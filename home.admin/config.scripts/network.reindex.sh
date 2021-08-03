@@ -100,4 +100,4 @@ sleep 4
 # clean logs (to prevent a false reindex detection)
 sudo rm /mnt/hdd/${network}/debug.log 2>/dev/null
 # reboot
-sudo /home/admin/XXshutdown.sh reboot
+sudo /home/admin/config.scripts/blitz.shutdown.sh reboot

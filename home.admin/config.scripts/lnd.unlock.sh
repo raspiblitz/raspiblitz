@@ -2,7 +2,8 @@
 
 if [ "$1" == "-h" ] || [ "$1" == "help" ]; then
  echo "script to unlock LND wallet"
- echo "lnd.unlock.sh [?passwordC]"
+ echo "lnd.unlock.sh status"
+ echo "lnd.unlock.sh unlock [?passwordC]"
  exit 1
 fi
 
@@ -10,15 +11,30 @@ fi
 source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
 
-# 1. parameter
-passwordC="$1"
+source <(/home/admin/config.scripts/network.aliases.sh getvars lnd ${chain}net)
+
+# 1. parameter (default is unlock)
+action="$1"
+
+# 2. parameter (optional password)
+passwordC="$2"
 
 # check if wallet is already unlocked
-echo "# checking LND wallet ... (can take some time)"
-walletLocked=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net getinfo 2>&1 | grep -c unlock)
-macaroonsMissing=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net getinfo 2>&1 | grep -c "unable to read macaroon")
+# echo "# checking LND wallet ... (can take some time)"
+lndError=$(sudo -u bitcoin lncli --chain=${network} --network=${chain}net getinfo 2>&1)
+walletLocked=$(echo "${lndError}" | grep -c "Wallet is encrypted")
+macaroonsMissing=$(echo "${lndError}" | grep -c "unable to read macaroon")
+
+# if action sis just status
+if [ "${action}" == "status" ]; then
+    echo "locked=${walletLocked}"
+    echo "missingMacaroons=${macaroonsMissing}"
+    exit 0
+fi
+
+# if already unlocked all is done
 if [ ${walletLocked} -eq 0 ] && [ ${macaroonsMissing} -eq 0 ]; then
-    echo "# OK LND wallet was already unlocked"
+    # echo "# OK LND wallet was already unlocked"
     exit 0
 fi
 
@@ -62,9 +78,9 @@ while [ ${fallback} -eq 0 ]
     recoveryOption=""
     if [ "${fundRecovery}" == "1" ]; then
         recoveryOption="--recovery_window=1000 "
-        echo "# runnign unlock with ${recoveryOption}"
+        echo "# running unlock with ${recoveryOption}"
     fi
-    result=$(echo "$passwordC" | sudo -u bitcoin lncli --chain=${network} --network=${chain}net unlock ${recoveryOption}--stdin 2>&1)
+    result=$(echo "$passwordC" | $lncli_alias unlock ${recoveryOption}--stdin 2>&1)
     wasUnlocked=$(echo "${result}" | grep -c 'successfully unlocked')
     wrongPassword=$(echo "${result}" | grep -c 'invalid passphrase')
     if [ ${wasUnlocked} -gt 0 ]; then
@@ -91,7 +107,7 @@ while [ ${fallback} -eq 0 ]
         # UNKNOWN RESULT
 
         # check if wallet was unlocked anyway
-        walletLocked=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net getinfo 2>&1 | grep -c unlock)
+        walletLocked=$($lncli_alias getinfo 2>&1 | grep -c unlock)
         if [ "${walletUnlocked}" = "0" ]; then
             echo "# OK LND wallet unlocked"
             exit 0
@@ -120,12 +136,12 @@ do
     # do CLI unlock
     echo
     echo "############################"
-    echo "Calling: lncli unlock"
+    echo "Calling: ${netprefix}lncli unlock"
     echo "Please re-enter Password C:"
-    lncli --chain=${network} --network=${chain}net unlock --recovery_window=1000
+    $lncli_alias unlock --recovery_window=1000
 
     # test unlock
-    walletLocked=$(sudo -u bitcoin /usr/local/bin/lncli getinfo 2>&1 | grep -c unlock)
+    walletLocked=$($lncli_alias getinfo 2>&1 | grep -c unlock)
     if [ ${walletLocked} -eq 0 ]; then
         echo "# --> OK LND wallet unlocked"
     else

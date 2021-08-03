@@ -5,19 +5,29 @@ echo "get raspiblitz config"
 source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
 
+# source <(/home/admin/config.scripts/network.aliases.sh getvars <lnd|cln> <mainnet|testnet|signet>)
+source <(/home/admin/config.scripts/network.aliases.sh getvars cln $1)
+
 # BASIC MENU INFO
 HEIGHT=12 # add 6 to CHOICE_HEIGHT + MENU lines
 WIDTH=64
 CHOICE_HEIGHT=6 # 1 line / OPTIONS
 BACKTITLE="RaspiBlitz"
-TITLE="System Options"
+TITLE="${CHAIN} System Options"
 MENU=""    # adds lines to HEIGHT
 OPTIONS=() # adds lines to HEIGHt + CHOICE_HEIGHT
 
-OPTIONS+=(${network}LOG "Monitor the debug.log")
+OPTIONS+=(${network}LOG "Monitor the debug.log for ${CHAIN}")
 OPTIONS+=(${network}CONF "Edit the bitcoin.conf")
-OPTIONS+=(LNDLOG "Monitor the lnd.log")
-OPTIONS+=(LNDCONF "Edit the lnd.conf")
+OPTIONS+=(LNDLOG "Monitor the lnd.log for ${CHAIN}")
+OPTIONS+=(LNDCONF "Edit the lnd.conf for ${CHAIN}")
+
+if grep "^${netprefix}cln=on" /mnt/hdd/raspiblitz.conf;then
+  OPTIONS+=(CLNLOG "Monitor the CLN log for ${CHAIN}")
+  OPTIONS+=(CLNCONF "Edit the CLN config for ${CHAIN}")
+    HEIGHT=$((HEIGHT+2))
+    CHOICE_HEIGHT=$((CHOICE_HEIGHT+2))
+fi
 
 if [ "${runBehindTor}" == "on" ]; then
   OPTIONS+=(TORLOG "Monitor the Tor Service with Nyx")
@@ -39,26 +49,33 @@ CHOICE=$(dialog --clear \
 
 case $CHOICE in
   ${network}LOG)
+    if [ ${CHAIN} = signet ]; then
+      bitcoinlogpath="/mnt/hdd/bitcoin/signet/debug.log"
+    elif [ ${CHAIN} = testnet ]; then
+      bitcoinlogpath="/mnt/hdd/bitcoin/testnet3/debug.log"
+    elif [ ${CHAIN} = mainnet ]; then
+      bitcoinlogpath="/mnt/hdd/bitcoin/debug.log"      
+    fi
     clear
     echo
-    echo "Will follow the /mnt/hdd/${network}/debug.log"
-    echo "running: 'sudo tail -n 30 -f /mnt/hdd/${network}/debug.log'"
+    echo "Will follow the ${bitcoinlogpath}"
+    echo "running: 'sudo tail -n 30 -f ${bitcoinlogpath}'"
     echo
     echo "Press ENTER to continue"
     echo "use CTRL+C any time to abort .. then use command 'raspiblitz' to return to menu"
     echo "###############################################################################"
     read key
-    sudo tail -n 30 -f /mnt/hdd/${network}/debug.log;;
+    sudo tail -n 30 -f ${bitcoinlogpath};;
   ${network}CONF)
     if /home/admin/config.scripts/blitz.setconf.sh "/mnt/hdd/${network}/${network}.conf" "root"
     then
       whiptail \
         --title "Restart" --yes-button "Restart" --no-button "Not now" \
-        --yesno "To apply the new settings ${network}d needs to restart.
-        Do you want to restart ${network}d now?" 10 55
+        --yesno "To apply the new settings ${netprefix}${network}d needs to restart.
+        Do you want to restart ${netprefix}${network}d now?" 10 55
       if [ $? -eq 0 ]; then
-        echo "# Restarting ${network}d"
-        sudo systemctl restart ${network}d
+        echo "# Restarting ${netprefix}${network}d"
+        sudo systemctl restart ${netprefix}${network}d
       else
         echo "# Continue without restarting."
       fi
@@ -77,7 +94,7 @@ case $CHOICE in
     read key
     sudo tail -n 30 -f /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log;;
   LNDCONF)
-    if /home/admin/config.scripts/blitz.setconf.sh "/mnt/hdd/lnd/lnd.conf" "root"
+    if /home/admin/config.scripts/blitz.setconf.sh "/mnt/hdd/lnd/${netprefix}lnd.conf" "root"
     then
       whiptail \
         --title "Restart" --yes-button "Restart" --no-button "Not now" \
@@ -85,13 +102,40 @@ case $CHOICE in
         Do you want to restart LND now?" 10 55
       if [ $? -eq 0 ]; then
         echo "# Restarting LND"
-        sudo systemctl restart lnd
+        sudo systemctl restart ${netprefix}lnd
       else
         echo "# Continue without restarting."
       fi
      else
       echo "# No change made"
-    fi;;         
+    fi;;
+  CLNLOG)
+    clear
+    echo
+    echo "Will follow the /home/bitcoin/.lightning/${CLNETWORK}/cl.log"
+    echo "running 'sudo tail -n 30 -f /home/bitcoin/.lightning/${CLNETWORK}/cl.log'"
+    echo
+    echo "Press ENTER to continue"
+    echo "use CTRL+C any time to abort .. then use command 'raspiblitz' to return to menu"
+    echo "###############################################################################"
+    read key
+    sudo tail -n 30 -f /home/bitcoin/.lightning/${CLNETWORK}/cl.log;;
+  CLNCONF)
+    if /home/admin/config.scripts/blitz.setconf.sh "/home/bitcoin/.lightning/${netprefix}config" "root"
+    then
+      whiptail \
+        --title "Restart" --yes-button "Restart" --no-button "Not now" \
+        --yesno "To apply the new settings C-lightning needs to restart.
+        Do you want to restart C-lightning now?" 0 0
+      if [ $? -eq 0 ]; then
+        echo "# Restarting C-lightning"
+        sudo systemctl restart ${netprefix}lightningd
+      else
+        echo "# Continue without restarting."
+      fi
+     else
+      echo "# No change made"
+    fi;;              
   TORLOG)
     sudo -u debian-tor nyx;;
   TORRC)

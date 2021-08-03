@@ -1,10 +1,8 @@
 #!/bin/bash
 
-# TODO: check if services/apps are running and stop all ... or let thet to outside?
-
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "# managing the RaspiBlitz data - import, export, backup."
- echo "# blitz.migration.sh [status|export|import|export-gui|import-gui|migration-umbrel|migration-mynode]"
+ echo "# blitz.migration.sh [export|import|export-gui|migration-umbrel|migration-mynode]"
  echo "error='missing parameters'"
  exit 1
 fi
@@ -22,25 +20,23 @@ fi
 # check if data drive is mounted - other wise cannot operate
 isMounted=$(sudo df | grep -c /mnt/hdd)
 
-# gathering system info
-isBTRFS=$(lsblk -o FSTYPE,MOUNTPOINT | grep /mnt/hdd | awk '$1=$1' | cut -d " " -f 1 | grep -c btrfs)
-
 # set place where zipped TAR file gets stored
-defaultZipPath="/mnt/hdd/temp"
+defaultUploadPath="/mnt/hdd/temp/migration"
 
 # get local ip
 source <(/home/admin/config.scripts/internet.sh status local)
 
 # SCP download and upload links
-scpDownloadUnix="scp -r 'bitcoin@${localip}:${defaultZipPath}/raspiblitz-*.tar.gz' ./"
-scpDownloadWin="scp -r bitcoin@${localip}:${defaultZipPath}/raspiblitz-*.tar.gz ."
-scpUploadUnix="scp -r ./raspiblitz-*.tar.gz bitcoin@${localip}:${defaultZipPath}"
-scpUploadWin="scp -r ./raspiblitz-*.tar.gz bitcoin@${localip}:${defaultZipPath}"
+scpDownloadUnix="scp -r 'bitcoin@${localip}:${defaultUploadPath}/raspiblitz-*.tar.gz' ./"
+scpDownloadWin="scp -r bitcoin@${localip}:${defaultUploadPath}/raspiblitz-*.tar.gz ."
+scpUploadUnix="scp -r ./raspiblitz-*.tar.gz bitcoin@${localip}:${defaultUploadPath}"
+scpUploadWin="scp -r ./raspiblitz-*.tar.gz bitcoin@${localip}:${defaultUploadPath}"
 
 # output status data & exit
 if [ "$1" = "status" ]; then
   echo "# RASPIBLITZ Data Import & Export"
-  echo "isBTRFS=${isBTRFS}"
+  echo "localip=\"${localip}\""
+  echo "defaultUploadPath=\"${defaultUploadPath}\""
   echo "scpDownloadUnix=\"${scpDownloadUnix}\""
   echo "scpUploadUnix=\"${scpUploadUnix}\""
   echo "scpDownloadWin=\"${scpDownloadWin}\""
@@ -310,23 +306,23 @@ if [ "$1" = "export" ]; then
 
   # zip it
   echo "# Building the Export File (this can take some time) .."
-  sudo tar -zcvf ${defaultZipPath}/raspiblitz-export-temp.tar.gz -X ~/.exclude.temp /mnt/hdd 1>~/.include.temp 2>/dev/null
+  sudo tar -zcvf ${defaultUploadPath}/raspiblitz-export-temp.tar.gz -X ~/.exclude.temp /mnt/hdd 1>~/.include.temp 2>/dev/null
 
   # get md5 checksum
   echo "# Building checksum (can take also a while) ..." 
-  md5checksum=$(md5sum ${defaultZipPath}/raspiblitz-export-temp.tar.gz | head -n1 | cut -d " " -f1)
+  md5checksum=$(md5sum ${defaultUploadPath}/raspiblitz-export-temp.tar.gz | head -n1 | cut -d " " -f1)
   echo "md5checksum=${md5checksum}"
   
   # get byte size
-  bytesize=$(wc -c ${defaultZipPath}/raspiblitz-export-temp.tar.gz | cut -d " " -f 1)
+  bytesize=$(wc -c ${defaultUploadPath}/raspiblitz-export-temp.tar.gz | cut -d " " -f 1)
   echo "bytesize=${bytesize}"
 
   # final renaming 
   name="raspiblitz${blitzname}${datestamp}-${md5checksum}.tar.gz"
-  echo "exportpath='${defaultZipPath}'"
+  echo "exportpath='${defaultUploadPath}'"
   echo "filename='${name}'"
-  sudo mv ${defaultZipPath}/raspiblitz-export-temp.tar.gz ${defaultZipPath}/${name}
-  sudo chown bitcoin:bitcoin ${defaultZipPath}/${name}
+  sudo mv ${defaultUploadPath}/raspiblitz-export-temp.tar.gz ${defaultUploadPath}/${name}
+  sudo chown bitcoin:bitcoin ${defaultUploadPath}/${name}
 
   # delete temp files
   rm ~/.exclude.temp
@@ -341,7 +337,7 @@ fi
 if [ "$1" = "export-gui" ]; then
 
   # cleaning old migration files from blitz
-  sudo rm ${defaultZipPath}/*.tar.gz 2>/dev/null
+  sudo rm ${defaultUploadPath}/*.tar.gz 2>/dev/null
 
   # stopping lnd / bitcoin
   echo "--> stopping services ..."
@@ -351,7 +347,7 @@ if [ "$1" = "export-gui" ]; then
   # create new migration file
   clear
   echo "--> creating blitz migration file ... (please wait)"
-  source <(sudo /home/admin/config.scripts/blitz.migration.sh "export")
+  source <(sudo /home/admin/config.scripts/blitz.migration.sh export)
   if [ ${#filename} -eq 0 ]; then
     echo "# FAIL: was not able to create migration file"
     exit 0
@@ -381,7 +377,7 @@ if [ "$1" = "export-gui" ]; then
   read key
   echo "Shutting down ...."
   sleep 4
-  /home/admin/XXshutdown.sh
+  /home/admin/config.scripts/blitz.shutdown.sh
   exit 0
 fi
 
@@ -391,71 +387,29 @@ fi
 
 if [ "$1" = "import" ]; then
 
-  # check second parameter for path and/or filename of import
-  importFile="${defaultZipPath}/raspiblitz-*.tar.gz"
-  if [ ${#2} -gt 0 ]; then
-    # check if and/or filename of import
-    containsPath=$(echo $2 | grep -c '/')
-    if [ ${containsPath} -gt 0 ]; then
-      startsOnPath=$(echo $2 | grep -c '^/')
-      if [ ${startsOnPath} -eq 0 ]; then
-        echo "# needs to be an absolut path: ${2}"
-        echo "error='invalid path'"
-        exit 1
-      else
-        if [ -d "$2" ]; then
-          echo "# using path from parameter to search for import"  
-          endsOnPath=$(echo $2 | grep -c '/$')
-          if [ ${endsOnPath} -eq 1 ]; then
-            importFile="${2}raspiblitz-*.tar.gz"  
-          else
-            importFile="${2}/raspiblitz-*.tar.gz"  
-          fi
-        else
-          echo "# using path+file from parameter for import"
-          importFile=$2
-        fi
-      fi
-    else
-      # is just filename - to use with default path
-      echo "# using file from parameter for import"
-      importFile="${defaultZipPath}/${2}"     
-    fi 
-  fi
-  
-  # checking if file exists and unique
-  echo "# checking for file with: ${importFile}"
-  countZips=$(sudo ls ${importFile} 2>/dev/null | grep -c '.tar.gz')
-  if [ ${countZips} -eq 0 ]; then
-    echo "# can just find file when ends on .tar.gz and exists"
-    echo "scpUploadUnix=\"${scpUploadUnix}\"" 
-    echo "scpUploadWin=\"${scpUploadWin}\"" 
-    echo "error='file not found'"
+  # BACKGROUND:
+  # the migration import is only called during setup phase - assume a prepared but clean HDD
+
+  # 2nd PARAMETER: file to import (expect that the file was valid checked from calling script)
+  importFile=$2
+  if [ "${importFile}" == "" ]; then
+    echo "error='filename missing'"
     exit 1
-  elif [ ${countZips} -eq 1 ]; then
-    importFile=$(sudo ls ${importFile})
-  else
-    echo "# Multiple files found. Not sure which to use."
-    echo "# Please use absolut-path+file as second parameter."
-    echo "error='file not unique'"
+  fi
+  fileExists=$(sudo ls ${importFile} 2>/dev/null | grep -c "${importFile}")
+  if [ "${fileExists}" != "1" ]; then
+    echo "error='filename not found'"
     exit 1
   fi
   echo "importFile='${importFile}'"
 
-  echo "# Validating Checksum (can take some time) .."
-  md5checksum=$(md5sum ${importFile} | head -n1 | cut -d " " -f1)
-  isCorrect=$(echo ${importFile} | grep -c ${md5checksum})
-  if [ ${isCorrect} -eq 1 ]; then
-    echo "# OK -> checksum looks good: ${md5checksum}"
-  else
-    echo "# FAIL -> Checksum not correct: ${md5checksum}"
-    echo "# Maybe transfer/upload failed?"
-    echo "error='bad checksum'"
-    exit 1
-  fi
-
   echo "# Importing (overwrite) (can take some time) .."
   sudo tar -xf ${importFile} -C /
+  if [ "$?" != "0" ]; then
+    echo "error='non zero exit state of unzipping migration file'"
+    echo "# reboot system ... HDD will offer fresh formating"
+    exit 1
+  fi
 
   # copy bitcoin/litecoin data backups back to orgplaces (if part of backup)
   if [ -d "/mnt/hdd/backup_bitcoin" ]; then
@@ -475,195 +429,16 @@ if [ "$1" = "import" ]; then
     sudo chown bitcoin:bitcoin -R /mnt/storage/litecoin 2>/dev/null
   fi
 
-  echo "# OK done - you may now want to:"
-  echo "# make sure that HDD is not registered in /etc/fstab & reboot"
-  echo "# to kickstart recovering system based in imported data"
-
-  exit 0
-fi
-
-if [ "$1" = "import-gui" ]; then
-
-  # get info about HDD
-  echo "# Gathering HDD/SSD info ..."
-  source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
-
-  # make sure HDD/SSD is not mounted
-  # because importing migration just works during early setup
-  if [ ${isMounted} -eq 1 ]; then
-    echo "FAIL --> cannot import migration data when HDD/SSD is mounted"
+  # check migration 
+  raspiblitzConfExists=$(sudo ls /mnt/hdd/raspiblitz.conf | grep -c "raspiblitz.conf")
+  if [ "${raspiblitzConfExists}" != "1" ]; then
+    echo "error='no raspiblitz.conf after unzip migration file'"
+    echo "# reboot system ... HDD will offer fresh formating"
     exit 1
   fi
 
-  # make sure a HDD/SSD is connected
-  if [ ${#hddCandidate} -eq 0 ]; then
-    echo "FAIL --> there is no HDD/SSD connected to migrate data to"
-    exit 1
-  fi
-
-  # check if HDD/SSD is big enough
-  if [ ${hddGigaBytes} -lt 120 ]; then
-    echo "FAIL --> connected HDD/SSD is too small"
-    exit 1
-  fi
-
-  # ask format for new HDD/SSD
-  OPTIONS=()
-  # check if HDD/SSD contains Bitcoin Blockchain
-  if [ "${hddBlocksBitcoin}" == "1" ]; then 
-    OPTIONS+=(KEEP "Dont format & use Blockchain")
-  fi
-  OPTIONS+=(EXT4 "Ext4 & 1 Partition (default)")
-  OPTIONS+=(BTRFS "BTRFS & 3 Partitions (experimental)")
-
-  useBlockchain=0
-  hddFormat=None
-  CHOICE=$(whiptail --clear --title "Formatting ${hddCandidate}" --menu "" 10 52 3 "${OPTIONS[@]}" 2>&1 >/dev/tty)
-  clear
-  case $CHOICE in
-    EXT4)
-      hddFormat=ext4
-      echo "EXT4 FORMAT -->"
-      source <(sudo /home/admin/config.scripts/blitz.datadrive.sh format ext4 ${hddPartitionCandidate})
-      if [ ${#error} -gt 0 ]; then
-        echo "FAIL --> ${error}"
-        exit 1
-      fi
-      ;;
-    BTRFS)
-      hddFormat=btrfs
-      echo "BTRFS FORMAT"
-      source <(sudo /home/admin/config.scripts/blitz.datadrive.sh format btrfs ${hddCandidate})
-      if [ ${#error} -gt 0 ]; then
-        echo "FAIL --> ${error}"
-        exit 1
-      fi
-      ;;
-    KEEP)
-      echo "Keep HDD & Blockchain"
-      useBlockchain=1
-      ;;
-    *)
-      echo "CANCEL"
-      exit 0
-      ;;
-  esac
-
-  if [ ${useBlockchain} -eq 1 ]; then
-     if [ ${isBTRFS} -eq 1 ]; then
-        hddFormat=btrfs
-     else
-        hddFormat=ext4
-     fi
-  fi
-
-  # now temp mount the HDD/SSD
-  if [ "$hddFormat" == "btrfs" ]; then
-     source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddCandidate})
-  else
-     source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddPartitionCandidate})
-  fi
-  if [ ${#error} -gt 0 ]; then
-    echo "FAIL: Was not able to temp mount the HDD/SSD --> ${error}"
-    exit 1
-  fi
-
-  # make sure all directories betare propper linked
-  sudo /home/admin/config.scripts/blitz.datadrive.sh link
-
-  # make sure that temp directory exists and can be written by admin
-  sudo mkdir -p ${defaultZipPath}
-  sudo chmod 777 -R ${defaultZipPath}
-
-  clear
-  echo
-  echo "*****************************"
-  echo "* UPLOAD THE MIGRATION FILE *"
-  echo "*****************************"
-  echo "If you have a migration file on your laptop you can now"
-  echo "upload it and restore on the new HDD/SSD."
-  echo
-  echo "ON YOUR LAPTOP open a new terminal and change into"
-  echo "the directory where your migration file is and"
-  echo "COPY, PASTE AND EXECUTE THE FOLLOWING COMMAND:"
-  echo "scp -r ./raspiblitz-*.tar.gz admin@${localip}:${defaultZipPath}"
-  echo ""
-  echo "Use password 'raspiblitz' to authenticate file transfer."
-  echo "PRESS ENTER when upload is done."
-  read key
-
-  countZips=$(sudo ls ${defaultZipPath}/raspiblitz-*.tar.gz 2>/dev/null | grep -c 'raspiblitz-')
-
-  # in case no upload found
-  if [ ${countZips} -eq 0 ]; then
-    echo
-    echo "FAIL: Was not able to detect uploaded file in ${defaultZipPath}"
-    echo "error='no file found'"
-    sleep 3
-    exit 1
-  fi
-
-  # in case of multiple files
-  if [ ${countZips} -gt 1 ]; then
-    echo
-    echo "# FAIL: Multiple possible files detected in ${defaultZipPath}"
-    echo "error='multiple files'"
-    sleep 3
-    exit 1
-  fi
-
-  # restore upload
-  echo
-  echo "OK: Upload found in ${defaultZipPath} - restoring data ... (please wait)"
-  source <(sudo /home/admin/config.scripts/blitz.migration.sh "import")
-  if [ ${#error} -gt 0 ]; then
-    echo
-    echo "# FAIL: Was not able to restore data"
-    echo "error='${error}'"
-    sleep 3
-    exit 1
-  fi
-  
-  # check & load config
-  source /mnt/hdd/raspiblitz.conf
-  if [ ${#network} -eq 0 ]; then
-    echo
-    echo "FAIL: No raspiblitz.conf found afer migration restore"
-    echo "error='migration contains no raspiblitz.conf'"
-    sleep 3
-    exit 1
-  fi
-
-  echo
-  echo "OK: Migration data was imported"
-  echo "PRESS ENTER"
-  read key
-
-  # Copy from other computer is only option for Bitcoin
-  if [ "${network}" == "bitcoin" ] && [ ${useBlockchain} -eq 0 ]; then
-    OPTIONS=(SYNC "Re-Sync & Validate Blockchain" \
-             COPY "Copy over LAN from other Computer"
-	  )
-    CHOICE=$(whiptail --clear --title "How to get Blockchain?" --menu "" 9 52 2 "${OPTIONS[@]}" 2>&1 >/dev/tty)
-    clear
-    case $CHOICE in
-      COPY)
-        echo "Copy Blockchain Data -->"
-        /home/admin/50copyHDD.sh stop-after-script
-        ;;
-    esac
-  fi
-
-  # if there is no blockchain yet - fallback to syncing
-  if [ $(sudo ls /mnt/hdd/bitcoin/ 2>/dev/null | grep -c blocks) -eq 0 ]; then
-    echo "Setting Blockchain Data to resync ..."
-    sudo -u bitcoin mkdir /mnt/hdd/${network}/blocks 2>/dev/null
-    sudo -u bitcoin mkdir /mnt/hdd/${network}/chainstate 2>/dev/null
-    sudo -u bitcoin touch /mnt/hdd/${network}/blocks/.selfsync
-  fi
-
-  echo "--> Now rebooting and kicking your node in to recovery/update mode ..."
-  sudo shutdown -r now
+  # correcting all user rights on data will be done by provisioning process
+  echo "# OK import done - provisioning process needed"
   exit 0
 fi
 
