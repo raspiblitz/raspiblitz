@@ -49,7 +49,7 @@ fi
 
 # just available for CLN
 if [ "${lightning}" == "cln" ]; then
-  OPTIONS+=(k 'Sparko' ${sparko})
+  OPTIONS+=(k 'Sparko C-Lightning WebWallet' ${sparko})
 fi
 
 OPTIONS+=(j 'JoinMarket' ${joinmarket})
