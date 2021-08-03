@@ -40,7 +40,7 @@ while [ "${chainInSync}" == "0" ]; do
 	 --pause "\n\n'$lncommand getinfo' shows 'synced_to_chain': false\n\nTry again in a few seconds." 15 60 5
   
   if [ $? -gt 0 ]; then
-      exit 1
+      exit 0
   fi
   chainInSync=${cmdChainInSync}
 done
@@ -57,8 +57,9 @@ if [ ${openChannels} -eq 0 ]; then
   echo "!!!!!!!!!!!!!!!!!!!"
   echo "FAIL - You have NO ESTABLISHED CHANNELS .. open a channel first."
   echo "!!!!!!!!!!!!!!!!!!!"
+  sleep 3
   echo 
-  exit 1
+  exit 0
 fi
 
 paymentRequestStart="???"
@@ -95,8 +96,8 @@ if [ ${#invoice} -eq 0 ]; then
   clear
   echo
   echo "no invoice entered - returning to menu ..."
-  sleep 2
-  exit 1
+  sleep 3
+  exit 0
 fi
 
 # TODO: maybe try/show the decoded info first by using https://api.lightning.community/#decodepayreq

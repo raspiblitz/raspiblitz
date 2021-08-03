@@ -34,7 +34,7 @@ elif [ $LNTYPE = lnd ];then
   # precheck: AutoPilot
   if [ "${autoPilot}" = "on" ]; then
     dialog --title 'Info' --msgbox 'You need to turn OFF the LND AutoPilot first,\nso that closed channels are not opening up again.\nYou find the AutoPilot -----> SERVICES section' 7 55
-    exit 1
+    exit 0
   fi
   command="$lncli_alias closeallchannels --force"
 fi
@@ -62,7 +62,7 @@ if [ ${chainOutSync} -eq 1 ]; then
   echo 
   echo "# PRESS ENTER to return to menu"
   read key
-  exit 1
+  exit 0
 else
   echo "# OK - the chain is synced"
 fi
@@ -88,5 +88,3 @@ fi
 echo
 echo "# OK - please recheck if channels really closed"
 sleep 5
-
-#TODO exits to CLI, not returning to menu

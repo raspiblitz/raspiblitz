@@ -40,7 +40,7 @@ while [ "${chainInSync}" == "0" ]; do
 	 --pause "\n\n'$lncommand getinfo' shows 'synced_to_chain': false\n\nTry again in a few seconds." 15 60 5
   
   if [ $? -gt 0 ]; then
-      exit 1
+      exit 0
   fi
   chainInSync=${cmdChainInSync}
 done
@@ -57,8 +57,8 @@ if [ ${openChannels} -eq 0 ]; then
   echo "!!!!!!!!!!!!!!!!!!!"
   echo "FAIL - You have NO ESTABLISHED CHANNELS .. open a channel first."
   echo "!!!!!!!!!!!!!!!!!!!"
-  echo 
-  exit 1
+  sleep 3
+  exit 0
 fi
 
 # let user enter the invoice
@@ -72,8 +72,8 @@ if [ ${#amount} -eq 0 ]; then
   clear
   echo
   echo "no amount entered - returning to menu ..."
-  sleep 2
-  exit 1
+  sleep 3
+  exit 0
 fi
 
 # TODO let user enter a description

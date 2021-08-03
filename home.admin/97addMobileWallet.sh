@@ -155,7 +155,7 @@ clear
 echo "creating install info ..."
 case $CHOICE in
   CLOSE)
-  	exit 1;
+  	exit 0;
     ;;
 	SPHINX)
 	  if [ "${sphinxrelay}" != "on" ]; then
@@ -173,7 +173,7 @@ case $CHOICE in
 	  fi
 	  # make pairing thru sphinx relay script
       /home/admin/config.scripts/bonus.sphinxrelay.sh menu
-	  exit 1;
+	  exit 0;
 	  ;;
   ZAP_IOS)
       appstoreLink="https://apps.apple.com/us/app/zap-bitcoin-lightning-wallet/id1406311960"
@@ -206,7 +206,7 @@ Or scan the qr code on the LCD with your mobile phone.
 	    choose_IP_or_TOR
 	  fi
   	  /home/admin/config.scripts/bonus.lndconnect.sh zap-ios ${connect}
-      exit 1;
+      exit 0;
     ;;
   ZAP_ANDROID)
       appstoreLink="https://play.google.com/store/apps/details?id=zapsolutions.zap"
@@ -229,7 +229,7 @@ Or scan the qr code on the LCD with your mobile phone.
 	    choose_IP_or_TOR
 	  fi
   	  /home/admin/config.scripts/bonus.lndconnect.sh zap-android ${connect}
-      exit 1;
+      exit 0;
     ;;
   SENDMANY_ANDROID)
 
@@ -241,7 +241,7 @@ To use the chat feature of the SendMany app, you need to activate the Keysend fe
 
 Please go to MAINMENU > SERVICES and activate KEYSEND first.
 " 12 65
-	    exit 1
+	    exit 0
 	  fi
 
       appstoreLink="https://github.com/fusion44/sendmany/releases"
@@ -256,7 +256,7 @@ Please go to MAINMENU > SERVICES and activate KEYSEND first.
 	  /home/admin/config.scripts/blitz.display.sh hide
 	  checkIP2TOR LND-GRPC-API
   	  /home/admin/config.scripts/bonus.lndconnect.sh sendmany-android ${connect}
-      exit 1;
+      exit 0;
     ;;
   ZEUS_IOS)
       appstoreLink="https://testflight.apple.com/join/gpVFzEHN"
@@ -271,7 +271,7 @@ Please go to MAINMENU > SERVICES and activate KEYSEND first.
 	  fi
 	  /home/admin/config.scripts/blitz.display.sh hide
   	  /home/admin/config.scripts/bonus.lndconnect.sh zeus-ios tor
-  	  exit 1;
+  	  exit 0;
   	;;
   ZEUS_ANDROID)
       appstoreLink="https://play.google.com/store/apps/details?id=app.zeusln.zeus"
@@ -290,7 +290,7 @@ Or scan the qr code on the LCD with your mobile phone.
 	  fi
 	  /home/admin/config.scripts/blitz.display.sh hide
   	  /home/admin/config.scripts/bonus.lndconnect.sh zeus-android tor
-  	  exit 1;
+  	  exit 0;
   	;;
   FULLY_NODED)
       appstoreLink="https://apps.apple.com/us/app/fully-noded/id1436425586"
@@ -309,6 +309,6 @@ Or scan the qr code on the LCD with your mobile phone.
 	  fi
 	  /home/admin/config.scripts/blitz.display.sh hide
   	  /home/admin/config.scripts/bonus.fullynoded.sh
-  	  exit 1;
+  	  exit 0;
   	;;
 esac
