@@ -1,5 +1,9 @@
 # CHANGES between Releases
 
+## What's new in Version 1.7.1 of RaspiBlitz?
+
+- Update: mempool space 2.2.0 [details](https://github.com/mempool/mempool)
+
 ## What's new in Version 1.7.0 of RaspiBlitz?
 
 - New: Raspberry Pi OS Base Image 64-bit (April 2021)

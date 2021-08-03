@@ -2,23 +2,23 @@
 # FAQ - Frequently Asked Questions
 
 - [What changed on the single RaspiBlitz updates?](#what-changed-on-the-single-raspiblitz-updates)
-- [How to update my RaspiBlitz (since 1.2)?](#how-to-update-my-raspiblitz-since-12)
-- [How to update my RaspiBlitz from older versions like v1.0 or v1.1?](#how-to-update-my-raspiblitz-from-older-versions-like-v10-or-v11)
+- [How do I update my RaspiBlitz (since 1.2)?](#how-do-i-update-my-raspiblitz-since-12)
+- [How do I update my RaspiBlitz from older versions like v1.0 or v1.1?](#how-do-i-update-my-raspiblitz-from-older-versions-like-v10-or-v11)
 - [How to verify the SD card image after download?](#how-to-verify-the-sd-card-image-after-download)
-- [How to update an old RaspiBlitz BEFORE v1.0? (LEGACY)](#how-to-update-a-old-raspiblitz-before-v10-legacy)
+- [How to update an old RaspiBlitz BEFORE v1.0? (LEGACY)](#how-to-update-an-old-raspiblitz-before-v10-legacy)
 - [Why do I need to re-burn my SD card for an update?](#why-do-i-need-to-re-burn-my-sd-card-for-an-update)
 - [I have the full blockchain on another computer. How do I copy it to the RaspiBlitz?](#i-have-the-full-blockchain-on-another-computer-how-do-i-copy-it-to-the-raspiblitz)
 - [How do I generate a Debug Report?](#how-do-i-generate-a-debug-report)
 - [Can I run my RaspiBlitz on Solar Energy?](#can-i-run-my-raspiblitz-on-solar-energy)
 - [Why is my "final sync" taking so long?](#why-is-my-final-sync-taking-so-long)
-- [How do I backup my Lightning Node?](#how-to-backup-my-lightning-node)
-  - [1) Securing your On-Chain and Channel-Funds during Operation](#1-securing-your-on-chain--and-channel-funds-during-operation)
+- [How do I backup my Lightning Node?](#how-do-i-backup-my-lightning-node)
+  - [1) Securing your On-Chain- and Channel-Funds during Operation](#1-securing-your-on-chain--and-channel-funds-during-operation)
   - [2) Making a complete LND data backup](#2-making-a-complete-lnd-data-backup)
 - [How can I recover my coins from a failing RaspiBlitz?](#how-can-i-recover-my-coins-from-a-failing-raspiblitz)
   - [1) Recover LND data](#1-recover-lnd-data)
   - [2) Recover from Wallet Seed](#2-recover-from-wallet-seed)
 - [What is this mnemonic seed word list?](#what-is-this-mnemonic-seed-word-list)
-- [How to move funds & channels from RaspiBlitz to LND Lightning Desktop App?](#how-to-move-funds--channels-from-raspiblitz-to-lnd-lightning-desktop-app)
+- [How do I move funds & channels from RaspiBlitz to LND Lightning Desktop App?](#how-do-i-move-funds--channels-from-raspiblitz-to-lnd-lightning-desktop-app)
 - [How do I change the Name/Alias of my lightning node](#how-do-i-change-the-namealias-of-my-lightning-node)
 - [What to do when on SSH I see "WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!"](#what-to-do-when-on-ssh-i-see-warning-remote-host-identification-has-changed)
 - [When using Auto-Unlock, how much security do I lose?](#when-using-auto-unlock-how-much-security-do-i-lose)
@@ -28,16 +28,16 @@
 - [Why is my node address on the display red?](#why-is-my-node-address-on-the-display-red)
 - [Why is my node address on the display yellow (not green)?](#why-is-my-node-address-on-the-display-yellow-not-green)
 - [Can I run the RaspiBlitz as Backend for BTCPayServer?](#can-i-run-the-raspiblitz-as-backend-for-btcpayserver)
-- [I don't have a LAN port on my Laptop - how do I connect to my RaspiBlitz?](#i-dont-have-a-lan-port-on-my-laptop---how-to-connect-to-my-raspiblitz)
+- [I don't have a LAN port on my Laptop - how do I connect to my RaspiBlitz?](#i-dont-have-a-lan-port-on-my-laptop---how-do-i-connect-to-my-raspiblitz)
 - [Is it possible to connect the Blitz over Wifi instead of using a LAN cable?](#is-it-possible-to-connect-the-blitz-over-wifi-instead-of-using-a-lan-cable)
-- [Can I directly connect the RaspiBlitz with my laptop?](#can-i-directly-connect-the-raspiblitz-with-my-laptop)
+- [Can I directly connect the RaspiBlitz to my laptop?](#can-i-directly-connect-the-raspiblitz-to-my-laptop)
 - [How do I unplug/shutdown safely without SSH](#how-do-i-unplugshutdown-safely-without-ssh)
 - [How can I build an SD card from another branch?](#how-can-i-build-an-sd-card-from-another-branch)
 - [How can I build an SD card from my forked GitHub Repo?](#how-can-i-build-an-sd-card-from-my-forked-github-repo)
 - [How can I checkout a new branch from the RaspiBlitz repo to my forked repo?](#how-can-i-checkout-a-new-branch-from-the-raspiblitz-repo-to-my-forked-repo)
 - [How can I sync a branch of my forked GitHub with my local RaspiBlitz?](#how-can-i-sync-a-branch-of-my-forked-github-with-my-local-raspiblitz)
 - [How contribute a feature/change from my forked branch back to the RaspiBlitz repo?](#how-contribute-a-featurechange-from-my-forked-branch-back-to-the-raspiblitz-repo)
-- [How can I help with testing a Pull Request?](#how-can-i-help-testing-a-pull-request)
+- [How can I help testing a Pull Request?](#how-can-i-help-testing-a-pull-request)
 - [How to attach the RaspberryPi to the HDD?](#how-to-attach-the-raspberrypi-to-the-hdd)
 - [What other case options do I have?](#what-other-case-options-do-i-have)
 - [Are those "Under-Voltage detected" warnings a problem?](#are-those-under-voltage-detected-warnings-a-problem)
@@ -46,27 +46,27 @@
 - [How do I return to the menu after exiting to the command line](#how-do-i-return-to-the-menu-after-exiting-to-the-command-line)
 - [Can I run RaspiBlitz on other computers than RaspberryPi?](#can-i-run-raspiblitz-on-other-computers-than-raspberrypi)
 - [Can I flip the screen?](#can-i-flip-the-screen)
-- [How do I setup fresh/clean/reset and not getting into recovery mode?](#how-to-setup-freshcleanreset-and-not-getting-into-recovery-mode)
+- [How do I setup fresh/clean/reset and without going into recovery mode?](#how-do-i-setup-freshcleanreset-and-without-going-into-recovery-mode)
 - [My blockchain data is corrupted - what can I do?](#my-blockchain-data-is-corrupted---what-can-i-do)
 - [Can I run the RaspiBlitz without a display/LCD?](#can-i-run-the-raspiblitz-without-a-displaylcd)
 - [How do I set up VNC?](#how-do-i-set-up-vnc)
 - [I have two RaspiBlitz in my network - can they both be public?](#i-have-two-raspiblitz-in-my-network---can-they-both-be-public)
-- [How do I change the public port LND/Lightning node is running on?](#how-to-change-the-public-port-lndlightning-node-is-running-on)
-- [How do I solve a "signature mismatch after caveat verification" error?](#how-to-solve-a-signature-mismatch-after-caveat-verification-error)
+- [How do I change the public port LND/Lightning node is running on?](#how-do-i-change-the-public-port-lndlightning-node-is-running-on)
+- [How do I solve a "signature mismatch after caveat verification" error?](#how-do-i-solve-a-signature-mismatch-after-caveat-verification-error)
 - [Why is my node not routing?](#why-is-my-node-not-routing)
 - [How can I update LND or bitcoind even before the next RaspiBlitz update?](#how-can-i-update-lnd-or-bitcoind-even-before-the-next-raspiblitz-update)
-- [I cannot connect per SSH to my RaspiBlitz. What can I do?](#i-cannot-connect-per-ssh-to-my-raspiblitz-what-to-do)
+- [I cannot connect via SSH to my RaspiBlitz. What do I do?](#i-cannot-connect-via-ssh-to-my-raspiblitz-what-do-i-do)
 - [How to SSH over Tor?](#how-to-ssh-over-tor)
-- [How do I setup port-forwarding with a SSH tunnel?](#how-to-setup-port-forwarding-with-a-ssh-tunnel)
-- [How do I setup just a port-forwarding user on my public server?](#how-to-setup-just-a-port-forwarding-user-on-my-public-server)
-- [How do I connect a UPS to the RaspiBlitz?](#how-to-connect-a-ups-to-the-raspiblitz)
+- [How to setup port-forwarding with a SSH tunnel?](#how-to-setup-port-forwarding-with-a-ssh-tunnel)
+- [How do I setup just a port-forwarding user on my public server?](#how-do-i-setup-just-a-port-forwarding-user-on-my-public-server)
+- [How do I connect a UPS to the RaspiBlitz?](#how-do-i-connect-a-ups-to-the-raspiblitz)
 - [Why use BTRFS on RaspiBlitz?](#why-use-btrfs-on-raspiblitz)
   - [Storing your important Data in RAID1 with a USB Thumb Drive](#storing-your-important-data-in-raid1-with-a-usb-thumb-drive)
   - [Snapshotting the Blockchain](#snapshotting-the-blockchain)
-- [How do I use BTRFS on RaspiBlitz?](#how-to-use-btrfs-on-raspiblitz)
-- [How do I recover a BTRFS partition?](#how-to-recover-a-btrfs-partition)
+- [How do I use BTRFS on RaspiBlitz?](#how-do-i-use-btrfs-on-raspiblitz)
+- [How to recover a BTRFS partition?](#how-to-recover-a-btrfs-partition)
 - [How do I fix a displayed Error in my Config?](#how-do-i-fix-a-displayed-error-in-my-config)
-- [How do I fix my upside down LCD after update?](#how-to-fix-my-upside-down-lcd-after-update)
+- [How to fix my upside down LCD after update?](#how-to-fix-my-upside-down-lcd-after-update)
 - [How can I repair my SSH login?](#how-can-i-repair-my-ssh-login)
 - [How to use the Let's Encrypt client](#how-to-use-the-lets-encrypt-client)
   - [Let's Encrypt - HTTP-01](#lets-encrypt---http-01)
@@ -74,6 +74,8 @@
   - [Let's Encrypt - eMail Address](#lets-encrypt---email-address)
   - [Let's Encrypt - Installation details](#lets-encrypt---installation-details)
   - [How can I customize my RaspiBlitz or add other software?](#how-can-i-customize-my-raspiblitz-or-add-other-software)
+- [Versioning](#versioning)
+- [GitHub Workflow](#github-workflow)
 - [How do I find the IP address when running without a display?](#how-do-i-find-the-ip-address-when-running-without-a-display)
 
 ---
@@ -277,7 +279,6 @@ With the 24 word list given you by LND upon wallet creation you can recover your
 
 For more background on the LND mnemonic seed [read this article](https://github.com/lightningnetwork/lnd/blob/master/docs/recovery.md#recovering-funds-from-lnd-funds-are-safu).
 
-
 ## How do I move funds & channels from RaspiBlitz to LND Lightning Desktop App?
 
 Before you start - download a LND-data-rescue file from your RaspiBlitz to your laptop `main menu -> UPDATE -> Update Anyway -> Start Update -> Download Backup -> FOLLOW INSTRUCTIONS and press Enter when ready with download -> START UPDATE`. Now your RaspiBlitz will power down.
@@ -302,7 +303,7 @@ Now start the Lightning App again. Your wallet password should now be your RaspI
 
 ## How do I change the Name/Alias of my lightning node
 
-Use the "Change Name/Alias of Node" option in the main menu. The RaspiBlitz will automatically reboot after this.
+Use the "Change Name/Alias of Node" option in the Lightning - LND Wallet Options menu. The RaspiBlitz will automatically reboot after this.
 
 ## What to do when on SSH I see "WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!"
 
@@ -512,7 +513,6 @@ When your USB power adapter for the RaspiBlitz delivers too low of a power level
 Using pre-built software almost always shifts trust to the one who made the binary. But at least you can check with the SHA checksum after downloading to verify that the image downloaded is really the one offered by the GitHub repo. To do so, make a quick check that your browser is really on the correct GitHub page, and that the HTTPS of the GitHub page is signed by 'DigiCert'. Then compare the SHA-256 string (always next to the download link of the image on the README) with the result of the command `shasum -a 256 [DOWNLOADED-FILE-TO-CHECK]` (Mac/Linux). Still, this is not optimal and if at least some people from the community request it, I will consider signing the download as an author for the future.
 
 The best way would be to build the SD card yourself. You use the script `build_sdcard.sh` for this. Take a few minutes to check if you see anything suspicious in that build script and then follow the [README](README.md#build-the-sd-card-image) on this.
-
 
 ## What is the process of creating a new SD card image release?
 
@@ -933,13 +933,13 @@ The RaspiBlitz is your computer to experiment with. Feel free to add your own sc
 - place your own scripts and data that should survive an update/recovery into the `/mnt/hdd/app-data` directory
 - put all install commands & modification of the system into the script `/mnt/hdd/app-data/custom-installs.sh` which will be started automatically on a recovery/update.
 
-# Versioning
+## Versioning
 
 * Major Updates: 1.0.0, 2.0.0, 3.0.0, ... are epic updates signaling that the software reached a new era.
 * Main Updates: 1.1.0, 1.2.0, 1.3.0, ... are breaking updates - the reflashing of the sd ard is mandatory.
 * Minor Updates: 1.1.0, 1.2.0, 1.3.0, ... are soft updates - can be done by 'patching' the scripts & code, but new sd card reflash is still advised.
 
-# GitHub Workflow
+## GitHub Workflow
 
 - Development is done on the 'dev' branch, new features should be done on single feature branches and merged into 'dev' once ready.
 - When a release of a new main-update (see above) comes closer, a new release branch gets created from 'dev' with the first release candidate - the RCs and the final release sd card will be build from this branch.
@@ -947,13 +947,10 @@ The RaspiBlitz is your computer to experiment with. Feel free to add your own sc
 - Once a release is ready, that release branch will be set as the "default" branch on GitHub (so its shown as main page)
 - Hot fixes & new features for minor verisons will be created as single branches from the release branch, and once ready will be merged back into that release branch as a Pull Request using 'Squash-Merge' AND then, this 'Squash-Merge' (one single commit) will get cherry-picked into the  'dev' branch ('git cherry-pick COMMITHASH' - may call 'git fetch' & 'git pull' before to make a clean cherry-pick into dev).
 
-
-# How do I find the IP address when running without a display?
+## How do I find the IP address when running without a display?
 
 If you can login into your local internet router it should show you the IP address assigned to the RaspberryPi.
 
 Another way is to use [Angry IP Scanner](https://angryip.org/) to find the IP address.
 
 You can also put an empty file just called `hdmi` (without any ending) onto the sd card when connected to your laptop and then start it up on the RaspberryPi. This will activate the HDMI port and if you connect a HDMI monitor to the RaspberryPi it will show you the RaspiBlitz status screen containing the local IP address.
-
-
