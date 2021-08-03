@@ -9,13 +9,14 @@ echo "services default values"
 if [ ${#autoPilot} -eq 0 ]; then autoPilot="off"; fi
 if [ ${#autoUnlock} -eq 0 ]; then autoUnlock="off"; fi
 if [ ${#runBehindTor} -eq 0 ]; then runBehindTor="off"; fi
-# if [ ${#chain} -eq 0 ]; then chain="main"; fi
 if [ ${#autoNatDiscovery} -eq 0 ]; then autoNatDiscovery="off"; fi
 if [ ${#networkUPnP} -eq 0 ]; then networkUPnP="off"; fi
 if [ ${#touchscreen} -eq 0 ]; then touchscreen=0; fi
 if [ ${#lcdrotate} -eq 0 ]; then lcdrotate=0; fi
 if [ ${#zerotier} -eq 0 ]; then zerotier="off"; fi
 if [ ${#circuitbreaker} -eq 0 ]; then circuitbreaker="off"; fi
+if [ ${#testnet} -eq 0 ]; then testnet="off"; fi
+if [ ${#cln} -eq 0 ]; then cln="off"; fi
 
 echo "map dropboxbackup to on/off"
 DropboxBackup="off"
@@ -71,10 +72,7 @@ fi
 # show select dialog
 echo "run dialog ..."
 
-
 # BASIC MENU INFO
-HEIGHT=19 # add 6 to CHOICE_HEIGHT + MENU lines
-WIDTH=45
 OPTIONS=()
 
 OPTIONS+=(t 'Run behind TOR' ${runBehindTor})
@@ -108,12 +106,7 @@ if [ ${chain} = "main" ];then
 fi
 
 CHOICE_HEIGHT=$(("${#OPTIONS[@]}"))
-CHOICES=$(dialog \
-          --title ' Node Settings & Options ' \
-          --checklist ' use spacebar to activate/de-activate ' \
-          $HEIGHT $WIDTH $CHOICE_HEIGHT \
-          "${OPTIONS[@]}" 2>&1 >/dev/tty)
-
+CHOICES=$(dialog --title ' Node Settings & Options ' --checklist ' use spacebar to activate/de-activate ' $CHOICE_HEIGHT 45 $CHOICE_HEIGHT "${OPTIONS[@]}" 2>&1 >/dev/tty)
 dialogcancel=$?
 clear
 

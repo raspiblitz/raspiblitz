@@ -23,8 +23,6 @@ if [ ${#sphinxrelay} -eq 0 ]; then sphinxrelay="off"; fi
 if [ ${#lit} -eq 0 ]; then lit="off"; fi
 if [ ${#whitepaper} -eq 0 ]; then whitepaper="off"; fi
 if [ ${#chantools} -eq 0 ]; then chantools="off"; fi
-if [ ${#testnet} -eq 0 ]; then testnet="off"; fi
-if [ ${#cln} -eq 0 ]; then cln="off"; fi
 
 # show select dialog
 echo "run dialog ..."
