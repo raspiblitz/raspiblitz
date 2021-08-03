@@ -24,32 +24,48 @@ Do you want to start the Update now?
     exit 0
   fi
 
-  whiptail --title "LND Data Backup" --yes-button "Download Backup" --no-button "Skip" --yesno "
-Before we start the RaspiBlitz Update process,
-its recommended to make a backup of all your LND Data
-and download that file to your laptop.
+  if [ "${lightning}" != "" ]; then
 
-Do you want to download LND Data Backup now?
+    whiptail --title "Lightning Data Backup" --yes-button "Download Backup" --no-button "Skip" --yesno "
+Before we start the RaspiBlitz Update process,
+its recommended to make a backup of all your Lightning
+Channel Data and download that file to your laptop.
+
+Do you want to download Lightning Data Backup now?
       " 12 58
-  if [ $? -eq 0 ]; then
-    clear
-    echo "*************************************"
-    echo "* PREPARING LND BACKUP DOWNLOAD"
-    echo "*************************************"
-    echo "please wait .."
-    sleep 2
-    /home/admin/config.scripts/lnd.backup.sh lnd-export-gui
-    echo
-    echo "PRESS ENTER to continue once you're done downloading."
-    read key
-  else
-    clear
-    echo "*************************************"
-    echo "* JUST MAKING BACKUP TO OLD SD CARD"
-    echo "*************************************"
-    echo "please wait .."
-    sleep 2
-    /home/admin/config.scripts/lnd.backup.sh lnd-export
+    if [ $? -eq 0 ]; then
+      clear
+      echo "*************************************"
+      echo "* PREPARING LIGHTNING BACKUP DOWNLOAD"
+      echo "*************************************"
+      echo "please wait .."
+      sleep 2
+      if [ "${lightning}" == "lnd" ]; then
+        /home/admin/config.scripts/lnd.backup.sh lnd-export-gui
+      elif [ "${lightning}" == "cln" ]; then
+        /home/admin/config.scripts/cln.backup.sh cln-export-gui
+      else
+        echo "TODO: Implement Data Backup for '${lightning}'"
+      fi
+      echo
+      echo "PRESS ENTER to continue once you're done downloading."
+      read key
+    else
+      clear
+      echo "*************************************"
+      echo "* JUST MAKING BACKUP TO OLD SD CARD"
+      echo "*************************************"
+      echo "please wait .."
+      sleep 2
+      if [ "${lightning}" == "lnd" ]; then
+        /home/admin/config.scripts/lnd.backup.sh lnd-export
+      elif [ "${lightning}" == "cln" ]; then
+        /home/admin/config.scripts/cln.backup.sh cln-export
+      else
+        echo "TODO: Implement Data Backup for '${lightning}'"
+        sleep 3
+      fi
+    fi
   fi
 
   whiptail --title "READY TO UPDATE?" --yes-button "START UPDATE" --no-button "Cancel" --yesno "If you start the update: The RaspiBlitz will power down.
@@ -68,7 +84,8 @@ and do you WANT TO START UPDATE NOW?
     dialog --title " Update Canceled " --msgbox "
 OK. RaspiBlitz will NOT update now.
       " 7 39
-    sudo systemctl start lnd
+    sudo systemctl start lnd 2>/dev/null
+    sudo systemctl start lightningd 2>/dev/null
     exit 0
   fi
 
