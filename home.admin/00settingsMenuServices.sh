@@ -32,21 +32,29 @@ echo "run dialog ..."
 OPTIONS=()
 OPTIONS+=(e 'Electrum Rust Server' ${ElectRS})
 OPTIONS+=(r 'RTL Webinterface' ${rtlWebinterface})
-OPTIONS+=(t 'ThunderHub' ${thunderhub})
-OPTIONS+=(l 'LIT (loop, pool, faraday)' ${lit})
 OPTIONS+=(p 'BTCPayServer' ${BTCPayServer})
-OPTIONS+=(i 'LNbits' ${LNBits})
 OPTIONS+=(b 'BTC-RPC-Explorer' ${BTCRPCexplorer})
 OPTIONS+=(s 'Cryptoadvance Specter' ${specter})
 OPTIONS+=(a 'Mempool Space' ${mempoolExplorer})
+
+# just available for LND
+if [ "${lightning}" == "lnd" ]; then
+  OPTIONS+=(t 'ThunderHub' ${thunderhub})
+  OPTIONS+=(l 'LIT (loop, pool, faraday)' ${lit})
+  OPTIONS+=(i 'LNbits' ${LNBits})
+  OPTIONS+=(o 'Balance of Satoshis' ${bos})
+  OPTIONS+=(y 'PyBLOCK' ${pyblock})
+  OPTIONS+=(h 'ChannelTools (Fund Rescue)' ${chantools})
+  OPTIONS+=(x 'Sphinx-Relay' ${sphinxrelay})
+fi
+
+# just available for CLN
+if [ "${lightning}" == "cln" ]; then
+  # none yet
+fi
+
 OPTIONS+=(j 'JoinMarket' ${joinmarket})
-OPTIONS+=(o 'Balance of Satoshis' ${bos})
-OPTIONS+=(x 'Sphinx-Relay' ${sphinxrelay})
-OPTIONS+=(y 'PyBLOCK' ${pyblock})
-OPTIONS+=(h 'ChannelTools (Fund Rescue)' ${chantools})
 OPTIONS+=(w 'Download Bitcoin Whitepaper' ${whitepaper})
-OPTIONS+=(n 'Parallel Testnet services' ${testnet})
-OPTIONS+=(c 'C-lightning' ${cln})
 
 CHOICES=$(dialog --title ' Additional Services ' \
           --checklist ' use spacebar to activate/de-activate ' \
@@ -436,55 +444,6 @@ else
   echo "Whitepaper setting unchanged."
 fi
 
-# testnet process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "n")
-if [ ${check} -eq 1 ]; then choice="on"; fi
-if [ "${testnet}" != "${choice}" ]; then
-  echo "# Testnet Setting changed .."
-  anychange=1
-  /home/admin/config.scripts/bitcoin.chains.sh ${choice} testnet
-  errorOnInstall=$?
-  if [ "${choice}" =  "on" ]; then
-    if [ ${errorOnInstall} -eq 0 ]; then
-      echo "# Successfully installed Testnet"
-      echo
-      echo "# Press ENTER to continue ..."
-      read key
-    else
-      l1="# !!! FAIL on Testnet install !!!"
-      l2="# Try manual install on terminal after reboot with:"
-      l3="/home/admin/config.scripts/bitcoin.chains.sh on testnet"
-      dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
-    fi
-  fi
-else
-  echo "# Testnet Setting unchanged."
-fi
-
-# cln process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "c")
-if [ ${check} -eq 1 ]; then choice="on"; fi
-if [ "${cln}" != "${choice}" ]; then
-  echo "# C-lightning Setting changed .."
-  anychange=1
-  /home/admin/config.scripts/cln.install.sh ${choice}
-  errorOnInstall=$?
-  if [ "${choice}" =  "on" ]; then
-    if [ ${errorOnInstall} -eq 0 ]; then
-      echo "# Successfully installed C-lightning"
-      echo
-      echo "# Press ENTER to continue ..."
-      read key
-    else
-      l1="# !!! FAIL on C-lightning install !!!"
-      l2="# Try manual install on terminal after reboot with:"
-      l3="/home/admin/config.scripts/cln.install.sh on"
-      dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
-    fi
-  fi
-else
-  echo "# C-lightning Setting unchanged."
-fi
 
 if [ ${anychange} -eq 0 ]; then
      dialog --msgbox "NOTHING CHANGED!\nUse Spacebar to check/uncheck services." 8 58
