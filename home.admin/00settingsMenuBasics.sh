@@ -75,7 +75,6 @@ echo "run dialog ..."
 # BASIC MENU INFO
 HEIGHT=19 # add 6 to CHOICE_HEIGHT + MENU lines
 WIDTH=45
-CHOICE_HEIGHT=11 # 1 line / OPTIONS
 OPTIONS=()
 
 OPTIONS+=(t 'Run behind TOR' ${runBehindTor})
@@ -103,6 +102,7 @@ if [ ${chain} = "main" ];then
   fi
 fi
 
+CHOICE_HEIGHT=$(("${#OPTIONS[@]}" / 3))
 CHOICES=$(dialog \
           --title ' Node Settings & Options ' \
           --checklist ' use spacebar to activate/de-activate ' \
