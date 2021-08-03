@@ -224,7 +224,12 @@ fi
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   installParallelService
   # setting value in raspi blitz config
-  sudo sed -i "s/^${CHAIN}=.*/${CHAIN}=on/g" /mnt/hdd/raspiblitz.conf
+  entryExists=$(sudo cat /mnt/hdd/raspiblitz.conf | grep -c "${CHAIN}=")
+  if [ "${entryExists}" == "0" ]; then
+    echo "${CHAIN}=on" /mnt/hdd/raspiblitz.conf
+  else
+    sudo sed -i "s/^${CHAIN}=.*/${CHAIN}=on/g" /mnt/hdd/raspiblitz.conf
+  fi
   exit 0
 fi
 
