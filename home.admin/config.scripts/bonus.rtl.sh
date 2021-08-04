@@ -108,7 +108,7 @@ fi
 configEntryExists=$(sudo cat /mnt/hdd/raspiblitz.conf | grep -c "${netprefix}${typeprefix}rtlWebinterface=")
 if [ "${configEntryExists}" == "0" ]; then
   echo "# adding default config entry for '${netprefix}${typeprefix}rtlWebinterface'"
-  echo "${netprefix}${typeprefix}rtlWebinterface=off" >> /mnt/hdd/raspiblitz.conf
+  sudo /bin/sh -c "echo '${netprefix}${typeprefix}rtlWebinterface=off' >> /mnt/hdd/raspiblitz.conf"
 else
   echo "# default config entry for '${netprefix}${typeprefix}rtlWebinterface' exists"
 fi
