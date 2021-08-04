@@ -48,9 +48,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   git checkout ${DEFAULT_GITHUB_BRANCH}
   pip install -r requirements.txt
 
-  # TODO: check if that manual install is still needed in a future version
-  pip install sse_starlette
-
   # build the config and set unique secret (its OK to be a new secret every install/upadte)
   /home/admin/config.scripts/blitz.web.api.sh update-config
   secret=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 64 ; echo '')
@@ -112,6 +109,7 @@ if [ "$1" = "update-config" ]; then
   fi
 
   cd /home/admin/blitz_api
+  cp ./.env_sample ./.env
   dateStr=$(date)
   echo "# Update Web API CONFIG (${dateStr})"
   RPCUSER=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcuser | cut -c 9-)
