@@ -46,14 +46,18 @@ ${toraddresstext}
   
   /home/admin/config.scripts/blitz.display.sh hide
 
-  echo "please wait ..."
+  echo "# please wait ..."
   exit 0
 fi
 
 # add default value to raspi config if needed
-if ! grep -Eq "^${CHAIN}=" /mnt/hdd/raspiblitz.conf; then
-  NEWENTRY="${netprefix}sparko=off"
-  sudo /bin/sh -c "echo '$NEWENTRY' >> /mnt/hdd/raspiblitz.conf" 
+configEntry="${netprefix}sparko"
+configEntryExists=$(sudo cat /mnt/hdd/raspiblitz.conf | grep -c "${configEntry}")
+if [ "${configEntryExists}" == "0" ]; then
+  echo "# adding default config entry for '${configEntry}'"
+  sudo /bin/sh -c "echo '${configEntry}=off' >> /mnt/hdd/raspiblitz.conf"
+else
+  echo "# default config entry for '${configEntry}' exists"
 fi
 
 if [ $1 = connect ];then

@@ -105,12 +105,13 @@ Activate TOR to access the web interface from outside your local network.
 fi
 
 # add default value to raspi config if needed
-configEntryExists=$(sudo cat /mnt/hdd/raspiblitz.conf | grep -c "${netprefix}${typeprefix}rtlWebinterface=")
+configEntry="${netprefix}${typeprefix}rtlWebinterface"
+configEntryExists=$(sudo cat /mnt/hdd/raspiblitz.conf | grep -c "${configEntry}")
 if [ "${configEntryExists}" == "0" ]; then
-  echo "# adding default config entry for '${netprefix}${typeprefix}rtlWebinterface'"
-  sudo /bin/sh -c "echo '${netprefix}${typeprefix}rtlWebinterface=off' >> /mnt/hdd/raspiblitz.conf"
+  echo "# adding default config entry for '${configEntry}'"
+  sudo /bin/sh -c "echo '${configEntry}=off' >> /mnt/hdd/raspiblitz.conf"
 else
-  echo "# default config entry for '${netprefix}${typeprefix}rtlWebinterface' exists"
+  echo "# default config entry for '${configEntry}' exists"
 fi
 
 # stop services
