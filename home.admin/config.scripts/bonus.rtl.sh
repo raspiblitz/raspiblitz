@@ -29,7 +29,7 @@ if [ ${#network} -eq 0 ]; then
 fi
 
 # LNTYPE is lnd | cln
-if [ $# -gt 1 ];then
+if [ $# -gt 1 ]; then
   LNTYPE=$2
 else
   LNTYPE=lnd
@@ -40,7 +40,7 @@ if [ ${LNTYPE} != lnd ]&&[ ${LNTYPE} != cln ];then
 fi
 
 # CHAIN is signet | testnet | mainnet
-if [ $# -gt 2 ];then
+if [ $# -gt 2 ]; then
   CHAIN=$3
 else
   CHAIN=${chain}net
@@ -50,22 +50,23 @@ if [ ${CHAIN} != testnet ]&&[ ${CHAIN} != mainnet ]&&[ ${CHAIN} != signet ];then
   exit 1
 fi
 
-# prefix for parallel services
-if [ ${CHAIN} = testnet ];then
+# prefix for parallel networks
+if [ "${CHAIN}" == "testnet" ]; then
   netprefix="t"
   portprefix=1
-elif [ ${CHAIN} = signet ];then
+elif [ "${CHAIN}" == "signet" ]; then
   netprefix="s"
   portprefix=3
-elif [ ${CHAIN} = mainnet ];then
+elif [ "${CHAIN}" == "mainnet" ]; then
   netprefix=""
   portprefix=""
 fi
 
-if [ ${LNTYPE} = cln ]; then
+# prefix for parallel lightning impl
+if [ "${LNTYPE}" == "cln" ]; then
   RTLHTTP=${portprefix}7000
-  typeprefix=c
-elif [ ${LNTYPE} = lnd ];then
+  typeprefix="c"
+elif [ "${LNTYPE}" == "lnd" ]; then
   RTLHTTP=${portprefix}3000
   typeprefix=""
 fi
@@ -104,8 +105,12 @@ Activate TOR to access the web interface from outside your local network.
 fi
 
 # add default value to raspi config if needed
-if ! grep -Eq "^${netprefix}${typeprefix}rtlWebinterface=" /mnt/hdd/raspiblitz.conf; then
+configEntryExists=$(sudo cat /mnt/hdd/raspiblitz.conf | grep -c "${netprefix}${typeprefix}rtlWebinterface=")
+if [ "${configEntryExists}" == "0" ]; then
+  echo "# adding default config entry for '${netprefix}${typeprefix}rtlWebinterface'"
   echo "${netprefix}${typeprefix}rtlWebinterface=off" >> /mnt/hdd/raspiblitz.conf
+else
+  echo "# default config entry for '${netprefix}${typeprefix}rtlWebinterface' exists"
 fi
 
 # stop services
