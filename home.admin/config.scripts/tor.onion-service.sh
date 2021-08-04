@@ -289,6 +289,8 @@ if [ "${1}" == "renew" ]; then
   fi
   if [ "${SERVICE}" == "all" ]; then
     sudo rm -rf ${SERVICES_DATA_DIR}/*
+  else
+    sudo rm -rf ${SERVICES_DATA_DIR}/${SERVICE}
   fi
   echo "Restarting Tor to activate the Hidden Service..."
   # set owner and permissions for config and data files
