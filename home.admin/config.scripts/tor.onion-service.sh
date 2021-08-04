@@ -311,10 +311,10 @@ if [ "${1}" == "vanguards" ]; then
   if [ "${STATUS}" == "install" ]; then
     sudo rm -rf ${DATA_DIR}/vanguards
     echo "Installing necessary packages..."
-    sudo -u ${OWNER_TOR_DATA_DIR} git clone https://github.com/mikeperry-tor/vanguards
+    sudo -u ${OWNER_DATA_DIR} git clone https://github.com/mikeperry-tor/vanguards
     cd vanguards || exit 1
     COMMITHASH=10942de
-    sudo -u ${OWNER_TOR_DATA_DIR} reset --hard ${COMMITHASH} || exit 1
+    sudo -u ${OWNER_DATA_DIR} reset --hard ${COMMITHASH} || exit 1
     sudo mv vanguards ${DATA_DIR}/
     sudo cp ${DATA_DIR}/vanguards/vanguards-example.conf ${DATA_DIR}/vanguards/vanguards.conf
     set_owner_permission
@@ -455,11 +455,6 @@ fi
 
 # SEE INFO
 if [ "${1}" == "credentials" ]; then
-  STATUS="${2}"
-  if [ ${#STATUS} -eq 0 ]; then
-    echo "ERROR: status is missing (on/off)"
-    exit 0
-  fi
   SERVICE="${2}"
   if [ ${#SERVICE} -eq 0 ]; then
     echo "ERROR: service name is missing"

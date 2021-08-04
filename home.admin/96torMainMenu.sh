@@ -185,7 +185,7 @@ case $CHOICE in
 
   NYX)
     trap "bash ${USER_DIR}/96torMainMenu.sh; exit 0" SIGINT
-    sudo -u ${OWNER_TOR_DATA_DIR} nyx
+    sudo -u ${OWNER_DATA_DIR} nyx
   ;;
 
 
@@ -197,7 +197,7 @@ case $CHOICE in
 
   TORRC)
     set_owner_permission
-    if ${USER_DIR}/config.scripts/blitz.setconf.sh ${TORRC} ${OWNER_TOR_DATA_DIR}; then
+    if ${USER_DIR}/config.scripts/blitz.setconf.sh ${TORRC} ${OWNER_DATA_DIR}; then
       whiptail \
         --title "Restart" --yes-button "Restart" --no-button "Not now" \
         --yesno "To apply the new settings Tor needs to reload.
@@ -244,7 +244,7 @@ case $CHOICE in
 
   # Counter measure
   CHANGE_CIRCUIT)
-    sudo -u ${OWNER_TOR_DATA_DIR} tor-prompt --run 'SIGNAL NEWNYM'
+    sudo -u ${OWNER_DATA_DIR} tor-prompt --run 'SIGNAL NEWNYM'
     whiptail --msgbox "Done !!! Using new circuit" 10 30
     #trap "bash 96torMainMenu.sh; exit 0" SIGINT
     #sudo bash tor.newnym.sh
@@ -271,7 +271,7 @@ case $CHOICE in
       sleep 2
       echo -e "${RED}[+] Resetting Tor statistics...${NOCOLOR}"
       sudo touch ${DATA_DIR}/log/tor/notice.log
-      sudo chown ${OWNER_TOR_DATA_DIR} ${DATA_DIR}/tor/notice.log
+      sudo chown ${OWNER_DATA_DIR} ${DATA_DIR}/tor/notice.log
       echo -e "${RED}[+] Done!${NOCOLOR}"
       sleep 4
       sudo systemctl restart tor@default

@@ -73,8 +73,8 @@ TOR_PKGS="tor torsocks obfs4proxy nyx apt-transport-tor"
 #Other variables
 DEFAULT_CONTROL_PORT=9051
 DEFAULT_SOCKS_PORT=9050
-OWNER_TOR_CONF_DIR="bitcoin"
-OWNER_TOR_DATA_DIR="debian-tor"
+OWNER_CONF_DIR="bitcoin"
+OWNER_DATA_DIR="debian-tor"
 USER="admin"
 ROOT_TORRC="/etc/tor"
 TORRC="${ROOT_TORRC}/torrc"
@@ -94,8 +94,8 @@ source ${CONF}
 ######## FUNCTIONS ###########
 
 set_owner_permission(){
-  sudo chown -R ${OWNER_TOR_DATA_DIR}:${OWNER_TOR_DATA_DIR} ${DATA_DIR}
-  sudo chown ${OWNER_TOR_CONF_DIR}:${OWNER_TOR_CONF_DIR} ${TORRC}
+  sudo chown -R ${OWNER_DATA_DIR}:${OWNER_DATA_DIR} ${DATA_DIR}
+  sudo chown ${OWNER_CONF_DIR}:${OWNER_CONF_DIR} ${TORRC}
   sudo chmod 700 ${DATA_DIR}
   sudo chmod 644 ${TORRC}
 }

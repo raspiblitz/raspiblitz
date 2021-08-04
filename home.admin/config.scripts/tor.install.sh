@@ -33,8 +33,8 @@ activateBitcoinOverTor()
     # make sure all is turned off and removed and then activate fresh (so that also old settings get removed)
     deactivateBitcoinOverTor
 
-    echo "# Make sure the user ${OWNER_TOR_CONF_DIR} is in the ${OWNER_TOR_DATA_DIR} group"
-    sudo usermod -a -G ${OWNER_TOR_DATA_DIR} ${OWNER_TOR_CONF_DIR}
+    echo "# Make sure the user ${OWNER_CONF_DIR} is in the ${OWNER_DATA_DIR} group"
+    sudo usermod -a -G ${OWNER_DATA_DIR} ${OWNER_CONF_DIR}
     sudo chmod 777 /home/bitcoin/.${network}/${network}.conf
     echo "Adding Tor config to the the ${network}.conf ..."
     sudo sed -i "s/^torpassword=.*//g" /home/bitcoin/.${network}/${network}.conf
@@ -371,7 +371,7 @@ EOF
     sudo rm ${TORRC}
     sudo mv ./torrc ${TORRC}
     sudo chmod 644 ${TORRC}
-    sudo chown -R ${OWNER_TOR_DATA_DIR}:${OWNER_TOR_DATA_DIR} /var/run/tor/ 2>/dev/null
+    sudo chown -R ${OWNER_DATA_DIR}:${OWNER_DATA_DIR} /var/run/tor/ 2>/dev/null
     echo ""
 
     sudo mkdir -p /etc/systemd/system/tor@default.service.d
