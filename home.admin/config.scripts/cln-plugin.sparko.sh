@@ -63,7 +63,7 @@ fi
 if [ $1 = connect ];then
   localip=$(ip addr | grep 'state UP' -A2 | grep -E -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
   toraddress=$(sudo cat /mnt/hdd/tor/${netprefix}sparko/hostname)
-  accesskey=$(sudo cat /home/bitcoin/.lightning/${netprefix}config | grep "^sparko-keys=" | cut -d= -f2 | cut -d';' -f1) 
+  accesskey=$(sudo cat ${CLNCONF} | grep "^sparko-keys=" | cut -d= -f2 | cut -d';' -f1) 
   url="https://${localip}:${portprefix}9000/"
   string="${url}?access-key=${accesskey}"
 
@@ -124,8 +124,8 @@ if [ $1 = on ];then
   ##########
   # Config #
   ##########
-  if ! grep -Eq "^sparko" /home/bitcoin/.lightning/${netprefix}config;then
-    echo "# Editing /home/bitcoin/.lightning/${netprefix}config"
+  if ! grep -Eq "^sparko" ${CLNCONF};then
+    echo "# Editing ${CLNCONF}"
     echo "# See: https://github.com/fiatjaf/sparko#how-to-use"
     PASSWORD_B=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcpassword | cut -c 13-)
     # Spark wallet only allows alphanumeric characters
@@ -139,9 +139,9 @@ sparko-port=${portprefix}9000
 sparko-tls-path=/home/bitcoin/.lightning/sparko-tls
 sparko-login=blitz:$PASSWORD_B
 sparko-keys=${masterkeythatcandoeverything}; ${secretaccesskeythatcanreadstuff}: getinfo, listchannels, listnodes; ${verysecretkeythatcanpayinvoices}: pay; ${keythatcanlistentoallevents}: stream
-" | sudo tee -a /home/bitcoin/.lightning/${netprefix}config
+" | sudo tee -a ${CLNCONF}
   else
-    echo "# Sparko is already configured in the /home/bitcoin/.lightning/${netprefix}config"
+    echo "# Sparko is already configured in ${CLNCONF}"
   fi
 
   echo "# Allowing port ${portprefix}9000 through the firewall"
@@ -170,8 +170,8 @@ if [ $1 = off ];then
   # delete symlink
   sudo rm -rf /home/bitcoin/${netprefix}cln-plugins-enabled/sparko
   
-  echo "# Editing /home/bitcoin/.lightning/${netprefix}config"
-  sudo sed -i "/^sparko/d" /home/bitcoin/.lightning/${netprefix}config
+  echo "# Editing ${CLNCONF}"
+  sudo sed -i "/^sparko/d" ${CLNCONF}
 
   echo "# Restart the ${netprefix}lightningd.service to deactivate Sparko"
   sudo systemctl restart ${netprefix}lightningd
