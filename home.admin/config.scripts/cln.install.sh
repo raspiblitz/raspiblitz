@@ -2,11 +2,11 @@
 # https://lightning.readthedocs.io/
 
 # https://github.com/ElementsProject/lightning/releases
-#CLVERSION=v0.10.0
+CLVERSION=v0.10.1
 
 # install the latest master by using the last commit id
-# https://github.com/ElementsProject/lightning/commit/063366ed7e3b7cc12a8d1681acc2b639cf07fa23
-CLVERSION="063366ed7e3b7cc12a8d1681acc2b639cf07fa23"
+# https://github.com/ElementsProject/lightning/commit/master
+# CLVERSION="063366ed7e3b7cc12a8d1681acc2b639cf07fa23"
 
 # vars
 source /home/admin/raspiblitz.info
