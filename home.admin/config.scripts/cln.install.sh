@@ -140,6 +140,10 @@ if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = experimental ]||[ "$1" = testPR ];
   sudo rm -rf /home/bitcoin/.lightning # not a symlink, delete
   sudo mkdir -p /mnt/hdd/app-data/.lightning
   sudo ln -s /mnt/hdd/app-data/.lightning /home/bitcoin/
+
+  if [ ${CLNETWORK} != "bitcoin" ] && [ ! -d /home/bitcoin/.lightning/${CLNETWORK} ] ;then
+    sudo -u bitcoin mkdir /home/bitcoin/.lightning/${CLNETWORK}
+  fi
   
   if ! sudo ls ${CLNCONF};then
     echo "# Create ${CLNCONF}"

@@ -100,7 +100,7 @@ if [ $1 = on ];then
     sudo -u bitcoin mkdir /home/bitcoin/cln-plugins-available
     # download binary
     sudo -u bitcoin wget https://github.com/fiatjaf/sparko/releases/download/${SPARKOVERSION}/sparko_${DISTRO}\
-    -O /home/bitcoin/${netprefix}cln-plugins-available/sparko || exit 1
+    -O /home/bitcoin/cln-plugins-available/sparko || exit 1
     # make executable
     sudo chmod +x /home/bitcoin/cln-plugins-available/sparko
   fi
