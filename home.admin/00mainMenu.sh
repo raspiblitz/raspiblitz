@@ -199,7 +199,7 @@ case $CHOICE in
                 do
 
                 # show the same info as on LCD screen
-                /home/admin/00infoBlitz.sh
+                /home/admin/00infoBlitz.sh ${lightning} ${chain}net
 
                 # wait 6 seconds for user exiting loop
                 echo ""
@@ -217,7 +217,7 @@ case $CHOICE in
               done
 
             else
-              /home/admin/00raspiblitz.sh
+              /home/admin/00raspiblitz.sh ${lightning} ${chain}net
               exit 0
             fi
             ;;
