@@ -132,7 +132,7 @@ if [ "${circuitbreaker}" == "on" ]; then
   OPTIONS+=(CIRCUIT "Circuitbreaker (LND firewall)")
 fi
 
-if [ "${testnet}" == "on" ]&&[ ${chain} != test ]; then
+if [ "${testnet}" == "on" ]; then
   OPTIONS+=(TESTNET "Testnet Service Options")
 fi
 if [ ${chain} != main ]; then
