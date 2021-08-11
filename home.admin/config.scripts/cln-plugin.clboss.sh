@@ -30,13 +30,15 @@ fi
 
 if [ $1 = on ];then
 
-  if [ ! -f /usr/local/bin/clboss ];then
+  if [ ! -f /home/bitcoin/cln-plugins-available/clboss-${CLBOSSVERSION}.tar.gz ];then
    
     # download tarball
     sudo -u bitcoin wget \
      https://github.com/ZmnSCPxj/clboss/releases/download/v${CLBOSSVERSION}/clboss-${CLBOSSVERSION}.tar.gz \
      -O /home/bitcoin/cln-plugins-available/clboss-${CLBOSSVERSION}.tar.gz || exit 1
+  fi
 
+  if [ ! -f /home/bitcoin/cln-plugins-available/clboss-${CLBOSSVERSION}/clboss ];then
     # dependencies
     sudo apt install -y build-essential pkg-config libev-dev \
      libcurl4-gnutls-dev libsqlite3-dev dnsutils
@@ -46,12 +48,12 @@ if [ $1 = on ];then
     sudo -u bitcoin tar -xvf clboss-${CLBOSSVERSION}.tar.gz
     cd clboss-${CLBOSSVERSION} || exit 1 
     sudo -u bitcoin ./configure && sudo -u bitcoin make
-    sudo make install
+    # sudo make install # installs to /usr/local/bin/clboss
   fi
 
   # symlink to enable
   if [ ! -L /home/bitcoin/${netprefix}cln-plugins-enabled/clboss ];then
-    sudo ln -s /usr/local/bin/clboss \
+    sudo ln -s /home/bitcoin/cln-plugins-available/clboss-${CLBOSSVERSION}/clboss \
                /home/bitcoin/${netprefix}cln-plugins-enabled
   fi
 
