@@ -935,20 +935,16 @@ echo "*** PREPARING LIGHTNING ***"
 # "*** LND ***"
 ## based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_40_lnd.md#lightning-lnd
 ## see LND releases: https://github.com/lightningnetwork/lnd/releases
-lndVersion="0.12.1-beta"
+lndVersion="0.13.1-beta"
 
 # olaoluwa
-#PGPauthor="roasbeef"
-#PGPpkeys="https://keybase.io/roasbeef/pgp_keys.asc"
-#PGPcheck="9769140D255C759B1EB77B46A96387A57CAAE94D"
+PGPauthor="roasbeef"
+PGPpkeys="https://keybase.io/roasbeef/pgp_keys.asc"
+PGPcheck="E4D85299674B2D31FAA1892E372CBD7633C61696"
 # bitconner
-PGPauthor="bitconner"
-PGPpkeys="https://keybase.io/bitconner/pgp_keys.asc"
-PGPcheck="9C8D61868A7C492003B2744EE7D737B67FA592C7"
-# Joost Jager
-#PGPauthor="joostjager"
-#PGPpkeys="https://keybase.io/joostjager/pgp_keys.asc"
-#PGPcheck="D146D0F68939436268FA9A130E26BB61B76C4D3A"
+#PGPauthor="bitconner"
+#PGPpkeys="https://keybase.io/bitconner/pgp_keys.asc"
+#PGPcheck="9C8D61868A7C492003B2744EE7D737B67FA592C7"
 
 # get LND resources
 cd /home/admin/download
