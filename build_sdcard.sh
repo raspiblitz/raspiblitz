@@ -1059,30 +1059,101 @@ echo "- OK install of LND done"
 
 echo "*** C-lightning ***"
 # https://github.com/ElementsProject/lightning/releases
-CLVERSION=v0.10.1
+CLVERSION=0.10.1
+# https://github.com/ElementsProject/lightning/tree/master/contrib/keys
+PGPsigner="rustyrussel"
+PGPpkeys="https://raw.githubusercontent.com/ElementsProject/lightning/master/contrib/keys/rustyrussell.txt"
+PGPcheck="D9200E6CD1ADB8F1"
 
-echo "Install build dependencies"
+# prepare download dir
+sudo rm -rf /home/admin/download/cln
+sudo -u admin mkdir -p /home/admin/download/cln
+cd /home/admin/download/cln || exit 1
+
+sudo -u admin wget -O "pgp_keys.asc" ${PGPpkeys}
+gpg --import --import-options show-only ./pgp_keys.asc
+fingerprint=$(gpg "pgp_keys.asc" 2>/dev/null | grep "${PGPcheck}" -c)
+if [ ${fingerprint} -lt 1 ]; then
+  echo
+  echo "!!! WARNING --> the PGP fingerprint is not as expected for ${PGPsigner}"
+  echo "Should contain PGP: ${PGPcheck}"
+  echo "PRESS ENTER to TAKE THE RISK if you think all is OK"
+  read key
+fi
+gpg --import ./pgp_keys.asc
+
+sudo -u admin wget https://github.com/ElementsProject/lightning/releases/download/v${CLVERSION}/SHA256SUMS
+sudo -u admin wget https://github.com/ElementsProject/lightning/releases/download/v${CLVERSION}/SHA256SUMS.asc
+
+verifyResult=$(gpg --verify SHA256SUMS.asc 2>&1)
+
+goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
+echo "goodSignature(${goodSignature})"
+correctKey=$(echo ${verifyResult} | tr -d " \t\n\r" | grep "${PGPcheck}" -c)
+echo "correctKey(${correctKey})"
+if [ ${correctKey} -lt 1 ] || [ ${goodSignature} -lt 1 ]; then
+  echo
+  echo "!!! BUILD FAILED --> PGP verification not OK / signature(${goodSignature}) verify(${correctKey})"
+  exit 1
+else
+  echo 
+  echo "****************************************************************"
+  echo "OK --> the PGP signature of the C-lighning SHA256SUMS is correct"
+  echo "****************************************************************"
+  echo 
+fi
+
+sudo -u admin wget https://github.com/ElementsProject/lightning/releases/download/v${CLVERSION}/clightning-v${CLVERSION}.zip
+
+hashCheckResult=$(sha256sum -c SHA256SUMS 2>&1)
+goodHash=$(echo ${hashCheckResult} | grep 'OK' -c)
+echo "goodHash(${goodHash})"
+if [ ${goodHash} -lt 1 ]; then
+  echo
+  echo "!!! BUILD FAILED --> Hash check not OK"
+  exit 1
+else
+  echo
+  echo "********************************************************************"
+  echo "OK --> the hash of the downloaded C-lightning source code is correct"
+  echo "********************************************************************"
+  echo
+fi
+
+echo "- Install build dependencies"
 sudo apt-get install -y \
   autoconf automake build-essential git libtool libgmp-dev \
   libsqlite3-dev python3 python3-mako net-tools zlib1g-dev libsodium-dev \
-  gettext
-cd /home/bitcoin || exit 1
+  gettext unzip
 
-echo "Cloning https://github.com/ElementsProject/lightning.git"
-sudo -u bitcoin git clone https://github.com/ElementsProject/lightning.git
-cd lightning || exit 1
-sudo -u bitcoin git reset --hard $CLVERSION
+unzip clightning-v${CLVERSION}.zip
+cd clightning-v${CLVERSION} || exit 1
 
-echo "Configuring EXPERIMENTAL_FEATURES enabled"
-sudo -u bitcoin ./configure --enable-experimental-features
+echo "- Configuring EXPERIMENTAL_FEATURES enabled"
+sudo -u admin ./configure --enable-experimental-features
 
-currentCLversion=$(cd /home/bitcoin/lightning 2>/dev/null; git describe --tags 2>/dev/null)
-echo "Building from source C-lightning $currentCLversion"
-sudo -u bitcoin make
+currentCLversion=$(git describe --tags 2>/dev/null)
+echo "- Building from source C-lightning $currentCLversion"
+sudo -u admin make
 
-echo "# Install to /usr/local/bin/"
+echo "- Install to /usr/local/bin/"
 sudo make install || exit 1
-echo "Built and installed C-lightning $currentCLversion"
+
+installed=$(sudo -u admin lightning-cli --version)
+if [ ${#installed} -eq 0 ]; then
+  echo
+  echo "!!! BUILD FAILED --> Was not able to install C-lightning"
+  exit 1
+fi
+
+correctVersion=$(echo "${installed}" | grep -c "${CLVERSION}")
+if [ ${correctVersion} -eq 0 ]; then
+  echo
+  echo "!!! BUILD FAILED --> installed C-lightning is not version ${CLVERSION}"
+  sudo -u admin lightning-cli --version
+  exit 1
+fi
+echo "- OK the installation of C-lightning v${installed} is done"
 
 echo ""
 echo "*** raspiblitz.info ***"
