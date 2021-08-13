@@ -827,7 +827,7 @@ echo "*** PREPARING BITCOIN ***"
 
 # set version (change if update is available)
 # https://bitcoincore.org/en/download/
-bitcoinVersion="0.21.0"
+bitcoinVersion="0.21.1"
 
 # needed to check code signing
 laanwjPGP="01EA5486DE18A882D4C2684590C8019E36C2E964"
@@ -839,9 +839,12 @@ cd /home/admin/download
 
 # download, check and import signer key
 sudo -u admin wget https://bitcoin.org/laanwj-releases.asc
+if [ ! -f "laanwj-releases.asc" ];then
+  sudo -u admin wget https://raw.githubusercontent.com/bitcoin-dot-org/Bitcoin.org/master/laanwj-releases.asc
+fi
 if [ ! -f "./laanwj-releases.asc" ]
 then
-  echo "!!! FAIL !!! Download laanwj-releases.asc not success."
+  echo "!!! FAIL !!! Could not download laanwj-releases.asc"
   exit 1
 fi
 gpg --import --import-options show-only ./laanwj-releases.asc
