@@ -1058,6 +1058,33 @@ fi
 sudo chown -R admin /home/admin
 echo "- OK install of LND done"
 
+echo "*** C-lightning ***"
+# https://github.com/ElementsProject/lightning/releases
+CLVERSION=v0.10.1
+
+echo "Install build dependencies"
+sudo apt-get install -y \
+  autoconf automake build-essential git libtool libgmp-dev \
+  libsqlite3-dev python3 python3-mako net-tools zlib1g-dev libsodium-dev \
+  gettext
+cd /home/bitcoin || exit 1
+
+echo "Cloning https://github.com/ElementsProject/lightning.git"
+sudo -u bitcoin git clone https://github.com/ElementsProject/lightning.git
+cd lightning || exit 1
+sudo -u bitcoin git reset --hard $CLVERSION
+
+echo "Configuring EXPERIMENTAL_FEATURES enabled"
+sudo -u bitcoin ./configure --enable-experimental-features
+
+currentCLversion=$(cd /home/bitcoin/lightning 2>/dev/null; git describe --tags 2>/dev/null)
+echo "Building from source C-lightning $currentCLversion"
+sudo -u bitcoin make
+
+echo "# Install to /usr/local/bin/"
+sudo make install || exit 1
+echo "Built and installed C-lightning $currentCLversion"
+
 echo ""
 echo "*** raspiblitz.info ***"
 sudo cat /home/admin/raspiblitz.info
