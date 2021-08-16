@@ -2,7 +2,7 @@
 
 # https://github.com/mempool/mempool
 
-pinnedVersion="v2.2.0"
+pinnedVersion="v2.2.1"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -134,7 +134,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "# npm install for mempool explorer (frontend)"
 
     cd frontend
-    sudo -u mempool NG_CLI_ANALYTICS=false npm install
+    sudo -u mempool NG_CLI_ANALYTICS=false npm install --no-optional
     if ! [ $? -eq 0 ]; then
         echo "FAIL - npm install did not run correctly, aborting"
         exit 1
@@ -148,7 +148,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "# npm install for mempool explorer (backend)"
 
     cd ../backend/
-    sudo -u mempool NG_CLI_ANALYTICS=false npm install
+    sudo -u mempool NG_CLI_ANALYTICS=false npm install --no-optional
     if ! [ $? -eq 0 ]; then
         echo "FAIL - npm install did not run correctly, aborting"
         exit 1
