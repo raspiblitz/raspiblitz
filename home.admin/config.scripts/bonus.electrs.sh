@@ -402,11 +402,21 @@ WorkingDirectory=/home/electrs/electrs
 ExecStart=/home/electrs/electrs/target/release/electrs --index-batch-size=10 --electrum-rpc-addr=\"0.0.0.0:50001\"
 User=electrs
 Group=electrs
+RuntimeDirectory=electrs
+RuntimeDirectoryMode=0710
 Type=simple
 KillMode=process
 TimeoutSec=60
 Restart=always
 RestartSec=60
+
+# Hardening
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=false # TODO: can we move the electrs stuff from /home/ elsewhere?
+NoNewPrivileges=true
+PrivateDevices=true
+MemoryDenyWriteExecute=true
 
 [Install]
 WantedBy=multi-user.target
