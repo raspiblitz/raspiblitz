@@ -105,8 +105,9 @@ if [ ${chain} = "main" ];then
   fi
 fi
 
-CHOICE_HEIGHT=$(("${#OPTIONS[@]}"))
-CHOICES=$(dialog --title ' Node Settings & Options ' --checklist ' use spacebar to activate/de-activate ' $CHOICE_HEIGHT 45 $CHOICE_HEIGHT "${OPTIONS[@]}" 2>&1 >/dev/tty)
+CHOICE_HEIGHT=$(("${#OPTIONS[@]}/2+1"))
+HEIGHT=$((CHOICE_HEIGHT+6))
+CHOICES=$(dialog --title ' Node Settings & Options ' --checklist ' use spacebar to activate/de-activate ' $HEIGHT 45 $CHOICE_HEIGHT "${OPTIONS[@]}" 2>&1 >/dev/tty)
 dialogcancel=$?
 clear
 
