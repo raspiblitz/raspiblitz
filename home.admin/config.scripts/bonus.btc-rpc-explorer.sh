@@ -203,9 +203,19 @@ After=${network}d.service
 WorkingDirectory=/home/btcrpcexplorer/btc-rpc-explorer
 ExecStart=/usr/bin/npm start
 User=btcrpcexplorer
-# Restart on failure but no more than default times (DefaultStartLimitBurst=5) every 10 minutes (600 seconds). Otherwise stop
+Group=btcrpcexplorer
+RuntimeDirectory=btcexp
+RuntimeDirectoryMode=0710
 Restart=on-failure
 RestartSec=600
+
+# Hardening
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=false # TODO: can we move the btcexp stuff from /home/ elsewhere?
+NoNewPrivileges=true
+PrivateDevices=true
+#MemoryDenyWriteExecute=false # 'true' unfortunately breaks it
 
 [Install]
 WantedBy=multi-user.target
