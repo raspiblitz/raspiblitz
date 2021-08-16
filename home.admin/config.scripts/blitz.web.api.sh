@@ -89,7 +89,7 @@ WantedBy=multi-user.target
   sudo ufw allow 11111 comment 'WebAPI Develop'
 
   # install info
-  echo "# the API should new be available under http://[LOCALHOST]/api and port 11111 for testing"
+  echo "# the API doc should now be available under http://[LOCALHOST]/api/docs or try port 11111 for testing"
   echo "# check for systemd:  sudo systemctl status blitzapi"
   echo "# check for logs:     sudo journalctl -f -u blitzapi"
 
