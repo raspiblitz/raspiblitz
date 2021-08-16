@@ -9,12 +9,14 @@ After=bitcoind.service
 #OnFailure=systemd-sendmail@%n
 
 [Service]
+User=bitcoin
+Group=bitcoin
 EnvironmentFile=/mnt/hdd/raspiblitz.conf
 ExecStartPre=-/home/admin/config.scripts/blitz.systemd.sh log lightning STARTED
 ExecStart=/usr/local/bin/lnd --externalip=${publicIP}:${lndPort} ${lndExtraParameter}
-PIDFile=/home/bitcoin/.lnd/lnd.pid
-User=bitcoin
-Group=bitcoin
+RuntimeDirectory=lnd
+RuntimeDirectoryMode=0710
+PIDFile=/run/lnd/lnd.pid
 LimitNOFILE=128000
 Type=simple
 KillMode=process
@@ -23,6 +25,14 @@ Restart=always
 RestartSec=60
 StandardOutput=null
 StandardError=journal
+
+# Hardening
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=false # TODO: can we move the lnd stuff from /home/ elsewhere?
+NoNewPrivileges=true
+PrivateDevices=true
+MemoryDenyWriteExecute=true
 
 [Install]
 WantedBy=multi-user.target
