@@ -89,7 +89,7 @@ if [ "${network}" == "bitcoin" ] && [ "${hddBlocksBitcoin}" == "0" ]; then
   # RP4 4GB
   if [ ${kbSizeRAM} -gt 3500000 ]; then
     echo "Detected RAM >=4GB --> optimizing ${network}.conf" >> ${logFile}
-    sudo sed -i "s/^dbcache=.*/dbcache=3072/g" /mnt/hdd/${network}/${network}.conf
+    sudo sed -i "s/^dbcache=.*/dbcache=2560/g" /mnt/hdd/${network}/${network}.conf
   # RP4 2GB
   elif [ ${kbSizeRAM} -gt 1500000 ]; then
     echo "Detected RAM >=2GB --> optimizing ${network}.conf" >> ${logFile}
