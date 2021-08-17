@@ -2,10 +2,11 @@
 
 ## What's new in Version 1.7.1 of RaspiBlitz?
 
-- Update: Pool v0.5.1-alpha with sidecar channels [details](https://github.com/lightninglabs/pool/releases/tag/v0.5.1-alpha)
-- Update: mempool space 2.2.1 [details](https://github.com/mempool/mempool)
-
+- Update: Lightning Terminal v0.5.0-alpha [details](https://github.com/lightninglabs/lightning-terminal/releases/tag/v0.5.0-alpha)
+- Update: Pool CLI v0.5.1-alpha [details](https://github.com/lightninglabs/pool/releases/tag/v0.5.1-alpha)
 - Fix: Prevent Pool dataloss on SDcard update [details](https://github.com/rootzoll/raspiblitz/issues/2266)
+
+- Update: mempool space 2.2.1 [details](https://github.com/mempool/mempool)
 
 ## What's new in Version 1.7.0 of RaspiBlitz?
 
