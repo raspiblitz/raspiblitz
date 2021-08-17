@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# https://github.com/alexbosworth/balanceofsatoshis/blob/ba7c35b42f1bad0dbb0c9c03d64ee34472665029/package.json#L79
-BOSVERSION="8.0.10"
+# https://github.com/alexbosworth/balanceofsatoshis/blob/master/package.json#L81
+BOSVERSION="10.7.8"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -28,8 +28,6 @@ Usage: https://github.com/alexbosworth/balanceofsatoshis/blob/master/README.md
 " 10 75
   exit 0
 fi
-
-
 
 
 # install
@@ -98,6 +96,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   exit 0
 fi
 
+
 # switch off
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
@@ -110,6 +109,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   exit 0
 
 fi
+
 
 # update
 if [ "$1" = "update" ]; then
