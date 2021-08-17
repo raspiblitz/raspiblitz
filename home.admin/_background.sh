@@ -316,14 +316,19 @@ do
         # check if a SCP backup target is set
         # parameter in raspiblitz.conf:
         # scpBackupTarget='[USER]@[SERVER]:[DIRPATH-WITHOUT-ENDING-/]'
+        # optionally a custom option string for the scp command can be set with
+        # scpBackupOptions='[YOUR-CUSTOM-OPTIONS]'
         # On target server add the public key of your RaspiBlitz to the authorized_keys for the user
         # https://www.linode.com/docs/security/authentication/use-public-key-authentication-with-ssh/
         if [ ${#scpBackupTarget} -gt 0 ]; then
           echo "--> Offsite-Backup SCP Server"
+          if [ "${scpBackupOptions}" == "" ]; then
+            scpBackupOptions="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+          fi 
           # its ok to ignore known host, because data is encrypted (worst case of MiM would be: no offsite channel backup)
           # but its more likely that without ignoring known host, script might not run thru and that way: no offsite channel backup
-          sudo scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${localBackupPath} ${scpBackupTarget}/
-          sudo scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${localTimestampedPath} ${scpBackupTarget}/
+          sudo scp ${scpBackupOptions} ${localBackupPath} ${scpBackupTarget}/
+          sudo scp ${scpBackupOptions} ${localTimestampedPath} ${scpBackupTarget}/
           result=$?
           if [ ${result} -eq 0 ]; then
             echo "OK - SCP Backup exited with 0"
