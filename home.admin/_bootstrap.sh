@@ -211,6 +211,7 @@ fi
 if [ "${systemInitReboot}" == "1" ]; then
   sudo cp ${logFile} ${logFile}.systeminit
   sudo sed -i "s/^state=.*/state=reboot/g" ${infoFile}
+  sleep 6
   sudo shutdown -r now
   sleep 100
   exit 0
@@ -332,6 +333,7 @@ if [ "${neededReboot}" == "1" ]; then
   echo "UASP FIX applied (2nd-try) ... reboot needed." >> $logFile
   sudo cp ${logFile} ${logFile}.uasp
   sudo sed -i "s/^state=.*/state=reboot/g" ${infoFile}
+  sleep 6
   sudo shutdown -r now
   sleep 100
   exit 0
