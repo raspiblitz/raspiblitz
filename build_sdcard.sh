@@ -1126,7 +1126,7 @@ sudo apt-get install -y \
   libsqlite3-dev python3 python3-mako net-tools zlib1g-dev libsodium-dev \
   gettext unzip
 
-unzip clightning-v${CLVERSION}.zip
+sudo -u admin unzip clightning-v${CLVERSION}.zip
 cd clightning-v${CLVERSION} || exit 1
 
 echo "- Configuring EXPERIMENTAL_FEATURES enabled"
