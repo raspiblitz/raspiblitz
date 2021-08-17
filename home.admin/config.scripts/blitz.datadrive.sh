@@ -667,6 +667,7 @@ if [ "$1" = "format" ]; then
        >&2 echo "# waiting until formatted drives gets available"
        sleep 2
        sync
+       sudo parted -l
        loopdone=$(lsblk -o NAME,LABEL | grep -c BLITZDATA)
        loopcount=$(($loopcount +1))
        if [ ${loopcount} -gt 60 ]; then
@@ -707,6 +708,7 @@ if [ "$1" = "format" ]; then
        >&2 echo "# waiting until formatted drives gets available"
        sleep 2
        sync
+       sudo parted -l
        loopdone=$(lsblk -o NAME,LABEL | grep -c BLITZSTORAGE)
        loopcount=$(($loopcount +1))
        if [ ${loopcount} -gt 60 ]; then
@@ -746,6 +748,7 @@ if [ "$1" = "format" ]; then
        >&2 echo "# waiting until formatted drives gets available"
        sleep 2
        sync
+       sudo parted -l
        loopdone=$(lsblk -o NAME,LABEL | grep -c BLITZTEMP)
        loopcount=$(($loopcount +1))
        if [ ${loopcount} -gt 60 ]; then
