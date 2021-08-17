@@ -50,7 +50,7 @@ fi
 
 # just available for CLN
 if [ "${lightning}" == "cln" ]; then
-  OPTIONS+=(r 'RTL C-Lightning Webinterface' ${crtlWebinterface})
+  OPTIONS+=(c 'RTL C-Lightning Webinterface' ${crtlWebinterface})
   OPTIONS+=(k 'Sparko C-Lightning WebWallet' ${sparko})
 fi
 
@@ -78,11 +78,12 @@ fi
 needsReboot=0
 anychange=0
 
-# RTL process choice
+# RTL process choice (LND)
 choice="off"; check=$(echo "${CHOICES}" | grep -c "r")
 if [ ${check} -eq 1 ]; then choice="on"; fi
+
 if [ "${rtlWebinterface}" != "${choice}" ]; then
-  echo "RTL Webinterface Setting changed .."
+  echo "RTL-lnd Webinterface Setting changed .."
   anychange=1
   /home/admin/config.scripts/bonus.rtl.sh ${choice} ${lightning} mainnet
   errorOnInstall=$?
@@ -100,7 +101,32 @@ if [ "${rtlWebinterface}" != "${choice}" ]; then
     fi
   fi
 else
-  echo "RTL Webinterface Setting unchanged."
+  echo "RTL-lnd Webinterface Setting unchanged."
+fi
+
+# RTL process choice (C-Lightning)
+choice="off"; check=$(echo "${CHOICES}" | grep -c "c")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${crtlWebinterface}" != "${choice}" ]; then
+  echo "RTL-cln Webinterface Setting changed .."
+  anychange=1
+  /home/admin/config.scripts/bonus.rtl.sh ${choice} cln mainnet
+  errorOnInstall=$?
+  if [ "${choice}" =  "on" ]; then
+    if [ ${errorOnInstall} -eq 0 ]; then
+      sudo systemctl start RTL
+      echo "waiting 10 secs .."
+      sleep 10
+      /home/admin/config.scripts/bonus.rtl.sh menu cln mainnet
+    else
+      l1="!!! FAIL on RTL C-Lightning install !!!"
+      l2="Try manual install on terminal after reboot with:"
+      l3="/home/admin/config.scripts/bonus.rtl.sh on cln mainnet"
+      dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
+    fi
+  fi
+else
+  echo "RTL-cln Webinterface Setting unchanged."
 fi
 
 # BTC-RPC-Explorer process choice

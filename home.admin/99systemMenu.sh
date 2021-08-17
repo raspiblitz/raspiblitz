@@ -9,9 +9,7 @@ source /mnt/hdd/raspiblitz.conf
 source <(/home/admin/config.scripts/network.aliases.sh getvars cln $1)
 
 # BASIC MENU INFO
-HEIGHT=12 # add 6 to CHOICE_HEIGHT + MENU lines
 WIDTH=64
-CHOICE_HEIGHT=6 # 1 line / OPTIONS
 BACKTITLE="RaspiBlitz"
 TITLE="${CHAIN} System Options"
 MENU=""    # adds lines to HEIGHT
@@ -25,18 +23,18 @@ OPTIONS+=(LNDCONF "Edit the lnd.conf for ${CHAIN}")
 if grep "^${netprefix}cln=on" /mnt/hdd/raspiblitz.conf;then
   OPTIONS+=(CLNLOG "Monitor the CLN log for ${CHAIN}")
   OPTIONS+=(CLNCONF "Edit the CLN config for ${CHAIN}")
-    HEIGHT=$((HEIGHT+2))
-    CHOICE_HEIGHT=$((CHOICE_HEIGHT+2))
 fi
 
 if [ "${runBehindTor}" == "on" ]; then
   OPTIONS+=(TORLOG "Monitor the Tor Service with Nyx")
   OPTIONS+=(TORRC "Edit the Tor Configuration")
-    HEIGHT=$((HEIGHT+2))
-    CHOICE_HEIGHT=$((CHOICE_HEIGHT+2))
 fi
+
 OPTIONS+=(CUSTOMLOG "Monitor a custom service")
 OPTIONS+=(CUSTOMRESTART "Restart a custom service")
+
+CHOICE_HEIGHT=$(("${#OPTIONS[@]}/2+1"))
+HEIGHT=$((CHOICE_HEIGHT+6))
 CHOICE=$(dialog --clear \
                 --backtitle "$BACKTITLE" \
                 --title "$TITLE" \

@@ -37,9 +37,7 @@ fi
 source <(/home/admin/config.scripts/internet.sh status local)
 
 # BASIC MENU INFO
-HEIGHT=10
 WIDTH=64
-CHOICE_HEIGHT=3
 BACKTITLE="${CHAIN} options"
 TITLE=""
 MENU="Choose one of the following options:"
@@ -59,56 +57,44 @@ if [ $chain = test ]&&[ "$trtlWebinterface" = "on" ]||\
    [ $chain = sig ]&& [ "$srtlWebinterface" = "on" ]||\
    [ $chain = main ]&&[ "$rtlWebinterface" = "on" ]; then
   OPTIONS+=(RTL "RTL Web Node Manager for LND ${CHAIN}")
-  HEIGHT=$((HEIGHT+1))
-  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
 fi
 
 if [ $chain = test ]&&[ "$tlnd" = "on" ]||\
    [ $chain = sig ]&& [ "$slnd" = "on" ]||\
    [ $chain = main ]&&[ "$lnd" = "on" ]; then
   OPTIONS+=(LND "LND options for ${CHAIN}")
-  HEIGHT=$((HEIGHT+1))
-  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
 fi
 
 if [ "$chain" = "test" ]&&[ "$tcrtlWebinterface" = "on" ]||\
    [ "$chain" = "sig" ]&& [ "$scrtlWebinterface" = "on" ]||\
    [ "$chain" = "main" ]&&[ "$crtlWebinterface" = "on" ]; then
   OPTIONS+=(cRTL "RTL Web Node Manager for C-lightning ${CHAIN}")
-  HEIGHT=$((HEIGHT+1))
-  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
 fi
 
 if [ "$chain" = "test" ]&&[ "$tcln" = "on" ]||\
    [ "$chain" = "sig" ]&& [ "$scln" = "on" ]||\
    [ "$chain" = "main" ]&&[ "$cln" = "on" ]; then
   OPTIONS+=(CLN "C-lightning options for ${CHAIN}")
-  HEIGHT=$((HEIGHT+1))
-  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
 fi
 
 OPTIONS+=(INFO "RaspiBlitz Status Screen for ${CHAIN}")
 
 if [ "$testnet" == "on" ]; then
-OPTIONS+=(SERVICES "Additional Apps & Services on ${CHAIN}")
-  HEIGHT=$((HEIGHT+1))
-  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
+  OPTIONS+=(SERVICES "Additional Apps & Services on ${CHAIN}")
 fi
 OPTIONS+=(SYSTEM "Monitoring & Configuration")
 #TODO OPTIONS+=(CONNECT "Connect Apps & Show Credentials")
 
 if [ $nonDefaultLNtype = 1 ];then
   OPTIONS+=(SWITCHLN "Make ${LNTYPE} the default lightning wallet")
-  HEIGHT=$((HEIGHT+1))
-  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
 fi
 
 if [ $nonDefaultChain = 1 ];then
   OPTIONS+=(MKDEFAULT "Make ${CHAIN} the default chain")
-  HEIGHT=$((HEIGHT+1))
-  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
 fi
 
+CHOICE_HEIGHT=$(("${#OPTIONS[@]}/2+1"))
+HEIGHT=$((CHOICE_HEIGHT+6))
 CHOICE=$(dialog --clear \
                 --backtitle "$BACKTITLE" \
                 --title "$TITLE" \
@@ -121,33 +107,35 @@ CHOICE=$(dialog --clear \
 
 case $CHOICE in
   INFO)
-   # #TODO
-   # echo "Gathering Information (please wait) ..."
-   # walletLocked=$(lncli getinfo 2>&1 | grep -c "Wallet is encrypted")
-   # if [ ${walletLocked} -eq 0 ]; then
-   #   while :
-   #     do
-   #     # show the same info as on LCD screen
-   #     /home/admin/00infoBlitz.sh 
-   #     # wait 6 seconds for user exiting loop
-   #     echo ""
-   #     echo -en "Screen is updating in a loop .... press 'x' now to get back to menu."
-   #     read -n 1 -t 6 keyPressed
-   #     echo -en "\rGathering information to update info ... please wait.                \n"  
-   #     # check if user wants to abort session
-   #     if [ "${keyPressed}" = "x" ]; then
-   #       echo ""
-   #       echo "Returning to menu ....."
-   #       sleep 4
-   #       break
-   #     fi
-   #   done
-   # else
-   #   /home/admin/00raspiblitz.sh
-   #   exit 0
-   # fi
-   /home/admin/00infoBlitz.sh $CHAIN
-    ;;
+      echo "Gathering Information (please wait) ..."
+      walletLocked=$(lncli getinfo 2>&1 | grep -c "Wallet is encrypted")
+      if [ ${walletLocked} -eq 0 ]; then
+        while :
+          do
+          
+          # show the same info as on LCD screen
+          /home/admin/00infoBlitz.sh ${lightning} ${chain}net
+          
+          # wait 6 seconds for user exiting loop
+          echo ""
+          echo -en "Screen is updating in a loop .... press 'x' now to get back to menu."
+          read -n 1 -t 6 keyPressed
+          echo -en "\rGathering information to update info ... please wait.                \n"  
+          
+          # check if user wants to abort session
+          if [ "${keyPressed}" = "x" ]; then
+            echo ""
+            echo "Returning to menu ....."
+            sleep 4
+            break
+          fi
+        done
+      
+      else
+        /home/admin/00raspiblitz.sh ${lightning} ${chain}net
+        exit 0
+      fi
+      ;;
   RTL)
     /home/admin/config.scripts/bonus.rtl.sh menu lnd $CHAIN
     ;;

@@ -11,9 +11,7 @@ source <(/home/admin/config.scripts/network.aliases.sh getvars cln $1)
 source <(/home/admin/config.scripts/internet.sh status local)
 
 # BASIC MENU INFO
-HEIGHT=14
 WIDTH=64
-CHOICE_HEIGHT=8
 BACKTITLE="RaspiBlitz"
 TITLE="C-Lightning Options"
 MENU=""
@@ -32,20 +30,18 @@ ln_channels_online="$(echo "${ln_getInfo}" | jq -r '.num_active_channels')" 2>/d
 cln_num_inactive_channels="$(echo "${ln_getInfo}" | jq -r '.num_inactive_channels')" 2>/dev/null
 openChannels=$((ln_channels_online+cln_num_inactive_channels))
 if [ ${#openChannels} -gt 0 ] && [ ${openChannels} -gt 0 ]; then
-OPTIONS+=(SUEZ "Visualize channels")
-OPTIONS+=(CLOSEALL "Close all open Channels on $CHAIN")
-  HEIGHT=$((HEIGHT+2))
-  CHOICE_HEIGHT=$((CHOICE_HEIGHT+2))  
+  OPTIONS+=(SUEZ "Visualize channels")
+  OPTIONS+=(CLOSEALL "Close all open Channels on $CHAIN")
 fi
 
 if [ ${#LNdefault} -gt 0 ]&&[ $LNdefault = lnd ];then
   OPTIONS+=(SWITCHLN  "Use C-lightning as default")
-  HEIGHT=$((HEIGHT+1))
-  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
 fi  
 
 OPTIONS+=(CASHOUT "Withdraw all funds from C-lightning on $CHAIN")
 
+CHOICE_HEIGHT=$(("${#OPTIONS[@]}/2+1"))
+HEIGHT=$((CHOICE_HEIGHT+6))
 CHOICE=$(dialog --clear \
                 --backtitle "$BACKTITLE" \
                 --title "$TITLE" \

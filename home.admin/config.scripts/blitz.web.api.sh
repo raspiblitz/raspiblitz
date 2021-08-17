@@ -48,9 +48,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   git checkout ${DEFAULT_GITHUB_BRANCH}
   pip install -r requirements.txt
 
-  # TODO: check if that manual install is still needed in a future version
-  pip install sse_starlette
-
   # build the config and set unique secret (its OK to be a new secret every install/upadte)
   /home/admin/config.scripts/blitz.web.api.sh update-config
   secret=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 64 ; echo '')
@@ -67,7 +64,7 @@ After=network.target
 WorkingDirectory=/home/admin/blitz_api
 # before every start update the config with latest credentials/settings
 ExecStartPre=-/home/admin/config.scripts/blitz.web.api.sh update-config
-ExecStart=sudo -admin /usr/bin/python -m uvicorn main:app --reload --port 11111 --host=0.0.0.0 --root-path /api
+ExecStart=sudo -u admin /usr/bin/python -m uvicorn main:app --reload --port 11111 --host=0.0.0.0 --root-path /api
 User=root
 Group=root
 Type=simple
@@ -92,7 +89,7 @@ WantedBy=multi-user.target
   sudo ufw allow 11111 comment 'WebAPI Develop'
 
   # install info
-  echo "# the API should new be available under http://[LOCALHOST]/api and port 11111 for testing"
+  echo "# the API doc should now be available under http://[LOCALHOST]/api/docs or try port 11111 for testing"
   echo "# check for systemd:  sudo systemctl status blitzapi"
   echo "# check for logs:     sudo journalctl -f -u blitzapi"
 
@@ -112,6 +109,7 @@ if [ "$1" = "update-config" ]; then
   fi
 
   cd /home/admin/blitz_api
+  cp ./.env_sample ./.env
   dateStr=$(date)
   echo "# Update Web API CONFIG (${dateStr})"
   RPCUSER=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcuser | cut -c 9-)

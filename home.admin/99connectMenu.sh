@@ -9,9 +9,7 @@ source /mnt/hdd/raspiblitz.conf
 source <(/home/admin/config.scripts/internet.sh status local)
 
 # BASIC MENU INFO
-HEIGHT=12
 WIDTH=64
-CHOICE_HEIGHT=6
 BACKTITLE="RaspiBlitz"
 TITLE="Connect Options"
 MENU=""
@@ -20,13 +18,9 @@ OPTIONS=()
 OPTIONS+=(MOBILE "Connect Mobile Wallet")
 if [ "${ElectRS}" == "on" ]; then
   OPTIONS+=(ELECTRS "Electrum Rust Server")
-  HEIGHT=$((HEIGHT+1))
-  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))  
 fi
 if [ "${BTCPayServer}" == "on" ]; then
   OPTIONS+=(BTCPAY "Show LND connection string")
-  HEIGHT=$((HEIGHT+1))
-  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))  
 fi
 OPTIONS+=(${network}RPC "Connect Specter Desktop or JoinMarket")
 OPTIONS+=(BISQ "Connect Bisq to this node")
@@ -34,6 +28,8 @@ OPTIONS+=(EXPORT "Get Macaroons and TLS.cert")
 OPTIONS+=(RESET "Recreate LND Macaroons & tls.cert")
 OPTIONS+=(SYNC "Sync Macaroons & tls.cert with Apps/Users")
 
+CHOICE_HEIGHT=$(("${#OPTIONS[@]}/2+1"))
+HEIGHT=$((CHOICE_HEIGHT+6))
 CHOICE=$(dialog --clear \
                 --backtitle "$BACKTITLE" \
                 --title "$TITLE" \

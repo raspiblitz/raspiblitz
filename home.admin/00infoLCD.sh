@@ -20,7 +20,7 @@ function usage() {
 verbose=0
 pause=12
 
-# this is used by touchscreen and command 'satus'
+# this is used by touchscreen and command 'status'
 # TODO: remove on v1.8
 while [[ "$1" == -* ]]; do
   case "$1" in
@@ -101,9 +101,9 @@ while :
 
     fi
 
-    # TODO: ALSO SEPERATE GUI/ACTION FOR THE SCANNING / WALLET UNLOCK / ERROR DETECTION 
+    # TODO: ALSO SEPARATE GUI/ACTION FOR THE SCANNING / WALLET UNLOCK / ERROR DETECTION 
     # if lightning is syncing or scanning
-    source <(sudo /home/admin/config.scripts/blitz.statusscan.sh)
+    source <(sudo /home/admin/config.scripts/blitz.statusscan.sh $lightning)
     if [ "${syncedToChain}" != "1" ]; then
       /home/admin/setup.scripts/eventBlockchainSync.sh lcd
       sleep 10
@@ -111,7 +111,7 @@ while :
     fi
 
     # no special case - show status display
-    /home/admin/00infoBlitz.sh
+    /home/admin/00infoBlitz.sh $lightning ${chain}net
     sleep 5
 
 done

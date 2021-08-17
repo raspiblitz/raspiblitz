@@ -2,11 +2,11 @@
 # https://lightning.readthedocs.io/
 
 # https://github.com/ElementsProject/lightning/releases
-#CLVERSION=v0.10.0
+CLVERSION=v0.10.1
 
 # install the latest master by using the last commit id
-# https://github.com/ElementsProject/lightning/commit/063366ed7e3b7cc12a8d1681acc2b639cf07fa23
-CLVERSION="063366ed7e3b7cc12a8d1681acc2b639cf07fa23"
+# https://github.com/ElementsProject/lightning/commit/master
+# CLVERSION="063366ed7e3b7cc12a8d1681acc2b639cf07fa23"
 
 # vars
 source /home/admin/raspiblitz.info
@@ -140,6 +140,10 @@ if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = experimental ]||[ "$1" = testPR ];
   sudo rm -rf /home/bitcoin/.lightning # not a symlink, delete
   sudo mkdir -p /mnt/hdd/app-data/.lightning
   sudo ln -s /mnt/hdd/app-data/.lightning /home/bitcoin/
+
+  if [ ${CLNETWORK} != "bitcoin" ] && [ ! -d /home/bitcoin/.lightning/${CLNETWORK} ] ;then
+    sudo -u bitcoin mkdir /home/bitcoin/.lightning/${CLNETWORK}
+  fi
   
   if ! sudo ls ${CLNCONF};then
     echo "# Create ${CLNCONF}"

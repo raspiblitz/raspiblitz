@@ -373,9 +373,7 @@ if [ "$1" == "github" ]; then
 fi
 
 # Basic Options Menu
-HEIGHT=10 # add 6 to CHOICE_HEIGHT + MENU lines
 WIDTH=55
-CHOICE_HEIGHT=4 # 1 line / OPTIONS
 OPTIONS=()
 OPTIONS+=(RELEASE "RaspiBlitz Release Update/Recovery")
 OPTIONS+=(PATCH "Patch RaspiBlitz v${codeVersion}")
@@ -417,7 +415,7 @@ if [ "${runBehindTor}" == "on" ]; then
   OPTIONS+=(TOR "Update Tor from the source code")
 fi
 
-CHOICE_HEIGHT=$(("${#OPTIONS[@]}"))
+CHOICE_HEIGHT=$(("${#OPTIONS[@]}/2+1"))
 HEIGHT=$((CHOICE_HEIGHT+6))  
 CHOICE=$(dialog --clear \
                 --backtitle "" \

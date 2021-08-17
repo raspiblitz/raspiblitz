@@ -46,20 +46,24 @@ ${toraddresstext}
   
   /home/admin/config.scripts/blitz.display.sh hide
 
-  echo "please wait ..."
+  echo "# please wait ..."
   exit 0
 fi
 
 # add default value to raspi config if needed
-if ! grep -Eq "^${CHAIN}=" /mnt/hdd/raspiblitz.conf; then
-  NEWENTRY="${netprefix}sparko=off"
-  sudo /bin/sh -c "echo '$NEWENTRY' >> /mnt/hdd/raspiblitz.conf" 
+configEntry="${netprefix}sparko"
+configEntryExists=$(sudo cat /mnt/hdd/raspiblitz.conf | grep -c "${configEntry}")
+if [ "${configEntryExists}" == "0" ]; then
+  echo "# adding default config entry for '${configEntry}'"
+  sudo /bin/sh -c "echo '${configEntry}=off' >> /mnt/hdd/raspiblitz.conf"
+else
+  echo "# default config entry for '${configEntry}' exists"
 fi
 
 if [ $1 = connect ];then
   localip=$(ip addr | grep 'state UP' -A2 | grep -E -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
   toraddress=$(sudo cat /mnt/hdd/tor/${netprefix}sparko/hostname)
-  accesskey=$(sudo cat /home/bitcoin/.lightning/${netprefix}config | grep "^sparko-keys=" | cut -d= -f2 | cut -d';' -f1) 
+  accesskey=$(sudo cat ${CLNCONF} | grep "^sparko-keys=" | cut -d= -f2 | cut -d';' -f1) 
   url="https://${localip}:${portprefix}9000/"
   string="${url}?access-key=${accesskey}"
 
@@ -96,7 +100,7 @@ if [ $1 = on ];then
     sudo -u bitcoin mkdir /home/bitcoin/cln-plugins-available
     # download binary
     sudo -u bitcoin wget https://github.com/fiatjaf/sparko/releases/download/${SPARKOVERSION}/sparko_${DISTRO}\
-    -O /home/bitcoin/${netprefix}cln-plugins-available/sparko || exit 1
+    -O /home/bitcoin/cln-plugins-available/sparko || exit 1
     # make executable
     sudo chmod +x /home/bitcoin/cln-plugins-available/sparko
   fi
@@ -120,8 +124,8 @@ if [ $1 = on ];then
   ##########
   # Config #
   ##########
-  if ! grep -Eq "^sparko" /home/bitcoin/.lightning/${netprefix}config;then
-    echo "# Editing /home/bitcoin/.lightning/${netprefix}config"
+  if ! grep -Eq "^sparko" ${CLNCONF};then
+    echo "# Editing ${CLNCONF}"
     echo "# See: https://github.com/fiatjaf/sparko#how-to-use"
     PASSWORD_B=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcpassword | cut -c 13-)
     # Spark wallet only allows alphanumeric characters
@@ -135,9 +139,9 @@ sparko-port=${portprefix}9000
 sparko-tls-path=/home/bitcoin/.lightning/sparko-tls
 sparko-login=blitz:$PASSWORD_B
 sparko-keys=${masterkeythatcandoeverything}; ${secretaccesskeythatcanreadstuff}: getinfo, listchannels, listnodes; ${verysecretkeythatcanpayinvoices}: pay; ${keythatcanlistentoallevents}: stream
-" | sudo tee -a /home/bitcoin/.lightning/${netprefix}config
+" | sudo tee -a ${CLNCONF}
   else
-    echo "# Sparko is already configured in the /home/bitcoin/.lightning/${netprefix}config"
+    echo "# Sparko is already configured in ${CLNCONF}"
   fi
 
   echo "# Allowing port ${portprefix}9000 through the firewall"
@@ -166,8 +170,8 @@ if [ $1 = off ];then
   # delete symlink
   sudo rm -rf /home/bitcoin/${netprefix}cln-plugins-enabled/sparko
   
-  echo "# Editing /home/bitcoin/.lightning/${netprefix}config"
-  sudo sed -i "/^sparko/d" /home/bitcoin/.lightning/${netprefix}config
+  echo "# Editing ${CLNCONF}"
+  sudo sed -i "/^sparko/d" ${CLNCONF}
 
   echo "# Restart the ${netprefix}lightningd.service to deactivate Sparko"
   sudo systemctl restart ${netprefix}lightningd
