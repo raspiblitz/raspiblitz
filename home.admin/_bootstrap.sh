@@ -211,7 +211,7 @@ fi
 if [ "${systemInitReboot}" == "1" ]; then
   sudo cp ${logFile} ${logFile}.systeminit
   sudo sed -i "s/^state=.*/state=reboot/g" ${infoFile}
-  sleep 6
+  sleep 60
   sudo shutdown -r now
   sleep 100
   exit 0
@@ -333,7 +333,7 @@ if [ "${neededReboot}" == "1" ]; then
   echo "UASP FIX applied (2nd-try) ... reboot needed." >> $logFile
   sudo cp ${logFile} ${logFile}.uasp
   sudo sed -i "s/^state=.*/state=reboot/g" ${infoFile}
-  sleep 6
+  sleep 60
   sudo shutdown -r now
   sleep 100
   exit 0
@@ -446,7 +446,7 @@ if [ ${isMounted} -eq 0 ]; then
       sed -i "s/^state=.*/state=errorHDD/g" ${infoFile}
       sed -i "s/^message=.*/message='lost HDD - rebooting'/g" ${infoFile}
       sudo cp ${logFile} ${logFile}.error
-      sleep 6
+      sleep 60
       sudo shutdown -r now
       sleep 100
       exit 0
