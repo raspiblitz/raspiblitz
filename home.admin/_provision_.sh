@@ -378,7 +378,8 @@ else
 fi
 
 #LOOP
-if [ "${loop}" = "on" ]; then
+# install only if LiT won't be installed
+if [ "${loop}" = "on" ] && [ "${#lit}" -eq 0 ] || [ "${lit}" = "off" ]; then
   echo "Provisioning Lightning Loop - run config script" >> ${logFile}
   sudo sed -i "s/^message=.*/message='Setup Lightning Loop'/g" ${infoFile}
   sudo -u admin /home/admin/config.scripts/bonus.loop.sh on >> ${logFile} 2>&1
@@ -615,6 +616,16 @@ else
   echo "Provisioning Stacking Sats Kraken - keep default" >> ${logFile}
 fi
 
+# Pool
+# install only if LiT won't be installed
+if [ "${pool}" = "on" ] && [ "${#lit}" -eq 0 ] || [ "${lit}" = "off" ]; then
+  echo "Provisioning Pool - run config script" >> ${logFile}
+  sudo sed -i "s/^message=.*/message='Setup Pool'/g" ${infoFile}
+  sudo -u admin /home/admin/config.scripts/bonus.pool.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning Pool - keep default" >> ${logFile}
+fi
+
 # lit (make sure to be installed after RTL)
 if [ "${lit}" = "on" ]; then
   echo "Provisioning LIT - run config script" >> ${logFile}
@@ -622,15 +633,6 @@ if [ "${lit}" = "on" ]; then
   sudo -u admin /home/admin/config.scripts/bonus.lit.sh on >> ${logFile} 2>&1
 else
   echo "Provisioning LIT - keep default" >> ${logFile}
-fi
-
-# pool
-if [ "${pool}" = "on" ]; then
-  echo "Provisioning Pool - run config script" >> ${logFile}
-  sudo sed -i "s/^message=.*/message='Setup Pool'/g" ${infoFile}
-  sudo -u admin /home/admin/config.scripts/bonus.pool.sh on >> ${logFile} 2>&1
-else
-  echo "Provisioning Pool - keep default" >> ${logFile}
 fi
 
 # sphinxrelay
