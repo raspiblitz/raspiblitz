@@ -124,6 +124,7 @@ if [ ${forceHDMIoutput} -eq 1 ]; then
   echo "HDMI switch found ... activating HDMI display output & reboot" >> $logFile
   sudo /home/admin/config.scripts/blitz.display.sh set-display hdmi >> $logFile
   systemInitReboot=1
+  sed -i "s/^message=.*/message='HDMI'/g" ${infoFile}
 else
   echo "No HDMI switch found. " >> $logFile
 fi
@@ -145,6 +146,7 @@ if [ ${sshReset} -eq 1 ]; then
   sudo rm /mnt/hdd/ssh/ssh_host* >> $logFile
   sudo ssh-keygen -A >> $logFile
   systemInitReboot=1
+  sed -i "s/^message=.*/message='SSHRESET'/g" ${infoFile}
 else
   echo "No SSHRESET switch found. " >> $logFile
 fi
@@ -162,6 +164,7 @@ if [ ${backgroundNeedsEdit} -eq 1 ]; then
   sudo sed -i "s/^Wants=.*/Wants=network.target/g" /etc/systemd/system/background.service
   sudo sed -i "s/^After=.*/After=network.target/g" /etc/systemd/system/background.service
   systemInitReboot=1
+  sed -i "s/^message=.*/message='BACKGROUND EDIT'/g" ${infoFile}
 else
   echo "BACKGROUND EDIT already done. " >> $logFile
 fi
@@ -178,6 +181,7 @@ if [ "${needsExpansion}" == "1" ] && [ "${fsexpanded}" == "0" ]; then
   sudo /home/admin/config.scripts/blitz.bootdrive.sh status >> $logFile
   sudo /home/admin/config.scripts/blitz.bootdrive.sh fsexpand >> $logFile
   systemInitReboot=1
+  sed -i "s/^message=.*/message='FSEXPAND'/g" ${infoFile}
 elif [ "${tooSmall}" == "1" ]; then
   echo "!!! FAIL !!!!!!!!!!!!!!!!!!!!" >> $logFile
   echo "SDCARD TOO SMALL 16G minimum" >> $logFile
@@ -199,6 +203,7 @@ fi
 source <(sudo /home/admin/config.scripts/blitz.datadrive.sh uasp-fix)
 if [ "${neededReboot}" == "1" ]; then
   echo "UASP FIX applied (1st-try) ... reboot needed." >> $logFile
+  sed -i "s/^message=.*/message='UASP'/g" ${infoFile}
   systemInitReboot=1
 else
   echo "No UASP FIX needed (1st-try)." >> $logFile
@@ -210,8 +215,9 @@ fi
 
 if [ "${systemInitReboot}" == "1" ]; then
   sudo cp ${logFile} ${logFile}.systeminit
-  sudo sed -i "s/^state=.*/state=reboot/g" ${infoFile}
+  sudo sed -i "s/^state=.*/state=initreboot/g" ${infoFile}
   sleep 60
+  sudo sed -i "s/^state=.*/state=reboot/g" ${infoFile}
   sudo shutdown -r now
   sleep 100
   exit 0
@@ -332,8 +338,10 @@ source <(sudo /home/admin/config.scripts/blitz.datadrive.sh uasp-fix)
 if [ "${neededReboot}" == "1" ]; then
   echo "UASP FIX applied (2nd-try) ... reboot needed." >> $logFile
   sudo cp ${logFile} ${logFile}.uasp
-  sudo sed -i "s/^state=.*/state=reboot/g" ${infoFile}
+  sudo sed -i "s/^state=.*/state=uaspreboot/g" ${infoFile}
+  sed -i "s/^message=.*/message='UASP2'/g" ${infoFile}
   sleep 60
+  sudo sed -i "s/^state=.*/state=reboot/g" ${infoFile}
   sudo shutdown -r now
   sleep 100
   exit 0
