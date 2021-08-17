@@ -1,7 +1,7 @@
 #!/bin/bash
 
 source /home/admin/raspiblitz.info
-source /mnt/hdd/raspiblitz.conf
+source /mnt/hdd/raspiblitz.conf 2>/dev/null
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -44,7 +44,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # some APC UPS were not running stable below 90% Battery - so start shutdown at 95% remaining
     sudo sed -i "s/^BATTERYLEVEL.*/BATTERYLEVEL 95/g" /etc/apcupsd/apcupsd.conf
     sudo sed -i "s/^ISCONFIGURED=.*/ISCONFIGURED=yes/g" /etc/default/apcupsd
-    sudo sed -i "s/^SHUTDOWN=.*/SHUTDOWN=\/home\/admin\/XXshutdown.sh/g" /etc/apcupsd/apccontrol
+    sudo sed -i "s/^SHUTDOWN=.*/SHUTDOWN=\/home\/admin\/config.scripts\/blitz.shutdown.sh/g" /etc/apcupsd/apccontrol
     sudo sed -i "s/^WALL=.*/#WALL=wall/g" /etc/apcupsd/apccontrol
     sudo systemctl enable apcupsd
     sudo systemctl start apcupsd

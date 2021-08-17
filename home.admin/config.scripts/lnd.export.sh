@@ -62,17 +62,17 @@ elif [ "${exportType}" = "hexstring" ]; then
   clear
   echo "###### HEXSTRING EXPORT ######"
   echo ""
-  echo "admin.macaroon:"
-  sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/${network}/${chain}net/admin.macaroon
+  adminMacaroon=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/${network}/${chain}net/admin.macaroon)
+  echo "adminMacaroon=${adminMacaroon}"
   echo ""
-  echo "invoice.macaroon:"
-  sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/${network}/${chain}net/invoice.macaroon
+  invoiceMacaroon=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/${network}/${chain}net/invoice.macaroon)
+  echo "invoiceMacaroon=${invoiceMacaroon}"
   echo ""
-  echo "readonly.macaroon:"
-  sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/${network}/${chain}net/readonly.macaroon
+  readonlyMacaroon=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/${network}/${chain}net/readonly.macaroon)
+  echo "readonlyMacaroon=${readonlyMacaroon}"
   echo ""
-  echo "tls.cert:"
-  sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/tls.cert
+  tlsCert=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/tls.cert)
+  echo "tlsCert=${tlsCert}"
   echo ""
 
 ########################
@@ -123,7 +123,7 @@ elif [ "${exportType}" = "btcpay" ]; then
 ###########################
 elif [ "${exportType}" = "scp" ]; then
 
-  local_ip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+  local_ip=$(hostname -I | awk '{print $1}')
   clear
   echo "###### DOWNLOAD BY SCP ######"
   echo "Copy, paste and execute these commands in your client terminal to download the files."
@@ -141,7 +141,7 @@ elif [ "${exportType}" = "scp" ]; then
 ###########################
 elif [ "${exportType}" = "http" ]; then
 
-  local_ip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+  local_ip=$(hostname -I | awk '{print $1}')
   randomPortNumber=$(shuf -i 20000-39999 -n 1)
   sudo ufw allow from 192.168.0.0/16 to any port ${randomPortNumber} comment 'temp http server'
   clear

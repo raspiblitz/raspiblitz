@@ -1,6 +1,7 @@
 # CHANGES between Releases
 
 - Update: Balance of Satoshis 10.7.8 (BOS) + keep data on reinstall [details](https://github.com/alexbosworth/balanceofsatoshis/blob/master/CHANGELOG.md#version-8010)
+- Update: mempool space 2.2.1 [details](https://github.com/mempool/mempool)
 
 ## What's new in Version 1.7.0 of RaspiBlitz?
 
