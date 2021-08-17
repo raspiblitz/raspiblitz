@@ -210,7 +210,7 @@ The following additional information is available:
             time.sleep(3)
 
     # trigger restart of relevant services so they can pickup new environment
-    print("# restarting Sphinx Relay to pickup new public url (please wait) ...")
+    print("# restarting services to pickup new public url (please wait) ...")
     os.system("sudo systemctl restart sphinxrelay 2>/dev/null")
     time.sleep(8)
 
@@ -271,7 +271,7 @@ def main():
     The IP2TOR service just makes sense if you run
     your RaspiBlitz behind TOR.
             ''', title="Info")
-            sys.exit(1)
+            sys.exit(0)
 
         os.system("clear")
         print("please wait ..")
@@ -405,7 +405,7 @@ def main():
             except Exception as e:
                 print(e)
                 time.sleep(3)
-                sys.exit(1)
+                sys.exit(0)
 
         # run creating a new IP2TOR subscription
         os.system("clear")
@@ -416,7 +416,7 @@ def main():
 
         # action after possibly new created bride
         if service_name == SERVICE_SPHINX:
-            print("# restarting Sphinx Relay to pickup new public url (please wait) ...")
+            print("# restarting services to pickup new public url (please wait) ...")
             os.system("sudo systemctl restart sphinxrelay")
             time.sleep(8)
 

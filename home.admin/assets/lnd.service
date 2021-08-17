@@ -17,12 +17,17 @@ User=bitcoin
 Group=bitcoin
 LimitNOFILE=128000
 Type=simple
-KillMode=process
 TimeoutSec=180
 Restart=always
 RestartSec=60
 StandardOutput=null
 StandardError=journal
+
+# Hardening measures
+PrivateTmp=true
+ProtectSystem=full
+NoNewPrivileges=true
+PrivateDevices=true
 
 [Install]
 WantedBy=multi-user.target

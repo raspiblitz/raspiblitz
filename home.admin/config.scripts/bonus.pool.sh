@@ -208,10 +208,15 @@ ExecStart=$proxy /usr/local/bin/poold --network=${chain}net --debuglevel=trace
 User=pool
 Group=pool
 Type=simple
-KillMode=process
 TimeoutSec=60
 Restart=always
 RestartSec=60
+
+# Hardening measures
+PrivateTmp=true
+ProtectSystem=full
+NoNewPrivileges=true
+PrivateDevices=true
 
 [Install]
 WantedBy=multi-user.target

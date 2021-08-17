@@ -34,6 +34,12 @@ Environment="AUTOSSH_GATETIME=0"
 ExecStart=/usr/bin/autossh [MONITORING-PORT] -N -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o ServerAliveInterval=60 -o ServerAliveCountMax=2 [PLACEHOLDER]
 StandardOutput=journal
 
+# Hardening measures
+PrivateTmp=true
+ProtectSystem=full
+NoNewPrivileges=true
+PrivateDevices=true
+
 [Install]
 WantedBy=multi-user.target
 """
