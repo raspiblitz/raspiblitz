@@ -1060,6 +1060,7 @@ echo "- OK install of LND done"
 echo "*** C-lightning ***"
 # https://github.com/ElementsProject/lightning/releases
 CLVERSION=0.10.1
+
 # https://github.com/ElementsProject/lightning/tree/master/contrib/keys
 PGPsigner="rustyrussel"
 PGPpkeys="https://raw.githubusercontent.com/ElementsProject/lightning/master/contrib/keys/rustyrussell.txt"
@@ -1126,14 +1127,13 @@ sudo apt-get install -y \
   libsqlite3-dev python3 python3-mako net-tools zlib1g-dev libsodium-dev \
   gettext unzip
 
-unzip clightning-v${CLVERSION}.zip
+sudo -u admin unzip clightning-v${CLVERSION}.zip
 cd clightning-v${CLVERSION} || exit 1
 
 echo "- Configuring EXPERIMENTAL_FEATURES enabled"
 sudo -u admin ./configure --enable-experimental-features
 
-currentCLversion=$(git describe --tags 2>/dev/null)
-echo "- Building from source C-lightning $currentCLversion"
+echo "- Building C-lightning from source"
 sudo -u admin make
 
 echo "- Install to /usr/local/bin/"
