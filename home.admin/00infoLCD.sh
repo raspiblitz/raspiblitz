@@ -18,7 +18,7 @@ function usage() {
 
 # Default Values
 verbose=0
-pause=12
+pause=3
 
 # this is used by touchscreen and command 'status'
 # TODO: remove on v1.8
