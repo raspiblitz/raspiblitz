@@ -152,24 +152,6 @@ else
 fi
 
 ################################
-# BACKGROUND TASK RUN FROM BEGINNING
-# on 1.7 sd card build background task runs after boostrap
-# but bootstrap already needs background task running now
-# REMOVE ON v1.8 release #2328
-################################
-
-backgroundNeedsEdit=$(sudo cat /etc/systemd/system/background.service 2>/dev/null | grep -c 'Wants=bootstrap.service')
-if [ ${backgroundNeedsEdit} -eq 1 ]; then
-  echo "BACKGROUND EDIT needed ..." >> $logFile
-  sudo sed -i "s/^Wants=.*/Wants=network.target/g" /etc/systemd/system/background.service
-  sudo sed -i "s/^After=.*/After=network.target/g" /etc/systemd/system/background.service
-  systemInitReboot=1
-  sed -i "s/^message=.*/message='BACKGROUND EDIT'/g" ${infoFile}
-else
-  echo "BACKGROUND EDIT already done. " >> $logFile
-fi
-
-################################
 # FS EXPAND
 # if a file called 'ssh.reset' gets
 # placed onto the boot part of
@@ -215,9 +197,8 @@ fi
 
 if [ "${systemInitReboot}" == "1" ]; then
   sudo cp ${logFile} ${logFile}.systeminit
-  sudo sed -i "s/^state=.*/state=initreboot/g" ${infoFile}
-  sleep 60
-  sudo sed -i "s/^state=.*/state=reboot/g" ${infoFile}
+  sudo sed -i "s/^state=.*/state=reboot-init/g" ${infoFile}
+  sleep 6
   sudo shutdown -r now
   sleep 100
   exit 0
@@ -338,10 +319,8 @@ source <(sudo /home/admin/config.scripts/blitz.datadrive.sh uasp-fix)
 if [ "${neededReboot}" == "1" ]; then
   echo "UASP FIX applied (2nd-try) ... reboot needed." >> $logFile
   sudo cp ${logFile} ${logFile}.uasp
-  sudo sed -i "s/^state=.*/state=uaspreboot/g" ${infoFile}
-  sed -i "s/^message=.*/message='UASP2'/g" ${infoFile}
-  sleep 60
   sudo sed -i "s/^state=.*/state=reboot/g" ${infoFile}
+  sleep 6
   sudo shutdown -r now
   sleep 100
   exit 0
@@ -454,7 +433,7 @@ if [ ${isMounted} -eq 0 ]; then
       sed -i "s/^state=.*/state=errorHDD/g" ${infoFile}
       sed -i "s/^message=.*/message='lost HDD - rebooting'/g" ${infoFile}
       sudo cp ${logFile} ${logFile}.error
-      sleep 60
+      sleep 6
       sudo shutdown -r now
       sleep 100
       exit 0
