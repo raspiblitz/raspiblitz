@@ -7,7 +7,7 @@
 - [How to verify the SD card image after download?](#how-to-verify-the-sd-card-image-after-download)
 - [How to update an old RaspiBlitz BEFORE v1.0? (LEGACY)](#how-to-update-an-old-raspiblitz-before-v10-legacy)
 - [Why do I need to re-burn my SD card for an update?](#why-do-i-need-to-re-burn-my-sd-card-for-an-update)
-- [I have the full blockchain on another computer. How do I copy it to the RaspiBlitz?](#i-have-the-full-blockchain-on-another-computer-how-do-i-copy-it-to-the-raspiblitz)
+- [I have the full blockchain on another storage. How do I copy it to the RaspiBlitz?](#i-have-the-full-blockchain-on-another-storage-how-do-i-copy-it-to-the-raspiblitz)
 - [How do I generate a Debug Report?](#how-do-i-generate-a-debug-report)
 - [Can I run my RaspiBlitz on Solar Energy?](#can-i-run-my-raspiblitz-on-solar-energy)
 - [Why is my "final sync" taking so long?](#why-is-my-final-sync-taking-so-long)
@@ -55,11 +55,11 @@
 - [How do I solve a "signature mismatch after caveat verification" error?](#how-do-i-solve-a-signature-mismatch-after-caveat-verification-error)
 - [Why is my node not routing?](#why-is-my-node-not-routing)
 - [How can I update LND or bitcoind even before the next RaspiBlitz update?](#how-can-i-update-lnd-or-bitcoind-even-before-the-next-raspiblitz-update)
-- [I cannot connect per SSH to my RaspiBlitz. What can I do?](#i-cannot-connect-per-ssh-to-my-raspiblitz-what-to-do)
+- [I cannot connect via SSH to my RaspiBlitz. What do I do?](#i-cannot-connect-via-ssh-to-my-raspiblitz-what-do-i-do)
 - [How to SSH over Tor?](#how-to-ssh-over-tor)
-- [How do I setup port-forwarding with a SSH tunnel?](#how-to-setup-port-forwarding-with-a-ssh-tunnel)
-- [How do I setup just a port-forwarding user on my public server?](#how-to-setup-just-a-port-forwarding-user-on-my-public-server)
-- [How do I connect a UPS to the RaspiBlitz?](#how-to-connect-a-ups-to-the-raspiblitz)
+- [How to setup port-forwarding with a SSH tunnel?](#how-to-setup-port-forwarding-with-a-ssh-tunnel)
+- [How do I setup just a port-forwarding user on my public server?](#how-do-i-setup-just-a-port-forwarding-user-on-my-public-server)
+- [How do I connect a UPS to the RaspiBlitz?](#how-do-i-connect-a-ups-to-the-raspiblitz)
 - [Why use BTRFS on RaspiBlitz?](#why-use-btrfs-on-raspiblitz)
   - [Storing your important Data in RAID1 with a USB Thumb Drive](#storing-your-important-data-in-raid1-with-a-usb-thumb-drive)
   - [Snapshotting the Blockchain](#snapshotting-the-blockchain)
@@ -170,15 +170,17 @@ Of course, people should modify the system, add own scripts, etc ... but if you 
 
 *BTW there is a beneficial side effect when updating with a new SD card: You also get rid of any malware or system bloat that happened in the past. You start with a fresh system :)*
 
-## I have the full blockchain on another computer. How do I copy it to the RaspiBlitz?
+## I have the full blockchain on another storage. How do I copy it to the RaspiBlitz?
 
-Copying a already synced blockchain from another computer (for example your Laptop) can be a quick way to get the RaspiBlitz started or replacing a corrupted blockchain with a fresh one. Also that way you have synced and verified the blockchain yourself, and are not trusting the RaspiBlitz Torrent downloads (Don't trust, verify).
+Copying a already synced blockchain from another storage (e.g. your Laptop or external hard drive) can be a quick way to get the RaspiBlitz started or replacing a corrupted blockchain with a fresh one. Also that way you have synced and verified the blockchain yourself, and are not trusting the RaspiBlitz Torrent downloads (Don't trust, verify).
 
 One requirement is that the blockchain is from another bitcoin-core client with version greater or equal to 0.17.1.
 
 But we don't copy the data via USB to the device, because the HDD needs to be formatted in EXT4 and that is usually not read/writable by Windows or Mac computers. So I will explain a way to copy the data through your local network. This should work from Windows, Mac, Linux and even from another already synced RaspiBlitz.
 
-Both computers (your RaspberryPi and the other computer with the full blockchain) need to be connected to the same local network. Make sure that bitcoind/bitcoin-qt is stopped on the computer containing the blockchain. If your blockchain source is another RaspiBlitz with v1.5 or higher - go to `REPAIR` > `COPY-SOURCE`. If your RaspiBlitz is below v1.5 then on the terminal `sudo systemctl stop bitcoind` and then go to the directory where the blockchain data is with `cd /mnt/hdd/bitcoin` - when the copy/transfer is done later reboot a RaspiBlitz source with `sudo shutdown -r now`.
+Both computers (your RaspberryPi and the other computer with the full blockchain) need to be connected to the same local network. Make sure that bitcoind/bitcoin-qt is stopped on the computer containing the blockchain. 
+If your blockchain source is another RaspiBlitz v1.5 or higher - go to `REPAIR` > `COPY-SOURCE`. 
+If your RaspiBlitz is below v1.5 then on the terminal `sudo systemctl stop bitcoind` and then go to the directory where the blockchain data is with `cd /mnt/hdd/bitcoin` - when the copy/transfer is done later reboot a RaspiBlitz source with `sudo shutdown -r now`.
 
 If everything described above is in order, start the setup of the new RaspiBlitz with a fresh SD card (like explained in the README) - it's OK that there is no blockchain data on your HDD yet - just follow the setup. When you get to the setup-point `Getting the Blockchain` choose the COPY option. Starting from version 1.0 of the RaspiBlitz this will give you further detailed instructions how to transfer the blockchain data onto your RaspiBlitz. In short: On your computer with the blockchain data source you will execute SCP commands that will copy the data over your local network to your RaspiBlitz.
 

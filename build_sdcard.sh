@@ -363,7 +363,7 @@ fi
 
 echo ""
 echo "*** CONFIG ***"
-# based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#raspi-config
+# based on https://stadicus.github.io/RaspiBolt/raspibolt_20_pi.html#raspi-config
 
 # set new default password for root user
 echo "root:raspiblitz" | sudo chpasswd
@@ -475,7 +475,7 @@ sudo service rsyslog restart
 
 echo ""
 echo "*** SOFTWARE UPDATE ***"
-# based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#software-update
+# based on https://stadicus.github.io/RaspiBolt/raspibolt_20_pi.html#software-update
 
 # installs like on RaspiBolt
 sudo apt install -y htop git curl bash-completion vim jq dphys-swapfile bsdmainutils
@@ -541,7 +541,7 @@ sudo apt -y autoremove
 
 echo ""
 echo "*** ADDING MAIN USER admin ***"
-# based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#adding-main-user-admin
+# based on https://stadicus.github.io/RaspiBolt/raspibolt_20_pi.html#add-users
 # using the default password 'raspiblitz'
 
 sudo adduser --disabled-password --gecos "" admin
@@ -561,7 +561,7 @@ sudo chmod 755 /home/admin/raspiblitz.info
 
 echo ""
 echo "*** ADDING SERVICE USER bitcoin"
-# based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#adding-the-service-user-bitcoin
+# based on https://stadicus.github.io/RaspiBolt/raspibolt_20_pi.html#add-users
 
 # create user and set default password for user
 sudo adduser --disabled-password --gecos "" bitcoin
@@ -681,7 +681,7 @@ sudo bash -c "echo '# Raspiblitz' >> /home/admin/.bashrc"
 
 echo ""
 echo "*** SWAP FILE ***"
-# based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#moving-the-swap-file
+# based on https://stadicus.github.io/RaspiBolt/raspibolt_20_pi.html#move-swap-file
 # but just deactivating and deleting old (will be created alter when user adds HDD)
 
 sudo dphys-swapfile swapoff
@@ -689,7 +689,7 @@ sudo dphys-swapfile uninstall
 
 echo ""
 echo "*** INCREASE OPEN FILE LIMIT ***"
-# based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#increase-your-open-files-limit
+# based on https://stadicus.github.io/RaspiBolt/raspibolt_21_security.html#increase-your-open-files-limit
 
 sudo sed --in-place -i "56s/.*/*    soft nofile 128000/" /etc/security/limits.conf
 sudo bash -c "echo '*    hard nofile 128000' >> /etc/security/limits.conf"
@@ -820,7 +820,7 @@ sudo cp /home/admin/assets/background.service /etc/systemd/system/background.ser
 sudo systemctl enable background
 
 # "*** BITCOIN ***"
-# based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_30_bitcoin.md#installation
+# based on https://stadicus.github.io/RaspiBolt/raspibolt_30_bitcoin.html#installation
 
 echo ""
 echo "*** PREPARING BITCOIN ***"
@@ -936,7 +936,7 @@ echo ""
 echo "*** PREPARING LIGHTNING ***"
 
 # "*** LND ***"
-## based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_40_lnd.md#lightning-lnd
+## based on https://stadicus.github.io/RaspiBolt/raspibolt_40_lnd.html#lightning-lnd
 ## see LND releases: https://github.com/lightningnetwork/lnd/releases
 lndVersion="0.13.1-beta"
 
