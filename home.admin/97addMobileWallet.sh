@@ -144,7 +144,7 @@ OPTIONS+=(SENDMANY_ANDROID "SendMany (Android)")
 
 # Additinal Options with TOR
 if [ "${runBehindTor}" = "on" ]; then
-  OPTIONS+=(FULLY_NODED "Fully Noded (IOS+TOR)") 
+  OPTIONS+=(FULLY_NODED "Fully Noded (iOS+Tor)") 
 fi
 
 CHOICE=$(whiptail --clear --title "Choose Mobile Wallet" --menu "" 14 50 8 "${OPTIONS[@]}" 2>&1 >/dev/tty)
@@ -259,12 +259,12 @@ Please go to MAINMENU > SERVICES and activate KEYSEND first.
       exit 0;
     ;;
   ZEUS_IOS)
-      appstoreLink="https://testflight.apple.com/join/gpVFzEHN"
+      appstoreLink="https://apps.apple.com/us/app/zeus-ln/id1456038895"
       /home/admin/config.scripts/blitz.display.sh image /home/admin/raspiblitz/pictures/app_zeus.png
-	  whiptail --title "Install Testflight and Zeus on your iOS device" \
+	  whiptail --title "Install Zeus on your iOS device" \
 		--yes-button "Continue" \
-		--no-button "Link as QR Code" \
-		--yesno "At the moment this app is in public beta testing.\nFirst open Apple Apstore, search & install 'TestFlight' app.\n\nThen open the following link on your mobile:\n${appstoreLink}\n\nUse 'Open In TestFlight' option of your mobile browser.\nWhen Zeus is installed and started --> Continue." 14 65
+		--no-button "Link as QRcode" \
+		--yesno "Open the Apple App Store on your mobile phone.\n\nSearch for --> 'zeus ln'\n\nCheck that logo is like on LCD and author is: Zeus LN LLC\nWhen the app is installed and started --> Continue." 12 65
 	  if [ $? -eq 1 ]; then
 		/home/admin/config.scripts/blitz.display.sh qr ${appstoreLink}
 		/home/admin/config.scripts/blitz.display.sh qr-console ${appstoreLink}
