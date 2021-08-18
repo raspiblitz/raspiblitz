@@ -433,7 +433,18 @@ if [ ${isMounted} -eq 0 ]; then
       sed -i "s/^state=.*/state=errorHDD/g" ${infoFile}
       sed -i "s/^message=.*/message='lost HDD - rebooting'/g" ${infoFile}
       sudo cp ${logFile} ${logFile}.error
-      sleep 6
+      sleep 3
+      sudo shutdown -r now
+      sleep 100
+      exit 0
+    fi
+
+    # detect if network get deconnected again
+    # --> "removing network cable" can be used as signal to shutdown clean on test startup
+    source <(/home/admin/config.scripts/internet.sh status)
+    if [ "${localip}" == "" ]; then
+      sed -i "s/^state=.*/state=errorNetwork/g" ${infoFile}
+      sleep 3
       sudo shutdown -r now
       sleep 100
       exit 0

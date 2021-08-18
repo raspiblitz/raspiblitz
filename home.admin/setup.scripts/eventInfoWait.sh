@@ -279,6 +279,14 @@ Detailed Error Message:
 ${contentString}
 " 7 35
 
+elif [ "${eventID}" == "errorNetwork" ]; then
+
+    dialog --backtitle "${backtitle}" --cr-wrap --infobox "
+PROBLEM: LOST NETWORK
+Shutting down ... 
+Manual restart needed.
+" 7 35
+
 elif [ "${eventID}" == "sdtoosmall" ]; then
 
     # contentWords[0] --> size string (for example '16GB')
