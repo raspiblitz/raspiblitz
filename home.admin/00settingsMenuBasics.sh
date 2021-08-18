@@ -9,13 +9,14 @@ echo "services default values"
 if [ ${#autoPilot} -eq 0 ]; then autoPilot="off"; fi
 if [ ${#autoUnlock} -eq 0 ]; then autoUnlock="off"; fi
 if [ ${#runBehindTor} -eq 0 ]; then runBehindTor="off"; fi
-if [ ${#chain} -eq 0 ]; then chain="main"; fi
 if [ ${#autoNatDiscovery} -eq 0 ]; then autoNatDiscovery="off"; fi
 if [ ${#networkUPnP} -eq 0 ]; then networkUPnP="off"; fi
 if [ ${#touchscreen} -eq 0 ]; then touchscreen=0; fi
 if [ ${#lcdrotate} -eq 0 ]; then lcdrotate=0; fi
 if [ ${#zerotier} -eq 0 ]; then zerotier="off"; fi
 if [ ${#circuitbreaker} -eq 0 ]; then circuitbreaker="off"; fi
+if [ ${#testnet} -eq 0 ]; then testnet="off"; fi
+if [ ${#cln} -eq 0 ]; then cln="off"; fi
 
 echo "map dropboxbackup to on/off"
 DropboxBackup="off"
@@ -29,9 +30,9 @@ echo "map zerotier to on/off"
 zerotierSwitch="off"
 if [ "${zerotier}" != "off" ]; then zerotierSwitch="on"; fi
 
-echo "map chain to on/off"
-chainValue="off"
-if [ "${chain}" = "test" ]; then chainValue="on"; fi
+# echo "map chain to on/off"
+# chainValue="off"
+# if [ "${chain}" = "test" ]; then chainValue="on"; fi
 
 echo "map domain to on/off"
 domainValue="off"
@@ -53,7 +54,7 @@ if [ ${touchscreen} -gt 0 ]; then
   touchscreenMenu='on'
 fi
 
-echo "check autopilot by lnd.conf"
+echo "check autopilot in lnd.conf"
 lndAutoPilotOn=$(sudo cat /mnt/hdd/lnd/lnd.conf | grep -c 'autopilot.active=1')
 if [ ${lndAutoPilotOn} -eq 1 ]; then
   autoPilot="on"
@@ -71,140 +72,144 @@ fi
 # show select dialog
 echo "run dialog ..."
 
-
 # BASIC MENU INFO
-HEIGHT=19 # add 6 to CHOICE_HEIGHT + MENU lines
-WIDTH=45
-CHOICE_HEIGHT=11 # 1 line / OPTIONS
 OPTIONS=()
 
 OPTIONS+=(t 'Run behind TOR' ${runBehindTor})
+
 if [ "${displayClass}" == "lcd" ]; then
   OPTIONS+=(s 'Touchscreen' ${touchscreenMenu}) 
   OPTIONS+=(r 'LCD Rotate' ${lcdrotateMenu})  
 fi
-OPTIONS+=(a 'Channel Autopilot' ${autoPilot}) 
-OPTIONS+=(k 'Accept Keysend' ${keysend})  
-OPTIONS+=(n 'Testnet' ${chainValue})    
-OPTIONS+=(c 'Circuitbreaker (LND firewall)' ${circuitbreaker})  
-OPTIONS+=(u 'LND Auto-Unlock' ${autoUnlock})  
-OPTIONS+=(d 'StaticChannelBackup on DropBox' ${DropboxBackup})
-OPTIONS+=(e 'StaticChannelBackup on USB Drive' ${LocalBackup})
+
+if [ "${lightning}" == "lnd" ]; then
+  OPTIONS+=(a 'Channel Autopilot' ${autoPilot}) 
+  OPTIONS+=(k 'Accept Keysend' ${keysend})  
+  OPTIONS+=(c 'Circuitbreaker (LND firewall)' ${circuitbreaker})  
+  OPTIONS+=(u 'LND Auto-Unlock' ${autoUnlock})  
+  OPTIONS+=(d 'StaticChannelBackup on DropBox' ${DropboxBackup})
+  OPTIONS+=(e 'StaticChannelBackup on USB Drive' ${LocalBackup})
+fi
+
 OPTIONS+=(z 'ZeroTier' ${zerotierSwitch})
+OPTIONS+=(t 'Parallel Testnet services' ${testnet})
 
-if [ ${#runBehindTor} -eq 0 ] || [ "${runBehindTor}" = "off" ]; then
-  OPTIONS+=(y ${dynDomainMenu} ${domainValue})
-  OPTIONS+=(b 'BTC UPnP (AutoNAT)' ${networkUPnP})  
-  OPTIONS+=(l 'LND UPnP (AutoNAT)' ${autoNatDiscovery})
-fi 
+# choose c-lightning just at setup for now
+#OPTIONS+=(n 'C-lightning' ${cln})
 
-CHOICES=$(dialog \
-          --title ' Node Settings & Options ' \
-          --checklist ' use spacebar to activate/de-activate ' \
-          $HEIGHT $WIDTH $CHOICE_HEIGHT \
-          "${OPTIONS[@]}" 2>&1 >/dev/tty)
+if [ ${chain} = "main" ];then
+  if [ ${#runBehindTor} -eq 0 ] || [ "${runBehindTor}" = "off" ]; then
+    OPTIONS+=(y ${dynDomainMenu} ${domainValue})
+    OPTIONS+=(b 'BTC UPnP (AutoNAT)' ${networkUPnP})  
+    OPTIONS+=(l 'LND UPnP (AutoNAT)' ${autoNatDiscovery})
+  fi
+fi
 
+CHOICE_HEIGHT=$(("${#OPTIONS[@]}/2+1"))
+HEIGHT=$((CHOICE_HEIGHT+6))
+CHOICES=$(dialog --title ' Node Settings & Options ' --checklist ' use spacebar to activate/de-activate ' $HEIGHT 45 $CHOICE_HEIGHT "${OPTIONS[@]}" 2>&1 >/dev/tty)
 dialogcancel=$?
-echo "done dialog"
 clear
 
 # check if user canceled dialog
-echo "dialogcancel(${dialogcancel})"
+echo "dialogcancel(${dialogcancel}) (${CHOICE_HEIGHT})"
 if [ ${dialogcancel} -eq 1 ]; then
   echo "user canceled"
-  exit 1
+  exit 0
 elif [ ${dialogcancel} -eq 255 ]; then
   echo "ESC pressed"
-  exit 1
+  exit 0
 fi
 
 needsReboot=0
 anychange=0
 
-# TESTNET process choice - KEEP FIRST IN ORDER
-choice="main"; check=$(echo "${CHOICES}" | grep -c "n")
-if [ ${check} -eq 1 ]; then choice="test"; fi
-if [ "${chain}" != "${choice}" ]; then
-  if [ "${network}" = "litecoin" ] && [ "${choice}"="test" ]; then
-     dialog --title 'FAIL' --msgbox 'Litecoin-Testnet not available.' 5 25
-  elif [ "${BTCRPCexplorer}" = "on" ]; then
-     dialog --title 'NOTICE' --msgbox 'Please turn off BTC-RPC-Explorer FIRST\nbefore changing testnet.' 6 45
-     exit 1
-  elif [ "${BTCPayServer}" = "on" ]; then
-     dialog --title 'NOTICE' --msgbox 'Please turn off BTC-Pay-Server FIRST\nbefore changing testnet.' 6 45
-     exit 1
-  elif [ "${ElectRS}" = "on" ]; then
-     dialog --title 'NOTICE' --msgbox 'Please turn off Electrum-Rust-Server FIRST\nbefore changing testnet.' 6 48
-     exit 1
-  elif [ "${loop}" = "on" ]; then
-     dialog --title 'NOTICE' --msgbox 'Please turn off Loop-Service FIRST\nbefore changing testnet.' 6 48
-     exit 1
-  else
-    echo "Testnet Setting changed .."
-    anychange=1
-    sudo /home/admin/config.scripts/network.chain.sh ${choice}net
-    walletExists=$(sudo ls /mnt/hdd/lnd/data/chain/${network}/${choice}net/wallet.db 2>/dev/null | grep -c 'wallet.db')
-    if [ ${walletExists} -eq 0 ]; then
-      echo "Need to creating a new wallet ... wait 20secs"
-      sudo systemctl start lnd
-      sleep 20
-      tryAgain=1
-      while [ ${tryAgain} -eq 1 ]
-        do
-          echo "****************************************************************************"
-          echo "Creating a new LND Wallet for ${network}/${choice}net"
-          echo "****************************************************************************"
-          echo "A) For 'Wallet Password' use your PASSWORD C --> !! minimum 8 characters !!"
-          echo "B) Answer 'n' because you don't have a 'cipher seed mnemonic' (24 words) yet"
-          echo "C) For 'passphrase' to encrypt your 'cipher seed' use PASSWORD D (optional)"
-          echo "****************************************************************************"
-          sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net create 2>error.out
-          error=`sudo cat error.out`
-          if [ ${#error} -eq 0 ]; then
-            sleep 2
-            # WIN
-            tryAgain=0
-            echo "!!! Make sure to write down the 24 words (cipher seed mnemonic) !!!"
-            echo "If you are ready. Press ENTER."
-          else
-            # FAIL
-            tryAgain=1
-            echo "!!! FAIL ---> SOMETHING WENT WRONG !!!"
-            echo "${error}"
-            echo "Press ENTER to retry ... or CTRL-c to EXIT"
-          fi
-          read key
-        done
-      echo "Check for Macaroon .. (10sec)"
-      sleep 10
-      macaroonExists=$(sudo ls /home/bitcoin/.lnd/data/chain/${network}/${choice}net/admin.macaroon | grep -c 'admin.macaroon')
-      if [ ${macaroonExists} -eq 0 ]; then
-        echo "*** PLEASE UNLOCK your wallet with PASSWORD C to create macaroon"
-        lncli unlock 2>/dev/null
-        sleep 6
-      fi
-      macaroonExists=$(sudo ls /home/bitcoin/.lnd/data/chain/${network}/${choice}net/admin.macaroon | grep -c 'admin.macaroon')
-      if [ ${macaroonExists} -eq 0 ]; then
-        echo "FAIL --> Was not able to create macaroon"
-        echo "Please report problem."
-        exit 1
-      fi
-      echo "stopping lnd again"
-      sleep 5
-      sudo systemctl stop lnd
-    fi
-
-    echo "Update Admin Macaroon"
-    sudo rm -r /home/admin/.lnd/data/chain/${network}/${choice}net 2>/dev/null
-    sudo mkdir /home/admin/.lnd/data/chain/${network}/${choice}net
-    sudo cp /home/bitcoin/.lnd/data/chain/${network}/${choice}net/admin.macaroon /home/admin/.lnd/data/chain/${network}/${choice}net
-    sudo chown -R admin:admin /home/admin/.lnd/
-
-    needsReboot=1
-  fi
-else
-  echo "Testnet Setting unchanged."
-fi
+# deprecated - see https://github.com/rootzoll/raspiblitz/issues/2290
+## TESTNET process choice - KEEP FIRST IN ORDER
+#choice="main"; check=$(echo "${CHOICES}" | grep -c "n")
+#if [ ${check} -eq 1 ]; then choice="test"; fi
+#if [ "${chain}" != "${choice}" ]; then
+#  if [ "${network}" = "litecoin" ] && [ "${choice}"="test" ]; then
+#     dialog --title 'FAIL' --msgbox 'Litecoin-Testnet not available.' 5 25
+#  elif [ "${BTCRPCexplorer}" = "on" ]; then
+#     dialog --title 'NOTICE' --msgbox 'Please turn off BTC-RPC-Explorer FIRST\nbefore changing testnet.' 6 45
+#     exit 1
+#  elif [ "${BTCPayServer}" = "on" ]; then
+#     dialog --title 'NOTICE' --msgbox 'Please turn off BTC-Pay-Server FIRST\nbefore changing testnet.' 6 45
+#     exit 1
+#  elif [ "${ElectRS}" = "on" ]; then
+#     dialog --title 'NOTICE' --msgbox 'Please turn off Electrum-Rust-Server FIRST\nbefore changing testnet.' 6 48
+#     exit 1
+#  elif [ "${loop}" = "on" ]; then
+#     dialog --title 'NOTICE' --msgbox 'Please turn off Loop-Service FIRST\nbefore changing testnet.' 6 48
+#     exit 1
+#  else
+#    echo "Testnet Setting changed .."
+#    anychange=1
+#    sudo /home/admin/config.scripts/network.chain.sh ${choice}net
+#    walletExists=$(sudo ls /mnt/hdd/lnd/data/chain/${network}/${choice}net/wallet.db 2>/dev/null | grep -c 'wallet.db')
+#    if [ ${walletExists} -eq 0 ]; then
+#      echo "Need to creating a new wallet ... wait 20secs"
+#      sudo systemctl start lnd
+#      sleep 20
+#      tryAgain=1
+#      while [ ${tryAgain} -eq 1 ]
+#        do
+#          echo "****************************************************************************"
+#          echo "Creating a new LND Wallet for ${network}/${choice}net"
+#          echo "****************************************************************************"
+#          echo "A) For 'Wallet Password' use your PASSWORD C --> !! minimum 8 characters !!"
+#          echo "B) Answer 'n' because you don't have a 'cipher seed mnemonic' (24 words) yet"
+#          echo "C) For 'passphrase' to encrypt your 'cipher seed' use PASSWORD D (optional)"
+#          echo "****************************************************************************"
+#          source <(/home/admin/config.scripts/network.aliases.sh getvars lnd ${choice}net)
+#          $lncli_alias create 2>error.out
+#          error=$(sudo cat error.out)
+#          if [ ${#error} -eq 0 ]; then
+#            sleep 2
+#            # WIN
+#            tryAgain=0
+#            echo "!!! Make sure to write down the 24 words (cipher seed mnemonic) !!!"
+#            echo "If you are ready. Press ENTER."
+#          else
+#            # FAIL
+#            tryAgain=1
+#            echo "!!! FAIL ---> SOMETHING WENT WRONG !!!"
+#            echo "${error}"
+#            echo "Press ENTER to retry ... or CTRL-c to EXIT"
+#          fi
+#          read key
+#        done
+#      echo "Check for Macaroon .. (10sec)"
+#      sleep 10
+#      macaroonExists=$(sudo ls /home/bitcoin/.lnd/data/chain/${network}/${choice}net/admin.macaroon | grep -c 'admin.macaroon')
+#      if [ ${macaroonExists} -eq 0 ]; then
+#        echo "*** PLEASE UNLOCK your wallet with PASSWORD C to create macaroon"
+#        lncli unlock 2>/dev/null
+#        sleep 6
+#      fi
+#      macaroonExists=$(sudo ls /home/bitcoin/.lnd/data/chain/${network}/${choice}net/admin.macaroon | grep -c 'admin.macaroon')
+#      if [ ${macaroonExists} -eq 0 ]; then
+#        echo "FAIL --> Was not able to create macaroon"
+#        echo "Please report problem."
+#        exit 1
+#      fi
+#      echo "stopping lnd again"
+#      sleep 5
+#      sudo systemctl stop lnd
+#    fi
+# 
+#     echo "Update Admin Macaroon"
+#     sudo rm -r /home/admin/.lnd/data/chain/${network}/${choice}net 2>/dev/null
+#     sudo mkdir /home/admin/.lnd/data/chain/${network}/${choice}net
+#     sudo cp /home/bitcoin/.lnd/data/chain/${network}/${choice}net/admin.macaroon /home/admin/.lnd/data/chain/${network}/${choice}net
+#     sudo chown -R admin:admin /home/admin/.lnd/
+# 
+#     needsReboot=1
+#   fi
+# else
+#   echo "Testnet Setting unchanged."
+# fi
 
 # AUTOPILOT process choice
 choice="off"; check=$(echo "${CHOICES}" | grep -c "a")
@@ -423,6 +428,57 @@ else
   echo "ZeroTier setting unchanged."
 fi
 
+# testnet process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "t")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${testnet}" != "${choice}" ]; then
+  echo "# Testnet Setting changed .."
+  anychange=1
+  /home/admin/config.scripts/bitcoin.chains.sh ${choice} testnet
+  errorOnInstall=$?
+  if [ "${choice}" =  "on" ]; then
+    if [ ${errorOnInstall} -eq 0 ]; then
+      echo "# Successfully installed Testnet"
+      echo
+      echo "# Press ENTER to continue ..."
+      read key
+    else
+      l1="# !!! FAIL on Testnet install !!!"
+      l2="# Try manual install on terminal after reboot with:"
+      l3="/home/admin/config.scripts/bitcoin.chains.sh on testnet"
+      dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
+    fi
+  fi
+else
+  echo "# Testnet Setting unchanged."
+fi
+
+
+# cln process choice
+#choice="off"; check=$(echo "${CHOICES}" | grep -c "n")
+#if [ ${check} -eq 1 ]; then choice="on"; fi
+#if [ "${cln}" != "${choice}" ]; then
+#  echo "# C-lightning Setting changed .."
+#  anychange=1
+#  /home/admin/config.scripts/cln.install.sh ${choice}
+#  errorOnInstall=$?
+#  if [ "${choice}" =  "on" ]; then
+#    if [ ${errorOnInstall} -eq 0 ]; then
+#      echo "# Successfully installed C-lightning"
+#      echo
+#      echo "# Press ENTER to continue ..."
+#      read key
+#    else
+#      l1="# !!! FAIL on C-lightning install !!!"
+#      l2="# Try manual install on terminal after reboot with:"
+#      l3="/home/admin/config.scripts/cln.install.sh on"
+#      dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
+#    fi
+#  fi
+#else
+#  echo "# C-lightning Setting unchanged."
+#fi
+
 if [ ${anychange} -eq 0 ]; then
      dialog --msgbox "NOTHING CHANGED!\nUse Spacebar to check/uncheck services." 8 58
      exit 0
@@ -436,5 +492,5 @@ if [ ${needsReboot} -eq 1 ]; then
    # stop bitcoind
    sudo -u bitcoin ${network}-cli stop
    sleep 4
-   sudo /home/admin/XXshutdown.sh reboot
+   sudo /home/admin/config.scripts/blitz.shutdown.sh reboot
 fi

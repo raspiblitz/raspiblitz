@@ -271,7 +271,7 @@ def main():
     The IP2TOR service just makes sense if you run
     your RaspiBlitz behind TOR.
             ''', title="Info")
-            sys.exit(1)
+            sys.exit(0)
 
         os.system("clear")
         print("please wait ..")
@@ -405,7 +405,7 @@ def main():
             except Exception as e:
                 print(e)
                 time.sleep(3)
-                sys.exit(1)
+                sys.exit(0)
 
         # run creating a new IP2TOR subscription
         os.system("clear")
