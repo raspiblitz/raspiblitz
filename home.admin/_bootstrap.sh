@@ -445,7 +445,7 @@ if [ ${isMounted} -eq 0 ]; then
     if [ "${localip}" == "" ]; then
       sed -i "s/^state=.*/state=errorNetwork/g" ${infoFile}
       sleep 3
-      sudo shutdown -r now
+      sudo shutdown now
       sleep 100
       exit 0
     fi
