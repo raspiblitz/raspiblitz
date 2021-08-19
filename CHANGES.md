@@ -2,6 +2,7 @@
 
 ## What's new in Version 1.7.1 of RaspiBlitz?
 
+- Update: RTL 0.11.0 [details](https://github.com/Ride-The-Lightning/RTL/releases/tag/v0.11.0)
 - Update: Lightning Terminal v0.5.0-alpha [details](https://github.com/lightninglabs/lightning-terminal/releases/tag/v0.5.0-alpha)
 - Update: Pool CLI v0.5.1-alpha [details](https://github.com/lightninglabs/pool/releases/tag/v0.5.1-alpha)
 - Update: Balance of Satoshis 10.7.8 (BOS) + keep data on reinstall [details](https://github.com/alexbosworth/balanceofsatoshis/blob/master/CHANGELOG.md#version-8010)

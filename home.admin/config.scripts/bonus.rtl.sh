@@ -1,5 +1,5 @@
 #!/bin/bash
-RTLVERSION="v0.10.0"
+RTLVERSION="v0.11.0"
 
 # check and load raspiblitz config
 # to know which network is running
