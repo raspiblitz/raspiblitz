@@ -110,7 +110,7 @@ if [ "$1" = "menu" ]; then
 	  fi
   fi
 
-  text="Local Webrowser: https://${localIP}:${httpsPort}"
+  text="Local Web Browser: https://${localIP}:${httpsPort}"
 
   if [ ${#publicDomain} -gt 0 ]; then
      text="${text}
