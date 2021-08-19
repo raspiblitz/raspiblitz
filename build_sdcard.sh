@@ -262,7 +262,9 @@ sudo apt remove -y --purge libreoffice* oracle-java* chromium-browser nuscratch 
 sudo apt clean
 sudo apt -y autoremove
 
-echo "*** Make sure python3 exists ***"
+echo ""
+echo "*** Python DEFAULT libs & dependencies ***"
+
 if [ -f "/usr/bin/python3.7" ]; then
   # make sure /usr/bin/python exists (and calls Python3.7 in Buster)
   sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.7 1
@@ -277,6 +279,17 @@ else
   echo "There is no tested version of python present"
   exit 1
 fi
+
+# for setup shell scripts
+sudo apt -y install dialog bc python3-dialog
+
+# libs (for global python scripts)
+sudo -H python3 -m pip install --upgrade pip
+sudo -H python3 -m pip install grpcio==1.38.1
+sudo -H python3 -m pip install googleapis-common-protos==1.53.0
+sudo -H python3 -m pip install toml==0.10.1
+sudo -H python3 -m pip install j2cli==0.3.10
+sudo -H python3 -m pip install requests[socks]==2.21.0
 
 echo ""
 echo "*** UPDATE Debian***"
@@ -581,19 +594,6 @@ sudo /usr/sbin/groupadd --force --gid 9704 lndchainnotifier
 sudo /usr/sbin/groupadd --force --gid 9705 lndsigner
 sudo /usr/sbin/groupadd --force --gid 9706 lndwalletkit
 sudo /usr/sbin/groupadd --force --gid 9707 lndrouter
-
-echo ""
-echo "*** Python DEFAULT libs & dependencies ***"
-
-# for setup shell scripts
-sudo apt -y install dialog bc python3-dialog
-
-# libs (for global python scripts)
-sudo -H python3 -m pip install grpcio==1.36.1
-sudo -H python3 -m pip install googleapis-common-protos==1.53.0
-sudo -H python3 -m pip install toml==0.10.1
-sudo -H python3 -m pip install j2cli==0.3.10
-sudo -H python3 -m pip install requests[socks]==2.21.0
 
 echo ""
 echo "*** SHELL SCRIPTS AND ASSETS ***"
