@@ -94,6 +94,11 @@ sudo chmod 777 ${infoFile}
 ######################################
 # CHECK SD CARD INCONSISTENT STATE
 
+# make sure SSH server certs are configured & sshd is running
+sudo systemctl stop sshd
+sudo dpkg-reconfigure openssh-server
+sudo systemctl start sshd
+
 # when the provision did not ran thru without error (ask user for fresh sd card)
 provisionFlagExists=$(sudo ls /home/admin/provision.flag | grep -c 'provision.flag')
 if [ "${provisionFlagExists}" == "1" ]; then
@@ -104,11 +109,6 @@ if [ "${provisionFlagExists}" == "1" ]; then
   echo "FAIL: 'provision did not ran thru - need fresh sd card!" >> ${logFile}
   exit 1
 fi
-
-# make sure SSH server certs are configured & sshd is running
-sudo systemctl stop sshd
-sudo dpkg-reconfigure openssh-server
-sudo systemctl start sshd
 
 ######################################
 # SECTION FOR POSSIBLE REBOOT ACTIONS
