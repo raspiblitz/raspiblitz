@@ -105,8 +105,10 @@ if [ "${provisionFlagExists}" == "1" ]; then
   exit 1
 fi
 
-# make sure SSH server certs are configured
+# make sure SSH server certs are configured & sshd is running
+sudo systemctl stop sshd
 sudo dpkg-reconfigure openssh-server
+sudo systemctl start sshd
 
 ######################################
 # SECTION FOR POSSIBLE REBOOT ACTIONS
