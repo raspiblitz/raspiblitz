@@ -106,8 +106,6 @@ echo ""
 echo "*** Start ${network} ***" >> ${logFile}
 sudo sed -i "s/^message=.*/message='Blockchain Testrun'/g" ${infoFile}
 echo "- This can take a while .." >> ${logFile}
-sudo systemctl stop ${network}d.service
-sudo systemctl disable ${network}d.service
 sudo cp /home/admin/assets/${network}d.service /etc/systemd/system/${network}d.service
 sudo systemctl enable ${network}d.service
 sudo systemctl start ${network}d.service

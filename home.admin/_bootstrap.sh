@@ -133,33 +133,12 @@ else
 fi
 
 ################################
-# SSH SERVER CERTS RESET
-# if a file called 'ssh.reset' gets
-# placed onto the boot part of
-# the sd card - delete old ssh data
-################################
-
-sshReset=$(sudo ls /boot/ssh.reset* 2>/dev/null | grep -c reset)
-if [ ${sshReset} -eq 1 ]; then
-  # delete that file (to prevent loop)
-  sudo rm /boot/ssh.reset* >> $logFile
-  # delete ssh certs
-  echo "SSHRESET switch found ... stopping SSH and deleting old certs" >> $logFile
-  sudo systemctl stop sshd >> $logFile
-  sudo rm /mnt/hdd/ssh/ssh_host* >> $logFile
-  sudo ssh-keygen -A >> $logFile
-  systemInitReboot=1
-  sed -i "s/^message=.*/message='SSHRESET'/g" ${infoFile}
-else
-  echo "No SSHRESET switch found. " >> $logFile
-fi
-
-################################
 # FS EXPAND
 # if a file called 'ssh.reset' gets
 # placed onto the boot part of
 # the sd card - delete old ssh data
 ################################
+
 source <(sudo /home/admin/config.scripts/blitz.bootdrive.sh status)
 if [ "${needsExpansion}" == "1" ] && [ "${fsexpanded}" == "0" ]; then
   echo "FSEXPAND needed ... starting process" >> $logFile
@@ -179,6 +158,29 @@ elif [ "${tooSmall}" == "1" ]; then
   exit 1
 else
   echo "No FS EXPAND needed. needsExpansion(${needsExpansion}) fsexpanded(${fsexpanded})" >> $logFile
+fi
+
+################################
+# SSH SERVER CERTS RESET
+# if a file called 'ssh.reset' gets
+# placed onto the boot part of
+# the sd card - delete old ssh data
+################################
+
+sshReset=$(sudo ls /boot/ssh.reset* 2>/dev/null | grep -c reset)
+if [ ${sshReset} -eq 1 ]; then
+  # delete that file (to prevent loop)
+  sudo rm /boot/ssh.reset* >> $logFile
+  # delete ssh certs
+  echo "SSHRESET switch found ... stopping SSH and deleting old certs" >> $logFile
+  sudo systemctl stop sshd >> $logFile
+  sudo rm /etc/ssh/ssh_host_*
+  sudo rm /mnt/hdd/ssh/ssh_host* >> $logFile
+  sudo ssh-keygen -A >> $logFile
+  systemInitReboot=1
+  sed -i "s/^message=.*/message='SSHRESET'/g" ${infoFile}
+else
+  echo "No SSHRESET switch found. " >> $logFile
 fi
 
 ################################
