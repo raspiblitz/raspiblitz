@@ -3,8 +3,8 @@
 
 # get basic system information
 # these are the same set of infos the WebGUI dialog/controler has
-source /home/admin/_version.info
-source /home/admin/raspiblitz.info
+source /home/admin/_version.info 2>/dev/null
+source /home/admin/raspiblitz.info 2>/dev/null
 
 # 1st PARAMETER: eventID
 # fixed ID string for a certain event
