@@ -144,7 +144,7 @@ OPTIONS+=(SENDMANY_ANDROID "SendMany (Android)")
 
 # Additinal Options with TOR
 if [ "${runBehindTor}" = "on" ]; then
-  OPTIONS+=(FULLY_NODED "Fully Noded (IOS+TOR)") 
+  OPTIONS+=(FULLY_NODED "Fully Noded (iOS+Tor)") 
 fi
 
 CHOICE=$(whiptail --clear --title "Choose Mobile Wallet" --menu "" 14 50 8 "${OPTIONS[@]}" 2>&1 >/dev/tty)
@@ -155,7 +155,7 @@ clear
 echo "creating install info ..."
 case $CHOICE in
   CLOSE)
-  	exit 1;
+  	exit 0;
     ;;
 	SPHINX)
 	  if [ "${sphinxrelay}" != "on" ]; then
@@ -173,7 +173,7 @@ case $CHOICE in
 	  fi
 	  # make pairing thru sphinx relay script
       /home/admin/config.scripts/bonus.sphinxrelay.sh menu
-	  exit 1;
+	  exit 0;
 	  ;;
   ZAP_IOS)
       appstoreLink="https://apps.apple.com/us/app/zap-bitcoin-lightning-wallet/id1406311960"
@@ -206,7 +206,7 @@ Or scan the qr code on the LCD with your mobile phone.
 	    choose_IP_or_TOR
 	  fi
   	  /home/admin/config.scripts/bonus.lndconnect.sh zap-ios ${connect}
-      exit 1;
+      exit 0;
     ;;
   ZAP_ANDROID)
       appstoreLink="https://play.google.com/store/apps/details?id=zapsolutions.zap"
@@ -229,7 +229,7 @@ Or scan the qr code on the LCD with your mobile phone.
 	    choose_IP_or_TOR
 	  fi
   	  /home/admin/config.scripts/bonus.lndconnect.sh zap-android ${connect}
-      exit 1;
+      exit 0;
     ;;
   SENDMANY_ANDROID)
 
@@ -241,7 +241,7 @@ To use the chat feature of the SendMany app, you need to activate the Keysend fe
 
 Please go to MAINMENU > SERVICES and activate KEYSEND first.
 " 12 65
-	    exit 1
+	    exit 0
 	  fi
 
       appstoreLink="https://github.com/fusion44/sendmany/releases"
@@ -256,22 +256,22 @@ Please go to MAINMENU > SERVICES and activate KEYSEND first.
 	  /home/admin/config.scripts/blitz.display.sh hide
 	  checkIP2TOR LND-GRPC-API
   	  /home/admin/config.scripts/bonus.lndconnect.sh sendmany-android ${connect}
-      exit 1;
+      exit 0;
     ;;
   ZEUS_IOS)
-      appstoreLink="https://testflight.apple.com/join/gpVFzEHN"
+      appstoreLink="https://apps.apple.com/us/app/zeus-ln/id1456038895"
       /home/admin/config.scripts/blitz.display.sh image /home/admin/raspiblitz/pictures/app_zeus.png
-	  whiptail --title "Install Testflight and Zeus on your iOS device" \
+	  whiptail --title "Install Zeus on your iOS device" \
 		--yes-button "Continue" \
-		--no-button "Link as QR Code" \
-		--yesno "At the moment this app is in public beta testing.\nFirst open Apple Apstore, search & install 'TestFlight' app.\n\nThen open the following link on your mobile:\n${appstoreLink}\n\nUse 'Open In TestFlight' option of your mobile browser.\nWhen Zeus is installed and started --> Continue." 14 65
+		--no-button "Link as QRcode" \
+		--yesno "Open the Apple App Store on your mobile phone.\n\nSearch for --> 'zeus ln'\n\nCheck that logo is like on LCD and author is: Zeus LN LLC\nWhen the app is installed and started --> Continue." 12 65
 	  if [ $? -eq 1 ]; then
 		/home/admin/config.scripts/blitz.display.sh qr ${appstoreLink}
 		/home/admin/config.scripts/blitz.display.sh qr-console ${appstoreLink}
 	  fi
 	  /home/admin/config.scripts/blitz.display.sh hide
   	  /home/admin/config.scripts/bonus.lndconnect.sh zeus-ios tor
-  	  exit 1;
+  	  exit 0;
   	;;
   ZEUS_ANDROID)
       appstoreLink="https://play.google.com/store/apps/details?id=app.zeusln.zeus"
@@ -290,7 +290,7 @@ Or scan the qr code on the LCD with your mobile phone.
 	  fi
 	  /home/admin/config.scripts/blitz.display.sh hide
   	  /home/admin/config.scripts/bonus.lndconnect.sh zeus-android tor
-  	  exit 1;
+  	  exit 0;
   	;;
   FULLY_NODED)
       appstoreLink="https://apps.apple.com/us/app/fully-noded/id1436425586"
@@ -309,6 +309,6 @@ Or scan the qr code on the LCD with your mobile phone.
 	  fi
 	  /home/admin/config.scripts/blitz.display.sh hide
   	  /home/admin/config.scripts/bonus.fullynoded.sh
-  	  exit 1;
+  	  exit 0;
   	;;
 esac

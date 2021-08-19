@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # load raspiblitz config data
-source /home/admin/raspiblitz.info
-source /mnt/hdd/raspiblitz.conf
 source /home/admin/_version.info
+source /home/admin/raspiblitz.info
+source /mnt/hdd/raspiblitz.conf 2>/dev/null
 
 ## PROCEDURES
 
@@ -21,35 +21,51 @@ No need to close channels or download blockchain again.
 Do you want to start the Update now?
       " 16 62
   if [ $? -eq 0 ]; then
-    exit 1
+    exit 0
   fi
 
-  whiptail --title "LND Data Backup" --yes-button "Download Backup" --no-button "Skip" --yesno "
-Before we start the RaspiBlitz Update process,
-its recommended to make a backup of all your LND Data
-and download that file to your laptop.
+  if [ "${lightning}" != "" ]; then
 
-Do you want to download LND Data Backup now?
+    whiptail --title "Lightning Data Backup" --yes-button "Download Backup" --no-button "Skip" --yesno "
+Before we start the RaspiBlitz Update process,
+its recommended to make a backup of all your Lightning
+Channel Data and download that file to your laptop.
+
+Do you want to download Lightning Data Backup now?
       " 12 58
-  if [ $? -eq 0 ]; then
-    clear
-    echo "*************************************"
-    echo "* PREPARING LND BACKUP DOWNLOAD"
-    echo "*************************************"
-    echo "please wait .."
-    sleep 2
-    /home/admin/config.scripts/lnd.rescue.sh backup
-    echo
-    echo "PRESS ENTER to continue once you're done downloading."
-    read key
-  else
-    clear
-    echo "*************************************"
-    echo "* JUST MAKING BACKUP TO OLD SD CARD"
-    echo "*************************************"
-    echo "please wait .."
-    sleep 2
-    /home/admin/config.scripts/lnd.rescue.sh backup no-download
+    if [ $? -eq 0 ]; then
+      clear
+      echo "*************************************"
+      echo "* PREPARING LIGHTNING BACKUP DOWNLOAD"
+      echo "*************************************"
+      echo "please wait .."
+      sleep 2
+      if [ "${lightning}" == "lnd" ]; then
+        /home/admin/config.scripts/lnd.backup.sh lnd-export-gui
+      elif [ "${lightning}" == "cln" ]; then
+        /home/admin/config.scripts/cln.backup.sh cln-export-gui
+      else
+        echo "TODO: Implement Data Backup for '${lightning}'"
+      fi
+      echo
+      echo "PRESS ENTER to continue once you're done downloading."
+      read key
+    else
+      clear
+      echo "*************************************"
+      echo "* JUST MAKING BACKUP TO OLD SD CARD"
+      echo "*************************************"
+      echo "please wait .."
+      sleep 2
+      if [ "${lightning}" == "lnd" ]; then
+        /home/admin/config.scripts/lnd.backup.sh lnd-export
+      elif [ "${lightning}" == "cln" ]; then
+        /home/admin/config.scripts/cln.backup.sh cln-export
+      else
+        echo "TODO: Implement Data Backup for '${lightning}'"
+        sleep 3
+      fi
+    fi
   fi
 
   whiptail --title "READY TO UPDATE?" --yes-button "START UPDATE" --no-button "Cancel" --yesno "If you start the update: The RaspiBlitz will power down.
@@ -68,8 +84,9 @@ and do you WANT TO START UPDATE NOW?
     dialog --title " Update Canceled " --msgbox "
 OK. RaspiBlitz will NOT update now.
       " 7 39
-    sudo systemctl start lnd
-    exit 1
+    sudo systemctl start lnd 2>/dev/null
+    sudo systemctl start lightningd 2>/dev/null
+    exit 0
   fi
 
   clear
@@ -93,7 +110,7 @@ hotfix the code and might compromise your security.
 Do you want to Patch your RaspiBlitz now?
       " 18 58
   if [ $? -eq 0 ]; then
-    exit 1
+    exit 0
   fi
 }
 
@@ -101,7 +118,7 @@ patch()
 {
 
   # get sync info
-  source <(sudo /home/admin/XXsyncScripts.sh info)
+  source <(sudo /home/admin/config.scripts/blitz.github.sh info)
 
   # Patch Options
   OPTIONS=(PATCH "Patch/Sync RaspiBlitz with GitHub Repo" \
@@ -115,7 +132,7 @@ patch()
   clear
   case $CHOICE in
     PATCH)
-      sudo -u admin /home/admin/XXsyncScripts.sh -run
+      sudo -u admin /home/admin/config.scripts/blitz.github.sh -run
       sleep 4
       whiptail --title " Patching/Syncing " --yes-button "Reboot" --no-button "Skip Reboot" --yesno "  OK patching/syncing done.
 
@@ -126,12 +143,13 @@ patch()
       if [ $? -eq 0 ]; then
         clear
         echo "REBOOT .."
-        /home/admin/XXshutdown.sh reboot
+        /home/admin/config.scripts/blitz.shutdown.sh reboot
         sleep 8
+        exit 1
       else
         echo "SKIP REBOOT .."
+        exit 0
       fi
-      exit 1
       ;;
     REPO)
       clear
@@ -142,13 +160,13 @@ patch()
         newGitHubUser=$(echo "${newGitHubUser}" | cut -d " " -f1)
         echo "--> " ${newGitHubUser}
         error=""
-        source <(sudo -u admin /home/admin/XXsyncScripts.sh -clean ${activeBranch} ${newGitHubUser})
+        source <(sudo -u admin /home/admin/config.scripts/blitz.github.sh -clean ${activeBranch} ${newGitHubUser})
         if [ ${#error} -gt 0 ]; then
           whiptail --title "ERROR" --msgbox "${error}" 8 30
         fi
       fi
       patch
-      exit 1
+      exit 0
       ;;
     BRANCH)
       clear
@@ -159,13 +177,13 @@ patch()
         newGitHubBranch=$(echo "${newGitHubBranch}" | cut -d " " -f1)
         echo "--> " $newGitHubBranch
         error=""
-        source <(sudo -u admin /home/admin/XXsyncScripts.sh ${newGitHubBranch})
+        source <(sudo -u admin /home/admin/config.scripts/blitz.github.sh ${newGitHubBranch})
         if [ ${#error} -gt 0 ]; then
           whiptail --title "ERROR" --msgbox "${error}" 8 30
         fi
       fi
       patch
-      exit 1
+      exit 0
       ;;
     PR)
       clear
@@ -178,15 +196,15 @@ patch()
         cd /home/admin/raspiblitz
         git fetch origin pull/${pullRequestID}/head:pr${pullRequestID}
         error=""
-        source <(sudo -u admin /home/admin/XXsyncScripts.sh pr${pullRequestID})
+        source <(sudo -u admin /home/admin/config.scripts/blitz.github.sh pr${pullRequestID})
         if [ ${#error} -gt 0 ]; then
           whiptail --title "ERROR" --msgbox "${error}" 8 30
         else
           echo "# update installs .."
-          /home/admin/XXsyncScripts.sh -justinstall
+          /home/admin/config.scripts/blitz.github.sh -justinstall
         fi
       fi
-      exit 1
+      exit 0
       ;;
   esac
 
@@ -212,7 +230,7 @@ lnd()
     VERIFIED)
       if [ ${lndUpdateInstalled} -eq 1 ]; then
         whiptail --title "ALREADY INSTALLED" --msgbox "The LND version ${lndUpdateVersion} is already installed." 8 30
-        exit 1
+        exit 0
       fi
       whiptail --title "OPTIONAL LND UPDATE" --yes-button "Cancel" --no-button "Update" --yesno "BEWARE on updating to LND v${lndUpdateVersion}:
 
@@ -222,7 +240,7 @@ Do you really want to update LND now?
       " 16 58
       if [ $? -eq 0 ]; then
         echo "# cancel update"
-        exit 1
+        exit 0
       fi
       # if loop is installed remove
       if [ "${loop}" == "on" ]; then
@@ -238,7 +256,7 @@ Do you really want to update LND now?
         if [ "${loop}" == "on" ]; then
           sudo -u admin /home/admin/config.scripts/bonus.loop.sh on
         fi
-        /home/admin/XXshutdown.sh reboot
+        /home/admin/config.scripts/blitz.shutdown.sh reboot
         sleep 8
       fi
       ;;
@@ -255,14 +273,14 @@ Do you really want to update LND now?
       " 16 58
       if [ $? -eq 0 ]; then
         echo "# cancel update"
-        exit 1
+        exit 0
       fi
       error=""
       source <(sudo -u admin /home/admin/config.scripts/lnd.update.sh reckless)
       if [ ${#error} -gt 0 ]; then
         whiptail --title "ERROR" --msgbox "${error}" 8 30
       else
-        /home/admin/XXshutdown.sh reboot
+        /home/admin/config.scripts/blitz.shutdown.sh reboot
         sleep 8
       fi
       ;;
@@ -296,7 +314,7 @@ bitcoinUpdate() {
       if [ ${bitcoinUpdateInstalled} -eq 1 ]; then
         whiptail --title "ALREADY INSTALLED" \
         --msgbox "The Bitcoin Core version ${bitcoinUpdateVersion} is already installed." 8 30
-        exit 1
+        exit 0
       fi
       whiptail --title "OPTIONAL Bitcoin Core update" --yes-button "Cancel" --no-button "Update" \
       --yesno "Info on updating to Bitcoin Core v${bitcoinVersion}:
@@ -308,7 +326,7 @@ Do you really want to update Bitcoin Core now?
       " 12 58
       if [ $? -eq 0 ]; then
         echo "# cancel update"
-        exit 1
+        exit 0
       fi
 
       error=""
@@ -332,7 +350,7 @@ Do you really want to update Bitcoin Core now?
       " 16 58
       if [ $? -eq 0 ]; then
         echo "# cancel update"
-        exit 1
+        exit 0
       fi
       error=""
       source <(sudo -u admin /home/admin/config.scripts/bitcoin.update.sh reckless)
@@ -355,55 +373,50 @@ if [ "$1" == "github" ]; then
 fi
 
 # Basic Options Menu
-HEIGHT=10 # add 6 to CHOICE_HEIGHT + MENU lines
 WIDTH=55
-CHOICE_HEIGHT=4 # 1 line / OPTIONS
-OPTIONS=(
-RELEASE "RaspiBlitz Release Update/Recovery"
-PATCH "Patch RaspiBlitz v${codeVersion}"
-LND "Interim LND Update Options"
-BITCOIN "Bitcoin Core Update Options"
-)
+OPTIONS=()
+OPTIONS+=(RELEASE "RaspiBlitz Release Update/Recovery")
+OPTIONS+=(PATCH "Patch RaspiBlitz v${codeVersion}")
+OPTIONS+=(BITCOIN "Bitcoin Core Update Options")
+
+if [ "${lightning}" == "lnd" ]; then
+  OPTIONS+=(LND "Interim LND Update Options")
+fi
 
 if [ "${bos}" == "on" ]; then
   OPTIONS+=(BOS "Update Balance of Satoshis")
-  HEIGHT=$((HEIGHT+1))
-  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))  
 fi
+
 if [ "${thunderhub}" == "on" ]; then
   OPTIONS+=(THUB "Update ThunderHub")
-  HEIGHT=$((HEIGHT+1))
-  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))  
 fi
+
 if [ "${specter}" == "on" ]; then
   OPTIONS+=(SPECTER "Update Cryptoadvance Specter")
-  HEIGHT=$((HEIGHT+1))
-  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))  
 fi
+
 if [ "${rtlWebinterface}" == "on" ]; then
   OPTIONS+=(RTL "Update RTL")
-  HEIGHT=$((HEIGHT+1))
-  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))  
 fi
+
 if [ "${sphinxrelay}" == "on" ]; then
   OPTIONS+=(SPHINX "Update Sphinx Server Relay")
-  HEIGHT=$((HEIGHT+1))
-  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))  
 fi
+
 if [ "${pyblock}" == "on" ]; then
   OPTIONS+=(PYBLOCK "Update PyBLOCK")
-  HEIGHT=$((HEIGHT+1))
-  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))  
 fi
+
 if [ "${mempoolExplorer}" == "on" ]; then
   OPTIONS+=(MEMPOOL "Update Mempool Explorer")
 fi
+
 if [ "${runBehindTor}" == "on" ]; then
   OPTIONS+=(TOR "Update Tor from the source code")
-  HEIGHT=$((HEIGHT+1))
-  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))  
 fi
 
+CHOICE_HEIGHT=$(("${#OPTIONS[@]}/2+1"))
+HEIGHT=$((CHOICE_HEIGHT+6))  
 CHOICE=$(dialog --clear \
                 --backtitle "" \
                 --title "Update Options" \

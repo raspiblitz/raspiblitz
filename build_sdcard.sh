@@ -10,7 +10,7 @@
 
 echo ""
 echo "*****************************************"
-echo "* RASPIBLITZ SD CARD IMAGE SETUP v1.7   *"
+echo "* RASPIBLITZ SD CARD IMAGE SETUP v1.7.1 *"
 echo "*****************************************"
 echo "For details on optional parameters - see build script source code:"
 
@@ -221,7 +221,7 @@ else
 fi
 
 echo "*** Install & Enable Tor ***"
-sudo apt update
+sudo apt update -y
 sudo apt install tor tor-arm torsocks -y
 echo ""
 
@@ -257,10 +257,13 @@ if [ "${baseimage}" = "raspbian" ] || [ "${baseimage}" = "dietpi" ] || \
   fi
 fi
 
-# remove some (big) packages that are not needed
+echo "*** Remove not needed packages ***"
 sudo apt remove -y --purge libreoffice* oracle-java* chromium-browser nuscratch scratch sonic-pi minecraft-pi plymouth python2 vlc
 sudo apt clean
 sudo apt -y autoremove
+
+echo ""
+echo "*** Python DEFAULT libs & dependencies ***"
 
 if [ -f "/usr/bin/python3.7" ]; then
   # make sure /usr/bin/python exists (and calls Python3.7 in Buster)
@@ -277,9 +280,19 @@ else
   exit 1
 fi
 
-# update debian
+# for setup shell scripts
+sudo apt -y install dialog bc python3-dialog
+
+# libs (for global python scripts)
+sudo -H python3 -m pip install --upgrade pip
+sudo -H python3 -m pip install grpcio==1.38.1
+sudo -H python3 -m pip install googleapis-common-protos==1.53.0
+sudo -H python3 -m pip install toml==0.10.1
+sudo -H python3 -m pip install j2cli==0.3.10
+sudo -H python3 -m pip install requests[socks]==2.21.0
+
 echo ""
-echo "*** UPDATE ***"
+echo "*** UPDATE Debian***"
 sudo apt update -y
 sudo apt upgrade -f -y
 
@@ -299,6 +312,9 @@ fi
 # special prepare when Raspbian
 if [ "${baseimage}" = "raspbian" ]||[ "${baseimage}" = "raspios_arm64" ]||\
    [ "${baseimage}" = "debian_rpi64" ]; then
+
+  echo ""
+  echo "*** PREPARE RASPBIAN ***"
   sudo apt install -y raspi-config 
   # do memory split (16MB)
   sudo raspi-config nonint do_memory_split 16
@@ -357,13 +373,13 @@ fi
 
 # special prepare when Nvidia Jetson Nano
 if [ ${isNvidia} -eq 1 ] ; then
-  # disable GUI on boot
+  echo "Nvidia --> disable GUI on boot"
   sudo systemctl set-default multi-user.target
 fi
 
 echo ""
 echo "*** CONFIG ***"
-# based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#raspi-config
+# based on https://stadicus.github.io/RaspiBolt/raspibolt_20_pi.html#raspi-config
 
 # set new default password for root user
 echo "root:raspiblitz" | sudo chpasswd
@@ -475,7 +491,7 @@ sudo service rsyslog restart
 
 echo ""
 echo "*** SOFTWARE UPDATE ***"
-# based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#software-update
+# based on https://stadicus.github.io/RaspiBolt/raspibolt_20_pi.html#software-update
 
 # installs like on RaspiBolt
 sudo apt install -y htop git curl bash-completion vim jq dphys-swapfile bsdmainutils
@@ -541,7 +557,7 @@ sudo apt -y autoremove
 
 echo ""
 echo "*** ADDING MAIN USER admin ***"
-# based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#adding-main-user-admin
+# based on https://stadicus.github.io/RaspiBolt/raspibolt_20_pi.html#add-users
 # using the default password 'raspiblitz'
 
 sudo adduser --disabled-password --gecos "" admin
@@ -561,7 +577,7 @@ sudo chmod 755 /home/admin/raspiblitz.info
 
 echo ""
 echo "*** ADDING SERVICE USER bitcoin"
-# based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#adding-the-service-user-bitcoin
+# based on https://stadicus.github.io/RaspiBolt/raspibolt_20_pi.html#add-users
 
 # create user and set default password for user
 sudo adduser --disabled-password --gecos "" bitcoin
@@ -578,19 +594,6 @@ sudo /usr/sbin/groupadd --force --gid 9704 lndchainnotifier
 sudo /usr/sbin/groupadd --force --gid 9705 lndsigner
 sudo /usr/sbin/groupadd --force --gid 9706 lndwalletkit
 sudo /usr/sbin/groupadd --force --gid 9707 lndrouter
-
-echo ""
-echo "*** Python DEFAULT libs & dependencies ***"
-
-# for setup shell scripts
-sudo apt -y install dialog bc python3-dialog
-
-# libs (for global python scripts)
-sudo -H python3 -m pip install grpcio==1.36.1
-sudo -H python3 -m pip install googleapis-common-protos==1.53.0
-sudo -H python3 -m pip install toml==0.10.1
-sudo -H python3 -m pip install j2cli==0.3.10
-sudo -H python3 -m pip install requests[socks]==2.21.0
 
 echo ""
 echo "*** SHELL SCRIPTS AND ASSETS ***"
@@ -681,7 +684,7 @@ sudo bash -c "echo '# Raspiblitz' >> /home/admin/.bashrc"
 
 echo ""
 echo "*** SWAP FILE ***"
-# based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#moving-the-swap-file
+# based on https://stadicus.github.io/RaspiBolt/raspibolt_20_pi.html#move-swap-file
 # but just deactivating and deleting old (will be created alter when user adds HDD)
 
 sudo dphys-swapfile swapoff
@@ -689,7 +692,7 @@ sudo dphys-swapfile uninstall
 
 echo ""
 echo "*** INCREASE OPEN FILE LIMIT ***"
-# based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_20_pi.md#increase-your-open-files-limit
+# based on https://stadicus.github.io/RaspiBolt/raspibolt_21_security.html#increase-your-open-files-limit
 
 sudo sed --in-place -i "56s/.*/*    soft nofile 128000/" /etc/security/limits.conf
 sudo bash -c "echo '*    hard nofile 128000' >> /etc/security/limits.conf"
@@ -820,14 +823,14 @@ sudo cp /home/admin/assets/background.service /etc/systemd/system/background.ser
 sudo systemctl enable background
 
 # "*** BITCOIN ***"
-# based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_30_bitcoin.md#installation
+# based on https://stadicus.github.io/RaspiBolt/raspibolt_30_bitcoin.html#installation
 
 echo ""
 echo "*** PREPARING BITCOIN ***"
 
 # set version (change if update is available)
 # https://bitcoincore.org/en/download/
-bitcoinVersion="0.21.0"
+bitcoinVersion="0.21.1"
 
 # needed to check code signing
 laanwjPGP="01EA5486DE18A882D4C2684590C8019E36C2E964"
@@ -839,9 +842,12 @@ cd /home/admin/download
 
 # download, check and import signer key
 sudo -u admin wget https://bitcoin.org/laanwj-releases.asc
+if [ ! -f "laanwj-releases.asc" ];then
+  sudo -u admin wget https://raw.githubusercontent.com/bitcoin-dot-org/Bitcoin.org/master/laanwj-releases.asc
+fi
 if [ ! -f "./laanwj-releases.asc" ]
 then
-  echo "!!! FAIL !!! Download laanwj-releases.asc not success."
+  echo "!!! FAIL !!! Could not download laanwj-releases.asc"
   exit 1
 fi
 gpg --import --import-options show-only ./laanwj-releases.asc
@@ -933,22 +939,18 @@ echo ""
 echo "*** PREPARING LIGHTNING ***"
 
 # "*** LND ***"
-## based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_40_lnd.md#lightning-lnd
+## based on https://stadicus.github.io/RaspiBolt/raspibolt_40_lnd.html#lightning-lnd
 ## see LND releases: https://github.com/lightningnetwork/lnd/releases
-lndVersion="0.12.1-beta"
+lndVersion="0.13.1-beta"
 
 # olaoluwa
-#PGPauthor="roasbeef"
-#PGPpkeys="https://keybase.io/roasbeef/pgp_keys.asc"
-#PGPcheck="9769140D255C759B1EB77B46A96387A57CAAE94D"
+PGPauthor="roasbeef"
+PGPpkeys="https://keybase.io/roasbeef/pgp_keys.asc"
+PGPcheck="E4D85299674B2D31FAA1892E372CBD7633C61696"
 # bitconner
-PGPauthor="bitconner"
-PGPpkeys="https://keybase.io/bitconner/pgp_keys.asc"
-PGPcheck="9C8D61868A7C492003B2744EE7D737B67FA592C7"
-# Joost Jager
-#PGPauthor="joostjager"
-#PGPpkeys="https://keybase.io/joostjager/pgp_keys.asc"
-#PGPcheck="D146D0F68939436268FA9A130E26BB61B76C4D3A"
+#PGPauthor="bitconner"
+#PGPpkeys="https://keybase.io/bitconner/pgp_keys.asc"
+#PGPcheck="9C8D61868A7C492003B2744EE7D737B67FA592C7"
 
 # get LND resources
 cd /home/admin/download
@@ -1058,6 +1060,104 @@ fi
 sudo chown -R admin /home/admin
 echo "- OK install of LND done"
 
+echo "*** C-lightning ***"
+# https://github.com/ElementsProject/lightning/releases
+CLVERSION=0.10.1
+
+# https://github.com/ElementsProject/lightning/tree/master/contrib/keys
+PGPsigner="rustyrussel"
+PGPpkeys="https://raw.githubusercontent.com/ElementsProject/lightning/master/contrib/keys/rustyrussell.txt"
+PGPcheck="D9200E6CD1ADB8F1"
+
+# prepare download dir
+sudo rm -rf /home/admin/download/cln
+sudo -u admin mkdir -p /home/admin/download/cln
+cd /home/admin/download/cln || exit 1
+
+sudo -u admin wget -O "pgp_keys.asc" ${PGPpkeys}
+gpg --import --import-options show-only ./pgp_keys.asc
+fingerprint=$(gpg "pgp_keys.asc" 2>/dev/null | grep "${PGPcheck}" -c)
+if [ ${fingerprint} -lt 1 ]; then
+  echo
+  echo "!!! WARNING --> the PGP fingerprint is not as expected for ${PGPsigner}"
+  echo "Should contain PGP: ${PGPcheck}"
+  echo "PRESS ENTER to TAKE THE RISK if you think all is OK"
+  read key
+fi
+gpg --import ./pgp_keys.asc
+
+sudo -u admin wget https://github.com/ElementsProject/lightning/releases/download/v${CLVERSION}/SHA256SUMS
+sudo -u admin wget https://github.com/ElementsProject/lightning/releases/download/v${CLVERSION}/SHA256SUMS.asc
+
+verifyResult=$(gpg --verify SHA256SUMS.asc 2>&1)
+
+goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
+echo "goodSignature(${goodSignature})"
+correctKey=$(echo ${verifyResult} | tr -d " \t\n\r" | grep "${PGPcheck}" -c)
+echo "correctKey(${correctKey})"
+if [ ${correctKey} -lt 1 ] || [ ${goodSignature} -lt 1 ]; then
+  echo
+  echo "!!! BUILD FAILED --> PGP verification not OK / signature(${goodSignature}) verify(${correctKey})"
+  exit 1
+else
+  echo 
+  echo "****************************************************************"
+  echo "OK --> the PGP signature of the C-lighning SHA256SUMS is correct"
+  echo "****************************************************************"
+  echo 
+fi
+
+sudo -u admin wget https://github.com/ElementsProject/lightning/releases/download/v${CLVERSION}/clightning-v${CLVERSION}.zip
+
+hashCheckResult=$(sha256sum -c SHA256SUMS 2>&1)
+goodHash=$(echo ${hashCheckResult} | grep 'OK' -c)
+echo "goodHash(${goodHash})"
+if [ ${goodHash} -lt 1 ]; then
+  echo
+  echo "!!! BUILD FAILED --> Hash check not OK"
+  exit 1
+else
+  echo
+  echo "********************************************************************"
+  echo "OK --> the hash of the downloaded C-lightning source code is correct"
+  echo "********************************************************************"
+  echo
+fi
+
+echo "- Install build dependencies"
+sudo apt-get install -y \
+  autoconf automake build-essential git libtool libgmp-dev \
+  libsqlite3-dev python3 python3-mako net-tools zlib1g-dev libsodium-dev \
+  gettext unzip
+
+sudo -u admin unzip clightning-v${CLVERSION}.zip
+cd clightning-v${CLVERSION} || exit 1
+
+echo "- Configuring EXPERIMENTAL_FEATURES enabled"
+sudo -u admin ./configure --enable-experimental-features
+
+echo "- Building C-lightning from source"
+sudo -u admin make
+
+echo "- Install to /usr/local/bin/"
+sudo make install || exit 1
+
+installed=$(sudo -u admin lightning-cli --version)
+if [ ${#installed} -eq 0 ]; then
+  echo
+  echo "!!! BUILD FAILED --> Was not able to install C-lightning"
+  exit 1
+fi
+
+correctVersion=$(echo "${installed}" | grep -c "${CLVERSION}")
+if [ ${correctVersion} -eq 0 ]; then
+  echo
+  echo "!!! BUILD FAILED --> installed C-lightning is not version ${CLVERSION}"
+  sudo -u admin lightning-cli --version
+  exit 1
+fi
+echo "- OK the installation of C-lightning v${installed} is done"
+
 echo ""
 echo "*** raspiblitz.info ***"
 sudo cat /home/admin/raspiblitz.info
@@ -1073,7 +1173,7 @@ echo "Take the chance & look thru the output above if you can spot any errors or
 echo ""
 echo "IMPORTANT IF WANT TO MAKE A RELEASE IMAGE FROM THIS BUILD:"
 echo "1. login fresh --> user:admin password:raspiblitz"
-echo "2. run --> ./XXprepareRelease.sh"
+echo "2. run --> release"
 echo ""
 
 # (do last - because might trigger reboot)
@@ -1082,3 +1182,5 @@ if [ "${displayClass}" != "headless" ] || [ "${baseimage}" = "raspbian" ] || [ "
   echo "- calling: blitz.display.sh set-display ${displayClass}"
   sudo /home/admin/config.scripts/blitz.display.sh set-display ${displayClass}
 fi
+
+echo "# BUILD DONE - see above"

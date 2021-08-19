@@ -137,7 +137,7 @@ if [ "$1" = "menu" ]; then
 The electrum system service is not running.
 Please check the following debug info.
       " 8 48
-    /home/admin/XXdebugLogs.sh
+    /home/admin/config.scripts/blitz.debug.sh
     echo "Press ENTER to get back to main menu."
     read key
     exit 0
@@ -263,10 +263,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo
     echo "# Installing Rust"
     echo
-    sudo -u electrs curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sudo -u electrs sh -s -- --default-toolchain 1.39.0 -y
-
+    # https://github.com/romanz/electrs/blob/master/doc/usage.md#build-dependencies
+    #sudo -u electrs curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sudo -u electrs sh -s -- --default-toolchain 1.39.0 -y
     sudo apt update
-    sudo apt install -y clang cmake  # for building 'rust-rocksdb'
+    sudo apt install -y cargo
+    sudo apt install -y clang cmake build-essential  # for building 'rust-rocksdb'
 
     echo
     echo "# Downloading and building electrs. This will take ~30 minutes" # ~22 min on an Odroid XU4
@@ -403,10 +404,15 @@ ExecStart=/home/electrs/electrs/target/release/electrs --index-batch-size=10 --e
 User=electrs
 Group=electrs
 Type=simple
-KillMode=process
 TimeoutSec=60
 Restart=always
 RestartSec=60
+
+# Hardening measures
+PrivateTmp=true
+ProtectSystem=full
+NoNewPrivileges=true
+PrivateDevices=true
 
 [Install]
 WantedBy=multi-user.target
