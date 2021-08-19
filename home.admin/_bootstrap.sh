@@ -105,6 +105,9 @@ if [ "${provisionFlagExists}" == "1" ]; then
   exit 1
 fi
 
+# make sure SSH server certs are configured
+sudo dpkg-reconfigure openssh-server
+
 ######################################
 # SECTION FOR POSSIBLE REBOOT ACTIONS
 systemInitReboot=0
