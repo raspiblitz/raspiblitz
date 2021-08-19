@@ -10,7 +10,7 @@
 
 echo ""
 echo "*****************************************"
-echo "* RASPIBLITZ SD CARD IMAGE SETUP v1.7   *"
+echo "* RASPIBLITZ SD CARD IMAGE SETUP v1.7.1 *"
 echo "*****************************************"
 echo "For details on optional parameters - see build script source code:"
 
@@ -257,11 +257,12 @@ if [ "${baseimage}" = "raspbian" ] || [ "${baseimage}" = "dietpi" ] || \
   fi
 fi
 
-# remove some (big) packages that are not needed
+echo "*** Remove not needed packages ***"
 sudo apt remove -y --purge libreoffice* oracle-java* chromium-browser nuscratch scratch sonic-pi minecraft-pi plymouth python2 vlc
 sudo apt clean
 sudo apt -y autoremove
 
+echo "*** Make sure python3 exists ***"
 if [ -f "/usr/bin/python3.7" ]; then
   # make sure /usr/bin/python exists (and calls Python3.7 in Buster)
   sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.7 1
@@ -277,9 +278,8 @@ else
   exit 1
 fi
 
-# update debian
 echo ""
-echo "*** UPDATE ***"
+echo "*** UPDATE Debian***"
 sudo apt update -y
 sudo apt upgrade -f -y
 
@@ -299,6 +299,9 @@ fi
 # special prepare when Raspbian
 if [ "${baseimage}" = "raspbian" ]||[ "${baseimage}" = "raspios_arm64" ]||\
    [ "${baseimage}" = "debian_rpi64" ]; then
+
+  echo ""
+  echo "*** PREPARE RASPBIAN ***"
   sudo apt install -y raspi-config 
   # do memory split (16MB)
   sudo raspi-config nonint do_memory_split 16
@@ -357,7 +360,7 @@ fi
 
 # special prepare when Nvidia Jetson Nano
 if [ ${isNvidia} -eq 1 ] ; then
-  # disable GUI on boot
+  echo "Nvidia --> disable GUI on boot"
   sudo systemctl set-default multi-user.target
 fi
 
