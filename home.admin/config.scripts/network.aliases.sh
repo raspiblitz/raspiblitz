@@ -18,8 +18,8 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ];then
   exit 1
 fi
 
-source /home/admin/raspiblitz.info
-source /mnt/hdd/raspiblitz.conf
+source /home/admin/raspiblitz.info 
+source /mnt/hdd/raspiblitz.conf 2>/dev/null
 
 if [ $1 = getvars ];then
   
