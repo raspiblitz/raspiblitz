@@ -101,10 +101,15 @@ ExecStart=/home/circuitbreaker/go/bin/circuitbreaker --network=${chain}net
 User=circuitbreaker
 Group=circuitbreaker
 Type=simple
-KillMode=process
 TimeoutSec=60
 Restart=always
 RestartSec=60
+
+# Hardening measures
+PrivateTmp=true
+ProtectSystem=full
+NoNewPrivileges=true
+PrivateDevices=true
 
 [Install]
 WantedBy=multi-user.target
