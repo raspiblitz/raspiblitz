@@ -404,6 +404,13 @@ if [ ${isMounted} -eq 0 ]; then
     infoMessage="Please Login for Migration"
     setupPhase="migration"
   elif [ "${hddRaspiData}" == "1" ]; then
+
+    # INIT OLD SSH HOST KEYS on Update/Recovery to prevent "Unknown Host" on ssh client
+    echo "COPY und Activating old SSH host keys" >> $logFile
+    sudo cp -r /mnt/hdd/ssh/* /etc/ssh/ >> ${logFile} 2>&1
+    sudo systemctl restart sshd
+    sudo dpkg-reconfigure openssh-server
+
     # determine if this is a recovery or an update
     # TODO: improve version/update detetion later
     isRecovery=$(echo "${hddRaspiVersion}" | grep -c "${codeVersion}")
@@ -414,6 +421,7 @@ if [ ${isMounted} -eq 0 ]; then
       infoMessage="Please Login for Update"
       setupPhase="update"
     fi
+
   fi
 
   # signal "WAIT LOOP: SETUP" to LCD, SSH & WEBAPI
