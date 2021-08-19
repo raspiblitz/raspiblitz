@@ -3,8 +3,8 @@
 
 [Unit]
 Description=RaspiBlitz Background Monitoring Service
-Wants=bootstrap.service
-After=bootstrap.service
+Wants=network.target
+After=network.target
 
 # for use with sendmail alert (coming soon)
 #OnFailure=systemd-sendmail@%n

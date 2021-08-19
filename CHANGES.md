@@ -6,6 +6,7 @@
 - Update: Pool CLI v0.5.1-alpha [details](https://github.com/lightninglabs/pool/releases/tag/v0.5.1-alpha)
 - Update: Balance of Satoshis 10.7.8 (BOS) + keep data on reinstall [details](https://github.com/alexbosworth/balanceofsatoshis/blob/master/CHANGELOG.md#version-8010)
 - Update: mempool space 2.2.1 [details](https://github.com/mempool/mempool)
+- Update: stacking-sats-kraken 0.4.4 [details](https://github.com/dennisreimann/stacking-sats-kraken/blob/master/README.md)
 - Fix: Prevent Pool dataloss on SDcard update [details](https://github.com/rootzoll/raspiblitz/issues/2266)
 
 ## What's new in Version 1.7.0 of RaspiBlitz?

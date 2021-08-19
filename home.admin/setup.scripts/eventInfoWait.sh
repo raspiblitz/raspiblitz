@@ -58,6 +58,12 @@ elif [ "${eventID}" == "reboot" ]; then
 Shutting down for reboot.
 " 5 30
 
+elif [ "${eventID}" == "reboot-init" ]; then
+
+    dialog --backtitle "${backtitle}" --cr-wrap --infobox "
+Rebooting for Setup (${contentString})
+" 5 30
+
 elif [ "${eventID}" == "error" ] && [ "${mode}" == "lcd" ]; then
 
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "
@@ -271,6 +277,14 @@ elif [ "${eventID}" == "errorHDD" ]; then
 PROBLEM: FAILED HDD/SSD
 Detailed Error Message:
 ${contentString}
+" 7 35
+
+elif [ "${eventID}" == "errorNetwork" ]; then
+
+    dialog --backtitle "${backtitle}" --cr-wrap --infobox "
+PROBLEM: LOST NETWORK
+Shutting down ... 
+Manual restart needed.
 " 7 35
 
 elif [ "${eventID}" == "sdtoosmall" ]; then
