@@ -32,10 +32,7 @@ sudo sed -i "s/^message=.*/message='Provision Setup'/g" ${infoFile}
 sudo sed -i "s/^message=.*/message='SSH Keys'/g" ${infoFile}
 
 # link ssh directory from SD card to HDD
-echo "# --> SSH key settings" >> ${logFile}
-echo "# copying SSH pub keys to HDD" >> ${logFile}
-sudo cp -r /etc/ssh /mnt/hdd/ssh >> ${logFile}
-echo "# OK" >> ${logFile}
+sudo /home/admin/config.scripts/blitz.ssh.sh backup
 
 ###################################
 # Prepare Blockchain Service
