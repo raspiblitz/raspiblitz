@@ -62,6 +62,7 @@ if [ "$1" = "checkrepair" ]; then
     sudo cd /etc/ssh
     sudo ssh-keygen -A
     echo "# ssh-keygen2"
+    sudo mkdir /home/admin/ssh
     sudo ssh-keygen -A -f /home/admin/ssh
     sudo ssh-keygen -A -f /etc/ssh
     echo "# dpkg-reconfigure"
