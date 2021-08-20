@@ -95,7 +95,7 @@ sudo chmod 777 ${infoFile}
 # CHECK SD CARD INCONSISTENT STATE
 
 # make sure SSH server is configured & running
-sudo /home/admin/config.scripts/blitz.ssh.sh checkrepair
+sudo /home/admin/config.scripts/blitz.ssh.sh checkrepair >> ${logFile}
 
 # when the provision did not ran thru without error (ask user for fresh sd card)
 provisionFlagExists=$(sudo ls /home/admin/provision.flag | grep -c 'provision.flag')
