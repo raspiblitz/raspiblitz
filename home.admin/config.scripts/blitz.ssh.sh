@@ -52,10 +52,12 @@ if [ "$1" = "checkrepair" ]; then
   countKeyFiles=$(sudo ls -la /etc/ssh/ssh_host_* 2>/dev/null | grep -c "/etc/ssh/ssh_host")
   echo "# countKeyFiles(${countKeyFiles})"
   if [ ${countKeyFiles} -lt 8 ]; then
+    sudo ls -la /etc/ssh
     echo "# DETECTED: MISSING SSHD KEYFILES --> Generating new ones"
     sudo systemctl stop sshd
     sudo ssh-keygen -A
     sudo systemctl start sshd
+    sudo ls -la /etc/ssh
     sleep 3
   fi
 

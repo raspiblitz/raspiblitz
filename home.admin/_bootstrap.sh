@@ -265,6 +265,7 @@ source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
 ################################
 
 echo "Waiting for HDD/SSD ..." >> $logFile
+sudo ls -la /etc/ssh >> $logFile 
 until [ ${isMounted} -eq 1 ] || [ ${#hddCandidate} -gt 0 ]
 do
 
