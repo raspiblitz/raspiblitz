@@ -48,6 +48,8 @@ fi
 if [ "$1" = "checkrepair" ]; then
   echo "# *** blitz.ssh.sh checkrepair"
 
+  sudo systemctl status sshd | cat
+
   # check if sshd host keys are missing / need generation
   countKeyFiles=$(sudo ls -la /etc/ssh/ssh_host_* 2>/dev/null | grep -c "/etc/ssh/ssh_host")
   echo "# countKeyFiles(${countKeyFiles})"
@@ -55,8 +57,13 @@ if [ "$1" = "checkrepair" ]; then
   
     echo "# DETECTED: MISSING SSHD KEYFILES --> Generating new ones"
     sudo ls -la /etc/ssh
-    sudo systemctl stop sshd
+    sudo systemctl stop ssh
+    echo "# ssh-keygen1"
+    sudo cd /etc/ssh
     sudo ssh-keygen -A
+    echo "# ssh-keygen2"
+    sudo ssh-keygen -A -d /home/admin/ssh
+    echo "# dpkg-reconfigure"
     sudo dpkg-reconfigure openssh-server
     sudo systemctl start sshd
     sleep 3
@@ -86,6 +93,8 @@ if [ "$1" = "checkrepair" ]; then
   if [ ${sshdRunning} -eq 1 ]; then
     echo "# OK: SSHD RUNNING"
   fi
+
+  sudo systemctl status sshd | cat
 
   exit 0
 fi
