@@ -94,9 +94,6 @@ sudo chmod 777 ${infoFile}
 ######################################
 # CHECK SD CARD INCONSISTENT STATE
 
-# make sure SSH server is configured & running
-sudo /home/admin/config.scripts/blitz.ssh.sh checkrepair >> $logFile
-
 # when the provision did not ran thru without error (ask user for fresh sd card)
 provisionFlagExists=$(sudo ls /home/admin/provision.flag | grep -c 'provision.flag')
 if [ "${provisionFlagExists}" == "1" ]; then
@@ -324,7 +321,6 @@ fi
 # WAIT LOOP: LOCALNET / INTERNET
 # after HDD > can contain WIFI conf
 ###################################
-
 gotLocalIP=0
 until [ ${gotLocalIP} -eq 1 ]
 do
@@ -357,6 +353,9 @@ do
   fi
   sleep 1
 done
+
+# make sure SSH server is configured & running
+sudo /home/admin/config.scripts/blitz.ssh.sh checkrepair >> $logFile
 
 # write info for LCD
 sed -i "s/^state=.*/state=inspect-hdd/g" ${infoFile}
