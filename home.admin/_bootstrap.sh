@@ -251,6 +251,9 @@ else
 fi
 echo ""
 
+# make sure SSH server is configured & running (before first wait loop)
+sudo /home/admin/config.scripts/blitz.ssh.sh checkrepair >> $logFile
+
 ###############################
 # WAIT FOR ALL SERVICES
 
@@ -353,9 +356,6 @@ do
   fi
   sleep 1
 done
-
-# make sure SSH server is configured & running
-sudo /home/admin/config.scripts/blitz.ssh.sh checkrepair >> $logFile
 
 # write info for LCD
 sed -i "s/^state=.*/state=inspect-hdd/g" ${infoFile}
