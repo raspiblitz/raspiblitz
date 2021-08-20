@@ -56,6 +56,7 @@ if [ "$1" = "checkrepair" ]; then
     echo "# DETECTED: MISSING SSHD KEYFILES --> Generating new ones"
     sudo systemctl stop sshd
     sudo ssh-keygen -A
+    sudo dpkg-reconfigure openssh-server
     sudo systemctl start sshd
     sudo ls -la /etc/ssh
     sleep 3
