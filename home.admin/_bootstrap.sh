@@ -174,6 +174,7 @@ if [ ${sshReset} -eq 1 ]; then
   # delete ssh certs
   echo "SSHRESET switch found ... stopping SSH and deleting old certs" >> $logFile
   sudo /home/admin/config.scripts/blitz.ssh.sh renew
+  sudo /home/admin/config.scripts/blitz.ssh.sh backup
   systemInitReboot=1
   sed -i "s/^message=.*/message='SSHRESET'/g" ${infoFile}
 else

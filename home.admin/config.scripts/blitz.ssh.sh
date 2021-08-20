@@ -3,11 +3,11 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ]; then
   echo "RaspiBlitz SSH tools"
-  echo "blitz.ssh.sh renew --> renew the sshd host certs"
-  echo "blitz.ssh.sh clear --> make sure old sshd host certs are cleared"
+  echo "blitz.ssh.sh renew       --> renew the sshd host certs"
+  echo "blitz.ssh.sh clear       --> make sure old sshd host certs are cleared"
   echo "blitz.ssh.sh checkrepair --> check sshd & repair just in case"
-  echo "blitz.ssh.sh backup --> copy ssh keys to backup (if exist)"
-  echo "blitz.ssh.sh restore --> restore ssh keys from backup (if exist)"
+  echo "blitz.ssh.sh backup      --> copy ssh keys to backup (if exist)"
+  echo "blitz.ssh.sh restore     --> restore ssh keys from backup (if exist)"
   exit 1
 fi
 
@@ -28,8 +28,6 @@ if [ "$1" = "renew" ]; then
   sudo rm /etc/ssh/ssh_host_*
   sudo ssh-keygen -A
   sudo dpkg-reconfigure openssh-server
-  sudo rm -r $DEFAULTBACKUPBASEDIR/ssh 2>/dev/null # delete backups if exist
-  sudo cp -r /etc/ssh $DEFAULTBACKUPBASEDIR/ssh 2>/dev/null # copy to backups if exist
   sudo systemctl start sshd
   exit 0
 fi
@@ -40,7 +38,6 @@ fi
 if [ "$1" = "clear" ]; then
   echo "# *** blitz.ssh.sh clear"
   sudo rm /etc/ssh/ssh_host_*
-  sudo rm $DEFAULTBACKUPBASEDIR/ssh/ssh_host* 2>/dev/null
   echo "# OK: SSHD keyfiles & possible backups deleted"
   exit 0
 fi
@@ -59,8 +56,6 @@ if [ "$1" = "checkrepair" ]; then
     sudo systemctl stop sshd
     sudo ssh-keygen -A
     sudo systemctl start sshd
-    sudo rm -r DEFAULTBACKUPBASEDIR/ssh 2>/dev/null # delete backups if exist
-    sudo cp -r /etc/ssh DEFAULTBACKUPBASEDIR/ssh 2>/dev/null # copy to backups if exist
     sleep 3
   fi
 
@@ -114,14 +109,16 @@ if [ "$1" = "restore" ]; then
     if [ -d "${DEFAULTBACKUPBASEDIR}/ssh" ]; then
 
       # restore sshd host keys
+      sudo rm /etc/ssh/*
       sudo cp -r $DEFAULTBACKUPBASEDIR/ssh/* /etc/ssh/
       sudo chown -R root:root /etc/ssh
       sudo dpkg-reconfigure openssh-server
       sudo systemctl restart sshd
 
       # restore root use keys
-      sudo cp -r $DEFAULTBACKUPBASEDIR/ssh/root_backup /root/.ssh
-      sudo chown -R root:root /root/.ssh
+      sudo rm -r /root/.ssh 2>/dev/null
+      sudo cp -r $DEFAULTBACKUPBASEDIR/ssh/root_backup /root/.ssh 2>/dev/null
+      sudo chown -R root:root /root/.ssh 2>/dev/null
 
       echo "# OK - ssh keys restore done"
     else
