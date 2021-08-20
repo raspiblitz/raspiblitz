@@ -52,6 +52,9 @@ do
   # source info file fresh on every loop
   source ${infoFile} 2>/dev/null
 
+  # make sure SSH server is configured & running
+  sudo /home/admin/config.scripts/blitz.ssh.sh checkrepair >> $logFile
+
   ####################################################
   # SKIP BACKGROUND TASK LOOP ON CERTAIN SYSTEM STATES
   # https://github.com/rootzoll/raspiblitz/issues/160

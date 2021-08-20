@@ -251,9 +251,6 @@ else
 fi
 echo ""
 
-# make sure SSH server is configured & running (before first wait loop)
-sudo /home/admin/config.scripts/blitz.ssh.sh checkrepair >> $logFile
-
 ###############################
 # WAIT FOR ALL SERVICES
 
