@@ -53,7 +53,7 @@ do
   source ${infoFile} 2>/dev/null
 
   # make sure SSH server is configured & running
-  sudo /home/admin/config.scripts/blitz.ssh.sh checkrepair >> $logFile
+  sudo /home/admin/config.scripts/blitz.ssh.sh checkrepair
 
   ####################################################
   # SKIP BACKGROUND TASK LOOP ON CERTAIN SYSTEM STATES
