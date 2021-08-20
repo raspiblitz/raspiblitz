@@ -95,7 +95,7 @@ sudo chmod 777 ${infoFile}
 # CHECK SD CARD INCONSISTENT STATE
 
 # make sure SSH server is configured & running
-sudo /home/admin/config.scripts/blitz.ssh.sh checkrepair
+sudo /home/admin/config.scripts/blitz.ssh.sh checkrepair >> $logFile
 
 # when the provision did not ran thru without error (ask user for fresh sd card)
 provisionFlagExists=$(sudo ls /home/admin/provision.flag | grep -c 'provision.flag')
@@ -173,8 +173,8 @@ if [ ${sshReset} -eq 1 ]; then
   sudo rm /boot/ssh.reset* >> $logFile
   # delete ssh certs
   echo "SSHRESET switch found ... stopping SSH and deleting old certs" >> $logFile
-  sudo /home/admin/config.scripts/blitz.ssh.sh renew
-  sudo /home/admin/config.scripts/blitz.ssh.sh backup
+  sudo /home/admin/config.scripts/blitz.ssh.sh renew >> $logFile
+  sudo /home/admin/config.scripts/blitz.ssh.sh backup >> $logFile
   systemInitReboot=1
   sed -i "s/^message=.*/message='SSHRESET'/g" ${infoFile}
 else
@@ -405,7 +405,7 @@ if [ ${isMounted} -eq 0 ]; then
 
     # INIT OLD SSH HOST KEYS on Update/Recovery to prevent "Unknown Host" on ssh client
     echo "COPY und Activating old SSH host keys" >> $logFile
-    sudo /home/admin/config.scripts/blitz.ssh.sh restore
+    sudo /home/admin/config.scripts/blitz.ssh.sh restore >> $logFile
 
     # determine if this is a recovery or an update
     # TODO: improve version/update detetion later
