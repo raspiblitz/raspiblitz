@@ -221,18 +221,6 @@ sleep 5
 /home/admin/config.scripts/blitz.display.sh hide
 
 ################################
-# GENERATE UNIQUE SSH PUB KEYS
-# on first boot up
-################################
-
-numberOfPubKeys=$(sudo ls /etc/ssh/ | grep -c 'ssh_host_')
-if [ ${numberOfPubKeys} -eq 0 ]; then
-  echo "*** Generating new SSH PubKeys" >> $logFile
-  sudo dpkg-reconfigure openssh-server
-  echo "OK" >> $logFile
-fi
-
-################################
 # CLEANING BOOT SYSTEM
 ################################
 
