@@ -8,6 +8,7 @@
 - Update: Balance of Satoshis 10.7.8 (BOS) + keep data on reinstall [details](https://github.com/alexbosworth/balanceofsatoshis/blob/master/CHANGELOG.md#version-8010)
 - Update: mempool space 2.2.1 [details](https://github.com/mempool/mempool)
 - Update: stacking-sats-kraken 0.4.4 [details](https://github.com/dennisreimann/stacking-sats-kraken/blob/master/README.md)
+- Update: Electrum Server in Rust v0.8.11 [details](https://github.com/romanz/electrs/blob/v0.8.11/RELEASE-NOTES.md#0811-18-aug-2021)
 - Fix: Prevent Pool dataloss on SDcard update [details](https://github.com/rootzoll/raspiblitz/issues/2266)
 
 ## What's new in Version 1.7.0 of RaspiBlitz?
