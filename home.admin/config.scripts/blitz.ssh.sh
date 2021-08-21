@@ -48,30 +48,27 @@ fi
 if [ "$1" = "checkrepair" ]; then
   echo "# *** blitz.ssh.sh checkrepair"
 
-  sudo systemctl status sshd | cat
+  systemctl status sshd | cat
 
   # check if sshd host keys are missing / need generation
-  countKeyFiles=$(sudo ls -la /etc/ssh/ssh_host_* 2>/dev/null | grep -c "/etc/ssh/ssh_host")
+  countKeyFiles=$(ls -la /etc/ssh/ssh_host_* 2>/dev/null | grep -c "/etc/ssh/ssh_host")
   echo "# countKeyFiles(${countKeyFiles})"
   if [ ${countKeyFiles} -lt 8 ]; then
   
     echo "# DETECTED: MISSING SSHD KEYFILES --> Generating new ones"
-    sudo ls -la /etc/ssh
-    sudo systemctl stop ssh
+    ls -la /etc/ssh
+    systemctl stop ssh
     echo "# ssh-keygen1"
-    sudo cd /etc/ssh
-    sudo ssh-keygen -A
+    cd /etc/ssh
+    ssh-keygen -A
     echo "# ssh-keygen2"
-    sudo mkdir /home/admin/ssh
-    sudo ssh-keygen -A -f /home/admin/ssh
-    sudo ssh-keygen -A -f /etc/ssh
-    echo "# dpkg-reconfigure"
-    sudo dpkg-reconfigure openssh-server
-    sudo systemctl start sshd
+    mkdir /home/admin/ssh
+    ssh-keygen -A -f /etc/ssh
+    systemctl start sshd
     sleep 3
 
-    sudo ls -la /etc/ssh
-    countKeyFiles=$(sudo ls -la /etc/ssh/ssh_host_* 2>/dev/null | grep -c "/etc/ssh/ssh_host")
+    ls -la /etc/ssh
+    countKeyFiles=$(ls -la /etc/ssh/ssh_host_* 2>/dev/null | grep -c "/etc/ssh/ssh_host")
     echo "# countKeyFiles(${countKeyFiles})"
     if [ ${countKeyFiles} -lt 8 ]; then
       echo "# FAIL: Was not able to generate new sshd host keys"
