@@ -61,9 +61,6 @@ if [ "$1" = "checkrepair" ]; then
     echo "# ssh-keygen1"
     cd /etc/ssh
     ssh-keygen -A
-    echo "# ssh-keygen2"
-    mkdir /home/admin/ssh
-    ssh-keygen -A -f /etc/ssh
     systemctl start sshd
     sleep 3
 
