@@ -61,6 +61,7 @@ if [ "$1" = "checkrepair" ]; then
     echo "# ssh-keygen1"
     mount
     cd /etc/ssh
+    touch test.test
     ssh-keygen -A
     systemctl start sshd
     sleep 3
