@@ -59,6 +59,7 @@ if [ "$1" = "checkrepair" ]; then
     ls -la /etc/ssh
     systemctl stop ssh
     echo "# ssh-keygen1"
+    mount
     cd /etc/ssh
     ssh-keygen -A
     systemctl start sshd
