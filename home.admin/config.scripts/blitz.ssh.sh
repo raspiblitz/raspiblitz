@@ -47,26 +47,20 @@ fi
 ###################
 if [ "$1" = "checkrepair" ]; then
   echo "# *** blitz.ssh.sh checkrepair"
-
-  systemctl status sshd | cat
-
+  
   # check if sshd host keys are missing / need generation
   countKeyFiles=$(ls -la /etc/ssh/ssh_host_* 2>/dev/null | grep -c "/etc/ssh/ssh_host")
   echo "# countKeyFiles(${countKeyFiles})"
   if [ ${countKeyFiles} -lt 8 ]; then
   
     echo "# DETECTED: MISSING SSHD KEYFILES --> Generating new ones"
-    ls -la /etc/ssh
     systemctl stop ssh
     echo "# ssh-keygen1"
-    mount
     cd /etc/ssh
-    touch test.test
     ssh-keygen -A
     systemctl start sshd
     sleep 3
 
-    ls -la /etc/ssh
     countKeyFiles=$(ls -la /etc/ssh/ssh_host_* 2>/dev/null | grep -c "/etc/ssh/ssh_host")
     echo "# countKeyFiles(${countKeyFiles})"
     if [ ${countKeyFiles} -lt 8 ]; then
@@ -91,8 +85,6 @@ if [ "$1" = "checkrepair" ]; then
   if [ ${sshdRunning} -eq 1 ]; then
     echo "# OK: SSHD RUNNING"
   fi
-
-  sudo systemctl status sshd | cat
 
   exit 0
 fi
