@@ -677,11 +677,11 @@ BTC-RPC-Explorer is a blockchain explorer website you can run on your own RaspiB
 
 After install, you will see a new `EXPLORE` option in the SSH main menu - it will give you all the information you need to start using it.
 
-##### Cryptoadvance Specter
+##### Specter Desktop
 
 Bitcoin Core has a very powerful command line interface and a wonderful daemon. Using pre-signed bitcoin transactions (PSBT) and [Hardware Wallet Interface](https://github.com/bitcoin-core/HWI) (HWI), it can also work with hardware wallets. At the moment it is very Linux-focused. The same applies to multi-signature setups.
 
-The goal of SpecterDesktop is to make a convenient and user-friendly GUI around Bitcoin Core, focusing on multi-signature setups with airgapped hardware wallets like Trezor, Ledger, COLDCARD or the Specter-DIY.
+The goal of Specter Desktop is to make a convenient and user-friendly GUI around Bitcoin Core, focusing on multi-signature setups with airgapped hardware wallets like Trezor, Ledger, COLDCARD or the Specter-DIY.
 
 ![SPECTER](pictures/specter.jpg)
 

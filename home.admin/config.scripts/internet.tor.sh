@@ -380,7 +380,7 @@ EOF
   fi
   if [ "${specter}" = "on" ]; then
     # specter makes only sense to be served over https
-    /home/admin/config.scripts/internet.hiddenservice.sh cryptoadvance-specter 443 25441
+    /home/admin/config.scripts/internet.hiddenservice.sh specter 443 25441
   fi
   if [ "${sphinxrelay}" = "on" ]; then
     /home/admin/config.scripts/internet.hiddenservice.sh sphinxrelay 80 3302 443 3303

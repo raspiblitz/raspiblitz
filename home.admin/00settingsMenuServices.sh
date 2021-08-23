@@ -33,7 +33,7 @@ OPTIONS=()
 OPTIONS+=(e 'Electrum Rust Server' ${ElectRS})
 OPTIONS+=(p 'BTCPayServer' ${BTCPayServer})
 OPTIONS+=(b 'BTC-RPC-Explorer' ${BTCRPCexplorer})
-OPTIONS+=(s 'Cryptoadvance Specter' ${specter})
+OPTIONS+=(s 'Specter Desktop' ${specter})
 OPTIONS+=(a 'Mempool Space' ${mempoolExplorer})
 
 # just available for LND
@@ -54,7 +54,7 @@ if [ "${lightning}" == "cln" ]; then
   OPTIONS+=(k 'Sparko C-Lightning WebWallet' ${sparko})
 fi
 
-OPTIONS+=(j 'JoinMarket' ${joinmarket})
+OPTIONS+=(j 'JoinMarket with JoininBox menu' ${joinmarket})
 OPTIONS+=(w 'Download Bitcoin Whitepaper' ${whitepaper})
 
 CHOICES=$(dialog --title ' Additional Services ' \
@@ -157,27 +157,27 @@ else
   echo "BTC-RPC-Explorer Setting unchanged."
 fi
 
-# cryptoadvance Specter process choice
+# Specter Desktop process choice
 choice="off"; check=$(echo "${CHOICES}" | grep -c "s")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${specter}" != "${choice}" ]; then
-  echo "Cryptoadvance Specter Setting changed .."
+  echo "Specter Desktop Setting changed .."
   anychange=1
-  /home/admin/config.scripts/bonus.cryptoadvance-specter.sh ${choice}
+  /home/admin/config.scripts/bonus.specter.sh ${choice}
   errorOnInstall=$?
   if [ "${choice}" =  "on" ]; then
     if [ ${errorOnInstall} -eq 0 ]; then
-      sudo systemctl start cryptoadvance-specter
-      /home/admin/config.scripts/bonus.cryptoadvance-specter.sh menu
+      sudo systemctl start specter
+      /home/admin/config.scripts/bonus.specter.sh menu
     else
-      l1="!!! FAIL on Cryptoadvance Specter install !!!"
+      l1="!!! FAIL on Specter Desktop install !!!"
       l2="Try manual install on terminal after reboot with:"
-      l3="/home/admin/config.scripts/bonus.cryptoadvance-specter.sh on"
+      l3="/home/admin/config.scripts/bonus.specter.sh on"
       dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
     fi
   fi
 else
-  echo "Cryptoadvance Specter Setting unchanged."
+  echo "Specter Desktop Setting unchanged."
 fi
 
 # ElectRS process choice

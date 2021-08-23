@@ -200,8 +200,8 @@ if [ "${specter}" = "" ] || [ "${specter}" = "off" ]; then
 else
   echo ""
   echo "*** LAST 20 SPECTER LOGS ***"
-  echo "sudo journalctl -u cryptoadvance-specter -b --no-pager -n20"
-  sudo journalctl -u cryptoadvance-specter -b --no-pager -n20
+  echo "sudo journalctl -u specter -b --no-pager -n20"
+  sudo journalctl -u specter -b --no-pager -n20
   echo ""
 fi
 

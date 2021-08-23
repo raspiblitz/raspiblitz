@@ -176,7 +176,7 @@ case $CHOICE in
     sudo /home/admin/config.scripts/lnd.credentials.sh sync
     if grep -Eq "^specter=on" /mnt/hdd/raspiblitz.conf; then
       echo "# Restart Specter on $CHAIN"
-      sudo systemctl restart cryptoadvance-specter.service
+      sudo systemctl restart specter.service
     fi
     echo
     echo "Press ENTER to return to main menu."

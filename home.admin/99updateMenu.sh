@@ -392,7 +392,7 @@ if [ "${thunderhub}" == "on" ]; then
 fi
 
 if [ "${specter}" == "on" ]; then
-  OPTIONS+=(SPECTER "Update Cryptoadvance Specter")
+  OPTIONS+=(SPECTER "Update Specter Desktop")
 fi
 
 if [ "${rtlWebinterface}" == "on" ]; then
@@ -447,7 +447,7 @@ case $CHOICE in
     /home/admin/config.scripts/bonus.thunderhub.sh update
     ;;
   SPECTER)
-    /home/admin/config.scripts/bonus.cryptoadvance-specter.sh update
+    /home/admin/config.scripts/bonus.specter.sh update
     ;;
   RTL)
     /home/admin/config.scripts/bonus.rtl.sh update

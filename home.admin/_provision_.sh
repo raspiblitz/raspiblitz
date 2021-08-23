@@ -516,7 +516,7 @@ fi
 if [ "${specter}" = "on" ]; then
   echo "Provisioning Specter - run config script" >> ${logFile}
   sudo sed -i "s/^message=.*/message='Setup Specter'/g" ${infoFile}
-  sudo -u admin /home/admin/config.scripts/bonus.cryptoadvance-specter.sh on >> ${logFile} 2>&1
+  sudo -u admin /home/admin/config.scripts/bonus.specter.sh on >> ${logFile} 2>&1
 else
   echo "Provisioning Specter - keep default" >> ${logFile}
 fi

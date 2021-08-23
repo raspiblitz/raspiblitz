@@ -1,18 +1,18 @@
 #!/bin/bash
 # https://github.com/cryptoadvance/specter-desktop  
 
-pinnedVersion="1.4.2"
+pinnedVersion="1.5.1"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
- echo "config script to switch cryptoadvance specter on, off or update"
- echo "bonus.cryptoadvance-specter.sh [status|on|off|update]"
+ echo "config script to switch Specter Desktop on, off, configure or update"
+ echo "bonus.specter.sh [status|on|off|config|update]"
  echo "installing the version $pinnedVersion by default"
  exit 1
 fi
 
 source /mnt/hdd/raspiblitz.conf
-echo "# bonus.cryptoadvance-specter.sh $1"
+echo "# bonus.specter.sh $1"
 
 # get status key/values
 if [ "$1" = "status" ]; then
@@ -23,14 +23,14 @@ if [ "$1" = "status" ]; then
 
     # get network info
     localip=$(hostname -I | awk '{print $1}')
-    toraddress=$(sudo cat /mnt/hdd/tor/cryptoadvance-specter/hostname 2>/dev/null)
+    toraddress=$(sudo cat /mnt/hdd/tor/specter/hostname 2>/dev/null)
     fingerprint=$(openssl x509 -in /home/specter/.specter/cert.pem -fingerprint -noout | cut -d"=" -f2)
     echo "localip='${localip}'"
     echo "toraddress='${toraddress}'"
     echo "fingerprint='${fingerprint}'"
 
     # check for error
-    serviceFailed=$(sudo systemctl status cryptoadvance-specter | grep -c 'inactive (dead)')
+    serviceFailed=$(sudo systemctl status specter | grep -c 'inactive (dead)')
     if [ "${serviceFailed}" = "1" ]; then
       echo "error='Service Failed'"
       exit 1
@@ -48,14 +48,14 @@ if [ "$1" = "menu" ]; then
 
   # get status
   echo "# collecting status info ... (please wait)"
-  source <(sudo /home/admin/config.scripts/bonus.cryptoadvance-specter.sh status)
+  source <(sudo /home/admin/config.scripts/bonus.specter.sh status)
   echo "# toraddress: ${toraddress}"
 
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
 
-    # TOR
+    # Tor
     /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
-    whiptail --title " Cryptoadvance Specter " --msgbox "Open in your local web browser & accept self-signed cert:
+    whiptail --title " Specter Desktop " --msgbox "Open in your local web browser & accept self-signed cert:
 https://${localip}:25441
 
 SHA1 Thumb/Fingerprint:
@@ -71,7 +71,7 @@ Unfortunately the camera is currently not usable via Tor, though.
   else
 
     # IP + Domain
-    whiptail --title " Cryptoadvance Specter " --msgbox "Open in your local web browser & accept self-signed cert:
+    whiptail --title " Specter Desktop " --msgbox "Open in your local web browser & accept self-signed cert:
 https://${localip}:25441
 
 SHA1 Thumb/Fingerprint:
@@ -99,11 +99,76 @@ fi
 # set variable ${blockfilterindex}
 source <(grep -E "^blockfilterindex=.*" /mnt/hdd/${network}/${network}.conf)
 
+function configure_specter {
+  echo "#    --> creating App-config"
+  if [ "${runBehindTor}" = "on" ];then
+    proxy="socks5h://localhost:9050"
+    torOnly="true"
+    tor_control_port="9051"
+  else
+    proxy=""
+    torOnly="false"
+    tor_control_port=""
+  fi
+  cat > /home/admin/config.json <<EOF
+{
+    "auth": {
+        "method": "rpcpasswordaspin",
+        "password_min_chars": 6,
+        "rate_limit": "10",
+        "registration_link_timeout": "1"
+    },
+    "active_node_alias": "raspiblitz_${chain}net",
+    "proxy_url": "${proxy}",
+    "only_tor": ${torOnly},
+    "tor_control_port": "${tor_control_port}",
+    "tor_status": false,
+    "hwi_bridge_url": "/hwi/api/",
+}
+EOF
+  sudo mv /home/admin/config.json /home/specter/.specter/config.json
+  sudo chown -R specter:specter /home/specter/.specter
+
+  echo "# Adding the raspiblitz_${chain}net node to Specter"
+  RPCUSER=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcuser | cut -c 9-)
+  PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
+  if [ ${chain} = "main" ];then
+    portprefix=""
+  elif [ ${chain} = "test" ];then
+    portprefix=1
+  elif [ ${chain} = "sig" ];then
+    portprefix=3
+  fi
+  PORT="${portprefix}8332"
+  cat > /home/admin/raspiblitz_${chain}net.json <<EOF    
+{
+    "name": "Bitcoin Core",
+    "alias": "raspiblitz_${chain}net",
+    "autodetect": false,
+    "datadir": "",
+    "user": "${RPCUSER}",
+    "password": "${PASSWORD_B}",
+    "port": "${PORT}",
+    "host": "localhost",
+    "protocol": "http",
+    "external_node": true,
+    "fullpath": "/home/specter/.specter/nodes/raspiblitz_${chain}net.json"
+}
+EOF
+    sudo mv /home/admin/raspiblitz_${chain}net.json.json /home/specter/.specter/nodes/raspiblitz_${chain}net.json
+    sudo chown -R specter:specter /home/specter/.specter
+}
+
+# config
+if [ "$1" = "config" ]; then
+  configure_specter
+fi
+
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
-  echo "#    --> INSTALL Cryptoadvance Specter ***"
+  echo "#    --> INSTALL Specter Desktop"
 
-  isInstalled=$(sudo ls /etc/systemd/system/cryptoadvance-specter.service 2>/dev/null | grep -c 'cryptoadvance-specter.service' || /bin/true)
+  isInstalled=$(sudo ls /etc/systemd/system/specter.service 2>/dev/null | grep -c 'specter.service' || /bin/true)
   if [ ${isInstalled} -eq 0 ]; then
 
     echo "#    --> Enable wallets in Bitcoin Core"
@@ -114,6 +179,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo apt install -y libusb-1.0.0-dev libudev-dev virtualenv libffi-dev
 
     sudo adduser --disabled-password --gecos "" specter
+    
+    echo "# add the user to the debian-tor group"
+    sudo usermod -a -G debian-tor specter
 
     # store data on the disk
     sudo mkdir -p /mnt/hdd/app-data/.specter 2>/dev/null
@@ -126,47 +194,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo chown -R specter:specter /home/specter/.specter
 
     # activating Authentication here ...
-    echo "#    --> creating App-config"
-    if [ "${runBehindTor}" = "on" ];then
-      proxy="socks5h://localhost:9050"
-      torOnly="true"
-    else
-      proxy=""
-      torOnly="false"
-    fi
-    cat > /home/admin/config.json <<EOF
-{
-    "rpc": {
-        "autodetect": true,
-        "datadir": "/home/bitcoin/.bitcoin",
-        "user": "",
-        "password": "",
-        "port": "",
-        "host": "localhost",
-        "protocol": "http"
-    },
-    "auth": "rpcpasswordaspin",
-    "explorers": {
-        "main": "",
-        "test": "",
-        "regtest": "",
-        "signet": ""
-    },
-    "proxy_url": "$proxy",
-    "only_tor": $torOnly,
-    "tor_control_port": "",
-    "hwi_bridge_url": "/hwi/api/",
-    "uid": "",
-    "unit": "btc",
-    "price_check": false,
-    "alt_rate": 1,
-    "alt_symbol": "BTC",
-    "price_provider": "",
-    "validate_merkle_proofs": false
-}
-EOF
-    sudo mv /home/admin/config.json /home/specter/.specter/config.json
-    sudo chown -R specter:specter /home/specter/.specter
+    configure_specter
 
     echo "#    --> creating a virtualenv"
     sudo -u specter virtualenv --python=python3 /home/specter/.env
@@ -184,7 +212,7 @@ EOF
 
     # open firewall
     echo "#    --> Updating Firewall"
-    sudo ufw allow 25441 comment 'cryptoadvance-specter'
+    sudo ufw allow 25441 comment 'specter'
     sudo ufw --force enable
     echo ""
 
@@ -270,12 +298,12 @@ EOF
     sudo usermod -aG plugdev specter
 
     # install service
-    echo "#    --> Install cryptoadvance-specter systemd service"
-    cat > /home/admin/cryptoadvance-specter.service <<EOF
-# systemd unit for Cryptoadvance Specter
+    echo "#    --> Install specter systemd service"
+    cat > /home/admin/specter.service <<EOF
+# systemd unit for Specter Desktop
 
 [Unit]
-Description=cryptoadvance-specter
+Description=specter
 Wants=${network}d.service
 After=${network}d.service
 
@@ -299,12 +327,12 @@ PrivateDevices=true
 WantedBy=multi-user.target
 EOF
 
-    sudo mv /home/admin/cryptoadvance-specter.service /etc/systemd/system/cryptoadvance-specter.service
-    sudo systemctl enable cryptoadvance-specter
+    sudo mv /home/admin/specter.service /etc/systemd/system/specter.service
+    sudo systemctl enable specter
 
-    echo "#    --> OK - the cryptoadvance-specter service is now enabled and started"
+    echo "#    --> OK - the specter service is now enabled and started"
   else 
-    echo "#    --> cryptoadvance-specter already installed."
+    echo "#    --> specter already installed."
   fi
 
   # setting value in raspi blitz config
@@ -315,7 +343,7 @@ EOF
   if [ "${runBehindTor}" = "on" ]; then
     # make sure to keep in sync with internet.tor.sh script
     # port 25441 is HTTPS with self-signed cert - specte only makes sense to be served over HTTPS
-    /home/admin/config.scripts/internet.hiddenservice.sh cryptoadvance-specter 443 25441
+    /home/admin/config.scripts/internet.hiddenservice.sh specter 443 25441
   fi
 
   # blockfilterindex on
@@ -347,16 +375,16 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # Hidden Service if Tor is active
   if [ "${runBehindTor}" = "on" ]; then
-    /home/admin/config.scripts/internet.hiddenservice.sh off cryptoadvance-specter
+    /home/admin/config.scripts/internet.hiddenservice.sh off specter
   fi
 
-  isInstalled=$(sudo ls /etc/systemd/system/cryptoadvance-specter.service 2>/dev/null | grep -c 'cryptoadvance-specter.service')
+  isInstalled=$(sudo ls /etc/systemd/system/specter.service 2>/dev/null | grep -c 'specter.service')
   if [ ${isInstalled} -eq 1 ]; then
 
-    echo "#    --> REMOVING Cryptoadvance Specter"
-    sudo systemctl stop cryptoadvance-specter
-    sudo systemctl disable cryptoadvance-specter
-    sudo rm /etc/systemd/system/cryptoadvance-specter.service
+    echo "#    --> REMOVING Specter Desktop"
+    sudo systemctl stop specter
+    sudo systemctl disable specter
+    sudo rm /etc/systemd/system/specter.service
     sudo -u specter /home/specter/.env/bin/python3 -m pip uninstall --yes cryptoadvance.specter
 
     if whiptail --defaultno --yesno "Do you want to delete all Data related to specter? This includes also Bitcoin-Core-Wallets managed by specter?" 0 0; then
@@ -389,20 +417,20 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
       sudo systemctl restart ${network}d
     fi
 
-    echo "#    --> OK Cryptoadvance Specter removed."
+    echo "#    --> OK Specter Desktop removed."
   else 
-    echo "#    --> Cryptoadvance Specter is not installed."
+    echo "#    --> Specter Desktop is not installed."
   fi
   exit 0
 fi
 
 # update
 if [ "$1" = "update" ]; then
-  echo "#    --> UPDATING Cryptoadvance Specter"
+  echo "#    --> UPDATING Specter Desktop "
   sudo -u specter /home/specter/.env/bin/python3 -m pip install --upgrade cryptoadvance.specter
   echo "#    --> Updated to the latest in https://pypi.org/project/cryptoadvance.specter/#history ***"
-  echo "#    --> Restarting the cryptoadvance-specter.service"
-  sudo systemctl restart cryptoadvance-specter
+  echo "#    --> Restarting the specter.service"
+  sudo systemctl restart specter
   exit 0
 fi
 

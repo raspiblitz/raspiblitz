@@ -157,7 +157,7 @@ case $CHOICE in
     echo
     echo "Example list: 
 btc-rpc-explorer, btcpayserver, circuitbreaker,
-cryptoadvance-specter, getty@tty1, electrs, litd,
+specter, getty@tty1, electrs, litd,
 lnbits, mempool, nbxlorer, nginx, RTL, telegraf,
 thunderhub, tor@default, tor@lnd, tor
 "
@@ -175,7 +175,7 @@ thunderhub, tor@default, tor@lnd, tor
     echo
     echo "Example list: 
 btc-rpc-explorer, btcpayserver, circuitbreaker,
-cryptoadvance-specter, getty@tty1, electrs, litd,
+specter, getty@tty1, electrs, litd,
 lnbits, mempool, nbxlorer, nginx, RTL, telegraf,
 thunderhub, tor@default, tor@lnd, tor
 "

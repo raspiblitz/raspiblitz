@@ -99,7 +99,7 @@ if [ "${mempoolExplorer}" == "on" ]; then
   OPTIONS+=(MEMPOOL "Mempool Space")
 fi
 if [ "${specter}" == "on" ]; then
-  OPTIONS+=(SPECTER "Cryptoadvance Specter")
+  OPTIONS+=(SPECTER "Specter Desktop")
 fi
 if [ "${joinmarket}" == "on" ]; then
   OPTIONS+=(JMARKET "JoinMarket")
@@ -267,7 +267,7 @@ case $CHOICE in
             /home/admin/config.scripts/bonus.mempool.sh menu
             ;;
         SPECTER)
-            /home/admin/config.scripts/bonus.cryptoadvance-specter.sh menu
+            /home/admin/config.scripts/bonus.specter.sh menu
             ;;
         JMARKET)
             sudo /home/admin/config.scripts/bonus.joinmarket.sh menu
