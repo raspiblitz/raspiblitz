@@ -180,7 +180,7 @@ EOF
 
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
-  echo "# Installing the RTL for ${LNTYPE} ${CHAIN}"
+  echo "# Installing RTL for ${LNTYPE} ${CHAIN}"
 
   isInstalled=$(sudo ls /etc/systemd/system/${netprefix}${typeprefix}RTL.service 2>/dev/null | grep -c "${netprefix}${typeprefix}RTL.service")
   if ! [ ${isInstalled} -eq 0 ]; then
@@ -194,57 +194,60 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       sudo adduser --disabled-password --gecos "" rtl || exit 1
     fi
 
-    if [ -f /home/rtl/RTL/rtl.js ];then
+    echo "# Make sure symlink to central app-data directory exists"
+    if ! [[ -L "/home/rtl/.lnd" ]]; then
+      sudo rm -rf "/home/rtl/.lnd"                          # not a symlink.. delete it silently
+      sudo ln -s "/mnt/hdd/app-data/lnd/" "/home/rtl/.lnd"  # and create symlink
+    fi
+
+    if [ -f /home/rtl/RTL/rtl ];then
       echo "# OK - the RTL code is already present"
+      cd /home/rtl/RTL
+      sudo -u rtl git pull
+    
     else
-      
-      echo "# Make sure symlink to central app-data directory exists"
-      if ! [[ -L "/home/rtl/.lnd" ]]; then
-        sudo rm -rf "/home/rtl/.lnd"                          # not a symlink.. delete it silently
-        sudo ln -s "/mnt/hdd/app-data/lnd/" "/home/rtl/.lnd"  # and create symlink
-      fi
-  
       # download source code and set to tag release
       echo "# Get the RTL Source Code"
       rm -rf /home/admin/RTL 2>/dev/null
       sudo -u rtl rm -rf /home/rtl/RTL 2>/dev/null
       sudo -u rtl git clone https://github.com/ShahanaFarooqui/RTL.git /home/rtl/RTL
       cd /home/rtl/RTL
-      # check https://github.com/Ride-The-Lightning/RTL/releases/
-      sudo -u rtl git reset --hard $RTLVERSION
-      # from https://github.com/Ride-The-Lightning/RTL/commits/master
-      # git checkout 917feebfa4fb583360c140e817c266649307ef72
-      if [ -d "/home/rtl/RTL" ]; then
-        echo "# OK - RTL code copy looks good"
-      else
-        echo "# FAIL - code copy did not run correctly"
-        echo "# ABORT - RTL install"
-        exit 1
-      fi
-      echo
-  
-      # install
-      echo "# Run: npm install"
-      export NG_CLI_ANALYTICS=false
-      sudo -u rtl npm install --only=prod
-      if ! [ $? -eq 0 ]; then
-          echo "# FAIL - npm install did not run correctly, aborting"
-          exit 1
-      else
-          echo "# OK - RTL install looks good"
-          echo
-      fi
+    fi  
+    
+    # check https://github.com/Ride-The-Lightning/RTL/releases/
+    sudo -u rtl git reset --hard $RTLVERSION
+    # from https://github.com/Ride-The-Lightning/RTL/commits/master
+    # git checkout 917feebfa4fb583360c140e817c266649307ef72
+    if [ -d "/home/rtl/RTL" ]; then
+      echo "# OK - RTL code copy looks good"
+    else
+      echo "# FAIL - code copy did not run correctly"
+      echo "# ABORT - RTL install"
+      exit 1
     fi
-
+    echo
+  
+    # install
+    echo "# Run: npm install"
+    export NG_CLI_ANALYTICS=false
+    sudo -u rtl npm install --only=prod
+    if ! [ $? -eq 0 ]; then
+        echo "# FAIL - npm install did not run correctly, aborting"
+        exit 1
+    else
+        echo "# OK - RTL install looks good"
+        echo
+    fi
+  
     echo "# Updating Firewall"
     sudo ufw allow ${RTLHTTP} comment "${netprefix}${typeprefix}RTL HTTP"
     sudo ufw allow $((RTLHTTP+1)) comment "${netprefix}${typeprefix}RTL HTTPS"
     echo
 
-  if [ $LNTYPE = lnd ];then
-    echo "# Install service"
-    echo "# Install RTL systemd for ${network} on ${chain}"
-    echo "
+    if [ $LNTYPE = lnd ];then
+      echo "# Install service"
+      echo "# Install RTL systemd for ${network} on ${chain}"
+      echo "
 # Systemd unit for ${netprefix}${typeprefix}RTL
 # /etc/systemd/system/${netprefix}${typeprefix}RTL.service
 
@@ -271,18 +274,15 @@ PrivateDevices=true
 
 [Install]
 WantedBy=multi-user.target
-" | sudo tee /home/admin/${netprefix}${typeprefix}RTL.service
-
+" |   sudo tee /home/admin/${netprefix}${typeprefix}RTL.service
       sudo mv /home/admin/${netprefix}${typeprefix}RTL.service /etc/systemd/system/${netprefix}${typeprefix}RTL.service
       sudo sed -i "s|chain/bitcoin/mainnet|chain/${network}/${CHAIN}|" /etc/systemd/system/${netprefix}${typeprefix}RTL.service
       sudo chown root:root /etc/systemd/system/${netprefix}${typeprefix}RTL.service
 
   elif [ $LNTYPE = cln ];then
-
-    # clnrest
-    /home/admin/config.scripts/cln.rest.sh on ${CHAIN}
-
-    echo "
+      # clnrest
+      /home/admin/config.scripts/cln.rest.sh on ${CHAIN}
+       echo "
 # Systemd unit for ${netprefix}${typeprefix}RTL
 # /etc/systemd/system/${netprefix}${typeprefix}RTL.service
 
@@ -314,11 +314,10 @@ PrivateDevices=true
 
 [Install]
 WantedBy=multi-user.target
-" | sudo tee /etc/systemd/system/${netprefix}${typeprefix}RTL.service
-
+" |   sudo tee /etc/systemd/system/${netprefix}${typeprefix}RTL.service
     fi
   fi
-
+  
   echo "# Setup nginx symlinks"
   if ! [ -f /etc/nginx/sites-available/${netprefix}${typeprefix}rtl_ssl.conf ]; then
      sudo cp /home/admin/assets/nginx/sites-available/rtl_ssl.conf /etc/nginx/sites-available/${netprefix}${typeprefix}rtl_ssl.conf
