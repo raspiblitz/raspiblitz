@@ -13,8 +13,6 @@ source /home/admin/_version.info
 # CONFIGFILE - configuration of RaspiBlitz
 # used by fresh SD image to recover configuration
 # and delivers basic config info for scripts 
-# make raspiblitz.conf if not there
-sudo touch /mnt/hdd/raspiblitz.conf
 configFile="/mnt/hdd/raspiblitz.conf"
 
 # LOGFILE - store debug logs of bootstrap
@@ -89,7 +87,7 @@ echo "fundRecovery=${fundRecovery}" >> $infoFile
 if [ "${setupStep}" != "100" ]; then
   echo "hostname=${hostname}" >> $infoFile
 fi
-sudo chmod 777 ${infoFile}
+sudo chmod 664 ${infoFile}
 
 ######################################
 # CHECK SD CARD INCONSISTENT STATE
@@ -227,8 +225,8 @@ sleep 5
 # resetting start count files
 echo "SYSTEMD RESTART LOG: blockchain (bitcoind/litecoind)" > /home/admin/systemd.blockchain.log
 echo "SYSTEMD RESTART LOG: lightning (LND)" > /home/admin/systemd.lightning.log
-sudo chmod 777 /home/admin/systemd.blockchain.log
-sudo chmod 777 /home/admin/systemd.lightning.log
+sudo chmod 666 /home/admin/systemd.blockchain.log
+sudo chmod 666 /home/admin/systemd.lightning.log
 
 # Emergency cleaning logs when over 1GB (to prevent SD card filling up)
 # see https://github.com/rootzoll/raspiblitz/issues/418#issuecomment-472180944
@@ -482,8 +480,13 @@ if [ ${isMounted} -eq 0 ]; then
   # copy over the raspiblitz.conf created from setup to HDD
   configExists=$(ls /mnt/hdd/raspiblitz.conf 2>/dev/null | grep -c "raspiblitz.conf")
   if [ "${configExists}" != "1" ]; then
-    sudo cp /var/cache/raspiblitz/temp/raspiblitz.conf /mnt/hdd/raspiblitz.conf
+    sudo cp /var/cache/raspiblitz/temp/raspiblitz.conf ${configFile}
   fi
+
+  # everyone can read the config but it can only be
+  # edited/written by root ot admin user (part of group sudo)
+  sudo chown root:sudo ${configFile}
+  sudo chmod 664 ${configFile}
 
   # kick-off provision process
   sed -i "s/^state=.*/state=provision/g" ${infoFile}
