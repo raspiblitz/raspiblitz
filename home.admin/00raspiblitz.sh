@@ -81,6 +81,7 @@ sudo chmod 740 /var/cache/raspiblitz/raspiblitz.status
 # an error drops user to terminal
 #####################################
 
+echo "# start ssh menu loop"
 exitMenuLoop=0
 doneIBD=0
 while [ ${exitMenuLoop} -eq 0 ]
@@ -94,6 +95,7 @@ do
 
   # gather fresh status scan and store results in memory
   # TODO: move this into background loop and unify with redis data storage later
+  echo "# blitz.statusscan.sh"
   sudo /home/admin/config.scripts/blitz.statusscan.sh > /var/cache/raspiblitz/raspiblitz.status
   source /var/cache/raspiblitz/raspiblitz.status
 
@@ -105,6 +107,7 @@ do
   # LND Wallet Unlock
 
   if [ "${lndActive}" == "1" ] && [ "${walletLocked}" == "1" ] && [ "${state}" == "ready" ]; then
+    echo "# lnd.unlock.sh"
     /home/admin/config.scripts/lnd.unlock.sh
   fi
 
@@ -115,6 +118,7 @@ do
   # when is needed & bootstrap process signals that it waits for user dialog 
   if [ "${setupPhase}" != "done" ] && [ "${state}" == "waitsetup" ]; then
     # push user to main menu
+    echo "# controlSetupDialog.sh"
     /home/admin/setup.scripts/controlSetupDialog.sh
     # use the exit code from setup menu as signal if menu loop should exited
     # 0 = continue loop / everything else = break loop and exit to terminal
@@ -129,6 +133,7 @@ do
   # when is needed & bootstrap process signals that it waits for user dialog 
   if [ "${setupPhase}" != "done" ] && [ "${state}" == "waitfinal" ]; then
     # push to final setup gui dialogs
+    echo "# controlFinalDialog.sh"
     /home/admin/setup.scripts/controlFinalDialog.sh
     continue
   fi  
@@ -139,6 +144,7 @@ do
   if [ "${setupPhase}" == "done" ] && [ "${state}" == "ready" ] && [ "${initialSync}" == "1" ]; then
     echo "debug wait eventBlockchainSync.sh ..."
     sleep 3
+    echo "# eventBlockchainSync.sh ssh loop"
     /home/admin/setup.scripts/eventBlockchainSync.sh ssh loop
     continue
   fi
@@ -150,6 +156,7 @@ do
   # when setup is done & state is ready .. jump to main menu
   if [ "${setupPhase}" == "done" ] && [ "${state}" == "ready" ]; then
     # MAIN MENU
+    echo "# 00mainMenu.sh"
     /home/admin/00mainMenu.sh
     # use the exit code from main menu as signal if menu loop should exited
     # 0 = continue loop / everything else = break loop and exit to terminal
@@ -192,6 +199,7 @@ do
       echo "state(${state}) message(${message})"
       if [ "${state}" == "errorHDD" ]; then
         # print some debug detail info on HDD/SSD error
+        echo "# blitz.datadrive.sh status"
         sudo /home/admin/config.scripts/blitz.datadrive.sh status
       fi
       echo "command to shutdown --> off"
