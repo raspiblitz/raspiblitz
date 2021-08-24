@@ -81,8 +81,8 @@ if [ "$1" = "target" ]; then
   sed -i "s/^message=.*/message='Receiving Blockchain over LAN'/g" /home/admin/raspiblitz.info
 
   echo "stopping services ..."
-  sudo systemctl stop bitcoind <2 /dev/null
-  sudo systemctl disable bitcoind <2 /dev/null
+  sudo systemctl stop bitcoind 2>/dev/null
+  sudo systemctl disable bitcoind 2>/dev/null
 
   # check if old blockchain data exists
   hasOldBlockchainData=0
