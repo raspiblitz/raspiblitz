@@ -95,7 +95,7 @@ do
 
   # gather fresh status scan and store results in memory
   # TODO: move this into background loop and unify with redis data storage later
-  echo "# blitz.statusscan.sh"
+  #echo "# blitz.statusscan.sh"
   sudo /home/admin/config.scripts/blitz.statusscan.sh > /var/cache/raspiblitz/raspiblitz.status
   source /var/cache/raspiblitz/raspiblitz.status
 
@@ -107,7 +107,7 @@ do
   # LND Wallet Unlock
 
   if [ "${lndActive}" == "1" ] && [ "${walletLocked}" == "1" ] && [ "${state}" == "ready" ]; then
-    echo "# lnd.unlock.sh"
+    #echo "# lnd.unlock.sh"
     /home/admin/config.scripts/lnd.unlock.sh
   fi
 
@@ -133,7 +133,7 @@ do
   # when is needed & bootstrap process signals that it waits for user dialog 
   if [ "${setupPhase}" != "done" ] && [ "${state}" == "waitfinal" ]; then
     # push to final setup gui dialogs
-    echo "# controlFinalDialog.sh"
+    #echo "# controlFinalDialog.sh"
     /home/admin/setup.scripts/controlFinalDialog.sh
     continue
   fi  
@@ -144,7 +144,7 @@ do
   if [ "${setupPhase}" == "done" ] && [ "${state}" == "ready" ] && [ "${initialSync}" == "1" ]; then
     echo "debug wait eventBlockchainSync.sh ..."
     sleep 3
-    echo "# eventBlockchainSync.sh ssh loop"
+    #echo "# eventBlockchainSync.sh ssh loop"
     /home/admin/setup.scripts/eventBlockchainSync.sh ssh loop
     continue
   fi
