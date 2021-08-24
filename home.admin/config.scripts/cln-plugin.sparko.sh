@@ -7,7 +7,7 @@
 SPARKOVERSION="v2.7"
 
 # command info
-if [ $# -lt 2 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ];then
+if [ $# -lt 1 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ];then
   echo
   echo "Install, remove, connect or get info about the Sparko plugin for C-lightning"
   echo "version: $SPARKOVERSION"
@@ -65,21 +65,43 @@ if [ $1 = connect ];then
   toraddress=$(sudo cat /mnt/hdd/tor/${netprefix}sparko/hostname)
   accesskey=$(sudo cat ${CLNCONF} | grep "^sparko-keys=" | cut -d= -f2 | cut -d';' -f1) 
   url="https://${localip}:${portprefix}9000/"
-  string="${url}?access-key=${accesskey}"
-
-  /home/admin/config.scripts/blitz.display.sh qr "$string"
+  #string="${url}?access-key=${accesskey}"
+  #/home/admin/config.scripts/blitz.display.sh qr "$string"
+  #clear
+  #echo "connection string (shown as a QRcode on the top and on the LCD):"
+  #echo "$string"
+  #qrencode -t ANSIUTF8 "${string}"
   clear
-  echo "connection string (shown as a QRcode on the top and on the LCD):"
-  echo "$string"
-  qrencode -t ANSIUTF8 "${string}"
   echo
-  echo "Tor address (shown as a QRcode below):"
-  echo "${toraddress}"
+  /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
+  echo "The Tor address is shown as a QRcode below and on the LCD"
+  echo "Scan it to your phone with a QR scanner app and paste it to: 'Host'"
+  echo
+  echo "Host: ${toraddress}"
+  echo
   qrencode -t ANSIUTF8 "${toraddress}"
+  echo
+  echo
+  echo "Alternatively to connect through the LAN the address is:"
+  echo "${url}"
+  echo
+  echo "# Press enter to continue to show the access key"
+  read key
+  /home/admin/config.scripts/blitz.display.sh hide
+  /home/admin/config.scripts/blitz.display.sh qr "${accesskey}"
+  clear
+  echo
+  echo "The Access Key is shown as a QRcode below and on the LCD"
+  echo "Scan it to your phone with a QR scanner app and paste it to: 'Access Key'"
+  echo
+  echo "Acces Key: ${accesskey}"
+  echo
+  qrencode -t ANSIUTF8 "${accesskey}"
   echo
   echo "# Press enter to hide the QRcode from the LCD"
   read key
   /home/admin/config.scripts/blitz.display.sh hide
+  exit 0
 fi
 
 if [ $1 = on ];then

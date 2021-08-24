@@ -4,8 +4,18 @@
 source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
 
+if [ "$1" = "-h" ] || [ "$1" = "-help" ];then
+  echo "Usage:" 
+  echo "97addMobileWallet.sh <lnd|cln> <mainnet|testnet|signet>"
+  echo "defaults from the configs are:"
+  echo "ligthning=${lightning}"
+  echo "chain=${chain}"
+fi
+
 justLocal=1
 aks4IP2TOR=0
+
+source <(/home/admin/config.scripts/network.aliases.sh getvars $1 $2)
 
 # if TOR is activated then outside reach is possible (no notice)
 if [ "${runBehindTor}" = "on" ]; then
@@ -131,23 +141,33 @@ checkIP2TOR()
   fi
 }
 
-# Also Zap-Android deactivated for now - see: https://github.com/rootzoll/raspiblitz/issues/2198#issuecomment-822808428
-#OPTIONS=(ZAP_ANDROID "Zap Wallet (Android)" \
-#		ZAP_IOS "Zap Wallet (iOS)" \
-OPTIONS=(ZEUS_IOS "Zeus Wallet (iOS)" \
-        ZEUS_ANDROID "Zeus Wallet (Android)" \
-		SPHINX "Sphinx Chat (Android or iOS)"
-	)
+if [ $lightning = "lnd" ]; then
+  # Also Zap-Android deactivated for now - see: https://github.com/rootzoll/raspiblitz/issues/2198#issuecomment-822808428
+  #OPTIONS=(ZAP_ANDROID "Zap Wallet (Android)" \
+  #		ZAP_IOS "Zap Wallet (iOS)" \
+  OPTIONS=(ZEUS_IOS "Zeus Wallet (iOS)" \
+          ZEUS_ANDROID "Zeus Wallet (Android)" \
+  		  SPHINX "Sphinx Chat (Android or iOS)" 
+  		  )
+  
+  # add SEND MANY APP
+  OPTIONS+=(SENDMANY_ANDROID "SendMany (Android)")
 
-# add SEND MANY APP
-OPTIONS+=(SENDMANY_ANDROID "SendMany (Android)") 
+elif [ $lightning = "cln" ]; then
 
-# Additinal Options with TOR
+  OPTIONS=(ZEUS_CLNREST "Zeus to C-lightningREST (Android or iOS)" \
+          ZEUS_SPARK "Zeus to Sparko (Android or iOS)" \
+    	  SPARK "Spark Wallet to Sparko (Android - EXPERIMENTAL)" 
+    	  )
+
+fi
+
+# Additional Options with Tor
 if [ "${runBehindTor}" = "on" ]; then
   OPTIONS+=(FULLY_NODED "Fully Noded (iOS+Tor)") 
 fi
 
-CHOICE=$(whiptail --clear --title "Choose Mobile Wallet" --menu "" 14 50 8 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+CHOICE=$(whiptail --clear --title "Choose Mobile Wallet" --menu "" 14 55 8 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
 /home/admin/config.scripts/blitz.display.sh hide
 
@@ -179,10 +199,10 @@ case $CHOICE in
       appstoreLink="https://apps.apple.com/us/app/zap-bitcoin-lightning-wallet/id1406311960"
       #/home/admin/config.scripts/blitz.display.sh qr ${appstoreLink}
 	  #whiptail --title "Install Testflight and Zap on your iOS device" \
-	#	--yes-button "continue" \
-	#	--no-button "link as QR code" \
-	#	--yesno "Search for 'Zap Bitcoin' in Apple Appstore for basic version\nOr join public beta test for latest features:\n${appstoreLink}\n\nJoin testing and follow ALL instructions.\n\nWhen installed and started -> continue" 11 65
-	 # if [ $? -eq 1 ]; then
+	  #	--yes-button "continue" \
+	  #	--no-button "link as QR code" \
+	  #	--yesno "Search for 'Zap Bitcoin' in Apple Appstore for basic version\nOr join public beta test for latest features:\n${appstoreLink}\n\nJoin testing and follow ALL instructions.\n\nWhen installed and started -> continue" 11 65
+	  # if [ $? -eq 1 ]; then
 	  #  /home/admin/config.scripts/blitz.display.sh qr-console ${appstoreLink}
 	  #fi
 
@@ -279,7 +299,7 @@ Please go to MAINMENU > SERVICES and activate KEYSEND first.
 	  whiptail --title "Install Zeus on your Android Phone" \
 		--yes-button "Continue" \
 		--no-button "StoreLink" \
-		--yesno "Open the Android Play Store on your mobile phone.\n\nSearch for --> 'zeus bitcoin app'\n\nCheck that logo is like on LCD and author is: Evan Kaloudis\nWhen app is installed and started --> Continue." 12 65
+		--yesno "Open the Android Play Store on your mobile phone.\n\nSearch for --> 'zeus ln'\n\nCheck that logo is like on LCD and author is: Evan Kaloudis\nWhen app is installed and started --> Continue." 12 65
 	  if [ $? -eq 1 ]; then
 		/home/admin/config.scripts/blitz.display.sh qr ${appstoreLink}
 		whiptail --title " App Store Link " --msgbox "\
@@ -311,4 +331,51 @@ Or scan the qr code on the LCD with your mobile phone.
   	  /home/admin/config.scripts/bonus.fullynoded.sh
   	  exit 0;
   	;;
+
+ZEUS_CLNREST)
+      /home/admin/config.scripts/blitz.display.sh image /home/admin/raspiblitz/pictures/app_zeus.png
+	  whiptail --title "Install Zeus on your Android or iOS Phone" \
+		--yes-button "Continue" \
+		--no-button "Cancel" \
+		--yesno "Open the https://zeusln.app/ on your mobile phone to find the App Store link or binary for your phone.\n\nWhen the app is installed and started --> Continue." 12 65
+	  if [ $? -eq 1 ]; then
+		exit 0
+	  fi
+	  /home/admin/config.scripts/blitz.display.sh hide
+  	  /home/admin/config.scripts/cln.rest.sh connect
+  	  exit 0;
+	;;
+ZEUS_SPARK)
+      /home/admin/config.scripts/blitz.display.sh image /home/admin/raspiblitz/pictures/app_zeus.png
+	  whiptail --title "Install Zeus on your Android or iOS Phone" \
+		--yes-button "Continue" \
+		--no-button "Cancel" \
+		--yesno "Open the https://zeusln.app/ on your mobile phone to find the App Store link or binary for your phone.\n\nWhen the app is installed and started --> Continue." 12 65
+	  if [ $? -eq 1 ]; then
+		exit 0
+	  fi
+	  /home/admin/config.scripts/blitz.display.sh hide
+  	  /home/admin/config.scripts/cln-plugin.sparko.sh connect
+  	  exit 0;
+	;;
+SPARK)
+      appstoreLink="https://github.com/shesek/spark-wallet#mobile-app"
+      /home/admin/config.scripts/blitz.display.sh image /home/admin/raspiblitz/pictures/app_zeus.png
+	  whiptail --title "Install Zeus on your Android Phone" \
+		--yes-button "Continue" \
+		--no-button "GitHub link" \
+		--yesno "Open the ${appstoreLink} on Android to find the App Store link or binary for your phone.\n\nWhen the app is installed and started --> Continue." 12 65
+	  if [ $? -eq 1 ]; then
+		/home/admin/config.scripts/blitz.display.sh qr ${appstoreLink}
+		whiptail --title " GitHub link " --msgbox "\
+To install app open the following link:\n
+${appstoreLink}\n
+Or scan the QR code on the LCD with your mobile phone.
+" 11 70
+	  fi
+	  /home/admin/config.scripts/blitz.display.sh hide
+  	  /home/admin/config.scripts/cln-plugin.sparko.sh connect
+  	  exit 0;
+;;
+
 esac
