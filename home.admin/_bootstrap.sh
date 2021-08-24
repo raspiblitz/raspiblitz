@@ -786,6 +786,8 @@ sed -i "s/^message=.*/message='Node Running'/g" ${infoFile}
 # make sure that bitcoin service is active
 sudo systemctl enable ${network}d
 
+# make sure setup/provision is marked as done
+sudo rm /home/admin/provision.flag
 sed -i "s/^setupPhase=.*/setupPhase='done'/g" ${infoFile}
 sed -i "s/^state=.*/state=ready/g" ${infoFile}
 
