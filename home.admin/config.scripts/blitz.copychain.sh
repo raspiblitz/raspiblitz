@@ -82,6 +82,7 @@ if [ "$1" = "target" ]; then
 
   echo "stopping services ..."
   sudo systemctl stop bitcoind <2 /dev/null
+  sudo systemctl disable bitcoind <2 /dev/null
 
   # check if old blockchain data exists
   hasOldBlockchainData=0
@@ -276,6 +277,7 @@ if [ "$1" = "target" ]; then
   fi
 
   echo "restarting services ... (please wait)"
+  sudo systemctl enable bitcoind 
   sudo systemctl start bitcoind 
   sleep 10
 
