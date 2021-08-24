@@ -85,10 +85,12 @@ case $CHOICE in
       if [ ! -f /home/bitcoin/suez/suez ];then
         /home/admin/config.scripts/bonus.suez.sh on
       fi
-      cd /home/bitcoin/suez || exit 0 
-      sudo -u bitcoin /home/bitcoin/.local/bin/poetry run ./suez \
-        --client=c-lightning \
-        --client-args=--conf=/home/bitcoin/.lightning/${netprefix}config
+      cd /home/bitcoin/suez || exit 0
+      command="sudo -u bitcoin /home/bitcoin/.local/bin/poetry run ./suez --client=c-lightning --client-args=--conf=${CLNCONF}"
+      echo "# Running the command:"
+      echo "${command}"
+      echo
+      $command
       echo
       echo "Press ENTER to return to main menu."
       read key
