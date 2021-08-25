@@ -358,8 +358,18 @@ if [ "$1" = "status" ]; then
     fi
     echo "hddAdapterUSB='${hddAdapter}'"
 
-    # check if HDD ADAPTER is on UASP WHITELIST (tested devices)
     hddAdapterUSAP=0
+    
+    # check if user wants to force UASP on
+    if [ -f "/boot/uasp.force"]; then
+      hddAdapterUSAP=1
+      echo "uaspForced=1"
+    fi
+    if [ $(grep -c "forceUasp=on" < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
+      hddAdapterUSAP=1
+    fi
+
+    # check if HDD ADAPTER is on UASP WHITELIST (tested devices)
     if [ "${hddAdapter}" == "174c:55aa" ]; then
       # UGREEN 2.5" External USB 3.0 Hard Disk Case with UASP support
       hddAdapterUSAP=1
