@@ -383,8 +383,18 @@ if [ "$1" = "status" ]; then
     fi
     echo "hddAdapterUSB='${hddAdapter}'"
 
-    # check if HDD ADAPTER is on UASP WHITELIST (tested devices)
     hddAdapterUSAP=0
+    
+    # check if user wants to force UASP on
+    if [ -f "/boot/uasp.force"]; then
+      hddAdapterUSAP=1
+      echo "uaspForced=1"
+    fi
+    if [ $(grep -c "forceUasp=on" < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
+      hddAdapterUSAP=1
+    fi
+
+    # check if HDD ADAPTER is on UASP WHITELIST (tested devices)
     if [ "${hddAdapter}" == "174c:55aa" ]; then
       # UGREEN 2.5" External USB 3.0 Hard Disk Case with UASP support
       hddAdapterUSAP=1
@@ -1780,6 +1790,16 @@ if [ "$1" = "uasp-fix" ]; then
   else 
     echo "# Skipping UASP deactivation ... cmdlineExists(${cmdlineExists}) hddAdapterUSB(${hddAdapterUSB}) hddAdapterUSAP(${hddAdapterUSAP})"
     echo "neededReboot=0"
+
+    if [ ${uaspForced} -eq 1 ]; then
+      # Add to raspiblitz.conf if not already there
+      entryExists=$(cat /mnt/hdd/raspiblitz.conf 2>/dev/null | grep -c 'forceUasp=on')
+      if [ ${entryExists} -eq 0 ]; then
+          sudo sed -i '/forceUasp=.*/d' /mnt/hdd/raspiblitz.conf
+          echo "forceUasp=on" >> /mnt/hdd/raspiblitz.conf
+          echo "# DONE forceUasp=on recorded in raspiblitz.conf"
+      fi
+    fi
   fi
 
   exit 0
