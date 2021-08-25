@@ -361,7 +361,7 @@ if [ "$1" = "status" ]; then
     hddAdapterUSAP=0
     
     # check if user wants to force UASP on
-    if [ -f "/boot/uasp.force"]; then
+    if [ -f "/boot/uasp.force" ]; then
       hddAdapterUSAP=1
       echo "uaspForced=1"
     fi
