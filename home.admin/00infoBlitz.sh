@@ -448,12 +448,12 @@ datetime=$(date -R)
 
 clear
 
-printf ""
-printf ""
-printf ""
-printf "${color_yellow}               ${color_amber}RaspiBlitz v${codeVersion} ${color_green} ${ln_alias} ${upsInfo}"
-printf "${color_yellow}               ${color_gray}${network^} Fullnode + Lightning Network ${torInfo}"
-printf "${color_yellow}        ,/     ${color_yellow}-------------------------------------------"
+printf "\n"
+printf "\n"
+printf "\n"
+printf "${color_yellow}               ${color_amber}RaspiBlitz v${codeVersion} ${color_green} ${ln_alias} ${upsInfo}\n"
+printf "${color_yellow}               ${color_gray}${network^} Fullnode + Lightning Network ${torInfo}\n"
+printf "${color_yellow}        ,/     ${color_yellow}-------------------------------------------\n"
 exit
 
 printf "
