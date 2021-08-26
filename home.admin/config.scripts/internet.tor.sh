@@ -41,7 +41,7 @@ activateBitcoinOverTOR()
 
     # remove empty lines
     sudo sed -i '/^ *$/d' /home/bitcoin/.${network}/${network}.conf
-    sudo chmod 444 /home/bitcoin/.${network}/${network}.conf
+    sudo chmod 664 /home/bitcoin/.${network}/${network}.conf
 
     # copy new bitcoin.conf to admin user for cli access
     sudo cp /home/bitcoin/.${network}/${network}.conf /home/admin/.${network}/${network}.conf
