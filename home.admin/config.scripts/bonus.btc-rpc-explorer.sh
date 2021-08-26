@@ -117,7 +117,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     cd /home/btcrpcexplorer
     sudo -u btcrpcexplorer git clone https://github.com/janoside/btc-rpc-explorer.git
     cd btc-rpc-explorer
-    sudo -u btcrpcexplorer git reset --hard v3.1.1
+    sudo -u btcrpcexplorer git reset --hard v3.2.0
     sudo -u btcrpcexplorer npm install
     if ! [ $? -eq 0 ]; then
         echo "FAIL - npm install did not run correctly, aborting"

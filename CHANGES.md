@@ -13,6 +13,7 @@
 - Update: Specter Desktop v0.15.1 [details](https://github.com/cryptoadvance/specter-desktop#specter-desktop)
 - Update: Electrum Server in Rust (electrs) v0.8.11 [details](https://github.com/romanz/electrs/blob/v0.8.11/RELEASE-NOTES.md#0811-18-aug-2021)
 - Update: Mempool 2.2.1 [details](https://github.com/mempool/mempool)
+- Update: BTC-RPC-Explorer v3.2.0 [details](https://github.com/janoside/btc-rpc-explorer/blob/master/CHANGELOG.md#v320)
 - Update: stacking-sats-kraken 0.4.4 [details](https://github.com/dennisreimann/stacking-sats-kraken/blob/master/README.md)
 
 ## What's new in Version 1.7.0 of RaspiBlitz?
