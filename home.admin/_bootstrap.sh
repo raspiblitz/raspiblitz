@@ -483,11 +483,6 @@ if [ ${isMounted} -eq 0 ]; then
     sudo cp /var/cache/raspiblitz/temp/raspiblitz.conf ${configFile}
   fi
 
-  # everyone can read the config but it can only be
-  # edited/written by root ot admin user (part of group sudo)
-  sudo chown root:sudo ${configFile}
-  sudo chmod 664 ${configFile}
-
   # kick-off provision process
   sed -i "s/^state=.*/state=provision/g" ${infoFile}
   sed -i "s/^message=.*/message='Starting Provision'/g" ${infoFile}
@@ -571,6 +566,11 @@ if [ ${isMounted} -eq 0 ]; then
     sed -i "s/^message=.*/message='_provision_.sh fail'/g" ${infoFile}
     exit 1
   fi
+
+  # everyone can read the config but it can only be
+  # edited/written by root ot admin user (part of group sudo)
+  sudo chown root:sudo ${configFile}
+  sudo chmod 664 ${configFile}
 
   # unlock lnd if needed
   source ${setupFile}

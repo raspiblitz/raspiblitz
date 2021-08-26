@@ -89,8 +89,8 @@ migrate_raspiblitz_conf () {
   echo "lcdrotate=1" >> /home/admin/raspiblitz.conf
   echo "runBehindTor=on" >> /home/admin/raspiblitz.conf
   sudo mv /home/admin/raspiblitz.conf /mnt/hdd/raspiblitz.conf
-  sudo chown root:root /mnt/hdd/raspiblitz.conf
-  sudo chmod 777 /mnt/hdd/raspiblitz.conf
+  sudo chown root:sudo /mnt/hdd/raspiblitz.conf
+  sudo chmod 664 /mnt/hdd/raspiblitz.conf
 
   # rename ext4 data drive
   sudo e2label /dev/sda1 BLOCKCHAIN
