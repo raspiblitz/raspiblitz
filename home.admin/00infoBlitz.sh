@@ -448,20 +448,6 @@ datetime=$(date -R)
 
 sleep 1
 clear
-sleep 1
-
-printf "
-${color_yellow}
-${color_yellow}
-${color_yellow}
-${color_yellow}               ${color_amber}%s ${color_green} ${ln_alias} ${upsInfo}
-${color_yellow}               ${color_gray}${network^} Fullnode + Lightning Network ${torInfo}
-${color_yellow}        ,/     ${color_yellow}%s
-
-" "RaspiBlitz v${codeVersion}" \
-"-------------------------------------------"
-
-exit
 
 printf "
 ${color_yellow}
