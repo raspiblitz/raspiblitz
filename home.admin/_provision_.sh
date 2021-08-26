@@ -141,6 +141,15 @@ sudo cp /home/admin/assets/tmux.conf.local /mnt/hdd/.tmux.conf.local >> ${logFil
 sudo chown admin:admin /mnt/hdd/.tmux.conf.local >> ${logFile} 2>&1
 sudo ln -s -f /mnt/hdd/.tmux.conf.local /home/admin/.tmux.conf.local >> ${logFile} 2>&1
 
+# make sure that ./bitcoin/debug.log is switched on
+debugFile=$(cat /mnt/hdd/${network}/${network}.conf | grep "debuglogfile=")
+echo "debugFile(${debugFile})" >> ${logFile}
+if [ "${debugFile}" == "0" ]; then
+  echo "# debug.log: Switching on" >> ${logFile}
+  echo "debuglogfile=/mnt/hdd/bitcoin/debug.log" >> /mnt/hdd/${network}/${network}.conf
+else
+  echo "# debug.log: Is on" >> ${logFile}
+fi
 
 # backup LND dir (especially for macaroons and tlscerts)
 # https://github.com/rootzoll/raspiblitz/issues/324
