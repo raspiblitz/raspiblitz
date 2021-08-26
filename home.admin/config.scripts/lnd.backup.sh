@@ -100,6 +100,7 @@ if [ ${mode} = "lnd-export-gui" ]; then
   echo "scp '${fileowner}@${localip}:${filename}' ./"
   echo "ON WINDOWS USE:"
   echo "scp ${fileowner}@${localip}:${filename} ."
+  echo "Use password A to authenticate file transfer."
   echo ""
   echo "Check for correct file size after transfer: ${size} byte"
   echo "Use command: stat lnd-rescue-*.tar.gz"
