@@ -461,6 +461,7 @@ ${color_yellow}        ,/     ${color_yellow}%s
 
 exit
 
+sudo setfont /usr/share/consolefonts/Uni3-TerminusBold24x12.psf.gz
 printf "
 ${color_yellow}
 ${color_yellow}
