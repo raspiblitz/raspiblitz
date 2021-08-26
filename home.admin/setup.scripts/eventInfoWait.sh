@@ -134,6 +134,15 @@ ssh admin@${localip}
 Use your Password A
 " 7 41
 
+
+elif [ "${eventID}" == "walletlocked" ] && [ "${mode}" == "lcd" ]; then
+
+    dialog --backtitle "${backtitle}" --cr-wrap --infobox "
+Lightning Wallet Locked
+ssh admin@${localip}
+Use your Password A
+" 7 41
+
 elif [ "${eventID}" == "copytarget" ] && [ "${mode}" == "lcd" ]; then
 
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "
