@@ -645,6 +645,12 @@ if [ ${isMounted} -eq 0 ]; then
   # signal that setup phas is over
   sed -i "s/^setupPhase=.*/setupPhase='done'/g" ${infoFile}
 
+  # if touchscreen is on (on recover/update) --> reboot now to activate touchscreen 
+  source ${configFile}
+  if [ "${touchscreen}" == "1" ] || [ "${touchscreen}" == "on" ]; then
+    /home/admin/config.scripts/blitz.shutdown.sh reboot
+  fi
+
 else
 
   ############################
