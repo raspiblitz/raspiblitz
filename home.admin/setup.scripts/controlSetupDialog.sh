@@ -63,12 +63,11 @@ fi
 # QuickOption: Migration from other node
 if [ "${setupPhase}" == "migration" ]; then
   # show recovery dialog
-  echo "# Starting migration dialog ..."
-  /home/admin/setup.scripts/dialogMigration.sh ${migrationOS}
+  echo "# Starting migration dialog (${hddGotMigrationData}) ..."
+  /home/admin/setup.scripts/dialogMigration.sh ${hddGotMigrationData}
   if [ "$?" == "0" ]; then
     # mark migration to happen on provision
-    echo "migrationOS='umbrel'" >> $SETUPFILE
-    echo "migrationVersion='${migrationVersion}'" >> $SETUPFILE
+    echo "migrationOS='${hddGotMigrationData}'" >> $SETUPFILE
     # user needs to reset password A, B & C
     echo "setPasswordA=1" >> $SETUPFILE
     echo "setPasswordB=1" >> $SETUPFILE
