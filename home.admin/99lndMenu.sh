@@ -38,7 +38,7 @@ if [ ${#openChannels} -gt 0 ] && [ ${openChannels} -gt 0 ]; then
 fi
 
 OPTIONS+=(CASHOUT "Withdraw all funds from LND on $CHAIN")
-if [ ${#LNdefault} -gt 0 ]&&[ $LNdefault = cln ];then
+if [ ${#lightning} -gt 0 ]&&[ $lightning = cln ];then
   OPTIONS+=(SWITCHLN  "Use LND as default")
 fi  
 
@@ -132,8 +132,8 @@ case $CHOICE in
       clear 
       echo
       # setting value in raspi blitz config
-      sudo sed -i "s/^LNdefault=.*/LNdefault=lnd/g" /mnt/hdd/raspiblitz.conf
-      echo "# OK - LNdefault=lnd is set in /mnt/hdd/raspiblitz.conf"
+      sudo sed -i "s/^lightning=.*/lightning=lnd/g" /mnt/hdd/raspiblitz.conf
+      echo "# OK - lightning=lnd is set in /mnt/hdd/raspiblitz.conf"
       echo
       echo "Press ENTER to return to main menu."
       read key

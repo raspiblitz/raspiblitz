@@ -34,7 +34,7 @@ if [ ${#openChannels} -gt 0 ] && [ ${openChannels} -gt 0 ]; then
   OPTIONS+=(CLOSEALL "Close all open Channels on $CHAIN")
 fi
 
-if [ ${#LNdefault} -gt 0 ]&&[ $LNdefault = lnd ];then
+if [ ${#lightning} -gt 0 ]&&[ $lightning = lnd ];then
   OPTIONS+=(SWITCHLN  "Use C-lightning as default")
 fi  
 
@@ -104,8 +104,8 @@ case $CHOICE in
       clear 
       echo
       # setting value in raspi blitz config
-      sudo sed -i "s/^LNdefault=.*/LNdefault=cln/g" /mnt/hdd/raspiblitz.conf
-      echo "# OK - LNdefault=cln is set in /mnt/hdd/raspiblitz.conf"
+      sudo sed -i "s/^lightning=.*/lightning=cln/g" /mnt/hdd/raspiblitz.conf
+      echo "# OK - lightning=cln is set in /mnt/hdd/raspiblitz.conf"
       echo
       echo "Press ENTER to return to main menu."
       read key

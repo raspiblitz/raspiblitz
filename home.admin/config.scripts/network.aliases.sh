@@ -27,8 +27,8 @@ if [ $1 = getvars ];then
   if [ $# -gt 1 ];then
     LNTYPE=$2
   else
-    if [ ${#LNdefault} -gt 0 ];then
-      LNTYPE=${LNdefault}
+    if [ ${#lightning} -gt 0 ];then
+      LNTYPE=${lightning}
     else
       LNTYPE=lnd
     fi

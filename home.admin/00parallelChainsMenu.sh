@@ -8,8 +8,8 @@ source /home/admin/raspiblitz.info
 if ! grep -Eq "^testnet=" /mnt/hdd/raspiblitz.conf; then
   echo "testnet=off" >> /mnt/hdd/raspiblitz.conf
 fi
-if ! grep -Eq "^LNdefault=" /mnt/hdd/raspiblitz.conf; then
-  echo "LNdefault=lnd" >> /mnt/hdd/raspiblitz.conf
+if ! grep -Eq "^lightning=" /mnt/hdd/raspiblitz.conf; then
+  echo "lightning=lnd" >> /mnt/hdd/raspiblitz.conf
 fi
 source /mnt/hdd/raspiblitz.conf
 
@@ -25,12 +25,12 @@ else
 fi
 
 # LNTYPE is lnd | cln
-if [ $# -gt 1 ]&&[ $2 != $LNdefault ];then
+if [ $# -gt 1 ]&&[ $2 != $lightning ];then
   nonDefaultLNtype=1
   LNTYPE=$2
 else
   nonDefaultLNtype=0
-  LNTYPE=$LNdefault
+  LNTYPE=$lightning
 fi
 
 # get the local network IP to be displayed on the LCD
@@ -163,8 +163,8 @@ case $CHOICE in
     ;;
   SWITCHLN)
     # setting value in raspi blitz config
-    sudo sed -i "s/^LNdefault=.*/LNdefault=$LNTYPE/g" /mnt/hdd/raspiblitz.conf
-    echo "# OK - Set LNdefault=$LNTYPE in /mnt/hdd/raspiblitz.conf"
+    sudo sed -i "s/^lightning=.*/lightning=$LNTYPE/g" /mnt/hdd/raspiblitz.conf
+    echo "# OK - Set lightning=$LNTYPE in /mnt/hdd/raspiblitz.conf"
     echo
     echo "Press ENTER to return to main menu."
     ;;
