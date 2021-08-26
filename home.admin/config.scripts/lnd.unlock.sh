@@ -23,6 +23,10 @@ passwordC="$2"
 # echo "# checking LND wallet ... (can take some time)"
 lndError=$(sudo -u bitcoin lncli --chain=${network} --network=${chain}net getinfo 2>&1)
 walletLocked=$(echo "${lndError}" | grep -c "Wallet is encrypted")
+if [ "${walletLocked}" == "0" ]; then
+    # test for new error message
+    walletLocked=$(echo "${lndError}" | grep -c "wallet locked")
+fi
 macaroonsMissing=$(echo "${lndError}" | grep -c "unable to read macaroon")
 
 # if action sis just status
