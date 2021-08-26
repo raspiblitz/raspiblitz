@@ -101,8 +101,8 @@ if [ ${mode} = "lnd-export-gui" ]; then
   echo "ON WINDOWS USE:"
   echo "scp ${fileowner}@${localip}:${filename} ."
   echo ""
-  echo "Use password A to authenticate file transfer."
   echo "Check for correct file size after transfer: ${size} byte"
+  echo "Use command: stat lnd-rescue-*.tar.gz"
   echo
   echo "BEWARE: Your Lightning node is now stopped. It's safe to backup the data and"
   echo "restore it on a fresh RaspiBlitz. But once this Lightning node gets started"
