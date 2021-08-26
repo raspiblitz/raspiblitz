@@ -23,9 +23,9 @@ lndUpdateComment="Please keep in mind that downgrading afterwards is not tested.
 
 # check who signed the release in https://github.com/lightningnetwork/lnd/releases
 # olaoluwa
-# PGPauthor="roasbeef"
-# lndUpdatePGPpkeys="https://keybase.io/roasbeef/pgp_keys.asc"
-# lndUpdatePGPcheck="4AB7F8DA6FAEBB3B70B1F903BC13F65E2DC84465"
+PGPauthor="roasbeef"
+lndUpdatePGPpkeys="https://keybase.io/roasbeef/pgp_keys.asc"
+lndUpdatePGPcheck="4AB7F8DA6FAEBB3B70B1F903BC13F65E2DC84465"
 
 #joostjager
 # PGPauthor="joostjager"
@@ -33,9 +33,9 @@ lndUpdateComment="Please keep in mind that downgrading afterwards is not tested.
 # lndUpdatePGPcheck="D146D0F68939436268FA9A130E26BB61B76C4D3A"
 
 # bitconner 
-PGPauthor="bitconner"
-lndUpdatePGPpkeys="https://keybase.io/bitconner/pgp_keys.asc"
-lndUpdatePGPcheck="9C8D61868A7C492003B2744EE7D737B67FA592C7"
+# PGPauthor="bitconner"
+# lndUpdatePGPpkeys="https://keybase.io/bitconner/pgp_keys.asc"
+# lndUpdatePGPcheck="9C8D61868A7C492003B2744EE7D737B67FA592C7"
 
 # wpaulino
 # PGPauthor="wpaulino"
