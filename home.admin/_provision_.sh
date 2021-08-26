@@ -146,7 +146,7 @@ debugFile=$(cat /mnt/hdd/${network}/${network}.conf | grep "debuglogfile=")
 echo "debugFile(${debugFile})" >> ${logFile}
 if [ "${debugFile}" == "0" ]; then
   echo "# debug.log: Switching on" >> ${logFile}
-  echo "debuglogfile=/mnt/hdd/bitcoin/debug.log" >> /mnt/hdd/${network}/${network}.conf
+  echo "debuglogfile=/mnt/hdd/${network}/debug.log" >> /mnt/hdd/${network}/${network}.conf
 else
   echo "# debug.log: Is on" >> ${logFile}
 fi
