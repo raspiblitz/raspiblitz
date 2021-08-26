@@ -26,11 +26,11 @@ if [ "$1" == "off" ]; then
   sudo sed -i "/# Hidden Service for ${service}/,/^\s*$/{d}" /etc/tor/torrc
 
   # remove double empty lines
-  sudo cp /etc/tor/torrc /mnt/hdd/temp/tmp
-  sudo chmod 777 /mnt/hdd/temp/tmp
-  sudo chown admin:admin /mnt/hdd/temp/tmp
-  sudo awk 'NF > 0 {blank=0} NF == 0 {blank++} blank < 2' /etc/tor/torrc > /mnt/hdd/temp/tmp
-  sudo mv /mnt/hdd/temp/tmp /etc/tor/torrc
+  sudo cp /etc/tor/torrc /var/cache/raspiblitz/tmp
+  sudo chmod 777 /var/cache/raspiblitz/tmp
+  sudo chown admin:admin /var/cache/raspiblitz/tmp
+  sudo awk 'NF > 0 {blank=0} NF == 0 {blank++} blank < 2' /etc/tor/torrc > /var/cache/raspiblitz/tmp
+  sudo mv /var/cache/raspiblitz/tmp /etc/tor/torrc
   sudo chmod 644 /etc/tor/torrc
   sudo chown bitcoin:bitcoin /etc/tor/torrc
 
@@ -84,7 +84,7 @@ HiddenServiceVersion 3
 HiddenServicePort $toPort 127.0.0.1:$fromPort" | sudo tee -a /etc/tor/torrc
 
   # remove double empty lines  
-  awk 'NF > 0 {blank=0} NF == 0 {blank++} blank < 2' /etc/tor/torrc | sudo tee /mnt/hdd/temp/tmp >/dev/null && sudo mv /mnt/hdd/temp/tmp /etc/tor/torrc
+  awk 'NF > 0 {blank=0} NF == 0 {blank++} blank < 2' /etc/tor/torrc | sudo tee /var/cache/raspiblitz/tmp >/dev/null && sudo mv /var/cache/raspiblitz/tmp /etc/tor/torrc
 
   # check and insert second port pair
   if [ ${#toPort2} -gt 0 ]; then
