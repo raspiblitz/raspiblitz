@@ -108,33 +108,26 @@ CHOICE=$(dialog --clear \
 case $CHOICE in
   INFO)
       echo "Gathering Information (please wait) ..."
-      walletLocked=$(lncli getinfo 2>&1 | grep -c "Wallet is encrypted")
-      if [ ${walletLocked} -eq 0 ]; then
-        while :
-          do
+      while :
+        do
           
-          # show the same info as on LCD screen
-          /home/admin/00infoBlitz.sh ${lightning} ${chain}net
+        # show the same info as on LCD screen
+        /home/admin/00infoBlitz.sh ${lightning} ${chain}net
           
-          # wait 6 seconds for user exiting loop
+        # wait 6 seconds for user exiting loop
+        echo ""
+        echo -en "Screen is updating in a loop .... press 'x' now to get back to menu."
+        read -n 1 -t 6 keyPressed
+        echo -en "\rGathering information to update info ... please wait.                \n"  
+          
+        # check if user wants to abort session
+        if [ "${keyPressed}" = "x" ]; then
           echo ""
-          echo -en "Screen is updating in a loop .... press 'x' now to get back to menu."
-          read -n 1 -t 6 keyPressed
-          echo -en "\rGathering information to update info ... please wait.                \n"  
-          
-          # check if user wants to abort session
-          if [ "${keyPressed}" = "x" ]; then
-            echo ""
-            echo "Returning to menu ....."
-            sleep 4
-            break
-          fi
-        done
-      
-      else
-        /home/admin/00raspiblitz.sh ${lightning} ${chain}net
-        exit 0
-      fi
+          echo "Returning to menu ....."
+          sleep 4
+          break
+        fi
+      done
       ;;
   RTL)
     /home/admin/config.scripts/bonus.rtl.sh menu lnd $CHAIN
