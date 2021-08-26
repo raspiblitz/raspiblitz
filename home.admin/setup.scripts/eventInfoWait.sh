@@ -81,9 +81,10 @@ SYSTEM RAN INTO AN ERROR:
 ${contentString}
 
 Please report to the Raspiblitz GitHub
-Use CTRL+C to exit to terminal.
-For shutdown use command: off
-" 10 50
+CTRL+C to exit to terminal for commands:
+cat raspiblitz.log --> see error log
+off --> shutdown system
+" 11 50
 
 elif [ "${eventID}" == "provision" ] || [ "${eventID}" == "recovering" ]; then
 

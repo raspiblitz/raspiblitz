@@ -519,8 +519,9 @@ if [ ${isMounted} -eq 0 ]; then
     echo "Calling _provision.setup.sh for basic setup tasks .." >> $logFile
     sed -i "s/^message=.*/message='Provision Setup'/g" ${infoFile}
     sudo /home/admin/_provision.setup.sh
-    if [ "$?" != "0" ]; then
-      echo "EXIT _provision.setup.sh BECAUSE OF ERROR STATE ($?)" >> $logFile
+    errorState=$?
+    if [ "$errorState" != "0" ]; then
+      echo "EXIT _provision.setup.sh BECAUSE OF ERROR STATE ($errorState)" >> $logFile
       echo "This can also happen if _provision.setup.sh has syntax errros" >> $logFile
       sed -i "s/^state=.*/state='error'/g" ${infoFile}
       sed -i "s/^message=.*/message='_provision.setup.sh fail'/g" ${infoFile}
@@ -533,8 +534,9 @@ if [ ${isMounted} -eq 0 ]; then
     echo "Calling _provision.migration.sh for possible migrations .." >> $logFile
     sed -i "s/^message=.*/message='Provision migration'/g" ${infoFile}
     sudo /home/admin/_provision.migration.sh
-    if [ "$?" != "0" ]; then
-      echo "EXIT _provision.migration.sh BECAUSE OF ERROR STATE ($?)" >> $logFile
+    errorState=$?
+    if [ "$errorState" != "0" ]; then
+      echo "EXIT _provision.migration.sh BECAUSE OF ERROR STATE ($errorState)" >> $logFile
       echo "This can also happen if _provision.migration.sh has syntax errros" >> $logFile
       sed -i "s/^state=.*/state='error'/g" ${infoFile}
       sed -i "s/^message=.*/message='_provision.migration.sh fail'/g" ${infoFile}
@@ -547,8 +549,9 @@ if [ ${isMounted} -eq 0 ]; then
     echo "Calling _provision.update.sh .." >> $logFile
     sed -i "s/^message=.*/message='Provision Update/Recovery/Migration'/g" ${infoFile}
     sudo /home/admin/_provision.update.sh
-    if [ "$?" != "0" ]; then
-      echo "EXIT _provision.update.sh BECAUSE OF ERROR STATE ($?)" >> $logFile
+    errorState=$?
+    if [ "$errorState" != "0" ]; then
+      echo "EXIT _provision.update.sh BECAUSE OF ERROR STATE ($errorState)" >> $logFile
       echo "This can also happen if _provision.update.sh has syntax errros" >> $logFile
       sed -i "s/^state=.*/state='error'/g" ${infoFile}
       sed -i "s/^message=.*/message='_provision.update.sh fail'/g" ${infoFile}
@@ -560,8 +563,9 @@ if [ ${isMounted} -eq 0 ]; then
   echo "Calling _bootstrap.provision.sh for general system provisioning (${setupPhase}) .." >> $logFile
   sed -i "s/^message=.*/message='Provision Basics'/g" ${infoFile}
   sudo /home/admin/_provision_.sh
-  if [ "$?" != "0" ]; then
-    echo "EXIT _provision_.sh BECAUSE OF ERROR STATE" >> $logFile
+  errorState=$?
+  if [ "$errorState" != "0" ]; then
+    echo "EXIT _provision_.sh BECAUSE OF ERROR STATE ($errorState)" >> $logFile
     echo "This can also happen if _provision_.sh has syntax errros" >> $logFile
     sed -i "s/^state=.*/state='error'/g" ${infoFile}
     sed -i "s/^message=.*/message='_provision_.sh fail'/g" ${infoFile}
