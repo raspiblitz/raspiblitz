@@ -18,7 +18,7 @@ mode="$1"
 
 # RECOMMENDED UPDATE BY RASPIBLITZ TEAM
 # comment will be shown as "BEWARE Info" when option is choosen (can be multiple lines) 
-lndUpdateVersion="0.13.2-beta"
+lndUpdateVersion="" # example: 0.13.2-beta .. just keep entry if no newer version as sd card build is available
 lndUpdateComment="Please keep in mind that downgrading afterwards is not tested. Also not all additional apps are fully tested with the this update - but it looked good on first tests."
 
 # check who signed the release in https://github.com/lightningnetwork/lnd/releases
