@@ -104,12 +104,6 @@ if [ "$1" = "migration-umbrel" ]; then
 
   source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
 
-  # can olny migrate unmonted data disks
-  if [ "${isMounted}" == "1" ]; then
-    echo "err='cannot migrate mounted drive'"
-    exit 1
-  fi
-  
   # check if the HDD is an umbrel data disk
   if [ "${hddGotMigrationData}" == "umbrel" ]; then
     echo "# found UMBREL data disk at ${hddPartitionCandidate}"
@@ -118,8 +112,10 @@ if [ "$1" = "migration-umbrel" ]; then
     exit 1
   fi
 
-  # temp mount the data drive
-  source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddPartitionCandidate})
+  # make sure data drive is mounted
+  if [ "${isMounted}" != "1" ]; then
+    source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddPartitionCandidate})
+  fi
   if [ "${isMounted}" == "1" ]; then
     echo "# mounted ${hddPartitionCandidate} to /mnt/hdd"
   else
@@ -198,12 +194,6 @@ if [ "$1" = "migration-mynode" ]; then
 
   source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
 
-  # can olny migrate unmonted data disks
-  if [ "${isMounted}" == "1" ]; then
-    echo "err='cannot migrate mounted drive'"
-    exit 1
-  fi
-
   # check if the HDD is an umbrel data disk
   if [ "${hddGotMigrationData}" == "mynode" ]; then
     echo "# found MYNODE data disk at ${hddPartitionCandidate}"
@@ -212,8 +202,10 @@ if [ "$1" = "migration-mynode" ]; then
     exit 1
   fi
 
-  # temp mount the data drive
-  source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddPartitionCandidate})
+  # make sure data drive is mounted
+  if [ "${isMounted}" != "1" ]; then
+    source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddPartitionCandidate})
+  fi
   if [ "${isMounted}" == "1" ]; then
     echo "# mounted ${hddPartitionCandidate} to /mnt/hdd"
   else
