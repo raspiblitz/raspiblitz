@@ -2,6 +2,7 @@
 
 ## What's new in Version 1.7.1 of RaspiBlitz?
 
+- Update: bitcoin-core version 0.21.1-beta [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-0.21.1.md)
 - Update: LND v0.13.1 [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.13.1-beta)
 - Update: RTL 0.11.0 [details](https://github.com/Ride-The-Lightning/RTL/releases/tag/v0.11.0)
 - Update: Lightning Terminal v0.5.0-alpha [details](https://github.com/lightninglabs/lightning-terminal/releases/tag/v0.5.0-alpha)
