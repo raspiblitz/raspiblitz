@@ -447,6 +447,15 @@ uptime=$(uptime --pretty)
 datetime=$(date -R)
 
 clear
+
+echo ""
+echo ""
+echo ""
+echo "${color_yellow}               ${color_amber}RaspiBlitz v${codeVersion} ${color_green} ${ln_alias} ${upsInfo}"
+echo "${color_yellow}               ${color_gray}${network^} Fullnode + Lightning Network ${torInfo}"
+echo "${color_yellow}        ,/     ${color_yellow}-------------------------------------------"
+exit
+
 printf "
 ${color_yellow}
 ${color_yellow}
