@@ -18,14 +18,14 @@ mode="$1"
 
 # RECOMMENDED UPDATE BY RASPIBLITZ TEAM
 # comment will be shown as "BEWARE Info" when option is choosen (can be multiple lines) 
-lndUpdateVersion="0.12.1-beta"
+lndUpdateVersion="0.13.2-beta"
 lndUpdateComment="Please keep in mind that downgrading afterwards is not tested. Also not all additional apps are fully tested with the this update - but it looked good on first tests."
 
 # check who signed the release in https://github.com/lightningnetwork/lnd/releases
 # olaoluwa
 # PGPauthor="roasbeef"
 # lndUpdatePGPpkeys="https://keybase.io/roasbeef/pgp_keys.asc"
-# lndUpdatePGPcheck="9769140D255C759B1EB77B46A96387A57CAAE94D"
+# lndUpdatePGPcheck="4AB7F8DA6FAEBB3B70B1F903BC13F65E2DC84465"
 
 #joostjager
 # PGPauthor="joostjager"
