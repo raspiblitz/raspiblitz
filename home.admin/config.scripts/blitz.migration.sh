@@ -104,14 +104,6 @@ if [ "$1" = "migration-umbrel" ]; then
 
   source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
 
-  # check if the HDD is an umbrel data disk
-  if [ "${hddGotMigrationData}" == "umbrel" ]; then
-    echo "# found UMBREL data disk at ${hddPartitionCandidate}"
-  else
-    echo "err='not an umbrel disk'"
-    exit 1
-  fi
-
   # make sure data drive is mounted
   if [ "${isMounted}" != "1" ]; then
     source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddPartitionCandidate})
@@ -181,7 +173,7 @@ if [ "$1" = "migration-umbrel" ]; then
   # call function for final migration
   migrate_raspiblitz_conf ${nameNode}
 
-  echo "# OK ... data disk converted to RaspiBlitz - reboot with fresh sd card to recover"
+  echo "# OK ... data disk converted to RaspiBlitz"
   exit 0
 fi
 
@@ -193,14 +185,6 @@ fi
 if [ "$1" = "migration-mynode" ]; then
 
   source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
-
-  # check if the HDD is an umbrel data disk
-  if [ "${hddGotMigrationData}" == "mynode" ]; then
-    echo "# found MYNODE data disk at ${hddPartitionCandidate}"
-  else
-    echo "err='not an mynode disk'"
-    exit 1
-  fi
 
   # make sure data drive is mounted
   if [ "${isMounted}" != "1" ]; then
