@@ -446,8 +446,7 @@ sleep 5
 uptime=$(uptime --pretty)
 datetime=$(date -R)
 
-sudo setfont /usr/share/consolefonts/Uni3-Terminus12x6.psf.gz
-
+sleep 1
 clear
 sleep 1
 
