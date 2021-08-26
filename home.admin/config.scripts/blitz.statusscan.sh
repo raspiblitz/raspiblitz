@@ -50,6 +50,12 @@ echo "bitcoinActive=${bitcoinRunning}"
 if [ ${bitcoinRunning} -eq 1 ]; then
 
   # get blockchain info
+  sudo touch /var/cache/raspiblitz/.bitcoind.out
+  sudo touch /var/cache/raspiblitz/.bitcoind.error
+  sudo chown root:sudo /var/cache/raspiblitz/.bitcoind.out
+  sudo chown root:sudo /var/cache/raspiblitz/.bitcoind.error
+  sudo chmod 660 /var/cache/raspiblitz/.bitcoind.out
+  sudo chmod 660 /var/cache/raspiblitz/.bitcoind.error
   $bitcoincli_alias getblockchaininfo 1>/var/cache/raspiblitz/.bitcoind.out 2>/var/cache/raspiblitz/.bitcoind.error
   # check if error on request
   blockchaininfo=$(cat /var/cache/raspiblitz/.bitcoind.out 2>/dev/null)
@@ -139,6 +145,9 @@ if [ ${lndRunning} -eq 1 ]; then
 
   # get LND info
   lndRPCReady=1
+  sudo touch /var/cache/raspiblitz/.lnd.error
+  sudo chown root:sudo /var/cache/raspiblitz/.lnd.error
+  sudo chmod 660 /var/cache/raspiblitz/.lnd.error
   lndinfo=$($lncli_alias getinfo 2>/var/cache/raspiblitz/.lnd.error)
   
   # check if error on request
@@ -176,6 +185,9 @@ if [ ${lndRunning} -eq 1 ]; then
 
     # scan error for walletLocked as common error
     locked=$(echo ${lndErrorFull} | grep -c 'Wallet is encrypted')
+    if [ "${locked}" == "0" ]; then
+      locked=$(echo ${lndErrorFull} | grep -c 'wallet locked')
+    fi
     if [ ${locked} -gt 0 ]; then
       echo "walletLocked=1"
     else
