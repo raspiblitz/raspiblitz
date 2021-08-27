@@ -149,6 +149,10 @@ BTCEXP_BITCOIND_USER=$RPC_USER
 BTCEXP_BITCOIND_PASS=$PASSWORD_B
 #BTCEXP_BITCOIND_COOKIE=/path/to/bitcoind/.cookie
 BTCEXP_BITCOIND_RPC_TIMEOUT=10000
+# Privacy mode disables:
+# Exchange-rate queries, IP-geolocation queries
+# Default: false
+BTCEXP_PRIVACY_MODE=true
 # Password protection for site via basic auth (enter any username, only the password is checked)
 # Default: none
 BTCEXP_BASIC_AUTH_PASSWORD=$PASSWORD_B
