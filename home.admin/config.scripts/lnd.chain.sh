@@ -74,7 +74,6 @@ bitcoin.${CHAIN}=1
 listen=0.0.0.0:${portprefix}9735
 rpclisten=0.0.0.0:1${rpcportmod}009
 restlisten=0.0.0.0:${portprefix}8080
-accept-keysend=true
 nat=false
 debuglevel=debug
 gc-canceled-invoices-on-startup=true 
@@ -90,13 +89,6 @@ tlskeypath=/home/bitcoin/.lnd/tls.key
 [Bitcoin]
 bitcoin.active=1
 bitcoin.node=bitcoind
-
-[Watchtower]
-watchtower.active=1
-watchtower.listen=0.0.0.0:${portprefix}9111
-
-[Wtclient]
-wtclient.active=1
 
 [Tor]
 tor.active=true

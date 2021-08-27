@@ -128,9 +128,20 @@ if [ "$1" == "prestart" ]; then
   # SET/UPDATE rpchost
   setting ${lndConfFile} ${insertLine} "${network}d\.rpchost" "127\.0\.0\.1\:${portprefix}8332"
 
+  # Application Options
+  
+  sectionLine=$(cat ${lndConfFile} | grep -n "^\[Application Options\]" | cut -d ":" -f1)
+  echo "# sectionLine(${sectionLine})"
+  insertLine=$(expr $sectionLine + 1)
+
   # make sure API ports are set to standard
-  sed -i "s/^rpclisten=.*/rpclisten=0\.0\.0\.0\:1${rpcportmod}009/g" ${lndConfFile}
-  sed -i "s/^restlisten=.*/restlisten=0\.0\.0\.0\:${portprefix}8080/g" ${lndConfFile}
+  setting ${lndConfFile} ${insertLine} "rpclisten" "0\.0\.0\.0\:1${rpcportmod}009"
+  setting ${lndConfFile} ${insertLine} "restlisten" "0\.0\.0\.0\:${portprefix}8080"
+
+  # enforce keysend if 'lndKeysend=on' in raspiblitz.conf
+  if [ "${lndKeysend}" == "on" ]; then
+    setting ${lndConfFile} ${insertLine} "accept-keysend" "true"
+  fi
 
   echo "# OK PRESTART DONE"
 
