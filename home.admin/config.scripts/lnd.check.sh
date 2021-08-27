@@ -72,6 +72,7 @@ if [ "$1" == "prestart" ]; then
     exit 1
   fi
 
+  # config file
   echo "# checking lnd config for ${targetchain}"
   lndConfFile="/mnt/hdd/lnd/${netprefix}lnd.conf"
   echo "# lndConfFile(${lndConfFile})"
@@ -106,31 +107,24 @@ if [ "$1" == "prestart" ]; then
 " | sudo tee -a ${lndConfFile}
   fi
 
-  # CHECK zmqpubrawtx
-  setting="zmqpubrawtx"
-  value="tcp\:\/\/127\.0\.0\.1\:${zmqprefix}333"
-  settingExists=$(sudo cat ${lndConfFile} | grep -c "^${network}d.${setting}=")
-  echo "# ${network}d.${setting} exists->(${settingExists})"
-  if [ "${settingExists}" == "0" ]; then
-    echo "# adding setting (${setting})"
-    sudo sed -i "${insertLine}i${network}d\.${setting}=" ${lndConfFile}
-  fi
-  echo "# updating setting (${setting}) with value(${value})"
-  sudo sed -i "s/^${network}d\.${setting}=.*/${network}d\.${setting}=${value}/g" ${lndConfFile}
+  # SET/UPDATE zmqpubrawtx
+  setting ${lndConfFile} ${insertLine} "${network}d\.zmqpubrawtx" "tcp\:\/\/127\.0\.0\.1\:${zmqprefix}333"
 
-  # CHECK zmqpubrawblock
+  # SET/UPDATE zmqpubrawblock
   setting ${lndConfFile} ${insertLine} "${network}d\.zmqpubrawblock" "tcp\:\/\/127\.0\.0\.1\:${zmqprefix}332"
 
-    # remove RPC user & pass from lnd.conf ... since v1.7
-    # https://github.com/rootzoll/raspiblitz/issues/2160
-    # echo "- #2160 lnd.conf --> make sure contains no RPC user/pass for bitcoind" >> ${logFile}
-    # sudo sed -i '/^\[Bitcoind\]/d' /mnt/hdd/lnd/lnd.conf
-    # sudo sed -i '/^bitcoind.rpchost=/d' /mnt/hdd/lnd/lnd.conf
-    # sudo sed -i '/^bitcoind.rpcpass=/d' /mnt/hdd/lnd/lnd.conf
-    # sudo sed -i '/^bitcoind.rpcuser=/d' /mnt/hdd/lnd/lnd.conf
-    # sudo sed -i '/^bitcoind.zmqpubrawblock=/d' /mnt/hdd/lnd/lnd.conf
-    # sudo sed -i '/^bitcoind.zmqpubrawtx=/d' /mnt/hdd/lnd/lnd.conf
+  # SET/UPDATE rpcpass
+  RPCPSW=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep "rpcpassword=" | cut -d "=" -f2)
+  setting ${lndConfFile} ${insertLine} "${network}d\.rpcpass" "${RPCPSW}"
 
+  # SET/UPDATE rpcuser
+  RPCUSER=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep "rpcuser=" | cut -d "=" -f2)
+  setting ${lndConfFile} ${insertLine} "${network}d\.rpcuser" "${RPCUSER}"
+
+  # SET/UPDATE rpchost
+  setting ${lndConfFile} ${insertLine} "${network}d\.rpchost" "127\.0\.0\.1\:${portprefix}8332"
+
+  echo "# OK PRESTART DONE"
 
 ######################################################################
 # BASIC-SETUP
