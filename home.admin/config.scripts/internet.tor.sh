@@ -269,7 +269,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # setting value in raspi blitz config
   sudo sed -i "s/^runBehindTor=.*/runBehindTor=on/g" /mnt/hdd/raspiblitz.conf
 
-  # check if Tor was already installed and is funtional
+  # check if Tor was already installed and is functional
   echo ""
   echo "*** Check if Tor service is functional ***"
   torRunning=$(curl --connect-timeout 10 --socks5-hostname 127.0.0.1:9050 https://check.torproject.org 2>/dev/null | grep "Congratulations. This browser is configured to use Tor." -c)
@@ -407,7 +407,7 @@ EOF
     sudo -u sphinxrelay bash -c "echo '${toraddress}' > /home/sphinxrelay/sphinx-relay/dist/toraddress.txt"
   fi
 
-    # get TOR address and store it readable for sphixrelay user
+    # get TOR address and store it readable for sphinxrelay user
     toraddress=$(sudo cat /mnt/hdd/tor/sphinxrelay/hostname 2>/dev/null)
     sudo -u sphinxrelay bash -c "echo '${toraddress}' > /home/sphinxrelay/sphinx-relay/dist/toraddress.txt"
 

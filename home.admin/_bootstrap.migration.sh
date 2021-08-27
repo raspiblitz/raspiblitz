@@ -59,7 +59,7 @@ fi
 
 echo "prechecks OK"  >> ${logFile}
 
-# DEFAULT VALUES - MISSING data fields on init or upadte
+# DEFAULT VALUES - MISSING data fields on init or update
 
 # AUTOPILOT
 # autoPilot=off|on

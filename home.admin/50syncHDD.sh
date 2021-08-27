@@ -84,7 +84,7 @@ echo "OK - sync is activated"
 
 if [ "${setupStep}" = "100" ]; then
 
-  # start servives
+  # start services
   echo "reboot needed: shutdown -r now"
 
 else

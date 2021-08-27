@@ -405,7 +405,7 @@ if [ "$1" = "update" ]; then
       sudo systemctl restart nginx
 
       # Remove useless deps
-      echo "Removing unneccesary modules..."
+      echo "Removing unnecessary modules..."
       npm prune --production
 
 

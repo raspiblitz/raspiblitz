@@ -167,7 +167,7 @@ do
         echo "new publicIP but no LND restart because no auto-unlock"
       fi
 
-      # trigger update if dnyamic domain (if set)
+      # trigger update if dynamic domain (if set)
       updateDynDomain=1
 
     else
@@ -266,10 +266,10 @@ do
             sudo cp ${localBackupPath} /mnt/backup/
             sudo cp ${localTimestampedPath} /mnt/backup/
 
-            # check reseults
+            # check results
             result=$?
             if [ ${result} -eq 0 ]; then
-              echo "OK - Sucessfull Copy to additional Backup Device"
+              echo "OK - Successful Copy to additional Backup Device"
             else
               echo "FAIL - Copy to additional Backup Device exited with ${result}"
             fi

@@ -31,19 +31,19 @@ isValidIP() {
     # IPv6
     echo 1
   else
-    # unkown
+    # unknown
     echo 0
   fi
 }
 
 #############################################
-# by deafult ipv6 is off (for publicIP)
+# by default ipv6 is off (for publicIP)
 if [ "${ipv6}" = "" ]; then
   ipv6="off"
 fi
 
 #############################################
-# get active network device (eth0 or wlan0) & trafiic
+# get active network device (eth0 or wlan0) & traffic
 networkDevice=$(ip addr | grep -v "lo:" | grep 'state UP' | tr -d " " | cut -d ":" -f2 | head -n 1)
 # get network traffic
 # ifconfig does not show eth0 on Armbian or in a VM - get first traffic info
@@ -150,11 +150,11 @@ if [ ${runGlobal} -eq 1 ]; then
 
   ##########################################
   # Public IP
-  # the public that is maybe set by raspibitz config file (overriding aut-detection)
+  # the public that is maybe set by raspiblitz config file (overriding aut-detection)
   if [ "${publicIP}" == "" ]; then
     # if publicIP is not set by config ... use detected global IP
     if [ "${ipv6}" == "on" ]; then
-      # use ipv6 with brackes so that it can be used in http addresses like a IPv4
+      # use ipv6 with brackets so that it can be used in http addresses like a IPv4
       publicIP="[${globalIP}]"
     else
       publicIP="${globalIP}"
@@ -186,7 +186,7 @@ if [ "$1" == "status" ]; then
     echo "globalip=${globalIP}"
     echo "# publicip --> may consider the static IP overide by raspiblitz config"
     echo "publicip=${publicIP}"
-    echo "# cleanip --> the publicip with no brakets like used on IPv6"
+    echo "# cleanip --> the publicip with no brackets like used on IPv6"
     echo "cleanip=${cleanIP}"
   else
     echo "# for more global internet info use 'status global'"
@@ -204,7 +204,7 @@ elif [ "$1" == "update-publicip" ]; then
   else
     echo "ip_changed=1"
     if [ "${ipv6}" == "on" ]; then
-      # use ipv6 with brackes so that it can be used in http addresses like a IPv4
+      # use ipv6 with brackets so that it can be used in http addresses like a IPv4
       publicIP="[${globalIP}]"
     else
       publicIP="${globalIP}"

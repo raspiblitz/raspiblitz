@@ -120,7 +120,7 @@ fi
 # check if copy blockchain over LAN to this RaspiBlitz was running
 source <(/home/admin/config.scripts/blitz.copyblockchain.sh status)
 if [ "${copyInProgress}" = "1" ]; then
-  echo "Detected interrupted COPY blochain process ..."
+  echo "Detected interrupted COPY blockchain process ..."
   /home/admin/50copyHDD.sh
   exit
 fi
@@ -140,9 +140,9 @@ if [ "${state}" = "reindex" ]; then
   exit 1
 fi
 
-# singal that copstation is running
+# signal that copystation is running
 if [ "${state}" = "copystation" ]; then
-  echo "Copy Station is Runnning ..."
+  echo "Copy Station is Running ..."
   echo "reboot to return to normal"
   sudo /home/admin/XXcopyStation.sh
   exit

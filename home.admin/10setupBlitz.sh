@@ -98,7 +98,7 @@ if [ ${lndRunning} -eq 1 ]; then
     exit 0
   fi
 
-  # if unlocked, blockchain synced and LND synced to chain .. finisch Setup
+  # if unlocked, blockchain synced and LND synced to chain .. finish Setup
   echo "FINSIH ... "
   sleep 3
   sudo /home/admin/90finishSetup.sh
@@ -164,7 +164,7 @@ if [ ${isMounted} -eq 1 ]; then
   if [ ${blockchainDataExists} -gt 0 ]; then
     if [ ${configExists} -eq 1 ]; then
       /home/admin/XXdebugLogs.sh
-      echo "UNKOWN STATE - there is blockain data config, but blockchain service is not running"
+      echo "UNKOWN STATE - there is blockchain data config, but blockchain service is not running"
       echo "It seems that something went wrong during sync/download/copy of the blockchain."
       echo "Or something with the config is not correct."
       echo "Sometimes a reboot helps - use command: restart"
@@ -211,7 +211,7 @@ if [ ${isMounted} -eq 1 ]; then
 
   # error
   else
-    echo "FAIL Unkown network(${network})"
+    echo "FAIL Unknown network(${network})"
     exit 1
    fi
 
@@ -233,7 +233,7 @@ if [ ${isMounted} -eq 1 ]; then
   esac
   exit 1
 
-fi # end HDD is already auto-mountes
+fi # end HDD is already auto-mounted
 
 
 # --- the HDD is not auto-mounted --> very early stage of setup
@@ -251,7 +251,7 @@ if [ ${setupStep} -eq 20 ]; then
   exit 1
 fi
 
-# the HDD is already ext4 formated and cointains blockchain data
+# the HDD is already ext4 formatted and contains blockchain data
 if [ "${hddFormat}" = "ext4" ] || [ "${hddFormat}" = "btrfs" ]; then
   if [ ${hddGotBlockchain} -eq 1 ]; then
     echo "HDD was already initialized/prepared"

@@ -344,7 +344,7 @@ elif [ ${#ups} -gt 1 ] && [ "${upsStatus}" = "n/a" ]; then
   echo "UPS service activated but not running"
 else
 
-  # cheching status of apps and display if in sync or problems
+  # checking status of apps and display if in sync or problems
   appInfoLine=""
 
   # Electrum Server - electrs
@@ -420,7 +420,7 @@ EOF
   if [ ${templateExists} -gt 0 ]; then
     res=$(/usr/local/bin/j2 /var/www/blitzweb/info/info.j2 /var/cache/raspiblitz/info.json -o /var/cache/raspiblitz/info.html)
     if ! [ $? -eq 0 ]; then
-      echo "an error occured.. maybe JSON syntax is wrong..!"
+      echo "an error occurred.. maybe JSON syntax is wrong..!"
       echo "${res}"
     fi
   fi

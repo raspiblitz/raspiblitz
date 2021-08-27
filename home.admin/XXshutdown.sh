@@ -1,7 +1,7 @@
 #!/bin/bash
 # for reboot call: sudo /home/admin/XXshutdown.sh reboot
 
-# use this script instead of dirct shutdown command to:
+# use this script instead of direct shutdown command to:
 # 1) give UI the info that a reboot/shutdown is now happening
 # 2) shutdown/reboot in a safe way to prevent data corruption
 

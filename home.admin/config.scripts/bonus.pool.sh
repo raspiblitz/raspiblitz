@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# !! NOTICE: Pool is now prt of the 'bonus.lit.sh' bundle
+# !! NOTICE: Pool is now part of the 'bonus.lit.sh' bundle
 # this single install script will still be available for now
 # but main focus for the future development should be on LIT
 
@@ -96,7 +96,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     # make systemd service
     if [ "${runBehindTor}" = "on" ]; then
-      echo " # Connect tothe Pool server through Tor"
+      echo " # Connect to the Pool server through Tor"
       proxy="torify"
     else
       echo "# Connect to Pool server through clearnet"

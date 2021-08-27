@@ -17,7 +17,7 @@ fi
 mode="$1"
 
 # RECOMMENDED UPDATE BY RASPIBLITZ TEAM
-# comment will be shown as "BEWARE Info" when option is choosen (can be multiple lines) 
+# comment will be shown as "BEWARE Info" when option is chosen (can be multiple lines) 
 lndUpdateVersion="0.12.1-beta"
 lndUpdateComment="Please keep in mind that downgrading afterwards is not tested. Also not all additional apps are fully tested with the this update - but it looked good on first tests."
 
@@ -168,7 +168,7 @@ if [ "${mode}" = "verified" ]; then
   echo "fingerprint='${fingerprint}'"
 
   echo 
-  echo "# checking gpg finger print"
+  echo "# checking PGP finger print"
   gpg --import ./pgp_keys.asc
   sleep 3
   verifyResult=$(gpg --verify manifest-${PGPauthor}-v${lndUpdateVersion}.sig manifest-v${lndUpdateVersion}.txt 2>&1)

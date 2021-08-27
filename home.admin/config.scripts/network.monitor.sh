@@ -59,10 +59,10 @@ if [ "$1" = "peer-kickstart" ]; then
   fi
   # check valid value
   if [ "${addressFormat}" != "ipv4" ] && [ "${addressFormat}" != "ipv6" ] && [ "${addressFormat}" != "tor" ] && [ "${addressFormat}" != "auto" ]; then
-    echo "error='unvalid network type'"
+    echo "error='invalid network type'"
     exit 1
   fi
-  # if auto then deterine whats running
+  # if auto then determine whats running
   if [ "${addressFormat}" == "auto" ]; then
     if [ "${runBehindTor}" == "on" ]; then
       addressFormat="tor"
@@ -88,8 +88,8 @@ if [ "$1" = "peer-kickstart" ]; then
     # get IPv6 nodes
     nodeList=$(echo "${bitnodesRawData}" | grep -o '\[.\{5,45\}\]\:[0-9]\{3,5\}')
   else
-    # unvalid address
-    echo "error='unvalid 2nd parameter'"
+    # invalid address
+    echo "error='invalid 2nd parameter'"
     exit 1
   fi
   #echo "${nodeList}"

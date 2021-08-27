@@ -131,7 +131,7 @@ if [ "$1" == "basic-setup" ]; then
   else
     echo "macaroonCopy=0"
     echo "macaroonMismatch=0"
-    echo "err='admin.macaroon is missing for user admin"
+    echo "err='admin.macaroon is missing for user admin'"
   fi
 
   # check for walletDB exist

@@ -152,7 +152,7 @@ elif [ ${mode} = "restore" ]; then
           echo "It is recommended to abort and upload again!"
         fi
 
-        # overrride test
+        # override test
         oldWalletExists=$(sudo ls /mnt/hdd/lnd/data/chain/${network}/${chain}net/wallet.db 2>/dev/null | grep -c "wallet.db")
         if [ ${oldWalletExists} -gt 0 ]; then
           echo

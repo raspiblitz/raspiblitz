@@ -100,7 +100,7 @@ else
     sudo rm -f /mnt/hdd/litecoin/.* 2>/dev/null
     sudo rm -f -r /mnt/hdd/litecoin/database
 
-    # lnd (delet all)
+    # lnd (delete all)
     sudo rm -f -r /mnt/hdd/lnd
     sudo rm -f -r /mnt/hdd/backup_lnd
 

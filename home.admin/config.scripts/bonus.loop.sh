@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# !! NOTICE: Faraday is now prt of the 'bonus.lit.sh' bundle
+# !! NOTICE: Faraday is now part of the 'bonus.lit.sh' bundle
 # this single install script will still be available for now
 # but main focus for the future development should be on LIT
 

@@ -62,7 +62,7 @@ Write them down & store them in a safe place.
 # call set password a script
 sudo /home/admin/config.scripts/blitz.setpassword.sh a
 
-# sucess info dialog
+# success info dialog
 dialog --backtitle "RaspiBlitz" --msgbox "OK - password A was set\nfor all users pi, admin, root & bitcoin" 6 52
 
 # call set password b script

@@ -71,7 +71,7 @@ password: `raspiblitz`
 
 ### Build your own DietPi image:
 
-Watch out this is an ardous process. 
+Watch out this is an arduous process. 
 Updating from a v6.14 DietPi image is causing a bootloop after the first restart. See the issue: https://github.com/MichaIng/DietPi/issues/2495.
 This will be sorted out once a new image version is uploaded for the Odroids to dietpi.com
 
@@ -135,7 +135,7 @@ Changing the SSH server will change the SSH keys again. To clear:
 
 * Run this command to build from the master branch of @rootzoll:  
 `wget https://raw.githubusercontent.com/rootzoll/raspiblitz/dev/build_sdcard.sh && sudo bash build_sdcard.sh`  
-This will take a couple minutes depending on your internet ceonnection and the processing power of the SBC.
+This will take a couple minutes depending on your internet connection and the processing power of the SBC.
 
 * Format of the command to build the SDcard from an alternative branch:  
 `wget https://raw.githubusercontent.com/[GITHUB-USERNAME]/raspiblitz/[BRANCH]/build_sdcard.sh && sudo bash build_sdcard.sh [BRANCH] [GITHUB-USERNAME]`  
