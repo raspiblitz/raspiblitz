@@ -23,14 +23,14 @@ function setting() # FILE LINENUMBER NAME VALUE
   LINENUMBER=$2
   NAME=$3
   VALUE=$4
-  settingExists=$(sudo cat ${FILE} | grep -c "^${NAME}=")
+  settingExists=$(cat ${FILE} | grep -c "^${NAME}=")
   echo "# ${NAME} exists->(${settingExists})"
   if [ "${settingExists}" == "0" ]; then
     echo "# adding setting (${NAME})"
-    sudo sed -i "${LINENUMBER}i${NAME}=" ${FILE}
+    sed -i "${LINENUMBER}i${NAME}=" ${FILE}
   fi
   echo "# updating setting (${NAME}) with value(${VALUE})"
-  sudo sed -i "s/^${NAME}=.*/${NAME}=${VALUE}/g" ${FILE}
+  sed -i "s/^${NAME}=.*/${NAME}=${VALUE}/g" ${FILE}
 }
 
 # check/repair lnd config before starting
@@ -89,17 +89,17 @@ if [ "$1" == "prestart" ]; then
   echo "# [${sectionName}] config ..."
 
   # make sure lnd config has a [bitcoind] section
-  sectionExists=$(sudo cat ${lndConfFile} | grep -c "^\[${sectionName}\]")
+  sectionExists=$(cat ${lndConfFile} | grep -c "^\[${sectionName}\]")
   echo "# sectionExists(${sectionExists})"
   if [ "${sectionExists}" == "0" ]; then
     echo "# adding section [${network}d]"
     echo "
 [${network}d]
-" | sudo tee -a ${lndConfFile}
+" | tee -a ${lndConfFile}
   fi
 
   # get line number of [bitcoind] section
-  sectionLine=$(sudo cat ${lndConfFile} | grep -n "^\[${sectionName}\]" | cut -d ":" -f1)
+  sectionLine=$(cat ${lndConfFile} | grep -n "^\[${sectionName}\]" | cut -d ":" -f1)
   echo "# sectionLine(${sectionLine})"
   insertLine=$(expr $sectionLine + 1)
   echo "# insertLine(${insertLine})"
@@ -108,7 +108,7 @@ if [ "$1" == "prestart" ]; then
   if [ ${fileLines} -lt ${insertLine} ]; then
     echo "# adding new line for inserts"
     echo "
-" | sudo tee -a ${lndConfFile}
+" | tee -a ${lndConfFile}
   fi
 
   # SET/UPDATE zmqpubrawtx
@@ -118,11 +118,11 @@ if [ "$1" == "prestart" ]; then
   setting ${lndConfFile} ${insertLine} "${network}d\.zmqpubrawblock" "tcp\:\/\/127\.0\.0\.1\:${zmqprefix}332"
 
   # SET/UPDATE rpcpass
-  RPCPSW=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep "rpcpassword=" | cut -d "=" -f2)
+  RPCPSW=$(cat /mnt/hdd/${network}/${network}.conf | grep "rpcpassword=" | cut -d "=" -f2)
   setting ${lndConfFile} ${insertLine} "${network}d\.rpcpass" "${RPCPSW}"
 
   # SET/UPDATE rpcuser
-  RPCUSER=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep "rpcuser=" | cut -d "=" -f2)
+  RPCUSER=$(cat /mnt/hdd/${network}/${network}.conf | grep "rpcuser=" | cut -d "=" -f2)
   setting ${lndConfFile} ${insertLine} "${network}d\.rpcuser" "${RPCUSER}"
 
   # SET/UPDATE rpchost
