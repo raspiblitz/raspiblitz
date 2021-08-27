@@ -141,18 +141,26 @@ sudo cp /home/admin/assets/tmux.conf.local /mnt/hdd/.tmux.conf.local >> ${logFil
 sudo chown admin:admin /mnt/hdd/.tmux.conf.local >> ${logFile} 2>&1
 sudo ln -s -f /mnt/hdd/.tmux.conf.local /home/admin/.tmux.conf.local >> ${logFile} 2>&1
 
-# backup LND dir (especially for macaroons and tlscerts)
-# https://github.com/rootzoll/raspiblitz/issues/324
-echo "*** Make backup of LND directory" >> ${logFile}
-sudo rm -r  /mnt/hdd/backup_lnd 2>/dev/null
-sudo cp -r /mnt/hdd/lnd /mnt/hdd/backup_lnd >> ${logFile} 2>&1
-numOfDiffers=$(sudo diff -arq /mnt/hdd/lnd /mnt/hdd/backup_lnd | grep -c "differ")
-if [ ${numOfDiffers} -gt 0 ]; then
-  echo "FAIL: Backup was not successful" >> ${logFile}
-  sudo diff -arq /mnt/hdd/lnd /mnt/hdd/backup_lnd >> ${logFile} 2>&1
-  echo "removing backup dir to prevent false override" >> ${logFile}
-else
-  echo "OK Backup is valid." >> ${logFile}
+
+# PREPARE LND (if activated)
+if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
+
+  echo "### PREPARE LND" >> ${logFile}
+  
+  # backup LND dir (especially for macaroons and tlscerts)
+  # https://github.com/rootzoll/raspiblitz/issues/324
+  echo "*** Make backup of LND directory" >> ${logFile}
+  sudo rm -r  /mnt/hdd/backup_lnd 2>/dev/null
+  sudo cp -r /mnt/hdd/lnd /mnt/hdd/backup_lnd >> ${logFile} 2>&1
+  numOfDiffers=$(sudo diff -arq /mnt/hdd/lnd /mnt/hdd/backup_lnd | grep -c "differ")
+  if [ ${numOfDiffers} -gt 0 ]; then
+    echo "FAIL: Backup was not successful" >> ${logFile}
+    sudo diff -arq /mnt/hdd/lnd /mnt/hdd/backup_lnd >> ${logFile} 2>&1
+    echo "removing backup dir to prevent false override" >> ${logFile}
+  else
+    echo "OK Backup is valid." >> ${logFile}
+  fi
+
 fi
 echo "" >> ${logFile}
 
