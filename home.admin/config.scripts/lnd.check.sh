@@ -91,7 +91,6 @@ if [ "$1" == "prestart" ]; then
   if [ "${settingExists}" == "0" ]; then
     echo "# adding setting (${setting})"
     sudo sed -i "${insertLine}i${network}d\.${setting}=" ${lndConfFile}
-    sudo sed -i "32ibitcoind\.zmqpubrawtx=" /mnt/hdd/lnd/lnd.conf
   fi
   echo "# updating setting (${setting}) with value(${value})"
   sudo sed -i "s/^${network}d\.${setting}=.*/${network}d\.${setting}=${value}/g" ${lndConfFile}
