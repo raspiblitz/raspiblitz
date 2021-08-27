@@ -82,7 +82,7 @@ if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ] || [ "${lnd}" == "1" ]; t
   echo "sudo tail -n 30 /mnt/hdd/lnd/logs/${network}/mainnet/lnd.log"
   sudo tail -n 30 /mnt/hdd/lnd/logs/${network}/mainnet/lnd.log
 else
-  echo "- not activated -"
+  echo "- OFF by config -"
 fi
 echo ""
 
@@ -98,7 +98,7 @@ if [ "${tlnd}" == "on" ] || [ "${tlnd}" == "1" ]; then
   echo "sudo tail -n 30 /mnt/hdd/lnd/logs/${network}/testnet/tnd.log"
   sudo tail -n 30 /mnt/hdd/lnd/logs/${network}/testnet/lnd.log
 else
-  echo "- not activated -"
+  echo "- OFF by config -"
 fi
 echo ""
 
@@ -114,7 +114,7 @@ if [ "${slnd}" == "on" ] || [ "${slnd}" == "1" ]; then
   echo "sudo tail -n 30 /mnt/hdd/lnd/logs/${network}/signet/tnd.log"
   sudo tail -n 30 /mnt/hdd/lnd/logs/${network}/signet/lnd.log
 else
-  echo "- not activated -"
+  echo "- OFF by config -"
 fi
 echo ""
 
@@ -152,7 +152,7 @@ echo "--> CHECK CONFIG: sudo nginx -t"
 sudo nginx -t
 echo ""
 
-if [ "${touchscreen}" = "" ] || [ "${touchscreen}" = "0" ]; then
+if [ "${touchscreen}" == "" ] || [ "${touchscreen}" == "0" ]; then
   echo "- TOUCHSCREEN is OFF by config"
 else
   echo ""
@@ -162,7 +162,7 @@ else
   echo ""
 fi
 
-if [ "${loop}" = "" ] || [ "${loop}" = "off" ]; then
+if [ "${loop}" == "" ] || [ "${loop}" == "off" ]; then
   echo "- Loop is OFF by config"
 else
   echo ""
@@ -172,7 +172,7 @@ else
   echo ""
 fi
 
-if [ "${rtlWebinterface}" = "" ] || [ "${rtlWebinterface}" = "off" ]; then
+if [ "${rtlWebinterface}" == "" ] || [ "${rtlWebinterface}" == "off" ]; then
   echo "- RTL is OFF by config"
 else
   echo ""
@@ -182,7 +182,7 @@ else
   echo ""
 fi
 
-if [ "${ElectRS}" = "" ] || [ "${ElectRS}" = "off" ]; then
+if [ "${ElectRS}" == "" ] || [ "${ElectRS}" == "off" ]; then
   echo "- Electrum Rust Server is OFF by config"
 else
   echo ""
@@ -195,7 +195,7 @@ else
   echo ""
 fi
 
-if [ "${lit}" = "" ] || [ "${lit}" = "off" ]; then
+if [ "${lit}" == "" ] || [ "${lit}" == "off" ]; then
   echo "- LIT is OFF by config"
 else
   echo ""
@@ -205,7 +205,7 @@ else
   echo ""
 fi
 
-if [ "${BTCPayServer}" = "" ] || [ "${BTCPayServer}" = "off" ]; then
+if [ "${BTCPayServer}" == "" ] || [ "${BTCPayServer}" == "off" ]; then
   echo "- BTCPayServer is OFF by config"
 else
   echo ""
@@ -215,7 +215,7 @@ else
   echo ""
 fi
 
-if [ "${LNBits}" = "" ] || [ "${LNBits}" = "off" ]; then
+if [ "${LNBits}" == "" ] || [ "${LNBits}" == "off" ]; then
   echo "- LNbits is OFF by config"
 else
   echo ""
@@ -225,7 +225,7 @@ else
   echo ""
 fi
 
-if [ "${thunderhub}" = "" ] || [ "${thunderhub}" = "off" ]; then
+if [ "${thunderhub}" == "" ] || [ "${thunderhub}" == "off" ]; then
   echo "- Thunderhub is OFF by config"
 else
   echo ""
@@ -235,7 +235,7 @@ else
   echo ""
 fi
 
-if [ "${specter}" = "" ] || [ "${specter}" = "off" ]; then
+if [ "${specter}" == "" ] || [ "${specter}" == "off" ]; then
   echo "- SPECTER is OFF by config"
 else
   echo ""
@@ -245,7 +245,7 @@ else
   echo ""
 fi
 
-if [ "${sphinxrelay}" = "" ] || [ "${sphinxrelay}" = "off" ]; then
+if [ "${sphinxrelay}" == "" ] || [ "${sphinxrelay}" == "off" ]; then
   echo "- SPHINX is OFF by config"
 else
   echo ""
