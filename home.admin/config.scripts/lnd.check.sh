@@ -14,6 +14,9 @@ source /mnt/hdd/raspiblitz.conf
 # check/repair lnd config before starting
 if [ "$1" == "prestart" ]; then
 
+  echo "### RUNNING lnd.check.sh prestart"
+  echo "# user($USER)"
+
   # set default chain parameter
   targetchain=$2
   if [ "${targetchain}" == "" ]; then
@@ -61,11 +64,30 @@ if [ "$1" == "prestart" ]; then
   # make sure lnd config has a [bitcoind] section
   sectionExists=$(sudo cat ${lndConfFile} | grep -c "^\[${sectionName}\]")
   echo "# sectionExists(${sectionExists})"
+  if [ "${sectionExists}" == "0" ]; then
+    echo "# adding template section [${network}d]"
+    echo "
+[${network}d]
+${network}d.rpcuser=
+${network}d.rpcpass=
+${network}d.zmqpubrawblock=
+${network}d.zmqpubrawtx=
+" | sudo tee -a /mnt/hdd/lnd/lnd.conf
+  fi
 
   # get line number of [bitcoind] section
   sectionLine=$(sudo cat ${lndConfFile} | grep -n "^\[${sectionName}\]" | cut -d ":" -f1)
   echo "# sectionLine(${sectionLine})"
 
+    # remove RPC user & pass from lnd.conf ... since v1.7
+    # https://github.com/rootzoll/raspiblitz/issues/2160
+    # echo "- #2160 lnd.conf --> make sure contains no RPC user/pass for bitcoind" >> ${logFile}
+    # sudo sed -i '/^\[Bitcoind\]/d' /mnt/hdd/lnd/lnd.conf
+    # sudo sed -i '/^bitcoind.rpchost=/d' /mnt/hdd/lnd/lnd.conf
+    # sudo sed -i '/^bitcoind.rpcpass=/d' /mnt/hdd/lnd/lnd.conf
+    # sudo sed -i '/^bitcoind.rpcuser=/d' /mnt/hdd/lnd/lnd.conf
+    # sudo sed -i '/^bitcoind.zmqpubrawblock=/d' /mnt/hdd/lnd/lnd.conf
+    # sudo sed -i '/^bitcoind.zmqpubrawtx=/d' /mnt/hdd/lnd/lnd.conf
 
 # check basic LND setup
 elif [ "$1" == "basic-setup" ]; then
