@@ -4,14 +4,71 @@
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ]; then
   echo "# script to check LND states"
   echo "# lnd.check.sh basic-setup"
+  echo "# lnd.check.sh prestart [mainnet|testnet|signet]"
   exit 1
 fi
 
 # load raspiblitz conf
 source /mnt/hdd/raspiblitz.conf
 
+# check/repair lnd config before starting
+if [ "$1" == "prestart" ]; then
+
+  # set default chain parameter
+  targetchain=$2
+  if [ "${targetchain}" == "" ];
+    targetchain="mainnet"
+  fi
+
+  # restart counting
+  if [ "${lightning}" == "lnd" ] && [ "${targetchain}" == "mainnet" ]; then
+    # count start if that service is the main lightning client
+    /home/admin/config.scripts/blitz.systemd.sh log lightning STARTED
+  fi
+
+  # prefixes for parallel services
+  if [ "${targetchain}" = "mainnet" ];then
+    netprefix=""
+    portprefix=""
+    rpcportmod=0
+    zmqprefix=28
+  elif [ "${targetchain}" = "testnet" ];then
+    netprefix="t"
+    portprefix=1
+    rpcportmod=1
+    zmqprefix=21
+  elif [ "${targetchain}" = "signet" ];then
+    netprefix="s"
+    portprefix=3
+    rpcportmod=3
+    zmqprefix=23
+  else
+    echo "err='unvalid chain parameter on lnd.check.sh'"
+    exit 1
+  fi
+
+  echo "# checking lnd config for ${targetchain}"
+  lndConfFile="/mnt/hdd/lnd/${netprefix}lnd.conf"
+  echo "# lndConfFile(${lndConfFile})"
+
+  # [bitcoind] Section ..
+  sectionName="[Bb]itcoind"
+  if [ "${network}" != "bitcoin" ]; then
+    sectionName="${network}d"
+  fi
+  echo "# [${sectionName}] config ..."
+
+  # make sure lnd config has a [bitcoind] section
+  sectionExists=$(sudo cat ${lndConfFile} | grep -c "^\[${sectionName}\]")
+  echo "# sectionExists(${sectionExists})"
+
+  # get line number of [bitcoind] section
+  sectionLine=$(sudo cat ${lndConfFile} | grep -n "^\[${sectionName}\]" | cut -d ":" -f1)
+  echo "# sectionLine(${sectionLine})"
+
+
 # check basic LND setup
-if [ "$1" == "basic-setup" ]; then
+elif [ "$1" == "basic-setup" ]; then
 
   # check TLS exits
   tlsExists=$(sudo ls /mnt/hdd/lnd/tls.cert 2>/dev/null | grep -c 'tls.cert')
