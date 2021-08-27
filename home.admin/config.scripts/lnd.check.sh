@@ -11,6 +11,12 @@ fi
 # load raspiblitz conf
 source /mnt/hdd/raspiblitz.conf
 
+######################################################################
+# PRESTART
+# is executed by systemd lnd services everytime before lnd is started
+# so it tries to make sure the config is in valid shape
+######################################################################
+
 # check/repair lnd config before starting
 if [ "$1" == "prestart" ]; then
 
@@ -65,19 +71,27 @@ if [ "$1" == "prestart" ]; then
   sectionExists=$(sudo cat ${lndConfFile} | grep -c "^\[${sectionName}\]")
   echo "# sectionExists(${sectionExists})"
   if [ "${sectionExists}" == "0" ]; then
-    echo "# adding template section [${network}d]"
-    echo "
-[${network}d]
-${network}d.rpcuser=
-${network}d.rpcpass=
-${network}d.zmqpubrawblock=
-${network}d.zmqpubrawtx=
-" | sudo tee -a /mnt/hdd/lnd/lnd.conf
+    echo "# adding section [${network}d]"
+    echo "\n[${network}d]" | sudo tee -a ${lndConfFile}
   fi
 
   # get line number of [bitcoind] section
   sectionLine=$(sudo cat ${lndConfFile} | grep -n "^\[${sectionName}\]" | cut -d ":" -f1)
   echo "# sectionLine(${sectionLine})"
+  insertLine=$(expr $sectionLine + 1)
+  echo "# insertLine(${insertLine})"
+
+  # CHECK zmqpubrawtx
+  setting="zmqpubrawtx"
+  value="tcp://127.0.0.1:${zmqprefix}333"
+  settingExists=$(sudo cat ${lndConfFile} | grep -c "^${network}d.${setting}=")
+  echo "# ^${network}d.${setting} exists->(${settingExists})"
+  if [ "${settingExists}" == "0" ]; then
+    echo "# adding setting (${setting})"
+    sudo sed -i "${insertLine}i${network}d.zmqpubrawtx=" ${lndConfFile}
+  fi
+  echo "# updating setting (${setting}) with value(${value})"
+  sudo sed -i "s/^${network}d.${setting}=.*/^${network}d.${setting}='${value}'/g" ${lndConfFile}
 
     # remove RPC user & pass from lnd.conf ... since v1.7
     # https://github.com/rootzoll/raspiblitz/issues/2160
@@ -88,6 +102,12 @@ ${network}d.zmqpubrawtx=
     # sudo sed -i '/^bitcoind.rpcuser=/d' /mnt/hdd/lnd/lnd.conf
     # sudo sed -i '/^bitcoind.zmqpubrawblock=/d' /mnt/hdd/lnd/lnd.conf
     # sudo sed -i '/^bitcoind.zmqpubrawtx=/d' /mnt/hdd/lnd/lnd.conf
+
+
+######################################################################
+# BASIC-SETUP
+# analyses if there are any possible problems with lnd setup
+######################################################################
 
 # check basic LND setup
 elif [ "$1" == "basic-setup" ]; then
