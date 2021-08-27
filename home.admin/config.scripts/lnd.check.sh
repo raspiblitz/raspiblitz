@@ -17,6 +17,22 @@ source /mnt/hdd/raspiblitz.conf
 # so it tries to make sure the config is in valid shape
 ######################################################################
 
+function setting() # FILE LINENUMBER NAME VALUE
+{
+  FILE=$1
+  LINENUMBER=$2
+  NAME=$3
+  VALUE=$4
+  settingExists=$(sudo cat ${FILE} | grep -c "^${NAME}=")
+  echo "# ${NAME} exists->(${settingExists})"
+  if [ "${settingExists}" == "0" ]; then
+    echo "# adding setting (${NAME})"
+    sudo sed -i "${LINENUMBER}i${NAME}=" ${FILE}
+  fi
+  echo "# updating setting (${NAME}) with value(${VALUE})"
+  sudo sed -i "s/^${NAME}=.*/${NAME}=${VALUE}/g" ${FILE}
+}
+
 # check/repair lnd config before starting
 if [ "$1" == "prestart" ]; then
 
@@ -94,6 +110,9 @@ if [ "$1" == "prestart" ]; then
   fi
   echo "# updating setting (${setting}) with value(${value})"
   sudo sed -i "s/^${network}d\.${setting}=.*/${network}d\.${setting}=${value}/g" ${lndConfFile}
+
+  # CHECK zmqpubrawblock
+  setting ${lndConfFile} ${insertLine} "${network}d\.zmqpubrawblock" "tcp\:\/\/127\.0\.0\.1\:${zmqprefix}332"
 
     # remove RPC user & pass from lnd.conf ... since v1.7
     # https://github.com/rootzoll/raspiblitz/issues/2160
