@@ -98,6 +98,12 @@ if [ "$1" == "prestart" ]; then
   echo "# sectionLine(${sectionLine})"
   insertLine=$(expr $sectionLine + 1)
   echo "# insertLine(${insertLine})"
+  fileLines=$(wc -l ${lndConfFile} | cut -d " " -f1)
+  if [ ${fileLines} -lt ${insertLine} ]; then
+    echo "# adding new line for inserts"
+    echo "
+" | sudo tee -a ${lndConfFile}
+  fi
 
   # CHECK zmqpubrawtx
   setting="zmqpubrawtx"
