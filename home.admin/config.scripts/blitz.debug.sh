@@ -235,7 +235,7 @@ else
   echo ""
 fi
 
-if [ "${specter}" == "" ] || [ "${specter}" == "off" ]; then
+if [ "${specter}" == "" ] || [ "${specter}" == "0" ] || [ "${specter}" == "off" ]; then
   echo "- SPECTER is OFF by config"
 else
   echo ""
@@ -245,7 +245,7 @@ else
   echo ""
 fi
 
-if [ "${sphinxrelay}" == "" ] || [ "${sphinxrelay}" == "off" ]; then
+if [ "${sphinxrelay}" == "" ] || [ "${sphinxrelay}" == "0" ] || [ "${sphinxrelay}" == "off" ]; then
   echo "- SPHINX is OFF by config"
 else
   echo ""
