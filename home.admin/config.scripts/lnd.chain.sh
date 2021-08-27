@@ -4,7 +4,7 @@
 if [ $# -lt 2 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ];then
   echo
   echo "Install or remove LND services on parallel chains"
-  echo "lnd.chain.sh [on|off] [testnet|mainnet]"
+  echo "lnd.chain.sh [on|off] [mainnet|testnet|signet]"
   echo
   exit 1
 fi
@@ -62,21 +62,6 @@ source /mnt/hdd/raspiblitz.conf
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
-  RPCUSER=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcuser | cut -c 9-)
-  RPCPSW=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
-  
-  echo "# Check mainnet lnd.conf" 
-  # it does not pick up main.zmqpubraw entries from bitcoin.conf, need to set manually
-  if [ $(grep -c zmqpubrawblock /mnt/hdd/lnd/lnd.conf) -eq 0 ];then 
-    echo "
-[bitcoind]
-bitcoind.rpcuser=$RPCUSER
-bitcoind.rpcpass=$RPCPSW
-bitcoind.zmqpubrawblock=tcp://127.0.0.1:28332
-bitcoind.zmqpubrawtx=tcp://127.0.0.1:28333
-" | sudo tee -a /mnt/hdd/lnd/lnd.conf
-  fi
-
   echo "# Create /home/bitcoin/.lnd/${netprefix}lnd.conf"
   if [ ! -f /home/bitcoin/.lnd/${netprefix}lnd.conf ];then
     echo "
@@ -106,12 +91,6 @@ tlskeypath=/home/bitcoin/.lnd/tls.key
 bitcoin.active=1
 bitcoin.node=bitcoind
 
-[bitcoind]
-bitcoind.rpcuser=$RPCUSER
-bitcoind.rpcpass=$RPCPSW
-bitcoind.zmqpubrawblock=tcp://127.0.0.1:${zmqprefix}332
-bitcoind.zmqpubrawtx=tcp://127.0.0.1:${zmqprefix}333
-
 [Watchtower]
 watchtower.active=1
 watchtower.listen=0.0.0.0:${portprefix}9111
@@ -140,8 +119,9 @@ Description=LND on $NETWORK
 User=bitcoin
 Group=bitcoin
 Type=simple
-ExecStart=/usr/local/bin/lnd\
- --configfile=/home/bitcoin/.lnd/${netprefix}lnd.conf
+EnvironmentFile=/mnt/hdd/raspiblitz.conf
+ExecStartPre=-/home/admin/config.scripts/lnd.check.sh prestart ${CHAIN}
+ExecStart=/usr/local/bin/lnd --configfile=/home/bitcoin/.lnd/${netprefix}lnd.conf --externalip=${publicIP}:${portprefix}${lndPort} ${lndExtraParameter}
 Restart=always
 TimeoutSec=120
 RestartSec=30
