@@ -660,12 +660,6 @@ else
   # Blockchain & Lightning not running
   ############################
 
-  ######################################################################
-  # MAKE SURE LND RPC/REST ports are standard & open to all connections 
-  ######################################################################
-  sudo sed -i "s/^rpclisten=.*/rpclisten=0.0.0.0:10009/g" /mnt/hdd/lnd/lnd.conf
-  sudo sed -i "s/^restlisten=.*/restlisten=0.0.0.0:8080/g" /mnt/hdd/lnd/lnd.conf
-
   #################################
   # FIX BLOCKCHAINDATA OWNER (just in case)
   # https://github.com/rootzoll/raspiblitz/issues/239#issuecomment-450887567
@@ -707,7 +701,7 @@ if [ ${configWifiExists} -eq 1 ]; then
   sudo cp /etc/wpa_supplicant/wpa_supplicant.conf /mnt/hdd/app-data/wpa_supplicant.conf
 fi
 
-# make sure lndAddress & lndPort exist in cofigfile
+# make sure lndAddress & lndPort exist in configfile
 valueExists=$(cat ${configFile} | grep -c 'lndPort=')
 if [ ${valueExists} -eq 0 ]; then
   lndPort=$(sudo cat /mnt/hdd/lnd/lnd.conf | grep "^listen=*" | cut -f2 -d':')

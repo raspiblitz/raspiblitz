@@ -128,6 +128,10 @@ if [ "$1" == "prestart" ]; then
   # SET/UPDATE rpchost
   setting ${lndConfFile} ${insertLine} "${network}d\.rpchost" "127\.0\.0\.1\:${portprefix}8332"
 
+  # make sure API ports are set to standard
+  sed -i "s/^rpclisten=.*/rpclisten=0\.0\.0\.0\:1${rpcportmod}009/g" ${lndConfFile}
+  sed -i "s/^restlisten=.*/restlisten=0\.0\.0\.0\:${portprefix}8080/g" ${lndConfFile}
+
   echo "# OK PRESTART DONE"
 
 ######################################################################
