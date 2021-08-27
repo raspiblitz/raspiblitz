@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# source aliases from /home/admin/_aliases
+if [ -f /home/admin/_aliases ];then
+  source /home/admin/_aliases
+fi
+
 # SHORTCUT COMMANDS you can call as user 'admin' from terminal
 
 # command: raspiblitz
@@ -32,14 +37,12 @@ function repair() {
 
 # command: restart
 function restart() {
-  cd /home/admin
-  ./XXshutdown.sh reboot
+  /home/admin/config.scripts/blitz.shutdown.sh reboot
 }
 
 # command: sourcemode
 function sourcemode() {
-  cd /home/admin
-  ./98repairMenu.sh sourcemode
+  /home/admin/config.scripts/blitz.copychain.sh source
 }
 
 # command: check
@@ -47,23 +50,27 @@ function check() {
   /home/admin/config.scripts/blitz.configcheck.py
 }
 
+# command: release
+function release() {
+  /home/admin/config.scripts/blitz.preparerelease.sh
+}
+
 # command: debug
 function debug() {
   cd /home/admin
-  ./XXdebugLogs.sh
+  /home/admin/config.scripts/blitz.debug.sh
 }
 
 # command: patch
 # syncs script with latest set github and branch
 function patch() {
   cd /home/admin
-  ./XXsyncScripts.sh -run
+  /home/admin/config.scripts/blitz.github.sh -run
 }
 
 # command: off
 function off() {
-  cd /home/admin
-  ./XXshutdown.sh
+  /home/admin/config.scripts/blitz.shutdown.sh
 }
 
 # command: github
@@ -123,7 +130,24 @@ function torthistx() {
 # start the status screen in the terminal
 function status() {
   echo "Gathering data - please wait a moment..."
-  sudo -u pi /home/admin/00infoLCD.sh --pause 0
+  while :
+  do
+    # show the same info as on LCD screen
+    # 00infoBlitz.sh <cln|lnd> <testnet|mainnet|signet>
+    /home/admin/00infoBlitz.sh $1 $2
+    # wait 6 seconds for user exiting loop
+    #echo
+    #echo -en "Screen is updating in a loop .... press 'x' now to get back to menu."
+    read -n 1 -t 6 keyPressed
+    #echo -en "\rGathering information to update info ... please wait.                \n"  
+    # check if user wants to abort session
+    if [ "${keyPressed}" = "x" ]; then
+      echo
+      echo "Returning to menu ....."
+      sleep 4
+      break
+    fi
+  done
 }
 
 # command: lnbalance
@@ -343,4 +367,19 @@ function notifyme() {
 function whitepaper() {
   cd /home/admin/config.scripts
   ./bonus.whitepaper.sh on
+}
+
+# command: qr ["string"]
+# shows a QR code from the string
+function qr() {
+  if [ ${#1} -eq 0 ]; then
+    echo "# Error='missing string'"
+  fi
+  echo
+  echo "Displaying the text:"
+  echo "$1"
+  echo
+  qrencode -t ANSIUTF8 "${1}"
+  echo "(To shrink QR code: MacOS press CMD- / Linux press CTRL-)"
+  echo
 }

@@ -20,7 +20,7 @@ mode="$1"
 
 # RECOMMENDED UPDATE BY RASPIBLITZ TEAM
 # comment will be shown as "BEWARE Info" when option is choosen (can be multiple lines) 
-bitcoinVersion="0.21.0"
+bitcoinVersion="" # example: 0.21.0 .. keep empty if no newer version as sd card build is available
 
 # needed to check code signing
 laanwjPGP="01EA5486DE18A882D4C2684590C8019E36C2E964"
