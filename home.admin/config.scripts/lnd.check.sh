@@ -87,25 +87,25 @@ if [ "$1" == "basic-setup" ]; then
     echo "err='lnd.conf: blockchain network in lnd.conf (${lndNetwork}) is different from raspiblitz.conf (${network})'"
   fi
 
-  # get chain from config (TESTNET / MAINNET)
-  lndChain=""
-  source <(sudo cat /mnt/hdd/lnd/lnd.conf 2>/dev/null | grep "${lndNetwork}.mainnet" | sed 's/^[a-z]*\.//g')
-  source <(sudo cat /mnt/hdd/lnd/lnd.conf 2>/dev/null | grep "${lndNetwork}.testnet" | sed 's/^[a-z]*\.//g')
-  if [ "${mainnet}" == "1" ] && [ "${testnet}" == "1" ]; then
-    echo "err='lnd.conf: mainnet and testnet are set active at the same time'"
-  elif [ "${mainnet}" == "1" ]; then
-    lndChain="main"
-  elif [ "${testnet}" == "1" ]; then
-    lndChain="test"
-  else
-    echo "err='lnd.conf: neither testnet or mainnet is set active (raspiblitz needs one of them active in lnd.conf)'"
-  fi
-  echo "chain='${lndChain}'"
-
-  # check if chain is same the raspiblitz config
-  if [ "${chain}" != "${lndChain}" ]; then
-    echo "err='lnd.conf: testnet/mainnet in lnd.conf (${lndChain}) is different from raspiblitz.conf (${chain})'"
-  fi
+#  # get chain from config (TESTNET / MAINNET)
+#  lndChain=""
+#  source <(sudo cat /mnt/hdd/lnd/lnd.conf 2>/dev/null | grep "${lndNetwork}.mainnet" | sed 's/^[a-z]*\.//g')
+#  source <(sudo cat /mnt/hdd/lnd/lnd.conf 2>/dev/null | grep "${lndNetwork}.testnet" | sed 's/^[a-z]*\.//g')
+#  if [ "${mainnet}" == "1" ] && [ "${testnet}" == "1" ]; then
+#    echo "err='lnd.conf: mainnet and testnet are set active at the same time'"
+#  elif [ "${mainnet}" == "1" ]; then
+#    lndChain="main"
+#  elif [ "${testnet}" == "1" ]; then
+#    lndChain="test"
+#  else
+#    echo "err='lnd.conf: neither testnet or mainnet is set active (raspiblitz needs one of them active in lnd.conf)'"
+#  fi
+#  echo "chain='${lndChain}'"
+#
+#  # check if chain is same the raspiblitz config
+#  if [ "${chain}" != "${lndChain}" ]; then
+#    echo "err='lnd.conf: testnet/mainnet in lnd.conf (${lndChain}) is different from raspiblitz.conf (${chain})'"
+#  fi
 
   # check for admin macaroon exist (on HDD)
   adminMacaroonExists=$(sudo ls /mnt/hdd/lnd/data/chain/${network}/${chain}net/admin.macaroon 2>/dev/null | grep -c 'admin.macaroon')
@@ -131,7 +131,7 @@ if [ "$1" == "basic-setup" ]; then
   else
     echo "macaroonCopy=0"
     echo "macaroonMismatch=0"
-    echo "err='admin.macaroon is missing for user admin"
+    echo "err='admin.macaroon is missing for user admin'"
   fi
 
   # check for walletDB exist

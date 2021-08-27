@@ -21,7 +21,7 @@ dialog \
 --title "Editing the $EDITFILE" \
 --editbox "$EDITFILE" 200 200 2> "$conf"
 
-# make decison
+# make decision
 pressed=$?
 case $pressed in
   0)

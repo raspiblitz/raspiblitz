@@ -47,7 +47,7 @@ Password C will be stored on the device.
   sudo systemctl restart lnd
   sleep 4
   error=""
-  source <(sudo /home/admin/config.scripts/lnd.unlock.sh "$passwordC")
+  source <(sudo /home/admin/config.scripts/lnd.unlock.sh unlock "$passwordC")
   if [ "${error}" != "" ];then
     echo "# PASSWORD C is wrong - try again or cancel"
     sleep 3
@@ -100,7 +100,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # setting value in raspi blitz config
   sudo sed -i "s/^autoUnlock=.*/autoUnlock=off/g" /mnt/hdd/raspiblitz.conf
 
-  # delete password C securly
+  # delete password C securely
   echo "# shredding password on for RaspiBlitz Auto-Unlock"
   sudo shred -u /root/lnd.autounlock.pwd 2>/dev/null
 

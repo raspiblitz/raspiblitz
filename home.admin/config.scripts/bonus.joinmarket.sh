@@ -5,8 +5,8 @@
 # https://github.com/openoms/bitcoin-tutorials/tree/master/joinmarket
 # https://github.com/openoms/joininbox
 
-JMVERSION="v0.8.2"
-JBVERSION="v0.3.4"
+JMVERSION="v0.9.1"
+JBVERSION="v0.6.0"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -44,7 +44,7 @@ fi
 
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
-  echo "*** INSTALL JOINMARKET ***"
+  echo "# INSTALL JOINMARKET"
 
   # check if running Tor
   if [ ${runBehindTor} = on ]; then
@@ -125,8 +125,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # don't install PyQt5 - using the system package instead 
     sudo -u joinmarket sed -i "s#^PyQt5.*##g" requirements/gui.txt
     sudo -u joinmarket ./install.sh --with-qt
+    echo
     echo "# installed JoinMarket $JMVERSION"
-
+    echo
     echo "# adding the joininbox menu"
     sudo rm -rf /home/joinmarket/joininbox
     sudo -u joinmarket git clone https://github.com/openoms/joininbox.git /home/joinmarket/joininbox
@@ -187,7 +188,7 @@ fi
 # check for joinmarket.cfg
 if [ ! -f "/home/joinmarket/.joinmarket/joinmarket.cfg" ] ; then
   echo "# generating the joinmarket.cfg"
-  echo ""
+  echo
   . /home/joinmarket/joinmarket-clientserver/jmvenv/bin/activate &&\
   cd /home/joinmarket/joinmarket-clientserver/scripts/
   python wallet-tool.py generate --datadir=/home/joinmarket/.joinmarket
@@ -201,15 +202,16 @@ if [ ! -f "/home/joinmarket/.joinmarket/joinmarket.cfg" ] ; then
   sed -i "s/^rpc_wallet_file =.*/rpc_wallet_file = wallet.dat/g" /home/joinmarket/.joinmarket/joinmarket.cfg
   echo "Using the bitcoind wallet: wallet.dat"
   #communicate with IRC servers via Tor
-  sed -i "s/^host = irc.darkscience.net/#host = irc.darkscience.net/g" /home/joinmarket/.joinmarket/joinmarket.cfg
-  sed -i "s/^#host = darksci3bfoka7tw.onion/host = darksci3bfoka7tw.onion/g" /home/joinmarket/.joinmarket/joinmarket.cfg
-  sed -i "s/^host = irc.hackint.org/#host = irc.hackint.org/g" /home/joinmarket/.joinmarket/joinmarket.cfg
-  sed -i "s/^#host = ncwkrwxpq2ikcngxq3dy2xctuheniggtqeibvgofixpzvrwpa77tozqd.onion/host = ncwkrwxpq2ikcngxq3dy2xctuheniggtqeibvgofixpzvrwpa77tozqd.onion/g" /home/joinmarket/.joinmarket/joinmarket.cfg
-  sed -i "s/^socks5 = false/#socks5 = false/g" /home/joinmarket/.joinmarket/joinmarket.cfg
-  sed -i "s/^#socks5 = true/socks5 = true/g" /home/joinmarket/.joinmarket/joinmarket.cfg
-  sed -i "s/^#port = 6667/port = 6667/g" /home/joinmarket/.joinmarket/joinmarket.cfg
-  sed -i "s/^#usessl = false/usessl = false/g" /home/joinmarket/.joinmarket/joinmarket.cfg
-  echo "# edited the joinmarket.cfg to communicate over Tor only."
+  JMcfgPath="/home/joinmarket/.joinmarket/joinmarket.cfg"
+  sed -i "s/^host = irc.darkscience.net/#host = irc.darkscience.net/g" \$JMcfgPath
+  sed -i "s/^#host = dark.*/host = darkirc6tqgpnwd3blln3yfv5ckl47eg7llfxkmtovrv7c7iwohhb6ad.onion/g" \$JMcfgPath
+  sed -i "s/^host = irc.hackint.org/#host = irc.hackint.org/g" \$JMcfgPath
+  sed -i "s/^#host = ncwkrwxpq2ikcngxq3dy2xctuheniggtqeibvgofixpzvrwpa77tozqd.onion/host = ncwkrwxpq2ikcngxq3dy2xctuheniggtqeibvgofixpzvrwpa77tozqd.onion/g" \$JMcfgPath
+  sed -i "s/^socks5 = false/#socks5 = false/g" \$JMcfgPath
+  sed -i "s/^#socks5 = true/socks5 = true/g" \$JMcfgPath
+  sed -i "s/^#port = 6667/port = 6667/g" \$JMcfgPath
+  sed -i "s/^#usessl = false/usessl = false/g" \$JMcfgPath
+  echo "# Edited the joinmarket.cfg to communicate over Tor only."
 fi
 EOF
     mv /home/admin/startup.sh /home/joinmarket/startup.sh
@@ -217,19 +219,18 @@ EOF
     chmod +x /home/joinmarket/startup.sh
   else
     echo "JoinMarket is already installed"
-    echo ""
+    echo
   fi    
   
   if [ -f "/home/joinmarket/joinmarket-clientserver/jmvenv/bin/activate" ] ; then
     # setting value in raspi blitz config
     sudo sed -i "s/^joinmarket=.*/joinmarket=on/g" /mnt/hdd/raspiblitz.conf
     # starting info
-    echo ""
-    echo "Start to use by logging in to the 'joinmarket' user with:"
-    echo "sudo su joinmarket"
-    echo ""
-    echo "If logging in directly via ssh the password is the PASSWORD_B"
-    echo ""   
+    echo "# Start to use by logging in to the 'joinmarket' user with:"
+    echo "# 'sudo su joinmarket' or use the shortcut 'jm'"
+    echo
+    echo "# If logging in directly via ssh the password is the PASSWORD_B"
+    echo   
   else
     echo " Failed to install JoinMarket"
     exit 1
@@ -245,7 +246,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   sudo sed -i "s/^joinmarket=.*/joinmarket=off/g" /mnt/hdd/raspiblitz.conf
 
   if [ -f "/home/joinmarket/joinmarket-clientserver/jmvenv/bin/activate" ] ; then
-    echo "*** REMOVING JOINMARKET ***"
+    echo "# REMOVING JOINMARKET"
     sudo userdel -rf joinmarket 2>/dev/null
     echo "# OK JoinMarket is removed"
   else 

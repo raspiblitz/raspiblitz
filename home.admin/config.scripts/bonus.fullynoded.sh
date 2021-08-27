@@ -22,12 +22,19 @@ elif [ "${chain}net" == "signet" ]; then
 fi
 
 # check and set up the HS    
-/home/admin/config.scripts/internet.hiddenservice.sh bitcoin ${BITCOINRPCPORT} ${BITCOINRPCPORT}
+/home/admin/config.scripts/internet.hiddenservice.sh bitcoin${BITCOINRPCPORT} ${BITCOINRPCPORT} ${BITCOINRPCPORT}
 
 hiddenService=$(sudo cat /mnt/hdd/tor/bitcoin${BITCOINRPCPORT}/hostname)
+# https://github.com/rootzoll/raspiblitz/issues/2339
+if [ ${#hiddenService} -eq 0 ];then
+  hiddenService=$(sudo cat /mnt/hdd/tor/bitcoin/hostname)
+fi
+
+echo "# The Hidden Service for bitcoind port ${BITCOINRPCPORT} is:"
+echo "${hiddenService}"
 
 # btcstandup://<rpcuser>:<rpcpassword>@<hidden service hostname>:<hidden service port>/?label=<optional node label> 
-quickConnect="btcstandup://$RPC_USER:$PASSWORD_B@$hiddenService:${BITCOINRPCPORT}/?label=$hostname"
+quickConnect="btcstandup://${RPC_USER}:${PASSWORD_B}@${hiddenService}:${BITCOINRPCPORT}/?label=${hostname}"
 echo
 echo "scan the QR Code with Fully Noded to connect to your node:"
 /home/admin/config.scripts/blitz.display.sh qr "${quickConnect}"

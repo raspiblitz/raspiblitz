@@ -101,10 +101,15 @@ ExecStart=/home/circuitbreaker/go/bin/circuitbreaker --network=${chain}net
 User=circuitbreaker
 Group=circuitbreaker
 Type=simple
-KillMode=process
 TimeoutSec=60
 Restart=always
 RestartSec=60
+
+# Hardening measures
+PrivateTmp=true
+ProtectSystem=full
+NoNewPrivileges=true
+PrivateDevices=true
 
 [Install]
 WantedBy=multi-user.target
@@ -163,7 +168,7 @@ fi
 
 # update
 if [ "$1" = "update" ]; then
-  echo "# Updating Circuit Braker"
+  echo "# Updating Circuit Breaker"
   cd /home/circuitbreaker/circuitbreaker
   # from https://github.com/apotdevin/thunderhub/blob/master/scripts/updateToLatest.sh
   # fetch latest master
