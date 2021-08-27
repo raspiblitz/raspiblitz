@@ -37,7 +37,11 @@ function setting() # FILE LINENUMBER NAME VALUE
 if [ "$1" == "prestart" ]; then
 
   echo "### RUNNING lnd.check.sh prestart"
-  echo "# user($USER)"
+
+  if [ "$USER" != "bitcoin" ]; then
+    echo "# FAIL: run as user 'bitcoin'"
+    exit 1
+  fi
 
   # set default chain parameter
   targetchain=$2
