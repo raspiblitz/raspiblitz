@@ -16,7 +16,7 @@ echo "For details on optional parameters - see build script source code:"
 
 # 1st optional paramater: NO-INTERACTION
 # ----------------------------------------
-# When 'true' then no questions will be ask on building .. so it can be used in build scripts
+# When 'true' then no questions will be asked on building .. so it can be used in build scripts
 # for containers or as part of other build scripts (default is false)
 
 noInteraction="$1"
