@@ -152,7 +152,7 @@ echo "--> CHECK CONFIG: sudo nginx -t"
 sudo nginx -t
 echo ""
 
-if [ "${touchscreen}" == "" ] || [ "${touchscreen}" == "0" ]; then
+if [ "${touchscreen}" == "" ]; then
   echo "- TOUCHSCREEN is OFF by config"
 else
   echo ""
