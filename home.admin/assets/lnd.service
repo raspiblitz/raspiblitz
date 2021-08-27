@@ -10,7 +10,7 @@ After=bitcoind.service
 
 [Service]
 EnvironmentFile=/mnt/hdd/raspiblitz.conf
-ExecStartPre=-/home/admin/config.scripts/blitz.systemd.sh log lightning STARTED
+ExecStartPre=-/home/admin/config.scripts/lnd.check.sh prestart mainnet
 ExecStart=/usr/local/bin/lnd --externalip=${publicIP}:${lndPort} ${lndExtraParameter}
 PIDFile=/home/bitcoin/.lnd/lnd.pid
 User=bitcoin
