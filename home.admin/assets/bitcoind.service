@@ -15,7 +15,7 @@ Group=bitcoin
 Type=forking
 PIDFile=/mnt/hdd/bitcoin/bitcoind.pid
 ExecStartPre=-/home/admin/config.scripts/blitz.systemd.sh log blockchain STARTED
-ExecStart=/usr/local/bin/bitcoind -daemon -conf=/mnt/hdd/bitcoin/bitcoin.conf -pid=/mnt/hdd/bitcoin/bitcoind.pid
+ExecStart=/usr/local/bin/bitcoind -daemon -conf=/mnt/hdd/bitcoin/bitcoin.conf -pid=/mnt/hdd/bitcoin/bitcoind.pid -debuglogfile=/mnt/hdd/bitcoin/debug.log
 Restart=always
 TimeoutSec=120
 RestartSec=30
