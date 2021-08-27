@@ -91,7 +91,7 @@ if [ "$1" == "prestart" ]; then
     sudo sed -i "${insertLine}i${network}d.zmqpubrawtx=" ${lndConfFile}
   fi
   echo "# updating setting (${setting}) with value(${value})"
-  sudo sed -i "s/^${network}d\.zmqpubrawtx=.*/${network}d\.zmqpubrawtx=\'${value}\'/g" ${lndConfFile}
+  sudo sed -i "s/^${network}d\.zmqpubrawtx=.*/${network}d\.zmqpubrawtx=${value}/g" ${lndConfFile}
 
     # remove RPC user & pass from lnd.conf ... since v1.7
     # https://github.com/rootzoll/raspiblitz/issues/2160
