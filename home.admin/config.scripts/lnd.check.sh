@@ -16,7 +16,7 @@ if [ "$1" == "prestart" ]; then
 
   # set default chain parameter
   targetchain=$2
-  if [ "${targetchain}" == "" ];
+  if [ "${targetchain}" == "" ]; then
     targetchain="mainnet"
   fi
 
