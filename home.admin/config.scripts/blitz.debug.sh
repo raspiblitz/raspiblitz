@@ -69,25 +69,65 @@ echo "sudo tail -n 20 /mnt/hdd/${network}${pathAdd}/debug.log"
 sudo tail -n 20 /mnt/hdd/${network}${pathAdd}/debug.log
 echo ""
 
-echo "*** LND SYSTEMD STATUS ***"
-sudo systemctl status lnd -n2 --no-pager
+echo "*** LND (MAINNET) SYSTEMD STATUS ***"
+if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ] || [ "${lnd}" == "1" ]; then
+  sudo systemctl status lnd -n2 --no-pager
+  echo ""
+  echo "*** LAST LND (MAINNET) ERROR LOGS ***"
+  echo "sudo journalctl -u lnd -b --no-pager -n12"
+  sudo journalctl -u lnd -b --no-pager -n12
+  cat /home/admin/systemd.lightning.log | grep "ERROR" | tail -n -1
+  echo ""
+  echo "*** LAST 30 LND (MAINNET) INFO LOGS ***"
+  echo "sudo tail -n 30 /mnt/hdd/lnd/logs/${network}/mainnet/lnd.log"
+  sudo tail -n 30 /mnt/hdd/lnd/logs/${network}/mainnet/lnd.log
+else
+  echo "- not activated -"
+fi
 echo ""
-echo "*** LAST LND ERROR LOGS ***"
-echo "sudo journalctl -u lnd -b --no-pager -n12"
-sudo journalctl -u lnd -b --no-pager -n12
-cat /home/admin/systemd.lightning.log | grep "ERROR" | tail -n -1
+
+echo "*** LND (TESTNET) SYSTEMD STATUS ***"
+if [ [ "${tlnd}" == "on" ] || [ "${tlnd}" == "1" ]; then
+  sudo systemctl status tlnd -n2 --no-pager
+  echo ""
+  echo "*** LAST LND (TESTNET) ERROR LOGS ***"
+  echo "sudo journalctl -u tlnd -b --no-pager -n12"
+  sudo journalctl -u tlnd -b --no-pager -n12
+  echo ""
+  echo "*** LAST 30 LND (TESTNET) INFO LOGS ***"
+  echo "sudo tail -n 30 /mnt/hdd/lnd/logs/${network}/testnet/tnd.log"
+  sudo tail -n 30 /mnt/hdd/lnd/logs/${network}/testnet/lnd.log
+else
+  echo "- not activated -"
+fi
 echo ""
-echo "*** LAST 30 LND INFO LOGS ***"
-echo "sudo tail -n 30 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log"
-sudo tail -n 30 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log
+
+echo "*** LND (SIGNET) SYSTEMD STATUS ***"
+if [ [ "${slnd}" == "on" ] || [ "${slnd}" == "1" ]; then
+  sudo systemctl status slnd -n2 --no-pager
+  echo ""
+  echo "*** LAST LND (SIGNET) ERROR LOGS ***"
+  echo "sudo journalctl -u slnd -b --no-pager -n12"
+  sudo journalctl -u slnd -b --no-pager -n12
+  echo ""
+  echo "*** LAST 30 LND (SIGNET) INFO LOGS ***"
+  echo "sudo tail -n 30 /mnt/hdd/lnd/logs/${network}/signet/tnd.log"
+  sudo tail -n 30 /mnt/hdd/lnd/logs/${network}/signet/lnd.log
+else
+  echo "- not activated -"
+fi
 echo ""
 
 echo "*** C-LIGHTNING SYSTEMD STATUS ***"
-sudo systemctl status lightningd -n2 --no-pager
-echo ""
-echo "*** LAST 30 C-LIGHTNING INFO LOGS ***"
-echo "sudo tail -n 30 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log"
-sudo tail -n 30 /home/bitcoin/.lightning/${network}/cl.log
+if [ "${lightning}" == "cln" ] || [ "${cln}" == "on" ] || [ "${cln}" == "1" ]; then
+  sudo systemctl status lightningd -n2 --no-pager
+  echo ""
+  echo "*** LAST 30 C-LIGHTNING INFO LOGS ***"
+  echo "sudo tail -n 30 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log"
+  sudo tail -n 30 /home/bitcoin/.lightning/${network}/cl.log
+else
+  echo "- not activated -"
+fi
 echo ""
 
 echo "*** NGINX SYSTEMD STATUS ***"
