@@ -72,7 +72,8 @@ if [ "$1" == "prestart" ]; then
   echo "# sectionExists(${sectionExists})"
   if [ "${sectionExists}" == "0" ]; then
     echo "# adding section [${network}d]"
-    echo "\n[${network}d]" | sudo tee -a ${lndConfFile}
+    echo "
+[${network}d]" | sudo tee -a ${lndConfFile}
   fi
 
   # get line number of [bitcoind] section
