@@ -99,6 +99,7 @@ if [ "$1" == "prestart" ]; then
   insertLine=$(expr $sectionLine + 1)
   echo "# insertLine(${insertLine})"
   fileLines=$(wc -l ${lndConfFile} | cut -d " " -f1)
+  echo "# fileLines(${fileLines})"
   if [ ${fileLines} -lt ${insertLine} ]; then
     echo "# adding new line for inserts"
     echo "
