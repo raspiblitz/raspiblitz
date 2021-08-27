@@ -171,16 +171,6 @@ if [ "${lightning}" == "lnd" ]; then
   configExists=$(sudo ls /mnt/hdd/lnd/lnd.conf | grep -c '.conf')
   if [ ${configExists} -eq 1 ]; then
 
-    # remove RPC user & pass from lnd.conf ... since v1.7
-    # https://github.com/rootzoll/raspiblitz/issues/2160
-    echo "- #2160 lnd.conf --> make sure contains no RPC user/pass for bitcoind" >> ${logFile}
-    sudo sed -i '/^\[Bitcoind\]/d' /mnt/hdd/lnd/lnd.conf
-    sudo sed -i '/^bitcoind.rpchost=/d' /mnt/hdd/lnd/lnd.conf
-    sudo sed -i '/^bitcoind.rpcpass=/d' /mnt/hdd/lnd/lnd.conf
-    sudo sed -i '/^bitcoind.rpcuser=/d' /mnt/hdd/lnd/lnd.conf
-    sudo sed -i '/^bitcoind.zmqpubrawblock=/d' /mnt/hdd/lnd/lnd.conf
-    sudo sed -i '/^bitcoind.zmqpubrawtx=/d' /mnt/hdd/lnd/lnd.conf
-
     # make sure additional values are added to [Application Options] since v1.7
     echo "- lnd.conf --> checking additional [Application Options] since v1.7" >> ${logFile}
     applicationOptionsLineNumber=$(sudo grep -n "\[Application Options\]" /mnt/hdd/lnd/lnd.conf | cut -d ":" -f1)

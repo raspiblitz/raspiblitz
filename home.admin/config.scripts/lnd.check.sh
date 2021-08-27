@@ -83,7 +83,7 @@ if [ "$1" == "prestart" ]; then
 
   # CHECK zmqpubrawtx
   setting="zmqpubrawtx"
-  value="tcp://127.0.0.1:${zmqprefix}333"
+  value="tcp\:\/\/127\.0\.0\.1\:${zmqprefix}333"
   settingExists=$(sudo cat ${lndConfFile} | grep -c "^${network}d.${setting}=")
   echo "# ${network}d.${setting} exists->(${settingExists})"
   if [ "${settingExists}" == "0" ]; then
@@ -91,7 +91,7 @@ if [ "$1" == "prestart" ]; then
     sudo sed -i "${insertLine}i${network}d.zmqpubrawtx=" ${lndConfFile}
   fi
   echo "# updating setting (${setting}) with value(${value})"
-  sudo sed -i "s/^${network}d.${setting}=.*/${network}d.${setting}='${value}'/g" ${lndConfFile}
+  sudo sed -i "s/^${network}d\.zmqpubrawtx=.*/${network}d\.zmqpubrawtx=\'${value}\'/g" ${lndConfFile}
 
     # remove RPC user & pass from lnd.conf ... since v1.7
     # https://github.com/rootzoll/raspiblitz/issues/2160

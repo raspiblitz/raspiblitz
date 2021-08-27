@@ -56,15 +56,14 @@ source /home/admin/raspiblitz.info
 if ! grep -Eq "^${netprefix}lnd=" /mnt/hdd/raspiblitz.conf; then
   echo "${netprefix}lnd=off" >> /mnt/hdd/raspiblitz.conf
 fi
-source /mnt/hdd/raspiblitz.conf
-source /mnt/hdd/raspiblitz.conf
 
+source /mnt/hdd/raspiblitz.conf
 
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   RPCUSER=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcuser | cut -c 9-)
-  RPCPSW=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
+  RPCPSW=$(sudo cat /mnt/hdd/${nesudo twork}/${network}.conf | grep rpcpassword | cut -c 13-)
   
   echo "# Check mainnet lnd.conf" 
   # it does not pick up main.zmqpubraw entries from bitcoin.conf, need to set manually
