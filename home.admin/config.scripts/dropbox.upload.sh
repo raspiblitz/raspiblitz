@@ -34,7 +34,7 @@ https://github.com/rootzoll/raspiblitz/#a-dropbox-backup-target" 11 70 2>/home/a
     shred -u /home/admin/.tmp
   fi
 
-  # set in config - that acivates the dropbox back in background process
+  # set in config - that activates the dropbox back in background process
   if [ ${#authtoken} -gt 0 ]; then
     if [ ${#dropboxBackupTarget} -eq 0 ]; then
       echo "dropboxBackupTarget='${authtoken}'" >> /mnt/hdd/raspiblitz.conf
@@ -118,7 +118,7 @@ elif [ "${MODE}" == "upload" ]; then
   fi
 
 else
-  echo "err='unkown mode'"
+  echo "err='unknown mode'"
   exit 1
 fi
 

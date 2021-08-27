@@ -100,7 +100,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # setting value in raspi blitz config
   sudo sed -i "s/^autoUnlock=.*/autoUnlock=off/g" /mnt/hdd/raspiblitz.conf
 
-  # delete password C securly
+  # delete password C securely
   echo "# shredding password on for RaspiBlitz Auto-Unlock"
   sudo shred -u /root/lnd.autounlock.pwd 2>/dev/null
 

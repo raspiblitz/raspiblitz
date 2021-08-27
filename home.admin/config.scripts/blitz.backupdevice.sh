@@ -24,7 +24,7 @@ if [ "$1" = "status" ]; then
     echo "backupdevice=1"
     echo "UUID='${localBackupDeviceUUID}'"
 
-    # check if nackup device is mounted
+    # check if backup device is mounted
     backupDeviceExists=$(df | grep -c "/mnt/backup")
     if [ ${backupDeviceExists} -gt 0 ]; then
       echo "isMounted=1"
@@ -43,7 +43,7 @@ if [ "$1" = "status" ]; then
     for disk in $(lsblk -o NAME,TYPE | grep "disk" | awk '$1=$1' | cut -d " " -f 1)
     do
       devMounted=$(lsblk -o MOUNTPOINT,NAME | grep "$disk" | grep -c "^/")
-      # is raid candidate when: not mounted & not the data drive cadidate (hdd/ssd) & not BTRFS RAID
+      # is raid candidate when: not mounted & not the data drive candidate (hdd/ssd) & not BTRFS RAID
       if [ ${devMounted} -eq 0 ] && [ "${disk}" != "${hdd}" ] && [ "${disk}" != "${raidUsbDev}" ]; then
         sizeBytes=$(lsblk -o NAME,SIZE -b | grep "^${disk}" | awk '$1=$1' | cut -d " " -f 2)
         sizeGigaBytes=$(echo "scale=0; ${sizeBytes}/1024/1024/1024" | bc -l)
@@ -86,7 +86,7 @@ if [ "$1" = "on" ]; then
       exit 1
     fi
 
-    # check if backup devcie is already connected
+    # check if backup device is already connected
     if [ ${backupCandidates} -eq 0 ]; then
       dialog --title ' Adding Backup Device ' --msgbox 'Please connect now the backup device\nFor example a thumb drive bigger than 120 MB.\nDont use a second HDD/SSD for that.\nBest on a USB2 port (not the blue ones).\nThen press OK.' 9 50
       clear
@@ -95,7 +95,7 @@ if [ "$1" = "on" ]; then
       sleep 3
       source <(sudo /home/admin/config.scripts/blitz.backupdevice.sh status)
       if [ ${backupCandidates} -eq 0 ]; then
-        dialog --title ' FAIL ' --msgbox 'NOT able to detect a possible backup device.\nProcess was not sucessful.' 6 50
+        dialog --title ' FAIL ' --msgbox 'NOT able to detect a possible backup device.\nProcess was not successful.' 6 50
         clear
         exit 1
       fi
@@ -246,5 +246,5 @@ if [ "$1" = "off" ]; then
   exit 0
 fi
 
-echo "error='unkown command'"
+echo "error='unknown command'"
 exit 1

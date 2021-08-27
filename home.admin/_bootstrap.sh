@@ -246,7 +246,7 @@ if [ ${logsMegaByte} -gt 1000 ]; then
   fi
   sleep 3
   echo "WARN !! Logs in /var/log in were bigger then 1GB and got emergency delete to prevent fillup."
-  echo "If you see this in the logs please report to the GitHub issues, so LOG config needs to hbe optimized."
+  echo "If you see this in the logs please report to the GitHub issues, so LOG config needs to be optimized."
 else
   echo "OK - logs are at ${logsMegaByte} MB - within safety limit"
 fi
@@ -738,7 +738,7 @@ if [ ${#network} -gt 0 ] && [ ${#chain} -gt 0 ]; then
   sudo /home/admin/config.scripts/lnd.credentials.sh sync >> $logFile
 
 else 
-  echo "skipping LND credientials sync" >> $logFile
+  echo "skipping LND credentials sync" >> $logFile
 fi
 
 ################################
@@ -782,7 +782,7 @@ fi
 # PREPARE SUBSCRIPTIONS DATA DIRECTORY
 ######################################
 
-if [ -d "/mnt/hdd/app-data/subscrptions" ]; then
+if [ -d "/mnt/hdd/app-data/subscriptions" ]; then
   echo "OK: subscription data directory exists"
 else
   echo "CREATE: subscription data directory"

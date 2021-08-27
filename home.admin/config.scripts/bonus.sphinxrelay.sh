@@ -263,7 +263,7 @@ if [ "$1" = "status" ]; then
     fi
   fi
 
-  # determnine the public url for the pairing code based on best setup
+  # determine the public url for the pairing code based on best setup
   connection=""
   publicURL=""
 
@@ -411,7 +411,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     if [ "${runBehindTor}" = "on" ]; then
       # make sure to keep in sync with internet.tor.sh script
       /home/admin/config.scripts/internet.hiddenservice.sh sphinxrelay 80 3302 443 3303
-      # get TOR address and store it readable for sphixrelay user
+      # get TOR address and store it readable for sphinxrelay user
       toraddress=$(sudo cat /mnt/hdd/tor/sphinxrelay/hostname 2>/dev/null)
       sudo -u sphinxrelay bash -c "echo '${toraddress}' > /home/sphinxrelay/sphinx-relay/dist/toraddress.txt"
     fi

@@ -73,7 +73,7 @@ For full support switch to mainnet.
 " 9 55
 fi
 
-# fuction to call for wallets that support TOR
+# function to call for wallets that support TOR
 connect="ip"
 choose_IP_or_TOR()
 {
@@ -90,7 +90,7 @@ choose_IP_or_TOR()
 	fi
 }
 
-# fuction to if already activated or user wants to activate IP2TOR
+# function to if already activated or user wants to activate IP2TOR
 # needs parameter: #1 "LND-REST-API" or "LND-GRPC-API"
 ip2tor=""
 checkIP2TOR()
@@ -109,7 +109,7 @@ checkIP2TOR()
   #read key
   
   # if IP2TOR is not already available:
-  # and the checks from avove showed there is SSH forwarding / dynDNS
+  # and the checks from above showed there is SSH forwarding / dynDNS
   # then ask user if IP2TOR subscription is wanted
   if [ ${#ip2tor} -eq 0 ] && [ ${aks4IP2TOR} -eq 1 ]; then
     whiptail --title " Want to use a IP2TOR Bridge? " --yes-button "Go To Shop" --no-button "No Thanks" --yesno "It can be hard to connect to your RaspiBlitz when away from home.\n\nDo you like to subscribe to a IP2TOR bridge service (that will give you a public IP while hidden behind TOR) and make it more easy to connect your mobile wallet?" 12 60

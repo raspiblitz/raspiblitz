@@ -4,7 +4,7 @@ import re
 import subprocess
 import sys
 
-# IDEA: At the momemt its just Reverse-SSh Tunnels thats why [INTERNAL-PORT]<[EXTERNAL-PORT]
+# IDEA: At the moment its just Reverse-SSH Tunnels thats why [INTERNAL-PORT]<[EXTERNAL-PORT]
 # For the future also just local ssh tunnels could be added with [INTERNAL-PORT]-[EXTERNAL-PORT]
 # for the use case when a server wants to use a RaspiBlitz behind a NAT as Lightning backend
 

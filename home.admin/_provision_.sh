@@ -69,7 +69,7 @@ if [ "${headless}" == "on" ]; then
   echo "displayClass=headless" >> ${configFile}
   displayClass="headless"
 elif [ "${headless}" != "" ]; then
-  echo "Remove old headless pramater from config" >> ${logFile}
+  echo "Remove old headless parameter from config" >> ${logFile}
   sudo sed -i "s/^headless=.*//g" ${configFile}
   displayClass="lcd"
 fi
@@ -148,7 +148,7 @@ sudo rm -r  /mnt/hdd/backup_lnd 2>/dev/null
 sudo cp -r /mnt/hdd/lnd /mnt/hdd/backup_lnd >> ${logFile} 2>&1
 numOfDiffers=$(sudo diff -arq /mnt/hdd/lnd /mnt/hdd/backup_lnd | grep -c "differ")
 if [ ${numOfDiffers} -gt 0 ]; then
-  echo "FAIL: Backup was not successfull" >> ${logFile}
+  echo "FAIL: Backup was not successful" >> ${logFile}
   sudo diff -arq /mnt/hdd/lnd /mnt/hdd/backup_lnd >> ${logFile} 2>&1
   echo "removing backup dir to prevent false override" >> ${logFile}
 else
@@ -249,7 +249,7 @@ if [ ${#bitcoinInterimsUpdate} -gt 0 ]; then
   sudo sed -i "s/^message=.*/message='Provisioning Bitcoin Core update'/g" ${infoFile}
   if [ "${bitcoinInterimsUpdate}" == "reckless" ]; then
     # recklessly update Bitcoin Core to latest release on GitHub
-    echo "Provisioning BItcoin Core reckless interims update" >> ${logFile}
+    echo "Provisioning Bitcoin Core reckless interims update" >> ${logFile}
     sudo /home/admin/config.scripts/bitcoin.update.sh reckless >> ${logFile}
   else
     # when installing the same sd image - this will re-trigger the secure interims update
@@ -673,7 +673,7 @@ if [ ${confExists} -eq 0 ]; then
   sudo chown bitcoin:bitcoin /mnt/hdd/bitcoin/bitcoin.conf
 fi
 
-# singal setup done
+# signal setup done
 sudo sed -i "s/^message=.*/message='Setup Done'/g" ${infoFile}
 
 # set the local network hostname (just if set in config - will not be set anymore by default in newer version)

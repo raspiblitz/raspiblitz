@@ -112,7 +112,7 @@ You have no active or inactive subscriptions.
         "\nYou have the following subscriptions - select for details:",
         choices=choices, cancel_label="Back", width=65, height=15, title="My Subscriptions")
 
-    # if user chosses CANCEL
+    # if user chooses CANCEL
     if code != d.OK:
         return
 
@@ -234,7 +234,7 @@ def main():
         "\nCheck existing subscriptions or create new:",
         choices=choices, width=50, height=10, title="Subscription Management")
 
-    # if user chosses CANCEL
+    # if user chooses CANCEL
     if code != d.OK:
         sys.exit(0)
 
@@ -334,7 +334,7 @@ def main():
             "\nChoose RaspiBlitz Service to create Bridge for:",
             choices=choices, width=60, height=10, title="Select Service")
 
-        # if user chosses CANCEL
+        # if user chooses CANCEL
         if code != d.OK:
             sys.exit(0)
 
@@ -416,7 +416,7 @@ def main():
 
         # action after possibly new created bride
         if service_name == SERVICE_SPHINX:
-            print("# restarting services to pickup new public url (please wait) ...")
+            print("# restarting services to pickup new public URL (please wait) ...")
             os.system("sudo systemctl restart sphinxrelay")
             time.sleep(8)
 

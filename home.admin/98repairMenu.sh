@@ -55,7 +55,7 @@ OPTIONS=(SOFTWARE "Run Softwaretest (DebugReport)" \
          RESET-CHAIN "Delete Blockchain & Re-Download" \
          RESET-LND "Delete LND & start new node/wallet" \
          RESET-HDD "Delete HDD Data but keep Blockchain" \
-         RESET-ALL "Delete HDD completly to start fresh" \
+         RESET-ALL "Delete HDD completely to start fresh" \
          DELETE-ELEC "Delete Electrum Index" \
          DELETE-INDEX "Delete Bitcoin Transaction-Index"
 	)

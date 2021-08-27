@@ -11,7 +11,7 @@ fi
 
 portnumber=$1
 
-# check port numer is a integer
+# check port number is a integer
 if ! [ "$portnumber" -eq "$portnumber" ] 2> /dev/null
 then
   echo "FAIL - portnumber(${portnumber}) not a number"

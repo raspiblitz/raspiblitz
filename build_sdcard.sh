@@ -14,7 +14,7 @@ echo "* RASPIBLITZ SD CARD IMAGE SETUP v1.7.1 *"
 echo "*****************************************"
 echo "For details on optional parameters - see build script source code:"
 
-# 1st optional paramater: NO-INTERACTION
+# 1st optional parameter: NO-INTERACTION
 # ----------------------------------------
 # When 'true' then no questions will be asked on building .. so it can be used in build scripts
 # for containers or as part of other build scripts (default is false)
@@ -30,7 +30,7 @@ else
   echo "1) will use NO-INTERACTION --> '${noInteraction}'"
 fi
 
-# 2nd optional paramater: FATPACK
+# 2nd optional parameter: FATPACK
 # -------------------------------
 # could be 'true' or 'false' (default)
 # When 'true' it will pre-install needed frameworks for additional apps and features
@@ -50,7 +50,7 @@ else
   echo "2) will use FATPACK --> '${fatpack}'"
 fi
 
-# 3rd optional paramater: GITHUB-USERNAME
+# 3rd optional parameter: GITHUB-USERNAME
 # ---------------------------------------
 # could be any valid github-user that has a fork of the raspiblitz repo - 'rootzoll' is default
 # The 'raspiblitz' repo of this user is used to provisioning sd card 
@@ -62,7 +62,7 @@ if [ ${#githubUser} -eq 0 ]; then
 fi
 echo "3) will use GITHUB-USERNAME --> '${githubUser}'"
 
-# 4th optional paramater: GITHUB-BRANCH
+# 4th optional parameter: GITHUB-BRANCH
 # -------------------------------------
 # could be any valid branch of the given GITHUB-USERNAME forked raspiblitz repo - 'dev' is default
 githubBranch="$4"
@@ -71,7 +71,7 @@ if [ ${#githubBranch} -eq 0 ]; then
 fi
 echo "4) will use GITHUB-BRANCH --> '${githubBranch}'"
 
-# 5th optional paramater: DISPLAY-CLASS
+# 5th optional parameter: DISPLAY-CLASS
 # ----------------------------------------
 # Could be 'hdmi', 'headless' or 'lcd'
 # On 'false' the standard video output is used (HDMI) by default.
@@ -87,7 +87,7 @@ else
   echo "5) will use DISPLAY-CLASS --> '${displayClass}'"
 fi
 
-# 6th optional paramater: TWEAK-BOOTDRIVE
+# 6th optional parameter: TWEAK-BOOTDRIVE
 # ---------------------------------------
 # could be 'true' (default) or 'false'
 # If 'true' it will try (based on the base OS) to optimize the boot drive.
@@ -103,7 +103,7 @@ else
   echo "6) will use TWEAK-BOOTDRIVE --> '${tweakBootdrives}'"
 fi
 
-# 7th optional paramater: WIFI
+# 7th optional parameter: WIFI
 # ---------------------------------------
 # could be 'false' or 'true' (default) or a valid WIFI country code like 'US' (default)
 # If 'false' WIFI will be deactivated by default
@@ -245,7 +245,7 @@ if [ "${baseimage}" = "raspbian" ] || [ "${baseimage}" = "dietpi" ] || \
     # https://github.com/rootzoll/raspiblitz/issues/684
     sudo sed -i "s/^    SendEnv LANG LC.*/#   SendEnv LANG LC_*/g" /etc/ssh/ssh_config
 
-    # remove unneccesary files
+    # remove unnecessary files
     sudo rm -rf /home/pi/MagPi
     # https://www.reddit.com/r/linux/comments/lbu0t1/microsoft_repo_installed_on_all_raspberry_pis/
     sudo rm -f /etc/apt/sources.list.d/vscode.list 

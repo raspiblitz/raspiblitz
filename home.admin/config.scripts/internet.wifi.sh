@@ -55,7 +55,7 @@ network={
 
   # activate new wifi settings
   sudo wpa_cli -i wlan0 reconfigure 1>/dev/null
-  echo "# OK - changes should be actrive now - maybe reboot needed"
+  echo "# OK - changes should be active now - maybe reboot needed"
   exit 0
 
 elif [ "$1" == "off" ]; then
@@ -73,7 +73,7 @@ update_config=1"
 
   # activate new wifi settings
   sudo wpa_cli -i wlan0 reconfigure 1>/dev/null
-  echo "# OK - changes should be actrive now - maybe reboot needed"
+  echo "# OK - changes should be active now - maybe reboot needed"
   exit 0
 
 # https://github.com/rootzoll/raspiblitz/issues/560

@@ -58,6 +58,6 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   exit 0
 fi
 
-echo "FAIL - Unknown Paramter $1"
+echo "FAIL - Unknown Parameter $1"
 echo "may needs reboot to run normal again"
 exit 1

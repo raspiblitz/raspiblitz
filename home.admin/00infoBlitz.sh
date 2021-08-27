@@ -481,7 +481,7 @@ elif [ ${#ups} -gt 1 ] && [ "${upsStatus}" = "n/a" ]; then
   echo "UPS service activated but not running"
 else
 
-  # cheching status of apps and display if in sync or problems
+  # checking status of apps and display if in sync or problems
   appInfoLine=""
 
   # Electrum Server - electrs

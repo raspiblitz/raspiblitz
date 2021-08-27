@@ -365,7 +365,7 @@ def shopList(shopUrl):
 
 
 def shopOrder(shopUrl, hostid, servicename, torTarget, duration, msatsFirst, msatsNext, description=""):
-    print("#### Placeing order ...")
+    print("#### Placing order ...")
     shopUrl = normalizeShopUrl(shopUrl)
     orderid = apiPlaceOrderNew(session, shopUrl, hostid, torTarget)
 

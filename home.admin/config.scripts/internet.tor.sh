@@ -388,7 +388,7 @@ EOF
     sudo -u sphinxrelay bash -c "echo '${toraddress}' > /home/sphinxrelay/sphinx-relay/dist/toraddress.txt"
   fi
 
-    # get TOR address and store it readable for sphixrelay user
+    # get TOR address and store it readable for sphinxrelay user
     toraddress=$(sudo cat /mnt/hdd/tor/sphinxrelay/hostname 2>/dev/null)
     sudo -u sphinxrelay bash -c "echo '${toraddress}' > /home/sphinxrelay/sphinx-relay/dist/toraddress.txt"
 

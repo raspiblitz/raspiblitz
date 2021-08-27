@@ -62,7 +62,7 @@ fi
 
 # special state: copystation
 if [ "${state}" = "copystation" ]; then
-  echo "Copy Station is Runnning ..."
+  echo "Copy Station is Running ..."
   echo "reboot to return to normal"
   sudo /home/admin/XXcopyStation.sh
   exit

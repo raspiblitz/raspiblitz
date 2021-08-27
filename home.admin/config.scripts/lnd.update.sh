@@ -168,7 +168,7 @@ if [ "${mode}" = "verified" ]; then
   echo "fingerprint='${fingerprint}'"
 
   echo 
-  echo "# checking gpg finger print"
+  echo "# checking PGP finger print"
   gpg --import ./pgp_keys.asc
   sleep 3
   verifyResult=$(gpg --verify manifest-${PGPauthor}-v${lndUpdateVersion}.sig manifest-v${lndUpdateVersion}.txt 2>&1)

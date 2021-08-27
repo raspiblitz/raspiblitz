@@ -58,7 +58,7 @@ KRAKEN_API_SECRET="privateKeyFromTheKrakenSettings"
 KRAKEN_API_FIAT="USD"
 KRAKEN_BUY_AMOUNT=21
 
-# Enable this to buy at market price instad of placing a limit order
+# Enable this to buy at market price instead of placing a limit order
 # KRAKEN_ORDER_TYPE="market"
 
 # Pay fee in this currency, e.g. buying XBT for USD and paying fee in XBT

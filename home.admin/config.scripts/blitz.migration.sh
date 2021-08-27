@@ -336,7 +336,7 @@ if [ "$1" = "export-gui" ]; then
   echo "* DOWNLOAD THE MIGRATION FILE *"
   echo "*******************************"
   echo 
-  echo "On yoz Linux or MacOS Laptop - RUN IN NEW TERMINAL:"
+  echo "On your Linux or MacOS Laptop - RUN IN NEW TERMINAL:"
   echo "${scpDownloadUnix}"
   echo "On Windows use command:"
   echo "${scpDownloadWin}"
@@ -387,7 +387,7 @@ if [ "$1" = "import" ]; then
     exit 1
   fi
 
-  # copy bitcoin/litecoin data backups back to orgplaces (if part of backup)
+  # copy bitcoin/litecoin data backups back to original places (if part of backup)
   if [ -d "/mnt/hdd/backup_bitcoin" ]; then
     echo "# Copying back bitcoin backup data .."
     sudo mkdir /mnt/hdd/bitcoin

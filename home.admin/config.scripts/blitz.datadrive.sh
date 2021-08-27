@@ -12,9 +12,9 @@ fi
 
 # TO UNDERSTAND THE BTFS HDD LAYOUT:
 ####################################
-# 1) BLITZDATA - a BTRFS partion for all RaspiBlitz data - 30GB
+# 1) BLITZDATA - a BTRFS partition for all RaspiBlitz data - 30GB
 #    here put all files of LND, app, etc that need backup
-# 2) BLITZSTORE - a BTFRS partion for mostly Blockchain data
+# 2) BLITZSTORAGE - a BTFRS partition for mostly Blockchain data
 #    all data here can get lost and rebuild if needed (Blockchain, Indexes, etc)
 # 3) BLITZTEMP - a FAT partition just for SWAP & Exchange - 34GB
 #    used for SWAP file and easy to read from Win32/MacOS for exchange
@@ -124,14 +124,14 @@ if [ "$1" = "status" ]; then
          fi
       else
 
-         # default hdd set, when there is no OSpartition and there might ne no partitions at all
+         # default hdd set, when there is no OSpartition and there might be no partitions at all
          if [ "${OSPartition}" = "root" ] && [ "${hdd}" = "" ] && [ "${testdevice}" != "" ]; then
           hdd="${testdevice}"
          fi
 
 	       # make sure to use the biggest
          if [ ${testsize} -gt ${sizeDataPartition} ]; then
-	        # Partion to be created is smaller than disk so this is not correct (but close)
+	        # Partition to be created is smaller than disk so this is not correct (but close)
             sizeDataPartition=$(sudo fdisk -l /dev/$testdevice | grep GiB | cut -d " " -f 5)
             hddDataPartition="${testdevice}1"
             hdd="${testdevice}"
@@ -418,7 +418,7 @@ if [ "$1" = "status" ]; then
     for disk in $(lsblk -o NAME,TYPE | grep "disk" | awk '$1=$1' | cut -d " " -f 1)
     do
       devMounted=$(lsblk -o MOUNTPOINT,NAME | grep "$disk" | grep -c "^/")
-      # is raid candidate when not mounted and not the data drive cadidate (hdd/ssd)
+      # is raid candidate when not mounted and not the data drive candidate (hdd/ssd)
       if [ ${devMounted} -eq 0 ] && [ "${disk}" != "${hdd}" ] && [ "${hdd}" != "" ]; then
         sizeBytes=$(lsblk -o NAME,SIZE -b | grep "^${disk}" | awk '$1=$1' | cut -d " " -f 2)
         sizeGigaBytes=$(echo "scale=0; ${sizeBytes}/1024/1024/1024" | bc -l)
@@ -447,7 +447,7 @@ fi
 # FORMAT EXT4 or BTRFS
 ######################
 
-# check basics for formating
+# check basics for formatting
 if [ "$1" = "format" ]; then
   
   # check valid format
@@ -465,7 +465,7 @@ if [ "$1" = "format" ]; then
   hdd=$3
   if [ ${#hdd} -eq 0 ]; then
     >&2 echo "# missing valid third parameter as the device (like 'sda')"
-    >&2 echo "# run 'status' to see cadidate devices"
+    >&2 echo "# run 'status' to see candidate devices"
     echo "error='missing parameter'"
     exit 1
   fi
@@ -631,7 +631,7 @@ if [ "$1" = "format" ]; then
        fi
      done
 
-     # setting fsk check intervall to 1
+     # setting fsk check interval to 1
      # see https://github.com/rootzoll/raspiblitz/issues/360#issuecomment-467567572
      if [ $ext4IsPartition -eq 0 ]; then
         sudo tune2fs -c 1 /dev/${hdd}1
@@ -643,7 +643,7 @@ if [ "$1" = "format" ]; then
      exit 0
   fi
 
-  # formatting new: BTRFS layout - this consists of 3 volmunes:
+  # formatting new: BTRFS layout - this consists of 3 volumes:
   if [ "$2" = "btrfs" ]; then
 
      # prepare temp mount point
@@ -729,7 +729,7 @@ if [ "$1" = "format" ]; then
      sudo btrfs subvolume create WORKINGDIR
      cd && sudo umount /tmp/btrfs
 
-     >&2 echo "# Creating the FAT32 partion"
+     >&2 echo "# Creating the FAT32 partition"
      sudo parted -s -a optimal -- /dev/${hdd} mkpart primary fat32 -34GiB 100% 1>/dev/null
      sync && sleep 3
      win=$(lsblk -o NAME | grep -c ${hdd}3)
@@ -911,7 +911,7 @@ if [ "$1" = "fstab" ]; then
       sync
     done
 
-    # get user and grouid if usr/group bitcoin
+    # get user and groupid if usr/group bitcoin
     bitcoinUID=$(id -u bitcoin)
     bitcoinGID=$(id -g bitcoin)
 
@@ -981,7 +981,7 @@ if [ "$1" = "raid" ]; then
      >&2 echo "# RAID - Removing raid drive to RaspiBlitz data drive"  
   else
      >&2 echo "# possible 2nd parameter is 'on' or 'off'"  
-     echo "error='unkown parameter'"
+     echo "error='unknown parameter'"
      exit 1
   fi
 
@@ -995,7 +995,7 @@ if [ "$1" = "raid" ] && [ "$2" = "on" ]; then
   # second parameter - like its named: lsblk
   usbdev=$3
   if [ ${#usbdev} -eq 0 ]; then
-    >&2 echo "# FAIL third parameter is missing with the name of the usb device to add"
+    >&2 echo "# FAIL third parameter is missing with the name of the USB device to add"
     echo "error='missing parameter'"
     exit 1
   fi
@@ -1037,7 +1037,7 @@ if [ "$1" = "raid" ] && [ "$2" = "on" ]; then
     exit 1
   fi
 
-  # remove all partions from device
+  # remove all partitions from device
   for v_partition in $(parted -s /dev/${usbdev} print|awk '/^ / {print $1}')
   do
    sudo parted -s /dev/${usbdev} rm ${v_partition}
@@ -1267,7 +1267,7 @@ if [ "$1" = "tempmount" ]; then
     
   elif [ "${hddFormat}" = "btrfs" ]; then
 
-    # get user and grouid if usr/group bitcoin
+    # get user and groupid if usr/group bitcoin
     bitcoinUID=$(id -u bitcoin)
     bitcoinGID=$(id -g bitcoin)
 
@@ -1430,7 +1430,7 @@ if [ "$1" = "link" ]; then
   echo "The /mnt/hdd/app-data directory should be used by additional/optional apps and services installed to the RaspiBlitz for their data that should survive an import/export/backup. Data that can be reproduced (indexes, etc.) should be stored in app-storage." > ./README.txt
   sudo mv ./README.txt /mnt/hdd/app-data/README.txt 2>/dev/null
 
-  echo "The /mnt/hdd/app-storage directrory should be used by additional/optional apps and services installed to the RaspiBlitz for their non-critical and reproducable data (indexes, public blockchain, etc.) that does not need to survive an an import/export/backup. Data is critical should be in app-data." > ./README.txt
+  echo "The /mnt/hdd/app-storage directory should be used by additional/optional apps and services installed to the RaspiBlitz for their non-critical and reproducible data (indexes, public blockchain, etc.) that does not need to survive an an import/export/backup. Data is critical should be in app-data." > ./README.txt
   sudo mv ./README.txt /mnt/hdd/app-storage/README.txt 2>/dev/null
 
   >&2 echo "# OK - all symbolic links build"
@@ -1514,8 +1514,8 @@ if [ "$1" = "swap" ]; then
     exit 0
 
   else
-    >&2 echo "# FAIL unkown second parameter - try 'on' or 'off'"
-    echo "error='unkown parameter'"
+    >&2 echo "# FAIL unknown second parameter - try 'on' or 'off'"
+    echo "error='unknown parameter'"
     exit 1
   fi
 
@@ -1560,7 +1560,7 @@ if [ "$1" = "clean" ]; then
         sudo dphys-swapfile uninstall 1>/dev/null
         sync
 
-        # for all other data shred files selectivly
+        # for all other data shred files selectively
         for entry in $(ls -A1 /mnt/hdd)
         do
 
@@ -1574,7 +1574,7 @@ if [ "$1" = "clean" ]; then
             fi
           fi
 
-          # decide when to shredd or just delete - just delete unsensitive data
+          # decide when to shred or just delete - just delete nonsensitive data
           if [ "${entry}" = "torrent" ] || [ "${entry}" = "app-storage" ]; then
             whenDeleteSchredd=0
           fi
@@ -1585,7 +1585,7 @@ if [ "$1" = "clean" ]; then
           if [ ${isBTRFS} -eq 1 ] && [ "${entry}" != "temp" ]; then
             whenDeleteSchredd=0
           fi
-          # on SSDs never shredd
+          # on SSDs never shred
           # https://www.davescomputers.com/securely-deleting-files-solid-state-drive/
           if [ "${isSSD}" == "1" ]; then
             whenDeleteSchredd=0
@@ -1681,8 +1681,8 @@ if [ "$1" = "clean" ]; then
       exit 1
 
     else
-      >&2 echo "# FAIL unkown third parameter try '-total' or '-keepblockchain'"
-      echo "error='unkown parameter'"
+      >&2 echo "# FAIL unknown third parameter try '-total' or '-keepblockchain'"
+      echo "error='unknown parameter'"
       exit 1    
     fi
 
@@ -1740,8 +1740,8 @@ if [ "$1" = "clean" ]; then
     exit 1
   
   else
-    >&2 echo "# FAIL unkown second parameter - try 'all','blockchain' or 'temp'"
-    echo "error='unkown parameter'"
+    >&2 echo "# FAIL unknown second parameter - try 'all','blockchain' or 'temp'"
+    echo "error='unknown parameter'"
     exit 1
   fi
 
