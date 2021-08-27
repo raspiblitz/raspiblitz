@@ -225,7 +225,7 @@ else
   echo ""
 fi
 
-if [ "${thunderhub}" == "" ] || [ "${thunderhub}" == "off" ]; then
+if [ "${thunderhub}" == "" ] || [ "${thunderhub}" == "0" ] | [ "${thunderhub}" == "off" ]; then
   echo "- Thunderhub is OFF by config"
 else
   echo ""
