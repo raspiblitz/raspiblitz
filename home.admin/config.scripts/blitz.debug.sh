@@ -87,7 +87,7 @@ fi
 echo ""
 
 echo "*** LND (TESTNET) SYSTEMD STATUS ***"
-if [ [ "${tlnd}" == "on" ] || [ "${tlnd}" == "1" ]; then
+if [ "${tlnd}" == "on" ] || [ "${tlnd}" == "1" ]; then
   sudo systemctl status tlnd -n2 --no-pager
   echo ""
   echo "*** LAST LND (TESTNET) ERROR LOGS ***"
@@ -103,7 +103,7 @@ fi
 echo ""
 
 echo "*** LND (SIGNET) SYSTEMD STATUS ***"
-if [ [ "${slnd}" == "on" ] || [ "${slnd}" == "1" ]; then
+if [ "${slnd}" == "on" ] || [ "${slnd}" == "1" ]; then
   sudo systemctl status slnd -n2 --no-pager
   echo ""
   echo "*** LAST LND (SIGNET) ERROR LOGS ***"
