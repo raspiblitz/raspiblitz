@@ -62,15 +62,25 @@ source /mnt/hdd/raspiblitz.conf
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
+  if [ "${CHAIN}" == "testnet" ] && [ "${testnet}" != "on" ]; then
+    echo "# before activating testnet on lnd, first activate testnet on bitcoind"
+    echo "err='missing bitcoin testnet'"
+    exit 1
+  fi
+
+  if [ "${CHAIN}" == "signet" ] && [ "${signet}" != "on" ]; then
+    echo "# before activating signet on lnd, first activate signet on bitcoind"
+    echo "err='missing bitcoin signet'"
+    exit 1
+  fi
+
   sudo ufw allow ${portprefix}9735 comment '${netprefix}lnd'
   sudo ufw allow ${portprefix}8080 comment '${netprefix}lnd REST'
   sudo ufw allow 1${rpcportmod}009 comment '${netprefix}lnd RPC'
 
   echo "# Create /home/bitcoin/.lnd/${netprefix}lnd.conf"
   if [ ! -f /home/bitcoin/.lnd/${netprefix}lnd.conf ];then
-    echo "
-# LND configuration
-bitcoin.${CHAIN}=1
+    echo "# LND configuration
 
 [Application Options]
 # alias=ALIAS # up to 32 UTF-8 characters
@@ -92,9 +102,8 @@ tlskeypath=/home/bitcoin/.lnd/tls.key
 
 [Bitcoin]
 bitcoin.active=1
+bitcoin.${CHAIN}=1
 bitcoin.node=bitcoind
-
-
 " | sudo -u bitcoin tee /home/bitcoin/.lnd/${netprefix}lnd.conf
   else
     echo "# The file /home/bitcoin/.lnd/${netprefix}lnd.conf is already present"
