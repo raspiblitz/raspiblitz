@@ -43,6 +43,7 @@ function removeParallelService() {
     fi
     sudo systemctl stop ${prefix}bitcoind
     sudo systemctl disable ${prefix}bitcoind
+    sudo rm /etc/systemd/system/${prefix}bitcoind.service 2>/dev/null
     if [ ${bitcoinprefix} = signet ];then
       # check for signet service set up by joininbox  
       if [ -f "/etc/systemd/system/signetd.service" ];then
@@ -133,8 +134,7 @@ User=bitcoin
 Group=bitcoin
 Type=forking
 PIDFile=/mnt/hdd/bitcoin/${prefix}bitcoind.pid
-ExecStart=/usr/local/bin/bitcoind -${CHAIN} -daemon\
- -pid=/mnt/hdd/bitcoin/${prefix}bitcoind.pid
+ExecStart=/usr/local/bin/bitcoind -${CHAIN} -daemon -pid=/mnt/hdd/bitcoin/${prefix}bitcoind.pid -debuglogfile=/mnt/hdd/bitcoin/${prefix}debug.log
 Restart=always
 TimeoutSec=120
 RestartSec=30
@@ -182,13 +182,7 @@ WantedBy=multi-user.target
     echo "# Installed $(bitcoind --version | grep version)"
     echo 
     echo "# Monitor the ${prefix}bitcoind with:"
-    if [ ${CHAIN} = signet ]; then
-      echo "sudo tail -f /mnt/hdd/bitcoin/signet/debug.log"
-    elif [ ${CHAIN} = testnet ]; then
-      echo "sudo tail -f /mnt/hdd/bitcoin/testnet3/debug.log"
-    elif [ ${CHAIN} = mainnet ]; then
-      echo "sudo tail -f /mnt/hdd/bitcoin/debug.log"      
-    fi
+    echo "# sudo tail -f /mnt/hdd/bitcoin/${prefix}debug.log"
     echo
   else
     echo "# Installation failed"

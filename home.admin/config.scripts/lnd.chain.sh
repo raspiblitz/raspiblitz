@@ -46,6 +46,7 @@ function removeParallelService() {
      --rpcserver localhost:1${rpcportmod}009 stop
     sudo systemctl stop ${netprefix}lnd
     sudo systemctl disable ${netprefix}lnd
+    sudo rm /etc/systemd/system/${netprefix}lnd.service 2>/dev/null
     echo "# ${netprefix}lnd.service on ${CHAIN} is stopped and disabled"
     echo
   fi

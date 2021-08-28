@@ -103,8 +103,8 @@ if [ "${testnet}" == "on" ] || [ "${testnet}" == "1" ]; then
   sudo journalctl -u t${network}d -b --no-pager -n8
   echo ""
   echo "*** LAST BLOCKCHAIN 20 INFO LOGS ***"
-  echo "sudo tail -n 20 /mnt/hdd/${network}/testnet3/debug.log"
-  sudo tail -n 20 /mnt/hdd/${network}/testnet3/debug.log
+  echo "sudo tail -n 20 /mnt/hdd/${network}/tdebug.log"
+  sudo tail -n 20 /mnt/hdd/${network}/tdebug.log
   echo ""
 else
   echo "- OFF by config -"
@@ -135,8 +135,8 @@ if [ "${signet}" == "on" ] || [ "${signet}" == "1" ]; then
   sudo journalctl -u s${network}d -b --no-pager -n8
   echo ""
   echo "*** LAST BLOCKCHAIN 20 INFO LOGS ***"
-  echo "sudo tail -n 20 /mnt/hdd/${network}/signet/debug.log"
-  sudo tail -n 20 /mnt/hdd/${network}/signet/debug.log
+  echo "sudo tail -n 20 /mnt/hdd/${network}/sdebug.log"
+  sudo tail -n 20 /mnt/hdd/${network}/sdebug.log
   echo ""
 else
   echo "- OFF by config -"
