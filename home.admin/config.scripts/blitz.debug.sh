@@ -126,6 +126,18 @@ else
 fi
 echo ""
 
+echo "*** C-LIGHTNING (TESTNET) SYSTEMD STATUS ***"
+if [ "${tcln}" == "on" ] || [ "${tcln}" == "1" ]; then
+  sudo systemctl status tlightningd -n2 --no-pager
+  echo ""
+  echo "*** LAST 30 C-LIGHTNING (TESTNET) INFO LOGS ***"
+  echo "sudo tail -n 30 /home/bitcoin/.lightning/testnet/cl.log"
+  sudo tail -n 30 /home/bitcoin/.lightning/testnet/cl.log
+else
+  echo "- not activated -"
+fi
+echo ""
+
 echo "*** BLOCKCHAIN (SIGNET) SYSTEMD STATUS ***"
 if [ "${signet}" == "on" ] || [ "${signet}" == "1" ]; then
   sudo systemctl status s${network}d -n2 --no-pager
@@ -155,6 +167,18 @@ if [ "${slnd}" == "on" ] || [ "${slnd}" == "1" ]; then
   sudo tail -n 30 /mnt/hdd/lnd/logs/${network}/signet/lnd.log
 else
   echo "- OFF by config -"
+fi
+echo ""
+
+echo "*** C-LIGHTNING (SIGNET) SYSTEMD STATUS ***"
+if [ "${scln}" == "on" ] || [ "${scln}" == "1" ]; then
+  sudo systemctl status slightningd -n2 --no-pager
+  echo ""
+  echo "*** LAST 30 C-LIGHTNING (SIGNET) INFO LOGS ***"
+  echo "sudo tail -n 30 /home/bitcoin/.lightning/signet/cl.log"
+  sudo tail -n 30 /home/bitcoin/.lightning/signet/cl.log
+else
+  echo "- not activated -"
 fi
 echo ""
 
