@@ -185,7 +185,6 @@ if [ "$1" == "prestart" ]; then
 " | tee -a ${lndConfFile}
     fi
 
---tor\.socks=$SOCKSPORT --tor\.control=$CONTROLPORT
     setting ${lndConfFile} ${insertLine} "tor.control" "9071"
     setting ${lndConfFile} ${insertLine} "tor.socks" "9070"
     setting ${lndConfFile} ${insertLine} "tor.privatekeypath" "\/mnt\/hdd\/lnd\/${netprefix}v3_onion_private_key"
