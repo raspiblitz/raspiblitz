@@ -189,6 +189,7 @@ alias ${netprefix}clnlog=\"sudo\
 alias ${netprefix}clnconf=\"sudo\
  nano ${CLNCONF}\"
 " | sudo tee -a /home/admin/_aliases
+  sudo chown admin:admin /home/admin/_aliases
 
   echo "# The installed C-lightning version is: $(sudo -u bitcoin /usr/local/bin/lightningd --version)"
   echo   

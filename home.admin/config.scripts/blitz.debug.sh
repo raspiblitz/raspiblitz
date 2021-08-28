@@ -52,7 +52,7 @@ echo "*** BACKGROUNDSERVICE ***"
 echo "to monitor Background service call: sudo journalctl -f -u background"
 echo ""
 
-echo "*** BLOCKCHAIN SYSTEMD STATUS ***"
+echo "*** BLOCKCHAIN (MAINNET) SYSTEMD STATUS ***"
 sudo systemctl status ${network}d -n2 --no-pager
 echo ""
 echo "*** LAST BLOCKCHAIN ERROR LOGS ***"
@@ -61,11 +61,7 @@ sudo journalctl -u ${network}d -b --no-pager -n8
 cat /home/admin/systemd.blockchain.log | grep "ERROR" | tail -n -2
 echo ""
 echo "*** LAST BLOCKCHAIN 20 INFO LOGS ***"
-pathAdd=""
-if [ "${chain}" = "test" ]; then
-  pathAdd="/testnet3"
-fi
-echo "sudo tail -n 20 /mnt/hdd/${network}${pathAdd}/debug.log"
+echo "sudo tail -n 20 /mnt/hdd/${network}/debug.log"
 sudo tail -n 20 /mnt/hdd/${network}${pathAdd}/debug.log
 echo ""
 
@@ -86,6 +82,34 @@ else
 fi
 echo ""
 
+echo "*** C-LIGHTNING (MAINNET) SYSTEMD STATUS ***"
+if [ "${lightning}" == "cln" ] || [ "${cln}" == "on" ] || [ "${cln}" == "1" ]; then
+  sudo systemctl status lightningd -n2 --no-pager
+  echo ""
+  echo "*** LAST 30 C-LIGHTNING INFO LOGS ***"
+  echo "sudo tail -n 30 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log"
+  sudo tail -n 30 /home/bitcoin/.lightning/${network}/cl.log
+else
+  echo "- not activated -"
+fi
+echo ""
+
+echo "*** BLOCKCHAIN (TESTNET) SYSTEMD STATUS ***"
+if [ "${testnet}" == "on" ] || [ "${testnet}" == "1" ]; then
+  sudo systemctl status t${network}d -n2 --no-pager
+  echo ""
+  echo "*** LAST BLOCKCHAIN ERROR LOGS ***"
+  echo "sudo journalctl -u t${network}d -b --no-pager -n8"
+  sudo journalctl -u t${network}d -b --no-pager -n8
+  echo ""
+  echo "*** LAST BLOCKCHAIN 20 INFO LOGS ***"
+  echo "sudo tail -n 20 /mnt/hdd/${network}/testnet3/debug.log"
+  sudo tail -n 20 /mnt/hdd/${network}/testnet3/debug.log
+  echo ""
+else
+  echo "- OFF by config -"
+fi
+
 echo "*** LND (TESTNET) SYSTEMD STATUS ***"
 if [ "${tlnd}" == "on" ] || [ "${tlnd}" == "1" ]; then
   sudo systemctl status tlnd -n2 --no-pager
@@ -102,6 +126,22 @@ else
 fi
 echo ""
 
+echo "*** BLOCKCHAIN (SIGNET) SYSTEMD STATUS ***"
+if [ "${signet}" == "on" ] || [ "${signet}" == "1" ]; then
+  sudo systemctl status s${network}d -n2 --no-pager
+  echo ""
+  echo "*** LAST BLOCKCHAIN ERROR LOGS ***"
+  echo "sudo journalctl -u s${network}d -b --no-pager -n8"
+  sudo journalctl -u s${network}d -b --no-pager -n8
+  echo ""
+  echo "*** LAST BLOCKCHAIN 20 INFO LOGS ***"
+  echo "sudo tail -n 20 /mnt/hdd/${network}/signet/debug.log"
+  sudo tail -n 20 /mnt/hdd/${network}/signet/debug.log
+  echo ""
+else
+  echo "- OFF by config -"
+fi
+
 echo "*** LND (SIGNET) SYSTEMD STATUS ***"
 if [ "${slnd}" == "on" ] || [ "${slnd}" == "1" ]; then
   sudo systemctl status slnd -n2 --no-pager
@@ -115,18 +155,6 @@ if [ "${slnd}" == "on" ] || [ "${slnd}" == "1" ]; then
   sudo tail -n 30 /mnt/hdd/lnd/logs/${network}/signet/lnd.log
 else
   echo "- OFF by config -"
-fi
-echo ""
-
-echo "*** C-LIGHTNING SYSTEMD STATUS ***"
-if [ "${lightning}" == "cln" ] || [ "${cln}" == "on" ] || [ "${cln}" == "1" ]; then
-  sudo systemctl status lightningd -n2 --no-pager
-  echo ""
-  echo "*** LAST 30 C-LIGHTNING INFO LOGS ***"
-  echo "sudo tail -n 30 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log"
-  sudo tail -n 30 /home/bitcoin/.lightning/${network}/cl.log
-else
-  echo "- not activated -"
 fi
 echo ""
 

@@ -165,6 +165,7 @@ WantedBy=multi-user.target
  -${CHAIN}\"' \
       >> /home/admin/_aliases"
     fi
+    sudo chown admin:admin /home/admin/_aliases
   fi
 
   source /home/admin/raspiblitz.info
