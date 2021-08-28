@@ -188,7 +188,7 @@ if [ "$1" == "prestart" ]; then
 --tor\.socks=$SOCKSPORT --tor\.control=$CONTROLPORT
     setting ${lndConfFile} ${insertLine} "tor.control" "9071"
     setting ${lndConfFile} ${insertLine} "tor.socks" "9070"
-    setting ${lndConfFile} ${insertLine} "tor.privatekeypath" "\/mnt\/hdd\/lnd/${netprefix}v3_onion_private_key"
+    setting ${lndConfFile} ${insertLine} "tor.privatekeypath" "test" #"\/mnt\/hdd\/lnd/${netprefix}v3_onion_private_key"
     setting ${lndConfFile} ${insertLine} "tor.streamisolation" "true"
     setting ${lndConfFile} ${insertLine} "tor.v3" "true"
     setting ${lndConfFile} ${insertLine} "tor.active" "true"
