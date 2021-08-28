@@ -41,7 +41,7 @@ elif [ ${CHAIN} = mainnet ];then
 fi
 
 function removeParallelService() {
-  if [ -f "/etc/systemd/system/${netprefix}bitcoind.service" ];then
+  if [ -f "/etc/systemd/system/${netprefix}lnd.service" ];then
     sudo -u bitcoin /usr/local/bin/lncli\
      --rpcserver localhost:1${rpcportmod}009 stop
     sudo systemctl stop ${netprefix}lnd
@@ -174,9 +174,12 @@ fi
 
 # switch off
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
+
+  echo "# removing ${CHAIN} lnd service (if active)"
+
   removeParallelService
 
-  # setting value in raspi blitz config
+  # setting value in raspiblitz config
   sudo sed -i "s/^${netprefix}lnd=.*/${netprefix}lnd=off/g" /mnt/hdd/raspiblitz.conf
 
   exit 0
