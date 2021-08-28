@@ -141,7 +141,7 @@ echo "startcountLightning=${startcountLightning}"
 lndRunning=$(systemctl status ${netprefix}lnd.service 2>/dev/null | grep -c running)
 echo "lndActive=${lndRunning}"
 
-if [ ${lndRunning} -eq 1 ]; then
+if [ ${lndRunning} -eq 1 ] && [ "${LNTYPE}" == "lnd" ]; then
 
   # get LND info
   lndRPCReady=1
@@ -279,7 +279,7 @@ fi
 # is CLN running
 clnRunning=$(systemctl status ${netprefix}lightningd.service 2>/dev/null | grep -c running)
 echo "clnActive=${clnRunning}"
-if [ ${clnRunning} -eq 1 ]; then
+if [ ${clnRunning} -eq 1 ] && [ "${LNTYPE}" == "cln" ]; then
   clnInfo=$($lightningcli_alias getinfo)
   clnBlockHeight=$(echo "${clnInfo}" | jq -r '.blockheight' | tr -cd '[[:digit:]]')
   scanProgress=$(echo "scale=2; $clnBlockHeight*100/$total" | bc)
