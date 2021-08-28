@@ -55,12 +55,12 @@ echo ""
 echo "*** BLOCKCHAIN (MAINNET) SYSTEMD STATUS ***"
 sudo systemctl status ${network}d -n2 --no-pager
 echo ""
-echo "*** LAST BLOCKCHAIN ERROR LOGS ***"
+echo "*** LAST BLOCKCHAIN (MAINNET) ERROR LOGS ***"
 echo "sudo journalctl -u ${network}d -b --no-pager -n8"
 sudo journalctl -u ${network}d -b --no-pager -n8
 cat /home/admin/systemd.blockchain.log | grep "ERROR" | tail -n -2
 echo ""
-echo "*** LAST BLOCKCHAIN 20 INFO LOGS ***"
+echo "*** LAST BLOCKCHAIN (MAINNET) 20 INFO LOGS ***"
 echo "sudo tail -n 20 /mnt/hdd/${network}/debug.log"
 sudo tail -n 20 /mnt/hdd/${network}${pathAdd}/debug.log
 echo ""
@@ -86,7 +86,7 @@ echo "*** C-LIGHTNING (MAINNET) SYSTEMD STATUS ***"
 if [ "${lightning}" == "cln" ] || [ "${cln}" == "on" ] || [ "${cln}" == "1" ]; then
   sudo systemctl status lightningd -n2 --no-pager
   echo ""
-  echo "*** LAST 30 C-LIGHTNING INFO LOGS ***"
+  echo "*** LAST 30 C-LIGHTNING (MAINNET) INFO LOGS ***"
   echo "sudo tail -n 30 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log"
   sudo tail -n 30 /home/bitcoin/.lightning/${network}/cl.log
 else
@@ -98,11 +98,11 @@ echo "*** BLOCKCHAIN (TESTNET) SYSTEMD STATUS ***"
 if [ "${testnet}" == "on" ] || [ "${testnet}" == "1" ]; then
   sudo systemctl status t${network}d -n2 --no-pager
   echo ""
-  echo "*** LAST BLOCKCHAIN ERROR LOGS ***"
+  echo "*** LAST BLOCKCHAIN (TESTNET) ERROR LOGS ***"
   echo "sudo journalctl -u t${network}d -b --no-pager -n8"
   sudo journalctl -u t${network}d -b --no-pager -n8
   echo ""
-  echo "*** LAST BLOCKCHAIN 20 INFO LOGS ***"
+  echo "*** LAST BLOCKCHAIN (TESTNET) 20 INFO LOGS ***"
   echo "sudo tail -n 20 /mnt/hdd/${network}/tdebug.log"
   sudo tail -n 20 /mnt/hdd/${network}/tdebug.log
   echo ""
@@ -130,11 +130,11 @@ echo "*** BLOCKCHAIN (SIGNET) SYSTEMD STATUS ***"
 if [ "${signet}" == "on" ] || [ "${signet}" == "1" ]; then
   sudo systemctl status s${network}d -n2 --no-pager
   echo ""
-  echo "*** LAST BLOCKCHAIN ERROR LOGS ***"
+  echo "*** LAST BLOCKCHAIN (SIGNET) ERROR LOGS ***"
   echo "sudo journalctl -u s${network}d -b --no-pager -n8"
   sudo journalctl -u s${network}d -b --no-pager -n8
   echo ""
-  echo "*** LAST BLOCKCHAIN 20 INFO LOGS ***"
+  echo "*** LAST BLOCKCHAIN (SIGNET) 20 INFO LOGS ***"
   echo "sudo tail -n 20 /mnt/hdd/${network}/sdebug.log"
   sudo tail -n 20 /mnt/hdd/${network}/sdebug.log
   echo ""

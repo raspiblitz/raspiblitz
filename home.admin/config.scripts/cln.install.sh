@@ -40,7 +40,20 @@ echo "# Using the settings for: ${network} ${CHAIN}"
 if ! grep -Eq "^${netprefix}cln=" /mnt/hdd/raspiblitz.conf; then
   echo "${netprefix}cln=off" | sudo tee -a /mnt/hdd/raspiblitz.conf
 fi
+
 source /mnt/hdd/raspiblitz.conf
+
+if [ "${CHAIN}" == "testnet" ] && [ "${testnet}" != "on" ]; then
+  echo "# before activating testnet on cln, first activate testnet on bitcoind"
+  echo "err='missing bitcoin testnet'"
+  exit 1
+fi
+
+if [ "${CHAIN}" == "signet" ] && [ "${signet}" != "on" ]; then
+  echo "# before activating signet on cln, first activate signet on bitcoind"
+  echo "err='missing bitcoin signet'"
+  exit 1
+fi
 
 if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = experimental ]||[ "$1" = testPR ];then
   if [ ! -f /usr/local/bin/lightningd ]||[ "$1" = update ]||[ "$1" = experimental ]||[ "$1" = testPR ];then
