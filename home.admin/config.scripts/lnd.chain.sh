@@ -62,6 +62,10 @@ source /mnt/hdd/raspiblitz.conf
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
+  sudo ufw allow ${portprefix}9735 comment '${netprefix}lnd'
+  sudo ufw allow ${portprefix}8080 comment '${netprefix}lnd REST'
+  sudo ufw allow 1${rpcportmod}009 comment '${netprefix}lnd RPC'
+
   echo "# Create /home/bitcoin/.lnd/${netprefix}lnd.conf"
   if [ ! -f /home/bitcoin/.lnd/${netprefix}lnd.conf ];then
     echo "
@@ -90,11 +94,7 @@ tlskeypath=/home/bitcoin/.lnd/tls.key
 bitcoin.active=1
 bitcoin.node=bitcoind
 
-[Tor]
-tor.active=true
-tor.streamisolation=true
-tor.v3=true
-tor.privatekeypath=/mnt/hdd/lnd/${netprefix}v3_onion_private_key
+
 " | sudo -u bitcoin tee /home/bitcoin/.lnd/${netprefix}lnd.conf
   else
     echo "# The file /home/bitcoin/.lnd/${netprefix}lnd.conf is already present"
@@ -113,7 +113,7 @@ Group=bitcoin
 Type=simple
 EnvironmentFile=/mnt/hdd/raspiblitz.conf
 ExecStartPre=-/home/admin/config.scripts/lnd.check.sh prestart ${CHAIN}
-ExecStart=/usr/local/bin/lnd --configfile=/home/bitcoin/.lnd/${netprefix}lnd.conf --externalip=${publicIP}:${portprefix}${lndPort} ${lndExtraParameter}
+ExecStart=/usr/local/bin/lnd --configfile=/home/bitcoin/.lnd/${netprefix}lnd.conf
 Restart=always
 TimeoutSec=120
 RestartSec=30

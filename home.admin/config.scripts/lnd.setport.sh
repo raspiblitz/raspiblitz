@@ -37,32 +37,6 @@ if [ "${runBehindTor}" = "on" ]; then
   exit 1
 fi
 
-# check lnd.conf exits 
-lndConfExists=$(sudo ls /mnt/hdd/lnd/lnd.conf | grep -c 'lnd.conf')
-if [ ${lndConfExists} -eq 0 ]; then
-  echo "FAIL - /mnt/hdd/lnd/lnd.conf not found"
-  exit 1
-fi
-
-# check if "listen=" exists in lnd config
-valueExists=$(sudo cat /mnt/hdd/lnd/lnd.conf | grep -c 'listen=')
-if [ ${valueExists} -lt 3 ]; then
-  echo "Adding listen config defaults to /mnt/hdd/lnd/lnd.conf"
-  sudo sed -i "9i listen=0.0.0.0:9735" /mnt/hdd/lnd/lnd.conf
-fi
-
-# stop services
-echo "making sure LND is not running"
-sudo systemctl stop lnd 2>/dev/null
-
-# disable services
-echo "making sure LND is disabled"
-sudo systemctl disable lnd
-
-# change port in lnd config
-echo "change port in lnd config"
-sudo sed -i "s/^listen=.*/listen=0.0.0.0:${portnumber}/g" /mnt/hdd/lnd/lnd.conf
-
 # add to raspiblitz.config (so it can survive update)
 valueExists=$(sudo cat /mnt/hdd/raspiblitz.conf | grep -c 'lndPort=')
 if [ ${valueExists} -eq 0 ]; then
@@ -75,7 +49,7 @@ fi
 
 # enable service again
 echo "enable service again"
-sudo systemctl enable lnd
+sudo systemctl restart lnd
 
 # make sure port is open on firewall
 sudo ufw allow ${portnumber} comment 'LND Port'

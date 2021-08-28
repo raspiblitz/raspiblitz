@@ -9,9 +9,8 @@ After=bitcoind.service
 #OnFailure=systemd-sendmail@%n
 
 [Service]
-EnvironmentFile=/mnt/hdd/raspiblitz.conf
 ExecStartPre=-/home/admin/config.scripts/lnd.check.sh prestart mainnet
-ExecStart=/usr/local/bin/lnd --externalip=${publicIP}:${lndPort} ${lndExtraParameter}
+ExecStart=/usr/local/bin/lnd --configfile=/home/bitcoin/.lnd/lnd.conf
 PIDFile=/home/bitcoin/.lnd/lnd.pid
 User=bitcoin
 Group=bitcoin

@@ -76,10 +76,6 @@ activateLndOverTOR()
   lndExists=$(sudo ls /etc/systemd/system/lnd.service | grep -c "lnd.service")
   if [ ${lndExists} -gt 0 ]; then
 
-    # deprecate 'torpassword='
-    sudo sed -i '/\[Tor\]*/d' /mnt/hdd/lnd/lnd.conf
-    sudo sed -i '/^tor.password=*/d' /mnt/hdd/lnd/lnd.conf
-
     # lnd-tor instance
     # https://www.torservers.net/wiki/setup/server#multiple_tor_processes
     NODENAME="lnd"
@@ -154,17 +150,7 @@ EOF
     sudo systemctl enable tor@$NODENAME
     sudo systemctl start tor@$NODENAME
     
-    # modify LND service
-    echo "# Make sure LND is disabled"
-    sudo systemctl disable lnd 2>/dev/null
 
-    echo "# Editing /etc/systemd/system/lnd.service"
-    sudo sed -i "s/^ExecStart=\/usr\/local\/bin\/lnd.*\
-/ExecStart=\/usr\/local\/bin\/lnd --tor\.active --tor\.streamisolation --tor\.v3 --tor\.socks=$SOCKSPORT --tor\.control=$CONTROLPORT --listen=127\.0\.0\.1\:9735 \${lndExtraParameter}/g" \
-    /etc/systemd/system/lnd.service
-
-    echo "# Enable LND again"
-    sudo systemctl enable lnd
     echo "# OK"
     echo 
 
@@ -445,14 +431,29 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   deactivateBitcoinOverTOR
   echo ""
 
-  echo "# *** Removing Tor from LND ***"
-  sudo systemctl disable lnd
-  echo "# editing /etc/systemd/system/lnd.service"
-  sudo sed -i "s/^ExecStart=\/usr\/local\/bin\/lnd.*/ExecStart=\/usr\/local\/bin\/lnd --externalip=\${publicIP}:\${lndPort} \${lndExtraParameter}/g" /etc/systemd/system/lnd.service
-
   sudo /home/admin/config.scripts/internet.sh update-publicip
+  
+  if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ] || [ "${lnd}" == "1" ]; then
+    echo "# *** Removing Tor from LND Mainnet ***"
+    sudo sed -i '/^\[[Tt]or\].*/d' /mnt/hdd/lnd/lnd.conf
+    sudo sed -i '/^tor\..*/d' /mnt/hdd/lnd/lnd.conf
+    sudo systemctl restart lnd
+  fi
 
-  sudo systemctl enable lnd
+  if [ "${tlnd}" == "on" ] || [ "${tlnd}" == "1" ]; then
+    echo "# *** Removing Tor from LND Testnet ***"
+    sudo sed -i '/^\[[Tt]or\].*/d' /mnt/hdd/lnd/tlnd.conf
+    sudo sed -i '/^tor\..*/d' /mnt/hdd/lnd/tlnd.conf
+    sudo systemctl restart tlnd
+  fi
+
+  if [ "${slnd}" == "on" ] || [ "${slnd}" == "1" ]; then
+    echo "# *** Removing Tor from LND Signet ***"
+    sudo sed -i '/^\[[Tt]or\].*/d' /mnt/hdd/lnd/slnd.conf
+    sudo sed -i '/^tor\..*/d' /mnt/hdd/lnd/slnd.conf
+    sudo systemctl restart slnd
+  fi
+
   echo "# OK"
   echo ""
 
@@ -495,7 +496,9 @@ if [ "$1" = "update" ]; then
   echo "# Installed $(tor --version)"
   if [ $(systemctl status lnd | grep -c "active (running)") -gt 0 ];then
     echo "# LND needs to restart"
-    sudo systemctl restart lnd
+    sudo systemctl restart lnd 
+    sudo systemctl restart tlnd 2>/dev/null
+    sudo systemctl restart slnd 2>/dev/null
     sleep 10
     lncli unlock
   fi

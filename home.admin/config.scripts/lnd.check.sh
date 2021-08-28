@@ -81,7 +81,9 @@ if [ "$1" == "prestart" ]; then
   lndConfFile="/mnt/hdd/lnd/${netprefix}lnd.conf"
   echo "# lndConfFile(${lndConfFile})"
 
-  # [bitcoind] Section ..
+  ##### BITCOIND OPTIONS SECTION #####
+
+  # [bitcoind]
   sectionName="[Bb]itcoind"
   if [ "${network}" != "bitcoin" ]; then
     sectionName="${network}d"
@@ -128,7 +130,7 @@ if [ "$1" == "prestart" ]; then
   # SET/UPDATE rpchost
   setting ${lndConfFile} ${insertLine} "${network}d\.rpchost" "127\.0\.0\.1\:${portprefix}8332"
 
-  # Application Options
+  ##### APPLICATION OPTIONS SECTION #####
   
   sectionLine=$(cat ${lndConfFile} | grep -n "^\[Application Options\]" | cut -d ":" -f1)
   echo "# sectionLine(${sectionLine})"
@@ -138,10 +140,64 @@ if [ "$1" == "prestart" ]; then
   setting ${lndConfFile} ${insertLine} "rpclisten" "0\.0\.0\.0\:1${rpcportmod}009"
   setting ${lndConfFile} ${insertLine} "restlisten" "0\.0\.0\.0\:${portprefix}8080"
 
-  # enforce keysend if 'lndKeysend=on' in raspiblitz.conf
+  # enforce LND port is set correctly (if set in raspiblitz.conf)
+  if [ "${lndPort}" != "" ]; then
+    setting ${lndConfFile} ${insertLine} "listen" "0\.0\.0\.0\:${portprefix}${lndPort}"
+  else
+    lndPort=9735
+  fi
+
+  # enforce PublicIP if (if not running Tor)
+  if [ "${runBehindTor}" != "on" ]; then
+    setting ${lndConfFile} ${insertLine} "externalip" "${publicIP}:${lndPort}"
+  fi
+
+  # enforce LND keysend (if set in raspiblitz.conf)
   if [ "${lndKeysend}" == "on" ]; then
     setting ${lndConfFile} ${insertLine} "accept-keysend" "true"
   fi
+
+  ##### TOR SECTION #####
+
+  if [ "${runBehindTor}" == "on" ]; then
+
+    # make sure lnd config has a [tor] section
+    echo "# [tor] config ..."
+    sectionExists=$(cat ${lndConfFile} | grep -c "^\[[Tt]or\]")
+    echo "# sectionExists(${sectionExists})"
+    if [ "${sectionExists}" == "0" ]; then
+      echo "# adding section [tor]"
+      echo "
+[tor]
+" | tee -a ${lndConfFile}
+    fi
+
+    # get line number of [tor] section
+    sectionLine=$(cat ${lndConfFile} | grep -n "^\[[Tt]or\]" | cut -d ":" -f1)
+    echo "# sectionLine(${sectionLine})"
+    insertLine=$(expr $sectionLine + 1)
+    echo "# insertLine(${insertLine})"
+    fileLines=$(wc -l ${lndConfFile} | cut -d " " -f1)
+    echo "# fileLines(${fileLines})"
+    if [ ${fileLines} -lt ${insertLine} ]; then
+      echo "# adding new line for inserts"
+      echo "
+" | tee -a ${lndConfFile}
+    fi
+
+--tor\.socks=$SOCKSPORT --tor\.control=$CONTROLPORT
+    setting ${lndConfFile} ${insertLine} "tor.control" "9071"
+    setting ${lndConfFile} ${insertLine} "tor.socks" "9070"
+    setting ${lndConfFile} ${insertLine} "tor.privatekeypath" "/mnt/hdd/lnd/${netprefix}v3_onion_private_key"
+    setting ${lndConfFile} ${insertLine} "tor.streamisolation" "true"
+    setting ${lndConfFile} ${insertLine} "tor.v3" "true"
+    setting ${lndConfFile} ${insertLine} "tor.active" "true"
+
+    # deprecate Tor password (remove if in lnd.conf)
+    sed -i '/^tor.password=*/d' ${lndConfFile}
+
+  fi
+
 
   echo "# OK PRESTART DONE"
 

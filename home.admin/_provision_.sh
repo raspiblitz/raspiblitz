@@ -288,13 +288,20 @@ else
   echo "Provisioning LND interims update - keep default" >> ${logFile}
 fi
 
-# TESTNET
-if [ "${chain}" = "test" ]; then
-    echo "Provisioning TESTNET - run config script" >> ${logFile}
-    sudo sed -i "s/^message=.*/message='Provisioning Testnet'/g" ${infoFile}
-    sudo /home/admin/config.scripts/network.chain.sh testnet >> ${logFile} 2>&1
+# LND Testnet
+if [ "${tlnd}" == "on" ]; then
+    echo "Provisioning LND Testnet - run config script" >> ${logFile}
+    sudo /home/admin/config.scripts/lnd.chain.sh testnet >> ${logFile} 2>&1
 else
-    echo "Provisioning TESTNET - keep default" >> ${logFile}
+    echo "Provisioning LND Testnet - not activ" >> ${logFile}
+fi
+
+# LND Signet
+if [ "${slnd}" == "on" ]; then
+    echo "Provisioning LND Signet - run config script" >> ${logFile}
+    sudo /home/admin/config.scripts/lnd.chain.sh signet >> ${logFile} 2>&1
+else
+    echo "Provisioning LND Signet - not activ" >> ${logFile}
 fi
 
 # TOR
