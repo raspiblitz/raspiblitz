@@ -318,6 +318,7 @@ fi
 if [ "${tlnd}" == "on" ]; then
     echo "Provisioning LND Testnet - run config script" >> ${logFile}
     sudo /home/admin/config.scripts/lnd.chain.sh on testnet >> ${logFile} 2>&1
+    sudo systemctl start tlnd >> ${logFile} 2>&1
 else
     echo "Provisioning LND Testnet - not activ" >> ${logFile}
 fi
@@ -326,6 +327,7 @@ fi
 if [ "${slnd}" == "on" ]; then
     echo "Provisioning LND Signet - run config script" >> ${logFile}
     sudo /home/admin/config.scripts/lnd.chain.sh on signet >> ${logFile} 2>&1
+    sudo systemctl start slnd >> ${logFile} 2>&1
 else
     echo "Provisioning LND Signet - not activ" >> ${logFile}
 fi
