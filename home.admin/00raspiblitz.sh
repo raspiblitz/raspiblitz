@@ -107,7 +107,7 @@ do
      cp /var/cache/raspiblitz/raspiblitz.status.tmp /var/cache/raspiblitz/raspiblitz.status
     else
      # statusscan blocked and was killed - fallback to old results
-     echo "statusscan blocked - fallback to old results"
+     echo "statusscan blocked (${result}) - fallback to old results"
      sleep 1
     fi 
   
