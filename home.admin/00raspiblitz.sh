@@ -102,7 +102,7 @@ do
     # run statusscan with timeout - if status scan was not killed it will copy over the 
     timeout 10 /home/admin/config.scripts/blitz.statusscan.sh > /var/cache/raspiblitz/raspiblitz.status.tmp
     result=$?
-    if [ "${result}" != "0" ]; then
+    if [ "${result}" == "0" ]; then
      # statusscan finished in under 10 seconds - use results
      cp /var/cache/raspiblitz/raspiblitz.status.tmp /var/cache/raspiblitz/raspiblitz.status
     else
