@@ -292,6 +292,7 @@ fi
 if [ "${testnet}" == "on" ]; then
     echo "Provisioning ${network} Testnet - run config script" >> ${logFile}
     sudo /home/admin/config.scripts/bitcoin.chains.sh on testnet >> ${logFile} 2>&1
+    sudo systemctl start tbitcoind >> ${logFile} 2>&1
 else
     echo "Provisioning ${network} Testnet - not activ" >> ${logFile}
 fi
@@ -300,6 +301,7 @@ fi
 if [ "${signet}" == "on" ]; then
     echo "Provisioning ${network} Signet - run config script" >> ${logFile}
     sudo /home/admin/config.scripts/bitcoin.chains.sh on signet >> ${logFile} 2>&1
+    sudo systemctl start sbitcoind >> ${logFile} 2>&1
 else
     echo "Provisioning ${network} Signet - not activ" >> ${logFile}
 fi
@@ -307,7 +309,7 @@ fi
 # LND Mainnet (when not main instance)
 if [ "${lnd}" == "on" ] && [ "${lightning}" != "lnd" ]; then
     echo "Provisioning LND Mainnet - run config script" >> ${logFile}
-    sudo /home/admin/config.scripts/lnd.chain.sh mainnet >> ${logFile} 2>&1
+    sudo /home/admin/config.scripts/lnd.chain.sh on mainnet >> ${logFile} 2>&1
 else
     echo "Provisioning LND Mainnet - not activ as secondary option" >> ${logFile}
 fi
@@ -315,7 +317,7 @@ fi
 # LND Testnet
 if [ "${tlnd}" == "on" ]; then
     echo "Provisioning LND Testnet - run config script" >> ${logFile}
-    sudo /home/admin/config.scripts/lnd.chain.sh testnet >> ${logFile} 2>&1
+    sudo /home/admin/config.scripts/lnd.chain.sh on testnet >> ${logFile} 2>&1
 else
     echo "Provisioning LND Testnet - not activ" >> ${logFile}
 fi
@@ -323,7 +325,7 @@ fi
 # LND Signet
 if [ "${slnd}" == "on" ]; then
     echo "Provisioning LND Signet - run config script" >> ${logFile}
-    sudo /home/admin/config.scripts/lnd.chain.sh signet >> ${logFile} 2>&1
+    sudo /home/admin/config.scripts/lnd.chain.sh on signet >> ${logFile} 2>&1
 else
     echo "Provisioning LND Signet - not activ" >> ${logFile}
 fi
@@ -331,7 +333,7 @@ fi
 # CLN Mainnet (when not main instance)
 if [ "${cln}" == "on" ] && [ "${lightning}" != "cln" ]; then
     echo "Provisioning CLN Mainnet - run config script" >> ${logFile}
-    sudo /home/admin/config.scripts/cln.install.sh mainnet >> ${logFile} 2>&1
+    sudo /home/admin/config.scripts/cln.install.sh on mainnet >> ${logFile} 2>&1
 else
     echo "Provisioning CLN Mainnet - not activ as secondary option" >> ${logFile}
 fi
@@ -339,7 +341,7 @@ fi
 # CLN Testnet
 if [ "${tcln}" == "on" ]; then
     echo "Provisioning CLN Testnet - run config script" >> ${logFile}
-    sudo /home/admin/config.scripts/cln.install.sh testnet >> ${logFile} 2>&1
+    sudo /home/admin/config.scripts/cln.install.sh on testnet >> ${logFile} 2>&1
 else
     echo "Provisioning CLN Testnet - not activ" >> ${logFile}
 fi
@@ -347,7 +349,7 @@ fi
 # CLN Signet
 if [ "${scln}" == "on" ]; then
     echo "Provisioning CLN Signet - run config script" >> ${logFile}
-    sudo /home/admin/config.scripts/cln.install.sh signet >> ${logFile} 2>&1
+    sudo /home/admin/config.scripts/cln.install.sh on signet >> ${logFile} 2>&1
 else
     echo "Provisioning CLN Signet - not activ" >> ${logFile}
 fi
