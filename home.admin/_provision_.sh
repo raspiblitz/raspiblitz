@@ -10,6 +10,7 @@ logFile="/home/admin/raspiblitz.log"
 
 # INFOFILE - state data from bootstrap
 infoFile="/home/admin/raspiblitz.info"
+infoFileDisplayClass="${displayClass}"
 
 # CONFIGFILE - configuration of RaspiBlitz
 configFile="/mnt/hdd/raspiblitz.conf"
@@ -26,12 +27,6 @@ configExists=$(ls ${configFile} 2>/dev/null | grep -c '.conf')
 if [ ${configExists} -eq 0 ]; then
   echo "FAIL: no config file (${configFile}) found to run provision!" >> ${logFile}
   exit 1
-fi
-
-# check that default parameter exist in config
-parameterExists=$(cat /mnt/hdd/raspiblitz.conf | grep -c "lndExtraParameter=")
-if [ ${parameterExists} -eq 0 ]; then
-  echo "lndExtraParameter=''" >> ${configFile}
 fi
 
 # import config values
@@ -533,13 +528,17 @@ else
 fi
 
 # LCD ROTATE
-if [ "${#lcdrotate}" -eq 0 ]; then
+if [ ${#lcdrotate} -eq 0 ]; then
   # when upgrading from an old raspiblitz - enforce lcdrotate = 0
   lcdrotate=0
 fi
-echo "Provisioning LCD rotate - run config script" >> ${logFile}
-sudo sed -i "s/^message=.*/message='LCD Rotate'/g" ${infoFile}
-sudo /home/admin/config.scripts/blitz.display.sh rotate ${lcdrotate} >> ${logFile} 2>&1
+if [ "${lcdrotate}" == "0" ]; then
+  echo "Provisioning LCD rotate - run config script" >> ${logFile}
+  sudo sed -i "s/^message=.*/message='LCD Rotate'/g" ${infoFile}
+  sudo /home/admin/config.scripts/blitz.display.sh rotate ${lcdrotate} >> ${logFile} 2>&1
+else
+  echo "Provisioning LCD rotate - not needed, keep default rotate on" >> ${logFile}
+fi
 
 # TOUCHSCREEN
 if [ "${#touchscreen}" -gt 0 ]; then

@@ -1183,6 +1183,7 @@ if [ "${displayClass}" != "headless" ] || [ "${baseimage}" = "raspbian" ] || [ "
   echo "*** ADDITIONAL DISPLAY OPTIONS ***"
   echo "- calling: blitz.display.sh set-display ${displayClass}"
   sudo /home/admin/config.scripts/blitz.display.sh set-display ${displayClass}
+  sudo /home/admin/config.scripts/blitz.display.sh rotate 1
 fi
 
 echo "# BUILD DONE - see above"
