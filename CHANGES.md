@@ -11,7 +11,6 @@
 - Update: Balance of Satoshis 10.7.8 (BOS) + keep data on reinstall [details](https://github.com/alexbosworth/balanceofsatoshis/blob/master/CHANGELOG.md#version-8010)
 - Update: JoinMarket v0.9.1 [details](https://github.com/JoinMarket-Org/joinmarket-clientserver/#joinmarket-clientserver)
 - Update: JoininBox v0.6.0 [details](https://github.com/openoms/joininbox/tree/master#joininbox)
-- Update: Specter Desktop v0.15.1 [details](https://github.com/cryptoadvance/specter-desktop#specter-desktop)
 - Update: Electrum Server in Rust (electrs) v0.8.11 [details](https://github.com/romanz/electrs/blob/v0.8.11/RELEASE-NOTES.md#0811-18-aug-2021)
 - Update: Mempool 2.2.1 [details](https://github.com/mempool/mempool)
 - Update: BTC-RPC-Explorer v3.2.0 [details](https://github.com/janoside/btc-rpc-explorer/blob/master/CHANGELOG.md#v320)
