@@ -87,6 +87,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # password C needs to be stored on RaspiBlitz
   echo "# storing password for root in /root/lnd.autounlock.pwd"
   sudo sh -c "echo \"${passwordC}\" > /root/lnd.autounlock.pwd"
+  sudo chmod 660 /root/lnd.autounlock.pwd
+  sudo chown root:sudo /root/lnd.autounlock.pwd
 
   echo "# Auto-Unlock is now ON"
   echo "# NOTE: you may need to reconnect mobile/external wallets (macaroon/tls)"
