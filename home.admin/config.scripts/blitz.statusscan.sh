@@ -280,7 +280,6 @@ fi
 clnRunning=$(systemctl status ${netprefix}lightningd.service 2>/dev/null | grep -c running)
 echo "clnActive=${clnRunning}"
 if [ ${clnRunning} -eq 1 ] && [ "${LNTYPE}" == "cln" ]; then
-  echo "# $lightningcli_alias getinfo"
   clnInfo=$($lightningcli_alias getinfo)
   clnBlockHeight=$(echo "${clnInfo}" | jq -r '.blockheight' | tr -cd '[[:digit:]]')
   scanProgress=$(echo "scale=2; $clnBlockHeight*100/$total" | bc)
@@ -292,7 +291,6 @@ if [ ${clnRunning} -eq 1 ] && [ "${LNTYPE}" == "cln" ]; then
       echo "syncedToChain=0"
   fi
 fi
-echo "# touchscreen check"
 
 # touchscreen statistics
 if [ "${touchscreen}" == "1" ]; then
