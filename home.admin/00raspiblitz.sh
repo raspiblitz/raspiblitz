@@ -96,7 +96,29 @@ do
   # gather fresh status scan and store results in memory
   # TODO: move this into background loop and unify with redis data storage later
   #echo "# blitz.statusscan.sh"
-  sudo /home/admin/config.scripts/blitz.statusscan.sh > /var/cache/raspiblitz/raspiblitz.status
+
+  if [ -f /var/cache/raspiblitz/raspiblitz.status ]; then
+
+    # run statusscan with timeout - if status scan was not killed it will copy over the 
+    timeout 10 sudo /home/admin/config.scripts/blitz.statusscan.sh > /var/cache/raspiblitz/raspiblitz.status.tmp
+    result=$?
+    if [ "${result}" != "0" ]; then
+     # statusscan finished in under 10 seconds - use results
+     cp /var/cache/raspiblitz/raspiblitz.status.tmp /var/cache/raspiblitz/raspiblitz.status
+    else
+     # statusscan blocked and was killed - fallback to old results
+     echo "statusscan blocked - fallback to old results"
+     sleep 1
+    fi 
+  
+  else
+  
+    # first time run statusscan without timeout
+    sudo /home/admin/config.scripts/blitz.statusscan.sh > /var/cache/raspiblitz/raspiblitz.status
+
+  fi
+
+  # load statusscan results
   source /var/cache/raspiblitz/raspiblitz.status
 
   #####################################
