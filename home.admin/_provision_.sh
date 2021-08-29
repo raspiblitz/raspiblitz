@@ -288,6 +288,22 @@ else
   echo "Provisioning LND interims update - keep default" >> ${logFile}
 fi
 
+# Bitcoin Testnet
+if [ "${testnet}" == "on" ]; then
+    echo "Provisioning ${network} Testnet - run config script" >> ${logFile}
+    sudo /home/admin/config.scripts/bitcoin.chain.sh on testnet >> ${logFile} 2>&1
+else
+    echo "Provisioning ${network} Testnet - not activ" >> ${logFile}
+fi
+
+# Bitcoin Signet
+if [ "${signet}" == "on" ]; then
+    echo "Provisioning ${network} Signet - run config script" >> ${logFile}
+    sudo /home/admin/config.scripts/bitcoin.chain.sh on signet >> ${logFile} 2>&1
+else
+    echo "Provisioning ${network} Signet - not activ" >> ${logFile}
+fi
+
 # LND Testnet
 if [ "${tlnd}" == "on" ]; then
     echo "Provisioning LND Testnet - run config script" >> ${logFile}
@@ -302,6 +318,22 @@ if [ "${slnd}" == "on" ]; then
     sudo /home/admin/config.scripts/lnd.chain.sh signet >> ${logFile} 2>&1
 else
     echo "Provisioning LND Signet - not activ" >> ${logFile}
+fi
+
+# LND Testnet
+if [ "${tcln}" == "on" ]; then
+    echo "Provisioning CLN Testnet - run config script" >> ${logFile}
+    sudo /home/admin/config.scripts/cln.install.sh testnet >> ${logFile} 2>&1
+else
+    echo "Provisioning CLN Testnet - not activ" >> ${logFile}
+fi
+
+# LND Signet
+if [ "${scln}" == "on" ]; then
+    echo "Provisioning CLN Signet - run config script" >> ${logFile}
+    sudo /home/admin/config.scripts/cln.install.sh signet >> ${logFile} 2>&1
+else
+    echo "Provisioning CLN Signet - not activ" >> ${logFile}
 fi
 
 # TOR
