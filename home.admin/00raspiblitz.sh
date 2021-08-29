@@ -97,9 +97,11 @@ do
   # TODO: move this into background loop and unify with redis data storage later
   #echo "# blitz.statusscan.sh"
 
-  if [ -f /var/cache/raspiblitz/raspiblitz.status ]; then
+  firstStatusScanExists=$(ls /var/cache/raspiblitz/raspiblitz.status | grep -c "raspiblitz.status")
+  if [ ${firstStatusScanExists} -eq 1 ]; then
 
     # run statusscan with timeout - if status scan was not killed it will copy over the 
+    echo "# running timeout status scan"
     timeout 15 /home/admin/config.scripts/blitz.statusscan.sh ${lightning} > /var/cache/raspiblitz/raspiblitz.status.tmp
     result=$?
     if [ "${result}" == "0" ]; then
@@ -115,7 +117,7 @@ do
   
     # first time run statusscan without timeout
     echo "# running statusscan for the first time ... can take time"
-    /home/admin/config.scripts/blitz.statusscan.sh > /var/cache/raspiblitz/raspiblitz.status ${lightning}
+    /home/admin/config.scripts/blitz.statusscan.sh ${lightning} > /var/cache/raspiblitz/raspiblitz.status 
 
   fi
 
