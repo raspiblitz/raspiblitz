@@ -90,8 +90,16 @@ while [ ${fallback} -eq 0 ]
     if [ ${wasUnlocked} -gt 0 ]; then
 
         # SUCCESS UNLOCK
-
         echo "# OK LND wallet unlocked"
+
+        # if autoUnlock set in config (but this manual input was needed)
+        # there seems to be no stored password - make sure to store password c now
+        if [ "${autoUnlock}" == "on" ]; then
+            echo "# storing password C for future Auto-Unlock"
+            /home/admin/config.scripts/lnd.autounlock.sh on "${passwordC}"
+            sleep 1
+        fi
+
         exit 0
 
     elif [ ${wrongPassword} -gt 0 ]; then
