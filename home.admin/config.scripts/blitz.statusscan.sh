@@ -279,7 +279,7 @@ fi
 # is CLN running
 clnRunning=$(systemctl status ${netprefix}lightningd.service 2>/dev/null | grep -c running)
 echo "clnActive=${clnRunning}"
-if [ ${clnRunning} -eq 1 ] && [ "${LNTYPE}" == "cln" ]; then
+if [ "${clnRunning}" == "1" ] && [ "${LNTYPE}" == "cln" ]; then
   clnInfo=$($lightningcli_alias getinfo)
   clnBlockHeight=$(echo "${clnInfo}" | jq -r '.blockheight' | tr -cd '[[:digit:]]')
   scanProgress=$(echo "scale=2; $clnBlockHeight*100/$total" | bc)

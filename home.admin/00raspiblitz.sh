@@ -100,7 +100,7 @@ do
   if [ -f /var/cache/raspiblitz/raspiblitz.status ]; then
 
     # run statusscan with timeout - if status scan was not killed it will copy over the 
-    timeout 10 /home/admin/config.scripts/blitz.statusscan.sh > /var/cache/raspiblitz/raspiblitz.status.tmp
+    timeout 15 /home/admin/config.scripts/blitz.statusscan.sh ${lightning} > /var/cache/raspiblitz/raspiblitz.status.tmp
     result=$?
     if [ "${result}" == "0" ]; then
      # statusscan finished in under 10 seconds - use results
@@ -115,7 +115,7 @@ do
   
     # first time run statusscan without timeout
     echo "# running statusscan for the first time ... can take time"
-    /home/admin/config.scripts/blitz.statusscan.sh > /var/cache/raspiblitz/raspiblitz.status
+    /home/admin/config.scripts/blitz.statusscan.sh > /var/cache/raspiblitz/raspiblitz.status ${lightning}
 
   fi
 
@@ -164,7 +164,7 @@ do
   #####################################
   # INITIAL BLOCKCHAIN SYNC (SUBLOOP)
   #####################################
-  if [ "${setupPhase}" == "done" ] && [ "${state}" == "ready" ] && [ "${initialSync}" == "1" ]; then
+  if [ "${setupPhase}" == "done" ] && [ "${state}" == "ready" ] && [ "${syncedToChain}" != "1" ]; then
     echo "debug wait eventBlockchainSync.sh ..."
     sleep 3
     #echo "# eventBlockchainSync.sh ssh loop"
