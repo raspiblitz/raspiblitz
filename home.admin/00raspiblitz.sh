@@ -114,6 +114,7 @@ do
   else
   
     # first time run statusscan without timeout
+    echo "# running statusscan for the first time ... can take time"
     sudo /home/admin/config.scripts/blitz.statusscan.sh > /var/cache/raspiblitz/raspiblitz.status
 
   fi
