@@ -431,9 +431,8 @@ else
     echo "Provisioning RTL CLN - keep default" >> ${logFile}
 fi
 
-#LOOP
-# install only if LiT won't be installed
-if [ "${loop}" = "on" ] && [ "${#lit}" -eq 0 ] || [ "${lit}" = "off" ]; then
+#LOOP - install only if LiT won't be installed
+if [ "${loop}" = "on" ] && [ "${lit}" != "on" ]; then
   echo "Provisioning Lightning Loop - run config script" >> ${logFile}
   sudo sed -i "s/^message=.*/message='Setup Lightning Loop'/g" ${infoFile}
   sudo -u admin /home/admin/config.scripts/bonus.loop.sh on >> ${logFile} 2>&1
@@ -659,9 +658,8 @@ else
   echo "Provisioning Stacking Sats Kraken - keep default" >> ${logFile}
 fi
 
-# Pool
-# install only if LiT won't be installed
-if [ "${pool}" = "on" ] && [ "${#lit}" -eq 0 ] || [ "${lit}" = "off" ]; then
+# Pool - install only if LiT won't be installed
+if [ "${pool}" = "on" ] && [ "${lit}" != "on" ]; then
   echo "Provisioning Pool - run config script" >> ${logFile}
   sudo sed -i "s/^message=.*/message='Setup Pool'/g" ${infoFile}
   sudo -u admin /home/admin/config.scripts/bonus.pool.sh on >> ${logFile} 2>&1
