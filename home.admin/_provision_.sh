@@ -291,7 +291,7 @@ fi
 # Bitcoin Testnet
 if [ "${testnet}" == "on" ]; then
     echo "Provisioning ${network} Testnet - run config script" >> ${logFile}
-    sudo /home/admin/config.scripts/bitcoin.chain.sh on testnet >> ${logFile} 2>&1
+    sudo /home/admin/config.scripts/bitcoin.chains.sh on testnet >> ${logFile} 2>&1
 else
     echo "Provisioning ${network} Testnet - not activ" >> ${logFile}
 fi
@@ -299,9 +299,17 @@ fi
 # Bitcoin Signet
 if [ "${signet}" == "on" ]; then
     echo "Provisioning ${network} Signet - run config script" >> ${logFile}
-    sudo /home/admin/config.scripts/bitcoin.chain.sh on signet >> ${logFile} 2>&1
+    sudo /home/admin/config.scripts/bitcoin.chains.sh on signet >> ${logFile} 2>&1
 else
     echo "Provisioning ${network} Signet - not activ" >> ${logFile}
+fi
+
+# LND Mainnet (when not main instance)
+if [ "${lnd}" == "on" ] && [ "${lightning}" != "lnd" ]; then
+    echo "Provisioning LND Mainnet - run config script" >> ${logFile}
+    sudo /home/admin/config.scripts/lnd.chain.sh mainnet >> ${logFile} 2>&1
+else
+    echo "Provisioning LND Mainnet - not activ as secondary option" >> ${logFile}
 fi
 
 # LND Testnet
@@ -320,7 +328,15 @@ else
     echo "Provisioning LND Signet - not activ" >> ${logFile}
 fi
 
-# LND Testnet
+# CLN Mainnet (when not main instance)
+if [ "${cln}" == "on" ] && [ "${lightning}" != "cln" ]; then
+    echo "Provisioning CLN Mainnet - run config script" >> ${logFile}
+    sudo /home/admin/config.scripts/cln.install.sh mainnet >> ${logFile} 2>&1
+else
+    echo "Provisioning CLN Mainnet - not activ as secondary option" >> ${logFile}
+fi
+
+# CLN Testnet
 if [ "${tcln}" == "on" ]; then
     echo "Provisioning CLN Testnet - run config script" >> ${logFile}
     sudo /home/admin/config.scripts/cln.install.sh testnet >> ${logFile} 2>&1
@@ -328,7 +344,7 @@ else
     echo "Provisioning CLN Testnet - not activ" >> ${logFile}
 fi
 
-# LND Signet
+# CLN Signet
 if [ "${scln}" == "on" ]; then
     echo "Provisioning CLN Signet - run config script" >> ${logFile}
     sudo /home/admin/config.scripts/cln.install.sh signet >> ${logFile} 2>&1
