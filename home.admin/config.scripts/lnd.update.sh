@@ -112,6 +112,7 @@ if [ "${mode}" = "verified" ]; then
     if [ "${fixedUpdateVersion}" != "${lndUpdateVersion}" ]; then
       echo "warn='required update version does not match'"
       echo "# this is normal when the recovery script of a new RaspiBlitz version checks for an old update - just ignore"
+      sed -i '/^lndInterimsUpdate=*/d' /mnt/hdd/raspiblitz.conf
       exit 1
     else
       echo "# OK - update version is matching"
