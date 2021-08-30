@@ -49,7 +49,7 @@ elif [ ${chain} = main ];then
 fi
 
 # BASIC MENU INFO
-WIDTH=64
+WIDTH=66
 BACKTITLE="RaspiBlitz"
 TITLE=""
 MENU="Choose one of the following options:"
@@ -67,8 +67,11 @@ fi
 BACKTITLE="${localip} / ${hostname} / ${network} ${plus}"
 
 # Put Activated Apps on top
-if [ "${rtlWebinterface}" == "on" ] || [ "${crtlWebinterface}" == "on" ]; then
-  OPTIONS+=(RTL "RTL Web Node Manager")
+if [ "${rtlWebinterface}" == "on" ]; then
+  OPTIONS+=(LRTL "LND RTL Webinterface")
+fi
+if [ "${crtlWebinterface}" == "on" ]; then
+  OPTIONS+=(CRTL "C-Lightning RTL Webinterface")
 fi
 if [ "${BTCPayServer}" == "on" ]; then
   OPTIONS+=(BTCPAY "BTCPay Server Info")
@@ -221,8 +224,11 @@ case $CHOICE in
             dialog --title 'Touchscreen Calibration' --msgbox 'Choose OK and then follow the instructions on touchscreen for calibration.\n\nBest is to use a stylus for accurate touchscreen interaction.' 9 48
             /home/admin/config.scripts/blitz.touchscreen.sh calibrate
             ;;
-        RTL)
-            /home/admin/config.scripts/bonus.rtl.sh menu ${lightning}
+        LRTL)
+            /home/admin/config.scripts/bonus.rtl.sh menu lnd
+            ;;
+        CRTL)
+            /home/admin/config.scripts/bonus.rtl.sh menu cln
             ;;
         BTCPAY)
             /home/admin/config.scripts/bonus.btcpayserver.sh menu
