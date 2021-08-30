@@ -229,9 +229,7 @@ if [ "${rtlWebinterface}" == "" ] || [ "${rtlWebinterface}" == "off" ]; then
 else
   echo ""
   echo "*** LND-RTL ***"
-  sudo systemctl status RTL -n2 --no-pager
-  echo "sudo journalctl -u RTL -b --no-pager -n20"
-  sudo journalctl -u RTL -b --no-pager -n20
+  sudo systemctl status RTL -n10 --no-pager
   echo ""
 fi
 
@@ -240,9 +238,7 @@ if [ "${crtlWebinterface}" == "" ] || [ "${crtlWebinterface}" == "off" ]; then
 else
   echo ""
   echo "*** CLN-RTL ***"
-  sudo systemctl status cRTL -n2 --no-pager
-  echo "sudo journalctl -u cRTL -b --no-pager -n20"
-  sudo journalctl -u cRTL -b --no-pager -n20
+  sudo systemctl status cRTL -n10 --no-pager
   echo ""
 fi
 
