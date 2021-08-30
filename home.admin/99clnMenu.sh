@@ -13,7 +13,7 @@ source <(/home/admin/config.scripts/internet.sh status local)
 # BASIC MENU INFO
 WIDTH=64
 BACKTITLE="RaspiBlitz"
-TITLE="C-Lightning Options"
+TITLE=" C-Lightning Options "
 MENU=""
 OPTIONS=()
 
@@ -34,11 +34,11 @@ if [ ${#openChannels} -gt 0 ] && [ ${openChannels} -gt 0 ]; then
   OPTIONS+=(CLOSEALL "Close all open Channels on $CHAIN")
 fi
 
-if [ ${#lightning} -gt 0 ]&&[ $lightning = lnd ];then
+OPTIONS+=(CASHOUT "Withdraw all funds from C-lightning on $CHAIN")
+
+if [ "${lightning}" != "cln" ]; then
   OPTIONS+=(SWITCHLN  "Use C-lightning as default")
 fi  
-
-OPTIONS+=(CASHOUT "Withdraw all funds from C-lightning on $CHAIN")
 
 CHOICE_HEIGHT=$(("${#OPTIONS[@]}/2+1"))
 HEIGHT=$((CHOICE_HEIGHT+6))
