@@ -645,12 +645,17 @@ if [ ${isMounted} -eq 0 ]; then
   # signal that setup phas is over
   sed -i "s/^setupPhase=.*/setupPhase='done'/g" ${infoFile}
 
+
+  ########################################
+  # AFTER SETUP REBOOT
+  # touchscreen activation, start with configured SWAP, fix LCD text bug
+
   # if touchscreen is on (on recover/update) --> reboot now to activate touchscreen 
   source ${configFile}
-  if [ "${touchscreen}" == "1" ] || [ "${touchscreen}" == "on" ]; then
-    sudo cp ${/home/admin/raspiblitz.log} ${/home/admin/raspiblitz.log}.setup
-    /home/admin/config.scripts/blitz.shutdown.sh reboot
-  fi
+  sudo cp $/home/admin/raspiblitz.log $/home/admin/raspiblitz.log.setup
+  /home/admin/config.scripts/blitz.shutdown.sh reboot finalsetup
+  sleep 100
+  exit 0
 
 else
 

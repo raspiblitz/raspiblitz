@@ -52,6 +52,12 @@ Preparing Blockchain Sync
 Please wait ...
 " 6 30
 
+elif [ "${eventID}" == "reboot" ] && [ "${contentString}" == "finalsetup" ]; then
+
+    dialog --backtitle "${backtitle}" --cr-wrap --infobox "
+Final Setup Reboot
+" 5 23
+
 elif [ "${eventID}" == "reboot" ]; then
 
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "
