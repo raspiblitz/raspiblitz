@@ -20,7 +20,6 @@ if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
   OPTIONS+=(${network}CONF "Edit the bitcoin.conf")
 fi
 
-if 
 OPTIONS+=(LNDLOG "Monitor the lnd.log for ${CHAIN}")
 OPTIONS+=(LNDCONF "Edit the lnd.conf for ${CHAIN}")
 
