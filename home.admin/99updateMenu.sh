@@ -379,7 +379,7 @@ OPTIONS+=(RELEASE "RaspiBlitz Release Update/Recovery")
 OPTIONS+=(PATCH "Patch RaspiBlitz v${codeVersion}")
 OPTIONS+=(BITCOIN "Bitcoin Core Update Options")
 
-if [ "${lightning}" == "lnd" ]; then
+if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
   OPTIONS+=(LND "Interim LND Update Options")
 fi
 
@@ -419,7 +419,7 @@ CHOICE_HEIGHT=$(("${#OPTIONS[@]}/2+1"))
 HEIGHT=$((CHOICE_HEIGHT+6))  
 CHOICE=$(dialog --clear \
                 --backtitle "" \
-                --title "Update Options" \
+                --title " Update Options " \
                 --ok-label "Select" \
                 --cancel-label "Main menu" \
                 --menu "" \
