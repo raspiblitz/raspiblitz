@@ -442,6 +442,11 @@ else
 fi
 sleep 5
 
+LNinfo=" + Lightning Network"
+if [ "${lightning}" == "" ]; then
+  LNinfo=""  
+fi
+
 ## get uptime and current date & time
 uptime=$(uptime --pretty)
 datetime=$(date -R)
@@ -454,7 +459,7 @@ ${color_yellow}
 ${color_yellow}
 ${color_yellow}
 ${color_yellow}               ${color_amber}%s ${color_green} ${ln_alias} ${upsInfo}
-${color_yellow}               ${color_gray}${network^} Fullnode + Lightning Network ${torInfo}
+${color_yellow}               ${color_gray}${network^} Fullnode${LNinfo} ${torInfo}
 ${color_yellow}        ,/     ${color_yellow}%s
 ${color_yellow}      ,'/      ${color_gray}%s
 ${color_yellow}    ,' /       ${color_gray}%s, ${templine}
