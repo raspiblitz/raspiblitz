@@ -43,20 +43,22 @@ fi
 
 source /mnt/hdd/raspiblitz.conf
 
-if [ "${CHAIN}" == "testnet" ] && [ "${testnet}" != "on" ]; then
-  echo "# before activating testnet on cln, first activate testnet on bitcoind"
-  echo "err='missing bitcoin testnet'"
-  exit 1
-fi
-
-if [ "${CHAIN}" == "signet" ] && [ "${signet}" != "on" ]; then
-  echo "# before activating signet on cln, first activate signet on bitcoind"
-  echo "err='missing bitcoin signet'"
-  exit 1
-fi
-
 if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = experimental ]||[ "$1" = testPR ];then
+
+  if [ "${CHAIN}" == "testnet" ] && [ "${testnet}" != "on" ]; then
+    echo "# before activating testnet on cln, first activate testnet on bitcoind"
+    echo "err='missing bitcoin testnet'"
+    exit 1
+  fi
+
+  if [ "${CHAIN}" == "signet" ] && [ "${signet}" != "on" ]; then
+    echo "# before activating signet on cln, first activate signet on bitcoind"
+    echo "err='missing bitcoin signet'"
+    exit 1
+  fi
+
   if [ ! -f /usr/local/bin/lightningd ]||[ "$1" = update ]||[ "$1" = experimental ]||[ "$1" = testPR ];then
+
 
     ########################
     # Install dependencies # 
