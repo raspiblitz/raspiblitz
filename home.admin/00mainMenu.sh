@@ -61,7 +61,7 @@ fi
 if [ ${#dynDomain} -gt 0 ]; then
   plus="${plus} / ${dynDomain}"
 fi
-BACKTITLE="${localip} / ${hostname} / ${network} / ${chain}${plus}"
+BACKTITLE="${localip} / ${hostname} / ${network} / ${lightning}${plus}"
 
 if [ "${rtlWebinterface}" == "on" ]; then
   TITLE="Webinterface: http://${localip}:3000"
