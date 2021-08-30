@@ -32,7 +32,7 @@ echo "run dialog ..."
 OPTIONS=()
 
 # just available for BTC
-if [ "${chain}" == "bitcoin" ]; then
+if [ "${network}" == "bitcoin" ]; then
   OPTIONS+=(e 'BTC Electrum Rust Server' ${ElectRS})
   OPTIONS+=(p 'BTC PayServer' ${BTCPayServer})
   OPTIONS+=(b 'BTC RPC-Explorer' ${BTCRPCexplorer})
