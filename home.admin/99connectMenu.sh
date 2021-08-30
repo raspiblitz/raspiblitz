@@ -24,9 +24,11 @@ if [ "${BTCPayServer}" == "on" ]; then
 fi
 OPTIONS+=(${network}RPC "Connect Specter Desktop or JoinMarket")
 OPTIONS+=(BISQ "Connect Bisq to this node")
-OPTIONS+=(EXPORT "Get Macaroons and TLS.cert")
-OPTIONS+=(RESET "Recreate LND Macaroons & tls.cert")
-OPTIONS+=(SYNC "Sync Macaroons & tls.cert with Apps/Users")
+if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
+  OPTIONS+=(EXPORT "Get Macaroons and TLS.cert")
+  OPTIONS+=(RESET "Recreate LND Macaroons & tls.cert")
+  OPTIONS+=(SYNC "Sync Macaroons & tls.cert with Apps/Users")
+fi
 
 CHOICE_HEIGHT=$(("${#OPTIONS[@]}/2+1"))
 HEIGHT=$((CHOICE_HEIGHT+6))
