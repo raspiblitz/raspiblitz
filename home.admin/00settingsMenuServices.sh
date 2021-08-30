@@ -30,36 +30,39 @@ if [ ${#sparko} -eq 0 ]; then sparko="off"; fi
 echo "run dialog ..."
 
 OPTIONS=()
-OPTIONS+=(e 'Electrum Rust Server' ${ElectRS})
-OPTIONS+=(p 'BTCPayServer' ${BTCPayServer})
-OPTIONS+=(b 'BTC-RPC-Explorer' ${BTCRPCexplorer})
-OPTIONS+=(s 'Specter Desktop' ${specter})
-OPTIONS+=(a 'Mempool Space' ${mempoolExplorer})
+
+# just available for BTC
+if [ "${chain}" == "bitcoin" ]; then
+  OPTIONS+=(e 'BTC Electrum Rust Server' ${ElectRS})
+  OPTIONS+=(p 'BTC PayServer' ${BTCPayServer})
+  OPTIONS+=(b 'BTC RPC-Explorer' ${BTCRPCexplorer})
+  OPTIONS+=(s 'BTC Specter Desktop' ${specter})
+  OPTIONS+=(a 'BTC Mempool Space' ${mempoolExplorer})
+  OPTIONS+=(j 'BTC JoinMarket+JoininBox menu' ${joinmarket})
+  OPTIONS+=(w 'BTC Download Bitcoin Whitepaper' ${whitepaper})
+fi
 
 # just available for LND
-if [ "${lightning}" == "lnd" ]; then
-  OPTIONS+=(r 'RTL LND Webinterface' ${rtlWebinterface})
-  OPTIONS+=(t 'ThunderHub' ${thunderhub})
-  OPTIONS+=(l 'LIT (loop, pool, faraday)' ${lit})
-  OPTIONS+=(i 'LNbits' ${LNBits})
-  OPTIONS+=(o 'Balance of Satoshis' ${bos})
-  OPTIONS+=(y 'PyBLOCK' ${pyblock})
-  OPTIONS+=(h 'ChannelTools (Fund Rescue)' ${chantools})
-  OPTIONS+=(x 'Sphinx-Relay' ${sphinxrelay})
+if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
+  OPTIONS+=(r 'LND RTL Webinterface' ${rtlWebinterface})
+  OPTIONS+=(t 'LND ThunderHub' ${thunderhub})
+  OPTIONS+=(l 'LND LIT (loop, pool, faraday)' ${lit})
+  OPTIONS+=(i 'LND LNbits' ${LNBits})
+  OPTIONS+=(o 'LND Balance of Satoshis' ${bos})
+  OPTIONS+=(y 'LND PyBLOCK' ${pyblock})
+  OPTIONS+=(h 'LND ChannelTools (Fund Rescue)' ${chantools})
+  OPTIONS+=(x 'LND Sphinx-Relay' ${sphinxrelay})
 fi
 
 # just available for CLN
-if [ "${lightning}" == "cln" ]; then
-  OPTIONS+=(c 'RTL C-Lightning Webinterface' ${crtlWebinterface})
-  OPTIONS+=(k 'Sparko C-Lightning WebWallet' ${sparko})
+if [ "${lightning}" == "cln" ] || [ "${cln}" == "on" ]; then
+  OPTIONS+=(c 'C-Lightning RTL Webinterface' ${crtlWebinterface})
+  OPTIONS+=(k 'C-Lightning Sparko WebWallet' ${sparko})
 fi
 
-OPTIONS+=(j 'JoinMarket with JoininBox menu' ${joinmarket})
-OPTIONS+=(w 'Download Bitcoin Whitepaper' ${whitepaper})
-
-CHOICES=$(dialog --title ' Additional Services ' \
+CHOICES=$(dialog --title ' Additional Mainnet Services ' \
           --checklist ' use spacebar to activate/de-activate ' \
-          24 45 17  "${OPTIONS[@]}" 2>&1 >/dev/tty)
+          24 55 17  "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
 dialogcancel=$?
 echo "done dialog"
