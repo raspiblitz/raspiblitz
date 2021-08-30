@@ -56,16 +56,12 @@ MENU="Choose one of the following options:"
 OPTIONS=()
 plus=""
 if [ "${runBehindTor}" = "on" ]; then
-  plus=" / TOR"
+  plus=" / Tor"
 fi
 if [ ${#dynDomain} -gt 0 ]; then
   plus="${plus} / ${dynDomain}"
 fi
 BACKTITLE="${localip} / ${hostname} / ${network} / ${lightning}${plus}"
-
-if [ "${rtlWebinterface}" == "on" ]; then
-  TITLE="Webinterface: http://${localip}:3000"
-fi
 
 # Put Activated Apps on top
 if [ "${rtlWebinterface}" == "on" ] || [ "${crtlWebinterface}" == "on" ]; then
