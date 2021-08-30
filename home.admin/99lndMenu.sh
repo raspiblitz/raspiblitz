@@ -13,7 +13,7 @@ source <(/home/admin/config.scripts/network.aliases.sh getvars lnd $1)
 # BASIC MENU INFO
 WIDTH=64
 BACKTITLE="RaspiBlitz"
-TITLE="Lightning Options"
+TITLE=" LND Lightning Options "
 MENU=""
 OPTIONS=()
 
@@ -38,7 +38,8 @@ if [ ${#openChannels} -gt 0 ] && [ ${openChannels} -gt 0 ]; then
 fi
 
 OPTIONS+=(CASHOUT "Withdraw all funds from LND on $CHAIN")
-if [ ${#lightning} -gt 0 ]&&[ $lightning = cln ];then
+
+if [ "${lightning} "= "lnd" ];then
   OPTIONS+=(SWITCHLN  "Use LND as default")
 fi  
 
