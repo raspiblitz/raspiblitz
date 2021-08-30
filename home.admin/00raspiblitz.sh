@@ -165,6 +165,7 @@ do
   #####################################
   # INITIAL BLOCKCHAIN SYNC (SUBLOOP)
   #####################################
+  if [ "${lightning}" == "" ]; then syncedToChain=1; fi
   if [ "${setupPhase}" == "done" ] && [ "${state}" == "ready" ] && [ "${syncedToChain}" != "1" ]; then
     echo "debug wait eventBlockchainSync.sh ..."
     sleep 3
