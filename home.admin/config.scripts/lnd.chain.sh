@@ -170,6 +170,12 @@ alias ${netprefix}lncli=\"sudo -u bitcoin /usr/local/bin/lncli\
   # setting value in raspi blitz config
   sudo sed -i "s/^${netprefix}lnd=.*/${netprefix}lnd=on/g" /mnt/hdd/raspiblitz.conf
 
+  # if this is the first lighting mainnet turned on - make default
+  if [ "${CHAIN}" == "mainnet" ] && [ "${lightning}" == "" ]; then
+    echo "# LND is now default lighthning implementation"
+    sudo sed -i "s/^lightning=.*/lightning=lnd/g" /mnt/hdd/raspiblitz.conf
+  fi
+
   exit 0
 fi
 
@@ -182,6 +188,16 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # setting value in raspiblitz config
   sudo sed -i "s/^${netprefix}lnd=.*/${netprefix}lnd=off/g" /mnt/hdd/raspiblitz.conf
+
+  # if lnd mainnet was default - remove 
+  if [ "${CHAIN}" == "mainnet" ] && [ "${lightning}" == "lnd" ]; then
+    echo "# LND is REMOVED as default lightning implementation"
+    sudo sed -i "s/^lightning=.*/lightning=/g" /mnt/hdd/raspiblitz.conf
+    if [ "${cln}" == "on" ]; then
+      echo "# CLN is now new default lightning implementation"
+      sudo sed -i "s/^lightning=.*/lightning=cln/g" /mnt/hdd/raspiblitz.conf
+    fi
+  fi
 
   exit 0
 fi

@@ -15,26 +15,38 @@ if [ ${#touchscreen} -eq 0 ]; then touchscreen=0; fi
 if [ ${#lcdrotate} -eq 0 ]; then lcdrotate=0; fi
 if [ ${#zerotier} -eq 0 ]; then zerotier="off"; fi
 if [ ${#circuitbreaker} -eq 0 ]; then circuitbreaker="off"; fi
-if [ ${#testnet} -eq 0 ]; then testnet="off"; fi
-if [ ${#cln} -eq 0 ]; then cln="off"; fi
 
-echo "map dropboxbackup to on/off"
+echo "# map LND to on/off"
+lndNode="off"
+if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
+  lndNode="on"
+fi
+
+echo "# map CLN to on/off"
+clnNode="off"
+if [ "${lightning}" == "cln" ] || [ "${cln}" == "on" ]; then
+  clnNode="on"
+fi
+
+echo "# map dropboxbackup to on/off"
 DropboxBackup="off"
 if [ ${#dropboxBackupTarget} -gt 0 ]; then DropboxBackup="on"; fi
 
-echo "map localbackup to on/off"
+echo "# map localbackup to on/off"
 LocalBackup="off"
 if [ ${#localBackupDeviceUUID} -gt 0 ] && [ "${localBackupDeviceUUID}" != "off" ]; then LocalBackup="on"; fi
 
-echo "map zerotier to on/off"
+echo "# map zerotier to on/off"
 zerotierSwitch="off"
 if [ "${zerotier}" != "off" ]; then zerotierSwitch="on"; fi
 
-# echo "map chain to on/off"
-# chainValue="off"
-# if [ "${chain}" = "test" ]; then chainValue="on"; fi
+echo "# map parallel testnets to on/off"
+parallelTestnets="off"
+if [ "${testnet}" == "on"] || [ "${signet}" == "on" ]; then
+  parallelTestnets="on"
+fi
 
-echo "map domain to on/off"
+echo "# map domain to on/off"
 domainValue="off"
 dynDomainMenu='DynamicDNS'
 if [ ${#dynDomain} -gt 0 ]; then
@@ -42,27 +54,27 @@ if [ ${#dynDomain} -gt 0 ]; then
   dynDomainMenu="${dynDomain}"
 fi
 
-echo "map lcdrotate to on/off"
+echo "# map lcdrotate to on/off"
 lcdrotateMenu='off'
 if [ ${lcdrotate} -gt 0 ]; then
   lcdrotateMenu='on'
 fi
 
-echo "map touchscreen to on/off"
+echo "# map touchscreen to on/off"
 touchscreenMenu='off'
 if [ ${touchscreen} -gt 0 ]; then
   touchscreenMenu='on'
 fi
 
-echo "check autopilot in lnd.conf"
-lndAutoPilotOn=$(sudo cat /mnt/hdd/lnd/lnd.conf | grep -c 'autopilot.active=1')
+echo "# map autopilot to on/off"
+lndAutoPilotOn=$(sudo cat /mnt/hdd/lnd/lnd.conf 2>/dev/null | grep -c 'autopilot.active=1')
 if [ ${lndAutoPilotOn} -eq 1 ]; then
   autoPilot="on"
 else
   autoPilot="off"
 fi
 
-echo "map keysend to on/off"
+echo "# map keysend to on/off"
 keysend="on"
 source <(sudo /home/admin/config.scripts/lnd.keysend.sh status)
 if [ ${keysendOn} -eq 0 ]; then
@@ -75,35 +87,36 @@ echo "run dialog ..."
 # BASIC MENU INFO
 OPTIONS=()
 
-OPTIONS+=(t 'Run behind Tor' ${runBehindTor})
-
+# LCD options (only when running with LCD screen)
 if [ "${displayClass}" == "lcd" ]; then
   OPTIONS+=(s 'Touchscreen' ${touchscreenMenu}) 
   OPTIONS+=(r 'LCD Rotate' ${lcdrotateMenu})  
 fi
 
-if [ "${lightning}" == "lnd" ]; then
-  OPTIONS+=(a 'Channel Autopilot' ${autoPilot}) 
-  OPTIONS+=(k 'Accept Keysend' ${keysend})  
-  OPTIONS+=(c 'Circuitbreaker (LND firewall)' ${circuitbreaker})  
-  OPTIONS+=(u 'LND Auto-Unlock' ${autoUnlock})  
-  OPTIONS+=(d 'StaticChannelBackup on DropBox' ${DropboxBackup})
-  OPTIONS+=(e 'StaticChannelBackup on USB Drive' ${LocalBackup})
-fi
-
+# Important basic options
+OPTIONS+=(t 'Run behind Tor' ${runBehindTor})
 OPTIONS+=(z 'ZeroTier' ${zerotierSwitch})
-OPTIONS+=(t 'Parallel Testnet services' ${testnet})
 
-# choose c-lightning just at setup for now
-#OPTIONS+=(n 'C-lightning' ${cln})
-
-if [ ${chain} = "main" ];then
-  if [ ${#runBehindTor} -eq 0 ] || [ "${runBehindTor}" = "off" ]; then
-    OPTIONS+=(y ${dynDomainMenu} ${domainValue})
-    OPTIONS+=(b 'BTC UPnP (AutoNAT)' ${networkUPnP})  
-    OPTIONS+=(l 'LND UPnP (AutoNAT)' ${autoNatDiscovery})
-  fi
+if [ ${#runBehindTor} -eq 0 ] || [ "${runBehindTor}" = "off" ]; then
+  OPTIONS+=(y ${dynDomainMenu} ${domainValue})
+  OPTIONS+=(b 'BTC UPnP (AutoNAT)' ${networkUPnP})  
 fi
+OPTIONS+=(p 'Parallel Testnet/Signet' ${parallelTestnets})
+
+# LND & options (only when running LND)
+OPTIONS+=(m 'LND LIGHTNING LABS NODE' ${lndNode}) 
+if [ "${lndNode}" == "on" ]; then
+  OPTIONS+=(a '-LND Channel Autopilot' ${autoPilot}) 
+  OPTIONS+=(k '-LND Accept Keysend' ${keysend})  
+  OPTIONS+=(c '-LND Circuitbreaker (firewall)' ${circuitbreaker})  
+  OPTIONS+=(u '-LND Auto-Unlock' ${autoUnlock})  
+  OPTIONS+=(d '-LND StaticChannelBackup DropBox' ${DropboxBackup})
+  OPTIONS+=(e '-LND StaticChannelBackup USB Drive' ${LocalBackup})
+  OPTIONS+=(l '-LND UPnP (AutoNAT)' ${autoNatDiscovery})
+fi
+
+# C-Lightning & options/PlugIns
+OPTIONS+=(n 'CLN C-LIGHTNING NODE' ${clnNode}) 
 
 CHOICE_HEIGHT=$(("${#OPTIONS[@]}/2+1"))
 HEIGHT=$((CHOICE_HEIGHT+6))
@@ -123,93 +136,6 @@ fi
 
 needsReboot=0
 anychange=0
-
-# deprecated - see https://github.com/rootzoll/raspiblitz/issues/2290
-## TESTNET process choice - KEEP FIRST IN ORDER
-#choice="main"; check=$(echo "${CHOICES}" | grep -c "n")
-#if [ ${check} -eq 1 ]; then choice="test"; fi
-#if [ "${chain}" != "${choice}" ]; then
-#  if [ "${network}" = "litecoin" ] && [ "${choice}"="test" ]; then
-#     dialog --title 'FAIL' --msgbox 'Litecoin-Testnet not available.' 5 25
-#  elif [ "${BTCRPCexplorer}" = "on" ]; then
-#     dialog --title 'NOTICE' --msgbox 'Please turn off BTC-RPC-Explorer FIRST\nbefore changing testnet.' 6 45
-#     exit 1
-#  elif [ "${BTCPayServer}" = "on" ]; then
-#     dialog --title 'NOTICE' --msgbox 'Please turn off BTC-Pay-Server FIRST\nbefore changing testnet.' 6 45
-#     exit 1
-#  elif [ "${ElectRS}" = "on" ]; then
-#     dialog --title 'NOTICE' --msgbox 'Please turn off Electrum-Rust-Server FIRST\nbefore changing testnet.' 6 48
-#     exit 1
-#  elif [ "${loop}" = "on" ]; then
-#     dialog --title 'NOTICE' --msgbox 'Please turn off Loop-Service FIRST\nbefore changing testnet.' 6 48
-#     exit 1
-#  else
-#    echo "Testnet Setting changed .."
-#    anychange=1
-#    sudo /home/admin/config.scripts/network.chain.sh ${choice}net
-#    walletExists=$(sudo ls /mnt/hdd/lnd/data/chain/${network}/${choice}net/wallet.db 2>/dev/null | grep -c 'wallet.db')
-#    if [ ${walletExists} -eq 0 ]; then
-#      echo "Need to creating a new wallet ... wait 20secs"
-#      sudo systemctl start lnd
-#      sleep 20
-#      tryAgain=1
-#      while [ ${tryAgain} -eq 1 ]
-#        do
-#          echo "****************************************************************************"
-#          echo "Creating a new LND Wallet for ${network}/${choice}net"
-#          echo "****************************************************************************"
-#          echo "A) For 'Wallet Password' use your PASSWORD C --> !! minimum 8 characters !!"
-#          echo "B) Answer 'n' because you don't have a 'cipher seed mnemonic' (24 words) yet"
-#          echo "C) For 'passphrase' to encrypt your 'cipher seed' use PASSWORD D (optional)"
-#          echo "****************************************************************************"
-#          source <(/home/admin/config.scripts/network.aliases.sh getvars lnd ${choice}net)
-#          $lncli_alias create 2>error.out
-#          error=$(sudo cat error.out)
-#          if [ ${#error} -eq 0 ]; then
-#            sleep 2
-#            # WIN
-#            tryAgain=0
-#            echo "!!! Make sure to write down the 24 words (cipher seed mnemonic) !!!"
-#            echo "If you are ready. Press ENTER."
-#          else
-#            # FAIL
-#            tryAgain=1
-#            echo "!!! FAIL ---> SOMETHING WENT WRONG !!!"
-#            echo "${error}"
-#            echo "Press ENTER to retry ... or CTRL-c to EXIT"
-#          fi
-#          read key
-#        done
-#      echo "Check for Macaroon .. (10sec)"
-#      sleep 10
-#      macaroonExists=$(sudo ls /home/bitcoin/.lnd/data/chain/${network}/${choice}net/admin.macaroon | grep -c 'admin.macaroon')
-#      if [ ${macaroonExists} -eq 0 ]; then
-#        echo "*** PLEASE UNLOCK your wallet with PASSWORD C to create macaroon"
-#        lncli unlock 2>/dev/null
-#        sleep 6
-#      fi
-#      macaroonExists=$(sudo ls /home/bitcoin/.lnd/data/chain/${network}/${choice}net/admin.macaroon | grep -c 'admin.macaroon')
-#      if [ ${macaroonExists} -eq 0 ]; then
-#        echo "FAIL --> Was not able to create macaroon"
-#        echo "Please report problem."
-#        exit 1
-#      fi
-#      echo "stopping lnd again"
-#      sleep 5
-#      sudo systemctl stop lnd
-#    fi
-# 
-#     echo "Update Admin Macaroon"
-#     sudo rm -r /home/admin/.lnd/data/chain/${network}/${choice}net 2>/dev/null
-#     sudo mkdir /home/admin/.lnd/data/chain/${network}/${choice}net
-#     sudo cp /home/bitcoin/.lnd/data/chain/${network}/${choice}net/admin.macaroon /home/admin/.lnd/data/chain/${network}/${choice}net
-#     sudo chown -R admin:admin /home/admin/.lnd/
-# 
-#     needsReboot=1
-#   fi
-# else
-#   echo "Testnet Setting unchanged."
-# fi
 
 # AUTOPILOT process choice
 choice="off"; check=$(echo "${CHOICES}" | grep -c "a")
@@ -428,56 +354,85 @@ else
   echo "ZeroTier setting unchanged."
 fi
 
-# testnet process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "t")
+# LND choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "m")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${lndNode}" != "${choice}" ]; then
+  echo "# LND NODE Setting changed .."
+  if [ "${choice}" = "on" ]; then
+    echo "# turning ON"
+    /home/admin/config.scripts/lnd.chain.sh on mainnet
+    if [ "${testnet}" == "on" ]; then
+      /home/admin/config.scripts/lnd.chain.sh on testnet
+    fi
+    if [ "${signetnet}" == "on" ]; then
+      /home/admin/config.scripts/lnd.chain.sh on signet
+    fi
+  else
+    echo "# turning OFF"
+    /home/admin/config.scripts/lnd.chain.sh off mainnet
+    /home/admin/config.scripts/lnd.chain.sh off testnet
+    /home/admin/config.scripts/lnd.chain.sh off signet
+  fi
+else
+  echo "LND NODE setting unchanged."
+fi
+
+# CLN choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "n")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${lndNode}" != "${choice}" ]; then
+  echo "# C-Lightning NODE Setting changed .."
+  if [ "${choice}" = "on" ]; then
+    echo "# turning ON"
+    /home/admin/config.scripts/cln.install.sh on mainnet
+    if [ "${testnet}" == "on" ]; then
+      /home/admin/config.scripts/cln.install.sh on testnet
+    fi
+    if [ "${signetnet}" == "on" ]; then
+      /home/admin/config.scripts/cln.install.sh on signet
+    fi
+  else
+    echo "# turning OFF"
+    /home/admin/config.scripts/cln.install.sh off mainnet
+    /home/admin/config.scripts/cln.install.sh off testnet
+    /home/admin/config.scripts/cln.install.sh off signet
+  fi
+else
+  echo "C-Lightning NODE setting unchanged."
+fi
+
+# parallel testnet process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "p")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${testnet}" != "${choice}" ]; then
-  echo "# Testnet Setting changed .."
+  echo "# Parallel Testnets Setting changed .."
   anychange=1
-  /home/admin/config.scripts/bitcoin.chains.sh ${choice} testnet
-  errorOnInstall=$?
-  if [ "${choice}" =  "on" ]; then
-    if [ ${errorOnInstall} -eq 0 ]; then
-      echo "# Successfully installed Testnet"
-      echo
-      echo "# Press ENTER to continue ..."
-      read key
-    else
-      l1="# !!! FAIL on Testnet install !!!"
-      l2="# Try manual install on terminal after reboot with:"
-      l3="/home/admin/config.scripts/bitcoin.chains.sh on testnet"
-      dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
+  if [ "${choice}" = "on" ]; then
+    /home/admin/config.scripts/bitcoin.chains.sh on testnet
+    /home/admin/config.scripts/bitcoin.chains.sh on signet
+    if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
+      /home/admin/config.scripts/lnd.chain.sh on testnet
+      /home/admin/config.scripts/lnd.chain.sh on signet
     fi
+    if [ "${lightning}" == "cln" ] || [ "${cln}" == "on" ]; then
+      /home/admin/config.scripts/cln.install.sh on testnet
+      /home/admin/config.scripts/cln.install.sh on signet
+    fi 
+  else
+    # just turn al lightning testnets off (even if not on before)
+    /home/admin/config.scripts/lnd.chain.sh off testnet
+    /home/admin/config.scripts/lnd.chain.sh off signet
+    /home/admin/config.scripts/cln.install.sh off testnet
+    /home/admin/config.scripts/cln.install.sh off signet
+    /home/admin/config.scripts/bitcoin.chains.sh off testnet
+    /home/admin/config.scripts/bitcoin.chains.sh off signet
   fi
+  # make sure to reboot - nodes that people activate testnets can take a reboot
+  needsReboot=1
 else
   echo "# Testnet Setting unchanged."
 fi
-
-
-# cln process choice
-#choice="off"; check=$(echo "${CHOICES}" | grep -c "n")
-#if [ ${check} -eq 1 ]; then choice="on"; fi
-#if [ "${cln}" != "${choice}" ]; then
-#  echo "# C-lightning Setting changed .."
-#  anychange=1
-#  /home/admin/config.scripts/cln.install.sh ${choice}
-#  errorOnInstall=$?
-#  if [ "${choice}" =  "on" ]; then
-#    if [ ${errorOnInstall} -eq 0 ]; then
-#      echo "# Successfully installed C-lightning"
-#      echo
-#      echo "# Press ENTER to continue ..."
-#      read key
-#    else
-#      l1="# !!! FAIL on C-lightning install !!!"
-#      l2="# Try manual install on terminal after reboot with:"
-#      l3="/home/admin/config.scripts/cln.install.sh on"
-#      dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
-#    fi
-#  fi
-#else
-#  echo "# C-lightning Setting unchanged."
-#fi
 
 if [ ${anychange} -eq 0 ]; then
      dialog --msgbox "NOTHING CHANGED!\nUse Spacebar to check/uncheck services." 8 58

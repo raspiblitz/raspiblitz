@@ -220,6 +220,12 @@ alias ${netprefix}clnconf=\"sudo\
   # setting value in raspi blitz config
   sudo sed -i "s/^${netprefix}cln=.*/${netprefix}cln=on/g" /mnt/hdd/raspiblitz.conf
 
+  # if this is the first lighting mainnet turned on - make default
+  if [ "${CHAIN}" == "mainnet" ] && [ "${lightning}" == "" ]; then
+    echo "# CLN is now default lighthning implementation"
+    sudo sed -i "s/^lightning=.*/lightning=cln/g" /mnt/hdd/raspiblitz.conf
+  fi
+
   exit 0
 fi
 
@@ -237,4 +243,14 @@ if [ "$1" = "off" ];then
   fi
   # setting value in raspi blitz config
   sudo sed -i "s/^${netprefix}cln=.*/${netprefix}cln=off/g" /mnt/hdd/raspiblitz.conf
+
+  # if cln mainnet was default - remove 
+  if [ "${CHAIN}" == "mainnet" ] && [ "${lightning}" == "cln" ]; then
+    echo "# CLN is REMOVED as default lightning implementation"
+    sudo sed -i "s/^lightning=.*/lightning=/g" /mnt/hdd/raspiblitz.conf
+    if [ "${lnd}" == "on" ]; then
+      echo "# LND is now new default lightning implementation"
+      sudo sed -i "s/^lightning=.*/lightning=lnd/g" /mnt/hdd/raspiblitz.conf
+    fi
+  fi
 fi
