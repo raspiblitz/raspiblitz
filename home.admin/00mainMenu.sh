@@ -59,9 +59,12 @@ if [ "${runBehindTor}" = "on" ]; then
   plus=" / Tor"
 fi
 if [ ${#dynDomain} -gt 0 ]; then
-  plus="${plus} / ${dynDomain}"
+  plus="/ ${dynDomain} ${plus}"
 fi
-BACKTITLE="${localip} / ${hostname} / ${network} / ${lightning}${plus}"
+if [ ${#lightning} -gt 0 ]; then
+  plus="/ ${lightning} ${plus}"
+fi
+BACKTITLE="${localip} / ${hostname} / ${network} ${plus}"
 
 # Put Activated Apps on top
 if [ "${rtlWebinterface}" == "on" ] || [ "${crtlWebinterface}" == "on" ]; then
