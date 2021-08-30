@@ -58,8 +58,8 @@ OPTIONS+=(COPY-SOURCE "Copy Blockchain Source Modus")
 OPTIONS+=(RESET-CHAIN "Delete Blockchain & Re-Download")
 OPTIONS+=(RESET-HDD "Delete HDD Data but keep Blockchain")
 OPTIONS+=(RESET-ALL "Delete HDD completely to start fresh")
-OPTIONS=(DELETE-ELEC "Delete Electrum Index")
-OPTIONS=(DELETE-INDEX "Delete Bitcoin Transaction-Index")
+OPTIONS+=(DELETE-ELEC "Delete Electrum Index")
+OPTIONS+=(DELETE-INDEX "Delete Bitcoin Transaction-Index")
 
 CHOICE=$(whiptail --clear --title "Repair Options" --menu "" 18 62 11 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
