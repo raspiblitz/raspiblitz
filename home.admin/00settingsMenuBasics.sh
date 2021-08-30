@@ -137,10 +137,10 @@ fi
 needsReboot=0
 anychange=0
 
-# AUTOPILOT process choice
+# LND AUTOPILOT process choice
 choice="off"; check=$(echo "${CHOICES}" | grep -c "a")
 if [ ${check} -eq 1 ]; then choice="on"; fi
-if [ "${autoPilot}" != "${choice}" ]; then
+if [ "${autoPilot}" != "${choice}" ] && [ "${lndNode}" == "on" ]; then
   echo "Autopilot Setting changed .."
   anychange=1
   sudo /home/admin/config.scripts/lnd.autopilot.sh ${choice}
@@ -182,10 +182,10 @@ else
   echo "BTC UPnP Setting unchanged."
 fi
 
-# AutoNAT
+# LND AutoNAT
 choice="off"; check=$(echo "${CHOICES}" | grep -c "l")
 if [ ${check} -eq 1 ]; then choice="on"; fi
-if [ "${autoNatDiscovery}" != "${choice}" ]; then
+if [ "${autoNatDiscovery}" != "${choice}" ] && [ "${lndNode}" == "on" ]; then
   echo "AUTO NAT Setting changed .."
   anychange=1
   if [ "${choice}" = "on" ]; then
@@ -236,7 +236,7 @@ fi
 # LND Auto-Unlock
 choice="off"; check=$(echo "${CHOICES}" | grep -c "u")
 if [ ${check} -eq 1 ]; then choice="on"; fi
-if [ "${autoUnlock}" != "${choice}" ]; then
+if [ "${autoUnlock}" != "${choice}" ] && [ "${lndNode}" == "on" ]; then
   echo "LND Autounlock Setting changed .."
   anychange=1
   sudo /home/admin/config.scripts/lnd.autounlock.sh ${choice}
@@ -279,10 +279,10 @@ else
   echo "Touchscreen Setting unchanged."
 fi
 
-# circuitbreaker
+# LND circuitbreaker
 choice="off"; check=$(echo "${CHOICES}" | grep -c "c")
 if [ ${check} -eq 1 ]; then choice="on"; fi
-if [ "${circuitbreaker}" != "${choice}" ]; then
+if [ "${circuitbreaker}" != "${choice}" ] && [ "${lndNode}" == "on" ]; then
   echo "Circuitbreaker Setting changed .."
   anychange=1
   sudo /home/admin/config.scripts/bonus.circuitbreaker.sh ${choice}
@@ -290,10 +290,10 @@ else
   echo "Circuitbreaker Setting unchanged."
 fi
 
-# DropBox process choice
+# LND DropBox process choice
 choice="off"; check=$(echo "${CHOICES}" | grep -c "d")
 if [ ${check} -eq 1 ]; then choice="on"; fi
-if [ "${DropboxBackup}" != "${choice}" ]; then
+if [ "${DropboxBackup}" != "${choice}" ] && [ "${lndNode}" == "on" ]; then
   echo "DropBox Setting changed .."
   anychange=1
   sudo -u admin /home/admin/config.scripts/dropbox.upload.sh ${choice}
@@ -317,10 +317,10 @@ else
   echo "BackupdDevice setting unchanged."
 fi
 
-# Keysend process choice
+# LND Keysend process choice
 choice="off"; check=$(echo "${CHOICES}" | grep -c "k")
 if [ ${check} -eq 1 ]; then choice="on"; fi
-if [ "${keysend}" != "${choice}" ]; then
+if [ "${keysend}" != "${choice}" ] && [ "${lndNode}" == "on" ]; then
   echo "keysend setting changed .."
   anychange=1
   needsReboot=1
@@ -382,7 +382,7 @@ fi
 # CLN choice
 choice="off"; check=$(echo "${CHOICES}" | grep -c "n")
 if [ ${check} -eq 1 ]; then choice="on"; fi
-if [ "${lndNode}" != "${choice}" ]; then
+if [ "${clnNode}" != "${choice}" ]; then
   anychange=1
   echo "# C-Lightning NODE Setting changed .."
   if [ "${choice}" = "on" ]; then
