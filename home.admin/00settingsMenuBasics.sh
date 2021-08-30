@@ -358,6 +358,7 @@ fi
 choice="off"; check=$(echo "${CHOICES}" | grep -c "m")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${lndNode}" != "${choice}" ]; then
+  anychange=1
   echo "# LND NODE Setting changed .."
   if [ "${choice}" = "on" ]; then
     echo "# turning ON"
@@ -382,6 +383,7 @@ fi
 choice="off"; check=$(echo "${CHOICES}" | grep -c "n")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${lndNode}" != "${choice}" ]; then
+  anychange=1
   echo "# C-Lightning NODE Setting changed .."
   if [ "${choice}" = "on" ]; then
     echo "# turning ON"
