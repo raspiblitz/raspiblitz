@@ -88,18 +88,18 @@ if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${rtlWebinterface}" != "${choice}" ]; then
   echo "RTL-lnd Webinterface Setting changed .."
   anychange=1
-  /home/admin/config.scripts/bonus.rtl.sh ${choice} ${lightning} mainnet
+  /home/admin/config.scripts/bonus.rtl.sh ${choice} lnd mainnet
   errorOnInstall=$?
   if [ "${choice}" =  "on" ]; then
     if [ ${errorOnInstall} -eq 0 ]; then
       sudo systemctl start RTL
       echo "waiting 10 secs .."
       sleep 10
-      /home/admin/config.scripts/bonus.rtl.sh menu ${lightning} mainnet
+      /home/admin/config.scripts/bonus.rtl.sh menu lnd mainnet
     else
-      l1="!!! FAIL on RTL ${lightning} install !!!"
+      l1="!!! FAIL on RTL lnd install !!!"
       l2="Try manual install on terminal after reboot with:"
-      l3="/home/admin/config.scripts/bonus.rtl.sh on ${lightning} mainnet"
+      l3="/home/admin/config.scripts/bonus.rtl.sh on lnd mainnet"
       dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
     fi
   fi
