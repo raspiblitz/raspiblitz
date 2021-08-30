@@ -652,7 +652,7 @@ if [ ${isMounted} -eq 0 ]; then
 
   # if touchscreen is on (on recover/update) --> reboot now to activate touchscreen 
   source ${configFile}
-  sudo cp $/home/admin/raspiblitz.log $/home/admin/raspiblitz.log.setup
+  sudo cp /home/admin/raspiblitz.log /home/admin/raspiblitz.log.setup
   /home/admin/config.scripts/blitz.shutdown.sh reboot finalsetup
   sleep 100
   exit 0
