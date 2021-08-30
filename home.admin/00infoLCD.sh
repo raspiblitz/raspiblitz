@@ -92,7 +92,7 @@ while :
       source <(/home/admin/config.scripts/network.aliases.sh getvars)
     fi
 
-    if [ "${setupPhase}" != "done" ] || [ "${state}" == "copytarget" ] || [ "${state}" == "copysource" ] || [ "${state}" == "copystation" ]; then
+    if [ "${setupPhase}" != "done" ] || [ "${state}" == "reboot" ] || [ "${state}" == "shutdown" ] || [ "${state}" == "copytarget" ] || [ "${state}" == "copysource" ] || [ "${state}" == "copystation" ]; then
 
       # show status info during boot & setup & repair on LCD
       /home/admin/setup.scripts/eventInfoWait.sh "${state}" "${message}" lcd

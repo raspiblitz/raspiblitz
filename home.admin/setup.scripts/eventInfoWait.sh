@@ -58,16 +58,16 @@ elif [ "${eventID}" == "reboot" ] && [ "${contentString}" == "finalsetup" ]; the
 Final Setup Reboot
 " 5 23
 
+elif [ "${eventID}" == "reboot" ] && [ "${contentString}" != "" ]; then
+
+    dialog --backtitle "${backtitle}" --cr-wrap --infobox "
+Rebooting (${contentString})
+" 5 35
+
 elif [ "${eventID}" == "reboot" ]; then
 
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "
 Shutting down for reboot.
-" 5 30
-
-elif [ "${eventID}" == "reboot-init" ]; then
-
-    dialog --backtitle "${backtitle}" --cr-wrap --infobox "
-Rebooting for Setup (${contentString})
 " 5 30
 
 elif [ "${eventID}" == "error" ] && [ "${mode}" == "lcd" ]; then

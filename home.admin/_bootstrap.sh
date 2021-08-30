@@ -198,7 +198,7 @@ fi
 
 if [ "${systemInitReboot}" == "1" ]; then
   sudo cp ${logFile} ${logFile}.systeminit
-  sudo sed -i "s/^state=.*/state=reboot-init/g" ${infoFile}
+  sudo sed -i "s/^state=.*/state=reboot/g" ${infoFile}
   sleep 8
   sudo shutdown -r now
   sleep 100
