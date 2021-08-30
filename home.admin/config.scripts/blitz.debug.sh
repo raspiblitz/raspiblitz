@@ -225,12 +225,24 @@ else
 fi
 
 if [ "${rtlWebinterface}" == "" ] || [ "${rtlWebinterface}" == "off" ]; then
-  echo "- RTL is OFF by config"
+  echo "- LND-RTL is OFF by config"
 else
   echo ""
-  echo "*** LAST 20 RTL LOGS ***"
+  echo "*** LND-RTL ***"
+  sudo systemctl status RTL
   echo "sudo journalctl -u RTL -b --no-pager -n20"
   sudo journalctl -u RTL -b --no-pager -n20
+  echo ""
+fi
+
+if [ "${crtlWebinterface}" == "" ] || [ "${crtlWebinterface}" == "off" ]; then
+  echo "- CLN-RTL is OFF by config"
+else
+  echo ""
+  echo "*** CLN-RTL ***"
+  sudo systemctl status cRTL
+  echo "sudo journalctl -u cRTL -b --no-pager -n20"
+  sudo journalctl -u cRTL -b --no-pager -n20
   echo ""
 fi
 
