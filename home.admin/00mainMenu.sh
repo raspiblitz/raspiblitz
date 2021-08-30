@@ -147,8 +147,12 @@ fi
 
 # if C-Lighthing is active
 if [ "${lightning}" == "cln" ] || [ "${cln}" == "on" ]; then
+  echo "GOT CLN"
   OPTIONS+=(CLN "C-lightning Wallet Options")
+else
+  echo "NO CLN (${cln})"
 fi
+sleep 3
 
 OPTIONS+=(SETTINGS "Node Settings & Options")
 OPTIONS+=(SERVICES "Additional Apps & Services")
