@@ -39,9 +39,11 @@ OPTIONS=()
 if [ ${#abcd} -eq 0 ]; then
     reboot=1;
     emptyAllowed=1
-    OPTIONS+=(A "Master User Password / SSH")
-    OPTIONS+=(B "RPC Password (blockchain/lnd)")
-    OPTIONS+=(C "LND Wallet Password")
+    OPTIONS+=(A "Master Login Password")
+    OPTIONS+=(B "RPC/App Password")
+    if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
+      OPTIONS+=(C "Lightning Wallet Password")
+    fi
     CHOICE=$(dialog --clear \
                 --backtitle "RaspiBlitz" \
                 --title "Set Password" \
@@ -367,19 +369,6 @@ elif [ "${abcd}" = "c" ]; then
     echo "# FAIL: Was not able to change password"
     exit 0
   fi
-
-  # old manual way
-  # clear
-  # echo ""
-  # echo "****************************************************************************"
-  # echo "Change LND Wallet Password --> lncli --chain=${network} --network=${chain}net changepassword"
-  # echo "****************************************************************************"
-  # echo "This is your Password C on the RaspiBlitz to unlock your LND wallet."
-  # echo "If you had Auto-Unlock active - you need to re-activate after this."
-  # echo "****************************************************************************"
-  # sleep 6
-  # let LND-CLI handle the password change
-  # sudo -u bitcoin lncli --chain=${network} --network=${chain}net changepassword
 
   # final user output
   echo ""
