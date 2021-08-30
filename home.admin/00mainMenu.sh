@@ -145,8 +145,8 @@ if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
   OPTIONS+=(LND "LND Wallet Options")
 fi
 
-# if C-Lighthing is active
-if [ "${lightning}" == "cln" ] || [ "${cln}" == "on" ]; then
+# if C-Lightning is active
+if [ "${lightning}" == "cln" ] || [ "${cln}" == "on" ]; then
   echo "GOT CLN"
   OPTIONS+=(CLN "C-lightning Wallet Options")
 else
