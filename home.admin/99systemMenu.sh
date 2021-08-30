@@ -11,12 +11,16 @@ source <(/home/admin/config.scripts/network.aliases.sh getvars cln $1)
 # BASIC MENU INFO
 WIDTH=64
 BACKTITLE="RaspiBlitz"
-TITLE="${CHAIN} System Options"
+TITLE=" ${CHAIN} System Options "
 MENU=""    # adds lines to HEIGHT
 OPTIONS=() # adds lines to HEIGHt + CHOICE_HEIGHT
 
-OPTIONS+=(${network}LOG "Monitor the debug.log for ${CHAIN}")
-OPTIONS+=(${network}CONF "Edit the bitcoin.conf")
+if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
+  OPTIONS+=(${network}LOG "Monitor the debug.log for ${CHAIN}")
+  OPTIONS+=(${network}CONF "Edit the bitcoin.conf")
+fi
+
+if 
 OPTIONS+=(LNDLOG "Monitor the lnd.log for ${CHAIN}")
 OPTIONS+=(LNDCONF "Edit the lnd.conf for ${CHAIN}")
 
