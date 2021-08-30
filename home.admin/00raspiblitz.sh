@@ -101,7 +101,6 @@ do
   if [ ${firstStatusScanExists} -eq 1 ]; then
 
     # run statusscan with timeout - if status scan was not killed it will copy over the 
-    echo "# running timeout status scan"
     timeout 15 /home/admin/config.scripts/blitz.statusscan.sh ${lightning} > /var/cache/raspiblitz/raspiblitz.status.tmp
     result=$?
     if [ "${result}" == "0" ]; then
