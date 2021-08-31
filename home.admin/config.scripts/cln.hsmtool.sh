@@ -109,6 +109,7 @@ function encryptHSMsecret() {
     sudo /home/admin/config.scripts/blitz.setpassword.sh x \
       "Enter the password to encrypt the C-lightning wallet file (hsm_secret)" \
       "$passwordFile"
+    sudo chown bitcoin:bitcoin $passwordFile
     sudo chmod 600 $passwordFile
     walletPassword=$(sudo cat $passwordFile)
   fi  
@@ -182,6 +183,18 @@ if [ "$1" = "new" ] || [ "$1" = "new-force" ] || [ "$1" = "seed" ] || [ "$1" = "
     seedpassword="$4"
   fi
 
+  # place the seedwords to /home/bitcoin/.lightning/${CLNETWORK}/seedwords.info
+  sudo touch /home/bitcoin/.lightning/${CLNETWORK}/seedwords.info
+  sudo chown bitcoin:bitcoin /home/bitcoin/.lightning/${CLNETWORK}/seedwords.info
+  sudo chmod 600 /home/bitcoin/.lightning/${CLNETWORK}/seedwords.info
+  echo "
+# This file was placed by cln.hsmtool.sh .
+# Contains the seed words from which the hsm_secret in the same directory was generated
+seedwords='${seedwords}'
+seedwords6x4='${seedwords6x4}'
+# Will be removed safely when the hsm_secret is encrypted.
+" | sudo -u bitcoin tee /home/bitcoin/.lightning/${CLNETWORK}/seedwords.info
+
   # pass to 'hsmtool generatehsm hsm_secret'
   if [ ${#seedpassword} -eq 0 ]; then
     (echo "0"; echo "${seedwords}"; echo) | sudo -u bitcoin /home/bitcoin/lightning/tools/hsmtool "generatehsm" $hsmSecretPath 1>&2
@@ -246,6 +259,33 @@ elif [ "$1" = "lock" ]; then
   exit 0
 
 elif [ "$1" = "encrypt" ]; then
+  if [ -f  /home/bitcoin/.lightning/${CLNETWORK}/seedwords.info ];then
+    # show the words one last time
+    source <(sudo -u bitcoin cat /home/bitcoin/.lightning/${CLNETWORK}/seedwords.info)
+    ack=0
+    while [ ${ack} -eq 0 ]
+    do
+      whiptail --title "IMPORTANT SEED WORDS - PLEASE WRITE DOWN" --msgbox "The backup of seedwords will be deleted, make sure you wrote them down. Store these numbered 24 words in a safe location:\n\n${seedwords6x4}" 13 76
+      whiptail --title "Please Confirm" --yes-button "Show Again" --no-button "CONTINUE" --yesno "  Are you sure that you wrote down the word list?" 8 55
+      if [ $? -eq 1 ]; then
+        ack=1
+      fi
+    done
+    # delete seedwords.info
+    sudo -u bitcoin shred /home/bitcoin/.lightning/${CLNETWORK}/seedwords.info
+    deletedWhen=" "
+  else
+    deletedWhen="not available any more"
+  fi
+  echo "
+# This file is placed by cln.hsmtool.sh .
+# The seed words from which the hsm_secret in the same directory was generated
+# were $deletedWhen.
+# The words cannot be generated from the hsm_secret (one way function).
+# If you don't have the words the hsm_secret can be still backed up in hex:
+# https://lightning.readthedocs.io/BACKUP.html#hsm-secret 
+" | sudo -u bitcoin tee /home/bitcoin/.lightning/${CLNETWORK}/seedwords.info
+  # encrypt
   walletPassword=$3
   encryptHSMsecret $walletPassword
 
