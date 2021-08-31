@@ -22,6 +22,7 @@ passwordC="$2"
 CHAIN="${chain}net"
 if [ "${action}" == "chain-unlock" ]; then
     action="unlock"
+    passwordC=""
     CHAIN=$2
 fi
 
