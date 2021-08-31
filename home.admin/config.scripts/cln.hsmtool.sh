@@ -109,6 +109,7 @@ function encryptHSMsecret() {
     sudo /home/admin/config.scripts/blitz.setpassword.sh x \
       "Enter the password to encrypt the C-lightning wallet file (hsm_secret)" \
       "$passwordFile"
+    sudo chown bitcoin:bitcoin $passwordFile
     sudo chmod 600 $passwordFile
     walletPassword=$(sudo cat $passwordFile)
   fi  

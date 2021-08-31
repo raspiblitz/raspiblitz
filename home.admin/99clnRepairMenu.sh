@@ -18,13 +18,11 @@ TITLE="C-lightning repair options for $CHAIN"
 MENU=""
 OPTIONS=()
 
-if [ ${NETclnEncryptedHSM} = "off" ];then
+if [ "$(eval echo \$${netprefix}clnEncryptedHSM)" = "off" ];then
     OPTIONS+=(ENCRYPT "Encrypt the hsm_secret")
-elif [ ${NETclnEncryptedHSM} = "on" ];then
+elif [ "$(eval echo \$${netprefix}clnEncryptedHSM)"  = "on" ];then
     OPTIONS+=(PASSWORD_C "Change the hsm_secret encryption password")
     OPTIONS+=(DECRYPT "Decrypt the hsm_secret")
-fi
-if [ ${NETclnEncryptedHSM} = "on" ];then
   if [ ! -f "/root/.${netprefix}cln.pw" ]; then
     OPTIONS+=(AUTOUNLOCK-ON "Auto-decrypt the hsm_secret after boot")
   else
