@@ -16,26 +16,23 @@ BACKTITLE="RaspiBlitz"
 TITLE=" C-Lightning Options (${CHAIN})"
 MENU=""
 OPTIONS=()
-
-OPTIONS+=(FUNDING "Fund your C-Lightning Wallet")
-OPTIONS+=(PEERING "Connect to a Peer")
-OPTIONS+=(CHANNEL "Open a Channel with Peer")
-OPTIONS+=(SEND "Pay an Invoice/PaymentRequest")
-OPTIONS+=(RECEIVE "Create Invoice/PaymentRequest")
-OPTIONS+=(SUMMARY "Information about this node")
-OPTIONS+=(NAME "Change Name/Alias of the Node")
-
+  OPTIONS+=(FUNDING "Fund the C-lightning wallet onchain")
+  OPTIONS+=(PEERING "Connect to a peer")
+  OPTIONS+=(CHANNEL "Open a channel with peer")
+  OPTIONS+=(SEND "Pay an invoice / payment request")
+  OPTIONS+=(RECEIVE "Create an invoice / payment request")
+  OPTIONS+=(SUMMARY "Information about this node")
+  OPTIONS+=(NAME "Change the name / alias of the node")
 ln_getInfo=$($lightningcli_alias getinfo 2>/dev/null)
 ln_channels_online="$(echo "${ln_getInfo}" | jq -r '.num_active_channels')" 2>/dev/null
 cln_num_inactive_channels="$(echo "${ln_getInfo}" | jq -r '.num_inactive_channels')" 2>/dev/null
 openChannels=$((ln_channels_online+cln_num_inactive_channels))
 if [ ${#openChannels} -gt 0 ] && [ ${openChannels} -gt 0 ]; then
   OPTIONS+=(SUEZ "Visualize channels")
-  OPTIONS+=(CLOSEALL "Close all open Channels on $CHAIN")
+  OPTIONS+=(CLOSEALL "Close all open channels on $CHAIN")
 fi
-
-OPTIONS+=(CASHOUT "Withdraw all funds from C-lightning on $CHAIN")
-
+  OPTIONS+=(CASHOUT "Withdraw all funds onchain ($CHAIN)")
+  OPTIONS+=(CLNREPAIR "Repair options for C-lightning")
 if [ "${lightning}" != "cln" ]; then
   OPTIONS+=(SWITCHLN  "Use C-lightning as default")
 fi  
@@ -100,10 +97,13 @@ case $CHOICE in
       echo "Press ENTER to return to main menu."
       read key
       ;;
+  CLNREPAIR)
+      /home/admin/99clnRepairMenu.sh $CHAIN
+      ;;
   SWITCHLN)
       clear 
       echo
-      # setting value in raspi blitz config
+      # setting value in the raspiblitz.conf
       sudo sed -i "s/^lightning=.*/lightning=cln/g" /mnt/hdd/raspiblitz.conf
       echo "# OK - lightning=cln is set in /mnt/hdd/raspiblitz.conf"
       echo
