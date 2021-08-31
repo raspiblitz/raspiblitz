@@ -20,15 +20,17 @@ if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
   OPTIONS+=(${network}CONF "Edit the bitcoin.conf")
 fi
 
-OPTIONS+=(LNDLOG "Monitor the lnd.log for ${CHAIN}")
-OPTIONS+=(LNDCONF "Edit the lnd.conf for ${CHAIN}")
+if grep "^${netprefix}lnd=on" /mnt/hdd/raspiblitz.conf;then
+  OPTIONS+=(LNDLOG "Monitor the lnd.log for ${CHAIN}")
+  OPTIONS+=(LNDCONF "Edit the lnd.conf for ${CHAIN}")
+fi
 
 if grep "^${netprefix}cln=on" /mnt/hdd/raspiblitz.conf;then
   OPTIONS+=(CLNLOG "Monitor the CLN log for ${CHAIN}")
   OPTIONS+=(CLNCONF "Edit the CLN config for ${CHAIN}")
 fi
 
-if [ "${runBehindTor}" == "on" ]; then
+if [ "${runBehindTor}" == "on" ] && [ "${netprefix}" == "" ]; then
   OPTIONS+=(TORLOG "Monitor the Tor Service with Nyx")
   OPTIONS+=(TORRC "Edit the Tor Configuration")
 fi
