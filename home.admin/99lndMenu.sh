@@ -39,7 +39,7 @@ fi
 
 OPTIONS+=(CASHOUT "Withdraw all funds from LND on $CHAIN")
 
-if [ "${lightning} "= "lnd" ];then
+if [ "${lightning}" != "lnd" ]; then
   OPTIONS+=(SWITCHLN  "Use LND as default")
 fi  
 
