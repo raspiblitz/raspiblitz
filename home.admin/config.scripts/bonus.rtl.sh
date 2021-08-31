@@ -113,15 +113,6 @@ Activate TOR to access the web interface from outside your local network.
   exit 0
 fi
 
-# prepare raspiblitz.conf --> add default value
-configEntryExists=$(sudo cat /mnt/hdd/raspiblitz.conf | grep -c "${configEntry}")
-if [ "${configEntryExists}" == "0" ]; then
-  echo "# adding default config entry for '${configEntry}'"
-  sudo /bin/sh -c "echo '${configEntry}=off' >> /mnt/hdd/raspiblitz.conf"
-else
-  echo "# default config entry for '${configEntry}' exists"
-fi
-
 ##########################
 # ON
 #########################
@@ -142,6 +133,15 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   fi
 
   echo "# Installing RTL for ${LNTYPE} ${CHAIN}"
+
+  # prepare raspiblitz.conf --> add default value
+  configEntryExists=$(sudo cat /mnt/hdd/raspiblitz.conf | grep -c "${configEntry}")
+  if [ "${configEntryExists}" == "0" ]; then
+    echo "# adding default config entry for '${configEntry}'"
+    sudo /bin/sh -c "echo '${configEntry}=off' >> /mnt/hdd/raspiblitz.conf"
+  else
+    echo "# default config entry for '${configEntry}' exists"
+  fi
 
   # check and install NodeJS
   /home/admin/config.scripts/bonus.nodejs.sh on
