@@ -66,7 +66,10 @@ if [ ${#lightning} -gt 0 ]; then
 fi
 BACKTITLE="${localip} / ${hostname} / ${network} ${plus}"
 
-# Put Activated Apps on top
+# Basic Options
+OPTIONS+=(INFO "RaspiBlitz Status Screen")
+
+# Activated Apps/Services
 if [ "${rtlWebinterface}" == "on" ]; then
   OPTIONS+=(LRTL "LND RTL Webinterface")
 fi
@@ -134,17 +137,10 @@ if [ "${circuitbreaker}" == "on" ]; then
   OPTIONS+=(CIRCUIT "Circuitbreaker (LND firewall)")
 fi
 
-if [ "${testnet}" == "on" ]; then
-  OPTIONS+=(TESTNETS "Testnet/Signet Options")
-fi
-
 # dont offer to switch to "testnet view for now" - so no wswitch back to mainnet needed
 #if [ ${chain} != "main" ]; then
 #  OPTIONS+=(MAINNET "Mainnet Service Options")
 #fi
-
-# Basic Options
-OPTIONS+=(INFO "RaspiBlitz Status Screen")
 
 # if LND is active
 if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
@@ -154,6 +150,10 @@ fi
 # if C-Lightning is active
 if [ "${lightning}" == "cln" ] || [ "${cln}" == "on" ]; then
   OPTIONS+=(CLN "C-lightning Wallet Options")
+fi
+
+if [ "${testnet}" == "on" ]; then
+  OPTIONS+=(TESTNETS "Testnet/Signet Options")
 fi
 
 OPTIONS+=(SETTINGS "Node Settings & Options")
