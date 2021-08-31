@@ -401,7 +401,6 @@ if [ "${rtlWebinterface}" = "on" ]; then
     echo "Provisioning RTL LND - run config script" >> ${logFile}
     sudo sed -i "s/^message=.*/message='Setup RTL (takes time)'/g" ${infoFile}
     sudo -u admin /home/admin/config.scripts/bonus.rtl.sh on lnd mainnet >> ${logFile} 2>&1
-    sudo systemctl disable RTL # will get enabled after recover dialog
 else
     echo "Provisioning RTL LND - keep default" >> ${logFile}
 fi
@@ -411,7 +410,6 @@ if [ "${crtlWebinterface}" = "on" ]; then
     echo "Provisioning RTL CLN - run config script" >> ${logFile}
     sudo sed -i "s/^message=.*/message='Setup RTL (takes time)'/g" ${infoFile}
     sudo -u admin /home/admin/config.scripts/bonus.rtl.sh on cln mainnet >> ${logFile} 2>&1
-    sudo systemctl disable cRTL # will get enabled after recover dialog
 else
     echo "Provisioning RTL CLN - keep default" >> ${logFile}
 fi
@@ -421,7 +419,6 @@ if [ "${sparko}" = "on" ]; then
     echo "Provisioning Sparko - run config script" >> ${logFile}
     sudo sed -i "s/^message=.*/message='Setup SPARKO (takes time)'/g" ${infoFile}
     sudo -u admin /home/admin/config.scripts/cln-plugin.sparko.sh on mainnet >> ${logFile} 2>&1
-    sudo systemctl disable cRTL # will get enabled after recover dialog
 else
     echo "Provisioning RTL CLN - keep default" >> ${logFile}
 fi
@@ -431,7 +428,6 @@ if [ "${loop}" = "on" ] && [ "${lit}" != "on" ]; then
   echo "Provisioning Lightning Loop - run config script" >> ${logFile}
   sudo sed -i "s/^message=.*/message='Setup Lightning Loop'/g" ${infoFile}
   sudo -u admin /home/admin/config.scripts/bonus.loop.sh on >> ${logFile} 2>&1
-  sudo systemctl disable loopd # will get enabled after recover dialog
 else
   echo "Provisioning Lightning Loop - keep default" >> ${logFile}
 fi
@@ -441,7 +437,6 @@ if [ "${BTCRPCexplorer}" = "on" ]; then
   echo "Provisioning BTCRPCexplorer - run config script" >> ${logFile}
   sudo sed -i "s/^message=.*/message='Setup BTCRPCexplorer (takes time)'/g" ${infoFile}
   sudo -u admin /home/admin/config.scripts/bonus.btc-rpc-explorer.sh on >> ${logFile} 2>&1
-  sudo systemctl disable btc-rpc-explorer # will get enabled after recover dialog
 else
   echo "Provisioning BTCRPCexplorer - keep default" >> ${logFile}
 fi
@@ -451,7 +446,6 @@ if [ "${ElectRS}" = "on" ]; then
   echo "Provisioning ElectRS - run config script" >> ${logFile}
   sudo sed -i "s/^message=.*/message='Setup ElectRS (takes time)'/g" ${infoFile}
   sudo -u admin /home/admin/config.scripts/bonus.electrs.sh on >> ${logFile} 2>&1
-  sudo systemctl disable electrs # will get enabled after recover dialog
 else
   echo "Provisioning ElectRS - keep default" >> ${logFile}
 fi
