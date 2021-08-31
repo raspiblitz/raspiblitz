@@ -30,9 +30,17 @@ if [ ${mode} = "cln-export" ]; then
   downloadPath="/home/admin"
   fileowner="admin"
 
-  # stop LND
+  # stop
   echo "# Stopping cln..."
   sudo systemctl stop lightningd 1>/dev/null
+  if grep -Eq "^tcln=on" /mnt/hdd/raspiblitz.conf; then
+    echo "# stopping tcln..."
+    sudo systemctl stop tlightningd 1>/dev/null
+  fi
+  if grep -Eq "^scln=on" /mnt/hdd/raspiblitz.conf; then
+    echo "# stopping scln..."
+    sudo systemctl stop slightningd 1>/dev/null
+  fi
   sleep 5
   echo "# OK"
   echo 
@@ -122,9 +130,17 @@ if [ ${mode} = "cln-import" ]; then
     exit 1
   fi
 
-  # stop LND
+  # stop
   echo "# stopping cln..."
   sudo systemctl stop lightningd 1>/dev/null
+  if grep -Eq "^tcln=on" /mnt/hdd/raspiblitz.conf; then
+    echo "# stopping tcln..."
+    sudo systemctl stop tlightningd 1>/dev/null
+  fi
+  if grep -Eq "^scln=on" /mnt/hdd/raspiblitz.conf; then
+    echo "# stopping scln..."
+    sudo systemctl stop slightningd 1>/dev/null
+  fi
   sleep 5
 
   # clean DIR
@@ -289,7 +305,7 @@ if [ ${mode} = "seed-export-gui" ]; then
   ack=0
   while [ ${ack} -eq 0 ]
   do
-    whiptail --title "IMPORTANT SEED WORDS - PLEASE WRITE DOWN" --msgbox "C-Lightning Wallet got created. Store these numbered words in a safe location:\n\n${seedwords6x4}" 12 76
+    whiptail --title "IMPORTANT SEED WORDS - PLEASE WRITE DOWN" --msgbox "Created a new C-lightning wallet. Store these numbered 24 words in a safe location:\n\n${seedwords6x4}" 13 76
     whiptail --title "Please Confirm" --yes-button "Show Again" --no-button "CONTINUE" --yesno "  Are you sure that you wrote down the word list?" 8 55
     if [ $? -eq 1 ]; then
       ack=1
