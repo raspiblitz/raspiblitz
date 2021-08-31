@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="v14.17.8"
+VERSION="v14.17.6"
 # get checksums from -> https://nodejs.org/dist/vx.y.z/SHASUMS256.txt (tar.xs files)
 CHECKSUM_linux_arm64="9c4f3a651e03cd9b5bddd33a80e8be6a6eb15e518513e410bb0852a658699156"
 CHECKSUM_linux_armv7l="09ad804c7354ebaded407d0ce64e72e534801fc435be084af3e5b16b1a9c96d0"

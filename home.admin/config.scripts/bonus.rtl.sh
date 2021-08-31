@@ -10,45 +10,35 @@ source /mnt/hdd/raspiblitz.conf
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "# config script to switch the RideTheLightning WebGUI on, off or update"
   echo
-  echo "# bonus.rtl.sh [on|off|menu|config] <lnd|cln> <testnet|signet>"
-  echo "# sets up lnd on ${chain}net by default"
+  echo "# bonus.rtl.sh [on|off|menu|config] <lnd|cln> <mainnet|testnet|signet>"
   echo "# able to run intances for lnd and cln parallel"
   echo "# lnd mainnet and testnet can run parallel"
   echo "# cln can only have one network active at a time"
   echo
-  echo "# bonus.rtl.sh [update<commit>|config]"
+  echo "# bonus.rtl.sh update"
   echo "# installs the version $RTLVERSION by default"
   exit 1
 fi
 
 echo "# Running: 'bonus.rtl.sh $*'"
 
-if [ ${#network} -eq 0 ]; then
- echo "FAIL - missing /mnt/hdd/raspiblitz.conf"
- exit 1
-fi
-
 # LNTYPE is lnd | cln
-if [ $# -gt 1 ]; then
-  LNTYPE=$2
-else
-  LNTYPE=lnd
-fi
-if [ ${LNTYPE} != lnd ]&&[ ${LNTYPE} != cln ];then
+LNTYPE=$2
+if [ "${LNTYPE}" != "lnd" ] && [ "${LNTYPE}" != "cln" ]; then
   echo "# ${LNTYPE} is not a supported LNTYPE"
+  echo "err='not supported parameter'"
   exit 1
 fi
+echo "# LNTYPE(${LNTYPE})"
 
 # CHAIN is signet | testnet | mainnet
-if [ $# -gt 2 ]; then
-  CHAIN=$3
-else
-  CHAIN=${chain}net
-fi
-if [ ${CHAIN} != testnet ]&&[ ${CHAIN} != mainnet ]&&[ ${CHAIN} != signet ];then
+CHAIN=$3
+if [ ${CHAIN} != testnet ] && [ ${CHAIN} != mainnet ] && [ ${CHAIN} != signet ]; then
   echo "# ${CHAIN} is not a supported CHAIN"
+  echo "err='not supported parameter'"
   exit 1
 fi
+echo "# CHAIN(${CHAIN})"
 
 # prefix for parallel networks
 if [ "${CHAIN}" == "testnet" ]; then
@@ -60,10 +50,9 @@ elif [ "${CHAIN}" == "signet" ]; then
 elif [ "${CHAIN}" == "mainnet" ]; then
   netprefix=""
   portprefix=""
-else
-  echo "# CHAIN(${CHAIN})"
-  echo "err='not supported chain'"
 fi
+echo "# netprefix(${netprefix})"
+echo "# portprefix(${portprefix})"
 
 # prefix for parallel lightning impl
 if [ "${LNTYPE}" == "cln" ]; then
@@ -73,17 +62,29 @@ elif [ "${LNTYPE}" == "lnd" ]; then
   RTLHTTP=${portprefix}3000
   typeprefix=""
 fi
+echo "# RTLHTTP(${RTLHTTP})"
+echo "# typeprefix(${typeprefix})"
+
+# construct needed varibale elements
+configEntry="${netprefix}${typeprefix}rtlWebinterface"
+systemdService="${netprefix}${typeprefix}RTL.service"
+echo "# configEntry(${configEntry})"
+echo "# systemdService(${systemdService})"
+
+##########################
+# MENU
+#########################
 
 # show info menu
 if [ "$1" = "menu" ]; then
 
   # get network info
   localip=$(hostname -I | awk '{print $1}')
-  toraddress=$(sudo cat /mnt/hdd/tor/RTL/hostname 2>/dev/null)
+  toraddress=$(sudo cat /mnt/hdd/tor/${netprefix}${typeprefix}RTL/hostname 2>/dev/null)
   fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
 
+  # Info with TOR
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
-    # Info with TOR
     /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
     whiptail --title "Ride The Lightning (RTL - $LNTYPE - $CHAIN)" --msgbox "Open in your local web browser:
 http://${localip}:${RTLHTTP}\n
@@ -93,8 +94,9 @@ Use your Password B to login.\n
 Hidden Service address for TOR Browser (QRcode on LCD):\n${toraddress}
 " 16 67
     /home/admin/config.scripts/blitz.display.sh hide
+
+  # Info without TOR  
   else
-    # Info without TOR
     whiptail --title "Ride The Lightning (RTL - $LNTYPE - $CHAIN)" --msgbox "Open in your local web browser & accept self-signed cert:
 http://${localip}:${RTLHTTP}\n
 https://${localip}:$((RTLHTTP+1)) with Fingerprint:
@@ -107,8 +109,7 @@ Activate TOR to access the web interface from outside your local network.
   exit 0
 fi
 
-# add default value to raspi config if needed
-configEntry="${netprefix}${typeprefix}rtlWebinterface"
+# prepare raspiblitz.conf --> add default value
 configEntryExists=$(sudo cat /mnt/hdd/raspiblitz.conf | grep -c "${configEntry}")
 if [ "${configEntryExists}" == "0" ]; then
   echo "# adding default config entry for '${configEntry}'"
@@ -119,16 +120,17 @@ fi
 
 # stop services
 echo "# making sure services are not running"
-sudo systemctl stop ${netprefix}${typeprefix}RTL 2>/dev/null
+sudo systemctl stop ${systemdService} 2>/dev/null
 
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "# Installing RTL for ${LNTYPE} ${CHAIN}"
 
-  isInstalled=$(sudo ls /etc/systemd/system/${netprefix}${typeprefix}RTL.service 2>/dev/null | grep -c "${netprefix}${typeprefix}RTL.service")
+  isInstalled=$(sudo ls /etc/systemd/system/${systemdService} 2>/dev/null | grep -c "${systemdService}")
   if ! [ ${isInstalled} -eq 0 ]; then
     echo "# OK, the ${netprefix}${typeprefix}RTL.service is already installed."
   else
+  
     # check and install NodeJS
     /home/admin/config.scripts/bonus.nodejs.sh on
 
@@ -200,7 +202,8 @@ Wants=lnd.service
 After=lnd.service
 
 [Service]
-Environment=\"RTL_CONFIG_PATH=/home/rtl/${netprefix}RTL/\"
+Environment=\"RTL_CONFIG_PATH=/home/rtl/${netprefix}${typeprefix}RTL/\"
+ExecStartPre=-/home/admin/config.scripts/bonus.rtl.sh config ${LNTYPE} ${CHAIN}
 ExecStart=/usr/bin/node /home/rtl/RTL/rtl
 User=rtl
 Restart=always
@@ -241,6 +244,7 @@ Environment=\"LN_IMPLEMENTATION=CLT\"
 Environment=\"LN_SERVER_URL=https://localhost:${portprefix}6100\"
 Environment=\"CONFIG_PATH=/home/bitcoin/.lightning/${netprefix}config\"
 Environment=\"MACAROON_PATH=/home/bitcoin/c-lightning-REST/certs\"
+ExecStartPre=-/home/admin/config.scripts/bonus.rtl.sh config ${LNTYPE} ${CHAIN}
 ExecStart=/usr/bin/node /home/rtl/RTL/rtl
 User=rtl
 Restart=always
@@ -288,7 +292,7 @@ WantedBy=multi-user.target
   sudo nginx -t
   sudo systemctl reload nginx
 
-    /home/admin/config.scripts/bonus.rtl.sh config $2 $3
+  /home/admin/config.scripts/bonus.rtl.sh config $2 $3
 
   # setting value in raspi blitz config
   sudo sed -i "s/^${netprefix}${typeprefix}rtlWebinterface=.*/${netprefix}${typeprefix}rtlWebinterface=on/g" /mnt/hdd/raspiblitz.conf
@@ -391,7 +395,7 @@ if [ "$1" = "config" ]; then
   fi
 
   # prepare RTL-Config.json file
-  echo "# ${netprefix}RTL/RTL.conf"
+  echo "# ${netprefix}${typeprefix}RTL/RTL.conf"
   # change of config: https://github.com/Ride-The-Lightning/RTL/tree/v0.6.4
   sudo cp /home/rtl/RTL/docs/Sample-RTL-Config.json /home/admin/RTL-Config.json
   sudo chown admin:admin /home/admin/RTL-Config.json
@@ -410,16 +414,16 @@ data.nodes[0].Authentication.swapMacaroonPath = '/home/rtl/.loop/${chain}net/'
 data.nodes[0].Authentication.boltzMacaroonPath = '/home/rtl/.boltz-lnd/macaroons/'
 data.multiPass = '$PASSWORD_B';
 data.nodes[0].Settings.userPersona = 'OPERATOR'
-data.nodes[0].Settings.channelBackupPath = '/home/rtl/${netprefix}RTL-SCB-backup-$hostname'
+data.nodes[0].Settings.channelBackupPath = '/home/rtl/${netprefix}${typeprefix}RTL-SCB-backup-$hostname'
 data.nodes[0].Settings.swapServerUrl = 'https://localhost:$SWAPSERVERPORT'
 //Output data
 console.log(JSON.stringify(data, null, 2));
 EOF
-  echo "# creatking dir: /home/rtl/${netprefix}RTL"
-  sudo -u rtl mkdir -p /home/rtl/${netprefix}RTL
-  sudo rm -f /home/rtl/${netprefix}RTL/RTL-Config.json
-  sudo mv /home/admin/RTL-Config.json /home/rtl/${netprefix}RTL/
-  sudo chown rtl:rtl /home/rtl/${netprefix}RTL/RTL-Config.json
+  echo "# creatking dir: /home/rtl/${netprefix}${typeprefix}RTL"
+  sudo -u rtl mkdir -p /home/rtl/${netprefix}${typeprefix}}RTL
+  sudo rm -f /home/rtl/${netprefix}${typeprefix}RTL/RTL-Config.json
+  sudo mv /home/admin/RTL-Config.json /home/rtl/${netprefix}${typeprefix}RTL/
+  sudo chown rtl:rtl /home/rtl/${netprefix}${typeprefix}RTL/RTL-Config.json
   exit 0
 fi
 
