@@ -160,7 +160,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo rm -rf "/home/rtl/.lnd" 2>/dev/null              # not a symlink.. delete it silently
     sudo ln -s "/mnt/hdd/app-data/lnd/" "/home/rtl/.lnd"  # and create symlink
   fi
-  if [ "${LNTYPE}" == "lnd"]; then
+  if [ "${LNTYPE}" == "lnd" ]; then
     # for LND make sure user rtl is allowed to access admin macaroons
     echo "# adding user rtl to group lndadmin"
     sudo /usr/sbin/usermod --append --groups lndadmin rtl
