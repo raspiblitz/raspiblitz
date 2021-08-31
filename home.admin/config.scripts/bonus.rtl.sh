@@ -78,7 +78,9 @@ if [ "$1" = "menu" ]; then
 
   # check that parameters are set
   if [ "${LNTYPE}" == "" ] || [ "${CHAIN}" == "" ]; then
-    echo "# missing parameter"
+    clear
+    echo "# FAIL missing parameter"
+    sleep 2
     exit 1
   fi
 

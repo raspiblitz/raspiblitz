@@ -228,10 +228,10 @@ case $CHOICE in
             /home/admin/config.scripts/blitz.touchscreen.sh calibrate
             ;;
         LRTL)
-            /home/admin/config.scripts/bonus.rtl.sh menu lnd
+            /home/admin/config.scripts/bonus.rtl.sh menu lnd mainnet
             ;;
         CRTL)
-            /home/admin/config.scripts/bonus.rtl.sh menu cln
+            /home/admin/config.scripts/bonus.rtl.sh menu cln mainnet
             ;;
         BTCPAY)
             /home/admin/config.scripts/bonus.btcpayserver.sh menu
