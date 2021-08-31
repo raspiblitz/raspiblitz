@@ -10,7 +10,7 @@ source /mnt/hdd/raspiblitz.conf
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "# config script to switch the RideTheLightning WebGUI on, off or update"
   echo
-  echo "# bonus.rtl.sh [on|off|menu] <lnd|cln> <testnet|signet>"
+  echo "# bonus.rtl.sh [on|off|menu|config] <lnd|cln> <testnet|signet>"
   echo "# sets up lnd on ${chain}net by default"
   echo "# able to run intances for lnd and cln parallel"
   echo "# lnd mainnet and testnet can run parallel"
@@ -60,6 +60,9 @@ elif [ "${CHAIN}" == "signet" ]; then
 elif [ "${CHAIN}" == "mainnet" ]; then
   netprefix=""
   portprefix=""
+else
+  echo "# CHAIN(${CHAIN})"
+  echo "err='not supported chain'"
 fi
 
 # prefix for parallel lightning impl
@@ -117,66 +120,6 @@ fi
 # stop services
 echo "# making sure services are not running"
 sudo systemctl stop ${netprefix}${typeprefix}RTL 2>/dev/null
-
-function configRTL() {
-
-  if [ $LNTYPE = lnd ];then
-    echo "# Make sure rtl is member of lndadmin"
-    sudo /usr/sbin/usermod --append --groups lndadmin rtl
-    SWAPSERVERPORT=8443
-    if [ "$(grep -Ec "(loop=|lit=)" < /mnt/hdd/raspiblitz.conf)" -gt 0 ];then 
-      if [ $lit = on ];then
-        echo "# Add the rtl user to the lit group"
-        sudo /usr/sbin/usermod --append --groups lit rtl
-        echo "# Symlink the lit-loop.macaroon"
-        sudo rm -rf "/home/rtl/.loop"                    #  delete symlink
-        sudo ln -s "/home/lit/.loop/" "/home/rtl/.loop"  # create symlink
-        SWAPSERVERPORT=8443
-      elif [ $loop = on ];then
-        echo "# Add the rtl user to the loop group"
-        sudo /usr/sbin/usermod --append --groups loop rtl
-        echo "# Symlink the loop.macaroon"
-        sudo rm -rf "/home/rtl/.loop"                     # delete symlink
-        sudo ln -s "/home/loop/.loop/" "/home/rtl/.loop"  # create symlink
-        SWAPSERVERPORT=8081
-      fi
-      echo "# Make the loop macaroon group readable"
-      sudo chmod 640 /home/rtl/.loop/mainnet/macaroons.db
-    else
-      echo "# No Loop or LiT is installed"
-    fi
-  fi
-
-  # prepare RTL-Config.json file
-  echo "# ${netprefix}RTL/RTL.conf"
-  # change of config: https://github.com/Ride-The-Lightning/RTL/tree/v0.6.4
-  sudo cp /home/rtl/RTL/docs/Sample-RTL-Config.json /home/admin/RTL-Config.json
-  sudo chown admin:admin /home/admin/RTL-Config.json
-  sudo chmod 600 /home/admin/RTL-Config.json || exit 1
-  PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
-  # modify sample-RTL-Config.json and save in RTL-Config.json
-  node > /home/admin/RTL-Config.json <<EOF
-//Read data
-var data = require('/home/rtl/RTL/docs/Sample-RTL-Config.json');
-//Manipulate data
-data.port = '$RTLHTTP'
-data.nodes[0].lnNode = '$hostname'
-data.nodes[0].Authentication.macaroonPath = '/home/rtl/.lnd/data/chain/${network}/${chain}net/'
-data.nodes[0].Authentication.configPath = '/home/rtl/.lnd/${netprefix}lnd.conf';
-data.nodes[0].Authentication.swapMacaroonPath = '/home/rtl/.loop/${chain}net/'
-data.nodes[0].Authentication.boltzMacaroonPath = '/home/rtl/.boltz-lnd/macaroons/'
-data.multiPass = '$PASSWORD_B';
-data.nodes[0].Settings.userPersona = 'OPERATOR'
-data.nodes[0].Settings.channelBackupPath = '/home/rtl/${netprefix}RTL-SCB-backup-$hostname'
-data.nodes[0].Settings.swapServerUrl = 'https://localhost:$SWAPSERVERPORT'
-//Output data
-console.log(JSON.stringify(data, null, 2));
-EOF
-  sudo -u rtl mkdir -p /home/rtl/${netprefix}RTL
-  sudo rm -f /home/rtl/${netprefix}RTL/RTL-Config.json
-  sudo mv /home/admin/RTL-Config.json /home/rtl/${netprefix}RTL/
-  sudo chown rtl:rtl /home/rtl/${netprefix}RTL/RTL-Config.json
-}
 
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
@@ -345,7 +288,7 @@ WantedBy=multi-user.target
   sudo nginx -t
   sudo systemctl reload nginx
 
-  configRTL
+    /home/admin/config.scripts/bonus.rtl.sh config $2 $3
 
   # setting value in raspi blitz config
   sudo sed -i "s/^${netprefix}${typeprefix}rtlWebinterface=.*/${netprefix}${typeprefix}rtlWebinterface=on/g" /mnt/hdd/raspiblitz.conf
@@ -420,7 +363,63 @@ fi
 # config
 if [ "$1" = "config" ]; then
   echo "# CONFIG RTL"
-  configRTL
+  if [ $LNTYPE = lnd ]; then
+    echo "# Make sure rtl is member of lndadmin"
+    sudo /usr/sbin/usermod --append --groups lndadmin rtl
+    SWAPSERVERPORT=8443
+    if [ "$(grep -Ec "(loop=|lit=)" < /mnt/hdd/raspiblitz.conf)" -gt 0 ];then 
+      if [ $lit = on ];then
+        echo "# Add the rtl user to the lit group"
+        sudo /usr/sbin/usermod --append --groups lit rtl
+        echo "# Symlink the lit-loop.macaroon"
+        sudo rm -rf "/home/rtl/.loop"                    #  delete symlink
+        sudo ln -s "/home/lit/.loop/" "/home/rtl/.loop"  # create symlink
+        SWAPSERVERPORT=8443
+      elif [ $loop = on ];then
+        echo "# Add the rtl user to the loop group"
+        sudo /usr/sbin/usermod --append --groups loop rtl
+        echo "# Symlink the loop.macaroon"
+        sudo rm -rf "/home/rtl/.loop"                     # delete symlink
+        sudo ln -s "/home/loop/.loop/" "/home/rtl/.loop"  # create symlink
+        SWAPSERVERPORT=8081
+      fi
+      echo "# Make the loop macaroon group readable"
+      sudo chmod 640 /home/rtl/.loop/mainnet/macaroons.db
+    else
+      echo "# No Loop or LiT is installed"
+    fi
+  fi
+
+  # prepare RTL-Config.json file
+  echo "# ${netprefix}RTL/RTL.conf"
+  # change of config: https://github.com/Ride-The-Lightning/RTL/tree/v0.6.4
+  sudo cp /home/rtl/RTL/docs/Sample-RTL-Config.json /home/admin/RTL-Config.json
+  sudo chown admin:admin /home/admin/RTL-Config.json
+  sudo chmod 600 /home/admin/RTL-Config.json || exit 1
+  PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
+  # modify sample-RTL-Config.json and save in RTL-Config.json
+  node > /home/admin/RTL-Config.json <<EOF
+//Read data
+var data = require('/home/rtl/RTL/docs/Sample-RTL-Config.json');
+//Manipulate data
+data.port = '$RTLHTTP'
+data.nodes[0].lnNode = '$hostname'
+data.nodes[0].Authentication.macaroonPath = '/home/rtl/.lnd/data/chain/${network}/${chain}net/'
+data.nodes[0].Authentication.configPath = '/home/rtl/.lnd/${netprefix}lnd.conf';
+data.nodes[0].Authentication.swapMacaroonPath = '/home/rtl/.loop/${chain}net/'
+data.nodes[0].Authentication.boltzMacaroonPath = '/home/rtl/.boltz-lnd/macaroons/'
+data.multiPass = '$PASSWORD_B';
+data.nodes[0].Settings.userPersona = 'OPERATOR'
+data.nodes[0].Settings.channelBackupPath = '/home/rtl/${netprefix}RTL-SCB-backup-$hostname'
+data.nodes[0].Settings.swapServerUrl = 'https://localhost:$SWAPSERVERPORT'
+//Output data
+console.log(JSON.stringify(data, null, 2));
+EOF
+  echo "# creatking dir: /home/rtl/${netprefix}RTL"
+  sudo -u rtl mkdir -p /home/rtl/${netprefix}RTL
+  sudo rm -f /home/rtl/${netprefix}RTL/RTL-Config.json
+  sudo mv /home/admin/RTL-Config.json /home/rtl/${netprefix}RTL/
+  sudo chown rtl:rtl /home/rtl/${netprefix}RTL/RTL-Config.json
   exit 0
 fi
 
@@ -462,7 +461,7 @@ if [ "$1" = "update" ]; then
     echo "# Unknown option: $updateOption"
   fi
 
-  configRTL
+  /home/admin/config.scripts/bonus.rtl.sh config $2 $3
   
   echo
   echo "# Starting the RTL service ... "
