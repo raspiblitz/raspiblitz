@@ -133,12 +133,15 @@ fi
 if [ "${circuitbreaker}" == "on" ]; then
   OPTIONS+=(CIRCUIT "Circuitbreaker (LND firewall)")
 fi
+
 if [ "${testnet}" == "on" ]; then
-  OPTIONS+=(TESTNET "Testnet Service Options")
+  OPTIONS+=(TESTNETS "Testnet/Signet Options")
 fi
-if [ ${chain} != "main" ]; then
-  OPTIONS+=(MAINNET "Mainnet Service Options")
-fi
+
+# dont offer to switch to "testnet view for now" - so no wswitch back to mainnet needed
+#if [ ${chain} != "main" ]; then
+#  OPTIONS+=(MAINNET "Mainnet Service Options")
+#fi
 
 # Basic Options
 OPTIONS+=(INFO "RaspiBlitz Status Screen")
@@ -290,12 +293,9 @@ case $CHOICE in
         CIRCUIT)
             sudo /home/admin/config.scripts/bonus.circuitbreaker.sh menu
             ;;
-        TESTNET)
-            /home/admin/00parallelChainsMenu.sh testnet
-            ;;    
-        MAINNET)
-            /home/admin/00parallelChainsMenu.sh mainnet
-            ;;    
+        TESTNETS)
+            /home/admin/00parallelChainsMenu.sh
+            ;;  
         SUBSCRIBE)
             /home/admin/config.scripts/blitz.subscriptions.py
             ;;
