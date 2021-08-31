@@ -4,6 +4,7 @@ if [ "$1" == "-h" ] || [ "$1" == "help" ]; then
  echo "script to unlock LND wallet"
  echo "lnd.unlock.sh status"
  echo "lnd.unlock.sh unlock [?passwordC]"
+ echo "lnd.unlock.sh chain-unlock [mainnet|testnet|signet]"
  exit 1
 fi
 
@@ -11,13 +12,20 @@ fi
 source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
 
-source <(/home/admin/config.scripts/network.aliases.sh getvars lnd ${chain}net)
-
 # 1. parameter (default is unlock)
 action="$1"
 
 # 2. parameter (optional password)
 passwordC="$2"
+
+# chain-unlock --> unlock with re-arranged parameters
+CHAIN="${chain}net"
+if [ "${action}" == "chain-unlock" ]; then
+    action="unlock"
+    CHAIN=$2
+fi
+
+source <(/home/admin/config.scripts/network.aliases.sh getvars lnd ${chain}net)
 
 # check if wallet is already unlocked
 # echo "# checking LND wallet ... (can take some time)"

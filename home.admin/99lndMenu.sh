@@ -10,6 +10,9 @@ source <(/home/admin/config.scripts/internet.sh status local)
 
 source <(/home/admin/config.scripts/network.aliases.sh getvars lnd $1)
 
+# make sure lnd wallet is unlocked
+/home/admin/config.scripts/lnd.unlock.sh chain-unlock ${CHAIN}
+
 # BASIC MENU INFO
 WIDTH=64
 BACKTITLE="RaspiBlitz"
