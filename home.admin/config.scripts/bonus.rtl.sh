@@ -389,7 +389,7 @@ if [ "$1" = "prestart" ]; then
   chmod 600 /home/rtl/${systemdService}/RTL-Config.json
 
   # LND changes of config
-  if [ "${LNType}" == "lnd" ]; then
+  if [ "${LNTYPE}" == "lnd" ]; then
     echo "# LND Config"
     cat /home/rtl/${systemdService}/RTL-Config.json | \
     jq ".port = \"${RTLHTTP}\"" | \
@@ -408,7 +408,7 @@ if [ "$1" = "prestart" ]; then
 
   # C-Lightning changes of config
   # https://github.com/Ride-The-Lightning/RTL/blob/master/docs/C-Lightning-setup.md
-  if [ "${LNType}" == "cln" ]; then
+  if [ "${LNTYPE}" == "cln" ]; then
     echo "# CLN Config"
     cat /home/rtl/${systemdService}/RTL-Config.json | \
     jq ".port = \"${RTLHTTP}\"" | \
