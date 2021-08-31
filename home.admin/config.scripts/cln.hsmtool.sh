@@ -260,22 +260,24 @@ elif [ "$1" = "lock" ]; then
 
 elif [ "$1" = "encrypt" ]; then
   if [ -f  /home/bitcoin/.lightning/${CLNETWORK}/seedwords.info ];then
-    # show the words one last time
     source <(sudo -u bitcoin cat /home/bitcoin/.lightning/${CLNETWORK}/seedwords.info)
-    ack=0
-    while [ ${ack} -eq 0 ]
-    do
-      whiptail --title "IMPORTANT SEED WORDS - PLEASE WRITE DOWN" --msgbox "The backup of seedwords will be deleted, make sure you wrote them down. Store these numbered 24 words in a safe location:\n\n${seedwords6x4}" 13 76
-      whiptail --title "Please Confirm" --yes-button "Show Again" --no-button "CONTINUE" --yesno "  Are you sure that you wrote down the word list?" 8 55
-      if [ $? -eq 1 ]; then
-        ack=1
-      fi
-    done
+    if [ ${#seedwords6x4} -gt 0 ];then
+      # show the words one last time
+      ack=0
+      while [ ${ack} -eq 0 ]
+      do
+        whiptail --title "IMPORTANT SEED WORDS - PLEASE WRITE DOWN" --msgbox "The backup of seedwords will be deleted, make sure you wrote them down. Store these numbered 24 words in a safe location:\n\n${seedwords6x4}" 13 76
+        whiptail --title "Please Confirm" --yes-button "Show Again" --no-button "CONTINUE" --yesno "  Are you sure that you wrote down the word list?" 8 55
+        if [ $? -eq 1 ]; then
+          ack=1
+        fi
+      done
+      deletedWhen="deleted when the hsm_secret was encrypted"
+    else
+      deletedWhen="not available any more"
+    fi
     # delete seedwords.info
     sudo -u bitcoin shred /home/bitcoin/.lightning/${CLNETWORK}/seedwords.info
-    deletedWhen=" "
-  else
-    deletedWhen="not available any more"
   fi
   echo "
 # This file is placed by cln.hsmtool.sh .

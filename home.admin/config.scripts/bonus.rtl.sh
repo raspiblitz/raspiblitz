@@ -1,5 +1,5 @@
 #!/bin/bash
-RTLVERSION="v0.11.0"
+RTLVERSION="v0.11.1"
 
 # check and load raspiblitz config
 # to know which network is running
@@ -39,23 +39,34 @@ fi
 echo "# CHAIN(${CHAIN})"
 
 # prefix for parallel networks
-if [ "${CHAIN}" == "testnet" ]; then
+if [ "${CHAIN}" == "mainnet" ]; then
+  netprefix=""
+  portprefix=""
+  CLNETWORK=${network}
+elif [ "${CHAIN}" == "testnet" ]; then
   netprefix="t"
   portprefix=1
+  CLNETWORK=${CHAIN}
 elif [ "${CHAIN}" == "signet" ]; then
   netprefix="s"
   portprefix=3
-elif [ "${CHAIN}" == "mainnet" ]; then
-  netprefix=""
-  portprefix=""
+  CLNETWORK=${CHAIN}
 fi
 echo "# netprefix(${netprefix})"
 echo "# portprefix(${portprefix})"
+echo "# CLNETWORK=${CLNETWORK}"
 
 # prefix for parallel lightning impl
 if [ "${LNTYPE}" == "cln" ]; then
   RTLHTTP=${portprefix}7000
   typeprefix="c"
+  # CLNCONF is the path to the config
+  if [ ${CLNETWORK} = "bitcoin" ]; then
+    CLNCONF="/home/bitcoin/.lightning/config"
+  else
+    CLNCONF="/home/bitcoin/.lightning/${CLNETWORK}/config"
+  fi
+  echo "# CLNCONF=${CLNCONF}"
 elif [ "${LNTYPE}" == "lnd" ]; then
   RTLHTTP=${portprefix}3000
   typeprefix=""
@@ -420,7 +431,7 @@ if [ "$1" = "prestart" ]; then
     jq ".nodes[0].nodes[0].Settings.swapServerUrl = \"https://localhost:${SWAPSERVERPORT}\"" > /home/rtl/${systemdService}/RTL-Config.json.tmp
     mv /home/rtl/${systemdService}/RTL-Config.json.tmp /home/rtl/${systemdService}/RTL-Config.json
   fi
-
+  
   echo "# RTL prestart config done"
   exit 0
 fi

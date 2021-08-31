@@ -237,7 +237,7 @@ if [ "${lightning}" == "cln" ]; then
  ln_baseInfo="-"
  ln_channelInfo="\n"
  ln_external="\n"
- ln_alias="$(sudo cat /home/bitcoin/.lightning/${netprefix}config | grep "^alias=*" | cut -f2 -d=)"
+ ln_alias="$(sudo cat "${CLNCONF}" | grep "^alias=*" | cut -f2 -d=)"
  if [ ${#ln_alias} -eq 0 ];then
   ln_alias=$(echo "${ln_getInfo}" | grep '"alias":' | cut -d '"' -f4)
  fi
@@ -245,7 +245,7 @@ if [ "${lightning}" == "cln" ]; then
   ln_alias=${hostname}
  fi
  ln_publicColor=""
- ln_port=$(sudo cat /home/bitcoin/.lightning/${netprefix}config | grep "^bind-addr=*" | cut -f2 -d':')
+ ln_port=$(sudo cat "${CLNCONF}" | grep "^bind-addr=*" | cut -f2 -d':')
  if [ ${#ln_port} -eq 0 ]; then
    ln_port=$(echo "${ln_getInfo}" | grep '"port":' | cut -d: -f2 | tail -1 | bc)
  fi
