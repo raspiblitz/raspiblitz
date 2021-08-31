@@ -122,11 +122,6 @@ else
   echo "# default config entry for '${configEntry}' exists"
 fi
 
-# stop services
-echo "# making sure services are not running"
-sudo systemctl stop ${systemdService} 2>/dev/null
-
-
 ##########################
 # ON
 #########################
@@ -447,6 +442,10 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     echo "# missing parameter"
     exit 1
   fi
+
+  # stop services
+  echo "# making sure services are not running"
+  sudo systemctl stop ${systemdService} 2>/dev/null
 
   # setting value in raspi blitz config
   sudo sed -i "s/^${configEntry}=.*/${configEntry}=off/g" /mnt/hdd/raspiblitz.conf
