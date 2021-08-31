@@ -11,7 +11,7 @@ fi
 newName=$2
 
 # use default values from the raspiblitz.conf
-source <(/home/admin/config.scripts/network.aliases.sh getvars $1)
+source <(/home/admin/config.scripts/network.aliases.sh getvars cln $1)
 
 # run interactive if 'turn on' && no further parameters
 if [ ${#newName} -eq 0 ]; then
@@ -31,7 +31,7 @@ fi
 blitzConfig="/mnt/hdd/raspiblitz.conf"
 
 # cln conf file
-clnConfig="/home/bitcoin/.lightning/${netprefix}config"
+clnConfig="${CLNCONF}"
 
 # check if raspiblitz config file exists
 if [ ! -f ${blitzConfig} ]; then

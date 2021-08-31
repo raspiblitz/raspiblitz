@@ -124,7 +124,7 @@ case $CHOICE in
     read key
     sudo tail -n 30 -f /home/bitcoin/.lightning/${CLNETWORK}/cl.log;;
   CLNCONF)
-    if /home/admin/config.scripts/blitz.setconf.sh "/home/bitcoin/.lightning/${netprefix}config" "root"
+    if /home/admin/config.scripts/blitz.setconf.sh "${CLNCONF}" "root"
     then
       whiptail \
         --title "Restart" --yes-button "Restart" --no-button "Not now" \
