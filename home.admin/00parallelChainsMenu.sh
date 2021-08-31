@@ -23,7 +23,8 @@ if [ "${testnet}" == "on" ]; then
   if [ "${lightning}" == "cln" ] || [ "${cln}" == "on" ]; then OPTIONS+=(tCLN "TESTNET C-Lightning Wallet Options"); fi
 fi
 
-OPTIONS+=(--- "--------------------------------------")
+# just an optical splitter - ignored on select
+OPTIONS+=(--- "----------------------------------")
 
 if [ "${signet}" == "on" ]; then
   OPTIONS+=(sSYS "SIGNET Monitoring & Configuration")
