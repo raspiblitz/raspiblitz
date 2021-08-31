@@ -167,7 +167,7 @@ if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = experimental ]||[ "$1" = testPR ];
 network=${CLNETWORK}
 announce-addr=127.0.0.1:${portprefix}9736
 log-file=cl.log
-log-level=debug
+log-level=info
 plugin-dir=/home/bitcoin/${netprefix}cln-plugins-enabled
 
 # Tor settings
