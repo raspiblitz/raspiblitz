@@ -13,7 +13,7 @@ source <(/home/admin/config.scripts/internet.sh status local)
 # BASIC MENU INFO
 WIDTH=64
 BACKTITLE="RaspiBlitz"
-TITLE=" C-Lightning Options "
+TITLE=" C-Lightning Options (${CHAIN})"
 MENU=""
 OPTIONS=()
 
