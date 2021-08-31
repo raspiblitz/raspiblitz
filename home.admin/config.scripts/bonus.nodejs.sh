@@ -1,10 +1,10 @@
 #!/bin/bash
 
-VERSION="v14.15.4"
+VERSION="v14.17.8"
 # get checksums from -> https://nodejs.org/dist/vx.y.z/SHASUMS256.txt (tar.xs files)
-CHECKSUM_linux_arm64="b990bd99679158c3164c55a20c2a6677c3d9e9ffdfa0d4a40afe9c9b5e97a96f"
-CHECKSUM_linux_armv7l="bafe4bfb22b046cdda3475d23cd6999c5ea85180c180c4bbb94014920aa7231b"
-CHECKSUM_linux_x64="ed01043751f86bb534d8c70b16ab64c956af88fd35a9506b7e4a68f5b8243d8a"
+CHECKSUM_linux_arm64="9c4f3a651e03cd9b5bddd33a80e8be6a6eb15e518513e410bb0852a658699156"
+CHECKSUM_linux_armv7l="09ad804c7354ebaded407d0ce64e72e534801fc435be084af3e5b16b1a9c96d0"
+CHECKSUM_linux_x64="3bbe4faf356738d88b45be222bf5e858330541ff16bd0d4cfad36540c331461b"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
