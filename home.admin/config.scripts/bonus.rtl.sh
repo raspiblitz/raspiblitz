@@ -42,31 +42,20 @@ echo "# CHAIN(${CHAIN})"
 if [ "${CHAIN}" == "mainnet" ]; then
   netprefix=""
   portprefix=""
-  CLNETWORK=${network}
 elif [ "${CHAIN}" == "testnet" ]; then
   netprefix="t"
   portprefix=1
-  CLNETWORK=${CHAIN}
 elif [ "${CHAIN}" == "signet" ]; then
   netprefix="s"
   portprefix=3
-  CLNETWORK=${CHAIN}
 fi
 echo "# netprefix(${netprefix})"
 echo "# portprefix(${portprefix})"
-echo "# CLNETWORK=${CLNETWORK}"
 
 # prefix for parallel lightning impl
 if [ "${LNTYPE}" == "cln" ]; then
   RTLHTTP=${portprefix}7000
   typeprefix="c"
-  # CLNCONF is the path to the config
-  if [ ${CLNETWORK} = "bitcoin" ]; then
-    CLNCONF="/home/bitcoin/.lightning/config"
-  else
-    CLNCONF="/home/bitcoin/.lightning/${CLNETWORK}/config"
-  fi
-  echo "# CLNCONF=${CLNCONF}"
 elif [ "${LNTYPE}" == "lnd" ]; then
   RTLHTTP=${portprefix}3000
   typeprefix=""
@@ -385,6 +374,16 @@ if [ "$1" = "prestart" ]; then
       SWAPSERVERPORT=""
   fi
 
+  # determine C-Lightning config path based on chain
+  if [ "${LNTYPE}" = "cln" ]; then
+    if [ "${CHAIN}" = "mainnet" ]; then
+      CLNCONF="/home/bitcoin/.lightning/config"
+    else
+      CLNCONF="/home/bitcoin/.lightning/${CHAIN}/config"
+    fi
+    echo "# CLNCONF(${CLNCONF})"
+  fi
+
   # prepare RTL-Config.json file
   echo "# PREPARE /home/rtl/${systemdService}/RTL-Config.json"
   # make and clean directory
@@ -422,7 +421,7 @@ if [ "$1" = "prestart" ]; then
     jq ".nodes[0].lnNode = \"${hostname}\"" | \
     jq ".nodes[0].lnImplementation = \"CLT\"" | \
     jq ".nodes[0].Authentication.macaroonPath = \"/home/bitcoin/c-lightning-REST/certs\"" | \
-    jq ".nodes[0].Authentication.configPath = \"/home/bitcoin/.lightning/${netprefix}config\"" | \
+    jq ".nodes[0].Authentication.configPath = \"${CLNCONF}\"" | \
     jq ".nodes[0].Authentication.swapMacaroonPath = \"/home/rtl/.loop/${CHAIN}/\"" | \
     jq ".nodes[0].Authentication.boltzMacaroonPath = \"/home/rtl/.boltz-lnd/macaroons/\"" | \
     jq ".nodes[0].Settings.userPersona = \"OPERATOR\"" | \
@@ -431,7 +430,7 @@ if [ "$1" = "prestart" ]; then
     jq ".nodes[0].nodes[0].Settings.swapServerUrl = \"https://localhost:${SWAPSERVERPORT}\"" > /home/rtl/${systemdService}/RTL-Config.json.tmp
     mv /home/rtl/${systemdService}/RTL-Config.json.tmp /home/rtl/${systemdService}/RTL-Config.json
   fi
-  
+
   echo "# RTL prestart config done"
   exit 0
 fi
