@@ -16,7 +16,7 @@ source <(/home/admin/config.scripts/network.aliases.sh getvars lnd $1)
 # BASIC MENU INFO
 WIDTH=64
 BACKTITLE="RaspiBlitz"
-TITLE=" LND Lightning Options "
+TITLE=" LND Lightning Options (${CHAIN}) "
 MENU=""
 OPTIONS=()
 
