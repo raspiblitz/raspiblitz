@@ -273,7 +273,7 @@ if [ "${lightning}" == "cln" ]; then
   fi
   BLOCKHEIGHT=$(echo "$blockchaininfo"|grep blocks|awk '{print $2}'|cut -d, -f1)
   CLHEIGHT=$(echo "${ln_getInfo}" | jq .blockheight)
-  if [ $BLOCKHEIGHT -eq $CLHEIGHT ];then
+  if [ "$BLOCKHEIGHT" == "$CLHEIGHT" ];then
     ln_sync=1
   else
     ln_sync=0
