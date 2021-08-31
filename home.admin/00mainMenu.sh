@@ -56,7 +56,7 @@ MENU="Choose one of the following options:"
 OPTIONS=()
 plus=""
 if [ "${runBehindTor}" = "on" ]; then
-  plus=" / Tor"
+  plus=" / tor"
 fi
 if [ ${#dynDomain} -gt 0 ]; then
   plus="/ ${dynDomain} ${plus}"
