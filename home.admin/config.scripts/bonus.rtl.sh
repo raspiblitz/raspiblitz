@@ -164,43 +164,40 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   fi
 
   # source code (one place for all instances)
-  if [ -f /home/rtl/RTL/rtl ];then
-    echo "# OK - the RTL code is already present - just update"
+  if [ -f /home/rtl/RTL/LICENSE ];then
+    echo "# OK - the RTL code is already present"
     cd /home/rtl/RTL
-    sudo -u rtl git pull
   else
     # download source code and set to tag release
     echo "# Get the RTL Source Code"
     sudo -u rtl rm -rf /home/rtl/RTL 2>/dev/null
     sudo -u rtl git clone https://github.com/ShahanaFarooqui/RTL.git /home/rtl/RTL
     cd /home/rtl/RTL
+    # check https://github.com/Ride-The-Lightning/RTL/releases/
+    sudo -u rtl git reset --hard $RTLVERSION
+    # from https://github.com/Ride-The-Lightning/RTL/commits/master
+    # git checkout 917feebfa4fb583360c140e817c266649307ef72
+    if [ -f /home/rtl/RTL/LICENSE ]; then
+      echo "# OK - RTL code copy looks good"
+    else
+      echo "# FAIL - RTL code not available"
+      echo "err='code download falied'"
+      exit 1
+    fi
+    # install
+    echo "# Run: npm install"
+    export NG_CLI_ANALYTICS=false
+    sudo -u rtl npm install --only=prod
+    if ! [ $? -eq 0 ]; then
+      echo "# FAIL - npm install did not run correctly - deleting code and exit"
+      sudo rm -r /home/rtl/RTL
+      exit 1
+    else
+      echo "# OK - RTL install looks good"
+      echo
+    fi
   fi
     
-  # check https://github.com/Ride-The-Lightning/RTL/releases/
-  sudo -u rtl git reset --hard $RTLVERSION
-  # from https://github.com/Ride-The-Lightning/RTL/commits/master
-  # git checkout 917feebfa4fb583360c140e817c266649307ef72
-  if [ -d "/home/rtl/RTL" ]; then
-    echo "# OK - RTL code copy looks good"
-  else
-    echo "# FAIL - RTL code not available"
-    echo "err='code download falied'"
-    exit 1
-  fi
-  echo
-  
-  # install
-  echo "# Run: npm install"
-  export NG_CLI_ANALYTICS=false
-  sudo -u rtl npm install --only=prod
-  if ! [ $? -eq 0 ]; then
-    echo "# FAIL - npm install did not run correctly, aborting"
-    exit 1
-  else
-    echo "# OK - RTL install looks good"
-    echo
-  fi
-  
   echo "# Updating Firewall"
   sudo ufw allow ${RTLHTTP} comment "${systemdService} HTTP"
   sudo ufw allow $((RTLHTTP+1)) comment "${systemdService} HTTPS"
