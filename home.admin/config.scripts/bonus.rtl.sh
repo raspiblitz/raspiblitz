@@ -77,7 +77,7 @@ echo "# systemdService(${systemdService})"
 if [ "$1" = "menu" ]; then
 
   # check that parameters are set
-  if [ "${LNTYPE}" == "" ] || [ "${CHAIN}" == "" ]; then
+  if [ "${LNTYPE}" == "" ] || [ "${CHAIN}" == "" ]; then
     echo "# missing parameter"
     exit 1
   fi
@@ -134,7 +134,7 @@ sudo systemctl stop ${systemdService} 2>/dev/null
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   # check that parameters are set
-  if [ "${LNTYPE}" == "" ] || [ "${CHAIN}" == "" ]; then
+  if [ "${LNTYPE}" == "" ] || [ "${CHAIN}" == "" ]; then
     echo "# missing parameter"
     exit 1
   fi
@@ -289,7 +289,7 @@ WantedBy=multi-user.target
   sudo systemctl enable ${systemdService}
   sudo systemctl start ${systemdService}
   echo "# OK - the ${systemdService}.service is now enabled & started"
-  echo "# Monitor with: sudo journalctl -f -u sudo journalctl -f -u"
+  echo "# Monitor with: sudo journalctl -f -u ${systemdService}"
   exit 0
 fi
 
@@ -345,7 +345,7 @@ fi
 if [ "$1" = "prestart" ]; then
 
   # check that parameters are set
-  if [ "${LNTYPE}" == "" ] || [ "${CHAIN}" == "" ]; then
+  if [ "${LNTYPE}" == "" ] || [ "${CHAIN}" == "" ]; then
     echo "# missing parameter"
     exit 1
   fi
