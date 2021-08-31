@@ -1,5 +1,5 @@
 #!/bin/bash
-RTLVERSION="v0.11.0"
+RTLVERSION="v0.11.1"
 
 # check and load raspiblitz config
 # to know which network is running
@@ -41,23 +41,34 @@ fi
 echo "# CHAIN(${CHAIN})"
 
 # prefix for parallel networks
-if [ "${CHAIN}" == "testnet" ]; then
+if [ "${CHAIN}" == "mainnet" ]; then
+  netprefix=""
+  portprefix=""
+  CLNETWORK=${network}
+elif [ "${CHAIN}" == "testnet" ]; then
   netprefix="t"
   portprefix=1
+  CLNETWORK=${CHAIN}
 elif [ "${CHAIN}" == "signet" ]; then
   netprefix="s"
   portprefix=3
-elif [ "${CHAIN}" == "mainnet" ]; then
-  netprefix=""
-  portprefix=""
+  CLNETWORK=${CHAIN}
 fi
 echo "# netprefix(${netprefix})"
 echo "# portprefix(${portprefix})"
+echo "# CLNETWORK=${CLNETWORK}"
 
 # prefix for parallel lightning impl
 if [ "${LNTYPE}" == "cln" ]; then
   RTLHTTP=${portprefix}7000
   typeprefix="c"
+  # CLNCONF is the path to the config
+  if [ ${CLNETWORK} = "bitcoin" ]; then
+    CLNCONF="/home/bitcoin/.lightning/config"
+  else
+    CLNCONF="/home/bitcoin/.lightning/${CLNETWORK}/config"
+  fi
+  echo "# CLNCONF=${CLNCONF}"
 elif [ "${LNTYPE}" == "lnd" ]; then
   RTLHTTP=${portprefix}3000
   typeprefix=""
@@ -242,7 +253,7 @@ Environment=\"RTL_CONFIG_PATH=/home/rtl/${netprefix}RTL/\"
 Environment=\"PORT=$RTLHTTP\"
 Environment=\"LN_IMPLEMENTATION=CLT\"
 Environment=\"LN_SERVER_URL=https://localhost:${portprefix}6100\"
-Environment=\"CONFIG_PATH=/home/bitcoin/.lightning/${netprefix}config\"
+Environment=\"CONFIG_PATH=${CLNCONF}\"
 Environment=\"MACAROON_PATH=/home/bitcoin/c-lightning-REST/certs\"
 ExecStartPre=-/home/admin/config.scripts/bonus.rtl.sh config ${LNTYPE} ${CHAIN}
 ExecStart=/usr/bin/node /home/rtl/RTL/rtl
@@ -419,7 +430,7 @@ data.nodes[0].Settings.swapServerUrl = 'https://localhost:$SWAPSERVERPORT'
 //Output data
 console.log(JSON.stringify(data, null, 2));
 EOF
-  echo "# creatking dir: /home/rtl/${netprefix}${typeprefix}RTL"
+  echo "# creating dir: /home/rtl/${netprefix}${typeprefix}RTL"
   sudo -u rtl mkdir -p /home/rtl/${netprefix}${typeprefix}}RTL
   sudo rm -f /home/rtl/${netprefix}${typeprefix}RTL/RTL-Config.json
   sudo mv /home/admin/RTL-Config.json /home/rtl/${netprefix}${typeprefix}RTL/
