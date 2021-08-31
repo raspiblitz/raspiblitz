@@ -395,10 +395,6 @@ if [ "${specter}" == "on" ]; then
   OPTIONS+=(SPECTER "Update Specter Desktop")
 fi
 
-if [ "${rtlWebinterface}" == "on" ]; then
-  OPTIONS+=(RTL "Update RTL")
-fi
-
 if [ "${sphinxrelay}" == "on" ]; then
   OPTIONS+=(SPHINX "Update Sphinx Server Relay")
 fi
@@ -448,9 +444,6 @@ case $CHOICE in
     ;;
   SPECTER)
     /home/admin/config.scripts/bonus.specter.sh update
-    ;;
-  RTL)
-    /home/admin/config.scripts/bonus.rtl.sh update
     ;;
   SPHINX)
     /home/admin/config.scripts/bonus.sphinxrelay.sh update
