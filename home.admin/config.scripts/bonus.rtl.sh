@@ -20,48 +20,24 @@ fi
 
 echo "# Running: 'bonus.rtl.sh $*'"
 
+source <(/home/admin/config.scripts/network.aliases.sh getvars $2 $3)
+
 # LNTYPE is lnd | cln
-LNTYPE=$2
-if [ "${LNTYPE}" != "" ] && [ "${LNTYPE}" != "lnd" ] && [ "${LNTYPE}" != "cln" ]; then
-  echo "# ${LNTYPE} is not a supported LNTYPE"
-  echo "err='not supported parameter'"
-  exit 1
-fi
 echo "# LNTYPE(${LNTYPE})"
-
 # CHAIN is signet | testnet | mainnet
-CHAIN=$3
-if [ "${CHAIN}" != "" ] && [ "${CHAIN}" != "testnet" ] && [ "${CHAIN}" != "mainnet" ] && [ "${CHAIN}" != "signet" ]; then
-  echo "# ${CHAIN} is not a supported CHAIN"
-  echo "err='not supported parameter'"
-  exit 1
-fi
 echo "# CHAIN(${CHAIN})"
-
 # prefix for parallel networks
-if [ "${CHAIN}" == "mainnet" ]; then
-  netprefix=""
-  portprefix=""
-elif [ "${CHAIN}" == "testnet" ]; then
-  netprefix="t"
-  portprefix=1
-elif [ "${CHAIN}" == "signet" ]; then
-  netprefix="s"
-  portprefix=3
-fi
 echo "# netprefix(${netprefix})"
 echo "# portprefix(${portprefix})"
+echo "# typeprefix(${typeprefix})"
 
 # prefix for parallel lightning impl
 if [ "${LNTYPE}" == "cln" ]; then
   RTLHTTP=${portprefix}7000
-  typeprefix="c"
 elif [ "${LNTYPE}" == "lnd" ]; then
   RTLHTTP=${portprefix}3000
-  typeprefix=""
 fi
 echo "# RTLHTTP(${RTLHTTP})"
-echo "# typeprefix(${typeprefix})"
 
 # construct needed varibale elements
 configEntry="${netprefix}${typeprefix}rtlWebinterface"
@@ -89,7 +65,7 @@ if [ "$1" = "menu" ]; then
   toraddress=$(sudo cat /mnt/hdd/tor/${netprefix}${typeprefix}RTL/hostname 2>/dev/null)
   fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
 
-  # Info with TOR
+  # info with Tor
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
     /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
     whiptail --title "Ride The Lightning (RTL - $LNTYPE - $CHAIN)" --msgbox "Open in your local web browser:
@@ -97,18 +73,18 @@ http://${localip}:${RTLHTTP}\n
 https://${localip}:$((RTLHTTP+1)) with Fingerprint:
 ${fingerprint}\n
 Use your Password B to login.\n
-Hidden Service address for TOR Browser (QRcode on LCD):\n${toraddress}
+Hidden Service address for Tor Browser (QRcode on LCD):\n${toraddress}
 " 16 67
     /home/admin/config.scripts/blitz.display.sh hide
 
-  # Info without TOR  
+  # info without Tor
   else
     whiptail --title "Ride The Lightning (RTL - $LNTYPE - $CHAIN)" --msgbox "Open in your local web browser & accept self-signed cert:
 http://${localip}:${RTLHTTP}\n
 https://${localip}:$((RTLHTTP+1)) with Fingerprint:
 ${fingerprint}\n
 Use your Password B to login.\n
-Activate TOR to access the web interface from outside your local network.
+Activate Tor to access the web interface from outside your local network.
 " 15 67
   fi
   echo "please wait ..."
@@ -241,11 +217,14 @@ WantedBy=multi-user.target
     sudo sed -i "s/^After=.*/After=${netprefix}lnd.service/g" /etc/systemd/system/${systemdService}.service
   fi
 
-  # adapt systemd service template for LND
+  # adapt systemd service template for CLN
   if [ "${LNTYPE}" == "cln" ]; then
     echo "# modifying ${systemdService}.service for CLN"
     sudo sed -i "s/^Wants=.*/Wants=${netprefix}lightningd.service/g" /etc/systemd/system/${systemdService}.service
     sudo sed -i "s/^After=.*/After=${netprefix}lightningd.service/g" /etc/systemd/system/${systemdService}.service
+
+    # set up C-LightningREST  
+    /home/admin/config.scripts/cln.rest.sh on ${CHAIN}
   fi
 
   # Note about RTL config file
@@ -368,16 +347,6 @@ if [ "$1" = "prestart" ]; then
       SWAPSERVERPORT=""
   fi
 
-  # determine C-Lightning config path based on chain
-  if [ "${LNTYPE}" = "cln" ]; then
-    if [ "${CHAIN}" = "mainnet" ]; then
-      CLNCONF="/home/bitcoin/.lightning/config"
-    else
-      CLNCONF="/home/bitcoin/.lightning/${CHAIN}/config"
-    fi
-    echo "# CLNCONF(${CLNCONF})"
-  fi
-
   # prepare RTL-Config.json file
   echo "# PREPARE /home/rtl/${systemdService}/RTL-Config.json"
   # make and clean directory
@@ -437,7 +406,7 @@ fi
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # check that parameters are set
-  if [ "${LNTYPE}" == "" ] || [ "${CHAIN}" == "" ]; then
+  if [ "${LNTYPE}" == "" ] || [ "${CHAIN}" == "" ]; then
     echo "# missing parameter"
     exit 1
   fi
