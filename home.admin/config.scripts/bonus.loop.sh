@@ -136,6 +136,9 @@ WantedBy=multi-user.target
     echo "# The Loop service already installed."
   fi
 
+  # in case RTL is installed - check to connect
+  sudo /home/admin/config.scripts/bonus.rtl.sh connect-services
+
   # setting value in raspi blitz config
   sudo sed -i "s/^loop=.*/loop=on/g" /mnt/hdd/raspiblitz.conf
   

@@ -332,18 +332,15 @@ alias lit-frcli=\"frcli --rpcserver=localhost:8443 \
     /home/admin/config.scripts/internet.hiddenservice.sh lit 443 8443
   fi
 
+  # in case RTL is installed - check to connect
+  sudo /home/admin/config.scripts/bonus.rtl.sh connect-services
+
   source /home/admin/raspiblitz.info
   if [ "${state}" == "ready" ]; then
     echo "# OK - the litd.service is enabled, system is ready so starting service"
     sudo systemctl start litd
   else
     echo "# OK - the litd.service is enabled, to start manually use: 'sudo systemctl start litd'"
-  fi
-
-  # make Loop work with RTL if installed
-  # dont call anything that starts RTL service - otherwise update/recover might block
-  if [ ${#rtlWebinterface} -gt 0 ]&&[ ${rtlWebinterface} = on ];then
-    /home/admin/config.scripts/bonus.rtl.sh config
   fi
 
   exit 0

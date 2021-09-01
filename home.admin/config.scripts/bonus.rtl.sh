@@ -274,12 +274,19 @@ fi
 
 if [ "$1" = "connect-services" ]; then
 
+  # has to run as use root or sudo
   if [ "$USER" != "root" ] && [ "$USER" != "admin" ]; then
     echo "# FAIL: run as user root or admin"
     exit 1
   fi
 
-  echo "## RTL CONNECT-SERVICES (when run as admin or root)" 
+  # only run when RTL is installed
+  if [ -d /home/rtl ]; then
+    echo "## RTL CONNECT-SERVICES" 
+  else
+    echo "# no RTL installed - no need to connect any services"
+    exit
+  fi
 
   # LIT & LOOP Swap Server
   echo "# checking of swap server ..."
