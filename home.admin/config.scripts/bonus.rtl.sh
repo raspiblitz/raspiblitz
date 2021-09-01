@@ -461,7 +461,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   exit 0
 fi
 
-# DEAKTIVATED FOR NOW:
+# DEACTIVATED FOR NOW:
 # - parameter scheme is conflicting with setting all perfixes etc
 # - also just updating to latest has high change of breaking
 #if [ "$1" = "update" ]; then
