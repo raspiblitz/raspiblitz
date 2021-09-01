@@ -2,9 +2,14 @@
 
 ## What's new in Version 1.7.1 of RaspiBlitz?
 
-- Update: bitcoin-core version 0.21.1-beta [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-0.21.1.md)
+- New: C-lightning v0.10.1 [details](https://github.com/ElementsProject/lightning/releases/tag/v0.10.1)
+- New: C-lightningREST v0.5.1 [details](https://github.com/Ride-The-Lightning/c-lightning-REST/releases/tag/v0.5.1)
+- New: CLN plugin: Sparko [details](https://github.com/fiatjaf/sparko)
+- New: Suez - channel visualization for LND and CLN [details](https://github.com/prusnak/suez)
+
+- Update: Bitcoin Vore v0.21.1 [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-0.21.1.md)
 - Update: LND v0.13.1 [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.13.1-beta)
-- Update: RTL 0.11.0 [details](https://github.com/Ride-The-Lightning/RTL/releases/tag/v0.11.0)
+- Update: RTL 0.11.1 [details](https://github.com/Ride-The-Lightning/RTL/releases/tag/v0.11.1)
 - Update: Specter Desktop 1.6.0 [details](https://github.com/cryptoadvance/specter-desktop/blob/master/README.md)
 - Update: Lightning Terminal v0.5.0-alpha [details](https://github.com/lightninglabs/lightning-terminal/releases/tag/v0.5.0-alpha)
 - Update: Pool CLI v0.5.1-alpha [details](https://github.com/lightninglabs/pool/releases/tag/v0.5.1-alpha)
@@ -15,6 +20,7 @@
 - Update: Mempool 2.2.1 [details](https://github.com/mempool/mempool)
 - Update: BTC-RPC-Explorer v3.2.0 [details](https://github.com/janoside/btc-rpc-explorer/blob/master/CHANGELOG.md#v320)
 - Update: stacking-sats-kraken 0.4.4 [details](https://github.com/dennisreimann/stacking-sats-kraken/blob/master/README.md)
+
 
 ## What's new in Version 1.7.0 of RaspiBlitz?
 
