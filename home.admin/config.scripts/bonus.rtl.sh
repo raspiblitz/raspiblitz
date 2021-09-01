@@ -10,8 +10,7 @@ source /mnt/hdd/raspiblitz.conf
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "# config script for RideTheLightning $RTLVERSION WebInterface"
   echo "# able to run intances for lnd and cln parallel"
-  echo "# lnd mainnet and testnet can run parallel"
-  echo "# cln can only have one network active at a time"
+  echo "# mainnet and testnet instances can run parallel"
   echo "# bonus.rtl.sh [on|off|menu] <lnd|cln> <mainnet|testnet|signet>"
   echo "# bonus.rtl.sh connect-services"
   echo "# bonus.rtl.sh prestart <mainnet|testnet|signet>"

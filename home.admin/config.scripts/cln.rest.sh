@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # https://github.com/Ride-The-Lightning/c-lightning-REST/releases/
-CLRESTVERSION="v0.4.4"
+CLRESTVERSION="v0.5.1"
 
 # help
 if [ $# -eq 0 ]||[ "$1" = "-h" ]||[ "$1" = "--help" ];then
@@ -9,7 +9,8 @@ if [ $# -eq 0 ]||[ "$1" = "-h" ]||[ "$1" = "--help" ];then
   echo "C-lightning-REST install script"
   echo "the default version is: $CLRESTVERSION"
   echo "setting up on ${chain}net unless otherwise specified"
-  echo "mainnet | testnet | signet instances cannot run parallel"
+  echo "mainnet | testnet | signet instances can run parallel"
+  echo "the same macaroon and certs will be used for the parallel networks"
   echo
   echo "usage:"
   echo "cln.rest.sh [on|off|connect] <mainnet|testnet|signet>"
@@ -75,30 +76,40 @@ fi
 if [ $1 = on ];then
   echo "# Setting up c-lightning-REST for $CHAIN"
 
-  sudo systemctl stop clnrest
-  sudo systemctl disable clnrest
+  sudo systemctl stop ${netprefix}clnrest
+  sudo systemctl disable ${netprefix}clnrest
 
-  cd /home/bitcoin || exit 1
-  sudo -u bitcoin git clone https://github.com/saubyk/c-lightning-REST
-  cd c-lightning-REST || exit 1
-  sudo -u bitcoin git reset --hard $CLRESTVERSION
-  sudo -u bitcoin npm install
-  sudo -u bitcoin cp sample-cl-rest-config.json cl-rest-config.json
-  sudo -u bitcoin sed -i "s/3001/${portprefix}6100/g" cl-rest-config.json
-
-  # symlink to /home/bitcoin/.lightning/lightning-rpc from the chosen network directory
-  sudo rm /home/bitcoin/.lightning/lightning-rpc # delete old symlink
-  sudo ln -s /home/bitcoin/.lightning/${CLNETWORK}/lightning-rpc /home/bitcoin/.lightning/
+  if [ ! -f /home/bitcoin/c-lightning-REST/cl-rest.js ];then
+    cd /home/bitcoin || exit 1
+    sudo -u bitcoin git clone https://github.com/saubyk/c-lightning-REST
+    cd c-lightning-REST || exit 1
+    sudo -u bitcoin git reset --hard $CLRESTVERSION
+    sudo -u bitcoin npm install
+  fi
+  
+  # config
+  cd /home/bitcoin/c-lightning-REST || exit 1
+  sudo -u bitcoin mkdir ${CLNETWORK}
+  echo "
+{
+    \"PORT\": ${portprefix}6100,
+    \"DOCPORT\": ${portprefix}4001,
+    \"PROTOCOL\": \"https\",
+    \"EXECMODE\": \"production\",
+    \"LNRPCPATH\": \"/home/bitcoin/.lightning/${CLNETWORK}/lightning-rpc\",
+    \"RPCCOMMANDS\": [\"*\"]
+}" | sudo -u bitcoin tee ./${CLNETWORK}/cl-rest-config.json
   
   echo "
 # systemd unit for c-lightning-REST for ${CHAIN}
-#/etc/systemd/system/clnrest.service
+# /etc/systemd/system/${netprefix}clnrest.service
 [Unit]
 Description=c-lightning-REST daemon for ${CHAIN}
 Wants=${netprefix}lightningd.service
 After=${netprefix}lightningd.service
 
 [Service]
+WorkingDirectory=/home/bitcoin/c-lightning-REST/${CLNETWORK}
 ExecStart=/usr/bin/node /home/bitcoin/c-lightning-REST/cl-rest.js
 User=bitcoin
 Restart=always
@@ -113,13 +124,13 @@ PrivateDevices=true
 
 [Install]
 WantedBy=multi-user.target
-" | sudo tee /etc/systemd/system/clnrest.service
+" | sudo tee /etc/systemd/system/${netprefix}clnrest.service
 
-  sudo systemctl enable clnrest
+  sudo systemctl enable ${netprefix}clnrest
   source /home/admin/raspiblitz.info
   if [ "${state}" == "ready" ]; then
     echo "# OK - the clnrest.service is enabled, system is ready so starting service"
-    sudo systemctl start clnrest
+    sudo systemctl start ${netprefix}clnrest
   else
     echo "# OK - the clnrest.service is enabled, to start manually use: 'sudo systemctl start clnrest'"
   fi
@@ -131,10 +142,14 @@ fi
 
 if [ $1 = off ];then
   echo "# Removing c-lightning-REST for ${CHAIN}"
-  sudo systemctl stop clnrest
-  sudo systemctl disable clnrest
-  sudo rm -rf /home/bitcoin/c-lightning-REST
+  sudo systemctl stop ${netprefix}clnrest
+  sudo systemctl disable ${netprefix}clnrest
+  sudo rm -rf /home/bitcoin/c-lightning-REST/${CLNETWORK}
   echo "# Deny port ${portprefix}6100 through the firewall"
   sudo ufw deny "${portprefix}6100"
   /home/admin/config.scripts/internet.hiddenservice.sh off ${netprefix}clnrest
+  if [ "$(echo "$@" | grep -c purge)" -gt 0 ];then
+    echo "# Removing the source code and binaries"
+    sudo rm -rf /home/bitcoin/c-lightning-REST
+  fi
 fi
