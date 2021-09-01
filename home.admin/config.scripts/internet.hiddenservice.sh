@@ -34,7 +34,7 @@ if [ "$1" == "off" ]; then
   sudo chmod 644 /etc/tor/torrc
   sudo chown bitcoin:bitcoin /etc/tor/torrc
 
-  echo "# OK service is removed - reloading TOR ..."
+  echo "# OK service is removed - reloading Tor ..."
   sudo systemctl reload tor@default
   sleep 10
   echo "# Done"
