@@ -362,18 +362,18 @@ if [ "${lndNode}" != "${choice}" ]; then
   echo "# LND NODE Setting changed .."
   if [ "${choice}" = "on" ]; then
     echo "# turning ON"
-    /home/admin/config.scripts/lnd.chain.sh on mainnet
+    /home/admin/config.scripts/lnd.install.sh on mainnet
     if [ "${testnet}" == "on" ]; then
-      /home/admin/config.scripts/lnd.chain.sh on testnet
+      /home/admin/config.scripts/lnd.install.sh on testnet
     fi
     if [ "${signetnet}" == "on" ]; then
-      /home/admin/config.scripts/lnd.chain.sh on signet
+      /home/admin/config.scripts/lnd.install.sh on signet
     fi
   else
     echo "# turning OFF"
-    /home/admin/config.scripts/lnd.chain.sh off mainnet
-    /home/admin/config.scripts/lnd.chain.sh off testnet
-    /home/admin/config.scripts/lnd.chain.sh off signet
+    /home/admin/config.scripts/lnd.install.sh off mainnet
+    /home/admin/config.scripts/lnd.install.sh off testnet
+    /home/admin/config.scripts/lnd.install.sh off signet
   fi
 else
   echo "LND NODE setting unchanged."
@@ -414,8 +414,8 @@ if [ "${testnet}" != "${choice}" ]; then
     /home/admin/config.scripts/bitcoin.install.sh on testnet
     /home/admin/config.scripts/bitcoin.install.sh on signet
     if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
-      /home/admin/config.scripts/lnd.chain.sh on testnet
-      /home/admin/config.scripts/lnd.chain.sh on signet
+      /home/admin/config.scripts/lnd.install.sh on testnet
+      /home/admin/config.scripts/lnd.install.sh on signet
     fi
     if [ "${lightning}" == "cln" ] || [ "${cln}" == "on" ]; then
       /home/admin/config.scripts/cln.install.sh on testnet
@@ -423,8 +423,8 @@ if [ "${testnet}" != "${choice}" ]; then
     fi 
   else
     # just turn al lightning testnets off (even if not on before)
-    /home/admin/config.scripts/lnd.chain.sh off testnet
-    /home/admin/config.scripts/lnd.chain.sh off signet
+    /home/admin/config.scripts/lnd.install.sh off testnet
+    /home/admin/config.scripts/lnd.install.sh off signet
     /home/admin/config.scripts/cln.install.sh off testnet
     /home/admin/config.scripts/cln.install.sh off signet
     /home/admin/config.scripts/bitcoin.install.sh off testnet

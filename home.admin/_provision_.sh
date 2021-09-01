@@ -304,7 +304,7 @@ fi
 # LND Mainnet (when not main instance)
 if [ "${lnd}" == "on" ] && [ "${lightning}" != "lnd" ]; then
     echo "Provisioning LND Mainnet - run config script" >> ${logFile}
-    sudo /home/admin/config.scripts/lnd.chain.sh on mainnet >> ${logFile} 2>&1
+    sudo /home/admin/config.scripts/lnd.install.sh on mainnet >> ${logFile} 2>&1
 else
     echo "Provisioning LND Mainnet - not activ as secondary option" >> ${logFile}
 fi
@@ -312,7 +312,7 @@ fi
 # LND Testnet
 if [ "${tlnd}" == "on" ]; then
     echo "Provisioning LND Testnet - run config script" >> ${logFile}
-    sudo /home/admin/config.scripts/lnd.chain.sh on testnet >> ${logFile} 2>&1
+    sudo /home/admin/config.scripts/lnd.install.sh on testnet >> ${logFile} 2>&1
     sudo systemctl start tlnd >> ${logFile} 2>&1
 else
     echo "Provisioning LND Testnet - not activ" >> ${logFile}
@@ -321,7 +321,7 @@ fi
 # LND Signet
 if [ "${slnd}" == "on" ]; then
     echo "Provisioning LND Signet - run config script" >> ${logFile}
-    sudo /home/admin/config.scripts/lnd.chain.sh on signet >> ${logFile} 2>&1
+    sudo /home/admin/config.scripts/lnd.install.sh on signet >> ${logFile} 2>&1
     sudo systemctl start slnd >> ${logFile} 2>&1
 else
     echo "Provisioning LND Signet - not activ" >> ${logFile}

@@ -175,7 +175,7 @@ if [ "${lightning}" == "lnd" ]; then
     sudo -u bitcoin mkdir /mnt/hdd/lnd 2> /dev/null
     sudo cp /home/admin/assets/lnd.${network}.conf /mnt/hdd/lnd/lnd.conf
     sudo chown bitcoin:bitcoin /mnt/hdd/lnd/lnd.conf
-    sudo /home/admin/config.scripts/lnd.chain.sh on mainnet
+    sudo /home/admin/config.scripts/lnd.install.sh on mainnet
     sudo /home/admin/config.scripts/lnd.setname.sh mainnet ${hostname}
   fi
 

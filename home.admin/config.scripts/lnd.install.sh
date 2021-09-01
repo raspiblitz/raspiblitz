@@ -4,7 +4,7 @@
 if [ $# -lt 2 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ];then
   echo
   echo "Install or remove LND services on parallel chains"
-  echo "lnd.chain.sh [on|off] [mainnet|testnet|signet]"
+  echo "lnd.install.sh [on|off] [mainnet|testnet|signet]"
   echo
   exit 1
 fi

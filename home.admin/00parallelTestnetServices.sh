@@ -52,7 +52,7 @@ if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${tlnd}" != "${choice}" ]; then
   echo "# LND on $CHAIN Setting changed .."
   anychange=1
-  /home/admin/config.scripts/lnd.chain.sh ${choice} $CHAIN
+  /home/admin/config.scripts/lnd.install.sh ${choice} $CHAIN
   errorOnInstall=$?
   if [ "${choice}" =  "on" ]; then
     if [ ${errorOnInstall} -eq 0 ]; then
@@ -60,7 +60,7 @@ if [ "${tlnd}" != "${choice}" ]; then
     else
       l1="# !!! FAIL on LND on $CHAIN install !!!"
       l2="# Try manual install on terminal after reboot with:"
-      l3="/home/admin/config.scripts/lnd.chain.sh on $CHAIN"
+      l3="/home/admin/config.scripts/lnd.install.sh on $CHAIN"
       dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
     fi
   fi
