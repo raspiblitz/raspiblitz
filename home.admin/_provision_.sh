@@ -286,7 +286,7 @@ fi
 # Bitcoin Testnet
 if [ "${testnet}" == "on" ]; then
     echo "Provisioning ${network} Testnet - run config script" >> ${logFile}
-    sudo /home/admin/config.scripts/bitcoin.chains.sh on testnet >> ${logFile} 2>&1
+    sudo /home/admin/config.scripts/bitcoin.install.sh on testnet >> ${logFile} 2>&1
     sudo systemctl start tbitcoind >> ${logFile} 2>&1
 else
     echo "Provisioning ${network} Testnet - not activ" >> ${logFile}
@@ -295,7 +295,7 @@ fi
 # Bitcoin Signet
 if [ "${signet}" == "on" ]; then
     echo "Provisioning ${network} Signet - run config script" >> ${logFile}
-    sudo /home/admin/config.scripts/bitcoin.chains.sh on signet >> ${logFile} 2>&1
+    sudo /home/admin/config.scripts/bitcoin.install.sh on signet >> ${logFile} 2>&1
     sudo systemctl start sbitcoind >> ${logFile} 2>&1
 else
     echo "Provisioning ${network} Signet - not activ" >> ${logFile}

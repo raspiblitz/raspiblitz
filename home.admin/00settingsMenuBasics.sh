@@ -411,8 +411,8 @@ if [ "${testnet}" != "${choice}" ]; then
   echo "# Parallel Testnets Setting changed .."
   anychange=1
   if [ "${choice}" = "on" ]; then
-    /home/admin/config.scripts/bitcoin.chains.sh on testnet
-    /home/admin/config.scripts/bitcoin.chains.sh on signet
+    /home/admin/config.scripts/bitcoin.install.sh on testnet
+    /home/admin/config.scripts/bitcoin.install.sh on signet
     if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
       /home/admin/config.scripts/lnd.chain.sh on testnet
       /home/admin/config.scripts/lnd.chain.sh on signet
@@ -427,8 +427,8 @@ if [ "${testnet}" != "${choice}" ]; then
     /home/admin/config.scripts/lnd.chain.sh off signet
     /home/admin/config.scripts/cln.install.sh off testnet
     /home/admin/config.scripts/cln.install.sh off signet
-    /home/admin/config.scripts/bitcoin.chains.sh off testnet
-    /home/admin/config.scripts/bitcoin.chains.sh off signet
+    /home/admin/config.scripts/bitcoin.install.sh off testnet
+    /home/admin/config.scripts/bitcoin.install.sh off signet
   fi
   # make sure to reboot - nodes that people activate testnets can take a reboot
   needsReboot=1
