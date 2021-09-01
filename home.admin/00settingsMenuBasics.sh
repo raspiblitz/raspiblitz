@@ -366,7 +366,7 @@ if [ "${lndNode}" != "${choice}" ]; then
     if [ "${testnet}" == "on" ]; then
       /home/admin/config.scripts/lnd.install.sh on testnet
     fi
-    if [ "${signetnet}" == "on" ]; then
+    if [ "${signet}" == "on" ]; then
       /home/admin/config.scripts/lnd.install.sh on signet
     fi
   else
@@ -391,7 +391,7 @@ if [ "${clnNode}" != "${choice}" ]; then
     if [ "${testnet}" == "on" ]; then
       /home/admin/config.scripts/cln.install.sh on testnet
     fi
-    if [ "${signetnet}" == "on" ]; then
+    if [ "${signet}" == "on" ]; then
       /home/admin/config.scripts/cln.install.sh on signet
     fi
   else
