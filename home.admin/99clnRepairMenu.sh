@@ -156,6 +156,8 @@ case $CHOICE in
   source $_temp 2>/dev/null
   sudo rm $_temp 2>/dev/null
   # regenerate config
+  /home/admin/config.scripts/cln.hsmtool.sh autounlock-off
+  /home/admin/config.scripts/cln.hsmtool.sh decrypt
   /home/admin/config.scripts/cln.install.sh on $CHAIN
   ;;
 
