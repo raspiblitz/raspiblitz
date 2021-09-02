@@ -81,8 +81,13 @@ if [ $1 = on ];then
 
 elif [ $1 = off ];then
   echo "# Removing the backup plugin"
-  sudo rm -f /home/bitcoin/${netprefix}cln-plugins-enabled/backup
-
+¬  sudo rm -f /home/bitcoin/${netprefix}cln-plugins-enabled/backup.py
+  echo "# Backup the existing old backup on the SDcard"
+  now=$(date +"%Y_%m_%d_%H%M%S")
+  sudo mv /home/bitcoin/${netprefix}lightningd.sqlite3.backup \
+            /home/bitcoin/${netprefix}lightningd.sqlite3.backup.${now}
+  echo "# Removing the backup.lock file"
+  sudo rm -f  /home/bitcoin/.lightning/${CLNETWORK}/backup.lock
 
 elif [ $1 = restore ];then
 
@@ -115,12 +120,12 @@ elif [ $1 = restore ];then
     sudo systemctl start ${netprefix}lightningd
   fi
 
-elif  [ $1 = backup-compact ];then
+elif [ $1 = backup-compact ];then
   
   if sudo ls /home/bitcoin/.lightning/${CLNETWORK}/lightningd.sqlite3;then
     # https://github.com/lightningd/plugins/tree/master/backup#performing-backup-compaction
     echo "#  Running $lightning-cli backup-compact ..."
-    $lightning-cli backup-compact
+    $lightningcli_alias backup-compact
 
   else
     echo "# No /home/bitcoin/.lightning/${CLNETWORK}/lightningd.sqlite3 is present"
