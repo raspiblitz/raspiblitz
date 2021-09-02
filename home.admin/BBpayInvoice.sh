@@ -1,5 +1,7 @@
 #!/bin/bash
 clear
+trap 'rm -f "$_temp"' EXIT
+trap 'rm -f "$_error"' EXIT
 _temp=$(mktemp -p /dev/shm/)
 _error=$(mktemp -p /dev/shm/)
 sudo chmod 7777 ${_error} 2>/dev/null

@@ -17,6 +17,9 @@ if [ "$EUID" -ne 0 ]
   exit
 fi
 
+# trap to delete on any exit
+trap 'rm -f $_temp' EXIT
+
 # tempfile 
 _temp=$(mktemp -p /dev/shm/)
 
