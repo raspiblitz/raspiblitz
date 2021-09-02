@@ -4,6 +4,8 @@ network=mainnet
 chain=bitcoin
 
 if [ "$1" = "-menu" ]; then
+  trap 'rm -f "$_temp"' EXIT
+  trap 'rm -f "$_error"' EXIT
   _temp=$(mktemp -p /dev/shm/)
   _error=$(mktemp -p /dev/shm/)
 

@@ -96,13 +96,13 @@ case $CHOICE in
     result=""
     while [ ${#result} -eq 0 ]
     do
+        trap 'rm -f "$_temp"' EXIT
         _temp=$(mktemp -p /dev/shm/)
         l1="Please enter the new name of your LND node:\n"
         l2="different name is better for a fresh identity\n"
         l3="one word, keep characters basic & not too long"
         dialog --backtitle "RaspiBlitz - Setup (${network}/${chain})" --inputbox "$l1$l2$l3" 13 52 2>$_temp
         result=$( cat $_temp | tr -dc '[:alnum:]-.' | tr -d ' ' )
-        shred -u $_temp
         echo "processing ..."
         sleep 3
     done

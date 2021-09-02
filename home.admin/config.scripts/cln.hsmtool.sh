@@ -64,10 +64,11 @@ function passwordToFile() {
     text="Type or paste the decryption password for the $CHAIN C-lightning wallet"
   fi
   # write password into a file in memory
+  # trap to delete on any exit
+  trap 'rm -f $data' EXIT
   # get password
   data=$(mktemp -p /dev/shm/)
-  # trap it
-  trap 'rm -f $data' 0 1 2 5 15
+
   dialog --clear \
    --backtitle "Enter password" \
    --title "Enter password" \
