@@ -272,17 +272,38 @@ if [ ${mode} = "cln-import-gui" ]; then
 
   # TODO: check if update of CLN is needed (see detailes in cln-import) for edge case
 
-  # TODO: auto-unlock for c-lightning?
   # turn off auto-unlock if activated because password c might now change
-  # if [ "${autoUnlock}" == "on" ]; then
-  #   /home/admin/config.scripts/cln.autounlock.sh off
-  # fi
+  /home/admin/config.scripts/cln.hsmtool.sh autounlock-off
+
+  # detect if the imported hsm_secret is encrypted
+  # use the variables for the default network 
+  source <(/home/admin/config.scripts/network.aliases.sh getvars cln)
+  hsmSecretPath="/home/bitcoin/.lightning/${CLNETWORK}/hsm_secret"
+  # check if encrypted
+  trap 'rm -f "$output"' EXIT
+  output=$(mktemp -p /dev/shm/)
+  echo "test" | sudo -u bitcoin \
+    /home/bitcoin/lightning/tools/hsmtool decrypt \
+    "$hsmSecretPath" 2> "$output"
+  if [ "$(grep -c "hsm_secret is not encrypted" < "$output")" -gt 0 ];then
+    echo "# The hsm_secret is not encrypted"
+    echo "# Record in raspiblitz.conf"
+    sudo sed -i \
+    "s/^${netprefix}clnEncryptedHSM=.*/${netprefix}clnEncryptedHSM=off/g" \
+    /mnt/hdd/raspiblitz.conf
+  else
+    cat $output
+    echo "# Starting cln.hsmtool.sh unlock"
+    /home/admin/config.scripts/cln.hsmtool.sh unlock # there are mutiple wallets possible, need to check for non-default ones too
+  fi
   
-  # restarting lnd & give final info
+  # restarting cln & give final info
   sudo systemctl start lightningd
-  echo "DONE - lightningd is now restarting .. Password C is now like within your rescue file"
-  echo "Check that CLN is starting up correctly and your old channel & funds are restored."
-  echo "Take into account that some channels might have been force closed in the meanwhile."
+  echo
+  echo "# DONE - lightningd is now starting"
+  echo "# Check that CLN is starting up correctly and your old channels & funds are restored."
+  echo "# Take into account that some channels might have been force closed in the meanwhile."
+  echo
   exit 0
 fi
 
