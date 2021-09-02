@@ -130,9 +130,21 @@ function decryptHSMsecret() {
   else
     echo "# Getting the password from $passwordFile"
   fi
+  trap 'rm -f "$output"' EXIT
+  output=$(mktemp -p /dev/shm/)
   sudo cat $passwordFile | sudo -u bitcoin \
     /home/bitcoin/lightning/tools/hsmtool decrypt \
-    $hsmSecretPath || exit 1
+    "$hsmSecretPath" 2> "$output"
+  if [ "$(grep -c "hsm_secret is not encrypted" < "$output")" -gt 0 ];then
+    echo "# The hsm_secret is not encrypted"
+    echo "# Continue to record in the raapiblitz.conf"
+  else
+    cat "$output"
+    # try again then exit
+    sudo cat $passwordFile | sudo -u bitcoin \
+    /home/bitcoin/lightning/tools/hsmtool decrypt \
+    "$hsmSecretPath" || exit 1
+  fi
   shredPasswordFile
   # setting value in raspiblitz config
   sudo sed -i \
@@ -342,5 +354,5 @@ else
   exit 1
 fi
 
-# set the lightnind service file after all choices unless exited before
+# set the lightningd service file after all choices unless exited before
 /home/admin/config.scripts/cln.install-service.sh $CHAIN
