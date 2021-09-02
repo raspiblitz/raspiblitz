@@ -572,17 +572,6 @@ if [ ${isMounted} -eq 0 ]; then
   sudo chown root:sudo ${configFile}
   sudo chmod 664 ${configFile}
 
-  # unlock lnd if needed
-  source ${setupFile}
-  echo "checking Unlock ..." >> $logFile
-  if [ "${lightning}" == "lnd" ] && [ "${passwordC}" != "" ]; then
-    echo "Unlock LND at end of provision with temp stored password C" >> $logFile
-    /home/admin/config.scripts/lnd.unlock.sh unlock "${passwordC}" >> ${logFile}
-    sleep 3
-  else
-    echo "No lightning unlock (${lightning}) or password C temp stored" >> $logFile
-  fi
-
   # mark provision process done
   sed -i "s/^message=.*/message='Provision Done'/g" ${infoFile}
 
