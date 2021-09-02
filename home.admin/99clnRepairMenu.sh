@@ -48,25 +48,25 @@ CHOICE=$(dialog --clear \
 
 case $CHOICE in
   ENCRYPT)
-  /home/admin/config.scripts/cln.hsmtool.sh encrypt
+  /home/admin/config.scripts/cln.hsmtool.sh encrypt $CHAIN
   source /mnt/hdd/raspiblitz.conf
   ;;
 
   DECRYPT)
-  /home/admin/config.scripts/cln.hsmtool.sh decrypt
+  /home/admin/config.scripts/cln.hsmtool.sh decrypt $CHAIN
   source /mnt/hdd/raspiblitz.conf
   ;;
   
   PASSWORD_C)
-  /home/admin/config.scripts/cln.hsmtool.sh change-password
+  /home/admin/config.scripts/cln.hsmtool.sh change-password $CHAIN
   ;;
   
   AUTOUNLOCK-ON)
-  /home/admin/config.scripts/cln.hsmtool.sh autounlock-on
+  /home/admin/config.scripts/cln.hsmtool.sh autounlock-on $CHAIN
   ;;
   
   AUTOUNLOCK-OFF)
-  /home/admin/config.scripts/cln.hsmtool.sh autounlock-off
+  /home/admin/config.scripts/cln.hsmtool.sh autounlock-off $CHAIN
   ;;
   
   BACKUP)
@@ -96,7 +96,7 @@ case $CHOICE in
   sudo rm /home/bitcoin/.lightning/${CLNETWORK}/hsm_secret
   sudo rm /home/bitcoin/.lightning/${CLNETWORK}/*.*
   # new
-  /home/admin/config.scripts/cln.hsmtool.sh new
+  /home/admin/config.scripts/cln.hsmtool.sh new $CHAIN
   ;;
   
   FILERESTORE)
