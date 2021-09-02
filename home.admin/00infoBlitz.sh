@@ -411,7 +411,8 @@ fi
 # show JoinMarket stats in place of the LND URI only if the Yield Generator is running
 source /home/joinmarket/joinin.conf 2>/dev/null
 if [ "${joinmarket}" = "on" ] && [ $(sudo -u joinmarket pgrep -f "python yg-privacyenhanced.py $YGwallet --wallet-password-stdin" 2>/dev/null | wc -l) -gt 2 ]; then
-  JMstats=$(mktemp 2>/dev/null)
+  trap 'rm -f "$JMstats"' EXIT
+  JMstats=$(mktemp -p /dev/shm)
   sudo -u joinmarket /home/joinmarket/info.stats.sh > $JMstats
   JMstatsL1=$(sed -n 1p < "$JMstats")
   JMstatsL2=$(sed -n 2p < "$JMstats")
