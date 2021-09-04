@@ -167,9 +167,6 @@ do
   #####################################
   if [ "${lightning}" == "" ]; then syncedToChain=1; fi
   if [ "${setupPhase}" == "done" ] && [ "${state}" == "ready" ] && [ "${syncedToChain}" != "1" ]; then
-    echo "debug wait eventBlockchainSync.sh ..."
-    sleep 3
-    #echo "# eventBlockchainSync.sh ssh loop"
     /home/admin/setup.scripts/eventBlockchainSync.sh ssh loop
     continue
   fi
@@ -231,8 +228,6 @@ do
       exit 1
     else
         # every other state just push as event to SSH frontend
-        echo "debug wait eventInfoWait.sh ..."
-        sleep 3
         /home/admin/setup.scripts/eventInfoWait.sh "${state}" "${message}"
     fi
 
