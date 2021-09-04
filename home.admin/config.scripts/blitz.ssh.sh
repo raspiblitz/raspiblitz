@@ -66,7 +66,7 @@ if [ "$1" = "checkrepair" ]; then
     if [ ${countKeyFiles} -lt 8 ]; then
       echo "# FAIL: Was not able to generate new sshd host keys"
     else
-      echo "# OK: New sshd host leys generated"
+      echo "# OK: New sshd host keys generated"
     fi
     
   fi

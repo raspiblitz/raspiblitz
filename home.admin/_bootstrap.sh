@@ -372,6 +372,14 @@ echo "HDD already part of system: $isMounted" >> $logFile
 
 if [ ${isMounted} -eq 0 ]; then
 
+  # temp mount the HDD
+  echo "Temp mounting data drive ($hddCandidate)" >> $logFile
+  if [ "${hddFormat}" != "btrfs" ]; then
+    source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddPartitionCandidate})
+  else
+    source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddCandidate})
+  fi
+
   # write data needed for setup process into raspiblitz.info
   echo "hddCandidate='${hddCandidate}'" >> ${infoFile}
   echo "hddBlocksBitcoin=${hddBlocksBitcoin}" >> ${infoFile}
@@ -465,14 +473,6 @@ if [ ${isMounted} -eq 0 ]; then
   # mark system on sd card as in setup process
   echo "the provision process was started but did not finish yet" > /home/admin/provision.flag
 
-  # temp mount the HDD
-  echo "Temp mounting data drive ($hddCandidate)" >> $logFile
-  if [ "${hddFormat}" != "btrfs" ]; then
-    source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddPartitionCandidate})
-  else
-    source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddCandidate})
-  fi
-
   # make sure all links between directories/drives are correct
   echo "Refreshing links between directories/drives .." >> $logFile
   sudo /home/admin/config.scripts/blitz.datadrive.sh link
@@ -488,7 +488,7 @@ if [ ${isMounted} -eq 0 ]; then
   sed -i "s/^message=.*/message='Starting Provision'/g" ${infoFile}
 
   # load setup data
-  source ${setupFile} 2>$logFile
+  source ${setupFile}
   
   # make sure basic info id in raspiblitz.info
   sudo sed -i "s/^network=.*/network=${network}/g" ${infoFile}
