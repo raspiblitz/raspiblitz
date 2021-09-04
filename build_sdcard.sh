@@ -569,6 +569,7 @@ sudo chsh admin -s /bin/bash
 echo '%sudo ALL=(ALL) NOPASSWD:ALL' | sudo EDITOR='tee -a' visudo
 
 # WRITE BASIC raspiblitz.info to sdcard
+# if further info gets added .. make sure to keep that on: blitz.preparerelease.sh
 echo "baseimage=${baseimage}" > /home/admin/raspiblitz.info
 echo "cpu=${cpu}" >> /home/admin/raspiblitz.info
 echo "displayClass=headless" >> /home/admin/raspiblitz.info

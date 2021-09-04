@@ -4,8 +4,13 @@
 # to prepare the image for release as a downloadable sd card image
 
 # raspiblitz.info & logs
-echo "deleting raspiblitz info & logs ..."
-sudo rm /home/admin/raspiblitz.*
+echo "cleaning raspiblitz info .."
+source /home/admin/raspiblitz.info
+echo "baseimage=${baseimage}" > /home/admin/raspiblitz.info
+echo "cpu=${cpu}" >> /home/admin/raspiblitz.info
+echo "displayClass=${displayClass}" >> /home/admin/raspiblitz.info
+echo "deleting raspiblitz logs .."
+sudo rm /home/admin/raspiblitz*.log
 echo "OK"
 
 # SSH Pubkeys (make unique for every sd card image install)
