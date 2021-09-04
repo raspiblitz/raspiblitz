@@ -9,6 +9,7 @@ sudo rm /home/admin/raspiblitz.*
 echo "OK"
 
 # SSH Pubkeys (make unique for every sd card image install)
+echo ""
 echo "deleting SSH Pub keys ..."
 echo "they will get recreated on fresh bootup, by _bootstrap.sh service"
 sudo rm /etc/ssh/ssh_host_*
