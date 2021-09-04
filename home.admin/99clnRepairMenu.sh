@@ -95,8 +95,17 @@ case $CHOICE in
   # reset
   sudo rm /home/bitcoin/.lightning/${CLNETWORK}/hsm_secret
   sudo rm /home/bitcoin/.lightning/${CLNETWORK}/*.*
+  # make sure the new hsm_secret is treated as unencrypted and clear autounlock
+  sudo sed -i \
+    "s/^${netprefix}clnEncryptedHSM=.*/${netprefix}clnEncryptedHSM=off/g" \
+    /mnt/hdd/raspiblitz.conf
+  sudo sed -i \
+    "s/^${netprefix}clnAutoUnlock=.*/${netprefix}clnEncryptedHSM=off/g" \
+    /mnt/hdd/raspiblitz.conf
   # new
   /home/admin/config.scripts/cln.hsmtool.sh new $CHAIN
+  # set the lightningd service file
+  /home/admin/config.scripts/cln.install-service.sh $CHAIN
   ;;
   
   FILERESTORE)
@@ -147,6 +156,8 @@ case $CHOICE in
   source $_temp 2>/dev/null
   sudo rm $_temp 2>/dev/null
   # regenerate config
+  /home/admin/config.scripts/cln.hsmtool.sh autounlock-off
+  /home/admin/config.scripts/cln.hsmtool.sh decrypt
   /home/admin/config.scripts/cln.install.sh on $CHAIN
   ;;
 
