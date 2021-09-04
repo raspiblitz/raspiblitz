@@ -99,7 +99,7 @@ if [ "${BTCRPCexplorer}" != "${choice}" ]; then
   errorOnInstall=$?
   if [ "${choice}" =  "on" ]; then
     if [ ${errorOnInstall} -eq 0 ]; then
-      sudo sytemctl start btc-rpc-explorer
+      sudo systemctl start btc-rpc-explorer
       whiptail --title " Installed BTC-RPC-Explorer " --msgbox "\
 The txindex may need to be created before BTC-RPC-Explorer can be active.\n
 This can take ~7 hours on a RPi4 with SSD. Monitor the progress on the LCD.\n
