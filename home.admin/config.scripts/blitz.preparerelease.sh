@@ -10,7 +10,7 @@ echo "baseimage=${baseimage}" > /home/admin/raspiblitz.info
 echo "cpu=${cpu}" >> /home/admin/raspiblitz.info
 echo "displayClass=${displayClass}" >> /home/admin/raspiblitz.info
 echo "deleting raspiblitz logs .."
-sudo rm /home/admin/raspiblitz*.log
+sudo rm /home/admin/raspiblitz.log*
 echo "OK"
 
 # SSH Pubkeys (make unique for every sd card image install)
