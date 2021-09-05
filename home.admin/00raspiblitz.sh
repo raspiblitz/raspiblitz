@@ -130,7 +130,7 @@ do
   ############################
   # LND Wallet Unlock
 
-  if [ "${lndActive}" == "1" ] && [ "${walletLocked}" == "1" ] && [ "${state}" == "ready" ]; then
+  if [ "${lndActive}" == "1" ] && [ "${walletLocked}" == "1" ] && [ "${state}" == "ready" ] && [ "${setupPhase}" == "done" ]; then
     #echo "# lnd.unlock.sh"
     /home/admin/config.scripts/lnd.unlock.sh
   fi
