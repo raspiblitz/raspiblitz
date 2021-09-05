@@ -150,11 +150,11 @@ fi
 
 # start network service
 echo ""
-echo "*** Start ${network} ***" >> ${logFile}
+echo "*** Start ${network} (UPDATE) ***" >> ${logFile}
 sudo sed -i "s/^message=.*/message='Blockchain Testrun'/g" ${infoFile}
 echo "- This can take a while .." >> ${logFile}
+sudo chown -R bitcoin:bitcoin /mnt/hdd/${network} >>${logFile} 2>&1
 sudo cp /home/admin/assets/${network}d.service /etc/systemd/system/${network}d.service
-#sudo chmod +x /etc/systemd/system/${network}d.service
 sudo systemctl daemon-reload >> ${logFile}
 sudo systemctl enable ${network}d.service >> ${logFile}
 sudo systemctl start ${network}d.service >> ${logFile}

@@ -67,12 +67,17 @@ fi
 # copy configs files and directories
 echo ""
 echo "*** Prepare ${network} ***" >> ${logFile}
-sudo -u bitcoin mkdir /mnt/hdd/${network} 2>/dev/null
-sudo -u bitcoin mkdir /mnt/hdd/${network}/blocks 2>/dev/null
-sudo -u bitcoin mkdir /mnt/hdd/${network}/chainstate 2>/dev/null
+sudo mkdir /mnt/hdd/${network} >>${logFile} 2>&1
+sudo chown -R bitcoin:bitcoin /mnt/hdd/${network} >>${logFile} 2>&1
+sudo -u bitcoin mkdir /mnt/hdd/${network}/blocks >>${logFile} 2>&1
+sudo -u bitcoin mkdir /mnt/hdd/${network}/chainstate >>${logFile} 2>&1
 sudo cp /home/admin/assets/${network}.conf /mnt/hdd/${network}/${network}.conf
-sudo mkdir /home/admin/.${network} 2>/dev/null
+sudo chown bitcoin:bitcoin /mnt/hdd/${network}/${network}.conf >>${logFile} 2>&1
+sudo mkdir /home/admin/.${network} >>${logFile} 2>&1
 sudo cp /home/admin/assets/${network}.conf /home/admin/.${network}/${network}.conf
+sudo chown -R admin:admin /home/admin/.${network} >>${logFile} 2>&1
+confExists=$(sudo ls /mnt/hdd/${network}/${network}.conf | grep -c "${network}.conf")
+echo "File Exists: /mnt/hdd/${network}/${network}.conf --> ${confExists}" >> ${logFile}
 
 # set password B as RPC password
 echo "SETTING PASSWORD B" >> ${logFile}
@@ -100,7 +105,7 @@ fi
 
 # start network service
 echo ""
-echo "*** Start ${network} ***" >> ${logFile}
+echo "*** Start ${network} (SETUP) ***" >> ${logFile}
 sudo sed -i "s/^message=.*/message='Blockchain Testrun'/g" ${infoFile}
 echo "- This can take a while .." >> ${logFile}
 sudo cp /home/admin/assets/${network}d.service /etc/systemd/system/${network}d.service
