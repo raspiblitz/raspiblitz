@@ -652,16 +652,12 @@ if [ ${isMounted} -eq 0 ]; then
   # delete setup data from RAM
   sudo rm ${setupFile}
 
-  # signal that setup phas is over
+  # signal that setup phase is over
   sed -i "s/^setupPhase=.*/setupPhase='done'/g" ${infoFile}
-
 
   ########################################
   # AFTER SETUP REBOOT
   # touchscreen activation, start with configured SWAP, fix LCD text bug
-
-  # if touchscreen is on (on recover/update) --> reboot now to activate touchscreen 
-  source ${configFile}
   sudo cp /home/admin/raspiblitz.log /home/admin/raspiblitz.log.setup
   /home/admin/config.scripts/blitz.shutdown.sh reboot finalsetup
   sleep 100

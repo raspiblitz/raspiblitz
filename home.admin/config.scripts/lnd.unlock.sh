@@ -26,6 +26,13 @@ if [ "${action}" == "chain-unlock" ]; then
     CHAIN=$2
 fi
 
+# dont if state is on reboot or shutdown
+if [ "${state}" == "reboot" ] || [ "${state}" == "shutdown" ]; then
+  echo "# ignore unlock - because system is in shutdown/reboot state"
+  sleep 1
+  exit 0
+fi
+
 source <(/home/admin/config.scripts/network.aliases.sh getvars lnd ${chain}net)
 
 # check if wallet is already unlocked
