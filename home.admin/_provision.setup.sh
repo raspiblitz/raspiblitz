@@ -78,7 +78,7 @@ sudo cp /home/admin/assets/${network}.conf /home/admin/.${network}/${network}.co
 sudo chown -R admin:admin /home/admin/.${network} >>${logFile} 2>&1
 
 # make sure all directories are linked
-sudo /home/admin/config.scripts/blitz.datadrive.sh link
+sudo /home/admin/config.scripts/blitz.datadrive.sh link >> ${logFile}
 
 # test bitcoin config
 confExists=$(sudo ls /mnt/hdd/${network}/${network}.conf | grep -c "${network}.conf")
