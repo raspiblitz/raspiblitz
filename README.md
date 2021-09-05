@@ -110,12 +110,12 @@ In the end your RaspiBlitz should look like this:
 |Difficulty level|Easy|Medium|
 |Pros|Make Blitz accessible to everyone|You don't need to trust us, build from your own forked repository|
 |Cons|You have to trust the mantainer image binaries|You need to read the build_sdcard.sh parameters in order for the customization to suit your needs|
-|Instructions|[Download image](https://raspiblitz.fulmo.org/images/raspiblitz-v1.7.0-2021-04-25.img.gz) and [Flash the sd card](README.md#write-the-sd-card-image-to-your-sd-card)|[Build your own sd card image](#build-the-sd-card-image)|
-|Verify what?|[Signature file](https://raspiblitz.fulmo.org/images/raspiblitz-v1.7.0-2021-04-25.img.gz.sig) and [verify the Sig](FAQ.md#how-to-verify-the-sd-card-image-after-download) OR SHA-256 (below)|All of the code, don't trust, verify|
+|Instructions|[Download image](https://raspiblitz.fulmo.org/images/raspiblitz-v1.7.1rc1-2021-09-06.img.gz) and [Flash the sd card](README.md#write-the-sd-card-image-to-your-sd-card)|[Build your own sd card image](#build-the-sd-card-image)|
+|Verify what?|[Signature file - only for final release]() and [verify the Sig](FAQ.md#how-to-verify-the-sd-card-image-after-download) OR SHA-256 (below)|All of the code, don't trust, verify|
 
 If downloading the mantainer sd card image:
 * GPG 64-bit: 1C73 060C 7C17 6461
-* SHA-256: e6d70ac1662af3e90e57bee8c50e9a7925239431892e1916c2be80e519befc3f
+* SHA-256: 195ef86314ae2bfafe953b1d8eefb0b0838ef3be893f6deea5893af2280f3fc8
 
 Which verification method should I used: Hash or Signature?
 * Signed file prove to you that the SD card image was actually built by the lead developer of the RaspiBlitz project. (Safest)
