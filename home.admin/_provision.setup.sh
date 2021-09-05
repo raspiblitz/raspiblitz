@@ -76,6 +76,11 @@ sudo chown bitcoin:bitcoin /mnt/hdd/${network}/${network}.conf >>${logFile} 2>&1
 sudo mkdir /home/admin/.${network} >>${logFile} 2>&1
 sudo cp /home/admin/assets/${network}.conf /home/admin/.${network}/${network}.conf
 sudo chown -R admin:admin /home/admin/.${network} >>${logFile} 2>&1
+
+# make sure all directories are linked
+sudo /home/admin/config.scripts/blitz.datadrive.sh link
+
+# test bitcoin config
 confExists=$(sudo ls /mnt/hdd/${network}/${network}.conf | grep -c "${network}.conf")
 echo "File Exists: /mnt/hdd/${network}/${network}.conf --> ${confExists}" >> ${logFile}
 
@@ -183,6 +188,9 @@ if [ "${lightning}" == "lnd" ]; then
     sudo /home/admin/config.scripts/lnd.install.sh on mainnet
     sudo /home/admin/config.scripts/lnd.setname.sh mainnet ${hostname}
   fi
+
+  # make sure all directories are linked
+  sudo /home/admin/config.scripts/blitz.datadrive.sh link
 
   # check if now a config exists
   configLinkedCorrectly=$(sudo ls sudo ls /home/bitcoin/.lnd/lnd.conf | grep -c "lnd.conf")
