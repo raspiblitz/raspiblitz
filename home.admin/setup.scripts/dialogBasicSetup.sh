@@ -20,6 +20,8 @@ OPTIONS+=(SHUTDOWN "Shutdown without Changes")
 
 CHOICE_HEIGHT=$(("${#OPTIONS[@]}/2+1"))
 HEIGHT=$(($CHOICE_HEIGHT+6))
+echo "CHOICE_HEIGHT(${CHOICE_HEIGHT}) HEIGHT(${HEIGHT})"
+sleep 3
 
 CHOICE=$(dialog --clear \
                 --backtitle "RaspiBlitz ${codeVersion} - Setup" \
