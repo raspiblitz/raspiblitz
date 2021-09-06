@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# consider installing with apt when updated next
+# https://github.com/nodesource/distributions/blob/master/README.md#installation-instructions
+
 VERSION="v14.17.6"
 # get checksums from -> https://nodejs.org/dist/vx.y.z/SHASUMS256.txt (tar.xs files)
 CHECKSUM_linux_arm64="9c4f3a651e03cd9b5bddd33a80e8be6a6eb15e518513e410bb0852a658699156"
@@ -87,6 +90,15 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       exit 1
     fi
   fi
+
+  npm7installed=$(npm -v 2>/dev/null | grep -c "7.")
+  if ! [ ${npm7installed} -eq 0 ]; then
+    # needed for RTL
+    # https://github.blog/2021-02-02-npm-7-is-now-generally-available/
+    echo "# Update npm to v7"
+    sudo npm install --global npm@7
+  fi
+
   echo "Installed nodeJS $(node -v)"
   exit 0
 fi
