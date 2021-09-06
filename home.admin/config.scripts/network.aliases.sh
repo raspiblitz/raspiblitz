@@ -52,17 +52,17 @@ if [ $1 = getvars ];then
   # netprefix is:     "" | t | s
   # portprefix is:    "" | 1 | 3
   # L2rpcportmod is:   0 | 1 | 3   
-  if [ ${chain} = "main" ];then
+  if [ "${chain}" == "main" ];then
     netprefix=""
     L1rpcportmod=""
     L2rpcportmod=0
     portprefix=""
-  elif [ ${chain} = "test" ];then
+  elif [ "${chain}" == "test" ];then
     netprefix="t"
     L1rpcportmod=1
     L2rpcportmod=1
     portprefix=1
-  elif [ ${chain} = "sig" ];then
+  elif [ "${chain}" == "sig" ];then
     netprefix="s"
     L1rpcportmod=3
     L2rpcportmod=3
@@ -72,9 +72,9 @@ if [ $1 = getvars ];then
   echo "portprefix=${portprefix}"
   echo "L2rpcportmod=${L2rpcportmod}"
   
-  if [ $LNTYPE = cln ];then
+  if [ "${LNTYPE}" == "cln" ];then
     # CLNETWORK is: bitcoin / signet / testnet
-    if [ $chain = main ];then
+    if [ "${chain}" == "main" ];then
       CLNETWORK=${network}
     else
       CLNETWORK=${chain}net
@@ -82,7 +82,7 @@ if [ $1 = getvars ];then
     echo "CLNETWORK=${CLNETWORK}"
 
     # CLNCONF is the path to the config
-    if [ ${CLNETWORK} = "bitcoin" ]; then
+    if [ "${CLNETWORK}" == "bitcoin" ]; then
       CLNCONF="/home/bitcoin/.lightning/config"
     else
       CLNCONF="/home/bitcoin/.lightning/${CLNETWORK}/config"
@@ -92,7 +92,7 @@ if [ $1 = getvars ];then
   fi
 
   # typeprefix is: "" | c
-  if [ $LNTYPE = lnd ];then
+  if [ "${LNTYPE}" == "lnd" ];then
     typeprefix=''
   fi
   echo "typeprefix=${typeprefix}"
