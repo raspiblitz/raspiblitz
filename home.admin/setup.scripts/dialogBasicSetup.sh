@@ -4,7 +4,7 @@
 # these are the same set of infos the WebGUI dialog/controler has
 source /home/admin/_version.info
 
-specialOption=$2 # (optional - can be 'update', 'recovery' or 'migration' )
+specialOption=$1 # (optional - can be 'update', 'recovery' or 'migration' )
 
 # chose how to setup node (fresh or from a upload backup)
 OPTIONS=()
@@ -17,11 +17,14 @@ if [ "${specialOption}" == "migration" ]; then
 fi
 OPTIONS+=(FROMBACKUP "Upload Migration Backup")
 OPTIONS+=(SHUTDOWN "Shutdown without Changes")
+
+CHOICE_HEIGHT=$(("${#OPTIONS[@]}/2+1"))
+HEIGHT=$((CHOICE_HEIGHT+6))
 CHOICE=$(dialog --clear \
                 --backtitle "RaspiBlitz ${codeVersion} - Setup" \
                 --title "⚡ Welcome to your RaspiBlitz ⚡" \
                 --menu "\nChoose how you want to setup your RaspiBlitz: \n " \
-                12 64 6 \
+                $CHOICE_HEIGHT 64 $HEIGHT \
                 "${OPTIONS[@]}" \
                 2>&1 >/dev/tty)
 clear
