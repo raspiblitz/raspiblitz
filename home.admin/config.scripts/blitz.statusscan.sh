@@ -7,7 +7,7 @@ source /mnt/hdd/raspiblitz.conf 2>/dev/null
 if [ $# -gt 0 ];then
   LNTYPE=$1
 else
-  LNTYPE=lnd
+  LNTYPE=${lightning}
 fi
 
 source <(/home/admin/config.scripts/network.aliases.sh getvars $LNTYPE ${chain}net)
