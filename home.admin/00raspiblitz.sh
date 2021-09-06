@@ -246,7 +246,7 @@ do
         echo "SSH again into system with:"
         echo "ssh admin@${localip}"
         echo "***********************************************************"
-´     fi
+      fi
       exit 0
     else
         # every other state just push as event to SSH frontend
