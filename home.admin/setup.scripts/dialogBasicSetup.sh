@@ -19,7 +19,8 @@ OPTIONS+=(FROMBACKUP "Upload Migration Backup")
 OPTIONS+=(SHUTDOWN "Shutdown without Changes")
 
 CHOICE_HEIGHT=$(("${#OPTIONS[@]}/2+1"))
-HEIGHT=$((CHOICE_HEIGHT+6))
+HEIGHT=$(($CHOICE_HEIGHT+6))
+
 CHOICE=$(dialog --clear \
                 --backtitle "RaspiBlitz ${codeVersion} - Setup" \
                 --title "⚡ Welcome to your RaspiBlitz ⚡" \
