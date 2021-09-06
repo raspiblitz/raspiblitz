@@ -161,6 +161,7 @@ sudo rm -r /home/admin/config.scripts
 sudo -u admin cp -r -f /home/admin/raspiblitz/home.admin/* /home/admin
 sudo -u admin chmod -R +x /home/admin/config.scripts
 sudo -u admin chmod -R +x /home/admin/setup.scripts
+sudo -u admin chmod +x /home/admin/*.sh
 echo "# ******************************************"
 
 echo "# Syncing Webcontent .."
