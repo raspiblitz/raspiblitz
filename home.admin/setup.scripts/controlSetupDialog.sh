@@ -38,7 +38,7 @@ if [ "${setupPhase}" == "update" ]; then
     # default to normal setup options
     setupPhase="setup"
     sudo sed -i "s/^setupPhase=.*/setupPhase='setup'/g" /home/admin/raspiblitz.info
-    echo "# you refused recovery option - defaulting to normal setup"
+    echo "# you refused recovery option - defaulting to normal setup menu"
   fi
 fi
 
@@ -55,7 +55,7 @@ if [ "${setupPhase}" == "recovery" ]; then
     # default to normal setup options
     setupPhase="setup"
     sudo sed -i "s/^setupPhase=.*/setupPhase='setup'/g" /home/admin/raspiblitz.info
-    echo "# you refused recovery option - defaulting to normal setup"
+    echo "# you refused recovery option - defaulting to normal setup menu"
   fi
 fi
 
@@ -88,8 +88,27 @@ fi
 if [ "${setupPhase}" == "setup" ]; then
 
   echo "# Starting basic setup dialog ..."
-  /home/admin/setup.scripts/dialogBasicSetup.sh
+  /home/admin/setup.scripts/dialogBasicSetup.sh ${orgSetupPhase}
   menuresult=$?
+
+  # menu REVOVER menu option
+  if [ "${menuresult}" == "4" ]; then
+    setupPhase="${orgSetupPhase}"
+    # proceed with provision (mark Password A to be set)
+    echo "# OK update process starting .."
+    echo "setPasswordA=1" >> $SETUPFILE
+  fi
+  
+  # menu MIGRATE menu option
+  if [ "${menuresult}" == "5" ]; then
+    setupPhase="${orgSetupPhase}"
+    # mark migration to happen on provision
+    echo "migrationOS='${hddGotMigrationData}'" >> $SETUPFILE
+    # user needs to reset password A, B & C
+    echo "setPasswordA=1" >> $SETUPFILE
+    echo "setPasswordB=1" >> $SETUPFILE
+    echo "setPasswordC=1" >> $SETUPFILE
+  fi
 
   # exit to terminal
   if [ "${menuresult}" == "3" ]; then

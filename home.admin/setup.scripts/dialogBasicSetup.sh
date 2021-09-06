@@ -4,9 +4,17 @@
 # these are the same set of infos the WebGUI dialog/controler has
 source /home/admin/_version.info
 
+specialOption=$2 # (optional - can be 'update', 'recovery' or 'migration' )
+
 # chose how to setup node (fresh or from a upload backup)
 OPTIONS=()
 OPTIONS+=(FRESHSETUP "Setup a new RaspiBlitz")
+if [ "${specialOption}" == "update" ] || [ "${specialOption}" == "recovery" ]; then
+  OPTIONS+=(RECOVER "Recover/Update existing RaspiBlitz")  
+fi
+if [ "${specialOption}" == "migration" ]; then
+  OPTIONS+=(CHANGE "Make Node a RaspiBlitz")  
+fi
 OPTIONS+=(FROMBACKUP "Upload Migration Backup")
 OPTIONS+=(SHUTDOWN "Shutdown without Changes")
 CHOICE=$(dialog --clear \
@@ -32,6 +40,14 @@ case $CHOICE in
             echo "Shutting down without changes ..."
             echo "Cut power when you see no status LED blinking anymore."
             exit 2
+            ;;
+        RECOVER)
+            # 4 --> RECOVER / UPDATE
+            exit 4
+            ;;
+        CHANGE)
+            # 5 --> MIGRATE
+            exit 5
             ;;
         *)
             # 3 --> ESC/CANCEL = EXIT TO TERMINAL
