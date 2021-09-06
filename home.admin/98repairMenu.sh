@@ -53,6 +53,9 @@ if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
   OPTIONS+=(BACKUP-LND "Backup your LND data (Rescue-File)")
   OPTIONS+=(RESET-LND "Delete LND & start new node/wallet")
 fi
+if [ "${lightning}" == "cln" ] || [ "${cln}" == "on" ]; then
+  OPTIONS+=(REPAIR-CLN "Repair/Backup C-Lightning")
+fi
 OPTIONS+=(MIGRATION "Migrate Blitz Data to new Hardware")
 OPTIONS+=(COPY-SOURCE "Copy Blockchain Source Modus")
 OPTIONS+=(RESET-CHAIN "Delete Blockchain & Re-Download")
@@ -78,6 +81,12 @@ case $CHOICE in
     echo "Press ENTER when your backup download is done to shutdown."
     read key
     /home/admin/config.scripts/blitz.shutdown.sh
+    ;;
+  REPAIR-CLN)
+    sudo /home/admin/99clnRepairMenu.sh
+    echo
+    echo "Press ENTER to return to main menu."
+    read key
     ;;
   MIGRATION)
     sudo /home/admin/config.scripts/blitz.migration.sh "export-gui"
