@@ -538,7 +538,7 @@ if [ ${isMounted} -eq 0 ]; then
     errorState=$?
     if [ "$errorState" != "0" ]; then
       echo "EXIT _provision.setup.sh BECAUSE OF ERROR STATE ($errorState)" >> $logFile
-      echo "This can also happen if _provision.setup.sh has syntax errros" >> $logFile
+      echo "This can also happen if _provision.setup.sh has syntax errors" >> $logFile
       sed -i "s/^state=.*/state='error'/g" ${infoFile}
       sed -i "s/^message=.*/message='_provision.setup.sh fail'/g" ${infoFile}
       exit 1
@@ -568,7 +568,7 @@ if [ ${isMounted} -eq 0 ]; then
     errorState=$?
     if [ "$errorState" != "0" ]; then
       echo "EXIT _provision.update.sh BECAUSE OF ERROR STATE ($errorState)" >> $logFile
-      echo "This can also happen if _provision.update.sh has syntax errros" >> $logFile
+      echo "This can also happen if _provision.update.sh has syntax errors" >> $logFile
       sed -i "s/^state=.*/state='error'/g" ${infoFile}
       sed -i "s/^message=.*/message='_provision.update.sh fail'/g" ${infoFile}
       exit 1
@@ -582,7 +582,7 @@ if [ ${isMounted} -eq 0 ]; then
   errorState=$?
   if [ "$errorState" != "0" ]; then
     echo "EXIT _provision_.sh BECAUSE OF ERROR STATE ($errorState)" >> $logFile
-    echo "This can also happen if _provision_.sh has syntax errros" >> $logFile
+    echo "This can also happen if _provision_.sh has syntax errors" >> $logFile
     sed -i "s/^state=.*/state='error'/g" ${infoFile}
     sed -i "s/^message=.*/message='_provision_.sh fail'/g" ${infoFile}
     exit 1
