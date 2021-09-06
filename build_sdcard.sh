@@ -597,7 +597,7 @@ sudo /usr/sbin/groupadd --force --gid 9706 lndwalletkit
 sudo /usr/sbin/groupadd --force --gid 9707 lndrouter
 
 echo ""
-echo "*** SHELL SCRIPTS AND ASSETS ***"
+echo "*** SHELL SCRIPTS & ASSETS ***"
 
 # copy raspiblitz repo from github
 cd /home/admin/
@@ -630,6 +630,12 @@ fi
 
 # add /sbin to path for all
 sudo bash -c "echo 'PATH=\$PATH:/sbin' >> /etc/profile"
+
+# replace boot splash image when raspbian
+if [ "${baseimage}" == "raspbian" ]; then
+  echo "* replacing boot splash"
+  sudo cp /home/admin/raspiblitz/pictures/splash.png /usr/share/plymouth/themes/pix/splash.png
+fi
 
 echo ""
 echo "*** RASPIBLITZ EXTRAS ***"
