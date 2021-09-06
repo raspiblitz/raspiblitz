@@ -5,6 +5,8 @@
 source /home/admin/_version.info
 
 specialOption=$1 # (optional - can be 'update', 'recovery' or 'migration' )
+echo "specialOption(${specialOption})"
+sleep 3
 
 # chose how to setup node (fresh or from a upload backup)
 OPTIONS=()
@@ -20,8 +22,6 @@ OPTIONS+=(SHUTDOWN "Shutdown without Changes")
 
 CHOICE_HEIGHT=$(("${#OPTIONS[@]}/2+1"))
 HEIGHT=$(($CHOICE_HEIGHT+8))
-echo "CHOICE_HEIGHT(${CHOICE_HEIGHT}) HEIGHT(${HEIGHT})"
-sleep 3
 
 CHOICE=$(dialog --clear --backtitle "RaspiBlitz ${codeVersion} - Setup" --title "⚡ Welcome to your RaspiBlitz ⚡" --menu "\nChoose how you want to setup your RaspiBlitz: \n " ${HEIGHT} 64 ${CHOICE_HEIGHT}  "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
