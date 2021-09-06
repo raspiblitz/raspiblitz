@@ -18,8 +18,8 @@ fi
 OPTIONS+=(FROMBACKUP "Upload Migration Backup")
 OPTIONS+=(SHUTDOWN "Shutdown without Changes")
 
-CHOICE_HEIGHT=$(("${#OPTIONS[@]}/2+1"))
-HEIGHT=$(($CHOICE_HEIGHT+6))
+CHOICE_HEIGHT=$(("${#OPTIONS[@]}/2+2"))
+HEIGHT=$(($CHOICE_HEIGHT+8))
 echo "CHOICE_HEIGHT(${CHOICE_HEIGHT}) HEIGHT(${HEIGHT})"
 sleep 3
 
