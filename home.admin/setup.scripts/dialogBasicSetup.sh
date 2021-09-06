@@ -5,8 +5,6 @@
 source /home/admin/_version.info
 
 specialOption=$1 # (optional - can be 'update', 'recovery' or 'migration' )
-echo "specialOption(${specialOption})"
-sleep 3
 
 # chose how to setup node (fresh or from a upload backup)
 OPTIONS=()
@@ -15,7 +13,7 @@ if [ "${specialOption}" == "update" ] || [ "${specialOption}" == "recovery" ]; t
   OPTIONS+=(RECOVER "Recover/Update RaspiBlitz")  
 fi
 if [ "${specialOption}" == "migration" ]; then
-  OPTIONS+=(CHANGE "Make Node a RaspiBlitz")  
+  OPTIONS+=(CONVERT "Make Node a RaspiBlitz")  
 fi
 OPTIONS+=(FROMBACKUP "Upload Migration Backup")
 OPTIONS+=(SHUTDOWN "Shutdown without Changes")
@@ -45,7 +43,7 @@ case $CHOICE in
             # 4 --> RECOVER / UPDATE
             exit 4
             ;;
-        CHANGE)
+        CONVERT)
             # 5 --> MIGRATE
             exit 5
             ;;
