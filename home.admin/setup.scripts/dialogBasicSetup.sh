@@ -12,7 +12,7 @@ sleep 3
 OPTIONS=()
 OPTIONS+=(FRESHSETUP "Setup a new RaspiBlitz")
 if [ "${specialOption}" == "update" ] || [ "${specialOption}" == "recovery" ]; then
-  OPTIONS+=(RECOVER "Recover/Update existing RaspiBlitz")  
+  OPTIONS+=(RECOVER "Recover/Update RaspiBlitz")  
 fi
 if [ "${specialOption}" == "migration" ]; then
   OPTIONS+=(CHANGE "Make Node a RaspiBlitz")  
