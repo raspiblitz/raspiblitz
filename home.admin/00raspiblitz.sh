@@ -34,6 +34,14 @@ if [ "${setupPhase}" == "" ] || [ "${state}" == "" ]; then
   exit 1
 fi
 
+stop
+
+# special state: copysource
+if [ "${state}" = "stop" ]; then
+  echo "OK ready for manual provision - run 'release' at the end."
+  exit
+fi
+
 # special state: copysource
 if [ "${state}" = "copysource" ]; then
   echo "***********************************************************"
