@@ -23,7 +23,7 @@ HEIGHT=$(($CHOICE_HEIGHT+6))
 echo "CHOICE_HEIGHT(${CHOICE_HEIGHT}) HEIGHT(${HEIGHT})"
 sleep 3
 
-CHOICE=$(dialog --clear --backtitle "RaspiBlitz ${codeVersion} - Setup" --title "⚡ Welcome to your RaspiBlitz ⚡" --menu "\nChoose how you want to setup your RaspiBlitz: \n " ${CHOICE_HEIGHT} 64 ${HEIGHT}  "${OPTIONS[@]}" 2>&1 >/dev/tty)
+CHOICE=$(dialog --clear --backtitle "RaspiBlitz ${codeVersion} - Setup" --title "⚡ Welcome to your RaspiBlitz ⚡" --menu "\nChoose how you want to setup your RaspiBlitz: \n " 12 64 6  "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
 case $CHOICE in
         FRESHSETUP)
