@@ -551,6 +551,7 @@ if [ ${isMounted} -eq 0 ]; then
     sed -i "s/^message=.*/message='Provision migration'/g" ${infoFile}
     sudo /home/admin/_provision.migration.sh
     errorState=$?
+    sudo cat /home/admin/raspiblitz.log.migration
     if [ "$errorState" != "0" ]; then
       echo "EXIT _provision.migration.sh BECAUSE OF ERROR STATE ($errorState)" >> $logFile
       echo "This can also happen if _provision.migration.sh has syntax errros" >> $logFile

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # LOGFILE - store debug logs of bootstrap
-logFile="/home/admin/raspiblitz.log"
+logFile="/home/admin/raspiblitz.log.migration"
 
 # INFOFILE - state data from bootstrap
 infoFile="/home/admin/raspiblitz.info"
@@ -11,7 +11,7 @@ source ${infoFile}
 configFile="/mnt/hdd/raspiblitz.conf"
 
 # log header
-echo "" >> ${logFile}
+echo "" > ${logFile}
 echo "###################################" >> ${logFile}
 echo "# _provision.migration.sh" >> ${logFile}
 echo "###################################" >> ${logFile}
@@ -22,7 +22,7 @@ if [ "${hddGotMigrationData}" == "" ]; then
   sed -i "s/^message=.*/message='config: missing hddGotMigrationData'/g" ${infoFile}
   echo "FAIL see ${logFile}"
   echo "FAIL: missing hddGotMigrationData in (${infoFile})!" >> ${logFile}
-  exit 1
+  exit 2
 fi
 
 source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
@@ -39,7 +39,7 @@ if [ "${err}" != "" ]; then
     echo "Format data disk on laptop & recover funds with fresh sd card using seed words + static channel backup." >> ${logFile}
     sed -i "s/^state=.*/state=error/g" ${infoFile}
     sed -i "s/^message=.*/message='migration failed'/g" ${infoFile}
-    exit 1
+    exit 3
 fi
 
 # if free space is lower than 100GB (100000000) delete backup files
