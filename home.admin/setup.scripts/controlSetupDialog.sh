@@ -299,6 +299,7 @@ if [ "${setupPhase}" == "setup" ]; then
     # prepare config file
     CONFIGFILE="/var/cache/raspiblitz/temp/raspiblitz.conf"
     sudo rm $CONFIGFILE 2>/dev/null
+    sudo touch $CONFIGFILE
     sudo chown admin:admin $CONFIGFILE
     sudo chmod 777 $CONFIGFILE
 
