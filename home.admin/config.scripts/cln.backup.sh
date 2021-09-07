@@ -245,7 +245,7 @@ if [ ${mode} = "cln-import-gui" ]; then
 
   # in setup scenario the final import is happening during provison
   if [ "${scenario}" == "setup" ]; then
-    # just add lndrescue filename to give file
+    # just add clnrescue filename to give file
     echo "# result in: ${RESULTFILE} (remember to make clean delete once processed)"
     echo "clnrescue='${filename}'" >> $RESULTFILE
     exit 0

@@ -106,7 +106,7 @@ if [ ${uploadRESCUE} -eq 1 ]; then
 
   # if user canceled upload
   if [ "${clnrescue}" == "" ]; then
-    # signal cancel to the calling script by exit code (3 = exit on lndrescue)
+    # signal cancel to the calling script by exit code (3 = exit on clnrescue)
     exit 3
   fi
 
