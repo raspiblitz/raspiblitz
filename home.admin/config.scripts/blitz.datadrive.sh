@@ -1597,18 +1597,18 @@ if [ "$1" = "clean" ]; then
             if [ -d "/mnt/hdd/$entry" ]; then
               if [ ${whenDeleteSchredd} -eq 1 ]; then
                 >&2 echo "# shredding DIR  : ${entry}"
-                sudo srm -lrv /mnt/hdd/$entry
+                sudo srm -lr /mnt/hdd/$entry
               else
                 >&2 echo "# deleting DIR  : ${entry}"
-                sudo rm -lrv /mnt/hdd/$entry
+                sudo rm -r /mnt/hdd/$entry
               fi
             else
               if [ ${whenDeleteSchredd} -eq 1 ]; then
                 >&2 echo "# shredding FILE : ${entry}"
-                sudo srm -lv /mnt/hdd/$entry
+                sudo srm -l /mnt/hdd/$entry
               else
                 >&2 echo "# deleting FILE : ${entry}"
-                sudo rm -lv /mnt/hdd/$entry
+                sudo rm /mnt/hdd/$entry
               fi
             fi
 
