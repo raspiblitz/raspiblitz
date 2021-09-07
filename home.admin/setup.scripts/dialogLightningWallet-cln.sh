@@ -94,7 +94,7 @@ else
   exit 1
 fi
 
-# UPLOAD LND RESCUE FILE dialog (if activated by dialogs above)
+# UPLOAD CLN RESCUE FILE dialog (if activated by dialogs above)
 if [ ${uploadRESCUE} -eq 1 ]; then
 
   # run upload dialog and get result
@@ -114,7 +114,7 @@ if [ ${uploadRESCUE} -eq 1 ]; then
   sudo sed -i '/^clnrescue=/d' $SETUPFILE
 
   # store result in setup state
-  echo "clnrescue='${lndrescue}'" >> $SETUPFILE
+  echo "clnrescue='${clnrescue}'" >> $SETUPFILE
 fi
 
 # INPUT LIGHTNING SEED dialog (if activated by dialogs above)

@@ -91,7 +91,7 @@ if [ "${setupPhase}" == "setup" ]; then
   /home/admin/setup.scripts/dialogBasicSetup.sh ${orgSetupPhase}
   menuresult=$?
 
-  # menu REVOVER menu option
+  # menu RECOVER menu option
   if [ "${menuresult}" == "4" ]; then
     setupPhase="${orgSetupPhase}"
     # proceed with provision (mark Password A to be set)
@@ -163,7 +163,7 @@ if [ "${setupPhase}" == "setup" ]; then
 
     elif [ "${userChoice}" == "2" ]; then
 
-      # KEEP BLOCKCHAIN + DLETE ALL THE REST
+      # KEEP BLOCKCHAIN + DELETE ALL THE REST
       
       # when blockchain comes from another node migrate data first
       if [ "${hddGotMigrationData}" != "" ]; then
@@ -190,7 +190,7 @@ if [ "${setupPhase}" == "setup" ]; then
       sudo /home/admin/config.scripts/blitz.datadrive.sh unmount
       sleep 2
 
-      # by keeping that blockchain - user choosed already the blockchain type
+      # by keeping that blockchain - user chose already the blockchain type
       echo "Selecting as blockchain network automatically .."
       if [ "${hddBlocksLitecoin}" == "1" ]; then
         echo "network=litecoin" >> $SETUPFILE
@@ -269,7 +269,7 @@ if [ "${setupPhase}" == "setup" ]; then
         dialogResult=$?
 
       else
-        echo "FAIL: unkown lightning implementation (${lightning})"
+        echo "FAIL: unknown lightning implementation (${lightning})"
         lightningWalletDone=1
         sleep 8
       fi
