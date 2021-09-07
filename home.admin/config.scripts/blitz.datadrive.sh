@@ -1597,18 +1597,18 @@ if [ "$1" = "clean" ]; then
             if [ -d "/mnt/hdd/$entry" ]; then
               if [ ${whenDeleteSchredd} -eq 1 ]; then
                 >&2 echo "# shredding DIR  : ${entry}"
-                sudo srm -r /mnt/hdd/$entry
+                sudo srm -lrv /mnt/hdd/$entry
               else
                 >&2 echo "# deleting DIR  : ${entry}"
-                sudo rm -r /mnt/hdd/$entry
+                sudo rm -lrv /mnt/hdd/$entry
               fi
             else
               if [ ${whenDeleteSchredd} -eq 1 ]; then
                 >&2 echo "# shredding FILE : ${entry}"
-                sudo srm /mnt/hdd/$entry
+                sudo srm -lv /mnt/hdd/$entry
               else
                 >&2 echo "# deleting FILE : ${entry}"
-                sudo rm /mnt/hdd/$entry
+                sudo rm -lv /mnt/hdd/$entry
               fi
             fi
 
@@ -1626,7 +1626,7 @@ if [ "$1" = "clean" ]; then
             echo "Cleaning Blockchain: ${chain}"
 
             # take extra care if wallet.db exists
-            sudo srm /mnt/hdd/${chain}/wallet.db 2>/dev/null
+            sudo srm -v /mnt/hdd/${chain}/wallet.db 2>/dev/null
 
             # the rest just delete (keep blocks and chainstate and testnet3)
             for entry in $(ls -A1 /mnt/hdd/${chain} 2>/dev/null)
