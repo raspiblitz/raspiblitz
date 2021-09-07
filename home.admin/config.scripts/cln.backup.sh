@@ -171,7 +171,7 @@ if [ ${mode} = "cln-import-gui" ]; then
   if [ "${scenario}" == "setup" ]; then
     RESULTFILE=$3
     if [ "${RESULTFILE}" == "" ]; then
-      echo "error='mising parameter'"
+      echo "error='missing parameter'"
       exit 1 
     fi
   fi

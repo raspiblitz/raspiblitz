@@ -413,7 +413,7 @@ if [ ${isMounted} -eq 0 ]; then
     sudo /home/admin/config.scripts/blitz.ssh.sh restore >> $logFile
 
     # determine if this is a recovery or an update
-    # TODO: improve version/update detetion later
+    # TODO: improve version/update detection later
     isRecovery=$(echo "${hddRaspiVersion}" | grep -c "${codeVersion}")
     if [ "${isRecovery}" == "1" ]; then
       infoMessage="Please Login for Recovery"
