@@ -365,8 +365,8 @@ if [ "${lightning}" == "cln" ]; then
   # OLD WALLET FROM CLIGHTNING RESCUE
   if [ "${clnrescue}" != "" ]; then
 
-    echo "Restore CLN data from uploaded rescue file ${lndrescue} ..." >> ${logFile}
-    source <(sudo /home/admin/config.scripts/cln.backup.sh cln-import ${lndrescue})
+    echo "Restore CLN data from uploaded rescue file ${clnrescue} ..." >> ${logFile}
+    source <(sudo /home/admin/config.scripts/cln.backup.sh cln-import ${clnrescue})
     if [ "${error}" != "" ]; then
       sed -i "s/^state=.*/state=error/g" ${infoFile}
       sed -i "s/^message=.*/message='setup: cln import backup failed'/g" ${infoFile}
