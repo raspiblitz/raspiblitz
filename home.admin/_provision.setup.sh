@@ -4,7 +4,7 @@
 # not on recoveries or updates
 
 # LOGFILE - store debug logs of bootstrap
-logFile="/home/admin/raspiblitz.log.setup"
+logFile="/home/admin/raspiblitz.provision-setup.log"
 
 # INFOFILE - state data from bootstrap
 infoFile="/home/admin/raspiblitz.info"

@@ -207,7 +207,7 @@ fi
 # from actions above
 
 if [ "${systemInitReboot}" == "1" ]; then
-  sudo cp ${logFile} ${logFile}.systeminit
+  sudo cp ${logFile} /home/admin/raspiblitz.systeminit.log
   sudo sed -i "s/^state=.*/state=reboot/g" ${infoFile}
   sleep 8
   sudo shutdown -r now
@@ -536,7 +536,7 @@ if [ ${isMounted} -eq 0 ]; then
     sed -i "s/^message=.*/message='Provision Setup'/g" ${infoFile}
     sudo /home/admin/_provision.setup.sh
     errorState=$?
-    sudo cat /home/admin/raspiblitz.log.setup
+    sudo cat /home/admin/raspiblitz.provision-setup.log
     if [ "$errorState" != "0" ]; then
       echo "EXIT _provision.setup.sh BECAUSE OF ERROR STATE ($errorState)" >> $logFile
       echo "This can also happen if _provision.setup.sh has syntax errors" >> $logFile
@@ -552,7 +552,7 @@ if [ ${isMounted} -eq 0 ]; then
     sed -i "s/^message=.*/message='Provision migration'/g" ${infoFile}
     sudo /home/admin/_provision.migration.sh
     errorState=$?
-    sudo cat /home/admin/raspiblitz.log.migration
+    sudo cat /home/admin/raspiblitz.provision-migration.log
     if [ "$errorState" != "0" ]; then
       echo "EXIT _provision.migration.sh BECAUSE OF ERROR STATE ($errorState)" >> $logFile
       echo "This can also happen if _provision.migration.sh has syntax errros" >> $logFile
@@ -568,7 +568,7 @@ if [ ${isMounted} -eq 0 ]; then
     sed -i "s/^message=.*/message='Provision Update/Recovery/Migration'/g" ${infoFile}
     sudo /home/admin/_provision.update.sh
     errorState=$?
-    sudo cat /home/admin/raspiblitz.log.update
+    sudo cat /home/admin/raspiblitz.provision-update.log
     if [ "$errorState" != "0" ]; then
       echo "EXIT _provision.update.sh BECAUSE OF ERROR STATE ($errorState)" >> $logFile
       echo "This can also happen if _provision.update.sh has syntax errors" >> $logFile
@@ -661,7 +661,7 @@ if [ ${isMounted} -eq 0 ]; then
   ########################################
   # AFTER SETUP REBOOT
   # touchscreen activation, start with configured SWAP, fix LCD text bug
-  sudo cp /home/admin/raspiblitz.log /home/admin/raspiblitz.log.setup
+  sudo cp /home/admin/raspiblitz.log /home/admin/raspiblitz.setup.log
   /home/admin/config.scripts/blitz.shutdown.sh reboot finalsetup
   sleep 100
   exit 0

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # LOGFILE - store debug logs of bootstrap
-logFile="/home/admin/raspiblitz.log.migration"
+logFile="/home/admin/raspiblitz.provision-migration.log"
 
 # INFOFILE - state data from bootstrap
 infoFile="/home/admin/raspiblitz.info"

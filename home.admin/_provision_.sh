@@ -15,6 +15,11 @@ infoFileDisplayClass="${displayClass}"
 # CONFIGFILE - configuration of RaspiBlitz
 configFile="/mnt/hdd/raspiblitz.conf"
 
+# SETUPFILE
+# this key/value file contains the state during the setup process
+setupFile="/var/cache/raspiblitz/temp/raspiblitz.setup"
+source ${setupFile}
+
 # log header
 echo "" >> ${logFile}
 echo "###################################" >> ${logFile}
