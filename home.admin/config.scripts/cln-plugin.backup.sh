@@ -9,7 +9,6 @@ function help(){
   echo "cln-plugin.backup.sh [on|off] [testnet|mainnet|signet]"
   echo "cln-plugin.backup.sh [restore] [testnet|mainnet|signet] [force]"
   echo "cln-plugin.backup.sh [backup-compact] [testnet|mainnet|signet]"
-  echo "cln-plugin.backup.sh [check [testnet|mainnet|signet]"
   echo
   echo "https://github.com/lightningd/plugins/tree/master/backup"
   echo
@@ -65,23 +64,21 @@ if [ $1 = on ];then
             /home/bitcoin/${netprefix}lightningd.sqlite3.backup.${now} || exit 1
   fi
 
-  # init plugin
-  if ! sudo ls /home/bitcoin/.lightning/${CLNETWORK}/backup.lock; then
-    # https://github.com/lightningd/plugins/tree/master/backup#setup
-    echo "# Initialize the backup plugin"
-    sudo -u bitcoin ${plugindir}/backup/backup-cli init\
-      --lightning-dir /home/bitcoin/.lightning/${CLNETWORK} \
-      file:///home/bitcoin/${netprefix}lightningd.sqlite3.backup
+  # always re-init plugin
+  if sudo ls /home/bitcoin/.lightning/${CLNETWORK}/backup.lock; then
+    sudo rm /home/bitcoin/.lightning/${CLNETWORK}/backup.lock
   fi
+  # https://github.com/lightningd/plugins/tree/master/backup#setup
+  echo "# Initialize the backup plugin"
+  sudo -u bitcoin ${plugindir}/backup/backup-cli init\
+   --lightning-dir /home/bitcoin/.lightning/${CLNETWORK} \
+   file:///home/bitcoin/${netprefix}lightningd.sqlite3.backup
 
   source /home/admin/raspiblitz.info
   if [ "${state}" == "ready" ]; then
     sudo systemctl start ${netprefix}lightningd
     echo "# Started the ${netprefix}lightningd.service"
   fi
-
-elif [ $1 = check ];then
-
 
 
 elif [ $1 = off ];then
@@ -93,6 +90,7 @@ elif [ $1 = off ];then
             /home/bitcoin/${netprefix}lightningd.sqlite3.backup.${now}
   echo "# Removing the backup.lock file"
   sudo rm -f  /home/bitcoin/.lightning/${CLNETWORK}/backup.lock
+
 
 elif [ $1 = restore ];then
 
@@ -121,9 +119,14 @@ elif [ $1 = restore ];then
     sudo -u bitcoin ${plugindir}/backup/backup-cli restore \
       file:///home/bitcoin/${netprefix}lightningd.sqlite3.backup \
       /home/bitcoin/.lightning/${CLNETWORK}/lightningd.sqlite3
-  
-    sudo systemctl start ${netprefix}lightningd
+    
+    source /home/admin/raspiblitz.info
+    if [ "${state}" == "ready" ]; then
+      sudo systemctl start ${netprefix}lightningd
+      echo "# Started the ${netprefix}lightningd.service"
+    fi
   fi
+
 
 elif [ $1 = backup-compact ];then
   
