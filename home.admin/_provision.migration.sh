@@ -7,6 +7,9 @@ logFile="/home/admin/raspiblitz.log.migration"
 infoFile="/home/admin/raspiblitz.info"
 source ${infoFile}
 
+# SETUPFILE - data from setup process
+source /var/cache/raspiblitz/temp/raspiblitz.setup
+
 # CONFIGFILE - configuration of RaspiBlitz
 configFile="/mnt/hdd/raspiblitz.conf"
 
@@ -40,6 +43,17 @@ if [ "${err}" != "" ]; then
     sed -i "s/^state=.*/state=error/g" ${infoFile}
     sed -i "s/^message=.*/message='migration failed'/g" ${infoFile}
     exit 3
+fi
+
+# set password c if given in flag from migration prep
+passwordFlagExists=$(sudo ls /mnt/hdd/passwordc.flag | grep -c "passwordc.flag")
+if [ "${passwordFlagExists}" == "1" ]; then
+    echo "Found /mnt/hdd/passwordc.flag .. changing password" >> ${logFile}
+    oldPasswordC=$(sudo cat /mnt/hdd/passwordc.flag)
+    sudo /home/admin/config.scripts/lnd.initwallet.py change-password "${oldPasswordC}" "${passwordC}" >> ${logFile}
+    sudo shred -u /mnt/hdd/passwordc.flag    
+else
+    echo "No /mnt/hdd/passwordc.flag" >> ${logFile}
 fi
 
 # if free space is lower than 100GB (100000000) delete backup files
