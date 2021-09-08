@@ -60,7 +60,7 @@ source ${configFile} 2>/dev/null
 source <(/home/admin/config.scripts/internet.sh status)
 
 # get basic hardware info
-source <(/home/admin/config.scripts/.sh status)
+source <(/home/admin/config.scripts/blitz.hardware.sh status)
 
 # get basic dns info
 source <(sudo /home/admin/config.scripts/internet.dns.sh test nodialog)
