@@ -43,7 +43,7 @@ if [ "${network}" == "" ]; then
   sed -i "s/^message=.*/message='config: missing network'/g" ${infoFile}
   echo "FAIL see ${logFile}"
   echo "FAIL: missing network in (${setupFile})!" >> ${logFile}
-  exit 1
+  exit 20
 fi
 
 if [ "${chain}" == "" ]; then
@@ -51,7 +51,7 @@ if [ "${chain}" == "" ]; then
   sed -i "s/^message=.*/message='config: missing chain'/g" ${infoFile}
   echo "FAIL see ${logFile}"
   echo "FAIL: missing chain in (${setupFile})!" >> ${logFile}
-  exit 1
+  exit 2
 fi
 
 # make sure choosen blockchain service is installed
@@ -61,7 +61,7 @@ if [ "${network}" != "bitcoin" ]; then
   sed -i "s/^message=.*/message='TODO: install ${network}'/g" ${infoFile}
   echo "FAIL see ${logFile}"
   echo "TODO: make sure ${network} is installed!" >> ${logFile}
-  exit 1
+  exit 3
 fi
 
 # copy configs files and directories
@@ -131,7 +131,7 @@ do
     sed -i "s/^state=.*/state=error/g" ${infoFile}
     sed -i "s/^message=.*/message='setup: failed ${network}'/g" ${infoFile}
     echo "FAIL: setup: failed ${network}" >> ${logFile}
-    exit 1
+    exit 4
   fi
 done
 echo "OK ${network} startup successful " >> ${logFile}
@@ -164,7 +164,7 @@ if [ "${lightning}" == "lnd" ]; then
     sed -i "s/^message=.*/message='config: missing passwordC'/g" ${infoFile}
     echo "FAIL see ${logFile}"
     echo "FAIL: missing passwordC in (${setupFile})!" >> ${logFile}
-    exit 1
+    exit 5
   fi
 
   # if user uploaded an LND rescue file
@@ -177,7 +177,7 @@ if [ "${lightning}" == "lnd" ]; then
       echo "FAIL see ${logFile}"
       echo "FAIL: setup: lnd import backup failed" >> ${logFile}
       echo "${error}" >> ${logFile}
-      exit 1
+      exit 6
     fi
   else
     # preparing new LND config
@@ -199,7 +199,7 @@ if [ "${lightning}" == "lnd" ]; then
     sed -i "s/^message=.*/message='setup: lnd conf link broken'/g" ${infoFile}
     echo "FAIL see ${logFile}"
     echo "FAIL: setup: lnd conf link broken" >> ${logFile}
-    exit 1
+    exit 7
   fi
 
   # Init LND service & start
@@ -240,7 +240,7 @@ if [ "${lightning}" == "lnd" ]; then
       sed -i "s/^message=.*/message='setup: failed lnd start'/g" ${infoFile}
       echo "FAIL see ${logFile}"
       echo "FAIL: setup: failed lnd start" >> ${logFile}
-      exit 1
+      exit 8
     fi
   done
   echo "OK - LND is running" ${logFile}
@@ -253,7 +253,7 @@ if [ "${lightning}" == "lnd" ]; then
       sed -i "s/^message=.*/message='setup: missing lnd tls'/g" ${infoFile}
       echo "FAIL see ${logFile}"
       echo "FAIL: setup: missing lnd tls" >> ${logFile}
-      exit 1
+      exit 9
   fi
 
   # import static channel backup if was uploaded
@@ -266,7 +266,7 @@ if [ "${lightning}" == "lnd" ]; then
       echo "FAIL see ${logFile}"
       echo "FAIL: setup: lnd import SCB failed" >> ${logFile}
       echo "${error}" >> ${logFile}
-      exit 1
+      exit 10
     fi
   fi
 
@@ -283,7 +283,7 @@ if [ "${lightning}" == "lnd" ]; then
       echo "FAIL: setup: lnd wallet SCB failed" >> ${logFile}
       echo "${err}" >> ${logFile}
       echo "${errMore}" >> ${logFile}
-      exit 1
+      exit 11
     fi
 
   # WALLET --> SEED
@@ -299,7 +299,7 @@ if [ "${lightning}" == "lnd" ]; then
       echo "FAIL: setup: lnd wallet SEED failed" >> ${logFile}
       echo "${err}" >> ${logFile}
       echo "${errMore}" >> ${logFile}
-      exit 1
+      exit 12
     fi
 
   # WALLET --> NEW
@@ -315,7 +315,7 @@ if [ "${lightning}" == "lnd" ]; then
       echo "FAIL: setup: lnd wallet SEED failed" >> ${logFile}
       echo "${err}" >> ${logFile}
       echo "${errMore}" >> ${logFile}
-      exit 1
+      exit 13
     fi
 
     # write created seedwords into SETUPFILE to be displayed to user on final setup later
@@ -334,7 +334,7 @@ if [ "${lightning}" == "lnd" ]; then
       sed -i "s/^state=.*/state=error/g" ${infoFile}
       sed -i "s/^message=.*/message='setup: lnd no macaroons'/g" ${infoFile}
       echo "FAIL: setup: lnd no macaroons" >> ${logFile}
-      exit 1
+      exit 14
   fi
 
   # now sync macaroons & TLS zo other users
@@ -347,7 +347,7 @@ if [ "${lightning}" == "lnd" ]; then
     sed -i "s/^message=.*/message='setup: lnd wallet SEED failed'/g" ${infoFile}
     echo "FAIL: setup: lnd wallet SEED failed" >> ${logFile}
     echo "${err}" >> ${logFile}
-    exit 1
+    exit 15
   fi
 
 fi
@@ -373,7 +373,7 @@ if [ "${lightning}" == "cln" ]; then
       echo "FAIL see ${logFile}"
       echo "FAIL: setup: cln import backup failed" >> ${logFile}
       echo "${error}" >> ${logFile}
-      exit 1
+      exit 16
     fi
 
   # OLD WALLET FROM SEEDWORDS
@@ -388,7 +388,7 @@ if [ "${lightning}" == "cln" ]; then
       sed -i "s/^state=.*/state=error/g" ${infoFile}
       sed -i "s/^message=.*/message='setup: seed maybe wrong'/g" ${infoFile}
       echo "FAIL: setup: no cln wallet created - seed maybe wrong" >> ${logFile}
-      exit 1
+      exit 17
     fi
 
   # NEW WALLET
@@ -404,7 +404,7 @@ if [ "${lightning}" == "cln" ]; then
       sed -i "s/^state=.*/state=error/g" ${infoFile}
       sed -i "s/^message=.*/message='setup: no cln seedwords'/g" ${infoFile}
       echo "FAIL: setup: no cln seedwords" >> ${logFile}
-      exit 1
+      exit 18
     fi
 
     # check if wallet really got created 
@@ -413,7 +413,7 @@ if [ "${lightning}" == "cln" ]; then
       sed -i "s/^state=.*/state=error/g" ${infoFile}
       sed -i "s/^message=.*/message='setup: no cln wallet created'/g" ${infoFile}
       echo "FAIL: setup: no cln wallet created" >> ${logFile}
-      exit 1
+      exit 19
     fi
 
     # write created seedwords into SETUPFILE to be displayed to user on final setup later
