@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # LOGFILE - store debug logs of bootstrap
-logFile="/home/admin/raspiblitz.log"
+logFile="/home/admin/raspiblitz.log.update"
 
 # INFOFILE - state data from bootstrap
 infoFile="/home/admin/raspiblitz.info"
@@ -14,7 +14,7 @@ setupFile="/var/cache/raspiblitz/temp/raspiblitz.setup"
 source ${setupFile}
 
 # log header
-echo "" >> ${logFile}
+echo "" > ${logFile}
 echo "###################################" >> ${logFile}
 echo "# _provision.update.sh" >> ${logFile}
 echo "###################################" >> ${logFile}

@@ -4,7 +4,7 @@
 # not on recoveries or updates
 
 # LOGFILE - store debug logs of bootstrap
-logFile="/home/admin/raspiblitz.log"
+logFile="/home/admin/raspiblitz.log.setup"
 
 # INFOFILE - state data from bootstrap
 infoFile="/home/admin/raspiblitz.info"
@@ -19,7 +19,7 @@ configFile="/mnt/hdd/raspiblitz.conf"
 source ${configFile}
 
 # log header
-echo "" >> ${logFile}
+echo "" > ${logFile}
 echo "###################################" >> ${logFile}
 echo "# _provision.setup.sh" >> ${logFile}
 echo "###################################" >> ${logFile}
