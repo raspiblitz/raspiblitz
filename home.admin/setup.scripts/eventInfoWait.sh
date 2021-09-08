@@ -38,12 +38,18 @@ backtitle="RaspiBlitz ${codeVersion} / ${eventID} / ${localip}"
 # 1) WELL DEFINED EVENTS
 ################################################
 
-if [ "${eventID}" == "starting" ] || [ "${eventID}" == "system-init" ] || [ "${eventID}" == "ready" ]; then
+if [ "${eventID}" == "starting" ] || [ "${eventID}" == "system-init" ]; then
 
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "
 Starting RaspiBlitz
 Please wait ...
 " 6 24
+
+elif [ "${eventID}" == "ready" ]; then
+
+    dialog --backtitle "${backtitle}" --cr-wrap --infobox "
+Please wait ...
+" 5 20
 
 elif [ "${eventID}" == "waitsync" ]; then
 

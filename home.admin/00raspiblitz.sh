@@ -232,25 +232,28 @@ do
       fi
       echo "command to shutdown --> off"
       exit 1
-    elif [ "${state}" == "reboot" ] || [ "${state}" == "shutdown" ]; then
-      clear
-      echo "***********************************************************"
-      echo "RaspiBlitz going to ${state}"
-      echo "***********************************************************"
-      if [ "${state}" == "reboot" ]; then
-        if [ "${message}" == "finalsetup" ]; then
-          echo "This is the final setup reboot - you will get disconnected."
-        fi
-        echo "SSH again into system with:"
-        echo "ssh admin@${localip}"
-        echo "***********************************************************"
-      fi
-      exit 0
     else
         # every other state just push as event to SSH frontend
         /home/admin/setup.scripts/eventInfoWait.sh "${state}" "${message}"
     fi
 
+  fi
+
+  # exit loop/script in case if system shutting down
+  if [ "${state}" == "reboot" ] || [ "${state}" == "shutdown" ]; then
+    clear
+    echo "***********************************************************"
+    echo "RaspiBlitz going to ${state}"
+    echo "***********************************************************"
+    if [ "${state}" == "reboot" ]; then
+      if [ "${message}" == "finalsetup" ]; then
+        echo "This is the final setup reboot - you will get disconnected."
+      fi
+      echo "SSH again into system with:"
+      echo "ssh admin@${localip}"
+      echo "***********************************************************"
+    fi
+    exit 0
   fi
 
 done
