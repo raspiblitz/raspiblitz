@@ -102,10 +102,10 @@ fi
 # when coming from fresh setup
 if [ "${setupPhase}" == "setup" ]; then
   clear
-  whiptail --title " SetUp Done " --msgbox "\
-Your RaspiBlitz Setup is done. Welcome new node operator! :D\n
-There might now be some waiting time until your Blockchain is fully synced before you can enter the RaspiBlitz user menu.\n
-Its safe to logout during sync and return later.\n
+  whiptail --title " Setup Done " --msgbox "\
+Your RaspiBlitz setup is done. Welcome new Node Operator! :D\n
+There can be some waiting time until your blockchain is fully synced before you can enter the RaspiBlitz user menu.\n
+It is safe to log out during the sync and return later.\n
 " 12 65
 
 # when coming from migration from other node

@@ -296,6 +296,9 @@ if [ ${mode} = "cln-import-gui" ]; then
     echo "# Starting cln.hsmtool.sh unlock"
     /home/admin/config.scripts/cln.hsmtool.sh unlock # there are mutiple wallets possible, need to check for non-default ones too
   fi
+
+  # init backup plugin
+  /home/admin/config.scripts/cln-plugin.backup.sh on $CHAIN
   
   # restarting cln & give final info
   sudo systemctl start lightningd

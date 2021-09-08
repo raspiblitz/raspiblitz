@@ -60,7 +60,7 @@ source ${configFile} 2>/dev/null
 source <(/home/admin/config.scripts/internet.sh status)
 
 # get basic hardware info
-source <(/home/admin/config.scripts/.sh status)
+source <(/home/admin/config.scripts/blitz.hardware.sh status)
 
 # get basic dns info
 source <(sudo /home/admin/config.scripts/internet.dns.sh test nodialog)
@@ -101,7 +101,7 @@ if [ "${flagExists}" == "1" ]; then
   sudo rm /boot/stop
   sed -i "s/^state=.*/state=stop/g" ${infoFile}
   sed -i "s/^message=.*/message='stopped for manual provision'/g" ${infoFile}
-  echo "INFO: 'bootstrap stopped - run release after manual provison" >> ${logFile}
+  echo "INFO: 'bootstrap stopped - run release after manual provison'" >> ${logFile}
   exit 0
 fi
 
@@ -112,7 +112,7 @@ if [ "${provisionFlagExists}" == "1" ]; then
   sudo systemctl stop lnd 2>/dev/null
   sed -i "s/^state=.*/state=inconsistentsystem/g" ${infoFile}
   sed -i "s/^message=.*/message='provision did not ran thru'/g" ${infoFile}
-  echo "FAIL: 'provision did not ran thru - need fresh sd card!" >> ${logFile}
+  echo "FAIL: 'provision did not ran thru' - need fresh sd card!" >> ${logFile}
   exit 1
 fi
 

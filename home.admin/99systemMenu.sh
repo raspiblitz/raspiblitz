@@ -15,10 +15,8 @@ TITLE=" ${CHAIN} System Options "
 MENU=""    # adds lines to HEIGHT
 OPTIONS=() # adds lines to HEIGHt + CHOICE_HEIGHT
 
-if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
-  OPTIONS+=(${network}LOG "Monitor the debug.log for ${CHAIN}")
-  OPTIONS+=(${network}CONF "Edit the bitcoin.conf")
-fi
+OPTIONS+=(${network}LOG "Monitor the debug.log for ${CHAIN}")
+OPTIONS+=(${network}CONF "Edit the bitcoin.conf")
 
 if grep "^${netprefix}lnd=on" /mnt/hdd/raspiblitz.conf;then
   OPTIONS+=(LNDLOG "Monitor the lnd.log for ${CHAIN}")
