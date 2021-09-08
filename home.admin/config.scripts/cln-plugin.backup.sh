@@ -9,6 +9,7 @@ function help(){
   echo "cln-plugin.backup.sh [on|off] [testnet|mainnet|signet]"
   echo "cln-plugin.backup.sh [restore] [testnet|mainnet|signet] [force]"
   echo "cln-plugin.backup.sh [backup-compact] [testnet|mainnet|signet]"
+  echo "cln-plugin.backup.sh [check [testnet|mainnet|signet]"
   echo
   echo "https://github.com/lightningd/plugins/tree/master/backup"
   echo
@@ -79,9 +80,13 @@ if [ $1 = on ];then
     echo "# Started the ${netprefix}lightningd.service"
   fi
 
+elif [ $1 = check ];then
+
+
+
 elif [ $1 = off ];then
   echo "# Removing the backup plugin"
-¬  sudo rm -f /home/bitcoin/${netprefix}cln-plugins-enabled/backup.py
+  sudo rm -f /home/bitcoin/${netprefix}cln-plugins-enabled/backup.py
   echo "# Backup the existing old backup on the SDcard"
   now=$(date +"%Y_%m_%d_%H%M%S")
   sudo mv /home/bitcoin/${netprefix}lightningd.sqlite3.backup \
