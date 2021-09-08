@@ -776,6 +776,16 @@ echo "Make sure main services are running .." >> ${logFile}
 sudo systemctl start ${network}d
 if [ "${lightning}" == "lnd" ];then
   sudo systemctl start lnd
+  # set password c if given in flag from migration prep
+  passwordFlagExists=$(sudo ls /mnt/hdd/passwordc.flag | grep -c "passwordc.flag")
+  if [ "${passwordFlagExists}" == "1" ]; then
+    echo "Found /mnt/hdd/passwordc.flag .. changing password" >> ${logFile}
+    oldPasswordC=$(sudo cat /mnt/hdd/passwordc.flag)
+    sudo /home/admin/config.scripts/lnd.initwallet.py change-password "${oldPasswordC}" "${passwordC}" >> ${logFile}
+    sudo shred -u /mnt/hdd/passwordc.flag    
+  else
+    echo "No /mnt/hdd/passwordc.flag" >> ${logFile}
+  fi
 elif [ "${lightning}" == "cln" ];then
   sudo systemctl start lightningd
 fi

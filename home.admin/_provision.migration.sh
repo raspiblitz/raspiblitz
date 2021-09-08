@@ -45,17 +45,6 @@ if [ "${err}" != "" ]; then
     exit 3
 fi
 
-# set password c if given in flag from migration prep
-passwordFlagExists=$(sudo ls /mnt/hdd/passwordc.flag | grep -c "passwordc.flag")
-if [ "${passwordFlagExists}" == "1" ]; then
-    echo "Found /mnt/hdd/passwordc.flag .. changing password" >> ${logFile}
-    oldPasswordC=$(sudo cat /mnt/hdd/passwordc.flag)
-    sudo /home/admin/config.scripts/lnd.initwallet.py change-password "${oldPasswordC}" "${passwordC}" >> ${logFile}
-    sudo shred -u /mnt/hdd/passwordc.flag    
-else
-    echo "No /mnt/hdd/passwordc.flag" >> ${logFile}
-fi
-
 # if free space is lower than 100GB (100000000) delete backup files
 if [ "${hddDataFreeKB}" != "" ] && [ ${hddDataFreeKB} -lt 407051412 ]; then
     echo "- free space of data disk is low ... deleting 'backup_migration'" >> ${logFile}
