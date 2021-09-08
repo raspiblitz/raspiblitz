@@ -112,7 +112,7 @@ if [ "${provisionFlagExists}" == "1" ]; then
   sudo systemctl stop lnd 2>/dev/null
   sed -i "s/^state=.*/state=inconsistentsystem/g" ${infoFile}
   sed -i "s/^message=.*/message='provision did not ran thru'/g" ${infoFile}
-  echo "FAIL: 'provision did not ran thru - need fresh sd card!" >> ${logFile}
+  echo "FAIL: 'provision did not ran thru' - need fresh sd card!" >> ${logFile}
   exit 1
 fi
 
