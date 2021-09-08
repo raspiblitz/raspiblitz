@@ -101,7 +101,7 @@ if [ "${flagExists}" == "1" ]; then
   sudo rm /boot/stop
   sed -i "s/^state=.*/state=stop/g" ${infoFile}
   sed -i "s/^message=.*/message='stopped for manual provision'/g" ${infoFile}
-  echo "INFO: 'bootstrap stopped - run release after manual provison" >> ${logFile}
+  echo "INFO: 'bootstrap stopped - run release after manual provison'" >> ${logFile}
   exit 0
 fi
 
