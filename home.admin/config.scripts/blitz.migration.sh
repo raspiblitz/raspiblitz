@@ -282,6 +282,7 @@ if [ "$1" = "export" ]; then
 
   # zip it
   echo "# Building the Export File (this can take some time) .."
+  sudo mkdir -p ${defaultUploadPath}
   sudo tar -zcvf ${defaultUploadPath}/raspiblitz-export-temp.tar.gz -X ~/.exclude.temp /mnt/hdd 1>~/.include.temp 2>/dev/null
 
   # get md5 checksum
