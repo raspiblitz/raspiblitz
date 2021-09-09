@@ -24,6 +24,7 @@ if [ $# -eq 0 ]||[ "$1" = "-h" ]||[ "$1" = "--help" ];then
   echo "cln.install.sh on <mainnet|testnet|signet>"
   echo "cln.install.sh off <mainnet|testnet|signet> <purge>"
   echo "cln.install.sh [update <version>|experimental|testPR <PRnumber>]"
+  echo "cln.install.sh display-seed <mainnet|testnet|signet>"
   echo
   exit 1
 fi
@@ -226,6 +227,32 @@ alias ${netprefix}clnconf=\"sudo\
   if [ "${CHAIN}" == "mainnet" ] && [ "${lightning}" == "" ]; then
     echo "# CLN is now default lighthning implementation"
     sudo sed -i "s/^lightning=.*/lightning=cln/g" /mnt/hdd/raspiblitz.conf
+  fi
+
+  exit 0
+fi
+
+if [ "$1" = "display-seed" ]; then
+  
+  # get network and aliasses from second parameter (default mainnet)
+  displayNetwork=$2
+  if [ "${displayNetwork}" == "" ]; then
+    displayNetwork="mainnet"
+  fi
+  source <(/home/admin/config.scripts/network.aliases.sh getvars cln $displayNetwork)
+
+  # check if seedword file exists
+  seewordFile="/home/bitcoin/.lightning/${CLNETWORK}/seedwords.info"
+  echo "# seewordFile(${seewordFile})"
+  seewordFileExists=$(sudo ls ${seewordFile} 2>/dev/null | grep -c "seedwords.info")
+  echo "# seewordFileExists(${seewordFileExists})"
+  if [ "${seewordFileExists}" == "1" ]; then
+    source ${seewordFile}
+    echo "# seedwords(${seedwords})"
+    echo "# seedwords6x4(${seedwords6x4})"
+    echo "TODO: display with dialog"
+  else
+    echo "TODO: display info on backuping hsm secret file directly"
   fi
 
   exit 0
