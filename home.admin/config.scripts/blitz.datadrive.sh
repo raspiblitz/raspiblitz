@@ -390,7 +390,7 @@ if [ "$1" = "status" ]; then
       hddAdapterUSAP=1
       echo "uaspForced=1"
     fi
-    if [ $(grep -c "forceUasp=on" < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
+    if [ $(cat /mnt/hdd/raspiblitz.conf 2>/dev/null | grep -c "forceUasp=on") -eq 1 ]; then
       hddAdapterUSAP=1
     fi
 

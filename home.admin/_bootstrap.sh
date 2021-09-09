@@ -398,16 +398,6 @@ if [ ${cmdlineExists} -eq 1 ] && [ ${#hddAdapterUSB} -gt 0 ] && [ ${hddAdapterUS
   fi
 else 
   echo "Skipping UASP deactivation ... cmdlineExists(${cmdlineExists}) hddAdapterUSB(${hddAdapterUSB}) hddAdapterUSAP(${hddAdapterUSAP})" >> $logFile
-  
-  if [ ${uaspForced} -eq 1 ]; then
-    # Add to raspiblitz.conf if not already there
-    entryExists=$(cat /mnt/hdd/raspiblitz.conf 2>/dev/null | grep -c 'forceUasp=on')
-    if [ ${entryExists} -eq 0 ]; then
-        sudo sed -i '/forceUasp=.*/d' /mnt/hdd/raspiblitz.conf
-        echo "forceUasp=on" >> /mnt/hdd/raspiblitz.conf
-        echo "DONE forceUasp=on recorded in raspiblitz.conf" >> $logFile
-    fi
-  fi
 fi
 
 # check if the HDD is auto-mounted ( auto-mounted = setup-done)
@@ -773,6 +763,17 @@ source ${configFile}
 
 # update public IP on boot - set to domain if available
 /home/admin/config.scripts/internet.sh update-publicip ${lndAddress} 
+
+# make constant UASP entry in raspiblitz.conf if still done by flag file
+# uaspForced comes from blitz.datadrive.sh status
+if [ ${uaspForced} -eq 1 ]; then
+  entryExists=$(cat /mnt/hdd/raspiblitz.conf 2>/dev/null | grep -c 'forceUasp=on')
+  if [ ${entryExists} -eq 0 ]; then
+      sudo sed -i '/forceUasp=.*/d' /mnt/hdd/raspiblitz.conf
+      echo "forceUasp=on" >> /mnt/hdd/raspiblitz.conf
+      echo "DONE forceUasp=on recorded in raspiblitz.conf" >> $logFile
+  fi
+fi
 
 #################################
 # MAKE SURE USERS HAVE LATEST LND CREDENTIALS
