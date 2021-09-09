@@ -372,6 +372,44 @@ sed -i "s/^message=.*/message='please wait'/g" ${infoFile}
 # get fresh info about data drive to continue
 source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
 
+echo "isMounted: $isMounted" >> $logFile
+
+# check if UASP is already deactivated (on RaspiOS)
+# https://www.pragmaticlinux.com/2021/03/fix-for-getting-your-ssd-working-via-usb-3-on-your-raspberry-pi/
+cmdlineExists=$(sudo ls /boot/cmdline.txt 2>/dev/null | grep -c "cmdline.txt")
+if [ ${cmdlineExists} -eq 1 ] && [ ${#hddAdapterUSB} -gt 0 ] && [ ${hddAdapterUSAP} -eq 0 ]; then
+  echo "Checking for UASP deactivation ..." >> $logFile
+  usbQuirkActive=$(sudo cat /boot/cmdline.txt | grep -c "usb-storage.quirks=")
+  # check if its maybe other device
+  usbQuirkDone=$(sudo cat /boot/cmdline.txt | grep -c "usb-storage.quirks=${hddAdapterUSB}:u")
+  if [ ${usbQuirkActive} -gt 0 ] && [ ${usbQuirkDone} -eq 0 ]; then
+    # remove old usb-storage.quirks
+    sudo sed -i "s/usb-storage.quirks=[^ ]* //g" /boot/cmdline.txt
+  fi 
+  if [ ${usbQuirkDone} -eq 0 ]; then
+    # add new usb-storage.quirks
+    sudo sed -i "1s/^/usb-storage.quirks=${hddAdapterUSB}:u /" /boot/cmdline.txt
+    sudo cat /boot/cmdline.txt >> $logFile
+    # go into reboot to activate new setting
+    echo "DONE deactivating UASP for ${hddAdapterUSB} ... one more reboot needed ... " >> $logFile
+    sudo cp ${logFile} ${logFile}.uasp
+    sudo shutdown -r now
+    sleep 100
+  fi
+else 
+  echo "Skipping UASP deactivation ... cmdlineExists(${cmdlineExists}) hddAdapterUSB(${hddAdapterUSB}) hddAdapterUSAP(${hddAdapterUSAP})" >> $logFile
+  
+  if [ ${uaspForced} -eq 1 ]; then
+    # Add to raspiblitz.conf if not already there
+    entryExists=$(cat /mnt/hdd/raspiblitz.conf 2>/dev/null | grep -c 'forceUasp=on')
+    if [ ${entryExists} -eq 0 ]; then
+        sudo sed -i '/forceUasp=.*/d' /mnt/hdd/raspiblitz.conf
+        echo "forceUasp=on" >> /mnt/hdd/raspiblitz.conf
+        echo "DONE forceUasp=on recorded in raspiblitz.conf" >> $logFile
+    fi
+  fi
+fi
+
 # check if the HDD is auto-mounted ( auto-mounted = setup-done)
 echo "HDD already part of system: $isMounted" >> $logFile
 
