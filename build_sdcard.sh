@@ -75,11 +75,14 @@ echo "4) will use GITHUB-BRANCH --> '${githubBranch}'"
 
 # 5th optional parameter: DISPLAY-CLASS
 # ----------------------------------------
-# Could be 'hdmi', 'headless' or 'lcd'
+# Could be 'hdmi', 'headless' or 'lcd' (lcd is default)
 # On 'false' the standard video output is used (HDMI) by default.
 # https://github.com/rootzoll/raspiblitz/issues/1265#issuecomment-813369284
 displayClass="$5"
-if [ ${#displayClass} -eq 0 ] || [ "${displayClass}" == "false" ]; then
+if [ ${#displayClass} -eq 0 ]; then
+  displayClass="lcd"
+fi
+if [ "${displayClass}" == "false" ]; then
   displayClass="hdmi"
 fi
 if [ "${displayClass}" != "hdmi" ] && [ "${displayClass}" != "lcd" ] && [ "${displayClass}" != "headless" ]; then
