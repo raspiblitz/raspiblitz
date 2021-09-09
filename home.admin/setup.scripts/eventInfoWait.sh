@@ -177,11 +177,16 @@ elif [ "${eventID}" == "waitsetup" ] && [ "${mode}" == "lcd" ]; then
     if [ "${setupPhase}" == "setup" ] || [ "${setupPhase}" == "update" ] || [ "${setupPhase}" == "recovery" ] || [ "${setupPhase}" == "migration" ]; then
 
         # custom backtitle for this dialog
-        backtitle="RaspiBlitz ${codeVersion} / ${setupPhase}"
+        backtitle="RaspiBlitz ${codeVersion}"
+
+        # display if RAM size
+        backtitle="${backtitle} / ${ramGB}GB RAM"
 
         # display if HDD conatains blockhain or not
         if [ "${hddBlocksBitcoin}" == "1" ] || [ "${hddBlocksLitecoin}" == "1" ]; then
-            backtitle="${backtitle} / (pre-synced)"
+            backtitle="${backtitle} / ${hddGigaBytes}GB (pre-synced)"
+        else
+            backtitle="${backtitle} / ${hddGigaBytes}GB HDD"
         fi
 
         # custom welcomeline for this dialog

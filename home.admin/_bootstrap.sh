@@ -73,6 +73,7 @@ echo "baseimage=${baseimage}" >> $infoFile
 echo "cpu=${cpu}" >> $infoFile
 echo "board=${board}" >> $infoFile
 echo "ramMB=${ramMB}" >> $infoFile
+echo "ramGB=${ramGB}" >> $infoFile
 echo "network=${network}" >> $infoFile
 echo "chain=${chain}" >> $infoFile
 echo "localip='${localip}'" >> $infoFile
@@ -421,6 +422,7 @@ if [ ${isMounted} -eq 0 ]; then
 
   # write data needed for setup process into raspiblitz.info
   echo "hddCandidate='${hddCandidate}'" >> ${infoFile}
+  echo "hddGigaBytes=${hddGigaBytes}" >> ${infoFile}
   echo "hddBlocksBitcoin=${hddBlocksBitcoin}" >> ${infoFile}
   echo "hddBlocksLitecoin=${hddBlocksLitecoin}" >> ${infoFile}
   echo "hddGotMigrationData=${hddGotMigrationData}" >> ${infoFile}
