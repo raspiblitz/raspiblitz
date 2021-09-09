@@ -614,7 +614,7 @@ sudo -u admin chmod +x /home/admin/config.scripts/*.sh
 sudo -u admin chmod +x /home/admin/setup.scripts/*.sh
 
 # install newest version of BlitzPy
-blitzpy_wheel=$(ls -trR /home/admin/raspiblitz/home.admin/BlitzPy/dist | grep -E "*any.whl" | tail -n 1)
+blitzpy_wheel=$(ls -tR /home/admin/raspiblitz/home.admin/BlitzPy/dist | grep -E "*any.whl" | tail -n 1)
 blitzpy_version=$(echo ${blitzpy_wheel} | grep -oE "([0-9]\.[0-9]\.[0-9])")
 echo ""
 echo "*** INSTALLING BlitzPy Version: ${blitzpy_version} ***"
