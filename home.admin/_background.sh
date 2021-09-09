@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# TODO: check & update localip in raspiblitz info for display (only write on change)
+
 # This script runs on after start in background
 # as a service and gets restarted on failure
 # it runs ALMOST every seconds
@@ -37,15 +39,47 @@ do
   # count up
   counter=$(($counter+1))
 
+  # limit counter to max seconds per week:
+  # 604800 = 60sec * 60min * 24hours * 7days
+  if [ ${counter} -gt 604800 ]; then
+    counter=0
+    echo "counter zero reset"
+  fi
+
   # gather the uptime seconds
   upSeconds=$(cat /proc/uptime | grep -o '^[0-9]\+')
 
-  # prevent restart if COPY OVER LAN is running
-  # see: https://github.com/rootzoll/raspiblitz/issues/1179#issuecomment-646079467
-  source ${infoFile}
-  if [ "${state}" == "copysource" ]; then 
-    echo "copysource mode: skipping background loop"
-    sleep 10
+  # source info file fresh on every loop
+  source ${infoFile} 2>/dev/null
+
+  ####################################################
+  # SKIP BACKGROUND TASK LOOP ON CERTAIN SYSTEM STATES
+  # https://github.com/rootzoll/raspiblitz/issues/160
+  ####################################################
+
+  if [ "${state}" == "" ] || [ "${state}" == "copysource" ] || [ "${state}" == "copytarget" ]; then
+    echo "skipping background loop (${counter}) - state(${state})"
+    sleep 1
+    continue
+  fi
+
+  ####################################################
+  # CHECK IF LOCAL IP CHANGED
+  ####################################################
+  oldLocalIP="${localip}";
+  source <(/home/admin/config.scripts/internet.sh status)
+  if [ "${oldLocalIP}" != "${localip}" ]; then
+    echo "local IP changed old(${oldLocalIP}) new(${localip}) - updating in raspiblitz.info"
+    sed -i "s/^localip=.*/localip='${localip}'/g" ${infoFile}
+  fi
+
+  ####################################################
+  # SKIP REST OF THE TASKS IF STILL IN SETUP PHASE
+  ####################################################
+
+  if [ "${setupPhase}" != "done" ]; then
+    echo "skipping rest of tasks because still in setupPhase(${setupPhase})"
+    sleep 1
     continue
   fi
 
@@ -60,13 +94,13 @@ do
     echo "*** RECHECK DHCP-SERVER  ***"
 
     # get the local network IP
-    localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+    localip=$(hostname -I | awk '{print $1}')
     echo "localip(${localip})"
 
     # detect a missing DHCP config 
     if [ "${localip:0:4}" = "169." ]; then
       echo "Missing DHCP detected ... trying emergency reboot"
-      sudo /home/admin/XXshutdown.sh reboot
+      sudo /home/admin/config.scripts/blitz.shutdown.sh reboot
     else
       echo "DHCP OK"
     fi
@@ -167,7 +201,7 @@ do
         echo "new publicIP but no LND restart because no auto-unlock"
       fi
 
-      # trigger update if dnyamic domain (if set)
+      # trigger update if dynamic domain (if set)
       updateDynDomain=1
 
     else
@@ -183,9 +217,9 @@ do
   # check every 1min
   recheckSync=$(($counter % 60))
   if [ ${recheckSync} -eq 1 ]; then
-    source <(sudo -u admin /home/admin/config.scripts/network.monitor.sh peer-status)
+    source <(sudo /home/admin/config.scripts/network.monitor.sh peer-status)
     echo "Blockchain Sync Monitoring: peers=${peers}"
-    if [ "${peers}" == "0" ]; then
+    if [ "${peers}" == "0" ] && [ "${running}" == "1" ]; then
       echo "Blockchain Sync Monitoring: ZERO PEERS DETECTED .. doing out-of-band kickstart"
       sudo /home/admin/config.scripts/network.monitor.sh peer-kickstart
     fi
@@ -266,10 +300,10 @@ do
             sudo cp ${localBackupPath} /mnt/backup/
             sudo cp ${localTimestampedPath} /mnt/backup/
 
-            # check reseults
+            # check results
             result=$?
             if [ ${result} -eq 0 ]; then
-              echo "OK - Sucessfull Copy to additional Backup Device"
+              echo "OK - Successful Copy to additional Backup Device"
             else
               echo "FAIL - Copy to additional Backup Device exited with ${result}"
             fi
@@ -282,14 +316,19 @@ do
         # check if a SCP backup target is set
         # parameter in raspiblitz.conf:
         # scpBackupTarget='[USER]@[SERVER]:[DIRPATH-WITHOUT-ENDING-/]'
+        # optionally a custom option string for the scp command can be set with
+        # scpBackupOptions='[YOUR-CUSTOM-OPTIONS]'
         # On target server add the public key of your RaspiBlitz to the authorized_keys for the user
         # https://www.linode.com/docs/security/authentication/use-public-key-authentication-with-ssh/
         if [ ${#scpBackupTarget} -gt 0 ]; then
           echo "--> Offsite-Backup SCP Server"
+          if [ "${scpBackupOptions}" == "" ]; then
+            scpBackupOptions="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+          fi 
           # its ok to ignore known host, because data is encrypted (worst case of MiM would be: no offsite channel backup)
           # but its more likely that without ignoring known host, script might not run thru and that way: no offsite channel backup
-          sudo scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${localBackupPath} ${scpBackupTarget}/
-          sudo scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${localTimestampedPath} ${scpBackupTarget}/
+          sudo scp ${scpBackupOptions} ${localBackupPath} ${scpBackupTarget}/
+          sudo scp ${scpBackupOptions} ${localTimestampedPath} ${scpBackupTarget}/
           result=$?
           if [ ${result} -eq 0 ]; then
             echo "OK - SCP Backup exited with 0"
@@ -354,7 +393,6 @@ do
 
   fi
 
-
   ###############################
   # LND AUTO-UNLOCK
   ###############################
@@ -367,8 +405,8 @@ do
     if [ "${autoUnlock}" = "on" ]; then
 
       # check if lnd is locked
-      locked=$(sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net getinfo 2>&1 | grep -c unlock)
-      if [ ${locked} -gt 0 ]; then
+      source <(/home/admin/config.scripts/lnd.unlock.sh status)
+      if [ "${locked}" != "0" ]; then
 
         echo "STARTING AUTO-UNLOCK ..."
         sudo /home/admin/config.scripts/lnd.unlock.sh
@@ -406,9 +444,10 @@ do
   recheckIBD=$((($counter % 60)+1))
   if [ ${recheckIBD} -eq 1 ]; then
     # check if flag exists (got created on 50syncHDD.sh)
-    flagExists=$(ls /home/admin/selfsync.flag 2>/dev/null | grep -c "selfsync.flag")
+    flagExists=$(ls /mnt/hdd/${network}/blocks/selfsync.flag 2>/dev/null | grep -c "selfsync.flag")
     if [ ${flagExists} -eq 1 ]; then
-      finishedIBD=$(sudo -u bitcoin ${network}-cli getblockchaininfo | grep "initialblockdownload" | grep -c "false")
+      source <(/home/admin/config.scripts/network.aliases.sh getvars)
+      finishedIBD=$($bitcoincli_alias getblockchaininfo | grep "initialblockdownload" | grep -c "false")
       if [ ${finishedIBD} -eq 1 ]; then
 
         echo "CHECK FOR END OF IBD --> reduce RAM, check TOR and restart ${network}d"
@@ -462,13 +501,6 @@ do
 
   # sleep 1 sec
   sleep 1
-
-  # limit counter to max seconds per week:
-  # 604800 = 60sec * 60min * 24hours * 7days
-  if [ ${counter} -gt 604800 ]; then
-    counter=0
-    echo "counter zero reset"
-  fi
 
 done
 

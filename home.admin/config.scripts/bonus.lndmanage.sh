@@ -65,7 +65,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   if [ ${goodSignature} -gt 0 ] && [ ${correctKey} -gt 0 ]; then
     echo "# OK signature is valid"
   else
-    echo "error='unvalid signature'"
+    echo "error='invalid signature'"
     sudo rm -rf /home/admin/lndmanage
     sleep 5
     exit 1
@@ -81,7 +81,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # install lndmanage
   # python3 -m pip install lndmanage==0.11.0
 
-  # check if install was successfull
+  # check if install was successful
   if [ $(python3 -m pip list | grep -c "lndmanage") -eq 0 ]; then
     echo
     echo "#!! FAIL --> Was not able to install LNDMANAGE"

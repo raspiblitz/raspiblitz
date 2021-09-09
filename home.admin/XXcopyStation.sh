@@ -71,7 +71,7 @@ fi
 if [ "$1" != "-foreground" ]; then 
   screenPID=$(screen -ls | grep "copystation" | cut -d "." -f1 | xargs)
   if [ ${#screenPID} -eq 0 ]; then
-    # start copystation in sreen 
+    # start copystation in screen 
     echo "# starting copystation screen session"
     screen -S copystation -dm /home/admin/XXcopyStation.sh -foreground
     screen -d -r
@@ -100,7 +100,7 @@ else
   chmod 777 ${pathTemplateHDD}
 fi
 
-# make sure that lnd is stopped (if runnning)
+# make sure that lnd is stopped (if running)
 systemctl stop lnd 2>/dev/null
 systemctl stop background 2>/dev/null
 
@@ -243,7 +243,7 @@ Please remove device and PRESS ENTER
           if [ "${nointeraction}" != "1" ]; then
             whiptail --title "Format HDD" --yes-button "Format" --no-button "Cancel" --yesno "
 Found new HDD. Do you want to FORMAT now?
-Lable of device with: ${detectedDrive}
+Label of device with: ${detectedDrive}
             " 10 54
             choice=$?
           else
@@ -254,7 +254,7 @@ Lable of device with: ${detectedDrive}
           # on cancel
           if [ "${choice}" != "0" ]; then
             whiptail --title "Format HDD" --msgbox "
-OK NO FORMAT - Please remove decive now.
+OK NO FORMAT - Please remove device now.
             " 8 46
             exit 1
           fi

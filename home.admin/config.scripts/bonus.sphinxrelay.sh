@@ -199,7 +199,7 @@ if [ "$1" = "status" ]; then
     echo "installed=0"
   fi
 
-  localIP=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+  localIP=$(hostname -I | awk '{print $1}')
   echo "localIP='${localIP}'"
   echo "httpsPort='3301'"
   echo "httpPort='3300'"
@@ -263,7 +263,7 @@ if [ "$1" = "status" ]; then
     fi
   fi
 
-  # determnine the public url for the pairing code based on best setup
+  # determine the public url for the pairing code based on best setup
   connection=""
   publicURL=""
 
@@ -411,7 +411,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     if [ "${runBehindTor}" = "on" ]; then
       # make sure to keep in sync with internet.tor.sh script
       /home/admin/config.scripts/internet.hiddenservice.sh sphinxrelay 80 3302 443 3303
-      # get TOR address and store it readable for sphixrelay user
+      # get TOR address and store it readable for sphinxrelay user
       toraddress=$(sudo cat /mnt/hdd/tor/sphinxrelay/hostname 2>/dev/null)
       sudo -u sphinxrelay bash -c "echo '${toraddress}' > /home/sphinxrelay/sphinx-relay/dist/toraddress.txt"
     fi
@@ -441,6 +441,12 @@ TimeoutSec=120
 RestartSec=30
 StandardOutput=journal
 StandardError=journal
+
+# Hardening measures
+PrivateTmp=true
+ProtectSystem=full
+NoNewPrivileges=true
+PrivateDevices=true
 
 [Install]
 WantedBy=multi-user.target

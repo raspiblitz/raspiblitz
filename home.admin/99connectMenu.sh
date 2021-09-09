@@ -9,9 +9,7 @@ source /mnt/hdd/raspiblitz.conf
 source <(/home/admin/config.scripts/internet.sh status local)
 
 # BASIC MENU INFO
-HEIGHT=12
 WIDTH=64
-CHOICE_HEIGHT=6
 BACKTITLE="RaspiBlitz"
 TITLE="Connect Options"
 MENU=""
@@ -20,20 +18,20 @@ OPTIONS=()
 OPTIONS+=(MOBILE "Connect Mobile Wallet")
 if [ "${ElectRS}" == "on" ]; then
   OPTIONS+=(ELECTRS "Electrum Rust Server")
-  HEIGHT=$((HEIGHT+1))
-  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))  
 fi
 if [ "${BTCPayServer}" == "on" ]; then
   OPTIONS+=(BTCPAY "Show LND connection string")
-  HEIGHT=$((HEIGHT+1))
-  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))  
 fi
 OPTIONS+=(${network}RPC "Connect Specter Desktop or JoinMarket")
 OPTIONS+=(BISQ "Connect Bisq to this node")
-OPTIONS+=(EXPORT "Get Macaroons and TLS.cert")
-OPTIONS+=(RESET "Recreate LND Macaroons & tls.cert")
-OPTIONS+=(SYNC "Sync Macaroons & tls.cert with Apps/Users")
+if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
+  OPTIONS+=(EXPORT "Get Macaroons and TLS.cert")
+  OPTIONS+=(RESET "Recreate LND Macaroons & tls.cert")
+  OPTIONS+=(SYNC "Sync Macaroons & tls.cert with Apps/Users")
+fi
 
+CHOICE_HEIGHT=$(("${#OPTIONS[@]}/2+1"))
+HEIGHT=$((CHOICE_HEIGHT+6))
 CHOICE=$(dialog --clear \
                 --backtitle "$BACKTITLE" \
                 --title "$TITLE" \
@@ -58,7 +56,7 @@ case $CHOICE in
   RESET)
     sudo /home/admin/config.scripts/lnd.credentials.sh reset
     sudo /home/admin/config.scripts/lnd.credentials.sh sync
-    sudo /home/admin/XXshutdown.sh reboot
+    sudo /home/admin/config.scripts/blitz.shutdown.sh reboot
     exit 0;;
   SYNC)
     sudo /home/admin/config.scripts/lnd.credentials.sh sync
@@ -166,12 +164,11 @@ HiddenServicePort 8333 127.0.0.1:8333" | sudo tee -a /etc/tor/torrc
     echo "# Running on ${chain}net"
     echo
     localIPrange=$(ip addr | grep 'state UP' -A2 | grep -E -v 'docker0|veth' |\
-    grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' |\
+    grep 'eth0\|wlan0\|enp0\|inet' | tail -n1 | awk '{print $2}' |\
     awk -F. '{print $1"."$2"."$3".0/24"}')
-    localIP=$(ip addr | grep 'state UP' -A2 | grep -E -v 'docker0|veth' |\
-    grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+    localIP=$(hostname -I | awk '{print $1}')
     allowIPrange=$(grep -c "rpcallowip=$localIPrange" <  /mnt/hdd/${network}/${network}.conf)
-    bindIP=$(grep -c "rpcbind=$localIP" <  /mnt/hdd/${network}/${network}.conf)
+    bindIP=$(grep -c "${chain}.rpcbind=$localIP" <  /mnt/hdd/${network}/${network}.conf)
     rpcTorService=$(grep -c "HiddenServicePort ${BITCOINRPCPORT} 127.0.0.1:${BITCOINRPCPORT}"  < /etc/tor/torrc)
     TorRPCaddress=$(sudo cat /mnt/hdd/tor/bitcoin${BITCOINRPCPORT}/hostname)
 
@@ -239,7 +236,7 @@ HiddenServicePort 8333 127.0.0.1:8333" | sudo tee -a /etc/tor/torrc
           restartCore=1
         fi
         if [ $bindIP -eq 0 ]; then
-          echo "rpcbind=$localIP" | sudo tee -a /mnt/hdd/${network}/${network}.conf
+          echo "${chain}.rpcbind=$localIP" | sudo tee -a /mnt/hdd/${network}/${network}.conf
           restartCore=1
         fi
         if [ $restartCore = 1 ];then
@@ -286,7 +283,7 @@ HiddenServicePort 8333 127.0.0.1:8333" | sudo tee -a /etc/tor/torrc
           restartCore=1
         fi
         if [ $bindIP -gt 0 ]; then
-          sudo sed -i "/^rpcbind=$localIP/d" /mnt/hdd/${network}/${network}.conf
+          sudo sed -i "/^${chain}.rpcbind=$localIP/d" /mnt/hdd/${network}/${network}.conf
           restartCore=1
         fi
         if [ $restartCore = 1 ];then

@@ -12,7 +12,7 @@ On MacOS you need to install:
 1. brew: `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"`
 2. packer: `brew install packer`
 3. vagrant: `brew install vagrant`
-4. virtualbox: `brew cask install virtualbox` (maybe re-run after you changed the requested secruity permission to be successfull)
+4. virtualbox: `brew cask install virtualbox` (maybe re-run after you changed the requested security permission to be successful)
 
 ```
 cd alternative.platforms/amd64/packer
