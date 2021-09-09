@@ -32,8 +32,9 @@ if [ ${#openChannels} -gt 0 ] && [ ${openChannels} -gt 0 ]; then
   OPTIONS+=(CLOSEALL "Close all open channels on $CHAIN")
 fi
   OPTIONS+=(CASHOUT "Withdraw all funds onchain ($CHAIN)")
+  OPTIONS+=(SEED "Show Wallet Seed Words")
   OPTIONS+=(CLNREPAIR "Repair options for C-lightning")
-if [ "${lightning}" != "cln" ]; then
+if [ "${lightning}" != "cln" ] && [ "${CHAIN}" == "mainnet" ]; then
   OPTIONS+=(SWITCHLN  "Use C-lightning as default")
 fi  
 
@@ -73,6 +74,9 @@ case $CHOICE in
       ;;
   RECEIVE)
       /home/admin/BBcreateInvoice.sh cln $CHAIN
+      ;;
+  SEED)
+      sudo /home/admin/config.scripts/cln.install.sh display-seed $CHAIN
       ;;
   NAME)
       sudo /home/admin/config.scripts/cln.setname.sh $CHAIN
