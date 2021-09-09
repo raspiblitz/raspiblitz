@@ -323,9 +323,10 @@ if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${keysend}" != "${choice}" ] && [ "${lndNode}" == "on" ]; then
   echo "keysend setting changed .."
   anychange=1
-  needsReboot=1
   sudo -u admin /home/admin/config.scripts/lnd.keysend.sh ${choice}
-  dialog --msgbox "Accept Keysend is now ${choice} after Reboot." 5 46
+  sudo systemctl restart lnd
+  dialog --msgbox "Accept Keysend on LND mainnet is now ${choice}.\n\nLND restarted - you might need to unlock wallet." 7 52
+  sudo -u admin /home/admin/config.scripts/lnd.unlock.sh
 else
   echo "keysend setting unchanged."
 fi
