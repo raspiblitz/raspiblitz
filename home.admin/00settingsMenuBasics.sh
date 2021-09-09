@@ -388,7 +388,7 @@ if [ "${clnNode}" != "${choice}" ]; then
   if [ "${choice}" = "on" ]; then
     echo "# turning ON"
     /home/admin/config.scripts/cln.install.sh on mainnet
-    /home/admin/config.scripts/cln.install.sh display-seed mainnet
+    sudo /home/admin/config.scripts/cln.install.sh display-seed mainnet
     if [ "${testnet}" == "on" ]; then
       /home/admin/config.scripts/cln.install.sh on testnet
     fi

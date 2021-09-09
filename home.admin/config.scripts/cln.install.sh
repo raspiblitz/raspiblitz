@@ -254,8 +254,8 @@ if [ "$1" = "display-seed" ]; then
   echo "# seewordFileExists(${seewordFileExists})"
   if [ "${seedwordFileExists}" == "1" ]; then
     source ${seedwordFile}
-    echo "# seedwords(${seedwords})"
-    echo "# seedwords6x4(${seedwords6x4})"
+    #echo "# seedwords(${seedwords})"
+    #echo "# seedwords6x4(${seedwords6x4})"
     ack=0
     while [ ${ack} -eq 0 ]
     do
