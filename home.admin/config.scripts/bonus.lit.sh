@@ -333,7 +333,10 @@ alias lit-frcli=\"frcli --rpcserver=localhost:8443 \
   fi
 
   # in case RTL is installed - check to connect
-  sudo /home/admin/config.scripts/bonus.rtl.sh connect-services
+  if [ -d /home/rtl ]; then
+    sudo /home/admin/config.scripts/bonus.rtl.sh connect-services
+    sudo systemctl restart RTL 2>/dev/null
+  fi
 
   source /home/admin/raspiblitz.info
   if [ "${state}" == "ready" ]; then
