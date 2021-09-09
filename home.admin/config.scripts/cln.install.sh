@@ -234,6 +234,12 @@ fi
 
 if [ "$1" = "display-seed" ]; then
   
+  # check if sudo
+  if [ "$EUID" -ne 0 ]; then
+    echo "Please run as root (with sudo)"
+    exit 1
+  fi
+
   # get network and aliasses from second parameter (default mainnet)
   displayNetwork=$2
   if [ "${displayNetwork}" == "" ]; then
@@ -242,12 +248,12 @@ if [ "$1" = "display-seed" ]; then
   source <(/home/admin/config.scripts/network.aliases.sh getvars cln $displayNetwork)
 
   # check if seedword file exists
-  seewordFile="/home/bitcoin/.lightning/${CLNETWORK}/seedwords.info"
-  echo "# seewordFile(${seewordFile})"
-  seewordFileExists=$(sudo ls ${seewordFile} 2>/dev/null | grep -c "seedwords.info")
+  seedwordFile="/home/bitcoin/.lightning/${CLNETWORK}/seedwords.info"
+  echo "# seewordFile(${seedwordFile})"
+  seedwordFileExists=$(ls ${seedwordFile} 2>/dev/null | grep -c "seedwords.info")
   echo "# seewordFileExists(${seewordFileExists})"
-  if [ "${seewordFileExists}" == "1" ]; then
-    source ${seewordFile}
+  if [ "${seedwordFileExists}" == "1" ]; then
+    source ${seedwordFile}
     echo "# seedwords(${seedwords})"
     echo "# seedwords6x4(${seedwords6x4})"
     ack=0
