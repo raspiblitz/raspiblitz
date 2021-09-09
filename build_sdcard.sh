@@ -8,9 +8,11 @@
 # setup fresh SD card with image above - login per SSH and run this script:
 ##########################################################################
 
+defaultBranchVersion="v1.7"
+
 echo ""
 echo "*****************************************"
-echo "* RASPIBLITZ SD CARD IMAGE SETUP v1.7.1 *"
+echo "* RASPIBLITZ SD CARD IMAGE SETUP ${defaultBranchVersion}.1 *"
 echo "*****************************************"
 echo "For details on optional parameters - see build script source code:"
 
@@ -64,10 +66,10 @@ echo "3) will use GITHUB-USERNAME --> '${githubUser}'"
 
 # 4th optional parameter: GITHUB-BRANCH
 # -------------------------------------
-# could be any valid branch of the given GITHUB-USERNAME forked raspiblitz repo - 'dev' is default
+# could be any valid branch of the given GITHUB-USERNAME forked raspiblitz repo - take ${defaultBranchVersion} is default
 githubBranch="$4"
 if [ ${#githubBranch} -eq 0 ]; then
-  githubBranch="dev"
+  githubBranch="${defaultBranchVersion}"
 fi
 echo "4) will use GITHUB-BRANCH --> '${githubBranch}'"
 
