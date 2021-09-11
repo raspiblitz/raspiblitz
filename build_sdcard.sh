@@ -875,7 +875,7 @@ fi
 gpg --import ./laanwj-releases.asc
 
 # download signed binary sha256 hash sum file and check
-sudo -u admin wget https://bitcoin.org/bin/bitcoin-core-${bitcoinVersion}/SHA256SUMS.asc
+sudo -u admin wget https://bitcoincore.org/bin/bitcoin-core-${bitcoinVersion}/SHA256SUMS.asc
 verifyResult=$(gpg --verify SHA256SUMS.asc 2>&1)
 goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
 echo "goodSignature(${goodSignature})"
@@ -911,10 +911,10 @@ echo "*** BITCOIN v${bitcoinVersion} for ${bitcoinOSversion} ***"
 # download resources
 binaryName="bitcoin-${bitcoinVersion}-${bitcoinOSversion}.tar.gz"
 if [ ! -f "./${binaryName}" ]; then
-   sudo -u admin wget https://bitcoin.org/bin/bitcoin-core-${bitcoinVersion}/${binaryName}
+   sudo -u admin wget https://bitcoincore.org/bin/bitcoin-core-${bitcoinVersion}/${binaryName}
 fi
 if [ ! -f "./${binaryName}" ]; then
-   echo "!!! FAIL !!! Download BITCOIN BINARY not success."
+   echo "!!! FAIL !!! Could not download the BITCOIN BINARY"
    exit 1
 else
   # check binary checksum test
