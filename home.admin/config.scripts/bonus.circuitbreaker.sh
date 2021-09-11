@@ -1,6 +1,7 @@
 #!/bin/bash
 
-pinnedVersion="v0.2.0"
+# https://github.com/lightningequipment/circuitbreaker/releases
+pinnedVersion="v0.3.0"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then

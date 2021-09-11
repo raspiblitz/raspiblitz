@@ -14,12 +14,14 @@
 - Update: Lightning Terminal v0.5.0-alpha [details](https://github.com/lightninglabs/lightning-terminal/releases/tag/v0.5.0-alpha)
 - Update: Pool CLI v0.5.1-alpha [details](https://github.com/lightninglabs/pool/releases/tag/v0.5.1-alpha)
 - Update: Balance of Satoshis 10.7.8 (BOS) + keep data on reinstall [details](https://github.com/alexbosworth/balanceofsatoshis/blob/master/CHANGELOG.md#version-8010)
+- Update: Circuitbreaker v0.3.0 [details](https://github.com/lightningequipment/circuitbreaker/blob/master/README.md)
 - Update: JoinMarket v0.9.1 [details](https://github.com/JoinMarket-Org/joinmarket-clientserver/#joinmarket-clientserver)
 - Update: JoininBox v0.6.0 [details](https://github.com/openoms/joininbox/tree/master#joininbox)
 - Update: Electrum Server in Rust (electrs) v0.8.11 [details](https://github.com/romanz/electrs/blob/v0.8.11/RELEASE-NOTES.md#0811-18-aug-2021)
 - Update: Mempool 2.2.1 [details](https://github.com/mempool/mempool)
 - Update: BTC-RPC-Explorer v3.2.0 [details](https://github.com/janoside/btc-rpc-explorer/blob/master/CHANGELOG.md#v320)
 - Update: stacking-sats-kraken 0.4.4 [details](https://github.com/dennisreimann/stacking-sats-kraken/blob/master/README.md)
+
 
 ## What's new in Version 1.7.0 of RaspiBlitz?
 
