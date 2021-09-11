@@ -6,7 +6,6 @@
 - New: C-lightningREST v0.5.1 [details](https://github.com/Ride-The-Lightning/c-lightning-REST/releases/tag/v0.5.1)
 - New: CLN plugin: Sparko [details](https://github.com/fiatjaf/sparko)
 - New: Suez - channel visualization for LND and CLN [details](https://github.com/prusnak/suez)
-
 - Update: Bitcoin Core v0.21.1 [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-0.21.1.md)
 - Update: LND v0.13.1 [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.13.1-beta)
 - Update: RTL 0.11.2 [details](https://github.com/Ride-The-Lightning/RTL/releases/tag/v0.11.2)
@@ -18,7 +17,7 @@
 - Update: JoinMarket v0.9.1 [details](https://github.com/JoinMarket-Org/joinmarket-clientserver/#joinmarket-clientserver)
 - Update: JoininBox v0.6.0 [details](https://github.com/openoms/joininbox/tree/master#joininbox)
 - Update: Electrum Server in Rust (electrs) v0.8.11 [details](https://github.com/romanz/electrs/blob/v0.8.11/RELEASE-NOTES.md#0811-18-aug-2021)
-- Update: Mempool 2.2.1 [details](https://github.com/mempool/mempool)
+- Update: Mempool 2.2.2 [details](https://github.com/mempool/mempool)
 - Update: BTC-RPC-Explorer v3.2.0 [details](https://github.com/janoside/btc-rpc-explorer/blob/master/CHANGELOG.md#v320)
 - Update: stacking-sats-kraken 0.4.4 [details](https://github.com/dennisreimann/stacking-sats-kraken/blob/master/README.md)
 
