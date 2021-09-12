@@ -59,7 +59,7 @@ sleep 3
 
 # make sure drives are synced before shutdown
 source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
-if [ ${isBTRFS} -eq 1 ] && [ ${isMounted} -eq 1 ]; then
+if [ "${isBTRFS}" == "1" ] && [ "${isMounted}" == "1" ]; then
   echo "STARTING BTRFS RAID DATA CHECK ..."
   sudo btrfs scrub start /mnt/hdd/
 fi

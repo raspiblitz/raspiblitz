@@ -80,10 +80,6 @@ if [ "${localip:0:4}" = "169." ]; then
 fi
 
 #############################################
-# check WifiConfig
-configWifiExists=$(sudo cat /etc/wpa_supplicant/wpa_supplicant.conf 2>/dev/null| grep -c "network=")
-
-#############################################
 # check for internet connection
 
 # first quick check if bitcoind has peers - if so the client is online
@@ -92,7 +88,7 @@ configWifiExists=$(sudo cat /etc/wpa_supplicant/wpa_supplicant.conf 2>/dev/null|
 source <(/home/admin/config.scripts/network.monitor.sh peer-status cached)
 
 online=0
-if [ "${peers}" != "0" ]; then
+if [ "${peers}" != "0" ] && "${peers}" != ""; then
   # bitcoind has peers - so device is online
   online=1
 fi

@@ -36,7 +36,11 @@ if [ "$1" = "peer-status" ]; then
   running=1
   if [ "$EUID" -eq 0 ]; then
     # sudo call
-    peerNum=$(sudo -u admin $bitcoincli_alias getnetworkinfo 2>/dev/null | grep "connections\"" | tr -cd '[[:digit:]]')
+    running=$(systemctl status bitcoind 2>/dev/null | grep -c "active (running)")
+    peerNum=0
+    if [ "${running}" == "1" ]; then 
+      peerNum=$(sudo -u admin $bitcoincli_alias getnetworkinfo 2>/dev/null | grep "connections\"" | tr -cd '[[:digit:]]')
+    fi
   else
     # user call
     peerNum=$($bitcoincli_alias getnetworkinfo 2>/dev/null | grep "connections\"" | tr -cd '[[:digit:]]')
@@ -51,7 +55,7 @@ if [ "$1" = "peer-status" ]; then
     touch /var/cache/raspiblitz/network.monitor.peer-status.cache
     echo "running=${running}" > /var/cache/raspiblitz/network.monitor.peer-status.cache
     echo "peers=${peerNum}" >> /var/cache/raspiblitz/network.monitor.peer-status.cache
-    sudo chmod 664 /var/cache/raspiblitz/network.monitor.peer-status.cache
+    chmod 664 /var/cache/raspiblitz/network.monitor.peer-status.cache
   fi
 
   # output to user

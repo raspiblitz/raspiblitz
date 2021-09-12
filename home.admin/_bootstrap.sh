@@ -347,6 +347,7 @@ do
     sed -i "s/^state=.*/state=noDHCP/g" ${infoFile}
     sed -i "s/^message=.*/message='Waiting for DHCP'/g" ${infoFile}
   elif [ ${#localip} -eq 0 ]; then
+    configWifiExists=$(sudo cat /etc/wpa_supplicant/wpa_supplicant.conf 2>/dev/null| grep -c "network=")
     if [ ${configWifiExists} -eq 0 ]; then
       # display user to connect LAN
       sed -i "s/^state=.*/state=noIP-LAN/g" ${infoFile}
@@ -626,6 +627,9 @@ if [ ${isMounted} -eq 0 ]; then
   sudo chown root:sudo ${configFile}
   sudo chmod 664 ${configFile}
 
+  # delete provision in progress flag
+  sudo rm /home/admin/provision.flag
+
   # mark provision process done
   sed -i "s/^message=.*/message='Provision Done'/g" ${infoFile}
 
@@ -675,12 +679,10 @@ if [ ${isMounted} -eq 0 ]; then
   ########################################
   # AFTER FINAL SETUP TASKS
 
-  # make sure for future starts that blockchain service gets started after boostrap
+  # make sure for future starts that blockchain service gets started after bootstrap
+  # so deamon reloas needed ... system will go into reboot just in a second
   sed -i "s/^Wants=.*/Wants=bootstrap.service/g" /etc/systemd/system/${network}d.service
   sed -i "s/^After=.*/After=network.target/g" /etc/systemd/system/${network}d.service
-
-  # delete provision in progress flag
-  sudo rm /home/admin/provision.flag
 
   # delete setup data from RAM
   sudo rm ${setupFile}
