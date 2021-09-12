@@ -113,15 +113,14 @@ function encryptHSMsecret() {
   if [ ${#walletPassword} -eq 0 ];then
     # ask for password in dialog if $walletPassword is not given in $3
     sudo /home/admin/config.scripts/blitz.setpassword.sh x \
-      "Enter the password to encrypt the C-lightning wallet file (hsm_secret)" \
-      "$passwordFile"
+     "Enter the password to encrypt the C-lightning wallet file (hsm_secret)" \
+     "$passwordFile"
     sudo chown bitcoin:bitcoin $passwordFile
     sudo chmod 600 $passwordFile
     walletPassword=$(sudo cat $passwordFile)
   fi  
-  (echo $walletPassword; echo $walletPassword) | sudo -u bitcoin \
-    /home/bitcoin/lightning/tools/hsmtool encrypt \
-    $hsmSecretPath || exit 1
+  (echo $walletPassword; echo $walletPassword) | \
+   sudo -u bitcoin lightning-hsmtool encrypt $hsmSecretPath || exit 1
   # setting value in raspiblitz.conf
   sudo sed -i \
     "s/^${netprefix}clnEncryptedHSM=.*/${netprefix}clnEncryptedHSM=on/g" \
@@ -134,9 +133,8 @@ function decryptHSMsecret() {
   # check if encrypted
   trap 'rm -f "$output"' EXIT
   output=$(mktemp -p /dev/shm/)
-  echo "test" | sudo -u bitcoin \
-    /home/bitcoin/lightning/tools/hsmtool decrypt \
-    "$hsmSecretPath" 2> "$output"
+  echo "test" | sudo -u bitcoin lightning-hsmtool decrypt "$hsmSecretPath" \
+   2> "$output"
   if [ "$(grep -c "hsm_secret is not encrypted" < "$output")" -gt 0 ];then
     echo "# The hsm_secret is not encrypted"
     shredPasswordFile
@@ -151,16 +149,14 @@ function decryptHSMsecret() {
     else
       passwordToFile
     fi
-    if sudo cat $passwordFile | sudo -u bitcoin \
-     /home/bitcoin/lightning/tools/hsmtool decrypt \
-     "$hsmSecretPath" ; then
+    if sudo cat $passwordFile | sudo -u bitcoin lightning-hsmtool decrypt \
+     "$hsmSecretPath"; then
       echo "# Decrypted successfully"
     else
       # unlock manually
       /home/admin/config.scripts/cln.hsmtool.sh unlock
       # attempt to decrypt again
-      sudo cat $passwordFile | sudo -u bitcoin \
-       /home/bitcoin/lightning/tools/hsmtool decrypt \
+      sudo cat $passwordFile | sudo -u bitcoin lightning-hsmtool decrypt \
        "$hsmSecretPath" || echo "# Couldn't decrypt"; exit 1
     fi
   fi
@@ -229,10 +225,12 @@ seedwords6x4='${seedwords6x4}'
 
   # pass to 'hsmtool generatehsm hsm_secret'
   if [ ${#seedpassword} -eq 0 ]; then
-    (echo "0"; echo "${seedwords}"; echo) | sudo -u bitcoin /home/bitcoin/lightning/tools/hsmtool "generatehsm" $hsmSecretPath 1>&2
+    (echo "0"; echo "${seedwords}"; echo) | sudo -u bitcoin lightning-hsmtool \
+     "generatehsm" $hsmSecretPath 1>&2
   else
     # pass to 'hsmtool generatehsm hsm_secret' - confirm seedPassword
-    (echo "0"; echo "${seedwords}"; echo "$seedpassword"; echo "$seedpassword") | sudo -u bitcoin /home/bitcoin/lightning/tools/hsmtool "generatehsm" $hsmSecretPath 1>&2
+    (echo "0"; echo "${seedwords}"; echo "$seedpassword"; echo "$seedpassword")\
+     | sudo -u bitcoin lightning-hsmtool "generatehsm" $hsmSecretPath 1>&2
   fi
 
   echo "# Re-init the backup plugin with the new wallet"
