@@ -633,6 +633,11 @@ if [ ${isMounted} -eq 0 ]; then
   # mark provision process done
   sed -i "s/^message=.*/message='Provision Done'/g" ${infoFile}
 
+  # make sure for future starts that blockchain service gets started after bootstrap
+  # so deamon reloas needed ... system will go into reboot after last loop
+  sed -i "s/^Wants=.*/Wants=bootstrap.service/g" /etc/systemd/system/${network}d.service
+  sed -i "s/^After=.*/After=network.target/g" /etc/systemd/system/${network}d.service
+
   # wait until syncProgress is available (neeed for final dialogs)
   while [ "${syncProgress}" == "" ]
   do
@@ -678,11 +683,6 @@ if [ ${isMounted} -eq 0 ]; then
 
   ########################################
   # AFTER FINAL SETUP TASKS
-
-  # make sure for future starts that blockchain service gets started after bootstrap
-  # so deamon reloas needed ... system will go into reboot just in a second
-  sed -i "s/^Wants=.*/Wants=bootstrap.service/g" /etc/systemd/system/${network}d.service
-  sed -i "s/^After=.*/After=network.target/g" /etc/systemd/system/${network}d.service
 
   # delete setup data from RAM
   sudo rm ${setupFile}
