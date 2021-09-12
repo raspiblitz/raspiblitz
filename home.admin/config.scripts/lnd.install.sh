@@ -165,7 +165,7 @@ alias ${netprefix}lncli=\"sudo -u bitcoin /usr/local/bin/lncli\
   if [ "${initwallet}" == "1" ] && [ "${walletExists}" == "0" ]; then
       # only ask on mainnet for passwordC - for the testnet/signet its default 'raspiblitz'
       if [ "${CHAIN}" == "mainnet" ]; then      
-        tempFile="/var/cache/raspiblitz/temp/passwordc.tmp"
+        tempFile="/var/cache/raspiblitz/passwordc.tmp"
         sudo /home/admin/config.scripts/blitz.setpassword.sh x "PASSWORD C - Lightning Wallet Password" ${tempFile}
         passwordC=$(sudo cat ${tempFile})
         sudo rm ${tempFile}
@@ -175,7 +175,8 @@ alias ${netprefix}lncli=\"sudo -u bitcoin /usr/local/bin/lncli\
       source <(sudo /home/admin/config.scripts/lnd.initwallet.py mainnet new ${passwordC})
       if [ "${err}" != "" ]; then
         clear
-        echo "!!! LND mainnet wallet creation failed"
+        echo "# !!! LND mainnet wallet creation failed"
+        echo "# ${err}"
         sleep 6
       else
         seedFile="/mnt/hdd/lnd/data/chain/${network}/${CHAIN}/seedwords.info"
