@@ -88,7 +88,7 @@ fi
 source <(/home/admin/config.scripts/network.monitor.sh peer-status cached)
 
 online=0
-if [ "${peers}" != "0" ] && "${peers}" != ""; then
+if [ "${peers}" != "0" ] && [ "${peers}" != "" ]; then
   # bitcoind has peers - so device is online
   online=1
 fi
