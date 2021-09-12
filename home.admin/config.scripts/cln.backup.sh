@@ -282,9 +282,8 @@ if [ ${mode} = "cln-import-gui" ]; then
   # check if encrypted
   trap 'rm -f "$output"' EXIT
   output=$(mktemp -p /dev/shm/)
-  echo "test" | sudo -u bitcoin \
-    /home/bitcoin/lightning/tools/hsmtool decrypt \
-    "$hsmSecretPath" 2> "$output"
+  echo "test" | sudo -u bitcoin lightning-hsmtool decrypt "$hsmSecretPath" \
+   2> "$output"
   if [ "$(grep -c "hsm_secret is not encrypted" < "$output")" -gt 0 ];then
     echo "# The hsm_secret is not encrypted"
     echo "# Record in raspiblitz.conf"
