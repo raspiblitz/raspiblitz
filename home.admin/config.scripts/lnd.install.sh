@@ -4,7 +4,9 @@
 if [ $# -lt 2 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ];then
   echo
   echo "Install or remove LND services on parallel chains"
-  echo "lnd.install.sh [on|off|display-seed] [mainnet|testnet|signet]"
+  echo "lnd.install.sh on [mainnet|testnet|signet] [?initwallet]"
+  echo "lnd.install.sh off [mainnet|testnet|signet]"
+  echo "lnd.install.sh display-seed [mainnet|testnet|signet] [?delete]"
   echo
   exit 1
 fi
@@ -72,6 +74,12 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "# before activating signet on lnd, first activate signet on bitcoind"
     echo "err='missing bitcoin signet'"
     exit 1
+  fi
+
+  initwallet=0
+  if [ "$3" == "initwallet" ]; then
+    initwallet=1
+    echo "# OK will init wallet if not exists (may ask for passwordc)"
   fi
 
   sudo ufw allow ${portprefix}9735 comment '${netprefix}lnd'
@@ -152,6 +160,30 @@ alias ${netprefix}lncli=\"sudo -u bitcoin /usr/local/bin/lncli\
  -n=${CHAIN} --rpcserver localhost:1${rpcportmod}009\"\
 " | sudo tee -a /home/admin/_aliases
 
+  # if parameter "initwallet" was set and wallet does not exist yet
+  walletExists=$(sudo ls /mnt/hdd/lnd/data/chain/${network}/${CHAIN}/wallet.db | grep -c "wallet.db")
+  if [ "${initwallet}" == "1" ] && [ "${walletExists}" == "0" ]; then
+      # only ask on mainnet for passwordC - for the testnet/signet its default 'raspiblitz'
+      if [ "${CHAIN}" == "mainnet" ]; then      
+        $_temp="/var/cache/raspiblitz/temp/passwordc.tmp"
+        sudo /home/admin/config.scripts/blitz.setpassword.sh x "PASSWORD C - Lightning Wallet Password" $_temp
+        passwordC=$(sudo cat $_temp)
+        sudo rm $_temp
+      else
+        passwordC="raspiblitz"
+      fi
+      source <(sudo /home/admin/config.scripts/lnd.initwallet.py mainnet new ${passwordC})
+      if [ "${err}" != "" ]; then
+        clear
+        echo "!!! LND mainnet wallet creation failed"
+        sleep 6
+      else
+        seedFile="/mnt/hdd/lnd/data/chain/${network}/${CHAIN}/seedwords.info"
+        echo "seedwords='${seedwords}'" > ${seedFile}
+        echo "seedwords6x4='${seedwords6x4}'" >> ${seedFile}
+      fi
+  fi
+
   echo
   echo "# The installed LND version is: $(sudo -u bitcoin /usr/local/bin/lnd --version)"
   echo   
@@ -192,6 +224,12 @@ if [ "$1" = "display-seed" ]; then
     displayNetwork="mainnet"
   fi
 
+  deleteSeedInfoAfterDisplay=0
+  if [ "$3" == "delete" ]; then
+    echo "# deleting seedinfo after display"
+    deleteSeedInfoAfterDisplay=1
+  fi
+
   # check if seedword file exists
   seedwordFile="/mnt/hdd/lnd/data/chain/${network}/${CHAIN}/seedwords.info"
   echo "# seewordFile(${seedwordFile})"
@@ -211,11 +249,14 @@ if [ "$1" = "display-seed" ]; then
         ack=1
       fi
     done
+    if [ "${deleteSeedInfoAfterDisplay}" == "1" ]; then
+      echo "# deleting seed info"
+      sudo shred ${seedwordFile}
+    fi
   else
     walletFile="/mnt/hdd/lnd/data/chain/${network}/${CHAIN}/wallet.db"
     whiptail --title "LND ${displayNetwork} Wallet Info" --msgbox "Your LND ${displayNetwork} wallet was already created before - there are no seed words available.\n\nTo secure your wallet secret you can manually backup the file: ${walletFile}" 11 76
   fi
-
   exit 0
 fi
 

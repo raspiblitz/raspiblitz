@@ -363,13 +363,13 @@ if [ "${lndNode}" != "${choice}" ]; then
   echo "# LND NODE Setting changed .."
   if [ "${choice}" = "on" ]; then
     echo "# turning ON"
-    /home/admin/config.scripts/lnd.install.sh on mainnet
-    sudo /home/admin/config.scripts/lnd.install.sh display-seed mainnet
+    /home/admin/config.scripts/lnd.install.sh on mainnet initwallet
+    sudo /home/admin/config.scripts/lnd.install.sh display-seed mainnet delete
     if [ "${testnet}" == "on" ]; then
-      /home/admin/config.scripts/lnd.install.sh on testnet
+      /home/admin/config.scripts/lnd.install.sh on testnet initwallet
     fi
     if [ "${signet}" == "on" ]; then
-      /home/admin/config.scripts/lnd.install.sh on signet
+      /home/admin/config.scripts/lnd.install.sh on signet initwallet
     fi
   else
     echo "# turning OFF"
@@ -417,8 +417,8 @@ if [ "${testnet}" != "${choice}" ]; then
     /home/admin/config.scripts/bitcoin.install.sh on testnet
     /home/admin/config.scripts/bitcoin.install.sh on signet
     if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
-      /home/admin/config.scripts/lnd.install.sh on testnet
-      /home/admin/config.scripts/lnd.install.sh on signet
+      /home/admin/config.scripts/lnd.install.sh on testnet initwallet
+      /home/admin/config.scripts/lnd.install.sh on signet initwallet
     fi
     if [ "${lightning}" == "cln" ] || [ "${cln}" == "on" ]; then
       /home/admin/config.scripts/cln.install.sh on testnet
