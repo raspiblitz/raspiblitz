@@ -161,14 +161,14 @@ alias ${netprefix}lncli=\"sudo -u bitcoin /usr/local/bin/lncli\
 " | sudo tee -a /home/admin/_aliases
 
   # if parameter "initwallet" was set and wallet does not exist yet
-  walletExists=$(sudo ls /mnt/hdd/lnd/data/chain/${network}/${CHAIN}/wallet.db | grep -c "wallet.db")
+  walletExists=$(sudo ls /mnt/hdd/lnd/data/chain/${network}/${CHAIN}/wallet.db 2>/dev/null | grep -c "wallet.db")
   if [ "${initwallet}" == "1" ] && [ "${walletExists}" == "0" ]; then
       # only ask on mainnet for passwordC - for the testnet/signet its default 'raspiblitz'
       if [ "${CHAIN}" == "mainnet" ]; then      
-        $_temp="/var/cache/raspiblitz/temp/passwordc.tmp"
-        sudo /home/admin/config.scripts/blitz.setpassword.sh x "PASSWORD C - Lightning Wallet Password" $_temp
-        passwordC=$(sudo cat $_temp)
-        sudo rm $_temp
+        tempFile="/var/cache/raspiblitz/temp/passwordc.tmp"
+        sudo /home/admin/config.scripts/blitz.setpassword.sh x "PASSWORD C - Lightning Wallet Password" ${tempFile}
+        passwordC=$(sudo cat ${tempFile})
+        sudo rm ${tempFile}
       else
         passwordC="raspiblitz"
       fi
