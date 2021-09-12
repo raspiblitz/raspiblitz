@@ -365,7 +365,7 @@ elif [ "${abcd}" = "c" ]; then
   sleep 2
 
   err=""
-  source <(sudo /home/admin/config.scripts/lnd.initwallet.py mainnet change-password $oldPassword $newPassword)
+  source <(sudo /home/admin/config.scripts/lnd.initwallet.py change-password mainnet $oldPassword $newPassword)
   if [ "${err}" != "" ]; then
     dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Was not able to change password\n\n${err}\n${errMore}" 10 52
     clear

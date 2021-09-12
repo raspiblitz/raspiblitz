@@ -172,12 +172,13 @@ alias ${netprefix}lncli=\"sudo -u bitcoin /usr/local/bin/lncli\
       else
         passwordC="raspiblitz"
       fi
-      source <(sudo /home/admin/config.scripts/lnd.initwallet.py mainnet new ${passwordC})
+      source <(sudo /home/admin/config.scripts/lnd.initwallet.py new mainnet ${passwordC})
       if [ "${err}" != "" ]; then
         clear
         echo "# !!! LND mainnet wallet creation failed"
         echo "# ${err}"
-        sleep 6
+        echo "# press ENTER to continue"
+        read key
       else
         seedFile="/mnt/hdd/lnd/data/chain/${network}/${CHAIN}/seedwords.info"
         echo "seedwords='${seedwords}'" > ${seedFile}
