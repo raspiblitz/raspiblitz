@@ -275,7 +275,7 @@ if [ "${lightning}" == "lnd" ]; then
 
     echo "WALLET --> SEED + SCB " >> ${logFile}
     sudo sed -i "s/^message=.*/message='LND Wallet (SEED & SCB)'/g" ${infoFile}    
-    sudo /home/admin/config.scripts/lnd.initwallet.py scb ${passwordC} "${seedWords}" "${staticchannelbackup}" ${seedPassword}
+    sudo /home/admin/config.scripts/lnd.initwallet.py mainnet scb ${passwordC} "${seedWords}" "${staticchannelbackup}" ${seedPassword}
     if [ "${err}" != "" ]; then
       sed -i "s/^state=.*/state=error/g" ${infoFile}
       sed -i "s/^message=.*/message='setup: lnd wallet SCB failed'/g" ${infoFile}
@@ -291,7 +291,7 @@ if [ "${lightning}" == "lnd" ]; then
     
     echo "WALLET --> SEED" >> ${logFile}
     sudo sed -i "s/^message=.*/message='LND Wallet (SEED)'/g" ${infoFile}    
-    sudo /home/admin/config.scripts/lnd.initwallet.py seed ${passwordC} "${seedWords}" ${seedPassword}
+    sudo /home/admin/config.scripts/lnd.initwallet.py mainnet seed ${passwordC} "${seedWords}" ${seedPassword}
     if [ "${err}" != "" ]; then
       sed -i "s/^state=.*/state=error/g" ${infoFile}
       sed -i "s/^message=.*/message='setup: lnd wallet SEED failed'/g" ${infoFile}
@@ -307,7 +307,7 @@ if [ "${lightning}" == "lnd" ]; then
 
     echo "WALLET --> NEW" >> ${logFile}
     sudo sed -i "s/^message=.*/message='LND Wallet (NEW)'/g" ${infoFile}    
-    source <(sudo /home/admin/config.scripts/lnd.initwallet.py new ${passwordC})
+    source <(sudo /home/admin/config.scripts/lnd.initwallet.py mainnet new ${passwordC})
     if [ "${err}" != "" ]; then
       sed -i "s/^state=.*/state=error/g" ${infoFile}
       sed -i "s/^message=.*/message='setup: lnd wallet SEED failed'/g" ${infoFile}

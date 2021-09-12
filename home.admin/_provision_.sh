@@ -786,7 +786,7 @@ if [ "${lightning}" == "lnd" ];then
   if [ "${passwordFlagExists}" == "1" ]; then
     echo "Found /mnt/hdd/passwordc.flag .. changing password" >> ${logFile}
     oldPasswordC=$(sudo cat /mnt/hdd/passwordc.flag)
-    sudo /home/admin/config.scripts/lnd.initwallet.py change-password "${oldPasswordC}" "${passwordC}" >> ${logFile}
+    sudo /home/admin/config.scripts/lnd.initwallet.py mainnet change-password "${oldPasswordC}" "${passwordC}" >> ${logFile}
     sudo shred -u /mnt/hdd/passwordc.flag    
   else
     echo "No /mnt/hdd/passwordc.flag" >> ${logFile}

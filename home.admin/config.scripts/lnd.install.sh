@@ -4,7 +4,7 @@
 if [ $# -lt 2 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ];then
   echo
   echo "Install or remove LND services on parallel chains"
-  echo "lnd.install.sh [on|off] [mainnet|testnet|signet]"
+  echo "lnd.install.sh [on|off|display-seed] [mainnet|testnet|signet]"
   echo
   exit 1
 fi
@@ -57,7 +57,6 @@ source /home/admin/raspiblitz.info
 if ! grep -Eq "^${netprefix}lnd=" /mnt/hdd/raspiblitz.conf; then
   echo "${netprefix}lnd=off" >> /mnt/hdd/raspiblitz.conf
 fi
-
 source /mnt/hdd/raspiblitz.conf
 
 # switch on
@@ -174,6 +173,47 @@ alias ${netprefix}lncli=\"sudo -u bitcoin /usr/local/bin/lncli\
   if [ "${CHAIN}" == "mainnet" ] && [ "${lightning}" == "" ]; then
     echo "# LND is now default lighthning implementation"
     sudo sed -i "s/^lightning=.*/lightning=lnd/g" /mnt/hdd/raspiblitz.conf
+  fi
+
+  exit 0
+fi
+
+if [ "$1" = "display-seed" ]; then
+  
+  # check if sudo
+  if [ "$EUID" -ne 0 ]; then
+    echo "Please run as root (with sudo)"
+    exit 1
+  fi
+
+  # get network and aliasses from second parameter (default mainnet)
+  displayNetwork=$2
+  if [ "${displayNetwork}" == "" ]; then
+    displayNetwork="mainnet"
+  fi
+
+  # check if seedword file exists
+  seedwordFile="/mnt/hdd/lnd/data/chain/${network}/${CHAIN}/seedwords.info"
+  echo "# seewordFile(${seedwordFile})"
+  seedwordFileExists=$(ls ${seedwordFile} 2>/dev/null | grep -c "seedwords.info")
+  echo "# seewordFileExists(${seewordFileExists})"
+  if [ "${seedwordFileExists}" == "1" ]; then
+    source ${seedwordFile}
+    #echo "# seedwords(${seedwords})"
+    #echo "# seedwords6x4(${seedwords6x4})"
+    ack=0
+    while [ ${ack} -eq 0 ]
+    do
+      whiptail --title "LND ${displayNetwork} Wallet" \
+        --msgbox "This is your LND ${displayNetwork} wallet seed. Store these numbered words in a safe location:\n\n${seedwords6x4}" 13 76
+      whiptail --title "Please Confirm" --yes-button "Show Again" --no-button "CONTINUE" --yesno "  Are you sure that you wrote down the word list?" 8 55
+      if [ $? -eq 1 ]; then
+        ack=1
+      fi
+    done
+  else
+    walletFile="/mnt/hdd/lnd/data/chain/${network}/${CHAIN}/wallet.db"
+    whiptail --title "LND ${displayNetwork} Wallet Info" --msgbox "Your LND ${displayNetwork} wallet was already created before - there are no seed words available.\n\nTo secure your wallet secret you can manually backup the file: ${walletFile}" 11 76
   fi
 
   exit 0

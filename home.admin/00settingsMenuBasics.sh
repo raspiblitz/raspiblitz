@@ -364,6 +364,7 @@ if [ "${lndNode}" != "${choice}" ]; then
   if [ "${choice}" = "on" ]; then
     echo "# turning ON"
     /home/admin/config.scripts/lnd.install.sh on mainnet
+    sudo /home/admin/config.scripts/lnd.install.sh display-seed mainnet
     if [ "${testnet}" == "on" ]; then
       /home/admin/config.scripts/lnd.install.sh on testnet
     fi
