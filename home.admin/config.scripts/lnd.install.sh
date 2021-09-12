@@ -166,7 +166,7 @@ alias ${netprefix}lncli=\"sudo -u bitcoin /usr/local/bin/lncli\
       # only ask on mainnet for passwordC - for the testnet/signet its default 'raspiblitz'
       if [ "${CHAIN}" == "mainnet" ]; then      
         tempFile="/var/cache/raspiblitz/passwordc.tmp"
-        sudo /home/admin/config.scripts/blitz.setpassword.sh x "PASSWORD C - Lightning Wallet Password" ${tempFile}
+        sudo /home/admin/config.scripts/blitz.setpassword.sh x "PASSWORD C - LND Wallet Password" ${tempFile}
         passwordC=$(sudo cat ${tempFile})
         sudo rm ${tempFile}
       else
