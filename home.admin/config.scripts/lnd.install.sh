@@ -13,12 +13,8 @@ fi
 
 # CHAIN is signet | testnet | mainnet
 CHAIN=$2
-if [ ${CHAIN} = testnet ]||[ ${CHAIN} = mainnet ];then
+if [ ${CHAIN} = testnet ]||[ ${CHAIN} = mainnet ]||[ ${CHAIN} = signet ];then
   echo "# Configuring the LND instance on ${CHAIN}"
-elif [ ${CHAIN} = signet ]; then
-  echo "# Signet is not yet supported in LND"
-  echo "# see https://github.com/lightningnetwork/lnd/issues/5018"
-  exit 1
 else
   echo "# ${CHAIN} is not supported"
   exit 1
