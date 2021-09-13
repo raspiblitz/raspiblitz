@@ -193,8 +193,8 @@ alias ${netprefix}lncli=\"sudo -u bitcoin /usr/local/bin/lncli\
         read key
       else
         seedFile="/mnt/hdd/lnd/data/chain/${network}/${CHAIN}/seedwords.info"
-        echo "seedwords='${seedwords}'" > ${seedFile}
-        echo "seedwords6x4='${seedwords6x4}'" >> ${seedFile}
+        echo "seedwords='${seedwords}'" | sudo tee ${seedFile}
+        echo "seedwords6x4='${seedwords6x4}'" | sudo tee -a ${seedFile}
       fi
   fi
 
