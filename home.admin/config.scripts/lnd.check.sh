@@ -188,8 +188,8 @@ if [ "$1" == "prestart" ]; then
 " | tee -a ${lndConfFile}
     fi
 
-    setting ${lndConfFile} ${insertLine} "tor.control" "9071"
-    setting ${lndConfFile} ${insertLine} "tor.socks" "9070"
+    setting ${lndConfFile} ${insertLine} "tor.control" "9051"
+    setting ${lndConfFile} ${insertLine} "tor.socks" "9050"
     setting ${lndConfFile} ${insertLine} "tor.privatekeypath" "\/mnt\/hdd\/lnd\/${netprefix}v3_onion_private_key"
     setting ${lndConfFile} ${insertLine} "tor.streamisolation" "true"
     setting ${lndConfFile} ${insertLine} "tor.v3" "true"

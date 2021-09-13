@@ -269,8 +269,6 @@ def main():
         grpcEndpoint="localhost:11009"
     elif network == "signet":
         grpcEndpoint="localhost:13009"
-        print("err='lnd does not support signet yet'")
-        sys.exit(1)
     else:
         print("err='chain not supported'")
         sys.exit(1)

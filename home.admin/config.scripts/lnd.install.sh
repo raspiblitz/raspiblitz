@@ -13,12 +13,8 @@ fi
 
 # CHAIN is signet | testnet | mainnet
 CHAIN=$2
-if [ ${CHAIN} = testnet ]||[ ${CHAIN} = mainnet ];then
+if [ ${CHAIN} = testnet ]||[ ${CHAIN} = mainnet ]||[ ${CHAIN} = signet ];then
   echo "# Configuring the LND instance on ${CHAIN}"
-elif [ ${CHAIN} = signet ]; then
-  echo "# Signet is not yet supported in LND"
-  echo "# see https://github.com/lightningnetwork/lnd/issues/5018"
-  exit 1
 else
   echo "# ${CHAIN} is not supported"
   exit 1
@@ -85,6 +81,18 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo ufw allow ${portprefix}9735 comment '${netprefix}lnd'
   sudo ufw allow ${portprefix}8080 comment '${netprefix}lnd REST'
   sudo ufw allow 1${rpcportmod}009 comment '${netprefix}lnd RPC'
+
+  echo "# Prepare directories"
+  if [ ! -d /mnt/hdd/lnd ]; then
+    echo "# Creating /mnt/hdd/lnd"
+    sudo mkdir /mnt/hdd/lnd
+  fi
+  sudo chown -R bitcoin:bitcoin /mnt/hdd/lnd
+  if [ ! -L /home/bitcoin/.lnd ];then
+    echo "# Linking lnd for user bitcoin"
+    sudo rm /home/bitcoin/.lnd 2>/dev/null
+    sudo ln -s /mnt/hdd/lnd /home/bitcoin/.lnd
+  fi
 
   echo "# Create /home/bitcoin/.lnd/${netprefix}lnd.conf"
   if [ ! -f /home/bitcoin/.lnd/${netprefix}lnd.conf ];then
@@ -172,17 +180,17 @@ alias ${netprefix}lncli=\"sudo -u bitcoin /usr/local/bin/lncli\
       else
         passwordC="raspiblitz"
       fi
-      source <(sudo /home/admin/config.scripts/lnd.initwallet.py new mainnet ${passwordC})
+      source <(sudo /home/admin/config.scripts/lnd.initwallet.py new ${CHAIN} ${passwordC})
       if [ "${err}" != "" ]; then
         clear
-        echo "# !!! LND mainnet wallet creation failed"
+        echo "# !!! LND ${CHAIN} wallet creation failed"
         echo "# ${err}"
         echo "# press ENTER to continue"
         read key
       else
         seedFile="/mnt/hdd/lnd/data/chain/${network}/${CHAIN}/seedwords.info"
-        echo "seedwords='${seedwords}'" > ${seedFile}
-        echo "seedwords6x4='${seedwords6x4}'" >> ${seedFile}
+        echo "seedwords='${seedwords}'" | sudo tee ${seedFile}
+        echo "seedwords6x4='${seedwords6x4}'" | sudo tee -a ${seedFile}
       fi
   fi
 
