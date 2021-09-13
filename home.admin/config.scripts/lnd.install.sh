@@ -86,6 +86,18 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo ufw allow ${portprefix}8080 comment '${netprefix}lnd REST'
   sudo ufw allow 1${rpcportmod}009 comment '${netprefix}lnd RPC'
 
+  echo "# Prepare directories"
+  if [ ! -d /mnt/hdd/lnd ]; then
+    echo "# Creating /mnt/hdd/lnd"
+    sudo mkdir /mnt/hdd/lnd
+  fi
+  sudo chown -R bitcoin:bitcoin /mnt/hdd/lnd
+  if [ ! -L /home/bitcoin/.lnd ];then
+    echo "# Linking lnd for user bitcoin"
+    sudo rm /home/bitcoin/.lnd 2>/dev/null
+    sudo ln -s /mnt/hdd/lnd /home/bitcoin/.lnd
+  fi
+
   echo "# Create /home/bitcoin/.lnd/${netprefix}lnd.conf"
   if [ ! -f /home/bitcoin/.lnd/${netprefix}lnd.conf ];then
     echo "# LND configuration
