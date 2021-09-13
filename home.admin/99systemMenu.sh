@@ -162,7 +162,7 @@ case $CHOICE in
 btc-rpc-explorer, btcpayserver, circuitbreaker,
 specter, getty@tty1, electrs, litd,
 lnbits, mempool, nbxlorer, nginx, RTL, telegraf,
-thunderhub, tor@default, tor@lnd, tor
+thunderhub, tor@default, tor
 "
     echo "Type the name of the service you would like to monitor:"  
     read SERVICE
@@ -180,7 +180,7 @@ thunderhub, tor@default, tor@lnd, tor
 btc-rpc-explorer, btcpayserver, circuitbreaker,
 specter, getty@tty1, electrs, litd,
 lnbits, mempool, nbxlorer, nginx, RTL, telegraf,
-thunderhub, tor@default, tor@lnd, tor
+thunderhub, tor@default, tor
 "
     echo "Type the name of the service you would like to restart:" 
     read SERVICE
