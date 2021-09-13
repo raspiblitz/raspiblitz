@@ -184,10 +184,10 @@ alias ${netprefix}lncli=\"sudo -u bitcoin /usr/local/bin/lncli\
       else
         passwordC="raspiblitz"
       fi
-      source <(sudo /home/admin/config.scripts/lnd.initwallet.py new mainnet ${passwordC})
+      source <(sudo /home/admin/config.scripts/lnd.initwallet.py new ${CHAIN} ${passwordC})
       if [ "${err}" != "" ]; then
         clear
-        echo "# !!! LND mainnet wallet creation failed"
+        echo "# !!! LND ${CHAIN} wallet creation failed"
         echo "# ${err}"
         echo "# press ENTER to continue"
         read key
