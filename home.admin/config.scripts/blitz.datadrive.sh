@@ -82,7 +82,13 @@ if [ "$1" = "status" ]; then
     # will then be used to offer formatting and permanent mounting
     hdd=""
     sizeDataPartition=0
-    OSPartition=$(sudo df /usr | grep dev | cut -d " " -f 1 | sed "s/\/dev\///g")
+    OSPartition=$(sudo df /usr | grep dev | cut -d " " -f 1 | sed "s#/dev/##g")
+    # detect boot partition on UEFI systems
+    bootPartition=$(sudo df /boot/efi | grep dev | cut -d " " -f 1 | sed "s#/dev/##g")
+    if [ ${#bootPartition} -eq 0 ]; then
+      # for non UEFI
+      bootPartition=$(sudo df /boot | grep dev | cut -d " " -f 1 | sed "s#/dev/##g")
+    fi
     lsblk -o NAME,SIZE -b | grep -P "[s|vn][dv][a-z][0-9]?" > .lsblk.tmp
     while read line; do
 
@@ -110,11 +116,12 @@ if [ "$1" = "status" ]; then
       #echo "# testpartitioncount($testpartitioncount)"
       #echo "# testpartitioncount(${testpartitioncount})"
       #echo "# OSPartition(${OSPartition})"
+      #echo "# bootPartition(${bootPartition})"
       #echo "# hdd(${hdd})"
 
       if [ $testpartitioncount -gt 0 ]; then
-         # if a partition was found - make sure to skip OS partition
-         if [ "$testpartition" != "$OSPartition" ]; then
+         # if a partition was found - make sure to skip the OS and boot partitions
+         if [ "$testpartition" != "$OSPartition" ] && [ "$testpartition" != "$bootPartition" ]; then
             # make sure to use the biggest
             if [ ${testsize} -gt ${sizeDataPartition} ]; then
                sizeDataPartition=${testsize}
