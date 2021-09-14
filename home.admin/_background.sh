@@ -368,6 +368,18 @@ do
           fi
         fi
 
+        # check if Nextcloud backups are enabled
+        if [ $nextcloudBackupServer ] && [ $nextcloudBackupUser ] && [ $nextcloudBackupPassword ]; then
+          echo "--> Offsite-Backup Nextcloud"
+          source <(sudo /home/admin/config.scripts/nextcloud.upload.sh upload ${localBackupPath})
+          source <(sudo /home/admin/config.scripts/nextcloud.upload.sh upload ${localTimestampedPath})
+          if [ ${#err} -gt 0 ]; then
+            echo "FAIL -  ${err}"
+          else
+            echo "OK - ${upload}"
+          fi
+        fi
+
       #else
       #  echo "Channel Backup File not changed."
       fi

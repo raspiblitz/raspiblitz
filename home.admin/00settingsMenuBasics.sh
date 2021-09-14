@@ -32,6 +32,10 @@ echo "# map dropboxbackup to on/off"
 DropboxBackup="off"
 if [ ${#dropboxBackupTarget} -gt 0 ]; then DropboxBackup="on"; fi
 
+echo "map nextcloudbackup to on/off"
+NextcloudBackup="off"
+if [ $nextcloudBackupServer ] && [ $nextcloudBackupUser ] && [ $nextcloudBackupPassword ]; then NextcloudBackup="on"; fi
+
 echo "# map localbackup to on/off"
 LocalBackup="off"
 if [ ${#localBackupDeviceUUID} -gt 0 ] && [ "${localBackupDeviceUUID}" != "off" ]; then LocalBackup="on"; fi
@@ -110,6 +114,7 @@ if [ "${lndNode}" == "on" ]; then
   OPTIONS+=(k '-LND Accept Keysend' ${keysend})  
   OPTIONS+=(c '-LND Circuitbreaker (firewall)' ${circuitbreaker})  
   OPTIONS+=(u '-LND Auto-Unlock' ${autoUnlock})  
+  OPTIONS+=(x '-LND StaticChannelBackup on Nextcloud' ${NextcloudBackup})
   OPTIONS+=(d '-LND StaticChannelBackup DropBox' ${DropboxBackup})
   OPTIONS+=(e '-LND StaticChannelBackup USB Drive' ${LocalBackup})
   OPTIONS+=(l '-LND UPnP (AutoNAT)' ${autoNatDiscovery})
@@ -304,6 +309,22 @@ if [ "${DropboxBackup}" != "${choice}" ] && [ "${lndNode}" == "on" ]; then
   fi
 else
   echo "Dropbox backup setting unchanged."
+fi
+
+# Nextcloud process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "x")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${NextcloudBackup}" != "${choice}" ]; then
+  echo "Nextcloud Setting changed .."
+  anychange=1
+  sudo -u admin /home/admin/config.scripts/nextcloud.upload.sh ${choice}
+  if [ "${choice}" =  "on" ]; then
+    # doing initial upload so that user can see result
+    source /mnt/hdd/raspiblitz.conf
+    sudo /home/admin/config.scripts/nextcloud.upload.sh upload /mnt/hdd/lnd/data/chain/${network}/${chain}net/channel.backup
+  fi
+else
+  echo "Nextcloud backup setting unchanged."
 fi
 
 # LocalBackup process choice
