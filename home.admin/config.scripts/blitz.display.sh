@@ -211,7 +211,7 @@ if [ "${command}" == "hdmi" ]; then
   elif [ "${secondParameter}" == "off" ]; then
     sudo /home/admin/config.scripts/blitz.display.sh set-display lcd
   else
-    echo "error='unkown second parameter'"
+    echo "error='unknown second parameter'"
     exit 1
   fi
   exit 0
@@ -220,7 +220,7 @@ fi
 #######################################
 # DISPLAY TYPED INSTALLS & UN-INSTALLS
 # HDMI is the default - every added
-# displayClass needs a install fuction
+# displayClass needs a install function
 # and a uninstall function back to HDMI
 #######################################
 
@@ -237,6 +237,12 @@ function install_lcd() {
   if [ "${baseimage}" = "raspios_arm64"  ] || [ "${baseimage}" = "debian_rpi64" ]; then
 
     echo "# INSTALL 64bit LCD DRIVER"
+
+    # set font
+    sudo sed -i "s/^CHARMAP=.*/CHARMAP=\"UTF-8\"/" /etc/default/console-setup
+    sudo sed -i "s/^CODESET=.*/CODESET=\"guess\"/" /etc/default/console-setup 
+    sudo sed -i "s/^FONTFACE=.*/FONTFACE=\"TerminusBoldVGA\"/" /etc/default/console-setup
+    sudo sed -i "s/^FONTSIZE=.*/FONTSIZE=\"8x16\"/" /etc/default/console-setup 
 
     # hold bootloader
     sudo apt-mark hold raspberrypi-bootloader
@@ -261,6 +267,8 @@ function install_lcd() {
 
     # modify /boot/config.txt 
     sudo sed -i "s/^hdmi_force_hotplug=.*//g" /boot/config.txt 
+    sudo sed -i '/^hdmi_group=/d' /boot/config.txt 2>/dev/null
+    sudo sed -i "/^hdmi_mode=/d" /boot/config.txt 2>/dev/null
     #echo "hdmi_force_hotplug=1" >> /boot/config.txt
     sudo sed -i "s/^dtparam=i2c_arm=.*//g" /boot/config.txt 
     # echo "dtparam=i2c_arm=on" >> /boot/config.txt --> this is to be called I2C errors - see: https://github.com/rootzoll/raspiblitz/issues/1058#issuecomment-739517713
@@ -282,7 +290,7 @@ function install_lcd() {
     fi
     containsModification=$(sudo grep -c "${modification}" /boot/cmdline.txt)
     if [ ${containsModification} -eq 0 ]; then
-      echo "# FAIL: was not able to mofify /boot/cmdline.txt"
+      echo "# FAIL: was not able to modify /boot/cmdline.txt"
       echo "err='ended unclear state'"
       exit 1
     fi
@@ -321,7 +329,11 @@ function uninstall_lcd() {
 
     # remove modifications of config.txt
     sudo sed -i '/^hdmi_force_hotplug=/d' /boot/config.txt 2>/dev/null
-    sudo sed -i "s/^dtoverlay=.*//g" /boot/config.txt 
+    sudo sed -i '/^hdmi_group=/d' /boot/config.txt 2>/dev/null
+    sudo sed -i "/^hdmi_mode=/d" /boot/config.txt 2>/dev/null
+    sudo sed -i "s/^dtoverlay=.*//g" /boot/config.txt 2>/dev/null
+    echo "hdmi_group=1" >> /boot/config.txt
+    echo "hdmi_mode=3" >> /boot/config.txt
     echo "dtoverlay=pi3-disable-bt" >> /boot/config.txt
     echo "dtoverlay=disable-bt" >> /boot/config.txt
 
@@ -394,7 +406,7 @@ function install_lcd_legacy() {
     # add waveshare mod
     sudo cp ./waveshare35a.dtbo /boot/overlays/
 
-    # modify /boot/config.txt 
+    # modify /boot/config.txt
     sudo sed -i "s/^hdmi_force_hotplug=.*//g" /boot/config.txt 
     #echo "hdmi_force_hotplug=1" >> /boot/config.txt
     sudo sed -i "s/^dtparam=i2c_arm=.*//g" /boot/config.txt 
@@ -554,5 +566,5 @@ if [ "${command}" == "set-display" ]; then
 fi
 
 # unknown command
-echo "error='unkown command'"
+echo "error='unknown command'"
 exit 1

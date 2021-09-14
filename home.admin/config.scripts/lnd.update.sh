@@ -18,14 +18,14 @@ mode="$1"
 
 # RECOMMENDED UPDATE BY RASPIBLITZ TEAM
 # comment will be shown as "BEWARE Info" when option is choosen (can be multiple lines) 
-lndUpdateVersion="0.12.1-beta"
+lndUpdateVersion="" # example: 0.13.2-beta .. keep empty if no newer version as sd card build is available
 lndUpdateComment="Please keep in mind that downgrading afterwards is not tested. Also not all additional apps are fully tested with the this update - but it looked good on first tests."
 
 # check who signed the release in https://github.com/lightningnetwork/lnd/releases
 # olaoluwa
-# PGPauthor="roasbeef"
-# lndUpdatePGPpkeys="https://keybase.io/roasbeef/pgp_keys.asc"
-# lndUpdatePGPcheck="9769140D255C759B1EB77B46A96387A57CAAE94D"
+PGPauthor="roasbeef"
+lndUpdatePGPpkeys="https://keybase.io/roasbeef/pgp_keys.asc"
+lndUpdatePGPcheck="4AB7F8DA6FAEBB3B70B1F903BC13F65E2DC84465"
 
 #joostjager
 # PGPauthor="joostjager"
@@ -33,9 +33,9 @@ lndUpdateComment="Please keep in mind that downgrading afterwards is not tested.
 # lndUpdatePGPcheck="D146D0F68939436268FA9A130E26BB61B76C4D3A"
 
 # bitconner 
-PGPauthor="bitconner"
-lndUpdatePGPpkeys="https://keybase.io/bitconner/pgp_keys.asc"
-lndUpdatePGPcheck="9C8D61868A7C492003B2744EE7D737B67FA592C7"
+# PGPauthor="bitconner"
+# lndUpdatePGPpkeys="https://keybase.io/bitconner/pgp_keys.asc"
+# lndUpdatePGPcheck="9C8D61868A7C492003B2744EE7D737B67FA592C7"
 
 # wpaulino
 # PGPauthor="wpaulino"
@@ -112,6 +112,7 @@ if [ "${mode}" = "verified" ]; then
     if [ "${fixedUpdateVersion}" != "${lndUpdateVersion}" ]; then
       echo "warn='required update version does not match'"
       echo "# this is normal when the recovery script of a new RaspiBlitz version checks for an old update - just ignore"
+      sed -i '/^lndInterimsUpdate=*/d' /mnt/hdd/raspiblitz.conf
       exit 1
     else
       echo "# OK - update version is matching"
@@ -168,7 +169,7 @@ if [ "${mode}" = "verified" ]; then
   echo "fingerprint='${fingerprint}'"
 
   echo 
-  echo "# checking gpg finger print"
+  echo "# checking PGP finger print"
   gpg --import ./pgp_keys.asc
   sleep 3
   verifyResult=$(gpg --verify manifest-${PGPauthor}-v${lndUpdateVersion}.sig manifest-v${lndUpdateVersion}.txt 2>&1)

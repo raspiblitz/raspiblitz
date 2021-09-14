@@ -144,15 +144,15 @@ if [ "$1" = "send" ]; then
 
   # now parse settings from config and use to send the message
   if [ "${notifyMethod}" = "ext" ]; then
-    /usr/bin/python3 /home/admin/XXsendNotification.py ext ${notifyExtCmd} "$2"
+    /usr/bin/python3 /home/admin/config.scripts/blitz.sendnotification.py ext ${notifyExtCmd} "$2"
   elif [ "${notifyMethod}" = "mail" ]; then
     if [ "${notifyMailEncrypt}" = "on" ]; then
-      /usr/bin/python3 /home/admin/XXsendNotification.py mail --from-address "${notifyMailFromAddress}" --from-name "${notifyMailFromName}" --cert "${notifyMailToCert}" --encrypt ${notifyMailTo} "${@:3}" "$2"
+      /usr/bin/python3 /home/admin/config.scripts/blitz.sendnotification.py mail --from-address "${notifyMailFromAddress}" --from-name "${notifyMailFromName}" --cert "${notifyMailToCert}" --encrypt ${notifyMailTo} "${@:3}" "$2"
     else
-      /usr/bin/python3 /home/admin/XXsendNotification.py mail --from-address "${notifyMailFromAddress}" --from-name "${notifyMailFromName}" "${notifyMailTo}" "${@:3}" "$2"
+      /usr/bin/python3 /home/admin/config.scripts/blitz.sendnotification.py mail --from-address "${notifyMailFromAddress}" --from-name "${notifyMailFromName}" "${notifyMailTo}" "${@:3}" "$2"
     fi
   elif [ "${notifyMethod}" = "slack" ]; then
-    /usr/bin/python3 /home/admin/XXsendNotification.py slack -h "$2"
+    /usr/bin/python3 /home/admin/config.scripts/blitz.sendnotification.py slack -h "$2"
   else
     echo "unknown notification method - check /mnt/hdd/raspiblitz.conf"
   fi

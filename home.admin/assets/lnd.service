@@ -9,20 +9,24 @@ After=bitcoind.service
 #OnFailure=systemd-sendmail@%n
 
 [Service]
-EnvironmentFile=/mnt/hdd/raspiblitz.conf
-ExecStartPre=-/home/admin/config.scripts/blitz.systemd.sh log lightning STARTED
-ExecStart=/usr/local/bin/lnd --externalip=${publicIP}:${lndPort} ${lndExtraParameter}
+ExecStartPre=-/home/admin/config.scripts/lnd.check.sh prestart mainnet
+ExecStart=/usr/local/bin/lnd --configfile=/home/bitcoin/.lnd/lnd.conf
 PIDFile=/home/bitcoin/.lnd/lnd.pid
 User=bitcoin
 Group=bitcoin
 LimitNOFILE=128000
 Type=simple
-KillMode=process
 TimeoutSec=180
 Restart=always
 RestartSec=60
 StandardOutput=null
 StandardError=journal
+
+# Hardening measures
+PrivateTmp=true
+ProtectSystem=full
+NoNewPrivileges=true
+PrivateDevices=true
 
 [Install]
 WantedBy=multi-user.target

@@ -22,16 +22,17 @@ ACME_CERT_HOME="${ACME_CONFIG_HOME}/certs"
 ACME_IS_INSTALLED=0
 
 # if Tor is on test that CURL is by default running over Tor
-if [ "${runBehindTor}" == "on" ]; then
-  echo "# checking if Tor proxy for CURL is working ..."
-  checkTor=$(curl -s https://check.torproject.org | grep -c "Congratulations")
-  if [ ${checkTor} -eq 0 ]; then
-    echo "err='curl tor proxy not working'"
-    exit 1
-  else
-    echo "# OK Tor proxy for CURL"
-  fi
-fi
+# TODO: issue https://github.com/rootzoll/raspiblitz/issues/1341
+#if [ "${runBehindTor}" == "on" ]; then
+#  echo "# checking if Tor proxy for CURL is working ..."
+#  checkTor=$(curl -s https://check.torproject.org | grep -c "Congratulations")
+#  if [ ${checkTor} -eq 0 ]; then
+#    echo "err='curl tor proxy not working'"
+#    exit 1
+#  else
+#    echo "# OK Tor proxy for CURL"
+#  fi
+#fi
 
 ###################
 # FUNCTIONS
@@ -46,7 +47,7 @@ You can *optionally* enter an eMail address.\n
 \n
 The address will not be included in the generated certificates.\n
 \n
-It will be used to e.g. notify you about certificate expiries and changes
+It will be used to e.g. notify you about certificate expiration and changes
 to the Terms of Service of Let's Encrypt.\n
 \n
 Feel free to leave empty."
@@ -139,12 +140,17 @@ function refresh_certs_with_nginx() {
     fi
 
     certsDirectories=$(sudo ls ${ACME_CERT_HOME})
+    echo "# certsDirectories(${certsDirectories})"
     directoryArray=(`echo "${certsDirectories}" | tr '  ' ' '`)
     for i in "${directoryArray[@]}"; do
       FQDN=$(echo "${i}" | cut -d "_" -f1)
+      echo "# i(${i})"
+      echo "# FQDN(${FQDN})"
       # check if there is a LetsEncrypt Subscription for this domain
       details=$(/home/admin/config.scripts/blitz.subscriptions.letsencrypt.py subscription-detail $FQDN)
       if [ ${#details} -gt 10 ]; then
+
+        echo "# details(${details})"
 
         # get target for that domain
         options=$(echo "${details}" | jq -r ".target")
@@ -158,7 +164,7 @@ function refresh_certs_with_nginx() {
           sudo ln -s ${ACME_CERT_HOME}/${FQDN}_ecc/${FQDN}.key /mnt/hdd/app-data/nginx/tls.key
         fi
 
-        # repleace certs for tor
+        # replace certs for tor
         if [ "${options}" == "tor" ] || [ "${options}" == "ip&tor" ]; then
           echo "# replacing TOR certs for ${FQDN}"
           sudo rm /mnt/hdd/app-data/nginx/tor_tls.cert
@@ -244,7 +250,7 @@ elif [ "$1" = "issue-cert" ]; then
 
   # check if letsencrypt is on
   if [ "${letsencrypt}" != "on" ]; then
-    echo "error='letsenscrypt is not on'"
+    echo "error='letsencrypt is not on'"
     exit 1
   fi
 
@@ -283,7 +289,7 @@ elif [ "$1" = "issue-cert" ]; then
     exit 1
   fi
 
-  # create certicicates
+  # create certificates
   echo "# creating certs for ${FQDN}"
   $ACME_INSTALL_HOME/acme.sh --home "${ACME_INSTALL_HOME}" --config-home "${ACME_CONFIG_HOME}" --cert-home "${ACME_CERT_HOME}" --issue --dns ${dnsservice} -d ${FQDN} --keylength ec-256 2>&1
   success1=$($ACME_INSTALL_HOME/acme.sh --list --home "${ACME_INSTALL_HOME}" --config-home "${ACME_CONFIG_HOME}" --cert-home "${ACME_CERT_HOME}" | grep -c "${FQDN}")
@@ -318,7 +324,7 @@ elif [ "$1" = "remove-cert" ]; then
 
   # check if letsencrypt is on
   if [ "${letsencrypt}" != "on" ]; then
-    echo "error='letsenscrypt is not on'"
+    echo "error='letsencrypt is not on'"
     exit 1
   fi
 

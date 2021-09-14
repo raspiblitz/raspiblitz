@@ -12,7 +12,7 @@ fi
 isRaspbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Raspbian')
 if [ ${isRaspbian} -eq 0]; then
 
-  echo "error='litecoin is only avaulable for raspbian realease'"
+  echo "error='litecoin is only available for raspbian release'"
   exit 1
 
 else

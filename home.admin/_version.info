@@ -1,2 +1,2 @@
 # RaspiBlitz Version - always [major].[main].[sub] (sub can be a string like '2rc1')
-codeVersion="1.7.0RC2"
+codeVersion="1.7.1rc1"

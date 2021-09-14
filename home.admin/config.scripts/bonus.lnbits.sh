@@ -33,7 +33,7 @@ if [ "$1" = "menu" ]; then
 	  fi
   fi
 
-  text="Local Webrowser: http://${localIP}:${httpPort}"
+  text="Local Web Browser: https://${localIP}:${httpsPort}"
 
   if [ ${#publicDomain} -gt 0 ]; then
      text="${text}
@@ -42,7 +42,7 @@ port forwarding on router needs to be active & may change port"
   fi
 
   text="${text}\n
-https://${localIP}:${httpsPort} with Fingerprint
+You need to accept self-signed HTTPS cert with SHA1 Fingerprint:
 ${sslFingerprintIP}" 
 
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
@@ -85,7 +85,7 @@ if [ "$1" = "status" ]; then
   if [ "${LNBits}" = "on" ]; then
     echo "installed=1"
 
-    localIP=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+    localIP=$(hostname -I | awk '{print $1}')
     echo "localIP='${localIP}'"
     echo "httpPort='5000'"
     echo "httpsPort='5001'"
@@ -178,6 +178,7 @@ if [ "$1" = "write-macaroons" ]; then
   #sudo sed -i "s|^LND_REST_INVOICE_MACAROON=.*|LND_REST_INVOICE_MACAROON=/home/lnbits/.lnd/data/chain/${network}/${chain}net/invoice.macaroon|g" /home/lnbits/lnbits/.env
   #sudo sed -i "s|^LND_REST_READ_MACAROON=.*|LND_REST_READ_MACAROON=/home/lnbits/.lnd/data/chain/${network}/${chain}net/read.macaroon|g" /home/lnbits/lnbits/.env
   echo "# OK - macaroons written to /home/lnbits/lnbits/.env"
+
   exit 0
 fi
 
@@ -269,7 +270,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo rm /home/lnbits/lnbits/.env 2>/dev/null
     sudo -u lnbits touch /home/lnbits/lnbits/.env
     sudo bash -c "echo 'QUART_APP=lnbits.app:create_app()' >> /home/lnbits/lnbits/.env"
-    sudo bash -c "echo 'LNBITS_FORCE_HTTPS=1' >> /home/lnbits/lnbits/.env"
+    sudo bash -c "echo 'LNBITS_FORCE_HTTPS=0' >> /home/lnbits/lnbits/.env"
     sudo bash -c "echo 'LNBITS_BACKEND_WALLET_CLASS=LndRestWallet' >> /home/lnbits/lnbits/.env"
     sudo bash -c "echo 'LND_REST_ENDPOINT=https://127.0.0.1:8080' >> /home/lnbits/lnbits/.env"
     sudo bash -c "echo 'LND_REST_CERT=' >> /home/lnbits/lnbits/.env"
@@ -326,6 +327,12 @@ TimeoutSec=120
 RestartSec=30
 StandardOutput=null
 StandardError=journal
+
+# Hardening measures
+PrivateTmp=true
+ProtectSystem=full
+NoNewPrivileges=true
+PrivateDevices=true
 
 [Install]
 WantedBy=multi-user.target

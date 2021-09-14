@@ -2,15 +2,15 @@
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
- echo "Interim optional Bitcoin Core updates between RaspiBlitz releases."
- echo "bitcoin.update.sh [info|tested|reckless|custom]"
- echo "info -> get actual state and possible actions"
- echo "tested -> only do a tested update by the RaspiBlitz team"
- echo "reckless -> the update was not tested by the RaspiBlitz team"
- echo "custom -> update to a chosen version"
- echo " the binary will be checked by signature and checksum in all cases"
- echo
- exit 1
+  echo "Interim optional Bitcoin Core updates between RaspiBlitz releases."
+  echo "bitcoin.update.sh [info|tested|reckless|custom]"
+  echo "info -> get actual state and possible actions"
+  echo "tested -> only do a tested update by the RaspiBlitz team"
+  echo "reckless -> the update was not tested by the RaspiBlitz team"
+  echo "custom -> update to a chosen version"
+  echo " the binary will be checked by signature and checksum in all cases"
+  echo
+  exit 1
 fi
 
 source /home/admin/raspiblitz.info
@@ -20,13 +20,12 @@ mode="$1"
 
 # RECOMMENDED UPDATE BY RASPIBLITZ TEAM
 # comment will be shown as "BEWARE Info" when option is choosen (can be multiple lines) 
-bitcoinVersion="0.21.0"
+bitcoinVersion="" # example: 0.21.0 .. keep empty if no newer version as sd card build is available
 
 # needed to check code signing
 laanwjPGP="01EA5486DE18A882D4C2684590C8019E36C2E964"
 
 # GATHER DATA
-
 # setting download directory
 downloadDir="/home/admin/download"
 
@@ -89,6 +88,7 @@ if [ "${mode}" = "tested" ]; then
       echo "# OK - update version is matching"
     fi
   fi
+  pathVersion=${bitcoinVersion}
 
 elif [ "${mode}" = "reckless" ]; then
   # RECKLESS
@@ -97,20 +97,31 @@ elif [ "${mode}" = "reckless" ]; then
   # it will always pick the latest release from the github
   echo "# bitcoin.update.sh reckless"
   bitcoinVersion=${bitcoinLatestVersion}
+  pathVersion=${bitcoinVersion}
 
 elif [ "${mode}" = "custom" ]; then
+  clear
   echo
   echo "# Update Bitcoin Core to a chosen version."
   echo
   echo "# Input the version you would like to install and press ENTER."
-  echo "# For example:"
+  echo "# Examples:"
+  echo "0.21.1rc1"
   echo "0.21.0"
   echo
   read bitcoinVersion
+  if [ $(echo ${bitcoinVersion} | grep -c "rc") -gt 0 ];then
+    cutVersion=$(echo ${bitcoinVersion} | awk -F"r" '{print $1}')
+    rcVersion=$(echo ${bitcoinVersion} | awk -F"r" '{print $2}')
+    pathVersion=${cutVersion}/test.r${rcVersion}
+  else
+    pathVersion=${bitcoinVersion}
+  fi
+
   if curl --output /dev/null --silent --head --fail \
-  https://bitcoin.org/bin/bitcoin-core-${bitcoinVersion}/SHA256SUMS.asc; then
-    echo "# OK version exists"
-    echo "# Press ENTER to proceed to install Bitcoin Core $bitcoinVersion, CTRL+C to abort."
+  https://bitcoincore.org/bin/bitcoin-core-${pathVersion}/SHA256SUMS.asc; then
+    echo "# OK version exists at https://bitcoincore.org/bin/bitcoin-core-${pathVersion}"
+    echo "# Press ENTER to proceed to install Bitcoin Core $bitcoinVersion or CTRL+C to abort."
     read key
   else 
     echo "# FAIL $bitcoinVersion does not exist"
@@ -145,9 +156,9 @@ if [ "${mode}" = "tested" ]||[ "${mode}" = "reckless" ]||[ "${mode}" = "custom" 
     echo "# !!! FAIL !!! Download laanwj-releases.asc not success."
     exit 1
   fi
-  gpg ./laanwj-releases.asc
-  fingerprint=$(gpg ./laanwj-releases.asc 2>/dev/null | grep "${laanwjPGP}" -c)
-  if [ ${fingerprint} -lt 1 ]; then
+  gpg --import-options show-only --import ./laanwj-releases.asc
+  fingerprint=$(gpg ./laanwj-releases.asc 2>/dev/null | grep -c "${laanwjPGP}")
+  if [ ${fingerprint} -eq 0 ]; then
     echo
     echo "# !!! BUILD WARNING --> Bitcoin PGP author not as expected"
     echo "# Should contain laanwjPGP: ${laanwjPGP}"
@@ -157,7 +168,7 @@ if [ "${mode}" = "tested" ]||[ "${mode}" = "reckless" ]||[ "${mode}" = "custom" 
   gpg --import ./laanwj-releases.asc
 
   # download signed binary sha256 hash sum file and check
-  sudo -u admin wget https://bitcoin.org/bin/bitcoin-core-${bitcoinVersion}/SHA256SUMS.asc
+  sudo -u admin wget https://bitcoincore.org/bin/bitcoin-core-${pathVersion}/SHA256SUMS.asc
   verifyResult=$(gpg --verify SHA256SUMS.asc 2>&1)
   goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
   echo "goodSignature(${goodSignature})"
@@ -173,46 +184,45 @@ if [ "${mode}" = "tested" ]||[ "${mode}" = "reckless" ]||[ "${mode}" = "custom" 
     echo
   fi
 
-  # get the sha256 value for the corresponding platform from signed hash sum file
-  bitcoinSHA256=$(grep -i "$bitcoinOSversion" SHA256SUMS.asc | cut -d " " -f1)
-
-  echo
-  echo "# BITCOIN v${bitcoinVersion} for ${bitcoinOSversion}"
-
-  # download resources
+  echo "# Downloading Bitcoin Core v${bitcoinVersion} for ${bitcoinOSversion} ..."
   binaryName="bitcoin-${bitcoinVersion}-${bitcoinOSversion}.tar.gz"
-  sudo -u admin wget https://bitcoin.org/bin/bitcoin-core-${bitcoinVersion}/${binaryName}
+  sudo -u admin wget https://bitcoincore.org/bin/bitcoin-core-${pathVersion}/${binaryName}
   if [ ! -f "./${binaryName}" ]
   then
-      echo "# !!! FAIL !!! Downloading BITCOIN BINARY did not succeed."
-      exit 1
+    echo "# !!! FAIL !!! Downloading BITCOIN BINARY did not succeed."
+    exit 1
   fi
 
-  # check binary checksum test
-  binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
-  if [ "${binaryChecksum}" != "${bitcoinSHA256}" ]; then
-    echo "!!! FAIL !!! Downloaded BITCOIN BINARY not matching SHA256 checksum: ${bitcoinSHA256}"
+  echo "# Checking binary checksum ..."
+  checksumTest=$(sha256sum -c --ignore-missing SHA256SUMS.asc ${binaryName} 2>/dev/null \
+                | grep -c "${binaryName}: OK")
+  if [ "${checksumTest}" -eq 0 ]; then
+    # get the sha256 value for the corresponding platform from signed hash sum file
+    bitcoinSHA256=$(grep -i "$bitcoinOSversion" SHA256SUMS.asc | cut -d " " -f1)
+    echo "!!! FAIL !!! Downloaded BITCOIN BINARY CHECKSUM:"
+    echo "$(sha256sum ${binaryName})"
+    echo "NOT matching SHA256 checksum:"
+    echo "${bitcoinSHA256}"
     exit 1
   else
     echo
-    echo "# OK --> VERIFIED BITCOIN CHECKSUM CORRECT"
+    echo "# OK --> VERIFIED BITCOIN CHECKSUM IS CORRECT"
     echo
   fi
 
 fi 
 
 if [ "${mode}" = "tested" ]||[ "${mode}" = "custom" ]; then
-  # note: install will be done the same as reckless further down
   bitcoinInterimsUpdateNew="${bitcoinVersion}"
 elif [ "${mode}" = "reckless" ]; then
   bitcoinInterimsUpdateNew="reckless"
 fi
 
-# JOINED INSTALL (tested & RECKLESS)
+# JOINED INSTALL
 if [ "${mode}" = "tested" ]||[ "${mode}" = "reckless" ]||[ "${mode}" = "custom" ];then
 
   # install
-  echo "# Stopping bitcoind and lnd"
+  echo "# Stopping bitcoind and lnd ..."
   sudo systemctl stop lnd
   sudo systemctl stop bitcoind
   echo
@@ -234,18 +244,24 @@ if [ "${mode}" = "tested" ]||[ "${mode}" = "reckless" ]||[ "${mode}" = "custom" 
     sudo sed -i "s/^bitcoinInterimsUpdate=.*/bitcoinInterimsUpdate='${bitcoinInterimsUpdateNew}'/g" /mnt/hdd/raspiblitz.conf
   fi
 
+  echo "# OK Bitcoin Core ${bitcoinVersion} is installed"
   if [ "${state}" == "ready" ]; then
+    echo
+    echo "# Starting ..."
     sudo systemctl start bitcoind
+    sleep 10
+    echo
     sudo systemctl start lnd
+    echo "# Starting LND ..."
+    sleep 10
+    echo
+    echo "# Press ENTER to proceed to unlock the LND wallet ..."
+    read key
+    sudo /home/admin/config.scripts/lnd.unlock.sh
   fi
-
-  echo "# OK Bitcoin Core Installed"
-  echo "# NOTE: RaspiBlitz may need to reboot now"
-  exit 1
+  exit 0
 
 else
-
   echo "# error='parameter not known'"
   exit 1
-
 fi

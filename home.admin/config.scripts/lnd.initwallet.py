@@ -15,10 +15,10 @@ if sys.version_info < (3, 0):
 # display config script info
 if len(sys.argv) <= 1 or sys.argv[1] in ["-h", "--help", "help"]:
     print("# creating or recovering the LND wallet")
-    print("# lnd.initwallet.py new [walletpassword] [?seedpassword]")
-    print("# lnd.initwallet.py seed [walletpassword] [\"seeds-words-seperated-spaces\"] [?seedpassword]")
-    print("# lnd.initwallet.py scb [walletpassword] [\"seeds-words-seperated-spaces\"] [filepathSCB] [?seedpassword]")
-    print("# lnd.initwallet.py change-password [walletpassword-old] [walletpassword-new]")
+    print("# lnd.initwallet.py new [mainnet|testnet|signet] [walletpassword] [?seedpassword]")
+    print("# lnd.initwallet.py seed [mainnet|testnet|signet] [walletpassword] [\"seeds-words-seperated-spaces\"] [?seedpassword]")
+    print("# lnd.initwallet.py scb [mainnet|testnet|signet] [walletpassword] [\"seeds-words-seperated-spaces\"] [filepathSCB] [?seedpassword]")
+    print("# lnd.initwallet.py change-password [mainnet|testnet|signet] [walletpassword-old] [walletpassword-new]")
     print("err='missing parameters'")
     sys.exit(1)
 
@@ -166,15 +166,22 @@ def change_password(stub, wallet_password="", wallet_password_new=""):
         sys.exit(1)
 
 def parse_args():
+    network = ""
     wallet_password = ""
     wallet_password_new = ""
     seed_words = ""
     seed_password = ""
     filepath_scb = ""
 
+    if len(sys.argv) > 2:
+        network = sys.argv[2]
+    else:
+        print("err='missing parameters'")
+        sys.exit(1)
+
     if mode == "new":
-        if len(sys.argv) > 2:
-            wallet_password = sys.argv[2]
+        if len(sys.argv) > 3:
+            wallet_password = sys.argv[3]
             if len(wallet_password) < 8:
                 print("err='wallet password is too short'")
                 sys.exit(1)
@@ -182,17 +189,17 @@ def parse_args():
             print("err='missing parameters'")
             sys.exit(1)
 
-        if len(sys.argv) > 3:
-            seed_password = sys.argv[3]
+        if len(sys.argv) > 4:
+            seed_password = sys.argv[4]
 
     elif mode == "change-password":
 
-        if len(sys.argv) > 3:
-            wallet_password = sys.argv[2]
+        if len(sys.argv) > 4:
+            wallet_password = sys.argv[3]
             if len(wallet_password) < 8:
                 print("err='wallet password is too short'")
                 sys.exit(1)
-            wallet_password_new = sys.argv[3]
+            wallet_password_new = sys.argv[4]
             if len(wallet_password_new ) < 8:
                 print("err='wallet password new is too short'")
                 sys.exit(1)
@@ -202,8 +209,8 @@ def parse_args():
 
     elif mode == "seed" or mode == "scb":
 
-        if len(sys.argv) > 2:
-            wallet_password = sys.argv[2]
+        if len(sys.argv) > 3:
+            wallet_password = sys.argv[3]
             if len(wallet_password) < 8:
                 print("err='wallet password is too short'")
                 sys.exit(1)
@@ -211,8 +218,8 @@ def parse_args():
             print("err='not correct amount of parameter - missing wallet password'")
             sys.exit(1)
 
-        if len(sys.argv) > 3:
-            seed_word_str = sys.argv[3]
+        if len(sys.argv) > 4:
+            seed_word_str = sys.argv[4]
             seed_words = seed_word_str.split(" ")
             if len(seed_words) < 24:
                 print("err='not 24 seed words separated by just spaces (surrounded with \")'")
@@ -223,13 +230,13 @@ def parse_args():
 
         if mode == "seed":
 
-            if len(sys.argv) > 4:
-                seed_password = sys.argv[4]
+            if len(sys.argv) > 5:
+                seed_password = sys.argv[5]
 
         elif mode == "scb":
 
-            if len(sys.argv) > 4:
-                filepath_scb = sys.argv[4]
+            if len(sys.argv) > 5:
+                filepath_scb = sys.argv[5]
                 scb_file = Path(filepath_scb)
                 if scb_file.is_file():
                     print("# OK SCB file exists")
@@ -240,25 +247,37 @@ def parse_args():
                 print("err='not correct amount of parameter  - missing seed filepathSCB'")
                 sys.exit(1)
 
-            if len(sys.argv) > 5:
-                seed_password = sys.argv[4]
+            if len(sys.argv) > 6:
+                seed_password = sys.argv[5]
 
     else:
 
         print("err='unknown mode parameter - run without any parameters to see options'")
         sys.exit(1)
 
-    return wallet_password, seed_words, seed_password, filepath_scb, wallet_password_new 
+    return network, wallet_password, seed_words, seed_password, filepath_scb, wallet_password_new 
 
 
 def main():
+
+    network, wallet_password, seed_words, seed_password, file_path_scb, wallet_password_new = parse_args()
+
+    grpcEndpoint="localhost:0"
+    if network == "mainnet":
+        grpcEndpoint="localhost:10009"
+    elif network == "testnet":
+        grpcEndpoint="localhost:11009"
+    elif network == "signet":
+        grpcEndpoint="localhost:13009"
+    else:
+        print("err='chain not supported'")
+        sys.exit(1)
+
     os.environ['GRPC_SSL_CIPHER_SUITES'] = 'HIGH+ECDSA'
     cert = open('/mnt/hdd/lnd/tls.cert', 'rb').read()
     ssl_creds = grpc.ssl_channel_credentials(cert)
-    channel = grpc.secure_channel('localhost:10009', ssl_creds)
+    channel = grpc.secure_channel(grpcEndpoint, ssl_creds)
     stub = rpcstub.WalletUnlockerStub(channel)
-
-    wallet_password, seed_words, seed_password, file_path_scb, wallet_password_new = parse_args()
 
     if mode == "new":
         print("# *** CREATING NEW LND WALLET ***")

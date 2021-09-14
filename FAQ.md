@@ -2,23 +2,23 @@
 # FAQ - Frequently Asked Questions
 
 - [What changed on the single RaspiBlitz updates?](#what-changed-on-the-single-raspiblitz-updates)
-- [How to update my RaspiBlitz (since 1.2)?](#how-to-update-my-raspiblitz-since-12)
-- [How to update my RaspiBlitz from older versions like v1.0 or v1.1?](#how-to-update-my-raspiblitz-from-older-versions-like-v10-or-v11)
+- [How do I update my RaspiBlitz (since 1.2)?](#how-do-i-update-my-raspiblitz-since-12)
+- [How do I update my RaspiBlitz from older versions like v1.0 or v1.1?](#how-do-i-update-my-raspiblitz-from-older-versions-like-v10-or-v11)
 - [How to verify the SD card image after download?](#how-to-verify-the-sd-card-image-after-download)
-- [How to update an old RaspiBlitz BEFORE v1.0? (LEGACY)](#how-to-update-a-old-raspiblitz-before-v10-legacy)
+- [How to update an old RaspiBlitz BEFORE v1.0? (LEGACY)](#how-to-update-an-old-raspiblitz-before-v10-legacy)
 - [Why do I need to re-burn my SD card for an update?](#why-do-i-need-to-re-burn-my-sd-card-for-an-update)
-- [I have the full blockchain on another computer. How do I copy it to the RaspiBlitz?](#i-have-the-full-blockchain-on-another-computer-how-do-i-copy-it-to-the-raspiblitz)
+- [I have the full blockchain on another storage. How do I copy it to the RaspiBlitz?](#i-have-the-full-blockchain-on-another-storage-how-do-i-copy-it-to-the-raspiblitz)
 - [How do I generate a Debug Report?](#how-do-i-generate-a-debug-report)
 - [Can I run my RaspiBlitz on Solar Energy?](#can-i-run-my-raspiblitz-on-solar-energy)
 - [Why is my "final sync" taking so long?](#why-is-my-final-sync-taking-so-long)
-- [How do I backup my Lightning Node?](#how-to-backup-my-lightning-node)
-  - [1) Securing your On-Chain and Channel-Funds during Operation](#1-securing-your-on-chain--and-channel-funds-during-operation)
+- [How do I backup my Lightning Node?](#how-do-i-backup-my-lightning-node)
+  - [1) Securing your On-Chain- and Channel-Funds during Operation](#1-securing-your-on-chain--and-channel-funds-during-operation)
   - [2) Making a complete LND data backup](#2-making-a-complete-lnd-data-backup)
 - [How can I recover my coins from a failing RaspiBlitz?](#how-can-i-recover-my-coins-from-a-failing-raspiblitz)
   - [1) Recover LND data](#1-recover-lnd-data)
   - [2) Recover from Wallet Seed](#2-recover-from-wallet-seed)
 - [What is this mnemonic seed word list?](#what-is-this-mnemonic-seed-word-list)
-- [How to move funds & channels from RaspiBlitz to LND Lightning Desktop App?](#how-to-move-funds--channels-from-raspiblitz-to-lnd-lightning-desktop-app)
+- [How do I move funds & channels from RaspiBlitz to LND Lightning Desktop App?](#how-do-i-move-funds--channels-from-raspiblitz-to-lnd-lightning-desktop-app)
 - [How do I change the Name/Alias of my lightning node](#how-do-i-change-the-namealias-of-my-lightning-node)
 - [What to do when on SSH I see "WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!"](#what-to-do-when-on-ssh-i-see-warning-remote-host-identification-has-changed)
 - [When using Auto-Unlock, how much security do I lose?](#when-using-auto-unlock-how-much-security-do-i-lose)
@@ -28,16 +28,16 @@
 - [Why is my node address on the display red?](#why-is-my-node-address-on-the-display-red)
 - [Why is my node address on the display yellow (not green)?](#why-is-my-node-address-on-the-display-yellow-not-green)
 - [Can I run the RaspiBlitz as Backend for BTCPayServer?](#can-i-run-the-raspiblitz-as-backend-for-btcpayserver)
-- [I don't have a LAN port on my Laptop - how do I connect to my RaspiBlitz?](#i-dont-have-a-lan-port-on-my-laptop---how-to-connect-to-my-raspiblitz)
+- [I don't have a LAN port on my Laptop - how do I connect to my RaspiBlitz?](#i-dont-have-a-lan-port-on-my-laptop---how-do-i-connect-to-my-raspiblitz)
 - [Is it possible to connect the Blitz over Wifi instead of using a LAN cable?](#is-it-possible-to-connect-the-blitz-over-wifi-instead-of-using-a-lan-cable)
-- [Can I directly connect the RaspiBlitz with my laptop?](#can-i-directly-connect-the-raspiblitz-with-my-laptop)
+- [Can I directly connect the RaspiBlitz to my laptop?](#can-i-directly-connect-the-raspiblitz-to-my-laptop)
 - [How do I unplug/shutdown safely without SSH](#how-do-i-unplugshutdown-safely-without-ssh)
 - [How can I build an SD card from another branch?](#how-can-i-build-an-sd-card-from-another-branch)
 - [How can I build an SD card from my forked GitHub Repo?](#how-can-i-build-an-sd-card-from-my-forked-github-repo)
 - [How can I checkout a new branch from the RaspiBlitz repo to my forked repo?](#how-can-i-checkout-a-new-branch-from-the-raspiblitz-repo-to-my-forked-repo)
 - [How can I sync a branch of my forked GitHub with my local RaspiBlitz?](#how-can-i-sync-a-branch-of-my-forked-github-with-my-local-raspiblitz)
 - [How contribute a feature/change from my forked branch back to the RaspiBlitz repo?](#how-contribute-a-featurechange-from-my-forked-branch-back-to-the-raspiblitz-repo)
-- [How can I help with testing a Pull Request?](#how-can-i-help-testing-a-pull-request)
+- [How can I help testing a Pull Request?](#how-can-i-help-testing-a-pull-request)
 - [How to attach the RaspberryPi to the HDD?](#how-to-attach-the-raspberrypi-to-the-hdd)
 - [What other case options do I have?](#what-other-case-options-do-i-have)
 - [Are those "Under-Voltage detected" warnings a problem?](#are-those-under-voltage-detected-warnings-a-problem)
@@ -46,26 +46,27 @@
 - [How do I return to the menu after exiting to the command line](#how-do-i-return-to-the-menu-after-exiting-to-the-command-line)
 - [Can I run RaspiBlitz on other computers than RaspberryPi?](#can-i-run-raspiblitz-on-other-computers-than-raspberrypi)
 - [Can I flip the screen?](#can-i-flip-the-screen)
-- [How do I setup fresh/clean/reset and not getting into recovery mode?](#how-to-setup-freshcleanreset-and-not-getting-into-recovery-mode)
+- [How do I setup fresh/clean/reset and without going into recovery mode?](#how-do-i-setup-freshcleanreset-and-without-going-into-recovery-mode)
 - [My blockchain data is corrupted - what can I do?](#my-blockchain-data-is-corrupted---what-can-i-do)
 - [Can I run the RaspiBlitz without a display/LCD?](#can-i-run-the-raspiblitz-without-a-displaylcd)
 - [How do I set up VNC?](#how-do-i-set-up-vnc)
 - [I have two RaspiBlitz in my network - can they both be public?](#i-have-two-raspiblitz-in-my-network---can-they-both-be-public)
-- [How do I change the public port LND/Lightning node is running on?](#how-to-change-the-public-port-lndlightning-node-is-running-on)
-- [How do I solve a "signature mismatch after caveat verification" error?](#how-to-solve-a-signature-mismatch-after-caveat-verification-error)
+- [How do I change the public port LND/Lightning node is running on?](#how-do-i-change-the-public-port-lndlightning-node-is-running-on)
+- [How do I solve a "signature mismatch after caveat verification" error?](#how-do-i-solve-a-signature-mismatch-after-caveat-verification-error)
 - [Why is my node not routing?](#why-is-my-node-not-routing)
 - [How can I update LND or bitcoind even before the next RaspiBlitz update?](#how-can-i-update-lnd-or-bitcoind-even-before-the-next-raspiblitz-update)
-- [I cannot connect per SSH to my RaspiBlitz. What can I do?](#i-cannot-connect-per-ssh-to-my-raspiblitz-what-to-do)
-- [How do I setup port-forwarding with a SSH tunnel?](#how-to-setup-port-forwarding-with-a-ssh-tunnel)
-- [How do I setup just a port-forwarding user on my public server?](#how-to-setup-just-a-port-forwarding-user-on-my-public-server)
-- [How do I connect a UPS to the RaspiBlitz?](#how-to-connect-a-ups-to-the-raspiblitz)
+- [I cannot connect via SSH to my RaspiBlitz. What do I do?](#i-cannot-connect-via-ssh-to-my-raspiblitz-what-do-i-do)
+- [How to SSH over Tor?](#how-to-ssh-over-tor)
+- [How to setup port-forwarding with a SSH tunnel?](#how-to-setup-port-forwarding-with-a-ssh-tunnel)
+- [How do I setup just a port-forwarding user on my public server?](#how-do-i-setup-just-a-port-forwarding-user-on-my-public-server)
+- [How do I connect a UPS to the RaspiBlitz?](#how-do-i-connect-a-ups-to-the-raspiblitz)
 - [Why use BTRFS on RaspiBlitz?](#why-use-btrfs-on-raspiblitz)
   - [Storing your important Data in RAID1 with a USB Thumb Drive](#storing-your-important-data-in-raid1-with-a-usb-thumb-drive)
   - [Snapshotting the Blockchain](#snapshotting-the-blockchain)
-- [How do I use BTRFS on RaspiBlitz?](#how-to-use-btrfs-on-raspiblitz)
-- [How do I recover a BTRFS partition?](#how-to-recover-a-btrfs-partition)
+- [How do I use BTRFS on RaspiBlitz?](#how-do-i-use-btrfs-on-raspiblitz)
+- [How to recover a BTRFS partition?](#how-to-recover-a-btrfs-partition)
 - [How do I fix a displayed Error in my Config?](#how-do-i-fix-a-displayed-error-in-my-config)
-- [How do I fix my upside down LCD after update?](#how-to-fix-my-upside-down-lcd-after-update)
+- [How to fix my upside down LCD after update?](#how-to-fix-my-upside-down-lcd-after-update)
 - [How can I repair my SSH login?](#how-can-i-repair-my-ssh-login)
 - [How to use the Let's Encrypt client](#how-to-use-the-lets-encrypt-client)
   - [Let's Encrypt - HTTP-01](#lets-encrypt---http-01)
@@ -73,6 +74,9 @@
   - [Let's Encrypt - eMail Address](#lets-encrypt---email-address)
   - [Let's Encrypt - Installation details](#lets-encrypt---installation-details)
   - [How can I customize my RaspiBlitz or add other software?](#how-can-i-customize-my-raspiblitz-or-add-other-software)
+- [Versioning](#versioning)
+- [GitHub Workflow](#github-workflow)
+- [How do I find the IP address when running without a display?](#how-do-i-find-the-ip-address-when-running-without-a-display)
 
 ---
 
@@ -166,15 +170,17 @@ Of course, people should modify the system, add own scripts, etc ... but if you 
 
 *BTW there is a beneficial side effect when updating with a new SD card: You also get rid of any malware or system bloat that happened in the past. You start with a fresh system :)*
 
-## I have the full blockchain on another computer. How do I copy it to the RaspiBlitz?
+## I have the full blockchain on another storage. How do I copy it to the RaspiBlitz?
 
-Copying a already synced blockchain from another computer (for example your Laptop) can be a quick way to get the RaspiBlitz started or replacing a corrupted blockchain with a fresh one. Also that way you have synced and verified the blockchain yourself, and are not trusting the RaspiBlitz Torrent downloads (Don't trust, verify).
+Copying a already synced blockchain from another storage (e.g. your Laptop or external hard drive) can be a quick way to get the RaspiBlitz started or replacing a corrupted blockchain with a fresh one. Also that way you have synced and verified the blockchain yourself, and are not trusting the RaspiBlitz Torrent downloads (Don't trust, verify).
 
 One requirement is that the blockchain is from another bitcoin-core client with version greater or equal to 0.17.1.
 
 But we don't copy the data via USB to the device, because the HDD needs to be formatted in EXT4 and that is usually not read/writable by Windows or Mac computers. So I will explain a way to copy the data through your local network. This should work from Windows, Mac, Linux and even from another already synced RaspiBlitz.
 
-Both computers (your RaspberryPi and the other computer with the full blockchain) need to be connected to the same local network. Make sure that bitcoind/bitcoin-qt is stopped on the computer containing the blockchain. If your blockchain source is another RaspiBlitz with v1.5 or higher - go to `REPAIR` > `COPY-SOURCE`. If your RaspiBlitz is below v1.5 then on the terminal `sudo systemctl stop bitcoind` and then go to the directory where the blockchain data is with `cd /mnt/hdd/bitcoin` - when the copy/transfer is done later reboot a RaspiBlitz source with `sudo shutdown -r now`.
+Both computers (your RaspberryPi and the other computer with the full blockchain) need to be connected to the same local network. Make sure that bitcoind/bitcoin-qt is stopped on the computer containing the blockchain. 
+If your blockchain source is another RaspiBlitz v1.5 or higher - go to `REPAIR` > `COPY-SOURCE`. 
+If your RaspiBlitz is below v1.5 then on the terminal `sudo systemctl stop bitcoind` and then go to the directory where the blockchain data is with `cd /mnt/hdd/bitcoin` - when the copy/transfer is done later reboot a RaspiBlitz source with `sudo shutdown -r now`.
 
 If everything described above is in order, start the setup of the new RaspiBlitz with a fresh SD card (like explained in the README) - it's OK that there is no blockchain data on your HDD yet - just follow the setup. When you get to the setup-point `Getting the Blockchain` choose the COPY option. Starting from version 1.0 of the RaspiBlitz this will give you further detailed instructions how to transfer the blockchain data onto your RaspiBlitz. In short: On your computer with the blockchain data source you will execute SCP commands that will copy the data over your local network to your RaspiBlitz.
 
@@ -186,7 +192,7 @@ If your RaspiBlitz is not working correctly and you like to get help from the co
 
 - SSH into your raspiblitz as admin user with your password A
 - If you see the menu - use CTRL+C to get to the terminal
-- To generate debug report run: `./XXdebugLogs.sh`
+- To generate debug report run: `debug`
 - Then copy all output beginning with `*** RASPIBLITZ LOGS ***` and share this
 
 *PLEASE NOTICE: It's possible that these logs can contain private information (like IPs, node IDs, ...) - just share publicly what you feel OK with.*
@@ -233,7 +239,7 @@ If you still can SSH in and HDD is readable, we can try to rescue/export your LN
 To rescue/export your Lightning data from a RaspiBlitz (since v1.1):
 
 * SSH into your RaspiBlitz and EXIT to terminal from the menu.
-* then run: `/home/admin/config.scripts/lnd.rescue.sh backup`
+* then run: `/home/admin/config.scripts/lnd.backup.sh lnd-export-gui`
 * follow the instructions of the script.
 
 This will create a lnd-rescue file (ends on gz.tar) that contains all the data from the LND. The script offers you a command to transfer the lnd-rescue file to your laptop. If the transfer was successful you can now setup a fresh RaspiBlitz. Do all the setup until you have a clean new Lightning node running - just without any funding or channels.
@@ -241,7 +247,7 @@ This will create a lnd-rescue file (ends on gz.tar) that contains all the data f
 Then to restore your old LND data and to recover your funds and channels:
 
 * SSH into your new RaspiBlitz and EXIT to terminal from the menu.
-* then run: `/home/admin/config.scripts/lnd.rescue.sh restore`
+* then run: `/home/admin/config.scripts/lnd.backup.sh lnd-import-gui`
 * follow the instructions of the script.
 
 This script will offer you a way to transfer the lnd-rescue file from your laptop to the new RaspiBlitz and will restore the old data. LND then gets restarted for you, and after some time it should show you the status screen again with your old funds and channels.
@@ -275,7 +281,6 @@ With the 24 word list given you by LND upon wallet creation you can recover your
 
 For more background on the LND mnemonic seed [read this article](https://github.com/lightningnetwork/lnd/blob/master/docs/recovery.md#recovering-funds-from-lnd-funds-are-safu).
 
-
 ## How do I move funds & channels from RaspiBlitz to LND Lightning Desktop App?
 
 Before you start - download a LND-data-rescue file from your RaspiBlitz to your laptop `main menu -> UPDATE -> Update Anyway -> Start Update -> Download Backup -> FOLLOW INSTRUCTIONS and press Enter when ready with download -> START UPDATE`. Now your RaspiBlitz will power down.
@@ -300,7 +305,7 @@ Now start the Lightning App again. Your wallet password should now be your RaspI
 
 ## How do I change the Name/Alias of my lightning node
 
-Use the "Change Name/Alias of Node" option in the main menu. The RaspiBlitz will automatically reboot after this.
+Use the "Change Name/Alias of Node" option in the Lightning - LND Wallet Options menu. The RaspiBlitz will automatically reboot after this.
 
 ## What to do when on SSH I see "WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!"
 
@@ -413,13 +418,13 @@ For example if you want to make a build from the 'dev' branch you execute the fo
 
 If you fork the RaspiBlitz repo (much welcome) and you want to run that code on your RaspiBlitz, there are two ways to do that:
 
-* The quick way: For small changes in scripts, go to `/home/admin` on your running RaspiBlitz, delete the old git with `sudo rm -r raspiblitz` then replace it with your code `git clone [YOURREPO]` and `/home/admin/XXsyncScripts.sh`
+* The quick way: For small changes in scripts, go to `/home/admin` on your running RaspiBlitz, delete the old git with `sudo rm -r raspiblitz` then replace it with your code `git clone [YOURREPO]` and `patch`
 
 * The long way: If you like to install/remove/change services and system configurations you need to build a SD card from your own code. Prepare like in [Build the SD Card Image](README.md#build-the-sd-card-image) from the README but in the end run the command:
 
 `wget --no-cache https://raw.githubusercontent.com/[GITHUB-USERNAME]/raspiblitz/[BRANCH]/build_sdcard.sh && sudo bash build_sdcard.sh false false [GITHUB-USERNAME] [BRANCH] lcd true true`
 
-If you are then working in your forked repo and want to update the scripts on your RaspiBlitz with your latest repo changes, run `/home/admin/XXsyncScripts.sh` - That's OK as long as you don't make changes to the SD card build script - for that you would need to build a fresh SD card again from your repo.
+If you are then working in your forked repo and want to update the scripts on your RaspiBlitz with your latest repo changes, run `patch` - That's OK as long as you don't make changes to the SD card build script - for that you would need to build a fresh SD card again from your repo.
 
 ## How can I checkout a new branch from the RaspiBlitz repo to my forked repo?
 
@@ -450,7 +455,7 @@ git remote set-url origin [THE-URL-OF-YOUR-FORKED-REPO]
 
 Now to sync your branch namend BRANCH on your forked repo with your RaspiBlitz, you always just run:
 ```
-/home/admin/XXsyncScripts.sh BRANCH
+/home/admin/config.scripts/blitz.github.sh BRANCH
 ```
 
 So your workflow can go like this: You write code on your local computer. Commit to your local repo, push it to your forked repo and use the sync-script above to get the code to your RaspiBlitz.
@@ -471,14 +476,14 @@ cd /home/admin/raspiblitz
 git fetch origin pull/[PRNUMBER]/head:pr[PRNUMBER]
 git checkout pr[PRNUMBER]
 cd /home/admin
-./XXsyncScripts.sh -justinstall
+/home/admin/config.scripts/blitz.github.sh -justinstall
 ```
 
 Now you have the code of the PR active - depending on what scripts are changed you might need to reboot.
 
 To change back to the code:
 ```
-./XXsyncScripts.sh master
+/home/admin/config.scripts/blitz.github.sh master
 ```
 
 ## How to attach the RaspberryPi to the HDD?
@@ -511,7 +516,6 @@ Using pre-built software almost always shifts trust to the one who made the bina
 
 The best way would be to build the SD card yourself. You use the script `build_sdcard.sh` for this. Take a few minutes to check if you see anything suspicious in that build script and then follow the [README](README.md#build-the-sd-card-image) on this.
 
-
 ## What is the process of creating a new SD card image release?
 
 Work notes for the process of producing a new SD card image release:
@@ -539,7 +543,7 @@ Work notes for the process of producing a new SD card image release:
 * Run the following command BUT REPLACE `[BRANCH]` with the branch-string of your latest version
 * `wget --no-cache https://raw.githubusercontent.com/rootzoll/raspiblitz/[BRANCH]/build_sdcard.sh && sudo bash build_sdcard.sh false true rootzoll [BRANCH] lcd true true`
 * Monitor/Check outputs for warnings/errors - install LCD
-* Login new with `ssh admin@[IP-OF-RASPIBLITZ]` (pw: raspiblitz) and run `./XXprepareRelease.sh`
+* Login new with `ssh admin@[IP-OF-RASPIBLITZ]` (pw: raspiblitz) and run `release`
 * Disconnect WiFi/LAN on build laptop (hardware switch off) and shutdown
 * Remove `Ubuntu LIVE` USB stick and cut power from the RaspberryPi
 * Connect USB stick with latest `TAILS` (make it stay offline)
@@ -712,6 +716,21 @@ If that doesn't work, try to ping the IP of the RaspiBlitz with `ping [IP-of-Ras
 
 If you've checked those and SSH is still not working: Join the conversation on [GitHub Issue #420](https://github.com/rootzoll/raspiblitz/issues/420).
 
+## How to SSH over Tor?
+
+SSH is already encrypted, why would I want to use it with Tor?
+* Remote access when away from LAN.
+* Anonymized access - Someone sniffing the traffic don't know where the server you are establishing a connection is, not the server side knows where the client is.
+
+Create Hidden Service:
+`bash /home/admin/config.scripts/internet.hiddenservice.sh ssh 22 22`
+
+SSH over Tor:
+`torsocks ssh admin@HiddenServiceAddress.onion`
+
+Get the address:
+`sudo cat /mnt/hdd/tor/ssh/hostname`
+
 ## How to setup port-forwarding with a SSH tunnel?
 
 To use a public server for port-forwarding thru a SSH tunnel you can use the following experimental script on the RaspiBlitz (since v1.2):
@@ -822,13 +841,13 @@ https://seravo.fi/2015/using-raid-btrfs-recovering-broken-disks
 ## How do I fix a displayed Error in my Config?
 
 When the LCD display is telling you to do a config check:
-- go to the RaspiBlitz terminal (X on main menu) and run './XXsyncScripts.sh'
-- start reboot with command: './XXshutdown.sh reboot' 
+- go to the RaspiBlitz terminal (X on main menu) and run 'patch'
+- start reboot with command: 'restart' 
 - go to the RaspiBlitz terminal run the command: 'check'
 - now edit the RaspiBlitz config and get rid of the errors: 'nano /mnt/hdd/raspiblitz.conf'
 - save config with: CTRL+o
 - exit nano editor with: CTRL+x
-- start reboot with command: './XXshutdown.sh reboot' 
+- start reboot with command: 'restart' 
 
 ## How to fix my upside down LCD after update?
 
@@ -916,13 +935,13 @@ The RaspiBlitz is your computer to experiment with. Feel free to add your own sc
 - place your own scripts and data that should survive an update/recovery into the `/mnt/hdd/app-data` directory
 - put all install commands & modification of the system into the script `/mnt/hdd/app-data/custom-installs.sh` which will be started automatically on a recovery/update.
 
-# Versioning
+## Versioning
 
 * Major Updates: 1.0.0, 2.0.0, 3.0.0, ... are epic updates signaling that the software reached a new era.
 * Main Updates: 1.1.0, 1.2.0, 1.3.0, ... are breaking updates - the reflashing of the sd ard is mandatory.
 * Minor Updates: 1.1.0, 1.2.0, 1.3.0, ... are soft updates - can be done by 'patching' the scripts & code, but new sd card reflash is still advised.
 
-# GitHub Workflow
+## GitHub Workflow
 
 - Development is done on the 'dev' branch, new features should be done on single feature branches and merged into 'dev' once ready.
 - When a release of a new main-update (see above) comes closer, a new release branch gets created from 'dev' with the first release candidate - the RCs and the final release sd card will be build from this branch.
@@ -930,4 +949,10 @@ The RaspiBlitz is your computer to experiment with. Feel free to add your own sc
 - Once a release is ready, that release branch will be set as the "default" branch on GitHub (so its shown as main page)
 - Hot fixes & new features for minor verisons will be created as single branches from the release branch, and once ready will be merged back into that release branch as a Pull Request using 'Squash-Merge' AND then, this 'Squash-Merge' (one single commit) will get cherry-picked into the  'dev' branch ('git cherry-pick COMMITHASH' - may call 'git fetch' & 'git pull' before to make a clean cherry-pick into dev).
 
+## How do I find the IP address when running without a display?
 
+If you can login into your local internet router it should show you the IP address assigned to the RaspberryPi.
+
+Another way is to use [Angry IP Scanner](https://angryip.org/) to find the IP address.
+
+You can also put an empty file just called `hdmi` (without any ending) onto the sd card when connected to your laptop and then start it up on the RaspberryPi. This will activate the HDMI port and if you connect a HDMI monitor to the RaspberryPi it will show you the RaspiBlitz status screen containing the local IP address.
