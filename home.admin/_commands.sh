@@ -11,58 +11,59 @@ fi
 # calls the the raspiblitz mainmenu (shortcut)
 function blitz() {
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ] || [ "$1" = "--help" ] || [ "$1" = "help" ] ; then
-  echo "_commands.sh"
-  echo "Usage: command [options]"
-  echo ""
-  echo "Blitz commands are consolidated here."
-  echo ""
-  echo "Menu access:"
-  echo "  raspiblitz   menu"
-  echo "  menu         menu"
-  echo "  bash         menu"
-  echo "  repair       menu > repair"
-  echo ""
-  echo "Checks:"
-  echo "  status       informational Blitz status screen"
-  echo "  sourcemode   copy blockchain source modus"
-  echo "  check        check if Blitz configuration files are correct"
-  echo "  debug        print debug logs"
-  echo "  debug   -l   print debug logs with bin link"
-  echo "  patch        sync scripts with latest set github and branch"
-  echo "  github       jumping directly into the options to change branch/repo/pr"
-  echo ""
-  echo "Power:"
-  echo "  restart      restart the node"
-  echo "  off          shutdown the node"
-  echo ""
-  echo "Display:"
-  echo "  hdmi         switch video output to HDMI"
-  echo "  lcd          switch video output to LCD"
-  echo "  headless     switch video output to HEADLESS"
-  echo ""
-  echo "BTC tx:"
-  echo "  torthistx    broadcast transaction through Tor to Blockstreams API and into the network"
-  echo "  gettx        retrieve transaction from mempool or blockchain and print as JSON"
-  echo "  watchtx      retrieve transaction from mempool or blockchain until certain confirmation target"
-  echo ""
-  echo "LND:"
-  echo "  balance      your satoshi balance"
-  echo "  channels     your lightning channels"
-  echo "  fwdreport    show forwarding report"
-  echo ""
-  echo "Users:"
-  echo "  bos          Balance of Satoshis"
-  echo "  chantools    ChanTools"
-  echo "  lit          Lightning Terminal"
-  echo "  jm           JoinMarket"
-  echo "  pyblock      PyBlock"
-  echo ""
-  echo " Extras:"
-  echo "  whitepaper   download the whitepaper from the blockchain to /home/admin/bitcoin.pdf"
-  echo "  notifyme     wrapper for blitz.notify.sh that will send a notification using the configured method and settings"
+    echo "_commands.sh"
+    echo "Usage: command [options]"
+    echo
+    echo "Blitz commands are consolidated here."
+    echo
+    echo "Menu access:"
+    echo "  raspiblitz   menu"
+    echo "  menu         menu"
+    echo "  bash         menu"
+    echo "  repair       menu > repair"
+    echo
+    echo "Checks:"
+    echo "  status       informational Blitz status screen"
+    echo "  sourcemode   copy blockchain source modus"
+    echo "  check        check if Blitz configuration files are correct"
+    echo "  debug        print debug logs"
+    echo "  debug   -l   print debug logs with bin link"
+    echo "  patch        sync scripts with latest set github and branch"
+    echo "  github       jumping directly into the options to change branch/repo/pr"
+    echo
+    echo "Power:"
+    echo "  restart      restart the node"
+    echo "  off          shutdown the node"
+    echo
+    echo "Display:"
+    echo "  hdmi         switch video output to HDMI"
+    echo "  lcd          switch video output to LCD"
+    echo "  headless     switch video output to HEADLESS"
+    echo
+    echo "BTC tx:"
+    echo "  torthistx    broadcast transaction through Tor to Blockstreams API and into the network"
+    echo "  gettx        retrieve transaction from mempool or blockchain and print as JSON"
+    echo "  watchtx      retrieve transaction from mempool or blockchain until certain confirmation target"
+    echo
+    echo "LND:"
+    echo "  balance      your satoshi balance"
+    echo "  channels     your lightning channels"
+    echo "  fwdreport    show forwarding report"
+    echo
+    echo "Users:"
+    echo "  bos          Balance of Satoshis"
+    echo "  chantools    ChanTools"
+    echo "  lit          Lightning Terminal"
+    echo "  jm           JoinMarket"
+    echo "  pyblock      PyBlock"
+    echo
+    echo " Extras:"
+    echo "  whitepaper   download the whitepaper from the blockchain to /home/admin/bitcoin.pdf"
+    echo "  notifyme     wrapper for blitz.notify.sh that will send a notification using the configured method and settings"
   else
-  cd /home/admin
-  ./00raspiblitz.sh
+    cd /home/admin
+    ./00raspiblitz.sh
+  fi
 }
 
 # command: raspiblitz
