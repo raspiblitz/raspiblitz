@@ -25,12 +25,12 @@ on() {
   fi
 
   if [ -z "${user}" ]; then
-    whiptail --title "Static Channel Backup on Nextcloud" --inputbox "Enter your Nextcloud username" 11 70 2>/home/admin/.tmp
+    whiptail --title "Static Channel Backup on Nextcloud" --inputbox "\nEnter your Nextcloud username:\n(best to use a dedicated user for backup)" 10 70 2>/home/admin/.tmp
     user=$(cat /home/admin/.tmp)
   fi
 
   if [ -z "${password}" ]; then
-    whiptail --title "Static Channel Backup on Nextcloud" --inputbox "Enter your Nextcloud password" 11 70 2>/home/admin/.tmp
+    whiptail --title "Static Channel Backup on Nextcloud" --inputbox "\nEnter your Nextcloud password:\n(will get stored in cleartext on raspiblitz)" 10 70 2>/home/admin/.tmp
     password=$(cat /home/admin/.tmp)
   fi
 
