@@ -540,12 +540,16 @@ if [ ${isMounted} -eq 0 ]; then
   sed -i "s/^message=.*/message='Starting Provision'/g" ${infoFile}
 
   # load setup data
+  echo "# Sourcing ${setupFile} " >> ${logFile}
   source ${setupFile}
+  cat ${setupFile} >> ${logFile}
   
   # make sure basic info id in raspiblitz.info
+  echo "# Update ${infoFile} " >> ${logFile}
   sudo sed -i "s/^network=.*/network=${network}/g" ${infoFile}
   sudo sed -i "s/^chain=.*/chain=${chain}/g" ${infoFile}
   sudo sed -i "s/^lightning=.*/lightning=${lightning}/g" ${infoFile}
+  cat ${infoFile} >> ${logFile}
 
   ###################################
   # Set Password A (in all cases)
