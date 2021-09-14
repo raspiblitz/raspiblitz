@@ -8,10 +8,8 @@ To start your Deep Dive into the RaspiBlitz project, watch [this video](https://
 ### Blitz philosophy
 
 * DIY community development, if you are unhappy with the code, fork and pull request, this will make you you DYOR instead of depending on the developers.
-* No additional service is installed by default, except BITCOIND and LND.
 * If you ask when the next release will be available, we don't know, but if you contribute, it might be faster.
 * Be sure to contribute back, every little help is wanted.
-
 
 ## Getting started
 Get all details on "How to contribute to RaspiBlitz Development" on [this video](https://www.youtube.com/watch?v=ZVtZepV3OfM).
@@ -23,7 +21,7 @@ Not all enhancements needs to go through all levels, these are levels of difficu
 #### Basic
 1. **Reporting user side** --> Open an issue to indicate a problem or make a feature request.
 1. **Community support** --> Solve other people issues.
-2. **Good first issue** --> The purpose of the good first issue label is to highlight which issues are suitable for a new contributor without a deep understanding of the codebase.
+1. **Good first issue** --> The purpose of the good first issue label is to highlight which issues are suitable for a new contributor without a deep understanding of the codebase.
 
 #### Medium
 1. **Sovereignty** --> Fork the repo to have the changes controlled by you.
@@ -36,6 +34,8 @@ Not all enhancements needs to go through all levels, these are levels of difficu
 1. **WEB-GUI** --> Turn your feature into customer ready
 
 ### Workflow
+
+Use the `github` command from terminal to set your RaspiBlitz to your own forked repo and development branch and use the command `patch` to sync your RaspiBlitz quickly with your latest commits. 
 
 **Solving issues**
 
