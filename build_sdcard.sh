@@ -1116,7 +1116,7 @@ if [ ${correctKey} -lt 1 ] || [ ${goodSignature} -lt 1 ]; then
 else
   echo 
   echo "****************************************************************"
-  echo "OK --> the PGP signature of the C-lighning SHA256SUMS is correct"
+  echo "OK --> the PGP signature of the C-lightning SHA256SUMS is correct"
   echo "****************************************************************"
   echo 
 fi
