@@ -7,13 +7,15 @@ fi
 
 # SHORTCUT COMMANDS you can call as user 'admin' from terminal
 
+# command: blitz
+# calls the the raspiblitz mainmenu (shortcut)
 function blitz() {
   cd /home/admin
   ./00raspiblitz.sh
 }
 
-# command: blitz
-# calls the the raspiblitz mainmenu (shortcut)
+# command: blitzhelp
+# gives overview of commands
 function blitzhelp() {
   echo
   echo "Blitz commands are consolidated here."
@@ -62,7 +64,6 @@ function blitzhelp() {
   echo "Extras:"
   echo "  whitepaper   download the whitepaper from the blockchain to /home/admin/bitcoin.pdf"
   echo "  notifyme     wrapper for blitz.notify.sh that will send a notification using the configured method and settings"
-  fi
 }
 
 # command: raspiblitz
