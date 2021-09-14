@@ -493,6 +493,7 @@ Use the new 'Homer' entry in Main Menu for more info.\n
   fi
 else
   echo "Homer Setting unchanged."
+fi
 
 # sparko process choice
 choice="off"; check=$(echo "${CHOICES}" | grep -c "k")
