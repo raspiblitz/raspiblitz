@@ -432,7 +432,7 @@ if [ "$1" = "status" ]; then
       if [ ${devMounted} -eq 0 ] && [ "${disk}" != "${hdd}" ] && [ "${hdd}" != "" ] && [ "${disk}" != "" ]; then
         sizeBytes=$(lsblk -o NAME,SIZE -b | grep "^${disk}" | awk '$1=$1' | cut -d " " -f 2)
         sizeGigaBytes=$(echo "scale=0; ${sizeBytes}/1024/1024/1024" | bc -l)
-        vedorname=$(lsblk -o NAME,VENDOR | grep "^${disk}" | awk '$1=$1' | cut -d " " -f 2)
+        vedorname=$(lsblk -o NAME,VENDOR | grep "^${disk}" | awk '$1=$1' | cut -d " " -f 2 | sed 's/[^a-zA-Z0-9]//g')
         mountoption="${disk} ${sizeGigaBytes} GB ${vedorname}"
         echo "raidCandidate[${drivecounter}]='${mountoption}'"
         drivecounter=$(($drivecounter +1))
