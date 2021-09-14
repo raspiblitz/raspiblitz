@@ -61,7 +61,7 @@ if [ "${lightning}" == "cln" ] || [ "${cln}" == "on" ]; then
   OPTIONS+=(k 'C-Lightning Sparko WebWallet' ${sparko})
 fi
 
-OPTIONS+=(m 'Homer Dashboard' ${homer})
+OPTIONS+=(d 'Homer Dashboard' ${homer})
 
 CHOICES=$(dialog --title ' Additional Mainnet Services ' \
           --checklist ' use spacebar to activate/de-activate ' \
@@ -478,7 +478,7 @@ else
 fi
 
 # Homer process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "m")
+choice="off"; check=$(echo "${CHOICES}" | grep -c "d")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${homer}" != "${choice}" ]; then
   echo "Homer settings changed .."
