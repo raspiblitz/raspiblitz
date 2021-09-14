@@ -125,7 +125,7 @@ OPTIONS+=(n 'CLN C-LIGHTNING NODE' ${clnNode})
 
 CHOICE_HEIGHT=$(("${#OPTIONS[@]}/2+1"))
 HEIGHT=$((CHOICE_HEIGHT+6))
-CHOICES=$(dialog --title ' Node Settings & Options ' --checklist ' use spacebar to activate/de-activate ' $HEIGHT 45 $CHOICE_HEIGHT "${OPTIONS[@]}" 2>&1 >/dev/tty)
+CHOICES=$(dialog --title ' Node Settings & Options ' --checklist ' use spacebar to activate/de-activate ' $HEIGHT 55 $CHOICE_HEIGHT "${OPTIONS[@]}" 2>&1 >/dev/tty)
 dialogcancel=$?
 clear
 
