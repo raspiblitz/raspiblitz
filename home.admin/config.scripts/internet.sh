@@ -31,38 +31,38 @@ isValidIP() {
     # IPv6
     echo 1
   else
-    # unkown
+    # unknown
     echo 0
   fi
 }
 
 #############################################
-# by deafult ipv6 is off (for publicIP)
+# by default ipv6 is off (for publicIP)
 if [ "${ipv6}" = "" ]; then
   ipv6="off"
 fi
 
 #############################################
-# get active network device (eth0 or wlan0) & trafiic
+# get active network device (eth0 or wlan0) & traffic
 networkDevice=$(ip addr | grep -v "lo:" | grep 'state UP' | tr -d " " | cut -d ":" -f2 | head -n 1)
 # get network traffic
 # ifconfig does not show eth0 on Armbian or in a VM - get first traffic info
 isArmbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Debian')
 if [ ${isArmbian} -gt 0 ] || [ ! -d "/sys/class/thermal/thermal_zone0/" ]; then
-  network_rx=$(ifconfig | grep -m1 'RX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
-  network_tx=$(ifconfig | grep -m1 'TX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
+  network_rx=$(ifconfig 2>/dev/null | grep -m1 'RX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
+  network_tx=$(ifconfig 2>/dev/null | grep -m1 'TX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
 else
-  network_rx=$(ifconfig ${networkDevice} | grep 'RX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
-  network_tx=$(ifconfig ${networkDevice} | grep 'TX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
+  network_rx=$(ifconfig ${networkDevice} 2>/dev/null | grep 'RX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
+  network_tx=$(ifconfig ${networkDevice} 2>/dev/null | grep 'TX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
 fi
 
 #############################################
 # get local IP (from different sources)
-localip_ALL=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | egrep -i '(*[eth|ens|enp|eno|wlan|inet|wlp][0-9]$)' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+localip_ALL=$(hostname -I | awk '{print $1}')
 if [ $(isValidIP ${localip_ALL}) -eq 0 ]; then
   localip_ALL=""
 fi
-localip_LAN=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | egrep -i '(*[eth][0-9]$)' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+localip_LAN=$(ip addr 2>/dev/null | grep 'state UP' -A2 | grep -E -v 'docker0|veth' | grep -E -i '(*[eth][0-9]$)*' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
 if [ $(isValidIP ${localip_LAN}) -eq 0 ]; then
   localip_LAN=""
 fi
@@ -81,34 +81,44 @@ fi
 
 #############################################
 # check for internet connection
+
+# first quick check if bitcoind has peers - if so the client is online
+# if not then recheck by pinging different sources if online
+# used cached results to not delay (cache will be updated by background process)
+source <(/home/admin/config.scripts/network.monitor.sh peer-status cached)
+
 online=0
-if [ ${#dnsServer} -gt 0 ]; then
+if [ "${peers}" != "0" ] && [ "${peers}" != "" ]; then
+  # bitcoind has peers - so device is online
+  online=1
+fi
+if [ ${online} -eq 0 ] && [ "${dnsServer}" != "" ]; then
   # re-test with user set dns server
-  online=$(ping ${dnsServer} -c 1 -W 2 | grep -c '1 received')
+  online=$(ping ${dnsServer} -c 1 -W 2 2>/dev/null | grep -c '1 received')
 fi
 if [ ${online} -eq 0 ]; then
   # re-test with other server
-  online=$(ping 1.0.0.1 -c 1 -W 2 | grep -c '1 received')
+  online=$(ping 1.0.0.1 -c 1 -W 2 2>/dev/null | grep -c '1 received')
 fi
 if [ ${online} -eq 0 ]; then
   # re-test with other server
-  online=$(ping 8.8.8.8 -c 1 -W 2 | grep -c '1 received')
+  online=$(ping 8.8.8.8 -c 1 -W 2 2>/dev/null | grep -c '1 received')
 fi
 if [ ${online} -eq 0 ]; then
   # re-test with other server (IPv6)
-  online=$(ping 2620:119:35::35 -c 1 -W 2 | grep -c '1 received')
+  online=$(ping 2620:119:35::35 -c 1 -W 2 2>/dev/null | grep -c '1 received')
 fi
 if [ ${online} -eq 0 ]; then
   # re-test with other server
-  online=$(ping 208.67.222.222 -c 1 -W 2 | grep -c '1 received')
+  online=$(ping 208.67.222.222 -c 1 -W 2 2>/dev/null | grep -c '1 received')
 fi
 if [ ${online} -eq 0 ]; then
   # re-test with other server (IPv6)
-  online=$(ping 2001:4860:4860::8844 -c 1 -W 2 | grep -c '1 received')
+  online=$(ping 2001:4860:4860::8844 -c 1 -W 2 2>/dev/null | grep -c '1 received')
 fi
 if [ ${online} -eq 0 ]; then
   # re-test with other server
-  online=$(ping 1.1.1.1 -c 1 -W 2 | grep -c '1 received')
+  online=$(ping 1.1.1.1 -c 1 -W 2 2>/dev/null | grep -c '1 received')
 fi
 
 #############################################
@@ -125,14 +135,17 @@ if [ ${runGlobal} -eq 1 ]; then
   else
     globalIP=$(curl -s -f -S -m 5 http://v4.ipv6-test.com/api/myip.php 2>/dev/null)
   fi
+  echo "##  curl returned:  ${globalIP}"
+  echo "##  curl exit code: ${?}"
+
 
   # sanity check on IP data
   # see https://github.com/rootzoll/raspiblitz/issues/371#issuecomment-472416349
   echo "# sanity check of IP data:"
   if [[ $globalIP =~ ^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$ ]]; then
-    echo "# OK IPv6"
+    echo "# OK IPv6 for ${globalIP}"
   elif [[ $globalIP =~ ^([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.([0-9]{1,2}|1[0-9][0-9]|2[0-4][0-9]|25[0-5])$ ]]; then
-    echo "# OK IPv4"
+    echo "# OK IPv4 for ${globalIP}"
   else
     echo "# FAIL - not an IPv4 or IPv6 address"
     globalIP=""
@@ -150,11 +163,11 @@ if [ ${runGlobal} -eq 1 ]; then
 
   ##########################################
   # Public IP
-  # the public that is maybe set by raspibitz config file (overriding aut-detection)
+  # the public that is maybe set by raspiblitz config file (overriding aut-detection)
   if [ "${publicIP}" == "" ]; then
     # if publicIP is not set by config ... use detected global IP
     if [ "${ipv6}" == "on" ]; then
-      # use ipv6 with brackes so that it can be used in http addresses like a IPv4
+      # use ipv6 with square brackets so that it can be used in http addresses like a IPv4
       publicIP="[${globalIP}]"
     else
       publicIP="${globalIP}"
@@ -175,6 +188,7 @@ if [ "$1" == "status" ]; then
   echo "### LOCAL INTERNET ###"
   echo "localip=${localip}"
   echo "dhcp=${dhcp}"
+  echo "configWifiExists=${configWifiExists}"
   echo "network_device=${networkDevice}"
   echo "network_rx='${network_rx}'"
   echo "network_tx='${network_tx}'"
@@ -182,11 +196,11 @@ if [ "$1" == "status" ]; then
   echo "online=${online}"
   if [ ${runGlobal} -eq 1 ]; then
     echo "ipv6=${ipv6}"
-     echo "# globalip --> ip detected from the outside"   
+    echo "# globalip --> ip detected from the outside"
     echo "globalip=${globalIP}"
     echo "# publicip --> may consider the static IP overide by raspiblitz config"
     echo "publicip=${publicIP}"
-    echo "# cleanip --> the publicip with no brakets like used on IPv6"
+    echo "# cleanip --> the publicip with no brackets like used on IPv6"
     echo "cleanip=${cleanIP}"
   else
     echo "# for more global internet info use 'status global'"
@@ -204,7 +218,7 @@ elif [ "$1" == "update-publicip" ]; then
   else
     echo "ip_changed=1"
     if [ "${ipv6}" == "on" ]; then
-      # use ipv6 with brackes so that it can be used in http addresses like a IPv4
+      # use ipv6 with square brackets so that it can be used in http addresses like an IPv4
       publicIP="[${globalIP}]"
     else
       publicIP="${globalIP}"
@@ -214,7 +228,7 @@ elif [ "$1" == "update-publicip" ]; then
 
   # store to raspiblitz.conf new publiciP
   publicIPValueExists=$(sudo cat /mnt/hdd/raspiblitz.conf | grep -c 'publicIP=')
-  if [ ${publicIPValueExists} -gt 1 ]; then 
+  if [ ${publicIPValueExists} -gt 1 ]; then
     # more then one publiIp entry - removing one
     sudo sed -i "s/^publicIP=.*//g" /mnt/hdd/raspiblitz.conf
   fi

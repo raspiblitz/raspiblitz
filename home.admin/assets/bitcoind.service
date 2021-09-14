@@ -1,26 +1,30 @@
 # RaspiBlitz: systemd unit for bitcoind
-
 [Unit]
-Description=Bitcoin daemon
-Wants=bootstrap.service
-After=bootstrap.service
+Description=Bitcoin-Daemon
+Wants=network.target
+After=network.target
 
-# for use with sendmail alert (coming soon)
+# for use with sendmail alert
 #OnFailure=systemd-sendmail@%n
 
 [Service]
 User=bitcoin
 Group=bitcoin
 Type=forking
-PIDFile=/home/bitcoin/.bitcoin/bitcoind.pid
+PIDFile=/mnt/hdd/bitcoin/bitcoind.pid
 ExecStartPre=-/home/admin/config.scripts/blitz.systemd.sh log blockchain STARTED
-ExecStart=/usr/local/bin/bitcoind -daemon -conf=/home/bitcoin/.bitcoin/bitcoin.conf -pid=/home/bitcoin/.bitcoin/bitcoind.pid
-KillMode=process
+ExecStart=/usr/local/bin/bitcoind -daemon -conf=/mnt/hdd/bitcoin/bitcoin.conf -pid=/mnt/hdd/bitcoin/bitcoind.pid -debuglogfile=/mnt/hdd/bitcoin/debug.log
 Restart=always
 TimeoutSec=120
 RestartSec=30
 StandardOutput=null
 StandardError=journal
+
+# Hardening measures
+PrivateTmp=true
+ProtectSystem=full
+NoNewPrivileges=true
+PrivateDevices=true
 
 [Install]
 WantedBy=multi-user.target

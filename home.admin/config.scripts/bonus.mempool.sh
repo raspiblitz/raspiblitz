@@ -2,7 +2,7 @@
 
 # https://github.com/mempool/mempool
 
-pinnedVersion="v2.1.2"
+pinnedVersion="v2.2.2"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -32,7 +32,7 @@ This can take multiple hours.
   fi
 
   # get network info
-  localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+  localip=$(hostname -I | awk '{print $1}')
   toraddress=$(sudo cat /mnt/hdd/tor/mempool/hostname 2>/dev/null)
   fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
 
@@ -40,9 +40,9 @@ This can take multiple hours.
 
     # TOR
     /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
-    whiptail --title " Mempool " --msgbox "Open in your local web browser & accept self-signed cert:
-https://${localip}:4081\n
-SHA1 Thumb/Fingerprint:
+    whiptail --title " Mempool " --msgbox "Open in your local web browser:
+http://${localip}:4080\n
+https://${localip}:4081 with Fingerprint:
 ${fingerprint}\n
 Hidden Service address for TOR Browser (QR see LCD):
 ${toraddress}
@@ -51,9 +51,9 @@ ${toraddress}
   else
 
     # IP + Domain
-    whiptail --title " Mempool " --msgbox "Open in your local web browser & accept self-signed cert:
-https://${localip}:4081\n
-SHA1 Thumb/Fingerprint:
+    whiptail --title " Mempool " --msgbox "Open in your local web browser:
+http://${localip}:4080\n
+https://${localip}:4081 with Fingerprint:
 ${fingerprint}\n
 Activate TOR to access the web block explorer from outside your local network.
 " 16 54
@@ -134,7 +134,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "# npm install for mempool explorer (frontend)"
 
     cd frontend
-    sudo -u mempool NG_CLI_ANALYTICS=false npm install
+    sudo -u mempool NG_CLI_ANALYTICS=false npm install --no-optional
     if ! [ $? -eq 0 ]; then
         echo "FAIL - npm install did not run correctly, aborting"
         exit 1
@@ -148,7 +148,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "# npm install for mempool explorer (backend)"
 
     cd ../backend/
-    sudo -u mempool NG_CLI_ANALYTICS=false npm install
+    sudo -u mempool NG_CLI_ANALYTICS=false npm install --no-optional
     if ! [ $? -eq 0 ]; then
         echo "FAIL - npm install did not run correctly, aborting"
         exit 1
@@ -213,6 +213,7 @@ EOF
 
     # open firewall
     echo "# *** Updating Firewall ***"
+    sudo ufw allow 4080 comment 'mempool HTTP'
     sudo ufw allow 4081 comment 'mempool HTTPS'
     echo ""
 
@@ -223,10 +224,12 @@ EOF
     # setup nginx symlinks
     sudo cp /home/admin/assets/nginx/snippets/mempool.conf /etc/nginx/snippets/mempool.conf
     sudo cp /home/admin/assets/nginx/snippets/mempool-http.conf /etc/nginx/snippets/mempool-http.conf
+    sudo cp /home/admin/assets/nginx/sites-available/mempool_.conf /etc/nginx/sites-available/mempool_.conf
     sudo cp /home/admin/assets/nginx/sites-available/mempool_ssl.conf /etc/nginx/sites-available/mempool_ssl.conf
     sudo cp /home/admin/assets/nginx/sites-available/mempool_tor.conf /etc/nginx/sites-available/mempool_tor.conf
     sudo cp /home/admin/assets/nginx/sites-available/mempool_tor_ssl.conf /etc/nginx/sites-available/mempool_tor_ssl.conf
 
+    sudo ln -sf /etc/nginx/sites-available/mempool_.conf /etc/nginx/sites-enabled/
     sudo ln -sf /etc/nginx/sites-available/mempool_ssl.conf /etc/nginx/sites-enabled/
     sudo ln -sf /etc/nginx/sites-available/mempool_tor.conf /etc/nginx/sites-enabled/
     sudo ln -sf /etc/nginx/sites-available/mempool_tor_ssl.conf /etc/nginx/sites-enabled/
@@ -251,6 +254,12 @@ User=mempool
 # Restart on failure but no more than default times (DefaultStartLimitBurst=5) every 10 minutes (600 seconds). Otherwise stop
 Restart=on-failure
 RestartSec=600
+
+# Hardening measures
+PrivateTmp=true
+ProtectSystem=full
+NoNewPrivileges=true
+PrivateDevices=true
 
 [Install]
 WantedBy=multi-user.target
@@ -306,9 +315,11 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     # remove nginx symlinks
     sudo rm -f /etc/nginx/snippets/mempool.conf
     sudo rm -f /etc/nginx/snippets/mempool-http.conf
+    sudo rm -f /etc/nginx/sites-enabled/mempool_.conf
     sudo rm -f /etc/nginx/sites-enabled/mempool_ssl.conf
     sudo rm -f /etc/nginx/sites-enabled/mempool_tor.conf
     sudo rm -f /etc/nginx/sites-enabled/mempool_tor_ssl.conf
+    sudo rm -f /etc/nginx/sites-available/mempool_.conf
     sudo rm -f /etc/nginx/sites-available/mempool_ssl.conf
     sudo rm -f /etc/nginx/sites-available/mempool_tor.conf
     sudo rm -f /etc/nginx/sites-available/mempool_tor_ssl.conf
@@ -330,6 +341,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   fi
 
   # close ports on firewall
+  sudo ufw deny 4080
   sudo ufw deny 4081
   exit 0
 fi
@@ -399,7 +411,7 @@ if [ "$1" = "update" ]; then
       sudo systemctl restart nginx
 
       # Remove useless deps
-      echo "Removing unneccesary modules..."
+      echo "Removing unnecessary modules..."
       npm prune --production
 
 

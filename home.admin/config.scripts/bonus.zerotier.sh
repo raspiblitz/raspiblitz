@@ -24,7 +24,7 @@ whiptail --title " Info ZeroTier " --msgbox "\n\
 Manage your ZeroTier account at https://my.zerotier.com. Add additional devices
 (desktop/laptop/mobile) to your network so they can communicate.\n\n\
 
-Currentlly connected to: $(echo $networkDetails | awk '{ print $3}')\n
+Currently connected to: $(echo $networkDetails | awk '{ print $3}')\n
 Assigned IP: $(echo $networkDetails | awk '{ print $9}')\n\n\
 
 Find more information on how to get started:\n

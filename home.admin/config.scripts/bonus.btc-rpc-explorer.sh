@@ -31,7 +31,7 @@ This can take multiple hours.
   fi
 
   # get network info
-  localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+  localip=$(ip addr | grep 'state UP' -A2 | grep -E -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
   toraddress=$(sudo cat /mnt/hdd/tor/btc-rpc-explorer/hostname 2>/dev/null)
   fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
 
@@ -39,9 +39,9 @@ This can take multiple hours.
 
     # TOR
     /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
-    whiptail --title " BTC-RPC-Explorer " --msgbox "Open in your local web browser & accept self-signed cert:
-https://${localip}:3021\n
-SHA1 Thumb/Fingerprint:
+    whiptail --title " BTC-RPC-Explorer " --msgbox "Open in your local web browser:
+http://${localip}:3020\n
+https://${localip}:3021 with Fingerprint:
 ${fingerprint}\n
 Login is 'admin' with your Password B\n
 Hidden Service address for TOR Browser (QR see LCD):
@@ -51,9 +51,9 @@ ${toraddress}
   else
 
     # IP + Domain
-    whiptail --title " BTC-RPC-Explorer " --msgbox "Open in your local web browser & accept self-signed cert:
-https://${localip}:3021\n
-SHA1 Thumb/Fingerprint:
+    whiptail --title " BTC-RPC-Explorer " --msgbox "Open in your local web browser:
+http://${localip}:3020\n
+https://${localip}:3021 with Fingerprint:
 ${fingerprint}\n
 Login is 'admin' with your Password B\n
 Activate TOR to access the web block explorer from outside your local network.
@@ -117,7 +117,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     cd /home/btcrpcexplorer
     sudo -u btcrpcexplorer git clone https://github.com/janoside/btc-rpc-explorer.git
     cd btc-rpc-explorer
-    sudo -u btcrpcexplorer git reset --hard v2.2.0
+    sudo -u btcrpcexplorer git reset --hard v3.2.0
     sudo -u btcrpcexplorer npm install
     if ! [ $? -eq 0 ]; then
         echo "FAIL - npm install did not run correctly, aborting"
@@ -149,6 +149,10 @@ BTCEXP_BITCOIND_USER=$RPC_USER
 BTCEXP_BITCOIND_PASS=$PASSWORD_B
 #BTCEXP_BITCOIND_COOKIE=/path/to/bitcoind/.cookie
 BTCEXP_BITCOIND_RPC_TIMEOUT=10000
+# Privacy mode disables:
+# Exchange-rate queries, IP-geolocation queries
+# Default: false
+BTCEXP_PRIVACY_MODE=true
 # Password protection for site via basic auth (enter any username, only the password is checked)
 # Default: none
 BTCEXP_BASIC_AUTH_PASSWORD=$PASSWORD_B
@@ -206,6 +210,12 @@ User=btcrpcexplorer
 # Restart on failure but no more than default times (DefaultStartLimitBurst=5) every 10 minutes (600 seconds). Otherwise stop
 Restart=on-failure
 RestartSec=600
+
+# Hardening measures
+PrivateTmp=true
+ProtectSystem=full
+NoNewPrivileges=true
+PrivateDevices=true
 
 [Install]
 WantedBy=multi-user.target

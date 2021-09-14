@@ -5,7 +5,7 @@
 # https://github.com/dgarage/NBXplorer/releases
 NBXplorerVersion="v2.1.49"
 # https://github.com/btcpayserver/btcpayserver/releases
-BTCPayVersion="v1.0.7.0"
+BTCPayVersion="v1.0.7.2"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -27,7 +27,7 @@ if [ "$1" = "status" ]; then
     isInstalled=$(sudo ls /etc/systemd/system/btcpayserver.service 2>/dev/null | grep -c 'btcpayserver.service')
     echo "installed=${isInstalled}"
 
-    localIP=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+    localIP=$(hostname -I | awk '{print $1}')
     echo "localIP='${localIP}'"
     echo "httpsPort='23001'"
     echo "publicIP='${publicIP}'"
@@ -110,7 +110,7 @@ if [ "$1" = "menu" ]; then
 	  fi
   fi
 
-  text="Local Webrowser: https://${localIP}:${httpsPort}"
+  text="Local Web Browser: https://${localIP}:${httpsPort}"
 
   if [ ${#publicDomain} -gt 0 ]; then
      text="${text}
@@ -145,7 +145,7 @@ consider adding a IP2TOR Bridge: MAINMENU > SUBSCRIBE > IP2TOR"
 
 text="${text}\n
 To get the 'Connection String' to activate Lightning Payments:
-MAINMENU > LNDCREDS > EXPORT > BTCPay Server"
+MAINMENU > CONNECT > BTCPay Server"
 
   whiptail --title " BTCPay Server " --msgbox "${text}" 17 69
   
@@ -353,7 +353,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     cd /home/btcpay || exit 1
     echo "# Download the NBXplorer source code ..."
     sudo -u btcpay git clone https://github.com/dgarage/NBXplorer.git 2>/dev/null
-    cd NBXplorer
+    cd NBXplorer || exit 1
     sudo -u btcpay git reset --hard $NBXplorerVersion
     echo "# Build NBXplorer ..."
     # from the build.sh with path
@@ -379,6 +379,7 @@ Type=simple
 PIDFile=/run/nbxplorer/nbxplorer.pid
 Restart=on-failure
 
+# Hardening measures
 PrivateTmp=true
 ProtectSystem=full
 NoNewPrivileges=true
@@ -460,6 +461,12 @@ Group=btcpay
 Type=simple
 PIDFile=/run/btcpayserver/btcpayserver.pid
 Restart=on-failure
+
+# Hardening measures
+PrivateTmp=true
+ProtectSystem=full
+NoNewPrivileges=true
+PrivateDevices=true
 
 [Install]
 WantedBy=multi-user.target

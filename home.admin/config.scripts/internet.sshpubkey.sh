@@ -5,7 +5,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "# config script to init/show/transfer ssh pub keys."
  echo "# -> return pubkey (and will init if needed):"
  echo "# internet.sshpubkey.sh get"
- echo "# -> transfer ssh-pub to a authorizedkey of remote server:"
+ echo "# -> transfer ssh-pub to a authorized key of remote server:"
  echo "# internet.sshpubkey.sh transfer [REMOTEUSER]@[REMOTESERVER]"
  echo "err='just informational output'"
  exit 1

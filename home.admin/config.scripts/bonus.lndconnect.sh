@@ -52,6 +52,7 @@ port=""
 addcert=1
 supportsTOR=0
 usingIP2TOR=""
+connectInfo="When you start the App choose to connect to your own node.\n(DIY / Remote-Node / lndconnect)\nClick on the 'Scan QR' button."
 
 if [ "${targetWallet}" = "zap-ios" ]; then
   if [ ${forceTOR} -eq 1 ]; then
@@ -71,9 +72,11 @@ if [ "${targetWallet}" = "zap-ios" ]; then
   fi  
   
 elif [ "${targetWallet}" = "zap-android" ]; then
+  connectInfo="- start the Zap Wallet --> SETUP WALLET\n  or choose new Wallet in app menu\n- scan the QR code \n- confirm host address"
   if [ ${forceTOR} -eq 1 ]; then
     # when ZAP runs on TOR it uses gRPC
     port="10009"
+    connectInfo="${connectInfo}\n- install & connect Orbot App (VPN mode)"
   else
     # normal ZAP uses gRPC ports
     port="10009"
@@ -84,7 +87,7 @@ elif [ "${targetWallet}" = "zap-android" ]; then
     forceTOR=1
     host="${ip2torGRPC_IP}"
     port="${ip2torGRPC_PORT}"
-  fi  
+  fi 
 
 elif [ "${targetWallet}" = "zeus-ios" ]; then
 
@@ -92,6 +95,7 @@ elif [ "${targetWallet}" = "zeus-ios" ]; then
     usingIP2TOR="LND-REST-API"
     forceTOR=1
     host=$(sudo cat /mnt/hdd/tor/lndrest8080/hostname)
+    connectInfo="- start the Zeus Wallet --> lndconnect\n- scan the QR code \n- activate 'Tor' option \n- activate 'Certification Verification' option\n- save Node Config"
 
 elif [ "${targetWallet}" = "zeus-android" ]; then
 
@@ -99,6 +103,7 @@ elif [ "${targetWallet}" = "zeus-android" ]; then
     usingIP2TOR="LND-REST-API"
     forceTOR=1
     host=$(sudo cat /mnt/hdd/tor/lndrest8080/hostname)
+    connectInfo="- start the Zeus Wallet --> lndconnect\n- scan the QR code \n- activate 'Tor' option \n- activate 'Certification Verification' option\n- save Node Config"
 
 elif [ "${targetWallet}" = "sendmany-android" ]; then
 
@@ -130,7 +135,7 @@ fi
 
 # get the local IP as default host
 if [ ${#host} -eq 0 ]; then
-    host=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+    host=$(hostname -I | awk '{print $1}')
 fi
 
 # change host to dynDNS if set
@@ -172,7 +177,7 @@ fi
 #### RUN LNDCONNECT
 
 # generate data parts
-macaroon=$(sudo base64 /mnt/hdd/app-data/lnd/data/chain/${network}/${chain}net/admin.macaroon | tr -d '=' | tr '/+' '_-' | tr -d '\n')
+macaroon=$(sudo base64 /home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon | tr -d '=' | tr '/+' '_-' | tr -d '\n')
 cert=$(sudo grep -v 'CERTIFICATE' /mnt/hdd/lnd/tls.cert | tr -d '=' | tr '/+' '_-' | tr -d '\n')
 
 # generate URI parameters
@@ -199,7 +204,7 @@ fi
 if [ ${#usingIP2TOR} -gt 0 ] && [ ${forceTOR} -eq 0 ]; then
   msg="Your IP2TOR bridge '${usingIP2TOR}' is used for this connection.\n\n"
 fi
-msg="You should now see the pairing QR code on the RaspiBlitz LCD.\n\n${msg}When you start the App choose to connect to your own node.\n(DIY / Remote-Node / lndconnect)\n\nClick on the 'Scan QR' button. Scan the QR on the LCD and <Continue> or <Console QRcode> to see it in this window."
+msg="You should now see the pairing QR code on the RaspiBlitz LCD.\n\n${msg}${connectInfo}\n\nIf your RaspiBlitz has no LCD use <Console QRcode>"
 whiptail --backtitle "Connecting Mobile Wallet" \
 	 --title "Pairing by QR code" \
 	 --yes-button "Continue" \

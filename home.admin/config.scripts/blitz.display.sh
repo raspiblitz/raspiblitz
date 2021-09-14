@@ -211,7 +211,7 @@ if [ "${command}" == "hdmi" ]; then
   elif [ "${secondParameter}" == "off" ]; then
     sudo /home/admin/config.scripts/blitz.display.sh set-display lcd
   else
-    echo "error='unkown second parameter'"
+    echo "error='unknown second parameter'"
     exit 1
   fi
   exit 0
@@ -220,7 +220,7 @@ fi
 #######################################
 # DISPLAY TYPED INSTALLS & UN-INSTALLS
 # HDMI is the default - every added
-# displayClass needs a install fuction
+# displayClass needs a install function
 # and a uninstall function back to HDMI
 #######################################
 
@@ -237,6 +237,12 @@ function install_lcd() {
   if [ "${baseimage}" = "raspios_arm64"  ] || [ "${baseimage}" = "debian_rpi64" ]; then
 
     echo "# INSTALL 64bit LCD DRIVER"
+
+    # set font
+    sudo sed -i "s/^CHARMAP=.*/CHARMAP=\"UTF-8\"/" /etc/default/console-setup
+    sudo sed -i "s/^CODESET=.*/CODESET=\"guess\"/" /etc/default/console-setup 
+    sudo sed -i "s/^FONTFACE=.*/FONTFACE=\"TerminusBoldVGA\"/" /etc/default/console-setup
+    sudo sed -i "s/^FONTSIZE=.*/FONTSIZE=\"8x16\"/" /etc/default/console-setup 
 
     # hold bootloader
     sudo apt-mark hold raspberrypi-bootloader
@@ -261,7 +267,9 @@ function install_lcd() {
 
     # modify /boot/config.txt 
     sudo sed -i "s/^hdmi_force_hotplug=.*//g" /boot/config.txt 
-    echo "hdmi_force_hotplug=1" >> /boot/config.txt
+    sudo sed -i '/^hdmi_group=/d' /boot/config.txt 2>/dev/null
+    sudo sed -i "/^hdmi_mode=/d" /boot/config.txt 2>/dev/null
+    #echo "hdmi_force_hotplug=1" >> /boot/config.txt
     sudo sed -i "s/^dtparam=i2c_arm=.*//g" /boot/config.txt 
     # echo "dtparam=i2c_arm=on" >> /boot/config.txt --> this is to be called I2C errors - see: https://github.com/rootzoll/raspiblitz/issues/1058#issuecomment-739517713
     # don't enable SPI and UART ports by default
@@ -282,7 +290,7 @@ function install_lcd() {
     fi
     containsModification=$(sudo grep -c "${modification}" /boot/cmdline.txt)
     if [ ${containsModification} -eq 0 ]; then
-      echo "# FAIL: was not able to mofify /boot/cmdline.txt"
+      echo "# FAIL: was not able to modify /boot/cmdline.txt"
       echo "err='ended unclear state'"
       exit 1
     fi
@@ -320,8 +328,12 @@ function uninstall_lcd() {
     sudo apt-get install -y xinput-calibrator
 
     # remove modifications of config.txt
-    sudo sed -i "s/^hdmi_force_hotplug=.*//g" /boot/config.txt 
-    sudo sed -i "s/^dtoverlay=.*//g" /boot/config.txt 
+    sudo sed -i '/^hdmi_force_hotplug=/d' /boot/config.txt 2>/dev/null
+    sudo sed -i '/^hdmi_group=/d' /boot/config.txt 2>/dev/null
+    sudo sed -i "/^hdmi_mode=/d" /boot/config.txt 2>/dev/null
+    sudo sed -i "s/^dtoverlay=.*//g" /boot/config.txt 2>/dev/null
+    echo "hdmi_group=1" >> /boot/config.txt
+    echo "hdmi_mode=3" >> /boot/config.txt
     echo "dtoverlay=pi3-disable-bt" >> /boot/config.txt
     echo "dtoverlay=disable-bt" >> /boot/config.txt
 
@@ -394,9 +406,9 @@ function install_lcd_legacy() {
     # add waveshare mod
     sudo cp ./waveshare35a.dtbo /boot/overlays/
 
-    # modify /boot/config.txt 
+    # modify /boot/config.txt
     sudo sed -i "s/^hdmi_force_hotplug=.*//g" /boot/config.txt 
-    echo "hdmi_force_hotplug=1" >> /boot/config.txt
+    #echo "hdmi_force_hotplug=1" >> /boot/config.txt
     sudo sed -i "s/^dtparam=i2c_arm=.*//g" /boot/config.txt 
     echo "dtparam=i2c_arm=on" >> /boot/config.txt
     # don't enable SPI and UART ports by default
@@ -445,6 +457,14 @@ function install_headless() {
     else
       echo "# auto-login of pi user is already deactivated"
     fi
+  elif [ "${baseimage}" = "dietpi" ]; then
+    # TODO make switch between headless & HDMI possible
+    echo "# TODO: reverse HDMI mode if set before"
+    echo "# headless is already the default mode"
+  elif [ "${baseimage}" = "ubuntu" ] || [ "${baseimage}" = "armbian" ]; then
+    # TODO make switch between headless & HDMI possible
+    echo "# TODO: reverse HDMI mode if set before"
+    echo "# headless is already the default mode"
   else
     echo "err='baseimage not supported'"
     exit 1
@@ -453,18 +473,33 @@ function install_headless() {
 
 function uninstall_headless() {
   if [ "${baseimage}" = "raspbian" ]||[ "${baseimage}" = "raspios_arm64" ]|| [ "${baseimage}" = "debian_rpi64" ]; then
+    # activate auto-login
+    sudo raspi-config nonint do_boot_behaviour B2
     modificationExists=$(sudo cat /etc/systemd/system/getty@tty1.service.d/autologin.conf | grep -c "autologin pi")
     if [ "${modificationExists}" == "0" ]; then
       echo "# activating auto-login of pi user again"
-      # set Raspi to boot up automatically with user pi (for the LCD)
+      # set Raspi to boot up automatically with user pi
       # https://www.raspberrypi.org/forums/viewtopic.php?t=21632
-      sudo raspi-config nonint do_boot_behaviour B2
       sudo bash -c "echo '[Service]' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
       sudo bash -c "echo 'ExecStart=' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
       sudo bash -c "echo 'ExecStart=-/sbin/agetty --autologin pi --noclear %I 38400 linux' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
     else
       echo "# auto-login of pi user already active"
     fi
+   elif [ "${baseimage}" = "dietpi" ]; then
+      # set DietPi to boot up automatically with user pi (for the LCD)
+      # requires AUTO_SETUP_AUTOSTART_TARGET_INDEX=7 in the dietpi.txt
+      # /DietPi/dietpi/dietpi-autostart overwrites /etc/systemd/system/getty@tty1.service.d/dietpi-autologin.conf on reboot
+      sudo sed -i 's/agetty --autologin root %I $TERM/agetty --autologin pi --noclear %I 38400 linux/' /DietPi/dietpi/dietpi-autostart
+   elif [ "${baseimage}" = "ubuntu" ] || [ "${baseimage}" = "armbian" ]; then
+      modificationExists=$(sudo cat /lib/systemd/system/getty@.service | grep -c "autologin pi")
+      if [ "${modificationExists}" == "0" ]; then
+        sudo bash -c "echo '[Service]' >> /lib/systemd/system/getty@.service"
+        sudo bash -c "echo 'ExecStart=' >> /lib/systemd/system/getty@.service"
+        sudo bash -c "echo 'ExecStart=-/sbin/agetty --autologin pi --noclear %I 38400 linux' >> /lib/systemd/system/getty@.service"
+      else
+        echo "# auto-login of pi user already active"
+      fi
   else
     echo "err='baseimage not supported'"
     exit 1
@@ -500,23 +535,15 @@ if [ "${command}" == "set-display" ]; then
     exit 1
   fi
 
+  # check if display class parameter is given
   if [ "${paramDisplayClass}" == "" ]; then
     echo "err='missing parameter'"
     exit 1
-  elif [ "${paramDisplayClass}" == "${displayClass}" ]; then
-
-    # normally dont make any changes here - but it can be the case that this called by recover/update process
-    # where raspiblitz.info (base image) raspiblitz.conf (user config) have different values - check fo this case:
-    confAndInfoValueIsSame=$(sudo cat /home/admin/raspiblitz.info | grep -c "displayClass=${paramDisplayClass}}")
-    if [ "${confAndInfoValueIsSame}" == "0" ]; then
-      echo "# raspiblitz.info is different from raspiblitz.conf --> enforcing ${displayClass} for both"
-      source /home/admin/raspiblitz.info
-      # continue with the raspiblitz.info value of displayClass as actual state (not the overwritten one from raspiblitz.conf)
-    else
-      echo "# raspiblitz.info (AND raspiblitz.conf) already running ${displayClass} - no need for change"
-      exit 1
-    fi
   fi
+
+  echo "# old(${displayClass})"
+  echo "# new(${paramDisplayClass})"
+
   if [ "${paramDisplayClass}" == "hdmi" ] || [ "${paramDisplayClass}" == "lcd" ] || [ "${paramDisplayClass}" == "headless" ]; then
 
     # uninstall old state
@@ -539,5 +566,5 @@ if [ "${command}" == "set-display" ]; then
 fi
 
 # unknown command
-echo "error='unkown command'"
+echo "error='unknown command'"
 exit 1

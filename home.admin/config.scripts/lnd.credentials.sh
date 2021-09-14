@@ -26,7 +26,7 @@ function copy_mac_set_perms() {
 }
 
 function check_macaroons() {
-macaroons="admin.macaroon invoice.macaroon readonly.macaroon invoices.macaroon chainnotifier.macaroon signer.macaroon  walletkit.macaroon router.macaroon"
+macaroons="admin.macaroon invoice.macaroon readonly.macaroon invoices.macaroon chainnotifier.macaroon signer.macaroon walletkit.macaroon router.macaroon"
 missing=0
 for macaroon in $macaroons
 do
@@ -67,7 +67,7 @@ if [ "$1" = "reset" ]; then
     keepOldMacaroons=0
   fi
   if [ "$2" == "keepold" ]; then
-    echo "# add the missing default macaroons without deauthenticating the old ones"
+    echo "# add the missing default macaroons without de-authenticating the old ones"
     resetTLS=0
     resetMacaroons=1
     keepOldMacaroons=1
@@ -79,7 +79,7 @@ if [ "$1" = "reset" ]; then
     cd || exit
     sudo find /mnt/hdd/app-data/lnd/data/chain/"${network}"/"${chain}"net/ -iname '*.macaroon' -delete
     sudo find /home/bitcoin/.lnd/data/chain/"${network}"/"${chain}"net/ -iname '*.macaroon' -delete
-    if [ ${keepOldMacaroons} -eq 0 ]; then
+    if [ "${keepOldMacaroons}" != "1" ]; then
       sudo rm /home/bitcoin/.lnd/data/chain/"${network}"/"${chain}"net/macaroons.db
     fi
   fi
@@ -107,6 +107,8 @@ if [ "$1" = "reset" ]; then
     copy_mac_set_perms readonly.macaroon lndreadonly "${network}" "${chain}"
     echo "# OK DONE"
   fi
+
+  /home/admin/config.scripts/lnd.credentials.sh sync
 
 ###########################
 # SYNC

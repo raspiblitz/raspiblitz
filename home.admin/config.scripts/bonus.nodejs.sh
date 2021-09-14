@@ -1,16 +1,45 @@
 #!/bin/bash
 
-VERSION="v14.15.4"
+# consider installing with apt when updated next
+# https://github.com/nodesource/distributions/blob/master/README.md#installation-instructions
+
+VERSION="v14.17.6"
 # get checksums from -> https://nodejs.org/dist/vx.y.z/SHASUMS256.txt (tar.xs files)
-CHECKSUM_linux_arm64="b990bd99679158c3164c55a20c2a6677c3d9e9ffdfa0d4a40afe9c9b5e97a96f"
-CHECKSUM_linux_armv7l="bafe4bfb22b046cdda3475d23cd6999c5ea85180c180c4bbb94014920aa7231b"
-CHECKSUM_linux_x64="ed01043751f86bb534d8c70b16ab64c956af88fd35a9506b7e4a68f5b8243d8a"
+CHECKSUM_linux_arm64="9c4f3a651e03cd9b5bddd33a80e8be6a6eb15e518513e410bb0852a658699156"
+CHECKSUM_linux_armv7l="09ad804c7354ebaded407d0ce64e72e534801fc435be084af3e5b16b1a9c96d0"
+CHECKSUM_linux_x64="3bbe4faf356738d88b45be222bf5e858330541ff16bd0d4cfad36540c331461b"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "config script to install NodeJs $VERSION"
- echo "bonus.nodejs.sh [on|off]"
+ echo "bonus.nodejs.sh [on|off|info]"
  exit 1
+fi
+
+ # determine nodeJS VERSION and DISTRO
+isARM=$(uname -m | grep -c 'arm')
+isAARCH64=$(uname -m | grep -c 'aarch64')
+isX86_64=$(uname -m | grep -c 'x86_64')
+if [ ${isARM} -eq 1 ] ; then
+  DISTRO="linux-armv7l"
+  CHECKSUM="${CHECKSUM_linux_armv7l}"
+elif [ ${isAARCH64} -eq 1 ] ; then
+  DISTRO="linux-arm64"
+  CHECKSUM="${CHECKSUM_linux_arm64}"
+elif [ ${isX86_64} -eq 1 ] ; then
+  DISTRO="linux-x64"
+  CHECKSUM="${CHECKSUM_linux_x64}"
+elif [ ${#DISTRO} -eq 0 ]; then
+  echo "# FAIL: Was not able to determine architecture"
+  exit 1
+fi
+
+# info
+if [ "$1" = "info" ]; then
+  echo "NODEVERSION='${VERSION}'"
+  echo "NODEDISTRO='${DISTRO}'"
+  echo "NODEPATH='/usr/local/lib/nodejs/node-$VERSION-$DISTRO/bin'"
+  exit 0
 fi
 
 # switch on
@@ -20,34 +49,15 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   if ! [ ${nodeJSInstalled} -eq 0 ]; then
     echo "nodeJS is already installed"
   else
-    # determine nodeJS VERSION and DISTRO
-    echo "Detect CPU architecture ..."
-    isARM=$(uname -m | grep -c 'arm')
-    isAARCH64=$(uname -m | grep -c 'aarch64')
-    isX86_64=$(uname -m | grep -c 'x86_64')
-        
-    if [ ${isARM} -eq 1 ] ; then
-      DISTRO="linux-armv7l"
-      CHECKSUM="${CHECKSUM_linux_armv7l}"
-    elif [ ${isAARCH64} -eq 1 ] ; then
-      DISTRO="linux-arm64"
-      CHECKSUM="${CHECKSUM_linux_arm64}"
-    elif [ ${isX86_64} -eq 1 ] ; then
-      DISTRO="linux-x64"
-      CHECKSUM="${CHECKSUM_linux_x64}"
-    elif [ ${#DISTRO} -eq 0 ]; then
-      echo "FAIL: Was not able to determine architecture"
-      exit 1
-    fi
+
+    # install latest nodejs
+    # https://github.com/nodejs/help/wiki/Installation
+    echo "*** Install NodeJS $VERSION-$DISTRO ***"
     echo "VERSION: ${VERSION}"
     echo "DISTRO: ${DISTRO}"
     echo "CHECKSUM: ${CHECKSUM}"
     echo ""
-  
-    # install latest nodejs
-    # https://github.com/nodejs/help/wiki/Installation
-    echo "*** Install NodeJS $VERSION-$DISTRO ***"
-  
+
     # download
     cd /home/admin/download
     wget https://nodejs.org/dist/$VERSION/node-$VERSION-$DISTRO.tar.xz
@@ -69,7 +79,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo ln -sf /usr/local/lib/nodejs/node-$VERSION-$DISTRO/bin/npm /usr/bin/npm
     sudo ln -sf /usr/local/lib/nodejs/node-$VERSION-$DISTRO/bin/npx /usr/bin/npx
     # add to PATH permanently
-    sudo bash -c "echo 'PATH=\$PATH:/usr/local/lib/nodejs/node-\$VERSION-\$DISTRO/bin/' >> /etc/profile"
+    sudo bash -c "echo 'PATH=\$PATH:/usr/local/lib/nodejs/node-${VERSION}-${DISTRO}/bin/' >> /etc/profile"
     echo ""
   
     # check if nodeJS was installed
@@ -80,6 +90,15 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       exit 1
     fi
   fi
+
+  npm7installed=$(npm -v 2>/dev/null | grep -c "7.")
+  if ! [ ${npm7installed} -eq 0 ]; then
+    # needed for RTL
+    # https://github.blog/2021-02-02-npm-7-is-now-generally-available/
+    echo "# Update npm to v7"
+    sudo npm install --global npm@7
+  fi
+
   echo "Installed nodeJS $(node -v)"
   exit 0
 fi

@@ -4,7 +4,7 @@ import re
 import subprocess
 import sys
 
-# IDEA: At the momemt its just Reverse-SSh Tunnels thats why [INTERNAL-PORT]<[EXTERNAL-PORT]
+# IDEA: At the moment its just Reverse-SSH Tunnels thats why [INTERNAL-PORT]<[EXTERNAL-PORT]
 # For the future also just local ssh tunnels could be added with [INTERNAL-PORT]-[EXTERNAL-PORT]
 # for the use case when a server wants to use a RaspiBlitz behind a NAT as Lightning backend
 
@@ -33,6 +33,12 @@ Group=root
 Environment="AUTOSSH_GATETIME=0"
 ExecStart=/usr/bin/autossh [MONITORING-PORT] -N -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o ServerAliveInterval=60 -o ServerAliveCountMax=2 [PLACEHOLDER]
 StandardOutput=journal
+
+# Hardening measures
+PrivateTmp=true
+ProtectSystem=full
+NoNewPrivileges=true
+PrivateDevices=true
 
 [Install]
 WantedBy=multi-user.target
@@ -162,7 +168,7 @@ def on(restore_on_update=False):
 
     # copy SSH keys for backup (for update with new sd card)
     print("making backup copy of SSH keys")
-    subprocess.call("sudo cp -r /root/.ssh /mnt/hdd/ssh/root_backup", shell=True)
+    subprocess.call("sudo /home/admin/config.scripts/blitz.ssh.sh backup", shell=True)
     print("DONE")
 
     # write ssh tunnel data to raspiblitz config (for update with new sd card)

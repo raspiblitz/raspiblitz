@@ -1,32 +1,56 @@
 # CHANGES between Releases
 
-## Whats new in Version 1.7.0 of RaspiBlitz?
+## What's new in Version 1.7.1 of RaspiBlitz?
 
-- New: Raspberry Pi OS Base Image 64-bit (August 2020)
+- New: C-lightning v0.10.1 [details](https://github.com/ElementsProject/lightning/releases/tag/v0.10.1)
+- New: C-lightningREST v0.5.1 [details](https://github.com/Ride-The-Lightning/c-lightning-REST/releases/tag/v0.5.1)
+- New: CLN plugin: Sparko [details](https://github.com/fiatjaf/sparko)
+- New: Suez - channel visualization for LND and CLN [details](https://github.com/prusnak/suez)
+- New: Homer Dashboard 21.03.2[details](https://github.com/bastienwirtz/homer/blob/main/README.md)
+- Update: Bitcoin Core v0.21.1 [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-0.21.1.md)
+- Update: LND v0.13.1 [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.13.1-beta)
+- Update: RTL 0.11.2 [details](https://github.com/Ride-The-Lightning/RTL/releases/tag/v0.11.2)
+- Update: Specter Desktop 1.6.0 [details](https://github.com/cryptoadvance/specter-desktop/blob/master/README.md)
+- Update: Lightning Terminal v0.5.0-alpha [details](https://github.com/lightninglabs/lightning-terminal/releases/tag/v0.5.0-alpha)
+- Update: Pool CLI v0.5.1-alpha [details](https://github.com/lightninglabs/pool/releases/tag/v0.5.1-alpha)
+- Update: Balance of Satoshis 10.7.8 (BOS) + keep data on reinstall [details](https://github.com/alexbosworth/balanceofsatoshis/blob/master/CHANGELOG.md#version-8010)
+- Update: Circuitbreaker v0.3.0 [details](https://github.com/lightningequipment/circuitbreaker/blob/master/README.md)
+- Update: JoinMarket v0.9.1 [details](https://github.com/JoinMarket-Org/joinmarket-clientserver/#joinmarket-clientserver)
+- Update: JoininBox v0.6.0 [details](https://github.com/openoms/joininbox/tree/master#joininbox)
+- Update: Electrum Server in Rust (electrs) v0.8.11 [details](https://github.com/romanz/electrs/blob/v0.8.11/RELEASE-NOTES.md#0811-18-aug-2021)
+- Update: Mempool 2.2.2 [details](https://github.com/mempool/mempool)
+- Update: BTC-RPC-Explorer v3.2.0 [details](https://github.com/janoside/btc-rpc-explorer/blob/master/CHANGELOG.md#v320)
+- Update: stacking-sats-kraken 0.4.4 [details](https://github.com/dennisreimann/stacking-sats-kraken/blob/master/README.md)
+
+
+## What's new in Version 1.7.0 of RaspiBlitz?
+
+- New: Raspberry Pi OS Base Image 64-bit (April 2021)
 - New: Build SD card Image with parameters & FatPack [details](https://github.com/rootzoll/raspiblitz/pull/2044)
-- New: Lightning Terminal 0.4.1-alpha (Loop, Pool & Faraday UI Bundle) [details](https://github.com/lightninglabs/lightning-terminal#lightning-terminal-lit)
-- New: chantools 0.8.2 [details](https://github.com/guggero/chantools/blob/master/README.md)
+- New: Improve LND uptime and reliability over Tor [details](https://github.com/rootzoll/raspiblitz/pull/2148)
+- New: Lightning Terminal v0.4.1-alpha (Loop, Pool & Faraday UI Bundle) [details](https://github.com/lightninglabs/lightning-terminal#lightning-terminal-lit)
+- New: Channel Tools (chantools) v0.8.2 [details](https://github.com/guggero/chantools/blob/master/README.md)
 - New: Circuitbreaker LND firewall (settings menu) [details](https://github.com/lightningequipment/circuitbreaker/blob/master/README.md)
 - New: Telegraf metrics (experimental) [details](https://github.com/rootzoll/raspiblitz/issues/1369)
 - New: Download whitepaper from blockchain [details](https://github.com/rootzoll/raspiblitz/pull/2017)
-- New: Homer Dashboard 21.03.2[details](https://github.com/bastienwirtz/homer/blob/main/README.md)
-- Update: bitcoin-core version 0.21.0-beta [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-0.21.0.md)
+- New: Extended CONNECT and SYSTEM options in the ssh menu [details](https://github.com/rootzoll/raspiblitz/pull/2119)
+- Update: bitcoin-core version 0.21.0-beta with UPDATE option [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-0.21.0.md)
 - Update: LND version 0.12.1-beta [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.12.1-beta)
 - Update: RTL 0.10.1 [details](https://github.com/Ride-The-Lightning/RTL/releases/tag/v0.10.1)
-- Update: Sphinx-Relay 2.0.3 (always latest release tag & improved connection dialog)
-- Update: Thunderhub 0.12.12 [details](https://github.com/apotdevin/thunderhub/releases/tag/v0.12.12)
-- Update: Electrs 0.8.8 [details](https://github.com/romanz/electrs/blob/master/RELEASE-NOTES.md#088-22-feb-2021)
-- Update: BTCPayServer 1.0.7.0 [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.0.7.0)
+- Update: Sphinx-Relay 2.0.11 (always latest release tag & improved connection dialog)
+- Update: Thunderhub 0.12.13 [details](https://github.com/apotdevin/thunderhub/releases/tag/v0.12.12)
+- Update: Electrs 0.8.9 [details](https://github.com/romanz/electrs/blob/master/RELEASE-NOTES.md#088-22-feb-2021)
+- Update: BTCPayServer 1.0.7.2 [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.0.7.2)
 - Update: Specter Desktop 1.3.0 [details](https://github.com/cryptoadvance/specter-desktop/blob/master/README.md)
-- Update: Balance of Satoshis 8.0.2 (BOS) [details](https://github.com/alexbosworth/balanceofsatoshis/blob/master/CHANGELOG.md#version-802)
-- Update: Faraday 0.2.3-alpha [details](https://github.com/lightninglabs/faraday/releases/tag/v0.2.3-alpha)
+- Update: Balance of Satoshis 8.0.5 (BOS) with CLI autocompletion [details](https://github.com/alexbosworth/balanceofsatoshis/blob/master/CHANGELOG.md#version-802)
+- Update: Faraday v0.2.3-alpha [details](https://github.com/lightninglabs/faraday/releases/tag/v0.2.3-alpha)
 - Update: JoinMarket 0.8.2 [details](https://github.com/JoinMarket-Org/joinmarket-clientserver/releases/tag/v0.8.2)
 - Update: JoininBox 0.3.4 [details](https://github.com/openoms/joininbox/releases/tag/v0.3.2)
 - Update: mempool v2.1.2 [detail](https://github.com/mempool/mempool/releases/tag/v2.1.2)
-- Update: BTC-RPC-Explorer v2.0.0 [details](https://github.com/janoside/btc-rpc-explorer/blob/master/CHANGELOG.md#v220)
+- Update: BTC-RPC-Explorer v3.0.0 [details](https://github.com/janoside/btc-rpc-explorer/blob/master/CHANGELOG.md#v300)
 - Update: stacking-sats-kraken 0.4.2 [details](https://github.com/dennisreimann/stacking-sats-kraken/blob/master/README.md)
 
-## Whats new in Version 1.6.3 of RaspiBlitz?
+## What's new in Version 1.6.3 of RaspiBlitz?
 
 - Update: mempool space 2.0.1 [details](https://github.com/mempool/mempool)
 - Update: specter 1.0.0
@@ -40,7 +64,7 @@
 - Fix: Specter Persistence
 - Experimental: MENU > LNDCRED > EXPORT > BTCPAY Server connection string with baked macaroon
 
-## Whats new in Version 1.6.2 of RaspiBlitz?
+## What's new in Version 1.6.2 of RaspiBlitz?
 
 - New: Pool (Inbound Liquidity Marketplace) [details](https://github.com/lightninglabs/pool/blob/master/README.md)
 - New: Sphinx Relay Server [details](https://github.com/stakwork/sphinx-relay/blob/master/README.md)
@@ -58,7 +82,7 @@
 - Update: Experimental BTRFS support 
 - Fix: DropBox API
 
-## Whats new in Version 1.6.1 of RaspiBlitz?
+## What's new in Version 1.6.1 of RaspiBlitz?
 
 - EMERGENCY-Update: LND version 0.11.1-beta [details](https://lists.linuxfoundation.org/pipermail/lightning-dev/2020-October/002819.html)
 - Update: IP2Tor+LetsEncrypt Functional Test [details](https://github.com/rootzoll/raspiblitz/issues/1412)
@@ -81,7 +105,7 @@
 
 For ALL small bug fixes & improvements see: https://github.com/rootzoll/raspiblitz/milestone/11
 
-## Whats new in Version 1.6 of RaspiBlitz?
+## What's new in Version 1.6 of RaspiBlitz?
 
 - Update: Raspberry Pi OS Base Image (May 2020)
 - Update: bitcoin-core version 0.20.0-beta [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/)
@@ -110,12 +134,12 @@ For ALL small bug fixes & improvements see: https://github.com/rootzoll/raspibli
 - Removed: Torrent Download of Blockchain (Copy over LAN now default for RP3)
 - Shoppinglist: 4GB RaspberryPi 4 is now default for Standard Package (will still run with less) 
 
-## Whats new in Version 1.5.1 of RaspiBlitz?
+## What's new in Version 1.5.1 of RaspiBlitz?
 
 - Bugfix: DropBox Backup of Static-Channel-Backup
 - Bugfix: Torrentfiles with active tracker 
 
-## Whats new in Version 1.5 of RaspiBlitz?
+## What.s new in Version 1.5 of RaspiBlitz?
 
 Beside many small improvements and changes, these are most important changes:
 
@@ -145,7 +169,7 @@ Beside many small improvements and changes, these are most important changes:
 
 DOWNLOAD the new RaspiBlitz v1.5 image [here](README.md#installing-the-software).
 
-## Whats new in Version 1.4 of RaspiBlitz?
+## What's new in Version 1.4 of RaspiBlitz?
 
 Beside many small improvements and changes, these are most important changes:
 
@@ -174,7 +198,7 @@ For full details see issue list of [Release 1.4 Milestone](https://github.com/ro
 
 Find the full Tutorial how to build a RaspiBlitz in the [README](README.md) or follow the [instructions to update to the latest version](README.md#updating-raspiblitz-to-new-version).
 
-## Whats new in Version 1.3 of RaspiBlitz?
+## What's new in Version 1.3 of RaspiBlitz?
 
 Version 1.3 is using the new Raspbian Buster that is ready to use with the RaspberryPi 4 (also still works with RaspberryPi 3).
 
@@ -199,7 +223,7 @@ Version 1.3 is using the new Raspbian Buster that is ready to use with the Raspb
 
 For full details see issue list of [Release 1.3 Milestone](https://github.com/rootzoll/raspiblitz/milestone/6?closed=1).
 
-## Whats new in Version 1.2 of RaspiBlitz?
+## What's new in Version 1.2 of RaspiBlitz?
 
 Version 1.2 packs some more fixes and enhancements to make the RaspiBlitz more stable, protect HDD data better and support you better in case of data corruption of the blockchain data.
 
@@ -228,7 +252,7 @@ Version 1.2 packs some more fixes and enhancements to make the RaspiBlitz more s
 
 For full details see issue list of [Release 1.2 Milestone](https://github.com/rootzoll/raspiblitz/milestone/5?closed=1).
 
-## Whats new in Version 1.1 of RaspiBlitz?
+## What's new in Version 1.1 of RaspiBlitz?
 
 Version 1.1 packs some first fixes and enhancements to make the RaspiBlitz more stable, protect HDD data better and support you better in case of data corruption of the blockchain data.
 

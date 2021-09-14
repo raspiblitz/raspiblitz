@@ -46,8 +46,8 @@ cfg.reload()
 
 # todo: make sure that also ACME script uses TOR if activated
 session = requests.session()
-if cfg.run_behind_tor.value:
-    session.proxies = {'http': 'socks5h://127.0.0.1:9050', 'https': 'socks5h://127.0.0.1:9050'}
+# if cfg.run_behind_tor.value:
+#    session.proxies = {'http': 'socks5h://127.0.0.1:9050', 'https': 'socks5h://127.0.0.1:9050'}
 
 
 #####################
@@ -212,7 +212,7 @@ def dynu_update(domain, token, ip):
 
 def subscriptions_new(ip, dnsservice, domain, token, target):
 
-    # check if already one subscrption exists (limit to just one)
+    # check if already one subscription exists (limit to just one)
     # https://github.com/rootzoll/raspiblitz/issues/1786
     if Path(SUBSCRIPTIONS_FILE).is_file():
         subs = toml.load(SUBSCRIPTIONS_FILE)
@@ -296,7 +296,7 @@ def subscriptions_new(ip, dnsservice, domain, token, target):
     eprint(str(err))
     if out.find("error=") > -1:
         time.sleep(6)
-        raise BlitzError("letsancrypt acme failed", out)
+        raise BlitzError("letsencrypt acme failed", out)
 
     print("# OK - LETSENCRYPT DOMAIN IS READY")
     return subscription
@@ -353,7 +353,7 @@ def get_subscription(subscription_id):
 
 
 def get_domain_by_ip(ip):
-    # does subscriptin file exists
+    # does subscription file exists
     if Path(SUBSCRIPTIONS_FILE).is_file():
         subs = toml.load(SUBSCRIPTIONS_FILE)
     else:
@@ -393,7 +393,7 @@ def menu_make_subscription():
         "\nChoose a free DNS service to work with:",
         choices=choices, width=60, height=10, title="Select Service")
 
-    # if user chosses CANCEL
+    # if user chooses CANCEL
     if code != d.OK:
         sys.exit(0)
 
@@ -427,8 +427,8 @@ If you havent already go to https://duckdns.org
         # check for valid input
         if len(subdomain) == 0:
             Dialog(dialog="dialog", autowidgetsize=True).msgbox('''
-This looks not like a valid subdomain.
-        ''', title="Unvalid Input")
+This does not look like a valid subdomain.
+        ''', title="Invalid Input")
             sys.exit(0)
 
         # enter the token
@@ -446,7 +446,7 @@ This looks not like a valid subdomain.
             token = ""
         if len(token) < 20:
             Dialog(dialog="dialog", autowidgetsize=True).msgbox('''
-This looks not like a valid token.
+This does not look like a valid token.
         ''', title="Invalid Input")
             sys.exit(0)
 
@@ -468,7 +468,7 @@ If you havent already go to https://dynu.com
         domain = text.strip()
         if len(domain) < 6:
             Dialog(dialog="dialog", autowidgetsize=True).msgbox('''
-This looks not like a valid DDNS.
+This does not look like a valid DDNS.
         ''', title="Invalid Input")
             sys.exit(0)
         os.system("clear")
@@ -490,7 +490,7 @@ Continue in your dynu.com account:
         clientid = clientid.split(' ')[0]
         if len(clientid) < 20 or len(clientid.split('-'))<2: 
             Dialog(dialog="dialog", autowidgetsize=True).msgbox('''
-This looks not like valid ClientID.
+This does not look like a valid ClientID.
         ''', title="Invalid Input")
             sys.exit(0)
 
@@ -503,7 +503,7 @@ This looks not like valid ClientID.
         secret = secret.split(' ')[0]
         if len(secret) < 10:
             Dialog(dialog="dialog", autowidgetsize=True).msgbox('''
-This looks not like valid.
+This does not look like a valid SECRET.
         ''', title="Invalid Input")
             sys.exit(0)
 
@@ -570,11 +570,11 @@ Create one first and try again.
             "\nChoose the IP2TOR subscription:",
             choices=choices, width=60, height=10, title="Select")
 
-        # if user chosses CANCEL
+        # if user chooses CANCEL
         if code != d.OK:
             sys.exit(0)
 
-        # get the slected IP2TOR bridge
+        # get the selected IP2TOR bridge
         ip2tor_select = ip2tor_subs[int(tag)]
         ip = ip2tor_select["ip"]
         serviceName = ip2tor_select["name"]
@@ -582,7 +582,7 @@ Create one first and try again.
 
     elif tag == "DYNDNS":
 
-        # the subscriptioNew method will handle acrivating the dnydns part
+        # the subscriptioNew method will handle activating the dnydns part
         ip = "dyndns"
 
     elif tag == "STATIC":
@@ -602,7 +602,7 @@ Create one first and try again.
             ip = ""
         if len(ip) == 0:
             Dialog(dialog="dialog", autowidgetsize=True).msgbox('''
-This looks not like a valid IP.
+This does not look like a valid IP.
         ''', title="Invalid Input")
             sys.exit(0)
 
@@ -613,7 +613,7 @@ This looks not like a valid IP.
 
         # restart certain services to update urls
         if "SPHINX" in serviceName:
-            print("# restarting Sphinx Relay to pickup new public url (please wait) ...")
+            print("# restarting services to pickup new public url (please wait) ...")
             os.system("sudo systemctl restart sphinxrelay")
             time.sleep(8)
 
@@ -631,7 +631,7 @@ to reach the service you wanted.
         # https://github.com/rootzoll/raspiblitz/issues/1772
         if "failed oAuth Service" in str(e):
             Dialog(dialog="dialog", autowidgetsize=True).msgbox('''
-A temporary error with the DYNU API happend:\nUnvalid OAuth Bearer Token
+A temporary error with the DYNU API happened:\nInvalid OAuth Bearer Token
 Please try again later or choose another dynamic domain service.
 ''', title="Exception on Subscription")
             sys.exit(1)
@@ -748,7 +748,7 @@ def subscription_detail():
             except Exception as e:
                 sub['https_response'] = 0
             if sub['https_response']!=200 and len(sub['warning'])==0:
-                sub['warning'] = "Not able to get HTTPS response."
+                sub['warning'] = "Not able to get HTTPS response ({0}).".format(sub['https_response'])
                 
         print(json.dumps(sub, indent=2))
 

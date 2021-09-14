@@ -21,13 +21,24 @@ fi
 
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
-  echo "Turn ON: Touchscreen"
+  echo "# Turn ON: Touchscreen"
+
+  # check that display class is `lcd`
+  if [ "${displayClass}" != "lcd" ]; then
+    echo "# displayClass(${displayClass}) is not supported for touchscreen"
+    echo "error='not supported'"
+    exit 1
+  fi
+
+  echo "# make sure hdmi_force_hotplug is deactivated"
+  sudo sed -i '/^hdmi_force_hotplug=/d' /boot/config.txt 2>/dev/null
 
   # update install sources
   echo "making sure system dependencies are installed"
   sudo apt-get update >/dev/null
   sudo apt-get install -y unclutter xterm python3-pyqt5 >/dev/null
   sudo apt-get install -y xfonts-terminus >/dev/null
+  sudo apt-get install -y xinput-calibrator 
 
   # check if python3 env exists - if not install it
   if [ ! -d /home/admin/python3-env-lnd ]; then
@@ -199,6 +210,10 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # switch back to console login
   echo "switching back to console mode on boot"
   sudo raspi-config nonint do_boot_behaviour B2 >/dev/null 2>&1
+
+  # make sure hdmi_force_hotplug=1 is added again to config.txt
+  sudo sed -i '/^hdmi_force_hotplug=/d' /boot/config.txt 2>/dev/null
+  #echo "hdmi_force_hotplug=1" >> /boot/config.txt
 
   # set user pi user for autostart
   # TODO(frennkie/rootzoll) what should happen here? This does the same as "on".
