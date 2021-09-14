@@ -30,14 +30,14 @@ if [ ${#chain} -eq 0 ]; then
 fi
 
 clear
-echo ""
+echo
 echo "***************************************************************"
 echo "* RASPIBLITZ DEBUG LOGS "
 echo "***************************************************************"
 echo "blitzversion: ${codeVersion}"
 echo "chainnetwork: ${network} / ${chain}"
 uptime
-echo ""
+echo
 
 echo "*** SETUPPHASE / BOOTSTRAP ***"
 echo "see logs: cat /home/admin/raspiblitz.log"
@@ -46,66 +46,66 @@ echo "state--> ${state}"
 if [ "${setupPhase}" != "done" ]; then
   sudo tail -n 20 /home/admin/raspiblitz.log
 fi
-echo ""
+echo
 
 echo "*** BACKGROUNDSERVICE ***"
 echo "to monitor Background service call: sudo journalctl -f -u background"
-echo ""
+echo
 
 echo "*** BLOCKCHAIN (MAINNET) SYSTEMD STATUS ***"
 sudo systemctl status ${network}d -n2 --no-pager
-echo ""
+echo
 echo "*** LAST BLOCKCHAIN (MAINNET) ERROR LOGS ***"
 echo "sudo journalctl -u ${network}d -b --no-pager -n8"
 sudo journalctl -u ${network}d -b --no-pager -n8
 cat /home/admin/systemd.blockchain.log | grep "ERROR" | tail -n -2
-echo ""
+echo
 echo "*** LAST BLOCKCHAIN (MAINNET) 20 INFO LOGS ***"
 echo "sudo tail -n 20 /mnt/hdd/${network}/debug.log"
 sudo tail -n 20 /mnt/hdd/${network}${pathAdd}/debug.log
-echo ""
+echo
 
 echo "*** LND (MAINNET) SYSTEMD STATUS ***"
 if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ] || [ "${lnd}" == "1" ]; then
   sudo systemctl status lnd -n2 --no-pager
-  echo ""
+  echo
   echo "*** LAST LND (MAINNET) ERROR LOGS ***"
   echo "sudo journalctl -u lnd -b --no-pager -n12"
   sudo journalctl -u lnd -b --no-pager -n12
   cat /home/admin/systemd.lightning.log | grep "ERROR" | tail -n -1
-  echo ""
+  echo
   echo "*** LAST 30 LND (MAINNET) INFO LOGS ***"
   echo "sudo tail -n 30 /mnt/hdd/lnd/logs/${network}/mainnet/lnd.log"
   sudo tail -n 30 /mnt/hdd/lnd/logs/${network}/mainnet/lnd.log
 else
   echo "- OFF by config -"
 fi
-echo ""
+echo
 
 echo "*** C-LIGHTNING (MAINNET) SYSTEMD STATUS ***"
 if [ "${lightning}" == "cln" ] || [ "${cln}" == "on" ] || [ "${cln}" == "1" ]; then
   sudo systemctl status lightningd -n2 --no-pager
-  echo ""
+  echo
   echo "*** LAST 30 C-LIGHTNING (MAINNET) INFO LOGS ***"
   echo "sudo tail -n 30 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log"
   sudo tail -n 30 /home/bitcoin/.lightning/${network}/cl.log
 else
   echo "- not activated -"
 fi
-echo ""
+echo
 
 echo "*** BLOCKCHAIN (TESTNET) SYSTEMD STATUS ***"
 if [ "${testnet}" == "on" ] || [ "${testnet}" == "1" ]; then
   sudo systemctl status t${network}d -n2 --no-pager
-  echo ""
+  echo
   echo "*** LAST BLOCKCHAIN (TESTNET) ERROR LOGS ***"
   echo "sudo journalctl -u t${network}d -b --no-pager -n8"
   sudo journalctl -u t${network}d -b --no-pager -n8
-  echo ""
+  echo
   echo "*** LAST BLOCKCHAIN (TESTNET) 20 INFO LOGS ***"
   echo "sudo tail -n 20 /mnt/hdd/${network}/tdebug.log"
   sudo tail -n 20 /mnt/hdd/${network}/tdebug.log
-  echo ""
+  echo
 else
   echo "- OFF by config -"
 fi
@@ -113,43 +113,43 @@ fi
 echo "*** LND (TESTNET) SYSTEMD STATUS ***"
 if [ "${tlnd}" == "on" ] || [ "${tlnd}" == "1" ]; then
   sudo systemctl status tlnd -n2 --no-pager
-  echo ""
+  echo
   echo "*** LAST LND (TESTNET) ERROR LOGS ***"
   echo "sudo journalctl -u tlnd -b --no-pager -n12"
   sudo journalctl -u tlnd -b --no-pager -n12
-  echo ""
+  echo
   echo "*** LAST 30 LND (TESTNET) INFO LOGS ***"
   echo "sudo tail -n 30 /mnt/hdd/lnd/logs/${network}/testnet/tnd.log"
   sudo tail -n 30 /mnt/hdd/lnd/logs/${network}/testnet/lnd.log
 else
   echo "- OFF by config -"
 fi
-echo ""
+echo
 
 echo "*** C-LIGHTNING (TESTNET) SYSTEMD STATUS ***"
 if [ "${tcln}" == "on" ] || [ "${tcln}" == "1" ]; then
   sudo systemctl status tlightningd -n2 --no-pager
-  echo ""
+  echo
   echo "*** LAST 30 C-LIGHTNING (TESTNET) INFO LOGS ***"
   echo "sudo tail -n 30 /home/bitcoin/.lightning/testnet/cl.log"
   sudo tail -n 30 /home/bitcoin/.lightning/testnet/cl.log
 else
   echo "- not activated -"
 fi
-echo ""
+echo
 
 echo "*** BLOCKCHAIN (SIGNET) SYSTEMD STATUS ***"
 if [ "${signet}" == "on" ] || [ "${signet}" == "1" ]; then
   sudo systemctl status s${network}d -n2 --no-pager
-  echo ""
+  echo
   echo "*** LAST BLOCKCHAIN (SIGNET) ERROR LOGS ***"
   echo "sudo journalctl -u s${network}d -b --no-pager -n8"
   sudo journalctl -u s${network}d -b --no-pager -n8
-  echo ""
+  echo
   echo "*** LAST BLOCKCHAIN (SIGNET) 20 INFO LOGS ***"
   echo "sudo tail -n 20 /mnt/hdd/${network}/sdebug.log"
   sudo tail -n 20 /mnt/hdd/${network}/sdebug.log
-  echo ""
+  echo
 else
   echo "- OFF by config -"
 fi
@@ -157,177 +157,178 @@ fi
 echo "*** LND (SIGNET) SYSTEMD STATUS ***"
 if [ "${slnd}" == "on" ] || [ "${slnd}" == "1" ]; then
   sudo systemctl status slnd -n2 --no-pager
-  echo ""
+  echo
   echo "*** LAST LND (SIGNET) ERROR LOGS ***"
   echo "sudo journalctl -u slnd -b --no-pager -n12"
   sudo journalctl -u slnd -b --no-pager -n12
-  echo ""
+  echo
   echo "*** LAST 30 LND (SIGNET) INFO LOGS ***"
   echo "sudo tail -n 30 /mnt/hdd/lnd/logs/${network}/signet/tnd.log"
   sudo tail -n 30 /mnt/hdd/lnd/logs/${network}/signet/lnd.log
 else
   echo "- OFF by config -"
 fi
-echo ""
+echo
 
 echo "*** C-LIGHTNING (SIGNET) SYSTEMD STATUS ***"
 if [ "${scln}" == "on" ] || [ "${scln}" == "1" ]; then
   sudo systemctl status slightningd -n2 --no-pager
-  echo ""
+  echo
   echo "*** LAST 30 C-LIGHTNING (SIGNET) INFO LOGS ***"
   echo "sudo tail -n 30 /home/bitcoin/.lightning/signet/cl.log"
   sudo tail -n 30 /home/bitcoin/.lightning/signet/cl.log
 else
   echo "- not activated -"
 fi
-echo ""
+echo
 
 echo "*** NGINX SYSTEMD STATUS ***"
 sudo systemctl status nginx -n2 --no-pager
-echo ""
+echo
 
 echo "*** LAST NGINX LOGS ***"
 echo "sudo journalctl -u nginx -b --no-pager -n20"
 sudo journalctl -u nginx -b --no-pager -n20
 echo "--> CHECK CONFIG: sudo nginx -t"
 sudo nginx -t
-echo ""
+echo
 
 echo "*** BLITZAPI SYSTEMD STATUS ***"
 sudo systemctl status blitzapi -n2 --no-pager
-echo ""
+echo
 
 echo "*** LAST BLITZAPI LOGS ***"
 echo "sudo journalctl -u blitzapi -b --no-pager -n20"
 sudo journalctl -u nginx -b --no-pager -n20
 echo "--> CHECK CONFIG: sudo nginx -t"
 sudo nginx -t
-echo ""
+echo
 
 if [ "${touchscreen}" == "" ] || [ "${touchscreen}" == "0" ] || [ "${touchscreen}" == "off" ]; then
   echo "- TOUCHSCREEN is OFF by config"
 else
-  echo ""
+  echo
   echo "*** LAST 20 TOUCHSCREEN LOGS ***"
   echo "sudo tail -n 20 /home/pi/.cache/lxsession/LXDE-pi/run.log"
   sudo tail -n 20 /home/pi/.cache/lxsession/LXDE-pi/run.log
-  echo ""
+  echo
 fi
 
 if [ "${loop}" == "" ] || [ "${loop}" == "off" ]; then
   echo "- Loop is OFF by config"
 else
-  echo ""
+  echo
   echo "*** LAST 20 LOOP LOGS ***"
   echo "sudo journalctl -u loopd -b --no-pager -n20"
   sudo journalctl -u loopd -b --no-pager -n20
-  echo ""
+  echo
 fi
 
-if [ "${rtlWebinterface}" == "" ] || [ "${rtlWebinterface}" == "off" ]; then
-  echo "- LND-RTL is OFF by config"
-else
-  echo ""
+
+if [ "${rtlWebinterface}" == "on" ]; then
+  echo
   echo "*** LND-RTL ***"
   sudo systemctl status RTL -n10 --no-pager
-  echo ""
+  echo
+else
+  echo "- LND-RTL is OFF by config"
 fi
 
-if [ "${crtlWebinterface}" == "" ] || [ "${crtlWebinterface}" == "off" ]; then
-  echo "- CLN-RTL is OFF by config"
-else
-  echo ""
+if [ "${crtlWebinterface}" == "on" ]; then
+  echo
   echo "*** CLN-RTL ***"
   sudo systemctl status cRTL -n10 --no-pager
-  echo ""
+  echo
+else
+  echo "- CLN-RTL is OFF by config"
 fi
 
-if [ "${ElectRS}" == "" ] || [ "${ElectRS}" == "off" ]; then
-  echo "- Electrum Rust Server is OFF by config"
-else
-  echo ""
+if [ "${ElectRS}" == "on" ]; then
+  echo
   echo "*** LAST 20 ElectRS LOGS ***"
   echo "sudo journalctl -u electrs -b --no-pager -n20"
   sudo journalctl -u electrs -b --no-pager -n20
-  echo ""
+  echo
   echo "*** ElectRS Status ***"
   sudo /home/admin/config.scripts/bonus.electrs.sh status
-  echo ""
+  echo
+else
+  echo "- Electrum Rust Server is OFF by config"
 fi
 
-if [ "${lit}" == "" ] || [ "${lit}" == "off" ]; then
-  echo "- LIT is OFF by config"
-else
-  echo ""
+if [ "${lit}" == "on" ]; then
+  echo
   echo "*** LAST 20 LIT LOGS ***"
   echo "sudo journalctl -u litd -b --no-pager -n20"
   sudo journalctl -u litd -b --no-pager -n20
-  echo ""
+  echo
+else
+  echo "- LIT is OFF by config"
 fi
 
-if [ "${BTCPayServer}" == "" ] || [ "${BTCPayServer}" == "off" ]; then
-  echo "- BTCPayServer is OFF by config"
-else
-  echo ""
+if [ "${BTCPayServer}" == "on" ]; then
+  echo
   echo "*** LAST 20 BTCPayServer LOGS ***"
   echo "sudo journalctl -u btcpayserver -b --no-pager -n20"
   sudo journalctl -u btcpayserver -b --no-pager -n20
-  echo ""
+  echo
+else
+  echo "- BTCPayServer is OFF by config"
 fi
 
-if [ "${LNBits}" == "" ] || [ "${LNBits}" == "off" ]; then
-  echo "- LNbits is OFF by config"
-else
-  echo ""
+if [ "${LNBits}" == "on" ]; then
+  echo
   echo "*** LAST 20 LNbits LOGS ***"
   echo "sudo journalctl -u lnbits -b --no-pager -n20"
   sudo journalctl -u lnbits -b --no-pager -n20
-  echo ""
+  echo
+else
+  echo "- LNbits is OFF by config"
 fi
 
-if [ "${thunderhub}" == "" ] || [ "${thunderhub}" == "0" ] | [ "${thunderhub}" == "off" ]; then
-  echo "- Thunderhub is OFF by config"
-else
-  echo ""
+if [ "${thunderhub}" == "on" ]; then
+  echo
   echo "*** LAST 20 Thunderhub LOGS ***"
   echo "sudo journalctl -u thunderhub -b --no-pager -n20"
   sudo journalctl -u thunderhub -b --no-pager -n20
-  echo ""
+  echo
+else
+  echo "- Thunderhub is OFF by config"
 fi
 
-if [ "${specter}" == "" ] || [ "${specter}" == "0" ] || [ "${specter}" == "off" ]; then
-  echo "- SPECTER is OFF by config"
-else
-  echo ""
+if [ "${specter}" == "on" ]; then
+  echo
   echo "*** LAST 20 SPECTER LOGS ***"
   echo "sudo journalctl -u specter -b --no-pager -n20"
   sudo journalctl -u specter -b --no-pager -n20
-  echo ""
+  echo
+else
+  echo "- SPECTER is OFF by config"
 fi
 
-if [ "${sphinxrelay}" == "" ] || [ "${sphinxrelay}" == "0" ] || [ "${sphinxrelay}" == "off" ]; then
-  echo "- SPHINX is OFF by config"
-else
-  echo ""
+if [ "${sphinxrelay}" == "on" ]; then
+  echo
   echo "*** LAST 20 SPHINX LOGS ***"
   echo "sudo journalctl -u sphinxrelay -b --no-pager -n20"
   sudo journalctl -u sphinxrelay -b --no-pager -n20
-  echo ""
+  echo
+else
+  echo "- SPHINX is OFF by config"
 fi
 
-echo ""
+echo
 echo "*** MOUNTED DRIVES ***"
 df -T -h
-echo ""
+echo
 
-echo ""
+echo
 echo "*** DATADRIVE ***"
 sudo /home/admin/config.scripts/blitz.datadrive.sh status
-echo ""
+echo
 
 echo "*** NETWORK ***"
 sudo /home/admin/config.scripts/internet.sh status | grep 'network_device\|localip\|dhcp'
-echo ""
+echo
 
 echo "*** HARDWARE TEST RESULTS ***"
 showImproveInfo=0
@@ -337,14 +338,14 @@ if [ ${#undervoltageReports} -gt 0 ]; then
     showImproveInfo=1
   fi
 fi
-echo ""
+echo
 
 echo "*** SYSTEM STATUS (can take some seconds to gather) ***"
 sudo /home/admin/config.scripts/blitz.statusscan.sh
-echo ""
+echo
 
 echo "*** OPTION: SHARE THIS DEBUG OUTPUT ***"
 echo "An easy way to share this debug output on GitHub or on a support chat"
 echo "use the following command and share the resulting link:"
-echo "debug | nc termbin.com 9999"
-echo ""
+echo "debug | torsocks nc termbin.com 9999"
+echo
