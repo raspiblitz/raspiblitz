@@ -307,7 +307,7 @@ else
   echo "For setup logs: cat raspiblitz.log"
   echo "or call the command 'debug' to see bigger report."
 fi
-echo "Blitz command line options: blitz help"
+echo "Blitz command line options: blitzhelp"
 echo "Back to menus use command: raspiblitz"
 echo
 exit 0
