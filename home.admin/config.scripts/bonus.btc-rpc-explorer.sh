@@ -234,6 +234,10 @@ EOF
   
   echo "# needs to finish creating txindex to be functional"
   echo "# monitor with: sudo tail -n 20 -f /mnt/hdd/bitcoin/debug.log"
+  echo "#npm audi fix#"
+  cd /home/btcrpcexplorer/btc-rpc-explorer/
+  sudo  npm audit fix
+
 
   ## Enable BTCEXP_ADDRESS_API if BTC-RPC-Explorer is active
   # see /home/admin/config.scripts/bonus.electrsexplorer.sh
