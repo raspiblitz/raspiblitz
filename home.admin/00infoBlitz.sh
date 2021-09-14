@@ -104,10 +104,10 @@ if [ -n "${btc_path}" ]; then
     btc_title="${btc_title} (${chain}net)"
 
     # get sync status
-    last_block="$($bitcoincli_alias getblockcount 2>/dev/null)"
+    headers="$(echo "${blockchaininfo}" | jq -r '.headers')"
     block_verified="$(echo "${blockchaininfo}" | jq -r '.blocks')"
-    block_diff=$(expr ${last_block} - ${block_verified})
-    blockInfo="${block_verified}/${last_block}"
+    block_diff=$(expr ${headers} - ${block_verified})
+    blockInfo="${block_verified}/${headers}"
 
     progress="$(echo "${blockchaininfo}" | jq -r '.verificationprogress')"
     sync_percentage=$(echo $progress | awk '{printf( "%.2f%%", 100 * $1)}')
