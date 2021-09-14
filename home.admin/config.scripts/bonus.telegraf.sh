@@ -64,7 +64,7 @@ fi
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "*** INSTALL TELEGRAF ***"
-  # soure and target dir for copy operation
+  # source and target dir for copy operation
   telegraf_source_dir=${resources_dir}
   telegraf_target_dir=/etc/telegraf
   #
@@ -72,7 +72,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   telegraf_conf_file=${telegraf_target_dir}/telegraf.conf
 
   echo "*** telegraf installation: apt-get part"
-  # get the repository publy key for apt-get
+  # get the repository public key for apt-get
   curl -sL https://repos.influxdata.com/influxdb.key | sudo apt-key add -
   DISTRIB_ID=$(lsb_release -c -s)
   # 
@@ -122,7 +122,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   #   telegrafInfluxPassword
   #
   echo "*** telegraf installation: telegrafInfluxUrl      = '${telegrafInfluxUrl}'"
-  # due to the occurance of '/' in the ${telegrafInfluxUrl} we need to switch to '#' as the sed-separator
+  # due to the occurrence of '/' in the ${telegrafInfluxUrl} we need to switch to '#' as the sed-separator
   sudo sed -i "s#^urls = .*#urls = \[\"${telegrafInfluxUrl}\"\]#g" ${telegraf_conf_file}
   #
   # the other replacements work with the std separator '/'

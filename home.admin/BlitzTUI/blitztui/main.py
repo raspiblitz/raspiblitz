@@ -522,7 +522,7 @@ class AppWindow(QMainWindow):
 
         process = QProcess(self)
         process.start('uxterm', ['-fa', 'Terminus', '-fs', '9', '-fn', 'fixed', '-into', str(int(self.ui.widget.winId())),
-                                '+sb', '-hold', '-e', 'bash -c \"sudo /home/admin/XXshutdown.sh\"'])
+                                '+sb', '-hold', '-e', 'bash -c \"sudo /home/admin/config.scripts/blitz.shutdown.sh\"'])
 
     def b4_restart(self):
         log.info("restart")
@@ -532,7 +532,7 @@ class AppWindow(QMainWindow):
 
         process = QProcess(self)
         process.start('uxterm', ['-fa', 'Terminus', '-fs', '9', '-fn', 'fixed', '-into', str(int(self.ui.widget.winId())),
-                                '+sb', '-hold', '-e', 'bash -c \"sudo /home/admin/XXshutdown.sh reboot\"'])
+                                '+sb', '-hold', '-e', 'bash -c \"sudo /home/admin/config.scripts/blitz.shutdown.sh reboot\"'])
 
     def create_new_invoice(self, memo="Pay to RaspiBlitz", amt=0):
         if IS_DEV_ENV:

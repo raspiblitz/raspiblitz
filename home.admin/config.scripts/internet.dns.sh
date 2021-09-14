@@ -29,7 +29,7 @@ if [ "${DNSSERVER}" = "test" ]; then
 
   # dns is not working --> ask in dialog to set a preset DNS
   whiptail --title ' DNS Test Failed ' --yes-button='Set DNS 1.1.1.1' --no-button='Ignore' --yesno "It looks like your DNS within local network is not working.\n
-Do you want to set the fixed DNS 1.1.1.1 by cloudfare (they claim they provide privacy) for your RaspiBlitz and reboot?\n
+Do you want to set the fixed DNS 1.1.1.1 by Cloudflare (they claim they provide privacy) for your RaspiBlitz and reboot?\n
 " 10 64
   if [ $? -eq 0 ]; then
     echo "# SETTING 1.1.1.1"

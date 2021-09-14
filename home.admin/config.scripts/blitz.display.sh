@@ -211,7 +211,7 @@ if [ "${command}" == "hdmi" ]; then
   elif [ "${secondParameter}" == "off" ]; then
     sudo /home/admin/config.scripts/blitz.display.sh set-display lcd
   else
-    echo "error='unkown second parameter'"
+    echo "error='unknown second parameter'"
     exit 1
   fi
   exit 0
@@ -220,7 +220,7 @@ fi
 #######################################
 # DISPLAY TYPED INSTALLS & UN-INSTALLS
 # HDMI is the default - every added
-# displayClass needs a install fuction
+# displayClass needs a install function
 # and a uninstall function back to HDMI
 #######################################
 
@@ -290,7 +290,7 @@ function install_lcd() {
     fi
     containsModification=$(sudo grep -c "${modification}" /boot/cmdline.txt)
     if [ ${containsModification} -eq 0 ]; then
-      echo "# FAIL: was not able to mofify /boot/cmdline.txt"
+      echo "# FAIL: was not able to modify /boot/cmdline.txt"
       echo "err='ended unclear state'"
       exit 1
     fi
@@ -566,5 +566,5 @@ if [ "${command}" == "set-display" ]; then
 fi
 
 # unknown command
-echo "error='unkown command'"
+echo "error='unknown command'"
 exit 1

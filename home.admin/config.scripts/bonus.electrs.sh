@@ -1,14 +1,14 @@
 #!/bin/bash
 
 # https://github.com/romanz/electrs/blob/master/doc/usage.md
-ELECTRSVERSION=v0.8.9
+ELECTRSVERSION=v0.8.11
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "config script to switch the Electrum Rust Server on or off"
  echo "bonus.electrs.sh status [?showAddress]"
  echo "bonus.electrs.sh [on|off|menu]"
- echo "installs the version $ELECTRSVERSION by default"
+ echo "installs the version $ELECTRSVERSION"
  exit 1
 fi
 
@@ -39,9 +39,14 @@ if [ "$1" = "status" ]; then
   if [ ${serviceRunning} -eq 1 ]; then
 
     # Experimental try to get sync Info
-    syncedToBlock=$(sudo journalctl -u electrs --no-pager -n100 | grep "new headers from height" | tail -n 1 | cut -d " " -f 16 | sed 's/[^0-9]*//g')
+    syncedToBlock=$(sudo journalctl -u electrs --no-pager -n2000 | grep "new headers from height" | tail -n 1 | cut -d " " -f 16 | sed 's/[^0-9]*//g')
     blockchainHeight=$(sudo -u bitcoin ${network}-cli getblockchaininfo 2>/dev/null | jq -r '.headers' | sed 's/[^0-9]*//g')
     lastBlockchainHeight=$(($blockchainHeight -1))
+    syncProgress=0
+    if [ "${syncedToBlock}" != "" ] && [ "${blockchainHeight}" != "" ] && [ "${blockchainHeight}" != "0" ]; then
+      syncProgress="$(echo "$syncedToBlock" "$blockchainHeight" | awk '{printf "%.2f", $1 / $2 * 100}')"
+    fi
+    echo "syncProgress=${syncProgress}%"
     if [ "${syncedToBlock}" = "${blockchainHeight}" ] || [ "${syncedToBlock}" = "${lastBlockchainHeight}" ]; then
       echo "tipSynced=1"
     else
@@ -137,7 +142,7 @@ if [ "$1" = "menu" ]; then
 The electrum system service is not running.
 Please check the following debug info.
       " 8 48
-    /home/admin/XXdebugLogs.sh
+    /home/admin/config.scripts/blitz.debug.sh
     echo "Press ENTER to get back to main menu."
     read key
     exit 0
@@ -263,18 +268,19 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo
     echo "# Installing Rust"
     echo
-    sudo -u electrs curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sudo -u electrs sh -s -- --default-toolchain 1.39.0 -y
-
+    # https://github.com/romanz/electrs/blob/master/doc/usage.md#build-dependencies
+    #sudo -u electrs curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sudo -u electrs sh -s -- --default-toolchain 1.39.0 -y
     sudo apt update
-    sudo apt install -y clang cmake  # for building 'rust-rocksdb'
+    sudo apt install -y cargo
+    sudo apt install -y clang cmake build-essential  # for building 'rust-rocksdb'
 
     echo
-    echo "# Downloading and building electrs. This will take ~30 minutes" # ~22 min on an Odroid XU4
+    echo "# Downloading and building electrs $ELECTRSVERSION. This will take ~30 minutes" # ~22 min on an Odroid XU4
     echo
     sudo -u electrs git clone https://github.com/romanz/electrs
-    cd /home/electrs/electrs
+    cd /home/electrs/electrs || exit 1 
     sudo -u electrs git reset --hard $ELECTRSVERSION
-    sudo -u electrs /home/electrs/.cargo/bin/cargo build --release
+    sudo -u electrs cargo build --release || exit 1 
 
     echo
     echo "# The electrs database will be built in /mnt/hdd/app-storage/electrs/db. Takes ~18 hours and ~50Gb diskspace"
@@ -403,10 +409,15 @@ ExecStart=/home/electrs/electrs/target/release/electrs --index-batch-size=10 --e
 User=electrs
 Group=electrs
 Type=simple
-KillMode=process
 TimeoutSec=60
 Restart=always
 RestartSec=60
+
+# Hardening measures
+PrivateTmp=true
+ProtectSystem=full
+NoNewPrivileges=true
+PrivateDevices=true
 
 [Install]
 WantedBy=multi-user.target

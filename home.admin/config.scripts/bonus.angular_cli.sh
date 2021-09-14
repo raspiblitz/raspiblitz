@@ -50,7 +50,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     yes | npm install -g @angular/cli
     echo "# link ng"
     sudo ln -sf /usr/local/lib/nodejs/node-$VERSION-$DISTRO/bin/ng /usr/bin/ng
-    echo "# explicit trun off statistics report"
+    echo "# explicit turn off statistics report"
     ng analytics off
 
     # check if nodeJS was installed

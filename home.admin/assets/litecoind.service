@@ -1,7 +1,8 @@
+# RaspiBlitz: systemd unit for bitcoind
 [Unit]
-Description=Litecoin daemon
-Wants=bootstrap.service
-After=bootstrap.service
+Description=Litecoin-Daemon
+Wants=network.target
+After=network.target
 
 # for use with sendmail alert (coming soon)
 #OnFailure=systemd-sendmail@%n
@@ -12,13 +13,18 @@ Group=bitcoin
 Type=forking
 PIDFile=/home/bitcoin/.litecoin/litecoind.pid
 ExecStartPre=-/home/admin/config.scripts/blitz.systemd.sh log blockchain STARTED
-ExecStart=/usr/local/bin/litecoind -daemon -conf=/home/bitcoin/.litecoin/litecoin.conf -pid=/home/bitcoin/.litecoin/litecoind.pid
-KillMode=process
+ExecStart=/usr/local/bin/litecoind -daemon -conf=/home/bitcoin/.litecoin/litecoin.conf -pid=/home/bitcoin/.litecoin/litecoind.pid -debuglogfile=/mnt/hdd/litecoin/debug.log
 Restart=always
 TimeoutSec=120
 RestartSec=30
 StandardOutput=null
 StandardError=journal
+
+# Hardening measures
+PrivateTmp=true
+ProtectSystem=full
+NoNewPrivileges=true
+PrivateDevices=true
 
 [Install]
 WantedBy=multi-user.target
