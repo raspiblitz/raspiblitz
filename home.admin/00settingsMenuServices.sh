@@ -61,7 +61,7 @@ if [ "${lightning}" == "cln" ] || [ "${cln}" == "on" ]; then
   OPTIONS+=(k 'C-Lightning Sparko WebWallet' ${sparko})
 fi
 
-OPTIONS+=(m 'Homer Desktop' ${homer})
+OPTIONS+=(m 'Homer Dashboard' ${homer})
 
 CHOICES=$(dialog --title ' Additional Mainnet Services ' \
           --checklist ' use spacebar to activate/de-activate ' \
