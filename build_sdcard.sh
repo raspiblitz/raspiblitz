@@ -836,64 +836,53 @@ sudo cp /home/admin/assets/background.service /etc/systemd/system/background.ser
 sudo systemctl enable background
 
 # "*** BITCOIN ***"
-# based on https://stadicus.github.io/RaspiBolt/raspibolt_30_bitcoin.html#installation
 
-echo ""
+echo
 echo "*** PREPARING BITCOIN ***"
 
 # set version (change if update is available)
 # https://bitcoincore.org/en/download/
-bitcoinVersion="0.21.1"
+bitcoinVersion="22.0"
 
 # needed to check code signing
-laanwjPGP="01EA5486DE18A882D4C2684590C8019E36C2E964"
+# https://github.com/laanwj
+laanwjPGP="71A3 B167 3540 5025 D447 E8F2 7481 0B01 2346 C9A6"
 
 # prepare directories
 sudo rm -rf /home/admin/download
 sudo -u admin mkdir /home/admin/download
 cd /home/admin/download
 
-# download, check and import signer key
-sudo -u admin wget https://bitcoin.org/laanwj-releases.asc
-if [ ! -f "laanwj-releases.asc" ];then
-  sudo -u admin wget https://raw.githubusercontent.com/bitcoin-dot-org/Bitcoin.org/master/laanwj-releases.asc
-fi
-if [ ! -f "./laanwj-releases.asc" ]
+# receive signer key
+if ! gpg --recv-key "71A3 B167 3540 5025 D447 E8F2 7481 0B01 2346 C9A6"
 then
-  echo "!!! FAIL !!! Could not download laanwj-releases.asc"
+  echo "!!! FAIL !!! Couldn't download Wladimir J. van der Laan's PGP pubkey"
   exit 1
 fi
-gpg --import --import-options show-only ./laanwj-releases.asc
-fingerprint=$(gpg ./laanwj-releases.asc 2>/dev/null | grep "${laanwjPGP}" -c)
-if [ ${fingerprint} -lt 1 ]; then
-  echo ""
-  echo "!!! BUILD WARNING --> Bitcoin PGP author not as expected"
-  echo "Should contain laanwjPGP: ${laanwjPGP}"
-  echo "PRESS ENTER to TAKE THE RISK if you think all is OK"
-  read key
-fi
-gpg --import ./laanwj-releases.asc
+
+# download signed binary sha256 hash sum file
+sudo -u admin wget https://bitcoincore.org/bin/bitcoin-core-${bitcoinVersion}/SHA256SUMS
 
 # download signed binary sha256 hash sum file and check
 sudo -u admin wget https://bitcoincore.org/bin/bitcoin-core-${bitcoinVersion}/SHA256SUMS.asc
 verifyResult=$(gpg --verify SHA256SUMS.asc 2>&1)
 goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
 echo "goodSignature(${goodSignature})"
-correctKey=$(echo ${verifyResult} |  grep "using RSA key ${laanwjPGP: -16}" -c)
+correctKey=$(echo ${verifyResult} | grep "${laanwjPGP}" -c)
 echo "correctKey(${correctKey})"
 if [ ${correctKey} -lt 1 ] || [ ${goodSignature} -lt 1 ]; then
   echo ""
   echo "!!! BUILD FAILED --> PGP Verify not OK / signature(${goodSignature}) verify(${correctKey})"
   exit 1
 else
-  echo ""
+  echo
   echo "****************************************"
   echo "OK --> BITCOIN MANIFEST IS CORRECT"
   echo "****************************************"
-  echo ""
+  echo
 fi
 
-# get the sha256 value for the corresponding platform from signed hash sum file
+# bitcoinOSversion
 if [ ${isARM} -eq 1 ] ; then
   bitcoinOSversion="arm-linux-gnueabihf"
 fi
@@ -903,10 +892,9 @@ fi
 if [ ${isX86_64} -eq 1 ] ; then
   bitcoinOSversion="x86_64-linux-gnu"
 fi
-bitcoinSHA256=$(grep -i "$bitcoinOSversion" SHA256SUMS.asc | cut -d " " -f1)
 
-echo ""
-echo "*** BITCOIN v${bitcoinVersion} for ${bitcoinOSversion} ***"
+echo
+echo "*** BITCOIN CORE v${bitcoinVersion} for ${bitcoinOSversion} ***"
 
 # download resources
 binaryName="bitcoin-${bitcoinVersion}-${bitcoinOSversion}.tar.gz"
@@ -917,8 +905,11 @@ if [ ! -f "./${binaryName}" ]; then
    echo "!!! FAIL !!! Could not download the BITCOIN BINARY"
    exit 1
 else
+
   # check binary checksum test
   echo "- checksum test"
+  # get the sha256 value for the corresponding platform from signed hash sum file
+  bitcoinSHA256=$(grep -i "${binaryName}" SHA256SUMS | cut -d " " -f1)
   binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
   echo "Valid SHA256 checksum should be: ${bitcoinSHA256}"
   echo "Downloaded binary SHA256 checksum: ${binaryChecksum}"
@@ -927,12 +918,13 @@ else
     rm -v ./${binaryName}
     exit 1
   else
-    echo ""
-    echo "****************************************"
-    echo "OK --> VERIFIED BITCOIN CHECKSUM CORRECT"
-    echo "****************************************"
+    echo
+    echo "********************************************"
+    echo "OK --> VERIFIED BITCOIN CORE BINARY CHECKSUM"
+    echo "********************************************"
+    echo
     sleep 10
-    echo ""
+    echo
   fi
 fi
 
