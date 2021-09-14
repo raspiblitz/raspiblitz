@@ -42,7 +42,10 @@ if [ "$1" = "status" ]; then
     syncedToBlock=$(sudo journalctl -u electrs --no-pager -n2000 | grep "new headers from height" | tail -n 1 | cut -d " " -f 16 | sed 's/[^0-9]*//g')
     blockchainHeight=$(sudo -u bitcoin ${network}-cli getblockchaininfo 2>/dev/null | jq -r '.headers' | sed 's/[^0-9]*//g')
     lastBlockchainHeight=$(($blockchainHeight -1))
-    syncProgress="$(echo "$syncedToBlock" "$blockchainHeight" | awk '{printf "%.2f", $1 / $2}')"
+    syncProgress=0
+    if [ "${syncedToBlock}" != "" ] && [ "${blockchainHeight}" != "" ] && [ "${blockchainHeight}" != "0" ]; then
+      syncProgress="$(echo "$syncedToBlock" "$blockchainHeight" | awk '{printf "%.2f", $1 / $2}')"
+    fi
     echo "syncProgress=${syncProgress}%"
     if [ "${syncedToBlock}" = "${blockchainHeight}" ] || [ "${syncedToBlock}" = "${lastBlockchainHeight}" ]; then
       echo "tipSynced=1"
