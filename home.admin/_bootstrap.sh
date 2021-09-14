@@ -635,8 +635,9 @@ if [ ${isMounted} -eq 0 ]; then
 
   # make sure for future starts that blockchain service gets started after bootstrap
   # so deamon reloas needed ... system will go into reboot after last loop
-  sed -i "s/^Wants=.*/Wants=bootstrap.service/g" /etc/systemd/system/${network}d.service
-  sed -i "s/^After=.*/After=network.target/g" /etc/systemd/system/${network}d.service
+  echo "# Updating service ${network}d.service ..." >> $logFile
+  sudo sed -i "s/^Wants=.*/Wants=bootstrap.service/g" /etc/systemd/system/${network}d.service
+  sudo sed -i "s/^After=.*/After=bootstrap.service/g" /etc/systemd/system/${network}d.service
 
   # wait until syncProgress is available (neeed for final dialogs)
   while [ "${syncProgress}" == "" ]
