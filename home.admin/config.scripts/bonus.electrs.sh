@@ -39,9 +39,11 @@ if [ "$1" = "status" ]; then
   if [ ${serviceRunning} -eq 1 ]; then
 
     # Experimental try to get sync Info
-    syncedToBlock=$(sudo journalctl -u electrs --no-pager -n100 | grep "new headers from height" | tail -n 1 | cut -d " " -f 16 | sed 's/[^0-9]*//g')
+    syncedToBlock=$(sudo journalctl -u electrs --no-pager -n2000 | grep "new headers from height" | tail -n 1 | cut -d " " -f 16 | sed 's/[^0-9]*//g')
     blockchainHeight=$(sudo -u bitcoin ${network}-cli getblockchaininfo 2>/dev/null | jq -r '.headers' | sed 's/[^0-9]*//g')
     lastBlockchainHeight=$(($blockchainHeight -1))
+    syncProgress="$(echo "$syncedToBlock" "$blockchainHeight" | awk '{printf "%.2f", $1 / $2}')"
+    echo "syncProgress=${syncProgress}%"
     if [ "${syncedToBlock}" = "${blockchainHeight}" ] || [ "${syncedToBlock}" = "${lastBlockchainHeight}" ]; then
       echo "tipSynced=1"
     else
