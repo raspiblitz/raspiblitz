@@ -149,7 +149,6 @@ StandardError=journal
 PrivateTmp=true
 ProtectSystem=full
 NoNewPrivileges=true
-PrivateDevices=true
 
 [Install]
 WantedBy=multi-user.target
