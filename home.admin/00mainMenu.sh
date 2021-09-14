@@ -171,6 +171,7 @@ OPTIONS+=(SERVICES "Additional Apps & Services")
 OPTIONS+=(SYSTEM "Monitoring & Configuration")
 OPTIONS+=(CONNECT "Connect Apps & Show Credentials")
 OPTIONS+=(SUBSCRIBE "Manage Subscriptions")
+OPTIONS+=(EXTENSIONS "Run Custom Scripts")
 OPTIONS+=(PASSWORD "Change Passwords")
 
 if [ "${touchscreen}" == "1" ]; then
@@ -301,6 +302,9 @@ case $CHOICE in
             ;;    
         SUBSCRIBE)
             /home/admin/config.scripts/blitz.subscriptions.py
+            ;;
+        EXTENSIONS)
+            /home/admin/10extensions.sh
             ;;
         SERVICES)
             /home/admin/00settingsMenuServices.sh

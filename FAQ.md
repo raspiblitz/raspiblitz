@@ -73,7 +73,8 @@
   - [Let's Encrypt - DNS-01](#lets-encrypt---dns-01)
   - [Let's Encrypt - eMail Address](#lets-encrypt---email-address)
   - [Let's Encrypt - Installation details](#lets-encrypt---installation-details)
-  - [How can I customize my RaspiBlitz or add other software?](#how-can-i-customize-my-raspiblitz-or-add-other-software)
+- [How can I customize my RaspiBlitz or add other software?](#how-can-i-customize-my-raspiblitz-or-add-other-software)
+  - [Can I create my own extensions to distribute?](#can-i-create-my-own-extensions-to-distribute)
 - [Versioning](#versioning)
 - [GitHub Workflow](#github-workflow)
 - [How do I find the IP address when running without a display?](#how-do-i-find-the-ip-address-when-running-without-a-display)
@@ -928,12 +929,21 @@ It is currently considered completely fine to leave this field empty and not pro
 The `acme.sh` script is installed in `/home/admin/.acme.sh/` - the configuration and the certificates are stored on the 
 external hard disk in `/mnt/hdd/app-data/letsencrypt`. 
 
-### How can I customize my RaspiBlitz or add other software?
+## How can I customize my RaspiBlitz or add other software?
 
 The RaspiBlitz is your computer to experiment with. Feel free to add your own scripts, edit the system or install further software from the command line. Just keep in mind that after an update/recovery the RaspiBlitz starts with a fresh and clean operating system again. So all your editings and installs might be gone. To prevent this you should do the following:
 
 - place your own scripts and data that should survive an update/recovery into the `/mnt/hdd/app-data` directory
 - put all install commands & modification of the system into the script `/mnt/hdd/app-data/custom-installs.sh` which will be started automatically on a recovery/update.
+
+
+### Can I create my own extensions to distribute?
+The Extensions menu in Raspiblitz automatically populates with any extensions downloaded to `/home/admin/extensions/`
+- To create your own extensions, your script must satisfy the following requirements:
+  - Near the top of the file should be the line `BLITZ_EXT_NAME="Your Extension's Description here"` This variable is used by Raspiblitz's extensions menu.
+  - The script filename must NOT begin with an underscore. If your script calls out to other files, it's beneficial to use an underscore prefix so it stays hidden from the menu. An example of a hidden script: `_recurringpayment.py`
+
+See [blitz.recurringpayment.sh](home.admin/extensions/blitz.recurringpayment.sh) for an example of a proper extension.
 
 ## Versioning
 
