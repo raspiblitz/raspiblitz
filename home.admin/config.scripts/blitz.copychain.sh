@@ -352,7 +352,7 @@ if [ "$1" = "source" ]; then
     do
 
       # transfere blockchain data
-      rm -f ./transferred.rsync
+      sudo rm -f ./transferred.rsync
       sudo sshpass -p "${targetPassword}" rsync -avhW -e 'ssh -o StrictHostKeyChecking=no -p 22' --info=progress2 --log-file=./transferred.rsync ./chainstate ./blocks bitcoin@${targetIP}:/mnt/hdd/bitcoin
 
       # check result
