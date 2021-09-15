@@ -540,6 +540,9 @@ if [ ${isMounted} -eq 0 ]; then
   sed -i "s/^message=.*/message='Starting Provision'/g" ${infoFile}
 
   # load setup data
+  echo "# Sourcing ${configFile} " >> ${logFile}
+  source ${configFile}
+  cat ${configFile} >> ${logFile}
   echo "# Sourcing ${setupFile} " >> ${logFile}
   source ${setupFile}
   cat ${setupFile} >> ${logFile}
