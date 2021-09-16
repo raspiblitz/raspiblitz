@@ -276,6 +276,16 @@ else
   echo "- BTCPayServer is OFF by config"
 fi
 
+if [ ${BTCRPCexplorer} == "on" ]; then
+  echo
+  echo "*** LAST 20 BTC-RPC-Explorer LOGS ***"
+  echo "sudo journalctl -u btc-rpc-explorer -b --no-pager -n20"
+  sudo journalctl -u btc-rpc-explorer -b --no-pager -n20
+  echo
+else
+  echo "- BTC-RPC-Explorer is OFF by config"
+fi
+
 if [ "${LNBits}" == "on" ]; then
   echo
   echo "*** LAST 20 LNbits LOGS ***"
