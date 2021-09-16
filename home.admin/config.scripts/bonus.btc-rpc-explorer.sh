@@ -14,6 +14,10 @@ fi
 
 source /mnt/hdd/raspiblitz.conf
 
+##########################
+# MENU
+#########################
+
 # show info menu
 if [ "$1" = "menu" ]; then
 
@@ -94,9 +98,50 @@ if [ "$1" = "status" ]; then
   exit 0
 fi
 
-# stop service
+##########################
+# PRESTART
+# - will be called as prestart by systemd service (as user btcrpcexplorer)
+#########################
+
+if [ "$1" = "prestart" ]; then
+
+  # users need to be `btcrpcexplorer` so that it can be run by systemd as prestart (no SUDO available)
+  if [ "$USER" != "btcrpcexplorer" ]; then
+    echo "# FAIL: run as user btcrpcexplorer"
+    exit 1
+  fi
+
+  echo "## btc-rpc-explorer.service PRESTART CONFIG" 
+
+  echo "# TODO: check generel config ..."
+
+  # check if electrs is installed & running
+  if [ "${ElectRS}" == "on" ]; then
+
+    # CHECK THAT ELECTRS IS PART OF CONFIG
+    echo "# TODO: check electrs config ..."
+
+    # CHECK THAT ELECTRS INDEX IS BUILD
+    # electrs listening in port 50001 means index is build
+    echo "# electrs is on .. checking if index is build"
+    echo "# waiting electrs on port 50001 (= index is ready)"
+    while [ $(netstat | grep -c "50001") -eq 0 ]; do
+      sleep 1
+    done
+
+    echo "# electrs started, launching BTC-RPC-Explorer ..."
+  fi
+
+fi
+
+
+# stop service (for all calls below)
 echo "# making sure services are not running"
 sudo systemctl stop btc-rpc-explorer 2>/dev/null
+
+##########################
+# ON
+#########################
 
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
@@ -254,40 +299,8 @@ EOF
 fi
 
 ##########################
-# PRESTART
-# - will be called as prestart by systemd service (as user btcrpcexplorer)
+# OFF
 #########################
-
-if [ "$1" = "prestart" ]; then
-
-  # users need to be `btcrpcexplorer` so that it can be run by systemd as prestart (no SUDO available)
-  if [ "$USER" != "btcrpcexplorer" ]; then
-    echo "# FAIL: run as user btcrpcexplorer"
-    exit 1
-  fi
-
-  echo "## btc-rpc-explorer.service PRESTART CONFIG" 
-
-  echo "# TODO: check generel config ..."
-
-  # check if electrs is installed & running
-  if [ "${ElectRS}" == "on" ]; then
-
-    # CHECK THAT ELECTRS IS PART OF CONFIG
-    echo "# TODO: check electrs config ..."
-
-    # CHECK THAT ELECTRS INDEX IS BUILD
-    # electrs listening in port 50001 means index is build
-    echo "# electrs is on .. checking if index is build"
-    echo "# waiting electrs on port 50001 (= index is ready)"
-    while [ $(netstat | grep -c "50001") -eq 0 ]; do
-      sleep 1
-    done
-
-    echo "# electrs started, launching BTC-RPC-Explorer ..."
-  fi
-
-fi
 
 # switch off
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
