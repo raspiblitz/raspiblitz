@@ -123,6 +123,10 @@ if [ "$1" = "prestart" ]; then
   # check if electrs is installed & running
   if [ "${ElectRS}" == "on" ]; then
 
+    # CHECK THAT ELECTRS IS PART OF CONFIG
+    echo "# updating BTCEXP_ADDRESS_API=electrumx"
+    sed -i 's/^BTCEXP_ADDRESS_API=*/BTCEXP_ADDRESS_API=electrumx/g' /home/btcrpcexplorer/.config/btc-rpc-explorer.env
+
     # CHECK THAT ELECTRS INDEX IS BUILD (WAITLOOP)
     # electrs listening in port 50001 means index is build
     echo "# electrs is on .. checking if index is build"
@@ -130,14 +134,12 @@ if [ "$1" = "prestart" ]; then
     while [ $(netstat | grep -c "50001") -eq 0 ]; do
       sleep 1
     done
-
-    # CHECK THAT ELECTRS IS PART OF CONFIG
-    sed -i 's/^BTCEXP_ADDRESS_API=*/BTCEXP_ADDRESS_API=electrumx/g' /home/btcrpcexplorer/.config/btc-rpc-explorer.env
-
     echo "# electrs started, launching BTC-RPC-Explorer ..."
+
   else
 
     # ELECTRS=OFF --> MAKE SURE IT IS NOT CONNECTED
+    echo "# updating BTCEXP_ADDRESS_API=none"
     sed -i 's/^BTCEXP_ADDRESS_API=*/BTCEXP_ADDRESS_API=none/g' /home/btcrpcexplorer/.config/btc-rpc-explorer.env
 
   fi
