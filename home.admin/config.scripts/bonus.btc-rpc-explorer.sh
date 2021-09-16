@@ -113,28 +113,21 @@ if [ "$1" = "prestart" ]; then
 
   echo "## btc-rpc-explorer.service PRESTART CONFIG"
 
-  #  UPDATE GENERAL CONFIG VALUES
-  
-  echo "# --> /home/btcrpcexplorer/.config/btc-rpc-explorer.env"
-  RPCPASSWORD=$(cat /mnt/hdd/${network}/${network}.conf | grep "^rpcpassword=" | cut -d "=" -f2)
-  echo "# updating BTCEXP_BITCOIND_PASS=${RPCPASSWORD}"
-  sed -i "s/^BTCEXP_BITCOIND_PASS=.*/BTCEXP_BITCOIND_PASS=${RPCPASSWORD}/g" /home/btcrpcexplorer/.config/btc-rpc-explorer.env
-
   # check if electrs is installed & running
   if [ "${ElectRS}" == "on" ]; then
+
+    # CHECK THAT ELECTRS INDEX IS BUILD (WAITLOOP)
+    # electrs listening in port 50001 means index is build
+    isElectrumReady=$(netstat | grep -c "50001")
+    if [ "${isElectrumReady}" == "0" ]; then
+      echo "# electrs is ON but not ready .. might still building index - kick systemd service into fail/wait/restart"
+      exit 1
+    fi
+    echo "# electrs is ON .. and ready (${isElectrumReady})"
 
     # CHECK THAT ELECTRS IS PART OF CONFIG
     echo "# updating BTCEXP_ADDRESS_API=electrumx"
     sed -i 's/^BTCEXP_ADDRESS_API=*/BTCEXP_ADDRESS_API=electrumx/g' /home/btcrpcexplorer/.config/btc-rpc-explorer.env
-
-    # CHECK THAT ELECTRS INDEX IS BUILD (WAITLOOP)
-    # electrs listening in port 50001 means index is build
-    echo "# electrs is on .. checking if index is build"
-    echo "# waiting electrs on port 50001 (= index is ready)"
-    while [ $(netstat | grep -c "50001") -eq 0 ]; do
-      sleep 1
-    done
-    echo "# electrs started, launching BTC-RPC-Explorer ..."
 
   else
 
@@ -144,7 +137,13 @@ if [ "$1" = "prestart" ]; then
 
   fi
 
-  exit 0
+  #  UPDATE GENERAL CONFIG VALUES
+  echo "# --> /home/btcrpcexplorer/.config/btc-rpc-explorer.env"
+  RPCPASSWORD=$(cat /mnt/hdd/${network}/${network}.conf | grep "^rpcpassword=" | cut -d "=" -f2)
+  echo "# updating BTCEXP_BITCOIND_PASS=${RPCPASSWORD}"
+  sed -i "s/^BTCEXP_BITCOIND_PASS=.*/BTCEXP_BITCOIND_PASS=${RPCPASSWORD}/g" /home/btcrpcexplorer/.config/btc-rpc-explorer.env
+
+  exit 0 # exit with clean code
 fi
 
 
@@ -261,16 +260,16 @@ EOF
 Description=btc-rpc-explorer
 Wants=${network}d.service
 After=${network}d.service
+StartLimitIntervalSec=0
 
 [Service]
 User=btcrpcexplorer
 TimeoutStartUSec=infinity
-ExecStartPre=-/home/admin/config.scripts/bonus.btc-rpc-explorer.sh prestart
+ExecStartPre=/home/admin/config.scripts/bonus.btc-rpc-explorer.sh prestart
 WorkingDirectory=/home/btcrpcexplorer/btc-rpc-explorer
 ExecStart=/usr/bin/npm start
-# Restart on failure but no more than default times (DefaultStartLimitBurst=5) every 10 minutes (600 seconds). Otherwise stop
 Restart=on-failure
-RestartSec=600
+RestartSec=20
 
 # Hardening measures
 PrivateTmp=true
