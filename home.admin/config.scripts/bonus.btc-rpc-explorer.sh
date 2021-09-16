@@ -8,6 +8,7 @@
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "# small config script to switch BTC-RPC-explorer on or off"
  echo "# bonus.btc-rpc-explorer.sh [status|on|off]"
+ echo "# bonus.btc-rpc-explorer.sh prestart"
  exit 1
 fi
 
@@ -204,9 +205,10 @@ Wants=${network}d.service
 After=${network}d.service
 
 [Service]
+User=btcrpcexplorer
+ExecStartPre=-/home/admin/config.scripts/bonus.btc-rpc-explorer.sh prestart
 WorkingDirectory=/home/btcrpcexplorer/btc-rpc-explorer
 ExecStart=/usr/bin/npm start
-User=btcrpcexplorer
 # Restart on failure but no more than default times (DefaultStartLimitBurst=5) every 10 minutes (600 seconds). Otherwise stop
 Restart=on-failure
 RestartSec=600
@@ -249,6 +251,42 @@ EOF
     /home/admin/config.scripts/internet.hiddenservice.sh btc-rpc-explorer 80 3022 443 3023
   fi
   exit 0
+fi
+
+##########################
+# PRESTART
+# - will be called as prestart by systemd service (as user btcrpcexplorer)
+#########################
+
+if [ "$1" = "prestart" ]; then
+
+  # users need to be `btcrpcexplorer` so that it can be run by systemd as prestart (no SUDO available)
+  if [ "$USER" != "btcrpcexplorer" ]; then
+    echo "# FAIL: run as user btcrpcexplorer"
+    exit 1
+  fi
+
+  echo "## btc-rpc-explorer.service PRESTART CONFIG" 
+
+  echo "# TODO: check generel config ..."
+
+  # check if electrs is installed & running
+  if [ "${ElectRS}" == "on" ]; then
+
+    # CHECK THAT ELECTRS IS PART OF CONFIG
+    echo "# TODO: check electrs config ..."
+
+    # CHECK THAT ELECTRS INDEX IS BUILD
+    # electrs listening in port 50001 means index is build
+    echo "# electrs is on .. checking if index is build"
+    echo "# waiting electrs on port 50001 (= index is ready)"
+    while [ $(netstat | grep -c "50001") -eq 0 ]; do
+      sleep 1
+    done
+
+    echo "# electrs started, launching BTC-RPC-Explorer ..."
+  fi
+
 fi
 
 # switch off
