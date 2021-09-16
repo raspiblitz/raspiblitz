@@ -123,10 +123,7 @@ if [ "$1" = "prestart" ]; then
   # check if electrs is installed & running
   if [ "${ElectRS}" == "on" ]; then
 
-    # CHECK THAT ELECTRS IS PART OF CONFIG
-    echo "# TODO: check electrs config ..."
-
-    # CHECK THAT ELECTRS INDEX IS BUILD
+    # CHECK THAT ELECTRS INDEX IS BUILD (WAITLOOP)
     # electrs listening in port 50001 means index is build
     echo "# electrs is on .. checking if index is build"
     echo "# waiting electrs on port 50001 (= index is ready)"
@@ -134,7 +131,15 @@ if [ "$1" = "prestart" ]; then
       sleep 1
     done
 
+    # CHECK THAT ELECTRS IS PART OF CONFIG
+    sed -i 's/^BTCEXP_ADDRESS_API=*/BTCEXP_ADDRESS_API=electrumx/g' /home/btcrpcexplorer/.config/btc-rpc-explorer.env
+
     echo "# electrs started, launching BTC-RPC-Explorer ..."
+  else
+
+    # ELECTRS=OFF --> MAKE SURE IT IS NOT CONNECTED
+    sed -i 's/^BTCEXP_ADDRESS_API=*/BTCEXP_ADDRESS_API=none/g' /home/btcrpcexplorer/.config/btc-rpc-explorer.env
+
   fi
 
   exit 0
@@ -290,10 +295,6 @@ EOF
   echo "# npm audi fix"
   cd /home/btcrpcexplorer/btc-rpc-explorer/
   sudo npm audit fix
-
-  ## Enable BTCEXP_ADDRESS_API if BTC-RPC-Explorer is active
-  # see /home/admin/config.scripts/bonus.electrsexplorer.sh
-  # run every 10 min by _background.sh
 
   # Hidden Service for BTC-RPC-explorer if Tor is active
   source /mnt/hdd/raspiblitz.conf

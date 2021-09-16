@@ -438,10 +438,6 @@ WantedBy=multi-user.target
     /home/admin/config.scripts/internet.hiddenservice.sh electrs 50002 50002 50001 50001
   fi
 
-  ## Enable BTCEXP_ADDRESS_API if BTC-RPC-Explorer is active
-  # see /home/admin/config.scripts/bonus.electrsexplorer.sh
-  # run every 10 min by _background.sh
-  
   echo
   echo "# To connect through SSL from outside of the local network make sure the port 50002 is forwarded on the router"
   echo
@@ -479,8 +475,6 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo ufw deny 50002 
     echo "# OK ElectRS removed."
     
-    ## Disable BTCEXP_ADDRESS_API if BTC-RPC-Explorer is active
-    /home/admin/config.scripts/bonus.electrsexplorer.sh
   else 
     echo "# ElectRS is not installed."
   fi
