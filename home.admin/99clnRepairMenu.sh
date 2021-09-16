@@ -104,8 +104,16 @@ case $CHOICE in
     /mnt/hdd/raspiblitz.conf
   # new
   /home/admin/config.scripts/cln.hsmtool.sh new $CHAIN
-  # set the lightningd service file
-  /home/admin/config.scripts/cln.install-service.sh $CHAIN
+  # set the lightningd service file on each active network
+  if [ "${cln}" == "on" ] || [ "${cln}" == "1" ]; then
+    /home/admin/config.scripts/cln.install-service.sh mainnet
+  fi
+  if [ "${tcln}" == "on" ] || [ "${tcln}" == "1" ]; then
+    /home/admin/config.scripts/cln.install-service.sh testnet
+  fi
+  if [ "${scln}" == "on" ] || [ "${scln}" == "1" ]; then
+    /home/admin/config.scripts/cln.install-service.sh signet
+  fi
   ;;
   
   FILERESTORE)
