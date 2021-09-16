@@ -111,9 +111,10 @@ if [ "$1" = "prestart" ]; then
     exit 1
   fi
 
-  echo "## btc-rpc-explorer.service PRESTART CONFIG" 
+  echo "## btc-rpc-explorer.service PRESTART CONFIG"
 
   echo "# TODO: check generel config ..."
+  date > /home/btcrpcexplorer/prestart.log
 
   # check if electrs is installed & running
   if [ "${ElectRS}" == "on" ]; then
@@ -132,6 +133,7 @@ if [ "$1" = "prestart" ]; then
     echo "# electrs started, launching BTC-RPC-Explorer ..."
   fi
 
+  exit 0
 fi
 
 
