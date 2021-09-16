@@ -113,8 +113,12 @@ if [ "$1" = "prestart" ]; then
 
   echo "## btc-rpc-explorer.service PRESTART CONFIG"
 
-  echo "# TODO: check generel config ..."
-  date > /home/btcrpcexplorer/prestart.log
+  #  UPDATE GENERAL CONFIG VALUES
+  
+  echo "# --> /home/btcrpcexplorer/.config/btc-rpc-explorer.env"
+  RPCPASSWORD=$(cat /mnt/hdd/${network}/${network}.conf | grep "^rpcpassword=" | cut -d "=" -f2)
+  echo "# updating BTCEXP_BITCOIND_PASS=${RPCPASSWORD}"
+  sudo sed -i "s/^BTCEXP_BITCOIND_PASS=.*/BTCEXP_BITCOIND_PASS=${RPCPASSWORD}/g" /home/btcrpcexplorer/.config/btc-rpc-explorer.env
 
   # check if electrs is installed & running
   if [ "${ElectRS}" == "on" ]; then
