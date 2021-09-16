@@ -40,6 +40,13 @@ This can take multiple hours.
   toraddress=$(sudo cat /mnt/hdd/tor/btc-rpc-explorer/hostname 2>/dev/null)
   fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
 
+  # check if password protected
+  isBitcoinWalletOff=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep -c "^disablewallet=1")
+  passwordInfo=""
+  if [ "${isBitcoinWalletOff}" != "1" ]; then
+    passwordInfo="Login is 'admin' with your Password B"
+  fi
+
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
 
     # TOR
@@ -48,7 +55,7 @@ This can take multiple hours.
 http://${localip}:3020\n
 https://${localip}:3021 with Fingerprint:
 ${fingerprint}\n
-Login is 'admin' with your Password B\n
+${passwordInfo}\n
 Hidden Service address for TOR Browser (QR see LCD):
 ${toraddress}
 " 16 67
@@ -60,7 +67,7 @@ ${toraddress}
 http://${localip}:3020\n
 https://${localip}:3021 with Fingerprint:
 ${fingerprint}\n
-Login is 'admin' with your Password B\n
+${passwordInfo}\n
 Activate TOR to access the web block explorer from outside your local network.
 " 16 54
   fi
