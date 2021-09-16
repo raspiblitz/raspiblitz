@@ -296,11 +296,22 @@ if [ ${mode} = "cln-import-gui" ]; then
     /home/admin/config.scripts/cln.hsmtool.sh unlock # there are mutiple wallets possible, need to check for non-default ones too
   fi
 
-  # init backup plugin
-  /home/admin/config.scripts/cln-plugin.backup.sh on $CHAIN
-  
-  # restarting cln & give final info
-  sudo systemctl start lightningd
+  # set the lightningd service file on each active network
+  # init backup plugin, restart cln
+  if [ "${cln}" == "on" ] || [ "${cln}" == "1" ]; then
+    /home/admin/config.scripts/cln.install-service.sh mainnet
+    /home/admin/config.scripts/cln-plugin.backup.sh on mainnet
+  fi
+  if [ "${tcln}" == "on" ] || [ "${tcln}" == "1" ]; then
+    /home/admin/config.scripts/cln.install-service.sh testnet
+    /home/admin/config.scripts/cln-plugin.backup.sh on testnet
+  fi
+  if [ "${scln}" == "on" ] || [ "${scln}" == "1" ]; then
+    /home/admin/config.scripts/cln.install-service.sh signet
+    /home/admin/config.scripts/cln-plugin.backup.sh on signet
+  fi
+ 
+  # give final info
   echo
   echo "# DONE - lightningd is now starting"
   echo "# Check that CLN is starting up correctly and your old channels & funds are restored."

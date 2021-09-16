@@ -60,5 +60,8 @@ sudo systemctl daemon-reload
 sudo systemctl enable ${netprefix}lightningd
 echo "# Enabled the ${netprefix}lightningd.service"
 
-sudo systemctl start ${netprefix}lightningd
-echo "# Started the ${netprefix}lightningd.service"
+source /home/admin/raspiblitz.info
+if [ "${state}" == "ready" ]; then
+  sudo systemctl start ${netprefix}lightningd
+  echo "# Started the ${netprefix}lightningd.service"
+fi

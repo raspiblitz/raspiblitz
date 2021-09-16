@@ -3,9 +3,9 @@
 # Based on: https://gist.github.com/normandmickey/3f10fc077d15345fb469034e3697d0d0
 
 # https://github.com/dgarage/NBXplorer/releases
-NBXplorerVersion="v2.1.49"
+NBXplorerVersion="v2.2.8"
 # https://github.com/btcpayserver/btcpayserver/releases
-BTCPayVersion="v1.0.7.2"
+BTCPayVersion="v1.2.3"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -273,26 +273,25 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo 
     echo "# Installing .NET"
     echo 
-    # download dotnet-sdk
     # https://dotnet.microsoft.com/download/dotnet-core/3.1
     # dependencies
     sudo apt-get -y install libunwind8 gettext libssl1.0
     
     if [ "${cpu}" = "arm" ]; then
       binaryVersion="arm"
-      dotNetdirectLink="https://download.visualstudio.microsoft.com/download/pr/f2e1cb4a-0c70-49b6-871c-ebdea5ebf09d/acb1ea0c0dbaface9e19796083fe1a6b/dotnet-sdk-3.1.300-linux-arm.tar.gz"
-      dotNetChecksum="510de2931522633e5a35cfbaebac255704bb2a282e4980e7597c924531564b1a2f769cf67b3d1f196442ceca3d0d9a53e0a6dcb12adc9b0c6c1500742e7b1ee5"
+      dotNetdirectLink="https://download.visualstudio.microsoft.com/download/pr/40edd52f-b1ca-4f0c-8d50-34433202ce9d/2b8f5b881c239a706f271f010e56159c/dotnet-sdk-3.1.413-linux-arm.tar.gz"
+      dotNetChecksum="31f395b1e48e9ba53d4dc63db7ff1ea38bdcb612a1d54b483cde22a009c48fbae0303779f42cee32db0e51bd953c8abfdaa1620a43a7fd84e1f8e937b6675d59"
     elif [ "${cpu}" = "aarch64" ]; then
       binaryVersion="arm64"
-      dotNetdirectLink="https://download.visualstudio.microsoft.com/download/pr/e5e70860-a6d4-48cf-b0d1-eeba32657d80/2da3c605aaa65c7e4ac2ad0507a2e429/dotnet-sdk-3.1.300-linux-arm64.tar.gz"
-      dotNetChecksum="b1d806dd719e61ae27297515d26e6ef12e615da131db4fd1c29b2acc4d6a68a6b0e4ce94ead4f8f737c203328d596422068c78495eba331a5759f595ed9ed149"
+      dotNetdirectLink="https://download.visualstudio.microsoft.com/download/pr/dfd0ad22-3e47-432f-9aa1-f65b11a2ced2/d096c5d1561732c1658543fa8fb7a31f/dotnet-sdk-3.1.413-linux-arm64.tar.gz"
+      dotNetChecksum="39f198f07577faf81f09ca621fb749d5aac38fc05e7e6bd6226009679abc7d001454068430ddb34b320901955f42de3951e2707e01bce825b5216df2bc0c8eca"
     elif [ "${cpu}" = "x86_64" ]; then
       binaryVersion="x64"
-      dotNetdirectLink="https://download.visualstudio.microsoft.com/download/pr/0c795076-b679-457e-8267-f9dd20a8ca28/02446ea777b6f5a5478cd3244d8ed65b/dotnet-sdk-3.1.300-linux-x64.tar.gz"
-      dotNetChecksum="1c3844ea5f8847d92372dae67529ebb08f09999cac0aa10ace571c63a9bfb615adbf8b9d5cebb2f960b0a81f6a5fba7d80edb69b195b77c2c7cca174cbc2fd0b"
+      dotNetdirectLink="https://download.visualstudio.microsoft.com/download/pr/70d12135-d65f-4f4c-9d96-a6ac0251fb1b/57856b7654e338027cfb53552b2c4d46/dotnet-sdk-3.1.413-linux-x64.tar.gz"
+      dotNetChecksum="2a0824f11aba0b79d3f9a36af0395649bc9b4137e61b240a48dccb671df0a5b8c2086054f8e495430b7ed6c344bb3f27ac3dfda5967d863718a6dadeca951a83"
     fi
 
-    dotNetName="dotnet-sdk-3.1.300-linux-${binaryVersion}.tar.gz"
+    dotNetName="dotnet-sdk-3.1.413-linux-${binaryVersion}.tar.gz"
     sudo rm /home/btcpay/${dotnetName} 2>/dev/null
     sudo -u btcpay wget "${dotNetdirectLink}"
     # check binary is was not manipulated (checksum test)
@@ -302,31 +301,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       exit 1
     fi
 
-    # download aspnetcore-runtime
-    if [ "${cpu}" = "arm" ]; then
-      AspNetdirectLink="https://download.visualstudio.microsoft.com/download/pr/06f9feeb-cd19-49e9-a5cd-a230e1d8c52f/a232fbb4a6e6a90bbe624225e180308a/aspnetcore-runtime-3.1.4-linux-arm.tar.gz"
-      AspNetChecksum="58fe16baf370cebda96b93735be9bc57cf9a846b56ecbdc3c745c83399ad5b59518251996b75ac959ee3a8eb438a92e2ea3d088af4f0631caed3c86006d4ed2d"
-    elif [ "${cpu}" = "aarch64" ]; then
-      AspNetdirectLink="https://download.visualstudio.microsoft.com/download/pr/0f94ccdf-a791-4978-a0e1-0309911f60a4/d734c7f79e6b180b7b91f3d7e78d24d8/aspnetcore-runtime-3.1.4-linux-arm64.tar.gz"
-      AspNetChecksum="db91ea66e796e3d27ee08d50cb0532d1fb74060d5a8f1c90d2f34cb66ad74d50d6a8d128457693c15216b3c94d6c1acb7bd342fe0a0fa770117e21211972abda"
-    elif [ "${cpu}" = "x86_64" ]; then
-      AspNetdirectLink="https://download.visualstudio.microsoft.com/download/pr/a1ddc998-933c-47af-b8c7-dc2503e44e91/42d8cd08b2055df52c9457c993911f2e/aspnetcore-runtime-3.1.4-linux-x64.tar.gz"
-      AspNetChecksum="a761fd3652a0bc838c33b2846724d21e82410a5744bd37cbfab96c60327c89ee89c177e480a519b0e0d62ee58ace37e2c2a4b12b517e5eb0af601ad9804e028f"
-    fi
-
-    aspNetCoreName="aspnetcore-runtime-3.1.4-linux-${binaryVersion}.tar.gz"
-    sudo rm /home/btcpay/${aspNetCoreName} 2>/dev/null
-    sudo -u btcpay wget "${AspNetdirectLink}"
-    # check binary is was not manipulated (checksum test)
-    actualAspNetChecksum=$(sha512sum /home/btcpay/${aspNetCoreName} | cut -d " " -f1)
-    if [ "${actualAspNetChecksum}" != "${AspNetChecksum=}" ]; then
-      echo "# !!! FAIL !!! Downloaded ${aspNetCoreName} not matching SHA512 checksum: ${AspNetChecksum=}"
-      exit 1
-    fi
-
     sudo -u btcpay mkdir /home/btcpay/dotnet
     sudo -u btcpay tar -xvf ${dotNetName} -C /home/btcpay/dotnet
-    sudo -u btcpay tar -xvf ${aspNetCoreName} -C /home/btcpay/dotnet
     sudo rm -f *.tar.gz*
 
     # opt out of telemetry
@@ -359,10 +335,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # from the build.sh with path
     sudo -u btcpay /home/btcpay/dotnet/dotnet build -c Release NBXplorer/NBXplorer.csproj
     # see the configuration options with:
-    # sudo -u btcpay /home/btcpay/dotnet/dotnet "/home/btcpay/NBXplorer/NBXplorer/bin/Release/netcoreapp3.1/NBXplorer.dll" -c /home/btcpay/.nbxplorer/Main/settings.config -h
+    # sudo -u btcpay /home/btcpay/dotnet/dotnet run --no-launch-profile --no-build -c Release -p "NBXplorer/NBXplorer.csproj" -c /home/btcpay/.nbxplorer/Main/settings.config -h
     # run manually to debug:
-    # sudo -u btcpay /home/btcpay/dotnet/dotnet "/home/btcpay/NBXplorer/NBXplorer/bin/Release/netcoreapp3.1/NBXplorer.dll" -c /home/btcpay/.nbxplorer/Main/settings.config --network=mainnet
-    echo"# create the nbxplorer.service"
+    # sudo -u btcpay /home/btcpay/dotnet/dotnet run --no-launch-profile --no-build -c Release -p "NBXplorer/NBXplorer.csproj" -c /home/btcpay/.nbxplorer/Main/settings.config --network=mainnet -- $@
+    echo "# create the nbxplorer.service"
     echo "
 [Unit]
 Description=NBXplorer daemon
@@ -370,9 +346,9 @@ Requires=bitcoind.service
 After=bitcoind.service
 
 [Service]
-ExecStart=/home/btcpay/dotnet/dotnet \
- \"/home/btcpay/NBXplorer/NBXplorer/bin/Release/netcoreapp3.1/NBXplorer.dll\" \
- -c /home/btcpay/.nbxplorer/Main/settings.config --network=${chain}net
+WorkingDirectory=/home/btcpay/NBXplorer
+ExecStart=/home/btcpay/dotnet/dotnet run --no-launch-profile --no-build \
+ -c Release -p \"NBXplorer/NBXplorer.csproj\" -- \$@
 User=btcpay
 Group=btcpay
 Type=simple
@@ -453,9 +429,8 @@ After=nbxplorer.service
 
 [Service]
 ExecStart=/home/btcpay/dotnet/dotnet run --no-launch-profile --no-build \
- -c Release \
- -p \"/home/btcpay/btcpayserver/BTCPayServer/BTCPayServer.csproj\" -- \
- --sqlitefile=sqllite.db --network=${chain}net
+ -c Release -p \"/home/btcpay/btcpayserver/BTCPayServer/BTCPayServer.csproj\" \
+ -- --sqlitefile=sqllite.db 
 User=btcpay
 Group=btcpay
 Type=simple
