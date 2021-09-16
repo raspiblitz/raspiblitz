@@ -13,7 +13,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "# mainnet and testnet instances can run parallel"
   echo "# bonus.rtl.sh [on|off|menu] <lnd|cln> <mainnet|testnet|signet>"
   echo "# bonus.rtl.sh connect-services"
-  echo "# bonus.rtl.sh prestart <mainnet|testnet|signet>"
+  echo "# bonus.rtl.sh prestart <lnd|cln> <mainnet|testnet|signet>"
   exit 1
 fi
 
