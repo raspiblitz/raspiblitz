@@ -146,10 +146,10 @@ if [ "$1" = "prestart" ]; then
   # WALLET PROTECTION (only if Bitcoin has wallet active protect BTC-RPC-Explorer with additional passwordB)
   isBitcoinWalletOff=$(cat /mnt/hdd/${network}/${network}.conf | grep -c "^disablewallet=1")
   if [ "${isBitcoinWalletOff}" == "1" ]; then
-    echo "# updating BTCEXP_BITCOIND_PASS= --> no password needed because wallet is disabled"
+    echo "# updating BTCEXP_BASIC_AUTH_PASSWORD= --> no password needed because wallet is disabled"
     sed -i "s/^BTCEXP_BASIC_AUTH_PASSWORD=.*/BTCEXP_BASIC_AUTH_PASSWORD=/g" /home/btcrpcexplorer/.config/btc-rpc-explorer.env
   else
-    echo "# updating BTCEXP_BITCOIND_PASS=${RPCPASSWORD} --> enable password to protect wallet"
+    echo "# updating BTCEXP_BASIC_AUTH_PASSWORD=${RPCPASSWORD} --> enable password to protect wallet"
     sed -i "s/^BTCEXP_BASIC_AUTH_PASSWORD=.*/BTCEXP_BASIC_AUTH_PASSWORD=${RPCPASSWORD}/g" /home/btcrpcexplorer/.config/btc-rpc-explorer.env
   fi
 
