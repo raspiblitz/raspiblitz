@@ -127,13 +127,13 @@ if [ "$1" = "prestart" ]; then
 
     # CHECK THAT ELECTRS IS PART OF CONFIG
     echo "# updating BTCEXP_ADDRESS_API=electrumx"
-    sed -i 's/^BTCEXP_ADDRESS_API=*/BTCEXP_ADDRESS_API=electrumx/g' /home/btcrpcexplorer/.config/btc-rpc-explorer.env
+    sed -i 's/^BTCEXP_ADDRESS_API=.*/BTCEXP_ADDRESS_API=electrumx/g' /home/btcrpcexplorer/.config/btc-rpc-explorer.env
 
   else
 
     # ELECTRS=OFF --> MAKE SURE IT IS NOT CONNECTED
     echo "# updating BTCEXP_ADDRESS_API=none"
-    sed -i 's/^BTCEXP_ADDRESS_API=*/BTCEXP_ADDRESS_API=none/g' /home/btcrpcexplorer/.config/btc-rpc-explorer.env
+    sed -i 's/^BTCEXP_ADDRESS_API=.*/BTCEXP_ADDRESS_API=none/g' /home/btcrpcexplorer/.config/btc-rpc-explorer.env
 
   fi
 
