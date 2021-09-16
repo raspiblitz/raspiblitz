@@ -363,5 +363,5 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   exit 0
 fi
 
-echo "error='unknown parameter'
+echo "error='unknown parameter'"
 exit 1
