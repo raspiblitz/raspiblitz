@@ -438,6 +438,12 @@ WantedBy=multi-user.target
     /home/admin/config.scripts/internet.hiddenservice.sh electrs 50002 50002 50001 50001
   fi
 
+  # restart BTC-RPC-Explorer to reconfigure itself to use electrs for address API
+  if [ "${BTCRPCexplorer}" == "on" ]; then
+    sudo systemctl restart btc-rpc-explorer
+    echo "# BTC-RPC-Explorer restarted"
+  fi
+
   echo
   echo "# To connect through SSL from outside of the local network make sure the port 50002 is forwarded on the router"
   echo
@@ -474,6 +480,12 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo ufw deny 50001
     sudo ufw deny 50002 
     echo "# OK ElectRS removed."
+
+      # restart BTC-RPC-Explorer to reconfigure itself to use electrs for address API
+  if [ "${BTCRPCexplorer}" == "on" ]; then
+    sudo systemctl restart btc-rpc-explorer
+    echo "# BTC-RPC-Explorer restarted"
+  fi
     
   else 
     echo "# ElectRS is not installed."
