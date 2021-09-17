@@ -7,7 +7,7 @@
 - New: CLN plugin: Sparko [details](https://github.com/fiatjaf/sparko)
 - New: Suez - channel visualization for LND and CLN [details](https://github.com/prusnak/suez)
 - New: LND Static Channel Backup to Nextcloud
-- Update: Bitcoin Core v0.21.1 [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-0.21.1.md)
+- Update: Bitcoin Core v22.0 [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-22.0.md)
 - Update: LND v0.13.1 [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.13.1-beta)
 - Update: RTL 0.11.2 [details](https://github.com/Ride-The-Lightning/RTL/releases/tag/v0.11.2)
 - Update: Specter Desktop 1.6.0 [details](https://github.com/cryptoadvance/specter-desktop/blob/master/README.md)
