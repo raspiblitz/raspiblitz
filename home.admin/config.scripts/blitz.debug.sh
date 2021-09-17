@@ -276,7 +276,7 @@ else
   echo "- BTCPayServer is OFF by config"
 fi
 
-if [ ${BTCRPCexplorer} == "on" ]; then
+if [ "${BTCRPCexplorer}" == "on" ]; then
   echo
   echo "*** LAST 20 BTC-RPC-Explorer LOGS ***"
   echo "sudo journalctl -u btc-rpc-explorer -b --no-pager -n20"
