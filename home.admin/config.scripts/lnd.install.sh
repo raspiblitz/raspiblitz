@@ -38,6 +38,17 @@ elif [ ${CHAIN} = mainnet ];then
   zmqprefix=28
 fi
 
+source /home/admin/raspiblitz.info
+# add default value to raspi config if needed
+if ! grep -Eq "^lightning=" /mnt/hdd/raspiblitz.conf; then
+  echo "lightning=lnd" | sudo tee -a /mnt/hdd/raspiblitz.conf
+fi
+# add default value to raspi config if needed
+if ! grep -Eq "^${netprefix}lnd=" /mnt/hdd/raspiblitz.conf; then
+  echo "${netprefix}lnd=off" >> /mnt/hdd/raspiblitz.conf
+fi
+source /mnt/hdd/raspiblitz.conf
+
 function removeParallelService() {
   if [ -f "/etc/systemd/system/${netprefix}lnd.service" ];then
     sudo -u bitcoin /usr/local/bin/lncli\
@@ -50,12 +61,6 @@ function removeParallelService() {
   fi
 }
 
-source /home/admin/raspiblitz.info
-# add default value to raspi config if needed
-if ! grep -Eq "^${netprefix}lnd=" /mnt/hdd/raspiblitz.conf; then
-  echo "${netprefix}lnd=off" >> /mnt/hdd/raspiblitz.conf
-fi
-source /mnt/hdd/raspiblitz.conf
 
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
