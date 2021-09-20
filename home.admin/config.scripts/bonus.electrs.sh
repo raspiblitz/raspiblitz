@@ -289,11 +289,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo mkdir /mnt/hdd/app-storage/electrs 2>/dev/null
     sudo chown -R electrs:electrs /mnt/hdd/app-storage/electrs
 
-    # whitelist downloading to localhost from bitcoind
-    if ! sudo grep -Eq "^whitelist=download@127.0.0.1" /mnt/hdd/bitcoin/bitcoin.conf;then
-      echo "whitelist=download@127.0.0.1" | sudo tee -a /mnt/hdd/bitcoin/bitcoin.conf
-    fi
-
     echo
     echo "# Getting RPC credentials from the bitcoin.conf"
     #read PASSWORD_B
@@ -386,8 +381,6 @@ stream {
             fi
     fi
 
-    sudo systemctl restart nginx
-
     echo
     echo "# Open ports 50001 and 5002 on UFW "
     echo
@@ -438,10 +431,24 @@ WantedBy=multi-user.target
     /home/admin/config.scripts/internet.hiddenservice.sh electrs 50002 50002 50001 50001
   fi
 
-  # restart BTC-RPC-Explorer to reconfigure itself to use electrs for address API
-  if [ "${BTCRPCexplorer}" == "on" ]; then
-    sudo systemctl restart btc-rpc-explorer
-    echo "# BTC-RPC-Explorer restarted"
+  # whitelist downloading to localhost from bitcoind
+  if ! sudo grep -Eq "^whitelist=download@127.0.0.1" /mnt/hdd/bitcoin/bitcoin.conf;then
+    echo "whitelist=download@127.0.0.1" | sudo tee -a /mnt/hdd/bitcoin/bitcoin.conf
+    bitcoindRestart=yes
+  fi
+
+  source /home/admin/raspiblitz.info
+  if [ "${state}" == "ready" ]; then
+    if [ "${bitcoindRestart}" == "yes" ]; then
+      sudo systemctl restart bitcoind
+    fi
+    sudo systemctl restart nginx
+    sudo systemctl start electrs
+    # restart BTC-RPC-Explorer to reconfigure itself to use electrs for address API
+    if [ "${BTCRPCexplorer}" == "on" ]; then
+      sudo systemctl restart btc-rpc-explorer
+      echo "# BTC-RPC-Explorer restarted"
+    fi
   fi
 
   echo
@@ -481,11 +488,11 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo ufw deny 50002 
     echo "# OK ElectRS removed."
 
-      # restart BTC-RPC-Explorer to reconfigure itself to use electrs for address API
-  if [ "${BTCRPCexplorer}" == "on" ]; then
-    sudo systemctl restart btc-rpc-explorer
-    echo "# BTC-RPC-Explorer restarted"
-  fi
+    # restart BTC-RPC-Explorer to reconfigure itself to use electrs for address API
+    if [ "${BTCRPCexplorer}" == "on" ]; then
+      sudo systemctl restart btc-rpc-explorer
+      echo "# BTC-RPC-Explorer restarted"
+    fi
     
   else 
     echo "# ElectRS is not installed."
