@@ -31,10 +31,6 @@ if [ "${lightning}" == "cln" ] || [ "${cln}" == "on" ]; then
   clnNode="on"
 fi
 
-echo "# map dropboxbackup to on/off"
-DropboxBackup="off"
-if [ ${#dropboxBackupTarget} -gt 0 ]; then DropboxBackup="on"; fi
-
 echo "map nextcloudbackup to on/off"
 NextcloudBackup="off"
 if [ $nextcloudBackupServer ] && [ $nextcloudBackupUser ] && [ $nextcloudBackupPassword ]; then NextcloudBackup="on"; fi
@@ -136,7 +132,6 @@ if [ "${lndNode}" == "on" ]; then
   OPTIONS+=(c '-LND Circuitbreaker (firewall)' ${circuitbreaker})  
   OPTIONS+=(u '-LND Auto-Unlock' ${autoUnlock})  
   OPTIONS+=(x '-LND StaticChannelBackup on Nextcloud' ${NextcloudBackup})
-  OPTIONS+=(d '-LND StaticChannelBackup DropBox' ${DropboxBackup})
   OPTIONS+=(e '-LND StaticChannelBackup USB Drive' ${LocalBackup})
   OPTIONS+=(l '-LND UPnP (AutoNAT)' ${autoNatDiscovery})
 fi
@@ -321,22 +316,6 @@ if [ "${circuitbreaker}" != "${choice}" ] && [ "${lndNode}" == "on" ]; then
   sudo /home/admin/config.scripts/bonus.circuitbreaker.sh ${choice}
 else
   echo "Circuitbreaker Setting unchanged."
-fi
-
-# LND DropBox process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "d")
-if [ ${check} -eq 1 ]; then choice="on"; fi
-if [ "${DropboxBackup}" != "${choice}" ] && [ "${lndNode}" == "on" ]; then
-  echo "DropBox Setting changed .."
-  anychange=1
-  sudo -u admin /home/admin/config.scripts/dropbox.upload.sh ${choice}
-  if [ "${choice}" =  "on" ]; then
-    # doing initial upload so that user can see result
-    source /mnt/hdd/raspiblitz.conf
-    sudo /home/admin/config.scripts/dropbox.upload.sh upload ${dropboxBackupTarget} /mnt/hdd/lnd/data/chain/${network}/${chain}net/channel.backup
-  fi
-else
-  echo "Dropbox backup setting unchanged."
 fi
 
 # Nextcloud process choice
