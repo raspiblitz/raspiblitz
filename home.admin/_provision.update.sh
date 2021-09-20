@@ -170,6 +170,7 @@ if [ "${lightning}" == "lnd" ]; then
   # convert old keysend by lndExtraParameter to raspiblitz.conf setting (will be enforced by lnd.check.sh prestart) since 1.7.1
   if [ "${lndExtraParameter}" == "--accept-keysend" ]; then
     echo "# MIGRATION KEYSEND from lndExtraParameter --> raspiblitz.conf" >> ${logFile}
+    sudo sed -i '/lndKeysend=.*/d' /mnt/hdd/raspiblitz.conf
     echo "lndKeysend=on" >> /mnt/hdd/raspiblitz.conf
     sudo sed -i "/^lndExtraParameter=/d" /mnt/hdd/raspiblitz.conf 2>/dev/null
   fi
