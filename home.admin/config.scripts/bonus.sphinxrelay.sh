@@ -166,7 +166,7 @@ ${publicURL}"
 		--no-button "Show QR Code" \
 		--yesno "Open the Sphinx Chat app & scan the QR code displayed on the LCD. If you dont have a RaspiBlitz with LCD choose 'Show QR Code'.\n
 The connection string can also be copied if needed: ${connectionCode}\n
-${extraPairInfo}" 16 70
+${extraPairInfo}" 17 76
 	  if [ $? -eq 1 ]; then
       clear
       qrencode -t ANSI256 "${connectionCode}"
