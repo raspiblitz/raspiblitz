@@ -5,24 +5,26 @@
 - New: C-lightning v0.10.1 [details](https://github.com/ElementsProject/lightning/releases/tag/v0.10.1)
 - New: C-lightningREST v0.5.1 [details](https://github.com/Ride-The-Lightning/c-lightning-REST/releases/tag/v0.5.1)
 - New: CLN plugin: Sparko [details](https://github.com/fiatjaf/sparko)
+- New: CLN plugin: CLBOSS The C-Lightning Node Manager [details](https://github.com/ZmnSCPxj/clboss#clboss-the-c-lightning-node-manager)
 - New: Suez - channel visualization for LND and CLN [details](https://github.com/prusnak/suez)
 - New: LND Static Channel Backup to Nextcloud
+- 
 - Update: Bitcoin Core v22.0 [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-22.0.md)
-- Update: LND v0.13.1 [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.13.1-beta)
-- Update: RTL 0.11.2 [details](https://github.com/Ride-The-Lightning/RTL/releases/tag/v0.11.2)
 - Update: Specter Desktop 1.6.0 [details](https://github.com/cryptoadvance/specter-desktop/blob/master/README.md)
-- Update: Lightning Terminal v0.5.0-alpha [details](https://github.com/lightninglabs/lightning-terminal/releases/tag/v0.5.0-alpha)
-- Update: Pool CLI v0.5.1-alpha [details](https://github.com/lightninglabs/pool/releases/tag/v0.5.1-alpha)
-- Update: Balance of Satoshis 10.7.8 (BOS) + keep data on reinstall [details](https://github.com/alexbosworth/balanceofsatoshis/blob/master/CHANGELOG.md#version-8010)
-- Update: Circuitbreaker v0.3.0 [details](https://github.com/lightningequipment/circuitbreaker/blob/master/README.md)
 - Update: JoinMarket v0.9.1 [details](https://github.com/JoinMarket-Org/joinmarket-clientserver/#joinmarket-clientserver)
 - Update: JoininBox v0.6.0 [details](https://github.com/openoms/joininbox/tree/master#joininbox)
-- Update: Electrum Server in Rust (electrs) v0.8.11 [details](https://github.com/romanz/electrs/blob/v0.8.11/RELEASE-NOTES.md#0811-18-aug-2021)
+- Update: Electrum Server in Rust (electrs) v0.9.0-rc1 [details](https://github.com/romanz/electrs/blob/v0.9.0-rc1/RELEASE-NOTES.md)
 - Update: Mempool 2.2.2 [details](https://github.com/mempool/mempool)
 - Update: BTC-RPC-Explorer v3.2.0 [details](https://github.com/janoside/btc-rpc-explorer/blob/master/CHANGELOG.md#v320)
 - Update: stacking-sats-kraken 0.4.4 [details](https://github.com/dennisreimann/stacking-sats-kraken/blob/master/README.md)
 - Update: BTCPayServer 1.2.3 [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.2.3)
 
+- Update: LND v0.13.1 [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.13.1-beta)
+- Update: RTL 0.11.2 [details](https://github.com/Ride-The-Lightning/RTL/releases/tag/v0.11.2)
+- Update: Lightning Terminal v0.5.0-alpha [details](https://github.com/lightninglabs/lightning-terminal/releases/tag/v0.5.0-alpha)
+- Update: Pool CLI v0.5.1-alpha [details](https://github.com/lightninglabs/pool/releases/tag/v0.5.1-alpha)
+- Update: Balance of Satoshis 10.7.8 (BOS) + keep data on reinstall [details](https://github.com/alexbosworth/balanceofsatoshis/blob/master/CHANGELOG.md#version-8010)
+- Update: Circuitbreaker v0.3.0 [details](https://github.com/lightningequipment/circuitbreaker/blob/master/README.md)
 
 ## What's new in Version 1.7.0 of RaspiBlitz?
 

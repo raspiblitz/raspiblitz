@@ -279,6 +279,21 @@ fi
 # is CLN running
 clnRunning=$(systemctl status ${netprefix}lightningd.service 2>/dev/null | grep -c running)
 echo "clnActive=${clnRunning}"
+echo "CLNwalletLocked=0"
+if [ "${clnRunning}" != "1" ] && [ "${LNTYPE}" == "cln" ]; then
+  clnInfo=$($lightningcli_alias getinfo 2>&1)
+  # check if locked
+  if [ $(echo "${clnInfo}" | grep -c "Connecting to 'lightning-rpc': Connection refused") -gt 0 ];then
+    echo "# CLN wallet not running yet"
+    clnError=$(sudo journalctl -n5 -u lightningd)
+    if [ $(echo "${clnError}" | grep -c 'encrypted-hsm: Could not read pass from stdin.') -gt 0 ]\
+    || [ $(echo "${clnError}" | grep -c 'hsm_secret is encrypted, you need to pass the --encrypted-hsm startup option.') -gt 0 ]\
+    || [ $(echo "${clnError}" | grep -c 'Wrong password for encrypted hsm_secret.') -gt 0 ]; then
+      echo "CLNwalletLocked=1"
+    fi
+  fi
+fi
+
 if [ "${clnRunning}" == "1" ] && [ "${LNTYPE}" == "cln" ]; then
   clnInfo=$($lightningcli_alias getinfo)
   clnBlockHeight=$(echo "${clnInfo}" | jq -r '.blockheight' | tr -cd '[[:digit:]]')
