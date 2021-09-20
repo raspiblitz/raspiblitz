@@ -287,7 +287,12 @@ if [ "$1" = "status" ]; then
     connection="dns&selfsigned"
     publicURL="https://${dynDomain}:3301"
 
-  # 5) LOCAL NETWORK (just HTTP)
+  # 5) just over Tor
+  elif [ "${runBehindTor}" == "on" ]; then
+    connection="tor"
+    publicURL="http://${toraddress}:80"
+
+  # 6) LOCAL NETWORK (just HTTP)
   else
     connection="localnetwork"
     publicURL="http://${localIP}:3300"
