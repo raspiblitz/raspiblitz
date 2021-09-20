@@ -335,7 +335,11 @@ if [ "$1" = "status" ]; then
 
   # test connection (accept self-signed certs here) ... calling the url /app should return INDEX
   connectionTest="n/a"
-  connectionResponse=$(wget --no-check-certificate -qO- ${publicURL}/app 2>/dev/null)
+  if [ "${sphinxrelay_connection}" == "tor" ]; then
+    connectionResponse=$(torsocks wget --no-check-certificate -qO- ${publicURL}/app 2>/dev/null)
+  else
+    connectionResponse=$(wget --no-check-certificate -qO- ${publicURL}/app 2>/dev/null)
+  fi
   if [ "${connectionResponse}" == "INDEX" ]; then
     connectionTest="OK"
   else
