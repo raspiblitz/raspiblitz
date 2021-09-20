@@ -56,10 +56,10 @@ if [ "$1" = "menu" ]; then
       # other options (dont set sphinxrelay_connection)
       echo "OK - keep as it is"
     fi
-    clear
-    
+
   elif [ "${sphinxrelay_connection}" == "tor" ]; then
     dialog --title " Tor Info " --msgbox "\nYou are using Sphinx App over Tor. If you want to try other options you need to deinstall & reinstall the Sphinx Relay." 10 40
+    clear
   fi
 
   extraPairInfo=""
