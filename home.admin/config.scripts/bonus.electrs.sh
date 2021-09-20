@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # https://github.com/romanz/electrs/blob/master/doc/usage.md
-ELECTRSVERSION=v0.8.11
+ELECTRSVERSION="v0.9.0-rc1"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -275,24 +275,24 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo apt install -y clang cmake build-essential  # for building 'rust-rocksdb'
 
     echo
-    echo "# Downloading and building electrs $ELECTRSVERSION. This will take ~30 minutes" # ~22 min on an Odroid XU4
+    echo "# Downloading and building electrs $ELECTRSVERSION. This will take ~40 minutes"
     echo
     sudo -u electrs git clone https://github.com/romanz/electrs
     cd /home/electrs/electrs || exit 1 
     sudo -u electrs git reset --hard $ELECTRSVERSION
-    sudo -u electrs cargo build --release || exit 1 
+
+    sudo -u electrs cargo build --locked --release || exit 1
 
     echo
     echo "# The electrs database will be built in /mnt/hdd/app-storage/electrs/db. Takes ~18 hours and ~50Gb diskspace"
     echo
-    # move old-database if present
-    if [ -d "/mnt/hdd/electrs/db" ]; then
-      echo "Moving existing ElectRS index to /mnt/hdd/app-storage/electrs..."
-      sudo mv -f /mnt/hdd/electrs /mnt/hdd/app-storage/
-    fi
-
     sudo mkdir /mnt/hdd/app-storage/electrs 2>/dev/null
     sudo chown -R electrs:electrs /mnt/hdd/app-storage/electrs
+
+    # whitelist downloading to localhost from bitcoind
+    if ! sudo grep -Eq "^whitelist=download@127.0.0.1" /mnt/hdd/bitcoin/bitcoin.conf;then
+      echo "whitelist=download@127.0.0.1" | sudo tee -a /mnt/hdd/bitcoin/bitcoin.conf
+    fi
 
     echo
     echo "# Getting RPC credentials from the bitcoin.conf"
@@ -308,7 +308,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # https://github.com/romanz/electrs/blob/master/doc/usage.md#configuration-files-and-environment-variables
     sudo -u electrs mkdir /home/electrs/.electrs 2>/dev/null
     echo "
-verbose = 4
+verbose = 2
 timestamp = true
 jsonrpc_import = true
 db_dir = \"/mnt/hdd/app-storage/electrs/db\"
@@ -401,7 +401,7 @@ stream {
     echo "
 [Unit]
 Description=Electrs
-After=lnd.service
+After=bitcoind.service
 
 [Service]
 WorkingDirectory=/home/electrs/electrs
