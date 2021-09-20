@@ -45,7 +45,9 @@ if [ ${#abcd} -eq 0 ]; then
     OPTIONS+=(A "Master Login Password")
     OPTIONS+=(B "RPC/App Password")
     if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
-      OPTIONS+=(C "Lightning Wallet Password")
+      OPTIONS+=(C "LND Lightning Wallet Password")
+    if [ "${cln}" == "on" ] && [ "${clnEncryptedHSM}" == "on" ]; then
+      OPTIONS+=(CLN "C-Lightning Wallet Password")
     fi
     CHOICE=$(dialog --clear \
                 --backtitle "RaspiBlitz" \
@@ -67,6 +69,9 @@ if [ ${#abcd} -eq 0 ]; then
           ;;
         D)
           abcd='d';
+          ;;
+        CLN)
+          /home/admin/config.scripts/cln.hsmtool.sh change-password mainnet
           ;;
         *)
           exit 0
