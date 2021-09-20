@@ -288,10 +288,10 @@ if [ "$1" = "status" ]; then
     publicURL="https://${dynDomain}:3301"
 
   # 5) just over Tor
-  elif [ "${runBehindTor}" == "on" ]; then
-    connection="tor"
-    publicURL="http://${toraddress}:80"
-
+  #elif [ "${runBehindTor}" == "on" ]; then
+  #  connection="tor"
+  #  publicURL="http://${toraddress}:80"
+  #
   # 6) LOCAL NETWORK (just HTTP)
   else
     connection="localnetwork"
