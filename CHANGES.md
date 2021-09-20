@@ -9,6 +9,7 @@
 - New: Suez - channel visualization for LND and CLN [details](https://github.com/prusnak/suez)
 - New: LND Static Channel Backup to Nextcloud
 - New: Allow SphinxApp to connect over Tor
+- New: Parallel TESTNET & SIGNET servcies
 - Update: Bitcoin Core v22.0 [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-22.0.md)
 - Update: Specter Desktop 1.6.0 [details](https://github.com/cryptoadvance/specter-desktop/blob/master/README.md)
 - Update: JoinMarket v0.9.1 [details](https://github.com/JoinMarket-Org/joinmarket-clientserver/#joinmarket-clientserver)
