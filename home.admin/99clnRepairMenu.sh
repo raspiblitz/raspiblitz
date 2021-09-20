@@ -48,126 +48,126 @@ CHOICE=$(dialog --clear \
 
 case $CHOICE in
   ENCRYPT)
-  /home/admin/config.scripts/cln.hsmtool.sh encrypt $CHAIN
-  source /mnt/hdd/raspiblitz.conf
-  ;;
+    /home/admin/config.scripts/cln.hsmtool.sh encrypt $CHAIN
+    source /mnt/hdd/raspiblitz.conf
+    ;;
 
   DECRYPT)
-  /home/admin/config.scripts/cln.hsmtool.sh decrypt $CHAIN
-  source /mnt/hdd/raspiblitz.conf
-  ;;
+    /home/admin/config.scripts/cln.hsmtool.sh decrypt $CHAIN
+    source /mnt/hdd/raspiblitz.conf
+    ;;
   
   PASSWORD_C)
-  /home/admin/config.scripts/cln.hsmtool.sh change-password $CHAIN
-  ;;
+    /home/admin/config.scripts/cln.hsmtool.sh change-password $CHAIN
+    ;;
   
   AUTOUNLOCK-ON)
-  /home/admin/config.scripts/cln.hsmtool.sh autounlock-on $CHAIN
-  ;;
+    /home/admin/config.scripts/cln.hsmtool.sh autounlock-on $CHAIN
+    ;;
   
   AUTOUNLOCK-OFF)
-  /home/admin/config.scripts/cln.hsmtool.sh autounlock-off $CHAIN
-  ;;
+    /home/admin/config.scripts/cln.hsmtool.sh autounlock-off $CHAIN
+    ;;
   
   BACKUP)
-  ## from dialogLightningWallet.sh 
-  # run upload dialog and get result
-  _temp="/var/cache/raspiblitz/temp/.temp.tmp"
-  clear
-  /home/admin/config.scripts/cln.backup.sh cln-export-gui production $_temp
-  source $_temp 2>/dev/null
-  sudo rm $_temp 2>/dev/null
-
-  ;;
+    ## from dialogLightningWallet.sh 
+    # run upload dialog and get result
+    _temp="/var/cache/raspiblitz/temp/.temp.tmp"
+    clear
+    /home/admin/config.scripts/cln.backup.sh cln-export-gui production $_temp
+    source $_temp 2>/dev/null
+    sudo rm $_temp 2>/dev/null
+    ;;
+  
   RESET)
-  # backup
-  ## from dialogLightningWallet.sh 
-  _temp="/var/cache/raspiblitz/temp/.temp.tmp"
-  clear
-  /home/admin/config.scripts/cln.backup.sh cln-export-gui production $_temp
-  source $_temp 2>/dev/null
-  sudo rm $_temp 2>/dev/null
-  echo
-  echo "The rescue file is stored on the SDcard named cln-rescue.*.tar.gz just in case."
-  echo "The next step will overwrite the old C-lighthning $CHAIN wallet"
-  echo "Press ENTER to continue or CTRL+C to abort"
-  read key
-  # reset
-  sudo rm /home/bitcoin/.lightning/${CLNETWORK}/hsm_secret
-  sudo rm /home/bitcoin/.lightning/${CLNETWORK}/*.*
-  # make sure the new hsm_secret is treated as unencrypted and clear autounlock
-  sudo sed -i \
-    "s/^${netprefix}clnEncryptedHSM=.*/${netprefix}clnEncryptedHSM=off/g" \
-    /mnt/hdd/raspiblitz.conf
-  sudo sed -i \
-    "s/^${netprefix}clnAutoUnlock=.*/${netprefix}clnEncryptedHSM=off/g" \
-    /mnt/hdd/raspiblitz.conf
-  # new
-  /home/admin/config.scripts/cln.hsmtool.sh new $CHAIN
-  # set the lightningd service file on each active network
-  if [ "${cln}" == "on" ] || [ "${cln}" == "1" ]; then
-    /home/admin/config.scripts/cln.install-service.sh mainnet
-  fi
-  if [ "${tcln}" == "on" ] || [ "${tcln}" == "1" ]; then
-    /home/admin/config.scripts/cln.install-service.sh testnet
-  fi
-  if [ "${scln}" == "on" ] || [ "${scln}" == "1" ]; then
-    /home/admin/config.scripts/cln.install-service.sh signet
-  fi
-  ;;
+    # backup
+    ## from dialogLightningWallet.sh 
+    _temp="/var/cache/raspiblitz/temp/.temp.tmp"
+    clear
+    /home/admin/config.scripts/cln.backup.sh cln-export-gui production $_temp
+    source $_temp 2>/dev/null
+    sudo rm $_temp 2>/dev/null
+    echo
+    echo "The rescue file is stored on the SDcard named cln-rescue.*.tar.gz just in case."
+    echo "The next step will overwrite the old C-lighthning $CHAIN wallet"
+    echo "Press ENTER to continue or CTRL+C to abort"
+    read key
+    # reset
+    sudo rm /home/bitcoin/.lightning/${CLNETWORK}/hsm_secret
+    sudo rm /home/bitcoin/.lightning/${CLNETWORK}/*.*
+    # make sure the new hsm_secret is treated as unencrypted and clear autounlock
+    sudo sed -i \
+      "s/^${netprefix}clnEncryptedHSM=.*/${netprefix}clnEncryptedHSM=off/g" \
+      /mnt/hdd/raspiblitz.conf
+    sudo sed -i \
+      "s/^${netprefix}clnAutoUnlock=.*/${netprefix}clnEncryptedHSM=off/g" \
+      /mnt/hdd/raspiblitz.conf
+    # new
+    /home/admin/config.scripts/cln.hsmtool.sh new $CHAIN
+    # set the lightningd service file on each active network
+    if [ "${cln}" == "on" ] || [ "${cln}" == "1" ]; then
+      /home/admin/config.scripts/cln.install-service.sh mainnet
+    fi
+    if [ "${tcln}" == "on" ] || [ "${tcln}" == "1" ]; then
+      /home/admin/config.scripts/cln.install-service.sh testnet
+    fi
+    if [ "${scln}" == "on" ] || [ "${scln}" == "1" ]; then
+      /home/admin/config.scripts/cln.install-service.sh signet
+    fi
+    ;;
   
   FILERESTORE)
-  # backup
-  ## from dialogLightningWallet.sh 
-  _temp="/var/cache/raspiblitz/temp/.temp.tmp"
-  clear
-  /home/admin/config.scripts/cln.backup.sh cln-export-gui production $_temp
-  source $_temp 2>/dev/null
-  sudo rm $_temp 2>/dev/null
-  echo
-  echo "The rescue file is stored on the SDcard named cln-rescue.*.tar.gz just in case."
-  echo "The next step will overwrite the old C-lighthning $CHAIN wallet"
-  echo "Press ENTER to continue or CTRL+C to abort"
-  read key
-  # reset
-  sudo rm /home/bitcoin/.lightning/${CLNETWORK}/hsm_secret
-  sudo rm /home/bitcoin/.lightning/${CLNETWORK}/*.*
-  # import file
-  _temp="/var/cache/raspiblitz/temp/.temp.tmp"
-  clear
-  /home/admin/config.scripts/cln.backup.sh cln-import-gui production $_temp
-  source $_temp 2>/dev/null
-  sudo rm $_temp 2>/dev/null
-  ;;
+    # backup
+    ## from dialogLightningWallet.sh 
+    _temp="/var/cache/raspiblitz/temp/.temp.tmp"
+    clear
+    /home/admin/config.scripts/cln.backup.sh cln-export-gui production $_temp
+    source $_temp 2>/dev/null
+    sudo rm $_temp 2>/dev/null
+    echo
+    echo "The rescue file is stored on the SDcard named cln-rescue.*.tar.gz just in case."
+    echo "The next step will overwrite the old C-lighthning $CHAIN wallet"
+    echo "Press ENTER to continue or CTRL+C to abort"
+    read key
+    # reset
+    sudo rm /home/bitcoin/.lightning/${CLNETWORK}/hsm_secret
+    sudo rm /home/bitcoin/.lightning/${CLNETWORK}/*.*
+    # import file
+    _temp="/var/cache/raspiblitz/temp/.temp.tmp"
+    clear
+    /home/admin/config.scripts/cln.backup.sh cln-import-gui production $_temp
+    source $_temp 2>/dev/null
+    sudo rm $_temp 2>/dev/null
+    ;;
   
   SEEDRESTORE)
-  # backup
-  ## from dialogLightningWallet.sh 
-  _temp="/var/cache/raspiblitz/temp/.temp.tmp"
-  clear
-  /home/admin/config.scripts/cln.backup.sh cln-export-gui production $_temp
-  source $_temp 2>/dev/null
-  sudo rm $_temp 2>/dev/null
-  echo
-  echo "The rescue file is stored on the SDcard named cln-rescue.*.tar.gz just in case."
-  echo "The next step will overwrite the old C-lighthning $CHAIN wallet"
-  echo "Press ENTER to continue or CTRL+C to abort"
-  read key
-  # reset
-  sudo rm /home/bitcoin/.lightning/${CLNETWORK}/hsm_secret
-  sudo rm /home/bitcoin/.lightning/${CLNETWORK}/config
-  sudo rm /home/bitcoin/.lightning/${CLNETWORK}/*.*
-  # import seed
-  _temp="/var/cache/raspiblitz/.temp.tmp"
-  /home/admin/config.scripts/cln.backup.sh seed-import-gui $_temp
-  /home/admin/config.scripts/cln.hsmtool.sh seed "$CHAIN" "$(cat $_temp)"
-  source $_temp 2>/dev/null
-  sudo rm $_temp 2>/dev/null
-  # regenerate config
-  /home/admin/config.scripts/cln.hsmtool.sh autounlock-off
-  /home/admin/config.scripts/cln.hsmtool.sh decrypt
-  /home/admin/config.scripts/cln.install.sh on $CHAIN
-  ;;
+    # backup
+    ## from dialogLightningWallet.sh 
+    _temp="/var/cache/raspiblitz/temp/.temp.tmp"
+    clear
+    /home/admin/config.scripts/cln.backup.sh cln-export-gui production $_temp
+    source $_temp 2>/dev/null
+    sudo rm $_temp 2>/dev/null
+    echo
+    echo "The rescue file is stored on the SDcard named cln-rescue.*.tar.gz just in case."
+    echo "The next step will overwrite the old C-lighthning $CHAIN wallet"
+    echo "Press ENTER to continue or CTRL+C to abort"
+    read key
+    # reset
+    sudo rm /home/bitcoin/.lightning/${CLNETWORK}/hsm_secret
+    sudo rm /home/bitcoin/.lightning/${CLNETWORK}/config
+    sudo rm /home/bitcoin/.lightning/${CLNETWORK}/*.*
+    # import seed
+    _temp="/var/cache/raspiblitz/.temp.tmp"
+    /home/admin/config.scripts/cln.backup.sh seed-import-gui $_temp
+    /home/admin/config.scripts/cln.hsmtool.sh seed "$CHAIN" "$(cat $_temp)"
+    source $_temp 2>/dev/null
+    sudo rm $_temp 2>/dev/null
+    # regenerate config
+    /home/admin/config.scripts/cln.hsmtool.sh autounlock-off
+    /home/admin/config.scripts/cln.hsmtool.sh decrypt
+    /home/admin/config.scripts/cln.install.sh on $CHAIN
+    ;;
 
 esac
 

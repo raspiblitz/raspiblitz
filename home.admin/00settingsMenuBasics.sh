@@ -16,6 +16,8 @@ if [ ${#lcdrotate} -eq 0 ]; then lcdrotate=0; fi
 if [ ${#zerotier} -eq 0 ]; then zerotier="off"; fi
 if [ ${#circuitbreaker} -eq 0 ]; then circuitbreaker="off"; fi
 if [ ${#clboss} -eq 0 ]; then clboss="off"; fi
+if [ ${#clnEncryptedHSM} -eq 0 ]; then clnEncryptedHSM="off"; fi
+if [ ${#clnAutoUnlock} -eq 0 ]; then clnAutoUnlock="off"; fi
 
 echo "# map LND to on/off"
 lndNode="off"
@@ -47,7 +49,7 @@ if [ "${zerotier}" != "off" ]; then zerotierSwitch="on"; fi
 
 echo "# map parallel testnets to on/off"
 parallelTestnets="off"
-if [ "${testnet}" == "on"] || [ "${signet}" == "on" ]; then
+if [ "${testnet}" == "on" ] || [ "${signet}" == "on" ]; then
   parallelTestnets="on"
 fi
 
@@ -88,8 +90,20 @@ fi
 
 echo "# map clboss to on/off"
 clbossMenu='off'
-if [ ${clboss} -gt 0 ]; then
+if [ "${clboss}" == "on" ]; then
   clbossMenu='on'
+fi
+
+echo "# map clnEncryptedHSM to on/off"
+clnEncryptedHSMMenu='off'
+if [ "${clnEncryptedHSM}" == "on" ]; then
+  clnEncryptedHSMMenu='on'
+fi
+
+echo "# map clnAutoUnlock to on/off"
+clnAutoUnlockMenu='off'
+if [ "${clnAutoUnlock}" == "on" ]; then
+  clnAutoUnlockMenu='on'
 fi
 
 # show select dialog
@@ -130,7 +144,11 @@ fi
 # C-Lightning & options/PlugIns
 OPTIONS+=(n 'CLN C-LIGHTNING NODE' ${clnNode}) 
 if [ "${clnNode}" == "on" ]; then
-  OPTIONS+=(o '-CLN CLBOSS Automatic Node Manager' ${clbossMenu}) 
+  OPTIONS+=(o '-CLN CLBOSS Automatic Node Manager' ${clbossMenu})
+  OPTIONS+=(h '-CLN Wallet Encryption' ${clnEncryptedHSMMenu})
+  if [ "${clnEncryptedHSM}" == "on" ]; then
+    OPTIONS+=(q '-CLN Auto-Unlock' ${clnAutoUnlockMenu})
+  fi
 fi
 
 CHOICE_HEIGHT=$(("${#OPTIONS[@]}/2+1"))
@@ -448,6 +466,38 @@ if [ "${clboss}" != "${choice}" ] && [ "${clnNode}" == "on" ]; then
   needsReboot=0
 else
   echo "CLBOSS Setting unchanged."
+fi
+
+# clnEncryptedHSM process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "h")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${clnEncryptedHSM}" != "${choice}" ] && [ "${clnNode}" == "on" ]; then
+  echo "clnEncryptedHSM Setting changed .."
+  anychange=1
+  if [ "${choice}" == "on" ]; then
+    /home/admin/config.scripts/cln.hsmtool.sh encrypt mainnet
+  else
+    /home/admin/config.scripts/cln.hsmtool.sh decrypt mainnet
+  fi
+  needsReboot=0
+else
+  echo "clnEncryptedHSM Setting unchanged."
+fi
+
+# clnAutoUnlock process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "q")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${clnAutoUnlock}" != "${choice}" ] && [ "${clnNode}" == "on" ]; then
+  echo "clnAutoUnlock Setting changed .."
+  anychange=1
+  if [ "${choice}" == "on" ]; then
+    /home/admin/config.scripts/cln.hsmtool.sh autounlock-on mainnet
+  else
+    /home/admin/config.scripts/cln.hsmtool.sh autounlock-off mainnet
+  fi
+  needsReboot=0
+else
+  echo "clnAutoUnlock Setting unchanged."
 fi
 
 # parallel testnet process choice
