@@ -280,7 +280,7 @@ elif [ "$1" = "unlock" ]; then
       exit 1
     fi
     echo "# Waiting to unlock wallet ... "
-    sleep 5
+    sleep 15
     attempt=$((attempt+1))
   done
   echo "# Ok the ${netprefix}lightningd wallet is unlocked"

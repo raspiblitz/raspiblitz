@@ -142,7 +142,7 @@ do
   fi
 
   # CLN Wallet Unlock 
-  if [ "${clnActive}" == "1" ] && [ "${CLNwalletLocked}" == "1" ] && [ "${state}" == "ready" ] && [ "${setupPhase}" == "done" ]; then
+  if [ "${CLNwalletLocked}" == "1" ] && [ "${state}" == "ready" ] && [ "${setupPhase}" == "done" ]; then
     /home/admin/config.scripts/cln.hsmtool.sh unlock
     sleep 5
   fi
