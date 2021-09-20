@@ -241,32 +241,41 @@ seedwords6x4='${seedwords6x4}'
 elif [ "$1" = "unlock" ]; then
   # check if unlocked
   attempt=0
-  while [ $($lightningcli_alias getinfo | grep -c '"id":') -eq 0 ];do
+  justUnlocked=0
+  while [ $($lightningcli_alias getinfo 2>&1 | grep -c '"id":') -eq 0 ];do
+    clnError=$(sudo journalctl -n5 -u ${netprefix}lightningd)
     
     # getpassword
-    if [ $(sudo journalctl -n5 -u ${netprefix}lightningd | \
+    if [ $(echo "${clnError}" | \
       grep -c 'encrypted-hsm: Could not read pass from stdin.') -gt 0 ];then
-      if [ -f $passwordFile ];then
-        echo "# Wrong passwordFile is present"
+      if [ ${justUnlocked} -eq 0 ];then 
+        if [ -f $passwordFile ];then
+          echo "# Wrong passwordFile is present"
+        else
+          echo "# No passwordFile is present"
+        fi
+        passwordToFile
+        sudo systemctl restart ${netprefix}lightningd
+        justUnlocked=1
       else
-        echo "# No passwordFile is present"
+        echo "# Waiting to unlock wallet (2) ... "
+        sleep 5
       fi
-      passwordToFile
-      sudo systemctl restart ${netprefix}lightningd
-    
+
     # configure --encrypted-hsm 
-    elif [ $(sudo journalctl -n5 -u ${netprefix}lightningd | \
+    elif [ $(echo "${clnError}" | \
       grep -c 'hsm_secret is encrypted, you need to pass the --encrypted-hsm startup option.') -gt 0 ];then
-      echo "# The hsm_secret is encrypted, but unlock is not configured"
-      passwordToFile
-      # setting value in raspiblitz config
-      sudo sed -i \
-        "s/^${netprefix}clnEncryptedHSM=.*/${netprefix}clnEncryptedHSM=on/g" \
-        /mnt/hdd/raspiblitz.conf
-      /home/admin/config.scripts/cln.install-service.sh $CHAIN
+
+        echo "# The hsm_secret is encrypted, but unlock is not configured"
+        passwordToFile
+        # setting value in raspiblitz config
+        sudo sed -i \
+          "s/^${netprefix}clnEncryptedHSM=.*/${netprefix}clnEncryptedHSM=on/g" \
+          /mnt/hdd/raspiblitz.conf
+        /home/admin/config.scripts/cln.install-service.sh $CHAIN
     
     # get new password 
-    elif [ $(sudo journalctl -n5 -u ${netprefix}lightningd | \
+    elif [ $(echo "${clnError}" | \
       grep -c 'Wrong password for encrypted hsm_secret.') -gt 0 ];then
       echo "# Wrong password"
       sudo rm -f $passwordFile
@@ -280,7 +289,7 @@ elif [ "$1" = "unlock" ]; then
       exit 1
     fi
     echo "# Waiting to unlock wallet ... "
-    sleep 15
+    sleep 5
     attempt=$((attempt+1))
   done
   echo "# Ok the ${netprefix}lightningd wallet is unlocked"
