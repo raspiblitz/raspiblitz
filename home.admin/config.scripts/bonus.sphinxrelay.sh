@@ -49,8 +49,9 @@ if [ "$1" = "menu" ]; then
     --yesno "\nYou can connect Sphinx App over Tor. Its build in for iOS and on Android you need to use it together with the Orbot App." 10 72
     if [ "$?" != "1" ]; then
       echo "sphinxrelay_connection='tor'" >> /mnt/hdd/raspiblitz.conf
-      echo "Please wait ... restarting sphinx relay to use tor"
+      echo "Please wait (+10secs) ... restarting sphinx relay to use tor"
       sudo systemctl restart sphinxrelay
+      sleep 10
 	  else
       # other options (dont set sphinxrelay_connection)
       echo "OK - keep as it is"
