@@ -40,6 +40,24 @@ if [ "$1" = "menu" ]; then
 	  fi
   fi
 
+  # ask if user wants to use tor
+  if [ ${connection} = "localnetwork" ] && [ "${sphinxrelay_connection}" == "" ]; then
+
+    whiptail --title " Connect over Tor " \
+    --yes-button "Use Tor" \
+    --no-button "Other Pptions" \
+    --yesno "You can connect Sphinx App over Tor. Its build in for iOS and on Android you need to use it together with the Orbot App." 14 72
+    if [ "$?" != "1" ]; then
+      echo "1"
+	  else
+      echo "0"
+    fi
+    exit
+
+  elif [ "${sphinxrelay_connection}" == "tor" ]; then
+    dialog --title " Tor Info " --msgbox "\nYou are using Sphinx App over Tor. If you want to try other options you need to deinstall & reinstall the Sphinx Relay." 10 40
+  fi
+
   extraPairInfo=""
   text="Go to https://sphinx.chat and download the Sphinx Chat app."
 
@@ -71,6 +89,12 @@ MAINMENU > SUBSCRIBE & add LetsEncrypt HTTPS Domain"
      text="${text}\n
 Public Domain: ${publicURL}
 port forwarding on router needs to be active & may change port"
+
+  # When Tor
+  elif [ ${connection} = "tor" ]; then
+     text="${text}\n
+Tor Connection: ${publicURL}
+iOS support is native, Android needs Orbot"
 
   # When nothing advise 
   elif [ ${connection} = "localnetwork" ]; then
