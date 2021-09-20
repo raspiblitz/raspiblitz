@@ -41,16 +41,19 @@ if [ "$1" = "menu" ]; then
   fi
 
   # ask if user wants to use tor
-  if [ ${connection} = "localnetwork" ] && [ "${sphinxrelay_connection}" == "" ]; then
+  if [ ${connection} = "localnetwork" ] && [ "${sphinxrelay_connection}" == "" ] && [ "${runBehindTor}" == "on" ]; then
 
     whiptail --title " Connect over Tor " \
     --yes-button "Use Tor" \
-    --no-button "Other Pptions" \
-    --yesno "You can connect Sphinx App over Tor. Its build in for iOS and on Android you need to use it together with the Orbot App." 14 72
+    --no-button "Other Options" \
+    --yesno "\nYou can connect Sphinx App over Tor. Its build in for iOS and on Android you need to use it together with the Orbot App." 10 72
     if [ "$?" != "1" ]; then
-      echo "1"
+      echo "sphinxrelay_connection='tor'" >> /mnt/hdd/raspiblitz.conf
+      echo "Please wait ... restarting sphinx relay to use tor"
+      sudo systemctl restart sphinxrelay
 	  else
-      echo "0"
+      # other options (dont set sphinxrelay_connection)
+      echo "OK - keep as it is"
     fi
     exit
 
@@ -312,10 +315,10 @@ if [ "$1" = "status" ]; then
     publicURL="https://${dynDomain}:3301"
 
   # 5) just over Tor
-  #elif [ "${runBehindTor}" == "on" ]; then
-  #  connection="tor"
-  #  publicURL="http://${toraddress}:80"
-  #
+  elif [ "${runBehindTor}" == "on" ] && [ "${sphinxrelay_connection}" == "tor" ]; then
+    connection="tor"
+    publicURL="http://${toraddress}:80"
+  
   # 6) LOCAL NETWORK (just HTTP)
   else
     connection="localnetwork"
@@ -575,7 +578,8 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # setting value in raspi blitz config
   sudo sed -i "s/^sphinxrelay=.*/sphinxrelay=off/g" /mnt/hdd/raspiblitz.conf
-
+  sudo sed -i "/^sphinxrelay_connection=.*/d" /mnt/hdd/raspiblitz.conf
+  
   # remove nginx symlinks
   sudo rm -f /etc/nginx/sites-enabled/sphinxrelay_ssl.conf
   sudo rm -f /etc/nginx/sites-enabled/sphinxrelay_tor.conf
