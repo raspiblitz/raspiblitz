@@ -5,6 +5,7 @@
 - New: C-lightning v0.10.1 [details](https://github.com/ElementsProject/lightning/releases/tag/v0.10.1)
 - New: C-lightningREST v0.5.1 [details](https://github.com/Ride-The-Lightning/c-lightning-REST/releases/tag/v0.5.1)
 - New: CLN plugin: Sparko [details](https://github.com/fiatjaf/sparko)
+- New: CLN plugin: CLBOSS The C-Lightning Node Manager [details](https://github.com/ZmnSCPxj/clboss#clboss-the-c-lightning-node-manager)
 - New: Suez - channel visualization for LND and CLN [details](https://github.com/prusnak/suez)
 - New: LND Static Channel Backup to Nextcloud
 - 
@@ -24,8 +25,6 @@
 - Update: Pool CLI v0.5.1-alpha [details](https://github.com/lightninglabs/pool/releases/tag/v0.5.1-alpha)
 - Update: Balance of Satoshis 10.7.8 (BOS) + keep data on reinstall [details](https://github.com/alexbosworth/balanceofsatoshis/blob/master/CHANGELOG.md#version-8010)
 - Update: Circuitbreaker v0.3.0 [details](https://github.com/lightningequipment/circuitbreaker/blob/master/README.md)
-
-
 
 ## What's new in Version 1.7.0 of RaspiBlitz?
 

@@ -15,6 +15,7 @@ if [ ${#touchscreen} -eq 0 ]; then touchscreen=0; fi
 if [ ${#lcdrotate} -eq 0 ]; then lcdrotate=0; fi
 if [ ${#zerotier} -eq 0 ]; then zerotier="off"; fi
 if [ ${#circuitbreaker} -eq 0 ]; then circuitbreaker="off"; fi
+if [ ${#clboss} -eq 0 ]; then clboss="off"; fi
 
 echo "# map LND to on/off"
 lndNode="off"
@@ -85,6 +86,12 @@ if [ ${keysendOn} -eq 0 ]; then
   keysend="off"
 fi
 
+echo "# map clboss to on/off"
+clbossMenu='off'
+if [ ${clboss} -gt 0 ]; then
+  clbossMenu='on'
+fi
+
 # show select dialog
 echo "run dialog ..."
 
@@ -122,6 +129,9 @@ fi
 
 # C-Lightning & options/PlugIns
 OPTIONS+=(n 'CLN C-LIGHTNING NODE' ${clnNode}) 
+if [ "${clnNode}" == "on" ]; then
+  OPTIONS+=(o '-CLN CLBOSS Automatic Node Manager' ${clbossMenu}) 
+fi
 
 CHOICE_HEIGHT=$(("${#OPTIONS[@]}/2+1"))
 HEIGHT=$((CHOICE_HEIGHT+6))
@@ -426,6 +436,18 @@ if [ "${clnNode}" != "${choice}" ]; then
   fi
 else
   echo "C-Lightning NODE setting unchanged."
+fi
+
+# CLBOSS process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "o")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${clboss}" != "${choice}" ] && [ "${clnNode}" == "on" ]; then
+  echo "CLBOSS Setting changed .."
+  anychange=1
+  sudo /home/admin/config.scripts/cln-plugin.clboss.sh ${choice}
+  needsReboot=0
+else
+  echo "CLBOSS Setting unchanged."
 fi
 
 # parallel testnet process choice
