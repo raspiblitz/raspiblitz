@@ -25,6 +25,7 @@
 - Update: Thunderhub v0.12.25 [details](https://github.com/apotdevin/thunderhub/releases/tag/v0.12.25)
 - Update: Pool CLI v0.5.1-alpha [details](https://github.com/lightninglabs/pool/releases/tag/v0.5.1-alpha)
 - Update: Balance of Satoshis 10.7.8 (BOS) + keep data on reinstall [details](https://github.com/alexbosworth/balanceofsatoshis/blob/master/CHANGELOG.md#version-8010)
+- Update: Channel Tools (chantools) v0.9.3 [details](https://github.com/guggero/chantools/blob/master/README.md)
 - Update: Circuitbreaker v0.3.0 [details](https://github.com/lightningequipment/circuitbreaker/blob/master/README.md)
 - Remove: DropBox Backup (its recommended to change to Nextcloud Backup)
 

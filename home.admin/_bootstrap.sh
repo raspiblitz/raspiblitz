@@ -665,13 +665,6 @@ if [ ${isMounted} -eq 0 ]; then
     sed -i "s/^message=.*/message='Setup Done'/g" ${infoFile}
   fi
 
-  # make sure for future starts that blockchain service gets started after bootstrap
-  # so deamon reloas needed ... system will go into reboot after last loop
-  # needs to be after wait loop because otherwise the "restart" on COPY OVER LAN will not work
-  echo "# Updating service ${network}d.service ..." >> $logFile
-  sudo sed -i "s/^Wants=.*/Wants=bootstrap.service/g" /etc/systemd/system/${network}d.service
-  sudo sed -i "s/^After=.*/After=bootstrap.service/g" /etc/systemd/system/${network}d.service
-
   source ${infoFile}
   echo "WAIT LOOP: FINAL SETUP .. see controlFinalDialog.sh" >> $logFile
   until [ "${state}" == "ready" ]
@@ -693,6 +686,13 @@ if [ ${isMounted} -eq 0 ]; then
 
   ########################################
   # AFTER FINAL SETUP TASKS
+
+  # make sure for future starts that blockchain service gets started after bootstrap
+  # so deamon reloas needed ... system will go into reboot after last loop
+  # needs to be after wait loop because otherwise the "restart" on COPY OVER LAN will not work
+  echo "# Updating service ${network}d.service ..." >> $logFile
+  sudo sed -i "s/^Wants=.*/Wants=bootstrap.service/g" /etc/systemd/system/${network}d.service
+  sudo sed -i "s/^After=.*/After=bootstrap.service/g" /etc/systemd/system/${network}d.service
 
   # delete setup data from RAM
   sudo rm ${setupFile}
