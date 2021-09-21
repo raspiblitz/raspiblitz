@@ -6,13 +6,18 @@ pinnedVersion="1.6.0"
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "config script to switch Specter Desktop on, off, configure or update"
- echo "bonus.specter.sh [status|on|off|config|update]"
+ echo "bonus.specter.sh [status|on|off|config|update] <mainnet|testnet|signet>"
  echo "installing the version $pinnedVersion by default"
  exit 1
 fi
 
 source /mnt/hdd/raspiblitz.conf
-echo "# bonus.specter.sh $1"
+echo "# bonus.specter.sh $1 $2"
+
+if [ $# -gt 1 ];then
+  CHAIN=$2
+  chain=${CHAIN::-3}
+fi
 
 # get status key/values
 if [ "$1" = "status" ]; then
@@ -115,34 +120,56 @@ function configure_specter {
     "auth": {
         "method": "rpcpasswordaspin",
         "password_min_chars": 6,
-        "rate_limit": "10",
-        "registration_link_timeout": "1"
+        "rate_limit": 10,
+        "registration_link_timeout": 1
     },
     "active_node_alias": "raspiblitz_${chain}net",
     "proxy_url": "${proxy}",
-    "only_tor": ${torOnly},
+    "only_tor": "${torOnly}",
     "tor_control_port": "${tor_control_port}",
-    "tor_status": false,
+    "tor_status": true,
     "hwi_bridge_url": "/hwi/api/"
 }
 EOF
+  sudo mkdir -p /home/specter/.specter/nodes
   sudo mv /home/admin/config.json /home/specter/.specter/config.json
-  sudo chown -R specter:specter /home/specter/.specter
+  sudo chown -RL specter:specter /home/specter/
 
   echo "# Adding the raspiblitz_${chain}net node to Specter"
   RPCUSER=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcuser | cut -c 9-)
   PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
-  if [ ${chain} = "main" ];then
-    portprefix=""
-  elif [ ${chain} = "test" ];then
-    portprefix=1
-  elif [ ${chain} = "sig" ];then
-    portprefix=3
-  fi
-  PORT="${portprefix}8332"
-  cat > /home/admin/raspiblitz_${chain}net.json <<EOF    
+
+  echo "# Connect Specter to the default mainnet node"
+  cat > /home/admin/default.json <<EOF    
 {
-    "name": "Bitcoin Core",
+    "name": "raspiblitz_mainnet",
+    "alias": "default",
+    "autodetect": false,
+    "datadir": "",
+    "user": "${RPCUSER}",
+    "password": "${PASSWORD_B}",
+    "port": "8332",
+    "host": "localhost",
+    "protocol": "http",
+    "external_node": true,
+    "fullpath": "/home/specter/.specter/nodes/default.json"
+}
+EOF
+    sudo mv /home/admin/default.json /home/specter/.specter/nodes/default.json
+    sudo chown -RL specter:specter /home/specter/
+
+    if [ "${chain}" != "main" ]; then
+      if [ "${chain}" = "test" ];then
+        portprefix=1
+      elif [ "${chain}" = "sig" ];then
+        portprefix=3
+      fi
+      PORT="${portprefix}8332"
+
+      echo "# Connect Specter to the raspiblitz_${chain}net node"
+      cat > /home/admin/raspiblitz_${chain}net.json <<EOF    
+{
+    "name": "raspiblitz_${chain}net",
     "alias": "raspiblitz_${chain}net",
     "autodetect": false,
     "datadir": "",
@@ -155,14 +182,18 @@ EOF
     "fullpath": "/home/specter/.specter/nodes/raspiblitz_${chain}net.json"
 }
 EOF
-    sudo mkdir /home/specter/.specter/nodes
-    sudo mv /home/admin/raspiblitz_${chain}net.json /home/specter/.specter/nodes/raspiblitz_${chain}net.json
-    sudo chown -R specter:specter /home/specter/.specter
+      sudo mv /home/admin/raspiblitz_${chain}net.json /home/specter/.specter/nodes/raspiblitz_${chain}net.json
+      sudo chown -RL specter:specter /home/specter/
+    fi
 }
+
 
 # config
 if [ "$1" = "config" ]; then
   configure_specter
+  echo "# Restarting Specter - reload it's page to log in with the new settings"
+  sudo systemctl restart specter
+  exit 0
 fi
 
 # switch on
