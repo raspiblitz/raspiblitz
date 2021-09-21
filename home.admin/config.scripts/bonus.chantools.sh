@@ -14,6 +14,7 @@ elif [ $lndVersion -eq 11 ]; then
 else
   echo "# LND not installed or a version not tested with chantools"
   lncli -v
+  exit 1
 fi
 
 # command info
