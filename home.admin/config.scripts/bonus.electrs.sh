@@ -1,7 +1,9 @@
 #!/bin/bash
 
-# https://github.com/romanz/electrs/blob/master/doc/usage.md
-ELECTRSVERSION="v0.8.12"
+# https://github.com/romanz/electrs/releases
+#ELECTRSVERSION="v0.9.0-rc1"
+# https://github.com/romanz/electrs/commits/master
+ELECTRSVERSION="3041e89cd2fb377541b929d852ef6298c2d4e60a"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -39,7 +41,7 @@ if [ "$1" = "status" ]; then
   if [ ${serviceRunning} -eq 1 ]; then
 
     # Experimental try to get sync Info
-    syncedToBlock=$(sudo journalctl -u electrs --no-pager -n2000 | grep "new headers from height" | tail -n 1 | cut -d " " -f 16 | sed 's/[^0-9]*//g')
+    syncedToBlock=$(sudo journalctl -u electrs --no-pager -n2000 | grep "height=" | tail -n1| cut -d= -f3)
     blockchainHeight=$(sudo -u bitcoin ${network}-cli getblockchaininfo 2>/dev/null | jq -r '.headers' | sed 's/[^0-9]*//g')
     lastBlockchainHeight=$(($blockchainHeight -1))
     syncProgress=0
@@ -91,7 +93,7 @@ if [ "$1" = "status" ]; then
       # no answer on that port
       echo "publicTCPPortAnswering=0"
     fi
-    echo "portHTTP='50002'"
+    echo "portSSL='50002'"
     localPortRunning=$(sudo netstat -an | grep -c '0.0.0.0:50002')
     echo "localHTTPPortActive=${localPortRunning}"
     publicPortRunning=$(nc -z -w6 ${publicip} 50002 2>/dev/null; echo $?)
@@ -104,13 +106,13 @@ if [ "$1" = "status" ]; then
     fi
     # add TOR info
     if [ "${runBehindTor}" == "on" ]; then
-      echo "TORrunning=1"
+      echo "TorRunning=1"
       if [ "$2" = "showAddress" ]; then
         TORaddress=$(sudo cat /mnt/hdd/tor/electrs/hostname)
         echo "TORaddress='${TORaddress}'"
       fi
     else
-      echo "TORrunning=0"
+      echo "TorRunning=0"
     fi
     # check Nginx
     nginxTest=$(sudo nginx -t 2>&1 | grep -c "test is successful")
@@ -193,12 +195,12 @@ Check 'sudo nginx -t' for a detailed error message.
     echo
     echo "On Network Settings > Server menu:"
     echo "- deactivate automatic server selection"
-    echo "- as manual server set '${localip}' & '${portHTTP}'"
+    echo "- as manual server set '${localip}' & '${portSSL}'"
     echo "- laptop and RaspiBlitz need to be within same local network"
     echo 
     echo "To start directly from laptop terminal use:"
-    echo "electrum --oneserver --server ${localip}:${portHTTP}:s"
-    if [ ${TORrunning} -eq 1 ]; then
+    echo "electrum --oneserver --server ${localip}:${portSSL}:s"
+    if [ ${TorRunning} -eq 1 ]; then
       echo
       echo "The Tor Hidden Service address for electrs is (see LCD for QR code):"
       echo "${TORaddress}"
