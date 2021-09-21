@@ -123,7 +123,7 @@ function configure_specter {
     "only_tor": ${torOnly},
     "tor_control_port": "${tor_control_port}",
     "tor_status": false,
-    "hwi_bridge_url": "/hwi/api/",
+    "hwi_bridge_url": "/hwi/api/"
 }
 EOF
   sudo mv /home/admin/config.json /home/specter/.specter/config.json
