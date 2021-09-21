@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # https://github.com/romanz/electrs/blob/master/doc/usage.md
-ELECTRSVERSION="v0.9.0-rc1"
+ELECTRSVERSION="v0.8.12"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -306,6 +306,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 verbose = 2
 timestamp = true
 jsonrpc_import = true
+index-batch-size=10 
 db_dir = \"/mnt/hdd/app-storage/electrs/db\"
 auth = \"$RPC_USER:$PASSWORD_B\"
 # allow BTC-RPC-explorer show tx-s for addresses with a history of more than 100
@@ -398,7 +399,7 @@ After=bitcoind.service
 
 [Service]
 WorkingDirectory=/home/electrs/electrs
-ExecStart=/home/electrs/electrs/target/release/electrs --index-batch-size=10 --electrum-rpc-addr=\"0.0.0.0:50001\"
+ExecStart=/home/electrs/electrs/target/release/electrs --electrum-rpc-addr=\"0.0.0.0:50001\"
 User=electrs
 Group=electrs
 Type=simple

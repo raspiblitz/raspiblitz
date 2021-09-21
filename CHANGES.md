@@ -14,7 +14,7 @@
 - Update: Specter Desktop 1.6.0 [details](https://github.com/cryptoadvance/specter-desktop/blob/master/README.md)
 - Update: JoinMarket v0.9.1 [details](https://github.com/JoinMarket-Org/joinmarket-clientserver/#joinmarket-clientserver)
 - Update: JoininBox v0.6.0 [details](https://github.com/openoms/joininbox/tree/master#joininbox)
-- Update: Electrum Server in Rust (electrs) v0.9.0-rc1 [details](https://github.com/romanz/electrs/blob/v0.9.0-rc1/RELEASE-NOTES.md)
+- Update: Electrum Server in Rust (electrs) v0.8.12 [details](https://github.com/romanz/electrs/blob/v0.8.12/RELEASE-NOTES.md)
 - Update: Mempool 2.2.2 [details](https://github.com/mempool/mempool)
 - Update: BTC-RPC-Explorer v3.2.0 [details](https://github.com/janoside/btc-rpc-explorer/blob/master/CHANGELOG.md#v320)
 - Update: stacking-sats-kraken 0.4.4 [details](https://github.com/dennisreimann/stacking-sats-kraken/blob/master/README.md)
