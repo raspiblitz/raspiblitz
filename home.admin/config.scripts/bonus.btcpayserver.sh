@@ -522,7 +522,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo systemctl disable nbxplorer
     sudo rm /etc/systemd/system/nbxplorer.service
     # clear dotnet cache
-    dotnet nuget locals all --clear
+    /home/btcpay/dotnet/dotnet nuget locals all --clear
     sudo rm -rf /tmp/NuGetScratch
     # remove dotnet
     sudo rm -rf /usr/share/dotnet
