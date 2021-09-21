@@ -155,7 +155,8 @@ EOF
     "fullpath": "/home/specter/.specter/nodes/raspiblitz_${chain}net.json"
 }
 EOF
-    sudo mv /home/admin/raspiblitz_${chain}net.json.json /home/specter/.specter/nodes/raspiblitz_${chain}net.json
+    sudo mkdir /home/specter/.specter/nodes
+    sudo mv /home/admin/raspiblitz_${chain}net.json /home/specter/.specter/nodes/raspiblitz_${chain}net.json
     sudo chown -R specter:specter /home/specter/.specter
 }
 
