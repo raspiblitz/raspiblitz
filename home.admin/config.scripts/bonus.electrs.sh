@@ -311,8 +311,6 @@ db_dir = \"/mnt/hdd/app-storage/electrs/db\"
 auth = \"$RPC_USER:$PASSWORD_B\"
 # allow BTC-RPC-explorer show tx-s for addresses with a history of more than 100
 txid_limit = 1000
-# https://github.com/Stadicus/RaspiBolt/issues/646
-wait_duration_secs = 20
 server_banner = \"Welcome to electrs $ELECTRSVERSION - the Electrum Rust Server on your RaspiBlitz\"
 " | sudo tee /home/electrs/.electrs/config.toml
     sudo chmod 600 /home/electrs/.electrs/config.toml
