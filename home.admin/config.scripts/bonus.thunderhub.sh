@@ -1,6 +1,6 @@
 #!/bin/bash
 
-THUBVERSION="v0.12.13"
+THUBVERSION="v0.12.25"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
