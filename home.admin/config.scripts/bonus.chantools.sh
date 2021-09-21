@@ -5,7 +5,9 @@
 # see https://github.com/guggero/chantools/releases
 
 lndVersion=$(lncli -v | cut -d " " -f 3 | cut -d"." -f2)
-if [ $lndVersion -eq 12 ]; then
+if [ $lndVersion -eq 13 ]; then
+  pinnedVersion="0.9.3"
+elif [ $lndVersion -eq 12 ]; then
   pinnedVersion="0.8.2"
 elif [ $lndVersion -eq 11 ]; then
   pinnedVersion="0.7.1" 
