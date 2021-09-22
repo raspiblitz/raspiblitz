@@ -1,8 +1,14 @@
 #!/bin/bash
 
-# script to set up or update the CLN systemd service
-# usage:
-# /home/admin/config.scripts/cln.install-service.sh $CHAIN
+# help
+if [ "$1" = "-h" ]||[ "$1" = "--help" ];then
+  echo
+  echo "Script to set up or update the C-lightning systemd service"
+  echo "Usage:"
+  echo "/home/admin/config.scripts/cln.install-service.sh <mainnet|testnet|signet>"
+  echo
+  exit 1
+fi
 
 # source <(/home/admin/config.scripts/network.aliases.sh getvars cln <mainnet|testnet|signet>)
 source <(/home/admin/config.scripts/network.aliases.sh getvars cln $1)

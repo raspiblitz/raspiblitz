@@ -9,26 +9,26 @@
 if [ $# -lt 1 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]||\
   ! echo "$@" | grep -Eq "new|seed|unlock|lock|encrypt|decrypt|autounlock-on|autounlock-off|change-password" ;then
   echo
-  echo "# create new wallet or import seed"
-  echo "# unlock/lock, encrypt, decrypt, set autounlock or change password for the hsm_secret"
+  echo "Create new wallet or import seed"
+  echo "Unlock/lock, encrypt, decrypt, set autounlock or change password for the hsm_secret"
   echo
-  echo "# usage:"
-  echo "# Create new wallet"
-  echo "# cln.hsmtool.sh [new] [mainnet|testnet|signet] [?seedPassword]"  
-  echo "# cln.hsmtool.sh [new-force] [mainnet|testnet|signet] [?seedPassword]"  
-  echo "# There will be no seedPassword(passphrase) used by default"
-  echo "# new-force will delete any old wallet and will work without dialog"
+  echo "Usage:"
+  echo "Create new wallet:"
+  echo "cln.hsmtool.sh [new] [mainnet|testnet|signet] [?seedPassword]"  
+  echo "cln.hsmtool.sh [new-force] [mainnet|testnet|signet] [?seedPassword]"  
+  echo "There will be no seedPassword(passphrase) used by default"
+  echo "new-force will delete any old wallet and will work without dialog"
   echo
-  echo "# cln.hsmtool.sh [seed] [mainnet|testnet|signet] [\"space-separated-seed-words\"] [?seedPassword]"  
-  echo "# cln.hsmtool.sh [seed-force] [mainnet|testnet|signet] [\"space-separated-seed-words\"] [?seedPassword]"  
-  echo "# the new hsm_secret will be not encrypted if no NewPassword is given"
-  echo "# seed-force will delete any old wallet and will work without dialog"
+  echo "cln.hsmtool.sh [seed] [mainnet|testnet|signet] [\"space-separated-seed-words\"] [?seedPassword]"  
+  echo "cln.hsmtool.sh [seed-force] [mainnet|testnet|signet] [\"space-separated-seed-words\"] [?seedPassword]"  
+  echo "The new hsm_secret will be not encrypted if no NewPassword is given"
+  echo "seed-force will delete any old wallet and will work without dialog"
   echo
-  echo "# cln.hsmtool.sh [unlock|lock] <mainnet|testnet|signet>"
-  echo "# cln.hsmtool.sh [encrypt|decrypt] <mainnet|testnet|signet>"
-  echo "# cln.hsmtool.sh [autounlock-on|autounlock-off] <mainnet|testnet|signet>"
+  echo "cln.hsmtool.sh [unlock|lock] <mainnet|testnet|signet>"
+  echo "cln.hsmtool.sh [encrypt|decrypt] <mainnet|testnet|signet>"
+  echo "cln.hsmtool.sh [autounlock-on|autounlock-off] <mainnet|testnet|signet>"
   echo
-  echo "# cln.hsmtool.sh [change-password] <mainnet|testnet|signet> <NewPassword>"
+  echo "cln.hsmtool.sh [change-password] <mainnet|testnet|signet> <NewPassword>"
   echo
   exit 1
 fi
