@@ -208,7 +208,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     echo "#    --> Installing prerequisites"
     sudo apt update
-    sudo apt install -y libusb-1.0.0-dev libudev-dev virtualenv libffi-dev
+    sudo apt-get install -y virtualenv libffi-dev libusb-1.0.0-dev libudev-dev 
 
     sudo adduser --disabled-password --gecos "" specter
     
@@ -225,15 +225,15 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo ln -s /mnt/hdd/app-data/.specter /home/specter/ 2>/dev/null
     sudo chown -R specter:specter /home/specter/.specter
 
-    # activating Authentication here ...
-    configure_specter
-
     echo "#    --> creating a virtualenv"
     sudo -u specter virtualenv --python=python3 /home/specter/.env
 
     echo "#    --> pip-installing specter"
-    sudo -u specter /home/specter/.env/bin/python3 -m pip install --upgrade cryptoadvance.specter==$pinnedVersion
-    
+    sudo -u specter /home/specter/.env/bin/python3 -m pip install --upgrade cryptoadvance.specter==$pinnedVersion || exit 1
+
+    # activating Authentication here ...
+    configure_specter
+
     # Mandatory as the camera doesn't work without https
     echo "#    --> Creating self-signed certificate"
     openssl req -x509 -newkey rsa:4096 -nodes -out /tmp/cert.pem -keyout /tmp/key.pem -days 365 -subj "/C=US/ST=Nooneknows/L=Springfield/O=Dis/CN=www.fakeurl.com"
@@ -246,7 +246,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "#    --> Updating Firewall"
     sudo ufw allow 25441 comment 'specter'
     sudo ufw --force enable
-    echo ""
+    echo
 
     echo "#    --> Installing udev-rules for hardware-wallets"
     
