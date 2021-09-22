@@ -23,7 +23,7 @@ if [ $# -eq 0 ]||[ "$1" = "-h" ]||[ "$1" = "--help" ];then
   echo "usage:"
   echo "cln.install.sh on <mainnet|testnet|signet>"
   echo "cln.install.sh off <mainnet|testnet|signet> <purge>"
-  echo "cln.install.sh [update <version>|experimental|testPR <PRnumber>]"
+  echo "cln.install.sh [update <version>|testPR <PRnumber>]"
   echo "cln.install.sh display-seed <mainnet|testnet|signet>"
   echo
   exit 1
@@ -61,8 +61,7 @@ if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = experimental ]||[ "$1" = testPR ];
     exit 1
   fi
 
-  if [ ! -f /usr/local/bin/lightningd ]||[ "$1" = update ]||[ "$1" = experimental ]||[ "$1" = testPR ];then
-
+  if [ ! -f /usr/local/bin/lightningd ]||[ "$1" = update ]||[ "$1" = testPR ];then
 
     ########################
     # Install dependencies # 
@@ -84,7 +83,7 @@ if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = experimental ]||[ "$1" = testPR ];
     ####################################
 
     cd /home/bitcoin || exit 1
-    if [ "$1" = "update" ] || [ "$1" = "testPR" ] || [ "$1" = "experimental" ]; then
+    if [ "$1" = "update" ]||[ "$1" = "testPR" ]||[ "$1" = "experimental" ];then
       echo
       echo "# Deleting the old source code"
       sudo rm -rf lightning
@@ -94,37 +93,35 @@ if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = experimental ]||[ "$1" = testPR ];
     echo
     sudo -u bitcoin git clone https://github.com/ElementsProject/lightning.git
     cd lightning || exit 1
+    echo
     
-    if [ "$1" = "testPR" ]; then
+    if [ "$1" = "update" ]; then
+      if [ $# -gt 1 ];then
+        CLVERSION=$2
+        echo "# Installing the version $CLVERSION"
+      else
+        echo "# Updating to the latest commit in:"
+        echo "# https://github.com/ElementsProject/lightning"
+      fi
+    
+    elif [ "$1" = "testPR" ]; then
       PRnumber=$2 || exit 1
-      echo
       echo "# Using the PR:"
       echo "# https://github.com/ElementsProject/lightning/pull/$PRnumber"
       sudo -u bitcoin git fetch origin pull/$PRnumber/head:pr$PRnumber || exit 1
       sudo -u bitcoin git checkout pr$PRnumber || exit 1
-      echo "# Building with EXPERIMENTAL_FEATURES enabled"
-      echo
-      sudo -u bitcoin ./configure --enable-experimental-features
-    elif [ "$1" = "experimental" ]; then
-      echo
-      echo "# Updating to the latest commit in:"
-      echo "# https://github.com/ElementsProject/lightning"
-      echo
-      echo "# Building with EXPERIMENTAL_FEATURES enabled"
-      sudo -u bitcoin ./configure --enable-experimental-features
+
     else
-      if [ "$1" = "update" ]; then
-        CLVERSION=$2
-        echo "# Updating to the version $CLVERSION"
-      fi
+      echo "# Installing the version $CLVERSION"
       sudo -u bitcoin git reset --hard $CLVERSION
-      sudo -u bitcoin ./configure
     fi
 
+    echo "# Building with EXPERIMENTAL_FEATURES enabled"
+    echo
+    sudo -u bitcoin ./configure --enable-experimental-features
+    echo
     currentCLversion=$(cd /home/bitcoin/lightning 2>/dev/null; \
     git describe --tags 2>/dev/null)
-    sudo -u bitcoin ./configure
-    echo
     echo "# Building from source C-lightning $currentCLversion"
     echo
     sudo -u bitcoin make
@@ -136,6 +133,7 @@ if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = experimental ]||[ "$1" = testPR ];
     sudo make install || exit 1
     # clean up
     # cd .. && rm -rf lightning
+  
   else
     installedVersion=$(sudo -u bitcoin /usr/local/bin/lightningd --version)
     echo "# C-lightning ${installedVersion} is already installed"
@@ -223,12 +221,12 @@ alias ${netprefix}clnconf=\"sudo\
   echo "${netprefix}lightning-cli help"
   echo
 
-  # setting value in raspi blitz config
+  # setting value in the raspiblitz.conf
   sudo sed -i "s/^${netprefix}cln=.*/${netprefix}cln=on/g" /mnt/hdd/raspiblitz.conf
 
-  # if this is the first lighting mainnet turned on - make default
+  # if this is the first lightning mainnet turned on - make default
   if [ "${CHAIN}" == "mainnet" ] && [ "${lightning}" == "" ]; then
-    echo "# CLN is now default lighthning implementation"
+    echo "# CLN is now the default lightning implementation"
     sudo sed -i "s/^lightning=.*/lightning=cln/g" /mnt/hdd/raspiblitz.conf
   fi
 
@@ -243,7 +241,7 @@ if [ "$1" = "display-seed" ]; then
     exit 1
   fi
 
-  # get network and aliasses from second parameter (default mainnet)
+  # get network and aliases from second parameter (default mainnet)
   displayNetwork=$2
   if [ "${displayNetwork}" == "" ]; then
     displayNetwork="mainnet"
@@ -252,9 +250,9 @@ if [ "$1" = "display-seed" ]; then
 
   # check if seedword file exists
   seedwordFile="/home/bitcoin/.lightning/${CLNETWORK}/seedwords.info"
-  echo "# seewordFile(${seedwordFile})"
+  echo "# seedwordFile(${seedwordFile})"
   seedwordFileExists=$(ls ${seedwordFile} 2>/dev/null | grep -c "seedwords.info")
-  echo "# seewordFileExists(${seewordFileExists})"
+  echo "# seedwordFileExists(${seewordFileExists})"
   if [ "${seedwordFileExists}" == "1" ]; then
     source ${seedwordFile}
     #echo "# seedwords(${seedwords})"
@@ -270,7 +268,7 @@ if [ "$1" = "display-seed" ]; then
       fi
     done
   else
-    hsmFile="/home/bitcoin/.lightning/${CLNETWORK}/hsm_secret"
+    # hsmFile="/home/bitcoin/.lightning/${CLNETWORK}/hsm_secret"
     whiptail --title "C-Lightning ${displayNetwork} Wallet Info" --msgbox "Your C-Lightning ${displayNetwork} wallet was already created before - there are no seed words available.\n\nTo secure your wallet secret you can manually backup the file: /home/bitcoin/.lightning/${CLNETWORK}/hsm_secret" 11 76
   fi
 
@@ -289,15 +287,15 @@ if [ "$1" = "off" ];then
     sudo rm -f /usr/local/bin/lightningd
     sudo rm -f /usr/local/bin/lightning-cli
   fi
-  # setting value in raspi blitz config
+  # setting value in the raspiblitz.conf
   sudo sed -i "s/^${netprefix}cln=.*/${netprefix}cln=off/g" /mnt/hdd/raspiblitz.conf
 
   # if cln mainnet was default - remove 
   if [ "${CHAIN}" == "mainnet" ] && [ "${lightning}" == "cln" ]; then
-    echo "# CLN is REMOVED as default lightning implementation"
+    echo "# CLN is REMOVED as the default lightning implementation"
     sudo sed -i "s/^lightning=.*/lightning=/g" /mnt/hdd/raspiblitz.conf
     if [ "${lnd}" == "on" ]; then
-      echo "# LND is now new default lightning implementation"
+      echo "# LND is now the new default lightning implementation"
       sudo sed -i "s/^lightning=.*/lightning=lnd/g" /mnt/hdd/raspiblitz.conf
     fi
   fi
