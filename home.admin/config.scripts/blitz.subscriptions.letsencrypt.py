@@ -135,13 +135,13 @@ def dynu_update(domain, token, ip):
     try:
         print(response.content)
         data = json.loads(response.content)
-        apitoken = data["access_token"];
+        apitoken = data["access_token"]
     except Exception as e:
         raise BlitzError("failed parsing data", response.content, e)
     if len(apitoken) == 0:
         raise BlitzError("access_token not found", response.content)
     print("# apitoken({0})".format(apitoken))
-    apitoken = re.sub("[^0-9a-zA-Z]", "", apitoken)
+    #apitoken = re.sub("[^0-9a-zA-Z]", "", apitoken)
     print("# cleaning API token:")
     print("# apitoken({0})".format(apitoken))
 
