@@ -105,9 +105,9 @@ case $CHOICE in
           if [ $(grep -c Bisq < /etc/tor/torrc) -eq 0 ];then
             echo "# Creating the Hidden Service for Bisq"
             echo "
-# Hidden Service for Bisq (bitcoin RPC v2)
+# Hidden Service for Bisq (bitcoin RPC v3)
 HiddenServiceDir /mnt/hdd/tor/bisq
-HiddenServiceVersion 2
+HiddenServiceVersion 3
 HiddenServicePort 8333 127.0.0.1:8333" | sudo tee -a /etc/tor/torrc
             echo "# Restarting Tor"
             sudo systemctl restart tor
