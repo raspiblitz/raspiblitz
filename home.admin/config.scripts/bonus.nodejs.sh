@@ -92,7 +92,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   fi
 
   npm7installed=$(npm -v 2>/dev/null | grep -c "7.")
-  if ! [ ${npm7installed} -eq 0 ]; then
+  if [ ${npm7installed} -eq 0 ]; then
     # needed for RTL
     # https://github.blog/2021-02-02-npm-7-is-now-generally-available/
     echo "# Update npm to v7"
