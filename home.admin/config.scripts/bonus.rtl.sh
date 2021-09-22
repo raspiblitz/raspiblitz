@@ -1,4 +1,5 @@
 #!/bin/bash
+# https://github.com/Ride-The-Lightning/RTL
 RTLVERSION="v0.11.2"
 
 # check and load raspiblitz config

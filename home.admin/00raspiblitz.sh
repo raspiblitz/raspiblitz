@@ -171,7 +171,8 @@ do
     # push to final setup gui dialogs
     #echo "# controlFinalDialog.sh"
     /home/admin/setup.scripts/controlFinalDialog.sh
-    continue
+    # exit for final setup reboot
+    exit 0
   fi  
 
   #####################################

@@ -548,7 +548,7 @@ if [ ${isMounted} -eq 0 ]; then
   source ${setupFile}
   cat ${setupFile} >> ${logFile}
   
-  # make sure basic info id in raspiblitz.info
+  # make sure basic info is in raspiblitz.info
   echo "# Update ${infoFile} " >> ${logFile}
   sudo sed -i "s/^network=.*/network=${network}/g" ${infoFile}
   sudo sed -i "s/^chain=.*/chain=${chain}/g" ${infoFile}
@@ -666,7 +666,7 @@ if [ ${isMounted} -eq 0 ]; then
   fi
 
   source ${infoFile}
-  echo "WAIT LOOP: FINAL SETUP .. see controlFinalDialog.sh" >> $logFile
+  echo "WAIT LOOP: FINAL SETUP .. see controlFinalDialog.sh network(${network})" >> $logFile
   until [ "${state}" == "ready" ]
   do
 
@@ -693,6 +693,7 @@ if [ ${isMounted} -eq 0 ]; then
   echo "# Updating service ${network}d.service ..." >> $logFile
   sudo sed -i "s/^Wants=.*/Wants=bootstrap.service/g" /etc/systemd/system/${network}d.service
   sudo sed -i "s/^After=.*/After=bootstrap.service/g" /etc/systemd/system/${network}d.service
+  sudo systemctl daemon-reload
 
   # delete setup data from RAM
   sudo rm ${setupFile}
