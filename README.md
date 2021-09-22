@@ -835,7 +835,7 @@ If you want a Webservice like BTCPay Server or LNbits available to the outside i
 
 Because you also need a domain name for that you will need to open a free account, the following are presently supported, would be good to add more with the help of the community: 
 [DuckDNS.org](https://www.duckdns.org)
-[DYNU.com](https://www.dynu.com) 
+[DYNU.com](https://www.dynu.com) (AT THE MOMENT NOT AVAILABLE)
 
 When you create a new LetsEncrypt subscription, you will be asked for your subdomain on DuckDNS and the Auth-Token of your DuckDNS account. Then RaspiBlitz tries to setup everything for you. If everything worked, you will find the subscription under `MAINMENU` > `SUBSCRIBE` > `LIST My Subscriptions`, where you can cancel it at any time if you wish.
 
