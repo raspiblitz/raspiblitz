@@ -303,6 +303,7 @@ def subscriptions_new(ip, dnsservice, domain, token, target):
 
 
 def subscriptions_cancel(s_id):
+    print("# subscriptions_cancel(${0})".format(s_id))
     os.system("sudo chown admin:admin {0}".format(SUBSCRIPTIONS_FILE))
     subs = toml.load(SUBSCRIPTIONS_FILE)
     new_list = []
@@ -316,6 +317,7 @@ def subscriptions_cancel(s_id):
 
     # run the ACME script to remove cert
     if removed_cert:
+        print("# /home/admin/config.scripts/bonus.letsencrypt.sh remove-cert {0} {1}".format(removed_cert['id'], removed_cert['target']))
         acme_result = subprocess.Popen(
             ["/home/admin/config.scripts/bonus.letsencrypt.sh", "remove-cert", removed_cert['id'],
              removed_cert['target']], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf8')
