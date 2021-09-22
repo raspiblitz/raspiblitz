@@ -21,6 +21,7 @@
 - Update: BTC-RPC-Explorer v3.2.0 [details](https://github.com/janoside/btc-rpc-explorer/blob/master/CHANGELOG.md#v320)
 - Update: stacking-sats-kraken 0.4.4 [details](https://github.com/dennisreimann/stacking-sats-kraken/blob/master/README.md)
 - Update: BTCPayServer 1.2.3 [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.2.3)
+- Update: Lightning Terminal v0.5.1-alpha [details](https://github.com/lightninglabs/lightning-terminal/releases/tag/v0.5.1-alpha)
 - Update: RTL 0.11.2 [details](https://github.com/Ride-The-Lightning/RTL/releases/tag/v0.11.2)
 - Update: Lightning Terminal v0.5.0-alpha [details](https://github.com/lightninglabs/lightning-terminal/releases/tag/v0.5.0-alpha)
 - Update: Thunderhub v0.12.25 [details](https://github.com/apotdevin/thunderhub/releases/tag/v0.12.25)
