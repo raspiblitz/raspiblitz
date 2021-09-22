@@ -2,18 +2,20 @@
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
- echo "# ---------------------------------------------------"
- echo "# CLN RESCUE FILE (tar.gz of complete cln directory)"
- echo "# ---------------------------------------------------"
- echo "# cln.backup.sh cln-export"
- echo "# cln.backup.sh cln-export-gui"
- echo "# cln.backup.sh cln-import [file]"
- echo "# cln.backup.sh cln-import-gui [setup|production] [?resultfile]"
- echo "# ---------------------------------------------------"
- echo "# SEED WORDS"
- echo "# ---------------------------------------------------"
- echo "# cln.backup.sh seed-export-gui [lndseeddata]"
- echo "# cln.backup.sh seed-import-gui [resultfile]"
+ echo
+ echo "---------------------------------------------------"
+ echo "CLN RESCUE FILE (tar.gz of complete cln directory)"
+ echo "---------------------------------------------------"
+ echo "cln.backup.sh cln-export"
+ echo "cln.backup.sh cln-export-gui"
+ echo "cln.backup.sh cln-import [file]"
+ echo "cln.backup.sh cln-import-gui [setup|production] [?resultfile]"
+ echo "---------------------------------------------------"
+ echo "SEED WORDS"
+ echo "---------------------------------------------------"
+ echo "cln.backup.sh seed-export-gui [lndseeddata]"
+ echo "cln.backup.sh seed-import-gui [resultfile]"
+ echo
  exit 1
 fi
 

@@ -7,12 +7,11 @@ CLRESTVERSION="v0.5.1"
 if [ $# -eq 0 ]||[ "$1" = "-h" ]||[ "$1" = "--help" ];then
   echo
   echo "C-lightning-REST install script"
-  echo "the default version is: $CLRESTVERSION"
-  echo "setting up on ${chain}net unless otherwise specified"
+  echo "The default version is: $CLRESTVERSION"
   echo "mainnet | testnet | signet instances can run parallel"
-  echo "the same macaroon and certs will be used for the parallel networks"
+  echo "The same macaroon and certs will be used for the parallel networks"
   echo
-  echo "usage:"
+  echo "Usage:"
   echo "cln.rest.sh [on|off|connect] <mainnet|testnet|signet>"
   echo
   exit 1

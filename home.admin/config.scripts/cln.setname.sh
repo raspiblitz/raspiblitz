@@ -2,9 +2,11 @@
 
 # command info
 if [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
- echo "small config script to set alias of the C-lightning node "
- echo "cln.setname.sh [mainnet|testnet|signet] [?newName]"
- exit 1
+  echo 
+  echo "Config script to set the alias of the C-lightning node"
+  echo "cln.setname.sh [mainnet|testnet|signet] [?newName]"
+  echo
+  exit 1
 fi
 
 # 1. parameter [?newName]

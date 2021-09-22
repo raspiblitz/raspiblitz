@@ -16,11 +16,11 @@ source /mnt/hdd/raspiblitz.conf
 if [ $# -eq 0 ]||[ "$1" = "-h" ]||[ "$1" = "--help" ];then
   echo
   echo "C-lightning install script"
-  echo "the default version is: $CLVERSION"
-  echo "setting up on ${chain}net unless otherwise specified"
+  echo "The default version is: $CLVERSION"
+  echo "Setting up on ${chain}net unless otherwise specified"
   echo "mainnet / testnet / signet instances can run parallel"
   echo
-  echo "usage:"
+  echo "Usage:"
   echo "cln.install.sh on <mainnet|testnet|signet>"
   echo "cln.install.sh off <mainnet|testnet|signet> <purge>"
   echo "cln.install.sh [update <version>|testPR <PRnumber>]"
