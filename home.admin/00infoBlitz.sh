@@ -452,6 +452,7 @@ fi
 uptime=$(uptime --pretty)
 datetime=$(date -R)
 
+stty sane
 sleep 1
 clear
 
