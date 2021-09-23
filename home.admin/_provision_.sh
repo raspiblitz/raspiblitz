@@ -107,6 +107,12 @@ fi
 echo "# Make sure the user bitcoin is in the debian-tor group"
 sudo usermod -a -G debian-tor bitcoin
 
+echo "# Optimizing log files: rotate daily, keep 2 weeks & compress old days " >> ${logFile}
+sudo sed -i "s/^weekly/daily/g" /etc/logrotate.conf >> ${logFile} 2>&1
+sudo sed -i "s/^rotate 4/rotate 14/g" /etc/logrotate.conf >> ${logFile} 2>&1
+sudo sed -i "s/^#compress/compress/g" /etc/logrotate.conf >> ${logFile} 2>&1
+sudo systemctl restart logrotate
+
 # set hostname data
 echo "Setting lightning alias: ${hostname}" >> ${logFile}
 sudo sed -i "s/^alias=.*/alias=${hostname}/g" /home/admin/assets/lnd.${network}.conf >> ${logFile} 2>&1
