@@ -854,7 +854,7 @@ sudo -u admin mkdir /home/admin/download
 cd /home/admin/download
 
 # receive signer key
-if ! gpg --recv-key "71A3 B167 3540 5025 D447 E8F2 7481 0B01 2346 C9A6"
+if ! gpg --keyserver hkp://keyserver.ubuntu.com --recv-key "71A3 B167 3540 5025 D447 E8F2 7481 0B01 2346 C9A6"
 then
   echo "!!! FAIL !!! Couldn't download Wladimir J. van der Laan's PGP pubkey"
   exit 1
