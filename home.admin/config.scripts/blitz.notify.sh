@@ -79,33 +79,33 @@ source /mnt/hdd/raspiblitz.conf 2>/dev/null
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "switching the NOTIFY ON"
 
-  # install sstmp if not already present
-  if ! command -v ssmtp >/dev/null; then
+  # install mstmp if not already present
+  if ! command -v msmtp >/dev/null; then
     [ -z "$(find -H /var/lib/apt/lists -maxdepth 0 -mtime -7)" ] && sudo apt-get update
-    sudo apt-get install -y ssmtp
+    sudo apt-get install -y msmtp
   fi
 
   # install python lib for smime into virtual env
   sudo -H /usr/bin/python3 -m pip install smime
 
   # write ssmtp config
-  cat << EOF | sudo tee /etc/ssmtp/ssmtp.conf >/dev/null
-#
-# Config file for sSMTP sendmail
-#
-# The person who gets all mail for userids < 1000
-# Make this empty to disable rewriting.
-Root=${notifyMailTo}
+  cat << EOF | sudo tee /etc/msmtprc >/dev/null
+# Set default values for all following accounts.
+defaults
+port 587
+tls on
+tls_trust_file /etc/ssl/certs/ca-certificates.crt
 
-# hostname of this system
-Hostname=${notifyMailHostname}
+account mail
+host ${notifyMailServer}
+from ${notifyMailFromAddress}
+auth on
+user ${notifyMailUser}
+password ${notifyMailPass}
 
-# relay/smarthost server settings
-Mailhub=${notifyMailServer}
-AuthUser=${notifyMailUser}
-AuthPass=${notifyMailPass}
-UseSTARTTLS=YES
-FromLineOverride=YES
+# Set a default account
+account default : mail
+
 EOF
 
   # edit raspi blitz config
@@ -137,22 +137,22 @@ if [ "$1" = "send" ]; then
     exit 1
   fi
 
-  if ! command -v ssmtp >/dev/null; then
+  if ! command -v msmtp >/dev/null; then
     echo "please run \"on\" first"
     exit 1
   fi
 
   # now parse settings from config and use to send the message
   if [ "${notifyMethod}" = "ext" ]; then
-    /usr/bin/python3 /home/admin/XXsendNotification.py ext ${notifyExtCmd} "$2"
+    /usr/bin/python3 /home/admin/config.scripts/blitz.sendnotification.py ext ${notifyExtCmd} "$2"
   elif [ "${notifyMethod}" = "mail" ]; then
     if [ "${notifyMailEncrypt}" = "on" ]; then
-      /usr/bin/python3 /home/admin/XXsendNotification.py mail --from-address "${notifyMailFromAddress}" --from-name "${notifyMailFromName}" --cert "${notifyMailToCert}" --encrypt ${notifyMailTo} "${@:3}" "$2"
+      /usr/bin/python3 /home/admin/config.scripts/blitz.sendnotification.py mail --from-address "${notifyMailFromAddress}" --from-name "${notifyMailFromName}" --cert "${notifyMailToCert}" --encrypt ${notifyMailTo} "${@:3}" "$2"
     else
-      /usr/bin/python3 /home/admin/XXsendNotification.py mail --from-address "${notifyMailFromAddress}" --from-name "${notifyMailFromName}" "${notifyMailTo}" "${@:3}" "$2"
+      /usr/bin/python3 /home/admin/config.scripts/blitz.sendnotification.py mail --from-address "${notifyMailFromAddress}" --from-name "${notifyMailFromName}" "${notifyMailTo}" "${@:3}" "$2"
     fi
   elif [ "${notifyMethod}" = "slack" ]; then
-    /usr/bin/python3 /home/admin/XXsendNotification.py slack -h "$2"
+    /usr/bin/python3 /home/admin/config.scripts/blitz.sendnotification.py slack -h "$2"
   else
     echo "unknown notification method - check /mnt/hdd/raspiblitz.conf"
   fi

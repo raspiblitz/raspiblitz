@@ -6,7 +6,9 @@ source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
 
 echo "services default values"
+if [ ${#runBehindTor} -eq 0 ]; then runBehindTor="off"; fi
 if [ ${#rtlWebinterface} -eq 0 ]; then rtlWebinterface="off"; fi
+if [ ${#crtlWebinterface} -eq 0 ]; then crtlWebinterface="off"; fi
 if [ ${#BTCRPCexplorer} -eq 0 ]; then BTCRPCexplorer="off"; fi
 if [ ${#specter} -eq 0 ]; then specter="off"; fi
 if [ ${#BTCPayServer} -eq 0 ]; then BTCPayServer="off"; fi
@@ -22,30 +24,45 @@ if [ ${#sphinxrelay} -eq 0 ]; then sphinxrelay="off"; fi
 if [ ${#lit} -eq 0 ]; then lit="off"; fi
 if [ ${#whitepaper} -eq 0 ]; then whitepaper="off"; fi
 if [ ${#chantools} -eq 0 ]; then chantools="off"; fi
+if [ ${#sparko} -eq 0 ]; then sparko="off"; fi
 
 # show select dialog
 echo "run dialog ..."
 
 OPTIONS=()
-OPTIONS+=(e 'Electrum Rust Server' ${ElectRS})
-OPTIONS+=(r 'RTL Webinterface' ${rtlWebinterface})
-OPTIONS+=(t 'ThunderHub' ${thunderhub})
-OPTIONS+=(l 'LIT (loop, pool, faraday)' ${lit})
-OPTIONS+=(p 'BTCPayServer' ${BTCPayServer})
-OPTIONS+=(i 'LNbits' ${LNBits})
-OPTIONS+=(b 'BTC-RPC-Explorer' ${BTCRPCexplorer})
-OPTIONS+=(s 'Cryptoadvance Specter' ${specter})
-OPTIONS+=(a 'Mempool Space' ${mempoolExplorer})
-OPTIONS+=(j 'JoinMarket' ${joinmarket})
-OPTIONS+=(o 'Balance of Satoshis' ${bos})
-OPTIONS+=(x 'Sphinx-Relay' ${sphinxrelay})
-OPTIONS+=(y 'PyBLOCK' ${pyblock})
-OPTIONS+=(c 'ChannelTools (Fund Rescue)' ${chantools})
-OPTIONS+=(w 'Download Bitcoin Whitepaper' ${whitepaper})
 
-CHOICES=$(dialog --title ' Additional Services ' \
+# just available for BTC
+if [ "${network}" == "bitcoin" ]; then
+  OPTIONS+=(e 'BTC Electrum Rust Server' ${ElectRS})
+  OPTIONS+=(p 'BTC PayServer' ${BTCPayServer})
+  OPTIONS+=(b 'BTC RPC-Explorer' ${BTCRPCexplorer})
+  OPTIONS+=(s 'BTC Specter Desktop' ${specter})
+  OPTIONS+=(a 'BTC Mempool Space' ${mempoolExplorer})
+  OPTIONS+=(j 'BTC JoinMarket+JoininBox menu' ${joinmarket})
+  OPTIONS+=(w 'BTC Download Bitcoin Whitepaper' ${whitepaper})
+fi
+
+# just available for LND
+if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
+  OPTIONS+=(r 'LND RTL Webinterface' ${rtlWebinterface})
+  OPTIONS+=(t 'LND ThunderHub' ${thunderhub})
+  OPTIONS+=(l 'LND LIT (loop, pool, faraday)' ${lit})
+  OPTIONS+=(i 'LND LNbits' ${LNBits})
+  OPTIONS+=(o 'LND Balance of Satoshis' ${bos})
+  OPTIONS+=(y 'LND PyBLOCK' ${pyblock})
+  OPTIONS+=(h 'LND ChannelTools (Fund Rescue)' ${chantools})
+  OPTIONS+=(x 'LND Sphinx-Relay' ${sphinxrelay})
+fi
+
+# just available for CLN
+if [ "${lightning}" == "cln" ] || [ "${cln}" == "on" ]; then
+  OPTIONS+=(c 'C-Lightning RTL Webinterface' ${crtlWebinterface})
+  OPTIONS+=(k 'C-Lightning Sparko WebWallet' ${sparko})
+fi
+
+CHOICES=$(dialog --title ' Additional Mainnet Services ' \
           --checklist ' use spacebar to activate/de-activate ' \
-          22 45 15  "${OPTIONS[@]}" 2>&1 >/dev/tty)
+          24 55 17  "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
 dialogcancel=$?
 echo "done dialog"
@@ -55,38 +72,64 @@ clear
 echo "dialogcancel(${dialogcancel})"
 if [ ${dialogcancel} -eq 1 ]; then
   echo "user canceled"
-  exit 1
+  exit 0
 elif [ ${dialogcancel} -eq 255 ]; then
   echo "ESC pressed"
-  exit 1
+  exit 0
 fi
 
 needsReboot=0
 anychange=0
 
-# RTL process choice
+# RTL process choice (LND)
 choice="off"; check=$(echo "${CHOICES}" | grep -c "r")
 if [ ${check} -eq 1 ]; then choice="on"; fi
+
 if [ "${rtlWebinterface}" != "${choice}" ]; then
-  echo "RTL Webinterface Setting changed .."
+  echo "RTL-lnd Webinterface Setting changed .."
   anychange=1
-  /home/admin/config.scripts/bonus.rtl.sh ${choice}
+  /home/admin/config.scripts/bonus.rtl.sh ${choice} lnd mainnet
   errorOnInstall=$?
   if [ "${choice}" =  "on" ]; then
     if [ ${errorOnInstall} -eq 0 ]; then
       sudo systemctl start RTL
       echo "waiting 10 secs .."
       sleep 10
-      /home/admin/config.scripts/bonus.rtl.sh menu
+      /home/admin/config.scripts/bonus.rtl.sh menu lnd mainnet
     else
-      l1="!!! FAIL on RTL install !!!"
+      l1="!!! FAIL on RTL lnd install !!!"
       l2="Try manual install on terminal after reboot with:"
-      l3="/home/admin/config.scripts/bonus.rtl.sh on"
+      l3="/home/admin/config.scripts/bonus.rtl.sh on lnd mainnet"
       dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
     fi
   fi
 else
-  echo "RTL Webinterface Setting unchanged."
+  echo "RTL-lnd Webinterface Setting unchanged."
+fi
+
+# RTL process choice (C-Lightning)
+choice="off"; check=$(echo "${CHOICES}" | grep -c "c")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${crtlWebinterface}" != "${choice}" ]; then
+  echo "RTL-cln Webinterface Setting changed .."
+  anychange=1
+  /home/admin/config.scripts/bonus.rtl.sh ${choice} cln mainnet
+  errorOnInstall=$?
+  if [ "${choice}" =  "on" ]; then
+    if [ ${errorOnInstall} -eq 0 ]; then
+      sudo systemctl start RTL
+      echo "waiting 10 secs .."
+      sleep 10
+      /home/admin/config.scripts/bonus.rtl.sh menu cln mainnet
+    else
+      l1="!!! FAIL on RTL C-Lightning install !!!"
+      l2="Try manual install on terminal after reboot with:"
+      l3="/home/admin/config.scripts/bonus.rtl.sh on cln mainnet"
+      dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
+    fi
+  fi
+else
+  echo "RTL-cln Webinterface Setting unchanged."
 fi
 
 # BTC-RPC-Explorer process choice
@@ -99,7 +142,7 @@ if [ "${BTCRPCexplorer}" != "${choice}" ]; then
   errorOnInstall=$?
   if [ "${choice}" =  "on" ]; then
     if [ ${errorOnInstall} -eq 0 ]; then
-      sudo sytemctl start btc-rpc-explorer
+      sudo systemctl start btc-rpc-explorer
       whiptail --title " Installed BTC-RPC-Explorer " --msgbox "\
 The txindex may need to be created before BTC-RPC-Explorer can be active.\n
 This can take ~7 hours on a RPi4 with SSD. Monitor the progress on the LCD.\n
@@ -117,27 +160,27 @@ else
   echo "BTC-RPC-Explorer Setting unchanged."
 fi
 
-# cryptoadvance Specter process choice
+# Specter Desktop process choice
 choice="off"; check=$(echo "${CHOICES}" | grep -c "s")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${specter}" != "${choice}" ]; then
-  echo "Cryptoadvance Specter Setting changed .."
+  echo "Specter Desktop Setting changed .."
   anychange=1
-  /home/admin/config.scripts/bonus.cryptoadvance-specter.sh ${choice}
+  /home/admin/config.scripts/bonus.specter.sh ${choice}
   errorOnInstall=$?
   if [ "${choice}" =  "on" ]; then
     if [ ${errorOnInstall} -eq 0 ]; then
-      sudo systemctl start cryptoadvance-specter
-      /home/admin/config.scripts/bonus.cryptoadvance-specter.sh menu
+      sudo systemctl start specter
+      /home/admin/config.scripts/bonus.specter.sh menu
     else
-      l1="!!! FAIL on Cryptoadvance Specter install !!!"
+      l1="!!! FAIL on Specter Desktop install !!!"
       l2="Try manual install on terminal after reboot with:"
-      l3="/home/admin/config.scripts/bonus.cryptoadvance-specter.sh on"
+      l3="/home/admin/config.scripts/bonus.specter.sh on"
       dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
     fi
   fi
 else
-  echo "Cryptoadvance Specter Setting unchanged."
+  echo "Specter Desktop Setting unchanged."
 fi
 
 # ElectRS process choice
@@ -166,7 +209,7 @@ The index database needs to be created before Electrum Server can be used.\n
 This can take hours/days depending on your RaspiBlitz. Monitor the progress on the LCD.\n
 When finished use the new 'ELECTRS' entry in Main Menu for more info.\n
 " 14 50
-      needsReboot=1
+      needsReboot=0
       else
         l1="!!! FAIL on ElectRS install !!!"
         l2="Try manual install on terminal after reboot with:"
@@ -242,7 +285,7 @@ else
 fi
 
 # CHANTOOLS process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "c")
+choice="off"; check=$(echo "${CHOICES}" | grep -c "h")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${chantools}" != "${choice}" ]; then
   echo "chantools Setting changed .."
@@ -431,6 +474,28 @@ else
   echo "Whitepaper setting unchanged."
 fi
 
+# sparko process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "k")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${sparko}" != "${choice}" ]; then
+  echo "# Sparko on mainnet Setting changed .."
+  anychange=1
+  /home/admin/config.scripts/cln-plugin.sparko.sh ${choice} mainnet
+  errorOnInstall=$?
+  if [ "${choice}" =  "on" ]; then
+    if [ ${errorOnInstall} -eq 0 ]; then
+      /home/admin/config.scripts/cln-plugin.sparko.sh menu mainnet
+    else
+      l1="# !!! FAIL on Sparko on mainnet install !!!"
+      l2="# Try manual install on terminal after reboot with:"
+      l3="/home/admin/config.scripts/cln-plugin.sparko.sh on mainnet"
+      dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
+    fi
+  fi
+else
+  echo "# Sparko on mainnet Setting unchanged."
+fi
+
 if [ ${anychange} -eq 0 ]; then
      dialog --msgbox "NOTHING CHANGED!\nUse Spacebar to check/uncheck services." 8 58
      exit 0
@@ -444,5 +509,5 @@ if [ ${needsReboot} -eq 1 ]; then
    # stop bitcoind
    sudo -u bitcoin ${network}-cli stop
    sleep 4
-   sudo /home/admin/XXshutdown.sh reboot
+   sudo /home/admin/config.scripts/blitz.shutdown.sh reboot
 fi

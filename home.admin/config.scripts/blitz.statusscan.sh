@@ -1,7 +1,16 @@
 #!/bin/bash
 
 source /home/admin/raspiblitz.info
-source /mnt/hdd/raspiblitz.conf 
+source /mnt/hdd/raspiblitz.conf 2>/dev/null
+
+# LNTYPE is lnd | cln
+if [ $# -gt 0 ];then
+  LNTYPE=$1
+else
+  LNTYPE=${lightning}
+fi
+
+source <(/home/admin/config.scripts/network.aliases.sh getvars $LNTYPE ${chain}net)
 
 # command info
 if [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -12,12 +21,8 @@ fi
 # measure time of scan
 startTime=$(date +%s)
 
-# make sure temp folder on HDD is available and fro all usable
-sudo mkdir /mnt/hdd/temp 2>/dev/null
-sudo chmod 777 -R /mnt/hdd/temp 2>/dev/null
-
 # localIP
-localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | egrep -i '(*[eth|ens|enp|eno|wlan|wlp][0-9]$)' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+localip=$(hostname -I | awk '{print $1}')
 echo "localIP='${localip}'"
 
 # temp - no measurement in a VM
@@ -45,17 +50,30 @@ echo "bitcoinActive=${bitcoinRunning}"
 if [ ${bitcoinRunning} -eq 1 ]; then
 
   # get blockchain info
-  sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo 1>/mnt/hdd/temp/.bitcoind.out 2>/mnt/hdd/temp/.bitcoind.error
+  sudo touch /var/cache/raspiblitz/.bitcoind.out
+  sudo touch /var/cache/raspiblitz/.bitcoind.error
+  sudo chown root:sudo /var/cache/raspiblitz/.bitcoind.out
+  sudo chown root:sudo /var/cache/raspiblitz/.bitcoind.error
+  sudo chmod 660 /var/cache/raspiblitz/.bitcoind.out
+  sudo chmod 660 /var/cache/raspiblitz/.bitcoind.error
+  $bitcoincli_alias getblockchaininfo 1>/var/cache/raspiblitz/.bitcoind.out 2>/var/cache/raspiblitz/.bitcoind.error
   # check if error on request
-  blockchaininfo=$(cat /mnt/hdd/temp/.bitcoind.out 2>/dev/null)
-  bitcoinError=$(cat /mnt/hdd/temp/.bitcoind.error 2>/dev/null)
-  #rm /mnt/hdd/temp/.bitcoind.error 2>/dev/null
+  blockchaininfo=$(cat /var/cache/raspiblitz/.bitcoind.out 2>/dev/null)
+  bitcoinError=$(cat /var/cache/raspiblitz/.bitcoind.error 2>/dev/null)
+  #rm /var/cache/raspiblitz/.bitcoind.error 2>/dev/null
   if [ ${#bitcoinError} -gt 0 ]; then
     bitcoinErrorShort=$(echo ${bitcoinError/error*:/} | sed 's/[^a-zA-Z0-9 ]//g')
     echo "bitcoinErrorShort='${bitcoinErrorShort}'"
     bitcoinErrorFull=$(echo ${bitcoinError} | tr -d "'")
     echo "bitcoinErrorFull='${bitcoinErrorFull}'"
   else
+
+    ###################################
+    # Get data from blockchain network
+    ###################################
+
+    source <(sudo -u bitcoin /home/admin/config.scripts/network.monitor.sh peer-status)
+    echo "blockchainPeers=${peers}"
 
     ##############################
     # Get data from blockchaininfo
@@ -120,19 +138,22 @@ startcountLightning=$(cat /home/admin/systemd.lightning.log 2>/dev/null | grep -
 echo "startcountLightning=${startcountLightning}"
 
 # is LND running
-lndRunning=$(systemctl status lnd.service 2>/dev/null | grep -c running)
+lndRunning=$(systemctl status ${netprefix}lnd.service 2>/dev/null | grep -c running)
 echo "lndActive=${lndRunning}"
 
-if [ ${lndRunning} -eq 1 ]; then
+if [ ${lndRunning} -eq 1 ] && [ "${LNTYPE}" == "lnd" ]; then
 
   # get LND info
   lndRPCReady=1
-  lndinfo=$(sudo -u bitcoin lncli --chain=${network} --network=${chain}net getinfo 2>/mnt/hdd/temp/.lnd.error)
-
+  sudo touch /var/cache/raspiblitz/.lnd.error
+  sudo chown root:sudo /var/cache/raspiblitz/.lnd.error
+  sudo chmod 660 /var/cache/raspiblitz/.lnd.error
+  lndinfo=$($lncli_alias getinfo 2>/var/cache/raspiblitz/.lnd.error)
+  
   # check if error on request
-  lndErrorFull=$(cat /mnt/hdd/temp/.lnd.error 2>/dev/null)
+  lndErrorFull=$(cat /var/cache/raspiblitz/.lnd.error 2>/dev/null)
   lndErrorShort=''
-  #rm /mnt/hdd/temp/.lnd.error 2>/dev/null
+  #rm /var/cache/raspiblitz/.lnd.error 2>/dev/null
 
   if [ ${#lndErrorFull} -gt 0 ]; then
 
@@ -164,6 +185,9 @@ if [ ${lndRunning} -eq 1 ]; then
 
     # scan error for walletLocked as common error
     locked=$(echo ${lndErrorFull} | grep -c 'Wallet is encrypted')
+    if [ "${locked}" == "0" ]; then
+      locked=$(echo ${lndErrorFull} | grep -c 'wallet locked')
+    fi
     if [ ${locked} -gt 0 ]; then
       echo "walletLocked=1"
     else
@@ -252,6 +276,32 @@ if [ ${lndRunning} -eq 1 ]; then
 
 fi
 
+# is CLN running
+clnRunning=$(systemctl status ${netprefix}lightningd.service 2>/dev/null | grep -c running)
+echo "clnActive=${clnRunning}"
+echo "CLNwalletLocked=0"
+
+if [ "${clnRunning}" != "1" ] && [ "${LNTYPE}" == "cln" ]; then
+  # check if locked
+  if [ "$(sudo journalctl -n5 -u ${netprefix}lightningd | \
+     grep -cE 'Could not read pass from stdin|pass the --encrypted-hsm|Wrong password')" -gt 0 ];then
+      echo "CLNwalletLocked=1"
+  fi
+fi
+
+if [ "${clnRunning}" == "1" ] && [ "${LNTYPE}" == "cln" ]; then
+  clnInfo=$($lightningcli_alias getinfo 2>&1)
+  clnBlockHeight=$(echo "${clnInfo}" | jq -r '.blockheight' | tr -cd '[[:digit:]]')
+  scanProgress=$(echo "scale=2; $clnBlockHeight*100/$total" | bc)
+  echo "scanProgress=${scanProgress}"
+  clnBlockHeightPlusOne=$(expr $clnBlockHeight + 1)
+  if [ "${total}" == "${clnBlockHeight}" ] || [ "${total}" == "${clnBlockHeightPlusOne}" ]; then
+      echo "syncedToChain=1"
+  else
+      echo "syncedToChain=0"
+  fi
+fi
+
 # touchscreen statistics
 if [ "${touchscreen}" == "1" ]; then
   echo "blitzTUIActive=1"
@@ -265,6 +315,9 @@ else
   echo "blitzTUIRestarts=0"
 fi
 
+# check if runnig in vagrant
+vagrant=$(df | grep -c "/vagrant")
+echo "vagrant=${vagrant}"
 
 # check if online if problem with other stuff 
 
