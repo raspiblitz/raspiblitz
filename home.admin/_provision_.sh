@@ -113,6 +113,11 @@ sudo sed -i "s/^rotate 4/rotate 14/g" /etc/logrotate.conf >> ${logFile} 2>&1
 sudo sed -i "s/^#compress/compress/g" /etc/logrotate.conf >> ${logFile} 2>&1
 sudo systemctl restart logrotate
 
+# make sure to have bitcoin core >=22 is backwards comp
+# see https://github.com/rootzoll/raspiblitz/issues/2546
+sed -i '/^deprecatedrpc=.*/d' /mnt/hdd/bitcoin/bitcoin.conf 2>/dev/null
+echo "deprecatedrpc=addresses" >> /mnt/hdd/bitcoin/bitcoin.conf 2>/dev/null
+
 # set hostname data
 echo "Setting lightning alias: ${hostname}" >> ${logFile}
 sudo sed -i "s/^alias=.*/alias=${hostname}/g" /home/admin/assets/lnd.${network}.conf >> ${logFile} 2>&1
