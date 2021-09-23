@@ -305,14 +305,18 @@ def main():
         # check if BTCPayServer is installed
         btc_pay_server = False
         status_data = subprocess.run(['/home/admin/config.scripts/bonus.btcpayserver.sh', 'status'],
-                                     stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
+            stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
         if status_data.find("installed=1") > -1:
             btc_pay_server = True
 
         # check if Sphinx-Relay is installed
         sphinx_relay = False
-        status_data = subprocess.run(['/home/admin/config.scripts/bonus.sphinxrelay.sh', 'status'],
-                                     stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
+        try:
+            status_data = subprocess.run(['/home/admin/config.scripts/bonus.sphinxrelay.sh', 'status'], 
+                stdout=subprocess.PIPE, timeout=10).stdout.decode('utf-8').strip()
+        except Exception as e:
+            print(e)
+
         if status_data.find("installed=1") > -1:
             sphinx_relay = True
 
