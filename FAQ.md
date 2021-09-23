@@ -520,6 +520,7 @@ The best way would be to build the SD card yourself. You use the script `build_s
 
 Work notes for the process of producing a new SD card image release:
 
+* Make sure you have the "Versioning" final in your RaspiBlitz Source Code
 * Start [`Ubuntu LIVE`](http://releases.ubuntu.com/18.04.3/ubuntu-18.04.3-desktop-amd64.iso) from USB stick on the Build Computer (press F12 on startup)
 * Connect to a secure WiFi (hardware switch on) or LAN
 * Download the latest RaspiOS-64bit (zip & sig file) namend in the [build_sdcard.sh](./build_sdcard.sh) and note the SHA256 checksum
