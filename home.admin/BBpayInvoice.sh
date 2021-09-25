@@ -116,8 +116,8 @@ fi
 clear
 echo "************************************************************"
 echo "Pay Invoice / Payment Request"
-echo "This script is as an example how to use the lncli interface."
-echo "Its not optimized for performance or error handling."
+echo "This script is an example using lightning in the command line."
+echo "It is not optimized for performance or error handling."
 echo "************************************************************"
 echo 
 echo "COMMAND LINE: "
