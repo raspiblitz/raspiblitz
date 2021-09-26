@@ -20,15 +20,137 @@
 *
 ### CLBOSS
 * Advanced usage
-https://github.com/ZmnSCPxj/clboss#clboss-status
+https://github.com/ZmnSCPxj/clboss#clboss-status  
 
 * Stopping CLBOSS will leave the node in the last state. No channels will be closed or funds removed when CLBOSS is stopped.
+
+### Offers
+* Details at bolt12.org
+* create an offer to receive payments:  
+https://lightning.readthedocs.io/lightning-offer.7.html
+    ```
+    lightning-cli offer amount description [vendor] [label] [quantity_min] [quantity_max] [absolute_expiry] [recurrence] [recurrence_base] [recurrence_paywindow] [recurrence_limit] [single_use]
+    ```
+* Create an offer to send payments:  
+https://lightning.readthedocs.io/lightning-offerout.7.html  
+    ```
+    lightning-cli offerout amount description [vendor] [label] [absolute_expiry] [refund_for]
+    ```
+* Fetch an invoice to pay an offer:  
+https://lightning.readthedocs.io/lightning-fetchinvoice.7.html  
+Will need at least one peer which supports onion the messages. For example:
+    ```
+    lightning-cli connect 024b9a1fa8e006f1e3937f65f66c408e6da8e1ca728ea43222a7381df1cc449605@128.199.202.168:9735
+    ```
+* Then use the command to fetch the BOLT12 invoice:  
+    ```
+    lightning-cli fetchinvoice offer [msatoshi] [quantity] [recurrence_counter] [recurrence_start] [recurrence_label] [timeout] [payer_note]
+    ```
+* decode a BOLT12 invoice:  
+    ```
+    lightning-cli decode bolt12_invoice
+    ```
+* pay a a BOLT12 invoice:
+Will need to pay through a peer which supports the onion messages which means you need at least one channel with such a node.
+    ```
+    lightning-cli pay bolt12_invoice
+    ```
+
+### Dual funded channels
+#### Reading
+* https://medium.com/blockstream/c-lightning-opens-first-dual-funded-mainnet-lightning-channel-ada6b32a527c  
+* https://medium.com/blockstream/setting-up-liquidity-ads-in-c-lightning-54e4c59c091d  
+* https://twitter.com/niftynei/status/1389328732377255938  
+* lightning-rfc PR: https://github.com/lightningnetwork/lightning-rfc/pull/851/files
+* represented by the feature bits 28/29
+
+#### Setting up
+* activate the feature on your node:  
+Type: `clnconf` or use the menu `SYSTEM` - `CLNCONF`.  
+Add the line:
+    ```
+    experimental-dual-fund    
+    ```
+    Save and restart C-lightning.
+
+* set up a liquidity ad:
+    ```
+    lightning-cli funderupdate -k policy=match policy_mod=100
+    ```
+    or set in the config for example - see the meaning of each line in https://medium.com/blockstream/setting-up-liquidity-ads-in-c-lightning-54e4c59c091d :
+
+    ```
+    experimental-dual-fund
+    funder-policy=match
+    funder-policy-mod=100
+    lease-fee-base-msat=500sat
+    lease-fee-basis=50
+    channel-fee-max-base-msat=100sat
+    channel-fee-max-proportional-thousandths=2
+    ```
+* check the settings used currently on your node:
+    ```
+    lightning-cli funderupdate
+    ```
+* check your advertised settings (needs some minutes to appear):
+    ```
+    lightning-cli listnodes $(lightning-cli getinfo | jq .id)
+    ```
+
+#### Opening a dual funded channel
+* check if a node has onchain liquidity on offer:
+    ```
+    lightning-cli listnodes nodeid
+    ```
+
+    Example:
+    ``` 
+    lightning-cli listnodes 02cca6c5c966fcf61d121e3a70e03a1cd9eeeea024b26ea666ce974d43b242e636
+    ```
+* list all nodes known in the graph with active offers:
+    ```
+    lightning-cli listnodes | grep option_will_fund -B20 -A7
+    ```
+* note the node `id` and `compact_lease`
+
+* connect to the node
+    ```
+    lightning-cli connect nodeID@IP_or.onion
+    ```
+* open the channel (amount is the own funds in the wallet contributed)
+    ```
+    lightning-cli fundchannel -k id=NODEID amount=0.01btc request_amt=0.01btc compact_lease=COMPACT_LEASE
+    ```  
+    It can fail if the offer changed or there are not enough funds available on either side.
+
+### About the feature bits
+* https://bitcoin.stackexchange.com/questions/107484/how-can-i-decode-the-feature-string-of-a-lightning-node-with-bolt-9
+* Convert the hex number from `lightning-cli listpeers` to binary: https://www.binaryhexconverter.com/hex-to-binary-converter and count the position of the bits from the right.
 
 ## Backups
 ### Seed
 -
 ### Channel database
 -
+
+
+## Commands and aliases
+
+* Check if the C-lightning daemon is running:
+    ```
+    sudo systemctl status lightningd
+    ```
+* Follow it's system output for debugging:
+    ```
+    sudo journalctl -fu lightningd
+    ```
+* The frequently used commands are shortened with alisases. Check them with the command `alias`:
+    ```
+    alias cln='sudo -u bitcoin /usr/local/bin/lightning-cli --conf=/home/bitcoin/.lightning/config'
+    alias clnconf='sudo nano /home/bitcoin/.lightning/config'
+    alias clnlog='sudo tail -n 30 -f /home/bitcoin/.lightning/bitcoin/cl.log'
+    ```
+
 
 ## Script file help list
 
