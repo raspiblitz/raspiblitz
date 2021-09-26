@@ -3,7 +3,7 @@
 source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf 2>/dev/null
 
-# LNTYPE is lnd | cln
+# LNTYPE is lnd | cl
 if [ $# -gt 0 ];then
   LNTYPE=$1
 else
@@ -276,26 +276,26 @@ if [ ${lndRunning} -eq 1 ] && [ "${LNTYPE}" == "lnd" ]; then
 
 fi
 
-# is CLN running
-clnRunning=$(systemctl status ${netprefix}lightningd.service 2>/dev/null | grep -c running)
-echo "clnActive=${clnRunning}"
-echo "CLNwalletLocked=0"
+# is CL running
+clRunning=$(systemctl status ${netprefix}lightningd.service 2>/dev/null | grep -c running)
+echo "clActive=${clRunning}"
+echo "CLwalletLocked=0"
 
-if [ "${clnRunning}" != "1" ] && [ "${LNTYPE}" == "cln" ]; then
+if [ "${clRunning}" != "1" ] && [ "${LNTYPE}" == "cl" ]; then
   # check if locked
   if [ "$(sudo journalctl -n5 -u ${netprefix}lightningd | \
      grep -cE 'Could not read pass from stdin|pass the --encrypted-hsm|Wrong password')" -gt 0 ];then
-      echo "CLNwalletLocked=1"
+      echo "CLwalletLocked=1"
   fi
 fi
 
-if [ "${clnRunning}" == "1" ] && [ "${LNTYPE}" == "cln" ]; then
-  clnInfo=$($lightningcli_alias getinfo 2>&1)
-  clnBlockHeight=$(echo "${clnInfo}" | jq -r '.blockheight' | tr -cd '[[:digit:]]')
-  scanProgress=$(echo "scale=2; $clnBlockHeight*100/$total" | bc)
+if [ "${clRunning}" == "1" ] && [ "${LNTYPE}" == "cl" ]; then
+  clInfo=$($lightningcli_alias getinfo 2>&1)
+  clBlockHeight=$(echo "${clInfo}" | jq -r '.blockheight' | tr -cd '[[:digit:]]')
+  scanProgress=$(echo "scale=2; $clBlockHeight*100/$total" | bc)
   echo "scanProgress=${scanProgress}"
-  clnBlockHeightPlusOne=$(expr $clnBlockHeight + 1)
-  if [ "${total}" == "${clnBlockHeight}" ] || [ "${total}" == "${clnBlockHeightPlusOne}" ]; then
+  clBlockHeightPlusOne=$(expr $clBlockHeight + 1)
+  if [ "${total}" == "${clBlockHeight}" ] || [ "${total}" == "${clBlockHeightPlusOne}" ]; then
       echo "syncedToChain=1"
   else
       echo "syncedToChain=0"

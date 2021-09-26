@@ -141,9 +141,9 @@ do
     /home/admin/config.scripts/lnd.unlock.sh
   fi
 
-  # CLN Wallet Unlock 
-  if [ "${CLNwalletLocked}" == "1" ] && [ "${state}" == "ready" ] && [ "${setupPhase}" == "done" ]; then
-    /home/admin/config.scripts/cln.hsmtool.sh unlock
+  # CL Wallet Unlock 
+  if [ "${CLwalletLocked}" == "1" ] && [ "${state}" == "ready" ] && [ "${setupPhase}" == "done" ]; then
+    /home/admin/config.scripts/cl.hsmtool.sh unlock
     sleep 5
   fi
 
@@ -306,7 +306,7 @@ if [ "${setupPhase}" == "done" ]; then
   if [ "${lightning}" == "lnd" ]; then
     echo "LND command line options: lncli -h"
   fi
-  if [ "${lightning}" == "cln" ]; then
+  if [ "${lightning}" == "cl" ]; then
     echo "C-Lightning command line options: lightning-cli help"
   fi
 else

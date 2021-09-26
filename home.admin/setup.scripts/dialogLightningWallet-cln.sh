@@ -23,7 +23,7 @@ if [ "${CHOICE}" == "NEW" ]; then
   sudo sed -i '/^setPasswordB=/d' $SETUPFILE
   sudo sed -i '/^setPasswordC=/d' $SETUPFILE
 
-  # mark all passwords to be set - passwordc wallet encryption not for cln 
+  # mark all passwords to be set - passwordc wallet encryption not for cl 
   echo "setPasswordA=1" >> $SETUPFILE
   echo "setPasswordB=1" >> $SETUPFILE
   echo "setPasswordC=0" >> $SETUPFILE
@@ -36,11 +36,11 @@ elif [ "${CHOICE}" == "OLD" ]; then
 
     # get more details what kind of old lightning wallet user has
     OPTIONS=()
-    OPTIONS+=(CLNRESCUE "CLN tar.gz-Backupfile (BEST)")
+    OPTIONS+=(CLRESCUE "CL tar.gz-Backupfile (BEST)")
     OPTIONS+=(ONLYSEED "Only Seed Word List (FALLBACK)")
-    CHOICESUB=$(dialog --backtitle "RaspiBlitz" --clear --title "RECOVER CLN DATA & WALLET" --menu "Data you have to recover from?" 11 60 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+    CHOICESUB=$(dialog --backtitle "RaspiBlitz" --clear --title "RECOVER CL DATA & WALLET" --menu "Data you have to recover from?" 11 60 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
-    if [ "${CHOICESUB}" == "CLNRESCUE" ]; then
+    if [ "${CHOICESUB}" == "CLRESCUE" ]; then
 
       # just activate LND rescue upload
       uploadRESCUE=1
@@ -94,27 +94,27 @@ else
   exit 1
 fi
 
-# UPLOAD CLN RESCUE FILE dialog (if activated by dialogs above)
+# UPLOAD CL RESCUE FILE dialog (if activated by dialogs above)
 if [ ${uploadRESCUE} -eq 1 ]; then
 
   # run upload dialog and get result
   _temp="/var/cache/raspiblitz/temp/.temp.tmp"
   clear
-  /home/admin/config.scripts/cln.backup.sh cln-import-gui setup $_temp
+  /home/admin/config.scripts/cl.backup.sh cl-import-gui setup $_temp
   source $_temp 2>/dev/null
   sudo rm $_temp 2>/dev/null
 
   # if user canceled upload
-  if [ "${clnrescue}" == "" ]; then
-    # signal cancel to the calling script by exit code (3 = exit on clnrescue)
+  if [ "${clrescue}" == "" ]; then
+    # signal cancel to the calling script by exit code (3 = exit on clrescue)
     exit 3
   fi
 
   # clear setup state from all fomer possible choices (previous loop)
-  sudo sed -i '/^clnrescue=/d' $SETUPFILE
+  sudo sed -i '/^clrescue=/d' $SETUPFILE
 
   # store result in setup state
-  echo "clnrescue='${clnrescue}'" >> $SETUPFILE
+  echo "clrescue='${clrescue}'" >> $SETUPFILE
 fi
 
 # INPUT LIGHTNING SEED dialog (if activated by dialogs above)
@@ -122,7 +122,7 @@ if [ ${enterSEED} -eq 1 ]; then
 
   # start seed input and get results
   _temp="/var/cache/raspiblitz/.temp.tmp"
-  /home/admin/config.scripts/cln.backup.sh seed-import-gui $_temp
+  /home/admin/config.scripts/cl.backup.sh seed-import-gui $_temp
   source $_temp 2>/dev/null
   sudo rm $_temp 2>/dev/null
 

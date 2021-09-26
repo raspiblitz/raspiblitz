@@ -42,8 +42,8 @@ Do you want to download Lightning Data Backup now?
       sleep 2
       if [ "${lightning}" == "lnd" ]; then
         /home/admin/config.scripts/lnd.backup.sh lnd-export-gui
-      elif [ "${lightning}" == "cln" ]; then
-        /home/admin/config.scripts/cln.backup.sh cln-export-gui
+      elif [ "${lightning}" == "cl" ]; then
+        /home/admin/config.scripts/cl.backup.sh cl-export-gui
       else
         echo "TODO: Implement Data Backup for '${lightning}'"
       fi
@@ -59,8 +59,8 @@ Do you want to download Lightning Data Backup now?
       sleep 2
       if [ "${lightning}" == "lnd" ]; then
         /home/admin/config.scripts/lnd.backup.sh lnd-export
-      elif [ "${lightning}" == "cln" ]; then
-        /home/admin/config.scripts/cln.backup.sh cln-export
+      elif [ "${lightning}" == "cl" ]; then
+        /home/admin/config.scripts/cl.backup.sh cl-export
       else
         echo "TODO: Implement Data Backup for '${lightning}'"
         sleep 3

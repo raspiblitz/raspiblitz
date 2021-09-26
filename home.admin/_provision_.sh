@@ -332,37 +332,37 @@ if [ "${tlnd}" == "on" ]; then
     sudo systemctl start tlnd >> ${logFile} 2>&1
 else
     echo "Provisioning LND Testnet - not active" >> ${logFile}
-fi
+fiCL
 
-# LND Signet
+# LND SignetCL
 if [ "${slnd}" == "on" ]; then
     echo "Provisioning LND Signet - run config script" >> ${logFile}
-    sudo /home/admin/config.scripts/lnd.install.sh on signet >> ${logFile} 2>&1
+    sudo /home/admin/coCLg.scripts/lnd.install.sh on signet >> ${logFile} 2>&1
     sudo systemctl start slnd >> ${logFile} 2>&1
 else
-    echo "Provisioning LND Signet - not active" >> ${logFile}
+  CLcho "Provisioning LND Signet - not active" >> ${logFile}
 fi
-
+CL
 # CLN Mainnet (when not main instance)
-if [ "${cln}" == "on" ] && [ "${lightning}" != "cln" ]; then
-    echo "Provisioning CLN Mainnet - run config script" >> ${logFile}
-    sudo /home/admin/config.scripts/cln.install.sh on mainnet >> ${logFile} 2>&1
+if [ "${cl}" == "on" ] && [ "${lightning}" != "cl" ]; then
+    echo "Provisioning CL Mainnet - run config script" >> ${logFile}
+    sudo /home/admin/config.scripts/cl.install.sh on mainnet >> ${logFile} 2>&1
 else
-    echo "Provisioning CLN Mainnet - not active as secondary option" >> ${logFile}
+  CLcho "Provisioning CLN Mainnet - not active as secondary option" >> ${logFile}
 fi
-
+CL
 # CLN Testnet
-if [ "${tcln}" == "on" ]; then
-    echo "Provisioning CLN Testnet - run config script" >> ${logFile}
-    sudo /home/admin/config.scripts/cln.install.sh on testnet >> ${logFile} 2>&1
+if [ "${tcl}" == "on" ]; then
+    echo "Provisioning CL Testnet - run config script" >> ${logFile}
+    sudo /home/admin/config.scripts/cl.install.sh on testnet >> ${logFile} 2>&1
 else
     echo "Provisioning CLN Testnet - not active" >> ${logFile}
 fi
 
 # CLN Signet
-if [ "${scln}" == "on" ]; then
+if [ "${scl}" == "on" ]; then
     echo "Provisioning CLN Signet - run config script" >> ${logFile}
-    sudo /home/admin/config.scripts/cln.install.sh on signet >> ${logFile} 2>&1
+    sudo /home/admin/config.scripts/cl.install.sh on signet >> ${logFile} 2>&1
 else
     echo "Provisioning CLN Signet - not active" >> ${logFile}
 fi
@@ -410,13 +410,13 @@ if [ "${#dynDomain}" -gt 0 ]; then
     sudo /home/admin/config.scripts/internet.dyndomain.sh on ${dynDomain} ${dynUpdateUrl} >> ${logFile} 2>&1
 else
     echo "Provisioning DYNAMIC DOMAIN - keep default" >> ${logFile}
-fi
+fiCL
 
-# RTL (LND)
+# RTL (LND)CL
 if [ "${rtlWebinterface}" = "on" ]; then
     echo "Provisioning RTL LND - run config script" >> ${logFile}
     sudo sed -i "s/^message=.*/message='Setup RTL (takes time)'/g" ${infoFile}
-    sudo -u admin /home/admin/config.scripts/bonus.rtl.sh on lnd mainnet >> ${logFile} 2>&1
+    sudo -u admin /home/admCLconfig.scripts/bonus.rtl.sh on lnd mainnet >> ${logFile} 2>&1
 else
     echo "Provisioning RTL LND - keep default" >> ${logFile}
 fi
@@ -425,7 +425,7 @@ fi
 if [ "${crtlWebinterface}" = "on" ]; then
     echo "Provisioning RTL CLN - run config script" >> ${logFile}
     sudo sed -i "s/^message=.*/message='Setup RTL (takes time)'/g" ${infoFile}
-    sudo -u admin /home/admin/config.scripts/bonus.rtl.sh on cln mainnet >> ${logFile} 2>&1
+    sudo -u admin /home/admCLconfig.scripts/bonus.rtl.sh on cl mainnet >> ${logFile} 2>&1
 else
     echo "Provisioning RTL CLN - keep default" >> ${logFile}
 fi
@@ -434,7 +434,7 @@ fi
 if [ "${sparko}" = "on" ]; then
     echo "Provisioning Sparko - run config script" >> ${logFile}
     sudo sed -i "s/^message=.*/message='Setup SPARKO (takes time)'/g" ${infoFile}
-    sudo -u admin /home/admin/config.scripts/cln-plugin.sparko.sh on mainnet >> ${logFile} 2>&1
+    sudo -u admin /home/admin/config.scripts/cl-plugin.sparko.sh on mainnet >> ${logFile} 2>&1
 else
     echo "Provisioning RTL CLN - keep default" >> ${logFile}
 fi
@@ -802,7 +802,7 @@ if [ "${lightning}" == "lnd" ];then
   else
     echo "No /mnt/hdd/passwordc.flag" >> ${logFile}
   fi
-elif [ "${lightning}" == "cln" ];then
+elif [ "${lightning}" == "cl" ];then
   sudo systemctl start lightningd
 fi
 

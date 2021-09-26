@@ -137,14 +137,14 @@ if [ "$1" = "update-config" ]; then
     sed -i "s/^lnd_macaroon=.*/lnd_macaroon=${adminMacaroon}/g" ./.env
     sed -i "s/^lnd_cert=.*/lnd_cert=${tlsCert}/g" ./.env
 
-  # configure CLN
-  elif [ "${lightning}" == "cln" ]; then
+  # configure CL
+  elif [ "${lightning}" == "cl" ]; then
     
-    echo "# CONFIG Web API Lightning --> CLN"
-    sed -i "s/^ln_node=.*/ln_node=cln/g" ./.env
+    echo "# CONFIG Web API Lightning --> CL"
+    sed -i "s/^ln_node=.*/ln_node=cl/g" ./.env
     
     # TODO: ADD C-Lightning config as soon as available
-    echo "# MISSING CLN CONFIG YET"
+    echo "# MISSING CL CONFIG YET"
 
   else
     echo "# CONFIG Web API Lightning --> OFF"

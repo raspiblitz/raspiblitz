@@ -16,8 +16,8 @@ if [ ${#lcdrotate} -eq 0 ]; then lcdrotate=0; fi
 if [ ${#zerotier} -eq 0 ]; then zerotier="off"; fi
 if [ ${#circuitbreaker} -eq 0 ]; then circuitbreaker="off"; fi
 if [ ${#clboss} -eq 0 ]; then clboss="off"; fi
-if [ ${#clnEncryptedHSM} -eq 0 ]; then clnEncryptedHSM="off"; fi
-if [ ${#clnAutoUnlock} -eq 0 ]; then clnAutoUnlock="off"; fi
+if [ ${#clEncryptedHSM} -eq 0 ]; then clEncryptedHSM="off"; fi
+if [ ${#clAutoUnlock} -eq 0 ]; then clAutoUnlock="off"; fi
 
 echo "# map LND to on/off"
 lndNode="off"
@@ -25,10 +25,10 @@ if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
   lndNode="on"
 fi
 
-echo "# map CLN to on/off"
-clnNode="off"
-if [ "${lightning}" == "cln" ] || [ "${cln}" == "on" ]; then
-  clnNode="on"
+echo "# map CL to on/off"
+clNode="off"
+if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ]; then
+  clNode="on"
 fi
 
 echo "map nextcloudbackup to on/off"
@@ -90,16 +90,16 @@ if [ "${clboss}" == "on" ]; then
   clbossMenu='on'
 fi
 
-echo "# map clnEncryptedHSM to on/off"
-clnEncryptedHSMMenu='off'
-if [ "${clnEncryptedHSM}" == "on" ]; then
-  clnEncryptedHSMMenu='on'
+echo "# map clEncryptedHSM to on/off"
+clEncryptedHSMMenu='off'
+if [ "${clEncryptedHSM}" == "on" ]; then
+  clEncryptedHSMMenu='on'
 fi
 
-echo "# map clnAutoUnlock to on/off"
-clnAutoUnlockMenu='off'
-if [ "${clnAutoUnlock}" == "on" ]; then
-  clnAutoUnlockMenu='on'
+echo "# map clAutoUnlock to on/off"
+clAutoUnlockMenu='off'
+if [ "${clAutoUnlock}" == "on" ]; then
+  clAutoUnlockMenu='on'
 fi
 
 # show select dialog
@@ -137,12 +137,12 @@ if [ "${lndNode}" == "on" ]; then
 fi
 
 # C-Lightning & options/PlugIns
-OPTIONS+=(n 'CLN C-LIGHTNING NODE' ${clnNode}) 
-if [ "${clnNode}" == "on" ]; then
-  OPTIONS+=(o '-CLN CLBOSS Automatic Node Manager' ${clbossMenu})
-  OPTIONS+=(h '-CLN Wallet Encryption' ${clnEncryptedHSMMenu})
-  if [ "${clnEncryptedHSM}" == "on" ]; then
-    OPTIONS+=(q '-CLN Auto-Unlock' ${clnAutoUnlockMenu})
+OPTIONS+=(n 'CL C-LIGHTNING NODE' ${clNode}) 
+if [ "${clNode}" == "on" ]; then
+  OPTIONS+=(o '-CL CLBOSS Automatic Node Manager' ${clbossMenu})
+  OPTIONS+=(h '-CL Wallet Encryption' ${clEncryptedHSMMenu})
+  if [ "${clEncryptedHSM}" == "on" ]; then
+    OPTIONS+=(q '-CL Auto-Unlock' ${clAutoUnlockMenu})
   fi
 fi
 
@@ -409,27 +409,27 @@ else
   echo "LND NODE setting unchanged."
 fi
 
-# CLN choice
+# CL choice
 choice="off"; check=$(echo "${CHOICES}" | grep -c "n")
 if [ ${check} -eq 1 ]; then choice="on"; fi
-if [ "${clnNode}" != "${choice}" ]; then
+if [ "${clNode}" != "${choice}" ]; then
   anychange=1
   echo "# C-Lightning NODE Setting changed .."
   if [ "${choice}" = "on" ]; then
     echo "# turning ON"
-    /home/admin/config.scripts/cln.install.sh on mainnet
-    sudo /home/admin/config.scripts/cln.install.sh display-seed mainnet
+    /home/admin/config.scripts/cl.install.sh on mainnet
+    sudo /home/admin/config.scripts/cl.install.sh display-seed mainnet
     if [ "${testnet}" == "on" ]; then
-      /home/admin/config.scripts/cln.install.sh on testnet
+      /home/admin/config.scripts/cl.install.sh on testnet
     fi
     if [ "${signet}" == "on" ]; then
-      /home/admin/config.scripts/cln.install.sh on signet
+      /home/admin/config.scripts/cl.install.sh on signet
     fi
   else
     echo "# turning OFF"
-    /home/admin/config.scripts/cln.install.sh off mainnet
-    /home/admin/config.scripts/cln.install.sh off testnet
-    /home/admin/config.scripts/cln.install.sh off signet
+    /home/admin/config.scripts/cl.install.sh off mainnet
+    /home/admin/config.scripts/cl.install.sh off testnet
+    /home/admin/config.scripts/cl.install.sh off signet
   fi
 else
   echo "C-Lightning NODE setting unchanged."
@@ -438,45 +438,45 @@ fi
 # CLBOSS process choice
 choice="off"; check=$(echo "${CHOICES}" | grep -c "o")
 if [ ${check} -eq 1 ]; then choice="on"; fi
-if [ "${clboss}" != "${choice}" ] && [ "${clnNode}" == "on" ]; then
+if [ "${clboss}" != "${choice}" ] && [ "${clNode}" == "on" ]; then
   echo "CLBOSS Setting changed .."
   anychange=1
-  sudo /home/admin/config.scripts/cln-plugin.clboss.sh ${choice}
+  sudo /home/admin/config.scripts/cl-plugin.clboss.sh ${choice}
   needsReboot=0
 else
   echo "CLBOSS Setting unchanged."
 fi
 
-# clnEncryptedHSM process choice
+# clEncryptedHSM process choice
 choice="off"; check=$(echo "${CHOICES}" | grep -c "h")
 if [ ${check} -eq 1 ]; then choice="on"; fi
-if [ "${clnEncryptedHSM}" != "${choice}" ] && [ "${clnNode}" == "on" ]; then
-  echo "clnEncryptedHSM Setting changed .."
+if [ "${clEncryptedHSM}" != "${choice}" ] && [ "${clNode}" == "on" ]; then
+  echo "clEncryptedHSM Setting changed .."
   anychange=1
   if [ "${choice}" == "on" ]; then
-    /home/admin/config.scripts/cln.hsmtool.sh encrypt mainnet
+    /home/admin/config.scripts/cl.hsmtool.sh encrypt mainnet
   else
-    /home/admin/config.scripts/cln.hsmtool.sh decrypt mainnet
+    /home/admin/config.scripts/cl.hsmtool.sh decrypt mainnet
   fi
   needsReboot=0
 else
-  echo "clnEncryptedHSM Setting unchanged."
+  echo "clEncryptedHSM Setting unchanged."
 fi
 
-# clnAutoUnlock process choice
+# clAutoUnlock process choice
 choice="off"; check=$(echo "${CHOICES}" | grep -c "q")
 if [ ${check} -eq 1 ]; then choice="on"; fi
-if [ "${clnAutoUnlock}" != "${choice}" ] && [ "${clnNode}" == "on" ]; then
-  echo "clnAutoUnlock Setting changed .."
+if [ "${clAutoUnlock}" != "${choice}" ] && [ "${clNode}" == "on" ]; then
+  echo "clAutoUnlock Setting changed .."
   anychange=1
   if [ "${choice}" == "on" ]; then
-    /home/admin/config.scripts/cln.hsmtool.sh autounlock-on mainnet
+    /home/admin/config.scripts/cl.hsmtool.sh autounlock-on mainnet
   else
-    /home/admin/config.scripts/cln.hsmtool.sh autounlock-off mainnet
+    /home/admin/config.scripts/cl.hsmtool.sh autounlock-off mainnet
   fi
   needsReboot=0
 else
-  echo "clnAutoUnlock Setting unchanged."
+  echo "clAutoUnlock Setting unchanged."
 fi
 
 # parallel testnet process choice
@@ -492,16 +492,16 @@ if [ "${testnet}" != "${choice}" ]; then
       /home/admin/config.scripts/lnd.install.sh on testnet initwallet
       /home/admin/config.scripts/lnd.install.sh on signet initwallet
     fi
-    if [ "${lightning}" == "cln" ] || [ "${cln}" == "on" ]; then
-      /home/admin/config.scripts/cln.install.sh on testnet
-      /home/admin/config.scripts/cln.install.sh on signet
+    if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ]; then
+      /home/admin/config.scripts/cl.install.sh on testnet
+      /home/admin/config.scripts/cl.install.sh on signet
     fi 
   else
     # just turn al lightning testnets off (even if not on before)
     /home/admin/config.scripts/lnd.install.sh off testnet
     /home/admin/config.scripts/lnd.install.sh off signet
-    /home/admin/config.scripts/cln.install.sh off testnet
-    /home/admin/config.scripts/cln.install.sh off signet
+    /home/admin/config.scripts/cl.install.sh off testnet
+    /home/admin/config.scripts/cl.install.sh off signet
     /home/admin/config.scripts/bitcoin.install.sh off testnet
     /home/admin/config.scripts/bitcoin.install.sh off signet
   fi

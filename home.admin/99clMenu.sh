@@ -5,7 +5,7 @@ echo "# get raspiblitz config"
 source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
 
-source <(/home/admin/config.scripts/network.aliases.sh getvars cln $1)
+source <(/home/admin/config.scripts/network.aliases.sh getvars cl $1)
 
 # get the local network IP to be displayed on the LCD
 source <(/home/admin/config.scripts/internet.sh status local)
@@ -25,16 +25,16 @@ OPTIONS=()
   OPTIONS+=(NAME "Change the name / alias of the node")
 ln_getInfo=$($lightningcli_alias getinfo 2>/dev/null)
 ln_channels_online="$(echo "${ln_getInfo}" | jq -r '.num_active_channels')" 2>/dev/null
-cln_num_inactive_channels="$(echo "${ln_getInfo}" | jq -r '.num_inactive_channels')" 2>/dev/null
-openChannels=$((ln_channels_online+cln_num_inactive_channels))
+cl_num_inactive_channels="$(echo "${ln_getInfo}" | jq -r '.num_inactive_channels')" 2>/dev/null
+openChannels=$((ln_channels_online+cl_num_inactive_channels))
 if [ ${#openChannels} -gt 0 ] && [ ${openChannels} -gt 0 ]; then
   OPTIONS+=(SUEZ "Visualize channels")
   OPTIONS+=(CLOSEALL "Close all open channels on $CHAIN")
 fi
   OPTIONS+=(CASHOUT "Withdraw all funds onchain ($CHAIN)")
   OPTIONS+=(SEED "Show Wallet Seed Words")
-  OPTIONS+=(CLNREPAIR "Repair options for C-lightning")
-if [ "${lightning}" != "cln" ] && [ "${CHAIN}" == "mainnet" ]; then
+  OPTIONS+=(CLREPAIR "Repair options for C-lightning")
+if [ "${lightning}" != "cl" ] && [ "${CHAIN}" == "mainnet" ]; then
   OPTIONS+=(SWITCHLN  "Use C-lightning as default")
 fi  
 
@@ -53,33 +53,33 @@ CHOICE=$(dialog --clear \
 case $CHOICE in
   SUMMARY)
       clear
-      /home/admin/config.scripts/cln-plugin.summary.sh $CHAIN
+      /home/admin/config.scripts/cl-plugin.summary.sh $CHAIN
       echo "Press ENTER to return to main menu."
       read key
       ;;
   PEERING)
-      /home/admin/BBconnectPeer.sh cln $CHAIN
+      /home/admin/BBconnectPeer.sh cl $CHAIN
       ;;
   FUNDING)
-      /home/admin/BBfundWallet.sh cln $CHAIN
+      /home/admin/BBfundWallet.sh cl $CHAIN
       ;;
   CASHOUT)
-      /home/admin/BBcashoutWallet.sh cln $CHAIN
+      /home/admin/BBcashoutWallet.sh cl $CHAIN
       ;;
   CHANNEL)
-      /home/admin/BBopenChannel.sh cln $CHAIN
+      /home/admin/BBopenChannel.sh cl $CHAIN
       ;;
   SEND)
-      /home/admin/BBpayInvoice.sh cln $CHAIN
+      /home/admin/BBpayInvoice.sh cl $CHAIN
       ;;
   RECEIVE)
-      /home/admin/BBcreateInvoice.sh cln $CHAIN
+      /home/admin/BBcreateInvoice.sh cl $CHAIN
       ;;
   SEED)
-      sudo /home/admin/config.scripts/cln.install.sh display-seed $CHAIN
+      sudo /home/admin/config.scripts/cl.install.sh display-seed $CHAIN
       ;;
   NAME)
-      sudo /home/admin/config.scripts/cln.setname.sh $CHAIN
+      sudo /home/admin/config.scripts/cl.setname.sh $CHAIN
       ;;
   SUEZ)
       clear
@@ -87,7 +87,7 @@ case $CHOICE in
         /home/admin/config.scripts/bonus.suez.sh on
       fi
       cd /home/bitcoin/suez || exit 0
-      command="sudo -u bitcoin /home/bitcoin/.local/bin/poetry run ./suez --client=c-lightning --client-args=--conf=${CLNCONF}"
+      command="sudo -u bitcoin /home/bitcoin/.local/bin/poetry run ./suez --client=c-lightning --client-args=--conf=${CLCONF}"
       echo "# Running the command:"
       echo "${command}"
       echo
@@ -97,19 +97,19 @@ case $CHOICE in
       read key
       ;;
   CLOSEALL)
-      /home/admin/BBcloseAllChannels.sh cln $CHAIN
+      /home/admin/BBcloseAllChannels.sh cl $CHAIN
       echo "Press ENTER to return to main menu."
       read key
       ;;
-  CLNREPAIR)
-      /home/admin/99clnRepairMenu.sh $CHAIN
+  CLREPAIR)
+      /home/admin/99clRepairMenu.sh $CHAIN
       ;;
   SWITCHLN)
       clear 
       echo
       # setting value in the raspiblitz.conf
-      sudo sed -i "s/^lightning=.*/lightning=cln/g" /mnt/hdd/raspiblitz.conf
-      echo "# OK - lightning=cln is set in /mnt/hdd/raspiblitz.conf"
+      sudo sed -i "s/^lightning=.*/lightning=cl/g" /mnt/hdd/raspiblitz.conf
+      echo "# OK - lightning=cl is set in /mnt/hdd/raspiblitz.conf"
       echo
       echo "Press ENTER to return to main menu."
       read key

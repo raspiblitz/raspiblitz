@@ -47,8 +47,8 @@ if [ ${#abcd} -eq 0 ]; then
     if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
       OPTIONS+=(C "LND Lightning Wallet Password")
     fi
-    if [ "${cln}" == "on" ] && [ "${clnEncryptedHSM}" == "on" ]; then
-      OPTIONS+=(CLN "C-Lightning Wallet Password")
+    if [ "${cl}" == "on" ] && [ "${clEncryptedHSM}" == "on" ]; then
+      OPTIONS+=(CL "C-Lightning Wallet Password")
     fi
     CHOICE=$(dialog --clear \
                 --backtitle "RaspiBlitz" \
@@ -71,8 +71,8 @@ if [ ${#abcd} -eq 0 ]; then
         D)
           abcd='d';
           ;;
-        CLN)
-          abcd='cln';
+        CL)
+          abcd='cl';
           ;;
         *)
           exit 0
@@ -442,9 +442,9 @@ elif [ "${abcd}" = "x" ]; then
     # store result is file
     echo "${password1}" > ${resultFile}
 
-elif [ "${abcd}" = "cln" ]; then
-  /home/admin/config.scripts/cln.hsmtool.sh change-password mainnet
-  # do not reboot for cln password
+elif [ "${abcd}" = "cl" ]; then
+  /home/admin/config.scripts/cl.hsmtool.sh change-password mainnet
+  # do not reboot for cl password
   reboot=0
 
 # everything else

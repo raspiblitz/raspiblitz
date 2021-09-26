@@ -83,7 +83,7 @@ fi
 echo
 
 echo "*** C-LIGHTNING (MAINNET) SYSTEMD STATUS ***"
-if [ "${lightning}" == "cln" ] || [ "${cln}" == "on" ] || [ "${cln}" == "1" ]; then
+if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ] || [ "${cl}" == "1" ]; then
   sudo systemctl status lightningd -n2 --no-pager
   echo
   echo "*** LAST 30 C-LIGHTNING (MAINNET) INFO LOGS ***"
@@ -127,7 +127,7 @@ fi
 echo
 
 echo "*** C-LIGHTNING (TESTNET) SYSTEMD STATUS ***"
-if [ "${tcln}" == "on" ] || [ "${tcln}" == "1" ]; then
+if [ "${tcl}" == "on" ] || [ "${tcl}" == "1" ]; then
   sudo systemctl status tlightningd -n2 --no-pager
   echo
   echo "*** LAST 30 C-LIGHTNING (TESTNET) INFO LOGS ***"
@@ -171,7 +171,7 @@ fi
 echo
 
 echo "*** C-LIGHTNING (SIGNET) SYSTEMD STATUS ***"
-if [ "${scln}" == "on" ] || [ "${scln}" == "1" ]; then
+if [ "${scl}" == "on" ] || [ "${scl}" == "1" ]; then
   sudo systemctl status slightningd -n2 --no-pager
   echo
   echo "*** LAST 30 C-LIGHTNING (SIGNET) INFO LOGS ***"
@@ -236,11 +236,11 @@ fi
 
 if [ "${crtlWebinterface}" == "on" ]; then
   echo
-  echo "*** CLN-RTL ***"
+  echo "*** CL-RTL ***"
   sudo systemctl status cRTL -n10 --no-pager
   echo
 else
-  echo "- CLN-RTL is OFF by config"
+  echo "- CL-RTL is OFF by config"
 fi
 
 if [ "${ElectRS}" == "on" ]; then

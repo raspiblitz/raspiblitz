@@ -262,10 +262,10 @@ if [ "${setupPhase}" == "setup" ]; then
         /home/admin/setup.scripts/dialogLightningWallet-lnd.sh
         dialogResult=$?
 
-      elif [ "${lightning}" == "cln" ]; then
+      elif [ "${lightning}" == "cl" ]; then
 
         echo "# Starting lightning wallet dialog for C-LIGHTNING ..."
-        /home/admin/setup.scripts/dialogLightningWallet-cln.sh
+        /home/admin/setup.scripts/dialogLightningWallet-cl.sh
         dialogResult=$?
 
       else
