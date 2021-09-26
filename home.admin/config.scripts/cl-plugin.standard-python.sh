@@ -18,7 +18,7 @@ fi
 
 if [ $1 = on ];then
 
-  source <(/home/admin/config.scripts/network.aliases.sh getvars cl $2)
+  source <(/home/admin/config.scripts/network.aliases.sh getvars cl $3)
 
   plugin=$2
 
