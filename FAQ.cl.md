@@ -66,7 +66,7 @@ Will need to pay through a peer which supports the onion messages which means yo
 
 #### Setting up
 * activate the feature on your node:  
-Type: `clnconf` or use the menu `SYSTEM` - `CLNCONF`.  
+Type: `clconf` or use the menu `SYSTEM` - `CLCONF`.  
 Add the line:
     ```
     experimental-dual-fund    
@@ -146,9 +146,9 @@ Add the line:
     ```
 * The frequently used commands are shortened with alisases. Check them with the command `alias`:
     ```
-    alias cln='sudo -u bitcoin /usr/local/bin/lightning-cli --conf=/home/bitcoin/.lightning/config'
-    alias clnconf='sudo nano /home/bitcoin/.lightning/config'
-    alias clnlog='sudo tail -n 30 -f /home/bitcoin/.lightning/bitcoin/cl.log'
+    alias cl='sudo -u bitcoin /usr/local/bin/lightning-cli --conf=/home/bitcoin/.lightning/config'
+    alias clconf='sudo nano /home/bitcoin/.lightning/config'
+    alias cllog='sudo tail -n 30 -f /home/bitcoin/.lightning/bitcoin/cl.log'
     ```
 
 
@@ -157,59 +157,59 @@ Add the line:
 ```
 # generate a list of help texts on a RaspiBlitz:
 cd /home/admin/config.scripts/
-ls cln*.sh > clnScriptList.txt
-sed -i "s#cln#./cln#g" clnScriptList.txt
-sed -i "s#.sh#.sh -h#g" clnScriptList.txt
-bash -x clnScriptList.txt
-rm clnScriptList.txt
+ls cl*.sh > clScriptList.txt
+sed -i "s#cl#./cl#g" clScriptList.txt
+sed -i "s#.sh#.sh -h#g" clScriptList.txt
+bash -x clScriptList.txt
+rm clScriptList.txt
 ```
 
 ```
-+ ./cln.backup.sh -h
++ ./cl.backup.sh -h
 
 ---------------------------------------------------
-CLN RESCUE FILE (tar.gz of complete cln directory)
+CL RESCUE FILE (tar.gz of complete cl directory)
 ---------------------------------------------------
-cln.backup.sh cln-export
-cln.backup.sh cln-export-gui
-cln.backup.sh cln-import [file]
-cln.backup.sh cln-import-gui [setup|production] [?resultfile]
+cl.backup.sh cl-export
+cl.backup.sh cl-export-gui
+cl.backup.sh cl-import [file]
+cl.backup.sh cl-import-gui [setup|production] [?resultfile]
 ---------------------------------------------------
 SEED WORDS
 ---------------------------------------------------
-cln.backup.sh seed-export-gui [lndseeddata]
-cln.backup.sh seed-import-gui [resultfile]
+cl.backup.sh seed-export-gui [lndseeddata]
+cl.backup.sh seed-import-gui [resultfile]
 
-+ ./cln.hsmtool.sh -h
++ ./cl.hsmtool.sh -h
 
 Create new wallet or import seed
 Unlock/lock, encrypt, decrypt, set autounlock or change password for the hsm_secret
 
 Usage:
 Create new wallet:
-cln.hsmtool.sh [new] [mainnet|testnet|signet] [?seedPassword]
-cln.hsmtool.sh [new-force] [mainnet|testnet|signet] [?seedPassword]
+cl.hsmtool.sh [new] [mainnet|testnet|signet] [?seedPassword]
+cl.hsmtool.sh [new-force] [mainnet|testnet|signet] [?seedPassword]
 There will be no seedPassword(passphrase) used by default
 new-force will delete any old wallet and will work without dialog
 
-cln.hsmtool.sh [seed] [mainnet|testnet|signet] ["space-separated-seed-words"] [?seedPassword]
-cln.hsmtool.sh [seed-force] [mainnet|testnet|signet] ["space-separated-seed-words"] [?seedPassword]
+cl.hsmtool.sh [seed] [mainnet|testnet|signet] ["space-separated-seed-words"] [?seedPassword]
+cl.hsmtool.sh [seed-force] [mainnet|testnet|signet] ["space-separated-seed-words"] [?seedPassword]
 The new hsm_secret will be not encrypted if no NewPassword is given
 seed-force will delete any old wallet and will work without dialog
 
-cln.hsmtool.sh [unlock|lock] <mainnet|testnet|signet>
-cln.hsmtool.sh [encrypt|decrypt] <mainnet|testnet|signet>
-cln.hsmtool.sh [autounlock-on|autounlock-off] <mainnet|testnet|signet>
+cl.hsmtool.sh [unlock|lock] <mainnet|testnet|signet>
+cl.hsmtool.sh [encrypt|decrypt] <mainnet|testnet|signet>
+cl.hsmtool.sh [autounlock-on|autounlock-off] <mainnet|testnet|signet>
 
-cln.hsmtool.sh [change-password] <mainnet|testnet|signet> <NewPassword>
+cl.hsmtool.sh [change-password] <mainnet|testnet|signet> <NewPassword>
 
-+ ./cln.install-service.sh -h
++ ./cl.install-service.sh -h
 
 Script to set up or update the C-lightning systemd service
 Usage:
-/home/admin/config.scripts/cln.install-service.sh <mainnet|testnet|signet>
+/home/admin/config.scripts/cl.install-service.sh <mainnet|testnet|signet>
 
-+ ./cln.install.sh -h
++ ./cl.install.sh -h
 
 C-lightning install script
 The default version is: v0.10.1
@@ -217,42 +217,42 @@ Setting up on mainnet unless otherwise specified
 mainnet / testnet / signet instances can run parallel
 
 Usage:
-cln.install.sh on <mainnet|testnet|signet>
-cln.install.sh off <mainnet|testnet|signet> <purge>
-cln.install.sh [update <version>|testPR <PRnumber>]
-cln.install.sh display-seed <mainnet|testnet|signet>
+cl.install.sh on <mainnet|testnet|signet>
+cl.install.sh off <mainnet|testnet|signet> <purge>
+cl.install.sh [update <version>|testPR <PRnumber>]
+cl.install.sh display-seed <mainnet|testnet|signet>
 
-+ ./cln-plugin.backup.sh -h
++ ./cl-plugin.backup.sh -h
 
 Install the backup plugin for C-lightning
 Replicates the lightningd.sqlite3 database on the SDcard
 
 Usage:
-cln-plugin.backup.sh [on|off] [testnet|mainnet|signet]
-cln-plugin.backup.sh [restore] [testnet|mainnet|signet] [force]
-cln-plugin.backup.sh [backup-compact] [testnet|mainnet|signet]
+cl-plugin.backup.sh [on|off] [testnet|mainnet|signet]
+cl-plugin.backup.sh [restore] [testnet|mainnet|signet] [force]
+cl-plugin.backup.sh [backup-compact] [testnet|mainnet|signet]
 
 https://github.com/lightningd/plugins/tree/master/backup
 
-+ ./cln-plugin.clboss.sh -h
++ ./cl-plugin.clboss.sh -h
 
 Install or remove the CLBOSS C-lightning plugin
 version: v0.10
 Usage:
-cln-plugin.clboss.sh [on|off] [testnet|mainnet|signet]
+cl-plugin.clboss.sh [on|off] [testnet|mainnet|signet]
 
-+ ./cln-plugin.sparko.sh -h
++ ./cl-plugin.sparko.sh -h
 
 Install, remove, connect or get info about the Sparko plugin for C-lightning
 version: v2.7
 Usage:
-cln-plugin.sparko.sh [on|off|menu|connect] [testnet|mainnet|signet]
+cl-plugin.sparko.sh [on|off|menu|connect] [testnet|mainnet|signet]
 
-+ ./cln-plugin.standard-python.sh -h
++ ./cl-plugin.standard-python.sh -h
 
 Install and show the output of the chosen plugin for C-lightning
 Usage:
-cln-plugin.standard-python.sh on [plugin-name] [testnet|mainnet|signet] [runonce]
+cl-plugin.standard-python.sh on [plugin-name] [testnet|mainnet|signet] [runonce]
 
 tested plugins:
 summary | helpme | feeadjuster
@@ -260,13 +260,13 @@ summary | helpme | feeadjuster
 find more at:
 https://github.com/lightningd/plugins
 
-+ ./cln-plugin.summary.sh -h
++ ./cl-plugin.summary.sh -h
 
 Install and show the output if the summary plugin for C-lightning
 Usage:
-cln-plugin.summary.sh [testnet|mainnet|signet] [runonce]
+cl-plugin.summary.sh [testnet|mainnet|signet] [runonce]
 
-+ ./cln.rest.sh -h
++ ./cl.rest.sh -h
 
 C-lightning-REST install script
 The default version is: v0.5.1
@@ -274,10 +274,10 @@ mainnet | testnet | signet instances can run parallel
 The same macaroon and certs will be used for the parallel networks
 
 Usage:
-cln.rest.sh [on|off|connect] <mainnet|testnet|signet>
+cl.rest.sh [on|off|connect] <mainnet|testnet|signet>
 
-+ ./cln.setname.sh -h
++ ./cl.setname.sh -h
 
 Config script to set the alias of the C-lightning node
-cln.setname.sh [mainnet|testnet|signet] [?newName]
+cl.setname.sh [mainnet|testnet|signet] [?newName]
 ```
