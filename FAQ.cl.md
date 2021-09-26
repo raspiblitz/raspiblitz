@@ -1,5 +1,5 @@
 <!-- omit in toc -->
-# C-lightning FAQ
+# C-lightning on the RaspiBlitz FAQ
 
 - [C-lightning official documentation](#c-lightning-official-documentation)
 - [Commands and aliases](#commands-and-aliases)
