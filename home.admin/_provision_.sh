@@ -343,28 +343,28 @@ else
   CLcho "Provisioning LND Signet - not active" >> ${logFile}
 fi
 CL
-# CLN Mainnet (when not main instance)
+# CL Mainnet (when not main instance)
 if [ "${cl}" == "on" ] && [ "${lightning}" != "cl" ]; then
     echo "Provisioning CL Mainnet - run config script" >> ${logFile}
     sudo /home/admin/config.scripts/cl.install.sh on mainnet >> ${logFile} 2>&1
 else
-  CLcho "Provisioning CLN Mainnet - not active as secondary option" >> ${logFile}
+  CLcho "Provisioning CL Mainnet - not active as secondary option" >> ${logFile}
 fi
 CL
-# CLN Testnet
+# CL Testnet
 if [ "${tcl}" == "on" ]; then
     echo "Provisioning CL Testnet - run config script" >> ${logFile}
     sudo /home/admin/config.scripts/cl.install.sh on testnet >> ${logFile} 2>&1
 else
-    echo "Provisioning CLN Testnet - not active" >> ${logFile}
+    echo "Provisioning CL Testnet - not active" >> ${logFile}
 fi
 
-# CLN Signet
+# CL Signet
 if [ "${scl}" == "on" ]; then
-    echo "Provisioning CLN Signet - run config script" >> ${logFile}
+    echo "Provisioning CL Signet - run config script" >> ${logFile}
     sudo /home/admin/config.scripts/cl.install.sh on signet >> ${logFile} 2>&1
 else
-    echo "Provisioning CLN Signet - not active" >> ${logFile}
+    echo "Provisioning CL Signet - not active" >> ${logFile}
 fi
 
 # TOR
@@ -423,11 +423,11 @@ fi
 
 # RTL (CLN)
 if [ "${crtlWebinterface}" = "on" ]; then
-    echo "Provisioning RTL CLN - run config script" >> ${logFile}
+    echo "Provisioning RTL CL - run config script" >> ${logFile}
     sudo sed -i "s/^message=.*/message='Setup RTL (takes time)'/g" ${infoFile}
     sudo -u admin /home/admCLconfig.scripts/bonus.rtl.sh on cl mainnet >> ${logFile} 2>&1
 else
-    echo "Provisioning RTL CLN - keep default" >> ${logFile}
+    echo "Provisioning RTL CL - keep default" >> ${logFile}
 fi
 
 # SPARKO
@@ -436,7 +436,7 @@ if [ "${sparko}" = "on" ]; then
     sudo sed -i "s/^message=.*/message='Setup SPARKO (takes time)'/g" ${infoFile}
     sudo -u admin /home/admin/config.scripts/cl-plugin.sparko.sh on mainnet >> ${logFile} 2>&1
 else
-    echo "Provisioning RTL CLN - keep default" >> ${logFile}
+    echo "Provisioning RTL CL - keep default" >> ${logFile}
 fi
 
 #LOOP - install only if LiT won't be installed

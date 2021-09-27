@@ -384,7 +384,7 @@ if [ "$1" = "prestart" ]; then
   # C-Lightning changes of config
   # https://github.com/Ride-The-Lightning/RTL/blob/master/docs/C-Lightning-setup.md
   if [ "${LNCLE}" == "cl" ]; then
-    echo "# CLN Config"
+    echo "# CL Config"
     cat /home/rtl/${systemdService}/RTL-Config.json | \
     jq ".port = \"${RTLHTTP}\"" | \
     jq ".multiPass = \"${RPCPASSWORD}\"" | \
