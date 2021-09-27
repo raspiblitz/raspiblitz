@@ -16,7 +16,14 @@ source <(/home/admin/config.scripts/network.aliases.sh getvars cl $1)
 if [ $(sudo -u bitcoin cat ${CLCONF} | grep -c "^sparko") -gt 0 ];then
   if [ ! -f /home/bitcoin/${netprefix}cl-plugins-enabled/sparko ];then
     echo "# The Sparko plugin is not present but in config"
-    /home/admin/config.scripts/cl-plugin.sparko.sh on $CHAIN
+    /home/admin/config.scripts/cl-plugin.sparko.sh on $CHAIN norestart
+  fi
+fi
+
+if [ $(sudo -u bitcoin cat ${CLCONF} | grep -c "^feeadjuster") -gt 0 ];then
+  if [ ! -f /home/bitcoin/${netprefix}cl-plugins-enabled/feeadjuster.py ];then
+    echo "# The feeadjuster plugin is not present but in config"
+    /home/admin/config.scripts/cl-plugin.feeadjuster.sh on $CHAIN norestart
   fi
 fi
 
@@ -41,11 +48,12 @@ echo "
 Description=c-lightning daemon on $CHAIN
 
 [Service]
+ExecStartPre=-/home/admin/config.scripts/cl.check.sh prestart $CHAIN
+ExecStart=/bin/sh -c '${passwordInput}/usr/local/bin/lightningd\
+ --conf=${CLCONF} ${encryptedHSMoption}'
 User=bitcoin
 Group=bitcoin
 Type=simple
-ExecStart=/bin/sh -c '${passwordInput}/usr/local/bin/lightningd\
- --conf=${CLCONF} ${encryptedHSMoption}'
 Restart=always
 TimeoutSec=120
 RestartSec=30
