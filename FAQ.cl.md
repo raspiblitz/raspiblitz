@@ -448,11 +448,17 @@ the feerate is in `perkb` by default, e.g. use 1000 for 1 sat/byte
 
 ### Offers
 * Details at bolt12.org
-* create an offer to receive payments:  
+* Create an offer to receive payments:  
 https://lightning.readthedocs.io/lightning-offer.7.html
     ```
     lightning-cli offer amount description [vendor] [label] [quantity_min] [quantity_max] [absolute_expiry] [recurrence] [recurrence_base] [recurrence_paywindow] [recurrence_limit] [single_use]
     ```
+* Example:  
+Create a reusable offer which can be paid with any amount for LN tips using a fixed string.
+    ```
+    lightning-cli offer any tip
+    ```
+
 * Create an offer to send payments:  
 https://lightning.readthedocs.io/lightning-offerout.7.html  
     ```
@@ -477,6 +483,11 @@ Will need to pay through a peer which supports the onion messages which means yo
     ```
     lightning-cli pay bolt12_invoice
     ```
+* see if there is a new invoice is paid with:
+    ```
+    lightning-cli listinvoices
+    ```
+    The `pay_index` will increase as the offer gets reused.
 
 ### About the feature bits
 * https://bitcoin.stackexchange.com/questions/107484/how-can-i-decode-the-feature-string-of-a-lightning-node-with-bolt-9
