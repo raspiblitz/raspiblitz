@@ -12,7 +12,7 @@ if [ $# -lt 1 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ];then
   echo "Install, remove, connect or get info about the Sparko plugin for C-lightning"
   echo "version: $SPARKOVERSION"
   echo "Usage:"
-  echo "cl-plugin.sparko.sh [on|off|menu|connect] [testnet|mainnet|signet]"
+  echo "cl-plugin.sparko.sh [on|off|menu|connect] [testnet|mainnet|signet] [norestart]"
   echo
   exit 1
 fi
@@ -104,7 +104,7 @@ if [ $1 = connect ];then
   exit 0
 fi
 
-if [ $1 = on ];then
+if [ "$1" = "on" ];then
   echo "# Detect CPU architecture ..."
   isARM=$(uname -m | grep -c 'arm')
   isAARCH64=$(uname -m | grep -c 'aarch64')
@@ -176,7 +176,7 @@ sparko-keys=${masterkeythatcandoeverything}; ${secretaccesskeythatcanreadstuff}:
   sudo sed -i "s/^${netprefix}sparko=.*/${netprefix}sparko=on/g" /mnt/hdd/raspiblitz.conf
 
   source /home/admin/raspiblitz.info
-  if [ "${state}" == "ready" ]; then
+  if [ "${state}" == "ready" ] && [ "$3" != "norestart" ]; then
     echo "# Restart the ${netprefix}lightningd.service to activate Sparko"
     sudo systemctl restart ${netprefix}lightningd
   fi
@@ -188,7 +188,7 @@ sparko-keys=${masterkeythatcandoeverything}; ${secretaccesskeythatcanreadstuff}:
   
 fi
 
-if [ $1 = off ];then
+if [ "$1" = "off" ];then
   # delete symlink
   sudo rm -rf /home/bitcoin/${netprefix}cl-plugins-enabled/sparko
   
