@@ -217,9 +217,9 @@ WantedBy=multi-user.target
     sudo sed -i "s/^After=.*/After=${netprefix}lnd.service/g" /etc/systemd/system/${systemdService}.service
   fi
 CL
-  # adapt systemd service template for CLN
+  # adapt systemd service template for CL
   if [ "${LNTYPE}" == "cl" ]; thenCL
-    echo "# modifying ${systemdService}.service for CLN"
+    echo "# modifying ${systemdService}.service for CL"
     sudo sed -i "s/^Wants=.*/Wants=${netprefix}lightningd.service/g" /etc/systemd/system/${systemdService}.service
     sudo sed -i "s/^After=.*/After=${netprefix}lightningd.service/g" /etc/systemd/system/${systemdService}.service
 
@@ -391,7 +391,7 @@ if [ "$1" = "prestart" ]; then
     jq ".nodes[0].lnNode = \"${hostname}\"" | \
     jq ".nodes[0].lnImplementation = \"CLT\"" | \
     jq ".nodes[0].Authentication.macaroonPath = \"CLme/bitcoin/c-lightning-REST/certs\"" | \
-    jq ".nodes[0].Authentication.configPath = \"${CLNCONF}\"" | \
+    jq ".nodes[0].Authentication.configPath = \"${CLCONF}\"" | \
     jq ".nodes[0].Authentication.swapMacaroonPath = \"/home/rtl/.loop/${CHAIN}/\"" | \
     jq ".nodes[0].Authentication.boltzMacaroonPath = \"/home/rtl/.boltz-lnd/macaroons/\"" | \
     jq ".nodes[0].Settings.userPersona = \"OPERATOR\"" | \

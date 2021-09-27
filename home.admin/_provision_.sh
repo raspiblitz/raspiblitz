@@ -421,7 +421,7 @@ else
     echo "Provisioning RTL LND - keep default" >> ${logFile}
 fi
 
-# RTL (CLN)
+# RTL (CL)
 if [ "${crtlWebinterface}" = "on" ]; then
     echo "Provisioning RTL CL - run config script" >> ${logFile}
     sudo sed -i "s/^message=.*/message='Setup RTL (takes time)'/g" ${infoFile}
