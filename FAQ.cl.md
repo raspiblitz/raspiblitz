@@ -5,26 +5,32 @@
 - [Commands and aliases](#commands-and-aliases)
 - [Directories](#directories)
 - [Config file](#config-file)
+  - [Default values](#default-values)
+  - [All possible config settings](#all-possible-config-settings)
 - [Plug-ins](#plug-ins)
   - [General info](#general-info)
   - [Directories](#directories-1)
   - [Implemented plugins](#implemented-plugins)
   - [Add a custom plugin](#add-a-custom-plugin)
   - [CLBOSS](#clboss)
+  - [Feeadjuster](#feeadjuster)
   - [Dual funded channels](#dual-funded-channels)
     - [Reading](#reading)
     - [Setting up](#setting-up)
-    - [Opening a dual funded channel](#opening-a-dual-funded-channel)
+    - [Open a dual funded channel](#open-a-dual-funded-channel)
+    - [Fundchannel syntax](#fundchannel-syntax)
   - [Offers](#offers)
   - [About the feature bits](#about-the-feature-bits)
 - [Testnets](#testnets)
 - [Backups](#backups)
   - [Seed](#seed)
   - [Channel database](#channel-database)
+  - [Recovery](#recovery)
 - [Script file help list](#script-file-help-list)
 
 ## C-lightning official documentation
 * https://lightning.readthedocs.io/
+* the lightningd is built by deafult with 
 
 ## Commands and aliases
 
@@ -51,22 +57,166 @@ or with the alias: `cllog`
 `/home/bitcoin/.lightningd`
 
 ## Config file
-* edit in the menu `SYSTEM` - `CLNCONF` or use the alias `clconf`
-* Default values for mainnet:
+* Edit in the menu `SYSTEM` - `CLNCONF` or use the alias `clconf`
+
+### Default values
+* on the RaspiBlitz for mainnet
     ```
     network=bitcoin
     announce-addr=127.0.0.1:9736
     log-file=cl.log
     log-level=info
     plugin-dir=/home/bitcoin/cln-plugins-enabled
-
     # Tor settings
     proxy=127.0.0.1:9050
     bind-addr=127.0.0.1:9736
     addr=statictor:127.0.0.1:9051/torport=9736
     always-use-proxy=true
     ```
-
+### All possible config settings
+  *  can be shown by running:   
+  `lightningd --help`  
+  * Place the settings in the config file  without the `--` and restart lightningd
+      ```
+    Usage: lightningd 
+    A bitcoin lightning daemon (default values shown for network: bitcoin).
+    --conf=<file>                                     Specify configuration file
+    --lightning-dir=<dir>                             Set base directory: network-specific subdirectory is
+                                                    under here (default: "/home/admin/.lightning")
+    --network <arg>                                   Select the network parameters (bitcoin, testnet,
+                                                    signet, regtest, litecoin or litecoin-testnet)
+                                                    (default: bitcoin)
+    --mainnet                                         Alias for --network=bitcoin
+    --testnet                                         Alias for --network=testnet
+    --signet                                          Alias for --network=signet
+    --allow-deprecated-apis <arg>                     Enable deprecated options, JSONRPC commands, fields,
+                                                    etc. (default: true)
+    --rpc-file <arg>                                  Set JSON-RPC socket (or /dev/tty)
+                                                    (default: "lightning-rpc")
+    --plugin <arg>                                    Add a plugin to be run (can be used multiple times)
+    --plugin-dir <arg>                                Add a directory to load plugins from (can be used
+                                                    multiple times)
+    --clear-plugins                                   Remove all plugins added before this option
+    --disable-plugin <arg>                            Disable a particular plugin by filename/name
+    --important-plugin <arg>                          Add an important plugin to be run (can be used multiple
+                                                    times). Die if the plugin dies.
+    --always-use-proxy <arg>                          Use the proxy always (default: false)
+    --daemon                                          Run in the background, suppress stdout/stderr
+    --wallet <arg>                                    Location of the wallet database.
+    --large-channels|--wumbo                          Allow channels larger than 0.16777215 BTC
+    --experimental-dual-fund                          experimental: Advertise dual-funding and allow peers to
+                                                    establish channels via v2 channel open protocol.
+    --experimental-onion-messages                     EXPERIMENTAL: enable send, receive and relay of onion
+                                                    messages
+    --experimental-offers                             EXPERIMENTAL: enable send and receive of offers (also
+                                                    sets experimental-onion-messages)
+    --experimental-shutdown-wrong-funding             EXPERIMENTAL: allow shutdown with alternate txids
+    --help|-h                                         Print this message.
+    --rgb <arg>                                       RRGGBB hex color for node
+    --alias <arg>                                     Up to 32-byte alias for node
+    --pid-file=<file>                                 Specify pid file
+                                                    (default: "/home/admin/.lightning/lightningd-bitcoin.pid")
+    --ignore-fee-limits <arg>                         (DANGEROUS) allow peer to set any feerate
+                                                    (default: false)
+    --watchtime-blocks <arg>                          Blocks before peer can unilaterally spend funds
+                                                    (default: 144)
+    --max-locktime-blocks <arg>                       Maximum blocks funds may be locked for (default: 2016)
+    --funding-confirms <arg>                          Confirmations required for funding transaction
+                                                    (default: 3)
+    --cltv-delta <arg>                                Number of blocks for cltv_expiry_delta (default: 34)
+    --cltv-final <arg>                                Number of blocks for final cltv_expiry (default: 18)
+    --commit-time=<millseconds>                       Time after changes before sending out COMMIT
+                                                    (default: 10)
+    --fee-base <arg>                                  Millisatoshi minimum to charge for HTLC (default: 1000)
+    --rescan <arg>                                    Number of blocks to rescan from the current head, or
+                                                    absolute blockheight if negative (default: 15)
+    --fee-per-satoshi <arg>                           Microsatoshi fee for every satoshi in HTLC
+                                                    (default: 10)
+    --max-concurrent-htlcs <arg>                      Number of HTLCs one channel can handle concurrently.
+                                                    Should be between 1 and 483 (default: 30)
+    --min-capacity-sat <arg>                          Minimum capacity in satoshis for accepting channels
+                                                    (default: 10000)
+    --addr <arg>                                      Set an IP address (v4 or v6) to listen on and announce
+                                                    to the network for incoming connections
+    --bind-addr <arg>                                 Set an IP address (v4 or v6) to listen on, but not
+                                                    announce
+    --announce-addr <arg>                             Set an IP address (v4 or v6) or .onion v3 to announce,
+                                                    but not listen on
+    --offline                                         Start in offline-mode (do not automatically reconnect
+                                                    and do not accept incoming connections)
+    --autolisten <arg>                                If true, listen on default port and announce if it
+                                                    seems to be a public interface (default: true)
+    --proxy <arg>                                     Set a socks v5 proxy IP address and port
+    --tor-service-password <arg>                      Set a Tor hidden service password
+    --experimental-accept-extra-tlv-types <arg>       Comma separated list of extra TLV types to accept.
+    --disable-dns                                     Disable DNS lookups of peers
+    --encrypted-hsm                                   Set the password to encrypt hsm_secret with. If no
+                                                    password is passed through command line, you will be
+                                                    prompted to enter it.
+    --rpc-file-mode <arg>                             Set the file mode (permissions) for the JSON-RPC socket
+                                                    (default: "0600")
+    --force-feerates <arg>                            Set testnet/regtest feerates in sats perkw,
+                                                    opening/mutual_close/unlateral_close/delayed_to_us/htlc_resolution/penalty:
+                                                    if fewer specified, last number applies to remainder
+    --subdaemon <arg>                                 Arg specified as SUBDAEMON:PATH. Specifies an alternate
+                                                    subdaemon binary. If the supplied path is relative the
+                                                    subdaemon binary is found in the working directory.
+                                                    This option may be specified multiple times. For
+                                                    example, --subdaemon=hsmd:remote_signer would use a
+                                                    hypothetical remote signing subdaemon.
+    --log-level <arg>                                 log level (io, debug, info, unusual, broken) [:prefix]
+                                                    (default: info)
+    --log-timestamps <arg>                            prefix log messages with timestamp (default: true)
+    --log-prefix <arg>                                log prefix (default: lightningd)
+    --log-file=<file>                                 log to file instead of stdout
+    --version|-V                                      Print version and exit
+    --autocleaninvoice-cycle <arg>                    Perform cleanup of expired invoices every given
+                                                    seconds, or do not autoclean if 0
+    --autocleaninvoice-expired-by <arg>               If expired invoice autoclean enabled, invoices that
+                                                    have expired for at least this given seconds are
+                                                    cleaned
+    --fetchinvoice-noconnect                          Don't try to connect directly to fetch an invoice.
+    --bitcoin-datadir <arg>                           -datadir arg for bitcoin-cli
+    --bitcoin-cli <arg>                               bitcoin-cli pathname
+    --bitcoin-rpcuser <arg>                           bitcoind RPC username
+    --bitcoin-rpcpassword <arg>                       bitcoind RPC password
+    --bitcoin-rpcconnect <arg>                        bitcoind RPC host to connect to
+    --bitcoin-rpcport <arg>                           bitcoind RPC host's port
+    --bitcoin-retry-timeout <arg>                     how long to keep retrying to contact bitcoind before
+                                                    fatally exiting
+    --commit-fee <arg>                                Percentage of fee to request for their commitment
+    --funder-policy <arg>                             Policy to use for dual-funding requests. [match,
+                                                    available, fixed]
+    --funder-policy-mod <arg>                         Percent to apply policy at (match/available); or amount
+                                                    to fund (fixed)
+    --funder-min-their-funding <arg>                  Minimum funding peer must open with to activate our
+                                                    policy
+    --funder-max-their-funding <arg>                  Maximum funding peer may open with to activate our
+                                                    policy
+    --funder-per-channel-min <arg>                    Minimum funding we'll add to a channel. If we can't
+                                                    meet this, we don't fund
+    --funder-per-channel-max <arg>                    Maximum funding we'll add to a channel. We cap all
+                                                    contributions to this
+    --funder-reserve-tank <arg>                       Amount of funds we'll always leave available.
+    --funder-fuzz-percent <arg>                       Percent to fuzz the policy contribution by. Defaults to
+                                                    5%. Max is 100%
+    --funder-fund-probability <arg>                   Percent of requests to consider. Defaults to 100%.
+                                                    Setting to 0% will disable dual-funding
+    --funder-lease-requests-only <arg>                Only fund lease requests. Defaults to true if channel
+                                                    lease rates are being advertised
+    --lease-fee-base-msat <arg>                       Channel lease rates, base fee for leased funds, in
+                                                    satoshi.
+    --lease-fee-basis <arg>                           Channel lease rates, basis charged for leased funds
+                                                    (per 10,000 satoshi.)
+    --lease-funding-weight <arg>                      Channel lease rates, weight we'll ask opening peer to
+                                                    pay for in funding transaction
+    --channel-fee-max-base-msat <arg>                 Channel lease rates, maximum channel fee base we'll
+                                                    charge for funds routed through a leased channel.
+    --channel-fee-max-proportional-thousandths <arg>  Channel lease rates, maximum proportional fee (in
+                                                    thousandths, or ppt) we'll charge for funds routed
+                                                    through a leased channel. Note: 1ppt = 1,000ppm
+    --disable-mpp                                     Disable multi-part payments.
+    ```
 
 ## Plug-ins
 
@@ -87,8 +237,7 @@ or with the alias: `cllog`
 * clboss
 
 ### Add a custom plugin
-
-* The easiest way is to palce the plugin in the  
+* The easiest way is to place the plugin in the  
 `/home/bitcoin/cl-plugins-enabled`
 directory and start with
     ```
@@ -98,10 +247,13 @@ directory and start with
     ```
     sudo systemctl restart lightningd
     ```
-    to have it loaded automatically.
+    to have it loaded automatically.  
+    From that directory it will load auomatically after restarts.
+    To just load it run it once store in:
+    `/home/bitcoin/cl-plugins-available/`
 
 ### CLBOSS
-A plugin for automatic LN node management.
+A plugin for automatic LN node management.  
 CLBOSS only requires to have funds deposited  to the onchain wallet of C-lightning.
 The recommended amount to start is ~ 10 million satoshis (0.1 BTC).
 
@@ -118,10 +270,36 @@ Overall it is a tool which makes users able to send and receive lightning paymen
 The transactions made by CLBOSS does cost money and running it requires a fair amount of trust in the (fully open-source - MIT) code.
 Neither the CLBOSS nor the RaspiBlitz developers can take resposibility for lost sats, use at your own discretion!
 
+* Activate it in the menu - `SETTINGS` - `-CL CLBOSS`
 * Discussion: https://github.com/rootzoll/raspiblitz/issues/2490
 * Advanced usage
 https://github.com/ZmnSCPxj/clboss#clboss-status  
 * Stopping CLBOSS will leave the node in the last state. No channels will be closed or funds removed when CLBOSS is uninstalled.
+
+### Feeadjuster
+
+* Install:
+
+* to set the deeafault fees in the config add:
+    ```
+    fee-base=BASEFEE_IN_MILLISATS
+    fee-per-satoshi=PPM_FEE_IN_SATS
+    ```
+* start the feeadjuster
+    ```
+    cl plugin start /home/bitcoin/cl-plugins-available/plugins/feeadjuster/feeadjuster.py
+    ```
+* stop (best to run only periodically)
+    ```
+    cl plugin stop /home/bitcoin/cl-plugins-available/plugins/feeadjuster/feeadjuster.py
+    ```
+* Can use menu - `CL` - `SUEZ` to visualize the channel balances and fee settings
+* check the list of base fees
+cl listpeers | grep fee_base_msat
+
+* check the list of proportional fees
+cl listpeers | grep fee_proportional_millionths
+
 
 ### Dual funded channels
 #### Reading
@@ -164,7 +342,7 @@ Add the line:
     lightning-cli listnodes $(lightning-cli getinfo | jq .id)
     ```
 
-#### Opening a dual funded channel
+#### Open a dual funded channel
 * check if a node has onchain liquidity on offer:
     ```
     lightning-cli listnodes nodeid
@@ -184,11 +362,21 @@ Add the line:
     ```
     lightning-cli connect nodeID@IP_or.onion
     ```
-* open the channel (amount is the own funds in the wallet contributed)
+#### Fundchannel syntax
+*  the amount is the own funds in the wallet contributed  
+use equal amounts to have a balanced channel from start  
+the amounts can be specified in `sat` or `btc`
     ```
-    lightning-cli fundchannel -k id=NODEID amount=0.01btc request_amt=0.01btc compact_lease=COMPACT_LEASE
+    lightning-cli fundchannel -k id=NODE_ID amount=OWN_AMOUNTsat request_amt=PEER_CONTRIBUTION_AMOUNTsat compact_lease=COMPACT_LEASE
     ```  
     It can fail if the offer changed or there are not enough funds available on either side.
+
+* open a dual funded channel with a chosen utxo and miner feerate  
+list the utxo-s with `lightning-cli listfunds`, can list multiple  
+the feerate is in `perkb` by default, e.g. use 1000 for 1 sat/byte
+    ```
+    lightning-cli fundchannel feerate=PERKB_FEERATE utxos='["TRANSACTION_ID:INDDEX_NUMBER"]' -kid=NODE_ID amount=OWN_AMOUNTsat request_amt=PEER_CONTRIBUTION_AMOUNTsat compact_lease=COMPACT_LEASE
+    ```
 
 ### Offers
 * Details at bolt12.org
@@ -228,7 +416,6 @@ Will need to pay through a peer which supports the onion messages which means yo
 
 
 ## Testnets
-
 * for testnet and signet there are prefixes `t` and `s` used for the aliases, daemons and their own plugin directory names.
 * Testnet
     ```
@@ -259,13 +446,17 @@ Will need to pay through a peer which supports the onion messages which means yo
     /home/bitcoin/scl-plugins-enabled
     ```
 
-
-
 ## Backups
+* https://lightning.readthedocs.io/FAQ.html#how-to-backup-my-wallet
+* General details: https://lightning.readthedocs.io/BACKUP.html
 ### Seed
 -
 ### Channel database
 *
+
+### Recovery
+* https://lightning.readthedocs.io/FAQ.html#database-corruption-channel-state-lost
+* https://lightning.readthedocs.io/FAQ.html#loss
 
 ## Script file help list
 
