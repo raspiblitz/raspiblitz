@@ -299,6 +299,24 @@ else
   echo "Provisioning LND interims update - keep default" >> ${logFile}
 fi
 
+# CL INTERIMS UPDATE
+if [ ${#clInterimsUpdate} -gt 0 ]; then
+  sudo sed -i "s/^message=.*/message='Provisioning CL update'/g" ${infoFile}
+  if [ "${clInterimsUpdate}" == "reckless" ]; then
+    # recklessly update CL to latest release on GitHub (just for test & dev nodes)
+    echo "Provisioning CL reckless interims update" >> ${logFile}
+    sudo /home/admin/config.scripts/cl.update.sh reckless >> ${logFile}
+  else
+    # when installing the same sd image - this will re-trigger the secure interims update
+    # if this a update with a newer RaspiBlitz version .. interims update will be ignored
+    # because standard CL version is most more up to date
+    echo "Provisioning CL verified interims update" >> ${logFile}
+    sudo /home/admin/config.scripts/cl.update.sh verified ${clInterimsUpdate} >> ${logFile}
+  fi
+else
+  echo "Provisioning CL interims update - keep default" >> ${logFile}
+fi
+
 # Bitcoin Testnet
 if [ "${testnet}" == "on" ]; then
     echo "Provisioning ${network} Testnet - run config script" >> ${logFile}

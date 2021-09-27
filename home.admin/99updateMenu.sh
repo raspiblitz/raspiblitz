@@ -287,6 +287,75 @@ Do you really want to update LND now?
   esac
 }
 
+cl()
+{
+
+  # get cl info
+  source <(sudo -u admin /home/admin/config.scripts/cl.update.sh info)
+
+  # C-lightning Update Options
+  OPTIONS=()
+  if [ ${clUpdateInstalled} -eq 0 ]; then
+    OPTIONS+=(VERIFIED "Optional C-lightning update to ${clUpdateVersion}")
+  fi
+  OPTIONS+=(RECKLESS "Experimental C-lightning update to ${clLatestVersion}")
+
+  CHOICE=$(whiptail --clear --title "Update C-lightning Options" --menu "" 9 60 2 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+
+  clear
+  case $CHOICE in
+    VERIFIED)
+      if [ ${clUpdateInstalled} -eq 1 ]; then
+        whiptail --title "ALREADY INSTALLED" --msgbox "The C-lightning version ${clUpdateVersion} is already installed." 8 30
+        exit 0
+      fi
+      whiptail --title "OPTIONAL C-lightning UPDATE" --yes-button "Cancel" --no-button "Update" --yesno "BEWARE on updating to C-lightning v${clUpdateVersion}:
+
+${clUpdateComment}
+
+Do you really want to update C-lightning now?
+      " 16 58
+      if [ $? -eq 0 ]; then
+        echo "# cancel update"
+        exit 0
+      fi
+      error=""
+      warn=""
+      source <(sudo -u admin /home/admin/config.scripts/cl.update.sh verified)
+      if [ ${#error} -gt 0 ]; then
+        whiptail --title "ERROR" --msgbox "${error}" 8 30
+      else
+        echo "# C-lightning was updated successfully"
+        exit 0
+      fi
+      ;;
+    RECKLESS)
+      whiptail --title "RECKLESS C-lightning UPDATE to ${clLatestVersion}" --yes-button "Cancel" --no-button "Update" --yesno "Using the 'RECKLESS' C-lightning update will simply
+grab the latest C-lightning release published on the C-lightning GitHub page (also release candidates).
+
+There will be no security checks on signature, etc.
+
+This update mode is only recommended for testing and
+development nodes with no serious funding. 
+
+Do you really want to update C-lightning now?
+      " 16 58
+      if [ $? -eq 0 ]; then
+        echo "# cancel update"
+        exit 0
+      fi
+      error=""
+      source <(sudo -u admin /home/admin/config.scripts/cl.update.sh reckless)
+      if [ ${#error} -gt 0 ]; then
+        whiptail --title "ERROR" --msgbox "${error}" 8 30
+      else
+        echo "# C-lightning was updated successfully"
+        exit 0
+      fi
+      ;;
+  esac
+}
+
 bitcoinUpdate() {
   # get bitcoin info
   source <(sudo -u admin /home/admin/config.scripts/bitcoin.update.sh info)
@@ -383,6 +452,10 @@ if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
   OPTIONS+=(LND "Interim LND Update Options")
 fi
 
+if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ]; then
+  OPTIONS+=(CL "Interim C-lightning Update Options")
+fi
+
 if [ "${bos}" == "on" ]; then
   OPTIONS+=(BOS "Update Balance of Satoshis")
 fi
@@ -432,6 +505,9 @@ case $CHOICE in
     ;;
   LND)
     lnd
+    ;;
+  CL)
+    cl
     ;;
   BITCOIN)
     bitcoinUpdate

@@ -32,7 +32,11 @@ fi
 # Tor
 TORGROUP="debian-tor"
 
-source <(/home/admin/config.scripts/network.aliases.sh getvars cl $2)
+if [ "$1" = update ]||[ "$1" = testPR ];then
+  source <(/home/admin/config.scripts/network.aliases.sh getvars cl mainnet)
+else
+  source <(/home/admin/config.scripts/network.aliases.sh getvars cl $2)
+fi
 
 echo "# Running: 'cl.install.sh $*'"
 echo "# Using the settings for: ${network} ${CHAIN}"
@@ -47,7 +51,7 @@ if ! grep -Eq "^${netprefix}cl=" /mnt/hdd/raspiblitz.conf; then
 fi
 source /mnt/hdd/raspiblitz.conf
 
-if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = experimental ]||[ "$1" = testPR ];then
+if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = testPR ];then
 
   if [ "${CHAIN}" == "testnet" ] && [ "${testnet}" != "on" ]; then
     echo "# before activating testnet on cl, first activate testnet on bitcoind"
@@ -61,12 +65,13 @@ if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = experimental ]||[ "$1" = testPR ];
     exit 1
   fi
 
-  if [ ! -f /usr/local/bin/lightningd ]||[ "$1" = update ]||[ "$1" = testPR ];then
+  if [ ! -f /usr/local/bin/lightningd ]||[ "$1" = "update" ]||[ "$1" = "testPR" ];then
 
     ########################
     # Install dependencies # 
     ########################
-  
+    
+    # https://lightning.readthedocs.io/INSTALL.html#to-build-on-ubuntu
     echo "# apt update"
     echo
     sudo apt-get update
@@ -115,6 +120,10 @@ if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = experimental ]||[ "$1" = testPR ];
       echo "# Installing the version $CLVERSION"
       sudo -u bitcoin git reset --hard $CLVERSION
     fi
+
+    echo "Installing additional dependencies"  
+    sudo apt-get install -y valgrind python3-pip libpq-dev 
+    sudo pip3 install -r requirements.txt
 
     echo "# Building with EXPERIMENTAL_FEATURES enabled"
     echo
