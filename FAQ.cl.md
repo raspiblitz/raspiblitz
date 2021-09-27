@@ -280,11 +280,73 @@ https://github.com/ZmnSCPxj/clboss#clboss-status
 
 * Install:
 
-* to set the deeafault fees in the config add:
+* to set the default fees in the config add:
     ```
     fee-base=BASEFEE_IN_MILLISATS
     fee-per-satoshi=PPM_FEE_IN_SATS
     ```
+* more options for the feeadjuster to be set in the c-lightning config can be seen in the [code](https://github.com/lightningd/plugins/blob/c16c564c2c5549b8f7236815490260c49e9e9bf4/feeadjuster/feeadjuster.py#L318): 
+    ```
+    plugin.add_option(
+        "feeadjuster-deactivate-fuzz",
+        False,
+        "Deactivate update threshold randomization and hysterisis.",
+        "flag"
+    )
+    plugin.add_option(
+        "feeadjuster-deactivate-fee-update",
+        False,
+        "Deactivate automatic fee updates for forward events.",
+        "flag"
+    )
+    plugin.add_option(
+        "feeadjuster-threshold",
+        "0.05",
+        "Relative channel balance delta at which to trigger an update. Default 0.05 means 5%. "
+        "Note: it's also fuzzed by 1.5%",
+        "string"
+    )
+    plugin.add_option(
+        "feeadjuster-threshold-abs",
+        "0.001btc",
+        "Absolute channel balance delta at which to always trigger an update. "
+        "Note: it's also fuzzed by 1.5%",
+        "string"
+    )
+    plugin.add_option(
+        "feeadjuster-enough-liquidity",
+        "0msat",
+        "Beyond this liquidity do not adjust fees. "
+        "This also modifies the fee curve to achieve having this amount of liquidity. "
+        "Default: '0msat' (turned off).",
+        "string"
+    )
+    plugin.add_option(
+        "feeadjuster-adjustment-method",
+        "default",
+        "Adjustment method to calculate channel fee"
+        "Can be 'default', 'soft' for less difference or 'hard' for higher difference"
+        "string"
+    )
+    plugin.add_option(
+        "feeadjuster-imbalance",
+        "0.5",
+        "Ratio at which channel imbalance the feeadjuster should start acting. "
+        "Default: 0.5 (always). Set higher or lower values to limit feeadjuster's "
+        "activity to more imbalanced channels. "
+        "E.g. 0.3 for '70/30'% or 0.6 for '40/60'%.",
+        "string"
+    )
+    plugin.add_option(
+        "feeadjuster-feestrategy",
+        "global",
+        "Sets the per channel fee selection strategy. "
+        "Can be 'global' to use global config or default values, "
+        "or 'median' to use the median fees from peers of peer "
+        "Default: 'global'.",
+        "string"
+    ```
+
 * start the feeadjuster
     ```
     cl plugin start /home/bitcoin/cl-plugins-available/plugins/feeadjuster/feeadjuster.py
@@ -295,11 +357,17 @@ https://github.com/ZmnSCPxj/clboss#clboss-status
     ```
 * Can use menu - `CL` - `SUEZ` to visualize the channel balances and fee settings
 * check the list of base fees
-cl listpeers | grep fee_base_msat
-
+    ```
+    cl listpeers | grep fee_base_msat
+    ```
 * check the list of proportional fees
-cl listpeers | grep fee_proportional_millionths
-
+    ```
+    cl listpeers | grep fee_proportional_millionths
+    ```
+* set the fees to the defaults
+    ```
+    cl setchannelfee all
+    ```
 
 ### Dual funded channels
 #### Reading
