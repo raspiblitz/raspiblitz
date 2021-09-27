@@ -5,7 +5,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ];then
   echo
   echo "Install and show the output of the chosen plugin for C-lightning"
   echo "Usage:"
-  echo "cln-plugin.standard-python.sh on [plugin-name] [testnet|mainnet|signet] [runonce]"
+  echo "cl-plugin.standard-python.sh on [plugin-name] [testnet|mainnet|signet] [runonce]"
   echo
   echo "tested plugins:"
   echo "summary | helpme | feeadjuster"
@@ -18,19 +18,19 @@ fi
 
 if [ $1 = on ];then
 
-  source <(/home/admin/config.scripts/network.aliases.sh getvars cln $3)
+  source <(/home/admin/config.scripts/network.aliases.sh getvars cl $3)
 
   plugin=$2
 
-  if [ ! -f "/home/bitcoin/cln-plugins-available/plugins/${plugin}/${plugin}.py" ]; then
-    cd /home/bitcoin/cln-plugins-available || exit 1
+  if [ ! -f "/home/bitcoin/cl-plugins-available/plugins/${plugin}/${plugin}.py" ]; then
+    cd /home/bitcoin/cl-plugins-available || exit 1
     sudo -u bitcoin git clone https://github.com/lightningd/plugins.git
   fi
 
   if [ $($lightningcli_alias | grep -c "${plugin}") -eq 0 ];then
     echo "# Starting the ${plugin} plugin"
-    sudo -u bitcoin pip install -r /home/bitcoin/cln-plugins-available/plugins/${plugin}/requirements.txt
-    $lightningcli_alias plugin start /home/bitcoin/cln-plugins-available/plugins/${plugin}/${plugin}.py
+    sudo -u bitcoin pip install -r /home/bitcoin/cl-plugins-available/plugins/${plugin}/requirements.txt
+    $lightningcli_alias plugin start /home/bitcoin/cl-plugins-available/plugins/${plugin}/${plugin}.py
   fi
 
   echo
@@ -48,7 +48,7 @@ if [ $1 = on ];then
   echo
 
   if [ "$(echo "$@" | grep -c "runonce")" -gt 0 ];then
-    $lightningcli_alias plugin stop /home/bitcoin/cln-plugins-available/plugins/${plugin}/${plugin}.py
+    $lightningcli_alias plugin stop /home/bitcoin/cl-plugins-available/plugins/${plugin}/${plugin}.py
   fi
 
 fi

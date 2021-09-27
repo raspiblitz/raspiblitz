@@ -1076,9 +1076,9 @@ PGPpkeys="https://raw.githubusercontent.com/ElementsProject/lightning/master/con
 PGPcheck="D9200E6CD1ADB8F1"
 
 # prepare download dir
-sudo rm -rf /home/admin/download/cln
-sudo -u admin mkdir -p /home/admin/download/cln
-cd /home/admin/download/cln || exit 1
+sudo rm -rf /home/admin/download/cl
+sudo -u admin mkdir -p /home/admin/download/cl
+cd /home/admin/download/cl || exit 1
 
 sudo -u admin wget -O "pgp_keys.asc" ${PGPpkeys}
 gpg --import --import-options show-only ./pgp_keys.asc

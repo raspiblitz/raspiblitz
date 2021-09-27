@@ -148,8 +148,8 @@ if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
 fi
 
 # if C-Lightning is active
-if [ "${lightning}" == "cln" ] || [ "${cln}" == "on" ]; then
-  OPTIONS+=(CLN "C-lightning Wallet Options")
+if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ]; then
+  OPTIONS+=(CL "C-lightning Wallet Options")
 fi
 
 if [ "${testnet}" == "on" ]; then
@@ -214,8 +214,8 @@ case $CHOICE in
         LND)
             /home/admin/99lndMenu.sh
             ;;
-        CLN)
-            /home/admin/99clnMenu.sh ${chain}net
+        CL)
+            /home/admin/99clMenu.sh ${chain}net
             ;;
         CONNECT)
             /home/admin/99connectMenu.sh
@@ -231,7 +231,7 @@ case $CHOICE in
             /home/admin/config.scripts/bonus.rtl.sh menu lnd mainnet
             ;;
         CRTL)
-            /home/admin/config.scripts/bonus.rtl.sh menu cln mainnet
+            /home/admin/config.scripts/bonus.rtl.sh menu cl mainnet
             ;;
         BTCPAY)
             /home/admin/config.scripts/bonus.btcpayserver.sh menu
@@ -246,7 +246,7 @@ case $CHOICE in
             /home/admin/config.scripts/bonus.lit.sh menu
             ;;
         SPARKO)
-            /home/admin/config.scripts/cln-plugin.sparko.sh menu mainnet
+            /home/admin/config.scripts/cl-plugin.sparko.sh menu mainnet
             ;;
         LNBITS)
             /home/admin/config.scripts/bonus.lnbits.sh menu

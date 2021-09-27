@@ -6,7 +6,7 @@ source /mnt/hdd/raspiblitz.conf
 
 if [ "$1" = "-h" ] || [ "$1" = "-help" ];then
   echo "Usage:" 
-  echo "97addMobileWallet.sh <lnd|cln> <mainnet|testnet|signet>"
+  echo "97addMobileWallet.sh <lnd|cl> <mainnet|testnet|signet>"
   echo "defaults from the configs are:"
   echo "ligthning=${lightning}"
   echo "chain=${chain}"
@@ -153,9 +153,9 @@ if [ $lightning = "lnd" ]; then
   # add SEND MANY APP
   OPTIONS+=(SENDMANY_ANDROID "SendMany (Android)")
 
-elif [ $lightning = "cln" ]; then
+elif [ $lightning = "cl" ]; then
 
-  OPTIONS=(ZEUS_CLNREST "Zeus to C-lightningREST (Android or iOS)" \
+  OPTIONS=(ZEUS_CLREST "Zeus to C-lightningREST (Android or iOS)" \
           ZEUS_SPARK "Zeus to Sparko (Android or iOS)" \
     	  SPARK "Spark Wallet to Sparko (Android - EXPERIMENTAL)" 
     	  )
@@ -332,7 +332,7 @@ Or scan the qr code on the LCD with your mobile phone.
   	  exit 0;
   	;;
 
-ZEUS_CLNREST)
+ZEUS_CLREST)
       /home/admin/config.scripts/blitz.display.sh image /home/admin/raspiblitz/pictures/app_zeus.png
 	  whiptail --title "Install Zeus on your Android or iOS Phone" \
 		--yes-button "Continue" \
@@ -342,7 +342,7 @@ ZEUS_CLNREST)
 		exit 0
 	  fi
 	  /home/admin/config.scripts/blitz.display.sh hide
-  	  /home/admin/config.scripts/cln.rest.sh connect
+  	  /home/admin/config.scripts/cl.rest.sh connect
   	  exit 0;
 	;;
 ZEUS_SPARK)
@@ -355,7 +355,7 @@ ZEUS_SPARK)
 		exit 0
 	  fi
 	  /home/admin/config.scripts/blitz.display.sh hide
-  	  /home/admin/config.scripts/cln-plugin.sparko.sh connect
+  	  /home/admin/config.scripts/cl-plugin.sparko.sh connect
   	  exit 0;
 	;;
 SPARK)
@@ -374,7 +374,7 @@ Or scan the QR code on the LCD with your mobile phone.
 " 11 70
 	  fi
 	  /home/admin/config.scripts/blitz.display.sh hide
-  	  /home/admin/config.scripts/cln-plugin.sparko.sh connect
+  	  /home/admin/config.scripts/cl-plugin.sparko.sh connect
   	  exit 0;
 ;;
 

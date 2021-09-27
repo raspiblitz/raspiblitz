@@ -248,16 +248,16 @@ if [ "${lightning}" == "lnd" ]; then
   sudo systemctl start lnd >> ${logFile}
 
 
-elif [ "${lightning}" == "cln" ]; then
+elif [ "${lightning}" == "cl" ]; then
 
   echo "Install C-lightning on update" >> ${logFile}
   sudo sed -i "s/^message=.*/message='C-Lightning Install'/g" ${infoFile}
-  sudo /home/admin/config.scripts/cln.install.sh on mainnet >> ${logFile}
+  sudo /home/admin/config.scripts/cl.install.sh on mainnet >> ${logFile}
   sudo sed -i "s/^message=.*/message='C-Lightning Setup'/g" ${infoFile}
 
 elif [ "${lightning}" == "none" ]; then
 
-  echo "No Lightnig" >> ${logFile}
+  echo "No Lightning" >> ${logFile}
 
 else
 
