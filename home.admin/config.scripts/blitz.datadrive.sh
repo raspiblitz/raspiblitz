@@ -580,7 +580,7 @@ if [ "$1" = "format" ]; then
        echo "error='partition cleaning failed'"
        exit 1
      fi
-     sudo parted -s /dev/${hdd} mklabel gpt 1>/dev/null 1>&2
+     sudo parted -s -a optimal -- /dev/${hdd} mklabel gpt 1>/dev/null 1>&2
      sleep 2
      sync
   fi
