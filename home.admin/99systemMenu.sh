@@ -143,12 +143,12 @@ case $CHOICE in
     if /home/admin/config.scripts/blitz.setconf.sh "/etc/tor/torrc" "debian-tor"
     then
       whiptail \
-        --title "Restart" --yes-button "Restart" --no-button "Not now" \
-        --yesno "To apply the new settings Tor needs to restart.
+        --title "Reload" --yes-button "Reload" --no-button "Not now" \
+        --yesno "To apply the new settings need to reload Tor.
         Do you want to restart Tor now?" 10 55
       if [ $? -eq 0 ]; then
         echo "# Restarting tor"
-        sudo systemctl restart tor@default
+        sudo systemctl reload tor@default
       else
         echo "# Continue without restarting."
       fi
