@@ -104,6 +104,7 @@ if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = testPR ];then
       if [ $# -gt 1 ];then
         CLVERSION=$2
         echo "# Installing the version $CLVERSION"
+        sudo -u bitcoin git reset --hard $CLVERSION
       else
         echo "# Updating to the latest commit in:"
         echo "# https://github.com/ElementsProject/lightning"
