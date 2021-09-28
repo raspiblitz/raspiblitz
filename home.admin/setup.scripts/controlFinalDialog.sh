@@ -13,7 +13,7 @@ source ${SETUPFILE}
 # SHOW SEED WORDS AFTER SETUP
 if [ "${lightning}" == "lnd" ]; then
   walletName="LND"
-elif [ "${lightning}" == "cln" ]; then
+elif [ "${lightning}" == "cl" ]; then
   walletName="C-lightning"
 fi
 if [ "${setupPhase}" == "setup" ] && [ "${seedwords6x4NEW}" != "" ]; then

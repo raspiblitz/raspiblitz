@@ -11,19 +11,19 @@ fi
 
 source <(/home/admin/config.scripts/network.aliases.sh getvars $1 $2)
 
-if [ $LNTYPE = cln ];then
+if [ $LNTYPE = cl ];then
   # https://lightning.readthedocs.io/lightning-close.7.html
   peerlist=$($lightningcli_alias listpeers|grep '"id":'|awk '{print $2}'|cut -d, -f1)
   # to display
-  function cln_closeall_command {
+  function cl_closeall_command {
     for i in $peerlist; do
       # close id [unilateraltimeout] [destination] [fee_negotiation_step] [*wrong_funding*]
       echo "$lightningcli_alias close $i 30;"
     done
   }
-  command=$(cln_closeall_command)
+  command=$(cl_closeall_command)
   # to run
-  function cln_closeall {
+  function cl_closeall {
     for i in $peerlist; do
       # close id [unilateraltimeout] [destination] [fee_negotiation_step] [*wrong_funding*]
       echo "# Attempting a mutual close one-by-one with a 30 seconds timeout"
@@ -42,7 +42,7 @@ fi
 clear
 echo
 echo "# Precheck" # PRECHECK) check if chain is in sync
-if [ $LNTYPE = cln ];then
+if [ $LNTYPE = cl ];then
   BLOCKHEIGHT=$($bitcoincli_alias getblockchaininfo|grep blocks|awk '{print $2}'|cut -d, -f1)
   CLHEIGHT=$($lightningcli_alias getinfo | jq .blockheight)
   if [ $BLOCKHEIGHT -eq $CLHEIGHT ];then
@@ -54,7 +54,7 @@ elif [ $LNTYPE = lnd ];then
   chainOutSync=$($lncli_alias getinfo | grep '"synced_to_chain": false' -c)
 fi
 if [ ${chainOutSync} -eq 1 ]; then
-  if [ $LNTYPE = cln ];then
+  if [ $LNTYPE = cl ];then
     echo "# FAIL PRECHECK - '${netprefix}lightning-cli getinfo' blockheight is different from '${netprefix}bitcoind getblockchaininfo' - wait until chain is sync "
   elif [ $LNTYPE = lnd ];then
     echo "# FAIL PRECHECK - ${netprefix}lncli getinfo shows 'synced_to_chain': false - wait until chain is sync "  
@@ -78,8 +78,8 @@ echo "# RESULT:"
 
 # execute command
 if [ ${#command} -gt 0 ]; then
-  if [ $LNTYPE = cln ];then
-    cln_closeall
+  if [ $LNTYPE = cl ];then
+    cl_closeall
   elif [ $LNTYPE = lnd ];then  
     ${command}
   fi

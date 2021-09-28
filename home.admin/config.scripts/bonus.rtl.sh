@@ -10,11 +10,11 @@ source /mnt/hdd/raspiblitz.conf
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "# config script for RideTheLightning $RTLVERSION WebInterface"
-  echo "# able to run intances for lnd and cln parallel"
+  echo "# able to run intances for lnd and cl parallel"
   echo "# mainnet and testnet instances can run parallel"
-  echo "# bonus.rtl.sh [on|off|menu] <lnd|cln> <mainnet|testnet|signet>"
+  echo "# bonus.rtl.sh [on|off|menu] <lnd|cl> <mainnet|testnet|signet>"
   echo "# bonus.rtl.sh connect-services"
-  echo "# bonus.rtl.sh prestart <lnd|cln> <mainnet|testnet|signet>"
+  echo "# bonus.rtl.sh prestart <lnd|cl> <mainnet|testnet|signet>"
   exit 1
 fi
 
@@ -22,7 +22,7 @@ echo "# Running: 'bonus.rtl.sh $*'"
 
 source <(/home/admin/config.scripts/network.aliases.sh getvars $2 $3)
 
-# LNTYPE is lnd | cln
+# LNTYPE is lnd | cl
 echo "# LNTYPE(${LNTYPE})"
 # CHAIN is signet | testnet | mainnet
 echo "# CHAIN(${CHAIN})"
@@ -32,7 +32,7 @@ echo "# portprefix(${portprefix})"
 echo "# typeprefix(${typeprefix})"
 
 # prefix for parallel lightning impl
-if [ "${LNTYPE}" == "cln" ]; then
+if [ "${LNTYPE}" == "cl" ]; then
   RTLHTTP=${portprefix}7000
 elif [ "${LNTYPE}" == "lnd" ]; then
   RTLHTTP=${portprefix}3000
@@ -216,15 +216,14 @@ WantedBy=multi-user.target
     sudo sed -i "s/^Wants=.*/Wants=${netprefix}lnd.service/g" /etc/systemd/system/${systemdService}.service
     sudo sed -i "s/^After=.*/After=${netprefix}lnd.service/g" /etc/systemd/system/${systemdService}.service
   fi
-
-  # adapt systemd service template for CLN
-  if [ "${LNTYPE}" == "cln" ]; then
-    echo "# modifying ${systemdService}.service for CLN"
+  # adapt systemd service template for
+  if [ "${LNTYPE}" == "cl" ]; then
+    echo "# modifying ${systemdService}.service for CL"
     sudo sed -i "s/^Wants=.*/Wants=${netprefix}lightningd.service/g" /etc/systemd/system/${systemdService}.service
     sudo sed -i "s/^After=.*/After=${netprefix}lightningd.service/g" /etc/systemd/system/${systemdService}.service
 
     # set up C-LightningREST  
-    /home/admin/config.scripts/cln.rest.sh on ${CHAIN}
+    /home/admin/config.scripts/cl.rest.sh on ${CHAIN}
   fi
 
   # Note about RTL config file
@@ -383,15 +382,15 @@ if [ "$1" = "prestart" ]; then
 
   # C-Lightning changes of config
   # https://github.com/Ride-The-Lightning/RTL/blob/master/docs/C-Lightning-setup.md
-  if [ "${LNTYPE}" == "cln" ]; then
-    echo "# CLN Config"
+  if [ "${LNCLE}" == "cl" ]; then
+    echo "# CL Config"
     cat /home/rtl/${systemdService}/RTL-Config.json | \
     jq ".port = \"${RTLHTTP}\"" | \
     jq ".multiPass = \"${RPCPASSWORD}\"" | \
     jq ".nodes[0].lnNode = \"${hostname}\"" | \
     jq ".nodes[0].lnImplementation = \"CLT\"" | \
-    jq ".nodes[0].Authentication.macaroonPath = \"/home/bitcoin/c-lightning-REST/certs\"" | \
-    jq ".nodes[0].Authentication.configPath = \"${CLNCONF}\"" | \
+    jq ".nodes[0].Authentication.macaroonPath = \"CLme/bitcoin/c-lightning-REST/certs\"" | \
+    jq ".nodes[0].Authentication.configPath = \"${CLCONF}\"" | \
     jq ".nodes[0].Authentication.swapMacaroonPath = \"/home/rtl/.loop/${CHAIN}/\"" | \
     jq ".nodes[0].Authentication.boltzMacaroonPath = \"/home/rtl/.boltz-lnd/macaroons/\"" | \
     jq ".nodes[0].Settings.userPersona = \"OPERATOR\"" | \
@@ -452,8 +451,8 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
       echo "# Removing the binaries"
       echo "# Delete user and home directory"
       sudo userdel -rf rtl
-      if [ $LNTYPE = cln ];then
-        /home/admin/config.scripts/cln.rest.sh off ${CHAIN}
+      if [ $LNTYPE = cl ];then
+        /home/admin/config.scripts/cl.rest.sh off ${CHAIN}
       fi
     fi
 

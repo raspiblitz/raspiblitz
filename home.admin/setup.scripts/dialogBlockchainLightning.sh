@@ -55,7 +55,7 @@ if [ "${network}" == "bitcoin" ]; then
      # choose lightning client
     OPTIONS=()
     OPTIONS+=(LND "LND - Lightning Network Daemon (DEFAULT)")
-    OPTIONS+=(CLN "C-lightning by Blockstream (fewer apps)")
+    OPTIONS+=(CL "C-lightning by Blockstream (fewer apps)")
     OPTIONS+=(NONE "Run without Lightning")
     CHOICE=$(dialog --clear \
                 --backtitle "RaspiBlitz ${codeVersion} - Setup" \
@@ -69,8 +69,8 @@ if [ "${network}" == "bitcoin" ]; then
         LND)
             lightning="lnd"
             ;;
-        CLN)
-            lightning="cln"
+        CL)
+            lightning="cl"
             ;;
         NONE)
             lightning="none"

@@ -21,10 +21,10 @@ if [ $# -eq 0 ]||[ "$1" = "-h" ]||[ "$1" = "--help" ];then
   echo "mainnet / testnet / signet instances can run parallel"
   echo
   echo "Usage:"
-  echo "cln.install.sh on <mainnet|testnet|signet>"
-  echo "cln.install.sh off <mainnet|testnet|signet> <purge>"
-  echo "cln.install.sh [update <version>|testPR <PRnumber>]"
-  echo "cln.install.sh display-seed <mainnet|testnet|signet>"
+  echo "cl.install.sh on <mainnet|testnet|signet>"
+  echo "cl.install.sh off <mainnet|testnet|signet> <purge>"
+  echo "cl.install.sh [update <version>|testPR <PRnumber>]"
+  echo "cl.install.sh display-seed <mainnet|testnet|signet>"
   echo
   exit 1
 fi
@@ -32,41 +32,46 @@ fi
 # Tor
 TORGROUP="debian-tor"
 
-source <(/home/admin/config.scripts/network.aliases.sh getvars cln $2)
+if [ "$1" = update ]||[ "$1" = testPR ];then
+  source <(/home/admin/config.scripts/network.aliases.sh getvars cl mainnet)
+else
+  source <(/home/admin/config.scripts/network.aliases.sh getvars cl $2)
+fi
 
-echo "# Running: 'cln.install.sh $*'"
+echo "# Running: 'cl.install.sh $*'"
 echo "# Using the settings for: ${network} ${CHAIN}"
 
 # add default value to raspi config if needed
 if ! grep -Eq "^lightning=" /mnt/hdd/raspiblitz.conf; then
-  echo "lightning=cln" | sudo tee -a /mnt/hdd/raspiblitz.conf
+  echo "lightning=cl" | sudo tee -a /mnt/hdd/raspiblitz.conf
 fi
 # add default value to raspi config if needed
-if ! grep -Eq "^${netprefix}cln=" /mnt/hdd/raspiblitz.conf; then
-  echo "${netprefix}cln=off" | sudo tee -a /mnt/hdd/raspiblitz.conf
+if ! grep -Eq "^${netprefix}cl=" /mnt/hdd/raspiblitz.conf; then
+  echo "${netprefix}cl=off" | sudo tee -a /mnt/hdd/raspiblitz.conf
 fi
 source /mnt/hdd/raspiblitz.conf
 
-if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = experimental ]||[ "$1" = testPR ];then
+if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = testPR ];then
 
   if [ "${CHAIN}" == "testnet" ] && [ "${testnet}" != "on" ]; then
-    echo "# before activating testnet on cln, first activate testnet on bitcoind"
+    echo "# before activating testnet on cl, first activate testnet on bitcoind"
     echo "err='missing bitcoin testnet'"
     exit 1
   fi
 
   if [ "${CHAIN}" == "signet" ] && [ "${signet}" != "on" ]; then
-    echo "# before activating signet on cln, first activate signet on bitcoind"
+    echo "# before activating signet on cl, first activate signet on bitcoind"
     echo "err='missing bitcoin signet'"
     exit 1
   fi
 
-  if [ ! -f /usr/local/bin/lightningd ]||[ "$1" = update ]||[ "$1" = testPR ];then
+  if [ ! -f /usr/local/bin/lightningd ]||[ "$1" = "update" ]||[ "$1" = "testPR" ];then
 
     ########################
     # Install dependencies # 
     ########################
-  
+    
+    # https://lightning.readthedocs.io/INSTALL.html#to-build-on-ubuntu
     echo "# apt update"
     echo
     sudo apt-get update
@@ -99,6 +104,7 @@ if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = experimental ]||[ "$1" = testPR ];
       if [ $# -gt 1 ];then
         CLVERSION=$2
         echo "# Installing the version $CLVERSION"
+        sudo -u bitcoin git reset --hard $CLVERSION
       else
         echo "# Updating to the latest commit in:"
         echo "# https://github.com/ElementsProject/lightning"
@@ -115,6 +121,10 @@ if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = experimental ]||[ "$1" = testPR ];
       echo "# Installing the version $CLVERSION"
       sudo -u bitcoin git reset --hard $CLVERSION
     fi
+
+    echo "Installing additional dependencies"  
+    sudo apt-get install -y valgrind python3-pip libpq-dev 
+    sudo pip3 install -r requirements.txt
 
     echo "# Building with EXPERIMENTAL_FEATURES enabled"
     echo
@@ -146,11 +156,11 @@ if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = experimental ]||[ "$1" = testPR ];
   echo "# Make sure bitcoin is in the ${TORGROUP} group"
   sudo usermod -a -G ${TORGROUP} bitcoin
 
-  echo "# Add plugin-dir: /home/bitcoin/${netprefix}cln-plugins-enabled"
-  echo "# Add plugin-dir: /home/bitcoin/cln-plugins-available"
+  echo "# Add plugin-dir: /home/bitcoin/${netprefix}cl-plugins-enabled"
+  echo "# Add plugin-dir: /home/bitcoin/cl-plugins-available"
   # note that the disk is mounted with noexec
-  sudo -u bitcoin mkdir /home/bitcoin/${netprefix}cln-plugins-enabled 2>/dev/null
-  sudo -u bitcoin mkdir /home/bitcoin/cln-plugins-available 2>/dev/null
+  sudo -u bitcoin mkdir /home/bitcoin/${netprefix}cl-plugins-enabled 2>/dev/null
+  sudo -u bitcoin mkdir /home/bitcoin/cl-plugins-available 2>/dev/null
 
   echo "# Store the lightning data in /mnt/hdd/app-data/.lightning"
   echo "# Symlink to /home/bitcoin/"
@@ -162,24 +172,24 @@ if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = experimental ]||[ "$1" = testPR ];
     sudo -u bitcoin mkdir /home/bitcoin/.lightning/${CLNETWORK}
   fi
   
-  if ! sudo ls ${CLNCONF};then
-    echo "# Create ${CLNCONF}"
+  if ! sudo ls ${CLCONF};then
+    echo "# Create ${CLCONF}"
     echo "# lightningd configuration for ${network} ${CHAIN}
 
 network=${CLNETWORK}
 announce-addr=127.0.0.1:${portprefix}9736
 log-file=cl.log
 log-level=info
-plugin-dir=/home/bitcoin/${netprefix}cln-plugins-enabled
+plugin-dir=/home/bitcoin/${netprefix}cl-plugins-enabled
 
 # Tor settings
 proxy=127.0.0.1:9050
 bind-addr=127.0.0.1:${portprefix}9736
 addr=statictor:127.0.0.1:9051/torport=${portprefix}9736
 always-use-proxy=true
-" | sudo tee ${CLNCONF}
+" | sudo tee ${CLCONF}
   else
-    echo "# The file ${CLNCONF} is already present"
+    echo "# The file ${CLCONF} is already present"
   fi
   sudo chown -R bitcoin:bitcoin /mnt/hdd/app-data/.lightning
   sudo chown -R bitcoin:bitcoin /home/bitcoin/  
@@ -187,24 +197,24 @@ always-use-proxy=true
   #################
   # Backup plugin #
   #################
-  /home/admin/config.scripts/cln-plugin.backup.sh on $CHAIN
+  /home/admin/config.scripts/cl-plugin.backup.sh on $CHAIN
 
   ###################
   # Systemd service #
   ###################
-  /home/admin/config.scripts/cln.install-service.sh $CHAIN
+  /home/admin/config.scripts/cl.install-service.sh $CHAIN
 
   echo
   echo "# Adding aliases"
   echo "\
 alias ${netprefix}lightning-cli=\"sudo -u bitcoin /usr/local/bin/lightning-cli\
- --conf=${CLNCONF}\"
-alias ${netprefix}cln=\"sudo -u bitcoin /usr/local/bin/lightning-cli\
- --conf=${CLNCONF}\"
-alias ${netprefix}clnlog=\"sudo\
+ --conf=${CLCONF}\"
+alias ${netprefix}cl=\"sudo -u bitcoin /usr/local/bin/lightning-cli\
+ --conf=${CLCONF}\"
+alias ${netprefix}cllog=\"sudo\
  tail -n 30 -f /home/bitcoin/.lightning/${CLNETWORK}/cl.log\"
-alias ${netprefix}clnconf=\"sudo\
- nano ${CLNCONF}\"
+alias ${netprefix}clconf=\"sudo\
+ nano ${CLCONF}\"
 " | sudo tee -a /home/admin/_aliases
   sudo chown admin:admin /home/admin/_aliases
 
@@ -222,12 +232,12 @@ alias ${netprefix}clnconf=\"sudo\
   echo
 
   # setting value in the raspiblitz.conf
-  sudo sed -i "s/^${netprefix}cln=.*/${netprefix}cln=on/g" /mnt/hdd/raspiblitz.conf
+  sudo sed -i "s/^${netprefix}cl=.*/${netprefix}cl=on/g" /mnt/hdd/raspiblitz.conf
 
   # if this is the first lightning mainnet turned on - make default
   if [ "${CHAIN}" == "mainnet" ] && [ "${lightning}" == "" ]; then
-    echo "# CLN is now the default lightning implementation"
-    sudo sed -i "s/^lightning=.*/lightning=cln/g" /mnt/hdd/raspiblitz.conf
+    echo "# CL is now the default lightning implementation"
+    sudo sed -i "s/^lightning=.*/lightning=cl/g" /mnt/hdd/raspiblitz.conf
   fi
 
   exit 0
@@ -246,7 +256,7 @@ if [ "$1" = "display-seed" ]; then
   if [ "${displayNetwork}" == "" ]; then
     displayNetwork="mainnet"
   fi
-  source <(/home/admin/config.scripts/network.aliases.sh getvars cln $displayNetwork)
+  source <(/home/admin/config.scripts/network.aliases.sh getvars cl $displayNetwork)
 
   # check if seedword file exists
   seedwordFile="/home/bitcoin/.lightning/${CLNETWORK}/seedwords.info"
@@ -288,11 +298,11 @@ if [ "$1" = "off" ];then
     sudo rm -f /usr/local/bin/lightning-cli
   fi
   # setting value in the raspiblitz.conf
-  sudo sed -i "s/^${netprefix}cln=.*/${netprefix}cln=off/g" /mnt/hdd/raspiblitz.conf
+  sudo sed -i "s/^${netprefix}cl=.*/${netprefix}cl=off/g" /mnt/hdd/raspiblitz.conf
 
-  # if cln mainnet was default - remove 
-  if [ "${CHAIN}" == "mainnet" ] && [ "${lightning}" == "cln" ]; then
-    echo "# CLN is REMOVED as the default lightning implementation"
+  # if cl mainnet was default - remove 
+  if [ "${CHAIN}" == "mainnet" ] && [ "${lightning}" == "cl" ]; then
+    echo "# CL is REMOVED as the default lightning implementation"
     sudo sed -i "s/^lightning=.*/lightning=/g" /mnt/hdd/raspiblitz.conf
     if [ "${lnd}" == "on" ]; then
       echo "# LND is now the new default lightning implementation"

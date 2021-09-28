@@ -315,8 +315,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
 [Unit]
 Description=lnbits
-Wants=lnd.service
-After=lnd.service
+Wants=bitcoind.service
+After=bitcoind.service
 
 [Service]
 WorkingDirectory=/home/lnbits/lnbits

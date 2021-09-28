@@ -146,11 +146,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo sed -i "s:^CookieAuthFile*:#CookieAuthFile:g" /etc/tor/torrc
     if ! grep -Eq "^CookieAuthentication 1" /etc/tor/torrc; then
       echo "CookieAuthentication 1" | sudo tee -a /etc/tor/torrc
-      sudo systemctl restart tor@default
+      sudo systemctl reload tor@default
     fi
     if ! grep -Eq "^AllowOutboundLocalhost 1" /etc/tor/torsocks.conf; then          
       echo "AllowOutboundLocalhost 1" | sudo tee -a /etc/tor/torsocks.conf
-      sudo systemctl restart tor@default
+      sudo systemctl reload tor@default
     fi
 
     # joinin.conf settings

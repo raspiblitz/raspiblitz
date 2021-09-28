@@ -18,11 +18,11 @@ fi
 source <(/home/admin/config.scripts/network.aliases.sh getvars $1 $2)
 
 # check if user has money in lightning channels - info about close all
-if [ $LNTYPE = cln ];then
+if [ $LNTYPE = cl ];then
   ln_getInfo=$($lightningcli_alias getinfo 2>/dev/null)
   ln_channels_online="$(echo "${ln_getInfo}" | jq -r '.num_active_channels')" 2>/dev/null
-  cln_num_inactive_channels="$(echo "${ln_getInfo}" | jq -r '.num_inactive_channels')" 2>/dev/null
-  openChannels=$((ln_channels_online+cln_num_inactive_channels))
+  cl_num_inactive_channels="$(echo "${ln_getInfo}" | jq -r '.num_inactive_channels')" 2>/dev/null
+  openChannels=$((ln_channels_online+cl_num_inactive_channels))
 elif [ $LNTYPE = lnd ];then
   openChannels=$($lncli_alias listchannels 2>/dev/null | jq '.[] | length')
 fi
@@ -47,10 +47,10 @@ if [ ${openChannels} -gt 0 ]; then
 fi
 
 # check if money is waiting to get confirmed
-if [ $LNTYPE = cln ];then
+if [ $LNTYPE = cl ];then
   ln_walletbalance_wait=0
-  cln_listfunds=$($lightningcli_alias listfunds 2>/dev/null)
-  for i in $(echo "$cln_listfunds" \
+  cl_listfunds=$($lightningcli_alias listfunds 2>/dev/null)
+  for i in $(echo "$cl_listfunds" \
    |jq .outputs[]|jq 'select(.status=="unconfirmed")'|grep value|awk '{print $2}'|cut -d, -f1);do
     ln_walletbalance_wait=$((ln_walletbalance_wait+i))
   done
@@ -91,7 +91,7 @@ echo "Sweep all possible Funds"
 echo "******************************"
 
 # execute command
-if [ ${LNTYPE} = "cln" ];then
+if [ ${LNTYPE} = "cl" ];then
   # withdraw destination satoshi [feerate] [minconf] [utxos]
   command="$lightningcli_alias withdraw ${address} all slow"
 elif [ ${LNTYPE} = "lnd" ];then

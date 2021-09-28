@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # https://github.com/prusnak/suez/commits/master
-SUEZVERSION="bbf366572ad6dc2d8644de85c0946c7fc386d141"
+SUEZVERSION="c19cedb715317a843d09a1347dcfaef4013f589b"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -85,7 +85,8 @@ if [ "$1" = "update" ]; then
     | sudo -u bitcoin python -
   # download source code
   sudo -u bitcoin git clone https://github.com/prusnak/suez.git
-  cd suez || exit 1 
+  cd suez || exit 1
+  sudo -u bitcoin git pull
   sudo -u bitcoin /home/bitcoin/.local/bin/poetry install
   echo "# Updated to the latest in https://github.com/prusnak/suez/commits/master"
   exit 0

@@ -12,23 +12,23 @@ if [ $# -eq 0 ]||[ "$1" = "-h" ]||[ "$1" = "--help" ];then
   echo "The same macaroon and certs will be used for the parallel networks"
   echo
   echo "Usage:"
-  echo "cln.rest.sh [on|off|connect] <mainnet|testnet|signet>"
+  echo "cl.rest.sh [on|off|connect] <mainnet|testnet|signet>"
   echo
   exit 1
 fi
 
-source <(/home/admin/config.scripts/network.aliases.sh getvars cln $2)
+source <(/home/admin/config.scripts/network.aliases.sh getvars cl $2)
 
-echo "# Running 'cln.rest.sh $*'"
+echo "# Running 'cl.rest.sh $*'"
 
 if [ $1 = connect ];then
   echo "# Allowing port ${portprefix}6100 through the firewall"
-  sudo ufw allow "${portprefix}6100" comment "${netprefix}clnrest"
+  sudo ufw allow "${portprefix}6100" comment "${netprefix}clrest"
   localip=$(ip addr | grep 'state UP' -A2 | grep -E -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
   # hidden service to https://xx.onion
-  /home/admin/config.scripts/internet.hiddenservice.sh ${netprefix}clnrest 443 ${portprefix}6100
+  /home/admin/config.scripts/internet.hiddenservice.sh ${netprefix}clrest 443 ${portprefix}6100
   
-  toraddress=$(sudo cat /mnt/hdd/tor/${netprefix}clnrest/hostname)
+  toraddress=$(sudo cat /mnt/hdd/tor/${netprefix}clrest/hostname)
   hex_macaroon=$(xxd -plain /home/bitcoin/c-lightning-REST/certs/access.macaroon | tr -d '\n') 
   url="https://${localip}:${portprefix}6100/"
   #string="${url}?${hex_macaroon}"
@@ -75,8 +75,8 @@ fi
 if [ $1 = on ];then
   echo "# Setting up c-lightning-REST for $CHAIN"
 
-  sudo systemctl stop ${netprefix}clnrest
-  sudo systemctl disable ${netprefix}clnrest
+  sudo systemctl stop ${netprefix}clrest
+  sudo systemctl disable ${netprefix}clrest
 
   if [ ! -f /home/bitcoin/c-lightning-REST/cl-rest.js ];then
     cd /home/bitcoin || exit 1
@@ -101,7 +101,7 @@ if [ $1 = on ];then
   
   echo "
 # systemd unit for c-lightning-REST for ${CHAIN}
-# /etc/systemd/system/${netprefix}clnrest.service
+# /etc/systemd/system/${netprefix}clrest.service
 [Unit]
 Description=c-lightning-REST daemon for ${CHAIN}
 Wants=${netprefix}lightningd.service
@@ -123,30 +123,30 @@ PrivateDevices=true
 
 [Install]
 WantedBy=multi-user.target
-" | sudo tee /etc/systemd/system/${netprefix}clnrest.service
+" | sudo tee /etc/systemd/system/${netprefix}clrest.service
 
-  sudo systemctl enable ${netprefix}clnrest
+  sudo systemctl enable ${netprefix}clrest
   source /home/admin/raspiblitz.info
   if [ "${state}" == "ready" ]; then
-    echo "# OK - the clnrest.service is enabled, system is ready so starting service"
-    sudo systemctl start ${netprefix}clnrest
+    echo "# OK - the clrest.service is enabled, system is ready so starting service"
+    sudo systemctl start ${netprefix}clrest
   else
-    echo "# OK - the clnrest.service is enabled, to start manually use: 'sudo systemctl start clnrest'"
+    echo "# OK - the clrest.service is enabled, to start manually use: 'sudo systemctl start clrest'"
   fi
   echo
   echo "# Monitor with:"
-  echo "sudo journalctl -f -u clnrest"
+  echo "sudo journalctl -f -u clrest"
   echo
 fi
 
 if [ $1 = off ];then
   echo "# Removing c-lightning-REST for ${CHAIN}"
-  sudo systemctl stop ${netprefix}clnrest
-  sudo systemctl disable ${netprefix}clnrest
+  sudo systemctl stop ${netprefix}clrest
+  sudo systemctl disable ${netprefix}clrest
   sudo rm -rf /home/bitcoin/c-lightning-REST/${CLNETWORK}
   echo "# Deny port ${portprefix}6100 through the firewall"
   sudo ufw deny "${portprefix}6100"
-  /home/admin/config.scripts/internet.hiddenservice.sh off ${netprefix}clnrest
+  /home/admin/config.scripts/internet.hiddenservice.sh off ${netprefix}clrest
   if [ "$(echo "$@" | grep -c purge)" -gt 0 ];then
     echo "# Removing the source code and binaries"
     sudo rm -rf /home/bitcoin/c-lightning-REST
