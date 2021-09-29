@@ -428,7 +428,7 @@ if [ "${#dynDomain}" -gt 0 ]; then
     sudo /home/admin/config.scripts/internet.dyndomain.sh on ${dynDomain} ${dynUpdateUrl} >> ${logFile} 2>&1
 else
     echo "Provisioning DYNAMIC DOMAIN - keep default" >> ${logFile}
-fiCL
+fi
 
 # RTL (LND)CL
 if [ "${rtlWebinterface}" = "on" ]; then
