@@ -653,7 +653,7 @@ if [ ${isMounted} -eq 0 ]; then
   # finalize provisioning
   echo "Calling _bootstrap.provision.sh for general system provisioning (${setupPhase}) .." >> $logFile
   sed -i "s/^message=.*/message='Provision Basics'/g" ${infoFile}
-  sudo /home/admin/_provision_.sh
+  /home/admin/_provision_.sh
   errorState=$?
   if [ "$errorState" != "0" ]; then
     echo "EXIT _provision_.sh BECAUSE OF ERROR STATE ($errorState)" >> $logFile

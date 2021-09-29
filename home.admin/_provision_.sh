@@ -350,7 +350,7 @@ if [ "${tlnd}" == "on" ]; then
     sudo systemctl start tlnd >> ${logFile} 2>&1
 else
     echo "Provisioning LND Testnet - not active" >> ${logFile}
-fiCL
+fi
 
 # LND SignetCL
 if [ "${slnd}" == "on" ]; then
@@ -358,17 +358,17 @@ if [ "${slnd}" == "on" ]; then
     sudo /home/admin/coCLg.scripts/lnd.install.sh on signet >> ${logFile} 2>&1
     sudo systemctl start slnd >> ${logFile} 2>&1
 else
-  CLcho "Provisioning LND Signet - not active" >> ${logFile}
+  echo "Provisioning LND Signet - not active" >> ${logFile}
 fi
-CL
+
 # CL Mainnet (when not main instance)
 if [ "${cl}" == "on" ] && [ "${lightning}" != "cl" ]; then
     echo "Provisioning CL Mainnet - run config script" >> ${logFile}
     sudo /home/admin/config.scripts/cl.install.sh on mainnet >> ${logFile} 2>&1
 else
-  CLcho "Provisioning CL Mainnet - not active as secondary option" >> ${logFile}
+  echo "Provisioning CL Mainnet - not active as secondary option" >> ${logFile}
 fi
-CL
+
 # CL Testnet
 if [ "${tcl}" == "on" ]; then
     echo "Provisioning CL Testnet - run config script" >> ${logFile}
@@ -828,3 +828,4 @@ echo "DONE - Give raspi some cool off time after hard building .... 5 secs sleep
 sleep 5
 
 echo "END Provisioning" >> ${logFile}
+exit 0
