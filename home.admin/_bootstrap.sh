@@ -606,7 +606,7 @@ if [ ${isMounted} -eq 0 ]; then
   if [ "${setupPhase}" == "setup" ]; then
     echo "Calling _provision.setup.sh for basic setup tasks .." >> $logFile
     sed -i "s/^message=.*/message='Provision Setup'/g" ${infoFile}
-    sudo /home/admin/_provision.setup.sh
+    /home/admin/_provision.setup.sh
     errorState=$?
     sudo cat /home/admin/raspiblitz.provision-setup.log
     if [ "$errorState" != "0" ]; then
@@ -622,9 +622,9 @@ if [ ${isMounted} -eq 0 ]; then
   if [ "${setupPhase}" == "migration" ]; then
     echo "Calling _provision.migration.sh for possible migrations .." >> $logFile
     sed -i "s/^message=.*/message='Provision migration'/g" ${infoFile}
-    sudo /home/admin/_provision.migration.sh
+    /home/admin/_provision.migration.sh
     errorState=$?
-    sudo cat /home/admin/raspiblitz.provision-migration.log
+    cat /home/admin/raspiblitz.provision-migration.log
     if [ "$errorState" != "0" ]; then
       echo "EXIT _provision.migration.sh BECAUSE OF ERROR STATE ($errorState)" >> $logFile
       echo "This can also happen if _provision.migration.sh has syntax errros" >> $logFile
@@ -638,9 +638,9 @@ if [ ${isMounted} -eq 0 ]; then
   if [ "${setupPhase}" == "update" ] || [ "${setupPhase}" == "recovery" ] || [ "${setupPhase}" == "migration" ]; then
     echo "Calling _provision.update.sh .." >> $logFile
     sed -i "s/^message=.*/message='Provision Update/Recovery/Migration'/g" ${infoFile}
-    sudo /home/admin/_provision.update.sh
+    /home/admin/_provision.update.sh
     errorState=$?
-    sudo cat /home/admin/raspiblitz.provision-update.log
+    cat /home/admin/raspiblitz.provision-update.log
     if [ "$errorState" != "0" ]; then
       echo "EXIT _provision.update.sh BECAUSE OF ERROR STATE ($errorState)" >> $logFile
       echo "This can also happen if _provision.update.sh has syntax errors" >> $logFile
