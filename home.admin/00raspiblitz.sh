@@ -258,9 +258,8 @@ do
         sudo /home/admin/config.scripts/blitz.datadrive.sh status
       fi
       if [ "${message}" == "_provision.setup.sh fail" ]; then
-        # print some debug detail info on HDD/SSD error
-        echo "# blitz.datadrive.sh status"
-        sudo /home/admin/config.scripts/blitz.datadrive.sh status
+        echo "# /home/admin/raspiblitz.provision-setup.log"
+        cat /home/admin/raspiblitz.provision-setup.log
       fi
       echo "***********************************************************"
       echo "ERROR - please report to development team"
