@@ -82,12 +82,12 @@ if [ "$1" = "status" ]; then
     # will then be used to offer formatting and permanent mounting
     hdd=""
     sizeDataPartition=0
-    OSPartition=$(sudo df /usr | grep dev | cut -d " " -f 1 | sed "s#/dev/##g")
+    OSPartition=$(sudo df /usr 2>/dev/null | grep dev | cut -d " " -f 1 | sed "s#/dev/##g")
     # detect boot partition on UEFI systems
-    bootPartition=$(sudo df /boot/efi | grep dev | cut -d " " -f 1 | sed "s#/dev/##g")
+    bootPartition=$(sudo df /boot/efi 2>/dev/null | grep dev | cut -d " " -f 1 | sed "s#/dev/##g")
     if [ ${#bootPartition} -eq 0 ]; then
       # for non UEFI
-      bootPartition=$(sudo df /boot | grep dev | cut -d " " -f 1 | sed "s#/dev/##g")
+      bootPartition=$(sudo df /boot 2>/dev/null | grep dev | cut -d " " -f 1 | sed "s#/dev/##g")
     fi
     lsblk -o NAME,SIZE -b | grep -P "[s|vn][dv][a-z][0-9]?" > .lsblk.tmp
     while read line; do
@@ -595,7 +595,7 @@ if [ "$1" = "format" ]; then
      if [ $ext4IsPartition -eq 0 ]; then
         # write new EXT4 partition
         >&2 echo "# Creating the one big partition"
-        sudo parted /dev/${hdd} mkpart primary ext4 0% 100% 1>&2
+        sudo parted -a optimal /dev/${hdd} mkpart primary ext4 0% 100% 1>&2
         sleep 6
         sync
         # loop until the partition gets available
