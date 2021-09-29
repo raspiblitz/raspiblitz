@@ -242,7 +242,7 @@ do
       echo "***********************************************************"
       exit 1
     fi
-error
+
     # for all critical errors (admin info & exit)
     if [ "${state}" == "error" ] || [ "${state}" == "errorHDD" ]; then
       clear
