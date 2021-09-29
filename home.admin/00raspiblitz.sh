@@ -177,6 +177,7 @@ do
 
   # exit loop/script in case if system shutting down
   if [ "${state}" == "reboot" ] || [ "${state}" == "shutdown" ]; then
+    dialog --pause "  Prepare Reboot ..." 8 58 6
     clear
     echo "***********************************************************"
     echo "RaspiBlitz going to ${state}"
@@ -187,6 +188,7 @@ do
       fi
       echo "SSH again into system with:"
       echo "ssh admin@${localip}"
+      echo "Use your password A"
       echo "***********************************************************"
     fi
     exit 0
