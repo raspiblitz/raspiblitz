@@ -543,14 +543,21 @@ if [ ${isMounted} -eq 0 ]; then
   echo "the provision process was started but did not finish yet" > /home/admin/provision.flag
 
   # make HDD is still temp mounted
+  source <(/home/admin/config.scripts/blitz.datadrive.sh status)
   echo "Temp mounting (2) data drive ($hddCandidate)" >> $logFile
-  source <(/home/admin/config.scripts/internet.sh status)
   if [ "${hddFormat}" != "btrfs" ]; then
     source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddPartitionCandidate})
   else
     source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddCandidate})
   fi
   echo "Temp mounting (2) result: ${isMounted}" >> $logFile
+
+  # check that HDD was temp mounted
+  if [ "${isMounted}" != "1"]; then
+    sed -i "s/^state=.*/state=errorHDD/g" ${infoFile}
+    sed -i "s/^message=.*/message='Was not able to mount HDD (2)'/g" ${infoFile}
+    exit 1
+  fi
 
   # make sure all links between directories/drives are correct
   echo "Refreshing links between directories/drives .." >> $logFile
@@ -572,7 +579,7 @@ if [ ${isMounted} -eq 0 ]; then
   cat ${configFile} >> ${logFile}
   echo "# Sourcing ${setupFile} " >> ${logFile}
   source ${setupFile}
-  cat ${setupFile} >> ${logFile}
+  sed -e '/^password/d' ${setupFile} >> ${logFile}
   
   # make sure basic info is in raspiblitz.info
   echo "# Update ${infoFile} " >> ${logFile}

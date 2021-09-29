@@ -242,18 +242,29 @@ do
       echo "***********************************************************"
       exit 1
     fi
-
+error
     # for all critical errors (admin info & exit)
-    if [ "${state}" == "errorHDD" ]; then
-      echo "***********************************************************"
-      echo "SETUP ERROR - please report to development team"
-      echo "***********************************************************"
-      echo "state(${state}) message(${message})"
+    if [ "${state}" == "error" ] || [ "${state}" == "errorHDD" ]; then
+      clear
+      echo "###########################################################"
+      echo "# /home/admin/raspiblitz.log"
+      cat /home/admin/raspiblitz.log
       if [ "${state}" == "errorHDD" ]; then
+        # print some debug detail info on HDD/SSD error
+        echo "###########################################################"
+        echo "# blitz.datadrive.sh status"
+        sudo /home/admin/config.scripts/blitz.datadrive.sh status
+      fi
+      if [ "${message}" == "_provision.setup.sh fail" ]; then
         # print some debug detail info on HDD/SSD error
         echo "# blitz.datadrive.sh status"
         sudo /home/admin/config.scripts/blitz.datadrive.sh status
       fi
+      echo "***********************************************************"
+      echo "ERROR - please report to development team"
+      echo "***********************************************************"
+      echo "state(${state}) message(${message})"
+      echo "https://github.com/rootzoll/raspiblitz#support"
       echo "command to shutdown --> off"
       exit 1
     else
