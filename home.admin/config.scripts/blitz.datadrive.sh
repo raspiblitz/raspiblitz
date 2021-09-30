@@ -121,7 +121,7 @@ if [ "$1" = "status" ]; then
 
       if [ $testpartitioncount -gt 0 ]; then
          # if a partition was found - make sure to skip the OS and boot partitions
-         if [ "$testpartition" != "$OSPartition" ] && [ "$testpartition" != "$bootPartition" ]; then
+         if [ "${testpartition}" != "${OSPartition}" ] && [ "${testpartition}" != "${bootPartition}" ]; then
             # make sure to use the biggest
             if [ ${testsize} -gt ${sizeDataPartition} ]; then
                sizeDataPartition=${testsize}
@@ -1794,7 +1794,7 @@ if [ "$1" = "uasp-fix" ]; then
       echo "# Already UASP deactivated for ${hddAdapterUSB}"
       echo "neededReboot=0"
     fi
-  else 
+  else
     echo "# Skipping UASP deactivation ... cmdlineExists(${cmdlineExists}) hddAdapterUSB(${hddAdapterUSB}) hddAdapterUSAP(${hddAdapterUSAP})"
     echo "neededReboot=0"
   fi

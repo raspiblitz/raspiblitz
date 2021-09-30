@@ -442,9 +442,9 @@ if [ ${isMounted} -eq 0 ]; then
   # temp mount the HDD
   echo "Temp mounting (1) data drive ($hddCandidate)" >> $logFile
   if [ "${hddFormat}" != "btrfs" ]; then
-    source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddPartitionCandidate})
+    source <(/home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddPartitionCandidate})
   else
-    source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddCandidate})
+    source <(/home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddCandidate})
   fi
   echo "Temp mounting (1) result: ${isMounted}" >> $logFile
 
@@ -462,6 +462,8 @@ if [ ${isMounted} -eq 0 ]; then
   df >> ${logFile}
   echo "# lsblk -o NAME,FSTYPE,LABEL " >> ${logFile}
   lsblk -o NAME,FSTYPE,LABEL >> ${logFile}
+  echo "# /home/admin/config.scripts/blitz.datadrive.sh status"
+  /home/admin/config.scripts/blitz.datadrive.sh status >> ${logFile}
 
   # determine correct setup phase
   infoMessage="Please Login for Setup"

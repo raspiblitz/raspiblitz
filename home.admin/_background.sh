@@ -1,7 +1,5 @@
 #!/bin/bash
 
-# TODO: check & update localip in raspiblitz info for display (only write on change)
-
 # This script runs on after start in background
 # as a service and gets restarted on failure
 # it runs ALMOST every seconds

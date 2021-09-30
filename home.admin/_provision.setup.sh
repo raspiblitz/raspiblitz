@@ -54,16 +54,6 @@ if [ "${chain}" == "" ]; then
   exit 2
 fi
 
-# make sure choosen blockchain service is installed
-if [ "${network}" != "bitcoin" ]; then
-  # TODO also ... check if /home/admin/selfsync.flag is needed on other chains
-  sed -i "s/^state=.*/state=error/g" ${infoFile}
-  sed -i "s/^message=.*/message='TODO: install ${network}'/g" ${infoFile}
-  echo "FAIL see ${logFile}"
-  echo "TODO: make sure ${network} is installed!" >> ${logFile}
-  exit 3
-fi
-
 # copy configs files and directories
 echo ""
 echo "*** Prepare ${network} ***" >> ${logFile}
