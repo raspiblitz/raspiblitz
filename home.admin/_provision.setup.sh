@@ -29,14 +29,14 @@ sudo sed -i "s/^message=.*/message='Provision Setup'/g" ${infoFile}
 # Preserve SSH keys
 # just copy dont link anymore
 # see: https://github.com/rootzoll/raspiblitz/issues/1798
-sudo sed -i "s/^message=.*/message='SSH Keys'/g" ${infoFile}
+sed -i "s/^message=.*/message='SSH Keys'/g" ${infoFile}
 
 # link ssh directory from SD card to HDD
-sudo /home/admin/config.scripts/blitz.ssh.sh backup
+/home/admin/config.scripts/blitz.ssh.sh backup
 
 ###################################
 # Prepare Blockchain Service
-sudo sed -i "s/^message=.*/message='Blockchain Setup'/g" ${infoFile}
+sed -i "s/^message=.*/message='Blockchain Setup'/g" ${infoFile}
 
 if [ "${network}" == "" ]; then
   sed -i "s/^state=.*/state=error/g" ${infoFile}
@@ -67,18 +67,18 @@ fi
 # copy configs files and directories
 echo ""
 echo "*** Prepare ${network} ***" >> ${logFile}
-sudo mkdir /mnt/hdd/${network} >>${logFile} 2>&1
-sudo chown -R bitcoin:bitcoin /mnt/hdd/${network} >>${logFile} 2>&1
+mkdir /mnt/hdd/${network} >>${logFile} 2>&1
+chown -R bitcoin:bitcoin /mnt/hdd/${network} >>${logFile} 2>&1
 sudo -u bitcoin mkdir /mnt/hdd/${network}/blocks >>${logFile} 2>&1
 sudo -u bitcoin mkdir /mnt/hdd/${network}/chainstate >>${logFile} 2>&1
-sudo cp /home/admin/assets/${network}.conf /mnt/hdd/${network}/${network}.conf
-sudo chown bitcoin:bitcoin /mnt/hdd/${network}/${network}.conf >>${logFile} 2>&1
-sudo mkdir /home/admin/.${network} >>${logFile} 2>&1
-sudo cp /home/admin/assets/${network}.conf /home/admin/.${network}/${network}.conf
-sudo chown -R admin:admin /home/admin/.${network} >>${logFile} 2>&1
+cp /home/admin/assets/${network}.conf /mnt/hdd/${network}/${network}.conf
+chown bitcoin:bitcoin /mnt/hdd/${network}/${network}.conf >>${logFile} 2>&1
+mkdir /home/admin/.${network} >>${logFile} 2>&1
+cp /home/admin/assets/${network}.conf /home/admin/.${network}/${network}.conf
+chown -R admin:admin /home/admin/.${network} >>${logFile} 2>&1
 
 # make sure all directories are linked
-sudo /home/admin/config.scripts/blitz.datadrive.sh link >> ${logFile}
+/home/admin/config.scripts/blitz.datadrive.sh link >> ${logFile}
 
 # test bitcoin config
 confExists=$(sudo ls /mnt/hdd/${network}/${network}.conf | grep -c "${network}.conf")
@@ -86,7 +86,7 @@ echo "File Exists: /mnt/hdd/${network}/${network}.conf --> ${confExists}" >> ${l
 
 # set password B as RPC password
 echo "SETTING PASSWORD B" >> ${logFile}
-sudo /home/admin/config.scripts/blitz.setpassword.sh b "${passwordB}" >> ${logFile}
+/home/admin/config.scripts/blitz.setpassword.sh b "${passwordB}" >> ${logFile}
 
 # optimize RAM for blockchain validation (bitcoin only)
 if [ "${network}" == "bitcoin" ] && [ "${hddBlocksBitcoin}" == "0" ]; then
@@ -96,38 +96,38 @@ if [ "${network}" == "bitcoin" ] && [ "${hddBlocksBitcoin}" == "0" ]; then
   # RP4 4GB
   if [ ${kbSizeRAM} -gt 3500000 ]; then
     echo "Detected RAM >=4GB --> optimizing ${network}.conf" >> ${logFile}
-    sudo sed -i "s/^dbcache=.*/dbcache=2560/g" /mnt/hdd/${network}/${network}.conf
+    sed -i "s/^dbcache=.*/dbcache=2560/g" /mnt/hdd/${network}/${network}.conf
   # RP4 2GB
   elif [ ${kbSizeRAM} -gt 1500000 ]; then
     echo "Detected RAM >=2GB --> optimizing ${network}.conf" >> ${logFile}
-    sudo sed -i "s/^dbcache=.*/dbcache=1536/g" /mnt/hdd/${network}/${network}.conf
+    sed -i "s/^dbcache=.*/dbcache=1536/g" /mnt/hdd/${network}/${network}.conf
   #RP3/4 1GB
   else
     echo "Detected RAM <=1GB --> optimizing ${network}.conf" >> ${logFile}
-    sudo sed -i "s/^dbcache=.*/dbcache=512/g" /mnt/hdd/${network}/${network}.conf
+    sed -i "s/^dbcache=.*/dbcache=512/g" /mnt/hdd/${network}/${network}.conf
   fi
 fi
 
 # start network service
 echo ""
 echo "*** Start ${network} (SETUP) ***" >> ${logFile}
-sudo sed -i "s/^message=.*/message='Blockchain Testrun'/g" ${infoFile}
+sed -i "s/^message=.*/message='Blockchain Testrun'/g" ${infoFile}
 echo "- This can take a while .." >> ${logFile}
-sudo cp /home/admin/assets/${network}d.service /etc/systemd/system/${network}d.service
-sudo systemctl enable ${network}d.service
-sudo systemctl start ${network}d.service
+cp /home/admin/assets/${network}d.service /etc/systemd/system/${network}d.service
+systemctl enable ${network}d.service
+systemctl start ${network}d.service
 
 # check if bitcoin has started
 bitcoinRunning=0
 loopcount=0
 while [ ${bitcoinRunning} -eq 0 ]
 do
-  >&2 echo "# (${loopcount}/200) checking if ${network}d is running ... " >> ${logFile}
+  >&2 echo "# (${loopcount}/50) checking if ${network}d is running ... " >> ${logFile}
   bitcoinRunning=$(sudo -u bitcoin ${network}-cli getblockchaininfo 2>/dev/null | grep "initialblockdownload" -c)
-  sleep 2
+  sleep 8
   sync
   loopcount=$(($loopcount +1))
-  if [ ${loopcount} -gt 200 ]; then
+  if [ ${loopcount} -gt 50 ]; then
     sed -i "s/^state=.*/state=error/g" ${infoFile}
     sed -i "s/^message=.*/message='setup: failed ${network}'/g" ${infoFile}
     echo "FAIL: setup: failed ${network}" >> ${logFile}
