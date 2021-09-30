@@ -352,10 +352,10 @@ else
     echo "Provisioning LND Testnet - not active" >> ${logFile}
 fi
 
-# LND SignetCL
+# LND Signet
 if [ "${slnd}" == "on" ]; then
     echo "Provisioning LND Signet - run config script" >> ${logFile}
-    sudo /home/admin/coCLg.scripts/lnd.install.sh on signet >> ${logFile} 2>&1
+    sudo /home/admin/config.scripts/lnd.install.sh on signet >> ${logFile} 2>&1
     sudo systemctl start slnd >> ${logFile} 2>&1
 else
   echo "Provisioning LND Signet - not active" >> ${logFile}
@@ -430,11 +430,11 @@ else
     echo "Provisioning DYNAMIC DOMAIN - keep default" >> ${logFile}
 fi
 
-# RTL (LND)CL
+# RTL (LND)
 if [ "${rtlWebinterface}" = "on" ]; then
     echo "Provisioning RTL LND - run config script" >> ${logFile}
     sudo sed -i "s/^message=.*/message='Setup RTL (takes time)'/g" ${infoFile}
-    sudo -u admin /home/admCLconfig.scripts/bonus.rtl.sh on lnd mainnet >> ${logFile} 2>&1
+    sudo -u admin /home/admin/config.scripts/bonus.rtl.sh on lnd mainnet >> ${logFile} 2>&1
 else
     echo "Provisioning RTL LND - keep default" >> ${logFile}
 fi
@@ -443,7 +443,7 @@ fi
 if [ "${crtlWebinterface}" = "on" ]; then
     echo "Provisioning RTL CL - run config script" >> ${logFile}
     sudo sed -i "s/^message=.*/message='Setup RTL (takes time)'/g" ${infoFile}
-    sudo -u admin /home/admCLconfig.scripts/bonus.rtl.sh on cl mainnet >> ${logFile} 2>&1
+    sudo -u admin /home/admin/config.scripts/bonus.rtl.sh on cl mainnet >> ${logFile} 2>&1
 else
     echo "Provisioning RTL CL - keep default" >> ${logFile}
 fi
