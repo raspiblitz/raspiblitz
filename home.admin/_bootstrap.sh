@@ -455,8 +455,13 @@ if [ ${isMounted} -eq 0 ]; then
   echo "hddBlocksLitecoin=${hddBlocksLitecoin}" >> ${infoFile}
   echo "hddGotMigrationData=${hddGotMigrationData}" >> ${infoFile}
   echo ""
-
   echo "HDD is there but not AutoMounted yet - Waiting for user Setup/Update" >> $logFile
+
+  # add some debug info to logfile
+  echo "# df " >> ${logFile}
+  df >> ${logFile}
+  echo "# lsblk -o NAME,FSTYPE,LABEL " >> ${logFile}
+  lsblk -o NAME,FSTYPE,LABEL >> ${logFile}
 
   # determine correct setup phase
   infoMessage="Please Login for Setup"
@@ -468,7 +473,7 @@ if [ ${isMounted} -eq 0 ]; then
 
     # INIT OLD SSH HOST KEYS on Update/Recovery to prevent "Unknown Host" on ssh client
     echo "COPY und Activating old SSH host keys" >> $logFile
-    sudo /home/admin/config.scripts/blitz.ssh.sh restore >> $logFile
+    /home/admin/config.scripts/blitz.ssh.sh restore >> $logFile
 
     # determine if this is a recovery or an update
     # TODO: improve version/update detection later
@@ -494,14 +499,14 @@ if [ ${isMounted} -eq 0 ]; then
   # until SSH or WEBUI setup data is available
   #############################################
 
-  echo "## WAIT LOOP: USER SETUP/UPDATE/MIGRATION" >> $logFile
+  echo "## WAIT LOOP: USER SETUP/UPDATE/MIGRATION" >> ${logFile}
   until [ "${state}" == "waitprovision" ]
   do
 
     # get fresh info about data drive (in case the hdd gets disconnected)
     source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
     if [ "${hddCandidate}" == "" ]; then
-      echo "!!! WARNING !!! Lost HDD connection .. triggering reboot, to restart system-init." >> $logFile
+      echo "!!! WARNING !!! Lost HDD connection .. triggering reboot, to restart system-init." >> ${logFile}
       sed -i "s/^state=.*/state=errorHDD/g" ${infoFile}
       sed -i "s/^message=.*/message='lost HDD - rebooting'/g" ${infoFile}
       sudo cp ${logFile} ${logFile}.error
@@ -537,20 +542,20 @@ if [ ${isMounted} -eq 0 ]; then
 
   # refresh data from info file
   source ${infoFile}
-  echo "# PROVISION PROCESS with setupPhase(${setupPhase})" >> $logFile
+  echo "# PROVISION PROCESS with setupPhase(${setupPhase})" >> ${logFile}
 
   # mark system on sd card as in setup process
   echo "the provision process was started but did not finish yet" > /home/admin/provision.flag
 
-  # make HDD is still temp mounted
+  # make sure HDD is mounted (could be freshly formatted by user on last loop)
   source <(/home/admin/config.scripts/blitz.datadrive.sh status)
-  echo "Temp mounting (2) data drive ($hddCandidate)" >> $logFile
+  echo "Temp mounting (2) data drive ($hddCandidate)" >> ${logFile}
   if [ "${hddFormat}" != "btrfs" ]; then
     source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddPartitionCandidate})
   else
     source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddCandidate})
   fi
-  echo "Temp mounting (2) result: ${isMounted}" >> $logFile
+  echo "Temp mounting (2) result: ${isMounted}" >> ${logFile}
 
   # check that HDD was temp mounted
   if [ "${isMounted}" != "1"]; then
@@ -560,7 +565,7 @@ if [ ${isMounted} -eq 0 ]; then
   fi
 
   # make sure all links between directories/drives are correct
-  echo "Refreshing links between directories/drives .." >> $logFile
+  echo "Refreshing links between directories/drives .." >> ${logFile}
   sudo /home/admin/config.scripts/blitz.datadrive.sh link
 
   # copy over the raspiblitz.conf created from setup to HDD
@@ -580,7 +585,13 @@ if [ ${isMounted} -eq 0 ]; then
   echo "# Sourcing ${setupFile} " >> ${logFile}
   source ${setupFile}
   sed -e '/^password/d' ${setupFile} >> ${logFile}
-  
+
+  # add some debug info to logfile
+  echo "# df " >> ${logFile}
+  df >> ${logFile}
+  echo "# lsblk -o NAME,FSTYPE,LABEL " >> ${logFile}
+  lsblk -o NAME,FSTYPE,LABEL >> ${logFile}
+
   # make sure basic info is in raspiblitz.info
   echo "# Update ${infoFile} " >> ${logFile}
   sudo sed -i "s/^network=.*/network=${network}/g" ${infoFile}
@@ -599,7 +610,7 @@ if [ ${isMounted} -eq 0 ]; then
     exit 1
   fi
 
-  echo "SETTING PASSWORD A" >> ${logFile}
+  echo "# setting PASSWORD A" >> ${logFile}
   sudo /home/admin/config.scripts/blitz.setpassword.sh a "${passwordA}" >> ${logFile}
 
   # if setup - run provision setup first

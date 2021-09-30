@@ -11,9 +11,11 @@ source $SETUPFILE
 
 
 #################################
-# SELECT BLOCKCHAIN
+# SELECT BLOCKCHAIN --> SKIPPED (litecoin deactivated, reactivate selection when other bitcoin implementations)
 # when not already set by setupfile
-
+if [ "${network}" == "" ]; then
+    network="bitcoin"
+fi
 if [ "${network}" == "" ]; then
 
     OPTIONS=()

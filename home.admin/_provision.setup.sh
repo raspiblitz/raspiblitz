@@ -85,13 +85,14 @@ confExists=$(sudo ls /mnt/hdd/${network}/${network}.conf | grep -c "${network}.c
 echo "File Exists: /mnt/hdd/${network}/${network}.conf --> ${confExists}" >> ${logFile}
 
 # set password B as RPC password
-echo "SETTING PASSWORD B" >> ${logFile}
+echo "# setting PASSWORD B" >> ${logFile}
 /home/admin/config.scripts/blitz.setpassword.sh b "${passwordB}" >> ${logFile}
 
 # optimize RAM for blockchain validation (bitcoin only)
 if [ "${network}" == "bitcoin" ] && [ "${hddBlocksBitcoin}" == "0" ]; then
   echo "*** Optimizing RAM for Sync ***" >> ${logFile}
   kbSizeRAM=$(cat /proc/meminfo | grep "MemTotal" | sed 's/[^0-9]*//g')
+  echo "kbSizeRAM(${kbSizeRAM})" >> ${logFile}
   echo "dont forget to reduce dbcache once IBD is done" > "/mnt/hdd/${network}/blocks/selfsync.flag"
   # RP4 4GB
   if [ ${kbSizeRAM} -gt 3500000 ]; then
