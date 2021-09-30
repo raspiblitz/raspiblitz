@@ -120,6 +120,8 @@ PrivateTmp=true
 ProtectSystem=full
 NoNewPrivileges=true
 PrivateDevices=true
+StandardOutput=null
+StandardError=journal
 
 [Install]
 WantedBy=multi-user.target
