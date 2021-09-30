@@ -30,6 +30,7 @@
 - Update: Channel Tools (chantools) v0.9.3 [details](https://github.com/guggero/chantools/blob/master/README.md)
 - Update: Circuitbreaker v0.3.0 [details](https://github.com/lightningequipment/circuitbreaker/blob/master/README.md)
 - Remove: DropBox Backup (its recommended to change to Nextcloud Backup)
+- Remove: Litecoin (fork recommended) [details](https://github.com/rootzoll/raspiblitz/issues/2542)
 
 ## What's new in Version 1.7.0 of RaspiBlitz?
 

@@ -2,7 +2,7 @@
 
 *Build your own Lightning & Bitcoin Fullnode on a RaspberryPi with a nice Display.*
 
-`Version 1.7.1rc2 with lnd 0.13.1 & c-lightning 0.10.0 and bitcoin 22.0.0 (or litecoin 0.18.1)`
+`Version 1.7.1rc2 with lnd 0.13.1 & c-lightning 0.10.0 and bitcoin 22.0.0`
 
 ![RaspiBlitz](pictures/raspiblitz.jpg)
 
@@ -233,11 +233,7 @@ First thing to setup is giving your RaspiBlitz a name:
 
 This name is given to the RaspiBlitz as a public alias of the lightning node for everybody to see.
 
-If your starting not with pre-synced blockchain then you can choose if you want to run a Bitcoin or a Litecoin Fullnode as the Baselayer. The default choice here is Bitcoin.
-
-![SSH1](pictures/ssh1-layer1.png)
-
-Then you can choose which Lightning implementation you want to run on top of your Fullnode. RaspiBlitz started with `LND` from Lightning Labs which is used by most other RaspberryPi lightning nodes and works with most additional apps. But you can now also choose `CL` for c-lightning by Blockstream which is a good choice for already more experienced node operators & lightning developers that want to use the highly customizable plug-in structure that c-lightning offers. 
+Then you can choose which Lightning implementation you want to run on top of your Bitcoin Fullnode. RaspiBlitz started with `LND` from Lightning Labs which is used by most other RaspberryPi lightning nodes and works with most additional apps. But you can now also choose `CL` for c-lightning by Blockstream which is a good choice for already more experienced node operators & lightning developers that want to use the highly customizable plug-in structure that c-lightning offers. 
 
 Its also possible to use both in parallel on your RaspiBlitz later on - just pick one to start with or choose `NONE` is your only interested in running a Fullnode without Lightning.
 
@@ -245,17 +241,35 @@ Its also possible to use both in parallel on your RaspiBlitz later on - just pic
 
 *In the following we show the setup with LND - which is very similar to the steps with c-lightning.*
 
-If you choosed one of the lightning implementations you will now be asked if you want to start a `NEW` wallet/lightning node if you had an `OLD` lightning wallet/node that you want to re-create by using different options of backups.
-
-Because you are setting up a new node simply choose `NEW` here.
+If you choosed one of the lightning implementations you will now be asked if you want to start a `NEW` wallet/lightning node or if you had an `OLD` lightning wallet/node that you want to re-create.
 
 ![SSH1](pictures/ssh1-oldnew.png)
 
-Finally you have to set 3 passwords called A, B & C ... please choose here single strings (without spaces and special characters) that are at least 8 chars long.
+Normally you just chose `NEW` here .. but to recover an old wallet you have the following options if you choose `OLD`:
+
+![SSH1](pictures/ssh2-layer2old.png)
+
+##### LNDRESCUE LND tar.gz-Backupfile (BEST)
+
+Choose this option if you have made a complete backup of the LND or c-lightning data and have a tar.gz file starting with the word 'lnd-rescue' or 'cl-rescue' available. It will recover all your on-chain funds and open channels you had. But you have to make sure that the rescue backup you have is really the latest version - otherwise you might lose channel funds.
+
+*If you have tar.gz file that starts with 'raspiblitz', that's a migration file. That also includes your old LND/c-lightning wallet, but you import that file at the beginning of the setup process with 'FROMBACKUP - Upload Migration Backup' instead choosing FRESHSETUP*
+
+##### SEED+SCB Words Seed & channel.backup file (OK)
+
+Next best option is, if you have the channel.backup file and the word list seed. This is the best chance to recover the on-chain funds you had in open channels. But all channels you had open before will be closed during this procedure.
+
+##### ONLY SEED Only Seed Word List (Fallback)
+
+If you just have the word list (RaspiBlitz 1.1 and older) you can at least try to recover your on-chain funds. Recovery of channel funds is not very likely in this scenario.
+
+But normally you are setting up a new node - so simply choose `NEW` in the menu.
 
 ![SSH2](pictures/ssh2-passwords.png)
 
-You can use this [RaspiBlitz Password Sheet (PDF)](https://github.com/rootzoll/raspiblitz/raw/v1.7/home.admin/assets/RaspiBlitzRecoverySheet.pdf) to write those passwords down for save storage and also use it later on for your Seed Words.
+Finally you have to set 3 passwords called A, B & C ... please choose here single strings (without spaces and special characters) that are at least 8 chars long.
+
+You can use this [RaspiBlitz Recovery Sheet (PDF)](https://github.com/rootzoll/raspiblitz/raw/v1.7/home.admin/assets/RaspiBlitzRecoverySheet.pdf) to write those passwords down for save storage and also use it later on for your Seed Words.
 
 *The password A,B,C idea is based on the [RaspiBolt Guide Preparations](https://stadicus.github.io/RaspiBolt/raspibolt_10_preparations.html#write-down-your-passwords) - check out for more background.*
 
@@ -275,134 +289,61 @@ After this the setup process will need some time to set everything up - just wai
 
 ### Final Setup
 
+Once the basic setup ran thru you lightning node & wallet was created and you get presented the important backup seed words which you need to write down on paper and store them in a secure location. You will need to confirm that you wrote the seed words down before you can continue.
 
+![SSH4](pictures/ssh4-seed.png)
 
+WRITE YOUR PERSONAL WORDS DOWN before you continue - you will need them to recover funds in case of failing hardware etc. If you just want to try/experiment with the RaspiBlitz, at least take a photo with your smartphone just in case. If you plan to keep your RaspiBlitz running, store this word list offline or in a password safe.
 
-### Getting the Blockchain
+You can use this [RaspiBlitz Recovery Sheet (PDF)](https://github.com/rootzoll/raspiblitz/raw/v1.7/home.admin/assets/RaspiBlitzRecoverySheet.pdf) to write down those seed words for save storage.
 
-*If you have a HDD/SSD with a prepared blockchain (e.g. a ready2go-set or you are at a workshop) you have the option to trust that data and skip to the [next chapter](#setup-lightning). If you started with an empty HDD - you will see the following screens:*
+If you dont had a full copy of the blockchain pre-synced/validated on your harddrive/ssd then you will now be asked how you want to get your copy of the blockchain .. there are two basic options here:
 
-If you connected a fresh Hard Drive or SSD to the RaspiBlitz, it might now ask you if it's OK to format it.
-
-<img src="pictures/ssh4-formatHDD.png" alt="format-HDD" width="366">
-
-*Your HDD/SSD will get formatted with the linux standard file system EXT4. If you want to try out the experimental new [BTRFS](FAQ.md#why-use-btrfs-on-raspiblitz) that RaspiBlitz supports since v1.4 - you need to start the setup with an additional 32GB USB thumb drive connected to the second USB3 port of the RaspberryPi. Then you will unlock this new secret feature.*
-
-After formatting you need to get a copy of the blockchain; the RaspiBlitz offers the following options:
-
-<img src="pictures/ssh5-blockchain2.png" alt="blockchain-options" width="551">
-
-The options - and when to choose which - will be explained here shortly:
+![SSH4](pictures/ssh4-blockchain.png)
 
 #### 1. SYNC - Selfvalidate all Blocks
 
-With the new RaspberryPi 4 (with SSD & min 2GB RAM) this is the best way to go. It will take around 2-3 days to sync & validate directly with the bitcoin network. With this option, you have done it the original `don't trust, verify` way.
+With the new RaspberryPi 4 (with SSD & min 2GB RAM) this is the best way to go. It will take around 3-6 days to sync & validate directly with the bitcoin network. With this option, you have done it the original `don't trust, verify` way.
 
 *For the old RaspberryPi 3 this is not recommended. A RaspberryPi 3 has a very low power CPU and syncing+validating the blockchain directly with the peer2peer network can take multiple weeks - that's why for a RP3 you should choose the COPY option .*
 
 #### 2. COPY - Copy from Laptop or another RaspiBlitz over Local Network
 
-First you need to download & validate the blockchain on your own computer/laptop. Todo so install bitcoin-core (0.18.1 or higher) from [bitcoin.org](https://bitcoin.org/en/download) and keep it running until blockchain is synced (will need around 320 GB).
+If you have a friend that is already running a synced RaspiBlitz or you have a laptop with enough free space on the harddrive that can download & validate the Blockchain much faster you can also choose the `COPY` option. You can then delete existing blockchain your RaspiBlitz already started syncing for you. 
 
-Then you can use the COPY option to copy the blockchain over to the RaspiBlitz. This will be done over the local network by SCP (SSH file transfer) - follow the instructions given in the dialogs.
+![SSH4](pictures/ssh4-copy.png)
 
-It's advised to keep a backup of the bitcoin-core & the blockchain data (e.g. on your laptop) in case you need to re-setup the RaspiBlitz.
+To copy from another RaspiBlitz choose `BLITZ` and follow the instructions. Know that the other Blitz will be offline to the lightning network during the copy that will take multiple hours.
+
+To copy from your laptop/computer (`WINDOWNS`, `MACOS` & `LINUX` options) you first need to download & validate the blockchain on your own computer/laptop. Todo so install latest bitcoin-core (0.18.1 or higher) from [bitcoin.org](https://bitcoin.org/en/download) and keep it running until blockchain is synced (will need around 400 GB). Then under the `COPY` option choose the Operating System. The copy will be done over the local network by SCP (SSH file transfer) - follow the instructions given in the dialogs. It's advised to keep a backup of the bitcoin-core & the blockchain data (e.g. on your laptop) in case you need to re-setup the RaspiBlitz.
 
 More details: [I have the full blockchain on another computer. How do I copy it to the RaspiBlitz?](FAQ.md#i-have-the-full-blockchain-on-another-computer-how-do-i-copy-it-to-the-raspiblitz)
 
-### Setup Lightning
+If you dont have the Bitcoin Blockchain already on another laptop or RaspiBlitz simply choose `SELFSYNC`.
 
-Lightning is installed and waiting for your setup if you see this screen.
+And hooray :D Your RaspiBlitz is ready to go! Welcome new node operator.
 
-![SSH7](pictures/ssh7-lndinit.png)
+![SSH4](pictures/ssh4-done.png)
 
-You can now decide if you want to setup a fresh new wallet or if you want to recover an old wallet from a RaspiBlitz you had before.
+If you hit OK, the RaspiBlitz will go into a final reboot.
 
-#### Setup a NEW Wallet
+![SSH5](pictures/ssh5-reboot.png)
 
-This is the default if you setup a RaspiBlitz the first time.
+Just wait a bit and then the SSH command to login again. Dont forget to use this time your password A ... which is always for password for system login.
 
-![SSH8](pictures/ssh8-wallet.png)
+![SSH5](pictures/ssh5-unlock.png)
 
-RaspiBlitz will ask you to set your wallet unlock password - use your chosen PASSWORD C here. Confirm by inputting it a second time.
+If you run LND you will be asked to unlock your wallet - thats always your password C. BTW under `SETTINGS` in the main menu you can activate the Auto-Unlock if you prefer.
 
-LND will now generate a fresh cipher seed (word list) for you.
+![SSH5](pictures/ssh5-sync.png)
 
-![SSH8](pictures/ssh8-walletb.png)
-
-WRITE YOUR PERSONAL WORDS DOWN before you continue - without it you limit your chances to recover funds in case of failing hardware etc. If you just want to try/experiment with the RaspiBlitz, at least take a photo with your smartphone just in case. If you plan to keep your RaspiBlitz running, store this word list offline or in a password safe. You can use the [RaspiBlitz Password Sheet (PDF)](https://github.com/rootzoll/raspiblitz/raw/v1.4/home.admin/assets/RaspiBlitzRecoverySheet.pdf) for this.
-
-#### Recover an OLD Wallet
-
-Choose this option if you had an old RaspiBlitz you want to recover. You have three options to do that:
-
-![SSH7](pictures/ssh7-lndrecover.png)
-
-The RaspiBlitz calling the LND wallet creation command for you:
-
-##### LNDRESCUE LND tar.gz-Backupfile (BEST)
-
-Choose this option if you have made a complete backup of the LND data and have a tar.gz file starting with the word 'lnd-rescue' available. It will recover all your on-chain funds and open channels you had. But you have to make sure that the LND backup you have is really the latest version - otherwise you might lose channel funds.
-
-*If you have tar.gz file that starts with 'raspiblitz', that's a migration file. That also includes your old LND wallet, but you import it earlier in the setup process .. see further below for details.*
-
-##### SEED+SCB Words Seed & channel.backup file (OK)
-
-Next best option is, if you have the channel.backup file and the word list seed. This is the best chance to recover the on-chain funds you had in open channels. But all channels you had open before will be closed during this procedure.
-
-##### ONLY SEED Only Seed Word List (Fallback)
-
-If you just have the word list (RaspiBlitz 1.1 and older) you can at least try to recover your on-chain funds. Recovery of channel funds is not very likely in this scenario.
-
-### Final LND Setup
-
-It will now make sure your wallet is initialized correctly and may ask you to unlock it with PASSWORD C.
-
-![SSH9c](pictures/ssh9c-unlock.png)
-
-*The LND wallet needs to get unlocked on every new start/reboot of the RaspiBlitz.*
-
-The RaspiBlitz will now do final setup configuration, such as installing tools, moving the SWAP file to the HDD, or activating the firewall. You will see some text moving across the screen until this screen:
-
-![SSH9b](pictures/ssh9b-reboot.png)
-
-The basic setup is done - hooray ... but it may still take some time before everything is ready and you can play around with your new RaspiBlitz. Press 'OK' to reboot. Your terminal session will get disconnected and the raspberry pi restarts.
-
-### First Start: Syncing & Scanning
-
-After the reboot is done, it will take a while for all services to start up - wait until you see on the LCD/display that LND wallet needs to get unlocked. Then SSH in again with the same command like in the beginning (check LCD/display) but this time (and every following login) use your PASSWORD A.
-
-After terminal login, LND will ask you (like on every start/reboot) to unlock the wallet again - use PASSWORD C:
-
-![SSH9c](pictures/ssh9c-unlock.png)
-
-On first start, you will have a longer waiting time (between 10 minutes and 2-3 days, depending on your initial setup) ... but that's OK, just leave the RaspiBlitz running until it's done.
-
-![SSH9d1](pictures/ssh9d-sync.png)
-
-*You can even close your terminal now and shutdown your laptop and ssh back in later on. You will see on the Blitz LCD/display that it is ready when the blue background screen is gone, and you see a status screen.*
-
-To understand what is taking so long .. it's two things:
-
-1. Blockchain Sync
-
-The blockchain on your HDD is not absolutely up-to-date. Depending on how you got it transferred to your RaspiBlitz it will be some hours, days, or even weeks behind. Now the RaspiBlitz needs to catch-up on the rest by directly syncing with the peer-2-peer network until it reaches almost 100%. Even if you see progress at 99.8%, there can still be waiting time - gaining 1% can take up to 4 hours (depending on network speed), so be patient here.
-
-2. Lightning Scanning
-
-Automatically if the Blockchain Sync is progressing LND will start to scan the blockchain and collect information. The Lightning scanning alone normally just takes around 1 hour until the waiting time is over. Can take much longer if you recover on old wallet from seed.
-
-* [Why is my "final sync" taking so long?](FAQ.md#why-is-my-final-sync-taking-so-long)
-
-Once all is done, you should see a status screen on the RaspiBlitz LCD/display like this:
-
-![SSH9dz](pictures/ssh9z-ready.png)
+Remeber that now your RaspiBlitz might need a longer time to sync/validate the blockchain - this can be multiple days. In the beginnig you might see fast progress but its normal that this gets slower later on. Also your RaspberryPi CPU might get quite hot ... thats also OK during this inital sync time - the RaspberryPi has its own protection against overheating and will push thru.
 
 ### Main Menu
 
-If you now login by SSH in your RaspiBlitz (or you are still logged in) you will see the Main Menu:
+Once the Blockchain is synced you will enter the SSH Main Menu:
 
-![SSH9e1](pictures/mainmenu.png)
+![SSH5](pictures/ssh5-mainmenu.png)
 
 All options on the main menu will be explained below in the feature documentation.
 
@@ -414,7 +355,7 @@ If you need an idea of what the most basic next steps to experience Lightning wo
 * Open a channel
 * Make a payment
 
-If you would prefer to do this from a web browser with a dashboard UI, instead of an SSH terminal, go to `SERVICES`, activate the `RTL Webinterface`, and after the reboot you will see a new `RTL` option in the SSH main menu - it will give you all the information so that you can now open the RTL Webinterface in your browser.
+If you would prefer to do this from a web browser with a dashboard UI, instead of an SSH terminal, go to `SERVICES`, activate the `RTL Webinterface`, and after install you will find a new menu option for RTL in the SSH main menu - it will give you all the information so that you can now open the RTL Webinterface in your browser.
 
 Have fun riding the lightning :D
 
@@ -426,7 +367,7 @@ Have fun riding the lightning :D
 
 These are the features available through the RaspiBlitz SSH menus. They have the goal to offer some basic/fallback functionality & configurations. More complex or user-friendly tasks are best to be done with wallets, apps and scripts you connect to your Lightning Node via [APIs](#interface--apis) - because you have a full Bitcoin- and Lightning-Node on the RaspiBlitz.
 
-So let's take a look at the SSH main in detail:
+So let's take a look at the SSH main menu in detail:
 
 #### INFO: Raspiblitz Status Screen
 
@@ -442,21 +383,21 @@ This is the screen that gets displayed on the LCD/display. It's useful to call i
 
 #### LIGHTNING (Basic Node Management)
 
-Under `LIGHTNING` you find some basic steps to manage your Lightning node. Those are very simplified in the RaspiBlitz SSH menu for the reason of learning. For more advanced management of your Lightning node see additional apps under 'SERVICES'.
+Under `LND/c-lightning Wallet options` you find some basic steps to manage your Lightning node. Those are very simplified in the RaspiBlitz SSH menu for the reason of learning. For more advanced management of your Lightning node see additional apps under `SERVICES`.
 
 ##### FUNDING: Fund your on-chain Wallet
 
-Before you can open channels with other nodes you need to put some coins in your LND on-chain wallet. Use this option to generate an address to send funds to.
+Before you can open channels with other nodes you need to put some coins in your on-chain wallet (managed by your lightning sofware). Use this option to generate an address to send funds to.
 
-*Reminder: RaspiBlitz & LND is still experimental software. With funding your LND node you accept the risk of losing funds. So just play with small amounts - something in the area of 20 EUR/USD should be enough to make your first experiences. Also, it's a good privacy practice to [coinjoin your coins](https://bitcoin-only.com/privacy) before sending them to any Lightning Network wallet.*
+*Reminder: RaspiBlitz is still experimental software. With funding your lightning node you accept the risk of losing funds. So just play with small amounts - something in the area of 20 EUR/USD should be enough to make your first experiences. Also, it's a good privacy practice to [coinjoin your coins](https://bitcoin-only.com/privacy) before sending them to any Lightning Network wallet.*
 
-You can fund it multiple times - starting with small amounts first to test. LND will always generate a different address, but all funds you send will get into the same LND on-chain wallet.
+You can fund it multiple times - starting with small amounts first to test. Your lightning node will always generate a different address, but all funds you send will get into the same LND on-chain wallet.
 
 ##### CONNECT: Connect to a Peer
 
 Before you can open a channel with another node on the network, you need to connect this node as a peer to your node.
 
-Opening a channel with a peer is just optional. Having another node as peer helps your node to receive information about the network through the gossip protocol. It will help your node to find better routes through the network.
+Opening a channel with a peer is just optional. Having another node as peer helps your node to receive information about the lightning network through the gossip protocol. It will help your node to find better routes through the network.
 
 ##### CHANNEL: Open a Channel with Peer
 
@@ -482,20 +423,6 @@ Create an invoice to send to someone for a service to be paid through lightning.
 
 *This is just a very basic shell script. For more usability try the RTL Webinterface (under Services) or connect a (mobile) wallet with your RaspiBlitz.*
 
-#### lnbalance: Detailed Wallet Balances
-
-<img src="pictures/bonus-lnbalance.png" alt="bonus-lnbalance" width="600">
-
-#### lnchannels: Lightning Channel List
-
-<img src="pictures/bonus-lnchannels.png" alt="bonus-lnchannels" width="600">
-
-#### lnfwdreport: Report on your earned fees for Forwarding Payments
-
-If you connected your node well within the Lightning Network you can become a "Routing Node". Other users might select your Node as part of a Lightning Payment and will pay you the fee you set on those channels. This menu point gives you a detailed report over the amount of days you set.
-
-Beware - earning fees as a routing node does not come automatic. It's a bit of hard work of building the right channels to be attractive for other people to route through. Check the internet for tutorials or use tools like "lndmanage" (see under RaspiBlitz SERVICES) to help you analyse and optimize your channel management.
-
 ##### NAME: Change name of your Node
 
 Here you can change the alias name of your node as it is shown as part of the Lightning network.
@@ -520,6 +447,23 @@ Here you will find basic settings for your RaspiBlitz:
 
 Activate/Deactivate settings with the space bar and then select 'OK' to activate changes. You can find more details about those options (top to down):
 
+##### Touchscreen (experimental)
+
+Your RaspiBlitz has an LCD that is touchscreen capable. You can switch on this new feature that is still in development.
+
+![RTL](pictures/touchscreen.png)
+
+It will give you 4 buttons on the right side.
+
+- Info - to be defined later
+- Node - shows the nodeid/uri as QR code (used to open channels from mobile wallets)
+- Invoice - creates an Invoice-QR code that can be used for payments
+- Off - Shutdown or Restart the RaspiBlitz
+
+##### LCD Rotate
+
+If you switch this on, you can rotate the LCD of your RaspiBlitz 180 degrees. This might make sense if you have a special case or wall mount.
+
 ##### Run behind Tor
 
 You can run your Bitcoin- & Lightning-Node, as well as additional Apps, as a Tor hidden service - replacing your IP with an .onion-address
@@ -539,24 +483,29 @@ But this can also come with the following side effects:
 
 To try it out, just switch on the service - you can deactivate it later on if it's not working for you.
 
-##### Touchscreen (experimental)
+##### Parallel Testnet/Signet
 
-Your RaspiBlitz has an LCD that is touchscreen capable. You can switch on this new feature that is still in development.
+It is very convenient to learn and test to play around in a "sandbox" environment. RaspiBlitz allows this through activating "Testnet & Signet" that run in parallel to the "Mainnet".
 
-![RTL](pictures/touchscreen.png)
+Once activated you will see an additional option in the SSH Main Menu that will give you more options to operate the Testnet & Signet.
 
-It will give you 4 buttons on the right side.
+You can get Bitcoin Testnet coins you can use Faucets from different places on the internet, here are a few links:
+* https://coinfaucet.eu/en/btc-testnet/
+* https://testnet-faucet.mempool.co/
+* https://kuttler.eu/en/bitcoin/btc/faucet/
+* https://faucet.lightning.community/
 
-- Info - to be defined later
-- Node - shows the nodeid/uri as QR code (used to open channels from mobile wallets)
-- Invoice - creates an Invoice-QR code that can be used for payments
-- Off - Shutdown or Restart the RaspiBlitz
+You can read more about TESTNET and Bitcoin Faucets here: https://kuttler.eu/code/bitcoin-testnet-blockchain-size-in-2020/
 
-##### LCD Rotate
+##### ZeroTier 
 
-If you switch this on, you can rotate the LCD of your RaspiBlitz 180 degrees. This might make sense if you have a special case or wall mount.
+With ZeroTier you can add your RaspiBlitz to a software defined network - see for details: https://en.wikipedia.org/wiki/ZeroTier
 
-##### Channels Autopilot
+##### LND LIGHTNING LABS NODE
+
+This needs to switched on to see the sub-settings options for LND. If switched on it means the LND lightning node implementation is installed and running on your RaspiBlitz - it can run in parallel to c-lightning. If activated you will find an additional option in the SSH Main Menu that offers you more options to operate the LND node. Also under `SERVICES` some apps might just be available if LND is activated.
+
+##### LND Channel Autopilot
 
 The channels autopilot feature of LND allows to automatically uses around half of your on-chain funds (if available) to open new channels with other lightning nodes. 
 Channels autopilot is very useful to get started transacting swiftly if you're a newbie as the channels are generated for you. 
@@ -564,32 +513,11 @@ It is very likely that after a while, once you will have a hang of the concept o
 
 Beware that presently toggling the Channels Autopilot setting will trigger a reboot of your Raspiblitz. It is not a problem per se, just a bit of waste of time [Improvement request #1953](https://github.com/rootzoll/raspiblitz/issues/1953)
 
-##### Accept Keysend
+##### LND Accept Keysend
 
 Keysend is a feature of LND that allows your node to accept payments without having created an invoice first. This needs to be activated, for example, if you want to use your nodes for experimental messaging over the Lightning Network (see RaspiBlitz MOBILE apps like SendMany).
 
-##### Testnet
-
-It is very convenient to learn and test to play around in a "sandbox" environment. RaspiBlitz allows this through the "Testnet" setting.
-You can freely switch from prod environemt (running on BITCOIN MAINNET) to test environment (running on BITCOIN TESTNET) and back using this setting. 
-The state of your environments is restored everytime you switch (blockchain, wallets, channels) which is very convenient and safe.
-Note however that switching from one environment to the other requires an auto resynchronisation with the corresponding blockchain (MAINNET or TESTNET) and can take some time (e.x. If you switch for the first time to "Testnet" the initial sync of the TESTNET blockchain may take several hours; also if you switch back and forth environment the corresponding blockchain must catchup from where it left before switching.
-
-Of course it would be much more fun and less scary if everyone could afford to own 2 distinct RaspiBlitz, one for each environment, this way your production RaspiBlitz remains online all the time and you can recklessly play around on the other one. 
-
-Once in "TESTNET" environment go ahead! Get hold of some Bitcoin Testnet Faucets (these are worthless bitcoins on testnet) and start playing around with them!
-You can get Bitcoin Testnet Faucets from different places on the internet, here are a few links:
-* https://coinfaucet.eu/en/btc-testnet/
-* https://testnet-faucet.mempool.co/
-* https://kuttler.eu/en/bitcoin/btc/faucet/
-* https://faucet.lightning.community/
-
-You can read more about TESTNET and Bitcoin Faucets here: https://kuttler.eu/code/bitcoin-testnet-blockchain-size-in-2020/
-Have fun.
-
-IMPORTANT: Presently BTCPay Server service is NOT supported on TESTNET (RPC connection error messages). Until this [issue #1724](https://github.com/rootzoll/raspiblitz/issues/1724) is resolved you can [play around with BTCPay Server on TESTNET](https://testnet.demo.btcpayserver.org)
-
-##### Circuitbreaker (LND Firewall)
+##### LND Circuitbreaker (Firewall for LND)
 
 Not everybody is acting friendly in the Lightning network. Circuitbreaker is a background service you cann activate that acts similar to a firewall to protect your now better. For details see: https://github.com/lightningequipment/circuitbreaker/blob/master/README.md
 
@@ -603,17 +531,27 @@ It can be activated under "Services" -> "Auto-unlock LND". We recommend that it 
 
 * [When using Auto-Unlock, how much security do I lose?](FAQ.md#when-using-auto-unlock-how-much-security-do-i-lose)
 
-##### StaticChannelBackup on DropBox
+##### LND StaticChannelBackup on Nextcloud
 
-See [below on this README](README.md#backup-for-on-chain---channel-funds) for your Backup options to secure your funds against loss. Storing the encrypted Static Channel Backup file to your Dropbox account is an easy and secure way to do this.
+See [below on this README](README.md#backup-for-on-chain---channel-funds) for your Backup options to secure your funds against loss. Storing the encrypted Static Channel Backup file to your Nextcloud account is an easy and secure way to do this.
+
+Nextcloud is an open-source project to host your own files: https://en.wikipedia.org/wiki/Nextcloud - in its basics its an open DropBox replacement ... but can do much much more. You can run it yourself or use a hosted Nextcloud server. Find free Nextcloud providers here to sign up: https://nextcloud.com/signup/
 
 ##### StaticChannelBackup on USB Drive
 
 You can connect a small extra USB drive to your RaspiBlitz (choose a small one up to 32GB - don't use second HDD or SSD here, that would drain too much power from the RaspiBlitz). On that USB drive your latest StaticChannelBackup will be stored - just in case your HDD gets an error.
 
-##### ZeroTier 
+##### C-LIGHTNING NODE
 
-With ZeroTier you can add your RaspiBlitz to a software defined network - see for details: https://en.wikipedia.org/wiki/ZeroTier
+This needs to switched on to see the sub-settings options for c-lightning. If switched on it means the c-lighting node implementation is installed and running on your RaspiBlitz - it can run in parallel to LND. If activated you will find an additional option in the SSH Main Menu that offers you more options to operate the c-lightning node. Also under `SERVICES` some apps might just be available if c-lightning is activated.
+
+##### CL CLBOSS Automatic Node Manager
+
+TODO
+
+##### CL Wallet Encryption
+
+TODO
 
 #### SERVICES: Activate/Deactivate Services
 
@@ -994,7 +932,7 @@ As mentioned above you can export a Migration File from your RaspiBlitz with MAI
 
 A Migration file contains all the important data from your RaspiBlitz, like your LND data, Bitcoin Wallet, raspiblitz.config, Tor/SSH keys .. and also installed apps. You can use this to migrate your RaspiBlitz to new hardware.
 
-If you want to import it again to a new RaspiBlitz (for example with an updated HDD/SSD), you can choose the `MIGRATION` option on the first setup dialog after the Hardware test (where you normally choose between Bitcoin & Litecoin).
+If you want to import it again to a new RaspiBlitz (for example with an updated HDD/SSD), you can choose the `MIGRATION` option on the first setup dialog of a fresh sd card image.
 
 ![SSH0](pictures/ssh0-welcome2.png)
 
