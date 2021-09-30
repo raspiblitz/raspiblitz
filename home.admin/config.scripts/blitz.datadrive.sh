@@ -580,7 +580,7 @@ if [ "$1" = "format" ]; then
        echo "error='partition cleaning failed'"
        exit 1
      fi
-     sudo parted -s -a optimal -- /dev/${hdd} mklabel gpt 1>/dev/null 1>&2
+     sudo parted -s /dev/${hdd} mklabel gpt 1>/dev/null 1>&2
      sleep 2
      sync
   fi
@@ -595,7 +595,7 @@ if [ "$1" = "format" ]; then
      if [ $ext4IsPartition -eq 0 ]; then
         # write new EXT4 partition
         >&2 echo "# Creating the one big partition"
-        sudo parted -a optimal /dev/${hdd} mkpart primary ext4 0% 100% 1>&2
+        sudo parted /dev/${hdd} mkpart primary ext4 0% 100% 1>&2
         sleep 6
         sync
         # loop until the partition gets available
