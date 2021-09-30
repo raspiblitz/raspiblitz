@@ -177,7 +177,7 @@ do
 
   # exit loop/script in case if system shutting down
   if [ "${state}" == "reboot" ] || [ "${state}" == "shutdown" ]; then
-    dialog --pause "  Prepare Reboot ..." 8 58 6
+    dialog --pause "  Prepare Reboot ..." 8 58 4
     clear
     echo "***********************************************************"
     echo "RaspiBlitz going to ${state}"

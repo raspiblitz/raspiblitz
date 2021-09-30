@@ -32,6 +32,7 @@ fi
 
 # do shutdown/reboot
 echo "-----------------------------------------------"
+sleep 3
 
 # stopping electRS (if installed)
 echo "stop electrs - please wait .."
