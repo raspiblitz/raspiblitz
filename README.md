@@ -335,7 +335,7 @@ Just wait a bit and then the SSH command to login again. Dont forget to use this
 
 If you run LND you will be asked to unlock your wallet - thats always your password C. BTW under `SETTINGS` in the main menu you can activate the Auto-Unlock if you prefer.
 
-![SSH5](pictures/ssh5-sync.png)
+![SSH5](pictures/ssh5-blocksync.png)
 
 Remeber that now your RaspiBlitz might need a longer time to sync/validate the blockchain - this can be multiple days. In the beginnig you might see fast progress but its normal that this gets slower later on. Also your RaspberryPi CPU might get quite hot ... thats also OK during this inital sync time - the RaspberryPi has its own protection against overheating and will push thru.
 
