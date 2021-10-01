@@ -750,6 +750,8 @@ This feature should support connecting your RaspiBlitz to a mobile wallets or ot
 
 ##### MOBILE: Mobile Wallet Apps (Smartphone)
 
+![MOBILE](pictures/mobile.png)
+
 At the moment, the following mobile wallets are supported - some are just available if LND or c-lightning is activated:
 
 * [Zeus (iOS/Android)](https://github.com/ZeusLN/zeus) (LND & c-lightning)
@@ -758,6 +760,10 @@ At the moment, the following mobile wallets are supported - some are just availa
 * [Sphinx Chat App (iOS/Android)](https://sphinx.chat/) (only LND)
 
 Mobile wallets work as a remote control app for your RaspiBlitz. First you need to install the apps on your phone - a QR code with the links to the app stores are displayed. Then you need to `pair` them with your RaspiBlitz - also via a QR code displayed on the LCD. If you run your RaspiBlitz without an LCD, there is the fallback option to display that QR code on the terminal as ASCII code (which might involve lowering your terminal's font size).
+
+##### Electrum Rust Server
+
+Information how to connect to Electrum Rust Server (if installed). 
 
 ##### BTCPAY: Get the connection string for the BTCPay Server
 
@@ -864,6 +870,19 @@ This stops your RaspiBlitz and creates an LND-Rescue ZIP file that you can downl
 
 *NOTICE: If you start your RaspiBlitz after this backup again the backup is outdated and using it can risk losing your channel funds.*
 
+##### RESET-LND: Delete LND & start a node/wallet
+
+*THIS WILL DELETE ALL YOUR LND DATA AND CHANNEL FUNDS.
+Use this only if you have closed all channels and removed all funds.*
+
+Use this option if you want to start with a fresh LND node id & wallet.
+
+##### REPAIR-CL: Repair/Backup C-Lightning
+
+Multiple options to repair/backup your c-lightning node:
+
+![RepairMenu](pictures/clrepair.png)
+
 ##### MIGRATION: Migrate Blitz Data to new Hardware
 
 This stops your RaspiBlitz and creates a Migration ZIP file you can download/export per SCP to your laptop. This contains all important data of your RaspiBlitz including LND, your Blitz configuration and also data from your installed apps. Can be used to migrate your RaspiBlitz to a new hardware - for example if you want to replace the HDD with a SSD. How to import a Migration File [see here](README.md#import-a-migration-file).
@@ -879,13 +898,6 @@ Make sure both RaspiBlitzes are connected to the same local network. During setu
 ##### RESET-CHAIN: Delete Blockchain and Re-Download
 
 Use this option if your blockchain data got corrupted. It will keep your LND data. You can even keep your channels open. Just keep in mind that your Lightning node will appear offline to the network until you have re-downloaded the blockchain.
-
-##### RESET-LND: Delete LND data & start new node/wallet
-
-*THIS WILL DELETE ALL YOUR LND DATA AND CHANNEL FUNDS.
-Use this only if you have closed all channels and removed all funds.*
-
-Use this option if you want to start with a fresh LND node id & wallet.
 
 ##### RESET-HDD: Delete HDD data but keep blockchain
 
@@ -911,11 +923,11 @@ If you had the Bitcoin Transaction Index activated you can use this option to ma
 
 #### UPDATE: Check/Prepare RaspiBlitz Update
 
-The `UPDATE` menu gives you options to update your RaspiBlitz
-
-![UpdateMenu](pictures/update.png)
+The `UPDATE` menu gives you options to update your RaspiBlitz and some apps you might have installed.
 
 The options are explained in detail:
+
+![UpdateMenu](pictures/update.png)
 
 *Please note that the RaspiBlitz does not support Auto-Update, to ensure that there is no remote control of your node from a central server.*
 
@@ -945,9 +957,9 @@ A safe way to restart the RaspiBlitz ... have you tried turning it off and on ag
 
 A safe way to shutdown the RaspiBlitz.
 
-#### X: Console Terminal
+#### EXIT: Console Terminal
 
-Closes the SSH main menu and exits to the terminal - where the user can make use of the CLI clients `bitcoin-cli` & `lncli` directly.
+The `EXIT` option next to `OK` closes the SSH main menu and exits to the terminal - where the user can make use of the CLI clients `bitcoin-cli` & `lncli` directly.
 
 With the command `raspiblitz`, it's possible to return to the main menu.
 
