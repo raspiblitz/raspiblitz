@@ -104,14 +104,17 @@ do
   #echo "# blitz.statusscan.sh"
 
   firstStatusScanExists=$(ls /var/cache/raspiblitz/raspiblitz.status | grep -c "raspiblitz.status")
+  echo "firstStatusScanExists(${firstStatusScanExists})"
   if [ ${firstStatusScanExists} -eq 1 ]; then
 
     # run statusscan with timeout - if status scan was not killed it will copy over the 
     timeout 15 /home/admin/config.scripts/blitz.statusscan.sh ${lightning} > /var/cache/raspiblitz/raspiblitz.status.tmp
     result=$?
+    echo "result(${result})"
     if [ "${result}" == "0" ]; then
      # statusscan finished in under 10 seconds - use results
      cp /var/cache/raspiblitz/raspiblitz.status.tmp /var/cache/raspiblitz/raspiblitz.status
+     echo "cp"
     else
      # statusscan blocked and was killed - fallback to old results
      echo "statusscan blocked (${result}) - fallback to old results"
