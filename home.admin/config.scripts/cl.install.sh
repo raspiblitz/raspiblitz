@@ -204,6 +204,29 @@ always-use-proxy=true
   ###################
   /home/admin/config.scripts/cl.install-service.sh $CHAIN
 
+  #############
+  # logrotate #
+  #############
+  echo "\
+/home/bitcoin/.lightning/${CLNETWORK}/cl.log
+{
+        rotate 5
+        daily
+        copytruncate
+        missingok
+        olddir /home/bitcoin/.lightning/${CLNETWORK}/cl.log_old
+        notifempty
+        nocompress
+        sharedscripts
+        # We don't need to kill as we use copytruncate
+        #postrotate
+        #        kill -HUP \`cat /run/lightningd/lightningd.pid\'
+        #endscript
+        su bitcoin bitcoin
+}" | sudo tee /etc/logrotate.d/${netprefix}lightningd
+  # debug: 
+  # sudo logrotate --debug /etc/logrotate.d/lightningd 
+
   echo
   echo "# Adding aliases"
   echo "\
