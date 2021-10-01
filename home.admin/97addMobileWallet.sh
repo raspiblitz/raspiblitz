@@ -145,10 +145,10 @@ OPTIONS=()
 
 if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
   	# Zap deactivated for now - see: https://github.com/rootzoll/raspiblitz/issues/2198#issuecomment-822808428
-	OPTIONS+=(ZEUS_IOS "Zeus Wallet (iOS)")
-	OPTIONS+=(ZEUS_ANDROID "Zeus Wallet (Android)")
-	OPTIONS+=(SPHINX "Sphinx Chat (Android or iOS)")
-  	OPTIONS+=(SENDMANY_ANDROID "SendMany (Android)")
+	OPTIONS+=(ZEUS_IOS "Zeus to LND (iOS)")
+	OPTIONS+=(ZEUS_ANDROID "Zeus to LND (Android)")
+	OPTIONS+=(SPHINX "Sphinx Chat to LND (Android/iOS)")
+  	OPTIONS+=(SENDMANY_ANDROID "SendMany to LND (Android)")
 fi
 
 if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ]; then
