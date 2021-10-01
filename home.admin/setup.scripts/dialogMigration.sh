@@ -99,6 +99,7 @@ if [ "${migrationOS}" == "raspiblitz" ]; then
 
   # migration OS & Version were already set earlier in setup process - now add migration filename
   echo "migrationFile='${filename}'" >> $SETUPFILE
+  echo "chain='main'" >> $SETUPFILE
   exit 0
 
 fi
