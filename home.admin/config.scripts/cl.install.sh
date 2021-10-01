@@ -127,7 +127,10 @@ if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = testPR ];then
 
     echo "Installing additional dependencies"  
     sudo apt-get install -y valgrind python3-pip libpq-dev 
-    sudo pip3 install -r requirements.txt
+    if ! sudo pip3 install -r requirements.txt; then
+      # just in case building the requirements fails
+      sudo pip3 install mrkd
+    fi
 
     echo "# Building with EXPERIMENTAL_FEATURES enabled"
     echo

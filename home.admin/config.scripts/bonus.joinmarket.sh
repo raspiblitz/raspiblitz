@@ -203,13 +203,19 @@ if [ ! -f "/home/joinmarket/.joinmarket/joinmarket.cfg" ] ; then
   echo "Using the bitcoind wallet: wallet.dat"
   #communicate with IRC servers via Tor
   JMcfgPath="/home/joinmarket/.joinmarket/joinmarket.cfg"
+  # hosts
   sed -i "s/^host = irc.darkscience.net/#host = irc.darkscience.net/g" \$JMcfgPath
   sed -i "s/^#host = dark.*/host = darkirc6tqgpnwd3blln3yfv5ckl47eg7llfxkmtovrv7c7iwohhb6ad.onion/g" \$JMcfgPath
   sed -i "s/^host = irc.hackint.org/#host = irc.hackint.org/g" \$JMcfgPath
   sed -i "s/^#host = ncwkrwxpq2ikcngxq3dy2xctuheniggtqeibvgofixpzvrwpa77tozqd.onion/host = ncwkrwxpq2ikcngxq3dy2xctuheniggtqeibvgofixpzvrwpa77tozqd.onion/g" \$JMcfgPath
+  sed -i "s/^host = agora.anarplex.net/#host = agora.anarplex.net/g" \$JMcfgPath
+  sed -i "s/^#host = vxecvd6lc4giwtasjhgbrr3eop6pzq6i5rveracktioneunalgqlwfad.onion/host = vxecvd6lc4giwtasjhgbrr3eop6pzq6i5rveracktioneunalgqlwfad.onion/g" \$JMcfgPath
+  # socks5
   sed -i "s/^socks5 = false/#socks5 = false/g" \$JMcfgPath
   sed -i "s/^#socks5 = true/socks5 = true/g" \$JMcfgPath
+  # port
   sed -i "s/^#port = 6667/port = 6667/g" \$JMcfgPath
+  # usessl
   sed -i "s/^#usessl = false/usessl = false/g" \$JMcfgPath
   echo "# Edited the joinmarket.cfg to communicate over Tor only."
 fi
