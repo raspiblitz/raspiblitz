@@ -451,10 +451,19 @@ fi
 # SPARKO
 if [ "${sparko}" = "on" ]; then
     echo "Provisioning Sparko - run config script" >> ${logFile}
-    sudo sed -i "s/^message=.*/message='Setup SPARKO (takes time)'/g" ${infoFile}
+    sudo sed -i "s/^message=.*/message='Setup SPARKO'/g" ${infoFile}
     sudo -u admin /home/admin/config.scripts/cl-plugin.sparko.sh on mainnet >> ${logFile} 2>&1
 else
-    echo "Provisioning RTL CL - keep default" >> ${logFile}
+    echo "Provisioning Sparko - keep default" >> ${logFile}
+fi
+
+# SPARK
+if [ "${spark}" = "on" ]; then
+    echo "Provisioning Spark Wallet - run config script" >> ${logFile}
+    sudo sed -i "s/^message=.*/message='Setup SPARK WALLET'/g" ${infoFile}
+    sudo -u admin /home/admin/config.scripts/cl.spark.sh on mainnet >> ${logFile} 2>&1
+else
+    echo "Provisioning Spark Wallet - keep default" >> ${logFile}
 fi
 
 #LOOP - install only if LiT won't be installed

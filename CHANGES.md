@@ -4,6 +4,7 @@
 
 - New: C-lightning v0.10.1 [details](https://github.com/ElementsProject/lightning/releases/tag/v0.10.1)
 - New: C-lightningREST v0.5.1 [details](https://github.com/Ride-The-Lightning/c-lightning-REST/releases/tag/v0.5.1)
+- New: CL Spark Wallet v0.3.0rc with BOLT12 offers [details](https://github.com/shesek/spark-wallet/releases)
 - New: CL plugin: Sparko [details](https://github.com/fiatjaf/sparko)
 - New: CL plugin: CLBOSS The C-Lightning Node Manager [details](https://github.com/ZmnSCPxj/clboss#clboss-the-c-lightning-node-manager)
 - New: Refactored Setup-Process [details](https://github.com/rootzoll/raspiblitz/issues/1126#issuecomment-829757665)

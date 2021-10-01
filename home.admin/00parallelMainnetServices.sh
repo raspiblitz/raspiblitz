@@ -14,6 +14,7 @@ if [ ${#lnd} -eq 0 ]; then lnd="off"; fi
 if [ ${#cl} -eq 0 ]; then cl="off"; fi
 if [ ${#crtlWebinterface} -eq 0 ]; then crtlWebinterface="off"; fi
 if [ ${#sparko} -eq 0 ]; then sparko="off"; fi
+if [ ${#spark} -eq 0 ]; then spark="off"; fi
 
 # show select dialog
 echo "run dialog ..."
@@ -24,6 +25,7 @@ OPTIONS+=(r "RTL for LND $CHAIN" ${rtlWebinterface})
 OPTIONS+=(c "C-lightning on $CHAIN" ${cl})
 OPTIONS+=(t "RTL for CL on $CHAIN" ${crtlWebinterface})
 OPTIONS+=(s "Sparko for CL on $CHAIN" ${sparko})
+OPTIONS+=(m "Spark for CL on $CHAIN" ${spark})
 
 CHOICES=$(dialog --title ' Additional Services ' \
           --checklist ' use spacebar to activate/de-activate ' \
@@ -160,6 +162,28 @@ if [ "${sparko}" != "${choice}" ]; then
   fi
 else
   echo "# Sparko on $CHAIN Setting unchanged."
+fi
+
+# spark process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "m")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${spark}" != "${choice}" ]; then
+  echo "# Spark Wallet on $CHAIN Setting changed .."
+  anychange=1
+  /home/admin/config.scripts/cl.spark.sh ${choice} $CHAIN
+  errorOnInstall=$?
+  if [ "${choice}" =  "on" ]; then
+    if [ ${errorOnInstall} -eq 0 ]; then
+      /home/admin/config.scripts/cl.spark.sh menu $CHAIN
+    else
+      l1="# !!! FAIL on Spark Wallet on $CHAIN install !!!"
+      l2="# Try manual install on terminal after reboot with:"
+      l3="/home/admin/config.scripts/cl.spark.sh on $CHAIN"
+      dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
+    fi
+  fi
+else
+  echo "# Spark Wallet on $CHAIN Setting unchanged."
 fi
 
 if [ ${anychange} -eq 0 ]; then
