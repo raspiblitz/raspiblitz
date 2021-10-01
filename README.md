@@ -545,9 +545,13 @@ You can connect a small extra USB drive to your RaspiBlitz (choose a small one u
 
 This needs to switched on to see the sub-settings options for c-lightning. If switched on it means the c-lighting node implementation is installed and running on your RaspiBlitz - it can run in parallel to LND. If activated you will find an additional option in the SSH Main Menu that offers you more options to operate the c-lightning node. Also under `SERVICES` some apps might just be available if c-lightning is activated.
 
+For more details on this lightning node implementation go to the [c-lightning FAQ page](FAQ.cl.md).
+
 ##### CL CLBOSS Automatic Node Manager
 
-TODO
+CLBOSS is an automated manager for C-Lightning routing payments nodes. CLBOSS is effectively a bunch of heuristics modules wired together to a regular clock to continuously monitor your node.
+
+Find more info at the [CLBOSS GitHub](https://github.com/ZmnSCPxj/clboss).
 
 ##### CL Wallet Encryption
 
