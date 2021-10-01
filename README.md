@@ -965,29 +965,19 @@ With the command `raspiblitz`, it's possible to return to the main menu.
 
 ## Import a Migration File
 
-As mentioned above you can export a Migration File from your RaspiBlitz with MAINMENU > REPAIR > MIGRATION and store it on your laptop.
+As mentioned above you can export a Migration File from your RaspiBlitz with `MAINMENU > REPAIR > MIGRATION` and store it on your laptop.
 
 A Migration file contains all the important data from your RaspiBlitz, like your LND data, Bitcoin Wallet, raspiblitz.config, Tor/SSH keys .. and also installed apps. You can use this to migrate your RaspiBlitz to new hardware.
 
-If you want to import it again to a new RaspiBlitz (for example with an updated HDD/SSD), you can choose the `MIGRATION` option on the first setup dialog of a fresh sd card image.
+If you want to import it again to a new RaspiBlitz (for example with an updated HDD/SSD), you can choose the `FROMBACKUP` option on the first setup dialog of a fresh sd card image.
 
 ![SSH0](pictures/ssh0-welcome2.png)
 
-If you start MIGRATION you will need to format your HDD/SSD in the next step.
+If you start MIGRATION you might get asked to use a existing blockchain on the harddrive/ssd and deleting the rest or even formatting the complete drive. Once thats done you get instructions how to upload the migration file (use the password `raspiblitz` when asked on executing the upload command):
 
 ![MIGRATION1](pictures/migration1.png)
 
-Normally you choose here the EXT4 format. But you also have the option to choose the BTRFS format which is an experimental feature under RaspiBlitz - see [FAQ for details on BTRFS](FAQ.md#why-use-btrfs-on-raspiblitz).
-
-Then you will be asked to upload the Migration Zip file to the RaspiBlitz. Follow the instructions shown to you.
-
-Then you need to get a copy of the blockchain data again for your RaspiBlitz.
-
-![MIGRATION2](pictures/migration2.png)
-
-You have the two options: [SYNC](README.md#1-sync---selfvalidate-all-blocks) and [COPY](README.md#2-copy---copy-from-laptop-or-another-raspiblitz-over-local-network), as mentioned in the normal setup.
-
-RaspiBlitz will reboot and start the normal recovery process to install all the services defined by the raspiblitz.config from your Migration File.
+After this you will be asked to set a new PasswordA and your RaspiBlitz will go into recovery/provision process Then RaspiBlitz might give you the option again to self-sync or copy the blockchain from another computer/blitz and after a final reboot.
 
 Then the blockchain needs to sync up and you should be back to normal.
 

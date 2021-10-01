@@ -601,6 +601,13 @@ if [ ${isMounted} -eq 0 ]; then
   sudo sed -i "s/^lightning=.*/lightning=${lightning}/g" ${infoFile}
   cat ${infoFile} >> ${logFile}
 
+  # if migrationFile was uploaded - now import it
+  echo "# migrationFile(${migrationFile})" >> ${logFile}
+  if [ "${migrationFile}" != "" ]; then
+    sed -i "s/^message=.*/message='Unpacking Migration Data'/g" ${infoFile}
+    /home/admin/config.scripts/blitz.migration.sh import "${migrationFile}" >> ${logFile}
+  fi
+
   ###################################
   # Set Password A (in all cases)
   
