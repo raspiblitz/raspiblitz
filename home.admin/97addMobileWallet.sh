@@ -162,7 +162,7 @@ if [ "${runBehindTor}" = "on" ]; then
   OPTIONS+=(FULLY_NODED "Fully Noded (iOS+Tor)") 
 fi
 
-CHOICE=$(whiptail --clear --title "Choose Mobile Wallet" --menu "" 14 62 8 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+CHOICE=$(whiptail --clear --title "Choose Mobile Wallet" --menu "" 14 75 8 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
 /home/admin/config.scripts/blitz.display.sh hide
 
