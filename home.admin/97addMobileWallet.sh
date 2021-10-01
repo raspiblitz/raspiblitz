@@ -141,25 +141,20 @@ checkIP2TOR()
   fi
 }
 
-if [ $lightning = "lnd" ]; then
-  # Also Zap-Android deactivated for now - see: https://github.com/rootzoll/raspiblitz/issues/2198#issuecomment-822808428
-  #OPTIONS=(ZAP_ANDROID "Zap Wallet (Android)" \
-  #		ZAP_IOS "Zap Wallet (iOS)" \
-  OPTIONS=(ZEUS_IOS "Zeus Wallet (iOS)" \
-          ZEUS_ANDROID "Zeus Wallet (Android)" \
-  		  SPHINX "Sphinx Chat (Android or iOS)" 
-  		  )
-  
-  # add SEND MANY APP
-  OPTIONS+=(SENDMANY_ANDROID "SendMany (Android)")
+OPTIONS=()
 
-elif [ $lightning = "cl" ]; then
+if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
+  	# Zap deactivated for now - see: https://github.com/rootzoll/raspiblitz/issues/2198#issuecomment-822808428
+	OPTIONS+=(ZEUS_IOS "Zeus Wallet (iOS)")
+	OPTIONS+=(ZEUS_ANDROID "Zeus Wallet (Android)")
+	OPTIONS+=(SPHINX "Sphinx Chat (Android or iOS)")
+  	OPTIONS+=(SENDMANY_ANDROID "SendMany (Android)")
+fi
 
-  OPTIONS=(ZEUS_CLREST "Zeus to C-lightningREST (Android or iOS)" \
-          ZEUS_SPARK "Zeus to Sparko (Android or iOS)" \
-    	  SPARK "Spark Wallet to Sparko (Android - EXPERIMENTAL)" 
-    	  )
-
+if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ]; then
+	OPTIONS+=(ZEUS_CLREST "Zeus to C-lightningREST (Android or iOS)")
+	OPTIONS+=(ZEUS_SPARK "Zeus to Sparko (Android or iOS)")
+	OPTIONS+=(SPARK "Spark Wallet to Sparko (Android - EXPERIMENTAL)" )
 fi
 
 # Additional Options with Tor
