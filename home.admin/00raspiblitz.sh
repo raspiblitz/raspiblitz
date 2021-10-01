@@ -129,6 +129,11 @@ do
   # load statusscan results
   source /var/cache/raspiblitz/raspiblitz.status
 
+  # detect wallet locked
+  if [ "${walletLocked}" == "1" ] || [ "${CLwalletLocked}" == "1" ]; then
+    state="walletlocked"
+  fi
+
   #####################################
   # ALWAYS: Handle System States 
   #####################################
