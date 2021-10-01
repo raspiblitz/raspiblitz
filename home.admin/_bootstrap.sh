@@ -606,6 +606,8 @@ if [ ${isMounted} -eq 0 ]; then
   if [ "${migrationFile}" != "" ]; then
     sed -i "s/^message=.*/message='Unpacking Migration Data'/g" ${infoFile}
     /home/admin/config.scripts/blitz.migration.sh import "${migrationFile}" >> ${logFile}
+    sed -i "s/^setupPhase=.*/setupPhase='recovery'/g" ${infoFile}
+    setupPhase="recovery"
   fi
 
   ###################################
@@ -638,7 +640,7 @@ if [ ${isMounted} -eq 0 ]; then
     fi
   fi
 
-  # if migration - run the migration provision first
+  # if migration from other nodes - run the migration provision first
   if [ "${setupPhase}" == "migration" ]; then
     echo "Calling _provision.migration.sh for possible migrations .." >> $logFile
     sed -i "s/^message=.*/message='Provision migration'/g" ${infoFile}
