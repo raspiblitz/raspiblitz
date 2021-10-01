@@ -726,9 +726,19 @@ The same RTL as above but running with c-lightning node. Can run parrallel to th
 
 ##### C-Lightning Sparko Webwallet
 
+WalletUI & HTTP-RPC bridge for c-lightning
 
+https://github.com/fiatjaf/sparko#the-sparko-plugin
+
+##### C-Lightning Spark Webwallet
+
+WalletUI for c-lightning with BOLT12 offers
+
+https://github.com/shesek/spark-wallet#progressive-web-app
 
 #### SYSTEM: Monitoring & Configuration
+
+Different options to monitor & edit system services.
 
 ![SYSTEM](pictures/system.png)
 
