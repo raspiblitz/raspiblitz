@@ -69,6 +69,16 @@ BACKTITLE="${localip} / ${hostname} / ${network} ${plus}"
 # Basic Options
 OPTIONS+=(INFO "RaspiBlitz Status Screen")
 
+# if LND is active
+if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
+  OPTIONS+=(LND "LND Wallet Options")
+fi
+
+# if C-Lightning is active
+if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ]; then
+  OPTIONS+=(CL "C-lightning Wallet Options")
+fi
+
 # Activated Apps/Services
 if [ "${rtlWebinterface}" == "on" ]; then
   OPTIONS+=(LRTL "LND RTL Webinterface")
@@ -141,16 +151,6 @@ fi
 #if [ ${chain} != "main" ]; then
 #  OPTIONS+=(MAINNET "Mainnet Service Options")
 #fi
-
-# if LND is active
-if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
-  OPTIONS+=(LND "LND Wallet Options")
-fi
-
-# if C-Lightning is active
-if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ]; then
-  OPTIONS+=(CL "C-lightning Wallet Options")
-fi
 
 if [ "${testnet}" == "on" ]; then
   OPTIONS+=(TESTNETS "Testnet/Signet Options")
