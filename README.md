@@ -556,11 +556,11 @@ Find more info at the [CLBOSS GitHub](https://github.com/ZmnSCPxj/clboss).
 
 ##### CL Wallet Encryption
 
-TODO
+You can protect your c-lightning wallet by encrypting it with your passwordC. On every restart/reboot you will need to decrypt/unlock with that password before c-lightning can use the wallet. This adds some physical security for example in case your node get stolen.
 
 #### SERVICES: Activate/Deactivate Services
 
-The RaspiBlitz offers further Services, Apps and configuration (scroll down to see all options in the RaspiBlitz):
+The RaspiBlitz offers further Services, Apps and configuration (scroll down to see all options in the RaspiBlitz) also some Apps & Services might just be available if you installed/activated LND or c-lightning:
 
 ![MainMenu-Services](pictures/services.png)
 
@@ -582,40 +582,6 @@ Learn how you can use Electrum with your own Server over Tor:
 
 After install, you will see a new `ELECTRS` option in the SSH main menu - it will give you all the information you need to start using it.
 
-##### RTL Webinterface
-
-The RTL Webinterface is an LND Control Dashboard you can run in your browser with a nice GUI - it offers much more control over your Lightning node than the RaspiBlitz SSH menus. It's recommended to give it a try.
-
-![RTL](pictures/RTL-dashboard.png)
-
-Get all the details on how to mannage your channels with RTL in this video:
-
-<a href="https://www.youtube.com/watch?v=pESO_Pm0v10" target="_blank"><img src="pictures/video-rtl.png" alt="Video Tutorial" width="400"></a><br>--watch--> https://www.youtube.com/watch?v=pESO_Pm0v10
-
-Read an Intro-Tutorial to RTL: https://medium.com/@suheb.khan/how-to-ride-the-lightning-447af999dcd2
-
-Feedback is welcome by the RTL programmer: https://github.com/ShahanaFarooqui/RTL
-
-After install, you will see a new `RTL` option in the SSH main menu - it will give you all the information you need to start using it.
-
-##### ThunderHub
-
-A Lightning Node Manager WebUI - similar to RTL. 
-
-[Details on Service](https://www.thunderhub.io)
-
-After install, you will see a new `THUB` option in the SSH main menu - it will give you all the information you need to start using it.
-
-##### Lightning Terminal (LIT) with loop, pool & faraday
-
-Lightning Terminal (LiT) is a browser-based interface for managing channel liquidity. It bundles the former single tools called loop, pool & faraday with an easy to use browser interface.
-
-![LIT](pictures/lit.png)
-
-[Details on Service](https://github.com/lightninglabs/lightning-terminal#lightning-terminal-lit)
-
-After install, you will see a new `LIT` option in the SSH main menu - it will give you all the information you need to start using it.
-
 ##### BTCPayServer
 
 [BTCPay Server](https://github.com/btcpayserver) is a self-hosted, open-source cryptocurrency payment processor. It's secure, private, censorship-resistant and free.
@@ -625,24 +591,6 @@ After install, you will see a new `LIT` option in the SSH main menu - it will gi
 Find all details on how to use the BTCPay Server on your RaspiBlitz in this great tutorial: https://coincharge.io/en/btcpay-server-on-the-raspiblitz/
 
 After install, you will see a new `BTCPAY` option in the SSH main menu - it will give you all the information you need to start using it.
-
-##### LNbits
-
-LNbits is a very simple server that sits on top of your Lightning Wallet.
-
-![LNBITS](pictures/lnbits.png)
-
-It can be used together with IP2Tor to provide:
-- Lightning Paper Vouchers (Plugin: LNURLw)
-- Merchant Onboarding (Plugin: TPOS)
-
-<a href="https://www.youtube.com/watch?v=0Bt3tHULAnw" target="_blank"><img src="pictures/video-vouchers.png" alt="Video Tutorial" width="400"></a><br>--watch--> https://www.youtube.com/watch?v=0Bt3tHULAnw
-
-You can also develop your own extensions on it.
-
-[Details on Service](https://github.com/arcbtc/lnbits/blob/master/README.md)
-
-After install, you will see a new `LNBITS` option in the SSH main menu - it will give you all the information you need to start using it.
 
 ##### BTC-RPC-Explorer
 
@@ -664,11 +612,11 @@ The goal of Specter Desktop is to make a convenient and user-friendly GUI around
 
 After install, you will see a new `SPECTER` option in the SSH main menu - it will give you all the information you need to start using it.
 
-##### Mempool Explorer
+##### Mempool Space
 
 ![MEMPOOL](pictures/mempool.png)
 
-Mempool is the fully featured visualizer, explorer, and API service running on mempool.space
+Mempool Space is the fully featured visualizer, explorer, and API service running on mempool.space
 
 [Details on Service](https://github.com/mempool/mempool)
 
@@ -686,6 +634,62 @@ For more details see [here](https://github.com/JoinMarket-Org/joinmarket-clients
 
 After install, you will see a new `JMARKET` option in the SSH main menu - it will give you all the information you need to start using it.
 
+##### Download Bitcoin Whitepaper
+
+Extract the original Bitcoin Whitepaper as PDF directly from the blockchain of your node.
+
+##### RTL Webinterface
+
+The RTL Webinterface is available as an LND & c-lightning Control Dashboard you can run in your browser with a nice GUI - it offers much more control over your Lightning node than the RaspiBlitz SSH menus. It's recommended to give it a try.
+
+![RTL](pictures/RTL-dashboard.png)
+
+Get all the details on how to mannage your channels with RTL in this video:
+
+<a href="https://www.youtube.com/watch?v=pESO_Pm0v10" target="_blank"><img src="pictures/video-rtl.png" alt="Video Tutorial" width="400"></a><br>--watch--> https://www.youtube.com/watch?v=pESO_Pm0v10
+
+Read an Intro-Tutorial to RTL: https://medium.com/@suheb.khan/how-to-ride-the-lightning-447af999dcd2
+
+Feedback is welcome by the RTL programmer: https://github.com/ShahanaFarooqui/RTL
+
+After install, you will see a new `RTL` option in the SSH main menu - it will give you all the information you need to start using it.
+
+##### ThunderHub
+
+A Lightning Node Manager WebUI - similar to RTL, but just available for LND.
+
+[Details on Service](https://www.thunderhub.io)
+
+After install, you will see a new `THUB` option in the SSH main menu - it will give you all the information you need to start using it.
+
+##### Lightning Terminal (LIT) with loop, pool & faraday
+
+Lightning Terminal (LiT) is a browser-based interface for managing channel liquidity on LND. It bundles the former single tools called loop, pool & faraday with an easy to use browser interface.
+
+![LIT](pictures/lit.png)
+
+[Details on Service](https://github.com/lightninglabs/lightning-terminal#lightning-terminal-lit)
+
+After install, you will see a new `LIT` option in the SSH main menu - it will give you all the information you need to start using it.
+
+##### LNbits
+
+LNbits is a very simple server that sits on top of your Lightning Wallet.
+
+![LNBITS](pictures/lnbits.png)
+
+It can be used together with IP2Tor to provide:
+- Lightning Paper Vouchers (Plugin: LNURLw)
+- Merchant Onboarding (Plugin: TPOS)
+
+<a href="https://www.youtube.com/watch?v=0Bt3tHULAnw" target="_blank"><img src="pictures/video-vouchers.png" alt="Video Tutorial" width="400"></a><br>--watch--> https://www.youtube.com/watch?v=0Bt3tHULAnw
+
+You can also develop your own extensions on it.
+
+[Details on Service](https://github.com/arcbtc/lnbits/blob/master/README.md)
+
+After install, you will see a new `LNBITS` option in the SSH main menu - it will give you all the information you need to start using it.
+
 ##### Balance of Satoshi
 
 Balance of Satoshi gives you enhanced commands for working with LND balances.
@@ -694,29 +698,35 @@ Balance of Satoshi gives you enhanced commands for working with LND balances.
 
 After install, you will see a new `BOS` option in the SSH main menu - it will give you all the information you need to start using it.
 
+##### PyBlock
+
+Dashboard Bitcoin information program (needs LND).
+
+![PYBLOCK](pictures/pyblock.png)
+
+https://github.com/curly60e/pyblock/blob/master/README.md 
+
+##### Channel Tools (chantools)
+
+This tool provides helper functions that can be used to rescue funds locked in LND channels in case lnd itself cannot run properly anymore. Also some other usefull command line features.
+
+https://github.com/guggero/chantools
+
 ##### Sphinx Relay Server
 
-The Sphinx App allows chat over the Lightning Network and ties into the idea of [Podcasting 2.0](https://u.today/father-of-podcasting-integrates-bitcoin-lightning-into-his-app). To use the mobile app with your own RaspiBlitz you need to install the [Sphinx Relay Server](https://github.com/stakwork/sphinx-relay/blob/master/README.md).
+The Sphinx App allows chat over the Lightning Network with LND and ties into the idea of [Podcasting 2.0](https://u.today/father-of-podcasting-integrates-bitcoin-lightning-into-his-app). To use the mobile app with your own RaspiBlitz you need to install the [Sphinx Relay Server](https://github.com/stakwork/sphinx-relay/blob/master/README.md).
 
 ![SPHINX](https://github.com/stakwork/sphinx-relay/raw/master/public/relay.jpg)
 
 After install, you will see a new `SPHINX` option in the SSH main menu - it will give you all the information you need to start using it.
 
-##### PyBlock
+##### C-Lightning RTL Webinterface
 
-![PYBLOCK](pictures/pyblock.png)
+The same RTL as above but running with c-lightning node. Can run parrallel to the LND version. See deatils above.
 
-https://github.com/curly60e/pyblock/blob/master/README.md
+##### C-Lightning Sparko Webwallet
 
-##### Channel Tools (chantools)
 
-This tool provides helper functions that can be used to rescue funds locked in lnd channels in case lnd itself cannot run properly anymore.
-
-https://github.com/curly60e/pyblock/blob/master/README.md
-
-##### Download Bitcoin Whitepaper
-
-Extract the original Bitcoin Whitepaper as PDF directly from the blockchain of your node.
 
 #### SYSTEM: Monitoring & Configuration
 
