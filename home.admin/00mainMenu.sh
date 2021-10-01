@@ -120,7 +120,7 @@ if [ "${specter}" == "on" ]; then
   OPTIONS+=(SPECTER "Specter Desktop")
 fi
 if [ "${joinmarket}" == "on" ]; then
-  OPTIONS+=(JMARKET "JoinMarket")
+  OPTIONS+=(JM "JoinMarket with JoininBox")
 fi
 if [ "${faraday}" == "on" ]; then
   OPTIONS+=(FARADAY "Faraday Channel Management")
@@ -269,7 +269,7 @@ case $CHOICE in
         SPECTER)
             /home/admin/config.scripts/bonus.specter.sh menu
             ;;
-        JMARKET)
+        JM)
             sudo /home/admin/config.scripts/bonus.joinmarket.sh menu
             ;;
         FARADAY)
