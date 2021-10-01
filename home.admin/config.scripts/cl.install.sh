@@ -108,6 +108,9 @@ if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = testPR ];then
       else
         echo "# Updating to the latest commit in:"
         echo "# https://github.com/ElementsProject/lightning"
+        echo "# Make sure this is intended, there might be no way to downgrade your database"
+        echo "# Press ENTER to continue or CTRL+C to abort the update"
+        read -r key
       fi
     
     elif [ "$1" = "testPR" ]; then
@@ -207,6 +210,8 @@ always-use-proxy=true
   #############
   # logrotate #
   #############
+  echo
+  echo "# Set logrotate for ${netprefix}lightningd"
   echo "\
 /home/bitcoin/.lightning/${CLNETWORK}/cl.log
 {
@@ -228,8 +233,9 @@ always-use-proxy=true
   # sudo logrotate --debug /etc/logrotate.d/lightningd 
 
   echo
-  echo "# Adding aliases"
-  echo "\
+  if ! grep -Eq "${netprefix}lightning-cli" /home/admin/_aliases; then
+    echo "# Adding aliases"
+    echo "\
 alias ${netprefix}lightning-cli=\"sudo -u bitcoin /usr/local/bin/lightning-cli\
  --conf=${CLCONF}\"
 alias ${netprefix}cl=\"sudo -u bitcoin /usr/local/bin/lightning-cli\
@@ -239,7 +245,8 @@ alias ${netprefix}cllog=\"sudo\
 alias ${netprefix}clconf=\"sudo\
  nano ${CLCONF}\"
 " | sudo tee -a /home/admin/_aliases
-  sudo chown admin:admin /home/admin/_aliases
+    sudo chown admin:admin /home/admin/_aliases
+  fi
 
   echo "# The installed C-lightning version is: $(sudo -u bitcoin /usr/local/bin/lightningd --version)"
   echo   
