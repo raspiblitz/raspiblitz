@@ -61,7 +61,7 @@ function passwordToFile() {
   if [ $# -gt 0 ];then
     text="$1"
   else
-    text="Type or paste the decryption password for the $CHAIN C-lightning wallet"
+    text="Type or paste the decryption passwordC for the $CHAIN C-lightning wallet"
   fi
   # write password into a file in memory
   # trap to delete on any exit
@@ -113,7 +113,7 @@ function encryptHSMsecret() {
   if [ ${#walletPassword} -eq 0 ];then
     # ask for password in dialog if $walletPassword is not given in $3
     sudo /home/admin/config.scripts/blitz.setpassword.sh x \
-     "Enter the password to encrypt the C-lightning wallet file (hsm_secret)" \
+     "Enter the password C to encrypt the C-lightning wallet file (hsm_secret)" \
      "$passwordFile"
     sudo chown bitcoin:bitcoin $passwordFile
     sudo chmod 600 $passwordFile
