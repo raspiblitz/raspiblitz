@@ -538,7 +538,7 @@ Keysend is a feature of LND that allows your node to accept payments without hav
 ##### Testnet
 
 It is very convenient to learn and test to play around in a "sandbox" environment. RaspiBlitz allows this through the "Testnet" setting.
-You can freely switch from prod environemt (running on BITCOIN MAINNET) to test environment (running on BITCOIN TESTNET) and back using this setting. 
+You can freely switch from prod environment (running on BITCOIN MAINNET) to test environment (running on BITCOIN TESTNET) and back using this setting. 
 The state of your environments is restored everytime you switch (blockchain, wallets, channels) which is very convenient and safe.
 Note however that switching from one environment to the other requires an auto resynchronisation with the corresponding blockchain (MAINNET or TESTNET) and can take some time (e.x. If you switch for the first time to "Testnet" the initial sync of the TESTNET blockchain may take several hours; also if you switch back and forth environment the corresponding blockchain must catchup from where it left before switching.
 
@@ -558,7 +558,7 @@ IMPORTANT: Presently BTCPay Server service is NOT supported on TESTNET (RPC conn
 
 ##### Circuitbreaker (LND Firewall)
 
-Not everybody is acting friendly in the Lightning network. Circuitbreaker is a background service you cann activate that acts similar to a firewall to protect your now better. For details see: https://github.com/lightningequipment/circuitbreaker/blob/master/README.md
+Not everybody is acting friendly in the Lightning network. Circuitbreaker is a background service you can activate that acts similar to a firewall to protect your now better. For details see: https://github.com/lightningequipment/circuitbreaker/blob/master/README.md
 
 ##### LND Auto-Unlock
 
