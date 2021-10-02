@@ -59,7 +59,7 @@ fi
 if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ]; then
   OPTIONS+=(c 'C-Lightning RTL Webinterface' ${crtlWebinterface})
   OPTIONS+=(k 'C-Lightning Sparko WebWallet' ${sparko})
-  OPTIONS+=(m 'C-Lightning Spark Wallet' ${spark})
+  OPTIONS+=(n 'C-Lightning Spark Wallet' ${spark})
 fi
 
 CHOICES=$(dialog --title ' Additional Mainnet Services ' \
@@ -499,7 +499,7 @@ else
 fi
 
 # spark wallet process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "m")
+choice="off"; check=$(echo "${CHOICES}" | grep -c "n")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${spark}" != "${choice}" ]; then
   echo "# Spark Wallet on mainnet Setting changed .."
