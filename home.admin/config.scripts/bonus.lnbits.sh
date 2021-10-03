@@ -85,7 +85,7 @@ if [ "$1" = "status" ]; then
   if [ "${LNBits}" = "on" ]; then
     echo "installed=1"
 
-    localIP=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+    localIP=$(hostname -I | awk '{print $1}')
     echo "localIP='${localIP}'"
     echo "httpPort='5000'"
     echo "httpsPort='5001'"
@@ -270,7 +270,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo rm /home/lnbits/lnbits/.env 2>/dev/null
     sudo -u lnbits touch /home/lnbits/lnbits/.env
     sudo bash -c "echo 'QUART_APP=lnbits.app:create_app()' >> /home/lnbits/lnbits/.env"
-    sudo bash -c "echo 'LNBITS_FORCE_HTTPS=1' >> /home/lnbits/lnbits/.env"
+    sudo bash -c "echo 'LNBITS_FORCE_HTTPS=0' >> /home/lnbits/lnbits/.env"
     sudo bash -c "echo 'LNBITS_BACKEND_WALLET_CLASS=LndRestWallet' >> /home/lnbits/lnbits/.env"
     sudo bash -c "echo 'LND_REST_ENDPOINT=https://127.0.0.1:8080' >> /home/lnbits/lnbits/.env"
     sudo bash -c "echo 'LND_REST_CERT=' >> /home/lnbits/lnbits/.env"
@@ -315,8 +315,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
 [Unit]
 Description=lnbits
-Wants=lnd.service
-After=lnd.service
+Wants=bitcoind.service
+After=bitcoind.service
 
 [Service]
 WorkingDirectory=/home/lnbits/lnbits
@@ -327,6 +327,12 @@ TimeoutSec=120
 RestartSec=30
 StandardOutput=null
 StandardError=journal
+
+# Hardening measures
+PrivateTmp=true
+ProtectSystem=full
+NoNewPrivileges=true
+PrivateDevices=true
 
 [Install]
 WantedBy=multi-user.target
