@@ -4,13 +4,15 @@ network=mainnet
 chain=bitcoin
 
 if [ "$1" = "-menu" ]; then
+  trap 'rm -f "$_temp"' EXIT
+  trap 'rm -f "$_error"' EXIT
   _temp=$(mktemp -p /dev/shm/)
   _error=$(mktemp -p /dev/shm/)
 
   # load raspiblitz config data (with backup from old config)
   source /home/admin/raspiblitz.info
   source /mnt/hdd/raspiblitz.conf
-  if [ ${#network} -eq 0 ]; then network=`cat .network`; fi
+  if [ ${#network} -eq 0 ]; then network=$(cat .network); fi
   if [ ${#network} -eq 0 ]; then network="bitcoin"; fi
   if [ ${#chain} -eq 0 ]; then
     echo "gathering chain info ... please wait"

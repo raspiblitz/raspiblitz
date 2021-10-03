@@ -19,23 +19,29 @@ if [ "${parameter}" == "on" ]; then
 
   # store to raspiblitz config (delete old line / add new)
   sudo sed -i '/lndExtraParameter=.*/d' /mnt/hdd/raspiblitz.conf
-  echo "lndExtraParameter='--accept-keysend'" >> /mnt/hdd/raspiblitz.conf
+  sudo sed -i '/lndKeysend=.*/d' /mnt/hdd/raspiblitz.conf
+  echo "lndKeysend=on" >> /mnt/hdd/raspiblitz.conf
 
   echo "# OK - keysend feature is switched ON"
+  echo "# will be enfored by lnd.check.sh prestart"
   echo "# LND or RaspiBlitz needs restart"
 
 elif [ "${parameter}" == "off" ]; then
 
  # just remove the parameter from the config file
  sudo sed -i '/lndExtraParameter=.*/d' /mnt/hdd/raspiblitz.conf
+ sudo sed -i '/lndKeysend=.*/d' /mnt/hdd/raspiblitz.conf
+ sudo sed -i '/accept-keysend=.*/d' /mnt/hdd/lnd/lnd.conf 2>/dev/null
+ sudo sed -i '/accept-keysend=.*/d' /mnt/hdd/lnd/tlnd.conf 2>/dev/null
+ sudo sed -i '/accept-keysend=.*/d' /mnt/hdd/lnd/slnd.conf 2>/dev/null
 
- echo "# OK - keysend feature is switched OFF"
+ echo "# OK - keysend enforcement is switched OFF"
  echo "# LND or RaspiBlitz needs restart"
 
 elif [ "${parameter}" == "status" ]; then
 
-  keysendOn=$(echo "${lndExtraParameter}" | grep -c 'accept-keysend')
-  keysendRunning=$(sudo systemctl status lnd | grep -c 'accept-keysend')
+  keysendOn=$(sudo cat /mnt/hdd/raspiblitz.conf | grep -c '^lndKeysend=on')
+  keysendRunning=$(sudo cat /mnt/hdd/lnd/lnd.conf | grep -c '^accept-keysend\=true')
   echo "keysendOn=${keysendOn}"
   echo "keysendRunning=${keysendRunning}"
 

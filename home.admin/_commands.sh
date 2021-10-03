@@ -1,17 +1,74 @@
 #!/bin/bash
 
-# SHORTCUT COMMANDS you can call as user 'admin' from terminal
+# source aliases from /home/admin/_aliases
+if [ -f /home/admin/_aliases ];then
+  source /home/admin/_aliases
+fi
 
-# command: raspiblitz
-# calls the the raspiblitz mainmenu (legacy)
-function raspiblitz() {
-  cd /home/admin
-  ./00raspiblitz.sh
-}
+# SHORTCUT COMMANDS you can call as user 'admin' from terminal
 
 # command: blitz
 # calls the the raspiblitz mainmenu (shortcut)
 function blitz() {
+  cd /home/admin
+  ./00raspiblitz.sh
+}
+
+# command: blitzhelp
+# gives overview of commands
+function blitzhelp() {
+  echo
+  echo "Blitz commands are consolidated here."
+  echo
+  echo "Menu access:"
+  echo "  raspiblitz   menu"
+  echo "  menu         menu"
+  echo "  bash         menu"
+  echo "  repair       menu > repair"
+  echo
+  echo "Checks:"
+  echo "  status       informational Blitz status screen"
+  echo "  sourcemode   copy blockchain source modus"
+  echo "  check        check if Blitz configuration files are correct"
+  echo "  debug        print debug logs"
+  echo "  debug   -l   print debug logs with bin link"
+  echo "  patch        sync scripts with latest set github and branch"
+  echo "  github       jumping directly into the options to change branch/repo/pr"
+  echo
+  echo "Power:"
+  echo "  restart      restart the node"
+  echo "  off          shutdown the node"
+  echo
+  echo "Display:"
+  echo "  hdmi         switch video output to HDMI"
+  echo "  lcd          switch video output to LCD"
+  echo "  headless     switch video output to HEADLESS"
+  echo
+  echo "BTC tx:"
+  echo "  torthistx    broadcast transaction through Tor to Blockstreams API and into the network"
+  echo "  gettx        retrieve transaction from mempool or blockchain and print as JSON"
+  echo "  watchtx      retrieve transaction from mempool or blockchain until certain confirmation target"
+  echo
+  echo "LND:"
+  echo "  balance      your satoshi balance"
+  echo "  channels     your lightning channels"
+  echo "  fwdreport    show forwarding report"
+  echo
+  echo "Users:"
+  echo "  bos          Balance of Satoshis"
+  echo "  chantools    ChanTools"
+  echo "  lit          Lightning Terminal"
+  echo "  jm           JoinMarket"
+  echo "  pyblock      PyBlock"
+  echo
+  echo "Extras:"
+  echo "  whitepaper   download the whitepaper from the blockchain to /home/admin/bitcoin.pdf"
+  echo "  notifyme     wrapper for blitz.notify.sh that will send a notification using the configured method and settings"
+}
+
+# command: raspiblitz
+# calls the the raspiblitz mainmenu (legacy)
+function raspiblitz() {
   cd /home/admin
   ./00raspiblitz.sh
 }
@@ -32,14 +89,12 @@ function repair() {
 
 # command: restart
 function restart() {
-  cd /home/admin
-  ./XXshutdown.sh reboot
+  /home/admin/config.scripts/blitz.shutdown.sh reboot
 }
 
 # command: sourcemode
 function sourcemode() {
-  cd /home/admin
-  ./98repairMenu.sh sourcemode
+  /home/admin/config.scripts/blitz.copychain.sh source
 }
 
 # command: check
@@ -47,23 +102,31 @@ function check() {
   /home/admin/config.scripts/blitz.configcheck.py
 }
 
+# command: release
+function release() {
+  /home/admin/config.scripts/blitz.preparerelease.sh
+}
+
 # command: debug
 function debug() {
-  cd /home/admin
-  ./XXdebugLogs.sh
+  echo "Printing debug logs. Be patient, this should take maximum 2 minutes ..."
+  if [[ $1 = "-l" ]]; then
+    /home/admin/config.scripts/blitz.debug.sh > /var/cache/raspiblitz/debug.log && cat /var/cache/raspiblitz/debug.log | torsocks nc termbin.com 9999
+  else
+    /home/admin/config.scripts/blitz.debug.sh > /var/cache/raspiblitz/debug.log && cat /var/cache/raspiblitz/debug.log
+  fi
 }
 
 # command: patch
 # syncs script with latest set github and branch
 function patch() {
   cd /home/admin
-  ./XXsyncScripts.sh -run
+  /home/admin/config.scripts/blitz.github.sh -run
 }
 
 # command: off
 function off() {
-  cd /home/admin
-  ./XXshutdown.sh
+  /home/admin/config.scripts/blitz.shutdown.sh
 }
 
 # command: github
@@ -94,20 +157,6 @@ function headless() {
   restart
 }
 
-# command: manage
-function manage() {
-  if [ $(cat /mnt/hdd/raspiblitz.conf 2>/dev/null | grep -c "lndmanage=on") -eq 1 ]; then
-    cd /home/admin/lndmanage
-    source venv/bin/activate
-    echo "NOTICE: Needs at least one active channel to run without error."
-    echo "to exit (venv) enter ---> deactivate"
-    lndmanage
-  else
-    echo "lndmanage not installed - to install run:"
-    echo "sudo /home/admin/config.scripts/bonus.lndmanage.sh on"
-  fi
-}
-
 # command: torthistx
 function torthistx() {
   if [ $(cat /mnt/hdd/raspiblitz.conf 2>/dev/null | grep -c "runBehindTor=on") -eq 1 ]; then
@@ -123,7 +172,24 @@ function torthistx() {
 # start the status screen in the terminal
 function status() {
   echo "Gathering data - please wait a moment..."
-  sudo -u pi /home/admin/00infoLCD.sh --pause 0
+  while :
+  do
+    # show the same info as on LCD screen
+    # 00infoBlitz.sh <cl|lnd> <testnet|mainnet|signet>
+    /home/admin/00infoBlitz.sh $1 $2
+    # wait 6 seconds for user exiting loop
+    #echo
+    #echo -en "Screen is updating in a loop .... press 'x' now to get back to menu."
+    read -n 1 -t 6 keyPressed
+    #echo -en "\rGathering information to update info ... please wait.                \n"  
+    # check if user wants to abort session
+    if [ "${keyPressed}" = "x" ]; then
+      echo
+      echo "Returning to menu ....."
+      sleep 4
+      break
+    fi
+  done
 }
 
 # command: lnbalance
@@ -204,21 +270,6 @@ function jm() {
   fi
 }
 
-# command: faraday
-# switch to the faraday user for the Faraday Service
-function faraday() {
-  if [ $(grep -c "faraday=on"  < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
-    echo "# switching to the faraday user with the command: 'sudo su - faraday'"
-    echo "# use command 'exit' and then 'raspiblitz' to return to menu"
-    echo "# use command 'frcli --help' now to get more info"
-    sudo su - faraday
-    echo "# use command 'raspiblitz' to return to menu"
-  else
-    echo "Faraday is not installed - to install run:"
-    echo "/home/admin/config.scripts/bonus.faraday.sh on"
-  fi
-}
-
 # command: lit
 # switch to the lit user for the loop, pool & faraday services
 function lit() {
@@ -249,36 +300,6 @@ if [ -f "/mnt/hdd/raspiblitz.conf" ] && [ $(grep -c "lit=on"  < /mnt/hdd/raspibl
     --tlscertpath=/home/lit/.lit/tls.cert \	
     --macaroonpath=/home/lit/.pool/${chain}net/pool.macaroon"
 fi
-
-# command: loop
-# switch to the loop user for the Lightning Loop Service
-function loop() {
-  if [ $(grep -c "loop=on"  < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
-    echo "# switching to the loop user with the command: 'sudo su - loop'"
-    echo "# use command 'exit' and then 'raspiblitz' to return to menu"
-    echo "# use command 'loop --help' now to get more info"
-    sudo su - loop
-    echo "# use command 'raspiblitz' to return to menu"
-  else
-    echo "Lightning Loop is not installed - to install run:"
-    echo "/home/admin/config.scripts/bonus.loop.sh on"
-  fi
-}
-
-# command: pool
-# switch to the pool user for the Pool Service
-function pool() {
-  if [ $(grep -c "pool=on"  < /mnt/hdd/raspiblitz.conf) -gt 0 ]; then
-    echo "# switching to the pool user with the command: 'sudo su - pool'"
-    echo "# use command 'exit' and then 'raspiblitz' to return to menu"
-    echo "# use command 'pool --help' now to get more info"
-    sudo su - pool
-    echo "# use command 'raspiblitz' to return to menu"
-  else
-    echo "Pool is not installed - to install run:"
-    echo "/home/admin/config.scripts/bonus.pool.sh on"
-  fi
-}
 
 # command: gettx
 # retrieve transaction from mempool or blockchain and print as JSON
@@ -341,6 +362,21 @@ function notifyme() {
 # command: whitepaper
 # downloads the whitepaper from the blockchain to /home/admin/bitcoin.pdf
 function whitepaper() {
-  cd /home/admin/config.scripts
-  ./bonus.whitepaper.sh on
+  cd /home/admin
+  ./config.scripts/bonus.whitepaper.sh on
+}
+
+# command: qr ["string"]
+# shows a QR code from the string
+function qr() {
+  if [ ${#1} -eq 0 ]; then
+    echo "# Error='missing string'"
+  fi
+  echo
+  echo "Displaying the text:"
+  echo "$1"
+  echo
+  qrencode -t ANSIUTF8 "${1}"
+  echo "(To shrink QR code: MacOS press CMD- / Linux press CTRL-)"
+  echo
 }

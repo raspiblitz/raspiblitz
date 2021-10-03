@@ -116,10 +116,15 @@ ExecStart=/home/loop/go/bin/loopd --network=${chain}net ${proxy}
 User=loop
 Group=loop
 Type=simple
-KillMode=process
 TimeoutSec=60
 Restart=always
 RestartSec=60
+
+# Hardening measures
+PrivateTmp=true
+ProtectSystem=full
+NoNewPrivileges=true
+PrivateDevices=true
 
 [Install]
 WantedBy=multi-user.target
@@ -130,6 +135,9 @@ WantedBy=multi-user.target
   else 
     echo "# The Loop service already installed."
   fi
+
+  # in case RTL is installed - check to connect
+  sudo /home/admin/config.scripts/bonus.rtl.sh connect-services
 
   # setting value in raspi blitz config
   sudo sed -i "s/^loop=.*/loop=on/g" /mnt/hdd/raspiblitz.conf

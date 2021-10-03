@@ -1,62 +1,101 @@
 #!/bin/bash
+trap 'rm -f "$_temp"' EXIT
+trap 'rm -f "$_error"' EXIT
 _temp=$(mktemp -p /dev/shm/)
 _error=$(mktemp -p /dev/shm/)
 
 # load raspiblitz config data (with backup from old config)
 source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
-if [ ${#network} -eq 0 ]; then network=`cat .network`; fi
+if [ ${#network} -eq 0 ]; then network=$(cat .network); fi
 if [ ${#network} -eq 0 ]; then network="bitcoin"; fi
 if [ ${#chain} -eq 0 ]; then
   echo "gathering chain info ... please wait"
   chain=$(${network}-cli getblockchaininfo | jq -r '.chain')
 fi
 
-echo ""
-echo "*** Precheck ***"
+source <(/home/admin/config.scripts/network.aliases.sh getvars $1 $2)
 
-# check if chain is in sync
-chainInSync=$(lncli --chain=${network} --network=${chain}net getinfo | grep '"synced_to_chain": true' -c)
-if [ ${chainInSync} -eq 0 ]; then
-  echo "FAIL - 'lncli getinfo' shows 'synced_to_chain': false"
-  echo "Wait until chain is sync with LND and try again."
-  echo ""
-  echo "Press ENTER to return to main menu."
+echo
+echo "# Precheck" # PRECHECK) check if chain is in sync
+if [ $LNTYPE = cl ];then
+  BLOCKHEIGHT=$($bitcoincli_alias getblockchaininfo|grep blocks|awk '{print $2}'|cut -d, -f1)
+  CLHEIGHT=$($lightningcli_alias getinfo | jq .blockheight)
+  if [ $BLOCKHEIGHT -eq $CLHEIGHT ];then
+    chainOutSync=0
+  else
+    chainOutSync=1
+  fi
+elif [ $LNTYPE = lnd ];then
+  chainOutSync=$($lncli_alias getinfo | grep '"synced_to_chain": false' -c)
+fi
+if [ ${chainOutSync} -eq 1 ]; then
+  if [ $LNTYPE = cl ];then
+    echo "# FAIL PRECHECK - 'lightning-cli getinfo' blockheight is different from 'bitcoind getblockchaininfo' - wait until chain is sync "
+  elif [ $LNTYPE = lnd ];then
+    echo "# FAIL PRECHECK - lncli getinfo shows 'synced_to_chain': false - wait until chain is sync "  
+  fi
+  echo 
+  echo "# PRESS ENTER to return to menu"
   read key
-  exit 1
+  exit 0
+else
+  echo "# OK - the chain is synced"
 fi
 
 # check available funding
-confirmedBalance=$(lncli --chain=${network} --network=${chain}net walletbalance | grep '"confirmed_balance"' | cut -d '"' -f4)
+if [ $LNTYPE = cl ];then
+  for i in $($lightningcli_alias \
+  listfunds|jq .outputs[]|jq 'select(.status=="confirmed")'|grep value|awk '{print $2}'|cut -d, -f1);do
+    confirmedBalance=$((confirmedBalance+i))
+  done
+elif [ $LNTYPE = lnd ];then
+  confirmedBalance=$($lncli_alias walletbalance | grep '"confirmed_balance"' | cut -d '"' -f4)
+fi
+
 if [ ${confirmedBalance} -eq 0 ]; then
   echo "FAIL - You have 0 SATOSHI in your confirmed LND On-Chain Wallet."
   echo "Please fund your on-chain wallet first and wait until confirmed."
-  echo ""
+  echo
   echo "Press ENTER to return to main menu."
   read key
-  exit 1
+  exit 0
 fi
 
 # check number of connected peers
-numConnectedPeers=$(lncli --chain=${network} --network=${chain}net listpeers | grep pub_key -c)
+if [ $LNTYPE = cl ];then
+  numConnectedPeers=$($lightningcli_alias listpeers | grep -c '"id":')
+elif [ $LNTYPE = lnd ];then
+  numConnectedPeers=$($lncli_alias listpeers | grep pub_key -c)
+fi
+
 if [ ${numConnectedPeers} -eq 0 ]; then
-  echo "FAIL - no peers connected on lightning network"
+  echo "FAIL - no peers connected on the lightning network"
   echo "You can only open channels to peer nodes to connected to first."
   echo "Use CONNECT peer option in main menu first."
-  echo ""
+  echo
   echo "Press ENTER to return to main menu."
   read key
-  exit 1
+  exit 0
 fi
 
 # let user pick a peer to open a channels with
 OPTIONS=()
-while IFS= read -r grepLine
-do
-  pubKey=$(echo ${grepLine} | cut -d '"' -f4)
-  #echo "grepLine(${pubKey})"
-  OPTIONS+=(${pubKey} "")
-done < <(lncli --chain=${network} --network=${chain}net listpeers | grep pub_key)
+if [ $LNTYPE = cl ];then
+  while IFS= read -r grepLine
+  do
+    pubKey=$(echo ${grepLine} | cut -d '"' -f4)
+    # echo "grepLine(${pubKey})"
+    OPTIONS+=(${pubKey} "")
+  done < <($lightningcli_alias listpeers | grep '"id":')
+elif [ $LNTYPE = lnd ];then
+  while IFS= read -r grepLine
+  do
+    pubKey=$(echo ${grepLine} | cut -d '"' -f4)
+    # echo "grepLine(${pubKey})"
+    OPTIONS+=(${pubKey} "")
+  done < <($lncli_alias listpeers | grep pub_key)
+fi
 TITLE="Open (Payment) Channel"
 MENU="\nChoose a peer you connected to, to open the channel with: \n "
 pubKey=$(dialog --clear \
@@ -68,11 +107,11 @@ pubKey=$(dialog --clear \
 
 clear
 if [ ${#pubKey} -eq 0 ]; then
- clear
- echo 
- echo "no channel selected - returning to menu ..."
- sleep 4
- exit 1
+  clear
+  echo 
+  echo "no channel selected - returning to menu ..."
+  sleep 4
+  exit 0
 fi
 
 # find out what is the minimum amount 
@@ -82,15 +121,17 @@ minSat=20000
 if [ "${network}" = "bitcoin" ]; then
   minSat=50000
 fi
-_error="./.error.out"
-lncli --chain=${network} openchannel --network=${chain}net ${CHOICE} 1 0 2>$_error
-error=`cat ${_error}`
-if [ $(echo "${error}" | grep "channel is too small" -c) -eq 1 ]; then
-  minSat=$(echo "${error}" | tr -dc '0-9')
+if [ $LNTYPE = lnd ];then
+  _error="./.error.out"
+  $lncli_alias openchannel ${pubkey} 1 0 2>$_error
+  error=$(cat ${_error})
+  if [ $(echo "${error}" | grep "channel is too small" -c) -eq 1 ]; then
+    minSat=$(echo "${error}" | tr -dc '0-9')
+  fi
 fi
 
 # let user enter an amount
-l1="Amount in SATOSHI to fund this channel:"
+l1="Amount in satoshis to fund this channel:"
 l2="min required  : ${minSat}"
 l3="max available : ${confirmedBalance}"
 dialog --title "Funding of Channel" \
@@ -101,7 +142,7 @@ if [ ${#amount} -eq 0 ]; then
   echo
   echo "no valid amount entered - returning to menu ..."
   sleep 4
-  exit 1
+  exit 0
 fi
 
 # let user enter a confirmation target
@@ -115,26 +156,31 @@ if [ ${#conf_target} -eq 0 ]; then
   echo
   echo "no valid target entered - returning to menu ..."
   sleep 4
-  exit 1
+  exit 0
 fi
 
 # build command
-command="lncli --chain=${network} --network=${chain}net openchannel --conf_target=${conf_target} ${pubKey} ${amount} 0"
-
+if [ $LNTYPE = cl ];then
+  # fundchannel id amount [feerate] [announce] [minconf] [utxos] [push_msat] [close_to]
+  feerate=$($bitcoincli_alias estimatesmartfee $conf_target |grep feerate|awk '{print $2}'|cut -c 5-7|bc)
+  command="$lightningcli_alias fundchannel ${pubKey} ${amount} $feerate"
+elif [ $LNTYPE = lnd ];then
+  command="$lncli_alias openchannel --conf_target=${conf_target} ${pubKey} ${amount} 0"
+fi
 # info output
 clear
 echo "******************************"
 echo "Open Channel"
 echo "******************************"
-echo ""
+echo
 echo "COMMAND LINE: "
 echo $command
-echo ""
+echo
 echo "RESULT:"
 
 # execute command
-result=$($command 2>$_error)
-error=`cat ${_error}`
+result=$(eval $command 2>$_error)
+error=$(cat ${_error})
 
 #echo "result(${result})"
 #echo "error(${error})"
@@ -149,20 +195,33 @@ else
   echo "WIN"
   echo "******************************"
   echo "${result}"
-  echo ""
-  echo "Whats next? --> You need to wait 3 confirmations, for the channel to be ready."
-  fundingTX=$(echo "${result}" | grep 'funding_txid' | cut -d '"' -f4)
+  echo
+  echo "What's next? --> You need to wait 3 confirmations for the channel to be ready."
+  if [ $LNTYPE = cl ];then
+    fundingTX=$(echo "${result}" | grep 'txid' | cut -d '"' -f4)
+  elif [ $LNTYPE = lnd ];then
+    fundingTX=$(echo "${result}" | grep 'funding_txid' | cut -d '"' -f4)
+  fi
+  echo
   if [ "${network}" = "bitcoin" ]; then
     if [ "${chain}" = "main" ]; then
-        echo "https://live.blockcypher.com/btc/tx/${fundingTX}"
-    else
-        echo "https://live.blockcypher.com/btc-testnet/tx/${fundingTX}"
+      #echo "https://live.blockcypher.com/btc/tx/${fundingTX}"
+      echo "https://mempool.space/tx/${fundingTX}"
+    elif [ "${chain}" = "test" ]||[ "${chain}" = "sig" ]; then
+      echo "https://mempool.space/${chain}net/tx/${fundingTX}"
+    fi
+    echo
+    echo "In the Tor Browser:"
+    if [ "${chain}" = "main" ]; then
+      echo "http://mempoolhqx4isw62xs7abwphsq7ldayuidyx2v2oethdhhj6mlo2r6ad.onion/tx/${fundingTX}"
+    elif [ "${chain}" = "test" ]||[ "${chain}" = "sig" ]; then
+      echo "http://mempoolhqx4isw62xs7abwphsq7ldayuidyx2v2oethdhhj6mlo2r6ad.onion/${chain}net/tx/${fundingTX}"
     fi
   fi
   if [ "${network}" = "litecoin" ]; then
     echo "https://live.blockcypher.com/ltc/tx/${fundingTX}/"
   fi
 fi
-echo ""
+echo
 echo "Press ENTER to return to main menu."
 read key

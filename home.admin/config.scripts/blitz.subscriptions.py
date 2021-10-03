@@ -271,7 +271,7 @@ def main():
     The IP2TOR service just makes sense if you run
     your RaspiBlitz behind TOR.
             ''', title="Info")
-            sys.exit(1)
+            sys.exit(0)
 
         os.system("clear")
         print("please wait ..")
@@ -311,8 +311,12 @@ def main():
 
         # check if Sphinx-Relay is installed
         sphinx_relay = False
-        status_data = subprocess.run(['/home/admin/config.scripts/bonus.sphinxrelay.sh', 'status'],
-                                     stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
+        try:
+            status_data = subprocess.run(['/home/admin/config.scripts/bonus.sphinxrelay.sh', 'status'], 
+                stdout=subprocess.PIPE, timeout=10).stdout.decode('utf-8').strip()
+        except Exception as e:
+            print(e)
+            
         if status_data.find("installed=1") > -1:
             sphinx_relay = True
 
@@ -405,7 +409,7 @@ def main():
             except Exception as e:
                 print(e)
                 time.sleep(3)
-                sys.exit(1)
+                sys.exit(0)
 
         # run creating a new IP2TOR subscription
         os.system("clear")

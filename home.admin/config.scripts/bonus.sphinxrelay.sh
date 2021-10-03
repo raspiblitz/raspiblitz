@@ -40,6 +40,30 @@ if [ "$1" = "menu" ]; then
 	  fi
   fi
 
+  # ask if user wants to use tor
+  if [ ${connection} = "localnetwork" ] && [ "${sphinxrelay_connection}" == "" ] && [ "${runBehindTor}" == "on" ]; then
+
+    whiptail --title " Connect over Tor " \
+    --yes-button "Use Tor" \
+    --no-button "Other Options" \
+    --yesno "\nYou can connect Sphinx App over Tor. Its build in for iOS and on Android you need to use it together with the Orbot App." 10 72
+    if [ "$?" != "1" ]; then
+      echo "sphinxrelay_connection='tor'" >> /mnt/hdd/raspiblitz.conf
+      echo "Please wait (+1min) ... restarting sphinx relay to use tor"
+      sudo systemctl restart sphinxrelay
+      sleep 60
+      # reload status
+      source <(sudo /home/admin/config.scripts/bonus.sphinxrelay.sh status)
+	  else
+      # other options (dont set sphinxrelay_connection)
+      echo "OK - keep as it is"
+    fi
+
+  elif [ "${sphinxrelay_connection}" == "tor" ]; then
+    dialog --title " Tor Info " --msgbox "\nYou are using Sphinx App over Tor. If you want to try other options you need to deinstall & reinstall the Sphinx Relay." 10 40
+    clear
+  fi
+
   extraPairInfo=""
   text="Go to https://sphinx.chat and download the Sphinx Chat app."
 
@@ -72,6 +96,12 @@ MAINMENU > SUBSCRIBE & add LetsEncrypt HTTPS Domain"
 Public Domain: ${publicURL}
 port forwarding on router needs to be active & may change port"
 
+  # When Tor
+  elif [ ${connection} = "tor" ]; then
+     text="${text}\n
+Tor Connection: ${publicURL}
+iOS support is native, Android needs Orbot"
+
   # When nothing advise 
   elif [ ${connection} = "localnetwork" ]; then
     text="${text}\n
@@ -89,7 +119,7 @@ MAINMENU > SUBSCRIBE > IP2TOR > SPHINX"
 
   text="${text}\n\nUse 'Connect App' to pair Sphinx App with RaspiBlitz."
 
-  whiptail --title " SPHINX RELAY " --yes-button "Connect App" --no-button "Back" --yesno "${text}" 15 69
+  whiptail --title " SPHINX RELAY " --yes-button "Connect App" --no-button "Back" --yesno "${text}" 15 76
   response=$?
   if [ "${response}" == "1" ]; then
       echo "please wait ..."
@@ -139,7 +169,7 @@ ${publicURL}"
 		--no-button "Show QR Code" \
 		--yesno "Open the Sphinx Chat app & scan the QR code displayed on the LCD. If you dont have a RaspiBlitz with LCD choose 'Show QR Code'.\n
 The connection string can also be copied if needed: ${connectionCode}\n
-${extraPairInfo}" 16 70
+${extraPairInfo}" 17 76
 	  if [ $? -eq 1 ]; then
       clear
       qrencode -t ANSI256 "${connectionCode}"
@@ -199,7 +229,7 @@ if [ "$1" = "status" ]; then
     echo "installed=0"
   fi
 
-  localIP=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+  localIP=$(hostname -I | awk '{print $1}')
   echo "localIP='${localIP}'"
   echo "httpsPort='3301'"
   echo "httpPort='3300'"
@@ -287,7 +317,12 @@ if [ "$1" = "status" ]; then
     connection="dns&selfsigned"
     publicURL="https://${dynDomain}:3301"
 
-  # 5) LOCAL NETWORK (just HTTP)
+  # 5) just over Tor
+  elif [ "${runBehindTor}" == "on" ] && [ "${sphinxrelay_connection}" == "tor" ]; then
+    connection="tor"
+    publicURL="http://${toraddress}:80"
+  
+  # 6) LOCAL NETWORK (just HTTP)
   else
     connection="localnetwork"
     publicURL="http://${localIP}:3300"
@@ -303,7 +338,11 @@ if [ "$1" = "status" ]; then
 
   # test connection (accept self-signed certs here) ... calling the url /app should return INDEX
   connectionTest="n/a"
-  connectionResponse=$(wget --no-check-certificate -qO- ${publicURL}/app 2>/dev/null)
+  if [ "${sphinxrelay_connection}" == "tor" ]; then
+    connectionResponse=$(torsocks wget --no-check-certificate -qO- ${publicURL}/app 2>/dev/null)
+  else
+    connectionResponse=$(wget --no-check-certificate -qO- ${publicURL}/app 2>/dev/null)
+  fi
   if [ "${connectionResponse}" == "INDEX" ]; then
     connectionTest="OK"
   else
@@ -442,6 +481,12 @@ RestartSec=30
 StandardOutput=journal
 StandardError=journal
 
+# Hardening measures
+PrivateTmp=true
+ProtectSystem=full
+NoNewPrivileges=true
+PrivateDevices=true
+
 [Install]
 WantedBy=multi-user.target
 EOF
@@ -540,7 +585,8 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # setting value in raspi blitz config
   sudo sed -i "s/^sphinxrelay=.*/sphinxrelay=off/g" /mnt/hdd/raspiblitz.conf
-
+  sudo sed -i "/^sphinxrelay_connection=.*/d" /mnt/hdd/raspiblitz.conf
+  
   # remove nginx symlinks
   sudo rm -f /etc/nginx/sites-enabled/sphinxrelay_ssl.conf
   sudo rm -f /etc/nginx/sites-enabled/sphinxrelay_tor.conf

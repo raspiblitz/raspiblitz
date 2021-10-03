@@ -4,11 +4,11 @@ echo "************* Vagrant Provisioning ********************"
 
 echo 'Syncing local code with RaspiBlitzVM'
 
-# make sure the latest sync script is in place
-cp /vagrant/home.admin/XXsyncScripts.sh /home/admin/XXsyncScripts.sh
+# make sure the lastest sync script is in place
+cp /vagrant/home.admin/config.scripts/blitz.github.sh /home/admin/config.scripts/blitz.github.sh
 
 # execute 'patch' command to sync laptop with VM
-/home/admin/XXsyncScripts.sh -run
+/home/admin/config.scripts/blitz.github.sh -run
 
 source <(/home/admin/config.scripts/internet.sh status)
 
