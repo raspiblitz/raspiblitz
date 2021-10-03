@@ -519,7 +519,7 @@ Keysend is a feature of LND that allows your node to accept payments without hav
 
 ##### LND Circuitbreaker (Firewall for LND)
 
-Not everybody is acting friendly in the Lightning network. Circuitbreaker is a background service you cann activate that acts similar to a firewall to protect your now better. For details see: https://github.com/lightningequipment/circuitbreaker/blob/master/README.md
+Not everybody is acting friendly in the Lightning network. Circuitbreaker is a background service you can activate that acts similar to a firewall to protect your now better. For details see: https://github.com/lightningequipment/circuitbreaker/blob/master/README.md
 
 ##### LND Auto-Unlock
 
