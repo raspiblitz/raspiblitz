@@ -64,7 +64,7 @@ After=network.target
 WorkingDirectory=/home/admin/blitz_api
 # before every start update the config with latest credentials/settings
 ExecStartPre=-/home/admin/config.scripts/blitz.web.api.sh update-config
-ExecStart=sudo -u admin /usr/bin/python -m uvicorn main:app --reload --port 11111 --host=0.0.0.0 --root-path /api
+ExecStart=sudo -u admin /usr/bin/python -m uvicorn app.main:app --port 11111 --host=0.0.0.0 --root-path /api
 User=root
 Group=root
 Type=simple
