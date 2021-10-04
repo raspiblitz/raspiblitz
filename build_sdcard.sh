@@ -947,7 +947,7 @@ echo "*** PREPARING LIGHTNING ***"
 ## based on https://stadicus.github.io/RaspiBolt/raspibolt_40_lnd.html#lightning-lnd
 ## see LND releases: https://github.com/lightningnetwork/lnd/releases
 ## !!!! If you change here - make sure to also change interims version in lnd.update.sh !!!
-lndVersion="0.13.1-beta"
+lndVersion="0.13.3-beta"
 
 # olaoluwa
 PGPauthor="roasbeef"

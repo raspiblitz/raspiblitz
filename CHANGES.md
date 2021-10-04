@@ -13,7 +13,7 @@
 - New: Allow SphinxApp to connect over Tor
 - New: Parallel TESTNET & SIGNET services 
 - Update: Bitcoin Core v22.0 [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-22.0.md)
-- Update: LND v0.13.1 [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.13.1-beta)
+- Update: LND v0.13.3 [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.13.3-beta)
 - Update: Specter Desktop 1.6.0 [details](https://github.com/cryptoadvance/specter-desktop/blob/master/README.md)
 - Update: JoinMarket v0.9.2 [details](https://github.com/JoinMarket-Org/joinmarket-clientserver/releases/tag/v0.9.2)
 - Update: JoininBox v0.6.1 [details](https://github.com/openoms/joininbox/releases/tag/v0.6.1)
