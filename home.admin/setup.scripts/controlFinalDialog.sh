@@ -40,8 +40,8 @@ if [ "${syncProgressFull}" != "" ] && [ "${network}" == "bitcoin" ] && [ ${syncP
   # offer choice to copy blockchain over LAN
   OPTIONS=()
   OPTIONS+=(SELFSYNC "Run full self sync/validation (takes long)")
-  OPTIONS+=(COPY "Copy from Computer/RaspiBlitz over LAN (±6h)")
-  CHOICESUB=$(dialog --backtitle "RaspiBlitz" --clear --title " Blockchain Sync/Validation " --menu "\nYour Blockchain sync is just at ${syncProgress}%\nThe full validation might take multiple days to finish.\n\nHow do you want to proceed:" 13 63 7 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+  OPTIONS+=(COPY "Copy from Computer/RaspiBlitz over LAN (3-10h)")
+  CHOICESUB=$(dialog --backtitle "RaspiBlitz" --clear --title " Blockchain Sync/Validation " --menu "\nYour Blockchain sync is just at ${syncProgress}%\nThe full validation might take multiple days to finish.\n\nHow do you want to proceed:" 13 66 7 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
   if [ "${CHOICESUB}" == "COPY" ]; then
     /home/admin/config.scripts/blitz.copychain.sh target
