@@ -37,19 +37,19 @@ if [ ${mode} = "lnd-export" ]; then
   downloadPath="/home/admin"
   fileowner="admin"
 
-  # stop LND
-  echo "# Stopping lnd..."
-  sudo systemctl stop lnd
-  sleep 5
-  echo "# OK"
-  echo 
-
   # add lnd version info into lnd dir (to detect needed updates later)
-  lndVersion=$(sudo -u bitcoin lncli getinfo | jq -r ".version" | cut -d ' ' -f1)
+  lndVersion=$(sudo -u bitcoin lncli getinfo 2>/dev/null | jq -r ".version" | cut -d ' ' -f1)
   sudo rm /mnt/hdd/lnd/version.info 2>/dev/null
   echo "${lndVersion}" > /home/admin/lnd.version.info
   sudo mv /home/admin/lnd.version.info /mnt/hdd/lnd/version.info
   sudo chown bitcoin:bitcoin /mnt/hdd/lnd/version.info
+
+  # stop LND
+  echo "# Stopping lnd..."
+  sudo systemctl stop lnd 2>/dev/null
+  sleep 5
+  echo "# OK"
+  echo 
 
   # zip it
   sudo tar -zcvf ${downloadPath}/lnd-rescue.tar.gz /mnt/hdd/lnd 1>&2
