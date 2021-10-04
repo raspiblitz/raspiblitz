@@ -760,8 +760,11 @@ if [ ${isMounted} -eq 0 ]; then
   # AFTER SETUP REBOOT
   # touchscreen activation, start with configured SWAP, fix LCD text bug
   sudo cp /home/admin/raspiblitz.log /home/admin/raspiblitz.setup.log
-  /home/admin/config.scripts/blitz.shutdown.sh reboot finalsetup
-  sleep 100
+  timeout 60 /home/admin/config.scripts/blitz.shutdown.sh reboot finalsetup
+  sleep 10
+  # if system has not rebooted yet - force reboot directly
+  sudo shutdown -r now
+  sleep 60
   exit 0
 
 else
