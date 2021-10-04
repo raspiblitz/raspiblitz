@@ -5,7 +5,7 @@
 # https://github.com/openoms/bitcoin-tutorials/tree/master/joinmarket
 # https://github.com/openoms/joininbox
 
-JBVERSION="v0.6.0"
+JBVERSION="v0.6.1" # with JoinMarket v0.9.2
 PGPsigner="openoms"
 PGPpkeys="https://keybase.io/oms/pgp_keys.asc"
 PGPcheck="13C688DB5B9C745DE4D2E4545BFB77609B081B65"
