@@ -199,7 +199,8 @@ do
   #####################################
   if [ "${lightning}" == "" ]; then syncedToChain=1; fi
   if [ "${setupPhase}" == "done" ] && [ "${state}" == "ready" ] && [ "${syncedToChain}" != "1" ]; then
-    /home/admin/setup.scripts/eventBlockchainSync.sh ssh loop
+    /home/admin/setup.scripts/eventBlockchainSync.sh ssh
+    sleep 10
     continue
   fi
 
