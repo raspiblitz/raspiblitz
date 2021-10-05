@@ -24,6 +24,7 @@ function setting() # FILE LINENUMBER NAME VALUE
   NAME=$3
   VALUE=$4
   settingExists=$(cat ${FILE} | grep -c "^${NAME}=")
+  echo "# setting ${FILE} ${LINENUMBER} ${NAME} ${VALUE}"
   echo "# ${NAME} exists->(${settingExists})"
   if [ "${settingExists}" == "0" ]; then
     echo "# adding setting (${NAME})"
@@ -114,6 +115,7 @@ if [ "$1" == "prestart" ]; then
   fi
 
   # SET/UPDATE zmqpubrawtx
+  echo "# zmqpubrawtx insert/update"
   setting ${lndConfFile} ${insertLine} "${network}d\.zmqpubrawtx" "tcp\:\/\/127\.0\.0\.1\:${zmqprefix}333"
 
   # SET/UPDATE zmqpubrawblock
