@@ -126,18 +126,6 @@ After the final reboot there might now be some waiting time until your Blockchai
 " 11 65
 fi
 
-# source info fresh
-source /home/admin/raspiblitz.info
-clear
-echo "***********************************************************"
-echo "RaspiBlitz going to reboot"
-echo "***********************************************************"
-echo "This is the final setup reboot - you will get disconnected."
-echo "SSH again into system with:"
-echo "ssh admin@${localip}"
-echo "Use your password A"
-echo "***********************************************************"
-
 ########################################
 # AFTER FINAL SETUP TASKS
 
@@ -154,6 +142,18 @@ sudo rm ${SETUPFILE}
 
 # signal that setup phase is over
 sed -i "s/^setupPhase=.*/setupPhase='done'/g" /home/admin/raspiblitz.info
+
+# source info fresh
+source /home/admin/raspiblitz.info
+clear
+echo "***********************************************************"
+echo "RaspiBlitz going to reboot"
+echo "***********************************************************"
+echo "This is the final setup reboot - you will get disconnected."
+echo "SSH again into system with:"
+echo "ssh admin@${localip}"
+echo "Use your password A"
+echo "***********************************************************"
 
 ########################################
 # AFTER SETUP REBOOT
