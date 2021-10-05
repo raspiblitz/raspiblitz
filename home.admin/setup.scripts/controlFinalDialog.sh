@@ -104,28 +104,64 @@ if [ "${setupPhase}" == "setup" ]; then
   clear
   whiptail --title " Setup Done " --msgbox "\
 Your RaspiBlitz setup is done. Welcome new Node Operator! :D\n
-There can be some waiting time until your blockchain is fully synced before you can enter the RaspiBlitz user menu.\n
+After the final reboot there can be some waiting time until your blockchain is fully synced before you can enter the RaspiBlitz user menu.\n
 It is safe to log out during the sync and return later.\n
-" 12 65
+" 13 65
 
 # when coming from migration from other node
 elif [ "${setupPhase}" == "migration" ]; then
   clear
   whiptail --title " Migration Done " --msgbox "\
 Your running now RaspiBlitz. Welcome to the family! :D\n
-There might now be some waiting time until your Blockchain is fully synced before you can enter the RaspiBlitz user menu.\n
+After the final reboot there might now be some waiting time until your Blockchain is fully synced before you can enter the RaspiBlitz user menu.\n
 Its safe to logout during sync and return later.\n
-" 12 65
+" 13 65
 
 # just in case then from another phase
 else
   clear
-  echo "Missing Final Done Dialog for: ${setupPhase}"
-  echo "PRESS ENTER"
-  read key
+  whiptail --title " Recovery/Update Done " --msgbox "\
+Your RaspiBlitz is now ready again :D\n
+After the final reboot there might now be some waiting time until your Blockchain sync has catched up before you can enter the RaspiBlitz user menu.\n
+" 11 65
 fi
 
-echo "Starting ... (please wait)"
+# source info fresh
+source /home/admin/raspiblitz.info
+clear
+echo "***********************************************************"
+echo "RaspiBlitz going to reboot"
+echo "***********************************************************"
+echo "This is the final setup reboot - you will get disconnected."
+echo "SSH again into system with:"
+echo "ssh admin@${localip}"
+echo "Use your password A"
+echo "***********************************************************"
 
-# signal to backend that all is good and it can continue
-sudo sed -i "s/^state=.*/state='ready'/g" /home/admin/raspiblitz.info 
+########################################
+# AFTER FINAL SETUP TASKS
+
+# make sure for future starts that blockchain service gets started after bootstrap
+# so deamon reloas needed ... system will go into reboot after last loop
+# needs to be after wait loop because otherwise the "restart" on COPY OVER LAN will not work
+echo "# Updating service ${network}d.service ..." >> $logFile
+sudo sed -i "s/^Wants=.*/Wants=bootstrap.service/g" /etc/systemd/system/${network}d.service
+sudo sed -i "s/^After=.*/After=bootstrap.service/g" /etc/systemd/system/${network}d.service
+sudo systemctl daemon-reload
+
+# delete setup data from RAM
+sudo rm ${setupFile}
+
+# signal that setup phase is over
+sed -i "s/^setupPhase=.*/setupPhase='done'/g" ${infoFile}
+
+########################################
+# AFTER SETUP REBOOT
+# touchscreen activation, start with configured SWAP, fix LCD text bug
+sudo cp /home/admin/raspiblitz.log /home/admin/raspiblitz.setup.log
+timeout 120 /home/admin/config.scripts/blitz.shutdown.sh reboot finalsetup
+# if system has not rebooted yet - force reboot directly
+sudo shutdown -r now
+sleep 120
+echo "FAIL: automatic final reboot didnt worked .. please report to dev team and try to reboot manually"
+exit 0

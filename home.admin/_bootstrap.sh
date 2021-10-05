@@ -706,66 +706,16 @@ if [ ${isMounted} -eq 0 ]; then
   done
 
   ###################################################
-  # WAIT LOOP: AFTER FRESH SETUP, MIGRATION
-  # successfull update & recover can skip this
+  # HANDOVER TO FINAL SETUP CONTROLLER
   ###################################################
 
-  if [ "${setupPhase}" == "setup" ] || [ "${setupPhase}" == "migration" ]; then
-    echo "# Go into WAIT LOOP for final setup dialog ..." >> $logFile
-    sed -i "s/^state=.*/state=waitfinal/g" ${infoFile}
-    sed -i "s/^message=.*/message='Setup Done'/g" ${infoFile}
-  else
-    echo "# Skip WAIT LOOP boot directly into main menu ..." >> $logFile
-    sed -i "s/^state=.*/state=ready/g" ${infoFile}
-    sed -i "s/^message=.*/message='Setup Done'/g" ${infoFile}
-  fi
+  echo "# HANDOVER TO FINAL SETUP CONTROLLER ..." >> $logFile
+  sed -i "s/^state=.*/state=waitfinal/g" ${infoFile}
+  sed -i "s/^message=.*/message='Setup Done'/g" ${infoFile}
 
-  source ${infoFile}
-  echo "WAIT LOOP: FINAL SETUP .. see controlFinalDialog.sh network(${network})" >> $logFile
-  until [ "${state}" == "ready" ]
-  do
-
-    # get latest network info & update raspiblitz.info (in case network changes)
-    source <(/home/admin/config.scripts/internet.sh status)
-    sed -i "s/^localip=.*/localip='${localip}'/g" ${infoFile}
-
-    # give the loop a little bed time
-    sleep 4
-
-    # check info file for updated values
-    # especially the state for checking loop
-    source ${infoFile}
-
-  done
-  echo "WAIT LOOP: DONE" >> $logFile
-
-  ########################################
-  # AFTER FINAL SETUP TASKS
-
-  # make sure for future starts that blockchain service gets started after bootstrap
-  # so deamon reloas needed ... system will go into reboot after last loop
-  # needs to be after wait loop because otherwise the "restart" on COPY OVER LAN will not work
-  echo "# Updating service ${network}d.service ..." >> $logFile
-  sudo sed -i "s/^Wants=.*/Wants=bootstrap.service/g" /etc/systemd/system/${network}d.service
-  sudo sed -i "s/^After=.*/After=bootstrap.service/g" /etc/systemd/system/${network}d.service
-  sudo systemctl daemon-reload
-
-  # delete setup data from RAM
-  sudo rm ${setupFile}
-
-  # signal that setup phase is over
-  sed -i "s/^setupPhase=.*/setupPhase='done'/g" ${infoFile}
-
-  ########################################
-  # AFTER SETUP REBOOT
-  # touchscreen activation, start with configured SWAP, fix LCD text bug
-  sudo cp /home/admin/raspiblitz.log /home/admin/raspiblitz.setup.log
-  timeout 60 /home/admin/config.scripts/blitz.shutdown.sh reboot finalsetup
-  sleep 10
-  # if system has not rebooted yet - force reboot directly
-  sudo shutdown -r now
-  sleep 60
-  exit 0
+  # system has to wait before reboot to present like seed words and other info/options to user
+  echo "BOOTSTRAP EXIT ... waiting for final setup controller to initiate final reboot." >> $logFile
+  exit 1
 
 else
 

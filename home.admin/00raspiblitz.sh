@@ -173,8 +173,8 @@ do
     # push to final setup gui dialogs
     #echo "# controlFinalDialog.sh"
     /home/admin/setup.scripts/controlFinalDialog.sh
-    # exit for final setup reboot
-    state="reboot"
+    # exit because controller will reboot at the end
+    exit 0
   fi  
 
   # exit loop/script in case if system shutting down
@@ -185,14 +185,12 @@ do
     echo "RaspiBlitz going to ${state}"
     echo "***********************************************************"
     if [ "${state}" == "reboot" ]; then
-      if [ "${message}" == "finalsetup" ]; then
-        echo "This is the final setup reboot - you will get disconnected."
-      fi
       echo "SSH again into system with:"
       echo "ssh admin@${localip}"
       echo "Use your password A"
       echo "***********************************************************"
     fi
+    sleep 10
     exit 0
   fi
 
