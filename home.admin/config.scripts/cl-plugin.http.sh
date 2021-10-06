@@ -97,8 +97,11 @@ if [ "$1" = "on" ];then
     cd /home/bitcoin/cl-plugins-available || exit 1 
     sudo -u bitcoin git clone https://github.com/Start9Labs/c-lightning-http-plugin.git
     cd c-lightning-http-plugin || exit 1
+    sudo -u bitcoin git reset --hard ${clHTTPpluginVersion} || exit 1
+    echo
     echo "# change CL REST port to 9080"
     sudo sed -i "s/8080/9080/g" src/rpc.rs
+    echo
     sudo -u bitcoin cargo build --release
     sudo chmod a+x /home/bitcoin/cl-plugins-available/c-lightning-http-plugin/target/release/c-lightning-http-plugin
   fi
