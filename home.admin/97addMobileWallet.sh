@@ -164,7 +164,7 @@ if [ "${runBehindTor}" = "on" ]; then
   OPTIONS+=(FN_BTC "Fully Noded to bitcoinRPC (iOS+Tor)") 
 fi
 
-CHOICE=$(whiptail --clear --title "Choose Mobile Wallet" --menu "" 14 75 8 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+CHOICE=$(whiptail --clear --title "Choose Mobile Wallet" --menu "" 16 75 10 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
 /home/admin/config.scripts/blitz.display.sh hide
 
@@ -309,6 +309,7 @@ Or scan the qr code on the LCD with your mobile phone.
   	  /home/admin/config.scripts/bonus.lndconnect.sh zeus-android tor
   	  exit 0;
   	;;
+
   FN_BTC)
       appstoreLink="https://apps.apple.com/us/app/fully-noded/id1436425586"
       /home/admin/config.scripts/blitz.display.sh image /home/admin/raspiblitz/pictures/app_fullynoded.png
@@ -347,8 +348,12 @@ Or scan the qr code on the LCD with your mobile phone.
 	  /home/admin/config.scripts/blitz.display.sh hide
   	  /home/admin/config.scripts/bonus.lndconnect.sh fullynoded-lnd tor
   	  exit 0;
+	;;
 
   FN_CL)
+	  if [ ! -L /home/bitcoin/cl-plugins-enabled/c-lightning-http-plugin ];then
+	    /home/admin/config.scripts/cl-plugin.http.sh on
+	  fi
       appstoreLink="https://apps.apple.com/us/app/fully-noded/id1436425586"
       /home/admin/config.scripts/blitz.display.sh image /home/admin/raspiblitz/pictures/app_fullynoded.png
 	  whiptail --title "Install Fully Noded on your iOS device" \
