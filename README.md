@@ -10,6 +10,8 @@
 
 RaspiBlitz is mainly targeted for learning how to run your own node decentralized from home - because: Not your Node, Not your Rules. Discover & develop the growing ecosystem of the Lightning Network by becoming a full part of it. Build it as part of a [workshop](WORKSHOP.md) or as a weekend project yourself.
 
+__When you set up your Raspiblitz, you have the option to set it up over clearnet or Tor. Using Tor hides your IP address but will possibly increase the [time](https://twitter.com/SeverinAlexB/status/1442138426740981761) it will take for your node to route a payment. Setting up over clearnet will give you a lower response time when routing but your IP address will be freely availible to the rest of the network like the node [tippin.me](https://1ml.com/node/03c2abfa93eacec04721c019644584424aab2ba4dff3ac9bdab4e9c97007491dda). If you need to be private and/or don't want to doxx your home network then Tor might be the option for you. However if privacy isn't something you need and/or want, or you are trying to set up a service that your node is the back end for then clearnet might be more advantageous choice.__
+
 ## Feature Overview
 
 There are further Services that can be switched on:
