@@ -245,11 +245,16 @@ if [ "${lightning}" == "lnd" ]; then
     echo "WARN: /mnt/hdd/lnd/lnd.conf not found" >> ${logFile}
   fi
 
+  # backup old lnd conf
+  sudo cp /mnt/hdd/lnd/lnd.conf /home/admin/lnd.conf.prebackup2
+
   # start LND service
   echo "Starting LND Service ..." >> ${logFile}
   sudo systemctl enable lnd >> ${logFile}
   sudo systemctl start lnd >> ${logFile}
 
+  # backup old lnd conf
+  sudo cp /mnt/hdd/lnd/lnd.conf /home/admin/lnd.conf.prebackup3
 
 elif [ "${lightning}" == "cl" ]; then
 

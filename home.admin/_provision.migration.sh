@@ -45,6 +45,10 @@ if [ "${err}" != "" ]; then
     exit 3
 fi
 
+# make sure for the rest of the seup info is set correctly
+sudo sed -i "s/^network=.*/network=bitcoin/g" ${infoFile}
+sudo sed -i "s/^chain=.*/chain=main/g" ${infoFile}
+
 # set Password B
 echo "## SETTING PASSWORD B" >> ${logFile}
 if [ "${setPasswordB}" == "1" ]; then

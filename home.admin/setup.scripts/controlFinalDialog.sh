@@ -9,6 +9,9 @@ source /home/admin/raspiblitz.info
 SETUPFILE="/var/cache/raspiblitz/temp/raspiblitz.setup"
 source ${SETUPFILE}
 
+# make sure also admin user can write to log
+sudo chmod 777 /home/admin/raspiblitz.log
+
 ############################################
 # SHOW SEED WORDS AFTER SETUP
 if [ "${lightning}" == "lnd" ]; then

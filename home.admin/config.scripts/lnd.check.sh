@@ -86,7 +86,7 @@ if [ "$1" == "prestart" ]; then
 
   # [bitcoind]
   sectionName="[Bb]itcoind"
-  if [ "${network}" != "bitcoin" ]; then
+  if [ "${network}" != "bitcoin" ] && [ "${network}" != "" ]; then
     sectionName="${network}d"
   fi
   echo "# [${sectionName}] config ..."
