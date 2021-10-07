@@ -68,6 +68,11 @@ migrate_lnd_conf () {
   # start from fresh configuration template (user will set password B on recovery)
   sudo cp /home/admin/assets/lnd.bitcoin.conf /mnt/hdd/lnd/lnd.conf
   sudo sed -i "s/^alias=.*/alias=${nodename}/g" /mnt/hdd/lnd/lnd.conf
+
+  # make sure correct file permisions are set
+  sudo chown bitcoin:bitcoin /mnt/hdd/lnd/lnd.conf
+  sudo chmod 664 /mnt/hdd/lnd/lnd.conf
+
 }
 
 migrate_raspiblitz_conf () {

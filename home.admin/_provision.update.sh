@@ -179,8 +179,9 @@ if [ "${lightning}" == "lnd" ]; then
   configExists=$(sudo ls /mnt/hdd/lnd/lnd.conf | grep -c '.conf')
   if [ ${configExists} -eq 1 ]; then
 
-    # backup old lnd conf
-    sudo cp /mnt/hdd/lnd/lnd.conf /home/admin/lnd.conf.prebackup
+    # make sure correct file permisions are set
+    sudo chown bitcoin:bitcoin /mnt/hdd/lnd/lnd.conf
+    sudo chmod 664 /mnt/hdd/lnd/lnd.conf
 
     # make sure additional values are added to [Application Options] since v1.7
     echo "- lnd.conf --> checking additional [Application Options] since v1.7" >> ${logFile}
@@ -245,16 +246,10 @@ if [ "${lightning}" == "lnd" ]; then
     echo "WARN: /mnt/hdd/lnd/lnd.conf not found" >> ${logFile}
   fi
 
-  # backup old lnd conf
-  sudo cp /mnt/hdd/lnd/lnd.conf /home/admin/lnd.conf.prebackup2
-
   # start LND service
   echo "Starting LND Service ..." >> ${logFile}
   sudo systemctl enable lnd >> ${logFile}
   sudo systemctl start lnd >> ${logFile}
-
-  # backup old lnd conf
-  sudo cp /mnt/hdd/lnd/lnd.conf /home/admin/lnd.conf.prebackup3
 
 elif [ "${lightning}" == "cl" ]; then
 
