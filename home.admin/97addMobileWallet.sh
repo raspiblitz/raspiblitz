@@ -149,19 +149,19 @@ if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
 	OPTIONS+=(ZEUS_ANDROID "Zeus to LND (Android)")
 	OPTIONS+=(SPHINX "Sphinx Chat to LND (Android/iOS)")
   	OPTIONS+=(SENDMANY_ANDROID "SendMany to LND (Android)")
-	OPTIONS+=(FN_LND "Fully Noded to LND REST (iOS+Tor)") 
+	OPTIONS+=(FULLYNODED_LND "Fully Noded to LND REST (iOS+Tor)") 
 fi
 
 if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ]; then
 	OPTIONS+=(ZEUS_CLREST "Zeus to C-lightningREST (Android or iOS)")
 	OPTIONS+=(ZEUS_SPARK "Zeus to Sparko (Android or iOS)")
 	OPTIONS+=(SPARK "Spark Wallet to Sparko (Android - EXPERIMENTAL)" )
-	OPTIONS+=(FN_CL "Fully Noded to CL REST (iOS+Tor)")
+	OPTIONS+=(FULLYNODED_CL "Fully Noded to CL REST (iOS+Tor)")
 fi
 
 # Additional Options with Tor
 if [ "${runBehindTor}" = "on" ]; then
-  OPTIONS+=(FN_BTC "Fully Noded to bitcoinRPC (iOS+Tor)") 
+  OPTIONS+=(FULLYNODED_BTC "Fully Noded to bitcoinRPC (iOS+Tor)") 
 fi
 
 CHOICE=$(whiptail --clear --title "Choose Mobile Wallet" --menu "" 16 75 10 "${OPTIONS[@]}" 2>&1 >/dev/tty)
@@ -310,7 +310,7 @@ Or scan the qr code on the LCD with your mobile phone.
   	  exit 0;
   	;;
 
-  FN_BTC)
+  FULLYNODED_BTC)
       appstoreLink="https://apps.apple.com/us/app/fully-noded/id1436425586"
       /home/admin/config.scripts/blitz.display.sh image /home/admin/raspiblitz/pictures/app_fullynoded.png
 	  whiptail --title "Install Fully Noded on your iOS device" \
@@ -330,7 +330,7 @@ Or scan the qr code on the LCD with your mobile phone.
   	  exit 0;
   	;;
 
-  FN_LND)
+  FULLYNODED_LND)
       appstoreLink="https://apps.apple.com/us/app/fully-noded/id1436425586"
       /home/admin/config.scripts/blitz.display.sh image /home/admin/raspiblitz/pictures/app_fullynoded.png
 	  whiptail --title "Install Fully Noded on your iOS device" \
@@ -350,7 +350,7 @@ Or scan the qr code on the LCD with your mobile phone.
   	  exit 0;
 	;;
 
-  FN_CL)
+  FULLYNODED_CL)
 	  if [ ! -L /home/bitcoin/cl-plugins-enabled/c-lightning-http-plugin ];then
 	    /home/admin/config.scripts/cl-plugin.http.sh on
 	  fi
@@ -372,7 +372,6 @@ Or scan the qr code on the LCD with your mobile phone.
   	  /home/admin/config.scripts/cl-plugin.http.sh connect
   	  exit 0;
   	;;
-
 
 ZEUS_CLREST)
       /home/admin/config.scripts/blitz.display.sh image /home/admin/raspiblitz/pictures/app_zeus.png
