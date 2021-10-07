@@ -70,6 +70,7 @@ if [ "${gotSCB}" == "1" ]; then
     # check if its possible to give background info on the error
     notMachtingSeed=$(echo $error | grep -c 'unable to unpack chan backup')
     if [ ${notMachtingSeed} -gt 0 ]; then
+      echo "# FAIL Static-Channel-Backup: seed not machting file" >> /home/admin/raspiblitz.log
       echo "--> ERROR BACKGROUND:"
       echo "The WORD SEED is not matching the channel.backup file."
       echo "Either there was an error in the word seed list or"
@@ -128,9 +129,18 @@ fi
 
 ########################################
 # AFTER FINAL SETUP TASKS
+echo "# AFTER FINAL SETUP TASKS" >> /home/admin/raspiblitz.log
 
 # source info fresh
 source /home/admin/raspiblitz.info
+echo "# source /home/admin/raspiblitz.info" >> /home/admin/raspiblitz.log
+cat /home/admin/raspiblitz.info >> /home/admin/raspiblitz.log
+
+# make sure network defaults to bitcoin
+if [ "${network}" == "" ]; then
+  echo "# WARN: default network to bitcoin" >> /home/admin/raspiblitz.log
+  network="bitcoin"
+fi
 
 # make sure for future starts that blockchain service gets started after bootstrap
 # so deamon reloas needed ... system will go into reboot after last loop
@@ -156,6 +166,7 @@ echo "SSH again into system with:"
 echo "ssh admin@${localip}"
 echo "Use your password A"
 echo "***********************************************************"
+echo "# final setup reboot ..." >> /home/admin/raspiblitz.log
 
 ########################################
 # AFTER SETUP REBOOT
