@@ -129,13 +129,16 @@ fi
 ########################################
 # AFTER FINAL SETUP TASKS
 
+# source info fresh
+source /home/admin/raspiblitz.info
+
 # make sure for future starts that blockchain service gets started after bootstrap
 # so deamon reloas needed ... system will go into reboot after last loop
 # needs to be after wait loop because otherwise the "restart" on COPY OVER LAN will not work
 echo "# Updating service ${network}d.service ..."
 sudo sed -i "s/^Wants=.*/Wants=bootstrap.service/g" /etc/systemd/system/${network}d.service
 sudo sed -i "s/^After=.*/After=bootstrap.service/g" /etc/systemd/system/${network}d.service
-sudo systemctl daemon-reload
+sudo systemctl daemon-reload 2>/dev/null
 
 # delete setup data from RAM
 sudo rm ${SETUPFILE}
@@ -143,8 +146,7 @@ sudo rm ${SETUPFILE}
 # signal that setup phase is over
 sed -i "s/^setupPhase=.*/setupPhase='done'/g" /home/admin/raspiblitz.info
 
-# source info fresh
-source /home/admin/raspiblitz.info
+sleep 2
 clear
 echo "***********************************************************"
 echo "RaspiBlitz going to reboot"
