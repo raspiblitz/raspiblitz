@@ -45,6 +45,20 @@ if [ "${err}" != "" ]; then
     exit 3
 fi
 
+# set Password B
+echo "## SETTING PASSWORD B" >> ${logFile}
+if [ "${setPasswordB}" == "1" ]; then
+ if [ "${passwordB}" != "" ]; then
+    # set password B as RPC password
+    echo "# setting PASSWORD B" >> ${logFile}
+    /home/admin/config.scripts/blitz.setpassword.sh b "${passwordB}" >> ${logFile}
+ else
+    echo "FAIL: Password B should be set but was empty! Running with default." >> ${logFile}
+ fi
+else
+  echo "WARN: setPasswordB!=1 this not normal on migration! Running with default." >> ${logFile}
+fi
+
 # if free space is lower than 100GB (100000000) delete backup files
 if [ "${hddDataFreeKB}" != "" ] && [ ${hddDataFreeKB} -lt 407051412 ]; then
     echo "- free space of data disk is low ... deleting 'backup_migration'" >> ${logFile}
