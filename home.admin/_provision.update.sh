@@ -179,6 +179,9 @@ if [ "${lightning}" == "lnd" ]; then
   configExists=$(sudo ls /mnt/hdd/lnd/lnd.conf | grep -c '.conf')
   if [ ${configExists} -eq 1 ]; then
 
+    # backup old lnd conf
+    sudo cp /mnt/hdd/lnd/lnd.conf /home/admin/lnd.conf.prebackup
+
     # make sure additional values are added to [Application Options] since v1.7
     echo "- lnd.conf --> checking additional [Application Options] since v1.7" >> ${logFile}
     applicationOptionsLineNumber=$(sudo grep -n "\[Application Options\]" /mnt/hdd/lnd/lnd.conf | cut -d ":" -f1)
