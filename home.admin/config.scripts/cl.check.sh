@@ -29,6 +29,16 @@ if [ $(grep -c "^sparko" < ${CLCONF}) -gt 0 ];then
   fi
 fi
 
+if [ $(grep -c "^http-pass" < ${CLCONF}) -gt 0 ];then
+  if [ ! -f /home/bitcoin/cl-plugins-enabled/c-lightning-http-plugin ]\
+    || [ "${clHTTPplugin}" != "on" ]; then
+    echo "# The clHTTPplugin is not present but in config"
+    sed -i "/^http-pass/d" ${CLCONF}
+    rm -rf /home/bitcoin/cl-plugins-enabled/c-lightning-http-plugin
+    sed -i "s/^clHTTPplugin=.*/clHTTPplugin=off/g" /mnt/hdd/raspiblitz.conf
+  fi
+fi
+
 if [ $(grep -c "^feeadjuster" < ${CLCONF}) -gt 0 ];then
   if [ ! -f /home/bitcoin/${netprefix}cl-plugins-enabled/feeadjuster.py ]\
     || [ "$(eval echo \$${netprefix}feeadjuster)" != "on" ]; then

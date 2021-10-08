@@ -4,7 +4,7 @@
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "# config script to connect mobile apps with lnd connect"
  echo "# will autodetect dyndns, sshtunnel or TOR"
- echo "# bonus.lndconnect.sh [zap-ios|zap-android|zeus-ios|zeus-android|shango-ios|shango-android|sendmany-android] [?ip|tor]"
+ echo "# bonus.lndconnect.sh [zap-ios|zap-android|zeus-ios|zeus-android|shango-ios|shango-android|sendmany-android|fullynoded-lnd] [?ip|tor]"
  exit 1
 fi
 
@@ -125,6 +125,14 @@ elif [ "${targetWallet}" = "sendmany-android" ]; then
     host="${ip2torGRPC_IP}"
     port="${ip2torGRPC_PORT}"
   fi  
+
+elif [ "${targetWallet}" = "fullynoded-lnd" ]; then
+
+    port="8080"
+    usingIP2TOR="LND-REST-API"
+    forceTOR=1
+    host=$(sudo cat /mnt/hdd/tor/lndrest8080/hostname)
+    connectInfo="- start Fully Noded and go to:\n Settings' -> 'Node Manger' -> 'scan QR'"
 
 else
   echo "error='unknown target wallet'"

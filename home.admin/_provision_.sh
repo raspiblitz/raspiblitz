@@ -457,6 +457,15 @@ else
     echo "Provisioning Sparko - keep default" >> ${logFile}
 fi
 
+# clHTTPplugin
+if [ "${clHTTPplugin}" = "on" ]; then
+    echo "Provisioning clHTTPplugin - run config script" >> ${logFile}
+    sudo sed -i "s/^message=.*/message='Setup clHTTPplugin'/g" ${infoFile}
+    sudo -u admin /home/admin/config.scripts/cl-plugin.http.sh on >> ${logFile} 2>&1
+else
+    echo "Provisioning clHTTPplugin - keep default" >> ${logFile}
+fi
+
 # SPARK
 if [ "${spark}" = "on" ]; then
     echo "Provisioning Spark Wallet - run config script" >> ${logFile}
