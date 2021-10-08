@@ -14,57 +14,10 @@ function blitz() {
   ./00raspiblitz.sh
 }
 
-# command: blitzhelp
-# gives overview of commands
-function blitzhelp() {
-  echo
-  echo "Blitz commands are consolidated here."
-  echo
-  echo "Menu access:"
-  echo "  raspiblitz   menu"
-  echo "  menu         menu"
-  echo "  bash         menu"
-  echo "  repair       menu > repair"
-  echo
-  echo "Checks:"
-  echo "  status       informational Blitz status screen"
-  echo "  sourcemode   copy blockchain source modus"
-  echo "  check        check if Blitz configuration files are correct"
-  echo "  debug        print debug logs"
-  echo "  debug   -l   print debug logs with bin link"
-  echo "  patch        sync scripts with latest set github and branch"
-  echo "  github       jumping directly into the options to change branch/repo/pr"
-  echo
-  echo "Power:"
-  echo "  restart      restart the node"
-  echo "  off          shutdown the node"
-  echo
-  echo "Display:"
-  echo "  hdmi         switch video output to HDMI"
-  echo "  lcd          switch video output to LCD"
-  echo "  headless     switch video output to HEADLESS"
-  echo
-  echo "BTC tx:"
-  echo "  torthistx    broadcast transaction through Tor to Blockstreams API and into the network"
-  echo "  gettx        retrieve transaction from mempool or blockchain and print as JSON"
-  echo "  watchtx      retrieve transaction from mempool or blockchain until certain confirmation target"
-  echo
-  echo "LND:"
-  echo "  balance      your satoshi balance"
-  echo "  channels     your lightning channels"
-  echo "  fwdreport    show forwarding report"
-  echo
-  echo "Users:"
-  echo "  bos          Balance of Satoshis"
-  echo "  chantools    ChanTools"
-  echo "  lit          Lightning Terminal"
-  echo "  jm           JoinMarket"
-  echo "  pyblock      PyBlock"
-  echo
-  echo "Extras:"
-  echo "  whitepaper   download the whitepaper from the blockchain to /home/admin/bitcoin.pdf"
-  echo "  notifyme     wrapper for blitz.notify.sh that will send a notification using the configured method and settings"
-}
+
+# command version
+# prints blitz version
+function version(){ cat /home/admin/_version.info; }
 
 # command: raspiblitz
 # calls the the raspiblitz mainmenu (legacy)
@@ -181,7 +134,7 @@ function status() {
     #echo
     #echo -en "Screen is updating in a loop .... press 'x' now to get back to menu."
     read -n 1 -t 6 keyPressed
-    #echo -en "\rGathering information to update info ... please wait.                \n"  
+    #echo -en "\rGathering information to update info ... please wait.                \n"
     # check if user wants to abort session
     if [ "${keyPressed}" = "x" ]; then
       echo
@@ -294,10 +247,10 @@ if [ -f "/mnt/hdd/raspiblitz.conf" ] && [ $(grep -c "lit=on"  < /mnt/hdd/raspibl
     --tlscertpath=/home/lit/.lit/tls.cert \
     --macaroonpath=/home/lit/.faraday/${chain}net/faraday.macaroon"
   alias lit-loop="sudo -u lit loop --rpcserver=localhost:8443 \\
-    --tlscertpath=/home/lit/.lit/tls.cert \\	
+    --tlscertpath=/home/lit/.lit/tls.cert \\
     --macaroonpath=/home/lit/.loop/${chain}net/loop.macaroon"
   alias lit-pool="sudo -u lit pool --rpcserver=localhost:8443 \
-    --tlscertpath=/home/lit/.lit/tls.cert \	
+    --tlscertpath=/home/lit/.lit/tls.cert \
     --macaroonpath=/home/lit/.pool/${chain}net/pool.macaroon"
 fi
 
@@ -316,7 +269,7 @@ function gettx() {
 
 # command: watchtx
 # try to retrieve transaction from mempool or blockchain until certain confirmation target
-# is reached and then exit cleanly. Default is to wait for 2 confs and to sleep for 60 secs. 
+# is reached and then exit cleanly. Default is to wait for 2 confs and to sleep for 60 secs.
 # $ watchtx "f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16" 6 30
 function watchtx() {
     tx_id="${1}"
@@ -348,8 +301,8 @@ function watchtx() {
 }
 
 # command: notifyme
-# A wrapper for blitz.notify.sh that will send a notification using the configured 
-# method and settings. 
+# A wrapper for blitz.notify.sh that will send a notification using the configured
+# method and settings.
 # This makes sense when waiting for commands to finish and then sending a notification.
 # $ notifyme "Hello there..!"
 # $ ./run_job_which_takes_long.sh && notifyme "I'm done."
