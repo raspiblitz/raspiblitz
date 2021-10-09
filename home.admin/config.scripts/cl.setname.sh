@@ -32,25 +32,22 @@ fi
 # config file
 blitzConfig="/mnt/hdd/raspiblitz.conf"
 
-# cl conf file
-clConfig="${CLCONF}"
-
 # check if raspiblitz config file exists
 if [ ! -f ${blitzConfig} ]; then
- echo "FAIL - missing ${blitzConfig}"
- exit 1
+  echo "FAIL - missing ${blitzConfig}"
+  exit 1
 fi
 
 # check if cl config file exists
-if sudo ls ${clConfig}; then
- echo "FAIL - missing ${clConfig}"
- exit 1
+if ! sudo ls ${CLCONF}; then
+  echo "FAIL - missing ${CLCONF}"
+  exit 1
 fi
 
 # make sure entry line for 'alias' exists 
-entryExists=$(cat ${clConfig} | grep -c "alias=")
+entryExists=$(cat ${CLCONF} | grep -c "alias=")
 if [ ${entryExists} -eq 0 ]; then
-  echo "alias=" >> ${clConfig}
+  echo "alias=" >> ${CLCONF}
 fi
 
 # stop services
@@ -58,7 +55,7 @@ echo "making sure services are not running"
 sudo systemctl stop ${netprefix}lightningd 2>/dev/null
 
 # config: change name
-sudo sed -i "s/^alias=.*/alias=${newName}/g" ${clConfig}
+sudo sed -i "s/^alias=.*/alias=${newName}/g" ${CLCONF}
 
 source /home/admin/raspiblitz.info
 if [ "${state}" == "ready" ]; then
