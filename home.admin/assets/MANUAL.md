@@ -30,7 +30,7 @@ Raspiblitz - control your bitcoin node
 
 ## CHECK
 
-**-v**, **--version**
+**version**
 : Displays the software version.
 
 **status**
