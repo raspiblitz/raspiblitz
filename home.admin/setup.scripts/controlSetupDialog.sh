@@ -94,6 +94,7 @@ if [ "${setupPhase}" == "setup" ]; then
   # menu RECOVER menu option
   if [ "${menuresult}" == "4" ]; then
     setupPhase="${orgSetupPhase}"
+    sudo sed -i "s/^setupPhase=.*/setupPhase='${setupPhase}'/g" /home/admin/raspiblitz.info
     # proceed with provision (mark Password A to be set)
     echo "# OK update process starting .."
     echo "setPasswordA=1" >> $SETUPFILE
@@ -102,6 +103,7 @@ if [ "${setupPhase}" == "setup" ]; then
   # menu MIGRATE menu option
   if [ "${menuresult}" == "5" ]; then
     setupPhase="${orgSetupPhase}"
+    sudo sed -i "s/^setupPhase=.*/setupPhase='${setupPhase}'/g" /home/admin/raspiblitz.info
     # mark migration to happen on provision
     echo "migrationOS='${hddGotMigrationData}'" >> $SETUPFILE
     # user needs to reset password A, B & C
