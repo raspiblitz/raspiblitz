@@ -129,7 +129,7 @@ do
   fi
 
   # load statusscan results
-  source /var/cache/raspiblitz/raspiblitz.status
+  source /var/cache/raspiblitz/raspiblitz.status 2>/dev/null
 
   #####################################
   # ALWAYS: Handle System States 
