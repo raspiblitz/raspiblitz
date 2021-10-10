@@ -957,3 +957,8 @@ If you can login into your local internet router it should show you the IP addre
 Another way is to use [Angry IP Scanner](https://angryip.org/) to find the IP address.
 
 You can also put an empty file just called `hdmi` (without any ending) onto the sd card when connected to your laptop and then start it up on the RaspberryPi. This will activate the HDMI port and if you connect a HDMI monitor to the RaspberryPi it will show you the RaspiBlitz status screen containing the local IP address.
+
+## How can I enforce UASP mode for my SSD controller?
+
+By default just tested & selected SSD encasings/controller are running enabled with UASP in RaspiBlitz. UASP brings a speed up for the SSD but also if not well supported by the SSD encasing/controller can lead to system halts. If you know for sure that your SSD encasing/controller is supporting UASP fully you can place a file called `uasp.force` on the sd card boot section after flashing the image with your laptop. See details or report errors on issue [#2488](https://github.com/rootzoll/raspiblitz/issues/2488)
+
