@@ -543,6 +543,18 @@ Nextcloud is an open-source project to host your own files: https://en.wikipedia
 
 You can connect a small extra USB drive to your RaspiBlitz (choose a small one up to 32GB - don't use second HDD or SSD here, that would drain too much power from the RaspiBlitz). On that USB drive your latest StaticChannelBackup will be stored - just in case your HDD gets an error.
 
+##### StaticChannelBackup per SCP/SSH to other server
+
+An option for more advanced users that you only can set directly in the `raspiblitz.conf` is the automated backup of the Static Channel Backup to another server per SSH/SCP. For this you need to set the value:
+
+`scpBackupTarget='[USER]@[SERVER]:[DIRPATH-WITHOUT-ENDING-/]'`
+
+and you can optionally set custom options for the scp command (for example to set a non-default port) with:
+
+`scpBackupOptions='[YOUR-CUSTOM-OPTIONS]'`
+
+On target server add the root ssh public key of your RaspiBlitz to the authorized_keys for the user - how to do this see: https://www.linode.com/docs/security/authentication/use-public-key-authentication-with-ssh/
+
 ##### C-LIGHTNING NODE
 
 This needs to switched on to see the sub-settings options for c-lightning. If switched on it means the c-lighting node implementation is installed and running on your RaspiBlitz - it can run in parallel to LND. If activated you will find an additional option in the SSH Main Menu that offers you more options to operate the c-lightning node. Also under `SERVICES` some apps might just be available if c-lightning is activated.
