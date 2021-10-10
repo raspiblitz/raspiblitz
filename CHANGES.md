@@ -8,7 +8,7 @@
 - New: CL plugin: Sparko [details](https://github.com/fiatjaf/sparko)
 - New: CL plugin: CLBOSS The C-Lightning Node Manager [details](https://github.com/ZmnSCPxj/clboss#clboss-the-c-lightning-node-manager)
 - New: Refactored Setup-Process [details](https://github.com/rootzoll/raspiblitz/issues/1126#issuecomment-829757665)
-- New: Suez - channel visualization for LND and CL [details](https://github.com/prusnak/suez)
+- New: Suez - channel visualization for LND and CL [info](https://github.com/rootzoll/raspiblitz/issues/2366#issuecomment-939521302)[details](https://github.com/prusnak/suez)
 - New: LND Static Channel Backup to Nextcloud
 - New: Allow SphinxApp to connect over Tor
 - New: Parallel TESTNET & SIGNET services 
