@@ -239,6 +239,7 @@ BTCEXP_BASIC_AUTH_PASSWORD=$PASSWORD_B
 BTCEXP_ADDRESS_API=none
 BTCEXP_ELECTRUMX_SERVERS=tcp://127.0.0.1:50001
 EOF
+    sudo -u btcrpcexplorer mkdir /home/btcrpcexplorer/.config
     sudo mv /home/admin/btc-rpc-explorer.env /home/btcrpcexplorer/.config/btc-rpc-explorer.env
     sudo chown btcrpcexplorer:btcrpcexplorer /home/btcrpcexplorer/.config/btc-rpc-explorer.env
 
