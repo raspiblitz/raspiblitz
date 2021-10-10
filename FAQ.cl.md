@@ -237,19 +237,22 @@ or with the alias: `cllog`
 * clboss
 
 ### Add a custom plugin
-* The easiest way is to place the plugin in the  
-`/home/bitcoin/cl-plugins-enabled`
-directory and start with
+* Place the plugin in the `/home/bitcoin/cl-plugins-enabled` directory 
+* Make sure it is owned by the `bitcoin` user and is executable:
+    ```
+    sudo chown bitcoin:bitcoin /home/bitcoin/cl-plugins-enabled/PLUGIN_NAME
+    sudo chmod +x /home/bitcoin/cl-plugins-enabled/PLUGIN_NAME
+    ```
+* start with
     ```
     lightnign-cli plugin start /home/bitcoin/cl-plugins-enabled/PLUGIN_NAME
     ```
-    or restart C-ligthning with:
+* or to load it automatically on restart:
     ```
     sudo systemctl restart lightningd
     ```
-    to have it loaded automatically.  
-    From that directory it will load auomatically after restarts.
-    To just load it run it once store in:
+    From the directory `/home/bitcoin/cl-plugins-enabled` it will load auomatically after restarts.
+* To just load it run it once store in (and start from):  
     `/home/bitcoin/cl-plugins-available/`
 
 ### CLBOSS
