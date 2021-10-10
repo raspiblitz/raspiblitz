@@ -82,15 +82,10 @@ fi
 
 if [ "$1" = "on" ];then
     
-  if [ $(cargo -V 2>/dev/null | grep -c cargo) -eq 0 ];then
-      echo
-      echo "# Installing Rust"
-      echo
-      # https://github.com/romanz/electrs/blob/master/doc/usage.md#build-dependencies
-      #sudo -u electrs curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sudo -u electrs sh -s -- --default-toolchain 1.39.0 -y
-      sudo apt update
-      sudo apt install -y cargo
-  fi
+  echo
+  echo "# Installing Rust for the bitcoin user"
+  echo
+  sudo -u bitcoin curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sudo -u bitcoin sh -s -- -y
 
   if [ ! -f /home/bitcoin/cl-plugins-available/c-lightning-http-plugin ];then
     sudo -u bitcoin mkdir /home/bitcoin/cl-plugins-available
@@ -102,7 +97,7 @@ if [ "$1" = "on" ];then
     echo "# change CL REST port to 9080"
     sudo sed -i "s/8080/9080/g" src/rpc.rs
     echo
-    sudo -u bitcoin cargo build --release
+    sudo -u bitcoin /home/bitcoin/.cargo/bin/cargo build --release
     sudo chmod a+x /home/bitcoin/cl-plugins-available/c-lightning-http-plugin/target/release/c-lightning-http-plugin
   fi
 
