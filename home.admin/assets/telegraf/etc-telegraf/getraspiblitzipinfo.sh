@@ -13,7 +13,7 @@ debugLevel=0
 writeMemoryfile=1
 
 # if "logFile" points to an existing file => logging enabled
-logFile=/mnt/hdd/temp/raspiblitzipinfo.log
+logFile=/var/cache/raspiblitz/raspiblitzipinfo.log
 
 
 # get the ISO timestamp for log output
@@ -77,7 +77,7 @@ if [ ${debugLevel} -gt 10 ]; then for i in $( seq 0 4 ); do printf "  %2d: %-10s
 
 
 # get the values from a prior run, that file will not be changes as long as all the values stay the same
-memoryFile=/mnt/hdd/temp/raspiblitzipinfo.out
+memoryFile=/var/cache/raspiblitz/raspiblitzipinfo.out
 source ${memoryFile} 2>/dev/null
 
 # prepare to count the changes

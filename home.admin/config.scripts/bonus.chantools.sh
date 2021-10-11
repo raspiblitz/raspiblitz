@@ -5,13 +5,16 @@
 # see https://github.com/guggero/chantools/releases
 
 lndVersion=$(lncli -v | cut -d " " -f 3 | cut -d"." -f2)
-if [ $lndVersion -eq 12 ]; then
+if [ $lndVersion -eq 13 ]; then
+  pinnedVersion="0.9.3"
+elif [ $lndVersion -eq 12 ]; then
   pinnedVersion="0.8.2"
 elif [ $lndVersion -eq 11 ]; then
   pinnedVersion="0.7.1" 
 else
   echo "# LND not installed or a version not tested with chantools"
   lncli -v
+  exit 1
 fi
 
 # command info
@@ -82,7 +85,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo -u admin wget -N https://github.com/guggero/chantools/releases/download/v${pinnedVersion}/${binaryName}
 
   # check binary was not manipulated (checksum test)
-  sudo -u admin wget -N https://github.com/guggero/chantools/releases/download/v${pinnedVersion}/manifest-v${pinnedVersion}.txt.asc
+  sudo -u admin wget -N https://github.com/guggero/chantools/releases/download/v${pinnedVersion}/manifest-v${pinnedVersion}.txt.sig
   sudo -u admin wget --no-check-certificate -N -O "${downloadDir}/pgp_keys.asc" ${PGPpkeys}
   binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
   if [ "${binaryChecksum}" != "${SHA256}" ]; then
@@ -102,7 +105,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   fi
   gpg --import ./pgp_keys.asc
   sleep 3
-  verifyResult=$(gpg --verify manifest-v${pinnedVersion}.txt.asc 2>&1)
+  echo "# running: gpg --verify manifest-v${pinnedVersion}.txt.sig"
+  verifyResult=$(gpg --verify manifest-v${pinnedVersion}.txt.sig 2>&1)
+  echo "# verifyResult(${verifyResult})"
   goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
   echo "# goodSignature(${goodSignature})"
   correctKey=$(echo ${verifyResult} | tr -d " \t\n\r" | grep "${GPGcheck}" -c)

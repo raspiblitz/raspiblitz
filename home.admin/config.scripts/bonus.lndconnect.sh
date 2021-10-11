@@ -4,7 +4,7 @@
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "# config script to connect mobile apps with lnd connect"
  echo "# will autodetect dyndns, sshtunnel or TOR"
- echo "# bonus.lndconnect.sh [zap-ios|zap-android|zeus-ios|zeus-android|shango-ios|shango-android|sendmany-android] [?ip|tor]"
+ echo "# bonus.lndconnect.sh [zap-ios|zap-android|zeus-ios|zeus-android|shango-ios|shango-android|sendmany-android|fullynoded-lnd] [?ip|tor]"
  exit 1
 fi
 
@@ -126,6 +126,14 @@ elif [ "${targetWallet}" = "sendmany-android" ]; then
     port="${ip2torGRPC_PORT}"
   fi  
 
+elif [ "${targetWallet}" = "fullynoded-lnd" ]; then
+
+    port="8080"
+    usingIP2TOR="LND-REST-API"
+    forceTOR=1
+    host=$(sudo cat /mnt/hdd/tor/lndrest8080/hostname)
+    connectInfo="- start Fully Noded and go to:\n Settings' -> 'Node Manger' -> 'scan QR'"
+
 else
   echo "error='unknown target wallet'"
   exit 1
@@ -135,7 +143,7 @@ fi
 
 # get the local IP as default host
 if [ ${#host} -eq 0 ]; then
-    host=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+    host=$(hostname -I | awk '{print $1}')
 fi
 
 # change host to dynDNS if set
@@ -177,7 +185,7 @@ fi
 #### RUN LNDCONNECT
 
 # generate data parts
-macaroon=$(sudo base64 /mnt/hdd/app-data/lnd/data/chain/${network}/${chain}net/admin.macaroon | tr -d '=' | tr '/+' '_-' | tr -d '\n')
+macaroon=$(sudo base64 /home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon | tr -d '=' | tr '/+' '_-' | tr -d '\n')
 cert=$(sudo grep -v 'CERTIFICATE' /mnt/hdd/lnd/tls.cert | tr -d '=' | tr '/+' '_-' | tr -d '\n')
 
 # generate URI parameters

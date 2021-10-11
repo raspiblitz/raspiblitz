@@ -135,13 +135,13 @@ def dynu_update(domain, token, ip):
     try:
         print(response.content)
         data = json.loads(response.content)
-        apitoken = data["access_token"];
+        apitoken = data["access_token"]
     except Exception as e:
         raise BlitzError("failed parsing data", response.content, e)
     if len(apitoken) == 0:
         raise BlitzError("access_token not found", response.content)
     print("# apitoken({0})".format(apitoken))
-    apitoken = re.sub("[^0-9a-zA-Z]", "", apitoken)
+    #apitoken = re.sub("[^0-9a-zA-Z]", "", apitoken)
     print("# cleaning API token:")
     print("# apitoken({0})".format(apitoken))
 
@@ -288,6 +288,7 @@ def subscriptions_new(ip, dnsservice, domain, token, target):
 
     # run the ACME script
     print("# Running letsencrypt ACME script ...")
+    print("# /home/admin/config.scripts/bonus.letsencrypt.sh issue-cert {0} {1} {2} {3}".format(dnsservice, domain, token, target))
     acme_result = subprocess.Popen(
         ["/home/admin/config.scripts/bonus.letsencrypt.sh", "issue-cert", dnsservice, domain, token, target],
         stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf8')
@@ -303,6 +304,7 @@ def subscriptions_new(ip, dnsservice, domain, token, target):
 
 
 def subscriptions_cancel(s_id):
+    print("# subscriptions_cancel(${0})".format(s_id))
     os.system("sudo chown admin:admin {0}".format(SUBSCRIPTIONS_FILE))
     subs = toml.load(SUBSCRIPTIONS_FILE)
     new_list = []
@@ -316,6 +318,7 @@ def subscriptions_cancel(s_id):
 
     # run the ACME script to remove cert
     if removed_cert:
+        print("# /home/admin/config.scripts/bonus.letsencrypt.sh remove-cert {0} {1}".format(removed_cert['id'], removed_cert['target']))
         acme_result = subprocess.Popen(
             ["/home/admin/config.scripts/bonus.letsencrypt.sh", "remove-cert", removed_cert['id'],
              removed_cert['target']], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf8')
@@ -385,7 +388,7 @@ def menu_make_subscription():
     # ask user for which RaspiBlitz service the bridge should be used
     choices = []
     choices.append(("DUCKDNS", "Use duckdns.org"))
-    choices.append(("DYNU", "Use dynu.com"))
+    #choices.append(("DYNU", "Use dynu.com"))
 
     d = Dialog(dialog="dialog", autowidgetsize=True)
     d.set_background_title("LetsEncrypt Subscription")

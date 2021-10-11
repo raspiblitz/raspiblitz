@@ -11,11 +11,11 @@ else
   echo "Opening $EDITFILE"
 fi
 
+# trap to delete on any exit
+trap 'rm -f $conf' EXIT
+
 # temp conf
 conf=$(mktemp -p /dev/shm/)
-
-# trap it
-trap 'rm -f $conf' 0 1 2 5 15
 
 dialog \
 --title "Editing the $EDITFILE" \

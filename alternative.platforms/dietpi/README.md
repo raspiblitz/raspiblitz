@@ -87,7 +87,7 @@ During the RaspiBlitz setup process:
 `sudo tail -n100 /mnt/hdd/bitcoin/debug.log` - shows the last 100 lines  
 `sudo systemctl status lnd` - status of the lnd service
 `sudo journalctl -f -u lnd` 
-`./home/admin/XXdebugLogs.sh` - debug log collection on the RaspiBlitz
+`debug` - debug log collection on the RaspiBlitz
 
 ---
 
