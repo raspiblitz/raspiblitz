@@ -77,6 +77,9 @@ case $CHOICE in
     /home/admin/config.scripts/cl.backup.sh cl-export-gui production $_temp
     source $_temp 2>/dev/null
     sudo rm $_temp 2>/dev/null
+    echo
+    echo "Press ENTER when finished downloading."
+    read key
     ;;
   
   RESET)
@@ -89,6 +92,7 @@ case $CHOICE in
     sudo rm $_temp 2>/dev/null
     echo
     echo "The rescue file is stored on the SDcard named cl-rescue.*.tar.gz just in case."
+    echo
     echo "The next step will overwrite the old C-lighthning $CHAIN wallet"
     echo "Press ENTER to continue or CTRL+C to abort"
     read key
@@ -126,6 +130,7 @@ case $CHOICE in
     sudo rm $_temp 2>/dev/null
     echo
     echo "The rescue file is stored on the SDcard named cl-rescue.*.tar.gz just in case."
+    echo
     echo "The next step will overwrite the old C-lighthning $CHAIN wallet"
     echo "Press ENTER to continue or CTRL+C to abort"
     read key
@@ -150,6 +155,7 @@ case $CHOICE in
     sudo rm $_temp 2>/dev/null
     echo
     echo "The rescue file is stored on the SDcard named cl-rescue.*.tar.gz just in case."
+    echo
     echo "The next step will overwrite the old C-lighthning $CHAIN wallet"
     echo "Press ENTER to continue or CTRL+C to abort"
     read key

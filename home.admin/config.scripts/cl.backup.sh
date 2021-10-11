@@ -81,8 +81,7 @@ if [ ${mode} = "cl-export" ]; then
 fi
 
 if [ ${mode} = "cl-export-gui" ]; then
-
-  # create lnd rescue file
+  echo "# Create the CL rescue file ..."
   source <(/home/admin/config.scripts/cl.backup.sh cl-export)
   if [ "${error}" != "" ]; then
     echo "error='${error}'"
