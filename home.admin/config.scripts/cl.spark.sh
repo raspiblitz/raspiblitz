@@ -171,7 +171,7 @@ if [ $1 = off ];then
 
   # purge
   if [ "$(echo "$@" | grep -c purge)" -gt 0 ];then
-    echo "# Delete user and home directory"
+    echo "# Delete install directory"
     sudo rm -rf /home/bitcoin/spark-wallet
   fi
   # setting value in raspi blitz config
