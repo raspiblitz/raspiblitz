@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# DEPRECATED: https://github.com/rootzoll/raspiblitz/issues/2264#issuecomment-872655605
+# script will stay on v1.7.1 ... but should be removed after that
+
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "# script to upload a file to DropBox (without third party libs)"

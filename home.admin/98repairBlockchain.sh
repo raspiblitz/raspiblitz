@@ -26,14 +26,14 @@ elif [ "${CHOICE}" = "RESYNC" ]; then
     dialog --pause "OK. System will reboot to activate changes." 8 58 8
     clear
     echo "rebooting .. (please wait)"
-    sudo /home/admin/XXshutdown.sh reboot
+    sudo /home/admin/config.scripts/blitz.shutdown.sh reboot
 
 elif [ "${CHOICE}" = "REINDEX" ]; then
     echo "Starting REINDEX ..."
     sudo /home/admin/config.scripts/network.reindex.sh
 
 elif [ "${CHOICE}" = "BACKUP" ]; then
-    sudo /home/admin/config.scripts/lnd.rescue.sh backup
+    sudo /home/admin/config.scripts/lnd.backup.sh lnd-export-gui
     echo "PRESS ENTER to continue."
     read key
 
