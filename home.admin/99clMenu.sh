@@ -33,7 +33,7 @@ if [ ${#openChannels} -gt 0 ] && [ ${openChannels} -gt 0 ]; then
 fi
   OPTIONS+=(CASHOUT "Withdraw all funds onchain ($CHAIN)")
   OPTIONS+=(SEED "Show Wallet Seed Words")
-  OPTIONS+=(CLREPAIR "Repair options for C-lightning")
+  OPTIONS+=(REPAIR-CL "Repair options for C-lightning")
 if [ "${lightning}" != "cl" ] && [ "${CHAIN}" == "mainnet" ]; then
   OPTIONS+=(SWITCHLN  "Use C-lightning as default")
 fi  
@@ -101,7 +101,7 @@ case $CHOICE in
       echo "Press ENTER to return to main menu."
       read key
       ;;
-  CLREPAIR)
+  REPAIR-CL)
       /home/admin/99clRepairMenu.sh $CHAIN
       ;;
   SWITCHLN)
