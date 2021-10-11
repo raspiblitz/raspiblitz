@@ -166,8 +166,8 @@ case $CHOICE in
     # import seed
     _temp="/var/cache/raspiblitz/.temp.tmp"
     /home/admin/config.scripts/cl.backup.sh seed-import-gui $_temp
-    /home/admin/config.scripts/cl.hsmtool.sh seed "$CHAIN" "$(cat $_temp)"
-    source $_temp 2>/dev/null
+    source $_temp
+    /home/admin/config.scripts/cl.hsmtool.sh seed-force "$CHAIN" "${seedWords}"
     sudo rm $_temp 2>/dev/null
     # regenerate config
     /home/admin/config.scripts/cl.hsmtool.sh autounlock-off
