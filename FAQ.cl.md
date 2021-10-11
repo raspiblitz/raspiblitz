@@ -1,6 +1,11 @@
 <!-- omit in toc -->
 # C-lightning on the RaspiBlitz FAQ
 
+- [Common questions about the different Lightning Network implementations](#common-questions-about-the-different-lightning-network-implementations)
+  - [Can LND and C-lightning nodes open channels to each other and route payments?](#can-lnd-and-c-lightning-nodes-open-channels-to-each-other-and-route-payments)
+  - [Can I run LND and C-lightning connected to the same node?](#can-i-run-lnd-and-c-lightning-connected-to-the-same-node)
+  - [Can I convert an LND node to C-lightning (or the opposite)?](#can-i-convert-an-lnd-node-to-c-lightning-or-the-opposite)
+  - [Is there a table to quickly compare LND and C-Lightning?](#is-there-a-table-to-quickly-compare-lnd-and-c-lightning)
 - [C-lightning official documentation](#c-lightning-official-documentation)
 - [Commands and aliases](#commands-and-aliases)
 - [Directories](#directories)
@@ -24,13 +29,31 @@
 - [Testnets](#testnets)
 - [Backups](#backups)
   - [Seed](#seed)
+  - [How to display the hsm_secret in a human-readable format?](#how-to-display-the-hsm_secret-in-a-human-readable-format)
   - [Channel database](#channel-database)
   - [Recovery](#recovery)
 - [Script file help list](#script-file-help-list)
 
+---
+## Common questions about the different Lightning Network implementations
+
+### Can LND and C-lightning nodes open channels to each other and route payments?
+* Yes, all [BOLT specification](https://github.com/lightningnetwork/lightning-rfc) compliant implementations can open channels to each other and route payments.
+
+### Can I run LND and C-lightning connected to the same node?
+* Yes, both can run parallel on a RaspiBlitz and even have channels witch each other.
+
+### Can I convert an LND node to C-lightning (or the opposite)?
+* No, currently there are no tools available to convert between the databases storing the channel states.  
+The channels would need to be closed to use the same funds in an other node.
+
+### Is there a table to quickly compare LND and C-Lightning?
+* see [github.com/openoms/lightning-node-management/blob/master/node-types/comparison.md](https://github.com/openoms/lightning-node-management/blob/master/node-types/comparison.md)
+
+---
+
 ## C-lightning official documentation
 * https://lightning.readthedocs.io/
-* the lightningd is built by deafult with 
 
 ## Commands and aliases
 
@@ -532,7 +555,14 @@ Will need to pay through a peer which supports the onion messages which means yo
 * https://lightning.readthedocs.io/FAQ.html#how-to-backup-my-wallet
 * General details: https://lightning.readthedocs.io/BACKUP.html
 ### Seed
--
+### How to display the hsm_secret in a human-readable format?
+* If there is no seed available it isbest is to save the hsm_secret as a file with `scp`. To display as text:
+    ```
+    sudo cat /home/bitcoin/.lightning/bitcoin/hsm_secret | xxd
+    ```
+
+
+
 ### Channel database
 *
 
