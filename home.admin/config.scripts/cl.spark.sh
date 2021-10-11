@@ -18,7 +18,6 @@ fi
 source <(/home/admin/config.scripts/network.aliases.sh getvars cl $2)
 systemdService="${netprefix}spark"
 
-
 # show info menu
 if [ "$1" = "menu" ]; then
 
@@ -81,6 +80,7 @@ if [ $1 = on ];then
   sudo -u bitcoin git clone https://github.com/shesek/spark-wallet
   cd spark-wallet || exit 1
   sudo -u bitcoin git reset --hard ${SPARKVERSION} || exit 1
+  sudo -u bitcoin npm install @babel/cli
   sudo -u bitcoin npm run dist:npm || exit 1
   
   if [ ! -f /home/bitcoin/.spark-wallet/tls/key.pem ];then
@@ -171,8 +171,8 @@ if [ $1 = off ];then
 
   # purge
   if [ "$(echo "$@" | grep -c purge)" -gt 0 ];then
-      echo "# Delete user and home directory"
-      /home/bitcoin/spark-wallet
+    echo "# Delete user and home directory"
+    sudo rm -rf /home/bitcoin/spark-wallet
   fi
   # setting value in raspi blitz config
   sudo sed -i "s/^${netprefix}spark=.*/${netprefix}spark=off/g" /mnt/hdd/raspiblitz.conf
