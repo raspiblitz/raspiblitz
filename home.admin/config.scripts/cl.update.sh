@@ -2,15 +2,17 @@
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
- echo "Interim optional C-lightning updates between RaspiBlitz releases."
- echo "cl.update.sh [info|verified|reckless]"
- echo "info -> get actual state and possible actions"
- echo "verified -> only do recommended updates by RaspiBlitz team"
- echo "  binary will be checked by signature and checksum"
- echo "reckless -> if you just want to update to the latest release"
- echo "  published on C-lightning GitHub releases (RC or final) without any"
- echo "  testing or security checks."
- exit 1
+  echo
+  echo "Interim optional C-lightning updates between RaspiBlitz releases."
+  echo "cl.update.sh [info|verified|reckless]"
+  echo "info -> get actual state and possible actions"
+  echo "verified -> only do recommended updates by RaspiBlitz team"
+  echo "  binary will be checked by signature and checksum"
+  echo "reckless -> if you just want to update to the latest release"
+  echo "  published on C-lightning GitHub releases (RC or final) without any"
+  echo "  testing or security checks."
+  echo
+  exit 1
 fi
 
 # 1. parameter [info|verified|reckless]
