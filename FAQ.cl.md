@@ -32,6 +32,9 @@
   - [How to display the hsm_secret in a human-readable format?](#how-to-display-the-hsm_secret-in-a-human-readable-format)
   - [Channel database](#channel-database)
   - [Recovery](#recovery)
+    - [Recover from a cl-rescue file](#recover-from-a-cl-rescue-file)
+    - [Recover from a seed](#recover-from-a-seed)
+    - [Rescan the chain after restoring a used c-lightning wallet](#rescan-the-chain-after-restoring-a-used-c-lightning-wallet)
 - [Script file help list](#script-file-help-list)
 
 ---
@@ -100,7 +103,7 @@ or with the alias: `cllog`
   *  can be shown by running:   
   `lightningd --help`  
   * Place the settings in the config file  without the `--` and restart lightningd
-      ```
+    ```
     Usage: lightningd 
     A bitcoin lightning daemon (default values shown for network: bitcoin).
     --conf=<file>                                     Specify configuration file
@@ -555,32 +558,46 @@ Will need to pay through a peer which supports the onion messages which means yo
 * https://lightning.readthedocs.io/FAQ.html#how-to-backup-my-wallet
 * General details: https://lightning.readthedocs.io/BACKUP.html
 ### Seed
+* by default a BIP39 wordlist compatible, 24 words seed is used to generate the `hsm_secret`
+* if the wallet was generated or restored from seed on the RaspiBlitz the seed is stored in the disk with the option to encrypt 
 ### How to display the hsm_secret in a human-readable format?
 * If there is no seed available it isbest is to save the hsm_secret as a file with `scp`. To display as text:
     ```
     sudo cat /home/bitcoin/.lightning/bitcoin/hsm_secret | xxd
     ```
-
-
-
 ### Channel database
-*
+* Stored on the disk and synchronised to the SDcard with the help of the bakcup plugin.
 
 ### Recovery
 * https://lightning.readthedocs.io/FAQ.html#database-corruption-channel-state-lost
 * https://lightning.readthedocs.io/FAQ.html#loss
+#### Recover from a cl-rescue file
+* use the `REPAIR-CL` - `FILERESTORE` option in the menu for instructions to upload
+#### Recover from a seed
+* use the `REPAIR-CL` - `SEEDRESTORE` option in the menu for instructions to paste the seedwords to restore
+#### Rescan the chain after restoring a used c-lightning wallet
+* https://lightning.readthedocs.io/FAQ.html#rescanning-the-block-chain-for-lost-utxos
+* Stop `lightningd`:
+    ```
+    sudo systemctl stop lightningd
+    ```
+* Rescan from the block 700000
+    ```
+    sudo -u bitcoin lightningd --rescan=700000
+    ```
 
 ## Script file help list
 
-```
-# generate a list of help texts on a RaspiBlitz:
-cd /home/admin/config.scripts/
-ls cl*.sh > clScriptList.txt
-sed -i "s#cl#./cl#g" clScriptList.txt
-sed -i "s#.sh#.sh -h#g" clScriptList.txt
-bash -x clScriptList.txt
-rm clScriptList.txt
-```
+
+* generate a list of the help texts on a RaspiBlitz:
+    ```
+    cd /home/admin/config.scripts/
+    ls cl*.sh > clScriptList.txt
+    sed -i 's#^#./#g' clScriptList.txt
+    sed -i 's#.sh#.sh -h#g' clScriptList.txt
+    bash -x clScriptList.txt
+    rm clScriptList.txt
+    ```
 
 ```
 + ./cl.backup.sh -h
@@ -597,6 +614,12 @@ SEED WORDS
 ---------------------------------------------------
 cl.backup.sh seed-export-gui [lndseeddata]
 cl.backup.sh seed-import-gui [resultfile]
+
++ ./cl.check.sh -h
+
+# script to check CL states
+# cl.check.sh basic-setup
+# cl.check.sh prestart [mainnet|testnet|signet]
 
 + ./cl.hsmtool.sh -h
 
@@ -659,21 +682,35 @@ version: v0.10
 Usage:
 cl-plugin.clboss.sh [on|off] [testnet|mainnet|signet]
 
++ ./cl-plugin.feeadjuster.sh -h
+
+Install the feeadjuster plugin for C-lightning
+Usage:
+cl-plugin.feeadjuster.sh [on|off] <testnet|mainnet|signet>
+
++ ./cl-plugin.http.sh -h
+
+Install, remove, connect the c-lightning-http-plugin
+version: 1dbb6537e0ec5fb9b8edde10db6b4cc613ccdb19
+Implemented for mainnet only.
+Usage:
+cl-plugin.http.sh [on|off|connect] <norestart>
+
 + ./cl-plugin.sparko.sh -h
 
 Install, remove, connect or get info about the Sparko plugin for C-lightning
 version: v2.7
 Usage:
-cl-plugin.sparko.sh [on|off|menu|connect] [testnet|mainnet|signet]
+cl-plugin.sparko.sh [on|off|menu|connect] [testnet|mainnet|signet] [norestart]
 
 + ./cl-plugin.standard-python.sh -h
 
 Install and show the output of the chosen plugin for C-lightning
 Usage:
-cl-plugin.standard-python.sh on [plugin-name] [testnet|mainnet|signet] [runonce]
+cl-plugin.standard-python.sh on [plugin-name] <testnet|mainnet|signet> <persist|runonce>
 
 tested plugins:
-summary | helpme | feeadjuster
+summary | helpme | feeadjuster | paytest
 
 find more at:
 https://github.com/lightningd/plugins
@@ -698,4 +735,23 @@ cl.rest.sh [on|off|connect] <mainnet|testnet|signet>
 
 Config script to set the alias of the C-lightning node
 cl.setname.sh [mainnet|testnet|signet] [?newName]
+
++ ./cl.spark.sh -h
+
+Install, remove or get info about the Spark Wallet for C-lightning
+version: v0.3.0rc
+Usage:
+cl.spark.sh [on|off|menu] <testnet|mainnet|signet> 
+
++ ./cl.update.sh -h
+
+Interim optional C-lightning updates between RaspiBlitz releases.
+cl.update.sh [info|verified|reckless]
+info -> get actual state and possible actions
+verified -> only do recommended updates by RaspiBlitz team
+  binary will be checked by signature and checksum
+reckless -> if you just want to update to the latest release
+  published on C-lightning GitHub releases (RC or final) without any
+  testing or security checks.
+
 ```

@@ -2,9 +2,11 @@
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ]; then
+  echo
   echo "# script to check CL states"
   echo "# cl.check.sh basic-setup"
   echo "# cl.check.sh prestart [mainnet|testnet|signet]"
+  echo
   exit 1
 fi
 
