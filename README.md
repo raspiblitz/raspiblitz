@@ -107,7 +107,7 @@ In the end your RaspiBlitz should look like this:
 
 ## Downloading the Software
 
-*PLEASE WAIT SOME MORE HOURS .. NEW RELEASE 1.7.1 IMAGE WILL BE POROVIDED VERY SOON*
+*PLEASE WAIT SOME MORE HOURS .. NEW RELEASE 1.7.1 IMAGE WILL BE PROVIDED VERY SOON*
 
 |Method|Install the image|Build the sd card|
 |------|-----------------|-----------------|   
