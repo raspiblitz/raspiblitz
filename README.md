@@ -107,26 +107,24 @@ In the end your RaspiBlitz should look like this:
 
 ## Downloading the Software
 
-*PLEASE WAIT SOME MORE HOURS .. NEW RELEASE 1.7.1 IMAGE WILL BE POROVIDED VERY SOON*
-
 |Method|Install the image|Build the sd card|
 |------|-----------------|-----------------|   
 |Philosophy|Trust|Sovereignty|
 |Difficulty level|Easy|Medium|
 |Pros|Make Blitz accessible to everyone|You don't need to trust us, build from your own forked repository|
-|Instructions|(NEW IMAGE WILL BE RELEASED SHORTLY) and [Flash the sd card](README.md#write-the-sd-card-image-to-your-sd-card)|[Build your own sd card image](#build-the-sd-card-image)|
-|Verify what?|[Signature file]() and [verify the Sig](FAQ.md#how-to-verify-the-sd-card-image-after-download) OR SHA-256 (below)|All of the code, don't trust, verify|
+|Instructions|[Download 1.7.1 image](https://raspiblitz.fulmo.org/images/raspiblitz-v1.7.1-2021-10-12.img.gz) and [Flash the sd card](README.md#write-the-sd-card-image-to-your-sd-card)|[Build your own sd card image](#build-the-sd-card-image)|
+|Verify what?|[Signature file](https://raspiblitz.fulmo.org/images/raspiblitz-v1.7.1-2021-10-12.img.gz.sig) and [verify the Sig](FAQ.md#how-to-verify-the-sd-card-image-after-download) OR SHA-256 (below)|All of the code, don't trust, verify|
 
 If downloading the maintainer sd card image:
 * GPG 64-bit: 1C73 060C 7C17 6461
-* SHA-256: (please wait)
+* SHA-256: 4b5481e0f27afe9b5aa8bab5805f7df033f2596db29a1e47c25d2f0109d9c003
 
 Which verification method should I used: Hash or Signature?
 * Signed file prove to you that the SD card image was actually built by the lead developer of the RaspiBlitz project. (Safest)
 * Hash function checks file integrity. (Secure)
 
 The maintainer sd card image can also be downloaded via torrent:
-* [assets/raspiblitz-vXXX.img.gz.torrent](https://github.com/rootzoll/raspiblitz/raw/v1.7/home.admin/assets/raspiblitz-XXX.img.gz.torrent)
+* [assets/raspiblitz-v1.7.1-2021-10-12.img.gz.torrent](https://github.com/rootzoll/raspiblitz/raw/dev/home.admin/assets/raspiblitz-v1.7.1-2021-10-12.img.gz.torrent)
 
 Useful info:
 * [What's new in Version 1.7.1 of RaspiBlitz?](CHANGES.md#whats-new-in-version-171-of-raspiblitz)
@@ -360,7 +358,7 @@ If you would prefer to do this from a web browser with a dashboard UI, instead o
 
 Have fun riding the lightning :D
 
-*BTW always love seeing photos of new RaspBlitzes added to the network on twitter @rootzoll - also there is a [RaspiBlitz Donation Page](https://tallyco.in/s/r5lx23/), why not try to send some satoshis there with your new RaspiBlitz :D *
+*BTW always love seeing photos of new RaspBlitzes added to the network on twitter @rootzoll - also there is a [RaspiBlitz Donation Page](https://raspiblitz.org/#donation), why not try to send some satoshis there with your new RaspiBlitz :D *
 
 * [How can I get further help/support?](#support)
 
@@ -416,7 +414,7 @@ Pay an invoice through lightning.
 
 *This is just a very basic shell script. For more usability try the RTL Webinterface (under Services) or connect a (mobile) wallet with your RaspiBlitz.*
 
-If you are looking for something to test payments with Lightning ... why not [donate some satoshis to RaspiBlitz development](https://tallyco.in/s/r5lx23/)? Thanks :)
+If you are looking for something to test payments with Lightning ... why not [donate some satoshis to RaspiBlitz development](https://raspiblitz.org/#donation)? Thanks :)
 
 ##### RECEIVE: Create Invoice/PaymentRequest
 
