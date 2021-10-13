@@ -36,6 +36,7 @@ There are further Services that can be switched on:
 * **CL Spark Wallet** (WalletUI with BOLT12 offers) [details](https://github.com/shesek/spark-wallet#progressive-web-app)
 * **CL plugin: Sparko** (WalletUI & HTTP-RPC bridge) [details](https://github.com/fiatjaf/sparko#the-sparko-plugin)
 * **CL plugin: CLBOSS** (Automated Node Manager) [details](https://github.com/ZmnSCPxj/clboss#clboss-the-c-lightning-node-manager)
+* **Tallycoin Connect** (Use Tallycoin with your own node) [details](https://github.com/djbooth007/tallycoin_connect)
 
 You can connect the following Wallet-Apps to your RaspiBlitz:
 
@@ -56,7 +57,7 @@ The RaspiBlitz is optimized for being setup during a workshop at a hackday or co
 
 If you start at home ordering the parts from Amazon (see shopping list below) then it's a weekend project with a lot of downloading and syncing time where you can do other stuff while checking on the progress from time to time.
 
-If you already run a Umbrel or myNode you have basically all the hardware needed and you can make the [Migration to RaspiBlitz from Umbrel/myNode](#make-a-raspiblitz-out-of-your-umbrel-or-mynode) under one hour. 
+If you already run a Umbrel or myNode you have basically all the hardware needed and you can make the [Migration to RaspiBlitz from Umbrel/myNode](#make-a-raspiblitz-out-of-your-umbrel-or-mynode) under one hour.
 
 ## Hardware Needed
 
@@ -86,7 +87,7 @@ The cheapest way is to buy and assemble the single parts yourself. There are two
   - Quimat 3,5'' Zoll Inch Touch
   - ELEGOO Display 3.5" Zoll TFT LCD
   - kuman 3.5 Inch Touch Screen TFT Monitor
-  - Waveshare 3.5inch Display for Raspberry Pi 
+  - Waveshare 3.5inch Display for Raspberry Pi
 
 *You can even pay for your RaspiBlitz Amazon Shopping with Bitcoin & Lightning through [Bitrefill](https://blog.bitrefill.com/its-here-buy-amazon-vouchers-with-bitcoin-on-bitrefill-bb2a4449724a).*
 
@@ -108,7 +109,7 @@ In the end your RaspiBlitz should look like this:
 ## Downloading the Software
 
 |Method|Install the image|Build the sd card|
-|------|-----------------|-----------------|   
+|------|-----------------|-----------------|
 |Philosophy|Trust|Sovereignty|
 |Difficulty level|Easy|Medium|
 |Pros|Make Blitz accessible to everyone|You don't need to trust us, build from your own forked repository|
@@ -278,7 +279,7 @@ First Password A is requested - this is the new password which has to be used fo
 
 Then enter the Password B - this is internally used for the bitcoin RPC interface. But also as login for additional apps like the RTL-WebGUI or the Blockexplorer:
 
-And finally enter the Password C - this is used to encrypt/lock the lightning wallet on the harddrive/ssd and is used by LND. Everytime a lightning node is started/rebooted LND needs load the wallet into memory to work with and ask you for the Password C to "unlock" the wallet. 
+And finally enter the Password C - this is used to encrypt/lock the lightning wallet on the harddrive/ssd and is used by LND. Everytime a lightning node is started/rebooted LND needs load the wallet into memory to work with and ask you for the Password C to "unlock" the wallet.
 
 *In the early RaspiBlitz versions there was also an additional Pasword D, that is no longer in use.*
 
@@ -308,7 +309,7 @@ With the new RaspberryPi 4 (with SSD & min 2GB RAM) this is the best way to go. 
 
 #### 2. COPY - Copy from Laptop or another RaspiBlitz over Local Network
 
-If you have a friend that is already running a synced RaspiBlitz or you have a laptop with enough free space on the harddrive that can download & validate the Blockchain much faster you can also choose the `COPY` option. You can then delete existing blockchain your RaspiBlitz already started syncing for you. 
+If you have a friend that is already running a synced RaspiBlitz or you have a laptop with enough free space on the harddrive that can download & validate the Blockchain much faster you can also choose the `COPY` option. You can then delete existing blockchain your RaspiBlitz already started syncing for you.
 
 ![SSH4](pictures/ssh4-copy.png)
 
@@ -498,7 +499,7 @@ You can get Bitcoin Testnet coins you can use Faucets from different places on t
 
 You can read more about TESTNET and Bitcoin Faucets here: https://kuttler.eu/code/bitcoin-testnet-blockchain-size-in-2020/
 
-##### ZeroTier 
+##### ZeroTier
 
 With ZeroTier you can add your RaspiBlitz to a software defined network - see for details: https://en.wikipedia.org/wiki/ZeroTier
 
@@ -508,8 +509,8 @@ This needs to switched on to see the sub-settings options for LND. If switched o
 
 ##### LND Channel Autopilot
 
-The channels autopilot feature of LND allows to automatically uses around half of your on-chain funds (if available) to open new channels with other lightning nodes. 
-Channels autopilot is very useful to get started transacting swiftly if you're a newbie as the channels are generated for you. 
+The channels autopilot feature of LND allows to automatically uses around half of your on-chain funds (if available) to open new channels with other lightning nodes.
+Channels autopilot is very useful to get started transacting swiftly if you're a newbie as the channels are generated for you.
 It is very likely that after a while, once you will have a hang of the concept of channels and how they work that you will not need channels autopilot anymore.
 
 Beware that presently toggling the Channels Autopilot setting will trigger a reboot of your Raspiblitz. It is not a problem per se, just a bit of waste of time [Improvement request #1953](https://github.com/rootzoll/raspiblitz/issues/1953)
@@ -716,7 +717,7 @@ Dashboard Bitcoin information program (needs LND).
 
 ![PYBLOCK](pictures/pyblock.png)
 
-https://github.com/curly60e/pyblock/blob/master/README.md 
+https://github.com/curly60e/pyblock/blob/master/README.md
 
 ##### Channel Tools (chantools)
 
@@ -775,7 +776,7 @@ Mobile wallets work as a remote control app for your RaspiBlitz. First you need 
 
 ##### Electrum Rust Server
 
-Information how to connect to Electrum Rust Server (if installed). 
+Information how to connect to Electrum Rust Server (if installed).
 
 ##### BTCPAY: Get the connection string for the BTCPay Server
 
@@ -834,7 +835,7 @@ At the moment, the following subscription services are available:
 
 IP2TOR is a tunnel service where you can run your RaspiBlitz anonymously behind TOR but you rent a port on a clearnet IP through which you can make services of your RaspiBlitz easy reachable for everybody on the internet. You don't need to care about your local router or firewall settings. You can pay this service also directly through Lightning from your RaspiBlitz as subscription.
 
-At first you select what service of your RaspiBlitz you like to tunnel thru a IP2TOR bridge. 
+At first you select what service of your RaspiBlitz you like to tunnel thru a IP2TOR bridge.
 
 You will get a list of available IP2TOR bridge offerings. Select `OK` on an IP2TOR bridge offering and you will see more details on it, such as how many satoshis the subscription will cost you - your node should be funded and have channels open at this point.
 
@@ -846,9 +847,9 @@ To try out the IP2TOR tunnel choose in `MAINMENU` the extra menu point of the Se
 
 ##### HTTPS with LetsEncrypt (free)
 
-If you want a Webservice like BTCPay Server or LNbits available to the outside internet (like with IP2TOR) people expect you to offer HTTPS address so that the communication between the client and your RaspiBlitz is encrypted. You could use the self-signed HTTPS certificate that RaspiBlitzis offering you, but this will give users Security Warnings in their browser and is not very user friendly. That's where you can use a LetsEncrypt Subscription to get a free valid HTTPS certificate that is excepted without warning from almost all common browsers. 
+If you want a Webservice like BTCPay Server or LNbits available to the outside internet (like with IP2TOR) people expect you to offer HTTPS address so that the communication between the client and your RaspiBlitz is encrypted. You could use the self-signed HTTPS certificate that RaspiBlitzis offering you, but this will give users Security Warnings in their browser and is not very user friendly. That's where you can use a LetsEncrypt Subscription to get a free valid HTTPS certificate that is excepted without warning from almost all common browsers.
 
-Because you also need a domain name for that you will need to open a free account, the following are presently supported, would be good to add more with the help of the community: 
+Because you also need a domain name for that you will need to open a free account, the following are presently supported, would be good to add more with the help of the community:
 [DuckDNS.org](https://www.duckdns.org)
 [DYNU.com](https://www.dynu.com) (AT THE MOMENT NOT AVAILABLE)
 
@@ -1009,7 +1010,7 @@ Instructions for Migration:
 * shutdown your old node
 * remove the sd card
 * [download the latest Raspiblitz sd card image & flash it to your sd card](#downloading-the-software)
-* if you like to use a HDMI monitor for status & progress, create a empty file called `hdmi` (without any ending) on the sd card while connected to your laptop 
+* if you like to use a HDMI monitor for status & progress, create a empty file called `hdmi` (without any ending) on the sd card while connected to your laptop
 * [insert sd card, boot up & login per SSH](#boot-your-raspiblitz)
 
 Now RaspiBlitz should show you that old data from your node was detected and offer you todo the migration.
@@ -1019,7 +1020,7 @@ Now RaspiBlitz should show you that old data from your node was detected and off
 * Login per SSH as before and reset the passwords (`FINAL RECOVERY LOGIN` on LCD). Then a final reboot will happen.
 * Login per SSH with your new password A & unlock LND wallet with password C. Now blockchain needs to catch up and then your RaspiBlitz should be ready and show you (under INFO) your on-chain & channel balance.
 
-If you don't have an LCD or HDMI monitor connected it might be a bit difficult to see what state your RaspiBlitz is in. Just (re-)try to login per SSH again after the reboots (might always take some time until it reacts). 
+If you don't have an LCD or HDMI monitor connected it might be a bit difficult to see what state your RaspiBlitz is in. Just (re-)try to login per SSH again after the reboots (might always take some time until it reacts).
 
 ## Interface / APIs
 
@@ -1052,7 +1053,7 @@ To recover your funds this way, you will need two things:
 
 You should have written down the word seed during wallet setup; keep it at a safe (offline) location. The `channel.backup` is stored on the HDD and updated by LND every time a new channel is opened or closed. The latest version of this file is needed to recover all your funds. In case your HDD gets damaged, RaspiBlitz always keeps a copy of the latest version of the `channel.backup` file on the SD card within the sub-directories of: `/home/admin/.lnd/data/chain/`.
 
-If you want to get one step further in securing your funds against total fall-out of the RaspiBlitz (gets completely damaged, stolen or lost) then you can additionally set up an off-location or cloud backup of the `channel.backup` file. The file itself is encrypted by your word seed - so it's OK to store the file to untrusted third parties for backup (if you want). 
+If you want to get one step further in securing your funds against total fall-out of the RaspiBlitz (gets completely damaged, stolen or lost) then you can additionally set up an off-location or cloud backup of the `channel.backup` file. The file itself is encrypted by your word seed - so it's OK to store the file to untrusted third parties for backup (if you want).
 
 This video explains in detail how you can set further back Static Channel information:
 
@@ -1084,7 +1085,7 @@ Go to your web browser, do the following:
 
     ![Dropbox API 3](https://github.com/rootzoll/raspiblitz/raw/v1.6/pictures/dropbox-3.png)
 
-    Now go back to the 'Settings' tab and under 'OAuth2', choose 'no expiration' under 'Access token expiration' then click the 'Generate' button. You will now see a long string of letters and numbers appear. This is your **Dropbox-Authtoken**. Make sure to copy the complete token string .. there might be more if you scroll to the right in the token field. 
+    Now go back to the 'Settings' tab and under 'OAuth2', choose 'no expiration' under 'Access token expiration' then click the 'Generate' button. You will now see a long string of letters and numbers appear. This is your **Dropbox-Authtoken**. Make sure to copy the complete token string .. there might be more if you scroll to the right in the token field.
 
 To test it, try opening or closing a channel, and then check if you can find a copy of `channel.backup` in your Dropbox. You can check the background-script logs to see details on errors: `sudo journalctl -f -u background`
 

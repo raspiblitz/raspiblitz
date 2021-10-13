@@ -74,7 +74,7 @@ elif [ "${headless}" != "" ]; then
   displayClass="lcd"
 fi
 
-# NEW: decide by displayClass 
+# NEW: decide by displayClass
 echo "raspiblitz.info(${infoFileDisplayClass}) raspiblitz.conf(${displayClass})" >> ${logFile}
 if [ "${infoFileDisplayClass}" != "" ] && [ "${displayClass}" != "" ]; then
   if [ "${infoFileDisplayClass}" != "${displayClass}" ]; then
@@ -157,7 +157,7 @@ sudo ln -s -f /mnt/hdd/.tmux.conf.local /home/admin/.tmux.conf.local >> ${logFil
 if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
 
   echo "### PREPARE LND" >> ${logFile}
-  
+
   # backup LND dir (especially for macaroons and tlscerts)
   # https://github.com/rootzoll/raspiblitz/issues/324
   echo "*** Make backup of LND directory" >> ${logFile}
@@ -502,13 +502,13 @@ else
   echo "Provisioning ElectRS - keep default" >> ${logFile}
 fi
 
-# BTCPAYSERVER 
+# BTCPAYSERVER
 if [ "${BTCPayServer}" = "on" ]; then
 
   echo "Provisioning BTCPAYSERVER on TOR - running setup" >> ${logFile}
   sudo sed -i "s/^message=.*/message='Setup BTCPay (takes time)'/g" ${infoFile}
   sudo -u admin /home/admin/config.scripts/bonus.btcpayserver.sh on >> ${logFile} 2>&1
-  
+
 else
   echo "Provisioning BTCPayServer - keep default" >> ${logFile}
 fi
@@ -739,6 +739,15 @@ else
   echo "Provisioning CircuitBreaker - keep default" >> ${logFile}
 fi
 
+# tallycoin_connect
+if [ "${tallycoinConnect}" = "on" ]; then
+  echo "Provisioning Tallycoin Connect - run config script" >> ${logFile}
+  sudo sed -i "s/^message=.*/message='Setup Tallycoin Connect'/g" ${infoFile}
+  sudo -u admin /home/admin/config.scripts/bonus.tallycoin-connect.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning Tallycoin Connect - keep default" >> ${logFile}
+fi
+
 # custom install script from user
 customInstallAvailable=$(sudo ls /mnt/hdd/app-data/custom-installs.sh 2>/dev/null | grep -c "custom-installs.sh")
 if [ ${customInstallAvailable} -gt 0 ]; then
@@ -834,7 +843,7 @@ if [ "${lightning}" == "lnd" ];then
     echo "Found /mnt/hdd/passwordc.flag .. changing password" >> ${logFile}
     oldPasswordC=$(sudo cat /mnt/hdd/passwordc.flag)
     sudo /home/admin/config.scripts/lnd.initwallet.py change-password mainnet "${oldPasswordC}" "${passwordC}" >> ${logFile}
-    sudo shred -u /mnt/hdd/passwordc.flag    
+    sudo shred -u /mnt/hdd/passwordc.flag
   else
     echo "No /mnt/hdd/passwordc.flag" >> ${logFile}
   fi
