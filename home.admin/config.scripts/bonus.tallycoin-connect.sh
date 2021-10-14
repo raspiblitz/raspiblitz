@@ -9,7 +9,7 @@ CONFIG_FILE=$APP_DATA_DIR/tallycoin_api.key
 RASPIBLITZ_INFO=/home/admin/raspiblitz.info
 RASPIBLITZ_CONF=/mnt/hdd/raspiblitz.conf
 SERVICE_FILE=/etc/systemd/system/tallycoin-connect.service
-TC_VERSION=1.4.0
+TC_VERSION=1.7.0
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -73,6 +73,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u $USERNAME mv tallycoin_connect{-$TC_VERSION,}
     sudo -u $USERNAME rm v$TC_VERSION.tar.gz
     cd tallycoin_connect
+    sudo -u $USERNAME cat .dockerignore | xargs rm -rf
+    sudo -u $USERNAME rm .dockerignore
     sudo -u $USERNAME npm install
     if ! [ $? -eq 0 ]; then
         echo "FAIL - npm install did not run correctly, aborting"
@@ -84,7 +86,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo chown $USERNAME:$USERNAME $APP_DATA_DIR
 
     if [[ ! -f "$CONFIG_FILE" ]]; then
-      configFile=/home/admin/tallycoin_connect.env
+      configFile=/home/admin/tallycoin_api.key
       touch $configFile
       sudo chmod 600 $configFile || exit 1
       passwordB=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
@@ -96,8 +98,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       sudo mv $configFile $CONFIG_FILE
       sudo chown $USERNAME:$USERNAME $CONFIG_FILE
     fi
-    sudo ln -s $CONFIG_FILE $HOME_DIR/tallycoin_connect/tallycoin_api.key
-    sudo chown $USERNAME:$USERNAME $HOME_DIR/tallycoin_connect/tallycoin_api.key
 
     ##################
     # NGINX
@@ -139,6 +139,7 @@ After=lnd.service
 
 [Service]
 WorkingDirectory=$HOME_DIR/tallycoin_connect
+Environment=\"CONFIG_FILE=$CONFIG_FILE\"
 ExecStart=/usr/bin/npm start
 User=tallycoin
 Restart=always
@@ -186,6 +187,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     echo "*** UNINSTALL TALLYCOIN CONNECT ***"
 
     # remove systemd service
+    sudo systemctl stop tallycoin-connect
     sudo systemctl disable tallycoin-connect
     sudo rm -f $SERVICE_FILE
 
