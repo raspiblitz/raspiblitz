@@ -145,6 +145,8 @@ FETCH_FEES = false
 DISABLE_LINKS = true
 DISABLE_LNMARKETS = true
 NO_VERSION_CHECK = true
+# https://nextjs.org/telemetry#how-do-i-opt-out
+NEXT_TELEMETRY_DISABLED=1
 
 # -----------
 # Account Configs
