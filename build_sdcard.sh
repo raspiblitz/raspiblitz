@@ -663,6 +663,11 @@ sudo bash -c "echo '' >> /home/admin/.bashrc"
 sudo bash -c "echo '# https://github.com/rootzoll/raspiblitz/issues/1784' >> /home/admin/.bashrc"
 sudo bash -c "echo 'NG_CLI_ANALYTICS=ci' >> /home/admin/.bashrc"
 
+# raspiblitz custom command prompt
+sudo bash -c "echo '' >> /home/admin/.bashrc"
+sudo bash -c "echo '# raspiblitz custom command prompt https://github.com/rootzoll/raspiblitz/issues/2400' >> /home/admin/.bashrc"
+sudo bash -c "echo 'PS1=\"\${debian_chroot:+(\$debian_chroot)}\[\e[33m\]\u \[\033[01;34m\]\w\[\e[33;40m\] ₿\[\e[m\] \"' >> /home/admin/.bashrc"
+
 homeFile=/home/admin/.bashrc
 keyBindings="source /usr/share/doc/fzf/examples/key-bindings.bash"
 keyBindingsDone=$(grep -c "$keyBindings" $homeFile)
