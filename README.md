@@ -1150,7 +1150,7 @@ The whole build process takes a while. At the end the LCD drivers get installed 
 *Note: If you plan to use your self-build sd card as a MASTER copy and distribute it: Use a smaller 8GB card for that. This way it's ensured that it will fit on every 16 GB card recommended for RaspiBlitz later on.*
 
 * [Can I run RaspiBlitz on other computers than RaspberryPi?](FAQ.md#can-i-run-raspiblitz-on-other-computers-than-raspberrypi)
-* [How can I build an SD card other than the master branch?](FAQ.md#how-can-i-build-an-sd-card-other-then-the-master-branch)
+* [How can I build an SD card from another branch?](FAQ.md#how-can-i-build-an-sd-card-from-another-branch)
 * [How can I build an SD card from my forked GitHub Repo?](FAQ.md#how-can-i-build-an-sd-card-from-my-forked-github-repo)
 
 ## FAQ
