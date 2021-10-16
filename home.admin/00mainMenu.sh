@@ -358,4 +358,6 @@ exitCodeOfSubmenu=$?
 if [ "${exitCodeOfSubmenu}" != "0" ]; then
   echo "# submenu signaled exit code '${exitCodeOfSubmenu}' --> forward to outside loop"
 fi
-exit ${exitCodeOfSubmenu}
+
+# go into loop - start script from beginning to load config/sate fresh
+/home/admin/00mainMenu.sh
