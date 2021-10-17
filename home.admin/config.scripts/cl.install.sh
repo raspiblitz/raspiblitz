@@ -183,7 +183,6 @@ if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = testPR ];then
     echo "# lightningd configuration for ${network} ${CHAIN}
 
 network=${CLNETWORK}
-announce-addr=127.0.0.1:${portprefix}9736
 log-file=cl.log
 log-level=info
 plugin-dir=/home/bitcoin/${netprefix}cl-plugins-enabled
