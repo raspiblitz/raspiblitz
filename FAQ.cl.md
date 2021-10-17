@@ -35,6 +35,9 @@
     - [Recover from a cl-rescue file](#recover-from-a-cl-rescue-file)
     - [Recover from a seed](#recover-from-a-seed)
     - [Rescan the chain after restoring a used c-lightning wallet](#rescan-the-chain-after-restoring-a-used-c-lightning-wallet)
+- [Update](#update)
+  - [Update to a new C-lightning release](#update-to-a-new-c-lightning-release)
+  - [Experimental update to the latest master](#experimental-update-to-the-latest-master)
 - [Script file help list](#script-file-help-list)
 
 ---
@@ -586,8 +589,28 @@ Will need to pay through a peer which supports the onion messages which means yo
     sudo -u bitcoin lightningd --rescan=700000
     ```
 
-## Script file help list
+## Update
+### Update to a new C-lightning release
+* See the tagged releases by the C-lightning team: [github.com/ElementsProject/lightning/releases](https://github.com/ElementsProject/lightning/releases)
+* Will be able to update to new releases from the menu - `UPDATE` - `CL`
+* Since downgrading the lightning database is not allowed the updated version will persist if the SDcard is reflashed.
 
+### Experimental update to the latest master
+* this won't persist in case the SDcard is reflashed so will need to manually update again. 
+* the commadn to use the built-in script to update to the lates commit in the default branch is:
+    ```
+    config.scripts/cl.install.sh update
+    ```
+* if the database version is not compatible with the default version after a downgrade there will be an error message in `sudo journalctl -u lightningd` similar to:
+    ```
+    Refusing to migrate down from version 178 to 176
+    ```
+* in this case update to the next release from the menu or the latest master again with:
+    ```
+    config.scripts/cl.install.sh update
+    ```
+
+## Script file help list
 
 * generate a list of the help texts on a RaspiBlitz:
     ```
