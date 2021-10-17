@@ -21,6 +21,11 @@ source <(/home/admin/config.scripts/network.aliases.sh getvars cl $2)
 # so it tries to make sure the config is in valid shape
 ######################################################################
 
+# do not announce 127.0.0.1 https://github.com/rootzoll/raspiblitz/issues/2634
+if [ $(grep -c "^announce-addr=127.0.0.1" < ${CLCONF}) -gt 0 ];then
+  sed -i "/^announce-addr=127.0.0.1/d" ${CLCONF}
+fi
+
 if [ $(grep -c "^sparko" < ${CLCONF}) -gt 0 ];then
   if [ ! -f /home/bitcoin/${netprefix}cl-plugins-enabled/sparko ]\
     || [ "$(eval echo \$${netprefix}sparko)" != "on" ]; then
