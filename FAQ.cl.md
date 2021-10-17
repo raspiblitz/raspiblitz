@@ -475,7 +475,7 @@ the amounts can be specified in `sat` or `btc`
 list the utxo-s with `lightning-cli listfunds`, can list multiple  
 the feerate is in `perkb` by default, e.g. use 1000 for 1 sat/byte
     ```
-    lightning-cli fundchannel feerate=PERKB_FEERATE utxos='["TRANSACTION_ID:INDDEX_NUMBER"]' -kid=NODE_ID amount=OWN_AMOUNTsat request_amt=PEER_CONTRIBUTION_AMOUNTsat compact_lease=COMPACT_LEASE
+    lightning-cli fundchannel feerate=PERKB_FEERATE utxos='["TRANSACTION_ID:INDDEX_NUMBER"]' -k id=NODE_ID amount=OWN_AMOUNTsat request_amt=PEER_CONTRIBUTION_AMOUNTsat compact_lease=COMPACT_LEASE
     ```
 
 ### Offers
@@ -560,11 +560,18 @@ Will need to pay through a peer which supports the onion messages which means yo
 ## Backups
 * https://lightning.readthedocs.io/FAQ.html#how-to-backup-my-wallet
 * General details: https://lightning.readthedocs.io/BACKUP.html
+
 ### Seed
-* by default a BIP39 wordlist compatible, 24 words seed is used to generate the `hsm_secret`
-* if the wallet was generated or restored from seed on the RaspiBlitz the seed is stored in the disk with the option to encrypt 
+* By default a BIP39 wordlist compatible, 24 words seed is used to generate the `hsm_secret`
+* If the wallet was generated or restored from seed on a RaspiBlitz the seed is stored in the disk with the option to encrypt 
+* Display the seed from the menu - `CL` - `SEED`
+* The file where the seed is stored (until encrypted) is on the disk: `/home/bitcoin/.lightning/bitcoin/seedwords.info`
+* Show manually with:  
+`sudo cat /home/bitcoin/.lightning/bitcoin/seedwords.info`
+* If there is no such file and you have not funded the C-lightning wallet yet can reset the wallet and the next wallet will be created with a seed.
 ### How to display the hsm_secret in a human-readable format?
-* If there is no seed available it isbest is to save the hsm_secret as a file with `scp`. To display as text:
+* If there is no seed available it is best to save the hsm_secret as a file with `scp`.
+To display it as text:
     ```
     sudo cat /home/bitcoin/.lightning/bitcoin/hsm_secret | xxd
     ```
