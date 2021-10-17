@@ -382,14 +382,14 @@ if [ "$1" = "prestart" ]; then
 
   # C-Lightning changes of config
   # https://github.com/Ride-The-Lightning/RTL/blob/master/docs/C-Lightning-setup.md
-  if [ "${LNCLE}" == "cl" ]; then
+  if [ "${LNTYPE}" == "cl" ]; then
     echo "# CL Config"
     cat /home/rtl/${systemdService}/RTL-Config.json | \
     jq ".port = \"${RTLHTTP}\"" | \
     jq ".multiPass = \"${RPCPASSWORD}\"" | \
     jq ".nodes[0].lnNode = \"${hostname}\"" | \
     jq ".nodes[0].lnImplementation = \"CLT\"" | \
-    jq ".nodes[0].Authentication.macaroonPath = \"CLme/bitcoin/c-lightning-REST/certs\"" | \
+    jq ".nodes[0].Authentication.macaroonPath = \"/home/bitcoin/c-lightning-REST/certs\"" | \
     jq ".nodes[0].Authentication.configPath = \"${CLCONF}\"" | \
     jq ".nodes[0].Authentication.swapMacaroonPath = \"/home/rtl/.loop/${CHAIN}/\"" | \
     jq ".nodes[0].Authentication.boltzMacaroonPath = \"/home/rtl/.boltz-lnd/macaroons/\"" | \
