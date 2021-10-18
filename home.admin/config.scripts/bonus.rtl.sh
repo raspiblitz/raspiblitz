@@ -375,6 +375,7 @@ if [ "$1" = "prestart" ]; then
     jq ".nodes[0].Authentication.swapMacaroonPath = \"/home/rtl/.loop/${CHAIN}/\"" | \
     jq ".nodes[0].Authentication.boltzMacaroonPath = \"/home/rtl/.boltz-lnd/macaroons/\"" | \
     jq ".nodes[0].Settings.userPersona = \"OPERATOR\"" | \
+    jq ".nodes[0].Settings.lnServerUrl = \"https://localhost:${portprefix}8080\"" | \
     jq ".nodes[0].Settings.channelBackupPath = \"/home/rtl/${systemdService}-SCB-backup-$hostname\"" | \
     jq ".nodes[0].Settings.swapServerUrl = \"https://localhost:${SWAPSERVERPORT}\"" > /home/rtl/${systemdService}/RTL-Config.json.tmp
     mv /home/rtl/${systemdService}/RTL-Config.json.tmp /home/rtl/${systemdService}/RTL-Config.json
