@@ -71,6 +71,8 @@ echo "# ******************************"
 echo "# RASPIBLITZ COPYSTATION SCRIPT"
 echo "# ******************************"
 echo
+echo "Make sure that no target HDD/SSDs are not connected yet .."
+echo
 
 sudo sed -i "s/^state=.*/state=copystation/g" /home/admin/raspiblitz.info 2>/dev/null
 
@@ -242,21 +244,22 @@ Please remove device and PRESS ENTER
     echo "**** SYNC LOOP DONE ****"
     echo "HDDs ready synced: ${hddsInfoString}"
     echo "*************************"
+    echo
     echo "Its safe to disconnect/remove HDDs now."
     echo "To stop copystation script: CTRL+c and then 'restart'"
-    echo ""
     sed -i "s/^message=.*/message='Ready HDDs: ${hddsInfoString}'/g" /home/admin/raspiblitz.info 2>/dev/null
     firstLoop=0
 
   else
 
     echo "**** NO TARGET HDD/SSDs CONNECTED ****"
+    echo
     echo "Best way to start a new batch:"
-    echo "- Disconnect powered USB-Hub"
-    echo "- Connect all HDD/SSDs to the USB-Hub"
-    echo "- Connect powered USB-Hub to Blitz"
+    echo "- Disconnect powered USB-Hub (best unplug USB cable at USB-Hub)"
+    echo "- Connect all HDD/SSDs to the disconnected USB-Hub"
+    echo "- Connect powered USB-Hub to Blitz (plug USB cable in)"
     echo "- During formatting remember names of physical HDD/SSDs"
-    echo "- As soon as you see an OK for that HDD/SSD you can remove it"
+    echo "- As soon as you see an OK for that HDD/SSD name you can remove it"
     sed -i "s/^message=.*/message='No target HDD/SSDs connected - connect USB Hub'/g" /home/admin/raspiblitz.info 2>/dev/null
     firstLoop=1
 
