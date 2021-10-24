@@ -93,8 +93,8 @@ systemctl stop background 2>/dev/null
 echo "# OK - the following drives detected as the system drive: $datadisk"
 echo
 
-sudo sed -i "s/^message=.*/message='Connect target HDDs ..'/g" /home/admin/raspiblitz.info 2>/dev/null
-sleep 5
+sudo sed -i "s/^message=.*/message='Connect target HDDs (10secs) ..'/g" /home/admin/raspiblitz.info 2>/dev/null
+sleep 10
 
 # BASIC IDEA:
 # 1. get fresh data from bitcoind --> template data
@@ -193,7 +193,7 @@ Please remove device and PRESS ENTER
         else
 
           choice=0
-          sed -i "s/^message=.*/message='Formatting new HDD: ${formatPartition}'/g" /home/admin/raspiblitz.info 2>/dev/null
+          sed -i "s/^message=.*/message='Formatting new HDD: ${detectedDrive}'/g" /home/admin/raspiblitz.info 2>/dev/null
 
           # format the HDD
           echo "Starting Formatting of device ${detectedDrive} ..."
@@ -222,14 +222,14 @@ Please remove device and PRESS ENTER
           rsync -a --info=progress2 --delete ${pathTemplateHDD}/* /mnt/hdd2
           chmod -R 777 /mnt/hdd2
           rm -r /mnt/hdd2/lost+found 2>/dev/null
-          echo "${partition} " >> ./.syncinfo.tmp
+          hddsInfoString="${hddsInfoString} ${partition}>OK"
         else
           echo "# FAIL: was not able to mount --> ${partition}"
         fi
         
         # unmount device
         umount -l /mnt/hdd2
-        hddsInfoString="${hddsInfoString} ${partition}>OK"
+        
 
       fi
 
@@ -238,8 +238,7 @@ Please remove device and PRESS ENTER
 
   clear
   echo "**** SYNC LOOP DONE ****"
-  synced=$(cat ./.syncinfo.tmp | tr '\r\n' ' ')
-  echo "HDDs ready synced: ${synced}"
+  echo "HDDs ready synced: ${hddsInfoString}"
   echo "*************************"
   echo "Its safe to disconnect/remove HDDs now."
   echo "Or connect a new HDD/SSD for syncing."
