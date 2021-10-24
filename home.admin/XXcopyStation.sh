@@ -238,7 +238,6 @@ do
     fi
   done
 
-
   clear
   if [ "${hddsInfoString}" == "" ]; then
 
@@ -266,7 +265,7 @@ do
 
   fi 
   
-  if [ "${hddsInfoString}" == "found-disks" ]
+  if [ "${hddsInfoString}" == "found-disks" ]; then
     # after script found discs and did formatting ... go into full loop
     firstLoop=0
   else
