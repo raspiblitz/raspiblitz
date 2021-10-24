@@ -234,23 +234,17 @@ do
         # unmount device
         umount -l /mnt/hdd2
         
-      else
-        echo "firstLoop(${firstLoop})"
-        echo "#partition(${#partition})"
-        sleep 1
       fi
 
     fi
   done
 
+  # check for flag
   foundTargets=$(ls /var/cache/raspiblitz/copystationFoundTargets.flag 2>/dev/null | grep -c "copystationFoundTargets.flag")
   rm /var/cache/raspiblitz/copystationFoundTargets.flag
-  echo "foundTargets(${foundTargets})"
-  echo "hddsInfoString(${hddsInfoString})"
-  sleep 2
 
   clear
-  if [ "${foundTargets}" == "1" ]; then
+  if [ "${foundTargets}" == "1" ] && [ "${firstLoop}" == "1" ]; then
 
     # after script found discs and did formatting ... go into full loop
     echo "OK first loop done ..."
