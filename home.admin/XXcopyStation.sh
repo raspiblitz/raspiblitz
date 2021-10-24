@@ -134,7 +134,7 @@ do
     # sync bitcoin
     echo "# Syncing Bitcoin to template folder ..."
 
-    sed -i "s/^message=.*/message='Updating Template: Bitcoin'/g" /home/admin/raspiblitz.info 2>/dev/null
+    sed -i "s/^message=.*/message='Updating Template: Bitcoin'/g" /home/admin/raspiblitz.info
 
     # make sure the bitcoin directory in template folder exists
     if [ ! -d "$pathTemplateHDD/bitcoin" ]; then
@@ -190,13 +190,13 @@ do
         echo "size: ${size}"
         if [ ${size} -lt 900000000000 ]; then
             echo "!! THE HDD/SSD IS TOO SMALL <900GB - use at least 1TB"
-            sed -i "s/^message=.*/message='HDD smaller than 1TB: ${detectedDrive}'/g" /home/admin/raspiblitz.info 2>/dev/null
+            sed -i "s/^message=.*/message='HDD smaller than 1TB: ${detectedDrive}'/g" /home/admin/raspiblitz.info
             echo
             sleep 10
         else
 
           choice=0
-          sed -i "s/^message=.*/message='Formatting new HDD: ${detectedDrive}'/g" /home/admin/raspiblitz.info 2>/dev/null
+          sed -i "s/^message=.*/message='Formatting new HDD: ${detectedDrive}'/g" /home/admin/raspiblitz.info
 
           # format the HDD
           echo "Starting Formatting of device ${detectedDrive} ..."
@@ -249,7 +249,7 @@ do
     echo "- Connect powered USB-Hub to Blitz (plug USB cable in)"
     echo "- During formatting remember names of physical HDD/SSDs"
     echo "- As soon as you see an OK for that HDD/SSD name you can remove it"
-    sed -i "s/^message=.*/message='No target HDD/SSDs connected - connect USB Hub'/g" /home/admin/raspiblitz.info 2>/dev/null
+    sed -i "s/^message=.*/message='No target HDD/SSDs connected - connect USB Hub'/g" /home/admin/raspiblitz.info
     firstLoop=1
 
   else
@@ -260,7 +260,7 @@ do
     echo
     echo "Its safe to disconnect/remove HDDs now."
     echo "To stop copystation script: CTRL+c and then 'restart'"
-    sed -i "s/^message=.*/message='Ready HDDs: ${hddsInfoString}'/g" /home/admin/raspiblitz.info 2>/dev/null
+    sed -i "s/^message=.*/message='Ready HDDs: ${hddsInfoString}'/g" /home/admin/raspiblitz.info
     firstLoop=0
 
   fi 
