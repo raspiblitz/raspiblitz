@@ -161,10 +161,7 @@ do
   echo "**************************************"
   echo "SYNCING TEMPLATE -> CONNECTED HDD/SSDs"
   echo "**************************************"
-  echo "NOTE: Only use to prepare fresh HDDs"
-
-  sleep 4
-  echo "" > ./.syncinfo.tmp
+  sleep 2
   lsblk -o NAME | grep "^[s|v]d" | while read -r detectedDrive ; do
     isSystemDrive=$(echo "${datadisk}" | grep -c "${detectedDrive}")
     if [ ${isSystemDrive} -eq 0 ]; then
@@ -205,7 +202,11 @@ do
 
         fi
 
-      fi # end init new HDD
+      else
+        echo
+        echo "*** ALREADY ACTIVE HDD FOUND ---> ${detectedDrive}"
+        sleep 1
+      fi
 
       ################################################
       # 3. sync HDD with template data (skip on first loop)
@@ -233,6 +234,10 @@ do
         # unmount device
         umount -l /mnt/hdd2
         
+      else
+        echo "firstLoop(${firstLoop})"
+        echo "#partition(${#partition})"
+        sleep 1
       fi
 
     fi
