@@ -167,7 +167,7 @@ do
     if [ ${isSystemDrive} -eq 0 ]; then
 
       # remember that disks were found
-      hddsInfoString="found-disks"
+      hddsInfoString="founddisks"
 
       # check if drives 1st partition is named BLOCKCHAIN & in EXT4 format
       isNamedBlockchain=$(lsblk -o NAME,FSTYPE,LABEL | grep "${detectedDrive}" | grep -c "BLOCKCHAIN")
@@ -205,7 +205,8 @@ do
       else
         echo
         echo "*** ALREADY ACTIVE HDD FOUND ---> ${detectedDrive}"
-        sleep 1
+        echo "hddsInfoString(${hddsInfoString})"
+        sleep 3
       fi
 
       ################################################
@@ -244,7 +245,7 @@ do
   done
 
   clear
-  if [ "${hddsInfoString}" == "found-disks" ]; then
+  if [ "${hddsInfoString}" == "founddisks" ]; then
 
     # after script found discs and did formatting ... go into full loop
     echo "OK first loop done ..."
@@ -281,7 +282,6 @@ do
     echo "You can close SSH terminal and script will run in background can can be re-entered."
 
     sed -i "s/^message=.*/message='Ready HDDs: ${hddsInfoString}'/g" /home/admin/raspiblitz.info
-    firstLoop=0
     sleep 25
 
   fi 
