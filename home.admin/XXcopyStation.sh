@@ -109,7 +109,9 @@ firstLoop=1
 while :
 do
 
-  hddsInfoString=""
+  # reset external data stores (needed because local vars dont work in deeper while loops)
+  echo "" > /var/cache/raspiblitz/copystationHddsInfoString.tmp
+  rm /var/cache/raspiblitz/copystationFoundTargets.flag
   
   ################################################
   # 1. get fresh data from bitcoind for template data (skip on first loop)
@@ -222,11 +224,12 @@ do
         # rsync device
         mountOK=$(lsblk -o NAME,MOUNTPOINT | grep "${detectedDrive}" | grep -c "/mnt/hdd2")
         if [ ${mountOK} -eq 1 ]; then
-          sed -i "s/^message=.*/message='${hddsInfoString} ${partition}>SYNC'/g" /home/admin/raspiblitz.info 2>/dev/null
+          hddsInfoString=$(cat /var/cache/raspiblitz/copystationHddsInfoString.tmp)
+          sed -i "s/^message=.*/message='${hddsInfoString} ${partition}>SYNC'/g" /home/admin/raspiblitz.info
           rsync -a --info=progress2 --delete ${pathTemplateHDD}/* /mnt/hdd2
           chmod -R 777 /mnt/hdd2
           rm -r /mnt/hdd2/lost+found 2>/dev/null
-          hddsInfoString="${hddsInfoString} ${partition}>OK"
+          echo "${partition}>OK" >> /var/cache/raspiblitz/copystationHddsInfoString.tmp
         else
           echo "# FAIL: was not able to mount --> ${partition}"
         fi
@@ -241,7 +244,7 @@ do
 
   # check for flag
   foundTargets=$(ls /var/cache/raspiblitz/copystationFoundTargets.flag 2>/dev/null | grep -c "copystationFoundTargets.flag")
-  rm /var/cache/raspiblitz/copystationFoundTargets.flag
+  hddsInfoString=$(cat /var/cache/raspiblitz/copystationHddsInfoString.tmp)
 
   clear
   if [ "${foundTargets}" == "1" ] && [ "${firstLoop}" == "1" ]; then
