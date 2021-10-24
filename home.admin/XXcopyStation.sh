@@ -105,12 +105,15 @@ sleep 5
 echo 
 echo "*** RUNNING ***"
 lastBlockchainUpdateTimestamp=1
+firstLoop=1
 
 while :
 do
+
+  hddsInfoString=""
   
   ################################################
-  # 1. get fresh data from bitcoind for template data
+  # 1. get fresh data from bitcoind for template data (skip on first loop)
 
   # only execute every 30min
   nowTimestamp=$(date +%s)
@@ -118,7 +121,7 @@ do
   echo "# seconds since last update from bitcoind: ${secondsDiff}"
   echo
 
-  if [ ${secondsDiff} -gt 3000 ]; then
+  if [ "${firstLoop}" != "1" ] && [ ${secondsDiff} -gt 3000 ]; then
   
     echo "******************************"
     echo "Bitcoin Blockchain Update"
@@ -195,16 +198,17 @@ Please remove device and PRESS ENTER
           # format the HDD
           echo "Starting Formatting of device ${detectedDrive} ..."
           /home/admin/config.scripts/blitz.datadrive.sh format ext4 ${detectedDrive}
+          sleep 4
 
         fi
 
       fi # end init new HDD
 
       ################################################
-      # 3. sync HDD with template data
+      # 3. sync HDD with template data (skip on first loop)
 
       partition=$(lsblk -o NAME,FSTYPE,LABEL | grep "${detectedDrive}" | grep "BLOCKCHAIN" | cut -d ' ' -f 1 | tr -cd "[:alnum:]")
-      if [ ${#partition} -gt 0 ]; then
+      if [ "${firstLoop}" != "1" ] && [ ${#partition} -gt 0 ]; then
 
         # temp mount device
         echo "mounting: ${partition}"
@@ -214,7 +218,7 @@ Please remove device and PRESS ENTER
         # rsync device
         mountOK=$(lsblk -o NAME,MOUNTPOINT | grep "${detectedDrive}" | grep -c "/mnt/hdd2")
         if [ ${mountOK} -eq 1 ]; then
-          sed -i "s/^message=.*/message='Syncing Template -> ${partition}'/g" /home/admin/raspiblitz.info 2>/dev/null
+          sed -i "s/^message=.*/message='${hddsInfoString} ${partition}>SYNC'/g" /home/admin/raspiblitz.info 2>/dev/null
           rsync -a --info=progress2 --delete ${pathTemplateHDD}/* /mnt/hdd2
           chmod -R 777 /mnt/hdd2
           rm -r /mnt/hdd2/lost+found 2>/dev/null
@@ -225,6 +229,7 @@ Please remove device and PRESS ENTER
         
         # unmount device
         umount -l /mnt/hdd2
+        hddsInfoString="${hddsInfoString} ${partition}>OK"
 
       fi
 
@@ -248,5 +253,6 @@ Please remove device and PRESS ENTER
   clear
   echo "starting new sync loop"
   sleep 5
+  firstLoop=0
 
 done
