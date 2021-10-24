@@ -249,7 +249,7 @@ do
     echo "- Connect powered USB-Hub to Blitz (plug USB cable in)"
     echo "- During formatting remember names of physical HDD/SSDs"
     echo "- As soon as you see an OK for that HDD/SSD name you can remove it"
-    sed -i "s/^message=.*/message='No target HDD/SSDs connected - connect USB Hub'/g" /home/admin/raspiblitz.info
+    sed -i "s/^message=.*/message='No target HDDs connected - connect USB Hub'/g" /home/admin/raspiblitz.info
     firstLoop=1
 
   else
