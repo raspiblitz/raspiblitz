@@ -45,7 +45,7 @@ if [ -d "$pathBitcoinBlockchain" ]; then
   echo "# OK found $pathBitcoinBlockchain"
 else
   echo "# FAIL path of 'pathBitcoinBlockchain' does not exists: ${pathBitcoinBlockchain}"
-  echo "error='pathBitcoinBlockchain nit found'"
+  echo "error='pathBitcoinBlockchain not found'"
   exit 1
 fi
 
@@ -123,7 +123,7 @@ do
   echo "# seconds since last update from bitcoind: ${secondsDiff}"
   echo
 
-  if [ "${firstLoop}" != "1" ] && [ ${secondsDiff} -gt 3000 ]; then
+  if [ ${secondsDiff} -gt 3000 ]; then
   
     echo "******************************"
     echo "Bitcoin Blockchain Update"
@@ -171,6 +171,9 @@ do
   lsblk -o NAME | grep "^[s|v]d" | while read -r detectedDrive ; do
     isSystemDrive=$(echo "${datadisk}" | grep -c "${detectedDrive}")
     if [ ${isSystemDrive} -eq 0 ]; then
+
+      # remember that disks were found
+      hddsInfoString="found-disks"
 
       # check if drives 1st partition is named BLOCKCHAIN & in EXT4 format
       isNamedBlockchain=$(lsblk -o NAME,FSTYPE,LABEL | grep "${detectedDrive}" | grep -c "BLOCKCHAIN")
@@ -239,18 +242,7 @@ Please remove device and PRESS ENTER
 
 
   clear
-  if [ "${hddsInfoString}" != "" ]; then
-
-    echo "**** SYNC LOOP DONE ****"
-    echo "HDDs ready synced: ${hddsInfoString}"
-    echo "*************************"
-    echo
-    echo "Its safe to disconnect/remove HDDs now."
-    echo "To stop copystation script: CTRL+c and then 'restart'"
-    sed -i "s/^message=.*/message='Ready HDDs: ${hddsInfoString}'/g" /home/admin/raspiblitz.info 2>/dev/null
-    firstLoop=0
-
-  else
+  if [ "${hddsInfoString}" == "" ]; then
 
     echo "**** NO TARGET HDD/SSDs CONNECTED ****"
     echo
@@ -263,13 +255,29 @@ Please remove device and PRESS ENTER
     sed -i "s/^message=.*/message='No target HDD/SSDs connected - connect USB Hub'/g" /home/admin/raspiblitz.info 2>/dev/null
     firstLoop=1
 
+  else
+
+    echo "**** SYNC LOOP DONE ****"
+    echo "HDDs ready synced: ${hddsInfoString}"
+    echo "*************************"
+    echo
+    echo "Its safe to disconnect/remove HDDs now."
+    echo "To stop copystation script: CTRL+c and then 'restart'"
+    sed -i "s/^message=.*/message='Ready HDDs: ${hddsInfoString}'/g" /home/admin/raspiblitz.info 2>/dev/null
+    firstLoop=0
+
   fi 
   
-  echo
-  echo "Next round starts in 25 seconds ..."
-  echo "To stop copystation script: CTRL+c and then 'restart'"
-  echo "You can close SSH terminal and script will run in background can can be re-entered."
-  sleep 25
+  if [ "${hddsInfoString}" == "found-disks" ]
+    # after script found discs and did formatting ... go into full loop
+    firstLoop=0
+  else
+    echo
+    echo "Next round starts in 25 seconds ..."
+    echo "To stop copystation script: CTRL+c and then 'restart'"
+    echo "You can close SSH terminal and script will run in background can can be re-entered."
+    sleep 25
+  fi
 
   clear
   echo "starting new sync loop"
