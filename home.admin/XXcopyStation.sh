@@ -247,6 +247,7 @@ do
 
   echo "foundTargets(${foundTargets})"
   echo "hddsInfoString(${hddsInfoString})"
+  sleep 2
 
   clear
   if [ "${foundTargets}" == "1" ]; then
