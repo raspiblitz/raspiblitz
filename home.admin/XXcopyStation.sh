@@ -244,7 +244,14 @@ do
   done
 
   clear
-  if [ "${hddsInfoString}" == "" ]; then
+  if [ "${hddsInfoString}" == "found-disks" ]; then
+
+    # after script found discs and did formatting ... go into full loop
+    echo "OK first loop done ..."
+    firstLoop=0
+    sleep 1
+
+  elif [ "${hddsInfoString}" == "" ]; then
 
     echo "**** NO TARGET HDD/SSDs CONNECTED ****"
     echo
@@ -254,8 +261,14 @@ do
     echo "- Connect powered USB-Hub to Blitz (plug USB cable in)"
     echo "- During formatting remember names of physical HDD/SSDs"
     echo "- As soon as you see an OK for that HDD/SSD name you can remove it"
+    echo
+    echo "Next round starts in 25 seconds ..."
+    echo "To stop copystation script: CTRL+c and then 'restart'"
+    echo "You can close SSH terminal and script will run in background can can be re-entered."
+
     sed -i "s/^message=.*/message='No target HDDs connected - connect USB Hub'/g" /home/admin/raspiblitz.info
     firstLoop=1
+    sleep 25
 
   else
 
@@ -263,23 +276,15 @@ do
     echo "HDDs ready synced: ${hddsInfoString}"
     echo "*************************"
     echo
-    echo "Its safe to disconnect/remove HDDs now."
-    echo "To stop copystation script: CTRL+c and then 'restart'"
-    sed -i "s/^message=.*/message='Ready HDDs: ${hddsInfoString}'/g" /home/admin/raspiblitz.info
-    firstLoop=0
-
-  fi 
-  
-  if [ "${hddsInfoString}" == "found-disks" ]; then
-    # after script found discs and did formatting ... go into full loop
-    firstLoop=0
-  else
-    echo
     echo "Next round starts in 25 seconds ..."
     echo "To stop copystation script: CTRL+c and then 'restart'"
     echo "You can close SSH terminal and script will run in background can can be re-entered."
+
+    sed -i "s/^message=.*/message='Ready HDDs: ${hddsInfoString}'/g" /home/admin/raspiblitz.info
+    firstLoop=0
     sleep 25
-  fi
+
+  fi 
 
   clear
   echo "starting new sync loop"
