@@ -230,28 +230,45 @@ Please remove device and PRESS ENTER
         # unmount device
         umount -l /mnt/hdd2
         
-
       fi
 
     fi
   done
 
+
   clear
-  echo "**** SYNC LOOP DONE ****"
-  echo "HDDs ready synced: ${hddsInfoString}"
-  echo "*************************"
-  echo "Its safe to disconnect/remove HDDs now."
-  echo "Or connect a new HDD/SSD for syncing."
+  if [ "${hddsInfoString}" != "" ]; then
+
+    echo "**** SYNC LOOP DONE ****"
+    echo "HDDs ready synced: ${hddsInfoString}"
+    echo "*************************"
+    echo "Its safe to disconnect/remove HDDs now."
+    echo "To stop copystation script: CTRL+c and then 'restart'"
+    echo ""
+    sed -i "s/^message=.*/message='Ready HDDs: ${hddsInfoString}'/g" /home/admin/raspiblitz.info 2>/dev/null
+    firstLoop=0
+
+  else
+
+    echo "**** NO TARGET HDD/SSDs CONNECTED ****"
+    echo "Best way to start a new batch:"
+    echo "- Disconnect powered USB-Hub"
+    echo "- Connect all HDD/SSDs to the USB-Hub"
+    echo "- Connect powered USB-Hub to Blitz"
+    echo "- During formatting remember names of physical HDD/SSDs"
+    echo "- As soon as you see an OK for that HDD/SSD you can remove it"
+    sed -i "s/^message=.*/message='No target HDD/SSDs connected - connect USB Hub'/g" /home/admin/raspiblitz.info 2>/dev/null
+    firstLoop=1
+
+  fi 
+  
+  echo
+  echo "Next round starts in 25 seconds ..."
   echo "To stop copystation script: CTRL+c and then 'restart'"
-  echo ""
-
-  sed -i "s/^message=.*/message='Ready HDDs: ${synced}'/g" /home/admin/raspiblitz.info 2>/dev/null
-
   sleep 25
 
   clear
   echo "starting new sync loop"
   sleep 5
-  firstLoop=0
-
+  
 done
