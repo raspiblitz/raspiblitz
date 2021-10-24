@@ -73,8 +73,8 @@ echo "# ******************************"
 echo
 echo "Make sure that no target HDD/SSDs are not connected yet .."
 echo
-
 sudo sed -i "s/^state=.*/state=copystation/g" /home/admin/raspiblitz.info 2>/dev/null
+sleep 10
 
 echo "*** CHECKING CONFIG"
 
@@ -94,9 +94,6 @@ systemctl stop background 2>/dev/null
 # finding system drives (the drives that should not be synced to)
 echo "# OK - the following drives detected as the system drive: $datadisk"
 echo
-
-sudo sed -i "s/^message=.*/message='Connect target HDDs (10secs) ..'/g" /home/admin/raspiblitz.info 2>/dev/null
-sleep 10
 
 # BASIC IDEA:
 # 1. get fresh data from bitcoind --> template data
@@ -182,8 +179,9 @@ do
       # init a fresh device
       if [ ${isNamedBlockchain} -eq 0 ] || [ ${isFormatExt4} -eq 0 ]; then
 
-        echo "*** NEW EMPTY HDD FOUND ***"
-        echo "Device: ${detectedDrive}"
+        echo
+        echo "**************************************************************"
+        echo "*** NEW EMPTY HDD FOUND ---> ${detectedDrive}"
         echo "isNamedBlockchain: ${isNamedBlockchain}"
         echo "isFormatExt4:" ${isFormatExt4}
 
@@ -191,10 +189,10 @@ do
         size=$(lsblk -o NAME,SIZE -b | grep "^${detectedDrive}" | awk '$1=$1' | cut -d " " -f 2)
         echo "size: ${size}"
         if [ ${size} -lt 900000000000 ]; then
-            whiptail --title "FAIL" --msgbox "
-THE DEVICE IS TOO SMALL <900GB
-Please remove device and PRESS ENTER
-            " 9 46
+            echo "!! THE HDD/SSD IS TOO SMALL <900GB - use at least 1TB"
+            sed -i "s/^message=.*/message='HDD smaller than 1TB: ${detectedDrive}'/g" /home/admin/raspiblitz.info 2>/dev/null
+            echo
+            sleep 10
         else
 
           choice=0
