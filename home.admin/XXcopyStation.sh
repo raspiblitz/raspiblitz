@@ -110,7 +110,6 @@ while :
 do
 
   hddsInfoString=""
-  foundTargets=0
   
   ################################################
   # 1. get fresh data from bitcoind for template data (skip on first loop)
@@ -168,7 +167,7 @@ do
     if [ ${isSystemDrive} -eq 0 ]; then
 
       # remember that disks were found
-      foundTargets=1
+      touch /var/cache/raspiblitz/copystationFoundTargets.flag
 
       # check if drives 1st partition is named BLOCKCHAIN & in EXT4 format
       isNamedBlockchain=$(lsblk -o NAME,FSTYPE,LABEL | grep "${detectedDrive}" | grep -c "BLOCKCHAIN")
@@ -238,13 +237,14 @@ do
       else
         echo "firstLoop(${firstLoop})"
         echo "#partition(${#partition})"
-        echo "foundTargets(${foundTargets})"
         sleep 1
       fi
 
     fi
   done
 
+  foundTargets=$(ls /var/cache/raspiblitz/copystationFoundTargets.flag 2>/dev/null | grep -c "copystationFoundTargets.flag")
+  rm /var/cache/raspiblitz/copystationFoundTargets.flag
   echo "foundTargets(${foundTargets})"
   echo "hddsInfoString(${hddsInfoString})"
   sleep 2
