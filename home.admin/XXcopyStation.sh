@@ -206,8 +206,7 @@ do
       else
         echo
         echo "*** ALREADY ACTIVE HDD FOUND ---> ${detectedDrive}"
-        echo "hddsInfoString(${hddsInfoString})"
-        sleep 3
+        sleep 1
       fi
 
       ################################################
@@ -239,11 +238,15 @@ do
       else
         echo "firstLoop(${firstLoop})"
         echo "#partition(${#partition})"
+        echo "foundTargets(${foundTargets})"
         sleep 1
       fi
 
     fi
   done
+
+  echo "foundTargets(${foundTargets})"
+  echo "hddsInfoString(${hddsInfoString})"
 
   clear
   if [ "${foundTargets}" == "1" ]; then
