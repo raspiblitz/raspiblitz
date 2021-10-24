@@ -268,6 +268,7 @@ Please remove device and PRESS ENTER
   echo
   echo "Next round starts in 25 seconds ..."
   echo "To stop copystation script: CTRL+c and then 'restart'"
+  echo "You can close SSH terminal and script will run in background can can be re-entered."
   sleep 25
 
   clear
