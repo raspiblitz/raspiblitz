@@ -110,6 +110,7 @@ while :
 do
 
   hddsInfoString=""
+  foundTargets=0
   
   ################################################
   # 1. get fresh data from bitcoind for template data (skip on first loop)
@@ -167,7 +168,7 @@ do
     if [ ${isSystemDrive} -eq 0 ]; then
 
       # remember that disks were found
-      hddsInfoString="founddisks"
+      foundTargets=1
 
       # check if drives 1st partition is named BLOCKCHAIN & in EXT4 format
       isNamedBlockchain=$(lsblk -o NAME,FSTYPE,LABEL | grep "${detectedDrive}" | grep -c "BLOCKCHAIN")
@@ -245,14 +246,14 @@ do
   done
 
   clear
-  if [ "${hddsInfoString}" == "founddisks" ]; then
+  if [ "${foundTargets}" == "1" ]; then
 
     # after script found discs and did formatting ... go into full loop
     echo "OK first loop done ..."
     firstLoop=0
     sleep 1
 
-  elif [ "${hddsInfoString}" == "" ]; then
+  elif [ "${foundTargets}" == "0" ]; then
 
     echo "**** NO TARGET HDD/SSDs CONNECTED ****"
     echo
