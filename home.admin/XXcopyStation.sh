@@ -276,7 +276,9 @@ do
   else
 
     echo "**** SYNC LOOP DONE ****"
-    echo "HDDs ready synced: ${hddsInfoString}"
+    echo "HDDs ready synced:"
+    cat /var/cache/raspiblitz/copystationHddsInfoString.tmp
+    echo
     echo "*************************"
     echo
     echo "Next round starts in 25 seconds ..."
