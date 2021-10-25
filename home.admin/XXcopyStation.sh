@@ -224,7 +224,7 @@ do
         # rsync device
         mountOK=$(lsblk -o NAME,MOUNTPOINT | grep "${detectedDrive}" | grep -c "/mnt/hdd2")
         if [ ${mountOK} -eq 1 ]; then
-          hddsInfoString=$(cat /var/cache/raspiblitz/copystationHddsInfoString.tmp)
+          hddsInfoString=$(cat /var/cache/raspiblitz/copystationHddsInfoString.tmp | tr '\n' ' ')
           sed -i "s/^message=.*/message='${hddsInfoString} ${partition}>SYNC'/g" /home/admin/raspiblitz.info
           rsync -a --info=progress2 --delete ${pathTemplateHDD}/* /mnt/hdd2
           chmod -R 777 /mnt/hdd2
@@ -244,7 +244,7 @@ do
 
   # check for flag
   foundTargets=$(ls /var/cache/raspiblitz/copystationFoundTargets.flag 2>/dev/null | grep -c "copystationFoundTargets.flag")
-  hddsInfoString=$(cat /var/cache/raspiblitz/copystationHddsInfoString.tmp)
+  hddsInfoString=$(cat /var/cache/raspiblitz/copystationHddsInfoString.tmp | tr '\n' ' ')
 
   clear
   if [ "${foundTargets}" == "1" ] && [ "${firstLoop}" == "1" ]; then
@@ -265,13 +265,13 @@ do
     echo "- During formatting remember names of physical HDD/SSDs"
     echo "- As soon as you see an OK for that HDD/SSD name you can remove it"
     echo
-    echo "Next round starts in 25 seconds ..."
+    echo "Next round starts in 30 seconds ..."
     echo "To stop copystation script: CTRL+c and then 'restart'"
     echo "You can close SSH terminal and script will run in background can can be re-entered."
 
     sed -i "s/^message=.*/message='No target HDDs connected - connect USB Hub'/g" /home/admin/raspiblitz.info
     firstLoop=1
-    sleep 25
+    sleep 30
 
   else
 
