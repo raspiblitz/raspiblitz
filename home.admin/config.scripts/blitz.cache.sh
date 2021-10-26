@@ -1,18 +1,34 @@
 #!/usr/bin/env bash
 
+# the cache concept of RaspiBlitz has two options
+# 1) RAMDISK for files under /var/cache/raspiblitz
+# 2) KEY-VALUE STORE for system state infos (REDIS)
+
+# SECURITY NOTE: The files on the RAMDISK can be set with unix file permissions and so restrict certain users access.
+# But all data stored in the KEY-VALUE STORE has to be asumed as system-wide public information.
+
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ]; then
-  echo "RaspiBlitz Cache RAM disk"
-  echo "blitz.cache.sh [on|off]"
+  echo "RaspiBlitz Cache"
+  echo
+  echo "*** RAMDISK for files under /var/cache/raspiblitz"
+  echo "blitz.cache.sh ramdisk [on|off]"
+  echo "blitz.cache.sh keyvalue [on|off]"
+  echo
+  echo "*** RAMDISK for files under /var/cache/raspiblitz"
+  echo "blitz.cache.sh set [key] [value] [?expire-seconds]"
+  echo "blitz.cache.sh get [key1] [?key2] [?key3] ..."
   exit 1
 fi
 
 ###################
-# SWITCH ON
+# RAMDISK
 ###################
-if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
-  echo "Turn ON: Cache"
+# install
+if [ "$1" = "ramdisk" ] && [ "$2" = "on" ]; then
+
+  echo "# Turn ON: RAMDISK"
 
   if ! grep -Eq '^tmpfs.*/var/cache/raspiblitz' /etc/fstab; then
 
@@ -31,12 +47,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo mount /var/cache/raspiblitz
   fi
 
-###################
-# SWITCH OFF
-###################
-elif [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
-  echo "Turn OFF: Cache"
+# uninstall
+elif [ "$1" = "ramdisk" ] || [ "$2" = "off" ]; then
+
+  echo "# Turn OFF: RAMDISK"
 
   if grep -Eq '/var/cache/raspiblitz' /etc/fstab; then
     sudo sed -i -E 's|^(tmpfs.*/var/cache/raspiblitz.*)$|#\1|g' /etc/fstab
@@ -46,7 +61,33 @@ elif [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo umount /var/cache/raspiblitz
   fi
 
-else
+###################
+# KEYVALUE (REDIS)
+###################
 
+# install
+elif [ "$1" = "keyvalue" ] && [ "$2" = "on" ]; then
+
+  echo "# Turn ON: KEYVALUE-STORE (REDIS)"
+  sudo apt install -y redis-server
+
+
+# uninstall
+elif [ "$1" = "keyvalue" ] && [ "$2" = "off" ]; then
+
+  echo "# Turn OFF: KEYVALUE-STORE (REDIS)"
+  sudo apt remove -y redis-server
+
+# set
+elif [ "$1" = "set" ]; then
+
+  echo "#TODO: set"
+
+# get
+elif [ "$1" = "get" ]; then
+
+  echo "#TODO: get"
+
+else
   echo "# FAIL: parameter not known - run with -h for help"
 fi
