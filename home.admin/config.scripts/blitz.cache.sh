@@ -18,6 +18,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ];
   echo "*** RAMDISK for files under /var/cache/raspiblitz"
   echo "blitz.cache.sh set [key] [value] [?expire-seconds]"
   echo "blitz.cache.sh get [key1] [?key2] [?key3] ..."
+  echo "blitz.cache.sh import [bash-keyvalue-file]"
   echo
   exit 1
 fi
@@ -121,6 +122,17 @@ elif [ "$1" = "get" ]; then
 
     # output key value in bash script compatible way
     echo "${keystr}=\"${valuestr}\""
+  done
+
+# import values from bash key-value store
+elif [ "$1" = "import" ]; then
+
+  # get parameters
+  filenameStr=$2
+  lines=$(cat $filenameStr)
+  for line in $lines
+  do
+    echo "$line"
   done
 
 else
