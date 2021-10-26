@@ -72,7 +72,6 @@ elif [ "$1" = "keyvalue" ] && [ "$2" = "on" ]; then
   echo "# Turn ON: KEYVALUE-STORE (REDIS)"
   sudo apt install -y redis-server
 
-
 # uninstall
 elif [ "$1" = "keyvalue" ] && [ "$2" = "off" ]; then
 
@@ -82,7 +81,26 @@ elif [ "$1" = "keyvalue" ] && [ "$2" = "off" ]; then
 # set
 elif [ "$1" = "set" ]; then
 
-  echo "#TODO: set"
+  # get parameters
+  keystr=$2
+  valuestr=$3
+  expire=$4
+
+  # check that key & value are given
+  if [ "${keystr}" == "" ] || [ "${valuestr}" == "" ]; then
+    echo "# Fail: missing parameter"
+    exit 1
+  fi
+
+  # filter from expire just numbers
+  expire="${expire//[^0-9.]/}"
+
+  additionalParams=""
+  if [ "${expire}" != "" ]; then
+    additionalParams="EX ${expire}"
+  fi
+
+  redis-cli set ${keystr} "${valuestr}" ${additionalParams}
 
 # get
 elif [ "$1" = "get" ]; then
