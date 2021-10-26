@@ -3,15 +3,21 @@
 # Just run this script once after a fresh sd card build
 # to prepare the image for release as a downloadable sd card image
 
-# raspiblitz.info & logs
-echo "cleaning raspiblitz info .."
+# cleaning logs
+echo "deleting raspiblitz & system logs .."
+sudo rm /var/log/*
+sudo rm /var/log/redis/*
+sudo rm /var/log/private/*
+sudo rm /var/log/nginx/*
+sudo rm /home/admin/*.log
+echo "OK"
+
+# clean raspiblitz.info toward the values set by sd card build script
+echo "cleaning raspiblitz.info"
 source /home/admin/raspiblitz.info
 echo "baseimage=${baseimage}" > /home/admin/raspiblitz.info
 echo "cpu=${cpu}" >> /home/admin/raspiblitz.info
 echo "displayClass=${displayClass}" >> /home/admin/raspiblitz.info
-echo "deleting raspiblitz logs .."
-sudo rm /home/admin/*.log
-echo "OK"
 
 # SSH Pubkeys (make unique for every sd card image install)
 echo ""

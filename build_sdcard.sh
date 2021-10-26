@@ -578,7 +578,6 @@ echo '%sudo ALL=(ALL) NOPASSWD:ALL' | sudo EDITOR='tee -a' visudo
 echo "baseimage=${baseimage}" > /home/admin/raspiblitz.info
 echo "cpu=${cpu}" >> /home/admin/raspiblitz.info
 echo "displayClass=headless" >> /home/admin/raspiblitz.info
-sudo mv ./raspiblitz.info /home/admin/raspiblitz.info
 sudo chmod 755 /home/admin/raspiblitz.info
 
 echo ""
@@ -1165,9 +1164,6 @@ if [ ${correctVersion} -eq 0 ]; then
 fi
 echo "- OK the installation of C-lightning v${installed} is done"
 
-echo ""
-echo "*** raspiblitz.info ***"
-sudo cat /home/admin/raspiblitz.info
 
 # *** RASPIBLITZ IMAGE READY INFO ***
 echo ""
