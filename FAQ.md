@@ -114,7 +114,7 @@ If you know have all the three elements needed - the imported public key, the im
 gpg --verify [SIGNATURE-FILE] [IMAGE-FILE]
 ```
 
-As a result you should see a "correct signature" message with a main fingerprint the same as you can find on the [keybase.io/rootzoll](https://keybase.io/rootzoll) that is ending on `1C73 060C 7C17 6461`. If that fingerprint is correct, the SD card image you downloaded is a original release RaspiBlitz.
+As a result you should see a "good signature" message with a main fingerprint the same as you can find on the [keybase.io/rootzoll](https://keybase.io/rootzoll) that is ending on `1C73 060C 7C17 6461`. If that fingerprint is correct, the SD card image you downloaded is a original release RaspiBlitz.
 
 ## How to update an old RaspiBlitz BEFORE v1.0? (LEGACY)
 
