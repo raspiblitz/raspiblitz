@@ -105,13 +105,13 @@ elif [ "$1" = "set" ]; then
     additionalParams="EX ${expire}"
   fi
 
-  # set in redis
+  # set in redis key value cache
   redis-cli set ${keystr} "${valuestr}" ${additionalParams}
 
   # also update value if part of raspiblitz.info (persiting values to survice boot)
   persistKey=$(cat ${infoFile} | grep -c "^${keystr}=")
   if [ ${persistKey} -gt 0 ]; then
-    sudo sed -i "s/^${keystr}=.*/${keystr}=${valuestr}/g" ${infoFile}
+    sudo sed -i "s/^${keystr}=.*/${keystr}='${valuestr}'/g" ${infoFile}
   fi
 
 # get
