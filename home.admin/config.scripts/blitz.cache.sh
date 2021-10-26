@@ -51,7 +51,7 @@ if [ "$1" = "ramdisk" ] && [ "$2" = "on" ]; then
 
 
 # uninstall
-elif [ "$1" = "ramdisk" ] || [ "$2" = "off" ]; then
+elif [ "$1" = "ramdisk" ] && [ "$2" = "off" ]; then
 
   echo "# Turn OFF: RAMDISK"
 
