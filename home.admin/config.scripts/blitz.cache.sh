@@ -18,6 +18,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ];
   echo "*** RAMDISK for files under /var/cache/raspiblitz"
   echo "blitz.cache.sh set [key] [value] [?expire-seconds]"
   echo "blitz.cache.sh get [key1] [?key2] [?key3] ..."
+  echo
   exit 1
 fi
 
@@ -86,7 +87,9 @@ elif [ "$1" = "set" ]; then
 # get
 elif [ "$1" = "get" ]; then
 
+  echo $#
   echo "#TODO: get"
+  echo $@
 
 else
   echo "# FAIL: parameter not known - run with -h for help"
