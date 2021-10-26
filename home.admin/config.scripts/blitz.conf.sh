@@ -37,8 +37,8 @@ if [ "$1" = "set" ]; then
     echo "${keystr}=" >> ${configFile}
   fi
 
-  # set value
-  sed -i "s/^${keystr}=.*/${keystr}='${valuestr}'/g" /mnt/hdd/raspiblitz.conf
+  # set value (sed needs sudo to operate when user is not root)
+  sudo sed -i "s/^${keystr}=.*/${keystr}='${valuestr}'/g" ${configFile}
 
 else
   echo "# FAIL: parameter not known - run with -h for help"
