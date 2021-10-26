@@ -22,14 +22,14 @@ if [ "$1" = "set" ]; then
   # check that key & value are given
   if [ "${keystr}" == "" ] || [ "${valuestr}" == "" ]; then
     echo "# blitz.conf.sh $@"
-    echo "# Fail: missing parameter"
+    echo "# FAIL: missing parameter"
     exit 1
   fi
 
   # check if input quotes are missing (there should be no 4th parameter)
   if [ "${overflow}" != "" ]; then
     echo "# blitz.conf.sh $@"
-    echo "# Fail: possible missing quotes in value string"
+    echo "# FAIL: possible missing quotes in value string"
     exit 2
   fi 
 
@@ -37,7 +37,7 @@ if [ "$1" = "set" ]; then
   raspiblitzConfExists=$(ls ${configFile} 2>/dev/null | grep -c "${configFile}")
   if [ ${raspiblitzConfExists} -eq 0 ]; then
     echo "# blitz.conf.sh $@"
-    echo "# Fail: missing config file: ${configFile}"
+    echo "# FAIL: missing config file: ${configFile}"
     exit 3
   fi
   
