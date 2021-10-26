@@ -90,12 +90,19 @@ elif [ "$1" = "get" ]; then
   position=0
   for keystr in $@
   do
+    
+    # skip first parameter
     ((position++))
     if [ $position -eq 1 ]; then
       echo "# blitz.cache.sh $@"
       continue
     fi
-    echo "${keystr}=\"\""
+
+    # get redis value
+    valuestr=$(redis-cli get ${keystr})
+
+    # output key value in bash script compatible way
+    echo "${keystr}=\"${valuestr}\""
   done
 
 else
