@@ -37,8 +37,13 @@ if [ "$1" = "set" ]; then
     echo "${keystr}=" >> ${configFile}
   fi
 
+  # add valuestr quotes if not standard values
+  if [ "${valuestr}" != "on" ] && [ "${valuestr}" != "off" ] && [ "${valuestr}" != "1" ] && [ "${valuestr}" != "0" ]; then
+    valuestr="'${valuestr}'"
+  fi
+
   # set value (sed needs sudo to operate when user is not root)
-  sudo sed -i "s/^${keystr}=.*/${keystr}='${valuestr}'/g" ${configFile}
+  sudo sed -i "s/^${keystr}=.*/${keystr}=${valuestr}/g" ${configFile}
 
 else
   echo "# FAIL: parameter not known - run with -h for help"
