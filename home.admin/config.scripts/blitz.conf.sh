@@ -33,6 +33,9 @@ if [ "$1" = "set" ]; then
     exit 2
   fi 
 
+  # update config value in cache
+  /home/admin/config.scripts/blitz.cache.sh set ${keystr} "${valuestr}"
+
   # check that config file exists
   raspiblitzConfExists=$(ls ${configFile} 2>/dev/null | grep -c "${configFile}")
   if [ ${raspiblitzConfExists} -eq 0 ]; then
@@ -40,7 +43,7 @@ if [ "$1" = "set" ]; then
     echo "# FAIL: missing config file: ${configFile}"
     exit 3
   fi
-  
+
   # check if key needs to be added (prepare new entry)
   entryExists=$(grep -c "^${keystr}=" ${configFile})
   if [ ${entryExists} -eq 0 ]; then

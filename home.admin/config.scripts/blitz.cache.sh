@@ -23,6 +23,9 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ];
   exit 1
 fi
 
+# path of the raspiblitz.info file (persiting cache values)
+infoFile="/home/admin/raspiblitz.info"
+
 ###################
 # RAMDISK
 ###################
@@ -96,12 +99,20 @@ elif [ "$1" = "set" ]; then
   # filter from expire just numbers
   expire="${expire//[^0-9.]/}"
 
+  # add an expire flag if given
   additionalParams=""
   if [ "${expire}" != "" ]; then
     additionalParams="EX ${expire}"
   fi
 
+  # set in redis
   redis-cli set ${keystr} "${valuestr}" ${additionalParams}
+
+  # also update value if part of raspiblitz.info (persiting values to survice boot)
+  persistKey=$(cat ${infoFile} | grep -c "^${keystr}=")
+  if [ ${persistKey} -gt 0 ]; then
+    sudo sed -i "s/^${keystr}=.*/${keystr}=${valuestr}/g" ${infoFile}
+  fi
 
 # get
 elif [ "$1" = "get" ]; then
