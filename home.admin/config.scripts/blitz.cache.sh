@@ -151,7 +151,7 @@ elif [ "$1" = "import" ]; then
 
     # import key from line & value from source above (that way quotes are habdled correctly)
     keyValue=$(echo "$line" | cut -d "=" -f1)
-    echo "# redis-cli set ${keyValue} \"${!keyValue}\”"
+    echo "# redis-cli set ${keyValue} ${!keyValue}"
     redis-cli set ${keyValue} "${!keyValue}"
 
   done < $filename
