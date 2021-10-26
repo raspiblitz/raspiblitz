@@ -87,6 +87,13 @@ elif [ "$1" = "set" ]; then
 # get
 elif [ "$1" = "get" ]; then
 
+  position=0
+  for keystr in $@
+  do
+    ((position++))
+    echo "${position}:${keystr}"
+  done
+
   echo $#
   echo "#TODO: get"
   echo $@
