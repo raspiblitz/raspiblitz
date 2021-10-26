@@ -130,6 +130,8 @@ elif [ "$1" = "import" ]; then
   # get parameter
   filename=$2
 
+  source ${filename}
+
   # read file and go thru line by line
   n=1
   while read line; do
