@@ -127,13 +127,11 @@ elif [ "$1" = "get" ]; then
 # import values from bash key-value store
 elif [ "$1" = "import" ]; then
 
-  # get parameters
-  filenameStr=$2
-  lines=$(cat $filenameStr)
-  for line in $lines
-  do
+  filename=$2
+  n=1
+  while read line; do
     echo "$line"
-  done
+  done < $filename
 
 else
   echo "# FAIL: parameter not known - run with -h for help"
