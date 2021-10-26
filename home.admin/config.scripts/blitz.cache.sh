@@ -127,9 +127,23 @@ elif [ "$1" = "get" ]; then
 # import values from bash key-value store
 elif [ "$1" = "import" ]; then
 
+  # read file and go thru line by line
   filename=$2
   n=1
   while read line; do
+
+    # skip comment lines
+    isComment=$(echo "${line}" | grep -c "^#")
+    if [ ${isComment} -eq 1 ]; then
+      continue
+    fi
+
+    # skip if not a value line
+    isValueLine=$(echo "${line}" | grep -c "=")
+    if [ ${isValueLine} -eq 0 ]; then
+      continue
+    fi
+
     echo "$line"
   done < $filename
 
