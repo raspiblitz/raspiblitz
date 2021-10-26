@@ -91,12 +91,12 @@ elif [ "$1" = "get" ]; then
   for keystr in $@
   do
     ((position++))
-    echo "${position}:${keystr}"
+    if [ $position -eq 1 ]; then
+      echo "# blitz.cache.sh $@"
+      continue
+    fi
+    echo "${keystr}=\"\""
   done
-
-  echo $#
-  echo "#TODO: get"
-  echo $@
 
 else
   echo "# FAIL: parameter not known - run with -h for help"
