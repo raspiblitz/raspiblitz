@@ -130,6 +130,7 @@ elif [ "$1" = "import" ]; then
   # get parameter
   filename=$2
 
+  # source values from given file (to be used for import later)
   source ${filename}
 
   # read file and go thru line by line
@@ -148,9 +149,10 @@ elif [ "$1" = "import" ]; then
       continue
     fi
 
-    # get the key value
+    # import key from line & value from source above (that way quotes are habdled correctly)
     keyValue=$(echo "$line" | cut -d "=" -f1)
-    echo "${keyValue}(${!keyValue})"
+    echo "# redis-cli set ${keyValue} \"${!keyValue}\”"
+    redis-cli set ${keyValue} "${!keyValue}"
 
   done < $filename
 
