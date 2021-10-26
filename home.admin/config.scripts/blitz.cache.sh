@@ -127,8 +127,13 @@ elif [ "$1" = "get" ]; then
 # import values from bash key-value store
 elif [ "$1" = "import" ]; then
 
-  # read file and go thru line by line
+  # get parameter
   filename=$2
+
+  # source values of given file 
+  source ${filename} 2>/dev/null
+
+  # read file and go thru line by line
   n=1
   while read line; do
 
@@ -144,7 +149,10 @@ elif [ "$1" = "import" ]; then
       continue
     fi
 
-    echo "$line"
+    # get the key value
+    keyValue=$(echo "$line" | cut -d "=" -f1)
+    echo "${keyValue}($${keyValue})"
+
   done < $filename
 
 else
