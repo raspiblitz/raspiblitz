@@ -475,15 +475,12 @@ do
       finishedIBD=$($bitcoincli_alias getblockchaininfo | grep "initialblockdownload" | grep -c "false")
       if [ ${finishedIBD} -eq 1 ]; then
 
-        echo "CHECK FOR END OF IBD --> reduce RAM, check TOR and restart ${network}d"
+        echo "CHECK FOR END OF IBD --> reduce RAM for next reboot"
 
         # remove flag
-        sudo rm /home/admin/selfsync.flag
+        sudo rm /mnt/hdd/${network}/blocks/selfsync.flag
 
-        # stop bitcoind
-        sudo systemctl stop ${network}d
-
-        # set dbcache back to normal (to give room for other apps)
+        # set dbcache back to normal (to give room for other apps after reboot in the future)
         kbSizeRAM=$(sudo cat /proc/meminfo | grep "MemTotal" | sed 's/[^0-9]*//g')
         if [ ${kbSizeRAM} -gt 1500000 ]; then
           echo "Detected RAM >1GB --> optimizing ${network}.conf"
@@ -492,17 +489,6 @@ do
           echo "Detected RAM 1GB --> optimizing ${network}.conf"
           sudo sed -i "s/^dbcache=.*/dbcache=128/g" /mnt/hdd/${network}/${network}.conf
         fi
-
-        # if TOR was activated during setup make sure bitcoin runs behind TOR latest from now on
-        if [ "${runBehindTor}" = "on" ]; then
-          echo "TOR is ON -> make sure bitcoin is running behind TOR after IBD"
-          sudo /home/admin/config.scripts/internet.tor.sh btcconf-on
-        else
-           echo "TOR is OFF after IBD"
-        fi
-
-        # restart bitcoind
-        sudo systemctl start ${network}d
 
       fi
     fi
