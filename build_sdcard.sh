@@ -158,7 +158,7 @@ if [ ${torKeyAvailable} -eq 0 ]; then
 fi
 echo "- OK key added"
 echo "*** Adding Tor Sources to sources.list ***"
-echo "- adding TOR sources ..."
+echo "- adding Tor sources ..."
 distribution=$(lsb_release -sc)
 echo "
 deb tor://apow7mjfryruh65chtdydfmqfpj5btws7nbocgtaovhvezgccyjazpqd.onion/torproject.org ${distribution} main
