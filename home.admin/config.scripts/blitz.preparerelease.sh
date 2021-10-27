@@ -5,11 +5,11 @@
 
 # cleaning logs
 echo "deleting raspiblitz & system logs .."
-sudo rm /var/log/*
-sudo rm /var/log/redis/*
-sudo rm /var/log/private/*
-sudo rm /var/log/nginx/*
-sudo rm /home/admin/*.log
+sudo rm /var/log/* 2>/dev/null
+sudo rm /var/log/redis/* 2>/dev/null
+sudo rm /var/log/private/* 2>/dev/null
+sudo rm /var/log/nginx/* 2>/dev/null
+sudo rm /home/admin/*.log 2>/dev/null
 echo "OK"
 
 # clean raspiblitz.info toward the values set by sd card build script
