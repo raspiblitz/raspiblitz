@@ -55,7 +55,7 @@ fi
 # 3rd optional parameter: GITHUB-USERNAME
 # ---------------------------------------
 # could be any valid github-user that has a fork of the raspiblitz repo - 'rootzoll' is default
-# The 'raspiblitz' repo of this user is used to provisioning sd card 
+# The 'raspiblitz' repo of this user is used to provisioning sd card
 # with raspiblitz assets/scripts later on.
 # If this parameter is set also the branch needs to be given (see next parameter).
 githubUser="$3"
@@ -205,7 +205,7 @@ echo "- OK key added"
 
 echo "*** Adding Tor Sources to sources.list ***"
 torSourceListAvailable=$(sudo grep -c 'https://deb.torproject.org/torproject.org' /etc/apt/sources.list)
-echo "torSourceListAvailable=${torSourceListAvailable}"  
+echo "torSourceListAvailable=${torSourceListAvailable}"
 if [ ${torSourceListAvailable} -eq 0 ]; then
   echo "- adding TOR sources ..."
   if [ "${baseimage}" = "raspbian" ] || [ "${baseimage}" = "raspios_arm64" ] || [ "${baseimage}" = "armbian" ] || [ "${baseimage}" = "dietpi" ]; then
@@ -215,7 +215,7 @@ if [ ${torSourceListAvailable} -eq 0 ]; then
   elif [ "${baseimage}" = "ubuntu" ]; then
     echo "- using https://deb.torproject.org/torproject.org focal"
     echo "deb https://deb.torproject.org/torproject.org focal main" | sudo tee -a /etc/apt/sources.list
-    echo "deb-src https://deb.torproject.org/torproject.org focal main" | sudo tee -a /etc/apt/sources.list    
+    echo "deb-src https://deb.torproject.org/torproject.org focal main" | sudo tee -a /etc/apt/sources.list
   else
     echo "!!! FAIL: No Tor sources for os: ${baseimage}"
     exit 1
@@ -253,7 +253,7 @@ if [ "${baseimage}" = "raspbian" ] || [ "${baseimage}" = "dietpi" ] || \
     # remove unnecessary files
     sudo rm -rf /home/pi/MagPi
     # https://www.reddit.com/r/linux/comments/lbu0t1/microsoft_repo_installed_on_all_raspberry_pis/
-    sudo rm -f /etc/apt/sources.list.d/vscode.list 
+    sudo rm -f /etc/apt/sources.list.d/vscode.list
     sudo rm -f /etc/apt/trusted.gpg.d/microsoft.gpg
   fi
   if [ ! -f /etc/apt/sources.list.d/raspi.list ]; then
@@ -308,7 +308,7 @@ echo "*** PREPARE ${baseimage} ***"
 if [ "$(compgen -u | grep -c dietpi)" -gt 0 ];then
   echo "# Renaming dietpi user to pi"
   sudo usermod -l pi dietpi
-elif [ "$(compgen -u | grep -c pi)" -eq 0 ];then  
+elif [ "$(compgen -u | grep -c pi)" -eq 0 ];then
   echo "# Adding the user pi"
   sudo adduser --disabled-password --gecos "" pi
   sudo adduser pi sudo
@@ -320,7 +320,7 @@ if [ "${baseimage}" = "raspbian" ]||[ "${baseimage}" = "raspios_arm64" ]||\
 
   echo ""
   echo "*** PREPARE RASPBIAN ***"
-  sudo apt install -y raspi-config 
+  sudo apt install -y raspi-config
   # do memory split (16MB)
   sudo raspi-config nonint do_memory_split 16
   # set to wait until network is available on boot (0 seems to yes)
@@ -535,6 +535,15 @@ sudo apt install -y python3-venv python3-dev python3-wheel python3-jinja2 python
 # make sure /usr/bin/pip exists (and calls pip3 in Debian Buster)
 sudo update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
 
+# for TorBox bridges python scripts (pip3)
+# https://github.com/radio24/TorBox/blob/master/requirements.txt
+sudo pip install pytesseract
+sudo pip install mechanize
+sudo pip install PySocks
+sudo pip install urwid
+sudo pip install Pillow
+sudo pip install requests
+
 # rsync is needed to copy from HDD
 sudo apt install -y rsync
 # install ifconfig
@@ -623,7 +632,7 @@ blitzpy_wheel=$(ls -tR /home/admin/raspiblitz/home.admin/BlitzPy/dist | grep -E 
 blitzpy_version=$(echo ${blitzpy_wheel} | grep -oE "([0-9]\.[0-9]\.[0-9])")
 echo ""
 echo "*** INSTALLING BlitzPy Version: ${blitzpy_version} ***"
-sudo -H /usr/bin/python -m pip install "/home/admin/raspiblitz/home.admin/BlitzPy/dist/${blitzpy_wheel}" >/dev/null 2>&1 
+sudo -H /usr/bin/python -m pip install "/home/admin/raspiblitz/home.admin/BlitzPy/dist/${blitzpy_wheel}" >/dev/null 2>&1
 
 # make sure lndlibs are patched for compatibility for both Python2 and Python3
 if ! grep -Fxq "from __future__ import absolute_import" /home/admin/config.scripts/lndlibs/rpc_pb2_grpc.py; then
@@ -722,7 +731,7 @@ sudo bash -c "echo '# end of pam-auth-update config' >> /etc/pam.d/common-sessio
 # *** fail2ban ***
 # based on https://stadicus.github.io/RaspiBolt/raspibolt_21_security.html
 echo "*** HARDENING ***"
-sudo apt install -y --no-install-recommends python3-systemd fail2ban 
+sudo apt install -y --no-install-recommends python3-systemd fail2ban
 
 # *** CACHE DISK IN RAM ***
 echo "Activating CACHE RAM DISK ... "
@@ -731,7 +740,7 @@ sudo /home/admin/config.scripts/blitz.cache.sh on
 # *** Wifi, Bluetooth & other configs ***
 if [ "${baseimage}" = "raspbian" ]||[ "${baseimage}" = "raspios_arm64"  ]||\
    [ "${baseimage}" = "debian_rpi64" ]; then
-   
+
   if [ "${modeWifi}" == "false" ]; then
     echo ""
     echo "*** DISABLE WIFI ***"
@@ -768,7 +777,7 @@ if [ "${baseimage}" = "raspbian" ]||[ "${baseimage}" = "raspios_arm64"  ]||\
   echo "*** DISABLE AUDIO (snd_bcm2835) ***"
   sudo sed -i "s/^dtparam=audio=on/# dtparam=audio=on/g" /boot/config.txt
   echo
-  
+
   # disable DRM VC4 V3D
   echo "*** DISABLE DRM VC4 V3D driver ***"
   dtoverlay=vc4-fkms-v3d
@@ -777,7 +786,7 @@ if [ "${baseimage}" = "raspbian" ]||[ "${baseimage}" = "raspios_arm64"  ]||\
 
   # I2C fix (make sure dtparam=i2c_arm is not on)
   # see: https://github.com/rootzoll/raspiblitz/issues/1058#issuecomment-739517713
-  sudo sed -i "s/^dtparam=i2c_arm=.*//g" /boot/config.txt 
+  sudo sed -i "s/^dtparam=i2c_arm=.*//g" /boot/config.txt
 fi
 
 # *** FATPACK *** (can be activated by parameter - see details at start of script)
@@ -810,7 +819,7 @@ if [ "${fatpack}" == "true" ]; then
   echo "*** FALLBACK NODE LIST ***"
   sudo -u admin curl -H "Accept: application/json; indent=4" https://bitnodes.io/api/v1/snapshots/latest/ -o /home/admin/fallback.nodes
   byteSizeList=$(sudo -u admin stat -c %s /home/admin/fallback.nodes)
-  if [ ${#byteSizeList} -eq 0 ] || [ ${byteSizeList} -lt 10240 ]; then 
+  if [ ${#byteSizeList} -eq 0 ] || [ ${byteSizeList} -lt 10240 ]; then
     echo "WARN: Failed downloading fresh FALLBACK NODE LIST --> https://bitnodes.io/api/v1/snapshots/latest/"
     sudo rm /home/admin/fallback.nodes 2>/dev/null
     sudo cp /home/admin/assets/fallback.nodes /home/admin/fallback.nodes
@@ -1106,11 +1115,11 @@ if [ ${correctKey} -lt 1 ] || [ ${goodSignature} -lt 1 ]; then
   echo "!!! BUILD FAILED --> PGP verification not OK / signature(${goodSignature}) verify(${correctKey})"
   exit 1
 else
-  echo 
+  echo
   echo "****************************************************************"
   echo "OK --> the PGP signature of the C-lightning SHA256SUMS is correct"
   echo "****************************************************************"
-  echo 
+  echo
 fi
 
 sudo -u admin wget https://github.com/ElementsProject/lightning/releases/download/v${CLVERSION}/clightning-v${CLVERSION}.zip
