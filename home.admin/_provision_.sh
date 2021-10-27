@@ -226,7 +226,7 @@ if [ ${#bitcoinInterimsUpdate} -gt 0 ]; then
     # when installing the same sd image - this will re-trigger the secure interims update
     # if this a update with a newer RaspiBlitz version .. interims update will be ignored
     # because standard Bitcoin Core version is most more up to date
-    echo "Provisioning BItcoin Core tested interims update" >> ${logFile}
+    echo "Provisioning Bitcoin Core tested interims update" >> ${logFile}
     sudo /home/admin/config.scripts/bitcoin.update.sh tested ${bitcoinInterimsUpdate} >> ${logFile}
   fi
 else
