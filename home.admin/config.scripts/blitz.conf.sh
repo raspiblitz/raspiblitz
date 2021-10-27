@@ -4,10 +4,10 @@ configFile="/mnt/hdd/raspiblitz.conf"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ]; then
-  echo "RaspiBlitz Config Edit - adds value and creates if needed"
-  echo "You find config file under: ${configFile}"
-  echo
+  echo "RaspiBlitz Config Edit - adds value to file & cache and creates entries if needed:"
   echo "blitz.cache.sh set [key] [value]"
+  echo "blitz.cache.sh delete [key]"
+  echo "To use values use in shell scripts: source ${configFile}"
   echo
   exit 1
 fi
@@ -57,6 +57,21 @@ if [ "$1" = "set" ]; then
 
   # set value (sed needs sudo to operate when user is not root)
   sudo sed -i "s/^${keystr}=.*/${keystr}=${valuestr}/g" ${configFile}
+
+
+elif [ "$1" = "delete" ]; then
+
+  # get parameters
+  keystr=$2
+
+  # check that key & value are given
+  if [ "${keystr}" == "" ]; then
+    echo "# FAIL: missing parameter"
+    exit 1
+  fi
+
+  # delete value
+  sudo sed -i "/^${keystr}=/d" ${configFile} 2>/dev/null
 
 else
   echo "# FAIL: parameter not known - run with -h for help"
