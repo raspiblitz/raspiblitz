@@ -5,15 +5,7 @@
 # 1) give UI the info that a reboot/shutdown is now happening
 # 2) shutdown/reboot in a safe way to prevent data corruption
 
-# INFOFILE - state data from bootstrap
-infoFile="/home/admin/raspiblitz.info"
-
-# get network info from config
-source ${infoFile} 2>/dev/null
-source /mnt/hdd/raspiblitz.conf 2>/dev/null
-if [ ${#network} -eq 0 ]; then
-  network=bitcoin
-fi
+source <(/home/admin/config.scripts/blitz.cache.sh get network)
 
 # display info
 echo ""
@@ -21,13 +13,13 @@ echo "Green activity light stays dark and LCD turns white when shutdown complete
 if [ "$1" = "reboot" ]; then
   shutdownParams="-h -r now"
   echo "It will then reboot again automatically."
-  sed -i "s/^state=.*/state=reboot/g" ${infoFile}
-  sed -i "s/^message=.*/message='$2'/g" ${infoFile}
+  /home/admin/config.scripts/blitz.cache.sh set state "reboot"
+  /home/admin/config.scripts/blitz.cache.sh set message "$2"
 else
   shutdownParams="-h now"
   echo "Then wait 5 seconds and disconnect power."
-  sed -i "s/^state=.*/state=shutdown/g" ${infoFile}
-  sed -i "s/^message=.*/message=''/g" ${infoFile}
+  /home/admin/config.scripts/blitz.cache.sh set state "shutdown"
+  /home/admin/config.scripts/blitz.cache.sh set message ""
 fi
 
 # do shutdown/reboot

@@ -6,8 +6,7 @@ source /home/admin/raspiblitz.info
 
 # SETUPFILE
 # this key/value file contains the state during the setup process
-SETUPFILE="/var/cache/raspiblitz/temp/raspiblitz.setup"
-source ${SETUPFILE}
+source /var/cache/raspiblitz/temp/raspiblitz.setup
 
 # make sure also admin user can write to log
 sudo chmod 777 /home/admin/raspiblitz.log
@@ -154,13 +153,15 @@ sudo sed -i "s/^After=.*/After=bootstrap.service/g" /etc/systemd/system/${networ
 sudo systemctl daemon-reload 2>/dev/null
 
 # delete setup data from RAM
-sudo rm ${SETUPFILE}
+sudo rm /var/cache/raspiblitz/temp/raspiblitz.setup
 
 # signal that setup phase is over
-sed -i "s/^setupPhase=.*/setupPhase='done'/g" /home/admin/raspiblitz.info
+/home/admin/config.scripts/blitz.cache.sh set setupPhase "done"
 
 sleep 2
 clear
+source <(/home/admin/config.scripts/blitz.cache.sh get localip)
+/home/admin/config.scripts/blitz.cache.sh set setupPhase "done"
 echo "***********************************************************"
 echo "RaspiBlitz going to reboot"
 echo "***********************************************************"
