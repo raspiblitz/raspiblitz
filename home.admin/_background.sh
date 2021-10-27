@@ -12,14 +12,6 @@ configFile="/mnt/hdd/raspiblitz.conf"
 
 # LOGS see: sudo journalctl -f -u background
 
-# Check if HDD contains configuration
-configExists=$(ls ${configFile} | grep -c '.conf')
-if [ ${configExists} -eq 1 ]; then
-    source ${configFile}
-else
-    source ${infoFile}
-fi
-
 echo "_background.sh STARTED"
 
 # global vars
@@ -47,8 +39,10 @@ do
   # gather the uptime seconds
   upSeconds=$(cat /proc/uptime | grep -o '^[0-9]\+')
 
-  # source info file fresh on every loop
+  # source info & config file fresh on every loop
   source ${infoFile} 2>/dev/null
+  source ${configFile} 2>/dev/null
+  source <(/home/admin/config.scripts/blitz.cache.sh get state setupPhase)
 
   ####################################################
   # SKIP BACKGROUND TASK LOOP ON CERTAIN SYSTEM STATES
@@ -67,8 +61,8 @@ do
   oldLocalIP="${localip}";
   source <(/home/admin/config.scripts/internet.sh status)
   if [ "${oldLocalIP}" != "${localip}" ]; then
-    echo "local IP changed old(${oldLocalIP}) new(${localip}) - updating in raspiblitz.info"
-    sed -i "s/^localip=.*/localip='${localip}'/g" ${infoFile}
+    echo "local IP changed old(${oldLocalIP}) new(${localip}) - updating in cache"
+    /home/admin/config.scripts/blitz.cache.sh set localip "${localip}"
   fi
 
   ####################################################
@@ -98,7 +92,7 @@ do
     # detect a missing DHCP config
     if [ "${localip:0:4}" = "169." ]; then
       echo "Missing DHCP detected ... trying emergency reboot"
-      sudo /home/admin/config.scripts/blitz.shutdown.sh reboot
+      /home/admin/config.scripts/blitz.shutdown.sh reboot
     else
       echo "DHCP OK"
     fi
@@ -112,7 +106,7 @@ do
   recheckUndervoltage=$(($counter % 3600))
   if [ ${recheckUndervoltage} -eq 1 ]; then
     echo "*** RECHECK UNDERVOLTAGE ***"
-    countReports=$(sudo cat /var/log/syslog | grep -c "Under-voltage detected!")
+    countReports=$(cat /var/log/syslog | grep -c "Under-voltage detected!")
     echo "${countReports} undervoltage reports found in syslog"
     /home/admin/config.scripts/blitz.cache.sh set undervoltageReports "${countReports}"
   fi
@@ -129,6 +123,7 @@ do
   # every 15min - not too often
   # because its a ping to external service
   recheckPublicIP=$((($counter % 900)+1))
+
   # prevent when lndAddress is set
   if [ ${#lndAddress} -gt 3 ]; then
     recheckPublicIP=0
@@ -144,9 +139,7 @@ do
     echo "*** RECHECK PUBLIC IP ***"
 
     # execute only after setup when config exists
-    if [ ${configExists} -eq 1 ]; then
-      publicIPChanged=$(/home/admin/config.scripts/internet.sh update-publicip | grep -c 'ip_changed=1')
-    fi
+    publicIPChanged=$(/home/admin/config.scripts/internet.sh update-publicip | grep -c 'ip_changed=1')
 
     # check if changed
     if [ ${publicIPChanged} -gt 0 ]; then
@@ -217,6 +210,27 @@ do
   fi
 
   ###############################
+  # UPDATE DYNAMIC DOMAIN
+  # like afraid.org
+  # ! experimental
+  ###############################
+
+  # if not activated above, update every 6 hours
+  if [ ${updateDynDomain} -eq 0 ]; then
+    # dont +1 so that it gets executed on first loop
+    updateDynDomain=$(($counter % 21600))
+  fi
+  if [ ${updateDynDomain} -eq 1 ]; then
+    echo "*** UPDATE DYNAMIC DOMAIN ***"
+    # check if update URL for dyn Domain is set
+    if [ ${#dynUpdateUrl} -gt 0 ]; then
+      /home/admin/config.scripts/internet.dyndomain.sh update
+    else
+      echo "'dynUpdateUrl' not set in ${configFile}"
+    fi
+  fi
+
+  ###############################
   # Blockchain Sync Monitor
   ###############################
 
@@ -266,8 +280,11 @@ do
   # SCB Monitoring
   ###############################
 
-  # check every 1min
-  recheckSCB=$(($counter % 60))
+  # check every 1min (only when lnd active)
+  recheckSCB=0
+  if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
+    recheckSCB=$(($counter % 60))
+  fi
   if [ ${recheckSCB} -eq 1 ]; then
     #echo "SCB Monitoring ..."
     source ${configFile}
@@ -275,6 +292,7 @@ do
     scbPath=/mnt/hdd/lnd/data/chain/${network}/${chain}net/channel.backup
     scbExists=$(sudo ls $scbPath 2>/dev/null | grep -c 'channel.backup')
     if [ ${scbExists} -eq 1 ]; then
+
       # timestamp backup filename
       timestampedFileName=channel-$(date "+%Y%m%d-%H%M%S").backup
       localBackupDir=/home/admin/backups/scb
@@ -343,22 +361,6 @@ do
           fi
         fi
 
-        # check if a DropBox backup target is set
-        # parameter in raspiblitz.conf:
-        # dropboxBackupTarget='[DROPBOX-APP-OAUTH2-TOKEN]'
-        # see dropbox setup: https://gist.github.com/vindard/e0cd3d41bb403a823f3b5002488e3f90
-        if [ ${#dropboxBackupTarget} -gt 0 ]; then
-          echo "--> Offsite-Backup Dropbox"
-          source <(sudo /home/admin/config.scripts/dropbox.upload.sh upload ${dropboxBackupTarget} ${localBackupPath})
-          source <(sudo /home/admin/config.scripts/dropbox.upload.sh upload ${dropboxBackupTarget} ${localTimestampedPath})
-          if [ ${#err} -gt 0 ]; then
-            echo "FAIL -  ${err}"
-            echo "${errMore}"
-          else
-            echo "OK - ${upload}"
-          fi
-        fi
-
         # check if Nextcloud backups are enabled
         if [ $nextcloudBackupServer ] && [ $nextcloudBackupUser ] && [ $nextcloudBackupPassword ]; then
           echo "--> Offsite-Backup Nextcloud"
@@ -399,14 +401,11 @@ do
   recheckRAID=$((($counter % 3600)+1))
   if [ ${recheckRAID} -eq 1 ]; then
 
-    # check if raid is active
+    # check if BTRTFS raid is active & scrub
     source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
-    if [ ${isRaid} -eq 1 ]; then
-
-      # will run in the background
+    if [ "${isBTRFS}" == "1" ] && [ "${isRaid}" == "1" ]; then
       echo "STARTING BTRFS RAID DATA CHECK ..."
       sudo btrfs scrub start /mnt/hdd/
-
     fi
 
   fi
@@ -415,8 +414,11 @@ do
   # LND AUTO-UNLOCK
   ###############################
 
-  # check every 10secs
-  recheckAutoUnlock=$((($counter % 10)+1))
+  # check every 10secs (only if LND is active)
+  recheckAutoUnlock=0
+  if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
+    recheckAutoUnlock=$((($counter % 10)+1))
+  fi
   if [ ${recheckAutoUnlock} -eq 1 ]; then
 
     # check if auto-unlock feature if activated
@@ -430,27 +432,6 @@ do
         sudo /home/admin/config.scripts/lnd.unlock.sh
 
       fi
-    fi
-  fi
-
-  ###############################
-  # UPDATE DYNAMIC DOMAIN
-  # like afraid.org
-  # ! experimental
-  ###############################
-
-  # if not activated above, update every 6 hours
-  if [ ${updateDynDomain} -eq 0 ]; then
-    # dont +1 so that it gets executed on first loop
-    updateDynDomain=$(($counter % 21600))
-  fi
-  if [ ${updateDynDomain} -eq 1 ]; then
-    echo "*** UPDATE DYNAMIC DOMAIN ***"
-    # check if update URL for dyn Domain is set
-    if [ ${#dynUpdateUrl} -gt 0 ]; then
-      /home/admin/config.scripts/internet.dyndomain.sh update
-    else
-      echo "'dynUpdateUrl' not set in ${configFile}"
     fi
   fi
 
@@ -468,15 +449,12 @@ do
       finishedIBD=$($bitcoincli_alias getblockchaininfo | grep "initialblockdownload" | grep -c "false")
       if [ ${finishedIBD} -eq 1 ]; then
 
-        echo "CHECK FOR END OF IBD --> reduce RAM, check TOR and restart ${network}d"
+        echo "CHECK FOR END OF IBD --> reduce RAM for next reboot"
 
         # remove flag
-        sudo rm /home/admin/selfsync.flag
+        sudo rm /mnt/hdd/${network}/blocks/selfsync.flag
 
-        # stop bitcoind
-        sudo systemctl stop ${network}d
-
-        # set dbcache back to normal (to give room for other apps)
+        # set dbcache back to normal (to give room for other apps after reboot in the future)
         kbSizeRAM=$(sudo cat /proc/meminfo | grep "MemTotal" | sed 's/[^0-9]*//g')
         if [ ${kbSizeRAM} -gt 1500000 ]; then
           echo "Detected RAM >1GB --> optimizing ${network}.conf"
@@ -485,17 +463,6 @@ do
           echo "Detected RAM 1GB --> optimizing ${network}.conf"
           sudo sed -i "s/^dbcache=.*/dbcache=128/g" /mnt/hdd/${network}/${network}.conf
         fi
-
-        # if TOR was activated during setup make sure bitcoin runs behind TOR latest from now on
-        if [ "${runBehindTor}" = "on" ]; then
-          echo "TOR is ON -> make sure bitcoin is running behind TOR after IBD"
-          sudo /home/admin/config.scripts/internet.tor.sh btcconf-on
-        else
-           echo "TOR is OFF after IBD"
-        fi
-
-        # restart bitcoind
-        sudo systemctl start ${network}d
 
       fi
     fi
