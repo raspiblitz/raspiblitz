@@ -39,7 +39,7 @@ if [ "$1" = "on" ];then
   # setting value in raspi blitz config
   sudo sed -i "s/^${netprefix}feeadjuster=.*/${netprefix}feeadjuster=on/g" /mnt/hdd/raspiblitz.conf
 
-  source /home/admin/raspiblitz.info
+  source <(/home/admin/config.scripts/blitz.cache.sh get state)
   if [ "${state}" == "ready" ] && [ "$3" != "norestart" ]; then
     echo "# Start ${netprefix}${plugin}"
     $lightningcli_alias plugin start /home/bitcoin/cl-plugins-enabled/${plugin}.py

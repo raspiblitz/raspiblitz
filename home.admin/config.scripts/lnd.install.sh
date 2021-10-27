@@ -39,6 +39,7 @@ elif [ ${CHAIN} = mainnet ];then
 fi
 
 source /home/admin/raspiblitz.info
+source <(/home/admin/config.scripts/blitz.cache.sh get state)
 # add default value to raspi config if needed
 if ! grep -Eq "^lightning=" /mnt/hdd/raspiblitz.conf; then
   echo "lightning=lnd" | sudo tee -a /mnt/hdd/raspiblitz.conf

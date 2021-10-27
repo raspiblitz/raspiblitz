@@ -57,7 +57,7 @@ sudo systemctl stop ${netprefix}lightningd 2>/dev/null
 # config: change name
 sudo sed -i "s/^alias=.*/alias=${newName}/g" ${CLCONF}
 
-source /home/admin/raspiblitz.info
+source <(/home/admin/config.scripts/blitz.cache.sh get state)
 if [ "${state}" == "ready" ]; then
   sudo systemctl start ${netprefix}lightningd
 fi

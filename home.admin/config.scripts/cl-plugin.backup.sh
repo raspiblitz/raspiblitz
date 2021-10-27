@@ -74,7 +74,7 @@ if [ $1 = on ];then
    --lightning-dir /home/bitcoin/.lightning/${CLNETWORK} \
    file:///home/bitcoin/${netprefix}lightningd.sqlite3.backup
 
-  source /home/admin/raspiblitz.info
+  source <(/home/admin/config.scripts/blitz.cache.sh get state)
   if [ "${state}" == "ready" ]; then
     sudo systemctl start ${netprefix}lightningd
     echo "# Started the ${netprefix}lightningd.service"
@@ -120,7 +120,7 @@ elif [ $1 = restore ];then
       file:///home/bitcoin/${netprefix}lightningd.sqlite3.backup \
       /home/bitcoin/.lightning/${CLNETWORK}/lightningd.sqlite3
     
-    source /home/admin/raspiblitz.info
+    source <(/home/admin/config.scripts/blitz.cache.sh get state)
     if [ "${state}" == "ready" ]; then
       sudo systemctl start ${netprefix}lightningd
       echo "# Started the ${netprefix}lightningd.service"

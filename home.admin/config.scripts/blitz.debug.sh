@@ -7,6 +7,7 @@ source /home/admin/_version.info
 
 ## get basic info (its OK if not set yet)
 source /home/admin/raspiblitz.info 2>/dev/null
+source <(/home/admin/config.scripts/blitz.cache.sh get state setupPhase)
 source /mnt/hdd/raspiblitz.conf 2>/dev/null
 
 # for old nodes

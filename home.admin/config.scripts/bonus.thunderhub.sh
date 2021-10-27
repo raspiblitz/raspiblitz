@@ -243,7 +243,7 @@ WantedBy=multi-user.target
       # make sure to keep in sync with internet.tor.sh script
       /home/admin/config.scripts/internet.hiddenservice.sh thunderhub 80 3012 443 3013
     fi
-    source /home/admin/raspiblitz.info
+    source <(/home/admin/config.scripts/blitz.cache.sh get state)
     if [ "${state}" == "ready" ]; then
       echo "# OK - the thunderhub.service is enabled, system is ready so starting service"
       sudo systemctl start thunderhub

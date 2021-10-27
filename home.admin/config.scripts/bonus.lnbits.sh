@@ -340,7 +340,7 @@ EOF
 
     sudo systemctl enable lnbits
 
-    source /home/admin/raspiblitz.info
+    source <(/home/admin/config.scripts/blitz.cache.sh get state)
     if [ "${state}" == "ready" ]; then
       echo "# OK - lnbits service is enabled, system is on ready so starting lnbits service"
       sudo systemctl start lnbits

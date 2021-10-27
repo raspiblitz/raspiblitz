@@ -60,7 +60,7 @@ if [ $1 = on ];then
   # setting value in raspiblitz.conf
   sudo sed -i "s/^${netprefix}clboss=.*/${netprefix}clboss=on/g" /mnt/hdd/raspiblitz.conf
 
-  source /home/admin/raspiblitz.info
+  source <(/home/admin/config.scripts/blitz.cache.sh get state)
   if [ "${state}" == "ready" ]; then
     echo "# Restart the ${netprefix}lightningd.service to activate clboss"
     sudo systemctl restart ${netprefix}lightningd

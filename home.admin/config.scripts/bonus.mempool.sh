@@ -274,7 +274,7 @@ EOF
   fi
 
   # start the service if ready
-  source /home/admin/raspiblitz.info
+  source <(/home/admin/config.scripts/blitz.cache.sh get state)
   if [ "${state}" == "ready" ]; then
     echo "# OK - the mempool.service is enabled, system is on ready so starting service"
     sudo systemctl start mempool

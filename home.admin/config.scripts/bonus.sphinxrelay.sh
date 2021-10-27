@@ -495,7 +495,7 @@ EOF
 
     sudo systemctl enable sphinxrelay
 
-    source /home/admin/raspiblitz.info
+    source <(/home/admin/config.scripts/blitz.cache.sh get state)
     if [ "${state}" == "ready" ]; then
       echo "# OK - sphinxrelay service is enabled, system is on ready so starting service"
       sudo systemctl start sphinxrelay

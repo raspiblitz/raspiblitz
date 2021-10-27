@@ -21,6 +21,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
 fi
 
 source /home/admin/raspiblitz.info
+source <(/home/admin/config.scripts/blitz.cache.sh get state)
 
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then

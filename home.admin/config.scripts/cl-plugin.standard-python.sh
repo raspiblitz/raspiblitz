@@ -35,7 +35,7 @@ if [ "$1" = "on" ];then
       sudo ln -s /home/bitcoin/cl-plugins-available/plugins/${plugin}/${plugin}.py \
                  /home/bitcoin/${netprefix}cl-plugins-enabled
       
-      source /home/admin/raspiblitz.info
+      source <(/home/admin/config.scripts/blitz.cache.sh get state)
       if [ "${state}" == "ready" ]; then
         echo "# Restart the ${netprefix}lightningd.service to activate the ${plugin} plugin"
         sudo systemctl restart ${netprefix}lightningd

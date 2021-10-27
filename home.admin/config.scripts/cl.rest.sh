@@ -128,7 +128,7 @@ WantedBy=multi-user.target
 " | sudo tee /etc/systemd/system/${netprefix}clrest.service
 
   sudo systemctl enable ${netprefix}clrest
-  source /home/admin/raspiblitz.info
+  source <(/home/admin/config.scripts/blitz.cache.sh get state)
   if [ "${state}" == "ready" ]; then
     echo "# OK - the clrest.service is enabled, system is ready so starting service"
     sudo systemctl start ${netprefix}clrest
