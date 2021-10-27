@@ -3,8 +3,10 @@
 
 # get basic system information
 # these are the same set of infos the WebGUI dialog/controler has
-source /home/admin/_version.info 2>/dev/null
 source /home/admin/raspiblitz.info 2>/dev/null
+
+# get values from cache
+source <(/home/admin/config.scripts/blitz.cache.sh get codeVersion localip)
 
 # 1st PARAMETER: eventID
 # fixed ID string for a certain event
@@ -172,6 +174,9 @@ flash a fresh RaspiBlitz image on it.
 elif [ "${eventID}" == "waitsetup" ] && [ "${mode}" == "lcd" ]; then
 
     if [ "${setupPhase}" == "setup" ] || [ "${setupPhase}" == "update" ] || [ "${setupPhase}" == "recovery" ] || [ "${setupPhase}" == "migration" ]; then
+
+        # get values from cache
+        source <(/home/admin/config.scripts/blitz.cache.sh get ramGB hddGigaBytes hddBlocksBitcoin hddBlocksLitecoin setupPhase)
 
         # custom backtitle for this dialog
         backtitle="RaspiBlitz ${codeVersion}"

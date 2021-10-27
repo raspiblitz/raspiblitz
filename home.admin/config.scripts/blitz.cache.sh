@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# TODOS:
+# - do counter with cache /home/admin/systemd.blockchain.log, /home/admin/systemd.lightning.log
+
 # the cache concept of RaspiBlitz has two options
 # 1) RAMDISK for files under /var/cache/raspiblitz
 # 2) KEY-VALUE STORE for system state infos (REDIS)
@@ -15,10 +18,13 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ];
   echo "blitz.cache.sh ramdisk [on|off]"
   echo "blitz.cache.sh keyvalue [on|off]"
   echo
-  echo "*** RAMDISK for files under /var/cache/raspiblitz"
+  echo "*** KEYVALUE STORE"
   echo "blitz.cache.sh set [key] [value] [?expire-seconds]"
   echo "blitz.cache.sh get [key1] [?key2] [?key3] ..."
   echo "blitz.cache.sh import [bash-keyvalue-file]"
+  echo
+  echo "*** SPECIAL CASE HANDLING"
+  echo "blitz.cache.sh error [source-script-name] [fixed-short-code] [message] [?logfile]"
   echo
   exit 1
 fi
@@ -166,6 +172,28 @@ elif [ "$1" = "import" ]; then
     redis-cli set ${keyValue} "${!keyValue}"
 
   done < $filename
+
+###################
+# SPECIAL
+###################
+
+# import values from bash key-value store
+elif [ "$1" = "error" ]; then
+
+  # get parameters
+  script=$2
+  shortcode=$3
+  detail=$4
+  logfile=$5
+  debugdata=$6
+
+  /home/admin/config.scripts/blitz.cache.sh set state "error"
+  /home/admin/config.scripts/blitz.cache.sh set message "${shortcode}"
+
+  if [ "${logfile}" !=  "" ]; then
+    echo "FAIL see ${logFile}"
+    echo "FAIL: setup: lnd import backup failed" >> ${logFile}
+  fi
 
 else
   echo "# FAIL: parameter not known - run with -h for help"

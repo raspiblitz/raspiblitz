@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# check if started with sudo
+if [ "$EUID" -ne 0 ]; then 
+  echo "error='run as root'"
+  exit 1
+fi
+
 # This script gets called from a fresh SD card
 # starting up that has an config file on HDD
 # from old RaspiBlitz or manufacturer to
@@ -25,71 +31,17 @@ echo "" >> ${logFile}
 echo "###################################" >> ${logFile}
 echo "# _provision_.sh" >> ${logFile}
 echo "###################################" >> ${logFile}
-sudo sed -i "s/^message=.*/message='Provisioning from Config'/g" ${infoFile}
+/home/admin/config.scripts/blitz.cache.sh set message "Provisioning from Config"
 
 # check if there is a config file
 configExists=$(ls ${configFile} 2>/dev/null | grep -c '.conf')
 if [ ${configExists} -eq 0 ]; then
-  echo "FAIL: no config file (${configFile}) found to run provision!" >> ${logFile}
+  /home/admin/config.scripts/blitz.error.sh _provision_.sh "missing-config" "no config file (${configFile}) found to run provision" "" ${logFile}
   exit 1
 fi
 
 # import config values
 source ${configFile}
-
-##########################
-# DISPLAY SETTINGS
-##########################
-
-# check if the raspiblitz config has a different display mode than the build image
-echo "### DISPLAY SETTINGS ###" >> ${logFile}
-
-# OLD: when nothing is set in raspiblitz.conf (<1.7)
-existsDisplayClass=$(sudo cat ${configFile} | grep -c "displayClass=")
-if [ "${existsDisplayClass}" == "0" ]; then
-  displayClass="lcd"
-fi
-
-# OLD: lcd2hdmi (deprecated)
-if [ "${lcd2hdmi}" == "on" ]; then
-  echo "Convert lcd2hdmi=on to displayClass='hdmi'" >> ${logFile}
-  sudo sed -i "s/^lcd2hdmi=.*//g" ${configFile}
-  echo "displayClass=hdmi" >> ${configFile}
-  displayClass="hdmi"
-elif [ "${lcd2hdmi}" != "" ]; then
-  echo "Remove old lcd2hdmi pramater from config" >> ${logFile}
-  sudo sed -i "s/^lcd2hdmi=.*//g" ${configFile}
-  displayClass="lcd"
-fi
-
-# OLD: headless (deprecated)
-if [ "${headless}" == "on" ]; then
-  echo "Convert headless=on to displayClass='headless'" >> ${logFile}
-  sudo sed -i "s/^headless=.*//g" ${configFile}
-  echo "displayClass=headless" >> ${configFile}
-  displayClass="headless"
-elif [ "${headless}" != "" ]; then
-  echo "Remove old headless parameter from config" >> ${logFile}
-  sudo sed -i "s/^headless=.*//g" ${configFile}
-  displayClass="lcd"
-fi
-
-# NEW: decide by displayClass 
-echo "raspiblitz.info(${infoFileDisplayClass}) raspiblitz.conf(${displayClass})" >> ${logFile}
-if [ "${infoFileDisplayClass}" != "" ] && [ "${displayClass}" != "" ]; then
-  if [ "${infoFileDisplayClass}" != "${displayClass}" ]; then
-    echo "Need to update displayClass from (${infoFileDisplayClass}) to (${displayClass})'" >> ${logFile}
-    sudo /home/admin/config.scripts/blitz.display.sh set-display ${displayClass} >> ${logFile}
-    echo "going into reboot" >> ${logFile}
-    sudo cp ${logFile} ${logFile}.display.recover
-    sudo shutdown -r now
-	  exit 0
-  else
-    echo "Display Setting is correct ... no need for change" >> ${logFile}
-  fi
-else
-  echo "WARN values in raspiblitz info and/or conf file seem broken" >> ${logFile}
-fi
 
 ##########################
 # BASIC SYSTEM SETTINGS

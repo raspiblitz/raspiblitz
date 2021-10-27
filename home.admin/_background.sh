@@ -114,14 +114,7 @@ do
     echo "*** RECHECK UNDERVOLTAGE ***"
     countReports=$(sudo cat /var/log/syslog | grep -c "Under-voltage detected!")
     echo "${countReports} undervoltage reports found in syslog"
-    if ! grep -Eq "^undervoltageReports=" ${infoFile}; then
-      # write new value to info file
-      undervoltageReports="${countReports}"
-      echo "undervoltageReports=${undervoltageReports}" >> ${infoFile}
-    else
-      # update value in info file
-      sed -i "s/^undervoltageReports=.*/undervoltageReports=${countReports}/g" ${infoFile}
-    fi
+    /home/admin/config.scripts/blitz.cache.sh set undervoltageReports "${countReports}"
   fi
 
   ####################################################

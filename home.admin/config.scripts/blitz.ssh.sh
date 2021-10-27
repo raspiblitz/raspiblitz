@@ -7,7 +7,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ];
   echo "blitz.ssh.sh clear       --> make sure old sshd host certs are cleared"
   echo "blitz.ssh.sh checkrepair --> check sshd & repair just in case"
   echo "blitz.ssh.sh backup      --> copy ssh keys to backup (if exist)"
-  echo "blitz.ssh.sh restore     --> restore ssh keys from backup (if exist)"
+  echo "blitz.ssh.sh restore [?backup-root] --> restore ssh keys from backup (if exist)"
   exit 1
 fi
 
@@ -117,6 +117,13 @@ fi
 ###################
 if [ "$1" = "restore" ]; then
   echo "# *** blitz.ssh.sh restore"
+
+    # second parameter (optional)
+    ALTBACKUPBASEDIR=$2
+    if [ "${ALTBACKUPBASEDIR}" != "" ]; then
+      DEFAULTBACKUPBASEDIR="${ALTBACKUPBASEDIR}"
+    fi
+
     echo "# backup dir: ${DEFAULTBACKUPBASEDIR}/ssh"
     if [ -d "${DEFAULTBACKUPBASEDIR}/ssh" ]; then
 

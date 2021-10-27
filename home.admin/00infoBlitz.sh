@@ -1,9 +1,7 @@
 #!/bin/bash
 
 # 00infoBlitz.sh <cl|lnd> <testnet|mainnet|signet>
-
-# load code software version
-source /home/admin/_version.info
+source <(/home/admin/config.scripts/network.aliases.sh getvars $1 $2)
 
 # set colors
 color_red='\033[0;31m'
@@ -16,7 +14,8 @@ color_gray='\033[0;37m'
 source /home/admin/raspiblitz.info 2>/dev/null
 source /mnt/hdd/raspiblitz.conf 2>/dev/null
 
-source <(/home/admin/config.scripts/network.aliases.sh getvars $1 $2)
+# get values from cache
+source <(/home/admin/config.scripts/blitz.cache.sh get codeVersion undervoltageReports)
 
 ## get HDD/SSD info
 source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)

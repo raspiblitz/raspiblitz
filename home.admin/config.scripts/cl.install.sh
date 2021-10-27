@@ -41,16 +41,6 @@ fi
 echo "# Running: 'cl.install.sh $*'"
 echo "# Using the settings for: ${network} ${CHAIN}"
 
-# add default value to raspi config if needed
-if ! grep -Eq "^lightning=" /mnt/hdd/raspiblitz.conf; then
-  echo "lightning=cl" | sudo tee -a /mnt/hdd/raspiblitz.conf
-fi
-# add default value to raspi config if needed
-if ! grep -Eq "^${netprefix}cl=" /mnt/hdd/raspiblitz.conf; then
-  echo "${netprefix}cl=off" | sudo tee -a /mnt/hdd/raspiblitz.conf
-fi
-source /mnt/hdd/raspiblitz.conf
-
 if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = testPR ];then
 
   if [ "${CHAIN}" == "testnet" ] && [ "${testnet}" != "on" ]; then
@@ -264,12 +254,12 @@ alias ${netprefix}clconf=\"sudo\
   echo
 
   # setting value in the raspiblitz.conf
-  sudo sed -i "s/^${netprefix}cl=.*/${netprefix}cl=on/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set l${netprefix}cl on
 
   # if this is the first lightning mainnet turned on - make default
   if [ "${CHAIN}" == "mainnet" ] && [ "${lightning}" == "" ]; then
     echo "# CL is now the default lightning implementation"
-    sudo sed -i "s/^lightning=.*/lightning=cl/g" /mnt/hdd/raspiblitz.conf
+    /home/admin/config.scripts/blitz.conf.sh set lightning cl
   fi
 
   exit 0
@@ -330,15 +320,15 @@ if [ "$1" = "off" ];then
     sudo rm -f /usr/local/bin/lightning-cli
   fi
   # setting value in the raspiblitz.conf
-  sudo sed -i "s/^${netprefix}cl=.*/${netprefix}cl=off/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set l${netprefix}cl "off"
 
   # if cl mainnet was default - remove 
   if [ "${CHAIN}" == "mainnet" ] && [ "${lightning}" == "cl" ]; then
     echo "# CL is REMOVED as the default lightning implementation"
-    sudo sed -i "s/^lightning=.*/lightning=/g" /mnt/hdd/raspiblitz.conf
+    /home/admin/config.scripts/blitz.conf.sh set lightning ""
     if [ "${lnd}" == "on" ]; then
       echo "# LND is now the new default lightning implementation"
-      sudo sed -i "s/^lightning=.*/lightning=lnd/g" /mnt/hdd/raspiblitz.conf
+      /home/admin/config.scripts/blitz.conf.sh set lightning "lnd"
     fi
   fi
 fi
