@@ -455,6 +455,7 @@ do
 
         # set dbcache back to normal (to give room for other apps after reboot in the future)
         kbSizeRAM=$(cat /proc/meminfo | grep "MemTotal" | sed 's/[^0-9]*//g')
+
         if [ ${kbSizeRAM} -gt 1500000 ]; then
           echo "Detected RAM >1GB --> optimizing ${network}.conf"
           sed -i "s/^dbcache=.*/dbcache=512/g" /mnt/hdd/${network}/${network}.conf
