@@ -24,6 +24,26 @@
   - [Can I run the RaspiBlitz without a display/LCD?](#can-i-run-the-raspiblitz-without-a-displaylcd)
   - [How do I find the IP address when running without a display?](#how-do-i-find-the-ip-address-when-running-without-a-display)
 
+- [Upgrade](#upgrade)
+  - [Is using the prepared SD card image secure?](#is-using-the-prepared-sd-card-image-secure)
+  - [How to verify the SD card image after download?](#how-to-verify-the-sd-card-image-after-download)
+  - [What changed on every upgrade?](#what-changed-on-every-upgrade)
+  - [How do I upgrade my RaspiBlitz?](#how-do-i-upgrade-my-raspiblitz)
+  - [Why do I need to re-burn my SD card for an update?](#why-do-i-need-to-re-burn-my-sd-card-for-an-update)
+  - [How can I update LND or bitcoind even before the next RaspiBlitz update?](#how-can-i-update-lnd-or-bitcoind-even-before-the-next-raspiblitz-update)
+- [SSH](#ssh)
+  - [What to do when on SSH I see "WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!"](#what-to-do-when-on-ssh-i-see-warning-remote-host-identification-has-changed)
+  - [How do I unplug/shutdown safely without SSH](#how-do-i-unplugshutdown-safely-without-ssh)
+  - [I cannot connect via SSH to my RaspiBlitz. What do I do?](#i-cannot-connect-via-ssh-to-my-raspiblitz-what-do-i-do)
+  - [How to SSH over Tor?](#how-to-ssh-over-tor)
+  - [How to setup port-forwarding with a SSH tunnel?](#how-to-setup-port-forwarding-with-a-ssh-tunnel)
+  - [How do I setup just a port-forwarding user on my public server?](#how-do-i-setup-just-a-port-forwarding-user-on-my-public-server)
+  - [How can I repair my SSH login?](#how-can-i-repair-my-ssh-login)
+- [Display](#display)
+  - [Can I flip the screen?](#can-i-flip-the-screen)
+  - [How to fix my upside down LCD after update?](#how-to-fix-my-upside-down-lcd-after-update)
+  - [Can I run the RaspiBlitz without a display/LCD?](#can-i-run-the-raspiblitz-without-a-displaylcd)
+  - [How do I find the IP address when running without a display?](#how-do-i-find-the-ip-address-when-running-without-a-display)
 - [Debug](#debug)
   - [I have the full blockchain on another storage. How do I copy it to the RaspiBlitz?](#i-have-the-full-blockchain-on-another-storage-how-do-i-copy-it-to-the-raspiblitz)
   - [How do I generate a Debug Report?](#how-do-i-generate-a-debug-report)
@@ -37,7 +57,7 @@
   - [How do I move funds & channels from RaspiBlitz to LND Lightning Desktop App?](#how-do-i-move-funds--channels-from-raspiblitz-to-lnd-lightning-desktop-app)
   - [How do I change the Name/Alias of my lightning node](#how-do-i-change-the-namealias-of-my-lightning-node)
   - [How do I change the public port LND/Lightning node is running on?](#how-do-i-change-the-public-port-lndlightning-node-is-running-on)
-  - [How do I solve a "signature mismatch after caveat verification" error on LND?](#how-do-i-solve-a-signature-mismatch-after-caveat-verification-error)
+  - [How do I solve a "signature mismatch after caveat verification" error?](#how-do-i-solve-a-signature-mismatch-after-caveat-verification-error)
   - [Why is my node not routing?](#why-is-my-node-not-routing)
   - [When using Auto-Unlock, how much security do I lose?](#when-using-auto-unlock-how-much-security-do-i-lose)
   - [I connected my HDD but it still says 'Connect HDD' on the display?](#i-connected-my-hdd-but-it-still-says-connect-hdd-on-the-display)
@@ -57,7 +77,34 @@
   - [How do I setup fresh/clean/reset and without going into recovery mode?](#how-do-i-setup-freshcleanreset-and-without-going-into-recovery-mode)
   - [My blockchain data is corrupted - what can I do?](#my-blockchain-data-is-corrupted---what-can-i-do)
   - [I have two RaspiBlitz in my network - can they both be public?](#i-have-two-raspiblitz-in-my-network---can-they-both-be-public)
-  - [How can I enforce UASP mode for my SSD controller?](#how-can-I-enforce-UASP-mode-for-my-SSD-controller)
+  - [How can I enforce UASP mode for my SSD controller?](#how-can-i-enforce-uasp-mode-for-my-ssd-controller)
+- [Development](#development)
+  - [What is the process of creating a new SD card image release?](#what-is-the-process-of-creating-a-new-sd-card-image-release)
+  - [How can I customize my RaspiBlitz or add other software?](#how-can-i-customize-my-raspiblitz-or-add-other-software)
+  - [Versioning](#versioning)
+  - [GitHub Workflow](#github-workflow)
+  - [Can I run RaspiBlitz on other computers than RaspberryPi?](#can-i-run-raspiblitz-on-other-computers-than-raspberrypi)
+  - [How can I build an SD card from another branch?](#how-can-i-build-an-sd-card-from-another-branch)
+  - [How can I build an SD card from my forked GitHub Repo?](#how-can-i-build-an-sd-card-from-my-forked-github-repo)
+  - [How can I checkout a new branch from the RaspiBlitz repo to my forked repo?](#how-can-i-checkout-a-new-branch-from-the-raspiblitz-repo-to-my-forked-repo)
+  - [How can I sync a branch of my forked GitHub with my local RaspiBlitz?](#how-can-i-sync-a-branch-of-my-forked-github-with-my-local-raspiblitz)
+  - [How contribute a feature/change from my forked branch back to the RaspiBlitz repo?](#how-contribute-a-featurechange-from-my-forked-branch-back-to-the-raspiblitz-repo)
+  - [How can I help testing a Pull Request?](#how-can-i-help-testing-a-pull-request)
+- [Extras](#extras)
+  - [How do I connect a UPS to the RaspiBlitz?](#how-do-i-connect-a-ups-to-the-raspiblitz)
+  - [Can I run my RaspiBlitz on Solar Energy?](#can-i-run-my-raspiblitz-on-solar-energy)
+  - [How to use the Let's Encrypt client](#how-to-use-the-lets-encrypt-client)
+    - [Let's Encrypt - HTTP-01](#lets-encrypt---http-01)
+    - [Let's Encrypt - DNS-01](#lets-encrypt---dns-01)
+    - [Let's Encrypt - eMail Address](#lets-encrypt---email-address)
+    - [Let's Encrypt - Installation details](#lets-encrypt---installation-details)
+  - [What is this mnemonic seed word list?](#what-is-this-mnemonic-seed-word-list)
+  - [How do I set up VNC?](#how-do-i-set-up-vnc)
+  - [Why use BTRFS on RaspiBlitz?](#why-use-btrfs-on-raspiblitz)
+    - [Storing your important Data in RAID1 with a USB Thumb Drive](#storing-your-important-data-in-raid1-with-a-usb-thumb-drive)
+    - [Snapshotting the Blockchain](#snapshotting-the-blockchain)
+    - [How do I use BTRFS on RaspiBlitz?](#how-do-i-use-btrfs-on-raspiblitz)
+    - [How to recover a BTRFS partition?](#how-to-recover-a-btrfs-partition)
 
 - [Development](#development)
   - [What is the process of creating a new SD card image release?](#what-is-the-process-of-creating-a-new-sd-card-image-release)
@@ -274,11 +321,7 @@ useradd -g forwardings -d /home [USERNAME]
 echo 'command="date" [CONTENT-OF-RASPIBLITZ-ROOT-SSH-PUBKEY]' > /etc/ssh/authorized_keys/[USERNAME]
 ```
 
-The `[CONTENT-OF-RASPIBLITZ-ROOT-SSH-PUBKEY]` you get when running the `internet.sshtunnel.py` script on the RaspiBlitz (see above). Now restart the RaspiBlitz. The server should not need a restart after adding a additional forwarding user.
-
-To check if a tunnel is running on on server check: `netstat -tulpn`
-
-To check for any errors on RaspiBlitz after restart check logs: `sudo journalctl -f -u autossh-tunnel.service`
+As a result you should see a "good signature" message with a main fingerprint the same as you can find on the [keybase.io/rootzoll](https://keybase.io/rootzoll) that is ending on `1C73 060C 7C17 6461` the sub fingerprint should end on `A2D7 AA9D D1B5 CC56 47DA`. If that fingerprint is correct, the SD card image you downloaded is a original release RaspiBlitz.
 
 ### How can I repair my SSH login?
 
