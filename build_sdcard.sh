@@ -146,7 +146,7 @@ sleep 3
 # INSTALL TOR
 echo "*** INSTALL TOR BY DEFAULT ***"
 echo
-sudo apt install -y dirmngr tor torsocks obfs4proxy apt-transport-tor
+sudo apt install -y dirmngr wget gpg tor torsocks obfs4proxy apt-transport-tor
 
 echo "*** Adding KEYS deb.torproject.org ***"
 # fix for v1.6 base image https://github.com/rootzoll/raspiblitz/issues/1906#issuecomment-755299759
