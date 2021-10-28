@@ -171,7 +171,7 @@ do
           # if BTCRPCexplorer is currently running
           # it needs to be restarted to pickup the new IP for its "Node Status Page"
           # but this is only needed in IPv6 only mode
-          breIsRunning=$(sudo systemctl status btc-rpc-explorer 2>/dev/null | grep -c 'active (running)')
+          breIsRunning=$(systemctl status btc-rpc-explorer 2>/dev/null | grep -c 'active (running)')
           if [ ${breIsRunning} -eq 1 ]; then
             echo "BTCRPCexplorer is running => restart BTCRPCexplorer to pickup up new publicIP for the bitcoin node"
             systemctl stop btc-rpc-explorer
@@ -267,7 +267,7 @@ do
         source <(/home/admin/config.scripts/blitz.cache.sh get blitzTUIRestarts)
         blitzTUIRestarts=$(($blitzTUIRestarts +1))
         /home/admin/config.scripts/blitz.cache.sh set blitzTUIRestarts "${blitzTUIRestarts}"
-        init 3 ; sleep 2 ; sudo init 5
+        init 3 ; sleep 2 ; init 5
       fi
     else
       echo "blitzTUIHeartBeatLine is empty - skipping check"
@@ -289,7 +289,7 @@ do
     source ${configFile}
     # check if channel.backup exists
     scbPath=/mnt/hdd/lnd/data/chain/${network}/${chain}net/channel.backup
-    scbExists=$(sudo ls $scbPath 2>/dev/null | grep -c 'channel.backup')
+    scbExists=$(ls $scbPath 2>/dev/null | grep -c 'channel.backup')
     if [ ${scbExists} -eq 1 ]; then
 
       # timestamp backup filename
@@ -299,16 +299,16 @@ do
       localTimestampedPath=${localBackupDir}/${timestampedFileName}
 
       #echo "Found Channel Backup File .. check if changed .."
-      md5checksumORG=$(sudo md5sum $scbPath 2>/dev/null | head -n1 | cut -d " " -f1)
-      md5checksumCPY=$(sudo md5sum $localBackupPath 2>/dev/null | head -n1 | cut -d " " -f1)
+      md5checksumORG=$(md5sum $scbPath 2>/dev/null | head -n1 | cut -d " " -f1)
+      md5checksumCPY=$(md5sum $localBackupPath 2>/dev/null | head -n1 | cut -d " " -f1)
       if [ "${md5checksumORG}" != "${md5checksumCPY}" ]; then
         echo "--> Channel Backup File changed"
 
         # make copy to sd card (as local basic backup)
-        sudo mkdir -p /home/admin/backups/scb/ 2>/dev/null
-        sudo cp $scbPath $localBackupPath
-        sudo cp $scbPath $localTimestampedPath
-        sudo cp $scbPath /boot/channel.backup
+        mkdir -p /home/admin/backups/scb/ 2>/dev/null
+        cp $scbPath $localBackupPath
+        cp $scbPath $localTimestampedPath
+        cp $scbPath /boot/channel.backup
         echo "OK channel.backup copied to '${localBackupPath}' and '{$localTimestampedPath}' and '/boot/channel.backup'"
 
         # check if a additional local backup target is set
@@ -320,8 +320,8 @@ do
           if [ ${backupDeviceExists} -gt 0 ]; then
 
             echo "--> Additional Local Backup Device"
-            sudo cp ${localBackupPath} /mnt/backup/
-            sudo cp ${localTimestampedPath} /mnt/backup/
+            cp ${localBackupPath} /mnt/backup/
+            cp ${localTimestampedPath} /mnt/backup/
 
             # check results
             result=$?
@@ -350,8 +350,8 @@ do
           fi 
           # its ok to ignore known host, because data is encrypted (worst case of MiM would be: no offsite channel backup)
           # but its more likely that without ignoring known host, script might not run thru and that way: no offsite channel backup
-          sudo scp ${scpBackupOptions} ${localBackupPath} ${scpBackupTarget}/
-          sudo scp ${scpBackupOptions} ${localTimestampedPath} ${scpBackupTarget}/
+          scp ${scpBackupOptions} ${localBackupPath} ${scpBackupTarget}/
+          scp ${scpBackupOptions} ${localTimestampedPath} ${scpBackupTarget}/
           result=$?
           if [ ${result} -eq 0 ]; then
             echo "OK - SCP Backup exited with 0"
@@ -363,8 +363,8 @@ do
         # check if Nextcloud backups are enabled
         if [ $nextcloudBackupServer ] && [ $nextcloudBackupUser ] && [ $nextcloudBackupPassword ]; then
           echo "--> Offsite-Backup Nextcloud"
-          source <(sudo /home/admin/config.scripts/nextcloud.upload.sh upload ${localBackupPath})
-          source <(sudo /home/admin/config.scripts/nextcloud.upload.sh upload ${localTimestampedPath})
+          source <(/home/admin/config.scripts/nextcloud.upload.sh upload ${localBackupPath})
+          source <(/home/admin/config.scripts/nextcloud.upload.sh upload ${localTimestampedPath})
           if [ ${#err} -gt 0 ]; then
             echo "FAIL -  ${err}"
           else
@@ -401,10 +401,10 @@ do
   if [ ${recheckRAID} -eq 1 ]; then
 
     # check if BTRTFS raid is active & scrub
-    source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
+    source <(/home/admin/config.scripts/blitz.datadrive.sh status)
     if [ "${isBTRFS}" == "1" ] && [ "${isRaid}" == "1" ]; then
       echo "STARTING BTRFS RAID DATA CHECK ..."
-      sudo btrfs scrub start /mnt/hdd/
+      btrfs scrub start /mnt/hdd/
     fi
 
   fi
@@ -428,7 +428,7 @@ do
       if [ "${locked}" != "0" ]; then
 
         echo "STARTING AUTO-UNLOCK ..."
-        sudo /home/admin/config.scripts/lnd.unlock.sh
+        /home/admin/config.scripts/lnd.unlock.sh
 
       fi
     fi
@@ -451,16 +451,16 @@ do
         echo "CHECK FOR END OF IBD --> reduce RAM for next reboot"
 
         # remove flag
-        sudo rm /mnt/hdd/${network}/blocks/selfsync.flag
+        rm /mnt/hdd/${network}/blocks/selfsync.flag
 
         # set dbcache back to normal (to give room for other apps after reboot in the future)
-        kbSizeRAM=$(sudo cat /proc/meminfo | grep "MemTotal" | sed 's/[^0-9]*//g')
+        kbSizeRAM=$(cat /proc/meminfo | grep "MemTotal" | sed 's/[^0-9]*//g')
         if [ ${kbSizeRAM} -gt 1500000 ]; then
           echo "Detected RAM >1GB --> optimizing ${network}.conf"
-          sudo sed -i "s/^dbcache=.*/dbcache=512/g" /mnt/hdd/${network}/${network}.conf
+          sed -i "s/^dbcache=.*/dbcache=512/g" /mnt/hdd/${network}/${network}.conf
         else
           echo "Detected RAM 1GB --> optimizing ${network}.conf"
-          sudo sed -i "s/^dbcache=.*/dbcache=128/g" /mnt/hdd/${network}/${network}.conf
+          sed -i "s/^dbcache=.*/dbcache=128/g" /mnt/hdd/${network}/${network}.conf
         fi
 
       fi
