@@ -2,6 +2,8 @@
 
 ## What's new in Version 1.7.1 of RaspiBlitz?
 
+There was a small patch-update with raspiblitz-v1.7.1-2021-10-28.img.gz to fix a restart-loop after blockchain was self-synced.
+
 - New: C-lightning v0.10.1 [details](https://github.com/ElementsProject/lightning/releases/tag/v0.10.1)
 - New: C-lightningREST v0.5.1 [details](https://github.com/Ride-The-Lightning/c-lightning-REST/releases/tag/v0.5.1)
 - New: CL Spark Wallet v0.3.0rc with BOLT12 offers [details](https://github.com/shesek/spark-wallet/releases)
