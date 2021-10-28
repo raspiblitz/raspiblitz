@@ -16,7 +16,7 @@ echo "_background.sh STARTED"
 
 # global vars
 blitzTUIHeartBeatLine=""
-blitzTUIRestarts=0
+/home/admin/config.scripts/blitz.cache.sh set blitzTUIRestarts "0"
 
 counter=0
 while [ 1 ]
@@ -164,9 +164,9 @@ do
           # and we will get more connections if this matches our real IP address
           # otherwise the bitcoin-node connections will slowly decline
           echo "IPv6 only is enabled => restart bitcoind to pickup up new publicIP as local IP"
-          sudo systemctl stop bitcoind
+          systemctl stop bitcoind
           sleep 3
-          sudo systemctl start bitcoind
+          systemctl start bitcoind
 
           # if BTCRPCexplorer is currently running
           # it needs to be restarted to pickup the new IP for its "Node Status Page"
@@ -174,8 +174,8 @@ do
           breIsRunning=$(sudo systemctl status btc-rpc-explorer 2>/dev/null | grep -c 'active (running)')
           if [ ${breIsRunning} -eq 1 ]; then
             echo "BTCRPCexplorer is running => restart BTCRPCexplorer to pickup up new publicIP for the bitcoin node"
-            sudo systemctl stop btc-rpc-explorer
-            sudo systemctl start btc-rpc-explorer
+            systemctl stop btc-rpc-explorer
+            systemctl start btc-rpc-explorer
           else
             echo "new publicIP but no BTCRPCexplorer restart because not running"
           fi
@@ -191,8 +191,8 @@ do
       if [ "${autoUnlock}" = "on" ]; then
         if [ "${publicIP_Old}" != "::1" ] && [ "${publicIP_New}" != "::1" ]; then
           echo "restart LND to pickup up new publicIP"
-          sudo systemctl stop lnd
-          sudo systemctl start lnd
+          systemctl stop lnd
+          systemctl start lnd
         else
           echo "publicIP_Old OR publicIP_New is equal ::1 => no need to restart LND"
         fi
@@ -237,11 +237,11 @@ do
   # check every 1min
   recheckSync=$(($counter % 60))
   if [ ${recheckSync} -eq 1 ]; then
-    source <(sudo /home/admin/config.scripts/network.monitor.sh peer-status)
+    source <(/home/admin/config.scripts/network.monitor.sh peer-status)
     echo "Blockchain Sync Monitoring: peers=${peers}"
     if [ "${peers}" == "0" ] && [ "${running}" == "1" ]; then
       echo "Blockchain Sync Monitoring: ZERO PEERS DETECTED .. doing out-of-band kickstart"
-      sudo /home/admin/config.scripts/network.monitor.sh peer-kickstart
+      /home/admin/config.scripts/network.monitor.sh peer-kickstart
     fi
   fi
 
@@ -252,23 +252,22 @@ do
   # check every 30sec
   recheckBlitzTUI=$(($counter % 30))
   if [ "${touchscreen}" == "1" ] && [ ${recheckBlitzTUI} -eq 1 ]; then
+    
     echo "BlitzTUI Monitoring Check"
     if [ -d "/var/cache/raspiblitz" ]; then
-      latestHeartBeatLine=$(sudo tail -n 300 /var/cache/raspiblitz/pi/blitz-tui.log | grep beat | tail -n 1)
+      latestHeartBeatLine=$(tail -n 300 /var/cache/raspiblitz/pi/blitz-tui.log | grep beat | tail -n 1)
     else
-      latestHeartBeatLine=$(sudo tail -n 300 /home/pi/blitz-tui.log | grep beat | tail -n 1)
+      latestHeartBeatLine=$(tail -n 300 /home/pi/blitz-tui.log | grep beat | tail -n 1)
     fi
     if [ ${#blitzTUIHeartBeatLine} -gt 0 ]; then
       #echo "blitzTUIHeartBeatLine(${blitzTUIHeartBeatLine})"
       #echo "latestHeartBeatLine(${latestHeartBeatLine})"
       if [ "${blitzTUIHeartBeatLine}" == "${latestHeartBeatLine}" ]; then
         echo "FAIL - still no new heart beat .. restarting BlitzTUI"
+        source <(/home/admin/config.scripts/blitz.cache.sh get blitzTUIRestarts)
         blitzTUIRestarts=$(($blitzTUIRestarts +1))
-        if [ $(sudo cat /home/admin/raspiblitz.info | grep -c 'blitzTUIRestarts=') -eq 0 ]; then
-          echo "blitzTUIRestarts=0" >> /home/admin/raspiblitz.info
-        fi
-        sudo sed -i "s/^blitzTUIRestarts=.*/blitzTUIRestarts=${blitzTUIRestarts}/g" /home/admin/raspiblitz.info
-        sudo init 3 ; sleep 2 ; sudo init 5
+        /home/admin/config.scripts/blitz.cache.sh set blitzTUIRestarts "${blitzTUIRestarts}"
+        init 3 ; sleep 2 ; sudo init 5
       fi
     else
       echo "blitzTUIHeartBeatLine is empty - skipping check"

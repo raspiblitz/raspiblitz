@@ -16,7 +16,6 @@ logFile="/home/admin/raspiblitz.log"
 
 # INFOFILE - state data from bootstrap
 infoFile="/home/admin/raspiblitz.info"
-infoFileDisplayClass="${displayClass}"
 
 # CONFIGFILE - configuration of RaspiBlitz
 configFile="/mnt/hdd/raspiblitz.conf"
@@ -48,7 +47,7 @@ source ${configFile}
 ##########################
 
 echo "### BASIC SYSTEM SETTINGS ###" >> ${logFile}
-sudo sed -i "s/^message=.*/message='Setup System .'/g" ${infoFile}
+/home/admin/config.scripts/blitz.cache.sh set message "Setup System ."
 
 # install litecoin (just if needed)
 if [ "${network}" = "litecoin" ]; then
@@ -132,7 +131,7 @@ echo "" >> ${logFile}
 ##########################
 
 # finish setup (SWAP, Benus, Firewall, Update, ..)
-sudo sed -i "s/^message=.*/message='Setup System ..'/g" ${infoFile}
+/home/admin/config.scripts/blitz.cache.sh set message "Setup System .."
 
 # add bonus scripts (auto install deactivated to reduce third party repos)
 mkdir /home/admin/tmpScriptDL
@@ -207,7 +206,7 @@ sudo sed -i "s/^setupStep=.*/setupStep=100/g" /home/admin/raspiblitz.info
 ##########################
 # PROVISIONING SERVICES
 ##########################
-sudo sed -i "s/^message=.*/message='Installing Services'/g" ${infoFile}
+/home/admin/config.scripts/blitz.cache.sh set message "Installing Services"
 
 echo "### RUNNING PROVISIONING SERVICES ###" >> ${logFile}
 
@@ -217,7 +216,7 @@ echo "Provisioning BLITZ WEB SERVICE - run config script" >> ${logFile}
 
 # BITCOIN INTERIMS UPDATE
 if [ ${#bitcoinInterimsUpdate} -gt 0 ]; then
-  sudo sed -i "s/^message=.*/message='Provisioning Bitcoin Core update'/g" ${infoFile}
+  /home/admin/config.scripts/blitz.cache.sh set message "Provisioning Bitcoin Core update"
   if [ "${bitcoinInterimsUpdate}" == "reckless" ]; then
     # recklessly update Bitcoin Core to latest release on GitHub
     echo "Provisioning Bitcoin Core reckless interims update" >> ${logFile}
@@ -235,7 +234,7 @@ fi
 
 # LND INTERIMS UPDATE
 if [ ${#lndInterimsUpdate} -gt 0 ]; then
-  sudo sed -i "s/^message=.*/message='Provisioning LND update'/g" ${infoFile}
+  /home/admin/config.scripts/blitz.cache.sh set message "Provisioning LND update"
   if [ "${lndInterimsUpdate}" == "reckless" ]; then
     # recklessly update LND to latest release on GitHub (just for test & dev nodes)
     echo "Provisioning LND reckless interims update" >> ${logFile}
@@ -253,7 +252,7 @@ fi
 
 # CL INTERIMS UPDATE
 if [ ${#clInterimsUpdate} -gt 0 ]; then
-  sudo sed -i "s/^message=.*/message='Provisioning CL update'/g" ${infoFile}
+  /home/admin/config.scripts/blitz.cache.sh set message "Provisioning CL update"
   if [ "${clInterimsUpdate}" == "reckless" ]; then
     # recklessly update CL to latest release on GitHub (just for test & dev nodes)
     echo "Provisioning CL reckless interims update" >> ${logFile}
@@ -340,7 +339,7 @@ fi
 # TOR
 if [ "${runBehindTor}" == "on" ]; then
     echo "Provisioning TOR - run config script" >> ${logFile}
-    sudo sed -i "s/^message=.*/message='Setup Tor (takes time)'/g" ${infoFile}
+    /home/admin/config.scripts/blitz.cache.sh set message "Setup Tor (takes time)"
     sudo /home/admin/config.scripts/internet.tor.sh on >> ${logFile} 2>&1
 else
     echo "Provisioning TOR - keep default" >> ${logFile}
@@ -349,7 +348,7 @@ fi
 # AUTO PILOT
 if [ "${autoPilot}" = "on" ]; then
     echo "Provisioning AUTO PILOT - run config script" >> ${logFile}
-    sudo sed -i "s/^message=.*/message='Setup AutoPilot'/g" ${infoFile}
+    /home/admin/config.scripts/blitz.cache.sh set message "Setup AutoPilot"
     sudo /home/admin/config.scripts/lnd.autopilot.sh on >> ${logFile} 2>&1
 else
     echo "Provisioning AUTO PILOT - keep default" >> ${logFile}
@@ -358,7 +357,7 @@ fi
 # NETWORK UPNP
 if [ "${networkUPnP}" = "on" ]; then
     echo "Provisioning NETWORK UPnP - run config script" >> ${logFile}
-    sudo sed -i "s/^message=.*/message='Setup UPnP'/g" ${infoFile}
+    /home/admin/config.scripts/blitz.cache.sh set message "Setup UPnP"
     sudo /home/admin/config.scripts/network.upnp.sh on >> ${logFile} 2>&1
 else
     echo "Provisioning NETWORK UPnP  - keep default" >> ${logFile}
@@ -367,7 +366,7 @@ fi
 # LND AUTO NAT DISCOVERY
 if [ "${autoNatDiscovery}" = "on" ]; then
     echo "Provisioning LND AUTO NAT DISCOVERY - run config script" >> ${logFile}
-    sudo sed -i "s/^message=.*/message='Setup AutoNAT'/g" ${infoFile}
+    /home/admin/config.scripts/blitz.cache.sh set message "Setup AutoNAT"
     sudo /home/admin/config.scripts/lnd.autonat.sh on >> ${logFile} 2>&1
 else
     echo "Provisioning AUTO NAT DISCOVERY - keep default" >> ${logFile}
@@ -376,7 +375,7 @@ fi
 # DYNAMIC DOMAIN
 if [ "${#dynDomain}" -gt 0 ]; then
     echo "Provisioning DYNAMIC DOMAIN - run config script" >> ${logFile}
-    sudo sed -i "s/^message=.*/message='Setup DynamicDomain'/g" ${infoFile}
+    /home/admin/config.scripts/blitz.cache.sh set message "Setup DynamicDomain"
     sudo /home/admin/config.scripts/internet.dyndomain.sh on ${dynDomain} ${dynUpdateUrl} >> ${logFile} 2>&1
 else
     echo "Provisioning DYNAMIC DOMAIN - keep default" >> ${logFile}
@@ -385,7 +384,7 @@ fi
 # RTL (LND)
 if [ "${rtlWebinterface}" = "on" ]; then
     echo "Provisioning RTL LND - run config script" >> ${logFile}
-    sudo sed -i "s/^message=.*/message='Setup RTL (takes time)'/g" ${infoFile}
+    /home/admin/config.scripts/blitz.cache.sh set message "Setup RTL LND (takes time)"
     sudo -u admin /home/admin/config.scripts/bonus.rtl.sh on lnd mainnet >> ${logFile} 2>&1
 else
     echo "Provisioning RTL LND - keep default" >> ${logFile}
@@ -394,7 +393,7 @@ fi
 # RTL (CL)
 if [ "${crtlWebinterface}" = "on" ]; then
     echo "Provisioning RTL CL - run config script" >> ${logFile}
-    sudo sed -i "s/^message=.*/message='Setup RTL (takes time)'/g" ${infoFile}
+    /home/admin/config.scripts/blitz.cache.sh set message "Setup RTL CL (takes time)"
     sudo -u admin /home/admin/config.scripts/bonus.rtl.sh on cl mainnet >> ${logFile} 2>&1
 else
     echo "Provisioning RTL CL - keep default" >> ${logFile}
@@ -403,7 +402,7 @@ fi
 # SPARKO
 if [ "${sparko}" = "on" ]; then
     echo "Provisioning Sparko - run config script" >> ${logFile}
-    sudo sed -i "s/^message=.*/message='Setup SPARKO'/g" ${infoFile}
+    /home/admin/config.scripts/blitz.cache.sh set message "Setup SPARKO"
     sudo -u admin /home/admin/config.scripts/cl-plugin.sparko.sh on mainnet >> ${logFile} 2>&1
 else
     echo "Provisioning Sparko - keep default" >> ${logFile}
@@ -412,7 +411,7 @@ fi
 # clHTTPplugin
 if [ "${clHTTPplugin}" = "on" ]; then
     echo "Provisioning clHTTPplugin - run config script" >> ${logFile}
-    sudo sed -i "s/^message=.*/message='Setup clHTTPplugin'/g" ${infoFile}
+    /home/admin/config.scripts/blitz.cache.sh set message "Setup clHTTPplugin"
     sudo -u admin /home/admin/config.scripts/cl-plugin.http.sh on >> ${logFile} 2>&1
 else
     echo "Provisioning clHTTPplugin - keep default" >> ${logFile}
@@ -421,7 +420,7 @@ fi
 # SPARK
 if [ "${spark}" = "on" ]; then
     echo "Provisioning Spark Wallet - run config script" >> ${logFile}
-    sudo sed -i "s/^message=.*/message='Setup SPARK WALLET'/g" ${infoFile}
+    /home/admin/config.scripts/blitz.cache.sh set message "Setup SPARK WALLET"
     sudo -u admin /home/admin/config.scripts/cl.spark.sh on mainnet >> ${logFile} 2>&1
 else
     echo "Provisioning Spark Wallet - keep default" >> ${logFile}
@@ -430,7 +429,7 @@ fi
 #LOOP - install only if LiT won't be installed
 if [ "${loop}" = "on" ] && [ "${lit}" != "on" ]; then
   echo "Provisioning Lightning Loop - run config script" >> ${logFile}
-  sudo sed -i "s/^message=.*/message='Setup Lightning Loop'/g" ${infoFile}
+  /home/admin/config.scripts/blitz.cache.sh set message "Setup Lightning Loop"
   sudo -u admin /home/admin/config.scripts/bonus.loop.sh on >> ${logFile} 2>&1
 else
   echo "Provisioning Lightning Loop - keep default" >> ${logFile}
@@ -439,7 +438,7 @@ fi
 #BTC RPC EXPLORER
 if [ "${BTCRPCexplorer}" = "on" ]; then
   echo "Provisioning BTCRPCexplorer - run config script" >> ${logFile}
-  sudo sed -i "s/^message=.*/message='Setup BTCRPCexplorer (takes time)'/g" ${infoFile}
+  /home/admin/config.scripts/blitz.cache.sh set message "Setup BTCRPCexplorer (takes time)"
   sudo -u admin /home/admin/config.scripts/bonus.btc-rpc-explorer.sh on >> ${logFile} 2>&1
 else
   echo "Provisioning BTCRPCexplorer - keep default" >> ${logFile}
@@ -448,7 +447,7 @@ fi
 #ELECTRS
 if [ "${ElectRS}" = "on" ]; then
   echo "Provisioning ElectRS - run config script" >> ${logFile}
-  sudo sed -i "s/^message=.*/message='Setup ElectRS (takes time)'/g" ${infoFile}
+  /home/admin/config.scripts/blitz.cache.sh set message "Setup ElectRS (takes time)"
   sudo -u admin /home/admin/config.scripts/bonus.electrs.sh on >> ${logFile} 2>&1
 else
   echo "Provisioning ElectRS - keep default" >> ${logFile}
@@ -458,7 +457,7 @@ fi
 if [ "${BTCPayServer}" = "on" ]; then
 
   echo "Provisioning BTCPAYSERVER on TOR - running setup" >> ${logFile}
-  sudo sed -i "s/^message=.*/message='Setup BTCPay (takes time)'/g" ${infoFile}
+  /home/admin/config.scripts/blitz.cache.sh set message "Setup BTCPay (takes time)"
   sudo -u admin /home/admin/config.scripts/bonus.btcpayserver.sh on >> ${logFile} 2>&1
   
 else
@@ -469,7 +468,7 @@ fi
 # LNDMANAGE
 #if [ "${lndmanage}" = "on" ]; then
 #  echo "Provisioning lndmanage - run config script" >> ${logFile}
-#  sudo sed -i "s/^message=.*/message='Setup lndmanage '/g" ${infoFile}
+#  /home/admin/config.scripts/blitz.cache.sh set message "Setup lndmanage"
 #  sudo -u admin /home/admin/config.scripts/bonus.lndmanage.sh on >> ${logFile} 2>&1
 #else
 #  echo "Provisioning lndmanage - not active" >> ${logFile}
@@ -502,6 +501,7 @@ fi
 # CHANTOOLS
 if [ "${chantools}" == "on" ]; then
     echo "Provisioning chantools - run config script" >> ${logFile}
+    /home/admin/config.scripts/blitz.cache.sh set message "Setup Chantools"
     sudo /home/admin/config.scripts/bonus.chantools.sh on >> ${logFile} 2>&1
 else
     echo "Provisioning chantools - keep default" >> ${logFile}
@@ -510,7 +510,7 @@ fi
 # SSH TUNNEL
 if [ "${#sshtunnel}" -gt 0 ]; then
     echo "Provisioning SSH Tunnel - run config script" >> ${logFile}
-    sudo sed -i "s/^message=.*/message='Setup SSH Tunnel'/g" ${infoFile}
+    /home/admin/config.scripts/blitz.cache.sh set message "Setup SSH Tunnel"
     sudo /home/admin/config.scripts/internet.sshtunnel.py restore ${sshtunnel} >> ${logFile} 2>&1
 else
     echo "Provisioning SSH Tunnel - not active" >> ${logFile}
@@ -519,7 +519,7 @@ fi
 # ZEROTIER
 if [ "${#zerotier}" -gt 0 ] && [ "${zerotier}" != "off" ]; then
     echo "Provisioning ZeroTier - run config script" >> ${logFile}
-    sudo sed -i "s/^message=.*/message='Setup ZeroTier'/g" ${infoFile}
+    /home/admin/config.scripts/blitz.cache.sh set message "Setup ZeroTier"
     sudo /home/admin/config.scripts/bonus.zerotier.sh on ${zerotier} >> ${logFile} 2>&1
 else
     echo "Provisioning ZeroTier - not active" >> ${logFile}
@@ -532,7 +532,7 @@ if [ ${#lcdrotate} -eq 0 ]; then
 fi
 if [ "${lcdrotate}" == "0" ]; then
   echo "Provisioning LCD rotate - run config script" >> ${logFile}
-  sudo sed -i "s/^message=.*/message='LCD Rotate'/g" ${infoFile}
+  /home/admin/config.scripts/blitz.cache.sh set message "LCD Rotate"
   sudo /home/admin/config.scripts/blitz.display.sh rotate ${lcdrotate} >> ${logFile} 2>&1
 else
   echo "Provisioning LCD rotate - not needed, keep default rotate on" >> ${logFile}
@@ -541,7 +541,7 @@ fi
 # TOUCHSCREEN
 if [ "${#touchscreen}" -gt 0 ]; then
     echo "Provisioning Touchscreen - run config script" >> ${logFile}
-    sudo sed -i "s/^message=.*/message='Setup Touchscreen'/g" ${infoFile}
+    /home/admin/config.scripts/blitz.cache.sh set message "Setup Touchscreen"
     sudo /home/admin/config.scripts/blitz.touchscreen.sh ${touchscreen} >> ${logFile} 2>&1
 else
     echo "Provisioning Touchscreen - not active" >> ${logFile}
@@ -550,7 +550,7 @@ fi
 # UPS
 if [ "${#ups}" -gt 0 ]; then
     echo "Provisioning UPS - run config script" >> ${logFile}
-    sudo sed -i "s/^message=.*/message='Setup UPS'/g" ${infoFile}
+    /home/admin/config.scripts/blitz.cache.sh set message "Setup UPS"
     sudo /home/admin/config.scripts/blitz.ups.sh on ${ups} >> ${logFile} 2>&1
 else
     echo "Provisioning UPS - not active" >> ${logFile}
@@ -559,7 +559,7 @@ fi
 # LNbits
 if [ "${LNBits}" = "on" ]; then
   echo "Provisioning LNbits - run config script" >> ${logFile}
-  sudo sed -i "s/^message=.*/message='Setup LNbits '/g" ${infoFile}
+  /home/admin/config.scripts/blitz.cache.sh set message "Setup LNbits"
   sudo -u admin /home/admin/config.scripts/bonus.lnbits.sh on >> ${logFile} 2>&1
 else
   echo "Provisioning LNbits - keep default" >> ${logFile}
@@ -568,7 +568,7 @@ fi
 # JoinMarket
 if [ "${joinmarket}" = "on" ]; then
   echo "Provisioning JoinMarket - run config script" >> ${logFile}
-  sudo sed -i "s/^message=.*/message='Setup JoinMarket'/g" ${infoFile}
+  /home/admin/config.scripts/blitz.cache.sh set message "Setup JoinMarket"
   sudo /home/admin/config.scripts/bonus.joinmarket.sh on >> ${logFile} 2>&1
 else
   echo "Provisioning JoinMarket - keep default" >> ${logFile}
@@ -577,7 +577,7 @@ fi
 # Specter
 if [ "${specter}" = "on" ]; then
   echo "Provisioning Specter - run config script" >> ${logFile}
-  sudo sed -i "s/^message=.*/message='Setup Specter'/g" ${infoFile}
+  /home/admin/config.scripts/blitz.cache.sh set message "Setup Specter"
   sudo -u admin /home/admin/config.scripts/bonus.specter.sh on >> ${logFile} 2>&1
 else
   echo "Provisioning Specter - keep default" >> ${logFile}
@@ -586,7 +586,7 @@ fi
 # Faraday
 if [ "${faraday}" = "on" ]; then
   echo "Provisioning Faraday - run config script" >> ${logFile}
-  sudo sed -i "s/^message=.*/message='Setup Faraday'/g" ${infoFile}
+  /home/admin/config.scripts/blitz.cache.sh set message "Setup Faraday"
   sudo -u admin /home/admin/config.scripts/bonus.faraday.sh on >> ${logFile} 2>&1
 else
   echo "Provisioning Faraday - keep default" >> ${logFile}
@@ -595,7 +595,7 @@ fi
 # BOS
 if [ "${bos}" = "on" ]; then
   echo "Provisioning Balance of Satoshis - run config script" >> ${logFile}
-  sudo sed -i "s/^message=.*/message='Setup Balance of Satoshis'/g" ${infoFile}
+  /home/admin/config.scripts/blitz.cache.sh set message "Setup Balance of Satoshis"
   sudo -u admin /home/admin/config.scripts/bonus.bos.sh on >> ${logFile} 2>&1
 else
   echo "Provisioning Balance of Satoshis - keep default" >> ${logFile}
@@ -604,7 +604,7 @@ fi
 # thunderhub
 if [ "${thunderhub}" = "on" ]; then
   echo "Provisioning ThunderHub - run config script" >> ${logFile}
-  sudo sed -i "s/^message=.*/message='Setup ThunderHub'/g" ${infoFile}
+  /home/admin/config.scripts/blitz.cache.sh set message "Setup ThunderHub"
   sudo -u admin /home/admin/config.scripts/bonus.thunderhub.sh on >> ${logFile} 2>&1
 else
   echo "Provisioning ThunderHub - keep default" >> ${logFile}
@@ -613,7 +613,7 @@ fi
 # mempool space
 if [ "${mempoolExplorer}" = "on" ]; then
   echo "Provisioning MempoolSpace - run config script" >> ${logFile}
-  sudo sed -i "s/^message=.*/message='Setup Mempool Space'/g" ${infoFile}
+  /home/admin/config.scripts/blitz.cache.sh set message "Setup Mempool Space"
   sudo -u admin /home/admin/config.scripts/bonus.mempool.sh on >> ${logFile} 2>&1
 else
   echo "Provisioning Mempool Explorer - keep default" >> ${logFile}
@@ -622,7 +622,7 @@ fi
 # letsencrypt
 if [ "${letsencrypt}" = "on" ]; then
   echo "Provisioning letsencrypt - run config script" >> ${logFile}
-  sudo sed -i "s/^message=.*/message='Setup letsencrypt'/g" ${infoFile}
+  /home/admin/config.scripts/blitz.cache.sh set message "Setup letsencrypt"
   sudo -u admin /home/admin/config.scripts/bonus.letsencrypt.sh on >> ${logFile} 2>&1
 else
   echo "Provisioning letsencrypt - keep default" >> ${logFile}
@@ -631,7 +631,7 @@ fi
 # kindle-display
 if [ "${kindleDisplay}" = "on" ]; then
   echo "Provisioning kindle-display - run config script" >> ${logFile}
-  sudo sed -i "s/^message=.*/message='Setup kindle-display'/g" ${infoFile}
+  /home/admin/config.scripts/blitz.cache.sh set message "Setup kindle-display"
   sudo -u admin /home/admin/config.scripts/bonus.kindle-display.sh on >> ${logFile} 2>&1
 else
   echo "Provisioning kindle-display - keep default" >> ${logFile}
@@ -640,7 +640,7 @@ fi
 # pyblock
 if [ "${pyblock}" = "on" ]; then
   echo "Provisioning pyblock - run config script" >> ${logFile}
-  sudo sed -i "s/^message=.*/message='Setup pyblock'/g" ${infoFile}
+  /home/admin/config.scripts/blitz.cache.sh set message "Setup pyblock"
   sudo -u admin /home/admin/config.scripts/bonus.pyblock.sh on >> ${logFile} 2>&1
 else
   echo "Provisioning pyblock - keep default" >> ${logFile}
@@ -649,7 +649,7 @@ fi
 # stacking-sats-kraken
 if [ "${stackingSatsKraken}" = "on" ]; then
   echo "Provisioning Stacking Sats Kraken - run config script" >> ${logFile}
-  sudo sed -i "s/^message=.*/message='Setup Stacking Sats Kraken'/g" ${infoFile}
+  /home/admin/config.scripts/blitz.cache.sh set message "Setup Stacking Sats Kraken"
   sudo -u admin /home/admin/config.scripts/bonus.stacking-sats-kraken.sh on >> ${logFile} 2>&1
 else
   echo "Provisioning Stacking Sats Kraken - keep default" >> ${logFile}
@@ -658,7 +658,7 @@ fi
 # Pool - install only if LiT won't be installed
 if [ "${pool}" = "on" ] && [ "${lit}" != "on" ]; then
   echo "Provisioning Pool - run config script" >> ${logFile}
-  sudo sed -i "s/^message=.*/message='Setup Pool'/g" ${infoFile}
+  /home/admin/config.scripts/blitz.cache.sh set message "Setup Pool"
   sudo -u admin /home/admin/config.scripts/bonus.pool.sh on >> ${logFile} 2>&1
 else
   echo "Provisioning Pool - keep default" >> ${logFile}
@@ -667,7 +667,7 @@ fi
 # lit (make sure to be installed after RTL)
 if [ "${lit}" = "on" ]; then
   echo "Provisioning LIT - run config script" >> ${logFile}
-  sudo sed -i "s/^message=.*/message='Setup LIT'/g" ${infoFile}
+  /home/admin/config.scripts/blitz.cache.sh set message "Setup LIT"
   sudo -u admin /home/admin/config.scripts/bonus.lit.sh on >> ${logFile} 2>&1
 else
   echo "Provisioning LIT - keep default" >> ${logFile}
@@ -676,7 +676,7 @@ fi
 # sphinxrelay
 if [ "${sphinxrelay}" = "on" ]; then
   echo "Sphinx-Relay - run config script" >> ${logFile}
-  sudo sed -i "s/^message=.*/message='Setup Sphinx-Relay'/g" ${infoFile}
+  /home/admin/config.scripts/blitz.cache.sh set message "Setup Sphinx-Relay"
   sudo -u admin /home/admin/config.scripts/bonus.sphinxrelay.sh on >> ${logFile} 2>&1
 else
   echo "Sphinx-Relay - keep default" >> ${logFile}
@@ -685,7 +685,7 @@ fi
 # circuitbreaker
 if [ "${circuitbreaker}" = "on" ]; then
   echo "Provisioning CircuitBreaker - run config script" >> ${logFile}
-  sudo sed -i "s/^message=.*/message='Setup CircuitBreaker'/g" ${infoFile}
+  /home/admin/config.scripts/blitz.cache.sh set message "Setup CircuitBreaker"
   sudo -u admin /home/admin/config.scripts/bonus.circuitbreaker.sh on >> ${logFile} 2>&1
 else
   echo "Provisioning CircuitBreaker - keep default" >> ${logFile}
@@ -695,6 +695,7 @@ fi
 customInstallAvailable=$(sudo ls /mnt/hdd/app-data/custom-installs.sh 2>/dev/null | grep -c "custom-installs.sh")
 if [ ${customInstallAvailable} -gt 0 ]; then
   echo "Running the custom install script .." >> ${logFile}
+  /home/admin/config.scripts/blitz.cache.sh set message "Running Custom Install Script"
   # copy script over to admin (in case HDD is not allowing exec)
   sudo cp -av /mnt/hdd/app-data/custom-installs.sh /home/admin/custom-installs.sh >> ${logFile}
   # make sure script is executable
@@ -736,7 +737,7 @@ if [ ${confExists} -eq 0 ]; then
 fi
 
 # signal setup done
-sudo sed -i "s/^message=.*/message='Setup Done'/g" ${infoFile}
+/home/admin/config.scripts/blitz.cache.sh set message "Setup Done"
 
 # set the local network hostname (just if set in config - will not be set anymore by default in newer version)
 # have at the end - see https://github.com/rootzoll/raspiblitz/issues/462
