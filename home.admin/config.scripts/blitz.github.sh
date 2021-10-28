@@ -15,8 +15,9 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ];
   exit 1
 fi
 
-cd /home/admin/raspiblitz
 source /mnt/hdd/raspiblitz.conf 2>/dev/null
+
+cd /home/admin/raspiblitz
 
 # gather info
 activeGitHubUser=$(sudo -u admin cat /home/admin/raspiblitz/.git/config 2>/dev/null | grep "url = " | cut -d "=" -f2 | cut -d "/" -f4)
@@ -26,6 +27,7 @@ commitHashShort=${commitHashLong:0:7}
 
 # if parameter is "info" just give back basic info about sync
 if [ "$1" == "info" ]; then
+
   echo "activeGitHubUser='${activeGitHubUser}'"
   echo "activeBranch='${activeBranch}'"
   echo "commitHashLong='${commitHashLong}'"
