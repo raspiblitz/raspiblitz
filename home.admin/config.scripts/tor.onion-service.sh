@@ -6,8 +6,8 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "config script to configure a Tor Hidden Service"
- echo "internet.hiddenservice.sh [service] [toPort] [fromPort] [optional-toPort2] [optional-fromPort2]"
- echo "internet.hiddenservice.sh off [service]"
+ echo "tor.onion-service.sh [service] [toPort] [fromPort] [optional-toPort2] [optional-fromPort2]"
+ echo "tor.onion-service.sh off [service]"
  exit 1
 fi
 
@@ -83,7 +83,7 @@ HiddenServiceDir /mnt/hdd/tor/$service
 HiddenServiceVersion 3
 HiddenServicePort $toPort 127.0.0.1:$fromPort" | sudo tee -a /etc/tor/torrc
 
-  # remove double empty lines  
+  # remove double empty lines
   awk 'NF > 0 {blank=0} NF == 0 {blank++} blank < 2' /etc/tor/torrc | sudo tee /var/cache/raspiblitz/tmp >/dev/null && sudo mv /var/cache/raspiblitz/tmp /etc/tor/torrc
 
   # check and insert second port pair

@@ -1,5 +1,5 @@
 #!/bin/bash
-# https://github.com/cryptoadvance/specter-desktop  
+# https://github.com/cryptoadvance/specter-desktop
 
 pinnedVersion="1.6.0"
 
@@ -44,7 +44,7 @@ if [ "$1" = "status" ]; then
   else
     echo "configured=0"
   fi
-  
+
   exit 0
 fi
 
@@ -140,7 +140,7 @@ EOF
   PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
 
   echo "# Connect Specter to the default mainnet node"
-  cat > /home/admin/default.json <<EOF    
+  cat > /home/admin/default.json <<EOF
 {
     "name": "raspiblitz_mainnet",
     "alias": "default",
@@ -167,7 +167,7 @@ EOF
       PORT="${portprefix}8332"
 
       echo "# Connect Specter to the raspiblitz_${chain}net node"
-      cat > /home/admin/raspiblitz_${chain}net.json <<EOF    
+      cat > /home/admin/raspiblitz_${chain}net.json <<EOF
 {
     "name": "raspiblitz_${chain}net",
     "alias": "raspiblitz_${chain}net",
@@ -208,10 +208,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     echo "#    --> Installing prerequisites"
     sudo apt update
-    sudo apt-get install -y virtualenv libffi-dev libusb-1.0.0-dev libudev-dev 
+    sudo apt-get install -y virtualenv libffi-dev libusb-1.0.0-dev libudev-dev
 
     sudo adduser --disabled-password --gecos "" specter
-    
+
     echo "# add the user to the debian-tor group"
     sudo usermod -a -G debian-tor specter
 
@@ -249,7 +249,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo
 
     echo "#    --> Installing udev-rules for hardware-wallets"
-    
+
     # Ledger
     cat > /home/admin/20-hw1.rules <<EOF
  HW.1 / Nano
@@ -265,7 +265,7 @@ SUBSYSTEMS=="usb", ATTRS{idVendor}=="2c97", ATTRS{idProduct}=="0003|3000|3001|30
 # Nano X
 SUBSYSTEMS=="usb", ATTRS{idVendor}=="2c97", ATTRS{idProduct}=="0004|4000|4001|4002|4003|4004|4005|4006|4007|4008|4009|400a|400b|400c|400d|400e|400f|4010|4011|4012|4013|4014|4015|4016|4017|4018|4019|401a|401b|401c|401d|401e|401f", TAG+="uaccess", TAG+="udev-acl", OWNER="specter"
 EOF
-    
+
     # ColdCard
     cat > /home/admin/51-coinkite.rules <<EOF
 # Linux udev support file.
@@ -284,7 +284,7 @@ SUBSYSTEMS=="usb", ATTRS{idVendor}=="d13e", ATTRS{idProduct}=="cc10", GROUP="plu
 # from <https://github.com/signal11/hidapi/blob/master/udev/99-hid.rules>
 KERNEL=="hidraw*", ATTRS{idVendor}=="d13e", ATTRS{idProduct}=="cc10", GROUP="plugdev", MODE="0666"
 EOF
-    
+
     # Trezor
     cat > /home/admin/51-trezor.rules <<EOF
 # Trezor: The Original Hardware Wallet
@@ -305,7 +305,7 @@ SUBSYSTEM=="usb", ATTR{idVendor}=="1209", ATTR{idProduct}=="53c0", MODE="0660", 
 SUBSYSTEM=="usb", ATTR{idVendor}=="1209", ATTR{idProduct}=="53c1", MODE="0660", GROUP="plugdev", TAG+="uaccess", TAG+="udev-acl", SYMLINK+="trezor%n"
 KERNEL=="hidraw*", ATTRS{idVendor}=="1209", ATTRS{idProduct}=="53c1", MODE="0660", GROUP="plugdev", TAG+="uaccess", TAG+="udev-acl"
 EOF
-    
+
     # KeepKey
     cat > /home/admin/51-usb-keepkey.rules <<EOF
 # KeepKey: Your Private Bitcoin Vault
@@ -363,19 +363,19 @@ EOF
     sudo systemctl enable specter
 
     echo "#    --> OK - the specter service is now enabled and started"
-  else 
+  else
     echo "#    --> specter already installed."
   fi
 
   # setting value in raspi blitz config
   sudo sed -i "s/^specter=.*/specter=on/g" /mnt/hdd/raspiblitz.conf
-  
+
   # Hidden Service for SERVICE if Tor is active
   source /mnt/hdd/raspiblitz.conf
   if [ "${runBehindTor}" = "on" ]; then
-    # make sure to keep in sync with internet.tor.sh script
+    # make sure to keep in sync with tor.network.sh script
     # port 25441 is HTTPS with self-signed cert - specte only makes sense to be served over HTTPS
-    /home/admin/config.scripts/internet.hiddenservice.sh specter 443 25441
+    /home/admin/config.scripts/tor.onion-service.sh specter 443 25441
   fi
 
   # blockfilterindex on
@@ -407,7 +407,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # Hidden Service if Tor is active
   if [ "${runBehindTor}" = "on" ]; then
-    /home/admin/config.scripts/internet.hiddenservice.sh off specter
+    /home/admin/config.scripts/tor.onion-service.sh off specter
   fi
 
   isInstalled=$(sudo ls /etc/systemd/system/specter.service 2>/dev/null | grep -c 'specter.service')
@@ -422,10 +422,10 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     if whiptail --defaultno --yesno "Do you want to delete all Data related to specter? This includes also Bitcoin-Core-Wallets managed by specter?" 0 0; then
       echo "#    --> Removing wallets in core"
       bitcoin-cli listwallets | jq -r .[] | tail -n +2
-      for i in $(bitcoin-cli listwallets | jq -r .[] | tail -n +2) 
-      do  
+      for i in $(bitcoin-cli listwallets | jq -r .[] | tail -n +2)
+      do
 	name=$(echo $i | cut -d"/" -f2)
-       	bitcoin-cli unloadwallet specter/$name 
+       	bitcoin-cli unloadwallet specter/$name
       done
       echo "#    --> Removing the /mnt/hdd/app-data/.specter"
       sudo rm -rf /mnt/hdd/app-data/.specter
@@ -450,7 +450,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     fi
 
     echo "#    --> OK Specter Desktop removed."
-  else 
+  else
     echo "#    --> Specter Desktop is not installed."
   fi
   exit 0

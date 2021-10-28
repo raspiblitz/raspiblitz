@@ -337,7 +337,7 @@ do
           echo "--> Offsite-Backup SCP Server"
           if [ "${scpBackupOptions}" == "" ]; then
             scpBackupOptions="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
-          fi 
+          fi
           # its ok to ignore known host, because data is encrypted (worst case of MiM would be: no offsite channel backup)
           # but its more likely that without ignoring known host, script might not run thru and that way: no offsite channel backup
           sudo scp ${scpBackupOptions} ${localBackupPath} ${scpBackupTarget}/
@@ -496,7 +496,7 @@ do
         # if TOR was activated during setup make sure bitcoin runs behind TOR latest from now on
         if [ "${runBehindTor}" = "on" ]; then
           echo "TOR is ON -> make sure bitcoin is running behind TOR after IBD"
-          sudo /home/admin/config.scripts/internet.tor.sh btcconf-on
+          sudo /home/admin/config.scripts/tor.network.sh btcconf-on
         else
            echo "TOR is OFF after IBD"
         fi

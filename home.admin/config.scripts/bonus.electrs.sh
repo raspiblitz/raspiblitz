@@ -158,7 +158,7 @@ This can take multiple hours.
       " 9 48
     exit 0
   fi
-  
+
   if [ ${nginxTest} -eq 0 ]; then
      dialog --title "Testing nginx.conf has failed" --msgbox "
 Nginx is in a failed state. Will attempt to fix.
@@ -197,7 +197,7 @@ Check 'sudo nginx -t' for a detailed error message.
     echo "- deactivate automatic server selection"
     echo "- as manual server set '${localip}' & '${portSSL}'"
     echo "- laptop and RaspiBlitz need to be within same local network"
-    echo 
+    echo
     echo "To start directly from laptop terminal use:"
     echo "electrum --oneserver --server ${localip}:${portSSL}:s"
     if [ ${TorRunning} -eq 1 ]; then
@@ -205,21 +205,21 @@ Check 'sudo nginx -t' for a detailed error message.
       echo "The Tor Hidden Service address for electrs is (see LCD for QR code):"
       echo "${TORaddress}"
       echo
-      echo "To connect through TOR open the Tor Browser and start with the options:" 
+      echo "To connect through TOR open the Tor Browser and start with the options:"
       echo "electrum --oneserver --server ${TORaddress}:50002:s --proxy socks5:127.0.0.1:9150"
       /home/admin/config.scripts/blitz.display.sh qr "${TORaddress}"
     fi
     echo
     echo "For more details check the RaspiBlitz README on ElectRS:"
     echo "https://github.com/rootzoll/raspiblitz"
-    echo 
+    echo
     echo "Press ENTER to get back to main menu."
     read key
     /home/admin/config.scripts/blitz.display.sh hide
     ;;
     STATUS)
     sudo /home/admin/config.scripts/bonus.electrs.sh status
-    echo 
+    echo
     echo "Press ENTER to get back to main menu."
     read key
     ;;
@@ -233,7 +233,7 @@ Check 'sudo nginx -t' for a detailed error message.
     echo "# starting service"
     sudo systemctl start electrs
     echo "# ok"
-    echo 
+    echo
     echo "Press ENTER to get back to main menu."
     read key
     ;;
@@ -259,7 +259,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   if [ ${isInstalled} -eq 0 ]; then
 
     #cleanup
-    sudo rm -f /home/electrs/.electrs/config.toml 
+    sudo rm -f /home/electrs/.electrs/config.toml
 
     echo
     echo "# Creating the electrs user"
@@ -278,7 +278,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "# Downloading and building electrs $ELECTRSVERSION. This will take ~40 minutes"
     echo
     sudo -u electrs git clone https://github.com/romanz/electrs
-    cd /home/electrs/electrs || exit 1 
+    cd /home/electrs/electrs || exit 1
     sudo -u electrs git reset --hard $ELECTRSVERSION
 
     sudo -u electrs /home/electrs/.cargo/bin/cargo build --locked --release || exit 1
@@ -391,7 +391,7 @@ stream {
     echo
     echo "# Installing the systemd service"
     echo
-    # sudo nano /etc/systemd/system/electrs.service 
+    # sudo nano /etc/systemd/system/electrs.service
     echo "
 [Unit]
 Description=Electrs
@@ -419,7 +419,7 @@ WantedBy=multi-user.target
     sudo systemctl enable electrs
     # manual start:
     # sudo -u electrs /home/electrs/.cargo/bin/cargo run --release -- --index-batch-size=10 --electrum-rpc-addr="0.0.0.0:50001"
-  else 
+  else
     echo "# ElectRS is already installed."
   fi
 
@@ -428,8 +428,8 @@ WantedBy=multi-user.target
 
   # Hidden Service for electrs if Tor active
   if [ "${runBehindTor}" = "on" ]; then
-    # make sure to keep in sync with internet.tor.sh script
-    /home/admin/config.scripts/internet.hiddenservice.sh electrs 50002 50002 50001 50001
+    # make sure to keep in sync with tor.network.sh script
+    /home/admin/config.scripts/tor.onion-service.sh electrs 50002 50002 50001 50001
   fi
 
   # whitelist downloading to localhost from bitcoind
@@ -455,7 +455,7 @@ WantedBy=multi-user.target
   echo
   echo "# To connect through SSL from outside of the local network make sure the port 50002 is forwarded on the router"
   echo
-  
+
   exit 0
 fi
 
@@ -473,7 +473,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # Hidden Service if Tor is active
   if [ "${runBehindTor}" = "on" ]; then
-    /home/admin/config.scripts/internet.hiddenservice.sh off electrs
+    /home/admin/config.scripts/tor.onion-service.sh off electrs
   fi
 
   isInstalled=$(sudo ls /etc/systemd/system/electrs.service 2>/dev/null | grep -c 'electrs.service')
@@ -483,10 +483,10 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo systemctl disable electrs
     sudo rm /etc/systemd/system/electrs.service
     # delete user and home directory
-    sudo userdel -rf electrs 
+    sudo userdel -rf electrs
     # close ports on firewall
     sudo ufw deny 50001
-    sudo ufw deny 50002 
+    sudo ufw deny 50002
     echo "# OK ElectRS removed."
 
     # restart BTC-RPC-Explorer to reconfigure itself to use electrs for address API
@@ -494,8 +494,8 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
       sudo systemctl restart btc-rpc-explorer
       echo "# BTC-RPC-Explorer restarted"
     fi
-    
-  else 
+
+  else
     echo "# ElectRS is not installed."
   fi
   exit 0

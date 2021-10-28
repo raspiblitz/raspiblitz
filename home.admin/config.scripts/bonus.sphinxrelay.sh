@@ -80,7 +80,7 @@ use it securely from everywhere.
   elif [ ${connection} = "dns&letsencrypt" ]; then
      text="${text}\n
 Public Domain: ${publicURL}
-port forwarding on router needs to be active & may change port" 
+port forwarding on router needs to be active & may change port"
 
   # When just IP2TOR
   elif [ ${connection} = "ip2tor&selfsigned" ]; then
@@ -102,7 +102,7 @@ port forwarding on router needs to be active & may change port"
 Tor Connection: ${publicURL}
 iOS support is native, Android needs Orbot"
 
-  # When nothing advise 
+  # When nothing advise
   elif [ ${connection} = "localnetwork" ]; then
     text="${text}\n
 At the moment your Sphinx Relay Server is just available
@@ -143,7 +143,7 @@ It needs an additional Domain with LetsEncrypt certificate for HTTPS: Go MAINMEN
 There CANNOT BE MORE THAN ONE APP connected at the same time.\n
 To switch devices within the Sphnix app: see PROFILE & export keys or
 you have to deinstall the Sphinx-Relay with DELETE DATA & reinstall.\n
-If you just upgraded from local network to IP2Tor + HTTPS --> 
+If you just upgraded from local network to IP2Tor + HTTPS -->
 open the app > PROFILE & under ADVANCED change the SERVER URL to:
 ${publicURL}"
     whiptail --title " Warning " \
@@ -242,11 +242,11 @@ if [ "$1" = "status" ]; then
     connectionCode=$(sudo cat /home/sphinxrelay/sphinx-relay/connection_string.txt)
   fi
   echo "connectionCode='${connectionCode}'"
-  
+
   # decode with base64 for debug
   connectionCodeClear=$(echo -n "${connectionCode}" | base64 --decode)
   echo "connectionCodeClear='${connectionCodeClear}'"
-  
+
   # check for LetsEnryptDomain for DynDns
   error=""
   source <(/home/admin/config.scripts/blitz.subscriptions.ip2tor.py ip-by-tor $publicIP)
@@ -321,7 +321,7 @@ if [ "$1" = "status" ]; then
   elif [ "${runBehindTor}" == "on" ] && [ "${sphinxrelay_connection}" == "tor" ]; then
     connection="tor"
     publicURL="http://${toraddress}:80"
-  
+
   # 6) LOCAL NETWORK (just HTTP)
   else
     connection="localnetwork"
@@ -448,8 +448,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # Hidden Service if Tor is active
     source /mnt/hdd/raspiblitz.conf
     if [ "${runBehindTor}" = "on" ]; then
-      # make sure to keep in sync with internet.tor.sh script
-      /home/admin/config.scripts/internet.hiddenservice.sh sphinxrelay 80 3302 443 3303
+      # make sure to keep in sync with tor.network.sh script
+      /home/admin/config.scripts/tor.onion-service.sh sphinxrelay 80 3302 443 3303
       # get TOR address and store it readable for sphinxrelay user
       toraddress=$(sudo cat /mnt/hdd/tor/sphinxrelay/hostname 2>/dev/null)
       sudo -u sphinxrelay bash -c "echo '${toraddress}' > /home/sphinxrelay/sphinx-relay/dist/toraddress.txt"
@@ -561,7 +561,7 @@ if [ "$1" = "update" ]; then
   #echo
   #echo "# Starting the sphinxrelay.service ... "
   #sudo systemctl start sphinxrelay
-  
+
   exit 0
 fi
 
@@ -586,7 +586,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # setting value in raspi blitz config
   sudo sed -i "s/^sphinxrelay=.*/sphinxrelay=off/g" /mnt/hdd/raspiblitz.conf
   sudo sed -i "/^sphinxrelay_connection=.*/d" /mnt/hdd/raspiblitz.conf
-  
+
   # remove nginx symlinks
   sudo rm -f /etc/nginx/sites-enabled/sphinxrelay_ssl.conf
   sudo rm -f /etc/nginx/sites-enabled/sphinxrelay_tor.conf
@@ -599,7 +599,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # Hidden Service if Tor is active
   if [ "${runBehindTor}" = "on" ]; then
-    /home/admin/config.scripts/internet.hiddenservice.sh off sphinxrelay
+    /home/admin/config.scripts/tor.onion-service.sh off sphinxrelay
   fi
 
   isInstalled=$(sudo ls /etc/systemd/system/sphinxrelay.service 2>/dev/null | grep -c 'sphinxrelay.service')

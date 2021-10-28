@@ -154,8 +154,8 @@ One requirement is that the blockchain is from another bitcoin-core client with 
 
 But we don't copy the data via USB to the device, because the HDD needs to be formatted in EXT4 and that is usually not read/writable by Windows or Mac computers. So I will explain a way to copy the data through your local network. This should work from Windows, Mac, Linux and even from another already synced RaspiBlitz.
 
-Both computers (your RaspberryPi and the other computer with the full blockchain) need to be connected to the same local network. Make sure that bitcoind/bitcoin-qt is stopped on the computer containing the blockchain. 
-If your blockchain source is another RaspiBlitz v1.5 or higher - go to `REPAIR` > `COPY-SOURCE`. 
+Both computers (your RaspberryPi and the other computer with the full blockchain) need to be connected to the same local network. Make sure that bitcoind/bitcoin-qt is stopped on the computer containing the blockchain.
+If your blockchain source is another RaspiBlitz v1.5 or higher - go to `REPAIR` > `COPY-SOURCE`.
 If your RaspiBlitz is below v1.5 then on the terminal `sudo systemctl stop bitcoind` and then go to the directory where the blockchain data is with `cd /mnt/hdd/bitcoin` - when the copy/transfer is done later reboot a RaspiBlitz source with `sudo shutdown -r now`.
 
 If everything described above is in order, start the setup of the new RaspiBlitz with a fresh SD card (like explained in the README) - it's OK that there is no blockchain data on your HDD yet - just follow the setup. When you get to the setup-point `Getting the Blockchain` choose the COPY option. Starting from version 1.0 of the RaspiBlitz this will give you further detailed instructions how to transfer the blockchain data onto your RaspiBlitz. In short: On your computer with the blockchain data source you will execute SCP commands that will copy the data over your local network to your RaspiBlitz.
@@ -175,7 +175,7 @@ If your RaspiBlitz is not working correctly and you like to get help from the co
 
 ## Can I run my RaspiBlitz on Solar Energy?
 
-Yes - take a look at the project of [Chimezie Chuta](https://twitter.com/mezie16/status/1264513274080636928?s=20) 
+Yes - take a look at the project of [Chimezie Chuta](https://twitter.com/mezie16/status/1264513274080636928?s=20)
 
 ![RaspiSolar](pictures/raspisolar.jpg)
 
@@ -416,7 +416,7 @@ Once the branch is available and synced between the RaspiBlitz GitHub repo, your
 
 Since v1.5 of RaspiBlitz there has been an easy way thru the SSH menus: Under `MAIN MENU > UPDATE > PATCH` you have the option to change the GitHub repository and and branch to sync with. You change the GitHub Reposity by setting the GitHub username where you forked the Repo.
 
-So for example: If you forked the RaspiBlitz project (rootzoll/raspiblitz) on GitHub and your GitHub project page is now called: https://github.com/raumi75/raspiblitz ... then just change the repo to sync/patch with to your username `raumi75`. 
+So for example: If you forked the RaspiBlitz project (rootzoll/raspiblitz) on GitHub and your GitHub project page is now called: https://github.com/raumi75/raspiblitz ... then just change the repo to sync/patch with to your username `raumi75`.
 
 Now you can use the `Patch/Sync RaspiBlitz with GitHub Repo` to easily keep your RaspiBlitz in sync with your forked repository and develop your own customizations and features.
 
@@ -592,58 +592,58 @@ If you are already logged in you can use on the console the commands:
 
 ## How do I set up VNC?
 
-Enter the Console/Terminal by selecting the last option from the Raspiblitz menu.  
-![Raspiblitz menu](pictures/vnc-go-to-console.png)  
+Enter the Console/Terminal by selecting the last option from the Raspiblitz menu.
+![Raspiblitz menu](pictures/vnc-go-to-console.png)
 
-Enable the VNC server using raspi-config:  
+Enable the VNC server using raspi-config:
 
 `sudo raspi-config`
 
-In the menu, go to  
-*Interfacing Options > VNC > Enable*  
-![Raspi-config menu](pictures/vnc-raspi-config-menu.png)  
-  
-After that reboot the Raspiblitz. You can do this easily from the Raspiblitz menu.  
-In the command line, type:   
-`menu`  
+In the menu, go to
+*Interfacing Options > VNC > Enable*
+![Raspi-config menu](pictures/vnc-raspi-config-menu.png)
+
+After that reboot the Raspiblitz. You can do this easily from the Raspiblitz menu.
+In the command line, type:
+`menu`
 The Raspiblitz menu has a reboot option if you scroll down. Select it and reboot.
 
 ![Raspi-config menu](pictures/vnc-reboot-from-menu.png)
 
 
-After the Raspiblitz is rebooted, set a password for the VNC Server:  
-`sudo vncpasswd -service`  
+After the Raspiblitz is rebooted, set a password for the VNC Server:
+`sudo vncpasswd -service`
 
-Set the Authentication parameter:  
-`sudo echo "Authentication=VncAuth" > /etc/vnc/config.d/common.custom`  
+Set the Authentication parameter:
+`sudo echo "Authentication=VncAuth" > /etc/vnc/config.d/common.custom`
 
-Restart the VNC Server for settings to take effect:  
-`sudo systemctl restart vncserver-x11-serviced`  
+Restart the VNC Server for settings to take effect:
+`sudo systemctl restart vncserver-x11-serviced`
 
-Open the relevant port in the firewall (ufw):  
+Open the relevant port in the firewall (ufw):
 `sudo ufw allow vnc`
 
-Start the VNC server from the Raspiblitz:  
-`vncserver`  
-This will run by default in the display number '1'. If you want to specify another number, run this (change  *\<display-number\>* to whatever you prefer):  
-`vncserver :<display-number>`  
+Start the VNC server from the Raspiblitz:
+`vncserver`
+This will run by default in the display number '1'. If you want to specify another number, run this (change  *\<display-number\>* to whatever you prefer):
+`vncserver :<display-number>`
 
-![VNC server started](pictures/vnc-server-started.png)  
+![VNC server started](pictures/vnc-server-started.png)
 
 From the VNC client (e.g. your PC, laptop), connect to the IP that the previous command has displayed in the screen (I covered it in pink in the screenshot). If everything is alright, you can see the display from the VNC client now.
 
-In order to stop broadcasting your display, stop the server from the Raspiblitz with this:  
-`vncserver -kill :<display-number>`  
+In order to stop broadcasting your display, stop the server from the Raspiblitz with this:
+`vncserver -kill :<display-number>`
 
 For example:
-`vncserver -kill :1`  
+`vncserver -kill :1`
 
 
-**Note**: You may have to set the resolution through raspi-config in certain situations:  
-`sudo raspi-config`  
+**Note**: You may have to set the resolution through raspi-config in certain situations:
+`sudo raspi-config`
  *Advanced Options > Resolution*
 
-**Hint**: From macOS, there is a built in VNC client hidden away at: /System/Library/CoreServices/Applications/Screen\ Sharing.app  
+**Hint**: From macOS, there is a built in VNC client hidden away at: /System/Library/CoreServices/Applications/Screen\ Sharing.app
 
 **Hint 2**: Find more info about VNC in Raspberry [here](https://www.raspberrypi.org/documentation/remote-access/vnc/).
 
@@ -700,7 +700,7 @@ SSH is already encrypted, why would I want to use it with Tor?
 * Anonymized access - Someone sniffing the traffic don't know where the server you are establishing a connection is, not the server side knows where the client is.
 
 Create Hidden Service:
-`bash /home/admin/config.scripts/internet.hiddenservice.sh ssh 22 22`
+`bash /home/admin/config.scripts/tor.onion-service.sh ssh 22 22`
 
 SSH over Tor:
 `torsocks ssh admin@HiddenServiceAddress.onion`
@@ -805,7 +805,7 @@ Because the BTRFS is still experimental it's a bit hidden. There are two ways to
 
 - When you start a fresh setup just connect a 32GB Thumb Drive on the second USB3 port from the beginning and you should be asked during HDD setup if you want to try out BTRFS and gave the Thumb Drive as RAID1.
 
-- If you have a existing RaspiBlitz and you want to switch to BTRFS then you need to export a Migration File (MAINMENU > REPAIR > MIGRATION) an then format your HDD/SSD clean. When you import a Migration File during a fresh Setup (see above) you will get the option to format the HDD/SSD with BTRFS. 
+- If you have a existing RaspiBlitz and you want to switch to BTRFS then you need to export a Migration File (MAINMENU > REPAIR > MIGRATION) an then format your HDD/SSD clean. When you import a Migration File during a fresh Setup (see above) you will get the option to format the HDD/SSD with BTRFS.
 
 Once the Blitz is running on BTRFS you can use the '/home/admin/config.scripts/blitz.datadrive.sh' script to add a RAID drive or make a snapshot.
 
@@ -819,12 +819,12 @@ https://seravo.fi/2015/using-raid-btrfs-recovering-broken-disks
 
 When the LCD display is telling you to do a config check:
 - go to the RaspiBlitz terminal (X on main menu) and run 'patch'
-- start reboot with command: 'restart' 
+- start reboot with command: 'restart'
 - go to the RaspiBlitz terminal run the command: 'check'
 - now edit the RaspiBlitz config and get rid of the errors: 'nano /mnt/hdd/raspiblitz.conf'
 - save config with: CTRL+o
 - exit nano editor with: CTRL+x
-- start reboot with command: 'restart' 
+- start reboot with command: 'restart'
 
 ## How to fix my upside down LCD after update?
 
@@ -843,67 +843,67 @@ If you cannot login via SSH into your RaspiBlitz your SSH RaspiBlitz certs might
 - power up - the RaspiBlitz should boot up & reboot again
 - then try again to SSH login
 
-If you see a "REMOTE HOST IDENTIFICATION HAS CHANGED!" warning on login, that's what we wanted - the SSH cert of your RaspiBlitz changed - thats good. We just need to remove the old one from our laptop first - on OSX you can use `rm ~/.ssh/known_hosts` (deletes all cached server certs) or remove the line with your RaspiBlitz IP manually from the `~/.ssh/known_hosts` file with a text editor. 
+If you see a "REMOTE HOST IDENTIFICATION HAS CHANGED!" warning on login, that's what we wanted - the SSH cert of your RaspiBlitz changed - thats good. We just need to remove the old one from our laptop first - on OSX you can use `rm ~/.ssh/known_hosts` (deletes all cached server certs) or remove the line with your RaspiBlitz IP manually from the `~/.ssh/known_hosts` file with a text editor.
 
 ## How to use the Let's Encrypt client
 
-The [Let's Encrypt](https://letsencrypt.org/) client software [acme.sh](https://github.com/acmesh-official/acme.sh) is 
-included (since v1.6) and can be used to create TLS certificates that are signed by the Certificate Authority (*Root 
+The [Let's Encrypt](https://letsencrypt.org/) client software [acme.sh](https://github.com/acmesh-official/acme.sh) is
+included (since v1.6) and can be used to create TLS certificates that are signed by the Certificate Authority (*Root
 CA*) **Let's Encrypt** and which are therefore trusted on all modern platforms.
 
-In order to successfully get a signed certificate you need to **verify ownership** over a **DNS domain** or a **full 
-qualified domain name** (**FQDN**). Currently Let's Encrypt **doesn't** issue certificates for IP addresses. The two 
+In order to successfully get a signed certificate you need to **verify ownership** over a **DNS domain** or a **full
+qualified domain name** (**FQDN**). Currently Let's Encrypt **doesn't** issue certificates for IP addresses. The two
 most common standards for verification of control are `HTTP-01` and `DNS-01`.
 
-The **acme.sh** client supports both modes and has a large number of DNS services (more than 50) it can interact with. 
+The **acme.sh** client supports both modes and has a large number of DNS services (more than 50) it can interact with.
 More details can be found on the [acme.sh wiki](https://github.com/acmesh-official/acme.sh/wiki).
 
 ### Let's Encrypt - HTTP-01
 
-To use `HTTP-01` your RaspiBlitz needs to be accessible directly from the Internet on a **public IP address** on **port 
-80**. If you don't have a public IPv4/IPv6 IP on either `eth0` or `wlan0` then it might be possible to use **NAT port 
+To use `HTTP-01` your RaspiBlitz needs to be accessible directly from the Internet on a **public IP address** on **port
+80**. If you don't have a public IPv4/IPv6 IP on either `eth0` or `wlan0` then it might be possible to use **NAT port
 forwarding** or an **autossh-tunnel** to fulfill this requirement.
 
-If everything (this includes creating a `DNS A` or `DNS CNAME` record that points to a static or dynamic IP address) is 
-set up so that the Let's Encrypt servers can reach your RaspiBlitz on port 80 then the following command will perform 
-the initial creation of a signed certificate and will also store the configuration data needed to regularly refresh it. 
+If everything (this includes creating a `DNS A` or `DNS CNAME` record that points to a static or dynamic IP address) is
+set up so that the Let's Encrypt servers can reach your RaspiBlitz on port 80 then the following command will perform
+the initial creation of a signed certificate and will also store the configuration data needed to regularly refresh it.
 Just run this once and then lean back and forget about it. :-D
 
 ```
-~/.acme.sh/acme.sh --keylength ec-256 --issue -d hostname.example.com -w /var/www/letsencrypt/ 
+~/.acme.sh/acme.sh --keylength ec-256 --issue -d hostname.example.com -w /var/www/letsencrypt/
 ```
 
 ### Let's Encrypt - DNS-01
 
 The `DNS-01` standard **proves ownership** by creating `DNS TXT` records on the domain or subdomain you want to use.
-This requires interaction with and access to a dns server but comes with the benefit that `wildcard certificates` 
-can be issued. 
+This requires interaction with and access to a dns server but comes with the benefit that `wildcard certificates`
+can be issued.
 
-It is beyond the scope of this FAQ entry to explain all details of this - please refer to the official documentation. 
+It is beyond the scope of this FAQ entry to explain all details of this - please refer to the official documentation.
 Assuming you are using the [DuckDNS](https://www.duckdns.org/) dynamic DNS service then the following command will
-get a certificate (including a wildcard subject alternative name (**SAN**) listing). It will also take care of continuous 
-renewals. 
+get a certificate (including a wildcard subject alternative name (**SAN**) listing). It will also take care of continuous
+renewals.
 
 ```
 export DuckDNS_Token="abcdefgh-0123-56ij-78kl-abcd9012efgh"
 ~/.acme.sh/acme.sh --issue --keylength ec-256 --dns dns_duckdns -d hostname.duckdns.org -d *.hostname.duckdns.org
 ```
 
-As mentioned, more that 50 other services (including self-hosted options like e.g. `nsupdate` or `PowerDNS`) are supported.   
+As mentioned, more that 50 other services (including self-hosted options like e.g. `nsupdate` or `PowerDNS`) are supported.
 
 ### Let's Encrypt - eMail Address
 
-The installation process of the `acme.sh` client includes a prompt for an eMail address. The data entered there is 
-stored in the `accounts.conf` file as `ACCOUNT_EMAIL`. This address is used by Let's Encrypt to notify you about 
-the expiry of certificates (which is not really needed as renewals are automated) and also about changes to their 
+The installation process of the `acme.sh` client includes a prompt for an eMail address. The data entered there is
+stored in the `accounts.conf` file as `ACCOUNT_EMAIL`. This address is used by Let's Encrypt to notify you about
+the expiry of certificates (which is not really needed as renewals are automated) and also about changes to their
 **Terms of Service**. For more details please check their [privacy policy](https://letsencrypt.org/privacy/).
 
-It is currently considered completely fine to leave this field empty and not provide an eMail address.  
+It is currently considered completely fine to leave this field empty and not provide an eMail address.
 
 ### Let's Encrypt - Installation details
 
-The `acme.sh` script is installed in `/home/admin/.acme.sh/` - the configuration and the certificates are stored on the 
-external hard disk in `/mnt/hdd/app-data/letsencrypt`. 
+The `acme.sh` script is installed in `/home/admin/.acme.sh/` - the configuration and the certificates are stored on the
+external hard disk in `/mnt/hdd/app-data/letsencrypt`.
 
 ### How can I customize my RaspiBlitz or add other software?
 

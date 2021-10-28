@@ -13,7 +13,7 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = *help* ]; then
  echo "script to switch Tor on or off"
- echo "internet.tor.sh [status|on|off|btcconf-on|btcconf-off|update]"
+ echo "tor.network.sh [status|on|off|btcconf-on|btcconf-off|update]"
  exit 1
 fi
 
@@ -48,7 +48,7 @@ activateBitcoinOverTor()
     sudo chown admin:admin /home/admin/.${network}/${network}.conf
 
   else
-    echo "BTC config does not found (yet) -  try with 'internet.tor.sh btcconf-on' again later"
+    echo "BTC config does not found (yet) -  try with 'tor.network.sh btcconf-on' again later"
   fi
 }
 
@@ -248,15 +248,15 @@ EOF
 
   # ACTIVATE APPS OVER TOR
   source /mnt/hdd/raspiblitz.conf 2>/dev/null
-  [ "${BTCRPCexplorer}" = "on" ] && /home/admin/config.scripts/internet.hiddenservice.sh btc-rpc-explorer 80 3022 443 3023
-  [ "${rtlWebinterface}" = "on" ] && /home/admin/config.scripts/internet.hiddenservice.sh RTL 80 3002 443 3003
-  [ "${BTCPayServer}" = "on" ] && /home/admin/config.scripts/internet.hiddenservice.sh btcpay 80 23002 443 23003
-  [ "${ElectRS}" = "on" ] && /home/admin/config.scripts/internet.hiddenservice.sh electrs 50002 50002 50001 50001
-  [ "${LNBits}" = "on" ] && /home/admin/config.scripts/internet.hiddenservice.sh lnbits 80 5002 443 5003
-  [ "${thunderhub}" = "on" ] && /home/admin/config.scripts/internet.hiddenservice.sh thunderhub 80 3012 443 3013
-  [ "${specter}" = "on" ] && /home/admin/config.scripts/internet.hiddenservice.sh specter 443 25441
+  [ "${BTCRPCexplorer}" = "on" ] && /home/admin/config.scripts/tor.onion-service.sh btc-rpc-explorer 80 3022 443 3023
+  [ "${rtlWebinterface}" = "on" ] && /home/admin/config.scripts/tor.onion-service.sh RTL 80 3002 443 3003
+  [ "${BTCPayServer}" = "on" ] && /home/admin/config.scripts/tor.onion-service.sh btcpay 80 23002 443 23003
+  [ "${ElectRS}" = "on" ] && /home/admin/config.scripts/tor.onion-service.sh electrs 50002 50002 50001 50001
+  [ "${LNBits}" = "on" ] && /home/admin/config.scripts/tor.onion-service.sh lnbits 80 5002 443 5003
+  [ "${thunderhub}" = "on" ] && /home/admin/config.scripts/tor.onion-service.sh thunderhub 80 3012 443 3013
+  [ "${specter}" = "on" ] && /home/admin/config.scripts/tor.onion-service.sh specter 443 25441
   if [ "${sphinxrelay}" = "on" ]; then
-    /home/admin/config.scripts/internet.hiddenservice.sh sphinxrelay 80 3302 443 3303
+    /home/admin/config.scripts/tor.onion-service.sh sphinxrelay 80 3302 443 3303
     toraddress=$(sudo cat /mnt/hdd/tor/sphinxrelay/hostname 2>/dev/null)
     sudo -u sphinxrelay bash -c "echo '${toraddress}' > /home/sphinxrelay/sphinx-relay/dist/toraddress.txt"
   fi
