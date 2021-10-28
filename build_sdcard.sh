@@ -119,7 +119,7 @@ echo "X) will use CPU-ARCHITECTURE --> '${cpu}'"
 
 # AUTO-DETECTION: OPERATINGSYSTEM
 # ---------------------------------------
-baseimage="$(lsb_release -i)"
+baseimage="$(lsb_release -si)"
 if [ "${baseimage}" = "Debian" ]; then
   if [ $(uname -n | grep -c 'rpi') -gt 0 ] && [ "${cpu}" = "aarch64" ]; then
     baseimage="debian_rpi64"
