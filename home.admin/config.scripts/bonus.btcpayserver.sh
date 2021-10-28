@@ -155,14 +155,6 @@ MAINMENU > CONNECT > BTCPay Server"
   exit 0
 fi
 
-# add default values to raspi config if needed
-if ! grep -Eq "^BTCPayServer=" /mnt/hdd/raspiblitz.conf; then
-  echo "BTCPayServer=off" >> /mnt/hdd/raspiblitz.conf
-fi
-if ! grep -Eq "^BTCPayDomain=" /mnt/hdd/raspiblitz.conf; then
-  echo "BTCPayDomain=off" >> /mnt/hdd/raspiblitz.conf
-fi
-
 # write-tls-macaroon
 if [ "$1" = "write-tls-macaroon" ]; then
 
@@ -480,7 +472,7 @@ WantedBy=multi-user.target
   fi
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^BTCPayServer=.*/BTCPayServer=on/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set BTCPayServer "on"
   exit 0
 fi
 
@@ -503,7 +495,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   echo "# deleteData(${deleteData})"
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^BTCPayServer=.*/BTCPayServer=off/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set BTCPayServer "off"
 
   # Hidden Service if Tor is active
   if [ "${runBehindTor}" = "on" ]; then

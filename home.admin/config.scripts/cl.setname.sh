@@ -29,15 +29,6 @@ if [ ${#newName} -eq 0 ]; then
   fi
 fi
 
-# config file
-blitzConfig="/mnt/hdd/raspiblitz.conf"
-
-# check if raspiblitz config file exists
-if [ ! -f ${blitzConfig} ]; then
-  echo "FAIL - missing ${blitzConfig}"
-  exit 1
-fi
-
 # check if cl config file exists
 if ! sudo ls ${CLCONF}; then
   echo "FAIL - missing ${CLCONF}"

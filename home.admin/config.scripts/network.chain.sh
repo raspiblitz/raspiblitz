@@ -78,9 +78,9 @@ fi
 # editing the raspi blitz config file
 echo "editing /mnt/hdd/raspiblitz.conf"
 if [ "$1" = "testnet" ]; then
-  sudo sed -i "s/^chain=.*/chain=test/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set chain "test"
 else
-  sudo sed -i "s/^chain=.*/chain=main/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set chain "main"
 fi
 
 # edit RTL.conf (if active)

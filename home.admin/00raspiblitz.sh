@@ -8,22 +8,10 @@
 echo "Starting SSH user interface ... (please wait)"
 
 # CONFIGFILE - configuration of RaspiBlitz
-configFile="/mnt/hdd/raspiblitz.conf"
-source ${configFile} 2>/dev/null
+source /mnt/hdd/raspiblitz.conf 2>/dev/null
 
 # INFOFILE - state data from bootstrap
 infoFile="/home/admin/raspiblitz.info"
-
-# check if raspiblitz.info exists
-systemInfoExists=$(ls ${infoFile} | grep -c "${infoFile}")
-if [ "${systemInfoExists}" != "1" ]; then
-  echo "systemInfoExists(${systemInfoExists})"
-  echo "FAIL: ${infoFile} does not exist .. which it should at this point."
-  echo "Check logs & bootstrap.service for errors and report to devs."
-  exit 1
-fi
-
-# get system state information raspiblitz.info
 source ${infoFile}
 source <(/home/admin/config.scripts/blitz.cache.sh get state message)
 

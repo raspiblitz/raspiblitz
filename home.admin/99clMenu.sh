@@ -108,7 +108,7 @@ case $CHOICE in
       clear 
       echo
       # setting value in the raspiblitz.conf
-      sudo sed -i "s/^lightning=.*/lightning=cl/g" /mnt/hdd/raspiblitz.conf
+      /home/admin/config.scripts/blitz.conf.sh set lightning "cl"
       echo "# OK - lightning=cl is set in /mnt/hdd/raspiblitz.conf"
       echo
       echo "Press ENTER to return to main menu."

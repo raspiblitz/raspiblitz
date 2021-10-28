@@ -11,14 +11,9 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  exit 1
 fi
 
-# check and load raspiblitz config
-# to know which network is running
+# load raspiblitz config
 source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
-if [ ${#network} -eq 0 ]; then
- echo "FAIL - missing /mnt/hdd/raspiblitz.conf"
- exit 1
-fi
 
 # show info menu
 if [ "$1" = "menu" ]; then
@@ -51,11 +46,6 @@ Activate TOR to access the web interface from outside your local network.
   fi
   echo "please wait ..."
   exit 0
-fi
-
-# add default value to raspi config if needed
-if ! grep -Eq "^thunderhub=" /mnt/hdd/raspiblitz.conf; then
-  echo "thunderhub=off" >> /mnt/hdd/raspiblitz.conf
 fi
 
 # stop services
@@ -236,7 +226,7 @@ WantedBy=multi-user.target
     sudo systemctl enable thunderhub
 
     # setting value in raspiblitz config
-    sudo sed -i "s/^thunderhub=.*/thunderhub=on/g" /mnt/hdd/raspiblitz.conf
+    /home/admin/config.scripts/blitz.conf.sh set thunderhub "on"
 
     # Hidden Service for thunderhub if Tor is active
     if [ "${runBehindTor}" = "on" ]; then
@@ -285,7 +275,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   echo "OK ThunderHub removed."
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^thunderhub=.*/thunderhub=off/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set thunderhub "off"
 
   exit 0
 fi

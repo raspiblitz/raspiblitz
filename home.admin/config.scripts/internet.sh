@@ -227,16 +227,7 @@ elif [ "$1" == "update-publicip" ]; then
   fi
 
   # store to raspiblitz.conf new publiciP
-  publicIPValueExists=$(sudo cat /mnt/hdd/raspiblitz.conf | grep -c 'publicIP=')
-  if [ ${publicIPValueExists} -gt 1 ]; then
-    # more then one publiIp entry - removing one
-    sudo sed -i "s/^publicIP=.*//g" /mnt/hdd/raspiblitz.conf
-  fi
-  if [ ${publicIPValueExists} -eq 0 ]; then
-    echo "publicIP='${publicIP}'" >> /mnt/hdd/raspiblitz.conf
-  else
-    sudo sed -i "s/^publicIP=.*/publicIP='${publicIP}'/g" /mnt/hdd/raspiblitz.conf
-  fi
+  /home/admin/config.scripts/blitz.conf.sh set publicIP "${publicIP}"
   exit 0
 
 #############################################
@@ -247,11 +238,7 @@ elif [ "$1" == "ipv6" ]; then
     echo "# Switching IPv6 ON"
 
     # set config
-    if ! grep -Eq "^ipv6=" /mnt/hdd/raspiblitz.conf; then
-      echo "ipv6=on" >> /mnt/hdd/raspiblitz.conf
-    else
-      sudo sed -i "s/^ipv6=.*/ipv6=on/g" /mnt/hdd/raspiblitz.conf
-    fi
+    /home/admin/config.scripts/blitz.conf.sh set ipv6 "on"
     exit 0
 
   elif [ "$2" == "off" ]; then
@@ -259,7 +246,8 @@ elif [ "$1" == "ipv6" ]; then
     echo "# Switching IPv6 OFF"
 
     # set config
-    sudo sed -i "s/^ipv6=.*/ipv6=off/g" /mnt/hdd/raspiblitz.conf
+    /home/admin/config.scripts/blitz.conf.sh set ipv6 "off"
+
     exit 0
 
   else

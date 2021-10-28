@@ -17,11 +17,6 @@ fi
 
 source /mnt/hdd/raspiblitz.conf
 
-# add default value to raspiblitz.conf if needed
-if ! grep -Eq "^circuitbreaker=" /mnt/hdd/raspiblitz.conf; then
-  echo "circuitbreaker=off" >> /mnt/hdd/raspiblitz.conf
-fi
-
 isInstalled=$(sudo ls /etc/systemd/system/circuitbreaker.service 2>/dev/null | grep -c 'circuitbreaker.service')
 
 # switch on
@@ -123,7 +118,7 @@ WantedBy=multi-user.target
   fi
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^circuitbreaker=.*/circuitbreaker=on/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set circuitbreaker "on"
 
   isInstalled=$(sudo -u circuitbreaker /home/circuitbreaker/go/bin/circuitbreaker --version | grep -c "circuitbreaker version")
   if [ ${isInstalled} -eq 1 ]; then
@@ -162,7 +157,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   fi
 
   # setting value in raspiblitz.conf
-  sudo sed -i "s/^circuitbreaker=.*/circuitbreaker=off/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set circuitbreaker "off"
 
   exit 0
 fi

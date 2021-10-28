@@ -112,7 +112,7 @@ if [ "${mode}" = "verified" ]; then
     if [ "${fixedUpdateVersion}" != "${lndUpdateVersion}" ]; then
       echo "warn='required update version does not match'"
       echo "# this is normal when the recovery script of a new RaspiBlitz version checks for an old update - just ignore"
-      sed -i '/^lndInterimsUpdate=*/d' /mnt/hdd/raspiblitz.conf
+      /home/admin/config.scripts/blitz.conf.sh delete lndInterimsUpdate
       exit 1
     else
       echo "# OK - update version is matching"
@@ -237,13 +237,9 @@ if [ "${mode}" = "verified" ] || [ "${mode}" = "reckless" ]; then
     echo "error='install failed'"
     exit 1
   fi
-  echo "# flag update in raspiblitz config"
-  source /mnt/hdd/raspiblitz.conf
-  if [ ${#lndInterimsUpdate} -eq 0 ]; then
-    echo "lndInterimsUpdate='${lndInterimsUpdateNew}'" >> /mnt/hdd/raspiblitz.conf
-  else
-    sudo sed -i "s/^lndInterimsUpdate=.*/lndInterimsUpdate='${lndInterimsUpdateNew}'/g" /mnt/hdd/raspiblitz.conf
-  fi
+
+  echo "# mark update in raspiblitz config"
+  /home/admin/config.scripts/blitz.conf.sh set lndInterimsUpdate "${lndInterimsUpdateNew}"
 
   echo "# OK LND Installed"
   echo "# NOTE: RaspiBlitz may need to reboot now"

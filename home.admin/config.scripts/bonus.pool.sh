@@ -16,12 +16,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  exit 1
 fi
 
-source /mnt/hdd/raspiblitz.conf
-
-# add default value to raspi config if needed
-if ! grep -Eq "^pool=" /mnt/hdd/raspiblitz.conf; then
-  echo "pool=off" >> /mnt/hdd/raspiblitz.conf
-fi
+source /mnt/hdd/
 
 # show info menu
 if [ "$1" = "menu" ]; then
@@ -236,7 +231,7 @@ WantedBy=multi-user.target
     echo "# OK - the poold.service is enabled, to start manually use: sudo systemctl start poold"
   fi
   # setting value in raspi blitz config
-  sudo sed -i "s/^pool=.*/pool=on/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set pool "on"
   
   isInstalled=$(sudo -u pool /usr/local/bin/poold  | grep -c pool)
   if [ ${isInstalled} -gt 0 ]; then
@@ -258,7 +253,7 @@ fi
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^pool=.*/pool=off/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set pool "off"
 
   isInstalled=$(sudo ls /etc/systemd/system/poold.service 2>/dev/null | grep -c 'poold.service')
   if [ ${isInstalled} -eq 1 ]; then

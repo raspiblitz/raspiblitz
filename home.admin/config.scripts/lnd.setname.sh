@@ -10,7 +10,6 @@ fi
 # 1. parameter [?newName]
 newName=$2
 
-# use default values from the raspiblitz.conf
 source <(/home/admin/config.scripts/network.aliases.sh getvars $2)
 
 # run interactive if 'turn on' && no further parameters
@@ -27,30 +26,8 @@ if [ ${#newName} -eq 0 ]; then
   fi
 fi
 
-# config file
-blitzConfig="/mnt/hdd/raspiblitz.conf"
-
 # lnd conf file
 lndConfig="/mnt/hdd/lnd/${netprefix}lnd.conf"
-
-# check if raspiblitz config file exists
-configExists=$(ls ${blitzConfig} | grep -c '.conf')
-if [ ${configExists} -eq 0 ]; then
- echo "FAIL - missing ${blitzConfig}"
- exit 1
-fi
-
-# make sure entry line for 'hostname' exists 
-entryExists=$(cat ${blitzConfig} | grep -c 'hostname=')
-if [ ${entryExists} -eq 0 ]; then
-  echo "hostname=" >> ${blitzConfig}
-fi
-
-# make sure entry line for 'setnetworkname' exists 
-entryExists=$(cat ${blitzConfig} | grep -c 'setnetworkname=')
-if [ ${entryExists} -eq 0 ]; then
-  echo "setnetworkname=" >> ${blitzConfig}
-fi
 
 # check if lnd config file exists
 configExists=$(ls ${lndConfig} | grep -c '.conf')
@@ -73,16 +50,16 @@ sudo systemctl stop ${netprefix}lnd 2>/dev/null
 sudo sed -i "s/^alias=.*/alias=${newName}/g" ${lndConfig}
 
 # raspiblitz.conf: change name
-sudo sed -i "s/^hostname=.*/hostname=${newName}/g" ${blitzConfig}
+/home/admin/config.scripts/blitz.conf.sh set hostname "${newName}"
 
 # set name in local network just if forced (not anymore by default)
 # see https://github.com/rootzoll/raspiblitz/issues/819
 if [ "$3" = "alsoNetwork" ]; then
   # OS: change hostname
   sudo raspi-config nonint do_hostname ${newName}
-  sudo sed -i "s/^setnetworkname=.*/setnetworkname=1/g" ${blitzConfig}
+  /home/admin/config.scripts/blitz.conf.sh set setnetworkname "1"
 else
-  sudo sed -i "s/^setnetworkname=.*/setnetworkname=0/g" ${blitzConfig}
+  /home/admin/config.scripts/blitz.conf.sh set setnetworkname "0"
 fi
 
 #TODO - no need for full reboot only unlock LND

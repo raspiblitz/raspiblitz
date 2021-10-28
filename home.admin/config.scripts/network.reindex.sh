@@ -11,10 +11,6 @@ fi
 # to know which network is running
 source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
-if [ ${#network} -eq 0 ]; then
- echo "FAIL - missing /mnt/hdd/raspiblitz.conf"
- exit 1
-fi
 
 # if re-index is not running, start ...
 source <(/home/admin/config.scripts/blitz.cache.sh get state)

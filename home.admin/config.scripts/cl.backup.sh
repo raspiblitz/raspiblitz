@@ -288,9 +288,7 @@ if [ ${mode} = "cl-import-gui" ]; then
   if [ "$(grep -c "hsm_secret is not encrypted" < "$output")" -gt 0 ];then
     echo "# The hsm_secret is not encrypted"
     echo "# Record in raspiblitz.conf"
-    sudo sed -i \
-    "s/^${netprefix}clEncryptedHSM=.*/${netprefix}clEncryptedHSM=off/g" \
-    /mnt/hdd/raspiblitz.conf
+    /home/admin/config.scripts/blitz.conf.sh set ${netprefix}clEncryptedHSM "off"
   else
     cat $output
     echo "# Starting cl.hsmtool.sh unlock"

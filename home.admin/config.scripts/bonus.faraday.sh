@@ -243,10 +243,7 @@ WantedBy=multi-user.target
   sudo chown -R faraday:faraday /home/faraday/.faraday
 
   echo "# flag in raspiblitz config"
-  if [ ${#faraday} -eq 0 ]; then
-    echo "faraday='on'" >> /mnt/hdd/raspiblitz.conf
-  fi
-  sudo sed -i "s/^faraday=.*/faraday=on/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set faraday "on"
 
   echo "# OK Faraday is installed"
   echo "# please 'restart' for clean creation of faraday tls/macaroons"
@@ -268,7 +265,7 @@ if [ "${mode}" = "off" ] || [ "${mode}" = "0" ]; then
   sudo userdel -r -f faraday
 
   echo "# modify config file"
-  sudo sed -i "s/^faraday=.*/faraday=off/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set faraday "off"
 
   exit 1
  

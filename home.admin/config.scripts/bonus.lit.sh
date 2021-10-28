@@ -24,11 +24,6 @@ fi
 
 source /mnt/hdd/raspiblitz.conf
 
-# add default value to raspi config if needed
-if ! grep -Eq "^lit=" /mnt/hdd/raspiblitz.conf; then
-  echo "lit=off" >> /mnt/hdd/raspiblitz.conf
-fi
-
 # show info menu
 if [ "$1" = "menu" ]; then
 
@@ -323,7 +318,7 @@ alias lit-frcli=\"frcli --rpcserver=localhost:8443 \
   sudo ufw allow 8443 comment "Lightning Terminal"
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^lit=.*/lit=on/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set lit "on"
   
   # Hidden Service if Tor is active
   if [ "${runBehindTor}" = "on" ]; then
@@ -377,7 +372,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # delete group
   sudo groupdel lit
   # setting value in raspi blitz config
-  sudo sed -i "s/^lit=.*/lit=off/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set lit "off"
 
   exit 0
 fi

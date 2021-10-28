@@ -12,39 +12,36 @@ fi
 source /mnt/hdd/raspiblitz.conf
 
 on() {
+
   local server="${1}"
   local user="${2}"
   local password="${3}" 
 
-  sudo touch /home/admin/.tmp
-  sudo chmod 777 /home/admin/.tmp
+  sudo touch /var/cache/raspiblitz/.tmp
+  sudo chmod 777 /var/cache/raspiblitz/.tmp
 
   if [ -z "${server}" ]; then
-    whiptail --title "Static Channel Backup on Nextcloud" --inputbox "Enter your Nextcloud server URL\nExample: https://cloud.johnsmith.com" 11 70 2>/home/admin/.tmp
-    server=$(cat /home/admin/.tmp)
+    whiptail --title "Static Channel Backup on Nextcloud" --inputbox "Enter your Nextcloud server URL\nExample: https://cloud.johnsmith.com" 11 70 2>/var/cache/raspiblitz/.tmp
+    server=$(cat /var/cache/raspiblitz/.tmp)
   fi
 
   if [ -z "${user}" ]; then
-    whiptail --title "Static Channel Backup on Nextcloud" --inputbox "\nEnter your Nextcloud username:\n(best to use a dedicated user for backup)" 10 70 2>/home/admin/.tmp
-    user=$(cat /home/admin/.tmp)
+    whiptail --title "Static Channel Backup on Nextcloud" --inputbox "\nEnter your Nextcloud username:\n(best to use a dedicated user for backup)" 10 70 2>/var/cache/raspiblitz/.tmp
+    user=$(cat /var/cache/raspiblitz/.tmp)
   fi
 
   if [ -z "${password}" ]; then
-    whiptail --title "Static Channel Backup on Nextcloud" --inputbox "\nEnter your Nextcloud password:\n(will get stored in cleartext on raspiblitz)" 10 70 2>/home/admin/.tmp
-    password=$(cat /home/admin/.tmp)
+    whiptail --title "Static Channel Backup on Nextcloud" --inputbox "\nEnter your Nextcloud password:\n(will get stored in cleartext on raspiblitz)" 10 70 2>/var/cache/raspiblitz/.tmp
+    password=$(cat /var/cache/raspiblitz/.tmp)
   fi
 
-  shred -u /home/admin/.tmp
+  # normal delete is OK because it a mem drive
+  rm /var/cache/raspiblitz/.tmp
 
   if [ "${server}" ] && [ "${user}" ] && [ "${password}" ]; then
-    sudo sed -i '/nextcloudBackupServer=.*/d' /mnt/hdd/raspiblitz.conf
-    echo "nextcloudBackupServer=${server}" >> /mnt/hdd/raspiblitz.conf
-
-    sudo sed -i '/nextcloudBackupUser=.*/d' /mnt/hdd/raspiblitz.conf
-    echo "nextcloudBackupUser=${user}" >> /mnt/hdd/raspiblitz.conf
-
-    sudo sed -i '/nextcloudBackupPassword=.*/d' /mnt/hdd/raspiblitz.conf
-    echo "nextcloudBackupPassword=${password}" >> /mnt/hdd/raspiblitz.conf
+    /home/admin/config.scripts/blitz.conf.sh set nextcloudBackupServer ${server}
+    /home/admin/config.scripts/blitz.conf.sh set nextcloudBackupUser ${user}
+    /home/admin/config.scripts/blitz.conf.sh set nextcloudBackupPassword ${password}
   else
     echo "Please provide nextcloud server, username and password"
     exit 1
@@ -52,9 +49,9 @@ on() {
 }
 
 off() {
-  sudo sed -i '/nextcloudBackupServer=.*/d' /mnt/hdd/raspiblitz.conf
-  sudo sed -i '/nextcloudBackupUser=.*/d' /mnt/hdd/raspiblitz.conf
-  sudo sed -i '/nextcloudBackupPassword=.*/d' /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh delete nextcloudBackupServer
+  /home/admin/config.scripts/blitz.conf.sh delete nextcloudBackupUser
+  /home/admin/config.scripts/blitz.conf.sh delete nextcloudBackupPassword
 }
 
 upload() {

@@ -254,7 +254,7 @@ alias ${netprefix}clconf=\"sudo\
   echo
 
   # setting value in the raspiblitz.conf
-  /home/admin/config.scripts/blitz.conf.sh set l${netprefix}cl on
+  /home/admin/config.scripts/blitz.conf.sh set ${netprefix}cl on
 
   # if this is the first lightning mainnet turned on - make default
   if [ "${CHAIN}" == "mainnet" ] && [ "${lightning}" == "" ]; then
@@ -320,7 +320,7 @@ if [ "$1" = "off" ];then
     sudo rm -f /usr/local/bin/lightning-cli
   fi
   # setting value in the raspiblitz.conf
-  /home/admin/config.scripts/blitz.conf.sh set l${netprefix}cl "off"
+  /home/admin/config.scripts/blitz.conf.sh set ${netprefix}cl "off"
 
   # if cl mainnet was default - remove 
   if [ "${CHAIN}" == "mainnet" ] && [ "${lightning}" == "cl" ]; then

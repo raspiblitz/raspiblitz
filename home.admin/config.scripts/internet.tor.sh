@@ -71,13 +71,8 @@ deactivateBitcoinOverTOR()
 
 # check and load raspiblitz config
 # to know which network is running
-if [ -f "/home/admin/raspiblitz.info" ]; then
-  source /home/admin/raspiblitz.info
-fi
-
-if [ -f "/mnt/hdd/raspiblitz.conf" ]; then
-  source /mnt/hdd/raspiblitz.conf
-fi
+source /home/admin/raspiblitz.info 2>/dev/null
+source /mnt/hdd/raspiblitz.conf 2>/dev/null
 
 torRunning=$(sudo systemctl --no-pager status tor@default | grep -c "Active: active")
 torFunctional=$(curl --connect-timeout 30 --socks5-hostname "127.0.0.1:9050" https://check.torproject.org 2>/dev/null | grep -c "Congratulations. This browser is configured to use Tor.")
@@ -108,12 +103,6 @@ fi
 if [ "$1" = "btcconf-off" ]; then
   deactivateBitcoinOverTOR
   exit 0
-fi
-
-# add default value to raspi config if needed
-checkTorEntry=$(sudo cat /mnt/hdd/raspiblitz.conf | grep -c "runBehindTor")
-if [ ${checkTorEntry} -eq 0 ]; then
-  echo "runBehindTor=off" >> /mnt/hdd/raspiblitz.conf
 fi
 
 # location of TOR config
@@ -152,7 +141,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   fi
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^runBehindTor=.*/runBehindTor=on/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set runBehindTor "on"
 
   # install package just in case it was deinstalled
   packageInstalled=$(dpkg -s tor-arm | grep -c 'Status: install ok')
@@ -313,7 +302,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   echo "# switching Tor OFF"
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^runBehindTor=.*/runBehindTor=off/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set runBehindTor "off"
 
   # *** CURL TOR PROXY ***
   # sudo rm /root/.curlrc

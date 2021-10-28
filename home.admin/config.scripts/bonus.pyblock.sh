@@ -7,12 +7,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  exit 1
 fi
 
-source /mnt/hdd/raspiblitz.conf
-
-# add default value to raspi config if needed
-if ! grep -Eq "^pyblock=" /mnt/hdd/raspiblitz.conf; then
-  echo "pyblock=off" >> /mnt/hdd/raspiblitz.conf
-fi
+source /mnt/hdd/
 
 # show info menu
 if [ "$1" = "menu" ]; then
@@ -74,7 +69,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo chown pyblock:pyblock /home/pyblock/blndconnect.conf
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^pyblock=.*/pyblock=on/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set pyblock "on"
   
   ## pyblock short command
   sudo bash -c "echo 'alias pyblock=\"cd ~; python3 ~/PyBLOCK/PyBlock.py\"' >> /home/pyblock/.bashrc"
@@ -91,7 +86,7 @@ fi
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^pyblock=.*/pyblock=off/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set pyblock "off"
   
   echo "*** REMOVING PyBLOCK ***"
   sudo userdel -rf pyblock

@@ -50,8 +50,9 @@ if [ ${#hostname} -eq 0 ]; then
   exit 1
 fi
 
-# check if config files contain lightning (lnd is default)
-if [ "${lightning}" == "" ]; then
+# check if config files contain lightning (lnd is default) introduced in v1.7.1
+entryExists=$(cat ${configFile} | grep -c "^lightning=")
+if [ "${entryExists}" != "1" ]; then
   lightning="lnd"
   echo "lightning=${lightning}" >> ${configFile}
 fi

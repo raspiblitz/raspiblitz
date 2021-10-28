@@ -18,16 +18,6 @@ fi
 # source <(/home/admin/config.scripts/network.aliases.sh getvars cl <mainnet|testnet|signet>)
 source <(/home/admin/config.scripts/network.aliases.sh getvars cl $2)
 
-# add default value to raspi config if needed
-configEntry="${netprefix}clboss"
-configEntryExists=$(sudo cat /mnt/hdd/raspiblitz.conf | grep -c "${configEntry}")
-if [ "${configEntryExists}" == "0" ]; then
-  echo "# adding default config entry for '${configEntry}'"
-  sudo /bin/sh -c "echo '${configEntry}=off' >> /mnt/hdd/raspiblitz.conf"
-else
-  echo "# default config entry for '${configEntry}' exists"
-fi
-
 if [ $1 = on ];then
 
   if [ ! -f /home/bitcoin/cl-plugins-available/clboss-${CLBOSSVERSION}.tar.gz ];then
@@ -58,7 +48,7 @@ if [ $1 = on ];then
   fi
 
   # setting value in raspiblitz.conf
-  sudo sed -i "s/^${netprefix}clboss=.*/${netprefix}clboss=on/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set ${netprefix}clboss "on"
 
   source <(/home/admin/config.scripts/blitz.cache.sh get state)
   if [ "${state}" == "ready" ]; then
@@ -89,7 +79,7 @@ if [ $1 = off ];then
   fi
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^${netprefix}clboss=.*/${netprefix}clboss=off/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set ${netprefix}clboss "off"
   echo "# clboss was uninstalled for $CHAIN"
 
 fi

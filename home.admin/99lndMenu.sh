@@ -136,7 +136,7 @@ case $CHOICE in
       clear 
       echo
       # setting value in raspi blitz config
-      sudo sed -i "s/^lightning=.*/lightning=lnd/g" /mnt/hdd/raspiblitz.conf
+      /home/admin/config.scripts/blitz.conf.sh set lightning "lnd"
       echo "# OK - lightning=lnd is set in /mnt/hdd/raspiblitz.conf"
       echo
       echo "Press ENTER to return to main menu."

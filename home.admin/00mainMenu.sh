@@ -2,15 +2,9 @@
 
 echo "Starting the main menu ..."
 
-# CONFIGFILE - configuration of RaspiBlitz
-configFile="/mnt/hdd/raspiblitz.conf"
-
-# INFOFILE - state data from bootstrap
-infoFile="/home/admin/raspiblitz.info"
-
 # MAIN MENU AFTER SETUP
-source ${infoFile}
-source ${configFile}
+source /home/admin/raspiblitz.info
+source /mnt/hdd/raspiblitz.conf
 
 # FUNCTIONS
 

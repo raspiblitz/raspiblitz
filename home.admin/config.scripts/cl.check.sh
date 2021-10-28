@@ -32,7 +32,7 @@ if [ $(grep -c "^sparko" < ${CLCONF}) -gt 0 ];then
     echo "# The Sparko plugin is not present but in config"
     sed -i "/^sparko/d" ${CLCONF}
     rm -rf /home/bitcoin/${netprefix}cl-plugins-enabled/sparko
-    sed -i "s/^${netprefix}sparko=.*/${netprefix}sparko=off/g" /mnt/hdd/raspiblitz.conf
+    /home/admin/config.scripts/blitz.conf.sh set ${netprefix}sparko "off"
   fi
 fi
 
@@ -42,7 +42,7 @@ if [ $(grep -c "^http-pass" < ${CLCONF}) -gt 0 ];then
     echo "# The clHTTPplugin is not present but in config"
     sed -i "/^http-pass/d" ${CLCONF}
     rm -rf /home/bitcoin/cl-plugins-enabled/c-lightning-http-plugin
-    sed -i "s/^clHTTPplugin=.*/clHTTPplugin=off/g" /mnt/hdd/raspiblitz.conf
+    /home/admin/config.scripts/blitz.conf.sh set clHTTPplugin "off"
   fi
 fi
 
@@ -52,6 +52,6 @@ if [ $(grep -c "^feeadjuster" < ${CLCONF}) -gt 0 ];then
     echo "# The feeadjuster plugin is not present but in config"
     sed -i "/^feeadjuster/d" ${CLCONF}
     rm -rf /home/bitcoin/${netprefix}cl-plugins-enabled/feeadjuster.py
-    sed -i "s/^${netprefix}feeadjuster=.*/${netprefix}feeadjuster=off/g" /mnt/hdd/raspiblitz.conf
+    /home/admin/config.scripts/blitz.conf.sh set ${netprefix}feeadjuster "off"
   fi
 fi

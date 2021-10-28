@@ -25,11 +25,6 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  exit 1
 fi
 
-# add default value to raspi config if needed
-if ! grep -Eq "^chantools=" /mnt/hdd/raspiblitz.conf; then
-  echo "chantools=off" >> /mnt/hdd/raspiblitz.conf
-fi
-
 # show info menu
 if [ "$1" = "menu" ]; then
   dialog --title " Channel Tools ${pinnedVersion} " --msgbox "\n
@@ -130,7 +125,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     exit 1
   fi
   # setting value in raspi blitz config
-  sudo sed -i "s/^chantools=.*/chantools=on/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set chantools "on"
 
   echo
   echo "Installed ${installed}"
@@ -147,7 +142,7 @@ fi
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^chantools=.*/chantools=off/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set chantools "off"
   
   echo "# REMOVING Channel Tools"
   sudo rm -rf /home/admin/download/chantools*

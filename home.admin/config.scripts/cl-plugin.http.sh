@@ -18,16 +18,6 @@ fi
 # source <(/home/admin/config.scripts/network.aliases.sh getvars cl <mainnet|testnet|signet>)
 source <(/home/admin/config.scripts/network.aliases.sh getvars cl mainnet)
 
-# add default value to raspi config if needed
-configEntry="clHTTPplugin"
-configEntryExists=$(sudo cat /mnt/hdd/raspiblitz.conf | grep -c "${configEntry}")
-if [ "${configEntryExists}" == "0" ]; then
-  echo "# adding default config entry for '${configEntry}'"
-  sudo /bin/sh -c "echo '${configEntry}=off' >> /mnt/hdd/raspiblitz.conf"
-else
-  echo "# default config entry for '${configEntry}' exists"
-fi
-
 if [ $1 = connect ];then
   toraddress=$(sudo cat /mnt/hdd/tor/clHTTPplugin/hostname)
   PASSWORD_B=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcpassword | cut -c 13-)
@@ -125,7 +115,7 @@ http-pass=${PASSWORD_B}
   /home/admin/config.scripts/internet.hiddenservice.sh clHTTPplugin 9080 9080
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^clHTTPplugin=.*/clHTTPplugin=on/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set clHTTPplugin "on"
 
   source <(/home/admin/config.scripts/blitz.cache.sh get state)
   if [ "${state}" == "ready" ] && [ "$2" != "norestart" ]; then
@@ -158,7 +148,7 @@ if [ "$1" = "off" ];then
     sudo rm -rf /home/bitcoin/cl-plugins-available/c-lightning-http-plugin
   fi
   # setting value in raspi blitz config
-  sudo sed -i "s/^clHTTPplugin=.*/clHTTPplugin=off/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set clHTTPplugin "off"
   echo "# clHTTPplugin was uninstalled"
 
 fi
