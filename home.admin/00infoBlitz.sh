@@ -478,7 +478,7 @@ ${color_yellow}               ${color_gray}${ln_channelInfo} ${ln_peersInfo}
 ${color_yellow}               ${color_gray}${ln_feeReport}
 $lastLine
 " \
-"RaspiBlitz v${codeVersion}" (${commitHashShort})\
+"RaspiBlitz v${codeVersion} (${commitHashShort})" \
 "-------------------------------------------" \
 "Refreshed: ${datetime}" \
 "CPU load${load##up*,  }" "${tempC}" "${tempF}" \
