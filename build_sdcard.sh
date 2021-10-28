@@ -707,21 +707,7 @@ if [ "${fatpack}" == "true" ]; then
     exit 1
   fi
   echo "* Optional Packages (may be needed for extended features)"
-  sudo apt install -y qrencode
-  sudo apt install -y btrfs-tools
-  sudo apt install -y secure-delete
-  sudo apt install -y fbi
-  sudo apt install -y ssmtp
-  sudo apt install -y unclutter xterm python3-pyqt5
-  sudo apt install -y xfonts-terminus
-  sudo apt install -y apache2-utils
-  sudo apt install -y nginx
-  sudo apt install -y python3-jinja2
-  sudo apt install -y socat
-  sudo apt install -y libatlas-base-dev
-  sudo apt install -y mariadb-server mariadb-client
-  sudo apt install -y hexyl
-  sudo apt install -y autossh
+  sudo apt install -y qrencode btrfs-tools secure-delete fbi ssmtp unclutter xterm python3-pyqt5 xfonts-terminus apache2-utils nginx python3-jinja2 socat libatlas-base-dev mariadb-server mariadb-client hexyl autossh
 
   # *** UPDATE FALLBACK NODE LIST (only as part of fatpack) *** see https://github.com/rootzoll/raspiblitz/issues/1888
   echo "*** FALLBACK NODE LIST ***"
