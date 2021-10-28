@@ -131,7 +131,7 @@ Which verification method should I used: Hash or Signature?
 * Hash function checks file integrity. (Secure)
 
 The maintainer sd card image can also be downloaded via torrent:
-* [assets/raspiblitz-v1.7.1-2021-10-28.img.gz.torrent](https://github.com/rootzoll/raspiblitz/raw/dev/home.admin/assets/raspiblitz-v1.7.1-2021-10-28.img.gz.torrent)
+* [assets/raspiblitz-v1.7.1-2021-10-28.img.gz.torrent](https://github.com/rootzoll/raspiblitz/raw/v1.7/home.admin/assets/raspiblitz-v1.7.1-2021-10-28.img.gz.torrent)
 
 Useful info:
 * [What's new in Version 1.7.1 of RaspiBlitz?](CHANGES.md#whats-new-in-version-171-of-raspiblitz)
