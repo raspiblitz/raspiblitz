@@ -434,40 +434,22 @@ sudo service rsyslog restart
 echo
 echo "*** SOFTWARE UPDATE ***"
 # based on https://stadicus.github.io/RaspiBolt/raspibolt_20_pi.html#software-update
-
-# installs like on RaspiBolt
-sudo apt install -y htop git curl bash-completion vim jq dphys-swapfile bsdmainutils
-
-# installs bandwidth monitoring for future statistics
-sudo apt install -y vnstat
-
-# prepare for format data drive
-sudo apt install -y parted dosfstools
-
-# prepare for BTRFS data drive raid
-sudo apt install -y btrfs-progs
-
-# network tools
-sudo apt install -y autossh telnet
-
-# prepare for display graphics mode
-# see https://github.com/rootzoll/raspiblitz/pull/334
-sudo apt install -y fbi
-
-# prepare for powertest
-sudo apt install -y sysbench
-
-# check for dependencies on DietPi, Ubuntu, Armbian
-sudo apt install -y build-essential
-
-# add armbian-config
-if [ "${baseimage}" = "Armbian" ]; then
-  # add armbian config
-  sudo apt install armbian-config -y
-fi
+# htop git curl bash-completion vim jq dphys-swapfile bsdmainutils -> helpers
+# autossh telnet vnstat -> network tools bandwidth monitoring for future statistics
+# parted dosfstolls -> prepare for format data drive
+# btrfs-progs -> prepare for BTRFS data drive raid
+# fbi -> prepare for display graphics mode. https://github.com/rootzoll/raspiblitz/pull/334
+# sysbench -> prepare for powertest
+# build-essential -> check for build dependencies on DietPi, Ubuntu, Armbian
+general_utils="htop git curl bash-completion vim jq dphys-swapfile bsdmainutils autossh telnet vnstat parted dosfstools btrfs-progs fbi sysbench build-essential"
 
 # dependencies for python
-sudo apt install -y python3-venv python3-dev python3-wheel python3-jinja2 python3-pip
+python_dependencies="python3-venv python3-dev python3-wheel python3-jinja2 python3-pip"
+
+# add armbian-config
+[ "${baseimage}" = "Armbian" ] && arbmbian_dependencies="armbian-config"
+
+sudo apt install -y ${general_utils} ${python_dependencies} ${arbmbian_dependencies}
 
 # make sure /usr/bin/pip exists (and calls pip3 in Debian Buster)
 sudo update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
@@ -480,31 +462,20 @@ sudo pip install PySocks
 sudo pip install urwid
 sudo pip install Pillow
 sudo pip install requests
-
-# rsync is needed to copy from HDD
-sudo apt install -y rsync
-# install ifconfig
-sudo apt install -y net-tools
-#to display hex codes
-sudo apt install -y xxd
 # setuptools needed for Nyx
 sudo pip install setuptools
-# netcat for 00infoBlitz.sh
-sudo apt install -y netcat
-# install OpenSSH client + server
-sudo apt install -y openssh-client
-sudo apt install -y openssh-sftp-server
-sudo apt install -y sshpass
-# install killall, fuser
-sudo apt install -y psmisc
-# install firewall
-sudo apt install -y ufw
-# make sure sqlite3 is available
-sudo apt install -y sqlite3
 
-
+# rsync -> is needed to copy from HDD
+# net-tools -> ifconfig
+# xxd -> display hex codes
+# netcat -> for 00infoBlitz.sh
+# openssh-client openssh-sftp-server sshpass -> install OpenSSH client + server
+# psmisc -> install killall, fuser
+# ufw -> firewall
+# sqlite3 -> database
+sudo apt install -y rsync net-tools xxd netcat openssh-client openssh-sftp-server sshpass psmisc ufw sqlite
 sudo apt clean
-sudo apt -y autoremove
+sudo apt autoremove -y
 
 echo
 echo "*** ADDING MAIN USER admin ***"
@@ -736,21 +707,21 @@ if [ "${fatpack}" == "true" ]; then
     exit 1
   fi
   echo "* Optional Packages (may be needed for extended features)"
-  sudo apt-get install -y qrencode
-  sudo apt-get install -y btrfs-tools
-  sudo apt-get install -y secure-delete
-  sudo apt-get install -y fbi
-  sudo apt-get install -y ssmtp
-  sudo apt-get install -y unclutter xterm python3-pyqt5
-  sudo apt-get install -y xfonts-terminus
-  sudo apt-get install -y nginx apache2-utils
-  sudo apt-get install -y nginx
-  sudo apt-get install -y python3-jinja2
-  sudo apt-get install -y socat
-  sudo apt-get install -y libatlas-base-dev
-  sudo apt-get install -y mariadb-server mariadb-client
-  sudo apt-get install -y hexyl
-  sudo apt-get install -y autossh
+  sudo apt install -y qrencode
+  sudo apt install -y btrfs-tools
+  sudo apt install -y secure-delete
+  sudo apt install -y fbi
+  sudo apt install -y ssmtp
+  sudo apt install -y unclutter xterm python3-pyqt5
+  sudo apt install -y xfonts-terminus
+  sudo apt install -y apache2-utils
+  sudo apt install -y nginx
+  sudo apt install -y python3-jinja2
+  sudo apt install -y socat
+  sudo apt install -y libatlas-base-dev
+  sudo apt install -y mariadb-server mariadb-client
+  sudo apt install -y hexyl
+  sudo apt install -y autossh
 
   # *** UPDATE FALLBACK NODE LIST (only as part of fatpack) *** see https://github.com/rootzoll/raspiblitz/issues/1888
   echo "*** FALLBACK NODE LIST ***"
@@ -1059,7 +1030,7 @@ else
 fi
 
 echo "- Install build dependencies"
-sudo apt-get install -y \
+sudo apt install -y \
   autoconf automake build-essential git libtool libgmp-dev \
   libsqlite3-dev python3 python3-mako net-tools zlib1g-dev libsodium-dev \
   gettext unzip
