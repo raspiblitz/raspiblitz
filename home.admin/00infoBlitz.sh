@@ -448,6 +448,8 @@ if [ "${lightning}" == "" ]; then
   LNinfo=""  
 fi
 
+source <(sudo /home/admin/config.scripts/blitz.github.sh info)
+
 ## get uptime and current date & time
 uptime=$(uptime --pretty)
 datetime=$(date -R)
@@ -476,7 +478,7 @@ ${color_yellow}               ${color_gray}${ln_channelInfo} ${ln_peersInfo}
 ${color_yellow}               ${color_gray}${ln_feeReport}
 $lastLine
 " \
-"RaspiBlitz v${codeVersion}" \
+"RaspiBlitz v${codeVersion}" (${commitHashShort})\
 "-------------------------------------------" \
 "Refreshed: ${datetime}" \
 "CPU load${load##up*,  }" "${tempC}" "${tempF}" \
