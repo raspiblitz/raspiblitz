@@ -19,7 +19,7 @@ fi
 
 torrc="/etc/tor/torrc"
 
-activateBitcoinOverTOR()
+activateBitcoinOverTor()
 {
   echo "*** Changing ${network} Config ***"
 
@@ -27,7 +27,7 @@ activateBitcoinOverTOR()
   if [ ${btcExists} -gt 0 ]; then
 
     # make sure all is turned off and removed and then activate fresh (so that also old settings get removed)
-    deactivateBitcoinOverTOR
+    deactivateBitcoinOverTor
 
     sudo chmod 777 /home/bitcoin/.${network}/${network}.conf
     echo "Adding Tor config to the the ${network}.conf ..."
@@ -52,7 +52,7 @@ activateBitcoinOverTOR()
   fi
 }
 
-deactivateBitcoinOverTOR()
+deactivateBitcoinOverTor()
 {
   # always make sure also to remove old settings
   sudo sed -i "s/^onlynet=.*//g" /home/bitcoin/.${network}/${network}.conf
@@ -91,16 +91,16 @@ if [ "$1" = "status" ]; then
 fi
 
 # if started with btcconf-on
-[ "$1" = "btcconf-on" ] && { activateBitcoinOverTOR; exit 0; }
+[ "$1" = "btcconf-on" ] && { activateBitcoinOverTor; exit 0; }
 
 # if started with btcconf-off
-[ "$1" = "btcconf-off" ] && { deactivateBitcoinOverTOR; exit 0; }
+[ "$1" = "btcconf-off" ] && { deactivateBitcoinOverTor; exit 0; }
 
 # add default value to raspi config if needed
 checkTorEntry=$(sudo cat /mnt/hdd/raspiblitz.conf | grep -c "runBehindTor")
 [ ${checkTorEntry} -eq 0 ] && echo "runBehindTor=off" >> /mnt/hdd/raspiblitz.conf
 
-# location of TOR config
+# location of tor config
 # make sure /etc/tor exists
 sudo mkdir /etc/tor 2>/dev/null
 
@@ -195,7 +195,7 @@ ExitRelay 0
 CookieAuthentication 1
 CookieAuthFileGroupReadable 1
 
-# NOTE: Bitcoin onion private key at /mnt/hdd/lnd/onion_v3_private_key. Delete it to reset.
+# NOTE: Bitcoin onion private key at /mnt/hdd/lnd/onion_v3_private_key. Delete the priv key and restart bitcoind to renew the advertised address.
 # NOTE: LND onion private key at /mnt/hdd/lnd/v3_onion_private_key
 
 # Hidden Service for WEB ADMIN INTERFACE
@@ -244,7 +244,7 @@ EOF
   echo
 
   # ACTIVATE BITCOIN OVER TOR (function call)
-  activateBitcoinOverTOR
+  activateBitcoinOverTor
 
   # ACTIVATE APPS OVER TOR
   source /mnt/hdd/raspiblitz.conf 2>/dev/null
@@ -299,13 +299,13 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # setting value in raspi blitz config
   sudo sed -i "s/^runBehindTor=.*/runBehindTor=off/g" /mnt/hdd/raspiblitz.conf
 
-  # disable TOR service
+  # disable tor service
   echo "# *** Disable Tor service ***"
   sudo systemctl disable tor@default
   echo
 
-  # DEACTIVATE BITCOIN OVER TOR (function call)
-  deactivateBitcoinOverTOR
+  # deactivate bitcoin over tor (function call)
+  deactivateBitcoinOverTor
   echo
 
   sudo /home/admin/config.scripts/internet.sh update-publicip
