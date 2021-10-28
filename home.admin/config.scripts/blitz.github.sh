@@ -10,22 +10,28 @@
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ]; then
   echo "FOR DEVELOPMENT USE ONLY!"
   echo "RaspiBlitz Sync Scripts"
-  echo "XXsyncScripts.sh info"
-  echo "XXsyncScripts.sh [-run|-clean|-install|-justinstall] branch [repo]"
+  echo "blitz.github.sh info"
+  echo "blitz.github.sh [-run|-clean|-install|-justinstall] branch [repo]"
   exit 1
 fi
 
-cd /home/admin/raspiblitz
 source /mnt/hdd/raspiblitz.conf 2>/dev/null
+
+cd /home/admin/raspiblitz
 
 # gather info
 activeGitHubUser=$(sudo -u admin cat /home/admin/raspiblitz/.git/config 2>/dev/null | grep "url = " | cut -d "=" -f2 | cut -d "/" -f4)
 activeBranch=$(git branch 2>/dev/null | grep \* | cut -d ' ' -f2)
+commitHashLong=$(git log -n1 --format=format:"%H")
+commitHashShort=${commitHashLong:0:7}
 
 # if parameter is "info" just give back basic info about sync
 if [ "$1" == "info" ]; then
+
   echo "activeGitHubUser='${activeGitHubUser}'"
   echo "activeBranch='${activeBranch}'"
+  echo "commitHashLong='${commitHashLong}'"
+  echo "commitHashShort='${commitHashShort}'"
   exit 1
 fi
 
