@@ -145,14 +145,14 @@ elif [ "$1" = "set" ]; then
   # set in redis the timestamp
   timestamp=$(date +%s)
   redis-cli set ${keystr}${META_LASTTOUCH_TS} "${timestamp}" ${additionalParams} 1>/dev/null
-  echo "# lasttouch(${timestamp})"
+  #echo "# lasttouch(${timestamp})"
 
   # check if the value has a outdate policy
   outdatesecs=$(redis-cli get ${keystr}${META_OUTDATED_SECONDS})
   if [ "${outdatesecs}" == "" ]; then
     outdatesecs="-1"
   fi 
-  echo "# outdatesecs(${outdatesecs})"
+  #echo "# outdatesecs(${outdatesecs})"
   if [ "${outdatesecs}" != "-1" ]; then
     # set exipire valid flag (if its gone - value is considered as outdated)
     redis-cli set ${keystr}${META_VALID_FLAG} "1" EX ${outdatesecs} 1>/dev/null
