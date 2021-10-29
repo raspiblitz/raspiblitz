@@ -11,8 +11,8 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 # better readbale seconds
-MINUTE1=60
-MINUTE10=600
+MINUTE=60
+HOURQUATER=900
 HOURHALF=1800
 HOUR=3600
 DAYHALF=43200
@@ -39,7 +39,7 @@ system_up=$(cat /proc/uptime | grep -o '^[0-9]\+')
 
 # basic local connection & online status
 source <(/home/admin/config.scripts/blitz.cache.sh valid localip dhcp network_rx network_tx online)
-if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE10} ]; then
+if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE} ]; then
   echo "updating: /home/admin/config.scripts/internet.sh status local"
   source <(/home/admin/config.scripts/internet.sh status local)
   /home/admin/config.scripts/blitz.cache.sh set localip "${localip}"
@@ -54,7 +54,7 @@ fi
 endTime=$(date +%s)
 runTime=$(echo "${endTime}-${startTime}" | bc)
 echo "scriptRuntime=${runTime}"
-if [ ${scriptRuntime} -gt $MINUTE1 ]; then
+if [ ${scriptRuntime} -gt ${MINUTE} ]; then
   echo "WARNING: HANGING SYSTEM ... systemscan took more than a minute!"
 else
   echo "OK"
