@@ -390,7 +390,6 @@ do
     /home/admin/config.scripts/blitz.cache.sh set state "noDHCP"
     /home/admin/config.scripts/blitz.cache.sh set message "Waiting for DHCP"
   elif [ ${#localip} -eq 0 ]; then
-    configWifiExists=$(sudo cat /etc/wpa_supplicant/wpa_supplicant.conf 2>/dev/null| grep -c "network=")
     if [ ${configWifiExists} -eq 0 ]; then
       # display user to connect LAN
       /home/admin/config.scripts/blitz.cache.sh set state "noIP-LAN"
@@ -756,7 +755,7 @@ echo "load configfile data" >> $logFile
 source ${configFile}
 
 # if a WIFI config exists backup to HDD
-configWifiExists=$(sudo cat /etc/wpa_supplicant/wpa_supplicant.conf 2>/dev/null| grep -c "network=")
+source <(/home/admin/config.scripts/internet.sh status)
 if [ ${configWifiExists} -eq 1 ]; then
   echo "Making Backup Copy of WIFI config to HDD" >> $logFile
   cp /etc/wpa_supplicant/wpa_supplicant.conf /mnt/hdd/app-data/wpa_supplicant.conf

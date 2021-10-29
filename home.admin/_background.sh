@@ -39,6 +39,9 @@ do
   # gather the uptime seconds
   upSeconds=$(cat /proc/uptime | grep -o '^[0-9]\+')
 
+  # TODO: move system scan into different background task later
+  /home/admin/config.scripts/blitz.systemscan.sh
+
   # source info & config file fresh on every loop
   source ${infoFile} 2>/dev/null
   source ${configFile} 2>/dev/null
