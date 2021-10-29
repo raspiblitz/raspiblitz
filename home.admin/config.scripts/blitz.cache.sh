@@ -239,7 +239,7 @@ elif [ "$1" = "outdated-seconds" ]; then
     exit 1
   fi
 
-  echo "# redis-cli set ${keyValue} ${!keyValue}"
+  echo "# redis-cli set ${keystr} ${outdatesecs}"
   redis-cli set ${keystr} "${outdatesecs}"
 
 # meta
