@@ -342,7 +342,7 @@ elif [ "$1" = "valid" ]; then
           lasttouch_overall="${lasttouch}"
         fi
       fi
-      echo "# lasttouch_overall(${lasttouch_overall})"
+      #echo "# lasttouch_overall(${lasttouch_overall})"
 
     fi
 
