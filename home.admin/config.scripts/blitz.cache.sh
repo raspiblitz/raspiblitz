@@ -20,7 +20,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ];
   echo "blitz.cache.sh set [key] [value] [?expire-seconds]"
   echo "blitz.cache.sh get [key1] [?key2] [?key3] ..."
   echo 
-  echo "blitz.cache.sh outdated-seconds [key] [value]"
+  echo "blitz.cache.sh outdate [key] [value]"
   echo "# set in how many seconds value is marked as outdated or"
   echo "# -1 = never outdated (default)"  
   echo "# 0  = always outdated"
@@ -31,7 +31,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ];
   echo "# stillvalid=0/1 if value is still valid or outdated"
   echo "# lasttouch= last update timestamp in unix seconds"
   echo 
-  echo "blitz.cache.sh all-valid [key1] [?key2] [?key3] ..."
+  echo "blitz.cache.sh valid [key1] [?key2] [?key3] ..."
   echo "# check multiple keys if all are still not outdated"
   echo "# use for example to check if a complex call needs"
   echo "# to be made that covers multiple single data points"
@@ -227,7 +227,7 @@ elif [ "$1" = "import" ]; then
 ##################################
 
 # outdated-seconds (set outdated policy)
-elif [ "$1" = "outdated-seconds" ]; then
+elif [ "$1" = "outdate" ]; then
 
   # get parameters
   keystr=$2
@@ -286,7 +286,7 @@ elif [ "$1" = "meta" ]; then
   echo "stillvalid=\"${stillvalid}\""
 
 # all-valid
-elif [ "$1" = "all-valid" ]; then
+elif [ "$1" = "valid" ]; then
 
   position=0
   for keystr in $@
