@@ -293,7 +293,7 @@ elif [ "$1" = "meta" ]; then
 elif [ "$1" = "valid" ]; then
 
   position=0
-  lasttouch_overall="";
+  lasttouch_overall=""
   for keystr in $@
   do
     
