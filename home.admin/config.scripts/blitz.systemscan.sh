@@ -45,6 +45,7 @@ if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE} ]; then
   /home/admin/config.scripts/blitz.cache.sh set localip "${localip}"
   /home/admin/config.scripts/blitz.cache.sh set dhcp "${dhcp}"
   /home/admin/config.scripts/blitz.cache.sh set network_rx "${network_rx}"
+  /home/admin/config.scripts/blitz.cache.sh set network_tx "${network_tx}"
   /home/admin/config.scripts/blitz.cache.sh set online "${online}"
 else
   echo "stillvalid: /home/admin/config.scripts/internet.sh status local"
