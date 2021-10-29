@@ -347,7 +347,7 @@ elif [ "$1" = "valid" ]; then
 
   echo "lasttouch_overall=\"${lasttouch_overall}\""
   # calculate age in seconds of oldest entry
-  if [ "${$lasttouch_overall}" != "" ]; then
+  if [ "${lasttouch_overall}" != "" ]; then
     timestamp=$(date +%s)
     age=$(($timestamp-$lasttouch_overall))
     echo "age=\"${age}\""
