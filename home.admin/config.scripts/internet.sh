@@ -106,6 +106,14 @@ if [ ${runOnline} -eq 1 ]; then
     # bitcoind has peers - so device is online
     online=1
   fi
+  # second try if tor test site can be called
+  if [ ${online} -eq 0 ]; then
+    source <(timeout 5 /home/admin/config.scripts/internet.tor.sh status)
+    if [ "${torFunctional}" == "1" ]; then
+      # tor delivers content
+      online=1
+    fi
+  fi
   # fallback: test pings to dns servers
   if [ ${online} -eq 0 ] && [ "${dnsServer}" != "" ]; then
     # re-test with user set dns server
