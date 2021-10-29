@@ -52,10 +52,10 @@ fi
 
 # info on scan run time
 endTime=$(date +%s)
-runTime=$(echo "${endTime}-${startTime}" | bc)
-echo "scriptRuntime=${runTime}"
-if [ ${scriptRuntime} -gt ${MINUTE} ]; then
+runTime=$((${endTime}-${startTime}))
+echo "runtime=${runTime}"
+if [ ${runTime} -gt ${MINUTE} ]; then
   echo "WARNING: HANGING SYSTEM ... systemscan took more than a minute!"
 else
-  echo "OK"
+  echo "DONE"
 fi
