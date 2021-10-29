@@ -35,20 +35,17 @@ system_up=$(cat /proc/uptime | grep -o '^[0-9]\+')
 # INTERNET
 
 # TODO: seperate local network from online to not always target online pings when local info updating
-# TODO: rename values to network_ so thatz they fit more nicely
 
 # basic local connection & online status
-source <(/home/admin/config.scripts/blitz.cache.sh valid localip dhcp network_rx network_tx online)
+source <(/home/admin/config.scripts/blitz.cache.sh valid internet_localip internet_dhcp internet_rx internet_tx internet_online)
 if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE} ]; then
   echo "updating: /home/admin/config.scripts/internet.sh status local"
   source <(/home/admin/config.scripts/internet.sh status local)
-  /home/admin/config.scripts/blitz.cache.sh set localip "${localip}"
-  /home/admin/config.scripts/blitz.cache.sh set dhcp "${dhcp}"
-  /home/admin/config.scripts/blitz.cache.sh set network_rx "${network_rx}"
-  /home/admin/config.scripts/blitz.cache.sh set network_tx "${network_tx}"
-  /home/admin/config.scripts/blitz.cache.sh set online "${online}"
-else
-  echo "stillvalid: /home/admin/config.scripts/internet.sh status local"
+  /home/admin/config.scripts/blitz.cache.sh set internet_localip "${localip}"
+  /home/admin/config.scripts/blitz.cache.sh set internet_dhcp "${dhcp}"
+  /home/admin/config.scripts/blitz.cache.sh set internet_rx "${network_rx}"
+  /home/admin/config.scripts/blitz.cache.sh set internet_tx "${network_tx}"
+  /home/admin/config.scripts/blitz.cache.sh set internet_online "${online}"
 fi
 
 # info on scan run time
@@ -57,6 +54,4 @@ runTime=$((${endTime}-${startTime}))
 echo "runtime=${runTime}"
 if [ ${runTime} -gt ${MINUTE} ]; then
   echo "WARNING: HANGING SYSTEM ... systemscan took more than a minute!"
-else
-  echo "DONE"
 fi
