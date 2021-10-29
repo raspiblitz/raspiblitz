@@ -377,7 +377,7 @@ You don't need a LAN port on your laptop as long as you can connect over WLAN to
 ## Is it possible to connect the Blitz over Wifi instead of using a LAN cable?
 
 A LAN cable is recommended because it reduces a possible source of error on the network connection side. But how to setup WLAN when you don't have a LAN-Router/Switch available see here:
-https://stadicus.github.io/RaspiBolt/raspibolt_20_pi.html#prepare-wifi
+https://raspibolt.github.io/raspibolt/raspibolt_20_pi.html#prepare-wifi
 
 ## Can I directly connect the RaspiBlitz to my laptop?
 
@@ -699,7 +699,7 @@ Also make sure to check again on your power supply - it needs to deliver equal o
 ## How can I update LND or bitcoind even before the next RaspiBlitz update?
 
 Try updating before a official RaspiBlitz at your own risk - you can find some info about that here:
-https://stadicus.github.io/RaspiBolt/raspibolt_faq.html#how-to-upgrade-bitcoin-core
+https://raspibolt.github.io/raspibolt/raspibolt_faq.html#how-to-upgrade-bitcoin-core
 
 ## I cannot connect via SSH to my RaspiBlitz. What do I do?
 

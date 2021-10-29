@@ -704,7 +704,7 @@ sudo bash -c "echo '# end of pam-auth-update config' >> /etc/pam.d/common-sessio
 
 
 # *** fail2ban ***
-# based on https://stadicus.github.io/RaspiBolt/raspibolt_21_security.html
+# based on https://raspibolt.github.io/raspibolt/raspibolt_21_security.html#fail2ban
 echo "*** HARDENING ***"
 sudo apt install -y --no-install-recommends python3-systemd fail2ban 
 

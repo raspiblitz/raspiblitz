@@ -201,7 +201,7 @@ Then the user is requested to think of and write down 4 passwords:
 
 You can use this [RaspiBlitz Password Sheet (PDF)](https://github.com/rootzoll/raspiblitz/raw/v1.4/home.admin/assets/RaspiBlitzRecoverySheet.pdf) to write those passwords down for save storage and also use it later on for your Seed Words.
 
-*The password A,B,C & D idea is directly based on the [RaspiBolt Guide Preparations](https://stadicus.github.io/RaspiBolt/raspibolt_10_preparations.html#write-down-your-passwords) - check out for more background.*
+*The password A,B,C & D idea is directly based on the [RaspiBolt Guide Preparations](https://raspibolt.github.io/raspibolt/raspibolt_10_preparations.html#write-down-your-passwords) - check out for more background.*
 
 Then the user is asked to enter the Password A:
 
@@ -1136,7 +1136,7 @@ Get all details on "How to contribute to RaspiBlitz Development" on this video:
 
 <a href="https://www.youtube.com/watch?v=ZVtZepV3OfM" target="_blank"><img src="pictures/video-contrib.png" alt="Video Tutorial" width="400"></a><br>--watch--> https://www.youtube.com/watch?v=ZVtZepV3OfM
 
-Also get inspired for a deep-dive with the original "[RaspiBolt](https://stadicus.github.io/RaspiBolt/)" tutorial on how to build a lightning node on the RaspberryPi, the base work on which the RaspiBlitz was developed - so much thx to Stadicus :)
+Also get inspired for a deep-dive with the original "[RaspiBolt](https://raspibolt.github.io/raspibolt/)" tutorial on how to build a lightning node on the RaspberryPi, the base work on which the RaspiBlitz was developed - so much thx to Stadicus :)
 
 Join me on twitter [@rootzoll](https://twitter.com/rootzoll), visit us at an upcoming [#lightninghackday](https://twitter.com/hashtag/LightningHackday?src=hash) or check by one of our bitcoin meetups in Berlin ... every 1st Thursday evening a month at the room77 bar - feel free to buy me a beer with lightning there :)
 
