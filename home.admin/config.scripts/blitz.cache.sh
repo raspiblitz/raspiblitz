@@ -306,6 +306,7 @@ elif [ "$1" = "all-valid" ]; then
     # break as soon one value is outdated
     if [ "${valuestr}" == "" ]; then
       echo "stillvalid=\"0\""
+      break
     fi
 
   done
