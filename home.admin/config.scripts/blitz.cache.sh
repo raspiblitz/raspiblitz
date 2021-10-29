@@ -301,13 +301,13 @@ elif [ "$1" = "valid" ]; then
 
     # get redis value
     valuestr=$(redis-cli get ${keystr}${META_VALID_FLAG})
-    echo "# ${keystr}${META_VALID_FLAG}=\"${valuestr}\""
+    #echo "# ${keystr}${META_VALID_FLAG}=\"${valuestr}\""
 
     # break as soon one value is outdated
     if [ "${valuestr}" == "" ]; then
       # break if value is not protected from outdated  
       outdatesecs=$(redis-cli get ${keystr}${META_OUTDATED_SECONDS})
-      echo "# ${keystr}${META_OUTDATED_SECONDS}=\"${outdatesecs}\""
+      #echo "# ${keystr}${META_OUTDATED_SECONDS}=\"${outdatesecs}\""
       if [ "${outdatesecs}" != "" ] && [ "${outdatesecs}" != "-1" ]; then
         echo "stillvalid=\"0\""
         exit 0
@@ -317,7 +317,7 @@ elif [ "$1" = "valid" ]; then
         # break if key does not exist in cache (count as outdated)
         notexists=$(redis-cli exists ${keystr} | grep -c "0")
         if [ "${notexists}" == "1" ]; then
-          echo "# '${keystr}' key does not exist"
+          #echo "# '${keystr}' key does not exist"
           echo "stillvalid=\"0\""
           exit 0
         fi
