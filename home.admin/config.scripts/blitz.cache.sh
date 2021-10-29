@@ -139,14 +139,18 @@ elif [ "$1" = "set" ]; then
 
   # set in redis the timestamp
   timestamp=$(date +%s)
-  redis-cli set ${keystr}${META_LASTTOUCH_TS} "${timestamp}" ${additionalParams}
+  redis-cli set ${keystr}${META_LASTTOUCH_TS} "${timestamp}" ${additionalParams} 2>/dev/null
+  echo "# lasttouch(${lasttouch})"
 
   # check if the value has a outdate policy
   outdatesecs=$(redis-cli get ${keystr}${META_OUTDATED_SECONDS})
+  if [ "${outdatesecs}" == "" ]; then
+    outdatesecs="-1"
+  fi 
   echo "# outdatesecs(${outdatesecs})"
-  if [ "${outdatesecs}" != "-1" ] && [ "${outdatesecs}" != "" ]; then
+  if [ "${outdatesecs}" != "-1" ]; then
     # set exipire valid flag (if its gone - value is considered as outdated)
-    redis-cli set ${keystr}${META_VALID_FLAG} "1" EX ${outdatesecs}
+    redis-cli set ${keystr}${META_VALID_FLAG} "1" EX ${outdatesecs} 2>/dev/null
   fi
 
   # also update value if part of raspiblitz.info (persiting values to survice boot)
