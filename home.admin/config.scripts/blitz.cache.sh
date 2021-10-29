@@ -120,7 +120,7 @@ elif [ "$1" = "set" ]; then
   expire=$4
 
   # check that key & value are given
-  if [ "${keystr}" == "" ] || [ "${valuestr}" == "" ]; then
+  if [ "${keystr}" == "" ]; then
     echo "# Fail: missing parameter"
     exit 1
   fi
