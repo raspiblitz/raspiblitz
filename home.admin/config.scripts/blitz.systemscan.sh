@@ -51,7 +51,7 @@ fi
 # info on scan run time
 endTime=$(date +%s)
 runTime=$((${endTime}-${startTime}))
-echo "runtime=${runTime}"
+#echo "runtime=${runTime}"
 if [ ${runTime} -gt ${MINUTE} ]; then
   echo "WARNING: HANGING SYSTEM ... systemscan took more than a minute!"
 fi
