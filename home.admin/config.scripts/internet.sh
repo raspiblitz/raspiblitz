@@ -78,6 +78,10 @@ if [ ${#localip_LAN} -gt 0 ]; then
 fi
 
 #############################################
+# get local IP Range
+localiprange=$(ip addr | grep 'state UP' -A2 | grep -E -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0\|inet' | tail -n1 | awk '{print $2}' | awk -F. '{print $1"."$2"."$3".0/24"}')
+
+#############################################
 # check DHCP
 dhcp=1
 if [ "${localip:0:4}" = "169." ]; then
@@ -212,6 +216,7 @@ if [ "$1" == "status" ]; then
 
   echo "### LOCAL INTERNET ###"
   echo "localip=${localip}"
+  echo "localiprange=${localiprange}"
   echo "dhcp=${dhcp}"
   echo "configWifiExists=${configWifiExists}"
   echo "network_device=${networkDevice}"

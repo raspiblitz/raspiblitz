@@ -7,9 +7,6 @@ source /mnt/hdd/raspiblitz.conf
 
 source <(/home/admin/config.scripts/network.aliases.sh getvars cl $1)
 
-# get the local network IP to be displayed on the LCD
-source <(/home/admin/config.scripts/internet.sh status local)
-
 # BASIC MENU INFO
 WIDTH=64
 BACKTITLE="RaspiBlitz"

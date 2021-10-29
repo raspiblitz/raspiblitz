@@ -6,7 +6,7 @@
 source /home/admin/raspiblitz.info 2>/dev/null
 
 # get values from cache
-source <(/home/admin/config.scripts/blitz.cache.sh get codeVersion localip)
+source <(/home/admin/config.scripts/blitz.cache.sh get codeVersion internet_localip)
 
 # 1st PARAMETER: eventID
 # fixed ID string for a certain event
@@ -34,7 +34,7 @@ if [ "${mode}" != "lcd" ] && [ "${mode}" != "ssh" ]; then
 fi
 
 # default backtitle for dialog
-backtitle="RaspiBlitz ${codeVersion} / ${eventID} / ${localip}"
+backtitle="RaspiBlitz ${codeVersion} / ${eventID} / ${internet_localip}"
 
 ################################################
 # 1) WELL DEFINED EVENTS
@@ -85,7 +85,7 @@ SYSTEM RAN INTO AN ERROR:
 ${contentString}
 ------------------------------------
 Use terminal command to login:
-ssh admin@${localip}
+ssh admin@${internet_localip}
 " 10 41
 
 elif [ "${eventID}" == "error" ] && [ "${mode}" == "ssh" ]; then
@@ -128,7 +128,7 @@ elif [ "${eventID}" == "repair" ] && [ "${mode}" == "lcd" ]; then
 
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "
 Repair-Mode - Login for Details:
-ssh admin@${localip}
+ssh admin@${internet_localip}
 Use your Password A
 " 7 41
 
@@ -136,7 +136,7 @@ elif [ "${eventID}" == "copysource" ] && [ "${mode}" == "lcd" ]; then
 
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "
 Repair-Mode - Providing Blockchain
-ssh admin@${localip}
+ssh admin@${internet_localip}
 Use your Password A
 " 7 41
 
@@ -150,7 +150,7 @@ elif [ "${eventID}" == "walletlocked" ] && [ "${mode}" == "lcd" ]; then
 
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "
 Lightning Wallet Locked
-ssh admin@${localip}
+ssh admin@${internet_localip}
 Use your Password A
 " 7 41
 
@@ -158,7 +158,7 @@ elif [ "${eventID}" == "copytarget" ] && [ "${mode}" == "lcd" ]; then
 
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "
 Receiving Blockchain over LAN
-ssh admin@${localip}
+ssh admin@${internet_localip}
 Use your Password A
 " 7 41
 
@@ -208,7 +208,7 @@ elif [ "${eventID}" == "waitsetup" ] && [ "${mode}" == "lcd" ]; then
 ${welcomeline}
 ------------------------------------
 Use terminal command to login:
-ssh admin@${localip}
+ssh admin@${internet_localip}
 password: raspiblitz
 " 9 41
 
@@ -221,7 +221,7 @@ password: raspiblitz
         dialog --backtitle "${backtitle}" --cr-wrap --infobox "
 Login for Maintenance:
 ---> ${contentString}
-ssh admin@${localip}
+ssh admin@${internet_localip}
 Use password: raspiblitz
 " 8 41
     fi
@@ -230,7 +230,7 @@ elif [ "${eventID}" == "waitfinal" ]; then
 
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "
 Setup-Done - Login for Details:
-ssh admin@${localip}
+ssh admin@${internet_localip}
 Use your Password A
 " 7 41
 

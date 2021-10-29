@@ -92,20 +92,8 @@ echo "- importing _version.info"
 # try to load config values if available (config overwrites info)
 source ${configFile} 2>/dev/null
 
-# get basic hardware info
-source <(/home/admin/config.scripts/blitz.hardware.sh status)
-/home/admin/config.scripts/blitz.cache.sh set board "${localip}"
-/home/admin/config.scripts/blitz.cache.sh set ramMB "${ramMB}"
-/home/admin/config.scripts/blitz.cache.sh set ramGB "${ramGB}"
-
-# get first basic network info
-source <(/home/admin/config.scripts/internet.sh status)
-/home/admin/config.scripts/blitz.cache.sh set localip "${localip}"
-/home/admin/config.scripts/blitz.cache.sh set online "${online}"
-
-# get basic dns info
-source <(sudo /home/admin/config.scripts/internet.dns.sh test nodialog)
-/home/admin/config.scripts/blitz.cache.sh set dnsworking "${dnsworking}"
+# monitor LAN connection fast to display local IP changes
+/home/admin/config.scripts/blitz.cache.sh outdate internet_localip 0
 
 ######################################
 # CHECK SD CARD INCONSISTENT STATE
@@ -380,9 +368,8 @@ gotLocalIP=0
 until [ ${gotLocalIP} -eq 1 ]
 do
 
-  # get latest network info & update raspiblitz.info
-  source <(/home/admin/config.scripts/internet.sh status)
-  /home/admin/config.scripts/blitz.cache.sh set localip "${localip}"
+  # get latest network info directly
+  source <(/home/admin/config.scripts/internet.sh status online)
 
   # check state of network
   if [ ${dhcp} -eq 0 ]; then
@@ -500,9 +487,9 @@ if [ ${isMounted} -eq 0 ]; then
       exit 0
     fi
 
-    # detect if network get deconnected again
+    # detect if network get deconnected again (call directly instead of cache)
     # --> "removing network cable" can be used as signal to shutdown clean on test startup
-    source <(/home/admin/config.scripts/internet.sh status)
+    source <(/home/admin/config.scripts/internet.sh status local)
     if [ "${localip}" == "" ]; then
       sed -i "s/^state=.*/state=errorNetwork/g" ${infoFile}
       sleep 8
@@ -833,6 +820,9 @@ sudo systemctl enable ${network}d
 /home/admin/config.scripts/blitz.cache.sh set setupPhase "done"
 /home/admin/config.scripts/blitz.cache.sh set state "ready"
 /home/admin/config.scripts/blitz.cache.sh set message "Node Running"
+
+# relax systemscan on certain values
+/home/admin/config.scripts/blitz.cache.sh outdate internet_localip 5
 
 echo "DONE BOOTSTRAP" >> $logFile
 exit 0

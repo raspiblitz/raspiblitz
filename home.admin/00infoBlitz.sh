@@ -22,7 +22,7 @@ source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
 hdd="${hddUsedInfo}"
 
 ## get internet info
-source <(sudo /home/admin/config.scripts/internet.sh status)
+source <(sudo /home/admin/config.scripts/internet.sh status global)
 cleanip=$(echo "${publicIP}" | tr -d '[]')
 
 ## get UPS info

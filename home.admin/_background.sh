@@ -59,16 +59,6 @@ do
   fi
 
   ####################################################
-  # CHECK IF LOCAL IP CHANGED
-  ####################################################
-  oldLocalIP="${localip}";
-  source <(/home/admin/config.scripts/internet.sh status)
-  if [ "${oldLocalIP}" != "${localip}" ]; then
-    echo "local IP changed old(${oldLocalIP}) new(${localip}) - updating in cache"
-    /home/admin/config.scripts/blitz.cache.sh set localip "${localip}"
-  fi
-
-  ####################################################
   # SKIP REST OF THE TASKS IF STILL IN SETUP PHASE
   ####################################################
 

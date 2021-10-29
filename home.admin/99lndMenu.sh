@@ -5,9 +5,6 @@ echo "get raspiblitz config"
 source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
 
-# get the local network IP to be displayed on the LCD
-source <(/home/admin/config.scripts/internet.sh status local)
-
 source <(/home/admin/config.scripts/network.aliases.sh getvars lnd $1)
 
 # make sure lnd wallet is unlocked

@@ -32,7 +32,7 @@ confirmation()
 }
 
 # get the local network IP to be displayed on the LCD
-source <(/home/admin/config.scripts/internet.sh status local)
+source <(/home/admin/config.scripts/blitz.cache.sh get internet_localip)
 
 if [ ${chain} = test ];then
   netprefix="t"
@@ -58,7 +58,7 @@ fi
 if [ ${#lightning} -gt 0 ]; then
   plus="/ ${lightning} ${plus}"
 fi
-BACKTITLE="${localip} / ${hostname} / ${network} ${plus}"
+BACKTITLE="${internet_localip} / ${hostname} / ${network} ${plus}"
 
 # Basic Options
 OPTIONS+=(INFO "RaspiBlitz Status Screen")

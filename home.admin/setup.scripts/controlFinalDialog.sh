@@ -160,14 +160,14 @@ sudo rm /var/cache/raspiblitz/temp/raspiblitz.setup
 
 sleep 2
 clear
-source <(/home/admin/config.scripts/blitz.cache.sh get localip)
+source <(/home/admin/config.scripts/blitz.cache.sh get internet_localip)
 /home/admin/config.scripts/blitz.cache.sh set setupPhase "done"
 echo "***********************************************************"
 echo "RaspiBlitz going to reboot"
 echo "***********************************************************"
 echo "This is the final setup reboot - you will get disconnected."
 echo "SSH again into system with:"
-echo "ssh admin@${localip}"
+echo "ssh admin@${internet_localip}"
 echo "Use your password A"
 echo "***********************************************************"
 echo "# final setup reboot ..." >> /home/admin/raspiblitz.log
