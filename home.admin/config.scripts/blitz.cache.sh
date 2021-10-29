@@ -335,7 +335,7 @@ elif [ "$1" = "valid" ]; then
 
       # so value is still valid - check if its the oldest value in list
       lasttouch=$(redis-cli get ${keystr}${META_LASTTOUCH_TS})
-      echo "# lasttouch(${lasttouch})"
+      #echo "# lasttouch(${lasttouch})"
       if [ "${lasttouch}" != "" ]; then
         # find smallest lasttouch
         if [ "${lasttouch_overall}" == "" ] || [ ${lasttouch_overall} -gt ${lasttouch} ]; then
@@ -351,7 +351,6 @@ elif [ "$1" = "valid" ]; then
   # of all were valid
   echo "stillvalid=\"1\""
 
-  echo "lasttouch_overall=\"${lasttouch_overall}\""
   # calculate age in seconds of oldest entry
   if [ "${lasttouch_overall}" != "" ]; then
     timestamp=$(date +%s)
