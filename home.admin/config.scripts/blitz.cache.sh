@@ -305,8 +305,14 @@ elif [ "$1" = "all-valid" ]; then
 
     # break as soon one value is outdated
     if [ "${valuestr}" == "" ]; then
-      echo "stillvalid=\"0\""
-      exit 0
+
+      # break if value is not protected from outdated  
+      outdatesecs=$(redis-cli get ${keystr}${META_OUTDATED_SECONDS})
+      if [ "${outdatesecs}" != "" ] && [ "${outdatesecs}" != "-1" ]; then
+        echo "stillvalid=\"0\""
+        exit 0
+      fi
+
     fi
 
   done
