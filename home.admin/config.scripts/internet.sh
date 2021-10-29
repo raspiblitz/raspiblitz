@@ -80,18 +80,27 @@ if [ "${localip:0:4}" = "169." ]; then
 fi
 
 #############################################
+# check for Wifi
+configWifiExists=0
+if [ "$EUID" -eq 0 ]; then
+  configWifiExists=$(cat /etc/wpa_supplicant/wpa_supplicant.conf 2>/dev/null| grep -c "network=")
+else
+  configWifiExists=$(sudo cat /etc/wpa_supplicant/wpa_supplicant.conf 2>/dev/null| grep -c "network=")
+fi
+
+#############################################
 # check for internet connection
+online=0
 
 # first quick check if bitcoind has peers - if so the client is online
 # if not then recheck by pinging different sources if online
 # used cached results to not delay (cache will be updated by background process)
-source <(/home/admin/config.scripts/network.monitor.sh peer-status cached)
-
-online=0
+source <(timeout 2 /home/admin/config.scripts/network.monitor.sh peer-status)
 if [ "${peers}" != "0" ] && [ "${peers}" != "" ]; then
   # bitcoind has peers - so device is online
   online=1
 fi
+# fallback: test pings to dns servers
 if [ ${online} -eq 0 ] && [ "${dnsServer}" != "" ]; then
   # re-test with user set dns server
   online=$(ping ${dnsServer} -c 1 -W 2 2>/dev/null | grep -c '1 received')
