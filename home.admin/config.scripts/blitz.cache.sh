@@ -140,7 +140,7 @@ elif [ "$1" = "set" ]; then
   fi
 
   # set in redis key value cache
-  redis-cli set ${keystr} "${valuestr}" ${additionalParams}
+  redis-cli set ${keystr} "${valuestr}" ${additionalParams} 1>/dev/null
 
   # set in redis the timestamp
   timestamp=$(date +%s)
