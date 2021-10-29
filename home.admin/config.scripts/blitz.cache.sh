@@ -239,8 +239,8 @@ elif [ "$1" = "outdated-seconds" ]; then
     exit 1
   fi
 
-  echo "# redis-cli set ${keystr} ${outdatesecs}"
-  redis-cli set ${keystr} "${outdatesecs}"
+  echo "# redis-cli set ${keystr}${META_OUTDATED_SECONDS} ${outdatesecs}"
+  redis-cli set ${keystr}${META_OUTDATED_SECONDS} "${outdatesecs}"
 
 # meta
 elif [ "$1" = "meta" ]; then
