@@ -3,7 +3,7 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "# handle the internet connection"
- echo "# internet.sh status [local|global]"
+ echo "# internet.sh status [local|online|global]"
  echo "# internet.sh ipv6 [on|off]"
  echo "# internet.sh update-publicip [?domain]"
  exit 1
@@ -11,7 +11,12 @@ fi
 
 # check when to global check
 runGlobal=0
+runOnline=0
+if [ "$2" == "online" ]; then
+  runOnline=1
+fi
 if [ "$2" == "global" ]; then
+  runOnline=0
   runGlobal=1
 fi
 if [ "$1" == "update-publicip" ]; then
@@ -88,47 +93,50 @@ else
   configWifiExists=$(sudo cat /etc/wpa_supplicant/wpa_supplicant.conf 2>/dev/null| grep -c "network=")
 fi
 
-#############################################
-# check for internet connection
-online=0
 
-# first quick check if bitcoind has peers - if so the client is online
-# if not then recheck by pinging different sources if online
-# used cached results to not delay (cache will be updated by background process)
-source <(timeout 2 /home/admin/config.scripts/network.monitor.sh peer-status)
-if [ "${peers}" != "0" ] && [ "${peers}" != "" ]; then
-  # bitcoind has peers - so device is online
-  online=1
+#############################################
+## check for internet connection
+online=0
+if [ ${runOnline} -eq 1 ]; then
+  # first quick check if bitcoind has peers - if so the client is online
+  # if not then recheck by pinging different sources if online
+  # used cached results to not delay (cache will be updated by background process)
+  source <(timeout 2 /home/admin/config.scripts/network.monitor.sh peer-status)
+  if [ "${peers}" != "0" ] && [ "${peers}" != "" ]; then
+    # bitcoind has peers - so device is online
+    online=1
+  fi
+  # fallback: test pings to dns servers
+  if [ ${online} -eq 0 ] && [ "${dnsServer}" != "" ]; then
+    # re-test with user set dns server
+    online=$(ping ${dnsServer} -c 1 -W 2 2>/dev/null | grep -c '1 received')
+  fi
+  if [ ${online} -eq 0 ]; then
+    # re-test with other server
+    online=$(ping 1.0.0.1 -c 1 -W 2 2>/dev/null | grep -c '1 received')
+  fi
+  if [ ${online} -eq 0 ]; then
+    # re-test with other server
+    online=$(ping 8.8.8.8 -c 1 -W 2 2>/dev/null | grep -c '1 received')
+  fi
+  if [ ${online} -eq 0 ]; then
+    # re-test with other server (IPv6)
+    online=$(ping 2620:119:35::35 -c 1 -W 2 2>/dev/null | grep -c '1 received')
+  fi
+  if [ ${online} -eq 0 ]; then
+    # re-test with other server
+    online=$(ping 208.67.222.222 -c 1 -W 2 2>/dev/null | grep -c '1 received')
+  fi
+  if [ ${online} -eq 0 ]; then
+    # re-test with other server (IPv6)
+    online=$(ping 2001:4860:4860::8844 -c 1 -W 2 2>/dev/null | grep -c '1 received')
+  fi
+  if [ ${online} -eq 0 ]; then
+    # re-test with other server
+    online=$(ping 1.1.1.1 -c 1 -W 2 2>/dev/null | grep -c '1 received')
+  fi
 fi
-# fallback: test pings to dns servers
-if [ ${online} -eq 0 ] && [ "${dnsServer}" != "" ]; then
-  # re-test with user set dns server
-  online=$(ping ${dnsServer} -c 1 -W 2 2>/dev/null | grep -c '1 received')
-fi
-if [ ${online} -eq 0 ]; then
-  # re-test with other server
-  online=$(ping 1.0.0.1 -c 1 -W 2 2>/dev/null | grep -c '1 received')
-fi
-if [ ${online} -eq 0 ]; then
-  # re-test with other server
-  online=$(ping 8.8.8.8 -c 1 -W 2 2>/dev/null | grep -c '1 received')
-fi
-if [ ${online} -eq 0 ]; then
-  # re-test with other server (IPv6)
-  online=$(ping 2620:119:35::35 -c 1 -W 2 2>/dev/null | grep -c '1 received')
-fi
-if [ ${online} -eq 0 ]; then
-  # re-test with other server
-  online=$(ping 208.67.222.222 -c 1 -W 2 2>/dev/null | grep -c '1 received')
-fi
-if [ ${online} -eq 0 ]; then
-  # re-test with other server (IPv6)
-  online=$(ping 2001:4860:4860::8844 -c 1 -W 2 2>/dev/null | grep -c '1 received')
-fi
-if [ ${online} -eq 0 ]; then
-  # re-test with other server
-  online=$(ping 1.1.1.1 -c 1 -W 2 2>/dev/null | grep -c '1 received')
-fi
+
 
 #############################################
 # check for internet connection
@@ -202,7 +210,9 @@ if [ "$1" == "status" ]; then
   echo "network_rx='${network_rx}'"
   echo "network_tx='${network_tx}'"
   echo "### GLOBAL INTERNET ###"
-  echo "online=${online}"
+  if [ ${runOnline} -eq 1 ]; then
+    echo "online=${online}"
+  fi
   if [ ${runGlobal} -eq 1 ]; then
     echo "ipv6=${ipv6}"
     echo "# globalip --> ip detected from the outside"
