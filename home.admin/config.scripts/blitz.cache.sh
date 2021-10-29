@@ -312,6 +312,17 @@ elif [ "$1" = "all-valid" ]; then
         echo "stillvalid=\"0\""
         exit 0
       fi
+      # of "outdatesecs" has no value it can also be that key does not exist
+      if [ "${outdatesecs}" == "" ]; then
+        # break if key does not exist in cache (count as outdated)
+        notexists=$(redis-cli exists ${keystr} | grep -c "0")
+        if [ "${notexists}" == "1" ]; then
+          echo "# '${keystr}' key does not exist"
+          echo "stillvalid=\"0\""
+          exit 0
+        fi
+      fi
+
     fi
 
   done
