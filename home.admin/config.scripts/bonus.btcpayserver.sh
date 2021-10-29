@@ -3,9 +3,9 @@
 # Based on: https://gist.github.com/normandmickey/3f10fc077d15345fb469034e3697d0d0
 
 # https://github.com/dgarage/NBXplorer/releases
-NBXplorerVersion="v2.2.8"
+NBXplorerVersion="v2.2.16"
 # https://github.com/btcpayserver/btcpayserver/releases
-BTCPayVersion="v1.2.3"
+BTCPayVersion="v1.3.0"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -554,6 +554,73 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     echo "# BTCPayServer is not installed."
   fi
   exit 0
+fi
+
+if [ "$1" = "update" ]; then
+
+  echo "# Update NBXplorer"
+  cd /home/btcpay || exit 1
+  cd NBXplorer || exit 1
+  # fetch latest master
+  if [ "$(sudo -u btcpay git fetch 2>&1 | grep -c "Please tell me who you are")" -gt 0 ]; then
+    sudo -u btcpay git config user.email "you@example.com"
+    sudo -u btcpay git config user.name "Your Name"
+  fi
+  sudo -u btcpay git fetch
+  # unset $1
+  set --
+  UPSTREAM=${1:-'@{u}'}
+  LOCAL=$(git rev-parse @)
+  REMOTE=$(git rev-parse "$UPSTREAM")
+
+  if [ $LOCAL = $REMOTE ]; then
+    TAG=$(git tag | sort -V | tail -1)
+    echo "# Up-to-date on version $TAG"
+  else
+    echo "# Pulling latest changes..."
+    sudo -u btcpay git pull -p
+    TAG=$(git tag | sort -V | tail -1)
+    echo "# Reset to the latest release tag: $TAG"
+    sudo -u btcpay git reset --hard $TAG
+    echo "# Build NBXplorer ..."
+    # from the build.sh with path
+    sudo systemctl stop nbxplorer
+    sudo -u btcpay /home/btcpay/dotnet/dotnet build -c Release NBXplorer/NBXplorer.csproj
+    sudo systemctl start nbxplorer
+    echo "# Updated NBXplorer to $TAG"
+  fi
+
+  echo "# Update BTCPayServer"
+  cd /home/btcpay || exit 1
+  cd btcpayserver || exit 1
+  # fetch latest master
+  if [ "$(sudo -u btcpay git fetch 2>&1 | grep -c "Please tell me who you are")" -gt 0 ]; then
+    sudo -u btcpay git config user.email "you@example.com"
+    sudo -u btcpay git config user.name "Your Name"
+  fi
+  sudo -u btcpay git fetch
+  # unset $1
+  set --
+  UPSTREAM=${1:-'@{u}'}
+  LOCAL=$(git rev-parse @)
+  REMOTE=$(git rev-parse "$UPSTREAM")
+  
+  if [ $LOCAL = $REMOTE ]; then
+    TAG=$(git tag | grep v1 | sort -V | tail -1)
+    echo "# Up-to-date on version $TAG"
+  else
+    echo "# Pulling latest changes..."
+    sudo -u btcpay git pull -p
+    TAG=$(git tag | grep v1 | sort -V | tail -1)
+    echo "# Reset to the latest release tag: $TAG"
+    sudo -u btcpay git reset --hard $TAG  
+    echo "# Build BTCPayServer ..."
+    # from the build.sh with path
+    sudo systemctl stop btcpayserver
+    sudo -u btcpay /home/btcpay/dotnet/dotnet build -c Release /home/btcpay/btcpayserver/BTCPayServer/BTCPayServer.csproj
+    sudo systemctl start btcpayserver
+    echo "# Updated BTCPayServer to $TAG"
+  fi
 fi
 
 echo "# FAIL - Unknown Parameter $1"
