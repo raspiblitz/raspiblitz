@@ -271,10 +271,10 @@ elif [ "$1" = "meta" ]; then
   # get META_LASTTOUCH_TS
   lasttouch=$(redis-cli get ${keystr}${META_LASTTOUCH_TS})
   if [ "${lasttouch}" == "" ]; then
-    echo "exists=0"
+    echo "initiated=0"
     exit 0
   fi
-  echo "exists=1"
+  echo "initiated=1"
   echo "lasttouch=\"${lasttouch}\""
 
   # get META_OUTDATED_SECONDS
