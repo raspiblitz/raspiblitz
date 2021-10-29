@@ -244,8 +244,12 @@ elif [ "$1" = "outdate" ]; then
     exit 1
   fi
 
+  # store the seconds policy
   echo "# redis-cli set ${keystr}${META_OUTDATED_SECONDS} ${outdatesecs}"
   redis-cli set ${keystr}${META_OUTDATED_SECONDS} "${outdatesecs}"
+
+  # set/renew exipire valid flag (important in case the key had before no expire)
+  redis-cli set ${keystr}${META_VALID_FLAG} "1" EX ${outdatesecs} 1>/dev/null
 
 # meta
 elif [ "$1" = "meta" ]; then
@@ -289,6 +293,7 @@ elif [ "$1" = "meta" ]; then
 elif [ "$1" = "valid" ]; then
 
   position=0
+  lasttouch_overall="";
   for keystr in $@
   do
     
@@ -323,12 +328,27 @@ elif [ "$1" = "valid" ]; then
         fi
       fi
 
+      # so value is still valid - check if its the oldest value in list
+      lasttouch=$(redis-cli get ${keystr}${META_LASTTOUCH_TS})
+      echo "# lasttouch(${lasttouch})"
+      if [ "${lasttouch}" != "" ]; then
+        if [ "${lasttouch_overall}" == "" ] || [ ${lasttouch_overall} -lt ${lasttouch} ]; then
+          lasttouch_overall = "${lasttouch}"
+        fi
+      fi
+
     fi
 
   done
 
   # of all were valid
   echo "stillvalid=\"1\""
+
+  # calculate age in seconds of oldest entry
+  timestamp=$(date +%s)
+  age=(($timestamp-$lasttouch_overall))
+  echo "lasttouch_overall=\"${lasttouch_overall}\""
+  echo "age=\"${age}\""
 
 else
   echo "# FAIL: parameter not known - run with -h for help"
