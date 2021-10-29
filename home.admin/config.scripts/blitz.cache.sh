@@ -31,6 +31,11 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ];
   echo "# stillvalid=0/1 if value is still valid or outdated"
   echo "# lasttouch= last update timestamp in unix seconds"
   echo 
+  echo "blitz.cache.sh all-valid [key1] [?key2] [?key3] ..."
+  echo "# check multiple keys if all are still not outdated"
+  echo "# use for example to check if a complex call needs"
+  echo "# to be made that covers multiple single data points"
+  echo 
   echo "blitz.cache.sh import [bash-keyvalue-file]"
   echo "# import a bash style key-value file into store"
   echo
@@ -279,6 +284,34 @@ elif [ "$1" = "meta" ]; then
     stillvalid=1
   fi
   echo "stillvalid=\"${stillvalid}\""
+
+# all-valid
+elif [ "$1" = "all-valid" ]; then
+
+  position=0
+  for keystr in $@
+  do
+    
+    # skip first parameter
+    ((position++))
+    if [ $position -eq 1 ]; then
+      echo "# blitz.cache.sh $@"
+      continue
+    fi
+
+    # get redis value
+    valuestr=$(redis-cli get ${keystr}${META_VALID_FLAG})
+    echo "# ${keystr}${META_VALID_FLAG}=\"${valuestr}\""
+
+    # break as soon one value is outdated
+    if [ "${valuestr}" == "" ]; then
+      echo "stillvalid=\"0\""
+    fi
+
+  done
+
+  # of all were valid
+  echo "stillvalid=\"1\""
 
 else
   echo "# FAIL: parameter not known - run with -h for help"
