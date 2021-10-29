@@ -337,7 +337,8 @@ elif [ "$1" = "valid" ]; then
       lasttouch=$(redis-cli get ${keystr}${META_LASTTOUCH_TS})
       echo "# lasttouch(${lasttouch})"
       if [ "${lasttouch}" != "" ]; then
-        if [ "${lasttouch_overall}" == "" ] || [ ${lasttouch_overall} -lt ${lasttouch} ]; then
+        # find smallest lasttouch
+        if [ "${lasttouch_overall}" == "" ] || [ ${lasttouch_overall} -gt ${lasttouch} ]; then
           lasttouch_overall="${lasttouch}"
         fi
       fi
