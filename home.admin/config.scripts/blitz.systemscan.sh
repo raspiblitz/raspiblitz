@@ -34,10 +34,8 @@ system_up=$(cat /proc/uptime | grep -o '^[0-9]\+')
 #################
 # INTERNET
 
-# TODO: seperate local network from online to not always target online pings when local info updating
-
-# basic local connection & online status
-source <(/home/admin/config.scripts/blitz.cache.sh valid internet_localip internet_dhcp internet_rx internet_tx internet_online)
+# basic local connection
+source <(/home/admin/config.scripts/blitz.cache.sh valid internet_localip internet_dhcp internet_rx internet_tx)
 if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE} ]; then
   echo "updating: /home/admin/config.scripts/internet.sh status local"
   source <(/home/admin/config.scripts/internet.sh status local)
@@ -45,6 +43,13 @@ if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE} ]; then
   /home/admin/config.scripts/blitz.cache.sh set internet_dhcp "${dhcp}"
   /home/admin/config.scripts/blitz.cache.sh set internet_rx "${network_rx}"
   /home/admin/config.scripts/blitz.cache.sh set internet_tx "${network_tx}"
+fi
+
+# connection to internet
+source <(/home/admin/config.scripts/blitz.cache.sh valid internet_online)
+if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${HOURQUATER} ]; then
+  echo "updating: /home/admin/config.scripts/internet.sh status online"
+  source <(/home/admin/config.scripts/internet.sh status online)
   /home/admin/config.scripts/blitz.cache.sh set internet_online "${online}"
 fi
 
