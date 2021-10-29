@@ -336,6 +336,7 @@ elif [ "$1" = "valid" ]; then
           lasttouch_overall = "${lasttouch}"
         fi
       fi
+      echo "# lasttouch_overall(${lasttouch_overall})"
 
     fi
 
@@ -344,11 +345,13 @@ elif [ "$1" = "valid" ]; then
   # of all were valid
   echo "stillvalid=\"1\""
 
-  # calculate age in seconds of oldest entry
-  timestamp=$(date +%s)
-  age=$(($timestamp-$lasttouch_overall))
   echo "lasttouch_overall=\"${lasttouch_overall}\""
-  echo "age=\"${age}\""
+  # calculate age in seconds of oldest entry
+  if [ "${$lasttouch_overall}" != "" ]; then
+    timestamp=$(date +%s)
+    age=$(($timestamp-$lasttouch_overall))
+    echo "age=\"${age}\""
+  fi
 
 else
   echo "# FAIL: parameter not known - run with -h for help"
