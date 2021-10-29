@@ -226,7 +226,7 @@ elif [ "$1" = "import" ]; then
 # key value with update metadata
 ##################################
 
-# outdated-seconds (set outdated policy)
+# outdate (set outdated policy)
 elif [ "$1" = "outdate" ]; then
 
   # get parameters
@@ -294,7 +294,7 @@ elif [ "$1" = "meta" ]; then
   fi
   echo "stillvalid=\"${stillvalid}\""
 
-# all-valid
+# valid
 elif [ "$1" = "valid" ]; then
 
   position=0
