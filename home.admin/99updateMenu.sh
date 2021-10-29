@@ -468,6 +468,10 @@ if [ "${specter}" == "on" ]; then
   OPTIONS+=(SPECTER "Update Specter Desktop")
 fi
 
+if [ "${BTCPayServer}" == "on" ]; then
+  OPTIONS+=(BTCPAY "Update BTCPayServer")
+fi
+
 if [ "${sphinxrelay}" == "on" ]; then
   OPTIONS+=(SPHINX "Update Sphinx Server Relay")
 fi
@@ -520,6 +524,9 @@ case $CHOICE in
     ;;
   SPECTER)
     /home/admin/config.scripts/bonus.specter.sh update
+    ;;
+  BTCPAY)
+    /home/admin/config.scripts/bonus.btcpayserver.sh update
     ;;
   SPHINX)
     /home/admin/config.scripts/bonus.sphinxrelay.sh update
