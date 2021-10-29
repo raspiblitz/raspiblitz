@@ -333,7 +333,7 @@ elif [ "$1" = "valid" ]; then
       echo "# lasttouch(${lasttouch})"
       if [ "${lasttouch}" != "" ]; then
         if [ "${lasttouch_overall}" == "" ] || [ ${lasttouch_overall} -lt ${lasttouch} ]; then
-          lasttouch_overall = "${lasttouch}"
+          lasttouch_overall="${lasttouch}"
         fi
       fi
       echo "# lasttouch_overall(${lasttouch_overall})"
