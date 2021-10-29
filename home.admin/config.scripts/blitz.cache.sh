@@ -14,26 +14,44 @@
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ]; then
   echo "RaspiBlitz Cache"
   echo
-  echo "*** RAMDISK for files under /var/cache/raspiblitz"
   echo "blitz.cache.sh ramdisk [on|off]"
   echo "blitz.cache.sh keyvalue [on|off]"
   echo
-  echo "*** KEYVALUE STORE"
   echo "blitz.cache.sh set [key] [value] [?expire-seconds]"
   echo "blitz.cache.sh get [key1] [?key2] [?key3] ..."
+  echo 
+  echo "blitz.cache.sh outdated-seconds [key] [value]"
+  echo "# set in how many seconds value is marked as outdated or"
+  echo "# -1 = never outdated (default)"  
+  echo "# 0  = always outdated"
+  echo 
+  echo "blitz.cache.sh meta [key] [?default]"
+  echo "# get single key with additional metadata:"
+  echo "# outdatesecs= see above"
+  echo "# stillvalid=0/1 if value is still valid or outdated"
+  echo "# lasttouch= last update timestamp in unix seconds"
+  echo 
   echo "blitz.cache.sh import [bash-keyvalue-file]"
-  echo
-  echo "*** SPECIAL CASE HANDLING"
-  echo "blitz.cache.sh error [source-script-name] [fixed-short-code] [message] [?logfile]"
+  echo "# import a bash style key-value file into store"
   echo
   exit 1
 fi
+
+# BACKGROUND: we need to build outdated meta info manually, 
+# because there is nothing as "AGE" in redis: https://github.com/redis/redis/issues/1147
+# only feature that can be used uis the EXPIRE feature to determine if a value is still valid
+
+# postfixes for metadata in key/value store
+META_OUTDATED_SECONDS="_out"
+META_LASTTOUCH_TS="_ts"
+META_VALID_FLAG="_val"
 
 # path of the raspiblitz.info file (persiting cache values)
 infoFile="/home/admin/raspiblitz.info"
 
 ###################
 # RAMDISK
+# will be available under /var/cache/raspiblitz
 ###################
 
 # install
@@ -88,6 +106,11 @@ elif [ "$1" = "keyvalue" ] && [ "$2" = "off" ]; then
   echo "# Turn OFF: KEYVALUE-STORE (REDIS)"
   sudo apt remove -y redis-server
 
+###################
+# SET/GET/IMPORT
+# basic key value
+###################
+
 # set
 elif [ "$1" = "set" ]; then
 
@@ -113,6 +136,18 @@ elif [ "$1" = "set" ]; then
 
   # set in redis key value cache
   redis-cli set ${keystr} "${valuestr}" ${additionalParams}
+
+  # set in redis the timestamp
+  timestamp=$(date +%s)
+  redis-cli set ${keystr}${META_LASTTOUCH_TS} "${timestamp}" ${additionalParams}
+
+  # check if the value has a outdate policy
+  outdatesecs=$(redis-cli get ${keystr}${META_OUTDATED_SECONDS})
+  echo "# outdatesecs(${outdatesecs})"
+  if [ "${outdatesecs}" != "-1" ] && [ "${outdatesecs}" != "" ]; then
+    # set exipire valid flag (if its gone - value is considered as outdated)
+    redis-cli set ${keystr}${META_VALID_FLAG} "1" EX ${outdatesecs}
+  fi
 
   # also update value if part of raspiblitz.info (persiting values to survice boot)
   persistKey=$(cat ${infoFile} | grep -c "^${keystr}=")
@@ -171,29 +206,75 @@ elif [ "$1" = "import" ]; then
     echo "# redis-cli set ${keyValue} ${!keyValue}"
     redis-cli set ${keyValue} "${!keyValue}"
 
+    # also set the timestamp on import for each value
+    timestamp=$(date +%s)
+    redis-cli set ${keyValue}${META_LASTTOUCH_TS} "${timestamp}"
+
   done < $filename
 
-###################
-# SPECIAL
-###################
+##################################
+# PUT/POLL TEMP CACHE
+# key value with update metadata
+##################################
 
-# import values from bash key-value store
-elif [ "$1" = "error" ]; then
+# outdated-seconds (set outdated policy)
+elif [ "$1" = "outdated-seconds" ]; then
 
   # get parameters
-  script=$2
-  shortcode=$3
-  detail=$4
-  logfile=$5
-  debugdata=$6
+  keystr=$2
+  outdatesecs=$3
 
-  /home/admin/config.scripts/blitz.cache.sh set state "error"
-  /home/admin/config.scripts/blitz.cache.sh set message "${shortcode}"
-
-  if [ "${logfile}" !=  "" ]; then
-    echo "FAIL see ${logFile}"
-    echo "FAIL: setup: lnd import backup failed" >> ${logFile}
+  # sanatize parameters
+  if [ "${outdatesecs}" != "-1" ]; then
+    outdatesecs="${outdatesecs//[^0-9.]/}"
   fi
+
+  # check that key & value are given
+  if [ "${keystr}" == "" ] || [ "${outdatesecs}" == "" ]; then
+    echo "# Fail: missing parameter"
+    exit 1
+  fi
+
+  echo "# redis-cli set ${keyValue} ${!keyValue}"
+  redis-cli set ${keystr} "${outdatesecs}"
+
+# meta
+elif [ "$1" = "meta" ]; then
+
+  # get parameters
+  keystr=$2
+  default=$3
+
+  # check that key & value are given
+  if [ "${keystr}" == "" ]; then
+    echo "# Fail: missing parameter"
+    exit 1
+  fi
+  
+  # get redis basic value 
+  valuestr=$(redis-cli get ${keystr})
+  echo "${keystr}=\"${valuestr}\""
+
+  # get META_LASTTOUCH_TS
+  lasttouch=$(redis-cli get ${keystr}${META_LASTTOUCH_TS})
+  echo "lasttouch=\"${lasttouch}\""
+
+  # get META_OUTDATED_SECONDS
+  outdatesecs=$(redis-cli get ${keystr}${META_OUTDATED_SECONDS})
+  if [ "${outdatesecs}" == "" ]; then
+    # default is -1 --> never outdate 
+    outdatesecs="-1"
+  fi
+  echo "outdatesecs=\"${outdatesecs}\""
+
+  # get META_VALID_FLAG
+  valuestr=$(redis-cli get ${keystr}${META_VALID_FLAG})
+  if [ "${valuestr}" == "" ] && [ "${outdatesecs}" != "-1" ]; then
+    stillvalid=0
+  else
+    stillvalid=1
+  fi
+  echo "stillvalid=\"${stillvalid}\""
 
 else
   echo "# FAIL: parameter not known - run with -h for help"
