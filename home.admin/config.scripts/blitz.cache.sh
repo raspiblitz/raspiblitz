@@ -42,9 +42,9 @@ fi
 # only feature that can be used uis the EXPIRE feature to determine if a value is still valid
 
 # postfixes for metadata in key/value store
-META_OUTDATED_SECONDS="_out"
-META_LASTTOUCH_TS="_ts"
-META_VALID_FLAG="_val"
+META_OUTDATED_SECONDS=":out"
+META_LASTTOUCH_TS=":ts"
+META_VALID_FLAG=":val"
 
 # path of the raspiblitz.info file (persiting cache values)
 infoFile="/home/admin/raspiblitz.info"
