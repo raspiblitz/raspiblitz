@@ -120,7 +120,7 @@ fi
 if [ "$2" = "blockchain" ]; then
 
   # get data
-  blockchaininfo=$($bitcoincli_alias getnetworkinfo 2>/dev/null)
+  blockchaininfo=$($bitcoincli_alias getblockchaininfo 2>/dev/null)
   if [ "${blockchaininfo}" ] == "" ]; then
     echo "error='no data'"
     exit 1
@@ -129,7 +129,7 @@ if [ "$2" = "blockchain" ]; then
   # parse data
   btc_blocks_headers=$(echo "${blockchaininfo}" | jq -r '.headers')
   btc_blocks_verified=$(echo "${blockchaininfo}" | jq -r '.blocks')
-  btc_blocks_behind=$((${headers} - ${block_verified}))
+  btc_blocks_behind=$((${btc_blocks_headers} - ${btc_blocks_verified}))
   btc_sync_progress=$(echo "${blockchaininfo}" | jq -r '.verificationprogress')
   btc_sync_percentage=$(echo ${btc_sync_progress} | awk '{printf( "%.2f%%", 100 * $1)}')
 
