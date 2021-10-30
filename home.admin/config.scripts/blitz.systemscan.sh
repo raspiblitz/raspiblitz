@@ -41,6 +41,10 @@ if [ "${stillvalid}" == "0" ]; then
   /home/admin/config.scripts/blitz.cache.sh set system_ramMB "${ramGB}"
 fi
 
+# default temp
+/home/admin/config.scripts/blitz.cache.sh set system_temp_celsius "0"
+/home/admin/config.scripts/blitz.cache.sh set system_temp_fahrenheit "0"
+
 ####################################################################
 # LOOP DATA (BASIC SYSTEM) 
 # data that is always available 
@@ -53,6 +57,24 @@ fi
 system_up=$(cat /proc/uptime | grep -o '^[0-9]\+')
 /home/admin/config.scripts/blitz.cache.sh set system_up "${system_up}"
 
+# cpu load
+cpu_load=$(w | head -n 1 | cut -d 'v' -f2 | cut -d ':' -f2)
+/home/admin/config.scripts/blitz.cache.sh set system_cpu_load "${cpu_load}"
+
+# cpu temp - no measurement in a VM
+if [ -d "/sys/class/thermal/thermal_zone0/" ]; then
+  cpu=$(cat /sys/class/thermal/thermal_zone0/temp)
+  tempC=$((cpu/1000))
+  tempF=$(((tempC * 18 + 325) / 10))
+  /home/admin/config.scripts/blitz.cache.sh set system_temp_celsius "${tempC}"
+  /home/admin/config.scripts/blitz.cache.sh set system_temp_fahrenheit "${tempF}"
+fi
+
+# ram
+ram=$(printf "%sM / %sM" "${ram_avail}" "$(free -m | grep Mem | awk '{ print $2 }')")
+ram_avail=$(free -m | grep Mem | awk '{ print $7 }')
+/home/admin/config.scripts/blitz.cache.sh set system_ram "${ram}"
+/home/admin/config.scripts/blitz.cache.sh set system_ram_available "${ram_avail}"
 
 # undervoltage
 source <(/home/admin/config.scripts/blitz.cache.sh valid system_undervoltage_count)
