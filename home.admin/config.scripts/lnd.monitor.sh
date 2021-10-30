@@ -121,6 +121,9 @@ fi
 
 if [ "$2" = "info" ]; then
 
+  # raw data demo:
+  # sudo /usr/local/bin/lncli -n=mainnet --rpcserver=localhost:10009 --macaroonpath=/home/bitcoin/.lnd/data/chain/bitcoin/mainnet/readonly.macaroon --tlscertpath=/home/bitcoin/.lnd/tls.cert getinfo
+
   # get data
   ln_getInfo=$($lndcli_alias getinfo 2>/dev/null)
   if [ "${ln_getInfo}" == "" ]; then
@@ -136,6 +139,7 @@ if [ "$2" = "info" ]; then
   lnd_channels_pending=$(echo "${ln_getInfo}" | jq -r '.num_pending_channels')
   lnd_channels_active=$(echo "${ln_getInfo}" | jq -r '.num_active_channels')
   lnd_channels_inactive=$(echo "${ln_getInfo}" | jq -r '.num_inactive_channels')
+  lnd_channels_total=$(( lnd_channels_pending + lnd_channels_active + lnd_channels_inactive ))
   lnd_peers=$(echo "${ln_getInfo}" | jq -r '.num_peers')
 
   # print data
@@ -146,6 +150,7 @@ if [ "$2" = "info" ]; then
   echo "lnd_channels_pending='${lnd_channels_pending}'"
   echo "lnd_channels_active='${lnd_channels_active}'"
   echo "lnd_channels_inactive='${lnd_channels_inactive}'"
+  echo "lnd_channels_total='${lnd_channels_total}'"
   echo "lnd_peers='${lnd_peers}'"
   exit 0
   
@@ -156,6 +161,9 @@ fi
 ######################################################
 
 if [ "$2" = "wallet" ]; then
+
+  # raw data demo:
+  # sudo /usr/local/bin/lncli -n=mainnet --rpcserver=localhost:10009 --macaroonpath=/home/bitcoin/.lnd/data/chain/bitcoin/mainnet/readonly.macaroon --tlscertpath=/home/bitcoin/.lnd/tls.cert walletbalance
 
   # get data
   ln_walletbalance=$($lndcli_alias walletbalance 2>/dev/null)
@@ -181,6 +189,21 @@ fi
 
 if [ "$2" = "channels" ]; then
 
+  # raw data demo:
+  # sudo /usr/local/bin/lncli -n=mainnet --rpcserver=localhost:10009 --macaroonpath=/home/bitcoin/.lnd/data/chain/bitcoin/mainnet/readonly.macaroon --tlscertpath=/home/bitcoin/.lnd/tls.cert listchannels
+
+  # get data
+  ln_channels=$($lndcli_alias listchannels 2>/dev/null)
+  if [ "${ln_channels}" == "" ]; then
+    echo "error='no data'"
+    exit 1
+  fi
+
+  # parse data
+  lnd_channels_total=$(echo "$ln_channels" | jq '.[] | length')
+
+  # print data
+  echo "lnd_channels_total='${lnd_channels_total}'"
   exit 0
   
 fi
@@ -191,11 +214,28 @@ fi
 
 if [ "$2" = "fees" ]; then
 
+# raw data demo:
+# sudo /usr/local/bin/lncli -n=mainnet --rpcserver=localhost:10009 --macaroonpath=/home/bitcoin/.lnd/data/chain/bitcoin/mainnet/readonly.macaroon --tlscertpath=/home/bitcoin/.lnd/tls.cert feereport
+
+  # get data
+  ln_feereport=$($lndcli_alias feereport 2>/dev/null)
+  if [ "${ln_feereport}" == "" ]; then
+    echo "error='no data'"
+    exit 1
+  fi
+
+  # parse data
+  lnd_fees_daily=$(echo "$ln_feereport" | jq -r '.day_fee_sum')
+  lnd_fees_weekly=$(echo "$ln_feereport" | jq -r '.week_fee_sum')
+  lnd_fees_month=$(echo "$ln_feereport" | jq -r '.month_fee_sum')
+
+  # print data
+  echo "lnd_fees_daily='${lnd_fees_daily}'"
+  echo "lnd_fees_weekly='${lnd_fees_daily}'"
+  echo "lnd_fees_month='${lnd_fees_daily}'"
   exit 0
   
 fi
 
 echo "FAIL - Unknown Parameter $2"
 exit 1
-
-
