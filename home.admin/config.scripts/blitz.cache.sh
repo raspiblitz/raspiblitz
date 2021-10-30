@@ -239,11 +239,13 @@ elif [ "$1" = "export" ]; then
 
   readarray -t arr <<< "${keylist}"
   for line in "${arr[@]}";do
-    # skip comment lines
-    #isComment=$(echo "${line}" | grep -c "^#")
-    #if [ ${isComment} -eq 1 ]; then
-    #  continue
-    #fi
+
+    # skip metadata lines
+    isMeta=$(echo "${line}" | grep -c ":")
+    if [ ${isMeta} -gt 0 ]; then
+      continue
+    fi
+    
     echo "${line}"
   done
 
