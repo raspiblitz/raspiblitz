@@ -2,7 +2,7 @@
 
 ## What's new in Version 1.7.2 of RaspiBlitz?
 
-- Update: BTCPayServer v1.3.0 with UPDATE option [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.3.0)
+- Update: BTCPayServer v1.3.1 with UPDATE option [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.3.0)
 
 ## What's new in Version 1.7.1 of RaspiBlitz?
 
