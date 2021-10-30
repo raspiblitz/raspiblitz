@@ -236,6 +236,11 @@ elif [ "$1" = "export" ]; then
   readarray -t arr <<< "${keylist}"
   for key in "${arr[@]}";do
 
+    # skip empty keys
+    if [ "${key}" == "" ]; then
+      continue
+    fi
+
     # skip metadata keys
     isMeta=$(echo "${key}" | grep -c ":")
     if [ ${isMeta} -gt 0 ]; then
