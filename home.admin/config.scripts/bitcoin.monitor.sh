@@ -106,9 +106,11 @@ if [ "$2" = "network" ]; then
 
   # parse data
   btc_peers=$(echo "${getnetworkinfo}" | grep "connections\"" | tr -cd '[[:digit:]]')
-  
+  btc_port=$(echo "${getnetworkinfo}" | jq -r '.localaddresses [0] .port')  
+
   # print data
   echo "btc_peers=${btc_peers}"
+  echo "btc_port=${btc_port}"
   exit 0
   
 fi
