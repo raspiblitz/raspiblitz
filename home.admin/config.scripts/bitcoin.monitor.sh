@@ -135,7 +135,7 @@ if [ "$2" = "blockchain" ]; then
   btc_blocks_verified=$(echo "${blockchaininfo}" | jq -r '.blocks')
   btc_blocks_behind=$((${btc_blocks_headers} - ${btc_blocks_verified}))
   btc_sync_progress=$(echo "${blockchaininfo}" | jq -r '.verificationprogress')
-  btc_sync_percentage=$(echo ${btc_sync_progress} | awk '{printf( "%.2f%%", 100 * $1)}')
+  btc_sync_percentage=$(echo ${btc_sync_progress} | awk '{printf( "%.2f%", 100 * $1)}')
 
   # print data
   echo "btc_blocks_headers='${btc_blocks_headers}'"
@@ -145,7 +145,6 @@ if [ "$2" = "blockchain" ]; then
   echo "btc_sync_percentage='${btc_sync_percentage}'"
   exit 0
   
-fi
 
 ######################################################
 # MEMPOOL
