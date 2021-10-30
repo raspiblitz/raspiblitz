@@ -66,14 +66,14 @@ if [ "$2" = "status" ]; then
     if [ "${failData}" != "" ]; then
       btc_ready="0"
       btc_error_short=$(echo ${failData/error*:/} | sed 's/[^a-zA-Z0-9 ]//g')
-      btc_error_full=$(echo ${failData} | tr -d "'")
+      btc_error_full=$(echo ${failData} | tr -d "'" | tr -d '"')
       btc_ready="0"
 
     # check results if proof for online
     else
       btc_ready="1"
       connections=$( echo "${winData}" | grep "connections\"" | tr -cd '[[:digit:]]')
-      if [ "${connections}" != "" ]; then
+      if [ "${connections}" != "" ] && [ "${connections}" != "0" ]; then
         btc_online="1"
       fi
     fi

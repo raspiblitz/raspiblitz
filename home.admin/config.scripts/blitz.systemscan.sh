@@ -278,17 +278,16 @@ if [ "${network}" == "bitcoin" ]; then
           echo "!! ERROR --> ${error}"
         fi
       fi
-
-    # TODO: handle errors?
-    #else
-    #  # TODO: improve error handling --- also add a state to bitcoin.monitor.sh
-    #  echo "!! WARNING Bitcoin (${CHAIN}net) running with error ..."
-    #  echo "$btc_error_short"
     fi
 
   done
 
 fi
+
+###################
+# Lightning (lnd)
+
+
 
 #################
 # DONE

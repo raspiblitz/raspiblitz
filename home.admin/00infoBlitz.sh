@@ -146,18 +146,6 @@ if [ "${public_port}" = "null" ]; then
   fi
 fi
 
-# check if RTL web interface is installed
-webinterfaceInfo=""
-runningRTL=$(systemctl status ${netprefix}${typeprefix}RTL.service 2>/dev/null | grep -c active)
-if [ ${runningRTL} -eq 1 ]; then
-  if [ "${lightning}" == "cl" ]; then
-    RTLHTTP=${portprefix}7000
-  elif [ "${lightning}" == "lnd" ];then
-    RTLHTTP=${portprefix}3000
-  fi
-  webinterfaceInfo="Web admin --> ${color_green}http://${local_ip}:${RTLHTTP}"
-fi
-
 # CHAIN NETWORK
 public_addr_pre="Public "
 public_addr="??"
@@ -195,15 +183,6 @@ else
 
   # DynDomain
   if [ ${#dynDomain} -gt 0 ]; then
-
-    #check if dynamic domain resolves to correct IP
-    ipOfDynDNS=$(getent hosts ${dynDomain} | awk '{ print $1 }')
-    if [ "${ipOfDynDNS}:${public_port}" != "${public_addr}" ]; then
-      public_color="${color_red}"
-    else
-      public_color="${color_amber}"
-    fi
-
     # replace IP display with dynDN
     public_addr_pre="DynDN "
     public_addr="${dynDomain}"
@@ -457,7 +436,7 @@ ${color_yellow}      ,'/      ${color_gray}%s
 ${color_yellow}    ,' /       ${color_gray}%s, temp %s°C %s°F
 ${color_yellow}  ,'  /_____   ${color_gray}Free Mem ${color_ram}${ram} ${color_gray} HDDuse ${color_hdd}%s${color_gray}
 ${color_yellow},'_____    ,'  ${color_gray}SSH admin@${color_green}${local_ip}${color_gray} d${network_rx} u${network_tx}
-${color_yellow}      /  ,'    ${color_gray}${webinterfaceInfo}
+${color_yellow}      /  ,'    ${color_gray}
 ${color_yellow}     / ,'      ${color_gray}${network} ${color_green}${networkVersion} ${color_gray}${chain}net ${networkConnectionsInfo}
 ${color_yellow}    /,'        ${color_gray}Blocks ${blockInfo} ${color_gray}Sync ${sync_color}${sync} %s
 ${color_yellow}   /'          ${color_gray}

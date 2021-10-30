@@ -18,8 +18,9 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
+# base directory of lnd
 lndHomeDir="/home/bitcoin/.lnd"
-# /usr/local/bin/lncli -n=mainnet --rpcserver=localhost:10009 --macaroonpath=/home/bitcoin/.lnd/data/chain/bitcoin/mainnet/readonly.macaroon --tlscertpath=/home/bitcoin/.lnd/tls.cert
+
 # set based on network type
 if [ "$1" == "mainnet" ]; then
   lndcli_alias="/usr/local/bin/lncli -n=mainnet --rpcserver=localhost:10009 --macaroonpath=${lndHomeDir}/data/chain/bitcoin/mainnet/readonly.macaroon --tlscertpath=${lndHomeDir}/tls.cert"
