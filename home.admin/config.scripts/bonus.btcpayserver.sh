@@ -2,10 +2,14 @@
 
 # Based on: https://gist.github.com/normandmickey/3f10fc077d15345fb469034e3697d0d0
 
-# https://github.com/dgarage/NBXplorer/releases
+# https://github.com/dgarage/NBXplorer/tags
 NBXplorerVersion="v2.2.16"
 # https://github.com/btcpayserver/btcpayserver/releases
 BTCPayVersion="v1.3.1"
+
+PGPsigner="nicolasdorier"
+PGPpubkeyLink="https://keybase.io/nicolasdorier/pgp_keys.asc"
+PGPpubkeyFingerprint="AB4CFA9895ACA0DBE27F6B346618763EF09186FE"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -335,6 +339,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u btcpay git clone https://github.com/dgarage/NBXplorer.git 2>/dev/null
     cd NBXplorer || exit 1
     sudo -u btcpay git reset --hard $NBXplorerVersion
+    # PGP verify
+    /home/admin/config.scripts/blitz.git-verify.sh "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
     echo "# Build NBXplorer ..."
     # from the build.sh with path
     sudo -u btcpay /home/btcpay/dotnet/dotnet build -c Release NBXplorer/NBXplorer.csproj
@@ -416,6 +422,8 @@ btc.rpc.password=$PASSWORD_B
     sudo -u btcpay git clone https://github.com/btcpayserver/btcpayserver.git 2>/dev/null
     cd btcpayserver
     sudo -u btcpay git reset --hard $BTCPayVersion
+    # PGP verify
+    /home/admin/config.scripts/blitz.git-verify.sh "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
     echo "# Build BTCPayServer ..."
     # from the build.sh with path
     sudo -u btcpay /home/btcpay/dotnet/dotnet build -c Release /home/btcpay/btcpayserver/BTCPayServer/BTCPayServer.csproj
@@ -586,6 +594,8 @@ if [ "$1" = "update" ]; then
     TAG=$(git tag | sort -V | tail -1)
     echo "# Reset to the latest release tag: $TAG"
     sudo -u btcpay git reset --hard $TAG
+    # PGP verify
+    /home/admin/config.scripts/blitz.git-verify.sh "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
     echo "# Build NBXplorer ..."
     # from the build.sh with path
     sudo systemctl stop nbxplorer
@@ -617,7 +627,9 @@ if [ "$1" = "update" ]; then
     sudo -u btcpay git pull -p
     TAG=$(git tag | grep v1 | sort -V | tail -1)
     echo "# Reset to the latest release tag: $TAG"
-    sudo -u btcpay git reset --hard $TAG  
+    sudo -u btcpay git reset --hard $TAG
+    # PGP verify
+    /home/admin/config.scripts/blitz.git-verify.sh "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
     echo "# Build BTCPayServer ..."
     # from the build.sh with path
     sudo systemctl stop btcpayserver
