@@ -30,6 +30,7 @@ elif [ "$1" == "signet" ]; then
   service_alias="sbitcoind"
 else
   echo "error='not supported net'"
+  exit 1
 fi
 
 ######################################################
