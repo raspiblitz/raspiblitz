@@ -38,11 +38,10 @@ if [ "${stillvalid}" == "0" ]; then
   /home/admin/config.scripts/blitz.cache.sh set system_ramMB "${ramGB}"
 fi
 
-
 ####################################################################
-# AFTER THE LOOP LATER ON
+# LOOP DATA (BASIC SYSTEM) 
+# data that is always available 
 ####################################################################
-
 
 #################
 # BASIC SYSTEM 
@@ -51,7 +50,9 @@ fi
 system_up=$(cat /proc/uptime | grep -o '^[0-9]\+')
 /home/admin/config.scripts/blitz.cache.sh set system_up "${system_up}"
 
-
+#################
+# DATADRIVE
+# TODO
 
 #################
 # INTERNET
@@ -83,6 +84,58 @@ source <(/home/admin/config.scripts/blitz.cache.sh valid tor_web80_addr)
 if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE} ]; then
   echo "updating: Tor Config Infos"
   /home/admin/config.scripts/blitz.cache.sh set tor_web_addr "$(cat /mnt/hdd/tor/web80/hostname 2>/dev/null)"
+fi
+
+# exit if still setup or higher system stopped
+sourtce <(/home/admin/config.scripts/blitz.cache.sh get setupPhase state)
+if [ "${setupPhase}" != "done" ] || [ "${state}" == "" ] || [ "${state}" == "copysource" ] || [ "${state}" == "copytarget" ]; then
+  echo "skipping deeper system scan (${counter}) - state(${state})"
+  exit 1
+  #sleep 1
+  #continue
+fi
+
+
+####################################################################
+# LOOP DATA (DEEPER SYSTEM)
+# data that may be based on setup phase or configuration
+####################################################################
+
+# read/update config values
+source /mnt/hdd/raspiblitz.conf
+
+
+###################
+# BITCOIN 
+if [ "${network}" == "bitcoin" ]; then
+
+  networks=( "main" "test" "sig" )
+  for CHAIN in "${networks[@]}"
+  do
+
+    echo "########## ${CHAIN}"
+    /home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net status
+    /home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net blockchain
+    /home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net network
+    /home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net mempool
+
+    # when default chain
+    if [ "${CHAIN}" == "${chain}" ]; then
+      echo "DEFAULT!"
+    fi
+
+  done
+
+
+  ###################
+  # BITCOIN (mainnet) 
+  #if [ "${chain}" == "main" ] || [ "${mainnet}" == "on" ]; then
+  #
+  #  # always check status
+  #  source <(/home/admin/config.scripts/bitcoin.monitor.sh mainnet status)
+  #
+  #fi
+
 fi
 
 #################
