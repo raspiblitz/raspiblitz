@@ -151,9 +151,9 @@ if [ "${network}" == "bitcoin" ]; then
     # check if is default chain (multiple networks can run at the same time - but only one is default)
     isDefaultChain=$(echo "${CHAIN}" | grep -c "${chain}")
 
-    # check is last status values are still valid
+    # check is last status values are still valid (most relaxed check every 10 secs)
     source <(/home/admin/config.scripts/blitz.cache.sh valid btc_${CHAIN}net_activated btc_${CHAIN}net_version btc_${CHAIN}net_running btc_${CHAIN}net_ready btc_${CHAIN}net_online  btc_${CHAIN}net_error_short btc_${CHAIN}net_error_full)
-    if [ "${stillvalid}" == "1" ] && [ ${age} -lt 5 ]; then
+    if [ "${stillvalid}" == "1" ] && [ ${age} -lt 10 ]; then
       continue
     fi
 
@@ -165,7 +165,7 @@ if [ "${network}" == "bitcoin" ]; then
     fi
 
     # update basic status values always
-    echo "updating:/home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net status"
+    echo "updating: /home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net status"
     source <(/home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net status)
     /home/admin/config.scripts/blitz.cache.sh set btc_${CHAIN}net_activated "1"
     /home/admin/config.scripts/blitz.cache.sh set btc_${CHAIN}net_version "${btc_version}"
