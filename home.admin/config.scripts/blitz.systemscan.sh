@@ -71,10 +71,10 @@ if [ -d "/sys/class/thermal/thermal_zone0/" ]; then
 fi
 
 # ram
-ram=$(printf "%sM / %sM" "${ram_avail}" "$(free -m | grep Mem | awk '{ print $2 }')")
 ram_avail=$(free -m | grep Mem | awk '{ print $7 }')
-/home/admin/config.scripts/blitz.cache.sh set system_ram "${ram}"
-/home/admin/config.scripts/blitz.cache.sh set system_ram_available "${ram_avail}"
+ram=$(printf "%sM / %sM" "${ram_avail}" "$(free -m | grep Mem | awk '{ print $2 }')")
+/home/admin/config.scripts/blitz.cache.sh set system_ram_mb "${ram}"
+/home/admin/config.scripts/blitz.cache.sh set system_ram_available_mb "${ram_avail}"
 
 # undervoltage
 source <(/home/admin/config.scripts/blitz.cache.sh valid system_undervoltage_count)
