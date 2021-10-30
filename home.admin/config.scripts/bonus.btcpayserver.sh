@@ -5,13 +5,17 @@
 # https://github.com/dgarage/NBXplorer/releases
 NBXplorerVersion="v2.2.16"
 # https://github.com/btcpayserver/btcpayserver/releases
-BTCPayVersion="v1.3.0"
+BTCPayVersion="v1.3.1"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
-  echo "# config script to switch BTCPay Server on or off"
-  echo "# bonus.btcpayserver.sh [on|off|menu|write-tls-macaroon]"
-  echo "# installs BTCPayServer $BTCPayVersion with NBXplorer $NBXplorerVersion"
+  echo "Config script to switch BTCPay Server on or off"
+  echo "Usage:"
+  echo "bonus.btcpayserver.sh [on|off|menu|write-tls-macaroon]"
+  echo "installs BTCPayServer $BTCPayVersion with NBXplorer $NBXplorerVersion"
+  echo "To update to the latest release published on github run:"
+  echo "bonus.btcpayserver.sh update"
+  echo
   exit 1
 fi
 
