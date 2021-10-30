@@ -157,7 +157,22 @@ fi
 
 if [ "$2" = "wallet" ]; then
 
+  # get data
+  ln_walletbalance=$($lndcli_alias walletbalance 2>/dev/null)
+  if [ "${ln_getInfo}" == "" ]; then
+    echo "error='no data'"
+    exit 1
+  fi
+
+  # parse data
+  lnd_wallet_confirmed=$(echo "$ln_walletbalance" | jq -r '.confirmed_balance')
+  lnd_wallet_unconfirmed=$(echo "$ln_walletbalance" | jq -r '.unconfirmed_balance')
+
+  # print data
+  echo "lnd_wallet_confirmed='${lnd_wallet_confirmed}'"
+  echo "lnd_wallet_unconfirmed='${lnd_wallet_unconfirmed}'"
   exit 0
+
 fi
 
 ######################################################
