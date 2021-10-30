@@ -625,6 +625,7 @@ if [ "$1" = "update" ]; then
     sudo systemctl start btcpayserver
     echo "# Updated BTCPayServer to $TAG"
   fi
+  exit 0
 fi
 
 echo "# FAIL - Unknown Parameter $1"
