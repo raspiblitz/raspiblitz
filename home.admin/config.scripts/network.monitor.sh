@@ -46,7 +46,7 @@ if [ "$2" = "status" ]; then
   btc_error_short=""
   btc_error_full=""
 
-  if [ "${btc_running}" != "0" ]
+  if [ "${btc_running}" != "0" ]; then
     btc_running="1"
 
     # test connection - record win & fail info
