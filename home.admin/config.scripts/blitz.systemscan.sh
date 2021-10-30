@@ -153,8 +153,6 @@ if [ "${network}" == "bitcoin" ]; then
 
     # check is last status values are still valid
     source <(/home/admin/config.scripts/blitz.cache.sh valid btc_${CHAIN}net_activated btc_${CHAIN}net_version btc_${CHAIN}net_running btc_${CHAIN}net_ready btc_${CHAIN}net_online  btc_${CHAIN}net_error_short btc_${CHAIN}net_error_full)
-    echo "/home/admin/config.scripts/blitz.cache.sh valid btc_${CHAIN}net_activated btc_${CHAIN}net_version btc_${CHAIN}net_running btc_${CHAIN}net_ready btc_${CHAIN}net_online  btc_${CHAIN}net_error_short btc_${CHAIN}net_error_full"
-    echo "stillvalid(${stillvalid}) age(${age})"
     if [ "${stillvalid}" == "1" ] && [ ${age} -lt 5 ]; then
       continue
     fi
