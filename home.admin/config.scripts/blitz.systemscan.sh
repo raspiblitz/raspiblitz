@@ -88,7 +88,6 @@ fi
 
 # exit if still setup or higher system stopped
 source <(/home/admin/config.scripts/blitz.cache.sh get setupPhase state)
-echo "setupPhase(${setupPhase}) state(${state})"
 if [ "${setupPhase}" != "done" ] ||
    [ "${state}" == "" ] ||
    [ "${state}" == "copysource" ] ||
@@ -224,16 +223,6 @@ if [ "${network}" == "bitcoin" ]; then
     fi
 
   done
-
-
-  ###################
-  # BITCOIN (mainnet) 
-  #if [ "${chain}" == "main" ] || [ "${mainnet}" == "on" ]; then
-  #
-  #  # always check status
-  #  source <(/home/admin/config.scripts/bitcoin.monitor.sh mainnet status)
-  #
-  #fi
 
 fi
 
