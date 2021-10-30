@@ -53,6 +53,16 @@ fi
 system_up=$(cat /proc/uptime | grep -o '^[0-9]\+')
 /home/admin/config.scripts/blitz.cache.sh set system_up "${system_up}"
 
+
+# undervoltage
+source <(/home/admin/config.scripts/blitz.cache.sh valid system_undervoltage_count)
+if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE} ]; then
+  echo "updating: undervoltage"
+  countReports=$(cat /var/log/syslog | grep -c "Under-voltage detected!")
+  echo "${countReports} undervoltage reports found in syslog"
+  /home/admin/config.scripts/blitz.cache.sh set sysundervoltageReports "${countReports}"
+fi
+
 #################
 # DATADRIVE
 
@@ -100,8 +110,8 @@ fi
 # TOR
 
 source <(/home/admin/config.scripts/blitz.cache.sh valid tor_web80_addr)
-if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE} ]; then
-  echo "updating: Tor Config Infos"
+if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE5} ]; then
+  echo "updating: tor"
   /home/admin/config.scripts/blitz.cache.sh set tor_web_addr "$(cat /mnt/hdd/tor/web80/hostname 2>/dev/null)"
 fi
 
@@ -116,7 +126,6 @@ if [ "${setupPhase}" != "done" ] ||
   #sleep 1
   #continue
 fi
-
 
 ####################################################################
 # LOOP DATA (DEEPER SYSTEM)
@@ -254,8 +263,9 @@ runTime=$((${endTime}-${startTime}))
 
 # write info on scan runtime into cache (use as signal that the first systemscan worked)
 /home/admin/config.scripts/blitz.cache.sh set systemscan_runtime "${runTime}"
+echo "SystemScan Loop done in ${runTime} seconds"
 
 # log warning if script took too long
 if [ ${runTime} -gt ${MINUTE} ]; then
-  echo "WARNING: HANGING SYSTEM ... systemscan took more than a minute!"
+  echo "WARNING: HANGING SYSTEM ... systemscan loop took too long (${runTime} seconds)!" 1>&2 
 fi

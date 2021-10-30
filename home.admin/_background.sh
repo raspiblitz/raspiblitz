@@ -93,18 +93,6 @@ do
   fi
 
   ####################################################
-  # CHECK FOR UNDERVOLTAGE REPORTS
-  # every 1 hour scan for undervoltage reports
-  ####################################################
-  recheckUndervoltage=$(($counter % 3600))
-  if [ ${recheckUndervoltage} -eq 1 ]; then
-    echo "*** RECHECK UNDERVOLTAGE ***"
-    countReports=$(cat /var/log/syslog | grep -c "Under-voltage detected!")
-    echo "${countReports} undervoltage reports found in syslog"
-    /home/admin/config.scripts/blitz.cache.sh set undervoltageReports "${countReports}"
-  fi
-
-  ####################################################
   # RECHECK PUBLIC IP
   #
   # when public IP changes
