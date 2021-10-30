@@ -159,7 +159,7 @@ if [ "$2" = "wallet" ]; then
 
   # get data
   ln_walletbalance=$($lndcli_alias walletbalance 2>/dev/null)
-  if [ "${ln_getInfo}" == "" ]; then
+  if [ "${ln_walletbalance}" == "" ]; then
     echo "error='no data'"
     exit 1
   fi
