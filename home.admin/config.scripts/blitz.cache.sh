@@ -234,21 +234,18 @@ elif [ "$1" = "export" ]; then
   # get value
   keylist=$(redis-cli KEYS "${keyfilter}")
   echo "${keylist}"
-  
+
   echo
 
-  # read file and go thru line by line
-  while read line; do
-
+  readarray -t arr <<< "${keylist}"
+  for line in "${arr[@]}";do
     # skip comment lines
     #isComment=$(echo "${line}" | grep -c "^#")
     #if [ ${isComment} -eq 1 ]; then
     #  continue
     #fi
-
     echo "${line}"
-
-  done < echo "${keylist}"
+  done
 
 ##################################
 # PUT/POLL TEMP CACHE
