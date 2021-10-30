@@ -96,11 +96,9 @@ fi
 # Bitcoin blockchain
 btc_path=$(command -v ${network}-cli)
 blockInfo="-"
-if [ -n "${btc_path}" ]; then
-  btc_title=$network
+if [ "${btc_path}" != "" ]; then
   blockchaininfo="$($bitcoincli_alias getblockchaininfo 2>/dev/null)"
   if [ ${#blockchaininfo} -gt 0 ]; then
-    btc_title="${btc_title} (${chain}net)"
 
     # get sync status
     headers="$(echo "${blockchaininfo}" | jq -r '.headers')"
@@ -129,16 +127,9 @@ if [ -n "${btc_path}" ]; then
       sync_behind="${sync_percentage}"
     fi
 
-    # get last known block
-    if [ ! -z "${last_block}" ]; then
-      btc_line2="${btc_line2} ${color_gray}(block ${last_block})"
-    fi
-
     # get mem pool transactions
     mempool="$($bitcoincli_alias getmempoolinfo 2>/dev/null | jq -r '.size')"
 
-  else
-    btc_line2="${color_red}NOT RUNNING\t\t"
   fi
 fi
 

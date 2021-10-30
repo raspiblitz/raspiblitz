@@ -102,22 +102,28 @@ fi
 ## check for internet connection
 online=0
 if [ ${runOnline} -eq 1 ]; then
-  # first quick check if bitcoind has peers - if so the client is online
-  # if not then recheck by pinging different sources if online
-  # used cached results to not delay (cache will be updated by background process)
-  source <(timeout 2 /home/admin/config.scripts/network.monitor.sh peer-status)
-  if [ "${peers}" != "0" ] && [ "${peers}" != "" ]; then
-    # bitcoind has peers - so device is online
-    online=1
+
+  if [ "$EUID" -eq 0 ]; then
+    # first quick check if bitcoind has peers - if so the client is online
+    # if not then recheck by pinging different sources if online
+    btc_online="0"
+    source <(timeout 2 /home/admin/config.scripts/network.monitor.sh mainnet status)
+    if [ "${btc_online}" == "1" ]; then
+      # bitcoind has peers - so device is online
+      online=1
+    fi
   fi
-  # second try if tor test site can be called
+
+  # next try if tor test site can be called
   if [ ${online} -eq 0 ]; then
+    torFunctional="0"
     source <(timeout 5 /home/admin/config.scripts/internet.tor.sh status)
     if [ "${torFunctional}" == "1" ]; then
       # tor delivers content
       online=1
     fi
   fi
+
   # fallback: test pings to dns servers
   if [ ${online} -eq 0 ] && [ "${dnsServer}" != "" ]; then
     # re-test with user set dns server

@@ -3,76 +3,113 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "monitor and troubleshot the bitcoin network"
- echo "network.monitor.sh peer-status [cached]"
- echo "network.monitor.sh peer-kickstart [ipv4|ipv6|tor|auto]"
- echo "network.monitor.sh peer-disconnectall"
+ echo "bitcoin.monitor.sh [mainnet|testnet|signet] status"
+ echo "bitcoin.monitor.sh [mainnet|testnet|signet] blockchain"
+ echo "bitcoin.monitor.sh [mainnet|testnet|signet] mempool"
+ echo "bitcoin.monitor.sh [mainnet|testnet|signet] network"
+ echo "bitcoin.monitor.sh [mainnet] peer-kickstart [ipv4|ipv6|tor|auto]"
+ echo "bitcoin.monitor.sh [mainnet] peer-disconnectall"
  exit 1
 fi
 
-source /home/admin/raspiblitz.info
-source /mnt/hdd/raspiblitz.conf 2>/dev/null
+# check if started with sudo
+if [ "$EUID" -ne 0 ]; then 
+  echo "error='run as root'"
+  exit 1
+fi
 
-source <(/home/admin/config.scripts/network.aliases.sh getvars lnd ${chain}net)
+if [ "$1" == "mainnet" ]; then
+  $bitcoincli_alias="/usr/local/bin/bitcoin-cli -datadir=/home/bitcoin/.bitcoin -rpcport=8332"
+  $service_alias="bitcoind"
+elif [ "$1" == "testnet" ]; then
+  $bitcoincli_alias="/usr/local/bin/bitcoin-cli -datadir=/home/bitcoin/.bitcoin -rpcport=18332"
+  $service_alias="tbitcoind"
+elif [ "$1" == "signet" ]; then
+  $bitcoincli_alias="/usr/local/bin/bitcoin-cli -datadir=/home/bitcoin/.bitcoin -rpcport=38332"
+  $service_alias="sbitcoind"
+else
+  echo "error='not supported net'"
+fi
 
-###################
+######################################################
 # STATUS
-###################
-if [ "$1" = "peer-status" ]; then
-  echo "#network.monitor.sh peer-status"
+# check general status info
+######################################################
 
-  # if second parameter is "cached" deliver cached result if available
-  if [ "$2" == "cached" ]; then
-    cacheExists=$(ls /var/cache/raspiblitz/network.monitor.peer-status.cache 2>/dev/null | grep -c "etwork.monitor.peer-status.cache")
-    if [ "${cacheExists}" == "1" ]; then
-      echo "cached=1"
-      cat /var/cache/raspiblitz/network.monitor.peer-status.cache
-      exit 1
+if [ "$2" = "status" ]; then
+
+  btc_version=$($bitcoincli_alias -version 2>/dev/null | cut -d ' ' -f6)
+  btc_running=$(systemctl status $service_alias 2>/dev/null | grep -c "active (running)")
+  btc_ready="0"
+  btc_online="0"
+  btc_error_short=""
+  btc_error_full=""
+
+  if [ "${btc_running}" != "0" ]
+    btc_running="1"
+
+    # test connection - record win & fail info
+    rm /var/cache/raspiblitz/.bitcoind.out 2>/dev/null
+    rm /var/cache/raspiblitz/.bitcoind.error 2>/dev/null
+    touch /var/cache/raspiblitz/.bitcoind.out
+    touch /var/cache/raspiblitz/.bitcoind.error
+    $bitcoincli_alias getnetworkinfo 1>/var/cache/raspiblitz/.bitcoind.out 2>/var/cache/raspiblitz/.bitcoind.error
+    winData=$(cat /var/cache/raspiblitz/.bitcoind.out 2>/dev/null)
+    failData=$(cat /var/cache/raspiblitz/.bitcoind.error 2>/dev/null)
+    rm /var/cache/raspiblitz/.bitcoind.out 2>/dev/null
+    rm /var/cache/raspiblitz/.bitcoind.error 2>/dev/null
+
+    # check for errors
+    if [ "${failData}" != "" ]; then
+      btc_ready="0"
+      btc_error_short=$(echo ${bitcoinError/error*:/} | sed 's/[^a-zA-Z0-9 ]//g')
+      btc_error_full=$(echo ${bitcoinError} | tr -d "'")
+      btc_ready="0"
+
+    # check results if proof for online
     else
-      echo "cached=0"
+      btc_ready="1"
+      connections=$( echo "${winData}" | grep "connections\"" | tr -cd '[[:digit:]]')
+      if [ "${connections}" != "" ]; then
+        btc_online="1"
+      fi
     fi
-  fi
 
-  # number of peers connected
-  running=1
-  if [ "$EUID" -eq 0 ]; then
-    # sudo call
-    running=$(systemctl status bitcoind 2>/dev/null | grep -c "active (running)")
-    peerNum=0
-    if [ "${running}" == "1" ]; then 
-      peerNum=$(sudo -u admin $bitcoincli_alias getnetworkinfo 2>/dev/null | grep "connections\"" | tr -cd '[[:digit:]]')
-    fi
-  else
-    # user call
-    peerNum=$($bitcoincli_alias getnetworkinfo 2>/dev/null | grep "connections\"" | tr -cd '[[:digit:]]')
-  fi
-  if [ "${peerNum}" = "" ]; then
-    running=0
-    peerNum=0
-  fi
+  fi 
 
-  # output to cache (normally gets written every 1min by background) if sudo
-  if [ "$EUID" -eq 0 ]; then
-    touch /var/cache/raspiblitz/network.monitor.peer-status.cache
-    echo "running=${running}" > /var/cache/raspiblitz/network.monitor.peer-status.cache
-    echo "peers=${peerNum}" >> /var/cache/raspiblitz/network.monitor.peer-status.cache
-    chmod 664 /var/cache/raspiblitz/network.monitor.peer-status.cache
-  fi
+  # print results
+  echo "btc_version='${btc_version}'"
+  echo "btc_running='${btc_running}'"
+  echo "btc_ready='${btc_ready}'"
+  echo "btc_online='${btc_online}'"
+  echo "btc_error_short='${btc_error_short}'"
+  echo "btc_error_full='${btc_error_full}'"
 
-  # output to user
-  echo "running=${running}"
+  exit 0
+fi   
+
+######################################################
+# NETWORK
+######################################################
+
+if [ "$2" = "network" ]; then
+
+  peerNum=$($bitcoincli_alias getnetworkinfo 2>/dev/null | grep "connections\"" | tr -cd '[[:digit:]]')
   echo "peers=${peerNum}"
   exit 0
+  
 fi
 
 ###################
 # PEER KICK START
 ###################
-if [ "$1" = "peer-kickstart" ]; then
+
+if [ "$2" = "peer-kickstart" ]; then
   echo "#network.monitor.sh peer-kickstart"
 
-  # check if started with sudo
-  if [ "$EUID" -ne 0 ]; then 
-    echo "error='missing sudo'"
+  # check calling only for mainnet
+  if [ "$1" != "mainnet" ]; then 
+    echo "error='only available for mainnet yet'"
     exit 1
   fi
 
@@ -84,6 +121,7 @@ if [ "$1" = "peer-kickstart" ]; then
     # call over clearnet
     # bitnodesRawData=$(curl -H "Accept: application/json; indent=4" https://bitnodes.io/api/v1/snapshots/latest/ 2>/dev/null)
   #fi
+
   bitnodesRawData=$(sudo -u admin cat /home/admin/fallback.nodes)
   if [ ${#bitnodesRawData} -lt 100 ]; then
     echo "error='no valid data from bitnodes.io'"
@@ -91,19 +129,20 @@ if [ "$1" = "peer-kickstart" ]; then
   fi
 
   # determine which address to choose
-  addressFormat="$2"
+  addressFormat="$3"
   # set default to auto
   if [ "${addressFormat}" == "" ]; then
     addressFormat="auto"
   fi
   # check valid value
   if [ "${addressFormat}" != "ipv4" ] && [ "${addressFormat}" != "ipv6" ] && [ "${addressFormat}" != "tor" ] && [ "${addressFormat}" != "auto" ]; then
-    echo "error='invalid network type'"
+    echo "error='invalid address type'"
     exit 1
   fi
   # if auto then determine whats running
   if [ "${addressFormat}" == "auto" ]; then
-    if [ "${runBehindTor}" == "on" ]; then
+    source <()
+    if [ "$(cat /mnt/hdd/raspiblitz.conf | grep -c "^runBehindTor=on")" != "0" ]; then
       addressFormat="tor"
     else
       source <(sudo ./config.scripts/internet.sh status global)
@@ -128,12 +167,16 @@ if [ "$1" = "peer-kickstart" ]; then
     nodeList=$(echo "${bitnodesRawData}" | grep -o '\[.\{5,45\}\]\:[0-9]\{3,5\}')
   else
     # invalid address
-    echo "error='invalid 2nd parameter'"
+    echo "error='invalid address format'"
     exit 1
   fi
   #echo "${nodeList}"
   nodesAvailable=$(echo "${nodeList}" | wc -l)
   echo "nodesAvailable=${nodesAvailable}"
+  if [ "${nodesAvailable}" == "0" ]; then
+    echo "error='no nodes available'"
+    exit 1
+  fi
 
   # pick random node from list
   randomLineNumber=$((1 + RANDOM % ${nodesAvailable}))
@@ -160,12 +203,12 @@ fi
 # DISCONNECT ALL PEERS
 # for testing peer kick-start
 ###################
-if [ "$1" = "peer-disconnectall" ]; then
+if [ "$2" = "peer-disconnectall" ]; then
   echo "#network.monitor.sh peer-disconnectall"
 
-  # check if started with sudo
-  if [ "$EUID" -ne 0 ]; then 
-    echo "error='missing sudo'"
+  # check calling only for mainnet
+  if [ "$1" != "mainnet" ]; then 
+    echo "error='only available for mainnet yet'"
     exit 1
   fi
 
@@ -182,5 +225,5 @@ if [ "$1" = "peer-disconnectall" ]; then
   exit 0
 fi
 
-echo "FAIL - Unknown Parameter $1"
+echo "FAIL - Unknown Parameter $2"
 exit 1
