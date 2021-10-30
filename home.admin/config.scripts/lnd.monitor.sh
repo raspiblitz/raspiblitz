@@ -21,7 +21,7 @@ fi
 # base directory of lnd
 lndHomeDir="/home/bitcoin/.lnd"
 
-# set based on network type
+# set based on network type (using own mapping to be able to run without calling sudo -u bitcoin)
 if [ "$1" == "mainnet" ]; then
   lndcli_alias="/usr/local/bin/lncli -n=mainnet --rpcserver=localhost:10009 --macaroonpath=${lndHomeDir}/data/chain/bitcoin/mainnet/readonly.macaroon --tlscertpath=${lndHomeDir}/tls.cert"
   netprefix=""
@@ -70,7 +70,6 @@ if [ "$2" = "status" ]; then
       lnd_ready="0"
       lnd_error_short=""
       lnd_error_full=$(echo ${failData} | tr -d "'" | tr -d '"')
-      lnd_ready="0"
 
     # check results if proof for online
     else

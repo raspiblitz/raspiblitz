@@ -325,10 +325,6 @@ elif [ "${lightning}" == "lnd" ];then
  if [ ${#ln_port} -eq 0 ]; then
    ln_port="9735"
  fi
- wallet_unlocked=$(sudo tail -n 1 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2> /dev/null | grep -c unlock)
- if [ "$wallet_unlocked" -gt 0 ] ; then
-   ln_alias="Wallet Locked"
- else
   ln_getInfo=$($lncli_alias --macaroonpath=${lnd_macaroon_dir}/readonly.macaroon --tlscertpath=${lnd_dir}/tls.cert getinfo 2>/dev/null)
   ln_external=$(echo "${ln_getInfo}" | grep "uris" -A 1 | tr -d '\n' | cut -d '"' -f4)
   ln_tor=$(echo "${ln_external}" | grep -c ".onion")
@@ -375,7 +371,6 @@ elif [ "${lightning}" == "lnd" ];then
      ln_feeReport="Fee Report (D-W-M): ${color_green}${ln_dailyfees}-${ln_weeklyfees}-${ln_monthlyfees} ${color_gray}sat"
    fi
  fi
-fi
 
 # show JoinMarket stats in place of the LND URI only if the Yield Generator is running
 source /home/joinmarket/joinin.conf 2>/dev/null
