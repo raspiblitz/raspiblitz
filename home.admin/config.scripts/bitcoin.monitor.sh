@@ -99,13 +99,13 @@ if [ "$2" = "network" ]; then
 
   # get data
   getnetworkinfo=$($bitcoincli_alias getnetworkinfo 2>/dev/null)
-  if [ "${getnetworkinfo}" ] == "" ]; then
+  if [ "${getnetworkinfo}" == "" ]; then
     echo "error='no data'"
     exit 1
   fi
 
   # parse data
-  btc_peers=$( echo "${getnetworkinfo}" | grep "connections\"" | tr -cd '[[:digit:]]')
+  btc_peers=$(echo "${getnetworkinfo}" | grep "connections\"" | tr -cd '[[:digit:]]')
   
   # print data
   echo "btc_peers=${btc_peers}"
@@ -151,13 +151,13 @@ if [ "$2" = "mempool" ]; then
 
   # get data
   mempoolinfo=$($bitcoincli_alias getmempoolinfo 2>/dev/null)
-  if [ "${blockchaininfo}" ] == "" ]; then
+  if [ "${mempoolinfo}" == "" ]; then
     echo "error='no data'"
     exit 1
   fi
 
   # parse data
-  btc_mempool_transactions=$(echo "${blockchaininfo}" | jq -r '.headers')
+  btc_mempool_transactions=$(echo "${mempoolinfo}" | jq -r '.size')
 
   # print data
   echo "btc_mempool_transactions=${btc_mempool_transactions}"
