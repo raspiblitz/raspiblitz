@@ -11,13 +11,16 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
-# better readbale seconds
+# better readbale seconds (slightly off to reduce same time window trigger)
 MINUTE=60
-HOURQUATER=900
-HOURHALF=1800
-HOUR=3600
-DAYHALF=43200
-DAY=86400
+MINUTE2=115
+MINUTE5=290
+MINUTE10=585
+HOURQUATER=880
+HOURHALF=1775
+HOUR=3570
+DAYHALF=43165
+DAY=86360
 WEEK=604800
 MONTH=2592000
 YEAR=31536000
@@ -52,7 +55,23 @@ system_up=$(cat /proc/uptime | grep -o '^[0-9]\+')
 
 #################
 # DATADRIVE
-# TODO
+
+source <(/home/admin/config.scripts/blitz.cache.sh valid hdd_mounted hdd_ssd hdd_btrfs hdd_raid hdd_uasp hdd_capacity_bytes hdd_capacity_gb hdd_free_bytes hdd_free_gb hdd_used_info hdd_blockchain_data)
+if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE2} ]; then
+  echo "updating: /home/admin/config.scripts/blitz.datadrive.sh status"
+  source <(/home/admin/config.scripts/blitz.datadrive.sh status)
+  /home/admin/config.scripts/blitz.cache.sh set hdd_mounted "${isMounted}"
+  /home/admin/config.scripts/blitz.cache.sh set hdd_ssd "${isSSD}"
+  /home/admin/config.scripts/blitz.cache.sh set hdd_btrfs "${isBTRFS}"
+  /home/admin/config.scripts/blitz.cache.sh set hdd_raid "${isRaid}"
+  /home/admin/config.scripts/blitz.cache.sh set hdd_uasp "${hddAdapterUSAP}"
+  /home/admin/config.scripts/blitz.cache.sh set hdd_capacity_bytes "${hddBytes}"
+  /home/admin/config.scripts/blitz.cache.sh set hdd_capacity_gb "${hddGigaBytes}"
+  /home/admin/config.scripts/blitz.cache.sh set hdd_free_bytes "${hddDataFreeBytes}"
+  /home/admin/config.scripts/blitz.cache.sh set hdd_free_gb "${hddDataFreeGB}"
+  /home/admin/config.scripts/blitz.cache.sh set hdd_used_info "${hddUsedInfo}"
+  /home/admin/config.scripts/blitz.cache.sh set hdd_blockchain_data "${hddBlocksBitcoin}"
+fi
 
 #################
 # INTERNET
@@ -139,7 +158,7 @@ if [ "${network}" == "bitcoin" ]; then
     /home/admin/config.scripts/blitz.cache.sh set btc_${CHAIN}net_ready "${btc_ready}"
     /home/admin/config.scripts/blitz.cache.sh set btc_${CHAIN}net_online "${btc_online}"
     /home/admin/config.scripts/blitz.cache.sh set btc_${CHAIN}net_error_short "${btc_error_short}"
-    /home/admin/config.scripts/blitz.cache.sh set btc_${CHAIN}net_error_full "$btc_error_full}"
+    /home/admin/config.scripts/blitz.cache.sh set btc_${CHAIN}net_error_full "${btc_error_full}"
 
     # when default chain transfere values
     if [ "${isDefaultChain}" == "1" ]; then
@@ -149,7 +168,7 @@ if [ "${network}" == "bitcoin" ]; then
       /home/admin/config.scripts/blitz.cache.sh set btc_ready "${btc_ready}"
       /home/admin/config.scripts/blitz.cache.sh set btc_online "${btc_online}"
       /home/admin/config.scripts/blitz.cache.sh set btc_error_short "${btc_error_short}"
-      /home/admin/config.scripts/blitz.cache.sh set btc_error_full "$btc_error_full}"
+      /home/admin/config.scripts/blitz.cache.sh set btc_error_full "${btc_error_full}"
     fi
 
     # update detail infos only when ready 
