@@ -110,9 +110,9 @@ if [ "$2" = "network" ]; then
   btc_port=$(echo "${getnetworkinfo}" | jq -r '.localaddresses [0] .port')
 
   # print data
-  echo "btc_peers=${btc_peers}"
-  echo "btc_address=${btc_address}"
-  echo "btc_port=${btc_port}"
+  echo "btc_peers='${btc_peers}'"
+  echo "btc_address='${btc_address}'"
+  echo "btc_port='${btc_port}'"
   exit 0
   
 fi
@@ -138,11 +138,11 @@ if [ "$2" = "blockchain" ]; then
   btc_sync_percentage=$(echo ${btc_sync_progress} | awk '{printf( "%.2f%%", 100 * $1)}')
 
   # print data
-  echo "btc_blocks_headers=${btc_blocks_headers}"
-  echo "btc_blocks_verified=${btc_blocks_verified}"
-  echo "btc_blocks_behind=${btc_blocks_behind}"
-  echo "btc_sync_progress=${btc_sync_progress}"
-  echo "btc_sync_percentage=${btc_sync_percentage}"
+  echo "btc_blocks_headers='${btc_blocks_headers}'"
+  echo "btc_blocks_verified='${btc_blocks_verified}'"
+  echo "btc_blocks_behind='${btc_blocks_behind}'"
+  echo "btc_sync_progress='${btc_sync_progress}'"
+  echo "btc_sync_percentage='${btc_sync_percentage}'"
   exit 0
   
 fi
