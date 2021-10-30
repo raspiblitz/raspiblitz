@@ -151,15 +151,17 @@ if [ "${network}" == "bitcoin" ]; then
     # check if is default chain (multiple networks can run at the same time - but only one is default)
     isDefaultChain=$(echo "${CHAIN}" | grep -c "${chain}")
 
+    # check is last status values are still valid
+    source <(/home/admin/config.scripts/blitz.cache.sh valid btc_${CHAIN}net_activated btc_${CHAIN}net_version btc_${CHAIN}net_running btc_${CHAIN}net_ready btc_${CHAIN}net_online  btc_${CHAIN}net_error_short btc_${CHAIN}net_error_full)
+    echo "/home/admin/config.scripts/blitz.cache.sh valid btc_${CHAIN}net_activated btc_${CHAIN}net_version btc_${CHAIN}net_running btc_${CHAIN}net_ready btc_${CHAIN}net_online  btc_${CHAIN}net_error_short btc_${CHAIN}net_error_full"
+    if [ "${stillvalid}" == "1" ] && [ ${age} -lt 5 ]; then
+      continue
+    fi
+
     # only continue if network chain is activated on blitz
     networkActive=$(cat /mnt/hdd/raspiblitz.conf | grep -c "^${CHAIN}net=on")
     if [ "${isDefaultChain}" != "1" ] && [ "${networkActive}" != "1" ]; then
       /home/admin/config.scripts/blitz.cache.sh set btc_${CHAIN}net_activated "0"
-      continue
-    fi
-
-    source <(/home/admin/config.scripts/blitz.cache.sh valid btc_${CHAIN}net_activated btc_${CHAIN}net_version btc_${CHAIN}net_running btc_${CHAIN}net_ready btc_${CHAIN}net_online  btc_${CHAIN}net_error_short btc_${CHAIN}net_error_full)
-    if [ "${stillvalid}" == "1" ] && [ ${age} -lt 4 ]; then
       continue
     fi
 
