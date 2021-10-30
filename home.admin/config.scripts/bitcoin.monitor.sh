@@ -50,15 +50,16 @@ if [ "$2" = "status" ]; then
     btc_running="1"
 
     # test connection - record win & fail info
-    rm /var/cache/raspiblitz/.bitcoind.out 2>/dev/null
-    rm /var/cache/raspiblitz/.bitcoind.error 2>/dev/null
-    touch /var/cache/raspiblitz/.bitcoind.out
-    touch /var/cache/raspiblitz/.bitcoind.error
-    $bitcoincli_alias getnetworkinfo 1>/var/cache/raspiblitz/.bitcoind.out 2>/var/cache/raspiblitz/.bitcoind.error
-    winData=$(cat /var/cache/raspiblitz/.bitcoind.out 2>/dev/null)
-    failData=$(cat /var/cache/raspiblitz/.bitcoind.error 2>/dev/null)
-    rm /var/cache/raspiblitz/.bitcoind.out
-    rm /var/cache/raspiblitz/.bitcoind.error
+    randStr=$(echo "$RANDOM")
+    rm /var/cache/raspiblitz/.bitcoind-${randStr}.out 2>/dev/null
+    rm /var/cache/raspiblitz/.bitcoind-${randStr}.error 2>/dev/null
+    touch /var/cache/raspiblitz/.bitcoind-${randStr}.out
+    touch /var/cache/raspiblitz/.bitcoind-${randStr}.error
+    $bitcoincli_alias getnetworkinfo 1>/var/cache/raspiblitz/.bitcoind-${randStr}.out 2>/var/cache/raspiblitz/.bitcoind-${randStr}.error
+    winData=$(cat /var/cache/raspiblitz/.bitcoind-${randStr}.out 2>/dev/null)
+    failData=$(cat /var/cache/raspiblitz/.bitcoind-${randStr}.error 2>/dev/null)
+    rm /var/cache/raspiblitz/.bitcoind-${randStr}.out
+    rm /var/cache/raspiblitz/.bitcoind-${randStr}.error
 
     # check for errors
     if [ "${failData}" != "" ]; then
@@ -95,8 +96,18 @@ fi
 
 if [ "$2" = "network" ]; then
 
-  peerNum=$($bitcoincli_alias getnetworkinfo 2>/dev/null | grep "connections\"" | tr -cd '[[:digit:]]')
-  echo "peers=${peerNum}"
+  getnetworkinfo=$($bitcoincli_alias getnetworkinfo 2>/dev/null)
+
+  if [ "${getnetworkinfo}" != "" ]; then
+    btc_running="1"
+    btc_peers=$( echo "${getnetworkinfo}" | grep "connections\"" | tr -cd '[[:digit:]]')
+  else
+    btc_running="0"
+    btc_peers="0"
+  fi
+  
+  echo "btc_running=${btc_running}"
+  echo "btc_peers=${btc_peers}"
   exit 0
   
 fi
@@ -106,7 +117,6 @@ fi
 ###################
 
 if [ "$2" = "peer-kickstart" ]; then
-  echo "#network.monitor.sh peer-kickstart"
 
   # check calling only for mainnet
   if [ "$1" != "mainnet" ]; then 
@@ -205,7 +215,6 @@ fi
 # for testing peer kick-start
 ###################
 if [ "$2" = "peer-disconnectall" ]; then
-  echo "#network.monitor.sh peer-disconnectall"
 
   # check calling only for mainnet
   if [ "$1" != "mainnet" ]; then 

@@ -72,7 +72,7 @@ if [ ${bitcoinRunning} -eq 1 ]; then
     # Get data from blockchain network
     ###################################
 
-    source <(sudo -u bitcoin /home/admin/config.scripts/network.monitor.sh ${chain}net network)
+    source <(sudo /home/admin/config.scripts/bitcoin.monitor.sh ${chain}net network)
     echo "blockchainPeers=${peers}"
 
     ##############################

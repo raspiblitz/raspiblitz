@@ -107,7 +107,7 @@ if [ ${runOnline} -eq 1 ]; then
     # first quick check if bitcoind has peers - if so the client is online
     # if not then recheck by pinging different sources if online
     btc_online="0"
-    source <(timeout 2 /home/admin/config.scripts/network.monitor.sh mainnet status)
+    source <(timeout 2 /home/admin/config.scripts/bitcoin.monitor.sh mainnet status)
     if [ "${btc_online}" == "1" ]; then
       # bitcoind has peers - so device is online
       online=1
