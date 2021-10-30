@@ -63,8 +63,8 @@ if [ "$2" = "status" ]; then
     # check for errors
     if [ "${failData}" != "" ]; then
       btc_ready="0"
-      btc_error_short=$(echo ${bitcoinError/error*:/} | sed 's/[^a-zA-Z0-9 ]//g')
-      btc_error_full=$(echo ${bitcoinError} | tr -d "'")
+      btc_error_short=$(echo ${failData/error*:/} | sed 's/[^a-zA-Z0-9 ]//g')
+      btc_error_full=$(echo ${failData} | tr -d "'")
       btc_ready="0"
 
     # check results if proof for online
