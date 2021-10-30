@@ -18,15 +18,16 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
+# set based on network type
 if [ "$1" == "mainnet" ]; then
-  $bitcoincli_alias="/usr/local/bin/bitcoin-cli -datadir=/home/bitcoin/.bitcoin -rpcport=8332"
-  $service_alias="bitcoind"
+  bitcoincli_alias="/usr/local/bin/bitcoin-cli -datadir=/home/bitcoin/.bitcoin -rpcport=8332"
+  service_alias="bitcoind"
 elif [ "$1" == "testnet" ]; then
-  $bitcoincli_alias="/usr/local/bin/bitcoin-cli -datadir=/home/bitcoin/.bitcoin -rpcport=18332"
-  $service_alias="tbitcoind"
+  bitcoincli_alias="/usr/local/bin/bitcoin-cli -datadir=/home/bitcoin/.bitcoin -rpcport=18332"
+  service_alias="tbitcoind"
 elif [ "$1" == "signet" ]; then
-  $bitcoincli_alias="/usr/local/bin/bitcoin-cli -datadir=/home/bitcoin/.bitcoin -rpcport=38332"
-  $service_alias="sbitcoind"
+  bitcoincli_alias="/usr/local/bin/bitcoin-cli -datadir=/home/bitcoin/.bitcoin -rpcport=38332"
+  service_alias="sbitcoind"
 else
   echo "error='not supported net'"
 fi
