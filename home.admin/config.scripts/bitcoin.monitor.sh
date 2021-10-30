@@ -121,7 +121,7 @@ if [ "$2" = "blockchain" ]; then
 
   # get data
   blockchaininfo=$($bitcoincli_alias getblockchaininfo 2>/dev/null)
-  if [ "${blockchaininfo}" ] == "" ]; then
+  if [ "${blockchaininfo}" == "" ]; then
     echo "error='no data'"
     exit 1
   fi
