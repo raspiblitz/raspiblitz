@@ -88,7 +88,10 @@ fi
 
 # exit if still setup or higher system stopped
 source <(/home/admin/config.scripts/blitz.cache.sh get setupPhase state)
-if [ "${setupPhase}" != "done" ] || [ "${state}" == "" ] || [ "${state}" == "copysource" ] || [ "${state}" == "copytarget" ]; then
+if [ "${setupPhase}" != "done" ] || 
+   [ "${state}" == "" ] ||
+   [ "${state}" == "copysource" ] ||
+   [ "${state}" == "copytarget" ]; then
   echo "skipping deeper system scan (${counter}) - state(${state})"
   exit 1
   #sleep 1
@@ -120,7 +123,6 @@ if [ "${network}" == "bitcoin" ]; then
 
     # check if is default chain (multiple networks can run at the same time - but only one is default)
     isDefaultChain=$(echo "${CHAIN}" | grep -c "${chain}")
-    echo "isDefaultChain(${isDefaultChain})"
 
     # only continue if network chain is activated on blitz
     networkActive=$(cat /mnt/hdd/raspiblitz.conf | grep -c "^${CHAIN}net=on")
