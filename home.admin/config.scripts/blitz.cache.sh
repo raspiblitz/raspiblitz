@@ -39,6 +39,10 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ];
   echo "blitz.cache.sh import [bash-keyvalue-file]"
   echo "# import a bash style key-value file into store"
   echo
+  echo "blitz.cache.sh export [?key-prefix]"
+  echo "# export bash-style key-value to stdout"
+  echo "# can be used with a key-prefix just get a subset"
+  echo
   exit 1
 fi
 
@@ -220,6 +224,31 @@ elif [ "$1" = "import" ]; then
     redis-cli set ${keyValue}${META_LASTTOUCH_TS} "${timestamp}"
 
   done < $filename
+
+# import values from bash key-value store
+elif [ "$1" = "export" ]; then
+
+  # get parameter
+  keyfilter="${2}*"
+
+  # get value
+  keylist=$(redis-cli KEYS "${keyfilter}")
+  echo "${keylist}"
+  
+  echo
+
+  # read file and go thru line by line
+  while read line; do
+
+    # skip comment lines
+    #isComment=$(echo "${line}" | grep -c "^#")
+    #if [ ${isComment} -eq 1 ]; then
+    #  continue
+    #fi
+
+    echo "${line}"
+
+  done < echo "${keylist}"
 
 ##################################
 # PUT/POLL TEMP CACHE
