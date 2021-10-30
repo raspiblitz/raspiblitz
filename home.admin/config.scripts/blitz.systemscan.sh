@@ -104,24 +104,120 @@ fi
 # read/update config values
 source /mnt/hdd/raspiblitz.conf
 
-
 ###################
 # BITCOIN 
 if [ "${network}" == "bitcoin" ]; then
 
+  # IMPORTANT NOTE: If you want to change the update frequency on a certain value
+  # with `blitz.cache.sh outdate` do it on the chain specific value - for example:
+  # do use: btc_${DEFAULT}net_sync_percentage
+  # not use: btc_sync_percentage
+
+  # loop thru mainet, testnet & signet
   networks=( "main" "test" "sig" )
   for CHAIN in "${networks[@]}"
   do
 
-    echo "########## ${CHAIN}"
-    /home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net status
-    /home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net blockchain
-    /home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net network
-    /home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net mempool
+    # check if is default chain (multiple networks can run at the same time - but only one is default)
+    isDefaultChain=$(echo "${CHAIN}" | grep -c "${chain}")
+    echo "isDefaultChain(${isDefaultChain})"
 
-    # when default chain
-    if [ "${CHAIN}" == "${chain}" ]; then
-      echo "DEFAULT!"
+    # only continue if network chain is activated on blitz
+    networkActive=$(cat /mnt/hdd/raspiblitz.conf | grep -c "^${CHAIN}net=on")
+    if [ "${isDefaultChain}" != "1" ] && [ "${networkActive}" != "1" ]; then
+      /home/admin/config.scripts/blitz.cache.sh set btc_${CHAIN}net_activated "0"
+      continue
+    fi
+
+    # update basic status values always
+    source <(/home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net status)
+    /home/admin/config.scripts/blitz.cache.sh set btc_${CHAIN}net_activated "1"
+    /home/admin/config.scripts/blitz.cache.sh set btc_${CHAIN}net_version "${btc_version}"
+    /home/admin/config.scripts/blitz.cache.sh set btc_${CHAIN}net_running "${btc_running}"
+    /home/admin/config.scripts/blitz.cache.sh set btc_${CHAIN}net_ready "${btc_ready}"
+    /home/admin/config.scripts/blitz.cache.sh set btc_${CHAIN}net_online "${btc_online}"
+    /home/admin/config.scripts/blitz.cache.sh set btc_${CHAIN}net_error_short "${btc_error_short}"
+    /home/admin/config.scripts/blitz.cache.sh set btc_${CHAIN}net_error_full "$btc_error_full}"
+
+    # when default chain transfere values
+    if [ "${isDefaultChain}" == "1" ]; then
+      /home/admin/config.scripts/blitz.cache.sh set btc_activated "1"
+      /home/admin/config.scripts/blitz.cache.sh set btc_version "${btc_version}"
+      /home/admin/config.scripts/blitz.cache.sh set btc_running "${btc_running}"
+      /home/admin/config.scripts/blitz.cache.sh set btc_ready "${btc_ready}"
+      /home/admin/config.scripts/blitz.cache.sh set btc_online "${btc_online}"
+      /home/admin/config.scripts/blitz.cache.sh set btc_error_short "${btc_error_short}"
+      /home/admin/config.scripts/blitz.cache.sh set btc_error_full "$btc_error_full}"
+    fi
+
+    # update detail infos only when ready 
+    if [ "${btc_ready}" == "1" ]; then 
+
+      # check if network needs update
+      source <(/home/admin/config.scripts/blitz.cache.sh valid btc_${CHAIN}net_blocks_headers btc_${CHAIN}net_blocks_verified btc_${CHAIN}net_blocks_behind btc_${CHAIN}net_sync_progress btc_${CHAIN}net_sync_percentage)
+      if [ "${stillvalid}" == "0" ] || [ ${age} -gt 30 ]; then
+        error=""
+        echo "updating: /home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net blockchain"
+        source <(/home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net blockchain)
+        if [ "${error}" == "" ]; then
+          /home/admin/config.scripts/blitz.cache.sh set btc_${CHAIN}net_blocks_headers "${btc_blocks_headers}"
+          /home/admin/config.scripts/blitz.cache.sh set btc_${CHAIN}net_blocks_verified "${btc_blocks_verified}"
+          /home/admin/config.scripts/blitz.cache.sh set btc_${CHAIN}net_blocks_behind "${btc_blocks_behind}"
+          /home/admin/config.scripts/blitz.cache.sh set btc_${CHAIN}net_sync_progress "${btc_sync_progress}"
+          /home/admin/config.scripts/blitz.cache.sh set btc_${CHAIN}net_sync_percentage "${btc_sync_percentage}"
+          if [ "${isDefaultChain}" == "1" ]; then
+            /home/admin/config.scripts/blitz.cache.sh set btc_blocks_headers "${btc_blocks_headers}"
+            /home/admin/config.scripts/blitz.cache.sh set btc_blocks_verified "${btc_blocks_verified}"
+            /home/admin/config.scripts/blitz.cache.sh set btc_blocks_behind "${btc_blocks_behind}"
+            /home/admin/config.scripts/blitz.cache.sh set btc_sync_progress "${btc_sync_progress}"
+            /home/admin/config.scripts/blitz.cache.sh set btc_sync_percentage "${btc_sync_percentage}"
+          fi
+        else
+          echo "!! ERROR --> ${error}"
+        fi
+      fi
+
+      # check if network needs update
+      source <(/home/admin/config.scripts/blitz.cache.sh valid btc_${CHAIN}net_peers btc_${CHAIN}net_address btc_${CHAIN}net_port)
+      if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE} ]; then
+        error=""
+        echo "updating: /home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net network"
+        source <(/home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net network)
+        if [ "${error}" == "" ]; then
+          /home/admin/config.scripts/blitz.cache.sh set btc_${CHAIN}net_peers "${btc_peers}"
+          /home/admin/config.scripts/blitz.cache.sh set btc_${CHAIN}net_address "${btc_address}"
+          /home/admin/config.scripts/blitz.cache.sh set btc_${CHAIN}net_port "${btc_btc_port}"
+          if [ "${isDefaultChain}" == "1" ]; then
+            /home/admin/config.scripts/blitz.cache.sh set btc_peers "${btc_peers}"
+            /home/admin/config.scripts/blitz.cache.sh set btc_address "${btc_address}"
+            /home/admin/config.scripts/blitz.cache.sh set btc_port "${btc_btc_port}"
+          fi
+        else
+          echo "!! ERROR --> ${error}"
+        fi
+      fi
+
+      # check if mempool needs update
+      source <(/home/admin/config.scripts/blitz.cache.sh valid btc_${CHAIN}net_mempool_transactions)
+      if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE} ]; then
+        error=""
+        echo "updating: /home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net mempool"
+        source <(/home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net mempool)
+        if [ "${error}" == "" ]; then
+          /home/admin/config.scripts/blitz.cache.sh set btc_${CHAIN}net_mempool_transactions "${btc_mempool_transactions}"
+          if [ "${isDefaultChain}" == "1" ]; then
+            /home/admin/config.scripts/blitz.cache.sh set btc_mempool_transactions "${btc_mempool_transactions}"
+          fi
+        else
+          echo "!! ERROR --> ${error}"
+        fi
+      fi
+
+    # TODO: handle errors?
+    #else
+    #  # TODO: improve error handling --- also add a state to bitcoin.monitor.sh
+    #  echo "!! WARNING Bitcoin (${CHAIN}net) running with error ..."
+    #  echo "$btc_error_short"
     fi
 
   done
