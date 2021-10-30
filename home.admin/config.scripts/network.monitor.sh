@@ -57,8 +57,8 @@ if [ "$2" = "status" ]; then
     $bitcoincli_alias getnetworkinfo 1>/var/cache/raspiblitz/.bitcoind.out 2>/var/cache/raspiblitz/.bitcoind.error
     winData=$(cat /var/cache/raspiblitz/.bitcoind.out 2>/dev/null)
     failData=$(cat /var/cache/raspiblitz/.bitcoind.error 2>/dev/null)
-    rm /var/cache/raspiblitz/.bitcoind.out 2>/dev/null
-    rm /var/cache/raspiblitz/.bitcoind.error 2>/dev/null
+    rm /var/cache/raspiblitz/.bitcoind.out
+    rm /var/cache/raspiblitz/.bitcoind.error
 
     # check for errors
     if [ "${failData}" != "" ]; then
