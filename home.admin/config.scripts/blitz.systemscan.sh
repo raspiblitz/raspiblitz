@@ -88,11 +88,12 @@ fi
 
 # exit if still setup or higher system stopped
 source <(/home/admin/config.scripts/blitz.cache.sh get setupPhase state)
-if [ "${setupPhase}" != "done" ] || 
+echo "setupPhase(${setupPhase}) state(${state})"
+if [ "${setupPhase}" != "done" ] ||
    [ "${state}" == "" ] ||
    [ "${state}" == "copysource" ] ||
    [ "${state}" == "copytarget" ]; then
-  echo "skipping deeper system scan (${counter}) - state(${state})"
+  echo "skipping deeper system scan (${setupPhase}) - state(${state})"
   exit 1
   #sleep 1
   #continue
