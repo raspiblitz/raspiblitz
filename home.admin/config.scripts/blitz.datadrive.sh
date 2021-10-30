@@ -280,9 +280,9 @@ if [ "$1" = "status" ]; then
             # BRTS
             hdd_data_free1Kblocks=$(df -h -k /dev/${hdd}1 | grep "/dev/${hdd}1" | sed -e's/  */ /g' | cut -d" " -f 4 | tr -dc '0-9')
           fi
+          echo "hddDataFreeKB=${hdd_data_free1Kblocks}"
           hddDataFreeBytes=$((${hdd_data_free1Kblocks} * 1024))
           echo "hddDataFreeBytes=${hddDataFreeBytes}"
-          echo "hddDataFreeKB=${hdd_data_free1Kblocks}"
           hddDataFreeGB=$((${hdd_data_free1Kblocks} / (1024 * 1024)))
           echo "hddDataFreeGB=${hddDataFreeGB}"
 
@@ -382,6 +382,10 @@ if [ "$1" = "status" ]; then
     fi
     echo "hddUsedInfo='${hddUsedInfo}'"
     echo "hddDataFreeKB=${hdd_data_free1Kblocks}"
+    hddDataFreeBytes=$((${hdd_data_free1Kblocks} * 1024))
+    echo "hddDataFreeBytes=${hddDataFreeBytes}"
+    hddDataFreeGB=$((${hdd_data_free1Kblocks} / (1024 * 1024)))
+    echo "hddDataFreeGB=${hddDataFreeGB}"
 
   fi
 
