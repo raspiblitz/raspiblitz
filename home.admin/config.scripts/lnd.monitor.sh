@@ -68,7 +68,7 @@ if [ "$2" = "status" ]; then
     if [ "${failData}" != "" ]; then
       lnd_ready="0"
       lnd_error_short=""
-      lnd_error_full=$(echo ${failData} | tr -d "'")
+      lnd_error_full=$(echo ${failData} | tr -d "'" | tr -d '"')
       lnd_ready="0"
 
     # check results if proof for online
