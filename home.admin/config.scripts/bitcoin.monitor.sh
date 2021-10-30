@@ -97,18 +97,70 @@ fi
 
 if [ "$2" = "network" ]; then
 
+  # get data
   getnetworkinfo=$($bitcoincli_alias getnetworkinfo 2>/dev/null)
-
-  if [ "${getnetworkinfo}" != "" ]; then
-    btc_running="1"
-    btc_peers=$( echo "${getnetworkinfo}" | grep "connections\"" | tr -cd '[[:digit:]]')
-  else
-    btc_running="0"
-    btc_peers="0"
+  if [ "${getnetworkinfo}" ] == "" ]; then
+    echo "error='no data'"
+    exit 1
   fi
+
+  # parse data
+  btc_peers=$( echo "${getnetworkinfo}" | grep "connections\"" | tr -cd '[[:digit:]]')
   
-  echo "btc_running=${btc_running}"
+  # print data
   echo "btc_peers=${btc_peers}"
+  exit 0
+  
+fi
+
+######################################################
+# BLOCKCHAIN
+######################################################
+
+if [ "$2" = "blockchain" ]; then
+
+  # get data
+  blockchaininfo=$($bitcoincli_alias getnetworkinfo 2>/dev/null)
+  if [ "${blockchaininfo}" ] == "" ]; then
+    echo "error='no data'"
+    exit 1
+  fi
+
+  # parse data
+  btc_blocks_headers=$(echo "${blockchaininfo}" | jq -r '.headers')
+  btc_blocks_verified=$(echo "${blockchaininfo}" | jq -r '.blocks')
+  btc_blocks_behind=$((${headers} - ${block_verified}))
+  btc_sync_progress=$(echo "${blockchaininfo}" | jq -r '.verificationprogress')
+  btc_sync_percentage=$(echo ${btc_sync_progress} | awk '{printf( "%.2f%%", 100 * $1)}')
+
+  # print data
+  echo "btc_blocks_headers=${btc_blocks_headers}"
+  echo "btc_blocks_verified=${btc_blocks_verified}"
+  echo "btc_blocks_behind=${btc_blocks_behind}"
+  echo "btc_sync_progress=${btc_sync_progress}"
+  echo "btc_sync_percentage=${btc_sync_percentage}"
+  exit 0
+  
+fi
+
+######################################################
+# MEMPOOL
+######################################################
+
+if [ "$2" = "mempool" ]; then
+
+  # get data
+  mempoolinfo=$($bitcoincli_alias getmempoolinfo 2>/dev/null)
+  if [ "${blockchaininfo}" ] == "" ]; then
+    echo "error='no data'"
+    exit 1
+  fi
+
+  # parse data
+  btc_mempool_transactions=$(echo "${blockchaininfo}" | jq -r '.headers')
+
+  # print data
+  echo "btc_mempool_transactions=${btc_mempool_transactions}"
   exit 0
   
 fi
