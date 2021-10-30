@@ -231,22 +231,20 @@ elif [ "$1" = "export" ]; then
   # get parameter
   keyfilter="${2}*"
 
-  # get value
+  # go thru all keys by keyfilter
   keylist=$(redis-cli KEYS "${keyfilter}")
-  echo "${keylist}"
-
-  echo
-
   readarray -t arr <<< "${keylist}"
-  for line in "${arr[@]}";do
+  for key in "${arr[@]}";do
 
-    # skip metadata lines
-    isMeta=$(echo "${line}" | grep -c ":")
+    # skip metadata keys
+    isMeta=$(echo "${key}" | grep -c ":")
     if [ ${isMeta} -gt 0 ]; then
       continue
     fi
-    
-    echo "${line}"
+
+    # print out key/value
+    value=$(redis-cli get "${key}")
+    echo "${key}=\"${value}\""
   done
 
 ##################################
