@@ -87,7 +87,7 @@ if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE} ]; then
 fi
 
 # exit if still setup or higher system stopped
-sourtce <(/home/admin/config.scripts/blitz.cache.sh get setupPhase state)
+source <(/home/admin/config.scripts/blitz.cache.sh get setupPhase state)
 if [ "${setupPhase}" != "done" ] || [ "${state}" == "" ] || [ "${state}" == "copysource" ] || [ "${state}" == "copytarget" ]; then
   echo "skipping deeper system scan (${counter}) - state(${state})"
   exit 1
