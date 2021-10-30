@@ -59,7 +59,6 @@ source <(/home/admin/config.scripts/blitz.cache.sh valid system_undervoltage_cou
 if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE} ]; then
   echo "updating: undervoltage"
   countReports=$(cat /var/log/syslog | grep -c "Under-voltage detected!")
-  echo "${countReports} undervoltage reports found in syslog"
   /home/admin/config.scripts/blitz.cache.sh set sysundervoltageReports "${countReports}"
 fi
 
@@ -159,7 +158,13 @@ if [ "${network}" == "bitcoin" ]; then
       continue
     fi
 
+    source <(/home/admin/config.scripts/blitz.cache.sh valid btc_${CHAIN}net_activated btc_${CHAIN}net_version btc_${CHAIN}net_running btc_${CHAIN}net_ready btc_${CHAIN}net_online  btc_${CHAIN}net_error_short btc_${CHAIN}net_error_full)
+    if [ "${stillvalid}" == "1" ] && [ ${age} -lt 4 ]; then
+      continue
+    fi
+
     # update basic status values always
+    echo "updating:/home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net status"
     source <(/home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net status)
     /home/admin/config.scripts/blitz.cache.sh set btc_${CHAIN}net_activated "1"
     /home/admin/config.scripts/blitz.cache.sh set btc_${CHAIN}net_version "${btc_version}"
