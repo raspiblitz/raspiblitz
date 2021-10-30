@@ -59,7 +59,15 @@ source <(/home/admin/config.scripts/blitz.cache.sh valid system_undervoltage_cou
 if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE} ]; then
   echo "updating: undervoltage"
   countReports=$(cat /var/log/syslog | grep -c "Under-voltage detected!")
-  /home/admin/config.scripts/blitz.cache.sh set sysundervoltageReports "${countReports}"
+  /home/admin/config.scripts/blitz.cache.sh set system_undervoltage_count "${countReports}"
+fi
+
+# UPS (uninterruptible power supply)
+source <(/home/admin/config.scripts/blitz.cache.sh valid system_ups_status)
+if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE} ]; then
+  echo "updating: /home/admin/config.scripts/blitz.ups.sh status"
+  source <(/home/admin/config.scripts/blitz.ups.sh status)
+  /home/admin/config.scripts/blitz.cache.sh set system_ups_status "${upsStatus}"
 fi
 
 #################
@@ -108,7 +116,7 @@ fi
 #################
 # TOR
 
-source <(/home/admin/config.scripts/blitz.cache.sh valid tor_web80_addr)
+source <(/home/admin/config.scripts/blitz.cache.sh valid tor_web_addr)
 if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE5} ]; then
   echo "updating: tor"
   /home/admin/config.scripts/blitz.cache.sh set tor_web_addr "$(cat /mnt/hdd/tor/web80/hostname 2>/dev/null)"
