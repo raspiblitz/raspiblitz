@@ -221,10 +221,10 @@ if [ "$2" = "wallet" ]; then
   if [ ${#ln_channelbalance_pending} -gt 0 ]; then ln_channelbalance_pending=" (+${ln_channelbalance_pending})"; fi
   
   # print data
-  echo "ln_cl_wallet_onchain_balance='${ln_walletbalance}'"
-  echo "ln_cl_wallet_onchain_pending='${ln_pendingonchain}'"
-  echo "ln_cl_wallet_channels_balance='${ln_channelbalance}'"
-  echo "ln_cl_wallet_channels_pending='${ln_channelbalance_pending}'"
+  echo "ln_cl_wallet_onchain_balance='${ln_walletbalance//[^0-9.]/}'"
+  echo "ln_cl_wallet_onchain_pending='${ln_pendingonchain//[^0-9.]/}'"
+  echo "ln_cl_wallet_channels_balance='${ln_channelbalance//[^0-9.]/}'"
+  echo "ln_cl_wallet_channels_pending='${ln_channelbalance_pending//[^0-9.]/}'"
   exit 0
 
 fi
