@@ -146,6 +146,7 @@ if [ "$2" = "info" ]; then
   cl_channels_inactive=$(echo "${ln_getInfo}" | jq -r '.num_inactive_channels')
   cl_channels_total=$(( cl_channels_pending + cl_channels_active + cl_channels_inactive ))
   cl_peers=$(echo "${ln_getInfo}" | jq -r '.num_peers')
+  cl_fees_collected_msat=$(echo "${ln_getInfo}" |  jq -r '.fees_collected_msat')
 
   # calculate with cached value if c-lightning is fully synced
   source <(/home/admin/config.scripts/blitz.cache.sh get ${blockchainHeightKey})
@@ -166,12 +167,13 @@ if [ "$2" = "info" ]; then
   echo "cl_alias='${cl_alias}'"
   echo "cl_address='${cl_address}'"
   echo "cl_tor='${cl_tor}'"
+  echo "cl_peers='${cl_peers}'"
   echo "cl_sync_chain='${cl_sync_chain}'"
   echo "cl_channels_pending='${cl_channels_pending}'"
   echo "cl_channels_active='${cl_channels_active}'"
   echo "cl_channels_inactive='${cl_channels_inactive}'"
   echo "cl_channels_total='${cl_channels_total}'"
-  echo "cl_peers='${cl_peers}'"
+  echo "cl_fees_collected_msat='${cl_fees_collected_msat}'"
   exit 0
   
 fi
@@ -186,21 +188,47 @@ if [ "$2" = "wallet" ]; then
   # sudo /usr/local/bin/lightning-cli --lightning-dir=/home/bitcoin/.lightning --conf=/home/bitcoin/.lightning/config listfunds
 
   # get data
-  ln_walletbalance=$($lightningcli_alias listfunds 2>/dev/null)
+  cl_listfunds=$($lightningcli_alias listfunds 2>/dev/null)
   if [ "${ln_walletbalance}" == "" ]; then
     echo "error='no data'"
     exit 1
   fi
 
-  echo "ln_walletbalance(${ln_walletbalance})"
-
-  # parse data
-  cl_wallet_confirmed=$(echo "$ln_walletbalance" | jq -r '.confirmed_balance')
-  cl_wallet_unconfirmed=$(echo "$ln_walletbalance" | jq -r '.unconfirmed_balance')
-
+  ln_walletbalance=0
+  for i in $(echo "$cl_listfunds" | jq .outputs[] | jq 'select(.status=="confirmed")' | grep value | awk '{print $2}' | cut -d, -f1);do
+    ln_walletbalance=$((ln_walletbalance+i))
+  done
+  ln_walletbalance_wait=0
+  for i in $(echo "$cl_listfunds" | jq .outputs[] | jq 'select(.status=="unconfirmed")' | grep value | awk '{print $2}' | cut -d, -f1);do
+    ln_walletbalance_wait=$((ln_walletbalance_wait+i))
+  done
+  ln_closedchannelbalance=0
+  for i in $(echo "$cl_listfunds" | jq .channels[] | jq 'select(.state=="ONCHAIN")' | grep channel_sat | awk '{print $2}' | cut -d, -f1);do
+    ln_closedchannelbalance=$((ln_closedchannelbalance+i))
+  done
+  ln_pendingonchain=$((ln_walletbalance_wait+ln_closedchannelbalance))
+  if [ "${ln_pendingonchain}" = "0" ]; then ln_pendingonchain=""; fi
+  if [ ${#ln_pendingonchain} -gt 0 ]; then ln_pendingonchain="(+${ln_pendingonchain})"; fi
+  ln_channelbalance=0
+  for i in $(echo "$cl_listfunds" |jq .channels[]|jq 'select(.state=="CHANNELD_NORMAL")'|grep channel_sat|awk '{print $2}'|cut -d, -f1);do
+    ln_channelbalance=$((ln_channelbalance+i))
+  done
+  if [ ${#ln_channelbalance} -eq 0 ];then
+    ln_channelbalance=0
+  fi
+  ln_channelbalance_all=0
+  for i in $(echo "$cl_listfunds" |jq .channels[]|grep channel_sat|awk '{print $2}'|cut -d, -f1);do
+    ln_channelbalance_all=$((ln_channelbalance_all+i))
+  done
+  ln_channelbalance_pending=$((ln_channelbalance_all-ln_channelbalance-ln_closedchannelbalance))
+  if [ "${ln_channelbalance_pending}" = "0" ]; then ln_channelbalance_pending=""; fi
+  if [ ${#ln_channelbalance_pending} -gt 0 ]; then ln_channelbalance_pending=" (+${ln_channelbalance_pending})"; fi
+  
   # print data
-  echo "cl_wallet_confirmed='${cl_wallet_confirmed}'"
-  echo "cl_wallet_unconfirmed='${cl_wallet_unconfirmed}'"
+  echo "cl_wallet_onchain_balance='${ln_walletbalance}'"
+  echo "cl_wallet_onchain_pending='${ln_pendingonchain}'"
+  echo "cl_wallet_channels_balance='${ln_channelbalance}'"
+  echo "cl_wallet_channels_pending='${ln_channelbalance_pending}'"
   exit 0
 
 fi
