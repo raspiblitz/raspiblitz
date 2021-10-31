@@ -171,7 +171,7 @@ if [ "$2" = "info" ]; then
   echo "ln_cl_channels_active='${cl_channels_active}'"
   echo "ln_cl_channels_inactive='${cl_channels_inactive}'"
   echo "ln_cl_channels_total='${cl_channels_total}'"
-  echo "ln_cl_fees_total='${cl_fees_collected_msat}'"
+  echo "ln_cl_fees_total='${cl_fees_collected_msat//[^0-9.]/}'"
   exit 0
   
 fi
