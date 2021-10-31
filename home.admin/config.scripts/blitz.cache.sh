@@ -297,7 +297,7 @@ elif [ "$1" = "meta" ]; then
   
   # get redis basic value 
   valuestr=$(redis-cli get ${keystr})
-  echo "${keystr}=\"${valuestr}\""
+  echo "value=\"${valuestr}\""
 
   # get META_LASTTOUCH_TS
   lasttouch=$(redis-cli get ${keystr}${META_LASTTOUCH_TS})
