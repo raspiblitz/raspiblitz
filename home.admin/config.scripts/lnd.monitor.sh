@@ -187,7 +187,7 @@ if [ "$2" = "wallet" ]; then
   lnd_wallet_channels_pending=$(echo "$ln_channelbalance" | jq -r '.pending_open_balance')
 
   # print data
-  echo "ln_lnd_wallet_onchain_balance='${nd_wallet_onchain_balance}'"
+  echo "ln_lnd_wallet_onchain_balance='${lnd_wallet_onchain_balance}'"
   echo "ln_lnd_wallet_onchain_pending='${lnd_wallet_onchain_pending}'"
   echo "ln_lnd_wallet_channels_balance='${lnd_wallet_channels_balance}'"
   echo "ln_lnd_wallet_channels_pending='${lnd_wallet_channels_pending}'"
