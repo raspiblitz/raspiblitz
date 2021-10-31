@@ -183,10 +183,10 @@ fi
 if [ "$2" = "wallet" ]; then
 
   # raw data demo:
-  # sudo /usr/local/bin/lncli -n=mainnet --rpcserver=localhost:10009 --macaroonpath=/home/bitcoin/.lnd/data/chain/bitcoin/mainnet/readonly.macaroon --tlscertpath=/home/bitcoin/.lnd/tls.cert walletbalance
+  # sudo /usr/local/bin/lightning-cli --lightning-dir=/home/bitcoin/.lightning --conf=/home/bitcoin/.lightning/config listfunds
 
   # get data
-  ln_walletbalance=$($lightningcli_alias walletbalance 2>/dev/null)
+  ln_walletbalance=$($lightningcli_alias listfunds 2>/dev/null)
   if [ "${ln_walletbalance}" == "" ]; then
     echo "error='no data'"
     exit 1
