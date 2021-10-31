@@ -83,12 +83,12 @@ if [ "$2" = "status" ]; then
   fi 
 
   # print results
-  echo "lnd_version='${lnd_version}'"
-  echo "lnd_running='${lnd_running}'"
-  echo "lnd_ready='${lnd_ready}'"
-  echo "lnd_online='${lnd_online}'"
-  echo "lnd_error_short='${lnd_error_short}'"
-  echo "lnd_error_full='${lnd_error_full}'"
+  echo "ln_lnd_version='${lnd_version}'"
+  echo "ln_lnd_running='${lnd_running}'"
+  echo "ln_lnd_ready='${lnd_ready}'"
+  echo "ln_lnd_online='${lnd_online}'"
+  echo "ln_lnd_error_short='${lnd_error_short}'"
+  echo "ln_lnd_error_full='${lnd_error_full}'"
 
   exit 0
 fi   
@@ -110,7 +110,7 @@ if [ "$2" = "config" ]; then
   lnd_alias=$( echo "${lndConfigData}" | grep "^alias=*" | cut -f2 -d=)
 
   # print data
-  echo "lnd_alias='${lnd_alias}'"
+  echo "ln_lnd_alias='${lnd_alias}'"
   exit 0
 fi
 
@@ -143,15 +143,15 @@ if [ "$2" = "info" ]; then
   lnd_peers=$(echo "${ln_getInfo}" | jq -r '.num_peers')
 
   # print data
-  echo "lnd_address='${lnd_address}'"
-  echo "lnd_tor='${lnd_tor}'"
-  echo "lnd_sync_chain='${lnd_sync_chain}'"
-  echo "lnd_sync_graph='${lnd_sync_graph}'"
-  echo "lnd_channels_pending='${lnd_channels_pending}'"
-  echo "lnd_channels_active='${lnd_channels_active}'"
-  echo "lnd_channels_inactive='${lnd_channels_inactive}'"
-  echo "lnd_channels_total='${lnd_channels_total}'"
-  echo "lnd_peers='${lnd_peers}'"
+  echo "ln_lnd_address='${lnd_address}'"
+  echo "ln_lnd_tor='${lnd_tor}'"
+  echo "ln_lnd_sync_chain='${lnd_sync_chain}'"
+  echo "ln_lnd_sync_graph='${lnd_sync_graph}'"
+  echo "ln_lnd_channels_pending='${lnd_channels_pending}'"
+  echo "ln_lnd_channels_active='${lnd_channels_active}'"
+  echo "ln_lnd_channels_inactive='${lnd_channels_inactive}'"
+  echo "ln_lnd_channels_total='${lnd_channels_total}'"
+  echo "ln_lnd_peers='${lnd_peers}'"
   exit 0
   
 fi
@@ -177,8 +177,8 @@ if [ "$2" = "wallet" ]; then
   lnd_wallet_unconfirmed=$(echo "$ln_walletbalance" | jq -r '.unconfirmed_balance')
 
   # print data
-  echo "lnd_wallet_confirmed='${lnd_wallet_confirmed}'"
-  echo "lnd_wallet_unconfirmed='${lnd_wallet_unconfirmed}'"
+  echo "ln_lnd_wallet_confirmed='${lnd_wallet_confirmed}'"
+  echo "ln_lnd_wallet_unconfirmed='${lnd_wallet_unconfirmed}'"
   exit 0
 
 fi
@@ -203,7 +203,7 @@ if [ "$2" = "channels" ]; then
   lnd_channels_total=$(echo "$ln_channels" | jq '.[] | length')
 
   # print data
-  echo "lnd_channels_total='${lnd_channels_total}'"
+  echo "ln_lnd_channels_total='${lnd_channels_total}'"
   exit 0
   
 fi
@@ -228,11 +228,13 @@ if [ "$2" = "fees" ]; then
   lnd_fees_daily=$(echo "$ln_feereport" | jq -r '.day_fee_sum')
   lnd_fees_weekly=$(echo "$ln_feereport" | jq -r '.week_fee_sum')
   lnd_fees_month=$(echo "$ln_feereport" | jq -r '.month_fee_sum')
+  lnd_fees_total=$((${lnd_fees_daily} + ${lnd_fees_weekly} + ${lnd_fees_month}))
 
   # print data
-  echo "lnd_fees_daily='${lnd_fees_daily}'"
-  echo "lnd_fees_weekly='${lnd_fees_daily}'"
-  echo "lnd_fees_month='${lnd_fees_daily}'"
+  echo "ln_lnd_fees_daily='${lnd_fees_daily}'"
+  echo "ln_lnd_fees_weekly='${lnd_fees_weekly}'"
+  echo "ln_lnd_fees_month='${lnd_fees_month}'"
+  echo "ln_lnd_fees_total='${lnd_fees_total}'"
   exit 0
   
 fi

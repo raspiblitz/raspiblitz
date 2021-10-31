@@ -7,8 +7,6 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "cl.monitor.sh [mainnet|testnet|signet] config"
  echo "cl.monitor.sh [mainnet|testnet|signet] info"
  echo "cl.monitor.sh [mainnet|testnet|signet] wallet"
- echo "cl.monitor.sh [mainnet|testnet|signet] channels"
- echo "cl.monitor.sh [mainnet|testnet|signet] fees"
  exit 1
 fi
 
@@ -86,12 +84,12 @@ if [ "$2" = "status" ]; then
   fi 
 
   # print results
-  echo "cl_version='${cl_version}'"
-  echo "cl_running='${cl_running}'"
-  echo "cl_ready='${cl_ready}'"
-  echo "cl_online='${cl_online}'"
-  echo "cl_error_short='${cl_error_short}'"
-  echo "cl_error_full='${cl_error_full}'"
+  echo "ln_cl_version='${cl_version}'"
+  echo "ln_cl_running='${cl_running}'"
+  echo "ln_cl_ready='${cl_ready}'"
+  echo "ln_cl_online='${cl_online}'"
+  echo "ln_cl_error_short='${cl_error_short}'"
+  echo "ln_cl_error_full='${cl_error_full}'"
 
   exit 0
 fi   
@@ -164,16 +162,16 @@ if [ "$2" = "info" ]; then
   fi
   
   # print data
-  echo "cl_alias='${cl_alias}'"
-  echo "cl_address='${cl_address}'"
-  echo "cl_tor='${cl_tor}'"
-  echo "cl_peers='${cl_peers}'"
-  echo "cl_sync_chain='${cl_sync_chain}'"
-  echo "cl_channels_pending='${cl_channels_pending}'"
-  echo "cl_channels_active='${cl_channels_active}'"
-  echo "cl_channels_inactive='${cl_channels_inactive}'"
-  echo "cl_channels_total='${cl_channels_total}'"
-  echo "cl_fees_collected_msat='${cl_fees_collected_msat}'"
+  echo "ln_cl_alias='${cl_alias}'"
+  echo "ln_cl_address='${cl_address}'"
+  echo "ln_cl_tor='${cl_tor}'"
+  echo "ln_cl_peers='${cl_peers}'"
+  echo "ln_cl_sync_chain='${cl_sync_chain}'"
+  echo "ln_cl_channels_pending='${cl_channels_pending}'"
+  echo "ln_cl_channels_active='${cl_channels_active}'"
+  echo "ln_cl_channels_inactive='${cl_channels_inactive}'"
+  echo "ln_cl_channels_total='${cl_channels_total}'"
+  echo "ln_cl_fees_total='${cl_fees_collected_msat}'"
   exit 0
   
 fi
@@ -207,7 +205,6 @@ if [ "$2" = "wallet" ]; then
     ln_closedchannelbalance=$((ln_closedchannelbalance+i))
   done
   ln_pendingonchain=$((ln_walletbalance_wait+ln_closedchannelbalance))
-  if [ "${ln_pendingonchain}" = "0" ]; then ln_pendingonchain=""; fi
   if [ ${#ln_pendingonchain} -gt 0 ]; then ln_pendingonchain="(+${ln_pendingonchain})"; fi
   ln_channelbalance=0
   for i in $(echo "$cl_listfunds" |jq .channels[]|jq 'select(.state=="CHANNELD_NORMAL")'|grep channel_sat|awk '{print $2}'|cut -d, -f1);do
@@ -221,14 +218,13 @@ if [ "$2" = "wallet" ]; then
     ln_channelbalance_all=$((ln_channelbalance_all+i))
   done
   ln_channelbalance_pending=$((ln_channelbalance_all-ln_channelbalance-ln_closedchannelbalance))
-  if [ "${ln_channelbalance_pending}" = "0" ]; then ln_channelbalance_pending=""; fi
   if [ ${#ln_channelbalance_pending} -gt 0 ]; then ln_channelbalance_pending=" (+${ln_channelbalance_pending})"; fi
   
   # print data
-  echo "cl_wallet_onchain_balance='${ln_walletbalance}'"
-  echo "cl_wallet_onchain_pending='${ln_pendingonchain}'"
-  echo "cl_wallet_channels_balance='${ln_channelbalance}'"
-  echo "cl_wallet_channels_pending='${ln_channelbalance_pending}'"
+  echo "ln_cl_wallet_onchain_balance='${ln_walletbalance}'"
+  echo "ln_cl_wallet_onchain_pending='${ln_pendingonchain}'"
+  echo "ln_cl_wallet_channels_balance='${ln_channelbalance}'"
+  echo "ln_cl_wallet_channels_pending='${ln_channelbalance_pending}'"
   exit 0
 
 fi
