@@ -447,17 +447,22 @@ do
   isDefaultChain=$(echo "${CHAIN}" | grep -c "${chain}")
   isDefaultLightning=$(echo "${lightning}" | grep -c "cl")
 
+  echo "c-lightning loop ${CHAIN}"
+
   # skip if network is not on by config
   if [ "${CHAIN}" == "main" ] && [ "${cl}" != "on" ]; then
     /home/admin/config.scripts/blitz.cache.sh set ln_cl_${CHAIN}net_activated "0"
+    echo "skip c-lightning mainnet scan"
     continue
   fi
   if [ "${CHAIN}" == "test" ] && [ "${tcl}" != "on" ]; then
     /home/admin/config.scripts/blitz.cache.sh set ln_cl_${CHAIN}net_activated "0"
+    echo "skip c-lightning testnet scan"
     continue
   fi
   if [ "${CHAIN}" == "sig" ] && [ "${scl}" != "on" ]; then
     /home/admin/config.scripts/blitz.cache.sh set ln_cl_${CHAIN}net_activated "0"
+    echo "skip c-lightning signet scan"
     continue
   fi
 
