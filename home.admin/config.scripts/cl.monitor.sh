@@ -192,13 +192,15 @@ if [ "$2" = "wallet" ]; then
     exit 1
   fi
 
+  echo "ln_walletbalance(${ln_walletbalance})"
+
   # parse data
-  lnd_wallet_confirmed=$(echo "$ln_walletbalance" | jq -r '.confirmed_balance')
-  lnd_wallet_unconfirmed=$(echo "$ln_walletbalance" | jq -r '.unconfirmed_balance')
+  cl_wallet_confirmed=$(echo "$ln_walletbalance" | jq -r '.confirmed_balance')
+  cl_wallet_unconfirmed=$(echo "$ln_walletbalance" | jq -r '.unconfirmed_balance')
 
   # print data
-  echo "lnd_wallet_confirmed='${lnd_wallet_confirmed}'"
-  echo "lnd_wallet_unconfirmed='${lnd_wallet_unconfirmed}'"
+  echo "cl_wallet_confirmed='${cl_wallet_confirmed}'"
+  echo "cl_wallet_unconfirmed='${cl_wallet_unconfirmed}'"
   exit 0
 
 fi
