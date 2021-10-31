@@ -191,9 +191,6 @@ if [ "$2" = "wallet" ]; then
   echo "ln_lnd_wallet_onchain_pending='${lnd_wallet_onchain_pending}'"
   echo "ln_lnd_wallet_channels_balance='${lnd_wallet_channels_balance}'"
   echo "ln_lnd_wallet_channels_pending='${lnd_wallet_channels_pending}'"
-
-
-  ln_wallet_onchain_balance
   exit 0
 
 fi
