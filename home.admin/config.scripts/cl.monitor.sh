@@ -185,11 +185,11 @@ fi
 if [ "$2" = "wallet" ]; then
 
   # raw data demo:
-  # sudo /usr/local/bin/lightning-cli --lightning-dir=/home/bitcoin/.lightning --conf=/home/bitcoin/.lightning/config listfunds
+  # /usr/local/bin/lightning-cli --lightning-dir=/home/bitcoin/.lightning --conf=/home/bitcoin/.lightning/config listfunds
 
   # get data
   cl_listfunds=$($lightningcli_alias listfunds 2>/dev/null)
-  if [ "${ln_walletbalance}" == "" ]; then
+  if [ "${cl_listfunds}" == "" ]; then
     echo "error='no data'"
     exit 1
   fi
