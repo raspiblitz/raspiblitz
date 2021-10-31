@@ -163,8 +163,8 @@ fi
 if [ "$2" = "wallet" ]; then
 
   # raw data demo:
-  # sudo /usr/local/bin/lncli -n=mainnet --rpcserver=localhost:10009 --macaroonpath=/home/bitcoin/.lnd/data/chain/bitcoin/mainnet/readonly.macaroon --tlscertpath=/home/bitcoin/.lnd/tls.cert walletbalance
-
+  # /usr/local/bin/lncli -n=mainnet --rpcserver=localhost:10009 --macaroonpath=/home/bitcoin/.lnd/data/chain/bitcoin/mainnet/readonly.macaroon --tlscertpath=/home/bitcoin/.lnd/tls.cert walletbalance
+  # /usr/local/bin/lncli -n=mainnet --rpcserver=localhost:10009 --macaroonpath=/home/bitcoin/.lnd/data/chain/bitcoin/mainnet/readonly.macaroon --tlscertpath=/home/bitcoin/.lnd/tls.cert channelbalance
   # get data
   ln_walletbalance=$($lndcli_alias walletbalance 2>/dev/null)
   if [ "${ln_walletbalance}" == "" ]; then
@@ -173,12 +173,27 @@ if [ "$2" = "wallet" ]; then
   fi
 
   # parse data
-  lnd_wallet_confirmed=$(echo "$ln_walletbalance" | jq -r '.confirmed_balance')
-  lnd_wallet_unconfirmed=$(echo "$ln_walletbalance" | jq -r '.unconfirmed_balance')
+  lnd_wallet_onchain_balance=$(echo "$ln_walletbalance" | jq -r '.confirmed_balance')
+  lnd_wallet_onchain_pending=$(echo "$ln_walletbalance" | jq -r '.unconfirmed_balance')
+
+  ln_channelbalance=$($lndcli_alias channelbalance 2>/dev/null)
+  if [ "${ln_channelbalance}" == "" ]; then
+    echo "error='no data'"
+    exit 1
+  fi
+
+   # parse data
+  lnd_wallet_channels_balance=$(echo "$ln_channelbalance" | jq -r '.balance')
+  lnd_wallet_channels_pending=$(echo "$ln_channelbalance" | jq -r '.pending_open_balance')
 
   # print data
-  echo "ln_lnd_wallet_confirmed='${lnd_wallet_confirmed}'"
-  echo "ln_lnd_wallet_unconfirmed='${lnd_wallet_unconfirmed}'"
+  echo "ln_lnd_wallet_onchain_balance='${nd_wallet_onchain_balance}'"
+  echo "ln_lnd_wallet_onchain_pending='${lnd_wallet_onchain_pending}'"
+  echo "ln_lnd_wallet_channels_balance='${lnd_wallet_channels_balance}'"
+  echo "ln_lnd_wallet_channels_pending='${lnd_wallet_channels_pending}'"
+
+
+  ln_wallet_onchain_balance
   exit 0
 
 fi
