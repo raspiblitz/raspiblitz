@@ -249,6 +249,8 @@ if [ "$1" = "display-seed" ]; then
   echo "# seewordFileExists(${seedwordFileExists})"
   if [ "${seedwordFileExists}" == "1" ]; then
     source ${seedwordFile}
+  fi
+  if [ "${seedwords}" != "" ]; then
     #echo "# seedwords(${seedwords})"
     #echo "# seedwords6x4(${seedwords6x4})"
     ack=0
@@ -264,6 +266,7 @@ if [ "$1" = "display-seed" ]; then
     if [ "${deleteSeedInfoAfterDisplay}" == "1" ]; then
       echo "# deleting seed info"
       sudo shred ${seedwordFile}
+      sudo rm ${seedwordFile} 2>/dev/null
     fi
   else
     walletFile="/mnt/hdd/lnd/data/chain/${network}/${CHAIN}/wallet.db"
