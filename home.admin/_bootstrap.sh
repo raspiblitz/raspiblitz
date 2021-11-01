@@ -70,21 +70,6 @@ cat $infoFile >> $logFile
 #########################
 echo "## INIT RaspiBlitz Cache" >> $logFile
 
-# import all base values from raspiblitz.info
-echo "- importing ${infoFile}"
-/home/admin/config.scripts/blitz.cache.sh import $infoFile >> $logFile
-
-# import all base values from raspiblitz.config (if already exists)
-configFileExists=$(ls ${configFile} | grep -c "${configFile}")
-if []; then
-  echo "- importing ${configFile}"
-  /home/admin/config.scripts/blitz.cache.sh import configFile >> $logFile
-fi
-
-# version info
-echo "- importing _version.info"
-/home/admin/config.scripts/blitz.cache.sh import /home/admin/_version.info >> $logFile
-
 # setting basic status info
 /home/admin/config.scripts/blitz.cache.sh set state "starting"
 /home/admin/config.scripts/blitz.cache.sh set message "bootstrap"
