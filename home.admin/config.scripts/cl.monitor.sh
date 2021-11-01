@@ -75,7 +75,7 @@ if [ "$2" = "status" ]; then
 
     # check results if proof for online
     else
-      lnd_ready="1"
+      cl_ready="1"
       connections=$( echo "${winData}" | grep "num_peers\"" | tr -cd '[[:digit:]]')
       if [ "${connections}" != "" ] && [ "${connections}" != "0" ]; then
         cl_online="1"
