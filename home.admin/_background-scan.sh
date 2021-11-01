@@ -403,7 +403,7 @@ do
 
     # update basic status values always
     source <(/home/admin/config.scripts/blitz.cache.sh valid ln_lnd_${CHAIN}net_locked ln_lnd_${CHAIN}net_version ln_lnd_${CHAIN}net_running ln_lnd_${CHAIN}net_ready ln_lnd_${CHAIN}net_online ln_lnd_${CHAIN}net_error_short ln_lnd_${CHAIN}net_error_full)
-    if [ "${stillvalid}" != "1" ] && [ ${age} -gt 10 ]; then
+    if [ "${stillvalid}" == "0" ] || [ ${age} -gt 10 ]; then
       echo "updating: /home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net status"
       source <(/home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net status)
       /home/admin/config.scripts/blitz.cache.sh set ln_lnd_${CHAIN}net_activated "1"
