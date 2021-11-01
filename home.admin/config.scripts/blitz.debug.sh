@@ -342,11 +342,11 @@ sudo /home/admin/config.scripts/internet.sh status | grep 'network_device\|local
 echo
 
 echo "*** HARDWARE TEST RESULTS ***"
-source <(/home/admin/config.scripts/blitz.cache.sh get system_undervoltage_count)
+source <(/home/admin/config.scripts/blitz.cache.sh get system_count_undervoltage)
 showImproveInfo=0
-if [ ${#system_undervoltage_count} -gt 0 ]; then
-  echo "UndervoltageReports in Logs: ${system_undervoltage_count}"
-  if [ ${system_undervoltage_count} -gt 0 ]; then
+if [ ${#system_count_undervoltage} -gt 0 ]; then
+  echo "UndervoltageReports in Logs: ${system_count_undervoltage}"
+  if [ ${system_count_undervoltage} -gt 0 ]; then
     showImproveInfo=1
   fi
 fi
