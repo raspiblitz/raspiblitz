@@ -5,10 +5,42 @@
 # Certain values have a default maximum age to get updated by this script.
 # Every single value can be set to update more frequently by `blitz.cache.sh outdate`.
 
-# start with parameter "-only-one-loop" 
+# LOGS see: sudo journalctl -f -u background-scan
+
+# start with parameter "only-one-loop" (use for testing)
 ONLY_ONE_LOOP="0"
-if [ "$1" == "-only-one-loop" ]; then
+if [ "$1" == "only-one-loop" ]; then
   ONLY_ONE_LOOP="1"
+fi
+# start with parameter "install" (to setup service as systemd background running)
+if [ "$1" == "install" ]; then
+  
+  # write systemd service
+  cat > /etc/systemd/system/background-scan.service <<EOF
+# Monitor the RaspiBlitz State
+# /etc/systemd/system/background-scan.service
+
+[Unit]
+Description=RaspiBlitz Background Monitoring Service
+Wants=redis.service
+After=redis.service
+
+[Service]
+User=root
+Group=root
+Type=simple
+ExecStart=/home/admin/_background.scan.sh
+Restart=always
+TimeoutSec=10
+RestartSec=10
+StandardOutput=journal
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+  # enable systemd service
+  sudo systemctl enable background-scan
 fi
 
 # check user running
