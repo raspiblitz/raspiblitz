@@ -261,17 +261,17 @@ do
       # skip if network is not on by config
       if [ "${CHAIN}" == "main" ] && [ "${mainnet}" != "on" ] && [ "${isDefaultChain}" != "1" ]; then
         /home/admin/config.scripts/blitz.cache.sh set btc_${CHAIN}net_activated "0"
-        echo "skip lnd ${CHAIN}net scan"
+        echo "skip btc ${CHAIN}net scan"
         continue
       fi
       if [ "${CHAIN}" == "test" ] && [ "${testnet}" != "on" ]; then
         /home/admin/config.scripts/blitz.cache.sh set btc_${CHAIN}net_activated "0"
-        echo "skip lnd ${CHAIN}net scan"
+        echo "skip btc ${CHAIN}net scan"
         continue
       fi
       if [ "${CHAIN}" == "sig" ] && [ "${signet}" != "on" ]; then
         /home/admin/config.scripts/blitz.cache.sh set btc_${CHAIN}net_activated "0"
-        echo "skip lnd ${CHAIN}net scan"
+        echo "skip btc ${CHAIN}net scan"
         continue
       fi
 
@@ -387,14 +387,17 @@ do
     # skip if network is not on by config
     if [ "${CHAIN}" == "main" ] && [ "${lnd}" != "on" ]; then
       /home/admin/config.scripts/blitz.cache.sh set ln_lnd_${CHAIN}net_activated "0"
+      echo "skip lnd ${CHAIN}net scan"
       continue
     fi
     if [ "${CHAIN}" == "test" ] && [ "${tlnd}" != "on" ]; then
       /home/admin/config.scripts/blitz.cache.sh set ln_lnd_${CHAIN}net_activated "0"
+      echo "skip lnd ${CHAIN}net scan"
       continue
     fi
     if [ "${CHAIN}" == "sig" ] && [ "${slnd}" != "on" ]; then
       /home/admin/config.scripts/blitz.cache.sh set ln_lnd_${CHAIN}net_activated "0"
+      echo "skip lnd ${CHAIN}net scan"
       continue
     fi
 
