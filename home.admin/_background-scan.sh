@@ -39,8 +39,9 @@ StandardOutput=journal
 WantedBy=multi-user.target
 EOF
 
-  # enable systemd service
+  # enable systemd service & exit
   sudo systemctl enable background-scan
+  exit
 fi
 
 # check user running
