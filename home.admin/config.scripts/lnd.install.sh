@@ -11,6 +11,11 @@ if [ $# -lt 2 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ];then
   exit 1
 fi
 
+source <(/home/admin/config.scripts/blitz.cache.sh get network)
+if [ "${network}" == "" ]; then
+  network="bitcoin"
+fi
+
 # CHAIN is signet | testnet | mainnet
 CHAIN=$2
 if [ ${CHAIN} = testnet ]||[ ${CHAIN} = mainnet ]||[ ${CHAIN} = signet ];then
@@ -219,6 +224,7 @@ fi
 
 if [ "$1" = "display-seed" ]; then
   
+
   # check if sudo
   if [ "$EUID" -ne 0 ]; then
     echo "Please run as root (with sudo)"
