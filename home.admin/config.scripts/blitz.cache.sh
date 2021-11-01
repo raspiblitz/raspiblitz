@@ -229,11 +229,11 @@ elif [ "$1" = "import" ]; then
     # import key from line & value from source above (that way quotes are habdled correctly)
     keyValue=$(echo "$line" | cut -d "=" -f1)
     echo "# redis-cli set ${keyValue} ${!keyValue}"
-    redis-cli set ${keyValue} "${!keyValue}"
+    redis-cli set ${keyValue} "${!keyValue}" 1>/dev/null
 
     # also set the timestamp on import for each value
     timestamp=$(date +%s)
-    redis-cli set ${keyValue}${META_LASTTOUCH_TS} "${timestamp}"
+    redis-cli set ${keyValue}${META_LASTTOUCH_TS} "${timestamp}" 1>/dev/null
 
   done < $filename
 
