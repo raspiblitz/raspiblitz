@@ -604,16 +604,16 @@ do
       fi
 
       # check if wallet needs update
-      source <(/home/admin/config.scripts/blitz.cache.sh valid ln_lnd_${CHAIN}net_onchain_balance ln_lnd_${CHAIN}net_onchain_pending ln_lnd_${CHAIN}net_channels_balance ln_lnd_${CHAIN}net_channels_pending)
+      source <(/home/admin/config.scripts/blitz.cache.sh valid ln_cl_${CHAIN}net_wallet_onchain_balance ln_cl_${CHAIN}net_wallet_onchain_pending ln_cl_${CHAIN}net_wallet_channels_balance ln_cl_${CHAIN}net_wallet_channels_pending)
       if [ "${stillvalid}" == "0" ] || [ ${age} -gt 22 ]; then
         error=""
         echo "updating: /home/admin/config.scripts/cl.monitor.sh ${CHAIN}net wallet"
         source <(/home/admin/config.scripts/cl.monitor.sh ${CHAIN}net wallet)
         if [ "${error}" == "" ]; then
-          /home/admin/config.scripts/blitz.cache.sh set ln_lnd_${CHAIN}net_onchain_balance "${ln_cl_wallet_onchain_balance}"
-          /home/admin/config.scripts/blitz.cache.sh set ln_lnd_${CHAIN}net_onchain_pending "${ln_cl_wallet_onchain_pending}"
-          /home/admin/config.scripts/blitz.cache.sh set ln_lnd_${CHAIN}net_channels_balance "${ln_cl_wallet_channels_balance}"
-          /home/admin/config.scripts/blitz.cache.sh set ln_lnd_${CHAIN}net_channels_pending "${ln_cl_wallet_channels_pending}"
+          /home/admin/config.scripts/blitz.cache.sh set ln_cl_${CHAIN}net_wallet_onchain_balance "${ln_cl_wallet_onchain_balance}"
+          /home/admin/config.scripts/blitz.cache.sh set ln_cl_${CHAIN}net_wallet_onchain_pending "${ln_cl_wallet_onchain_pending}"
+          /home/admin/config.scripts/blitz.cache.sh set ln_cl_${CHAIN}net_wallet_channels_balance "${ln_cl_wallet_channels_balance}"
+          /home/admin/config.scripts/blitz.cache.sh set ln_cl_${CHAIN}net_wallet_channels_pending "${ln_cl_wallet_channels_pending}"
           if [ "${isDefaultLightning}" == "1" ] && [ "${isDefaultChain}" == "1" ]; then
             /home/admin/config.scripts/blitz.cache.sh set ln_wallet_onchain_balance "${ln_cl_wallet_onchain_balance}"
             /home/admin/config.scripts/blitz.cache.sh set ln_wallet_onchain_pending "${ln_cl_wallet_onchain_pending}"
