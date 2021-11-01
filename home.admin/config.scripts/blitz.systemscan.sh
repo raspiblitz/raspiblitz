@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# This script is called regularly in the background to gather basic system information.
-# Ut will place those values in the `blitz.cache.sh` system and take care about updates.
+# This script will loop in the background to gather basic system information.
+# It will place those values in the `blitz.cache.sh` system and take care about updates.
 # Certain values have a default maximum age to get updated by this script.
 # Every single value can be set to update more frequently by `blitz.cache.sh outdate`.
 
@@ -293,6 +293,11 @@ fi
 ###################
 # Lightning (lnd)
 
+# IMPORTANT NOTE: If you want to change the update frequency on a certain value
+# with `blitz.cache.sh outdate` do it on the chain specific value - for example:
+# do use: ln_lnd_${DEFAULT}net_locked
+# not use: ln_locked
+
 # loop thru mainet, testnet & signet
 networks=( "main" "test" "sig" )
 for CHAIN in "${networks[@]}"
@@ -317,7 +322,7 @@ do
   fi
 
   # update basic status values always
-  source <(/home/admin/config.scripts/blitz.cache.sh valid ln_lnd_${CHAIN}net_version ln_lnd_${CHAIN}net_running ln_lnd_${CHAIN}net_ready ln_lnd_${CHAIN}net_online ln_lnd_${CHAIN}net_error_short ln_lnd_${CHAIN}net_error_full)
+  source <(/home/admin/config.scripts/blitz.cache.sh valid ln_lnd_${CHAIN}net_locked ln_lnd_${CHAIN}net_version ln_lnd_${CHAIN}net_running ln_lnd_${CHAIN}net_ready ln_lnd_${CHAIN}net_online ln_lnd_${CHAIN}net_error_short ln_lnd_${CHAIN}net_error_full)
   if [ "${stillvalid}" != "1" ] && [ ${age} -gt 10 ]; then
     echo "updating: /home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net status"
     source <(/home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net status)
@@ -326,6 +331,7 @@ do
     /home/admin/config.scripts/blitz.cache.sh set ln_lnd_${CHAIN}net_running "${ln_lnd_running}"
     /home/admin/config.scripts/blitz.cache.sh set ln_lnd_${CHAIN}net_ready "${ln_lnd_ready}"
     /home/admin/config.scripts/blitz.cache.sh set ln_lnd_${CHAIN}net_online "${ln_lnd_online}"
+    /home/admin/config.scripts/blitz.cache.sh set ln_lnd_${CHAIN}net_locked "${ln_lnd_locked}"
     /home/admin/config.scripts/blitz.cache.sh set ln_lnd_${CHAIN}net_error_short "${ln_lnd_error_short}"
     /home/admin/config.scripts/blitz.cache.sh set ln_lnd_${CHAIN}net_error_full "${ln_lnd_error_full}"
     if [ "${isDefaultLightning}" == "1" ] && [ "${isDefaultChain}" == "1" ]; then
@@ -334,6 +340,7 @@ do
       /home/admin/config.scripts/blitz.cache.sh set ln_running "${ln_lnd_running}"
       /home/admin/config.scripts/blitz.cache.sh set ln_ready "${ln_lnd_ready}"
       /home/admin/config.scripts/blitz.cache.sh set ln_online "${ln_lnd_online}"
+      /home/admin/config.scripts/blitz.cache.sh set ln_locked "${ln_lnd_locked}"
       /home/admin/config.scripts/blitz.cache.sh set ln_error_short "${ln_lnd_error_short}"
       /home/admin/config.scripts/blitz.cache.sh set ln_error_full "${ln_lnd_error_full}"
     fi
@@ -437,6 +444,11 @@ done
 
 ###################
 # Lightning (c-lightning)
+
+# IMPORTANT NOTE: If you want to change the update frequency on a certain value
+# with `blitz.cache.sh outdate` do it on the chain specific value - for example:
+# do use: ln_cl_${DEFAULT}net_locked
+# not use: ln_locked
 
 # loop thru mainet, testnet & signet
 networks=( "main" "test" "sig" )
