@@ -109,6 +109,18 @@ elif [ "$1" = "keyvalue" ] && [ "$2" = "on" ]; then
   echo "# Turn ON: KEYVALUE-STORE (REDIS)"
   sudo apt install -y redis-server
 
+  # edit config: dont save to disk
+  sudo sed -i "/^save .*/d" /etc/redis/redis.confl
+
+  # restart with new config
+  sudo systemctl restart redis-server
+
+  # clean old databases if exist
+  sudo rm /var/lib/redis/dump.rdb 2>/dev/null
+
+  # restart again this time there is no old data dump to load
+  sudo systemctl restart redis-server
+
 # uninstall
 elif [ "$1" = "keyvalue" ] && [ "$2" = "off" ]; then
 
