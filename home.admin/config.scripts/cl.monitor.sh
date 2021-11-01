@@ -19,17 +19,17 @@ fi
 # set based on network type (using own mapping to be able to run without calling sudo -u bitcoin)
 if [ "$1" == "mainnet" ]; then
   clHomeDir="/home/bitcoin/.lightning"
-  lightningcli_alias="sudo /usr/local/bin/lightning-cli --lightning-dir=${clHomeDir} --conf=${clHomeDir}/config"
+  lightningcli_alias="/usr/local/bin/lightning-cli --lightning-dir=${clHomeDir} --conf=${clHomeDir}/config"
   blockchainHeightKey="btc_blocks_verified"
   netprefix=""
 elif [ "$1" == "testnet" ]; then
   clHomeDir="/home/bitcoin/.lightning/testnet"
-  lightningcli_alias="sudo /usr/local/bin/lightning-cli --lightning-dir=${clHomeDir} --conf=${clHomeDir}/config"
+  lightningcli_alias="/usr/local/bin/lightning-cli --lightning-dir=${clHomeDir} --conf=${clHomeDir}/config"
   blockchainHeightKey="btc_testnet_blocks_verified"
   netprefix="t"
 elif [ "$1" == "signet" ]; then
   clHomeDir="/home/bitcoin/.lightning/signet"
-  lightningcli_alias="sudo /usr/local/bin/lightning-cli --lightning-dir=${clHomeDir} --conf=${clHomeDir}/config"
+  lightningcli_alias="/usr/local/bin/lightning-cli --lightning-dir=${clHomeDir} --conf=${clHomeDir}/config"
   blockchainHeightKey="btc_signet_blocks_verified"
   netprefix="s"
 else
