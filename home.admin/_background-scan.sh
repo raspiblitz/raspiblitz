@@ -264,15 +264,15 @@ do
 
       # skip if network is not on by config
       if [ "${CHAIN}" == "main" ] && [ "${mainnet}" != "on" ] && [ "${isDefaultChain}" != "1" ]; then
-        #echo "skip btc ${CHAIN}net scan - because its off"
+        echo "skip btc ${CHAIN}net scan - because its off"
         continue
       fi
       if [ "${CHAIN}" == "test" ] && [ "${testnet}" != "on" ]; then
-        #echo "skip btc ${CHAIN}net scan - because its off"
+        echo "skip btc ${CHAIN}net scan - because its off"
         continue
       fi
       if [ "${CHAIN}" == "sig" ] && [ "${signet}" != "on" ]; then
-        #echo "skip btc ${CHAIN}net scan - because its off"
+        echo "skip btc ${CHAIN}net scan - because its off"
         continue
       fi
 
