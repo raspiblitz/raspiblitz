@@ -49,18 +49,18 @@ startTime=$(date +%s)
 /home/admin/config.scripts/blitz.cache.sh set system_temp_fahrenheit "0"
 
 # import all base values from raspiblitz.info
-echo "- importing ${infoFile}"
+echo "importing: ${infoFile}"
 /home/admin/config.scripts/blitz.cache.sh import $infoFile
 
 # import all base values from raspiblitz.config (if exists)
 configFileExists=$(ls ${configFile} | grep -c "${configFile}")
 if [ "${configFileExists}" != "0" ]; then
-  echo "- importing ${configFile}"
+  echo "importing: ${configFile}"
   /home/admin/config.scripts/blitz.cache.sh import ${configFile}
 fi
 
 # version info
-echo "- importing _version.info"
+echo "importing: _version.info"
 /home/admin/config.scripts/blitz.cache.sh import /home/admin/_version.info
 
 # basic hardware info (will not change)
