@@ -497,7 +497,7 @@ if [ "${testnet}" != "${choice}" ]; then
       /home/admin/config.scripts/cl.install.sh on signet
     fi 
   else
-    # just turn al lightning testnets off (even if not on before)
+    # just turn all lightning testnets off (even if not on before)
     /home/admin/config.scripts/lnd.install.sh off testnet
     /home/admin/config.scripts/lnd.install.sh off signet
     /home/admin/config.scripts/cl.install.sh off testnet

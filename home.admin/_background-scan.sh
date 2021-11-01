@@ -41,6 +41,7 @@ EOF
 
   # enable systemd service & exit
   sudo systemctl enable background-scan
+  echo "# background-scan.service will start after reboot or calling: sudo systemctl start background-scan"
   exit
 fi
 
@@ -237,6 +238,9 @@ do
   # data that may be based on setup phase or configuration
   ####################################################################
 
+  # by default will only scan the btc & lightning instances that are set to default
+  # but can scan/monitor all that are switched on when `system_scan_all=on` in config
+
   # read/update config values
   source /mnt/hdd/raspiblitz.conf
 
@@ -380,10 +384,6 @@ do
   for CHAIN in "${networks[@]}"
   do
 
-    # check if is default chain & lightning
-    isDefaultChain=$(echo "${CHAIN}" | grep -c "${chain}")
-    isDefaultLightning=$(echo "${lightning}" | grep -c "lnd")
-
     # skip if network is not on by config
     if [ "${CHAIN}" == "main" ] && [ "${lnd}" != "on" ]; then
       /home/admin/config.scripts/blitz.cache.sh set ln_lnd_${CHAIN}net_activated "0"
@@ -399,6 +399,18 @@ do
       /home/admin/config.scripts/blitz.cache.sh set ln_lnd_${CHAIN}net_activated "0"
       echo "skip lnd ${CHAIN}net scan"
       continue
+    fi
+
+    # check if default chain & lightning
+    isDefaultChain=$(echo "${CHAIN}" | grep -c "${chain}")
+    isDefaultLightning=$(echo "${lightning}" | grep -c "lnd")
+
+    # only scan non defaults when set by parameter from config
+    if [ "${system_scan_all}" != "on" ]; then
+      if [ "${isDefaultChain}" != "1" ] || [ ${isDefaultLightning} != "1" ]; then
+        echo "skip lnd ${CHAIN}net scan - because its not default"
+        continue
+      fi
     fi
 
     # update basic status values always
