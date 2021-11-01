@@ -124,7 +124,10 @@ case $CHOICE in
     echo "stopping lnd ..."
     sudo systemctl stop lnd
     sudo rm -r /mnt/hdd/lnd
+    # create wallet
     /home/admin/config.scripts/lnd.install.sh on mainnet initwallet
+    # display seed for mainnet
+    sudo /home/admin/config.scripts/lnd.install.sh display-seed mainnet
     if [ "${tlnd}" == "on" ];then
       /home/admin/config.scripts/lnd.install.sh on testnet initwallet
     fi
