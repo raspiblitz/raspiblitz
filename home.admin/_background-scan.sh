@@ -286,7 +286,7 @@ do
 
       # update basic status values always
       source <(/home/admin/config.scripts/blitz.cache.sh valid btc_${CHAIN}net_version btc_${CHAIN}net_running btc_${CHAIN}net_ready btc_${CHAIN}net_online  btc_${CHAIN}net_error_short btc_${CHAIN}net_error_full)
-      if [ "${stillvalid}" != "1" ] && [ ${age} -gt 10 ]; then
+      if [ "${stillvalid}" == "0" ] || [ ${age} -gt 10 ]; then
         echo "updating: /home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net status"
         source <(/home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net status)
         /home/admin/config.scripts/blitz.cache.sh set btc_${CHAIN}net_activated "1"
