@@ -60,6 +60,7 @@ if [ "$2" = "status" ]; then
     rm /var/cache/raspiblitz/.lnd-${randStr}.error 2>/dev/null
     touch /var/cache/raspiblitz/.lnd-${randStr}.out
     touch /var/cache/raspiblitz/.lnd-${randStr}.error
+    echo "# $lndcli_alias getinfo"
     $lndcli_alias getinfo 1>/var/cache/raspiblitz/.lnd-${randStr}.out 2>/var/cache/raspiblitz/.lnd-${randStr}.error
     winData=$(cat /var/cache/raspiblitz/.lnd-${randStr}.out 2>/dev/null)
     failData=$(cat /var/cache/raspiblitz/.lnd-${randStr}.error 2>/dev/null)
