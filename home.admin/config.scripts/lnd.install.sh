@@ -275,7 +275,8 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   removeParallelService
 
   # setting value in raspiblitz config
-  /home/admin/config.scripts/blitz.conf.sh set lnd "off"
+  /home/admin/config.scripts/blitz.conf.sh set ${netprefix}lnd "off"
+  echo "# ${netprefix}lnd --> off"
 
   # if lnd mainnet was default - remove 
   if [ "${CHAIN}" == "mainnet" ] && [ "${lightning}" == "lnd" ]; then
