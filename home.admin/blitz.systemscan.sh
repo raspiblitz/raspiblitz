@@ -41,9 +41,11 @@ YEAR=31536000
 # INIT 
 ####################################################################
 
-# default/init temp entries
+# init values
 /home/admin/config.scripts/blitz.cache.sh set system_temp_celsius "0"
 /home/admin/config.scripts/blitz.cache.sh set system_temp_fahrenheit "0"
+/home/admin/config.scripts/blitz.cache.sh set system_count_longscan "0"
+/home/admin/config.scripts/blitz.cache.sh set system_count_undervoltage "0"
 
 # import all base values from raspiblitz.info
 echo "importing: ${infoFile}"
@@ -107,11 +109,11 @@ do
   /home/admin/config.scripts/blitz.cache.sh set system_ram_available_mb "${ram_avail}"
 
   # undervoltage
-  source <(/home/admin/config.scripts/blitz.cache.sh valid system_undervoltage_count)
+  source <(/home/admin/config.scripts/blitz.cache.sh valid system_count_undervoltage)
   if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE} ]; then
     echo "updating: undervoltage"
     countReports=$(cat /var/log/syslog | grep -c "Under-voltage detected!")
-    /home/admin/config.scripts/blitz.cache.sh set system_undervoltage_count "${countReports}"
+    /home/admin/config.scripts/blitz.cache.sh set system_count_undervoltage "${countReports}"
   fi
 
   #################
@@ -605,7 +607,8 @@ do
 
   # log warning if script took too long
   if [ ${runTime} -gt ${MINUTE} ]; then
-    echo "WARNING: HANGING SYSTEM ... systemscan loop took too long (${runTime} seconds)!" 1>&2 
+    echo "WARNING: HANGING SYSTEM ... systemscan loop took too long (${runTime} seconds)!" 1>&2
+    /home/admin/config.scripts/blitz.cache.sh increment system_count_longscan
   fi
 
   # small sleep before next loop
