@@ -104,6 +104,9 @@ if [ "${stillvalid}" == "0" ]; then
   /home/admin/config.scripts/blitz.cache.sh set system_ramMB "${ramGB}"
 fi
 
+# flag that init was done (will be checked on each loop)
+/home/admin/config.scripts/blitz.cache.sh set system_init_time "$(date +%s)"
+
 while [ 1 ]
 do
 
@@ -111,6 +114,14 @@ do
   # LOOP DATA (BASIC SYSTEM) 
   # data that is always available 
   ####################################################################
+
+  # check that redis contains init data (detect possible restart of redis)
+  source <(/home/admin/config.scripts/blitz.cache.sh get system_init_time)
+  if [ "${system_init_time}" == "" ]; then
+    /home/admin/config.scripts/blitz.error.sh "_background-scan.sh" "cache-lost-initdata"
+    echo "FAIL: CACHE IS MISSING INIT DATA ... exiting to let systemd restart"
+    exit 1
+  fi
 
   # measure time of loop scan
   startTime=$(date +%s)
