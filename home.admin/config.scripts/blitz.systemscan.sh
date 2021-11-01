@@ -114,7 +114,18 @@ do
     /home/admin/config.scripts/blitz.cache.sh set system_undervoltage_count "${countReports}"
   fi
 
+  #################
+  # TOR
+
+  source <(/home/admin/config.scripts/blitz.cache.sh valid tor_web_addr)
+  if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE5} ]; then
+    echo "updating: tor"
+    /home/admin/config.scripts/blitz.cache.sh set tor_web_addr "$(cat /mnt/hdd/tor/web80/hostname 2>/dev/null)"
+  fi
+
+  #################
   # UPS (uninterruptible power supply)
+
   source <(/home/admin/config.scripts/blitz.cache.sh valid system_ups_status)
   if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE} ]; then
     echo "updating: /home/admin/config.scripts/blitz.ups.sh status"
@@ -163,15 +174,6 @@ do
     echo "updating: /home/admin/config.scripts/internet.sh status online"
     source <(/home/admin/config.scripts/internet.sh status online)
     /home/admin/config.scripts/blitz.cache.sh set internet_online "${online}"
-  fi
-
-  #################
-  # TOR
-
-  source <(/home/admin/config.scripts/blitz.cache.sh valid tor_web_addr)
-  if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE5} ]; then
-    echo "updating: tor"
-    /home/admin/config.scripts/blitz.cache.sh set tor_web_addr "$(cat /mnt/hdd/tor/web80/hostname 2>/dev/null)"
   fi
 
   # exit if still setup or higher system stopped
@@ -482,8 +484,6 @@ do
     # check if is default chain & lightning
     isDefaultChain=$(echo "${CHAIN}" | grep -c "${chain}")
     isDefaultLightning=$(echo "${lightning}" | grep -c "cl")
-
-    echo "c-lightning loop ${CHAIN}"
 
     # skip if network is not on by config
     if [ "${CHAIN}" == "main" ] && [ "${cl}" != "on" ]; then
