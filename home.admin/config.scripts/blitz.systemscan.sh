@@ -506,7 +506,7 @@ do
 
     # update basic status values always
     source <(/home/admin/config.scripts/blitz.cache.sh valid ln_cl_${CHAIN}net_version ln_cl_${CHAIN}net_running ln_cl_${CHAIN}net_ready ln_cl_${CHAIN}net_online ln_cl_${CHAIN}net_error_short ln_cl_${CHAIN}net_error_full)
-    if [ "${stillvalid}" != "1" ] && [ ${age} -gt 10 ]; then
+    if [ "${stillvalid}" == "0" ] || [ ${age} -gt 10 ]; then
       echo "updating: /home/admin/config.scripts/cl.monitor.sh ${CHAIN}net status"
       source <(/home/admin/config.scripts/cl.monitor.sh ${CHAIN}net status)
       /home/admin/config.scripts/blitz.cache.sh set ln_cl_${CHAIN}net_activated "1"
