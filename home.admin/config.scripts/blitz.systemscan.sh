@@ -178,12 +178,10 @@ do
   source <(/home/admin/config.scripts/blitz.cache.sh get setupPhase state)
   if [ "${setupPhase}" != "done" ] ||
      [ "${state}" == "" ] ||
-    [ "${state}" == "copysource" ] ||
-    [ "${state}" == "copytarget" ]; then
-    echo "skipping deeper system scan (${setupPhase}) - state(${state})"
-    exit 1
-    #sleep 1
-    #continue
+     [ "${state}" == "copysource" ] ||
+     [ "${state}" == "copytarget" ]; then
+    sleep 1
+    continue
   fi
 
   ####################################################################
@@ -195,7 +193,7 @@ do
   source /mnt/hdd/raspiblitz.conf
 
   ###################
-  # BITCOIN 
+  # BITCOIN
 
   if [ "${network}" == "bitcoin" ]; then
 
