@@ -20,6 +20,8 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ];
   echo "blitz.cache.sh set [key] [value] [?expire-seconds]"
   echo "blitz.cache.sh get [key1] [?key2] [?key3] ..."
   echo 
+  echo "blitz.cache.sh increment [key1]"
+  echo
   echo "blitz.cache.sh outdate [key] [value]"
   echo "# set in how many seconds value is marked as outdated or"
   echo "# -1 = never outdated (default)"  
@@ -263,6 +265,30 @@ elif [ "$1" = "export" ]; then
     value=$(redis-cli get "${key}")
     echo "${key}=\"${value}\""
   done
+
+##################################
+# COUNT
+# count value up
+##################################
+
+# set
+elif [ "$1" = "increment" ]; then
+
+  # get parameters
+  keystr=$2
+
+  # check that key & value are given
+  if [ "${keystr}" == "" ]; then
+    echo "# Fail: missing parameter"
+    exit 1
+  fi
+  # set in redis key value cache
+  redis-cli incr ${keystr} 1>/dev/null
+
+  # set in redis the timestamp
+  timestamp=$(date +%s)
+  redis-cli set ${keystr}${META_LASTTOUCH_TS} "${timestamp}" 1>/dev/null
+
 
 ##################################
 # PUT/POLL TEMP CACHE
