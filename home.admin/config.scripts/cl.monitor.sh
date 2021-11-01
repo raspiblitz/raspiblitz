@@ -60,6 +60,7 @@ if [ "$2" = "status" ]; then
     rm /var/cache/raspiblitz/.cl-${randStr}.error 2>/dev/null
     touch /var/cache/raspiblitz/.cl-${randStr}.out
     touch /var/cache/raspiblitz/.cl-${randStr}.error
+    echo "# ${lightningcli_alias} getinfo"
     $lightningcli_alias getinfo 1>/var/cache/raspiblitz/.cl-${randStr}.out 2>/var/cache/raspiblitz/.cl-${randStr}.error
     winData=$(cat /var/cache/raspiblitz/.cl-${randStr}.out 2>/dev/null)
     failData=$(cat /var/cache/raspiblitz/.cl-${randStr}.error 2>/dev/null)
