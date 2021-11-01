@@ -56,7 +56,7 @@ echo "- importing ${infoFile}"
 configFileExists=$(ls ${configFile} | grep -c "${configFile}")
 if [ "${configFileExists}" != "0" ]; then
   echo "- importing ${configFile}"
-  /home/admin/config.scripts/blitz.cache.sh import configFile
+  /home/admin/config.scripts/blitz.cache.sh import ${configFile}
 fi
 
 # version info
