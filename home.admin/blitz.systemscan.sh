@@ -37,9 +37,6 @@ WEEK=604800
 MONTH=2592000
 YEAR=31536000
 
-# measure time of scan
-startTime=$(date +%s)
-
 ####################################################################
 # INIT 
 ####################################################################
@@ -79,6 +76,9 @@ do
   # LOOP DATA (BASIC SYSTEM) 
   # data that is always available 
   ####################################################################
+
+  # measure time of loop scan
+  startTime=$(date +%s)
 
   #################
   # BASIC SYSTEM 
