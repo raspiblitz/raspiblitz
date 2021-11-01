@@ -224,7 +224,6 @@ fi
 
 if [ "$1" = "display-seed" ]; then
   
-
   # check if sudo
   if [ "$EUID" -ne 0 ]; then
     echo "Please run as root (with sudo)"
@@ -246,7 +245,7 @@ if [ "$1" = "display-seed" ]; then
   # check if seedword file exists
   seedwordFile="/mnt/hdd/lnd/data/chain/${network}/${CHAIN}/seedwords.info"
   echo "# seewordFile(${seedwordFile})"
-  seedwordFileExists=$(ls ${seedwordFile} 2>/dev/null | grep -c "seedwords.info")
+  seedwordFileExists=$(sudo ls ${seedwordFile} 2>/dev/null | grep -c "seedwords.info")
   echo "# seewordFileExists(${seewordFileExists})"
   if [ "${seedwordFileExists}" == "1" ]; then
     source ${seedwordFile}
