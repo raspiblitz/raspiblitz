@@ -118,7 +118,6 @@ do
   # check that redis contains init data (detect possible restart of redis)
   source <(/home/admin/config.scripts/blitz.cache.sh get system_init_time)
   if [ "${system_init_time}" == "" ]; then
-    /home/admin/config.scripts/blitz.error.sh "_background-scan.sh" "cache-lost-initdata"
     echo "FAIL: CACHE IS MISSING INIT DATA ... exiting to let systemd restart"
     exit 1
   fi
@@ -228,6 +227,7 @@ do
      [ "${state}" == "" ] ||
      [ "${state}" == "copysource" ] ||
      [ "${state}" == "copytarget" ]; then
+    echo "Skipping deeper system scan - setupPhase(${setupPhase}) state(${state})"
     sleep 1
     continue
   fi
