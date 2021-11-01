@@ -261,14 +261,17 @@ do
       # skip if network is not on by config
       if [ "${CHAIN}" == "main" ] && [ "${mainnet}" != "on" ] && [ "${isDefaultChain}" != "1" ]; then
         /home/admin/config.scripts/blitz.cache.sh set btc_${CHAIN}net_activated "0"
+        echo "skip lnd ${CHAIN}net scan"
         continue
       fi
       if [ "${CHAIN}" == "test" ] && [ "${testnet}" != "on" ]; then
         /home/admin/config.scripts/blitz.cache.sh set btc_${CHAIN}net_activated "0"
+        echo "skip lnd ${CHAIN}net scan"
         continue
       fi
       if [ "${CHAIN}" == "sig" ] && [ "${signet}" != "on" ]; then
         /home/admin/config.scripts/blitz.cache.sh set btc_${CHAIN}net_activated "0"
+        echo "skip lnd ${CHAIN}net scan"
         continue
       fi
 
