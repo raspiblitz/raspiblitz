@@ -264,19 +264,24 @@ do
 
       # skip if network is not on by config
       if [ "${CHAIN}" == "main" ] && [ "${mainnet}" != "on" ] && [ "${isDefaultChain}" != "1" ]; then
-        /home/admin/config.scripts/blitz.cache.sh set btc_${CHAIN}net_activated "0"
-        echo "skip btc ${CHAIN}net scan"
+        #echo "skip btc ${CHAIN}net scan - because its off"
         continue
       fi
       if [ "${CHAIN}" == "test" ] && [ "${testnet}" != "on" ]; then
-        /home/admin/config.scripts/blitz.cache.sh set btc_${CHAIN}net_activated "0"
-        echo "skip btc ${CHAIN}net scan"
+        #echo "skip btc ${CHAIN}net scan - because its off"
         continue
       fi
       if [ "${CHAIN}" == "sig" ] && [ "${signet}" != "on" ]; then
-        /home/admin/config.scripts/blitz.cache.sh set btc_${CHAIN}net_activated "0"
-        echo "skip btc ${CHAIN}net scan"
+        #echo "skip btc ${CHAIN}net scan - because its off"
         continue
+      fi
+
+      # only scan non defaults when set by parameter from config
+      if [ "${system_scan_all}" != "on" ]; then
+        if [ "${isDefaultChain}" != "1" ]; then
+          echo "skip btc ${CHAIN}net scan - because its not default"
+          continue
+        fi
       fi
 
       # update basic status values always
@@ -387,17 +392,17 @@ do
     # skip if network is not on by config
     if [ "${CHAIN}" == "main" ] && [ "${lnd}" != "on" ]; then
       /home/admin/config.scripts/blitz.cache.sh set ln_lnd_${CHAIN}net_activated "0"
-      echo "skip lnd ${CHAIN}net scan"
+      #echo "skip lnd ${CHAIN}net scan - because its off"
       continue
     fi
     if [ "${CHAIN}" == "test" ] && [ "${tlnd}" != "on" ]; then
       /home/admin/config.scripts/blitz.cache.sh set ln_lnd_${CHAIN}net_activated "0"
-      echo "skip lnd ${CHAIN}net scan"
+      #echo "skip lnd ${CHAIN}net scan - because its off"
       continue
     fi
     if [ "${CHAIN}" == "sig" ] && [ "${slnd}" != "on" ]; then
       /home/admin/config.scripts/blitz.cache.sh set ln_lnd_${CHAIN}net_activated "0"
-      echo "skip lnd ${CHAIN}net scan"
+      #echo "skip lnd ${CHAIN}net scan - because its off"
       continue
     fi
 
@@ -408,7 +413,7 @@ do
     # only scan non defaults when set by parameter from config
     if [ "${system_scan_all}" != "on" ]; then
       if [ "${isDefaultChain}" != "1" ] || [ ${isDefaultLightning} != "1" ]; then
-        echo "skip lnd ${CHAIN}net scan - because its not default"
+        #echo "skip lnd ${CHAIN}net scan - because its not default"
         continue
       fi
     fi
@@ -545,25 +550,33 @@ do
   for CHAIN in "${networks[@]}"
   do
 
-    # check if is default chain & lightning
-    isDefaultChain=$(echo "${CHAIN}" | grep -c "${chain}")
-    isDefaultLightning=$(echo "${lightning}" | grep -c "cl")
-
     # skip if network is not on by config
     if [ "${CHAIN}" == "main" ] && [ "${cl}" != "on" ]; then
       /home/admin/config.scripts/blitz.cache.sh set ln_cl_${CHAIN}net_activated "0"
-      echo "skip c-lightning mainnet scan"
+      #echo "skip c-lightning mainnet scan - because its off"
       continue
     fi
     if [ "${CHAIN}" == "test" ] && [ "${tcl}" != "on" ]; then
       /home/admin/config.scripts/blitz.cache.sh set ln_cl_${CHAIN}net_activated "0"
-      echo "skip c-lightning testnet scan"
+      #echo "skip c-lightning testnet scan - because its off"
       continue
     fi
     if [ "${CHAIN}" == "sig" ] && [ "${scl}" != "on" ]; then
       /home/admin/config.scripts/blitz.cache.sh set ln_cl_${CHAIN}net_activated "0"
-      echo "skip c-lightning signet scan"
+      #echo "skip c-lightning signet scan - because its off"
       continue
+    fi
+
+    # check if default chain & lightning
+    isDefaultChain=$(echo "${CHAIN}" | grep -c "${chain}")
+    isDefaultLightning=$(echo "${lightning}" | grep -c "cl")
+
+    # only scan non defaults when set by parameter from config
+    if [ "${system_scan_all}" != "on" ]; then
+      if [ "${isDefaultChain}" != "1" ] || [ ${isDefaultLightning} != "1" ]; then
+        #echo "skip cl ${CHAIN}net scan - because its not default"
+        continue
+      fi
     fi
 
     # TODO: c-lightning is seen as "always unlocked" for now - needs to be implemented later #2691
