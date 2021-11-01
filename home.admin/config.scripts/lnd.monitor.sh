@@ -47,6 +47,7 @@ if [ "$2" = "status" ]; then
   lnd_running=$(systemctl status ${netprefix}lnd 2>/dev/null | grep -c "active (running)")
   lnd_ready="0"
   lnd_online="0"
+  lnd_locked="0"
   lnd_error_short=""
   lnd_error_full=""
 
@@ -68,8 +69,19 @@ if [ "$2" = "status" ]; then
     # check for errors
     if [ "${failData}" != "" ]; then
       lnd_ready="0"
+
+      # store error messages 
       lnd_error_short=""
       lnd_error_full=$(echo ${failData} | tr -d "'" | tr -d '"')
+
+      # check if error because wallet is locked
+      if [ $(echo "${failData}" | grep -c "wallet locked") -gt 0 ]; then
+        # signal wallet locked
+        lnd_locked="1"
+        # dont report it as error
+        lnd_error_short=""
+        lnd_error_full=""
+      fi
 
     # check results if proof for online
     else
@@ -87,6 +99,7 @@ if [ "$2" = "status" ]; then
   echo "ln_lnd_running='${lnd_running}'"
   echo "ln_lnd_ready='${lnd_ready}'"
   echo "ln_lnd_online='${lnd_online}'"
+  echo "ln_lnd_locked='${lnd_locked}'"
   echo "ln_lnd_error_short='${lnd_error_short}'"
   echo "ln_lnd_error_full='${lnd_error_full}'"
 
