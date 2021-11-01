@@ -60,6 +60,7 @@ echo "setupPhase=${setupPhase}" >> $infoFile
 echo "setupStep=${setupStep}" >> $infoFile
 echo "fundRecovery=${fundRecovery}" >> $infoFile
 echo "fsexpanded=${fsexpanded}" >> $infoFile
+echo "state=starting" >> $infoFile
 sudo chmod 664 ${infoFile}
 
 # write content of raspiblitz.info to logs
