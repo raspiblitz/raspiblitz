@@ -33,6 +33,7 @@ function blitzhelp() {
   echo "  debug        print debug logs"
   echo "  debug   -l   print debug logs with bin link"
   echo "  patch        sync scripts with latest set github and branch"
+  echo "  cache        check on chache system state"
   echo "  github       jumping directly into the options to change branch/repo/pr"
   echo
   echo "Power:"
@@ -155,6 +156,11 @@ function headless() {
   echo "# SWITCHING VIDEO OUTPUT TO --> HEADLESS"
   sudo /home/admin/config.scripts/blitz.display.sh set-display headless
   restart
+}
+
+# command: cache
+function cache() {
+  sudo /home/admin/_cache.sh $@
 }
 
 # command: torthistx
