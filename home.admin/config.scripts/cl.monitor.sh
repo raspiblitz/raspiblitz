@@ -158,7 +158,10 @@ if [ "$2" = "info" ]; then
   cl_sync_progress=""
   if [ "${blockheight}" != "" ]; then
     cl_sync_progress=$(echo "scale=2; $cl_sync_height*100/$blockheight" | bc)
-    if [ ${blockheight} > ${cl_sync_height} ];then
+    # needs to be two blocks behind 
+    blockheight=$(($blockheight - 1))
+    echo "#blockheight(${blockheight})"
+    if [ ${blockheight} -gt ${cl_sync_height} ];then
       cl_sync_chain=0
     else
       cl_sync_chain=1
