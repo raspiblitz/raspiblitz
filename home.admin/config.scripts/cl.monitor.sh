@@ -154,7 +154,9 @@ if [ "$2" = "info" ]; then
   #echo "#blockheight(${blockheight})"
   cl_sync_height=$(echo "${ln_getInfo}" | jq .blockheight)
   cl_sync_chain=""
+  cl_sync_progress=""
   if [ "${blockheight}" != "" ]; then
+    cl_sync_progress=$(echo "scale=2; $cl_sync_height*100/$blockheight" | bc)
     if [ ${blockheight} > ${cl_sync_height} ];then
       cl_sync_chain=0
     else
@@ -168,6 +170,7 @@ if [ "$2" = "info" ]; then
   echo "ln_cl_tor='${cl_tor}'"
   echo "ln_cl_peers='${cl_peers}'"
   echo "ln_cl_sync_chain='${cl_sync_chain}'"
+  echo "ln_cl_sync_progress='${cl_sync_progress}'"
   echo "ln_cl_channels_pending='${cl_channels_pending}'"
   echo "ln_cl_channels_active='${cl_channels_active}'"
   echo "ln_cl_channels_inactive='${cl_channels_inactive}'"
