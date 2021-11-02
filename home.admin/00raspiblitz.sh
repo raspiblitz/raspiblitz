@@ -20,6 +20,7 @@ if [ "$1" == "newsshsession" ]; then
   # if already one ssh session is open - ask on the second to exit to terminal
   source <(sudo /home/admin/config.scripts/blitz.ssh.sh sessions)
   if [ "${ssh_session_count}" != "" ] && [ "${ssh_session_count}" != "1" ]; then
+    echo "####################################################################"
     echo "# You already have another SSH session open ... exiting to terminal."
     echo "# To open main menu type command: raspiblitz"
     exit 0
