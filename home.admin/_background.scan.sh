@@ -80,6 +80,8 @@ YEAR=31536000
 /home/admin/_cache.sh set system_temp_fahrenheit "0"
 /home/admin/_cache.sh set system_count_longscan "0"
 /home/admin/_cache.sh set system_count_undervoltage "0"
+/home/admin/_cache.sh set system_count_start_blockchain "0"
+/home/admin/_cache.sh set system_count_start_lightning "0"
 
 # import all base values from raspiblitz.info
 echo "importing: ${infoFile}"

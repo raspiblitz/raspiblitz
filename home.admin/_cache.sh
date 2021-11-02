@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
 
-# TODOS:
-# - do counter with cache /home/admin/systemd.blockchain.log, /home/admin/systemd.lightning.log
-
 # the cache concept of RaspiBlitz has two options
 # 1) RAMDISK for files under /var/cache/raspiblitz
 # 2) KEY-VALUE STORE for system state infos (REDIS)

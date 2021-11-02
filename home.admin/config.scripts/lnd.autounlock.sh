@@ -43,7 +43,6 @@ Password C will be stored on the device.
 
   # test if correct
   echo "# testing password .. please wait"
-  echo "SYSTEMD RESTART LOG: lightning (LND)" > /home/admin/systemd.lightning.log
   sudo systemctl restart lnd
   sleep 4
   error=""

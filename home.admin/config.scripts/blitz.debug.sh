@@ -59,7 +59,6 @@ echo
 echo "*** LAST BLOCKCHAIN (MAINNET) ERROR LOGS ***"
 echo "sudo journalctl -u ${network}d -b --no-pager -n8"
 sudo journalctl -u ${network}d -b --no-pager -n8
-cat /home/admin/systemd.blockchain.log | grep "ERROR" | tail -n -2
 echo
 echo "*** LAST BLOCKCHAIN (MAINNET) 20 INFO LOGS ***"
 echo "sudo tail -n 20 /mnt/hdd/${network}/debug.log"
@@ -73,7 +72,6 @@ if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ] || [ "${lnd}" == "1" ]; t
   echo "*** LAST LND (MAINNET) ERROR LOGS ***"
   echo "sudo journalctl -u lnd -b --no-pager -n12"
   sudo journalctl -u lnd -b --no-pager -n12
-  cat /home/admin/systemd.lightning.log | grep "ERROR" | tail -n -1
   echo
   echo "*** LAST 30 LND (MAINNET) INFO LOGS ***"
   echo "sudo tail -n 30 /mnt/hdd/lnd/logs/${network}/mainnet/lnd.log"

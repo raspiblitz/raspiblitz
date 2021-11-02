@@ -176,12 +176,6 @@ sleep 5
 # CLEANING BOOT SYSTEM
 ################################
 
-# resetting start count files
-echo "SYSTEMD RESTART LOG: blockchain" > /home/admin/systemd.blockchain.log
-echo "SYSTEMD RESTART LOG: lightning" > /home/admin/systemd.lightning.log
-sudo chmod 666 /home/admin/systemd.blockchain.log
-sudo chmod 666 /home/admin/systemd.lightning.log
-
 # Emergency cleaning logs when over 1GB (to prevent SD card filling up)
 # see https://github.com/rootzoll/raspiblitz/issues/418#issuecomment-472180944
 echo "*** Checking Log Size ***"

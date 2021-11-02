@@ -40,7 +40,9 @@ echo "uptime=${uptime}"
 /home/admin/config.scripts/blitz.ups.sh status
 
 # count restarts of bitcoind/litecoind
-startcountBlockchain=$(cat /home/admin/systemd.blockchain.log 2>/dev/null | grep -c "STARTED")
+
+source <(/home/admin/_cache.sh meta system_count_start_blockchain)
+startcountBlockchain=${value}
 echo "startcountBlockchain=${startcountBlockchain}"
 
 # is bitcoind running
@@ -128,13 +130,14 @@ else
   if [ ${#bitcoinErrorShort} -gt 0 ]; then
     echo "bitcoinErrorShort='${bitcoinErrorShort}'"
     echo "bitcoinErrorFull='${bitcoinErrorFull}'"
-    /home/admin/config.scripts/blitz.systemd.sh log blockchain "ERROR: ${bitcoinErrorShort}"
+    #/home/admin/config.scripts/blitz.systemd.sh log blockchain "ERROR: ${bitcoinErrorShort}"
   fi
 
 fi
 
 # count restarts of bitcoind/litecoind
-startcountLightning=$(cat /home/admin/systemd.lightning.log 2>/dev/null | grep -c "STARTED")
+source <(/home/admin/_cache.sh meta system_count_start_lightning)
+startcountLightning=${value}
 echo "startcountLightning=${startcountLightning}"
 
 # is LND running
@@ -223,7 +226,7 @@ if [ ${lndRunning} -eq 1 ] && [ "${LNTYPE}" == "lnd" ]; then
       if [ ${#lndErrorFull} -gt 0 ]; then
         echo "lndErrorShort='${lndErrorShort}'"
         echo "lndErrorFull='${lndErrorFull}'"
-        /home/admin/config.scripts/blitz.systemd.sh log lightning "ERROR: ${lndErrorFull}"
+        #/home/admin/config.scripts/blitz.systemd.sh log lightning "ERROR: ${lndErrorFull}"
       fi
 
     fi
