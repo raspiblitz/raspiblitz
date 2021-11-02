@@ -156,10 +156,27 @@ if [ "$2" = "info" ]; then
   lnd_channels_total=$(( lnd_channels_pending + lnd_channels_active + lnd_channels_inactive ))
   lnd_peers=$(echo "${ln_getInfo}" | jq -r '.num_peers')
 
+  # calaculate the sync/scan progress
+  lnd_sync_progress=""
+  scanTimestamp=$(echo "${ln_getInfo}" | jq -r '.best_header_timestamp')
+  nowTimestamp=$(date +%s)
+  if [ "${scanTimestamp}" != "" ] && [ ${scanTimestamp} -gt ${nowTimestamp} ]; then
+    scanTimestamp=${nowTimestamp}
+  fi
+  if [ "${scanTimestamp}" != "" ]; then
+    # calculate LND scan progress by seconds since Genesis block
+    echo "#scanTimestamp=${scanTimestamp}"
+    genesisTimestamp=1230940800
+    totalSeconds=$(echo "${nowTimestamp}-${genesisTimestamp}" | bc)
+    scannedSeconds=$(echo "${scanTimestamp}-${genesisTimestamp}" | bc)
+    lnd_sync_progress=$(echo "scale=2; $scannedSeconds*100/$totalSeconds" | bc)
+  fi
+
   # print data
   echo "ln_lnd_address='${lnd_address}'"
   echo "ln_lnd_tor='${lnd_tor}'"
   echo "ln_lnd_sync_chain='${lnd_sync_chain}'"
+  echo "ln_lnd_sync_progress='${lnd_sync_progress}'"
   echo "ln_lnd_sync_graph='${lnd_sync_graph}'"
   echo "ln_lnd_channels_pending='${lnd_channels_pending}'"
   echo "ln_lnd_channels_active='${lnd_channels_active}'"
