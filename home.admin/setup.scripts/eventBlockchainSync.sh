@@ -15,7 +15,7 @@ fi
 
 # 2nd PARAMETER (optional): -loop-until-synced
 PARAMETER_LOOPUNTILSYNCED=0
-if [ "$2" == "loop" ]; then
+if [ "$2" == "-loop-until-synced" ]; then
     PARAMETER_LOOPUNTILSYNCED=1
 fi
 
@@ -106,7 +106,6 @@ do
     # display info to user
     time=$(date '+%H:%M:%S')
     dialog --title " Node is Syncing (${time}) " --backtitle "RaspiBlitz ${codeVersion} ${system_temp_celsius}°C / ${system_temp_fahrenheit}°F / ${hostname}" --infobox "${infoStr}\n ${adminStr}" ${height} ${width}
-    sleep 2
 
     # break loop if set by parameter
     if [ ${PARAMETER_LOOPUNTILSYNCED} -eq 0 ]; then

@@ -114,7 +114,7 @@ while :
 
     if [ "${syncedToChain}" != "1" ]; then
       /home/admin/setup.scripts/eventBlockchainSync.sh lcd
-      sleep 10
+      sleep 3
       continue
     fi
 
