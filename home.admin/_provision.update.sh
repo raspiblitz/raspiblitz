@@ -24,7 +24,7 @@ echo "" > ${logFile}
 echo "###################################" >> ${logFile}
 echo "# _provision.update.sh" >> ${logFile}
 echo "###################################" >> ${logFile}
-/home/admin/config.scripts/blitz.cache.sh set message "Running Data Update"
+/home/admin/_cache.sh set message "Running Data Update"
 
 # HDD BTRFS RAID REPAIR IF NEEDED
 source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
@@ -152,7 +152,7 @@ fi
 # start network service
 echo ""
 echo "*** Start ${network} (UPDATE) ***" >> ${logFile}
-/home/admin/config.scripts/blitz.cache.sh set message "Blockchain Testrun"
+/home/admin/_cache.sh set message "Blockchain Testrun"
 echo "- This can take a while .." >> ${logFile}
 chown -R bitcoin:bitcoin /mnt/hdd/${network} >>${logFile} 2>&1
 cp /home/admin/assets/${network}d.service /etc/systemd/system/${network}d.service
@@ -256,9 +256,9 @@ fi
 if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ]; then
 
   echo "Install C-lightning on update" >> ${logFile}
-  /home/admin/config.scripts/blitz.cache.sh set message "C-Lightning Install"
+  /home/admin/_cache.sh set message "C-Lightning Install"
   /home/admin/config.scripts/cl.install.sh on mainnet >> ${logFile}
-  /home/admin/config.scripts/blitz.cache.sh set message "C-Lightning Setup"
+  /home/admin/_cache.sh set message "C-Lightning Setup"
 
 fi
 

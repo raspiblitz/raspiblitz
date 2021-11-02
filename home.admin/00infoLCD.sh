@@ -86,7 +86,7 @@ while :
 
     # get config info if already available (with state value)
     source ${infoFile}
-    source <(/home/admin/config.scripts/blitz.cache.sh get state message)
+    source <(/home/admin/_cache.sh get state message)
 
     configExists=$(ls ${configFile} 2>/dev/null | grep -c '.conf')
     if [ ${configExists} -eq 1 ]; then

@@ -64,7 +64,7 @@ fi
 
 #TODO - no need for full reboot only unlock LND
 #if [ $# -lt 3 ];then
-#  source <(/home/admin/config.scripts/blitz.cache.sh get state)
+#  source <(/home/admin/_cache.sh get state)
 #  if [ "${state}" == "ready" ]; then
 #    sudo systemctl start ${netprefix}lnd
 #    # signal 1 to not reboot

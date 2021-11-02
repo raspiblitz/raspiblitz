@@ -7,7 +7,7 @@ source /home/admin/_version.info
 
 ## get basic info (its OK if not set yet)
 source /home/admin/raspiblitz.info 2>/dev/null
-source <(/home/admin/config.scripts/blitz.cache.sh get state setupPhase)
+source <(/home/admin/_cache.sh get state setupPhase)
 source /mnt/hdd/raspiblitz.conf 2>/dev/null
 
 # for old nodes
@@ -342,7 +342,7 @@ sudo /home/admin/config.scripts/internet.sh status | grep 'network_device\|local
 echo
 
 echo "*** HARDWARE TEST RESULTS ***"
-source <(/home/admin/config.scripts/blitz.cache.sh get system_count_undervoltage)
+source <(/home/admin/_cache.sh get system_count_undervoltage)
 showImproveInfo=0
 if [ ${#system_count_undervoltage} -gt 0 ]; then
   echo "UndervoltageReports in Logs: ${system_count_undervoltage}"

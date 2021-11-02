@@ -165,7 +165,7 @@ sparko-keys=${masterkeythatcandoeverything}; ${secretaccesskeythatcanreadstuff}:
   # setting value in raspi blitz config
   /home/admin/config.scripts/blitz.conf.sh set ${netprefix}sparko "on"
 
-  source <(/home/admin/config.scripts/blitz.cache.sh get state)
+  source <(/home/admin/_cache.sh get state)
   if [ "${state}" == "ready" ] && [ "$3" != "norestart" ]; then
     echo "# Restart the ${netprefix}lightningd.service to activate Sparko"
     sudo systemctl restart ${netprefix}lightningd

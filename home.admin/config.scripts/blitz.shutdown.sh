@@ -5,7 +5,7 @@
 # 1) give UI the info that a reboot/shutdown is now happening
 # 2) shutdown/reboot in a safe way to prevent data corruption
 
-source <(/home/admin/config.scripts/blitz.cache.sh get network)
+source <(/home/admin/_cache.sh get network)
 
 # display info
 echo ""
@@ -13,13 +13,13 @@ echo "Green activity light stays dark and LCD turns white when shutdown complete
 if [ "$1" = "reboot" ]; then
   shutdownParams="-h -r now"
   echo "It will then reboot again automatically."
-  /home/admin/config.scripts/blitz.cache.sh set state "reboot"
-  /home/admin/config.scripts/blitz.cache.sh set message "$2"
+  /home/admin/_cache.sh set state "reboot"
+  /home/admin/_cache.sh set message "$2"
 else
   shutdownParams="-h now"
   echo "Then wait 5 seconds and disconnect power."
-  /home/admin/config.scripts/blitz.cache.sh set state "shutdown"
-  /home/admin/config.scripts/blitz.cache.sh set message ""
+  /home/admin/_cache.sh set state "shutdown"
+  /home/admin/_cache.sh set message ""
 fi
 
 # do shutdown/reboot

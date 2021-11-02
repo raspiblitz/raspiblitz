@@ -332,7 +332,7 @@ alias lit-frcli=\"frcli --rpcserver=localhost:8443 \
     sudo systemctl restart RTL 2>/dev/null
   fi
   
-  source <(/home/admin/config.scripts/blitz.cache.sh get state)
+  source <(/home/admin/_cache.sh get state)
   if [ "${state}" == "ready" ]; then
     echo "# OK - the litd.service is enabled, system is ready so starting service"
     sudo systemctl start litd

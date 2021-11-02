@@ -76,37 +76,37 @@ YEAR=31536000
 ####################################################################
 
 # init values
-/home/admin/config.scripts/blitz.cache.sh set system_temp_celsius "0"
-/home/admin/config.scripts/blitz.cache.sh set system_temp_fahrenheit "0"
-/home/admin/config.scripts/blitz.cache.sh set system_count_longscan "0"
-/home/admin/config.scripts/blitz.cache.sh set system_count_undervoltage "0"
+/home/admin/_cache.sh set system_temp_celsius "0"
+/home/admin/_cache.sh set system_temp_fahrenheit "0"
+/home/admin/_cache.sh set system_count_longscan "0"
+/home/admin/_cache.sh set system_count_undervoltage "0"
 
 # import all base values from raspiblitz.info
 echo "importing: ${infoFile}"
-/home/admin/config.scripts/blitz.cache.sh import $infoFile
+/home/admin/_cache.sh import $infoFile
 
 # import all base values from raspiblitz.config (if exists)
 configFileExists=$(ls ${configFile} | grep -c "${configFile}")
 if [ "${configFileExists}" != "0" ]; then
   echo "importing: ${configFile}"
-  /home/admin/config.scripts/blitz.cache.sh import ${configFile}
+  /home/admin/_cache.sh import ${configFile}
 fi
 
 # version info
 echo "importing: _version.info"
-/home/admin/config.scripts/blitz.cache.sh import /home/admin/_version.info
+/home/admin/_cache.sh import /home/admin/_version.info
 
 # basic hardware info (will not change)
-source <(/home/admin/config.scripts/blitz.cache.sh valid system_board system_ramMB system_ramMB)
+source <(/home/admin/_cache.sh valid system_board system_ramMB system_ramMB)
 if [ "${stillvalid}" == "0" ]; then
   source <(/home/admin/config.scripts/blitz.hardware.sh status)
-  /home/admin/config.scripts/blitz.cache.sh set system_board "${board}"
-  /home/admin/config.scripts/blitz.cache.sh set system_ramMB "${ramMB}"
-  /home/admin/config.scripts/blitz.cache.sh set system_ramMB "${ramGB}"
+  /home/admin/_cache.sh set system_board "${board}"
+  /home/admin/_cache.sh set system_ramMB "${ramMB}"
+  /home/admin/_cache.sh set system_ramMB "${ramGB}"
 fi
 
 # flag that init was done (will be checked on each loop)
-/home/admin/config.scripts/blitz.cache.sh set system_init_time "$(date +%s)"
+/home/admin/_cache.sh set system_init_time "$(date +%s)"
 
 while [ 1 ]
 do
@@ -117,7 +117,7 @@ do
   ####################################################################
 
   # check that redis contains init data (detect possible restart of redis)
-  source <(/home/admin/config.scripts/blitz.cache.sh get system_init_time)
+  source <(/home/admin/_cache.sh get system_init_time)
   if [ "${system_init_time}" == "" ]; then
     echo "FAIL: CACHE IS MISSING INIT DATA ... exiting to let systemd restart"
     exit 1
@@ -131,99 +131,99 @@ do
 
   # uptime just do on every run
   system_up=$(cat /proc/uptime | grep -o '^[0-9]\+')
-  /home/admin/config.scripts/blitz.cache.sh set system_up "${system_up}"
+  /home/admin/_cache.sh set system_up "${system_up}"
 
   # cpu load
   cpu_load=$(w | head -n 1 | cut -d 'v' -f2 | cut -d ':' -f2)
-  /home/admin/config.scripts/blitz.cache.sh set system_cpu_load "${cpu_load}"
+  /home/admin/_cache.sh set system_cpu_load "${cpu_load}"
 
   # cpu temp - no measurement in a VM
   if [ -d "/sys/class/thermal/thermal_zone0/" ]; then
     cpu=$(cat /sys/class/thermal/thermal_zone0/temp)
     tempC=$((cpu/1000))
     tempF=$(((tempC * 18 + 325) / 10))
-    /home/admin/config.scripts/blitz.cache.sh set system_temp_celsius "${tempC}"
-    /home/admin/config.scripts/blitz.cache.sh set system_temp_fahrenheit "${tempF}"
+    /home/admin/_cache.sh set system_temp_celsius "${tempC}"
+    /home/admin/_cache.sh set system_temp_fahrenheit "${tempF}"
   fi
 
   # ram
   ram=$(free -m | grep Mem | awk '{ print $2 }')
   ram_avail=$(free -m | grep Mem | awk '{ print $7 }')
-  /home/admin/config.scripts/blitz.cache.sh set system_ram_mb "${ram}"
-  /home/admin/config.scripts/blitz.cache.sh set system_ram_available_mb "${ram_avail}"
+  /home/admin/_cache.sh set system_ram_mb "${ram}"
+  /home/admin/_cache.sh set system_ram_available_mb "${ram_avail}"
 
   # undervoltage
-  source <(/home/admin/config.scripts/blitz.cache.sh valid system_count_undervoltage)
+  source <(/home/admin/_cache.sh valid system_count_undervoltage)
   if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE} ]; then
     echo "updating: undervoltage"
     countReports=$(cat /var/log/syslog | grep -c "Under-voltage detected!")
-    /home/admin/config.scripts/blitz.cache.sh set system_count_undervoltage "${countReports}"
+    /home/admin/_cache.sh set system_count_undervoltage "${countReports}"
   fi
 
   #################
   # TOR
 
-  source <(/home/admin/config.scripts/blitz.cache.sh valid tor_web_addr)
+  source <(/home/admin/_cache.sh valid tor_web_addr)
   if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE5} ]; then
     echo "updating: tor"
-    /home/admin/config.scripts/blitz.cache.sh set tor_web_addr "$(cat /mnt/hdd/tor/web80/hostname 2>/dev/null)"
+    /home/admin/_cache.sh set tor_web_addr "$(cat /mnt/hdd/tor/web80/hostname 2>/dev/null)"
   fi
 
   #################
   # UPS (uninterruptible power supply)
 
-  source <(/home/admin/config.scripts/blitz.cache.sh valid system_ups_status)
+  source <(/home/admin/_cache.sh valid system_ups_status)
   if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE} ]; then
     echo "updating: /home/admin/config.scripts/blitz.ups.sh status"
     source <(/home/admin/config.scripts/blitz.ups.sh status)
-    /home/admin/config.scripts/blitz.cache.sh set system_ups_status "${upsStatus}"
+    /home/admin/_cache.sh set system_ups_status "${upsStatus}"
   fi
 
   #################
   # DATADRIVE
 
-  source <(/home/admin/config.scripts/blitz.cache.sh valid hdd_mounted hdd_ssd hdd_btrfs hdd_raid hdd_uasp hdd_capacity_bytes hdd_capacity_gb hdd_free_bytes hdd_free_gb hdd_used_info hdd_blockchain_data)
+  source <(/home/admin/_cache.sh valid hdd_mounted hdd_ssd hdd_btrfs hdd_raid hdd_uasp hdd_capacity_bytes hdd_capacity_gb hdd_free_bytes hdd_free_gb hdd_used_info hdd_blockchain_data)
   if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE2} ]; then
     echo "updating: /home/admin/config.scripts/blitz.datadrive.sh status"
     source <(/home/admin/config.scripts/blitz.datadrive.sh status)
-    /home/admin/config.scripts/blitz.cache.sh set hdd_mounted "${isMounted}"
-    /home/admin/config.scripts/blitz.cache.sh set hdd_ssd "${isSSD}"
-    /home/admin/config.scripts/blitz.cache.sh set hdd_btrfs "${isBTRFS}"
-    /home/admin/config.scripts/blitz.cache.sh set hdd_raid "${isRaid}"
-    /home/admin/config.scripts/blitz.cache.sh set hdd_uasp "${hddAdapterUSAP}"
-    /home/admin/config.scripts/blitz.cache.sh set hdd_capacity_bytes "${hddBytes}"
-    /home/admin/config.scripts/blitz.cache.sh set hdd_capacity_gb "${hddGigaBytes}"
-    /home/admin/config.scripts/blitz.cache.sh set hdd_free_bytes "${hddDataFreeBytes}"
-    /home/admin/config.scripts/blitz.cache.sh set hdd_free_gb "${hddDataFreeGB}"
-    /home/admin/config.scripts/blitz.cache.sh set hdd_used_info "${hddUsedInfo}"
-    /home/admin/config.scripts/blitz.cache.sh set hdd_blockchain_data "${hddBlocksBitcoin}"
+    /home/admin/_cache.sh set hdd_mounted "${isMounted}"
+    /home/admin/_cache.sh set hdd_ssd "${isSSD}"
+    /home/admin/_cache.sh set hdd_btrfs "${isBTRFS}"
+    /home/admin/_cache.sh set hdd_raid "${isRaid}"
+    /home/admin/_cache.sh set hdd_uasp "${hddAdapterUSAP}"
+    /home/admin/_cache.sh set hdd_capacity_bytes "${hddBytes}"
+    /home/admin/_cache.sh set hdd_capacity_gb "${hddGigaBytes}"
+    /home/admin/_cache.sh set hdd_free_bytes "${hddDataFreeBytes}"
+    /home/admin/_cache.sh set hdd_free_gb "${hddDataFreeGB}"
+    /home/admin/_cache.sh set hdd_used_info "${hddUsedInfo}"
+    /home/admin/_cache.sh set hdd_blockchain_data "${hddBlocksBitcoin}"
   fi
 
   #################
   # INTERNET
 
   # basic local connection
-  source <(/home/admin/config.scripts/blitz.cache.sh valid internet_localip internet_localiprange internet_dhcp internet_rx internet_tx)
+  source <(/home/admin/_cache.sh valid internet_localip internet_localiprange internet_dhcp internet_rx internet_tx)
   if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE} ]; then
     echo "updating: /home/admin/config.scripts/internet.sh status local"
     source <(/home/admin/config.scripts/internet.sh status local)
-    /home/admin/config.scripts/blitz.cache.sh set internet_localip "${localip}"
-    /home/admin/config.scripts/blitz.cache.sh set internet_localiprange "${localiprange}"
-    /home/admin/config.scripts/blitz.cache.sh set internet_dhcp "${dhcp}"
-    /home/admin/config.scripts/blitz.cache.sh set internet_rx "${network_rx}"
-    /home/admin/config.scripts/blitz.cache.sh set internet_tx "${network_tx}"
+    /home/admin/_cache.sh set internet_localip "${localip}"
+    /home/admin/_cache.sh set internet_localiprange "${localiprange}"
+    /home/admin/_cache.sh set internet_dhcp "${dhcp}"
+    /home/admin/_cache.sh set internet_rx "${network_rx}"
+    /home/admin/_cache.sh set internet_tx "${network_tx}"
   fi
 
   # connection to internet
-  source <(/home/admin/config.scripts/blitz.cache.sh valid internet_online)
+  source <(/home/admin/_cache.sh valid internet_online)
   if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${HOURQUATER} ]; then
     echo "updating: /home/admin/config.scripts/internet.sh status online"
     source <(/home/admin/config.scripts/internet.sh status online)
-    /home/admin/config.scripts/blitz.cache.sh set internet_online "${online}"
+    /home/admin/_cache.sh set internet_online "${online}"
   fi
 
   # exit if still setup or higher system stopped
-  source <(/home/admin/config.scripts/blitz.cache.sh get setupPhase state)
+  source <(/home/admin/_cache.sh get setupPhase state)
   if [ "${setupPhase}" != "done" ] ||
      [ "${state}" == "" ] ||
      [ "${state}" == "copysource" ] ||
@@ -285,52 +285,52 @@ do
       fi
 
       # update basic status values always
-      source <(/home/admin/config.scripts/blitz.cache.sh valid btc_${CHAIN}net_version btc_${CHAIN}net_running btc_${CHAIN}net_ready btc_${CHAIN}net_online  btc_${CHAIN}net_error_short btc_${CHAIN}net_error_full)
+      source <(/home/admin/_cache.sh valid btc_${CHAIN}net_version btc_${CHAIN}net_running btc_${CHAIN}net_ready btc_${CHAIN}net_online  btc_${CHAIN}net_error_short btc_${CHAIN}net_error_full)
       if [ "${stillvalid}" == "0" ] || [ ${age} -gt 10 ]; then
         echo "updating: /home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net status"
         source <(/home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net status)
-        /home/admin/config.scripts/blitz.cache.sh set btc_${CHAIN}net_activated "1"
-        /home/admin/config.scripts/blitz.cache.sh set btc_${CHAIN}net_version "${btc_version}"
-        /home/admin/config.scripts/blitz.cache.sh set btc_${CHAIN}net_running "${btc_running}"
-        /home/admin/config.scripts/blitz.cache.sh set btc_${CHAIN}net_ready "${btc_ready}"
-        /home/admin/config.scripts/blitz.cache.sh set btc_${CHAIN}net_online "${btc_online}"
-        /home/admin/config.scripts/blitz.cache.sh set btc_${CHAIN}net_error_short "${btc_error_short}"
-        /home/admin/config.scripts/blitz.cache.sh set btc_${CHAIN}net_error_full "${btc_error_full}"
+        /home/admin/_cache.sh set btc_${CHAIN}net_activated "1"
+        /home/admin/_cache.sh set btc_${CHAIN}net_version "${btc_version}"
+        /home/admin/_cache.sh set btc_${CHAIN}net_running "${btc_running}"
+        /home/admin/_cache.sh set btc_${CHAIN}net_ready "${btc_ready}"
+        /home/admin/_cache.sh set btc_${CHAIN}net_online "${btc_online}"
+        /home/admin/_cache.sh set btc_${CHAIN}net_error_short "${btc_error_short}"
+        /home/admin/_cache.sh set btc_${CHAIN}net_error_full "${btc_error_full}"
 
         # when default chain transfere values
         if [ "${isDefaultChain}" == "1" ]; then
-          /home/admin/config.scripts/blitz.cache.sh set btc_default_activated "1"
-          /home/admin/config.scripts/blitz.cache.sh set btc_default_version "${btc_version}"
-          /home/admin/config.scripts/blitz.cache.sh set btc_default_running "${btc_running}"
-          /home/admin/config.scripts/blitz.cache.sh set btc_default_ready "${btc_ready}"
-          /home/admin/config.scripts/blitz.cache.sh set btc_default_online "${btc_online}"
-          /home/admin/config.scripts/blitz.cache.sh set btc_default_error_short "${btc_error_short}"
-          /home/admin/config.scripts/blitz.cache.sh set btc_default_error_full "${btc_error_full}"
+          /home/admin/_cache.sh set btc_default_activated "1"
+          /home/admin/_cache.sh set btc_default_version "${btc_version}"
+          /home/admin/_cache.sh set btc_default_running "${btc_running}"
+          /home/admin/_cache.sh set btc_default_ready "${btc_ready}"
+          /home/admin/_cache.sh set btc_default_online "${btc_online}"
+          /home/admin/_cache.sh set btc_default_error_short "${btc_error_short}"
+          /home/admin/_cache.sh set btc_default_error_full "${btc_error_full}"
         fi
       fi
 
       # update detail infos only when ready (get as value from cache)
-      source <(/home/admin/config.scripts/blitz.cache.sh meta btc_${CHAIN}net_ready)
+      source <(/home/admin/_cache.sh meta btc_${CHAIN}net_ready)
       if [ "${value}" == "1" ]; then 
 
         # check if network needs update
-        source <(/home/admin/config.scripts/blitz.cache.sh valid btc_${CHAIN}net_blocks_headers btc_${CHAIN}net_blocks_verified btc_${CHAIN}net_blocks_behind btc_${CHAIN}net_sync_progress btc_${CHAIN}net_sync_percentage)
+        source <(/home/admin/_cache.sh valid btc_${CHAIN}net_blocks_headers btc_${CHAIN}net_blocks_verified btc_${CHAIN}net_blocks_behind btc_${CHAIN}net_sync_progress btc_${CHAIN}net_sync_percentage)
         if [ "${stillvalid}" == "0" ] || [ ${age} -gt 30 ]; then
           error=""
           echo "updating: /home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net blockchain"
           source <(/home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net blockchain)
           if [ "${error}" == "" ]; then
-            /home/admin/config.scripts/blitz.cache.sh set btc_${CHAIN}net_blocks_headers "${btc_blocks_headers}"
-            /home/admin/config.scripts/blitz.cache.sh set btc_${CHAIN}net_blocks_verified "${btc_blocks_verified}"
-            /home/admin/config.scripts/blitz.cache.sh set btc_${CHAIN}net_blocks_behind "${btc_blocks_behind}"
-            /home/admin/config.scripts/blitz.cache.sh set btc_${CHAIN}net_sync_progress "${btc_sync_progress}"
-            /home/admin/config.scripts/blitz.cache.sh set btc_${CHAIN}net_sync_percentage "${btc_sync_percentage}"
+            /home/admin/_cache.sh set btc_${CHAIN}net_blocks_headers "${btc_blocks_headers}"
+            /home/admin/_cache.sh set btc_${CHAIN}net_blocks_verified "${btc_blocks_verified}"
+            /home/admin/_cache.sh set btc_${CHAIN}net_blocks_behind "${btc_blocks_behind}"
+            /home/admin/_cache.sh set btc_${CHAIN}net_sync_progress "${btc_sync_progress}"
+            /home/admin/_cache.sh set btc_${CHAIN}net_sync_percentage "${btc_sync_percentage}"
             if [ "${isDefaultChain}" == "1" ]; then
-              /home/admin/config.scripts/blitz.cache.sh set btc_default_blocks_headers "${btc_blocks_headers}"
-              /home/admin/config.scripts/blitz.cache.sh set btc_default_blocks_verified "${btc_blocks_verified}"
-              /home/admin/config.scripts/blitz.cache.sh set btc_default_blocks_behind "${btc_blocks_behind}"
-              /home/admin/config.scripts/blitz.cache.sh set btc_default_sync_progress "${btc_sync_progress}"
-              /home/admin/config.scripts/blitz.cache.sh set btc_default_sync_percentage "${btc_sync_percentage}"
+              /home/admin/_cache.sh set btc_default_blocks_headers "${btc_blocks_headers}"
+              /home/admin/_cache.sh set btc_default_blocks_verified "${btc_blocks_verified}"
+              /home/admin/_cache.sh set btc_default_blocks_behind "${btc_blocks_behind}"
+              /home/admin/_cache.sh set btc_default_sync_progress "${btc_sync_progress}"
+              /home/admin/_cache.sh set btc_default_sync_percentage "${btc_sync_percentage}"
             fi
           else
             echo "!! ERROR --> ${error}"
@@ -338,19 +338,19 @@ do
         fi
 
         # check if network needs update
-        source <(/home/admin/config.scripts/blitz.cache.sh valid btc_${CHAIN}net_peers btc_${CHAIN}net_address btc_${CHAIN}net_port)
+        source <(/home/admin/_cache.sh valid btc_${CHAIN}net_peers btc_${CHAIN}net_address btc_${CHAIN}net_port)
         if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE} ]; then
           error=""
           echo "updating: /home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net network"
           source <(/home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net network)
           if [ "${error}" == "" ]; then
-            /home/admin/config.scripts/blitz.cache.sh set btc_${CHAIN}net_peers "${btc_peers}"
-            /home/admin/config.scripts/blitz.cache.sh set btc_${CHAIN}net_address "${btc_address}"
-            /home/admin/config.scripts/blitz.cache.sh set btc_${CHAIN}net_port "${btc_btc_port}"
+            /home/admin/_cache.sh set btc_${CHAIN}net_peers "${btc_peers}"
+            /home/admin/_cache.sh set btc_${CHAIN}net_address "${btc_address}"
+            /home/admin/_cache.sh set btc_${CHAIN}net_port "${btc_btc_port}"
             if [ "${isDefaultChain}" == "1" ]; then
-              /home/admin/config.scripts/blitz.cache.sh set btc_default_peers "${btc_peers}"
-              /home/admin/config.scripts/blitz.cache.sh set btc_default_address "${btc_address}"
-              /home/admin/config.scripts/blitz.cache.sh set btc_default_port "${btc_btc_port}"
+              /home/admin/_cache.sh set btc_default_peers "${btc_peers}"
+              /home/admin/_cache.sh set btc_default_address "${btc_address}"
+              /home/admin/_cache.sh set btc_default_port "${btc_btc_port}"
             fi
           else
             echo "!! ERROR --> ${error}"
@@ -358,15 +358,15 @@ do
         fi
 
         # check if mempool needs update
-        source <(/home/admin/config.scripts/blitz.cache.sh valid btc_${CHAIN}net_mempool_transactions)
+        source <(/home/admin/_cache.sh valid btc_${CHAIN}net_mempool_transactions)
         if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE} ]; then
           error=""
           echo "updating: /home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net mempool"
           source <(/home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net mempool)
           if [ "${error}" == "" ]; then
-            /home/admin/config.scripts/blitz.cache.sh set btc_${CHAIN}net_mempool_transactions "${btc_mempool_transactions}"
+            /home/admin/_cache.sh set btc_${CHAIN}net_mempool_transactions "${btc_mempool_transactions}"
             if [ "${isDefaultChain}" == "1" ]; then
-              /home/admin/config.scripts/blitz.cache.sh set btc_default_mempool_transactions "${btc_mempool_transactions}"
+              /home/admin/_cache.sh set btc_default_mempool_transactions "${btc_mempool_transactions}"
             fi
           else
             echo "!! ERROR --> ${error}"
@@ -416,44 +416,44 @@ do
     fi
 
     # update basic status values always
-    source <(/home/admin/config.scripts/blitz.cache.sh valid ln_lnd_${CHAIN}net_locked ln_lnd_${CHAIN}net_version ln_lnd_${CHAIN}net_running ln_lnd_${CHAIN}net_ready ln_lnd_${CHAIN}net_online ln_lnd_${CHAIN}net_error_short ln_lnd_${CHAIN}net_error_full)
+    source <(/home/admin/_cache.sh valid ln_lnd_${CHAIN}net_locked ln_lnd_${CHAIN}net_version ln_lnd_${CHAIN}net_running ln_lnd_${CHAIN}net_ready ln_lnd_${CHAIN}net_online ln_lnd_${CHAIN}net_error_short ln_lnd_${CHAIN}net_error_full)
     if [ "${stillvalid}" == "0" ] || [ ${age} -gt 10 ]; then
       echo "updating: /home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net status"
       source <(/home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net status)
-      /home/admin/config.scripts/blitz.cache.sh set ln_lnd_${CHAIN}net_activated "1"
-      /home/admin/config.scripts/blitz.cache.sh set ln_lnd_${CHAIN}net_version "${ln_lnd_version}"
-      /home/admin/config.scripts/blitz.cache.sh set ln_lnd_${CHAIN}net_running "${ln_lnd_running}"
-      /home/admin/config.scripts/blitz.cache.sh set ln_lnd_${CHAIN}net_ready "${ln_lnd_ready}"
-      /home/admin/config.scripts/blitz.cache.sh set ln_lnd_${CHAIN}net_online "${ln_lnd_online}"
-      /home/admin/config.scripts/blitz.cache.sh set ln_lnd_${CHAIN}net_locked "${ln_lnd_locked}"
-      /home/admin/config.scripts/blitz.cache.sh set ln_lnd_${CHAIN}net_error_short "${ln_lnd_error_short}"
-      /home/admin/config.scripts/blitz.cache.sh set ln_lnd_${CHAIN}net_error_full "${ln_lnd_error_full}"
+      /home/admin/_cache.sh set ln_lnd_${CHAIN}net_activated "1"
+      /home/admin/_cache.sh set ln_lnd_${CHAIN}net_version "${ln_lnd_version}"
+      /home/admin/_cache.sh set ln_lnd_${CHAIN}net_running "${ln_lnd_running}"
+      /home/admin/_cache.sh set ln_lnd_${CHAIN}net_ready "${ln_lnd_ready}"
+      /home/admin/_cache.sh set ln_lnd_${CHAIN}net_online "${ln_lnd_online}"
+      /home/admin/_cache.sh set ln_lnd_${CHAIN}net_locked "${ln_lnd_locked}"
+      /home/admin/_cache.sh set ln_lnd_${CHAIN}net_error_short "${ln_lnd_error_short}"
+      /home/admin/_cache.sh set ln_lnd_${CHAIN}net_error_full "${ln_lnd_error_full}"
       if [ "${isDefaultLightning}" == "1" ] && [ "${isDefaultChain}" == "1" ]; then
-        /home/admin/config.scripts/blitz.cache.sh set ln_default_activated "1"
-        /home/admin/config.scripts/blitz.cache.sh set ln_default_version "${ln_lnd_version}"
-        /home/admin/config.scripts/blitz.cache.sh set ln_default_running "${ln_lnd_running}"
-        /home/admin/config.scripts/blitz.cache.sh set ln_default_ready "${ln_lnd_ready}"
-        /home/admin/config.scripts/blitz.cache.sh set ln_default_online "${ln_lnd_online}"
-        /home/admin/config.scripts/blitz.cache.sh set ln_default_locked "${ln_lnd_locked}"
-        /home/admin/config.scripts/blitz.cache.sh set ln_error_short "${ln_lnd_error_short}"
-        /home/admin/config.scripts/blitz.cache.sh set ln_default_error_full "${ln_lnd_error_full}"
+        /home/admin/_cache.sh set ln_default_activated "1"
+        /home/admin/_cache.sh set ln_default_version "${ln_lnd_version}"
+        /home/admin/_cache.sh set ln_default_running "${ln_lnd_running}"
+        /home/admin/_cache.sh set ln_default_ready "${ln_lnd_ready}"
+        /home/admin/_cache.sh set ln_default_online "${ln_lnd_online}"
+        /home/admin/_cache.sh set ln_default_locked "${ln_lnd_locked}"
+        /home/admin/_cache.sh set ln_error_short "${ln_lnd_error_short}"
+        /home/admin/_cache.sh set ln_default_error_full "${ln_lnd_error_full}"
       fi
     fi
 
     # update detail infos only when ready
-    source <(/home/admin/config.scripts/blitz.cache.sh meta ln_lnd_${CHAIN}net_ready)
+    source <(/home/admin/_cache.sh meta ln_lnd_${CHAIN}net_ready)
     if [ "${value}" == "1" ]; then
 
       # check if config needs update
-      source <(/home/admin/config.scripts/blitz.cache.sh valid ln_lnd_${CHAIN}net_alias)
+      source <(/home/admin/_cache.sh valid ln_lnd_${CHAIN}net_alias)
       if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE} ]; then
         error=""
         echo "updating: /home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net config"
         source <(/home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net config)
         if [ "${error}" == "" ]; then
-          /home/admin/config.scripts/blitz.cache.sh set ln_lnd_${CHAIN}net_alias "${ln_lnd_alias}"
+          /home/admin/_cache.sh set ln_lnd_${CHAIN}net_alias "${ln_lnd_alias}"
           if [ "${isDefaultLightning}" == "1" ] && [ "${isDefaultChain}" == "1" ]; then
-            /home/admin/config.scripts/blitz.cache.sh set ln_default_alias "${ln_lnd_alias}"
+            /home/admin/_cache.sh set ln_default_alias "${ln_lnd_alias}"
           fi
         else
           echo "!! ERROR --> ${error}"
@@ -461,30 +461,30 @@ do
       fi
 
       # check if info needs update
-      source <(/home/admin/config.scripts/blitz.cache.sh valid ln_lnd_${CHAIN}net_address ln_lnd_${CHAIN}net_tor ln_lnd_${CHAIN}net_sync_chain ln_lnd_${CHAIN}net_sync_graph ln_lnd_${CHAIN}net_channels_pending ln_lnd_${CHAIN}net_channels_active ln_lnd_${CHAIN}net_channels_inactive ln_lnd_${CHAIN}net_channels_total ln_lnd_${CHAIN}net_peers)
+      source <(/home/admin/_cache.sh valid ln_lnd_${CHAIN}net_address ln_lnd_${CHAIN}net_tor ln_lnd_${CHAIN}net_sync_chain ln_lnd_${CHAIN}net_sync_graph ln_lnd_${CHAIN}net_channels_pending ln_lnd_${CHAIN}net_channels_active ln_lnd_${CHAIN}net_channels_inactive ln_lnd_${CHAIN}net_channels_total ln_lnd_${CHAIN}net_peers)
       if [ "${stillvalid}" == "0" ] || [ ${age} -gt 20 ]; then
         error=""
         echo "updating: /home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net info"
         source <(/home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net info)
         if [ "${error}" == "" ]; then
-          /home/admin/config.scripts/blitz.cache.sh set ln_lnd_${CHAIN}net_address "${ln_lnd_address}"
-          /home/admin/config.scripts/blitz.cache.sh set ln_lnd_${CHAIN}net_tor "${ln_lnd_tor}"
-          /home/admin/config.scripts/blitz.cache.sh set ln_lnd_${CHAIN}net_sync_chain "${ln_lnd_sync_chain}"
-          /home/admin/config.scripts/blitz.cache.sh set ln_lnd_${CHAIN}net_sync_graph "${ln_lnd_sync_graph}"
-          /home/admin/config.scripts/blitz.cache.sh set ln_lnd_${CHAIN}net_channels_pending "${ln_lnd_channels_pending}"
-          /home/admin/config.scripts/blitz.cache.sh set ln_lnd_${CHAIN}net_channels_active "${ln_lnd_channels_active}"
-          /home/admin/config.scripts/blitz.cache.sh set ln_lnd_${CHAIN}net_channels_inactive "${ln_lnd_channels_inactive}"
-          /home/admin/config.scripts/blitz.cache.sh set ln_lnd_${CHAIN}net_channels_total "${ln_lnd_channels_total}"
-          /home/admin/config.scripts/blitz.cache.sh set ln_lnd_${CHAIN}net_peers "${ln_lnd_peers}"
+          /home/admin/_cache.sh set ln_lnd_${CHAIN}net_address "${ln_lnd_address}"
+          /home/admin/_cache.sh set ln_lnd_${CHAIN}net_tor "${ln_lnd_tor}"
+          /home/admin/_cache.sh set ln_lnd_${CHAIN}net_sync_chain "${ln_lnd_sync_chain}"
+          /home/admin/_cache.sh set ln_lnd_${CHAIN}net_sync_graph "${ln_lnd_sync_graph}"
+          /home/admin/_cache.sh set ln_lnd_${CHAIN}net_channels_pending "${ln_lnd_channels_pending}"
+          /home/admin/_cache.sh set ln_lnd_${CHAIN}net_channels_active "${ln_lnd_channels_active}"
+          /home/admin/_cache.sh set ln_lnd_${CHAIN}net_channels_inactive "${ln_lnd_channels_inactive}"
+          /home/admin/_cache.sh set ln_lnd_${CHAIN}net_channels_total "${ln_lnd_channels_total}"
+          /home/admin/_cache.sh set ln_lnd_${CHAIN}net_peers "${ln_lnd_peers}"
           if [ "${isDefaultLightning}" == "1" ] && [ "${isDefaultChain}" == "1" ]; then
-            /home/admin/config.scripts/blitz.cache.sh set ln_default_address "${ln_lnd_address}"
-            /home/admin/config.scripts/blitz.cache.sh set ln_default_tor "${ln_lnd_tor}"
-            /home/admin/config.scripts/blitz.cache.sh set ln_default_sync_chain "${ln_lnd_sync_chain}"
-            /home/admin/config.scripts/blitz.cache.sh set ln_default_channels_pending "${ln_lnd_channels_pending}"
-            /home/admin/config.scripts/blitz.cache.sh set ln_default_channels_active "${ln_lnd_channels_active}"
-            /home/admin/config.scripts/blitz.cache.sh set ln_default_channels_inactive "${ln_lnd_channels_inactive}"
-            /home/admin/config.scripts/blitz.cache.sh set ln_default_channels_total "${ln_lnd_channels_total}"
-            /home/admin/config.scripts/blitz.cache.sh set ln_default_peers "${ln_lnd_peers}"
+            /home/admin/_cache.sh set ln_default_address "${ln_lnd_address}"
+            /home/admin/_cache.sh set ln_default_tor "${ln_lnd_tor}"
+            /home/admin/_cache.sh set ln_default_sync_chain "${ln_lnd_sync_chain}"
+            /home/admin/_cache.sh set ln_default_channels_pending "${ln_lnd_channels_pending}"
+            /home/admin/_cache.sh set ln_default_channels_active "${ln_lnd_channels_active}"
+            /home/admin/_cache.sh set ln_default_channels_inactive "${ln_lnd_channels_inactive}"
+            /home/admin/_cache.sh set ln_default_channels_total "${ln_lnd_channels_total}"
+            /home/admin/_cache.sh set ln_default_peers "${ln_lnd_peers}"
           fi
         else
           echo "!! ERROR --> ${error}"
@@ -492,21 +492,21 @@ do
       fi
 
       # check if wallet needs update
-      source <(/home/admin/config.scripts/blitz.cache.sh valid ln_lnd_${CHAIN}net_wallet_onchain_balance ln_lnd_${CHAIN}net_wallet_onchain_pending ln_lnd_${CHAIN}net_wallet_channels_balance ln_lnd_${CHAIN}net_wallet_channels_pending)
+      source <(/home/admin/_cache.sh valid ln_lnd_${CHAIN}net_wallet_onchain_balance ln_lnd_${CHAIN}net_wallet_onchain_pending ln_lnd_${CHAIN}net_wallet_channels_balance ln_lnd_${CHAIN}net_wallet_channels_pending)
       if [ "${stillvalid}" == "0" ] || [ ${age} -gt 22 ]; then
         error=""
         echo "updating: /home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net wallet"
         source <(/home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net wallet)
         if [ "${error}" == "" ]; then
-          /home/admin/config.scripts/blitz.cache.sh set ln_lnd_${CHAIN}net_wallet_onchain_balance "${ln_lnd_wallet_onchain_balance}"
-          /home/admin/config.scripts/blitz.cache.sh set ln_lnd_${CHAIN}net_wallet_onchain_pending "${ln_lnd_wallet_onchain_pending}"
-          /home/admin/config.scripts/blitz.cache.sh set ln_lnd_${CHAIN}net_wallet_channels_balance "${ln_lnd_wallet_channels_balance}"
-          /home/admin/config.scripts/blitz.cache.sh set ln_lnd_${CHAIN}net_wallet_channels_pending "${ln_lnd_wallet_channels_pending}"
+          /home/admin/_cache.sh set ln_lnd_${CHAIN}net_wallet_onchain_balance "${ln_lnd_wallet_onchain_balance}"
+          /home/admin/_cache.sh set ln_lnd_${CHAIN}net_wallet_onchain_pending "${ln_lnd_wallet_onchain_pending}"
+          /home/admin/_cache.sh set ln_lnd_${CHAIN}net_wallet_channels_balance "${ln_lnd_wallet_channels_balance}"
+          /home/admin/_cache.sh set ln_lnd_${CHAIN}net_wallet_channels_pending "${ln_lnd_wallet_channels_pending}"
           if [ "${isDefaultLightning}" == "1" ] && [ "${isDefaultChain}" == "1" ]; then
-            /home/admin/config.scripts/blitz.cache.sh set ln_default_wallet_onchain_balance "${ln_lnd_wallet_onchain_balance}"
-            /home/admin/config.scripts/blitz.cache.sh set ln_default_wallet_onchain_pending "${ln_lnd_wallet_onchain_pending}"
-            /home/admin/config.scripts/blitz.cache.sh set ln_default_wallet_channels_balance "${ln_lnd_wallet_channels_balance}"
-            /home/admin/config.scripts/blitz.cache.sh set ln_default_wallet_channels_pending "${ln_lnd_wallet_channels_pending}"
+            /home/admin/_cache.sh set ln_default_wallet_onchain_balance "${ln_lnd_wallet_onchain_balance}"
+            /home/admin/_cache.sh set ln_default_wallet_onchain_pending "${ln_lnd_wallet_onchain_pending}"
+            /home/admin/_cache.sh set ln_default_wallet_channels_balance "${ln_lnd_wallet_channels_balance}"
+            /home/admin/_cache.sh set ln_default_wallet_channels_pending "${ln_lnd_wallet_channels_pending}"
           fi
         else
           echo "!! ERROR --> ${error}"
@@ -514,16 +514,16 @@ do
       fi
 
       # check if fees needs update
-      source <(/home/admin/config.scripts/blitz.cache.sh valid ln_lnd_${CHAIN}net_fees_daily ln_lnd_${CHAIN}net_fees_weekly ln_lnd_${CHAIN}net_fees_month ln_lnd_${CHAIN}net_fees_total)
+      source <(/home/admin/_cache.sh valid ln_lnd_${CHAIN}net_fees_daily ln_lnd_${CHAIN}net_fees_weekly ln_lnd_${CHAIN}net_fees_month ln_lnd_${CHAIN}net_fees_total)
       if [ "${stillvalid}" == "0" ] || [ ${age} -gt 22 ]; then
         error=""
         echo "updating: /home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net fees"
         source <(/home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net fees)
         if [ "${error}" == "" ]; then
-          /home/admin/config.scripts/blitz.cache.sh set ln_lnd_${CHAIN}net_fees_daily "${ln_lnd_fees_daily}"
-          /home/admin/config.scripts/blitz.cache.sh set ln_lnd_${CHAIN}net_fees_weekly "${ln_lnd_fees_weekly}"
-          /home/admin/config.scripts/blitz.cache.sh set ln_lnd_${CHAIN}net_fees_month "${ln_lnd_fees_month}"
-          /home/admin/config.scripts/blitz.cache.sh set ln_lnd_${CHAIN}net_fees_total "${ln_lnd_fees_total}"
+          /home/admin/_cache.sh set ln_lnd_${CHAIN}net_fees_daily "${ln_lnd_fees_daily}"
+          /home/admin/_cache.sh set ln_lnd_${CHAIN}net_fees_weekly "${ln_lnd_fees_weekly}"
+          /home/admin/_cache.sh set ln_lnd_${CHAIN}net_fees_month "${ln_lnd_fees_month}"
+          /home/admin/_cache.sh set ln_lnd_${CHAIN}net_fees_total "${ln_lnd_fees_total}"
           if [ "${isDefaultLightning}" == "1" ] && [ "${isDefaultChain}" == "1" ]; then
             home/admin/config.scripts/blitz.cache.sh set ln_default_fees_total "${ln_lnd_fees_total}"
           fi
@@ -576,63 +576,63 @@ do
     # TODO: c-lightning is seen as "always unlocked" for now - needs to be implemented later #2691
 
     # update basic status values always
-    source <(/home/admin/config.scripts/blitz.cache.sh valid ln_cl_${CHAIN}net_version ln_cl_${CHAIN}net_running ln_cl_${CHAIN}net_ready ln_cl_${CHAIN}net_online ln_cl_${CHAIN}net_error_short ln_cl_${CHAIN}net_error_full)
+    source <(/home/admin/_cache.sh valid ln_cl_${CHAIN}net_version ln_cl_${CHAIN}net_running ln_cl_${CHAIN}net_ready ln_cl_${CHAIN}net_online ln_cl_${CHAIN}net_error_short ln_cl_${CHAIN}net_error_full)
     if [ "${stillvalid}" == "0" ] || [ ${age} -gt 10 ]; then
       echo "updating: /home/admin/config.scripts/cl.monitor.sh ${CHAIN}net status"
       source <(/home/admin/config.scripts/cl.monitor.sh ${CHAIN}net status)
-      /home/admin/config.scripts/blitz.cache.sh set ln_cl_${CHAIN}net_activated "1"
-      /home/admin/config.scripts/blitz.cache.sh set ln_cl_${CHAIN}net_version "${ln_cl_version}"
-      /home/admin/config.scripts/blitz.cache.sh set ln_cl_${CHAIN}net_running "${ln_cl_running}"
-      /home/admin/config.scripts/blitz.cache.sh set ln_cl_${CHAIN}net_ready "${ln_cl_ready}"
-      /home/admin/config.scripts/blitz.cache.sh set ln_cl_${CHAIN}net_online "${ln_cl_online}"
-      /home/admin/config.scripts/blitz.cache.sh set ln_cl_${CHAIN}net_locked "0"
-      /home/admin/config.scripts/blitz.cache.sh set ln_cl_${CHAIN}net_error_short "${ln_cl_error_short}"
-      /home/admin/config.scripts/blitz.cache.sh set ln_cl_${CHAIN}net_error_full "${ln_cl_error_full}"
+      /home/admin/_cache.sh set ln_cl_${CHAIN}net_activated "1"
+      /home/admin/_cache.sh set ln_cl_${CHAIN}net_version "${ln_cl_version}"
+      /home/admin/_cache.sh set ln_cl_${CHAIN}net_running "${ln_cl_running}"
+      /home/admin/_cache.sh set ln_cl_${CHAIN}net_ready "${ln_cl_ready}"
+      /home/admin/_cache.sh set ln_cl_${CHAIN}net_online "${ln_cl_online}"
+      /home/admin/_cache.sh set ln_cl_${CHAIN}net_locked "0"
+      /home/admin/_cache.sh set ln_cl_${CHAIN}net_error_short "${ln_cl_error_short}"
+      /home/admin/_cache.sh set ln_cl_${CHAIN}net_error_full "${ln_cl_error_full}"
       if [ "${isDefaultLightning}" == "1" ] && [ "${isDefaultChain}" == "1" ]; then
-        /home/admin/config.scripts/blitz.cache.sh set ln_default_activated "1"
-        /home/admin/config.scripts/blitz.cache.sh set ln_default_version "${cl_lnd_version}"
-        /home/admin/config.scripts/blitz.cache.sh set ln_default_running "${lc_running}"
-        /home/admin/config.scripts/blitz.cache.sh set ln_default_ready "${cl_ready}"
-        /home/admin/config.scripts/blitz.cache.sh set ln_default_online "${cl_online}"
-        /home/admin/config.scripts/blitz.cache.sh set ln_default_locked "0"
-        /home/admin/config.scripts/blitz.cache.sh set ln_default_error_short "${cl_error_short}"
-        /home/admin/config.scripts/blitz.cache.sh set ln_default_error_full "${cl_error_full}"
+        /home/admin/_cache.sh set ln_default_activated "1"
+        /home/admin/_cache.sh set ln_default_version "${cl_lnd_version}"
+        /home/admin/_cache.sh set ln_default_running "${lc_running}"
+        /home/admin/_cache.sh set ln_default_ready "${cl_ready}"
+        /home/admin/_cache.sh set ln_default_online "${cl_online}"
+        /home/admin/_cache.sh set ln_default_locked "0"
+        /home/admin/_cache.sh set ln_default_error_short "${cl_error_short}"
+        /home/admin/_cache.sh set ln_default_error_full "${cl_error_full}"
       fi
     fi
 
     # update detail infos only when ready
-    source <(/home/admin/config.scripts/blitz.cache.sh meta ln_cl_${CHAIN}net_ready)
+    source <(/home/admin/_cache.sh meta ln_cl_${CHAIN}net_ready)
     if [ "${value}" == "1" ]; then
 
       # check if info needs update
-      source <(/home/admin/config.scripts/blitz.cache.sh valid ln_cl_${CHAIN}net_alias ln_cl_${CHAIN}net_address ln_cl_${CHAIN}net_tor ln_cl_${CHAIN}net_peers ln_cl_${CHAIN}net_sync_chain ln_cl_${CHAIN}net_channels_pending ln_cl_${CHAIN}net_channels_active ln_cl_${CHAIN}net_channels_inactive ln_cl_${CHAIN}net_channels_total ln_cl_${CHAIN}net_fees_total)
+      source <(/home/admin/_cache.sh valid ln_cl_${CHAIN}net_alias ln_cl_${CHAIN}net_address ln_cl_${CHAIN}net_tor ln_cl_${CHAIN}net_peers ln_cl_${CHAIN}net_sync_chain ln_cl_${CHAIN}net_channels_pending ln_cl_${CHAIN}net_channels_active ln_cl_${CHAIN}net_channels_inactive ln_cl_${CHAIN}net_channels_total ln_cl_${CHAIN}net_fees_total)
       if [ "${stillvalid}" == "0" ] || [ ${age} -gt 20 ]; then
         error=""
         echo "updating: /home/admin/config.scripts/cl.monitor.sh ${CHAIN}net info"
         source <(/home/admin/config.scripts/cl.monitor.sh ${CHAIN}net info)
         if [ "${error}" == "" ]; then
-          /home/admin/config.scripts/blitz.cache.sh set ln_cl_${CHAIN}net_alias "${ln_cl_alias}"
-          /home/admin/config.scripts/blitz.cache.sh set ln_cl_${CHAIN}net_address "${ln_cl_address}"
-          /home/admin/config.scripts/blitz.cache.sh set ln_cl_${CHAIN}net_tor "${ln_cl_tor}"
-          /home/admin/config.scripts/blitz.cache.sh set ln_cl_${CHAIN}net_peers "${ln_cl_peers}"
-          /home/admin/config.scripts/blitz.cache.sh set ln_cl_${CHAIN}net_sync_chain "${ln_cl_sync_chain}"
-          /home/admin/config.scripts/blitz.cache.sh set ln_cl_${CHAIN}net_channels_pending "${ln_cl_channels_pending}"
-          /home/admin/config.scripts/blitz.cache.sh set ln_cl_${CHAIN}net_channels_active "${ln_cl_channels_active}"
-          /home/admin/config.scripts/blitz.cache.sh set ln_cl_${CHAIN}net_channels_inactive "${ln_cl_channels_inactive}"
-          /home/admin/config.scripts/blitz.cache.sh set ln_cl_${CHAIN}net_channels_total "${ln_cl_channels_total}"
-          /home/admin/config.scripts/blitz.cache.sh set ln_cl_${CHAIN}net_fees_total "${ln_cl_fees_total}"
+          /home/admin/_cache.sh set ln_cl_${CHAIN}net_alias "${ln_cl_alias}"
+          /home/admin/_cache.sh set ln_cl_${CHAIN}net_address "${ln_cl_address}"
+          /home/admin/_cache.sh set ln_cl_${CHAIN}net_tor "${ln_cl_tor}"
+          /home/admin/_cache.sh set ln_cl_${CHAIN}net_peers "${ln_cl_peers}"
+          /home/admin/_cache.sh set ln_cl_${CHAIN}net_sync_chain "${ln_cl_sync_chain}"
+          /home/admin/_cache.sh set ln_cl_${CHAIN}net_channels_pending "${ln_cl_channels_pending}"
+          /home/admin/_cache.sh set ln_cl_${CHAIN}net_channels_active "${ln_cl_channels_active}"
+          /home/admin/_cache.sh set ln_cl_${CHAIN}net_channels_inactive "${ln_cl_channels_inactive}"
+          /home/admin/_cache.sh set ln_cl_${CHAIN}net_channels_total "${ln_cl_channels_total}"
+          /home/admin/_cache.sh set ln_cl_${CHAIN}net_fees_total "${ln_cl_fees_total}"
 
           if [ "${isDefaultLightning}" == "1" ] && [ "${isDefaultChain}" == "1" ]; then
-            /home/admin/config.scripts/blitz.cache.sh set ln_default_alias "${ln_cl_alias}"
-            /home/admin/config.scripts/blitz.cache.sh set ln_default_address "${ln_cl_address}"
-            /home/admin/config.scripts/blitz.cache.sh set ln_default_tor "${ln_cl_tor}"
-            /home/admin/config.scripts/blitz.cache.sh set ln_default_peers "${ln_cl_fees_total}"
-            /home/admin/config.scripts/blitz.cache.sh set ln_default_sync_chain "${ln_cl_sync_chain}"
-            /home/admin/config.scripts/blitz.cache.sh set ln_default_hannels_pending "${ln_cl_channels_pending}"
-            /home/admin/config.scripts/blitz.cache.sh set ln_default_channels_active "${ln_cl_channels_active}"
-            /home/admin/config.scripts/blitz.cache.sh set ln_default_channels_inactive "${ln_cl_channels_inactive}"
-            /home/admin/config.scripts/blitz.cache.sh set ln_default_channels_total "${ln_cl_channels_total}"
-            /home/admin/config.scripts/blitz.cache.sh set ln_default_fees_total "${ln_cl_fees_total}"
+            /home/admin/_cache.sh set ln_default_alias "${ln_cl_alias}"
+            /home/admin/_cache.sh set ln_default_address "${ln_cl_address}"
+            /home/admin/_cache.sh set ln_default_tor "${ln_cl_tor}"
+            /home/admin/_cache.sh set ln_default_peers "${ln_cl_fees_total}"
+            /home/admin/_cache.sh set ln_default_sync_chain "${ln_cl_sync_chain}"
+            /home/admin/_cache.sh set ln_default_hannels_pending "${ln_cl_channels_pending}"
+            /home/admin/_cache.sh set ln_default_channels_active "${ln_cl_channels_active}"
+            /home/admin/_cache.sh set ln_default_channels_inactive "${ln_cl_channels_inactive}"
+            /home/admin/_cache.sh set ln_default_channels_total "${ln_cl_channels_total}"
+            /home/admin/_cache.sh set ln_default_fees_total "${ln_cl_fees_total}"
           fi
         else
           echo "!! ERROR --> ${error}"
@@ -640,21 +640,21 @@ do
       fi
 
       # check if wallet needs update
-      source <(/home/admin/config.scripts/blitz.cache.sh valid ln_cl_${CHAIN}net_wallet_onchain_balance ln_cl_${CHAIN}net_wallet_onchain_pending ln_cl_${CHAIN}net_wallet_channels_balance ln_cl_${CHAIN}net_wallet_channels_pending)
+      source <(/home/admin/_cache.sh valid ln_cl_${CHAIN}net_wallet_onchain_balance ln_cl_${CHAIN}net_wallet_onchain_pending ln_cl_${CHAIN}net_wallet_channels_balance ln_cl_${CHAIN}net_wallet_channels_pending)
       if [ "${stillvalid}" == "0" ] || [ ${age} -gt 22 ]; then
         error=""
         echo "updating: /home/admin/config.scripts/cl.monitor.sh ${CHAIN}net wallet"
         source <(/home/admin/config.scripts/cl.monitor.sh ${CHAIN}net wallet)
         if [ "${error}" == "" ]; then
-          /home/admin/config.scripts/blitz.cache.sh set ln_cl_${CHAIN}net_wallet_onchain_balance "${ln_cl_wallet_onchain_balance}"
-          /home/admin/config.scripts/blitz.cache.sh set ln_cl_${CHAIN}net_wallet_onchain_pending "${ln_cl_wallet_onchain_pending}"
-          /home/admin/config.scripts/blitz.cache.sh set ln_cl_${CHAIN}net_wallet_channels_balance "${ln_cl_wallet_channels_balance}"
-          /home/admin/config.scripts/blitz.cache.sh set ln_cl_${CHAIN}net_wallet_channels_pending "${ln_cl_wallet_channels_pending}"
+          /home/admin/_cache.sh set ln_cl_${CHAIN}net_wallet_onchain_balance "${ln_cl_wallet_onchain_balance}"
+          /home/admin/_cache.sh set ln_cl_${CHAIN}net_wallet_onchain_pending "${ln_cl_wallet_onchain_pending}"
+          /home/admin/_cache.sh set ln_cl_${CHAIN}net_wallet_channels_balance "${ln_cl_wallet_channels_balance}"
+          /home/admin/_cache.sh set ln_cl_${CHAIN}net_wallet_channels_pending "${ln_cl_wallet_channels_pending}"
           if [ "${isDefaultLightning}" == "1" ] && [ "${isDefaultChain}" == "1" ]; then
-            /home/admin/config.scripts/blitz.cache.sh set ln_default_wallet_onchain_balance "${ln_cl_wallet_onchain_balance}"
-            /home/admin/config.scripts/blitz.cache.sh set ln_default_wallet_onchain_pending "${ln_cl_wallet_onchain_pending}"
-            /home/admin/config.scripts/blitz.cache.sh set ln_default_wallet_channels_balance "${ln_cl_wallet_channels_balance}"
-            /home/admin/config.scripts/blitz.cache.sh set ln_default_wallet_channels_pending "${ln_cl_wallet_channels_pending}"
+            /home/admin/_cache.sh set ln_default_wallet_onchain_balance "${ln_cl_wallet_onchain_balance}"
+            /home/admin/_cache.sh set ln_default_wallet_onchain_pending "${ln_cl_wallet_onchain_pending}"
+            /home/admin/_cache.sh set ln_default_wallet_channels_balance "${ln_cl_wallet_channels_balance}"
+            /home/admin/_cache.sh set ln_default_wallet_channels_pending "${ln_cl_wallet_channels_pending}"
           fi
         else
           echo "!! ERROR --> ${error}"
@@ -671,13 +671,13 @@ do
   runTime=$((${endTime}-${startTime}))
 
   # write info on scan runtime into cache (use as signal that the first systemscan worked)
-  /home/admin/config.scripts/blitz.cache.sh set systemscan_runtime "${runTime}"
+  /home/admin/_cache.sh set systemscan_runtime "${runTime}"
   echo "SystemScan Loop done in ${runTime} seconds"
 
   # log warning if script took too long
   if [ ${runTime} -gt ${MINUTE} ]; then
     echo "WARNING: HANGING SYSTEM ... systemscan loop took too long (${runTime} seconds)!" 1>&2
-    /home/admin/config.scripts/blitz.cache.sh increment system_count_longscan
+    /home/admin/_cache.sh increment system_count_longscan
   fi
 
   # small sleep before next loop

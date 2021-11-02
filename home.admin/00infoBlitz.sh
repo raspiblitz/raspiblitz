@@ -15,7 +15,7 @@ source /home/admin/raspiblitz.info 2>/dev/null
 source /mnt/hdd/raspiblitz.conf 2>/dev/null
 
 # get values from cache
-source <(/home/admin/config.scripts/blitz.cache.sh get codeVersion undervoltageReports)
+source <(/home/admin/_cache.sh get codeVersion undervoltageReports)
 
 ## get HDD/SSD info
 source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)

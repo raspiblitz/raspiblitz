@@ -13,7 +13,7 @@ source /mnt/hdd/raspiblitz.conf 2>/dev/null
 # INFOFILE - state data from bootstrap
 infoFile="/home/admin/raspiblitz.info"
 source ${infoFile}
-source <(/home/admin/config.scripts/blitz.cache.sh get state message)
+source <(/home/admin/_cache.sh get state message)
 
 # check that basic system phase/state information is available
 if [ "${setupPhase}" == "" ] || [ "${state}" == "" ]; then
@@ -86,7 +86,7 @@ do
   # Access fresh system info on every loop
 
   # refresh system state information
-  source <(/home/admin/config.scripts/blitz.cache.sh get state message)
+  source <(/home/admin/_cache.sh get state message)
 
   # gather fresh status scan and store results in memory
   # TODO: move this into background loop and unify with redis data storage later

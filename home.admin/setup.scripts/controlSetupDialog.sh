@@ -17,7 +17,7 @@ echo "# RASPIBLITZ SETUP STATE" > $SETUPFILE
 sudo chown admin:admin $SETUPFILE
 sudo chmod 777 $SETUPFILE
 
-source <(/home/admin/config.scripts/blitz.cache.sh get setupPhase dnsworking)
+source <(/home/admin/_cache.sh get setupPhase dnsworking)
 
 # remember original setupphase
 orgSetupPhase="${setupPhase}"
@@ -39,7 +39,7 @@ if [ "${setupPhase}" == "update" ]; then
     echo "setPasswordA=1" >> $SETUPFILE
   else
     # default to normal setup options
-    /home/admin/config.scripts/blitz.cache.sh set setupPhase "setup"
+    /home/admin/_cache.sh set setupPhase "setup"
     echo "# you refused recovery option - defaulting to normal setup menu"
   fi
 fi
@@ -55,7 +55,7 @@ if [ "${setupPhase}" == "recovery" ]; then
     echo "setPasswordA=1" >> $SETUPFILE
   else
     # default to normal setup options
-    /home/admin/config.scripts/blitz.cache.sh set setupPhase "setup"
+    /home/admin/_cache.sh set setupPhase "setup"
     echo "# you refused recovery option - defaulting to normal setup menu"
   fi
 fi
@@ -75,14 +75,14 @@ if [ "${setupPhase}" == "migration" ]; then
     echo "setPasswordC=1" >> $SETUPFILE
   else
     # on cancel - default to normal setup
-    /home/admin/config.scripts/blitz.cache.sh set setupPhase "setup"
+    /home/admin/_cache.sh set setupPhase "setup"
     echo "# you refused node migration option - defaulting to normal setup"
     exit 1
   fi
 
 fi
 
-source <(/home/admin/config.scripts/blitz.cache.sh get setupPhase)
+source <(/home/admin/_cache.sh get setupPhase)
 
 ############################################
 # DEFAULT: Basic Setup menu
@@ -96,7 +96,7 @@ if [ "${setupPhase}" == "setup" ]; then
   # menu RECOVER menu option
   if [ "${menuresult}" == "4" ]; then
     setupPhase="${orgSetupPhase}"
-    /home/admin/config.scripts/blitz.cache.sh set setupPhase "${setupPhase}"
+    /home/admin/_cache.sh set setupPhase "${setupPhase}"
     # proceed with provision (mark Password A to be set)
     echo "# OK update process starting .."
     echo "setPasswordA=1" >> $SETUPFILE
@@ -105,7 +105,7 @@ if [ "${setupPhase}" == "setup" ]; then
   # menu MIGRATE menu option
   if [ "${menuresult}" == "5" ]; then
     setupPhase="${orgSetupPhase}"
-    /home/admin/config.scripts/blitz.cache.sh set setupPhase "${setupPhase}"
+    /home/admin/_cache.sh set setupPhase "${setupPhase}"
     # mark migration to happen on provision
     echo "migrationOS='${hddGotMigrationData}'" >> $SETUPFILE
     # user needs to reset password A, B & C
@@ -129,7 +129,7 @@ if [ "${setupPhase}" == "setup" ]; then
   # FORMAT DRIVE on NEW SETUP or MIGRATION UPLOAD 
   if [ "${menuresult}" == "0" ] || [ "${menuresult}" == "1" ]; then
 
-    source <(/home/admin/config.scripts/blitz.cache.sh get hddGotMigrationData hddBlocksBitcoin hddBlocksLitecoin hddCandidate)
+    source <(/home/admin/_cache.sh get hddGotMigrationData hddBlocksBitcoin hddBlocksLitecoin hddCandidate)
 
     # check if there is a blockchain to use (so HDD is already formatted)
     # thats also true if the node is coming from another nodeOS
@@ -331,7 +331,7 @@ echo "# Starting passwords dialog ..."
 /home/admin/setup.scripts/dialogPasswords.sh
 
 # set flag for bootstrap process to kick-off provision process
-/home/admin/config.scripts/blitz.cache.sh set state "waitprovision"
+/home/admin/_cache.sh set state "waitprovision"
   
 clear
 echo "# setup dialog done - results in:"

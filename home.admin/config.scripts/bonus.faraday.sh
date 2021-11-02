@@ -24,7 +24,7 @@ mode="$1"
 
 # GATHER DATA
 source /home/admin/raspiblitz.info
-source <(/home/admin/config.scripts/blitz.cache.sh get state)
+source <(/home/admin/_cache.sh get state)
 source /mnt/hdd/raspiblitz.conf
 
 # setting download directory

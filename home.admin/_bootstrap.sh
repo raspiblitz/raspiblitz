@@ -72,14 +72,14 @@ cat $infoFile >> $logFile
 echo "## INIT RaspiBlitz Cache" >> $logFile
 
 # setting basic status info
-/home/admin/config.scripts/blitz.cache.sh set state "starting"
-/home/admin/config.scripts/blitz.cache.sh set message "bootstrap"
+/home/admin/_cache.sh set state "starting"
+/home/admin/_cache.sh set message "bootstrap"
 
 # try to load config values if available (config overwrites info)
 source ${configFile} 2>/dev/null
 
 # monitor LAN connection fast to display local IP changes
-/home/admin/config.scripts/blitz.cache.sh outdate internet_localip 0
+/home/admin/_cache.sh outdate internet_localip 0
 
 ######################################
 # CHECK SD CARD INCONSISTENT STATE
@@ -93,8 +93,8 @@ if [ "${flagExists}" == "1" ]; then
   # remove flag
   sudo rm /boot/stop
   # set state info
-  /home/admin/config.scripts/blitz.cache.sh set state "stop"
-  /home/admin/config.scripts/blitz.cache.sh set message "stopped for manual provision"
+  /home/admin/_cache.sh set state "stop"
+  /home/admin/_cache.sh set message "stopped for manual provision"
   # log info
   echo "INFO: 'bootstrap stopped - run release after manual provison'" >> ${logFile}
   exit 0
@@ -104,8 +104,8 @@ fi
 provisionFlagExists=$(sudo ls /home/admin/provision.flag | grep -c 'provision.flag')
 if [ "${provisionFlagExists}" == "1" ]; then
   sudo systemctl stop ${network}d 2>/dev/null
-  /home/admin/config.scripts/blitz.cache.sh set state "inconsistentsystem"
-  /home/admin/config.scripts/blitz.cache.sh set message "provision did not ran thru"
+  /home/admin/_cache.sh set state "inconsistentsystem"
+  /home/admin/_cache.sh set message "provision did not ran thru"
   echo "FAIL: 'provision did not ran thru' - need fresh sd card!" >> ${logFile}
   exit 1
 fi
@@ -129,7 +129,7 @@ if [ ${forceHDMIoutput} -eq 1 ]; then
   echo "HDMI switch found ... activating HDMI display output & reboot" >> $logFile
   sudo /home/admin/config.scripts/blitz.display.sh set-display hdmi >> $logFile
   systemInitReboot=1
-  /home/admin/config.scripts/blitz.cache.sh set message "HDMI"
+  /home/admin/_cache.sh set message "HDMI"
 else
   echo "No HDMI switch found. " >> $logFile
 fi
@@ -144,12 +144,12 @@ if [ "${needsExpansion}" == "1" ] && [ "${fsexpanded}" == "0" ]; then
   sudo /home/admin/config.scripts/blitz.bootdrive.sh status >> $logFile
   sudo /home/admin/config.scripts/blitz.bootdrive.sh fsexpand >> $logFile
   systemInitReboot=1
-  /home/admin/config.scripts/blitz.cache.sh set message "FSEXPAND"
+  /home/admin/_cache.sh set message "FSEXPAND"
 elif [ "${tooSmall}" == "1" ]; then
   echo "!!! FAIL !!!!!!!!!!!!!!!!!!!!" >> $logFile
   echo "SDCARD TOO SMALL 16G minimum" >> $logFile
   echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" >> $logFile
-  /home/admin/config.scripts/blitz.cache.sh set state "sdtoosmall"
+  /home/admin/_cache.sh set state "sdtoosmall"
   echo "System stopped. Please cut power." >> $logFile
   sleep 6000
   sudo shutdown -r now
@@ -191,7 +191,7 @@ if [ ${logsMegaByte} -gt 1000 ]; then
   # dont delete directories - can make services crash
   sudo rm /var/log/*
   sudo service rsyslog restart
-  /home/admin/config.scripts/blitz.cache.sh set message "WARNING: /var/log/ >1GB"
+  /home/admin/_cache.sh set message "WARNING: /var/log/ >1GB"
   echo "WARN !! Logs in /var/log in were bigger then 1GB and got emergency delete to prevent fillup." >> $logFile
   echo "If you see this in the logs please report to the GitHub issues, so LOG config needs to be optimized." >> $logFile
   sleep 10
@@ -223,11 +223,11 @@ do
   # in case of HDD analyse ERROR
   if [ "${hddError}" != "" ]; then
     echo "FAIL - error on HDD analysis: ${hddError}" >> $logFile
-    /home/admin/config.scripts/blitz.cache.sh set state "errorHDD"
-    /home/admin/config.scripts/blitz.cache.sh set message "${hddError}"
+    /home/admin/_cache.sh set state "errorHDD"
+    /home/admin/_cache.sh set message "${hddError}"
   elif [ "${isMounted}" == "0" ] && [ "${hddCandidate}" == "" ]; then
-    /home/admin/config.scripts/blitz.cache.sh set state "noHDD"
-    /home/admin/config.scripts/blitz.cache.sh set message ">=1TB"
+    /home/admin/_cache.sh set state "noHDD"
+    /home/admin/_cache.sh set message ">=1TB"
   fi
 
   # wait for next check
@@ -237,8 +237,8 @@ done
 echo "HDD/SSD connected: ${$hddCandidate}" >> $logFile
 
 # write info for LCD
-/home/admin/config.scripts/blitz.cache.sh set state "system-init"
-/home/admin/config.scripts/blitz.cache.sh set message "please wait"
+/home/admin/_cache.sh set state "system-init"
+/home/admin/_cache.sh set message "please wait"
 
 # now that HDD/SSD is connected ... if relevant data from a previous RaspiBlitz was available
 # /var/cache/raspiblitz/hdd-inspect exists with copy of config data to init system with
@@ -286,7 +286,7 @@ if [ ${sshReset} -eq 1 ]; then
   /home/admin/config.scripts/blitz.ssh.sh renew >> $logFile
   /home/admin/config.scripts/blitz.ssh.sh backup >> $logFile
   systemInitReboot=1
-  /home/admin/config.scripts/blitz.cache.sh set message "SSHRESET"
+  /home/admin/_cache.sh set message "SSHRESET"
 else
   echo "No SSHRESET switch found. " >> $logFile
 fi
@@ -324,7 +324,7 @@ fi
 ################################
 # UASP FIX
 ################################
-/home/admin/config.scripts/blitz.cache.sh set message "checking HDD"
+/home/admin/_cache.sh set message "checking HDD"
 source <(sudo /home/admin/config.scripts/blitz.datadrive.sh uasp-fix)
 if [ "${neededReboot}" == "1" ]; then
   echo "UASP FIX applied ... reboot needed." >> $logFile
@@ -339,7 +339,7 @@ fi
 
 if [ "${systemInitReboot}" == "1" ]; then
   sudo cp ${logFile} /home/admin/raspiblitz.systeminit.log
-  /home/admin/config.scripts/blitz.cache.sh set state "reboot"
+  /home/admin/_cache.sh set state "reboot"
   sleep 8
   sudo shutdown -r now
   sleep 100
@@ -360,22 +360,22 @@ do
   # check state of network
   if [ ${dhcp} -eq 0 ]; then
     # display user waiting for DHCP
-    /home/admin/config.scripts/blitz.cache.sh set state "noDHCP"
-    /home/admin/config.scripts/blitz.cache.sh set message "Waiting for DHCP"
+    /home/admin/_cache.sh set state "noDHCP"
+    /home/admin/_cache.sh set message "Waiting for DHCP"
   elif [ ${#localip} -eq 0 ]; then
     if [ ${configWifiExists} -eq 0 ]; then
       # display user to connect LAN
-      /home/admin/config.scripts/blitz.cache.sh set state "noIP-LAN"
-      /home/admin/config.scripts/blitz.cache.sh set message "Connect the LAN/WAN"
+      /home/admin/_cache.sh set state "noIP-LAN"
+      /home/admin/_cache.sh set message "Connect the LAN/WAN"
     else
       # display user that wifi settings are not working
-      /home/admin/config.scripts/blitz.cache.sh set state "noIP-WIFI"
-      /home/admin/config.scripts/blitz.cache.sh set message "WIFI Settings not working"
+      /home/admin/_cache.sh set state "noIP-WIFI"
+      /home/admin/_cache.sh set message "WIFI Settings not working"
     fi
   elif [ ${online} -eq 0 ]; then
     # display user that wifi settings are not working
-    /home/admin/config.scripts/blitz.cache.sh set state "noInternet"
-    /home/admin/config.scripts/blitz.cache.sh set message "No connection to Internet"
+    /home/admin/_cache.sh set state "noInternet"
+    /home/admin/_cache.sh set message "No connection to Internet"
   else
     gotLocalIP=1
   fi
@@ -383,8 +383,8 @@ do
 done
 
 # write info for LCD
-/home/admin/config.scripts/blitz.cache.sh set state "inspect-hdd"
-/home/admin/config.scripts/blitz.cache.sh set message "please wait"
+/home/admin/_cache.sh set state "inspect-hdd"
+/home/admin/_cache.sh set message "please wait"
 
 # get fresh info about data drive to continue
 source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
@@ -411,11 +411,11 @@ if [ ${isMounted} -eq 0 ]; then
   echo "Temp mounting (1) result: ${isMounted}" >> $logFile
 
   # write data needed for setup process into raspiblitz.info
-  /home/admin/config.scripts/blitz.cache.sh set hddCandidate "${hddCandidate}"
-  /home/admin/config.scripts/blitz.cache.sh set hddGigaBytes "${hddGigaBytes}"
-  /home/admin/config.scripts/blitz.cache.sh set hddBlocksBitcoin "${hddBlocksBitcoin}"
-  /home/admin/config.scripts/blitz.cache.sh set hddBlocksLitecoin "${hddBlocksLitecoin}"
-  /home/admin/config.scripts/blitz.cache.sh set hddGotMigrationData "${hddGotMigrationData}"
+  /home/admin/_cache.sh set hddCandidate "${hddCandidate}"
+  /home/admin/_cache.sh set hddGigaBytes "${hddGigaBytes}"
+  /home/admin/_cache.sh set hddBlocksBitcoin "${hddBlocksBitcoin}"
+  /home/admin/_cache.sh set hddBlocksLitecoin "${hddBlocksLitecoin}"
+  /home/admin/_cache.sh set hddGotMigrationData "${hddGotMigrationData}"
   echo ""
   echo "HDD is there but not AutoMounted yet - Waiting for user Setup/Update" >> $logFile
 
@@ -450,9 +450,9 @@ if [ ${isMounted} -eq 0 ]; then
 
   # signal "WAIT LOOP: SETUP" to LCD, SSH & WEBAPI
   echo "Displaying Info Message: ${infoMessage}" >> $logFile
-  /home/admin/config.scripts/blitz.cache.sh set state "waitsetup"
-  /home/admin/config.scripts/blitz.cache.sh set message "${infoMessage}"
-  /home/admin/config.scripts/blitz.cache.sh set setupPhase "${setupPhase}"
+  /home/admin/_cache.sh set state "waitsetup"
+  /home/admin/_cache.sh set message "${infoMessage}"
+  /home/admin/_cache.sh set setupPhase "${setupPhase}"
 
   #############################################
   # WAIT LOOP: USER SETUP/UPDATE/MIGRATION
@@ -488,7 +488,7 @@ if [ ${isMounted} -eq 0 ]; then
     sleep 4
 
     # check for updated state value from SSH-UI or WEB-UI for loop
-    source <(/home/admin/config.scripts/blitz.cache.sh get state)
+    source <(/home/admin/_cache.sh get state)
 
   done
 
@@ -497,7 +497,7 @@ if [ ${isMounted} -eq 0 ]; then
   #############################################
 
   # refresh data from info file
-  source <(/home/admin/config.scripts/blitz.cache.sh get state setupPhase)
+  source <(/home/admin/_cache.sh get state setupPhase)
   echo "# PROVISION PROCESS with setupPhase(${setupPhase})" >> ${logFile}
 
   # mark system on sd card as in setup process
@@ -531,8 +531,8 @@ if [ ${isMounted} -eq 0 ]; then
   fi
 
   # kick-off provision process
-  /home/admin/config.scripts/blitz.cache.sh set state "provision"
-  /home/admin/config.scripts/blitz.cache.sh set message "Starting Provision"
+  /home/admin/_cache.sh set state "provision"
+  /home/admin/_cache.sh set message "Starting Provision"
 
   # add some debug info to logfile
   echo "# df " >> ${logFile}
@@ -556,7 +556,7 @@ if [ ${isMounted} -eq 0 ]; then
 
     # signal recovery provision phase
     setupPhase="recovery"
-    /home/admin/config.scripts/blitz.cache.sh set setupPhase "${setupPhase}"
+    /home/admin/_cache.sh set setupPhase "${setupPhase}"
   fi
 
   # load fresh config data
@@ -570,9 +570,9 @@ if [ ${isMounted} -eq 0 ]; then
   source ${setupFile}
 
   # make sure basic info is in raspiblitz.info
-  /home/admin/config.scripts/blitz.cache.sh set network "${network}"
-  /home/admin/config.scripts/blitz.cache.sh set chain "${chain}"
-  /home/admin/config.scripts/blitz.cache.sh set lightning "${lightning}"
+  /home/admin/_cache.sh set network "${network}"
+  /home/admin/_cache.sh set chain "${chain}"
+  /home/admin/_cache.sh set lightning "${lightning}"
 
   ###################################
   # Set Password A (in all cases)
@@ -594,7 +594,7 @@ if [ ${isMounted} -eq 0 ]; then
     sudo cat /home/admin/raspiblitz.provision-setup.log
     if [ "$errorState" != "0" ]; then
       # only trigger an error message if the script hasnt itself triggered an error message already
-      source <(/home/admin/config.scripts/blitz.cache.sh get state)
+      source <(/home/admin/_cache.sh get state)
       if [ "${state}" != "error" ]; then
         /home/admin/config.scripts/blitz.error.sh _bootstrap.sh "provision-setup-exit" "unknown or syntax error on (${errorState}) _provision.setup.sh" "" ${logFile}
       fi
@@ -611,7 +611,7 @@ if [ ${isMounted} -eq 0 ]; then
     cat /home/admin/raspiblitz.provision-migration.log
     if [ "$errorState" != "0" ]; then
       # only trigger an error message if the script hasnt itself triggered an error message already
-      source <(/home/admin/config.scripts/blitz.cache.sh get state)
+      source <(/home/admin/_cache.sh get state)
       if [ "${state}" != "error" ]; then
         /home/admin/config.scripts/blitz.error.sh _bootstrap.sh "provision-migration-exit" "unknown or syntax error on (${errorState}) _provision.migration.sh" "" ${logFile}
       fi
@@ -628,7 +628,7 @@ if [ ${isMounted} -eq 0 ]; then
     cat /home/admin/raspiblitz.provision-update.log
     if [ "$errorState" != "0" ]; then
       # only trigger an error message if the script hasnt itself triggered an error message already
-      source <(/home/admin/config.scripts/blitz.cache.sh get state)
+      source <(/home/admin/_cache.sh get state)
       if [ "${state}" != "error" ]; then
         /home/admin/config.scripts/blitz.error.sh _bootstrap.sh "provision-update-exit" "unknown or syntax error on (${errorState}) _provision.update.sh" "" ${logFile}
       fi
@@ -643,7 +643,7 @@ if [ ${isMounted} -eq 0 ]; then
   errorState=$?
   if [ "$errorState" != "0" ]; then
     # only trigger an error message if the script hasnt itself triggered an error message already
-    source <(/home/admin/config.scripts/blitz.cache.sh get state)
+    source <(/home/admin/_cache.sh get state)
     if [ "${state}" != "error" ]; then
       /home/admin/config.scripts/blitz.error.sh _bootstrap.sh "provision-exit" "unknown or syntax error on (${errorState}) _provision_.sh" "" ${logFile}
     fi
@@ -659,14 +659,14 @@ if [ ${isMounted} -eq 0 ]; then
   rm /home/admin/provision.flag
 
   # mark provision process done
-  /home/admin/config.scripts/blitz.cache.sh set message "Provision Done"
+  /home/admin/_cache.sh set message "Provision Done"
 
   # wait until syncProgress is available (neeed for final dialogs)
   while [ "${syncProgress}" == "" ]
   do
     echo "# Waiting for blockchain sync progress info ..." >> $logFile
     source <(sudo /home/admin/config.scripts/blitz.statusscan.sh)
-    /home/admin/config.scripts/blitz.cache.sh set state "waitsync"
+    /home/admin/_cache.sh set state "waitsync"
     sleep 2
   done
 
@@ -675,8 +675,8 @@ if [ ${isMounted} -eq 0 ]; then
   ###################################################
 
   echo "# HANDOVER TO FINAL SETUP CONTROLLER ..." >> $logFile
-  /home/admin/config.scripts/blitz.cache.sh set state "waitfinal"
-  /home/admin/config.scripts/blitz.cache.sh set message "Setup Done"
+  /home/admin/_cache.sh set state "waitfinal"
+  /home/admin/_cache.sh set message "Setup Done"
 
   # system has to wait before reboot to present like seed words and other info/options to user
   echo "BOOTSTRAP EXIT ... waiting for final setup controller to initiate final reboot." >> $logFile
@@ -721,7 +721,7 @@ fi
 ##############################
 # BOOSTRAP IN EVERY SITUATION
 ##############################
-/home/admin/config.scripts/blitz.cache.sh set setupPhase "starting"
+/home/admin/_cache.sh set setupPhase "starting"
 
 # load data from config file fresh
 echo "load configfile data" >> $logFile
@@ -803,12 +803,12 @@ fi
 sudo systemctl enable ${network}d
 
 # make sure setup/provision is marked as done
-/home/admin/config.scripts/blitz.cache.sh set setupPhase "done"
-/home/admin/config.scripts/blitz.cache.sh set state "ready"
-/home/admin/config.scripts/blitz.cache.sh set message "Node Running"
+/home/admin/_cache.sh set setupPhase "done"
+/home/admin/_cache.sh set state "ready"
+/home/admin/_cache.sh set message "Node Running"
 
 # relax systemscan on certain values
-/home/admin/config.scripts/blitz.cache.sh outdate internet_localip 5
+/home/admin/_cache.sh outdate internet_localip 5
 
 echo "DONE BOOTSTRAP" >> $logFile
 exit 0

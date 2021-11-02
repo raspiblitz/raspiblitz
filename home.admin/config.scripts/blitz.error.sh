@@ -28,8 +28,8 @@ if [ "${shortcode}" == "" ]; then
 fi
 
 # set error info in cache system state (for DISPLAY on lcd, report to webui, etc)
-/home/admin/config.scripts/blitz.cache.sh set state "error"
-/home/admin/config.scripts/blitz.cache.sh set message "${shortcode}"
+/home/admin/_cache.sh set state "error"
+/home/admin/_cache.sh set message "${shortcode}"
 
 # prepare log error report
 dateStr=$(date)

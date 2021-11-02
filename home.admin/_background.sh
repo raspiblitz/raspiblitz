@@ -16,7 +16,7 @@ echo "_background.sh STARTED"
 
 # global vars
 blitzTUIHeartBeatLine=""
-/home/admin/config.scripts/blitz.cache.sh set blitzTUIRestarts "0"
+/home/admin/_cache.sh set blitzTUIRestarts "0"
 
 counter=0
 while [ 1 ]
@@ -42,7 +42,7 @@ do
   # source info & config file fresh on every loop
   source ${infoFile} 2>/dev/null
   source ${configFile} 2>/dev/null
-  source <(/home/admin/config.scripts/blitz.cache.sh get state setupPhase)
+  source <(/home/admin/_cache.sh get state setupPhase)
 
   ####################################################
   # SKIP BACKGROUND TASK LOOP ON CERTAIN SYSTEM STATES
@@ -242,9 +242,9 @@ do
       #echo "latestHeartBeatLine(${latestHeartBeatLine})"
       if [ "${blitzTUIHeartBeatLine}" == "${latestHeartBeatLine}" ]; then
         echo "FAIL - still no new heart beat .. restarting BlitzTUI"
-        source <(/home/admin/config.scripts/blitz.cache.sh get blitzTUIRestarts)
+        source <(/home/admin/_cache.sh get blitzTUIRestarts)
         blitzTUIRestarts=$(($blitzTUIRestarts +1))
-        /home/admin/config.scripts/blitz.cache.sh set blitzTUIRestarts "${blitzTUIRestarts}"
+        /home/admin/_cache.sh set blitzTUIRestarts "${blitzTUIRestarts}"
         init 3 ; sleep 2 ; init 5
       fi
     else

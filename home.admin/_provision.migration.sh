@@ -21,7 +21,7 @@ echo "" > ${logFile}
 echo "###################################" >> ${logFile}
 echo "# _provision.migration.sh" >> ${logFile}
 echo "###################################" >> ${logFile}
-/home/admin/config.scripts/blitz.cache.sh set message "Provision Migration"
+/home/admin/_cache.sh set message "Provision Migration"
 
 source <(/home/admin/config.scripts/blitz.datadrive.sh status)
 

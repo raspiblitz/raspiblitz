@@ -148,7 +148,7 @@ if [ "$2" = "info" ]; then
   cl_fees_collected_msat=$(echo "${ln_getInfo}" |  jq -r '.fees_collected_msat')
 
   # calculate with cached value if c-lightning is fully synced
-  source <(/home/admin/config.scripts/blitz.cache.sh get ${blockchainHeightKey})
+  source <(/home/admin/_cache.sh get ${blockchainHeightKey})
   #echo "#blockchainHeightKey(${!blockchainHeightKey})"
   blockheight="${!blockchainHeightKey}"
   #echo "#blockheight(${blockheight})"

@@ -18,7 +18,7 @@ fi
 source /mnt/hdd/raspiblitz.conf
 # get cpu architecture
 source /home/admin/raspiblitz.info
-source <(/home/admin/config.scripts/blitz.cache.sh get state)
+source <(/home/admin/_cache.sh get state)
 
 if [ "$1" = "status" ]; then
 

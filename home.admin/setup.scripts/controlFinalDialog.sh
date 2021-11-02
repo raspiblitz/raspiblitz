@@ -156,12 +156,12 @@ sudo systemctl daemon-reload 2>/dev/null
 sudo rm /var/cache/raspiblitz/temp/raspiblitz.setup
 
 # signal that setup phase is over
-/home/admin/config.scripts/blitz.cache.sh set setupPhase "done"
+/home/admin/_cache.sh set setupPhase "done"
 
 sleep 2
 clear
-source <(/home/admin/config.scripts/blitz.cache.sh get internet_localip)
-/home/admin/config.scripts/blitz.cache.sh set setupPhase "done"
+source <(/home/admin/_cache.sh get internet_localip)
+/home/admin/_cache.sh set setupPhase "done"
 echo "***********************************************************"
 echo "RaspiBlitz going to reboot"
 echo "***********************************************************"

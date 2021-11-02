@@ -34,7 +34,7 @@ if [ "$1" = "set" ]; then
   fi 
 
   # update config value in cache
-  /home/admin/config.scripts/blitz.cache.sh set ${keystr} "${valuestr}"
+  /home/admin/_cache.sh set ${keystr} "${valuestr}"
 
   # check that config file exists
   raspiblitzConfExists=$(ls ${configFile} 2>/dev/null | grep -c "${configFile}")

@@ -124,7 +124,7 @@ WantedBy=multi-user.target
   if [ ${isInstalled} -eq 1 ]; then
     echo
 
-    source <(/home/admin/config.scripts/blitz.cache.sh get state)
+    source <(/home/admin/_cache.sh get state)
     if [ "${state}" == "ready" ]; then
       echo "# OK - the circuitbreaker.service is enabled, system is on ready so starting service"
       sudo systemctl start circuitbreaker

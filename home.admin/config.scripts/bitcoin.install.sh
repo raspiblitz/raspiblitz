@@ -168,7 +168,7 @@ WantedBy=multi-user.target
     sudo chown admin:admin /home/admin/_aliases
   fi
 
-  source <(/home/admin/config.scripts/blitz.cache.sh get state)
+  source <(/home/admin/_cache.sh get state)
 
   if [ "${state}" == "ready" ]; then
     echo "# OK - the ${prefix}bitcoind.service is enabled, system is ready so starting service"

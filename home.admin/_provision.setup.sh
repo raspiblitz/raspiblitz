@@ -34,15 +34,15 @@ echo "###################################" >> ${logFile}
 # Preserve SSH keys
 # just copy dont link anymore
 # see: https://github.com/rootzoll/raspiblitz/issues/1798
-/home/admin/config.scripts/blitz.cache.sh set message "SSH Keys"
+/home/admin/_cache.sh set message "SSH Keys"
 
 # link ssh directory from SD card to HDD
 /home/admin/config.scripts/blitz.ssh.sh backup
 
 ###################################
 # Prepare Blockchain Service
-/home/admin/config.scripts/blitz.cache.sh set message "Blockchain Setup"
-source <(/home/admin/config.scripts/blitz.cache.sh get network chain hddBlocksBitcoin)
+/home/admin/_cache.sh set message "Blockchain Setup"
+source <(/home/admin/_cache.sh get network chain hddBlocksBitcoin)
 
 if [ "${network}" == "" ]; then
   /home/admin/config.scripts/blitz.error.sh _provision.setup.sh "missing-network" "" "" ${logFile}
@@ -128,7 +128,7 @@ echo "OK ${network} startup successful " >> ${logFile}
 
 ###################################
 # Prepare Lightning
-source <(/home/admin/config.scripts/blitz.cache.sh get lightning hostname)
+source <(/home/admin/_cache.sh get lightning hostname)
 echo "Prepare Lightning (${lightning})" >> ${logFile}
 
 if [ "${hostname}" == "" ]; then
@@ -141,7 +141,7 @@ if [ "${lightning}" != "lnd" ]; then
   ###################################
   # Remove LND from systemd
   echo "Remove LND" >> ${logFile}
-  /home/admin/config.scripts/blitz.cache.sh set message "Deactivate Lightning"
+  /home/admin/_cache.sh set message "Deactivate Lightning"
   sudo systemctl disable lnd
   sudo rm /etc/systemd/system/lnd.service 2>/dev/null
   sudo systemctl daemon-reload
@@ -152,7 +152,7 @@ if [ "${lightning}" == "lnd" ]; then
   ###################################
   # LND
   echo "############## Setup LND" >> ${logFile}
-  /home/admin/config.scripts/blitz.cache.sh set message "LND Setup"
+  /home/admin/_cache.sh set message "LND Setup"
 
   # password C (raspiblitz.setup)
   if [ "${passwordC}" == "" ]; then
@@ -190,7 +190,7 @@ if [ "${lightning}" == "lnd" ]; then
 
   # Init LND service & start
   echo "*** Init LND Service & Start ***" >> ${logFile}
-  /home/admin/config.scripts/blitz.cache.sh set message "LND Testrun"
+  /home/admin/_cache.sh set message "LND Testrun"
 
   # just in case
   sudo systemctl stop lnd 2>/dev/null
@@ -247,7 +247,7 @@ if [ "${lightning}" == "lnd" ]; then
   if [ "${seedWords}" != "" ] && [ "${staticchannelbackup}" != "" ]; then
 
     echo "WALLET --> SEED + SCB " >> ${logFile}
-    /home/admin/config.scripts/blitz.cache.sh set message "LND Wallet (SEED & SCB)"
+    /home/admin/_cache.sh set message "LND Wallet (SEED & SCB)"
     source <(/home/admin/config.scripts/lnd.initwallet.py scb mainnet ${passwordC} "${seedWords}" "${staticchannelbackup}" ${seedPassword})
     if [ "${err}" != "" ]; then
       /home/admin/config.scripts/blitz.error.sh _provision.setup.sh "lnd-wallet-seed+scb" "lnd.initwallet.py scb returned error" "/home/admin/config.scripts/lnd.initwallet.py scb mainnet ... --> ${err} + ${errMore}" ${logFile}
@@ -258,7 +258,7 @@ if [ "${lightning}" == "lnd" ]; then
   elif [ "${seedWords}" != "" ]; then
     
     echo "WALLET --> SEED" >> ${logFile} 
-    /home/admin/config.scripts/blitz.cache.sh set message "LND Wallet (SEED)"
+    /home/admin/_cache.sh set message "LND Wallet (SEED)"
     source <(/home/admin/config.scripts/lnd.initwallet.py seed mainnet ${passwordC} "${seedWords}" ${seedPassword})
     if [ "${err}" != "" ]; then
       /home/admin/config.scripts/blitz.error.sh _provision.setup.sh "lnd-wallet-seed" "lnd.initwallet.py seed returned error" "/home/admin/config.scripts/lnd.initwallet.py seed mainnet ... --> ${err} + ${errMore}" ${logFile}
@@ -269,12 +269,12 @@ if [ "${lightning}" == "lnd" ]; then
   else
 
     echo "WALLET --> NEW" >> ${logFile}
-    /home/admin/config.scripts/blitz.cache.sh set message "LND Wallet (NEW)"
+    /home/admin/_cache.sh set message "LND Wallet (NEW)"
     source <(/home/admin/config.scripts/lnd.initwallet.py new mainnet ${passwordC})
     if [ "${err}" != "" ]; then
       /home/admin/config.scripts/blitz.error.sh _provision.setup.sh "lnd-wallet-new" "lnd.initwallet.py new returned error" "/home/admin/config.scripts/lnd.initwallet.py new mainnet ... --> ${err} + ${errMore}" ${logFile}
-      /home/admin/config.scripts/blitz.cache.sh set state "error"
-      /home/admin/config.scripts/blitz.cache.sh set message "setup: lnd wallet NEW failed"
+      /home/admin/_cache.sh set state "error"
+      /home/admin/_cache.sh set message "setup: lnd wallet NEW failed"
       echo "FAIL see ${logFile}"
       echo "FAIL: setup: lnd wallet SEED failed (2)" >> ${logFile}
       echo "${err}" >> ${logFile}
@@ -290,7 +290,7 @@ if [ "${lightning}" == "lnd" ]; then
 
   # sync macaroons & TLS to other users
   echo "*** Copy LND Macaroons to user admin ***" >> ${logFile}
-  /home/admin/config.scripts/blitz.cache.sh set message "LND Credentials"
+  /home/admin/_cache.sh set message "LND Credentials"
 
   # check if macaroon exists now - if not fail
   macaroonExists=$(sudo -u bitcoin ls -la /home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon 2>/dev/null | grep -c admin.macaroon)
@@ -317,9 +317,9 @@ if [ "${lightning}" == "cl" ]; then
   # c-lightning
   echo "############## c-lightning" >> ${logFile}
 
-  /home/admin/config.scripts/blitz.cache.sh set message "C-Lightning Install"
+  /home/admin/_cache.sh set message "C-Lightning Install"
   sudo /home/admin/config.scripts/cl.install.sh on mainnet >> ${logFile}
-  /home/admin/config.scripts/blitz.cache.sh set message "C-Lightning Setup"
+  /home/admin/_cache.sh set message "C-Lightning Setup"
 
   # OLD WALLET FROM CLIGHTNING RESCUE
   if [ "${clrescue}" != "" ]; then
@@ -373,6 +373,6 @@ if [ "${lightning}" == "cl" ]; then
 
 fi
 
-/home/admin/config.scripts/blitz.cache.sh set message "Provision Setup Finish"
+/home/admin/_cache.sh set message "Provision Setup Finish"
 echo "END Setup"  >> ${logFile}
 exit 0

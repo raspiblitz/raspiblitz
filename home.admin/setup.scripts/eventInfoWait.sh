@@ -6,7 +6,7 @@
 source /home/admin/raspiblitz.info 2>/dev/null
 
 # get values from cache
-source <(/home/admin/config.scripts/blitz.cache.sh get codeVersion internet_localip)
+source <(/home/admin/_cache.sh get codeVersion internet_localip)
 
 # 1st PARAMETER: eventID
 # fixed ID string for a certain event
@@ -176,7 +176,7 @@ elif [ "${eventID}" == "waitsetup" ] && [ "${mode}" == "lcd" ]; then
     if [ "${setupPhase}" == "setup" ] || [ "${setupPhase}" == "update" ] || [ "${setupPhase}" == "recovery" ] || [ "${setupPhase}" == "migration" ]; then
 
         # get values from cache
-        source <(/home/admin/config.scripts/blitz.cache.sh get ramGB hddGigaBytes hddBlocksBitcoin hddBlocksLitecoin setupPhase)
+        source <(/home/admin/_cache.sh get ramGB hddGigaBytes hddBlocksBitcoin hddBlocksLitecoin setupPhase)
 
         # custom backtitle for this dialog
         backtitle="RaspiBlitz ${codeVersion}"

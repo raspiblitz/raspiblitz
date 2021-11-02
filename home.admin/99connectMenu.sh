@@ -5,7 +5,7 @@ echo "get raspiblitz config"
 source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
 
-source <(/home/admin/config.scripts/blitz.cache.sh get internet_localip internet_localiprange)
+source <(/home/admin/_cache.sh get internet_localip internet_localiprange)
 localIP="${internet_localip}"
 localIPrange="${internet_localiprange}"
 

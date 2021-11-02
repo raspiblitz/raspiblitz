@@ -433,7 +433,7 @@ WantedBy=multi-user.target
     bitcoindRestart=yes
   fi
   
-  source <(/home/admin/config.scripts/blitz.cache.sh get state)
+  source <(/home/admin/_cache.sh get state)
   if [ "${state}" == "ready" ]; then
     if [ "${bitcoindRestart}" == "yes" ]; then
       sudo systemctl restart bitcoind

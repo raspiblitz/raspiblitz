@@ -117,7 +117,7 @@ http-pass=${PASSWORD_B}
   # setting value in raspi blitz config
   /home/admin/config.scripts/blitz.conf.sh set clHTTPplugin "on"
 
-  source <(/home/admin/config.scripts/blitz.cache.sh get state)
+  source <(/home/admin/_cache.sh get state)
   if [ "${state}" == "ready" ] && [ "$2" != "norestart" ]; then
     echo "# Restart the lightningd.service to activate clHTTPplugin"
     sudo systemctl restart lightningd

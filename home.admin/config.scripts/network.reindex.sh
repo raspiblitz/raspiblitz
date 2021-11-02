@@ -13,7 +13,7 @@ source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
 
 # if re-index is not running, start ...
-source <(/home/admin/config.scripts/blitz.cache.sh get state)
+source <(/home/admin/_cache.sh get state)
 if [ "${state}" != "reindex" ]; then
 
   # stop services

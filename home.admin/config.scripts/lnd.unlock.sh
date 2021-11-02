@@ -27,7 +27,7 @@ if [ "${action}" == "chain-unlock" ]; then
 fi
 
 # dont if state is on reboot or shutdown
-source <(/home/admin/config.scripts/blitz.cache.sh get state)
+source <(/home/admin/_cache.sh get state)
 if [ "${state}" == "reboot" ] || [ "${state}" == "shutdown" ]; then
   echo "# ignore unlock - because system is in shutdown/reboot state"
   sleep 1

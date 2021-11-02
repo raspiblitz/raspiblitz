@@ -11,7 +11,7 @@ if [ $# -lt 2 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ];then
   exit 1
 fi
 
-source <(/home/admin/config.scripts/blitz.cache.sh get network)
+source <(/home/admin/_cache.sh get network)
 if [ "${network}" == "" ]; then
   network="bitcoin"
 fi
@@ -44,7 +44,7 @@ elif [ ${CHAIN} = mainnet ];then
 fi
 
 source /home/admin/raspiblitz.info
-source <(/home/admin/config.scripts/blitz.cache.sh get state)
+source <(/home/admin/_cache.sh get state)
 source /mnt/hdd/raspiblitz.conf
 
 function removeParallelService() {

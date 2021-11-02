@@ -725,8 +725,8 @@ sudo apt install -y --no-install-recommends python3-systemd fail2ban
 
 # *** CACHE DISK IN RAM & KEYVALUE-STORE***
 echo "Activating CACHE RAM DISK ... "
-sudo /home/admin/config.scripts/blitz.cache.sh ramdisk on
-sudo /home/admin/config.scripts/blitz.cache.sh keyvalue on
+sudo /home/admin/_cache.sh ramdisk on
+sudo /home/admin/_cache.sh keyvalue on
 
 # *** Wifi, Bluetooth & other configs ***
 if [ "${baseimage}" = "raspbian" ]||[ "${baseimage}" = "raspios_arm64"  ]||\

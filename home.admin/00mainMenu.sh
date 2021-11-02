@@ -32,7 +32,7 @@ confirmation()
 }
 
 # get the local network IP to be displayed on the LCD
-source <(/home/admin/config.scripts/blitz.cache.sh get internet_localip)
+source <(/home/admin/_cache.sh get internet_localip)
 
 if [ ${chain} = test ];then
   netprefix="t"
