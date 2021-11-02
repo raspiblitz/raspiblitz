@@ -20,7 +20,7 @@ fi
 if [ "$1" == "mainnet" ]; then
   clConfigDir="/home/bitcoin/.lightning"
   lightningcli_alias="/usr/local/bin/lightning-cli --lightning-dir=/home/bitcoin/.lightning --conf=${clConfigDir}/config"
-  blockchainHeightKey="btc_blocks_verified"
+  blockchainHeightKey="btc_mainnet_blocks_verified"
   netprefix=""
 elif [ "$1" == "testnet" ]; then
   clConfigDir="/home/bitcoin/.lightning/testnet"
