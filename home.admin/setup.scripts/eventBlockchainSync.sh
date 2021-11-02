@@ -27,7 +27,7 @@ width=45
 actionString="Please wait - this can take some time"
 
 # formatting BLOCKCHAIN SYNC PROGRESS
-if [ "${btc_default_ready}" == "0" ]; then
+if [ "${btc_default_ready}" == "0" ] || [ "${btc_default_peers}" == "" ]; then
     if [ ${system_count_start_blockchain} -gt 1 ]; then
         syncProgress="${system_count_start_blockchain} restarts"
     else
