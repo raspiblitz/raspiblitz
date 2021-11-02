@@ -100,7 +100,11 @@ echo "importing: _version.info"
 /home/admin/_cache.sh import /home/admin/_version.info
 
 # basic hardware info (will not change)
-source <(/home/admin/_cache.sh valid system_board system_ramMB system_ramMB)
+source <(/home/admin/_cache.sh valid \
+  system_board \
+  system_ramMB \
+  system_ramMB \
+)
 if [ "${stillvalid}" == "0" ]; then
   source <(/home/admin/config.scripts/blitz.hardware.sh status)
   /home/admin/_cache.sh set system_board "${board}"
@@ -192,7 +196,17 @@ do
   #################
   # DATADRIVE
 
-  source <(/home/admin/_cache.sh valid hdd_mounted hdd_ssd hdd_btrfs hdd_raid hdd_uasp hdd_capacity_bytes hdd_capacity_gb hdd_free_bytes hdd_free_gb hdd_used_info hdd_blockchain_data)
+  source <(/home/admin/_cache.sh valid \
+    hdd_mounted \
+    hdd_ssd hdd_btrfs \
+    hdd_raid hdd_uasp \
+    hdd_capacity_bytes \
+    hdd_capacity_gb \
+    hdd_free_bytes \
+    hdd_free_gb \
+    hdd_used_info \
+    hdd_blockchain_data \
+  )
   if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE2} ]; then
     echo "updating: /home/admin/config.scripts/blitz.datadrive.sh status"
     source <(/home/admin/config.scripts/blitz.datadrive.sh status)
@@ -213,7 +227,13 @@ do
   # INTERNET
 
   # basic local connection
-  source <(/home/admin/_cache.sh valid internet_localip internet_localiprange internet_dhcp internet_rx internet_tx)
+  source <(/home/admin/_cache.sh valid \
+    internet_localip \
+    internet_localiprange \
+    internet_dhcp \
+    internet_rx \
+    internet_tx \
+  )
   if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE} ]; then
     echo "updating: /home/admin/config.scripts/internet.sh status local"
     source <(/home/admin/config.scripts/internet.sh status local)
@@ -295,7 +315,14 @@ do
       fi
 
       # update basic status values always
-      source <(/home/admin/_cache.sh valid btc_${CHAIN}net_version btc_${CHAIN}net_running btc_${CHAIN}net_ready btc_${CHAIN}net_online  btc_${CHAIN}net_error_short btc_${CHAIN}net_error_full)
+      source <(/home/admin/_cache.sh valid \
+        btc_${CHAIN}net_version \
+        btc_${CHAIN}net_running \
+        btc_${CHAIN}net_ready \
+        btc_${CHAIN}net_online  \
+        btc_${CHAIN}net_error_short \
+        btc_${CHAIN}net_error_full \
+      )
       if [ "${stillvalid}" == "0" ] || [ ${age} -gt 10 ]; then
         echo "updating: /home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net status"
         source <(/home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net status)
@@ -324,23 +351,32 @@ do
       if [ "${value}" == "1" ]; then 
 
         # check if network needs update
-        source <(/home/admin/_cache.sh valid btc_${CHAIN}net_blocks_headers btc_${CHAIN}net_blocks_verified btc_${CHAIN}net_blocks_behind btc_${CHAIN}net_sync_progress btc_${CHAIN}net_sync_percentage)
+        source <(/home/admin/_cache.sh valid \
+          btc_${CHAIN}net_blocks_headers \
+          btc_${CHAIN}net_blocks_verified \
+          btc_${CHAIN}net_blocks_behind \
+          btc_${CHAIN}net_sync_progress \
+          btc_${CHAIN}net_sync_percentage \
+          btc_${CHAIN}net_sync_initialblockdownload \
+        )
         if [ "${stillvalid}" == "0" ] || [ ${age} -gt 30 ]; then
           error=""
-          echo "updating: /home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net blockchain"
-          source <(/home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net blockchain)
+          echo "updating: /home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net info"
+          source <(/home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net info)
           if [ "${error}" == "" ]; then
             /home/admin/_cache.sh set btc_${CHAIN}net_blocks_headers "${btc_blocks_headers}"
             /home/admin/_cache.sh set btc_${CHAIN}net_blocks_verified "${btc_blocks_verified}"
             /home/admin/_cache.sh set btc_${CHAIN}net_blocks_behind "${btc_blocks_behind}"
             /home/admin/_cache.sh set btc_${CHAIN}net_sync_progress "${btc_sync_progress}"
             /home/admin/_cache.sh set btc_${CHAIN}net_sync_percentage "${btc_sync_percentage}"
+            /home/admin/_cache.sh set btc_${CHAIN}net_sync_initialblockdownload "${btc_sync_initialblockdownload}"
             if [ "${isDefaultChain}" == "1" ]; then
               /home/admin/_cache.sh set btc_default_blocks_headers "${btc_blocks_headers}"
               /home/admin/_cache.sh set btc_default_blocks_verified "${btc_blocks_verified}"
               /home/admin/_cache.sh set btc_default_blocks_behind "${btc_blocks_behind}"
               /home/admin/_cache.sh set btc_default_sync_progress "${btc_sync_progress}"
               /home/admin/_cache.sh set btc_default_sync_percentage "${btc_sync_percentage}"
+              /home/admin/_cache.sh set btc_default_sync_initialblockdownload "${btc_sync_initialblockdownload}"
             fi
           else
             echo "!! ERROR --> ${error}"
@@ -348,7 +384,11 @@ do
         fi
 
         # check if network needs update
-        source <(/home/admin/_cache.sh valid btc_${CHAIN}net_peers btc_${CHAIN}net_address btc_${CHAIN}net_port)
+        source <(/home/admin/_cache.sh valid \
+          btc_${CHAIN}net_peers \
+          btc_${CHAIN}net_address \
+          btc_${CHAIN}net_port \
+        )
         if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE} ]; then
           error=""
           echo "updating: /home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net network"
@@ -368,7 +408,9 @@ do
         fi
 
         # check if mempool needs update
-        source <(/home/admin/_cache.sh valid btc_${CHAIN}net_mempool_transactions)
+        source <(/home/admin/_cache.sh valid \
+          btc_${CHAIN}net_mempool_transactions \
+        )
         if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE} ]; then
           error=""
           echo "updating: /home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net mempool"
@@ -426,7 +468,15 @@ do
     fi
 
     # update basic status values always
-    source <(/home/admin/_cache.sh valid ln_lnd_${CHAIN}net_locked ln_lnd_${CHAIN}net_version ln_lnd_${CHAIN}net_running ln_lnd_${CHAIN}net_ready ln_lnd_${CHAIN}net_online ln_lnd_${CHAIN}net_error_short ln_lnd_${CHAIN}net_error_full)
+    source <(/home/admin/_cache.sh valid \
+      ln_lnd_${CHAIN}net_locked \
+      ln_lnd_${CHAIN}net_version \
+      ln_lnd_${CHAIN}net_running \
+      ln_lnd_${CHAIN}net_ready \
+      ln_lnd_${CHAIN}net_online \
+      ln_lnd_${CHAIN}net_error_short \
+      ln_lnd_${CHAIN}net_error_full \
+    )
     if [ "${stillvalid}" == "0" ] || [ ${age} -gt 10 ]; then
       echo "updating: /home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net status"
       source <(/home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net status)
@@ -471,7 +521,17 @@ do
       fi
 
       # check if info needs update
-      source <(/home/admin/_cache.sh valid ln_lnd_${CHAIN}net_address ln_lnd_${CHAIN}net_tor ln_lnd_${CHAIN}net_sync_chain ln_lnd_${CHAIN}net_sync_graph ln_lnd_${CHAIN}net_channels_pending ln_lnd_${CHAIN}net_channels_active ln_lnd_${CHAIN}net_channels_inactive ln_lnd_${CHAIN}net_channels_total ln_lnd_${CHAIN}net_peers)
+      source <(/home/admin/_cache.sh valid \
+        ln_lnd_${CHAIN}net_address \
+        ln_lnd_${CHAIN}net_tor \
+        ln_lnd_${CHAIN}net_sync_chain \
+        ln_lnd_${CHAIN}net_sync_graph \
+        ln_lnd_${CHAIN}net_channels_pending \
+        ln_lnd_${CHAIN}net_channels_active \
+        ln_lnd_${CHAIN}net_channels_inactive \
+        ln_lnd_${CHAIN}net_channels_total \
+        ln_lnd_${CHAIN}net_peers \
+      )
       if [ "${stillvalid}" == "0" ] || [ ${age} -gt 20 ]; then
         error=""
         echo "updating: /home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net info"
@@ -504,7 +564,12 @@ do
       fi
 
       # check if wallet needs update
-      source <(/home/admin/_cache.sh valid ln_lnd_${CHAIN}net_wallet_onchain_balance ln_lnd_${CHAIN}net_wallet_onchain_pending ln_lnd_${CHAIN}net_wallet_channels_balance ln_lnd_${CHAIN}net_wallet_channels_pending)
+      source <(/home/admin/_cache.sh valid \
+        ln_lnd_${CHAIN}net_wallet_onchain_balance \
+        ln_lnd_${CHAIN}net_wallet_onchain_pending \
+        ln_lnd_${CHAIN}net_wallet_channels_balance \
+        ln_lnd_${CHAIN}net_wallet_channels_pending \
+      )
       if [ "${stillvalid}" == "0" ] || [ ${age} -gt 22 ]; then
         error=""
         echo "updating: /home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net wallet"
@@ -526,7 +591,12 @@ do
       fi
 
       # check if fees needs update
-      source <(/home/admin/_cache.sh valid ln_lnd_${CHAIN}net_fees_daily ln_lnd_${CHAIN}net_fees_weekly ln_lnd_${CHAIN}net_fees_month ln_lnd_${CHAIN}net_fees_total)
+      source <(/home/admin/_cache.sh valid \
+        ln_lnd_${CHAIN}net_fees_daily \
+        ln_lnd_${CHAIN}net_fees_weekly \
+        ln_lnd_${CHAIN}net_fees_month \
+        ln_lnd_${CHAIN}net_fees_total \
+      )
       if [ "${stillvalid}" == "0" ] || [ ${age} -gt 22 ]; then
         error=""
         echo "updating: /home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net fees"
@@ -588,7 +658,14 @@ do
     # TODO: c-lightning is seen as "always unlocked" for now - needs to be implemented later #2691
 
     # update basic status values always
-    source <(/home/admin/_cache.sh valid ln_cl_${CHAIN}net_version ln_cl_${CHAIN}net_running ln_cl_${CHAIN}net_ready ln_cl_${CHAIN}net_online ln_cl_${CHAIN}net_error_short ln_cl_${CHAIN}net_error_full)
+    source <(/home/admin/_cache.sh valid \
+      ln_cl_${CHAIN}net_version \
+      ln_cl_${CHAIN}net_running \
+      ln_cl_${CHAIN}net_ready \
+      ln_cl_${CHAIN}net_online \
+      ln_cl_${CHAIN}net_error_short \
+      ln_cl_${CHAIN}net_error_full \
+    )
     if [ "${stillvalid}" == "0" ] || [ ${age} -gt 10 ]; then
       echo "updating: /home/admin/config.scripts/cl.monitor.sh ${CHAIN}net status"
       source <(/home/admin/config.scripts/cl.monitor.sh ${CHAIN}net status)
@@ -617,7 +694,18 @@ do
     if [ "${value}" == "1" ]; then
 
       # check if info needs update
-      source <(/home/admin/_cache.sh valid ln_cl_${CHAIN}net_alias ln_cl_${CHAIN}net_address ln_cl_${CHAIN}net_tor ln_cl_${CHAIN}net_peers ln_cl_${CHAIN}net_sync_chain ln_cl_${CHAIN}net_channels_pending ln_cl_${CHAIN}net_channels_active ln_cl_${CHAIN}net_channels_inactive ln_cl_${CHAIN}net_channels_total ln_cl_${CHAIN}net_fees_total)
+      source <(/home/admin/_cache.sh valid \
+        ln_cl_${CHAIN}net_alias \
+        ln_cl_${CHAIN}net_address \
+        ln_cl_${CHAIN}net_tor \
+        ln_cl_${CHAIN}net_peers \
+        ln_cl_${CHAIN}net_sync_chain \
+        ln_cl_${CHAIN}net_channels_pending \
+        ln_cl_${CHAIN}net_channels_active \
+        ln_cl_${CHAIN}net_channels_inactive \
+        ln_cl_${CHAIN}net_channels_total \
+        ln_cl_${CHAIN}net_fees_total \
+      )
       if [ "${stillvalid}" == "0" ] || [ ${age} -gt 20 ]; then
         error=""
         echo "updating: /home/admin/config.scripts/cl.monitor.sh ${CHAIN}net info"
@@ -654,7 +742,12 @@ do
       fi
 
       # check if wallet needs update
-      source <(/home/admin/_cache.sh valid ln_cl_${CHAIN}net_wallet_onchain_balance ln_cl_${CHAIN}net_wallet_onchain_pending ln_cl_${CHAIN}net_wallet_channels_balance ln_cl_${CHAIN}net_wallet_channels_pending)
+      source <(/home/admin/_cache.sh valid \
+        ln_cl_${CHAIN}net_wallet_onchain_balance \
+        ln_cl_${CHAIN}net_wallet_onchain_pending \
+        ln_cl_${CHAIN}net_wallet_channels_balance \
+        ln_cl_${CHAIN}net_wallet_channels_pending \
+      )
       if [ "${stillvalid}" == "0" ] || [ ${age} -gt 22 ]; then
         error=""
         echo "updating: /home/admin/config.scripts/cl.monitor.sh ${CHAIN}net wallet"
