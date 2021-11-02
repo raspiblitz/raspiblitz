@@ -16,7 +16,7 @@ fi
 if [ "$1" == "install" ]; then
   
   # write systemd service
-  cat > /etc/systemd/system/background-scan.service <<EOF
+  cat > /etc/systemd/system/background.scan.service <<EOF
 # Monitor the RaspiBlitz State
 # /etc/systemd/system/background-scan.service
 
@@ -29,7 +29,7 @@ After=redis.service
 User=root
 Group=root
 Type=simple
-ExecStart=/home/admin/_background-scan.sh
+ExecStart=/home/admin/_background.scan.sh
 Restart=always
 TimeoutSec=10
 RestartSec=10
@@ -41,7 +41,7 @@ EOF
 
   # enable systemd service & exit
   sudo systemctl enable background-scan
-  echo "# background-scan.service will start after reboot or calling: sudo systemctl start background-scan"
+  echo "# background.scan.service will start after reboot or calling: sudo systemctl start background-scan"
   exit
 fi
 
