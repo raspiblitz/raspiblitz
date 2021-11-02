@@ -157,6 +157,12 @@ function headless() {
   restart
 }
 
+# command: cache
+function cache() {
+  sudo /home/admin/config.scripts/blitz.cache.sh $@
+  restart
+}
+
 # command: torthistx
 function torthistx() {
   if [ $(cat /mnt/hdd/raspiblitz.conf 2>/dev/null | grep -c "runBehindTor=on") -eq 1 ]; then
