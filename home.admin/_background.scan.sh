@@ -40,7 +40,7 @@ WantedBy=multi-user.target
 EOF
 
   # enable systemd service & exit
-  sudo systemctl enable background-scan
+  sudo systemctl enable background.scan
   echo "# background.scan.service will start after reboot or calling: sudo systemctl start background-scan"
   exit
 fi
