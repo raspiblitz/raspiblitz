@@ -143,7 +143,7 @@ if [ "$2" = "info" ]; then
   echo "btc_blocks_verified='${btc_blocks_verified}'"
   echo "btc_blocks_behind='${btc_blocks_behind}'"
   echo "btc_sync_progress='${btc_sync_progress}'"
-  echo "btc_sync_percentage='${btc_sync_percentage}'"
+  echo "btc_sync_percentage='${btc_sync_percentage//[^0-9\..]/}'"
   echo "btc_sync_initialblockdownload='${btc_sync_initialblockdownload}'"
   exit 0
   
