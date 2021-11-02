@@ -4,7 +4,7 @@
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "monitor and troubleshot the bitcoin network"
  echo "bitcoin.monitor.sh [mainnet|testnet|signet] status"
- echo "bitcoin.monitor.sh [mainnet|testnet|signet] blockchain"
+ echo "bitcoin.monitor.sh [mainnet|testnet|signet] info"
  echo "bitcoin.monitor.sh [mainnet|testnet|signet] mempool"
  echo "bitcoin.monitor.sh [mainnet|testnet|signet] network"
  echo "bitcoin.monitor.sh [mainnet] peer-kickstart [ipv4|ipv6|tor|auto]"
@@ -121,7 +121,7 @@ fi
 # BLOCKCHAIN
 ######################################################
 
-if [ "$2" = "blockchain" ]; then
+if [ "$2" = "info" ]; then
 
   # get data
   blockchaininfo=$($bitcoincli_alias getblockchaininfo 2>/dev/null)
