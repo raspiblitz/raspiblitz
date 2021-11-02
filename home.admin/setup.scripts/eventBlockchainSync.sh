@@ -94,4 +94,4 @@ fi
 
 # display info to user
 time=$(date '+%H:%M:%S')
-dialog --title " Node is Syncing (${time}) " --backtitle "RaspiBlitz ${codeVersion} ${system_temp_celsius}°C / ${system_temp_fahrenheit}°F / ${hostname}" --infobox "${infoStr}\n ${adminStr}" ${height} ${width}
+dialog --title " Node is Syncing (${time}) " --backtitle "RaspiBlitz ${codeVersion} / ${system_temp_celsius}°C / ${system_temp_fahrenheit}°F / ${hostname}" --infobox "${infoStr}\n ${adminStr}" ${height} ${width}
