@@ -170,6 +170,9 @@ if [ "$2" = "info" ]; then
     totalSeconds=$(echo "${nowTimestamp}-${genesisTimestamp}" | bc)
     scannedSeconds=$(echo "${scanTimestamp}-${genesisTimestamp}" | bc)
     lnd_sync_progress=$(echo "scale=2; $scannedSeconds*100/$totalSeconds" | bc)
+    if [ "${lnd_sync_progress}" == "99.99" ]; then
+      lnd_sync_progress="100.00"
+    fi
   fi
 
   # print data
