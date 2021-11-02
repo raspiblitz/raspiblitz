@@ -14,13 +14,12 @@ if [ "$1" == "lcd" ]; then
 fi
 
 # 2nd PARAMETER (optional): -loop-until-synced
-loopUntilSynced=0
+PARAMETER_LOOPUNTILSYNCED=0
 if [ "$2" == "loop" ]; then
-    loopUntilSynced=1
+    PARAMETER_LOOPUNTILSYNCED=1
 fi
 
-loop=1
-while [ ${loop} -eq 1 ]
+while [ 1 ]
 do
 
     # get data from cache
@@ -91,7 +90,8 @@ do
       codeVersion \
       system_temp_celsius \
       system_temp_fahrenheit \
-      network \
+      btc_default_sync_initialblockdownload \
+      btc_default_blocks_behind \
       hostname \
       network \
     )
@@ -106,12 +106,20 @@ do
     # display info to user
     time=$(date '+%H:%M:%S')
     dialog --title " Node is Syncing (${time}) " --backtitle "RaspiBlitz ${codeVersion} ${system_temp_celsius}°C / ${system_temp_fahrenheit}°F / ${hostname}" --infobox "${infoStr}\n ${adminStr}" ${height} ${width}
+    sleep 2
 
-    # determine to loop or not
-    loop=0
-    if [ ${loopUntilSynced} -eq 1 ] && [ "${syncedToChain}" == "0" ]; then
-        # loop until synced to chain
-        loop=1
-        sleep 3
+    # break loop if set by parameter
+    if [ ${PARAMETER_LOOPUNTILSYNCED} -eq 0 ]; then
+        exit 0
+    fi
+
+    # otherwise break if chain is synced up
+    if [ "${btc_default_sync_initialblockdownload}" == "0" ]; then
+    
+        # also check after initial blockdown load if synced up again
+        if [ ${btc_default_blocks_behind} -lt 2 ]; then
+            exit 0
+        fi
+
     fi
 done
