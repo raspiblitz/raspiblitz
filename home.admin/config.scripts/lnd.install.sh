@@ -267,6 +267,7 @@ if [ "$1" = "display-seed" ]; then
     if [ "${deleteSeedInfoAfterDisplay}" == "1" ]; then
       echo "# deleting seed info"
       sudo shred ${seedwordFile}
+      sudo rm ${seedwordFile}
     fi
   else
     walletFile="/mnt/hdd/lnd/data/chain/${network}/${CHAIN}/wallet.db"
