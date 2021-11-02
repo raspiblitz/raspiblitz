@@ -136,6 +136,7 @@ if [ "$2" = "info" ]; then
   btc_blocks_behind=$((${btc_blocks_headers} - ${btc_blocks_verified}))
   btc_sync_progress=$(echo "${blockchaininfo}" | jq -r '.verificationprogress')
   btc_sync_percentage=$(echo ${btc_sync_progress} | awk '{printf( "%.2f%%", 100 * $1)}')
+  btc_sync_initialblockdownload=$(echo "${blockchaininfo}" | jq -r '.initialblockdownload')
 
   # print data
   echo "btc_blocks_headers='${btc_blocks_headers}'"
@@ -143,6 +144,7 @@ if [ "$2" = "info" ]; then
   echo "btc_blocks_behind='${btc_blocks_behind}'"
   echo "btc_sync_progress='${btc_sync_progress}'"
   echo "btc_sync_percentage='${btc_sync_percentage}'"
+  echo "btc_sync_initialblockdownload='${btc_sync_initialblockdownload}'"
   exit 0
   
 fi
