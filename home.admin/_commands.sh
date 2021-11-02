@@ -160,7 +160,6 @@ function headless() {
 # command: cache
 function cache() {
   sudo /home/admin/config.scripts/blitz.cache.sh $@
-  restart
 }
 
 # command: torthistx
