@@ -27,15 +27,17 @@ width=45
 actionString="Please wait - this can take some time"
 
 # formatting BLOCKCHAIN SYNC PROGRESS
-if [ "${btc_default_sync_percentage}" == "" ]; then
-    if [ ${system_count_start_blockchain} -lt 2 ]; then
-        syncProgress="waiting"
-    else
+if [ "${btc_default_ready}" == "0" ]; then
+    if [ ${system_count_start_blockchain} -gt 1 ]; then
         syncProgress="${system_count_start_blockchain} restarts"
+    else
+        syncProgress="waiting for start"
     fi
+elif [ "${btc_default_peers}" == "0" ]; then
+    syncProgress="waiting for peers"
 elif [ ${#btc_default_sync_percentage} -lt 6 ]; then
     syncProgress=" ${btc_default_sync_percentage} % ${btc_default_peers} peers"
- else
+else
     syncProgress="${btc_default_sync_percentage} % ${btc_default_peers} peers"
 fi
 
