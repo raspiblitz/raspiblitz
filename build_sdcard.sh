@@ -684,7 +684,7 @@ if [ ${autostartDone} -eq 0 ]; then
   sudo bash -c "echo '# automatically start main menu for admin unless' >> /home/admin/.bashrc"
   sudo bash -c "echo '# when running in a tmux session' >> /home/admin/.bashrc"
   sudo bash -c "echo 'if [ -z \"\$TMUX\" ]; then' >> /home/admin/.bashrc"
-  sudo bash -c "echo '    ./00raspiblitz.sh' >> /home/admin/.bashrc"
+  sudo bash -c "echo '    ./00raspiblitz.sh newsshsession' >> /home/admin/.bashrc"
   sudo bash -c "echo 'fi' >> /home/admin/.bashrc"
   echo "autostart added to $homeFile"
 else

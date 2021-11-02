@@ -15,6 +15,17 @@ infoFile="/home/admin/raspiblitz.info"
 source ${infoFile}
 source <(/home/admin/_cache.sh get state message)
 
+# only check when first pramater is "newsshsession" (calling from bash.rc)
+if [ "$1" == "newsshsession" ]; then
+  # if already one ssh session is open - ask on the second to exit to terminal
+  source <(sudo /home/admin/config.scripts/blitz.ssh.sh sessions)
+  if [ "${ssh_session_count}" != "" ] && [ "${ssh_session_count}" != "1" ]; then
+    echo "# You already have another SSH session open ... exiting to terminal."
+    echo "# To open main menu type command: raspiblitz"
+    exit 0
+  fi
+fi
+
 # check that basic system phase/state information is available
 if [ "${setupPhase}" == "" ] || [ "${state}" == "" ]; then
   echo "setupPhase(${setupPhase}) state(${state})"
