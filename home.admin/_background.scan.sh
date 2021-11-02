@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # This script will loop in the background to gather basic system information.
-# It will place those values in the `blitz.cache.sh` system and take care about updates.
+# It will place those values in the `_cache.sh` system and take care about updates.
 # Certain values have a default maximum age to get updated by this script.
-# Every single value can be set to update more frequently by `blitz.cache.sh outdate`.
+# Every single value can be set to update more frequently by `_cache.sh outdate`.
 
 # LOGS see: sudo journalctl -f -u background.scan
 
@@ -250,7 +250,7 @@ do
   if [ "${network}" == "bitcoin" ]; then
 
     # IMPORTANT NOTE: If you want to change the update frequency on a certain value
-    # with `blitz.cache.sh outdate` do it on the chain specific value - for example:
+    # with `_cache.sh outdate` do it on the chain specific value - for example:
     # do use: btc_${DEFAULT}net_sync_percentage
     # not use: btc_sync_percentage
 
@@ -380,7 +380,7 @@ do
   # Lightning (lnd)
 
   # IMPORTANT NOTE: If you want to change the update frequency on a certain value
-  # with `blitz.cache.sh outdate` do it on the chain specific value - for example:
+  # with `_cache.sh outdate` do it on the chain specific value - for example:
   # do use: ln_lnd_${DEFAULT}net_locked
   # not use: ln_locked
 
@@ -525,7 +525,7 @@ do
           /home/admin/_cache.sh set ln_lnd_${CHAIN}net_fees_month "${ln_lnd_fees_month}"
           /home/admin/_cache.sh set ln_lnd_${CHAIN}net_fees_total "${ln_lnd_fees_total}"
           if [ "${isDefaultLightning}" == "1" ] && [ "${isDefaultChain}" == "1" ]; then
-            home/admin/config.scripts/blitz.cache.sh set ln_default_fees_total "${ln_lnd_fees_total}"
+            /home/admin/_cache.sh set ln_default_fees_total "${ln_lnd_fees_total}"
           fi
         else
           echo "!! ERROR --> ${error}"
@@ -538,7 +538,7 @@ do
   # Lightning (c-lightning)
 
   # IMPORTANT NOTE: If you want to change the update frequency on a certain value
-  # with `blitz.cache.sh outdate` do it on the chain specific value - for example:
+  # with `_cache.sh outdate` do it on the chain specific value - for example:
   # do use: ln_cl_${DEFAULT}net_locked
   # not use: ln_locked
 

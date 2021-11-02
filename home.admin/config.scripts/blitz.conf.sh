@@ -5,8 +5,8 @@ configFile="/mnt/hdd/raspiblitz.conf"
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ]; then
   echo "RaspiBlitz Config Edit - adds value to file & cache and creates entries if needed:"
-  echo "blitz.cache.sh set [key] [value]"
-  echo "blitz.cache.sh delete [key]"
+  echo "blitz.conf.sh set [key] [value]"
+  echo "blitz.conf.sh delete [key]"
   echo "To use values use in shell scripts: source ${configFile}"
   echo
   exit 1

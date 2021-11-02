@@ -14,34 +14,34 @@
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ]; then
   echo "RaspiBlitz Cache"
   echo
-  echo "blitz.cache.sh ramdisk [on|off]"
-  echo "blitz.cache.sh keyvalue [on|off]"
+  echo "_cache.sh ramdisk [on|off]"
+  echo "_cache.sh keyvalue [on|off]"
   echo
-  echo "blitz.cache.sh set [key] [value] [?expire-seconds]"
-  echo "blitz.cache.sh get [key1] [?key2] [?key3] ..."
+  echo "_cache.sh set [key] [value] [?expire-seconds]"
+  echo "_cache.sh get [key1] [?key2] [?key3] ..."
   echo 
-  echo "blitz.cache.sh increment [key1]"
+  echo "_cache.sh increment [key1]"
   echo
-  echo "blitz.cache.sh outdate [key] [value]"
+  echo "_cache.sh outdate [key] [value]"
   echo "# set in how many seconds value is marked as outdated or"
   echo "# -1 = never outdated (default)"  
   echo "# 0  = always outdated"
   echo 
-  echo "blitz.cache.sh meta [key] [?default]"
+  echo "_cache.sh meta [key] [?default]"
   echo "# get single key with additional metadata:"
   echo "# outdatesecs= see above"
   echo "# stillvalid=0/1 if value is still valid or outdated"
   echo "# lasttouch= last update timestamp in unix seconds"
   echo 
-  echo "blitz.cache.sh valid [key1] [?key2] [?key3] ..."
+  echo "_cache.sh valid [key1] [?key2] [?key3] ..."
   echo "# check multiple keys if all are still not outdated"
   echo "# use for example to check if a complex call needs"
   echo "# to be made that covers multiple single data points"
   echo 
-  echo "blitz.cache.sh import [bash-keyvalue-file]"
+  echo "_cache.sh import [bash-keyvalue-file]"
   echo "# import a bash style key-value file into store"
   echo
-  echo "blitz.cache.sh export [?key-prefix]"
+  echo "_cache.sh export [?key-prefix]"
   echo "# export bash-style key-value to stdout"
   echo "# can be used with a key-prefix just get a subset"
   echo
@@ -192,7 +192,7 @@ elif [ "$1" = "get" ]; then
     # skip first parameter
     ((position++))
     if [ $position -eq 1 ]; then
-      echo "# blitz.cache.sh $@"
+      echo "# _cache.sh $@"
       continue
     fi
 
@@ -374,7 +374,7 @@ elif [ "$1" = "valid" ]; then
     # skip first parameter
     ((position++))
     if [ $position -eq 1 ]; then
-      echo "# blitz.cache.sh $@"
+      echo "# _cache.sh $@"
       continue
     fi
 
