@@ -299,13 +299,13 @@ do
 
         # when default chain transfere values
         if [ "${isDefaultChain}" == "1" ]; then
-          /home/admin/config.scripts/blitz.cache.sh set btc_activated "1"
-          /home/admin/config.scripts/blitz.cache.sh set btc_version "${btc_version}"
-          /home/admin/config.scripts/blitz.cache.sh set btc_running "${btc_running}"
-          /home/admin/config.scripts/blitz.cache.sh set btc_ready "${btc_ready}"
-          /home/admin/config.scripts/blitz.cache.sh set btc_online "${btc_online}"
-          /home/admin/config.scripts/blitz.cache.sh set btc_error_short "${btc_error_short}"
-          /home/admin/config.scripts/blitz.cache.sh set btc_error_full "${btc_error_full}"
+          /home/admin/config.scripts/blitz.cache.sh set btc_default_activated "1"
+          /home/admin/config.scripts/blitz.cache.sh set btc_default_version "${btc_version}"
+          /home/admin/config.scripts/blitz.cache.sh set btc_default_running "${btc_running}"
+          /home/admin/config.scripts/blitz.cache.sh set btc_default_ready "${btc_ready}"
+          /home/admin/config.scripts/blitz.cache.sh set btc_default_online "${btc_online}"
+          /home/admin/config.scripts/blitz.cache.sh set btc_default_error_short "${btc_error_short}"
+          /home/admin/config.scripts/blitz.cache.sh set btc_default_error_full "${btc_error_full}"
         fi
       fi
 
@@ -326,11 +326,11 @@ do
             /home/admin/config.scripts/blitz.cache.sh set btc_${CHAIN}net_sync_progress "${btc_sync_progress}"
             /home/admin/config.scripts/blitz.cache.sh set btc_${CHAIN}net_sync_percentage "${btc_sync_percentage}"
             if [ "${isDefaultChain}" == "1" ]; then
-              /home/admin/config.scripts/blitz.cache.sh set btc_blocks_headers "${btc_blocks_headers}"
-              /home/admin/config.scripts/blitz.cache.sh set btc_blocks_verified "${btc_blocks_verified}"
-              /home/admin/config.scripts/blitz.cache.sh set btc_blocks_behind "${btc_blocks_behind}"
-              /home/admin/config.scripts/blitz.cache.sh set btc_sync_progress "${btc_sync_progress}"
-              /home/admin/config.scripts/blitz.cache.sh set btc_sync_percentage "${btc_sync_percentage}"
+              /home/admin/config.scripts/blitz.cache.sh set btc_default_blocks_headers "${btc_blocks_headers}"
+              /home/admin/config.scripts/blitz.cache.sh set btc_default_blocks_verified "${btc_blocks_verified}"
+              /home/admin/config.scripts/blitz.cache.sh set btc_default_blocks_behind "${btc_blocks_behind}"
+              /home/admin/config.scripts/blitz.cache.sh set btc_default_sync_progress "${btc_sync_progress}"
+              /home/admin/config.scripts/blitz.cache.sh set btc_default_sync_percentage "${btc_sync_percentage}"
             fi
           else
             echo "!! ERROR --> ${error}"
@@ -348,9 +348,9 @@ do
             /home/admin/config.scripts/blitz.cache.sh set btc_${CHAIN}net_address "${btc_address}"
             /home/admin/config.scripts/blitz.cache.sh set btc_${CHAIN}net_port "${btc_btc_port}"
             if [ "${isDefaultChain}" == "1" ]; then
-              /home/admin/config.scripts/blitz.cache.sh set btc_peers "${btc_peers}"
-              /home/admin/config.scripts/blitz.cache.sh set btc_address "${btc_address}"
-              /home/admin/config.scripts/blitz.cache.sh set btc_port "${btc_btc_port}"
+              /home/admin/config.scripts/blitz.cache.sh set btc_default_peers "${btc_peers}"
+              /home/admin/config.scripts/blitz.cache.sh set btc_default_address "${btc_address}"
+              /home/admin/config.scripts/blitz.cache.sh set btc_default_port "${btc_btc_port}"
             fi
           else
             echo "!! ERROR --> ${error}"
@@ -366,7 +366,7 @@ do
           if [ "${error}" == "" ]; then
             /home/admin/config.scripts/blitz.cache.sh set btc_${CHAIN}net_mempool_transactions "${btc_mempool_transactions}"
             if [ "${isDefaultChain}" == "1" ]; then
-              /home/admin/config.scripts/blitz.cache.sh set btc_mempool_transactions "${btc_mempool_transactions}"
+              /home/admin/config.scripts/blitz.cache.sh set btc_default_mempool_transactions "${btc_mempool_transactions}"
             fi
           else
             echo "!! ERROR --> ${error}"
@@ -391,17 +391,14 @@ do
 
     # skip if network is not on by config
     if [ "${CHAIN}" == "main" ] && [ "${lnd}" != "on" ]; then
-      /home/admin/config.scripts/blitz.cache.sh set ln_lnd_${CHAIN}net_activated "0"
       #echo "skip lnd ${CHAIN}net scan - because its off"
       continue
     fi
     if [ "${CHAIN}" == "test" ] && [ "${tlnd}" != "on" ]; then
-      /home/admin/config.scripts/blitz.cache.sh set ln_lnd_${CHAIN}net_activated "0"
       #echo "skip lnd ${CHAIN}net scan - because its off"
       continue
     fi
     if [ "${CHAIN}" == "sig" ] && [ "${slnd}" != "on" ]; then
-      /home/admin/config.scripts/blitz.cache.sh set ln_lnd_${CHAIN}net_activated "0"
       #echo "skip lnd ${CHAIN}net scan - because its off"
       continue
     fi
@@ -432,14 +429,14 @@ do
       /home/admin/config.scripts/blitz.cache.sh set ln_lnd_${CHAIN}net_error_short "${ln_lnd_error_short}"
       /home/admin/config.scripts/blitz.cache.sh set ln_lnd_${CHAIN}net_error_full "${ln_lnd_error_full}"
       if [ "${isDefaultLightning}" == "1" ] && [ "${isDefaultChain}" == "1" ]; then
-        /home/admin/config.scripts/blitz.cache.sh set ln_activated "1"
-        /home/admin/config.scripts/blitz.cache.sh set ln_version "${ln_lnd_version}"
-        /home/admin/config.scripts/blitz.cache.sh set ln_running "${ln_lnd_running}"
-        /home/admin/config.scripts/blitz.cache.sh set ln_ready "${ln_lnd_ready}"
-        /home/admin/config.scripts/blitz.cache.sh set ln_online "${ln_lnd_online}"
-        /home/admin/config.scripts/blitz.cache.sh set ln_locked "${ln_lnd_locked}"
+        /home/admin/config.scripts/blitz.cache.sh set ln_default_activated "1"
+        /home/admin/config.scripts/blitz.cache.sh set ln_default_version "${ln_lnd_version}"
+        /home/admin/config.scripts/blitz.cache.sh set ln_default_running "${ln_lnd_running}"
+        /home/admin/config.scripts/blitz.cache.sh set ln_default_ready "${ln_lnd_ready}"
+        /home/admin/config.scripts/blitz.cache.sh set ln_default_online "${ln_lnd_online}"
+        /home/admin/config.scripts/blitz.cache.sh set ln_default_locked "${ln_lnd_locked}"
         /home/admin/config.scripts/blitz.cache.sh set ln_error_short "${ln_lnd_error_short}"
-        /home/admin/config.scripts/blitz.cache.sh set ln_error_full "${ln_lnd_error_full}"
+        /home/admin/config.scripts/blitz.cache.sh set ln_default_error_full "${ln_lnd_error_full}"
       fi
     fi
 
@@ -456,7 +453,7 @@ do
         if [ "${error}" == "" ]; then
           /home/admin/config.scripts/blitz.cache.sh set ln_lnd_${CHAIN}net_alias "${ln_lnd_alias}"
           if [ "${isDefaultLightning}" == "1" ] && [ "${isDefaultChain}" == "1" ]; then
-            /home/admin/config.scripts/blitz.cache.sh set ln_alias "${ln_lnd_alias}"
+            /home/admin/config.scripts/blitz.cache.sh set ln_default_alias "${ln_lnd_alias}"
           fi
         else
           echo "!! ERROR --> ${error}"
@@ -480,14 +477,14 @@ do
           /home/admin/config.scripts/blitz.cache.sh set ln_lnd_${CHAIN}net_channels_total "${ln_lnd_channels_total}"
           /home/admin/config.scripts/blitz.cache.sh set ln_lnd_${CHAIN}net_peers "${ln_lnd_peers}"
           if [ "${isDefaultLightning}" == "1" ] && [ "${isDefaultChain}" == "1" ]; then
-            /home/admin/config.scripts/blitz.cache.sh set ln_address "${ln_lnd_address}"
-            /home/admin/config.scripts/blitz.cache.sh set ln_tor "${ln_lnd_tor}"
-            /home/admin/config.scripts/blitz.cache.sh set ln_sync_chain "${ln_lnd_sync_chain}"
-            /home/admin/config.scripts/blitz.cache.sh set ln_channels_pending "${ln_lnd_channels_pending}"
-            /home/admin/config.scripts/blitz.cache.sh set ln_channels_active "${ln_lnd_channels_active}"
-            /home/admin/config.scripts/blitz.cache.sh set ln_channels_inactive "${ln_lnd_channels_inactive}"
-            /home/admin/config.scripts/blitz.cache.sh set ln_channels_total "${ln_lnd_channels_total}"
-            /home/admin/config.scripts/blitz.cache.sh set ln_peers "${ln_lnd_peers}"
+            /home/admin/config.scripts/blitz.cache.sh set ln_default_address "${ln_lnd_address}"
+            /home/admin/config.scripts/blitz.cache.sh set ln_default_tor "${ln_lnd_tor}"
+            /home/admin/config.scripts/blitz.cache.sh set ln_default_sync_chain "${ln_lnd_sync_chain}"
+            /home/admin/config.scripts/blitz.cache.sh set ln_default_channels_pending "${ln_lnd_channels_pending}"
+            /home/admin/config.scripts/blitz.cache.sh set ln_default_channels_active "${ln_lnd_channels_active}"
+            /home/admin/config.scripts/blitz.cache.sh set ln_default_channels_inactive "${ln_lnd_channels_inactive}"
+            /home/admin/config.scripts/blitz.cache.sh set ln_default_channels_total "${ln_lnd_channels_total}"
+            /home/admin/config.scripts/blitz.cache.sh set ln_default_peers "${ln_lnd_peers}"
           fi
         else
           echo "!! ERROR --> ${error}"
@@ -506,10 +503,10 @@ do
           /home/admin/config.scripts/blitz.cache.sh set ln_lnd_${CHAIN}net_wallet_channels_balance "${ln_lnd_wallet_channels_balance}"
           /home/admin/config.scripts/blitz.cache.sh set ln_lnd_${CHAIN}net_wallet_channels_pending "${ln_lnd_wallet_channels_pending}"
           if [ "${isDefaultLightning}" == "1" ] && [ "${isDefaultChain}" == "1" ]; then
-            /home/admin/config.scripts/blitz.cache.sh set ln_wallet_onchain_balance "${ln_lnd_wallet_onchain_balance}"
-            /home/admin/config.scripts/blitz.cache.sh set ln_wallet_onchain_pending "${ln_lnd_wallet_onchain_pending}"
-            /home/admin/config.scripts/blitz.cache.sh set ln_wallet_channels_balance "${ln_lnd_wallet_channels_balance}"
-            /home/admin/config.scripts/blitz.cache.sh set ln_wallet_channels_pending "${ln_lnd_wallet_channels_pending}"
+            /home/admin/config.scripts/blitz.cache.sh set ln_default_wallet_onchain_balance "${ln_lnd_wallet_onchain_balance}"
+            /home/admin/config.scripts/blitz.cache.sh set ln_default_wallet_onchain_pending "${ln_lnd_wallet_onchain_pending}"
+            /home/admin/config.scripts/blitz.cache.sh set ln_default_wallet_channels_balance "${ln_lnd_wallet_channels_balance}"
+            /home/admin/config.scripts/blitz.cache.sh set ln_default_wallet_channels_pending "${ln_lnd_wallet_channels_pending}"
           fi
         else
           echo "!! ERROR --> ${error}"
@@ -528,7 +525,7 @@ do
           /home/admin/config.scripts/blitz.cache.sh set ln_lnd_${CHAIN}net_fees_month "${ln_lnd_fees_month}"
           /home/admin/config.scripts/blitz.cache.sh set ln_lnd_${CHAIN}net_fees_total "${ln_lnd_fees_total}"
           if [ "${isDefaultLightning}" == "1" ] && [ "${isDefaultChain}" == "1" ]; then
-            home/admin/config.scripts/blitz.cache.sh set ln_fees_total "${ln_lnd_fees_total}"
+            home/admin/config.scripts/blitz.cache.sh set ln_default_fees_total "${ln_lnd_fees_total}"
           fi
         else
           echo "!! ERROR --> ${error}"
@@ -552,17 +549,14 @@ do
 
     # skip if network is not on by config
     if [ "${CHAIN}" == "main" ] && [ "${cl}" != "on" ]; then
-      /home/admin/config.scripts/blitz.cache.sh set ln_cl_${CHAIN}net_activated "0"
       #echo "skip c-lightning mainnet scan - because its off"
       continue
     fi
     if [ "${CHAIN}" == "test" ] && [ "${tcl}" != "on" ]; then
-      /home/admin/config.scripts/blitz.cache.sh set ln_cl_${CHAIN}net_activated "0"
       #echo "skip c-lightning testnet scan - because its off"
       continue
     fi
     if [ "${CHAIN}" == "sig" ] && [ "${scl}" != "on" ]; then
-      /home/admin/config.scripts/blitz.cache.sh set ln_cl_${CHAIN}net_activated "0"
       #echo "skip c-lightning signet scan - because its off"
       continue
     fi
@@ -595,14 +589,14 @@ do
       /home/admin/config.scripts/blitz.cache.sh set ln_cl_${CHAIN}net_error_short "${ln_cl_error_short}"
       /home/admin/config.scripts/blitz.cache.sh set ln_cl_${CHAIN}net_error_full "${ln_cl_error_full}"
       if [ "${isDefaultLightning}" == "1" ] && [ "${isDefaultChain}" == "1" ]; then
-        /home/admin/config.scripts/blitz.cache.sh set ln_activated "1"
-        /home/admin/config.scripts/blitz.cache.sh set ln_version "${cl_lnd_version}"
-        /home/admin/config.scripts/blitz.cache.sh set ln_running "${lc_running}"
-        /home/admin/config.scripts/blitz.cache.sh set ln_ready "${cl_ready}"
-        /home/admin/config.scripts/blitz.cache.sh set ln_online "${cl_online}"
-        /home/admin/config.scripts/blitz.cache.sh set ln_locked "0"
-        /home/admin/config.scripts/blitz.cache.sh set ln_error_short "${cl_error_short}"
-        /home/admin/config.scripts/blitz.cache.sh set ln_error_full "${cl_error_full}"
+        /home/admin/config.scripts/blitz.cache.sh set ln_default_activated "1"
+        /home/admin/config.scripts/blitz.cache.sh set ln_default_version "${cl_lnd_version}"
+        /home/admin/config.scripts/blitz.cache.sh set ln_default_running "${lc_running}"
+        /home/admin/config.scripts/blitz.cache.sh set ln_default_ready "${cl_ready}"
+        /home/admin/config.scripts/blitz.cache.sh set ln_default_online "${cl_online}"
+        /home/admin/config.scripts/blitz.cache.sh set ln_default_locked "0"
+        /home/admin/config.scripts/blitz.cache.sh set ln_default_error_short "${cl_error_short}"
+        /home/admin/config.scripts/blitz.cache.sh set ln_default_error_full "${cl_error_full}"
       fi
     fi
 
@@ -629,16 +623,16 @@ do
           /home/admin/config.scripts/blitz.cache.sh set ln_cl_${CHAIN}net_fees_total "${ln_cl_fees_total}"
 
           if [ "${isDefaultLightning}" == "1" ] && [ "${isDefaultChain}" == "1" ]; then
-            /home/admin/config.scripts/blitz.cache.sh set ln_alias "${ln_cl_alias}"
-            /home/admin/config.scripts/blitz.cache.sh set ln_address "${ln_cl_address}"
-            /home/admin/config.scripts/blitz.cache.sh set ln_tor "${ln_cl_tor}"
-            /home/admin/config.scripts/blitz.cache.sh set ln_peers "${ln_cl_fees_total}"
-            /home/admin/config.scripts/blitz.cache.sh set ln_sync_chain "${ln_cl_sync_chain}"
-            /home/admin/config.scripts/blitz.cache.sh set ln_channels_pending "${ln_cl_channels_pending}"
-            /home/admin/config.scripts/blitz.cache.sh set ln_channels_active "${ln_cl_channels_active}"
-            /home/admin/config.scripts/blitz.cache.sh set ln_channels_inactive "${ln_cl_channels_inactive}"
-            /home/admin/config.scripts/blitz.cache.sh set ln_channels_total "${ln_cl_channels_total}"
-            /home/admin/config.scripts/blitz.cache.sh set ln_fees_total "${ln_cl_fees_total}"
+            /home/admin/config.scripts/blitz.cache.sh set ln_default_alias "${ln_cl_alias}"
+            /home/admin/config.scripts/blitz.cache.sh set ln_default_address "${ln_cl_address}"
+            /home/admin/config.scripts/blitz.cache.sh set ln_default_tor "${ln_cl_tor}"
+            /home/admin/config.scripts/blitz.cache.sh set ln_default_peers "${ln_cl_fees_total}"
+            /home/admin/config.scripts/blitz.cache.sh set ln_default_sync_chain "${ln_cl_sync_chain}"
+            /home/admin/config.scripts/blitz.cache.sh set ln_default_hannels_pending "${ln_cl_channels_pending}"
+            /home/admin/config.scripts/blitz.cache.sh set ln_default_channels_active "${ln_cl_channels_active}"
+            /home/admin/config.scripts/blitz.cache.sh set ln_default_channels_inactive "${ln_cl_channels_inactive}"
+            /home/admin/config.scripts/blitz.cache.sh set ln_default_channels_total "${ln_cl_channels_total}"
+            /home/admin/config.scripts/blitz.cache.sh set ln_default_fees_total "${ln_cl_fees_total}"
           fi
         else
           echo "!! ERROR --> ${error}"
@@ -657,10 +651,10 @@ do
           /home/admin/config.scripts/blitz.cache.sh set ln_cl_${CHAIN}net_wallet_channels_balance "${ln_cl_wallet_channels_balance}"
           /home/admin/config.scripts/blitz.cache.sh set ln_cl_${CHAIN}net_wallet_channels_pending "${ln_cl_wallet_channels_pending}"
           if [ "${isDefaultLightning}" == "1" ] && [ "${isDefaultChain}" == "1" ]; then
-            /home/admin/config.scripts/blitz.cache.sh set ln_wallet_onchain_balance "${ln_cl_wallet_onchain_balance}"
-            /home/admin/config.scripts/blitz.cache.sh set ln_wallet_onchain_pending "${ln_cl_wallet_onchain_pending}"
-            /home/admin/config.scripts/blitz.cache.sh set ln_wallet_channels_balance "${ln_cl_wallet_channels_balance}"
-            /home/admin/config.scripts/blitz.cache.sh set ln_wallet_channels_pending "${ln_cl_wallet_channels_pending}"
+            /home/admin/config.scripts/blitz.cache.sh set ln_default_wallet_onchain_balance "${ln_cl_wallet_onchain_balance}"
+            /home/admin/config.scripts/blitz.cache.sh set ln_default_wallet_onchain_pending "${ln_cl_wallet_onchain_pending}"
+            /home/admin/config.scripts/blitz.cache.sh set ln_default_wallet_channels_balance "${ln_cl_wallet_channels_balance}"
+            /home/admin/config.scripts/blitz.cache.sh set ln_default_wallet_channels_pending "${ln_cl_wallet_channels_pending}"
           fi
         else
           echo "!! ERROR --> ${error}"
