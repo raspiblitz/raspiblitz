@@ -242,9 +242,7 @@ do
       #echo "latestHeartBeatLine(${latestHeartBeatLine})"
       if [ "${blitzTUIHeartBeatLine}" == "${latestHeartBeatLine}" ]; then
         echo "FAIL - still no new heart beat .. restarting BlitzTUI"
-        source <(/home/admin/_cache.sh get blitzTUIRestarts)
-        blitzTUIRestarts=$(($blitzTUIRestarts +1))
-        /home/admin/_cache.sh set blitzTUIRestarts "${blitzTUIRestarts}"
+        source <(/home/admin/_cache.sh increment system_count_start_tui)
         init 3 ; sleep 2 ; init 5
       fi
     else

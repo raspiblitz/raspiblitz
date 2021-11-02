@@ -151,8 +151,9 @@ if [ "$2" = "info" ]; then
   source <(/home/admin/_cache.sh get ${blockchainHeightKey})
   #echo "#blockchainHeightKey(${!blockchainHeightKey})"
   blockheight="${!blockchainHeightKey}"
-  #echo "#blockheight(${blockheight})"
+  echo "#blockheight(${blockheight})"
   cl_sync_height=$(echo "${ln_getInfo}" | jq .blockheight)
+  echo "#cl_sync_height(${cl_sync_height})"
   cl_sync_chain=""
   cl_sync_progress=""
   if [ "${blockheight}" != "" ]; then

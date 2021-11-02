@@ -308,11 +308,8 @@ fi
 # touchscreen statistics
 if [ "${touchscreen}" == "1" ]; then
   echo "blitzTUIActive=1"
-  if [ ${#blitzTUIRestarts} -gt 0 ]; then
-    echo "blitzTUIRestarts=${blitzTUIRestarts}"
-  else
-    echo "blitzTUIRestarts=0"
-  fi
+  source <(/home/admin/_cache.sh get system_count_start_tui)
+  echo "blitzTUIRestarts=${system_count_start_tui}"
 else
   echo "blitzTUIActive=0"
   echo "blitzTUIRestarts=0"

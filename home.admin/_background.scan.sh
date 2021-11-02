@@ -82,6 +82,7 @@ YEAR=31536000
 /home/admin/_cache.sh set system_count_undervoltage "0"
 /home/admin/_cache.sh set system_count_start_blockchain "0"
 /home/admin/_cache.sh set system_count_start_lightning "0"
+/home/admin/_cache.sh set system_count_start_tui "0"
 
 # import all base values from raspiblitz.info
 echo "importing: ${infoFile}"
@@ -105,6 +106,13 @@ if [ "${stillvalid}" == "0" ]; then
   /home/admin/_cache.sh set system_board "${board}"
   /home/admin/_cache.sh set system_ramMB "${ramMB}"
   /home/admin/_cache.sh set system_ramMB "${ramGB}"
+fi
+
+# VM detect vagrant
+source <(/home/admin/_cache.sh valid system_vm_vagrant)
+if [ "${stillvalid}" == "0" ]; then
+  vagrant=$(df | grep -c "/vagrant")
+  /home/admin/_cache.sh set system_vm_vagrant "${vagrant}"
 fi
 
 # flag that init was done (will be checked on each loop)
