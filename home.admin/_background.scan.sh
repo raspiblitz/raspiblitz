@@ -5,7 +5,7 @@
 # Certain values have a default maximum age to get updated by this script.
 # Every single value can be set to update more frequently by `blitz.cache.sh outdate`.
 
-# LOGS see: sudo journalctl -f -u background-scan
+# LOGS see: sudo journalctl -f -u background.scan
 
 # start with parameter "only-one-loop" (use for testing)
 ONLY_ONE_LOOP="0"
@@ -18,7 +18,7 @@ if [ "$1" == "install" ]; then
   # write systemd service
   cat > /etc/systemd/system/background.scan.service <<EOF
 # Monitor the RaspiBlitz State
-# /etc/systemd/system/background-scan.service
+# /etc/systemd/system/background.scan.service
 
 [Unit]
 Description=RaspiBlitz Background Monitoring Service
@@ -41,7 +41,7 @@ EOF
 
   # enable systemd service & exit
   sudo systemctl enable background.scan
-  echo "# background.scan.service will start after reboot or calling: sudo systemctl start background-scan"
+  echo "# background.scan.service will start after reboot or calling: sudo systemctl start background.scan"
   exit
 fi
 
