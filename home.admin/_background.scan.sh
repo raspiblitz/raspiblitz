@@ -229,7 +229,7 @@ do
   # INTERNET
 
    # GLOBAL & PUBLIC IP
-  sudo <(/home/admin/_cache.sh get runBehindTor)
+  source <(/home/admin/_cache.sh get runBehindTor)
   if [ "${runBehindTor}" == "off" ]; then
     source <(/home/admin/_cache.sh valid \
       internet_public_ipv6 \
