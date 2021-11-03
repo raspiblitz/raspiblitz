@@ -12,6 +12,8 @@ source <(/home/admin/_cache.sh get \
   hdd_used_info \
   internet_localip \
   internet_public_ip_clean \
+  internet_rx \
+  internet_tx \
   system_ram_available_mb \
   system_ram_mb \
   system_ups_status \
@@ -280,7 +282,7 @@ ${color_yellow}        ,/     ${color_yellow}%s
 ${color_yellow}      ,'/      ${color_gray}%s
 ${color_yellow}    ,' /       ${color_gray}%s, temp %s°C %s°F
 ${color_yellow}  ,'  /_____   ${color_gray}Free Mem ${color_ram}${ram} ${color_gray} HDDuse ${color_hdd}%s${color_gray}
-${color_yellow},'_____    ,'  ${color_gray}SSH admin@${color_green}${internet_localip}${color_gray} d${network_rx} u${network_tx}
+${color_yellow},'_____    ,'  ${color_gray}SSH admin@${color_green}${internet_localip}${color_gray} d${internet_rx} u${internet_tx}
 ${color_yellow}      /  ,'    ${color_gray}
 ${color_yellow}     / ,'      ${color_gray}${network} ${color_green}${networkVersion} ${color_gray}${chain}net ${networkConnectionsInfo}
 ${color_yellow}    /,'        ${color_gray}Blocks ${blockInfo} ${color_gray}Sync ${sync_color}${sync} %s
