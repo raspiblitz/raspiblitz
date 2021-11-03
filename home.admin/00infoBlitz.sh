@@ -177,7 +177,7 @@ if [ "${lightning}" != "" ]; then
     ln_baseInfo="${color_red} Not Started | Not Ready Yet"
 
   # lightning is still syncing
-  elif [ "${ln_locked}" != "1" ]; then
+  elif [ "${ln_locked}" == "1" ]; then
 
       ln_baseInfo="${color_amber} Wallet Locked"
 
