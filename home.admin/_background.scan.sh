@@ -298,12 +298,20 @@ do
   # read/update config values
   source /mnt/hdd/raspiblitz.conf
 
-  # check if a one time `system_scan_all_once` is set on cache
+  # check if a one time `system_scan_all_once=1` is set on cache
   # will trigger a scan_all for one loop
   source <(/home/admin/_cache.sh get system_scan_all_once)
   if [ "${system_scan_all_once}" == "1" ]; then
     echo "system_scan_all_once found --> TRIGGER system_scan_all for one loop"
     /home/admin/_cache.sh set system_scan_all_once "0"
+    system_scan_all="on"
+  fi
+
+  # check if a temporary `system_scan_all_temp=1` is set on cache
+  # will trigger a scan_all until its gone or `0`
+  source <(/home/admin/_cache.sh get system_scan_all_temp)
+  if [ "${system_scan_all_temp}" == "1" ]; then
+    echo "system_scan_all_temp found --> TRIGGER system_scan_all"
     system_scan_all="on"
   fi
 
