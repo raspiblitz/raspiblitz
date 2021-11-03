@@ -130,6 +130,7 @@ source <(/home/admin/_cache.sh meta btc_${chain}net_peers)
 btc_peers=${value}
 source <(/home/admin/_cache.sh meta btc_${chain}net_version)
 networkVersion=${value}
+if 
 if [ "${btc_peers}" != "" ] && [  ${btc_peers} -gt 0 ]; then
   networkConnectionsInfo="${color_green}${btc_peers} ${color_gray}peers"
 else
@@ -171,7 +172,9 @@ if [ "${lightning}" != "" ]; then
   ln_external="${value}"
 
   source <(/home/admin/_cache.sh meta ln_${lightning}_${chain}net_peers)
-  ln_peersInfo="${color_green}${value} ${color_gray}peers"
+  if [ "${value}" != "" ]; then
+    ln_peersInfo="${color_green}${value} ${color_gray}peers"
+  fi
 
   source <(/home/admin/_cache.sh meta ln_${lightning}_${chain}net_ready)
   ln_ready="${value}"
@@ -183,19 +186,19 @@ if [ "${lightning}" != "" ]; then
   # lightning is still starting
   if [ "${ln_ready}" != "1" ]; then
 
-    ln_baseInfo="${color_red} Not Started | Not Ready Yet"
+    ln_baseInfo="${color_red}Not Started | Not Ready Yet"
 
   # lightning is still syncing
   elif [ "${ln_locked}" == "1" ]; then
 
-      ln_baseInfo="${color_amber} Wallet Locked"
+      ln_baseInfo="${color_amber}Wallet Locked"
 
   # lightning is still syncing
   elif [ "${ln_sync}" != "1" ]; then
 
     source <(/home/admin/_cache.sh meta ln_${lightning}_${chain}net_sync_progress)
     ln_syncprogress="${value}"
-    ln_baseInfo="${color_amber} Scanning blocks: ${ln_syncprogress}%"
+    ln_baseInfo="${color_amber}Scanning blocks: ${ln_syncprogress}%"
 
   # OK lightning is ready - get more details
   else
