@@ -193,7 +193,7 @@ if [ "${lightning}" != "" ]; then
   # lightning is still starting
   if [ "${ln_ready}" != "1" ]; then
 
-    ln_baseInfo="${color_red}Not Started | Not Ready Yet | No Data"
+    ln_baseInfo="\n                ${color_red}Not Started | Not Ready Yet | No Data"
 
   # lightning is still syncing
   elif [ "${ln_locked}" == "1" ]; then
@@ -278,7 +278,7 @@ ${color_yellow}${ln_publicColor}${ln_external}${color_gray}"
 fi
 
 if [ "${lightning}" == "cl" ]; then
-  LNline="C-LIGHTNING ${color_green}${ln_version}\n               ${ln_baseInfo}"
+  LNline="C-LIGHTNING ${color_green}${ln_version} ${ln_baseInfo}"
 elif [ "${lightning}"  == "lnd" ]; then
   LNline="LND ${color_green}${ln_version} ${ln_baseInfo}"
 fi
