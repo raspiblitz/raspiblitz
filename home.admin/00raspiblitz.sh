@@ -94,6 +94,7 @@ do
   source <(/home/admin/_cache.sh get \
     state \
     setupPhase \
+    btc_default_synced \
     message \
     network \
     chain \
@@ -176,10 +177,9 @@ do
   fi
 
   #####################################
-  # INITIAL BLOCKCHAIN SYNC (SUBLOOP)
+  # MAKE SURE BLOCKCHAIN IS SYNC 
   #####################################
-  if [ "${lightning}" == "" ]; then syncedToChain=1; fi
-  if [ "${setupPhase}" == "done" ] && [ "${state}" == "ready" ] && [ "${syncedToChain}" != "1" ]; then
+  if [ "${setupPhase}" == "done" ] && [ "${state}" == "ready" ] && [ "${btc_default_synced}" != "1" ]; then
     /home/admin/setup.scripts/eventBlockchainSync.sh ssh
     sleep 3
     continue
