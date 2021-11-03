@@ -364,6 +364,7 @@ do
           echo "updating: /home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net info"
           source <(/home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net info)
           if [ "${error}" == "" ]; then
+            /home/admin/_cache.sh set btc_${CHAIN}net_synced "${btc_synced}"
             /home/admin/_cache.sh set btc_${CHAIN}net_blocks_headers "${btc_blocks_headers}"
             /home/admin/_cache.sh set btc_${CHAIN}net_blocks_verified "${btc_blocks_verified}"
             /home/admin/_cache.sh set btc_${CHAIN}net_blocks_behind "${btc_blocks_behind}"
@@ -371,6 +372,7 @@ do
             /home/admin/_cache.sh set btc_${CHAIN}net_sync_percentage "${btc_sync_percentage}"
             /home/admin/_cache.sh set btc_${CHAIN}net_sync_initialblockdownload "${btc_sync_initialblockdownload}"
             if [ "${isDefaultChain}" == "1" ]; then
+              /home/admin/_cache.sh set btc_default_synced "${btc_synced}"
               /home/admin/_cache.sh set btc_default_blocks_headers "${btc_blocks_headers}"
               /home/admin/_cache.sh set btc_default_blocks_verified "${btc_blocks_verified}"
               /home/admin/_cache.sh set btc_default_blocks_behind "${btc_blocks_behind}"
