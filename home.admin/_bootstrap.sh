@@ -72,7 +72,7 @@ cat $infoFile >> $logFile
 
 echo "## INIT RaspiBlitz Cache ... wait background.scan.service to finsih first scan loop" >> $logFile
 systemscan_runtime=""
-while [ "${systemscan_runtime}" == "" ]; then
+while [ "${systemscan_runtime}" == "" ]
 do
   sleep 1
   source <(/home/admin/_cache.sh get systemscan_runtime)
