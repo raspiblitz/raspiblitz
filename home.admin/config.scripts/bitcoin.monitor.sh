@@ -134,9 +134,12 @@ if [ "$2" = "info" ]; then
   btc_blocks_headers=$(echo "${blockchaininfo}" | jq -r '.headers')
   btc_blocks_verified=$(echo "${blockchaininfo}" | jq -r '.blocks')
   btc_blocks_behind=$((${btc_blocks_headers} - ${btc_blocks_verified}))
+  btc_sync_initialblockdownload=$(echo "${blockchaininfo}" | jq -r '.initialblockdownload' | grep -c 'true')
   btc_sync_progress=$(echo "${blockchaininfo}" | jq -r '.verificationprogress')
   btc_sync_percentage=$(echo ${btc_sync_progress} | awk '{printf( "%.2f%%", 100 * $1)}')
-  btc_sync_initialblockdownload=$(echo "${blockchaininfo}" | jq -r '.initialblockdownload' | grep -c 'true')
+  if [ "${btc_blocks_headers}" != "" ]  && [ "${btc_blocks_headers}" == "${btc_blocks_verified}" ]; then
+    btc_sync_percentage="100.00"
+  fi
 
   # determine if synced (tolerate falling 1 block behind)
   # and be sure that initial blockdownload is done
