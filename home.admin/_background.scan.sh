@@ -284,12 +284,12 @@ do
      [ "${state}" == "copytarget" ]; then
 
       # dont skip when setup/recovery is in "waitsync" state
-      if [ "${state}" != "waitsync"]
+      if [ "${state}" != "waitsync" ]; then
         echo "Skipping deeper system scan - setupPhase(${setupPhase}) state(${state})"
         sleep 1
         continue
       fi
-      
+
   fi
 
   ####################################################################
