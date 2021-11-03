@@ -115,11 +115,7 @@ if [ "${value}" != "" ]; then
   sync_percentage="${value}%"
 fi
 
-if [ "${btc_blocks_headers}" != "" ]; then
-  blockInfo="${btc_blocks_verified}/${btc_blocks_headers}"
-else
-  blockInfo="${color_red}No Data${color_gray}"
-fi
+# construct blockinfo string
 if [ "${btc_blocks_behind}" == "" ]; then 
   sync="WAIT"
   sync_color="${color_yellow}"
@@ -130,10 +126,14 @@ else
   sync=""
   sync_color="${color_red}"
 fi
+blockInfo="Blocks ${btc_blocks_verified}/${btc_blocks_headers} ${color_gray}Sync ${sync_color}${sync}"
+if [ "${btc_blocks_headers}" == "" ]
+  blockInfo="${color_red}No Data${color_gray}"
+fi
 
 # get address data - use meta on cache to call dynamic variable name
 source <(/home/admin/_cache.sh meta btc_${chain}net_version)
-networkVersion=${value}
+networkVersion="${value} "
 source <(/home/admin/_cache.sh meta btc_${chain}net_peers)
 btc_peers=${value}
 if [ "${btc_peers}" == "" ]; then
@@ -299,8 +299,8 @@ ${color_yellow}    ,' /       ${color_gray}%s, temp %s°C %s°F
 ${color_yellow}  ,'  /_____   ${color_gray}Free Mem ${color_ram}${ram} ${color_gray} HDDuse ${color_hdd}%s${color_gray}
 ${color_yellow},'_____    ,'  ${color_gray}SSH admin@${color_green}${internet_localip}${color_gray} d${internet_rx} u${internet_tx}
 ${color_yellow}      /  ,'    ${color_gray}
-${color_yellow}     / ,'      ${color_gray}${network} ${color_green}${networkVersion} ${color_gray}${chain}net ${networkConnectionsInfo}
-${color_yellow}    /,'        ${color_gray}Blocks ${blockInfo} ${color_gray}Sync ${sync_color}${sync} %s
+${color_yellow}     / ,'      ${color_gray}${network} ${color_green}${networkVersion}${color_gray}${chain}net ${networkConnectionsInfo}
+${color_yellow}    /,'        ${color_gray}${blockInfo} %s
 ${color_yellow}   /'          ${color_gray}
 ${color_yellow}               ${color_gray}${LNline}
 ${color_yellow}               ${color_gray}${ln_channelInfo} ${ln_peersInfo}
