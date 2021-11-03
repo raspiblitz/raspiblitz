@@ -193,12 +193,14 @@ if [ "${lightning}" != "" ]; then
   # lightning is still starting
   if [ "${ln_ready}" != "1" ]; then
 
-    ln_baseInfo="\n                ${color_red}Not Started | Not Ready Yet | No Data"
+    ln_baseInfo="\n               ${color_red}Not Started | Not Ready Yet | No Data"
+    ln_peersInfo=""
 
   # lightning is still syncing
   elif [ "${ln_locked}" == "1" ]; then
 
-      ln_baseInfo="${color_amber}Wallet Locked"
+    ln_baseInfo="${color_amber}Wallet Locked"
+    ln_peersInfo=""
 
   # lightning is still syncing
   elif [ "${ln_sync}" != "1" ]; then
