@@ -103,16 +103,20 @@ while :
 
     fi
 
-    # TODO: ALSO SEPARATE GUI/ACTION FOR THE SCANNING / WALLET UNLOCK / ERROR DETECTION 
     # if lightning is syncing or scanning
-    source <(sudo /home/admin/config.scripts/blitz.statusscan.sh $lightning)
-    if [ "${walletLocked}" == "1" ] || [ "${CLwalletLocked}" == "1" ]; then
+    source <(/home/admin/_cache.sh get \
+      ln_default_locked \
+      btc_default_sync_initialblockdownload \
+      btc_default_blocks_behind \
+    )
+
+    if [ "${ln_default_locked}" == "1" ]; then
       /home/admin/setup.scripts/eventInfoWait.sh "walletlocked" "" lcd
       sleep 3
       continue
     fi
 
-    if [ "${syncedToChain}" != "1" ]; then
+    if [ "${btc_default_sync_initialblockdownload}" == "1" ] || [ ${btc_default_blocks_behind} -gt 1 ]; then
       /home/admin/setup.scripts/eventBlockchainSync.sh lcd
       sleep 3
       continue

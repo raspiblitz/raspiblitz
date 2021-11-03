@@ -350,10 +350,12 @@ if [ ${#system_count_undervoltage} -gt 0 ]; then
 fi
 echo
 
-echo "*** SYSTEM STATUS (can take some seconds to gather) ***"
-sudo /home/admin/config.scripts/blitz.statusscan.sh
-echo
+echo "*** SYSTEM CACHE STATUS ***"
+/home/admin/_cache.sh "export" system_
+/home/admin/_cache.sh "export" ln_default | grep -v "ln_default_address"
+/home/admin/_cache.sh "export" btc_default | grep -v "btc_default_address"
 
+echo
 echo "*** OPTION: SHARE THIS DEBUG OUTPUT ***"
 echo "An easy way to share this debug output on GitHub or on a support chat"
 echo "use the following command and share the resulting link:"

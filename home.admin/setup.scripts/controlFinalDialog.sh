@@ -35,8 +35,11 @@ fi
 # BLOCKCHAIN INFO & OPTIONS
 
 # get fresh data
-source <(sudo /home/admin/config.scripts/blitz.statusscan.sh)
-syncProgressFull=$(echo "${syncProgress}" | cut -d "." -f1)
+source <(/home/admin/_cache.sh get \n
+  btc_default_sync_percentage \n
+  network \n
+)
+syncProgressFull=$(echo "${btc_default_sync_percentage}" | cut -d "." -f1)
 if [ "${syncProgressFull}" != "" ] && [ "${network}" == "bitcoin" ] && [ ${syncProgressFull} -lt 75 ]; then
 
   # offer choice to copy blockchain over LAN

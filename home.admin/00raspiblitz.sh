@@ -75,13 +75,6 @@ if [ "${state}" = "copystation" ]; then
   exit
 fi
 
-# prepare status file
-# TODO: this is to be replaced and unified together with raspiblitz.info
-# when we move to a background monitoring thread & redis for WebUI with v1.8
-sudo touch /var/cache/raspiblitz/raspiblitz.status
-sudo chown admin:admin /var/cache/raspiblitz/raspiblitz.status
-sudo chmod 740 /var/cache/raspiblitz/raspiblitz.status
-
 #####################################
 # SSH MENU LOOP
 # this loop runs until user exits or
@@ -98,56 +91,43 @@ do
   # Access fresh system info on every loop
 
   # refresh system state information
-  source <(/home/admin/_cache.sh get state message)
-
-  # gather fresh status scan and store results in memory
-  # TODO: move this into background loop and unify with redis data storage later
-  #echo "# blitz.statusscan.sh"
-
-  firstStatusScanExists=$(ls /var/cache/raspiblitz/raspiblitz.status | grep -c "raspiblitz.status")
-  #echo "firstStatusScanExists(${firstStatusScanExists})"
-  if [ ${firstStatusScanExists} -eq 1 ]; then
-
-    # run statusscan with timeout - if status scan was not killed it will copy over the 
-    timeout 15 /home/admin/config.scripts/blitz.statusscan.sh ${lightning} > /var/cache/raspiblitz/raspiblitz.status.tmp
-    result=$?
-    #echo "result(${result})"
-    if [ "${result}" == "0" ]; then
-     # statusscan finished in under 10 seconds - use results
-     cp /var/cache/raspiblitz/raspiblitz.status.tmp /var/cache/raspiblitz/raspiblitz.status
-    else
-     # statusscan blocked and was killed - fallback to old results
-     echo "statusscan blocked (${result}) - fallback to old results"
-     sleep 1
-    fi 
-  
-  else
-  
-    # first time run statusscan without timeout
-    echo "# running statusscan for the first time ... can take time"
-    /home/admin/config.scripts/blitz.statusscan.sh ${lightning} > /var/cache/raspiblitz/raspiblitz.status 
-
-  fi
-
-  # load statusscan results
-  source /var/cache/raspiblitz/raspiblitz.status 2>/dev/null
+  source <(/home/admin/_cache.sh get \
+    state \
+    setupPhase \
+    message \
+    network \
+    chain \
+    lightning \
+    internet_localip \
+    system_vm_vagrant \
+  )
 
   #####################################
   # ALWAYS: Handle System States 
   #####################################
 
   ############################
-  # LND Wallet Unlock
+  # Wallet Unlock
 
-  if [ "${lndActive}" == "1" ] && [ "${walletLocked}" == "1" ] && [ "${state}" == "ready" ] && [ "${setupPhase}" == "done" ]; then
-    #echo "# lnd.unlock.sh"
-    /home/admin/config.scripts/lnd.unlock.sh
-  fi
+  if [ "${state}" == "ready" ] && [ "${setupPhase}" == "done" ]; then
 
-  # CL Wallet Unlock 
-  if [ "${CLwalletLocked}" == "1" ] && [ "${state}" == "ready" ] && [ "${setupPhase}" == "done" ]; then
-    /home/admin/config.scripts/cl.hsmtool.sh unlock
-    sleep 5
+    # lnd (get thru meta value)
+    source <(/home/admin/_cache.sh meta ln_lnd_${chain}net_running)
+    lndRunning="${value}"
+    source <(/home/admin/_cache.sh meta ln_lnd_${chain}net_locked)
+    lndLocked="${value}"
+    if [ "${lndActive}" == "1" ] && [ "${lndLocked}" == "1" ]; then
+      /home/admin/config.scripts/lnd.unlock.sh
+    fi
+
+    # c-lightning
+    source <(/home/admin/_cache.sh meta ln_cl_${chain}net_locked)
+    clLocked="${value}"
+    if [ "${clLocked}" == "1" ]; then
+      /home/admin/config.scripts/cl.hsmtool.sh unlock
+      sleep 5
+    fi
+
   fi
 
   #####################################
@@ -187,7 +167,7 @@ do
     echo "***********************************************************"
     if [ "${state}" == "reboot" ]; then
       echo "SSH again into system with:"
-      echo "ssh admin@${localip}"
+      echo "ssh admin@${internet_localip}"
       echo "Use your password A"
       echo "***********************************************************"
     fi
@@ -229,7 +209,7 @@ do
     #echo "# DURING SETUP: Handle System State (${state})"
 
     # when no HDD on Vagrant - just print info & exit (admin info & exit)
-    if [ "${state}" == "noHDD" ] && [ ${vagrant} -gt 0 ]; then
+    if [ "${state}" == "noHDD" ] && [ ${system_vm_vagrant} != "0" ]; then
       echo "***********************************************************"
       echo "VAGRANT INFO"
       echo "***********************************************************"

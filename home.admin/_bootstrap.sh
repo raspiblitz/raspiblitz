@@ -656,11 +656,12 @@ if [ ${isMounted} -eq 0 ]; then
   /home/admin/_cache.sh set message "Provision Done"
 
   # wait until syncProgress is available (neeed for final dialogs)
-  while [ "${syncProgress}" == "" ]
+  /home/admin/_cache.sh set state "waitsync"
+  btc_default_ready="0"
+  while [ "${btc_default_ready}" != "1" ]
   do
-    echo "# Waiting for blockchain sync progress info ..." >> $logFile
-    source <(sudo /home/admin/config.scripts/blitz.statusscan.sh)
-    /home/admin/_cache.sh set state "waitsync"
+    source <(/home/admin/_cache.sh get btc_default_ready)
+    echo "# waitsync loop ... btc_default_ready(${btc_default_ready})" >> $logFile
     sleep 2
   done
 
