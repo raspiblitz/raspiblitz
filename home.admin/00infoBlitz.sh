@@ -18,7 +18,12 @@ source <(/home/admin/_cache.sh get \
   system_ram_mb \
   system_ups_status \
   system_cpu_load \
+  system_temp_celsius \
+  system_temp_fahrenheit \
   runBehindTor \
+  ups \
+  ElectRS \
+  BTCRPCexplorer \
 )
 
 # PARAMETER 1: forcing view on a lightning implementation
@@ -105,6 +110,8 @@ source <(/home/admin/_cache.sh meta btc_${chain}net_blocks_verified)
 btc_blocks_verified="${value}"
 source <(/home/admin/_cache.sh meta btc_${chain}net_blocks_behind)
 btc_blocks_behind="${value}"
+source <(/home/admin/_cache.sh meta btc_${chain}net_sync_percentage)
+sync_percentage="${value}%"
 
 blockInfo="${btc_blocks_verified}/${btc_blocks_headers}"
 if [ "${btc_blocks_behind}" == "" ]; then 
@@ -264,8 +271,6 @@ if [ "${lightning}" == "" ]; then
   LNinfo=""  
 fi
 
-## get uptime and current date & time
-uptime=$(uptime --pretty)
 datetime=$(date -R)
 
 stty sane
