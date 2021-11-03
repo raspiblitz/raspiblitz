@@ -115,7 +115,7 @@ if [ "${value}" != "" ]; then
   sync_percentage="${value}%"
 fi
 
-if [ "${{btc_blocks_headers}" != "" ]; then
+if [ "${btc_blocks_headers}" != "" ]; then
   blockInfo="${btc_blocks_verified}/${btc_blocks_headers}"
 else
   blockInfo="${color_red}No Data${color_gray}"
