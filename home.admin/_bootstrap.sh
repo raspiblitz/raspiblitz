@@ -69,7 +69,18 @@ cat $infoFile >> $logFile
 #########################
 # INIT RaspiBlitz Cache
 #########################
-echo "## INIT RaspiBlitz Cache" >> $logFile
+
+echo "## INIT RaspiBlitz Cache ... wait background.scan.service to finsih first scan loop" >> $logFile
+systemscan_runtime=""
+while [ "${systemscan_runtime}" == "" ]; then
+do
+  sleep 1
+  source <(/home/admin/_cache.sh get systemscan_runtime)
+  echo "- waiting for background.scan.service --> systemscan_runtime(${systemscan_runtime})" >> $logFile
+done
+
+# make sure latest info file is imported
+/home/admin/_cache.sh import $infoFile
 
 # setting basic status info
 /home/admin/_cache.sh set state "starting"

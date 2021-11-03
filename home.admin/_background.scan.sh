@@ -285,6 +285,10 @@ do
 
       # dont skip when setup/recovery is in "waitsync" state
       if [ "${state}" != "waitsync" ]; then
+        endTime=$(date +%s)
+        runTime=$((${endTime}-${startTime}))
+        # write info on scan runtime into cache (use as signal that the first systemscan worked)
+        /home/admin/_cache.sh set systemscan_runtime "${runTime}"
         echo "Skipping deeper system scan - setupPhase(${setupPhase}) state(${state})"
         sleep 1
         continue
