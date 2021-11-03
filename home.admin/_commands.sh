@@ -177,8 +177,11 @@ function torthistx() {
 # command: status
 # start the status screen in the terminal
 function status() {
-  echo "Gathering data - please wait a moment..."
-  /home/admin/_cache.sh set system_scan_all_temp "1"
+  echo
+  echo "Keep X pressed to EXIT loop ... (please wait)"
+  echo
+  /home/admin/_cache.sh set system_scan_all_temp "1" 
+  sleep 5
   while :
   do
     # show the same info as on LCD screen
@@ -196,7 +199,7 @@ function status() {
       break
     fi
   done
-  /home/admin/_cache.sh set system_scan_all_temp "0"
+  /home/admin/_cache.sh set system_scan_all_temp "1"
 }
 
 # command: lnbalance
