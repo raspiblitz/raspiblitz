@@ -81,7 +81,7 @@ fi
 # an error drops user to terminal
 #####################################
 
-echo "# start ssh menu loop"
+echo "# starting ssh menu loop ... "
 exitMenuLoop=0
 doneIBD=0
 while [ ${exitMenuLoop} -eq 0 ]
@@ -92,6 +92,7 @@ do
 
   # refresh system state information
   source <(/home/admin/_cache.sh get \
+    systemscan_runtime \
     state \
     setupPhase \
     btc_default_synced \
@@ -103,6 +104,13 @@ do
     internet_localip \
     system_vm_vagrant \
   )
+
+  # background.scan is not ready yet
+  if [ "${systemscan_runtime}" == "" ]; then
+    echo "# background.scan not ready yet ... "
+    sleep 4
+    continue
+  fi
 
   #####################################
   # ALWAYS: Handle System States 
