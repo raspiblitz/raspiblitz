@@ -42,7 +42,7 @@ if [ "${PARAMETER_CHAIN}" == "signet" ]; then
 fi
 
 # generate netprefix
-${netprefix}=${chain:0:1}
+netprefix=${chain:0:1}
 if [ "${netprefix}" == "m" ]; then
   netprefix=""
 fi
