@@ -110,21 +110,15 @@ do
   ############################
   # Wallet Unlock
 
-  if [ "${state}" == "ready" ] && [ "${setupPhase}" == "done" ]; then
+  if [ "${state}" == "ready" ] && [ "${setupPhase}" == "done" ] && [ "${ln_default_locked}" == "1" ]; then
 
-    # lnd (get thru meta value)
-    source <(/home/admin/_cache.sh meta ln_lnd_${chain}net_running)
-    lndRunning="${value}"
-    source <(/home/admin/_cache.sh meta ln_lnd_${chain}net_locked)
-    lndLocked="${value}"
-    if [ "${lndActive}" == "1" ] && [ "${lndLocked}" == "1" ]; then
+    # unlock lnd
+    if [ "${lightning}" == "lnd" ]; then
       /home/admin/config.scripts/lnd.unlock.sh
     fi
 
-    # c-lightning
-    source <(/home/admin/_cache.sh meta ln_cl_${chain}net_locked)
-    clLocked="${value}"
-    if [ "${clLocked}" == "1" ]; then
+    # unlock c-lightning
+    if [ "${lightning}" == "cl" ]; then
       /home/admin/config.scripts/cl.hsmtool.sh unlock
       sleep 5
     fi
