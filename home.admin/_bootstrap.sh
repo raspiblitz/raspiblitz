@@ -35,6 +35,9 @@ echo "Running RaspiBlitz Bootstrap ${codeVersion}" >> $logFile
 date >> $logFile
 echo "***********************************************" >> $logFile
 
+# make sure SSH server is configured & running
+sudo /home/admin/config.scripts/blitz.ssh.sh checkrepair >> ${logFile}
+
 ################################
 # INIT raspiblitz.info
 ################################
@@ -93,10 +96,7 @@ source ${configFile} 2>/dev/null
 /home/admin/_cache.sh outdate internet_localip 0
 
 ######################################
-# CHECK SD CARD INCONSISTENT STATE
-
-# make sure SSH server is configured & running
-sudo /home/admin/config.scripts/blitz.ssh.sh checkrepair >> ${logFile}
+# CHECK SD CARD STATE
 
 # when a file 'stop' is on the sd card boot partition - stop for manual provision
 flagExists=$(sudo ls /boot/stop | grep -c 'stop')
