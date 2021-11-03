@@ -114,7 +114,7 @@ fi
 if [ "$2" = "config" ]; then
 
   # get data
-  lndConfigData=$(cat $lndHomeDir/${netprefix}lnd.conf)
+  lndConfigData=$(cat "${lndHomeDir}/${netprefix}lnd.conf")
   if [ "${lndConfigData}" == "" ]; then
     echo "error='no config'"
     exit 1
