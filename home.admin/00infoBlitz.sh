@@ -210,14 +210,21 @@ if [ "${lightning}" != "" ]; then
   # OK lightning is ready - get more details
   else
 
+
     # create fee report
-    source <(/home/admin/_cache.sh meta ln_${lightning}_${chain}net_fees_daily)
-    ln_dailyfees="${value}"
-    source <(/home/admin/_cache.sh meta ln_${lightning}_${chain}net_fees_weekly)
-    ln_weeklyfees="${value}"
-    source <(/home/admin/_cache.sh meta ln_${lightning}_${chain}net_fees_month)
-    ln_monthlyfees="${value}"
-    ln_feeReport="Fee Report (D-W-M): ${color_green}${ln_dailyfees}-${ln_weeklyfees}-${ln_monthlyfees} ${color_gray}sat"
+    if [ "${lightning}" == "lnd" ]; then
+      source <(/home/admin/_cache.sh meta ln_${lightning}_${chain}net_fees_daily)
+      ln_dailyfees="${value}"
+      source <(/home/admin/_cache.sh meta ln_${lightning}_${chain}net_fees_weekly)
+      ln_weeklyfees="${value}"
+      source <(/home/admin/_cache.sh meta ln_${lightning}_${chain}net_fees_month)
+      ln_monthlyfees="${value}"
+      ln_feeReport="Fee Report (D-W-M): ${color_green}${ln_dailyfees}-${ln_weeklyfees}-${ln_monthlyfees} ${color_gray}${netprefix}sat"
+    else
+      source <(/home/admin/_cache.sh meta ln_${lightning}_${chain}net_fees_total)
+      ln_totalfees="${value}"
+      ln_feeReport="Fee Report Total: ${color_green}${ln_totalfees} ${color_gray}${netprefix}sat"
+    fi
 
     # on-chain wallet info
     ln_pendingonchain=""
