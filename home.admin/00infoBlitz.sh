@@ -127,8 +127,8 @@ else
   sync_color="${color_red}"
 fi
 blockInfo="Blocks ${btc_blocks_verified}/${btc_blocks_headers} ${color_gray}Sync ${sync_color}${sync}"
-if [ "${btc_blocks_headers}" == "" ]
-  blockInfo="${color_red}No Data${color_gray}"
+if [ "${btc_blocks_headers}" == "" ]; then
+  blockInfo="${color_red}Not Started | Not Ready Yet | No Data${color_gray}"
 fi
 
 # get address data - use meta on cache to call dynamic variable name
