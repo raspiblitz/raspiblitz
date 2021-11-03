@@ -109,7 +109,7 @@ elif [ "$1" = "keyvalue" ] && [ "$2" = "on" ]; then
   sudo apt install -y redis-server
 
   # edit config: dont save to disk
-  sudo sed -i "/^save .*/d" /etc/redis/redis.confl
+  sudo sed -i "/^save .*/d" /etc/redis/redis.conf
 
   # restart with new config
   sudo systemctl restart redis-server
