@@ -194,12 +194,12 @@ function status() {
     # check if user wants to abort session
     if [ "${keyPressed}" = "x" ]; then
       echo
+      /home/admin/_cache.sh set system_scan_all_temp "0"
       echo "Returning to menu ....."
       sleep 4
       break
     fi
   done
-  /home/admin/_cache.sh set system_scan_all_temp "1"
 }
 
 # command: lnbalance
