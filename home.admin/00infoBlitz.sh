@@ -111,9 +111,15 @@ btc_blocks_verified="${value}"
 source <(/home/admin/_cache.sh meta btc_${chain}net_blocks_behind)
 btc_blocks_behind="${value}"
 source <(/home/admin/_cache.sh meta btc_${chain}net_sync_percentage)
-sync_percentage="${value}%"
+if [ "${value}" != "" ]; then
+  sync_percentage="${value}%"
+fi
 
-blockInfo="${btc_blocks_verified}/${btc_blocks_headers}"
+if [ "${{btc_blocks_headers}" != "" ]; then
+  blockInfo="${btc_blocks_verified}/${btc_blocks_headers}"
+else
+  blockInfo="${color_red}No Data${color_gray}"
+fi
 if [ "${btc_blocks_behind}" == "" ]; then 
   sync="WAIT"
   sync_color="${color_yellow}"
@@ -130,7 +136,9 @@ source <(/home/admin/_cache.sh meta btc_${chain}net_version)
 networkVersion=${value}
 source <(/home/admin/_cache.sh meta btc_${chain}net_peers)
 btc_peers=${value}
-if [ "${btc_peers}" != "" ] && [  ${btc_peers} -gt 0 ]; then
+if [ "${btc_peers}" == "" ]; then
+  networkConnectionsInfo=""
+elif [ ${btc_peers} -gt 0 ]; then
   networkConnectionsInfo="${color_green}${btc_peers} ${color_gray}peers"
 else
   networkConnectionsInfo="${color_red}${btc_peers} ${color_gray}peers"
@@ -185,7 +193,7 @@ if [ "${lightning}" != "" ]; then
   # lightning is still starting
   if [ "${ln_ready}" != "1" ]; then
 
-    ln_baseInfo="${color_red}Not Started | Not Ready Yet"
+    ln_baseInfo="${color_red}Not Started | Not Ready Yet | No Data"
 
   # lightning is still syncing
   elif [ "${ln_locked}" == "1" ]; then
