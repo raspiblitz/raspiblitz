@@ -12,6 +12,8 @@ source <(/home/admin/_cache.sh get \
   hdd_used_info \
   internet_localip \
   internet_public_ip_clean \
+  system_ram_available_mb \
+  system_ram_mb \
   system_ups_status \
   system_cpu_load \
   runBehindTor \
@@ -79,7 +81,7 @@ fi
 
 # ram info string
 ram=$(printf "%sM / %sM" "${system_ram_available_mb}" "${system_ram_mb}")
-if [ "${system_ram_available_mb}" == "" ] && [ ${system_ram_available_mb} -lt 50 ]; then
+if [ "${system_ram_available_mb}" != "" ] && [ ${system_ram_available_mb} -lt 50 ]; then
   color_ram="${color_red}\e[7m"
 else
   color_ram=${color_green}
