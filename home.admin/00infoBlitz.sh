@@ -92,37 +92,3 @@ torInfo=""
 if [ "${runBehindTor}" = "on" ]; then
   torInfo="+ Tor"
 fi
-
-#######################
-# BITCOIN INFO
-
-# get block data - use meta on cache to call dynamic variable name
-source <(/home/admin/_cache.sh meta btc_${chain}net_blocks_headers)
-btc_blocks_headers=${value}
-source <(/home/admin/_cache.sh meta btc_${chain}net_blocks_verified)
-btc_blocks_verified=${value}
-source <(/home/admin/_cache.sh meta btc_${chain}net_blocks_behind)
-btc_blocks_behind=${value}
-
-blockInfo="${btc_blocks_verified}/${btc_blocks_headers}"
-if [ "${btc_blocks_behind}" == "" ]; then 
-  sync="WAIT"
-  sync_color="${color_yellow}"
-if [ ${btc_blocks_behind} -lt 2 ]; then 
-  sync="OK"
-  sync_color="${color_green}"
-else
-  sync=""
-  sync_color="${color_red}"
-fi
-
-# get address data - use meta on cache to call dynamic variable name
-source <(/home/admin/_cache.sh meta btc_${chain}net_peers)
-btc_peers=${value}
-source <(/home/admin/_cache.sh meta btc_${chain}net_version)
-networkVersion=${value}
-if [ "${btc_peers}" != "" ] && [  ${btc_peers} -gt 0 ]; then
-  networkConnectionsInfo="${color_green}${btc_peers} ${color_gray}peers"
-else
-  networkConnectionsInfo="${color_red}${btc_peers} ${color_gray}peers"
-fi
