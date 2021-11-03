@@ -102,14 +102,14 @@ echo "importing: _version.info"
 # basic hardware info (will not change)
 source <(/home/admin/_cache.sh valid \
   system_board \
-  system_ramMB \
-  system_ramMB \
+  system_ram_mb \
+  system_ram_gb \
 )
 if [ "${stillvalid}" == "0" ]; then
   source <(/home/admin/config.scripts/blitz.hardware.sh status)
   /home/admin/_cache.sh set system_board "${board}"
-  /home/admin/_cache.sh set system_ramMB "${ramMB}"
-  /home/admin/_cache.sh set system_ramMB "${ramGB}"
+  /home/admin/_cache.sh set system_ram_mb "${ramMB}"
+  /home/admin/_cache.sh set system_ram_gb "${ramGB}"
 fi
 
 # VM detect vagrant
@@ -198,8 +198,10 @@ do
 
   source <(/home/admin/_cache.sh valid \
     hdd_mounted \
-    hdd_ssd hdd_btrfs \
-    hdd_raid hdd_uasp \
+    hdd_ssd \
+    hdd_btrfs \
+    hdd_raid \
+    hdd_uasp \
     hdd_capacity_bytes \
     hdd_capacity_gb \
     hdd_free_bytes \
@@ -226,7 +228,29 @@ do
   #################
   # INTERNET
 
-  # basic local connection
+   # GLOBAL & PUBLIC IP
+  sudo <(/home/admin/_cache.sh get runBehindTor)
+  if [ "${runBehindTor}" == "off" ]; then
+    source <(/home/admin/_cache.sh valid \
+      internet_public_ipv6 \
+      internet_public_ip_detected \
+      internet_public_ip_forced \
+      internet_public_ip_clean \
+    )
+    if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${HOUR} ]; then
+      echo "updating: /home/admin/config.scripts/internet.sh status global"
+      source <(/home/admin/config.scripts/internet.sh status global)
+      /home/admin/_cache.sh set internet_public_ipv6 "${ipv6}"
+      # globalip --> ip detected from the outside
+      /home/admin/_cache.sh set internet_public_ip_detected "${globalip}"
+      # publicip --> may consider the static IP overide by raspiblitz config
+      /home/admin/_cache.sh set internet_public_ip_forced "${publicip}"
+      # cleanip --> the publicip with no brackets like used on IPv6
+      /home/admin/_cache.sh set internet_public_ip_clean "${cleanip}"
+    fi
+  fi
+
+  # LOCAL IP & data
   source <(/home/admin/_cache.sh valid \
     internet_localip \
     internet_localiprange \
@@ -273,6 +297,15 @@ do
 
   # read/update config values
   source /mnt/hdd/raspiblitz.conf
+
+  # check if a one time `system_scan_all_once` is set on cache
+  # will trigger a scan_all for one loop
+  source <(/home/admin/_cache.sh get system_scan_all_once)
+  if [ "${system_scan_all_once}" == "1" ]; then
+    echo "system_scan_all_once found --> TRIGGER system_scan_all for one loop"
+    /home/admin/_cache.sh set system_scan_all_once "0"
+    system_scan_all="on"
+  fi
 
   ###################
   # BITCOIN
@@ -398,11 +431,11 @@ do
           if [ "${error}" == "" ]; then
             /home/admin/_cache.sh set btc_${CHAIN}net_peers "${btc_peers}"
             /home/admin/_cache.sh set btc_${CHAIN}net_address "${btc_address}"
-            /home/admin/_cache.sh set btc_${CHAIN}net_port "${btc_btc_port}"
+            /home/admin/_cache.sh set btc_${CHAIN}net_port "${btc_port}"
             if [ "${isDefaultChain}" == "1" ]; then
               /home/admin/_cache.sh set btc_default_peers "${btc_peers}"
               /home/admin/_cache.sh set btc_default_address "${btc_address}"
-              /home/admin/_cache.sh set btc_default_port "${btc_btc_port}"
+              /home/admin/_cache.sh set btc_default_port "${btc_port}"
             fi
           else
             echo "!! ERROR --> ${error}"
