@@ -107,7 +107,7 @@ do
 
   # background.scan is not ready yet
   if [ "${systemscan_runtime}" == "" ]; then
-    echo "# background.scan not ready yet ... "
+    echo "# background.scan not ready yet ... (please wait)"
     sleep 4
     continue
   fi
