@@ -135,7 +135,7 @@ ln_alias=${hostname}
 ln_baseInfo="-"
 ln_channelInfo="\n"
 ln_external="\n"
-ln_feeReport""
+ln_feeReport=""
 ln_peersInfo=""
 ln_version=""
 ln_publicColor="${color_green}"
