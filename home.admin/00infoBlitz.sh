@@ -229,6 +229,8 @@ if [ "${lightning}" != "" ]; then
 
 fi
 
+exit 1
+
 # show JoinMarket stats in place of the LND URI only if the Yield Generator is running
 source /home/joinmarket/joinin.conf 2>/dev/null
 if [ "${joinmarket}" = "on" ] && [ $(sudo -u joinmarket pgrep -f "python yg-privacyenhanced.py $YGwallet --wallet-password-stdin" 2>/dev/null | wc -l) -gt 2 ]; then
@@ -249,11 +251,11 @@ else
     lastLine="\
 ${color_yellow}
 ${color_yellow}${ln_publicColor}${ln_external}${color_gray}"
-  fi
+fi
 
-if [ "${lightning}" == "cl" ];then
+if [ "${lightning}" == "cl" ]; then
   LNline="C-LIGHTNING ${color_green}${ln_version}\n               ${ln_baseInfo}"
-elif [ "${lightning}"  == "lnd" ];then
+elif [ "${lightning}"  == "lnd" ]; then
   LNline="LND ${color_green}${ln_version} ${ln_baseInfo}"
 fi
 
@@ -330,5 +332,3 @@ else
   fi
 
 fi
-
-# EOF
