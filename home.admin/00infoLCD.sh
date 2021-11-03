@@ -105,18 +105,19 @@ while :
 
     # if lightning is syncing or scanning
     source <(/home/admin/_cache.sh get \
+      lightning \
       ln_default_locked \
       btc_default_sync_initialblockdownload \
       btc_default_blocks_behind \
     )
 
-    if [ "${ln_default_locked}" == "1" ]; then
+    if [ "${lightning}" != "" ] && [ "${lightning}" != "none" ] && [ "${ln_default_locked}" == "1" ]; then
       /home/admin/setup.scripts/eventInfoWait.sh "walletlocked" "" lcd
       sleep 3
       continue
     fi
 
-    if [ "${btc_default_sync_initialblockdownload}" == "1" ] || [ ${btc_default_blocks_behind} -gt 1 ]; then
+    if [ "${btc_default_synced}" != "1" ]; then
       /home/admin/setup.scripts/eventBlockchainSync.sh lcd
       sleep 3
       continue
