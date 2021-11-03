@@ -223,7 +223,7 @@ if [ "${lightning}" != "" ]; then
     else
       source <(/home/admin/_cache.sh meta ln_${lightning}_${chain}net_fees_total)
       ln_totalfees="${value}"
-      ln_feeReport="Fee Report Total: ${color_green}${ln_totalfees} ${color_gray}${netprefix}sat"
+      ln_feeReport="Fee Report: ${color_green}${ln_totalfees} ${color_gray}${netprefix}sat"
     fi
 
     # on-chain wallet info

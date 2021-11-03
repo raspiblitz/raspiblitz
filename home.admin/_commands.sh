@@ -181,7 +181,7 @@ function status() {
   echo "Keep X pressed to EXIT loop ... (please wait)"
   echo
   /home/admin/_cache.sh set system_scan_all_temp "1" 
-  sleep 5
+  sleep 4
   while :
   do
     # show the same info as on LCD screen
