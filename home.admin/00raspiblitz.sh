@@ -95,6 +95,7 @@ do
     state \
     setupPhase \
     btc_default_synced \
+    ln_default_locked \
     message \
     network \
     chain \
