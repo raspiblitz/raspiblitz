@@ -10,14 +10,18 @@
 # basic install of Tor is done by the build script now .. on/off will just switch service on/off
 # also thats where the sources are set and the preparation is done
 
+torrc="/etc/tor/torrc"
+
+## https://github.com/keroserene/snowflake/commits/master
+snowflake_commit_hash="af6e2c30e1a6aacc6e7adf9a31df0a387891cc37"
+
+
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = *help* ]; then
  echo "script to switch Tor on or off"
  echo "tor.network.sh [status|on|off|btcconf-on|btcconf-off|update]"
  exit 1
 fi
-
-torrc="/etc/tor/torrc"
 
 activateBitcoinOverTor()
 {
@@ -146,7 +150,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo -e "${WHITE}[!] COULDN'T CLONE THE SNOWFLAKE REPOSITORY!${NOCOLOR}"
     echo -e "${RED}[+] The Snowflake repository may be blocked or offline!${NOCOLOR}"
     echo -e "${RED}[+] Please try again later and if the problem persists, please report it${NOCOLOR}"
+  else
+    git -C ~/downloads/snowflake checkout "${snowflake_commit_hash}"
   fi
+
   bash /home/admin/config.scripts/bonus.go.sh
   export GO111MODULE="on"
   cd ~/downloads/snowflake/proxy
