@@ -199,6 +199,9 @@ do
   # when setup is done & state is ready .. jump to main menu
   if [ "${setupPhase}" == "done" ] && [ "${state}" == "ready" ]; then
     # MAIN MENU
+    # remove higher scan rate on values
+    /home/admin/_cache.sh focus ln_default_locked -1
+    /home/admin/_cache.sh focus btc_default_synced -1
     echo "# 00mainMenu.sh"
     /home/admin/00mainMenu.sh
     # use the exit code from main menu as signal if menu loop should exited
