@@ -406,7 +406,8 @@ do
 
         # check if network needs update
         source <(/home/admin/_cache.sh valid \
-         btc_${CHAIN}net_blocks_headers \
+          btc_${CHAIN}net_synced \
+          btc_${CHAIN}net_blocks_headers \
           btc_${CHAIN}net_blocks_verified \
           btc_${CHAIN}net_blocks_behind \
           btc_${CHAIN}net_sync_progress \
@@ -415,6 +416,7 @@ do
         )
         if [ "${isDefaultChain}" == "1" ] && [ "${stillvalid}" == "1" ]; then
           source <(/home/admin/_cache.sh valid \
+          btc_default_synced \
           btc_default_blocks_headers \
           btc_default_blocks_verified \
           btc_default_blocks_behind \
