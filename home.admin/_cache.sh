@@ -317,10 +317,15 @@ elif [ "$1" = "focus" ]; then
     exit
   fi
 
-  # sanatize parameters
-  if [ "${outdatesecs}" != "-1" ]; then
-    outdatesecs="${outdatesecs//[^0-9.]/}"
+  # delete outdate policy field ==> default
+  if [ "${outdatesecs}" == "-1" ]; then
+    echo "# redis-cli del ${keystr}${META_OUTDATED_SECONDS}"
+    redis-cli del ${keystr}${META_OUTDATED_SECONDS}
+    exit
   fi
+
+  # sanatize parameters (if not -1)
+  outdatesecs="${outdatesecs//[^0-9.]/}"
 
   # check that key & value are given
   if [ "${outdatesecs}" == "" ]; then
