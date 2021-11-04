@@ -112,6 +112,9 @@ elif [ $LNTYPE = lnd ];then
   command="$lncli_alias sendpayment --force --pay_req=${invoice}"
 fi
 
+# raise high focus on lightning channel balance next 5min
+/home/admin/_cache.sh focus ln_${LNTYPE}_${$CHAIN}_channels_balance 0 300
+
 # info output
 clear
 echo "************************************************************"
