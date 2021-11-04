@@ -814,7 +814,14 @@ sudo systemctl enable ${network}d
 /home/admin/_cache.sh set message "Node Running"
 
 # relax systemscan on certain values
-/home/admin/_cache.sh outdate internet_localip 5
+/home/admin/_cache.sh outdate internet_localip -1
+
+# if node is stil in inital blockchain download
+source <(/home/admin/_cache.sh get btc_default_sync_initialblockdownload)
+if [ "${btc_default_sync_initialblockdownload}" == "1" ]; then
+  echo "Node is still in IBD .. refresh btc_default_sync_progress faster" >> $logFile
+  /home/admin/_cache.sh outdate btc_default_sync_progress 0
+fi
 
 echo "DONE BOOTSTRAP" >> $logFile
 exit 0

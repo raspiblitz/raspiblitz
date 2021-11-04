@@ -19,10 +19,11 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ];
   echo 
   echo "_cache.sh increment [key1]"
   echo
-  echo "_cache.sh outdate [key] [value]"
+  echo "_cache.sh outdate [key] [value] [?duration-seconds]"
   echo "# set in how many seconds value is marked as outdated or"
   echo "# -1 = never outdated (default)"  
   echo "# 0  = always outdated"
+  echo "# set a 'duration-seconds' after defaults to -1 (optional)"
   echo 
   echo "_cache.sh meta [key] [?default]"
   echo "# get single key with additional metadata:"
@@ -298,6 +299,7 @@ elif [ "$1" = "outdate" ]; then
   # get parameters
   keystr=$2
   outdatesecs=$3
+  durationsecs=$4
 
   # sanatize parameters
   if [ "${outdatesecs}" != "-1" ]; then
@@ -310,9 +312,15 @@ elif [ "$1" = "outdate" ]; then
     exit 1
   fi
 
+    # add an expire flag if given
+  additionalParams=""
+  if [ "${durationsecs//[^0-9.]/}" != "" ]; then
+    additionalParams="EX ${durationsecs//[^0-9.]/}"
+  fi
+
   # store the seconds policy
-  echo "# redis-cli set ${keystr}${META_OUTDATED_SECONDS} ${outdatesecs}"
-  redis-cli set ${keystr}${META_OUTDATED_SECONDS} "${outdatesecs}"
+  echo "# redis-cli set ${keystr}${META_OUTDATED_SECONDS} ${outdatesecs} ${additionalParams}"
+  redis-cli set ${keystr}${META_OUTDATED_SECONDS} "${outdatesecs} ${additionalParams}"
 
   # set/renew exipire valid flag (important in case the key had before no expire)
   redis-cli set ${keystr}${META_VALID_FLAG} "1" EX ${outdatesecs} 1>/dev/null

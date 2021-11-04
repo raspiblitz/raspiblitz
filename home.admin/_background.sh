@@ -440,6 +440,9 @@ do
           sed -i "s/^dbcache=.*/dbcache=128/g" /mnt/hdd/${network}/${network}.conf
         fi
 
+        # relax sanning on sync progress
+        /home/admin/_cache.sh outdate btc_default_sync_progress -1
+
       fi
     fi
   fi
