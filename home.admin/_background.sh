@@ -337,7 +337,7 @@ do
           echo "--> Offsite-Backup SCP Server"
           if [ "${scpBackupOptions}" == "" ]; then
             scpBackupOptions="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
-          fi 
+          fi
           # its ok to ignore known host, because data is encrypted (worst case of MiM would be: no offsite channel backup)
           # but its more likely that without ignoring known host, script might not run thru and that way: no offsite channel backup
           sudo scp ${scpBackupOptions} ${localBackupPath} ${scpBackupTarget}/

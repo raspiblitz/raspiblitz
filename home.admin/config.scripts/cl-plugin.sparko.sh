@@ -43,7 +43,7 @@ Accept the self-signed SSL certificate with the fingerprint:
 ${fingerprint}\n
 ${toraddresstext}
 " 17 67
-  
+
   /home/admin/config.scripts/blitz.display.sh hide
 
   echo "# please wait ..."
@@ -63,7 +63,7 @@ fi
 if [ $1 = connect ];then
   localip=$(ip addr | grep 'state UP' -A2 | grep -E -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
   toraddress=$(sudo cat /mnt/hdd/tor/${netprefix}sparko/hostname)
-  accesskey=$(sudo cat ${CLCONF} | grep "^sparko-keys=" | cut -d= -f2 | cut -d';' -f1) 
+  accesskey=$(sudo cat ${CLCONF} | grep "^sparko-keys=" | cut -d= -f2 | cut -d';' -f1)
   url="https://${localip}:${portprefix}9000/"
   #string="${url}?access-key=${accesskey}"
   #/home/admin/config.scripts/blitz.display.sh qr "$string"
@@ -109,7 +109,7 @@ if [ "$1" = "on" ];then
   isARM=$(uname -m | grep -c 'arm')
   isAARCH64=$(uname -m | grep -c 'aarch64')
   isX86_64=$(uname -m | grep -c 'x86_64')
-      
+
   if [ ${isARM} -eq 1 ] ; then
     DISTRO="linux-arm"
   elif [ ${isAARCH64} -eq 1 ] ; then
@@ -117,7 +117,7 @@ if [ "$1" = "on" ];then
   elif [ ${isX86_64} -eq 1 ] ; then
     DISTRO="linux_amd64"
   fi
-  
+
   if [ ! -f /home/bitcoin/cl-plugins-available/sparko ];then
     sudo -u bitcoin mkdir /home/bitcoin/cl-plugins-available
     # download binary
@@ -134,7 +134,7 @@ if [ "$1" = "on" ];then
 
   if [ ! -f /home/bitcoin/.lightning/sparko-tls/key.pem ];then
     # create a self signed cert https://github.com/fiatjaf/sparko#how-to-use
-    /home/admin/config.scripts/internet.selfsignedcert.sh   
+    /home/admin/config.scripts/internet.selfsignedcert.sh
     # sparko looks for specific filenames
     sudo -u bitcoin mkdir /home/bitcoin/.lightning/sparko-tls
     sudo ln -sf /mnt/hdd/app-data/selfsignedcert/selfsigned.key \
@@ -170,7 +170,7 @@ sparko-keys=${masterkeythatcandoeverything}; ${secretaccesskeythatcanreadstuff}:
   sudo ufw allow "${portprefix}9000" comment "${netprefix}sparko"
 
   # hidden service to https://xx.onion
-  /home/admin/config.scripts/internet.hiddenservice.sh ${netprefix}sparko 443 ${portprefix}9000
+  /home/admin/config.scripts/tor.onion-service.sh ${netprefix}sparko 443 ${portprefix}9000
 
   # setting value in raspi blitz config
   sudo sed -i "s/^${netprefix}sparko=.*/${netprefix}sparko=on/g" /mnt/hdd/raspiblitz.conf
@@ -185,13 +185,13 @@ sparko-keys=${masterkeythatcandoeverything}; ${secretaccesskeythatcanreadstuff}:
   echo "# Monitor with:"
   echo "sudo journalctl | grep sparko | tail -n5"
   echo "sudo tail -n 100 -f /home/bitcoin/.lightning/${CLNETWORK}/cl.log | grep sparko"
-  
+
 fi
 
 if [ "$1" = "off" ];then
   # delete symlink
   sudo rm -rf /home/bitcoin/${netprefix}cl-plugins-enabled/sparko
-  
+
   echo "# Editing ${CLCONF}"
   sudo sed -i "/^sparko/d" ${CLCONF}
 
@@ -200,8 +200,8 @@ if [ "$1" = "off" ];then
 
   echo "# Deny port ${portprefix}9000 through the firewall"
   sudo ufw deny "${portprefix}9000"
-  
-  /home/admin/config.scripts/internet.hiddenservice.sh off ${netprefix}sparko
+
+  /home/admin/config.scripts/tor.onion-service.sh off ${netprefix}sparko
 
   # purge
   if [ "$(echo "$@" | grep -c purge)" -gt 0 ];then

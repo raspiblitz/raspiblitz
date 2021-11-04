@@ -173,7 +173,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       echo
     fi
   fi
-    
+
   echo "# Updating Firewall"
   sudo ufw allow ${RTLHTTP} comment "${systemdService} HTTP"
   sudo ufw allow $((RTLHTTP+1)) comment "${systemdService} HTTPS"
@@ -222,7 +222,7 @@ WantedBy=multi-user.target
     sudo sed -i "s/^Wants=.*/Wants=${netprefix}lightningd.service/g" /etc/systemd/system/${systemdService}.service
     sudo sed -i "s/^After=.*/After=${netprefix}lightningd.service/g" /etc/systemd/system/${systemdService}.service
 
-    # set up C-LightningREST  
+    # set up C-LightningREST
     /home/admin/config.scripts/cl.rest.sh on ${CHAIN}
   fi
 
@@ -231,8 +231,8 @@ WantedBy=multi-user.target
 
   # Hidden Service for RTL if Tor is active
   if [ "${runBehindTor}" = "on" ]; then
-    # make sure to keep in sync with internet.tor.sh script
-    /home/admin/config.scripts/internet.hiddenservice.sh ${netprefix}${typeprefix}RTL 80 $((RTLHTTP+2)) 443 $((RTLHTTP+3))
+    # make sure to keep in sync with tor.network.sh script
+    /home/admin/config.scripts/tor.onion-service.sh ${netprefix}${typeprefix}RTL 80 $((RTLHTTP+2)) 443 $((RTLHTTP+3))
   fi
 
   # nginx configuration
@@ -267,7 +267,7 @@ fi
 
 ##########################
 # CONNECT SERVICES
-# will be called by lit or loop services to make sure services 
+# will be called by lit or loop services to make sure services
 # are connected or on RTL install/update
 #########################
 
@@ -281,7 +281,7 @@ if [ "$1" = "connect-services" ]; then
 
   # only run when RTL is installed
   if [ -d /home/rtl ]; then
-    echo "## RTL CONNECT-SERVICES" 
+    echo "## RTL CONNECT-SERVICES"
   else
     echo "# no RTL installed - no need to connect any services"
     exit
@@ -311,7 +311,7 @@ if [ "$1" = "connect-services" ]; then
     echo "# No lit or loop single detected"
   fi
 
-  echo "# RTL CONNECT-SERVICES done" 
+  echo "# RTL CONNECT-SERVICES done"
   exit 0
 
 fi
@@ -335,7 +335,7 @@ if [ "$1" = "prestart" ]; then
     exit 1
   fi
 
-  echo "## RTL PRESTART CONFIG (called by systemd prestart)" 
+  echo "## RTL PRESTART CONFIG (called by systemd prestart)"
 
   # getting the up-to-date RPC password
   RPCPASSWORD=$(cat /mnt/hdd/${network}/${network}.conf | grep "^rpcpassword=" | cut -d "=" -f2)
@@ -357,7 +357,7 @@ if [ "$1" = "prestart" ]; then
   echo "# PREPARE /home/rtl/${systemdService}/RTL-Config.json"
   # make and clean directory
   mkdir -p /home/rtl/${systemdService}
-  rm -f /home/rtl/${systemdService}/RTL-Config.json 2>/dev/null 
+  rm -f /home/rtl/${systemdService}/RTL-Config.json 2>/dev/null
   # copy template
   cp /home/rtl/RTL/docs/Sample-RTL-Config.json /home/rtl/${systemdService}/RTL-Config.json
   chmod 600 /home/rtl/${systemdService}/RTL-Config.json
@@ -437,7 +437,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # Hidden Service if Tor is active
   if [ "${runBehindTor}" = "on" ]; then
-    /home/admin/config.scripts/internet.hiddenservice.sh off ${systemdService}
+    /home/admin/config.scripts/tor.onion-service.sh off ${systemdService}
   fi
 
   isInstalled=$(sudo ls /etc/systemd/system/${systemdService}.service 2>/dev/null | grep -c "${systemdService}.service")
@@ -504,7 +504,7 @@ fi
 #    sudo -u rtl npm install --only=prod
 #    currentRTLcommit=$(cd /home/rtl/RTL; git describe --tags)
 #    echo "# Updated RTL to $currentRTLcommit"
-#  else 
+#  else
 #    echo "# Unknown option: $updateOption"
 #  fi
 #

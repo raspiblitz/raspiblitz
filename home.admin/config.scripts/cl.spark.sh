@@ -82,7 +82,7 @@ if [ $1 = on ];then
   sudo -u bitcoin git reset --hard ${SPARKVERSION} || exit 1
   sudo -u bitcoin npm install @babel/cli
   sudo -u bitcoin npm run dist:npm || exit 1
-  
+
   if [ ! -f /home/bitcoin/.spark-wallet/tls/key.pem ];then
     # create a self signed cert https://github.com/fiatjaf/spark#how-to-use
     /home/admin/config.scripts/internet.selfsignedcert.sh
@@ -110,7 +110,7 @@ onion
 "   | sudo -u bitcoin tee /home/bitcoin/.spark-wallet/${netprefix}config
   fi
 
-  #################  
+  #################
   # SYSTEMD SERVICE
   #################
   # https://raw.githubusercontent.com/shesek/spark-wallet/master/scripts/spark-wallet.service
@@ -145,15 +145,15 @@ PrivateDevices=true
 WantedBy=multi-user.target
 " | sudo tee /etc/systemd/system/${systemdService}.service
   sudo chown root:root /etc/systemd/system/${systemdService}.service
-  
+
   echo "# Allowing port ${portprefix}8000 through the firewall"
   sudo ufw allow "${portprefix}8000" comment "${netprefix}spark-wallet"
-  
-  /home/admin/config.scripts/internet.hiddenservice.sh ${netprefix}spark-wallet 443 ${portprefix}8000
+
+  /home/admin/config.scripts/tor.onion-service.sh ${netprefix}spark-wallet 443 ${portprefix}8000
 
   # setting value in raspi blitz config
   sudo sed -i "s/^${netprefix}spark=.*/${netprefix}spark=on/g" /mnt/hdd/raspiblitz.conf
-  
+
   sudo systemctl enable ${systemdService}
   sudo systemctl start ${systemdService}
   echo "# OK - the ${systemdService}.service is now enabled & started"
@@ -166,8 +166,8 @@ if [ $1 = off ];then
 
   sudo systemctl stop ${systemdService} 2>/dev/null
   sudo systemctl disable ${systemdService} 2>/dev/null
-  
-  /home/admin/config.scripts/internet.hiddenservice.sh off ${netprefix}spark-wallet
+
+  /home/admin/config.scripts/tor.onion-service.sh off ${netprefix}spark-wallet
 
   # purge
   if [ "$(echo "$@" | grep -c purge)" -gt 0 ];then
