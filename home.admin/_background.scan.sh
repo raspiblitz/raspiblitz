@@ -463,7 +463,7 @@ do
         source <(/home/admin/_cache.sh valid \
           btc_${CHAIN}net_mempool_transactions \
         )
-        if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE} ]; then
+        if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE5} ]; then
           error=""
           echo "updating: /home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net mempool"
           source <(/home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net mempool)
@@ -558,7 +558,7 @@ do
 
       # check if config needs update
       source <(/home/admin/_cache.sh valid ln_lnd_${CHAIN}net_alias)
-      if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE} ]; then
+      if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE5} ]; then
         error=""
         echo "updating: /home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net config"
         source <(/home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net config)
