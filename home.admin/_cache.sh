@@ -320,7 +320,7 @@ elif [ "$1" = "outdate" ]; then
 
   # store the seconds policy
   echo "# redis-cli set ${keystr}${META_OUTDATED_SECONDS} ${outdatesecs} ${additionalParams}"
-  redis-cli set ${keystr}${META_OUTDATED_SECONDS} "${outdatesecs} ${additionalParams}"
+  redis-cli set ${keystr}${META_OUTDATED_SECONDS} "${outdatesecs}" ${additionalParams}
 
   # set/renew exipire valid flag (important in case the key had before no expire)
   redis-cli set ${keystr}${META_VALID_FLAG} "1" EX ${outdatesecs} 1>/dev/null
