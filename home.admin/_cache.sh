@@ -307,6 +307,9 @@ elif [ "$1" = "focus" ]; then
     keylist=$(redis-cli KEYS "*:out")
     readarray -t arr <<< "${keylist}"
     for key in "${arr[@]}";do
+      if [ "${key}" == "" ]; then
+        continue
+      fi 
       keyClean=$(echo $key | cut -d ":" f1)
       value=$(redis-cli get "${key}")
       echo "${keyClean}=${value}"
