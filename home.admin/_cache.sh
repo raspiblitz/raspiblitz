@@ -376,53 +376,59 @@ elif [ "$1" = "valid" ]; then
   for keystr in $@
   do
     
-    # skip first parameter
+    # skip first parameter from script - thats the action string
     ((position++))
     if [ $position -eq 1 ]; then
       echo "# _cache.sh $@"
       continue
     fi
 
-    # get redis value
-    valuestr=$(redis-cli get ${keystr}${META_VALID_FLAG})
-    #echo "# ${keystr}${META_VALID_FLAG}=\"${valuestr}\""
+    # check lasttouch for value
+    lasttouch=$(redis-cli get ${keystr}${META_LASTTOUCH_TS})
+    #echo "# lasttouch(${lasttouch})"
 
-    # break as soon one value is outdated
-    if [ "${valuestr}" == "" ]; then
-      # break if value is not protected from outdated  
-      outdatesecs=$(redis-cli get ${keystr}${META_OUTDATED_SECONDS})
-      #echo "# ${keystr}${META_OUTDATED_SECONDS}=\"${outdatesecs}\""
-      if [ "${outdatesecs}" != "" ] && [ "${outdatesecs}" != "-1" ]; then
-        echo "stillvalid=\"0\""
-        exit 0
-      fi
-      # of "outdatesecs" has no value it can also be that key does not exist
-      if [ "${outdatesecs}" == "" ]; then
-        # break if key does not exist in cache (count as outdated)
-        notexists=$(redis-cli exists ${keystr} | grep -c "0")
-        if [ "${notexists}" == "1" ]; then
-          #echo "# '${keystr}' key does not exist"
-          echo "stillvalid=\"0\""
-          exit 0
-        fi
-      fi
-
-      # so value is still valid - check if its the oldest value in list
-      lasttouch=$(redis-cli get ${keystr}${META_LASTTOUCH_TS})
-      #echo "# lasttouch(${lasttouch})"
-      if [ "${lasttouch}" != "" ]; then
-        # find smallest lasttouch
-        if [ "${lasttouch_overall}" == "" ] || [ ${lasttouch_overall} -gt ${lasttouch} ]; then
-          lasttouch_overall="${lasttouch}"
-        fi
-      fi
-      #echo "# lasttouch_overall(${lasttouch_overall})"
-
+    # no lasttouch entry ==> was not initiated ==> not valid
+    if [ "${lasttouch}" == "" ]; then
+      # break loop on first unvalid value found
+      echo "stillvalid=\"0\""
+      exit 0
     fi
+
+    # record the smallest timestamp (oldest date) of all values
+    if [ "${lasttouch}" != "" ]; then
+      # find smallest lasttouch
+      if [ "${lasttouch_overall}" == "" ] || [ ${lasttouch_overall} -gt ${lasttouch} ]; then
+        lasttouch_overall="${lasttouch}"
+      fi
+    fi
+
+    # get outdate police of value (outdated = not valid anymore)
+    outdatesecs=$(redis-cli get ${keystr}${META_OUTDATED_SECONDS})
+    #echo "# ${keystr}${META_OUTDATED_SECONDS}=\"${outdatesecs}\""
+    
+    # if outdate policy is default or -1 ==> never outdated
+    if [ "${outdatesecs}" == "" ] || [ "${outdatesecs}" == "-1" ]; then
+      continue
+    fi
+
+    # so outdate policy is active - check if valid flag exists
+    validflag=$(redis-cli get ${keystr}${META_VALID_FLAG})
+    #echo "# ${keystr}${META_VALID_FLAG}=\"${validflag}\""
+
+    # if valid flag exists this value is valid
+    if [ "${valuestr}" != "" ]; then
+      continue
+    fi
+
+    # so valid flag does not exists anymore
+    # ==> this means value is outdated
+    # break loop and 
+    echo "stillvalid=\"0\""
+    exit 0
 
   done
 
-  # of all were valid
+  # so if all were valid
   echo "stillvalid=\"1\""
 
   # calculate age in seconds of oldest entry
