@@ -310,7 +310,7 @@ elif [ "$1" = "focus" ]; then
       if [ "${key}" == "" ]; then
         continue
       fi 
-      keyClean=$(echo $key | cut -d ":" f1)
+      keyClean=$(echo $key | cut -d ":" -f1)
       value=$(redis-cli get "${key}")
       echo "${keyClean}=${value}"
     done
