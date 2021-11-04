@@ -373,7 +373,7 @@ do
         btc_${CHAIN}net_error_short \
         btc_${CHAIN}net_error_full \
       )
-      if [ "${stillvalid}" == "0" ] || [ ${age} -gt 10 ]; then
+      if [ "${stillvalid}" == "0" ] || [ ${age} -gt 30 ]; then
         echo "updating: /home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net status"
         source <(/home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net status)
         /home/admin/_cache.sh set btc_${CHAIN}net_activated "1"
@@ -409,7 +409,7 @@ do
           btc_${CHAIN}net_sync_percentage \
           btc_${CHAIN}net_sync_initialblockdownload \
         )
-        if [ "${stillvalid}" == "0" ] || [ ${age} -gt 30 ]; then
+        if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE} ]; then
           error=""
           echo "updating: /home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net info"
           source <(/home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net info)
@@ -529,7 +529,7 @@ do
       ln_lnd_${CHAIN}net_error_short \
       ln_lnd_${CHAIN}net_error_full \
     )
-    if [ "${stillvalid}" == "0" ] || [ ${age} -gt 10 ]; then
+    if [ "${stillvalid}" == "0" ] || [ ${age} -gt 30 ]; then
       echo "updating: /home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net status"
       source <(/home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net status)
       /home/admin/_cache.sh set ln_lnd_${CHAIN}net_activated "1"
@@ -584,7 +584,7 @@ do
         ln_lnd_${CHAIN}net_channels_total \
         ln_lnd_${CHAIN}net_peers \
       )
-      if [ "${stillvalid}" == "0" ] || [ ${age} -gt 20 ]; then
+      if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE} ]; then
         error=""
         echo "updating: /home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net info"
         source <(/home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net info)
@@ -649,7 +649,7 @@ do
         ln_lnd_${CHAIN}net_fees_month \
         ln_lnd_${CHAIN}net_fees_total \
       )
-      if [ "${stillvalid}" == "0" ] || [ ${age} -gt 22 ]; then
+      if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE5} ]; then
         error=""
         echo "updating: /home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net fees"
         source <(/home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net fees)
@@ -718,7 +718,7 @@ do
       ln_cl_${CHAIN}net_error_short \
       ln_cl_${CHAIN}net_error_full \
     )
-    if [ "${stillvalid}" == "0" ] || [ ${age} -gt 10 ]; then
+    if [ "${stillvalid}" == "0" ] || [ ${age} -gt 30 ]; then
       echo "updating: /home/admin/config.scripts/cl.monitor.sh ${CHAIN}net status"
       source <(/home/admin/config.scripts/cl.monitor.sh ${CHAIN}net status)
       /home/admin/_cache.sh set ln_cl_${CHAIN}net_activated "1"
@@ -758,7 +758,7 @@ do
         ln_cl_${CHAIN}net_channels_total \
         ln_cl_${CHAIN}net_fees_total \
       )
-      if [ "${stillvalid}" == "0" ] || [ ${age} -gt 20 ]; then
+      if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE} ]; then
         error=""
         echo "updating: /home/admin/config.scripts/cl.monitor.sh ${CHAIN}net info"
         source <(/home/admin/config.scripts/cl.monitor.sh ${CHAIN}net info)
@@ -800,7 +800,7 @@ do
         ln_cl_${CHAIN}net_wallet_channels_balance \
         ln_cl_${CHAIN}net_wallet_channels_pending \
       )
-      if [ "${stillvalid}" == "0" ] || [ ${age} -gt 22 ]; then
+      if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE} ]; then
         error=""
         echo "updating: /home/admin/config.scripts/cl.monitor.sh ${CHAIN}net wallet"
         source <(/home/admin/config.scripts/cl.monitor.sh ${CHAIN}net wallet)

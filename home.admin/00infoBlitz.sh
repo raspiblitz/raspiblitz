@@ -207,11 +207,10 @@ if [ "${lightning}" != "" ]; then
 
     source <(/home/admin/_cache.sh meta ln_${lightning}_${chain}net_sync_progress)
     ln_syncprogress="${value}"
-    ln_baseInfo="${color_amber}Scanning blocks: ${ln_syncprogress}%"
+    ln_baseInfo="${color_amber}Scanning blocks: ${ln_syncprogress}"
 
   # OK lightning is ready - get more details
   else
-
 
     # create fee report
     if [ "${lightning}" == "lnd" ]; then
