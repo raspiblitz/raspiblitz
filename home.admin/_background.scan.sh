@@ -373,6 +373,16 @@ do
         btc_${CHAIN}net_error_short \
         btc_${CHAIN}net_error_full \
       )
+      if [ "${isDefaultChain}" == "1" ] && [ "${stillvalid}" == "1" ]; then
+        source <(/home/admin/_cache.sh valid \
+        btc_default_version \
+        btc_default_running \
+        btc_default_ready \
+        btc_default_online  \
+        btc_default_error_short \
+        btc_default_error_full \
+        )
+      fi
       if [ "${stillvalid}" == "0" ] || [ ${age} -gt 30 ]; then
         echo "updating: /home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net status"
         source <(/home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net status)
@@ -402,13 +412,23 @@ do
 
         # check if network needs update
         source <(/home/admin/_cache.sh valid \
-          btc_${CHAIN}net_blocks_headers \
+         btc_${CHAIN}net_blocks_headers \
           btc_${CHAIN}net_blocks_verified \
           btc_${CHAIN}net_blocks_behind \
           btc_${CHAIN}net_sync_progress \
           btc_${CHAIN}net_sync_percentage \
           btc_${CHAIN}net_sync_initialblockdownload \
         )
+        if [ "${isDefaultChain}" == "1" ] && [ "${stillvalid}" == "1" ]; then
+          source <(/home/admin/_cache.sh valid \
+          btc_default_blocks_headers \
+          btc_default_blocks_verified \
+          btc_default_blocks_behind \
+          btc_default_sync_progress \
+          btc_default_sync_percentage \
+          btc_default_sync_initialblockdownload \
+          )
+        fi
         if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE} ]; then
           error=""
           echo "updating: /home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net info"
@@ -441,6 +461,13 @@ do
           btc_${CHAIN}net_address \
           btc_${CHAIN}net_port \
         )
+        if [ "${isDefaultChain}" == "1" ] && [ "${stillvalid}" == "1" ]; then
+          source <(/home/admin/_cache.sh valid \
+          btc_default_peers \
+          btc_default_address \
+          btc_default_port \
+          )
+        fi
         if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE} ]; then
           error=""
           echo "updating: /home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net network"
@@ -463,6 +490,11 @@ do
         source <(/home/admin/_cache.sh valid \
           btc_${CHAIN}net_mempool_transactions \
         )
+        if [ "${isDefaultChain}" == "1" ] && [ "${stillvalid}" == "1" ]; then
+          source <(/home/admin/_cache.sh valid \
+          btc_default_mempool_transactions \
+          )
+        fi
         if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE5} ]; then
           error=""
           echo "updating: /home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net mempool"
@@ -529,6 +561,17 @@ do
       ln_lnd_${CHAIN}net_error_short \
       ln_lnd_${CHAIN}net_error_full \
     )
+    if [ "${isDefaultLightning}" == "1" ] && [ "${isDefaultChain}" == "1" ] && [ "${stillvalid}" == "1" ]; then
+      source <(/home/admin/_cache.sh valid \
+      ln_default_locked \
+      ln_default_version \
+      ln_default_running \
+      ln_default_ready \
+      ln_default_online \
+      ln_default_error_short \
+      ln_default_error_full \
+      )
+    fi
     if [ "${stillvalid}" == "0" ] || [ ${age} -gt 30 ]; then
       echo "updating: /home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net status"
       source <(/home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net status)
@@ -584,6 +627,19 @@ do
         ln_lnd_${CHAIN}net_channels_total \
         ln_lnd_${CHAIN}net_peers \
       )
+      if [ "${isDefaultLightning}" == "1" ] && [ "${isDefaultChain}" == "1" ] && [ "${stillvalid}" == "1" ]; then
+        source <(/home/admin/_cache.sh valid \
+        ln_default_address \
+        ln_default_tor \
+        ln_default_sync_chain \
+        ln_default_sync_graph \
+        ln_default_channels_pending \
+        ln_default_channels_active \
+        ln_default_channels_inactive \
+        ln_default_channels_total \
+        ln_default_peers \
+        )
+      fi
       if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE} ]; then
         error=""
         echo "updating: /home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net info"
@@ -622,6 +678,14 @@ do
         ln_lnd_${CHAIN}net_wallet_channels_balance \
         ln_lnd_${CHAIN}net_wallet_channels_pending \
       )
+      if [ "${isDefaultLightning}" == "1" ] && [ "${isDefaultChain}" == "1" ] && [ "${stillvalid}" == "1" ]; then
+        source <(/home/admin/_cache.sh valid \
+        ln_default_wallet_onchain_balance \
+        ln_default_wallet_onchain_pending \
+        ln_default_wallet_channels_balance \
+        ln_default_wallet_channels_pending \
+        )
+      fi
       if [ "${stillvalid}" == "0" ] || [ ${age} -gt 22 ]; then
         error=""
         echo "updating: /home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net wallet"
@@ -649,6 +713,11 @@ do
         ln_lnd_${CHAIN}net_fees_month \
         ln_lnd_${CHAIN}net_fees_total \
       )
+      if [ "${isDefaultLightning}" == "1" ] && [ "${isDefaultChain}" == "1" ] && [ "${stillvalid}" == "1" ]; then
+        source <(/home/admin/_cache.sh valid \
+        ln_default_fees_total \
+        )
+      fi
       if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE5} ]; then
         error=""
         echo "updating: /home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net fees"
@@ -718,6 +787,16 @@ do
       ln_cl_${CHAIN}net_error_short \
       ln_cl_${CHAIN}net_error_full \
     )
+    if [ "${isDefaultLightning}" == "1" ] && [ "${isDefaultChain}" == "1" ] && [ "${stillvalid}" == "1" ]; then
+      source <(/home/admin/_cache.sh valid \
+      ln_default_version \
+      ln_default_running \
+      ln_default_ready \
+      ln_default_online \
+      ln_default_error_short \
+      ln_default_error_full \
+      )
+    fi
     if [ "${stillvalid}" == "0" ] || [ ${age} -gt 30 ]; then
       echo "updating: /home/admin/config.scripts/cl.monitor.sh ${CHAIN}net status"
       source <(/home/admin/config.scripts/cl.monitor.sh ${CHAIN}net status)
@@ -758,6 +837,20 @@ do
         ln_cl_${CHAIN}net_channels_total \
         ln_cl_${CHAIN}net_fees_total \
       )
+      if [ "${isDefaultLightning}" == "1" ] && [ "${isDefaultChain}" == "1" ] && [ "${stillvalid}" == "1" ]; then
+        source <(/home/admin/_cache.sh valid \
+        ln_default_alias \
+        ln_default_address \
+        ln_default_tor \
+        ln_default_peers \
+        ln_default_sync_chain \
+        ln_default_channels_pending \
+        ln_default_channels_active \
+        ln_default_channels_inactive \
+        ln_default_channels_total \
+        ln_default_fees_total \
+        )
+      fi
       if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE} ]; then
         error=""
         echo "updating: /home/admin/config.scripts/cl.monitor.sh ${CHAIN}net info"
@@ -800,6 +893,14 @@ do
         ln_cl_${CHAIN}net_wallet_channels_balance \
         ln_cl_${CHAIN}net_wallet_channels_pending \
       )
+      if [ "${isDefaultLightning}" == "1" ] && [ "${isDefaultChain}" == "1" ] && [ "${stillvalid}" == "1" ]; then
+        source <(/home/admin/_cache.sh valid \
+        ln_default_wallet_onchain_balance \
+        ln_default_wallet_onchain_pending \
+        ln_default_wallet_channels_balance \
+        ln_default_wallet_channels_pending \
+        )
+      fi
       if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE} ]; then
         error=""
         echo "updating: /home/admin/config.scripts/cl.monitor.sh ${CHAIN}net wallet"
