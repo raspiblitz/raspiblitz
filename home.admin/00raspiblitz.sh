@@ -81,6 +81,10 @@ fi
 # an error drops user to terminal
 #####################################
 
+# put some values on higher scan rate for 10 minute
+/home/admin/_cache.sh focus ln_default_locked 2 600
+/home/admin/_cache.sh focus btc_default_synced 2 600
+
 echo "# starting ssh menu loop ... "
 exitMenuLoop=0
 doneIBD=0

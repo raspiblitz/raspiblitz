@@ -19,15 +19,15 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ];
   echo 
   echo "_cache.sh increment [key1]"
   echo
-  echo "_cache.sh outdate [key] [value] [?duration-seconds]"
-  echo "# set in how many seconds value is marked as outdated or"
-  echo "# -1 = never outdated (default)"  
-  echo "# 0  = always outdated"
+  echo "_cache.sh focus [key] [update-seconds] [?duration-seconds]"
+  echo "# set in how many seconds value is marked to be rescanned"
+  echo "# -1 = slowest default update cycle"  
+  echo "# 0  = update on every cycle"
   echo "# set a 'duration-seconds' after defaults to -1 (optional)"
   echo 
   echo "_cache.sh meta [key] [?default]"
   echo "# get single key with additional metadata:"
-  echo "# outdatesecs= see above"
+  echo "# updateseconds= see above"
   echo "# stillvalid=0/1 if value is still valid or outdated"
   echo "# lasttouch= last update timestamp in unix seconds"
   echo 
@@ -289,17 +289,30 @@ elif [ "$1" = "increment" ]; then
 
 
 ##################################
-# PUT/POLL TEMP CACHE
-# key value with update metadata
+# FOCUS
+# signal update rate on value
 ##################################
 
-# outdate (set outdated policy)
-elif [ "$1" = "outdate" ]; then
+# focus (set outdated policy)
+elif [ "$1" = "focus" ]; then
 
   # get parameters
   keystr=$2
   outdatesecs=$3
   durationsecs=$4
+
+  # if no further parameters - list all values with running focus
+  if [ "${keystr}" == "" ]; then
+    echo "# cache values with active focus:"
+    keylist=$(redis-cli KEYS "*:out")
+    readarray -t arr <<< "${keylist}"
+    for key in "${arr[@]}";do
+      keyClean=$(echo $key | cut -d ":" f1)
+      value=$(redis-cli get "${key}")
+      echo "${keyClean}=${value}"
+    done
+    exit
+  fi
 
   # sanatize parameters
   if [ "${outdatesecs}" != "-1" ]; then
@@ -307,7 +320,7 @@ elif [ "$1" = "outdate" ]; then
   fi
 
   # check that key & value are given
-  if [ "${keystr}" == "" ] || [ "${outdatesecs}" == "" ]; then
+  if [ "${outdatesecs}" == "" ]; then
     echo "# Fail: missing parameter"
     exit 1
   fi
@@ -324,6 +337,11 @@ elif [ "$1" = "outdate" ]; then
 
   # set/renew exipire valid flag (important in case the key had before no expire)
   redis-cli set ${keystr}${META_VALID_FLAG} "1" EX ${outdatesecs} 1>/dev/null
+
+##################################
+# META
+# metadata on values
+##################################
 
 # meta
 elif [ "$1" = "meta" ]; then
@@ -367,6 +385,11 @@ elif [ "$1" = "meta" ]; then
     stillvalid=1
   fi
   echo "stillvalid=\"${stillvalid}\""
+
+##################################
+# VALID
+# check if a value needs update
+##################################
 
 # valid
 elif [ "$1" = "valid" ]; then

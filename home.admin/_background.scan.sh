@@ -2,8 +2,7 @@
 
 # This script will loop in the background to gather basic system information.
 # It will place those values in the `_cache.sh` system and take care about updates.
-# Certain values have a default maximum age to get updated by this script.
-# Every single value can be set to update more frequently by `_cache.sh outdate`.
+# You can use `_cache.sh focus` to make the scanning of a certain value more often.
 
 # LOGS see: sudo journalctl -f -u background.scan
 
@@ -329,11 +328,6 @@ do
 
   if [ "${network}" == "bitcoin" ]; then
 
-    # IMPORTANT NOTE: If you want to change the update frequency on a certain value
-    # with `_cache.sh outdate` do it on the chain specific value - for example:
-    # do use: btc_${DEFAULT}net_sync_percentage
-    # not use: btc_sync_percentage
-
     # loop thru mainet, testnet & signet
     networks=( "main" "test" "sig" )
     for CHAIN in "${networks[@]}"
@@ -514,11 +508,6 @@ do
 
   ###################
   # Lightning (lnd)
-
-  # IMPORTANT NOTE: If you want to change the update frequency on a certain value
-  # with `_cache.sh outdate` do it on the chain specific value - for example:
-  # do use: ln_lnd_${DEFAULT}net_locked
-  # not use: ln_locked
 
   # loop thru mainet, testnet & signet
   networks=( "main" "test" "sig" )
@@ -739,11 +728,6 @@ do
 
   ###################
   # Lightning (c-lightning)
-
-  # IMPORTANT NOTE: If you want to change the update frequency on a certain value
-  # with `_cache.sh outdate` do it on the chain specific value - for example:
-  # do use: ln_cl_${DEFAULT}net_locked
-  # not use: ln_locked
 
   # loop thru mainet, testnet & signet
   networks=( "main" "test" "sig" )
