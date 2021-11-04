@@ -565,21 +565,21 @@ do
       echo "updating: /home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net status"
       source <(/home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net status)
       /home/admin/_cache.sh set ln_lnd_${CHAIN}net_activated "1"
+      /home/admin/_cache.sh set ln_lnd_${CHAIN}net_locked "${ln_lnd_locked}"
       /home/admin/_cache.sh set ln_lnd_${CHAIN}net_version "${ln_lnd_version}"
       /home/admin/_cache.sh set ln_lnd_${CHAIN}net_running "${ln_lnd_running}"
       /home/admin/_cache.sh set ln_lnd_${CHAIN}net_ready "${ln_lnd_ready}"
       /home/admin/_cache.sh set ln_lnd_${CHAIN}net_online "${ln_lnd_online}"
-      /home/admin/_cache.sh set ln_lnd_${CHAIN}net_locked "${ln_lnd_locked}"
       /home/admin/_cache.sh set ln_lnd_${CHAIN}net_error_short "${ln_lnd_error_short}"
       /home/admin/_cache.sh set ln_lnd_${CHAIN}net_error_full "${ln_lnd_error_full}"
       if [ "${isDefaultLightning}" == "1" ] && [ "${isDefaultChain}" == "1" ]; then
         /home/admin/_cache.sh set ln_default_activated "1"
+        /home/admin/_cache.sh set ln_default_locked "${ln_lnd_locked}"
         /home/admin/_cache.sh set ln_default_version "${ln_lnd_version}"
         /home/admin/_cache.sh set ln_default_running "${ln_lnd_running}"
         /home/admin/_cache.sh set ln_default_ready "${ln_lnd_ready}"
         /home/admin/_cache.sh set ln_default_online "${ln_lnd_online}"
-        /home/admin/_cache.sh set ln_default_locked "${ln_lnd_locked}"
-        /home/admin/_cache.sh set ln_error_short "${ln_lnd_error_short}"
+        /home/admin/_cache.sh set ln_default_error_short "${ln_lnd_error_short}"
         /home/admin/_cache.sh set ln_default_error_full "${ln_lnd_error_full}"
       fi
     fi
@@ -621,7 +621,7 @@ do
         ln_default_address \
         ln_default_tor \
         ln_default_sync_chain \
-        ln_default_sync_graph \
+        ln_default_sync_progress \
         ln_default_channels_pending \
         ln_default_channels_active \
         ln_default_channels_inactive \
