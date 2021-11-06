@@ -47,7 +47,6 @@ case "$1" in
     printf "*** REMOVING GO ***\n"
     sudo rm -rf /usr/local/go /usr/local/gocode
     printf "OK Go removed.\n"
-    exit 0
   ;;
 
   *) printf "Config script to install or remove Go\n./bonus.go.sh [on|off]\n"; exit 1
