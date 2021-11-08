@@ -2,16 +2,24 @@
 
 # Based on: https://gist.github.com/normandmickey/3f10fc077d15345fb469034e3697d0d0
 
-# https://github.com/dgarage/NBXplorer/releases
-NBXplorerVersion="v2.2.8"
+# https://github.com/dgarage/NBXplorer/tags
+NBXplorerVersion="v2.2.16"
 # https://github.com/btcpayserver/btcpayserver/releases
-BTCPayVersion="v1.2.3"
+BTCPayVersion="v1.3.3"
+
+PGPsigner="nicolasdorier"
+PGPpubkeyLink="https://keybase.io/nicolasdorier/pgp_keys.asc"
+PGPpubkeyFingerprint="AB4CFA9895ACA0DBE27F6B346618763EF09186FE"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
-  echo "# config script to switch BTCPay Server on or off"
-  echo "# bonus.btcpayserver.sh [on|off|menu|write-tls-macaroon]"
-  echo "# installs BTCPayServer $BTCPayVersion with NBXplorer $NBXplorerVersion"
+  echo "Config script to switch BTCPay Server on or off"
+  echo "Usage:"
+  echo "bonus.btcpayserver.sh [on|off|menu|write-tls-macaroon]"
+  echo "installs BTCPayServer $BTCPayVersion with NBXplorer $NBXplorerVersion"
+  echo "To update to the latest release published on github run:"
+  echo "bonus.btcpayserver.sh update"
+  echo
   exit 1
 fi
 
@@ -331,6 +339,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u btcpay git clone https://github.com/dgarage/NBXplorer.git 2>/dev/null
     cd NBXplorer || exit 1
     sudo -u btcpay git reset --hard $NBXplorerVersion
+    # PGP verify
+    sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
     echo "# Build NBXplorer ..."
     # from the build.sh with path
     sudo -u btcpay /home/btcpay/dotnet/dotnet build -c Release NBXplorer/NBXplorer.csproj
@@ -399,7 +409,17 @@ btc.rpc.password=$PASSWORD_B
     sudo chmod 600 /home/btcpay/.nbxplorer/Main/settings.config
     sudo chown btcpay:btcpay /home/btcpay/.nbxplorer/Main/settings.config
 
+    # whitelist localhost in bitcoind
+    if ! sudo grep -Eq "^whitelist=127.0.0.1" /mnt/hdd/bitcoin/bitcoin.conf;then
+      echo "whitelist=127.0.0.1" | sudo tee -a /mnt/hdd/bitcoin/bitcoin.conf
+      bitcoindRestart=yes
+    fi
+
     if [ "${state}" == "ready" ]; then
+      if [ "${bitcoindRestart}" == "yes" ]; then
+        echo "# Restarting bitcoind"
+        sudo systemctl restart bitcoind
+      fi
       sudo systemctl restart nbxplorer
     fi  
 
@@ -412,6 +432,8 @@ btc.rpc.password=$PASSWORD_B
     sudo -u btcpay git clone https://github.com/btcpayserver/btcpayserver.git 2>/dev/null
     cd btcpayserver
     sudo -u btcpay git reset --hard $BTCPayVersion
+    # PGP verify
+    sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
     echo "# Build BTCPayServer ..."
     # from the build.sh with path
     sudo -u btcpay /home/btcpay/dotnet/dotnet build -c Release /home/btcpay/btcpayserver/BTCPayServer/BTCPayServer.csproj
@@ -552,6 +574,86 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     echo "# OK BTCPayServer removed."
   else
     echo "# BTCPayServer is not installed."
+  fi
+  exit 0
+fi
+
+if [ "$1" = "update" ]; then
+
+  echo "# Update NBXplorer"
+  cd /home/btcpay || exit 1
+  cd NBXplorer || exit 1
+  # fetch latest master
+  if [ "$(sudo -u btcpay git fetch 2>&1 | grep -c "Please tell me who you are")" -gt 0 ]; then
+    sudo -u btcpay git config user.email "you@example.com"
+    sudo -u btcpay git config user.name "Your Name"
+  fi
+  sudo -u btcpay git fetch
+  # unset $1
+  set --
+  UPSTREAM=${1:-'@{u}'}
+  LOCAL=$(git rev-parse @)
+  REMOTE=$(git rev-parse "$UPSTREAM")
+
+  if [ $LOCAL = $REMOTE ]; then
+    TAG=$(git tag | sort -V | tail -1)
+    echo "# Up-to-date on version $TAG"
+  else
+    echo "# Pulling latest changes..."
+    sudo -u btcpay git pull -p
+    TAG=$(git tag | sort -V | tail -1)
+    echo "# Reset to the latest release tag: $TAG"
+    sudo -u btcpay git reset --hard $TAG
+    # PGP verify
+    sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
+    echo "# Build NBXplorer ..."
+    # from the build.sh with path
+    sudo systemctl stop nbxplorer
+    sudo -u btcpay /home/btcpay/dotnet/dotnet build -c Release NBXplorer/NBXplorer.csproj
+
+    # whitelist localhost in bitcoind
+    if ! sudo grep -Eq "^whitelist=127.0.0.1" /mnt/hdd/bitcoin/bitcoin.conf;then
+      echo "whitelist=127.0.0.1" | sudo tee -a /mnt/hdd/bitcoin/bitcoin.conf
+      echo "# Restarting bitcoind"
+      sudo systemctl restart bitcoind
+    fi
+   
+    sudo systemctl start nbxplorer
+    echo "# Updated NBXplorer to $TAG"
+  fi
+
+  echo "# Update BTCPayServer"
+  cd /home/btcpay || exit 1
+  cd btcpayserver || exit 1
+  # fetch latest master
+  if [ "$(sudo -u btcpay git fetch 2>&1 | grep -c "Please tell me who you are")" -gt 0 ]; then
+    sudo -u btcpay git config user.email "you@example.com"
+    sudo -u btcpay git config user.name "Your Name"
+  fi
+  sudo -u btcpay git fetch
+  # unset $1
+  set --
+  UPSTREAM=${1:-'@{u}'}
+  LOCAL=$(git rev-parse @)
+  REMOTE=$(git rev-parse "$UPSTREAM")
+  
+  if [ $LOCAL = $REMOTE ]; then
+    TAG=$(git tag | grep v1 | sort -V | tail -1)
+    echo "# Up-to-date on version $TAG"
+  else
+    echo "# Pulling latest changes..."
+    sudo -u btcpay git pull -p
+    TAG=$(git tag | grep v1 | sort -V | tail -1)
+    echo "# Reset to the latest release tag: $TAG"
+    sudo -u btcpay git reset --hard $TAG
+    # PGP verify
+    sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
+    echo "# Build BTCPayServer ..."
+    # from the build.sh with path
+    sudo systemctl stop btcpayserver
+    sudo -u btcpay /home/btcpay/dotnet/dotnet build -c Release /home/btcpay/btcpayserver/BTCPayServer/BTCPayServer.csproj
+    sudo systemctl start btcpayserver
+    echo "# Updated BTCPayServer to $TAG"
   fi
   exit 0
 fi
