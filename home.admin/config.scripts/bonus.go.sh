@@ -4,12 +4,18 @@
 goVersion="1.17.3"
 downloadFolder="/home/admin/download"
 
+usage(){
+  printf "Config script to install or remove Go\n"
+  printf "./bonus.go.sh [on|off]\n"
+  exit 1
+}
+
 case "$1" in
 
   1|on) # switch on
     . /etc/profile # get Go vars - needed if there was no log-out since Go installed
     printf "Check Framework: Go\n"
-    if go version | grep -q "go" ; then
+    if go version 2>/dev/null | grep -q "go" ; then
       printf "\nVersion of Go requested already installed.\n"
       go version
       printf "\n"
@@ -21,7 +27,7 @@ case "$1" in
         x86_64) goOSversion="amd64";;
         *) printf %s"Not available for architecture=${architecture}\n"; exit 1
       esac
-      printf %s"*** Installing Go v${goVersion} for ${goOSversion} \n***"
+      printf %s"\n*** Installing Go v${goVersion} for ${goOSversion} \n***"
       wget https://dl.google.com/go/go${goVersion}.linux-${goOSversion}.tar.gz -P ${downloadFolder}
       if [ ! -f "${downloadFolder}/go${goVersion}.linux-${goOSversion}.tar.gz" ]; then
         printf "!!! FAIL !!! Download failed.\n"
@@ -39,7 +45,7 @@ case "$1" in
       sudo grep -q "GOROOT=" /etc/profile || { printf "\nGOROOT=/usr/local/go\nPATH=\$PATH:\$GOROOT/bin/\nGOPATH=/usr/local/gocode\nPATH=\$PATH:\$GOPATH/bin/\n\n" | sudo tee -a /etc/profile; }
       go env -w GOPATH=/usr/local/gocode # set GOPATH https://github.com/golang/go/wiki/SettingGOPATH
       go version | grep -q "go" || { printf "FAIL: Unable to install Go\n"; exit 1; }
-      printf %s"\nInstalled $(go version 2>/dev/null)\n\n"
+      printf %s"Installed $(go version 2>/dev/null)\n\n"
     fi
   ;;
 
@@ -49,6 +55,6 @@ case "$1" in
     printf "OK Go removed.\n"
   ;;
 
-  *) printf "Config script to install or remove Go\n./bonus.go.sh [on|off]\n"; exit 1
+  *) usage
 
 esac
