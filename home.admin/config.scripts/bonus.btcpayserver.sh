@@ -409,14 +409,15 @@ btc.rpc.password=$PASSWORD_B
     sudo chmod 600 /home/btcpay/.nbxplorer/Main/settings.config
     sudo chown btcpay:btcpay /home/btcpay/.nbxplorer/Main/settings.config
 
-    # whitelist downloading to localhost from bitcoind
-    if ! sudo grep -Eq "^whitelist=download@127.0.0.1" /mnt/hdd/bitcoin/bitcoin.conf;then
-      echo "whitelist=download@127.0.0.1" | sudo tee -a /mnt/hdd/bitcoin/bitcoin.conf
+    # whitelist localhost in bitcoind
+    if ! sudo grep -Eq "^whitelist=127.0.0.1" /mnt/hdd/bitcoin/bitcoin.conf;then
+      echo "whitelist=127.0.0.1" | sudo tee -a /mnt/hdd/bitcoin/bitcoin.conf
       bitcoindRestart=yes
     fi
 
     if [ "${state}" == "ready" ]; then
       if [ "${bitcoindRestart}" == "yes" ]; then
+        echo "# Restarting bitcoind"
         sudo systemctl restart bitcoind
       fi
       sudo systemctl restart nbxplorer
@@ -609,6 +610,14 @@ if [ "$1" = "update" ]; then
     # from the build.sh with path
     sudo systemctl stop nbxplorer
     sudo -u btcpay /home/btcpay/dotnet/dotnet build -c Release NBXplorer/NBXplorer.csproj
+
+    # whitelist localhost in bitcoind
+    if ! sudo grep -Eq "^whitelist=127.0.0.1" /mnt/hdd/bitcoin/bitcoin.conf;then
+      echo "whitelist=127.0.0.1" | sudo tee -a /mnt/hdd/bitcoin/bitcoin.conf
+      echo "# Restarting bitcoind"
+      sudo systemctl restart bitcoind
+    fi
+   
     sudo systemctl start nbxplorer
     echo "# Updated NBXplorer to $TAG"
   fi
