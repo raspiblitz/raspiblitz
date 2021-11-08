@@ -670,7 +670,7 @@ if ! grep -Eq "^[[:space:]]*PS1.*₿" /home/admin/.bashrc; then
     sudo sed -i '/^unset color_prompt force_color_prompt$/i if [ "$color_prompt" = yes ]; then' /home/admin/.bashrc
     sudo sed -i '/^unset color_prompt force_color_prompt$/i \    PS1=\x27${debian_chroot:+($debian_chroot)}\\[\\033[00;33m\\]\\u@$raspiIp:\\[\\033[00;34m\\]\\w\\[\\033[01;35m\\]$(__git_ps1 "(%s)") \\[\\033[01;33m\\]₿\\[\\033[00m\\] \x27' /home/admin/.bashrc
     sudo sed -i '/^unset color_prompt force_color_prompt$/i else' /home/admin/.bashrc
-    sudo sed -i '/^unset color_prompt force_color_prompt$/i \    PS1=\x27${debian_chroot:+($debian_chroot)}\\u@\\h:\\w₿ \x27' /home/admin/.bashrc
+    sudo sed -i '/^unset color_prompt force_color_prompt$/i \    PS1=\x27${debian_chroot:+($debian_chroot)}\\u@$raspiIp:\\w₿ \x27' /home/admin/.bashrc
     sudo sed -i '/^unset color_prompt force_color_prompt$/i fi' /home/admin/.bashrc
 fi
 
