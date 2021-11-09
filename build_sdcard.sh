@@ -7,6 +7,7 @@
 # setup fresh SD card with image above - login per SSH and run this script:
 ##########################################################################
 
+# https://github.com/rootzoll/raspiblitz/tags
 defaultTag="v1.7.1"
 echo
 echo "*****************************************"
