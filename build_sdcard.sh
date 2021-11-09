@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #########################################################################
 # Build your SD card image based on:
 # raspios_arm64-2020-08-24
@@ -119,57 +119,32 @@ echo "X) will use CPU-ARCHITECTURE --> '${cpu}'"
 
 # AUTO-DETECTION: OPERATINGSYSTEM
 # ---------------------------------------
-baseimage="$(lsb_release -si)"
+baseimage="$(lsb_release -si 2>/dev/null)"
 if [ "${baseimage}" = "Debian" ]; then
-  if [ $(uname -n | grep -c 'rpi') -gt 0 ] && [ "${cpu}" = "aarch64" ]; then
+  if [ "$(uname -n | grep -c 'rpi')" -gt 0 ] && [ "${cpu}" = "aarch64" ]; then
     baseimage="debian_rpi64"
-  elif [ $(uname -n | grep -c 'raspberrypi') -gt 0 ] && [ "${cpu}" = "aarch64" ]; then
+  elif [ "$(uname -n | grep -c 'raspberrypi')" -gt 0 ] && [ "${cpu}" = "aarch64" ]; then
     baseimage="raspios_arm64"
   elif [ "${cpu}" = "aarch64" ] || [ "${cpu}" = "arm" ] ; then
     baseimage="armbian"
   fi
+elif [ "${baseimage}" = "" ]; then
+  cat /etc/os-release 2>/dev/null
+  echo "!!! FAIL: Base Image cannot be detected or is not supported."
+  exit 1
 fi
-
-[ "${baseimage}" = "" ] && { echo "!!! FAIL: Base Image cannot be detected or is not supported."; exit 1; }
 echo "X) will use OPERATINGSYSTEM ---> '${baseimage}'"
 
 # USER-CONFIRMATION
 if [ "${noInteraction}" != "true" ]; then
   echo -n "Do you agree with all parameters above? (yes/no) "
-  read installRaspiblitzAnswer
+  read -r installRaspiblitzAnswer
   [ "$installRaspiblitzAnswer" != "yes" ] && exit 1
 fi
 echo "Building RaspiBlitz ..."
 echo
 sleep 3
 
-# INSTALL TOR
-echo "*** INSTALL TOR BY DEFAULT ***"
-echo
-sudo apt install -y dirmngr wget gpg tor torsocks obfs4proxy apt-transport-tor
-
-echo "*** Adding KEYS deb.torproject.org ***"
-# fix for v1.6 base image https://github.com/rootzoll/raspiblitz/issues/1906#issuecomment-755299759
-torsocks wget -O- https://deb.torproject.org/torproject.org/A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89.asc | gpg --dearmor | tee /usr/share/keyrings/tor-archive-keyring.gpg >/dev/null
-torKeyAvailable=$(sudo gpg --list-keys | grep -c "A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89")
-if [ ${torKeyAvailable} -eq 0 ]; then
-  echo "!!! FAIL: Was not able to import deb.torproject.org key"
-  exit 1
-fi
-echo "- OK key added"
-echo "*** Adding Tor Sources to sources.list ***"
-echo "- adding Tor sources ..."
-distribution=$(lsb_release -sc)
-echo "
-deb tor://apow7mjfryruh65chtdydfmqfpj5btws7nbocgtaovhvezgccyjazpqd.onion/torproject.org ${distribution} main
-deb-src tor://apow7mjfryruh65chtdydfmqfpj5btws7nbocgtaovhvezgccyjazpqd.onion/torproject.org  ${distribution} main
-" | sudo tee /etc/apt/sources.list.d/tor.list
-echo "- OK sources added"
-
-echo "*** Install & Enable Tor ***"
-sudo apt update -y
-sudo apt install -y tor torsocks nyx obfs4proxy
-echo
 
 # FIXING LOCALES
 # https://github.com/rootzoll/raspiblitz/issues/138
@@ -522,7 +497,7 @@ echo
 echo "*** SHELL SCRIPTS & ASSETS ***"
 
 # copy raspiblitz repo from github
-cd /home/admin/
+cd /home/admin/ || exit 1
 sudo -u admin git config --global user.name "${githubUser}"
 sudo -u admin git config --global user.email "johndoe@example.com"
 sudo -u admin rm -rf /home/admin/raspiblitz
@@ -536,8 +511,8 @@ sudo -u admin chmod +x /home/admin/config.scripts/*.sh
 sudo -u admin chmod +x /home/admin/setup.scripts/*.sh
 
 # install newest version of BlitzPy
-blitzpy_wheel=$(ls -tR /home/admin/raspiblitz/home.admin/BlitzPy/dist | grep -E "*any.whl" | tail -n 1)
-blitzpy_version=$(echo ${blitzpy_wheel} | grep -oE "([0-9]\.[0-9]\.[0-9])")
+blitzpy_wheel=$(ls -tR /home/admin/raspiblitz/home.admin/BlitzPy/dist | grep -E "any.whl" | tail -n 1)
+blitzpy_version=$(echo "${blitzpy_wheel}" | grep -oE "([0-9]\.[0-9]\.[0-9])")
 echo
 echo "*** INSTALLING BlitzPy Version: ${blitzpy_version} ***"
 sudo -H /usr/bin/python -m pip install "/home/admin/raspiblitz/home.admin/BlitzPy/dist/${blitzpy_wheel}" >/dev/null 2>&1
@@ -663,10 +638,10 @@ if [ "${baseimage}" = "Raspbian" ]||[ "${baseimage}" = "Raspios_arm64"  ]||\
   disableBT="dtoverlay=disable-bt"
   disableBTDone=$(grep -c "$disableBT" $configFile)
 
-  if [ ${disableBTDone} -eq 0 ]; then
+  if [ "${disableBTDone}" -eq 0 ]; then
     # disable bluetooth module
-    sudo echo >> $configFile
-    sudo echo "# Raspiblitz" >> $configFile
+    echo "" | sudo tee -a $configFile
+    echo "# Raspiblitz" | sudo tee -a $configFile
     echo 'dtoverlay=pi3-disable-bt' | sudo tee -a $configFile
     echo 'dtoverlay=disable-bt' | sudo tee -a $configFile
   else
@@ -689,7 +664,7 @@ if [ "${baseimage}" = "Raspbian" ]||[ "${baseimage}" = "Raspios_arm64"  ]||\
   # disable DRM VC4 V3D
   echo "*** DISABLE DRM VC4 V3D driver ***"
   dtoverlay=vc4-fkms-v3d
-  sudo sed -i "s/^dtoverlay=vc4-fkms-v3d/# dtoverlay=vc4-fkms-v3d/g" /boot/config.txt
+  sudo sed -i "s/^dtoverlay=${dtoverlay}/# dtoverlay=${dtoverlay}/g" /boot/config.txt
   echo
 
   # I2C fix (make sure dtparam=i2c_arm is not on)
@@ -754,7 +729,7 @@ laanwjPGP="71A3 B167 3540 5025 D447 E8F2 7481 0B01 2346 C9A6"
 # prepare directories
 sudo rm -rf /home/admin/download
 sudo -u admin mkdir /home/admin/download
-cd /home/admin/download
+cd /home/admin/download || exit 1
 
 # receive signer key
 if ! gpg --keyserver hkp://keyserver.ubuntu.com --recv-key "71A3 B167 3540 5025 D447 E8F2 7481 0B01 2346 C9A6"
@@ -855,7 +830,7 @@ PGPcheck="E4D85299674B2D31FAA1892E372CBD7633C61696"
 #PGPcheck="9C8D61868A7C492003B2744EE7D737B67FA592C7"
 
 # get LND resources
-cd /home/admin/download
+cd /home/admin/download || exit 1
 
 # download lnd binary checksum manifest
 sudo -u admin wget -N https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/manifest-v${lndVersion}.txt
@@ -870,7 +845,7 @@ if [ ${fingerprint} -lt 1 ]; then
   echo "!!! BUILD WARNING --> LND PGP author not as expected"
   echo "Should contain PGP: ${PGPcheck}"
   echo "PRESS ENTER to TAKE THE RISK if you think all is OK"
-  read key
+  read -r
 fi
 gpg --import ./pgp_keys.asc
 sleep 3
@@ -895,12 +870,12 @@ fi
 lndSHA256=$(grep -i "linux-$architecture" manifest-v$lndVersion.txt | cut -d " " -f1)
 
 echo
-echo "*** LND v${lndVersion} for ${lndOSversion} ***"
+echo "*** LND v${lndVersion} for ${architecture} ***"
 echo "SHA256 hash: $lndSHA256"
 echo
 
 # get LND binary
-binaryName="lnd-linux-${lndOSversion}-v${lndVersion}.tar.gz"
+binaryName="lnd-linux-${architecture}-v${lndVersion}.tar.gz"
 if [ ! -f "./${binaryName}" ]; then
   lndDownloadUrl="https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/${binaryName}"
   echo "- downloading lnd binary --> ${lndDownloadUrl}"
@@ -932,7 +907,7 @@ fi
 # install
 echo "- install LND binary"
 sudo -u admin tar -xzf ${binaryName}
-sudo install -m 0755 -o root -g root -t /usr/local/bin lnd-linux-${lndOSversion}-v${lndVersion}/*
+sudo install -m 0755 -o root -g root -t /usr/local/bin lnd-linux-"${architecture}"-v${lndVersion}/*
 sleep 3
 installed=$(sudo -u admin lnd --version)
 if [ ${#installed} -eq 0 ]; then
@@ -942,7 +917,7 @@ if [ ${#installed} -eq 0 ]; then
 fi
 
 correctVersion=$(sudo -u admin lnd --version | grep -c "${lndVersion}")
-if [ ${correctVersion} -eq 0 ]; then
+if [ "${correctVersion}" -eq 0 ]; then
   echo
   echo "!!! BUILD FAILED --> installed LND is not version ${lndVersion}"
   sudo -u admin lnd --version
@@ -973,7 +948,7 @@ if [ ${fingerprint} -lt 1 ]; then
   echo "!!! WARNING --> the PGP fingerprint is not as expected for ${PGPsigner}"
   echo "Should contain PGP: ${PGPcheck}"
   echo "PRESS ENTER to TAKE THE RISK if you think all is OK"
-  read key
+  read -r
 fi
 gpg --import ./pgp_keys.asc
 
