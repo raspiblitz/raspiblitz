@@ -21,9 +21,7 @@ echo "For details on optional parameters - see build script source code:"
 # When 'true' then no questions will be asked on building .. so it can be used in build scripts
 # for containers or as part of other build scripts (default is false)
 
-noInteraction="$1"
-[ -z "${noInteraction}" ] && noInteraction="false"
-
+noInteraction="${1:-false}"
 if [ "${noInteraction}" != "true" ] && [ "${noInteraction}" != "false" ]; then
   echo "ERROR: NO-INTERACTION parameter needs to be either 'true' or 'false'"
   exit 1
@@ -39,9 +37,7 @@ echo "1) will use NO-INTERACTION --> '${noInteraction}'"
 # install needed frameworks and libraries on demand when activated by user.
 # Use 'false' if you want to run your node without: go, dot-net, nodejs, docker, ...
 
-fatpack="$2"
-[ -z "${fatpack}" ] && fatpack="false"
-
+fatpack="${2:-false}"
 if [ "${fatpack}" != "true" ] && [ "${fatpack}" != "false" ]; then
   echo "ERROR: FATPACK parameter needs to be either 'true' or 'false'"
   exit 1
@@ -54,15 +50,13 @@ echo "2) will use FATPACK --> '${fatpack}'"
 # The 'raspiblitz' repo of this user is used to provisioning sd card
 # with raspiblitz assets/scripts later on.
 # If this parameter is set also the branch needs to be given (see next parameter).
-githubUser="$3"
-[ -z "${githubUser}" ] && githubUser="rootzoll"
+githubUser="${3:-rootzoll}"
 echo "3) will use GITHUB-USERNAME --> '${githubUser}'"
 
 # 4th optional parameter: GITHUB-BRANCH
 # -------------------------------------
 # could be any valid branch of the given GITHUB-USERNAME forked raspiblitz repo - take ${defaultBranchVersion} is default
-githubBranch="$4"
-[ -z "${githubBranch}" ] && githubBranch="${defaultBranchVersion}"
+githubBranch="${4:-"${defaultBranchVersion}"}"
 echo "4) will use GITHUB-BRANCH --> '${githubBranch}'"
 
 # 5th optional parameter: DISPLAY-CLASS
@@ -70,10 +64,8 @@ echo "4) will use GITHUB-BRANCH --> '${githubBranch}'"
 # Could be 'hdmi', 'headless' or 'lcd' (lcd is default)
 # On 'false' the standard video output is used (HDMI) by default.
 # https://github.com/rootzoll/raspiblitz/issues/1265#issuecomment-813369284
-displayClass="$5"
-[ -z "${displayClass}" ] && displayClass="lcd"
+displayClass="${5:-lcd}"
 [ "${displayClass}" = "false" ] && displayClass="hdmi"
-
 if [ "${displayClass}" != "hdmi" ] && [ "${displayClass}" != "lcd" ] && [ "${displayClass}" != "headless" ]; then
   echo "ERROR: DISPLAY-CLASS parameter needs to be 'lcd', 'hdmi' or 'headless'"
   exit 1
@@ -85,9 +77,7 @@ echo "5) will use DISPLAY-CLASS --> '${displayClass}'"
 # could be 'true' (default) or 'false'
 # If 'true' it will try (based on the base OS) to optimize the boot drive.
 # If 'false' this will skipped.
-tweakBootdrives="$6"
-[ -z "${tweakBootdrives}" ] && tweakBootdrives="true"
-
+tweakBootdrives="${6:-true}"
 if [ "${tweakBootdrives}" != "true" ] && [ "${tweakBootdrives}" != "false" ]; then
   echo "ERROR: TWEAK-BOOTDRIVE parameter needs to be either 'true' or 'false'"
   exit 1
@@ -100,8 +90,8 @@ echo "6) will use TWEAK-BOOTDRIVE --> '${tweakBootdrives}'"
 # If 'false' WIFI will be deactivated by default
 # If 'true' WIFI will be activated by with default country code 'US'
 # If any valid wifi country code Wifi will be activated with that country code by default
-modeWifi="$7"
-if [ -z "${modeWifi}" ] || [ "${modeWifi}" = "true" ]; then modeWifi="US"; fi
+modeWifi="${7:-US}"
+[ "${modeWifi}" = "true" ] && modeWifi="US"
 echo "7) will use WIFI --> '${modeWifi}'"
 
 # AUTO-DETECTION: CPU-ARCHITECTURE
