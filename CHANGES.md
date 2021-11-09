@@ -3,6 +3,9 @@
 ## What's new in Version 1.7.2 of RaspiBlitz?
 
 - Update: BTCPayServer v1.3.1 with UPDATE option [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.3.0)
+- Update: Electrum Server in Rust (electrs) v0.9.2 [details](https://github.com/romanz/electrs/blob/v0.9.2/RELEASE-NOTES.md)
+- Update: JoinMarket v0.9.3 [details](https://github.com/JoinMarket-Org/joinmarket-clientserver/releases/tag/v0.9.2)
+- Update: JoininBox v0.6.3 [details](https://github.com/openoms/joininbox/releases/tag/v0.6.1)
 
 ## What's new in Version 1.7.1 of RaspiBlitz?
 
