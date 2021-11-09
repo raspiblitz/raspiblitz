@@ -8,11 +8,11 @@
 # setup fresh SD card with image above - login per SSH and run this script:
 ##########################################################################
 
-defaultBranchVersion="v1.7"
+defaultTag="v1.7.1"
 
 echo
 echo "*****************************************"
-echo "* RASPIBLITZ SD CARD IMAGE SETUP ${defaultBranchVersion}.1 *"
+echo "* RASPIBLITZ SD CARD IMAGE SETUP ${defaultTag} *"
 echo "*****************************************"
 echo "For details on optional parameters - see build script source code:"
 
@@ -20,7 +20,6 @@ echo "For details on optional parameters - see build script source code:"
 # ----------------------------------------
 # When 'true' then no questions will be asked on building .. so it can be used in build scripts
 # for containers or as part of other build scripts (default is false)
-
 noInteraction="${1:-false}"
 if [ "${noInteraction}" != "true" ] && [ "${noInteraction}" != "false" ]; then
   echo "ERROR: NO-INTERACTION parameter needs to be either 'true' or 'false'"
@@ -36,7 +35,6 @@ echo "1) will use NO-INTERACTION --> '${noInteraction}'"
 # When 'false' it will just install the bare minimum and additional apps will just
 # install needed frameworks and libraries on demand when activated by user.
 # Use 'false' if you want to run your node without: go, dot-net, nodejs, docker, ...
-
 fatpack="${2:-false}"
 if [ "${fatpack}" != "true" ] && [ "${fatpack}" != "false" ]; then
   echo "ERROR: FATPACK parameter needs to be either 'true' or 'false'"
@@ -55,8 +53,8 @@ echo "3) will use GITHUB-USERNAME --> '${githubUser}'"
 
 # 4th optional parameter: GITHUB-BRANCH
 # -------------------------------------
-# could be any valid branch of the given GITHUB-USERNAME forked raspiblitz repo - take ${defaultBranchVersion} is default
-githubBranch="${4:-"${defaultBranchVersion}"}"
+# could be any valid branch of the given GITHUB-USERNAME forked raspiblitz repo - take ${defaultTag} is default
+githubBranch="${4:-"${defaultTag}"}"
 echo "4) will use GITHUB-BRANCH --> '${githubBranch}'"
 
 # 5th optional parameter: DISPLAY-CLASS
@@ -491,7 +489,7 @@ cd /home/admin/ || exit 1
 sudo -u admin git config --global user.name "${githubUser}"
 sudo -u admin git config --global user.email "johndoe@example.com"
 sudo -u admin rm -rf /home/admin/raspiblitz
-sudo -u admin git clone -b ${githubBranch} https://github.com/${githubUser}/raspiblitz.git
+sudo -u admin git clone -b "${githubBranch}" https://github.com/${githubUser}/raspiblitz.git
 sudo -u admin cp -r /home/admin/raspiblitz/home.admin/*.* /home/admin
 sudo -u admin cp -r /home/admin/raspiblitz/home.admin/.tmux.conf /home/admin
 sudo -u admin chmod +x *.sh
