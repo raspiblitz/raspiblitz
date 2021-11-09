@@ -9,7 +9,6 @@
 ##########################################################################
 
 defaultTag="v1.7.1"
-
 echo
 echo "*****************************************"
 echo "* RASPIBLITZ SD CARD IMAGE SETUP ${defaultTag} *"
@@ -25,7 +24,7 @@ if [ "${noInteraction}" != "true" ] && [ "${noInteraction}" != "false" ]; then
   echo "ERROR: NO-INTERACTION parameter needs to be either 'true' or 'false'"
   exit 1
 fi
-echo "1) will use NO-INTERACTION --> '${noInteraction}'"
+echo "1) NO-INTERACTION --> '${noInteraction}'"
 
 # 2nd optional parameter: FATPACK
 # -------------------------------
@@ -40,7 +39,7 @@ if [ "${fatpack}" != "true" ] && [ "${fatpack}" != "false" ]; then
   echo "ERROR: FATPACK parameter needs to be either 'true' or 'false'"
   exit 1
 fi
-echo "2) will use FATPACK --> '${fatpack}'"
+echo "2) FATPACK --> '${fatpack}'"
 
 # 3rd optional parameter: GITHUB-USERNAME
 # ---------------------------------------
@@ -49,13 +48,13 @@ echo "2) will use FATPACK --> '${fatpack}'"
 # with raspiblitz assets/scripts later on.
 # If this parameter is set also the branch needs to be given (see next parameter).
 githubUser="${3:-rootzoll}"
-echo "3) will use GITHUB-USERNAME --> '${githubUser}'"
+echo "3) GITHUB-USERNAME --> '${githubUser}'"
 
 # 4th optional parameter: GITHUB-BRANCH
 # -------------------------------------
 # could be any valid branch of the given GITHUB-USERNAME forked raspiblitz repo - take ${defaultTag} is default
 githubBranch="${4:-"${defaultTag}"}"
-echo "4) will use GITHUB-BRANCH --> '${githubBranch}'"
+echo "4) GITHUB-BRANCH --> '${githubBranch}'"
 
 # 5th optional parameter: DISPLAY-CLASS
 # ----------------------------------------
@@ -68,7 +67,7 @@ if [ "${displayClass}" != "hdmi" ] && [ "${displayClass}" != "lcd" ] && [ "${dis
   echo "ERROR: DISPLAY-CLASS parameter needs to be 'lcd', 'hdmi' or 'headless'"
   exit 1
 fi
-echo "5) will use DISPLAY-CLASS --> '${displayClass}'"
+echo "5) DISPLAY-CLASS --> '${displayClass}'"
 
 # 6th optional parameter: TWEAK-BOOTDRIVE
 # ---------------------------------------
@@ -80,7 +79,7 @@ if [ "${tweakBootdrives}" != "true" ] && [ "${tweakBootdrives}" != "false" ]; th
   echo "ERROR: TWEAK-BOOTDRIVE parameter needs to be either 'true' or 'false'"
   exit 1
 fi
-echo "6) will use TWEAK-BOOTDRIVE --> '${tweakBootdrives}'"
+echo "6) TWEAK-BOOTDRIVE --> '${tweakBootdrives}'"
 
 # 7th optional parameter: WIFI
 # ---------------------------------------
@@ -90,7 +89,7 @@ echo "6) will use TWEAK-BOOTDRIVE --> '${tweakBootdrives}'"
 # If any valid wifi country code Wifi will be activated with that country code by default
 modeWifi="${7:-US}"
 [ "${modeWifi}" = "true" ] && modeWifi="US"
-echo "7) will use WIFI --> '${modeWifi}'"
+echo "7) WIFI --> '${modeWifi}'"
 
 # AUTO-DETECTION: CPU-ARCHITECTURE
 # ---------------------------------------
@@ -103,7 +102,7 @@ if [ "${cpu}" != "arm" ] && [ "${cpu}" != "aarch64" ] && [ "${cpu}" != "x86_64" 
   ${cpu}
   exit 1
 fi
-echo "X) will use CPU-ARCHITECTURE --> '${cpu}'"
+echo "8) CPU-ARCHITECTURE --> '${cpu}'"
 
 # AUTO-DETECTION: OPERATINGSYSTEM
 # ---------------------------------------
@@ -121,11 +120,11 @@ elif [ "${baseimage}" = "" ]; then
   echo "!!! FAIL: Base Image cannot be detected or is not supported."
   exit 1
 fi
-echo "X) will use OPERATINGSYSTEM ---> '${baseimage}'"
+echo "9) OPERATINGSYSTEM ---> '${baseimage}'"
 
 # USER-CONFIRMATION
 if [ "${noInteraction}" != "true" ]; then
-  echo -n "Do you agree with all parameters above? (yes/no) "
+  echo -n "# Do you agree with all parameters above? (yes/no) "
   read -r installRaspiblitzAnswer
   [ "$installRaspiblitzAnswer" != "yes" ] && exit 1
 fi
