@@ -8,6 +8,7 @@
 - Update: JoinMarket v0.9.3 [details](https://github.com/JoinMarket-Org/joinmarket-clientserver/releases/tag/v0.9.2)
 - Update: JoininBox v0.6.3 [details](https://github.com/openoms/joininbox/releases/tag/v0.6.1)
 - Update: Thunderhub v0.12.31 [details](https://github.com/apotdevin/thunderhub/releases/tag/v0.12.31)
+- Update: C-lightningREST v0.5.2 [details](https://github.com/Ride-The-Lightning/c-lightning-REST/releases/tag/v0.5.2)
 
 ## What's new in Version 1.7.1 of RaspiBlitz?
 
