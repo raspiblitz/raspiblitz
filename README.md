@@ -41,7 +41,7 @@ There are further Services that can be switched on:
 
 You can connect the following Wallet-Apps to your RaspiBlitz:
 
-* **Zeus** (Android & iOS-TestFlight) [details](https://zeusln.app)
+* **Zeus** (Android & iOS) [details](https://zeusln.app)
 * **Fully Noded** (iOS) [details](https://apps.apple.com/us/app/fully-noded/id1436425586)
 * **SendMany** (Android) [details](https://github.com/fusion44/sendmany/blob/master/README.md)
 * **Sphinx Chat App** (Android & iOS) [details](https://sphinx.chat)
