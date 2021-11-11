@@ -384,7 +384,7 @@ fi
 
 echo ""
 echo "*** CONFIG ***"
-# based on https://stadicus.github.io/RaspiBolt/raspibolt_20_pi.html#raspi-config
+# based on https://raspibolt.github.io/raspibolt/raspibolt_20_pi.html#raspi-config
 
 # set new default password for root user
 echo "root:raspiblitz" | sudo chpasswd
@@ -496,7 +496,7 @@ sudo service rsyslog restart
 
 echo ""
 echo "*** SOFTWARE UPDATE ***"
-# based on https://stadicus.github.io/RaspiBolt/raspibolt_20_pi.html#software-update
+# based on https://raspibolt.github.io/raspibolt/raspibolt_20_pi.html#software-update
 
 # installs like on RaspiBolt
 sudo apt install -y htop git curl bash-completion vim jq dphys-swapfile bsdmainutils
@@ -562,7 +562,7 @@ sudo apt -y autoremove
 
 echo ""
 echo "*** ADDING MAIN USER admin ***"
-# based on https://stadicus.github.io/RaspiBolt/raspibolt_20_pi.html#add-users
+# based on https://raspibolt.github.io/raspibolt/raspibolt_20_pi.html#add-users
 # using the default password 'raspiblitz'
 
 sudo adduser --disabled-password --gecos "" admin
@@ -583,7 +583,7 @@ sudo chmod 755 /home/admin/raspiblitz.info
 
 echo ""
 echo "*** ADDING SERVICE USER bitcoin"
-# based on https://stadicus.github.io/RaspiBolt/raspibolt_20_pi.html#add-users
+# based on https://raspibolt.github.io/raspibolt/raspibolt_20_pi.html#add-users
 
 # create user and set default password for user
 sudo adduser --disabled-password --gecos "" bitcoin
@@ -697,7 +697,7 @@ sudo bash -c "echo '# Raspiblitz' >> /home/admin/.bashrc"
 
 echo ""
 echo "*** SWAP FILE ***"
-# based on https://stadicus.github.io/RaspiBolt/raspibolt_20_pi.html#move-swap-file
+# based on https://raspibolt.github.io/raspibolt/raspibolt_20_pi.html#move-swap-file
 # but just deactivating and deleting old (will be created alter when user adds HDD)
 
 sudo dphys-swapfile swapoff
@@ -705,7 +705,7 @@ sudo dphys-swapfile uninstall
 
 echo ""
 echo "*** INCREASE OPEN FILE LIMIT ***"
-# based on https://stadicus.github.io/RaspiBolt/raspibolt_21_security.html#increase-your-open-files-limit
+# based on https://raspibolt.github.io/raspibolt/raspibolt_21_security.html#increase-your-open-files-limit
 
 sudo sed --in-place -i "56s/.*/*    soft nofile 128000/" /etc/security/limits.conf
 sudo bash -c "echo '*    hard nofile 128000' >> /etc/security/limits.conf"
@@ -720,7 +720,7 @@ sudo bash -c "echo '# end of pam-auth-update config' >> /etc/pam.d/common-sessio
 
 
 # *** fail2ban ***
-# based on https://stadicus.github.io/RaspiBolt/raspibolt_21_security.html
+# based on https://raspibolt.github.io/raspibolt/raspibolt_21_security.html#fail2ban
 echo "*** HARDENING ***"
 sudo apt install -y --no-install-recommends python3-systemd fail2ban 
 
@@ -944,7 +944,7 @@ echo ""
 echo "*** PREPARING LIGHTNING ***"
 
 # "*** LND ***"
-## based on https://stadicus.github.io/RaspiBolt/raspibolt_40_lnd.html#lightning-lnd
+## based on https://raspibolt.github.io/raspibolt/raspibolt_40_lnd.html#lightning-lnd
 ## see LND releases: https://github.com/lightningnetwork/lnd/releases
 ## !!!! If you change here - make sure to also change interims version in lnd.update.sh !!!
 lndVersion="0.13.3-beta"

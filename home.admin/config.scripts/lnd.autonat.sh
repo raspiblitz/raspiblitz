@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# based on: https://github.com/Stadicus/guides/issues/249
+# based on: https://github.com/raspibolt/raspibolt/issues/249
 
 if [ $# -eq 0 ]; then
  echo "small config script to switch the LND autoNatDiscovery on or off"

@@ -3,7 +3,6 @@
 
 - [What changed on the single RaspiBlitz updates?](#what-changed-on-the-single-raspiblitz-updates)
 - [How do I update my RaspiBlitz (since 1.2)?](#how-do-i-update-my-raspiblitz-since-12)
-- [How do I update my RaspiBlitz from older versions like v1.0 or v1.1?](#how-do-i-update-my-raspiblitz-from-older-versions-like-v10-or-v11)
 - [How to verify the SD card image after download?](#how-to-verify-the-sd-card-image-after-download)
 - [How to update an old RaspiBlitz BEFORE v1.0? (LEGACY)](#how-to-update-an-old-raspiblitz-before-v10-legacy)
 - [Why do I need to re-burn my SD card for an update?](#why-do-i-need-to-re-burn-my-sd-card-for-an-update)
@@ -97,29 +96,6 @@ The update should be quite simple - you don't need to close any channels:
 
 After the final reboot your RaspiBlitz should be ready, running the new RaspiBlitz version.
 
-## How do I update my RaspiBlitz from older versions like v1.0 or v1.1?
-
-To update you DON'T NEED to close any channels, remove funding, or download the blockchain again.
-
-Here is a YouTube video tutorial on how to update: https://www.youtube.com/watch?v=Xvn0WQfHUdI
-
-Simply [Download the new RaspiBlitz SD card image](https://github.com/rootzoll/raspiblitz#installing-the-software) to your laptop and have an SD card writer ready. Then login into your RaspiBlitz with SSH and:
-
-- main menu > OFF
-- remove power
-- remove SD card
-
-Write the new image to your SD card .. yes, you simply overwrite the old one. It's OK, all your personal data is on the HDD. If you want to be extra safe you can make an image backup of your old SD card first - but that is optional. If you made manual changes to your RaspiBlitz with scripts on the SD card you might want to check on this FAQ question first: [Why do I need to re-burn my SD card for an update?](FAQ.md#why-do-i-need-to-re-burn-my-sd-card-for-an-update).
-
-- insert new SD card image
-- power on the RaspiBlitz again
-
-You should see that it switched into recover/backup mode. It's now provisioning the fresh OS on the sd card with your old settings and data. This process can take some time, especially if you had the RTL Web UI activated. Follow the instructions on the display ... if it takes longer than an hour .. [get support](https://github.com/rootzoll/raspiblitz#support).
-
-When the update/recover process is ready you will see a `FINAL RECOVER LOGIN NEEDED` message on the display. Login via SSH by using the password `raspiblitz` and set your Password A again. It can be the same as the old one, but consider using the occasion to make a password change for security reasons. If you had auto-unlock activated you might also be asked to enter your old Password C again. Then it wil make a final reboot.
-
-After your RaspiBlitz is done catching up with the latest blockchain data you should see your status screen displaying your funds and channels. Your backup is complete.
-
 ## How to verify the SD card image after download?
 
 You can do a quick check to verify that the sha256 hash of the file you downloaded is the same as the sha256 hash mentioned below the download link, or use the torrent download which will also check the file for a checksum after download. But this does not prove to you that the SD card image was actually built by the lead developer of the RaspiBlitz project.
@@ -137,7 +113,6 @@ If you know have all the three elements needed - the imported public key, the im
 ```
 gpg --verify [SIGNATURE-FILE] [IMAGE-FILE]
 ```
-
 As a result you should see a "good signature" message with a main fingerprint the same as you can find on the [keybase.io/rootzoll](https://keybase.io/rootzoll) that is ending on `1C73 060C 7C17 6461` the sub fingerprint should end on `A2D7 AA9D D1B5 CC56 47DA`. If that fingerprint is correct, the SD card image you downloaded is a original release RaspiBlitz.
 
 ## How to update an old RaspiBlitz BEFORE v1.0? (LEGACY)
@@ -380,7 +355,7 @@ You don't need a LAN port on your laptop as long as you can connect over WLAN to
 ## Is it possible to connect the Blitz over Wifi instead of using a LAN cable?
 
 A LAN cable is recommended because it reduces a possible source of error on the network connection side. But how to setup WLAN when you don't have a LAN-Router/Switch available see here:
-https://stadicus.github.io/RaspiBolt/raspibolt_20_pi.html#prepare-wifi
+https://raspibolt.github.io/raspibolt/raspibolt_20_pi.html#prepare-wifi
 
 ## Can I directly connect the RaspiBlitz to my laptop?
 
@@ -702,7 +677,7 @@ Also make sure to check again on your power supply - it needs to deliver equal o
 ## How can I update LND or bitcoind even before the next RaspiBlitz update?
 
 Try updating before a official RaspiBlitz at your own risk - you can find some info about that here:
-https://stadicus.github.io/RaspiBolt/raspibolt_faq.html#how-to-upgrade-bitcoin-core
+https://raspibolt.github.io/raspibolt/raspibolt_faq.html#how-to-upgrade-bitcoin-core
 
 ## I cannot connect via SSH to my RaspiBlitz. What do I do?
 
