@@ -93,6 +93,14 @@ if [ "${peers}" != "0" ] && [ "${peers}" != "" ]; then
   online=1
 fi
 if [ ${online} -eq 0 ] && [ "${dnsServer}" != "" ]; then
+    # test with netcat to avoid firewall issues with ICMP packets
+    online=$(nc -v -z -w 3 ${dnsServer} 53 &> /dev/null && echo "1" || echo "0")
+fi
+if [ ${online} -eq 0 ]; then
+    # test with netcat to avoid firewall issues with ICMP packets
+    online=$(nc -v -z -w 3 8.8.8.8 53 &> /dev/null && echo "1" || echo "0")
+fi
+if [ ${online} -eq 0 ] && [ "${dnsServer}" != "" ]; then
   # re-test with user set dns server
   online=$(ping ${dnsServer} -c 1 -W 2 2>/dev/null | grep -c '1 received')
 fi
