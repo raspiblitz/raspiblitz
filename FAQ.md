@@ -3,9 +3,9 @@
 
 - [Upgrade](#upgrade)
   - [Is using the prepared SD card image secure?](#is-using-the-prepared-sd-card-image-secure)
+  - [How to verify the SD card image after download?](#how-to-verify-the-sd-card-image-after-download)
   - [What changed on every upgrade?](#what-changed-on-every-upgrade)
   - [How do I upgrade my RaspiBlitz?](#how-do-i-upgrade-my-raspiblitz)
-  - [How to verify the SD card image after download?](#how-to-verify-the-sd-card-image-after-download)
   - [Why do I need to re-burn my SD card for an update?](#why-do-i-need-to-re-burn-my-sd-card-for-an-update)
   - [How can I update LND or bitcoind even before the next RaspiBlitz update?](#how-can-i-update-lnd-or-bitcoind-even-before-the-next-raspiblitz-update)
 
@@ -18,10 +18,13 @@
   - [How do I setup just a port-forwarding user on my public server?](#how-do-i-setup-just-a-port-forwarding-user-on-my-public-server)
   - [How can I repair my SSH login?](#how-can-i-repair-my-ssh-login)
 
-- [Debug](#debug)
+- [Display](#display)
   - [Can I flip the screen?](#can-i-flip-the-screen)
   - [How to fix my upside down LCD after update?](#how-to-fix-my-upside-down-lcd-after-update)
   - [Can I run the RaspiBlitz without a display/LCD?](#can-i-run-the-raspiblitz-without-a-displaylcd)
+  - [How do I find the IP address when running without a display?](#how-do-i-find-the-ip-address-when-running-without-a-display)
+
+- [Debug](#debug)
   - [I have the full blockchain on another storage. How do I copy it to the RaspiBlitz?](#i-have-the-full-blockchain-on-another-storage-how-do-i-copy-it-to-the-raspiblitz)
   - [How do I generate a Debug Report?](#how-do-i-generate-a-debug-report)
   - [Why is my "final sync" taking so long?](#why-is-my-final-sync-taking-so-long)
@@ -43,7 +46,6 @@
   - [Why is my node address on the display red?](#why-is-my-node-address-on-the-display-red)
   - [Why is my node address on the display yellow (not green)?](#why-is-my-node-address-on-the-display-yellow-not-green)
   - [How do I fix a displayed Error in my Config?](#how-do-i-fix-a-displayed-error-in-my-config)
-  - [How do I find the IP address when running without a display?](#how-do-i-find-the-ip-address-when-running-without-a-display)
   - [Can I run the RaspiBlitz as Backend for BTCPayServer?](#can-i-run-the-raspiblitz-as-backend-for-btcpayserver)
   - [I don't have a LAN port on my Laptop - how do I connect to my RaspiBlitz?](#i-dont-have-a-lan-port-on-my-laptop---how-do-i-connect-to-my-raspiblitz)
   - [Is it possible to connect the Blitz over Wifi instead of using a LAN cable?](#is-it-possible-to-connect-the-blitz-over-wifi-instead-of-using-a-lan-cable)
@@ -91,9 +93,39 @@
 
 ### Is using the prepared SD card image secure?
 
-Using pre-built software almost always shifts trust to the one who made the binary. But at least you can check with the SHA checksum after downloading to verify that the image downloaded is really the one offered by the GitHub repo. To do so, make a quick check that your browser is really on the correct GitHub page, and that the HTTPS of the GitHub page is signed by 'DigiCert'. Then compare the SHA-256 string (always next to the download link of the image on the README) with the result of the command `shasum -a 256 [DOWNLOADED-FILE-TO-CHECK]` (Mac/Linux). Still, this is not optimal and if at least some people from the community request it, I will consider signing the download as an author for the future.
+Using pre-built software almost always shifts trust to the one who made the binary. At least, you should [verify the SD card image after download](#how-to-verify-the-sd-card-image-after-download).
 
 The best way would be to build the SD card yourself. You use the script `build_sdcard.sh` for this. Take a few minutes to check if you see anything suspicious in that build script and then follow the [README](README.md#build-the-sd-card-image) on this.
+
+### How to verify the SD card image after download?
+
+There are two methods, verify the hash (proves integrity) or the signature (proves integrity and authenticity)
+
+You can do a quick check to verify that the sha256 hash of the file you downloaded is the same as the sha256 hash mentioned below the download link, or use the torrent download which will also check the file for a checksum after download.
+
+To verify the shasum:
+
+```
+shasum -a 256 [DOWNLOADED-FILE-TO-CHECK]
+```
+
+But verifying the shasum does not prove to you that the SD card image was actually built by the lead developer of the RaspiBlitz project.
+
+To verify that the download was actually signed by [rootzoll](https://keybase.io/rootzoll) you need to use GPG and import the following public key:
+
+```
+curl --tlsv1.2 --proto =https https://keybase.io/rootzoll/pgp_keys.asc | gpg --import
+```
+
+Next, download the "signature file" for the SD card image. It's the same download link as for the image file - just added a `.sig` at the end. You should also always find the download link for the signature file in the README right below the image download link following the `SIGNATURE` link.
+
+If you know have all the three elements needed - the imported public key, the image signature and the image file itself - you can verify the download with:
+
+```
+gpg --verify [SIGNATURE-FILE] [IMAGE-FILE]
+```
+
+As a result you should see a "good signature" message with a main fingerprint the same as you can find on the [keybase.io/rootzoll](https://keybase.io/rootzoll) that is ending on `1C73 060C 7C17 6461`. If that fingerprint is correct, the SD card image you downloaded is an original RaspiBlitz release.
 
 ### What changed on every upgrade?
 
@@ -111,26 +143,6 @@ The upgrade should be quite simple - you don't need to close any channels:
 - Once that's done, login once via SSH and use the password raspiblitz and set a new password A (can be your old one or a new one).
 
 After the final reboot your RaspiBlitz should be ready, running the new RaspiBlitz version.
-
-### How to verify the SD card image after download?
-
-You can do a quick check to verify that the sha256 hash of the file you downloaded is the same as the sha256 hash mentioned below the download link, or use the torrent download which will also check the file for a checksum after download. But this does not prove to you that the SD card image was actually built by the lead developer of the RaspiBlitz project.
-
-To verify that the download was actually signed by [rootzoll](https://keybase.io/rootzoll) you need to use GPG and import the following public key:
-
-```
-curl https://keybase.io/rootzoll/pgp_keys.asc | gpg --import
-```
-
-Next, download the "signature file" for the SD card image. It's the same download link as for the image file - just added a `.sig` at the end. You should also always find the download link for the signature file in the README right below the image download link following the `SIGNATURE` link.
-
-If you know have all the three elements needed - the imported public key, the image signature and the image file itself - you can verify the download with:
-
-```
-gpg --verify [SIGNATURE-FILE] [IMAGE-FILE]
-```
-
-As a result you should see a "good signature" message with a main fingerprint the same as you can find on the [keybase.io/rootzoll](https://keybase.io/rootzoll) that is ending on `1C73 060C 7C17 6461`. If that fingerprint is correct, the SD card image you downloaded is a original release RaspiBlitz.
 
 ### Why do I need to re-burn my SD card for an update?
 
@@ -283,7 +295,7 @@ If you cannot login via SSH into your RaspiBlitz your SSH RaspiBlitz certs might
 
 If you see a "REMOTE HOST IDENTIFICATION HAS CHANGED!" warning on login, that's what we wanted - the SSH cert of your RaspiBlitz changed - thats good. We just need to remove the old one from our laptop first - on OSX you can use `rm ~/.ssh/known_hosts` (deletes all cached server certs) or remove the line with your RaspiBlitz IP manually from the `~/.ssh/known_hosts` file with a text editor.
 
-## Debug
+## Display
 
 ### Can I flip the screen?
 
@@ -306,6 +318,16 @@ If you are already logged in you can use on the console the commands:
 
 - `hdmi` --> switch to HDMI
 - `lcd` --> switch to LCD
+
+### How do I find the IP address when running without a display?
+
+If you can login into your local internet router it should show you the IP address assigned to the RaspberryPi.
+
+Another way is to use [Angry IP Scanner](https://angryip.org/) to find the IP address.
+
+You can also put an empty file just called `hdmi` (without any ending) onto the sd card when connected to your laptop and then start it up on the RaspberryPi. This will activate the HDMI port and if you connect a HDMI monitor to the RaspberryPi it will show you the RaspiBlitz status screen containing the local IP address.
+
+## Debug
 
 ### I have the full blockchain on another storage. How do I copy it to the RaspiBlitz?
 
@@ -517,14 +539,6 @@ When the LCD display is telling you to do a config check:
 - exit nano editor with: CTRL+x
 - start reboot with command: 'restart'
 
-### How do I find the IP address when running without a display?
-
-If you can login into your local internet router it should show you the IP address assigned to the RaspberryPi.
-
-Another way is to use [Angry IP Scanner](https://angryip.org/) to find the IP address.
-
-You can also put an empty file just called `hdmi` (without any ending) onto the sd card when connected to your laptop and then start it up on the RaspberryPi. This will activate the HDMI port and if you connect a HDMI monitor to the RaspberryPi it will show you the RaspiBlitz status screen containing the local IP address.
-
 ### Can I run the RaspiBlitz as Backend for BTCPayServer?
 
 BTCPay Server is a solution to be your own payment processor to accept Lightning Payments for your online store: https://github.com/btcpayserver/btcpayserver
@@ -685,7 +699,7 @@ The RaspiBlitz is your computer to experiment with. Feel free to add your own sc
 
 * Major Updates: 1.0.0, 2.0.0, 3.0.0, ... are epic updates signaling that the software reached a new era.
 * Main Updates: 1.1.0, 1.2.0, 1.3.0, ... are breaking updates - the reflashing of the sd ard is mandatory.
-* Minor Updates: 1.1.0, 1.2.0, 1.3.0, ... are soft updates - can be done by 'patching' the scripts & code, but new sd card reflash is still advised.
+* Minor Updates: 1.3.0, 1.3.1, 1.3.2, ... are soft updates - can be done by 'patching' the scripts & code, but new sd card reflash is still advised.
 
 ### GitHub Workflow
 
