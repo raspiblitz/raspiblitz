@@ -41,7 +41,7 @@ There are further Services that can be switched on:
 
 You can connect the following Wallet-Apps to your RaspiBlitz:
 
-* **Zeus** (Android & iOS-TestFlight) [details](https://zeusln.app)
+* **Zeus** (Android & iOS) [details](https://zeusln.app)
 * **Fully Noded** (iOS) [details](https://apps.apple.com/us/app/fully-noded/id1436425586)
 * **SendMany** (Android) [details](https://github.com/fusion44/sendmany/blob/master/README.md)
 * **Sphinx Chat App** (Android & iOS) [details](https://sphinx.chat)
@@ -295,7 +295,7 @@ For each password please choose unique, single strings, without spaces and speci
 
 You can use this [RaspiBlitz Recovery Sheet (PDF)](https://github.com/rootzoll/raspiblitz/raw/v1.7/home.admin/assets/RaspiBlitzRecoverySheet.pdf) to write those passwords down for safe storage and also use it later on for your Seed Words.
 
-*The password A,B,C idea is based on the [RaspiBolt Guide Preparations](https://stadicus.github.io/RaspiBolt/raspibolt_10_preparations.html#write-down-your-passwords) - check out for more background.*
+*The password A,B,C idea is based on the [RaspiBolt Guide Preparations](https://raspibolt.github.io/raspibolt/raspibolt_10_preparations.html#write-down-your-passwords) - check out for more background.*
 
 First, password A is requested - this is the password which will be used for SSH login and it's also set for the existing users: admin, root, bitcoin & pi.
 
@@ -611,7 +611,7 @@ For details see: https://github.com/lightningequipment/circuitbreaker/blob/maste
 
 The RaspiBlitz will automatically unlock the LND wallet upon every start.
 
-This feature is based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_6A_auto-unlock.md
+This feature is based on https://github.com/raspibolt/raspibolt/blob/fec8efc95ab4ec7285a1cb623e98c2682e5ef514/raspibolt/raspibolt_6A_auto-unlock.md
 
 It can be activated under "Services" -> "Auto-unlock LND".
 We recommend that it be turned on when DynamicDNS is used.

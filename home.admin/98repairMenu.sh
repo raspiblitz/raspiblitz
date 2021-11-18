@@ -124,8 +124,16 @@ case $CHOICE in
     echo "stopping lnd ..."
     sudo systemctl stop lnd
     sudo rm -r /mnt/hdd/lnd
-    /home/admin/70initLND.sh
-
+    # create wallet
+    /home/admin/config.scripts/lnd.install.sh on mainnet initwallet
+    # display and delete the seed for mainnet
+    sudo /home/admin/config.scripts/lnd.install.sh display-seed mainnet delete
+    if [ "${tlnd}" == "on" ];then
+      /home/admin/config.scripts/lnd.install.sh on testnet initwallet
+    fi
+    if [ "${slnd}" == "on" ];then
+      /home/admin/config.scripts/lnd.install.sh on signet initwallet
+    fi
     # go back to main menu (and show)
     /home/admin/00raspiblitz.sh
     exit 0;
