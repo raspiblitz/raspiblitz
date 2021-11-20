@@ -1,9 +1,9 @@
 #!/bin/bash
 #########################################################################
 # Build your SD card image based on:
-# raspios_arm64-2020-08-24
-# https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2021-04-09/
-# SHA256: a30a3650c3ef22a69f6f025760c6b04611a5992961a8c2cd44468f1c429d68bb
+# 2021-10-30-raspios-bullseye-arm64.zip
+# https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2021-11-08/
+# SHA256: b35425de5b4c5b08959aa9f29b9c0f730cd0819fe157c3e37c56a6d0c5c13ed8
 ##########################################################################
 # setup fresh SD card with image above - login per SSH and run this script:
 ##########################################################################
@@ -209,9 +209,9 @@ echo "torSourceListAvailable=${torSourceListAvailable}"
 if [ ${torSourceListAvailable} -eq 0 ]; then
   echo "- adding TOR sources ..."
   if [ "${baseimage}" = "raspbian" ] || [ "${baseimage}" = "raspios_arm64" ] || [ "${baseimage}" = "armbian" ] || [ "${baseimage}" = "dietpi" ]; then
-    echo "- using https://deb.torproject.org/torproject.org buster"
-    echo "deb https://deb.torproject.org/torproject.org buster main" | sudo tee -a /etc/apt/sources.list
-    echo "deb-src https://deb.torproject.org/torproject.org buster main" | sudo tee -a /etc/apt/sources.list
+    echo "- using https://deb.torproject.org/torproject.org bullseye"
+    echo "deb https://deb.torproject.org/torproject.org bullseye main" | sudo tee -a /etc/apt/sources.list
+    echo "deb-src https://deb.torproject.org/torproject.org bullseye main" | sudo tee -a /etc/apt/sources.list
   elif [ "${baseimage}" = "ubuntu" ]; then
     echo "- using https://deb.torproject.org/torproject.org focal"
     echo "deb https://deb.torproject.org/torproject.org focal main" | sudo tee -a /etc/apt/sources.list
@@ -258,7 +258,7 @@ if [ "${baseimage}" = "raspbian" ] || [ "${baseimage}" = "dietpi" ] || \
   fi
   if [ ! -f /etc/apt/sources.list.d/raspi.list ]; then
     echo "# Add the archive.raspberrypi.org/debian/ to the sources.list"
-    echo "deb http://archive.raspberrypi.org/debian/ buster main" | sudo tee /etc/apt/sources.list.d/raspi.list
+    echo "deb http://archive.raspberrypi.org/debian/ bullseye main" | sudo tee /etc/apt/sources.list.d/raspi.list
   fi
 fi
 
@@ -270,15 +270,15 @@ sudo apt -y autoremove
 echo ""
 echo "*** Python DEFAULT libs & dependencies ***"
 
-if [ -f "/usr/bin/python3.7" ]; then
-  # make sure /usr/bin/python exists (and calls Python3.7 in Buster)
-  sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.7 1
-  echo "python calls python3.7"
-elif [ -f "/usr/bin/python3.8" ]; then
-  # use python 3.8 if available
+if [ -f "/usr/bin/python3.8" ]; then
+  # make sure /usr/bin/python exists (and calls Python3.7 in bullseye)
   sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.8 1
-  sudo ln -s /usr/bin/python3.8 /usr/bin/python3.7
   echo "python calls python3.8"
+elif [ -f "/usr/bin/python3.9" ]; then
+  # use python 3.9 if available
+  sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.9 1
+  sudo ln -s /usr/bin/python3.9 /usr/bin/python3.8
+  echo "python calls python3.9"
 else
   echo "!!! FAIL !!!"
   echo "There is no tested version of python present"
@@ -532,7 +532,7 @@ fi
 # dependencies for python
 sudo apt install -y python3-venv python3-dev python3-wheel python3-jinja2 python3-pip
 
-# make sure /usr/bin/pip exists (and calls pip3 in Debian Buster)
+# make sure /usr/bin/pip exists (and calls pip3 in Debian bullseye)
 sudo update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
 
 # rsync is needed to copy from HDD
