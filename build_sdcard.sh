@@ -175,15 +175,15 @@ sudo apt -y autoremove
 echo
 echo "*** Python DEFAULT libs & dependencies ***"
 
-if [ -f "/usr/bin/python3.7" ]; then
-  # make sure /usr/bin/python exists (and calls Python3.7 in Buster)
-  sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.7 1
-  echo "python calls python3.7"
-elif [ -f "/usr/bin/python3.8" ]; then
-  # use python 3.8 if available
-  sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.8 1
-  sudo ln -s /usr/bin/python3.8 /usr/bin/python3.7
-  echo "python calls python3.8"
+if [ -f "/usr/bin/python3.9" ]; then
+  # use python 3.9 if available
+  sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.9 1
+  echo "python calls python3.9"
+elif [ -f "/usr/bin/python3.10" ]; then
+  # use python 3.10 if available
+  sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.10 1
+  sudo ln -s /usr/bin/python3.10 /usr/bin/python3.9
+  echo "python calls python3.10"
 else
   echo "!!! FAIL !!!"
   echo "There is no tested version of python present"
@@ -195,9 +195,9 @@ sudo apt -y install dialog bc python3-dialog
 
 # libs (for global python scripts)
 sudo -H python3 -m pip install --upgrade pip
-sudo -H python3 -m pip install grpcio==1.38.1
+sudo -H python3 -m pip install grpcio==1.42.0
 sudo -H python3 -m pip install googleapis-common-protos==1.53.0
-sudo -H python3 -m pip install toml==0.10.1
+sudo -H python3 -m pip install toml==0.10.2
 sudo -H python3 -m pip install j2cli==0.3.10
 sudo -H python3 -m pip install requests[socks]==2.21.0
 
