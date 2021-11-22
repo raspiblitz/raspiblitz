@@ -707,6 +707,11 @@ sudo systemctl enable background
 echo
 echo "*** PREPARING BITCOIN ***"
 
+# prepare directories
+sudo rm -rf /home/admin/download
+sudo -u admin mkdir /home/admin/download
+cd /home/admin/download || exit 1
+
 # set version (change if update is available)
 # https://bitcoincore.org/en/download/
 bitcoinVersion="22.0"
@@ -715,16 +720,12 @@ bitcoinVersion="22.0"
 # https://github.com/laanwj
 laanwjPGP="71A3 B167 3540 5025 D447 E8F2 7481 0B01 2346 C9A6"
 
-# prepare directories
-sudo rm -rf /home/admin/download
-sudo -u admin mkdir /home/admin/download
-cd /home/admin/download || exit 1
-
 # receive signer key
-if ! gpg --keyserver hkp://keyserver.ubuntu.com --recv-key "71A3 B167 3540 5025 D447 E8F2 7481 0B01 2346 C9A6"
-then
-  echo "!!! FAIL !!! Couldn't download Wladimir J. van der Laan's PGP pubkey"
-  exit 1
+if ! gpg --keyserver hkp://keyserver.ubuntu.com --recv-key "${laanwjPGP}"; then
+  if ! gpg --keyserver hkp://keyserver.ubuntu.com --recv-key "${laanwjPGP}"; then
+    echo "!!! FAIL !!! Couldn't download Wladimir J. van der Laan's PGP pubkey"
+    exit 1
+  fi
 fi
 
 # download signed binary sha256 hash sum file
