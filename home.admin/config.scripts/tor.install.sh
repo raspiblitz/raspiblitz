@@ -15,11 +15,12 @@
 
 #### VARIABLES ####
 
+download_dir="/home/admin/download"
 tor_data_dir="/mnd/hdd/tor"
 torrc="/etc/tor/torrc"
 torrc_bridges="/etc/tor/torrc.d/bridges"
 torrc_services="/etc/tor/torrc.d/services"
-tor_pkgs="tor torsocks nyx obfs4proxy python3-stem apt-transport-tor curl gpg dirmngr"
+tor_pkgs="tor torsocks nyx obfs4proxy python3-stem apt-transport-tor curl gpg"
 tor_deb_repo="tor+http://apow7mjfryruh65chtdydfmqfpj5btws7nbocgtaovhvezgccyjazpqd.onion"
 #tor_deb_repo="tor+https://deb.torproject.org"
 #tor_deb_repo="https://deb.torproject.org"
@@ -50,8 +51,7 @@ deb-src [arch=${architecture}] ${tor_deb_repo}/torproject.org  ${distribution} m
 
 configure_default_torrc(){
   echo "# - updating Tor config ${torrc}"
-  echo "
-## torrc for tor@default
+  echo "## raspiblitz torrc
 ## See 'man tor', or https://2019.www.torproject.org/docs/tor-manual.html.en
 ## See https://github.com/torproject/tor/blob/main/src/config/torrc.sample.in
 
@@ -118,6 +118,7 @@ configure_pluggable_transports(){
   (sudo mv /usr/local/bin/tor* /usr/bin) 2>/dev/null
   sudo chmod a+x /usr/share/tor/geoip*
   # Copy not moving!
+  sudo apt install -y obfs4proxy
   (sudo cp /usr/share/tor/geoip* /usr/bin) 2>/dev/null
   sudo setcap 'cap_net_bind_service=+ep' /usr/bin/obfs4proxy
   sudo sed -i "s/^NoNewPrivileges=yes/NoNewPrivileges=no/g" /lib/systemd/system/tor@default.service
@@ -125,34 +126,37 @@ configure_pluggable_transports(){
 
   ## Install Snowflake
   ## nyxnor: unfortunately it reaches TPO domain for a lib which I can't fix
-  sudo rm -rf ~/downloads/snowflake
-  git clone https://github.com/keroserene/snowflake.git ~/downloads/snowflake
-  if [ -d ~/downloads/snowflake ]; then
+  sudo rm -rf "${download_dir}"/snowflake
+  git clone https://github.com/keroserene/snowflake.git "${download_dir}"/snowflake
+  if [ ! -d "${download_dir}"/snowflake ]; then
     echo "FAIL: COULDN'T CLONE THE SNOWFLAKE REPOSITORY!"
     echo "INFO: The Snowflake repository may be blocked or offline!"
     echo "INFO: Please try again later and if the problem persists, please report it"
   else
-    git -C ~/downloads/snowflake checkout "${snowflake_commit_hash}"
+    git -C "${download_dir}"/snowflake -c advice.detachedHead=false checkout "${snowflake_commit_hash}"
+    sudo bash /home/admin/config.scripts/bonus.go.sh on
+    . /etc/profile ## GOPATH
+    export GO111MODULE="on"
+    cd "${download_dir}"/snowflake/proxy || exit 1
+    echo "## Installing snowflake-proxy"
+    go get
+    go build
+    sudo cp proxy /usr/bin/snowflake-proxy
+    cd "${download_dir}"/snowflake/client || exit 1
+    echo "## Installing snowflake-client"
+    go get
+    go build
+    sudo cp client /usr/bin/snowflake-client
+    cd ~ || exit 1
+    sudo rm -rf "${download_dir}"/snowflake
   fi
-  /home/admin/config.scripts/bonus.go.sh
-  export GO111MODULE="on"
-  cd /home/admin/download/snowflake/proxy || exit 1
-  go get
-  go build
-  sudo cp proxy /usr/bin/snowflake-proxy
-  cd /home/admin/download/snowflake/client || exit 1
-  go get
-  go build
-  sudo cp client /usr/bin/snowflake-client
-  cd ~ || exit 1
-  sudo rm -rf /home/admin/download/snowflake
 }
 
 
 #### MAIN ####
 
 # create tor dirs and set permissions
-sudo mkdir -pv /etc/tor/torrc.d "${tor_data_dir}"/sys "${tor_data_dir}"/services "${tor_data_dir}"/onion_auth
+sudo mkdir -pv /etc/tor/torrc.d "${tor_data_dir}"/sys/keys "${tor_data_dir}"/services "${tor_data_dir}"/onion_auth
 sudo chmod -v 700 "${tor_data_dir}"
 sudo chmod -v 755 /etc/tor /etc/tor/torrc.d
 sudo chmod -v 644 /etc/tor/torrc /etc/tor/torrc.d/*
@@ -161,7 +165,7 @@ sudo chown -Rv debian-tor:debian-tor "${tor_data_dir}"
 sudo chown -Rv root:root /etc/tor
 
 # create tor config if not existent
-sudo grep -q "Bitcoin" ${torrc} || configure_default_torrc
+sudo grep -q "raspiblitz" ${torrc} || configure_default_torrc
 
 configure_pluggable_transports
 
