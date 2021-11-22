@@ -151,15 +151,13 @@ configure_pluggable_transports(){
 
 #### MAIN ####
 
-# create tor data directory if it not exist
+# create tor dirs and set permissions
 sudo mkdir -pv /etc/tor/torrc.d "${tor_data_dir}"/sys "${tor_data_dir}"/services "${tor_data_dir}"/onion_auth
-# make sure its the correct owner
 sudo chmod -v 700 "${tor_data_dir}"
-sudo chown -Rv debian-tor:debian-tor "${tor_data_dir}"
-
-# make sure its the correct owner
 sudo chmod -v 755 /etc/tor /etc/tor/torrc.d
 sudo chmod -v 644 /etc/tor/torrc /etc/tor/torrc.d/*
+# make sure its the correct owner
+sudo chown -Rv debian-tor:debian-tor "${tor_data_dir}"
 sudo chown -Rv root:root /etc/tor
 
 # create tor config if not existent
