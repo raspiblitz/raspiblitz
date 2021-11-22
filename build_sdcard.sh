@@ -437,7 +437,7 @@ sudo pip install setuptools
 # psmisc -> install killall, fuser
 # ufw -> firewall
 # sqlite3 -> database
-sudo apt install -y rsync net-tools xxd netcat openssh-client openssh-sftp-server sshpass psmisc ufw sqlite
+sudo apt install -y rsync net-tools xxd netcat openssh-client openssh-sftp-server sshpass psmisc ufw sqlite3
 sudo apt clean
 sudo apt autoremove -y
 
