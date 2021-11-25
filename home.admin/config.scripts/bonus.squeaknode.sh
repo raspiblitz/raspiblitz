@@ -20,7 +20,7 @@ if [ "$1" = "menu" ]; then
   echo "# collecting status info ... (please wait)"
   source <(sudo /home/admin/config.scripts/bonus.squeaknode.sh status)
 
-  text="Local Web Browser: https://${localIP}:${httpPort}"
+  text="Local Web Browser: http://${localIP}:${httpPort}"
 
   if [ ${#publicDomain} -gt 0 ]; then
      text="${text}
