@@ -87,9 +87,6 @@ if [ "$1" = "write-macaroons" ]; then
   #sudo /usr/sbin/usermod --append --groups lndreadonly squeaknode
   #sudo /usr/sbin/usermod --append --groups lndadmin squeaknode
 
-  toraddress=$(sudo cat /mnt/hdd/tor/squeaknode-p2p-${chain}net/hostname 2>/dev/null)
-  sudo -u squeaknode sed -i "s|^SQUEAKNODE_SERVER_EXTERNAL_ADDRESS=.*|SQUEAKNODE_SERVER_EXTERNAL_ADDRESS=${toraddress}|g" /home/squeaknode/squeaknode/.env
-
   # set macaroon  path info in .env - USING PATH
   #sudo sed -i "s|^LND_REST_ADMIN_MACAROON=.*|LND_REST_ADMIN_MACAROON=/home/squeaknode/.lnd/data/chain/${network}/${chain}net/admin.macaroon|g" /home/squeaknode/squeaknode/.env
   #sudo sed -i "s|^LND_REST_INVOICE_MACAROON=.*|LND_REST_INVOICE_MACAROON=/home/squeaknode/.lnd/data/chain/${network}/${chain}net/invoice.macaroon|g" /home/squeaknode/squeaknode/.env
@@ -165,6 +162,19 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo chown squeaknode:squeaknode -R /mnt/hdd/app-data/squeaknode
     sudo bash -c "echo 'SQUEAKNODE_NODE_SQK_DIR_PATH=/mnt/hdd/app-data/squeaknode' >> /home/squeaknode/squeaknode/.env"
 
+    # Hidden Service if Tor is active
+    source /mnt/hdd/raspiblitz.conf
+    if [ "${runBehindTor}" = "on" ]; then
+      # make sure to keep in sync with internet.tor.sh script
+      /home/admin/config.scripts/internet.hiddenservice.sh squeaknode-p2p-mainnet 80 8555
+      /home/admin/config.scripts/internet.hiddenservice.sh squeaknode-p2p-testnet 80 18555
+    fi
+    exit 0
+
+    # Set the external address config using the p2p hidden service.
+    toraddress=$(sudo cat /mnt/hdd/tor/squeaknode-p2p-${chain}net/hostname 2>/dev/null)
+    sudo -u squeaknode sed -i "s|^SQUEAKNODE_SERVER_EXTERNAL_ADDRESS=.*|SQUEAKNODE_SERVER_EXTERNAL_ADDRESS=${toraddress}|g" /home/squeaknode/squeaknode/.env
+
     # to the install
     echo "# installing application dependencies"
 
@@ -235,14 +245,6 @@ EOF
   # setting value in raspi blitz config
   sudo sed -i "s/^squeaknode=.*/squeaknode=on/g" /mnt/hdd/raspiblitz.conf
 
-  # Hidden Service if Tor is active
-  source /mnt/hdd/raspiblitz.conf
-  if [ "${runBehindTor}" = "on" ]; then
-    # make sure to keep in sync with internet.tor.sh script
-    /home/admin/config.scripts/internet.hiddenservice.sh squeaknode-p2p-mainnet 80 8555
-    /home/admin/config.scripts/internet.hiddenservice.sh squeaknode-p2p-testnet 80 18555
-  fi
-  exit 0
 fi
 
 # switch off
