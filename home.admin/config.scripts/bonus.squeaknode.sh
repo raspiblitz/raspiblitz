@@ -1,15 +1,13 @@
 #!/bin/bash
 
 # https://github.com/yzernik/squeaknode
+pinnedVersion="v0.1.176"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "small config script to switch squeaknode on or off"
-  echo "bonus.squeaknode.sh on [?GITHUBUSER] [?BRANCH]"
+  echo "bonus.squeaknode.sh on"
   echo "bonus.squeaknode.sh [off|status|menu|write-macaroons]"
-  echo "# DEVELOPMENT: TO SYNC WITH YOUR FORKED GITHUB-REPO"
-  echo "bonus.squeaknode.sh github repo [GITHUBUSER] [?BRANCH]"
-  echo "bonus.squeaknode.sh github sync"
   exit 1
 fi
 
@@ -22,49 +20,12 @@ if [ "$1" = "menu" ]; then
   echo "# collecting status info ... (please wait)"
   source <(sudo /home/admin/config.scripts/bonus.squeaknode.sh status)
 
-  # display possible problems with IP2TOR setup
-  if [ ${#ip2torWarn} -gt 0 ]; then
-    whiptail --title " Warning " \
-    --yes-button "Back" \
-    --no-button "Continue Anyway" \
-    --yesno "Your IP2TOR+LetsEncrypt may have problems:\n${ip2torWarn}\n\nCheck if locally responding: https://${localIP}:${httpsPort}\n\nCheck if service is reachable over Tor:\n${toraddress}" 14 72
-    if [ "$?" != "1" ]; then
-      exit 0
-	  fi
-  fi
-
-  text="Local Web Browser: https://${localIP}:${httpsPort}"
+  text="Local Web Browser: https://${localIP}:${httpPort}"
 
   if [ ${#publicDomain} -gt 0 ]; then
      text="${text}
-Public Domain: https://${publicDomain}:${httpsPort}
-port forwarding on router needs to be active & may change port" 
-  fi
-
-  text="${text}\n
-You need to accept self-signed HTTPS cert with SHA1 Fingerprint:
-${sslFingerprintIP}" 
-
-  if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
-    /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
-    text="${text}\n
-TOR Browser Hidden Service address (QR see LCD):
-${toraddress}"
-  fi
-
-  if [ ${#ip2torDomain} -gt 0 ]; then
-    text="${text}\n
-IP2TOR+LetsEncrypt: https://${ip2torDomain}:${ip2torPort}
-SHA1 ${sslFingerprintTOR}"
-  elif [ ${#ip2torIP} -gt 0 ]; then
-    text="${text}\n
-IP2TOR: https://${ip2torIP}:${ip2torPort}
-SHA1 ${sslFingerprintTOR}
-go MAINMENU > SUBSCRIBE and add LetsEncrypt HTTPS Domain"
-  elif [ ${#publicDomain} -eq 0 ]; then
-    text="${text}\n
-To enable easy reachability with normal browser from the outside
-consider adding a IP2TOR Bridge (MAINMENU > SUBSCRIBE)."
+Public Domain: https://${publicDomain}:${httpPort}
+port forwarding on router needs to be active & may change port"
   fi
 
   whiptail --title " squeaknode " --msgbox "${text}" 16 69
@@ -88,7 +49,6 @@ if [ "$1" = "status" ]; then
     localIP=$(hostname -I | awk '{print $1}')
     echo "localIP='${localIP}'"
     echo "httpPort='5000'"
-    echo "httpsPort='5001'"
     echo "publicIP='${publicIP}'"
 
     # check for LetsEnryptDomain for DynDns
@@ -96,35 +56,6 @@ if [ "$1" = "status" ]; then
     source <(sudo /home/admin/config.scripts/blitz.subscriptions.ip2tor.py ip-by-tor $publicIP)
     if [ ${#error} -eq 0 ]; then
       echo "publicDomain='${domain}'"
-    fi
-
-    sslFingerprintIP=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout 2>/dev/null | cut -d"=" -f2)
-    echo "sslFingerprintIP='${sslFingerprintIP}'"
-
-    toraddress=$(sudo cat /mnt/hdd/tor/squeaknode/hostname 2>/dev/null)
-    echo "toraddress='${toraddress}'"
-
-    sslFingerprintTOR=$(openssl x509 -in /mnt/hdd/app-data/nginx/tor_tls.cert -fingerprint -noout 2>/dev/null | cut -d"=" -f2)
-    echo "sslFingerprintTOR='${sslFingerprintTOR}'"
-
-    # check for IP2TOR
-    error=""
-    source <(sudo /home/admin/config.scripts/blitz.subscriptions.ip2tor.py ip-by-tor $toraddress)
-    if [ ${#error} -eq 0 ]; then
-      echo "ip2torType='${ip2tor-v1}'"
-      echo "ip2torID='${id}'"
-      echo "ip2torIP='${ip}'"
-      echo "ip2torPort='${port}'"
-      # check for LetsEnryptDomain on IP2TOR
-      error=""
-      source <(sudo /home/admin/config.scripts/blitz.subscriptions.letsencrypt.py domain-by-ip $ip)
-      if [ ${#error} -eq 0 ]; then
-        echo "ip2torDomain='${domain}'"
-        domainWarning=$(sudo /home/admin/config.scripts/blitz.subscriptions.letsencrypt.py subscription-detail ${domain} ${port} | jq -r ".warning")
-        if [ ${#domainWarning} -gt 0 ]; then
-          echo "ip2torWarn='${domainWarning}'"
-        fi
-      fi
     fi
 
     # check for error
@@ -157,16 +88,12 @@ if [ "$1" = "write-macaroons" ]; then
   fi
 
   # set tls.cert path (use | as separator to avoid escaping file path slashes)
-  sudo -u squeaknode sed -i "s|^LND_REST_CERT=.*|LND_REST_CERT=/home/squeaknode/.lnd/tls.cert|g" /home/squeaknode/squeaknode/.env
+  sudo -u squeaknode sed -i "s|^SQUEAKNODE_LND_TLS_CERT_PATH=.*|SQUEAKNODE_LND_TLS_CERT_PATH=/home/squeaknode/.lnd/tls.cert|g" /home/squeaknode/squeaknode/.env
 
-  # set macaroon  path info in .env - USING HEX IMPORT
+  # set macaroon path info in .env
   sudo chmod 600 /home/squeaknode/squeaknode/.env
-  macaroonAdminHex=$(sudo xxd -ps -u -c 1000 /home/squeaknode/.lnd/data/chain/${network}/${chain}net/admin.macaroon)
-  macaroonInvoiceHex=$(sudo xxd -ps -u -c 1000 /home/squeaknode/.lnd/data/chain/${network}/${chain}net/invoice.macaroon)
-  macaroonReadHex=$(sudo xxd -ps -u -c 1000 /home/squeaknode/.lnd/data/chain/${network}/${chain}net/readonly.macaroon)
-  sudo sed -i "s/^LND_REST_ADMIN_MACAROON=.*/LND_REST_ADMIN_MACAROON=${macaroonAdminHex}/g" /home/squeaknode/squeaknode/.env
-  sudo sed -i "s/^LND_REST_INVOICE_MACAROON=.*/LND_REST_INVOICE_MACAROON=${macaroonInvoiceHex}/g" /home/squeaknode/squeaknode/.env
-  sudo sed -i "s/^LND_REST_READ_MACAROON=.*/LND_REST_READ_MACAROON=${macaroonReadHex}/g" /home/squeaknode/squeaknode/.env
+  lndMacaroonPath=/home/squeaknode/.lnd/data/chain/${network}/${chain}net/admin.macaroon
+  sudo sed -i "s/^SQUEAKNODE_LND_MACAROON_PATH=.*/SQUEAKNODE_LND_MACAROON_PATH=${lndMacaroonPath}/g" /home/squeaknode/squeaknode/.env
 
   #echo "make sure squeaknode is member of lndreadonly, lndinvoice, lndadmin"
   #sudo /usr/sbin/usermod --append --groups lndinvoice squeaknode
@@ -179,53 +106,6 @@ if [ "$1" = "write-macaroons" ]; then
   #sudo sed -i "s|^LND_REST_READ_MACAROON=.*|LND_REST_READ_MACAROON=/home/squeaknode/.lnd/data/chain/${network}/${chain}net/read.macaroon|g" /home/squeaknode/squeaknode/.env
   echo "# OK - macaroons written to /home/squeaknode/squeaknode/.env"
 
-  exit 0
-fi
-
-if [ "$1" = "repo" ]; then
-
-  # get github parameters
-  githubUser="$2"
-  if [ ${#githubUser} -eq 0 ]; then
-    echo "echo='missing parameter'"
-    exit 1
-  fi
-  githubBranch="$3"
-  if [ ${#githubBranch} -eq 0 ]; then
-    githubBranch="master"
-  fi
-
-  # check if repo exists
-  githubRepo="https://github.com/${githubUser}/squeaknode"
-  httpcode=$(curl -s -o /dev/null -w "%{http_code}" ${githubRepo})
-  if [ "${httpcode}" != "200" ]; then
-    echo "# tested github repo: ${githubRepo}"
-    echo "error='repo for user does not exist'"
-    exit 1
-  fi
-
-  # change origin repo of squeaknode code
-  echo "# changing squeaknode github repo(${githubUser}) branch(${githubBranch})"
-  cd /home/squeaknode/squeaknode
-  sudo git remote remove origin
-  sudo git remote add origin ${githubRepo}
-  sudo git fetch
-  sudo git checkout ${githubBranch}
-  sudo git branch --set-upstream-to=origin/${githubBranch} ${githubBranch}
-
-fi
-
-if [ "$1" = "sync" ] || [ "$1" = "repo" ]; then
-  echo "# pull all changes from github repo"
-  # output basic info
-  cd /home/squeaknode/squeaknode
-  sudo git remote -v
-  sudo git branch -v
-  # pull latest code
-  sudo git pull
-  # restart squeaknode service
-  sudo systemctl restart squeaknode
-  echo "# server is restarting ... maybe takes some seconds until available"
   exit 0
 fi
 
@@ -246,38 +126,37 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # make sure needed debian packages are installed
     echo "# installing needed packages"
 
-    # get optional github parameter
-    githubUser="yzernik"
-    if [ "$2" != "" ]; then
-      githubUser="$2"
-    fi
-    githubBranch="master"
-    #githubBranch="f6bcff01f4b62ca26177f22bd2d479b01d371406"
-    if [ "$3" != "" ]; then
-      githubBranch="$3"
-    fi
-
-
     # install from GitHub
-    echo "# get the github code user(${githubUser}) branch(${githubBranch})"
+    githubRepo="https://github.com/yzernik/squeaknode"
+    echo "# get the github code ${githubRepo}"
     sudo rm -r /home/squeaknode/squeaknode 2>/dev/null
     cd /home/squeaknode
-    sudo -u squeaknode git clone https://github.com/${githubUser}/squeaknode.git
+    sudo -u squeaknode git clone ${githubRepo}.git
     cd /home/squeaknode/squeaknode
-    sudo -u squeaknode git checkout ${githubBranch}
+    sudo -u squeaknode git checkout ${pinnedVersion}
 
     # prepare .env file
     echo "# preparing env file"
     sudo rm /home/squeaknode/squeaknode/.env 2>/dev/null
     sudo -u squeaknode touch /home/squeaknode/squeaknode/.env
-    sudo bash -c "echo 'QUART_APP=squeaknode.app:create_app()' >> /home/squeaknode/squeaknode/.env"
-    sudo bash -c "echo 'SQUEAKNODE_FORCE_HTTPS=0' >> /home/squeaknode/squeaknode/.env"
-    sudo bash -c "echo 'SQUEAKNODE_BACKEND_WALLET_CLASS=LndRestWallet' >> /home/squeaknode/squeaknode/.env"
-    sudo bash -c "echo 'LND_REST_ENDPOINT=https://127.0.0.1:8080' >> /home/squeaknode/squeaknode/.env"
-    sudo bash -c "echo 'LND_REST_CERT=' >> /home/squeaknode/squeaknode/.env"
-    sudo bash -c "echo 'LND_REST_ADMIN_MACAROON=' >> /home/squeaknode/squeaknode/.env"
-    sudo bash -c "echo 'LND_REST_INVOICE_MACAROON=' >> /home/squeaknode/squeaknode/.env"
-    sudo bash -c "echo 'LND_REST_READ_MACAROON=' >> /home/squeaknode/squeaknode/.env"
+    sudo bash -c "echo 'SQUEAKNODE_BITCOIN_RPC_HOST=' >> /home/squeaknode/squeaknode/.env"
+    sudo bash -c "echo 'SQUEAKNODE_BITCOIN_RPC_PORT=' >> /home/squeaknode/squeaknode/.env"
+    sudo bash -c "echo 'SQUEAKNODE_BITCOIN_RPC_USER=' >> /home/squeaknode/squeaknode/.env"
+    sudo bash -c "echo 'SQUEAKNODE_BITCOIN_RPC_PASS=' >> /home/squeaknode/squeaknode/.env"
+    sudo bash -c "echo 'SQUEAKNODE_BITCOIN_ZEROMQ_HASHBLOCK_PORT=' >> /home/squeaknode/squeaknode/.env"
+    sudo bash -c "echo 'SQUEAKNODE_LND_HOST=' >> /home/squeaknode/squeaknode/.env"
+    sudo bash -c "echo 'SQUEAKNODE_LND_RPC_PORT=' >> /home/squeaknode/squeaknode/.env"
+    sudo bash -c "echo 'SQUEAKNODE_LND_TLS_CERT_PATH=' >> /home/squeaknode/squeaknode/.env"
+    sudo bash -c "echo 'SQUEAKNODE_LND_MACAROON_PATH=' >> /home/squeaknode/squeaknode/.env"
+    sudo bash -c "echo 'SQUEAKNODE_TOR_PROXY_IP=' >> /home/squeaknode/squeaknode/.env"
+    sudo bash -c "echo 'SQUEAKNODE_TOR_PROXY_PORT=' >> /home/squeaknode/squeaknode/.env"
+    sudo bash -c "echo 'SQUEAKNODE_WEBADMIN_ENABLED=' >> /home/squeaknode/squeaknode/.env"
+    sudo bash -c "echo 'SQUEAKNODE_WEBADMIN_USERNAME=' >> /home/squeaknode/squeaknode/.env"
+    sudo bash -c "echo 'SQUEAKNODE_WEBADMIN_PASSWORD=' >> /home/squeaknode/squeaknode/.env"
+    sudo bash -c "echo 'SQUEAKNODE_NODE_NETWORK=' >> /home/squeaknode/squeaknode/.env"
+    sudo bash -c "echo 'SQUEAKNODE_NODE_SQK_DIR_PATH=' >> /home/squeaknode/squeaknode/.env"
+    sudo bash -c "echo 'SQUEAKNODE_NODE_MAX_SQUEAKS=' >> /home/squeaknode/squeaknode/.env"
+    sudo bash -c "echo 'SQUEAKNODE_SERVER_EXTERNAL_ADDRESS=' >> /home/squeaknode/squeaknode/.env"
     /home/admin/config.scripts/bonus.squeaknode.sh write-macaroons
 
     # set database path to HDD data so that its survives updates and migrations
@@ -292,20 +171,12 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     sudo -u squeaknode python3 -m venv venv
     sudo -u squeaknode ./venv/bin/pip install -r requirements.txt
-
-    # process assets
-    echo "# processing assets"
-    sudo -u squeaknode ./venv/bin/quart assets
-
-    # update databases (if needed)
-    echo "# updating databases"
-    sudo -u squeaknode ./venv/bin/quart migrate
+    sudo -u squeaknode ./venv/bin/pip install .
 
     # open firewall
     echo
     echo "*** Updating Firewall ***"
-    sudo ufw allow 5000 comment 'squeaknode HTTP'
-    sudo ufw allow 5001 comment 'squeaknode HTTPS'
+    sudo ufw allow 12994 comment 'squeaknode HTTP'
     echo ""
 
     # install service
@@ -320,7 +191,7 @@ After=bitcoind.service
 
 [Service]
 WorkingDirectory=/home/squeaknode/squeaknode
-ExecStart=/bin/sh -c 'cd /home/squeaknode/squeaknode && ./venv/bin/hypercorn -k trio --bind 0.0.0.0:5000 "squeaknode.app:create_app()"'
+ExecStart=/bin/sh -c 'cd /home/squeaknode/squeaknode && ./venv/bin/squeaknode'
 User=squeaknode
 Restart=always
 TimeoutSec=120
@@ -352,22 +223,6 @@ EOF
     echo "squeaknode already installed."
   fi
 
-  # setup nginx symlinks
-  if ! [ -f /etc/nginx/sites-available/squeaknode_ssl.conf ]; then
-     sudo cp /home/admin/assets/nginx/sites-available/squeaknode_ssl.conf /etc/nginx/sites-available/squeaknode_ssl.conf
-  fi
-  if ! [ -f /etc/nginx/sites-available/squeaknode_tor.conf ]; then
-     sudo cp /home/admin/assets/nginx/sites-available/squeaknode_tor.conf /etc/nginx/sites-available/squeaknode_tor.conf
-  fi
-  if ! [ -f /etc/nginx/sites-available/squeaknode_tor_ssl.conf ]; then
-     sudo cp /home/admin/assets/nginx/sites-available/squeaknode_tor_ssl.conf /etc/nginx/sites-available/squeaknode_tor_ssl.conf
-  fi
-  sudo ln -sf /etc/nginx/sites-available/squeaknode_ssl.conf /etc/nginx/sites-enabled/
-  sudo ln -sf /etc/nginx/sites-available/squeaknode_tor.conf /etc/nginx/sites-enabled/
-  sudo ln -sf /etc/nginx/sites-available/squeaknode_tor_ssl.conf /etc/nginx/sites-enabled/
-  sudo nginx -t
-  sudo systemctl reload nginx
-
   # setting value in raspi blitz config
   sudo sed -i "s/^squeaknode=.*/squeaknode=on/g" /mnt/hdd/raspiblitz.conf
 
@@ -375,7 +230,7 @@ EOF
   source /mnt/hdd/raspiblitz.conf
   if [ "${runBehindTor}" = "on" ]; then
     # make sure to keep in sync with internet.tor.sh script
-    /home/admin/config.scripts/internet.hiddenservice.sh squeaknode 80 5002 443 5003
+    /home/admin/config.scripts/internet.hiddenservice.sh squeaknode 80 12994
   fi
   exit 0
 fi
@@ -400,16 +255,6 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # setting value in raspi blitz config
   sudo sed -i "s/^squeaknode=.*/squeaknode=off/g" /mnt/hdd/raspiblitz.conf
-
-  # remove nginx symlinks
-  sudo rm -f /etc/nginx/sites-enabled/squeaknode_ssl.conf
-  sudo rm -f /etc/nginx/sites-enabled/squeaknode_tor.conf
-  sudo rm -f /etc/nginx/sites-enabled/squeaknode_tor_ssl.conf
-  sudo rm -f /etc/nginx/sites-available/squeaknode_ssl.conf
-  sudo rm -f /etc/nginx/sites-available/squeaknode_tor.conf
-  sudo rm -f /etc/nginx/sites-available/squeaknode_tor_ssl.conf
-  sudo nginx -t
-  sudo systemctl reload nginx
 
   # Hidden Service if Tor is active
   if [ "${runBehindTor}" = "on" ]; then
