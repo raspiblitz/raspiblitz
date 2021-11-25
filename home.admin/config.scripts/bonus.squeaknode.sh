@@ -239,7 +239,8 @@ EOF
   source /mnt/hdd/raspiblitz.conf
   if [ "${runBehindTor}" = "on" ]; then
     # make sure to keep in sync with internet.tor.sh script
-    /home/admin/config.scripts/internet.hiddenservice.sh squeaknode 80 12994
+    /home/admin/config.scripts/internet.hiddenservice.sh squeaknode-p2p-mainnet 80 8555
+    /home/admin/config.scripts/internet.hiddenservice.sh squeaknode-p2p-testnet 80 18555
   fi
   exit 0
 fi
@@ -267,7 +268,8 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # Hidden Service if Tor is active
   if [ "${runBehindTor}" = "on" ]; then
-    /home/admin/config.scripts/internet.hiddenservice.sh off squeaknode
+    /home/admin/config.scripts/internet.hiddenservice.sh off squeaknode-p2p-mainnet
+    /home/admin/config.scripts/internet.hiddenservice.sh off squeaknode-p2p-testnet
   fi
 
   isInstalled=$(sudo ls /etc/systemd/system/squeaknode.service 2>/dev/null | grep -c 'squeaknode.service')
