@@ -54,7 +54,7 @@ if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
   OPTIONS+=(y 'LND PyBLOCK' ${pyblock})
   OPTIONS+=(h 'LND ChannelTools (Fund Rescue)' ${chantools})
   OPTIONS+=(x 'LND Sphinx-Relay' ${sphinxrelay})
-  OPTIONS+=(i 'LND squeaknode' ${squeaknode})
+  OPTIONS+=(q 'LND squeaknode' ${squeaknode})
 fi
 
 # just available for CL
@@ -523,7 +523,7 @@ else
 fi
 
 # squeaknode process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "i")
+choice="off"; check=$(echo "${CHOICES}" | grep -c "q")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${squeaknode}" != "${choice}" ]; then
   echo "squeaknode Setting changed .."
