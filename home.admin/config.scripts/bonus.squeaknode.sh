@@ -166,9 +166,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     # to the install
     echo "# installing application dependencies"
-    cd /home/squeaknode/squeaknode
-    # do install like this
 
+    sudo apt update
+    sudo apt-get install -y libffi-dev libudev-dev
+
+    cd /home/squeaknode/squeaknode
     sudo -u squeaknode python3 -m venv venv
     sudo -u squeaknode ./venv/bin/pip install -r requirements.txt
     sudo -u squeaknode ./venv/bin/pip install .
