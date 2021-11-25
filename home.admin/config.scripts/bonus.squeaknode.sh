@@ -162,7 +162,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # set database path to HDD data so that its survives updates and migrations
     sudo mkdir /mnt/hdd/app-data/squeaknode 2>/dev/null
     sudo chown squeaknode:squeaknode -R /mnt/hdd/app-data/squeaknode
-    sudo bash -c "echo 'SQUEAKNODE_DATA_FOLDER=/mnt/hdd/app-data/squeaknode' >> /home/squeaknode/squeaknode/.env"
+    sudo bash -c "echo 'SQUEAKNODE_NODE_SQK_DIR_PATH=/mnt/hdd/app-data/squeaknode' >> /home/squeaknode/squeaknode/.env"
 
     # to the install
     echo "# installing application dependencies"
