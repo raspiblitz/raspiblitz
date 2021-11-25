@@ -197,6 +197,7 @@ Wants=bitcoind.service
 After=bitcoind.service
 
 [Service]
+EnvironmentFile=/home/squeaknode/squeaknode/.env
 WorkingDirectory=/home/squeaknode/squeaknode
 ExecStart=/bin/sh -c 'cd /home/squeaknode/squeaknode && ./venv/bin/squeaknode'
 User=squeaknode
