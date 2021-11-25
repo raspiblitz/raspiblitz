@@ -87,7 +87,7 @@ if [ "$1" = "write-macaroons" ]; then
   #sudo /usr/sbin/usermod --append --groups lndreadonly squeaknode
   #sudo /usr/sbin/usermod --append --groups lndadmin squeaknode
 
-  toraddress=$(sudo cat /mnt/hdd/tor/squeaknode/hostname 2>/dev/null)
+  toraddress=$(sudo cat /mnt/hdd/tor/squeaknode-p2p-${chain}net/hostname 2>/dev/null)
   sudo -u squeaknode sed -i "s|^SQUEAKNODE_SERVER_EXTERNAL_ADDRESS=.*|SQUEAKNODE_SERVER_EXTERNAL_ADDRESS=${toraddress}|g" /home/squeaknode/squeaknode/.env
 
   # set macaroon  path info in .env - USING PATH
