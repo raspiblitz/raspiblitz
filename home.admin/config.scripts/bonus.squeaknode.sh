@@ -48,7 +48,7 @@ if [ "$1" = "status" ]; then
 
     localIP=$(hostname -I | awk '{print $1}')
     echo "localIP='${localIP}'"
-    echo "httpPort='5000'"
+    echo "httpPort='12994'"
     echo "publicIP='${publicIP}'"
 
     # check for LetsEnryptDomain for DynDns
