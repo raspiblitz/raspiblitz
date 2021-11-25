@@ -136,11 +136,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u squeaknode git checkout ${pinnedVersion}
 
     # Prepare configs
-    NETWORK="mainnet"
     RPCHOST="localhost"
     RPCPORT="8332"
-    RPCUSER=$(sudo cat /mnt/hdd/${network}/${NETWORK}.conf | grep rpcuser | cut -c 9-)
-    PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${NETWORK}.conf | grep rpcpassword | cut -c 13-)
+    RPCUSER=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcuser | cut -c 9-)
+    PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
     ZEROMQ_HASHBLOCK_PORT=28334
 
     LNDHOST="localhost"
@@ -166,7 +165,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo bash -c "echo 'SQUEAKNODE_WEBADMIN_ENABLED=true' >> /home/squeaknode/squeaknode/.env"
     sudo bash -c "echo 'SQUEAKNODE_WEBADMIN_USERNAME=raspiblitz' >> /home/squeaknode/squeaknode/.env"
     sudo bash -c "echo 'SQUEAKNODE_WEBADMIN_PASSWORD=pass' >> /home/squeaknode/squeaknode/.env"
-    sudo bash -c "echo 'SQUEAKNODE_NODE_NETWORK=${NETWORK}' >> /home/squeaknode/squeaknode/.env"
+    sudo bash -c "echo 'SQUEAKNODE_NODE_NETWORK=${chain}net' >> /home/squeaknode/squeaknode/.env"
     # sudo bash -c "echo 'SQUEAKNODE_NODE_SQK_DIR_PATH=' >> /home/squeaknode/squeaknode/.env"
     sudo bash -c "echo 'SQUEAKNODE_NODE_MAX_SQUEAKS=${MAX_SQUEAKS}' >> /home/squeaknode/squeaknode/.env"
     # sudo bash -c "echo 'SQUEAKNODE_SERVER_EXTERNAL_ADDRESS=' >> /home/squeaknode/squeaknode/.env"
