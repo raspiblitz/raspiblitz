@@ -295,7 +295,7 @@ For each password please choose unique, single strings, without spaces and speci
 
 You can use this [RaspiBlitz Recovery Sheet (PDF)](https://github.com/rootzoll/raspiblitz/raw/v1.7/home.admin/assets/RaspiBlitzRecoverySheet.pdf) to write those passwords down for safe storage and also use it later on for your Seed Words.
 
-*The password A,B,C idea is based on the [RaspiBolt Guide Preparations](https://stadicus.github.io/RaspiBolt/raspibolt_10_preparations.html#write-down-your-passwords) - check out for more background.*
+*The password A,B,C idea is based on the [RaspiBolt Guide Preparations](https://raspibolt.github.io/raspibolt/raspibolt_10_preparations.html#write-down-your-passwords) - check out for more background.*
 
 First, password A is requested - this is the password which will be used for SSH login and it's also set for the existing users: admin, root, bitcoin & pi.
 
@@ -611,7 +611,7 @@ For details see: https://github.com/lightningequipment/circuitbreaker/blob/maste
 
 The RaspiBlitz will automatically unlock the LND wallet upon every start.
 
-This feature is based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_6A_auto-unlock.md
+This feature is based on [https://raspibolt.github.io/raspibolt/raspibolt_6A_auto-unlock.html].
 
 It can be activated under "Services" -> "Auto-unlock LND".
 We recommend that it be turned on when DynamicDNS is used.
@@ -1372,7 +1372,7 @@ Get all details on "How to contribute to RaspiBlitz Development" on this video:
 
 <a href="https://www.youtube.com/watch?v=ZVtZepV3OfM" target="_blank"><img src="pictures/video-contrib.png" alt="Video Tutorial" width="400"></a><br>--watch--> https://www.youtube.com/watch?v=ZVtZepV3OfM
 
-Also get inspired for a deep-dive with the original "[RaspiBolt](https://stadicus.github.io/RaspiBolt/)" tutorial on how to build a lightning node on the RaspberryPi, the base work on which the RaspiBlitz was developed - so much thx to Stadicus :)
+Also get inspired for a deep-dive with the original "[RaspiBolt](https://raspibolt.github.io/raspibolt/)" tutorial on how to build a lightning node on the RaspberryPi, the base work on which the RaspiBlitz was developed - so much thx to Stadicus :)
 
 Join me on twitter [@rootzoll](https://twitter.com/rootzoll), visit us at an upcoming [#lightninghackday](https://twitter.com/hashtag/LightningHackday?src=hash) or check by one of our bitcoin meetups in Berlin ... every 1st Thursday evening a month at the room77 bar - feel free to buy me a beer with lightning there :)
 
