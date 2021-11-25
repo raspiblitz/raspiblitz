@@ -87,6 +87,9 @@ if [ "$1" = "write-macaroons" ]; then
   #sudo /usr/sbin/usermod --append --groups lndreadonly squeaknode
   #sudo /usr/sbin/usermod --append --groups lndadmin squeaknode
 
+  toraddress=$(sudo cat /mnt/hdd/tor/thunderhub/hostname 2>/dev/null)
+  sudo -u squeaknode sed -i "s|^SQUEAKNODE_SERVER_EXTERNAL_ADDRESS=.*|SQUEAKNODE_SERVER_EXTERNAL_ADDRESS=${toraddress}|g" /home/squeaknode/squeaknode/.env
+
   # set macaroon  path info in .env - USING PATH
   #sudo sed -i "s|^LND_REST_ADMIN_MACAROON=.*|LND_REST_ADMIN_MACAROON=/home/squeaknode/.lnd/data/chain/${network}/${chain}net/admin.macaroon|g" /home/squeaknode/squeaknode/.env
   #sudo sed -i "s|^LND_REST_INVOICE_MACAROON=.*|LND_REST_INVOICE_MACAROON=/home/squeaknode/.lnd/data/chain/${network}/${chain}net/invoice.macaroon|g" /home/squeaknode/squeaknode/.env
@@ -154,7 +157,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo bash -c "echo 'SQUEAKNODE_WEBADMIN_PASSWORD=pass' >> /home/squeaknode/squeaknode/.env"
     sudo bash -c "echo 'SQUEAKNODE_NODE_NETWORK=${chain}net' >> /home/squeaknode/squeaknode/.env"
     sudo bash -c "echo 'SQUEAKNODE_NODE_MAX_SQUEAKS=${MAX_SQUEAKS}' >> /home/squeaknode/squeaknode/.env"
-    # sudo bash -c "echo 'SQUEAKNODE_SERVER_EXTERNAL_ADDRESS=' >> /home/squeaknode/squeaknode/.env"
+    sudo bash -c "echo 'SQUEAKNODE_SERVER_EXTERNAL_ADDRESS=' >> /home/squeaknode/squeaknode/.env"
     /home/admin/config.scripts/bonus.squeaknode.sh write-macaroons
 
     # set database path to HDD data so that its survives updates and migrations
