@@ -135,28 +135,41 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     cd /home/squeaknode/squeaknode
     sudo -u squeaknode git checkout ${pinnedVersion}
 
+    # Prepare configs
+    NETWORK="mainnet"
+    RPCHOST="localhost"
+    RPCPORT="8332"
+    RPCUSER=$(sudo cat /mnt/hdd/${network}/${NETWORK}.conf | grep rpcuser | cut -c 9-)
+    PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${NETWORK}.conf | grep rpcpassword | cut -c 13-)
+    ZEROMQ_HASHBLOCK_PORT=28334
+
+    LNDHOST="localhost"
+    LNDRPCPORT=10009
+
+    MAX_SQUEAKS=100000
+
     # prepare .env file
     echo "# preparing env file"
     sudo rm /home/squeaknode/squeaknode/.env 2>/dev/null
     sudo -u squeaknode touch /home/squeaknode/squeaknode/.env
-    sudo bash -c "echo 'SQUEAKNODE_BITCOIN_RPC_HOST=' >> /home/squeaknode/squeaknode/.env"
-    sudo bash -c "echo 'SQUEAKNODE_BITCOIN_RPC_PORT=' >> /home/squeaknode/squeaknode/.env"
-    sudo bash -c "echo 'SQUEAKNODE_BITCOIN_RPC_USER=' >> /home/squeaknode/squeaknode/.env"
-    sudo bash -c "echo 'SQUEAKNODE_BITCOIN_RPC_PASS=' >> /home/squeaknode/squeaknode/.env"
-    sudo bash -c "echo 'SQUEAKNODE_BITCOIN_ZEROMQ_HASHBLOCK_PORT=' >> /home/squeaknode/squeaknode/.env"
-    sudo bash -c "echo 'SQUEAKNODE_LND_HOST=' >> /home/squeaknode/squeaknode/.env"
-    sudo bash -c "echo 'SQUEAKNODE_LND_RPC_PORT=' >> /home/squeaknode/squeaknode/.env"
+    sudo bash -c "echo 'SQUEAKNODE_BITCOIN_RPC_HOST=${RPCHOST}' >> /home/squeaknode/squeaknode/.env"
+    sudo bash -c "echo 'SQUEAKNODE_BITCOIN_RPC_PORT=${RPCPORT}' >> /home/squeaknode/squeaknode/.env"
+    sudo bash -c "echo 'SQUEAKNODE_BITCOIN_RPC_USER=${RPCUSER}' >> /home/squeaknode/squeaknode/.env"
+    sudo bash -c "echo 'SQUEAKNODE_BITCOIN_RPC_PASS=${PASSWORD_B}' >> /home/squeaknode/squeaknode/.env"
+    sudo bash -c "echo 'SQUEAKNODE_BITCOIN_ZEROMQ_HASHBLOCK_PORT=${ZEROMQ_HASHBLOCK_PORT}' >> /home/squeaknode/squeaknode/.env"
+    sudo bash -c "echo 'SQUEAKNODE_LND_HOST=${LNDHOST}' >> /home/squeaknode/squeaknode/.env"
+    sudo bash -c "echo 'SQUEAKNODE_LND_RPC_PORT=${LNDRPCPORT}' >> /home/squeaknode/squeaknode/.env"
     sudo bash -c "echo 'SQUEAKNODE_LND_TLS_CERT_PATH=' >> /home/squeaknode/squeaknode/.env"
     sudo bash -c "echo 'SQUEAKNODE_LND_MACAROON_PATH=' >> /home/squeaknode/squeaknode/.env"
-    sudo bash -c "echo 'SQUEAKNODE_TOR_PROXY_IP=' >> /home/squeaknode/squeaknode/.env"
-    sudo bash -c "echo 'SQUEAKNODE_TOR_PROXY_PORT=' >> /home/squeaknode/squeaknode/.env"
-    sudo bash -c "echo 'SQUEAKNODE_WEBADMIN_ENABLED=' >> /home/squeaknode/squeaknode/.env"
-    sudo bash -c "echo 'SQUEAKNODE_WEBADMIN_USERNAME=' >> /home/squeaknode/squeaknode/.env"
-    sudo bash -c "echo 'SQUEAKNODE_WEBADMIN_PASSWORD=' >> /home/squeaknode/squeaknode/.env"
-    sudo bash -c "echo 'SQUEAKNODE_NODE_NETWORK=' >> /home/squeaknode/squeaknode/.env"
-    sudo bash -c "echo 'SQUEAKNODE_NODE_SQK_DIR_PATH=' >> /home/squeaknode/squeaknode/.env"
-    sudo bash -c "echo 'SQUEAKNODE_NODE_MAX_SQUEAKS=' >> /home/squeaknode/squeaknode/.env"
-    sudo bash -c "echo 'SQUEAKNODE_SERVER_EXTERNAL_ADDRESS=' >> /home/squeaknode/squeaknode/.env"
+    # sudo bash -c "echo 'SQUEAKNODE_TOR_PROXY_IP=' >> /home/squeaknode/squeaknode/.env"
+    # sudo bash -c "echo 'SQUEAKNODE_TOR_PROXY_PORT=' >> /home/squeaknode/squeaknode/.env"
+    sudo bash -c "echo 'SQUEAKNODE_WEBADMIN_ENABLED=true' >> /home/squeaknode/squeaknode/.env"
+    sudo bash -c "echo 'SQUEAKNODE_WEBADMIN_USERNAME=raspiblitz' >> /home/squeaknode/squeaknode/.env"
+    sudo bash -c "echo 'SQUEAKNODE_WEBADMIN_PASSWORD=pass' >> /home/squeaknode/squeaknode/.env"
+    sudo bash -c "echo 'SQUEAKNODE_NODE_NETWORK=${NETWORK}' >> /home/squeaknode/squeaknode/.env"
+    # sudo bash -c "echo 'SQUEAKNODE_NODE_SQK_DIR_PATH=' >> /home/squeaknode/squeaknode/.env"
+    sudo bash -c "echo 'SQUEAKNODE_NODE_MAX_SQUEAKS=${MAX_SQUEAKS}' >> /home/squeaknode/squeaknode/.env"
+    # sudo bash -c "echo 'SQUEAKNODE_SERVER_EXTERNAL_ADDRESS=' >> /home/squeaknode/squeaknode/.env"
     /home/admin/config.scripts/bonus.squeaknode.sh write-macaroons
 
     # set database path to HDD data so that its survives updates and migrations
