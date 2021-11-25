@@ -22,12 +22,6 @@ if [ "$1" = "menu" ]; then
 
   text="Local Web Browser: http://${localIP}:${httpPort}"
 
-  if [ ${#publicDomain} -gt 0 ]; then
-     text="${text}
-Public Domain: https://${publicDomain}:${httpPort}
-port forwarding on router needs to be active & may change port"
-  fi
-
   whiptail --title " squeaknode " --msgbox "${text}" 16 69
 
   /home/admin/config.scripts/blitz.display.sh hide
@@ -49,14 +43,6 @@ if [ "$1" = "status" ]; then
     localIP=$(hostname -I | awk '{print $1}')
     echo "localIP='${localIP}'"
     echo "httpPort='12994'"
-    echo "publicIP='${publicIP}'"
-
-    # check for LetsEnryptDomain for DynDns
-    error=""
-    source <(sudo /home/admin/config.scripts/blitz.subscriptions.ip2tor.py ip-by-tor $publicIP)
-    if [ ${#error} -eq 0 ]; then
-      echo "publicDomain='${domain}'"
-    fi
 
     # check for error
     isDead=$(sudo systemctl status squeaknode | grep -c 'inactive (dead)')
