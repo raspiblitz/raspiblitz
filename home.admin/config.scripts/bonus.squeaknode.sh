@@ -93,7 +93,7 @@ if [ "$1" = "write-macaroons" ]; then
   # set macaroon path info in .env
   # sudo chmod 600 /home/squeaknode/squeaknode/.env
   lndMacaroonPath=$(sudo echo /home/squeaknode/.lnd/data/chain/${network}/${chain}net/admin.macaroon)
-  sudo chmod 600 ${lndMacaroonPath}
+  sudo chown squeaknode ${lndMacaroonPath}
   sudo -u squeaknode sed -i "s|^SQUEAKNODE_LND_MACAROON_PATH=.*|SQUEAKNODE_LND_MACAROON_PATH=${lndMacaroonPath}|g" /home/squeaknode/squeaknode/.env
 
   #echo "make sure squeaknode is member of lndreadonly, lndinvoice, lndadmin"
