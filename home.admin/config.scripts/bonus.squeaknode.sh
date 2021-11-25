@@ -91,9 +91,9 @@ if [ "$1" = "write-macaroons" ]; then
   sudo -u squeaknode sed -i "s|^SQUEAKNODE_LND_TLS_CERT_PATH=.*|SQUEAKNODE_LND_TLS_CERT_PATH=/home/squeaknode/.lnd/tls.cert|g" /home/squeaknode/squeaknode/.env
 
   # set macaroon path info in .env
-  sudo chmod 600 /home/squeaknode/squeaknode/.env
+  # sudo chmod 600 /home/squeaknode/squeaknode/.env
   lndMacaroonPath='/home/squeaknode/.lnd/data/chain/${network}/${chain}net/admin.macaroon'
-  sudo -u squeaknode sed -i "s/^SQUEAKNODE_LND_MACAROON_PATH=.*/SQUEAKNODE_LND_MACAROON_PATH=${lndMacaroonPath}/g" /home/squeaknode/squeaknode/.env
+  sudo -u squeaknode sed -i "s|^SQUEAKNODE_LND_MACAROON_PATH=.*|SQUEAKNODE_LND_MACAROON_PATH=${lndMacaroonPath}|g" /home/squeaknode/squeaknode/.env
 
   #echo "make sure squeaknode is member of lndreadonly, lndinvoice, lndadmin"
   #sudo /usr/sbin/usermod --append --groups lndinvoice squeaknode
