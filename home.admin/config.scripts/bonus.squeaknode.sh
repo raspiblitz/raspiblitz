@@ -191,9 +191,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     cd /home/squeaknode/squeaknode
     sudo -u squeaknode python3 -m venv venv
-    sudo -u squeaknode ./venv/bin/pip install --upgrade pip
-    sudo -u squeaknode ./venv/bin/pip install --upgrade setuptools
-    sudo -u squeaknode ./venv/bin/pip install --no-cache-dir  --force-reinstall -Iv grpcio==1.39.0
+    # sudo -u squeaknode ./venv/bin/pip install --upgrade pip
+    # sudo -u squeaknode ./venv/bin/pip install --upgrade setuptools
+    # sudo -u squeaknode ./venv/bin/pip install --no-cache-dir  --force-reinstall -Iv grpcio==1.39.0
     # sudo -u squeaknode ./venv/bin/pip install wheel
     # sudo -u squeaknode ./venv/bin/pip install -r requirements.txt
     # sudo -u squeaknode ./venv/bin/pip install .
