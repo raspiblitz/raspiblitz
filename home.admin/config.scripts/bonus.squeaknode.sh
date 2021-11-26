@@ -82,18 +82,10 @@ if [ "$1" = "write-macaroons" ]; then
   sudo chown squeaknode ${lndMacaroonPath}
   sudo -u squeaknode sed -i "s|^SQUEAKNODE_LND_MACAROON_PATH=.*|SQUEAKNODE_LND_MACAROON_PATH=${lndMacaroonPath}|g" /home/squeaknode/squeaknode/.env
 
-  #echo "make sure squeaknode is member of lndreadonly, lndinvoice, lndadmin"
-  #sudo /usr/sbin/usermod --append --groups lndinvoice squeaknode
-  #sudo /usr/sbin/usermod --append --groups lndreadonly squeaknode
-  #sudo /usr/sbin/usermod --append --groups lndadmin squeaknode
-
   toraddress=$(sudo cat /mnt/hdd/tor/squeaknode-p2p-${chain}net/hostname 2>/dev/null)
   sudo -u squeaknode sed -i "s|^SQUEAKNODE_SERVER_EXTERNAL_ADDRESS=.*|SQUEAKNODE_SERVER_EXTERNAL_ADDRESS=${toraddress}|g" /home/squeaknode/squeaknode/.env
 
   # set macaroon  path info in .env - USING PATH
-  #sudo sed -i "s|^LND_REST_ADMIN_MACAROON=.*|LND_REST_ADMIN_MACAROON=/home/squeaknode/.lnd/data/chain/${network}/${chain}net/admin.macaroon|g" /home/squeaknode/squeaknode/.env
-  #sudo sed -i "s|^LND_REST_INVOICE_MACAROON=.*|LND_REST_INVOICE_MACAROON=/home/squeaknode/.lnd/data/chain/${network}/${chain}net/invoice.macaroon|g" /home/squeaknode/squeaknode/.env
-  #sudo sed -i "s|^LND_REST_READ_MACAROON=.*|LND_REST_READ_MACAROON=/home/squeaknode/.lnd/data/chain/${network}/${chain}net/read.macaroon|g" /home/squeaknode/squeaknode/.env
   echo "# OK - macaroons written to /home/squeaknode/squeaknode/.env"
 
   exit 0
