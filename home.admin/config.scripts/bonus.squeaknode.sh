@@ -190,6 +190,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # open firewall
     echo
     echo "*** Updating Firewall ***"
+    sudo ufw allow 8555 comment 'squeaknode P2P mainnet'
+    sudo ufw allow 18555 comment 'squeaknode P2P testnet'
     sudo ufw allow 12994 comment 'squeaknode HTTP'
     echo ""
 
