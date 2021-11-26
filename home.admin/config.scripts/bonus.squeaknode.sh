@@ -194,10 +194,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u squeaknode ./venv/bin/pip install --upgrade pip
     sudo -u squeaknode ./venv/bin/pip install --upgrade setuptools
     sudo -u squeaknode ./venv/bin/pip install --no-cache-dir  --force-reinstall -Iv grpcio==1.39.0
-    sudo -u squeaknode ./venv/bin/pip install wheel
-    sudo -u squeaknode ./venv/bin/pip install -r requirements.txt
-    sudo -u squeaknode ./venv/bin/pip install .
-    # sudo -u squeaknode ./venv/bin/pip install squeaknode==${pinnedVersion}
+    # sudo -u squeaknode ./venv/bin/pip install wheel
+    # sudo -u squeaknode ./venv/bin/pip install -r requirements.txt
+    # sudo -u squeaknode ./venv/bin/pip install .
+    sudo -u squeaknode ./venv/bin/pip install squeaknode==${pinnedVersion}
 
     # open firewall
     echo
