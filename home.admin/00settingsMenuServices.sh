@@ -54,7 +54,7 @@ if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
   OPTIONS+=(y 'LND PyBLOCK' ${pyblock})
   OPTIONS+=(h 'LND ChannelTools (Fund Rescue)' ${chantools})
   OPTIONS+=(x 'LND Sphinx-Relay' ${sphinxrelay})
-  OPTIONS+=(q 'LND squeaknode' ${squeaknode})
+  OPTIONS+=(q 'LND Squeaknode' ${squeaknode})
 fi
 
 # just available for CL
