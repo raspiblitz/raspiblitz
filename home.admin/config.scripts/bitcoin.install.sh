@@ -104,7 +104,14 @@ ${bitcoinprefix}.rpcport=${rpcprefix}8332"|\
   if [ $(grep -c "${bitcoinprefix}.zmqpubrawblock" < /mnt/hdd/${network}/${network}.conf) -eq 0 ];then
     echo "\
 ${bitcoinprefix}.zmqpubrawblock=tcp://127.0.0.1:${zmqprefix}332
-${bitcoinprefix}.zmqpubrawtx=tcp://127.0.0.1:${zmqprefix}333
+${bitcoinprefix}.zmqpubrawtx=tcp://127.0.0.1:${zmqprefix}333"|\
+    sudo tee -a /mnt/hdd/${network}/${network}.conf
+  fi
+
+  # correct zmqpubhashblock entry
+  sudo sed -i s/^zmqpubraw/main.zmqpubraw/g /mnt/hdd/${network}/${network}.conf
+  if [ $(grep -c "${bitcoinprefix}.zmqpubhashblock" < /mnt/hdd/${network}/${network}.conf) -eq 0 ];then
+    echo "\
 ${bitcoinprefix}.zmqpubhashblock=tcp://127.0.0.1:${zmqprefix}334"|\
     sudo tee -a /mnt/hdd/${network}/${network}.conf
   fi
