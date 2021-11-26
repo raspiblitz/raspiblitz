@@ -136,7 +136,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     RPCPORT="8332"
     RPCUSER=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcuser | cut -c 9-)
     PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
-    ZEROMQ_HASHBLOCK_PORT=28334
+    ZEROMQ_HASHBLOCK_PORT=${zmqprefix}334
 
     LNDHOST="localhost"
     LNDRPCPORT=10009

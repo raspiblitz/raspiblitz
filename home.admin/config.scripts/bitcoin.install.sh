@@ -20,7 +20,7 @@ fi
 if [ ${CHAIN} = testnet ];then
   prefix="t"
   bitcoinprefix="test"
-  zmqprefix=21  # zmqpubrawblock=21332 zmqpubrawtx=21333
+  zmqprefix=21  # zmqpubrawblock=21332 zmqpubrawtx=21333 zmqpubhashblock=21334
   rpcprefix=1   # rpcport=18332
 elif [ ${CHAIN} = signet ];then
   prefix="s"
@@ -70,6 +70,7 @@ rpcuser=raspiblitz
 rpcpassword=$randomRPCpass
 ${bitcoinprefix}.zmqpubrawblock=tcp://127.0.0.1:${zmqprefix}332
 ${bitcoinprefix}.zmqpubrawtx=tcp://127.0.0.1:${zmqprefix}333
+${bitcoinprefix}.zmqpubhashblock=tcp://127.0.0.1:${zmqprefix}334
 
 onlynet=onion
 proxy=127.0.0.1:9050
@@ -103,7 +104,8 @@ ${bitcoinprefix}.rpcport=${rpcprefix}8332"|\
   if [ $(grep -c "${bitcoinprefix}.zmqpubrawblock" < /mnt/hdd/${network}/${network}.conf) -eq 0 ];then
     echo "\
 ${bitcoinprefix}.zmqpubrawblock=tcp://127.0.0.1:${zmqprefix}332
-${bitcoinprefix}.zmqpubrawtx=tcp://127.0.0.1:${zmqprefix}333"|\
+${bitcoinprefix}.zmqpubrawtx=tcp://127.0.0.1:${zmqprefix}333
+${bitcoinprefix}.zmqpubhashblock=tcp://127.0.0.1:${zmqprefix}334"|\
     sudo tee -a /mnt/hdd/${network}/${network}.conf
   fi
 
