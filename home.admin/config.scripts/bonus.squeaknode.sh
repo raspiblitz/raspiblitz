@@ -107,6 +107,12 @@ sudo systemctl stop squeaknode 2>/dev/null
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "*** INSTALL squeaknode ***"
 
+  if [ "${runBehindTor}" = "on" ]; then
+    # make sure to keep in sync with internet.tor.sh script
+    /home/admin/config.scripts/internet.hiddenservice.sh squeaknode-p2p-mainnet 80 8555
+    /home/admin/config.scripts/internet.hiddenservice.sh squeaknode-p2p-testnet 80 18555
+  fi
+
   isInstalled=$(sudo ls /etc/systemd/system/squeaknode.service 2>/dev/null | grep -c 'squeaknode.service')
   if [ ${isInstalled} -eq 0 ]; then
 
@@ -237,11 +243,6 @@ EOF
 
   # Hidden Service if Tor is active
   source /mnt/hdd/raspiblitz.conf
-  if [ "${runBehindTor}" = "on" ]; then
-    # make sure to keep in sync with internet.tor.sh script
-    /home/admin/config.scripts/internet.hiddenservice.sh squeaknode-p2p-mainnet 80 8555
-    /home/admin/config.scripts/internet.hiddenservice.sh squeaknode-p2p-testnet 80 18555
-  fi
   exit 0
 fi
 
