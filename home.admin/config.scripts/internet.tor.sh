@@ -278,8 +278,8 @@ EOF
     sudo -u sphinxrelay bash -c "echo '${toraddress}' > /home/sphinxrelay/sphinx-relay/dist/toraddress.txt"
 
   if [ "${squeaknode}" = "on" ]; then
-    /home/admin/config.scripts/internet.hiddenservice.sh squeaknode-p2p-mainnet 80 8555
-    /home/admin/config.scripts/internet.hiddenservice.sh squeaknode-p2p-testnet 80 18555
+    /home/admin/config.scripts/internet.hiddenservice.sh squeaknode-p2p-mainnet 8555 8555
+    /home/admin/config.scripts/internet.hiddenservice.sh squeaknode-p2p-testnet 18555 18555
   fi
 
   echo "Setup logrotate"
