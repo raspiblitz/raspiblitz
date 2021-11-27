@@ -150,7 +150,7 @@ if [ "${circuitbreaker}" == "on" ]; then
   OPTIONS+=(CIRCUIT "Circuitbreaker (LND firewall)")
 fi
 if [ "${squeaknode}" == "on" ]; then
-  OPTIONS+=(SQUEAKNODE "squeaknode")
+  OPTIONS+=(SQUEAKNODE "Squeaknode")
 fi
 
 # dont offer to switch to "testnet view for now" - so no wswitch back to mainnet needed
