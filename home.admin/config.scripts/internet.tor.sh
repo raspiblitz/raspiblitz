@@ -277,6 +277,11 @@ EOF
     toraddress=$(sudo cat /mnt/hdd/tor/sphinxrelay/hostname 2>/dev/null)
     sudo -u sphinxrelay bash -c "echo '${toraddress}' > /home/sphinxrelay/sphinx-relay/dist/toraddress.txt"
 
+  if [ "${squeaknode}" = "on" ]; then
+    /home/admin/config.scripts/internet.hiddenservice.sh squeaknode-p2p-mainnet 8555 8555
+    /home/admin/config.scripts/internet.hiddenservice.sh squeaknode-p2p-testnet 18555 18555
+  fi
+
   echo "Setup logrotate"
   # add logrotate config for modified Tor dir on ext. disk
   sudo tee /etc/logrotate.d/raspiblitz-tor >/dev/null <<EOF

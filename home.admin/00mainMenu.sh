@@ -149,6 +149,9 @@ fi
 if [ "${circuitbreaker}" == "on" ]; then
   OPTIONS+=(CIRCUIT "Circuitbreaker (LND firewall)")
 fi
+if [ "${squeaknode}" == "on" ]; then
+  OPTIONS+=(SQUEAKNODE "squeaknode")
+fi
 
 # dont offer to switch to "testnet view for now" - so no wswitch back to mainnet needed
 #if [ ${chain} != "main" ]; then
@@ -293,7 +296,10 @@ case $CHOICE in
         SPHINX)
             sudo /home/admin/config.scripts/bonus.sphinxrelay.sh menu
             ;;
-        CHANTOOLS)
+        SQUEAKNODE)
+            /home/admin/config.scripts/bonus.squeaknode.sh menu
+            ;;
+	CHANTOOLS)
             sudo /home/admin/config.scripts/bonus.chantools.sh menu
             ;;
         CIRCUIT)
