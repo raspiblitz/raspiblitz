@@ -297,6 +297,11 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   else
     echo "squeaknode is not installed."
   fi
+
+  # close ports on firewall
+  sudo ufw deny 8555
+  sudo ufw deny 18555
+  sudo ufw deny 12994
   exit 0
 fi
 
