@@ -38,6 +38,7 @@ There are further Services that can be switched on:
 * **CL Spark Wallet** (WalletUI with BOLT12 offers) [details](https://github.com/shesek/spark-wallet#progressive-web-app)
 * **CL plugin: Sparko** (WalletUI & HTTP-RPC bridge) [details](https://github.com/fiatjaf/sparko#the-sparko-plugin)
 * **CL plugin: CLBOSS** (Automated Node Manager) [details](https://github.com/ZmnSCPxj/clboss#clboss-the-c-lightning-node-manager)
+* **Squeaknode** [details](https://github.com/yzernik/squeaknode)
 
 You can connect the following Wallet-Apps to your RaspiBlitz:
 
