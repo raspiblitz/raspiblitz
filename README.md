@@ -35,10 +35,10 @@ There are further Services that can be switched on:
 * **Telegraf metrics** [details](https://github.com/rootzoll/raspiblitz/issues/1369)
 * **Chantools** (Fund Rescue) [details](https://github.com/guggero/chantools/blob/master/README.md)
 * **Suez** (Channel Visualization for LND & CL) [details](https://github.com/prusnak/suez#suez)
+* **Squeaknode** [details](https://github.com/yzernik/squeaknode)
 * **CL Spark Wallet** (WalletUI with BOLT12 offers) [details](https://github.com/shesek/spark-wallet#progressive-web-app)
 * **CL plugin: Sparko** (WalletUI & HTTP-RPC bridge) [details](https://github.com/fiatjaf/sparko#the-sparko-plugin)
 * **CL plugin: CLBOSS** (Automated Node Manager) [details](https://github.com/ZmnSCPxj/clboss#clboss-the-c-lightning-node-manager)
-* **Squeaknode** [details](https://github.com/yzernik/squeaknode)
 
 You can connect the following Wallet-Apps to your RaspiBlitz:
 
