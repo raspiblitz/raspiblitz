@@ -131,11 +131,23 @@ if [ "$1" = "update-config" ]; then
 
     echo "# CONFIG Web API Lightning --> LND"
     tlsCert=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/tls.cert)
-    adminMacaroon=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/bitcoin/mainnet/admin.macaroon)
+    adminMacaroon=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/bitcoin/${chain}net/admin.macaroon)
     sed -i "s/^ln_node=.*/ln_node=lnd/g" ./.env
     sed -i "s/^lnd_grpc_ip=.*/lnd_grpc_ip=127.0.0.1/g" ./.env
     sed -i "s/^lnd_macaroon=.*/lnd_macaroon=${adminMacaroon}/g" ./.env
     sed -i "s/^lnd_cert=.*/lnd_cert=${tlsCert}/g" ./.env
+    if [ "${chain}" == "main" ];then
+      L2rpcportmod=0
+      portprefix=""
+    elif [ "${chain}" == "test" ];then
+      L2rpcportmod=1
+      portprefix=1
+    elif [ "${chain}" == "sig" ];then
+      L2rpcportmod=3
+      portprefix=3
+    fi
+    lnd_grpc_port=1${L2rpcportmod}009
+    lnd_rest_port=${portprefix}8080
 
   # configure CL
   elif [ "${lightning}" == "cl" ]; then
