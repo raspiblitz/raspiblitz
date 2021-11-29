@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # check if started with sudo
-if [ "$EUID" -ne 0 ]; then 
+if [ "$EUID" -ne 0 ]; then
   echo "error='run as root'"
   exit 1
 fi
@@ -551,6 +551,15 @@ if [ "${joinmarket}" = "on" ]; then
   sudo /home/admin/config.scripts/bonus.joinmarket.sh on >> ${logFile} 2>&1
 else
   echo "Provisioning JoinMarket - keep default" >> ${logFile}
+fi
+
+# JoinMarket Web UI
+if [ "${joinmarketWebUI}" = "on" ]; then
+  echo "Provisioning JoinMarket Web UI - run config script" >> ${logFile}
+  sudo sed -i "s/^message=.*/message='Setup JoinMarket Web UI'/g" ${infoFile}
+  sudo /home/admin/config.scripts/bonus.joinmarket-webui.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning JoinMarket Web UI - keep default" >> ${logFile}
 fi
 
 # Specter
