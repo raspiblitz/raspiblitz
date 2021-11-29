@@ -279,6 +279,11 @@ elif [ -f "/usr/bin/python3.8" ]; then
   sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.8 1
   sudo ln -s /usr/bin/python3.8 /usr/bin/python3.7
   echo "python calls python3.8"
+elif [ -f "/usr/bin/python3.9" ]; then
+  # use python 3.9 if available
+  sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.9 1
+  sudo ln -s /usr/bin/python3.9 /usr/bin/python3.7
+  echo "python calls python3.9"
 else
   echo "!!! FAIL !!!"
   echo "There is no tested version of python present"
