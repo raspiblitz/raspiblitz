@@ -623,10 +623,12 @@ To display it as text:
     ```
 
 ## sqlite3 queries
+
 * Query the reasons for force closes
     ```
     sudo -u bitcoin sqlite3 /home/bitcoin/.lightning/bitcoin/lightningd.sqlite3 'select short_channel_id, timestamp, cause, message from channel_state_changes inner join channels on channel_id = id where new_state = 7 order by timestamp'
     ```
+
 * Query the reasons for cooperative channel closes
     ```
     sudo -u bitcoin sqlite3 /home/bitcoin/.lightning/bitcoin/lightningd.sqlite3 'select short_channel_id, timestamp, cause, message from channel_state_changes inner join channels on channel_id = id where new_state = 4 order by timestamp'

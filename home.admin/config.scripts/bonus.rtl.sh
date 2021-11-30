@@ -151,6 +151,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     cd /home/rtl/RTL
     # check https://github.com/Ride-The-Lightning/RTL/releases/
     sudo -u rtl git reset --hard $RTLVERSION
+    PGPsigner="saubyk"
+    PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
+    PGPpubkeyFingerprint="00C9E2BC2E45666F"
+    sudo -u rtl /home/admin/config.scripts/blitz.git-verify.sh \
+     "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" "${RTLVERSION}" || exit 1
     # from https://github.com/Ride-The-Lightning/RTL/commits/master
     # git checkout 917feebfa4fb583360c140e817c266649307ef72
     if [ -f /home/rtl/RTL/LICENSE ]; then
@@ -469,7 +474,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 fi
 
 # DEACTIVATED FOR NOW:
-# - parameter scheme is conflicting with setting all perfixes etc
+# - parameter scheme is conflicting with setting all prefixes etc
 # - also just updating to latest has high change of breaking
 #if [ "$1" = "update" ]; then
 #  echo "# UPDATING RTL"
