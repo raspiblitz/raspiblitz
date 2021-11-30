@@ -258,7 +258,7 @@ if [ "${lightning}" == "cl" ]; then
  if [ ${#address} -eq 0 ];then
   address=$(echo "${ln_getInfo}" | grep '"ipv4"' -A 1 | tail -1 | cut -d '"' -f4)
  fi
-  ln_external="${pubkey}@${address}"
+  ln_external="${pubkey}@${address}:${ln_port}"
   ln_tor=$(echo "${ln_external}" | grep -c ".onion")
   if [ ${ln_tor} -eq 1 ]; then
     ln_publicColor="${color_green}"

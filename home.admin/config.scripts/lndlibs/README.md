@@ -7,7 +7,9 @@ To generate the lnd RPC libs - login as admin and run:
 ```
 cd
 sudo python3 -m pip install grpcio grpcio-tools googleapis-common-protos pathlib2
+rm -rf googleapis 
 git clone https://github.com/googleapis/googleapis.git
+rm -rf protobuffs
 mkdir protobuffs
 curl -o ./rpc.proto -s https://raw.githubusercontent.com/lightningnetwork/lnd/master/lnrpc/rpc.proto
 curl -o ./walletunlocker.proto -s https://raw.githubusercontent.com/lightningnetwork/lnd/master/lnrpc/walletunlocker.proto

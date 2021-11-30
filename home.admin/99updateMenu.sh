@@ -127,7 +127,7 @@ patch()
            PR "Checkout a PullRequest to test"
 	)
 
-  CHOICE=$(whiptail --clear --title "GitHub-User: ${activeGitHubUser} Branch: ${activeBranch}" --menu "" 11 55 4 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+  CHOICE=$(whiptail --clear --title " GitHub user:${activeGitHubUser} branch:${activeBranch} (${commitHashShort})" --menu "" 11 60 4 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
   clear
   case $CHOICE in
@@ -468,6 +468,10 @@ if [ "${specter}" == "on" ]; then
   OPTIONS+=(SPECTER "Update Specter Desktop")
 fi
 
+if [ "${BTCPayServer}" == "on" ]; then
+  OPTIONS+=(BTCPAY "Update BTCPayServer")
+fi
+
 if [ "${sphinxrelay}" == "on" ]; then
   OPTIONS+=(SPHINX "Update Sphinx Server Relay")
 fi
@@ -520,6 +524,9 @@ case $CHOICE in
     ;;
   SPECTER)
     /home/admin/config.scripts/bonus.specter.sh update
+    ;;
+  BTCPAY)
+    /home/admin/config.scripts/bonus.btcpayserver.sh update
     ;;
   SPHINX)
     /home/admin/config.scripts/bonus.sphinxrelay.sh update

@@ -39,12 +39,19 @@ curl https://keybase.io/oms/pgp_keys.asc | gpg --import
 ```
 Ensure that you put quotes around fingerprints containing spaces if importing with other methods.
 
-# Online Security
+# Network Security
 
-* Wi-fi and Bluetooth is disabled by default in the build script.
-* UFW is active and only specific ports are open, closing ports and removing hidden services when services are uninstalled.
-* Fail-2-Ban is protecting the SSH login against brute-force-attacks.
-* Admin (and Joinmarket [optional]) users have passwordless sudo access to be able to perform installations and read password without much user interaction.
+* Limit attack surface: Wi-fi and Bluetooth is disabled by default in the build script.
+* Firewall: UFW is active and only specific ports are open, closing ports and removing hidden services when services are uninstalled.
+* Password brute forcing protection: Fail-2-Ban is protecting the SSH login against brute-force-attacks.
+
+# Software security
+
+* The `admin` (and the `joinmarket` [optional]) users have passwordless sudo access to be able to perform installations and read password without much user interaction.
+
+* Downloaded binaries and source code is verified with the authors' PGP keys by either:
+    * signed shasum files and checking the hash of each downloaded binary
+    * verfying the signature on the source code changes utilising the `git verify-commit` or `git verify-tag` commands
 
 # Physical Security
 
@@ -69,6 +76,8 @@ Some apps (like Fully Noded or JoinMarket) activate the bitcoin core wallet and 
 
 # Off-chain Funds (Lightning Channels)
 
-Please note that there is no perfect backup concept for the funds in your lightning channels yet. We strongly recommend using the `Static Channel Backup` provided by LND and consider off-line location backup of that file to have the best chances to recover Lightning funds in a case of recoverying from a disaster.
+Please note that there is no perfect backup concept for the funds in your lightning channels yet. We strongly recommend using the `Static Channel Backup` provided by LND and consider off-line location backup of that file to have the best chances to recover Lightning funds in a case of recovering from a disaster.
+
+The C-ligthning lightning.sqlite3 is replicated on the SDcard from the disk in real time. See more details in the [C-lightning FAQ](FAQ.cl.md#backups)
 
 For more practical information on this topic see: [Backup Channel Funds](README.md#backup-for-on-chain---channel-funds)

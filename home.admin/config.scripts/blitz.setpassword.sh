@@ -371,6 +371,7 @@ elif [ "${abcd}" = "c" ]; then
   sleep 2
 
   err=""
+  if ! pip list | grep grpc; then sudo -H python3 -m pip install grpcio==1.38.1; fi
   source <(sudo /home/admin/config.scripts/lnd.initwallet.py change-password mainnet $oldPassword $newPassword)
   if [ "${err}" != "" ]; then
     dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Was not able to change password\n\n${err}\n${errMore}" 10 52

@@ -2,9 +2,18 @@
 
 ## What's new in Version 1.7.2 of RaspiBlitz?
 
+- New: Verify git commits and tags everywhere possible [issue](https://github.com/rootzoll/raspiblitz/issues/2686)
 - Update: C-lightning v0.10.2 [details](https://github.com/ElementsProject/lightning/releases/tag/v0.10.2)
+- Update: BTCPayServer v1.3.3 with UPDATE option [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.3.3)
+- Update: Electrum Server in Rust (electrs) v0.9.2 [details](https://github.com/romanz/electrs/blob/v0.9.2/RELEASE-NOTES.md)
+- Update: JoinMarket v0.9.3 [details](https://github.com/JoinMarket-Org/joinmarket-clientserver/releases/tag/v0.9.2)
+- Update: JoininBox v0.6.3 [details](https://github.com/openoms/joininbox/releases/tag/v0.6.1)
+- Update: Thunderhub v0.12.31 [details](https://github.com/apotdevin/thunderhub/releases/tag/v0.12.31)
+- Update: C-lightningREST v0.5.2 [details](https://github.com/Ride-The-Lightning/c-lightning-REST/releases/tag/v0.5.2)
 
 ## What's new in Version 1.7.1 of RaspiBlitz?
+
+There was a small patch-update with raspiblitz-v1.7.1-2021-10-28.img.gz to fix a restart-loop after blockchain was self-synced.
 
 - New: C-lightning v0.10.1 [details](https://github.com/ElementsProject/lightning/releases/tag/v0.10.1)
 - New: C-lightningREST v0.5.1 [details](https://github.com/Ride-The-Lightning/c-lightning-REST/releases/tag/v0.5.1)

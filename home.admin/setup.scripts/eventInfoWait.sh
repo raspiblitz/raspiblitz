@@ -140,11 +140,8 @@ Use your Password A
 
 elif [ "${eventID}" == "copystation" ] && [ "${mode}" == "lcd" ]; then
 
-    dialog --backtitle "${backtitle}" --cr-wrap --infobox "
-Copy-Station Mode
-ssh admin@${localip}
-Use your Password A
-" 7 41
+    dialog --backtitle "${backtitle}" --title " Copy-Station Mode " --cr-wrap --infobox "
+${contentString}" 7 41
 
 
 elif [ "${eventID}" == "walletlocked" ] && [ "${mode}" == "lcd" ]; then

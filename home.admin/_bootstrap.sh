@@ -46,32 +46,6 @@ displayClass="lcd"
 displayType=""
 fundRecovery=0
 
-##############################################
-# check raspiblitz.conf for outdated variables
-##############################################
-
-# change all cln to cl
-# https://github.com/rootzoll/raspiblitz/pull/2575#issuecomment-927261596
-if [ $(grep -c cln < /mnt/hdd/raspiblitz.conf) -gt 0 ];then
-  sudo sed -i 's/cln/cl/g' /mnt/hdd/raspiblitz.conf
-  sudo sed -i 's/cln/cl/g' _aliases
-
-  sudo sed -i 's/cln/cl/g' /home/bitcoin/.lightning/config 
-  sudo sed -i 's/cln/cl/g' /home/bitcoin/.lightning/testnet/config 
-  sudo sed -i 's/cln/cl/g' /home/bitcoin/.lightning/signet/config 
- 
-  sudo -u bitcoin mv /home/bitcoin/cln-plugins-available /home/bitcoin/cl-plugins-available
-  sudo -u bitcoin mv /home/bitcoin/cln-plugins-enabled /home/bitcoin/cl-plugins-enabled
-  sudo -u bitcoin mv /home/bitcoin/tcln-plugins-enabled /home/bitcoin/tcl-plugins-enabled
-  sudo -u bitcoin mv /home/bitcoin/scln-plugins-enabled /home/bitcoin/scl-plugins-enabled
-
-  sudo sed -i 's/cln/cl/g'  /etc/systemd/system/lightningd.service
-  sudo sed -i 's/cln/cl/g'  /etc/systemd/system/tlightningd.service
-  sudo sed -i 's/cln/cl/g'  /etc/systemd/system/slightningd.service
-
-  sudo /home/admin/config.scripts/blitz.shutdown.sh reboot
-fi
-
 ################################
 # INIT raspiblitz.info
 ################################
@@ -627,6 +601,7 @@ if [ ${isMounted} -eq 0 ]; then
   # if setup - run provision setup first
   if [ "${setupPhase}" == "setup" ]; then
     echo "Calling _provision.setup.sh for basic setup tasks .." >> $logFile
+    echo "Follow in a new terminal with: 'tail -f raspiblitz.provision-setup.log'" >> $logFile
     sed -i "s/^message=.*/message='Provision Setup'/g" ${infoFile}
     /home/admin/_provision.setup.sh
     errorState=$?

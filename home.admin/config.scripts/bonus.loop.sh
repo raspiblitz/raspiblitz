@@ -5,7 +5,7 @@
 # but main focus for the future development should be on LIT
 
 # https://github.com/lightninglabs/loop/releases-
-pinnedVersion="v0.11.2-beta"
+pinnedVersion="v0.15.0-beta"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -31,6 +31,16 @@ Type 'loop' again to see the available options.
 " 10 56
   exit 0
 fi
+
+# releases are creatd on GitHub
+PGPsigner="web-flow"
+PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
+PGPpubkeyFingerprint="4AEE18F83AFDEB23"
+
+# TODO download with .tar.gz
+#PGPsigner="alexbosworth"
+#PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
+#PGPpubkeyFingerprint="E80D2F3F311FD87E"
 
 # stop services
 echo "making sure the loopd.service is not running"
@@ -75,6 +85,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u loop git clone https://github.com/lightninglabs/loop.git
     cd /home/loop/loop
     sudo -u loop git reset --hard $pinnedversion
+    sudo -u loop /home/admin/config.scripts/blitz.git-verify.sh \
+     "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
     cd /home/loop/loop/cmd
     sudo -u loop /usr/local/go/bin/go install ./... || exit 1
 
@@ -198,6 +210,8 @@ if [ "$1" = "update" ]; then
     echo "# Reset to the latest release tag"
     TAG=$(git tag | sort -V | tail -1)
     sudo -u loop git reset --hard $TAG
+    sudo -u loop /home/admin/config.scripts/blitz.git-verify.sh \
+     "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
     echo "# Updating ..."
     # install to /home/loop/go/bin/
     cd /home/loop/loop/cmd
