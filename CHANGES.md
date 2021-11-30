@@ -1,5 +1,9 @@
 # CHANGES between Releases
 
+## What's new in Version 1.7.2 of RaspiBlitz?
+
+- Update: C-lightning v0.10.2 [details](https://github.com/ElementsProject/lightning/releases/tag/v0.10.2)
+
 ## What's new in Version 1.7.1 of RaspiBlitz?
 
 - New: C-lightning v0.10.1 [details](https://github.com/ElementsProject/lightning/releases/tag/v0.10.1)
