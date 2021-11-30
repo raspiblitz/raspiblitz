@@ -4,6 +4,7 @@
 
 - New: Verify git commits and tags everywhere possible [issue](https://github.com/rootzoll/raspiblitz/issues/2686)
 - Update: C-lightning v0.10.2 [details](https://github.com/ElementsProject/lightning/releases/tag/v0.10.2)
+- Update: Lightning Terminal v0.6.0-alpha with Lightning Node Connect over Tor [details](https://github.com/lightninglabs/lightning-terminal/releases/tag/v0.6.0-alpha)
 - Update: BTCPayServer v1.3.3 with UPDATE option [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.3.3)
 - Update: Electrum Server in Rust (electrs) v0.9.2 [details](https://github.com/romanz/electrs/blob/v0.9.2/RELEASE-NOTES.md)
 - Update: JoinMarket v0.9.3 [details](https://github.com/JoinMarket-Org/joinmarket-clientserver/releases/tag/v0.9.2)
