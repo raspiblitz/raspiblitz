@@ -35,17 +35,10 @@ gpg --import --import-options show-only ./pgp_keys.asc
 fingerprint=$(gpg pgp_keys.asc 2>/dev/null | grep "${PGPpubkeyFingerprint}" -c)
 if [ "${fingerprint}" -lt 1 ]; then
   echo
-  echo "# !!! WARNING --> the PGP fingerprint is not as expected for ${PGPsigner}"
-  echo "# Should contain PGP: ${PGPpubkeyFingerprint}"
-  source /home/admin/raspiblitz.info
-  if [ "${state}" == "ready" ]; then
-    echo "# Type: 'Accept risk' and press ENTER to TAKE THE RISK if you think all is OK"
-    read -r confirmation
-    if [ "$confirmation" != "Accept risk" ]; then exit 1; fi
-  else
-    echo "# Exiting"
-    exit 1
-  fi
+  echo "# !!! WARNING --> the PGP fingerprint is not as expected for ${PGPsigner}" >&2
+  echo "# Should contain PGP: ${PGPpubkeyFingerprint}" >&2
+  echo "# Exiting" >&2
+  exit 7
 fi
 gpg --import ./pgp_keys.asc
 
