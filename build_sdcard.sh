@@ -104,7 +104,7 @@ if [ "${cpu}" != "arm" ] && [ "${cpu}" != "aarch64" ] && [ "${cpu}" != "x86_64" 
   ${cpu}
   exit 1
 fi
-echo "8) CPU-ARCHITECTURE --> '${cpu}'"
+echo "8) CPU-ARCHITECTURE --> '${cpu} (${architecture})'"
 
 # AUTO-DETECTION: OPERATINGSYSTEM
 # ---------------------------------------
@@ -420,19 +420,19 @@ sudo update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
 
 # for TorBox bridges python scripts (pip3)
 # https://github.com/radio24/TorBox/blob/master/requirements.txt
-sudo pip install pytesseract
-sudo pip install mechanize
-sudo pip install PySocks
-sudo pip install urwid
-sudo pip install Pillow
-sudo pip install requests
+sudo -H python3 -m pip install pytesseract
+sudo -H python3 -m pip install mechanize
+sudo -H python3 -m pip install PySocks
+sudo -H python3 -m pip install urwid
+sudo -H python3 -m pip install Pillow
+sudo -H python3 -m pip install requests
 # setuptools needed for Nyx
-sudo pip install setuptools
+sudo -H python3 -m pip install setuptools
 
 # rsync -> is needed to copy from HDD
 # net-tools -> ifconfig
 # xxd -> display hex codes
-# netcat -> for 00infoBlitz.sh
+# netcat -> for proxy
 # openssh-client openssh-sftp-server sshpass -> install OpenSSH client + server
 # psmisc -> install killall, fuser
 # ufw -> firewall
@@ -453,9 +453,6 @@ sudo chsh admin -s /bin/bash
 
 # configure sudo for usage without password entry
 echo '%sudo ALL=(ALL) NOPASSWD:ALL' | sudo EDITOR='tee -a' visudo
-
-## Just to be sure folder exists
-sudo -u admin mkdir -p /home/admin
 
 # WRITE BASIC raspiblitz.info to sdcard
 # if further info gets added .. make sure to keep that on: blitz.preparerelease.sh
