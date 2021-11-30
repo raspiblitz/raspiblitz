@@ -262,7 +262,8 @@ if [ "${lightning}" == "lnd" ]; then
   if [ "${seedWords}" != "" ] && [ "${staticchannelbackup}" != "" ]; then
 
     echo "WALLET --> SEED + SCB " >> ${logFile}
-    sudo sed -i "s/^message=.*/message='LND Wallet (SEED & SCB)'/g" ${infoFile}    
+    sudo sed -i "s/^message=.*/message='LND Wallet (SEED & SCB)'/g" ${infoFile}
+    if ! pip list | grep grpc; then sudo -H python3 -m pip install grpcio==1.38.1; fi  
     sudo /home/admin/config.scripts/lnd.initwallet.py scb mainnet ${passwordC} "${seedWords}" "${staticchannelbackup}" ${seedPassword}
     if [ "${err}" != "" ]; then
       sed -i "s/^state=.*/state=error/g" ${infoFile}
@@ -278,7 +279,8 @@ if [ "${lightning}" == "lnd" ]; then
   elif [ "${seedWords}" != "" ]; then
     
     echo "WALLET --> SEED" >> ${logFile}
-    sudo sed -i "s/^message=.*/message='LND Wallet (SEED)'/g" ${infoFile}    
+    sudo sed -i "s/^message=.*/message='LND Wallet (SEED)'/g" ${infoFile}
+    if ! pip list | grep grpc; then sudo -H python3 -m pip install grpcio==1.38.1; fi  
     sudo /home/admin/config.scripts/lnd.initwallet.py seed mainnet ${passwordC} "${seedWords}" ${seedPassword}
     if [ "${err}" != "" ]; then
       sed -i "s/^state=.*/state=error/g" ${infoFile}
@@ -294,7 +296,8 @@ if [ "${lightning}" == "lnd" ]; then
   else
 
     echo "WALLET --> NEW" >> ${logFile}
-    sudo sed -i "s/^message=.*/message='LND Wallet (NEW)'/g" ${infoFile}    
+    sudo sed -i "s/^message=.*/message='LND Wallet (NEW)'/g" ${infoFile}
+    if ! pip list | grep grpc; then sudo -H python3 -m pip install grpcio==1.38.1; fi  
     source <(sudo /home/admin/config.scripts/lnd.initwallet.py new mainnet ${passwordC})
     if [ "${err}" != "" ]; then
       sed -i "s/^state=.*/state=error/g" ${infoFile}
