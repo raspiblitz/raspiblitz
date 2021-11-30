@@ -613,15 +613,16 @@ echo "*** SHELL SCRIPTS & ASSETS ***"
 cd /home/admin/
 sudo -u admin git config --global user.name "${githubUser}"
 sudo -u admin git config --global user.email "johndoe@example.com"
-sudo -u admin rm -rf /home/admin/raspiblitz
+sudo rm -rf /home/admin/raspiblitz
 sudo -u admin git clone -b ${githubBranch} https://github.com/${githubUser}/raspiblitz.git
-sudo -u admin cp -r /home/admin/raspiblitz/home.admin/*.* /home/admin
-sudo -u admin cp -r /home/admin/raspiblitz/home.admin/.tmux.conf /home/admin
-sudo -u admin chmod +x *.sh
 sudo -u admin cp -r /home/admin/raspiblitz/home.admin/assets /home/admin/
+sudo -u admin cp /home/admin/raspiblitz/home.admin/.tmux.conf /home/admin
+sudo -u admin cp /home/admin/raspiblitz/home.admin/*.* /home/admin
+sudo -u admin chmod 755 *.sh
 sudo -u admin cp -r /home/admin/raspiblitz/home.admin/config.scripts /home/admin/
-sudo -u admin chmod +x /home/admin/config.scripts/*.sh
-sudo -u admin chmod +x /home/admin/setup.scripts/*.sh
+sudo -u admin chmod 755 /home/admin/config.scripts/*.sh
+sudo -u admin cp -r /home/admin/raspiblitz/home.admin/setup.scripts /home/admin/
+sudo -u admin chmod 755 /home/admin/setup.scripts/*.sh
 
 # install newest version of BlitzPy
 blitzpy_wheel=$(ls -tR /home/admin/raspiblitz/home.admin/BlitzPy/dist | grep -E "*any.whl" | tail -n 1)
