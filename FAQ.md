@@ -38,7 +38,6 @@
   - [How to SSH over Tor?](#how-to-ssh-over-tor)
   - [How to setup port-forwarding with a SSH tunnel?](#how-to-setup-port-forwarding-with-a-ssh-tunnel)
   - [How do I setup just a port-forwarding user on my public server?](#how-do-i-setup-just-a-port-forwarding-user-on-my-public-server)
-  - [How can I repair my SSH login?](#how-can-i-repair-my-ssh-login)
 - [Display](#display)
   - [Can I flip the screen?](#can-i-flip-the-screen)
   - [How to fix my upside down LCD after update?](#how-to-fix-my-upside-down-lcd-after-update)
@@ -322,10 +321,6 @@ echo 'command="date" [CONTENT-OF-RASPIBLITZ-ROOT-SSH-PUBKEY]' > /etc/ssh/authori
 ```
 
 As a result you should see a "good signature" message with a main fingerprint the same as you can find on the [keybase.io/rootzoll](https://keybase.io/rootzoll) that is ending on `1C73 060C 7C17 6461` the sub fingerprint should end on `A2D7 AA9D D1B5 CC56 47DA`. If that fingerprint is correct, the SD card image you downloaded is a original release RaspiBlitz.
-
-### How can I repair my SSH login?
-
-If you cannot login via SSH into your RaspiBlitz your SSH RaspiBlitz certs might be corrupted. To renew and reset those do the following (since version 1.5):
 
 - shutdown the RaspiBlitz - if you dont have touchscreen activated, disconnect LAN cable, wait until HDD/SSD activity slows down (no constant blinking) and then cut the power
 - take out the SD card and connect it to your laptop - it should appear as a `boot` drive
