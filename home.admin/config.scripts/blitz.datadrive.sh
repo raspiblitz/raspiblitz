@@ -123,7 +123,9 @@ if [ "$1" = "status" ]; then
         testParentDisk=$(echo "$testpartition" | sed 's/[^a-z]*//g')
         OSParentDisk=$(echo "$OSPartition" | sed 's/[^a-z]*//g')
         bootParentDisk=$(echo "$bootPartition" | sed 's/[^a-z]*//g')
-        if [ "$testdevice" != "$testParentDisk" ] &&  [ "$testdevice" != "$OSParentDisk" ] && [ "$testdevice" != "$bootParentDisk" ];then
+        if [ "$testdevice" != "$OSParentDisk" ] && [ "$testdevice" != "$bootParentDisk" ];then
+          sizeDataPartition=${testsize}
+          hddDataPartition="${testpartition}"
           hdd="${testdevice}"
         fi
       elif [ $testpartitioncount -gt 0 ]; then
