@@ -61,7 +61,7 @@ isSwapExternal=$(swapon -s | grep -c "${externalSwapPath}")
 # output and exit if just status action
 if [ "$1" = "status" ]; then
 
-  # optional second parameter can be 'bitcoin' or 'litecoin'
+  # optional second parameter can be 'bitcoin'
   blockchainType=$2
 
   echo "# RASPIBLITZ DATA DRIVE Status"  
@@ -97,9 +97,9 @@ if [ "$1" = "status" ]; then
       testdevice=$(echo $testname | sed 's/[^a-z]*//g')
       testpartition=$(echo $testname | grep -P '[a-z]{3,5}[0-9]{1}')
       if [ ${#testpartition} -gt 0 ]; then
-         testsize=$(echo $line | sed "s/  */ /g" | cut -d " " -f 2 | sed 's/[^0-9]*//g')
+        testsize=$(echo $line | sed "s/  */ /g" | cut -d " " -f 2 | sed 's/[^0-9]*//g')
       else
-         testsize=0
+        testsize=0
       fi
 
       #echo "# line($line)"
@@ -119,32 +119,39 @@ if [ "$1" = "status" ]; then
       #echo "# bootPartition(${bootPartition})"
       #echo "# hdd(${hdd})"
 
-      if [ $testpartitioncount -gt 0 ]; then
-         # if a partition was found - make sure to skip the OS and boot partitions
-         if [ "${testpartition}" != "${OSPartition}" ] && [ "${testpartition}" != "${bootPartition}" ]; then
-            # make sure to use the biggest
-            if [ ${testsize} -gt ${sizeDataPartition} ]; then
-               sizeDataPartition=${testsize}
-               hddDataPartition="${testpartition}"
-               hdd="${testdevice}"
-            fi
-         fi
+      if [ "$(uname -m)" = "x86_64" ]; then
+        testParentDisk=$(echo "$testpartition" | sed 's/[^a-z]*//g')
+        OSParentDisk=$(echo "$OSPartition" | sed 's/[^a-z]*//g')
+        bootParentDisk=$(echo "$bootPartition" | sed 's/[^a-z]*//g')
+        if [ "$testdevice" != "$OSParentDisk" ] && [ "$testdevice" != "$bootParentDisk" ];then
+          sizeDataPartition=${testsize}
+          hddDataPartition="${testpartition}"
+          hdd="${testdevice}"
+        fi
+      elif [ $testpartitioncount -gt 0 ]; then
+        # if a partition was found - make sure to skip the OS and boot partitions
+        if [ "${testpartition}" != "${OSPartition}" ] && [ "${testpartition}" != "${bootPartition}" ]; then
+          # make sure to use the biggest
+          if [ ${testsize} -gt ${sizeDataPartition} ]; then
+            sizeDataPartition=${testsize}
+            hddDataPartition="${testpartition}"
+            hdd="${testdevice}"
+          fi
+        fi
       else
 
-         # default hdd set, when there is no OSpartition and there might be no partitions at all
-         if [ "${OSPartition}" = "root" ] && [ "${hdd}" = "" ] && [ "${testdevice}" != "" ]; then
+        # default hdd set, when there is no OSpartition and there might be no partitions at all
+        if [ "${OSPartition}" = "root" ] && [ "${hdd}" = "" ] && [ "${testdevice}" != "" ]; then
           hdd="${testdevice}"
-         fi
-
-	       # make sure to use the biggest
-         if [ ${testsize} -gt ${sizeDataPartition} ]; then
+        fi
+	      # make sure to use the biggest
+        if [ ${testsize} -gt ${sizeDataPartition} ]; then
 	        # Partition to be created is smaller than disk so this is not correct (but close)
-            sizeDataPartition=$(sudo fdisk -l /dev/$testdevice | grep GiB | cut -d " " -f 5)
-            hddDataPartition="${testdevice}1"
-            hdd="${testdevice}"
-	       fi
+          sizeDataPartition=$(sudo fdisk -l /dev/$testdevice | grep GiB | cut -d " " -f 5)
+          hddDataPartition="${testdevice}1"
+          hdd="${testdevice}"
+	      fi
       fi
-      
     done < .lsblk.tmp
     rm -f .lsblk.tmp 1>/dev/null 2>/dev/null
 
@@ -256,11 +263,7 @@ if [ "$1" = "status" ]; then
           # check for blockchain data on storage
           hddBlocksBitcoin=$(sudo ls /mnt/storage${subVolumeDir}/bitcoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
           echo "hddBlocksBitcoin=${hddBlocksBitcoin}"
-          hddBlocksLitecoin=$(sudo ls /mnt/storage${subVolumeDir}/litecoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
-          echo "hddBlocksLitecoin=${hddBlocksLitecoin}"
           if [ "${blockchainType}" = "bitcoin" ] && [ ${hddBlocksBitcoin} -eq 1 ]; then
-            echo "hddGotBlockchain=1"
-          elif [ "${blockchainType}" = "litecoin" ] && [ ${hddBlocksLitecoin} -eq 1 ]; then
             echo "hddGotBlockchain=1"
           elif [ ${#blockchainType} -gt 0 ]; then
             echo "hddGotBlockchain=0"
@@ -299,7 +302,6 @@ if [ "$1" = "status" ]; then
         # if not ext4 or btrfs - there is no usable data
         echo "hddRaspiData=0"
         echo "hddBlocksBitcoin=0"
-        echo "hddBlocksLitecoin=0"
         echo "hddGotBlockchain=0"
       fi
     fi
@@ -338,11 +340,7 @@ if [ "$1" = "status" ]; then
     # check if blockchain data is available
     hddBlocksBitcoin=$(sudo ls /mnt/hdd/bitcoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
     echo "hddBlocksBitcoin=${hddBlocksBitcoin}"
-    hddBlocksLitecoin=$(sudo ls /mnt/hdd/litecoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
-    echo "hddBlocksLitecoin=${hddBlocksLitecoin}"
     if [ "${blockchainType}" = "bitcoin" ] && [ ${hddBlocksBitcoin} -eq 1 ]; then
-      echo "hddGotBlockchain=1"
-    elif [ "${blockchainType}" = "litecoin" ] && [ ${hddBlocksLitecoin} -eq 1 ]; then
       echo "hddGotBlockchain=1"
     elif [ ${#blockchainType} -gt 0 ]; then
       echo "hddGotBlockchain=0"
@@ -362,7 +360,7 @@ if [ "$1" = "status" ]; then
       hdd_data_free1Kblocks=$(df -h -k /dev/${hddDataPartitionExt4} | grep "/dev/${hddDataPartitionExt4}" | sed -e's/  */ /g' | cut -d" " -f 4 | tr -dc '0-9')
       hddUsedInfo="${hdd_used_space} (${hdd_used_ratio}%)"
     else
-      # BRTS calculations
+      # BTRFS calculations
       # TODO: this is the final/correct way - make better later
       # https://askubuntu.com/questions/170044/btrfs-and-missing-free-space
       datadrive=$(df -h | grep "/dev/${hdd}1" | sed -e's/  */ /g' | cut -d" " -f 5)
@@ -1345,12 +1343,6 @@ if [ "$1" = "link" ]; then
   else
     sudo rm /home/bitcoin/.bitcoin 2>/dev/null
   fi
-  if [ $(sudo ls -la /home/bitcoin/ | grep -c "litecoin ->") -eq 0 ]; then
-    >&2 echo "# - /home/bitcoin/.litecoin -> is not a link, cleaning"
-    sudo rm -r /home/bitcoin/.litecoin 2>/dev/null
-  else
-    sudo rm /home/bitcoin/.litecoin 2>/dev/null
-  fi
 
   # make sure common base directory exits
   sudo mkdir -p /mnt/hdd/lnd
@@ -1368,14 +1360,6 @@ if [ "$1" = "link" ]; then
       sudo ln -s /mnt/storage/bitcoin /mnt/hdd/bitcoin
       sudo rm /mnt/storage/bitcoin/bitcoin 2>/dev/null
     fi
-    if [ $(ls -F /mnt/hdd/litecoin | grep -c '/mnt/hdd/litecoin@') -eq 0 ]; then
-      sudo mkdir -p /mnt/storage/litecoin
-      sudo cp -R /mnt/hdd/litecoin/* /mnt/storage/litecoin 2>/dev/null
-      sudo chown -R bitcoin:bitcoin /mnt/storage/litecoin
-      sudo rm -r /mnt/hdd/litecoin
-      sudo ln -s /mnt/storage/litecoin /mnt/hdd/litecoin
-      sudo rm /mnt/storage/litecoin/litecoin 2>/dev/null
-    fi
 
     >&2 echo "# linking lnd for user bitcoin"
     sudo rm /home/bitcoin/.lnd 2>/dev/null
@@ -1383,7 +1367,6 @@ if [ "$1" = "link" ]; then
 
     >&2 echo "# - linking blockchain for user bitcoin"
     sudo ln -s /mnt/storage/bitcoin /home/bitcoin/.bitcoin
-    sudo ln -s /mnt/storage/litecoin /home/bitcoin/.litecoin
 
     >&2 echo "# - linking storage into /mnt/hdd"
     sudo mkdir -p /mnt/storage/app-storage
@@ -1405,15 +1388,11 @@ if [ "$1" = "link" ]; then
 
     >&2 echo "# opening blockchain into /mnt/hdd"
     sudo mkdir -p /mnt/hdd/bitcoin
-    sudo mkdir -p /mnt/hdd/litecoin
 
     >&2 echo "# linking blockchain for user bitcoin"
     sudo rm /home/bitcoin/.bitcoin 2>/dev/null
     sudo ln -s /mnt/hdd/bitcoin /home/bitcoin/.bitcoin
     
-    sudo rm /home/bitcoin/.litecoin 2>/dev/null
-    sudo ln -s /mnt/hdd/litecoin /home/bitcoin/.litecoin
-
     >&2 echo "# linking lnd for user bitcoin"
     sudo rm /home/bitcoin/.lnd 2>/dev/null
     sudo ln -s /mnt/hdd/lnd /home/bitcoin/.lnd
@@ -1426,10 +1405,8 @@ if [ "$1" = "link" ]; then
 
   # fix ownership of linked files
   sudo chown -R bitcoin:bitcoin /mnt/hdd/bitcoin
-  sudo chown -R bitcoin:bitcoin /mnt/hdd/litecoin
   sudo chown -R bitcoin:bitcoin /mnt/hdd/lnd
   sudo chown -R bitcoin:bitcoin /home/bitcoin/.lnd
-  sudo chown -R bitcoin:bitcoin /home/bitcoin/.litecoin
   sudo chown -R bitcoin:bitcoin /home/bitcoin/.bitcoin
   sudo chown -R bitcoin:bitcoin /mnt/hdd/app-storage
   sudo chown -R bitcoin:bitcoin /mnt/hdd/app-data
@@ -1585,7 +1562,7 @@ if [ "$1" = "clean" ]; then
 
           # deactivate delete if a blockchain directory (if -keepblockchain)
           if [ "$3" = "-keepblockchain" ]; then
-            if [ "${entry}" = "bitcoin" ] || [ "${entry}" = "litecoin" ]; then
+            if [ "${entry}" = "bitcoin" ]; then
               delete=0
             fi
           fi
@@ -1594,7 +1571,7 @@ if [ "$1" = "clean" ]; then
           if [ "${entry}" = "torrent" ] || [ "${entry}" = "app-storage" ]; then
             whenDeleteSchredd=0
           fi
-          if [ "${entry}" = "bitcoin" ] || [ "${entry}" = "litecoin" ]; then
+          if [ "${entry}" = "bitcoin" ]; then
             whenDeleteSchredd=0
           fi
           # if BTRFS just shred stuff in /mnt/hdd/temp (because thats EXT4)
@@ -1636,7 +1613,7 @@ if [ "$1" = "clean" ]; then
 
         # KEEP BLOCKCHAIN means just blocks & chainstate - delete the rest
         if [ "$3" = "-keepblockchain" ]; then
-          chains=(bitcoin litecoin)
+          chains=(bitcoin)
           for chain in "${chains[@]}"
           do
             echo "Cleaning Blockchain: ${chain}"
@@ -1717,8 +1694,6 @@ if [ "$1" = "clean" ]; then
     # deleting the blocks and chainstate
     sudo rm -R ${basePath}/bitcoin/blocks 1>/dev/null 2>/dev/null
     sudo rm -R ${basePath}/bitcoin/chainstate 1>/dev/null 2>/dev/null
-    sudo rm -R ${basePath}/litecoin/blocks 1>/dev/null 2>/dev/null
-    sudo rm -R ${basePath}/litecoin/chainstate 1>/dev/null 2>/dev/null
 
     >&2 echo "# OK cleaning done."
     exit 1

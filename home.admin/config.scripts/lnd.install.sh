@@ -135,7 +135,7 @@ bitcoin.node=bitcoind
   echo "# Create /etc/systemd/system/.lnd.service"
   echo "
 [Unit]
-Description=LND on $NETWORK
+Description=LND on $CHAIN
 
 [Service]
 User=bitcoin
@@ -167,11 +167,18 @@ WantedBy=multi-user.target
   fi
 
   echo
-  echo "# Adding aliases"
-  echo "\
+  echo "# Add aliases ${netprefix}lncli, ${netprefix}lndlog"
+  if [ $(alias | grep -c "alias ${netprefix}lncli") -eq 0 ];then 
+    echo "\
 alias ${netprefix}lncli=\"sudo -u bitcoin /usr/local/bin/lncli\
  -n=${CHAIN} --rpcserver localhost:1${rpcportmod}009\"\
 " | sudo tee -a /home/admin/_aliases
+  fi
+  if [ $(alias | grep -c "alias ${netprefix}lndlog") -eq 0 ];then
+    echo "\
+alias ${netprefix}lndlog=\"sudo tail -n 30 -f /mnt/hdd/lnd/logs/${network}/${CHAIN}/lnd.log\"\
+" | sudo tee -a /home/admin/_aliases
+  fi
 
   # if parameter "initwallet" was set and wallet does not exist yet
   walletExists=$(sudo ls /mnt/hdd/lnd/data/chain/${network}/${CHAIN}/wallet.db 2>/dev/null | grep -c "wallet.db")
@@ -185,6 +192,7 @@ alias ${netprefix}lncli=\"sudo -u bitcoin /usr/local/bin/lncli\
       else
         passwordC="raspiblitz"
       fi
+      if ! pip list | grep grpc; then sudo -H python3 -m pip install grpcio==1.38.1; fi
       source <(sudo /home/admin/config.scripts/lnd.initwallet.py new ${CHAIN} ${passwordC})
       if [ "${err}" != "" ]; then
         clear
