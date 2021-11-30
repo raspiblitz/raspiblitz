@@ -595,7 +595,7 @@ if [ "$1" = "format" ]; then
      if [ $ext4IsPartition -eq 0 ]; then
         # write new EXT4 partition
         >&2 echo "# Creating the one big partition"
-        sudo parted /dev/${hdd} mkpart primary ext4 0% 100% 1>&2
+        sudo parted -s /dev/${hdd} mkpart primary ext4 1024KiB 100% 1>&2
         sleep 6
         sync
         # loop until the partition gets available
@@ -667,7 +667,7 @@ if [ "$1" = "format" ]; then
      sudo mkdir -p /tmp/btrfs 1>/dev/null
 
      >&2 echo "# Creating BLITZDATA (${hdd})"
-     sudo parted -s -a optimal -- /dev/${hdd} mkpart primary btrfs 0% 30GiB 1>/dev/null
+     sudo parted -s -- /dev/${hdd} mkpart primary btrfs 1024KiB 30GiB 1>/dev/null
      sync
      sleep 6
      win=$(lsblk -o NAME | grep -c ${hdd}1)
@@ -708,7 +708,7 @@ if [ "$1" = "format" ]; then
      cd && sudo umount /tmp/btrfs
 
      >&2 echo "# Creating BLITZSTORAGE"
-     sudo parted -s -a optimal -- /dev/${hdd} mkpart primary btrfs 30GiB -34GiB 1>/dev/null
+     sudo parted -s -- /dev/${hdd} mkpart primary btrfs 30GiB -34GiB 1>/dev/null
      sync
      sleep 6
      win=$(lsblk -o NAME | grep -c ${hdd}2)
@@ -747,7 +747,7 @@ if [ "$1" = "format" ]; then
      cd && sudo umount /tmp/btrfs
 
      >&2 echo "# Creating the FAT32 partition"
-     sudo parted -s -a optimal -- /dev/${hdd} mkpart primary fat32 -34GiB 100% 1>/dev/null
+     sudo parted -s -- /dev/${hdd} mkpart primary fat32 -34GiB 100% 1>/dev/null
      sync && sleep 3
      win=$(lsblk -o NAME | grep -c ${hdd}3)
      if [ ${win} -eq 0 ]; then 
