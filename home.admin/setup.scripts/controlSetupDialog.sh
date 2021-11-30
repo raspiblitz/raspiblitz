@@ -254,7 +254,11 @@ if [ "${setupPhase}" == "setup" ]; then
 
     lightningWalletDone=0
     source ${SETUPFILE}
-    if [ "${lightning}" == "none" ]; then lightningWalletDone=1; fi 
+    if [ "${lightning}" == "none" ]; then
+      lightningWalletDone=1
+      # also disable asking for password c if no lightning implementation was chosen
+      sed -i "s/^setPasswordC=.*/setPasswordC=0/g" ${SETUPFILE}
+    fi 
     while [ "${lightningWalletDone}" == "0" ]
     do
 
