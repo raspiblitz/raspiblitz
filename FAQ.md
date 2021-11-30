@@ -137,12 +137,6 @@
 
 ## Upgrade
 
-### Is using the prepared SD card image secure?
-
-Using pre-built software almost always shifts trust to the one who made the binary. At least, you should [verify the SD card image after download](#how-to-verify-the-sd-card-image-after-download).
-
-The best way would be to build the SD card yourself. You use the script `build_sdcard.sh` for this. Take a few minutes to check if you see anything suspicious in that build script and then follow the [README](README.md#build-the-sd-card-image) on this.
-
 ### How to verify the SD card image after download?
 
 There are two methods, verify the hash (proves integrity) or the signature (proves integrity and authenticity)
@@ -160,18 +154,20 @@ But verifying the shasum does not prove to you that the SD card image was actual
 To verify that the download was actually signed by [rootzoll](https://keybase.io/rootzoll) you need to use GPG and import the following public key:
 
 ```
-curl --tlsv1.2 --proto =https https://keybase.io/rootzoll/pgp_keys.asc | gpg --import
+curl --tlsv1.2 --proto '=https' https://keybase.io/rootzoll/pgp_keys.asc | gpg --import
 ```
 
-Next, download the "signature file" for the SD card image. It's the same download link as for the image file - just added a `.sig` at the end. You should also always find the download link for the signature file in the README right below the image download link following the `SIGNATURE` link.
+Next, download the "signature file" for the SD card image. It's the same download link as for the image file - just added a `.sig` at the end. You should also always find the download link for the signature file in the README right next to the image download link.
 
-If you know have all the three elements needed - the imported public key, the image signature and the image file itself - you can verify the download with:
+If you now have all the three elements needed - the imported public key, the image signature and the image file itself - you can verify the download with:
 
 ```
 gpg --verify [SIGNATURE-FILE] [IMAGE-FILE]
 ```
 
-As a result you should see a "good signature" message with a main fingerprint the same as you can find on the [keybase.io/rootzoll](https://keybase.io/rootzoll) that is ending on `1C73 060C 7C17 6461`. If that fingerprint is correct, the SD card image you downloaded is an original RaspiBlitz release.
+As a result you should see a "good signature" message with a main fingerprint the same as you can find on the [keybase.io/rootzoll](https://keybase.io/rootzoll) that is ending on `1C73 060C 7C17 6461`. You should also see the sub-key fingerprint ending on `AA9D D1B5 CC56 47DA`, that is used at the moment to sign the sd card image. If those fingerprints shown correctly, the SD card image you downloaded is an original RaspiBlitz release.
+
+*You can ignore any warning about the key being 'not a trusted signature' or untrusted .. as long you see "good signature" and the correct main & sub fingerprints the download is valid.*
 
 ### What changed on every upgrade?
 
