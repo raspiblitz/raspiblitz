@@ -38,6 +38,7 @@
 - [Update](#update)
   - [Update to a new C-lightning release](#update-to-a-new-c-lightning-release)
   - [Experimental update to the latest master](#experimental-update-to-the-latest-master)
+- [sqlite3 queries](#sqlite3-queries)
 - [Script file help list](#script-file-help-list)
 
 ---
@@ -615,6 +616,18 @@ To display it as text:
 * in this case update to the next release from the menu or the latest master again with:
     ```
     config.scripts/cl.install.sh update
+    ```
+
+## sqlite3 queries
+
+* Query the reasons for force closes
+    ```
+    sudo -u bitcoin sqlite3 /home/bitcoin/.lightning/bitcoin/lightningd.sqlite3 'select short_channel_id, timestamp, cause, message from channel_state_changes inner join channels on channel_id = id where new_state = 7 order by timestamp'
+    ```
+
+* Query the reasons for cooperative channel closes
+    ```
+    sudo -u bitcoin sqlite3 /home/bitcoin/.lightning/bitcoin/lightningd.sqlite3 'select short_channel_id, timestamp, cause, message from channel_state_changes inner join channels on channel_id = id where new_state = 4 order by timestamp'
     ```
 
 ## Script file help list
