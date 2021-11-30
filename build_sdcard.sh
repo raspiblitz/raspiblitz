@@ -3,6 +3,8 @@
 # Build your SD card image based on: 2021-10-30-raspios-bullseye-arm64
 # https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2021-11-08/
 # SHA256: b35425de5b4c5b08959aa9f29b9c0f730cd0819fe157c3e37c56a6d0c5c13ed8
+# PGP fingerprint: 8738CD6B956F460C
+# PGP key: https://www.raspberrypi.org/raspberrypi_downloads.gpg.key
 ##########################################################################
 # setup fresh SD card with image above - login per SSH and run this script:
 ##########################################################################
@@ -173,15 +175,15 @@ sudo apt -y autoremove
 echo
 echo "*** Python DEFAULT libs & dependencies ***"
 
-if [ -f "/usr/bin/python3.7" ]; then
-  # make sure /usr/bin/python exists (and calls Python3.7 in Buster)
-  sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.7 1
-  echo "python calls python3.7"
-elif [ -f "/usr/bin/python3.8" ]; then
-  # use python 3.8 if available
-  sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.8 1
-  sudo ln -s /usr/bin/python3.8 /usr/bin/python3.7
-  echo "python calls python3.8"
+if [ -f "/usr/bin/python3.9" ]; then
+  # use python 3.9 if available
+  sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.9 1
+  echo "python calls python3.9"
+elif [ -f "/usr/bin/python3.10" ]; then
+  # use python 3.10 if available
+  sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.10 1
+  sudo ln -s /usr/bin/python3.10 /usr/bin/python3.9
+  echo "python calls python3.10"
 else
   echo "!!! FAIL !!!"
   echo "There is no tested version of python present"
@@ -193,9 +195,9 @@ sudo apt -y install dialog bc python3-dialog
 
 # libs (for global python scripts)
 sudo -H python3 -m pip install --upgrade pip
-sudo -H python3 -m pip install grpcio==1.38.1
+sudo -H python3 -m pip install grpcio==1.42.0
 sudo -H python3 -m pip install googleapis-common-protos==1.53.0
-sudo -H python3 -m pip install toml==0.10.1
+sudo -H python3 -m pip install toml==0.10.2
 sudo -H python3 -m pip install j2cli==0.3.10
 sudo -H python3 -m pip install requests[socks]==2.21.0
 
@@ -435,7 +437,7 @@ sudo pip install setuptools
 # psmisc -> install killall, fuser
 # ufw -> firewall
 # sqlite3 -> database
-sudo apt install -y rsync net-tools xxd netcat openssh-client openssh-sftp-server sshpass psmisc ufw sqlite
+sudo apt install -y rsync net-tools xxd netcat openssh-client openssh-sftp-server sshpass psmisc ufw sqlite3
 sudo apt clean
 sudo apt autoremove -y
 
@@ -705,6 +707,11 @@ sudo systemctl enable background
 echo
 echo "*** PREPARING BITCOIN ***"
 
+# prepare directories
+sudo rm -rf /home/admin/download
+sudo -u admin mkdir /home/admin/download
+cd /home/admin/download || exit 1
+
 # set version (change if update is available)
 # https://bitcoincore.org/en/download/
 bitcoinVersion="22.0"
@@ -713,16 +720,12 @@ bitcoinVersion="22.0"
 # https://github.com/laanwj
 laanwjPGP="71A3 B167 3540 5025 D447 E8F2 7481 0B01 2346 C9A6"
 
-# prepare directories
-sudo rm -rf /home/admin/download
-sudo -u admin mkdir /home/admin/download
-cd /home/admin/download || exit 1
-
 # receive signer key
-if ! gpg --keyserver hkp://keyserver.ubuntu.com --recv-key "71A3 B167 3540 5025 D447 E8F2 7481 0B01 2346 C9A6"
-then
-  echo "!!! FAIL !!! Couldn't download Wladimir J. van der Laan's PGP pubkey"
-  exit 1
+if ! gpg --keyserver hkp://keyserver.ubuntu.com --recv-key "${laanwjPGP}"; then
+  if ! gpg --keyserver hkp://keyserver.ubuntu.com --recv-key "${laanwjPGP}"; then
+    echo "!!! FAIL !!! Couldn't download Wladimir J. van der Laan's PGP pubkey"
+    exit 1
+  fi
 fi
 
 # download signed binary sha256 hash sum file
