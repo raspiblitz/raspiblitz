@@ -739,6 +739,15 @@ else
   echo "Provisioning CircuitBreaker - keep default" >> ${logFile}
 fi
 
+# squeaknode
+if [ "${squeaknode}" = "on" ]; then
+  echo "Provisioning Squeaknode - run config script" >> ${logFile}
+  sudo sed -i "s/^message=.*/message='Setup Squeaknode '/g" ${infoFile}
+  sudo -u admin /home/admin/config.scripts/bonus.squeaknode.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning Squeaknode - keep default" >> ${logFile}
+fi
+
 # custom install script from user
 customInstallAvailable=$(sudo ls /mnt/hdd/app-data/custom-installs.sh 2>/dev/null | grep -c "custom-installs.sh")
 if [ ${customInstallAvailable} -gt 0 ]; then
