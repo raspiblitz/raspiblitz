@@ -172,14 +172,14 @@ configure_pluggable_transports
 # install tor
 echo "*** Install Tor ***"
 # shellcheck disable=SC2086
-sudo apt install -y ${tor_pkgs}
+sudo apt -o Dpkg::Options::="--force-confold" install -y ${tor_pkgs}
 
 add_tpo_repo
 
 echo "*** Reinstall & Enable Tor ***"
 sudo apt update -y
 # shellcheck disable=SC2086
-sudo apt install -y ${tor_pkgs}
+sudo apt -o Dpkg::Options::="--force-confold" install -y ${tor_pkgs}
 echo
 
 sudo mkdir -p /etc/systemd/system/tor@default.service.d
