@@ -284,11 +284,14 @@ if [ "$1" = "status" ]; then
           if [ "${hddFormat}" = "ext4" ]; then
             # check for other node implementations
             isUmbrelHDD=$(sudo ls /mnt/storage/umbrel/info.json 2>/dev/null | grep -c '.json')
+            isCitadelHDD=$(sudo ls /mnt/storage/citadel/info.json 2>/dev/null | grep -c '.json')
             isMyNodeHDD=$(sudo ls /mnt/storage/mynode/bitcoin/bitcoin.conf 2>/dev/null | grep -c '.conf')
             if [ ${isUmbrelHDD} -gt 0 ]; then
               hddGotMigrationData="umbrel"
             elif [ ${isMyNodeHDD} -gt 0 ]; then
               hddGotMigrationData="mynode"
+            elif [ ${isCitadelHDD} -gt 0 ]; then
+              hddGotMigrationData="citadel"
             fi
           else
             echo "# not an ext4 drive - all known fullnode packages use ext4 at the moment"
