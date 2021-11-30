@@ -341,6 +341,10 @@ if [ "${lightning}" == "lnd" ]; then
     exit 15
   fi
 
+  # stop lnd for the rest of the provision process
+  echo "stopping lnd for the rest provision again (will start on next boot)" >> ${logFile}
+  systemctl stop lnd >> ${logFile}
+
 fi
 
 if [ "${lightning}" == "cl" ]; then 
@@ -413,7 +417,15 @@ if [ "${lightning}" == "cl" ]; then
 
   fi
 
+  # stop c-lightning for the rest of the provision process
+  echo "stopping lightningd for the rest provision again (will start on next boot)" >> ${logFile}
+  systemctl stop lightningd >> ${logFile}
+
 fi
+
+# stop bitcoind for the rest of the provision process
+echo "stopping bitcoind for the rest provision again (will start on next boot)" >> ${logFile}
+systemctl stop bitcoind >> ${logFile}
 
 sudo sed -i "s/^message=.*/message='Provision Setup Finish'/g" ${infoFile}
 echo "END Setup"  >> ${logFile}
