@@ -627,6 +627,7 @@ if [ ${isMounted} -eq 0 ]; then
   # if setup - run provision setup first
   if [ "${setupPhase}" == "setup" ]; then
     echo "Calling _provision.setup.sh for basic setup tasks .." >> $logFile
+    echo "Follow in a new terminal with: 'tail -f raspiblitz.provision-setup.log'" >> $logFile
     sed -i "s/^message=.*/message='Provision Setup'/g" ${infoFile}
     /home/admin/_provision.setup.sh
     errorState=$?
