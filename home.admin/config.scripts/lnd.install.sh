@@ -67,9 +67,9 @@ if [ "$1" = "install" ] ; then
     exit 1
   else
     echo
-    echo "****************************************"
-    echo "OK --> SIGNATURE LND MANIFEST IS CORRECT"
-    echo "****************************************"
+    echo "********************************************"
+    echo "OK --> THE LND MANIFEST SIGNATURE IS CORRECT"
+    echo "********************************************"
     echo
   fi
 
@@ -85,7 +85,6 @@ if [ "$1" = "install" ] ; then
     lndSHA256=$(grep -i "linux-$lndOSversion" manifest-v$lndVersion.txt | cut -d " " -f1)
   fi
 
-  echo
   echo "*** LND v${lndVersion} for ${lndOSversion} ***"
   echo "SHA256 hash: $lndSHA256"
   echo
@@ -113,9 +112,9 @@ if [ "$1" = "install" ] ; then
     exit 1
   else
     echo
-    echo "****************************************"
-    echo "OK --> VERIFIED LND CHECKSUM IS CORRECT"
-    echo "****************************************"
+    echo "**************************************************"
+    echo "OK --> THE VERIFIED LND BINARY CHECKSUM IS CORRECT"
+    echo "**************************************************"
     echo
     sleep 10
   fi
