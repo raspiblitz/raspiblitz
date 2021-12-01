@@ -34,17 +34,21 @@ if [ "$1" = "install" ]; then
   echo "*** PREPARING C-LIGHTNING ***"
   
   # https://github.com/ElementsProject/lightning/tree/master/contrib/keys
-  PGPsigner="rustyrussel"
-  PGPpkeys="https://raw.githubusercontent.com/ElementsProject/lightning/master/contrib/keys/rustyrussell.txt"
-  PGPcheck="D9200E6CD1ADB8F1"
-  
+  # PGPsigner="rustyrussel"
+  # PGPpkeys="https://raw.githubusercontent.com/ElementsProject/lightning/master/contrib/keys/rustyrussell.txt"
+  # PGPcheck="D9200E6CD1ADB8F1"
+
+  PGPsigner="cdecker"
+  PGPpkeys="https://raw.githubusercontent.com/ElementsProject/lightning/master/contrib/keys/cdecker.txt"
+  PGPcheck="A26D6D9FE088ED58"
+
   # prepare download dir
   sudo rm -rf /home/admin/download/cl
   sudo -u admin mkdir -p /home/admin/download/cl
   cd /home/admin/download/cl || exit 1
-  
+
   sudo -u admin wget -O "pgp_keys.asc" ${PGPpkeys}
-  gpg --import --import-options show-only ./pgp_keys.asc
+  sudo -u admin gpg --import --import-options show-only ./pgp_keys.asc
   fingerprint=$(gpg "pgp_keys.asc" 2>/dev/null | grep "${PGPcheck}" -c)
   if [ ${fingerprint} -lt 1 ]; then
     echo
@@ -53,12 +57,12 @@ if [ "$1" = "install" ]; then
     echo "PRESS ENTER to TAKE THE RISK if you think all is OK"
     read key
   fi
-  gpg --import ./pgp_keys.asc
-  
+  sudo -u admin gpg --import ./pgp_keys.asc
+
   sudo -u admin wget https://github.com/ElementsProject/lightning/releases/download/${CLVERSION}/SHA256SUMS
   sudo -u admin wget https://github.com/ElementsProject/lightning/releases/download/${CLVERSION}/SHA256SUMS.asc
   
-  verifyResult=$(gpg --verify SHA256SUMS.asc 2>&1)
+  verifyResult=$(sudo -u admin gpg --verify SHA256SUMS.asc 2>&1)
 
   goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
   echo "goodSignature(${goodSignature})"
@@ -76,7 +80,7 @@ if [ "$1" = "install" ]; then
     echo 
   fi
   
-  sudo -u admin wget https://github.com/ElementsProject/lightning/releases/download/${CLVERSION}/clightning-v${CLVERSION}.zip
+  sudo -u admin wget https://github.com/ElementsProject/lightning/releases/download/${CLVERSION}/clightning-${CLVERSION}.zip
   
   hashCheckResult=$(sha256sum -c SHA256SUMS 2>&1)
   goodHash=$(echo ${hashCheckResult} | grep 'OK' -c)
@@ -99,8 +103,8 @@ if [ "$1" = "install" ]; then
     libsqlite3-dev python3 python3-mako net-tools zlib1g-dev libsodium-dev \
     gettext unzip
   
-  sudo -u admin unzip clightning-v${CLVERSION}.zip
-  cd clightning-v${CLVERSION} || exit 1
+  sudo -u admin unzip clightning-${CLVERSION}.zip
+  cd clightning-${CLVERSION} || exit 1
   
   echo "- Configuring EXPERIMENTAL_FEATURES enabled"
   sudo -u admin ./configure --enable-experimental-features
