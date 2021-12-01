@@ -55,8 +55,8 @@ if [ "$1" = "install" ]; then
   fi
   gpg --import ./pgp_keys.asc
   
-  sudo -u admin wget https://github.com/ElementsProject/lightning/releases/download/v${CLVERSION}/SHA256SUMS
-  sudo -u admin wget https://github.com/ElementsProject/lightning/releases/download/v${CLVERSION}/SHA256SUMS.asc
+  sudo -u admin wget https://github.com/ElementsProject/lightning/releases/download/${CLVERSION}/SHA256SUMS
+  sudo -u admin wget https://github.com/ElementsProject/lightning/releases/download/${CLVERSION}/SHA256SUMS.asc
   
   verifyResult=$(gpg --verify SHA256SUMS.asc 2>&1)
 
@@ -76,7 +76,7 @@ if [ "$1" = "install" ]; then
     echo 
   fi
   
-  sudo -u admin wget https://github.com/ElementsProject/lightning/releases/download/v${CLVERSION}/clightning-v${CLVERSION}.zip
+  sudo -u admin wget https://github.com/ElementsProject/lightning/releases/download/${CLVERSION}/clightning-v${CLVERSION}.zip
   
   hashCheckResult=$(sha256sum -c SHA256SUMS 2>&1)
   goodHash=$(echo ${hashCheckResult} | grep 'OK' -c)
