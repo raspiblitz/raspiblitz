@@ -11,9 +11,8 @@ if [ $# -lt 2 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ];then
 fi
 
 if [ "$1" = "install" ]; then
-  echo
   echo "*** PREPARING BITCOIN ***"
-  
+
   # set version (change if update is available)
   # https://bitcoincore.org/en/download/
   bitcoinVersion="22.0"

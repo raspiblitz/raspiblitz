@@ -13,8 +13,6 @@ if [ $# -lt 2 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ];then
 fi
 
 if [ "$1" = "install" ] ; then
-
-  echo
   echo "*** PREPARING LND ***"
   
   # "*** LND ***"

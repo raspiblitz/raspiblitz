@@ -10,7 +10,7 @@
 
 defaultBranchVersion="v1.7"
 
-echo ""
+echo
 echo "*****************************************"
 echo "* RASPIBLITZ SD CARD IMAGE SETUP ${defaultBranchVersion}.1 *"
 echo "*****************************************"
@@ -122,16 +122,12 @@ echo "7) will use WIFI --> '${modeWifi}'"
 
 # AUTO-DETECTION: CPU-ARCHITECTURE
 # ---------------------------------------
-# keep in mind that DietPi for Raspberry is also a stripped down Raspbian
-isARM=$(uname -m | grep -c 'arm')
-isAARCH64=$(uname -m | grep -c 'aarch64')
-isX86_64=$(uname -m | grep -c 'x86_64')
 cpu="?"
-if [ ${isARM} -gt 0 ]; then
+if [ "$(uname -m | grep -c 'arm')" -gt 1 ]; then
   cpu="arm"
-elif [ ${isAARCH64} -gt 0 ]; then
+elif [ "$(uname -m | grep -c 'aarch64')" -gt 1 ]; then
   cpu="aarch64"
-elif [ ${isX86_64} -gt 0 ]; then
+elif [ "$(uname -m | grep -c 'x86_64')" -gt 1 ]; then
   cpu="x86_64"
 else
   echo "!!! FAIL !!!"
@@ -143,6 +139,7 @@ echo "X) will use CPU-ARCHITECTURE --> '${cpu}'"
 
 # AUTO-DETECTION: OPERATINGSYSTEM
 # ---------------------------------------
+# keep in mind that DietPi for Raspberry is also a stripped down Raspbian
 baseimage="?"
 isDietPi=$(uname -n | grep -c 'DietPi')
 isRaspbian=$(grep -c 'Raspbian' /etc/os-release 2>/dev/null)
@@ -185,12 +182,12 @@ if [ "${noInteraction}" != "true" ]; then
   fi
 fi
 echo "Building RaspiBlitz ..."
-echo ""
+echo
 sleep 3
 
 # INSTALL TOR
 echo "*** INSTALL TOR BY DEFAULT ***"
-echo ""
+echo
 sudo apt install -y dirmngr
 echo "*** Adding KEYS deb.torproject.org ***"
 # fix for v1.6 base image https://github.com/rootzoll/raspiblitz/issues/1906#issuecomment-755299759
@@ -228,7 +225,7 @@ fi
 echo "*** Install & Enable Tor ***"
 sudo apt update -y
 sudo apt install tor tor-arm torsocks -y
-echo ""
+echo
 
 # FIXING LOCALES
 # https://github.com/rootzoll/raspiblitz/issues/138
@@ -236,7 +233,7 @@ echo ""
 # https://stackoverflow.com/questions/38188762/generate-all-locales-in-a-docker-image
 if [ "${baseimage}" = "raspbian" ] || [ "${baseimage}" = "dietpi" ] || \
    [ "${baseimage}" = "raspios_arm64" ]||[ "${baseimage}" = "debian_rpi64" ]; then
-  echo ""
+  echo
   echo "*** FIXING LOCALES FOR BUILD ***"
 
   sudo sed -i "s/^# en_US.UTF-8 UTF-8.*/en_US.UTF-8 UTF-8/g" /etc/locale.gen
@@ -267,7 +264,7 @@ sudo apt remove -y --purge libreoffice* oracle-java* chromium-browser nuscratch 
 sudo apt clean
 sudo apt -y autoremove
 
-echo ""
+echo
 echo "*** Python DEFAULT libs & dependencies ***"
 
 if [ -f "/usr/bin/python3.7" ]; then
@@ -301,12 +298,12 @@ sudo -H python3 -m pip install toml==0.10.1
 sudo -H python3 -m pip install j2cli==0.3.10
 sudo -H python3 -m pip install requests[socks]==2.21.0
 
-echo ""
+echo
 echo "*** UPDATE Debian***"
 sudo apt update -y
 sudo apt upgrade -f -y
 
-echo ""
+echo
 echo "*** PREPARE ${baseimage} ***"
 
 # make sure the pi user is present
@@ -323,7 +320,7 @@ fi
 if [ "${baseimage}" = "raspbian" ]||[ "${baseimage}" = "raspios_arm64" ]||\
    [ "${baseimage}" = "debian_rpi64" ]; then
 
-  echo ""
+  echo
   echo "*** PREPARE RASPBIAN ***"
   sudo apt install -y raspi-config 
   # do memory split (16MB)
@@ -342,7 +339,7 @@ if [ "${baseimage}" = "raspbian" ]||[ "${baseimage}" = "raspios_arm64" ]||\
   max_usb_currentDone=$(grep -c "$max_usb_current" $configFile)
 
   if [ ${max_usb_currentDone} -eq 0 ]; then
-    echo "" | sudo tee -a $configFile
+    echo | sudo tee -a $configFile
     echo "# Raspiblitz" | sudo tee -a $configFile
     echo "$max_usb_current" | sudo tee -a $configFile
   else
@@ -387,7 +384,7 @@ if [ ${isNvidia} -eq 1 ] ; then
   sudo systemctl set-default multi-user.target
 fi
 
-echo ""
+echo
 echo "*** CONFIG ***"
 # based on https://raspibolt.github.io/raspibolt/raspibolt_20_pi.html#raspi-config
 
@@ -444,7 +441,7 @@ echo "	postrotate" >> ./rsyslog
 echo "		invoke-rc.d rsyslog rotate > /dev/null" >> ./rsyslog
 echo "	endscript" >> ./rsyslog
 echo "}" >> ./rsyslog
-echo "" >> ./rsyslog
+echo >> ./rsyslog
 echo "/var/log/mail.info" >> ./rsyslog
 echo "/var/log/mail.warn" >> ./rsyslog
 echo "/var/log/mail.err" >> ./rsyslog
@@ -462,7 +459,7 @@ echo "        postrotate" >> ./rsyslog
 echo "                invoke-rc.d rsyslog rotate > /dev/null" >> ./rsyslog
 echo "        endscript" >> ./rsyslog
 echo "}" >> ./rsyslog
-echo "" >> ./rsyslog
+echo >> ./rsyslog
 echo "/var/log/kern.log" >> ./rsyslog
 echo "/var/log/auth.log" >> ./rsyslog
 echo "{" >> ./rsyslog
@@ -477,7 +474,7 @@ echo "        postrotate" >> ./rsyslog
 echo "                invoke-rc.d rsyslog rotate > /dev/null" >> ./rsyslog
 echo "        endscript" >> ./rsyslog
 echo "}" >> ./rsyslog
-echo "" >> ./rsyslog
+echo >> ./rsyslog
 echo "/var/log/user.log" >> ./rsyslog
 echo "/var/log/lpr.log" >> ./rsyslog
 echo "/var/log/cron.log" >> ./rsyslog
@@ -499,7 +496,7 @@ sudo mv ./rsyslog /etc/logrotate.d/rsyslog
 sudo chown root:root /etc/logrotate.d/rsyslog
 sudo service rsyslog restart
 
-echo ""
+echo
 echo "*** SOFTWARE UPDATE ***"
 # based on https://raspibolt.github.io/raspibolt/raspibolt_20_pi.html#software-update
 
@@ -561,11 +558,10 @@ sudo apt install -y ufw
 # make sure sqlite3 is available
 sudo apt install -y sqlite3
 
-
 sudo apt clean
 sudo apt -y autoremove
 
-echo ""
+echo
 echo "*** ADDING MAIN USER admin ***"
 # based on https://raspibolt.github.io/raspibolt/raspibolt_20_pi.html#add-users
 # using the default password 'raspiblitz'
@@ -586,7 +582,7 @@ echo "displayClass=headless" >> /home/admin/raspiblitz.info
 sudo mv ./raspiblitz.info /home/admin/raspiblitz.info
 sudo chmod 755 /home/admin/raspiblitz.info
 
-echo ""
+echo
 echo "*** ADDING SERVICE USER bitcoin"
 # based on https://raspibolt.github.io/raspibolt/raspibolt_20_pi.html#add-users
 
@@ -594,7 +590,7 @@ echo "*** ADDING SERVICE USER bitcoin"
 sudo adduser --disabled-password --gecos "" bitcoin
 echo "bitcoin:raspiblitz" | sudo chpasswd
 
-echo ""
+echo
 echo "*** ADDING GROUPS FOR CREDENTIALS STORE ***"
 # access to credentials (e.g. macaroon files) in a central location is managed with unix groups and permissions
 sudo /usr/sbin/groupadd --force --gid 9700 lndadmin
@@ -606,11 +602,11 @@ sudo /usr/sbin/groupadd --force --gid 9705 lndsigner
 sudo /usr/sbin/groupadd --force --gid 9706 lndwalletkit
 sudo /usr/sbin/groupadd --force --gid 9707 lndrouter
 
-echo ""
+echo
 echo "*** SHELL SCRIPTS & ASSETS ***"
 
 # copy raspiblitz repo from github
-cd /home/admin/
+cd /home/admin/ || exit 1
 sudo -u admin git config --global user.name "${githubUser}"
 sudo -u admin git config --global user.email "johndoe@example.com"
 sudo rm -rf /home/admin/raspiblitz
@@ -627,7 +623,7 @@ sudo -u admin chmod 755 /home/admin/setup.scripts/*.sh
 # install newest version of BlitzPy
 blitzpy_wheel=$(ls -tR /home/admin/raspiblitz/home.admin/BlitzPy/dist | grep -E "*any.whl" | tail -n 1)
 blitzpy_version=$(echo ${blitzpy_wheel} | grep -oE "([0-9]\.[0-9]\.[0-9])")
-echo ""
+echo
 echo "*** INSTALLING BlitzPy Version: ${blitzpy_version} ***"
 sudo -H /usr/bin/python -m pip install "/home/admin/raspiblitz/home.admin/BlitzPy/dist/${blitzpy_wheel}" >/dev/null 2>&1 
 
@@ -648,7 +644,7 @@ if [ "${baseimage}" == "raspbian" ]; then
   sudo cp /home/admin/raspiblitz/pictures/splash.png /usr/share/plymouth/themes/pix/splash.png
 fi
 
-echo ""
+echo
 echo "*** RASPIBLITZ EXTRAS ***"
 
 # for background processes
@@ -701,7 +697,7 @@ fi
 sudo bash -c "echo '' >> /home/admin/.bashrc"
 sudo bash -c "echo '# Raspiblitz' >> /home/admin/.bashrc"
 
-echo ""
+echo
 echo "*** SWAP FILE ***"
 # based on https://raspibolt.github.io/raspibolt/raspibolt_20_pi.html#move-swap-file
 # but just deactivating and deleting old (will be created alter when user adds HDD)
@@ -709,7 +705,7 @@ echo "*** SWAP FILE ***"
 sudo dphys-swapfile swapoff
 sudo dphys-swapfile uninstall
 
-echo ""
+echo
 echo "*** INCREASE OPEN FILE LIMIT ***"
 # based on https://raspibolt.github.io/raspibolt/raspibolt_21_security.html#increase-your-open-files-limit
 
@@ -739,13 +735,13 @@ if [ "${baseimage}" = "raspbian" ]||[ "${baseimage}" = "raspios_arm64"  ]||\
    [ "${baseimage}" = "debian_rpi64" ]; then
    
   if [ "${modeWifi}" == "false" ]; then
-    echo ""
+    echo
     echo "*** DISABLE WIFI ***"
     sudo systemctl disable wpa_supplicant.service
     sudo ifconfig wlan0 down
   fi
 
-  echo ""
+  echo
   echo "*** DISABLE BLUETOOTH ***"
 
   configFile="/boot/config.txt"
@@ -754,8 +750,8 @@ if [ "${baseimage}" = "raspbian" ]||[ "${baseimage}" = "raspios_arm64"  ]||\
 
   if [ ${disableBTDone} -eq 0 ]; then
     # disable bluetooth module
-    sudo echo "" >> $configFile
-    sudo echo "# Raspiblitz" >> $configFile
+    echo >> $configFile
+    echo "# Raspiblitz" >> $configFile
     echo 'dtoverlay=pi3-disable-bt' | sudo tee -a $configFile
     echo 'dtoverlay=disable-bt' | sudo tee -a $configFile
   else
@@ -828,365 +824,54 @@ else
 fi
 
 # *** BOOTSTRAP ***
-echo ""
+echo
 echo "*** RASPI BOOTSTRAP SERVICE ***"
 sudo chmod +x /home/admin/_bootstrap.sh
 sudo cp /home/admin/assets/bootstrap.service /etc/systemd/system/bootstrap.service
 sudo systemctl enable bootstrap
 
 # *** BACKGROUND ***
-echo ""
+echo
 echo "*** RASPI BACKGROUND SERVICE ***"
 sudo chmod +x /home/admin/_background.sh
 sudo cp /home/admin/assets/background.service /etc/systemd/system/background.service
 sudo systemctl enable background
 
-# "*** BITCOIN ***"
+###########
+# BITCOIN #
+###########
+echo
+/home/admin/config.scripts/bitcoin.install.sh install || exit 1
+
+#######
+# LND #
+#######
+echo
+/home/admin/config.scripts/lnd.install.sh install || exit 1
+
+###############
+# C-LIGHTNING #
+###############
+echo
+/home/admin/config.scripts/cl.install.sh install || exit 1
 
 echo
-echo "*** PREPARING BITCOIN ***"
-
-# set version (change if update is available)
-# https://bitcoincore.org/en/download/
-bitcoinVersion="22.0"
-
-# needed to check code signing
-# https://github.com/laanwj
-laanwjPGP="71A3 B167 3540 5025 D447 E8F2 7481 0B01 2346 C9A6"
-
-# prepare directories
-sudo rm -rf /home/admin/download
-sudo -u admin mkdir /home/admin/download
-cd /home/admin/download
-
-# receive signer key
-if ! gpg --keyserver hkp://keyserver.ubuntu.com --recv-key "71A3 B167 3540 5025 D447 E8F2 7481 0B01 2346 C9A6"
-then
-  echo "!!! FAIL !!! Couldn't download Wladimir J. van der Laan's PGP pubkey"
-  exit 1
-fi
-
-# download signed binary sha256 hash sum file
-sudo -u admin wget https://bitcoincore.org/bin/bitcoin-core-${bitcoinVersion}/SHA256SUMS
-
-# download signed binary sha256 hash sum file and check
-sudo -u admin wget https://bitcoincore.org/bin/bitcoin-core-${bitcoinVersion}/SHA256SUMS.asc
-verifyResult=$(gpg --verify SHA256SUMS.asc 2>&1)
-goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
-echo "goodSignature(${goodSignature})"
-correctKey=$(echo ${verifyResult} | grep "${laanwjPGP}" -c)
-echo "correctKey(${correctKey})"
-if [ ${correctKey} -lt 1 ] || [ ${goodSignature} -lt 1 ]; then
-  echo ""
-  echo "!!! BUILD FAILED --> PGP Verify not OK / signature(${goodSignature}) verify(${correctKey})"
-  exit 1
-else
-  echo
-  echo "****************************************"
-  echo "OK --> BITCOIN MANIFEST IS CORRECT"
-  echo "****************************************"
-  echo
-fi
-
-# bitcoinOSversion
-if [ ${isARM} -eq 1 ] ; then
-  bitcoinOSversion="arm-linux-gnueabihf"
-fi
-if [ ${isAARCH64} -eq 1 ] ; then
-  bitcoinOSversion="aarch64-linux-gnu"
-fi
-if [ ${isX86_64} -eq 1 ] ; then
-  bitcoinOSversion="x86_64-linux-gnu"
-fi
-
-echo
-echo "*** BITCOIN CORE v${bitcoinVersion} for ${bitcoinOSversion} ***"
-
-# download resources
-binaryName="bitcoin-${bitcoinVersion}-${bitcoinOSversion}.tar.gz"
-if [ ! -f "./${binaryName}" ]; then
-   sudo -u admin wget https://bitcoincore.org/bin/bitcoin-core-${bitcoinVersion}/${binaryName}
-fi
-if [ ! -f "./${binaryName}" ]; then
-   echo "!!! FAIL !!! Could not download the BITCOIN BINARY"
-   exit 1
-else
-
-  # check binary checksum test
-  echo "- checksum test"
-  # get the sha256 value for the corresponding platform from signed hash sum file
-  bitcoinSHA256=$(grep -i "${binaryName}" SHA256SUMS | cut -d " " -f1)
-  binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
-  echo "Valid SHA256 checksum should be: ${bitcoinSHA256}"
-  echo "Downloaded binary SHA256 checksum: ${binaryChecksum}"
-  if [ "${binaryChecksum}" != "${bitcoinSHA256}" ]; then
-    echo "!!! FAIL !!! Downloaded BITCOIN BINARY not matching SHA256 checksum: ${bitcoinSHA256}"
-    rm -v ./${binaryName}
-    exit 1
-  else
-    echo
-    echo "********************************************"
-    echo "OK --> VERIFIED BITCOIN CORE BINARY CHECKSUM"
-    echo "********************************************"
-    echo
-    sleep 10
-    echo
-  fi
-fi
-
-# install
-sudo -u admin tar -xvf ${binaryName}
-sudo install -m 0755 -o root -g root -t /usr/local/bin/ bitcoin-${bitcoinVersion}/bin/*
-sleep 3
-installed=$(sudo -u admin bitcoind --version | grep "${bitcoinVersion}" -c)
-if [ ${installed} -lt 1 ]; then
-  echo ""
-  echo "!!! BUILD FAILED --> Was not able to install bitcoind version(${bitcoinVersion})"
-  exit 1
-fi
-echo "- Bitcoin install OK"
-
-echo ""
-echo "*** PREPARING LIGHTNING ***"
-
-# "*** LND ***"
-## based on https://raspibolt.github.io/raspibolt/raspibolt_40_lnd.html#lightning-lnd
-## see LND releases: https://github.com/lightningnetwork/lnd/releases
-## !!!! If you change here - make sure to also change interims version in lnd.update.sh !!!
-lndVersion="0.13.3-beta"
-
-# olaoluwa
-PGPauthor="roasbeef"
-PGPpkeys="https://keybase.io/roasbeef/pgp_keys.asc"
-PGPcheck="E4D85299674B2D31FAA1892E372CBD7633C61696"
-# bitconner
-#PGPauthor="bitconner"
-#PGPpkeys="https://keybase.io/bitconner/pgp_keys.asc"
-#PGPcheck="9C8D61868A7C492003B2744EE7D737B67FA592C7"
-
-# get LND resources
-cd /home/admin/download
-
-# download lnd binary checksum manifest
-sudo -u admin wget -N https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/manifest-v${lndVersion}.txt
-
-# check if checksums are signed by lnd dev team
-sudo -u admin wget -N https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/manifest-${PGPauthor}-v${lndVersion}.sig
-sudo -u admin wget --no-check-certificate -N -O "pgp_keys.asc" ${PGPpkeys}
-gpg --import --import-options show-only ./pgp_keys.asc
-fingerprint=$(sudo gpg "pgp_keys.asc" 2>/dev/null | grep "${PGPcheck}" -c)
-if [ ${fingerprint} -lt 1 ]; then
-  echo ""
-  echo "!!! BUILD WARNING --> LND PGP author not as expected"
-  echo "Should contain PGP: ${PGPcheck}"
-  echo "PRESS ENTER to TAKE THE RISK if you think all is OK"
-  read key
-fi
-gpg --import ./pgp_keys.asc
-sleep 3
-verifyResult=$(gpg --verify manifest-${PGPauthor}-v${lndVersion}.sig manifest-v${lndVersion}.txt 2>&1)
-goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
-echo "goodSignature(${goodSignature})"
-correctKey=$(echo ${verifyResult} | tr -d " \t\n\r" | grep "${PGPcheck}" -c)
-echo "correctKey(${correctKey})"
-if [ ${correctKey} -lt 1 ] || [ ${goodSignature} -lt 1 ]; then
-  echo ""
-  echo "!!! BUILD FAILED --> LND PGP Verify not OK / signature(${goodSignature}) verify(${correctKey})"
-  exit 1
-else
-  echo ""
-  echo "****************************************"
-  echo "OK --> SIGNATURE LND MANIFEST IS CORRECT"
-  echo "****************************************"
-  echo ""
-fi
-
-# get the lndSHA256 for the corresponding platform from manifest file
-if [ ${isARM} -eq 1 ] ; then
-  lndOSversion="armv7"
-  lndSHA256=$(grep -i "linux-$lndOSversion" manifest-v$lndVersion.txt | cut -d " " -f1)
-fi
-if [ ${isAARCH64} -eq 1 ] ; then
-  lndOSversion="arm64"
-  lndSHA256=$(grep -i "linux-$lndOSversion" manifest-v$lndVersion.txt | cut -d " " -f1)
-fi
-if [ ${isX86_64} -eq 1 ] ; then
-  lndOSversion="amd64"
-  lndSHA256=$(grep -i "linux-$lndOSversion" manifest-v$lndVersion.txt | cut -d " " -f1)
-fi
-
-echo ""
-echo "*** LND v${lndVersion} for ${lndOSversion} ***"
-echo "SHA256 hash: $lndSHA256"
-echo ""
-
-# get LND binary
-binaryName="lnd-linux-${lndOSversion}-v${lndVersion}.tar.gz"
-if [ ! -f "./${binaryName}" ]; then
-  lndDownloadUrl="https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/${binaryName}"
-  echo "- downloading lnd binary --> ${lndDownloadUrl}"
-  sudo -u admin wget ${lndDownloadUrl}
-  echo "- download done"
-else
-  echo "- using existing lnd binary"
-fi
-
-# check binary was not manipulated (checksum test)
-echo "- checksum test"
-binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
-echo "Valid SHA256 checksum(s) should be: ${lndSHA256}"
-echo "Downloaded binary SHA256 checksum: ${binaryChecksum}"
-checksumCorrect=$(echo "${lndSHA256}" | grep -c "${binaryChecksum}")
-if [ "${checksumCorrect}" != "1" ]; then
-  echo "!!! FAIL !!! Downloaded LND BINARY not matching SHA256 checksum in manifest: ${lndSHA256}"
-  rm -v ./${binaryName}
-  exit 1
-else
-  echo ""
-  echo "****************************************"
-  echo "OK --> VERIFIED LND CHECKSUM IS CORRECT"
-  echo "****************************************"
-  echo ""
-  sleep 10
-fi
-
-# install
-echo "- install LND binary"
-sudo -u admin tar -xzf ${binaryName}
-sudo install -m 0755 -o root -g root -t /usr/local/bin lnd-linux-${lndOSversion}-v${lndVersion}/*
-sleep 3
-installed=$(sudo -u admin lnd --version)
-if [ ${#installed} -eq 0 ]; then
-  echo ""
-  echo "!!! BUILD FAILED --> Was not able to install LND"
-  exit 1
-fi
-
-correctVersion=$(sudo -u admin lnd --version | grep -c "${lndVersion}")
-if [ ${correctVersion} -eq 0 ]; then
-  echo ""
-  echo "!!! BUILD FAILED --> installed LND is not version ${lndVersion}"
-  sudo -u admin lnd --version
-  exit 1
-fi
-sudo chown -R admin /home/admin
-echo "- OK install of LND done"
-
-echo "*** C-lightning ***"
-# https://github.com/ElementsProject/lightning/releases
-CLVERSION=0.10.1
-
-# https://github.com/ElementsProject/lightning/tree/master/contrib/keys
-PGPsigner="rustyrussel"
-PGPpkeys="https://raw.githubusercontent.com/ElementsProject/lightning/master/contrib/keys/rustyrussell.txt"
-PGPcheck="D9200E6CD1ADB8F1"
-
-# prepare download dir
-sudo rm -rf /home/admin/download/cl
-sudo -u admin mkdir -p /home/admin/download/cl
-cd /home/admin/download/cl || exit 1
-
-sudo -u admin wget -O "pgp_keys.asc" ${PGPpkeys}
-gpg --import --import-options show-only ./pgp_keys.asc
-fingerprint=$(gpg "pgp_keys.asc" 2>/dev/null | grep "${PGPcheck}" -c)
-if [ ${fingerprint} -lt 1 ]; then
-  echo
-  echo "!!! WARNING --> the PGP fingerprint is not as expected for ${PGPsigner}"
-  echo "Should contain PGP: ${PGPcheck}"
-  echo "PRESS ENTER to TAKE THE RISK if you think all is OK"
-  read key
-fi
-gpg --import ./pgp_keys.asc
-
-sudo -u admin wget https://github.com/ElementsProject/lightning/releases/download/v${CLVERSION}/SHA256SUMS
-sudo -u admin wget https://github.com/ElementsProject/lightning/releases/download/v${CLVERSION}/SHA256SUMS.asc
-
-verifyResult=$(gpg --verify SHA256SUMS.asc 2>&1)
-
-goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
-echo "goodSignature(${goodSignature})"
-correctKey=$(echo ${verifyResult} | tr -d " \t\n\r" | grep "${PGPcheck}" -c)
-echo "correctKey(${correctKey})"
-if [ ${correctKey} -lt 1 ] || [ ${goodSignature} -lt 1 ]; then
-  echo
-  echo "!!! BUILD FAILED --> PGP verification not OK / signature(${goodSignature}) verify(${correctKey})"
-  exit 1
-else
-  echo 
-  echo "****************************************************************"
-  echo "OK --> the PGP signature of the C-lightning SHA256SUMS is correct"
-  echo "****************************************************************"
-  echo 
-fi
-
-sudo -u admin wget https://github.com/ElementsProject/lightning/releases/download/v${CLVERSION}/clightning-v${CLVERSION}.zip
-
-hashCheckResult=$(sha256sum -c SHA256SUMS 2>&1)
-goodHash=$(echo ${hashCheckResult} | grep 'OK' -c)
-echo "goodHash(${goodHash})"
-if [ ${goodHash} -lt 1 ]; then
-  echo
-  echo "!!! BUILD FAILED --> Hash check not OK"
-  exit 1
-else
-  echo
-  echo "********************************************************************"
-  echo "OK --> the hash of the downloaded C-lightning source code is correct"
-  echo "********************************************************************"
-  echo
-fi
-
-echo "- Install build dependencies"
-sudo apt-get install -y \
-  autoconf automake build-essential git libtool libgmp-dev \
-  libsqlite3-dev python3 python3-mako net-tools zlib1g-dev libsodium-dev \
-  gettext unzip
-
-sudo -u admin unzip clightning-v${CLVERSION}.zip
-cd clightning-v${CLVERSION} || exit 1
-
-echo "- Configuring EXPERIMENTAL_FEATURES enabled"
-sudo -u admin ./configure --enable-experimental-features
-
-echo "- Building C-lightning from source"
-sudo -u admin make
-
-echo "- Install to /usr/local/bin/"
-sudo make install || exit 1
-
-installed=$(sudo -u admin lightning-cli --version)
-if [ ${#installed} -eq 0 ]; then
-  echo
-  echo "!!! BUILD FAILED --> Was not able to install C-lightning"
-  exit 1
-fi
-
-correctVersion=$(echo "${installed}" | grep -c "${CLVERSION}")
-if [ ${correctVersion} -eq 0 ]; then
-  echo
-  echo "!!! BUILD FAILED --> installed C-lightning is not version ${CLVERSION}"
-  sudo -u admin lightning-cli --version
-  exit 1
-fi
-echo "- OK the installation of C-lightning v${installed} is done"
-
-echo ""
 echo "*** raspiblitz.info ***"
 sudo cat /home/admin/raspiblitz.info
 
 # *** RASPIBLITZ IMAGE READY INFO ***
-echo ""
+echo
 echo "**********************************************"
 echo "BASIC SD CARD BUILD DONE"
 echo "**********************************************"
-echo ""
+echo
 echo "Your SD Card Image for RaspiBlitz is ready (might still do display config)."
 echo "Take the chance & look thru the output above if you can spot any errors or warnings."
-echo ""
+echo
 echo "IMPORTANT IF WANT TO MAKE A RELEASE IMAGE FROM THIS BUILD:"
 echo "1. login fresh --> user:admin password:raspiblitz"
 echo "2. run --> release"
-echo ""
+echo
 
 # (do last - because might trigger reboot)
 if [ "${displayClass}" != "headless" ] || [ "${baseimage}" = "raspbian" ] || [ "${baseimage}" = "raspios_arm64" ]; then

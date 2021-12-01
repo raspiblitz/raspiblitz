@@ -32,6 +32,7 @@ fi
 
 if [ "$1" = "install" ]; then
   echo "*** PREPARING C-LIGHTNING ***"
+  
   # https://github.com/ElementsProject/lightning/tree/master/contrib/keys
   PGPsigner="rustyrussel"
   PGPpkeys="https://raw.githubusercontent.com/ElementsProject/lightning/master/contrib/keys/rustyrussell.txt"
