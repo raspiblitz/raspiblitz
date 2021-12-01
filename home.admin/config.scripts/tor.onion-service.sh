@@ -13,7 +13,8 @@ fi
 
 source /mnt/hdd/raspiblitz.conf
 
-torrc_services="/etc/tor/torrc.d/services"
+tor_conf_dir="/mnt/hdd/app-data/tor/"
+torrc_services="${tor_conf_dir}/torrc.d/services"
 
 # delete a hidden service
 if [ "$1" == "off" ]; then

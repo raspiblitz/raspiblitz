@@ -122,6 +122,8 @@ case "$1" in
 
     # ACTIVATE APPS OVER TOR
     . /mnt/hdd/raspiblitz.conf 2>/dev/null
+    /home/admin/config.scripts/tor.onion-service.sh web80 80 80 443 9999
+    /home/admin/config.scripts/tor.onion-service.sh debuglogs 80 6969
     [ "${BTCRPCexplorer}" = "on" ] && /home/admin/config.scripts/tor.onion-service.sh btc-rpc-explorer 80 3022 443 3023
     [ "${rtlWebinterface}" = "on" ] && /home/admin/config.scripts/tor.onion-service.sh RTL 80 3002 443 3003
     [ "${BTCPayServer}" = "on" ] && /home/admin/config.scripts/tor.onion-service.sh btcpay 80 23002 443 23003

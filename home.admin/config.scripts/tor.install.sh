@@ -17,9 +17,10 @@
 
 download_dir="/home/admin/download"
 tor_data_dir="/mnt/hdd/tor"
+tor_conf_dir="/mnt/hdd/app-data/tor/"
 torrc="/etc/tor/torrc"
-torrc_bridges="/etc/tor/torrc.d/bridges"
-torrc_services="/etc/tor/torrc.d/services"
+torrc_bridges="${tor_conf_dir}/torrc.d/bridges"
+torrc_services="${tor_conf_dir}/torrc.d/services"
 tor_pkgs="torsocks nyx obfs4proxy python3-stem apt-transport-tor curl gpg"
 tor_deb_repo="tor+http://apow7mjfryruh65chtdydfmqfpj5btws7nbocgtaovhvezgccyjazpqd.onion"
 #tor_deb_repo="tor+https://deb.torproject.org"
@@ -50,12 +51,12 @@ deb-src [arch=${architecture}] ${tor_deb_repo}/torproject.org  ${distribution} m
 
 
 configure_default_torrc(){
-  echo -e "\n*** updating Tor config ${torrc} and ${torrc_bridges} ***"
-  echo "## raspiblitz torrc
+  echo -e "\n*** updating Tor config ${torrc} ***"
+  echo "## raspiblitz torrc (anchor, do not remove this line)
 ## See 'man tor', or https://2019.www.torproject.org/docs/tor-manual.html.en
 ## See https://github.com/torproject/tor/blob/main/src/config/torrc.sample.in
 
-%include /etc/tor/torrc.d
+%include ${tor_conf_dir}/torrc.d
 
 DataDirectory ${tor_data_dir}/sys
 PidFile ${tor_data_dir}/sys/tor.pid
@@ -72,28 +73,11 @@ ExitRelay 0
 CookieAuthentication 1
 CookieAuthFileGroupReadable 1
 " | sudo tee ${torrc}
+}
 
-  echo "
-## NOTE: Bitcoin onion private key at /mnt/hdd/bitcoin/onion_v3_private_key. Delete the priv key and restart bitcoind to renew the advertised address.
-## NOTE: LND onion private key at /mnt/hdd/lnd/v3_onion_private_key
 
-HiddenServiceDir ${tor_data_dir}/services/web80
-HiddenServiceVersion 3
-HiddenServicePort 80 127.0.0.1:80
-
-HiddenServiceDir ${tor_data_dir}/services/debuglogs
-HiddenServiceVersion 3
-HiddenServicePort 80 127.0.0.1:6969
-
-HiddenServiceDir ${tor_data_dir}/services/lndrpc10009
-HiddenServiceVersion 3
-HiddenServicePort 10009 127.0.0.1:10009
-
-HiddenServiceDir ${tor_data_dir}/services/lndrest8080
-HiddenServiceVersion 3
-HiddenServicePort 8080 127.0.0.1:8080
-" | sudo tee ${torrc_services}
-
+configure_bridges_torrc(){
+  echo -e "\n*** updating Tor config ${torrc_bridges} ***"
   echo "
 #UseBridges 1
 #UpdateBridgesFromAuthority 1
@@ -147,27 +131,28 @@ configure_pluggable_transports(){
       cd ~ || exit 1
       sudo rm -rf "${download_dir}"/snowflake
     fi
+  else
+    echo -e "\n*** Snowflake client and proxy already installed ***\n"
   fi
 }
 
 
 #### MAIN ####
-
 echo -e "*** Installing tor ***\ns"
 
 # create tor dirs and set permissions
 echo -e "*** Create directories and set permissions ***"
-sudo mkdir -pv /etc/tor/torrc.d "${tor_data_dir}"/sys/keys "${tor_data_dir}"/services "${tor_data_dir}"/onion_auth
+sudo mkdir -pv "${tor_conf_dir}"/torrc.d "${tor_data_dir}"/sys/keys "${tor_data_dir}"/services "${tor_data_dir}"/onion_auth
 sudo chmod -v 700 "${tor_data_dir}"
-sudo chmod -v 755 /etc/tor /etc/tor/torrc.d
-sudo chmod -v 644 /etc/tor/torrc /etc/tor/torrc.d/*
+sudo chmod -v 755 "${tor_conf_dir}""${tor_conf_dir}"/torrc.d
+sudo chmod -v 644 "${torrc}" "${tor_conf_dir}"/torrc.d/*
 # make sure its the correct owner
 sudo chown -Rv debian-tor:debian-tor "${tor_data_dir}"
-sudo chown -Rv root:root /etc/tor
+sudo chown -Rv root:root "${tor_conf_dir}"
 
 # create tor config if not existent
 sudo grep -q "raspiblitz" ${torrc} || configure_default_torrc
-
+sudo grep -q "Bridge" ${torrc_bridges} || configure_bridges_torrc
 configure_pluggable_transports
 
 # install tor
