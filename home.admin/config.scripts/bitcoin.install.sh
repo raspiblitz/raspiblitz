@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # command info
-if [ $# -lt 2 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ];then
+if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ];then
   echo
   echo "bitcoin.install.sh install - called by build.sdcard.sh"
   echo "Install or remove parallel chains for Bitcoin Core:"

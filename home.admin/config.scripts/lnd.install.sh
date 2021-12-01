@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # command info
-if [ $# -lt 2 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ];then
+if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ];then
   echo
   echo "Install or remove LND services on parallel chains"
   echo "lnd.install.sh install - called by the build_sdcard.sh"
