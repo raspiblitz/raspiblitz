@@ -102,6 +102,7 @@ if [ "$1" = "install" ]; then
     autoconf automake build-essential git libtool libgmp-dev \
     libsqlite3-dev python3 python3-mako net-tools zlib1g-dev libsodium-dev \
     gettext unzip
+  sudo pip3 install mrkd
   
   sudo -u admin unzip clightning-${CLVERSION}.zip
   cd clightning-${CLVERSION} || exit 1
@@ -122,14 +123,14 @@ if [ "$1" = "install" ]; then
     exit 1
   fi
   
-  correctVersion=$(echo "${installed}" | grep -c "${CLVERSION}")
+  correctVersion=$(echo "${installed}" | grep -c "${CLVERSION:1}")
   if [ ${correctVersion} -eq 0 ]; then
     echo
     echo "!!! BUILD FAILED --> installed C-lightning is not version ${CLVERSION}"
     sudo -u admin lightning-cli --version
     exit 1
   fi
-  echo "- OK the installation of C-lightning v${installed} is done"
+  echo "- OK the installation of C-lightning v${installed} is successful"
   exit 0
 fi
 
