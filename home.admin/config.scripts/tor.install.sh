@@ -16,11 +16,11 @@
 #### VARIABLES ####
 
 download_dir="/home/admin/download"
-tor_data_dir="/mnd/hdd/tor"
+tor_data_dir="/mnt/hdd/tor"
 torrc="/etc/tor/torrc"
 torrc_bridges="/etc/tor/torrc.d/bridges"
 torrc_services="/etc/tor/torrc.d/services"
-tor_pkgs="tor torsocks nyx obfs4proxy python3-stem apt-transport-tor curl gpg"
+tor_pkgs="torsocks nyx obfs4proxy python3-stem apt-transport-tor curl gpg"
 tor_deb_repo="tor+http://apow7mjfryruh65chtdydfmqfpj5btws7nbocgtaovhvezgccyjazpqd.onion"
 #tor_deb_repo="tor+https://deb.torproject.org"
 #tor_deb_repo="https://deb.torproject.org"
@@ -35,12 +35,12 @@ architecture=$(dpkg --print-architecture)
 #### FUNCTIONS ####
 
 add_tpo_repo(){
-  echo "*** Adding deb.torproject.org keyring ***"
+  echo -e "\n*** Adding deb.torproject.org keyring ***"
   torsocks curl --tlsv1.3 --proto =https --connect-timeout 10 https://deb.torproject.org/torproject.org/A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89.asc | gpg --dearmor | sudo tee /usr/share/keyrings/tor-archive-keyring.gpg >/dev/null
   gpg --list-keys | grep -q "A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89" || { echo "!!! FAIL: Was not able to import deb.torproject.org key"; exit 1; }
   echo "- OK key added"
 
-  echo "*** Adding Tor Sources ***"
+  echo -e "\n*** Adding Tor Sources ***"
   echo "
 deb [arch=${architecture}] ${tor_deb_repo}/torproject.org ${distribution} main
 deb-src [arch=${architecture}] ${tor_deb_repo}/torproject.org  ${distribution} main
@@ -50,7 +50,7 @@ deb-src [arch=${architecture}] ${tor_deb_repo}/torproject.org  ${distribution} m
 
 
 configure_default_torrc(){
-  echo "# - updating Tor config ${torrc}"
+  echo -e "\n*** updating Tor config ${torrc} and ${torrc_bridges} ***"
   echo "## raspiblitz torrc
 ## See 'man tor', or https://2019.www.torproject.org/docs/tor-manual.html.en
 ## See https://github.com/torproject/tor/blob/main/src/config/torrc.sample.in
@@ -117,16 +117,12 @@ configure_pluggable_transports(){
 
   ## https://github.com/radio24/TorBox/blob/master/install/run_install.sh
   ## Configuring Tor with the pluggable transports
-  (sudo mv /usr/local/bin/tor* /usr/bin) 2>/dev/null ## only if tor is built from source
-  sudo chmod a+x /usr/share/tor/geoip*
-  # Copy not moving!
   sudo apt install -y obfs4proxy
-  (sudo cp /usr/share/tor/geoip* /usr/bin) 2>/dev/null
   sudo setcap 'cap_net_bind_service=+ep' /usr/bin/obfs4proxy
 
   ## Install Snowflake
   ## nyxnor: unfortunately it reaches TPO domain for a lib which I can't fix
-  if [ ! -d /usr/bin/snowflake-proxy ]; then
+  if [ ! -f /usr/bin/snowflake-proxy ] || [ ! -f /usr/bin/snowflake-client ]; then
     sudo rm -rf "${download_dir}"/snowflake
     git clone https://github.com/keroserene/snowflake.git "${download_dir}"/snowflake
     if [ ! -d "${download_dir}"/snowflake ]; then
@@ -135,16 +131,16 @@ configure_pluggable_transports(){
       echo "INFO: Please try again later and if the problem persists, please report it"
     else
       git -C "${download_dir}"/snowflake -c advice.detachedHead=false checkout "${snowflake_commit_hash}"
-      sudo bash /home/admin/config.scripts/bonus.go.sh on
+      echo; sudo bash /home/admin/config.scripts/bonus.go.sh on
       . /etc/profile ## GOPATH
       export GO111MODULE="on"
       cd "${download_dir}"/snowflake/proxy || exit 1
-      echo -e "\n## Installing snowflake-proxy"
+      echo -e "\n*** Installing snowflake-proxy ***"
       go get
       go build
       sudo cp proxy /usr/bin/snowflake-proxy
       cd "${download_dir}"/snowflake/client || exit 1
-      echo -e "\n## Installing snowflake-client"
+      echo -e "\n*** Installing snowflake-client ***"
       go get
       go build
       sudo cp client /usr/bin/snowflake-client
@@ -156,6 +152,8 @@ configure_pluggable_transports(){
 
 
 #### MAIN ####
+
+echo -e "*** Installing tor ***\ns"
 
 # create tor dirs and set permissions
 echo -e "*** Create directories and set permissions ***"
@@ -175,14 +173,16 @@ configure_pluggable_transports
 # install tor
 echo -e "\n*** Install Tor ***"
 # shellcheck disable=SC2086
-sudo apt -o Dpkg::Options::="--force-confold" install -y ${tor_pkgs}
+sudo apt -o Dpkg::Options::="--force-confold" install -y tor
+sudo apt install -y ${tor_pkgs}
 
 add_tpo_repo
 
 echo -e "\n*** Reinstall & Enable Tor ***"
 sudo apt update -y
 # shellcheck disable=SC2086
-sudo apt -o Dpkg::Options::="--force-confold" install -y ${tor_pkgs}
+sudo apt -o Dpkg::Options::="--force-confold" install -y tor
+sudo apt install -y ${tor_pkgs}
 echo
 
 sudo sed -i "s/^NoNewPrivileges=yes/NoNewPrivileges=no/g" /lib/systemd/system/tor@default.service
@@ -198,6 +198,6 @@ After=network.target nss-lookup.target mnt-hdd.mount
 echo -e "\n*** Enable Tor Service ***"
 sudo systemctl unmask tor@default
 sudo systemctl daemon-reload
-sudo systemctl enable --now tor@default
+sudo systemctl enable --now tor@ tor@.service
 sudo systemctl restart tor@default
 echo
