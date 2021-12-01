@@ -11,7 +11,7 @@ fi
 
 # add default value to raspi config if needed
 if ! grep -Eq "^zerotier=" /mnt/hdd/raspiblitz.conf; then
-  echo "zerotier=off" >> /mnt/hdd/raspiblitz.conf
+  echo "zerotier=off" | tee -a  /mnt/hdd/raspiblitz.conf
 fi
 source /mnt/hdd/raspiblitz.conf
 

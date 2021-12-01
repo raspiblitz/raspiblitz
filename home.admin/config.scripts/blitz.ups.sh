@@ -51,7 +51,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     # add default 'ups' raspiblitz.conf if needed
     if [ ${#ups} -eq 0 ]; then
-      echo "ups=on" >> /mnt/hdd/raspiblitz.conf
+      echo "ups=on" | tee -a  /mnt/hdd/raspiblitz.conf
     fi
     # set ups config value (in case of update)
     sudo sed -i "s/^ups=.*/ups='apcusb'/g" /mnt/hdd/raspiblitz.conf

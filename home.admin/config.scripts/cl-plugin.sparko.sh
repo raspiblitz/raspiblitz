@@ -55,7 +55,7 @@ configEntry="${netprefix}sparko"
 configEntryExists=$(sudo cat /mnt/hdd/raspiblitz.conf | grep -c "${configEntry}")
 if [ "${configEntryExists}" == "0" ]; then
   echo "# adding default config entry for '${configEntry}'"
-  sudo /bin/sh -c "echo '${configEntry}=off' >> /mnt/hdd/raspiblitz.conf"
+  sudo /bin/sh -c "echo '${configEntry}=off' | tee -a  /mnt/hdd/raspiblitz.conf"
 else
   echo "# default config entry for '${configEntry}' exists"
 fi

@@ -82,7 +82,7 @@ fi
 
 # add default value to raspi config if needed
 if ! grep -Eq "^BTCRPCexplorer=" /mnt/hdd/raspiblitz.conf; then
-  echo "BTCRPCexplorer=off" >> /mnt/hdd/raspiblitz.conf
+  echo "BTCRPCexplorer=off" | tee -a  /mnt/hdd/raspiblitz.conf
 fi
 
 # status

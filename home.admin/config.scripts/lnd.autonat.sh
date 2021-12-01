@@ -30,7 +30,7 @@ sudo systemctl stop lnd 2>/dev/null
 source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
 if [ ${#autoNatDiscovery} -eq 0 ]; then
-  echo "autoNatDiscovery=off" >> /mnt/hdd/raspiblitz.conf
+  echo "autoNatDiscovery=off" | tee -a  /mnt/hdd/raspiblitz.conf
 fi
 
 # switch on

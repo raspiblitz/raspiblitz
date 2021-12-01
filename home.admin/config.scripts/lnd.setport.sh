@@ -41,7 +41,7 @@ fi
 valueExists=$(sudo cat /mnt/hdd/raspiblitz.conf | grep -c 'lndPort=')
 if [ ${valueExists} -eq 0 ]; then
   # add as new value
-  echo "lndPort=${portnumber}" >> /mnt/hdd/raspiblitz.conf
+  echo "lndPort=${portnumber}" | tee -a  /mnt/hdd/raspiblitz.conf
 else
   # update existing value
   sudo sed -i "s/^lndPort=.*/lndPort=${portnumber}/g" /mnt/hdd/raspiblitz.conf

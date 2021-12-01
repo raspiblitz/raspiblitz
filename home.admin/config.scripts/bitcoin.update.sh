@@ -248,7 +248,7 @@ if [ "${mode}" = "tested" ]||[ "${mode}" = "reckless" ]||[ "${mode}" = "custom" 
   echo "# flag update in raspiblitz config"
   source /mnt/hdd/raspiblitz.conf
   if [ ${#bitcoinInterimsUpdate} -eq 0 ]; then
-    echo "bitcoinInterimsUpdate='${bitcoinInterimsUpdateNew}'" >> /mnt/hdd/raspiblitz.conf
+    echo "bitcoinInterimsUpdate='${bitcoinInterimsUpdateNew}'" | tee -a  /mnt/hdd/raspiblitz.conf
   else
     sudo sed -i "s/^bitcoinInterimsUpdate=.*/bitcoinInterimsUpdate='${bitcoinInterimsUpdateNew}'/g" /mnt/hdd/raspiblitz.conf
   fi

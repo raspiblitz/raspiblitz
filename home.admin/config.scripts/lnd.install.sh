@@ -45,7 +45,7 @@ if ! grep -Eq "^lightning=" /mnt/hdd/raspiblitz.conf; then
 fi
 # add default value to raspi config if needed
 if ! grep -Eq "^${netprefix}lnd=" /mnt/hdd/raspiblitz.conf; then
-  echo "${netprefix}lnd=off" >> /mnt/hdd/raspiblitz.conf
+  echo "${netprefix}lnd=off" | tee -a  /mnt/hdd/raspiblitz.conf
 fi
 source /mnt/hdd/raspiblitz.conf
 

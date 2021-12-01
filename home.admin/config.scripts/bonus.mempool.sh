@@ -69,7 +69,7 @@ fi
 
 # add default value to raspi config if needed
 if ! grep -Eq "^mempoolExplorer=" /mnt/hdd/raspiblitz.conf; then
-  echo "mempoolExplorer=off" >> /mnt/hdd/raspiblitz.conf
+  echo "mempoolExplorer=off" | tee -a  /mnt/hdd/raspiblitz.conf
 fi
 
 # status

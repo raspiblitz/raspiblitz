@@ -59,7 +59,7 @@ fi
 
 # add default value to raspi config if needed
 if ! grep -Eq "^thunderhub=" /mnt/hdd/raspiblitz.conf; then
-  echo "thunderhub=off" >> /mnt/hdd/raspiblitz.conf
+  echo "thunderhub=off" | tee -a  /mnt/hdd/raspiblitz.conf
 fi
 
 # stop services

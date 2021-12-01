@@ -164,10 +164,10 @@ fi
 
 # add default values to raspi config if needed
 if ! grep -Eq "^BTCPayServer=" /mnt/hdd/raspiblitz.conf; then
-  echo "BTCPayServer=off" >> /mnt/hdd/raspiblitz.conf
+  echo "BTCPayServer=off" | tee -a  /mnt/hdd/raspiblitz.conf
 fi
 if ! grep -Eq "^BTCPayDomain=" /mnt/hdd/raspiblitz.conf; then
-  echo "BTCPayDomain=off" >> /mnt/hdd/raspiblitz.conf
+  echo "BTCPayDomain=off" | tee -a  /mnt/hdd/raspiblitz.conf
 fi
 
 # write-tls-macaroon

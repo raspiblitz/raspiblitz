@@ -71,7 +71,7 @@ echo ""
 source /mnt/hdd/raspiblitz.conf
 if [ ${#dnsServer} -eq 0 ]; then
   echo "# Adding value to /mnt/hdd/raspiblitz.conf"
-  echo "dnsServer=${DNSSERVER}" >> /mnt/hdd/raspiblitz.conf
+  echo "dnsServer=${DNSSERVER}" | tee -a  /mnt/hdd/raspiblitz.conf
 else
   echo "# Updating value in /mnt/hdd/raspiblitz.conf"
   sudo sed -i "s/^dnsServer=.*/dnsServer=${DNSSERVER}/g" /mnt/hdd/raspiblitz.conf

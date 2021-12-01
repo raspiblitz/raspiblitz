@@ -73,7 +73,7 @@ fi
 # make sure entry line for 'autoUnlock' exists 
 entryExists=$(cat ${configFile} | grep -c 'autoUnlock=')
 if [ ${entryExists} -eq 0 ]; then
-  echo "autoUnlock=" >> ${configFile}
+  echo "autoUnlock=" | tee -a ${configFile}
 fi
 
 # switch on

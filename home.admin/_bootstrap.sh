@@ -748,11 +748,11 @@ if [ ${valueExists} -eq 0 ]; then
   if [ ${#lndPort} -eq 0 ]; then
     lndPort="9735"
   fi
-  echo "lndPort='${lndPort}'" >> ${configFile}
+  echo "lndPort='${lndPort}'" | tee -a ${configFile}
 fi
 valueExists=$(cat ${configFile} | grep -c 'lndAddress=')
 if [ ${valueExists} -eq 0 ]; then
-  echo "lndAddress=''" >> ${configFile}
+  echo "lndAddress=''" | tee -a ${configFile}
 fi
 
 # load data from config file fresh
@@ -767,9 +767,9 @@ source ${configFile}
 if [ ${uaspForced} -eq 1 ]; then
   entryExists=$(cat /mnt/hdd/raspiblitz.conf 2>/dev/null | grep -c 'forceUasp=on')
   if [ ${entryExists} -eq 0 ]; then
-      sudo sed -i '/forceUasp=.*/d' /mnt/hdd/raspiblitz.conf
-      echo "forceUasp=on" >> /mnt/hdd/raspiblitz.conf
-      echo "DONE forceUasp=on recorded in raspiblitz.conf" >> $logFile
+    sudo sed -i '/forceUasp=.*/d' /mnt/hdd/raspiblitz.conf
+    echo "forceUasp=on" | tee -a  /mnt/hdd/raspiblitz.conf
+    echo "DONE forceUasp=on recorded in raspiblitz.conf" >> $logFile
   fi
 fi
 

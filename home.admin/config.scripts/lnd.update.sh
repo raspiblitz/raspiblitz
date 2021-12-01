@@ -238,7 +238,7 @@ if [ "${mode}" = "verified" ] || [ "${mode}" = "reckless" ]; then
   echo "# flag update in raspiblitz config"
   source /mnt/hdd/raspiblitz.conf
   if [ ${#lndInterimsUpdate} -eq 0 ]; then
-    echo "lndInterimsUpdate='${lndInterimsUpdateNew}'" >> /mnt/hdd/raspiblitz.conf
+    echo "lndInterimsUpdate='${lndInterimsUpdateNew}'" | tee -a  /mnt/hdd/raspiblitz.conf
   else
     sudo sed -i "s/^lndInterimsUpdate=.*/lndInterimsUpdate='${lndInterimsUpdateNew}'/g" /mnt/hdd/raspiblitz.conf
   fi

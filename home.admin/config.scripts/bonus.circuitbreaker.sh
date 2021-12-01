@@ -20,7 +20,7 @@ source /mnt/hdd/raspiblitz.conf
 
 # add default value to raspiblitz.conf if needed
 if ! grep -Eq "^circuitbreaker=" /mnt/hdd/raspiblitz.conf; then
-  echo "circuitbreaker=off" >> /mnt/hdd/raspiblitz.conf
+  echo "circuitbreaker=off" | tee -a  /mnt/hdd/raspiblitz.conf
 fi
 
 isInstalled=$(sudo ls /etc/systemd/system/circuitbreaker.service 2>/dev/null | grep -c 'circuitbreaker.service')

@@ -50,7 +50,7 @@ fi
 # check if config files contain lightning (lnd is default)
 if [ "${lightning}" == "" ]; then
   lightning="lnd"
-  echo "lightning=${lightning}" >> ${configFile}
+  echo "lightning=${lightning}" | tee -a ${configFile}
 fi
 
 # load codeVersion
@@ -171,7 +171,7 @@ if [ "${lightning}" == "lnd" ]; then
   if [ "${lndExtraParameter}" == "--accept-keysend" ]; then
     echo "# MIGRATION KEYSEND from lndExtraParameter --> raspiblitz.conf" >> ${logFile}
     sudo sed -i '/lndKeysend=.*/d' /mnt/hdd/raspiblitz.conf
-    echo "lndKeysend=on" >> /mnt/hdd/raspiblitz.conf
+    echo "lndKeysend=on" | tee -a  /mnt/hdd/raspiblitz.conf
     sudo sed -i "/^lndExtraParameter=/d" /mnt/hdd/raspiblitz.conf 2>/dev/null
   fi
 

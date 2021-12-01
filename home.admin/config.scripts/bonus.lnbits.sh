@@ -76,7 +76,7 @@ fi
 
 # add default value to raspi config if needed
 if ! grep -Eq "^LNBits=" /mnt/hdd/raspiblitz.conf; then
-  echo "LNBits=off" >> /mnt/hdd/raspiblitz.conf
+  echo "LNBits=off" | tee -a  /mnt/hdd/raspiblitz.conf
 fi
 
 # status

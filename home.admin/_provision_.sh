@@ -54,7 +54,7 @@ fi
 if [ "${lcd2hdmi}" == "on" ]; then
   echo "Convert lcd2hdmi=on to displayClass='hdmi'" >> ${logFile}
   sudo sed -i "s/^lcd2hdmi=.*//g" ${configFile}
-  echo "displayClass=hdmi" >> ${configFile}
+  echo "displayClass=hdmi" | tee -a ${configFile}
   displayClass="hdmi"
 elif [ "${lcd2hdmi}" != "" ]; then
   echo "Remove old lcd2hdmi pramater from config" >> ${logFile}
@@ -66,7 +66,7 @@ fi
 if [ "${headless}" == "on" ]; then
   echo "Convert headless=on to displayClass='headless'" >> ${logFile}
   sudo sed -i "s/^headless=.*//g" ${configFile}
-  echo "displayClass=headless" >> ${configFile}
+  echo "displayClass=headless" | tee -a ${configFile}
   displayClass="headless"
 elif [ "${headless}" != "" ]; then
   echo "Remove old headless parameter from config" >> ${logFile}

@@ -17,7 +17,7 @@ source /mnt/hdd/raspiblitz.conf
 
 # add default value to raspi config if needed
 if ! grep -Eq "^lndmanage=" /mnt/hdd/raspiblitz.conf; then
-  echo "lndmanage=off" >> /mnt/hdd/raspiblitz.conf
+  echo "lndmanage=off" | tee -a  /mnt/hdd/raspiblitz.conf
 fi
 
 # show info menu

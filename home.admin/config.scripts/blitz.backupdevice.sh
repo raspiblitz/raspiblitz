@@ -171,7 +171,7 @@ THIS WILL DELETE ALL DATA ON THAT DEVICE!
   # change raspiblitz.conf
   entryExists=$(cat /mnt/hdd/raspiblitz.conf | grep -c 'localBackupDeviceUUID=')
   if [ ${entryExists} -eq 0 ]; then
-    echo "localBackupDeviceUUID='off'" >> /mnt/hdd/raspiblitz.conf
+    echo "localBackupDeviceUUID='off'" | tee -a  /mnt/hdd/raspiblitz.conf
   fi
   sudo sed -i "s/^localBackupDeviceUUID=.*/localBackupDeviceUUID='${uuid}'/g" /mnt/hdd/raspiblitz.conf
   echo "activated=1"

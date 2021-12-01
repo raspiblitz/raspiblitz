@@ -119,11 +119,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   # remove line & write fresh
   sudo sed -i "/dynDomain=*/d" /mnt/hdd/raspiblitz.conf
-  echo "dynDomain='${dynDomain}'" >> /mnt/hdd/raspiblitz.conf
+  echo "dynDomain='${dynDomain}'" | tee -a  /mnt/hdd/raspiblitz.conf
 
   # remove line & write fresh
   sudo sed -i "/dynUpdateUrl=*/d" /mnt/hdd/raspiblitz.conf
-  echo "dynUpdateUrl='${dynUpdateUrl}'" >> /mnt/hdd/raspiblitz.conf
+  echo "dynUpdateUrl='${dynUpdateUrl}'" | tee -a  /mnt/hdd/raspiblitz.conf
 
   # make sure dyndomain is added to lnd config file (just edits the config file)
   sudo /home/admin/config.scripts/lnd.tlscert.sh domain-add ${dynDomain}

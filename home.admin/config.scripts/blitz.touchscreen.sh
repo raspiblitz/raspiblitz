@@ -138,7 +138,7 @@ EOF
 
   # mark touchscreen as switched ON in config
   if [ ${#touchscreen} -eq 0 ]; then
-    echo "touchscreen=0" >> /mnt/hdd/raspiblitz.conf
+    echo "touchscreen=0" | tee -a  /mnt/hdd/raspiblitz.conf
   fi
   sudo sed -i 's/^touchscreen=.*/touchscreen=1/g' /mnt/hdd/raspiblitz.conf
 

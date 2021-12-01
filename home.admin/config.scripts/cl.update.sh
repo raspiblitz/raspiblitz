@@ -111,7 +111,7 @@ if [ "${mode}" = "verified" ] || [ "${mode}" = "reckless" ]; then
   echo "# flag update in raspiblitz config"
   source /mnt/hdd/raspiblitz.conf
   if [ ${#clInterimsUpdate} -eq 0 ]; then
-    echo "clInterimsUpdate='${clInterimsUpdateNew}'" >> /mnt/hdd/raspiblitz.conf
+    echo "clInterimsUpdate='${clInterimsUpdateNew}'" | tee -a  /mnt/hdd/raspiblitz.conf
   else
     sudo sed -i "s/^clInterimsUpdate=.*/clInterimsUpdate='${clInterimsUpdateNew}'/g" /mnt/hdd/raspiblitz.conf
   fi

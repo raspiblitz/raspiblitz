@@ -19,7 +19,7 @@ source /mnt/hdd/raspiblitz.conf
 
 # add default value to raspi config if needed
 if ! grep -Eq "^loop=" /mnt/hdd/raspiblitz.conf; then
-  echo "loop=off" >> /mnt/hdd/raspiblitz.conf
+  echo "loop=off" | tee -a  /mnt/hdd/raspiblitz.conf
 fi
 
 # show info menu

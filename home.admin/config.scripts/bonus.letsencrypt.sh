@@ -196,7 +196,7 @@ fi
 
 # add default value to RaspiBlitz config if needed
 if ! grep -Eq "^letsencrypt" /mnt/hdd/raspiblitz.conf; then
-  echo "letsencrypt=off" >> /mnt/hdd/raspiblitz.conf
+  echo "letsencrypt=off" | tee -a  /mnt/hdd/raspiblitz.conf
 fi
 
 

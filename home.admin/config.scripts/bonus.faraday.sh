@@ -243,7 +243,7 @@ WantedBy=multi-user.target
 
   echo "# flag in raspiblitz config"
   if [ ${#faraday} -eq 0 ]; then
-    echo "faraday='on'" >> /mnt/hdd/raspiblitz.conf
+    echo "faraday='on'" | tee -a  /mnt/hdd/raspiblitz.conf
   fi
   sudo sed -i "s/^faraday=.*/faraday=on/g" /mnt/hdd/raspiblitz.conf
 

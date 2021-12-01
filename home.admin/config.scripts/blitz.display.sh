@@ -46,7 +46,7 @@ if [ "${command}" == "rotate" ]; then
 
     # add default 'lcdrotate' raspiblitz.conf if needed
     if [ ${#lcdrotate} -eq 0 ]; then
-      echo "lcdrotate=0" >> /mnt/hdd/raspiblitz.conf
+      echo "lcdrotate=0" | tee -a  /mnt/hdd/raspiblitz.conf
     fi
 
     # change rotation config
@@ -516,7 +516,7 @@ function prepareDisplayClassEntryRaspiblitzConf() {
     echo "file does exists"
     entryExists=$(grep -c "displayClass=" /mnt/hdd/raspiblitz.conf)
     if [ ${entryExists} -eq 0 ]; then
-      echo "displayClass=${displayClass}" >> /mnt/hdd/raspiblitz.conf
+      echo "displayClass=${displayClass}" | tee -a  /mnt/hdd/raspiblitz.conf
     fi
   else
     echo "# /mnt/hdd/raspiblitz.conf does not exists (yet) - change is just part of raspiblitz.info"

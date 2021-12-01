@@ -205,7 +205,7 @@ source /mnt/hdd/raspiblitz.conf
 # add default value to raspi config if needed
 if ! grep -Eq "^${CHAIN}=" /mnt/hdd/raspiblitz.conf; then
   NEWENTRY="${CHAIN}=off"
-  sudo /bin/sh -c "echo '$NEWENTRY' >> /mnt/hdd/raspiblitz.conf" 
+  sudo /bin/sh -c "echo '$NEWENTRY' | tee -a  /mnt/hdd/raspiblitz.conf" 
 fi
 
 # switch on

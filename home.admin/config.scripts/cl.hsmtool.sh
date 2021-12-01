@@ -47,11 +47,11 @@ fi
 
 # add default value to raspi config if needed
 if ! grep -Eq "^${netprefix}clEncryptedHSM=" /mnt/hdd/raspiblitz.conf; then
-  echo "${netprefix}clEncryptedHSM=off" >> /mnt/hdd/raspiblitz.conf
+  echo "${netprefix}clEncryptedHSM=off" | tee -a  /mnt/hdd/raspiblitz.conf
 fi
 # add default value to raspi config if needed
 if ! grep -Eq "^${netprefix}clAutoUnlock=" /mnt/hdd/raspiblitz.conf; then
-  echo "${netprefix}clAutoUnlock=off" >> /mnt/hdd/raspiblitz.conf
+  echo "${netprefix}clAutoUnlock=off" | tee -a  /mnt/hdd/raspiblitz.conf
 fi
 
 #############

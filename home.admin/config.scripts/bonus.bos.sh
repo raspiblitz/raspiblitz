@@ -15,7 +15,7 @@ source /mnt/hdd/raspiblitz.conf
 
 # add default value to raspi config if needed
 if ! grep -Eq "^bos=" /mnt/hdd/raspiblitz.conf; then
-  echo "bos=off" >> /mnt/hdd/raspiblitz.conf
+  echo "bos=off" | tee -a  /mnt/hdd/raspiblitz.conf
 fi
 
 # show info menu

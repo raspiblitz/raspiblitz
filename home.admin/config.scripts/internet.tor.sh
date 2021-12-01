@@ -113,7 +113,7 @@ fi
 # add default value to raspi config if needed
 checkTorEntry=$(sudo cat /mnt/hdd/raspiblitz.conf | grep -c "runBehindTor")
 if [ ${checkTorEntry} -eq 0 ]; then
-  echo "runBehindTor=off" >> /mnt/hdd/raspiblitz.conf
+  echo "runBehindTor=off" | tee -a  /mnt/hdd/raspiblitz.conf
 fi
 
 # location of TOR config

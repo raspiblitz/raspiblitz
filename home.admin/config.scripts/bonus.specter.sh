@@ -93,7 +93,7 @@ fi
 
 # add default value to raspi config if needed
 if ! grep -Eq "^specter=" /mnt/hdd/raspiblitz.conf; then
-  echo "specter=off" >> /mnt/hdd/raspiblitz.conf
+  echo "specter=off" | tee -a  /mnt/hdd/raspiblitz.conf
 fi
 
 # blockfilterindex

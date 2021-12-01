@@ -11,7 +11,7 @@ source /mnt/hdd/raspiblitz.conf
 
 # add default value to raspi config if needed
 if ! grep -Eq "^angular_cli=" /mnt/hdd/raspiblitz.conf; then
-  echo "angular_cli=off" >> /mnt/hdd/raspiblitz.conf
+  echo "angular_cli=off" | tee -a  /mnt/hdd/raspiblitz.conf
 fi
 
 # switch on

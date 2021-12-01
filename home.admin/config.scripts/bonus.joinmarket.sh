@@ -29,7 +29,7 @@ source /mnt/hdd/raspiblitz.conf
 
 # add default value to raspi config if needed
 if ! grep -Eq "^joinmarket=" /mnt/hdd/raspiblitz.conf; then
-  echo "joinmarket=off" >> /mnt/hdd/raspiblitz.conf
+  echo "joinmarket=off" | tee -a  /mnt/hdd/raspiblitz.conf
 fi
 
 # show info menu

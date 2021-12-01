@@ -248,7 +248,7 @@ fi
 
 # add default value to raspi config if needed
 if ! grep -Eq "^ElectRS=" /mnt/hdd/raspiblitz.conf; then
-  echo "ElectRS=off" >> /mnt/hdd/raspiblitz.conf
+  echo "ElectRS=off" | tee -a  /mnt/hdd/raspiblitz.conf
 fi
 
 # stop service

@@ -27,7 +27,7 @@ fi
 
 # add default value to raspi config if needed
 if ! grep -Eq "^chantools=" /mnt/hdd/raspiblitz.conf; then
-  echo "chantools=off" >> /mnt/hdd/raspiblitz.conf
+  echo "chantools=off" | tee -a  /mnt/hdd/raspiblitz.conf
 fi
 
 # show info menu

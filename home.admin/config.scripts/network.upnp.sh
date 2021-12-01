@@ -36,7 +36,7 @@ sudo systemctl stop ${network}d 2>/dev/null
 
 # add default value to raspi config if needed
 if [ ${#networkUPnP} -eq 0 ]; then
-  echo "networkUPnP=off" >> /mnt/hdd/raspiblitz.conf
+  echo "networkUPnP=off" | tee -a  /mnt/hdd/raspiblitz.conf
 fi
 
 # switch on

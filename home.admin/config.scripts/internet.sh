@@ -233,7 +233,7 @@ elif [ "$1" == "update-publicip" ]; then
     sudo sed -i "s/^publicIP=.*//g" /mnt/hdd/raspiblitz.conf
   fi
   if [ ${publicIPValueExists} -eq 0 ]; then
-    echo "publicIP='${publicIP}'" >> /mnt/hdd/raspiblitz.conf
+    echo "publicIP='${publicIP}'" | tee -a  /mnt/hdd/raspiblitz.conf
   else
     sudo sed -i "s/^publicIP=.*/publicIP='${publicIP}'/g" /mnt/hdd/raspiblitz.conf
   fi
@@ -248,7 +248,7 @@ elif [ "$1" == "ipv6" ]; then
 
     # set config
     if ! grep -Eq "^ipv6=" /mnt/hdd/raspiblitz.conf; then
-      echo "ipv6=on" >> /mnt/hdd/raspiblitz.conf
+      echo "ipv6=on" | tee -a  /mnt/hdd/raspiblitz.conf
     else
       sudo sed -i "s/^ipv6=.*/ipv6=on/g" /mnt/hdd/raspiblitz.conf
     fi

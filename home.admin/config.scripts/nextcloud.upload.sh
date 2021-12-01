@@ -38,13 +38,13 @@ on() {
 
   if [ "${server}" ] && [ "${user}" ] && [ "${password}" ]; then
     sudo sed -i '/nextcloudBackupServer=.*/d' /mnt/hdd/raspiblitz.conf
-    echo "nextcloudBackupServer=${server}" >> /mnt/hdd/raspiblitz.conf
+    echo "nextcloudBackupServer=${server}" | tee -a  /mnt/hdd/raspiblitz.conf
 
     sudo sed -i '/nextcloudBackupUser=.*/d' /mnt/hdd/raspiblitz.conf
-    echo "nextcloudBackupUser=${user}" >> /mnt/hdd/raspiblitz.conf
+    echo "nextcloudBackupUser=${user}" | tee -a  /mnt/hdd/raspiblitz.conf
 
     sudo sed -i '/nextcloudBackupPassword=.*/d' /mnt/hdd/raspiblitz.conf
-    echo "nextcloudBackupPassword=${password}" >> /mnt/hdd/raspiblitz.conf
+    echo "nextcloudBackupPassword=${password}" | tee -a  /mnt/hdd/raspiblitz.conf
   else
     echo "Please provide nextcloud server, username and password"
     exit 1

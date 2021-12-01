@@ -11,7 +11,7 @@ source /mnt/hdd/raspiblitz.conf
 
 # add default value to raspi config if needed
 if ! grep -Eq "^pyblock=" /mnt/hdd/raspiblitz.conf; then
-  echo "pyblock=off" >> /mnt/hdd/raspiblitz.conf
+  echo "pyblock=off" | tee -a  /mnt/hdd/raspiblitz.conf
 fi
 
 # show info menu

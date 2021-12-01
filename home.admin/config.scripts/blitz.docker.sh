@@ -15,7 +15,7 @@ source /mnt/hdd/raspiblitz.conf
 
 # add default value to raspi config if needed
 if ! grep -Eq "^docker=" /mnt/hdd/raspiblitz.conf; then
-  echo "docker=off" >> /mnt/hdd/raspiblitz.conf
+  echo "docker=off" | tee -a  /mnt/hdd/raspiblitz.conf
 fi
 
 # switch on

@@ -11,7 +11,7 @@ source /mnt/hdd/raspiblitz.conf
 
 # add default value to raspi config if needed
 if ! grep -Eq "^typescript=" /mnt/hdd/raspiblitz.conf; then
-  echo "typescript=off" >> /mnt/hdd/raspiblitz.conf
+  echo "typescript=off" | tee -a  /mnt/hdd/raspiblitz.conf
 fi
 
 # switch on

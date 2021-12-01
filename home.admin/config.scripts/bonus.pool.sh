@@ -20,7 +20,7 @@ source /mnt/hdd/raspiblitz.conf
 
 # add default value to raspi config if needed
 if ! grep -Eq "^pool=" /mnt/hdd/raspiblitz.conf; then
-  echo "pool=off" >> /mnt/hdd/raspiblitz.conf
+  echo "pool=off" | tee -a  /mnt/hdd/raspiblitz.conf
 fi
 
 # show info menu

@@ -31,7 +31,7 @@ fi
 source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
 if [ ${#autoPilot} -eq 0 ]; then
-  echo "autoPilot=off" >> /mnt/hdd/raspiblitz.conf
+  echo "autoPilot=off" | tee -a  /mnt/hdd/raspiblitz.conf
 fi
 
 # switch on
