@@ -195,11 +195,12 @@ echo "*** Adding Tor Sources to sources.list ***"
 torSourceListAvailable=$(sudo grep -c 'https://deb.torproject.org/torproject.org' /etc/apt/sources.list)
 echo "torSourceListAvailable=${torSourceListAvailable}"  
 if [ ${torSourceListAvailable} -eq 0 ]; then
-  echo "- adding TOR sources ..."
-  if [ "${baseimage}" = "raspbian" ] || [ "${baseimage}" = "raspios_arm64" ] || [ "${baseimage}" = "armbian" ] || [ "${baseimage}" = "dietpi" ]; then
-    echo "- using https://deb.torproject.org/torproject.org buster"
-    echo "deb https://deb.torproject.org/torproject.org buster main" | sudo tee -a /etc/apt/sources.list
-    echo "deb-src https://deb.torproject.org/torproject.org buster main" | sudo tee -a /etc/apt/sources.list
+  echo "- adding Tor sources ..."
+  if [ "${baseimage}" = "raspbian" ] || [ "${baseimage}" = "raspios_arm64" ] || \
+     [ "${baseimage}" = "armbian" ] || [ "${baseimage}" = "dietpi" ] || [ "${baseimage}" = "debian" ]; then
+    echo "- using https://deb.torproject.org/torproject.org bullseye"
+    echo "deb https://deb.torproject.org/torproject.org bullseye main" | sudo tee -a /etc/apt/sources.list
+    echo "deb-src https://deb.torproject.org/torproject.org bullseye main" | sudo tee -a /etc/apt/sources.list
   elif [ "${baseimage}" = "ubuntu" ]; then
     echo "- using https://deb.torproject.org/torproject.org focal"
     echo "deb https://deb.torproject.org/torproject.org focal main" | sudo tee -a /etc/apt/sources.list
@@ -210,7 +211,7 @@ if [ ${torSourceListAvailable} -eq 0 ]; then
   fi
   echo "- OK sources added"
 else
-  echo "TOR sources are available"
+  echo "Tor sources are available"
 fi
 
 echo "*** Install & Enable Tor ***"
