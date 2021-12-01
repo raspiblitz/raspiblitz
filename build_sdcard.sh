@@ -288,6 +288,9 @@ fi
 # for setup shell scripts
 sudo apt -y install dialog bc python3-dialog
 
+# dependencies for python
+sudo apt install -y python3-venv python3-dev python3-wheel python3-jinja2 python3-pip
+
 # libs (for global python scripts)
 sudo -H python3 -m pip install --upgrade pip
 sudo -H python3 -m pip install grpcio==1.38.1
@@ -528,9 +531,6 @@ if [ "${baseimage}" = "armbian" ]; then
   # add armbian config
   sudo apt install armbian-config -y
 fi
-
-# dependencies for python
-sudo apt install -y python3-venv python3-dev python3-wheel python3-jinja2 python3-pip
 
 # make sure /usr/bin/pip exists (and calls pip3 in Debian Buster)
 sudo update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
