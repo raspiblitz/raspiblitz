@@ -68,13 +68,13 @@ if [ "$1" = "install" ] ; then
   fi
 
   # get the lndSHA256 for the corresponding platform from manifest file
-  if [ "$(uname -m | grep -c 'arm')" -gt 1 ]; then
+  if [ "$(uname -m | grep -c 'arm')" -gt 0 ]; then
     lndOSversion="armv7"
     lndSHA256=$(grep -i "linux-$lndOSversion" manifest-v$lndVersion.txt | cut -d " " -f1)
-  elif [ "$(uname -m | grep -c 'aarch64')" -gt 1 ]; then
+  elif [ "$(uname -m | grep -c 'aarch64')" -gt 0 ]; then
     lndOSversion="arm64"
     lndSHA256=$(grep -i "linux-$lndOSversion" manifest-v$lndVersion.txt | cut -d " " -f1)
-  elif [ "$(uname -m | grep -c 'x86_64')" -gt 1 ]; then
+  elif [ "$(uname -m | grep -c 'x86_64')" -gt 0 ]; then
     lndOSversion="amd64"
     lndSHA256=$(grep -i "linux-$lndOSversion" manifest-v$lndVersion.txt | cut -d " " -f1)
   fi

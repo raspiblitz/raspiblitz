@@ -56,11 +56,11 @@ if [ "$1" = "install" ]; then
   fi
   
   # bitcoinOSversion
-  if [ "$(uname -m | grep -c 'arm')" -gt 1 ]; then
+  if [ "$(uname -m | grep -c 'arm')" -gt 0 ]; then
     bitcoinOSversion="arm-linux-gnueabihf"
-  elif [ "$(uname -m | grep -c 'aarch64')" -gt 1 ]; then
+  elif [ "$(uname -m | grep -c 'aarch64')" -gt 0 ]; then
     bitcoinOSversion="aarch64-linux-gnu"
-  elif [ "$(uname -m | grep -c 'x86_64')" -gt 1 ]; then
+  elif [ "$(uname -m | grep -c 'x86_64')" -gt 0 ]; then
     bitcoinOSversion="x86_64-linux-gnu"
   fi
   

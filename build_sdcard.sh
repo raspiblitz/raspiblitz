@@ -123,11 +123,11 @@ echo "7) will use WIFI --> '${modeWifi}'"
 # AUTO-DETECTION: CPU-ARCHITECTURE
 # ---------------------------------------
 cpu="?"
-if [ "$(uname -m | grep -c 'arm')" -gt 1 ]; then
+if [ "$(uname -m | grep -c 'arm')" -gt 0 ]; then
   cpu="arm"
-elif [ "$(uname -m | grep -c 'aarch64')" -gt 1 ]; then
+elif [ "$(uname -m | grep -c 'aarch64')" -gt 0 ]; then
   cpu="aarch64"
-elif [ "$(uname -m | grep -c 'x86_64')" -gt 1 ]; then
+elif [ "$(uname -m | grep -c 'x86_64')" -gt 0 ]; then
   cpu="x86_64"
 else
   echo "!!! FAIL !!!"
@@ -141,32 +141,23 @@ echo "X) will use CPU-ARCHITECTURE --> '${cpu}'"
 # ---------------------------------------
 # keep in mind that DietPi for Raspberry is also a stripped down Raspbian
 baseimage="?"
-isDietPi=$(uname -n | grep -c 'DietPi')
-isRaspbian=$(grep -c 'Raspbian' /etc/os-release 2>/dev/null)
-isDebian=$(grep -c 'Debian' /etc/os-release 2>/dev/null)
-isUbuntu=$(grep -c 'Ubuntu' /etc/os-release 2>/dev/null)
-isNvidia=$(uname -a | grep -c 'tegra')
-if [ ${isRaspbian} -gt 0 ]; then
+if [ $(grep -c 'Raspbian' /etc/os-release 2>/dev/null) -gt 0 ]; then
   baseimage="raspbian"
-fi
-if [ ${isDebian} -gt 0 ]; then
+elif [ $(grep -c 'Debian' /etc/os-release 2>/dev/null) -gt 0 ]; then
   if [ $(uname -n | grep -c 'rpi') -gt 0 ] && [ ${isAARCH64} -gt 0 ]; then
     baseimage="debian_rpi64"
   elif [ $(uname -n | grep -c 'raspberrypi') -gt 0 ] && [ ${isAARCH64} -gt 0 ]; then
     baseimage="raspios_arm64"
-  elif [ ${isAARCH64} -gt 0 ] || [ ${isARM} -gt 0 ] ; then
+  elif [ "${cpu}" = "arm" ] || [ "${cpu}" = "aarch64" ]  ; then
     baseimage="armbian"
   else
     baseimage="debian"
   fi
-fi
-if [ ${isUbuntu} -gt 0 ]; then
+elif [ $(grep -c 'Ubuntu' /etc/os-release 2>/dev/null) -gt 0 ]; then
   baseimage="ubuntu"
-fi
-if [ ${isDietPi} -gt 0 ]; then
+elif [ $(uname -n | grep -c 'DietPi') -gt 0 ]; then
   baseimage="dietpi"
-fi
-if [ "${baseimage}" = "?" ]; then
+elif [ "${baseimage}" = "?" ]; then
   cat /etc/os-release 2>/dev/null
   echo "!!! FAIL: Base Image cannot be detected or is not supported."
   exit 1
@@ -379,7 +370,7 @@ if [ "${baseimage}" = "raspbian" ]||[ "${baseimage}" = "raspios_arm64" ]||\
 fi
 
 # special prepare when Nvidia Jetson Nano
-if [ ${isNvidia} -eq 1 ] ; then
+if [ $(uname -a | grep -c 'tegra') -gt 0 ] ; then
   echo "Nvidia --> disable GUI on boot"
   sudo systemctl set-default multi-user.target
 fi
