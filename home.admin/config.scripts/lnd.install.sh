@@ -4,12 +4,142 @@
 if [ $# -lt 2 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ];then
   echo
   echo "Install or remove LND services on parallel chains"
+  echo "lnd.install.sh install - called by the build_sdcard.sh"
   echo "lnd.install.sh on [mainnet|testnet|signet] [?initwallet]"
   echo "lnd.install.sh off [mainnet|testnet|signet]"
   echo "lnd.install.sh display-seed [mainnet|testnet|signet] [?delete]"
   echo
   exit 1
 fi
+
+if [ "$1" = "install" ] ; then
+
+  echo
+  echo "*** PREPARING LND ***"
+  
+  # "*** LND ***"
+  ## based on https://raspibolt.github.io/raspibolt/raspibolt_40_lnd.html#lightning-lnd
+  ## see LND releases: https://github.com/lightningnetwork/lnd/releases
+  ## !!!! If you change here - make sure to also change interims version in lnd.update.sh !!!
+  lndVersion="0.14.1-beta"
+
+  # olaoluwa
+  PGPauthor="roasbeef"
+  PGPpkeys="https://keybase.io/roasbeef/pgp_keys.asc"
+  PGPcheck="E4D85299674B2D31FAA1892E372CBD7633C61696"
+  # bitconner
+  #PGPauthor="bitconner"
+  #PGPpkeys="https://keybase.io/bitconner/pgp_keys.asc"
+  #PGPcheck="9C8D61868A7C492003B2744EE7D737B67FA592C7"
+  
+  # get LND resources
+  cd /home/admin/download || exit 1
+  
+  # download lnd binary checksum manifest
+  sudo -u admin wget -N https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/manifest-v${lndVersion}.txt
+
+  # check if checksums are signed by lnd dev team
+  sudo -u admin wget -N https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/manifest-${PGPauthor}-v${lndVersion}.sig
+  sudo -u admin wget --no-check-certificate -N -O "pgp_keys.asc" ${PGPpkeys}
+  gpg --import --import-options show-only ./pgp_keys.asc
+  fingerprint=$(sudo gpg "pgp_keys.asc" 2>/dev/null | grep "${PGPcheck}" -c)
+  if [ ${fingerprint} -lt 1 ]; then
+    echo ""
+    echo "!!! BUILD WARNING --> LND PGP author not as expected"
+    echo "Should contain PGP: ${PGPcheck}"
+    echo "PRESS ENTER to TAKE THE RISK if you think all is OK"
+    read key
+  fi
+  gpg --import ./pgp_keys.asc
+  sleep 3
+  verifyResult=$(gpg --verify manifest-${PGPauthor}-v${lndVersion}.sig manifest-v${lndVersion}.txt 2>&1)
+  goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
+  echo "goodSignature(${goodSignature})"
+  correctKey=$(echo ${verifyResult} | tr -d " \t\n\r" | grep "${PGPcheck}" -c)
+  echo "correctKey(${correctKey})"
+  if [ ${correctKey} -lt 1 ] || [ ${goodSignature} -lt 1 ]; then
+    echo
+    echo "!!! BUILD FAILED --> LND PGP Verify not OK / signature(${goodSignature}) verify(${correctKey})"
+    exit 1
+  else
+    echo
+    echo "****************************************"
+    echo "OK --> SIGNATURE LND MANIFEST IS CORRECT"
+    echo "****************************************"
+    echo
+  fi
+
+  # get the lndSHA256 for the corresponding platform from manifest file
+  if [ "$(uname -m | grep -c 'arm')" -gt 1 ]; then
+    lndOSversion="armv7"
+    lndSHA256=$(grep -i "linux-$lndOSversion" manifest-v$lndVersion.txt | cut -d " " -f1)
+  elif [ "$(uname -m | grep -c 'aarch64')" -gt 1 ]; then
+    lndOSversion="arm64"
+    lndSHA256=$(grep -i "linux-$lndOSversion" manifest-v$lndVersion.txt | cut -d " " -f1)
+  elif [ "$(uname -m | grep -c 'x86_64')" -gt 1 ]; then
+    lndOSversion="amd64"
+    lndSHA256=$(grep -i "linux-$lndOSversion" manifest-v$lndVersion.txt | cut -d " " -f1)
+  fi
+
+  echo
+  echo "*** LND v${lndVersion} for ${lndOSversion} ***"
+  echo "SHA256 hash: $lndSHA256"
+  echo
+  
+  # get LND binary
+  binaryName="lnd-linux-${lndOSversion}-v${lndVersion}.tar.gz"
+  if [ ! -f "./${binaryName}" ]; then
+    lndDownloadUrl="https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/${binaryName}"
+    echo "- downloading lnd binary --> ${lndDownloadUrl}"
+    sudo -u admin wget ${lndDownloadUrl}
+    echo "- download done"
+  else
+    echo "- using existing lnd binary"
+  fi
+  
+  # check binary was not manipulated (checksum test)
+  echo "- checksum test"
+  binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
+  echo "Valid SHA256 checksum(s) should be: ${lndSHA256}"
+  echo "Downloaded binary SHA256 checksum: ${binaryChecksum}"
+  checksumCorrect=$(echo "${lndSHA256}" | grep -c "${binaryChecksum}")
+  if [ "${checksumCorrect}" != "1" ]; then
+    echo "!!! FAIL !!! Downloaded LND BINARY not matching SHA256 checksum in manifest: ${lndSHA256}"
+    rm -v ./${binaryName}
+    exit 1
+  else
+    echo
+    echo "****************************************"
+    echo "OK --> VERIFIED LND CHECKSUM IS CORRECT"
+    echo "****************************************"
+    echo
+    sleep 10
+  fi
+  
+  # install
+  echo "- install LND binary"
+  sudo -u admin tar -xzf ${binaryName}
+  sudo install -m 0755 -o root -g root -t /usr/local/bin lnd-linux-${lndOSversion}-v${lndVersion}/*
+  sleep 3
+  installed=$(sudo -u admin lnd --version)
+  if [ ${#installed} -eq 0 ]; then
+    echo
+    echo "!!! BUILD FAILED --> Was not able to install LND"
+    exit 1
+  fi
+  
+  correctVersion=$(sudo -u admin lnd --version | grep -c "${lndVersion}")
+  if [ ${correctVersion} -eq 0 ]; then
+    echo ""
+    echo "!!! BUILD FAILED --> installed LND is not version ${lndVersion}"
+    sudo -u admin lnd --version
+    exit 1
+  fi
+  sudo chown -R admin /home/admin
+  echo "- OK install of LND done"
+  exit 0
+fi
+
 
 # CHAIN is signet | testnet | mainnet
 CHAIN=$2
