@@ -164,7 +164,7 @@ if [ "$1" = "prestart" ]; then
     echo "# network(${network}) chain(${chain})"
 
     # check if lnbits user has read access on lnd data files
-    checkReadAccess=$(cat /mnt/hdd/app-data/lnd/tls.cert | grep -c "BEGIN CERTIFICATE")
+    checkReadAccess=$(cat /mnt/hdd/app-data/lnd/data/chain/${network}/${chain}net/admin.macaroon | grep -c "lnd")
     if [ "${checkReadAccess}" != "1" ]; then
       echo "# FAIL: missing lnd data in '/mnt/hdd/app-data/lnd' or missing access rights for lnbits user"
       exit 1
@@ -176,7 +176,7 @@ if [ "$1" = "prestart" ]; then
     sed -i "s|^LND_REST_CERT=.*|LND_REST_CERT=/mnt/hdd/app-data/lnd/tls.cert|g" /home/lnbits/lnbits/.env
 
     # set macaroon  path info in .env - USING HEX IMPORT
-    sudo chmod 600 /home/lnbits/lnbits/.env
+    chmod 600 /home/lnbits/lnbits/.env
     macaroonAdminHex=$(xxd -ps -u -c 1000 /mnt/hdd/app-data/lnd/data/chain/${network}/${chain}net/admin.macaroon)
     macaroonInvoiceHex=$(xxd -ps -u -c 1000 /mnt/hdd/app-data/lnd/data/chain/${network}/${chain}net/invoice.macaroon)
     macaroonReadHex=$(xxd -ps -u -c 1000 /mnt/hdd/app-data/lnd/data/chain/${network}/${chain}net/readonly.macaroon)
