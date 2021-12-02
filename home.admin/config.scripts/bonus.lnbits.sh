@@ -6,10 +6,11 @@
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "small config script to switch LNbits on or off"
   echo "bonus.lnbits.sh on [lnd|cl] [?GITHUBUSER] [?BRANCH]"
-  echo "bonus.lnbits.sh [off|status|menu|write-macaroons]"
+  echo "bonus.lnbits.sh [off|status|menu]"
   echo "# DEVELOPMENT: TO SYNC WITH YOUR FORKED GITHUB-REPO"
   echo "bonus.lnbits.sh github repo [GITHUBUSER] [?BRANCH]"
   echo "bonus.lnbits.sh github sync"
+  echo "bonus.lnbits.sh prestart [lnd|cl]" 
   exit 1
 fi
 
@@ -140,46 +141,64 @@ if [ "$1" = "status" ]; then
   exit 0
 fi
 
-# status
-if [ "$1" = "write-macaroons" ]; then
+##########################
+# PRESTART
+# - will be called as prestart by systemd service (as user lnbits)
+#########################
 
-  # make sure its run as user admin
-  adminUserId=$(id -u admin)
-  if [ "${EUID}" != "${adminUserId}" ]; then
-    echo "error='please run as admin user'"
+if [ "$1" = "prestart" ]; then
+
+  # users need to be `lnbits` so that it can be run by systemd as prestart (no SUDO available)
+  if [ "$USER" != "lnbits" ]; then
+    echo "# FAIL: run as user lnbits"
     exit 1
   fi
 
-  echo "make sure symlink to central app-data directory exists"
-  if ! [[ -L "/home/lnbits/.lnd" ]]; then
-    sudo rm -rf "/home/lnbits/.lnd"                          # not a symlink.. delete it silently
-    sudo ln -s "/mnt/hdd/app-data/lnd/" "/home/lnbits/.lnd"  # and create symlink
+  # get if its for lnd or cl service
+  fundingsource="$2"
+
+  if [ "${fundingsource}" == "lnd" ]; then
+
+    echo "## lnbits.service PRESTART CONFIG"
+    echo "# --> /home/lnbits/lnbits/.env"
+    echo "# network(${network}) chain(${chain})"
+
+    # check if lnbits user has read access on lnd data files
+    checkReadAccess=$(cat /mnt/hdd/app-data/lnd/tls.cert | grep -c "BEGIN CERTIFICATE")
+    if [ "${checkReadAccess}" != "1" ]; then
+      echo "# FAIL: missing lnd data in '/mnt/hdd/app-data/lnd' or missing access rights for lnbits user"
+      exit 1
+    fi
+
+    echo "# Updating LND TLS & macaroon data fresh for LNbits config ..."
+
+    # set tls.cert path (use | as separator to avoid escaping file path slashes)
+    sed -i "s|^LND_REST_CERT=.*|LND_REST_CERT=/mnt/hdd/app-data/lnd/tls.cert|g" /home/lnbits/lnbits/.env
+
+    # set macaroon  path info in .env - USING HEX IMPORT
+    sudo chmod 600 /home/lnbits/lnbits/.env
+    macaroonAdminHex=$(xxd -ps -u -c 1000 /mnt/hdd/app-data/lnd/data/chain/${network}/${chain}net/admin.macaroon)
+    macaroonInvoiceHex=$(xxd -ps -u -c 1000 /mnt/hdd/app-data/lnd/data/chain/${network}/${chain}net/invoice.macaroon)
+    macaroonReadHex=$(xxd -ps -u -c 1000 /mnt/hdd/app-data/lnd/data/chain/${network}/${chain}net/readonly.macaroon)
+    sed -i "s/^LND_REST_ADMIN_MACAROON=.*/LND_REST_ADMIN_MACAROON=${macaroonAdminHex}/g" /home/lnbits/lnbits/.env
+    sed -i "s/^LND_REST_INVOICE_MACAROON=.*/LND_REST_INVOICE_MACAROON=${macaroonInvoiceHex}/g" /home/lnbits/lnbits/.env
+    sed -i "s/^LND_REST_READ_MACAROON=.*/LND_REST_READ_MACAROON=${macaroonReadHex}/g" /home/lnbits/lnbits/.env
+
+  elif [ "${fundingsource}" == "cl" ]; then
+
+    echo "## clnbits.service PRESTART CONFIG"
+    echo "# --> /home/lnbits/clnbits/.env"
+
+    echo "# FAIL: to do implementation"
+    exit 1
+
+  else
+    echo "# FAIL: missing or not supported lightning funding source"
+    exit 1
   fi
 
-  # set tls.cert path (use | as separator to avoid escaping file path slashes)
-  sudo -u lnbits sed -i "s|^LND_REST_CERT=.*|LND_REST_CERT=/home/lnbits/.lnd/tls.cert|g" /home/lnbits/lnbits/.env
-
-  # set macaroon  path info in .env - USING HEX IMPORT
-  sudo chmod 600 /home/lnbits/lnbits/.env
-  macaroonAdminHex=$(sudo xxd -ps -u -c 1000 /home/lnbits/.lnd/data/chain/${network}/${chain}net/admin.macaroon)
-  macaroonInvoiceHex=$(sudo xxd -ps -u -c 1000 /home/lnbits/.lnd/data/chain/${network}/${chain}net/invoice.macaroon)
-  macaroonReadHex=$(sudo xxd -ps -u -c 1000 /home/lnbits/.lnd/data/chain/${network}/${chain}net/readonly.macaroon)
-  sudo sed -i "s/^LND_REST_ADMIN_MACAROON=.*/LND_REST_ADMIN_MACAROON=${macaroonAdminHex}/g" /home/lnbits/lnbits/.env
-  sudo sed -i "s/^LND_REST_INVOICE_MACAROON=.*/LND_REST_INVOICE_MACAROON=${macaroonInvoiceHex}/g" /home/lnbits/lnbits/.env
-  sudo sed -i "s/^LND_REST_READ_MACAROON=.*/LND_REST_READ_MACAROON=${macaroonReadHex}/g" /home/lnbits/lnbits/.env
-
-  #echo "make sure lnbits is member of lndreadonly, lndinvoice, lndadmin"
-  #sudo /usr/sbin/usermod --append --groups lndinvoice lnbits
-  #sudo /usr/sbin/usermod --append --groups lndreadonly lnbits
-  #sudo /usr/sbin/usermod --append --groups lndadmin lnbits
-
-  # set macaroon  path info in .env - USING PATH
-  #sudo sed -i "s|^LND_REST_ADMIN_MACAROON=.*|LND_REST_ADMIN_MACAROON=/home/lnbits/.lnd/data/chain/${network}/${chain}net/admin.macaroon|g" /home/lnbits/lnbits/.env
-  #sudo sed -i "s|^LND_REST_INVOICE_MACAROON=.*|LND_REST_INVOICE_MACAROON=/home/lnbits/.lnd/data/chain/${network}/${chain}net/invoice.macaroon|g" /home/lnbits/lnbits/.env
-  #sudo sed -i "s|^LND_REST_READ_MACAROON=.*|LND_REST_READ_MACAROON=/home/lnbits/.lnd/data/chain/${network}/${chain}net/read.macaroon|g" /home/lnbits/lnbits/.env
-  echo "# OK - macaroons written to /home/lnbits/lnbits/.env"
-
-  exit 0
+  echo "# OK: prestart finished"
+  exit 0 # exit with clean code
 fi
 
 if [ "$1" = "repo" ]; then
@@ -265,6 +284,12 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     cd /home/lnbits/lnbits
     sudo -u lnbits git checkout ${githubBranch}
 
+    # make sure lnbits user can access LND credentials
+    echo "make sure lnbits is member of lndreadonly, lndinvoice, lndadmin"
+    sudo /usr/sbin/usermod --append --groups lndinvoice lnbits
+    sudo /usr/sbin/usermod --append --groups lndreadonly lnbits
+    sudo /usr/sbin/usermod --append --groups lndadmin lnbits
+
     # prepare .env file
     echo "# preparing env file"
     sudo rm /home/lnbits/lnbits/.env 2>/dev/null
@@ -277,7 +302,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo bash -c "echo 'LND_REST_ADMIN_MACAROON=' >> /home/lnbits/lnbits/.env"
     sudo bash -c "echo 'LND_REST_INVOICE_MACAROON=' >> /home/lnbits/lnbits/.env"
     sudo bash -c "echo 'LND_REST_READ_MACAROON=' >> /home/lnbits/lnbits/.env"
-    /home/admin/config.scripts/bonus.lnbits.sh write-macaroons
 
     # set database path to HDD data so that its survives updates and migrations
     sudo mkdir /mnt/hdd/app-data/LNBits 2>/dev/null
@@ -320,6 +344,7 @@ After=bitcoind.service
 
 [Service]
 WorkingDirectory=/home/lnbits/lnbits
+ExecStartPre=/home/admin/config.scripts/bonus.lnbits.sh prestart lnd
 ExecStart=/bin/sh -c 'cd /home/lnbits/lnbits && ./venv/bin/hypercorn -k trio --bind 0.0.0.0:5000 "lnbits.app:create_app()"'
 User=lnbits
 Restart=always

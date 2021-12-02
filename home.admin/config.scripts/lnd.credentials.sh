@@ -162,12 +162,6 @@ elif [ "$1" = "sync" ]; then
     sudo ln -s "/mnt/hdd/lnd/tls.cert" "/mnt/hdd/app-data/lnd/tls.cert"  # and create symlink
   fi
   
-  if [ "${LNBits}" = "on" ]; then
-    echo "# fix the macaroon for LNbits" 
-    # https://github.com/rootzoll/raspiblitz/pull/1156#issuecomment-623293240
-    sudo -u admin /home/admin/config.scripts/bonus.lnbits.sh write-macaroons
-  fi
-  
 ###########################
 # Check Macaroons and fix missing
 ###########################
