@@ -482,7 +482,8 @@ fi
 # parallel testnet process choice
 choice="off"; check=$(echo "${CHOICES}" | grep -c "p")
 if [ ${check} -eq 1 ]; then choice="on"; fi
-if [ "${testnet}" != "${choice}" ]; then
+if [ "${testnet}" != "${choice}" ] || \
+   [ "${signet}" != "${choice}" ]; then
   echo "# Parallel Testnets Setting changed .."
   anychange=1
   if [ "${choice}" = "on" ]; then

@@ -9,14 +9,13 @@ if [ $# -lt 2 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ];then
   exit 1
 fi
 
-# CHAIN is signet | testnet | mainnet
+# CHAIN is mainnet | testnet | signet
 CHAIN=$2
 if [ "${CHAIN}" != signet ]&&[ "${CHAIN}" != testnet ]&&[ "${CHAIN}" != mainnet ];then
   echo "# ${CHAIN} is not supported"
   exit 1
 fi
-
-# prefix for parallel services
+# prefixes for parallel services
 if [ ${CHAIN} = testnet ];then
   prefix="t"
   bitcoinprefix="test"
@@ -155,18 +154,27 @@ WantedBy=multi-user.target
   sudo systemctl enable ${prefix}bitcoind
   echo "# OK - the bitcoin daemon on ${CHAIN} service is now enabled"
 
-  # add aliases
-  if [ ${CHAIN} != mainnet ];then
-    if [ $(alias | grep -c ${prefix}bitcoin) -eq 0 ];then 
-      bash -c "echo 'alias ${prefix}bitcoin-cli=\"/usr/local/bin/bitcoin-cli\
- -rpcport=${rpcprefix}8332\"' \
-      >> /home/admin/_aliases"
-      bash -c "echo 'alias ${prefix}bitcoind=\"/usr/local/bin/bitcoind\
- -${CHAIN}\"' \
-      >> /home/admin/_aliases"
-    fi
-    sudo chown admin:admin /home/admin/_aliases
+  echo "# Add aliases ${prefix}bitcoin-cli, ${prefix}bitcoind, ${prefix}bitcoinlog"
+  if [ $(alias | grep -c "alias ${prefix}bitcoin-cli") -eq 0 ];then 
+    echo "\
+alias ${prefix}bitcoin-cli=\"/usr/local/bin/bitcoin-cli\
+ -rpcport=${rpcprefix}8332\"
+alias ${prefix}bitcoind=\"/usr/local/bin/bitcoind -${CHAIN}\"\
+"  | sudo tee -a /home/admin/_aliases
   fi
+  if [ $(alias | grep -c "alias ${prefix}bitcoinlog") -eq 0 ];then 
+    if [ ${CHAIN} = signet ]; then
+      bitcoinlogpath="/mnt/hdd/bitcoin/signet/debug.log"
+    elif [ ${CHAIN} = testnet ]; then
+      bitcoinlogpath="/mnt/hdd/bitcoin/testnet3/debug.log"
+    elif [ ${CHAIN} = mainnet ]; then
+      bitcoinlogpath="/mnt/hdd/bitcoin/debug.log"      
+    fi
+    echo "\
+alias ${prefix}bitcoinlog=\"sudo tail -n 30 -f ${bitcoinlogpath}\"\
+"  | sudo tee -a /home/admin/_aliases
+  fi
+  sudo chown admin:admin /home/admin/_aliases
 
   source /home/admin/raspiblitz.info
   if [ "${state}" == "ready" ]; then

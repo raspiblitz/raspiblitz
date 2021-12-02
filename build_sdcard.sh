@@ -279,6 +279,11 @@ elif [ -f "/usr/bin/python3.8" ]; then
   sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.8 1
   sudo ln -s /usr/bin/python3.8 /usr/bin/python3.7
   echo "python calls python3.8"
+elif [ -f "/usr/bin/python3.9" ]; then
+  # use python 3.9 if available
+  sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.9 1
+  sudo ln -s /usr/bin/python3.9 /usr/bin/python3.7
+  echo "python calls python3.9"
 else
   echo "!!! FAIL !!!"
   echo "There is no tested version of python present"
@@ -384,7 +389,7 @@ fi
 
 echo ""
 echo "*** CONFIG ***"
-# based on https://stadicus.github.io/RaspiBolt/raspibolt_20_pi.html#raspi-config
+# based on https://raspibolt.github.io/raspibolt/raspibolt_20_pi.html#raspi-config
 
 # set new default password for root user
 echo "root:raspiblitz" | sudo chpasswd
@@ -496,7 +501,7 @@ sudo service rsyslog restart
 
 echo ""
 echo "*** SOFTWARE UPDATE ***"
-# based on https://stadicus.github.io/RaspiBolt/raspibolt_20_pi.html#software-update
+# based on https://raspibolt.github.io/raspibolt/raspibolt_20_pi.html#software-update
 
 # installs like on RaspiBolt
 sudo apt install -y htop git curl bash-completion vim jq dphys-swapfile bsdmainutils
@@ -562,7 +567,7 @@ sudo apt -y autoremove
 
 echo ""
 echo "*** ADDING MAIN USER admin ***"
-# based on https://stadicus.github.io/RaspiBolt/raspibolt_20_pi.html#add-users
+# based on https://raspibolt.github.io/raspibolt/raspibolt_20_pi.html#add-users
 # using the default password 'raspiblitz'
 
 sudo adduser --disabled-password --gecos "" admin --ingroup admin
@@ -583,7 +588,7 @@ sudo chmod 755 /home/admin/raspiblitz.info
 
 echo ""
 echo "*** ADDING SERVICE USER bitcoin"
-# based on https://stadicus.github.io/RaspiBolt/raspibolt_20_pi.html#add-users
+# based on https://raspibolt.github.io/raspibolt/raspibolt_20_pi.html#add-users
 
 # create user and set default password for user
 sudo adduser --disabled-password --gecos "" bitcoin
@@ -608,15 +613,16 @@ echo "*** SHELL SCRIPTS & ASSETS ***"
 cd /home/admin/
 sudo -u admin git config --global user.name "${githubUser}"
 sudo -u admin git config --global user.email "johndoe@example.com"
-sudo -u admin rm -rf /home/admin/raspiblitz
+sudo rm -rf /home/admin/raspiblitz
 sudo -u admin git clone -b ${githubBranch} https://github.com/${githubUser}/raspiblitz.git
-sudo -u admin cp -r /home/admin/raspiblitz/home.admin/*.* /home/admin
-sudo -u admin cp -r /home/admin/raspiblitz/home.admin/.tmux.conf /home/admin
-sudo -u admin chmod +x *.sh
 sudo -u admin cp -r /home/admin/raspiblitz/home.admin/assets /home/admin/
+sudo -u admin cp /home/admin/raspiblitz/home.admin/.tmux.conf /home/admin
+sudo -u admin cp /home/admin/raspiblitz/home.admin/*.* /home/admin
+sudo -u admin chmod 755 *.sh
 sudo -u admin cp -r /home/admin/raspiblitz/home.admin/config.scripts /home/admin/
-sudo -u admin chmod +x /home/admin/config.scripts/*.sh
-sudo -u admin chmod +x /home/admin/setup.scripts/*.sh
+sudo -u admin chmod 755 /home/admin/config.scripts/*.sh
+sudo -u admin cp -r /home/admin/raspiblitz/home.admin/setup.scripts /home/admin/
+sudo -u admin chmod 755 /home/admin/setup.scripts/*.sh
 
 # install newest version of BlitzPy
 blitzpy_wheel=$(ls -tR /home/admin/raspiblitz/home.admin/BlitzPy/dist | grep -E "*any.whl" | tail -n 1)
@@ -697,7 +703,7 @@ sudo bash -c "echo '# Raspiblitz' >> /home/admin/.bashrc"
 
 echo ""
 echo "*** SWAP FILE ***"
-# based on https://stadicus.github.io/RaspiBolt/raspibolt_20_pi.html#move-swap-file
+# based on https://raspibolt.github.io/raspibolt/raspibolt_20_pi.html#move-swap-file
 # but just deactivating and deleting old (will be created alter when user adds HDD)
 
 sudo dphys-swapfile swapoff
@@ -705,7 +711,7 @@ sudo dphys-swapfile uninstall
 
 echo ""
 echo "*** INCREASE OPEN FILE LIMIT ***"
-# based on https://stadicus.github.io/RaspiBolt/raspibolt_21_security.html#increase-your-open-files-limit
+# based on https://raspibolt.github.io/raspibolt/raspibolt_21_security.html#increase-your-open-files-limit
 
 sudo sed --in-place -i "56s/.*/*    soft nofile 128000/" /etc/security/limits.conf
 sudo bash -c "echo '*    hard nofile 128000' >> /etc/security/limits.conf"
@@ -720,7 +726,7 @@ sudo bash -c "echo '# end of pam-auth-update config' >> /etc/pam.d/common-sessio
 
 
 # *** fail2ban ***
-# based on https://stadicus.github.io/RaspiBolt/raspibolt_21_security.html
+# based on https://raspibolt.github.io/raspibolt/raspibolt_21_security.html#fail2ban
 echo "*** HARDENING ***"
 sudo apt install -y --no-install-recommends python3-systemd fail2ban 
 
@@ -944,7 +950,7 @@ echo ""
 echo "*** PREPARING LIGHTNING ***"
 
 # "*** LND ***"
-## based on https://stadicus.github.io/RaspiBolt/raspibolt_40_lnd.html#lightning-lnd
+## based on https://raspibolt.github.io/raspibolt/raspibolt_40_lnd.html#lightning-lnd
 ## see LND releases: https://github.com/lightningnetwork/lnd/releases
 ## !!!! If you change here - make sure to also change interims version in lnd.update.sh !!!
 lndVersion="0.13.3-beta"

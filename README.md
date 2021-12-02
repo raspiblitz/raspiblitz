@@ -41,7 +41,7 @@ There are further Services that can be switched on:
 
 You can connect the following Wallet-Apps to your RaspiBlitz:
 
-* **Zeus** (Android & iOS-TestFlight) [details](https://zeusln.app)
+* **Zeus** (Android & iOS) [details](https://zeusln.app)
 * **Fully Noded** (iOS) [details](https://apps.apple.com/us/app/fully-noded/id1436425586)
 * **SendMany** (Android) [details](https://github.com/fusion44/sendmany/blob/master/README.md)
 * **Sphinx Chat App** (Android & iOS) [details](https://sphinx.chat)
@@ -119,19 +119,19 @@ In the end your RaspiBlitz should look like this:
 |Philosophy|Trust|Sovereignty|
 |Difficulty level|Easy|Medium|
 |Pros|Make Blitz accessible to everyone|You don't need to trust us, build from your own forked repository|
-|Instructions|[Download 1.7.1 image](https://raspiblitz.fulmo.org/images/raspiblitz-v1.7.1-2021-10-12.img.gz) and [Flash the sd card](README.md#write-the-sd-card-image-to-your-sd-card)|[Build your own sd card image](#build-the-sd-card-image)|
-|Verify what?|[Signature file](https://raspiblitz.fulmo.org/images/raspiblitz-v1.7.1-2021-10-12.img.gz.sig) and [verify the Sig](FAQ.md#how-to-verify-the-sd-card-image-after-download) OR SHA-256 (below)|All of the code, don't trust, verify|
+|Instructions|[Download 1.7.1 image](https://raspiblitz.fulmo.org/images/raspiblitz-v1.7.1-2021-10-28.img.gz) and [Flash the sd card](README.md#write-the-sd-card-image-to-your-sd-card)|[Build your own sd card image](#build-the-sd-card-image)|
+|Verify what?|[Signature file](https://raspiblitz.fulmo.org/images/raspiblitz-v1.7.1-2021-10-28.img.gz.sig) and [verify the Sig](FAQ.md#how-to-verify-the-sd-card-image-after-download) OR SHA-256 (below)|All of the code, don't trust, verify|
 
 If downloading the maintainer SD card image:
-* GPG 64-bit: 1C73 060C 7C17 6461
-* SHA-256: 4b5481e0f27afe9b5aa8bab5805f7df033f2596db29a1e47c25d2f0109d9c003
+* GPG 64-bit (main): 1C73 060C 7C17 6461 & (sub): AA9D D1B5 CC56 47DA
+* SHA-256: 6d06813860ccb9ba335086a0e53fb01f80c9ae699a59bfffdb8a89ae94087aad
 
 Which verification method should I used: Hash or Signature?
 * Signed file prove to you that the SD card image was actually built by the lead developer of the RaspiBlitz project. (Safest)
 * Hash function checks file integrity. (Secure)
 
 The maintainer sd card image can also be downloaded via torrent:
-* [assets/raspiblitz-v1.7.1-2021-10-12.img.gz.torrent](https://github.com/rootzoll/raspiblitz/raw/dev/home.admin/assets/raspiblitz-v1.7.1-2021-10-12.img.gz.torrent)
+* [assets/raspiblitz-v1.7.1-2021-10-28.img.gz.torrent](https://github.com/rootzoll/raspiblitz/raw/v1.7/home.admin/assets/raspiblitz-v1.7.1-2021-10-28.img.gz.torrent)
 
 Useful info:
 * [What's new in Version 1.7.1 of RaspiBlitz?](CHANGES.md#whats-new-in-version-171-of-raspiblitz)
@@ -295,7 +295,7 @@ For each password please choose unique, single strings, without spaces and speci
 
 You can use this [RaspiBlitz Recovery Sheet (PDF)](https://github.com/rootzoll/raspiblitz/raw/v1.7/home.admin/assets/RaspiBlitzRecoverySheet.pdf) to write those passwords down for safe storage and also use it later on for your Seed Words.
 
-*The password A,B,C idea is based on the [RaspiBolt Guide Preparations](https://stadicus.github.io/RaspiBolt/raspibolt_10_preparations.html#write-down-your-passwords) - check out for more background.*
+*The password A,B,C idea is based on the [RaspiBolt Guide Preparations](https://raspibolt.github.io/raspibolt/raspibolt_10_preparations.html#write-down-your-passwords) - check out for more background.*
 
 First, password A is requested - this is the password which will be used for SSH login and it's also set for the existing users: admin, root, bitcoin & pi.
 
@@ -611,7 +611,7 @@ For details see: https://github.com/lightningequipment/circuitbreaker/blob/maste
 
 The RaspiBlitz will automatically unlock the LND wallet upon every start.
 
-This feature is based on https://github.com/Stadicus/guides/blob/master/raspibolt/raspibolt_6A_auto-unlock.md
+This feature is based on [https://raspibolt.github.io/raspibolt/raspibolt_6A_auto-unlock.html].
 
 It can be activated under "Services" -> "Auto-unlock LND".
 We recommend that it be turned on when DynamicDNS is used.
@@ -1372,7 +1372,7 @@ Get all details on "How to contribute to RaspiBlitz Development" on this video:
 
 <a href="https://www.youtube.com/watch?v=ZVtZepV3OfM" target="_blank"><img src="pictures/video-contrib.png" alt="Video Tutorial" width="400"></a><br>--watch--> https://www.youtube.com/watch?v=ZVtZepV3OfM
 
-Also get inspired for a deep-dive with the original "[RaspiBolt](https://stadicus.github.io/RaspiBolt/)" tutorial on how to build a lightning node on the RaspberryPi, the base work on which the RaspiBlitz was developed - so much thx to Stadicus :)
+Also get inspired for a deep-dive with the original "[RaspiBolt](https://raspibolt.github.io/raspibolt/)" tutorial on how to build a lightning node on the RaspberryPi, the base work on which the RaspiBlitz was developed - so much thx to Stadicus :)
 
 Join me on twitter [@rootzoll](https://twitter.com/rootzoll), visit us at an upcoming [#lightninghackday](https://twitter.com/hashtag/LightningHackday?src=hash) or check by one of our bitcoin meetups in Berlin ... every 1st Thursday evening a month at the room77 bar - feel free to buy me a beer with lightning there :)
 

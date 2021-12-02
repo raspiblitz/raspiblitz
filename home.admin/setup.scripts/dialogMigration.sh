@@ -16,7 +16,7 @@ source $SETUPFILE
 # this is useful for testing the dialog outside of the setup process
 # normally migrationOS & migrationVersion are provided by raspiblitz.info or raspiblitz.setup
 
-# 1st PARAMATER (optional): [raspiblitz|mynode|umbrel]
+# 1st PARAMATER (optional): [raspiblitz|mynode|umbrel|citadel]
 if [ "${migrationOS}" == "" ]; then
   migrationOS="$1"
 fi  
@@ -27,7 +27,7 @@ if [ "${migrationVersion}" == "" ]; then
 fi
 
 # check parameter values
-if [ "${migrationOS}" != "raspiblitz" ] && [ "${migrationOS}" != "mynode" ] && [ "${migrationOS}" != "umbrel" ]; then
+if [ "${migrationOS}" != "raspiblitz" ] && [ "${migrationOS}" != "mynode" ] && [ "${migrationOS}" != "umbrel" ] && [ "${migrationOS}" != "citadel" ]; then
     echo "# FAIL: the given migrationOS '${migrationOS}' is not supported yet"
     exit 1
 fi
@@ -117,6 +117,33 @@ if [ "${migrationOS}" == "umbrel" ]; then
 You can migrate your blockchain & LND data (funds & channels) over to RaspiBlitz.
 
 Please make sure to have your UMBREL seed words & static channel backup file (just in case). Also any data of additional apps you had installed on UMBREL might get lost.
+
+Do you want to start migration to RaspiBlitz now?
+      " 16 58
+
+  if [ "$?" != "0" ]; then
+    # user cancel - signal by exit code
+    exit 1
+  fi
+  
+  # signal that user wants to proceed with migration
+  exit 0
+
+fi
+
+####################################################
+# CITADEL
+# migrating from Citadel to RaspiBlitz
+####################################################
+
+if [ "${migrationOS}" == "citadel" ]; then
+
+  # infodialog
+  whiptail --title " CITADEL --> RASPIBLITZ " --yes-button "Start Migration" --no-button "No+Shutdown" --yesno "RaspiBlitz found data from CITADEL
+
+You can migrate your blockchain & LND data (funds & channels) over to RaspiBlitz.
+
+Please make sure to have your CITADEL seed words & static channel backup file (just in case). Also any data of additional apps you had installed on CITADEL might get lost.
 
 Do you want to start migration to RaspiBlitz now?
       " 16 58
