@@ -5,7 +5,7 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "small config script to switch LNbits on or off"
-  echo "bonus.lnbits.sh on [?GITHUBUSER] [?BRANCH]"
+  echo "bonus.lnbits.sh on [lnd|cl] [?GITHUBUSER] [?BRANCH]"
   echo "bonus.lnbits.sh [off|status|menu|write-macaroons]"
   echo "# DEVELOPMENT: TO SYNC WITH YOUR FORKED GITHUB-REPO"
   echo "bonus.lnbits.sh github repo [GITHUBUSER] [?BRANCH]"
