@@ -20,6 +20,7 @@ Download LND Data Backup now?
       echo "*************************************"
       echo "please wait .."
       sleep 2
+      /home/admin/config.scripts/lnd.compact.sh interactive
       /home/admin/config.scripts/lnd.backup.sh lnd-export-gui
       echo
       echo "PRESS ENTER to continue once you are done downloading."
@@ -52,6 +53,7 @@ OPTIONS+=(SOFTWARE "Run Softwaretest (DebugReport)")
 if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
   OPTIONS+=(BACKUP-LND "Backup your LND data (Rescue-File)")
   OPTIONS+=(RESET-LND "Delete LND & start new node/wallet")
+  OPTIONS+=(COMPACT "Compact the LND channel.db")
 fi
 if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ]; then
   OPTIONS+=(REPAIR-CL "Repair/Backup C-Lightning")
@@ -64,7 +66,7 @@ OPTIONS+=(RESET-ALL "Delete HDD completely to start fresh")
 OPTIONS+=(DELETE-ELEC "Delete Electrum Index")
 OPTIONS+=(DELETE-INDEX "Delete Bitcoin Transaction-Index")
 
-CHOICE=$(whiptail --clear --title "Repair Options" --menu "" 18 62 11 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+CHOICE=$(whiptail --clear --title "Repair Options" --menu "" 19 62 12 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
 clear
 case $CHOICE in
@@ -76,11 +78,18 @@ case $CHOICE in
     read key
     ;;
   BACKUP-LND)
+    /home/admin/config.scripts/lnd.compact.sh interactive
     sudo /home/admin/config.scripts/lnd.backup.sh lnd-export-gui
     echo
     echo "Press ENTER when your backup download is done to shutdown."
     read key
     /home/admin/config.scripts/blitz.shutdown.sh
+    ;;
+  COMPACT)
+    /home/admin/config.scripts/lnd.compact.sh interactive
+    echo
+    echo "Press ENTER to return to main menu."
+    read key
     ;;
   REPAIR-CL)
     sudo /home/admin/99clRepairMenu.sh
