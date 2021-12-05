@@ -87,6 +87,8 @@ case $CHOICE in
     ;;
   COMPACT)
     /home/admin/config.scripts/lnd.compact.sh interactive
+    echo "# Starting lnd.service ..."
+    sudo systemctl start lnd
     echo
     echo "Press ENTER to return to main menu."
     read key
