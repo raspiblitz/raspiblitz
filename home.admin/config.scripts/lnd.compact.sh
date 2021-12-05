@@ -7,13 +7,14 @@ if [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ]; then
 fi
 
 channelDBsize=$(sudo du -h /mnt/hdd/lnd/data/graph/mainnet/channel.db | awk '{print $1}')
-echo "# The current channel.db size: $channelDBsize"
-echo "# If compacting the database the first time it can take a long time, but reduces the size 2-3 times."
-echo "# Can monitor the background process in a new window with:"
+echo
+echo "The current channel.db size: $channelDBsize"
+echo "If compacting the database the first time it can take a long time, but reduces the size 2-3 times."
+echo "Can monitor the background process in a new window with:"
 echo "'tail -f /home/admin/lnd.db.bolt.auto-compact.log'"
 
 if [ "$1" = interactive ];then
-  read -p "# Do you want to compact the database now?" confirm && [[ $confirm == [yY]||$confirm == [yY][eE][sS] ]]||exit 1
+  read -p "Do you want to compact the database now (yes/no) ?" confirm && [[ $confirm == [yY]||$confirm == [yY][eE][sS] ]]||exit 1
 fi
 
 echo "# Stop LND"
