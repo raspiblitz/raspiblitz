@@ -69,17 +69,80 @@ To enable easy reachability with normal browser from the outside
 consider adding a IP2TOR Bridge (MAINMENU > SUBSCRIBE)."
   fi
 
-
   whiptail --title " LNbits " --yes-button "OK" --no-button "Options" --yesno "${text}" 16 69
   result=$?
   /home/admin/config.scripts/blitz.display.sh hide
   echo "option (${result}) - please wait ..."
 
-  # exit when 
+  # exit when user presses OK to close menu
   if [ ${result} -eq 0 ]; then
-    echo "# cancel update"
     exit 0
   fi
+
+  # LNbits OPTIONS menu
+  OPTIONS=()
+
+  # IP2TOR options
+  if [ "${ip2torDomain}" != "" ]; then
+    # IP2TOR+LetsEncrypt active - offer cancel
+    OPTIONS+=(IP2TOR-OFF "Cancel IP2Tor Subscription for LNbits")
+  elif [ "${ip2torIP}" != "" ]; then
+    # just IP2TOR active - offer cancel or Lets Encrypt
+    OPTIONS+=(HTTPS-ON "Add free HTTPS-Certificate for LNbits")
+    OPTIONS+=(IP2TOR-OFF "Cancel IP2Tor Subscription for LNbits")
+  else
+    OPTIONS+=(IP2TOR-ON "Make Public with IP2Tor Subscrption")
+  fi
+
+  # Change Funding Source options (only if available)
+  if [ "${LNBitsFunding}" == "lnd" ] && [ "${cl}" == "on" ]; then
+    OPTIONS+=(SWITCH-CL "Switch: Use c-lightning as funding source")
+  elif [ "${LNBitsFunding}" == "cl" ] && [ "${lnd}" == "on" ]; then
+    OPTIONS+=(SWITCH-LND "Switch: Use LND as funding source")
+  fi
+
+  WIDTH=46
+  CHOICE_HEIGHT=$(("${#OPTIONS[@]}/2+1"))
+  HEIGHT=$((CHOICE_HEIGHT+6))
+  CHOICE=$(dialog --clear \
+                --title " LNbits - Options" \
+                --ok-label "Select" \
+                --cancel-label "Back" \
+                --menu "Choose one of the following options:" \
+                $HEIGHT $WIDTH $CHOICE_HEIGHT \
+                "${OPTIONS[@]}" \
+                2>&1 >/dev/tty)
+
+  case $CHOICE in
+        IP2TOR-ON)
+            echo "TODO: IP2TOR-ON implement"
+            sleep 5
+            exit 0
+            ;;
+        IP2TOR-OFF)
+            echo "TODO: IP2TOR-OFF implement"
+            sleep 5
+            exit 0
+            ;;
+        HTTPS-ON)
+            echo "TODO: HTTPS-ON implement"
+            sleep 5
+            exit 0
+            ;;
+        SWITCH-CL)
+            echo "TODO: SWITCH-CL implement"
+            sleep 5
+            exit 0
+            ;;
+        SWITCH-LND)
+            echo "TODO: SWITCH-LND implement"
+            sleep 5
+            exit 0
+            ;;
+        *)
+            clear
+            exit 0
+  esac
 
   exit 0
 fi
