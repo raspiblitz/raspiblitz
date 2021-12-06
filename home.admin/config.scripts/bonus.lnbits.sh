@@ -482,14 +482,15 @@ EOF
     # make sure to keep in sync with internet.tor.sh script
     /home/admin/config.scripts/internet.hiddenservice.sh lnbits 80 5002 443 5003
   fi
+
+  echo "# OK install done ... might need to restart or call: sudo systemctl start lnbits"
   exit 0
 fi
 
 # config for a special funding source (e.g lnd or c-lightning as backend)
 if [ "$1" = "switch" ]; then
 
-  echo "# NOTE: If you switch the funding source of a running LNbits instance all sub account will keep balance."
-  echo "# Make sure that the new funding source has enough sats to cover the LNbits bookeeping of sub accounts."
+  echo "## bonus.lnbits.sh switch $2"
 
   # get funding source and check that its available
   fundingsource="$2"
@@ -537,6 +538,11 @@ if [ "$1" = "switch" ]; then
     exit 1
   fi
 
+  echo "##############"
+  echo "# NOTE: If you switch the funding source of a running LNbits instance all sub account will keep balance."
+  echo "# Make sure that the new funding source has enough sats to cover the LNbits bookeeping of sub accounts."
+  echo "##############"
+
   # remove all old possible settings for former funding source (clean state)
   sudo sed -i "/^LNBITS_BACKEND_WALLET_CLASS=/d" /home/lnbits/lnbits/.env 2>/dev/null
   sudo sed -i "/^LND_REST_ENDPOINT=/d" /home/lnbits/lnbits/.env 2>/dev/null
@@ -551,7 +557,7 @@ if [ "$1" = "switch" ]; then
   if [ "${fundingsource}" == "lnd" ] || [ "${fundingsource}" == "tlnd" ] || [ "${fundingsource}" == "slnd" ] ; then
 
     # make sure lnbits user can access LND credentials
-    echo "# make sure lnbits user is member of lndreadonly, lndinvoice, lndadmin"
+    echo "# adding lnbits user is member of lndreadonly, lndinvoice, lndadmin"
     sudo /usr/sbin/usermod --append --groups lndinvoice lnbits
     sudo /usr/sbin/usermod --append --groups lndreadonly lnbits
     sudo /usr/sbin/usermod --append --groups lndadmin lnbits
@@ -578,6 +584,10 @@ if [ "$1" = "switch" ]; then
     echo "LNBitsFunding=" >> /mnt/hdd/raspiblitz.conf
   fi
   sudo sed -i "s/^LNBitsFunding=.*/LNBitsFunding=${fundingsource}/g" /mnt/hdd/raspiblitz.conf
+
+  echo "##############"
+  echo "# OK new fundig source set - does need restart or call: sudo systemctl restart lnbits"
+  echo "##############"
 
   exit 0
 fi
