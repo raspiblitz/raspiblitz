@@ -304,7 +304,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   # check if already installed
   isInstalled=$(sudo ls /etc/systemd/system/lnbits.service 2>/dev/null | grep -c 'lnbits.service')
-  if [ "${isInstalled}" != "1" ]; then
+  if [ "${isInstalled}" == "1" ]; then
     echo "# FAIL: already installed"
     exit 1
   fi
