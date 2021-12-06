@@ -5,12 +5,13 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "small config script to switch LNbits on or off"
-  echo "bonus.lnbits.sh on [lnd|cl] [?GITHUBUSER] [?BRANCH]"
-  echo "bonus.lnbits.sh [off|status|menu]"
-  echo "# DEVELOPMENT: TO SYNC WITH YOUR FORKED GITHUB-REPO"
-  echo "bonus.lnbits.sh github repo [GITHUBUSER] [?BRANCH]"
-  echo "bonus.lnbits.sh github sync"
-  echo "bonus.lnbits.sh prestart [lnd|cl]" 
+  echo "bonus.lnbits.sh on [lnd|tlnd|slnd|cl|tcl|scl] [?GITHUBUSER] [?BRANCH]"
+  echo "bonus.lnbits.sh switch [lnd|tlnd|slnd|cl|tcl|scl]"
+  echo "bonus.lnbits.sh off"
+  echo "bonus.lnbits.sh status"
+  echo "bonus.lnbits.sh menu"
+  echo "bonus.lnbits.sh prestart" 
+  echo "bonus.lnbits.sh githubsync"
   exit 1
 fi
 
@@ -92,6 +93,12 @@ if [ "$1" = "status" ]; then
     echo "httpsPort='5001'"
     echo "publicIP='${publicIP}'"
 
+    # check funding source
+    if [ "${LNBitsFunding}" == "" ]; then
+      LNBitsFunding="lnd"
+    fi
+    echo "LNBitsFunding='${LNBitsFunding}'"
+
     # check for LetsEnryptDomain for DynDns
     error=""
     source <(sudo /home/admin/config.scripts/blitz.subscriptions.ip2tor.py ip-by-tor $publicIP)
@@ -155,16 +162,59 @@ if [ "$1" = "prestart" ]; then
   fi
 
   # get if its for lnd or cl service
-  fundingsource="$2"
+  echo "## lnbits.service PRESTART CONFIG"
+  echo "# --> /home/lnbits/lnbits/.env"
 
-  if [ "${fundingsource}" == "lnd" ]; then
+  # set values based in funding source in raspiblitz config
+  LNBitsNetwork="bitcoin"
+  LNBitsChain=""
+  LNBitsLightning=""
+  if [ "${LNBitsFunding}" == "" ] || [ "${LNBitsFunding}" == "lnd" ]; then
+    LNBitsFunding="lnd"
+    LNBitsLightning="lnd"
+    LNBitsChain="main"
+  elif [ "${LNBitsFunding}" == "tlnd" ]; then
+    echo "# FAIL: ${LNBitsFunding} needs implementation"
+    exit 1
+  elif [ "${LNBitsFunding}" == "tlnd" ]; then
+    LNBitsLightning="lnd"
+    LNBitsChain="test"
+    echo "# FAIL: ${LNBitsFunding} needs implementation"
+    exit 1
+  elif [ "${LNBitsFunding}" == "slnd" ]; then
+    LNBitsLightning="lnd"
+    LNBitsChain="sig"
+    echo "# FAIL: ${LNBitsFunding} needs implementation"
+    exit 1
+  elif [ "${LNBitsFunding}" == "cl" ]; then
+    LNBitsLightning="cl"
+    LNBitsChain="main"
+    echo "# FAIL: ${LNBitsFunding} needs implementation"
+    exit 1
+  elif [ "${LNBitsFunding}" == "tcl" ]; then
+    LNBitsLightning="cl"
+    LNBitsChain="test"
+    echo "# FAIL: ${LNBitsFunding} needs implementation"
+    exit 1
+  elif [ "${LNBitsFunding}" == "scl" ]; then
+    LNBitsLightning="cl"
+    LNBitsChain="sig"
+    echo "# FAIL: ${LNBitsFunding} needs implementation"
+    exit 1
+  else
+    echo "# FAIL: Unknown LNBitsFunding=${LNBitsFunding}"
+    exit 1
+  fi
 
-    echo "## lnbits.service PRESTART CONFIG"
-    echo "# --> /home/lnbits/lnbits/.env"
-    echo "# network(${network}) chain(${chain})"
+  echo "# network(${LNBitsNetwork}) chain(${LNBitsChain}) lightning(${LNBitsLightning})"
+
+  # set lnd config
+  if [ "${LNBitsLightning}" == "lnd" ]; then
+
+    echo "# setting lnd config fresh ..."
 
     # check if lnbits user has read access on lnd data files
-    checkReadAccess=$(cat /mnt/hdd/app-data/lnd/data/chain/${network}/${chain}net/admin.macaroon | grep -c "lnd")
+    checkReadAccess=$(cat /mnt/hdd/app-data/lnd/data/chain/${LNBitsNetwork}/${LNBitsChain}net/admin.macaroon | grep -c "lnd")
     if [ "${checkReadAccess}" != "1" ]; then
       echo "# FAIL: missing lnd data in '/mnt/hdd/app-data/lnd' or missing access rights for lnbits user"
       exit 1
@@ -177,23 +227,20 @@ if [ "$1" = "prestart" ]; then
 
     # set macaroon  path info in .env - USING HEX IMPORT
     chmod 600 /home/lnbits/lnbits/.env
-    macaroonAdminHex=$(xxd -ps -u -c 1000 /mnt/hdd/app-data/lnd/data/chain/${network}/${chain}net/admin.macaroon)
-    macaroonInvoiceHex=$(xxd -ps -u -c 1000 /mnt/hdd/app-data/lnd/data/chain/${network}/${chain}net/invoice.macaroon)
-    macaroonReadHex=$(xxd -ps -u -c 1000 /mnt/hdd/app-data/lnd/data/chain/${network}/${chain}net/readonly.macaroon)
+    macaroonAdminHex=$(xxd -ps -u -c 1000 /mnt/hdd/app-data/lnd/data/chain/${LNBitsNetwork}/${LNBitsChain}net/admin.macaroon)
+    macaroonInvoiceHex=$(xxd -ps -u -c 1000 /mnt/hdd/app-data/lnd/data/chain/${LNBitsNetwork}/${LNBitsChain}net/invoice.macaroon)
+    macaroonReadHex=$(xxd -ps -u -c 1000 /mnt/hdd/app-data/lnd/data/chain/${LNBitsNetwork}/${LNBitsChain}net/readonly.macaroon)
     sed -i "s/^LND_REST_ADMIN_MACAROON=.*/LND_REST_ADMIN_MACAROON=${macaroonAdminHex}/g" /home/lnbits/lnbits/.env
     sed -i "s/^LND_REST_INVOICE_MACAROON=.*/LND_REST_INVOICE_MACAROON=${macaroonInvoiceHex}/g" /home/lnbits/lnbits/.env
     sed -i "s/^LND_REST_READ_MACAROON=.*/LND_REST_READ_MACAROON=${macaroonReadHex}/g" /home/lnbits/lnbits/.env
 
-  elif [ "${fundingsource}" == "cl" ]; then
+  elif [ "${LNBitsLightning}" == "cl" ]; then
 
-    echo "## clnbits.service PRESTART CONFIG"
-    echo "# --> /home/lnbits/clnbits/.env"
-
-    echo "# FAIL: to do implementation"
+    echo "# FAIL: to do implementation for LNBitsLightning=${LNBitsLightning}"
     exit 1
 
   else
-    echo "# FAIL: missing or not supported lightning funding source"
+    echo "# FAIL: missing or not supported LNBitsLightning=${LNBitsLightning}"
     exit 1
   fi
 
@@ -252,85 +299,122 @@ fi
 echo "making sure services are not running"
 sudo systemctl stop lnbits 2>/dev/null
 
-# switch on
+# install
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
-  echo "*** INSTALL LNbits ***"
 
+  # check if already installed
   isInstalled=$(sudo ls /etc/systemd/system/lnbits.service 2>/dev/null | grep -c 'lnbits.service')
-  if [ ${isInstalled} -eq 0 ]; then
+  if [ "${isInstalled}" != "1" ]; then
+    echo "# FAIL: already installed"
+    exit 1
+  fi
 
-    echo "*** Add the 'lnbits' user ***"
-    sudo adduser --disabled-password --gecos "" lnbits
+  # get funding source and check that its available
+  fundingsource="$2"
 
-    # make sure needed debian packages are installed
-    echo "# installing needed packages"
-
-    # get optional github parameter
-    githubUser="lnbits"
-    if [ "$2" != "" ]; then
-      githubUser="$2"
-    fi
-    githubBranch="tags/raspiblitz"
-    #githubBranch="f6bcff01f4b62ca26177f22bd2d479b01d371406"
-    if [ "$3" != "" ]; then
-      githubBranch="$3"
+  if [ "${fundingsource}" == "lnd" ]; then
+    if [ "${lnd}" != "on" ]; then
+      echo "#FAIL: lnd mainnet needs to activated"
+      exit 1
     fi
 
-    # install from GitHub
-    echo "# get the github code user(${githubUser}) branch(${githubBranch})"
-    sudo rm -r /home/lnbits/lnbits 2>/dev/null
-    cd /home/lnbits
-    sudo -u lnbits git clone https://github.com/${githubUser}/lnbits.git
-    cd /home/lnbits/lnbits
-    sudo -u lnbits git checkout ${githubBranch}
+  elif [ "${fundingsource}" == "tlnd" ]; then
+    if [ "${tlnd}" != "on" ]; then
+      echo "#FAIL: lnd testnet needs to activated"
+      exit 1
+    fi
 
-    # make sure lnbits user can access LND credentials
-    echo "make sure lnbits is member of lndreadonly, lndinvoice, lndadmin"
-    sudo /usr/sbin/usermod --append --groups lndinvoice lnbits
-    sudo /usr/sbin/usermod --append --groups lndreadonly lnbits
-    sudo /usr/sbin/usermod --append --groups lndadmin lnbits
+  elif [ "${fundingsource}" == "slnd" ]; then
+    if [ "${slnd}" != "on" ]; then
+      echo "#FAIL: lnd signet needs to activated"
+      exit 1
+    fi
 
-    # prepare .env file
-    echo "# preparing env file"
-    sudo rm /home/lnbits/lnbits/.env 2>/dev/null
-    sudo -u lnbits touch /home/lnbits/lnbits/.env
-    sudo bash -c "echo 'QUART_APP=lnbits.app:create_app()' >> /home/lnbits/lnbits/.env"
-    sudo bash -c "echo 'LNBITS_FORCE_HTTPS=0' >> /home/lnbits/lnbits/.env"
-    sudo bash -c "echo 'LNBITS_BACKEND_WALLET_CLASS=LndRestWallet' >> /home/lnbits/lnbits/.env"
-    sudo bash -c "echo 'LND_REST_ENDPOINT=https://127.0.0.1:8080' >> /home/lnbits/lnbits/.env"
-    sudo bash -c "echo 'LND_REST_CERT=' >> /home/lnbits/lnbits/.env"
-    sudo bash -c "echo 'LND_REST_ADMIN_MACAROON=' >> /home/lnbits/lnbits/.env"
-    sudo bash -c "echo 'LND_REST_INVOICE_MACAROON=' >> /home/lnbits/lnbits/.env"
-    sudo bash -c "echo 'LND_REST_READ_MACAROON=' >> /home/lnbits/lnbits/.env"
+  elif [ "${fundingsource}" == "cl" ]; then
+    if [ "${cl}" != "on" ]; then
+      echo "# FAIL: c-lightning mainnet needs to activated"
+      exit 1
+    fi
 
-    # set database path to HDD data so that its survives updates and migrations
-    sudo mkdir /mnt/hdd/app-data/LNBits 2>/dev/null
-    sudo chown lnbits:lnbits -R /mnt/hdd/app-data/LNBits
-    sudo bash -c "echo 'LNBITS_DATA_FOLDER=/mnt/hdd/app-data/LNBits' >> /home/lnbits/lnbits/.env"
+  elif [ "${fundingsource}" == "tcl" ]; then
+    if [ "${tcl}" != "on" ]; then
+      echo "# FAIL: c-lightning testnet needs to activated"
+      exit 1
+    fi
 
-    # to the install
-    echo "# installing application dependencies"
-    cd /home/lnbits/lnbits
-    # do install like this
+  elif [ "${fundingsource}" == "scl" ]; then
+    if [ "${scl}" != "on" ]; then
+      echo "# FAIL: c-lightning signet needs to activated"
+      exit 1
+    fi
 
-    sudo -u lnbits python3 -m venv venv
-    #sudo -u lnbits /home/lnbits/lnbits/venv/bin/pip install hypercorn
-    sudo -u lnbits ./venv/bin/pip install -r requirements.txt
+  else
+    echo "# FAIL: unvalid fundig source parameter"
+    exit 1
+  fi
 
-    # process assets
-    echo "# processing assets"
-    sudo -u lnbits ./venv/bin/quart assets
+  # add lnbits user
+  echo "*** Add the 'lnbits' user ***"
+  sudo adduser --disabled-password --gecos "" lnbits 2>/dev/null
+  sudo /usr/sbin/usermod --append --groups bitcoin lnbits
 
-    # update databases (if needed)
-    echo "# updating databases"
-    sudo -u lnbits ./venv/bin/quart migrate
+  # get optional github parameter
+  githubUser="lnbits"
+  if [ "$2" != "" ]; then
+    githubUser="$3"
+  fi
+  githubBranch="tags/raspiblitz"
+  #githubBranch="f6bcff01f4b62ca26177f22bd2d479b01d371406"
+  if [ "$3" != "" ]; then
+    githubBranch="$4"
+  fi
 
-    # open firewall
-    echo
-    echo "*** Updating Firewall ***"
-    sudo ufw allow 5000 comment 'lnbits HTTP'
-    sudo ufw allow 5001 comment 'lnbits HTTPS'
-    echo ""
+  # install from GitHub
+  echo "# get the github code user(${githubUser}) branch(${githubBranch})"
+  sudo rm -r /home/lnbits/lnbits 2>/dev/null
+  cd /home/lnbits
+  sudo -u lnbits git clone https://github.com/${githubUser}/lnbits.git lnbits
+  cd /home/lnbits/lnbits
+  sudo -u lnbits git checkout ${githubBranch}
+
+  # prepare .env file
+  echo "# preparing env file"
+  sudo rm /home/lnbits/lnbits/.env 2>/dev/null
+  sudo -u lnbits touch /home/lnbits/lnbits/.env
+  sudo bash -c "echo 'QUART_APP=lnbits.app:create_app()' >> /home/lnbits/lnbits/.env"
+  sudo bash -c "echo 'LNBITS_FORCE_HTTPS=0' >> /home/lnbits/lnbits/.env"
+
+  # set database path to HDD data so that its survives updates and migrations
+  sudo mkdir /mnt/hdd/app-data/LNBits 2>/dev/null
+  sudo chown lnbits:lnbits -R /mnt/hdd/app-data/LNBits
+  sudo bash -c "echo 'LNBITS_DATA_FOLDER=/mnt/hdd/app-data/LNBits' >> /home/lnbits/lnbits/.env"
+
+  # let switch command part do the detail config 
+  /home/admin/config.scripts/bonus.lnbits.sh switch ${fundingsource}
+
+  # to the install
+  echo "# installing application dependencies"
+  cd /home/lnbits/lnbits
+
+  # do install like this
+  sudo -u lnbits python3 -m venv venv
+  sudo -u lnbits ./venv/bin/pip install -r requirements.txt
+  sudo -u lnbits ./venv/bin/pip install pylightning
+
+  # process assets
+  echo "# processing assets"
+  sudo -u lnbits ./venv/bin/quart assets
+
+  # update databases (if needed)
+  echo "# updating databases"
+  sudo -u lnbits ./venv/bin/quart migrate
+
+  # open firewall
+  echo
+  echo "*** Updating Firewall ***"
+  sudo ufw allow 5000 comment 'lnbits HTTP'
+  sudo ufw allow 5001 comment 'lnbits HTTPS'
+  echo ""
 
     # install service
     echo "*** Install systemd ***"
@@ -344,13 +428,13 @@ After=bitcoind.service
 
 [Service]
 WorkingDirectory=/home/lnbits/lnbits
-ExecStartPre=/home/admin/config.scripts/bonus.lnbits.sh prestart lnd
+ExecStartPre=/home/admin/config.scripts/bonus.lnbits.sh prestart
 ExecStart=/bin/sh -c 'cd /home/lnbits/lnbits && ./venv/bin/hypercorn -k trio --bind 0.0.0.0:5000 "lnbits.app:create_app()"'
 User=lnbits
 Restart=always
 TimeoutSec=120
 RestartSec=30
-StandardOutput=null
+StandardOutput=journal
 StandardError=journal
 
 # Hardening measures
@@ -372,10 +456,6 @@ EOF
     else
       echo "# OK - lnbits service is enabled, but needs reboot or manual starting: sudo systemctl start lnbits"
     fi
-
-  else
-    echo "LNbits already installed."
-  fi
 
   # setup nginx symlinks
   if ! [ -f /etc/nginx/sites-available/lnbits_ssl.conf ]; then
@@ -402,6 +482,103 @@ EOF
     # make sure to keep in sync with internet.tor.sh script
     /home/admin/config.scripts/internet.hiddenservice.sh lnbits 80 5002 443 5003
   fi
+  exit 0
+fi
+
+# config for a special funding source (e.g lnd or c-lightning as backend)
+if [ "$1" = "switch" ]; then
+
+  echo "# NOTE: If you switch the funding source of a running LNbits instance all sub account will keep balance."
+  echo "# Make sure that the new funding source has enough sats to cover the LNbits bookeeping of sub accounts."
+
+  # get funding source and check that its available
+  fundingsource="$2"
+  clrpcsubdir=""
+  if [ "${fundingsource}" == "lnd" ]; then
+    if [ "${lnd}" != "on" ]; then
+      echo "#FAIL: lnd mainnet needs to activated"
+      exit 1
+    fi
+
+  elif [ "${fundingsource}" == "tlnd" ]; then
+    if [ "${tlnd}" != "on" ]; then
+      echo "# FAIL: lnd testnet needs to activated"
+      exit 1
+    fi
+
+  elif [ "${fundingsource}" == "slnd" ]; then
+    if [ "${slnd}" != "on" ]; then
+      echo "# FAIL: lnd signet needs to activated"
+      exit 1
+    fi
+
+  elif [ "${fundingsource}" == "cl" ]; then
+    if [ "${cl}" != "on" ]; then
+      echo "# FAIL: c-lightning mainnet needs to activated"
+      exit 1
+    fi
+
+  elif [ "${fundingsource}" == "tcl" ]; then
+    clrpcsubdir="testnet/"
+    if [ "${tcl}" != "on" ]; then
+      echo "# FAIL: c-lightning testnet needs to activated"
+      exit 1
+    fi
+
+  elif [ "${fundingsource}" == "scl" ]; then
+    clrpcsubdir="signet/"
+    if [ "${scl}" != "on" ]; then
+      echo "# FAIL: c-lightning signet needs to activated"
+      exit 1
+    fi
+
+  else
+    echo "# FAIL: unvalid fundig source parameter"
+    exit 1
+  fi
+
+  # remove all old possible settings for former funding source (clean state)
+  sudo sed -i "/^LNBITS_BACKEND_WALLET_CLASS=/d" /home/lnbits/lnbits/.env 2>/dev/null
+  sudo sed -i "/^LND_REST_ENDPOINT=/d" /home/lnbits/lnbits/.env 2>/dev/null
+  sudo sed -i "/^LND_REST_CERT=/d" /home/lnbits/lnbits/.env 2>/dev/null
+  sudo sed -i "/^LND_REST_ADMIN_MACAROON=/d" /home/lnbits/lnbits/.env 2>/dev/null
+  sudo sed -i "/^LND_REST_INVOICE_MACAROON=/d" /home/lnbits/lnbits/.env 2>/dev/null
+  sudo sed -i "/^LND_REST_READ_MACAROON=/d" /home/lnbits/lnbits/.env 2>/dev/null
+  sudo /usr/sbin/usermod -G lnbits lnbits
+  sudo sed -i "/^CLIGHTNING_RPC=/d" /home/lnbits/lnbits/.env 2>/dev/null
+
+  # LND CONFIG
+  if [ "${fundingsource}" == "lnd" ] || [ "${fundingsource}" == "tlnd" ] || [ "${fundingsource}" == "slnd" ] ; then
+
+    # make sure lnbits user can access LND credentials
+    echo "# make sure lnbits user is member of lndreadonly, lndinvoice, lndadmin"
+    sudo /usr/sbin/usermod --append --groups lndinvoice lnbits
+    sudo /usr/sbin/usermod --append --groups lndreadonly lnbits
+    sudo /usr/sbin/usermod --append --groups lndadmin lnbits
+
+    # prepare config entries in lnbits config for lnd
+    sudo bash -c "echo 'LNBITS_BACKEND_WALLET_CLASS=LndRestWallet' >> /home/lnbits/lnbits/.env"
+    sudo bash -c "echo 'LND_REST_ENDPOINT=https://127.0.0.1:8080' >> /home/lnbits/lnbits/.env"
+    sudo bash -c "echo 'LND_REST_CERT=' >> /home/lnbits/lnbits/.env"
+    sudo bash -c "echo 'LND_REST_ADMIN_MACAROON=' >> /home/lnbits/lnbits/.env"
+    sudo bash -c "echo 'LND_REST_INVOICE_MACAROON=' >> /home/lnbits/lnbits/.env"
+    sudo bash -c "echo 'LND_REST_READ_MACAROON=' >> /home/lnbits/lnbits/.env"
+
+  fi  
+
+  if [ "${fundingsource}" == "cl" ] || [ "${fundingsource}" == "tcl" ] || [ "${fundingsource}" == "scl" ] ; then
+  
+    sudo bash -c "echo 'LNBITS_BACKEND_WALLET_CLASS=CLightningWallet' >> /home/lnbits/lnbits/.env"
+    sudo bash -c "echo 'CLIGHTNING_RPC=/home/bitcoin/.lightning/${clrpcsubdir}lightning-rpc' >> /home/lnbits/lnbits/.env"
+
+  fi
+
+  # set raspiblitz config value for funding
+  if ! grep -Eq "^LNBitsFunding=" /mnt/hdd/raspiblitz.conf; then
+    echo "LNBitsFunding=" >> /mnt/hdd/raspiblitz.conf
+  fi
+  sudo sed -i "s/^LNBitsFunding=.*/LNBitsFunding=${fundingsource}/g" /mnt/hdd/raspiblitz.conf
+
   exit 0
 fi
 

@@ -362,7 +362,7 @@ if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${LNBits}" != "${choice}" ]; then
   echo "LNbits Setting changed .."
   anychange=1
-  sudo -u admin /home/admin/config.scripts/bonus.lnbits.sh ${choice}
+  sudo -u admin /home/admin/config.scripts/bonus.lnbits.sh ${choice} lnd
   if [ "${choice}" =  "on" ]; then
     sudo systemctl start lnbits
     sudo -u admin /home/admin/config.scripts/bonus.lnbits.sh menu
