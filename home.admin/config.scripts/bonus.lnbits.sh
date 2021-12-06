@@ -62,14 +62,14 @@ SHA1 ${sslFingerprintTOR}"
     text="${text}\n
 IP2TOR: https://${ip2torIP}:${ip2torPort}
 SHA1 ${sslFingerprintTOR}
-go MAINMENU > SUBSCRIBE and add LetsEncrypt HTTPS Domain"
+consider adding a LetsEncrypt HTTPS Domain under OPTIONS."
   elif [ ${#publicDomain} -eq 0 ]; then
     text="${text}\n
 To enable easy reachability with normal browser from the outside
-consider adding a IP2TOR Bridge (MAINMENU > SUBSCRIBE)."
+consider adding a IP2TOR Bridge under OPTIONS."
   fi
 
-  whiptail --title " LNbits " --yes-button "OK" --no-button "Options" --yesno "${text}" 16 69
+  whiptail --title " LNbits " --yes-button "OK" --no-button "OPTIONS" --yesno "${text}" 16 69
   result=$?
   /home/admin/config.scripts/blitz.display.sh hide
   echo "option (${result}) - please wait ..."
@@ -101,9 +101,9 @@ consider adding a IP2TOR Bridge (MAINMENU > SUBSCRIBE)."
     OPTIONS+=(SWITCH-LND "Switch: Use LND as funding source")
   fi
 
-  WIDTH=46
+  WIDTH=66
   CHOICE_HEIGHT=$(("${#OPTIONS[@]}/2+1"))
-  HEIGHT=$((CHOICE_HEIGHT+6))
+  HEIGHT=$((CHOICE_HEIGHT+7))
   CHOICE=$(dialog --clear \
                 --title " LNbits - Options" \
                 --ok-label "Select" \
