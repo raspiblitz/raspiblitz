@@ -554,9 +554,7 @@ if [ "$1" = "switch" ]; then
   sudo sed -i "/^CLIGHTNING_RPC=/d" /home/lnbits/lnbits/.env 2>/dev/null
 
   # LND CONFIG
-  if [ "${fundingsource}" == "lnd" ] || \
-     [ "${fundingsource}" == "tlnd" ] || \
-     [ "${fundingsource}" == "slnd" ]; then
+  if [ "${fundingsource}" == "lnd" ] || [ "${fundingsource}" == "tlnd" ] || [ "${fundingsource}" == "slnd" ]; then
 
     # make sure lnbits user can access LND credentials
     echo "# adding lnbits user is member of lndreadonly, lndinvoice, lndadmin"
@@ -575,9 +573,7 @@ if [ "$1" = "switch" ]; then
 
   fi  
 
-  if [ "${fundingsource}" == "cl" ] || \
-     [ "${fundingsource}" == "tcl" ] || \
-     [ "${fundingsource}" == "scl" ]; then
+  if [ "${fundingsource}" == "cl" ] || [ "${fundingsource}" == "tcl" ] || [ "${fundingsource}" == "scl" ]; then
   
     echo "# preparing lnbits config for c-lightning"
     sudo bash -c "echo 'LNBITS_BACKEND_WALLET_CLASS=CLightningWallet' >> /home/lnbits/lnbits/.env"
