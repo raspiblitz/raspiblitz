@@ -236,8 +236,13 @@ if [ "$1" = "prestart" ]; then
 
   elif [ "${LNBitsLightning}" == "cl" ]; then
 
-    echo "# FAIL: to do implementation for LNBitsLightning=${LNBitsLightning}"
-    exit 1
+    isUsingCL=$(cat /home/lnbits/lnbits/.env | grep -c "LNBITS_BACKEND_WALLET_CLASS=CLightningWallet")
+    if [ "${isUsingCL}" != "1" ]; then
+      echo "# FAIL: /home/lnbits/lnbits/.env not set to c-lightning"
+      exit 1
+    fi
+
+    echo "# OK - everything looks OK for lnbits config on c-lightning on ${LNBitsChain}net"
 
   else
     echo "# FAIL: missing or not supported LNBitsLightning=${LNBitsLightning}"
