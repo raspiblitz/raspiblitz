@@ -174,33 +174,20 @@ if [ "$1" = "prestart" ]; then
     LNBitsLightning="lnd"
     LNBitsChain="main"
   elif [ "${LNBitsFunding}" == "tlnd" ]; then
-    echo "# FAIL: ${LNBitsFunding} needs implementation"
-    exit 1
-  elif [ "${LNBitsFunding}" == "tlnd" ]; then
     LNBitsLightning="lnd"
     LNBitsChain="test"
-    echo "# FAIL: ${LNBitsFunding} needs implementation"
-    exit 1
   elif [ "${LNBitsFunding}" == "slnd" ]; then
     LNBitsLightning="lnd"
     LNBitsChain="sig"
-    echo "# FAIL: ${LNBitsFunding} needs implementation"
-    exit 1
   elif [ "${LNBitsFunding}" == "cl" ]; then
     LNBitsLightning="cl"
     LNBitsChain="main"
-    echo "# FAIL: ${LNBitsFunding} needs implementation"
-    exit 1
   elif [ "${LNBitsFunding}" == "tcl" ]; then
     LNBitsLightning="cl"
     LNBitsChain="test"
-    echo "# FAIL: ${LNBitsFunding} needs implementation"
-    exit 1
   elif [ "${LNBitsFunding}" == "scl" ]; then
     LNBitsLightning="cl"
     LNBitsChain="sig"
-    echo "# FAIL: ${LNBitsFunding} needs implementation"
-    exit 1
   else
     echo "# FAIL: Unknown LNBitsFunding=${LNBitsFunding}"
     exit 1
