@@ -229,7 +229,7 @@ if [ "$1" = "prestart" ]; then
       exit 1
     fi
 
-    echo "# OK - everything looks OK for lnbits config on c-lightning on ${LNBitsChain}net"
+    echo "# everything looks OK for lnbits config on c-lightning on ${LNBitsChain}net"
 
   else
     echo "# FAIL: missing or not supported LNBitsLightning=${LNBitsLightning}"
