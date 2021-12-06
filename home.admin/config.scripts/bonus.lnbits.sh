@@ -360,12 +360,12 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   # get optional github parameter
   githubUser="lnbits"
-  if [ "$2" != "" ]; then
+  if [ "$3" != "" ]; then
     githubUser="$3"
   fi
   githubBranch="tags/raspiblitz"
   #githubBranch="f6bcff01f4b62ca26177f22bd2d479b01d371406"
-  if [ "$3" != "" ]; then
+  if [ "$4" != "" ]; then
     githubBranch="$4"
   fi
 
