@@ -554,7 +554,7 @@ if [ "$1" = "switch" ]; then
   sudo sed -i "/^CLIGHTNING_RPC=/d" /home/lnbits/lnbits/.env 2>/dev/null
 
   # LND CONFIG
-  if [ "${fundingsource}" == "lnd" ] || [ "${fundingsource}" == "tlnd" ] || [ "${fundingsource}" == "slnd" ] ; then
+  if [ "${fundingsource}" == "lnd" ] || [ "${fundingsource}" == "tlnd" ] || [ "${fundingsource}" == "slnd" ]; then
 
     # make sure lnbits user can access LND credentials
     echo "# adding lnbits user is member of lndreadonly, lndinvoice, lndadmin"
@@ -563,6 +563,7 @@ if [ "$1" = "switch" ]; then
     sudo /usr/sbin/usermod --append --groups lndadmin lnbits
 
     # prepare config entries in lnbits config for lnd
+    echo "# preparing lnbits config for lnd"
     sudo bash -c "echo 'LNBITS_BACKEND_WALLET_CLASS=LndRestWallet' >> /home/lnbits/lnbits/.env"
     sudo bash -c "echo 'LND_REST_ENDPOINT=https://127.0.0.1:8080' >> /home/lnbits/lnbits/.env"
     sudo bash -c "echo 'LND_REST_CERT=' >> /home/lnbits/lnbits/.env"
@@ -572,8 +573,9 @@ if [ "$1" = "switch" ]; then
 
   fi  
 
-  if [ "${fundingsource}" == "cl" ] || [ "${fundingsource}" == "tcl" ] || [ "${fundingsource}" == "scl" ] ; then
+  if [ "${fundingsource}" == "cl" ] || [ "${fundingsource}" == "tcl" ] || [ "${fundingsource}" == "scl" ]; then
   
+    echo "# preparing lnbits config for c-lightning"
     sudo bash -c "echo 'LNBITS_BACKEND_WALLET_CLASS=CLightningWallet' >> /home/lnbits/lnbits/.env"
     sudo bash -c "echo 'CLIGHTNING_RPC=/home/bitcoin/.lightning/${clrpcsubdir}lightning-rpc' >> /home/lnbits/lnbits/.env"
 
