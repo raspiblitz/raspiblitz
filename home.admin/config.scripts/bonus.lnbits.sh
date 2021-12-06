@@ -206,7 +206,7 @@ if [ "$1" = "prestart" ]; then
     exit 1
   fi
 
-  echo "# network(${LNBitsNetwork}) chain(${LNBitsChain}) lightning(${LNBitsLightning})"
+  echo "# LNBitsFunding(${LNBitsFunding}) --> network(${LNBitsNetwork}) chain(${LNBitsChain}) lightning(${LNBitsLightning})"
 
   # set lnd config
   if [ "${LNBitsLightning}" == "lnd" ]; then
