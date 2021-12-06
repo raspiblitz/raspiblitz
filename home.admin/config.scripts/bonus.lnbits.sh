@@ -497,39 +497,39 @@ if [ "$1" = "switch" ]; then
   clrpcsubdir=""
   if [ "${fundingsource}" == "lnd" ]; then
     if [ "${lnd}" != "on" ]; then
-      echo "#FAIL: lnd mainnet needs to activated"
+      echo "#FAIL: lnd mainnet not installed or running"
       exit 1
     fi
 
   elif [ "${fundingsource}" == "tlnd" ]; then
     if [ "${tlnd}" != "on" ]; then
-      echo "# FAIL: lnd testnet needs to activated"
+      echo "# FAIL: lnd testnet not installed or running"
       exit 1
     fi
 
   elif [ "${fundingsource}" == "slnd" ]; then
     if [ "${slnd}" != "on" ]; then
-      echo "# FAIL: lnd signet needs to activated"
+      echo "# FAIL: lnd signet not installed or running"
       exit 1
     fi
 
   elif [ "${fundingsource}" == "cl" ]; then
     if [ "${cl}" != "on" ]; then
-      echo "# FAIL: c-lightning mainnet needs to activated"
+      echo "# FAIL: c-lightning mainnet not installed or running"
       exit 1
     fi
 
   elif [ "${fundingsource}" == "tcl" ]; then
     clrpcsubdir="testnet/"
     if [ "${tcl}" != "on" ]; then
-      echo "# FAIL: c-lightning testnet needs to activated"
+      echo "# FAIL: c-lightning testnet not installed or running"
       exit 1
     fi
 
   elif [ "${fundingsource}" == "scl" ]; then
     clrpcsubdir="signet/"
     if [ "${scl}" != "on" ]; then
-      echo "# FAIL: c-lightning signet needs to activated"
+      echo "# FAIL: c-lightning signet not installed or running"
       exit 1
     fi
 
