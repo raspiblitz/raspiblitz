@@ -1,7 +1,7 @@
 #!/bin/bash
 # https://github.com/cryptoadvance/specter-desktop  
 
-pinnedVersion="1.6.0"
+pinnedVersion="1.7.2"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
