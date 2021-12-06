@@ -69,10 +69,18 @@ To enable easy reachability with normal browser from the outside
 consider adding a IP2TOR Bridge (MAINMENU > SUBSCRIBE)."
   fi
 
-  whiptail --title " LNbits " --msgbox "${text}" 16 69
-  
+
+  whiptail --title " LNbits " --yes-button "OK" --no-button "Options" --yesno "${text}" 16 69
+  result=$?
   /home/admin/config.scripts/blitz.display.sh hide
-  echo "please wait ..."
+  echo "option (${result}) - please wait ..."
+
+  # exit when 
+  if [ ${result} -eq 0 ]; then
+    echo "# cancel update"
+    exit 0
+  fi
+
   exit 0
 fi
 
@@ -512,14 +520,14 @@ if [ "$1" = "switch" ]; then
     fi
 
   elif [ "${fundingsource}" == "tcl" ]; then
-    clrpcsubdir="testnet/"
+    clrpcsubdir="/testnet"
     if [ "${tcl}" != "on" ]; then
       echo "# FAIL: c-lightning testnet not installed or running"
       exit 1
     fi
 
   elif [ "${fundingsource}" == "scl" ]; then
-    clrpcsubdir="signet/"
+    clrpcsubdir="/signet"
     if [ "${scl}" != "on" ]; then
       echo "# FAIL: c-lightning signet not installed or running"
       exit 1
@@ -567,9 +575,13 @@ if [ "$1" = "switch" ]; then
 
   if [ "${fundingsource}" == "cl" ] || [ "${fundingsource}" == "tcl" ] || [ "${fundingsource}" == "scl" ]; then
   
+    echo "# allowing lnbits user as part of the bitcoin group to RW RPC hook"
+    sudo chmod 770 /home/bitcoin/.lightning/bitcoin${clrpcsubdir}
+    sudo chmod 660 /home/bitcoin/.lightning/bitcoin${clrpcsubdir}/lightning-rpc
+
     echo "# preparing lnbits config for c-lightning"
     sudo bash -c "echo 'LNBITS_BACKEND_WALLET_CLASS=CLightningWallet' >> /home/lnbits/lnbits/.env"
-    sudo bash -c "echo 'CLIGHTNING_RPC=/home/bitcoin/.lightning/bitcoin/${clrpcsubdir}lightning-rpc' >> /home/lnbits/lnbits/.env"
+    sudo bash -c "echo 'CLIGHTNING_RPC=/home/bitcoin/.lightning/bitcoin${clrpcsubdir}/lightning-rpc' >> /home/lnbits/lnbits/.env"
   fi
 
   # set raspiblitz config value for funding
