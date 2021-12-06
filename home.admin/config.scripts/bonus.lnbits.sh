@@ -91,7 +91,7 @@ consider adding a IP2TOR Bridge under OPTIONS."
     OPTIONS+=(HTTPS-ON "Add free HTTPS-Certificate for LNbits")
     OPTIONS+=(IP2TOR-OFF "Cancel IP2Tor Subscription for LNbits")
   else
-    OPTIONS+=(IP2TOR-ON "Make Public with IP2Tor Subscrption")
+    OPTIONS+=(IP2TOR-ON "Make Public with IP2Tor Subscription")
   fi
 
   # Change Funding Source options (only if available)
@@ -130,13 +130,23 @@ consider adding a IP2TOR Bridge under OPTIONS."
             exit 0
             ;;
         SWITCH-CL)
-            echo "TODO: SWITCH-CL implement"
-            sleep 5
+            clear
+            /home/admin/config.scripts/bonus.lnbits.sh switch cl
+            echo "Restarting LNbits ..."
+            sudo systemctl restart lnbits
+            echo
+            echo "OK new funding source for LNbits set - press ENTER to continue"
+            read key
             exit 0
             ;;
         SWITCH-LND)
-            echo "TODO: SWITCH-LND implement"
-            sleep 5
+            clear
+            /home/admin/config.scripts/bonus.lnbits.sh switch lnd
+            echo "Restarting LNbits ..."
+            sudo systemctl restart lnbits
+            echo
+            echo "OK new funding source for LNbits set - press ENTER to continue"
+            read key
             exit 0
             ;;
         *)
