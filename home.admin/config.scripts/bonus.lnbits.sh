@@ -569,8 +569,7 @@ if [ "$1" = "switch" ]; then
   
     echo "# preparing lnbits config for c-lightning"
     sudo bash -c "echo 'LNBITS_BACKEND_WALLET_CLASS=CLightningWallet' >> /home/lnbits/lnbits/.env"
-    sudo bash -c "echo 'CLIGHTNING_RPC=/home/bitcoin/.lightning/${clrpcsubdir}lightning-rpc' >> /home/lnbits/lnbits/.env"
-
+    sudo bash -c "echo 'CLIGHTNING_RPC=/home/bitcoin/.lightning/bitcoin/${clrpcsubdir}lightning-rpc' >> /home/lnbits/lnbits/.env"
   fi
 
   # set raspiblitz config value for funding
