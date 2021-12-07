@@ -184,6 +184,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo ufw allow $((RTLHTTP+1)) comment "${systemdService} HTTPS"
   echo
 
+  # make sure config directory exists
+  sudo mkdir -p /mnt/hdd/app-data/rtl
+  sudo chown rtl:rtl /mnt/hdd/app-data/rtl
+
   echo "# Create Systemd Service: ${systemdService}.service (Template)"
   echo "
 # Systemd unit for ${systemdService}
@@ -194,7 +198,7 @@ Wants=
 After=
 
 [Service]
-Environment=\"RTL_CONFIG_PATH=/home/rtl/${systemdService}/\"
+Environment=\"RTL_CONFIG_PATH=/mnt/hdd/app-data/rtl/${systemdService}/\"
 ExecStartPre=-/home/admin/config.scripts/bonus.rtl.sh prestart ${LNTYPE} ${CHAIN}
 ExecStart=/usr/bin/node /home/rtl/RTL/rtl
 User=rtl
@@ -359,23 +363,23 @@ if [ "$1" = "prestart" ]; then
   fi
 
   # prepare RTL-Config.json file
-  echo "# PREPARE /home/rtl/${systemdService}/RTL-Config.json"
+  echo "# PREPARE /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json"
 
   # make sure directory exists
-  mkdir -p /home/rtl/${systemdService} 2>/dev/null
+  mkdir -p /mnt/hdd/app-data/rtl/${systemdService} 2>/dev/null
 
   # check if RTL-Config.json exists
-  configExists=$(ls /home/rtl/${systemdService}/RTL-Config.json 2>/dev/null | grep -c "RTL-Config.json")
+  configExists=$(ls /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json 2>/dev/null | grep -c "RTL-Config.json")
   if [ "${configExists}" == "" ]; then
     # copy template
-    cp /home/rtl/RTL/docs/Sample-RTL-Config.json /home/rtl/${systemdService}/RTL-Config.json
-    chmod 600 /home/rtl/${systemdService}/RTL-Config.json
+    cp /home/rtl/RTL/docs/Sample-RTL-Config.json /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json
+    chmod 600 /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json
   fi
 
   # LND changes of config
   if [ "${LNTYPE}" == "lnd" ]; then
     echo "# LND Config"
-    cat /home/rtl/${systemdService}/RTL-Config.json | \
+    cat /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json | \
     jq ".port = \"${RTLHTTP}\"" | \
     jq ".multiPass = \"${RPCPASSWORD}\"" | \
     jq ".multiPassHashed = \"\"" | \
@@ -387,16 +391,16 @@ if [ "$1" = "prestart" ]; then
     jq ".nodes[0].Authentication.boltzMacaroonPath = \"/home/rtl/.boltz-lnd/macaroons/\"" | \
     jq ".nodes[0].Settings.userPersona = \"OPERATOR\"" | \
     jq ".nodes[0].Settings.lnServerUrl = \"https://localhost:${portprefix}8080\"" | \
-    jq ".nodes[0].Settings.channelBackupPath = \"/home/rtl/${systemdService}-SCB-backup-$hostname\"" | \
-    jq ".nodes[0].Settings.swapServerUrl = \"https://localhost:${SWAPSERVERPORT}\"" > /home/rtl/${systemdService}/RTL-Config.json.tmp
-    mv /home/rtl/${systemdService}/RTL-Config.json.tmp /home/rtl/${systemdService}/RTL-Config.json
+    jq ".nodes[0].Settings.channelBackupPath = \"/mnt/hdd/app-data/rtl/${systemdService}-SCB-backup-$hostname\"" | \
+    jq ".nodes[0].Settings.swapServerUrl = \"https://localhost:${SWAPSERVERPORT}\"" > /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json.tmp
+    mv /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json.tmp /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json
   fi
 
   # C-Lightning changes of config
   # https://github.com/Ride-The-Lightning/RTL/blob/master/docs/C-Lightning-setup.md
   if [ "${LNTYPE}" == "cl" ]; then
     echo "# CL Config"
-    cat /home/rtl/${systemdService}/RTL-Config.json | \
+    cat /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json | \
     jq ".port = \"${RTLHTTP}\"" | \
     jq ".multiPass = \"${RPCPASSWORD}\"" | \
     jq ".multiPassHashed = \"\"" | \
@@ -408,9 +412,9 @@ if [ "$1" = "prestart" ]; then
     jq ".nodes[0].Authentication.boltzMacaroonPath = \"/home/rtl/.boltz-lnd/macaroons/\"" | \
     jq ".nodes[0].Settings.userPersona = \"OPERATOR\"" | \
     jq ".nodes[0].Settings.lnServerUrl = \"https://localhost:${portprefix}6100\"" | \
-    jq ".nodes[0].Settings.channelBackupPath = \"/home/rtl/${systemdService}-SCB-backup-$hostname\"" | \
-    jq ".nodes[0].Settings.swapServerUrl = \"https://localhost:${SWAPSERVERPORT}\"" > /home/rtl/${systemdService}/RTL-Config.json.tmp
-    mv /home/rtl/${systemdService}/RTL-Config.json.tmp /home/rtl/${systemdService}/RTL-Config.json
+    jq ".nodes[0].Settings.channelBackupPath = \"/mnt/hdd/app-data/rtl/${systemdService}-SCB-backup-$hostname\"" | \
+    jq ".nodes[0].Settings.swapServerUrl = \"https://localhost:${SWAPSERVERPORT}\"" > /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json.tmp
+    mv /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json.tmp /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json
   fi
 
   echo "# RTL prestart config done"
