@@ -131,8 +131,7 @@ Consider adding a IP2TOR Bridge under OPTIONS."
             exit 0
             ;;
         HTTPS-ON)
-            echo "TODO: HTTPS-ON implement"
-            sleep 5
+            python /home/admin/config.scripts/blitz.subscriptions.letsencrypt.py create-ssh-dialog
             exit 0
             ;;
         SWITCH-CL)
