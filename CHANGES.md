@@ -3,6 +3,7 @@
 ## What's new in Version 1.7.2 of RaspiBlitz?
 
 - New: Verify git commits and tags everywhere possible [issue](https://github.com/rootzoll/raspiblitz/issues/2686)
+- New: Switch LNbits between lnd & c-lightning [issue](https://github.com/rootzoll/raspiblitz/issues/2556)
 - Update: C-lightning v0.10.2 [details](https://github.com/ElementsProject/lightning/releases/tag/v0.10.2)
 - Update: Lightning Terminal v0.6.0-alpha with Lightning Node Connect over Tor [details](https://github.com/lightninglabs/lightning-terminal/releases/tag/v0.6.0-alpha)
 - Update: BTCPayServer v1.3.3 with UPDATE option [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.3.3)
