@@ -829,6 +829,7 @@ fi
 
 if [ -d "/mnt/hdd/app-data/subscriptions" ]; then
   echo "OK: subscription data directory exists"
+  sudo chown admin:admin /mnt/hdd/app-data/subscriptions
 else
   echo "CREATE: subscription data directory"
   sudo mkdir /mnt/hdd/app-data/subscriptions
