@@ -606,9 +606,12 @@ fi
 
 # LNbits
 if [ "${LNBits}" = "on" ]; then
-  echo "Provisioning LNbits - run config script" >> ${logFile}
-  sudo sed -i "s/^message=.*/message='Setup LNbits '/g" ${infoFile}
-  sudo -u admin /home/admin/config.scripts/bonus.lnbits.sh on >> ${logFile} 2>&1
+  if [ "${LNBitsFunding}" == "" ]; then
+    LNBitsFunding="lnd"
+  fi
+  echo "Provisioning LNbits (${LNBitsFunding}) - run config script" >> ${logFile}
+  sudo sed -i "s/^message=.*/message='Setup LNbits (${LNBitsFunding})'/g" ${infoFile}
+  sudo -u admin /home/admin/config.scripts/bonus.lnbits.sh on ${LNBitsFunding} >> ${logFile} 2>&1
 else
   echo "Provisioning LNbits - keep default" >> ${logFile}
 fi
