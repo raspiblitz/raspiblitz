@@ -105,7 +105,11 @@ if [ "${BTCRPCexplorer}" == "on" ]; then
   OPTIONS+=(EXPLORE "BTC RPC Explorer")
 fi
 if [ "${LNBits}" == "on" ]; then
-  OPTIONS+=(LNBITS "LNbits Server")
+  if [ "${LNBitsFunding}" == "lnd" ] || [ "${LNBitsFunding}" == "tlnd" ] || [ "${LNBitsFunding}" == "slnd" ] || [ "${LNBitsFunding}" == "" ]; then
+    OPTIONS+=(LNBITS "LNbits on LND")
+  elif [ "${LNBitsFunding}" == "cl" ] || [ "${LNBitsFunding}" == "tcl" ] || [ "${LNBitsFunding}" == "scl" ]; then
+    OPTIONS+=(LNBITS "LNbits on c-lightning")
+  fi
 fi
 if [ "${lndmanage}" == "on" ]; then
   OPTIONS+=(LNDMANAGE "LND Manage Script")
