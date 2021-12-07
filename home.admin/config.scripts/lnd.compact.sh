@@ -6,7 +6,7 @@ if [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ]; then
   exit 1
 fi
 
-
+# basic info
 echo "###########################################"
 echo "# lnd.compact.sh"
 
@@ -36,6 +36,7 @@ Do you want to compact the LND database now?" 11 60
 	fi
 fi
 
+echo "###########################################"
 echo "# Start compacting ...."
 echo "# Can monitor the background process in a new window with:"
 echo "# tail -f /home/admin/lnd.db.bolt.auto-compact.log"
