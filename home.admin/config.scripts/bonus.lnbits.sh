@@ -65,7 +65,8 @@ ${toraddress}"
   if [ ${#ip2torDomain} -gt 0 ]; then
     text="${text}\n
 IP2TOR+LetsEncrypt: https://${ip2torDomain}:${ip2torPort}
-SHA1 ${sslFingerprintTOR}"
+SHA1 ${sslFingerprintTOR}\n
+https://${ip2torDomain}:${ip2torPort} ready for public use."
   elif [ ${#ip2torIP} -gt 0 ]; then
     text="${text}\n
 IP2TOR: https://${ip2torIP}:${ip2torPort}
@@ -128,6 +129,9 @@ Consider adding a IP2TOR Bridge under OPTIONS."
             ;;
         IP2TOR-OFF)
             python /home/admin/config.scripts/blitz.subscriptions.ip2tor.py subscription-cancel ${ip2torID}
+            echo
+            echo "PRESS ENTER to continue"
+            read key
             exit 0
             ;;
         HTTPS-ON)
