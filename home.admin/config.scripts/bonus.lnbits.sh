@@ -127,8 +127,7 @@ consider adding a IP2TOR Bridge under OPTIONS."
             exit 0
             ;;
         IP2TOR-OFF)
-            echo "TODO: IP2TOR-OFF implement"
-            sleep 5
+            python /home/admin/config.scripts/blitz.subscriptions.ip2tor.py subscription-cancel ${ip2torID}
             exit 0
             ;;
         HTTPS-ON)
