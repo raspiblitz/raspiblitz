@@ -13,7 +13,7 @@ WEBUI_VERSION=0.1.0
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "config script to switch joinmarket_webui on or off"
- echo "bonus.joinmarket-webui.sh [on|off|menu]"
+ echo "bonus.joinmarket-webui.sh [on|off|update|menu]"
  exit 1
 fi
 
@@ -72,7 +72,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u $USERNAME mv jm-web-client-main $APP_DIR
     sudo -u $USERNAME rm main.tar.gz
 
-    cd webui
+    cd $APP_DIR
     sudo -u $USERNAME npm install
     if ! [ $? -eq 0 ]; then
         echo "FAIL - npm install did not run correctly, aborting"
@@ -170,6 +170,41 @@ WantedBy=multi-user.target
   else
     echo "*** JOINMARKET WEB UI ALREADY INSTALLED ***"
   fi
+  exit 0
+fi
+
+# update
+if [ "$1" = "update" ]; then
+  isInstalled=$(sudo ls $HOME_DIR 2>/dev/null | grep -c "$APP_DIR")
+  if [ ${isInstalled} -eq 1 ]; then
+    echo "*** UPDATE JOINMARKET WEB UI ***"
+    cd $HOME_DIR
+
+    sudo -u $USERNAME wget https://github.com/joinmarket-webui/jm-web-client/archive/refs/heads/main.tar.gz
+    sudo -u $USERNAME tar -xzf main.tar.gz
+    sudo -u $USERNAME rm -rf main.tar.gz
+    cd jm-web-client-main
+
+    sudo -u $USERNAME npm install
+    if ! [ $? -eq 0 ]; then
+      echo "FAIL - npm install did not run correctly, aborting"
+      exit 1
+    fi
+
+    sudo -u $USERNAME npm run build
+    if ! [ $? -eq 0 ]; then
+      echo "FAIL - npm run build did not run correctly, aborting"
+      exit 1
+    fi
+    cd ..
+    sudo -u $USERNAME rm -rf $APP_DIR
+    sudo -u $USERNAME mv jm-web-client-main $APP_DIR
+
+    echo "*** JOINMARKET WEB UI UPDATED ***"
+  else
+    echo "*** JOINMARKET WEB UI NOT INSTALLED ***"
+  fi
+
   exit 0
 fi
 
