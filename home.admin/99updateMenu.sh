@@ -41,6 +41,7 @@ Do you want to download Lightning Data Backup now?
       echo "please wait .."
       sleep 2
       if [ "${lightning}" == "lnd" ]; then
+        /home/admin/config.scripts/lnd.compact.sh interactive
         /home/admin/config.scripts/lnd.backup.sh lnd-export-gui
       elif [ "${lightning}" == "cl" ]; then
         /home/admin/config.scripts/cl.backup.sh cl-export-gui
