@@ -6,16 +6,40 @@ if [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ]; then
   exit 1
 fi
 
-channelDBsize=$(sudo du -h /mnt/hdd/lnd/data/graph/mainnet/channel.db | awk '{print $1}')
-echo
-echo "The current channel.db size: $channelDBsize"
-echo "If compacting the database the first time it can take a long time, but reduces the size 2-3 times."
-echo "Can monitor the background process in a new window with:"
-echo "'tail -f /home/admin/lnd.db.bolt.auto-compact.log'"
 
-if [ "$1" = interactive ];then
-  read -p "Do you want to compact the database now (yes/no) ?" confirm && [[ $confirm == [yY]||$confirm == [yY][eE][sS] ]]||exit 1
+echo "###########################################"
+echo "# lnd.compact.sh"
+
+
+# check if HDD/SSD has enough space to run compaction (at least again the size as the channel.db at the moment)
+channelDBsizeKB=$(sudo ls -l --block-size=K /mnt/hdd/lnd/data/graph/mainnet/channel.db | cut -d " " -f5 | tr -dc '0-9')
+echo "# channelDBsizeKB(${channelDBsizeKB})"
+source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
+echo "# hddDataFreeKB(${hddDataFreeKB})"
+if [ "${channelDBsizeKB}" != "" ] && [ "${hddDataFreeKB}" != "" ] && [ ${hddDataFreeKB} -lt ${channelDBsizeKB} ]; then
+  echo "error='HDD/SSD free space is too low to run LND compact'"
+  exit 1
 fi
+
+# check if interactive
+if [ "$1" = interactive ];then
+  channelDBsizeHumanRead=$(sudo du -h /mnt/hdd/lnd/data/graph/mainnet/channel.db | awk '{print $1}')
+  whiptail --title " Compact LND database? " \
+	--yes-button "Yes" \
+	--no-button "No" \
+	--yesno "The current LND channel.db size: $channelDBsizeHumanRead
+If compacting the database the first time it can take a long time, but can reduce the size a lot.\n
+Do you want to compact the LND database now?" 11 60
+	if [ "$?" != "0" ]; then
+    # no
+	  exit 1
+	fi
+fi
+
+echo "# Start compacting ...."
+echo "# Can monitor the background process in a new window with:"
+echo "# tail -f /home/admin/lnd.db.bolt.auto-compact.log"
+echo
 
 echo "# Stop LND"
 sudo systemctl stop lnd
