@@ -69,12 +69,12 @@ SHA1 ${sslFingerprintTOR}"
   elif [ ${#ip2torIP} -gt 0 ]; then
     text="${text}\n
 IP2TOR: https://${ip2torIP}:${ip2torPort}
-SHA1 ${sslFingerprintTOR}
-consider adding a LetsEncrypt HTTPS Domain under OPTIONS."
+SHA1 ${sslFingerprintTOR}\n
+Consider adding a LetsEncrypt HTTPS Domain under OPTIONS."
   elif [ ${#publicDomain} -eq 0 ]; then
     text="${text}\n
 To enable easy reachability with normal browser from the outside
-consider adding a IP2TOR Bridge under OPTIONS."
+Consider adding a IP2TOR Bridge under OPTIONS."
   fi
 
   whiptail --title " LNbits ${fundinginfo}" --yes-button "OK" --no-button "OPTIONS" --yesno "${text}" 18 69
