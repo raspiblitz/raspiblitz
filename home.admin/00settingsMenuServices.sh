@@ -43,12 +43,17 @@ if [ "${network}" == "bitcoin" ]; then
   OPTIONS+=(w 'BTC Download Bitcoin Whitepaper' ${whitepaper})
 fi
 
+
+# available for both LND & c-lightning
+if [ "${lnd}" == "on" ] || [ "${cl}" == "on" ]; then
+  OPTIONS+=(i 'LNbits (Lightning Accounts)' ${LNBits})
+fi
+
 # just available for LND
 if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
   OPTIONS+=(r 'LND RTL Webinterface' ${rtlWebinterface})
   OPTIONS+=(t 'LND ThunderHub' ${thunderhub})
   OPTIONS+=(l 'LND LIT (loop, pool, faraday)' ${lit})
-  OPTIONS+=(i 'LND LNbits' ${LNBits})
   OPTIONS+=(o 'LND Balance of Satoshis' ${bos})
   OPTIONS+=(y 'LND PyBLOCK' ${pyblock})
   OPTIONS+=(h 'LND ChannelTools (Fund Rescue)' ${chantools})
@@ -362,7 +367,7 @@ if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${LNBits}" != "${choice}" ]; then
   echo "LNbits Setting changed .."
   anychange=1
-  sudo -u admin /home/admin/config.scripts/bonus.lnbits.sh ${choice} lnd
+  sudo -u admin /home/admin/config.scripts/bonus.lnbits.sh ${choice} ${lightning}
   if [ "${choice}" =  "on" ]; then
     sudo systemctl start lnbits
     sudo -u admin /home/admin/config.scripts/bonus.lnbits.sh menu
