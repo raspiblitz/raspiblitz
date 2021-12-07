@@ -185,8 +185,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo
 
   # make sure config directory exists
-  sudo mkdir -p /mnt/hdd/app-data/rtl
-  sudo chown rtl:rtl /mnt/hdd/app-data/rtl
+  sudo mkdir -p /mnt/hdd/app-data/rtl 2>/dev/null
+  sudo chown -R rtl:rtl /mnt/hdd/app-data/rtl
 
   echo "# Create Systemd Service: ${systemdService}.service (Template)"
   echo "
@@ -370,7 +370,7 @@ if [ "$1" = "prestart" ]; then
 
   # check if RTL-Config.json exists
   configExists=$(ls /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json 2>/dev/null | grep -c "RTL-Config.json")
-  if [ "${configExists}" == "" ]; then
+  if [ "${configExists}" == "0" ]; then
     # copy template
     cp /home/rtl/RTL/docs/Sample-RTL-Config.json /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json
     chmod 600 /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json
