@@ -613,7 +613,7 @@ def menuMakeSubscription(blitzServiceName, torAddress, torPort):
         d = Dialog(dialog="dialog", autowidgetsize=True)
         d.set_background_title("Select IP2TOR Bridge Shop (communication secured thru TOR)")
         code, text = d.inputbox(
-            "Enter Address of a IP2TOR Shop (OR JUST USE DEFAULT):",
+            "Enter Address of the IP2TOR Shop (OR JUST PRESS OK):",
             height=10, width=72, init=shopurl,
             title="Shop Address")
 
