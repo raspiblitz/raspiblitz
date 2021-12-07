@@ -581,6 +581,8 @@ echo "*** ADDING SERVICE USER bitcoin"
 # create user and set default password for user
 sudo adduser --disabled-password --gecos "" bitcoin
 echo "bitcoin:raspiblitz" | sudo chpasswd
+# make home directory readable
+sudo chmod 755 /home/bitcoin
 
 echo
 echo "*** ADDING GROUPS FOR CREDENTIALS STORE ***"
