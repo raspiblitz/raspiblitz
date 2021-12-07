@@ -123,8 +123,7 @@ consider adding a IP2TOR Bridge under OPTIONS."
 
   case $CHOICE in
         IP2TOR-ON)
-            echo "TODO: IP2TOR-ON implement"
-            sleep 5
+            python /home/admin/config.scripts/blitz.subscriptions.ip2tor.py create-ssh-dialog LNBITS ${toraddress} 80
             exit 0
             ;;
         IP2TOR-OFF)
