@@ -1079,6 +1079,7 @@ def subscription_by_service():
             subs = toml.load(SUBSCRIPTIONS_FILE)
             for idx, sub in enumerate(subs['subscriptions_ip2tor']):
                 if sub['active'] and sub['name'] == service_name:
+                    print("id='{0}'".format(sub['id']))
                     print("type='{0}'".format(sub['type']))
                     print("ip='{0}'".format(sub['ip']))
                     print("port='{0}'".format(sub['port']))
