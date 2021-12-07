@@ -35,6 +35,14 @@ if [ "$1" = "menu" ]; then
 	  fi
   fi
 
+  # add info on funding source
+  fundinginfo=""
+  if [ "${fundingsource}" == "lnd" ] || [ "${fundingsource}" == "tlnd" ] || [ "${fundingsource}" == "slnd" ]; then
+    fundinginfo="on LND "
+  elif [ "${fundingsource}" == "cl" ] || [ "${fundingsource}" == "tcl" ] || [ "${fundingsource}" == "scl" ]; then
+    fundinginfo="on c-lightning "
+  fi
+
   text="Local Web Browser: https://${localIP}:${httpsPort}"
 
   if [ ${#publicDomain} -gt 0 ]; then
@@ -69,7 +77,7 @@ To enable easy reachability with normal browser from the outside
 consider adding a IP2TOR Bridge under OPTIONS."
   fi
 
-  whiptail --title " LNbits " --yes-button "OK" --no-button "OPTIONS" --yesno "${text}" 16 69
+  whiptail --title " LNbits ${fundinginfo}" --yes-button "OK" --no-button "OPTIONS" --yesno "${text}" 16 69
   result=$?
   /home/admin/config.scripts/blitz.display.sh hide
   echo "option (${result}) - please wait ..."
@@ -135,7 +143,8 @@ consider adding a IP2TOR Bridge under OPTIONS."
             echo "Restarting LNbits ..."
             sudo systemctl restart lnbits
             echo
-            echo "OK new funding source for LNbits set - press ENTER to continue"
+            echo "OK new funding source for LNbits active."
+            echo "PRESS ENTER to continue"
             read key
             exit 0
             ;;
@@ -145,7 +154,8 @@ consider adding a IP2TOR Bridge under OPTIONS."
             echo "Restarting LNbits ..."
             sudo systemctl restart lnbits
             echo
-            echo "OK new funding source for LNbits set - press ENTER to continue"
+            echo "OK new funding source for LNbits active." 
+            echo "PRESS ENTER to continue"
             read key
             exit 0
             ;;
@@ -369,7 +379,6 @@ if [ "$1" = "sync" ] || [ "$1" = "repo" ]; then
 fi
 
 # stop service
-echo "making sure services are not running"
 sudo systemctl stop lnbits 2>/dev/null
 
 # install
