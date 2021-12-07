@@ -360,12 +360,17 @@ if [ "$1" = "prestart" ]; then
 
   # prepare RTL-Config.json file
   echo "# PREPARE /home/rtl/${systemdService}/RTL-Config.json"
-  # make and clean directory
-  mkdir -p /home/rtl/${systemdService}
-  rm -f /home/rtl/${systemdService}/RTL-Config.json 2>/dev/null 
-  # copy template
-  cp /home/rtl/RTL/docs/Sample-RTL-Config.json /home/rtl/${systemdService}/RTL-Config.json
-  chmod 600 /home/rtl/${systemdService}/RTL-Config.json
+
+  # make sure directory exists
+  mkdir -p /home/rtl/${systemdService} 2>/dev/null
+
+  # check if RTL-Config.json exists
+  configExists=$(ls /home/rtl/${systemdService}/RTL-Config.json 2>/dev/null | grep -c "RTL-Config.json")
+  if [ "${configExists}" == "" ]; then
+    # copy template
+    cp /home/rtl/RTL/docs/Sample-RTL-Config.json /home/rtl/${systemdService}/RTL-Config.json
+    chmod 600 /home/rtl/${systemdService}/RTL-Config.json
+  fi
 
   # LND changes of config
   if [ "${LNTYPE}" == "lnd" ]; then
@@ -373,6 +378,7 @@ if [ "$1" = "prestart" ]; then
     cat /home/rtl/${systemdService}/RTL-Config.json | \
     jq ".port = \"${RTLHTTP}\"" | \
     jq ".multiPass = \"${RPCPASSWORD}\"" | \
+    jq ".multiPassHashed = \"\"" | \
     jq ".nodes[0].lnNode = \"${hostname}\"" | \
     jq ".nodes[0].lnImplementation = \"LND\"" | \
     jq ".nodes[0].Authentication.macaroonPath = \"/home/rtl/.lnd/data/chain/${network}/${CHAIN}/\"" | \
@@ -393,6 +399,7 @@ if [ "$1" = "prestart" ]; then
     cat /home/rtl/${systemdService}/RTL-Config.json | \
     jq ".port = \"${RTLHTTP}\"" | \
     jq ".multiPass = \"${RPCPASSWORD}\"" | \
+    jq ".multiPassHashed = \"\"" | \
     jq ".nodes[0].lnNode = \"${hostname}\"" | \
     jq ".nodes[0].lnImplementation = \"CLT\"" | \
     jq ".nodes[0].Authentication.macaroonPath = \"/home/bitcoin/c-lightning-REST/certs\"" | \
