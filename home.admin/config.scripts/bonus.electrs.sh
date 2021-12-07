@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # https://github.com/romanz/electrs/releases
-ELECTRSVERSION="v0.9.2"
+ELECTRSVERSION="v0.9.3"
 # https://github.com/romanz/electrs/commits/master
 # ELECTRSVERSION="3041e89cd2fb377541b929d852ef6298c2d4e60a"
 
@@ -308,7 +308,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # https://github.com/romanz/electrs/blob/master/doc/usage.md#configuration-files-and-environment-variables
     sudo -u electrs mkdir /home/electrs/.electrs 2>/dev/null
     echo "
-verbose = 2
 timestamp = true
 jsonrpc_import = true
 index-batch-size = 10
