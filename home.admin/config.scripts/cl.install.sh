@@ -97,7 +97,8 @@ if [ "$1" = "install" ]; then
     autoconf automake build-essential git libtool libgmp-dev \
     libsqlite3-dev python3 python3-mako net-tools zlib1g-dev libsodium-dev \
     gettext unzip
-  sudo pip3 install mrkd
+  sudo pip3 install mrkd==0.2.0
+  sudo pip3 install mistune==0.8.4
   
   sudo -u admin unzip clightning-${CLVERSION}.zip
   cd clightning-${CLVERSION} || exit 1
@@ -125,6 +126,7 @@ if [ "$1" = "install" ]; then
     sudo -u admin lightning-cli --version
     exit 1
   fi
+  echo
   echo "- OK the installation of C-lightning v${installed} is successful"
   exit 0
 fi
@@ -181,9 +183,11 @@ if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = testPR ];then
     echo "# Installing dependencies"
     echo
     sudo apt-get install -y \
-    autoconf automake build-essential git libtool libgmp-dev \
-    libsqlite3-dev python3 python3-mako net-tools zlib1g-dev libsodium-dev \
-    gettext
+     autoconf automake build-essential git libtool libgmp-dev \
+     libsqlite3-dev python3 python3-mako net-tools zlib1g-dev libsodium-dev \
+     gettext
+    sudo pip3 install mrkd==0.2.0
+    sudo pip3 install mistune==0.8.4
 
     ####################################
     # Download and compile from source #
@@ -225,13 +229,6 @@ if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = testPR ];then
     else
       echo "# Installing the version $CLVERSION"
       sudo -u bitcoin git reset --hard $CLVERSION
-    fi
-
-    echo "Installing additional dependencies"  
-    sudo apt-get install -y valgrind python3-pip libpq-dev 
-    if ! sudo pip3 install -r requirements.txt; then
-      # just in case building the requirements fails
-      sudo pip3 install mrkd
     fi
 
     echo "# Building with EXPERIMENTAL_FEATURES enabled"
