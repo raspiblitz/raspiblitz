@@ -75,6 +75,14 @@ if [ "$pause" -ne "0" ]; then
     dialog --pause "  Starting RaspiBlitz v${codeVersion} ..." 8 58 ${pause}
 fi
 
+# listen to CTRL-c & CTRL-z to break loop
+quit() {
+  echo "SIGINT or SIGTERM received, exiting..."
+  kill -9 $$
+}
+trap quit INT
+trap quit TERM
+
 # DISPLAY LOOP
 chain=""
 while :
