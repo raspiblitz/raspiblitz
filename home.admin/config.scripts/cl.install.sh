@@ -8,16 +8,11 @@ CLVERSION=v0.10.2
 # https://github.com/ElementsProject/lightning/commit/master
 # CLVERSION="063366ed7e3b7cc12a8d1681acc2b639cf07fa23"
 
-# vars
-source /home/admin/raspiblitz.info
-source /mnt/hdd/raspiblitz.conf
-
 # help
 if [ $# -eq 0 ]||[ "$1" = "-h" ]||[ "$1" = "--help" ];then
   echo
   echo "C-lightning install script"
   echo "The default version is: $CLVERSION"
-  echo "Setting up on ${chain}net unless otherwise specified"
   echo "mainnet / testnet / signet instances can run parallel"
   echo
   echo "Usage:"
@@ -134,7 +129,9 @@ if [ "$1" = "install" ]; then
   exit 0
 fi
 
-# Tor
+# vars
+source /home/admin/raspiblitz.info
+source /mnt/hdd/raspiblitz.conf
 TORGROUP="debian-tor"
 
 if [ "$1" = update ]||[ "$1" = testPR ];then
