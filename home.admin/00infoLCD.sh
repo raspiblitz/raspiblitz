@@ -80,14 +80,6 @@ chain=""
 while :
     do
 
-    # listen to CTRL-c & CTRL-z to break loop
-    quit() {
-      echo "SIGINT or SIGTERM received, exiting..."
-      kill -9 $$
-    }
-    trap quit INT
-    trap quit TERM
-
     ###########################
     # CHECK BASIC DATA
     ###########################   
