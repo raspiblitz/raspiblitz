@@ -87,11 +87,22 @@ sudo chmod 740 /var/cache/raspiblitz/raspiblitz.status
 # an error drops user to terminal
 #####################################
 
+# listen to CTRL-c & CTRL-z to break loop
+quit() {
+  echo "SIGINT or SIGTERM received, exiting..."
+  kill -9 $$
+}
+trap quit INT
+trap quit TERM
+
 echo "# start ssh menu loop"
 exitMenuLoop=0
 doneIBD=0
 while [ ${exitMenuLoop} -eq 0 ]
 do
+
+  echo "debug sleep to check break"
+  sleep 10
 
   #####################################
   # Access fresh system info on every loop
