@@ -144,9 +144,9 @@ baseimage="?"
 if [ $(grep -c 'Raspbian' /etc/os-release 2>/dev/null) -gt 0 ]; then
   baseimage="raspbian"
 elif [ $(grep -c 'Debian' /etc/os-release 2>/dev/null) -gt 0 ]; then
-  if [ $(uname -n | grep -c 'rpi') -gt 0 ] && [ ${isAARCH64} -gt 0 ]; then
+  if [ $(uname -n | grep -c 'rpi') -gt 0 ] && [ "${cpu}" = aarch64 ]; then
     baseimage="debian_rpi64"
-  elif [ $(uname -n | grep -c 'raspberrypi') -gt 0 ] && [ ${isAARCH64} -gt 0 ]; then
+  elif [ $(uname -n | grep -c 'raspberrypi') -gt 0 ] && [ "${cpu}" = aarch64 ]; then
     baseimage="raspios_arm64"
   elif [ "${cpu}" = "arm" ] || [ "${cpu}" = "aarch64" ]  ; then
     baseimage="armbian"
@@ -647,6 +647,235 @@ sudo apt -y install screen
 # for multiple (detachable/background) sessions when using SSH
 # https://github.com/rootzoll/raspiblitz/issues/990
 sudo apt -y install tmux
+
+# optimization for torrent download
+sudo bash -c "echo 'net.core.rmem_max = 4194304' >> /etc/sysctl.conf"
+sudo bash -c "echo 'net.core.wmem_max = 1048576' >> /etc/sysctl.conf"
+
+# install a command-line fuzzy finder (https://github.com/junegunn/fzf)
+sudo apt -y install fzf
+
+sudo bash -c "echo '' >> /home/admin/.bashrc"
+sudo bash -c "echo '# https://github.com/rootzoll/raspiblitz/issues/1784' >> /home/admin/.bashrc"
+sudo bash -c "echo 'NG_CLI_ANALYTICS=ci' >> /home/admin/.bashrc"
+
+homeFile=/home/admin/.bashrc
+keyBindings="source /usr/share/doc/fzf/examples/key-bindings.bash"
+keyBindingsDone=$(grep -c "$keyBindings" $homeFile)
+
+if [ ${keyBindingsDone} -eq 0 ]; then
+  sudo bash -c "echo 'source /usr/share/doc/fzf/examples/key-bindings.bash' >> /home/admin/.bashrc"
+  echo "key-bindings added to $homeFile"
+else
+  echo "key-bindings already in $homeFile"
+fi
+
+homeFile=/home/admin/.bashrc
+autostart="automatically start main menu"
+autostartDone=$(grep -c "$autostart" $homeFile)
+
+if [ ${autostartDone} -eq 0 ]; then
+  # bash autostart for admin
+  sudo bash -c "echo '# shortcut commands' >> /home/admin/.bashrc"
+  sudo bash -c "echo 'source /home/admin/_commands.sh' >> /home/admin/.bashrc"
+  sudo bash -c "echo '# automatically start main menu for admin unless' >> /home/admin/.bashrc"
+  sudo bash -c "echo '# when running in a tmux session' >> /home/admin/.bashrc"
+  sudo bash -c "echo 'if [ -z \"\$TMUX\" ]; then' >> /home/admin/.bashrc"
+  sudo bash -c "echo '    ./00raspiblitz.sh' >> /home/admin/.bashrc"
+  sudo bash -c "echo 'fi' >> /home/admin/.bashrc"
+  echo "autostart added to $homeFile"
+else
+  echo "autostart already in $homeFile"
+fi
+
+sudo bash -c "echo '' >> /home/admin/.bashrc"
+sudo bash -c "echo '# Raspiblitz' >> /home/admin/.bashrc"
+
+echo
+echo "*** SWAP FILE ***"
+# based on https://raspibolt.github.io/raspibolt/raspibolt_20_pi.html#move-swap-file
+# but just deactivating and deleting old (will be created alter when user adds HDD)
+
+sudo dphys-swapfile swapoff
+sudo dphys-swapfile uninstall
+
+echo
+echo "*** INCREASE OPEN FILE LIMIT ***"
+# based on https://raspibolt.github.io/raspibolt/raspibolt_21_security.html#increase-your-open-files-limit
+
+sudo sed --in-place -i "56s/.*/*    soft nofile 128000/" /etc/security/limits.conf
+sudo bash -c "echo '*    hard nofile 128000' >> /etc/security/limits.conf"
+sudo bash -c "echo 'root soft nofile 128000' >> /etc/security/limits.conf"
+sudo bash -c "echo 'root hard nofile 128000' >> /etc/security/limits.conf"
+sudo bash -c "echo '# End of file' >> /etc/security/limits.conf"
+
+sudo sed --in-place -i "23s/.*/session required pam_limits.so/" /etc/pam.d/common-session
+
+sudo sed --in-place -i "25s/.*/session required pam_limits.so/" /etc/pam.d/common-session-noninteractive
+sudo bash -c "echo '# end of pam-auth-update config' >> /etc/pam.d/common-session-noninteractive"
+
+
+# *** fail2ban ***
+# based on https://raspibolt.github.io/raspibolt/raspibolt_21_security.html#fail2ban
+echo "*** HARDENING ***"
+sudo apt install -y --no-install-recommends python3-systemd fail2ban 
+
+# *** CACHE DISK IN RAM ***
+echo "Activating CACHE RAM DISK ... "
+sudo /home/admin/config.scripts/blitz.cache.sh on
+
+# *** Wifi, Bluetooth & other configs ***
+if [ "${baseimage}" = "raspbian" ]||[ "${baseimage}" = "raspios_arm64"  ]||\
+   [ "${baseimage}" = "debian_rpi64" ]; then
+   
+  if [ "${modeWifi}" == "false" ]; then
+    echo
+    echo "*** DISABLE WIFI ***"
+    sudo systemctl disable wpa_supplicant.service
+    sudo ifconfig wlan0 down
+  fi
+
+  echo
+  echo "*** DISABLE BLUETOOTH ***"
+
+  configFile="/boot/config.txt"
+  disableBT="dtoverlay=disable-bt"
+  disableBTDone=$(grep -c "$disableBT" $configFile)
+
+  if [ ${disableBTDone} -eq 0 ]; then
+    # disable bluetooth module
+    echo >> $configFile
+    echo "# Raspiblitz" >> $configFile
+    echo 'dtoverlay=pi3-disable-bt' | sudo tee -a $configFile
+    echo 'dtoverlay=disable-bt' | sudo tee -a $configFile
+  else
+    echo "disable BT already in $configFile"
+  fi
+
+  # remove bluetooth services
+  sudo systemctl disable bluetooth.service
+  sudo systemctl disable hciuart.service
+
+  # remove bluetooth packages
+  sudo apt remove -y --purge pi-bluetooth bluez bluez-firmware
+  echo
+
+  # disable audio
+  echo "*** DISABLE AUDIO (snd_bcm2835) ***"
+  sudo sed -i "s/^dtparam=audio=on/# dtparam=audio=on/g" /boot/config.txt
+  echo
+  
+  # disable DRM VC4 V3D
+  echo "*** DISABLE DRM VC4 V3D driver ***"
+  dtoverlay=vc4-fkms-v3d
+  sudo sed -i "s/^dtoverlay=vc4-fkms-v3d/# dtoverlay=vc4-fkms-v3d/g" /boot/config.txt
+  echo
+
+  # I2C fix (make sure dtparam=i2c_arm is not on)
+  # see: https://github.com/rootzoll/raspiblitz/issues/1058#issuecomment-739517713
+  sudo sed -i "s/^dtparam=i2c_arm=.*//g" /boot/config.txt 
+fi
+
+# *** FATPACK *** (can be activated by parameter - see details at start of script)
+if [ "${fatpack}" == "true" ]; then
+  echo "*** FATPACK ***"
+  echo "* Adding nodeJS Framework ..."
+  sudo /home/admin/config.scripts/bonus.nodejs.sh on
+  if [ "$?" != "0" ]; then
+    echo "FATPACK FAILED"
+    exit 1
+  fi
+  echo "* Optional Packages (may be needed for extended features)"
+  sudo apt-get install -y qrencode
+  sudo apt-get install -y btrfs-tools
+  sudo apt-get install -y secure-delete
+  sudo apt-get install -y fbi
+  sudo apt-get install -y ssmtp
+  sudo apt-get install -y unclutter xterm python3-pyqt5
+  sudo apt-get install -y xfonts-terminus
+  sudo apt-get install -y nginx apache2-utils
+  sudo apt-get install -y nginx
+  sudo apt-get install -y python3-jinja2
+  sudo apt-get install -y socat
+  sudo apt-get install -y libatlas-base-dev
+  sudo apt-get install -y mariadb-server mariadb-client
+  sudo apt-get install -y hexyl
+  sudo apt-get install -y autossh
+
+  # *** UPDATE FALLBACK NODE LIST (only as part of fatpack) *** see https://github.com/rootzoll/raspiblitz/issues/1888
+  echo "*** FALLBACK NODE LIST ***"
+  sudo -u admin curl -H "Accept: application/json; indent=4" https://bitnodes.io/api/v1/snapshots/latest/ -o /home/admin/fallback.nodes
+  byteSizeList=$(sudo -u admin stat -c %s /home/admin/fallback.nodes)
+  if [ ${#byteSizeList} -eq 0 ] || [ ${byteSizeList} -lt 10240 ]; then 
+    echo "WARN: Failed downloading fresh FALLBACK NODE LIST --> https://bitnodes.io/api/v1/snapshots/latest/"
+    sudo rm /home/admin/fallback.nodes 2>/dev/null
+    sudo cp /home/admin/assets/fallback.nodes /home/admin/fallback.nodes
+  fi
+  sudo chown admin:admin /home/admin/fallback.nodes
+
+else
+  echo "* skipping FATPACK"
+fi
+
+# *** BOOTSTRAP ***
+echo
+echo "*** RASPI BOOTSTRAP SERVICE ***"
+sudo chmod +x /home/admin/_bootstrap.sh
+sudo cp /home/admin/assets/bootstrap.service /etc/systemd/system/bootstrap.service
+sudo systemctl enable bootstrap
+
+# *** BACKGROUND ***
+echo
+echo "*** RASPI BACKGROUND SERVICE ***"
+sudo chmod +x /home/admin/_background.sh
+sudo cp /home/admin/assets/background.service /etc/systemd/system/background.service
+sudo systemctl enable background
+
+###########
+# BITCOIN #
+###########
+echo
+/home/admin/config.scripts/bitcoin.install.sh install || exit 1
+
+#######
+# LND #
+#######
+echo
+/home/admin/config.scripts/lnd.install.sh install || exit 1
+
+###############
+# C-LIGHTNING #
+###############
+echo
+/home/admin/config.scripts/cl.install.sh install || exit 1
+
+echo
+echo "*** raspiblitz.info ***"
+sudo cat /home/admin/raspiblitz.info
+
+# *** RASPIBLITZ IMAGE READY INFO ***
+echo
+echo "**********************************************"
+echo "BASIC SD CARD BUILD DONE"
+echo "**********************************************"
+echo
+echo "Your SD Card Image for RaspiBlitz is ready (might still do display config)."
+echo "Take the chance & look thru the output above if you can spot any errors or warnings."
+echo
+echo "IMPORTANT IF WANT TO MAKE A RELEASE IMAGE FROM THIS BUILD:"
+echo "1. login fresh --> user:admin password:raspiblitz"
+echo "2. run --> release"
+echo
+
+# (do last - because might trigger reboot)
+if [ "${displayClass}" != "headless" ] || [ "${baseimage}" = "raspbian" ] || [ "${baseimage}" = "raspios_arm64" ]; then
+  echo "*** ADDITIONAL DISPLAY OPTIONS ***"
+  echo "- calling: blitz.display.sh set-display ${displayClass}"
+  sudo /home/admin/config.scripts/blitz.display.sh set-display ${displayClass}
+  sudo /home/admin/config.scripts/blitz.display.sh rotate 1
+fi
+
+echo "# BUILD DONE - see above"
 
 # optimization for torrent download
 sudo bash -c "echo 'net.core.rmem_max = 4194304' >> /etc/sysctl.conf"
