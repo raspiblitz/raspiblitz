@@ -101,9 +101,6 @@ doneIBD=0
 while [ ${exitMenuLoop} -eq 0 ]
 do
 
-  echo "debug sleep to check break"
-  sleep 10
-
   #####################################
   # Access fresh system info on every loop
 
