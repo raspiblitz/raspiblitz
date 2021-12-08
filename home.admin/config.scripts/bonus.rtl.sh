@@ -168,7 +168,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # install
     echo "# Run: npm install"
     export NG_CLI_ANALYTICS=false
-    sudo -u rtl npm install --only=prod
+    sudo -u rtl npm install --only=prod --logLevel warn
     if ! [ $? -eq 0 ]; then
       echo "# FAIL - npm install did not run correctly - deleting code and exit"
       sudo rm -r /home/rtl/RTL
