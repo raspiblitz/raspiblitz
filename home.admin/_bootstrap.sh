@@ -143,9 +143,7 @@ fi
 
 ################################
 # FS EXPAND
-# if a file called 'ssh.reset' gets
-# placed onto the boot part of
-# the sd card - delete old ssh data
+# extend sd card to maximum capacity
 ################################
 
 source <(sudo /home/admin/config.scripts/blitz.bootdrive.sh status)
@@ -184,6 +182,7 @@ if [ ${sshReset} -eq 1 ]; then
   echo "SSHRESET switch found ... stopping SSH and deleting old certs" >> $logFile
   sudo /home/admin/config.scripts/blitz.ssh.sh renew >> $logFile
   sudo /home/admin/config.scripts/blitz.ssh.sh backup >> $logFile
+  sudo ufw allow ssh
   systemInitReboot=1
   sed -i "s/^message=.*/message='SSHRESET'/g" ${infoFile}
 else
