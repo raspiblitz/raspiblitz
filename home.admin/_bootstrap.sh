@@ -233,7 +233,7 @@ sleep 5
 ################################
 
 # resetting start count files
-echo "SYSTEMD RESTART LOG: blockchain (bitcoind/litecoind)" > /home/admin/systemd.blockchain.log
+echo "SYSTEMD RESTART LOG: blockchain (bitcoind)" > /home/admin/systemd.blockchain.log
 echo "SYSTEMD RESTART LOG: lightning (LND)" > /home/admin/systemd.lightning.log
 sudo chmod 666 /home/admin/systemd.blockchain.log
 sudo chmod 666 /home/admin/systemd.lightning.log
@@ -425,7 +425,6 @@ if [ ${isMounted} -eq 0 ]; then
   echo "hddCandidate='${hddCandidate}'" >> ${infoFile}
   echo "hddGigaBytes=${hddGigaBytes}" >> ${infoFile}
   echo "hddBlocksBitcoin=${hddBlocksBitcoin}" >> ${infoFile}
-  echo "hddBlocksLitecoin=${hddBlocksLitecoin}" >> ${infoFile}
   echo "hddGotMigrationData=${hddGotMigrationData}" >> ${infoFile}
   echo ""
   echo "HDD is there but not AutoMounted yet - Waiting for user Setup/Update" >> $logFile

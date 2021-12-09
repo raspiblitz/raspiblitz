@@ -323,7 +323,7 @@ if [ "$1" = "export" ]; then
   # collect files to exclude in export in temp file
   echo "*.tar.gz" > ~/.exclude.temp
   echo "/mnt/hdd/bitcoin" >> ~/.exclude.temp 
-  echo "/mnt/hdd/litecoin" >> ~/.exclude.temp 
+  echo "/mnt/hdd/litecoin" >> ~/.exclude.temp # keep for legacy reasons
   echo "/mnt/hdd/swapfile" >> ~/.exclude.temp 
   echo "/mnt/hdd/temp" >> ~/.exclude.temp
   echo "/mnt/hdd/lost+found" >> ~/.exclude.temp 
@@ -461,7 +461,7 @@ if [ "$1" = "import" ]; then
     exit 1
   fi
 
-  # copy bitcoin/litecoin data backups back to original places (if part of backup)
+  # copy bitcoin data backups back to original places (if part of backup)
   if [ -d "/mnt/hdd/backup_bitcoin" ]; then
     echo "# Copying back bitcoin backup data .."
     sudo mkdir /mnt/hdd/bitcoin

@@ -20,7 +20,6 @@ if [ "${network}" == "" ]; then
 
     OPTIONS=()
     OPTIONS+=(BITCOIN "Setup BITCOIN Blockchain (BitcoinCore)")
-    OPTIONS+=(LITECOIN "Setup LITECOIN Blockchain (experimental)")
     CHOICE=$(dialog --clear \
                 --backtitle "RaspiBlitz ${codeVersion} - Setup" \
                 --title "⚡ Blockchain ⚡" \
@@ -33,12 +32,6 @@ if [ "${network}" == "" ]; then
         BITCOIN)
             # bitcoin core
             network="bitcoin"
-            ;;
-        LITECOIN)
-            # litecoin
-            network="litecoin"
-            # can only work with LND
-            lightning="lnd"
             ;;
         *)
             clear

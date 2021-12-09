@@ -267,18 +267,7 @@ elif [ "$1" == "basic-setup" ]; then
   fi
 
   # get network from config (BLOCKCHAIN)
-  lndNetwork=""
-  source <(sudo cat /mnt/hdd/lnd/lnd.conf 2>/dev/null | grep 'bitcoin.active' | sed 's/^[a-z]*\./bitcoin_/g')
-  source <(sudo cat /mnt/hdd/lnd/lnd.conf 2>/dev/null | grep 'litecoin.active' | sed 's/^[a-z]*\./litecoin_/g')
-  if [ "${bitcoin_active}" == "1" ] && [ "${litecoin_active}" == "1" ]; then
-    echo "err='lnd.conf: bitcoin and litecoin are set active at the same time'"
-  elif [ "${bitcoin_active}" == "1" ]; then
-    lndNetwork="bitcoin"
-  elif [ "${litecoin_active}" == "1" ]; then
-    lndNetwork="litecoin"
-  else
-    echo "err='lnd.conf: no blockchain network is set'"
-  fi
+  lndNetwork="bitcoin"
   echo "network='${lndNetwork}'"
 
   # check if network is same the raspiblitz config

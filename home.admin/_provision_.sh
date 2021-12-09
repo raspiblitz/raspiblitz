@@ -206,8 +206,6 @@ echo "allow: bitcoin testnet"
 sudo ufw allow 18333 comment 'bitcoin testnet'
 echo "allow: bitcoin mainnet"
 sudo ufw allow 8333 comment 'bitcoin mainnet'
-echo "allow: litecoin mainnet"
-sudo ufw allow 9333 comment 'litecoin mainnet'
 echo 'allow: lightning testnet'
 sudo ufw allow 19735 comment 'lightning testnet'
 echo "allow: lightning mainnet"

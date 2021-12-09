@@ -130,9 +130,6 @@ if [ "${setupPhase}" == "setup" ]; then
     # check if there is a blockchain to use (so HDD is already formatted)
     # thats also true if the node is coming from another nodeOS
     existingBlockchain=""
-    if [ "${hddBlocksLitecoin}" == "1" ]; then
-      existingBlockchain="LITECOIN"
-    fi
     if [ "${hddBlocksBitcoin}" == "1" ] || [ "${hddGotMigrationData}" != "" ]; then
       existingBlockchain="BITCOIN"
     fi
@@ -194,11 +191,7 @@ if [ "${setupPhase}" == "setup" ]; then
 
       # by keeping that blockchain - user chose already the blockchain type
       echo "Selecting as blockchain network automatically .."
-      if [ "${hddBlocksLitecoin}" == "1" ]; then
-        echo "network=litecoin" >> $SETUPFILE
-      else
-        echo "network=bitcoin" >> $SETUPFILE
-      fi
+      echo "network=bitcoin" >> $SETUPFILE
 
     else
 

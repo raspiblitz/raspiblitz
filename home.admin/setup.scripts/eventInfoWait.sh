@@ -180,7 +180,7 @@ elif [ "${eventID}" == "waitsetup" ] && [ "${mode}" == "lcd" ]; then
         backtitle="${backtitle} / ${ramGB}GB RAM"
 
         # display if HDD conatains blockhain or not
-        if [ "${hddBlocksBitcoin}" == "1" ] || [ "${hddBlocksLitecoin}" == "1" ]; then
+        if [ "${hddBlocksBitcoin}" == "1" ]; then
             backtitle="${backtitle} / ${hddGigaBytes}GB (pre-synced)"
         else
             backtitle="${backtitle} / ${hddGigaBytes}GB HDD"

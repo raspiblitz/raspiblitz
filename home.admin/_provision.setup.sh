@@ -174,7 +174,7 @@ if [ "${lightning}" == "lnd" ]; then
     # preparing new LND config
     echo "Creating new LND config ..." >> ${logFile}
     sudo -u bitcoin mkdir /mnt/hdd/lnd 2> /dev/null
-    sudo cp /home/admin/assets/lnd.${network}.conf /mnt/hdd/lnd/lnd.conf
+    sudo cp /home/admin/assets/lnd.bitcoin.conf /mnt/hdd/lnd/lnd.conf
     sudo chown bitcoin:bitcoin /mnt/hdd/lnd/lnd.conf
     sudo /home/admin/config.scripts/lnd.install.sh on mainnet
     sudo /home/admin/config.scripts/lnd.setname.sh mainnet ${hostname}
@@ -201,9 +201,7 @@ if [ "${lightning}" == "lnd" ]; then
   sudo systemctl stop lnd 2>/dev/null
   sudo systemctl disable lnd 2>/dev/null
 
-  # make sure lnd gets started after blockchain service
-  sed -i "5s/.*/Wants=${network}d.service/" /home/admin/assets/lnd.service >> ${logFile}
-  sed -i "6s/.*/After=${network}d.service/" /home/admin/assets/lnd.service >> ${logFile}
+  # copy lnd service
   sudo cp /home/admin/assets/lnd.service /etc/systemd/system/lnd.service >> ${logFile}
 
   # start lnd up
