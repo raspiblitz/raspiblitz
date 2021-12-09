@@ -378,7 +378,8 @@ if [ "$1" = "status" ]; then
 
   # HDD Adpater UASP support --> https://www.pragmaticlinux.com/2021/03/fix-for-getting-your-ssd-working-via-usb-3-on-your-raspberry-pi/
   # in both cases (if mounted or not - using the hdd selection from both cases)
-  if [ ${#hdd} -gt 0 ]; then
+  # only check if lsusb command is availabe
+  if [ ${#hdd} -gt 0 ] && [ "$(type -t lsusb | grep -c file)" -gt 0 ]; then
 
     # determine USB HDD adapter model ID 
     hddAdapter=$(lsusb | grep "SATA" | head -1 | cut -d " " -f6)
