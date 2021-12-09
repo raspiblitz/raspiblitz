@@ -12,7 +12,7 @@ torrc="/etc/tor/torrc"
 # command info
 usage(){
  echo "script to switch Tor on or off"
- echo "tor.network.sh [status|on|off|btcconf-on|btcconf-off|update]"
+ echo "tor.network.sh [status|on|off|btcconf-on|btcconf-off]"
  exit 1
 }
 
@@ -112,7 +112,7 @@ case "$1" in
       exit 1
     fi
 
-    /home/admin/config.scripts/tor.install.sh
+    /home/admin/config.scripts/tor.install.sh install
 
     # setting value in raspi blitz config
     sudo sed -i "s/^runBehindTor=.*/runBehindTor=on/g" /mnt/hdd/raspiblitz.conf
@@ -122,7 +122,7 @@ case "$1" in
 
     # ACTIVATE APPS OVER TOR
     . /mnt/hdd/raspiblitz.conf 2>/dev/null
-    /home/admin/config.scripts/tor.onion-service.sh web80 80 80 443 9999
+    /home/admin/config.scripts/tor.onion-service.sh web80 80 80
     /home/admin/config.scripts/tor.onion-service.sh debuglogs 80 6969
     [ "${BTCRPCexplorer}" = "on" ] && /home/admin/config.scripts/tor.onion-service.sh btc-rpc-explorer 80 3022 443 3023
     [ "${rtlWebinterface}" = "on" ] && /home/admin/config.scripts/tor.onion-service.sh RTL 80 3002 443 3003
@@ -221,7 +221,7 @@ EOF
 
 
   update)
-    /home/admin/config.scripts/tor.update.sh
+    /home/admin/config.scripts/tor.install.sh update source
     if [ "$(sudo systemctl is-active lnd | grep -c "active")" -gt 0 ];then
       echo "# LND needs to be restarted"
       sudo systemctl restart lnd

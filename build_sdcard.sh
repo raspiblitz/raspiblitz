@@ -9,6 +9,7 @@
 # setup fresh SD card with image above - login per SSH and run this script:
 ##########################################################################
 
+defaultBranch="v1.7.1"
 echo "*****************************************"
 echo "*     RASPIBLITZ SD CARD IMAGE SETUP    *"
 echo "*****************************************"
@@ -51,9 +52,9 @@ echo "3) GITHUB-USERNAME --> '${githubUser}'"
 
 # 4th optional parameter: GITHUB-BRANCH
 # -------------------------------------
-# could be any valid branch of the given GITHUB-USERNAME forked raspiblitz repo
+# could be any valid branch or tag of the given GITHUB-USERNAME forked raspiblitz repo
 # https://github.com/rootzoll/raspiblitz/tags
-githubBranch="${4:-v1.7.1}"
+githubBranch="${4:-"${defaultBranch}"}"
 echo "4) GITHUB-BRANCH --> '${githubBranch}'"
 
 # 5th optional parameter: DISPLAY-CLASS
@@ -96,27 +97,22 @@ echo "7) WIFI --> '${modeWifi}'"
 # keep in mind that DietPi for Raspberry is also a stripped down Raspbian
 cpu="$(uname -m)"
 architecture="$(dpkg --print-architecture)"
-if [ "${cpu}" != "arm*" ] && [ "${cpu}" != "aarch64" ] && [ "${cpu}" != "x86_64" ]; then
-  echo "!!! FAIL !!!"
-  echo "Can only build on ARM, aarch64, x86_64 not on:"
-  ${cpu}
-  exit 1
-fi
+case "${cpu}" in
+  arm*|aarch64|x86_64|amd64);;
+  *) echo -e "!!! FAIL !!!\nCan only build on ARM, aarch64, x86_64 not on: cpu=${cpu}"; exit 1;;
+esac
 echo "X) CPU-ARCHITECTURE --> '${cpu} (${architecture})'"
 
 # AUTO-DETECTION: OPERATINGSYSTEM
 # ---------------------------------------
 baseimage="$(lsb_release -si 2>/dev/null)"
 if [ "${baseimage}" = "Debian" ]; then
-  if [ "$(uname -n | grep -c 'rpi')" -gt 0 ] && [ "${cpu}" = "aarch64" ]; then
-    baseimage="debian_rpi64"
-  elif [ "$(uname -n | grep -c 'raspberrypi')" -gt 0 ] && [ "${cpu}" = "aarch64" ]; then
-    baseimage="raspios_arm64"
-  elif [ "${cpu}" = "aarch64" ] || [ "${cpu}" = "arm*" ] ; then
-    baseimage="armbian"
-  fi
-elif [ "${baseimage}" = "" ]; then
+  { [ "$(uname -n | grep -c 'rpi')" -gt 0 ] && [ "${cpu}" = "aarch64" ]; } && baseimage="debian_rpi64"
+  { [ "$(uname -n | grep -c 'raspberrypi')" -gt 0 ] && [ "${cpu}" = "aarch64" ]; } && baseimage="raspios_arm64"
+  { [ "${cpu}" = "aarch64" ] || [ "${cpu}" = "arm7l" ] || [ "${cpu}" = "arm6l" ]; } && baseimage="armbian"
+elif [ -z "${baseimage}" ]; then
   cat /etc/os-release 2>/dev/null
+  uname -a
   echo "!!! FAIL: Base Image cannot be detected or is not supported."
   exit 1
 fi
