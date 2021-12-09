@@ -297,7 +297,7 @@ do
   sleep 2
 
 done
-echo "HDD/SSD connected: ${$hddCandidate}" >> $logFile
+echo "HDD/SSD connected: ${hddCandidate}" >> $logFile
 
 # write info for LCD
 sed -i "s/^state=.*/state=system-init/g" ${infoFile}
