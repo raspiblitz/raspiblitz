@@ -165,7 +165,7 @@ if [ "${runBehindTor}" = "on" ]; then
   OPTIONS+=(FULLYNODED_BTC "Fully Noded to bitcoinRPC (iOS+Tor)") 
 fi
 
-CHOICE=$(whiptail --clear --title "Choose Mobile Wallet" --menu "" 16 75 10 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+CHOICE=$(whiptail --clear --title "Choose Mobile Wallet" --menu "" 18 75 12 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
 /home/admin/config.scripts/blitz.display.sh hide
 
@@ -242,11 +242,7 @@ Or scan the qr code on the LCD with your mobile phone.
 " 11 70
 	  fi
 	  /home/admin/config.scripts/blitz.display.sh hide
-	  checkIP2TOR LND-GRPC-API
-      if [ ${#ip2tor} -eq 0 ]; then
-	    choose_IP_or_TOR
-	  fi
-  	  /home/admin/config.scripts/bonus.lndconnect.sh zap-android ${connect}
+  	  /home/admin/config.scripts/bonus.lndconnect.sh zap-android tor
       exit 0;
     ;;
   SENDMANY_ANDROID)
