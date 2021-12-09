@@ -69,6 +69,16 @@ BACKTITLE="${localip} / ${hostname} / ${network} ${plus}"
 # Basic Options
 OPTIONS+=(INFO "RaspiBlitz Status Screen")
 
+# if LND is active
+if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
+  OPTIONS+=(LND "LND Wallet Options")
+fi
+
+# if C-Lightning is active
+if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ]; then
+  OPTIONS+=(CL "C-lightning Wallet Options")
+fi
+
 # Activated Apps/Services
 if [ "${rtlWebinterface}" == "on" ]; then
   OPTIONS+=(LRTL "LND RTL Webinterface")
@@ -84,6 +94,9 @@ if [ "${lit}" == "on" ]; then
 fi
 if [ "${sparko}" == "on" ]; then
   OPTIONS+=(SPARKO "Sparko Webwallet")
+fi
+if [ "${spark}" == "on" ]; then
+  OPTIONS+=(SPARK "Spark Wallet")
 fi
 if [ "${ElectRS}" == "on" ]; then
   OPTIONS+=(ELECTRS "Electrum Rust Server")
@@ -107,7 +120,7 @@ if [ "${specter}" == "on" ]; then
   OPTIONS+=(SPECTER "Specter Desktop")
 fi
 if [ "${joinmarket}" == "on" ]; then
-  OPTIONS+=(JMARKET "JoinMarket")
+  OPTIONS+=(JM "JoinMarket with JoininBox")
 fi
 if [ "${faraday}" == "on" ]; then
   OPTIONS+=(FARADAY "Faraday Channel Management")
@@ -141,16 +154,6 @@ fi
 #if [ ${chain} != "main" ]; then
 #  OPTIONS+=(MAINNET "Mainnet Service Options")
 #fi
-
-# if LND is active
-if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
-  OPTIONS+=(LND "LND Wallet Options")
-fi
-
-# if C-Lightning is active
-if [ "${lightning}" == "cln" ] || [ "${cln}" == "on" ]; then
-  OPTIONS+=(CLN "C-lightning Wallet Options")
-fi
 
 if [ "${testnet}" == "on" ]; then
   OPTIONS+=(TESTNETS "Testnet/Signet Options")
@@ -214,8 +217,8 @@ case $CHOICE in
         LND)
             /home/admin/99lndMenu.sh
             ;;
-        CLN)
-            /home/admin/99clnMenu.sh ${chain}net
+        CL)
+            /home/admin/99clMenu.sh ${chain}net
             ;;
         CONNECT)
             /home/admin/99connectMenu.sh
@@ -231,7 +234,7 @@ case $CHOICE in
             /home/admin/config.scripts/bonus.rtl.sh menu lnd mainnet
             ;;
         CRTL)
-            /home/admin/config.scripts/bonus.rtl.sh menu cln mainnet
+            /home/admin/config.scripts/bonus.rtl.sh menu cl mainnet
             ;;
         BTCPAY)
             /home/admin/config.scripts/bonus.btcpayserver.sh menu
@@ -246,7 +249,10 @@ case $CHOICE in
             /home/admin/config.scripts/bonus.lit.sh menu
             ;;
         SPARKO)
-            /home/admin/config.scripts/cln-plugin.sparko.sh menu mainnet
+            /home/admin/config.scripts/cl-plugin.sparko.sh menu mainnet
+            ;;
+        SPARK)
+            /home/admin/config.scripts/cl.spark.sh menu mainnet
             ;;
         LNBITS)
             /home/admin/config.scripts/bonus.lnbits.sh menu
@@ -263,7 +269,7 @@ case $CHOICE in
         SPECTER)
             /home/admin/config.scripts/bonus.specter.sh menu
             ;;
-        JMARKET)
+        JM)
             sudo /home/admin/config.scripts/bonus.joinmarket.sh menu
             ;;
         FARADAY)

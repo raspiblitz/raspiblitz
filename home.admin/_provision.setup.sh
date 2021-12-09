@@ -29,14 +29,14 @@ sudo sed -i "s/^message=.*/message='Provision Setup'/g" ${infoFile}
 # Preserve SSH keys
 # just copy dont link anymore
 # see: https://github.com/rootzoll/raspiblitz/issues/1798
-sudo sed -i "s/^message=.*/message='SSH Keys'/g" ${infoFile}
+sed -i "s/^message=.*/message='SSH Keys'/g" ${infoFile}
 
 # link ssh directory from SD card to HDD
-sudo /home/admin/config.scripts/blitz.ssh.sh backup
+/home/admin/config.scripts/blitz.ssh.sh backup
 
 ###################################
 # Prepare Blockchain Service
-sudo sed -i "s/^message=.*/message='Blockchain Setup'/g" ${infoFile}
+sed -i "s/^message=.*/message='Blockchain Setup'/g" ${infoFile}
 
 if [ "${network}" == "" ]; then
   sed -i "s/^state=.*/state=error/g" ${infoFile}
@@ -54,80 +54,71 @@ if [ "${chain}" == "" ]; then
   exit 2
 fi
 
-# make sure choosen blockchain service is installed
-if [ "${network}" != "bitcoin" ]; then
-  # TODO also ... check if /home/admin/selfsync.flag is needed on other chains
-  sed -i "s/^state=.*/state=error/g" ${infoFile}
-  sed -i "s/^message=.*/message='TODO: install ${network}'/g" ${infoFile}
-  echo "FAIL see ${logFile}"
-  echo "TODO: make sure ${network} is installed!" >> ${logFile}
-  exit 3
-fi
-
 # copy configs files and directories
 echo ""
 echo "*** Prepare ${network} ***" >> ${logFile}
-sudo mkdir /mnt/hdd/${network} >>${logFile} 2>&1
-sudo chown -R bitcoin:bitcoin /mnt/hdd/${network} >>${logFile} 2>&1
+mkdir /mnt/hdd/${network} >>${logFile} 2>&1
+chown -R bitcoin:bitcoin /mnt/hdd/${network} >>${logFile} 2>&1
 sudo -u bitcoin mkdir /mnt/hdd/${network}/blocks >>${logFile} 2>&1
 sudo -u bitcoin mkdir /mnt/hdd/${network}/chainstate >>${logFile} 2>&1
-sudo cp /home/admin/assets/${network}.conf /mnt/hdd/${network}/${network}.conf
-sudo chown bitcoin:bitcoin /mnt/hdd/${network}/${network}.conf >>${logFile} 2>&1
-sudo mkdir /home/admin/.${network} >>${logFile} 2>&1
-sudo cp /home/admin/assets/${network}.conf /home/admin/.${network}/${network}.conf
-sudo chown -R admin:admin /home/admin/.${network} >>${logFile} 2>&1
+cp /home/admin/assets/${network}.conf /mnt/hdd/${network}/${network}.conf
+chown bitcoin:bitcoin /mnt/hdd/${network}/${network}.conf >>${logFile} 2>&1
+mkdir /home/admin/.${network} >>${logFile} 2>&1
+cp /home/admin/assets/${network}.conf /home/admin/.${network}/${network}.conf
+chown -R admin:admin /home/admin/.${network} >>${logFile} 2>&1
 
 # make sure all directories are linked
-sudo /home/admin/config.scripts/blitz.datadrive.sh link >> ${logFile}
+/home/admin/config.scripts/blitz.datadrive.sh link >> ${logFile}
 
 # test bitcoin config
 confExists=$(sudo ls /mnt/hdd/${network}/${network}.conf | grep -c "${network}.conf")
 echo "File Exists: /mnt/hdd/${network}/${network}.conf --> ${confExists}" >> ${logFile}
 
 # set password B as RPC password
-echo "SETTING PASSWORD B" >> ${logFile}
-sudo /home/admin/config.scripts/blitz.setpassword.sh b "${passwordB}" >> ${logFile}
+echo "# setting PASSWORD B" >> ${logFile}
+/home/admin/config.scripts/blitz.setpassword.sh b "${passwordB}" >> ${logFile}
 
 # optimize RAM for blockchain validation (bitcoin only)
 if [ "${network}" == "bitcoin" ] && [ "${hddBlocksBitcoin}" == "0" ]; then
   echo "*** Optimizing RAM for Sync ***" >> ${logFile}
   kbSizeRAM=$(cat /proc/meminfo | grep "MemTotal" | sed 's/[^0-9]*//g')
+  echo "kbSizeRAM(${kbSizeRAM})" >> ${logFile}
   echo "dont forget to reduce dbcache once IBD is done" > "/mnt/hdd/${network}/blocks/selfsync.flag"
   # RP4 4GB
   if [ ${kbSizeRAM} -gt 3500000 ]; then
     echo "Detected RAM >=4GB --> optimizing ${network}.conf" >> ${logFile}
-    sudo sed -i "s/^dbcache=.*/dbcache=2560/g" /mnt/hdd/${network}/${network}.conf
+    sed -i "s/^dbcache=.*/dbcache=2560/g" /mnt/hdd/${network}/${network}.conf
   # RP4 2GB
   elif [ ${kbSizeRAM} -gt 1500000 ]; then
     echo "Detected RAM >=2GB --> optimizing ${network}.conf" >> ${logFile}
-    sudo sed -i "s/^dbcache=.*/dbcache=1536/g" /mnt/hdd/${network}/${network}.conf
+    sed -i "s/^dbcache=.*/dbcache=1536/g" /mnt/hdd/${network}/${network}.conf
   #RP3/4 1GB
   else
     echo "Detected RAM <=1GB --> optimizing ${network}.conf" >> ${logFile}
-    sudo sed -i "s/^dbcache=.*/dbcache=512/g" /mnt/hdd/${network}/${network}.conf
+    sed -i "s/^dbcache=.*/dbcache=512/g" /mnt/hdd/${network}/${network}.conf
   fi
 fi
 
 # start network service
 echo ""
 echo "*** Start ${network} (SETUP) ***" >> ${logFile}
-sudo sed -i "s/^message=.*/message='Blockchain Testrun'/g" ${infoFile}
+sed -i "s/^message=.*/message='Blockchain Testrun'/g" ${infoFile}
 echo "- This can take a while .." >> ${logFile}
-sudo cp /home/admin/assets/${network}d.service /etc/systemd/system/${network}d.service
-sudo systemctl enable ${network}d.service
-sudo systemctl start ${network}d.service
+cp /home/admin/assets/${network}d.service /etc/systemd/system/${network}d.service
+systemctl enable ${network}d.service
+systemctl start ${network}d.service
 
 # check if bitcoin has started
 bitcoinRunning=0
 loopcount=0
 while [ ${bitcoinRunning} -eq 0 ]
 do
-  >&2 echo "# (${loopcount}/200) checking if ${network}d is running ... " >> ${logFile}
+  >&2 echo "# (${loopcount}/50) checking if ${network}d is running ... " >> ${logFile}
   bitcoinRunning=$(sudo -u bitcoin ${network}-cli getblockchaininfo 2>/dev/null | grep "initialblockdownload" -c)
-  sleep 2
+  sleep 8
   sync
   loopcount=$(($loopcount +1))
-  if [ ${loopcount} -gt 200 ]; then
+  if [ ${loopcount} -gt 50 ]; then
     sed -i "s/^state=.*/state=error/g" ${infoFile}
     sed -i "s/^message=.*/message='setup: failed ${network}'/g" ${infoFile}
     echo "FAIL: setup: failed ${network}" >> ${logFile}
@@ -183,7 +174,7 @@ if [ "${lightning}" == "lnd" ]; then
     # preparing new LND config
     echo "Creating new LND config ..." >> ${logFile}
     sudo -u bitcoin mkdir /mnt/hdd/lnd 2> /dev/null
-    sudo cp /home/admin/assets/lnd.${network}.conf /mnt/hdd/lnd/lnd.conf
+    sudo cp /home/admin/assets/lnd.bitcoin.conf /mnt/hdd/lnd/lnd.conf
     sudo chown bitcoin:bitcoin /mnt/hdd/lnd/lnd.conf
     sudo /home/admin/config.scripts/lnd.install.sh on mainnet
     sudo /home/admin/config.scripts/lnd.setname.sh mainnet ${hostname}
@@ -210,9 +201,7 @@ if [ "${lightning}" == "lnd" ]; then
   sudo systemctl stop lnd 2>/dev/null
   sudo systemctl disable lnd 2>/dev/null
 
-  # make sure lnd gets started after blockchain service
-  sed -i "5s/.*/Wants=${network}d.service/" /home/admin/assets/lnd.service >> ${logFile}
-  sed -i "6s/.*/After=${network}d.service/" /home/admin/assets/lnd.service >> ${logFile}
+  # copy lnd service
   sudo cp /home/admin/assets/lnd.service /etc/systemd/system/lnd.service >> ${logFile}
 
   # start lnd up
@@ -271,7 +260,8 @@ if [ "${lightning}" == "lnd" ]; then
   if [ "${seedWords}" != "" ] && [ "${staticchannelbackup}" != "" ]; then
 
     echo "WALLET --> SEED + SCB " >> ${logFile}
-    sudo sed -i "s/^message=.*/message='LND Wallet (SEED & SCB)'/g" ${infoFile}    
+    sudo sed -i "s/^message=.*/message='LND Wallet (SEED & SCB)'/g" ${infoFile}
+    if ! pip list | grep grpc; then sudo -H python3 -m pip install grpcio==1.38.1; fi  
     sudo /home/admin/config.scripts/lnd.initwallet.py scb mainnet ${passwordC} "${seedWords}" "${staticchannelbackup}" ${seedPassword}
     if [ "${err}" != "" ]; then
       sed -i "s/^state=.*/state=error/g" ${infoFile}
@@ -287,7 +277,8 @@ if [ "${lightning}" == "lnd" ]; then
   elif [ "${seedWords}" != "" ]; then
     
     echo "WALLET --> SEED" >> ${logFile}
-    sudo sed -i "s/^message=.*/message='LND Wallet (SEED)'/g" ${infoFile}    
+    sudo sed -i "s/^message=.*/message='LND Wallet (SEED)'/g" ${infoFile}
+    if ! pip list | grep grpc; then sudo -H python3 -m pip install grpcio==1.38.1; fi  
     sudo /home/admin/config.scripts/lnd.initwallet.py seed mainnet ${passwordC} "${seedWords}" ${seedPassword}
     if [ "${err}" != "" ]; then
       sed -i "s/^state=.*/state=error/g" ${infoFile}
@@ -303,7 +294,8 @@ if [ "${lightning}" == "lnd" ]; then
   else
 
     echo "WALLET --> NEW" >> ${logFile}
-    sudo sed -i "s/^message=.*/message='LND Wallet (NEW)'/g" ${infoFile}    
+    sudo sed -i "s/^message=.*/message='LND Wallet (NEW)'/g" ${infoFile}
+    if ! pip list | grep grpc; then sudo -H python3 -m pip install grpcio==1.38.1; fi  
     source <(sudo /home/admin/config.scripts/lnd.initwallet.py new mainnet ${passwordC})
     if [ "${err}" != "" ]; then
       sed -i "s/^state=.*/state=error/g" ${infoFile}
@@ -347,28 +339,32 @@ if [ "${lightning}" == "lnd" ]; then
     exit 15
   fi
 
+  # stop lnd for the rest of the provision process
+  echo "stopping lnd for the rest provision again (will start on next boot)" >> ${logFile}
+  systemctl stop lnd >> ${logFile}
+
 fi
 
-if [ "${lightning}" == "cln" ]; then 
+if [ "${lightning}" == "cl" ]; then 
 
   ###################################
   # c-lightning
   echo "############## c-lightning" >> ${logFile}
 
   sudo sed -i "s/^message=.*/message='C-Lightning Install'/g" ${infoFile}
-  sudo /home/admin/config.scripts/cln.install.sh on mainnet >> ${logFile}
+  sudo /home/admin/config.scripts/cl.install.sh on mainnet >> ${logFile}
   sudo sed -i "s/^message=.*/message='C-Lightning Setup'/g" ${infoFile}
 
   # OLD WALLET FROM CLIGHTNING RESCUE
-  if [ "${clnrescue}" != "" ]; then
+  if [ "${clrescue}" != "" ]; then
 
-    echo "Restore CLN data from uploaded rescue file ${clnrescue} ..." >> ${logFile}
-    source <(sudo /home/admin/config.scripts/cln.backup.sh cln-import ${clnrescue})
+    echo "Restore CL data from uploaded rescue file ${clrescue} ..." >> ${logFile}
+    source <(sudo /home/admin/config.scripts/cl.backup.sh cl-import ${clrescue})
     if [ "${error}" != "" ]; then
       sed -i "s/^state=.*/state=error/g" ${infoFile}
-      sed -i "s/^message=.*/message='setup: cln import backup failed'/g" ${infoFile}
+      sed -i "s/^message=.*/message='setup: cl import backup failed'/g" ${infoFile}
       echo "FAIL see ${logFile}"
-      echo "FAIL: setup: cln import backup failed" >> ${logFile}
+      echo "FAIL: setup: cl import backup failed" >> ${logFile}
       echo "${error}" >> ${logFile}
       exit 16
     fi
@@ -376,31 +372,31 @@ if [ "${lightning}" == "cln" ]; then
   # OLD WALLET FROM SEEDWORDS
   elif [ "${seedWords}" != "" ]; then
 
-    echo "Restore CLN wallet from seedWords ..." >> ${logFile}
-    source <(sudo /home/admin/config.scripts/cln.hsmtool.sh seed-force mainnet "${seedWords}" "${seedPassword}")
+    echo "Restore CL wallet from seedWords ..." >> ${logFile}
+    source <(sudo /home/admin/config.scripts/cl.hsmtool.sh seed-force mainnet "${seedWords}" "${seedPassword}")
 
     # check if wallet really got created 
     walletExistsNow=$(sudo ls /home/bitcoin/.lightning/bitcoin/hsm_secret 2>/dev/null | grep -c "hsm_secret")
     if [ $walletExistsNow -eq 0 ]; then
       sed -i "s/^state=.*/state=error/g" ${infoFile}
       sed -i "s/^message=.*/message='setup: seed maybe wrong'/g" ${infoFile}
-      echo "FAIL: setup: no cln wallet created - seed maybe wrong" >> ${logFile}
+      echo "FAIL: setup: no cl wallet created - seed maybe wrong" >> ${logFile}
       exit 17
     fi
 
   # NEW WALLET
   else
 
-    echo "Generate new CLN wallet ..." >> ${logFile}
+    echo "Generate new CL wallet ..." >> ${logFile}
 
     # generate new wallet
-    source <(sudo /home/admin/config.scripts/cln.hsmtool.sh new-force mainnet)
+    source <(sudo /home/admin/config.scripts/cl.hsmtool.sh new-force mainnet)
 
     # check if got new seedwords
     if [ "${seedwords}" == "" ] || [ "${seedwords6x4}" == "" ]; then
       sed -i "s/^state=.*/state=error/g" ${infoFile}
-      sed -i "s/^message=.*/message='setup: no cln seedwords'/g" ${infoFile}
-      echo "FAIL: setup: no cln seedwords" >> ${logFile}
+      sed -i "s/^message=.*/message='setup: no cl seedwords'/g" ${infoFile}
+      echo "FAIL: setup: no cl seedwords" >> ${logFile}
       exit 18
     fi
 
@@ -408,8 +404,8 @@ if [ "${lightning}" == "cln" ]; then
     walletExistsNow=$(sudo ls /home/bitcoin/.lightning/bitcoin/hsm_secret 2>/dev/null | grep -c "hsm_secret")
     if [ $walletExistsNow -eq 0 ]; then
       sed -i "s/^state=.*/state=error/g" ${infoFile}
-      sed -i "s/^message=.*/message='setup: no cln wallet created'/g" ${infoFile}
-      echo "FAIL: setup: no cln wallet created" >> ${logFile}
+      sed -i "s/^message=.*/message='setup: no cl wallet created'/g" ${infoFile}
+      echo "FAIL: setup: no cl wallet created" >> ${logFile}
       exit 19
     fi
 
@@ -419,7 +415,15 @@ if [ "${lightning}" == "cln" ]; then
 
   fi
 
+  # stop c-lightning for the rest of the provision process
+  echo "stopping lightningd for the rest provision again (will start on next boot)" >> ${logFile}
+  systemctl stop lightningd >> ${logFile}
+
 fi
+
+# stop bitcoind for the rest of the provision process
+echo "stopping bitcoind for the rest provision again (will start on next boot)" >> ${logFile}
+systemctl stop bitcoind >> ${logFile}
 
 sudo sed -i "s/^message=.*/message='Provision Setup Finish'/g" ${infoFile}
 echo "END Setup"  >> ${logFile}

@@ -163,13 +163,12 @@ sudo systemctl start ${network}d.service >> ${logFile}
 if [ "${lightning}" == "lnd" ]; then
 
   # prepare lnd service
-  sed -i "5s/.*/Wants=${network}d.service/" /home/admin/assets/lnd.service >> ${logFile} 2>&1
-  sed -i "6s/.*/After=${network}d.service/" /home/admin/assets/lnd.service >> ${logFile} 2>&1
   sudo cp /home/admin/assets/lnd.service /etc/systemd/system/lnd.service >> ${logFile} 2>&1
 
   # convert old keysend by lndExtraParameter to raspiblitz.conf setting (will be enforced by lnd.check.sh prestart) since 1.7.1
   if [ "${lndExtraParameter}" == "--accept-keysend" ]; then
     echo "# MIGRATION KEYSEND from lndExtraParameter --> raspiblitz.conf" >> ${logFile}
+    sudo sed -i '/lndKeysend=.*/d' /mnt/hdd/raspiblitz.conf
     echo "lndKeysend=on" >> /mnt/hdd/raspiblitz.conf
     sudo sed -i "/^lndExtraParameter=/d" /mnt/hdd/raspiblitz.conf 2>/dev/null
   fi
@@ -177,6 +176,10 @@ if [ "${lightning}" == "lnd" ]; then
   # if old lnd.conf exists ...
   configExists=$(sudo ls /mnt/hdd/lnd/lnd.conf | grep -c '.conf')
   if [ ${configExists} -eq 1 ]; then
+
+    # make sure correct file permisions are set
+    sudo chown bitcoin:bitcoin /mnt/hdd/lnd/lnd.conf
+    sudo chmod 664 /mnt/hdd/lnd/lnd.conf
 
     # make sure additional values are added to [Application Options] since v1.7
     echo "- lnd.conf --> checking additional [Application Options] since v1.7" >> ${logFile}
@@ -246,17 +249,16 @@ if [ "${lightning}" == "lnd" ]; then
   sudo systemctl enable lnd >> ${logFile}
   sudo systemctl start lnd >> ${logFile}
 
-
-elif [ "${lightning}" == "cln" ]; then
+elif [ "${lightning}" == "cl" ]; then
 
   echo "Install C-lightning on update" >> ${logFile}
   sudo sed -i "s/^message=.*/message='C-Lightning Install'/g" ${infoFile}
-  sudo /home/admin/config.scripts/cln.install.sh on mainnet >> ${logFile}
+  sudo /home/admin/config.scripts/cl.install.sh on mainnet >> ${logFile}
   sudo sed -i "s/^message=.*/message='C-Lightning Setup'/g" ${infoFile}
 
 elif [ "${lightning}" == "none" ]; then
 
-  echo "No Lightnig" >> ${logFile}
+  echo "No Lightning" >> ${logFile}
 
 else
 

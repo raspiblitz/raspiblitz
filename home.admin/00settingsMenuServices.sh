@@ -25,6 +25,7 @@ if [ ${#lit} -eq 0 ]; then lit="off"; fi
 if [ ${#whitepaper} -eq 0 ]; then whitepaper="off"; fi
 if [ ${#chantools} -eq 0 ]; then chantools="off"; fi
 if [ ${#sparko} -eq 0 ]; then sparko="off"; fi
+if [ ${#spark} -eq 0 ]; then spark="off"; fi
 
 # show select dialog
 echo "run dialog ..."
@@ -54,15 +55,16 @@ if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
   OPTIONS+=(x 'LND Sphinx-Relay' ${sphinxrelay})
 fi
 
-# just available for CLN
-if [ "${lightning}" == "cln" ] || [ "${cln}" == "on" ]; then
+# just available for CL
+if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ]; then
   OPTIONS+=(c 'C-Lightning RTL Webinterface' ${crtlWebinterface})
   OPTIONS+=(k 'C-Lightning Sparko WebWallet' ${sparko})
+  OPTIONS+=(n 'C-Lightning Spark Wallet' ${spark})
 fi
 
 CHOICES=$(dialog --title ' Additional Mainnet Services ' \
           --checklist ' use spacebar to activate/de-activate ' \
-          24 55 17  "${OPTIONS[@]}" 2>&1 >/dev/tty)
+          25 55 18  "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
 dialogcancel=$?
 echo "done dialog"
@@ -111,25 +113,25 @@ fi
 choice="off"; check=$(echo "${CHOICES}" | grep -c "c")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${crtlWebinterface}" != "${choice}" ]; then
-  echo "RTL-cln Webinterface Setting changed .."
+  echo "RTL-cl Webinterface Setting changed .."
   anychange=1
-  /home/admin/config.scripts/bonus.rtl.sh ${choice} cln mainnet
+  /home/admin/config.scripts/bonus.rtl.sh ${choice} cl mainnet
   errorOnInstall=$?
   if [ "${choice}" =  "on" ]; then
     if [ ${errorOnInstall} -eq 0 ]; then
       sudo systemctl start RTL
       echo "waiting 10 secs .."
       sleep 10
-      /home/admin/config.scripts/bonus.rtl.sh menu cln mainnet
+      /home/admin/config.scripts/bonus.rtl.sh menu cl mainnet
     else
       l1="!!! FAIL on RTL C-Lightning install !!!"
       l2="Try manual install on terminal after reboot with:"
-      l3="/home/admin/config.scripts/bonus.rtl.sh on cln mainnet"
+      l3="/home/admin/config.scripts/bonus.rtl.sh on cl mainnet"
       dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
     fi
   fi
 else
-  echo "RTL-cln Webinterface Setting unchanged."
+  echo "RTL-cl Webinterface Setting unchanged."
 fi
 
 # BTC-RPC-Explorer process choice
@@ -209,7 +211,7 @@ The index database needs to be created before Electrum Server can be used.\n
 This can take hours/days depending on your RaspiBlitz. Monitor the progress on the LCD.\n
 When finished use the new 'ELECTRS' entry in Main Menu for more info.\n
 " 14 50
-      needsReboot=1
+      needsReboot=0
       else
         l1="!!! FAIL on ElectRS install !!!"
         l2="Try manual install on terminal after reboot with:"
@@ -480,20 +482,42 @@ if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${sparko}" != "${choice}" ]; then
   echo "# Sparko on mainnet Setting changed .."
   anychange=1
-  /home/admin/config.scripts/cln-plugin.sparko.sh ${choice} mainnet
+  /home/admin/config.scripts/cl-plugin.sparko.sh ${choice} mainnet
   errorOnInstall=$?
   if [ "${choice}" =  "on" ]; then
     if [ ${errorOnInstall} -eq 0 ]; then
-      /home/admin/config.scripts/cln-plugin.sparko.sh menu mainnet
+      /home/admin/config.scripts/cl-plugin.sparko.sh menu mainnet
     else
       l1="# !!! FAIL on Sparko on mainnet install !!!"
       l2="# Try manual install on terminal after reboot with:"
-      l3="/home/admin/config.scripts/cln-plugin.sparko.sh on mainnet"
+      l3="/home/admin/config.scripts/cl-plugin.sparko.sh on mainnet"
       dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
     fi
   fi
 else
   echo "# Sparko on mainnet Setting unchanged."
+fi
+
+# spark wallet process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "n")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${spark}" != "${choice}" ]; then
+  echo "# Spark Wallet on mainnet Setting changed .."
+  anychange=1
+  /home/admin/config.scripts/cl.spark.sh ${choice} mainnet
+  errorOnInstall=$?
+  if [ "${choice}" =  "on" ]; then
+    if [ ${errorOnInstall} -eq 0 ]; then
+      /home/admin/config.scripts/cl.spark.sh menu mainnet
+    else
+      l1="# !!! FAIL on Spark Wallet on mainnet install !!!"
+      l2="# Try manual install on terminal after reboot with:"
+      l3="/home/admin/config.scripts/cl.spark.sh on mainnet"
+      dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
+    fi
+  fi
+else
+  echo "# Spark Wallet on mainnet Setting unchanged."
 fi
 
 if [ ${anychange} -eq 0 ]; then

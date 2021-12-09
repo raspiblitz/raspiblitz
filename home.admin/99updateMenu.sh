@@ -41,9 +41,10 @@ Do you want to download Lightning Data Backup now?
       echo "please wait .."
       sleep 2
       if [ "${lightning}" == "lnd" ]; then
+        /home/admin/config.scripts/lnd.compact.sh interactive
         /home/admin/config.scripts/lnd.backup.sh lnd-export-gui
-      elif [ "${lightning}" == "cln" ]; then
-        /home/admin/config.scripts/cln.backup.sh cln-export-gui
+      elif [ "${lightning}" == "cl" ]; then
+        /home/admin/config.scripts/cl.backup.sh cl-export-gui
       else
         echo "TODO: Implement Data Backup for '${lightning}'"
       fi
@@ -59,8 +60,8 @@ Do you want to download Lightning Data Backup now?
       sleep 2
       if [ "${lightning}" == "lnd" ]; then
         /home/admin/config.scripts/lnd.backup.sh lnd-export
-      elif [ "${lightning}" == "cln" ]; then
-        /home/admin/config.scripts/cln.backup.sh cln-export
+      elif [ "${lightning}" == "cl" ]; then
+        /home/admin/config.scripts/cl.backup.sh cl-export
       else
         echo "TODO: Implement Data Backup for '${lightning}'"
         sleep 3
@@ -127,7 +128,7 @@ patch()
            PR "Checkout a PullRequest to test"
 	)
 
-  CHOICE=$(whiptail --clear --title "GitHub-User: ${activeGitHubUser} Branch: ${activeBranch}" --menu "" 11 55 4 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+  CHOICE=$(whiptail --clear --title " GitHub user:${activeGitHubUser} branch:${activeBranch} (${commitHashShort})" --menu "" 11 60 4 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
   clear
   case $CHOICE in
@@ -287,6 +288,75 @@ Do you really want to update LND now?
   esac
 }
 
+cl()
+{
+
+  # get cl info
+  source <(sudo -u admin /home/admin/config.scripts/cl.update.sh info)
+
+  # C-lightning Update Options
+  OPTIONS=()
+  if [ ${clUpdateInstalled} -eq 0 ]; then
+    OPTIONS+=(VERIFIED "Optional C-lightning update to ${clUpdateVersion}")
+  fi
+  OPTIONS+=(RECKLESS "Experimental C-lightning update to ${clLatestVersion}")
+
+  CHOICE=$(whiptail --clear --title "Update C-lightning Options" --menu "" 9 60 2 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+
+  clear
+  case $CHOICE in
+    VERIFIED)
+      if [ ${clUpdateInstalled} -eq 1 ]; then
+        whiptail --title "ALREADY INSTALLED" --msgbox "The C-lightning version ${clUpdateVersion} is already installed." 8 30
+        exit 0
+      fi
+      whiptail --title "OPTIONAL C-lightning UPDATE" --yes-button "Cancel" --no-button "Update" --yesno "BEWARE on updating to C-lightning v${clUpdateVersion}:
+
+${clUpdateComment}
+
+Do you really want to update C-lightning now?
+      " 16 58
+      if [ $? -eq 0 ]; then
+        echo "# cancel update"
+        exit 0
+      fi
+      error=""
+      warn=""
+      source <(sudo -u admin /home/admin/config.scripts/cl.update.sh verified)
+      if [ ${#error} -gt 0 ]; then
+        whiptail --title "ERROR" --msgbox "${error}" 8 30
+      else
+        echo "# C-lightning was updated successfully"
+        exit 0
+      fi
+      ;;
+    RECKLESS)
+      whiptail --title "RECKLESS C-lightning UPDATE to ${clLatestVersion}" --yes-button "Cancel" --no-button "Update" --yesno "Using the 'RECKLESS' C-lightning update will simply
+grab the latest C-lightning release published on the C-lightning GitHub page (also release candidates).
+
+There will be no security checks on signature, etc.
+
+This update mode is only recommended for testing and
+development nodes with no serious funding. 
+
+Do you really want to update C-lightning now?
+      " 16 58
+      if [ $? -eq 0 ]; then
+        echo "# cancel update"
+        exit 0
+      fi
+      error=""
+      source <(sudo -u admin /home/admin/config.scripts/cl.update.sh reckless)
+      if [ ${#error} -gt 0 ]; then
+        whiptail --title "ERROR" --msgbox "${error}" 8 30
+      else
+        echo "# C-lightning was updated successfully"
+        exit 0
+      fi
+      ;;
+  esac
+}
+
 bitcoinUpdate() {
   # get bitcoin info
   source <(sudo -u admin /home/admin/config.scripts/bitcoin.update.sh info)
@@ -383,6 +453,10 @@ if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
   OPTIONS+=(LND "Interim LND Update Options")
 fi
 
+if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ]; then
+  OPTIONS+=(CL "Interim C-lightning Update Options")
+fi
+
 if [ "${bos}" == "on" ]; then
   OPTIONS+=(BOS "Update Balance of Satoshis")
 fi
@@ -393,6 +467,10 @@ fi
 
 if [ "${specter}" == "on" ]; then
   OPTIONS+=(SPECTER "Update Specter Desktop")
+fi
+
+if [ "${BTCPayServer}" == "on" ]; then
+  OPTIONS+=(BTCPAY "Update BTCPayServer")
 fi
 
 if [ "${sphinxrelay}" == "on" ]; then
@@ -433,6 +511,9 @@ case $CHOICE in
   LND)
     lnd
     ;;
+  CL)
+    cl
+    ;;
   BITCOIN)
     bitcoinUpdate
     ;;
@@ -444,6 +525,9 @@ case $CHOICE in
     ;;
   SPECTER)
     /home/admin/config.scripts/bonus.specter.sh update
+    ;;
+  BTCPAY)
+    /home/admin/config.scripts/bonus.btcpayserver.sh update
     ;;
   SPHINX)
     /home/admin/config.scripts/bonus.sphinxrelay.sh update

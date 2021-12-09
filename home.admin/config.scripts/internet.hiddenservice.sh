@@ -96,7 +96,7 @@ HiddenServicePort $toPort 127.0.0.1:$fromPort" | sudo tee -a /etc/tor/torrc
     fi
   fi
 
-  # restart tor
+  # reload tor
   echo
   echo "Reloading Tor to activate the Hidden Service..."
   sudo chmod 644 /etc/tor/torrc

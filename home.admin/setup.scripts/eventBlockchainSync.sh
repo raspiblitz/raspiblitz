@@ -65,7 +65,7 @@ do
     # setting info string
     infoStr=" Blockchain Progress : ${syncProgress}\n"
     
-    if [ "${lightning}" == "lnd" ] || [ "${lightning}" == "cln" ]; then
+    if [ "${lightning}" == "lnd" ] || [ "${lightning}" == "cl" ]; then
        infoStr="${infoStr} Lightning Progress  : ${scanProgress}\n ${actionString}"
     else
        # if lightning is deactivated (leave line clear)

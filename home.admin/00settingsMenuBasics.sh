@@ -15,6 +15,9 @@ if [ ${#touchscreen} -eq 0 ]; then touchscreen=0; fi
 if [ ${#lcdrotate} -eq 0 ]; then lcdrotate=0; fi
 if [ ${#zerotier} -eq 0 ]; then zerotier="off"; fi
 if [ ${#circuitbreaker} -eq 0 ]; then circuitbreaker="off"; fi
+if [ ${#clboss} -eq 0 ]; then clboss="off"; fi
+if [ ${#clEncryptedHSM} -eq 0 ]; then clEncryptedHSM="off"; fi
+if [ ${#clAutoUnlock} -eq 0 ]; then clAutoUnlock="off"; fi
 
 echo "# map LND to on/off"
 lndNode="off"
@@ -22,15 +25,15 @@ if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
   lndNode="on"
 fi
 
-echo "# map CLN to on/off"
-clnNode="off"
-if [ "${lightning}" == "cln" ] || [ "${cln}" == "on" ]; then
-  clnNode="on"
+echo "# map CL to on/off"
+clNode="off"
+if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ]; then
+  clNode="on"
 fi
 
-echo "# map dropboxbackup to on/off"
-DropboxBackup="off"
-if [ ${#dropboxBackupTarget} -gt 0 ]; then DropboxBackup="on"; fi
+echo "map nextcloudbackup to on/off"
+NextcloudBackup="off"
+if [ $nextcloudBackupServer ] && [ $nextcloudBackupUser ] && [ $nextcloudBackupPassword ]; then NextcloudBackup="on"; fi
 
 echo "# map localbackup to on/off"
 LocalBackup="off"
@@ -42,7 +45,7 @@ if [ "${zerotier}" != "off" ]; then zerotierSwitch="on"; fi
 
 echo "# map parallel testnets to on/off"
 parallelTestnets="off"
-if [ "${testnet}" == "on"] || [ "${signet}" == "on" ]; then
+if [ "${testnet}" == "on" ] || [ "${signet}" == "on" ]; then
   parallelTestnets="on"
 fi
 
@@ -81,6 +84,24 @@ if [ ${keysendOn} -eq 0 ]; then
   keysend="off"
 fi
 
+echo "# map clboss to on/off"
+clbossMenu='off'
+if [ "${clboss}" == "on" ]; then
+  clbossMenu='on'
+fi
+
+echo "# map clEncryptedHSM to on/off"
+clEncryptedHSMMenu='off'
+if [ "${clEncryptedHSM}" == "on" ]; then
+  clEncryptedHSMMenu='on'
+fi
+
+echo "# map clAutoUnlock to on/off"
+clAutoUnlockMenu='off'
+if [ "${clAutoUnlock}" == "on" ]; then
+  clAutoUnlockMenu='on'
+fi
+
 # show select dialog
 echo "run dialog ..."
 
@@ -110,17 +131,24 @@ if [ "${lndNode}" == "on" ]; then
   OPTIONS+=(k '-LND Accept Keysend' ${keysend})  
   OPTIONS+=(c '-LND Circuitbreaker (firewall)' ${circuitbreaker})  
   OPTIONS+=(u '-LND Auto-Unlock' ${autoUnlock})  
-  OPTIONS+=(d '-LND StaticChannelBackup DropBox' ${DropboxBackup})
+  OPTIONS+=(x '-LND StaticChannelBackup on Nextcloud' ${NextcloudBackup})
   OPTIONS+=(e '-LND StaticChannelBackup USB Drive' ${LocalBackup})
   OPTIONS+=(l '-LND UPnP (AutoNAT)' ${autoNatDiscovery})
 fi
 
 # C-Lightning & options/PlugIns
-OPTIONS+=(n 'CLN C-LIGHTNING NODE' ${clnNode}) 
+OPTIONS+=(n 'CL C-LIGHTNING NODE' ${clNode}) 
+if [ "${clNode}" == "on" ]; then
+  OPTIONS+=(o '-CL CLBOSS Automatic Node Manager' ${clbossMenu})
+  OPTIONS+=(h '-CL Wallet Encryption' ${clEncryptedHSMMenu})
+  if [ "${clEncryptedHSM}" == "on" ]; then
+    OPTIONS+=(q '-CL Auto-Unlock' ${clAutoUnlockMenu})
+  fi
+fi
 
 CHOICE_HEIGHT=$(("${#OPTIONS[@]}/2+1"))
 HEIGHT=$((CHOICE_HEIGHT+6))
-CHOICES=$(dialog --title ' Node Settings & Options ' --checklist ' use spacebar to activate/de-activate ' $HEIGHT 45 $CHOICE_HEIGHT "${OPTIONS[@]}" 2>&1 >/dev/tty)
+CHOICES=$(dialog --title ' Node Settings & Options ' --checklist ' use spacebar to activate/de-activate ' $HEIGHT 55 $CHOICE_HEIGHT "${OPTIONS[@]}" 2>&1 >/dev/tty)
 dialogcancel=$?
 clear
 
@@ -290,20 +318,20 @@ else
   echo "Circuitbreaker Setting unchanged."
 fi
 
-# LND DropBox process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "d")
+# Nextcloud process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "x")
 if [ ${check} -eq 1 ]; then choice="on"; fi
-if [ "${DropboxBackup}" != "${choice}" ] && [ "${lndNode}" == "on" ]; then
-  echo "DropBox Setting changed .."
+if [ "${NextcloudBackup}" != "${choice}" ]; then
+  echo "Nextcloud Setting changed .."
   anychange=1
-  sudo -u admin /home/admin/config.scripts/dropbox.upload.sh ${choice}
+  sudo -u admin /home/admin/config.scripts/nextcloud.upload.sh ${choice}
   if [ "${choice}" =  "on" ]; then
     # doing initial upload so that user can see result
     source /mnt/hdd/raspiblitz.conf
-    sudo /home/admin/config.scripts/dropbox.upload.sh upload ${dropboxBackupTarget} /mnt/hdd/lnd/data/chain/${network}/${chain}net/channel.backup
+    sudo /home/admin/config.scripts/nextcloud.upload.sh upload /mnt/hdd/lnd/data/chain/${network}/${chain}net/channel.backup
   fi
 else
-  echo "Dropbox backup setting unchanged."
+  echo "Nextcloud backup setting unchanged."
 fi
 
 # LocalBackup process choice
@@ -381,36 +409,81 @@ else
   echo "LND NODE setting unchanged."
 fi
 
-# CLN choice
+# CL choice
 choice="off"; check=$(echo "${CHOICES}" | grep -c "n")
 if [ ${check} -eq 1 ]; then choice="on"; fi
-if [ "${clnNode}" != "${choice}" ]; then
+if [ "${clNode}" != "${choice}" ]; then
   anychange=1
   echo "# C-Lightning NODE Setting changed .."
   if [ "${choice}" = "on" ]; then
     echo "# turning ON"
-    /home/admin/config.scripts/cln.install.sh on mainnet
-    sudo /home/admin/config.scripts/cln.install.sh display-seed mainnet
+    /home/admin/config.scripts/cl.install.sh on mainnet
+    sudo /home/admin/config.scripts/cl.install.sh display-seed mainnet
     if [ "${testnet}" == "on" ]; then
-      /home/admin/config.scripts/cln.install.sh on testnet
+      /home/admin/config.scripts/cl.install.sh on testnet
     fi
     if [ "${signet}" == "on" ]; then
-      /home/admin/config.scripts/cln.install.sh on signet
+      /home/admin/config.scripts/cl.install.sh on signet
     fi
   else
     echo "# turning OFF"
-    /home/admin/config.scripts/cln.install.sh off mainnet
-    /home/admin/config.scripts/cln.install.sh off testnet
-    /home/admin/config.scripts/cln.install.sh off signet
+    /home/admin/config.scripts/cl.install.sh off mainnet
+    /home/admin/config.scripts/cl.install.sh off testnet
+    /home/admin/config.scripts/cl.install.sh off signet
   fi
 else
   echo "C-Lightning NODE setting unchanged."
 fi
 
+# CLBOSS process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "o")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${clboss}" != "${choice}" ] && [ "${clNode}" == "on" ]; then
+  echo "CLBOSS Setting changed .."
+  anychange=1
+  sudo /home/admin/config.scripts/cl-plugin.clboss.sh ${choice}
+  needsReboot=0
+else
+  echo "CLBOSS Setting unchanged."
+fi
+
+# clEncryptedHSM process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "h")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${clEncryptedHSM}" != "${choice}" ] && [ "${clNode}" == "on" ]; then
+  echo "clEncryptedHSM Setting changed .."
+  anychange=1
+  if [ "${choice}" == "on" ]; then
+    /home/admin/config.scripts/cl.hsmtool.sh encrypt mainnet
+  else
+    /home/admin/config.scripts/cl.hsmtool.sh decrypt mainnet
+  fi
+  needsReboot=0
+else
+  echo "clEncryptedHSM Setting unchanged."
+fi
+
+# clAutoUnlock process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "q")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${clAutoUnlock}" != "${choice}" ] && [ "${clNode}" == "on" ]; then
+  echo "clAutoUnlock Setting changed .."
+  anychange=1
+  if [ "${choice}" == "on" ]; then
+    /home/admin/config.scripts/cl.hsmtool.sh autounlock-on mainnet
+  else
+    /home/admin/config.scripts/cl.hsmtool.sh autounlock-off mainnet
+  fi
+  needsReboot=0
+else
+  echo "clAutoUnlock Setting unchanged."
+fi
+
 # parallel testnet process choice
 choice="off"; check=$(echo "${CHOICES}" | grep -c "p")
 if [ ${check} -eq 1 ]; then choice="on"; fi
-if [ "${testnet}" != "${choice}" ]; then
+if [ "${testnet}" != "${choice}" ] || \
+   [ "${signet}" != "${choice}" ]; then
   echo "# Parallel Testnets Setting changed .."
   anychange=1
   if [ "${choice}" = "on" ]; then
@@ -420,16 +493,16 @@ if [ "${testnet}" != "${choice}" ]; then
       /home/admin/config.scripts/lnd.install.sh on testnet initwallet
       /home/admin/config.scripts/lnd.install.sh on signet initwallet
     fi
-    if [ "${lightning}" == "cln" ] || [ "${cln}" == "on" ]; then
-      /home/admin/config.scripts/cln.install.sh on testnet
-      /home/admin/config.scripts/cln.install.sh on signet
+    if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ]; then
+      /home/admin/config.scripts/cl.install.sh on testnet
+      /home/admin/config.scripts/cl.install.sh on signet
     fi 
   else
     # just turn al lightning testnets off (even if not on before)
     /home/admin/config.scripts/lnd.install.sh off testnet
     /home/admin/config.scripts/lnd.install.sh off signet
-    /home/admin/config.scripts/cln.install.sh off testnet
-    /home/admin/config.scripts/cln.install.sh off signet
+    /home/admin/config.scripts/cl.install.sh off testnet
+    /home/admin/config.scripts/cl.install.sh off signet
     /home/admin/config.scripts/bitcoin.install.sh off testnet
     /home/admin/config.scripts/bitcoin.install.sh off signet
   fi

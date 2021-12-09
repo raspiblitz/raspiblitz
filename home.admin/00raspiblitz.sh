@@ -87,6 +87,14 @@ sudo chmod 740 /var/cache/raspiblitz/raspiblitz.status
 # an error drops user to terminal
 #####################################
 
+# listen to CTRL-c & CTRL-z to break loop
+quit() {
+  echo "SIGINT or SIGTERM received, exiting..."
+  kill -9 $$
+}
+trap quit INT
+trap quit TERM
+
 echo "# start ssh menu loop"
 exitMenuLoop=0
 doneIBD=0
@@ -104,11 +112,13 @@ do
   #echo "# blitz.statusscan.sh"
 
   firstStatusScanExists=$(ls /var/cache/raspiblitz/raspiblitz.status | grep -c "raspiblitz.status")
+  #echo "firstStatusScanExists(${firstStatusScanExists})"
   if [ ${firstStatusScanExists} -eq 1 ]; then
 
     # run statusscan with timeout - if status scan was not killed it will copy over the 
     timeout 15 /home/admin/config.scripts/blitz.statusscan.sh ${lightning} > /var/cache/raspiblitz/raspiblitz.status.tmp
     result=$?
+    #echo "result(${result})"
     if [ "${result}" == "0" ]; then
      # statusscan finished in under 10 seconds - use results
      cp /var/cache/raspiblitz/raspiblitz.status.tmp /var/cache/raspiblitz/raspiblitz.status
@@ -127,7 +137,7 @@ do
   fi
 
   # load statusscan results
-  source /var/cache/raspiblitz/raspiblitz.status
+  source /var/cache/raspiblitz/raspiblitz.status 2>/dev/null
 
   #####################################
   # ALWAYS: Handle System States 
@@ -139,6 +149,12 @@ do
   if [ "${lndActive}" == "1" ] && [ "${walletLocked}" == "1" ] && [ "${state}" == "ready" ] && [ "${setupPhase}" == "done" ]; then
     #echo "# lnd.unlock.sh"
     /home/admin/config.scripts/lnd.unlock.sh
+  fi
+
+  # CL Wallet Unlock 
+  if [ "${CLwalletLocked}" == "1" ] && [ "${state}" == "ready" ] && [ "${setupPhase}" == "done" ]; then
+    /home/admin/config.scripts/cl.hsmtool.sh unlock
+    sleep 5
   fi
 
   #####################################
@@ -165,15 +181,34 @@ do
     # push to final setup gui dialogs
     #echo "# controlFinalDialog.sh"
     /home/admin/setup.scripts/controlFinalDialog.sh
-    continue
+    # exit because controller will reboot at the end
+    exit 0
   fi  
+
+  # exit loop/script in case if system shutting down
+  if [ "${state}" == "reboot" ] || [ "${state}" == "shutdown" ]; then
+    dialog --pause "  Prepare Reboot ..." 8 58 4
+    clear
+    echo "***********************************************************"
+    echo "RaspiBlitz going to ${state}"
+    echo "***********************************************************"
+    if [ "${state}" == "reboot" ]; then
+      echo "SSH again into system with:"
+      echo "ssh admin@${localip}"
+      echo "Use your password A"
+      echo "***********************************************************"
+    fi
+    sleep 10
+    exit 0
+  fi
 
   #####################################
   # INITIAL BLOCKCHAIN SYNC (SUBLOOP)
   #####################################
   if [ "${lightning}" == "" ]; then syncedToChain=1; fi
   if [ "${setupPhase}" == "done" ] && [ "${state}" == "ready" ] && [ "${syncedToChain}" != "1" ]; then
-    /home/admin/setup.scripts/eventBlockchainSync.sh ssh loop
+    /home/admin/setup.scripts/eventBlockchainSync.sh ssh
+    sleep 10
     continue
   fi
 
@@ -220,16 +255,26 @@ do
     fi
 
     # for all critical errors (admin info & exit)
-    if [ "${state}" == "errorHDD" ]; then
-      echo "***********************************************************"
-      echo "SETUP ERROR - please report to development team"
-      echo "***********************************************************"
-      echo "state(${state}) message(${message})"
+    if [ "${state}" == "error" ] || [ "${state}" == "errorHDD" ]; then
+      clear
+      echo "###########################################################"
+      echo "# /home/admin/raspiblitz.log"
+      cat /home/admin/raspiblitz.log
       if [ "${state}" == "errorHDD" ]; then
         # print some debug detail info on HDD/SSD error
+        echo "###########################################################"
         echo "# blitz.datadrive.sh status"
         sudo /home/admin/config.scripts/blitz.datadrive.sh status
       fi
+      if [ "${message}" == "_provision.setup.sh fail" ]; then
+        echo "# /home/admin/raspiblitz.provision-setup.log"
+        cat /home/admin/raspiblitz.provision-setup.log
+      fi
+      echo "***********************************************************"
+      echo "ERROR - please report to development team"
+      echo "***********************************************************"
+      echo "state(${state}) message(${message})"
+      echo "https://github.com/rootzoll/raspiblitz#support"
       echo "command to shutdown --> off"
       exit 1
     else
@@ -237,23 +282,6 @@ do
         /home/admin/setup.scripts/eventInfoWait.sh "${state}" "${message}"
     fi
 
-  fi
-
-  # exit loop/script in case if system shutting down
-  if [ "${state}" == "reboot" ] || [ "${state}" == "shutdown" ]; then
-    clear
-    echo "***********************************************************"
-    echo "RaspiBlitz going to ${state}"
-    echo "***********************************************************"
-    if [ "${state}" == "reboot" ]; then
-      if [ "${message}" == "finalsetup" ]; then
-        echo "This is the final setup reboot - you will get disconnected."
-      fi
-      echo "SSH again into system with:"
-      echo "ssh admin@${localip}"
-      echo "***********************************************************"
-    fi
-    exit 0
   fi
 
 done
@@ -299,7 +327,7 @@ if [ "${setupPhase}" == "done" ]; then
   if [ "${lightning}" == "lnd" ]; then
     echo "LND command line options: lncli -h"
   fi
-  if [ "${lightning}" == "cln" ]; then
+  if [ "${lightning}" == "cl" ]; then
     echo "C-Lightning command line options: lightning-cli help"
   fi
 else
@@ -307,7 +335,7 @@ else
   echo "For setup logs: cat raspiblitz.log"
   echo "or call the command 'debug' to see bigger report."
 fi
-echo "Blitz command line options: blitz help"
+echo "Blitz command line options: blitzhelp"
 echo "Back to menus use command: raspiblitz"
 echo
 exit 0

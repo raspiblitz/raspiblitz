@@ -148,7 +148,7 @@ function refresh_certs_with_nginx() {
       echo "# FQDN(${FQDN})"
       # check if there is a LetsEncrypt Subscription for this domain
       details=$(/home/admin/config.scripts/blitz.subscriptions.letsencrypt.py subscription-detail $FQDN)
-      if [ ${#details} -gt 10 ]; then
+      if [ $(echo "${details}" | grep -c "error=") -eq 0 ] && [ ${#details} -gt 10 ]; then
 
         echo "# details(${details})"
 
@@ -322,12 +322,6 @@ elif [ "$1" = "issue-cert" ]; then
 
 elif [ "$1" = "remove-cert" ]; then
 
-  # check if letsencrypt is on
-  if [ "${letsencrypt}" != "on" ]; then
-    echo "error='letsencrypt is not on'"
-    exit 1
-  fi
-
   # make sure storage directory exist
   sudo mkdir -p $ACME_CERT_HOME 2>/dev/null
   sudo chown -R admin:admin $ACME_CONFIG_HOME
@@ -343,6 +337,8 @@ elif [ "$1" = "remove-cert" ]; then
   if [ ${#options} -eq 0 ]; then
     options="ip&tor"
   fi
+
+  echo "# bonus.letsencrypt.sh remove-cert ${FQDN} ${options}"
 
   # remove cert from renewal
   $ACME_INSTALL_HOME/acme.sh --remove -d "${FQDN}" --ecc --home "${ACME_INSTALL_HOME}" --config-home "${ACME_CONFIG_HOME}" --cert-home "${ACME_CERT_HOME}" 2>&1

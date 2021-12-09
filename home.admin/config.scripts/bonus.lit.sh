@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # https://github.com/lightninglabs/lightning-terminal/releases
-LITVERSION="0.5.0-alpha"
+LITVERSION="0.6.1-alpha"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -12,7 +12,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
 fi
 
 # check who signed the release in https://github.com/lightninglabs/lightning-terminal/releases
-PGPsigner="roasbeef" 
+PGPsigner="guggero" 
 
 if [ $PGPsigner = guggero ];then
   PGPpkeys="https://keybase.io/guggero/pgp_keys.asc"
@@ -93,8 +93,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   if [ ${isInstalled} -eq 0 ]; then
  
     # create dedicated user
-    sudo adduser --disabled-password --gecos "" lit || exit 1
-
+    sudo adduser --disabled-password --gecos "" lit
     # make sure symlink to central app-data directory exists
     sudo rm -rf /home/lit/.lnd  # not a symlink.. delete it silently
     # create symlink
@@ -188,7 +187,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     wget -N https://github.com/lightninglabs/lightning-terminal/releases/download/v${LITVERSION}/${binaryName}
 
     echo "# check binary was not manipulated (checksum test)"
-    wget -N https://github.com/lightninglabs/lightning-terminal/releases/download/v${LITVERSION}/manifest-${PGPsigner}-v${LITVERSION}.sig
+    wget -N https://github.com/lightninglabs/lightning-terminal/releases/download/v${LITVERSION}/manifest-v${LITVERSION}.sig
     wget --no-check-certificate ${PGPpkeys}
     binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
     if [ "${binaryChecksum}" != "${SHA256}" ]; then
@@ -209,7 +208,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     fi
     gpg --import ./pgp_keys.asc
     sleep 3
-    verifyResult=$(gpg --verify manifest-${PGPsigner}-v${LITVERSION}.sig manifest-v${LITVERSION}.txt 2>&1)
+    verifyResult=$(gpg --verify manifest-v${LITVERSION}.sig manifest-v${LITVERSION}.txt 2>&1)
     goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
     echo "goodSignature(${goodSignature})"
     correctKey=$(echo ${verifyResult} | tr -d " \t\n\r" | grep "${GPGcheck}" -c)
@@ -229,13 +228,15 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # config  #
     ###########
     if [ "${runBehindTor}" = "on" ]; then
-      echo "# Connect to the Pool server through Tor"
+      echo "# Connect to the Pool, Loop and Terminal server through Tor"
       LOOPPROXY="loop.server.proxy=127.0.0.1:9050"
       POOLPROXY="pool.proxy=127.0.0.1:9050"
+      runLitd="torsocks /usr/local/bin/litd"
     else
-      echo "# Connect to Pool and Loop server through clearnet"
+      echo "# Connect to Pool, Loop and Terminal server through clearnet"
       LOOPPROXY=""
       POOLPROXY=""
+      runLitd="/usr/local/bin/litd"
     fi
     PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
     echo "
@@ -283,7 +284,7 @@ Description=litd Service
 After=lnd.service
 
 [Service]
-ExecStart=/usr/local/bin/litd
+ExecStart=${runLitd}
 User=lit
 Group=lit
 Type=simple

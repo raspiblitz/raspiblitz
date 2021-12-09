@@ -140,11 +140,8 @@ Use your Password A
 
 elif [ "${eventID}" == "copystation" ] && [ "${mode}" == "lcd" ]; then
 
-    dialog --backtitle "${backtitle}" --cr-wrap --infobox "
-Copy-Station Mode
-ssh admin@${localip}
-Use your Password A
-" 7 41
+    dialog --backtitle "${backtitle}" --title " Copy-Station Mode " --cr-wrap --infobox "
+${contentString}" 7 41
 
 
 elif [ "${eventID}" == "walletlocked" ] && [ "${mode}" == "lcd" ]; then
@@ -183,7 +180,7 @@ elif [ "${eventID}" == "waitsetup" ] && [ "${mode}" == "lcd" ]; then
         backtitle="${backtitle} / ${ramGB}GB RAM"
 
         # display if HDD conatains blockhain or not
-        if [ "${hddBlocksBitcoin}" == "1" ] || [ "${hddBlocksLitecoin}" == "1" ]; then
+        if [ "${hddBlocksBitcoin}" == "1" ]; then
             backtitle="${backtitle} / ${hddGigaBytes}GB (pre-synced)"
         else
             backtitle="${backtitle} / ${hddGigaBytes}GB HDD"

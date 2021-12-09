@@ -94,6 +94,7 @@ if [ "${setupPhase}" == "setup" ]; then
   # menu RECOVER menu option
   if [ "${menuresult}" == "4" ]; then
     setupPhase="${orgSetupPhase}"
+    sudo sed -i "s/^setupPhase=.*/setupPhase='${setupPhase}'/g" /home/admin/raspiblitz.info
     # proceed with provision (mark Password A to be set)
     echo "# OK update process starting .."
     echo "setPasswordA=1" >> $SETUPFILE
@@ -102,6 +103,7 @@ if [ "${setupPhase}" == "setup" ]; then
   # menu MIGRATE menu option
   if [ "${menuresult}" == "5" ]; then
     setupPhase="${orgSetupPhase}"
+    sudo sed -i "s/^setupPhase=.*/setupPhase='${setupPhase}'/g" /home/admin/raspiblitz.info
     # mark migration to happen on provision
     echo "migrationOS='${hddGotMigrationData}'" >> $SETUPFILE
     # user needs to reset password A, B & C
@@ -128,9 +130,6 @@ if [ "${setupPhase}" == "setup" ]; then
     # check if there is a blockchain to use (so HDD is already formatted)
     # thats also true if the node is coming from another nodeOS
     existingBlockchain=""
-    if [ "${hddBlocksLitecoin}" == "1" ]; then
-      existingBlockchain="LITECOIN"
-    fi
     if [ "${hddBlocksBitcoin}" == "1" ] || [ "${hddGotMigrationData}" != "" ]; then
       existingBlockchain="BITCOIN"
     fi
@@ -192,11 +191,7 @@ if [ "${setupPhase}" == "setup" ]; then
 
       # by keeping that blockchain - user chose already the blockchain type
       echo "Selecting as blockchain network automatically .."
-      if [ "${hddBlocksLitecoin}" == "1" ]; then
-        echo "network=litecoin" >> $SETUPFILE
-      else
-        echo "network=bitcoin" >> $SETUPFILE
-      fi
+      echo "network=bitcoin" >> $SETUPFILE
 
     else
 
@@ -252,7 +247,11 @@ if [ "${setupPhase}" == "setup" ]; then
 
     lightningWalletDone=0
     source ${SETUPFILE}
-    if [ "${lightning}" == "none" ]; then lightningWalletDone=1; fi 
+    if [ "${lightning}" == "none" ]; then
+      lightningWalletDone=1
+      # also disable asking for password c if no lightning implementation was chosen
+      sed -i "s/^setPasswordC=.*/setPasswordC=0/g" ${SETUPFILE}
+    fi 
     while [ "${lightningWalletDone}" == "0" ]
     do
 
@@ -262,10 +261,10 @@ if [ "${setupPhase}" == "setup" ]; then
         /home/admin/setup.scripts/dialogLightningWallet-lnd.sh
         dialogResult=$?
 
-      elif [ "${lightning}" == "cln" ]; then
+      elif [ "${lightning}" == "cl" ]; then
 
         echo "# Starting lightning wallet dialog for C-LIGHTNING ..."
-        /home/admin/setup.scripts/dialogLightningWallet-cln.sh
+        /home/admin/setup.scripts/dialogLightningWallet-cl.sh
         dialogResult=$?
 
       else

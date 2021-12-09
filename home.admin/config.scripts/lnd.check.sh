@@ -24,6 +24,7 @@ function setting() # FILE LINENUMBER NAME VALUE
   NAME=$3
   VALUE=$4
   settingExists=$(cat ${FILE} | grep -c "^${NAME}=")
+  echo "# setting ${FILE} ${LINENUMBER} ${NAME} ${VALUE}"
   echo "# ${NAME} exists->(${settingExists})"
   if [ "${settingExists}" == "0" ]; then
     echo "# adding setting (${NAME})"
@@ -85,7 +86,7 @@ if [ "$1" == "prestart" ]; then
 
   # [bitcoind]
   sectionName="[Bb]itcoind"
-  if [ "${network}" != "bitcoin" ]; then
+  if [ "${network}" != "bitcoin" ] && [ "${network}" != "" ]; then
     sectionName="${network}d"
   fi
   echo "# [${sectionName}] config ..."
@@ -114,6 +115,7 @@ if [ "$1" == "prestart" ]; then
   fi
 
   # SET/UPDATE zmqpubrawtx
+  echo "# zmqpubrawtx insert/update"
   setting ${lndConfFile} ${insertLine} "${network}d\.zmqpubrawtx" "tcp\:\/\/127\.0\.0\.1\:${zmqprefix}333"
 
   # SET/UPDATE zmqpubrawblock
@@ -265,18 +267,7 @@ elif [ "$1" == "basic-setup" ]; then
   fi
 
   # get network from config (BLOCKCHAIN)
-  lndNetwork=""
-  source <(sudo cat /mnt/hdd/lnd/lnd.conf 2>/dev/null | grep 'bitcoin.active' | sed 's/^[a-z]*\./bitcoin_/g')
-  source <(sudo cat /mnt/hdd/lnd/lnd.conf 2>/dev/null | grep 'litecoin.active' | sed 's/^[a-z]*\./litecoin_/g')
-  if [ "${bitcoin_active}" == "1" ] && [ "${litecoin_active}" == "1" ]; then
-    echo "err='lnd.conf: bitcoin and litecoin are set active at the same time'"
-  elif [ "${bitcoin_active}" == "1" ]; then
-    lndNetwork="bitcoin"
-  elif [ "${litecoin_active}" == "1" ]; then
-    lndNetwork="litecoin"
-  else
-    echo "err='lnd.conf: no blockchain network is set'"
-  fi
+  lndNetwork="bitcoin"
   echo "network='${lndNetwork}'"
 
   # check if network is same the raspiblitz config

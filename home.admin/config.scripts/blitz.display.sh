@@ -254,6 +254,8 @@ function install_lcd() {
     sudo -u admin chown -R admin:admin wavesharelcd-64bit-rpi
     cd /home/admin/wavesharelcd-64bit-rpi
     sudo -u admin git reset --hard 5a206a7 || exit 1
+    sudo -u admin /home/admin/config.scripts/blitz.git-verify.sh \
+     'GitHub' 'https://github.com/web-flow.gpg' '4AEE18F83AFDEB23' || exit 1
 
     # customized from https://github.com/tux1c/wavesharelcd-64bit-rpi/blob/master/install.sh
     # prepare X11
@@ -366,6 +368,7 @@ function install_lcd_legacy() {
     sudo -u admin chmod -R 755 LCD-show
     sudo -u admin chown -R admin:admin LCD-show
     cd LCD-show/
+    # not signed
     sudo -u admin git reset --hard 53dd0bf || exit 1
     # install xinput calibrator package
     echo "--> install xinput calibrator package"
@@ -395,7 +398,8 @@ function install_lcd_legacy() {
     sudo -u admin chown -R admin:admin wavesharelcd-64bit-rpi
     cd /home/admin/wavesharelcd-64bit-rpi
     sudo -u admin git reset --hard 5a206a7 || exit 1
-
+    sudo -u admin /home/admin/config.scripts/blitz.git-verify.sh \
+     'GitHub' 'https://github.com/web-flow.gpg' '4AEE18F83AFDEB23' || exit 1
     # from https://github.com/tux1c/wavesharelcd-64bit-rpi/blob/master/install.sh
     # prepare X11
     sudo rm -rf /etc/X11/xorg.conf.d/40-libinput.conf

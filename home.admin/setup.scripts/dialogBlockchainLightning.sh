@@ -11,14 +11,15 @@ source $SETUPFILE
 
 
 #################################
-# SELECT BLOCKCHAIN
+# SELECT BLOCKCHAIN --> SKIPPED (litecoin deactivated, reactivate selection when other bitcoin implementations)
 # when not already set by setupfile
-
+if [ "${network}" == "" ]; then
+    network="bitcoin"
+fi
 if [ "${network}" == "" ]; then
 
     OPTIONS=()
     OPTIONS+=(BITCOIN "Setup BITCOIN Blockchain (BitcoinCore)")
-    #OPTIONS+=(LITECOIN "Setup LITECOIN Blockchain (experimental)")
     CHOICE=$(dialog --clear \
                 --backtitle "RaspiBlitz ${codeVersion} - Setup" \
                 --title "⚡ Blockchain ⚡" \
@@ -32,12 +33,6 @@ if [ "${network}" == "" ]; then
             # bitcoin core
             network="bitcoin"
             ;;
-        # LITECOIN)
-        #     # litecoin
-        #     network="litecoin"
-        #     # can only work with LND
-        #     lightning="lnd"
-        #     ;;
         *)
             clear
             echo "User Cancel"
@@ -55,12 +50,12 @@ if [ "${network}" == "bitcoin" ]; then
      # choose lightning client
     OPTIONS=()
     OPTIONS+=(LND "LND - Lightning Network Daemon (DEFAULT)")
-    OPTIONS+=(CLN "C-lightning by Blockstream (fewer apps)")
+    OPTIONS+=(CL "C-lightning by Blockstream (NEW)")
     OPTIONS+=(NONE "Run without Lightning")
     CHOICE=$(dialog --clear \
                 --backtitle "RaspiBlitz ${codeVersion} - Setup" \
                 --title "⚡ Lightning ⚡" \
-                --menu "\nChoose your Lightning Client: \n " \
+                --menu "\nChoose your Lightning Client to run on RaspiBlitz: \n " \
                 12 64 6 \
                 "${OPTIONS[@]}" \
                 2>&1 >/dev/tty)
@@ -69,8 +64,8 @@ if [ "${network}" == "bitcoin" ]; then
         LND)
             lightning="lnd"
             ;;
-        CLN)
-            lightning="cln"
+        CL)
+            lightning="cl"
             ;;
         NONE)
             lightning="none"

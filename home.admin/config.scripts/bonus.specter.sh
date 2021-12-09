@@ -1,18 +1,23 @@
 #!/bin/bash
 # https://github.com/cryptoadvance/specter-desktop  
 
-pinnedVersion="1.6.0"
+pinnedVersion="1.7.2"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "config script to switch Specter Desktop on, off, configure or update"
- echo "bonus.specter.sh [status|on|off|config|update]"
+ echo "bonus.specter.sh [status|on|off|config|update] <mainnet|testnet|signet>"
  echo "installing the version $pinnedVersion by default"
  exit 1
 fi
 
 source /mnt/hdd/raspiblitz.conf
-echo "# bonus.specter.sh $1"
+echo "# bonus.specter.sh $1 $2"
+
+if [ $# -gt 1 ];then
+  CHAIN=$2
+  chain=${CHAIN::-3}
+fi
 
 # get status key/values
 if [ "$1" = "status" ]; then
@@ -115,34 +120,56 @@ function configure_specter {
     "auth": {
         "method": "rpcpasswordaspin",
         "password_min_chars": 6,
-        "rate_limit": "10",
-        "registration_link_timeout": "1"
+        "rate_limit": 10,
+        "registration_link_timeout": 1
     },
     "active_node_alias": "raspiblitz_${chain}net",
     "proxy_url": "${proxy}",
-    "only_tor": ${torOnly},
+    "only_tor": "${torOnly}",
     "tor_control_port": "${tor_control_port}",
-    "tor_status": false,
-    "hwi_bridge_url": "/hwi/api/",
+    "tor_status": true,
+    "hwi_bridge_url": "/hwi/api/"
 }
 EOF
+  sudo mkdir -p /home/specter/.specter/nodes
   sudo mv /home/admin/config.json /home/specter/.specter/config.json
-  sudo chown -R specter:specter /home/specter/.specter
+  sudo chown -RL specter:specter /home/specter/
 
   echo "# Adding the raspiblitz_${chain}net node to Specter"
   RPCUSER=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcuser | cut -c 9-)
   PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
-  if [ ${chain} = "main" ];then
-    portprefix=""
-  elif [ ${chain} = "test" ];then
-    portprefix=1
-  elif [ ${chain} = "sig" ];then
-    portprefix=3
-  fi
-  PORT="${portprefix}8332"
-  cat > /home/admin/raspiblitz_${chain}net.json <<EOF    
+
+  echo "# Connect Specter to the default mainnet node"
+  cat > /home/admin/default.json <<EOF    
 {
-    "name": "Bitcoin Core",
+    "name": "raspiblitz_mainnet",
+    "alias": "default",
+    "autodetect": false,
+    "datadir": "",
+    "user": "${RPCUSER}",
+    "password": "${PASSWORD_B}",
+    "port": "8332",
+    "host": "localhost",
+    "protocol": "http",
+    "external_node": true,
+    "fullpath": "/home/specter/.specter/nodes/default.json"
+}
+EOF
+    sudo mv /home/admin/default.json /home/specter/.specter/nodes/default.json
+    sudo chown -RL specter:specter /home/specter/
+
+    if [ "${chain}" != "main" ]; then
+      if [ "${chain}" = "test" ];then
+        portprefix=1
+      elif [ "${chain}" = "sig" ];then
+        portprefix=3
+      fi
+      PORT="${portprefix}8332"
+
+      echo "# Connect Specter to the raspiblitz_${chain}net node"
+      cat > /home/admin/raspiblitz_${chain}net.json <<EOF    
+{
+    "name": "raspiblitz_${chain}net",
     "alias": "raspiblitz_${chain}net",
     "autodetect": false,
     "datadir": "",
@@ -155,13 +182,18 @@ EOF
     "fullpath": "/home/specter/.specter/nodes/raspiblitz_${chain}net.json"
 }
 EOF
-    sudo mv /home/admin/raspiblitz_${chain}net.json.json /home/specter/.specter/nodes/raspiblitz_${chain}net.json
-    sudo chown -R specter:specter /home/specter/.specter
+      sudo mv /home/admin/raspiblitz_${chain}net.json /home/specter/.specter/nodes/raspiblitz_${chain}net.json
+      sudo chown -RL specter:specter /home/specter/
+    fi
 }
+
 
 # config
 if [ "$1" = "config" ]; then
   configure_specter
+  echo "# Restarting Specter - reload it's page to log in with the new settings"
+  sudo systemctl restart specter
+  exit 0
 fi
 
 # switch on
@@ -176,7 +208,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     echo "#    --> Installing prerequisites"
     sudo apt update
-    sudo apt install -y libusb-1.0.0-dev libudev-dev virtualenv libffi-dev
+    sudo apt-get install -y virtualenv libffi-dev libusb-1.0.0-dev libudev-dev 
 
     sudo adduser --disabled-password --gecos "" specter
     
@@ -193,15 +225,15 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo ln -s /mnt/hdd/app-data/.specter /home/specter/ 2>/dev/null
     sudo chown -R specter:specter /home/specter/.specter
 
-    # activating Authentication here ...
-    configure_specter
-
     echo "#    --> creating a virtualenv"
     sudo -u specter virtualenv --python=python3 /home/specter/.env
 
     echo "#    --> pip-installing specter"
-    sudo -u specter /home/specter/.env/bin/python3 -m pip install --upgrade cryptoadvance.specter==$pinnedVersion
-    
+    sudo -u specter /home/specter/.env/bin/python3 -m pip install --upgrade cryptoadvance.specter==$pinnedVersion || exit 1
+
+    # activating Authentication here ...
+    configure_specter
+
     # Mandatory as the camera doesn't work without https
     echo "#    --> Creating self-signed certificate"
     openssl req -x509 -newkey rsa:4096 -nodes -out /tmp/cert.pem -keyout /tmp/key.pem -days 365 -subj "/C=US/ST=Nooneknows/L=Springfield/O=Dis/CN=www.fakeurl.com"
@@ -214,7 +246,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "#    --> Updating Firewall"
     sudo ufw allow 25441 comment 'specter'
     sudo ufw --force enable
-    echo ""
+    echo
 
     echo "#    --> Installing udev-rules for hardware-wallets"
     

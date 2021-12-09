@@ -6,7 +6,7 @@ source /mnt/hdd/raspiblitz.conf
 
 if [ "$1" = "-h" ] || [ "$1" = "-help" ];then
   echo "Usage:" 
-  echo "97addMobileWallet.sh <lnd|cln> <mainnet|testnet|signet>"
+  echo "97addMobileWallet.sh <lnd|cl> <mainnet|testnet|signet>"
   echo "defaults from the configs are:"
   echo "ligthning=${lightning}"
   echo "chain=${chain}"
@@ -141,33 +141,30 @@ checkIP2TOR()
   fi
 }
 
-if [ $lightning = "lnd" ]; then
-  # Also Zap-Android deactivated for now - see: https://github.com/rootzoll/raspiblitz/issues/2198#issuecomment-822808428
-  #OPTIONS=(ZAP_ANDROID "Zap Wallet (Android)" \
-  #		ZAP_IOS "Zap Wallet (iOS)" \
-  OPTIONS=(ZEUS_IOS "Zeus Wallet (iOS)" \
-          ZEUS_ANDROID "Zeus Wallet (Android)" \
-  		  SPHINX "Sphinx Chat (Android or iOS)" 
-  		  )
-  
-  # add SEND MANY APP
-  OPTIONS+=(SENDMANY_ANDROID "SendMany (Android)")
+OPTIONS=()
 
-elif [ $lightning = "cln" ]; then
+if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
+  	# Zap deactivated for now - see: https://github.com/rootzoll/raspiblitz/issues/2198#issuecomment-822808428
+	OPTIONS+=(ZEUS_IOS "Zeus to LND (iOS)")
+	OPTIONS+=(ZEUS_ANDROID "Zeus to LND (Android)")
+	OPTIONS+=(SPHINX "Sphinx Chat to LND (Android/iOS)")
+  	OPTIONS+=(SENDMANY_ANDROID "SendMany to LND (Android)")
+	OPTIONS+=(FULLYNODED_LND "Fully Noded to LND REST (iOS+Tor)") 
+fi
 
-  OPTIONS=(ZEUS_CLNREST "Zeus to C-lightningREST (Android or iOS)" \
-          ZEUS_SPARK "Zeus to Sparko (Android or iOS)" \
-    	  SPARK "Spark Wallet to Sparko (Android - EXPERIMENTAL)" 
-    	  )
-
+if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ]; then
+	OPTIONS+=(ZEUS_CLREST "Zeus to C-lightningREST (Android or iOS)")
+	OPTIONS+=(ZEUS_SPARK "Zeus to Sparko (Android or iOS)")
+	OPTIONS+=(SPARK "Spark Wallet to Sparko (Android - EXPERIMENTAL)" )
+	OPTIONS+=(FULLYNODED_CL "Fully Noded to CL REST (iOS+Tor)")
 fi
 
 # Additional Options with Tor
 if [ "${runBehindTor}" = "on" ]; then
-  OPTIONS+=(FULLY_NODED "Fully Noded (iOS+Tor)") 
+  OPTIONS+=(FULLYNODED_BTC "Fully Noded to bitcoinRPC (iOS+Tor)") 
 fi
 
-CHOICE=$(whiptail --clear --title "Choose Mobile Wallet" --menu "" 14 62 8 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+CHOICE=$(whiptail --clear --title "Choose Mobile Wallet" --menu "" 16 75 10 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
 /home/admin/config.scripts/blitz.display.sh hide
 
@@ -312,7 +309,8 @@ Or scan the qr code on the LCD with your mobile phone.
   	  /home/admin/config.scripts/bonus.lndconnect.sh zeus-android tor
   	  exit 0;
   	;;
-  FULLY_NODED)
+
+  FULLYNODED_BTC)
       appstoreLink="https://apps.apple.com/us/app/fully-noded/id1436425586"
       /home/admin/config.scripts/blitz.display.sh image /home/admin/raspiblitz/pictures/app_fullynoded.png
 	  whiptail --title "Install Fully Noded on your iOS device" \
@@ -332,7 +330,50 @@ Or scan the qr code on the LCD with your mobile phone.
   	  exit 0;
   	;;
 
-ZEUS_CLNREST)
+  FULLYNODED_LND)
+      appstoreLink="https://apps.apple.com/us/app/fully-noded/id1436425586"
+      /home/admin/config.scripts/blitz.display.sh image /home/admin/raspiblitz/pictures/app_fullynoded.png
+	  whiptail --title "Install Fully Noded on your iOS device" \
+		--yes-button "Continue" \
+		--no-button "StoreLink" \
+		--yesno "Open the Apple App Store on your mobile phone.\n\nSearch for --> 'fully noded'\n\nCheck that logo is like on LCD and author is: Denton LLC\nWhen app is installed and started --> Continue." 12 65
+	  if [ $? -eq 1 ]; then
+		/home/admin/config.scripts/blitz.display.sh qr ${appstoreLink}
+		whiptail --title " App Store Link " --msgbox "\
+To install app open the following link:\n
+${appstoreLink}\n
+Or scan the qr code on the LCD with your mobile phone.
+" 11 70
+	  fi
+	  /home/admin/config.scripts/blitz.display.sh hide
+  	  /home/admin/config.scripts/bonus.lndconnect.sh fullynoded-lnd tor
+  	  exit 0;
+	;;
+
+  FULLYNODED_CL)
+	  if [ ! -L /home/bitcoin/cl-plugins-enabled/c-lightning-http-plugin ];then
+	    /home/admin/config.scripts/cl-plugin.http.sh on
+	  fi
+      appstoreLink="https://apps.apple.com/us/app/fully-noded/id1436425586"
+      /home/admin/config.scripts/blitz.display.sh image /home/admin/raspiblitz/pictures/app_fullynoded.png
+	  whiptail --title "Install Fully Noded on your iOS device" \
+		--yes-button "Continue" \
+		--no-button "StoreLink" \
+		--yesno "Open the Apple App Store on your mobile phone.\n\nSearch for --> 'fully noded'\n\nCheck that logo is like on LCD and author is: Denton LLC\nWhen app is installed and started --> Continue." 12 65
+	  if [ $? -eq 1 ]; then
+		/home/admin/config.scripts/blitz.display.sh qr ${appstoreLink}
+		whiptail --title " App Store Link " --msgbox "\
+To install app open the following link:\n
+${appstoreLink}\n
+Or scan the qr code on the LCD with your mobile phone.
+" 11 70
+	  fi
+	  /home/admin/config.scripts/blitz.display.sh hide
+  	  /home/admin/config.scripts/cl-plugin.http.sh connect
+  	  exit 0;
+  	;;
+
+ZEUS_CLREST)
       /home/admin/config.scripts/blitz.display.sh image /home/admin/raspiblitz/pictures/app_zeus.png
 	  whiptail --title "Install Zeus on your Android or iOS Phone" \
 		--yes-button "Continue" \
@@ -342,7 +383,7 @@ ZEUS_CLNREST)
 		exit 0
 	  fi
 	  /home/admin/config.scripts/blitz.display.sh hide
-  	  /home/admin/config.scripts/cln.rest.sh connect
+  	  /home/admin/config.scripts/cl.rest.sh connect
   	  exit 0;
 	;;
 ZEUS_SPARK)
@@ -355,7 +396,7 @@ ZEUS_SPARK)
 		exit 0
 	  fi
 	  /home/admin/config.scripts/blitz.display.sh hide
-  	  /home/admin/config.scripts/cln-plugin.sparko.sh connect
+  	  /home/admin/config.scripts/cl-plugin.sparko.sh connect
   	  exit 0;
 	;;
 SPARK)
@@ -374,7 +415,7 @@ Or scan the QR code on the LCD with your mobile phone.
 " 11 70
 	  fi
 	  /home/admin/config.scripts/blitz.display.sh hide
-  	  /home/admin/config.scripts/cln-plugin.sparko.sh connect
+  	  /home/admin/config.scripts/cl-plugin.sparko.sh connect
   	  exit 0;
 ;;
 

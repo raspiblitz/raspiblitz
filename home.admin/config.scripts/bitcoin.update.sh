@@ -20,14 +20,15 @@ mode="$1"
 
 # RECOMMENDED UPDATE BY RASPIBLITZ TEAM
 # comment will be shown as "BEWARE Info" when option is choosen (can be multiple lines) 
-bitcoinVersion="" # example: 0.21.0 .. keep empty if no newer version as sd card build is available
+bitcoinVersion="" # example: 22.0 .. keep empty if no newer version as sd card build is available
 
 # needed to check code signing
-laanwjPGP="01EA5486DE18A882D4C2684590C8019E36C2E964"
+# https://github.com/laanwj
+laanwjPGP="71A3 B167 3540 5025 D447 E8F2 7481 0B01 2346 C9A6"
 
 # GATHER DATA
-# setting download directory
-downloadDir="/home/admin/download"
+# setting download directory to the current user
+downloadDir="/home/$(whoami)/download/bitcoin.update"
 
 # detect CPU architecture & fitting download link
 if [ $(uname -m | grep -c 'arm') -eq 1 ] ; then
@@ -105,14 +106,15 @@ elif [ "${mode}" = "custom" ]; then
   echo "# Update Bitcoin Core to a chosen version."
   echo
   echo "# Input the version you would like to install and press ENTER."
-  echo "# Examples:"
-  echo "0.21.1rc1"
-  echo "0.21.0"
+  echo "# Examples (versions below 22 are not supported):"
+  echo "22.0rc3"
+  echo "22.0"
   echo
   read bitcoinVersion
   if [ $(echo ${bitcoinVersion} | grep -c "rc") -gt 0 ];then
     cutVersion=$(echo ${bitcoinVersion} | awk -F"r" '{print $1}')
     rcVersion=$(echo ${bitcoinVersion} | awk -F"r" '{print $2}')
+    # https://bitcoincore.org/bin/bitcoin-core-22.0/test.rc3/
     pathVersion=${cutVersion}/test.r${rcVersion}
   else
     pathVersion=${bitcoinVersion}
@@ -145,34 +147,42 @@ if [ "${mode}" = "tested" ]||[ "${mode}" = "reckless" ]||[ "${mode}" = "custom" 
 
   echo 
   echo "# clean & change into download directory"
-  sudo rm -r ${downloadDir}/*
+  sudo rm -rf "${downloadDir}"
+  mkdir -p "${downloadDir}"
   cd "${downloadDir}" || exit 1
 
-  echo
-  # download, check and import signer key
-  sudo -u admin wget https://bitcoin.org/laanwj-releases.asc
-  if [ ! -f "./laanwj-releases.asc" ]
+  # download signed binary sha256 hash sum file
+  wget https://bitcoincore.org/bin/bitcoin-core-${pathVersion}/SHA256SUMS
+  # download signed binary sha256 hash sum file and check
+  wget https://bitcoincore.org/bin/bitcoin-core-${pathVersion}/SHA256SUMS.asc
+
+  echo "# Paste the PGP pubkey fingerprint of a signer."
+  echo "# Example for W. J. van der Laan (https://github.com/laanwj):"
+  echo "71A3 B167 3540 5025 D447 E8F2 7481 0B01 2346 C9A6"
+  echo ""
+  read customKey
+
+  if [ ${#customKey} -eq 0 ];then
+    customKey=$laanwjPGP
+  fi
+
+  # receive signer key
+  if ! gpg --recv-key "$customKey"
   then
-    echo "# !!! FAIL !!! Download laanwj-releases.asc not success."
+    echo
+    echo "!!! FAIL !!! Could not download the PGP pubkey"
+    echo
+    echo "See the signers of this release:"
+    echo
+    gpg --verify SHA256SUMS.asc 
+    echo
     exit 1
   fi
-  gpg --import-options show-only --import ./laanwj-releases.asc
-  fingerprint=$(gpg ./laanwj-releases.asc 2>/dev/null | grep -c "${laanwjPGP}")
-  if [ ${fingerprint} -eq 0 ]; then
-    echo
-    echo "# !!! BUILD WARNING --> Bitcoin PGP author not as expected"
-    echo "# Should contain laanwjPGP: ${laanwjPGP}"
-    echo "# PRESS ENTER to TAKE THE RISK if you think all is OK"
-    read key
-  fi
-  gpg --import ./laanwj-releases.asc
-
-  # download signed binary sha256 hash sum file and check
-  sudo -u admin wget https://bitcoincore.org/bin/bitcoin-core-${pathVersion}/SHA256SUMS.asc
+  
   verifyResult=$(gpg --verify SHA256SUMS.asc 2>&1)
   goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
   echo "goodSignature(${goodSignature})"
-  correctKey=$(echo ${verifyResult} |  grep "using RSA key ${laanwjPGP: -16}" -c)
+  correctKey=$(echo ${verifyResult} | grep "${customKey}" -c)
   echo "correctKey(${correctKey})"
   if [ ${correctKey} -lt 1 ] || [ ${goodSignature} -lt 1 ]; then
     echo
@@ -186,7 +196,7 @@ if [ "${mode}" = "tested" ]||[ "${mode}" = "reckless" ]||[ "${mode}" = "custom" 
 
   echo "# Downloading Bitcoin Core v${bitcoinVersion} for ${bitcoinOSversion} ..."
   binaryName="bitcoin-${bitcoinVersion}-${bitcoinOSversion}.tar.gz"
-  sudo -u admin wget https://bitcoincore.org/bin/bitcoin-core-${pathVersion}/${binaryName}
+  wget https://bitcoincore.org/bin/bitcoin-core-${pathVersion}/${binaryName}
   if [ ! -f "./${binaryName}" ]
   then
     echo "# !!! FAIL !!! Downloading BITCOIN BINARY did not succeed."
@@ -194,11 +204,11 @@ if [ "${mode}" = "tested" ]||[ "${mode}" = "reckless" ]||[ "${mode}" = "custom" 
   fi
 
   echo "# Checking binary checksum ..."
-  checksumTest=$(sha256sum -c --ignore-missing SHA256SUMS.asc ${binaryName} 2>/dev/null \
+  checksumTest=$(sha256sum -c --ignore-missing SHA256SUMS ${binaryName} 2>/dev/null \
                 | grep -c "${binaryName}: OK")
   if [ "${checksumTest}" -eq 0 ]; then
     # get the sha256 value for the corresponding platform from signed hash sum file
-    bitcoinSHA256=$(grep -i "$bitcoinOSversion" SHA256SUMS.asc | cut -d " " -f1)
+    bitcoinSHA256=$(grep -i "${binaryName}}" SHA256SUMS | cut -d " " -f1)
     echo "!!! FAIL !!! Downloaded BITCOIN BINARY CHECKSUM:"
     echo "$(sha256sum ${binaryName})"
     echo "NOT matching SHA256 checksum:"
@@ -206,10 +216,9 @@ if [ "${mode}" = "tested" ]||[ "${mode}" = "reckless" ]||[ "${mode}" = "custom" 
     exit 1
   else
     echo
-    echo "# OK --> VERIFIED BITCOIN CHECKSUM IS CORRECT"
+    echo "# OK --> VERIFIED BITCOIN CORE BINARY CHECKSUM IS CORRECT"
     echo
   fi
-
 fi 
 
 if [ "${mode}" = "tested" ]||[ "${mode}" = "custom" ]; then
@@ -227,10 +236,10 @@ if [ "${mode}" = "tested" ]||[ "${mode}" = "reckless" ]||[ "${mode}" = "custom" 
   sudo systemctl stop bitcoind
   echo
   echo "# Installing Bitcoin Core v${bitcoinVersion}"
-  sudo -u admin tar -xvf ${binaryName}
+  tar -xvf ${binaryName}
   sudo install -m 0755 -o root -g root -t /usr/local/bin/ bitcoin-${bitcoinVersion}/bin/*
   sleep 3
-  installed=$(sudo -u admin bitcoind --version | grep "${bitcoinVersion}" -c)
+  installed=$(bitcoind --version | grep "${bitcoinVersion}" -c)
   if [ ${installed} -lt 1 ]; then
     echo
     echo "# !!! BUILD FAILED --> Was not able to install bitcoind version(${bitcoinVersion})"

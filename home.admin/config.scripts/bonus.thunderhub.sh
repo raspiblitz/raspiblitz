@@ -1,6 +1,7 @@
 #!/bin/bash
 
-THUBVERSION="v0.12.13"
+# https://github.com/apotdevin/thunderhub
+THUBVERSION="v0.12.31"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -9,6 +10,10 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "install $THUBVERSION by default"
  exit 1
 fi
+
+PGPsigner="apotdevin"
+PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
+PGPpubkeyFingerprint="4403F1DFBE779457"
 
 # check and load raspiblitz config
 # to know which network is running
@@ -85,11 +90,16 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     cd /home/thunderhub/thunderhub || exit 1
     # https://github.com/apotdevin/thunderhub/releases
     sudo -u thunderhub git reset --hard $THUBVERSION
+
+    sudo -u thunderhub /home/admin/config.scripts/blitz.git-verify.sh \
+     "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
+
+    # opt out of telemetry 
+    sudo -u thunderhub npx next telemetry disable
     echo "Running npm install and run build..."
-    sudo -u thunderhub npm install
-    if ! [ $? -eq 0 ]; then
-        echo "FAIL - npm install did not run correctly, aborting"
-        exit 1
+    if ! sudo -u thunderhub npm install; then
+      echo "FAIL - npm install did not run correctly, aborting"
+      exit 1
     fi
 
     sudo -u thunderhub npm run build
@@ -135,6 +145,8 @@ FETCH_FEES = false
 DISABLE_LINKS = true
 DISABLE_LNMARKETS = true
 NO_VERSION_CHECK = true
+# https://nextjs.org/telemetry#how-do-i-opt-out
+NEXT_TELEMETRY_DISABLED=1
 
 # -----------
 # Account Configs
@@ -311,8 +323,12 @@ if [ "$1" = "update" ]; then
     echo "# Reset to the latest release tag"
     TAG=$(git tag | sort -V | tail -1)
     sudo -u thunderhub git reset --hard $TAG
+    sudo -u thunderhub /home/admin/config.scripts/blitz.git-verify.sh \
+     "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
 
     # install deps
+    # opt out of telemetry 
+    sudo -u thunderhub npx next telemetry disable
     echo "# Installing dependencies..."
     sudo -u thunderhub npm install --quiet
     if ! [ $? -eq 0 ]; then
@@ -328,7 +344,7 @@ if [ "$1" = "update" ]; then
   fi
 
   echo "# Updated to the release in https://github.com/apotdevin/thunderhub"
-  echo ""
+  echo
   echo "# Starting the ThunderHub service ... *** "
   sudo systemctl start thunderhub
   exit 0

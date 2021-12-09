@@ -98,18 +98,19 @@ fi
 echo "### BASIC SYSTEM SETTINGS ###" >> ${logFile}
 sudo sed -i "s/^message=.*/message='Setup System .'/g" ${infoFile}
 
-# install litecoin (just if needed)
-if [ "${network}" = "litecoin" ]; then
-  echo "Installing Litecoin ..." >> ${logFile}
-  /home/admin/config.scripts/blitz.litecoin.sh on >> ${logFile}
-fi
-
 echo "# Make sure the user bitcoin is in the debian-tor group"
 sudo usermod -a -G debian-tor bitcoin
 
-# set hostname data
-echo "Setting lightning alias: ${hostname}" >> ${logFile}
-sudo sed -i "s/^alias=.*/alias=${hostname}/g" /home/admin/assets/lnd.${network}.conf >> ${logFile} 2>&1
+echo "# Optimizing log files: rotate daily, keep 2 weeks & compress old days " >> ${logFile}
+sudo sed -i "s/^weekly/daily/g" /etc/logrotate.conf >> ${logFile} 2>&1
+sudo sed -i "s/^rotate 4/rotate 14/g" /etc/logrotate.conf >> ${logFile} 2>&1
+sudo sed -i "s/^#compress/compress/g" /etc/logrotate.conf >> ${logFile} 2>&1
+sudo systemctl restart logrotate
+
+# make sure to have bitcoin core >=22 is backwards comp
+# see https://github.com/rootzoll/raspiblitz/issues/2546
+sed -i '/^deprecatedrpc=.*/d' /mnt/hdd/bitcoin/bitcoin.conf 2>/dev/null
+echo "deprecatedrpc=addresses" >> /mnt/hdd/bitcoin/bitcoin.conf 2>/dev/null
 
 # backup SSH PubKeys
 sudo /home/admin/config.scripts/blitz.ssh.sh backup
@@ -205,8 +206,6 @@ echo "allow: bitcoin testnet"
 sudo ufw allow 18333 comment 'bitcoin testnet'
 echo "allow: bitcoin mainnet"
 sudo ufw allow 8333 comment 'bitcoin mainnet'
-echo "allow: litecoin mainnet"
-sudo ufw allow 9333 comment 'litecoin mainnet'
 echo 'allow: lightning testnet'
 sudo ufw allow 19735 comment 'lightning testnet'
 echo "allow: lightning mainnet"
@@ -288,6 +287,24 @@ else
   echo "Provisioning LND interims update - keep default" >> ${logFile}
 fi
 
+# CL INTERIMS UPDATE
+if [ ${#clInterimsUpdate} -gt 0 ]; then
+  sudo sed -i "s/^message=.*/message='Provisioning CL update'/g" ${infoFile}
+  if [ "${clInterimsUpdate}" == "reckless" ]; then
+    # recklessly update CL to latest release on GitHub (just for test & dev nodes)
+    echo "Provisioning CL reckless interims update" >> ${logFile}
+    sudo /home/admin/config.scripts/cl.update.sh reckless >> ${logFile}
+  else
+    # when installing the same sd image - this will re-trigger the secure interims update
+    # if this a update with a newer RaspiBlitz version .. interims update will be ignored
+    # because standard CL version is most more up to date
+    echo "Provisioning CL verified interims update" >> ${logFile}
+    sudo /home/admin/config.scripts/cl.update.sh verified ${clInterimsUpdate} >> ${logFile}
+  fi
+else
+  echo "Provisioning CL interims update - keep default" >> ${logFile}
+fi
+
 # Bitcoin Testnet
 if [ "${testnet}" == "on" ]; then
     echo "Provisioning ${network} Testnet - run config script" >> ${logFile}
@@ -329,31 +346,31 @@ if [ "${slnd}" == "on" ]; then
     sudo /home/admin/config.scripts/lnd.install.sh on signet >> ${logFile} 2>&1
     sudo systemctl start slnd >> ${logFile} 2>&1
 else
-    echo "Provisioning LND Signet - not active" >> ${logFile}
+  echo "Provisioning LND Signet - not active" >> ${logFile}
 fi
 
-# CLN Mainnet (when not main instance)
-if [ "${cln}" == "on" ] && [ "${lightning}" != "cln" ]; then
-    echo "Provisioning CLN Mainnet - run config script" >> ${logFile}
-    sudo /home/admin/config.scripts/cln.install.sh on mainnet >> ${logFile} 2>&1
+# CL Mainnet (when not main instance)
+if [ "${cl}" == "on" ] && [ "${lightning}" != "cl" ]; then
+    echo "Provisioning CL Mainnet - run config script" >> ${logFile}
+    sudo /home/admin/config.scripts/cl.install.sh on mainnet >> ${logFile} 2>&1
 else
-    echo "Provisioning CLN Mainnet - not active as secondary option" >> ${logFile}
+  echo "Provisioning CL Mainnet - not active as secondary option" >> ${logFile}
 fi
 
-# CLN Testnet
-if [ "${tcln}" == "on" ]; then
-    echo "Provisioning CLN Testnet - run config script" >> ${logFile}
-    sudo /home/admin/config.scripts/cln.install.sh on testnet >> ${logFile} 2>&1
+# CL Testnet
+if [ "${tcl}" == "on" ]; then
+    echo "Provisioning CL Testnet - run config script" >> ${logFile}
+    sudo /home/admin/config.scripts/cl.install.sh on testnet >> ${logFile} 2>&1
 else
-    echo "Provisioning CLN Testnet - not active" >> ${logFile}
+    echo "Provisioning CL Testnet - not active" >> ${logFile}
 fi
 
-# CLN Signet
-if [ "${scln}" == "on" ]; then
-    echo "Provisioning CLN Signet - run config script" >> ${logFile}
-    sudo /home/admin/config.scripts/cln.install.sh on signet >> ${logFile} 2>&1
+# CL Signet
+if [ "${scl}" == "on" ]; then
+    echo "Provisioning CL Signet - run config script" >> ${logFile}
+    sudo /home/admin/config.scripts/cl.install.sh on signet >> ${logFile} 2>&1
 else
-    echo "Provisioning CLN Signet - not active" >> ${logFile}
+    echo "Provisioning CL Signet - not active" >> ${logFile}
 fi
 
 # TOR
@@ -410,22 +427,40 @@ else
     echo "Provisioning RTL LND - keep default" >> ${logFile}
 fi
 
-# RTL (CLN)
+# RTL (CL)
 if [ "${crtlWebinterface}" = "on" ]; then
-    echo "Provisioning RTL CLN - run config script" >> ${logFile}
+    echo "Provisioning RTL CL - run config script" >> ${logFile}
     sudo sed -i "s/^message=.*/message='Setup RTL (takes time)'/g" ${infoFile}
-    sudo -u admin /home/admin/config.scripts/bonus.rtl.sh on cln mainnet >> ${logFile} 2>&1
+    sudo -u admin /home/admin/config.scripts/bonus.rtl.sh on cl mainnet >> ${logFile} 2>&1
 else
-    echo "Provisioning RTL CLN - keep default" >> ${logFile}
+    echo "Provisioning RTL CL - keep default" >> ${logFile}
 fi
 
 # SPARKO
 if [ "${sparko}" = "on" ]; then
     echo "Provisioning Sparko - run config script" >> ${logFile}
-    sudo sed -i "s/^message=.*/message='Setup SPARKO (takes time)'/g" ${infoFile}
-    sudo -u admin /home/admin/config.scripts/cln-plugin.sparko.sh on mainnet >> ${logFile} 2>&1
+    sudo sed -i "s/^message=.*/message='Setup SPARKO'/g" ${infoFile}
+    sudo -u admin /home/admin/config.scripts/cl-plugin.sparko.sh on mainnet >> ${logFile} 2>&1
 else
-    echo "Provisioning RTL CLN - keep default" >> ${logFile}
+    echo "Provisioning Sparko - keep default" >> ${logFile}
+fi
+
+# clHTTPplugin
+if [ "${clHTTPplugin}" = "on" ]; then
+    echo "Provisioning clHTTPplugin - run config script" >> ${logFile}
+    sudo sed -i "s/^message=.*/message='Setup clHTTPplugin'/g" ${infoFile}
+    sudo -u admin /home/admin/config.scripts/cl-plugin.http.sh on >> ${logFile} 2>&1
+else
+    echo "Provisioning clHTTPplugin - keep default" >> ${logFile}
+fi
+
+# SPARK
+if [ "${spark}" = "on" ]; then
+    echo "Provisioning Spark Wallet - run config script" >> ${logFile}
+    sudo sed -i "s/^message=.*/message='Setup SPARK WALLET'/g" ${infoFile}
+    sudo -u admin /home/admin/config.scripts/cl.spark.sh on mainnet >> ${logFile} 2>&1
+else
+    echo "Provisioning Spark Wallet - keep default" >> ${logFile}
 fi
 
 #LOOP - install only if LiT won't be installed
@@ -786,12 +821,13 @@ if [ "${lightning}" == "lnd" ];then
   if [ "${passwordFlagExists}" == "1" ]; then
     echo "Found /mnt/hdd/passwordc.flag .. changing password" >> ${logFile}
     oldPasswordC=$(sudo cat /mnt/hdd/passwordc.flag)
+    if ! pip list | grep grpc; then sudo -H python3 -m pip install grpcio==1.38.1; fi
     sudo /home/admin/config.scripts/lnd.initwallet.py change-password mainnet "${oldPasswordC}" "${passwordC}" >> ${logFile}
     sudo shred -u /mnt/hdd/passwordc.flag    
   else
     echo "No /mnt/hdd/passwordc.flag" >> ${logFile}
   fi
-elif [ "${lightning}" == "cln" ];then
+elif [ "${lightning}" == "cl" ];then
   sudo systemctl start lightningd
 fi
 
@@ -799,3 +835,4 @@ echo "DONE - Give raspi some cool off time after hard building .... 5 secs sleep
 sleep 5
 
 echo "END Provisioning" >> ${logFile}
+exit 0

@@ -2,6 +2,7 @@
 
 # https://github.com/lightningequipment/circuitbreaker/releases
 pinnedVersion="v0.3.0"
+# the commits are not signed
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then

@@ -22,7 +22,7 @@ if [ "$1" = "peer-status" ]; then
 
   # if second parameter is "cached" deliver cached result if available
   if [ "$2" == "cached" ]; then
-    cacheExists=$(ls /var/cache/raspiblitz/network.monitor.peer-status.cache 2>/dev/null | grep -c "etwork.monitor.peer-status.cache")
+    cacheExists=$(ls /var/cache/raspiblitz/network.monitor.peer-status.cache 2>/dev/null | grep -c "network.monitor.peer-status.cache")
     if [ "${cacheExists}" == "1" ]; then
       echo "cached=1"
       cat /var/cache/raspiblitz/network.monitor.peer-status.cache

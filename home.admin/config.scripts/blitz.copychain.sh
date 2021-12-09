@@ -12,7 +12,7 @@ source /home/admin/raspiblitz.info 2>/dev/null
 source /mnt/hdd/raspiblitz.conf 2>/dev/null
 
 # check that blockchain is set & supported
-if [ "${network}" != "bitcoin" ] && [ "${network}" != "litecoin" ]; then
+if [ "${network}" != "bitcoin" ]; then
   echo "blockchain='{$network}'"
   echo "error='blockchain type missing or not supported'"
   exit 1
@@ -81,29 +81,34 @@ if [ "$1" = "target" ]; then
   sed -i "s/^message=.*/message='Receiving Blockchain over LAN'/g" /home/admin/raspiblitz.info
 
   echo "stopping services ..."
+  sudo systemctl stop lnd 2>/dev/null
+  sudo systemctl stop lightningd 2>/dev/null
   sudo systemctl stop bitcoind 2>/dev/null
   sudo systemctl disable bitcoind 2>/dev/null
 
-  # check if old blockchain data exists
-  hasOldBlockchainData=0
+  # check if old blockchain data exists (1 Block is 1KB)
+  deleteOldBlockchain=0
   sizeBlocks=$(sudo du -s /mnt/hdd/bitcoin/blocks 2>/dev/null | tr -dc '[0-9]')
-  if [ ${#sizeBlocks} -gt 0 ] && [ ${sizeBlocks} -gt 0 ]; then
-    hasOldBlockchainData=1
-  fi
-  sizeChainstate=$(sudo du -s /mnt/hdd/bitcoin/chainstate 2>/dev/null | tr -dc '[0-9]')
-  if [ ${#sizeChainstate} -gt 0 ] && [ ${sizeChainstate} -gt 0 ]; then
-    hasOldBlockchainData=1
+  if [ "${sizeBlocks}" == "" ] || [ ${sizeBlocks} -lt 250000 ]; then 
+    # blockchain block data is below 250MB ... assume just to be deleted and start copy fresh
+    deleteOldBlockchain=1
+  else
+    # ask if existing blockchain data should be deleted for not before copy start
+    dialog --title " Old Blockchain Data Found " --yesno "\nDo you want to delete the existing blockchain data now?" 7 60
+    response=$?
+    clear
+    echo "response(${response})"
+    if [ "${response}" = "1" ]; then
+      echo "OK - keep old blockchain - just try to repair by copying over it"
+      sleep 3
+    else
+      echo "OK - mark old blockchain to be deleted"
+      deleteOldBlockchain=1
+    fi
   fi
 
-  dialog --title " Old Blockchain Data Found " --yesno "\nDo you want to delete the existing blockchain data now?" 7 60
-  response=$?
-  clear
-  echo "response(${response})"
-  if [ "${response}" = "1" ]; then
-    echo "OK - keep old blockchain - just try to repair by copying over it"
-    sleep 3
-  else
-    echo "OK - delete old blockchain"
+  # delete ald blockchain data
+  if [ "${deleteOldBlockchain}" == "1" ]; then
     sudo rm -rfv /mnt/hdd/bitcoin/blocks/* 2>/dev/null
     sudo rm -rfv /mnt/hdd/bitcoin/chainstate/* 2>/dev/null
     sleep 3
@@ -279,6 +284,8 @@ if [ "$1" = "target" ]; then
   echo "restarting services ... (please wait)"
   sudo systemctl enable bitcoind 
   sudo systemctl start bitcoind 
+  sudo systemctl start lnd 2>/dev/null
+  sudo systemctl start lightningd 2>/dev/null
   sleep 10
 
   # setting copy state
@@ -327,13 +334,12 @@ if [ "$1" = "source" ]; then
   fi
 
   echo "# stopping services ..."
-  sudo systemctl stop background
-  sudo systemctl stop lnd
+  sudo systemctl stop lnd 2>/dev/null
+  sudo systemctl stop lightningd 2>/dev/null
   sudo systemctl stop ${network}d
   sudo systemctl disable ${network}d
   sleep 5
-  sudo systemctl stop bitcoind 2>/dev/null
-  
+
   clear
   echo
   echo "# Starting copy over LAN (around 4-6 hours) ..."
@@ -390,8 +396,8 @@ if [ "$1" = "source" ]; then
   echo "# start services again ..."
   sudo systemctl enable ${network}d
   sudo systemctl start ${network}d
-  sudo systemctl start lnd
-  sudo systemctl start background
+  sudo systemctl start lnd 2>/dev/null
+  sudo systemctl start lightningd 2>/dev/null
 
   echo "# show final message"
   whiptail --msgbox "OK - Copy Process Finished.\n\nNow check on the target RaspiBlitz if it was sucessful." 10 40 "" --title " DONE " --backtitle "RaspiBlitz - Copy Blockchain"

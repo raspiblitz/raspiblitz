@@ -27,11 +27,6 @@ PGPauthor="roasbeef"
 lndUpdatePGPpkeys="https://keybase.io/roasbeef/pgp_keys.asc"
 lndUpdatePGPcheck="4AB7F8DA6FAEBB3B70B1F903BC13F65E2DC84465"
 
-#joostjager
-# PGPauthor="joostjager"
-# lndUpdatePGPpkeys="https://keybase.io/joostjager/pgp_keys.asc"
-# lndUpdatePGPcheck="D146D0F68939436268FA9A130E26BB61B76C4D3A"
-
 # bitconner 
 # PGPauthor="bitconner"
 # lndUpdatePGPpkeys="https://keybase.io/bitconner/pgp_keys.asc"
@@ -71,10 +66,13 @@ lndInstalledVersionMinor=$(echo "${lndInstalledVersion}" | cut -d "-" -f1 | cut 
 # test if the installed version already the verified/recommended update version
 lndUpdateInstalled=$(echo "${lndInstalledVersion}" | grep -c "${lndUpdateVersion}")
 
-# get latest release from LND GitHub releases
-gitHubLatestReleaseJSON="$(curl -s https://api.github.com/repos/lightningnetwork/lnd/releases | jq '.[0]')"
-lndLatestVersion=$(echo "${gitHubLatestReleaseJSON}" | jq -r '.tag_name')
-lndLatestDownload=$(echo "${gitHubLatestReleaseJSON}" | grep "browser_download_url" | grep "linux-${cpuArchitecture}" | cut -d '"' -f4)
+# get latest release from LND GitHub releases (without release candidates)
+lndLatestVersion=$(curl -s https://api.github.com/repos/lightningnetwork/lnd/releases | jq -r '.[].tag_name' | grep -v "rc" | head -n1)
+# example: v0.13.3-beta
+binaryName="lnd-linux-${cpuArchitecture}-${lndLatestVersion}.tar.gz"
+# example: lnd-linux-arm64-v0.13.3-beta.tar.gz
+lndLatestDownload="https://github.com/lightningnetwork/lnd/releases/download/${lndLatestVersion}/${binaryName}"
+# example: https://github.com/lightningnetwork/lnd/releases/download/v0.13.3-beta/lnd-linux-arm64-v0.13.3-beta.tar.gz
 
 # INFO
 if [ "${mode}" = "info" ]; then
@@ -122,7 +120,7 @@ if [ "${mode}" = "verified" ]; then
   echo 
   echo "# clean & change into download directory"
   sudo rm -r ${downloadDir}/*
-  cd "${downloadDir}"
+  cd "${downloadDir}" || exit 1
 
   echo
   echo "# extract the SHA256 hash from the manifest file for the corresponding platform"
@@ -203,7 +201,7 @@ if [ "${mode}" = "reckless" ]; then
 
   # clean & change into download directory
   sudo rm -r ${downloadDir}/*
-  cd "${downloadDir}"
+  cd "${downloadDir}" || exit 1
 
   # download binary
   echo "# downloading binary"

@@ -17,7 +17,7 @@ fi
 
 # display info
 echo ""
-echo "LCD turns white when shutdown complete."
+echo "Green activity light stays dark and LCD turns white when shutdown complete."
 if [ "$1" = "reboot" ]; then
   shutdownParams="-h -r now"
   echo "It will then reboot again automatically."
@@ -32,6 +32,7 @@ fi
 
 # do shutdown/reboot
 echo "-----------------------------------------------"
+sleep 3
 
 # stopping electRS (if installed)
 echo "stop electrs - please wait .."

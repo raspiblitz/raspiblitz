@@ -76,7 +76,7 @@ case $CHOICE in
     if [ $(grep -c "peerbloomfilters=1" < /mnt/hdd/bitcoin/bitcoin.conf) -gt 0 ]&&\
     [ $(grep -c Bisq < /etc/tor/torrc) -gt 0 ];then
       OPTIONS+=(SHOWBISQ "Show the Hidden Service to connect Bisq")
-      OPTIONS+=(REMOVEBISQ "Remove the Hidden Service for bisq")
+      OPTIONS+=(REMOVEBISQ "Remove the Hidden Service for Bisq")
     fi
     CHOICE=$(dialog --clear \
                 --backtitle "" \
@@ -103,12 +103,12 @@ case $CHOICE in
           if [ $(grep -c Bisq < /etc/tor/torrc) -eq 0 ];then
             echo "# Creating the Hidden Service for Bisq"
             echo "
-# Hidden Service for Bisq (bitcoin RPC v2)
+# Hidden Service for Bisq (bitcoin P2P v3)
 HiddenServiceDir /mnt/hdd/tor/bisq
-HiddenServiceVersion 2
+HiddenServiceVersion 3
 HiddenServicePort 8333 127.0.0.1:8333" | sudo tee -a /etc/tor/torrc
-            echo "# Restarting Tor"
-            sudo systemctl restart tor
+            echo "# Reloading Tor"
+            sudo systemctl reload tor@default
             sleep 10
             TOR_ADDRESS=$(sudo cat /mnt/hdd/tor/bisq/hostname)
               if [ -z "$TOR_ADDRESS" ]; then
@@ -135,7 +135,7 @@ HiddenServicePort 8333 127.0.0.1:8333" | sudo tee -a /etc/tor/torrc
         REMOVEBISQ)
           sudo sed -i '/Bisq/{N;N;N;d}'  /etc/tor/torrc
           echo "# Restarting Tor"
-          sudo systemctl restart tor;;
+          sudo systemctl reload tor@default;;
         SHOWBISQ)
           clear
           TOR_ADDRESS=$(sudo cat /mnt/hdd/tor/bisq/hostname)

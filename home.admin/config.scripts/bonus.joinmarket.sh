@@ -5,16 +5,19 @@
 # https://github.com/openoms/bitcoin-tutorials/tree/master/joinmarket
 # https://github.com/openoms/joininbox
 
-JMVERSION="v0.9.1"
-JBVERSION="v0.6.0"
+JBVERSION="v0.6.3" # with JoinMarket v0.9.3
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "JoinMarket install script to switch JoinMarket on or off"
  echo "sudo /home/admin/config.scrips/bonus.joinmarket.sh on|off"
- echo "Installs JoinMarket $JMVERSION with JoininBox $JBVERSION"
+ echo "Installs JoininBox $JBVERSION"
  exit 1
 fi
+
+PGPsigner="openoms"
+PGPpubkeyLink="https://github.com/openoms.gpg"
+PGPpubkeyFingerprint="13C688DB5B9C745DE4D2E4545BFB77609B081B65"
 
 # check if sudo
 if [ "$EUID" -ne 0 ]
@@ -33,12 +36,10 @@ fi
 if [ "$1" = "menu" ]; then
   whiptail --title " JoinMarket info " --msgbox "
 Type: 'jm' in the command line to switch to the dedicated user
-and start the JoininBox menu. Notes on usage:
+and start the JoininBox menu.
+Notes on usage:
 https://github.com/openoms/bitcoin-tutorials/blob/master/joinmarket/README.md
-
-You can log in directly with the 'joinmarket' user via ssh.
-The user password is the PASSWORD_B.
-" 13 81
+" 11 81
   exit 0
 fi
 
@@ -96,48 +97,23 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       echo "# specified to use wallet.dat in the recovered joinmarket.cfg"
     fi
 
-    # install joinmarket
-    cd /home/joinmarket
-    # PySide2 for armf: https://packages.debian.org/buster/python3-pyside2.qtcore
-    echo "# installing ARM specific dependencies to run the QT GUI"
-    sudo apt install -y python3-pyside2.qtcore python3-pyside2.qtgui \
-    python3-pyside2.qtwidgets zlib1g-dev libjpeg-dev python3-pyqt5 libltdl-dev
-    # https://github.com/JoinMarket-Org/joinmarket-clientserver/issues/668#issuecomment-717815719
-    sudo apt install -y build-essential automake pkg-config libffi-dev python3-dev libgmp-dev 
-    sudo -u joinmarket pip install libtool asn1crypto cffi pycparser coincurve
-    echo "# installing JoinMarket"
-    sudo -u joinmarket git clone https://github.com/Joinmarket-Org/joinmarket-clientserver
-    cd joinmarket-clientserver || exit 1
-    sudo -u joinmarket git reset --hard $JMVERSION
-    # make install.sh set up jmvenv with -- system-site-packages
-    # and import the PySide2 armf package from the system
-    sudo -u joinmarket sed -i \
-    "s#^    virtualenv -p \"\${python}\" \"\${jm_source}/jmvenv\" || return 1#\
-    virtualenv --system-site-packages -p \"\${python}\" \"\${jm_source}/jmvenv\" || return 1 ;\
-    /home/joinmarket/joinmarket-clientserver/jmvenv/bin/python -c \'import PySide2\'\
-    #g" install.sh
-    # do not stop at installing debian dependencies
-    sudo -u joinmarket sed -i \
-    "s#^        if ! sudo apt-get install \${deb_deps\[@\]}; then#\
-        if ! sudo apt-get install -y \${deb_deps\[@\]}; then#g" install.sh
-    # don't install PySide2 - using the system-site-package instead 
-    sudo -u joinmarket sed -i "s#^PySide2.*##g" requirements/gui.txt
-    # don't install PyQt5 - using the system package instead 
-    sudo -u joinmarket sed -i "s#^PyQt5.*##g" requirements/gui.txt
-    sudo -u joinmarket ./install.sh --with-qt
-    echo
-    echo "# installed JoinMarket $JMVERSION"
-    echo
-    echo "# adding the joininbox menu"
+    echo "# adding JoininBox"
     sudo rm -rf /home/joinmarket/joininbox
     sudo -u joinmarket git clone https://github.com/openoms/joininbox.git /home/joinmarket/joininbox
     # check the latest at:
     cd /home/joinmarket/joininbox || exit 1
     # https://github.com/openoms/joininbox/releases/
     sudo -u joinmarket git reset --hard $JBVERSION
+    sudo -u joinmarket /home/admin/config.scripts/blitz.git-verify.sh \
+     "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
+
+    # copy the scripts in place
     sudo -u joinmarket cp /home/joinmarket/joininbox/scripts/* /home/joinmarket/
     sudo -u joinmarket cp /home/joinmarket/joininbox/scripts/.* /home/joinmarket/ 2>/dev/null
     sudo chmod +x /home/joinmarket/*.sh
+
+    echo "# Set ssh access off with the joinmarket user"
+    sudo /home/joinmarket/set.ssh.sh off
 
     # Tor config
     # add the joinmarket user to the Tor group
@@ -146,11 +122,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo sed -i "s:^CookieAuthFile*:#CookieAuthFile:g" /etc/tor/torrc
     if ! grep -Eq "^CookieAuthentication 1" /etc/tor/torrc; then
       echo "CookieAuthentication 1" | sudo tee -a /etc/tor/torrc
-      sudo systemctl restart tor@default
+      sudo systemctl reload tor@default
     fi
     if ! grep -Eq "^AllowOutboundLocalhost 1" /etc/tor/torsocks.conf; then          
       echo "AllowOutboundLocalhost 1" | sudo tee -a /etc/tor/torsocks.conf
-      sudo systemctl restart tor@default
+      sudo systemctl reload tor@default
     fi
 
     # joinin.conf settings
@@ -163,18 +139,29 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     if grep -Eq "^runBehindTor=on" /mnt/hdd/raspiblitz.conf; then
       sudo -u joinmarket sed -i "s/^runBehindTor=.*/runBehindTor=on/g" /home/joinmarket/joinin.conf
     fi
-
-    echo "# setting the autostart script for joinmarket"
+    echo 
+    echo "##########"
+    echo "# Extras #"
+    echo "##########"
+    echo 
+    # install a command-line fuzzy finder (https://github.com/junegunn/fzf)
+    apt -y install fzf
+    bash -c "echo 'source /usr/share/doc/fzf/examples/key-bindings.bash' >> \
+    /home/joinmarket/.bashrc"
+    
+    # install tmux
+    apt -y install tmux
+    
+    echo 
+    echo "#############"
+    echo "# Autostart #"
+    echo "#############"
     echo "
-# automatically start startup.sh for joinmarket unless
-# when running in a tmux session
-if [ -z \"\$TMUX\" ]; then
-  /home/joinmarket/startup.sh
+if [ -f \"/home/joinmarket/joinmarket-clientserver/jmvenv/bin/activate\" ]; then
+  . /home/joinmarket/joinmarket-clientserver/jmvenv/bin/activate
+  /home/joinmarket/joinmarket-clientserver/jmvenv/bin/python -c \"import PySide2\"
+  cd /home/joinmarket/joinmarket-clientserver/scripts/
 fi
-# always activate jmvenv with PySide2 and cd to scripts'
-. /home/joinmarket/joinmarket-clientserver/jmvenv/bin/activate
-/home/joinmarket/joinmarket-clientserver/jmvenv/bin/python -c \"import PySide2\"
-cd /home/joinmarket/joinmarket-clientserver/scripts/
 # shortcut commands
 source /home/joinmarket/_commands.sh
 # automatically start main menu for joinmarket unless
@@ -182,41 +169,13 @@ source /home/joinmarket/_commands.sh
 if [ -z \"\$TMUX\" ]; then
   /home/joinmarket/menu.sh
 fi
-" | sudo -u joinmarket tee -a /home/joinmarket/.bashrc
+"   | sudo -u joinmarket tee -a /home/joinmarket/.bashrc
 
-    cat > /home/admin/startup.sh <<EOF
-# check for joinmarket.cfg
-if [ ! -f "/home/joinmarket/.joinmarket/joinmarket.cfg" ] ; then
-  echo "# generating the joinmarket.cfg"
-  echo
-  . /home/joinmarket/joinmarket-clientserver/jmvenv/bin/activate &&\
-  cd /home/joinmarket/joinmarket-clientserver/scripts/
-  python wallet-tool.py generate --datadir=/home/joinmarket/.joinmarket
-  sudo chmod 600 /home/joinmarket/.joinmarket/joinmarket.cfg || exit 1
-  echo ""
-  echo "# editing the joinmarket.cfg"
-  sed -i "s/^rpc_user =.*/rpc_user = raspibolt/g" /home/joinmarket/.joinmarket/joinmarket.cfg
-  PASSWORD_B=\$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcpassword | cut -c 13-)
-  sed -i "s/^rpc_password =.*/rpc_password = \$PASSWORD_B/g" /home/joinmarket/.joinmarket/joinmarket.cfg
-  echo "Filled the bitcoin RPC password (PASSWORD_B)"
-  sed -i "s/^rpc_wallet_file =.*/rpc_wallet_file = wallet.dat/g" /home/joinmarket/.joinmarket/joinmarket.cfg
-  echo "Using the bitcoind wallet: wallet.dat"
-  #communicate with IRC servers via Tor
-  JMcfgPath="/home/joinmarket/.joinmarket/joinmarket.cfg"
-  sed -i "s/^host = irc.darkscience.net/#host = irc.darkscience.net/g" \$JMcfgPath
-  sed -i "s/^#host = dark.*/host = darkirc6tqgpnwd3blln3yfv5ckl47eg7llfxkmtovrv7c7iwohhb6ad.onion/g" \$JMcfgPath
-  sed -i "s/^host = irc.hackint.org/#host = irc.hackint.org/g" \$JMcfgPath
-  sed -i "s/^#host = ncwkrwxpq2ikcngxq3dy2xctuheniggtqeibvgofixpzvrwpa77tozqd.onion/host = ncwkrwxpq2ikcngxq3dy2xctuheniggtqeibvgofixpzvrwpa77tozqd.onion/g" \$JMcfgPath
-  sed -i "s/^socks5 = false/#socks5 = false/g" \$JMcfgPath
-  sed -i "s/^#socks5 = true/socks5 = true/g" \$JMcfgPath
-  sed -i "s/^#port = 6667/port = 6667/g" \$JMcfgPath
-  sed -i "s/^#usessl = false/usessl = false/g" \$JMcfgPath
-  echo "# Edited the joinmarket.cfg to communicate over Tor only."
-fi
-EOF
-    mv /home/admin/startup.sh /home/joinmarket/startup.sh
-    chown joinmarket:joinmarket /home/joinmarket/startup.sh
-    chmod +x /home/joinmarket/startup.sh
+    echo "######################"
+    echo "# Install JoinMarket #"
+    echo "######################"
+    sudo -u joinmarket /home/joinmarket/install.joinmarket.sh install
+
   else
     echo "JoinMarket is already installed"
     echo
@@ -226,11 +185,11 @@ EOF
     # setting value in raspi blitz config
     sudo sed -i "s/^joinmarket=.*/joinmarket=on/g" /mnt/hdd/raspiblitz.conf
     # starting info
+    echo
     echo "# Start to use by logging in to the 'joinmarket' user with:"
     echo "# 'sudo su joinmarket' or use the shortcut 'jm'"
     echo
-    echo "# If logging in directly via ssh the password is the PASSWORD_B"
-    echo   
+  
   else
     echo " Failed to install JoinMarket"
     exit 1

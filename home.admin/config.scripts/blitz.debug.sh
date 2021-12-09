@@ -13,10 +13,6 @@ source /mnt/hdd/raspiblitz.conf 2>/dev/null
 if [ ${#network} -eq 0 ]; then
   echo "backup info: network"
   network="bitcoin"
-  litecoinActive=$(sudo ls /mnt/hdd/litecoin/litecoin.conf | grep -c 'litecoin.conf')
-  if [ ${litecoinActive} -eq 1 ]; then
-    network="litecoin"
-  fi
 fi
 
 # for non final config nodes
@@ -83,11 +79,11 @@ fi
 echo
 
 echo "*** C-LIGHTNING (MAINNET) SYSTEMD STATUS ***"
-if [ "${lightning}" == "cln" ] || [ "${cln}" == "on" ] || [ "${cln}" == "1" ]; then
+if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ] || [ "${cl}" == "1" ]; then
   sudo systemctl status lightningd -n2 --no-pager
   echo
   echo "*** LAST 30 C-LIGHTNING (MAINNET) INFO LOGS ***"
-  echo "sudo tail -n 30 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log"
+  echo "sudo tail -n 30 /home/bitcoin/.lightning/${network}/cl.log"
   sudo tail -n 30 /home/bitcoin/.lightning/${network}/cl.log
 else
   echo "- not activated -"
@@ -127,7 +123,7 @@ fi
 echo
 
 echo "*** C-LIGHTNING (TESTNET) SYSTEMD STATUS ***"
-if [ "${tcln}" == "on" ] || [ "${tcln}" == "1" ]; then
+if [ "${tcl}" == "on" ] || [ "${tcl}" == "1" ]; then
   sudo systemctl status tlightningd -n2 --no-pager
   echo
   echo "*** LAST 30 C-LIGHTNING (TESTNET) INFO LOGS ***"
@@ -171,7 +167,7 @@ fi
 echo
 
 echo "*** C-LIGHTNING (SIGNET) SYSTEMD STATUS ***"
-if [ "${scln}" == "on" ] || [ "${scln}" == "1" ]; then
+if [ "${scl}" == "on" ] || [ "${scl}" == "1" ]; then
   sudo systemctl status slightningd -n2 --no-pager
   echo
   echo "*** LAST 30 C-LIGHTNING (SIGNET) INFO LOGS ***"
@@ -236,11 +232,11 @@ fi
 
 if [ "${crtlWebinterface}" == "on" ]; then
   echo
-  echo "*** CLN-RTL ***"
+  echo "*** CL-RTL ***"
   sudo systemctl status cRTL -n10 --no-pager
   echo
 else
-  echo "- CLN-RTL is OFF by config"
+  echo "- CL-RTL is OFF by config"
 fi
 
 if [ "${ElectRS}" == "on" ]; then
@@ -274,6 +270,16 @@ if [ "${BTCPayServer}" == "on" ]; then
   echo
 else
   echo "- BTCPayServer is OFF by config"
+fi
+
+if [ "${BTCRPCexplorer}" == "on" ]; then
+  echo
+  echo "*** LAST 20 BTC-RPC-Explorer LOGS ***"
+  echo "sudo journalctl -u btc-rpc-explorer -b --no-pager -n20"
+  sudo journalctl -u btc-rpc-explorer -b --no-pager -n20
+  echo
+else
+  echo "- BTC-RPC-Explorer is OFF by config"
 fi
 
 if [ "${LNBits}" == "on" ]; then

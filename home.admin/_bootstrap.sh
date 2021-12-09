@@ -143,9 +143,7 @@ fi
 
 ################################
 # FS EXPAND
-# if a file called 'ssh.reset' gets
-# placed onto the boot part of
-# the sd card - delete old ssh data
+# extend sd card to maximum capacity
 ################################
 
 source <(sudo /home/admin/config.scripts/blitz.bootdrive.sh status)
@@ -184,6 +182,7 @@ if [ ${sshReset} -eq 1 ]; then
   echo "SSHRESET switch found ... stopping SSH and deleting old certs" >> $logFile
   sudo /home/admin/config.scripts/blitz.ssh.sh renew >> $logFile
   sudo /home/admin/config.scripts/blitz.ssh.sh backup >> $logFile
+  sudo ufw allow ssh
   systemInitReboot=1
   sed -i "s/^message=.*/message='SSHRESET'/g" ${infoFile}
 else
@@ -234,7 +233,7 @@ sleep 5
 ################################
 
 # resetting start count files
-echo "SYSTEMD RESTART LOG: blockchain (bitcoind/litecoind)" > /home/admin/systemd.blockchain.log
+echo "SYSTEMD RESTART LOG: blockchain (bitcoind)" > /home/admin/systemd.blockchain.log
 echo "SYSTEMD RESTART LOG: lightning (LND)" > /home/admin/systemd.lightning.log
 sudo chmod 666 /home/admin/systemd.blockchain.log
 sudo chmod 666 /home/admin/systemd.lightning.log
@@ -251,6 +250,7 @@ if [ ${logsMegaByte} -gt 1000 ]; then
     echo "/var/log/nginx is present"
   fi
   sudo rm -r /var/log/*
+  sudo service rsyslog restart
   if [ $nginxLog == 1 ]; then
     sudo mkdir /var/log/nginx
     echo "Recreated /var/log/nginx"
@@ -415,9 +415,9 @@ if [ ${isMounted} -eq 0 ]; then
   # temp mount the HDD
   echo "Temp mounting (1) data drive ($hddCandidate)" >> $logFile
   if [ "${hddFormat}" != "btrfs" ]; then
-    source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddPartitionCandidate})
+    source <(/home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddPartitionCandidate})
   else
-    source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddCandidate})
+    source <(/home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddCandidate})
   fi
   echo "Temp mounting (1) result: ${isMounted}" >> $logFile
 
@@ -425,11 +425,17 @@ if [ ${isMounted} -eq 0 ]; then
   echo "hddCandidate='${hddCandidate}'" >> ${infoFile}
   echo "hddGigaBytes=${hddGigaBytes}" >> ${infoFile}
   echo "hddBlocksBitcoin=${hddBlocksBitcoin}" >> ${infoFile}
-  echo "hddBlocksLitecoin=${hddBlocksLitecoin}" >> ${infoFile}
   echo "hddGotMigrationData=${hddGotMigrationData}" >> ${infoFile}
   echo ""
-
   echo "HDD is there but not AutoMounted yet - Waiting for user Setup/Update" >> $logFile
+
+  # add some debug info to logfile
+  echo "# df " >> ${logFile}
+  df >> ${logFile}
+  echo "# lsblk -o NAME,FSTYPE,LABEL " >> ${logFile}
+  lsblk -o NAME,FSTYPE,LABEL >> ${logFile}
+  echo "# /home/admin/config.scripts/blitz.datadrive.sh status"
+  /home/admin/config.scripts/blitz.datadrive.sh status >> ${logFile}
 
   # determine correct setup phase
   infoMessage="Please Login for Setup"
@@ -441,7 +447,7 @@ if [ ${isMounted} -eq 0 ]; then
 
     # INIT OLD SSH HOST KEYS on Update/Recovery to prevent "Unknown Host" on ssh client
     echo "COPY und Activating old SSH host keys" >> $logFile
-    sudo /home/admin/config.scripts/blitz.ssh.sh restore >> $logFile
+    /home/admin/config.scripts/blitz.ssh.sh restore >> $logFile
 
     # determine if this is a recovery or an update
     # TODO: improve version/update detection later
@@ -467,14 +473,14 @@ if [ ${isMounted} -eq 0 ]; then
   # until SSH or WEBUI setup data is available
   #############################################
 
-  echo "## WAIT LOOP: USER SETUP/UPDATE/MIGRATION" >> $logFile
+  echo "## WAIT LOOP: USER SETUP/UPDATE/MIGRATION" >> ${logFile}
   until [ "${state}" == "waitprovision" ]
   do
 
     # get fresh info about data drive (in case the hdd gets disconnected)
     source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
     if [ "${hddCandidate}" == "" ]; then
-      echo "!!! WARNING !!! Lost HDD connection .. triggering reboot, to restart system-init." >> $logFile
+      echo "!!! WARNING !!! Lost HDD connection .. triggering reboot, to restart system-init." >> ${logFile}
       sed -i "s/^state=.*/state=errorHDD/g" ${infoFile}
       sed -i "s/^message=.*/message='lost HDD - rebooting'/g" ${infoFile}
       sudo cp ${logFile} ${logFile}.error
@@ -510,23 +516,30 @@ if [ ${isMounted} -eq 0 ]; then
 
   # refresh data from info file
   source ${infoFile}
-  echo "# PROVISION PROCESS with setupPhase(${setupPhase})" >> $logFile
+  echo "# PROVISION PROCESS with setupPhase(${setupPhase})" >> ${logFile}
 
   # mark system on sd card as in setup process
   echo "the provision process was started but did not finish yet" > /home/admin/provision.flag
 
-  # make HDD is still temp mounted
-  echo "Temp mounting (2) data drive ($hddCandidate)" >> $logFile
-  source <(/home/admin/config.scripts/internet.sh status)
+  # make sure HDD is mounted (could be freshly formatted by user on last loop)
+  source <(/home/admin/config.scripts/blitz.datadrive.sh status)
+  echo "Temp mounting (2) data drive ($hddCandidate)" >> ${logFile}
   if [ "${hddFormat}" != "btrfs" ]; then
     source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddPartitionCandidate})
   else
     source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddCandidate})
   fi
-  echo "Temp mounting (2) result: ${isMounted}" >> $logFile
+  echo "Temp mounting (2) result: ${isMounted}" >> ${logFile}
+
+  # check that HDD was temp mounted
+  if [ "${isMounted}" != "1"]; then
+    sed -i "s/^state=.*/state=errorHDD/g" ${infoFile}
+    sed -i "s/^message=.*/message='Was not able to mount HDD (2)'/g" ${infoFile}
+    exit 1
+  fi
 
   # make sure all links between directories/drives are correct
-  echo "Refreshing links between directories/drives .." >> $logFile
+  echo "Refreshing links between directories/drives .." >> ${logFile}
   sudo /home/admin/config.scripts/blitz.datadrive.sh link
 
   # copy over the raspiblitz.conf created from setup to HDD
@@ -540,12 +553,34 @@ if [ ${isMounted} -eq 0 ]; then
   sed -i "s/^message=.*/message='Starting Provision'/g" ${infoFile}
 
   # load setup data
+  echo "# Sourcing ${configFile} " >> ${logFile}
+  source ${configFile}
+  cat ${configFile} >> ${logFile}
+  echo "# Sourcing ${setupFile} " >> ${logFile}
   source ${setupFile}
-  
-  # make sure basic info id in raspiblitz.info
+  sed -e '/^password/d' ${setupFile} >> ${logFile}
+
+  # add some debug info to logfile
+  echo "# df " >> ${logFile}
+  df >> ${logFile}
+  echo "# lsblk -o NAME,FSTYPE,LABEL " >> ${logFile}
+  lsblk -o NAME,FSTYPE,LABEL >> ${logFile}
+
+  # make sure basic info is in raspiblitz.info
+  echo "# Update ${infoFile} " >> ${logFile}
   sudo sed -i "s/^network=.*/network=${network}/g" ${infoFile}
   sudo sed -i "s/^chain=.*/chain=${chain}/g" ${infoFile}
   sudo sed -i "s/^lightning=.*/lightning=${lightning}/g" ${infoFile}
+  cat ${infoFile} >> ${logFile}
+
+  # if migrationFile was uploaded - now import it
+  echo "# migrationFile(${migrationFile})" >> ${logFile}
+  if [ "${migrationFile}" != "" ]; then
+    sed -i "s/^message=.*/message='Unpacking Migration Data'/g" ${infoFile}
+    /home/admin/config.scripts/blitz.migration.sh import "${migrationFile}" >> ${logFile}
+    sed -i "s/^setupPhase=.*/setupPhase='recovery'/g" ${infoFile}
+    setupPhase="recovery"
+  fi
 
   ###################################
   # Set Password A (in all cases)
@@ -558,14 +593,15 @@ if [ ${isMounted} -eq 0 ]; then
     exit 1
   fi
 
-  echo "SETTING PASSWORD A" >> ${logFile}
+  echo "# setting PASSWORD A" >> ${logFile}
   sudo /home/admin/config.scripts/blitz.setpassword.sh a "${passwordA}" >> ${logFile}
 
   # if setup - run provision setup first
   if [ "${setupPhase}" == "setup" ]; then
     echo "Calling _provision.setup.sh for basic setup tasks .." >> $logFile
+    echo "Follow in a new terminal with: 'tail -f raspiblitz.provision-setup.log'" >> $logFile
     sed -i "s/^message=.*/message='Provision Setup'/g" ${infoFile}
-    sudo /home/admin/_provision.setup.sh
+    /home/admin/_provision.setup.sh
     errorState=$?
     sudo cat /home/admin/raspiblitz.provision-setup.log
     if [ "$errorState" != "0" ]; then
@@ -577,13 +613,13 @@ if [ ${isMounted} -eq 0 ]; then
     fi
   fi
 
-  # if migration - run the migration provision first
+  # if migration from other nodes - run the migration provision first
   if [ "${setupPhase}" == "migration" ]; then
     echo "Calling _provision.migration.sh for possible migrations .." >> $logFile
     sed -i "s/^message=.*/message='Provision migration'/g" ${infoFile}
-    sudo /home/admin/_provision.migration.sh
+    /home/admin/_provision.migration.sh
     errorState=$?
-    sudo cat /home/admin/raspiblitz.provision-migration.log
+    cat /home/admin/raspiblitz.provision-migration.log
     if [ "$errorState" != "0" ]; then
       echo "EXIT _provision.migration.sh BECAUSE OF ERROR STATE ($errorState)" >> $logFile
       echo "This can also happen if _provision.migration.sh has syntax errros" >> $logFile
@@ -597,9 +633,9 @@ if [ ${isMounted} -eq 0 ]; then
   if [ "${setupPhase}" == "update" ] || [ "${setupPhase}" == "recovery" ] || [ "${setupPhase}" == "migration" ]; then
     echo "Calling _provision.update.sh .." >> $logFile
     sed -i "s/^message=.*/message='Provision Update/Recovery/Migration'/g" ${infoFile}
-    sudo /home/admin/_provision.update.sh
+    /home/admin/_provision.update.sh
     errorState=$?
-    sudo cat /home/admin/raspiblitz.provision-update.log
+    cat /home/admin/raspiblitz.provision-update.log
     if [ "$errorState" != "0" ]; then
       echo "EXIT _provision.update.sh BECAUSE OF ERROR STATE ($errorState)" >> $logFile
       echo "This can also happen if _provision.update.sh has syntax errors" >> $logFile
@@ -612,7 +648,7 @@ if [ ${isMounted} -eq 0 ]; then
   # finalize provisioning
   echo "Calling _bootstrap.provision.sh for general system provisioning (${setupPhase}) .." >> $logFile
   sed -i "s/^message=.*/message='Provision Basics'/g" ${infoFile}
-  sudo /home/admin/_provision_.sh
+  /home/admin/_provision_.sh
   errorState=$?
   if [ "$errorState" != "0" ]; then
     echo "EXIT _provision_.sh BECAUSE OF ERROR STATE ($errorState)" >> $logFile
@@ -633,11 +669,6 @@ if [ ${isMounted} -eq 0 ]; then
   # mark provision process done
   sed -i "s/^message=.*/message='Provision Done'/g" ${infoFile}
 
-  # make sure for future starts that blockchain service gets started after bootstrap
-  # so deamon reloas needed ... system will go into reboot after last loop
-  sed -i "s/^Wants=.*/Wants=bootstrap.service/g" /etc/systemd/system/${network}d.service
-  sed -i "s/^After=.*/After=network.target/g" /etc/systemd/system/${network}d.service
-
   # wait until syncProgress is available (neeed for final dialogs)
   while [ "${syncProgress}" == "" ]
   do
@@ -648,55 +679,16 @@ if [ ${isMounted} -eq 0 ]; then
   done
 
   ###################################################
-  # WAIT LOOP: AFTER FRESH SETUP, MIGRATION
-  # successfull update & recover can skip this
+  # HANDOVER TO FINAL SETUP CONTROLLER
   ###################################################
 
-  if [ "${setupPhase}" == "setup" ] || [ "${setupPhase}" == "migration" ]; then
-    echo "# Go into WAIT LOOP for final setup dialog ..." >> $logFile
-    sed -i "s/^state=.*/state=waitfinal/g" ${infoFile}
-    sed -i "s/^message=.*/message='Setup Done'/g" ${infoFile}
-  else
-    echo "# Skip WAIT LOOP boot directly into main menu ..." >> $logFile
-    sed -i "s/^state=.*/state=ready/g" ${infoFile}
-    sed -i "s/^message=.*/message='Setup Done'/g" ${infoFile}
-  fi
+  echo "# HANDOVER TO FINAL SETUP CONTROLLER ..." >> $logFile
+  sed -i "s/^state=.*/state=waitfinal/g" ${infoFile}
+  sed -i "s/^message=.*/message='Setup Done'/g" ${infoFile}
 
-  source ${infoFile}
-  echo "WAIT LOOP: FINAL SETUP .. see controlFinalDialog.sh" >> $logFile
-  until [ "${state}" == "ready" ]
-  do
-
-    # get latest network info & update raspiblitz.info (in case network changes)
-    source <(/home/admin/config.scripts/internet.sh status)
-    sed -i "s/^localip=.*/localip='${localip}'/g" ${infoFile}
-
-    # give the loop a little bed time
-    sleep 4
-
-    # check info file for updated values
-    # especially the state for checking loop
-    source ${infoFile}
-
-  done
-  echo "WAIT LOOP: DONE" >> $logFile
-
-  ########################################
-  # AFTER FINAL SETUP TASKS
-
-  # delete setup data from RAM
-  sudo rm ${setupFile}
-
-  # signal that setup phase is over
-  sed -i "s/^setupPhase=.*/setupPhase='done'/g" ${infoFile}
-
-  ########################################
-  # AFTER SETUP REBOOT
-  # touchscreen activation, start with configured SWAP, fix LCD text bug
-  sudo cp /home/admin/raspiblitz.log /home/admin/raspiblitz.setup.log
-  /home/admin/config.scripts/blitz.shutdown.sh reboot finalsetup
-  sleep 100
-  exit 0
+  # system has to wait before reboot to present like seed words and other info/options to user
+  echo "BOOTSTRAP EXIT ... waiting for final setup controller to initiate final reboot." >> $logFile
+  exit 1
 
 else
 
@@ -835,6 +827,7 @@ fi
 
 if [ -d "/mnt/hdd/app-data/subscriptions" ]; then
   echo "OK: subscription data directory exists"
+  sudo chown admin:admin /mnt/hdd/app-data/subscriptions
 else
   echo "CREATE: subscription data directory"
   sudo mkdir /mnt/hdd/app-data/subscriptions

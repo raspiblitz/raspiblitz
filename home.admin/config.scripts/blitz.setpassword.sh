@@ -45,7 +45,10 @@ if [ ${#abcd} -eq 0 ]; then
     OPTIONS+=(A "Master Login Password")
     OPTIONS+=(B "RPC/App Password")
     if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
-      OPTIONS+=(C "Lightning Wallet Password")
+      OPTIONS+=(C "LND Lightning Wallet Password")
+    fi
+    if [ "${cl}" == "on" ] && [ "${clEncryptedHSM}" == "on" ]; then
+      OPTIONS+=(CL "C-Lightning Wallet Password")
     fi
     CHOICE=$(dialog --clear \
                 --backtitle "RaspiBlitz" \
@@ -67,6 +70,9 @@ if [ ${#abcd} -eq 0 ]; then
           ;;
         D)
           abcd='d';
+          ;;
+        CL)
+          abcd='cl';
           ;;
         *)
           exit 0
@@ -365,6 +371,7 @@ elif [ "${abcd}" = "c" ]; then
   sleep 2
 
   err=""
+  if ! pip list | grep grpc; then sudo -H python3 -m pip install grpcio==1.38.1; fi
   source <(sudo /home/admin/config.scripts/lnd.initwallet.py change-password mainnet $oldPassword $newPassword)
   if [ "${err}" != "" ]; then
     dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Was not able to change password\n\n${err}\n${errMore}" 10 52
@@ -435,7 +442,12 @@ elif [ "${abcd}" = "x" ]; then
 
     # store result is file
     echo "${password1}" > ${resultFile}
-    
+
+elif [ "${abcd}" = "cl" ]; then
+  /home/admin/config.scripts/cl.hsmtool.sh change-password mainnet
+  # do not reboot for cl password
+  reboot=0
+
 # everything else
 else
   echo "FAIL: there is no password '${abcd}' (reminder: use lower case)"

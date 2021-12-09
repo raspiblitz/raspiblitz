@@ -20,6 +20,7 @@ Download LND Data Backup now?
       echo "*************************************"
       echo "please wait .."
       sleep 2
+      /home/admin/config.scripts/lnd.compact.sh interactive
       /home/admin/config.scripts/lnd.backup.sh lnd-export-gui
       echo
       echo "PRESS ENTER to continue once you are done downloading."
@@ -52,9 +53,10 @@ OPTIONS+=(SOFTWARE "Run Softwaretest (DebugReport)")
 if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
   OPTIONS+=(BACKUP-LND "Backup your LND data (Rescue-File)")
   OPTIONS+=(RESET-LND "Delete LND & start new node/wallet")
+  OPTIONS+=(COMPACT "Compact the LND channel.db")
 fi
-if [ "${lightning}" == "cln" ] || [ "${cln}" == "on" ]; then
-  OPTIONS+=(REPAIR-CLN "Repair/Backup C-Lightning")
+if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ]; then
+  OPTIONS+=(REPAIR-CL "Repair/Backup C-Lightning")
 fi
 OPTIONS+=(MIGRATION "Migrate Blitz Data to new Hardware")
 OPTIONS+=(COPY-SOURCE "Copy Blockchain Source Modus")
@@ -64,7 +66,7 @@ OPTIONS+=(RESET-ALL "Delete HDD completely to start fresh")
 OPTIONS+=(DELETE-ELEC "Delete Electrum Index")
 OPTIONS+=(DELETE-INDEX "Delete Bitcoin Transaction-Index")
 
-CHOICE=$(whiptail --clear --title "Repair Options" --menu "" 18 62 11 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+CHOICE=$(whiptail --clear --title "Repair Options" --menu "" 19 62 12 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
 clear
 case $CHOICE in
@@ -76,14 +78,23 @@ case $CHOICE in
     read key
     ;;
   BACKUP-LND)
+    /home/admin/config.scripts/lnd.compact.sh interactive
     sudo /home/admin/config.scripts/lnd.backup.sh lnd-export-gui
     echo
     echo "Press ENTER when your backup download is done to shutdown."
     read key
     /home/admin/config.scripts/blitz.shutdown.sh
     ;;
-  REPAIR-CLN)
-    sudo /home/admin/99clnRepairMenu.sh
+  COMPACT)
+    /home/admin/config.scripts/lnd.compact.sh interactive
+    echo "# Starting lnd.service ..."
+    sudo systemctl start lnd
+    echo
+    echo "Press ENTER to return to main menu."
+    read key
+    ;;
+  REPAIR-CL)
+    sudo /home/admin/99clRepairMenu.sh
     echo
     echo "Press ENTER to return to main menu."
     read key
@@ -124,8 +135,16 @@ case $CHOICE in
     echo "stopping lnd ..."
     sudo systemctl stop lnd
     sudo rm -r /mnt/hdd/lnd
-    /home/admin/70initLND.sh
-
+    # create wallet
+    /home/admin/config.scripts/lnd.install.sh on mainnet initwallet
+    # display and delete the seed for mainnet
+    sudo /home/admin/config.scripts/lnd.install.sh display-seed mainnet delete
+    if [ "${tlnd}" == "on" ];then
+      /home/admin/config.scripts/lnd.install.sh on testnet initwallet
+    fi
+    if [ "${slnd}" == "on" ];then
+      /home/admin/config.scripts/lnd.install.sh on signet initwallet
+    fi
     # go back to main menu (and show)
     /home/admin/00raspiblitz.sh
     exit 0;

@@ -19,6 +19,7 @@ if [ "${parameter}" == "on" ]; then
 
   # store to raspiblitz config (delete old line / add new)
   sudo sed -i '/lndExtraParameter=.*/d' /mnt/hdd/raspiblitz.conf
+  sudo sed -i '/lndKeysend=.*/d' /mnt/hdd/raspiblitz.conf
   echo "lndKeysend=on" >> /mnt/hdd/raspiblitz.conf
 
   echo "# OK - keysend feature is switched ON"

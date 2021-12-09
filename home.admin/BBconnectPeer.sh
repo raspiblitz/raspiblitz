@@ -41,7 +41,7 @@ pubkey=$(echo "${_input}"|cut -d@ -f1)
 # address=$(echo "${_input}"|cut -d@ -f2|cut -d: -f1)
 # port=$(echo "${_input}"|cut -d: -f2)
 # build command
-if [ $LNTYPE = cln ];then
+if [ $LNTYPE = cl ];then
   # connect id [host port]
   command="$lightningcli_alias connect ${_input}"
 elif [ $LNTYPE = lnd ];then
@@ -104,7 +104,7 @@ else
   echo "$result"
 
   # check if the node is now in peer list
-  if [ $LNTYPE = cln ];then
+  if [ $LNTYPE = cl ];then
     isPeer=$($lightningcli_alias listpeers 2>/dev/null| grep "${pubkey}" -c)
   elif [ $LNTYPE = lnd ];then
     isPeer=$($lncli_alias listpeers 2>/dev/null| grep "${pubkey}" -c)
