@@ -151,6 +151,14 @@ EOF
       sudo -u $USERNAME $CRON_FILE
     fi
 
+    # set cronjob
+    echo "# setting cronbjob for kindle-display (default: every 5 minutes)"
+    echo "# /etc/cron.d/kindle-display
+SHELL=/bin/bash
+PATH=/bin:/usr/bin:/usr/local/bin
+# m h dom mon dow user-name command to be executed
+*/5 * * * * $USERNAME $CRON_FILE >/dev/null 2>&1" | sudo tee /etc/cron.d/kindle-display >/dev/null
+
     echo "OK - the KINDLE-DISPLAY script is now installed."
     echo ""
     echo "Switch to the '$USERNAME' user and adapt the settings in $CONFIG_FILE"
@@ -159,19 +167,6 @@ EOF
     grep -q '^kindleDisplay' $RASPIBLITZ_FILE && sudo sed -i "s/^kindleDisplay=.*/kindleDisplay=on/g" $RASPIBLITZ_FILE || echo 'kindleDisplay=on' >> $RASPIBLITZ_FILE
   else
     echo "KINDLE-DISPLAY already installed."
-  fi
-
-  cron_count=$(sudo -u $USERNAME crontab -l | grep "$CRON_FILE" -c)
-  if [ "${cron_count}" = "0" ]; then
-    echo ""
-    echo "You might want to set up a cronjob to run the script in regular intervals."
-    echo "As the '$USERNAME' user you can run the 'crontab -e' command."
-    echo ""
-    echo "Here is an example for updating every five minutes ..."
-    echo ""
-    echo "SHELL=/bin/bash"
-    echo "PATH=/bin:/usr/bin:/usr/local/bin"
-    echo "*/5 * * * * $CRON_FILE > /dev/null 2>&1"
   fi
 
   exit 0
@@ -192,6 +187,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo systemctl stop kindle-display
     sudo systemctl disable kindle-display
     sudo rm /etc/systemd/system/kindle-display.service
+    sudo rm -f /etc/cron.d/kindle-display
 
     # close port on firewall
     sudo ufw deny $SERVER_PORT
