@@ -145,23 +145,13 @@ sudo ln -s -f /mnt/hdd/.tmux.conf.local /home/admin/.tmux.conf.local >> ${logFil
 
 # PREPARE LND (if activated)
 if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
-
-  echo "### PREPARE LND" >> ${logFile}
-  
-  # backup LND dir (especially for macaroons and tlscerts)
+  # backup LND TLS certs
   # https://github.com/rootzoll/raspiblitz/issues/324
-  echo "*** Make backup of LND directory" >> ${logFile}
-  sudo rm -r  /mnt/hdd/backup_lnd 2>/dev/null
-  sudo cp -r /mnt/hdd/lnd /mnt/hdd/backup_lnd >> ${logFile} 2>&1
-  numOfDiffers=$(sudo diff -arq /mnt/hdd/lnd /mnt/hdd/backup_lnd | grep -c "differ")
-  if [ ${numOfDiffers} -gt 0 ]; then
-    echo "FAIL: Backup was not successful" >> ${logFile}
-    sudo diff -arq /mnt/hdd/lnd /mnt/hdd/backup_lnd >> ${logFile} 2>&1
-    echo "removing backup dir to prevent false override" >> ${logFile}
-  else
-    echo "OK Backup is valid." >> ${logFile}
-  fi
-
+  echo "*** Make backup of LND TLS files" >> ${logFile}
+  sudo rm -r  /var/cache/raspiblitz/tls_backup 2>/dev/null
+  sudo mkdir /var/cache/raspiblitz/tls_backup 2>/dev/null
+  sudo cp /mnt/hdd/lnd/tls.cert /var/cache/raspiblitz/tls_backup/tls.cert >> ${logFile} 2>&1
+  sudo cp /mnt/hdd/lnd/tls.key /var/cache/raspiblitz/tls_backup/tls.key >> ${logFile} 2>&1
 fi
 echo "" >> ${logFile}
 
@@ -748,11 +738,11 @@ fi
 # https://github.com/rootzoll/raspiblitz/issues/324
 echo "" >> ${logFile}
 echo "*** Replay backup of LND conf/tls" >> ${logFile}
-if [ -d "/mnt/hdd/backup_lnd" ]; then
+if [ -d "/var/cache/raspiblitz/tls_backup" ]; then
 
   echo "Copying TLS ..." >> ${logFile}
-  sudo cp /mnt/hdd/backup_lnd/tls.cert /mnt/hdd/lnd/tls.cert >> ${logFile} 2>&1
-  sudo cp /mnt/hdd/backup_lnd/tls.key /mnt/hdd/lnd/tls.key >> ${logFile} 2>&1
+  sudo cp /var/cache/raspiblitz/tls_backup/tls.cert /mnt/hdd/lnd/tls.cert >> ${logFile} 2>&1
+  sudo cp /var/cache/raspiblitz/tls_backup/tls.key /mnt/hdd/lnd/tls.key >> ${logFile} 2>&1
   sudo chown -R bitcoin:bitcoin /mnt/hdd/lnd >> ${logFile} 2>&1
   echo "On next final restart admin creds will be updated by _boostrap.sh" >> ${logFile}
 
