@@ -338,13 +338,6 @@ if [ "$1" = "export" ]; then
     sudo cp /mnt/hdd/bitcoin/wallet.dat /mnt/hdd/backup_bitcoin/wallet.dat 2>/dev/null
   fi
 
-  # copy litecoin data files to backup dir (if litecoin active)
-  if [ -f "/mnt/hdd/litecoin/litecoin.conf" ]; then
-    sudo mkdir -p /mnt/hdd/backup_litecoin
-    sudo cp /mnt/hdd/bitcoin/litecoin.conf /mnt/hdd/backup_litecoin/litecoin.conf
-    sudo cp /mnt/hdd/bitcoin/wallet.dat /mnt/hdd/backup_litecoin/wallet.dat 2>/dev/null
-  fi
-
   # clean old backups from temp
   rm -f /hdd/temp/raspiblitz-*.tar.gz 2>/dev/null
 
@@ -476,14 +469,6 @@ if [ "$1" = "import" ]; then
     sudo cp /mnt/hdd/backup_bitcoin/wallet.dat /mnt/hdd/bitcoin/wallet.dat  2>/dev/null
     sudo chown bitcoin:bitcoin -R /mnt/hdd/bitcoin
     sudo chown bitcoin:bitcoin -R /mnt/storage/bitcoin 2>/dev/null
-  fi
-  if [ -d "/mnt/hdd/backup_litecoin" ]; then
-    echo "# Copying back litecoin backup data .."
-    sudo mkdir /mnt/hdd/litecoin
-    sudo cp /mnt/hdd/backup_litecoin/litecoin.conf /mnt/hdd/litecoin/litecoin.conf
-    sudo cp /mnt/hdd/backup_litecoin/wallet.dat /mnt/hdd/litecoin/wallet.dat  2>/dev/null
-    sudo chown bitcoin:bitcoin -R /mnt/hdd/litecoin
-    sudo chown bitcoin:bitcoin -R /mnt/storage/litecoin 2>/dev/null
   fi
 
   # check migration 

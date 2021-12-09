@@ -13,10 +13,6 @@ source /mnt/hdd/raspiblitz.conf 2>/dev/null
 if [ ${#network} -eq 0 ]; then
   echo "backup info: network"
   network="bitcoin"
-  litecoinActive=$(sudo ls /mnt/hdd/litecoin/litecoin.conf | grep -c 'litecoin.conf')
-  if [ ${litecoinActive} -eq 1 ]; then
-    network="litecoin"
-  fi
 fi
 
 # for non final config nodes

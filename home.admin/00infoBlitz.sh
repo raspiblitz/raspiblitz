@@ -43,26 +43,9 @@ fi
 if [ ${#hostname} -eq 0 ]; then hostname="raspiblitz"; fi
 
 # for oldnodes
-if [ ${#network} -eq 0 ]; then
-  network="bitcoin"
-  litecoinActive=$(sudo ls /mnt/hdd/litecoin/litecoin.conf 2>/dev/null | grep -c 'litecoin.conf')
-  if [ ${litecoinActive} -eq 1 ]; then
-    network="litecoin"
-  else
-    network=$(sudo cat /home/admin/.network 2>/dev/null)
-  fi
-  if [ ${#network} -eq 0 ]; then
-    network="bitcoin"
-  fi
-fi
-
-# for oldnodes
 if [ ${#chain} -eq 0 ]; then
-  chain="test"
-  isMainChain=$(sudo cat /mnt/hdd/${network}/${network}.conf 2>/dev/null | grep "#testnet=1" -c)
-  if [ ${isMainChain} -gt 0 ];then
-    chain="main"
-  fi
+  network="bitcoin"
+  chain="main"
 fi
 
 # set datadir
