@@ -98,12 +98,6 @@ fi
 echo "### BASIC SYSTEM SETTINGS ###" >> ${logFile}
 sudo sed -i "s/^message=.*/message='Setup System .'/g" ${infoFile}
 
-# install litecoin (just if needed)
-if [ "${network}" = "litecoin" ]; then
-  echo "Installing Litecoin ..." >> ${logFile}
-  /home/admin/config.scripts/blitz.litecoin.sh on >> ${logFile}
-fi
-
 echo "# Make sure the user bitcoin is in the debian-tor group"
 sudo usermod -a -G debian-tor bitcoin
 
@@ -117,10 +111,6 @@ sudo systemctl restart logrotate
 # see https://github.com/rootzoll/raspiblitz/issues/2546
 sed -i '/^deprecatedrpc=.*/d' /mnt/hdd/bitcoin/bitcoin.conf 2>/dev/null
 echo "deprecatedrpc=addresses" >> /mnt/hdd/bitcoin/bitcoin.conf 2>/dev/null
-
-# set hostname data
-echo "Setting lightning alias: ${hostname}" >> ${logFile}
-sudo sed -i "s/^alias=.*/alias=${hostname}/g" /home/admin/assets/lnd.${network}.conf >> ${logFile} 2>&1
 
 # backup SSH PubKeys
 sudo /home/admin/config.scripts/blitz.ssh.sh backup
