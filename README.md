@@ -42,6 +42,7 @@ There are further Services that can be switched on:
 You can connect the following Wallet-Apps to your RaspiBlitz:
 
 * **Zeus** (Android & iOS) [details](https://zeusln.app)
+* **Zap** (Android & iOS) [details](https://www.zaphq.io)
 * **Fully Noded** (iOS) [details](https://apps.apple.com/us/app/fully-noded/id1436425586)
 * **SendMany** (Android) [details](https://github.com/fusion44/sendmany/blob/master/README.md)
 * **Sphinx Chat App** (Android & iOS) [details](https://sphinx.chat)
@@ -885,6 +886,7 @@ This feature should support connecting your RaspiBlitz to a mobile wallets or ot
 At the moment the following mobile wallets are supported - some are only available if LND or c-lightning is activated:
 
 * [Zeus (iOS/Android)](https://github.com/ZeusLN/zeus) (LND & c-lightning)
+* [Zap (iOS/Android)](https://www.zaphq.io/) (only LND)
 * [Fully Noded (iOS over Tor)](https://apps.apple.com/us/app/fully-noded/id1436425586)
 * [SendMany (Android)](https://github.com/fusion44/sendmany/blob/master/README.md) (only LND)
 * [Sphinx Chat App (iOS/Android)](https://sphinx.chat/) (only LND)
