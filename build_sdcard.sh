@@ -552,7 +552,7 @@ echo "*** ADDING MAIN USER admin ***"
 # based on https://raspibolt.github.io/raspibolt/raspibolt_20_pi.html#add-users
 # using the default password 'raspiblitz'
 
-sudo adduser --disabled-password --gecos "" admin
+sudo adduser --disabled-password --gecos "" admin --ingroup admin
 echo "admin:raspiblitz" | sudo chpasswd
 sudo adduser admin sudo
 sudo chsh admin -s /bin/bash
