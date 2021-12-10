@@ -98,12 +98,6 @@ fi
 echo "### BASIC SYSTEM SETTINGS ###" >> ${logFile}
 sudo sed -i "s/^message=.*/message='Setup System .'/g" ${infoFile}
 
-# install litecoin (just if needed)
-if [ "${network}" = "litecoin" ]; then
-  echo "Installing Litecoin ..." >> ${logFile}
-  /home/admin/config.scripts/blitz.litecoin.sh on >> ${logFile}
-fi
-
 echo "# Make sure the user bitcoin is in the debian-tor group"
 sudo usermod -a -G debian-tor bitcoin
 
@@ -117,10 +111,6 @@ sudo systemctl restart logrotate
 # see https://github.com/rootzoll/raspiblitz/issues/2546
 sed -i '/^deprecatedrpc=.*/d' /mnt/hdd/bitcoin/bitcoin.conf 2>/dev/null
 echo "deprecatedrpc=addresses" >> /mnt/hdd/bitcoin/bitcoin.conf 2>/dev/null
-
-# set hostname data
-echo "Setting lightning alias: ${hostname}" >> ${logFile}
-sudo sed -i "s/^alias=.*/alias=${hostname}/g" /home/admin/assets/lnd.${network}.conf >> ${logFile} 2>&1
 
 # backup SSH PubKeys
 sudo /home/admin/config.scripts/blitz.ssh.sh backup
@@ -155,23 +145,13 @@ sudo ln -s -f /mnt/hdd/.tmux.conf.local /home/admin/.tmux.conf.local >> ${logFil
 
 # PREPARE LND (if activated)
 if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
-
-  echo "### PREPARE LND" >> ${logFile}
-
-  # backup LND dir (especially for macaroons and tlscerts)
+  # backup LND TLS certs
   # https://github.com/rootzoll/raspiblitz/issues/324
-  echo "*** Make backup of LND directory" >> ${logFile}
-  sudo rm -r  /mnt/hdd/backup_lnd 2>/dev/null
-  sudo cp -r /mnt/hdd/lnd /mnt/hdd/backup_lnd >> ${logFile} 2>&1
-  numOfDiffers=$(sudo diff -arq /mnt/hdd/lnd /mnt/hdd/backup_lnd | grep -c "differ")
-  if [ ${numOfDiffers} -gt 0 ]; then
-    echo "FAIL: Backup was not successful" >> ${logFile}
-    sudo diff -arq /mnt/hdd/lnd /mnt/hdd/backup_lnd >> ${logFile} 2>&1
-    echo "removing backup dir to prevent false override" >> ${logFile}
-  else
-    echo "OK Backup is valid." >> ${logFile}
-  fi
-
+  echo "*** Make backup of LND TLS files" >> ${logFile}
+  sudo rm -r  /var/cache/raspiblitz/tls_backup 2>/dev/null
+  sudo mkdir /var/cache/raspiblitz/tls_backup 2>/dev/null
+  sudo cp /mnt/hdd/lnd/tls.cert /var/cache/raspiblitz/tls_backup/tls.cert >> ${logFile} 2>&1
+  sudo cp /mnt/hdd/lnd/tls.key /var/cache/raspiblitz/tls_backup/tls.key >> ${logFile} 2>&1
 fi
 echo "" >> ${logFile}
 
@@ -216,8 +196,6 @@ echo "allow: bitcoin testnet"
 sudo ufw allow 18333 comment 'bitcoin testnet'
 echo "allow: bitcoin mainnet"
 sudo ufw allow 8333 comment 'bitcoin mainnet'
-echo "allow: litecoin mainnet"
-sudo ufw allow 9333 comment 'litecoin mainnet'
 echo 'allow: lightning testnet'
 sudo ufw allow 19735 comment 'lightning testnet'
 echo "allow: lightning mainnet"
@@ -760,11 +738,11 @@ fi
 # https://github.com/rootzoll/raspiblitz/issues/324
 echo "" >> ${logFile}
 echo "*** Replay backup of LND conf/tls" >> ${logFile}
-if [ -d "/mnt/hdd/backup_lnd" ]; then
+if [ -d "/var/cache/raspiblitz/tls_backup" ]; then
 
   echo "Copying TLS ..." >> ${logFile}
-  sudo cp /mnt/hdd/backup_lnd/tls.cert /mnt/hdd/lnd/tls.cert >> ${logFile} 2>&1
-  sudo cp /mnt/hdd/backup_lnd/tls.key /mnt/hdd/lnd/tls.key >> ${logFile} 2>&1
+  sudo cp /var/cache/raspiblitz/tls_backup/tls.cert /mnt/hdd/lnd/tls.cert >> ${logFile} 2>&1
+  sudo cp /var/cache/raspiblitz/tls_backup/tls.key /mnt/hdd/lnd/tls.key >> ${logFile} 2>&1
   sudo chown -R bitcoin:bitcoin /mnt/hdd/lnd >> ${logFile} 2>&1
   echo "On next final restart admin creds will be updated by _boostrap.sh" >> ${logFile}
 
@@ -833,6 +811,7 @@ if [ "${lightning}" == "lnd" ];then
   if [ "${passwordFlagExists}" == "1" ]; then
     echo "Found /mnt/hdd/passwordc.flag .. changing password" >> ${logFile}
     oldPasswordC=$(sudo cat /mnt/hdd/passwordc.flag)
+    if ! pip list | grep grpc; then sudo -H python3 -m pip install grpcio==1.38.1; fi
     sudo /home/admin/config.scripts/lnd.initwallet.py change-password mainnet "${oldPasswordC}" "${passwordC}" >> ${logFile}
     sudo shred -u /mnt/hdd/passwordc.flag
   else

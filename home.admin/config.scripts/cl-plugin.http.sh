@@ -15,6 +15,10 @@ if [ $# -lt 1 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ];then
   exit 1
 fi
 
+PGPsigner="web-flow"
+PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
+PGPpubkeyFingerprint="4AEE18F83AFDEB23"
+
 # source <(/home/admin/config.scripts/network.aliases.sh getvars cl <mainnet|testnet|signet>)
 source <(/home/admin/config.scripts/network.aliases.sh getvars cl mainnet)
 
@@ -93,6 +97,10 @@ if [ "$1" = "on" ];then
     sudo -u bitcoin git clone https://github.com/Start9Labs/c-lightning-http-plugin.git
     cd c-lightning-http-plugin || exit 1
     sudo -u bitcoin git reset --hard ${clHTTPpluginVersion} || exit 1
+
+    sudo -u bitcoin /home/admin/config.scripts/blitz.git-verify.sh \
+     "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
+
     echo
     echo "# change CL REST port to 9080"
     sudo sed -i "s/8080/9080/g" src/rpc.rs

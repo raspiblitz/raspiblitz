@@ -38,6 +38,7 @@
 - [Update](#update)
   - [Update to a new C-lightning release](#update-to-a-new-c-lightning-release)
   - [Experimental update to the latest master](#experimental-update-to-the-latest-master)
+- [sqlite3 queries](#sqlite3-queries)
 - [Script file help list](#script-file-help-list)
 
 ---
@@ -62,7 +63,6 @@ The channels would need to be closed to use the same funds in an other node.
 * https://lightning.readthedocs.io/
 
 ## Commands and aliases
-
 * Check if the C-lightning daemon is running:
     ```
     sudo systemctl status lightningd
@@ -79,6 +79,7 @@ or with the alias: `cllog`
     alias clconf='sudo nano /home/bitcoin/.lightning/config'
     alias cllog='sudo tail -n 30 -f /home/bitcoin/.lightning/bitcoin/cl.log'
     ```
+
 ## Directories
 * All data is stored on the disk in:  
 `/mnt/hdd/app-data/.lightningd`  
@@ -90,18 +91,17 @@ or with the alias: `cllog`
 
 ### Default values
 * on the RaspiBlitz for mainnet
-    ```
-    network=bitcoin
-    announce-addr=127.0.0.1:9736
-    log-file=cl.log
-    log-level=info
-    plugin-dir=/home/bitcoin/cln-plugins-enabled
-    # Tor settings
-    proxy=127.0.0.1:9050
-    bind-addr=127.0.0.1:9736
-    addr=statictor:127.0.0.1:9051/torport=9736
-    always-use-proxy=true
-    ```
+  ```
+  network=bitcoin
+  log-file=cl.log
+  log-level=info
+  plugin-dir=/home/bitcoin/cln-plugins-enabled
+  # Tor settings
+  proxy=127.0.0.1:9050
+  bind-addr=127.0.0.1:9736
+  addr=statictor:127.0.0.1:9051/torport=9736
+  always-use-proxy=true
+  ```
 ### All possible config settings
   *  can be shown by running:   
   `lightningd --help`  
@@ -263,7 +263,8 @@ or with the alias: `cllog`
 ### Implemented plugins
 * summary
 * sparko
-* clboss
+* [CLBOSS](#clboss)
+* [feeadjuster](#feeadjuster)
 
 ### Add a custom plugin
 * Place the plugin in the `/home/bitcoin/cl-plugins-enabled` directory 
@@ -311,12 +312,13 @@ https://github.com/ZmnSCPxj/clboss#clboss-status
 ### Feeadjuster
 
 * Install:
+`config.scripts/cl-plugin.feedadjuster.sh on`
 
-* to set the default fees in the config add:
-    ```
-    fee-base=BASEFEE_IN_MILLISATS
-    fee-per-satoshi=PPM_FEE_IN_SATS
-    ```
+* to set the default fees add to the C-lightning `config` file:
+  ```
+  fee-base=BASEFEE_IN_MILLISATS
+  fee-per-satoshi=PPM_FEE_IN_SATS
+  ```
 * more options for the feeadjuster to be set in the c-lightning config can be seen in the [code](https://github.com/lightningd/plugins/blob/c16c564c2c5549b8f7236815490260c49e9e9bf4/feeadjuster/feeadjuster.py#L318): 
     ```
     plugin.add_option(
@@ -525,7 +527,6 @@ Will need to pay through a peer which supports the onion messages which means yo
 * https://bitcoin.stackexchange.com/questions/107484/how-can-i-decode-the-feature-string-of-a-lightning-node-with-bolt-9
 * Convert the hex number from `lightning-cli listpeers` to binary: https://www.binaryhexconverter.com/hex-to-binary-converter and count the position of the bits from the right.
 
-
 ## Testnets
 * for testnet and signet there are prefixes `t` and `s` used for the aliases, daemons and their own plugin directory names.
 * Testnet
@@ -575,16 +576,20 @@ To display it as text:
     ```
     sudo cat /home/bitcoin/.lightning/bitcoin/hsm_secret | xxd
     ```
+
 ### Channel database
-* Stored on the disk and synchronised to the SDcard with the help of the bakcup plugin.
+* Stored on the disk and synchronised to the SDcard with the help of the `backup` plugin.
 
 ### Recovery
 * https://lightning.readthedocs.io/FAQ.html#database-corruption-channel-state-lost
 * https://lightning.readthedocs.io/FAQ.html#loss
+ 
 #### Recover from a cl-rescue file
 * use the `REPAIR-CL` - `FILERESTORE` option in the menu for instructions to upload
+
 #### Recover from a seed
 * use the `REPAIR-CL` - `SEEDRESTORE` option in the menu for instructions to paste the seedwords to restore
+
 #### Rescan the chain after restoring a used c-lightning wallet
 * https://lightning.readthedocs.io/FAQ.html#rescanning-the-block-chain-for-lost-utxos
 * Stop `lightningd`:
@@ -617,8 +622,19 @@ To display it as text:
     config.scripts/cl.install.sh update
     ```
 
-## Script file help list
+## sqlite3 queries
 
+* Query the reasons for force closes
+    ```
+    sudo -u bitcoin sqlite3 /home/bitcoin/.lightning/bitcoin/lightningd.sqlite3 'select short_channel_id, timestamp, cause, message from channel_state_changes inner join channels on channel_id = id where new_state = 7 order by timestamp'
+    ```
+
+* Query the reasons for cooperative channel closes
+    ```
+    sudo -u bitcoin sqlite3 /home/bitcoin/.lightning/bitcoin/lightningd.sqlite3 'select short_channel_id, timestamp, cause, message from channel_state_changes inner join channels on channel_id = id where new_state = 4 order by timestamp'
+    ```
+
+## Script file help list
 * generate a list of the help texts on a RaspiBlitz:
     ```
     cd /home/admin/config.scripts/

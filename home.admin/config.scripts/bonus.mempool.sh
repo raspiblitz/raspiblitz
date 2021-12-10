@@ -12,6 +12,10 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   exit 1
 fi
 
+PGPsigner="wiz"
+PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
+PGPpubkeyFingerprint="A394E332255A6173"
+
 source /mnt/hdd/raspiblitz.conf
 
 # show info menu
@@ -120,6 +124,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u mempool git clone https://github.com/mempool/mempool.git
     cd mempool
     sudo -u mempool git reset --hard $pinnedVersion
+    sudo -u mempool /home/admin/config.scripts/blitz.git-verify.sh \
+     "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
 
     # modify an
     #echo "# try to suppress question on statistics report .."

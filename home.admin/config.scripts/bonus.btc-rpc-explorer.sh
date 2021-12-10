@@ -12,6 +12,10 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  exit 1
 fi
 
+PGPsigner="janoside"
+PGPpubkeyLink="https://github.com/janoside.gpg"
+PGPpubkeyFingerprint="F579929B39B119CC7B0BB71FB326ACF51F317B69"
+
 source /mnt/hdd/raspiblitz.conf
 
 ##########################
@@ -193,6 +197,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u btcrpcexplorer git clone https://github.com/janoside/btc-rpc-explorer.git
     cd btc-rpc-explorer
     sudo -u btcrpcexplorer git reset --hard v3.2.0
+    sudo -u btcrpcexplorer /home/admin/config.scripts/blitz.git-verify.sh \
+     "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
     sudo -u btcrpcexplorer npm install
     if ! [ $? -eq 0 ]; then
         echo "FAIL - npm install did not run correctly, aborting"

@@ -13,10 +13,6 @@ source /mnt/hdd/raspiblitz.conf 2>/dev/null
 if [ ${#network} -eq 0 ]; then
   echo "backup info: network"
   network="bitcoin"
-  litecoinActive=$(sudo ls /mnt/hdd/litecoin/litecoin.conf | grep -c 'litecoin.conf')
-  if [ ${litecoinActive} -eq 1 ]; then
-    network="litecoin"
-  fi
 fi
 
 # for non final config nodes
@@ -87,7 +83,7 @@ if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ] || [ "${cl}" == "1" ]; then
   sudo systemctl status lightningd -n2 --no-pager
   echo
   echo "*** LAST 30 C-LIGHTNING (MAINNET) INFO LOGS ***"
-  echo "sudo tail -n 30 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log"
+  echo "sudo tail -n 30 /home/bitcoin/.lightning/${network}/cl.log"
   sudo tail -n 30 /home/bitcoin/.lightning/${network}/cl.log
 else
   echo "- not activated -"

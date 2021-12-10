@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # https://github.com/Ride-The-Lightning/c-lightning-REST/releases/
-CLRESTVERSION="v0.5.1"
+CLRESTVERSION="v0.5.2"
 
 # help
 if [ $# -eq 0 ]||[ "$1" = "-h" ]||[ "$1" = "--help" ];then
@@ -21,7 +21,7 @@ source <(/home/admin/config.scripts/network.aliases.sh getvars cl $2)
 
 echo "# Running 'cl.rest.sh $*'"
 
-if [ $1 = connect ];then
+if [ "$1" = connect ];then
   echo "# Allowing port ${portprefix}6100 through the firewall"
   sudo ufw allow "${portprefix}6100" comment "${netprefix}clrest"
   localip=$(ip addr | grep 'state UP' -A2 | grep -E -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
@@ -72,7 +72,7 @@ if [ $1 = connect ];then
   exit 0
 fi
 
-if [ $1 = on ];then
+if [ "$1" = on ];then
   echo "# Setting up c-lightning-REST for $CHAIN"
 
   sudo systemctl stop ${netprefix}clrest
@@ -83,6 +83,13 @@ if [ $1 = on ];then
     sudo -u bitcoin git clone https://github.com/saubyk/c-lightning-REST
     cd c-lightning-REST || exit 1
     sudo -u bitcoin git reset --hard $CLRESTVERSION
+    
+    PGPsigner="saubyk"
+    PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
+    PGPpubkeyFingerprint="00C9E2BC2E45666F"
+    sudo -u bitcoin /home/admin/config.scripts/blitz.git-verify.sh \
+     "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
+    
     sudo -u bitcoin npm install
   fi
 

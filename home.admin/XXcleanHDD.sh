@@ -17,7 +17,6 @@ if [ "${extraParameter}" = "-all" ]; then
     sudo systemctl stop lnd.service 2>/dev/null
     echo "# - blockchain"
     sudo systemctl stop bitcoind.service 2>/dev/null
-    sudo systemctl stop litecoind.service 2>/dev/null
 
     # delete plain all on HDD
     echo "# cleaning HDD ... (please wait)"
@@ -38,7 +37,6 @@ elif [ "${extraParameter}" = "-blockchain" ]; then
     sudo systemctl stop lnd.service 2>/dev/null
     echo "# - blockchain"
     sudo systemctl stop bitcoind.service 2>/dev/null
-    sudo systemctl stop litecoind.service 2>/dev/null
     echo ""
     echo "# DELETING ..."
 
@@ -49,14 +47,6 @@ elif [ "${extraParameter}" = "-blockchain" ]; then
     sudo mv /mnt/hdd/bitcoin.conf /mnt/hdd/bitcoin/bitcoin.conf 2>/dev/null
     sudo mv /mnt/hdd/wallet.dat /mnt/hdd/bitcoin/wallet.dat 2>/dev/null
     sudo chown -R bitcoin:bitcoin /mnt/hdd/bitcoin
-
-    # delete litecoin blockchain (but keep config & wallet)
-    sudo mv /mnt/hdd/litecoin/litecoin.conf /mnt/hdd/litecoin.conf 2>/dev/null
-    sudo mv /mnt/hdd/litecoin/wallet.dat /mnt/hdd/wallet.dat 2>/dev/null
-    sudo rm -f -r /mnt/hdd/litecoin/*
-    sudo mv /mnt/hdd/litecoin.conf /mnt/hdd/litecoin/litecoin.conf 2>/dev/null
-    sudo mv /mnt/hdd/wallet.dat /mnt/hdd/litecoin/wallet.dat 2>/dev/null
-    sudo chown -R bitcoin:bitcoin /mnt/hdd/litecoin
 
     echo "OK Blockchain data deleted - you may want now run: /home/admin/98repairBlockchain.sh"
     
@@ -80,7 +70,6 @@ else
 
     echo "- blockchain"
     sudo systemctl stop bitcoind.service 2>/dev/null
-    sudo systemctl stop litecoind.service 2>/dev/null
 
     # just delete selective
     echo "selective delete ... (please wait)"
@@ -95,7 +84,7 @@ else
     sudo rm -f /mnt/hdd/bitcoin/testnet3/.* 2>/dev/null
     sudo rm -f -r /mnt/hdd/bitcoin/testnet/database
 
-    # litecoin mainnet (clean working files)
+    # litecoin mainnet (clean working files) -- keep for legacy clean up reasons
     sudo rm -f /mnt/hdd/litecoin/* 2>/dev/null
     sudo rm -f /mnt/hdd/litecoin/.* 2>/dev/null
     sudo rm -f -r /mnt/hdd/litecoin/database

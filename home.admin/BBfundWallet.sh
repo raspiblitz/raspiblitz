@@ -69,9 +69,6 @@ fi
 
 # prepare coin info
 coininfo="Bitcoin"
-if [ "$network" = "litecoin" ]; then
-  coininfo="Litecoin"
-fi
 if [ "$chain" = "test" ]; then
   coininfo="TESTNET Bitcoin"
 fi

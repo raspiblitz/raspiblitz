@@ -2,25 +2,21 @@
 # https://lightning.readthedocs.io/
 
 # https://github.com/ElementsProject/lightning/releases
-CLVERSION=v0.10.1
+CLVERSION=v0.10.2
 
 # install the latest master by using the last commit id
 # https://github.com/ElementsProject/lightning/commit/master
 # CLVERSION="063366ed7e3b7cc12a8d1681acc2b639cf07fa23"
-
-# vars
-source /home/admin/raspiblitz.info
-source /mnt/hdd/raspiblitz.conf
 
 # help
 if [ $# -eq 0 ]||[ "$1" = "-h" ]||[ "$1" = "--help" ];then
   echo
   echo "C-lightning install script"
   echo "The default version is: $CLVERSION"
-  echo "Setting up on ${chain}net unless otherwise specified"
   echo "mainnet / testnet / signet instances can run parallel"
   echo
   echo "Usage:"
+  echo "cl.install.sh install - called by build_sdcard.sh"
   echo "cl.install.sh on <mainnet|testnet|signet>"
   echo "cl.install.sh off <mainnet|testnet|signet> <purge>"
   echo "cl.install.sh [update <version>|testPR <PRnumber>]"
@@ -29,7 +25,115 @@ if [ $# -eq 0 ]||[ "$1" = "-h" ]||[ "$1" = "--help" ];then
   exit 1
 fi
 
-# Tor
+if [ "$1" = "install" ]; then
+  echo "*** PREPARING C-LIGHTNING ***"
+  
+  # https://github.com/ElementsProject/lightning/tree/master/contrib/keys
+  # PGPsigner="rustyrussel"
+  # PGPpkeys="https://raw.githubusercontent.com/ElementsProject/lightning/master/contrib/keys/rustyrussell.txt"
+  # PGPcheck="D9200E6CD1ADB8F1"
+
+  PGPsigner="cdecker"
+  PGPpkeys="https://raw.githubusercontent.com/ElementsProject/lightning/master/contrib/keys/cdecker.txt"
+  PGPcheck="A26D6D9FE088ED58"
+
+  # prepare download dir
+  sudo rm -rf /home/admin/download/cl
+  sudo -u admin mkdir -p /home/admin/download/cl
+  cd /home/admin/download/cl || exit 1
+
+  sudo -u admin wget -O "pgp_keys.asc" ${PGPpkeys}
+  sudo -u admin gpg --import --import-options show-only ./pgp_keys.asc
+  fingerprint=$(gpg "pgp_keys.asc" 2>/dev/null | grep "${PGPcheck}" -c)
+  if [ ${fingerprint} -lt 1 ]; then
+    echo
+    echo "!!! WARNING --> the PGP fingerprint is not as expected for ${PGPsigner}"
+    echo "Should contain PGP: ${PGPcheck}"
+    echo "PRESS ENTER to TAKE THE RISK if you think all is OK"
+    read key
+  fi
+  sudo -u admin gpg --import ./pgp_keys.asc
+
+  sudo -u admin wget https://github.com/ElementsProject/lightning/releases/download/${CLVERSION}/SHA256SUMS
+  sudo -u admin wget https://github.com/ElementsProject/lightning/releases/download/${CLVERSION}/SHA256SUMS.asc
+  
+  verifyResult=$(sudo -u admin gpg --verify SHA256SUMS.asc 2>&1)
+
+  goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
+  echo "goodSignature(${goodSignature})"
+  correctKey=$(echo ${verifyResult} | tr -d " \t\n\r" | grep "${PGPcheck}" -c)
+  echo "correctKey(${correctKey})"
+  if [ ${correctKey} -lt 1 ] || [ ${goodSignature} -lt 1 ]; then
+    echo
+    echo "!!! BUILD FAILED --> PGP verification not OK / signature(${goodSignature}) verify(${correctKey})"
+    exit 1
+  else
+    echo 
+    echo "****************************************************************"
+    echo "OK --> the PGP signature of the C-lightning SHA256SUMS is correct"
+    echo "****************************************************************"
+    echo 
+  fi
+  
+  sudo -u admin wget https://github.com/ElementsProject/lightning/releases/download/${CLVERSION}/clightning-${CLVERSION}.zip
+  
+  hashCheckResult=$(sha256sum -c SHA256SUMS 2>&1)
+  goodHash=$(echo ${hashCheckResult} | grep 'OK' -c)
+  echo "goodHash(${goodHash})"
+  if [ ${goodHash} -lt 1 ]; then
+    echo
+    echo "!!! BUILD FAILED --> Hash check not OK"
+    exit 1
+  else
+    echo
+    echo "********************************************************************"
+    echo "OK --> the hash of the downloaded C-lightning source code is correct"
+    echo "********************************************************************"
+    echo
+  fi
+  
+  echo "- Install build dependencies"
+  sudo apt-get install -y \
+    autoconf automake build-essential git libtool libgmp-dev \
+    libsqlite3-dev python3 python3-mako net-tools zlib1g-dev libsodium-dev \
+    gettext unzip
+  sudo pip3 install mrkd==0.2.0
+  sudo pip3 install mistune==0.8.4
+  
+  sudo -u admin unzip clightning-${CLVERSION}.zip
+  cd clightning-${CLVERSION} || exit 1
+  
+  echo "- Configuring EXPERIMENTAL_FEATURES enabled"
+  sudo -u admin ./configure --enable-experimental-features
+  
+  echo "- Building C-lightning from source"
+  sudo -u admin make
+
+  echo "- Install to /usr/local/bin/"
+  sudo make install || exit 1
+  
+  installed=$(sudo -u admin lightning-cli --version)
+  if [ ${#installed} -eq 0 ]; then
+    echo
+    echo "!!! BUILD FAILED --> Was not able to install C-lightning"
+    exit 1
+  fi
+  
+  correctVersion=$(echo "${installed}" | grep -c "${CLVERSION:1}")
+  if [ ${correctVersion} -eq 0 ]; then
+    echo
+    echo "!!! BUILD FAILED --> installed C-lightning is not version ${CLVERSION}"
+    sudo -u admin lightning-cli --version
+    exit 1
+  fi
+  echo
+  echo "- OK the installation of C-lightning v${installed} is successful"
+  exit 0
+fi
+
+# vars
+source /home/admin/raspiblitz.info
+source /mnt/hdd/raspiblitz.conf
 TORGROUP="debian-tor"
 
 if [ "$1" = update ]||[ "$1" = testPR ];then
@@ -79,9 +183,11 @@ if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = testPR ];then
     echo "# Installing dependencies"
     echo
     sudo apt-get install -y \
-    autoconf automake build-essential git libtool libgmp-dev \
-    libsqlite3-dev python3 python3-mako net-tools zlib1g-dev libsodium-dev \
-    gettext
+     autoconf automake build-essential git libtool libgmp-dev \
+     libsqlite3-dev python3 python3-mako net-tools zlib1g-dev libsodium-dev \
+     gettext
+    sudo pip3 install mrkd==0.2.0
+    sudo pip3 install mistune==0.8.4
 
     ####################################
     # Download and compile from source #
@@ -123,13 +229,6 @@ if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = testPR ];then
     else
       echo "# Installing the version $CLVERSION"
       sudo -u bitcoin git reset --hard $CLVERSION
-    fi
-
-    echo "Installing additional dependencies"  
-    sudo apt-get install -y valgrind python3-pip libpq-dev 
-    if ! sudo pip3 install -r requirements.txt; then
-      # just in case building the requirements fails
-      sudo pip3 install mrkd
     fi
 
     echo "# Building with EXPERIMENTAL_FEATURES enabled"

@@ -143,9 +143,7 @@ fi
 
 ################################
 # FS EXPAND
-# if a file called 'ssh.reset' gets
-# placed onto the boot part of
-# the sd card - delete old ssh data
+# extend sd card to maximum capacity
 ################################
 
 source <(sudo /home/admin/config.scripts/blitz.bootdrive.sh status)
@@ -184,6 +182,7 @@ if [ ${sshReset} -eq 1 ]; then
   echo "SSHRESET switch found ... stopping SSH and deleting old certs" >> $logFile
   sudo /home/admin/config.scripts/blitz.ssh.sh renew >> $logFile
   sudo /home/admin/config.scripts/blitz.ssh.sh backup >> $logFile
+  sudo ufw allow ssh
   systemInitReboot=1
   sed -i "s/^message=.*/message='SSHRESET'/g" ${infoFile}
 else
@@ -234,7 +233,7 @@ sleep 5
 ################################
 
 # resetting start count files
-echo "SYSTEMD RESTART LOG: blockchain (bitcoind/litecoind)" > /home/admin/systemd.blockchain.log
+echo "SYSTEMD RESTART LOG: blockchain (bitcoind)" > /home/admin/systemd.blockchain.log
 echo "SYSTEMD RESTART LOG: lightning (LND)" > /home/admin/systemd.lightning.log
 sudo chmod 666 /home/admin/systemd.blockchain.log
 sudo chmod 666 /home/admin/systemd.lightning.log
@@ -426,7 +425,6 @@ if [ ${isMounted} -eq 0 ]; then
   echo "hddCandidate='${hddCandidate}'" >> ${infoFile}
   echo "hddGigaBytes=${hddGigaBytes}" >> ${infoFile}
   echo "hddBlocksBitcoin=${hddBlocksBitcoin}" >> ${infoFile}
-  echo "hddBlocksLitecoin=${hddBlocksLitecoin}" >> ${infoFile}
   echo "hddGotMigrationData=${hddGotMigrationData}" >> ${infoFile}
   echo ""
   echo "HDD is there but not AutoMounted yet - Waiting for user Setup/Update" >> $logFile
@@ -601,6 +599,7 @@ if [ ${isMounted} -eq 0 ]; then
   # if setup - run provision setup first
   if [ "${setupPhase}" == "setup" ]; then
     echo "Calling _provision.setup.sh for basic setup tasks .." >> $logFile
+    echo "Follow in a new terminal with: 'tail -f raspiblitz.provision-setup.log'" >> $logFile
     sed -i "s/^message=.*/message='Provision Setup'/g" ${infoFile}
     /home/admin/_provision.setup.sh
     errorState=$?
@@ -828,6 +827,7 @@ fi
 
 if [ -d "/mnt/hdd/app-data/subscriptions" ]; then
   echo "OK: subscription data directory exists"
+  sudo chown admin:admin /mnt/hdd/app-data/subscriptions
 else
   echo "CREATE: subscription data directory"
   sudo mkdir /mnt/hdd/app-data/subscriptions

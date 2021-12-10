@@ -151,10 +151,11 @@ else
 fi
 
 if [ ${clean} -eq 1 ]; then
-  echo "# Cleaning assets .. "
+  echo "# Cleaning scripts and assets .. "
   sudo rm -f *.sh
   sudo rm -rf assets
-  sudo -u admin mkdir assets
+  sudo rm -rf /home/admin/config.scripts
+  sudo rm -rf /home/admin/setup.scripts
 else
   echo "# ******************************************"
   echo "# NOT cleaning/deleting old files"
@@ -163,11 +164,14 @@ else
 fi
 
 echo "# COPYING from GIT-Directory to /home/admin/"
-sudo rm -r /home/admin/config.scripts
-sudo -u admin cp -r -f /home/admin/raspiblitz/home.admin/* /home/admin
-sudo -u admin chmod -R +x /home/admin/config.scripts
-sudo -u admin chmod -R +x /home/admin/setup.scripts
-sudo -u admin chmod +x /home/admin/*.sh
+sudo -u admin cp /home/admin/raspiblitz/home.admin/.tmux.conf /home/admin
+sudo -u admin cp -r /home/admin/raspiblitz/home.admin/assets /home/admin/
+sudo -u admin cp /home/admin/raspiblitz/home.admin/*.* /home/admin
+sudo -u admin chmod 755 *.sh
+sudo -u admin cp -r /home/admin/raspiblitz/home.admin/config.scripts /home/admin/
+sudo -u admin chmod 755 /home/admin/config.scripts/*.sh
+sudo -u admin cp -r /home/admin/raspiblitz/home.admin/setup.scripts /home/admin/
+sudo -u admin chmod 755 /home/admin/setup.scripts/*.sh
 echo "# ******************************************"
 
 echo "# Syncing Webcontent .."

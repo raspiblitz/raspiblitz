@@ -24,12 +24,6 @@ if [ ${#network} -eq 0 ]; then
  exit 1
 fi
 
-# testnet on litecoin cannot be set 
-if [ "${network}" = "litecoin" ] && [ "$1" = "testnet" ]; then
-  echo "FAIL - no lightning support for litecoin testnet"
-  exit 1
-fi
-
 # stop services
 echo "making sure services are not running"
 sudo systemctl stop lnd 2>/dev/null

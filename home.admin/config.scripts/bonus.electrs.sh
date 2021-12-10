@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # https://github.com/romanz/electrs/releases
-ELECTRSVERSION="v0.9.0"
+ELECTRSVERSION="v0.9.3"
 # https://github.com/romanz/electrs/commits/master
 # ELECTRSVERSION="3041e89cd2fb377541b929d852ef6298c2d4e60a"
 
@@ -13,6 +13,10 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "installs the version $ELECTRSVERSION"
  exit 1
 fi
+
+PGPsigner="romanz"
+PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
+PGPpubkeyFingerprint="87CAE5FA46917CBB"
 
 source /mnt/hdd/raspiblitz.conf
 
@@ -280,7 +284,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u electrs git clone https://github.com/romanz/electrs
     cd /home/electrs/electrs || exit 1
     sudo -u electrs git reset --hard $ELECTRSVERSION
-
+    sudo -u electrs /home/admin/config.scripts/blitz.git-verify.sh \
+     "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
     sudo -u electrs /home/electrs/.cargo/bin/cargo build --locked --release || exit 1
 
     echo
@@ -303,7 +308,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # https://github.com/romanz/electrs/blob/master/doc/usage.md#configuration-files-and-environment-variables
     sudo -u electrs mkdir /home/electrs/.electrs 2>/dev/null
     echo "
-verbose = 2
 timestamp = true
 jsonrpc_import = true
 index-batch-size = 10

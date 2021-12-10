@@ -41,6 +41,7 @@ Do you want to download Lightning Data Backup now?
       echo "please wait .."
       sleep 2
       if [ "${lightning}" == "lnd" ]; then
+        /home/admin/config.scripts/lnd.compact.sh interactive
         /home/admin/config.scripts/lnd.backup.sh lnd-export-gui
       elif [ "${lightning}" == "cl" ]; then
         /home/admin/config.scripts/cl.backup.sh cl-export-gui
@@ -468,6 +469,10 @@ if [ "${specter}" == "on" ]; then
   OPTIONS+=(SPECTER "Update Specter Desktop")
 fi
 
+if [ "${BTCPayServer}" == "on" ]; then
+  OPTIONS+=(BTCPAY "Update BTCPayServer")
+fi
+
 if [ "${sphinxrelay}" == "on" ]; then
   OPTIONS+=(SPHINX "Update Sphinx Server Relay")
 fi
@@ -520,6 +525,9 @@ case $CHOICE in
     ;;
   SPECTER)
     /home/admin/config.scripts/bonus.specter.sh update
+    ;;
+  BTCPAY)
+    /home/admin/config.scripts/bonus.btcpayserver.sh update
     ;;
   SPHINX)
     /home/admin/config.scripts/bonus.sphinxrelay.sh update

@@ -36,6 +36,10 @@ if ! grep -Eq "^notifyMailServer=.*" /mnt/hdd/raspiblitz.conf; then
     echo "notifyMailServer=mail.example.com" | sudo tee -a /mnt/hdd/raspiblitz.conf >/dev/null
 fi
 
+if ! grep -Eq "^notifyMailPort=.*" /mnt/hdd/raspiblitz.conf; then
+    echo "notifyMailPort=587" | sudo tee -a /mnt/hdd/raspiblitz.conf >/dev/null
+fi
+
 if ! grep -Eq "^notifyMailHostname=.*" /mnt/hdd/raspiblitz.conf; then
     echo "notifyMailHostname=$(hostname)" | sudo tee -a /mnt/hdd/raspiblitz.conf >/dev/null
 fi
@@ -92,12 +96,12 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   cat << EOF | sudo tee /etc/msmtprc >/dev/null
 # Set default values for all following accounts.
 defaults
-port 587
 tls on
 tls_trust_file /etc/ssl/certs/ca-certificates.crt
 
 account mail
 host ${notifyMailServer}
+port ${notifyMailPort}
 from ${notifyMailFromAddress}
 auth on
 user ${notifyMailUser}

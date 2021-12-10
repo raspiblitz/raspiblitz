@@ -218,9 +218,6 @@ else
       echo "http://mempoolhqx4isw62xs7abwphsq7ldayuidyx2v2oethdhhj6mlo2r6ad.onion/${chain}net/tx/${fundingTX}"
     fi
   fi
-  if [ "${network}" = "litecoin" ]; then
-    echo "https://live.blockcypher.com/ltc/tx/${fundingTX}/"
-  fi
 fi
 echo
 echo "Press ENTER to return to main menu."

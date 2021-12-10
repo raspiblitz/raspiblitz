@@ -322,12 +322,6 @@ elif [ "$1" = "issue-cert" ]; then
 
 elif [ "$1" = "remove-cert" ]; then
 
-  # check if letsencrypt is on
-  if [ "${letsencrypt}" != "on" ]; then
-    echo "error='letsencrypt is not on'"
-    exit 1
-  fi
-
   # make sure storage directory exist
   sudo mkdir -p $ACME_CERT_HOME 2>/dev/null
   sudo chown -R admin:admin $ACME_CONFIG_HOME

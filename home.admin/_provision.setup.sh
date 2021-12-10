@@ -174,7 +174,7 @@ if [ "${lightning}" == "lnd" ]; then
     # preparing new LND config
     echo "Creating new LND config ..." >> ${logFile}
     sudo -u bitcoin mkdir /mnt/hdd/lnd 2> /dev/null
-    sudo cp /home/admin/assets/lnd.${network}.conf /mnt/hdd/lnd/lnd.conf
+    sudo cp /home/admin/assets/lnd.bitcoin.conf /mnt/hdd/lnd/lnd.conf
     sudo chown bitcoin:bitcoin /mnt/hdd/lnd/lnd.conf
     sudo /home/admin/config.scripts/lnd.install.sh on mainnet
     sudo /home/admin/config.scripts/lnd.setname.sh mainnet ${hostname}
@@ -201,9 +201,7 @@ if [ "${lightning}" == "lnd" ]; then
   sudo systemctl stop lnd 2>/dev/null
   sudo systemctl disable lnd 2>/dev/null
 
-  # make sure lnd gets started after blockchain service
-  sed -i "5s/.*/Wants=${network}d.service/" /home/admin/assets/lnd.service >> ${logFile}
-  sed -i "6s/.*/After=${network}d.service/" /home/admin/assets/lnd.service >> ${logFile}
+  # copy lnd service
   sudo cp /home/admin/assets/lnd.service /etc/systemd/system/lnd.service >> ${logFile}
 
   # start lnd up
@@ -262,7 +260,8 @@ if [ "${lightning}" == "lnd" ]; then
   if [ "${seedWords}" != "" ] && [ "${staticchannelbackup}" != "" ]; then
 
     echo "WALLET --> SEED + SCB " >> ${logFile}
-    sudo sed -i "s/^message=.*/message='LND Wallet (SEED & SCB)'/g" ${infoFile}    
+    sudo sed -i "s/^message=.*/message='LND Wallet (SEED & SCB)'/g" ${infoFile}
+    if ! pip list | grep grpc; then sudo -H python3 -m pip install grpcio==1.38.1; fi  
     sudo /home/admin/config.scripts/lnd.initwallet.py scb mainnet ${passwordC} "${seedWords}" "${staticchannelbackup}" ${seedPassword}
     if [ "${err}" != "" ]; then
       sed -i "s/^state=.*/state=error/g" ${infoFile}
@@ -278,7 +277,8 @@ if [ "${lightning}" == "lnd" ]; then
   elif [ "${seedWords}" != "" ]; then
     
     echo "WALLET --> SEED" >> ${logFile}
-    sudo sed -i "s/^message=.*/message='LND Wallet (SEED)'/g" ${infoFile}    
+    sudo sed -i "s/^message=.*/message='LND Wallet (SEED)'/g" ${infoFile}
+    if ! pip list | grep grpc; then sudo -H python3 -m pip install grpcio==1.38.1; fi  
     sudo /home/admin/config.scripts/lnd.initwallet.py seed mainnet ${passwordC} "${seedWords}" ${seedPassword}
     if [ "${err}" != "" ]; then
       sed -i "s/^state=.*/state=error/g" ${infoFile}
@@ -294,7 +294,8 @@ if [ "${lightning}" == "lnd" ]; then
   else
 
     echo "WALLET --> NEW" >> ${logFile}
-    sudo sed -i "s/^message=.*/message='LND Wallet (NEW)'/g" ${infoFile}    
+    sudo sed -i "s/^message=.*/message='LND Wallet (NEW)'/g" ${infoFile}
+    if ! pip list | grep grpc; then sudo -H python3 -m pip install grpcio==1.38.1; fi  
     source <(sudo /home/admin/config.scripts/lnd.initwallet.py new mainnet ${passwordC})
     if [ "${err}" != "" ]; then
       sed -i "s/^state=.*/state=error/g" ${infoFile}
@@ -337,6 +338,10 @@ if [ "${lightning}" == "lnd" ]; then
     echo "${err}" >> ${logFile}
     exit 15
   fi
+
+  # stop lnd for the rest of the provision process
+  echo "stopping lnd for the rest provision again (will start on next boot)" >> ${logFile}
+  systemctl stop lnd >> ${logFile}
 
 fi
 
@@ -410,7 +415,15 @@ if [ "${lightning}" == "cl" ]; then
 
   fi
 
+  # stop c-lightning for the rest of the provision process
+  echo "stopping lightningd for the rest provision again (will start on next boot)" >> ${logFile}
+  systemctl stop lightningd >> ${logFile}
+
 fi
+
+# stop bitcoind for the rest of the provision process
+echo "stopping bitcoind for the rest provision again (will start on next boot)" >> ${logFile}
+systemctl stop bitcoind >> ${logFile}
 
 sudo sed -i "s/^message=.*/message='Provision Setup Finish'/g" ${infoFile}
 echo "END Setup"  >> ${logFile}
