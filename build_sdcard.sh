@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #########################################################################
-# Build your SD card image based on: 2021-10-30-raspios-bullseye-arm64
+# Build your SD card image based on: 2021-10-30-raspios-bullseye-arm64.zip
 # https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2021-11-08/
 # SHA256: b35425de5b4c5b08959aa9f29b9c0f730cd0819fe157c3e37c56a6d0c5c13ed8
 # PGP fingerprint: 8738CD6B956F460C
@@ -160,7 +160,7 @@ if [ "${baseimage}" = "Raspbian" ] || [ "${baseimage}" = "DietPi" ] || \
 fi
 
 echo "*** Remove unecessary packages ***"
-sudo apt remove --purge -y libreoffice* oracle-java* chromium-browser nuscratch scratch sonic-pi minecraft-pi plymouth python2 vlc
+sudo apt remove --purge -y libreoffice* oracle-java* chromium-browser nuscratch scratch sonic-pi plymouth python2 vlc
 sudo apt clean -y
 sudo apt autoremove -y
 
