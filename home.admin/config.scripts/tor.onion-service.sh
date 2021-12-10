@@ -13,6 +13,9 @@ fi
 
 source /mnt/hdd/raspiblitz.conf
 
+tor_conf_dir="/mnt/hdd/app-data/tor/"
+torrc_services="${tor_conf_dir}/torrc.d/services"
+
 # delete a hidden service
 if [ "$1" == "off" ]; then
 
@@ -23,16 +26,16 @@ if [ "$1" == "off" ]; then
   fi
 
   # remove service paragraph
-  sudo sed -i "/# Hidden Service for ${service}/,/^\s*$/{d}" /etc/tor/torrc
+  sudo sed -i "/# Hidden Service for ${service}/,/^\s*$/{d}" "${torrc_services}"
 
   # remove double empty lines
-  sudo cp /etc/tor/torrc /var/cache/raspiblitz/tmp
+  sudo cp "${torrc_services}" /var/cache/raspiblitz/tmp
   sudo chmod 777 /var/cache/raspiblitz/tmp
   sudo chown admin:admin /var/cache/raspiblitz/tmp
-  sudo awk 'NF > 0 {blank=0} NF == 0 {blank++} blank < 2' /etc/tor/torrc > /var/cache/raspiblitz/tmp
-  sudo mv /var/cache/raspiblitz/tmp /etc/tor/torrc
-  sudo chmod 644 /etc/tor/torrc
-  sudo chown bitcoin:bitcoin /etc/tor/torrc
+  sudo awk 'NF > 0 {blank=0} NF == 0 {blank++} blank < 2' "${torrc_services}" > /var/cache/raspiblitz/tmp
+  sudo mv /var/cache/raspiblitz/tmp "${torrc_services}"
+  sudo chmod 644 "${torrc_services}"
+  sudo chown bitcoin:bitcoin "${torrc_services}"
 
   echo "# OK service is removed - reloading Tor ..."
   sudo systemctl reload tor@default
@@ -74,32 +77,32 @@ fi
 if [ "${runBehindTor}" = "on" ]; then
 
   # delete any old entry for that servive
-  sudo sed -i "/# Hidden Service for ${service}/,/^\s*$/{d}" /etc/tor/torrc
+  sudo sed -i "/# Hidden Service for ${service}/,/^\s*$/{d}" "${torrc_services}"
 
   # make new entry for that service
   echo "
 # Hidden Service for $service
 HiddenServiceDir /mnt/hdd/tor/$service
 HiddenServiceVersion 3
-HiddenServicePort $toPort 127.0.0.1:$fromPort" | sudo tee -a /etc/tor/torrc
+HiddenServicePort $toPort 127.0.0.1:$fromPort" | sudo tee -a "${torrc_services}"
 
   # remove double empty lines
-  awk 'NF > 0 {blank=0} NF == 0 {blank++} blank < 2' /etc/tor/torrc | sudo tee /var/cache/raspiblitz/tmp >/dev/null && sudo mv /var/cache/raspiblitz/tmp /etc/tor/torrc
+  awk 'NF > 0 {blank=0} NF == 0 {blank++} blank < 2' "${torrc_services}" | sudo tee /var/cache/raspiblitz/tmp >/dev/null && sudo mv /var/cache/raspiblitz/tmp "${torrc_services}"
 
   # check and insert second port pair
   if [ ${#toPort2} -gt 0 ]; then
-    alreadyThere=$(sudo cat /etc/tor/torrc 2>/dev/null | grep -c "\b127.0.0.1:$fromPort2\b")
+    alreadyThere=$(sudo cat "${torrc_services}" 2>/dev/null | grep -c "\b127.0.0.1:$fromPort2\b")
     if [ ${alreadyThere} -gt 0 ]; then
-      echo "The port $fromPort2 is already forwarded. Check the /etc/tor/torrc for the details."
+      echo "The port $fromPort2 is already forwarded. Check the "${torrc_services}" for the details."
     else
-      echo "HiddenServicePort $toPort2 127.0.0.1:$fromPort2" | sudo tee -a /etc/tor/torrc
+      echo "HiddenServicePort $toPort2 127.0.0.1:$fromPort2" | sudo tee -a "${torrc_services}"
     fi
   fi
 
   # reload tor
   echo
   echo "Reloading Tor to activate the Hidden Service..."
-  sudo chmod 644 /etc/tor/torrc
+  sudo chmod 644 "${torrc_services}"
   sudo systemctl reload tor@default
   sleep 10
 
@@ -119,7 +122,7 @@ HiddenServicePort $toPort 127.0.0.1:$fromPort" | sudo tee -a /etc/tor/torrc
   echo "$TOR_ADDRESS"
   echo "use with the port: $toPort"
   if [ ${#toPort2} -gt 0 ]; then
-    wasAdded=$(sudo cat /etc/tor/torrc 2>/dev/null | grep -c "\b127.0.0.1:$fromPort2\b")
+    wasAdded=$(sudo cat "${torrc_services}" 2>/dev/null | grep -c "\b127.0.0.1:$fromPort2\b")
     if [ ${wasAdded} -gt 0 ]; then
       echo "or the port: $toPort2"
     fi

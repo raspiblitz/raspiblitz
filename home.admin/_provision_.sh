@@ -83,7 +83,7 @@ if [ "${infoFileDisplayClass}" != "" ] && [ "${displayClass}" != "" ]; then
     echo "going into reboot" >> ${logFile}
     sudo cp ${logFile} ${logFile}.display.recover
     sudo shutdown -r now
-	  exit 0
+    exit 0
   else
     echo "Display Setting is correct ... no need for change" >> ${logFile}
   fi
@@ -387,11 +387,11 @@ fi
 
 # TOR
 if [ "${runBehindTor}" == "on" ]; then
-    echo "Provisioning TOR - run config script" >> ${logFile}
+    echo "Provisioning Tor - run config script" >> ${logFile}
     sudo sed -i "s/^message=.*/message='Setup Tor (takes time)'/g" ${infoFile}
     sudo /home/admin/config.scripts/tor.network.sh on >> ${logFile} 2>&1
 else
-    echo "Provisioning TOR - keep default" >> ${logFile}
+    echo "Provisioning Tor - keep default" >> ${logFile}
 fi
 
 # AUTO PILOT
