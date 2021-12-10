@@ -276,7 +276,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo
     # https://github.com/romanz/electrs/blob/master/doc/usage.md#build-dependencies
     sudo -u electrs curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sudo -u electrs sh -s -- --default-toolchain none -y
-    sudo apt install -y clang cmake build-essential  # for building 'rust-rocksdb'
+    sudo apt install -y clang cmake build-essential librocksdb-dev=6.11.4-3  # for building 'rust-rocksdb'
 
     echo
     echo "# Downloading and building electrs $ELECTRSVERSION. This will take ~40 minutes"
@@ -286,7 +286,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u electrs git reset --hard $ELECTRSVERSION
     sudo -u electrs /home/admin/config.scripts/blitz.git-verify.sh \
      "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
-    sudo -u electrs /home/electrs/.cargo/bin/cargo build --locked --release || exit 1
+    sudo -u electrs ROCKSDB_INCLUDE_DIR=/usr/include ROCKSDB_LIB_DIR=/usr/lib /home/electrs/.cargo/bin/cargo build --locked --release || exit 1
 
     echo
     echo "# The electrs database will be built in /mnt/hdd/app-storage/electrs/db. Takes ~18 hours and ~50Gb diskspace"
