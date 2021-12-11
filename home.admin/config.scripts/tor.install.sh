@@ -169,7 +169,7 @@ deb-src [arch=${architecture}] ${tor_deb_repo}/torproject.org  ${distribution} m
 fi 
 
 #### ENABLE (once HDD is available) ####
-if [ "${action}" = "enbable" ]; then
+if [ "${action}" = "enable" ]; then
 
   echo -e "\n*** Enable Tor Service ***"
 
