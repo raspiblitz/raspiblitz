@@ -5,8 +5,9 @@ echo "get raspiblitz config"
 source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
 
-# get the local network IP to be displayed on the LCD
-source <(/home/admin/config.scripts/internet.sh status local)
+source <(/home/admin/_cache.sh get internet_localip internet_localiprange)
+localIP="${internet_localip}"
+localIPrange="${internet_localiprange}"
 
 # BASIC MENU INFO
 WIDTH=64
@@ -163,10 +164,6 @@ HiddenServicePort 8333 127.0.0.1:8333" | sudo tee -a /etc/tor/torrc
     fi
     echo "# Running on ${chain}net"
     echo
-    localIPrange=$(ip addr | grep 'state UP' -A2 | grep -E -v 'docker0|veth' |\
-    grep 'eth0\|wlan0\|enp0\|inet' | tail -n1 | awk '{print $2}' |\
-    awk -F. '{print $1"."$2"."$3".0/24"}')
-    localIP=$(hostname -I | awk '{print $1}')
     allowIPrange=$(grep -c "rpcallowip=$localIPrange" <  /mnt/hdd/${network}/${network}.conf)
     bindIP=$(grep -c "${chain}.rpcbind=$localIP" <  /mnt/hdd/${network}/${network}.conf)
     rpcTorService=$(grep -c "HiddenServicePort ${BITCOINRPCPORT} 127.0.0.1:${BITCOINRPCPORT}"  < /etc/tor/torrc)

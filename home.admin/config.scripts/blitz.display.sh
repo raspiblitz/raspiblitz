@@ -3,19 +3,22 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "# make changes to the LCD screen"
-  echo "# blitz.display.sh rotate [on|off]"
+  echo
   echo "# blitz.display.sh image [path]"
   echo "# blitz.display.sh qr [datastring]"
   echo "# blitz.display.sh qr-console [datastring]"
   echo "# blitz.display.sh hide"
-  echo "# blitz.display.sh hdmi [on|off] ---> DEPRECATED use set-display"
+  echo
+  echo "# blitz.display.sh rotate [on|off]"
   echo "# blitz.display.sh test-lcd-connect"
   echo "# blitz.display.sh set-display [hdmi|lcd|headless]"
   exit 1
 fi
 
-# load config
-source /home/admin/raspiblitz.info 2>/dev/null
+# 1. Parameter: lcd command
+command=$1
+
+# its OK if its not exist yet
 source /mnt/hdd/raspiblitz.conf 2>/dev/null
 
 # Make sure needed packages are installed
@@ -25,9 +28,6 @@ fi
 if [ $(sudo dpkg-query -l | grep "ii  qrencode" | wc -l) = 0 ]; then
    sudo apt-get install qrencode -y > /dev/null
 fi
-
-# 1. Parameter: lcd command
-command=$1
 
 # check if LCD (/dev/fb1) or HDMI (/dev/fb0)
 # see https://github.com/rootzoll/raspiblitz/pull/1580
@@ -44,18 +44,12 @@ if [ "${command}" == "rotate" ]; then
   # TURN ROTATE ON (the new default)
   if [ "$2" = "1" ] || [ "$2" = "on" ]; then
 
-    # add default 'lcdrotate' raspiblitz.conf if needed
-    if [ ${#lcdrotate} -eq 0 ]; then
-      echo "lcdrotate=0" >> /mnt/hdd/raspiblitz.conf
-    fi
-
     # change rotation config
     echo "# Turn ON: LCD ROTATE"
     sudo sed -i "s/^dtoverlay=.*/dtoverlay=waveshare35a:rotate=90/g" /boot/config.txt
     sudo rm /etc/X11/xorg.conf.d/40-libinput.conf >/dev/null
 
-    # update raspiblitz conf file
-    sudo sed -i "s/^lcdrotate=.*/lcdrotate=1/g" /mnt/hdd/raspiblitz.conf
+    /home/admin/blitz.conf.sh set lcdrotate 1
     echo "# OK - a restart is needed: sudo shutdown -r now"
 
   # TURN ROTATE OFF
@@ -79,8 +73,8 @@ EndSection
 EOF
     fi
 
-    # update raspiblitz conf file
-    sudo sed -i "s/^lcdrotate=.*/lcdrotate=0/g" /mnt/hdd/raspiblitz.conf
+    # update raspiblitz conf
+    /home/admin/blitz.conf.sh set lcdrotate 0  
     echo "OK - a restart is needed: sudo shutdown -r now"
 
   else
@@ -133,14 +127,14 @@ if [ "${command}" == "qr" ]; then
     exit 1
   fi
 
-  qrencode -l L -o /home/admin/qr.png "${datastring}" > /dev/null
+  qrencode -l L -o /var/cache/raspiblitz/qr.png "${datastring}" > /dev/null
   # see https://github.com/rootzoll/raspiblitz/pull/1580
   if [ ${lcdExists} -eq 1 ] ; then
     # LCD
-    sudo fbi -a -T 1 -d /dev/fb1 --noverbose /home/admin/qr.png 2> /dev/null
+    sudo fbi -a -T 1 -d /dev/fb1 --noverbose /var/cache/raspiblitz/qr.png 2> /dev/null
   else
     # HDMI
-    sudo fbi -a -T 1 -d /dev/fb0 --noverbose /home/admin/qr.png 2> /dev/null
+    sudo fbi -a -T 1 -d /dev/fb0 --noverbose /var/cache/raspiblitz/qr.png 2> /dev/null
   fi
   exit 0
 fi
@@ -175,7 +169,7 @@ fi
 
 if [ "${command}" == "hide" ]; then
   sudo killall -3 fbi
-  shred -u /home/admin/qr.png 2> /dev/null
+  rm /var/cache/raspiblitz/qr.png 2> /dev/null
   exit 0
 fi
 
@@ -199,22 +193,6 @@ if [ "${command}" == "test-lcd-connect" ]; then
     exit 1
   fi
    exit 0
-fi
-
-###############################
-# HDMI (deprecated - redirect)
-###############################
-if [ "${command}" == "hdmi" ]; then
-  secondParameter=$2
-  if [ "${secondParameter}" == "on" ]; then
-    sudo /home/admin/config.scripts/blitz.display.sh set-display hdmi
-  elif [ "${secondParameter}" == "off" ]; then
-    sudo /home/admin/config.scripts/blitz.display.sh set-display lcd
-  else
-    echo "error='unknown second parameter'"
-    exit 1
-  fi
-  exit 0
 fi
 
 #######################################
@@ -475,19 +453,6 @@ function uninstall_headless() {
   fi
 }
 
-function prepareDisplayClassEntryRaspiblitzConf() {
-  # check if file exists / hdd is mounted
-  if [ -f "/mnt/hdd/raspiblitz.conf" ]; then
-    echo "file does exists"
-    entryExists=$(grep -c "displayClass=" /mnt/hdd/raspiblitz.conf)
-    if [ ${entryExists} -eq 0 ]; then
-      echo "displayClass=${displayClass}" >> /mnt/hdd/raspiblitz.conf
-    fi
-  else
-    echo "# /mnt/hdd/raspiblitz.conf does not exists (yet) - change is just part of raspiblitz.info"
-  fi
-}
-
 ###################
 # SET DISPLAY TYPE
 ###################
@@ -526,10 +491,9 @@ if [ "${command}" == "set-display" ]; then
     exit 1
   fi
 
-  # mark new display class in configs
-  prepareDisplayClassEntryRaspiblitzConf
+  # mark new display class in config (if exist)
+  /home/admin/blitz.conf.sh set displayClass ${paramDisplayClass}
   sudo sed -i "s/^displayClass=.*/displayClass=${paramDisplayClass}/g" /home/admin/raspiblitz.info
-  sudo sed -i "s/^displayClass=.*/displayClass=${paramDisplayClass}/g" /mnt/hdd/raspiblitz.conf 2>/dev/null
   exit 0
 
 fi

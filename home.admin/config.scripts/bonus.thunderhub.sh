@@ -19,10 +19,6 @@ PGPpubkeyFingerprint="4403F1DFBE779457"
 # to know which network is running
 source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
-if [ ${#network} -eq 0 ]; then
- echo "FAIL - missing /mnt/hdd/raspiblitz.conf"
- exit 1
-fi
 
 # show info menu
 if [ "$1" = "menu" ]; then
@@ -55,11 +51,6 @@ Activate TOR to access the web interface from outside your local network.
   fi
   echo "please wait ..."
   exit 0
-fi
-
-# add default value to raspi config if needed
-if ! grep -Eq "^thunderhub=" /mnt/hdd/raspiblitz.conf; then
-  echo "thunderhub=off" >> /mnt/hdd/raspiblitz.conf
 fi
 
 # stop services
@@ -247,14 +238,14 @@ WantedBy=multi-user.target
     sudo systemctl enable thunderhub
 
     # setting value in raspiblitz config
-    sudo sed -i "s/^thunderhub=.*/thunderhub=on/g" /mnt/hdd/raspiblitz.conf
+    /home/admin/config.scripts/blitz.conf.sh set thunderhub "on"
 
     # Hidden Service for thunderhub if Tor is active
     if [ "${runBehindTor}" = "on" ]; then
       # make sure to keep in sync with tor.network.sh script
       /home/admin/config.scripts/tor.onion-service.sh thunderhub 80 3012 443 3013
     fi
-    source /home/admin/raspiblitz.info
+    source <(/home/admin/_cache.sh get state)
     if [ "${state}" == "ready" ]; then
       echo "# OK - the thunderhub.service is enabled, system is ready so starting service"
       sudo systemctl start thunderhub
@@ -296,7 +287,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   echo "OK ThunderHub removed."
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^thunderhub=.*/thunderhub=off/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set thunderhub "off"
 
   exit 0
 fi

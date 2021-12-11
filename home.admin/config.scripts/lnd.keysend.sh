@@ -17,10 +17,9 @@ source /mnt/hdd/raspiblitz.conf
 parameter=$1
 if [ "${parameter}" == "on" ]; then
 
-  # store to raspiblitz config (delete old line / add new)
-  sudo sed -i '/lndExtraParameter=.*/d' /mnt/hdd/raspiblitz.conf
-  sudo sed -i '/lndKeysend=.*/d' /mnt/hdd/raspiblitz.conf
-  echo "lndKeysend=on" >> /mnt/hdd/raspiblitz.conf
+  # store to raspiblitz config
+  /home/admin/config.scripts/blitz.conf.sh delete lndExtraParameter
+  /home/admin/config.scripts/blitz.conf.sh set lndKeysend "on"
 
   echo "# OK - keysend feature is switched ON"
   echo "# will be enfored by lnd.check.sh prestart"
@@ -29,8 +28,8 @@ if [ "${parameter}" == "on" ]; then
 elif [ "${parameter}" == "off" ]; then
 
  # just remove the parameter from the config file
- sudo sed -i '/lndExtraParameter=.*/d' /mnt/hdd/raspiblitz.conf
- sudo sed -i '/lndKeysend=.*/d' /mnt/hdd/raspiblitz.conf
+ /home/admin/config.scripts/blitz.conf.sh delete lndExtraParameter
+ /home/admin/config.scripts/blitz.conf.sh delete lndKeysend
  sudo sed -i '/accept-keysend=.*/d' /mnt/hdd/lnd/lnd.conf 2>/dev/null
  sudo sed -i '/accept-keysend=.*/d' /mnt/hdd/lnd/tlnd.conf 2>/dev/null
  sudo sed -i '/accept-keysend=.*/d' /mnt/hdd/lnd/slnd.conf 2>/dev/null

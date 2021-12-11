@@ -8,23 +8,24 @@
 echo "Starting SSH user interface ... (please wait)"
 
 # CONFIGFILE - configuration of RaspiBlitz
-configFile="/mnt/hdd/raspiblitz.conf"
-source ${configFile} 2>/dev/null
+source /mnt/hdd/raspiblitz.conf 2>/dev/null
 
 # INFOFILE - state data from bootstrap
 infoFile="/home/admin/raspiblitz.info"
-
-# check if raspiblitz.info exists
-systemInfoExists=$(ls ${infoFile} | grep -c "${infoFile}")
-if [ "${systemInfoExists}" != "1" ]; then
-  echo "systemInfoExists(${systemInfoExists})"
-  echo "FAIL: ${infoFile} does not exist .. which it should at this point."
-  echo "Check logs & bootstrap.service for errors and report to devs."
-  exit 1
-fi
-
-# get system state information raspiblitz.info
 source ${infoFile}
+source <(/home/admin/_cache.sh get state message)
+
+# only check when first pramater is "newsshsession" (calling from bash.rc)
+if [ "$1" == "newsshsession" ]; then
+  # if already one ssh session is open - ask on the second to exit to terminal
+  source <(sudo /home/admin/config.scripts/blitz.ssh.sh sessions)
+  if [ "${ssh_session_count}" != "" ] && [ "${ssh_session_count}" != "1" ]; then
+    echo "####################################################################"
+    echo "# You already have another SSH session open ... exiting to terminal."
+    echo "# To open main menu type command: raspiblitz"
+    exit 0
+  fi
+fi
 
 # check that basic system phase/state information is available
 if [ "${setupPhase}" == "" ] || [ "${state}" == "" ]; then
@@ -74,13 +75,6 @@ if [ "${state}" = "copystation" ]; then
   exit
 fi
 
-# prepare status file
-# TODO: this is to be replaced and unified together with raspiblitz.info
-# when we move to a background monitoring thread & redis for WebUI with v1.8
-sudo touch /var/cache/raspiblitz/raspiblitz.status
-sudo chown admin:admin /var/cache/raspiblitz/raspiblitz.status
-sudo chmod 740 /var/cache/raspiblitz/raspiblitz.status
-
 #####################################
 # SSH MENU LOOP
 # this loop runs until user exits or
@@ -96,6 +90,11 @@ trap quit INT
 trap quit TERM
 
 echo "# start ssh menu loop"
+# put some values on higher scan rate for 10 minute
+/home/admin/_cache.sh focus ln_default_locked 2 600
+/home/admin/_cache.sh focus btc_default_synced 2 600
+
+echo "# starting ssh menu loop ... "
 exitMenuLoop=0
 doneIBD=0
 while [ ${exitMenuLoop} -eq 0 ]
@@ -105,56 +104,47 @@ do
   # Access fresh system info on every loop
 
   # refresh system state information
-  source ${infoFile}
+  source <(/home/admin/_cache.sh get \
+    systemscan_runtime \
+    state \
+    setupPhase \
+    btc_default_synced \
+    ln_default_locked \
+    message \
+    network \
+    chain \
+    lightning \
+    internet_localip \
+    system_vm_vagrant \
+  )
 
-  # gather fresh status scan and store results in memory
-  # TODO: move this into background loop and unify with redis data storage later
-  #echo "# blitz.statusscan.sh"
-
-  firstStatusScanExists=$(ls /var/cache/raspiblitz/raspiblitz.status | grep -c "raspiblitz.status")
-  #echo "firstStatusScanExists(${firstStatusScanExists})"
-  if [ ${firstStatusScanExists} -eq 1 ]; then
-
-    # run statusscan with timeout - if status scan was not killed it will copy over the 
-    timeout 15 /home/admin/config.scripts/blitz.statusscan.sh ${lightning} > /var/cache/raspiblitz/raspiblitz.status.tmp
-    result=$?
-    #echo "result(${result})"
-    if [ "${result}" == "0" ]; then
-     # statusscan finished in under 10 seconds - use results
-     cp /var/cache/raspiblitz/raspiblitz.status.tmp /var/cache/raspiblitz/raspiblitz.status
-    else
-     # statusscan blocked and was killed - fallback to old results
-     echo "statusscan blocked (${result}) - fallback to old results"
-     sleep 1
-    fi 
-  
-  else
-  
-    # first time run statusscan without timeout
-    echo "# running statusscan for the first time ... can take time"
-    /home/admin/config.scripts/blitz.statusscan.sh ${lightning} > /var/cache/raspiblitz/raspiblitz.status 
-
+  # background.scan is not ready yet
+  if [ "${systemscan_runtime}" == "" ]; then
+    echo "# background.scan not ready yet ... (please wait)"
+    sleep 4
+    continue
   fi
-
-  # load statusscan results
-  source /var/cache/raspiblitz/raspiblitz.status 2>/dev/null
 
   #####################################
   # ALWAYS: Handle System States 
   #####################################
 
   ############################
-  # LND Wallet Unlock
+  # Wallet Unlock
 
-  if [ "${lndActive}" == "1" ] && [ "${walletLocked}" == "1" ] && [ "${state}" == "ready" ] && [ "${setupPhase}" == "done" ]; then
-    #echo "# lnd.unlock.sh"
-    /home/admin/config.scripts/lnd.unlock.sh
-  fi
+  if [ "${state}" == "ready" ] && [ "${setupPhase}" == "done" ] && [ "${ln_default_locked}" == "1" ]; then
 
-  # CL Wallet Unlock 
-  if [ "${CLwalletLocked}" == "1" ] && [ "${state}" == "ready" ] && [ "${setupPhase}" == "done" ]; then
-    /home/admin/config.scripts/cl.hsmtool.sh unlock
-    sleep 5
+    # unlock lnd
+    if [ "${lightning}" == "lnd" ]; then
+      /home/admin/config.scripts/lnd.unlock.sh
+    fi
+
+    # unlock c-lightning
+    if [ "${lightning}" == "cl" ]; then
+      /home/admin/config.scripts/cl.hsmtool.sh unlock
+      sleep 5
+    fi
+
   fi
 
   #####################################
@@ -194,7 +184,7 @@ do
     echo "***********************************************************"
     if [ "${state}" == "reboot" ]; then
       echo "SSH again into system with:"
-      echo "ssh admin@${localip}"
+      echo "ssh admin@${internet_localip}"
       echo "Use your password A"
       echo "***********************************************************"
     fi
@@ -203,12 +193,11 @@ do
   fi
 
   #####################################
-  # INITIAL BLOCKCHAIN SYNC (SUBLOOP)
+  # MAKE SURE BLOCKCHAIN IS SYNC 
   #####################################
-  if [ "${lightning}" == "" ]; then syncedToChain=1; fi
-  if [ "${setupPhase}" == "done" ] && [ "${state}" == "ready" ] && [ "${syncedToChain}" != "1" ]; then
+  if [ "${setupPhase}" == "done" ] && [ "${state}" == "ready" ] && [ "${btc_default_synced}" != "1" ]; then
     /home/admin/setup.scripts/eventBlockchainSync.sh ssh
-    sleep 10
+    sleep 3
     continue
   fi
 
@@ -219,6 +208,9 @@ do
   # when setup is done & state is ready .. jump to main menu
   if [ "${setupPhase}" == "done" ] && [ "${state}" == "ready" ]; then
     # MAIN MENU
+    # remove higher scan rate on values
+    /home/admin/_cache.sh focus ln_default_locked -1
+    /home/admin/_cache.sh focus btc_default_synced -1
     echo "# 00mainMenu.sh"
     /home/admin/00mainMenu.sh
     # use the exit code from main menu as signal if menu loop should exited
@@ -236,7 +228,7 @@ do
     #echo "# DURING SETUP: Handle System State (${state})"
 
     # when no HDD on Vagrant - just print info & exit (admin info & exit)
-    if [ "${state}" == "noHDD" ] && [ ${vagrant} -gt 0 ]; then
+    if [ "${state}" == "noHDD" ] && [ ${system_vm_vagrant} != "0" ]; then
       echo "***********************************************************"
       echo "VAGRANT INFO"
       echo "***********************************************************"

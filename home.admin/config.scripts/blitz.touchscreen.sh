@@ -135,11 +135,7 @@ EOF
     echo "LCD is rotated into default - no touchscreen rotate"
   fi
 
-  # mark touchscreen as switched ON in config
-  if [ ${#touchscreen} -eq 0 ]; then
-    echo "touchscreen=0" >> /mnt/hdd/raspiblitz.conf
-  fi
-  sudo sed -i 's/^touchscreen=.*/touchscreen=1/g' /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set touchscreen "1"
 
   echo "OK - a restart is needed: sudo shutdown -r now"
   exit 0
@@ -235,7 +231,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   sudo rm -f /etc/X11/xorg.conf.d/40-libinput.conf >/dev/null
 
   # mark touchscreen as switched OFF in config
-  sudo sed -i 's/^touchscreen=.*/touchscreen=0/g' /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set touchscreen "0"
 
   echo "OK - a restart is needed: sudo shutdown -r now"
   exit 0

@@ -12,6 +12,11 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ];then
   exit 1
 fi
 
+source <(/home/admin/_cache.sh get network)
+if [ "${network}" == "" ]; then
+  network="bitcoin"
+fi
+
 if [ "$1" = "install" ] ; then
   echo "*** PREPARING LND ***"
   
@@ -172,14 +177,7 @@ elif [ ${CHAIN} = mainnet ];then
 fi
 
 source /home/admin/raspiblitz.info
-# add default value to raspi config if needed
-if ! grep -Eq "^lightning=" /mnt/hdd/raspiblitz.conf; then
-  echo "lightning=lnd" | sudo tee -a /mnt/hdd/raspiblitz.conf
-fi
-# add default value to raspi config if needed
-if ! grep -Eq "^${netprefix}lnd=" /mnt/hdd/raspiblitz.conf; then
-  echo "${netprefix}lnd=off" >> /mnt/hdd/raspiblitz.conf
-fi
+source <(/home/admin/_cache.sh get state)
 source /mnt/hdd/raspiblitz.conf
 
 function removeParallelService() {
@@ -193,7 +191,6 @@ function removeParallelService() {
     echo
   fi
 }
-
 
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
@@ -355,12 +352,12 @@ alias ${netprefix}lndlog=\"sudo tail -n 30 -f /mnt/hdd/lnd/logs/${network}/${CHA
   echo
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^${netprefix}lnd=.*/${netprefix}lnd=on/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set ${netprefix}lnd "on"
 
   # if this is the first lightning mainnet turned on - make default
   if [ "${CHAIN}" == "mainnet" ] && [ "${lightning}" == "" ]; then
     echo "# LND is now default lighthning implementation"
-    sudo sed -i "s/^lightning=.*/lightning=lnd/g" /mnt/hdd/raspiblitz.conf
+    /home/admin/config.scripts/blitz.conf.sh set lightning "lnd"
   fi
 
   exit 0
@@ -390,9 +387,11 @@ if [ "$1" = "display-seed" ]; then
   seedwordFile="/mnt/hdd/lnd/data/chain/${network}/${CHAIN}/seedwords.info"
   echo "# seewordFile(${seedwordFile})"
   seedwordFileExists=$(ls ${seedwordFile} 2>/dev/null | grep -c "seedwords.info")
-  echo "# seewordFileExists(${seewordFileExists})"
+  echo "# seewordFileExists(${seedwordFileExists})"
   if [ "${seedwordFileExists}" == "1" ]; then
     source ${seedwordFile}
+  fi
+  if [ "${seedwords}" != "" ]; then
     #echo "# seedwords(${seedwords})"
     #echo "# seedwords6x4(${seedwords6x4})"
     ack=0
@@ -408,7 +407,7 @@ if [ "$1" = "display-seed" ]; then
     if [ "${deleteSeedInfoAfterDisplay}" == "1" ]; then
       echo "# deleting seed info"
       sudo shred ${seedwordFile}
-      sudo rm ${seedwordFile}
+      sudo rm ${seedwordFile} 2>/dev/null
     fi
   else
     walletFile="/mnt/hdd/lnd/data/chain/${network}/${CHAIN}/wallet.db"
@@ -425,15 +424,16 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   removeParallelService
 
   # setting value in raspiblitz config
-  sudo sed -i "s/^${netprefix}lnd=.*/${netprefix}lnd=off/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set ${netprefix}lnd "off"
+  echo "# ${netprefix}lnd --> off"
 
   # if lnd mainnet was default - remove 
   if [ "${CHAIN}" == "mainnet" ] && [ "${lightning}" == "lnd" ]; then
     echo "# LND is REMOVED as default lightning implementation"
-    sudo sed -i "s/^lightning=.*/lightning=/g" /mnt/hdd/raspiblitz.conf
+    /home/admin/config.scripts/blitz.conf.sh set lightning ""
     if [ "${cl}" == "on" ]; then
       echo "# CL is now the new default lightning implementation"
-      sudo sed -i "s/^lightning=.*/lightning=cl/g" /mnt/hdd/raspiblitz.conf
+      /home/admin/config.scripts/blitz.conf.sh set lightning "cl"
     fi
   fi
 

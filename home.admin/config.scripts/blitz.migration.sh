@@ -86,16 +86,17 @@ migrate_raspiblitz_conf () {
   # write default raspiblitz config
   source /home/admin/_version.info
   echo "# RASPIBLITZ CONFIG FILE" > /home/admin/raspiblitz.conf
-  echo "raspiBlitzVersion='${codeVersion}'" >> /home/admin/raspiblitz.conf
-  echo "network=bitcoin" >> /home/admin/raspiblitz.conf
-  echo "chain=main" >> /home/admin/raspiblitz.conf
-  echo "hostname=${nodename}" >> /home/admin/raspiblitz.conf
-  echo "displayClass=lcd" >> /home/admin/raspiblitz.conf
-  echo "lcdrotate=1" >> /home/admin/raspiblitz.conf
-  echo "runBehindTor=on" >> /home/admin/raspiblitz.conf
   sudo mv /home/admin/raspiblitz.conf /mnt/hdd/raspiblitz.conf
   sudo chown root:sudo /mnt/hdd/raspiblitz.conf
   sudo chmod 664 /mnt/hdd/raspiblitz.conf
+
+  /home/admin/config.scripts/blitz.conf.sh set raspiBlitzVersion "${codeVersion}"
+  /home/admin/config.scripts/blitz.conf.sh set network "bitcoin"
+  /home/admin/config.scripts/blitz.conf.sh set chain "main"
+  /home/admin/config.scripts/blitz.conf.sh set hostname "${nodename}"
+  /home/admin/config.scripts/blitz.conf.sh set displayClass "lcd"
+  /home/admin/config.scripts/blitz.conf.sh set lcdrotate "1"
+  /home/admin/config.scripts/blitz.conf.sh set runBehindTor "on"
 
   # rename ext4 data drive
   sudo e2label /dev/sda1 BLOCKCHAIN

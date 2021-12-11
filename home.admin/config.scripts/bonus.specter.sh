@@ -11,7 +11,6 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  exit 1
 fi
 
-source /mnt/hdd/raspiblitz.conf
 echo "# bonus.specter.sh $1 $2"
 
 if [ $# -gt 1 ];then
@@ -89,11 +88,6 @@ Activate TOR to access the web block explorer from outside your local network.
 
   echo "# please wait ..."
   exit 0
-fi
-
-# add default value to raspi config if needed
-if ! grep -Eq "^specter=" /mnt/hdd/raspiblitz.conf; then
-  echo "specter=off" >> /mnt/hdd/raspiblitz.conf
 fi
 
 # blockfilterindex
@@ -368,10 +362,9 @@ EOF
   fi
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^specter=.*/specter=on/g" /mnt/hdd/raspiblitz.conf
-
+  /home/admin/config.scripts/blitz.conf.sh set specter "on"
+  
   # Hidden Service for SERVICE if Tor is active
-  source /mnt/hdd/raspiblitz.conf
   if [ "${runBehindTor}" = "on" ]; then
     # make sure to keep in sync with tor.network.sh script
     # port 25441 is HTTPS with self-signed cert - specte only makes sense to be served over HTTPS
@@ -403,7 +396,7 @@ fi
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^specter=.*/specter=off/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set specter "off"
 
   # Hidden Service if Tor is active
   if [ "${runBehindTor}" = "on" ]; then

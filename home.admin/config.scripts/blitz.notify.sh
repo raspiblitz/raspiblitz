@@ -12,65 +12,43 @@ fi
 # load config values
 source /home/admin/raspiblitz.info 2>/dev/null
 source /mnt/hdd/raspiblitz.conf 2>/dev/null
-if [ ${#network} -eq 0 ]; then
-  echo "FAIL - was not able to load config data / network"
-  exit 1
-fi
 
-# make sure main "notify" setting is present (add with default if not)
-if ! grep -Eq "^notify=.*" /mnt/hdd/raspiblitz.conf; then
-    echo "notify=off" | sudo tee -a /mnt/hdd/raspiblitz.conf >/dev/null
-fi
-
-# check all other settings and add if missing
+# write default values if no custum values in raspiblitz config yet
 if ! grep -Eq "^notifyMethod=.*" /mnt/hdd/raspiblitz.conf; then
-    echo "notifyMethod=mail" | sudo tee -a /mnt/hdd/raspiblitz.conf >/dev/null
+    /home/admin/config.scripts/blitz.conf.sh set notifyMethod "mail"
 fi
-
-# Mail
 if ! grep -Eq "^notifyMailTo=.*" /mnt/hdd/raspiblitz.conf; then
-    echo "notifyMailTo=mail@example.com" | sudo tee -a /mnt/hdd/raspiblitz.conf >/dev/null
+    /home/admin/config.scripts/blitz.conf.sh set notifyMailTo "mail@example.com"
 fi
-
 if ! grep -Eq "^notifyMailServer=.*" /mnt/hdd/raspiblitz.conf; then
-    echo "notifyMailServer=mail.example.com" | sudo tee -a /mnt/hdd/raspiblitz.conf >/dev/null
+    /home/admin/config.scripts/blitz.conf.sh set notifyMailServer "mail.example.com"
 fi
-
 if ! grep -Eq "^notifyMailPort=.*" /mnt/hdd/raspiblitz.conf; then
-    echo "notifyMailPort=587" | sudo tee -a /mnt/hdd/raspiblitz.conf >/dev/null
+    /home/admin/config.scripts/blitz.conf.sh set notifyMailPort "587"
 fi
-
 if ! grep -Eq "^notifyMailHostname=.*" /mnt/hdd/raspiblitz.conf; then
-    echo "notifyMailHostname=$(hostname)" | sudo tee -a /mnt/hdd/raspiblitz.conf >/dev/null
+    /home/admin/config.scripts/blitz.conf.sh set notifyMailHostname "${hostname}"
 fi
-
 if ! grep -Eq "^notifyMailFromAddress=.*" /mnt/hdd/raspiblitz.conf; then
-    echo "notifyMailFromAddress=rb@example.com" | sudo tee -a /mnt/hdd/raspiblitz.conf >/dev/null
+    /home/admin/config.scripts/blitz.conf.sh set notifyMailFromAddress "rb@example.com"
 fi
-
 if ! grep -Eq "^notifyMailFromName=.*" /mnt/hdd/raspiblitz.conf; then
-    echo "notifyMailFromName=\"RB User\"" | sudo tee -a /mnt/hdd/raspiblitz.conf >/dev/null
+    /home/admin/config.scripts/blitz.conf.sh set notifyMailFromName "RB User"
 fi
-
 if ! grep -Eq "^notifyMailUser=.*" /mnt/hdd/raspiblitz.conf; then
-    echo "notifyMailUser=username" | sudo tee -a /mnt/hdd/raspiblitz.conf >/dev/null
+    /home/admin/config.scripts/blitz.conf.sh set notifyMailUser "username"
 fi
-
 if ! grep -Eq "^notifyMailPass=.*" /mnt/hdd/raspiblitz.conf; then
-    echo "notifyMailPass=password" | sudo tee -a /mnt/hdd/raspiblitz.conf >/dev/null
+    /home/admin/config.scripts/blitz.conf.sh set notifyMailPass "password"
 fi
-
 if ! grep -Eq "^notifyMailEncrypt=.*" /mnt/hdd/raspiblitz.conf; then
-    echo "notifyMailEncrypt=off" | sudo tee -a /mnt/hdd/raspiblitz.conf >/dev/null
+    /home/admin/config.scripts/blitz.conf.sh set notifyMailEncrypt "off"
 fi
-
 if ! grep -Eq "^notifyMailToCert=.*" /mnt/hdd/raspiblitz.conf; then
-    echo "notifyMailToCert=/mnt/hdd/notify_mail_cert.pem" | sudo tee -a /mnt/hdd/raspiblitz.conf >/dev/null
+    /home/admin/config.scripts/blitz.conf.sh set notifyMailToCert "/mnt/hdd/notify_mail_cert.pem"
 fi
-
-# Ext
 if ! grep -Eq "^notifyExtCmd=.*" /mnt/hdd/raspiblitz.conf; then
-    echo "notifyExtCmd=/usr/bin/printf" | sudo tee -a /mnt/hdd/raspiblitz.conf >/dev/null
+    /home/admin/config.scripts/blitz.conf.sh set notifyExtCmd "/usr/bin/printf"
 fi
 
 # reload settings
@@ -114,7 +92,7 @@ EOF
 
   # edit raspi blitz config
   echo "editing /mnt/hdd/raspiblitz.conf"
-  sudo sed -i "s/^notify=.*/notify=on/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set notify "on"
   exit 0
 fi
 
@@ -126,7 +104,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   echo "switching the NOTIFY OFF"
   # edit raspi blitz config
   echo "editing /mnt/hdd/raspiblitz.conf"
-  sudo sed -i "s/^notify=.*/notify=off/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set notify "off"
   exit 0
 fi
 

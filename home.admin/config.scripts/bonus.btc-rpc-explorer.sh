@@ -80,11 +80,6 @@ Activate TOR to access the web block explorer from outside your local network.
   exit 0
 fi
 
-# add default value to raspi config if needed
-if ! grep -Eq "^BTCRPCexplorer=" /mnt/hdd/raspiblitz.conf; then
-  echo "BTCRPCexplorer=off" >> /mnt/hdd/raspiblitz.conf
-fi
-
 # status
 if [ "$1" = "status" ]; then
 
@@ -314,8 +309,8 @@ EOF
   fi
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^BTCRPCexplorer=.*/BTCRPCexplorer=on/g" /mnt/hdd/raspiblitz.conf
-
+  /home/admin/config.scripts/blitz.conf.sh set BTCRPCexplorer "on"
+  
   echo "# needs to finish creating txindex to be functional"
   echo "# monitor with: sudo tail -n 20 -f /mnt/hdd/bitcoin/debug.log"
   echo "# npm audi fix"
@@ -339,7 +334,7 @@ fi
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^BTCRPCexplorer=.*/BTCRPCexplorer=off/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set BTCRPCexplorer "off"
 
   isInstalled=$(sudo ls /etc/systemd/system/btc-rpc-explorer.service 2>/dev/null | grep -c 'btc-rpc-explorer.service')
   if [ ${isInstalled} -eq 1 ]; then

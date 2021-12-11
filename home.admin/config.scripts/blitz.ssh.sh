@@ -7,7 +7,8 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ];
   echo "blitz.ssh.sh clear       --> make sure old sshd host certs are cleared"
   echo "blitz.ssh.sh checkrepair --> check sshd & repair just in case"
   echo "blitz.ssh.sh backup      --> copy ssh keys to backup (if exist)"
-  echo "blitz.ssh.sh restore     --> restore ssh keys from backup (if exist)"
+  echo "blitz.ssh.sh sessions    --> count open sessions"
+  echo "blitz.ssh.sh restore [?backup-root] --> restore ssh keys from backup (if exist)"
   exit 1
 fi
 
@@ -39,6 +40,16 @@ if [ "$1" = "clear" ]; then
   echo "# *** blitz.ssh.sh clear"
   sudo rm /etc/ssh/ssh_host_*
   echo "# OK: SSHD keyfiles & possible backups deleted"
+  exit 0
+fi
+
+###################
+# SESSIONS
+###################
+if [ "$1" = "sessions" ]; then
+  echo "# *** blitz.ssh.sh sessions"
+  sessionsCount=$(ss | grep -c ":ssh")
+  echo "ssh_session_count=${sessionsCount}"
   exit 0
 fi
 
@@ -117,6 +128,13 @@ fi
 ###################
 if [ "$1" = "restore" ]; then
   echo "# *** blitz.ssh.sh restore"
+
+    # second parameter (optional)
+    ALTBACKUPBASEDIR=$2
+    if [ "${ALTBACKUPBASEDIR}" != "" ]; then
+      DEFAULTBACKUPBASEDIR="${ALTBACKUPBASEDIR}"
+    fi
+
     echo "# backup dir: ${DEFAULTBACKUPBASEDIR}/ssh"
     if [ -d "${DEFAULTBACKUPBASEDIR}/ssh" ]; then
 

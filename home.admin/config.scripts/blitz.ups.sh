@@ -53,8 +53,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     if [ ${#ups} -eq 0 ]; then
       echo "ups=on" >> /mnt/hdd/raspiblitz.conf
     fi
+    
     # set ups config value (in case of update)
-    sudo sed -i "s/^ups=.*/ups='apcusb'/g" /mnt/hdd/raspiblitz.conf
+    /home/admin/config.scripts/blitz.conf.sh set ups "apcusb"
 
     echo "OK - UPS is now connected"
     echo "Check status/connection with command: apcaccess"
@@ -116,7 +117,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo systemctl stop apcupsd
     sudo systemctl disable apcupsd
     sudo apt-get remove -y apcupsd
-    sudo sed -i "s/^ups=.*/ups=off/g" /mnt/hdd/raspiblitz.conf
+    /home/admin/config.scripts/blitz.conf.sh set ups "off"
   else
     echo "FAIL: unknown UPSTYPE: ${ups}"
     exit 1

@@ -5,7 +5,6 @@ RTLVERSION="v0.11.2"
 # check and load raspiblitz config
 # to know which network is running
 source /home/admin/raspiblitz.info
-source /mnt/hdd/raspiblitz.conf
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -111,15 +110,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   fi
 
   echo "# Installing RTL for ${LNTYPE} ${CHAIN}"
-
-  # prepare raspiblitz.conf --> add default value
-  configEntryExists=$(sudo cat /mnt/hdd/raspiblitz.conf | grep -c "${configEntry}")
-  if [ "${configEntryExists}" == "0" ]; then
-    echo "# adding default config entry for '${configEntry}'"
-    sudo /bin/sh -c "echo '${configEntry}=off' >> /mnt/hdd/raspiblitz.conf"
-  else
-    echo "# default config entry for '${configEntry}' exists"
-  fi
 
   # check and install NodeJS
   /home/admin/config.scripts/bonus.nodejs.sh on
@@ -264,8 +254,8 @@ WantedBy=multi-user.target
   # run config as root to connect prepare services (lit, pool, ...)
   sudo /home/admin/config.scripts/bonus.rtl.sh connect-services
 
-  # raspiblitz.config
-  sudo sed -i "s/^${configEntry}=.*/${configEntry}=on/g" /mnt/hdd/raspiblitz.conf
+  # ig
+  /home/admin/config.scripts/blitz.conf.sh set ${configEntry} "on"
 
   sudo systemctl enable ${systemdService}
   sudo systemctl start ${systemdService}
@@ -439,7 +429,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   sudo systemctl stop ${systemdService} 2>/dev/null
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^${configEntry}=.*/${configEntry}=off/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set ${configEntry} "off"
 
   # remove nginx symlinks
   sudo rm -f /etc/nginx/sites-enabled/${netprefix}${typeprefix}rtl_ssl.conf 2>/dev/null

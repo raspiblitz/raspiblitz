@@ -33,6 +33,7 @@ function blitzhelp() {
   echo "  debug        print debug logs"
   echo "  debug   -l   print debug logs with bin link"
   echo "  patch        sync scripts with latest set github and branch"
+  echo "  cache        check on chache system state"
   echo "  github       jumping directly into the options to change branch/repo/pr"
   echo
   echo "Power:"
@@ -157,6 +158,11 @@ function headless() {
   restart
 }
 
+# command: cache
+function cache() {
+  sudo /home/admin/_cache.sh $@
+}
+
 # command: torthistx
 function torthistx() {
   if [ $(cat /mnt/hdd/raspiblitz.conf 2>/dev/null | grep -c "runBehindTor=on") -eq 1 ]; then
@@ -171,7 +177,11 @@ function torthistx() {
 # command: status
 # start the status screen in the terminal
 function status() {
-  echo "Gathering data - please wait a moment..."
+  echo
+  echo "Keep X pressed to EXIT loop ... (please wait)"
+  echo
+  /home/admin/_cache.sh set system_scan_all_temp "1" 
+  sleep 4
   while :
   do
     # show the same info as on LCD screen
@@ -181,10 +191,10 @@ function status() {
     #echo
     #echo -en "Screen is updating in a loop .... press 'x' now to get back to menu."
     read -n 1 -t 6 keyPressed
-    #echo -en "\rGathering information to update info ... please wait.                \n"
     # check if user wants to abort session
     if [ "${keyPressed}" = "x" ]; then
       echo
+      /home/admin/_cache.sh set system_scan_all_temp "0"
       echo "Returning to menu ....."
       sleep 4
       break

@@ -68,14 +68,7 @@ echo "# OK"
 echo ""
 
 # make sure entry in raspiblitz.conf exists
-source /mnt/hdd/raspiblitz.conf
-if [ ${#dnsServer} -eq 0 ]; then
-  echo "# Adding value to /mnt/hdd/raspiblitz.conf"
-  echo "dnsServer=${DNSSERVER}" >> /mnt/hdd/raspiblitz.conf
-else
-  echo "# Updating value in /mnt/hdd/raspiblitz.conf"
-  sudo sed -i "s/^dnsServer=.*/dnsServer=${DNSSERVER}/g" /mnt/hdd/raspiblitz.conf
-fi
+/home/admin/config.scripts/blitz.conf.sh set dnsServer "${DNSSERVER}"
 echo "# OK"
 echo ""
 

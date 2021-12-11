@@ -48,7 +48,7 @@ if [ "$1" = "menu" ]; then
     --no-button "Other Options" \
     --yesno "\nYou can connect Sphinx App over Tor. Its build in for iOS and on Android you need to use it together with the Orbot App." 10 72
     if [ "$?" != "1" ]; then
-      echo "sphinxrelay_connection='tor'" >> /mnt/hdd/raspiblitz.conf
+      /home/admin/config.scripts/blitz.conf.sh set sphinxrelay_connection "tor"
       echo "Please wait (+1min) ... restarting sphinx relay to use tor"
       sudo systemctl restart sphinxrelay
       sleep 60
@@ -181,11 +181,6 @@ ${extraPairInfo}" 17 76
 
   /home/admin/config.scripts/blitz.display.sh hide
   exit 0
-fi
-
-# add default value to raspi config if needed
-if ! grep -Eq "^sphinxrelay=" /mnt/hdd/raspiblitz.conf; then
-  echo "sphinxrelay=off" >> /mnt/hdd/raspiblitz.conf
 fi
 
 # write environment configs fresh before every start
@@ -495,7 +490,7 @@ EOF
 
     sudo systemctl enable sphinxrelay
 
-    source /home/admin/raspiblitz.info
+    source <(/home/admin/_cache.sh get state)
     if [ "${state}" == "ready" ]; then
       echo "# OK - sphinxrelay service is enabled, system is on ready so starting service"
       sudo systemctl start sphinxrelay
@@ -524,7 +519,7 @@ EOF
   sudo systemctl reload nginx
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^sphinxrelay=.*/sphinxrelay=on/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set sphinxrelay "on"
 
   exit 0
 fi
@@ -584,9 +579,9 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   echo "# deleteData(${deleteData})"
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^sphinxrelay=.*/sphinxrelay=off/g" /mnt/hdd/raspiblitz.conf
-  sudo sed -i "/^sphinxrelay_connection=.*/d" /mnt/hdd/raspiblitz.conf
-
+  /home/admin/config.scripts/blitz.conf.sh set sphinxrelay "off"
+  /home/admin/config.scripts/blitz.conf.sh delete sphinxrelay_connection
+  
   # remove nginx symlinks
   sudo rm -f /etc/nginx/sites-enabled/sphinxrelay_ssl.conf
   sudo rm -f /etc/nginx/sites-enabled/sphinxrelay_tor.conf

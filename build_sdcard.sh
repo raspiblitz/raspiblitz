@@ -514,7 +514,7 @@ if [ ${autostartDone} -eq 0 ]; then
   sudo bash -c "echo '# automatically start main menu for admin unless' >> /home/admin/.bashrc"
   sudo bash -c "echo '# when running in a tmux session' >> /home/admin/.bashrc"
   sudo bash -c "echo 'if [ -z \"\$TMUX\" ]; then' >> /home/admin/.bashrc"
-  sudo bash -c "echo '    ./00raspiblitz.sh' >> /home/admin/.bashrc"
+  sudo bash -c "echo '    ./00raspiblitz.sh newsshsession' >> /home/admin/.bashrc"
   sudo bash -c "echo 'fi' >> /home/admin/.bashrc"
   echo "autostart added to $homeFile"
 else
@@ -543,9 +543,10 @@ sudo bash -c "echo '# end of pam-auth-update config' >> /etc/pam.d/common-sessio
 echo "*** HARDENING ***"
 sudo apt install -y --no-install-recommends python3-systemd fail2ban
 
-# *** CACHE DISK IN RAM ***
+# *** CACHE DISK IN RAM & KEYVALUE-STORE***
 echo "Activating CACHE RAM DISK ... "
-sudo /home/admin/config.scripts/blitz.cache.sh on
+sudo /home/admin/_cache.sh ramdisk on
+sudo /home/admin/_cache.sh keyvalue on
 
 # *** Wifi, Bluetooth & other RaspberryPi configs ***
 if [ "${baseimage}" = "raspios_arm64"  ] || [ "${baseimage}" = "debian_rpi64" ]; then

@@ -17,7 +17,6 @@ if [ ${#chain} -eq 0 ]; then
 fi
 
 source <(/home/admin/config.scripts/network.aliases.sh getvars $1 $2)
-
 source <(/home/admin/config.scripts/network.aliases.sh getvars $LNTYPE ${chain}net)
 
 # check if chain is in sync
@@ -126,6 +125,9 @@ else
   if [ $(sudo dpkg-query -l | grep "ii  qrencode" | wc -l) = 0 ]; then
    sudo apt-get install qrencode -y > /dev/null
   fi
+
+  # raise high focus on lightning channel balance next 5min
+  /home/admin/_cache.sh focus ln_${LNTYPE}_${$CHAIN}_channels_balance 0 300
 
   echo
   echo "********************"

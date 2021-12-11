@@ -246,11 +246,6 @@ Check 'sudo nginx -t' for a detailed error message.
   exit 0
 fi
 
-# add default value to raspi config if needed
-if ! grep -Eq "^ElectRS=" /mnt/hdd/raspiblitz.conf; then
-  echo "ElectRS=off" >> /mnt/hdd/raspiblitz.conf
-fi
-
 # stop service
 echo "# Making sure services are not running"
 sudo systemctl stop electrs 2>/dev/null
@@ -428,7 +423,7 @@ WantedBy=multi-user.target
   fi
 
   # setting value in raspiblitz config
-  sudo sed -i "s/^ElectRS=.*/ElectRS=on/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set ElectRS "on"
 
   # Hidden Service for electrs if Tor active
   if [ "${runBehindTor}" = "on" ]; then
@@ -441,8 +436,8 @@ WantedBy=multi-user.target
     echo "whitelist=download@127.0.0.1" | sudo tee -a /mnt/hdd/bitcoin/bitcoin.conf
     bitcoindRestart=yes
   fi
-
-  source /home/admin/raspiblitz.info
+  
+  source <(/home/admin/_cache.sh get state)
   if [ "${state}" == "ready" ]; then
     if [ "${bitcoindRestart}" == "yes" ]; then
       sudo systemctl restart bitcoind
@@ -467,7 +462,7 @@ fi
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # setting value in raspiblitz config
-  sudo sed -i "s/^ElectRS=.*/ElectRS=off/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set ElectRS "off"
 
   # if second parameter is "deleteindex"
   if [ "$2" == "deleteindex" ]; then

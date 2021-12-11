@@ -50,16 +50,6 @@ ${toraddresstext}
   exit 0
 fi
 
-# add default value to raspi config if needed
-configEntry="${netprefix}sparko"
-configEntryExists=$(sudo cat /mnt/hdd/raspiblitz.conf | grep -c "${configEntry}")
-if [ "${configEntryExists}" == "0" ]; then
-  echo "# adding default config entry for '${configEntry}'"
-  sudo /bin/sh -c "echo '${configEntry}=off' >> /mnt/hdd/raspiblitz.conf"
-else
-  echo "# default config entry for '${configEntry}' exists"
-fi
-
 if [ $1 = connect ];then
   localip=$(ip addr | grep 'state UP' -A2 | grep -E -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
   toraddress=$(sudo cat /mnt/hdd/tor/${netprefix}sparko/hostname)
@@ -173,9 +163,9 @@ sparko-keys=${masterkeythatcandoeverything}; ${secretaccesskeythatcanreadstuff}:
   /home/admin/config.scripts/tor.onion-service.sh ${netprefix}sparko 443 ${portprefix}9000
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^${netprefix}sparko=.*/${netprefix}sparko=on/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set ${netprefix}sparko "on"
 
-  source /home/admin/raspiblitz.info
+  source <(/home/admin/_cache.sh get state)
   if [ "${state}" == "ready" ] && [ "$3" != "norestart" ]; then
     echo "# Restart the ${netprefix}lightningd.service to activate Sparko"
     sudo systemctl restart ${netprefix}lightningd
@@ -209,7 +199,7 @@ if [ "$1" = "off" ];then
     sudo rm -rf /home/bitcoin/cl-plugins-available/sparko
   fi
   # setting value in raspi blitz config
-  sudo sed -i "s/^${netprefix}sparko=.*/${netprefix}sparko=off/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set ${netprefix}sparko "off"
   echo "# Sparko was uninstalled"
 
 fi

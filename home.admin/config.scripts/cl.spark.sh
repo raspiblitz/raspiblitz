@@ -48,16 +48,6 @@ ${toraddresstext}
   exit 0
 fi
 
-# add default value to raspiblitz.conf if needed
-configEntry="${netprefix}spark="
-configEntryExists=$(sudo cat /mnt/hdd/raspiblitz.conf | grep -c "${configEntry}")
-if [ "${configEntryExists}" == "0" ]; then
-  echo "# adding default config entry for '${configEntry}'"
-  sudo /bin/sh -c "echo '${configEntry}off' >> /mnt/hdd/raspiblitz.conf"
-else
-  echo "# default config entry for '${configEntry}' exists"
-fi
-
 if [ $1 = on ];then
 
   # check and install NodeJS
@@ -152,8 +142,8 @@ WantedBy=multi-user.target
   /home/admin/config.scripts/tor.onion-service.sh ${netprefix}spark-wallet 443 ${portprefix}8000
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^${netprefix}spark=.*/${netprefix}spark=on/g" /mnt/hdd/raspiblitz.conf
-
+  /home/admin/config.scripts/blitz.conf.sh set ${netprefix}spark "on"
+  
   sudo systemctl enable ${systemdService}
   sudo systemctl start ${systemdService}
   echo "# OK - the ${systemdService}.service is now enabled & started"
@@ -175,6 +165,6 @@ if [ $1 = off ];then
     sudo rm -rf /home/bitcoin/spark-wallet
   fi
   # setting value in raspi blitz config
-  sudo sed -i "s/^${netprefix}spark=.*/${netprefix}spark=off/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set ${netprefix}spark "off"
   echo "# ${netprefix}spark was uninstalled"
 fi

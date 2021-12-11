@@ -74,11 +74,6 @@ consider adding a IP2TOR Bridge (MAINMENU > SUBSCRIBE)."
   exit 0
 fi
 
-# add default value to raspi config if needed
-if ! grep -Eq "^LNBits=" /mnt/hdd/raspiblitz.conf; then
-  echo "LNBits=off" >> /mnt/hdd/raspiblitz.conf
-fi
-
 # status
 if [ "$1" = "status" ]; then
 
@@ -340,7 +335,7 @@ EOF
 
     sudo systemctl enable lnbits
 
-    source /home/admin/raspiblitz.info
+    source <(/home/admin/_cache.sh get state)
     if [ "${state}" == "ready" ]; then
       echo "# OK - lnbits service is enabled, system is on ready so starting lnbits service"
       sudo systemctl start lnbits
@@ -369,7 +364,7 @@ EOF
   sudo systemctl reload nginx
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^LNBits=.*/LNBits=on/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set LNBits "on"
 
   # Hidden Service if Tor is active
   source /mnt/hdd/raspiblitz.conf
@@ -399,7 +394,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   echo "# deleteData(${deleteData})"
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^LNBits=.*/LNBits=off/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set LNBits "off"
 
   # remove nginx symlinks
   sudo rm -f /etc/nginx/sites-enabled/lnbits_ssl.conf

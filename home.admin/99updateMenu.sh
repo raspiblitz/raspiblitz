@@ -404,9 +404,8 @@ Do you really want to update Bitcoin Core now?
       source <(sudo -u admin /home/admin/config.scripts/bitcoin.update.sh tested)
       if [ ${#error} -gt 0 ]; then
         whiptail --title "ERROR" --msgbox "${error}" 8 30
-      else
-        sleep 8
       fi
+      /home/admin/config.scripts/blitz.shutdown.sh reboot
       ;;
     RECKLESS)
       whiptail --title "UNTESTED Bitcoin Core update to ${bitcoinLatestVersion}" --yes-button "Cancel" \
@@ -426,12 +425,12 @@ Do you really want to update Bitcoin Core now?
       source <(sudo -u admin /home/admin/config.scripts/bitcoin.update.sh reckless)
       if [ ${#error} -gt 0 ]; then
         whiptail --title "ERROR" --msgbox "${error}" 8 30
-      else
-        sleep 8
       fi
+      /home/admin/config.scripts/blitz.shutdown.sh reboot
       ;;
     CUSTOM)
       sudo -u admin /home/admin/config.scripts/bitcoin.update.sh custom
+      /home/admin/config.scripts/blitz.shutdown.sh reboot
       ;;
   esac
 }

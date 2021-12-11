@@ -13,11 +13,6 @@ fi
 
 source /mnt/hdd/raspiblitz.conf
 
-# add default value to raspi config if needed
-if ! grep -Eq "^bos=" /mnt/hdd/raspiblitz.conf; then
-  echo "bos=off" >> /mnt/hdd/raspiblitz.conf
-fi
-
 # show info menu
 if [ "$1" = "menu" ]; then
   dialog --title " Info Balance of Satoshis " --msgbox "
@@ -86,7 +81,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo -u bos bash -c 'echo "source <(bos completion bash)" >> /home/bos/.bashrc'
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^bos=.*/bos=on/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set bos "on"
 
   echo "# Usage: https://github.com/alexbosworth/balanceofsatoshis/blob/master/README.md"
   echo "# To start type: 'sudo su bos' in the command line."
@@ -101,8 +96,8 @@ fi
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^bos=.*/bos=off/g" /mnt/hdd/raspiblitz.conf
-  
+  /home/admin/config.scripts/blitz.conf.sh set bos "off"
+
   echo "*** REMOVING BALANCE OF SATOSHIS ***"
   sudo userdel -rf bos
   echo "# OK, bos is removed."

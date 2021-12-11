@@ -29,15 +29,6 @@ if [ ${#newName} -eq 0 ]; then
   fi
 fi
 
-# config file
-blitzConfig="/mnt/hdd/raspiblitz.conf"
-
-# check if raspiblitz config file exists
-if [ ! -f ${blitzConfig} ]; then
-  echo "FAIL - missing ${blitzConfig}"
-  exit 1
-fi
-
 # check if cl config file exists
 if ! sudo ls ${CLCONF}; then
   echo "FAIL - missing ${CLCONF}"
@@ -57,7 +48,7 @@ sudo systemctl stop ${netprefix}lightningd 2>/dev/null
 # config: change name
 sudo sed -i "s/^alias=.*/alias=${newName}/g" ${CLCONF}
 
-source /home/admin/raspiblitz.info
+source <(/home/admin/_cache.sh get state)
 if [ "${state}" == "ready" ]; then
   sudo systemctl start ${netprefix}lightningd
 fi

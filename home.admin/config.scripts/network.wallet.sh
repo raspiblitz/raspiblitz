@@ -53,6 +53,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   else
     echo "The ${network} core wallet is already on"    
   fi
+  source <(/home/admin/_cache.sh get state)
   if [ ${restartService} == 1 ] && [ ${state} != "recovering" ]; then
     echo "Restarting ${network}d"
     sudo systemctl restart ${network}d

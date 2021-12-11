@@ -183,7 +183,6 @@ function refresh_certs_with_nginx() {
 
 }
 
-
 ###################
 # running as admin
 ###################
@@ -192,13 +191,6 @@ if [ "${EUID}" != "${adminUserId}" ]; then
   echo "error='please run as admin user'"
   exit 1
 fi
-
-
-# add default value to RaspiBlitz config if needed
-if ! grep -Eq "^letsencrypt" /mnt/hdd/raspiblitz.conf; then
-  echo "letsencrypt=off" >> /mnt/hdd/raspiblitz.conf
-fi
-
 
 ###################
 # update status
@@ -213,7 +205,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "*** INSTALLING Let's Encrypt Client 'acme.sh' ***"
 
     # setting value in RaspiBlitz config
-    sudo sed -i "s/^letsencrypt=.*/letsencrypt=on/g" /mnt/hdd/raspiblitz.conf
+    /home/admin/config.scripts/blitz.conf.sh set letsencrypt "on"
 
     address="$2"
     if [ "$2" == "enter-email" ]; then
@@ -391,7 +383,7 @@ elif [ "$1" = "0" ] || [ "$1" = "off" ]; then
     echo "*** UNINSTALLING Let's Encrypt Client 'acme.sh' ***"
 
     # setting value in RaspiBlitz config
-    sudo sed -i "s/^letsencrypt=.*/letsencrypt=off/g" /mnt/hdd/raspiblitz.conf
+    /home/admin/config.scripts/blitz.conf.sh set letsencrypt "off"
 
     "${ACME_INSTALL_HOME}/acme.sh" --uninstall \
       --home "${ACME_INSTALL_HOME}" \
