@@ -661,8 +661,8 @@ sudo systemctl enable background
 #######
 # TOR #
 #######
-# echo
-# sudo -u admin /home/admin/config.scripts/tor.install.sh install || exit 1
+echo
+sudo /home/admin/config.scripts/tor.install.sh prepare || exit 1
 
 ###########
 # BITCOIN #
@@ -674,13 +674,21 @@ echo
 # LND #
 #######
 echo
-/home/admin/config.scripts/lnd.install.sh install || exit 1
+if [ "${fatpack}" == "true" ]; then
+  /home/admin/config.scripts/lnd.install.sh install || exit 1
+else
+  echo -e "\nSkipping LND install - let user install later if needed ..."
+fi
 
 ###############
 # C-LIGHTNING #
 ###############
 echo
-/home/admin/config.scripts/cl.install.sh install || exit 1
+if [ "${fatpack}" == "true" ]; then
+  /home/admin/config.scripts/cl.install.sh install || exit 1
+else
+  echo -e "\nSkipping c-lightning install - let user install later if needed ..."
+fi
 
 echo
 echo "*** raspiblitz.info ***"
