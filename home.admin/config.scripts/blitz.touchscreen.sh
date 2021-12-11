@@ -1,7 +1,6 @@
 #!/bin/bash
 # see issue: https://github.com/rootzoll/raspiblitz/issues/646
 # and issue: https://github.com/rootzoll/raspiblitz/issues/809
-# to work it needs to be based on Raspbian Desktop base image
 # to check debug logs: sudo cat /home/pi/.cache/lxsession/LXDE-pi/run.log
 
 source /home/admin/raspiblitz.info

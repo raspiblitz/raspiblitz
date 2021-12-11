@@ -360,36 +360,7 @@ function uninstall_lcd() {
 # not being used - can be deleted after mid 2021
 function install_lcd_legacy() {
 
-  if [ "${baseimage}" = "raspbian" ] || [ "${baseimage}" = "dietpi" ]; then
-    echo "*** 32bit LCD DRIVER ***"
-    echo "--> Downloading LCD Driver from Github"
-    cd /home/admin/
-    sudo -u admin git clone https://github.com/MrYacha/LCD-show.git
-    sudo -u admin chmod -R 755 LCD-show
-    sudo -u admin chown -R admin:admin LCD-show
-    cd LCD-show/
-    # not signed
-    sudo -u admin git reset --hard 53dd0bf || exit 1
-    # install xinput calibrator package
-    echo "--> install xinput calibrator package"
-    sudo apt install -y libxi6
-    sudo dpkg -i xinput-calibrator_0.7.5-1_armhf.deb
- 
-    if [ "${baseimage}" = "dietpi" ]; then
-      echo "--> dietpi preparations"
-      sudo rm -rf /etc/X11/xorg.conf.d/40-libinput.conf
-      sudo mkdir /etc/X11/xorg.conf.d
-      sudo cp ./usr/tft35a-overlay.dtb /boot/overlays/
-      sudo cp ./usr/tft35a-overlay.dtb /boot/overlays/tft35a.dtbo
-      sudo cp -rf ./usr/99-calibration.conf-35  /etc/X11/xorg.conf.d/99-calibration.conf
-      sudo cp -rf ./usr/99-fbturbo.conf  /usr/share/X11/xorg.conf.d/
-      sudo cp ./usr/cmdline.txt /DietPi/
-      sudo cp ./usr/inittab /etc/
-      sudo cp ./boot/config-35.txt /DietPi/config.txt
-      # make LCD screen rotation correct
-      sudo sed -i "s/dtoverlay=tft35a/dtoverlay=tft35a:rotate=270/" /DietPi/config.txt
-    fi
-  elif [ "${baseimage}" = "raspios_arm64"  ] || [ "${baseimage}" = "debian_rpi64" ]; then
+  if [ "${baseimage}" = "raspios_arm64"  ] || [ "${baseimage}" = "debian_rpi64" ]; then
     echo "*** 64bit LCD DRIVER ***"
     echo "--> Downloading LCD Driver from Github"
     cd /home/admin/
@@ -433,13 +404,7 @@ function install_lcd_legacy() {
 
   # activate LCD and trigger reboot
   # dont do this on dietpi to allow for automatic build
-  if [ "${baseimage}" = "raspbian" ]; then
-    echo "Installing 32-bit LCD drivers ..."
-    sudo chmod +x -R /home/admin/LCD-show
-    cd /home/admin/LCD-show/
-    sudo apt-mark hold raspberrypi-bootloader
-    sudo ./LCD35-show
-  elif [ "${baseimage}" = "raspios_arm64" ] || [ "${baseimage}" = "debian_rpi64" ]; then
+  if [ "${baseimage}" = "raspios_arm64" ] || [ "${baseimage}" = "debian_rpi64" ]; then
     echo "Installing 64-bit LCD drivers ..."
     sudo chmod +x -R /home/admin/wavesharelcd-64bit-rpi
     cd /home/admin/wavesharelcd-64bit-rpi
@@ -452,7 +417,7 @@ function install_lcd_legacy() {
 }
 
 function install_headless() {
-  if [ "${baseimage}" = "raspbian" ]||[ "${baseimage}" = "raspios_arm64" ]|| [ "${baseimage}" = "debian_rpi64" ]; then
+  if [ "${baseimage}" = "raspios_arm64" ]|| [ "${baseimage}" = "debian_rpi64" ]; then
     modificationExists=$(sudo cat /etc/systemd/system/getty@tty1.service.d/autologin.conf | grep -c "autologin pi")
     if [ "${modificationExists}" == "1" ]; then
       echo "# deactivating auto-login of pi user"
@@ -476,7 +441,7 @@ function install_headless() {
 }
 
 function uninstall_headless() {
-  if [ "${baseimage}" = "raspbian" ]||[ "${baseimage}" = "raspios_arm64" ]|| [ "${baseimage}" = "debian_rpi64" ]; then
+  if [ "${baseimage}" = "raspios_arm64" ] || [ "${baseimage}" = "debian_rpi64" ]; then
     # activate auto-login
     sudo raspi-config nonint do_boot_behaviour B2
     modificationExists=$(sudo cat /etc/systemd/system/getty@tty1.service.d/autologin.conf | grep -c "autologin pi")

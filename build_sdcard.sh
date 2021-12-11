@@ -94,7 +94,6 @@ echo "7) WIFI --> '${modeWifi}'"
 
 # AUTO-DETECTION: CPU-ARCHITECTURE
 # ---------------------------------------
-# keep in mind that DietPi for Raspberry is also a stripped down Raspbian
 cpu="$(uname -m)"
 architecture="$(dpkg --print-architecture)"
 case "${cpu}" in
@@ -105,18 +104,23 @@ echo "X) CPU-ARCHITECTURE --> '${cpu} (${architecture})'"
 
 # AUTO-DETECTION: OPERATINGSYSTEM
 # ---------------------------------------
-baseimage="$(lsb_release -si 2>/dev/null)"
-if [ "${baseimage}" = "Debian" ]; then
-  if [ $(uname -n | grep -c 'rpi') -gt 0 ] && [ "${cpu}" = aarch64 ]; then
-    baseimage="debian_rpi64"
-  elif [ $(uname -n | grep -c 'raspberrypi') -gt 0 ] && [ "${cpu}" = aarch64 ]; then
+if [ $(grep -c 'Debian' /etc/os-release 2>/dev/null) -gt 0 ]; then
+  if [ $(uname -n | grep -c 'raspberrypi') -gt 0 ] && [ "${cpu}" = aarch64 ]; then
+    # default image for RaspberryPi
     baseimage="raspios_arm64"
+  elif [ $(uname -n | grep -c 'rpi') -gt 0 ] && [ "${cpu}" = aarch64 ]; then
+    # experimental: a clean alternative image of debian for RaspberryPi
+    baseimage="debian_rpi64"
   elif [ "${cpu}" = "arm" ] || [ "${cpu}" = "aarch64" ]; then
+    # experimental: fallback for all debian on arm
     baseimage="armbian"
   else
+    # experimental: fallback for all debian on other CPUs
     baseimage="debian"
   fi
-elif [ -z "${baseimage}" ]; then
+elif [ $(grep -c 'Ubuntu' /etc/os-release 2>/dev/null) -gt 0 ]; then
+  baseimage="ubuntu"
+else [ -z "${baseimage}" ]; then
   cat /etc/os-release 2>/dev/null
   uname -a
   echo "!!! FAIL: Base Image cannot be detected or is not supported."
@@ -139,8 +143,7 @@ export DEBIAN_FRONTEND=noninteractive
 # https://github.com/rootzoll/raspiblitz/issues/138
 # https://daker.me/2014/10/how-to-fix-perl-warning-setting-locale-failed-in-raspbian.html
 # https://stackoverflow.com/questions/38188762/generate-all-locales-in-a-docker-image
-if [ "${baseimage}" = "Raspbian" ] || [ "${baseimage}" = "DietPi" ] || \
-   [ "${baseimage}" = "Raspios_arm64" ]||[ "${baseimage}" = "Debian_rpi64" ]; then
+if [ "${baseimage}" = "raspios_arm64" ]||[ "${baseimage}" = "debian_rpi64" ]; then
   echo -e "\n*** FIXING LOCALES FOR BUILD ***"
 
   sudo sed -i "s/^# en_US.UTF-8 UTF-8.*/en_US.UTF-8 UTF-8/g" /etc/locale.gen
@@ -148,17 +151,6 @@ if [ "${baseimage}" = "Raspbian" ] || [ "${baseimage}" = "DietPi" ] || \
   sudo locale-gen
   export LANGUAGE=en_US.UTF-8
   export LANG=en_US.UTF-8
-  if [ "${baseimage}" = "Raspbian" ] || [ "${baseimage}" = "DietPi" ]; then
-    export LC_ALL=en_US.UTF-8
-
-    # https://github.com/rootzoll/raspiblitz/issues/684
-    sudo sed -i "s/^    SendEnv LANG LC.*/#   SendEnv LANG LC_*/g" /etc/ssh/ssh_config
-
-    # remove unnecessary files
-    sudo rm -rf /home/pi/MagPi
-    # https://www.reddit.com/r/linux/comments/lbu0t1/microsoft_repo_installed_on_all_raspberry_pis/
-    sudo rm -f /etc/apt/sources.list.d/vscode.list /etc/apt/trusted.gpg.d/microsoft.gpg
-  fi
   if [ ! -f /etc/apt/sources.list.d/raspi.list ]; then
     echo "# Add the archive.raspberrypi.org/debian/ to the sources.list"
     echo "deb http://archive.raspberrypi.org/debian/ bullseye main" | sudo tee /etc/apt/sources.list.d/raspi.list
@@ -182,7 +174,7 @@ echo -e "\n*** SOFTWARE UPDATE ***"
 # btrfs-progs -> prepare for BTRFS data drive raid
 # fbi -> prepare for display graphics mode. https://github.com/rootzoll/raspiblitz/pull/334
 # sysbench -> prepare for powertest
-# build-essential -> check for build dependencies on DietPi, Ubuntu, Armbian
+# build-essential -> check for build dependencies on Ubuntu, Armbian
 # dialog -> dialog bc python3-dialog
 # rsync -> is needed to copy from HDD
 # net-tools -> ifconfig
@@ -195,8 +187,8 @@ echo -e "\n*** SOFTWARE UPDATE ***"
 general_utils="htop git curl bash-completion vim jq dphys-swapfile bsdmainutils autossh telnet vnstat parted dosfstools btrfs-progs fbi sysbench build-essential dialog bc python3-dialog"
 python_dependencies="python3-venv python3-dev python3-wheel python3-jinja2 python3-pip"
 server_utils="rsync net-tools xxd netcat openssh-client openssh-sftp-server sshpass psmisc ufw sqlite3"
-[ "${baseimage}" = "Armbian" ] && arbmbian_dependencies="armbian-config" # add armbian-config
-sudo apt install -y ${general_utils} ${python_dependencies} ${server_utils} ${arbmbian_dependencies}
+[ "${baseimage}" = "armbian" ] && armbian_dependencies="armbian-config" # add armbian-config
+sudo apt install -y ${general_utils} ${python_dependencies} ${server_utils} ${armbian_dependencies}
 sudo apt clean -y
 sudo apt autoremove -y
 
@@ -232,20 +224,16 @@ fi
 echo -e "\n*** PREPARE ${baseimage} ***"
 
 # make sure the pi user is present
-if [ "$(compgen -u | grep -c dietpi)" -gt 0 ];then
-  echo "# Renaming dietpi user to pi"
-  sudo usermod -l pi dietpi
-elif [ "$(compgen -u | grep -c pi)" -eq 0 ];then
+if [ "$(compgen -u | grep -c pi)" -eq 0 ];then
   echo "# Adding the user pi"
   sudo adduser --disabled-password --gecos "" pi
   sudo adduser pi sudo
 fi
 
 # special prepare when Raspbian
-if [ "${baseimage}" = "Raspbian" ]||[ "${baseimage}" = "Raspios_arm64" ]||\
-   [ "${baseimage}" = "Debian_rpi64" ]; then
+if [ "${baseimage}" = "raspios_arm64" ] || [ "${baseimage}" = "debian_rpi64" ]; then
 
-  echo -e "\n*** PREPARE RASPBIAN ***"
+  echo -e "\n*** PREPARE RASPBERRY OS VARIANTS ***"
   sudo apt install -y raspi-config
   # do memory split (16MB)
   sudo raspi-config nonint do_memory_split 16
@@ -314,9 +302,8 @@ echo "root:raspiblitz" | sudo chpasswd
 echo "pi:raspiblitz" | sudo chpasswd
 
 # prepare auto-start of 00infoLCD.sh script on pi user login (just kicks in if auto-login of pi is activated in HDMI or LCD mode)
-if [ "${baseimage}" = "Raspbian" ]||[ "${baseimage}" = "Raspios_arm64" ]||\
-  [ "${baseimage}" = "Debian_rpi64" ]||[ "${baseimage}" = "Armbian" ]||\
-  [ "${baseimage}" = "Ubuntu" ]; then
+if [ "${baseimage}" = "raspios_arm64" ] || [ "${baseimage}" = "debian_rpi64" ] || \
+   [ "${baseimage}" = "armbian" ] || [ "${baseimage}" = "ubuntu" ]; then
   homeFile=/home/pi/.bashrc
   autostartDone=$(grep -c "automatic start the LCD" $homeFile)
   if [ ${autostartDone} -eq 0 ]; then
@@ -327,19 +314,6 @@ if [ "${baseimage}" = "Raspbian" ]||[ "${baseimage}" = "Raspios_arm64" ]||\
     sudo bash -c 'echo "SCRIPT=/home/admin/00infoLCD.sh" >> /home/pi/.bashrc'
     sudo bash -c 'echo "# replace shell with script => logout when exiting script" >> /home/pi/.bashrc'
     sudo bash -c 'echo "exec \$SCRIPT" >> /home/pi/.bashrc'
-    echo "autostart LCD added to $homeFile"
-  else
-    echo "autostart LCD already in $homeFile"
-  fi
-elif [ "${baseimage}" = "DietPi" ]; then
-  homeFile=/home/dietpi/.bashrc
-  autostartDone=$(grep -c "automatic start the LCD" $homeFile)
-  if [ ${autostartDone} -eq 0 ]; then
-    # bash autostart for dietpi
-    sudo bash -c 'echo "# automatic start the LCD info loop" >> /home/dietpi/.bashrc'
-    sudo bash -c 'echo "SCRIPT=/home/admin/00infoLCD.sh" >> /home/dietpi/.bashrc'
-    sudo bash -c 'echo "# replace shell with script => logout when exiting script" >> /home/dietpi/.bashrc'
-    sudo bash -c 'echo "exec \$SCRIPT" >> /home/dietpi/.bashrc'
     echo "autostart LCD added to $homeFile"
   else
     echo "autostart LCD already in $homeFile"
@@ -496,7 +470,7 @@ file="/home/admin/config.scripts/lndlibs/rpc_pb2_grpc.py"
 sudo bash -c "echo 'PATH=\$PATH:/sbin' >> /etc/profile"
 
 # replace boot splash image when raspbian
-[ "${baseimage}" = "Raspbian" ] && { echo "* replacing boot splash"; sudo cp /home/admin/raspiblitz/pictures/splash.png /usr/share/plymouth/themes/pix/splash.png; }
+[ "${baseimage}" = "raspios_arm64" ] && { echo "* replacing boot splash"; sudo cp /home/admin/raspiblitz/pictures/splash.png /usr/share/plymouth/themes/pix/splash.png; }
 
 echo -e "\n*** RASPIBLITZ EXTRAS ***"
 
@@ -574,8 +548,7 @@ echo "Activating CACHE RAM DISK ... "
 sudo /home/admin/config.scripts/blitz.cache.sh on
 
 # *** Wifi, Bluetooth & other RaspberryPi configs ***
-if [ "${baseimage}" = "Raspbian" ]||[ "${baseimage}" = "Raspios_arm64"  ]||\
-   [ "${baseimage}" = "Debian_rpi64" ]; then
+if [ "${baseimage}" = "raspios_arm64"  ] || [ "${baseimage}" = "debian_rpi64" ]; then
 
   if [ "${modeWifi}" == "false" ]; then
     echo -e "\n*** DISABLE WIFI ***"
@@ -705,7 +678,7 @@ echo "1. login fresh --> user:admin password:raspiblitz"
 echo -e "2. run --> release\n"
 
 # (do last - because might trigger reboot)
-if [ "${displayClass}" != "headless" ] || [ "${baseimage}" = "raspbian" ] || [ "${baseimage}" = "raspios_arm64" ]; then
+if [ "${displayClass}" != "headless" ] || [ "${baseimage}" = "raspios_arm64" ]; then
   echo "*** ADDITIONAL DISPLAY OPTIONS ***"
   echo "- calling: blitz.display.sh set-display ${displayClass}"
   sudo /home/admin/config.scripts/blitz.display.sh set-display ${displayClass}
