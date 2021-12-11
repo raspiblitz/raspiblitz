@@ -19,14 +19,6 @@ usage(){
 # add default value to raspi config if needed
 sudo grep -q "runBehindTor" /mnt/hdd/raspiblitz.conf || { echo "runBehindTor=off" | sudo tee -a /mnt/hdd/raspiblitz.conf; }
 
-if [ "$1" != "update" ]; then
-  # stop services (if running)
-  echo "making sure services are not running"
-  sudo systemctl stop lnd 2>/dev/null
-  sudo systemctl stop ${network}d 2>/dev/null
-  sudo systemctl stop tor@default 2>/dev/null
-fi
-
 activateBitcoinOverTor()
 {
   echo "*** Changing ${network} Config ***"
@@ -112,8 +104,6 @@ case "$1" in
       exit 1
     fi
 
-    /home/admin/config.scripts/tor.install.sh install
-
     # setting value in raspi blitz config
     sudo sed -i "s/^runBehindTor=.*/runBehindTor=on/g" /mnt/hdd/raspiblitz.conf
 
@@ -172,11 +162,6 @@ EOF
     # setting value in raspi blitz config
     sudo sed -i "s/^runBehindTor=.*/runBehindTor=off/g" /mnt/hdd/raspiblitz.conf
 
-    # disable tor service
-    echo "# *** Disable Tor service ***"
-    sudo systemctl disable tor@default
-    echo
-
     # deactivate bitcoin over tor (function call)
     deactivateBitcoinOverTor
     echo
@@ -206,17 +191,6 @@ EOF
 
     echo "# OK"
     echo
-    echo "# *** Stop Tor service ***"
-    sudo systemctl stop tor@default
-    echo
-
-    if [ "$2" = "clear" ]; then
-        echo "# *** Uninstall Tor & Delete Data ***"
-        sudo rm -r /mnt/hdd/tor 2>/dev/null
-        sudo apt remove -y tor nyx
-    fi
-
-    echo "# needs reboot to activate new setting"
   ;;
 
 
