@@ -658,6 +658,12 @@ sudo chmod +x /home/admin/_background.sh
 sudo cp /home/admin/assets/background.service /etc/systemd/system/background.service
 sudo systemctl enable background
 
+#######
+# TOR #
+#######
+echo
+/home/admin/config.scripts/tor.install.sh install || exit 1
+
 ###########
 # BITCOIN #
 ###########
