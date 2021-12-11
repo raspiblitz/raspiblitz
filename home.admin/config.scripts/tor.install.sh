@@ -138,7 +138,7 @@ if [ "${action}" = "install" ]; then
   sudo apt install -y ${tor_pkgs}
 
   echo -e "\n*** Adding deb.torproject.org keyring ***"
-  if ! torsocks gpg --keyserver hkp://keyserver.ubuntu.com --recv-key "A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89"
+  if ! torsocks curl -s https://deb.torproject.org/torproject.org/A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89.asc | sudo gpg --no-default-keyring --keyring gnupg-ring:/etc/apt/trusted.gpg.d/NAME.gpg --import
   then
     echo "!!! FAIL: Was not able to import deb.torproject.org key";
     exit 1
