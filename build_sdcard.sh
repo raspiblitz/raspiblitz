@@ -107,9 +107,9 @@ echo "X) CPU-ARCHITECTURE --> '${cpu} (${architecture})'"
 # ---------------------------------------
 baseimage="$(lsb_release -si 2>/dev/null)"
 if [ "${baseimage}" = "Debian" ]; then
-  if [ $(uname -n | grep -c 'rpi') -gt 0 ] && [ "${cpu}" = aarch64 ]; then
+  if [ $(uname -n | grep -c 'rpi') -gt 0 ] && [ "${cpu}" = "aarch64" ]; then
     baseimage="debian_rpi64"
-  elif [ $(uname -n | grep -c 'raspberrypi') -gt 0 ] && [ "${cpu}" = aarch64 ]; then
+  elif [ $(uname -n | grep -c 'raspberrypi') -gt 0 ] && [ "${cpu}" = "aarch64" ]; then
     baseimage="raspios_arm64"
   elif [ "${cpu}" = "arm" ] || [ "${cpu}" = "aarch64" ]; then
     baseimage="armbian"
