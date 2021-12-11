@@ -156,9 +156,6 @@ else
 fi
 echo ""
 
-###############################
-# WAIT FOR ALL SERVICES
-
 # get the state of data drive
 source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
 

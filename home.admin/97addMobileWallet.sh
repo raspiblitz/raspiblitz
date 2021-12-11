@@ -144,9 +144,10 @@ checkIP2TOR()
 OPTIONS=()
 
 if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
-  	# Zap deactivated for now - see: https://github.com/rootzoll/raspiblitz/issues/2198#issuecomment-822808428
 	OPTIONS+=(ZEUS_IOS "Zeus to LND (iOS)")
 	OPTIONS+=(ZEUS_ANDROID "Zeus to LND (Android)")
+	OPTIONS+=(ZAP_IOS "Zap to LND (iOS)")
+	OPTIONS+=(ZAP_ANDROID "Zap to LND (Android)")
 	OPTIONS+=(SPHINX "Sphinx Chat to LND (Android/iOS)")
   	OPTIONS+=(SENDMANY_ANDROID "SendMany to LND (Android)")
 	OPTIONS+=(FULLYNODED_LND "Fully Noded to LND REST (iOS+Tor)") 
@@ -164,7 +165,7 @@ if [ "${runBehindTor}" = "on" ]; then
   OPTIONS+=(FULLYNODED_BTC "Fully Noded to bitcoinRPC (iOS+Tor)") 
 fi
 
-CHOICE=$(whiptail --clear --title "Choose Mobile Wallet" --menu "" 16 75 10 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+CHOICE=$(whiptail --clear --title "Choose Mobile Wallet" --menu "" 18 75 12 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
 /home/admin/config.scripts/blitz.display.sh hide
 
@@ -194,15 +195,6 @@ case $CHOICE in
 	  ;;
   ZAP_IOS)
       appstoreLink="https://apps.apple.com/us/app/zap-bitcoin-lightning-wallet/id1406311960"
-      #/home/admin/config.scripts/blitz.display.sh qr ${appstoreLink}
-	  #whiptail --title "Install Testflight and Zap on your iOS device" \
-	  #	--yes-button "continue" \
-	  #	--no-button "link as QR code" \
-	  #	--yesno "Search for 'Zap Bitcoin' in Apple Appstore for basic version\nOr join public beta test for latest features:\n${appstoreLink}\n\nJoin testing and follow ALL instructions.\n\nWhen installed and started -> continue" 11 65
-	  # if [ $? -eq 1 ]; then
-	  #  /home/admin/config.scripts/blitz.display.sh qr-console ${appstoreLink}
-	  #fi
-
       /home/admin/config.scripts/blitz.display.sh image /home/admin/raspiblitz/pictures/app_zap.png
 	  whiptail --title "Install Fully Noded on your iOS device" \
 		--yes-button "Continue" \
@@ -217,12 +209,7 @@ Or scan the qr code on the LCD with your mobile phone.
 " 11 70
 	  fi
 	  /home/admin/config.scripts/blitz.display.sh hide
-	  checkIP2TOR LND-GRPC-API
-	  see https://github.com/rootzoll/raspiblitz/issues/1001#issuecomment-634580257
-      if [ ${#ip2tor} -eq 0 ]; then
-	    choose_IP_or_TOR
-	  fi
-  	  /home/admin/config.scripts/bonus.lndconnect.sh zap-ios ${connect}
+  	  /home/admin/config.scripts/bonus.lndconnect.sh zap-ios tor
       exit 0;
     ;;
   ZAP_ANDROID)
@@ -241,11 +228,7 @@ Or scan the qr code on the LCD with your mobile phone.
 " 11 70
 	  fi
 	  /home/admin/config.scripts/blitz.display.sh hide
-	  checkIP2TOR LND-GRPC-API
-      if [ ${#ip2tor} -eq 0 ]; then
-	    choose_IP_or_TOR
-	  fi
-  	  /home/admin/config.scripts/bonus.lndconnect.sh zap-android ${connect}
+  	  /home/admin/config.scripts/bonus.lndconnect.sh zap-android tor
       exit 0;
     ;;
   SENDMANY_ANDROID)

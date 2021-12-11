@@ -213,9 +213,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "# OK will init wallet if not exists (may ask for passwordc)"
   fi
 
-  sudo ufw allow ${portprefix}9735 comment '${netprefix}lnd'
-  sudo ufw allow ${portprefix}8080 comment '${netprefix}lnd REST'
-  sudo ufw allow 1${rpcportmod}009 comment '${netprefix}lnd RPC'
+  sudo ufw allow ${portprefix}9735 comment "${netprefix}lnd"
+  sudo ufw allow ${portprefix}8080 comment "${netprefix}lnd REST"
+  sudo ufw allow 1${rpcportmod}009 comment "${netprefix}lnd RPC"
 
   echo "# Prepare directories"
   if [ ! -d /mnt/hdd/lnd ]; then
