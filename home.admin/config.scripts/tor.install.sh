@@ -14,7 +14,7 @@
 # command info
 usage(){
  echo "script to switch Tor on or off"
- echo "tor.install.sh [prepare|install|update]"
+ echo "tor.install.sh [install|enable|update]"
  exit 1
 }
 
@@ -37,25 +37,7 @@ snowflake_commit_hash="af6e2c30e1a6aacc6e7adf9a31df0a387891cc37"
 distribution=$(lsb_release -sc)
 architecture=$(dpkg --print-architecture)
 
-
 #### FUNCTIONS ####
-
-add_tpo_repo(){
-  echo -e "\n*** Adding deb.torproject.org keyring ***"
-  if ! torsocks gpg --keyserver hkp://keyserver.ubuntu.com --recv-key "A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89"
-  then
-    echo "!!! FAIL: Was not able to import deb.torproject.org key";
-    exit 1
-  fi
-  echo "- OK key added"
-
-  echo -e "\n*** Adding Tor Sources ***"
-  echo "
-deb [arch=${architecture}] ${tor_deb_repo}/torproject.org ${distribution} main
-deb-src [arch=${architecture}] ${tor_deb_repo}/torproject.org  ${distribution} main
-" | sudo tee /etc/apt/sources.list.d/tor.list
-  echo "- OK sources added"
-}
 
 
 configure_default_torrc(){
@@ -104,8 +86,14 @@ configure_bridges_torrc(){
 }
 
 
-configure_pluggable_transports(){
-  echo -e "\n*** Configuring pluggable transports ***"
+action=$1
+
+#### INSTALL ####
+if [ "${action}" = "install" ]; then
+
+  echo -e "*** Installing tor (but not run it yet - needs HDD connected )***\n"
+
+  echo -e "\n--> Configuring pluggable transports ***"
 
   ## https://github.com/radio24/TorBox/blob/master/install/run_install.sh
   ## Configuring Tor with the pluggable transports
@@ -140,29 +128,45 @@ configure_pluggable_transports(){
       sudo rm -rf "${download_dir}"/snowflake
     fi
   else
-    echo -e "\n*** Snowflake client and proxy already installed ***\n"
+    echo -e "\n--> Snowflake client and proxy already installed ***\n"
   fi
-}
 
+  # install tor
+  echo -e "\n*** Install Tor ***"
+  # shellcheck disable=SC2086
+  sudo apt -o Dpkg::Options::="--force-confold" install -y tor
+  sudo apt install -y ${tor_pkgs}
 
-action=$1
+  echo -e "\n*** Adding deb.torproject.org keyring ***"
+  if ! torsocks gpg --keyserver hkp://keyserver.ubuntu.com --recv-key "A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89"
+  then
+    echo "!!! FAIL: Was not able to import deb.torproject.org key";
+    exit 1
+  fi
+  echo "- OK key added"
 
-#### PREPARE (is an install just on the sd card) ####
-if [ "${action}" = "prepare" ]; then
-  download_dir="/home/admin/download"
-  tor_data_dir="/home/admin/tor"
-  tor_conf_dir="/home/admin/tor/"
-  torrc="/etc/tor/torrc"
-  torrc_bridges="${tor_conf_dir}/torrc.d/bridges"
-  torrc_services="${tor_conf_dir}/torrc.d/services"
-  # trigger now install part
-  action="install"
-fi
+  echo -e "\n*** Adding Tor Sources ***"
+  echo "
+deb [arch=${architecture}] ${tor_deb_repo}/torproject.org ${distribution} main
+deb-src [arch=${architecture}] ${tor_deb_repo}/torproject.org  ${distribution} main
+" | sudo tee /etc/apt/sources.list.d/tor.list
+  echo "- OK sources added"
 
-#### INSTALL ####
-if [ "${action}" = "install" ]; then
+  echo -e "\n*** Reinstall ***"
+  sudo apt update -y
+  # shellcheck disable=SC2086
+  sudo apt -o Dpkg::Options::="--force-confold" install -y tor
+  sudo apt install -y ${tor_pkgs}
 
-  echo -e "*** Installing tor ***\n"
+  echo
+  exit
+fi 
+
+#### ENABLE (once HDD is available) ####
+if [ "${action}" = "enbable" ]; then
+
+  echo -e "\n*** Enable Tor Service ***"
+
   # create tor dirs and set permissions
   echo -e "*** Create directories and set permissions ***"
   sudo mkdir -pv "${tor_conf_dir}"/torrc.d "${tor_data_dir}"/sys/keys "${tor_data_dir}"/services "${tor_data_dir}"/onion_auth
@@ -176,23 +180,8 @@ if [ "${action}" = "install" ]; then
   # create tor config if not existent
   sudo grep -q "raspiblitz" ${torrc} || configure_default_torrc
   sudo grep -q "Bridge" ${torrc_bridges} || configure_bridges_torrc
-  configure_pluggable_transports
 
-  # install tor
-  echo -e "\n*** Install Tor ***"
-  # shellcheck disable=SC2086
-  sudo apt -o Dpkg::Options::="--force-confold" install -y tor
-  sudo apt install -y ${tor_pkgs}
-
-  add_tpo_repo
-
-  echo -e "\n*** Reinstall & Enable Tor ***"
-  sudo apt update -y
-  # shellcheck disable=SC2086
-  sudo apt -o Dpkg::Options::="--force-confold" install -y tor
-  sudo apt install -y ${tor_pkgs}
-  echo
-
+  # edit tor services
   sudo sed -i "s/^NoNewPrivileges=yes/NoNewPrivileges=no/g" /lib/systemd/system/tor@default.service
   sudo sed -i "s/^NoNewPrivileges=yes/NoNewPrivileges=no/g" /lib/systemd/system/tor@.service
   sudo mkdir -p /etc/systemd/system/tor@default.service.d
@@ -203,14 +192,15 @@ if [ "${action}" = "install" ]; then
     After=network.target nss-lookup.target mnt-hdd.mount
     " | sudo tee /etc/systemd/system/tor@default.service.d/raspiblitz.conf
 
-  echo -e "\n*** Enable Tor Service ***"
+  # enable tor services
   sudo systemctl unmask tor@default
   sudo systemctl daemon-reload
   sudo systemctl enable --now tor@ tor@service
   sudo systemctl restart tor@default
+
   echo
-  exit
-fi 
+  exit 
+fi
 
 if [ "${action}" = "update" ]; then
     case "$2" in
