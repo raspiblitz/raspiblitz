@@ -20,9 +20,10 @@ usage(){
 
 #### VARIABLES (some might be reset by prepare) ####
 
+hdd_path="/mnt/hdd"
 download_dir="/home/admin/download"
-tor_data_dir="/mnt/hdd/tor"
-tor_conf_dir="/mnt/hdd/app-data/tor/"
+tor_data_dir="${hdd_path}/tor"
+tor_conf_dir="${hdd_path}/app-data/tor/"
 torrc="/etc/tor/torrc"
 torrc_bridges="${tor_conf_dir}/torrc.d/bridges"
 torrc_services="${tor_conf_dir}/torrc.d/services"
@@ -158,6 +159,11 @@ deb-src [arch=${architecture}] ${tor_deb_repo}/torproject.org  ${distribution} m
   sudo apt -o Dpkg::Options::="--force-confold" install -y tor
   sudo apt install -y ${tor_pkgs}
 
+  # make sure tor is not running after is was installed
+  # should be enabled after main menu when HDD is mounted
+  # while user has options to configure
+  sudo systemctl disable --now tor@default
+
   echo
   exit
 fi 
@@ -166,6 +172,18 @@ fi
 if [ "${action}" = "enbable" ]; then
 
   echo -e "\n*** Enable Tor Service ***"
+
+  # check if tor@default is already running
+  if [ $(sudo systemctl status tor@default | grep -c "Active: active") -gt 0 ]; then
+    echo "# WARN: tor@default already enabled"
+    exit 1
+  fi
+
+  # check if HDD/SSD is available
+  if [ $(sudo df | grep -c "${hdd_path}") -lt 1 ]; then
+    echo "# FAIL: '${hdd_path}' needs to be mounted to enable Tor"
+    exit 2
+  fi
 
   # create tor dirs and set permissions
   echo -e "*** Create directories and set permissions ***"

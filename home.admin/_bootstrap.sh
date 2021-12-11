@@ -548,6 +548,9 @@ if [ ${isMounted} -eq 0 ]; then
     sudo cp /var/cache/raspiblitz/temp/raspiblitz.conf ${configFile}
   fi
 
+  # enable tor service
+  sudo /home/admin/config.scripts/tor.install.sh enable
+
   # kick-off provision process
   sed -i "s/^state=.*/state=provision/g" ${infoFile}
   sed -i "s/^message=.*/message='Starting Provision'/g" ${infoFile}
