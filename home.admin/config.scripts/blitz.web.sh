@@ -61,8 +61,6 @@ EOF
     sudo sed -i "s/# server_tokens off;/server_tokens off;/g" /etc/nginx/nginx.conf
   fi
 
-  # server_tokens off;
-
   echo "# Checking dhparam.pem ..."
   if [ ! -f /etc/ssl/certs/dhparam.pem ]; then
 
