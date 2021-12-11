@@ -44,8 +44,11 @@ architecture=$(dpkg --print-architecture)
 
 add_tpo_repo(){
   echo -e "\n*** Adding deb.torproject.org keyring ***"
-  torsocks curl --tlsv1.3 --proto =https --connect-timeout 10 https://deb.torproject.org/torproject.org/A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89.asc | gpg --dearmor | sudo tee /usr/share/keyrings/tor-archive-keyring.gpg >/dev/null
-  gpg --list-keys | grep -q "A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89" || { echo "!!! FAIL: Was not able to import deb.torproject.org key"; exit 1; }
+  if ! torsocks gpg --keyserver hkp://keyserver.ubuntu.com --recv-key "A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89"
+  then
+    echo "!!! FAIL: Was not able to import deb.torproject.org key";
+    exit 1
+  fi
   echo "- OK key added"
 
   echo -e "\n*** Adding Tor Sources ***"
