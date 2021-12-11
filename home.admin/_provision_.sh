@@ -204,8 +204,6 @@ echo "allow: lightning gRPC"
 sudo ufw allow 10009 comment 'lightning gRPC'
 echo "allow: lightning REST API"
 sudo ufw allow 8080 comment 'lightning REST API'
-echo "allow: transmission"
-sudo ufw allow 49200:49250/tcp comment 'rtorrent'
 echo "allow: public web HTTP"
 sudo ufw allow from any to any port 80 comment 'allow public web HTTP'
 echo "allow: local web admin HTTPS"
