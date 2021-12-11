@@ -120,7 +120,7 @@ if [ $(grep -c 'Debian' /etc/os-release 2>/dev/null) -gt 0 ]; then
   fi
 elif [ $(grep -c 'Ubuntu' /etc/os-release 2>/dev/null) -gt 0 ]; then
   baseimage="ubuntu"
-else [ -z "${baseimage}" ]; then
+else
   cat /etc/os-release 2>/dev/null
   uname -a
   echo "!!! FAIL: Base Image cannot be detected or is not supported."
