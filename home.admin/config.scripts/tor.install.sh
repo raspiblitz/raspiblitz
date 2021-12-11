@@ -228,7 +228,7 @@ if [ "${action}" = "update" ]; then
       ;;
       *) sudo apt update -y && sudo apt upgrade -y tor;;
     esac
-  ;;
+  echo
   exit
 fi
 
