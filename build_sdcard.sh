@@ -417,22 +417,20 @@ sudo service rsyslog restart
 echo -e "\n*** ADDING MAIN USER admin ***"
 # based on https://stadicus.github.io/RaspiBolt/raspibolt_20_pi.html#add-users
 # using the default password 'raspiblitz'
-
-sudo adduser --disabled-password --gecos "" admin --ingroup admin
+sudo adduser --disabled-password --gecos "" admin
 echo "admin:raspiblitz" | sudo chpasswd
 sudo adduser admin sudo
 sudo chsh admin -s /bin/bash
-
 # configure sudo for usage without password entry
 echo '%sudo ALL=(ALL) NOPASSWD:ALL' | sudo EDITOR='tee -a' visudo
-
-# WRITE BASIC raspiblitz.info to sdcard
-# if further info gets added .. make sure to keep that on: blitz.preparerelease.sh
-echo "baseimage=${baseimage}" | tee raspiblitz.info
-echo "cpu=${cpu}" | tee -a raspiblitz.info
-echo "displayClass=headless" | tee -a raspiblitz.info
-sudo mv raspiblitz.info /home/admin/
-sudo chmod 755 /home/admin/raspiblitz.info
+# check if group "admin" was created
+if [ $(sudo cat /etc/group | grep -c "^admin") -lt 1 ]; then
+  echo -e "\nMissing group admin - creating it ..."
+  sudo /usr/sbin/groupadd --force --gid 1002 admin
+  sudo usermod -a -G admin admin
+else
+  echo -e "\nOK group admin exists"
+fi
 
 echo -e "\n*** ADDING SERVICE USER bitcoin"
 # based on https://stadicus.github.io/RaspiBolt/raspibolt_20_pi.html#add-users
@@ -441,6 +439,14 @@ sudo adduser --disabled-password --gecos "" bitcoin
 echo "bitcoin:raspiblitz" | sudo chpasswd
 # make home directory readable
 sudo chmod 755 /home/bitcoin
+
+# WRITE BASIC raspiblitz.info to sdcard
+# if further info gets added .. make sure to keep that on: blitz.preparerelease.sh
+echo "baseimage=${baseimage}" | tee raspiblitz.info
+echo "cpu=${cpu}" | tee -a raspiblitz.info
+echo "displayClass=headless" | tee -a raspiblitz.info
+sudo mv raspiblitz.info /home/admin/
+sudo chmod 755 /home/admin/raspiblitz.info
 
 echo -e "\n*** ADDING GROUPS FOR CREDENTIALS STORE ***"
 # access to credentials (e.g. macaroon files) in a central location is managed with unix groups and permissions
