@@ -178,7 +178,7 @@ if [ "${setupPhase}" == "setup" ]; then
 
       # delete everything but blockchain
       echo "Deleting everything on HDD/SSD while keeping blockchain ..."
-      sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount
+      sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount 1>/dev/null 2>/dev/null
       sudo /home/admin/config.scripts/blitz.datadrive.sh clean all -keepblockchain
       if [ "${error}" != "" ]; then
         echo "CLEANING HDD FAILED:"
