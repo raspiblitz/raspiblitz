@@ -661,8 +661,8 @@ sudo systemctl enable background
 #######
 # TOR #
 #######
-echo
-/home/admin/config.scripts/tor.install.sh install || exit 1
+# echo
+# sudo -u admin /home/admin/config.scripts/tor.install.sh install || exit 1
 
 ###########
 # BITCOIN #
