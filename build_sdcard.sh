@@ -626,11 +626,14 @@ sudo chmod +x /home/admin/_bootstrap.sh
 sudo cp /home/admin/assets/bootstrap.service /etc/systemd/system/bootstrap.service
 sudo systemctl enable bootstrap
 
-# *** BACKGROUND ***
+# *** BACKGROUND TASKS ***
 echo -e "\n*** RASPI BACKGROUND SERVICE ***"
 sudo chmod +x /home/admin/_background.sh
 sudo cp /home/admin/assets/background.service /etc/systemd/system/background.service
 sudo systemctl enable background
+
+# *** BACKGROUND SCAN ***
+/home/admin/_background.scan.sh install
 
 #######
 # TOR #
