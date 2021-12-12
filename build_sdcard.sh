@@ -549,10 +549,9 @@ sudo apt -y autoremove
 
 echo
 echo "*** ADDING MAIN USER admin ***"
-# based on https://raspibolt.github.io/raspibolt/raspibolt_20_pi.html#add-users
+# based on https://raspibolt.org/system-configuration.html#add-users
 # using the default password 'raspiblitz'
-
-sudo adduser --disabled-password --gecos "" admin --ingroup admin
+sudo adduser --disabled-password --gecos "" admin
 echo "admin:raspiblitz" | sudo chpasswd
 sudo adduser admin sudo
 sudo chsh admin -s /bin/bash
@@ -570,8 +569,7 @@ sudo chmod 755 /home/admin/raspiblitz.info
 
 echo
 echo "*** ADDING SERVICE USER bitcoin"
-# based on https://raspibolt.github.io/raspibolt/raspibolt_20_pi.html#add-users
-
+# based on https://raspibolt.org/system-configuration.html#add-users
 # create user and set default password for user
 sudo adduser --disabled-password --gecos "" bitcoin
 echo "bitcoin:raspiblitz" | sudo chpasswd
