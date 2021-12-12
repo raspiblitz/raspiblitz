@@ -422,6 +422,7 @@ sudo chmod 755 /home/bitcoin
 
 # WRITE BASIC raspiblitz.info to sdcard
 # if further info gets added .. make sure to keep that on: blitz.preparerelease.sh
+sudo touch /home/admin/raspiblitz.info
 echo "baseimage=${baseimage}" | tee raspiblitz.info
 echo "cpu=${cpu}" | tee -a raspiblitz.info
 echo "displayClass=headless" | tee -a raspiblitz.info
