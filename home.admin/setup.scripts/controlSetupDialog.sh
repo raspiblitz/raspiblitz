@@ -299,23 +299,20 @@ if [ "${setupPhase}" == "setup" ]; then
     # source the setup state fresh
     source $SETUPFILE
 
-    # prepare config file
+    # prepare & write basic config file (on temp mem drive)
     CONFIGFILE="/var/cache/raspiblitz/temp/raspiblitz.conf"
     sudo rm $CONFIGFILE 2>/dev/null
     sudo touch $CONFIGFILE
     sudo chown admin:admin $CONFIGFILE
     sudo chmod 777 $CONFIGFILE
     echo "# RASPIBLITZ CONFIG FILE" > $CONFIGFILE
-
-    # write basic config file data
-    /home/admin/config.scripts/blitz.conf.sh set raspiBlitzVersion "${codeVersion}"
-    /home/admin/config.scripts/blitz.conf.sh set lcdrotate "1"
-    /home/admin/config.scripts/blitz.conf.sh set lightning "${lightning}"
-    /home/admin/config.scripts/blitz.conf.sh set network "${network}"
-    /home/admin/config.scripts/blitz.conf.sh set chain "main"
-    /home/admin/config.scripts/blitz.conf.sh set hostname "${hostname}"
-    /home/admin/config.scripts/blitz.conf.sh set runBehindTor "on"
-  
+    echo "raspiBlitzVersion='${codeVersion}'" >> $CONFIGFILE
+    echo "lcdrotate='1'" >> $CONFIGFILE
+    echo "lightning='${lightning}'" >> $CONFIGFILE
+    echo "network='${network}'" >> $CONFIGFILE
+    echo "chain='main'" >> $CONFIGFILE
+    echo "hostname='${hostname}'" >> $CONFIGFILE
+    echo "runBehindTor='on'" >> $CONFIGFILE
   fi
 
 fi

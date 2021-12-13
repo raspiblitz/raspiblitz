@@ -203,6 +203,7 @@ if [ "${lightning}" == "lnd" ]; then
   echo "Starting LND Service ..." >> ${logFile}
   sudo systemctl enable lnd >> ${logFile}
   sudo systemctl start lnd >> ${logFile}
+  echo "Starting LND Service ... executed" >> ${logFile}
 
   # check that lnd started
   lndRunning=0
