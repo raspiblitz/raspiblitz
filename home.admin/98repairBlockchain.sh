@@ -17,12 +17,13 @@ clear
 if [ "${CHOICE}" = "COPY" ]; then
     echo "Starting COPY ..."
     sudo sed -i "s/^state=.*/state=recopy/g" /home/admin/raspiblitz.info
-    /home/admin/50copyHDD.sh
+    /home/admin/config.scripts/blitz.copychain.sh target
     sudo sed -i "s/^state=.*/state=na/g" /home/admin/raspiblitz.info
 
 elif [ "${CHOICE}" = "RESYNC" ]; then
     echo "Starting RESYNC ..."
-    /home/admin/50syncHDD.sh
+    #TODO #FIXME
+    # /home/admin/50syncHDD.sh
     dialog --pause "OK. System will reboot to activate changes." 8 58 8
     clear
     echo "rebooting .. (please wait)"
