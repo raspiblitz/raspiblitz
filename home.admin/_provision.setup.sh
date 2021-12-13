@@ -128,7 +128,7 @@ echo "OK ${network} startup successful " >> ${logFile}
 
 ###################################
 # Prepare Lightning
-source <(/home/admin/_cache.sh get lightning hostname)
+source /mnt/hdd/raspiblitz.conf
 echo "Prepare Lightning (${lightning})" >> ${logFile}
 
 if [ "${hostname}" == "" ]; then
