@@ -19,6 +19,7 @@ fi
 command=$1
 
 # its OK if its not exist yet
+source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf 2>/dev/null
 
 # Make sure needed packages are installed
@@ -462,10 +463,17 @@ if [ "${command}" == "set-display" ]; then
   paramDisplayClass=$2
   paramDisplayType=$3
   echo "# blitz.display.sh set-display ${paramDisplayClass} ${paramDisplayType}"
+  echo "baseimage(${baseimage})"
 
   # check if started with sudo
   if [ "$EUID" -ne 0 ]; then 
     echo "error='missing sudo'"
+    exit 1
+  fi
+
+  # check if display class parameter is given
+  if [ "${baseimage}" == "" ]; then
+    echo "err='missing baseimage info'"
     exit 1
   fi
 
