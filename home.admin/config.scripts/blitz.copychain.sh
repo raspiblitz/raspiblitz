@@ -262,7 +262,7 @@ if [ "$1" = "target" ]; then
     response=$?
     echo "response(${response})"
     if [ "${response}" == "0" ]; then
-      /home/admin/config.scripts/blitz.copychain.sh
+      /home/admin/config.scripts/blitz.copychain.sh target
       exit 0
     fi
 
