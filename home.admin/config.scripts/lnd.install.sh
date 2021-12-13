@@ -145,7 +145,7 @@ EnvironmentFile=/mnt/hdd/raspiblitz.conf
 ExecStartPre=-/home/admin/config.scripts/lnd.check.sh prestart ${CHAIN}
 ExecStart=/usr/local/bin/lnd --configfile=/home/bitcoin/.lnd/${netprefix}lnd.conf
 Restart=always
-TimeoutSec=120
+TimeoutSec=240
 RestartSec=30
 StandardOutput=null
 StandardError=journal
