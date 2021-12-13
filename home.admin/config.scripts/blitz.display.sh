@@ -50,7 +50,7 @@ if [ "${command}" == "rotate" ]; then
     sudo sed -i "s/^dtoverlay=.*/dtoverlay=waveshare35a:rotate=90/g" /boot/config.txt
     sudo rm /etc/X11/xorg.conf.d/40-libinput.conf >/dev/null
 
-    /home/admin/blitz.conf.sh set lcdrotate 1
+    /home/admin/config.scripts/blitz.conf.sh set lcdrotate 1
     echo "# OK - a restart is needed: sudo shutdown -r now"
 
   # TURN ROTATE OFF
@@ -75,7 +75,7 @@ EOF
     fi
 
     # update raspiblitz conf
-    /home/admin/blitz.conf.sh set lcdrotate 0  
+    /home/admin/config.scripts/blitz.conf.sh set lcdrotate 0  
     echo "OK - a restart is needed: sudo shutdown -r now"
 
   else
@@ -500,7 +500,7 @@ if [ "${command}" == "set-display" ]; then
   fi
 
   # mark new display class in config (if exist)
-  /home/admin/blitz.conf.sh set displayClass ${paramDisplayClass}
+  /home/admin/config.scripts/blitz.conf.sh set displayClass ${paramDisplayClass}
   sudo sed -i "s/^displayClass=.*/displayClass=${paramDisplayClass}/g" /home/admin/raspiblitz.info
   exit 0
 
