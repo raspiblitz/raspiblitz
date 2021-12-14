@@ -12,6 +12,7 @@
 - Update: JoinMarket v0.9.4 [details](https://github.com/JoinMarket-Org/joinmarket-clientserver/releases/tag/v0.9.4)
 - Update: JoininBox v0.6.5 [details](https://github.com/openoms/joininbox/releases/tag/v0.6.5)
 - Update: Thunderhub v0.12.31 [details](https://github.com/apotdevin/thunderhub/releases/tag/v0.12.31)
+- Update: BTC-RPC-Explorer v3.3.0 [details](https://github.com/janoside/btc-rpc-explorer/blob/master/CHANGELOG.md#v330)
 - Update: C-lightningREST v0.5.2 [details](https://github.com/Ride-The-Lightning/c-lightning-REST/releases/tag/v0.5.2)
 - Update: Specter Desktop 1.7.2 [details](https://github.com/cryptoadvance/specter-desktop/releases/tag/v1.7.2)
 - Update: Re-Add connecting node with Zap mobile wallet iOS & Android
