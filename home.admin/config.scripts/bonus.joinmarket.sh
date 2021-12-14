@@ -27,11 +27,6 @@ fi
 
 source /mnt/hdd/raspiblitz.conf
 
-# add default value to raspi config if needed
-if ! grep -Eq "^joinmarket=" /mnt/hdd/raspiblitz.conf; then
-  echo "joinmarket=off" >> /mnt/hdd/raspiblitz.conf
-fi
-
 # show info menu
 if [ "$1" = "menu" ]; then
   whiptail --title " JoinMarket info " --msgbox "
@@ -183,7 +178,7 @@ fi
   
   if [ -f "/home/joinmarket/joinmarket-clientserver/jmvenv/bin/activate" ] ; then
     # setting value in raspi blitz config
-    sudo sed -i "s/^joinmarket=.*/joinmarket=on/g" /mnt/hdd/raspiblitz.conf
+    /home/admin/config.scripts/blitz.conf.sh set joinmarket "on"
     # starting info
     echo
     echo "# Start to use by logging in to the 'joinmarket' user with:"
@@ -202,7 +197,7 @@ fi
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^joinmarket=.*/joinmarket=off/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set joinmarket "off"
 
   if [ -f "/home/joinmarket/joinmarket-clientserver/jmvenv/bin/activate" ] ; then
     echo "# REMOVING JOINMARKET"

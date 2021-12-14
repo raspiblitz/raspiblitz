@@ -26,6 +26,7 @@ fi
 source /mnt/hdd/raspiblitz.conf
 # get cpu architecture
 source /home/admin/raspiblitz.info
+source <(/home/admin/_cache.sh get state)
 
 if [ "$1" = "status" ]; then
 
@@ -123,11 +124,11 @@ if [ "$1" = "menu" ]; then
   if [ ${#publicDomain} -gt 0 ]; then
      text="${text}
 Public Domain: https://${publicDomain}:${httpsPort}
-port forwarding on router needs to be active & may change port" 
+port forwarding on router needs to be active & may change port"
   fi
 
   text="${text}
-SHA1 ${sslFingerprintIP}" 
+SHA1 ${sslFingerprintIP}"
 
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
     /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
@@ -135,7 +136,7 @@ SHA1 ${sslFingerprintIP}"
 TOR Browser Hidden Service address (see the QR onLCD):
 ${toraddress}"
   fi
-  
+
   if [ ${#ip2torDomain} -gt 0 ]; then
     text="${text}\n
 IP2TOR+LetsEncrypt: https://${ip2torDomain}:${ip2torPort}
@@ -156,18 +157,10 @@ To get the 'Connection String' to activate Lightning Payments:
 MAINMENU > CONNECT > BTCPay Server"
 
   whiptail --title " BTCPay Server " --msgbox "${text}" 17 69
-  
+
   /home/admin/config.scripts/blitz.display.sh hide
   echo "# please wait ..."
   exit 0
-fi
-
-# add default values to raspi config if needed
-if ! grep -Eq "^BTCPayServer=" /mnt/hdd/raspiblitz.conf; then
-  echo "BTCPayServer=off" >> /mnt/hdd/raspiblitz.conf
-fi
-if ! grep -Eq "^BTCPayDomain=" /mnt/hdd/raspiblitz.conf; then
-  echo "BTCPayDomain=off" >> /mnt/hdd/raspiblitz.conf
 fi
 
 # write-tls-macaroon
@@ -211,7 +204,7 @@ BTC.lightning=type=lnd-rest;server=https://127.0.0.1:8080/;macaroonfilepath=/hom
     s="BTC.lightning=type=lnd-rest\;server=https\://127.0.0.1:8080/\;macaroonfilepath=/home/btcpay/admin.macaroon\;"
     sudo -u btcpay sed -i "s|^${s}certthumbprint=.*|${s}certthumbprint=$FINGERPRINT|g" /home/btcpay/.btcpayserver/Main/settings.config
   fi
-  
+
   if [ "${state}" == "ready" ]; then
     sudo systemctl restart btcpayserver
   fi
@@ -240,7 +233,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo ln -sf /etc/nginx/sites-available/btcpay_tor_ssl.conf /etc/nginx/sites-enabled/
   sudo nginx -t
   sudo systemctl reload nginx
-  
+
   # open the firewall
   echo "# Updating the firewall"
   sudo ufw allow 23000 comment 'allow BTCPay HTTP'
@@ -249,8 +242,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   # Hidden Service for BTCPay if Tor is active
   if [ "${runBehindTor}" = "on" ]; then
-    # make sure to keep in sync with internet.tor.sh script
-    /home/admin/config.scripts/internet.hiddenservice.sh btcpay 80 23002 443 23003
+    # make sure to keep in sync with tor.network.sh script
+    /home/admin/config.scripts/tor.onion-service.sh btcpay 80 23002 443 23003
   fi
 
   # check for $BTCPayDomain
@@ -278,13 +271,13 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo ln -s /mnt/hdd/app-data/.btcpayserver /home/btcpay/ 2>/dev/null
     sudo chown -R btcpay:btcpay /home/btcpay/.btcpayserver
 
-    echo 
+    echo
     echo "# Installing .NET"
-    echo 
+    echo
     # https://dotnet.microsoft.com/download/dotnet-core/3.1
     # dependencies
     sudo apt-get -y install libunwind8 gettext libssl1.0
-    
+
     if [ "${cpu}" = "arm" ]; then
       binaryVersion="arm"
       dotNetdirectLink="https://download.visualstudio.microsoft.com/download/pr/40edd52f-b1ca-4f0c-8d50-34433202ce9d/2b8f5b881c239a706f271f010e56159c/dotnet-sdk-3.1.413-linux-arm.tar.gz"
@@ -422,7 +415,7 @@ btc.rpc.password=$PASSWORD_B
         sudo systemctl restart bitcoind
       fi
       sudo systemctl restart nbxplorer
-    fi  
+    fi
 
     # BTCPayServer
     echo
@@ -453,7 +446,7 @@ After=nbxplorer.service
 [Service]
 ExecStart=/home/btcpay/dotnet/dotnet run --no-launch-profile --no-build \
  -c Release -p \"/home/btcpay/btcpayserver/BTCPayServer/BTCPayServer.csproj\" \
- -- --sqlitefile=sqllite.db 
+ -- --sqlitefile=sqllite.db
 User=btcpay
 Group=btcpay
 Type=simple
@@ -487,7 +480,7 @@ WantedBy=multi-user.target
     else
       echo "# Because the system is not 'ready' the service 'btcpayserver' will not be started at this point .. its enabled and will start on next reboot"
     fi
-    
+
     sudo -u btcpay mkdir -p /home/btcpay/.btcpayserver/Main/
     /home/admin/config.scripts/bonus.btcpayserver.sh write-tls-macaroon
 
@@ -502,7 +495,7 @@ WantedBy=multi-user.target
   fi
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^BTCPayServer=.*/BTCPayServer=on/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set BTCPayServer "on"
   exit 0
 fi
 
@@ -525,11 +518,11 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   echo "# deleteData(${deleteData})"
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^BTCPayServer=.*/BTCPayServer=off/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set BTCPayServer "off"
 
   # Hidden Service if Tor is active
   if [ "${runBehindTor}" = "on" ]; then
-    /home/admin/config.scripts/internet.hiddenservice.sh off btcpay
+    /home/admin/config.scripts/tor.onion-service.sh off btcpay
   fi
 
   isInstalled=$(sudo ls /etc/systemd/system/btcpayserver.service 2>/dev/null | grep -c 'btcpayserver.service')

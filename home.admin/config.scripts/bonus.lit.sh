@@ -12,7 +12,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
 fi
 
 # check who signed the release in https://github.com/lightninglabs/lightning-terminal/releases
-PGPsigner="guggero" 
+PGPsigner="guggero"
 
 if [ $PGPsigner = guggero ];then
   PGPpkeys="https://keybase.io/guggero/pgp_keys.asc"
@@ -23,11 +23,6 @@ elif [ $PGPsigner = roasbeef ];then
 fi
 
 source /mnt/hdd/raspiblitz.conf
-
-# add default value to raspi config if needed
-if ! grep -Eq "^lit=" /mnt/hdd/raspiblitz.conf; then
-  echo "lit=off" >> /mnt/hdd/raspiblitz.conf
-fi
 
 # show info menu
 if [ "$1" = "menu" ]; then
@@ -88,10 +83,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       echo "# Replacing single install of: FARADAY"
       /home/admin/config.scripts/bonus.faraday.sh off
   fi
-  
+
   isInstalled=$(sudo ls /etc/systemd/system/litd.service 2>/dev/null | grep -c 'litd.service')
   if [ ${isInstalled} -eq 0 ]; then
- 
+
     # create dedicated user
     sudo adduser --disabled-password --gecos "" lit
     # make sure symlink to central app-data directory exists
@@ -138,7 +133,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo rm -rf /home/lit/.loop # not a symlink.. delete it silently
     sudo ln -s /mnt/hdd/app-data/.loop/ /home/lit/.loop
     sudo chown lit:lit -R /mnt/hdd/app-data/.loop
-    
+
     echo "# Pool"
     echo "# remove so can't be used parallel with LiT"
     config.scripts/bonus.pool.sh off
@@ -149,7 +144,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo ln -s /mnt/hdd/app-data/.pool/ /home/lit/.pool
     sudo chown lit:lit -R /mnt/hdd/app-data/.pool
 
-    echo "Detect CPU architecture ..." 
+    echo "Detect CPU architecture ..."
     isARM=$(uname -m | grep -c 'arm')
     isAARCH64=$(uname -m | grep -c 'aarch64')
     isX86_64=$(uname -m | grep -c 'x86_64')
@@ -175,7 +170,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       OSversion="arm64"
     elif [ ${isX86_64} -eq 1 ] ; then
       OSversion="amd64"
-    fi 
+    fi
     SHA256=$(grep -i "linux-$OSversion" manifest-v$LITVERSION.txt | cut -d " " -f1)
 
     echo
@@ -304,7 +299,7 @@ WantedBy=multi-user.target
     sudo systemctl enable litd
     echo "OK - the Lightning lit service is now enabled"
 
-  else 
+  else
     echo "# The Lightning Terminal is already installed."
   fi
 
@@ -325,12 +320,12 @@ alias lit-frcli=\"frcli --rpcserver=localhost:8443 \
   sudo ufw allow 8443 comment "Lightning Terminal"
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^lit=.*/lit=on/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set lit "on"
   
   # Hidden Service if Tor is active
   if [ "${runBehindTor}" = "on" ]; then
-    # make sure to keep in sync with internet.tor.sh script
-    /home/admin/config.scripts/internet.hiddenservice.sh lit 443 8443
+    # make sure to keep in sync with tor.network.sh script
+    /home/admin/config.scripts/tor.onion-service.sh lit 443 8443
   fi
 
   # in case RTL is installed - check to connect
@@ -338,8 +333,8 @@ alias lit-frcli=\"frcli --rpcserver=localhost:8443 \
     sudo /home/admin/config.scripts/bonus.rtl.sh connect-services
     sudo systemctl restart RTL 2>/dev/null
   fi
-
-  source /home/admin/raspiblitz.info
+  
+  source <(/home/admin/_cache.sh get state)
   if [ "${state}" == "ready" ]; then
     echo "# OK - the litd.service is enabled, system is ready so starting service"
     sudo systemctl start litd
@@ -367,19 +362,19 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     echo "# OK, the lit.service is removed."
     # Hidden Service if Tor is active
     if [ "${runBehindTor}" = "on" ]; then
-      /home/admin/config.scripts/internet.hiddenservice.sh off lit
+      /home/admin/config.scripts/tor.onion-service.sh off lit
     fi
-  else 
+  else
     echo "# LiT is not installed."
   fi
-  
+
   # clean up anyway
-  # delete user 
+  # delete user
   sudo userdel -rf lit
   # delete group
   sudo groupdel lit
   # setting value in raspi blitz config
-  sudo sed -i "s/^lit=.*/lit=off/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set lit "off"
 
   exit 0
 fi
@@ -387,4 +382,4 @@ fi
 echo "FAIL - Unknown Parameter $1"
 echo "may need reboot to run normal again"
 exit 1
-  
+

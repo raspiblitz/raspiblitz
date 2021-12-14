@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# check if started with sudo
+if [ "$EUID" -ne 0 ]; then 
+  echo "error='run as root'"
+  exit 1
+fi
+
 # LOGFILE - store debug logs of bootstrap
 logFile="/home/admin/raspiblitz.provision-update.log"
 
@@ -18,7 +24,7 @@ echo "" > ${logFile}
 echo "###################################" >> ${logFile}
 echo "# _provision.update.sh" >> ${logFile}
 echo "###################################" >> ${logFile}
-sudo sed -i "s/^message=.*/message='Running Data Update'/g" ${infoFile}
+/home/admin/_cache.sh set message "Running Data Update"
 
 # HDD BTRFS RAID REPAIR IF NEEDED
 source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
@@ -40,15 +46,13 @@ source ${configFile}
 
 # check if config files contains basic: hostname
 if [ ${#hostname} -eq 0 ]; then
-  sed -i "s/^state=.*/state=error/g" ${infoFile}
-  sed -i "s/^message=.*/message='config: missing hostname'/g" ${infoFile}
-  echo "FAIL see ${logFile}"
-  echo "FAIL: missing hostname in (${configFile})!" >> ${logFile}
+  /home/admin/config.scripts/blitz.error.sh _provision.update.sh "missing-hostname" "${setupFile} or ${configFile} contains no hostname" "" ${logFile}
   exit 1
 fi
 
-# check if config files contain lightning (lnd is default)
-if [ "${lightning}" == "" ]; then
+# check if config files contain lightning (lnd is default) introduced in v1.7.1
+entryExists=$(cat ${configFile} | grep -c "^lightning=")
+if [ "${entryExists}" != "1" ]; then
   lightning="lnd"
   echo "lightning=${lightning}" >> ${configFile}
 fi
@@ -58,10 +62,7 @@ source /home/admin/_version.info
 
 # check if code version was loaded
 if [ ${#codeVersion} -eq 0 ]; then
-  sed -i "s/^state=.*/state=error/g" ${infoFile}
-  sed -i "s/^message=.*/message='missing /home/admin/_version.info'/g" ${infoFile}
-  echo "FAIL see ${logFile}"
-  echo "FAIL: no code version (/home/admin/_version.info) found!" >> ${logFile}
+  /home/admin/config.scripts/blitz.error.sh _provision.update.sh "missing-version" "missing /home/admin/_version.info" "" ${logFile}
   exit 1
 fi
 
@@ -143,7 +144,7 @@ if [ "${raspiBlitzVersion}" != "${codeVersion}" ]; then
   echo "detected version change ... starting migration script" >> ${logFile}
   # nothing specific here yet
   echo "OK Done - Updating version in config"
-  sudo sed -i "s/^raspiBlitzVersion=.*/raspiBlitzVersion='${codeVersion}'/g" ${configFile}
+  /home/admin/config.scripts/blitz.conf.sh set raspiBlitzVersion "${codeVersion}"
 else
   echo "OK - version of config data is up to date" >> ${logFile}
 fi
@@ -151,26 +152,25 @@ fi
 # start network service
 echo ""
 echo "*** Start ${network} (UPDATE) ***" >> ${logFile}
-sudo sed -i "s/^message=.*/message='Blockchain Testrun'/g" ${infoFile}
+/home/admin/_cache.sh set message "Blockchain Testrun"
 echo "- This can take a while .." >> ${logFile}
-sudo chown -R bitcoin:bitcoin /mnt/hdd/${network} >>${logFile} 2>&1
-sudo cp /home/admin/assets/${network}d.service /etc/systemd/system/${network}d.service
-sudo systemctl daemon-reload >> ${logFile}
-sudo systemctl enable ${network}d.service >> ${logFile}
-sudo systemctl start ${network}d.service >> ${logFile}
+chown -R bitcoin:bitcoin /mnt/hdd/${network} >>${logFile} 2>&1
+cp /home/admin/assets/${network}d.service /etc/systemd/system/${network}d.service
+systemctl daemon-reload >> ${logFile}
+systemctl enable ${network}d.service >> ${logFile}
+systemctl start ${network}d.service >> ${logFile}
 
 # INSTALL LND on Upadte/Recovery
-if [ "${lightning}" == "lnd" ]; then
+if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
 
   # prepare lnd service
-  sudo cp /home/admin/assets/lnd.service /etc/systemd/system/lnd.service >> ${logFile} 2>&1
+  cp /home/admin/assets/lnd.service /etc/systemd/system/lnd.service >> ${logFile} 2>&1
 
   # convert old keysend by lndExtraParameter to raspiblitz.conf setting (will be enforced by lnd.check.sh prestart) since 1.7.1
   if [ "${lndExtraParameter}" == "--accept-keysend" ]; then
     echo "# MIGRATION KEYSEND from lndExtraParameter --> raspiblitz.conf" >> ${logFile}
-    sudo sed -i '/lndKeysend=.*/d' /mnt/hdd/raspiblitz.conf
-    echo "lndKeysend=on" >> /mnt/hdd/raspiblitz.conf
-    sudo sed -i "/^lndExtraParameter=/d" /mnt/hdd/raspiblitz.conf 2>/dev/null
+    /home/admin/config.scripts/blitz.conf.sh set lndKeysend "on"
+    /home/admin/config.scripts/blitz.conf.sh delete lndExtraParameter
   fi
 
   # if old lnd.conf exists ...
@@ -178,61 +178,61 @@ if [ "${lightning}" == "lnd" ]; then
   if [ ${configExists} -eq 1 ]; then
 
     # make sure correct file permisions are set
-    sudo chown bitcoin:bitcoin /mnt/hdd/lnd/lnd.conf
-    sudo chmod 664 /mnt/hdd/lnd/lnd.conf
+    chown bitcoin:bitcoin /mnt/hdd/lnd/lnd.conf
+    chmod 664 /mnt/hdd/lnd/lnd.conf
 
     # make sure additional values are added to [Application Options] since v1.7
     echo "- lnd.conf --> checking additional [Application Options] since v1.7" >> ${logFile}
-    applicationOptionsLineNumber=$(sudo grep -n "\[Application Options\]" /mnt/hdd/lnd/lnd.conf | cut -d ":" -f1)
+    applicationOptionsLineNumber=$(grep -n "\[Application Options\]" /mnt/hdd/lnd/lnd.conf | cut -d ":" -f1)
     if [ "${applicationOptionsLineNumber}" != "" ]; then
       applicationOptionsLineNumber="$(($applicationOptionsLineNumber+1))"
 
       # Avoid historical graph data sync
       # ignore-historical-gossip-filters=1
-      configParamExists=$(sudo grep -c "^ignore-historical-gossip-filters=" /mnt/hdd/lnd/lnd.conf)
+      configParamExists=$(grep -c "^ignore-historical-gossip-filters=" /mnt/hdd/lnd/lnd.conf)
       if [ "${configParamExists}" == "0" ]; then
         echo " - ADDING 'ignore-historical-gossip-filters'" >> ${logFile}
-        sudo sed -i "${applicationOptionsLineNumber}iignore-historical-gossip-filters=1" /mnt/hdd/lnd/lnd.conf
+        sed -i "${applicationOptionsLineNumber}iignore-historical-gossip-filters=1" /mnt/hdd/lnd/lnd.conf
       else
         echo " - OK 'ignore-historical-gossip-filters' exists (${configParamExists})" >> ${logFile}
       fi
 
       # Avoid slow startup time
       # sync-freelist=1
-      configParamExists=$(sudo grep -c "^sync-freelist=" /mnt/hdd/lnd/lnd.conf)
+      configParamExists=$(grep -c "^sync-freelist=" /mnt/hdd/lnd/lnd.conf)
       if [ "${configParamExists}" == "0" ]; then
         echo " - ADDING 'sync-freelist'" >> ${logFile}
-        sudo sed -i "${applicationOptionsLineNumber}isync-freelist=1" /mnt/hdd/lnd/lnd.conf
+        sed -i "${applicationOptionsLineNumber}isync-freelist=1" /mnt/hdd/lnd/lnd.conf
       else
         echo " - OK 'sync-freelist' exists (${configParamExists})" >> ${logFile}
       fi
 
       # Avoid high startup overhead
       # stagger-initial-reconnect=1
-      configParamExists=$(sudo grep -c "^stagger-initial-reconnect=" /mnt/hdd/lnd/lnd.conf)
+      configParamExists=$(grep -c "^stagger-initial-reconnect=" /mnt/hdd/lnd/lnd.conf)
       if [ "${configParamExists}" == "0" ]; then
         echo " - ADDING 'stagger-initial-reconnect'" >> ${logFile}
-        sudo sed -i "${applicationOptionsLineNumber}istagger-initial-reconnect=1" /mnt/hdd/lnd/lnd.conf
+        sed -i "${applicationOptionsLineNumber}istagger-initial-reconnect=1" /mnt/hdd/lnd/lnd.conf
       else
         echo " - OK 'stagger-initial-reconnect' exists (${configParamExists})" >> ${logFile}
       fi
 
       # Delete and recreate RPC TLS certificate when details change or cert expires
       # tlsautorefresh=1
-      configParamExists=$(sudo grep -c "^tlsautorefresh=" /mnt/hdd/lnd/lnd.conf)
+      configParamExists=$(grep -c "^tlsautorefresh=" /mnt/hdd/lnd/lnd.conf)
       if [ "${configParamExists}" == "0" ]; then
         echo " - ADDING 'tlsautorefresh'" >> ${logFile}
-        sudo sed -i "${applicationOptionsLineNumber}itlsautorefresh=1" /mnt/hdd/lnd/lnd.conf
+        sed -i "${applicationOptionsLineNumber}itlsautorefresh=1" /mnt/hdd/lnd/lnd.conf
       else
         echo " - OK 'tlsautorefresh' exists (${configParamExists})" >> ${logFile}
       fi
 
       # Do not include IPs in the RPC TLS certificate
       # tlsdisableautofill=1
-      configParamExists=$(sudo grep -c "^tlsdisableautofill=" /mnt/hdd/lnd/lnd.conf)
+      configParamExists=$(grep -c "^tlsdisableautofill=" /mnt/hdd/lnd/lnd.conf)
       if [ "${configParamExists}" == "0" ]; then
         echo " - ADDING 'tlsdisableautofill'" >> ${logFile}
-        sudo sed -i "${applicationOptionsLineNumber}itlsdisableautofill=1" /mnt/hdd/lnd/lnd.conf
+        sed -i "${applicationOptionsLineNumber}itlsdisableautofill=1" /mnt/hdd/lnd/lnd.conf
       else
         echo " - OK 'tlsdisableautofill' exists (${configParamExists})" >> ${logFile}
       fi
@@ -246,29 +246,19 @@ if [ "${lightning}" == "lnd" ]; then
 
   # start LND service
   echo "Starting LND Service ..." >> ${logFile}
-  sudo systemctl enable lnd >> ${logFile}
-  sudo systemctl start lnd >> ${logFile}
+  systemctl enable lnd >> ${logFile}
+  systemctl start lnd >> ${logFile}
 
-elif [ "${lightning}" == "cl" ]; then
+fi
+
+if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ]; then
 
   echo "Install C-lightning on update" >> ${logFile}
-  sudo sed -i "s/^message=.*/message='C-Lightning Install'/g" ${infoFile}
-  sudo /home/admin/config.scripts/cl.install.sh on mainnet >> ${logFile}
-  sudo sed -i "s/^message=.*/message='C-Lightning Setup'/g" ${infoFile}
+  /home/admin/_cache.sh set message "C-Lightning Install"
+  /home/admin/config.scripts/cl.install.sh on mainnet >> ${logFile}
+  /home/admin/_cache.sh set message "C-Lightning Setup"
 
-elif [ "${lightning}" == "none" ]; then
-
-  echo "No Lightning" >> ${logFile}
-
-else
-
-  sed -i "s/^state=.*/state=error/g" ${infoFile}
-  sed -i "s/^message=.*/message='unknown lightning (${lightning})'/g" ${infoFile}
-  echo "FAIL see ${logFile}"
-  echo "FAIL: unknown lightning (${lightning}) in (${configFile})!" >> ${logFile}
-  exit 1
-
-fi 
+fi
 
 echo "END Migration/Init"  >> ${logFile}
 

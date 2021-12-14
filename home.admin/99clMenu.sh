@@ -7,9 +7,6 @@ source /mnt/hdd/raspiblitz.conf
 
 source <(/home/admin/config.scripts/network.aliases.sh getvars cl $1)
 
-# get the local network IP to be displayed on the LCD
-source <(/home/admin/config.scripts/internet.sh status local)
-
 # BASIC MENU INFO
 WIDTH=64
 BACKTITLE="RaspiBlitz"
@@ -108,7 +105,7 @@ case $CHOICE in
       clear 
       echo
       # setting value in the raspiblitz.conf
-      sudo sed -i "s/^lightning=.*/lightning=cl/g" /mnt/hdd/raspiblitz.conf
+      /home/admin/config.scripts/blitz.conf.sh set lightning "cl"
       echo "# OK - lightning=cl is set in /mnt/hdd/raspiblitz.conf"
       echo
       echo "Press ENTER to return to main menu."

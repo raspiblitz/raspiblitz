@@ -185,48 +185,48 @@ datadir=/mnt/hdd/bitcoin
   fi
   
   # make sure rpcbind is correctly configured
-  sudo sed -i s/^rpcbind=/main.rpcbind=/g /mnt/hdd/${network}/${network}.conf
-  if [ $(grep -c "rpcallowip" < /mnt/hdd/${network}/${network}.conf) -gt 0 ];then
-    if [ $(grep -c "${bitcoinprefix}.rpcbind=" < /mnt/hdd/${network}/${network}.conf) -eq 0 ];then
+  sudo sed -i s/^rpcbind=/main.rpcbind=/g /mnt/hdd/bitcoin/bitcoin.conf
+  if [ $(grep -c "rpcallowip" < /mnt/hdd/bitcoin/bitcoin.conf) -gt 0 ];then
+    if [ $(grep -c "${bitcoinprefix}.rpcbind=" < /mnt/hdd/bitcoin/bitcoin.conf) -eq 0 ];then
       echo "\
 ${bitcoinprefix}.rpcbind=127.0.0.1"|\
-      sudo tee -a /mnt/hdd/${network}/${network}.conf
+      sudo tee -a /mnt/hdd/bitcoin/bitcoin.conf
     fi
   fi
 
   # correct rpcport entry
-  sudo sed -i s/^rpcport=/main.rpcport=/g /mnt/hdd/${network}/${network}.conf
-  if [ $(grep -c "${bitcoinprefix}.rpcport" < /mnt/hdd/${network}/${network}.conf) -eq 0 ];then
+  sudo sed -i s/^rpcport=/main.rpcport=/g /mnt/hdd/bitcoin/bitcoin.conf
+  if [ $(grep -c "${bitcoinprefix}.rpcport" < /mnt/hdd/bitcoin/bitcoin.conf) -eq 0 ];then
     echo "\
 ${bitcoinprefix}.rpcport=${rpcprefix}8332"|\
-    sudo tee -a /mnt/hdd/${network}/${network}.conf
+    sudo tee -a /mnt/hdd/bitcoin/bitcoin.conf
   fi
 
   # correct zmq entry
-  sudo sed -i s/^zmqpubraw/main.zmqpubraw/g /mnt/hdd/${network}/${network}.conf
-  if [ $(grep -c "${bitcoinprefix}.zmqpubrawblock" < /mnt/hdd/${network}/${network}.conf) -eq 0 ];then
+  sudo sed -i s/^zmqpubraw/main.zmqpubraw/g /mnt/hdd/bitcoin/bitcoin.conf
+  if [ $(grep -c "${bitcoinprefix}.zmqpubrawblock" < /mnt/hdd/bitcoin/bitcoin.conf) -eq 0 ];then
     echo "\
 ${bitcoinprefix}.zmqpubrawblock=tcp://127.0.0.1:${zmqprefix}332
 ${bitcoinprefix}.zmqpubrawtx=tcp://127.0.0.1:${zmqprefix}333"|\
-    sudo tee -a /mnt/hdd/${network}/${network}.conf
+    sudo tee -a /mnt/hdd/bitcoin/bitcoin.conf
   fi
 
   # addnode
   if [ ${bitcoinprefix} = signet ];then
-    if [ $(grep -c "${bitcoinprefix}.addnode" < /mnt/hdd/${network}/${network}.conf) -eq 0 ];then
+    if [ $(grep -c "${bitcoinprefix}.addnode" < /mnt/hdd/bitcoin/bitcoin.conf) -eq 0 ];then
       echo "\
 signet.addnode=s7fcvn5rblem7tiquhhr7acjdhu7wsawcph7ck44uxyd6sismumemcyd.onion:38333
 signet.addnode=6megrst422lxzsqvshkqkg6z2zhunywhyrhy3ltezaeyfspfyjdzr3qd.onion:38333
 signet.addnode=jahtu4veqnvjldtbyxjiibdrltqiiighauai7hmvknwxhptsb4xat4qd.onion:38333
 signet.addnode=f4kwoin7kk5a5kqpni7yqe25z66ckqu6bv37sqeluon24yne5rodzkqd.onion:38333
 signet.addnode=nsgyo7begau4yecc46ljfecaykyzszcseapxmtu6adrfagfrrzrlngyd.onion:38333"|\
-      sudo tee -a /mnt/hdd/${network}/${network}.conf
+      sudo tee -a /mnt/hdd/bitcoin/bitcoin.conf
     fi
   fi
 
   removeParallelService
   if [ ${CHAIN} = mainnet ];then
-    sudo cp /home/admin/assets/${network}d.service /etc/systemd/system/${network}d.service
+    sudo cp /home/admin/assets/bitcoind.service /etc/systemd/system/bitcoind.service
   else 
     # /etc/systemd/system/${prefix}bitcoind.service
     echo "
@@ -281,7 +281,8 @@ alias ${prefix}bitcoinlog=\"sudo tail -n 30 -f ${bitcoinlogpath}\"\
   fi
   sudo chown admin:admin /home/admin/_aliases
 
-  source /home/admin/raspiblitz.info
+  source <(/home/admin/_cache.sh get state)
+
   if [ "${state}" == "ready" ]; then
     echo "# OK - the ${prefix}bitcoind.service is enabled, system is ready so starting service"
     sudo systemctl start ${prefix}bitcoind
@@ -307,17 +308,11 @@ alias ${prefix}bitcoinlog=\"sudo tail -n 30 -f ${bitcoinlogpath}\"\
 
 source /mnt/hdd/raspiblitz.conf
 
-# add default value to raspi config if needed
-if ! grep -Eq "^${CHAIN}=" /mnt/hdd/raspiblitz.conf; then
-  NEWENTRY="${CHAIN}=off"
-  sudo /bin/sh -c "echo '$NEWENTRY' >> /mnt/hdd/raspiblitz.conf" 
-fi
-
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   installParallelService
   # setting value in raspi blitz config
-  sudo sed -i "s/^${CHAIN}=.*/${CHAIN}=on/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set ${CHAIN} "on"
   exit 0
 fi
 
@@ -326,7 +321,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   echo "# Uninstall Bitcoin Core instance on ${CHAIN}"
   removeParallelService
   # setting value in raspi blitz config
-  sudo sed -i "s/^${CHAIN}=.*/${CHAIN}=off/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set ${CHAIN} "off"
   exit 0
 fi
 

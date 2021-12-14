@@ -39,16 +39,13 @@ https://github.com/rootzoll/raspiblitz/#a-dropbox-backup-target" 11 70 2>/home/a
 
   # set in config - that activates the dropbox back in background process
   if [ ${#authtoken} -gt 0 ]; then
-    if [ ${#dropboxBackupTarget} -eq 0 ]; then
-      echo "dropboxBackupTarget='${authtoken}'" >> /mnt/hdd/raspiblitz.conf
-    fi
-    sudo sed -i "s/^dropboxBackupTarget=.*/dropboxBackupTarget='${authtoken}'/g" /mnt/hdd/raspiblitz.conf
+    /home/admin/config.scripts/blitz.conf.sh set dropboxBackupTarget "${authtoken}"
   fi
 
 elif [ "${MODE}" == "off" ]; then
 
   # to turn backup off - delete the parameter from the config file
-  sudo sed -i '/dropboxBackupTarget=.*/d' /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh delete dropboxBackupTarget
 
 elif [ "${MODE}" == "check" ]; then
 

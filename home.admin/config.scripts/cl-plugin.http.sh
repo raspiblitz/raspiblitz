@@ -22,16 +22,6 @@ PGPpubkeyFingerprint="4AEE18F83AFDEB23"
 # source <(/home/admin/config.scripts/network.aliases.sh getvars cl <mainnet|testnet|signet>)
 source <(/home/admin/config.scripts/network.aliases.sh getvars cl mainnet)
 
-# add default value to raspi config if needed
-configEntry="clHTTPplugin"
-configEntryExists=$(sudo cat /mnt/hdd/raspiblitz.conf | grep -c "${configEntry}")
-if [ "${configEntryExists}" == "0" ]; then
-  echo "# adding default config entry for '${configEntry}'"
-  sudo /bin/sh -c "echo '${configEntry}=off' >> /mnt/hdd/raspiblitz.conf"
-else
-  echo "# default config entry for '${configEntry}' exists"
-fi
-
 if [ $1 = connect ];then
   toraddress=$(sudo cat /mnt/hdd/tor/clHTTPplugin/hostname)
   PASSWORD_B=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcpassword | cut -c 13-)
@@ -49,7 +39,7 @@ In Fully Noded go to 'Settings' > 'Node Manager' > +, from there you will be aut
     add a label
     add the rpc user: lightning
     add the rpc password is your Password_B
-    add the onion address (also shown on the display as a QR and below), ensure you add the port at the end: 
+    add the onion address (also shown on the display as a QR and below), ensure you add the port at the end:
     ${toraddress}:9080"
 
     qrencode -t ANSIUTF8 "${toraddress}:9080"
@@ -57,7 +47,7 @@ In Fully Noded go to 'Settings' > 'Node Manager' > +, from there you will be aut
     echo "
     ignore the macaroon and cert as that is for LND only
 
-Thats it, Fully Noded will now automatically use those credentials for any lightning related functionality. 
+Thats it, Fully Noded will now automatically use those credentials for any lightning related functionality.
 You can only have one lightning node at a a time, to add a new one just overwrite the existing credentials.
 
 In Fully Noded you will see lightning bolt zap buttons in a few places, tap them to see what they do.
@@ -93,7 +83,7 @@ if [ "$1" = "on" ];then
 
   if [ ! -f /home/bitcoin/cl-plugins-available/c-lightning-http-plugin ];then
     sudo -u bitcoin mkdir /home/bitcoin/cl-plugins-available
-    cd /home/bitcoin/cl-plugins-available || exit 1 
+    cd /home/bitcoin/cl-plugins-available || exit 1
     sudo -u bitcoin git clone https://github.com/Start9Labs/c-lightning-http-plugin.git
     cd c-lightning-http-plugin || exit 1
     sudo -u bitcoin git reset --hard ${clHTTPpluginVersion} || exit 1
@@ -124,18 +114,18 @@ if [ "$1" = "on" ];then
     echo "
 http-pass=${PASSWORD_B}
 " | sudo tee -a ${CLCONF}
-  
+
   else
     echo "# clHTTPplugin is already configured in ${CLCONF}"
   fi
 
   # hidden service to https://xx.onion
-  /home/admin/config.scripts/internet.hiddenservice.sh clHTTPplugin 9080 9080
+  /home/admin/config.scripts/tor.onion-service.sh clHTTPplugin 9080 9080
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^clHTTPplugin=.*/clHTTPplugin=on/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set clHTTPplugin "on"
 
-  source /home/admin/raspiblitz.info
+  source <(/home/admin/_cache.sh get state)
   if [ "${state}" == "ready" ] && [ "$2" != "norestart" ]; then
     echo "# Restart the lightningd.service to activate clHTTPplugin"
     sudo systemctl restart lightningd
@@ -158,7 +148,7 @@ if [ "$1" = "off" ];then
   echo "# Restart the lightningd.service to deactivate clHTTPplugin"
   sudo systemctl restart lightningd
 
-  /home/admin/config.scripts/internet.hiddenservice.sh off clHTTPplugin
+  /home/admin/config.scripts/tor.onion-service.sh off clHTTPplugin
 
   # purge
   if [ "$(echo "$@" | grep -c purge)" -gt 0 ];then
@@ -166,7 +156,7 @@ if [ "$1" = "off" ];then
     sudo rm -rf /home/bitcoin/cl-plugins-available/c-lightning-http-plugin
   fi
   # setting value in raspi blitz config
-  sudo sed -i "s/^clHTTPplugin=.*/clHTTPplugin=off/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set clHTTPplugin "off"
   echo "# clHTTPplugin was uninstalled"
 
 fi

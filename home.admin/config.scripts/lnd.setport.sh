@@ -38,14 +38,7 @@ if [ "${runBehindTor}" = "on" ]; then
 fi
 
 # add to raspiblitz.config (so it can survive update)
-valueExists=$(sudo cat /mnt/hdd/raspiblitz.conf | grep -c 'lndPort=')
-if [ ${valueExists} -eq 0 ]; then
-  # add as new value
-  echo "lndPort=${portnumber}" >> /mnt/hdd/raspiblitz.conf
-else
-  # update existing value
-  sudo sed -i "s/^lndPort=.*/lndPort=${portnumber}/g" /mnt/hdd/raspiblitz.conf
-fi
+/home/admin/config.scripts/blitz.conf.sh set lndPort "${portnumber}"
 
 # enable service again
 echo "enable service again"

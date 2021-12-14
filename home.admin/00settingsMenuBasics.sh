@@ -110,8 +110,8 @@ OPTIONS=()
 
 # LCD options (only when running with LCD screen)
 if [ "${displayClass}" == "lcd" ]; then
-  OPTIONS+=(s 'Touchscreen' ${touchscreenMenu}) 
-  OPTIONS+=(r 'LCD Rotate' ${lcdrotateMenu})  
+  OPTIONS+=(s 'Touchscreen' ${touchscreenMenu})
+  OPTIONS+=(r 'LCD Rotate' ${lcdrotateMenu})
 fi
 
 # Important basic options
@@ -120,24 +120,24 @@ OPTIONS+=(z 'ZeroTier' ${zerotierSwitch})
 
 if [ ${#runBehindTor} -eq 0 ] || [ "${runBehindTor}" = "off" ]; then
   OPTIONS+=(y ${dynDomainMenu} ${domainValue})
-  OPTIONS+=(b 'BTC UPnP (AutoNAT)' ${networkUPnP})  
+  OPTIONS+=(b 'BTC UPnP (AutoNAT)' ${networkUPnP})
 fi
 OPTIONS+=(p 'Parallel Testnet/Signet' ${parallelTestnets})
 
 # LND & options (only when running LND)
-OPTIONS+=(m 'LND LIGHTNING LABS NODE' ${lndNode}) 
+OPTIONS+=(m 'LND LIGHTNING LABS NODE' ${lndNode})
 if [ "${lndNode}" == "on" ]; then
-  OPTIONS+=(a '-LND Channel Autopilot' ${autoPilot}) 
-  OPTIONS+=(k '-LND Accept Keysend' ${keysend})  
-  OPTIONS+=(c '-LND Circuitbreaker (firewall)' ${circuitbreaker})  
-  OPTIONS+=(u '-LND Auto-Unlock' ${autoUnlock})  
+  OPTIONS+=(a '-LND Channel Autopilot' ${autoPilot})
+  OPTIONS+=(k '-LND Accept Keysend' ${keysend})
+  OPTIONS+=(c '-LND Circuitbreaker (firewall)' ${circuitbreaker})
+  OPTIONS+=(u '-LND Auto-Unlock' ${autoUnlock})
   OPTIONS+=(x '-LND StaticChannelBackup on Nextcloud' ${NextcloudBackup})
   OPTIONS+=(e '-LND StaticChannelBackup USB Drive' ${LocalBackup})
   OPTIONS+=(l '-LND UPnP (AutoNAT)' ${autoNatDiscovery})
 fi
 
 # C-Lightning & options/PlugIns
-OPTIONS+=(n 'CL C-LIGHTNING NODE' ${clNode}) 
+OPTIONS+=(n 'CL C-LIGHTNING NODE' ${clNode})
 if [ "${clNode}" == "on" ]; then
   OPTIONS+=(o '-CL CLBOSS Automatic Node Manager' ${clbossMenu})
   OPTIONS+=(h '-CL Wallet Encryption' ${clEncryptedHSMMenu})
@@ -254,7 +254,7 @@ Please keep in mind that thru your LND node id & your previous IP history with y
 
   # change Tor
   anychange=1
-  sudo /home/admin/config.scripts/internet.tor.sh ${choice}
+  sudo /home/admin/config.scripts/tor.network.sh ${choice}
   needsReboot=1
 
 else
@@ -272,7 +272,7 @@ if [ "${autoUnlock}" != "${choice}" ] && [ "${lndNode}" == "on" ]; then
     l1="AUTO-UNLOCK IS NOW OFF"
     if [ "${choice}" = "on" ]; then
       l1="AUTO-UNLOCK IS NOW ACTIVE"
-    fi  
+    fi
     dialog --title 'OK' --msgbox "\n${l1}\n" 9 50
     needsReboot=1
   fi
@@ -378,7 +378,7 @@ if [ "${zerotierSwitch}" != "${choice}" ]; then
   else
     dialog --msgbox "ZeroTier is now OFF." 5 46
   fi
-  
+
 else
   echo "ZeroTier setting unchanged."
 fi
@@ -496,9 +496,9 @@ if [ "${testnet}" != "${choice}" ] || \
     if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ]; then
       /home/admin/config.scripts/cl.install.sh on testnet
       /home/admin/config.scripts/cl.install.sh on signet
-    fi 
+    fi
   else
-    # just turn al lightning testnets off (even if not on before)
+    # just turn all lightning testnets off (even if not on before)
     /home/admin/config.scripts/lnd.install.sh off testnet
     /home/admin/config.scripts/lnd.install.sh off signet
     /home/admin/config.scripts/cl.install.sh off testnet

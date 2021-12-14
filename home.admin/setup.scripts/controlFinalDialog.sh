@@ -6,8 +6,7 @@ source /home/admin/raspiblitz.info
 
 # SETUPFILE
 # this key/value file contains the state during the setup process
-SETUPFILE="/var/cache/raspiblitz/temp/raspiblitz.setup"
-source ${SETUPFILE}
+source /var/cache/raspiblitz/temp/raspiblitz.setup
 
 # make sure also admin user can write to log
 sudo chmod 777 /home/admin/raspiblitz.log
@@ -36,8 +35,11 @@ fi
 # BLOCKCHAIN INFO & OPTIONS
 
 # get fresh data
-source <(sudo /home/admin/config.scripts/blitz.statusscan.sh)
-syncProgressFull=$(echo "${syncProgress}" | cut -d "." -f1)
+source <(/home/admin/_cache.sh get \n
+  btc_default_sync_percentage \n
+  network \n
+)
+syncProgressFull=$(echo "${btc_default_sync_percentage}" | cut -d "." -f1)
 if [ "${syncProgressFull}" != "" ] && [ "${network}" == "bitcoin" ] && [ ${syncProgressFull} -lt 75 ]; then
 
   # offer choice to copy blockchain over LAN
@@ -154,19 +156,21 @@ sudo sed -i "s/^After=.*/After=bootstrap.service/g" /etc/systemd/system/${networ
 sudo systemctl daemon-reload 2>/dev/null
 
 # delete setup data from RAM
-sudo rm ${SETUPFILE}
+sudo rm /var/cache/raspiblitz/temp/raspiblitz.setup
 
 # signal that setup phase is over
-sed -i "s/^setupPhase=.*/setupPhase='done'/g" /home/admin/raspiblitz.info
+/home/admin/_cache.sh set setupPhase "done"
 
 sleep 2
 clear
+source <(/home/admin/_cache.sh get internet_localip)
+/home/admin/_cache.sh set setupPhase "done"
 echo "***********************************************************"
 echo "RaspiBlitz going to reboot"
 echo "***********************************************************"
 echo "This is the final setup reboot - you will get disconnected."
 echo "SSH again into system with:"
-echo "ssh admin@${localip}"
+echo "ssh admin@${internet_localip}"
 echo "Use your password A"
 echo "***********************************************************"
 echo "# final setup reboot ..." >> /home/admin/raspiblitz.log

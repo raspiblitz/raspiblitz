@@ -22,7 +22,7 @@ fi
 
 # check if started with sudo
 if [ "$EUID" -ne 0 ]; then 
-  echo "error='missing sudo'"
+  echo "error='run as root'"
   exit 1
 fi
 
@@ -218,26 +218,32 @@ if [ "$1" = "status" ]; then
 
           #####################################
           # Pre-Setup Investigation of DATA-PART
+          # make copy of raspiblitz.conf & 
 
           # check for recoverable RaspiBlitz data (if config file exists) and raid 
-          hddRaspiData=$(sudo ls -l /mnt/hdd${subVolumeDir} 2>/dev/null | grep -c raspiblitz.conf)
-          #isRaid=$(btrfs filesystem df /mnt/hdd 2>/dev/null | grep -c "Data, RAID1")
+          hddRaspiData=$(ls -l /mnt/hdd${subVolumeDir} 2>/dev/null | grep -c raspiblitz.conf)
           echo "hddRaspiData=${hddRaspiData}"
           hddRaspiVersion=""
           if [ ${hddRaspiData} -eq 1 ]; then
+
+            # output version data from raspiblitz.conf
             source /mnt/hdd${subVolumeDir}/raspiblitz.conf
-            hddRaspiVersion="${raspiBlitzVersion}"
-          fi
-          echo "hddRaspiVersion='${hddRaspiVersion}'"
+            echo "hddRaspiVersion='${raspiBlitzVersion}'"
 
-          # check if there is a wifi configuration as backup
-          hddGotWifiConf=$(ls /mnt/hdd${subVolumeDir}/app-data/wpa_supplicant.conf 2>/dev/null | grep -c "wpa_supplicant.conf")
-          if [ ${hddGotWifiConf} -eq 1 ]; then
-            # make a copy to the mem cache drive (so that Wifi can be connected before setup & final HDD mount)
-            sudo cp /mnt/hdd${subVolumeDir}/app-data/wpa_supplicant.conf /var/cache/raspiblitz/wpa_supplicant.conf
-            echo "wifiBackupConfigCopy='/var/cache/raspiblitz/wpa_supplicant.conf'"
-          fi
+            # create hdd-inspect data dir on RAMDISK
+            mkdir /var/cache/raspiblitz/hdd-inspect
 
+            # make copy of raspiblitz.conf to RAMDISK
+            cp /mnt/hdd${subVolumeDir}/raspiblitz.conf /var/cache/raspiblitz/hdd-inspect/raspiblitz.conf
+
+            # make copy of WIFI config to RAMDISK (if available)
+            cp /mnt/hdd${subVolumeDir}/app-data/wpa_supplicant.conf /var/cache/raspiblitz/hdd-inspect/wpa_supplicant.conf 2>/dev/null
+
+            # make copy of SSH keys to RAMDISK (if available)
+            cp /mnt/hdd${subVolumeDir}/ssh /var/cache/raspiblitz/hdd-inspect/ssh 2>/dev/null
+
+          fi
+        
           # comment this line out if case to study the contect of the data section
           sudo umount /mnt/hdd
         fi
@@ -277,7 +283,11 @@ if [ "$1" = "status" ]; then
             # BRTS
             hdd_data_free1Kblocks=$(df -h -k /dev/${hdd}1 | grep "/dev/${hdd}1" | sed -e's/  */ /g' | cut -d" " -f 4 | tr -dc '0-9')
           fi
+          hddDataFreeBytes=$((${hdd_data_free1Kblocks} * 1024))
+          hddDataFreeGB=$((${hdd_data_free1Kblocks} / (1024 * 1024)))
+          echo "hddDataFreeBytes=${hddDataFreeBytes}"
           echo "hddDataFreeKB=${hdd_data_free1Kblocks}"
+          echo "hddDataFreeGB=${hddDataFreeGB}"
 
           # check if its another fullnode implementation data disk
           hddGotMigrationData=""
@@ -372,7 +382,11 @@ if [ "$1" = "status" ]; then
       hddUsedInfo="${datadrive} & ${storageDrive}"
     fi
     echo "hddUsedInfo='${hddUsedInfo}'"
+    hddDataFreeBytes=$((${hdd_data_free1Kblocks} * 1024))
+    hddDataFreeGB=$((${hdd_data_free1Kblocks} / (1024 * 1024)))
+    echo "hddDataFreeBytes=${hddDataFreeBytes}"
     echo "hddDataFreeKB=${hdd_data_free1Kblocks}"
+    echo "hddDataFreeGB=${hddDataFreeGB}"
 
   fi
 
@@ -393,11 +407,12 @@ if [ "$1" = "status" ]; then
 
     hddAdapterUSAP=0
     
-    # check if user wants to force UASP on
+    # check if force UASP flag is set on sd card
     if [ -f "/boot/uasp.force" ]; then
       hddAdapterUSAP=1
-      echo "uaspForced=1"
     fi
+
+    # or UASP is set by config file
     if [ $(cat /mnt/hdd/raspiblitz.conf 2>/dev/null | grep -c "forceUasp=on") -eq 1 ]; then
       hddAdapterUSAP=1
     fi
@@ -411,6 +426,7 @@ if [ "$1" = "status" ]; then
       # SupTronics 2.5" SATA HDD Shield X825 v1.5
       hddAdapterUSAP=1
     fi
+
     echo "hddAdapterUSAP=${hddAdapterUSAP}"
   fi
 

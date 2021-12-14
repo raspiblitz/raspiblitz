@@ -118,12 +118,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # so first remove dynUpdateUrl from config and then add fresh as new line at the end
 
   # remove line & write fresh
-  sudo sed -i "/dynDomain=*/d" /mnt/hdd/raspiblitz.conf
-  echo "dynDomain='${dynDomain}'" >> /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set dynDomain "${dynDomain}"
 
   # remove line & write fresh
-  sudo sed -i "/dynUpdateUrl=*/d" /mnt/hdd/raspiblitz.conf
-  echo "dynUpdateUrl='${dynUpdateUrl}'" >> /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set dynUpdateUrl "${dynUpdateUrl}"
 
   # make sure dyndomain is added to lnd config file (just edits the config file)
   sudo /home/admin/config.scripts/lnd.tlscert.sh domain-add ${dynDomain}
@@ -151,8 +149,8 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   echo "# switching DynamicDNS OFF"
 
   # removing values in raspiblitz config
-  sudo sed -i "/dynUpdateUrl=*/d" /mnt/hdd/raspiblitz.conf
-  sudo sed -i "/dynDomain=*/d" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh delete dynUpdateUrl
+  /home/admin/config.scripts/blitz.conf.sh delete dynDomain
 
   # lnd.conf: remove domain tls entries
   sudo /home/admin/config.scripts/lnd.tlscert.sh domain-remove ALL

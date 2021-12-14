@@ -5,7 +5,6 @@ RTLVERSION="v0.11.2"
 # check and load raspiblitz config
 # to know which network is running
 source /home/admin/raspiblitz.info
-source /mnt/hdd/raspiblitz.conf
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -112,15 +111,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   echo "# Installing RTL for ${LNTYPE} ${CHAIN}"
 
-  # prepare raspiblitz.conf --> add default value
-  configEntryExists=$(sudo cat /mnt/hdd/raspiblitz.conf | grep -c "${configEntry}")
-  if [ "${configEntryExists}" == "0" ]; then
-    echo "# adding default config entry for '${configEntry}'"
-    sudo /bin/sh -c "echo '${configEntry}=off' >> /mnt/hdd/raspiblitz.conf"
-  else
-    echo "# default config entry for '${configEntry}' exists"
-  fi
-
   # check and install NodeJS
   /home/admin/config.scripts/bonus.nodejs.sh on
 
@@ -178,7 +168,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       echo
     fi
   fi
-    
+
   echo "# Updating Firewall"
   sudo ufw allow ${RTLHTTP} comment "${systemdService} HTTP"
   sudo ufw allow $((RTLHTTP+1)) comment "${systemdService} HTTPS"
@@ -231,7 +221,7 @@ WantedBy=multi-user.target
     sudo sed -i "s/^Wants=.*/Wants=${netprefix}lightningd.service/g" /etc/systemd/system/${systemdService}.service
     sudo sed -i "s/^After=.*/After=${netprefix}lightningd.service/g" /etc/systemd/system/${systemdService}.service
 
-    # set up C-LightningREST  
+    # set up C-LightningREST
     /home/admin/config.scripts/cl.rest.sh on ${CHAIN}
   fi
 
@@ -240,8 +230,8 @@ WantedBy=multi-user.target
 
   # Hidden Service for RTL if Tor is active
   if [ "${runBehindTor}" = "on" ]; then
-    # make sure to keep in sync with internet.tor.sh script
-    /home/admin/config.scripts/internet.hiddenservice.sh ${netprefix}${typeprefix}RTL 80 $((RTLHTTP+2)) 443 $((RTLHTTP+3))
+    # make sure to keep in sync with tor.network.sh script
+    /home/admin/config.scripts/tor.onion-service.sh ${netprefix}${typeprefix}RTL 80 $((RTLHTTP+2)) 443 $((RTLHTTP+3))
   fi
 
   # nginx configuration
@@ -264,8 +254,8 @@ WantedBy=multi-user.target
   # run config as root to connect prepare services (lit, pool, ...)
   sudo /home/admin/config.scripts/bonus.rtl.sh connect-services
 
-  # raspiblitz.config
-  sudo sed -i "s/^${configEntry}=.*/${configEntry}=on/g" /mnt/hdd/raspiblitz.conf
+  # ig
+  /home/admin/config.scripts/blitz.conf.sh set ${configEntry} "on"
 
   sudo systemctl enable ${systemdService}
   sudo systemctl start ${systemdService}
@@ -276,7 +266,7 @@ fi
 
 ##########################
 # CONNECT SERVICES
-# will be called by lit or loop services to make sure services 
+# will be called by lit or loop services to make sure services
 # are connected or on RTL install/update
 #########################
 
@@ -290,7 +280,7 @@ if [ "$1" = "connect-services" ]; then
 
   # only run when RTL is installed
   if [ -d /home/rtl ]; then
-    echo "## RTL CONNECT-SERVICES" 
+    echo "## RTL CONNECT-SERVICES"
   else
     echo "# no RTL installed - no need to connect any services"
     exit
@@ -320,7 +310,7 @@ if [ "$1" = "connect-services" ]; then
     echo "# No lit or loop single detected"
   fi
 
-  echo "# RTL CONNECT-SERVICES done" 
+  echo "# RTL CONNECT-SERVICES done"
   exit 0
 
 fi
@@ -344,7 +334,7 @@ if [ "$1" = "prestart" ]; then
     exit 1
   fi
 
-  echo "## RTL PRESTART CONFIG (called by systemd prestart)" 
+  echo "## RTL PRESTART CONFIG (called by systemd prestart)"
 
   # getting the up-to-date RPC password
   RPCPASSWORD=$(cat /mnt/hdd/${network}/${network}.conf | grep "^rpcpassword=" | cut -d "=" -f2)
@@ -439,7 +429,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   sudo systemctl stop ${systemdService} 2>/dev/null
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^${configEntry}=.*/${configEntry}=off/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set ${configEntry} "off"
 
   # remove nginx symlinks
   sudo rm -f /etc/nginx/sites-enabled/${netprefix}${typeprefix}rtl_ssl.conf 2>/dev/null
@@ -453,7 +443,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # Hidden Service if Tor is active
   if [ "${runBehindTor}" = "on" ]; then
-    /home/admin/config.scripts/internet.hiddenservice.sh off ${systemdService}
+    /home/admin/config.scripts/tor.onion-service.sh off ${systemdService}
   fi
 
   isInstalled=$(sudo ls /etc/systemd/system/${systemdService}.service 2>/dev/null | grep -c "${systemdService}.service")
@@ -520,7 +510,7 @@ fi
 #    sudo -u rtl npm install --only=prod
 #    currentRTLcommit=$(cd /home/rtl/RTL; git describe --tags)
 #    echo "# Updated RTL to $currentRTLcommit"
-#  else 
+#  else
 #    echo "# Unknown option: $updateOption"
 #  fi
 #

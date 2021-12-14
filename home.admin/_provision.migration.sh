@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# check if started with sudo
+if [ "$EUID" -ne 0 ]; then 
+  echo "error='run as root'"
+  exit 1
+fi
+
 # LOGFILE - store debug logs of bootstrap
 logFile="/home/admin/raspiblitz.provision-migration.log"
 
@@ -10,25 +16,19 @@ source ${infoFile}
 # SETUPFILE - data from setup process
 source /var/cache/raspiblitz/temp/raspiblitz.setup
 
-# CONFIGFILE - configuration of RaspiBlitz
-configFile="/mnt/hdd/raspiblitz.conf"
-
 # log header
 echo "" > ${logFile}
 echo "###################################" >> ${logFile}
 echo "# _provision.migration.sh" >> ${logFile}
 echo "###################################" >> ${logFile}
-sudo sed -i "s/^message=.*/message='Provision Migration'/g" ${infoFile}
+/home/admin/_cache.sh set message "Provision Migration"
+
+source <(/home/admin/config.scripts/blitz.datadrive.sh status)
 
 if [ "${hddGotMigrationData}" == "" ]; then
-  sed -i "s/^state=.*/state=error/g" ${infoFile}
-  sed -i "s/^message=.*/message='config: missing hddGotMigrationData'/g" ${infoFile}
-  echo "FAIL see ${logFile}"
-  echo "FAIL: missing hddGotMigrationData in (${infoFile})!" >> ${logFile}
+  /home/admin/config.scripts/blitz.error.sh _provision.migration.sh "missing-hostnamemigrationdata" "missing hddGotMigrationData" "" ${logFile}
   exit 2
 fi
-
-source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
 
 err=""
 nodenameUpperCase=$(echo "${hddGotMigrationData}" | tr "[a-z]" "[A-Z]")
@@ -38,16 +38,13 @@ echo "**************************************************" >> ${logFile}
 echo "- started ..." >> ${logFile}
 source <(sudo /home/admin/config.scripts/blitz.migration.sh migration-${hddGotMigrationData})
 if [ "${err}" != "" ]; then
-    echo "MIGRATION FAILED: ${err}" >> ${logFile}
-    echo "Format data disk on laptop & recover funds with fresh sd card using seed words + static channel backup." >> ${logFile}
-    sed -i "s/^state=.*/state=error/g" ${infoFile}
-    sed -i "s/^message=.*/message='migration failed'/g" ${infoFile}
+    /home/admin/config.scripts/blitz.error.sh _provision.migration.sh "migration-failed" "${err}" "Recover funds with fresh sd card using seed words + static channel backup." ${logFile}
     exit 3
 fi
 
 # make sure for the rest of the seup info is set correctly
-sudo sed -i "s/^network=.*/network=bitcoin/g" ${infoFile}
-sudo sed -i "s/^chain=.*/chain=main/g" ${infoFile}
+/home/admin/config.scripts/blitz.conf.sh set network "bitcoin"
+/home/admin/config.scripts/blitz.conf.sh set chain "main"
 
 # set Password B
 echo "## SETTING PASSWORD B" >> ${logFile}
@@ -57,20 +54,21 @@ if [ "${setPasswordB}" == "1" ]; then
     echo "# setting PASSWORD B" >> ${logFile}
     /home/admin/config.scripts/blitz.setpassword.sh b "${passwordB}" >> ${logFile}
  else
-    echo "FAIL: Password B should be set but was empty! Running with default." >> ${logFile}
+    /home/admin/config.scripts/blitz.error.sh _provision.migration.sh "missing-passwordb" "FAIL: Password B should be set but was empty! Running with default." "" ${logFile}
+    exit 4
  fi
 else
-  echo "WARN: setPasswordB!=1 this not normal on migration! Running with default." >> ${logFile}
+  /home/admin/config.scripts/blitz.error.sh _provision.migration.sh "missing-setpasswordb" "setPasswordB!=1 this not normal on migration! Running with default." "" ${logFile}
+  exit 5
 fi
 
 # if free space is lower than 100GB (100000000) delete backup files
 if [ "${hddDataFreeKB}" != "" ] && [ ${hddDataFreeKB} -lt 407051412 ]; then
     echo "- free space of data disk is low ... deleting 'backup_migration'" >> ${logFile}
-    sudo rm -R /mnt/hdd/backup_migration
+    rm -R /mnt/hdd/backup_migration
 else
     echo "- old data of ${nodenameUpperCase} can be found in '/mnt/hdd/backup_migration'" >> ${logFile}
 fi
 echo "OK MIGRATION" >> ${logFile}
 echo "END Migration"  >> ${logFile}
 exit 0
-

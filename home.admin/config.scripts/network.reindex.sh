@@ -11,19 +11,9 @@ fi
 # to know which network is running
 source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
-if [ ${#network} -eq 0 ]; then
- echo "FAIL - missing /mnt/hdd/raspiblitz.conf"
- exit 1
-fi
-
-# load raspiblitz.info to know if reindex is already running
-source /home/admin/raspiblitz.info 2>/dev/null
-if [ ${#state} -eq 0 ]; then
- echo "FAIL - missing /home/admin/raspiblitz.info"
- exit 1
-fi
 
 # if re-index is not running, start ...
+source <(/home/admin/_cache.sh get state)
 if [ "${state}" != "reindex" ]; then
 
   # stop services

@@ -12,19 +12,11 @@ configFile="/mnt/hdd/raspiblitz.conf"
 
 # LOGS see: sudo journalctl -f -u background
 
-# Check if HDD contains configuration
-configExists=$(ls ${configFile} | grep -c '.conf')
-if [ ${configExists} -eq 1 ]; then
-    source ${configFile}
-else
-    source ${infoFile}
-fi
-
 echo "_background.sh STARTED"
 
 # global vars
 blitzTUIHeartBeatLine=""
-blitzTUIRestarts=0
+/home/admin/_cache.sh set blitzTUIRestarts "0"
 
 counter=0
 while [ 1 ]
@@ -47,8 +39,10 @@ do
   # gather the uptime seconds
   upSeconds=$(cat /proc/uptime | grep -o '^[0-9]\+')
 
-  # source info file fresh on every loop
+  # source info & config file fresh on every loop
   source ${infoFile} 2>/dev/null
+  source ${configFile} 2>/dev/null
+  source <(/home/admin/_cache.sh get state setupPhase)
 
   ####################################################
   # SKIP BACKGROUND TASK LOOP ON CERTAIN SYSTEM STATES
@@ -59,16 +53,6 @@ do
     echo "skipping background loop (${counter}) - state(${state})"
     sleep 1
     continue
-  fi
-
-  ####################################################
-  # CHECK IF LOCAL IP CHANGED
-  ####################################################
-  oldLocalIP="${localip}";
-  source <(/home/admin/config.scripts/internet.sh status)
-  if [ "${oldLocalIP}" != "${localip}" ]; then
-    echo "local IP changed old(${oldLocalIP}) new(${localip}) - updating in raspiblitz.info"
-    sed -i "s/^localip=.*/localip='${localip}'/g" ${infoFile}
   fi
 
   ####################################################
@@ -98,30 +82,11 @@ do
     # detect a missing DHCP config
     if [ "${localip:0:4}" = "169." ]; then
       echo "Missing DHCP detected ... trying emergency reboot"
-      sudo /home/admin/config.scripts/blitz.shutdown.sh reboot
+      /home/admin/config.scripts/blitz.shutdown.sh reboot
     else
       echo "DHCP OK"
     fi
 
-  fi
-
-  ####################################################
-  # CHECK FOR UNDERVOLTAGE REPORTS
-  # every 1 hour scan for undervoltage reports
-  ####################################################
-  recheckUndervoltage=$(($counter % 3600))
-  if [ ${recheckUndervoltage} -eq 1 ]; then
-    echo "*** RECHECK UNDERVOLTAGE ***"
-    countReports=$(sudo cat /var/log/syslog | grep -c "Under-voltage detected!")
-    echo "${countReports} undervoltage reports found in syslog"
-    if ! grep -Eq "^undervoltageReports=" ${infoFile}; then
-      # write new value to info file
-      undervoltageReports="${countReports}"
-      echo "undervoltageReports=${undervoltageReports}" >> ${infoFile}
-    else
-      # update value in info file
-      sed -i "s/^undervoltageReports=.*/undervoltageReports=${countReports}/g" ${infoFile}
-    fi
   fi
 
   ####################################################
@@ -136,6 +101,7 @@ do
   # every 15min - not too often
   # because its a ping to external service
   recheckPublicIP=$((($counter % 900)+1))
+
   # prevent when lndAddress is set
   if [ ${#lndAddress} -gt 3 ]; then
     recheckPublicIP=0
@@ -151,9 +117,7 @@ do
     echo "*** RECHECK PUBLIC IP ***"
 
     # execute only after setup when config exists
-    if [ ${configExists} -eq 1 ]; then
-      publicIPChanged=$(/home/admin/config.scripts/internet.sh update-publicip | grep -c 'ip_changed=1')
-    fi
+    publicIPChanged=$(/home/admin/config.scripts/internet.sh update-publicip | grep -c 'ip_changed=1')
 
     # check if changed
     if [ ${publicIPChanged} -gt 0 ]; then
@@ -178,18 +142,18 @@ do
           # and we will get more connections if this matches our real IP address
           # otherwise the bitcoin-node connections will slowly decline
           echo "IPv6 only is enabled => restart bitcoind to pickup up new publicIP as local IP"
-          sudo systemctl stop bitcoind
+          systemctl stop bitcoind
           sleep 3
-          sudo systemctl start bitcoind
+          systemctl start bitcoind
 
           # if BTCRPCexplorer is currently running
           # it needs to be restarted to pickup the new IP for its "Node Status Page"
           # but this is only needed in IPv6 only mode
-          breIsRunning=$(sudo systemctl status btc-rpc-explorer 2>/dev/null | grep -c 'active (running)')
+          breIsRunning=$(systemctl status btc-rpc-explorer 2>/dev/null | grep -c 'active (running)')
           if [ ${breIsRunning} -eq 1 ]; then
             echo "BTCRPCexplorer is running => restart BTCRPCexplorer to pickup up new publicIP for the bitcoin node"
-            sudo systemctl stop btc-rpc-explorer
-            sudo systemctl start btc-rpc-explorer
+            systemctl stop btc-rpc-explorer
+            systemctl start btc-rpc-explorer
           else
             echo "new publicIP but no BTCRPCexplorer restart because not running"
           fi
@@ -205,8 +169,8 @@ do
       if [ "${autoUnlock}" = "on" ]; then
         if [ "${publicIP_Old}" != "::1" ] && [ "${publicIP_New}" != "::1" ]; then
           echo "restart LND to pickup up new publicIP"
-          sudo systemctl stop lnd
-          sudo systemctl start lnd
+          systemctl stop lnd
+          systemctl start lnd
         else
           echo "publicIP_Old OR publicIP_New is equal ::1 => no need to restart LND"
         fi
@@ -224,17 +188,38 @@ do
   fi
 
   ###############################
+  # UPDATE DYNAMIC DOMAIN
+  # like afraid.org
+  # ! experimental
+  ###############################
+
+  # if not activated above, update every 6 hours
+  if [ ${updateDynDomain} -eq 0 ]; then
+    # dont +1 so that it gets executed on first loop
+    updateDynDomain=$(($counter % 21600))
+  fi
+  if [ ${updateDynDomain} -eq 1 ]; then
+    echo "*** UPDATE DYNAMIC DOMAIN ***"
+    # check if update URL for dyn Domain is set
+    if [ ${#dynUpdateUrl} -gt 0 ]; then
+      /home/admin/config.scripts/internet.dyndomain.sh update
+    else
+      echo "'dynUpdateUrl' not set in ${configFile}"
+    fi
+  fi
+
+  ###############################
   # Blockchain Sync Monitor
   ###############################
 
   # check every 1min
   recheckSync=$(($counter % 60))
-  if [ ${recheckSync} -eq 1 ]; then
-    source <(sudo /home/admin/config.scripts/network.monitor.sh peer-status)
+  if [ ${recheckSync} -eq 1 ] && [ "${chain}" == "main" ]; then
+    source <(/home/admin/config.scripts/bitcoin.monitor.sh mainnet network)
     echo "Blockchain Sync Monitoring: peers=${peers}"
-    if [ "${peers}" == "0" ] && [ "${running}" == "1" ]; then
+    if [ "${btc_peers}" == "0" ] && [ "${btc_running}" == "1" ]; then
       echo "Blockchain Sync Monitoring: ZERO PEERS DETECTED .. doing out-of-band kickstart"
-      sudo /home/admin/config.scripts/network.monitor.sh peer-kickstart
+      /home/admin/config.scripts/bitcoin.monitor.sh mainnet peer-kickstart
     fi
   fi
 
@@ -245,23 +230,20 @@ do
   # check every 30sec
   recheckBlitzTUI=$(($counter % 30))
   if [ "${touchscreen}" == "1" ] && [ ${recheckBlitzTUI} -eq 1 ]; then
+    
     echo "BlitzTUI Monitoring Check"
     if [ -d "/var/cache/raspiblitz" ]; then
-      latestHeartBeatLine=$(sudo tail -n 300 /var/cache/raspiblitz/pi/blitz-tui.log | grep beat | tail -n 1)
+      latestHeartBeatLine=$(tail -n 300 /var/cache/raspiblitz/pi/blitz-tui.log | grep beat | tail -n 1)
     else
-      latestHeartBeatLine=$(sudo tail -n 300 /home/pi/blitz-tui.log | grep beat | tail -n 1)
+      latestHeartBeatLine=$(tail -n 300 /home/pi/blitz-tui.log | grep beat | tail -n 1)
     fi
     if [ ${#blitzTUIHeartBeatLine} -gt 0 ]; then
       #echo "blitzTUIHeartBeatLine(${blitzTUIHeartBeatLine})"
       #echo "latestHeartBeatLine(${latestHeartBeatLine})"
       if [ "${blitzTUIHeartBeatLine}" == "${latestHeartBeatLine}" ]; then
         echo "FAIL - still no new heart beat .. restarting BlitzTUI"
-        blitzTUIRestarts=$(($blitzTUIRestarts +1))
-        if [ $(sudo cat /home/admin/raspiblitz.info | grep -c 'blitzTUIRestarts=') -eq 0 ]; then
-          echo "blitzTUIRestarts=0" >> /home/admin/raspiblitz.info
-        fi
-        sudo sed -i "s/^blitzTUIRestarts=.*/blitzTUIRestarts=${blitzTUIRestarts}/g" /home/admin/raspiblitz.info
-        sudo init 3 ; sleep 2 ; sudo init 5
+        source <(/home/admin/_cache.sh increment system_count_start_tui)
+        init 3 ; sleep 2 ; init 5
       fi
     else
       echo "blitzTUIHeartBeatLine is empty - skipping check"
@@ -273,15 +255,19 @@ do
   # SCB Monitoring
   ###############################
 
-  # check every 1min
-  recheckSCB=$(($counter % 60))
+  # check every 1min (only when lnd active)
+  recheckSCB=0
+  if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
+    recheckSCB=$(($counter % 60))
+  fi
   if [ ${recheckSCB} -eq 1 ]; then
     #echo "SCB Monitoring ..."
     source ${configFile}
     # check if channel.backup exists
     scbPath=/mnt/hdd/lnd/data/chain/${network}/${chain}net/channel.backup
-    scbExists=$(sudo ls $scbPath 2>/dev/null | grep -c 'channel.backup')
+    scbExists=$(ls $scbPath 2>/dev/null | grep -c 'channel.backup')
     if [ ${scbExists} -eq 1 ]; then
+
       # timestamp backup filename
       timestampedFileName=channel-$(date "+%Y%m%d-%H%M%S").backup
       localBackupDir=/home/admin/backups/scb
@@ -289,16 +275,16 @@ do
       localTimestampedPath=${localBackupDir}/${timestampedFileName}
 
       #echo "Found Channel Backup File .. check if changed .."
-      md5checksumORG=$(sudo md5sum $scbPath 2>/dev/null | head -n1 | cut -d " " -f1)
-      md5checksumCPY=$(sudo md5sum $localBackupPath 2>/dev/null | head -n1 | cut -d " " -f1)
+      md5checksumORG=$(md5sum $scbPath 2>/dev/null | head -n1 | cut -d " " -f1)
+      md5checksumCPY=$(md5sum $localBackupPath 2>/dev/null | head -n1 | cut -d " " -f1)
       if [ "${md5checksumORG}" != "${md5checksumCPY}" ]; then
         echo "--> Channel Backup File changed"
 
         # make copy to sd card (as local basic backup)
-        sudo mkdir -p /home/admin/backups/scb/ 2>/dev/null
-        sudo cp $scbPath $localBackupPath
-        sudo cp $scbPath $localTimestampedPath
-        sudo cp $scbPath /boot/channel.backup
+        mkdir -p /home/admin/backups/scb/ 2>/dev/null
+        cp $scbPath $localBackupPath
+        cp $scbPath $localTimestampedPath
+        cp $scbPath /boot/channel.backup
         echo "OK channel.backup copied to '${localBackupPath}' and '{$localTimestampedPath}' and '/boot/channel.backup'"
 
         # check if a additional local backup target is set
@@ -310,8 +296,8 @@ do
           if [ ${backupDeviceExists} -gt 0 ]; then
 
             echo "--> Additional Local Backup Device"
-            sudo cp ${localBackupPath} /mnt/backup/
-            sudo cp ${localTimestampedPath} /mnt/backup/
+            cp ${localBackupPath} /mnt/backup/
+            cp ${localTimestampedPath} /mnt/backup/
 
             # check results
             result=$?
@@ -337,11 +323,11 @@ do
           echo "--> Offsite-Backup SCP Server"
           if [ "${scpBackupOptions}" == "" ]; then
             scpBackupOptions="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
-          fi 
+          fi
           # its ok to ignore known host, because data is encrypted (worst case of MiM would be: no offsite channel backup)
           # but its more likely that without ignoring known host, script might not run thru and that way: no offsite channel backup
-          sudo scp ${scpBackupOptions} ${localBackupPath} ${scpBackupTarget}/
-          sudo scp ${scpBackupOptions} ${localTimestampedPath} ${scpBackupTarget}/
+          scp ${scpBackupOptions} ${localBackupPath} ${scpBackupTarget}/
+          scp ${scpBackupOptions} ${localTimestampedPath} ${scpBackupTarget}/
           result=$?
           if [ ${result} -eq 0 ]; then
             echo "OK - SCP Backup exited with 0"
@@ -350,27 +336,11 @@ do
           fi
         fi
 
-        # check if a DropBox backup target is set
-        # parameter in raspiblitz.conf:
-        # dropboxBackupTarget='[DROPBOX-APP-OAUTH2-TOKEN]'
-        # see dropbox setup: https://gist.github.com/vindard/e0cd3d41bb403a823f3b5002488e3f90
-        if [ ${#dropboxBackupTarget} -gt 0 ]; then
-          echo "--> Offsite-Backup Dropbox"
-          source <(sudo /home/admin/config.scripts/dropbox.upload.sh upload ${dropboxBackupTarget} ${localBackupPath})
-          source <(sudo /home/admin/config.scripts/dropbox.upload.sh upload ${dropboxBackupTarget} ${localTimestampedPath})
-          if [ ${#err} -gt 0 ]; then
-            echo "FAIL -  ${err}"
-            echo "${errMore}"
-          else
-            echo "OK - ${upload}"
-          fi
-        fi
-
         # check if Nextcloud backups are enabled
         if [ $nextcloudBackupServer ] && [ $nextcloudBackupUser ] && [ $nextcloudBackupPassword ]; then
           echo "--> Offsite-Backup Nextcloud"
-          source <(sudo /home/admin/config.scripts/nextcloud.upload.sh upload ${localBackupPath})
-          source <(sudo /home/admin/config.scripts/nextcloud.upload.sh upload ${localTimestampedPath})
+          source <(/home/admin/config.scripts/nextcloud.upload.sh upload ${localBackupPath})
+          source <(/home/admin/config.scripts/nextcloud.upload.sh upload ${localTimestampedPath})
           if [ ${#err} -gt 0 ]; then
             echo "FAIL -  ${err}"
           else
@@ -406,14 +376,11 @@ do
   recheckRAID=$((($counter % 3600)+1))
   if [ ${recheckRAID} -eq 1 ]; then
 
-    # check if raid is active
-    source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
-    if [ ${isRaid} -eq 1 ]; then
-
-      # will run in the background
+    # check if BTRTFS raid is active & scrub
+    source <(/home/admin/config.scripts/blitz.datadrive.sh status)
+    if [ "${isBTRFS}" == "1" ] && [ "${isRaid}" == "1" ]; then
       echo "STARTING BTRFS RAID DATA CHECK ..."
-      sudo btrfs scrub start /mnt/hdd/
-
+      btrfs scrub start /mnt/hdd/
     fi
 
   fi
@@ -422,8 +389,11 @@ do
   # LND AUTO-UNLOCK
   ###############################
 
-  # check every 10secs
-  recheckAutoUnlock=$((($counter % 10)+1))
+  # check every 10secs (only if LND is active)
+  recheckAutoUnlock=0
+  if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
+    recheckAutoUnlock=$((($counter % 10)+1))
+  fi
   if [ ${recheckAutoUnlock} -eq 1 ]; then
 
     # check if auto-unlock feature if activated
@@ -434,30 +404,9 @@ do
       if [ "${locked}" != "0" ]; then
 
         echo "STARTING AUTO-UNLOCK ..."
-        sudo /home/admin/config.scripts/lnd.unlock.sh
+        /home/admin/config.scripts/lnd.unlock.sh
 
       fi
-    fi
-  fi
-
-  ###############################
-  # UPDATE DYNAMIC DOMAIN
-  # like afraid.org
-  # ! experimental
-  ###############################
-
-  # if not activated above, update every 6 hours
-  if [ ${updateDynDomain} -eq 0 ]; then
-    # dont +1 so that it gets executed on first loop
-    updateDynDomain=$(($counter % 21600))
-  fi
-  if [ ${updateDynDomain} -eq 1 ]; then
-    echo "*** UPDATE DYNAMIC DOMAIN ***"
-    # check if update URL for dyn Domain is set
-    if [ ${#dynUpdateUrl} -gt 0 ]; then
-      /home/admin/config.scripts/internet.dyndomain.sh update
-    else
-      echo "'dynUpdateUrl' not set in ${configFile}"
     fi
   fi
 
@@ -478,17 +427,21 @@ do
         echo "CHECK FOR END OF IBD --> reduce RAM for next reboot"
 
         # remove flag
-        sudo rm /mnt/hdd/${network}/blocks/selfsync.flag
+        rm /mnt/hdd/${network}/blocks/selfsync.flag
 
         # set dbcache back to normal (to give room for other apps after reboot in the future)
-        kbSizeRAM=$(sudo cat /proc/meminfo | grep "MemTotal" | sed 's/[^0-9]*//g')
+        kbSizeRAM=$(cat /proc/meminfo | grep "MemTotal" | sed 's/[^0-9]*//g')
+
         if [ ${kbSizeRAM} -gt 1500000 ]; then
           echo "Detected RAM >1GB --> optimizing ${network}.conf"
-          sudo sed -i "s/^dbcache=.*/dbcache=512/g" /mnt/hdd/${network}/${network}.conf
+          sed -i "s/^dbcache=.*/dbcache=512/g" /mnt/hdd/${network}/${network}.conf
         else
           echo "Detected RAM 1GB --> optimizing ${network}.conf"
-          sudo sed -i "s/^dbcache=.*/dbcache=128/g" /mnt/hdd/${network}/${network}.conf
+          sed -i "s/^dbcache=.*/dbcache=128/g" /mnt/hdd/${network}/${network}.conf
         fi
+
+        # relax sanning on sync progress (after 30 more secs)
+        /home/admin/_cache.sh focus btc_default_sync_progress 10 30
 
       fi
     fi
@@ -502,4 +455,3 @@ do
   sleep 1
 
 done
-

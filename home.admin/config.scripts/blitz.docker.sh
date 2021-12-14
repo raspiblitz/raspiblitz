@@ -13,11 +13,6 @@ fi
 
 source /mnt/hdd/raspiblitz.conf
 
-# add default value to raspi config if needed
-if ! grep -Eq "^docker=" /mnt/hdd/raspiblitz.conf; then
-  echo "docker=off" >> /mnt/hdd/raspiblitz.conf
-fi
-
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
@@ -48,7 +43,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo pip3 install docker-compose
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^docker=.*/docker=on/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set docker "on"
   echo "# docker install done"
   exit 0
 fi
@@ -56,7 +51,7 @@ fi
 # switch off
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # setting value in raspiblitz config
-  sudo sed -i "s/^docker=.*/docker=off/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set docker "off"
   echo "*** REMOVING docker & docker-compose ***"
   sudo pip3 uninstall -y docker-compose
   sudo apt-get purge -y docker-ce docker-ce-cli

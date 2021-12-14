@@ -17,11 +17,6 @@ PGPpubkeyFingerprint="91F3B339B9A02A3D"
 
 source /mnt/hdd/raspiblitz.conf
 
-# add default value to raspi config if needed
-if ! grep -Eq "^suez=" /mnt/hdd/raspiblitz.conf; then
-  echo "suez=off" >> /mnt/hdd/raspiblitz.conf
-fi
-
 # show info menu
 if [ "$1" = "menu" ]; then
   dialog --title " Info Suez" --msgbox "
@@ -56,7 +51,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
    | sudo tee -a /home/admin/_aliases
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^suez=.*/suez=on/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set suez "on"
 
   echo "# To use the alias in /home/admin/_aliases:"
   echo "source /home/admin/_aliases"
@@ -75,7 +70,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   echo "# OK, suez is removed."
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^suez=.*/suez=off/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set suez "off"
 
   exit 0
 

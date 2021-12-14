@@ -45,15 +45,6 @@ if grep -Eq "${netprefix}clEncryptedHSM=on" /mnt/hdd/raspiblitz.conf;then
   fi
 fi
 
-# add default value to raspi config if needed
-if ! grep -Eq "^${netprefix}clEncryptedHSM=" /mnt/hdd/raspiblitz.conf; then
-  echo "${netprefix}clEncryptedHSM=off" >> /mnt/hdd/raspiblitz.conf
-fi
-# add default value to raspi config if needed
-if ! grep -Eq "^${netprefix}clAutoUnlock=" /mnt/hdd/raspiblitz.conf; then
-  echo "${netprefix}clAutoUnlock=off" >> /mnt/hdd/raspiblitz.conf
-fi
-
 #############
 # Functions #
 #############
@@ -122,9 +113,7 @@ function encryptHSMsecret() {
   (echo $walletPassword; echo $walletPassword) | \
    sudo -u bitcoin lightning-hsmtool encrypt $hsmSecretPath || exit 1
   # setting value in raspiblitz.conf
-  sudo sed -i \
-    "s/^${netprefix}clEncryptedHSM=.*/${netprefix}clEncryptedHSM=on/g" \
-    /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set ${netprefix}clEncryptedHSM "on"
   echo "# Encrypted the hsm_secret for C-lightning $CHAIN"
 }
 
@@ -141,9 +130,7 @@ function decryptHSMsecret() {
     echo "# Continue to record in the raspiblitz.conf"
   else
     # setting value in raspiblitz.conf
-    sudo sed -i \
-     "s/^${netprefix}clEncryptedHSM=.*/${netprefix}clEncryptedHSM=on/g" \
-     /mnt/hdd/raspiblitz.conf
+    /home/admin/config.scripts/blitz.conf.sh set ${netprefix}clEncryptedHSM "on"
     if [ -f $passwordFile ];then
       echo "# Getting the password from $passwordFile"
     else
@@ -162,9 +149,7 @@ function decryptHSMsecret() {
   fi
   shredPasswordFile
   # setting value in raspiblitz config
-  sudo sed -i \
-   "s/^${netprefix}clEncryptedHSM=.*/${netprefix}clEncryptedHSM=off/g" \
-   /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set ${netprefix}clEncryptedHSM "off"
   echo "# Decrypted the hsm_secret for C-lightning $CHAIN"
 }
 
@@ -269,9 +254,7 @@ elif [ "$1" = "unlock" ]; then
         echo "# The hsm_secret is encrypted, but unlock is not configured"
         passwordToFile
         # setting value in raspiblitz config
-        sudo sed -i \
-          "s/^${netprefix}clEncryptedHSM=.*/${netprefix}clEncryptedHSM=on/g" \
-          /mnt/hdd/raspiblitz.conf
+        /home/admin/config.scripts/blitz.conf.sh set ${netprefix}clEncryptedHSM "on"
         /home/admin/config.scripts/cl.install-service.sh $CHAIN
     
     # get new password 
@@ -345,9 +328,8 @@ elif [ "$1" = "autounlock-on" ]; then
     passwordToFile
   fi
   # setting value in raspiblitz config
-  sudo sed -i \
-   "s/^${netprefix}clAutoUnlock=.*/${netprefix}clAutoUnlock=on/g" \
-   /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set ${netprefix}clAutoUnlock "on"
+
   echo "# Autounlock is on for C-lightning $CHAIN"
 
 elif [ "$1" = "autounlock-off" ]; then
@@ -358,9 +340,7 @@ elif [ "$1" = "autounlock-off" ]; then
     sudo chown bitcoin:bitcoin /dev/shm/.${netprefix}cl.pw
   fi
   # setting value in raspiblitz config
-  sudo sed -i \
-   "s/^${netprefix}clAutoUnlock=.*/${netprefix}clAutoUnlock=off/g" \
-   /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set ${netprefix}clAutoUnlock "off"
   echo "# Autounlock is off for C-lightning $CHAIN"
 
 elif [ "$1" = "change-password" ]; then

@@ -34,11 +34,6 @@ fi
 echo "making sure services are not running"
 sudo systemctl stop ${network}d 2>/dev/null
 
-# add default value to raspi config if needed
-if [ ${#networkUPnP} -eq 0 ]; then
-  echo "networkUPnP=off" >> /mnt/hdd/raspiblitz.conf
-fi
-
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "switching the NETWORK UPnP ON"
@@ -47,7 +42,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo sed -i "s/^upnp=.*/upnp=1/g" /mnt/hdd/${network}/${network}.conf
 # edit raspi blitz config
   echo "editing /mnt/hdd/raspiblitz.conf"
-  sudo sed -i "s/^networkUPnP=.*/networkUPnP=on/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set networkUPnP "on"
   # enable lnd service
   echo "OK - UPnP is now ON"
   echo "needs reboot to activate new setting"
@@ -62,7 +57,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   sudo sed -i "s/^upnp=.*/upnp=0/g" /mnt/hdd/${network}/${network}.conf
   # edit raspi blitz config
   echo "editing /mnt/hdd/raspiblitz.conf"
-  sudo sed -i "s/^networkUPnP=.*/networkUPnP=off/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set networkUPnP "off"
   # enable lnd service
   echo "OK - UPnP is now OFF"
   echo "needs reboot to activate new setting"

@@ -19,10 +19,6 @@ PGPpubkeyFingerprint="4403F1DFBE779457"
 # to know which network is running
 source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
-if [ ${#network} -eq 0 ]; then
- echo "FAIL - missing /mnt/hdd/raspiblitz.conf"
- exit 1
-fi
 
 # show info menu
 if [ "$1" = "menu" ]; then
@@ -57,11 +53,6 @@ Activate TOR to access the web interface from outside your local network.
   exit 0
 fi
 
-# add default value to raspi config if needed
-if ! grep -Eq "^thunderhub=" /mnt/hdd/raspiblitz.conf; then
-  echo "thunderhub=off" >> /mnt/hdd/raspiblitz.conf
-fi
-
 # stop services
 echo "making sure services are not running"
 sudo systemctl stop thunderhub 2>/dev/null
@@ -73,7 +64,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   isInstalled=$(sudo ls /etc/systemd/system/thunderhub.service 2>/dev/null | grep -c 'thunderhub.service')
   if ! [ ${isInstalled} -eq 0 ]; then
     echo "ThunderHub already installed."
-  else 
+  else
     ###############
     # INSTALL
     ###############
@@ -185,7 +176,7 @@ EOF
     sudo chmod 600 /mnt/hdd/app-data/thunderhub/thubConfig.yaml | exit 1
     # symlink
     sudo ln -s /mnt/hdd/app-data/thunderhub/thubConfig.yaml /home/thunderhub/
-    
+
     ##################
     # NGINX
     ##################
@@ -204,13 +195,13 @@ EOF
     sudo ln -sf /etc/nginx/sites-available/thub_tor_ssl.conf /etc/nginx/sites-enabled/
     sudo nginx -t
     sudo systemctl reload nginx
-    
+
     # open the firewall
     echo "*** Updating Firewall ***"
     sudo ufw allow from any to any port 3010 comment 'allow ThunderHub HTTP'
     sudo ufw allow from any to any port 3011 comment 'allow ThunderHub HTTPS'
     echo ""
-        
+
     ##################
     # SYSTEMD SERVICE
     ##################
@@ -247,14 +238,14 @@ WantedBy=multi-user.target
     sudo systemctl enable thunderhub
 
     # setting value in raspiblitz config
-    sudo sed -i "s/^thunderhub=.*/thunderhub=on/g" /mnt/hdd/raspiblitz.conf
+    /home/admin/config.scripts/blitz.conf.sh set thunderhub "on"
 
     # Hidden Service for thunderhub if Tor is active
     if [ "${runBehindTor}" = "on" ]; then
-      # make sure to keep in sync with internet.tor.sh script
-      /home/admin/config.scripts/internet.hiddenservice.sh thunderhub 80 3012 443 3013
+      # make sure to keep in sync with tor.network.sh script
+      /home/admin/config.scripts/tor.onion-service.sh thunderhub 80 3012 443 3013
     fi
-    source /home/admin/raspiblitz.info
+    source <(/home/admin/_cache.sh get state)
     if [ "${state}" == "ready" ]; then
       echo "# OK - the thunderhub.service is enabled, system is ready so starting service"
       sudo systemctl start thunderhub
@@ -267,7 +258,7 @@ fi
 
 # switch off
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
-  
+
   echo "*** REMOVING THUNDERHUB ***"
   # remove systemd service
   sudo systemctl disable thunderhub
@@ -290,13 +281,13 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # Hidden Service if Tor is active
   if [ "${runBehindTor}" = "on" ]; then
-    /home/admin/config.scripts/internet.hiddenservice.sh off thunderhub
+    /home/admin/config.scripts/tor.onion-service.sh off thunderhub
   fi
 
   echo "OK ThunderHub removed."
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^thunderhub=.*/thunderhub=off/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set thunderhub "off"
 
   exit 0
 fi
@@ -313,7 +304,7 @@ if [ "$1" = "update" ]; then
   UPSTREAM=${1:-'@{u}'}
   LOCAL=$(git rev-parse @)
   REMOTE=$(git rev-parse "$UPSTREAM")
-  
+
   if [ $LOCAL = $REMOTE ]; then
     TAG=$(git tag | sort -V | tail -1)
     echo "# Up-to-date on version" $TAG

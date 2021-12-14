@@ -9,11 +9,6 @@ fi
 
 source /mnt/hdd/raspiblitz.conf
 
-# add default value to raspi config if needed
-if ! grep -Eq "^typescript=" /mnt/hdd/raspiblitz.conf; then
-  echo "typescript=off" >> /mnt/hdd/raspiblitz.conf
-fi
-
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # check if typescript was installed
@@ -55,7 +50,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     fi
   fi
   # setting value in raspi blitz config
-  sudo sed -i "s/^typescript=.*/typescript=on/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set typescript "on"
   echo "Installed typescript $(node -v)"
   exit 0
 fi
@@ -63,7 +58,7 @@ fi
 # switch off
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # setting value in raspiblitz config
-  sudo sed -i "s/^typescript=.*/typescript=off/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set typescript "off"
   echo "*** REMOVING typescript ***"
   npm uninstall typescript -g
   echo "OK typescript removed."

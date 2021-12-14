@@ -10,16 +10,6 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ];then
   exit 1
 fi
 
-# add default value to raspi config if needed
-configEntry="${netprefix}feeadjuster"
-configEntryExists=$(sudo cat /mnt/hdd/raspiblitz.conf | grep -c "${configEntry}")
-if [ "${configEntryExists}" == "0" ]; then
-  echo "# adding default config entry for '${configEntry}'"
-  sudo /bin/sh -c "echo '${configEntry}=off' >> /mnt/hdd/raspiblitz.conf"
-else
-  echo "# default config entry for '${configEntry}' exists"
-fi
-
 source <(/home/admin/config.scripts/network.aliases.sh getvars cl $2)
 
 if [ "$1" = "on" ];then
@@ -37,9 +27,9 @@ if [ "$1" = "on" ];then
   fi
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^${netprefix}feeadjuster=.*/${netprefix}feeadjuster=on/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set ${netprefix}feeadjuster "on"
 
-  source /home/admin/raspiblitz.info
+  source <(/home/admin/_cache.sh get state)
   if [ "${state}" == "ready" ] && [ "$3" != "norestart" ]; then
     echo "# Start ${netprefix}${plugin}"
     $lightningcli_alias plugin start /home/bitcoin/cl-plugins-enabled/${plugin}.py
@@ -59,7 +49,7 @@ if [ "$1" = "off" ];then
   sudo sed -i "/^feeadjuster/d" ${CLCONF}
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^${netprefix}feeadjuster=.*/${netprefix}feeadjuster=off/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set ${netprefix}feeadjuster "off"
 
   echo "# The ${plugin} was uninstalled"
 fi

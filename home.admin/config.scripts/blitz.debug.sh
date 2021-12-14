@@ -7,6 +7,7 @@ source /home/admin/_version.info
 
 ## get basic info (its OK if not set yet)
 source /home/admin/raspiblitz.info 2>/dev/null
+source <(/home/admin/_cache.sh get state setupPhase)
 source /mnt/hdd/raspiblitz.conf 2>/dev/null
 
 # for old nodes
@@ -54,7 +55,6 @@ echo
 echo "*** LAST BLOCKCHAIN (MAINNET) ERROR LOGS ***"
 echo "sudo journalctl -u ${network}d -b --no-pager -n8"
 sudo journalctl -u ${network}d -b --no-pager -n8
-cat /home/admin/systemd.blockchain.log | grep "ERROR" | tail -n -2
 echo
 echo "*** LAST BLOCKCHAIN (MAINNET) 20 INFO LOGS ***"
 echo "sudo tail -n 20 /mnt/hdd/${network}/debug.log"
@@ -68,7 +68,6 @@ if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ] || [ "${lnd}" == "1" ]; t
   echo "*** LAST LND (MAINNET) ERROR LOGS ***"
   echo "sudo journalctl -u lnd -b --no-pager -n12"
   sudo journalctl -u lnd -b --no-pager -n12
-  cat /home/admin/systemd.lightning.log | grep "ERROR" | tail -n -1
   echo
   echo "*** LAST 30 LND (MAINNET) INFO LOGS ***"
   echo "sudo tail -n 30 /mnt/hdd/lnd/logs/${network}/mainnet/lnd.log"
@@ -337,19 +336,22 @@ sudo /home/admin/config.scripts/internet.sh status | grep 'network_device\|local
 echo
 
 echo "*** HARDWARE TEST RESULTS ***"
+source <(/home/admin/_cache.sh get system_count_undervoltage)
 showImproveInfo=0
-if [ ${#undervoltageReports} -gt 0 ]; then
-  echo "UndervoltageReports in Logs: ${undervoltageReports}"
-  if [ ${undervoltageReports} -gt 0 ]; then
+if [ ${#system_count_undervoltage} -gt 0 ]; then
+  echo "UndervoltageReports in Logs: ${system_count_undervoltage}"
+  if [ ${system_count_undervoltage} -gt 0 ]; then
     showImproveInfo=1
   fi
 fi
 echo
 
-echo "*** SYSTEM STATUS (can take some seconds to gather) ***"
-sudo /home/admin/config.scripts/blitz.statusscan.sh
-echo
+echo "*** SYSTEM CACHE STATUS ***"
+/home/admin/_cache.sh "export" system_
+/home/admin/_cache.sh "export" ln_default | grep -v "ln_default_address"
+/home/admin/_cache.sh "export" btc_default | grep -v "btc_default_address"
 
+echo
 echo "*** OPTION: SHARE THIS DEBUG OUTPUT ***"
 echo "An easy way to share this debug output on GitHub or on a support chat"
 echo "use the following command and share the resulting link:"

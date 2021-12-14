@@ -14,7 +14,7 @@ release()
 - Download the new SD card image to your laptop:
   https://github.com/rootzoll/raspiblitz
 - Flash that SD card image to a new SD card (best)
-  or override old SD card after shutdown (fallback) 
+  or override old SD card after shutdown (fallback)
 - Choose 'Start Update' below.
 
 No need to close channels or download blockchain again.
@@ -100,9 +100,9 @@ patchNotice()
 It means it will sync the program code with the
 GitHub repo for your version branch v${codeVersion}.
 
-This can be useful if there are important updates 
+This can be useful if there are important updates
 in between releases to fix severe bugs. It can also
-be used to sync your own code with your RaspiBlitz 
+be used to sync your own code with your RaspiBlitz
 if you are developing on your own GitHub Repo.
 
 BUT BEWARE: This means RaspiBlitz will contact GitHub,
@@ -268,7 +268,7 @@ grab the latest LND release published on the LND GitHub page (also release candi
 There will be no security checks on signature, etc.
 
 This update mode is only recommended for testing and
-development nodes with no serious funding. 
+development nodes with no serious funding.
 
 Do you really want to update LND now?
       " 16 58
@@ -337,7 +337,7 @@ grab the latest C-lightning release published on the C-lightning GitHub page (al
 There will be no security checks on signature, etc.
 
 This update mode is only recommended for testing and
-development nodes with no serious funding. 
+development nodes with no serious funding.
 
 Do you really want to update C-lightning now?
       " 16 58
@@ -404,9 +404,8 @@ Do you really want to update Bitcoin Core now?
       source <(sudo -u admin /home/admin/config.scripts/bitcoin.update.sh tested)
       if [ ${#error} -gt 0 ]; then
         whiptail --title "ERROR" --msgbox "${error}" 8 30
-      else
-        sleep 8
       fi
+      /home/admin/config.scripts/blitz.shutdown.sh reboot
       ;;
     RECKLESS)
       whiptail --title "UNTESTED Bitcoin Core update to ${bitcoinLatestVersion}" --yes-button "Cancel" \
@@ -426,12 +425,12 @@ Do you really want to update Bitcoin Core now?
       source <(sudo -u admin /home/admin/config.scripts/bitcoin.update.sh reckless)
       if [ ${#error} -gt 0 ]; then
         whiptail --title "ERROR" --msgbox "${error}" 8 30
-      else
-        sleep 8
       fi
+      /home/admin/config.scripts/blitz.shutdown.sh reboot
       ;;
     CUSTOM)
       sudo -u admin /home/admin/config.scripts/bitcoin.update.sh custom
+      /home/admin/config.scripts/blitz.shutdown.sh reboot
       ;;
   esac
 }
@@ -490,7 +489,7 @@ if [ "${runBehindTor}" == "on" ]; then
 fi
 
 CHOICE_HEIGHT=$(("${#OPTIONS[@]}/2+1"))
-HEIGHT=$((CHOICE_HEIGHT+6))  
+HEIGHT=$((CHOICE_HEIGHT+6))
 CHOICE=$(dialog --clear \
                 --backtitle "" \
                 --title " Update Options " \
@@ -536,9 +535,9 @@ case $CHOICE in
     /home/admin/config.scripts/bonus.pyblock.sh update
     ;;
   TOR)
-    sudo /home/admin/config.scripts/internet.tor.sh update  
+    sudo /home/admin/config.scripts/tor.network.sh update
     ;;
   MEMPOOL)
-    /home/admin/config.scripts/bonus.mempool.sh update 
+    /home/admin/config.scripts/bonus.mempool.sh update
     ;;
 esac

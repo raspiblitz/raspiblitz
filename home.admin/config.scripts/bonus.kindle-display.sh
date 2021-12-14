@@ -21,6 +21,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
 fi
 
 source /home/admin/raspiblitz.info
+source <(/home/admin/_cache.sh get state)
 
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
@@ -164,7 +165,7 @@ PATH=/bin:/usr/bin:/usr/local/bin
     echo "Switch to the '$USERNAME' user and adapt the settings in $CONFIG_FILE"
 
     # setting value in raspi blitz config
-    grep -q '^kindleDisplay' $RASPIBLITZ_FILE && sudo sed -i "s/^kindleDisplay=.*/kindleDisplay=on/g" $RASPIBLITZ_FILE || echo 'kindleDisplay=on' >> $RASPIBLITZ_FILE
+    /home/admin/config.scripts/blitz.conf.sh set kindleDisplay "on"
   else
     echo "KINDLE-DISPLAY already installed."
   fi
@@ -181,7 +182,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     echo "*** REMOVING KINDLE-DISPLAY ***"
 
     # setting value in raspi blitz config
-    sudo sed -i "s/^kindleDisplay=.*/kindleDisplay=off/g" $RASPIBLITZ_FILE
+    /home/admin/config.scripts/blitz.conf.sh set kindleDisplay "off"
 
     # uninstall service
     sudo systemctl stop kindle-display
