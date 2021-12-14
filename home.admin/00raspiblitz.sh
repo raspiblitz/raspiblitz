@@ -91,8 +91,8 @@ trap quit TERM
 
 echo "# start ssh menu loop"
 # put some values on higher scan rate for 10 minute
-/home/admin/_cache.sh focus ln_default_locked 2 600
-/home/admin/_cache.sh focus btc_default_synced 2 600
+/home/admin/_cache.sh focus ln_default_locked 2 600 >/dev/null
+/home/admin/_cache.sh focus btc_default_synced 2 600 >/dev/null
 
 echo "# starting ssh menu loop ... "
 exitMenuLoop=0
