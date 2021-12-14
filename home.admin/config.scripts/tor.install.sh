@@ -23,7 +23,7 @@ usage(){
 hdd_path="/mnt/hdd"
 download_dir="/home/admin/download"
 tor_data_dir="${hdd_path}/tor"
-tor_conf_dir="${hdd_path}/app-data/tor/"
+tor_conf_dir="${hdd_path}/app-data/tor"
 torrc="/etc/tor/torrc"
 torrc_bridges="${tor_conf_dir}/torrc.d/bridges"
 torrc_services="${tor_conf_dir}/torrc.d/services"
