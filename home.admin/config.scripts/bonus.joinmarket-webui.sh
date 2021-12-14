@@ -138,8 +138,6 @@ Group=joinmarket
 Restart=always
 TimeoutSec=120
 RestartSec=30
-StandardOutput=null
-StandardError=journal
 
 # Hardening measures
 PrivateTmp=true
