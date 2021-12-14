@@ -385,9 +385,9 @@ if [ "$1" = "display-seed" ]; then
 
   # check if seedword file exists
   seedwordFile="/mnt/hdd/lnd/data/chain/${network}/${CHAIN}/seedwords.info"
-  echo "# seewordFile(${seedwordFile})"
+  echo "# seedwordFile(${seedwordFile})"
   seedwordFileExists=$(ls ${seedwordFile} 2>/dev/null | grep -c "seedwords.info")
-  echo "# seewordFileExists(${seedwordFileExists})"
+  echo "# seedwordFileExists(${seedwordFileExists})"
   if [ "${seedwordFileExists}" == "1" ]; then
     source ${seedwordFile}
   fi

@@ -940,7 +940,7 @@ Opens an ad-hoc web server so that you can download the files in your local netw
 Remember with the Admin-Macaroon somebody could take over your node and spend all your funds.
 Just use as last fallback.*
 
-####### Hex-String
+###### Hex-String
 
 The Macaroons and TLS.cert files can be copy+pasted as Hex-Strings from RaspiBlitz to any other app that supports that format.
 If you choose this option, RaspiBlitz will print all the files for you as Hex-String to do so.
