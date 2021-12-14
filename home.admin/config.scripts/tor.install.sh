@@ -173,12 +173,6 @@ if [ "${action}" = "enable" ]; then
 
   echo -e "\n*** Enable Tor Service ***"
 
-  # check if tor@default is already running
-  if [ $(sudo systemctl status tor@default | grep -c "Active: active") -gt 0 ]; then
-    echo "# WARN: tor@default already enabled"
-    exit 1
-  fi
-
   # check if HDD/SSD is available
   if [ $(sudo df | grep -c "${hdd_path}") -lt 1 ]; then
     echo "# FAIL: '${hdd_path}' needs to be mounted to enable Tor"
