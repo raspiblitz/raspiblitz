@@ -534,7 +534,7 @@ if [ ${isMounted} -eq 0 ]; then
   fi
 
   # enable tor service
-  sudo /home/admin/config.scripts/tor.install.sh enable
+  sudo /home/admin/config.scripts/tor.install.sh enable >> ${logFile}
 
   # kick-off provision process
   /home/admin/_cache.sh set state "provision"

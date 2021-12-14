@@ -196,9 +196,19 @@ if [ "${action}" = "enable" ]; then
   sudo chown -Rv root:root "${tor_conf_dir}"
 
   # create tor config if not existent
-  sudo grep -q "raspiblitz" ${torrc} || configure_default_torrc
-  sudo grep -q "Bridge" ${torrc_bridges} || configure_bridges_torrc
-
+  if [ $(sudo grep -c "raspiblitz" ${torrc}) -lt 1 ]; then
+    echo "- ${torrc} will get edited"
+    configure_default_torrc
+  else
+    echo "- ${torrc} already edited"
+  fi
+  if [ $(sudo grep -c "Bridge" ${torrc_bridges}) -lt 1 ]; then
+    echo "- ${torrc_bridges} will get edited"
+    configure_bridges_torrc
+  else
+    echo "- ${torrc_bridges} already edited"
+  fi
+  
   # edit tor services
   sudo sed -i "s/^NoNewPrivileges=yes/NoNewPrivileges=no/g" /lib/systemd/system/tor@default.service
   sudo sed -i "s/^NoNewPrivileges=yes/NoNewPrivileges=no/g" /lib/systemd/system/tor@.service
