@@ -393,7 +393,7 @@ if [ "$1" = "display-seed" ]; then
   seedwordFile="/home/bitcoin/.lightning/${CLNETWORK}/seedwords.info"
   echo "# seedwordFile(${seedwordFile})"
   seedwordFileExists=$(ls ${seedwordFile} 2>/dev/null | grep -c "seedwords.info")
-  echo "# seedwordFileExists(${seewordFileExists})"
+  echo "# seedwordFileExists(${seedwordFileExists})"
   if [ "${seedwordFileExists}" == "1" ]; then
     source ${seedwordFile}
     #echo "# seedwords(${seedwords})"
