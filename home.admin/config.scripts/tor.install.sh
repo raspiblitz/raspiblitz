@@ -183,7 +183,7 @@ if [ "${action}" = "enable" ]; then
   echo -e "*** Create directories and set permissions ***"
   sudo mkdir -pv "${tor_conf_dir}"/torrc.d "${tor_data_dir}"/sys/keys "${tor_data_dir}"/services "${tor_data_dir}"/onion_auth
   sudo chmod -v 700 "${tor_data_dir}"
-  sudo chmod -v 755 "${tor_conf_dir}""${tor_conf_dir}"/torrc.d
+  sudo chmod -v 755 "${tor_conf_dir}" "${tor_conf_dir}"/torrc.d
   sudo chmod -v 644 "${torrc}" "${tor_conf_dir}"/torrc.d/*
   # make sure its the correct owner
   sudo chown -Rv debian-tor:debian-tor "${tor_data_dir}"
