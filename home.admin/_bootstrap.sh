@@ -187,7 +187,7 @@ do
   sleep 2
 
 done
-echo "HDD/SSD connected: ${$hddCandidate}" >> $logFile
+echo "HDD/SSD connected: ${hddCandidate}" >> $logFile
 
 # write info for LCD
 /home/admin/_cache.sh set state "system-init"
