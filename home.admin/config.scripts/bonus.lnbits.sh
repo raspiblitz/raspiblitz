@@ -456,7 +456,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   cd /home/lnbits
   sudo -u lnbits git clone https://github.com/${githubUser}/lnbits-legend lnbits
   cd /home/lnbits/lnbits
-  sudo -u lnbits git checkout ${githubBranch}
+  #sudo -u lnbits git checkout ${githubBranch}
 
   # prepare .env file
   echo "# preparing env file"
