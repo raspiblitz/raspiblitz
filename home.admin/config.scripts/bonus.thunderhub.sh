@@ -326,6 +326,7 @@ if [ "$1" = "update" ]; then
     fi
 
     # opt out of telemetry 
+    echo "# opt out of telemetry .. "
     sudo -u thunderhub npx next telemetry disable
 
     # build nextjs
