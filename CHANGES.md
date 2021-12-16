@@ -4,6 +4,7 @@
 
 - Security: Verify git commits and tags everywhere possible [issue](https://github.com/rootzoll/raspiblitz/issues/2686)
 - New: Compact the LND channel.db on-demand from REPAIR and before backups [issue](https://github.com/rootzoll/raspiblitz/issues/2752)
+- New: Switch LNbits between lnd & c-lightning [issue](https://github.com/rootzoll/raspiblitz/issues/2556)
 - Update: LND v0.14.1-beta [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.14.1-beta)
 - Update: C-lightning v0.10.2 [details](https://github.com/ElementsProject/lightning/releases/tag/v0.10.2)
 - Update: Lightning Terminal v0.6.1-alpha with Lightning Node Connect over Tor [details](https://github.com/lightninglabs/lightning-terminal/releases/tag/v0.6.1-alpha)
