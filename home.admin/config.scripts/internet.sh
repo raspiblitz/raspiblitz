@@ -122,7 +122,7 @@ if [ ${runOnline} -eq 1 ]; then
   # next try if tor test site can be called
   if [ ${online} -eq 0 ]; then
     torFunctional="0"
-    source <(timeout 5 /home/admin/config.scripts/internet.tor.sh status)
+    source <(timeout 5 /home/admin/config.scripts/tor.network.sh status)
     if [ "${torFunctional}" == "1" ]; then
       # tor delivers content
       online=1
