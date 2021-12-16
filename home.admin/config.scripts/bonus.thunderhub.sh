@@ -86,6 +86,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
      "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
 
     echo "Running npm install ..."
+    sudo rm -r /home/thunderhub/thunderhub/node_modules 2>/dev/null
     if ! sudo -u thunderhub npm install; then
       echo "FAIL - npm install did not run correctly, aborting"
       exit 1
