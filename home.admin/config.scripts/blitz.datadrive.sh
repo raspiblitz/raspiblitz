@@ -240,7 +240,7 @@ if [ "$1" = "status" ]; then
             cp /mnt/hdd${subVolumeDir}/app-data/wpa_supplicant.conf /var/cache/raspiblitz/hdd-inspect/wpa_supplicant.conf 2>/dev/null
 
             # make copy of SSH keys to RAMDISK (if available)
-            cp /mnt/hdd${subVolumeDir}/ssh /var/cache/raspiblitz/hdd-inspect/ssh 2>/dev/null
+            cp -r /mnt/hdd${subVolumeDir}/ssh /var/cache/raspiblitz/hdd-inspect/ssh 2>/dev/null
 
           fi
         
