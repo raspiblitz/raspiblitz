@@ -318,14 +318,15 @@ if [ "$1" = "update" ]; then
      "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
 
     # install deps
-    # opt out of telemetry 
-    sudo -u thunderhub npx next telemetry disable
     echo "# Installing dependencies..."
-    sudo -u thunderhub npm install --quiet
+    sudo -u thunderhub npm install --quiet --yes
     if ! [ $? -eq 0 ]; then
         echo "# FAIL - npm install did not run correctly, aborting"
         exit 1
     fi
+
+    # opt out of telemetry 
+    sudo -u thunderhub npx next telemetry disable
 
     # build nextjs
     echo "# Building application..."
