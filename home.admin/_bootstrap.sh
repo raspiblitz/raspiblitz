@@ -517,7 +517,7 @@ if [ ${isMounted} -eq 0 ]; then
   echo "Temp mounting (2) result: ${isMounted}" >> ${logFile}
 
   # check that HDD was temp mounted
-  if [ "${isMounted}" != "1"]; then
+  if [ "${isMounted}" != "1" ]; then
     sed -i "s/^state=.*/state=errorHDD/g" ${infoFile}
     sed -i "s/^message=.*/message='Was not able to mount HDD (2)'/g" ${infoFile}
     exit 1
