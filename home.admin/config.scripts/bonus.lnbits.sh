@@ -444,8 +444,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   if [ "$3" != "" ]; then
     githubUser="$3"
   fi
-  githubBranch="tags/raspiblitz"
-  #githubBranch="f6bcff01f4b62ca26177f22bd2d479b01d371406"
+  #githubBranch="tags/raspiblitz"
+  githubBranch="ec874baa6b4ea3d6ec039c9bd71b9c73a899a737" #commit 5. December 2021
   if [ "$4" != "" ]; then
     githubBranch="$4"
   fi
@@ -456,7 +456,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   cd /home/lnbits
   sudo -u lnbits git clone https://github.com/${githubUser}/lnbits-legend lnbits
   cd /home/lnbits/lnbits
-  #sudo -u lnbits git checkout ${githubBranch}
+  sudo -u lnbits git checkout ${githubBranch}
 
   # prepare .env file
   echo "# preparing env file"
