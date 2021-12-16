@@ -85,14 +85,16 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u thunderhub /home/admin/config.scripts/blitz.git-verify.sh \
      "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
 
-    # opt out of telemetry 
-    sudo -u thunderhub npx next telemetry disable
-    echo "Running npm install and run build..."
+    echo "Running npm install ..."
     if ! sudo -u thunderhub npm install; then
       echo "FAIL - npm install did not run correctly, aborting"
       exit 1
     fi
 
+    echo "# opt out of telemetry ..."
+    sudo -u thunderhub npx next telemetry disable
+
+    echo "# run build ..."
     sudo -u thunderhub npm run build
 
     ###############
