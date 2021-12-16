@@ -613,7 +613,7 @@ def menuMakeSubscription(blitzServiceName, torAddress, torPort):
         d = Dialog(dialog="dialog", autowidgetsize=True)
         d.set_background_title("Select IP2TOR Bridge Shop (communication secured thru TOR)")
         code, text = d.inputbox(
-            "Enter Address of a IP2TOR Shop (OR JUST USE DEFAULT):",
+            "Enter Address of the IP2TOR Shop (OR JUST PRESS OK):",
             height=10, width=72, init=shopurl,
             title="Shop Address")
 
@@ -1079,6 +1079,7 @@ def subscription_by_service():
             subs = toml.load(SUBSCRIPTIONS_FILE)
             for idx, sub in enumerate(subs['subscriptions_ip2tor']):
                 if sub['active'] and sub['name'] == service_name:
+                    print("id='{0}'".format(sub['id']))
                     print("type='{0}'".format(sub['type']))
                     print("ip='{0}'".format(sub['ip']))
                     print("port='{0}'".format(sub['port']))
