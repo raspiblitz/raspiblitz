@@ -347,8 +347,8 @@ if [ "$1" = "status" ]; then
     isSSD=$(sudo cat /sys/block/${hdd}/queue/rotational 2>/dev/null | grep -c 0)
     echo "isSSD=${isSSD}"
 
-    echo "datadisk='${hdd}'"
-    echo "datapartition='${hddDataPartition}'"
+    echo "hddCandidate='${hdd}'"
+    echo "hddPartitionCandidate='${hddDataPartition}'"
 
     # check if blockchain data is available
     hddBlocksBitcoin=$(sudo ls /mnt/hdd/bitcoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
