@@ -4,7 +4,7 @@ RTLVERSION="v0.11.2"
 
 # check and load raspiblitz config
 # to know which network is running
-source /home/admin/raspiblitz.info
+source /mnt/hdd/raspiblitz.conf
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
