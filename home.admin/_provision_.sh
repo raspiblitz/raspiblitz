@@ -316,7 +316,7 @@ fi
 if [ "${runBehindTor}" == "on" ]; then
     echo "Provisioning TOR - run config script" >> ${logFile}
     /home/admin/_cache.sh set message "Setup Tor (takes time)"
-    sudo /home/admin/config.scripts/internet.tor.sh on >> ${logFile} 2>&1
+    sudo /home/admin/config.scripts/tor.network.sh on >> ${logFile} 2>&1
 else
     echo "Provisioning Tor - keep default" >> ${logFile}
 fi
