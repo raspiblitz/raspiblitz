@@ -191,7 +191,9 @@ if [ "$1" = "repo" ]; then
   fi
 
   # check if repo exists
-  githubRepo="https://github.com/${githubUser}/lnbits"
+  #githubRepo="https://github.com/${githubUser}/lnbits"
+  githubRepo="https://github.com/${githubUser}/lnbits-legend"
+  
   httpcode=$(curl -s -o /dev/null -w "%{http_code}" ${githubRepo})
   if [ "${httpcode}" != "200" ]; then
     echo "# tested github repo: ${githubRepo}"
@@ -256,9 +258,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "# get the github code user(${githubUser}) branch(${githubBranch})"
     sudo rm -r /home/lnbits/lnbits 2>/dev/null
     cd /home/lnbits
-    sudo -u lnbits git clone https://github.com/${githubUser}/lnbits.git
+    sudo -u lnbits git clone https://github.com/${githubUser}/lnbits-legend
     cd /home/lnbits/lnbits
-    sudo -u lnbits git checkout ${githubBranch}
+    # sudo -u lnbits git checkout ${githubBranch}
 
     # prepare .env file
     echo "# preparing env file"
