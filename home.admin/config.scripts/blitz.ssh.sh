@@ -141,7 +141,7 @@ if [ "$1" = "restore" ]; then
     if [ -d "${DEFAULTBACKUPBASEDIR}/sshd" ] && [ -d "${DEFAULTBACKUPBASEDIR}/root_backup" ]; then
 
       # restore sshd host keys
-      sudo rm -r /etc/ssh
+      sudo rm -r /etc/ssh/*
       sudo cp -a $DEFAULTBACKUPBASEDIR/sshd/* /etc/ssh/
       sudo chown -R root:root /etc/ssh
       sudo dpkg-reconfigure openssh-server
