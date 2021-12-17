@@ -12,7 +12,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ];
   exit 1
 fi
 
-DEFAULTBACKUPBASEDIR="/mnt/hdd" # compiles to /mnt/hdd/ssh
+DEFAULTBACKUPBASEDIR="/mnt/hdd/ssh"
 
 # check if started with sudo
 if [ "$EUID" -ne 0 ]; then 
