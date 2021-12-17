@@ -16,6 +16,7 @@
 - Update: BTC-RPC-Explorer v3.3.0 [details](https://github.com/janoside/btc-rpc-explorer/blob/master/CHANGELOG.md#v330)
 - Update: C-lightningREST v0.5.2 [details](https://github.com/Ride-The-Lightning/c-lightning-REST/releases/tag/v0.5.2)
 - Update: Specter Desktop 1.7.2 [details](https://github.com/cryptoadvance/specter-desktop/releases/tag/v1.7.2)
+- Upadte: PyBlock to 1.1.8.5 (adapt to new install mechanism)
 - Update: Re-Add connecting node with Zap mobile wallet iOS & Android
 
 ## What's new in Version 1.7.1 of RaspiBlitz?
