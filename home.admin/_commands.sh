@@ -241,11 +241,8 @@ function bos() {
 # switch to the pyblock user for PyBLOCK
 function pyblock() {
   if [ $(grep -c "pyblock=on" < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
-    echo "# switching to the pyblock user with the command: 'sudo su - pyblock'"
-    echo "# use command 'exit' and then 'raspiblitz' to return to menu"
-    echo "# use command 'pyblock' again to start"
-    sudo su - pyblock
-    echo "# use command 'raspiblitz' to return to menu"
+    cd /home/pyblock
+    sudo -u pyblock /home/pyblock/.local/bin/pyblock
   else
     echo "PyBlock is not installed - to install run:"
     echo "/home/admin/config.scripts/bonus.pyblock.sh on"

@@ -476,10 +476,6 @@ if [ "${sphinxrelay}" == "on" ]; then
   OPTIONS+=(SPHINX "Update Sphinx Server Relay")
 fi
 
-if [ "${pyblock}" == "on" ]; then
-  OPTIONS+=(PYBLOCK "Update PyBLOCK")
-fi
-
 if [ "${mempoolExplorer}" == "on" ]; then
   OPTIONS+=(MEMPOOL "Update Mempool Explorer")
 fi
@@ -530,9 +526,6 @@ case $CHOICE in
     ;;
   SPHINX)
     /home/admin/config.scripts/bonus.sphinxrelay.sh update
-    ;;
-  PYBLOCK)
-    /home/admin/config.scripts/bonus.pyblock.sh update
     ;;
   TOR)
     sudo /home/admin/config.scripts/tor.network.sh update
