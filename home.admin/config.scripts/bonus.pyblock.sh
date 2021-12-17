@@ -32,9 +32,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # create pyblock user
   sudo adduser --disabled-password --gecos "" pyblock
   cd /home/pyblock
+  sudo -u pyblock mkdir /home/pyblock/config
 
   # install via pip
-  sudo -u pyblock pip3 install pybitblock
+  sudo -u pyblock pip3 install hexyl pybitblock 
 
   # set PATH for the user
   sudo bash -c "echo 'PATH=\$PATH:/home/pyblock/.local/bin/' >> /home/pyblock/.profile"
@@ -55,13 +56,13 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   ## Create conf
   # from xxd -p bclock.conf | tr -d '\n'
   echo 80037d710028580700000069705f706f727471015807000000687474703a2f2f710258070000007270637573657271035800000000710458070000007270637061737371056804580a000000626974636f696e636c697106581a0000002f7573722f6c6f63616c2f62696e2f626974636f696e2d636c697107752e0a | xxd -r -p -  ~/bclock.conf
-  sudo mv ~/bclock.conf /home/pyblock/bclock.conf
-  sudo chown pyblock:pyblock /home/pyblock/bclock.conf
+  sudo mv ~/bclock.conf /home/pyblock/config/bclock.conf
+  sudo chown pyblock:pyblock /home/pyblock/config/bclock.conf
 
   # from xxd -p blndconnect.conf | tr -d '\n'
   echo 80037d710028580700000069705f706f72747101580000000071025803000000746c737103680258080000006d616361726f6f6e7104680258020000006c6e710558140000002f7573722f6c6f63616c2f62696e2f6c6e636c697106752e0a | xxd -r -p -  ~/blndconnect.conf
-  sudo mv ~/blndconnect.conf /home/pyblock/blndconnect.conf
-  sudo chown pyblock:pyblock /home/pyblock/blndconnect.conf
+  sudo mv ~/blndconnect.conf /home/pyblock/config/blndconnect.conf
+  sudo chown pyblock:pyblock /home/pyblock/config/blndconnect.conf
 
   # setting value in raspi blitz config
   /home/admin/config.scripts/blitz.conf.sh set pyblock "on"

@@ -241,6 +241,7 @@ function bos() {
 # switch to the pyblock user for PyBLOCK
 function pyblock() {
   if [ $(grep -c "pyblock=on" < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
+    cd /home/pyblock
     sudo -u pyblock /home/pyblock/.local/bin/pyblock
   else
     echo "PyBlock is not installed - to install run:"
