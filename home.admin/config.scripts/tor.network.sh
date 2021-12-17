@@ -16,9 +16,6 @@ usage(){
  exit 1
 }
 
-# add default value to raspi config if needed
-sudo grep -q "runBehindTor" /mnt/hdd/raspiblitz.conf || { echo "runBehindTor=off" | sudo tee -a /mnt/hdd/raspiblitz.conf; }
-
 activateBitcoinOverTor()
 {
   echo "*** Changing ${network} Config ***"
@@ -80,6 +77,9 @@ curl --socks5 127.0.0.1:9050 --socks5-hostname 127.0.0.1:9050 -m 5 -s https://ch
 case "$1" in
 
   status)
+    if [ "${runBehindTor}" = "" ]; then
+      runBehindTor="off"
+    fi
     echo "torEnabled=${runBehindTor}"
     echo "torActive=${torActive}"
     echo "torFunctional=${torFunctional}"
@@ -105,7 +105,7 @@ case "$1" in
     fi
 
     # setting value in raspi blitz config
-    sudo sed -i "s/^runBehindTor=.*/runBehindTor=on/g" /mnt/hdd/raspiblitz.conf
+    /home/admin/config.scripts/blitz.conf.sh set runBehindTor "on"
 
     # ACTIVATE BITCOIN OVER TOR (function call)
     activateBitcoinOverTor
@@ -160,7 +160,7 @@ EOF
     echo "# switching Tor OFF"
 
     # setting value in raspi blitz config
-    sudo sed -i "s/^runBehindTor=.*/runBehindTor=off/g" /mnt/hdd/raspiblitz.conf
+    /home/admin/config.scripts/blitz.conf.sh set runBehindTor "off"
 
     # deactivate bitcoin over tor (function call)
     deactivateBitcoinOverTor

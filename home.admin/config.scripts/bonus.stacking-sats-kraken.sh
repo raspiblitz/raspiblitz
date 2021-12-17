@@ -6,7 +6,6 @@ USERNAME=stackingsats
 APP_DATA_DIR=/mnt/hdd/app-data/stacking-sats-kraken
 HOME_DIR=/home/$USERNAME
 CONFIG_FILE=$APP_DATA_DIR/.env
-RASPIBLITZ_FILE=/mnt/hdd/raspiblitz.conf
 SCRIPT_DIR=$HOME_DIR/stacking-sats-kraken
 SCRIPT_NAME=stacksats.sh
 SCRIPT_VERSION=0.4.4

@@ -48,11 +48,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo sed -i "s/^WALL=.*/#WALL=wall/g" /etc/apcupsd/apccontrol
     sudo systemctl enable apcupsd
     sudo systemctl start apcupsd
-
-    # add default 'ups' raspiblitz.conf if needed
-    if [ ${#ups} -eq 0 ]; then
-      echo "ups=on" >> /mnt/hdd/raspiblitz.conf
-    fi
     
     # set ups config value (in case of update)
     /home/admin/config.scripts/blitz.conf.sh set ups "apcusb"
