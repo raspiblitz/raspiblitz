@@ -216,7 +216,7 @@ do
   recheckSync=$(($counter % 60))
   if [ ${recheckSync} -eq 1 ] && [ "${chain}" == "main" ]; then
     source <(/home/admin/config.scripts/bitcoin.monitor.sh mainnet network)
-    echo "Blockchain Sync Monitoring: peers=${peers}"
+    echo "Blockchain Sync Monitoring: peers=${btc_peers}"
     if [ "${btc_peers}" == "0" ] && [ "${btc_running}" == "1" ]; then
       echo "Blockchain Sync Monitoring: ZERO PEERS DETECTED .. doing out-of-band kickstart"
       /home/admin/config.scripts/bitcoin.monitor.sh mainnet peer-kickstart
