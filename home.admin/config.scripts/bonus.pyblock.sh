@@ -34,8 +34,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   cd /home/pyblock
   sudo -u pyblock mkdir /home/pyblock/config
 
+  # install hexyl
+  sudo apt-get install hexyl
+
   # install via pip
-  sudo -u pyblock pip3 install hexyl pybitblock 
+  sudo -u pyblock pip3 install pybitblock 
 
   # set PATH for the user
   sudo bash -c "echo 'PATH=\$PATH:/home/pyblock/.local/bin/' >> /home/pyblock/.profile"
