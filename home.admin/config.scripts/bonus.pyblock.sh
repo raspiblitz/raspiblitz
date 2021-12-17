@@ -35,7 +35,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo -u pyblock mkdir /home/pyblock/config
 
   # install hexyl
-  sudo apt-get install hexyl
+  sudo apt-get install hexyl html2text
 
   # install via pip
   sudo -u pyblock pip3 install pybitblock 
