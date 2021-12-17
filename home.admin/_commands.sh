@@ -26,12 +26,15 @@ function blitzhelp() {
   echo "  bash         menu"
   echo "  repair       menu > repair"
   echo
+  echo "Debug:"
+  echo "  debug        print debug logs"
+  echo "  debug -l     print debug logs with bin link with tor by default"
+  echo "  debug -l -n  print debug logs with bin link without tor"
+  echo
   echo "Checks:"
   echo "  status       informational Blitz status screen"
   echo "  sourcemode   copy blockchain source modus"
   echo "  check        check if Blitz configuration files are correct"
-  echo "  debug        print debug logs"
-  echo "  debug   -l   print debug logs with bin link"
   echo "  patch        sync scripts with latest set github and branch"
   echo "  cache        check on chache system state"
   echo "  github       jumping directly into the options to change branch/repo/pr"
@@ -111,10 +114,13 @@ function release() {
 # command: debug
 function debug() {
   echo "Printing debug logs. Be patient, this should take maximum 2 minutes ..."
-  if [[ $1 = "-l" ]]; then
-    /home/admin/config.scripts/blitz.debug.sh > /var/cache/raspiblitz/debug.log && cat /var/cache/raspiblitz/debug.log | torsocks nc termbin.com 9999
+  /home/admin/config.scripts/blitz.debug.sh > /var/cache/raspiblitz/debug.log
+  if [ "$1" = "-l" ]||[ "$1" = "--link" ]; then
+    proxy="-X 5 -x localhost:9050"
+    if [ "$2" = "-n" ]||[ "$2" = "--no-tor" ]; then proxy=""; fi
+    cat /var/cache/raspiblitz/debug.log | nc ${proxy} termbin.com 9999 | sed "s/termbin.com/l.termbin.com/"
   else
-    /home/admin/config.scripts/blitz.debug.sh > /var/cache/raspiblitz/debug.log && cat /var/cache/raspiblitz/debug.log
+    cat /var/cache/raspiblitz/debug.log
   fi
 }
 
@@ -180,7 +186,7 @@ function status() {
   echo
   echo "Keep X pressed to EXIT loop ... (please wait)"
   echo
-  /home/admin/_cache.sh set system_scan_all_temp "1" 
+  /home/admin/_cache.sh set system_scan_all_temp "1"
   sleep 4
   while :
   do
