@@ -763,7 +763,7 @@ To build a SD card image from another branch than master, you follow the [Build 
 
 For example if you want to make a build from the 'dev' branch you execute the following command:
 
-`wget --no-cache https://raw.githubusercontent.com/rootzoll/raspiblitz/dev/build_sdcard.sh && sudo bash build_sdcard.sh false false rootzoll dev lcd true true`
+`wget --no-cache https://raw.githubusercontent.com/rootzoll/raspiblitz/dev/build_sdcard.sh && sudo bash build_sdcard.sh false true rootzoll dev lcd true true`
 
 ### How can I build an SD card from my forked GitHub Repo?
 
