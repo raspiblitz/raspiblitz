@@ -354,6 +354,8 @@ echo "*** SYSTEM CACHE STATUS ***"
 echo
 echo "*** OPTION: SHARE THIS DEBUG OUTPUT ***"
 echo "An easy way to share this debug output on GitHub or on a support chat"
-echo "use the following command and share the resulting link:"
-echo "debug | torsocks nc termbin.com 9999"
+echo "Use the following command and share the resulting link using termbin.com service and tor proxy:"
+echo " debug -l"
+echo "If tor is failing and you don't mind leaking your ip address to the termbin service, use without tor:"
+echo " debug -l -n"
 echo
