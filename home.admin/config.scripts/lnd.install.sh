@@ -1,5 +1,26 @@
 #!/bin/bash
 
+# "*** LND ***"
+## based on https://raspibolt.github.io/raspibolt/raspibolt_40_lnd.html#lightning-lnd
+## see LND releases: https://github.com/lightningnetwork/lnd/releases
+## !!!! If you change here - make sure to also change interims version in lnd.update.sh !!!
+lndVersion="0.14.1-beta"
+
+# olaoluwa
+# PGPauthor="roasbeef"
+# PGPpkeys="https://keybase.io/roasbeef/pgp_keys.asc"
+# PGPcheck="E4D85299674B2D31FAA1892E372CBD7633C61696"
+
+# guggero
+PGPauthor="guggero"
+PGPpkeys="https://keybase.io/guggero/pgp_keys.asc"
+PGPcheck="F4FC70F07310028424EFC20A8E4256593F177720"
+
+# bitconner
+#PGPauthor="bitconner"
+#PGPpkeys="https://keybase.io/bitconner/pgp_keys.asc"
+#PGPcheck="9C8D61868A7C492003B2744EE7D737B67FA592C7"
+
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ];then
   echo
@@ -18,28 +39,16 @@ if [ "${network}" == "" ]; then
 fi
 
 if [ "$1" = "install" ] ; then
-  echo "*** PREPARING LND ***"
-  
-  # "*** LND ***"
-  ## based on https://raspibolt.github.io/raspibolt/raspibolt_40_lnd.html#lightning-lnd
-  ## see LND releases: https://github.com/lightningnetwork/lnd/releases
-  ## !!!! If you change here - make sure to also change interims version in lnd.update.sh !!!
-  lndVersion="0.14.1-beta"
 
-  # olaoluwa
-  # PGPauthor="roasbeef"
-  # PGPpkeys="https://keybase.io/roasbeef/pgp_keys.asc"
-  # PGPcheck="E4D85299674B2D31FAA1892E372CBD7633C61696"
+  echo "# *** INSTALL LND ${lndVersion} BINARY ***"
+  echo "# only binary install to system"
+  echo "# no configuration, no systemd service"
 
-  # guggero
-  PGPauthor="guggero"
-  PGPpkeys="https://keybase.io/guggero/pgp_keys.asc"
-  PGPcheck="F4FC70F07310028424EFC20A8E4256593F177720"
-
-  # bitconner
-  #PGPauthor="bitconner"
-  #PGPpkeys="https://keybase.io/bitconner/pgp_keys.asc"
-  #PGPcheck="9C8D61868A7C492003B2744EE7D737B67FA592C7"
+  # check if lnd binary is already installed
+  if [ $(sudo -u admin lnd --version 2>/dev/null| grep -c 'lnd') -gt 0 ]; then
+    echo "lnd binary already installed - done"
+    exit 1
+  fi
   
   # get LND resources
   cd /home/admin/download || exit 1
@@ -212,6 +221,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     initwallet=1
     echo "# OK will init wallet if not exists (may ask for passwordc)"
   fi
+
+  # make sure binary is installed (will skip if already done)
+  /home/admin/config.scripts/lnd.install.sh install
 
   sudo ufw allow ${portprefix}9735 comment "${netprefix}lnd"
   sudo ufw allow ${portprefix}8080 comment "${netprefix}lnd REST"

@@ -98,11 +98,13 @@ fi
 if [ "$2" = "network" ]; then
 
   # get data
+  btc_running=$(systemctl status $service_alias 2>/dev/null | grep -c "active (running)")
   getnetworkinfo=$($bitcoincli_alias getnetworkinfo 2>/dev/null)
   if [ "${getnetworkinfo}" == "" ]; then
     echo "error='no data'"
     exit 1
   fi
+   
 
   # parse data
   btc_peers=$(echo "${getnetworkinfo}" | grep "connections\"" | tr -cd '[[:digit:]]')
@@ -110,6 +112,7 @@ if [ "$2" = "network" ]; then
   btc_port=$(echo "${getnetworkinfo}" | jq -r '.localaddresses [0] .port')
 
   # print data
+  echo "btc_running='${btc_running}'"
   echo "btc_peers='${btc_peers}'"
   echo "btc_address='${btc_address}'"
   echo "btc_port='${btc_port}'"

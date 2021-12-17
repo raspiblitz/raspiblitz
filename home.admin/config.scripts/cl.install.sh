@@ -8,6 +8,15 @@ CLVERSION=v0.10.2
 # https://github.com/ElementsProject/lightning/commit/master
 # CLVERSION="063366ed7e3b7cc12a8d1681acc2b639cf07fa23"
 
+# https://github.com/ElementsProject/lightning/tree/master/contrib/keys
+# PGPsigner="rustyrussel"
+# PGPpkeys="https://raw.githubusercontent.com/ElementsProject/lightning/master/contrib/keys/rustyrussell.txt"
+# PGPcheck="D9200E6CD1ADB8F1"
+
+PGPsigner="cdecker"
+PGPpkeys="https://raw.githubusercontent.com/ElementsProject/lightning/master/contrib/keys/cdecker.txt"
+PGPcheck="A26D6D9FE088ED58"
+
 # help
 if [ $# -eq 0 ]||[ "$1" = "-h" ]||[ "$1" = "--help" ];then
   echo
@@ -26,16 +35,16 @@ if [ $# -eq 0 ]||[ "$1" = "-h" ]||[ "$1" = "--help" ];then
 fi
 
 if [ "$1" = "install" ]; then
-  echo "*** PREPARING C-LIGHTNING ***"
   
-  # https://github.com/ElementsProject/lightning/tree/master/contrib/keys
-  # PGPsigner="rustyrussel"
-  # PGPpkeys="https://raw.githubusercontent.com/ElementsProject/lightning/master/contrib/keys/rustyrussell.txt"
-  # PGPcheck="D9200E6CD1ADB8F1"
+  echo "# *** INSTALL C-LIGHTNING ${CLVERSION} BINARY ***"
+  echo "# only binary install to system"
+  echo "# no configuration, no systemd service"
 
-  PGPsigner="cdecker"
-  PGPpkeys="https://raw.githubusercontent.com/ElementsProject/lightning/master/contrib/keys/cdecker.txt"
-  PGPcheck="A26D6D9FE088ED58"
+  # check if lnd binary is already installed
+  if [ $(sudo -u admin lightningd 2>/dev/null --version | grep -c ".") -gt 0 ]; then
+    echo "c-lightning binary already installed - done"
+    exit 1
+  fi
 
   # prepare download dir
   sudo rm -rf /home/admin/download/cl
@@ -158,6 +167,9 @@ if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = testPR ];then
     echo "err='missing bitcoin signet'"
     exit 1
   fi
+
+  # make sure binary is installed (will skip if already done)
+  /home/admin/config.scripts/cl.install.sh install
 
   if [ ! -f /usr/local/bin/lightningd ]||[ "$1" = "update" ]||[ "$1" = "testPR" ];then
 

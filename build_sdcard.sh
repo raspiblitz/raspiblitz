@@ -652,21 +652,21 @@ echo
 # LND #
 #######
 echo
-#if [ "${fatpack}" == "true" ]; then
+if [ "${fatpack}" == "true" ]; then
   /home/admin/config.scripts/lnd.install.sh install || exit 1
-#else
-#  echo -e "\nSkipping LND install - let user install later if needed ..."
-#fi
+else
+  echo -e "\nSkipping LND install - let user install later if needed ..."
+fi
 
 ###############
 # C-LIGHTNING #
 ###############
 echo
-#if [ "${fatpack}" == "true" ]; then
+if [ "${fatpack}" == "true" ]; then
   /home/admin/config.scripts/cl.install.sh install || exit 1
-#else
-#  echo -e "\nSkipping c-lightning install - let user install later if needed ..."
-#fi
+else
+  echo -e "\nSkipping c-lightning install - let user install later if needed ..."
+fi
 
 echo
 echo "*** raspiblitz.info ***"
