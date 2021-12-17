@@ -666,10 +666,7 @@ if [ "$1" = "switch" ]; then
   fi
 
   # set raspiblitz config value for funding
-  if ! grep -Eq "^LNBitsFunding=" /mnt/hdd/raspiblitz.conf; then
-    echo "LNBitsFunding=" >> /mnt/hdd/raspiblitz.conf
-  fi
-  sudo sed -i "s/^LNBitsFunding=.*/LNBitsFunding=${fundingsource}/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set LNBitsFunding "${fundingsource}"
 
   echo "##############"
   echo "# OK new fundig source set - does need restart or call: sudo systemctl restart lnbits"
