@@ -259,7 +259,7 @@ if [ "$1" = "status" ]; then
                fi
             fi
 
-            cp -r /mnt/hdd${subVolumeDir}/ssh /var/cache/raspiblitz/hdd-inspect 2>/dev/null
+            cp -r /mnt/hdd${subVolumeDir}/ssh /var/cache/raspiblitz/hdd-inspect
 
           fi
         
