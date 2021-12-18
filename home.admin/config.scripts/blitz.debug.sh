@@ -188,16 +188,20 @@ echo "--> CHECK CONFIG: sudo nginx -t"
 sudo nginx -t
 echo
 
-echo "*** BLITZAPI SYSTEMD STATUS ***"
-sudo systemctl status blitzapi -n2 --no-pager
-echo
+if [ $(sudo systemctl status blitzapi 2>/dev/null | grep -c "blitzapi.service") -lt 1 ]; then
+  echo "- BLITZAPI is not running"
+else
+  echo "*** BLITZAPI SYSTEMD STATUS ***"
+  sudo systemctl status blitzapi -n2 --no-pager
+  echo
 
-echo "*** LAST BLITZAPI LOGS ***"
-echo "sudo journalctl -u blitzapi -b --no-pager -n20"
-sudo journalctl -u nginx -b --no-pager -n20
-echo "--> CHECK CONFIG: sudo nginx -t"
-sudo nginx -t
-echo
+  echo "*** LAST BLITZAPI LOGS ***"
+  echo "sudo journalctl -u blitzapi -b --no-pager -n20"
+  sudo journalctl -u nginx -b --no-pager -n20
+  echo "--> CHECK CONFIG: sudo nginx -t"
+  sudo nginx -t
+  echo
+fi
 
 if [ "${touchscreen}" == "" ] || [ "${touchscreen}" == "0" ] || [ "${touchscreen}" == "off" ]; then
   echo "- TOUCHSCREEN is OFF by config"
