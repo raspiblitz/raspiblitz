@@ -36,7 +36,7 @@ fi
 
 if grep -Eq "${netprefix}clEncryptedHSM=on" /mnt/hdd/raspiblitz.conf;then
   if grep -Eq "${netprefix}clAutoUnlock=on" /mnt/hdd/raspiblitz.conf;then
-    passwordFile=/root/.${netprefix}cl.pw
+    passwordFile=/home/bitcoin/.${netprefix}cl.pw
   else
     passwordFile=/dev/shm/.${netprefix}cl.pw
   fi
