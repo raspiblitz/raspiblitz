@@ -39,6 +39,10 @@ curl https://keybase.io/oms/pgp_keys.asc | gpg --import
 ```
 Ensure that you put quotes around fingerprints containing spaces if importing with other methods.
 
+# Privacy Protection
+
+When you call `debug` on the command line you get basic system & services logs that can be used if you need to report details for support by other users. There is already a basic redaction of private data (nodeids, IPv4s, .onion-adresses, balances) for that debug report BUT always check the data you post in DMs or public before sending. If you find further private data that needs redaction, please report as an issue on the github repo.  
+
 # Network Security
 
 * Limit attack surface: Wi-fi and Bluetooth is disabled by default in the build script.

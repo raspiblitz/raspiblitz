@@ -115,6 +115,7 @@ function release() {
 function debug() {
   echo "Printing debug logs. Be patient, this should take maximum 2 minutes ..."
   /home/admin/config.scripts/blitz.debug.sh > /var/cache/raspiblitz/debug.log
+  /home/admin/config.scripts/blitz.debug.sh redact /var/cache/raspiblitz/debug.log
   if [ "$1" = "-l" ]||[ "$1" = "--link" ]; then
     proxy="-X 5 -x localhost:9050"
     if [ "$2" = "-n" ]||[ "$2" = "--no-tor" ]; then proxy=""; fi

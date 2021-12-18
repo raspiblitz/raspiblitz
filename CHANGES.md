@@ -18,6 +18,7 @@
 - Update: Specter Desktop 1.7.2 [details](https://github.com/cryptoadvance/specter-desktop/releases/tag/v1.7.2)
 - Upadte: PyBlock to 1.1.8.5 (adapt to new install mechanism)
 - Update: Re-Add connecting node with Zap mobile wallet iOS & Android
+- Update: additional redaction of private data in debug logs
 
 ## What's new in Version 1.7.1 of RaspiBlitz?
 

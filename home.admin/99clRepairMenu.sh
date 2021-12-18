@@ -21,7 +21,7 @@ if [ "$(eval echo \$${netprefix}clEncryptedHSM)" = "off" ];then
 elif [ "$(eval echo \$${netprefix}clEncryptedHSM)"  = "on" ];then
     OPTIONS+=(PASSWORD_C "Change the hsm_secret encryption password")
     OPTIONS+=(DECRYPT "Decrypt the hsm_secret")
-  if [ ! -f "/root/.${netprefix}cl.pw" ]; then
+  if [ ! -f "/home/bitcoin/.${netprefix}cl.pw" ]; then
     OPTIONS+=(AUTOUNLOCK-ON "Auto-decrypt the hsm_secret after boot")
   else
     OPTIONS+=(AUTOUNLOCK-OFF "Do not auto-decrypt the hsm_secret after boot")
