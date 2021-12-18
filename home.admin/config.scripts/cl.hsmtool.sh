@@ -41,7 +41,7 @@ hsmSecretPath="/home/bitcoin/.lightning/${CLNETWORK}/hsm_secret"
 passwordFile=/dev/shm/.${netprefix}cl.pw
 if grep -Eq "${netprefix}clEncryptedHSM=on" /mnt/hdd/raspiblitz.conf;then
   if grep -Eq "${netprefix}clAutoUnlock=on" /mnt/hdd/raspiblitz.conf;then
-    passwordFile=/home/bitcoin/${netprefix}cl.pw
+    passwordFile=/home/bitcoin/.${netprefix}cl.pw
   fi
 fi
 
@@ -94,8 +94,8 @@ function shredPasswordFile() {
   if [ -f /dev/shm/.${netprefix}cl.pw ];then
     sudo shred -uvz /dev/shm/.${netprefix}cl.pw
   fi
-  if [ -f /home/bitcoin/${netprefix}cl.pw ];then
-    sudo shred -uvz /home/bitcoin/${netprefix}cl.pw
+  if [ -f /home/bitcoin/.${netprefix}cl.pw ];then
+    sudo shred -uvz /home/bitcoin/.${netprefix}cl.pw
   fi
 }
 
@@ -333,7 +333,7 @@ elif [ "$1" = "autounlock-on" ]; then
   echo "# Autounlock is on for C-lightning $CHAIN"
 
 elif [ "$1" = "autounlock-off" ]; then
-  if [ -f /home/bitcoin/${netprefix}cl.pw ];then
+  if [ -f /home/bitcoin/.${netprefix}cl.pw ];then
     sudo cp /home/bitcoin/.${netprefix}cl.pw /dev/shm/.${netprefix}cl.pw
     sudo shred -uzv /home/bitcoin/.${netprefix}cl.pw
     sudo chmod 600 /dev/shm/.${netprefix}cl.pw
