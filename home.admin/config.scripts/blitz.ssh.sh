@@ -12,7 +12,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ];
   exit 1
 fi
 
-DEFAULTBACKUPBASEDIR="/mnt/hdd" # compiles to /mnt/hdd/ssh
+DEFAULTBACKUPBASEDIR="/mnt/hdd/ssh"
 
 # check if started with sudo
 if [ "$EUID" -ne 0 ]; then 
@@ -24,7 +24,7 @@ fi
 # RENEW
 ###################
 if [ "$1" = "renew" ]; then
-  echo "# *** blitz.ssh.sh renew"
+  echo "# *** $0 $1"
   sudo systemctl stop sshd
   sudo rm /etc/ssh/ssh_host_*
   sudo ssh-keygen -A
@@ -37,7 +37,7 @@ fi
 # CLEAR
 ###################
 if [ "$1" = "clear" ]; then
-  echo "# *** blitz.ssh.sh clear"
+  echo "# *** $0 $1"
   sudo rm /etc/ssh/ssh_host_*
   echo "# OK: SSHD keyfiles & possible backups deleted"
   exit 0
@@ -47,7 +47,7 @@ fi
 # SESSIONS
 ###################
 if [ "$1" = "sessions" ]; then
-  echo "# *** blitz.ssh.sh sessions"
+  echo "# *** $0 $1"
   sessionsCount=$(ss | grep -c ":ssh")
   echo "ssh_session_count=${sessionsCount}"
   exit 0
@@ -57,7 +57,7 @@ fi
 # CHECK & REPAIR
 ###################
 if [ "$1" = "checkrepair" ]; then
-  echo "# *** blitz.ssh.sh checkrepair"
+  echo "# *** $0 $1"
   
   # check if sshd host keys are missing / need generation
   countKeyFiles=$(ls -la /etc/ssh/ssh_host_* 2>/dev/null | grep -c "/etc/ssh/ssh_host")
@@ -104,18 +104,20 @@ fi
 # BACKUP
 ###################
 if [ "$1" = "backup" ]; then
-  echo "# *** blitz.ssh.sh backup"
-    echo "# backup dir: ${DEFAULTBACKUPBASEDIR}/ssh"
+    echo "# *** $0 $1"
+    echo "# backup dir: ${DEFAULTBACKUPBASEDIR}"
 
     # backup sshd host keys
-    sudo rm -r $DEFAULTBACKUPBASEDIR/ssh 2>/dev/null # delete backups if exist
-    sudo cp -r /etc/ssh $DEFAULTBACKUPBASEDIR/ssh 2>/dev/null # copy to backups if exist
+    # directory 'sshd' is created in blitz.datadrive.sh
+    sudo rm -rf $DEFAULTBACKUPBASEDIR/sshd/*
+    sudo cp -a /etc/ssh $DEFAULTBACKUPBASEDIR/sshd
 
     # backup root use ssh keys
-    sudo rm -r $DEFAULTBACKUPBASEDIR/ssh/root_backup 2>/dev/null
-    sudo cp -r /root/.ssh $DEFAULTBACKUPBASEDIR/ssh/root_backup 2>/dev/null
+    # directory 'root_backup' is created in blitz.datadrive.sh
+    sudo rm -rf $DEFAULTBACKUPBASEDIR/root_backup/*
+    sudo cp -a /root/.ssh $DEFAULTBACKUPBASEDIR/root_backup
 
-    if [ -d "${DEFAULTBACKUPBASEDIR}/ssh" ]; then
+    if [ -d "${DEFAULTBACKUPBASEDIR}/sshd" ] && [ -d "${DEFAULTBACKUPBASEDIR}/root_backup" ]; then
       echo "# OK - ssh keys backup done"
     else
       echo "error='ssh keys backup failed - backup location may not exist'"
@@ -127,28 +129,30 @@ fi
 # RESTORE
 ###################
 if [ "$1" = "restore" ]; then
-  echo "# *** blitz.ssh.sh restore"
+    echo "# *** $0 $1"
 
     # second parameter (optional)
     ALTBACKUPBASEDIR=$2
     if [ "${ALTBACKUPBASEDIR}" != "" ]; then
-      DEFAULTBACKUPBASEDIR="${ALTBACKUPBASEDIR}"
+       DEFAULTBACKUPBASEDIR="${ALTBACKUPBASEDIR}"
     fi
 
-    echo "# backup dir: ${DEFAULTBACKUPBASEDIR}/ssh"
-    if [ -d "${DEFAULTBACKUPBASEDIR}/ssh" ]; then
+    echo "# backup dir: ${DEFAULTBACKUPBASEDIR}"
+    if [ -d "${DEFAULTBACKUPBASEDIR}/sshd" ] && [ -d "${DEFAULTBACKUPBASEDIR}/root_backup" ]; then
 
       # restore sshd host keys
-      sudo rm -r /etc/ssh/*
-      sudo cp -r $DEFAULTBACKUPBASEDIR/ssh/* /etc/ssh/
+      sudo rm -rf /etc/ssh/*
+      sudo cp -a $DEFAULTBACKUPBASEDIR/sshd/* /etc/ssh/
       sudo chown -R root:root /etc/ssh
       sudo dpkg-reconfigure openssh-server
       sudo systemctl restart sshd
 
       # restore root use keys
-      sudo rm -r /root/.ssh 2>/dev/null
-      sudo cp -r $DEFAULTBACKUPBASEDIR/ssh/root_backup /root/.ssh 2>/dev/null
-      sudo chown -R root:root /root/.ssh 2>/dev/null
+      sudo rm -rf /root/.ssh
+      # directory may not exist
+      sudo mkdir /root/.ssh
+      sudo cp -a $DEFAULTBACKUPBASEDIR/root_backup/* /root/.ssh
+      sudo chown -R root:root /root/.ssh
 
       echo "# OK - ssh keys restore done"
     else

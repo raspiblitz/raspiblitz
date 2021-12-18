@@ -240,7 +240,26 @@ if [ "$1" = "status" ]; then
             cp /mnt/hdd${subVolumeDir}/app-data/wpa_supplicant.conf /var/cache/raspiblitz/hdd-inspect/wpa_supplicant.conf 2>/dev/null
 
             # make copy of SSH keys to RAMDISK (if available)
-            cp -r /mnt/hdd${subVolumeDir}/ssh /var/cache/raspiblitz/hdd-inspect/ssh 2>/dev/null
+            # conversion to two directories
+            SSHBACKUPDIR="/mnt/hdd/ssh"
+            if [ -d "${SSHBACKUPDIR}/sshd" ] && [ -d "${SSHBACKUPDIR}/root_backup" ]; then
+               echo "SSH backup directory has 2 subdirectories. No conversion."
+            else
+               echo -n "SSH backup directory is 1 directory. Converting..."
+               DATE=$(date +%Y%m%d%H%M)
+               cp -a ${SSHBACKUPDIR} ${SSHBACKUPDIR}.old.bak.${DATE}
+               mkdir -p ${SSHBACKUPDIR}/root_backup
+               mkdir -p ${SSHBACKUPDIR}/sshd
+               cp -a $SSHBACKUPDIR/* ${DEFAULTBACKUPBASEDIR}/sshd
+               COPIED=$?
+               if [ COPIED == 0 ]; then
+                  echo "done"
+               else
+                  echo "FAILED"
+               fi
+            fi
+
+            cp -r /mnt/hdd${subVolumeDir}/ssh /var/cache/raspiblitz/hdd-inspect 2>/dev/null
 
           fi
         

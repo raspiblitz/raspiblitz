@@ -268,7 +268,7 @@ fi
 if [ -d "/var/cache/raspiblitz/hdd-inspect/ssh" ]; then
   # INIT OLD SSH HOST KEYS on Update/Recovery to prevent "Unknown Host" on ssh client
   echo "SSH SERVER CERTS RESTORE activating old SSH host keys" >> $logFile
-  /home/admin/config.scripts/blitz.ssh.sh restore /var/cache/raspiblitz/hdd-inspect >> $logFile
+  /home/admin/config.scripts/blitz.ssh.sh restore /var/cache/raspiblitz/hdd-inspect/ssh >> $logFile
 else
   echo "No SSH SERVER CERTS RESTORE because no /var/cache/raspiblitz/hdd-inspect/ssh" >> $logFile
 fi
