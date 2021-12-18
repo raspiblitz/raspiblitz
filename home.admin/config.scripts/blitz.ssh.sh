@@ -136,7 +136,7 @@ if [ "$1" = "restore" ]; then
     fi
 
     echo "# backup dir: ${DEFAULT_BASEDIR}"
-    if [ -d "${DEFAULT_BASEDIR}/sshd" ] && [ -d "${DEFAULT_BASEDIR}/ssh-root" ]; then
+    if [ -d "${DEFAULT_BASEDIR}/sshd" ]; then
 
       # restore sshd host keys
       sudo rm -rf /etc/ssh/*
@@ -144,6 +144,13 @@ if [ "$1" = "restore" ]; then
       sudo chown -R root:root /etc/ssh
       sudo dpkg-reconfigure openssh-server
       sudo systemctl restart sshd
+      echo "# OK - sshd keys restore done"
+    else
+      echo "error='sshd keys backup not found'"
+      exit 1
+    fi
+
+    if [ -d "${DEFAULT_BASEDIR}/ssh-root" ]; then
 
       # restore root use keys (directory may not exist)
       sudo rm -rf /root/.ssh
@@ -151,10 +158,11 @@ if [ "$1" = "restore" ]; then
       sudo cp -a $DEFAULT_BASEDIR/ssh-root/* /root/.ssh
       sudo chown -R root:root /root/.ssh
 
-      echo "# OK - ssh keys restore done"
+      echo "# OK - ssh-root keys restore done"
     else
-      echo "error='ssh keys backup not found'"
+      echo "# INFO - ssh-root keys backup not available"
     fi
+    
   exit 0
 fi
 

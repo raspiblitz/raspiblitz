@@ -265,12 +265,12 @@ fi
 # if backup is available on HDD/SSD
 ################################
 
-if [ -d "/var/cache/raspiblitz/hdd-inspect/ssh" ]; then
+if [ -d "/var/cache/raspiblitz/hdd-inspect/sshd" ]; then
   # INIT OLD SSH HOST KEYS on Update/Recovery to prevent "Unknown Host" on ssh client
   echo "SSH SERVER CERTS RESTORE activating old SSH host keys" >> $logFile
-  /home/admin/config.scripts/blitz.ssh.sh restore /var/cache/raspiblitz/hdd-inspect/ssh >> $logFile
+  /home/admin/config.scripts/blitz.ssh.sh restore /var/cache/raspiblitz/hdd-inspect >> $logFile
 else
-  echo "No SSH SERVER CERTS RESTORE because no /var/cache/raspiblitz/hdd-inspect/ssh" >> $logFile
+  echo "No SSH SERVER CERTS RESTORE because no /var/cache/raspiblitz/hdd-inspect" >> $logFile
 fi
 
 ################################
