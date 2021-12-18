@@ -300,6 +300,17 @@ always-use-proxy=true
   sudo chown -R bitcoin:bitcoin /mnt/hdd/app-data/.lightning
   sudo chown -R bitcoin:bitcoin /home/bitcoin/  
 
+  ## Create a wallet from seedwords for mainnet
+  if [ ${CHAIN} = "mainnet" ]; then
+    hsmSecretPath="/home/bitcoin/.lightning/${CLNETWORK}/hsm_secret"
+    if sudo ls $hsmSecretPath; then
+      echo "# $hsmSecretPath is already present"
+    else
+      echo "Create a wallet from seedwords for mainnet"
+      /home/admin/config.scripts/cl.hsmtool.sh new-force mainnet
+    fi
+  fi
+
   #################
   # Backup plugin #
   #################

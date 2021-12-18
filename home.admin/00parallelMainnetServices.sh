@@ -81,6 +81,9 @@ if [ "${cl}" != "${choice}" ]; then
   if [ "${choice}" =  "on" ]; then
     if [ ${errorOnInstall} -eq 0 ]; then
       echo "# Successfully installed CL on $CHAIN"
+      # for mainnet only
+      # generate wallet from seedwords
+      /home/admin/config.scripts/cl.hsmtool.sh new $CHAIN
     else
       l1="# !!! FAIL on CL on $CHAIN install !!!"
       l2="# Try manual install on terminal after reboot with:"
