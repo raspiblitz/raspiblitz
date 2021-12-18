@@ -418,11 +418,14 @@ if [ "${clNode}" != "${choice}" ]; then
   if [ "${choice}" = "on" ]; then
     echo "# turning ON"
     /home/admin/config.scripts/cl.install.sh on mainnet
-    sudo /home/admin/config.scripts/cl.install.sh display-seed mainnet
+    # generate wallet from seedwords or just display
+    /home/admin/config.scripts/cl.hsmtool.sh new mainnet
     if [ "${testnet}" == "on" ]; then
+      # no seed for testnet
       /home/admin/config.scripts/cl.install.sh on testnet
     fi
     if [ "${signet}" == "on" ]; then
+      # no seed for signet
       /home/admin/config.scripts/cl.install.sh on signet
     fi
   else
