@@ -31,6 +31,8 @@ if [ "$1" == "redact" ]; then
   # redact balances
   sed -i 's/[0-9]* mSAT/* mSAT/' ${redactFile}
   sed -i 's/[0-9]*.[0-9]* BTC/* BTC/' ${redactFile}
+  sed -i 's/[0-9]*.[0-9]* BTC/* BTC/' ${redactFile}
+  sed -i 's/balance=[^\r\n]*/balance=****/' ${redactFile}
 
   exit 0
 fi
