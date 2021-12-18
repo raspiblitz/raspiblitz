@@ -3,7 +3,7 @@
 # keeps the password in memory between restarts: /dev/shm/.${netprefix}cl.pw
 # see the reasoning: https://github.com/ElementsProject/lightning#hd-wallet-encryption
 # does not store the password on disk unless auto-unlock is enabled
-# autounlock password is in /root/.${netprefix}cl.pw
+# autounlock password is in /home/bitcoin/.${netprefix}cl.pw
 
 # command info
 if [ $# -lt 1 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]||\
@@ -41,7 +41,7 @@ hsmSecretPath="/home/bitcoin/.lightning/${CLNETWORK}/hsm_secret"
 passwordFile=/dev/shm/.${netprefix}cl.pw
 if grep -Eq "${netprefix}clEncryptedHSM=on" /mnt/hdd/raspiblitz.conf;then
   if grep -Eq "${netprefix}clAutoUnlock=on" /mnt/hdd/raspiblitz.conf;then
-    passwordFile=/root/${netprefix}cl.pw
+    passwordFile=/home/bitcoin/${netprefix}cl.pw
   fi
 fi
 
@@ -81,7 +81,7 @@ function passwordToFile() {
       sudo touch $passwordFile
       sudo chmod 600 $passwordFile
       sudo chown bitcoin:bitcoin $passwordFile
-      sudo tee $passwordFile 1>/dev/null < "$data"
+      sudo -u bitcoin tee $passwordFile 1>/dev/null < "$data"
       shred "$data";;
     1)
       shred "$data"
@@ -103,8 +103,8 @@ function shredPasswordFile() {
   if [ -f /dev/shm/.${netprefix}cl.pw ];then
     sudo shred -uvz /dev/shm/.${netprefix}cl.pw
   fi
-  if [ -f /root/${netprefix}cl.pw ];then
-    sudo shred -uvz /root/${netprefix}cl.pw
+  if [ -f /home/bitcoin/${netprefix}cl.pw ];then
+    sudo shred -uvz /home/bitcoin/${netprefix}cl.pw
   fi
 }
 
@@ -338,10 +338,10 @@ elif [ "$1" = "decrypt" ]; then
 
 elif [ "$1" = "autounlock-on" ]; then
   if grep -Eq "${netprefix}clEncryptedHSM=on" /mnt/hdd/raspiblitz.conf;then
-    echo "# Moving the password from $passwordFile to /root/.${netprefix}cl.pw"
-    sudo -u bitcoin mv /dev/shm/.${netprefix}cl.pw /root/.${netprefix}cl.pw
+    echo "# Moving the password from $passwordFile to /home/bitcoin/.${netprefix}cl.pw"
+    sudo -u bitcoin mv /dev/shm/.${netprefix}cl.pw /home/bitcoin/.${netprefix}cl.pw
   else
-    passwordFile=/root/.${netprefix}cl.pw
+    passwordFile=/home/bitcoin/.${netprefix}cl.pw
     passwordToFile
   fi
   # setting value in raspiblitz config
@@ -351,9 +351,9 @@ elif [ "$1" = "autounlock-on" ]; then
   echo "# Autounlock is on for C-lightning $CHAIN"
 
 elif [ "$1" = "autounlock-off" ]; then
-  if [ -f /root/${netprefix}cl.pw ];then
-    sudo cp /root/.${netprefix}cl.pw /dev/shm/.${netprefix}cl.pw
-    sudo shred -uzv /root/.${netprefix}cl.pw
+  if [ -f /home/bitcoin/${netprefix}cl.pw ];then
+    sudo cp /home/bitcoin/.${netprefix}cl.pw /dev/shm/.${netprefix}cl.pw
+    sudo shred -uzv /home/bitcoin/.${netprefix}cl.pw
     sudo chmod 600 /dev/shm/.${netprefix}cl.pw
     sudo chown bitcoin:bitcoin /dev/shm/.${netprefix}cl.pw
   fi
