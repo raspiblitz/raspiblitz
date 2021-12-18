@@ -12,8 +12,6 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ];
   exit 1
 fi
 
-DEFAULTBACKUPBASEDIR="/mnt/hdd/ssh"
-
 # check if started with sudo
 if [ "$EUID" -ne 0 ]; then 
   echo "error='missing sudo'"
@@ -100,24 +98,26 @@ if [ "$1" = "checkrepair" ]; then
   exit 0
 fi
 
+DEFAULT_BASEDIR="/mnt/hdd/app-data"
+
 ###################
 # BACKUP
 ###################
 if [ "$1" = "backup" ]; then
     echo "# *** $0 $1"
-    echo "# backup dir: ${DEFAULTBACKUPBASEDIR}"
+    echo "# backup dir: ${DEFAULT_BASEDIR}"
 
     # backup sshd host keys
-    # directory 'sshd' is created in blitz.datadrive.sh
-    sudo rm -rf $DEFAULTBACKUPBASEDIR/sshd/*
-    sudo cp -a /etc/ssh $DEFAULTBACKUPBASEDIR/sshd
+    mkdir -p $DEFAULT_BASEDIR/sshd
+    sudo rm -rf $DEFAULT_BASEDIR/sshd/*
+    sudo cp -a /etc/ssh $DEFAULT_BASEDIR/sshd
 
     # backup root use ssh keys
-    # directory 'root_backup' is created in blitz.datadrive.sh
-    sudo rm -rf $DEFAULTBACKUPBASEDIR/root_backup/*
-    sudo cp -a /root/.ssh $DEFAULTBACKUPBASEDIR/root_backup
+    mkdir -p $DEFAULT_BASEDIR/ssh-root
+    sudo rm -rf $DEFAULT_BASEDIR/ssh-root/*
+    sudo cp -a /root/.ssh $DEFAULT_BASEDIR/ssh-root
 
-    if [ -d "${DEFAULTBACKUPBASEDIR}/sshd" ] && [ -d "${DEFAULTBACKUPBASEDIR}/root_backup" ]; then
+    if [ -d "${DEFAULT_BASEDIR}/sshd" ] && [ -d "${DEFAULT_BASEDIR}/ssh-root" ]; then
       echo "# OK - ssh keys backup done"
     else
       echo "error='ssh keys backup failed - backup location may not exist'"
@@ -130,28 +130,25 @@ fi
 ###################
 if [ "$1" = "restore" ]; then
     echo "# *** $0 $1"
-
-    # second parameter (optional)
-    ALTBACKUPBASEDIR=$2
-    if [ "${ALTBACKUPBASEDIR}" != "" ]; then
-       DEFAULTBACKUPBASEDIR="${ALTBACKUPBASEDIR}"
+    ALT_BASEDIR=$2
+    if [ "${ALT_BASEDIR}" != "" ]; then
+       DEFAULT_BASEDIR="${ALT_BASEDIR}"
     fi
 
-    echo "# backup dir: ${DEFAULTBACKUPBASEDIR}"
-    if [ -d "${DEFAULTBACKUPBASEDIR}/sshd" ] && [ -d "${DEFAULTBACKUPBASEDIR}/root_backup" ]; then
+    echo "# backup dir: ${DEFAULT_BASEDIR}"
+    if [ -d "${DEFAULT_BASEDIR}/sshd" ] && [ -d "${DEFAULT_BASEDIR}/ssh-root" ]; then
 
       # restore sshd host keys
       sudo rm -rf /etc/ssh/*
-      sudo cp -a $DEFAULTBACKUPBASEDIR/sshd/* /etc/ssh/
+      sudo cp -a $DEFAULT_BASEDIR/sshd/* /etc/ssh/
       sudo chown -R root:root /etc/ssh
       sudo dpkg-reconfigure openssh-server
       sudo systemctl restart sshd
 
-      # restore root use keys
+      # restore root use keys (directory may not exist)
       sudo rm -rf /root/.ssh
-      # directory may not exist
       sudo mkdir /root/.ssh
-      sudo cp -a $DEFAULTBACKUPBASEDIR/root_backup/* /root/.ssh
+      sudo cp -a $DEFAULT_BASEDIR/ssh-root/* /root/.ssh
       sudo chown -R root:root /root/.ssh
 
       echo "# OK - ssh keys restore done"
