@@ -8,10 +8,10 @@ if [ "$1" == "redact" ]; then
   redactFile=$2
   if [ "${redactFile}" == "" ]; then
     echo "# FAIL: missing second parameter"
-    exi 1
+    exit 1
   fi
   echo "# redacting file: ${redactFile}"
-  if [ $(ls ${redactFile} 2>/dev/null | grep -c ${redactFile}) -lt 1 ]; then
+  if [ $(ls ${redactFile} 2>/dev/null | grep -c "${redactFile}") -lt 1 ]; then
     echo "# FAIL: file does not exist"
     exi 1
   fi
