@@ -2,6 +2,40 @@
 
 # USE THIS SCRIPT FOR BASIC SYSTEM STATUS DEBUG INFO
 
+if [ "$1" == "redact" ]; then
+
+  # get & check parameters
+  redactFile=$2
+  if [ "${redactFile}" == "" ]; then
+    echo "# FAIL: missing second parameter"
+    exi 1
+  fi
+  echo "# redacting file: ${redactFile}"
+  if [ $(ls ${redactFile} 2>/dev/null | grep -c ${redactFile}) -lt 1 ]; then
+    echo "# FAIL: file does not exist"
+    exi 1
+  fi
+
+  # redact nodeIDs
+  sed -i 's/[a-z0-9]*@/***@/' ${redactFile}
+
+  # redact IPv4s
+  sed -i 's/[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}/*.*.*.*/' ${redactFile}
+
+  # redact onion adresses
+  sed -i 's/[a-z0-9]*.onion/***.onion/' ${redactFile}
+
+  # redact hostname
+  sed -i 's/hostname=[^\r\n]*/hostname=*****/' ${redactFile}
+
+  # redact balances
+  sed -i 's/[0-9]* mSAT/* mSAT/' ${redactFile}
+  sed -i 's/[0-9]*.[0-9]* BTC/* BTC/' ${redactFile}
+
+  exit 0
+fi
+
+
 # load code software version
 source /home/admin/_version.info
 
