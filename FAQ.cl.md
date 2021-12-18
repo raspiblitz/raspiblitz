@@ -105,7 +105,7 @@ or with the alias: `cllog`
 ### All possible config settings
   *  can be shown by running:   
   `lightningd --help`  
-  * Place the settings in the config file  without the `--` and restart lightningd
+  * To persist the setings place the options in the config file without the `--` and restart lightningd
     ```
     Usage: lightningd 
     A bitcoin lightning daemon (default values shown for network: bitcoin).
@@ -596,9 +596,20 @@ To display it as text:
     ```
     sudo systemctl stop lightningd
     ```
+    An ungraceful method:
+    ```
+    sudo killall ligthningd
 * Rescan from the block 700000
     ```
-    sudo -u bitcoin lightningd --rescan=700000
+    sudo -u bitcoin lightningd --rescan -700000 --log-level debug
+    ```
+* Rescan the last 1000 blocks:
+    ```
+    sudo -u bitcoin lightningd --rescan 1000 --log-level debug
+    ```
+* can monitor in a new window using the shortcut:
+    ```
+    cllog
     ```
 
 ## Update
