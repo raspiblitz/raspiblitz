@@ -166,7 +166,7 @@ patch()
         newGitHubUser=$(echo "${newGitHubUser}" | cut -d " " -f1)
         echo "--> " ${newGitHubUser}
         error=""
-        source <(sudo -u admin /home/admin/config.scripts/blitz.github.sh -clean ${activeBranch} ${newGitHubUser})
+        source <(sudo -u admin /home/admin/config.scripts/blitz.github.sh ${activeBranch} ${newGitHubUser})
         if [ ${#error} -gt 0 ]; then
           whiptail --title "ERROR" --msgbox "${error}" 8 30
         fi
