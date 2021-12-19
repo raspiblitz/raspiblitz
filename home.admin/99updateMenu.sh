@@ -40,13 +40,12 @@ Do you want to download Lightning Data Backup now?
       echo "*************************************"
       echo "please wait .."
       sleep 2
-      if [ "${lightning}" == "lnd" ]; then
+      if [ "${lightning}" == "lnd" ] || [ "${lnd}" = "on" ]; then
         /home/admin/config.scripts/lnd.compact.sh interactive
         /home/admin/config.scripts/lnd.backup.sh lnd-export-gui
-      elif [ "${lightning}" == "cl" ]; then
+      fi
+      if [ "${lightning}" == "cl" ] || [ "${cl}" = "on" ]; then
         /home/admin/config.scripts/cl.backup.sh cl-export-gui
-      else
-        echo "TODO: Implement Data Backup for '${lightning}'"
       fi
       echo
       echo "PRESS ENTER to continue once you're done downloading."
@@ -58,14 +57,13 @@ Do you want to download Lightning Data Backup now?
       echo "*************************************"
       echo "please wait .."
       sleep 2
-      if [ "${lightning}" == "lnd" ]; then
+      if [ "${lightning}" == "lnd" ] || [ "${lnd}" = "on" ]; then
         /home/admin/config.scripts/lnd.backup.sh lnd-export
-      elif [ "${lightning}" == "cl" ]; then
-        /home/admin/config.scripts/cl.backup.sh cl-export
-      else
-        echo "TODO: Implement Data Backup for '${lightning}'"
-        sleep 3
       fi
+      if [ "${lightning}" == "cl" ] || [ "${cl}" = "on" ]; then
+        /home/admin/config.scripts/cl.backup.sh cl-export
+      fi
+      sleep 3
     fi
   fi
 
