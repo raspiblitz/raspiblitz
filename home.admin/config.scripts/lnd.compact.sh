@@ -78,7 +78,7 @@ done
 echo "# LND state:"
 sudo -u bitcoin lncli state
 
-sudo killall lnd >> /home/admin/lnd.db.bolt.auto-compact.log 2>&1
+sudo pkill lnd >> /home/admin/lnd.db.bolt.auto-compact.log 2>&1
 
 echo
 echo "# Finished compacting."
