@@ -146,7 +146,7 @@ else
   sudo rm -r /home/admin/raspiblitz
   sudo mkdir /home/admin/raspiblitz
   echo "# - copy from vagrant new raspiblitz files (ignore hidden dirs)"
-  sudo cp -r /vagrant/* /home/admin/raspiblitz
+  sudo cp -R /vagrant/* /home/admin/raspiblitz
   echo "# - set admin as owner of files"
   sudo chown admin:admin -R /home/admin/raspiblitz
 fi
@@ -166,12 +166,12 @@ fi
 
 echo "# COPYING from GIT-Directory to /home/admin/"
 sudo -u admin cp /home/admin/raspiblitz/home.admin/.tmux.conf /home/admin
-sudo -u admin cp -r /home/admin/raspiblitz/home.admin/assets /home/admin/
+sudo -u admin cp -R /home/admin/raspiblitz/home.admin/assets /home/admin/
 sudo -u admin cp /home/admin/raspiblitz/home.admin/*.* /home/admin
 sudo -u admin chmod 755 *.sh
-sudo -u admin cp -r /home/admin/raspiblitz/home.admin/config.scripts /home/admin/
+sudo -u admin cp -R /home/admin/raspiblitz/home.admin/config.scripts /home/admin/
 sudo -u admin chmod 755 /home/admin/config.scripts/*.sh
-sudo -u admin cp -r /home/admin/raspiblitz/home.admin/setup.scripts /home/admin/
+sudo -u admin cp -R /home/admin/raspiblitz/home.admin/setup.scripts /home/admin/
 sudo -u admin chmod 755 /home/admin/setup.scripts/*.sh
 echo "# ******************************************"
 
