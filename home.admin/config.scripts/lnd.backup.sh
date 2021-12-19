@@ -80,6 +80,7 @@ fi
 if [ ${mode} = "lnd-export-gui" ]; then
 
   # create lnd rescue file
+  echo "# lnd.backup lnd-export-gui ..." 
   source <(/home/admin/config.scripts/lnd.backup.sh lnd-export)
   if [ "${error}" != "" ]; then
     echo "error='${error}'"
