@@ -309,7 +309,7 @@ index-batch-size = 10
 wait_duration_secs = 10
 jsonrpc_timeout_secs = 15
 db_dir = \"/mnt/hdd/app-storage/electrs/db\"
-auth = \"$RPC_USER:$PASSWORD_B\"
+auth = \"${RPC_USER}:${PASSWORD_B}\"
 # allow BTC-RPC-explorer show tx-s for addresses with a history of more than 100
 txid_limit = 1000
 server_banner = \"Welcome to electrs $ELECTRSVERSION - the Electrum Rust Server on your RaspiBlitz\"
