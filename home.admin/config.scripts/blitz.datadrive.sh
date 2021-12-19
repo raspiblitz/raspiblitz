@@ -1492,14 +1492,16 @@ if [ "$1" = "swap" ]; then
     if [ ${isBTRFS} -eq 1 ]; then
 
       >&2 echo "# Rewrite external SWAP config for BTRFS setup"
-      sudo sed -i "12s/.*/CONF_SWAPFILE=\/mnt\/temp\/swapfile/" /etc/dphys-swapfile
-      sudo sed -i "16s/.*/#CONF_SWAPSIZE=/" /etc/dphys-swapfile  
+      sudo sed -i "s/^#CONF_SWAPFILE=/CONF_SWAPFILE=/g" /etc/dphys-swapfile  
+      sudo sed -i "s/^CONF_SWAPFILE=.*/CONF_SWAPFILE=\/mnt\/temp\/swapfile/g" /etc/dphys-swapfile  
+      sudo sed -i "s/^CONF_SWAPSIZE=/#CONF_SWAPSIZE=/g" /etc/dphys-swapfile  
     
     else
 
       >&2 echo "# Rewrite external SWAP config for EXT4 setup"
-      sudo sed -i "12s/.*/CONF_SWAPFILE=\/mnt\/hdd\/swapfile/" /etc/dphys-swapfile
-      sudo sed -i "16s/.*/#CONF_SWAPSIZE=/" /etc/dphys-swapfile
+      sudo sed -i "s/^#CONF_SWAPFILE=/CONF_SWAPFILE=/g" /etc/dphys-swapfile  
+      sudo sed -i "s/^CONF_SWAPFILE=.*/CONF_SWAPFILE=\/mnt\/hdd\/swapfile/g" /etc/dphys-swapfile  
+      sudo sed -i "s/^CONF_SWAPSIZE=/#CONF_SWAPSIZE=/g" /etc/dphys-swapfile  
 
     fi
 

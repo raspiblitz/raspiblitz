@@ -530,10 +530,10 @@ sudo dphys-swapfile uninstall
 
 echo -e "\n*** INCREASE OPEN FILE LIMIT ***"
 # based on https://stadicus.github.io/RaspiBolt/raspibolt_21_security.html#increase-your-open-files-limit
-sudo sed --in-place -i "56s/.*/*    soft nofile 128000/" /etc/security/limits.conf
-sudo bash -c "echo '*    hard nofile 128000' >> /etc/security/limits.conf"
-sudo bash -c "echo 'root soft nofile 128000' >> /etc/security/limits.conf"
-sudo bash -c "echo 'root hard nofile 128000' >> /etc/security/limits.conf"
+sudo sed --in-place -i "56s/.*/*    soft nofile 256000/" /etc/security/limits.conf
+sudo bash -c "echo '*    hard nofile 256000' >> /etc/security/limits.conf"
+sudo bash -c "echo 'root soft nofile 256000' >> /etc/security/limits.conf"
+sudo bash -c "echo 'root hard nofile 256000' >> /etc/security/limits.conf"
 sudo bash -c "echo '# End of file' >> /etc/security/limits.conf"
 sudo sed --in-place -i "23s/.*/session required pam_limits.so/" /etc/pam.d/common-session
 sudo sed --in-place -i "25s/.*/session required pam_limits.so/" /etc/pam.d/common-session-noninteractive
