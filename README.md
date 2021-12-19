@@ -1271,7 +1271,7 @@ You can check the background-script logs to see details on errors: `sudo journal
 In the `/mnt/hdd/raspiblitz.conf` the parameter `scpBackupTarget='[USER]@[SERVER]:[DIRPATH-WITHOUT-ENDING-/]'` can be set to activate this feature.
 On the remote server, the public key of the RaspiBlitz root user needs to be added to the `authorized_keys` file so that no password is needed for the background script to make the backup.
 
-The script `/home/admin/config.scripts/internet.sshpubkey.sh` helps on initialization (init); it will show and transfer ssh-pubkey to a remote server.
+The script `/home/admin/config.scripts/blitz.ssh.sh` show (`root-get`) and transfer ssh-pubkey (`root-transfer`) to a remote server.
 
 To test it, try opening or closing a channel and then check if you can find a copy of `channel.backup` on your remote server.
 You can check the background-script logs to see details on errors: `sudo journalctl -f -u background`
