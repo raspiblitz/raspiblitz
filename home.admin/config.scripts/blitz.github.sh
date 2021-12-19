@@ -157,12 +157,12 @@ sudo rm -rf assets
 sudo -u admin cp -R /home/admin/raspiblitz/home.admin/assets /home/admin/assets
 # config.scripts directory
 sudo rm -rf /home/admin/config.scripts
-sudo -u admin cp -R /home/admin/raspiblitz/home.admin/config.scripts /home/admin/config.scripts
+sudo -u admin cp -R /home/admin/raspiblitz/home.admin/config.scripts /home/admin/config.scripts 2>/dev/null
 sudo -u admin chmod 755 /home/admin/config.scripts/*.sh
 sudo -u admin chmod 755 /home/admin/config.scripts/*.py
 # setup.scripts directory
 sudo rm -rf /home/admin/setup.scripts
-sudo -u admin cp -R /home/admin/raspiblitz/home.admin/setup.scripts /home/admin/setup.scripts
+sudo -u admin cp -R /home/admin/raspiblitz/home.admin/setup.scripts /home/admin/setup.scripts 2>/dev/null
 sudo -u admin chmod 755 /home/admin/setup.scripts/*.sh
 sudo -u admin chmod 755 /home/admin/config.scripts/*.py
 echo "# ******************************************"
