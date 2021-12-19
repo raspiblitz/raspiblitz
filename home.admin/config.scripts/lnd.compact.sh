@@ -45,9 +45,6 @@ echo
 echo "# Stop LND"
 sudo systemctl stop lnd
 
-trap "exit" INT TERM ERR
-trap "kill 0" EXIT
-
 echo "# Run LND with --db.bolt.auto-compact"
 sudo -u bitcoin /usr/local/bin/lnd --configfile=/home/bitcoin/.lnd/lnd.conf --db.bolt.auto-compact > /home/admin/lnd.db.bolt.auto-compact.log &
 
@@ -62,9 +59,6 @@ while [ $(sudo -u bitcoin lncli state 2>&1 | grep -c "connection refused") -gt 0
   sleep 10
 done
 
-echo "# LND state:"
-sudo -u bitcoin lncli state
-
 counter=0
 while [ $(sudo -u bitcoin lncli state | grep -c "WAITING_TO_START") -gt 0 ]; do
   echo
@@ -78,7 +72,7 @@ done
 echo "# LND state:"
 sudo -u bitcoin lncli state
 
-sudo killall lnd >> /home/admin/lnd.db.bolt.auto-compact.log 2>&1
+sudo -u bitcoin pkill lnd 2>/dev/null
 
 echo
 echo "# Finished compacting."

@@ -34,38 +34,43 @@ Channel Data and download that file to your laptop.
 Do you want to download Lightning Data Backup now?
       " 12 58
     if [ $? -eq 0 ]; then
-      clear
-      echo "*************************************"
-      echo "* PREPARING LIGHTNING BACKUP DOWNLOAD"
-      echo "*************************************"
-      echo "please wait .."
-      sleep 2
-      if [ "${lightning}" == "lnd" ]; then
+      if [ "${lightning}" == "lnd" ] || [ "${lnd}" = "on" ]; then
+        clear
+        echo "***********************************"
+        echo "* PREPARING THE LND BACKUP DOWNLOAD"
+        echo "***********************************"
+        echo "please wait .."
         /home/admin/config.scripts/lnd.compact.sh interactive
         /home/admin/config.scripts/lnd.backup.sh lnd-export-gui
-      elif [ "${lightning}" == "cl" ]; then
-        /home/admin/config.scripts/cl.backup.sh cl-export-gui
-      else
-        echo "TODO: Implement Data Backup for '${lightning}'"
+        echo
+        echo "PRESS ENTER to continue once you're done downloading."
+        read key
       fi
-      echo
-      echo "PRESS ENTER to continue once you're done downloading."
-      read key
+      if [ "${lightning}" == "cl" ] || [ "${cl}" = "on" ]; then
+        clear
+        echo "*******************************************"
+        echo "* PREPARING THE C-LIGHTNING BACKUP DOWNLOAD"
+        echo "*******************************************"
+        echo "please wait .."
+        /home/admin/config.scripts/cl.backup.sh cl-export-gui
+        echo
+        echo "PRESS ENTER to continue once you're done downloading."
+        read key
+      fi
     else
       clear
-      echo "*************************************"
-      echo "* JUST MAKING BACKUP TO OLD SD CARD"
-      echo "*************************************"
+      echo "*****************************************"
+      echo "* JUST MAKING A BACKUP TO THE OLD SD CARD"
+      echo "*****************************************"
       echo "please wait .."
       sleep 2
-      if [ "${lightning}" == "lnd" ]; then
+      if [ "${lightning}" == "lnd" ] || [ "${lnd}" = "on" ]; then
         /home/admin/config.scripts/lnd.backup.sh lnd-export
-      elif [ "${lightning}" == "cl" ]; then
-        /home/admin/config.scripts/cl.backup.sh cl-export
-      else
-        echo "TODO: Implement Data Backup for '${lightning}'"
-        sleep 3
       fi
+      if [ "${lightning}" == "cl" ] || [ "${cl}" = "on" ]; then
+        /home/admin/config.scripts/cl.backup.sh cl-export
+      fi
+      sleep 3
     fi
   fi
 
