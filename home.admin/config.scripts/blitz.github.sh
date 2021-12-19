@@ -134,6 +134,7 @@ if [ ${vagrant} -eq 0 ]; then
   echo "# REPO ----> ${origin}"
   echo "# BRANCH --> ${activeBranch}"
   echo "# ******************************************"
+  git config pull.rebase true
   git pull 1>&2
   cd ..
 else
