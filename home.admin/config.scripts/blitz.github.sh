@@ -150,19 +150,19 @@ echo "# COPYING from GIT-Directory to /home/admin/"
 echo "# - basic admin files"
 sudo rm -f *.sh
 sudo -u admin cp /home/admin/raspiblitz/home.admin/.tmux.conf /home/admin
-sudo -u admin cp /home/admin/raspiblitz/home.admin/*.* /home/admin
+sudo -u admin cp /home/admin/raspiblitz/home.admin/*.* /home/admin 2>/dev/null
 sudo -u admin chmod 755 *.sh
 echo "# - asset directory"
 sudo rm -rf assets
 sudo -u admin cp -R /home/admin/raspiblitz/home.admin/assets /home/admin/assets
 echo "# - config.scripts directory"
 sudo rm -rf /home/admin/config.scripts
-sudo -u admin cp -R /home/admin/raspiblitz/home.admin/config.scripts /home/admin/config.scripts 2>/dev/null
+sudo -u admin cp -R /home/admin/raspiblitz/home.admin/config.scripts /home/admin/config.scripts 
 sudo -u admin chmod 755 /home/admin/config.scripts/*.sh
 sudo -u admin chmod 755 /home/admin/config.scripts/*.py
 echo "# - setup.scripts directory"
 sudo rm -rf /home/admin/setup.scripts
-sudo -u admin cp -R /home/admin/raspiblitz/home.admin/setup.scripts /home/admin/setup.scripts 2>/dev/null
+sudo -u admin cp -R /home/admin/raspiblitz/home.admin/setup.scripts /home/admin/setup.scripts
 sudo -u admin chmod 755 /home/admin/setup.scripts/*.sh
 sudo -u admin chmod 755 /home/admin/config.scripts/*.py
 echo "# ******************************************"
