@@ -59,6 +59,7 @@ fi
 
 # installed LND version
 lndInstalledVersion=$(sudo -u bitcoin lncli --version | cut -d " " -f3)
+# example: '0.14.1-beta'
 lndInstalledVersionMajor=$(echo "${lndInstalledVersion}" | cut -d "-" -f1 | cut -d "." -f1)
 lndInstalledVersionMain=$(echo "${lndInstalledVersion}" | cut -d "-" -f1 | cut -d "." -f2)
 lndInstalledVersionMinor=$(echo "${lndInstalledVersion}" | cut -d "-" -f1 | cut -d "." -f3)
@@ -95,6 +96,24 @@ if [ "${mode}" = "info" ]; then
 
   exit 1
 fi
+
+function installLND() {
+  # install
+  echo "# stopping LND"
+  sudo systemctl stop lnd
+  echo "# unzip LND binary"
+  sudo -u admin tar -xzf ${binaryName}
+  # removing the tar.gz ending from the binary
+  directoryName="${binaryName%.*.*}"
+  echo "# install binary directory '${directoryName}'"
+  sudo install -m 0755 -o root -g root -t /usr/local/bin ${directoryName}/*
+  sleep 3
+  installed=$(sudo -u admin lnd --version)
+  if [ ${#installed} -eq 0 ]; then
+    echo "error='install failed'"
+    exit 1
+  fi
+}
 
 # verified
 if [ "${mode}" = "verified" ]; then
@@ -183,6 +202,8 @@ if [ "${mode}" = "verified" ]; then
   # note: install will be done the same as reckless further down
   lndInterimsUpdateNew="${lndUpdateVersion}"
 
+  installLND
+
 fi
 
 # RECKLESS
@@ -192,49 +213,43 @@ fi
 if [ "${mode}" = "reckless" ]; then
 
   echo "# lnd.update.sh reckless"
+  # only update if the latest release is different from the installed
+  if [ "v${lndInstalledVersion}" = "${lndLatestVersion}" ]; then
+    # attention to leading 'v'
+    echo "# lndInstalledVersion = lndLatestVersion (${lndLatestVersion:1})"
+    echo "# There is no need to update again."
+    lndInterimsUpdateNew="${lndLatestVersion:1}"
+  else
+    # check that download link has a value
+    if [ ${#lndLatestDownload} -eq 0 ]; then
+      echo "error='no download link'"
+      exit 1
+    fi
+  
+    # clean & change into download directory
+    sudo rm -r ${downloadDir}/*
+    cd "${downloadDir}" || exit 1
+  
+    # download binary
+    echo "# downloading binary"
+    binaryName=$(basename "${lndLatestDownload}")
+    sudo -u admin wget -N ${lndLatestDownload}
+    checkDownload=$(ls ${binaryName} 2>/dev/null | grep -c ${binaryName})
+    if [ ${checkDownload} -eq 0 ]; then
+      echo "error='download binary failed'"
+      exit 1
+    fi
+  
+    # prepare install
+    lndInterimsUpdateNew="reckless"
 
-  # check that download link has a value
-  if [ ${#lndLatestDownload} -eq 0 ]; then
-    echo "error='no download link'"
-    exit 1
+    installLND
+
   fi
-
-  # clean & change into download directory
-  sudo rm -r ${downloadDir}/*
-  cd "${downloadDir}" || exit 1
-
-  # download binary
-  echo "# downloading binary"
-  binaryName=$(basename "${lndLatestDownload}")
-  sudo -u admin wget -N ${lndLatestDownload}
-  checkDownload=$(ls ${binaryName} 2>/dev/null | grep -c ${binaryName})
-  if [ ${checkDownload} -eq 0 ]; then
-    echo "error='download binary failed'"
-    exit 1
-  fi
-
-  # prepare install
-  lndInterimsUpdateNew="reckless"
 fi
 
 # JOINED INSTALL (verified & RECKLESS)
 if [ "${mode}" = "verified" ] || [ "${mode}" = "reckless" ]; then
-
-  # install
-  echo "# stopping LND"
-  sudo systemctl stop lnd
-  echo "# unzip LND binary"
-  sudo -u admin tar -xzf ${binaryName}
-  # removing the tar.gz ending from the binary
-  directoryName="${binaryName%.*.*}"
-  echo "# install binary directory '${directoryName}'"
-  sudo install -m 0755 -o root -g root -t /usr/local/bin ${directoryName}/*
-  sleep 3
-  installed=$(sudo -u admin lnd --version)
-  if [ ${#installed} -eq 0 ]; then
-    echo "error='install failed'"
-    exit 1
-  fi
 
   echo "# mark update in raspiblitz config"
   /home/admin/config.scripts/blitz.conf.sh set lndInterimsUpdate "${lndInterimsUpdateNew}"

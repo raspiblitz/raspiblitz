@@ -99,10 +99,16 @@ if [ "${mode}" = "reckless" ]; then
 
   echo "# cl.update.sh reckless"
 
-  /home/admin/config.scripts/cl.install.sh update ${clLatestVersion}
-
-  # prepare install
-  clInterimsUpdateNew="reckless"
+  # only update if the latest release is different from the installed
+  if [ "v${clInstalledVersion}" = "${clLatestVersion}" ]; then
+    # attention to leading 'v'
+    echo "# clInstalledVersion = clLatestVersion (${clLatestVersion:1})"
+    echo "# There is no need to update again."
+    clInterimsUpdateNew="${clLatestVersion:1}"
+  else
+    /home/admin/config.scripts/cl.install.sh update ${clLatestVersion}
+    clInterimsUpdateNew="reckless"
+  fi
 fi
 
 # JOINED INSTALL (verified & RECKLESS)
