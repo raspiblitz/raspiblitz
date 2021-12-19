@@ -110,7 +110,7 @@ if [ ${uploadRESCUE} -eq 1 ]; then
     exit 3
   fi
 
-  # clear setup state from all fomer possible choices (previous loop)
+  # clear setup state from all former possible choices (previous loop)
   sudo sed -i '/^clrescue=/d' $SETUPFILE
 
   # store result in setup state
