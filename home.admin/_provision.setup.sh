@@ -71,7 +71,7 @@ chown -R admin:admin /home/admin/.${network} >>${logFile} 2>&1
 /home/admin/config.scripts/blitz.datadrive.sh link >> ${logFile}
 
 # test bitcoin config
-confExists=$(sudo ls /mnt/hdd/${network}/${network}.conf | grep -c "${network}.conf")
+confExists=$(ls /mnt/hdd/${network}/${network}.conf | grep -c "${network}.conf")
 echo "File Exists: /mnt/hdd/${network}/${network}.conf --> ${confExists}" >> ${logFile}
 
 # set password B as RPC password (from setup file)
@@ -142,9 +142,9 @@ if [ "${lightning}" != "lnd" ]; then
   # Remove LND from systemd
   echo "Remove LND" >> ${logFile}
   /home/admin/_cache.sh set message "Deactivate Lightning"
-  sudo systemctl disable lnd
-  sudo rm /etc/systemd/system/lnd.service 2>/dev/null
-  sudo systemctl daemon-reload
+  systemctl disable lnd
+  rm /etc/systemd/system/lnd.service 2>/dev/null
+  systemctl daemon-reload
 fi
 
 if [ "${lightning}" == "lnd" ]; then 
@@ -163,7 +163,7 @@ if [ "${lightning}" == "lnd" ]; then
   # if user uploaded an LND rescue file (raspiblitz.setup)
   if [ "${lndrescue}" != "" ]; then
     echo "Restore LND data from uploaded rescue file ${lndrescue} ..." >> ${logFile}
-    source <(sudo /home/admin/config.scripts/lnd.backup.sh lnd-import ${lndrescue})
+    source <(/home/admin/config.scripts/lnd.backup.sh lnd-import ${lndrescue})
     if [ "${error}" != "" ]; then
       /home/admin/config.scripts/blitz.error.sh _provision.setup.sh "lndrescue-import" "setup: lnd import backup failed" "${error}" ${logFile}
       exit 6
@@ -172,17 +172,17 @@ if [ "${lightning}" == "lnd" ]; then
     # preparing new LND config (raspiblitz.setup)
     echo "Creating new LND config ..." >> ${logFile}
     sudo -u bitcoin mkdir /mnt/hdd/lnd 2> /dev/null
-    sudo cp /home/admin/assets/lnd.bitcoin.conf /mnt/hdd/lnd/lnd.conf
-    sudo chown bitcoin:bitcoin /mnt/hdd/lnd/lnd.conf
-    sudo /home/admin/config.scripts/lnd.install.sh on mainnet
-    sudo /home/admin/config.scripts/lnd.setname.sh mainnet ${hostname}
+    cp /home/admin/assets/lnd.bitcoin.conf /mnt/hdd/lnd/lnd.conf
+    chown bitcoin:bitcoin /mnt/hdd/lnd/lnd.conf
+    /home/admin/config.scripts/lnd.install.sh on mainnet
+    /home/admin/config.scripts/lnd.setname.sh mainnet ${hostname}
   fi
 
   # make sure all directories are linked
-  sudo /home/admin/config.scripts/blitz.datadrive.sh link
+  /home/admin/config.scripts/blitz.datadrive.sh link
 
   # check if now a config exists
-  configLinkedCorrectly=$(sudo ls sudo ls /home/bitcoin/.lnd/lnd.conf | grep -c "lnd.conf")
+  configLinkedCorrectly=$(ls /home/bitcoin/.lnd/lnd.conf | grep -c "lnd.conf")
   if [ "${configLinkedCorrectly}" != "1" ]; then
     /home/admin/config.scripts/blitz.error.sh _provision.setup.sh "lnd-link-broken" "link /home/bitcoin/.lnd/lnd.conf broken" "" ${logFile}
     exit 7
@@ -193,16 +193,16 @@ if [ "${lightning}" == "lnd" ]; then
   /home/admin/_cache.sh set message "LND Testrun"
 
   # just in case
-  sudo systemctl stop lnd 2>/dev/null
-  sudo systemctl disable lnd 2>/dev/null
+  systemctl stop lnd 2>/dev/null
+  systemctl disable lnd 2>/dev/null
 
   # copy lnd service
-  sudo cp /home/admin/assets/lnd.service /etc/systemd/system/lnd.service >> ${logFile}
+  cp /home/admin/assets/lnd.service /etc/systemd/system/lnd.service >> ${logFile}
 
   # start lnd up
   echo "Starting LND Service ..." >> ${logFile}
-  sudo systemctl enable lnd >> ${logFile}
-  sudo systemctl start lnd >> ${logFile}
+  systemctl enable lnd >> ${logFile}
+  systemctl start lnd >> ${logFile}
   echo "Starting LND Service ... executed" >> ${logFile}
 
   # check that lnd started
@@ -302,7 +302,7 @@ if [ "${lightning}" == "lnd" ]; then
   fi
 
   # now sync macaroons & TLS zo other users
-  sudo /home/admin/config.scripts/lnd.credentials.sh sync >> ${logFile}
+  /home/admin/config.scripts/lnd.credentials.sh sync >> ${logFile}
 
   # make a final lnd check
   source <(/home/admin/config.scripts/lnd.check.sh basic-setup)
@@ -324,7 +324,7 @@ if [ "${lightning}" == "cl" ]; then
   echo "############## c-lightning" >> ${logFile}
 
   /home/admin/_cache.sh set message "C-Lightning Install"
-  sudo /home/admin/config.scripts/cl.install.sh on mainnet >> ${logFile}
+  /home/admin/config.scripts/cl.install.sh on mainnet >> ${logFile}
   /home/admin/_cache.sh set message "C-Lightning Setup"
 
   # OLD WALLET FROM CLIGHTNING RESCUE
@@ -335,6 +335,41 @@ if [ "${lightning}" == "cl" ]; then
     if [ "${error}" != "" ]; then
       /home/admin/config.scripts/blitz.error.sh _provision.setup.sh "cl-import-backup" "cl.backup.sh cl-import with error" "/home/admin/config.scripts/cl.backup.sh cl-import ${clrescue} --> ${error}" ${logFile}
       exit 16
+    fi
+
+    # detect if the imported hsm_secret is encrypted and set in raspiblitz.conf
+    # use the variables for the default network 
+    source <(/home/admin/config.scripts/network.aliases.sh getvars cl mainnet)
+    hsmSecretPath="/home/bitcoin/.lightning/bitcoin/hsm_secret"
+    # check if encrypted
+    trap 'rm -f "$output"' EXIT
+    output=$(mktemp -p /dev/shm/)
+    echo "test" | sudo -u bitcoin lightning-hsmtool decrypt "$hsmSecretPath" \
+     2> "$output"
+    if [ "$(grep -c "hsm_secret is not encrypted" < "$output")" -gt 0 ];then
+      echo "# The hsm_secret is not encrypted"
+      echo "# Record in raspiblitz.conf"
+      /home/admin/config.scripts/blitz.conf.sh set ${netprefix}clEncryptedHSM "off"
+    else
+      cat $output
+      echo "# The hsm_secret is encrypted"
+      echo "# Record in raspiblitz.conf"
+      /home/admin/config.scripts/blitz.conf.sh set ${netprefix}clEncryptedHSM "off"
+    fi
+
+    # set the lightningd service file on each active network
+    # init backup plugin, restart cl
+    if [ "${cl}" == "on" ] || [ "${cl}" == "1" ]; then
+      /home/admin/config.scripts/cl.install-service.sh mainnet
+      /home/admin/config.scripts/cl-plugin.backup.sh on mainnet
+    fi
+    if [ "${tcl}" == "on" ] || [ "${tcl}" == "1" ]; then
+      /home/admin/config.scripts/cl.install-service.sh testnet
+      /home/admin/config.scripts/cl-plugin.backup.sh on testnet
+    fi
+    if [ "${scl}" == "on" ] || [ "${scl}" == "1" ]; then
+      /home/admin/config.scripts/cl.install-service.sh signet
+      /home/admin/config.scripts/cl-plugin.backup.sh on signet
     fi
 
   # OLD WALLET FROM SEEDWORDS
@@ -355,8 +390,16 @@ if [ "${lightning}" == "cl" ]; then
 
     echo "Generate new CL wallet ..." >> ${logFile}
 
-    # generate new wallet
-    source <(/home/admin/config.scripts/cl.hsmtool.sh new-force mainnet)
+    # a new wallet is generated in /home/admin/config.scripts/cl.install.sh on mainnet
+    walletExistsNow=$(ls /home/bitcoin/.lightning/bitcoin/hsm_secret 2>/dev/null | grep -c "hsm_secret")
+    seedwordsFileExitNow=$(ls /home/bitcoin/.lightning/bitcoin/seedwords.info 2>/dev/null | grep -c "seedwords.info")
+    if [ "${walletExistsNow}" -gt 0 ] && [ "${seedwordsFileExitNow}" -gt 0 ]; then
+      # get existing ${seedwords} and "${seedwords6x4}"
+      source /home/bitcoin/.lightning/bitcoin/seedwords.info
+    else
+      # generate new wallet
+      source <(/home/admin/config.scripts/cl.hsmtool.sh new-force mainnet)
+    fi
 
     # check if got new seedwords
     if [ "${seedwords}" == "" ] || [ "${seedwords6x4}" == "" ]; then
@@ -365,9 +408,9 @@ if [ "${lightning}" == "cl" ]; then
     fi
 
     # check if wallet really got created 
-    walletExistsNow=$(sudo ls /home/bitcoin/.lightning/bitcoin/hsm_secret 2>/dev/null | grep -c "hsm_secret")
+    walletExistsNow=$(ls /home/bitcoin/.lightning/bitcoin/hsm_secret 2>/dev/null | grep -c "hsm_secret")
     if [ $walletExistsNow -eq 0 ]; then
-      /home/admin/config.scripts/blitz.error.sh _provision.setup.sh "cl-wallet-new-nowallet" "cl.hsmtool.sh new-force did not created wallet" "/home/bitcoin/.lightning/bitcoin/hsm_secret --> missing" ${logFile}
+      /home/admin/config.scripts/blitz.error.sh _provision.setup.sh "cl-wallet-new-nowallet" "cl.hsmtool.sh new-force did not create wallet" "/home/bitcoin/.lightning/bitcoin/hsm_secret --> missing" ${logFile}
       exit 19
     fi
 
