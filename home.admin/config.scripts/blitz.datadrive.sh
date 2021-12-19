@@ -404,7 +404,7 @@ if [ "$1" = "status" ]; then
 
   fi
 
-  # HDD Adpater UASP support --> https://www.pragmaticlinux.com/2021/03/fix-for-getting-your-ssd-working-via-usb-3-on-your-raspberry-pi/
+  # HDD Adapter UASP support --> https://www.pragmaticlinux.com/2021/03/fix-for-getting-your-ssd-working-via-usb-3-on-your-raspberry-pi/
   # in both cases (if mounted or not - using the hdd selection from both cases)
   # only check if lsusb command is availabe
   if [ ${#hdd} -gt 0 ] && [ "$(type -t lsusb | grep -c file)" -gt 0 ]; then
@@ -1794,7 +1794,7 @@ if [ "$1" = "uasp-fix" ]; then
     fi 
     if [ ${usbQuirkDone} -eq 0 ]; then
       # add new usb-storage.quirks
-      sudo sed -i "1s/^/usb-storage.quirks=${hddAdapterUSB}:u /" /boot/cmdline.txt
+      sudo sed -i "s/^/usb-storage.quirks=${hddAdapterUSB}:u /" /boot/cmdline.txt
       # go into reboot to activate new setting
       echo "# DONE deactivating UASP for ${hddAdapterUSB} ... reboot needed"
       echo "neededReboot=1"

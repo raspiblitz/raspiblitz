@@ -73,7 +73,7 @@ cat $infoFile >> $logFile
 # INIT RaspiBlitz Cache
 #########################
 
-echo "## INIT RaspiBlitz Cache ... wait background.scan.service to finsih first scan loop" >> $logFile
+echo "## INIT RaspiBlitz Cache ... wait background.scan.service to finish first scan loop" >> $logFile
 systemscan_runtime=""
 while [ "${systemscan_runtime}" == "" ]
 do
@@ -299,7 +299,7 @@ fi
 ##################################
 if [ -f "/var/cache/raspiblitz/hdd-inspect/raspiblitz.conf" ]; then
 
-  echo "check that display class in raspiblitz.conf from HDD is different from as it is ow in raspiblitz.info ..." >> $logFile
+  echo "check that display class in raspiblitz.conf from HDD is different from as it is now in raspiblitz.info ..." >> $logFile
   
   # get display class value from raspiblitz.info
   source <(cat ${infoFile} | grep "^displayClass=")
