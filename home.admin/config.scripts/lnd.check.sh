@@ -193,9 +193,16 @@ if [ "$1" == "prestart" ]; then
     setting ${lndConfFile} ${insertLine} "tor.control" "9051"
     setting ${lndConfFile} ${insertLine} "tor.socks" "9050"
     setting ${lndConfFile} ${insertLine} "tor.privatekeypath" "\/mnt\/hdd\/lnd\/${netprefix}v3_onion_private_key"
-    setting ${lndConfFile} ${insertLine} "tor.streamisolation" "true"
     setting ${lndConfFile} ${insertLine} "tor.v3" "true"
     setting ${lndConfFile} ${insertLine} "tor.active" "true"
+
+    # take care of incompatible settings https://github.com/rootzoll/raspiblitz/issues/2787#issuecomment-991245694
+    if [ $(cat ${lndConfFile} | grep -c "tor.skip-proxy-for-clearnet-targets=true") -gt 0 ] ||
+       [ $(cat ${lndConfFile} | grep -c "tor.skip-proxy-for-clearnet-targets=1") -gt 0 ]; then
+      setting ${lndConfFile} ${insertLine} "tor.streamisolation" "false"
+    else
+      setting ${lndConfFile} ${insertLine} "tor.streamisolation" "true"
+    fi
 
     # deprecate Tor password (remove if in lnd.conf)
     sed -i '/^tor.password=*/d' ${lndConfFile}
