@@ -6,33 +6,51 @@ source /mnt/hdd/raspiblitz.conf
 
 askBackupCopy()
 {
-    whiptail --title "LND Data Backup" --yes-button "Backup" --no-button "Skip" --yesno "
+    whiptail --title "Lightning Data Backup" --yes-button "Backup" --no-button "Skip" --yesno "
 Before deleting your data, do you want
-to make a backup of all your LND Data
-and download that file to your laptop?
+to make a backup of all your Lightning Data
+and download the file(s) to your laptop?
 
-Download LND Data Backup now?
+Download Lightning Data Backup now?
       " 12 44
     if [ $? -eq 0 ]; then
-      clear
-      echo "*************************************"
-      echo "* PREPARING LND BACKUP DOWNLOAD"
-      echo "*************************************"
-      echo "please wait .."
-      sleep 2
-      /home/admin/config.scripts/lnd.compact.sh interactive
-      /home/admin/config.scripts/lnd.backup.sh lnd-export-gui
-      echo
-      echo "PRESS ENTER to continue once you are done downloading."
-      read key
+      if [ "${lightning}" == "lnd" ] || [ "${lnd}" = "on" ]; then
+        clear
+        echo "***********************************"
+        echo "* PREPARING THE LND BACKUP DOWNLOAD"
+        echo "***********************************"
+        echo "please wait .."
+        /home/admin/config.scripts/lnd.compact.sh interactive
+        /home/admin/config.scripts/lnd.backup.sh lnd-export-gui
+        echo
+        echo "PRESS ENTER to continue once you're done downloading."
+        read key
+      fi
+      if [ "${lightning}" == "cl" ] || [ "${cl}" = "on" ]; then
+        clear
+        echo "*******************************************"
+        echo "* PREPARING THE C-LIGHTNING BACKUP DOWNLOAD"
+        echo "*******************************************"
+        echo "please wait .."
+        /home/admin/config.scripts/cl.backup.sh cl-export-gui
+        echo
+        echo "PRESS ENTER to continue once you're done downloading."
+        read key
+      fi
     else
       clear
-      echo "*************************************"
-      echo "* JUST MAKING BACKUP TO SD CARD"
-      echo "*************************************"
+      echo "*****************************************"
+      echo "* JUST MAKING A BACKUP TO THE OLD SD CARD"
+      echo "*****************************************"
       echo "please wait .."
       sleep 2
-      /home/admin/config.scripts/lnd.backup.sh lnd-export
+      if [ "${lightning}" == "lnd" ] || [ "${lnd}" = "on" ]; then
+        /home/admin/config.scripts/lnd.backup.sh lnd-export
+      fi
+      if [ "${lightning}" == "cl" ] || [ "${cl}" = "on" ]; then
+        /home/admin/config.scripts/cl.backup.sh cl-export
+      fi
+      sleep 3
     fi
 }
 

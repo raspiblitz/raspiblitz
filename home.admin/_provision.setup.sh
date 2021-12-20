@@ -155,7 +155,7 @@ if [ "${lightning}" == "lnd" ]; then
   /home/admin/_cache.sh set message "LND Setup"
 
   # password C (raspiblitz.setup)
-  if [ "${passwordC}" == "" ]; then
+  if [ "${passwordC}" == "" ] && [ "${lndrescue}" = "" ]; then
     /home/admin/config.scripts/blitz.error.sh _provision.setup.sh "missing-passwordc" "config: missing passwordC" "" ${logFile}
     exit 5
   fi
@@ -242,11 +242,11 @@ if [ "${lightning}" == "lnd" ]; then
     fi
   fi
 
-  # WALLET --> FROM RESCUEFILE
-  if [ $(sudo -u bitcoin ls /mnt/hdd/lnd/data/chain/bitcoin/mainnet/wallet.db 2>/dev/null | grep -c wallet.db) -gt 0 ]; then
+  # WALLET --> LNDRESCUE
+  if  [ "${lndrescue}" != "" ];then
 
-    # OK no further action needed
-    echo "WALLET --> FROM RESCUEFILE " >> ${logFile}
+    echo "WALLET --> LNDRESCUE " >> ${logFile}
+    /home/admin/_cache.sh set message "LND Wallet (LNDRESCUE)"
 
   # WALLET --> SEED + SCB 
   elif [ "${seedWords}" != "" ] && [ "${staticchannelbackup}" != "" ]; then
@@ -307,7 +307,7 @@ if [ "${lightning}" == "lnd" ]; then
       exit 14
   fi
 
-  # now sync macaroons & TLS zo other users
+  # now sync macaroons & TLS to other users
   /home/admin/config.scripts/lnd.credentials.sh sync >> ${logFile}
 
   # make a final lnd check
