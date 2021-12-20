@@ -80,9 +80,9 @@ if [ ${numConnectedPeers} -eq 0 ]; then
 fi
 
 # raise high focus on lightning channels next 1 hour
-/home/admin/_cache.sh focus ln_${LNTYPE}_${$CHAIN}_channels_pending 0 3600
-/home/admin/_cache.sh focus ln_${LNTYPE}_${$CHAIN}_channels_total 0 3600
-/home/admin/_cache.sh focus ln_${LNTYPE}_${$CHAIN}_channels_active 0 3600
+/home/admin/_cache.sh focus ln_${LNTYPE}_${CHAIN}_channels_pending 0 3600
+/home/admin/_cache.sh focus ln_${LNTYPE}_${CHAIN}_channels_total 0 3600
+/home/admin/_cache.sh focus ln_${LNTYPE}_${CHAIN}_channels_active 0 3600
 
 # let user pick a peer to open a channels with
 OPTIONS=()
