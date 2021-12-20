@@ -7,6 +7,9 @@ source /mnt/hdd/raspiblitz.conf
 
 source <(/home/admin/config.scripts/network.aliases.sh getvars cl $1)
 
+# make sure the CL wallet is unlocked
+/home/admin/config.scripts/cl.hsmtool.sh unlock ${CHAIN}
+
 # BASIC MENU INFO
 WIDTH=64
 BACKTITLE="RaspiBlitz"
