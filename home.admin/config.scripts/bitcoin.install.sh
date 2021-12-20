@@ -239,10 +239,11 @@ Wants=network-online.target
 
 [Service]
 PIDFile=/mnt/hdd/bitcoin/${prefix}bitcoind.pid
-ExecStart=/usr/local/bin/bitcoind -${CHAIN} -daemonwait \
-                                  -pid=/mnt/hdd/bitcoin/${prefix}bitcoind.pid \
-                                  -conf=/mnt/hdd/bitcoin/bitcoin.conf \
-                                  -datadir=/mnt/hdd/bitcoin \
+ExecStart=/usr/local/bin/bitcoind -${CHAIN} \\
+                                  -daemonwait \\
+                                  -pid=/mnt/hdd/bitcoin/${prefix}bitcoind.pid \\
+                                  -conf=/mnt/hdd/bitcoin/bitcoin.conf \\
+                                  -datadir=/mnt/hdd/bitcoin \\
                                   -debuglogfile=/mnt/hdd/bitcoin/${prefix}debug.log
 
 # Make sure the config directory is readable by the service user
@@ -251,7 +252,6 @@ ExecStartPre=/bin/chgrp bitcoin /mnt/hdd/bitcoin
 
 # Process management
 ####################
-
 Type=forking
 PIDFile=/mnt/hdd/bitcoin/${prefix}bitcoind.pid
 Restart=on-failure
@@ -260,46 +260,27 @@ TimeoutStopSec=600
 
 # Directory creation and permissions
 ####################################
-
 # Run as bitcoin:bitcoin
 User=bitcoin
 Group=bitcoin
-
-# /mnt/hdd/bitcoin
-RuntimeDirectory=bitcoin
-RuntimeDirectoryMode=0710
-
-# /mnt/hdd/bitcoin
-ConfigurationDirectory=bitcoin
-ConfigurationDirectoryMode=0710
-
-# /mnt/hdd/bitcoin
-StateDirectory=bitcoin
-StateDirectoryMode=0710
 
 StandardOutput=null
 StandardError=journal
 
 # Hardening measures
 ####################
-
 # Provide a private /tmp and /var/tmp.
 PrivateTmp=true
-
 # Mount /usr, /boot/ and /etc read-only for the process.
 ProtectSystem=full
-
 # Deny access to /home, /root and /run/user
 ProtectHome=true
-
 # Disallow the process and all of its children to gain
 # new privileges through execve().
 NoNewPrivileges=true
-
 # Use a new /dev namespace only populated with API pseudo devices
 # such as /dev/null, /dev/zero and /dev/random.
 PrivateDevices=true
-
 # Deny the creation of writable and executable memory mappings.
 MemoryDenyWriteExecute=true
 
