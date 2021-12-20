@@ -70,7 +70,8 @@ RuntimeDirectory=lightningd
 
 User=bitcoin
 Group=bitcoin
-Type=forking
+# Type=forking hangs on restart
+Type=simple
 PIDFile=/run/lightningd/${netprefix}lightningd.pid
 Restart=on-failure
 
