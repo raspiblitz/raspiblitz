@@ -234,15 +234,15 @@ if [ "$1" = "status" ]; then
             mkdir /var/cache/raspiblitz/hdd-inspect
 
             # make copy of raspiblitz.conf to RAMDISK
-            cp /mnt/hdd${subVolumeDir}/raspiblitz.conf /var/cache/raspiblitz/hdd-inspect/raspiblitz.conf
+            cp -a /mnt/hdd${subVolumeDir}/raspiblitz.conf /var/cache/raspiblitz/hdd-inspect/raspiblitz.conf
 
             # make copy of WIFI config to RAMDISK (if available)
-            cp /mnt/hdd${subVolumeDir}/app-data/wpa_supplicant.conf /var/cache/raspiblitz/hdd-inspect/wpa_supplicant.conf 2>/dev/null
+            cp -a /mnt/hdd${subVolumeDir}/app-data/wpa_supplicant.conf /var/cache/raspiblitz/hdd-inspect/wpa_supplicant.conf 2>/dev/null
 
             # Convert old ssh backup data structure (if needed)
             if [ -d "/mnt/hdd/ssh" ]; then
                 # make a complete backup of directory
-                cp -a /mnt/hdd/ssh /mnt/hdd/app-storage/ssh-old-bakup
+                cp -a /mnt/hdd/ssh /mnt/hdd/app-storage/ssh-old-backup
                 # delete old false sub directory (if exists)
                 rm -r /mnt/hdd/ssh/ssh 2>/dev/null
                 # move ssh root keys into new directory (if exists)
@@ -252,8 +252,8 @@ if [ "$1" = "status" ]; then
             fi
 
             # make copy of SSH keys to RAMDISK (if available)
-            cp -r /mnt/hdd${subVolumeDir}/app-data/sshd /var/cache/raspiblitz/hdd-inspect/sshd 2>/dev/null
-            cp -r /mnt/hdd${subVolumeDir}/app-data/ssh-root /var/cache/raspiblitz/hdd-inspect/ssh-root 2>/dev/null
+            cp -a /mnt/hdd${subVolumeDir}/app-data/sshd /var/cache/raspiblitz/hdd-inspect/sshd 2>/dev/null
+            cp -a /mnt/hdd${subVolumeDir}/app-data/ssh-root /var/cache/raspiblitz/hdd-inspect/ssh-root 2>/dev/null
           fi
         
           # comment this line out if case to study the contect of the data section
