@@ -242,8 +242,14 @@ if [ "${lightning}" == "lnd" ]; then
     fi
   fi
 
+  # WALLET --> FROM RESCUEFILE
+  if [ $(sudo -u bitcoin ls /mnt/hdd/lnd/data/chain/bitcoin/mainnet/wallet.db 2>/dev/null | grep -c wallet.db) -gt 0 ]; then
+
+    # OK no further action needed
+    echo "WALLET --> FROM RESCUEFILE " >> ${logFile}
+
   # WALLET --> SEED + SCB 
-  if [ "${seedWords}" != "" ] && [ "${staticchannelbackup}" != "" ]; then
+  elif [ "${seedWords}" != "" ] && [ "${staticchannelbackup}" != "" ]; then
 
     echo "WALLET --> SEED + SCB " >> ${logFile}
     /home/admin/_cache.sh set message "LND Wallet (SEED & SCB)"
