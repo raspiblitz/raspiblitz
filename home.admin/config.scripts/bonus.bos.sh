@@ -18,8 +18,8 @@ if [ "$1" = "menu" ]; then
   dialog --title " Info Balance of Satoshis " --msgbox "
 Balance of Satoshis is a command line tool.
 Type: 'bos' in the command line to switch to the dedicated user.
-Then see 'bos help' for the options.
-Usage: https://github.com/alexbosworth/balanceofsatoshis/blob/master/README.md
+Then see 'bos help' for the options. Usage:
+https://github.com/alexbosworth/balanceofsatoshis/blob/master/README.md
 " 10 75
   exit 0
 fi
