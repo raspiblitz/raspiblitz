@@ -1,8 +1,11 @@
 # RaspiBlitz: systemd unit for lnd
+# based on https://github.com/lightningnetwork/lnd/blob/master/contrib/init/lnd.service
 
 [Unit]
-Description=LND Lightning Daemon
-Wants=bitcoind.service
+Description=Lightning Network Daemon
+
+# Make sure lnd starts after bitcoind is ready
+Requires=bitcoind.service
 After=bitcoind.service
 
 # for use with sendmail alert
@@ -11,22 +14,47 @@ After=bitcoind.service
 [Service]
 ExecStartPre=-/home/admin/config.scripts/lnd.check.sh prestart mainnet
 ExecStart=/usr/local/bin/lnd --configfile=/home/bitcoin/.lnd/lnd.conf
+ExecStop=/usr/local/bin/lncli stop
 PIDFile=/home/bitcoin/.lnd/lnd.pid
+
 User=bitcoin
 Group=bitcoin
-LimitNOFILE=128000
-Type=simple
-TimeoutSec=180
-Restart=always
+
+# Try restarting lnd if it stops due to a failure
+Restart=on-failure
 RestartSec=60
+
+# Type=notify is required for lnd to notify systemd when it is ready
+Type=notify
+
+# An extended timeout period is needed to allow for database compaction
+# and other time intensive operations during startup. We also extend the
+# stop timeout to ensure graceful shutdowns of lnd.
+TimeoutStartSec=1200
+TimeoutStopSec=3600
+
+LimitNOFILE=128000
 StandardOutput=null
 StandardError=journal
 
-# Hardening measures
-PrivateTmp=true
+# Hardening Measures
+####################
+
+# Mount /usr, /boot/ and /etc read-only for the process.
 ProtectSystem=full
+
+# Disallow the process and all of its children to gain
+# new privileges through execve().
 NoNewPrivileges=true
+
+# Use a new /dev namespace only populated with API pseudo devices
+# such as /dev/null, /dev/zero and /dev/random.
 PrivateDevices=true
+
+# Deny the creation of writable and executable memory mappings.
+MemoryDenyWriteExecute=true
+
+PrivateTmp=true
 
 [Install]
 WantedBy=multi-user.target
