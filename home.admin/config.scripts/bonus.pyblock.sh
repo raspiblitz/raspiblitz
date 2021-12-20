@@ -11,8 +11,7 @@ fi
 if [ "$1" = "menu" ]; then
   dialog --title " Info PyBlock " --msgbox "
 pyblock is a command line tool.
-Type: 'pyblock' in the command line to switch to the dedicated user.
-Then 'pyblock' for starting PyBlock.
+Exit to Terminal and use command 'pyblock'.
 Usage: https://github.com/curly60e/pyblock/blob/master/README.md
 " 10 75
   exit 0
