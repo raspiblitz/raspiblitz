@@ -30,7 +30,7 @@ if [ "$1" = "menu" ]; then
   else
     /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
   fi
-  fingerprint=$(openssl x509 -in /home/bitcoin/.lightning/spark-tls/cert.pem -fingerprint -noout | cut -d"=" -f2)
+  fingerprint=$(openssl x509 -in /home/bitcoin/.spark-wallet/tls/cert.pem -fingerprint -noout | cut -d"=" -f2)
 
   whiptail --title "\
 spark - $CHAIN" --msgbox "Open in your local web browser:
