@@ -74,6 +74,7 @@ if [ $1 = on ];then
   sudo -u bitcoin npm run dist:npm || exit 1
 
   if [ ! -f /home/bitcoin/.spark-wallet/tls/key.pem ];then
+    echo "# creating /home/bitcoin/.spark-wallet/tls/key.pem"
     # create a self signed cert https://github.com/fiatjaf/spark#how-to-use
     /home/admin/config.scripts/internet.selfsignedcert.sh
     # spark looks for specific filenames
@@ -82,6 +83,8 @@ if [ $1 = on ];then
         /home/bitcoin/.spark-wallet/tls/key.pem
     sudo ln -sf /mnt/hdd/app-data/selfsignedcert/selfsigned.cert \
         /home/bitcoin/.spark-wallet/tls/cert.pem
+  else
+    echo "# exists /home/bitcoin/.spark-wallet/tls/key.pem"
   fi
 
   ##########
