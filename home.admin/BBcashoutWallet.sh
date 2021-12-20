@@ -91,8 +91,8 @@ echo "Sweep all possible Funds"
 echo "******************************"
 
 # raise high focus on onchain wallet balance & pending for the next 15min
-/home/admin/_cache.sh focus ln_${LNTYPE}_${$chain}net_wallet_onchain_pending 0 900
-/home/admin/_cache.sh focus ln_${LNTYPE}_${$chain}net_wallet_onchain_balance 0 900
+/home/admin/_cache.sh focus ln_${LNTYPE}_${chain}net_wallet_onchain_pending 0 900
+/home/admin/_cache.sh focus ln_${LNTYPE}_${chain}net_wallet_onchain_balance 0 900
 
 # execute command
 if [ ${LNTYPE} = "cl" ];then
