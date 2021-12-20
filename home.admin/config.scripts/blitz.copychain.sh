@@ -13,7 +13,7 @@ source /mnt/hdd/raspiblitz.conf 2>/dev/null
 
 # check that blockchain is set & supported
 if [ "${network}" != "bitcoin" ]; then
-  echo "blockchain='{$network}'"
+  echo "blockchain='${network}'"
   echo "error='blockchain type missing or not supported'"
   exit 1
 fi

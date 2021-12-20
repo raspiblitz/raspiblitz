@@ -285,7 +285,7 @@ do
         cp $scbPath $localBackupPath
         cp $scbPath $localTimestampedPath
         cp $scbPath /boot/channel.backup
-        echo "OK channel.backup copied to '${localBackupPath}' and '{$localTimestampedPath}' and '/boot/channel.backup'"
+        echo "OK channel.backup copied to '${localBackupPath}' and '${localTimestampedPath}' and '/boot/channel.backup'"
 
         # check if a additional local backup target is set
         # see ./config.scripts/blitz.backupdevice.sh
