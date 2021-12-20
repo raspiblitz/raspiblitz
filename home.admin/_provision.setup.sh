@@ -242,8 +242,14 @@ if [ "${lightning}" == "lnd" ]; then
     fi
   fi
 
+  # WALLET --> LNDRESCUE
+  if  [ "${lndrescue}" != "" ];then
+
+    echo "WALLET --> LNDRESCUE " >> ${logFile}
+    /home/admin/_cache.sh set message "LND Wallet (LNDRESCUE)"
+
   # WALLET --> SEED + SCB 
-  if [ "${seedWords}" != "" ] && [ "${staticchannelbackup}" != "" ]; then
+  elif [ "${seedWords}" != "" ] && [ "${staticchannelbackup}" != "" ]; then
 
     echo "WALLET --> SEED + SCB " >> ${logFile}
     /home/admin/_cache.sh set message "LND Wallet (SEED & SCB)"
@@ -301,7 +307,7 @@ if [ "${lightning}" == "lnd" ]; then
       exit 14
   fi
 
-  # now sync macaroons & TLS zo other users
+  # now sync macaroons & TLS to other users
   /home/admin/config.scripts/lnd.credentials.sh sync >> ${logFile}
 
   # make a final lnd check
