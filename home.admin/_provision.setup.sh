@@ -155,7 +155,7 @@ if [ "${lightning}" == "lnd" ]; then
   /home/admin/_cache.sh set message "LND Setup"
 
   # password C (raspiblitz.setup)
-  if [ "${passwordC}" == "" ]; then
+  if [ "${passwordC}" == "" ] && [ "${lndrescue}" = "" ]; then
     /home/admin/config.scripts/blitz.error.sh _provision.setup.sh "missing-passwordc" "config: missing passwordC" "" ${logFile}
     exit 5
   fi
