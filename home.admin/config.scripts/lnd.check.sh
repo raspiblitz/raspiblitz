@@ -82,6 +82,52 @@ if [ "$1" == "prestart" ]; then
   lndConfFile="/mnt/hdd/lnd/${netprefix}lnd.conf"
   echo "# lndConfFile(${lndConfFile})"
 
+
+  ##### BITCOIN OPTIONS SECTION #####
+
+  # [bitcoin]
+  sectionName="[Bb]itcoin"
+  if [ "${network}" != "bitcoin" ] && [ "${network}" != "" ]; then
+    sectionName="${network}"
+  fi
+  echo "# [${sectionName}] config ..."
+
+  # make sure lnd config has a [bitcoind] section
+  sectionExists=$(cat ${lndConfFile} | grep -c "^\[${sectionName}\]")
+  echo "# sectionExists(${sectionExists})"
+  if [ "${sectionExists}" == "0" ]; then
+    echo "# adding section [${network}]"
+    echo "
+[${network}]
+" | tee -a ${lndConfFile}
+  fi
+
+  # get line number of [bitcoin] section
+  sectionLine=$(cat ${lndConfFile} | grep -n "^\[${sectionName}\]" | cut -d ":" -f1)
+  echo "# sectionLine(${sectionLine})"
+  insertLine=$(expr $sectionLine + 1)
+  echo "# insertLine(${insertLine})"
+  fileLines=$(wc -l ${lndConfFile} | cut -d " " -f1)
+  echo "# fileLines(${fileLines})"
+  if [ ${fileLines} -lt ${insertLine} ]; then
+    echo "# adding new line for inserts"
+    echo "
+" | tee -a ${lndConfFile}
+  fi
+
+  # SET/UPDATE bitcoin.active
+  echo "# ${network}.active insert/update"
+  setting ${lndConfFile} ${insertLine} "${network}\.active" "1"
+
+  # SET/UPDATE bitcoin.mainnet
+  echo "# ${network}.${targetchain} insert/update"
+  setting ${lndConfFile} ${insertLine} "${network}\.${targetchain}" "1"
+
+  # SET/UPDATE bitcoin.node
+  echo "# ${network}.node insert/update"
+  setting ${lndConfFile} ${insertLine} "${network}\.node" "${network}d"
+  
+
   ##### BITCOIND OPTIONS SECTION #####
 
   # [bitcoind]
