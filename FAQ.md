@@ -178,7 +178,7 @@ Of course, people should modify the system, add own scripts, etc ... but if you 
 ### How can I update LND or bitcoind even before the next RaspiBlitz update?
 
 Try updating before a official RaspiBlitz at your own risk - you can find some info about that here:
-https://github.com/raspibolt/raspibolt/blob/99f2909f9d90ef5d4ec7aa994562798e50c4ace4/bitcoin-core.md#for-the-future-upgrade-bitcoin-core
+https://github.com/raspibolt/raspibolt/blob/master/bitcoin-core.md#for-the-future-upgrade-bitcoin-core
 
 
 
