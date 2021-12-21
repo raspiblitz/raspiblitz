@@ -38,6 +38,7 @@ There are further Services that can be switched on:
 * **CL Spark Wallet** (WalletUI with BOLT12 offers) [details](https://github.com/shesek/spark-wallet#progressive-web-app)
 * **CL plugin: Sparko** (WalletUI & HTTP-RPC bridge) [details](https://github.com/fiatjaf/sparko#the-sparko-plugin)
 * **CL plugin: CLBOSS** (Automated Node Manager) [details](https://github.com/ZmnSCPxj/clboss#clboss-the-c-lightning-node-manager)
+* **Tallycoin Connect** (Use Tallycoin with your own node) [details](https://github.com/djbooth007/tallycoin_connect)
 
 You can connect the following Wallet-Apps to your RaspiBlitz:
 
@@ -61,7 +62,6 @@ When it comes fully assembled with an up-to-date synced blockchain, it's possibl
 If you start at home ordering the parts from Amazon (see shopping list below) then it's a weekend project with a lot of downloading and syncing time where you can do other stuff while checking on the progress from time to time.
 
 If you already run a Umbrel or myNode you have basically all the hardware needed and you can make the [Migration to RaspiBlitz from Umbrel/myNode](#make-a-raspiblitz-out-of-your-umbrel-or-mynode) under one hour.
-
 
 ## Hardware Needed
 
@@ -94,7 +94,7 @@ The idea of the shopping lists is to provide you the best tested hardware compon
   - Quimat 3,5'' Zoll Inch Touch
   - ELEGOO Display 3.5" Zoll TFT LCD
   - kuman 3.5 Inch Touch Screen TFT Monitor
-  - Waveshare 3.5inch Display for Raspberry Pi 
+  - Waveshare 3.5inch Display for Raspberry Pi
 
 *You can even pay for your RaspiBlitz Amazon Shopping with Bitcoin & Lightning through [Bitrefill](https://blog.bitrefill.com/its-here-buy-amazon-vouchers-with-bitcoin-on-bitrefill-bb2a4449724a).*
 
@@ -116,7 +116,7 @@ In the end your RaspiBlitz should look like this:
 ## Downloading the Software
 
 |Method|Install the image|Build the sd card|
-|------|-----------------|-----------------|   
+|------|-----------------|-----------------|
 |Philosophy|Trust|Sovereignty|
 |Difficulty level|Easy|Medium|
 |Pros|Make Blitz accessible to everyone|You don't need to trust us, build from your own forked repository|
@@ -577,7 +577,7 @@ To get some bitcoin testnet coins, you can use "faucets" from different places o
 
 You can read more about TESTNET and Bitcoin faucets here: https://kuttler.eu/code/bitcoin-testnet-blockchain-size-in-2020/
 
-##### ZeroTier 
+##### ZeroTier
 
 With ZeroTier you can add your RaspiBlitz to a software defined network - see for details: https://en.wikipedia.org/wiki/ZeroTier
 
@@ -831,7 +831,7 @@ Dashboard Bitcoin information program (needs LND).
 
 ![PYBLOCK](pictures/pyblock.png)
 
-https://github.com/curly60e/pyblock/blob/master/README.md 
+https://github.com/curly60e/pyblock/blob/master/README.md
 
 ##### Channel Tools (chantools)
 
@@ -985,7 +985,7 @@ If you want a web service, like BTCPay Server or LNbits, to be available to the 
 You could use the self-signed HTTPS certificate that RaspiBlitz is offering you, but this will give users Security Warnings in their browser and is not very user friendly.
 That's where you can use a LetsEncrypt Subscription to get a free valid HTTPS certificate that is excepted without warning from almost all common browsers 
 
-Because you also need a domain name for that you will need to open a free account, the following are presently supported, would be good to add more with the help of the community: 
+Because you also need a domain name for that you will need to open a free account, the following are presently supported, would be good to add more with the help of the community:
 [DuckDNS.org](https://www.duckdns.org)
 [DYNU.com](https://www.dynu.com) (AT THE MOMENT NOT AVAILABLE)
 
@@ -1259,7 +1259,7 @@ Go to your web browser, do the following:
 
     ![Dropbox API 3](https://github.com/rootzoll/raspiblitz/raw/v1.6/pictures/dropbox-3.png)
 
-    Now go back to the 'Settings' tab and under 'OAuth2', choose 'no expiration' under 'Access token expiration' then click the 'Generate' button. You will now see a long string of letters and numbers appear. This is your **Dropbox-Authtoken**. Make sure to copy the complete token string .. there might be more if you scroll to the right in the token field. 
+    Now go back to the 'Settings' tab and under 'OAuth2', choose 'no expiration' under 'Access token expiration' then click the 'Generate' button. You will now see a long string of letters and numbers appear. This is your **Dropbox-Authtoken**. Make sure to copy the complete token string .. there might be more if you scroll to the right in the token field.
 
 To test it, try opening or closing a channel and then check if you can find a copy of `channel.backup` in your Dropbox.
 You can check the background-script logs to see details on errors: `sudo journalctl -f -u background`

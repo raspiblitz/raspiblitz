@@ -91,7 +91,7 @@ source <(/home/admin/_cache.sh get \
 if [ ${PRAMETER_LCD} -eq 1 ]; then
     adminStr="ssh admin@${internet_localip} -> Password A"
 else
-    adminStr="open 2nd SSH session -> terminal access"
+    adminStr="CTRL+C -> exit to terminal"
 fi
 
 # display info to user
