@@ -445,7 +445,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     githubUser="$3"
   fi
   #githubBranch="tags/raspiblitz"
-  githubBranch="ec874baa6b4ea3d6ec039c9bd71b9c73a899a737" #commit 5. December 2021
+  githubBranch="a1ae7aca9e5c0dba89f1e62b5d172b12d4492019" #commit 21. December 2021
   if [ "$4" != "" ]; then
     githubBranch="$4"
   fi
