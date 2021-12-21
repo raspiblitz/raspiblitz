@@ -161,7 +161,7 @@ if [ ${mode} = "lnd-import-gui" ]; then
   # get by second parameter if this call if happening during setup or production
   scenario=$2
   if [ "${scenario}" != "setup" ] && [ "${scenario}" != "production" ]; then
-    echo "error='mising parameter'"
+    echo "error='missing parameter'"
     exit 1
   fi
 
@@ -169,7 +169,7 @@ if [ ${mode} = "lnd-import-gui" ]; then
   if [ "${scenario}" == "setup" ]; then
     RESULTFILE=$3
     if [ "${RESULTFILE}" == "" ]; then
-      echo "error='mising parameter'"
+      echo "error='missing parameter'"
       exit 1 
     fi
   fi
@@ -354,7 +354,7 @@ if [ ${mode} = "scb-import-gui" ]; then
   # get by second parameter if this call if happening during setup or production
   scenario=$2
   if [ "${scenario}" != "setup" ] && [ "${scenario}" != "production" ]; then
-    echo "error='mising parameter'"
+    echo "error='missing parameter'"
     exit 1
   fi
 
@@ -362,7 +362,7 @@ if [ ${mode} = "scb-import-gui" ]; then
   if [ "${scenario}" == "setup" ]; then
     RESULTFILE=$3
     if [ "${RESULTFILE}" == "" ]; then
-      echo "error='mising parameter'"
+      echo "error='missing parameter'"
       exit 1 
     fi
   fi
@@ -463,7 +463,7 @@ if [ ${mode} = "seed-export-gui" ]; then
   # 2nd PARAMETER: lnd seed data
   seedwords6x4=$2
   if [ "${seedwords6x4}" == "" ]; then
-    echo "error='mising parameter'"
+    echo "error='missing parameter'"
     exit 1 
   fi
 
@@ -489,7 +489,7 @@ if [ ${mode} = "seed-import-gui" ]; then
   # scenario setup needs a 3rd parameter - the RESULTFILE to store results in
   RESULTFILE=$2
   if [ "${RESULTFILE}" == "" ]; then
-    echo "error='mising parameter'"
+    echo "error='missing parameter'"
     exit 1
   fi
 
