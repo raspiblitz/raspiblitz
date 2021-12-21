@@ -38,7 +38,7 @@ https://${localip}:8124 with Fingerprint:
 ${fingerprint}\n
 Use your Password B to login.\n
 Hidden Service address for TOR Browser (see LCD for QR):\n${toraddress}
-" 16 67
+" 16 72
     /home/admin/config.scripts/blitz.display.sh hide
   else
     # Info without TOR
@@ -48,7 +48,7 @@ https://${localip}:8124 with Fingerprint:
 ${fingerprint}\n
 Use your Password B to login.\n
 Activate TOR to access the web interface from outside your local network.
-" 15 57
+" 15 72
   fi
   echo "please wait ..."
   exit 0
