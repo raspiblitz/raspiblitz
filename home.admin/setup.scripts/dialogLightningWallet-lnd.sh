@@ -162,7 +162,7 @@ fi
 # UPLOAD STATIC CHANNEL BACKUP FILE dialog (if activated by dialogs above)
 if [ ${uploadSCB} -eq 1 ]; then
 
-  # start seed input and get results
+  # import SCB and get results
   _temp="/var/cache/raspiblitz/.temp.tmp"
   /home/admin/config.scripts/lnd.backup.sh scb-import-gui setup $_temp
   source $_temp 2>/dev/null
