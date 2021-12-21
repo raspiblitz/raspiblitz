@@ -167,7 +167,7 @@ sudo apt update -y
 sudo apt upgrade -f -y
 
 echo -e "\n*** SOFTWARE UPDATE ***"
-# based on https://github.com/raspibolt/raspibolt/blob/master/bonus/raspberry-pi/upgrade-external-drive.md#software-update
+# based on https://raspibolt.org/system-configuration.html#system-update
 # htop git curl bash-completion vim jq dphys-swapfile bsdmainutils -> helpers
 # autossh telnet vnstat -> network tools bandwidth monitoring for future statistics
 # parted dosfstolls -> prepare for format data drive
@@ -395,7 +395,7 @@ sudo chown root:root /etc/logrotate.d/rsyslog
 sudo service rsyslog restart
 
 echo -e "\n*** ADDING MAIN USER admin ***"
-# based on https://github.com/raspibolt/raspibolt/blob/master/system-configuration.md#add-users
+# based on https://raspibolt.org/system-configuration.html#add-users
 # using the default password 'raspiblitz'
 sudo adduser --disabled-password --gecos "" admin
 echo "admin:raspiblitz" | sudo chpasswd
@@ -413,7 +413,7 @@ else
 fi
 
 echo -e "\n*** ADDING SERVICE USER bitcoin"
-# based on https://github.com/raspibolt/raspibolt/blob/master/system-configuration.md#add-users
+# based on https://raspibolt.org/system-configuration.html#add-users
 # create user and set default password for user
 sudo adduser --disabled-password --gecos "" bitcoin
 echo "bitcoin:raspiblitz" | sudo chpasswd
@@ -529,7 +529,7 @@ sudo dphys-swapfile swapoff
 sudo dphys-swapfile uninstall
 
 echo -e "\n*** INCREASE OPEN FILE LIMIT ***"
-# based on https://github.com/raspibolt/raspibolt/blob/master/security.md#increase-your-open-files-limit
+# based on https://raspibolt.org/security.html#increase-your-open-files-limit
 sudo sed --in-place -i "56s/.*/*    soft nofile 256000/" /etc/security/limits.conf
 sudo bash -c "echo '*    hard nofile 256000' >> /etc/security/limits.conf"
 sudo bash -c "echo 'root soft nofile 256000' >> /etc/security/limits.conf"
@@ -540,7 +540,7 @@ sudo sed --in-place -i "25s/.*/session required pam_limits.so/" /etc/pam.d/commo
 sudo bash -c "echo '# end of pam-auth-update config' >> /etc/pam.d/common-session-noninteractive"
 
 # *** fail2ban ***
-# based on https://github.com/raspibolt/raspibolt/blob/master/security.md#fail2ban
+# based on https://raspibolt.org/security.html#fail2ban
 echo "*** HARDENING ***"
 sudo apt install -y --no-install-recommends python3-systemd fail2ban
 
