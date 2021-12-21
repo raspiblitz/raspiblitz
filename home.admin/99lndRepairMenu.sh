@@ -62,23 +62,56 @@ lndHealthCheck()
     fi
     loopcount=$(($loopcount +1))
     if [ ${loopcount} -gt 100 ]; then
-      /home/admin/config.scripts/blitz.error.sh _provision.setup.sh "lnd-start-fail" "lnd service not getting to running status" "sudo systemctl status lnd.service | grep -c running --> ${lndRunning}" ${logFile}
+      echo "lnd-start-fail" "lnd service not getting to running status" "sudo systemctl status lnd.service | grep -c running --> ${lndRunning}"
       exit 8
     fi
   done
-  echo "OK - LND is running" ${logFile}
+  echo "OK - LND is running"
   sleep 10
 
   # Check LND health/fails (to be extended)
   tlsExists=$(ls /mnt/hdd/lnd/tls.cert 2>/dev/null | grep -c "tls.cert")
   if [ ${tlsExists} -eq 0 ]; then
-      /home/admin/config.scripts/blitz.error.sh _provision.setup.sh "lnd-no-tls" "lnd not created TLS cert" "no /mnt/hdd/lnd/tls.cert" ${logFile}
-      exit 9
+    echo "lnd-no-tls" "lnd not created TLS cert" "no /mnt/hdd/lnd/tls.cert"
+    exit 9
   fi
 }
 
-syncAndCheckLND() 
+syncAndCheckLND() # from _provision.setup.sh
 {
+  # make sure all directories are linked
+  /home/admin/config.scripts/blitz.datadrive.sh link
+
+  # check if now a config exists
+  configLinkedCorrectly=$(ls /home/bitcoin/.lnd/lnd.conf | grep -c "lnd.conf")
+  if [ "${configLinkedCorrectly}" != "1" ]; then
+    echo "lnd-link-broken" "link /home/bitcoin/.lnd/lnd.conf broken" ""
+    exit 7
+  fi
+
+  # Init LND service & start
+  echo "*** Init LND Service & Start ***"
+  /home/admin/_cache.sh set message "LND Testrun"
+
+  # just in case
+  systemctl stop lnd 2>/dev/null
+  systemctl disable lnd 2>/dev/null
+
+  # copy lnd service
+  cp /home/admin/assets/lnd.service /etc/systemd/system/lnd.service
+
+  # start lnd up
+  echo "Starting LND Service ..."
+  systemctl enable lnd
+  systemctl start lnd
+  echo "Starting LND Service ... executed"  
+  
+  if [ $(sudo -u bitcoin ls /mnt/hdd/lnd/data/chain/bitcoin/mainnet/wallet.db 2>/dev/null | grep -c wallet.db) -gt 0 ]; then
+    echo "# OK, there is an LND wallet present"
+  else
+    echo "lnd-no-wallet" "there is no LND wallet present" "/mnt/hdd/lnd/data/chain/bitcoin/mainnet/wallet.db --> missing"
+    exit 13
+  fi
   # sync macaroons & TLS to other users
   echo "*** Copy LND Macaroons to user admin ***"
   /home/admin/_cache.sh set message "LND Credentials"
@@ -86,7 +119,7 @@ syncAndCheckLND()
   # check if macaroon exists now - if not fail
   macaroonExists=$(sudo -u bitcoin ls -la /home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon 2>/dev/null | grep -c admin.macaroon)
   if [ ${macaroonExists} -eq 0 ]; then
-      /home/admin/config.scripts/blitz.error.sh _provision.setup.sh "lnd-no-macaroons" "lnd did not create macaroons" "/home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon --> missing" ${logFile}
+      echo "lnd-no-macaroons" "lnd did not create macaroons" "/home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon --> missing"
       exit 14
   fi
 
@@ -96,7 +129,7 @@ syncAndCheckLND()
   # make a final lnd check
   source <(/home/admin/config.scripts/lnd.check.sh basic-setup)
   if [ "${err}" != "" ]; then
-    /home/admin/config.scripts/blitz.error.sh _provision.setup.sh "lnd-check-error" "lnd.check.sh basic-setup with error" "/home/admin/config.scripts/lnd.check.sh basic-setup --> ${err}" ${logFile}
+    echo "lnd-check-error" "lnd.check.sh basic-setup with error" "/home/admin/config.scripts/lnd.check.sh basic-setup --> ${err}"
     exit 15
   fi
 }
@@ -221,6 +254,9 @@ case $CHOICE in
     source $_temp 2>/dev/null
     sudo rm $_temp 2>/dev/null
 
+    /home/admin/config.scripts/lnd.install.sh on ${CHAIN}
+    sudo systemctl start ${netprefix}lnd
+    
     syncAndCheckLND
     
     echo "Press ENTER to return to main menu."
@@ -260,12 +296,12 @@ case $CHOICE in
     
     getpasswordC
 
-    # from _provison.setup.sh
+    # from _provision.setup.sh
     # create wallet
     # import static channel backup if was uploaded
     source <(/home/admin/config.scripts/lnd.backup.sh scb-import ${staticchannelbackup})
     if [ "${error}" != "" ]; then
-      /home/admin/config.scripts/blitz.error.sh _provision.setup.sh "lnd-scb-import" "lnd.backup.sh scb-import returned error" "/home/admin/config.scripts/lnd.backup.sh scb-import ${staticchannelbackup} --> ${error}" ${logFile}
+      echo "lnd-scb-import" "lnd.backup.sh scb-import returned error" "/home/admin/config.scripts/lnd.backup.sh scb-import ${staticchannelbackup} --> ${error}"
       exit 10
     fi
 
@@ -294,7 +330,7 @@ case $CHOICE in
       if ! pip list | grep grpc; then sudo -H python3 -m pip install grpcio==1.38.1; fi
       source <(/home/admin/config.scripts/lnd.initwallet.py scb mainnet ${passwordC} "${seedWords}" "${staticchannelbackup}" ${seedPassword})
       if [ "${err}" != "" ]; then
-      /home/admin/config.scripts/blitz.error.sh _provision.setup.sh "lnd-wallet-seed+scb" "lnd.initwallet.py scb returned error" "/home/admin/config.scripts/lnd.initwallet.py scb mainnet ... --> ${err} + ${errMore}" ${logFile}
+      echo "lnd-wallet-seed+scb" "lnd.initwallet.py scb returned error" "/home/admin/config.scripts/lnd.initwallet.py scb mainnet ... --> ${err} + ${errMore}"
       exit 11
       fi
     fi
@@ -361,7 +397,7 @@ or having a complete LND rescue-backup from your old node.
       if ! pip list | grep grpc; then sudo -H python3 -m pip install grpcio==1.38.1; fi  
       source <(/home/admin/config.scripts/lnd.initwallet.py seed mainnet ${passwordC} "${seedWords}" ${seedPassword})
       if [ "${err}" != "" ]; then
-      /home/admin/config.scripts/blitz.error.sh _provision.setup.sh "lnd-wallet-seed" "lnd.initwallet.py seed returned error" "/home/admin/config.scripts/lnd.initwallet.py seed mainnet ... --> ${err} + ${errMore}" ${logFile}
+      echo "lnd-wallet-seed" "lnd.initwallet.py seed returned error" "/home/admin/config.scripts/lnd.initwallet.py seed mainnet ... --> ${err} + ${errMore}"
       exit 12
       fi
     fi
