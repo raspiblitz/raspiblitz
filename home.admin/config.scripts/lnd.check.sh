@@ -82,6 +82,52 @@ if [ "$1" == "prestart" ]; then
   lndConfFile="/mnt/hdd/lnd/${netprefix}lnd.conf"
   echo "# lndConfFile(${lndConfFile})"
 
+
+  ##### BITCOIN OPTIONS SECTION #####
+
+  # [bitcoin]
+  sectionName="[Bb]itcoin"
+  if [ "${network}" != "bitcoin" ] && [ "${network}" != "" ]; then
+    sectionName="${network}"
+  fi
+  echo "# [${sectionName}] config ..."
+
+  # make sure lnd config has a [bitcoind] section
+  sectionExists=$(cat ${lndConfFile} | grep -c "^\[${sectionName}\]")
+  echo "# sectionExists(${sectionExists})"
+  if [ "${sectionExists}" == "0" ]; then
+    echo "# adding section [${network}]"
+    echo "
+[${network}]
+" | tee -a ${lndConfFile}
+  fi
+
+  # get line number of [bitcoin] section
+  sectionLine=$(cat ${lndConfFile} | grep -n "^\[${sectionName}\]" | cut -d ":" -f1)
+  echo "# sectionLine(${sectionLine})"
+  insertLine=$(expr $sectionLine + 1)
+  echo "# insertLine(${insertLine})"
+  fileLines=$(wc -l ${lndConfFile} | cut -d " " -f1)
+  echo "# fileLines(${fileLines})"
+  if [ ${fileLines} -lt ${insertLine} ]; then
+    echo "# adding new line for inserts"
+    echo "
+" | tee -a ${lndConfFile}
+  fi
+
+  # SET/UPDATE bitcoin.active
+  echo "# ${network}.active insert/update"
+  setting ${lndConfFile} ${insertLine} "${network}\.active" "1"
+
+  # SET/UPDATE bitcoin.mainnet
+  echo "# ${network}.${targetchain} insert/update"
+  setting ${lndConfFile} ${insertLine} "${network}\.${targetchain}" "1"
+
+  # SET/UPDATE bitcoin.node
+  echo "# ${network}.node insert/update"
+  setting ${lndConfFile} ${insertLine} "${network}\.node" "${network}d"
+  
+
   ##### BITCOIND OPTIONS SECTION #####
 
   # [bitcoind]
@@ -193,9 +239,16 @@ if [ "$1" == "prestart" ]; then
     setting ${lndConfFile} ${insertLine} "tor.control" "9051"
     setting ${lndConfFile} ${insertLine} "tor.socks" "9050"
     setting ${lndConfFile} ${insertLine} "tor.privatekeypath" "\/mnt\/hdd\/lnd\/${netprefix}v3_onion_private_key"
-    setting ${lndConfFile} ${insertLine} "tor.streamisolation" "true"
     setting ${lndConfFile} ${insertLine} "tor.v3" "true"
     setting ${lndConfFile} ${insertLine} "tor.active" "true"
+
+    # take care of incompatible settings https://github.com/rootzoll/raspiblitz/issues/2787#issuecomment-991245694
+    if [ $(cat ${lndConfFile} | grep -c "tor.skip-proxy-for-clearnet-targets=true") -gt 0 ] ||
+       [ $(cat ${lndConfFile} | grep -c "tor.skip-proxy-for-clearnet-targets=1") -gt 0 ]; then
+      setting ${lndConfFile} ${insertLine} "tor.streamisolation" "false"
+    else
+      setting ${lndConfFile} ${insertLine} "tor.streamisolation" "true"
+    fi
 
     # deprecate Tor password (remove if in lnd.conf)
     sed -i '/^tor.password=*/d' ${lndConfFile}
@@ -267,18 +320,7 @@ elif [ "$1" == "basic-setup" ]; then
   fi
 
   # get network from config (BLOCKCHAIN)
-  lndNetwork=""
-  source <(sudo cat /mnt/hdd/lnd/lnd.conf 2>/dev/null | grep 'bitcoin.active' | sed 's/^[a-z]*\./bitcoin_/g')
-  source <(sudo cat /mnt/hdd/lnd/lnd.conf 2>/dev/null | grep 'litecoin.active' | sed 's/^[a-z]*\./litecoin_/g')
-  if [ "${bitcoin_active}" == "1" ] && [ "${litecoin_active}" == "1" ]; then
-    echo "err='lnd.conf: bitcoin and litecoin are set active at the same time'"
-  elif [ "${bitcoin_active}" == "1" ]; then
-    lndNetwork="bitcoin"
-  elif [ "${litecoin_active}" == "1" ]; then
-    lndNetwork="litecoin"
-  else
-    echo "err='lnd.conf: no blockchain network is set'"
-  fi
+  lndNetwork="bitcoin"
   echo "network='${lndNetwork}'"
 
   # check if network is same the raspiblitz config

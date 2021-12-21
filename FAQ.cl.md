@@ -35,6 +35,10 @@
     - [Recover from a cl-rescue file](#recover-from-a-cl-rescue-file)
     - [Recover from a seed](#recover-from-a-seed)
     - [Rescan the chain after restoring a used c-lightning wallet](#rescan-the-chain-after-restoring-a-used-c-lightning-wallet)
+- [Update](#update)
+  - [Update to a new C-lightning release](#update-to-a-new-c-lightning-release)
+  - [Experimental update to the latest master](#experimental-update-to-the-latest-master)
+- [sqlite3 queries](#sqlite3-queries)
 - [Script file help list](#script-file-help-list)
 
 ---
@@ -59,7 +63,6 @@ The channels would need to be closed to use the same funds in an other node.
 * https://lightning.readthedocs.io/
 
 ## Commands and aliases
-
 * Check if the C-lightning daemon is running:
     ```
     sudo systemctl status lightningd
@@ -76,6 +79,7 @@ or with the alias: `cllog`
     alias clconf='sudo nano /home/bitcoin/.lightning/config'
     alias cllog='sudo tail -n 30 -f /home/bitcoin/.lightning/bitcoin/cl.log'
     ```
+
 ## Directories
 * All data is stored on the disk in:  
 `/mnt/hdd/app-data/.lightningd`  
@@ -87,22 +91,21 @@ or with the alias: `cllog`
 
 ### Default values
 * on the RaspiBlitz for mainnet
-    ```
-    network=bitcoin
-    announce-addr=127.0.0.1:9736
-    log-file=cl.log
-    log-level=info
-    plugin-dir=/home/bitcoin/cln-plugins-enabled
-    # Tor settings
-    proxy=127.0.0.1:9050
-    bind-addr=127.0.0.1:9736
-    addr=statictor:127.0.0.1:9051/torport=9736
-    always-use-proxy=true
-    ```
+  ```
+  network=bitcoin
+  log-file=cl.log
+  log-level=info
+  plugin-dir=/home/bitcoin/cln-plugins-enabled
+  # Tor settings
+  proxy=127.0.0.1:9050
+  bind-addr=127.0.0.1:9736
+  addr=statictor:127.0.0.1:9051/torport=9736
+  always-use-proxy=true
+  ```
 ### All possible config settings
   *  can be shown by running:   
   `lightningd --help`  
-  * Place the settings in the config file  without the `--` and restart lightningd
+  * To persist the setings place the options in the config file without the `--` and restart lightningd
     ```
     Usage: lightningd 
     A bitcoin lightning daemon (default values shown for network: bitcoin).
@@ -260,7 +263,8 @@ or with the alias: `cllog`
 ### Implemented plugins
 * summary
 * sparko
-* clboss
+* [CLBOSS](#clboss)
+* [feeadjuster](#feeadjuster)
 
 ### Add a custom plugin
 * Place the plugin in the `/home/bitcoin/cl-plugins-enabled` directory 
@@ -308,12 +312,13 @@ https://github.com/ZmnSCPxj/clboss#clboss-status
 ### Feeadjuster
 
 * Install:
+`config.scripts/cl-plugin.feedadjuster.sh on`
 
-* to set the default fees in the config add:
-    ```
-    fee-base=BASEFEE_IN_MILLISATS
-    fee-per-satoshi=PPM_FEE_IN_SATS
-    ```
+* to set the default fees add to the C-lightning `config` file:
+  ```
+  fee-base=BASEFEE_IN_MILLISATS
+  fee-per-satoshi=PPM_FEE_IN_SATS
+  ```
 * more options for the feeadjuster to be set in the c-lightning config can be seen in the [code](https://github.com/lightningd/plugins/blob/c16c564c2c5549b8f7236815490260c49e9e9bf4/feeadjuster/feeadjuster.py#L318): 
     ```
     plugin.add_option(
@@ -472,7 +477,7 @@ the amounts can be specified in `sat` or `btc`
 list the utxo-s with `lightning-cli listfunds`, can list multiple  
 the feerate is in `perkb` by default, e.g. use 1000 for 1 sat/byte
     ```
-    lightning-cli fundchannel feerate=PERKB_FEERATE utxos='["TRANSACTION_ID:INDDEX_NUMBER"]' -kid=NODE_ID amount=OWN_AMOUNTsat request_amt=PEER_CONTRIBUTION_AMOUNTsat compact_lease=COMPACT_LEASE
+    lightning-cli fundchannel feerate=PERKB_FEERATE utxos='["TRANSACTION_ID:INDDEX_NUMBER"]' -k id=NODE_ID amount=OWN_AMOUNTsat request_amt=PEER_CONTRIBUTION_AMOUNTsat compact_lease=COMPACT_LEASE
     ```
 
 ### Offers
@@ -522,7 +527,6 @@ Will need to pay through a peer which supports the onion messages which means yo
 * https://bitcoin.stackexchange.com/questions/107484/how-can-i-decode-the-feature-string-of-a-lightning-node-with-bolt-9
 * Convert the hex number from `lightning-cli listpeers` to binary: https://www.binaryhexconverter.com/hex-to-binary-converter and count the position of the bits from the right.
 
-
 ## Testnets
 * for testnet and signet there are prefixes `t` and `s` used for the aliases, daemons and their own plugin directory names.
 * Testnet
@@ -557,38 +561,91 @@ Will need to pay through a peer which supports the onion messages which means yo
 ## Backups
 * https://lightning.readthedocs.io/FAQ.html#how-to-backup-my-wallet
 * General details: https://lightning.readthedocs.io/BACKUP.html
+
 ### Seed
-* by default a BIP39 wordlist compatible, 24 words seed is used to generate the `hsm_secret`
-* if the wallet was generated or restored from seed on the RaspiBlitz the seed is stored in the disk with the option to encrypt 
+* By default a BIP39 wordlist compatible, 24 words seed is used to generate the `hsm_secret`
+* If the wallet was generated or restored from seed on a RaspiBlitz the seed is stored in the disk with the option to encrypt 
+* Display the seed from the menu - `CL` - `SEED`
+* The file where the seed is stored (until encrypted) is on the disk: `/home/bitcoin/.lightning/bitcoin/seedwords.info`
+* Show manually with:  
+`sudo cat /home/bitcoin/.lightning/bitcoin/seedwords.info`
+* If there is no such file and you have not funded the C-lightning wallet yet can reset the wallet and the next wallet will be created with a seed.
 ### How to display the hsm_secret in a human-readable format?
-* If there is no seed available it isbest is to save the hsm_secret as a file with `scp`. To display as text:
+* If there is no seed available it is best to save the hsm_secret as a file with `scp`.
+To display it as text:
     ```
     sudo cat /home/bitcoin/.lightning/bitcoin/hsm_secret | xxd
     ```
+
 ### Channel database
-* Stored on the disk and synchronised to the SDcard with the help of the bakcup plugin.
+* Stored on the disk and synchronised to the SDcard with the help of the `backup` plugin.
 
 ### Recovery
 * https://lightning.readthedocs.io/FAQ.html#database-corruption-channel-state-lost
 * https://lightning.readthedocs.io/FAQ.html#loss
+ 
 #### Recover from a cl-rescue file
 * use the `REPAIR-CL` - `FILERESTORE` option in the menu for instructions to upload
+
 #### Recover from a seed
 * use the `REPAIR-CL` - `SEEDRESTORE` option in the menu for instructions to paste the seedwords to restore
+
 #### Rescan the chain after restoring a used c-lightning wallet
 * https://lightning.readthedocs.io/FAQ.html#rescanning-the-block-chain-for-lost-utxos
 * Stop `lightningd`:
     ```
     sudo systemctl stop lightningd
     ```
+    An ungraceful method:
+    ```
+    sudo killall ligthningd
 * Rescan from the block 700000
     ```
-    sudo -u bitcoin lightningd --rescan=700000
+    sudo -u bitcoin lightningd --rescan -700000 --log-level debug
+    ```
+* Rescan the last 1000 blocks:
+    ```
+    sudo -u bitcoin lightningd --rescan 1000 --log-level debug
+    ```
+* can monitor in a new window using the shortcut:
+    ```
+    cllog
+    ```
+
+## Update
+### Update to a new C-lightning release
+* See the tagged releases by the C-lightning team: [github.com/ElementsProject/lightning/releases](https://github.com/ElementsProject/lightning/releases)
+* Will be able to update to new releases from the menu - `UPDATE` - `CL`
+* Since downgrading the lightning database is not allowed the updated version will persist if the SDcard is reflashed.
+
+### Experimental update to the latest master
+* this won't persist in case the SDcard is reflashed so will need to manually update again. 
+* the commadn to use the built-in script to update to the lates commit in the default branch is:
+    ```
+    config.scripts/cl.install.sh update
+    ```
+* if the database version is not compatible with the default version after a downgrade there will be an error message in `sudo journalctl -u lightningd` similar to:
+    ```
+    Refusing to migrate down from version 178 to 176
+    ```
+* in this case update to the next release from the menu or the latest master again with:
+    ```
+    config.scripts/cl.install.sh update
+    ```
+
+## sqlite3 queries
+
+* Query the reasons for force closes
+    ```
+    sudo -u bitcoin sqlite3 /home/bitcoin/.lightning/bitcoin/lightningd.sqlite3 'select short_channel_id, timestamp, cause, message from channel_state_changes inner join channels on channel_id = id where new_state = 7 order by timestamp'
+    ```
+
+* Query the reasons for cooperative channel closes
+    ```
+    sudo -u bitcoin sqlite3 /home/bitcoin/.lightning/bitcoin/lightningd.sqlite3 'select short_channel_id, timestamp, cause, message from channel_state_changes inner join channels on channel_id = id where new_state = 4 order by timestamp'
     ```
 
 ## Script file help list
-
-
 * generate a list of the help texts on a RaspiBlitz:
     ```
     cd /home/admin/config.scripts/

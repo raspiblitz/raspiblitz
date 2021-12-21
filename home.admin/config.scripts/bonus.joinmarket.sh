@@ -5,10 +5,7 @@
 # https://github.com/openoms/bitcoin-tutorials/tree/master/joinmarket
 # https://github.com/openoms/joininbox
 
-JBVERSION="v0.6.1" # with JoinMarket v0.9.2
-PGPsigner="openoms"
-PGPpkeys="https://keybase.io/oms/pgp_keys.asc"
-PGPcheck="13C688DB5B9C745DE4D2E4545BFB77609B081B65"
+JBVERSION="v0.6.5" # with JoinMarket v0.9.4
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -18,6 +15,10 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  exit 1
 fi
 
+PGPsigner="openoms"
+PGPpubkeyLink="https://github.com/openoms.gpg"
+PGPpubkeyFingerprint="13C688DB5B9C745DE4D2E4545BFB77609B081B65"
+
 # check if sudo
 if [ "$EUID" -ne 0 ]
   then echo "Please run as root (with sudo)"
@@ -25,11 +26,6 @@ if [ "$EUID" -ne 0 ]
 fi
 
 source /mnt/hdd/raspiblitz.conf
-
-# add default value to raspi config if needed
-if ! grep -Eq "^joinmarket=" /mnt/hdd/raspiblitz.conf; then
-  echo "joinmarket=off" >> /mnt/hdd/raspiblitz.conf
-fi
 
 # show info menu
 if [ "$1" = "menu" ]; then
@@ -103,36 +99,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     cd /home/joinmarket/joininbox || exit 1
     # https://github.com/openoms/joininbox/releases/
     sudo -u joinmarket git reset --hard $JBVERSION
-
-    sudo -u joinmarket wget -O "pgp_keys.asc" ${PGPpkeys}
-    gpg --import --import-options show-only ./pgp_keys.asc
-    fingerprint=$(gpg "pgp_keys.asc" 2>/dev/null | grep "${PGPcheck}" -c)
-    if [ ${fingerprint} -lt 1 ]; then
-      echo
-      echo "# !!! WARNING --> the PGP fingerprint is not as expected for ${PGPsigner}"
-      echo "# Should contain PGP: ${PGPcheck}"
-      echo "# PRESS ENTER to TAKE THE RISK if you think all is OK"
-      read key
-    fi
-    gpg --import ./pgp_keys.asc
-    
-    verifyResult=$(git verify-commit $JBVERSION 2>&1)
-    
-    goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
-    echo "# goodSignature(${goodSignature})"
-    correctKey=$(echo ${verifyResult} | tr -d " \t\n\r" | grep "${PGPcheck}" -c)
-    echo "# correctKey(${correctKey})"
-    if [ ${correctKey} -lt 1 ] || [ ${goodSignature} -lt 1 ]; then
-      echo 
-      echo "# !!! BUILD FAILED --> PGP verification not OK / signature(${goodSignature}) verify(${correctKey})"
-      exit 1
-    else
-      echo 
-      echo "########################################################################"
-      echo "# OK --> the PGP signature of the checked out $JBVERSION commit is correct #"
-      echo "########################################################################"
-      echo 
-    fi
+    sudo -u joinmarket /home/admin/config.scripts/blitz.git-verify.sh \
+     "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
 
     # copy the scripts in place
     sudo -u joinmarket cp /home/joinmarket/joininbox/scripts/* /home/joinmarket/
@@ -210,7 +178,7 @@ fi
   
   if [ -f "/home/joinmarket/joinmarket-clientserver/jmvenv/bin/activate" ] ; then
     # setting value in raspi blitz config
-    sudo sed -i "s/^joinmarket=.*/joinmarket=on/g" /mnt/hdd/raspiblitz.conf
+    /home/admin/config.scripts/blitz.conf.sh set joinmarket "on"
     # starting info
     echo
     echo "# Start to use by logging in to the 'joinmarket' user with:"
@@ -229,7 +197,7 @@ fi
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^joinmarket=.*/joinmarket=off/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set joinmarket "off"
 
   if [ -f "/home/joinmarket/joinmarket-clientserver/jmvenv/bin/activate" ] ; then
     echo "# REMOVING JOINMARKET"

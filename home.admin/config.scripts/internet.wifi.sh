@@ -96,7 +96,7 @@ elif [ "$1" == "backup-restore" ]; then
 
   # check if mem copy of wifi config is available (for restore only)
   # this should be available if a backup on HDD exists and HDD is not mounted yet but was inspected by datadrive script
-  memRestoreConfigAvailable=$(sudo ls /var/cache/raspiblitz/wpa_supplicant.conf 2>/dev/null | grep -c "wpa_supplicant.conf")
+  memRestoreConfigAvailable=$(sudo ls /var/cache/raspiblitz/hdd-inspect/wpa_supplicant.conf 2>/dev/null | grep -c "wpa_supplicant.conf")
   echo "memRestoreConfigAvailable=${memRestoreConfigAvailable}"
 
   if [ ${wifiIsSet} -eq 1 ]; then
@@ -119,9 +119,9 @@ elif [ "$1" == "backup-restore" ]; then
     echo "wifiRestore=1"
     echo "wifiBackup=0"
     exit 0
-  elif [ ${hddRestoreConfigAvailable} -eq 1 ]; then
+  elif [ ${memRestoreConfigAvailable} -eq 1 ]; then
     # RESTORE backuped wifi settings from MEMCOPY to RaspiBlitz
-    sudo cp /var/cache/raspiblitz/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.conf
+    sudo cp /var/cache/raspiblitz/hdd-inspect/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.conf
     echo "# restoring old wifi settings from MEMCOPY ... wait 4 secounds to connect"
     sudo wpa_cli -i wlan0 reconfigure 1>/dev/null
     sleep 4

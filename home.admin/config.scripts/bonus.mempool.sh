@@ -12,6 +12,10 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   exit 1
 fi
 
+PGPsigner="wiz"
+PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
+PGPpubkeyFingerprint="A394E332255A6173"
+
 source /mnt/hdd/raspiblitz.conf
 
 # show info menu
@@ -61,11 +65,6 @@ Activate TOR to access the web block explorer from outside your local network.
 
   echo "please wait ..."
   exit 0
-fi
-
-# add default value to raspi config if needed
-if ! grep -Eq "^mempoolExplorer=" /mnt/hdd/raspiblitz.conf; then
-  echo "mempoolExplorer=off" >> /mnt/hdd/raspiblitz.conf
 fi
 
 # status
@@ -120,6 +119,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u mempool git clone https://github.com/mempool/mempool.git
     cd mempool
     sudo -u mempool git reset --hard $pinnedVersion
+    sudo -u mempool /home/admin/config.scripts/blitz.git-verify.sh \
+     "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
 
     # modify an
     #echo "# try to suppress question on statistics report .."
@@ -274,7 +275,7 @@ EOF
   fi
 
   # start the service if ready
-  source /home/admin/raspiblitz.info
+  source <(/home/admin/_cache.sh get state)
   if [ "${state}" == "ready" ]; then
     echo "# OK - the mempool.service is enabled, system is on ready so starting service"
     sudo systemctl start mempool
@@ -283,17 +284,16 @@ EOF
   fi
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^mempoolExplorer=.*/mempoolExplorer=on/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set mempoolExplorer "on"
 
   echo "# needs to finish creating txindex to be functional"
   echo "# monitor with: sudo tail -n 20 -f /mnt/hdd/bitcoin/debug.log"
 
 
   # Hidden Service for Mempool if Tor is active
-  source /mnt/hdd/raspiblitz.conf
   if [ "${runBehindTor}" = "on" ]; then
-    # make sure to keep in sync with internet.tor.sh script
-    /home/admin/config.scripts/internet.hiddenservice.sh mempool 80 4082 443 4083
+    # make sure to keep in sync with tor.network.sh script
+    /home/admin/config.scripts/tor.onion-service.sh mempool 80 4082 443 4083
   fi
   exit 0
 fi
@@ -302,7 +302,7 @@ fi
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^mempoolExplorer=.*/mempoolExplorer=off/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set mempoolExplorer "off"
 
   isInstalled=$(sudo ls /etc/systemd/system/mempool.service 2>/dev/null | grep -c 'mempool.service')
   if [ ${isInstalled} -eq 1 ]; then
@@ -330,8 +330,8 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
     # Hidden Service if Tor is active
     if [ "${runBehindTor}" = "on" ]; then
-      # make sure to keep in sync with internet.tor.sh script
-      /home/admin/config.scripts/internet.hiddenservice.sh off mempool
+      # make sure to keep in sync with tor.network.sh script
+      /home/admin/config.scripts/tor.onion-service.sh off mempool
     fi
 
     echo "# OK Mempool removed."
@@ -349,14 +349,14 @@ fi
 # update
 if [ "$1" = "update" ]; then
   echo "*** Checking Mempool Explorer Version ***"
-  
+
   cd /home/mempool/mempool
 
   localVersion=$(git describe --tag)
   updateVersion=$(curl -s https://api.github.com/repos/mempool/mempool/releases/latest|grep tag_name|head -1|cut -d '"' -f4)
 
   if [ $localVersion = $updateVersion ]; then
-      echo "***  You are up-to-date on version $localVersion ***" 
+      echo "***  You are up-to-date on version $localVersion ***"
       sudo systemctl restart mempool 2>/dev/null
       echo "***  Restarting Mempool  ***"
   else
@@ -399,7 +399,7 @@ if [ "$1" = "update" ]; then
       sudo chown mempool:mempool /home/mempool/mempool/backend/mempool-config.json
 
 
-      # Restore frontend files 
+      # Restore frontend files
       cd /home/mempool/mempool/frontend
       sudo rsync -I -av --delete dist/mempool/ /var/www/mempool/
       sudo chown -R www-data:www-data /var/www/mempool

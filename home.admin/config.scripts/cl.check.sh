@@ -21,13 +21,18 @@ source <(/home/admin/config.scripts/network.aliases.sh getvars cl $2)
 # so it tries to make sure the config is in valid shape
 ######################################################################
 
+# do not announce 127.0.0.1 https://github.com/rootzoll/raspiblitz/issues/2634
+if [ $(grep -c "^announce-addr=127.0.0.1" < ${CLCONF}) -gt 0 ];then
+  sed -i "/^announce-addr=127.0.0.1/d" ${CLCONF}
+fi
+
 if [ $(grep -c "^sparko" < ${CLCONF}) -gt 0 ];then
   if [ ! -f /home/bitcoin/${netprefix}cl-plugins-enabled/sparko ]\
     || [ "$(eval echo \$${netprefix}sparko)" != "on" ]; then
     echo "# The Sparko plugin is not present but in config"
     sed -i "/^sparko/d" ${CLCONF}
     rm -rf /home/bitcoin/${netprefix}cl-plugins-enabled/sparko
-    sed -i "s/^${netprefix}sparko=.*/${netprefix}sparko=off/g" /mnt/hdd/raspiblitz.conf
+    /home/admin/config.scripts/blitz.conf.sh set ${netprefix}sparko "off"
   fi
 fi
 
@@ -37,7 +42,7 @@ if [ $(grep -c "^http-pass" < ${CLCONF}) -gt 0 ];then
     echo "# The clHTTPplugin is not present but in config"
     sed -i "/^http-pass/d" ${CLCONF}
     rm -rf /home/bitcoin/cl-plugins-enabled/c-lightning-http-plugin
-    sed -i "s/^clHTTPplugin=.*/clHTTPplugin=off/g" /mnt/hdd/raspiblitz.conf
+    /home/admin/config.scripts/blitz.conf.sh set clHTTPplugin "off"
   fi
 fi
 
@@ -47,6 +52,6 @@ if [ $(grep -c "^feeadjuster" < ${CLCONF}) -gt 0 ];then
     echo "# The feeadjuster plugin is not present but in config"
     sed -i "/^feeadjuster/d" ${CLCONF}
     rm -rf /home/bitcoin/${netprefix}cl-plugins-enabled/feeadjuster.py
-    sed -i "s/^${netprefix}feeadjuster=.*/${netprefix}feeadjuster=off/g" /mnt/hdd/raspiblitz.conf
+    /home/admin/config.scripts/blitz.conf.sh set ${netprefix}feeadjuster "off"
   fi
 fi

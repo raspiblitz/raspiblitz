@@ -26,13 +26,17 @@ function blitzhelp() {
   echo "  bash         menu"
   echo "  repair       menu > repair"
   echo
+  echo "Debug:"
+  echo "  debug        print debug logs"
+  echo "  debug -l     print debug logs with bin link with tor by default"
+  echo "  debug -l -n  print debug logs with bin link without tor"
+  echo
   echo "Checks:"
   echo "  status       informational Blitz status screen"
   echo "  sourcemode   copy blockchain source modus"
   echo "  check        check if Blitz configuration files are correct"
-  echo "  debug        print debug logs"
-  echo "  debug   -l   print debug logs with bin link"
   echo "  patch        sync scripts with latest set github and branch"
+  echo "  cache        check on chache system state"
   echo "  github       jumping directly into the options to change branch/repo/pr"
   echo
   echo "Power:"
@@ -110,10 +114,14 @@ function release() {
 # command: debug
 function debug() {
   echo "Printing debug logs. Be patient, this should take maximum 2 minutes ..."
-  if [[ $1 = "-l" ]]; then
-    /home/admin/config.scripts/blitz.debug.sh > /var/cache/raspiblitz/debug.log && cat /var/cache/raspiblitz/debug.log | torsocks nc termbin.com 9999
+  /home/admin/config.scripts/blitz.debug.sh > /var/cache/raspiblitz/debug.log
+  /home/admin/config.scripts/blitz.debug.sh redact /var/cache/raspiblitz/debug.log
+  if [ "$1" = "-l" ]||[ "$1" = "--link" ]; then
+    proxy="-X 5 -x localhost:9050"
+    if [ "$2" = "-n" ]||[ "$2" = "--no-tor" ]; then proxy=""; fi
+    cat /var/cache/raspiblitz/debug.log | nc ${proxy} termbin.com 9999 | sed "s/termbin.com/l.termbin.com/"
   else
-    /home/admin/config.scripts/blitz.debug.sh > /var/cache/raspiblitz/debug.log && cat /var/cache/raspiblitz/debug.log
+    cat /var/cache/raspiblitz/debug.log
   fi
 }
 
@@ -157,6 +165,11 @@ function headless() {
   restart
 }
 
+# command: cache
+function cache() {
+  sudo /home/admin/_cache.sh $@
+}
+
 # command: torthistx
 function torthistx() {
   if [ $(cat /mnt/hdd/raspiblitz.conf 2>/dev/null | grep -c "runBehindTor=on") -eq 1 ]; then
@@ -164,14 +177,18 @@ function torthistx() {
     curl --socks5-hostname localhost:9050 -d $1 -X POST http://explorerzydxu5ecjrkwceayqybizmpjjznk5izmitf2modhcusuqlid.onion/api/tx
   else
     echo "Not running behind Tor - to install run:"
-    echo "sudo /home/admin/config.scripts/internet.tor.sh on"
+    echo "sudo /home/admin/config.scripts/tor.network.sh on"
   fi
 }
 
 # command: status
 # start the status screen in the terminal
 function status() {
-  echo "Gathering data - please wait a moment..."
+  echo
+  echo "Keep X pressed to EXIT loop ... (please wait)"
+  echo
+  /home/admin/_cache.sh set system_scan_all_temp "1"
+  sleep 4
   while :
   do
     # show the same info as on LCD screen
@@ -181,10 +198,10 @@ function status() {
     #echo
     #echo -en "Screen is updating in a loop .... press 'x' now to get back to menu."
     read -n 1 -t 6 keyPressed
-    #echo -en "\rGathering information to update info ... please wait.                \n"  
     # check if user wants to abort session
     if [ "${keyPressed}" = "x" ]; then
       echo
+      /home/admin/_cache.sh set system_scan_all_temp "0"
       echo "Returning to menu ....."
       sleep 4
       break
@@ -231,11 +248,8 @@ function bos() {
 # switch to the pyblock user for PyBLOCK
 function pyblock() {
   if [ $(grep -c "pyblock=on" < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
-    echo "# switching to the pyblock user with the command: 'sudo su - pyblock'"
-    echo "# use command 'exit' and then 'raspiblitz' to return to menu"
-    echo "# use command 'pyblock' again to start"
-    sudo su - pyblock
-    echo "# use command 'raspiblitz' to return to menu"
+    cd /home/pyblock
+    sudo -u pyblock /home/pyblock/.local/bin/pyblock
   else
     echo "PyBlock is not installed - to install run:"
     echo "/home/admin/config.scripts/bonus.pyblock.sh on"
@@ -294,10 +308,10 @@ if [ -f "/mnt/hdd/raspiblitz.conf" ] && [ $(grep -c "lit=on"  < /mnt/hdd/raspibl
     --tlscertpath=/home/lit/.lit/tls.cert \
     --macaroonpath=/home/lit/.faraday/${chain}net/faraday.macaroon"
   alias lit-loop="sudo -u lit loop --rpcserver=localhost:8443 \\
-    --tlscertpath=/home/lit/.lit/tls.cert \\	
+    --tlscertpath=/home/lit/.lit/tls.cert \\
     --macaroonpath=/home/lit/.loop/${chain}net/loop.macaroon"
   alias lit-pool="sudo -u lit pool --rpcserver=localhost:8443 \
-    --tlscertpath=/home/lit/.lit/tls.cert \	
+    --tlscertpath=/home/lit/.lit/tls.cert \
     --macaroonpath=/home/lit/.pool/${chain}net/pool.macaroon"
 fi
 
@@ -316,7 +330,7 @@ function gettx() {
 
 # command: watchtx
 # try to retrieve transaction from mempool or blockchain until certain confirmation target
-# is reached and then exit cleanly. Default is to wait for 2 confs and to sleep for 60 secs. 
+# is reached and then exit cleanly. Default is to wait for 2 confs and to sleep for 60 secs.
 # $ watchtx "f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16" 6 30
 function watchtx() {
     tx_id="${1}"
@@ -348,8 +362,8 @@ function watchtx() {
 }
 
 # command: notifyme
-# A wrapper for blitz.notify.sh that will send a notification using the configured 
-# method and settings. 
+# A wrapper for blitz.notify.sh that will send a notification using the configured
+# method and settings.
 # This makes sense when waiting for commands to finish and then sending a notification.
 # $ notifyme "Hello there..!"
 # $ ./run_job_which_takes_long.sh && notifyme "I'm done."

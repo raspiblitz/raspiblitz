@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# based on: https://github.com/Stadicus/guides/issues/249
+# based on: https://github.com/raspibolt/raspibolt/issues/249
 
 if [ $# -eq 0 ]; then
  echo "small config script to switch the LND autoNatDiscovery on or off"
@@ -29,9 +29,6 @@ sudo systemctl stop lnd 2>/dev/null
 # add default value to raspi config if needed
 source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
-if [ ${#autoNatDiscovery} -eq 0 ]; then
-  echo "autoNatDiscovery=off" >> /mnt/hdd/raspiblitz.conf
-fi
 
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
@@ -41,7 +38,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo sed -i "s/^nat=.*/nat=true/g" /mnt/hdd/lnd/lnd.conf
   # edit raspi blitz config
   echo "editing /mnt/hdd/raspiblitz.conf"
-  sudo sed -i "s/^autoNatDiscovery=.*/autoNatDiscovery=on/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set autoNatDiscovery "on"
   echo "OK - autonat is now ON"
   echo "needs reboot to activate new setting"
   exit 0
@@ -55,7 +52,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   sudo sed -i "s/^nat=.*/nat=false/g" /mnt/hdd/lnd/lnd.conf
   # edit raspi blitz config
   echo "editing /mnt/hdd/raspiblitz.conf"
-  sudo sed -i "s/^autoNatDiscovery=.*/autoNatDiscovery=off/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set autoNatDiscovery "off"
   echo "OK - autonat is now OFF"
   echo "needs reboot to activate new setting"
   exit 0

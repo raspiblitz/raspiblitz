@@ -36,7 +36,7 @@ fi
 
 if grep -Eq "${netprefix}clEncryptedHSM=on" /mnt/hdd/raspiblitz.conf;then
   if grep -Eq "${netprefix}clAutoUnlock=on" /mnt/hdd/raspiblitz.conf;then
-    passwordFile=/root/.${netprefix}cl.pw
+    passwordFile=/home/bitcoin/.${netprefix}cl.pw
   else
     passwordFile=/dev/shm/.${netprefix}cl.pw
   fi
@@ -49,29 +49,51 @@ fi
 
 sudo systemctl stop ${netprefix}lightningd
 sudo systemctl disable ${netprefix}lightningd
+# based on https://github.com/ElementsProject/lightning/blob/master/contrib/init/lightningd.service
 echo "# Create /etc/systemd/system/${netprefix}lightningd.service"
 echo "
 [Unit]
 Description=c-lightning daemon on $CHAIN
+Requires=${netprefix}bitcoind.service
+After=${netprefix}bitcoind.service
+Wants=network-online.target
+After=network-online.target
 
 [Service]
 ExecStartPre=-/home/admin/config.scripts/cl.check.sh prestart $CHAIN
-ExecStart=/bin/sh -c '${passwordInput}/usr/local/bin/lightningd\
- --conf=${CLCONF} ${encryptedHSMoption}'
+ExecStart=/bin/sh -c '${passwordInput}/usr/local/bin/lightningd \\
+                       --conf=${CLCONF} ${encryptedHSMoption} \\
+                       --pid-file=/run/lightningd/${netprefix}lightningd.pid'
+
+# Creates /run/lightningd owned by bitcoin
+RuntimeDirectory=lightningd
+
 User=bitcoin
 Group=bitcoin
+# Type=forking hangs on restart
 Type=simple
-Restart=always
-TimeoutSec=120
+PIDFile=/run/lightningd/${netprefix}lightningd.pid
+Restart=on-failure
+
+TimeoutSec=240
 RestartSec=30
 StandardOutput=null
 StandardError=journal
 
 # Hardening measures
+####################
+# Provide a private /tmp and /var/tmp.
 PrivateTmp=true
+# Mount /usr, /boot/ and /etc read-only for the process.
 ProtectSystem=full
+# Disallow the process and all of its children to gain
+# new privileges through execve().
 NoNewPrivileges=true
+# Use a new /dev namespace only populated with API pseudo devices
+# such as /dev/null, /dev/zero and /dev/random.
 PrivateDevices=true
+# Deny the creation of writable and executable memory mappings.
+MemoryDenyWriteExecute=true
 
 [Install]
 WantedBy=multi-user.target
@@ -81,7 +103,7 @@ sudo systemctl daemon-reload
 sudo systemctl enable ${netprefix}lightningd
 echo "# Enabled the ${netprefix}lightningd.service"
 
-source /home/admin/raspiblitz.info
+source <(/home/admin/_cache.sh get state)
 if [ "${state}" == "ready" ]; then
   sudo systemctl start ${netprefix}lightningd
   echo "# Started the ${netprefix}lightningd.service"

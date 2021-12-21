@@ -17,7 +17,7 @@ source /mnt/hdd/raspiblitz.conf
 function copy_mac_set_perms() {
   local file_name=${1}  # the file name (e.g. admin.macaroon)
   local group_name=${2} # the unix group name (e.g. lndadmin)
-  local n=${3:-bitcoin} # the network (e.g. bitcoin or litecoin) defaults to bitcoin
+  local n=${3:-bitcoin} # the network (e.g. bitcoin) defaults to bitcoin
   local c=${4:-main}    # the chain (e.g. main, test, sim, reg) defaults to main (for mainnet)
 
   sudo /bin/cp /mnt/hdd/lnd/data/chain/"${n}"/"${c}"net/"${file_name}" /mnt/hdd/app-data/lnd/data/chain/"${n}"/"${c}"net/"${file_name}"
@@ -31,7 +31,7 @@ missing=0
 for macaroon in $macaroons
 do
   local file_name=${macaroon}
-  local n=${1:-bitcoin} # the network (e.g. bitcoin or litecoin) defaults to bitcoin
+  local n=${1:-bitcoin} # the network (e.g. bitcoin) defaults to bitcoin
   local c=${2:-main}    # the chain (e.g. main, test, sim, reg) defaults to main (for mainnet)
   if [ ! -f /mnt/hdd/app-data/lnd/data/chain/"${n}"/"${c}"net/"${macaroon}" ]; then
     missing=$(($missing + 1))
@@ -160,12 +160,6 @@ elif [ "$1" = "sync" ]; then
   if ! [[ -L "/mnt/hdd/app-data/lnd/tls.cert" ]]; then
     sudo rm -rf "/mnt/hdd/app-data/lnd/tls.cert"                    # not a symlink.. delete it silently
     sudo ln -s "/mnt/hdd/lnd/tls.cert" "/mnt/hdd/app-data/lnd/tls.cert"  # and create symlink
-  fi
-  
-  if [ "${LNBits}" = "on" ]; then
-    echo "# fix the macaroon for LNbits" 
-    # https://github.com/rootzoll/raspiblitz/pull/1156#issuecomment-623293240
-    sudo -u admin /home/admin/config.scripts/bonus.lnbits.sh write-macaroons
   fi
   
 ###########################

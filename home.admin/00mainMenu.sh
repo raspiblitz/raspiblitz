@@ -2,15 +2,9 @@
 
 echo "Starting the main menu ..."
 
-# CONFIGFILE - configuration of RaspiBlitz
-configFile="/mnt/hdd/raspiblitz.conf"
-
-# INFOFILE - state data from bootstrap
-infoFile="/home/admin/raspiblitz.info"
-
 # MAIN MENU AFTER SETUP
-source ${infoFile}
-source ${configFile}
+source /home/admin/raspiblitz.info
+source /mnt/hdd/raspiblitz.conf
 
 # FUNCTIONS
 
@@ -38,7 +32,7 @@ confirmation()
 }
 
 # get the local network IP to be displayed on the LCD
-source <(/home/admin/config.scripts/internet.sh status local)
+source <(/home/admin/_cache.sh get internet_localip)
 
 if [ ${chain} = test ];then
   netprefix="t"
@@ -64,7 +58,7 @@ fi
 if [ ${#lightning} -gt 0 ]; then
   plus="/ ${lightning} ${plus}"
 fi
-BACKTITLE="${localip} / ${hostname} / ${network} ${plus}"
+BACKTITLE="${internet_localip} / ${hostname} / ${network} ${plus}"
 
 # Basic Options
 OPTIONS+=(INFO "RaspiBlitz Status Screen")
@@ -105,7 +99,11 @@ if [ "${BTCRPCexplorer}" == "on" ]; then
   OPTIONS+=(EXPLORE "BTC RPC Explorer")
 fi
 if [ "${LNBits}" == "on" ]; then
-  OPTIONS+=(LNBITS "LNbits Server")
+  if [ "${LNBitsFunding}" == "lnd" ] || [ "${LNBitsFunding}" == "tlnd" ] || [ "${LNBitsFunding}" == "slnd" ] || [ "${LNBitsFunding}" == "" ]; then
+    OPTIONS+=(LNBITS "LNbits on LND")
+  elif [ "${LNBitsFunding}" == "cl" ] || [ "${LNBitsFunding}" == "tcl" ] || [ "${LNBitsFunding}" == "scl" ]; then
+    OPTIONS+=(LNBITS "LNbits on c-lightning")
+  fi
 fi
 if [ "${lndmanage}" == "on" ]; then
   OPTIONS+=(LNDMANAGE "LND Manage Script")

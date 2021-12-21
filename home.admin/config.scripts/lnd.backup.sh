@@ -80,6 +80,7 @@ fi
 if [ ${mode} = "lnd-export-gui" ]; then
 
   # create lnd rescue file
+  echo "# lnd.backup lnd-export-gui ..." 
   source <(/home/admin/config.scripts/lnd.backup.sh lnd-export)
   if [ "${error}" != "" ]; then
     echo "error='${error}'"
@@ -92,16 +93,16 @@ if [ ${mode} = "lnd-export-gui" ]; then
   # offer SCP for download
   clear
   echo
-  echo "****************************"
-  echo "* DOWNLOAD THE RESCUE FILE *"
-  echo "****************************"
+  echo "********************************"
+  echo "* DOWNLOAD THE LND RESCUE FILE *"
+  echo "********************************"
   echo 
   echo "ON YOUR MAC & LINUX LAPTOP - RUN IN NEW TERMINAL:"
   echo "scp '${fileowner}@${localip}:${filename}' ./"
   echo "ON WINDOWS USE:"
   echo "scp ${fileowner}@${localip}:${filename} ."
   echo "Use password A to authenticate file transfer."
-  echo ""
+  echo
   echo "Check for correct file size after transfer: ${size} byte"
   echo "Use command: stat lnd-rescue-*.tar.gz"
   echo
@@ -187,9 +188,9 @@ if [ ${mode} = "lnd-import-gui" ]; then
   while [ "${filename}" == "" ]
     do
       clear 
-      echo "**************************"
-      echo "* UPLOAD THE RESCUE FILE *"
-      echo "**************************"
+      echo "******************************"
+      echo "* UPLOAD THE LND RESCUE FILE *"
+      echo "******************************"
       echo "If you have a lnd-rescue backup file on your laptop you can now"
       echo "upload it and restore your latest LND state."
       echo
@@ -199,7 +200,7 @@ if [ ${mode} = "lnd-import-gui" ]; then
       echo "change into the directory where your lnd-rescue file is and"
       echo "COPY, PASTE AND EXECUTE THE FOLLOWING COMMAND:"
       echo "scp -r ./lnd-rescue-*.tar.gz ${defaultUploadUser}@${localip}:${defaultUploadPath}/"
-      echo ""
+      echo
       echo "Use ${passwordInfo} to authenticate file transfer."
       echo "PRESS ENTER when upload is done"
       read key

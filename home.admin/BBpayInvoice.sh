@@ -65,25 +65,17 @@ if [ ${openChannels} -eq 0 ]; then
 fi
 
 paymentRequestStart="???"
-if [ "${network}" = "bitcoin" ]; then
-  if [ "${chain}" = "main" ]; then
-    paymentRequestStart="lnbc"
-  else
-    paymentRequestStart="lntb"
-  fi
-elif [ "${network}" = "litecoin" ]; then
-    paymentRequestStart="lnltc"
+if [ "${chain}" = "main" ]; then
+  paymentRequestStart="lnbc"
+else
+  paymentRequestStart="lntb"
 fi
 
 testSite="???"
-if [ "${network}" = "bitcoin" ]; then
-  if [ "${chain}" = "main" ]; then
-    testSite="https://satoshis.place"
-  else
-    testSite="https://starblocks.acinq.co/"
-  fi
-elif [ "${network}" = "litecoin" ]; then
-    testSite="https://millionlitecoinhomepage.net"
+if [ "${chain}" = "main" ]; then
+  testSite="https://satoshis.place"
+else
+  testSite="https://starblocks.acinq.co/"
 fi
 
 # let user enter the invoice
@@ -111,6 +103,9 @@ if [ $LNTYPE = cl ];then
 elif [ $LNTYPE = lnd ];then
   command="$lncli_alias sendpayment --force --pay_req=${invoice}"
 fi
+
+# raise high focus on lightning channel balance next 5min
+/home/admin/_cache.sh focus ln_${LNTYPE}_${CHAIN}_channels_balance 0 300
 
 # info output
 clear

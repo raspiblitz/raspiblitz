@@ -8,7 +8,6 @@
 # Usage
 # $ lnchannels            to display lnd mainnet channels
 # $ lnchannels --testnet  to display lnd testnet channels
-# $ lnchannels litecoin   to display lnd litecoin channels
 
 # Set default (mainnet)
 lncli='/usr/local/bin/lncli'

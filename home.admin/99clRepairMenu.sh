@@ -7,8 +7,6 @@ source /mnt/hdd/raspiblitz.conf
 
 source <(/home/admin/config.scripts/network.aliases.sh getvars cl $1)
 
-# get the local network IP to be displayed on the LCD
-source <(/home/admin/config.scripts/internet.sh status local)
 NETclEncryptedHSM="${netprefix}clEncryptedHSM"
 
 # BASIC MENU INFO
@@ -23,7 +21,7 @@ if [ "$(eval echo \$${netprefix}clEncryptedHSM)" = "off" ];then
 elif [ "$(eval echo \$${netprefix}clEncryptedHSM)"  = "on" ];then
     OPTIONS+=(PASSWORD_C "Change the hsm_secret encryption password")
     OPTIONS+=(DECRYPT "Decrypt the hsm_secret")
-  if [ ! -f "/root/.${netprefix}cl.pw" ]; then
+  if [ ! -f "/home/bitcoin/.${netprefix}cl.pw" ]; then
     OPTIONS+=(AUTOUNLOCK-ON "Auto-decrypt the hsm_secret after boot")
   else
     OPTIONS+=(AUTOUNLOCK-OFF "Do not auto-decrypt the hsm_secret after boot")
@@ -100,12 +98,8 @@ case $CHOICE in
     sudo rm /home/bitcoin/.lightning/${CLNETWORK}/hsm_secret
     sudo rm /home/bitcoin/.lightning/${CLNETWORK}/*.*
     # make sure the new hsm_secret is treated as unencrypted and clear autounlock
-    sudo sed -i \
-      "s/^${netprefix}clEncryptedHSM=.*/${netprefix}clEncryptedHSM=off/g" \
-      /mnt/hdd/raspiblitz.conf
-    sudo sed -i \
-      "s/^${netprefix}clAutoUnlock=.*/${netprefix}clEncryptedHSM=off/g" \
-      /mnt/hdd/raspiblitz.conf
+    /home/admin/config.scripts/blitz.conf.sh set ${netprefix}clEncryptedHSM "off"
+    /home/admin/config.scripts/blitz.conf.sh set ${netprefix}clAutoUnlock "off"
     # new
     /home/admin/config.scripts/cl.hsmtool.sh new $CHAIN
     # set the lightningd service file on each active network

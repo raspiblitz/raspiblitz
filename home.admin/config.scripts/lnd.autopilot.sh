@@ -30,9 +30,6 @@ fi
 # add default value to raspi config if needed
 source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
-if [ ${#autoPilot} -eq 0 ]; then
-  echo "autoPilot=off" >> /mnt/hdd/raspiblitz.conf
-fi
 
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
@@ -40,7 +37,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "editing /mnt/hdd/lnd/lnd.conf"
   sudo sed -i "s/^autopilot.active=.*/autopilot.active=1/g" /mnt/hdd/lnd/lnd.conf
   echo "editing /mnt/hdd/raspiblitz.conf"
-  sudo sed -i "s/^autoPilot=.*/autoPilot=on/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set autoPilot "on"
   echo "OK - autopilot is now ON"
   echo "needs reboot to activate new setting"
   exit 0
@@ -52,7 +49,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   echo "editing /mnt/hdd/lnd/lnd.conf"
   sudo sed -i "s/^autopilot.active=.*/autopilot.active=0/g" /mnt/hdd/lnd/lnd.conf
   echo "editing /mnt/hdd/raspiblitz.conf"
-  sudo sed -i "s/^autoPilot=.*/autoPilot=off/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set autoPilot "off"
   echo "OK - autopilot is now OFF"
   echo "needs reboot to activate new setting"
   exit 0

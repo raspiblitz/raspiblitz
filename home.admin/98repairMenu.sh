@@ -6,32 +6,51 @@ source /mnt/hdd/raspiblitz.conf
 
 askBackupCopy()
 {
-    whiptail --title "LND Data Backup" --yes-button "Backup" --no-button "Skip" --yesno "
+    whiptail --title "Lightning Data Backup" --yes-button "Backup" --no-button "Skip" --yesno "
 Before deleting your data, do you want
-to make a backup of all your LND Data
-and download that file to your laptop?
+to make a backup of all your Lightning Data
+and download the file(s) to your laptop?
 
-Download LND Data Backup now?
+Download Lightning Data Backup now?
       " 12 44
     if [ $? -eq 0 ]; then
-      clear
-      echo "*************************************"
-      echo "* PREPARING LND BACKUP DOWNLOAD"
-      echo "*************************************"
-      echo "please wait .."
-      sleep 2
-      /home/admin/config.scripts/lnd.backup.sh lnd-export-gui
-      echo
-      echo "PRESS ENTER to continue once you are done downloading."
-      read key
+      if [ "${lightning}" == "lnd" ] || [ "${lnd}" = "on" ]; then
+        clear
+        echo "***********************************"
+        echo "* PREPARING THE LND BACKUP DOWNLOAD"
+        echo "***********************************"
+        echo "please wait .."
+        /home/admin/config.scripts/lnd.compact.sh interactive
+        /home/admin/config.scripts/lnd.backup.sh lnd-export-gui
+        echo
+        echo "PRESS ENTER to continue once you're done downloading."
+        read key
+      fi
+      if [ "${lightning}" == "cl" ] || [ "${cl}" = "on" ]; then
+        clear
+        echo "*******************************************"
+        echo "* PREPARING THE C-LIGHTNING BACKUP DOWNLOAD"
+        echo "*******************************************"
+        echo "please wait .."
+        /home/admin/config.scripts/cl.backup.sh cl-export-gui
+        echo
+        echo "PRESS ENTER to continue once you're done downloading."
+        read key
+      fi
     else
       clear
-      echo "*************************************"
-      echo "* JUST MAKING BACKUP TO SD CARD"
-      echo "*************************************"
+      echo "*****************************************"
+      echo "* JUST MAKING A BACKUP TO THE OLD SD CARD"
+      echo "*****************************************"
       echo "please wait .."
       sleep 2
-      /home/admin/config.scripts/lnd.backup.sh lnd-export
+      if [ "${lightning}" == "lnd" ] || [ "${lnd}" = "on" ]; then
+        /home/admin/config.scripts/lnd.backup.sh lnd-export
+      fi
+      if [ "${lightning}" == "cl" ] || [ "${cl}" = "on" ]; then
+        /home/admin/config.scripts/cl.backup.sh cl-export
+      fi
+      sleep 3
     fi
 }
 
@@ -52,6 +71,7 @@ OPTIONS+=(SOFTWARE "Run Softwaretest (DebugReport)")
 if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
   OPTIONS+=(BACKUP-LND "Backup your LND data (Rescue-File)")
   OPTIONS+=(RESET-LND "Delete LND & start new node/wallet")
+  OPTIONS+=(COMPACT "Compact the LND channel.db")
 fi
 if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ]; then
   OPTIONS+=(REPAIR-CL "Repair/Backup C-Lightning")
@@ -64,7 +84,7 @@ OPTIONS+=(RESET-ALL "Delete HDD completely to start fresh")
 OPTIONS+=(DELETE-ELEC "Delete Electrum Index")
 OPTIONS+=(DELETE-INDEX "Delete Bitcoin Transaction-Index")
 
-CHOICE=$(whiptail --clear --title "Repair Options" --menu "" 18 62 11 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+CHOICE=$(whiptail --clear --title "Repair Options" --menu "" 19 62 12 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
 clear
 case $CHOICE in
@@ -76,11 +96,20 @@ case $CHOICE in
     read key
     ;;
   BACKUP-LND)
+    /home/admin/config.scripts/lnd.compact.sh interactive
     sudo /home/admin/config.scripts/lnd.backup.sh lnd-export-gui
     echo
     echo "Press ENTER when your backup download is done to shutdown."
     read key
     /home/admin/config.scripts/blitz.shutdown.sh
+    ;;
+  COMPACT)
+    /home/admin/config.scripts/lnd.compact.sh interactive
+    echo "# Starting lnd.service ..."
+    sudo systemctl start lnd
+    echo
+    echo "Press ENTER to return to main menu."
+    read key
     ;;
   REPAIR-CL)
     sudo /home/admin/99clRepairMenu.sh
@@ -119,13 +148,21 @@ case $CHOICE in
     # make sure host is named like in the raspiblitz config
     echo "Setting the Name/Alias/Hostname .."
     sudo /home/admin/config.scripts/lnd.setname.sh mainnet ${result}
-    sudo sed -i "s/^hostname=.*/hostname=${result}/g" /mnt/hdd/raspiblitz.conf
+    /home/admin/config.scripts/blitz.conf.sh set hostname "${result}"
 
     echo "stopping lnd ..."
     sudo systemctl stop lnd
     sudo rm -r /mnt/hdd/lnd
-    /home/admin/70initLND.sh
-
+    # create wallet
+    /home/admin/config.scripts/lnd.install.sh on mainnet initwallet
+    # display and delete the seed for mainnet
+    sudo /home/admin/config.scripts/lnd.install.sh display-seed mainnet delete
+    if [ "${tlnd}" == "on" ];then
+      /home/admin/config.scripts/lnd.install.sh on testnet initwallet
+    fi
+    if [ "${slnd}" == "on" ];then
+      /home/admin/config.scripts/lnd.install.sh on signet initwallet
+    fi
     # go back to main menu (and show)
     /home/admin/00raspiblitz.sh
     exit 0;

@@ -22,7 +22,7 @@ fi
 
 # check if started with sudo
 if [ "$EUID" -ne 0 ]; then 
-  echo "error='missing sudo'"
+  echo "error='run as root'"
   exit 1
 fi
 
@@ -61,7 +61,7 @@ isSwapExternal=$(swapon -s | grep -c "${externalSwapPath}")
 # output and exit if just status action
 if [ "$1" = "status" ]; then
 
-  # optional second parameter can be 'bitcoin' or 'litecoin'
+  # optional second parameter can be 'bitcoin'
   blockchainType=$2
 
   echo "# RASPIBLITZ DATA DRIVE Status"  
@@ -97,9 +97,9 @@ if [ "$1" = "status" ]; then
       testdevice=$(echo $testname | sed 's/[^a-z]*//g')
       testpartition=$(echo $testname | grep -P '[a-z]{3,5}[0-9]{1}')
       if [ ${#testpartition} -gt 0 ]; then
-         testsize=$(echo $line | sed "s/  */ /g" | cut -d " " -f 2 | sed 's/[^0-9]*//g')
+        testsize=$(echo $line | sed "s/  */ /g" | cut -d " " -f 2 | sed 's/[^0-9]*//g')
       else
-         testsize=0
+        testsize=0
       fi
 
       #echo "# line($line)"
@@ -119,32 +119,39 @@ if [ "$1" = "status" ]; then
       #echo "# bootPartition(${bootPartition})"
       #echo "# hdd(${hdd})"
 
-      if [ $testpartitioncount -gt 0 ]; then
-         # if a partition was found - make sure to skip the OS and boot partitions
-         if [ "${testpartition}" != "${OSPartition}" ] && [ "${testpartition}" != "${bootPartition}" ]; then
-            # make sure to use the biggest
-            if [ ${testsize} -gt ${sizeDataPartition} ]; then
-               sizeDataPartition=${testsize}
-               hddDataPartition="${testpartition}"
-               hdd="${testdevice}"
-            fi
-         fi
+      if [ "$(uname -m)" = "x86_64" ]; then
+        testParentDisk=$(echo "$testpartition" | sed 's/[^a-z]*//g')
+        OSParentDisk=$(echo "$OSPartition" | sed 's/[^a-z]*//g')
+        bootParentDisk=$(echo "$bootPartition" | sed 's/[^a-z]*//g')
+        if [ "$testdevice" != "$OSParentDisk" ] && [ "$testdevice" != "$bootParentDisk" ];then
+          sizeDataPartition=${testsize}
+          hddDataPartition="${testpartition}"
+          hdd="${testdevice}"
+        fi
+      elif [ $testpartitioncount -gt 0 ]; then
+        # if a partition was found - make sure to skip the OS and boot partitions
+        if [ "${testpartition}" != "${OSPartition}" ] && [ "${testpartition}" != "${bootPartition}" ]; then
+          # make sure to use the biggest
+          if [ ${testsize} -gt ${sizeDataPartition} ]; then
+            sizeDataPartition=${testsize}
+            hddDataPartition="${testpartition}"
+            hdd="${testdevice}"
+          fi
+        fi
       else
 
-         # default hdd set, when there is no OSpartition and there might be no partitions at all
-         if [ "${OSPartition}" = "root" ] && [ "${hdd}" = "" ] && [ "${testdevice}" != "" ]; then
+        # default hdd set, when there is no OSpartition and there might be no partitions at all
+        if [ "${OSPartition}" = "root" ] && [ "${hdd}" = "" ] && [ "${testdevice}" != "" ]; then
           hdd="${testdevice}"
-         fi
-
-	       # make sure to use the biggest
-         if [ ${testsize} -gt ${sizeDataPartition} ]; then
+        fi
+	      # make sure to use the biggest
+        if [ ${testsize} -gt ${sizeDataPartition} ]; then
 	        # Partition to be created is smaller than disk so this is not correct (but close)
-            sizeDataPartition=$(sudo fdisk -l /dev/$testdevice | grep GiB | cut -d " " -f 5)
-            hddDataPartition="${testdevice}1"
-            hdd="${testdevice}"
-	       fi
+          sizeDataPartition=$(sudo fdisk -l /dev/$testdevice | grep GiB | cut -d " " -f 5)
+          hddDataPartition="${testdevice}1"
+          hdd="${testdevice}"
+	      fi
       fi
-      
     done < .lsblk.tmp
     rm -f .lsblk.tmp 1>/dev/null 2>/dev/null
 
@@ -211,26 +218,44 @@ if [ "$1" = "status" ]; then
 
           #####################################
           # Pre-Setup Investigation of DATA-PART
+          # make copy of raspiblitz.conf & 
 
           # check for recoverable RaspiBlitz data (if config file exists) and raid 
-          hddRaspiData=$(sudo ls -l /mnt/hdd${subVolumeDir} 2>/dev/null | grep -c raspiblitz.conf)
-          #isRaid=$(btrfs filesystem df /mnt/hdd 2>/dev/null | grep -c "Data, RAID1")
+          hddRaspiData=$(ls -l /mnt/hdd${subVolumeDir} 2>/dev/null | grep -c raspiblitz.conf)
           echo "hddRaspiData=${hddRaspiData}"
           hddRaspiVersion=""
           if [ ${hddRaspiData} -eq 1 ]; then
+
+            # output version data from raspiblitz.conf
             source /mnt/hdd${subVolumeDir}/raspiblitz.conf
-            hddRaspiVersion="${raspiBlitzVersion}"
-          fi
-          echo "hddRaspiVersion='${hddRaspiVersion}'"
+            echo "hddRaspiVersion='${raspiBlitzVersion}'"
 
-          # check if there is a wifi configuration as backup
-          hddGotWifiConf=$(ls /mnt/hdd${subVolumeDir}/app-data/wpa_supplicant.conf 2>/dev/null | grep -c "wpa_supplicant.conf")
-          if [ ${hddGotWifiConf} -eq 1 ]; then
-            # make a copy to the mem cache drive (so that Wifi can be connected before setup & final HDD mount)
-            sudo cp /mnt/hdd${subVolumeDir}/app-data/wpa_supplicant.conf /var/cache/raspiblitz/wpa_supplicant.conf
-            echo "wifiBackupConfigCopy='/var/cache/raspiblitz/wpa_supplicant.conf'"
-          fi
+            # create hdd-inspect data dir on RAMDISK
+            mkdir /var/cache/raspiblitz/hdd-inspect
 
+            # make copy of raspiblitz.conf to RAMDISK
+            cp -a /mnt/hdd${subVolumeDir}/raspiblitz.conf /var/cache/raspiblitz/hdd-inspect/raspiblitz.conf
+
+            # make copy of WIFI config to RAMDISK (if available)
+            cp -a /mnt/hdd${subVolumeDir}/app-data/wpa_supplicant.conf /var/cache/raspiblitz/hdd-inspect/wpa_supplicant.conf 2>/dev/null
+
+            # Convert old ssh backup data structure (if needed)
+            if [ -d "/mnt/hdd/ssh" ]; then
+                # make a complete backup of directory
+                cp -a /mnt/hdd/ssh /mnt/hdd/app-storage/ssh-old-backup
+                # delete old false sub directory (if exists)
+                rm -r /mnt/hdd/ssh/ssh 2>/dev/null
+                # move ssh root keys into new directory (if exists)
+                mv /mnt/hdd/ssh/root_backup /mnt/hdd/app-data/ssh-root 2>/dev/null
+                # move sshd keys into new directory
+                mv /mnt/hdd/ssh /mnt/hdd/app-data/sshd
+            fi
+
+            # make copy of SSH keys to RAMDISK (if available)
+            cp -a /mnt/hdd${subVolumeDir}/app-data/sshd /var/cache/raspiblitz/hdd-inspect/sshd 2>/dev/null
+            cp -a /mnt/hdd${subVolumeDir}/app-data/ssh-root /var/cache/raspiblitz/hdd-inspect/ssh-root 2>/dev/null
+          fi
+        
           # comment this line out if case to study the contect of the data section
           sudo umount /mnt/hdd
         fi
@@ -256,11 +281,7 @@ if [ "$1" = "status" ]; then
           # check for blockchain data on storage
           hddBlocksBitcoin=$(sudo ls /mnt/storage${subVolumeDir}/bitcoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
           echo "hddBlocksBitcoin=${hddBlocksBitcoin}"
-          hddBlocksLitecoin=$(sudo ls /mnt/storage${subVolumeDir}/litecoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
-          echo "hddBlocksLitecoin=${hddBlocksLitecoin}"
           if [ "${blockchainType}" = "bitcoin" ] && [ ${hddBlocksBitcoin} -eq 1 ]; then
-            echo "hddGotBlockchain=1"
-          elif [ "${blockchainType}" = "litecoin" ] && [ ${hddBlocksLitecoin} -eq 1 ]; then
             echo "hddGotBlockchain=1"
           elif [ ${#blockchainType} -gt 0 ]; then
             echo "hddGotBlockchain=0"
@@ -274,18 +295,25 @@ if [ "$1" = "status" ]; then
             # BRTS
             hdd_data_free1Kblocks=$(df -h -k /dev/${hdd}1 | grep "/dev/${hdd}1" | sed -e's/  */ /g' | cut -d" " -f 4 | tr -dc '0-9')
           fi
+          hddDataFreeBytes=$((${hdd_data_free1Kblocks} * 1024))
+          hddDataFreeGB=$((${hdd_data_free1Kblocks} / (1024 * 1024)))
+          echo "hddDataFreeBytes=${hddDataFreeBytes}"
           echo "hddDataFreeKB=${hdd_data_free1Kblocks}"
+          echo "hddDataFreeGB=${hddDataFreeGB}"
 
           # check if its another fullnode implementation data disk
           hddGotMigrationData=""
           if [ "${hddFormat}" = "ext4" ]; then
             # check for other node implementations
             isUmbrelHDD=$(sudo ls /mnt/storage/umbrel/info.json 2>/dev/null | grep -c '.json')
+            isCitadelHDD=$(sudo ls /mnt/storage/citadel/info.json 2>/dev/null | grep -c '.json')
             isMyNodeHDD=$(sudo ls /mnt/storage/mynode/bitcoin/bitcoin.conf 2>/dev/null | grep -c '.conf')
             if [ ${isUmbrelHDD} -gt 0 ]; then
               hddGotMigrationData="umbrel"
             elif [ ${isMyNodeHDD} -gt 0 ]; then
               hddGotMigrationData="mynode"
+            elif [ ${isCitadelHDD} -gt 0 ]; then
+              hddGotMigrationData="citadel"
             fi
           else
             echo "# not an ext4 drive - all known fullnode packages use ext4 at the moment"
@@ -299,7 +327,6 @@ if [ "$1" = "status" ]; then
         # if not ext4 or btrfs - there is no usable data
         echo "hddRaspiData=0"
         echo "hddBlocksBitcoin=0"
-        echo "hddBlocksLitecoin=0"
         echo "hddGotBlockchain=0"
       fi
     fi
@@ -334,15 +361,13 @@ if [ "$1" = "status" ]; then
 
     echo "datadisk='${hdd}'"
     echo "datapartition='${hddDataPartition}'"
+    echo "hddCandidate='${hdd}'"
+    echo "hddPartitionCandidate='${hddDataPartition}'"
 
     # check if blockchain data is available
     hddBlocksBitcoin=$(sudo ls /mnt/hdd/bitcoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
     echo "hddBlocksBitcoin=${hddBlocksBitcoin}"
-    hddBlocksLitecoin=$(sudo ls /mnt/hdd/litecoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
-    echo "hddBlocksLitecoin=${hddBlocksLitecoin}"
     if [ "${blockchainType}" = "bitcoin" ] && [ ${hddBlocksBitcoin} -eq 1 ]; then
-      echo "hddGotBlockchain=1"
-    elif [ "${blockchainType}" = "litecoin" ] && [ ${hddBlocksLitecoin} -eq 1 ]; then
       echo "hddGotBlockchain=1"
     elif [ ${#blockchainType} -gt 0 ]; then
       echo "hddGotBlockchain=0"
@@ -362,7 +387,7 @@ if [ "$1" = "status" ]; then
       hdd_data_free1Kblocks=$(df -h -k /dev/${hddDataPartitionExt4} | grep "/dev/${hddDataPartitionExt4}" | sed -e's/  */ /g' | cut -d" " -f 4 | tr -dc '0-9')
       hddUsedInfo="${hdd_used_space} (${hdd_used_ratio}%)"
     else
-      # BRTS calculations
+      # BTRFS calculations
       # TODO: this is the final/correct way - make better later
       # https://askubuntu.com/questions/170044/btrfs-and-missing-free-space
       datadrive=$(df -h | grep "/dev/${hdd}1" | sed -e's/  */ /g' | cut -d" " -f 5)
@@ -371,13 +396,18 @@ if [ "$1" = "status" ]; then
       hddUsedInfo="${datadrive} & ${storageDrive}"
     fi
     echo "hddUsedInfo='${hddUsedInfo}'"
+    hddDataFreeBytes=$((${hdd_data_free1Kblocks} * 1024))
+    hddDataFreeGB=$((${hdd_data_free1Kblocks} / (1024 * 1024)))
+    echo "hddDataFreeBytes=${hddDataFreeBytes}"
     echo "hddDataFreeKB=${hdd_data_free1Kblocks}"
+    echo "hddDataFreeGB=${hddDataFreeGB}"
 
   fi
 
-  # HDD Adpater UASP support --> https://www.pragmaticlinux.com/2021/03/fix-for-getting-your-ssd-working-via-usb-3-on-your-raspberry-pi/
+  # HDD Adapter UASP support --> https://www.pragmaticlinux.com/2021/03/fix-for-getting-your-ssd-working-via-usb-3-on-your-raspberry-pi/
   # in both cases (if mounted or not - using the hdd selection from both cases)
-  if [ ${#hdd} -gt 0 ]; then
+  # only check if lsusb command is availabe
+  if [ ${#hdd} -gt 0 ] && [ "$(type -t lsusb | grep -c file)" -gt 0 ]; then
 
     # determine USB HDD adapter model ID 
     hddAdapter=$(lsusb | grep "SATA" | head -1 | cut -d " " -f6)
@@ -391,11 +421,12 @@ if [ "$1" = "status" ]; then
 
     hddAdapterUSAP=0
     
-    # check if user wants to force UASP on
+    # check if force UASP flag is set on sd card
     if [ -f "/boot/uasp.force" ]; then
       hddAdapterUSAP=1
-      echo "uaspForced=1"
     fi
+
+    # or UASP is set by config file
     if [ $(cat /mnt/hdd/raspiblitz.conf 2>/dev/null | grep -c "forceUasp=on") -eq 1 ]; then
       hddAdapterUSAP=1
     fi
@@ -409,6 +440,7 @@ if [ "$1" = "status" ]; then
       # SupTronics 2.5" SATA HDD Shield X825 v1.5
       hddAdapterUSAP=1
     fi
+
     echo "hddAdapterUSAP=${hddAdapterUSAP}"
   fi
 
@@ -594,7 +626,7 @@ if [ "$1" = "format" ]; then
      if [ $ext4IsPartition -eq 0 ]; then
         # write new EXT4 partition
         >&2 echo "# Creating the one big partition"
-        sudo parted /dev/${hdd} mkpart primary ext4 0% 100% 1>&2
+        sudo parted -s /dev/${hdd} mkpart primary ext4 1024KiB 100% 1>&2
         sleep 6
         sync
         # loop until the partition gets available
@@ -666,7 +698,7 @@ if [ "$1" = "format" ]; then
      sudo mkdir -p /tmp/btrfs 1>/dev/null
 
      >&2 echo "# Creating BLITZDATA (${hdd})"
-     sudo parted -s -a optimal -- /dev/${hdd} mkpart primary btrfs 0% 30GiB 1>/dev/null
+     sudo parted -s -- /dev/${hdd} mkpart primary btrfs 1024KiB 30GiB 1>/dev/null
      sync
      sleep 6
      win=$(lsblk -o NAME | grep -c ${hdd}1)
@@ -707,7 +739,7 @@ if [ "$1" = "format" ]; then
      cd && sudo umount /tmp/btrfs
 
      >&2 echo "# Creating BLITZSTORAGE"
-     sudo parted -s -a optimal -- /dev/${hdd} mkpart primary btrfs 30GiB -34GiB 1>/dev/null
+     sudo parted -s -- /dev/${hdd} mkpart primary btrfs 30GiB -34GiB 1>/dev/null
      sync
      sleep 6
      win=$(lsblk -o NAME | grep -c ${hdd}2)
@@ -746,7 +778,7 @@ if [ "$1" = "format" ]; then
      cd && sudo umount /tmp/btrfs
 
      >&2 echo "# Creating the FAT32 partition"
-     sudo parted -s -a optimal -- /dev/${hdd} mkpart primary fat32 -34GiB 100% 1>/dev/null
+     sudo parted -s -- /dev/${hdd} mkpart primary fat32 -34GiB 100% 1>/dev/null
      sync && sleep 3
      win=$(lsblk -o NAME | grep -c ${hdd}3)
      if [ ${win} -eq 0 ]; then 
@@ -1345,12 +1377,6 @@ if [ "$1" = "link" ]; then
   else
     sudo rm /home/bitcoin/.bitcoin 2>/dev/null
   fi
-  if [ $(sudo ls -la /home/bitcoin/ | grep -c "litecoin ->") -eq 0 ]; then
-    >&2 echo "# - /home/bitcoin/.litecoin -> is not a link, cleaning"
-    sudo rm -r /home/bitcoin/.litecoin 2>/dev/null
-  else
-    sudo rm /home/bitcoin/.litecoin 2>/dev/null
-  fi
 
   # make sure common base directory exits
   sudo mkdir -p /mnt/hdd/lnd
@@ -1368,14 +1394,6 @@ if [ "$1" = "link" ]; then
       sudo ln -s /mnt/storage/bitcoin /mnt/hdd/bitcoin
       sudo rm /mnt/storage/bitcoin/bitcoin 2>/dev/null
     fi
-    if [ $(ls -F /mnt/hdd/litecoin | grep -c '/mnt/hdd/litecoin@') -eq 0 ]; then
-      sudo mkdir -p /mnt/storage/litecoin
-      sudo cp -R /mnt/hdd/litecoin/* /mnt/storage/litecoin 2>/dev/null
-      sudo chown -R bitcoin:bitcoin /mnt/storage/litecoin
-      sudo rm -r /mnt/hdd/litecoin
-      sudo ln -s /mnt/storage/litecoin /mnt/hdd/litecoin
-      sudo rm /mnt/storage/litecoin/litecoin 2>/dev/null
-    fi
 
     >&2 echo "# linking lnd for user bitcoin"
     sudo rm /home/bitcoin/.lnd 2>/dev/null
@@ -1383,7 +1401,6 @@ if [ "$1" = "link" ]; then
 
     >&2 echo "# - linking blockchain for user bitcoin"
     sudo ln -s /mnt/storage/bitcoin /home/bitcoin/.bitcoin
-    sudo ln -s /mnt/storage/litecoin /home/bitcoin/.litecoin
 
     >&2 echo "# - linking storage into /mnt/hdd"
     sudo mkdir -p /mnt/storage/app-storage
@@ -1405,15 +1422,11 @@ if [ "$1" = "link" ]; then
 
     >&2 echo "# opening blockchain into /mnt/hdd"
     sudo mkdir -p /mnt/hdd/bitcoin
-    sudo mkdir -p /mnt/hdd/litecoin
 
     >&2 echo "# linking blockchain for user bitcoin"
     sudo rm /home/bitcoin/.bitcoin 2>/dev/null
     sudo ln -s /mnt/hdd/bitcoin /home/bitcoin/.bitcoin
     
-    sudo rm /home/bitcoin/.litecoin 2>/dev/null
-    sudo ln -s /mnt/hdd/litecoin /home/bitcoin/.litecoin
-
     >&2 echo "# linking lnd for user bitcoin"
     sudo rm /home/bitcoin/.lnd 2>/dev/null
     sudo ln -s /mnt/hdd/lnd /home/bitcoin/.lnd
@@ -1426,10 +1439,8 @@ if [ "$1" = "link" ]; then
 
   # fix ownership of linked files
   sudo chown -R bitcoin:bitcoin /mnt/hdd/bitcoin
-  sudo chown -R bitcoin:bitcoin /mnt/hdd/litecoin
   sudo chown -R bitcoin:bitcoin /mnt/hdd/lnd
   sudo chown -R bitcoin:bitcoin /home/bitcoin/.lnd
-  sudo chown -R bitcoin:bitcoin /home/bitcoin/.litecoin
   sudo chown -R bitcoin:bitcoin /home/bitcoin/.bitcoin
   sudo chown -R bitcoin:bitcoin /mnt/hdd/app-storage
   sudo chown -R bitcoin:bitcoin /mnt/hdd/app-data
@@ -1481,14 +1492,16 @@ if [ "$1" = "swap" ]; then
     if [ ${isBTRFS} -eq 1 ]; then
 
       >&2 echo "# Rewrite external SWAP config for BTRFS setup"
-      sudo sed -i "12s/.*/CONF_SWAPFILE=\/mnt\/temp\/swapfile/" /etc/dphys-swapfile
-      sudo sed -i "16s/.*/#CONF_SWAPSIZE=/" /etc/dphys-swapfile  
+      sudo sed -i "s/^#CONF_SWAPFILE=/CONF_SWAPFILE=/g" /etc/dphys-swapfile  
+      sudo sed -i "s/^CONF_SWAPFILE=.*/CONF_SWAPFILE=\/mnt\/temp\/swapfile/g" /etc/dphys-swapfile  
+      sudo sed -i "s/^CONF_SWAPSIZE=/#CONF_SWAPSIZE=/g" /etc/dphys-swapfile  
     
     else
 
       >&2 echo "# Rewrite external SWAP config for EXT4 setup"
-      sudo sed -i "12s/.*/CONF_SWAPFILE=\/mnt\/hdd\/swapfile/" /etc/dphys-swapfile
-      sudo sed -i "16s/.*/#CONF_SWAPSIZE=/" /etc/dphys-swapfile
+      sudo sed -i "s/^#CONF_SWAPFILE=/CONF_SWAPFILE=/g" /etc/dphys-swapfile  
+      sudo sed -i "s/^CONF_SWAPFILE=.*/CONF_SWAPFILE=\/mnt\/hdd\/swapfile/g" /etc/dphys-swapfile  
+      sudo sed -i "s/^CONF_SWAPSIZE=/#CONF_SWAPSIZE=/g" /etc/dphys-swapfile  
 
     fi
 
@@ -1585,7 +1598,7 @@ if [ "$1" = "clean" ]; then
 
           # deactivate delete if a blockchain directory (if -keepblockchain)
           if [ "$3" = "-keepblockchain" ]; then
-            if [ "${entry}" = "bitcoin" ] || [ "${entry}" = "litecoin" ]; then
+            if [ "${entry}" = "bitcoin" ]; then
               delete=0
             fi
           fi
@@ -1594,7 +1607,7 @@ if [ "$1" = "clean" ]; then
           if [ "${entry}" = "torrent" ] || [ "${entry}" = "app-storage" ]; then
             whenDeleteSchredd=0
           fi
-          if [ "${entry}" = "bitcoin" ] || [ "${entry}" = "litecoin" ]; then
+          if [ "${entry}" = "bitcoin" ]; then
             whenDeleteSchredd=0
           fi
           # if BTRFS just shred stuff in /mnt/hdd/temp (because thats EXT4)
@@ -1636,7 +1649,7 @@ if [ "$1" = "clean" ]; then
 
         # KEEP BLOCKCHAIN means just blocks & chainstate - delete the rest
         if [ "$3" = "-keepblockchain" ]; then
-          chains=(bitcoin litecoin)
+          chains=(bitcoin)
           for chain in "${chains[@]}"
           do
             echo "Cleaning Blockchain: ${chain}"
@@ -1717,8 +1730,6 @@ if [ "$1" = "clean" ]; then
     # deleting the blocks and chainstate
     sudo rm -R ${basePath}/bitcoin/blocks 1>/dev/null 2>/dev/null
     sudo rm -R ${basePath}/bitcoin/chainstate 1>/dev/null 2>/dev/null
-    sudo rm -R ${basePath}/litecoin/blocks 1>/dev/null 2>/dev/null
-    sudo rm -R ${basePath}/litecoin/chainstate 1>/dev/null 2>/dev/null
 
     >&2 echo "# OK cleaning done."
     exit 1
@@ -1785,7 +1796,7 @@ if [ "$1" = "uasp-fix" ]; then
     fi 
     if [ ${usbQuirkDone} -eq 0 ]; then
       # add new usb-storage.quirks
-      sudo sed -i "1s/^/usb-storage.quirks=${hddAdapterUSB}:u /" /boot/cmdline.txt
+      sudo sed -i "s/^/usb-storage.quirks=${hddAdapterUSB}:u /" /boot/cmdline.txt
       # go into reboot to activate new setting
       echo "# DONE deactivating UASP for ${hddAdapterUSB} ... reboot needed"
       echo "neededReboot=1"

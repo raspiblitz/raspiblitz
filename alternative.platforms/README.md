@@ -1,24 +1,45 @@
 # ⚡️ Alternative platforms for the RaspiBlitz ⚡️
 
 Minimum requirements:
-* ARMv7, ARMv8 or x86 processor (32 or 64 bit)
+* ARMv8 or x86 processor (64 bit)
 * 1 GB RAM
-* \> 300 GB HDD
+* 500 GB HDD
 
 Desirable:
-* \> 2GB DDR3 RAM
-* USB 3.0 or SATA connector
-* SSD
-* Compact case with efficient cooling (heatsink / fan)
-* HDMI / GPIO screen
-
+* \> 2GB DDR3 ECC RAM (8GB+ if using ZFS)
+* USB 3.0 / SATA / PCIE / NVME connectors
+* SSD - multiple disks for redundancy
 
 Specifications of the tested hardware: [hw_comparison.md](hw_comparison.md)
 
 All testers are welcome. Open an issue for your specific board to collaborate and share your experience.
 
 ---
-## Armbian Buster
+## Virtual Machine
+Tested with: 
+* Ubuntu image in VirtualBox and linux virt-manager / [cockpit-machines](https://github.com/cockpit-project/cockpit-machines)
+* Debian image in VirtualBox https://github.com/rootzoll/raspiblitz/issues/2756#issuecomment-983532237
+* TrueNAS (FreeBSD bhyve) with an Ubuntu VM: https://github.com/rootzoll/raspiblitz/issues/2104#issuecomment-917444238
+
+To just experiment can load a virtualbox image from: https://www.osboxes.org/ubuntu (does not need installation)
+Password: `osboxes.org`
+Can carry on straight to building the OS:
+
+```
+# download the build script
+wget https://raw.githubusercontent.com/rootzoll/raspiblitz/dev/build_sdcard.sh
+# run
+sudo bash build_sdcard.sh false false rootzoll dev headless
+```
+
+switch off when ready   
+and attach an other disk (can be even small if you prune or [stop bitcoind](https://github.com/rootzoll/raspiblitz/issues/1500#issuecomment-982779830) ).
+
+The second virtual disk will be used as the BLOCKCHAIN drive.  
+This makes that data portable and independent from the OS similar to the combination of the SDcard and separate SSD.
+
+---
+## Armbian
 Many SBC-s are supported:
 https://www.armbian.com/download/
 
@@ -26,7 +47,6 @@ To verify the downloaded image follow: https://docs.armbian.com/User-Guide_Getti
 
 Tested on:
 * Odroid XU4 / HC1 / HC2 with the Armbian Buster image from https://www.armbian.com/odroid-xu4/
-
 
 Burn the image to the SDcard with [Etcher](https://www.balena.io/etcher/).
 
@@ -42,8 +62,7 @@ Continue with building the SDcard: https://github.com/rootzoll/raspiblitz#build-
 
 ---
 
-## Ubuntu Bionic
-
+## Ubuntu
 A common distro to be supplied by the manufacturer for various boards.
 
 Tested on:
@@ -92,6 +111,7 @@ The HDMI screen tested: https://www.aliexpress.com/item/3-5-inch-LCD-HDMI-USB-To
 Detailed instructions for the RaspiBlitz-on-DietPi: [alternative.platforms/dietpi/README.md](/alternative.platforms/dietpi/README.md)
 
 ---
+
 For the process to build a custom SDcard image release see:
 https://github.com/rootzoll/raspiblitz/blob/dev/FAQ.md#what-is-the-process-of-creating-a-new-sd-card-image-release
 

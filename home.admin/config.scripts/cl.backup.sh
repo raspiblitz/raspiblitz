@@ -94,15 +94,15 @@ if [ ${mode} = "cl-export-gui" ]; then
   # offer SCP for download
   clear
   echo
-  echo "****************************"
-  echo "* DOWNLOAD THE RESCUE FILE *"
-  echo "****************************"
+  echo "****************************************"
+  echo "* DOWNLOAD THE C-LIGHTNING RESCUE FILE *"
+  echo "****************************************"
   echo 
   echo "ON YOUR MAC & LINUX LAPTOP - RUN IN NEW TERMINAL:"
   echo "scp '${fileowner}@${localip}:${filename}' ./"
   echo "ON WINDOWS USE:"
   echo "scp ${fileowner}@${localip}:${filename} ."
-  echo ""
+  echo
   echo "Use password A to authenticate file transfer."
   echo "Check for correct file size after transfer: ${size} byte"
   echo
@@ -191,19 +191,19 @@ if [ ${mode} = "cl-import-gui" ]; then
   while [ "${filename}" == "" ]
     do
       clear 
-      echo "**************************"
-      echo "* UPLOAD THE RESCUE FILE *"
-      echo "**************************"
+      echo "**************************************"
+      echo "* UPLOAD THE C-LIGHTNING RESCUE FILE *"
+      echo "**************************************"
       echo "If you have a cl-rescue backup file on your laptop you can now"
       echo "upload it and restore your latest C-Lightning state."
       echo
-      echo "CAUTION: Dont restore outdated states - risk of loosing funds!"
+      echo "CAUTION: Don't restore outdated states - risk of loosing funds!"
       echo
       echo "To make upload open a new terminal on your laptop,"
       echo "change into the directory where your cl-rescue file is and"
       echo "COPY, PASTE AND EXECUTE THE FOLLOWING COMMAND:"
       echo "scp -r ./cl-rescue-*.tar.gz ${defaultUploadUser}@${localip}:${defaultUploadPath}/"
-      echo ""
+      echo
       echo "Use ${passwordInfo} to authenticate file transfer."
       echo "PRESS ENTER when upload is done"
       read key
@@ -288,9 +288,7 @@ if [ ${mode} = "cl-import-gui" ]; then
   if [ "$(grep -c "hsm_secret is not encrypted" < "$output")" -gt 0 ];then
     echo "# The hsm_secret is not encrypted"
     echo "# Record in raspiblitz.conf"
-    sudo sed -i \
-    "s/^${netprefix}clEncryptedHSM=.*/${netprefix}clEncryptedHSM=off/g" \
-    /mnt/hdd/raspiblitz.conf
+    /home/admin/config.scripts/blitz.conf.sh set ${netprefix}clEncryptedHSM "off"
   else
     cat $output
     echo "# Starting cl.hsmtool.sh unlock"

@@ -10,22 +10,28 @@
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ]; then
   echo "FOR DEVELOPMENT USE ONLY!"
   echo "RaspiBlitz Sync Scripts"
-  echo "XXsyncScripts.sh info"
-  echo "XXsyncScripts.sh [-run|-clean|-install|-justinstall] branch [repo]"
+  echo "blitz.github.sh info"
+  echo "blitz.github.sh [-run|-install|-justinstall] branch [repo]"
   exit 1
 fi
 
-cd /home/admin/raspiblitz
 source /mnt/hdd/raspiblitz.conf 2>/dev/null
+
+cd /home/admin/raspiblitz
 
 # gather info
 activeGitHubUser=$(sudo -u admin cat /home/admin/raspiblitz/.git/config 2>/dev/null | grep "url = " | cut -d "=" -f2 | cut -d "/" -f4)
 activeBranch=$(git branch 2>/dev/null | grep \* | cut -d ' ' -f2)
+commitHashLong=$(git log -n1 --format=format:"%H")
+commitHashShort=${commitHashLong:0:7}
 
 # if parameter is "info" just give back basic info about sync
 if [ "$1" == "info" ]; then
+
   echo "activeGitHubUser='${activeGitHubUser}'"
   echo "activeBranch='${activeBranch}'"
+  echo "commitHashLong='${commitHashLong}'"
+  echo "commitHashShort='${commitHashShort}'"
   exit 1
 fi
 
@@ -45,11 +51,6 @@ if [ "${wantedBranch}" = "-run" ]; then
     echo "# forcing github over vagrant sync"
     vagrant=0
   fi
-fi
-if [ "${wantedBranch}" = "-clean" ]; then
-  clean=1
-  wantedBranch="$2"
-  wantedGitHubUser="$3"
 fi
 if [ "${wantedBranch}" = "-install" ]; then
   install=1
@@ -128,6 +129,7 @@ if [ ${vagrant} -eq 0 ]; then
   echo "# REPO ----> ${origin}"
   echo "# BRANCH --> ${activeBranch}"
   echo "# ******************************************"
+  git config pull.rebase true
   git pull 1>&2
   cd ..
 else
@@ -139,29 +141,30 @@ else
   sudo rm -r /home/admin/raspiblitz
   sudo mkdir /home/admin/raspiblitz
   echo "# - copy from vagrant new raspiblitz files (ignore hidden dirs)"
-  sudo cp -r /vagrant/* /home/admin/raspiblitz
+  sudo cp -R /vagrant/* /home/admin/raspiblitz
   echo "# - set admin as owner of files"
   sudo chown admin:admin -R /home/admin/raspiblitz
 fi
 
-if [ ${clean} -eq 1 ]; then
-  echo "# Cleaning assets .. "
-  sudo rm -f *.sh
-  sudo rm -rf assets
-  sudo -u admin mkdir assets
-else
-  echo "# ******************************************"
-  echo "# NOT cleaning/deleting old files"
-  echo "# use parameter '-clean' if you want that next time"
-  echo "# ******************************************"
-fi
-
 echo "# COPYING from GIT-Directory to /home/admin/"
-sudo rm -r /home/admin/config.scripts
-sudo -u admin cp -r -f /home/admin/raspiblitz/home.admin/* /home/admin
-sudo -u admin chmod -R +x /home/admin/config.scripts
-sudo -u admin chmod -R +x /home/admin/setup.scripts
-sudo -u admin chmod +x /home/admin/*.sh
+echo "# - basic admin files"
+sudo rm -f *.sh
+sudo -u admin cp /home/admin/raspiblitz/home.admin/.tmux.conf /home/admin
+sudo -u admin cp /home/admin/raspiblitz/home.admin/*.* /home/admin 2>/dev/null
+sudo -u admin chmod 755 *.sh
+echo "# - asset directory"
+sudo rm -rf assets
+sudo -u admin cp -R /home/admin/raspiblitz/home.admin/assets /home/admin/assets
+echo "# - config.scripts directory"
+sudo rm -rf /home/admin/config.scripts
+sudo -u admin cp -R /home/admin/raspiblitz/home.admin/config.scripts /home/admin/config.scripts 
+sudo -u admin chmod 755 /home/admin/config.scripts/*.sh
+sudo -u admin chmod 755 /home/admin/config.scripts/*.py
+echo "# - setup.scripts directory"
+sudo rm -rf /home/admin/setup.scripts
+sudo -u admin cp -R /home/admin/raspiblitz/home.admin/setup.scripts /home/admin/setup.scripts
+sudo -u admin chmod 755 /home/admin/setup.scripts/*.sh
+sudo -u admin chmod 755 /home/admin/config.scripts/*.py
 echo "# ******************************************"
 
 echo "# Syncing Webcontent .."

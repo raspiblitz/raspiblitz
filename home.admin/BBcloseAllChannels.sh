@@ -67,6 +67,11 @@ else
   echo "# OK - the chain is synced"
 fi
 
+# raise high focus on lightning channels next 1 hour
+/home/admin/_cache.sh focus ln_${LNTYPE}_${CHAIN}_channels_active 0 3600
+/home/admin/_cache.sh focus ln_${LNTYPE}_${CHAIN}_channels_inactive 0 3600
+/home/admin/_cache.sh focus ln_${LNTYPE}_${CHAIN}_channels_total 0 3600
+
 echo "#####################################"
 echo "# Closing All Channels (EXPERIMENTAL)"
 echo "#####################################"

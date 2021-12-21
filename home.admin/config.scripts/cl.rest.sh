@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # https://github.com/Ride-The-Lightning/c-lightning-REST/releases/
-CLRESTVERSION="v0.5.1"
+CLRESTVERSION="v0.5.2"
 
 # help
 if [ $# -eq 0 ]||[ "$1" = "-h" ]||[ "$1" = "--help" ];then
@@ -21,15 +21,15 @@ source <(/home/admin/config.scripts/network.aliases.sh getvars cl $2)
 
 echo "# Running 'cl.rest.sh $*'"
 
-if [ $1 = connect ];then
+if [ "$1" = connect ];then
   echo "# Allowing port ${portprefix}6100 through the firewall"
   sudo ufw allow "${portprefix}6100" comment "${netprefix}clrest"
   localip=$(ip addr | grep 'state UP' -A2 | grep -E -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
   # hidden service to https://xx.onion
-  /home/admin/config.scripts/internet.hiddenservice.sh ${netprefix}clrest 443 ${portprefix}6100
-  
+  /home/admin/config.scripts/tor.onion-service.sh ${netprefix}clrest 443 ${portprefix}6100
+
   toraddress=$(sudo cat /mnt/hdd/tor/${netprefix}clrest/hostname)
-  hex_macaroon=$(xxd -plain /home/bitcoin/c-lightning-REST/certs/access.macaroon | tr -d '\n') 
+  hex_macaroon=$(xxd -plain /home/bitcoin/c-lightning-REST/certs/access.macaroon | tr -d '\n')
   url="https://${localip}:${portprefix}6100/"
   #string="${url}?${hex_macaroon}"
   #/home/admin/config.scripts/blitz.display.sh qr "$string"
@@ -72,7 +72,7 @@ if [ $1 = connect ];then
   exit 0
 fi
 
-if [ $1 = on ];then
+if [ "$1" = on ];then
   echo "# Setting up c-lightning-REST for $CHAIN"
 
   sudo systemctl stop ${netprefix}clrest
@@ -83,9 +83,16 @@ if [ $1 = on ];then
     sudo -u bitcoin git clone https://github.com/saubyk/c-lightning-REST
     cd c-lightning-REST || exit 1
     sudo -u bitcoin git reset --hard $CLRESTVERSION
+    
+    PGPsigner="saubyk"
+    PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
+    PGPpubkeyFingerprint="00C9E2BC2E45666F"
+    sudo -u bitcoin /home/admin/config.scripts/blitz.git-verify.sh \
+     "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
+    
     sudo -u bitcoin npm install
   fi
-  
+
   # config
   cd /home/bitcoin/c-lightning-REST || exit 1
   sudo -u bitcoin mkdir ${CLNETWORK}
@@ -98,7 +105,7 @@ if [ $1 = on ];then
     \"LNRPCPATH\": \"/home/bitcoin/.lightning/${CLNETWORK}/lightning-rpc\",
     \"RPCCOMMANDS\": [\"*\"]
 }" | sudo -u bitcoin tee ./${CLNETWORK}/cl-rest-config.json
-  
+
   echo "
 # systemd unit for c-lightning-REST for ${CHAIN}
 # /etc/systemd/system/${netprefix}clrest.service
@@ -128,7 +135,7 @@ WantedBy=multi-user.target
 " | sudo tee /etc/systemd/system/${netprefix}clrest.service
 
   sudo systemctl enable ${netprefix}clrest
-  source /home/admin/raspiblitz.info
+  source <(/home/admin/_cache.sh get state)
   if [ "${state}" == "ready" ]; then
     echo "# OK - the clrest.service is enabled, system is ready so starting service"
     sudo systemctl start ${netprefix}clrest
@@ -148,7 +155,7 @@ if [ $1 = off ];then
   sudo rm -rf /home/bitcoin/c-lightning-REST/${CLNETWORK}
   echo "# Deny port ${portprefix}6100 through the firewall"
   sudo ufw deny "${portprefix}6100"
-  /home/admin/config.scripts/internet.hiddenservice.sh off ${netprefix}clrest
+  /home/admin/config.scripts/tor.onion-service.sh off ${netprefix}clrest
   if [ "$(echo "$@" | grep -c purge)" -gt 0 ];then
     echo "# Removing the source code and binaries"
     sudo rm -rf /home/bitcoin/c-lightning-REST

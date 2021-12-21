@@ -30,7 +30,7 @@ if [ "$1" = "menu" ]; then
   else
     /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
   fi
-  fingerprint=$(openssl x509 -in /home/bitcoin/.lightning/spark-tls/cert.pem -fingerprint -noout | cut -d"=" -f2)
+  fingerprint=$(openssl x509 -in /home/bitcoin/.spark-wallet/tls/cert.pem -fingerprint -noout | cut -d"=" -f2)
 
   whiptail --title "\
 spark - $CHAIN" --msgbox "Open in your local web browser:
@@ -46,16 +46,6 @@ ${toraddresstext}
 
   echo "# please wait ..."
   exit 0
-fi
-
-# add default value to raspiblitz.conf if needed
-configEntry="${netprefix}spark="
-configEntryExists=$(sudo cat /mnt/hdd/raspiblitz.conf | grep -c "${configEntry}")
-if [ "${configEntryExists}" == "0" ]; then
-  echo "# adding default config entry for '${configEntry}'"
-  sudo /bin/sh -c "echo '${configEntry}off' >> /mnt/hdd/raspiblitz.conf"
-else
-  echo "# default config entry for '${configEntry}' exists"
 fi
 
 if [ $1 = on ];then
@@ -82,8 +72,9 @@ if [ $1 = on ];then
   sudo -u bitcoin git reset --hard ${SPARKVERSION} || exit 1
   sudo -u bitcoin npm install @babel/cli
   sudo -u bitcoin npm run dist:npm || exit 1
-  
+
   if [ ! -f /home/bitcoin/.spark-wallet/tls/key.pem ];then
+    echo "# creating /home/bitcoin/.spark-wallet/tls/key.pem"
     # create a self signed cert https://github.com/fiatjaf/spark#how-to-use
     /home/admin/config.scripts/internet.selfsignedcert.sh
     # spark looks for specific filenames
@@ -92,6 +83,8 @@ if [ $1 = on ];then
         /home/bitcoin/.spark-wallet/tls/key.pem
     sudo ln -sf /mnt/hdd/app-data/selfsignedcert/selfsigned.cert \
         /home/bitcoin/.spark-wallet/tls/cert.pem
+  else
+    echo "# exists /home/bitcoin/.spark-wallet/tls/key.pem"
   fi
 
   ##########
@@ -110,7 +103,7 @@ onion
 "   | sudo -u bitcoin tee /home/bitcoin/.spark-wallet/${netprefix}config
   fi
 
-  #################  
+  #################
   # SYSTEMD SERVICE
   #################
   # https://raw.githubusercontent.com/shesek/spark-wallet/master/scripts/spark-wallet.service
@@ -145,14 +138,14 @@ PrivateDevices=true
 WantedBy=multi-user.target
 " | sudo tee /etc/systemd/system/${systemdService}.service
   sudo chown root:root /etc/systemd/system/${systemdService}.service
-  
+
   echo "# Allowing port ${portprefix}8000 through the firewall"
   sudo ufw allow "${portprefix}8000" comment "${netprefix}spark-wallet"
-  
-  /home/admin/config.scripts/internet.hiddenservice.sh ${netprefix}spark-wallet 443 ${portprefix}8000
+
+  /home/admin/config.scripts/tor.onion-service.sh ${netprefix}spark-wallet 443 ${portprefix}8000
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^${netprefix}spark=.*/${netprefix}spark=on/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set ${netprefix}spark "on"
   
   sudo systemctl enable ${systemdService}
   sudo systemctl start ${systemdService}
@@ -166,8 +159,8 @@ if [ $1 = off ];then
 
   sudo systemctl stop ${systemdService} 2>/dev/null
   sudo systemctl disable ${systemdService} 2>/dev/null
-  
-  /home/admin/config.scripts/internet.hiddenservice.sh off ${netprefix}spark-wallet
+
+  /home/admin/config.scripts/tor.onion-service.sh off ${netprefix}spark-wallet
 
   # purge
   if [ "$(echo "$@" | grep -c purge)" -gt 0 ];then
@@ -175,6 +168,6 @@ if [ $1 = off ];then
     sudo rm -rf /home/bitcoin/spark-wallet
   fi
   # setting value in raspi blitz config
-  sudo sed -i "s/^${netprefix}spark=.*/${netprefix}spark=off/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set ${netprefix}spark "off"
   echo "# ${netprefix}spark was uninstalled"
 fi

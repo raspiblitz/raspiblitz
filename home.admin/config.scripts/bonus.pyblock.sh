@@ -7,19 +7,11 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  exit 1
 fi
 
-source /mnt/hdd/raspiblitz.conf
-
-# add default value to raspi config if needed
-if ! grep -Eq "^pyblock=" /mnt/hdd/raspiblitz.conf; then
-  echo "pyblock=off" >> /mnt/hdd/raspiblitz.conf
-fi
-
 # show info menu
 if [ "$1" = "menu" ]; then
   dialog --title " Info PyBlock " --msgbox "
 pyblock is a command line tool.
-Type: 'pyblock' in the command line to switch to the dedicated user.
-Then 'pyblock' for starting PyBlock.
+Exit to Terminal and use command 'pyblock'.
 Usage: https://github.com/curly60e/pyblock/blob/master/README.md
 " 10 75
   exit 0
@@ -38,13 +30,14 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   
   # create pyblock user
   sudo adduser --disabled-password --gecos "" pyblock
+  cd /home/pyblock
+  sudo -u pyblock mkdir /home/pyblock/config
 
-  
-  # download source code
-  sudo -u pyblock git clone https://github.com/curly60e/pyblock.git /home/pyblock/PyBLOCK
-  cd /home/pyblock/PyBLOCK
-  sudo -u pyblock pip3 install -r requirements.txt
-  sudo apt-get install hexyl
+  # install hexyl
+  sudo apt-get install hexyl html2text
+
+  # install via pip
+  sudo -u pyblock pip3 install pybitblock 
 
   # set PATH for the user
   sudo bash -c "echo 'PATH=\$PATH:/home/pyblock/.local/bin/' >> /home/pyblock/.profile"
@@ -65,24 +58,18 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   ## Create conf
   # from xxd -p bclock.conf | tr -d '\n'
   echo 80037d710028580700000069705f706f727471015807000000687474703a2f2f710258070000007270637573657271035800000000710458070000007270637061737371056804580a000000626974636f696e636c697106581a0000002f7573722f6c6f63616c2f62696e2f626974636f696e2d636c697107752e0a | xxd -r -p -  ~/bclock.conf
-  sudo mv ~/bclock.conf /home/pyblock/bclock.conf
-  sudo chown pyblock:pyblock /home/pyblock/bclock.conf
+  sudo mv ~/bclock.conf /home/pyblock/config/bclock.conf
+  sudo chown pyblock:pyblock /home/pyblock/config/bclock.conf
 
   # from xxd -p blndconnect.conf | tr -d '\n'
   echo 80037d710028580700000069705f706f72747101580000000071025803000000746c737103680258080000006d616361726f6f6e7104680258020000006c6e710558140000002f7573722f6c6f63616c2f62696e2f6c6e636c697106752e0a | xxd -r -p -  ~/blndconnect.conf
-  sudo mv ~/blndconnect.conf /home/pyblock/blndconnect.conf
-  sudo chown pyblock:pyblock /home/pyblock/blndconnect.conf
+  sudo mv ~/blndconnect.conf /home/pyblock/config/blndconnect.conf
+  sudo chown pyblock:pyblock /home/pyblock/config/blndconnect.conf
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^pyblock=.*/pyblock=on/g" /mnt/hdd/raspiblitz.conf
-  
-  ## pyblock short command
-  sudo bash -c "echo 'alias pyblock=\"cd ~; python3 ~/PyBLOCK/PyBlock.py\"' >> /home/pyblock/.bashrc"
-  
-  echo "# Usage: https://github.com/curly60e/pyblock/blob/master/README.md"
-  echo "# To start type: 'sudo su pyblock' in the command line."
-  echo "# Then pyblock"
-  echo "# To exit the user - type 'exit' and press ENTER"
+  /home/admin/config.scripts/blitz.conf.sh set pyblock "on"
+  echo "# Usage: https://github.com/curly60e/pyblock"
+  echo "# To start use raspiblitz shortcut-command: pyblock"
 
   exit 0
 fi
@@ -91,23 +78,13 @@ fi
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^pyblock=.*/pyblock=off/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set pyblock "off"
   
   echo "*** REMOVING PyBLOCK ***"
   sudo userdel -rf pyblock
   echo "# OK, pyblock is removed."
   exit 0
 
-fi
-
-# update
-if [ "$1" = "update" ]; then
-  echo "*** UPDATING PyBLOCK ***"
-  cd /home/pyblock/PyBLOCK
-  sudo -u pyblock git pull
-  sudo -u pyblock pip3 install -r requirements.txt
-  echo "*** Updated to the latest in https://github.com/curly60e/pyblock ***"
-  exit 0
 fi
 
 echo "FAIL - Unknown Parameter $1"

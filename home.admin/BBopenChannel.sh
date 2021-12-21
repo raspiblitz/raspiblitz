@@ -79,6 +79,11 @@ if [ ${numConnectedPeers} -eq 0 ]; then
   exit 0
 fi
 
+# raise high focus on lightning channels next 1 hour
+/home/admin/_cache.sh focus ln_${LNTYPE}_${CHAIN}_channels_pending 0 3600
+/home/admin/_cache.sh focus ln_${LNTYPE}_${CHAIN}_channels_total 0 3600
+/home/admin/_cache.sh focus ln_${LNTYPE}_${CHAIN}_channels_active 0 3600
+
 # let user pick a peer to open a channels with
 OPTIONS=()
 if [ $LNTYPE = cl ];then
@@ -217,9 +222,6 @@ else
     elif [ "${chain}" = "test" ]||[ "${chain}" = "sig" ]; then
       echo "http://mempoolhqx4isw62xs7abwphsq7ldayuidyx2v2oethdhhj6mlo2r6ad.onion/${chain}net/tx/${fundingTX}"
     fi
-  fi
-  if [ "${network}" = "litecoin" ]; then
-    echo "https://live.blockcypher.com/ltc/tx/${fundingTX}/"
   fi
 fi
 echo

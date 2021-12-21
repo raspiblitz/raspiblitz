@@ -57,6 +57,9 @@ EOF
     # ToDo(frennkie) verify this
     sudo sed -i -E '/^.*server_names_hash_bucket_size [0-9]*;$/a \\tserver_names_hash_bucket_size 128;' /etc/nginx/nginx.conf
   fi
+  if [ $(sudo cat /etc/nginx/nginx.conf | grep -c "# server_tokens off") -gt 0 ]; then
+    sudo sed -i "s/# server_tokens off;/server_tokens off;/g" /etc/nginx/nginx.conf
+  fi
 
   echo "# Checking dhparam.pem ..."
   if [ ! -f /etc/ssl/certs/dhparam.pem ]; then

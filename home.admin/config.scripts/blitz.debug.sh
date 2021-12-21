@@ -2,21 +2,55 @@
 
 # USE THIS SCRIPT FOR BASIC SYSTEM STATUS DEBUG INFO
 
+if [ "$1" == "redact" ]; then
+
+  # get & check parameters
+  redactFile=$2
+  if [ "${redactFile}" == "" ]; then
+    echo "# FAIL: missing second parameter"
+    exit 1
+  fi
+  echo "# redacting file: ${redactFile}"
+  if [ $(ls ${redactFile} 2>/dev/null | grep -c "${redactFile}") -lt 1 ]; then
+    echo "# FAIL: file does not exist"
+    exi 1
+  fi
+
+  # redact nodeIDs
+  sed -i 's/[a-z0-9]*@/***@/' ${redactFile}
+
+  # redact IPv4s
+  sed -i 's/[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}/*.*.*.*/' ${redactFile}
+
+  # redact onion adresses
+  sed -i 's/[a-z0-9]*.onion/***.onion/' ${redactFile}
+
+  # redact hostname
+  sed -i 's/hostname=[^\r\n]*/hostname=*****/' ${redactFile}
+
+  # redact balances
+  sed -i 's/[0-9]* mSAT/* mSAT/' ${redactFile}
+  sed -i 's/[0-9]*.[0-9]* BTC/* BTC/' ${redactFile}
+  sed -i 's/[0-9]*.[0-9]* BTC/* BTC/' ${redactFile}
+  sed -i 's/balance=[^\r\n]*/balance=****/' ${redactFile}
+  sed -i 's/Server started with public key .+/Server started with public key ****/' ${redactFile}
+  
+  exit 0
+fi
+
+
 # load code software version
 source /home/admin/_version.info
 
 ## get basic info (its OK if not set yet)
 source /home/admin/raspiblitz.info 2>/dev/null
+source <(/home/admin/_cache.sh get state setupPhase)
 source /mnt/hdd/raspiblitz.conf 2>/dev/null
 
 # for old nodes
 if [ ${#network} -eq 0 ]; then
   echo "backup info: network"
   network="bitcoin"
-  litecoinActive=$(sudo ls /mnt/hdd/litecoin/litecoin.conf | grep -c 'litecoin.conf')
-  if [ ${litecoinActive} -eq 1 ]; then
-    network="litecoin"
-  fi
 fi
 
 # for non final config nodes
@@ -58,7 +92,6 @@ echo
 echo "*** LAST BLOCKCHAIN (MAINNET) ERROR LOGS ***"
 echo "sudo journalctl -u ${network}d -b --no-pager -n8"
 sudo journalctl -u ${network}d -b --no-pager -n8
-cat /home/admin/systemd.blockchain.log | grep "ERROR" | tail -n -2
 echo
 echo "*** LAST BLOCKCHAIN (MAINNET) 20 INFO LOGS ***"
 echo "sudo tail -n 20 /mnt/hdd/${network}/debug.log"
@@ -72,7 +105,6 @@ if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ] || [ "${lnd}" == "1" ]; t
   echo "*** LAST LND (MAINNET) ERROR LOGS ***"
   echo "sudo journalctl -u lnd -b --no-pager -n12"
   sudo journalctl -u lnd -b --no-pager -n12
-  cat /home/admin/systemd.lightning.log | grep "ERROR" | tail -n -1
   echo
   echo "*** LAST 30 LND (MAINNET) INFO LOGS ***"
   echo "sudo tail -n 30 /mnt/hdd/lnd/logs/${network}/mainnet/lnd.log"
@@ -87,7 +119,7 @@ if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ] || [ "${cl}" == "1" ]; then
   sudo systemctl status lightningd -n2 --no-pager
   echo
   echo "*** LAST 30 C-LIGHTNING (MAINNET) INFO LOGS ***"
-  echo "sudo tail -n 30 /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log"
+  echo "sudo tail -n 30 /home/bitcoin/.lightning/${network}/cl.log"
   sudo tail -n 30 /home/bitcoin/.lightning/${network}/cl.log
 else
   echo "- not activated -"
@@ -190,19 +222,21 @@ echo "*** LAST NGINX LOGS ***"
 echo "sudo journalctl -u nginx -b --no-pager -n20"
 sudo journalctl -u nginx -b --no-pager -n20
 echo "--> CHECK CONFIG: sudo nginx -t"
-sudo nginx -t
+sudo nginx -t 2>&1
 echo
 
-echo "*** BLITZAPI SYSTEMD STATUS ***"
-sudo systemctl status blitzapi -n2 --no-pager
-echo
+if [ $(sudo systemctl status blitzapi 2>/dev/null | grep -c "blitzapi.service") -lt 1 ]; then
+  echo "- BLITZAPI is not running"
+else
+  echo "*** BLITZAPI SYSTEMD STATUS ***"
+  sudo systemctl status blitzapi -n2 --no-pager
+  echo
 
-echo "*** LAST BLITZAPI LOGS ***"
-echo "sudo journalctl -u blitzapi -b --no-pager -n20"
-sudo journalctl -u nginx -b --no-pager -n20
-echo "--> CHECK CONFIG: sudo nginx -t"
-sudo nginx -t
-echo
+  echo "*** LAST BLITZAPI LOGS ***"
+  echo "sudo journalctl -u blitzapi -b --no-pager -n20"
+  sudo journalctl -u nginx -b --no-pager -n20
+  echo
+fi
 
 if [ "${touchscreen}" == "" ] || [ "${touchscreen}" == "0" ] || [ "${touchscreen}" == "off" ]; then
   echo "- TOUCHSCREEN is OFF by config"
@@ -341,21 +375,26 @@ sudo /home/admin/config.scripts/internet.sh status | grep 'network_device\|local
 echo
 
 echo "*** HARDWARE TEST RESULTS ***"
+source <(/home/admin/_cache.sh get system_count_undervoltage)
 showImproveInfo=0
-if [ ${#undervoltageReports} -gt 0 ]; then
-  echo "UndervoltageReports in Logs: ${undervoltageReports}"
-  if [ ${undervoltageReports} -gt 0 ]; then
+if [ ${#system_count_undervoltage} -gt 0 ]; then
+  echo "UndervoltageReports in Logs: ${system_count_undervoltage}"
+  if [ ${system_count_undervoltage} -gt 0 ]; then
     showImproveInfo=1
   fi
 fi
 echo
 
-echo "*** SYSTEM STATUS (can take some seconds to gather) ***"
-sudo /home/admin/config.scripts/blitz.statusscan.sh
-echo
+echo "*** SYSTEM CACHE STATUS ***"
+/home/admin/_cache.sh "export" system_
+/home/admin/_cache.sh "export" ln_default | grep -v "ln_default_address"
+/home/admin/_cache.sh "export" btc_default | grep -v "btc_default_address"
 
+echo
 echo "*** OPTION: SHARE THIS DEBUG OUTPUT ***"
 echo "An easy way to share this debug output on GitHub or on a support chat"
-echo "use the following command and share the resulting link:"
-echo "debug | torsocks nc termbin.com 9999"
+echo "Use the following command and share the resulting link using termbin.com service and tor proxy:"
+echo " debug -l"
+echo "If tor is failing and you don't mind leaking your ip address to the termbin service, use without tor:"
+echo " debug -l -n"
 echo

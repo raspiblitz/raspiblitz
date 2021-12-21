@@ -20,7 +20,7 @@ mode="$1"
 
 # RECOMMENDED UPDATE BY RASPIBLITZ TEAM
 # comment will be shown as "BEWARE Info" when option is choosen (can be multiple lines) 
-clUpdateVersion="0.10.1" # example: v0.10.1 .. keep empty if no newer version as sd card build is available
+clUpdateVersion="0.10.2" # example: 0.10.1 .. keep empty if no newer version as sd card build is available
 clUpdateComment="Please keep in mind that downgrading afterwards is not tested. Also not all additional apps are fully tested with the this update - but it looked good on first tests."
 
 # GATHER DATA
@@ -34,9 +34,9 @@ clInstalledVersionMinor=$(echo "${clInstalledVersion}" | cut -d "-" -f1 | cut -d
 # test if the installed version already the verified/recommended update version
 clUpdateInstalled=$(echo "${clInstalledVersion}" | grep -c "${clUpdateVersion}")
 
-# get latest release from C-lightning GitHub releases
-gitHubLatestReleaseJSON="$(curl -s https://api.github.com/repos/ElementsProject/lightning/releases | jq '.[0]')"
-clLatestVersion=$(echo "${gitHubLatestReleaseJSON}" | jq -r '.tag_name')
+# get latest release from C-lightning GitHub releases without release candidates
+clLatestVersion=$(curl -s https://api.github.com/repos/ElementsProject/lightning/releases | jq -r '.[].tag_name' | grep -v "rc" | head -n1)
+# example: v0.10.2
 
 # INFO
 if [ "${mode}" = "info" ]; then
@@ -72,7 +72,7 @@ if [ "${mode}" = "verified" ]; then
     if [ "${fixedUpdateVersion}" != "${clUpdateVersion}" ]; then
       echo "warn='required update version does not match'"
       echo "# this is normal when the recovery script of a new RaspiBlitz version checks for an old update - just ignore"
-      sed -i '/^clInterimsUpdate=*/d' /mnt/hdd/raspiblitz.conf
+      /home/admin/config.scripts/blitz.conf.sh delete clInterimsUpdate
       exit 1
     else
       echo "# OK - update version is matching"
@@ -99,22 +99,23 @@ if [ "${mode}" = "reckless" ]; then
 
   echo "# cl.update.sh reckless"
 
-  /home/admin/config.scripts/cl.install.sh update ${clLatestVersion}
-
-  # prepare install
-  clInterimsUpdateNew="reckless"
+  # only update if the latest release is different from the installed
+  if [ "v${clInstalledVersion}" = "${clLatestVersion}" ]; then
+    # attention to leading 'v'
+    echo "# clInstalledVersion = clLatestVersion (${clLatestVersion:1})"
+    echo "# There is no need to update again."
+    clInterimsUpdateNew="${clLatestVersion:1}"
+  else
+    /home/admin/config.scripts/cl.install.sh update ${clLatestVersion}
+    clInterimsUpdateNew="reckless"
+  fi
 fi
 
 # JOINED INSTALL (verified & RECKLESS)
 if [ "${mode}" = "verified" ] || [ "${mode}" = "reckless" ]; then
 
   echo "# flag update in raspiblitz config"
-  source /mnt/hdd/raspiblitz.conf
-  if [ ${#clInterimsUpdate} -eq 0 ]; then
-    echo "clInterimsUpdate='${clInterimsUpdateNew}'" >> /mnt/hdd/raspiblitz.conf
-  else
-    sudo sed -i "s/^clInterimsUpdate=.*/clInterimsUpdate='${clInterimsUpdateNew}'/g" /mnt/hdd/raspiblitz.conf
-  fi
+  /home/admin/config.scripts/blitz.conf.sh set clInterimsUpdate "${clInterimsUpdateNew}"
 
   echo "# OK C-lightning is installed"
   echo "# NOTE: RaspiBlitz may need to reboot now"

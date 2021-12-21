@@ -1,30 +1,59 @@
 # RaspiBlitz: systemd unit for bitcoind
+# based  on https://github.com/bitcoin/bitcoin/blob/master/contrib/init/bitcoind.service
 [Unit]
-Description=Bitcoin-Daemon
-Wants=network.target
-After=network.target
+Description=Bitcoin daemon
+
+After=network-online.target
+Wants=network-online.target
 
 # for use with sendmail alert
 #OnFailure=systemd-sendmail@%n
 
 [Service]
-User=bitcoin
-Group=bitcoin
+ExecStartPre=-/home/admin/config.scripts/blitz.systemd.sh log blockchain STARTED
+ExecStart=/usr/local/bin/bitcoind -daemonwait \
+                                  -pid=/mnt/hdd/bitcoin/bitcoind.pid \
+                                  -conf=/mnt/hdd/bitcoin/bitcoin.conf \
+                                  -datadir=/mnt/hdd/bitcoin \
+                                  -debuglogfile=/mnt/hdd/bitcoin/debug.log
+
+# Make sure the config directory is readable by the service user
+PermissionsStartOnly=true
+ExecStartPre=/bin/chgrp bitcoin /mnt/hdd/bitcoin
+
+# Process management
+####################
 Type=forking
 PIDFile=/mnt/hdd/bitcoin/bitcoind.pid
-ExecStartPre=-/home/admin/config.scripts/blitz.systemd.sh log blockchain STARTED
-ExecStart=/usr/local/bin/bitcoind -daemon -conf=/mnt/hdd/bitcoin/bitcoin.conf -pid=/mnt/hdd/bitcoin/bitcoind.pid -debuglogfile=/mnt/hdd/bitcoin/debug.log
-Restart=always
-TimeoutSec=120
-RestartSec=30
+Restart=on-failure
+TimeoutStartSec=infinity
+TimeoutStopSec=600
+
+# Directory creation and permissions
+####################################
+# Run as bitcoin:bitcoin
+User=bitcoin
+Group=bitcoin
+
 StandardOutput=null
 StandardError=journal
 
 # Hardening measures
+####################
+# Provide a private /tmp and /var/tmp.
 PrivateTmp=true
+# Mount /usr, /boot/ and /etc read-only for the process.
 ProtectSystem=full
+# Deny access to /home, /root and /run/user
+ProtectHome=true
+# Disallow the process and all of its children to gain
+# new privileges through execve().
 NoNewPrivileges=true
+# Use a new /dev namespace only populated with API pseudo devices
+# such as /dev/null, /dev/zero and /dev/random.
 PrivateDevices=true
+# Deny the creation of writable and executable memory mappings.
+MemoryDenyWriteExecute=true
 
 [Install]
 WantedBy=multi-user.target

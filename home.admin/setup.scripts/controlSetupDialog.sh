@@ -3,13 +3,11 @@
 # get basic system information
 # these are the same set of infos the WebGUI dialog/controler has
 source /home/admin/raspiblitz.info
+# get values from cache
 
 # SETUPFILE
 # this key/value file contains the state during the setup process
 SETUPFILE="/var/cache/raspiblitz/temp/raspiblitz.setup"
-
-# remember original setupphase
-orgSetupPhase="${setupPhase}"
 
 # init SETUPFILE & temp dir on mem drive
 sudo mkdir /var/cache/raspiblitz/temp
@@ -18,6 +16,11 @@ sudo rm $SETUPFILE 2>/dev/null
 echo "# RASPIBLITZ SETUP STATE" > $SETUPFILE
 sudo chown admin:admin $SETUPFILE
 sudo chmod 777 $SETUPFILE
+
+source <(/home/admin/_cache.sh get setupPhase dnsworking)
+
+# remember original setupphase
+orgSetupPhase="${setupPhase}"
 
 ############################################
 # PRESETUP: SET DNS (just if needed)
@@ -36,8 +39,7 @@ if [ "${setupPhase}" == "update" ]; then
     echo "setPasswordA=1" >> $SETUPFILE
   else
     # default to normal setup options
-    setupPhase="setup"
-    sudo sed -i "s/^setupPhase=.*/setupPhase='setup'/g" /home/admin/raspiblitz.info
+    /home/admin/_cache.sh set setupPhase "setup"
     echo "# you refused recovery option - defaulting to normal setup menu"
   fi
 fi
@@ -53,8 +55,7 @@ if [ "${setupPhase}" == "recovery" ]; then
     echo "setPasswordA=1" >> $SETUPFILE
   else
     # default to normal setup options
-    setupPhase="setup"
-    sudo sed -i "s/^setupPhase=.*/setupPhase='setup'/g" /home/admin/raspiblitz.info
+    /home/admin/_cache.sh set setupPhase "setup"
     echo "# you refused recovery option - defaulting to normal setup menu"
   fi
 fi
@@ -74,13 +75,14 @@ if [ "${setupPhase}" == "migration" ]; then
     echo "setPasswordC=1" >> $SETUPFILE
   else
     # on cancel - default to normal setup
-    setupPhase="setup"
-    sudo sed -i "s/^setupPhase=.*/setupPhase='setup'/g" /home/admin/raspiblitz.info
+    /home/admin/_cache.sh set setupPhase "setup"
     echo "# you refused node migration option - defaulting to normal setup"
     exit 1
   fi
 
 fi
+
+source <(/home/admin/_cache.sh get setupPhase)
 
 ############################################
 # DEFAULT: Basic Setup menu
@@ -94,7 +96,7 @@ if [ "${setupPhase}" == "setup" ]; then
   # menu RECOVER menu option
   if [ "${menuresult}" == "4" ]; then
     setupPhase="${orgSetupPhase}"
-    sudo sed -i "s/^setupPhase=.*/setupPhase='${setupPhase}'/g" /home/admin/raspiblitz.info
+    /home/admin/_cache.sh set setupPhase "${setupPhase}"
     # proceed with provision (mark Password A to be set)
     echo "# OK update process starting .."
     echo "setPasswordA=1" >> $SETUPFILE
@@ -103,7 +105,7 @@ if [ "${setupPhase}" == "setup" ]; then
   # menu MIGRATE menu option
   if [ "${menuresult}" == "5" ]; then
     setupPhase="${orgSetupPhase}"
-    sudo sed -i "s/^setupPhase=.*/setupPhase='${setupPhase}'/g" /home/admin/raspiblitz.info
+    /home/admin/_cache.sh set setupPhase "${setupPhase}"
     # mark migration to happen on provision
     echo "migrationOS='${hddGotMigrationData}'" >> $SETUPFILE
     # user needs to reset password A, B & C
@@ -127,12 +129,11 @@ if [ "${setupPhase}" == "setup" ]; then
   # FORMAT DRIVE on NEW SETUP or MIGRATION UPLOAD 
   if [ "${menuresult}" == "0" ] || [ "${menuresult}" == "1" ]; then
 
+    source <(/home/admin/_cache.sh get hddGotMigrationData hddBlocksBitcoin hddBlocksLitecoin hddCandidate)
+
     # check if there is a blockchain to use (so HDD is already formatted)
     # thats also true if the node is coming from another nodeOS
     existingBlockchain=""
-    if [ "${hddBlocksLitecoin}" == "1" ]; then
-      existingBlockchain="LITECOIN"
-    fi
     if [ "${hddBlocksBitcoin}" == "1" ] || [ "${hddGotMigrationData}" != "" ]; then
       existingBlockchain="BITCOIN"
     fi
@@ -181,7 +182,7 @@ if [ "${setupPhase}" == "setup" ]; then
 
       # delete everything but blockchain
       echo "Deleting everything on HDD/SSD while keeping blockchain ..."
-      sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount
+      sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount 1>/dev/null 2>/dev/null
       sudo /home/admin/config.scripts/blitz.datadrive.sh clean all -keepblockchain
       if [ "${error}" != "" ]; then
         echo "CLEANING HDD FAILED:"
@@ -194,11 +195,7 @@ if [ "${setupPhase}" == "setup" ]; then
 
       # by keeping that blockchain - user chose already the blockchain type
       echo "Selecting as blockchain network automatically .."
-      if [ "${hddBlocksLitecoin}" == "1" ]; then
-        echo "network=litecoin" >> $SETUPFILE
-      else
-        echo "network=bitcoin" >> $SETUPFILE
-      fi
+      echo "network=bitcoin" >> $SETUPFILE
 
     else
 
@@ -254,7 +251,11 @@ if [ "${setupPhase}" == "setup" ]; then
 
     lightningWalletDone=0
     source ${SETUPFILE}
-    if [ "${lightning}" == "none" ]; then lightningWalletDone=1; fi 
+    if [ "${lightning}" == "none" ]; then
+      lightningWalletDone=1
+      # also disable asking for password c if no lightning implementation was chosen
+      sed -i "s/^setPasswordC=.*/setPasswordC=0/g" ${SETUPFILE}
+    fi 
     while [ "${lightningWalletDone}" == "0" ]
     do
 
@@ -298,23 +299,20 @@ if [ "${setupPhase}" == "setup" ]; then
     # source the setup state fresh
     source $SETUPFILE
 
-    # prepare config file
+    # prepare & write basic config file (on temp mem drive)
     CONFIGFILE="/var/cache/raspiblitz/temp/raspiblitz.conf"
     sudo rm $CONFIGFILE 2>/dev/null
     sudo touch $CONFIGFILE
     sudo chown admin:admin $CONFIGFILE
     sudo chmod 777 $CONFIGFILE
-
-    # write basic config file data
     echo "# RASPIBLITZ CONFIG FILE" > $CONFIGFILE
     echo "raspiBlitzVersion='${codeVersion}'" >> $CONFIGFILE
-    echo "lcdrotate=1" >> $CONFIGFILE
-    echo "lightning=${lightning}" >> $CONFIGFILE
-    echo "network=${network}" >> $CONFIGFILE
-    echo "chain=main" >> $CONFIGFILE
+    echo "lcdrotate='1'" >> $CONFIGFILE
+    echo "lightning='${lightning}'" >> $CONFIGFILE
+    echo "network='${network}'" >> $CONFIGFILE
+    echo "chain='main'" >> $CONFIGFILE
     echo "hostname='${hostname}'" >> $CONFIGFILE
-    echo "runBehindTor=on" >> $CONFIGFILE
-  
+    echo "runBehindTor='on'" >> $CONFIGFILE
   fi
 
 fi
@@ -327,7 +325,7 @@ echo "# Starting passwords dialog ..."
 /home/admin/setup.scripts/dialogPasswords.sh
 
 # set flag for bootstrap process to kick-off provision process
-sudo sed -i "s/^state=.*/state=waitprovision/g" /home/admin/raspiblitz.info
+/home/admin/_cache.sh set state "waitprovision"
   
 clear
 echo "# setup dialog done - results in:"

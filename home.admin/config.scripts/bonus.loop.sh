@@ -5,7 +5,7 @@
 # but main focus for the future development should be on LIT
 
 # https://github.com/lightninglabs/loop/releases-
-pinnedVersion="v0.11.2-beta"
+pinnedVersion="v0.15.0-beta"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -13,13 +13,6 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "bonus.loop.sh [on|off|menu|update]"
  echo "!! DEPRECATED use instead: bonus.lit.sh"
  exit 1
-fi
-
-source /mnt/hdd/raspiblitz.conf
-
-# add default value to raspi config if needed
-if ! grep -Eq "^loop=" /mnt/hdd/raspiblitz.conf; then
-  echo "loop=off" >> /mnt/hdd/raspiblitz.conf
 fi
 
 # show info menu
@@ -31,6 +24,16 @@ Type 'loop' again to see the available options.
 " 10 56
   exit 0
 fi
+
+# releases are creatd on GitHub
+PGPsigner="web-flow"
+PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
+PGPpubkeyFingerprint="4AEE18F83AFDEB23"
+
+# TODO download with .tar.gz
+#PGPsigner="alexbosworth"
+#PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
+#PGPpubkeyFingerprint="E80D2F3F311FD87E"
 
 # stop services
 echo "making sure the loopd.service is not running"
@@ -75,6 +78,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u loop git clone https://github.com/lightninglabs/loop.git
     cd /home/loop/loop
     sudo -u loop git reset --hard $pinnedversion
+    sudo -u loop /home/admin/config.scripts/blitz.git-verify.sh \
+     "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
     cd /home/loop/loop/cmd
     sudo -u loop /usr/local/go/bin/go install ./... || exit 1
 
@@ -140,7 +145,7 @@ WantedBy=multi-user.target
   sudo /home/admin/config.scripts/bonus.rtl.sh connect-services
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^loop=.*/loop=on/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set loop "on"
   
   isInstalled=$(sudo -u loop /home/loop/go/bin/loop | grep -c loop)
   if [ ${isInstalled} -gt 0 ] ; then
@@ -157,7 +162,7 @@ fi
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^loop=.*/loop=off/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set loop "off"
 
   isInstalled=$(sudo ls /etc/systemd/system/loopd.service 2>/dev/null | grep -c 'loopd.service')
   if [ ${isInstalled} -eq 1 ]; then
@@ -198,6 +203,8 @@ if [ "$1" = "update" ]; then
     echo "# Reset to the latest release tag"
     TAG=$(git tag | sort -V | tail -1)
     sudo -u loop git reset --hard $TAG
+    sudo -u loop /home/admin/config.scripts/blitz.git-verify.sh \
+     "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
     echo "# Updating ..."
     # install to /home/loop/go/bin/
     cd /home/loop/loop/cmd

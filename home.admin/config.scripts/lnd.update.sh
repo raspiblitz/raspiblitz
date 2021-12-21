@@ -27,11 +27,6 @@ PGPauthor="roasbeef"
 lndUpdatePGPpkeys="https://keybase.io/roasbeef/pgp_keys.asc"
 lndUpdatePGPcheck="4AB7F8DA6FAEBB3B70B1F903BC13F65E2DC84465"
 
-#joostjager
-# PGPauthor="joostjager"
-# lndUpdatePGPpkeys="https://keybase.io/joostjager/pgp_keys.asc"
-# lndUpdatePGPcheck="D146D0F68939436268FA9A130E26BB61B76C4D3A"
-
 # bitconner 
 # PGPauthor="bitconner"
 # lndUpdatePGPpkeys="https://keybase.io/bitconner/pgp_keys.asc"
@@ -64,6 +59,7 @@ fi
 
 # installed LND version
 lndInstalledVersion=$(sudo -u bitcoin lncli --version | cut -d " " -f3)
+# example: '0.14.1-beta'
 lndInstalledVersionMajor=$(echo "${lndInstalledVersion}" | cut -d "-" -f1 | cut -d "." -f1)
 lndInstalledVersionMain=$(echo "${lndInstalledVersion}" | cut -d "-" -f1 | cut -d "." -f2)
 lndInstalledVersionMinor=$(echo "${lndInstalledVersion}" | cut -d "-" -f1 | cut -d "." -f3)
@@ -71,10 +67,13 @@ lndInstalledVersionMinor=$(echo "${lndInstalledVersion}" | cut -d "-" -f1 | cut 
 # test if the installed version already the verified/recommended update version
 lndUpdateInstalled=$(echo "${lndInstalledVersion}" | grep -c "${lndUpdateVersion}")
 
-# get latest release from LND GitHub releases
-gitHubLatestReleaseJSON="$(curl -s https://api.github.com/repos/lightningnetwork/lnd/releases | jq '.[0]')"
-lndLatestVersion=$(echo "${gitHubLatestReleaseJSON}" | jq -r '.tag_name')
-lndLatestDownload=$(echo "${gitHubLatestReleaseJSON}" | grep "browser_download_url" | grep "linux-${cpuArchitecture}" | cut -d '"' -f4)
+# get latest release from LND GitHub releases (without release candidates)
+lndLatestVersion=$(curl -s https://api.github.com/repos/lightningnetwork/lnd/releases | jq -r '.[].tag_name' | grep -v "rc" | head -n1)
+# example: v0.13.3-beta
+binaryName="lnd-linux-${cpuArchitecture}-${lndLatestVersion}.tar.gz"
+# example: lnd-linux-arm64-v0.13.3-beta.tar.gz
+lndLatestDownload="https://github.com/lightningnetwork/lnd/releases/download/${lndLatestVersion}/${binaryName}"
+# example: https://github.com/lightningnetwork/lnd/releases/download/v0.13.3-beta/lnd-linux-arm64-v0.13.3-beta.tar.gz
 
 # INFO
 if [ "${mode}" = "info" ]; then
@@ -98,6 +97,24 @@ if [ "${mode}" = "info" ]; then
   exit 1
 fi
 
+function installLND() {
+  # install
+  echo "# stopping LND"
+  sudo systemctl stop lnd
+  echo "# unzip LND binary"
+  sudo -u admin tar -xzf ${binaryName}
+  # removing the tar.gz ending from the binary
+  directoryName="${binaryName%.*.*}"
+  echo "# install binary directory '${directoryName}'"
+  sudo install -m 0755 -o root -g root -t /usr/local/bin ${directoryName}/*
+  sleep 3
+  installed=$(sudo -u admin lnd --version)
+  if [ ${#installed} -eq 0 ]; then
+    echo "error='install failed'"
+    exit 1
+  fi
+}
+
 # verified
 if [ "${mode}" = "verified" ]; then
 
@@ -112,7 +129,7 @@ if [ "${mode}" = "verified" ]; then
     if [ "${fixedUpdateVersion}" != "${lndUpdateVersion}" ]; then
       echo "warn='required update version does not match'"
       echo "# this is normal when the recovery script of a new RaspiBlitz version checks for an old update - just ignore"
-      sed -i '/^lndInterimsUpdate=*/d' /mnt/hdd/raspiblitz.conf
+      /home/admin/config.scripts/blitz.conf.sh delete lndInterimsUpdate
       exit 1
     else
       echo "# OK - update version is matching"
@@ -122,7 +139,7 @@ if [ "${mode}" = "verified" ]; then
   echo 
   echo "# clean & change into download directory"
   sudo rm -r ${downloadDir}/*
-  cd "${downloadDir}"
+  cd "${downloadDir}" || exit 1
 
   echo
   echo "# extract the SHA256 hash from the manifest file for the corresponding platform"
@@ -185,6 +202,8 @@ if [ "${mode}" = "verified" ]; then
   # note: install will be done the same as reckless further down
   lndInterimsUpdateNew="${lndUpdateVersion}"
 
+  installLND
+
 fi
 
 # RECKLESS
@@ -194,56 +213,46 @@ fi
 if [ "${mode}" = "reckless" ]; then
 
   echo "# lnd.update.sh reckless"
+  # only update if the latest release is different from the installed
+  if [ "v${lndInstalledVersion}" = "${lndLatestVersion}" ]; then
+    # attention to leading 'v'
+    echo "# lndInstalledVersion = lndLatestVersion (${lndLatestVersion:1})"
+    echo "# There is no need to update again."
+    lndInterimsUpdateNew="${lndLatestVersion:1}"
+  else
+    # check that download link has a value
+    if [ ${#lndLatestDownload} -eq 0 ]; then
+      echo "error='no download link'"
+      exit 1
+    fi
+  
+    # clean & change into download directory
+    sudo rm -r ${downloadDir}/*
+    cd "${downloadDir}" || exit 1
+  
+    # download binary
+    echo "# downloading binary"
+    binaryName=$(basename "${lndLatestDownload}")
+    sudo -u admin wget -N ${lndLatestDownload}
+    checkDownload=$(ls ${binaryName} 2>/dev/null | grep -c ${binaryName})
+    if [ ${checkDownload} -eq 0 ]; then
+      echo "error='download binary failed'"
+      exit 1
+    fi
+  
+    # prepare install
+    lndInterimsUpdateNew="reckless"
 
-  # check that download link has a value
-  if [ ${#lndLatestDownload} -eq 0 ]; then
-    echo "error='no download link'"
-    exit 1
+    installLND
+
   fi
-
-  # clean & change into download directory
-  sudo rm -r ${downloadDir}/*
-  cd "${downloadDir}"
-
-  # download binary
-  echo "# downloading binary"
-  binaryName=$(basename "${lndLatestDownload}")
-  sudo -u admin wget -N ${lndLatestDownload}
-  checkDownload=$(ls ${binaryName} 2>/dev/null | grep -c ${binaryName})
-  if [ ${checkDownload} -eq 0 ]; then
-    echo "error='download binary failed'"
-    exit 1
-  fi
-
-  # prepare install
-  lndInterimsUpdateNew="reckless"
 fi
 
 # JOINED INSTALL (verified & RECKLESS)
 if [ "${mode}" = "verified" ] || [ "${mode}" = "reckless" ]; then
 
-  # install
-  echo "# stopping LND"
-  sudo systemctl stop lnd
-  echo "# unzip LND binary"
-  sudo -u admin tar -xzf ${binaryName}
-  # removing the tar.gz ending from the binary
-  directoryName="${binaryName%.*.*}"
-  echo "# install binary directory '${directoryName}'"
-  sudo install -m 0755 -o root -g root -t /usr/local/bin ${directoryName}/*
-  sleep 3
-  installed=$(sudo -u admin lnd --version)
-  if [ ${#installed} -eq 0 ]; then
-    echo "error='install failed'"
-    exit 1
-  fi
-  echo "# flag update in raspiblitz config"
-  source /mnt/hdd/raspiblitz.conf
-  if [ ${#lndInterimsUpdate} -eq 0 ]; then
-    echo "lndInterimsUpdate='${lndInterimsUpdateNew}'" >> /mnt/hdd/raspiblitz.conf
-  else
-    sudo sed -i "s/^lndInterimsUpdate=.*/lndInterimsUpdate='${lndInterimsUpdateNew}'/g" /mnt/hdd/raspiblitz.conf
-  fi
+  echo "# mark update in raspiblitz config"
+  /home/admin/config.scripts/blitz.conf.sh set lndInterimsUpdate "${lndInterimsUpdateNew}"
 
   echo "# OK LND Installed"
   echo "# NOTE: RaspiBlitz may need to reboot now"
