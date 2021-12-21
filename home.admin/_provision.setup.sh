@@ -168,6 +168,8 @@ if [ "${lightning}" == "lnd" ]; then
       /home/admin/config.scripts/blitz.error.sh _provision.setup.sh "lndrescue-import" "setup: lnd import backup failed" "${error}" ${logFile}
       exit 6
     fi
+    # fix config after import
+    /home/admin/config.scripts/lnd.install.sh on mainnet
   else
     # preparing new LND config (raspiblitz.setup)
     echo "Creating new LND config ..." >> ${logFile}
