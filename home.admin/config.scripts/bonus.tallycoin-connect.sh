@@ -73,7 +73,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u $USERNAME mv tallycoin_connect{-$TC_VERSION,}
     sudo -u $USERNAME rm v$TC_VERSION.tar.gz
     cd tallycoin_connect
-    sudo -u $USERNAME cat .dockerignore | xargs rm -rf
+    sudo -u $USERNAME cat .dockerignore | sudo -u $USERNAME xargs rm -rf
     sudo -u $USERNAME rm .dockerignore
     sudo -u $USERNAME npm install
     if ! [ $? -eq 0 ]; then
