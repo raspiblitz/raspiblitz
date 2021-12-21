@@ -730,7 +730,7 @@ if [ ${#hostname} -gt 0 ]; then
     fi
     if [ "${setnetworkname}" == "1" ]; then
       echo "Setting new network hostname '$hostnameSanatized'" >> ${logFile}
-      if [ "${os}" == "raspbian" ]; then
+      if [ "${baseimage}" == "raspbian" ]; then
          sudo raspi-config nonint do_hostname ${hostnameSanatized} >> ${logFile} 2>&1
       else
          sudo hostname-current=$(hostname)
