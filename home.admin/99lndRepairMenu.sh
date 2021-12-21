@@ -80,7 +80,7 @@ lndHealthCheck()
 syncAndCheckLND() # from _provision.setup.sh
 {
   # make sure all directories are linked
-  /home/admin/config.scripts/blitz.datadrive.sh link
+  sudo /home/admin/config.scripts/blitz.datadrive.sh link
 
   # check if now a config exists
   configLinkedCorrectly=$(ls /home/bitcoin/.lnd/lnd.conf | grep -c "lnd.conf")
@@ -94,16 +94,16 @@ syncAndCheckLND() # from _provision.setup.sh
   /home/admin/_cache.sh set message "LND Testrun"
 
   # just in case
-  systemctl stop lnd 2>/dev/null
-  systemctl disable lnd 2>/dev/null
+  sudo systemctl stop lnd 2>/dev/null
+  sudo systemctl disable lnd 2>/dev/null
 
   # copy lnd service
-  cp /home/admin/assets/lnd.service /etc/systemd/system/lnd.service
+  sudo cp /home/admin/assets/lnd.service /etc/systemd/system/lnd.service
 
   # start lnd up
   echo "Starting LND Service ..."
-  systemctl enable lnd
-  systemctl start lnd
+  sudo systemctl enable lnd
+  sudo systemctl start lnd
   echo "Starting LND Service ... executed"  
   
   if [ $(sudo -u bitcoin ls /mnt/hdd/lnd/data/chain/bitcoin/mainnet/wallet.db 2>/dev/null | grep -c wallet.db) -gt 0 ]; then
@@ -124,7 +124,7 @@ syncAndCheckLND() # from _provision.setup.sh
   fi
 
   # now sync macaroons & TLS to other users
-  /home/admin/config.scripts/lnd.credentials.sh sync
+  sudo /home/admin/config.scripts/lnd.credentials.sh sync
 
   # make a final lnd check
   source <(/home/admin/config.scripts/lnd.check.sh basic-setup)
