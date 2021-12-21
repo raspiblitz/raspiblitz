@@ -289,7 +289,8 @@ EnvironmentFile=/mnt/hdd/raspiblitz.conf
 
 ExecStartPre=-/home/admin/config.scripts/lnd.check.sh prestart ${CHAIN}
 ExecStart=/usr/local/bin/lnd --configfile=/home/bitcoin/.lnd/${netprefix}lnd.conf
-ExecStop=/usr/local/bin/lncli -n=${CHAIN} --rpcserver localhost:1${rpcportmod}009 stop
+# avoid hanging on stop
+# ExecStop=/usr/local/bin/lncli -n=${CHAIN} --rpcserver localhost:1${rpcportmod}009 stop
 PIDFile=/home/bitcoin/.lnd/${netprefix}lnd.pid
 
 User=bitcoin
@@ -313,21 +314,16 @@ StandardError=journal
 
 # Hardening Measures
 ####################
-
 # Mount /usr, /boot/ and /etc read-only for the process.
 ProtectSystem=full
-
 # Disallow the process and all of its children to gain
 # new privileges through execve().
 NoNewPrivileges=true
-
 # Use a new /dev namespace only populated with API pseudo devices
 # such as /dev/null, /dev/zero and /dev/random.
 PrivateDevices=true
-
 # Deny the creation of writable and executable memory mappings.
 MemoryDenyWriteExecute=true
-
 PrivateTmp=true
 
 [Install]

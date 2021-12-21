@@ -164,7 +164,7 @@ if [ ${mode} = "cl-import-gui" ]; then
   # get by second parameter if this call if happening during setup or production
   scenario=$2
   if [ "${scenario}" != "setup" ] && [ "${scenario}" != "production" ]; then
-    echo "error='mising parameter'"
+    echo "error='missing parameter'"
     exit 1
   fi
 

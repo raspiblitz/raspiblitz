@@ -97,6 +97,7 @@ do
     state \
     setupPhase \
     btc_default_synced \
+    ln_default_sync_chain \
     ln_default_locked \
     message \
     network \
@@ -181,12 +182,14 @@ do
   fi
 
   #####################################
-  # MAKE SURE BLOCKCHAIN IS SYNC 
+  # MAKE SURE BLOCKCHAIN/LN IS SYNC 
   #####################################
-  if [ "${setupPhase}" == "done" ] && [ "${state}" == "ready" ] && [ "${btc_default_synced}" != "1" ]; then
-    /home/admin/setup.scripts/eventBlockchainSync.sh ssh
-    sleep 3
-    continue
+  if [ "${setupPhase}" == "done" ] && [ "${state}" == "ready" ]; then
+    if [ "${btc_default_synced}" != "1" ] || [ "${ln_default_sync_chain}" != "1" ]; then
+      /home/admin/setup.scripts/eventBlockchainSync.sh ssh
+      sleep 3
+      continue
+    fi
   fi
 
   #####################################
