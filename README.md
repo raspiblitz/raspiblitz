@@ -24,7 +24,7 @@ There are further Services that can be switched on:
 * **SpecterDesktop** (Multisig Trezor, Ledger, COLDCARDwallet & Specter-DIY) [details](https://github.com/cryptoadvance/specter-desktop) [app connection guide](https://d11n.net/connect-specter-desktor-with-raspiblitz.html)
 * **Lightning Terminal (Loop, Pool & Faraday)** (Manage Channel Liquidity) [details](https://github.com/lightninglabs/lightning-terminal#lightning-terminal-lit)
 * **JoinMarket** (CoinJoin Service) [details](https://github.com/JoinMarket-Org/joinmarket-clientserver)
-* **JoinMarket Web UI** (Browser-based interface for JoinMarket) [details](https://github.com/joinmarket-webui/jm-web-client)
+* **JoinMarket Web UI** (Browser-based interface for JoinMarket) [details](https://github.com/joinmarket-webui/joinmarket-webui)
 * **ThunderHub** (Lightning Node Manager WebUI) [details](https://www.thunderhub.io/)
 * **Balance Of Satoshis** (Commands for working with LND balances) [details](https://github.com/alexbosworth/balanceofsatoshis/blob/master/README.md)
 * **Kindle Display** (Bitcoin Status Display made with a jailbroken Kindle) [details](https://github.com/dennisreimann/kindle-display)
@@ -348,7 +348,7 @@ A RaspberryPi 3 has a very low power CPU and syncing+validating the blockchain d
 #### 2. COPY - Copy from Laptop or another RaspiBlitz over Local Network
 
 If you have a friend that is already running a synced RaspiBlitz or you have a laptop with enough free space on the hard drive that can download & validate the Blockchain much faster you can also choose the `COPY` option.
-You can then delete existing blockchain your RaspiBlitz already started syncing for you 
+You can then delete existing blockchain your RaspiBlitz already started syncing for you
 
 ![SSH4](pictures/ssh4-copy.png)
 
@@ -966,7 +966,7 @@ IP2TOR is a tunnel service where you can run your RaspiBlitz anonymously behind 
 You don't need to care about your local router or firewall settings.
 You can pay for this service directly through Lightning from your RaspiBlitz as subscription.
 
-At first you select what services of your RaspiBlitz you like to tunnel through a IP2TOR bridge. 
+At first you select what services of your RaspiBlitz you like to tunnel through a IP2TOR bridge.
 
 You will get a list of available IP2TOR bridge offerings.
 Select `OK` on an IP2TOR bridge offering and you will see more details on it, such as how many satoshis the subscription will cost you.
@@ -984,7 +984,7 @@ To try out the IP2TOR tunnel choose in `MAINMENU` the extra menu point of the Se
 
 If you want a web service, like BTCPay Server or LNbits, to be available to the outside internet (like with IP2TOR) people expect you to offer an HTTPS address so that the communication between the client and your RaspiBlitz is encrypted.
 You could use the self-signed HTTPS certificate that RaspiBlitz is offering you, but this will give users Security Warnings in their browser and is not very user friendly.
-That's where you can use a LetsEncrypt Subscription to get a free valid HTTPS certificate that is excepted without warning from almost all common browsers 
+That's where you can use a LetsEncrypt Subscription to get a free valid HTTPS certificate that is excepted without warning from almost all common browsers
 
 Because you also need a domain name for that you will need to open a free account, the following are presently supported, would be good to add more with the help of the community:
 [DuckDNS.org](https://www.duckdns.org)
@@ -1174,7 +1174,7 @@ Instructions for Migration:
 * shutdown your old node
 * remove the SD card
 * [download the latest Raspiblitz sd card image & flash it to your sd card](#downloading-the-software)
-* if you want to use a HDMI monitor for status & progress, create a empty file called `hdmi` (without any ending) on the SD card while connected to your laptop 
+* if you want to use a HDMI monitor for status & progress, create a empty file called `hdmi` (without any ending) on the SD card while connected to your laptop
 * [insert sd card, boot up & login by SSH](#boot-your-raspiblitz)
 
 Now RaspiBlitz should show you that old data from your node was detected and offer to do the migration for you.
@@ -1226,7 +1226,7 @@ The latest version of this file is needed to recover all your funds.
 In case your HDD gets damaged RaspiBlitz always keeps a copy of the latest version of the `channel.backup` file on the SD card within the sub-directories of: `/home/admin/.lnd/data/chain/`.
 
 If you want to go one step further in securing your funds against total loss of the RaspiBlitz (gets completely damaged, stolen or lost), then you can additionally set up an off-location or cloud backup of the `channel.backup` file.
-The file itself is encrypted by your word seed so it's acceptable to store the file with untrusted third parties for backup purposes (if you want) 
+The file itself is encrypted by your word seed so it's acceptable to store the file with untrusted third parties for backup purposes (if you want)
 
 This video explains in detail how you can set further back Static Channel information:
 
