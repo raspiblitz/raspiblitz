@@ -742,9 +742,8 @@ if [ ${#hostname} -gt 0 ]; then
       if [ "${baseimage}" == "raspios_arm64" ]; then
          sudo raspi-config nonint do_hostname ${hostnameSanatized} >> ${logFile} 2>&1
       else
-         sudo hostnameCurrent=$(hostname)
-         sudo $(hostname $hostnameSanatized)
-         sudo echo $hostnameSanatized > /etc/hostname
+         hostnameCurrent=$(hostname)
+         sudo sed -i "s/${hostnameCurrent}/${hostnameSanatized}/g" /etc/hostname 2>&1
          sudo sed -i "s/${hostnameCurrent}/${hostnameSanatized}/g" /etc/hosts 2>&1
       fi
     else
