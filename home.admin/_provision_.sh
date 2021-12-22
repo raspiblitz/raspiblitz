@@ -742,10 +742,10 @@ if [ ${#hostname} -gt 0 ]; then
       if [ "${baseimage}" == "raspios_arm64" ]; then
          sudo raspi-config nonint do_hostname ${hostnameSanatized} >> ${logFile} 2>&1
       else
-         sudo hostname-current=$(hostname)
+         sudo hostnameCurrent=$(hostname)
          sudo $(hostname $hostnameSanatized)
          sudo echo $hostnameSanatized > /etc/hostname
-         sudo sed -i "s/^${hostname-current}/${hostnameSanatized}/g" /etc/hosts 2>&1
+         sudo sed -i "s/${hostnameCurrent}/${hostnameSanatized}/g" /etc/hosts 2>&1
       fi
     else
       echo "Not setting local network hostname" >> ${logFile}
