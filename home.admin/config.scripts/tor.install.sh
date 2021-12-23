@@ -31,6 +31,8 @@ tor_pkgs="torsocks nyx obfs4proxy python3-stem apt-transport-tor curl gpg"
 tor_deb_repo="tor+http://apow7mjfryruh65chtdydfmqfpj5btws7nbocgtaovhvezgccyjazpqd.onion"
 #tor_deb_repo="tor+https://deb.torproject.org"
 #tor_deb_repo="https://deb.torproject.org"
+tor_deb_repo_clean="${tor_deb_repo#*tor+}"
+tor_deb_repo_pgp_fingerprint="A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89"
 
 ## https://github.com/keroserene/snowflake/commits/master
 snowflake_commit_hash="af6e2c30e1a6aacc6e7adf9a31df0a387891cc37"
@@ -134,13 +136,12 @@ if [ "${action}" = "install" ]; then
 
   # install tor
   echo -e "\n*** Install Tor ***"
-  # shellcheck disable=SC2086
   sudo apt -o Dpkg::Options::="--force-confold" install -y tor
+  # shellcheck disable=SC2086
   sudo apt install -y ${tor_pkgs}
 
   echo -e "\n*** Adding deb.torproject.org keyring ***"
-  if ! torsocks curl -s https://deb.torproject.org/torproject.org/A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89.asc | sudo gpg --no-default-keyring --keyring gnupg-ring:/etc/apt/trusted.gpg.d/torproject.gpg --import
-  then
+  if ! curl -s -x socks5h://127.0.0.1:9050 --connect-timeout 10 "${tor_deb_repo_clean}/torproject.org/${tor_deb_repo_pgp_fingerprint}.asc" | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/torproject.gpg >/dev/null; then
     echo "!!! FAIL: Was not able to import deb.torproject.org key";
     exit 1
   fi
@@ -155,8 +156,8 @@ deb-src [arch=${architecture}] ${tor_deb_repo}/torproject.org  ${distribution} m
 
   echo -e "\n*** Reinstall ***"
   sudo apt update -y
-  # shellcheck disable=SC2086
   sudo apt -o Dpkg::Options::="--force-confold" install -y tor
+  # shellcheck disable=SC2086
   sudo apt install -y ${tor_pkgs}
 
   # make sure tor is not running after is was installed
@@ -166,7 +167,7 @@ deb-src [arch=${architecture}] ${tor_deb_repo}/torproject.org  ${distribution} m
 
   echo
   exit
-fi 
+fi
 
 #### ENABLE (once HDD is available) ####
 if [ "${action}" = "enable" ]; then
@@ -202,7 +203,7 @@ if [ "${action}" = "enable" ]; then
   else
     echo "- ${torrc_bridges} already edited"
   fi
-  
+
   # edit tor services
   sudo sed -i "s/^NoNewPrivileges=yes/NoNewPrivileges=no/g" /lib/systemd/system/tor@default.service
   sudo sed -i "s/^NoNewPrivileges=yes/NoNewPrivileges=no/g" /lib/systemd/system/tor@.service
@@ -221,7 +222,7 @@ if [ "${action}" = "enable" ]; then
   sudo systemctl restart tor@default
 
   echo
-  exit 
+  exit
 fi
 
 if [ "${action}" = "update" ]; then
