@@ -445,7 +445,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     githubUser="$3"
   fi
   #githubBranch="tags/raspiblitz"
-  githubBranch="a1ae7aca9e5c0dba89f1e62b5d172b12d4492019" #commit 21. December 2021
+  githubBranch="93e58f4c807006c26b675f34947a5bda9743cd86" #commit 23. December 2021
   if [ "$4" != "" ]; then
     githubBranch="$4"
   fi
@@ -510,7 +510,8 @@ After=bitcoind.service
 [Service]
 WorkingDirectory=/home/lnbits/lnbits
 ExecStartPre=/home/admin/config.scripts/bonus.lnbits.sh prestart
-ExecStart=/bin/sh -c 'cd /home/lnbits/lnbits && ./venv/bin/hypercorn -k trio --bind 0.0.0.0:5000 "lnbits.app:create_app()"'
+
+ExecStart=/bin/sh -c 'cd /home/lnbits/lnbits && ./venv/bin/uvicorn lnbits.__main__:app --port 5000'
 User=lnbits
 Restart=always
 TimeoutSec=120
