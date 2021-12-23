@@ -338,6 +338,7 @@ WantedBy=multi-user.target
 
   echo
   echo "# Add aliases ${netprefix}lncli, ${netprefix}lndlog, ${netprefix}lndconf"
+  touch /home/admin/_aliases
   if [ $(grep -c "alias ${netprefix}lncli" < /home/admin/_aliases) -eq 0 ];then  
     echo "\
 alias ${netprefix}lncli=\"sudo -u bitcoin /usr/local/bin/lncli\
