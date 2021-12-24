@@ -22,7 +22,7 @@ PGPcheck="F4FC70F07310028424EFC20A8E4256593F177720"
 #PGPcheck="9C8D61868A7C492003B2744EE7D737B67FA592C7"
 
 # command info
-if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ];then
+if [ $# -eq 0 ] || [ "$1" == "-h" ] || [ "$1" == "-help" ];then
   echo
   echo "Install or remove LND services on parallel chains"
   echo "lnd.install.sh install - called by the build_sdcard.sh"
@@ -38,7 +38,7 @@ if [ "${network}" == "" ]; then
   network="bitcoin"
 fi
 
-if [ "$1" = "install" ] ; then
+if [ "$1" == "install" ] ; then
 
   echo "# *** INSTALL LND ${lndVersion} BINARY ***"
   echo "# only binary install to system"
@@ -160,7 +160,7 @@ fi
 
 # CHAIN is signet | testnet | mainnet
 CHAIN=$2
-if [ ${CHAIN} = testnet ]||[ ${CHAIN} = mainnet ]||[ ${CHAIN} = signet ];then
+if [ ${CHAIN} == "testnet" ] || [ ${CHAIN} == "mainnet" ] || [ ${CHAIN} == "signet" ];then
   echo "# Configuring the LND instance on ${CHAIN}"
 else
   echo "# ${CHAIN} is not supported"
@@ -168,17 +168,17 @@ else
 fi
 
 # prefix for parallel services
-if [ ${CHAIN} = testnet ];then
+if [ ${CHAIN} == "testnet" ];then
   netprefix="t"
   portprefix=1
   rpcportmod=1
   zmqprefix=21
-elif [ ${CHAIN} = signet ];then
+elif [ ${CHAIN} == "signet" ];then
   netprefix="s"
   portprefix=3
   rpcportmod=3
   zmqprefix=23
-elif [ ${CHAIN} = mainnet ];then
+elif [ ${CHAIN} == "mainnet" ];then
   netprefix=""
   portprefix=""
   rpcportmod=0
@@ -202,7 +202,7 @@ function removeParallelService() {
 }
 
 # switch on
-if [ "$1" = "1" ] || [ "$1" = "on" ]; then
+if [ "$1" == "1" ] || [ "$1" == "on" ]; then
 
   if [ "${CHAIN}" == "testnet" ] && [ "${testnet}" != "on" ]; then
     echo "# before activating testnet on lnd, first activate testnet on bitcoind"
@@ -338,22 +338,23 @@ WantedBy=multi-user.target
 
   echo
   echo "# Add aliases ${netprefix}lncli, ${netprefix}lndlog, ${netprefix}lndconf"
-  touch /home/admin/_aliases
-  if [ $(grep -c "alias ${netprefix}lncli" < /home/admin/_aliases) -eq 0 ];then  
+  aliasesFile="/home/admin/_aliases"
+  touch $aliasesFile
+  if [ $(grep -c "alias ${netprefix}lncli" < $aliasesFile) == 0 ]; then  
     echo "\
 alias ${netprefix}lncli=\"sudo -u bitcoin /usr/local/bin/lncli\
  -n=${CHAIN} --rpcserver localhost:1${rpcportmod}009\"\
-" | sudo tee -a /home/admin/_aliases
+" | sudo tee -a $aliasesFile
   fi
-  if [ $(grep -c "alias ${netprefix}lndlog" < /home/admin/_aliases) -eq 0 ];then 
+  if [ $(grep -c "alias ${netprefix}lndlog" < $aliasesFile) == 0 ]; then 
     echo "\
 alias ${netprefix}lndlog=\"sudo tail -n 30 -f /mnt/hdd/lnd/logs/${network}/${CHAIN}/lnd.log\"\
-" | sudo tee -a /home/admin/_aliases
+" | sudo tee -a $aliasesFile
   fi
-  if [ $(grep -c "alias ${netprefix}lndconf" < /home/admin/_aliases) -eq 0 ];then 
+  if [ $(grep -c "alias ${netprefix}lndconf" < $aliasesFile) == 0 ]; then 
     echo "\
 alias ${netprefix}lndconf=\"sudo nano /home/bitcoin/.lnd/${netprefix}lnd.conf\"\
-" | sudo tee -a /home/admin/_aliases
+" | sudo tee -a $aliasesFile
   fi
 
   # if parameter "initwallet" was set and wallet does not exist yet
@@ -409,7 +410,7 @@ alias ${netprefix}lndconf=\"sudo nano /home/bitcoin/.lnd/${netprefix}lnd.conf\"\
   exit 0
 fi
 
-if [ "$1" = "display-seed" ]; then
+if [ "$1" == "display-seed" ]; then
   
   # check if sudo
   if [ "$EUID" -ne 0 ]; then
@@ -463,7 +464,7 @@ if [ "$1" = "display-seed" ]; then
 fi
 
 # switch off
-if [ "$1" = "0" ] || [ "$1" = "off" ]; then
+if [ "$1" == "0" ] || [ "$1" == "off" ]; then
 
   echo "# removing ${CHAIN} lnd service (if active)"
 
