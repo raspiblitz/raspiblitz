@@ -428,6 +428,7 @@ echo "cpu=${cpu}" | tee -a raspiblitz.info
 echo "displayClass=headless" | tee -a raspiblitz.info
 sudo mv raspiblitz.info /home/admin/
 sudo chmod 755 /home/admin/raspiblitz.info
+sudo chown admin:admin /home/admin/raspiblitz.info
 
 echo -e "\n*** ADDING GROUPS FOR CREDENTIALS STORE ***"
 # access to credentials (e.g. macaroon files) in a central location is managed with unix groups and permissions
