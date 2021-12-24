@@ -54,7 +54,7 @@ lndHealthCheck()
   loopcount=0
   while [ ${lndRunning} -eq 0 ]
   do
-    lndRunning=$(systemctl status lnd.service | grep -c running)
+    lndRunning=$(systemctl status ${netprefix}lnd.service | grep -c running)
     if [ ${lndRunning} -eq 0 ]; then
       date +%s
       echo "LND not ready yet ... waiting another 60 seconds."
@@ -62,7 +62,7 @@ lndHealthCheck()
     fi
     loopcount=$(($loopcount +1))
     if [ ${loopcount} -gt 100 ]; then
-      echo "lnd-start-fail" "lnd service not getting to running status" "sudo systemctl status lnd.service | grep -c running --> ${lndRunning}"
+      echo "lnd-start-fail" "lnd service not getting to running status" "sudo systemctl status ${netprefix}lnd.service | grep -c running --> ${lndRunning}"
       exit 8
     fi
   done
@@ -94,16 +94,16 @@ syncAndCheckLND() # from _provision.setup.sh
   /home/admin/_cache.sh set message "LND Testrun"
 
   # just in case
-  sudo systemctl stop lnd 2>/dev/null
-  sudo systemctl disable lnd 2>/dev/null
+  sudo systemctl stop ${netprefix}lnd 2>/dev/null
+  sudo systemctl disable ${netprefix}lnd 2>/dev/null
 
   # copy lnd service
   sudo cp /home/admin/assets/lnd.service /etc/systemd/system/lnd.service
 
   # start lnd up
   echo "Starting LND Service ..."
-  sudo systemctl enable lnd
-  sudo systemctl start lnd
+  sudo systemctl enable ${netprefix}lnd
+  sudo systemctl start ${netprefix}lnd
   echo "Starting LND Service ... executed"  
   
   if [ $(sudo -u bitcoin ls /mnt/hdd/lnd/data/chain/bitcoin/mainnet/wallet.db 2>/dev/null | grep -c wallet.db) -gt 0 ]; then
@@ -164,7 +164,7 @@ case $CHOICE in
 
   COMPACT)
     /home/admin/config.scripts/lnd.compact.sh interactive
-    echo "# Starting lnd.service ..."
+    echo "# Starting ${netprefix}lnd.service ..."
     sudo systemctl start lnd
     echo
     echo "Press ENTER to return to main menu."
@@ -172,7 +172,7 @@ case $CHOICE in
     ;;
   BACKUP-LND)
     /home/admin/config.scripts/lnd.compact.sh interactive
-    sudo /home/admin/config.scripts/lnd.backup.sh lnd-export-gui
+    sudo /home/admin/config.scripts/lnd.backup.sh ${netprefix}lnd-export-gui
     echo
     echo "Press ENTER when your backup download is done to shutdown."
     read key
@@ -200,8 +200,8 @@ case $CHOICE in
     sudo /home/admin/config.scripts/lnd.setname.sh mainnet "${result}"
     /home/admin/config.scripts/blitz.conf.sh set hostname "${result}"
 
-    echo "stopping lnd ..."
-    sudo systemctl stop lnd
+    echo "stopping ${netprefix}lnd ..."
+    sudo systemctl stop ${netprefix}lnd
     if [ "${tlnd}" == "on" ];then
       sudo systemctl stop tlnd
     fi
@@ -235,8 +235,8 @@ case $CHOICE in
     echo "The next step will overwrite the old LND wallets on all chains"
     echo "Press ENTER to continue or CTRL+C to abort"
     read key
-    echo "Stopping lnd ..."
-    sudo systemctl stop lnd
+    echo "Stopping ${netprefix}lnd ..."
+    sudo systemctl stop ${netprefix}lnd
     if [ "${tlnd}" == "on" ];then
       sudo systemctl stop tlnd
     fi
@@ -308,8 +308,8 @@ case $CHOICE in
     echo "The next step will overwrite the old LND wallets on all chains"
     echo "Press ENTER to continue or CTRL+C to abort"
     read key
-    echo "Stopping lnd ..."
-    sudo systemctl stop lnd
+    echo "Stopping ${netprefix}lnd ..."
+    sudo systemctl stop ${netprefix}lnd
     if [ "${tlnd}" == "on" ];then
       sudo systemctl stop tlnd
     fi
@@ -373,8 +373,8 @@ or having a complete LND rescue-backup from your old node.
     echo "The next step will overwrite the old LND wallets on all chains"
     echo "Press ENTER to continue or CTRL+C to abort"
     read key
-    echo "Stopping lnd ..."
-    sudo systemctl stop lnd
+    echo "Stopping ${netprefix}lnd ..."
+    sudo systemctl stop ${netprefix}lnd
     if [ "${tlnd}" == "on" ];then
       sudo systemctl stop tlnd
     fi
