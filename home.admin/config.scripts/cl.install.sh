@@ -347,6 +347,7 @@ always-use-proxy=true
   # sudo logrotate --debug /etc/logrotate.d/lightningd 
 
   echo
+  sudo -u admin touch /home/admin/_aliases
   if ! grep -Eq "${netprefix}lightning-cli" /home/admin/_aliases; then
     echo "# Adding aliases"
     echo "\
