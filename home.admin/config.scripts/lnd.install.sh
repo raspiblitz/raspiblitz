@@ -338,18 +338,19 @@ WantedBy=multi-user.target
 
   echo
   echo "# Add aliases ${netprefix}lncli, ${netprefix}lndlog, ${netprefix}lndconf"
-  if [ $(grep -c "alias ${netprefix}lncli" < /home/admin/_aliases) == 0 ]; then  
+  sudo -u admin touch /home/admin/_aliases
+  if [ $(grep -c "alias ${netprefix}lncli" < /home/admin/_aliases) -eq 0 ];then  
     echo "\
 alias ${netprefix}lncli=\"sudo -u bitcoin /usr/local/bin/lncli\
  -n=${CHAIN} --rpcserver localhost:1${rpcportmod}009\"\
 " | sudo tee -a /home/admin/_aliases
   fi
-  if [ $(grep -c "alias ${netprefix}lndlog" < /home/admin/_aliases) == 0 ]; then 
+  if [ $(grep -c "alias ${netprefix}lndlog" < /home/admin/_aliases) -eq 0 ];then 
     echo "\
 alias ${netprefix}lndlog=\"sudo tail -n 30 -f /mnt/hdd/lnd/logs/${network}/${CHAIN}/lnd.log\"\
 " | sudo tee -a /home/admin/_aliases
   fi
-  if [ $(grep -c "alias ${netprefix}lndconf" < /home/admin/_aliases) == 0 ]; then 
+  if [ $(grep -c "alias ${netprefix}lndconf" < /home/admin/_aliases) -eq 0 ];then 
     echo "\
 alias ${netprefix}lndconf=\"sudo nano /home/bitcoin/.lnd/${netprefix}lnd.conf\"\
 " | sudo tee -a /home/admin/_aliases
