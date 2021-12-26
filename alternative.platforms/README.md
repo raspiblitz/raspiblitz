@@ -4,6 +4,7 @@ Minimum requirements:
 * ARMv8 or x86 processor (64 bit)
 * 1 GB RAM
 * 500 GB HDD
+* Python >=3.9 (see [how to upgrade below](#python-upgrade) )
 
 Desirable:
 * \> 2GB DDR3 ECC RAM (8GB+ if using ZFS)
@@ -21,8 +22,8 @@ Tested with:
 * Debian image in VirtualBox https://github.com/rootzoll/raspiblitz/issues/2756#issuecomment-983532237
 * TrueNAS (FreeBSD bhyve) with an Ubuntu VM: https://github.com/rootzoll/raspiblitz/issues/2104#issuecomment-917444238
 
-To just experiment can load a virtualbox image from: https://www.osboxes.org/ubuntu (does not need installation)
-Password: `osboxes.org`
+To just experiment can load a virtualbox image from: https://www.osboxes.org/ubuntu (does not need installation)  
+Password: `osboxes.org`  
 Can carry on straight to building the OS:
 
 ```
@@ -32,7 +33,7 @@ wget https://raw.githubusercontent.com/rootzoll/raspiblitz/dev/build_sdcard.sh
 sudo bash build_sdcard.sh false false rootzoll dev headless
 ```
 
-switch off when ready   
+Switch off when ready   
 and attach an other disk (can be even small if you prune or [stop bitcoind](https://github.com/rootzoll/raspiblitz/issues/1500#issuecomment-982779830) ).
 
 The second virtual disk will be used as the BLOCKCHAIN drive.  
@@ -54,7 +55,7 @@ Assemble and boot.
 
 `ssh root@192.168.x.x`
 
-password: 1234
+password: `1234`
 
 Follow the instructions in the terminal. Set the new password to `raspiblitz` and name the new user `admin` to keep in line with the rest of the setup.
 
@@ -93,27 +94,34 @@ Continue with building the SDcard: https://github.com/rootzoll/raspiblitz#build-
 
 ---
 
-## DietPi
+## Python upgrade 
 
-Many SBC-s are supported:
-https://dietpi.com/#download
-
-Tested on:
-
-* Odroid HC1
-* Odroid HC2 (the same board with a 3.5" 12V HDD)
-* Odroid XU4 (with HDMI screen)
-* Raspberry Pi 3 B+ (with the default GPIO or HDMI display)
-
-
-The HDMI screen tested: https://www.aliexpress.com/item/3-5-inch-LCD-HDMI-USB-Touch-Screen-Real-HD-1920x1080-LCD-Display-Py-for-Raspberri/32818537950.html
-
-Detailed instructions for the RaspiBlitz-on-DietPi: [alternative.platforms/dietpi/README.md](/alternative.platforms/dietpi/README.md)
-
----
-
-For the process to build a custom SDcard image release see:
-https://github.com/rootzoll/raspiblitz/blob/dev/FAQ.md#what-is-the-process-of-creating-a-new-sd-card-image-release
-
-Extras for advanced users and powerful hardware:
-https://github.com/openoms/bitcoin-tutorials/
+```
+# select version 
+pythonVersion="3.10.1"
+majorPythonVersion=$(echo "$pythonVersion" | awk -F. '{print $1"."$2}' )
+# update and upgrade
+sudo apt update
+sudo apt upgrade -y
+# dependencies
+sudo apt install wget software-properties-common build-essential libnss3-dev zlib1g-dev libgdbm-dev libncurses5-dev libssl-dev libffi-dev libreadline-dev libsqlite3-dev libbz2-dev -y
+# download
+wget https://www.python.org/ftp/python/${pythonVersion}/Python-${pythonVersion}.tgz
+# optional signature for verification
+wget https://www.python.org/ftp/python/${pythonVersion}/Python-${pythonVersion}.tgz.asc
+# get PGP pubkey of Pablo Galindo Salgado
+gpg --recv-key CFDCA245B1043CF2A5F97865FFE87404168BD847
+# check for: Good signature from "Pablo Galindo Salgado <pablogsal@gmail.com>"
+gpg --verify Python-${pythonVersion}.tgz.asc
+# unzip
+tar xvf Python-${pythonVersion}.tgz
+cd Python-${pythonVersion}
+# configure
+./configure --enable-optimizations
+# install
+sudo make altinstall
+# move the python binary to the expected directory
+sudo mv $(which python${majorPythonVersion}) /usr/bin/
+# check
+ls -la /usr/bin/python${majorPythonVersion}
+```
