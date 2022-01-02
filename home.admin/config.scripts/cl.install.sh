@@ -34,13 +34,29 @@ if [ $# -eq 0 ]||[ "$1" = "-h" ]||[ "$1" = "--help" ];then
   exit 1
 fi
 
+function installDependencies() 
+{
+  echo "- Install build dependencies"
+  # from https://lightning.readthedocs.io/INSTALL.html#to-build-on-ubuntu
+  sudo apt-get install -y \
+   autoconf automake build-essential git libtool libgmp-dev \
+   libsqlite3-dev python3 python3-mako net-tools zlib1g-dev libsodium-dev \
+   gettext
+  # additional requirements
+  sudo apt-get install -y postgresql libpq-dev
+  sudo -u bitcoin pip3 install --user mrkd==0.2.0
+  sudo -u bitcoin pip3 install --user mistune==0.8.4
+  echo "- Install from the requirements.txt"
+  sudo -u bitcoin pip3 install --user -r requirements.txt
+}
+
 if [ "$1" = "install" ]; then
   
   echo "# *** INSTALL C-LIGHTNING ${CLVERSION} BINARY ***"
   echo "# only binary install to system"
   echo "# no configuration, no systemd service"
 
-  # check if lnd binary is already installed
+  # check if the binary is already installed
   if [ $(sudo -u admin lightningd 2>/dev/null --version | grep -c ".") -gt 0 ]; then
     echo "c-lightning binary already installed - done"
     exit 1
@@ -74,7 +90,7 @@ if [ "$1" = "install" ]; then
   echo "correctKey(${correctKey})"
   if [ ${correctKey} -lt 1 ] || [ ${goodSignature} -lt 1 ]; then
     echo
-    echo "!!! BUILD FAILED --> PGP verification not OK / signature(${goodSignature}) verify(${correctKey})"
+    echo "!!! DOWNLOAD FAILED --> PGP verification not OK / signature(${goodSignature}) verify(${correctKey})"
     exit 1
   else
     echo 
@@ -101,17 +117,11 @@ if [ "$1" = "install" ]; then
     echo
   fi
   
-  echo "- Install build dependencies"
-  sudo apt-get install -y \
-    autoconf automake build-essential git libtool libgmp-dev \
-    libsqlite3-dev python3 python3-mako net-tools zlib1g-dev libsodium-dev \
-    gettext unzip
-  sudo pip3 install mrkd==0.2.0
-  sudo pip3 install mistune==0.8.4
-  
   sudo -u admin unzip clightning-${CLVERSION}.zip
   cd clightning-${CLVERSION} || exit 1
-  
+
+  installDependencies
+
   echo "- Configuring EXPERIMENTAL_FEATURES enabled"
   sudo -u admin ./configure --enable-experimental-features
   
@@ -176,20 +186,9 @@ if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = testPR ];then
     ########################
     # Install dependencies # 
     ########################
-    
-    # https://lightning.readthedocs.io/INSTALL.html#to-build-on-ubuntu
     echo "# apt update"
     echo
     sudo apt-get update
-    echo
-    echo "# Installing dependencies"
-    echo
-    sudo apt-get install -y \
-     autoconf automake build-essential git libtool libgmp-dev \
-     libsqlite3-dev python3 python3-mako net-tools zlib1g-dev libsodium-dev \
-     gettext
-    sudo pip3 install mrkd==0.2.0
-    sudo pip3 install mistune==0.8.4
 
     ####################################
     # Download and compile from source #
@@ -232,6 +231,8 @@ if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = testPR ];then
       echo "# Installing the version $CLVERSION"
       sudo -u bitcoin git reset --hard $CLVERSION
     fi
+
+    installDependencies
 
     echo "# Building with EXPERIMENTAL_FEATURES enabled"
     echo
