@@ -264,7 +264,7 @@ EOF
   if [ "${ElectRS}" == "on" ]; then
     echo "# changing the RPC password for ELECTRS"
     RPC_USER=$(cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcuser | cut -c 9-)
-    sudo sed -i "s/^cookie = \"$RPC_USER.*\"/cookie = \"$RPC_USER:${newPassword}\"/g" /home/electrs/.electrs/config.toml
+    sudo sed -i "s/^auth = \"$RPC_USER.*\"/auth = \"$RPC_USER:${newPassword}\"/g" /home/electrs/.electrs/config.toml
   fi
 
   # BTC-RPC-Explorer
