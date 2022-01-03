@@ -58,7 +58,7 @@ service Lightning {
     /* lncli: `sendcoins`
     SendCoins executes a request to send coins to a particular address. Unlike
     SendMany, this RPC call only allows creating a single output at a time. If
-    neither target_conf, or sat_per_byte are set, then the internal wallet will
+    neither target_conf, or sat_per_vbyte are set, then the internal wallet will
     consult its fee model to determine a fee for the default confirmation
     target.
     */
@@ -82,7 +82,7 @@ service Lightning {
 
     /* lncli: `sendmany`
     SendMany handles a request for a transaction that creates multiple specified
-    outputs in parallel. If neither target_conf, or sat_per_byte are set, then
+    outputs in parallel. If neither target_conf, or sat_per_vbyte are set, then
     the internal wallet will consult its fee model to determine a fee for the
     default confirmation target.
     */
@@ -199,6 +199,16 @@ service Lightning {
     then be used to manually progress the channel funding flow.
     */
     rpc OpenChannel (OpenChannelRequest) returns (stream OpenStatusUpdate);
+
+    /* lncli: `batchopenchannel`
+    BatchOpenChannel attempts to open multiple single-funded channels in a
+    single transaction in an atomic way. This means either all channel open
+    requests succeed at once or all attempts are aborted if any of them fail.
+    This is the safer variant of using PSBTs to manually fund a batch of
+    channels through the OpenChannel RPC.
+    */
+    rpc BatchOpenChannel (BatchOpenChannelRequest)
+        returns (BatchOpenChannelResponse);
 
     /*
     FundingStateStep is an advanced funding related call that allows the caller
@@ -330,7 +340,14 @@ service Lightning {
     rpc ListPayments (ListPaymentsRequest) returns (ListPaymentsResponse);
 
     /*
-    DeleteAllPayments deletes all outgoing payments from DB.
+    DeletePayment deletes an outgoing payment from DB. Note that it will not
+    attempt to delete an In-Flight payment, since that would be unsafe.
+    */
+    rpc DeletePayment (DeletePaymentRequest) returns (DeletePaymentResponse);
+
+    /*
+    DeleteAllPayments deletes all outgoing payments from DB. Note that it will
+    not attempt to delete In-Flight payments, since that would be unsafe.
     */
     rpc DeleteAllPayments (DeleteAllPaymentsRequest)
         returns (DeleteAllPaymentsResponse);
@@ -426,8 +443,9 @@ service Lightning {
     /* lncli: `fwdinghistory`
     ForwardingHistory allows the caller to query the htlcswitch for a record of
     all HTLCs forwarded within the target time range, and integer offset
-    within that time range. If no time-range is specified, then the first chunk
-    of the past 24 hrs of forwarding history are returned.
+    within that time range, for a maximum number of events. If no maximum number
+    of events is specified, up to 100 events will be returned. If no time-range
+    is specified, then events will be returned in the order that they occured.
 
     A list of forwarding events are returned. The size of each forwarding event
     is 40 bytes, and the max message size able to be returned in gRPC is 4 MiB.
@@ -514,6 +532,72 @@ service Lightning {
     */
     rpc ListPermissions (ListPermissionsRequest)
         returns (ListPermissionsResponse);
+
+    /*
+    CheckMacaroonPermissions checks whether a request follows the constraints
+    imposed on the macaroon and that the macaroon is authorized to follow the
+    provided permissions.
+    */
+    rpc CheckMacaroonPermissions (CheckMacPermRequest)
+        returns (CheckMacPermResponse);
+
+    /*
+    RegisterRPCMiddleware adds a new gRPC middleware to the interceptor chain. A
+    gRPC middleware is software component external to lnd that aims to add
+    additional business logic to lnd by observing/intercepting/validating
+    incoming gRPC client requests and (if needed) replacing/overwriting outgoing
+    messages before they're sent to the client. When registering the middleware
+    must identify itself and indicate what custom macaroon caveats it wants to
+    be responsible for. Only requests that contain a macaroon with that specific
+    custom caveat are then sent to the middleware for inspection. The other
+    option is to register for the read-only mode in which all requests/responses
+    are forwarded for interception to the middleware but the middleware is not
+    allowed to modify any responses. As a security measure, _no_ middleware can
+    modify responses for requests made with _unencumbered_ macaroons!
+    */
+    rpc RegisterRPCMiddleware (stream RPCMiddlewareResponse)
+        returns (stream RPCMiddlewareRequest);
+
+    /* lncli: `sendcustom`
+    SendCustomMessage sends a custom peer message.
+    */
+    rpc SendCustomMessage (SendCustomMessageRequest)
+        returns (SendCustomMessageResponse);
+
+    /* lncli: `subscribecustom`
+    SubscribeCustomMessages subscribes to a stream of incoming custom peer
+    messages.
+    */
+    rpc SubscribeCustomMessages (SubscribeCustomMessagesRequest)
+        returns (stream CustomMessage);
+}
+
+message SubscribeCustomMessagesRequest {
+}
+
+message CustomMessage {
+    // Peer from which the message originates
+    bytes peer = 1;
+
+    // Message type. This value will be in the custom range (>= 32768).
+    uint32 type = 2;
+
+    // Raw message data
+    bytes data = 3;
+}
+
+message SendCustomMessageRequest {
+    // Peer to send the message to
+    bytes peer = 1;
+
+    // Message type. This value needs to be in the custom range (>= 32768).
+    uint32 type = 2;
+
+    // Raw message data.
+    bytes data = 3;
+}
+
+message SendCustomMessageResponse {
 }
 
 message Utxo {
@@ -582,6 +666,9 @@ message GetTransactionsRequest {
     default to this option.
     */
     int32 end_height = 2;
+
+    // An optional filter to only include transactions relevant to an account.
+    string account = 3;
 }
 
 message TransactionDetails {
@@ -708,6 +795,11 @@ message SendRequest {
     fallback.
     */
     repeated FeatureBit dest_features = 15;
+
+    /*
+    The payment address of the generated invoice.
+    */
+    bytes payment_addr = 16;
 }
 
 message SendResponse {
@@ -783,6 +875,9 @@ message ChannelAcceptRequest {
     // A bit-field which the initiator uses to specify proposed channel
     // behavior.
     uint32 channel_flags = 13;
+
+    // The commitment type the initiator wishes to use for the proposed channel.
+    CommitmentType commitment_type = 14;
 }
 
 message ChannelAcceptResponse {
@@ -891,14 +986,25 @@ message EstimateFeeRequest {
     // The target number of blocks that this transaction should be confirmed
     // by.
     int32 target_conf = 2;
+
+    // The minimum number of confirmations each one of your outputs used for
+    // the transaction must satisfy.
+    int32 min_confs = 3;
+
+    // Whether unconfirmed outputs should be used as inputs for the transaction.
+    bool spend_unconfirmed = 4;
 }
 
 message EstimateFeeResponse {
     // The total fee in satoshis.
     int64 fee_sat = 1;
 
-    // The fee rate in satoshi/byte.
-    int64 feerate_sat_per_byte = 2;
+    // Deprecated, use sat_per_vbyte.
+    // The fee rate in satoshi/vbyte.
+    int64 feerate_sat_per_byte = 2 [deprecated = true];
+
+    // The fee rate in satoshi/vbyte.
+    uint64 sat_per_vbyte = 3;
 }
 
 message SendManyRequest {
@@ -909,9 +1015,14 @@ message SendManyRequest {
     // by.
     int32 target_conf = 3;
 
-    // A manual fee rate set in sat/byte that should be used when crafting the
+    // A manual fee rate set in sat/vbyte that should be used when crafting the
     // transaction.
-    int64 sat_per_byte = 5;
+    uint64 sat_per_vbyte = 4;
+
+    // Deprecated, use sat_per_vbyte.
+    // A manual fee rate set in sat/vbyte that should be used when crafting the
+    // transaction.
+    int64 sat_per_byte = 5 [deprecated = true];
 
     // An optional label for the transaction, limited to 500 characters.
     string label = 6;
@@ -939,9 +1050,14 @@ message SendCoinsRequest {
     // by.
     int32 target_conf = 3;
 
-    // A manual fee rate set in sat/byte that should be used when crafting the
+    // A manual fee rate set in sat/vbyte that should be used when crafting the
     // transaction.
-    int64 sat_per_byte = 5;
+    uint64 sat_per_vbyte = 4;
+
+    // Deprecated, use sat_per_vbyte.
+    // A manual fee rate set in sat/vbyte that should be used when crafting the
+    // transaction.
+    int64 sat_per_byte = 5 [deprecated = true];
 
     /*
     If set, then the amount field will be ignored, and lnd will attempt to
@@ -971,6 +1087,9 @@ message ListUnspentRequest {
 
     // The maximum number of confirmations to be included.
     int32 max_confs = 2;
+
+    // An optional filter to only include outputs belonging to an account.
+    string account = 3;
 }
 message ListUnspentResponse {
     // A list of utxos
@@ -991,8 +1110,14 @@ enum AddressType {
 }
 
 message NewAddressRequest {
-    // The address type
+    // The type of address to generate.
     AddressType type = 1;
+
+    /*
+    The name of the account to generate a new address for. If empty, the
+    default wallet account is used.
+    */
+    string account = 2;
 }
 message NewAddressResponse {
     // The newly generated wallet address
@@ -1005,6 +1130,12 @@ message SignMessageRequest {
     base64.
     */
     bytes msg = 1;
+
+    /*
+    Instead of the default double-SHA256 hashing of the message before signing,
+    only use one round of hashing instead.
+    */
+    bool single_hash = 2;
 }
 message SignMessageResponse {
     // The signature for the given message
@@ -1077,10 +1208,15 @@ message HTLC {
 
 enum CommitmentType {
     /*
+    Returned when the commitment type isn't known or unavailable.
+    */
+    UNKNOWN_COMMITMENT_TYPE = 0;
+
+    /*
     A channel using the legacy commitment format having tweaked to_remote
     keys.
     */
-    LEGACY = 0;
+    LEGACY = 1;
 
     /*
     A channel that uses the modern commitment format where the key in the
@@ -1088,19 +1224,23 @@ enum CommitmentType {
     up and recovery easier as when the channel is closed, the funds go
     directly to that key.
     */
-    STATIC_REMOTE_KEY = 1;
+    STATIC_REMOTE_KEY = 2;
 
     /*
     A channel that uses a commitment format that has anchor outputs on the
     commitments, allowing fee bumping after a force close transaction has
     been broadcast.
     */
-    ANCHORS = 2;
+    ANCHORS = 3;
 
     /*
-    Returned when the commitment type isn't known or unavailable.
+    A channel that uses a commitment type that builds upon the anchors
+    commitment format, but in addition requires a CLTV clause to spend outputs
+    paying to the channel initiator. This is intended for use on leased channels
+    to guarantee that the channel initiator has no incentives to close a leased
+    channel before its maturity date.
     */
-    UNKNOWN_COMMITMENT_TYPE = 999;
+    SCRIPT_ENFORCED_LEASE = 4;
 }
 
 message ChannelConstraints {
@@ -1522,6 +1662,11 @@ message Peer {
     zero, we have not observed any flaps for this peer.
     */
     int64 last_flap_ns = 14;
+
+    /*
+    The last ping payload the peer has sent to us.
+    */
+    bytes last_ping_payload = 15;
 }
 
 message TimestampedError {
@@ -1680,9 +1825,10 @@ message CloseChannelRequest {
     // confirmed by.
     int32 target_conf = 3;
 
-    // A manual fee rate set in sat/byte that should be used when crafting the
+    // Deprecated, use sat_per_vbyte.
+    // A manual fee rate set in sat/vbyte that should be used when crafting the
     // closure transaction.
-    int64 sat_per_byte = 4;
+    int64 sat_per_byte = 4 [deprecated = true];
 
     /*
     An optional address to send funds to in the case of a cooperative close.
@@ -1691,6 +1837,10 @@ message CloseChannelRequest {
     to the upfront shutdown addresss.
     */
     string delivery_address = 5;
+
+    // A manual fee rate set in sat/vbyte that should be used when crafting the
+    // closure transaction.
+    uint64 sat_per_vbyte = 6;
 }
 
 message CloseStatusUpdate {
@@ -1727,7 +1877,89 @@ message ReadyForPsbtFunding {
     bytes psbt = 3;
 }
 
+message BatchOpenChannelRequest {
+    // The list of channels to open.
+    repeated BatchOpenChannel channels = 1;
+
+    // The target number of blocks that the funding transaction should be
+    // confirmed by.
+    int32 target_conf = 2;
+
+    // A manual fee rate set in sat/vByte that should be used when crafting the
+    // funding transaction.
+    int64 sat_per_vbyte = 3;
+
+    // The minimum number of confirmations each one of your outputs used for
+    // the funding transaction must satisfy.
+    int32 min_confs = 4;
+
+    // Whether unconfirmed outputs should be used as inputs for the funding
+    // transaction.
+    bool spend_unconfirmed = 5;
+
+    // An optional label for the batch transaction, limited to 500 characters.
+    string label = 6;
+}
+
+message BatchOpenChannel {
+    // The pubkey of the node to open a channel with. When using REST, this
+    // field must be encoded as base64.
+    bytes node_pubkey = 1;
+
+    // The number of satoshis the wallet should commit to the channel.
+    int64 local_funding_amount = 2;
+
+    // The number of satoshis to push to the remote side as part of the initial
+    // commitment state.
+    int64 push_sat = 3;
+
+    // Whether this channel should be private, not announced to the greater
+    // network.
+    bool private = 4;
+
+    // The minimum value in millisatoshi we will require for incoming HTLCs on
+    // the channel.
+    int64 min_htlc_msat = 5;
+
+    // The delay we require on the remote's commitment transaction. If this is
+    // not set, it will be scaled automatically with the channel size.
+    uint32 remote_csv_delay = 6;
+
+    /*
+    Close address is an optional address which specifies the address to which
+    funds should be paid out to upon cooperative close. This field may only be
+    set if the peer supports the option upfront feature bit (call listpeers
+    to check). The remote peer will only accept cooperative closes to this
+    address if it is set.
+
+    Note: If this value is set on channel creation, you will *not* be able to
+    cooperatively close out to a different address.
+    */
+    string close_address = 7;
+
+    /*
+    An optional, unique identifier of 32 random bytes that will be used as the
+    pending channel ID to identify the channel while it is in the pre-pending
+    state.
+    */
+    bytes pending_chan_id = 8;
+
+    /*
+    The explicit commitment type to use. Note this field will only be used if
+    the remote peer supports explicit channel negotiation.
+    */
+    CommitmentType commitment_type = 9;
+}
+
+message BatchOpenChannelResponse {
+    repeated PendingUpdate pending_channels = 1;
+}
+
 message OpenChannelRequest {
+    // A manual fee rate set in sat/vbyte that should be used when crafting the
+    // funding transaction.
+    uint64 sat_per_vbyte = 1;
+
     /*
     The pubkey of the node to open a channel with. When using REST, this field
     must be encoded as base64.
@@ -1751,9 +1983,10 @@ message OpenChannelRequest {
     // confirmed by.
     int32 target_conf = 6;
 
-    // A manual fee rate set in sat/byte that should be used when crafting the
+    // Deprecated, use sat_per_vbyte.
+    // A manual fee rate set in sat/vbyte that should be used when crafting the
     // funding transaction.
-    int64 sat_per_byte = 7;
+    int64 sat_per_byte = 7 [deprecated = true];
 
     // Whether this channel should be private, not announced to the greater
     // network.
@@ -1813,6 +2046,12 @@ message OpenChannelRequest {
     transaction.
     */
     uint32 max_local_csv = 17;
+
+    /*
+    The explicit commitment type to use. Note this field will only be used if
+    the remote peer supports explicit channel negotiation.
+    */
+    CommitmentType commitment_type = 18;
 }
 message OpenStatusUpdate {
     oneof update {
@@ -1952,6 +2191,20 @@ message FundingPsbtVerify {
 
     // The pending channel ID of the channel to get the PSBT for.
     bytes pending_chan_id = 2;
+
+    /*
+    Can only be used if the no_publish flag was set to true in the OpenChannel
+    call meaning that the caller is solely responsible for publishing the final
+    funding transaction. If skip_finalize is set to true then lnd will not wait
+    for a FundingPsbtFinalize state step and instead assumes that a transaction
+    with the same TXID as the passed in PSBT will eventually confirm.
+    IT IS ABSOLUTELY IMPERATIVE that the TXID of the transaction that is
+    eventually published does have the _same TXID_ as the verified PSBT. That
+    means no inputs or outputs can change, only signatures can be added. If the
+    TXID changes between this call and the publish step then the channel will
+    never be created and the funds will be in limbo.
+    */
+    bool skip_finalize = 3;
 }
 
 message FundingPsbtFinalize {
@@ -2056,6 +2309,12 @@ message PendingChannelsResponse {
 
         // The commitment type used by this channel.
         CommitmentType commitment_type = 9;
+
+        // Total number of forwarding packages created in this channel.
+        int64 num_forwarding_packages = 10;
+
+        // A set of flags showing the current state of the channel.
+        string chan_status_flags = 11;
     }
 
     message PendingOpenChannel {
@@ -2200,6 +2459,7 @@ message ChannelEventUpdate {
         ChannelPoint active_channel = 3;
         ChannelPoint inactive_channel = 4;
         PendingUpdate pending_open_channel = 6;
+        ChannelPoint fully_resolved_channel = 7;
     }
 
     enum UpdateType {
@@ -2208,13 +2468,23 @@ message ChannelEventUpdate {
         ACTIVE_CHANNEL = 2;
         INACTIVE_CHANNEL = 3;
         PENDING_OPEN_CHANNEL = 4;
+        FULLY_RESOLVED_CHANNEL = 5;
     }
 
     UpdateType type = 5;
 }
 
+message WalletAccountBalance {
+    // The confirmed balance of the account (with >= 1 confirmations).
+    int64 confirmed_balance = 1;
+
+    // The unconfirmed balance of the account (with 0 confirmations).
+    int64 unconfirmed_balance = 2;
+}
+
 message WalletBalanceRequest {
 }
+
 message WalletBalanceResponse {
     // The balance of the wallet
     int64 total_balance = 1;
@@ -2224,6 +2494,9 @@ message WalletBalanceResponse {
 
     // The unconfirmed balance of a wallet(with 0 confirmations)
     int64 unconfirmed_balance = 3;
+
+    // A mapping of each wallet account's name to its balance.
+    map<string, WalletAccountBalance> account_balance = 4;
 }
 
 message Amount {
@@ -2338,7 +2611,7 @@ message QueryRoutesRequest {
     An optional field that can be used to pass an arbitrary set of TLV records
     to a peer which understands the new records. This can be used to pass
     application specific data during the payment attempt. If the destination
-    does not support the specified recrods, and error will be returned.
+    does not support the specified records, an error will be returned.
     Record types are required to be in the custom range >= 65536. When using
     REST, the values must be encoded as base64.
     */
@@ -2418,7 +2691,7 @@ message Hop {
     output index for the channel.
     */
     uint64 chan_id = 1 [jstype = JS_STRING];
-    int64 chan_capacity = 2;
+    int64 chan_capacity = 2 [deprecated = true];
     int64 amt_to_forward = 3 [deprecated = true];
     int64 fee = 4 [deprecated = true];
     uint32 expiry = 5;
@@ -2440,11 +2713,21 @@ message Hop {
 
     /*
     An optional TLV record that signals the use of an MPP payment. If present,
-    the receiver will enforce that that the same mpp_record is included in the
-    final hop payload of all non-zero payments in the HTLC set. If empty, a
-    regular single-shot payment is or was attempted.
+    the receiver will enforce that the same mpp_record is included in the final
+    hop payload of all non-zero payments in the HTLC set. If empty, a regular
+    single-shot payment is or was attempted.
     */
     MPPRecord mpp_record = 10;
+
+    /*
+    An optional TLV record that signals the use of an AMP payment. If present,
+    the receiver will treat all received payments including the same
+    (payment_addr, set_id) pair  as being part of one logical payment. The
+    payment will be settled by XORing the root_share's together and deriving the
+    child hashes and preimages according to BOLT XX. Must be used in conjunction
+    with mpp_record.
+    */
+    AMPRecord amp_record = 12;
 
     /*
     An optional set of key-value TLV records. This is useful within the context
@@ -2470,6 +2753,14 @@ message MPPRecord {
     total_amt_msat must be used on all subpayments.
     */
     int64 total_amt_msat = 10;
+}
+
+message AMPRecord {
+    bytes root_share = 1;
+
+    bytes set_id = 2;
+
+    uint32 child_index = 3;
 }
 
 /*
@@ -2697,11 +2988,21 @@ message GraphTopologyUpdate {
     repeated ClosedChannelUpdate closed_chans = 3;
 }
 message NodeUpdate {
-    repeated string addresses = 1;
+    /*
+    Deprecated, use node_addresses.
+    */
+    repeated string addresses = 1 [deprecated = true];
+
     string identity_key = 2;
+
+    /*
+    Deprecated, use features.
+    */
     bytes global_features = 3 [deprecated = true];
+
     string alias = 4;
     string color = 5;
+    repeated NodeAddress node_addresses = 7;
 
     /*
     Features that the node has advertised in the init message, node
@@ -2758,12 +3059,30 @@ message HopHint {
     uint32 cltv_expiry_delta = 5;
 }
 
+message SetID {
+    bytes set_id = 1;
+}
+
 message RouteHint {
     /*
     A list of hop hints that when chained together can assist in reaching a
     specific destination.
     */
     repeated HopHint hop_hints = 1;
+}
+
+message AMPInvoiceState {
+    // The state the HTLCs associated with this setID are in.
+    InvoiceHTLCState state = 1;
+
+    // The settle index of this HTLC set, if the invoice state is settled.
+    uint64 settle_index = 2;
+
+    // The time this HTLC set was settled expressed in unix epoch.
+    int64 settle_time = 3;
+
+    // The total amount paid for the sub-invoice expressed in milli satoshis.
+    int64 amt_paid_msat = 5;
 }
 
 message Invoice {
@@ -2911,10 +3230,25 @@ message Invoice {
 
     /*
     The payment address of this invoice. This value will be used in MPP
-    payments, and also for newer invoies that always require the MPP paylaod
+    payments, and also for newer invoices that always require the MPP payload
     for added end-to-end security.
     */
     bytes payment_addr = 26;
+
+    /*
+    Signals whether or not this is an AMP invoice.
+    */
+    bool is_amp = 27;
+
+    /*
+    [EXPERIMENTAL]:
+
+    Maps a 32-byte hex-encoded set ID to the sub-invoice AMP state for the
+    given set ID. This field is always populated for AMP invoices, and can be
+    used along side LookupInvoice to obtain the HTLC information related to a
+    given sub-invoice.
+    */
+    map<string, AMPInvoiceState> amp_invoice_state = 28;
 }
 
 enum InvoiceHTLCState {
@@ -3253,6 +3587,16 @@ message ListPaymentsResponse {
     uint64 last_index_offset = 3;
 }
 
+message DeletePaymentRequest {
+    // Payment hash to delete.
+    bytes payment_hash = 1;
+
+    /*
+    Only delete failed HTLCs from the payment, not the payment itself.
+    */
+    bool failed_htlcs_only = 2;
+}
+
 message DeleteAllPaymentsRequest {
     // Only delete failed payments.
     bool failed_payments_only = 1;
@@ -3263,6 +3607,9 @@ message DeleteAllPaymentsRequest {
     bool failed_htlcs_only = 2;
 }
 
+message DeletePaymentResponse {
+}
+
 message DeleteAllPaymentsResponse {
 }
 
@@ -3270,6 +3617,13 @@ message AbandonChannelRequest {
     ChannelPoint channel_point = 1;
 
     bool pending_funding_shim_only = 2;
+
+    /*
+    Override the requirement for being in dev mode by setting this to true and
+    confirming the user knows what they are doing and this is a potential foot
+    gun to lose funds if used on active channels.
+    */
+    bool i_know_what_i_am_doing = 3;
 }
 
 message AbandonChannelResponse {
@@ -3327,6 +3681,8 @@ enum FeatureBit {
     ANCHORS_OPT = 21;
     ANCHORS_ZERO_FEE_HTLC_REQ = 22;
     ANCHORS_ZERO_FEE_HTLC_OPT = 23;
+    AMP_REQ = 30;
+    AMP_OPT = 31;
 }
 
 message Feature {
@@ -3403,7 +3759,28 @@ message PolicyUpdateRequest {
     // If true, min_htlc_msat is applied.
     bool min_htlc_msat_specified = 8;
 }
+enum UpdateFailure {
+    UPDATE_FAILURE_UNKNOWN = 0;
+    UPDATE_FAILURE_PENDING = 1;
+    UPDATE_FAILURE_NOT_FOUND = 2;
+    UPDATE_FAILURE_INTERNAL_ERR = 3;
+    UPDATE_FAILURE_INVALID_PARAMETER = 4;
+}
+
+message FailedUpdate {
+    // The outpoint in format txid:n
+    OutPoint outpoint = 1;
+
+    // Reason for the policy update failure.
+    UpdateFailure reason = 2;
+
+    // A string representation of the policy update error.
+    string update_error = 3;
+}
+
 message PolicyUpdateResponse {
+    // List of failed policy updates.
+    repeated FailedUpdate failed_updates = 1;
 }
 
 message ForwardingHistoryRequest {
@@ -3571,6 +3948,12 @@ message BakeMacaroonRequest {
 
     // The root key ID used to create the macaroon, must be a positive integer.
     uint64 root_key_id = 2;
+
+    /*
+    Informs the RPC on whether to allow external permissions that LND is not
+    aware of.
+    */
+    bool allow_external_permissions = 3;
 }
 message BakeMacaroonResponse {
     // The hex encoded macaroon, serialized in binary format.
@@ -3781,4 +4164,211 @@ message MacaroonId {
 message Op {
     string entity = 1;
     repeated string actions = 2;
+}
+
+message CheckMacPermRequest {
+    bytes macaroon = 1;
+    repeated MacaroonPermission permissions = 2;
+    string fullMethod = 3;
+}
+
+message CheckMacPermResponse {
+    bool valid = 1;
+}
+
+message RPCMiddlewareRequest {
+    /*
+    The unique ID of the intercepted original gRPC request. Useful for mapping
+    request to response when implementing full duplex message interception. For
+    streaming requests, this will be the same ID for all incoming and outgoing
+    middleware intercept messages of the _same_ stream.
+    */
+    uint64 request_id = 1;
+
+    /*
+    The raw bytes of the complete macaroon as sent by the gRPC client in the
+    original request. This might be empty for a request that doesn't require
+    macaroons such as the wallet unlocker RPCs.
+    */
+    bytes raw_macaroon = 2;
+
+    /*
+    The parsed condition of the macaroon's custom caveat for convenient access.
+    This field only contains the value of the custom caveat that the handling
+    middleware has registered itself for. The condition _must_ be validated for
+    messages of intercept_type stream_auth and request!
+    */
+    string custom_caveat_condition = 3;
+
+    /*
+    There are three types of messages that will be sent to the middleware for
+    inspection and approval: Stream authentication, request and response
+    interception. The first two can only be accepted (=forward to main RPC
+    server) or denied (=return error to client). Intercepted responses can also
+    be replaced/overwritten.
+    */
+    oneof intercept_type {
+        /*
+        Intercept stream authentication: each new streaming RPC call that is
+        initiated against lnd and contains the middleware's custom macaroon
+        caveat can be approved or denied based upon the macaroon in the stream
+        header. This message will only be sent for streaming RPCs, unary RPCs
+        must handle the macaroon authentication in the request interception to
+        avoid an additional message round trip between lnd and the middleware.
+        */
+        StreamAuth stream_auth = 4;
+
+        /*
+        Intercept incoming gRPC client request message: all incoming messages,
+        both on streaming and unary RPCs, are forwarded to the middleware for
+        inspection. For unary RPC messages the middleware is also expected to
+        validate the custom macaroon caveat of the request.
+        */
+        RPCMessage request = 5;
+
+        /*
+        Intercept outgoing gRPC response message: all outgoing messages, both on
+        streaming and unary RPCs, are forwarded to the middleware for inspection
+        and amendment. The response in this message is the original response as
+        it was generated by the main RPC server. It can either be accepted
+        (=forwarded to the client), replaced/overwritten with a new message of
+        the same type, or replaced by an error message.
+        */
+        RPCMessage response = 6;
+    }
+
+    /*
+    The unique message ID of this middleware intercept message. There can be
+    multiple middleware intercept messages per single gRPC request (one for the
+    incoming request and one for the outgoing response) or gRPC stream (one for
+    each incoming message and one for each outgoing response). This message ID
+    must be referenced when responding (accepting/rejecting/modifying) to an
+    intercept message.
+    */
+    uint64 msg_id = 7;
+}
+
+message StreamAuth {
+    /*
+    The full URI (in the format /<rpcpackage>.<ServiceName>/MethodName, for
+    example /lnrpc.Lightning/GetInfo) of the streaming RPC method that was just
+    established.
+    */
+    string method_full_uri = 1;
+}
+
+message RPCMessage {
+    /*
+    The full URI (in the format /<rpcpackage>.<ServiceName>/MethodName, for
+    example /lnrpc.Lightning/GetInfo) of the RPC method the message was sent
+    to/from.
+    */
+    string method_full_uri = 1;
+
+    /*
+    Indicates whether the message was sent over a streaming RPC method or not.
+    */
+    bool stream_rpc = 2;
+
+    /*
+    The full canonical gRPC name of the message type (in the format
+    <rpcpackage>.TypeName, for example lnrpc.GetInfoRequest).
+    */
+    string type_name = 3;
+
+    /*
+    The full content of the gRPC message, serialized in the binary protobuf
+    format.
+    */
+    bytes serialized = 4;
+}
+
+message RPCMiddlewareResponse {
+    /*
+    The request message ID this response refers to. Must always be set when
+    giving feedback to an intercept but is ignored for the initial registration
+    message.
+    */
+    uint64 ref_msg_id = 1;
+
+    /*
+    The middleware can only send two types of messages to lnd: The initial
+    registration message that identifies the middleware and after that only
+    feedback messages to requests sent to the middleware.
+    */
+    oneof middleware_message {
+        /*
+        The registration message identifies the middleware that's being
+        registered in lnd. The registration message must be sent immediately
+        after initiating the RegisterRpcMiddleware stream, otherwise lnd will
+        time out the attempt and terminate the request. NOTE: The middleware
+        will only receive interception messages for requests that contain a
+        macaroon with the custom caveat that the middleware declares it is
+        responsible for handling in the registration message! As a security
+        measure, _no_ middleware can intercept requests made with _unencumbered_
+        macaroons!
+        */
+        MiddlewareRegistration register = 2;
+
+        /*
+        The middleware received an interception request and gives feedback to
+        it. The request_id indicates what message the feedback refers to.
+        */
+        InterceptFeedback feedback = 3;
+    }
+}
+
+message MiddlewareRegistration {
+    /*
+    The name of the middleware to register. The name should be as informative
+    as possible and is logged on registration.
+    */
+    string middleware_name = 1;
+
+    /*
+    The name of the custom macaroon caveat that this middleware is responsible
+    for. Only requests/responses that contain a macaroon with the registered
+    custom caveat are forwarded for interception to the middleware. The
+    exception being the read-only mode: All requests/responses are forwarded to
+    a middleware that requests read-only access but such a middleware won't be
+    allowed to _alter_ responses. As a security measure, _no_ middleware can
+    change responses to requests made with _unencumbered_ macaroons!
+    NOTE: Cannot be used at the same time as read_only_mode.
+    */
+    string custom_macaroon_caveat_name = 2;
+
+    /*
+    Instead of defining a custom macaroon caveat name a middleware can register
+    itself for read-only access only. In that mode all requests/responses are
+    forwarded to the middleware but the middleware isn't allowed to alter any of
+    the responses.
+    NOTE: Cannot be used at the same time as custom_macaroon_caveat_name.
+    */
+    bool read_only_mode = 3;
+}
+
+message InterceptFeedback {
+    /*
+    The error to return to the user. If this is non-empty, the incoming gRPC
+    stream/request is aborted and the error is returned to the gRPC client. If
+    this value is empty, it means the middleware accepts the stream/request/
+    response and the processing of it can continue.
+    */
+    string error = 1;
+
+    /*
+    A boolean indicating that the gRPC response should be replaced/overwritten.
+    As its name suggests, this can only be used as a feedback to an intercepted
+    response RPC message and is ignored for feedback on any other message. This
+    boolean is needed because in protobuf an empty message is serialized as a
+    0-length or nil byte slice and we wouldn't be able to distinguish between
+    an empty replacement message and the "don't replace anything" case.
+    */
+    bool replace_response = 2;
+
+    /*
+    If the replace_response field is set to true, this field must contain the
+    binary serialized gRPC response message in the protobuf format.
+    */
+    bytes replacement_serialized = 3;
 }
