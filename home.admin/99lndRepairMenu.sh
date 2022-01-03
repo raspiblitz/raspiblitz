@@ -134,6 +134,71 @@ syncAndCheckLND() # from _provision.setup.sh
   fi
 }
 
+function restoreFromSeed()
+{
+    askLNDbackupCopy
+
+    ## from dialogLightningWallet.sh 
+    # let people know about the difference between SEED & SEED+SCB
+    whiptail --title "IMPORTANT INFO" --yes-button "ENTER SEED" --no-button "Go Back" --yesno "
+Using JUST SEED WORDS will only recover your on-chain funds.
+To also try to recover the open channel funds you need the
+channel.backup file (since RaspiBlitz v1.2 / LND 0.6-beta)
+or having a complete LND rescue-backup from your old node.
+    " 11 65
+    
+    # start seed input and get results
+    _temp="/var/cache/raspiblitz/.temp.tmp"
+    /home/admin/config.scripts/lnd.backup.sh seed-import-gui $_temp
+    source $_temp 2>/dev/null
+    sudo rm $_temp 2>/dev/null
+
+    # if user canceled the seed input
+    if [ "${seedWords}" == "" ]; then
+      # signal cancel to the calling script by exit code (4 = exit on seedwords)
+      exit 4
+    fi
+
+    getpasswordC
+
+    clear
+    echo  
+    echo "The next step will overwrite the old LND wallets on all chains"
+    echo "Press ENTER to continue or CTRL+C to abort"
+    read key
+    echo "Stopping ${netprefix}lnd ..."
+    sudo systemctl stop ${netprefix}lnd
+    if [ "${tlnd}" == "on" ];then
+      sudo systemctl stop tlnd
+    fi
+    if [ "${slnd}" == "on" ];then
+      sudo systemctl stop slnd
+    fi
+    echo "Reset wallet"
+    sudo rm -r /mnt/hdd/lnd
+
+    /home/admin/config.scripts/lnd.install.sh on $CHAIN
+    sudo systemctl start ${netprefix}lnd
+    lndHealthCheck
+
+    # from _provison.setup.sh
+    # create wallet
+    # WALLET --> SEED
+    if [ "${seedWords}" != "" ]; then
+      echo "WALLET --> SEED"
+      /home/admin/_cache.sh set message "LND Wallet (SEED)"
+      if ! pip list | grep grpc; then sudo -H python3 -m pip install grpcio==1.38.1; fi  
+      source <(/home/admin/config.scripts/lnd.initwallet.py seed mainnet ${passwordC} "${seedWords}" ${seedPassword})
+      if [ "${err}" != "" ]; then
+      echo "lnd-wallet-seed" "lnd.initwallet.py seed returned error" "/home/admin/config.scripts/lnd.initwallet.py seed mainnet ... --> ${err} + ${errMore}"
+      exit 12
+      fi
+    fi
+
+    syncAndCheckLND
+}
+
+
 # BASIC MENU INFO
 WIDTH=64
 BACKTITLE="RaspiBlitz"
@@ -267,20 +332,7 @@ case $CHOICE in
     ;;
 
   SEED+SCB)
-    askLNDbackupCopy
-
-    ## from dialogLightningWallet.sh     
-    # start seed input and get results
-    _temp="/var/cache/raspiblitz/.temp.tmp"
-    /home/admin/config.scripts/lnd.backup.sh seed-import-gui $_temp
-    source $_temp 2>/dev/null
-    sudo rm $_temp 2>/dev/null
-
-    # if user cancelled the seed input
-    if [ "${seedWords}" == "" ]; then
-        # signal cancel to the calling script by exit code (4 = exit on seedwords)
-        exit 4
-    fi
+    restoreFromSeed
 
     # import SCB and get results
     _temp="/var/cache/raspiblitz/.temp.tmp"
@@ -294,41 +346,19 @@ case $CHOICE in
         exit 5
     fi
     
-    getpasswordC
-
-    # from _provision.setup.sh
-    # create wallet
-    # import static channel backup if was uploaded
-    source <(/home/admin/config.scripts/lnd.backup.sh scb-import ${staticchannelbackup})
-    if [ "${error}" != "" ]; then
-      echo "lnd-scb-import" "lnd.backup.sh scb-import returned error" "/home/admin/config.scripts/lnd.backup.sh scb-import ${staticchannelbackup} --> ${error}"
-      exit 10
-    fi
-
-    echo "The next step will overwrite the old LND wallets on all chains"
+    echo
+    echo "The next step will attempt to trigger all online peers to force close the channels with this node."
+    echo "Restoring the channel.backup can be repeated again until all the channels are force closed."
+    echo "Contacting the peers and asking them to force close achieves the same."
     echo "Press ENTER to continue or CTRL+C to abort"
     read key
-    echo "Stopping ${netprefix}lnd ..."
-    sudo systemctl stop ${netprefix}lnd
-    if [ "${tlnd}" == "on" ];then
-      sudo systemctl stop tlnd
-    fi
-    if [ "${slnd}" == "on" ];then
-      sudo systemctl stop slnd
-    fi
-    echo "Delete wallet"
-    sudo rm -r /mnt/hdd/lnd
-
-    /home/admin/config.scripts/lnd.install.sh on $CHAIN
-    sudo systemctl start ${netprefix}lnd
-    lndHealthCheck
 
     # WALLET --> SEED + SCB 
-    if [ "${seedWords}" != "" ] && [ "${staticchannelbackup}" != "" ]; then
+    if [ "${staticchannelbackup}" != "" ]; then
       echo "WALLET --> SEED + SCB "
       /home/admin/_cache.sh set message "LND Wallet (SEED & SCB)"
       if ! pip list | grep grpc; then sudo -H python3 -m pip install grpcio==1.38.1; fi
-      source <(/home/admin/config.scripts/lnd.initwallet.py scb mainnet ${passwordC} "${seedWords}" "${staticchannelbackup}" ${seedPassword})
+      source <(/home/admin/config.scripts/lnd.initwallet.py scb mainnet "${staticchannelbackup}")
       if [ "${err}" != "" ]; then
       echo "lnd-wallet-seed+scb" "lnd.initwallet.py scb returned error" "/home/admin/config.scripts/lnd.initwallet.py scb mainnet ... --> ${err} + ${errMore}"
       exit 11
@@ -337,6 +367,7 @@ case $CHOICE in
 
     syncAndCheckLND
     
+    echo
     echo "Press ENTER to return to main menu."
     read key
     # go back to main menu (and show)
@@ -345,64 +376,7 @@ case $CHOICE in
     ;;
 
   ONLYSEED)
-    askLNDbackupCopy
-
-    ## from dialogLightningWallet.sh 
-    # let people know about the difference between SEED & SEED+SCB
-    whiptail --title "IMPORTANT INFO" --yes-button "JUST SEED" --no-button "Go Back" --yesno "
-Using JUST SEED WORDS will only recover your on-chain funds.
-To also try to recover the open channel funds you need the
-channel.backup file (since RaspiBlitz v1.2 / LND 0.6-beta)
-or having a complete LND rescue-backup from your old node.
-    " 11 65
-    
-    # start seed input and get results
-    _temp="/var/cache/raspiblitz/.temp.tmp"
-    /home/admin/config.scripts/lnd.backup.sh seed-import-gui $_temp
-    source $_temp 2>/dev/null
-    sudo rm $_temp 2>/dev/null
-
-    # if user canceled the seed input
-    if [ "${seedWords}" == "" ]; then
-      # signal cancel to the calling script by exit code (4 = exit on seedwords)
-      exit 4
-    fi
-
-    getpasswordC
-
-    echo "The next step will overwrite the old LND wallets on all chains"
-    echo "Press ENTER to continue or CTRL+C to abort"
-    read key
-    echo "Stopping ${netprefix}lnd ..."
-    sudo systemctl stop ${netprefix}lnd
-    if [ "${tlnd}" == "on" ];then
-      sudo systemctl stop tlnd
-    fi
-    if [ "${slnd}" == "on" ];then
-      sudo systemctl stop slnd
-    fi
-    echo "Reset wallet"
-    sudo rm -r /mnt/hdd/lnd
-
-    /home/admin/config.scripts/lnd.install.sh on $CHAIN
-    sudo systemctl start ${netprefix}lnd
-    lndHealthCheck
-
-    # from _provison.setup.sh
-    # create wallet
-    # WALLET --> SEED
-    if [ "${seedWords}" != "" ]; then
-      echo "WALLET --> SEED"
-      /home/admin/_cache.sh set message "LND Wallet (SEED)"
-      if ! pip list | grep grpc; then sudo -H python3 -m pip install grpcio==1.38.1; fi  
-      source <(/home/admin/config.scripts/lnd.initwallet.py seed mainnet ${passwordC} "${seedWords}" ${seedPassword})
-      if [ "${err}" != "" ]; then
-      echo "lnd-wallet-seed" "lnd.initwallet.py seed returned error" "/home/admin/config.scripts/lnd.initwallet.py seed mainnet ... --> ${err} + ${errMore}"
-      exit 12
-      fi
-    fi
-
-    syncAndCheckLND
+    restoreFromSeed
     
     echo "Press ENTER to return to main menu."
     read key
