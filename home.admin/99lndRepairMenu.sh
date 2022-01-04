@@ -362,7 +362,7 @@ case $CHOICE in
       # LND was restarted so need to unlock
       echo "WALLET --> UNLOCK WALLET - SCAN 0"
       /home/admin/_cache.sh set message "LND Wallet Unlock - scan 0"
-      source <(/home/admin/config.scripts/lnd.initwallet.py unlock ${chain}net "${passwordC}" 0)
+      source <(/home/admin/config.scripts/lnd.initwallet.py unlock "${chain}net" "${passwordC}" 0)
       if [ "${err}" != "" ]; then
         echo "lnd-wallet-unlock" "lnd.initwallet.py unlock returned error" "/home/admin/config.scripts/lnd.initwallet.py unlock ${chain}net ... --> ${err} + ${errMore}"
         exit 11
