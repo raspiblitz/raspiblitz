@@ -178,6 +178,6 @@ if [ ${uploadSCB} -eq 1 ]; then
   sudo sed -i '/^staticchannelbackup=/d' $SETUPFILE
 
   # write the filename into the setup state
-  echo "staticchannelbackup='${staticchannelbackup}'" >> $SETUPFILE
+  echo "staticchannelbackup='/home/admin/channel.backup'" >> $SETUPFILE
 
 fi

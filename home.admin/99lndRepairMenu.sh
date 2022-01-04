@@ -190,7 +190,7 @@ or having a complete LND rescue-backup from your old node.
     if [ "${seedWords}" != "" ]; then
       echo "WALLET --> SEED"
       /home/admin/_cache.sh set message "LND Wallet (SEED)"
-      source <(/home/admin/config.scripts/lnd.initwallet.py seed "${chain}net" "${passwordC}" "${seedWords}" "${seedPassword})"
+      source <(/home/admin/config.scripts/lnd.initwallet.py seed "${chain}net" "${passwordC}" "${seedWords}" "${seedPassword}")
       if [ "${err}" != "" ]; then
       echo "lnd-wallet-seed" "lnd.initwallet.py seed returned error" "/home/admin/config.scripts/lnd.initwallet.py seed ${chain}net ... --> ${err} + ${errMore}"
       exit 12
@@ -371,7 +371,8 @@ case $CHOICE in
       echo "WALLET --> SEED + SCB "
       /home/admin/_cache.sh set message "LND Wallet (SEED & SCB)"
       macaroonPath="/home/admin/.lnd/data/chain/${network}/${chain}net/admin.macaroon"
-      source <(/home/admin/config.scripts/lnd.initwallet.py scb ${chain}net "${staticchannelbackup}" "${macaroonPath}")
+
+      source <(/home/admin/config.scripts/lnd.initwallet.py scb ${chain}net "/home/admin/channel.backup" "${macaroonPath}")
       if [ "${err}" != "" ]; then
         echo "lnd-wallet-seed+scb" "lnd.initwallet.py scb returned error" "/home/admin/config.scripts/lnd.initwallet.py scb ${chain}net ... --> ${err} + ${errMore}"
         exit 12

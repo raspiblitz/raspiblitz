@@ -443,7 +443,7 @@ if [ ${mode} = "scb-import-gui" ]; then
 
   # run import process
   echo "OK importing channel.backup file ..."
-  source <(sudo /home/admin/config.scripts/lnd.backup.sh scb-import ${filename})
+  source <(sudo /home/admin/config.scripts/lnd.backup.sh scb-import "${filename}")
 
   # give final info
   echo "DONE - placed SCB file at /home/admin/channel.backup"

@@ -234,15 +234,6 @@ if [ "${lightning}" == "lnd" ]; then
       exit 9
   fi
 
-  # import static channel backup if was uploaded
-  if [ "${staticchannelbackup}" != "" ]; then
-    echo "Preparing static channel backup file ${staticchannelbackup} ..." >> ${logFile}
-    source <(/home/admin/config.scripts/lnd.backup.sh scb-import "${staticchannelbackup}")
-    if [ "${error}" != "" ]; then
-      /home/admin/config.scripts/blitz.error.sh _provision.setup.sh "lnd-scb-import" "lnd.backup.sh scb-import returned error" "/home/admin/config.scripts/lnd.backup.sh scb-import ${staticchannelbackup} --> ${error}" ${logFile}
-      exit 10
-    fi
-  fi
 
   # WALLET --> LNDRESCUE
   if  [ "${lndrescue}" != "" ];then
@@ -315,7 +306,7 @@ if [ "${lightning}" == "lnd" ]; then
     /home/admin/_cache.sh set message "LND Wallet (SEED & SCB)"
     
     macaroonPath="/home/admin/.lnd/data/chain/${network}/${chain}net/admin.macaroon"
-    source <(/home/admin/config.scripts/lnd.initwallet.py scb "${chain}net" "${staticchannelbackup}" "${macaroonPath}")
+    source <(/home/admin/config.scripts/lnd.initwallet.py scb "${chain}net" "/home/admin/channel.backup" "${macaroonPath}")
     if [ "${err}" != "" ]; then
       echo "lnd-wallet-seed+scb" "lnd.initwallet.py scb returned error" "/home/admin/config.scripts/lnd.initwallet.py scb mainnet ... --> ${err} + ${errMore}"
       exit 12
