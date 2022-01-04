@@ -1,12 +1,9 @@
 #!/usr/bin/env python3
-import binascii
 import os
 import sys
 from pathlib import Path
 
 import grpc
-from lndlibs import walletunlocker_pb2 as lnrpc
-from lndlibs import walletunlocker_pb2_grpc as rpcstub
 
 if sys.version_info < (3, 0):
     print("Can't run on Python2")
@@ -17,12 +14,23 @@ if len(sys.argv) <= 1 or sys.argv[1] in ["-h", "--help", "help"]:
     print("# creating or recovering the LND wallet")
     print("# lnd.initwallet.py new [mainnet|testnet|signet] [walletpassword] [?seedpassword]")
     print("# lnd.initwallet.py seed [mainnet|testnet|signet] [walletpassword] [\"seeds-words-seperated-spaces\"] [?seedpassword]")
-    print("# lnd.initwallet.py scb [mainnet|testnet|signet] [walletpassword] [\"seeds-words-seperated-spaces\"] [filepathSCB] [?seedpassword]")
+    print("# lnd.initwallet.py unlock [mainnet|testnet|signet] [walletpassword] [recovery_window]")
+    print("# lnd.initwallet.py scb [mainnet|testnet|signet] [filepathSCB] [macaroonPath]")
     print("# lnd.initwallet.py change-password [mainnet|testnet|signet] [walletpassword-old] [walletpassword-new]")
     print("err='missing parameters'")
     sys.exit(1)
 
 mode = sys.argv[1]
+
+if mode == "scb":
+    import codecs
+    from lndlibs import lightning_pb2 as lnrpc
+    from lndlibs import lightning_pb2_grpc as lightningstub
+    
+else:
+    from lndlibs import walletunlocker_pb2 as lnrpc
+    from lndlibs import walletunlocker_pb2_grpc as rpcstub
+    
 
 def new(stub, wallet_password="", seed_entropy=None):
     if seed_entropy:
@@ -86,7 +94,7 @@ def seed(stub, wallet_password="", seed_words="", seed_password=""):
     request = lnrpc.InitWalletRequest(
         wallet_password=wallet_password.encode(),
         cipher_seed_mnemonic=[x.encode() for x in seed_words],
-        recovery_window=5000,
+        recovery_window=0,
         aezeed_passphrase=seed_password.encode()
     )
 
@@ -105,42 +113,58 @@ def seed(stub, wallet_password="", seed_words="", seed_password=""):
         print("err='InitWallet'")
         sys.exit(1)
 
-
-def scb(stub, wallet_password="", seed_words="", seed_password="", file_path_scb=""):
-    with open(file_path_scb, 'rb') as f:
-        content = f.read()
-    scb_hex_str = binascii.hexlify(content)
-    print(scb_hex_str)
-
-    request = lnrpc.InitWalletRequest(
+def unlock(stub, wallet_password="", scan_depth=int):
+    request = lnrpc.UnlockWalletRequest(
         wallet_password=wallet_password.encode(),
-        cipher_seed_mnemonic=[x.encode() for x in seed_words],
-        recovery_window=5000,
-        aezeed_passphrase=seed_password.encode(),
-        channel_backups=scb_hex_str.encode()
+        recovery_window=scan_depth,
     )
 
     try:
-        response = stub.InitWallet(request)
+        response = stub.UnlockWallet(request)
+        print("# ok - wallet unlocked - using recovery window:", scan_depth)
+
     except grpc.RpcError as rpc_error_call:
         code = rpc_error_call.code()
         print(code, file=sys.stderr)
         details = rpc_error_call.details()
-        print("err='RPCError InitWallet'")
+        print("err='RPCError UnlockWallet'")
         print("errMore=\"" + details + "\"")
         sys.exit(1)
     except:
         e = sys.exc_info()[0]
         print(e, file=sys.stderr)
-        print("err='InitWallet'")
+        print("err='UnlockWallet'")
         sys.exit(1)
 
-    # TODO(rootzoll) implement creating from seed/scb
-    print("err='TODO: implement creating from seed/scb'")
-    sys.exit(1)
+
+def scb(stub, file_path_scb="", macaroon_path=""):
+    macaroon_file = Path(macaroon_path)
+    print(macaroon_file)
+    macaroon = codecs.encode(open(macaroon_file, 'rb').read(), 'hex')
+    with open(file_path_scb, 'rb') as f:
+        content = f.read()
+        request = lnrpc.RestoreChanBackupRequest(
+        multi_chan_backup=content
+    )
+
+    try:
+        response = stub.RestoreChannelBackups(request, metadata=[('macaroon', macaroon)])
+        print(response)
+    except grpc.RpcError as rpc_error_call:
+        code = rpc_error_call.code()
+        print(code, file=sys.stderr)
+        details = rpc_error_call.details()
+        print("err='RPCError RestoreChanBackupRequest'")
+        print("errMore=\"" + details + "\"")
+        sys.exit(1)
+    except:
+        e = sys.exc_info()[0]
+        print(e, file=sys.stderr)
+        print("err='RestoreChanBackupRequest'")
+        sys.exit(1)
+
 
 def change_password(stub, wallet_password="", wallet_password_new=""):
-
     request = lnrpc.ChangePasswordRequest(
         current_password=wallet_password.encode(),
         new_password=wallet_password_new.encode()
@@ -165,6 +189,7 @@ def change_password(stub, wallet_password="", wallet_password_new=""):
         print("err='ChangePassword'")
         sys.exit(1)
 
+
 def parse_args():
     network = ""
     wallet_password = ""
@@ -172,6 +197,8 @@ def parse_args():
     seed_words = ""
     seed_password = ""
     filepath_scb = ""
+    macaroon_path = ""
+    scan_depth = int
 
     if len(sys.argv) > 2:
         network = sys.argv[2]
@@ -207,7 +234,7 @@ def parse_args():
             print("err='missing parameters'")
             sys.exit(1)
 
-    elif mode == "seed" or mode == "scb":
+    elif mode == "seed":
 
         if len(sys.argv) > 3:
             wallet_password = sys.argv[3]
@@ -228,39 +255,66 @@ def parse_args():
             print("err='not correct amount of parameter  - missing seed string'")
             sys.exit(1)
 
-        if mode == "seed":
-
-            if len(sys.argv) > 5:
+        if len(sys.argv) > 5:
                 seed_password = sys.argv[5]
 
-        elif mode == "scb":
 
-            if len(sys.argv) > 5:
-                filepath_scb = sys.argv[5]
-                scb_file = Path(filepath_scb)
-                if scb_file.is_file():
-                    print("# OK SCB file exists")
-                else:
-                    print("err='the given filepathSCB - file does not exists or no permission'")
-                    sys.exit(1)
-            else:
-                print("err='not correct amount of parameter  - missing seed filepathSCB'")
+    elif mode == "unlock":
+
+        if len(sys.argv) > 3:
+            wallet_password = sys.argv[3]
+            if len(wallet_password) < 8:
+                print("err='wallet password is too short'")
                 sys.exit(1)
+        else:
+            print("err='not correct amount of parameter - missing wallet password'")
+            sys.exit(1)
+        if len(sys.argv) > 4:
+            scan_depth = int(sys.argv[4])
+            if type(scan_depth) is not int:
+                print("err='expecting a number for recovery_window'")
+                sys.exit(1)
+        else:
+            print("err='not correct amount of parameter - missing recovery_window'")
+            sys.exit(1)
 
-            if len(sys.argv) > 6:
-                seed_password = sys.argv[5]
+    elif mode == "scb":
+
+        if len(sys.argv) > 3:
+            filepath_scb = sys.argv[3]
+            scb_file = Path(filepath_scb)
+            if scb_file.is_file():
+                print("# OK the SCB file exists")
+            else:
+                print("err='the given filepathSCB - file does not exist or no permission'")
+                sys.exit(1)
+        else:
+            print("err='not correct amount of parameter  - missing filepathSCB'")
+            sys.exit(1)
+        
+        if len(sys.argv) > 4:
+            macaroon_path = sys.argv[4]
+            macaroon_file = Path(macaroon_path)
+            if macaroon_file.is_file():
+                print("# OK the admin.macaroon exists")
+            else:
+                print("err='the given macaroonPath - file does not exist or no permission'")
+                sys.exit(1)
+        else:
+            print("err='not correct amount of parameter  - missing macaroonPath'")
+            sys.exit(1)
 
     else:
 
         print("err='unknown mode parameter - run without any parameters to see options'")
         sys.exit(1)
 
-    return network, wallet_password, seed_words, seed_password, filepath_scb, wallet_password_new 
+    return network, wallet_password, seed_words, seed_password, filepath_scb, macaroon_path, wallet_password_new, scan_depth
 
 
 def main():
 
-    network, wallet_password, seed_words, seed_password, file_path_scb, wallet_password_new = parse_args()
+    network, wallet_password, seed_words, seed_password, file_path_scb, macaroon_path, wallet_password_new, scan_depth = parse_args()
 
     grpcEndpoint="localhost:0"
     if network == "mainnet":
@@ -277,7 +331,10 @@ def main():
     cert = open('/mnt/hdd/lnd/tls.cert', 'rb').read()
     ssl_creds = grpc.ssl_channel_credentials(cert)
     channel = grpc.secure_channel(grpcEndpoint, ssl_creds)
-    stub = rpcstub.WalletUnlockerStub(channel)
+    if mode == "scb":
+        stub = lightningstub.LightningStub(channel)
+    else:
+        stub = rpcstub.WalletUnlockerStub(channel)
 
     if mode == "new":
         print("# *** CREATING NEW LND WALLET ***")
@@ -287,9 +344,13 @@ def main():
         print("# *** RECOVERING LND WALLET FROM SEED ***")
         seed(stub, wallet_password, seed_words, seed_password)
 
+    elif mode == "unlock":
+        print("# *** UNLOCK WALLET WITH PASSWORD_C ***")
+        unlock(stub, wallet_password, scan_depth)
+
     elif mode == "scb":
-        print("# *** RECOVERING LND WALLET FROM SEED + SCB ***")
-        scb(stub, wallet_password, seed_words, seed_password, file_path_scb)
+        print("# *** RECOVERING LND CHANNEL FUNDS FROM SCB ***")
+        scb(stub, file_path_scb, macaroon_path)
 
     elif mode == "change-password":
         print("# *** SETTING NEW PASSWORD FOR WALLET ***")

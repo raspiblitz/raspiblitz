@@ -11,9 +11,9 @@ rm -rf googleapis
 git clone https://github.com/googleapis/googleapis.git
 rm -rf protobuffs
 mkdir protobuffs
-curl -o ./rpc.proto -s https://raw.githubusercontent.com/lightningnetwork/lnd/master/lnrpc/rpc.proto
 curl -o ./walletunlocker.proto -s https://raw.githubusercontent.com/lightningnetwork/lnd/master/lnrpc/walletunlocker.proto
-python3 -m grpc_tools.protoc --proto_path=googleapis:. --python_out=./protobuffs --grpc_python_out=./protobuffs ./rpc.proto ./walletunlocker.proto
+curl -o ./lightning.proto -s https://raw.githubusercontent.com/lightningnetwork/lnd/master/lnrpc/lightning.proto
+python3 -m grpc_tools.protoc --proto_path=googleapis:. --python_out=./protobuffs --grpc_python_out=./protobuffs ./walletunlocker.proto ./lightning.proto
 cp ./*.proto ./protobuffs
 ````
 
@@ -23,12 +23,12 @@ Now copy the generated RPC libs per SCP over to your Laptop and add them to the 
 
 scp -r admin@192.168.X.X:/home/admin/protobuffs ./protobuffs
 
-Make sure the first lines (ignore comments) of the `rpc_pb2_grpc.py` look like the following for python3 compatibility:
+Make sure the first lines (ignore comments) of the `lightning_pb2_grpc.py` look like the following for python3 compatibility:
 ```
 from __future__ import absolute_import
 import grpc
 
-from . import rpc_pb2 as rpc__pb2
+from . import lightning_pb2 as lightning__pb2
 ```
 
 Make sure the first lines (ignore comments) of the `walletunlocker_pb2_grpc.py` look like the following for python3 compatibility:
@@ -50,7 +50,7 @@ from google.protobuf import symbol_database as _symbol_database
 _sym_db = _symbol_database.Default()
 
 
-from . import rpc_pb2 as rpc__pb2
+from . import lightning_pb2 as lightning__pb2
 ```
 
 

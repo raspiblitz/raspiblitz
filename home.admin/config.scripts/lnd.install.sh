@@ -225,6 +225,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # make sure binary is installed (will skip if already done)
   /home/admin/config.scripts/lnd.install.sh install
 
+  echo "# Make sure the user bitcoin is in the debian-tor group"
+  sudo usermod -a -G debian-tor bitcoin
+
   sudo ufw allow ${portprefix}9735 comment "${netprefix}lnd"
   sudo ufw allow ${portprefix}8080 comment "${netprefix}lnd REST"
   sudo ufw allow 1${rpcportmod}009 comment "${netprefix}lnd RPC"
