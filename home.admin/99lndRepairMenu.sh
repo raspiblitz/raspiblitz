@@ -31,9 +31,9 @@ Download LND Data Backup now?
     read key
   else
     clear
-    echo "*****************************************"
+    echo "*************************************"
     echo "* JUST MAKING A BACKUP TO THE SD CARD"
-    echo "*****************************************"
+    echo "*************************************"
     echo "please wait .."
     sleep 2
     /home/admin/config.scripts/lnd.backup.sh lnd-export
@@ -108,10 +108,10 @@ syncAndCheckLND() # from _provision.setup.sh
   sudo systemctl start ${netprefix}lnd
   echo "Starting LND Service ... executed"  
   
-  if [ $(sudo -u bitcoin ls /mnt/hdd/lnd/data/chain/bitcoin/mainnet/wallet.db 2>/dev/null | grep -c wallet.db) -gt 0 ]; then
+  if [ $(sudo -u bitcoin ls /mnt/hdd/lnd/data/chain/bitcoin/${chain}net/wallet.db 2>/dev/null | grep -c wallet.db) -gt 0 ]; then
     echo "# OK, there is an LND wallet present"
   else
-    echo "lnd-no-wallet" "there is no LND wallet present" "/mnt/hdd/lnd/data/chain/bitcoin/mainnet/wallet.db --> missing"
+    echo "lnd-no-wallet" "there is no LND wallet present" "/mnt/hdd/lnd/data/chain/bitcoin/${chain}net/wallet.db --> missing"
     exit 13
   fi
   # sync macaroons & TLS to other users
@@ -179,6 +179,7 @@ or having a complete LND rescue-backup from your old node.
     echo "Reset wallet"
     sudo rm -r /mnt/hdd/lnd
 
+    # creates fresh lnd.conf without an alias
     /home/admin/config.scripts/lnd.install.sh on $CHAIN
     sudo systemctl start ${netprefix}lnd
     lndHealthCheck
@@ -189,9 +190,9 @@ or having a complete LND rescue-backup from your old node.
     if [ "${seedWords}" != "" ]; then
       echo "WALLET --> SEED"
       /home/admin/_cache.sh set message "LND Wallet (SEED)"
-      source <(/home/admin/config.scripts/lnd.initwallet.py seed mainnet ${passwordC} "${seedWords}" ${seedPassword})
+      source <(/home/admin/config.scripts/lnd.initwallet.py seed "${chain}net" "${passwordC}" "${seedWords}" "${seedPassword})"
       if [ "${err}" != "" ]; then
-      echo "lnd-wallet-seed" "lnd.initwallet.py seed returned error" "/home/admin/config.scripts/lnd.initwallet.py seed mainnet ... --> ${err} + ${errMore}"
+      echo "lnd-wallet-seed" "lnd.initwallet.py seed returned error" "/home/admin/config.scripts/lnd.initwallet.py seed ${chain}net ... --> ${err} + ${errMore}"
       exit 12
       fi
     fi
@@ -261,10 +262,11 @@ case $CHOICE in
         sleep 3
     done
 
+    #TODO the new hostname is not taken into account on init (user can change set the lnd name in menu later)
     # make sure host is named like in the raspiblitz config
-    echo "Setting the Name/Alias/Hostname .."
-    sudo /home/admin/config.scripts/lnd.setname.sh mainnet "${result}"
-    /home/admin/config.scripts/blitz.conf.sh set hostname "${result}"
+    # echo "Setting the Name/Alias/Hostname .."
+    # sudo /home/admin/config.scripts/lnd.setname.sh ${chain}net "${result}"
+    # /home/admin/config.scripts/blitz.conf.sh set hostname "${result}"
 
     echo "stopping ${netprefix}lnd ..."
     sudo systemctl stop ${netprefix}lnd
@@ -277,9 +279,9 @@ case $CHOICE in
     echo "Delete wallet"
     sudo rm -r /mnt/hdd/lnd
     # create wallet
-    /home/admin/config.scripts/lnd.install.sh on mainnet initwallet
-    # display and delete the seed for mainnet
-    sudo /home/admin/config.scripts/lnd.install.sh display-seed mainnet delete
+    /home/admin/config.scripts/lnd.install.sh on ${chain}net initwallet
+    # display and delete the seed for ${chain}net
+    sudo /home/admin/config.scripts/lnd.install.sh display-seed ${chain}net delete
     if [ "${tlnd}" == "on" ];then
       /home/admin/config.scripts/lnd.install.sh on testnet initwallet
     fi
@@ -357,21 +359,21 @@ case $CHOICE in
     # WALLET --> SEED + SCB 
     if [ "${staticchannelbackup}" != "" ]; then
 
+      # LND was restarted so need to unlock
       echo "WALLET --> UNLOCK WALLET - SCAN 0"
       /home/admin/_cache.sh set message "LND Wallet Unlock - scan 0"
-      source <(/home/admin/config.scripts/lnd.initwallet.py unlock mainnet "${passwordC}" 0)
+      source <(/home/admin/config.scripts/lnd.initwallet.py unlock ${chain}net "${passwordC}" 0)
       if [ "${err}" != "" ]; then
-        echo "lnd-wallet-unlock" "lnd.initwallet.py unlock returned error" "/home/admin/config.scripts/lnd.initwallet.py unlock mainnet ... --> ${err} + ${errMore}"
+        echo "lnd-wallet-unlock" "lnd.initwallet.py unlock returned error" "/home/admin/config.scripts/lnd.initwallet.py unlock ${chain}net ... --> ${err} + ${errMore}"
         exit 11
       fi
 
       echo "WALLET --> SEED + SCB "
       /home/admin/_cache.sh set message "LND Wallet (SEED & SCB)"
-      
       macaroonPath="/home/admin/.lnd/data/chain/${network}/${chain}net/admin.macaroon"
-      source <(/home/admin/config.scripts/lnd.initwallet.py scb mainnet "${staticchannelbackup}" "${macaroonPath}")
+      source <(/home/admin/config.scripts/lnd.initwallet.py scb ${chain}net "${staticchannelbackup}" "${macaroonPath}")
       if [ "${err}" != "" ]; then
-        echo "lnd-wallet-seed+scb" "lnd.initwallet.py scb returned error" "/home/admin/config.scripts/lnd.initwallet.py scb mainnet ... --> ${err} + ${errMore}"
+        echo "lnd-wallet-seed+scb" "lnd.initwallet.py scb returned error" "/home/admin/config.scripts/lnd.initwallet.py scb ${chain}net ... --> ${err} + ${errMore}"
         exit 12
       fi
     fi
@@ -380,9 +382,9 @@ case $CHOICE in
 
     echo "WALLET --> UNLOCK WALLET - SCAN 5000"
     /home/admin/_cache.sh set message "LND Wallet Unlock - scan 5000"
-    source <(/home/admin/config.scripts/lnd.initwallet.py unlock mainnet "${passwordC}" 5000)
+    source <(/home/admin/config.scripts/lnd.initwallet.py unlock ${chain}net "${passwordC}" 5000)
     if [ "${err}" != "" ]; then
-      echo "lnd-wallet-unlock" "lnd.initwallet.py unlock returned error" "/home/admin/config.scripts/lnd.initwallet.py unlock mainnet ... --> ${err} + ${errMore}"
+      echo "lnd-wallet-unlock" "lnd.initwallet.py unlock returned error" "/home/admin/config.scripts/lnd.initwallet.py unlock ${chain}net ... --> ${err} + ${errMore}"
       exit 13
     fi
     
@@ -399,9 +401,9 @@ case $CHOICE in
     
     echo "WALLET --> UNLOCK WALLET - SCAN 5000"
     /home/admin/_cache.sh set message "LND Wallet Unlock - scan 5000"
-    source <(/home/admin/config.scripts/lnd.initwallet.py unlock mainnet "${passwordC}" 5000)
+    source <(/home/admin/config.scripts/lnd.initwallet.py unlock ${chain}net "${passwordC}" 5000)
     if [ "${err}" != "" ]; then
-      echo "lnd-wallet-unlock" "lnd.initwallet.py unlock returned error" "/home/admin/config.scripts/lnd.initwallet.py unlock mainnet ... --> ${err} + ${errMore}"
+      echo "lnd-wallet-unlock" "lnd.initwallet.py unlock returned error" "/home/admin/config.scripts/lnd.initwallet.py unlock ${chain}net ... --> ${err} + ${errMore}"
       exit 13
     fi
 
