@@ -200,6 +200,69 @@ or having a complete LND rescue-backup from your old node.
     syncAndCheckLND
 }
 
+function restoreSCB()
+{
+    # import SCB and get results
+    _temp="/var/cache/raspiblitz/.temp.tmp"
+    /home/admin/config.scripts/lnd.backup.sh scb-import-gui setup $_temp
+    source $_temp 2>/dev/null
+    sudo rm $_temp 2>/dev/null
+    
+    # if user canceled the upload
+    if [ "${staticchannelbackup}" == "" ]; then
+      # signal cancel to the calling script by exit code (5 = exit on scb)
+      exit 5
+    fi
+    
+    echo
+    echo "The next step will attempt to trigger all online peers to force close the channels with this node."
+    echo "Restoring the channel.backup can be repeated again until all the channels are force closed."
+    echo "Contacting the peers and asking them to force close achieves the same."
+    echo "Press ENTER to continue or CTRL+C to abort"
+    read key
+
+    # WALLET --> SEED + SCB 
+    if [ "${staticchannelbackup}" != "" ]; then
+
+      # LND was restarted so need to unlock
+      echo "WALLET --> UNLOCK WALLET - SCAN 0"
+      /home/admin/_cache.sh set message "LND Wallet Unlock - scan 0"
+      source <(/home/admin/config.scripts/lnd.initwallet.py unlock "${chain}net" "${passwordC}" 0)
+      if [ "${err}" != "" ]; then
+        echo "lnd-wallet-unlock" "lnd.initwallet.py unlock returned error" "/home/admin/config.scripts/lnd.initwallet.py unlock ${chain}net ... --> ${err} + ${errMore}"
+        if [ "${errMore}" = "wallet already unlocked, WalletUnlocker service is no longer available" ]; then
+          echo "The wallet is already unlocked, continue."
+        else
+          exit 11
+        fi
+      fi
+
+      echo "WALLET --> SCB "
+      /home/admin/_cache.sh set message "LND Wallet (SEED & SCB)"
+      macaroonPath="/home/admin/.lnd/data/chain/${network}/${chain}net/admin.macaroon"
+      source <(/home/admin/config.scripts/lnd.initwallet.py scb ${chain}net "/home/admin/channel.backup" "${macaroonPath}")
+      if [ "${err}" != "" ]; then
+        echo "lnd-wallet-seed+scb" "lnd.initwallet.py scb returned error" "/home/admin/config.scripts/lnd.initwallet.py scb ${chain}net ... --> ${err} + ${errMore}"
+        if [ "${errMore}" = "server is still in the process of starting" ]; then
+          echo "The SCB recovery is not possible now - use the RETRYSCB option the REPAIR-LND menu after LND is synced."
+          echo "Can repeat the SCB recovery until all peers have force closed the channels to this node."
+        else
+          exit 12
+        fi
+      fi
+    fi
+
+    syncAndCheckLND
+
+    # LND was restarted so need to unlock
+    echo "WALLET --> UNLOCK WALLET - SCAN 5000"
+    /home/admin/_cache.sh set message "LND Wallet Unlock - scan 5000"
+    source <(/home/admin/config.scripts/lnd.initwallet.py unlock ${chain}net "${passwordC}" 5000)
+    if [ "${err}" != "" ]; then
+      echo "lnd-wallet-unlock" "lnd.initwallet.py unlock returned error" "/home/admin/config.scripts/lnd.initwallet.py unlock ${chain}net ... --> ${err} + ${errMore}"
+      exit 13
+    fi
+}
 
 # BASIC MENU INFO
 WIDTH=64
@@ -213,6 +276,7 @@ OPTIONS+=(BACKUP-LND "Backup your LND data (Rescue-File)")
 OPTIONS+=(RESET-LND "Delete LND & start new node/wallet")
 OPTIONS+=(LNDRESCUE "Restore from a rescue file")
 OPTIONS+=(SEED+SCB "Restore from a seed and channel.backup")
+OPTIONS+=(RETRYSCB "Retry closing channels with the channel.backup")
 OPTIONS+=(ONLYSEED "Restore from a seed (onchain funds only)")
 
 CHOICE_HEIGHT=$(("${#OPTIONS[@]}/2+1"))
@@ -337,57 +401,18 @@ case $CHOICE in
   SEED+SCB)
     restoreFromSeed
 
-    # import SCB and get results
-    _temp="/var/cache/raspiblitz/.temp.tmp"
-    /home/admin/config.scripts/lnd.backup.sh scb-import-gui setup $_temp
-    source $_temp 2>/dev/null
-    sudo rm $_temp 2>/dev/null
-    
-    # if user canceled the upload
-    if [ "${staticchannelbackup}" == "" ]; then
-      # signal cancel to the calling script by exit code (5 = exit on scb)
-      exit 5
-    fi
+    restoreSCB
     
     echo
-    echo "The next step will attempt to trigger all online peers to force close the channels with this node."
-    echo "Restoring the channel.backup can be repeated again until all the channels are force closed."
-    echo "Contacting the peers and asking them to force close achieves the same."
-    echo "Press ENTER to continue or CTRL+C to abort"
+    echo "Press ENTER to return to main menu."
     read key
+    # go back to main menu (and show)
+    /home/admin/00raspiblitz.sh
+    exit 0
+    ;;
 
-    # WALLET --> SEED + SCB 
-    if [ "${staticchannelbackup}" != "" ]; then
-
-      # LND was restarted so need to unlock
-      echo "WALLET --> UNLOCK WALLET - SCAN 0"
-      /home/admin/_cache.sh set message "LND Wallet Unlock - scan 0"
-      source <(/home/admin/config.scripts/lnd.initwallet.py unlock "${chain}net" "${passwordC}" 0)
-      if [ "${err}" != "" ]; then
-        echo "lnd-wallet-unlock" "lnd.initwallet.py unlock returned error" "/home/admin/config.scripts/lnd.initwallet.py unlock ${chain}net ... --> ${err} + ${errMore}"
-        exit 11
-      fi
-
-      echo "WALLET --> SEED + SCB "
-      /home/admin/_cache.sh set message "LND Wallet (SEED & SCB)"
-      macaroonPath="/home/admin/.lnd/data/chain/${network}/${chain}net/admin.macaroon"
-
-      source <(/home/admin/config.scripts/lnd.initwallet.py scb ${chain}net "/home/admin/channel.backup" "${macaroonPath}")
-      if [ "${err}" != "" ]; then
-        echo "lnd-wallet-seed+scb" "lnd.initwallet.py scb returned error" "/home/admin/config.scripts/lnd.initwallet.py scb ${chain}net ... --> ${err} + ${errMore}"
-        exit 12
-      fi
-    fi
-
-    syncAndCheckLND
-
-    echo "WALLET --> UNLOCK WALLET - SCAN 5000"
-    /home/admin/_cache.sh set message "LND Wallet Unlock - scan 5000"
-    source <(/home/admin/config.scripts/lnd.initwallet.py unlock ${chain}net "${passwordC}" 5000)
-    if [ "${err}" != "" ]; then
-      echo "lnd-wallet-unlock" "lnd.initwallet.py unlock returned error" "/home/admin/config.scripts/lnd.initwallet.py unlock ${chain}net ... --> ${err} + ${errMore}"
-      exit 13
-    fi
+  RETRYSCB)
+    restoreSCB
     
     echo
     echo "Press ENTER to return to main menu."

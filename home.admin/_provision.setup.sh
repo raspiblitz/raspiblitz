@@ -305,23 +305,31 @@ if [ "${lightning}" == "lnd" ]; then
     echo "WALLET --> UNLOCK WALLET - SCAN 0" >> ${logFile}
     /home/admin/_cache.sh set message "LND Wallet Unlock - scan 0"
     source <(/home/admin/config.scripts/lnd.initwallet.py unlock "${chain}net" "${passwordC}" 0)
-    #if [ "${err}" != "" ]; then
-    #  echo "lnd-wallet-unlock" "lnd.initwallet.py unlock returned error" "/home/admin/config.scripts/lnd.initwallet.py unlock ${chain}net ... --> ${err} + ${errMore}"
-    #  exit 11
-    #fi
+    if [ "${err}" != "" ]; then
+      echo "lnd-wallet-unlock" "lnd.initwallet.py unlock returned error" "/home/admin/config.scripts/lnd.initwallet.py unlock ${chain}net ... --> ${err} + ${errMore}"
+      if [ "${errMore}" = "wallet already unlocked, WalletUnlocker service is no longer available" ]; then
+        echo "The wallet is already unlocked, continue."
+      else
+        exit 11
+      fi
+    fi
 
-    echo "WALLET --> SEED + SCB " >> ${logFile}
+    echo "WALLET --> SCB" >> ${logFile}
     /home/admin/_cache.sh set message "LND Wallet (SEED & SCB)"
-    
     macaroonPath="/home/admin/.lnd/data/chain/${network}/${chain}net/admin.macaroon"
     source <(/home/admin/config.scripts/lnd.initwallet.py scb "${chain}net" "/home/admin/channel.backup" "${macaroonPath}")
     if [ "${err}" != "" ]; then
       echo "lnd-wallet-seed+scb" "lnd.initwallet.py scb returned error" "/home/admin/config.scripts/lnd.initwallet.py scb mainnet ... --> ${err} + ${errMore}"  ${logFile}
-      exit 12
+      if [ ${errMore} = "server is still in the process of starting" ]; then
+        echo "The SCB recovery is not possible now - use the RETRYSCB option the REPAIR-LND menu after LND is synced."  >> ${logFile}
+        echo "Can repeat the SCB recovery until all peers have force closed the channels to this node." >> ${logFile}
+      else
+        exit 12
+      fi
     fi
   fi
 
-  #restart and unlock with a high recovery_window
+  # restart and unlock with a high recovery_window
   echo "restarting lnd to start rescan" >> ${logFile}
   systemctl restart lnd >> ${logFile}
 
