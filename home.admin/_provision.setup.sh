@@ -163,7 +163,7 @@ if [ "${lightning}" == "lnd" ]; then
   # if user uploaded an LND rescue file (raspiblitz.setup)
   if [ "${lndrescue}" != "" ]; then
     echo "Restore LND data from uploaded rescue file ${lndrescue} ..." >> ${logFile}
-    source <(/home/admin/config.scripts/lnd.backup.sh lnd-import ${lndrescue})
+    source <(/home/admin/config.scripts/lnd.backup.sh lnd-import "${lndrescue}")
     if [ "${error}" != "" ]; then
       /home/admin/config.scripts/blitz.error.sh _provision.setup.sh "lndrescue-import" "setup: lnd import backup failed" "${error}" ${logFile}
       exit 6
@@ -237,7 +237,7 @@ if [ "${lightning}" == "lnd" ]; then
   # import static channel backup if was uploaded
   if [ "${staticchannelbackup}" != "" ]; then
     echo "Preparing static channel backup file ${staticchannelbackup} ..." >> ${logFile}
-    source <(/home/admin/config.scripts/lnd.backup.sh scb-import ${staticchannelbackup})
+    source <(/home/admin/config.scripts/lnd.backup.sh scb-import "${staticchannelbackup}")
     if [ "${error}" != "" ]; then
       /home/admin/config.scripts/blitz.error.sh _provision.setup.sh "lnd-scb-import" "lnd.backup.sh scb-import returned error" "/home/admin/config.scripts/lnd.backup.sh scb-import ${staticchannelbackup} --> ${error}" ${logFile}
       exit 10
@@ -250,25 +250,13 @@ if [ "${lightning}" == "lnd" ]; then
     echo "WALLET --> LNDRESCUE " >> ${logFile}
     /home/admin/_cache.sh set message "LND Wallet (LNDRESCUE)"
 
-  # WALLET --> SEED + SCB 
-  elif [ "${seedWords}" != "" ] && [ "${staticchannelbackup}" != "" ]; then
-
-    echo "WALLET --> SEED + SCB " >> ${logFile}
-    /home/admin/_cache.sh set message "LND Wallet (SEED & SCB)"
-    if ! pip list | grep grpc; then sudo -H python3 -m pip install grpcio==1.38.1; fi
-    source <(/home/admin/config.scripts/lnd.initwallet.py scb mainnet ${passwordC} "${seedWords}" "${staticchannelbackup}" ${seedPassword})
-    if [ "${err}" != "" ]; then
-      /home/admin/config.scripts/blitz.error.sh _provision.setup.sh "lnd-wallet-seed+scb" "lnd.initwallet.py scb returned error" "/home/admin/config.scripts/lnd.initwallet.py scb mainnet ... --> ${err} + ${errMore}" ${logFile}
-      exit 11
-    fi
-
-  # WALLET --> SEED
+  # WALLET --> SEED (+ SCB to be restored later)
   elif [ "${seedWords}" != "" ]; then
     
     echo "WALLET --> SEED" >> ${logFile} 
     /home/admin/_cache.sh set message "LND Wallet (SEED)"
     if ! pip list | grep grpc; then sudo -H python3 -m pip install grpcio==1.38.1; fi  
-    source <(/home/admin/config.scripts/lnd.initwallet.py seed mainnet ${passwordC} "${seedWords}" ${seedPassword})
+    source <(/home/admin/config.scripts/lnd.initwallet.py seed mainnet "${passwordC}" "${seedWords}" ${seedPassword})
     if [ "${err}" != "" ]; then
       /home/admin/config.scripts/blitz.error.sh _provision.setup.sh "lnd-wallet-seed" "lnd.initwallet.py seed returned error" "/home/admin/config.scripts/lnd.initwallet.py seed mainnet ... --> ${err} + ${errMore}" ${logFile}
       exit 12
@@ -280,7 +268,7 @@ if [ "${lightning}" == "lnd" ]; then
     echo "WALLET --> NEW" >> ${logFile}
     /home/admin/_cache.sh set message "LND Wallet (NEW)"
     if ! pip list | grep grpc; then sudo -H python3 -m pip install grpcio==1.38.1; fi 
-    source <(/home/admin/config.scripts/lnd.initwallet.py new mainnet ${passwordC})
+    source <(/home/admin/config.scripts/lnd.initwallet.py new mainnet "${passwordC}")
     if [ "${err}" != "" ]; then
       /home/admin/config.scripts/blitz.error.sh _provision.setup.sh "lnd-wallet-new" "lnd.initwallet.py new returned error" "/home/admin/config.scripts/lnd.initwallet.py new mainnet ... --> ${err} + ${errMore}" ${logFile}
       /home/admin/_cache.sh set state "error"
@@ -319,6 +307,33 @@ if [ "${lightning}" == "lnd" ]; then
     exit 15
   fi
 
+  # restore SCB
+  if [ "${staticchannelbackup}" != "" ]; then
+
+    # LND is started and unlocked here after the restore from SEED
+    echo "WALLET --> SEED + SCB " >> ${logFile}
+    /home/admin/_cache.sh set message "LND Wallet (SEED & SCB)"
+    
+    macaroonPath="/home/admin/.lnd/data/chain/${network}/${chain}net/admin.macaroon"
+    source <(/home/admin/config.scripts/lnd.initwallet.py scb "${chain}net" "${staticchannelbackup}" "${macaroonPath}")
+    if [ "${err}" != "" ]; then
+      echo "lnd-wallet-seed+scb" "lnd.initwallet.py scb returned error" "/home/admin/config.scripts/lnd.initwallet.py scb mainnet ... --> ${err} + ${errMore}"
+      exit 12
+    fi
+  fi
+
+  #restart and unlock with a high recovery_window
+  echo "restarting lnd to start rescan" >> ${logFile}
+  systemctl restart lnd >> ${logFile}
+
+  echo "WALLET --> UNLOCK WALLET - SCAN 5000"
+  /home/admin/_cache.sh set message "LND Wallet Unlock - scan 5000"
+  source <(/home/admin/config.scripts/lnd.initwallet.py unlock "${chain}net" "${passwordC}" 5000)
+  if [ "${err}" != "" ]; then
+    echo "lnd-wallet-unlock" "lnd.initwallet.py unlock returned error" "/home/admin/config.scripts/lnd.initwallet.py unlock ${chain}net ... --> ${err} + ${errMore}"
+    exit 13
+  fi
+
   # stop lnd for the rest of the provision process
   echo "stopping lnd for the rest provision again (will start on next boot)" >> ${logFile}
   systemctl stop lnd >> ${logFile}
@@ -339,7 +354,7 @@ if [ "${lightning}" == "cl" ]; then
   if [ "${clrescue}" != "" ]; then
 
     echo "Restore CL data from uploaded rescue file ${clrescue} ..." >> ${logFile}
-    source <(/home/admin/config.scripts/cl.backup.sh cl-import ${clrescue})
+    source <(/home/admin/config.scripts/cl.backup.sh cl-import "${clrescue}")
     if [ "${error}" != "" ]; then
       /home/admin/config.scripts/blitz.error.sh _provision.setup.sh "cl-import-backup" "cl.backup.sh cl-import with error" "/home/admin/config.scripts/cl.backup.sh cl-import ${clrescue} --> ${error}" ${logFile}
       exit 16
@@ -357,12 +372,12 @@ if [ "${lightning}" == "cl" ]; then
     if [ "$(grep -c "hsm_secret is not encrypted" < "$output")" -gt 0 ];then
       echo "# The hsm_secret is not encrypted"
       echo "# Record in raspiblitz.conf"
-      /home/admin/config.scripts/blitz.conf.sh set ${netprefix}clEncryptedHSM "off"
+      /home/admin/config.scripts/blitz.conf.sh set "${netprefix}clEncryptedHSM" "off"
     else
       cat $output
       echo "# The hsm_secret is encrypted"
       echo "# Record in raspiblitz.conf"
-      /home/admin/config.scripts/blitz.conf.sh set ${netprefix}clEncryptedHSM "off"
+      /home/admin/config.scripts/blitz.conf.sh set "${netprefix}clEncryptedHSM" "off"
     fi
 
     # set the lightningd service file on each active network
