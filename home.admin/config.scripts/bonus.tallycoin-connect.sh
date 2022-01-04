@@ -9,7 +9,7 @@ CONFIG_FILE=$APP_DATA_DIR/tallycoin_api.key
 RASPIBLITZ_INFO=/home/admin/raspiblitz.info
 RASPIBLITZ_CONF=/mnt/hdd/raspiblitz.conf
 SERVICE_FILE=/etc/systemd/system/tallycoin-connect.service
-TC_VERSION=1.7.0
+TC_VERSION=1.7.1
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -73,7 +73,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u $USERNAME mv tallycoin_connect{-$TC_VERSION,}
     sudo -u $USERNAME rm v$TC_VERSION.tar.gz
     cd tallycoin_connect
-    sudo -u $USERNAME cat .dockerignore | sudo -u $USERNAME xargs rm -rf
+    sudo -u $USERNAME cat .dockerignore | sudo -u $USERNAME xargs sudo -u $USERNAME rm -rf
     sudo -u $USERNAME rm .dockerignore
     sudo -u $USERNAME npm install
     if ! [ $? -eq 0 ]; then

@@ -174,7 +174,7 @@ elif [ "$1" = "set" ]; then
     redis-cli set ${keystr}${META_VALID_FLAG} "1" EX ${outdatesecs} 1>/dev/null
   fi
 
-  # also update value if part of raspiblitz.info (persiting values to survice boot)
+  # also update value if part of raspiblitz.info (persisting values to survive boot)
   persistKey=$(cat ${infoFile} | grep -c "^${keystr}=")
   if [ ${persistKey} -gt 0 ]; then
     sudo sed -i "s/^${keystr}=.*/${keystr}='${valuestr}'/g" ${infoFile}

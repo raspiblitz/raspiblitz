@@ -737,9 +737,15 @@ if [ ${#hostname} -gt 0 ]; then
     if [ ${#setnetworkname} -eq 0 ]; then
       setnetworkname=1
     fi
-    if [ "${setnetworkname}" = "1" ]; then
+    if [ "${setnetworkname}" == "1" ]; then
       echo "Setting new network hostname '$hostnameSanatized'" >> ${logFile}
-      sudo raspi-config nonint do_hostname ${hostnameSanatized} >> ${logFile} 2>&1
+      if [ "${baseimage}" == "raspios_arm64" ]; then
+         sudo raspi-config nonint do_hostname ${hostnameSanatized} >> ${logFile} 2>&1
+      else
+         hostnameCurrent=$(hostname)
+         sudo sed -i "s/${hostnameCurrent}/${hostnameSanatized}/g" /etc/hostname 2>&1
+         sudo sed -i "s/${hostnameCurrent}/${hostnameSanatized}/g" /etc/hosts 2>&1
+      fi
     else
       echo "Not setting local network hostname" >> ${logFile}
     fi

@@ -273,7 +273,7 @@ if [ "$2" = "peer-kickstart" ]; then
     echo "error='selecting node from list failed'"
     exit 1
   fi
-  echo "newpeer='${nodeAddress}"
+  echo "newpeer='${nodeAddress}'"
 
   # kick start node with 
   $bitcoincli_alias addnode "${nodeAddress}" "onetry" 1>/dev/null

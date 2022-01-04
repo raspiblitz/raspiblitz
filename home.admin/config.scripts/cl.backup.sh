@@ -252,7 +252,7 @@ if [ ${mode} = "cl-import-gui" ]; then
     exit 0
   fi
 
-  # in production now start restoring LND data based on file
+  # in production now start restoring CL data based on file
   source /mnt/hdd/raspiblitz.conf
   
   # ask security question before deleting old wallet

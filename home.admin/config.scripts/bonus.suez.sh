@@ -47,6 +47,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo -u bitcoin /home/bitcoin/.local/bin/poetry install
 
   echo "# Adding alias"
+  sudo -u admin touch /home/admin/_aliases
   echo "alias suez='cd /home/bitcoin/suez && sudo -u bitcoin /home/bitcoin/.local/bin/poetry run ./suez'"\
    | sudo tee -a /home/admin/_aliases
 

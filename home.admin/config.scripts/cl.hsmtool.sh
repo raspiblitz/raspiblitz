@@ -218,6 +218,8 @@ if [ "$1" = "new" ] || [ "$1" = "new-force" ] || [ "$1" = "seed" ] || [ "$1" = "
   elif [ "$1" = "seed" ] || [ "$1" = "seed-force" ]; then
     #TODO get seedwords from cl.backup.sh seed-import-gui [$RESULTFILE]
     seedwords="$3"
+    # get seedwords6x4
+    source <(python /home/admin/config.scripts/blitz.mnemonic.py add6x4 "${seedwords}")
     seedpassword="$4"
   fi
 

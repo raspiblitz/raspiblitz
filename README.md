@@ -120,12 +120,12 @@ In the end your RaspiBlitz should look like this:
 |Philosophy|Trust|Sovereignty|
 |Difficulty level|Easy|Medium|
 |Pros|Make Blitz accessible to everyone|You don't need to trust us, build from your own forked repository|
-|Instructions|[Download 1.7.2RC1 image](https://raspiblitz.fulmo.org/images/raspiblitz-v1.7.2rc1-2021-12-18.img.gz) and [Flash the sd card](README.md#write-the-sd-card-image-to-your-sd-card)|[Build your own sd card image](#build-the-sd-card-image)|
+|Instructions|[Download 1.7.2RC1b image](https://raspiblitz.fulmo.org/images/raspiblitz-v1.7.2rc1b-2021-12-21.img.gz) and [Flash the sd card](README.md#write-the-sd-card-image-to-your-sd-card)|[Build your own sd card image](#build-the-sd-card-image)|
 |Verify what?|[Signature file]() and [verify the Sig](FAQ.md#how-to-verify-the-sd-card-image-after-download) OR SHA-256 (below)|All of the code, don't trust, verify|
 
 If downloading the maintainer SD card image:
 * GPG 64-bit (main): 1C73 060C 7C17 6461 & (sub): AA9D D1B5 CC56 47DA
-* SHA-256: 1705fea0a028ff222b26185d2ff3afbecf92169e9da034cf538a770cc5b6078c
+* SHA-256: 64171a04f04345a1a214a84f640141770a9a11f70002d9b3803e38aa6b81ca39
 
 Which verification method should I used: Hash or Signature?
 * Signed file prove to you that the SD card image was actually built by the lead developer of the RaspiBlitz project. (Safest)
@@ -296,7 +296,7 @@ For each password please choose unique, single strings, without spaces and speci
 
 You can use this [RaspiBlitz Recovery Sheet (PDF)](https://github.com/rootzoll/raspiblitz/raw/v1.7/home.admin/assets/RaspiBlitzRecoverySheet.pdf) to write those passwords down for safe storage and also use it later on for your Seed Words.
 
-*The password A,B,C idea is based on the [RaspiBolt Guide Preparations](https://raspibolt.github.io/raspibolt/raspibolt_10_preparations.html#write-down-your-passwords) - check out for more background.*
+*The password A,B,C idea is based on the [RaspiBolt Guide Preparations](https://raspibolt.org/preparations.html#write-down-your-passwords) - check out for more background.*
 
 First, password A is requested - this is the password which will be used for SSH login and it's also set for the existing users: admin, root, bitcoin & pi.
 
@@ -612,7 +612,7 @@ For details see: https://github.com/lightningequipment/circuitbreaker/blob/maste
 
 The RaspiBlitz will automatically unlock the LND wallet upon every start.
 
-This feature is based on [https://raspibolt.github.io/raspibolt/raspibolt_6A_auto-unlock.html].
+This feature is based on [https://raspibolt.org/bonus/lightning/auto-unlock.html#bonus-guide-auto-unlock-lnd-on-startup].
 
 It can be activated under "Services" -> "Auto-unlock LND".
 We recommend that it be turned on when DynamicDNS is used.

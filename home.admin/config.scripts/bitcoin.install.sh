@@ -293,6 +293,7 @@ WantedBy=multi-user.target
   echo "# OK - the bitcoin daemon on ${CHAIN} service is now enabled"
 
   echo "# Add aliases ${prefix}bitcoin-cli, ${prefix}bitcoind, ${prefix}bitcoinlog"
+  sudo -u admin touch /home/admin/_aliases
   if [ $(alias | grep -c "alias ${prefix}bitcoin-cli") -eq 0 ];then 
     echo "\
 alias ${prefix}bitcoin-cli=\"/usr/local/bin/bitcoin-cli\
