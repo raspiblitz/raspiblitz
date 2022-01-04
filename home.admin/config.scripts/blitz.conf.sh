@@ -47,7 +47,7 @@ if [ "$1" = "set" ]; then
   # check if key needs to be added (prepare new entry)
   entryExists=$(grep -c "^${keystr}=" ${configFile})
   if [ ${entryExists} -eq 0 ]; then
-    echo "${keystr}=" | tee -a ${configFile}
+    echo "${keystr}=" | sudo tee -a ${configFile}
   fi
 
   # add valuestr quotes if not standard values
