@@ -247,7 +247,7 @@ if [ "${lightning}" == "lnd" ]; then
     echo "WALLET --> SEED" >> ${logFile} 
     /home/admin/_cache.sh set message "LND Wallet (SEED)"
     if ! pip list | grep grpc; then sudo -H python3 -m pip install grpcio==1.38.1; fi  
-    source <(/home/admin/config.scripts/lnd.initwallet.py seed mainnet "${passwordC}" "${seedWords}" ${seedPassword})
+    source <(/home/admin/config.scripts/lnd.initwallet.py seed mainnet "${passwordC}" "${seedWords}" "${seedPassword}")
     if [ "${err}" != "" ]; then
       /home/admin/config.scripts/blitz.error.sh _provision.setup.sh "lnd-wallet-seed" "lnd.initwallet.py seed returned error" "/home/admin/config.scripts/lnd.initwallet.py seed mainnet ... --> ${err} + ${errMore}" ${logFile}
       exit 12
@@ -302,7 +302,7 @@ if [ "${lightning}" == "lnd" ]; then
   if [ "${staticchannelbackup}" != "" ]; then
 
     # LND was restarted so need to unlock
-    echo "WALLET --> UNLOCK WALLET - SCAN 0"
+    echo "WALLET --> UNLOCK WALLET - SCAN 0" >> ${logFile}
     /home/admin/_cache.sh set message "LND Wallet Unlock - scan 0"
     source <(/home/admin/config.scripts/lnd.initwallet.py unlock "${chain}net" "${passwordC}" 0)
     #if [ "${err}" != "" ]; then
@@ -316,7 +316,7 @@ if [ "${lightning}" == "lnd" ]; then
     macaroonPath="/home/admin/.lnd/data/chain/${network}/${chain}net/admin.macaroon"
     source <(/home/admin/config.scripts/lnd.initwallet.py scb "${chain}net" "/home/admin/channel.backup" "${macaroonPath}")
     if [ "${err}" != "" ]; then
-      echo "lnd-wallet-seed+scb" "lnd.initwallet.py scb returned error" "/home/admin/config.scripts/lnd.initwallet.py scb mainnet ... --> ${err} + ${errMore}"
+      echo "lnd-wallet-seed+scb" "lnd.initwallet.py scb returned error" "/home/admin/config.scripts/lnd.initwallet.py scb mainnet ... --> ${err} + ${errMore}"  ${logFile}
       exit 12
     fi
   fi
@@ -325,11 +325,11 @@ if [ "${lightning}" == "lnd" ]; then
   echo "restarting lnd to start rescan" >> ${logFile}
   systemctl restart lnd >> ${logFile}
 
-  echo "WALLET --> UNLOCK WALLET - SCAN 5000"
+  echo "WALLET --> UNLOCK WALLET - SCAN 5000" >> ${logFile}
   /home/admin/_cache.sh set message "LND Wallet Unlock - scan 5000"
   source <(/home/admin/config.scripts/lnd.initwallet.py unlock "${chain}net" "${passwordC}" 5000)
   if [ "${err}" != "" ]; then
-    echo "lnd-wallet-unlock" "lnd.initwallet.py unlock returned error" "/home/admin/config.scripts/lnd.initwallet.py unlock ${chain}net ... --> ${err} + ${errMore}"
+    echo "lnd-wallet-unlock" "lnd.initwallet.py unlock returned error" "/home/admin/config.scripts/lnd.initwallet.py unlock ${chain}net ... --> ${err} + ${errMore}"  ${logFile}
     exit 13
   fi
 
