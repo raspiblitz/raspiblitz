@@ -8,13 +8,13 @@ REPO=joinmarket-webui/joinmarket-webui
 APP_DIR=webui
 RASPIBLITZ_INFO=/home/admin/raspiblitz.info
 RASPIBLITZ_CONF=/mnt/hdd/raspiblitz.conf
-WEBUI_VERSION=0.1.0
+WEBUI_VERSION=0.0.2
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
- echo "config script to switch joinmarket_webui on or off"
- echo "bonus.joinmarket-webui.sh [on|off|menu|update|update commit]"
- exit 1
+  echo "config script to switch joinmarket_webui on or off"
+  echo "bonus.joinmarket-webui.sh [on|off|menu|update|update commit]"
+  exit 1
 fi
 
 # check and load raspiblitz config to know which network is running
@@ -23,31 +23,36 @@ source $RASPIBLITZ_CONF
 
 # show info menu
 if [ "$1" = "menu" ]; then
-  # get network info
-  localip=$(hostname -I | awk '{print $1}')
-  toraddress=$(sudo cat /mnt/hdd/tor/joinmarket-webui/hostname 2>/dev/null)
-  fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
+  isInstalled=$(sudo ls $HOME_DIR 2>/dev/null | grep -c "$APP_DIR")
+  if [ ${isInstalled} -eq 1 ]; then
+    # get network info
+    localip=$(hostname -I | awk '{print $1}')
+    toraddress=$(sudo cat /mnt/hdd/tor/joinmarket-webui/hostname 2>/dev/null)
+    fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
 
-  if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
-    # Info with TOR
-    /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
-    whiptail --title " JoinMarket Web UI " --msgbox "Open in your local web browser:
+    if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
+      # Info with TOR
+      /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
+      whiptail --title " JoinMarket Web UI " --msgbox "Open in your local web browser:
 http://${localip}:7500\n
 https://${localip}:7501 with Fingerprint:
 ${fingerprint}\n
 Hidden Service address for TOR Browser (see LCD for QR):\n${toraddress}
 " 16 67
-    /home/admin/config.scripts/blitz.display.sh hide
-  else
-    # Info without TOR
-    whiptail --title " JoinMarket Web UI " --msgbox "Open in your local web browser & accept self-signed cert:
+      /home/admin/config.scripts/blitz.display.sh hide
+    else
+      # Info without TOR
+      whiptail --title " JoinMarket Web UI " --msgbox "Open in your local web browser & accept self-signed cert:
 http://${localip}:7500\n
 https://${localip}:7501 with Fingerprint:
 ${fingerprint}\n
 Activate TOR to access the web interface from outside your local network.
 " 15 57
+    fi
+    echo "please wait ..."
+  else
+    echo "*** JOINMARKET WEB UI NOT INSTALLED ***"
   fi
-  echo "please wait ..."
   exit 0
 fi
 
@@ -65,10 +70,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     sudo -u $USERNAME wget https://github.com/$REPO/archive/refs/tags/v$WEBUI_VERSION.tar.gz
     sudo -u $USERNAME tar -xzf v$WEBUI_VERSION.tar.gz
-    sudo -u $USERNAME mv joinmarket-webui-$WEBUI_VERSION $APP_DIR
     sudo -u $USERNAME rm v$WEBUI_VERSION.tar.gz
+    sudo -u $USERNAME mv joinmarket-webui-$WEBUI_VERSION $APP_DIR
 
     cd $APP_DIR
+    sudo -u $USERNAME rm -rf docker
     sudo -u $USERNAME npm install
     if ! [ $? -eq 0 ]; then
         echo "FAIL - npm install did not run correctly, aborting"
@@ -177,21 +183,22 @@ if [ "$1" = "update" ]; then
       sudo -u $USERNAME rm -rf master.tar.gz
       sudo -u $USERNAME mv joinmarket-webui-master $APP_DIR-update
     else
-      version=$(curl --silent "https://api.github.com/repos/$REPO/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+      version=$(curl --silent "https://api.github.com/repos/$REPO/releases/latest" | grep '"tag_name":' | sed -E 's/.*"v([^"]+)".*/\1/')
       cd $APP_DIR
       current=$(node -p "require('./package.json').version")
       cd ..
-      if [ "v$current" = "$version" ]; then
+      if [ "$current" = "$version" ]; then
         echo "*** JOINMARKET WEB UI IS ALREADY UPDATED TO LATEST VERSION ***"
         exit 0
       fi
-      sudo -u $USERNAME wget https://github.com/$REPO/archive/refs/tags/$version.tar.gz
-      sudo -u $USERNAME tar -xzf $version.tar.gz
-      sudo -u $USERNAME rm $version.tar.gz
+      sudo -u $USERNAME wget https://github.com/$REPO/archive/refs/tags/v$version.tar.gz
+      sudo -u $USERNAME tar -xzf v$version.tar.gz
+      sudo -u $USERNAME rm v$version.tar.gz
       sudo -u $USERNAME mv joinmarket-webui-$version $APP_DIR-update
     fi
 
     cd $APP_DIR-update
+    sudo -u $USERNAME rm -rf docker
     sudo -u $USERNAME npm install
     if ! [ $? -eq 0 ]; then
       echo "FAIL - npm install did not run correctly, aborting"
