@@ -7,6 +7,8 @@ source /mnt/hdd/raspiblitz.conf
 
 source <(/home/admin/config.scripts/network.aliases.sh getvars lnd $1)
 
+if ! pip list | grep grpc; then sudo -H python3 -m pip install grpcio==1.38.1; fi
+
 askLNDbackupCopy()
 {
   whiptail --title "LND Data Backup" --yes-button "Backup" --no-button "Skip" --yesno "
@@ -187,7 +189,6 @@ or having a complete LND rescue-backup from your old node.
     if [ "${seedWords}" != "" ]; then
       echo "WALLET --> SEED"
       /home/admin/_cache.sh set message "LND Wallet (SEED)"
-      if ! pip list | grep grpc; then sudo -H python3 -m pip install grpcio==1.38.1; fi  
       source <(/home/admin/config.scripts/lnd.initwallet.py seed mainnet ${passwordC} "${seedWords}" ${seedPassword})
       if [ "${err}" != "" ]; then
       echo "lnd-wallet-seed" "lnd.initwallet.py seed returned error" "/home/admin/config.scripts/lnd.initwallet.py seed mainnet ... --> ${err} + ${errMore}"
@@ -342,8 +343,8 @@ case $CHOICE in
     
     # if user canceled the upload
     if [ "${staticchannelbackup}" == "" ]; then
-        # signal cancel to the calling script by exit code (5 = exit on scb)
-        exit 5
+      # signal cancel to the calling script by exit code (5 = exit on scb)
+      exit 5
     fi
     
     echo
@@ -355,17 +356,35 @@ case $CHOICE in
 
     # WALLET --> SEED + SCB 
     if [ "${staticchannelbackup}" != "" ]; then
+
+      echo "WALLET --> UNLOCK WALLET - SCAN 0"
+      /home/admin/_cache.sh set message "LND Wallet Unlock - scan 0"
+      source <(/home/admin/config.scripts/lnd.initwallet.py unlock mainnet "${passwordC}" 0)
+      if [ "${err}" != "" ]; then
+        echo "lnd-wallet-unlock" "lnd.initwallet.py unlock returned error" "/home/admin/config.scripts/lnd.initwallet.py unlock mainnet ... --> ${err} + ${errMore}"
+        exit 11
+      fi
+
       echo "WALLET --> SEED + SCB "
       /home/admin/_cache.sh set message "LND Wallet (SEED & SCB)"
-      if ! pip list | grep grpc; then sudo -H python3 -m pip install grpcio==1.38.1; fi
-      source <(/home/admin/config.scripts/lnd.initwallet.py scb mainnet "${staticchannelbackup}")
+      
+      macaroonPath="/home/admin/.lnd/data/chain/${network}/${chain}net/admin.macaroon"
+      source <(/home/admin/config.scripts/lnd.initwallet.py scb mainnet "${staticchannelbackup}" "${macaroonPath}")
       if [ "${err}" != "" ]; then
-      echo "lnd-wallet-seed+scb" "lnd.initwallet.py scb returned error" "/home/admin/config.scripts/lnd.initwallet.py scb mainnet ... --> ${err} + ${errMore}"
-      exit 11
+        echo "lnd-wallet-seed+scb" "lnd.initwallet.py scb returned error" "/home/admin/config.scripts/lnd.initwallet.py scb mainnet ... --> ${err} + ${errMore}"
+        exit 12
       fi
     fi
 
     syncAndCheckLND
+
+    echo "WALLET --> UNLOCK WALLET - SCAN 5000"
+    /home/admin/_cache.sh set message "LND Wallet Unlock - scan 5000"
+    source <(/home/admin/config.scripts/lnd.initwallet.py unlock mainnet "${passwordC}" 5000)
+    if [ "${err}" != "" ]; then
+      echo "lnd-wallet-unlock" "lnd.initwallet.py unlock returned error" "/home/admin/config.scripts/lnd.initwallet.py unlock mainnet ... --> ${err} + ${errMore}"
+      exit 13
+    fi
     
     echo
     echo "Press ENTER to return to main menu."
@@ -378,6 +397,14 @@ case $CHOICE in
   ONLYSEED)
     restoreFromSeed
     
+    echo "WALLET --> UNLOCK WALLET - SCAN 5000"
+    /home/admin/_cache.sh set message "LND Wallet Unlock - scan 5000"
+    source <(/home/admin/config.scripts/lnd.initwallet.py unlock mainnet "${passwordC}" 5000)
+    if [ "${err}" != "" ]; then
+      echo "lnd-wallet-unlock" "lnd.initwallet.py unlock returned error" "/home/admin/config.scripts/lnd.initwallet.py unlock mainnet ... --> ${err} + ${errMore}"
+      exit 13
+    fi
+
     echo "Press ENTER to return to main menu."
     read key
     # go back to main menu (and show)
