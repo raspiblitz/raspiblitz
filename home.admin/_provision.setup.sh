@@ -252,7 +252,10 @@ if [ "${lightning}" == "lnd" ]; then
       /home/admin/config.scripts/blitz.error.sh _provision.setup.sh "lnd-wallet-seed" "lnd.initwallet.py seed returned error" "/home/admin/config.scripts/lnd.initwallet.py seed mainnet ... --> ${err} + ${errMore}" ${logFile}
       exit 12
     fi
-
+    
+    echo "Rescanning addresses takes a long time" >> ${logFile}
+    echo "use the RESCAN option in the REPAIR-LND menu after LND is synced or 'lncli unlock ---recovery_window 5000'" >> ${logFile}
+  
   # WALLET --> NEW
   else
 
@@ -334,17 +337,8 @@ if [ "${lightning}" == "lnd" ]; then
     fi
   fi
 
-  # restart and unlock with a high recovery_window
-  echo "restarting lnd to start rescan" >> ${logFile}
-  systemctl restart lnd >> ${logFile}
-
-  echo "WALLET --> UNLOCK WALLET - SCAN 5000" >> ${logFile}
-  /home/admin/_cache.sh set message "LND Wallet Unlock - scan 5000"
-  source <(/home/admin/config.scripts/lnd.initwallet.py unlock "${chain}net" "${passwordC}" 5000)
-  if [ "${err}" != "" ]; then
-    echo "lnd-wallet-unlock" "lnd.initwallet.py unlock returned error" "/home/admin/config.scripts/lnd.initwallet.py unlock ${chain}net ... --> ${err} + ${errMore}"  ${logFile}
-    exit 13
-  fi
+  echo "Rescanning addresses takes a long time" >> ${logFile}
+  echo "use the RESCAN option in the REPAIR-LND menu after LND is synced or 'lncli unlock ---recovery_window 5000'" >> ${logFile}
 
   # stop lnd for the rest of the provision process
   echo "stopping lnd for the rest provision again (will start on next boot)" >> ${logFile}

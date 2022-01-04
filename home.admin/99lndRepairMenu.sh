@@ -43,6 +43,8 @@ Download LND Data Backup now?
 
 getpasswordC() # from dialogPasswords.sh
 {
+  # temp file for password results
+  _temp="/var/cache/raspiblitz/temp/.temp.tmp"
   sudo /home/admin/config.scripts/blitz.setpassword.sh x "PASSWORD C - Lightning Wallet Password" $_temp
   passwordC=$(sudo cat $_temp)
   sudo rm $_temp
@@ -265,7 +267,7 @@ function restoreSCB()
     source <(/home/admin/config.scripts/lnd.initwallet.py unlock ${chain}net "${passwordC}" 5000)
     if [ "${err}" != "" ]; then
       echo "lnd-wallet-unlock" "lnd.initwallet.py unlock returned error" "/home/admin/config.scripts/lnd.initwallet.py unlock ${chain}net ... --> ${err} + ${errMore}"
-      exit 13
+      exit 50
     fi
 }
 
@@ -283,6 +285,7 @@ OPTIONS+=(LNDRESCUE "Restore from a rescue file")
 OPTIONS+=(SEED+SCB "Restore from a seed and channel.backup")
 OPTIONS+=(RETRYSCB "Retry closing channels with the channel.backup")
 OPTIONS+=(ONLYSEED "Restore from a seed (onchain funds only)")
+OPTIONS+=(RESCAN "Rescan the blockchain to recover onchain funds")
 
 CHOICE_HEIGHT=$(("${#OPTIONS[@]}/2+1"))
 HEIGHT=$((CHOICE_HEIGHT+6))
@@ -432,10 +435,10 @@ case $CHOICE in
     
     echo "WALLET --> UNLOCK WALLET - SCAN 5000"
     /home/admin/_cache.sh set message "LND Wallet Unlock - scan 5000"
-    source <(/home/admin/config.scripts/lnd.initwallet.py unlock ${chain}net "${passwordC}" 5000)
+    source <(/home/admin/config.scripts/lnd.initwallet.py unlock "${chain}net" "${passwordC}" 5000)
     if [ "${err}" != "" ]; then
       echo "lnd-wallet-unlock" "lnd.initwallet.py unlock returned error" "/home/admin/config.scripts/lnd.initwallet.py unlock ${chain}net ... --> ${err} + ${errMore}"
-      exit 13
+      exit 50
     fi
 
     echo "Press ENTER to return to main menu."
@@ -443,6 +446,47 @@ case $CHOICE in
     # go back to main menu (and show)
     /home/admin/00raspiblitz.sh
     exit 0
+    ;;
+
+  RESCAN)
+    clear
+    echo "Restart lnd to lock the wallet ..."
+    echo "If this takes very long LND might be already rescanning."
+    echo "Can use 'sudo pkill lnd' to shut down ungracefully."
+    sudo systemctl restart lnd
+
+    # from blitz.conf.sh
+    configFile="/home/admin/raspiblitz.info"
+    keystr="fundRecovery"
+    valuestr="1"
+    # check if key needs to be added (prepare new entry)
+    entryExists=$(grep -c "^${keystr}=" ${configFile})
+    if [ ${entryExists} -eq 0 ]; then
+      echo "${keystr}=" | tee -a ${configFile}
+    fi
+    # add valuestr quotes if not standard values
+    if [ "${valuestr}" != "on" ] && [ "${valuestr}" != "off" ] && [ "${valuestr}" != "1" ] && [ "${valuestr}" != "0" ]; then
+      valuestr="'${valuestr}'"
+    fi
+    # set value (sed needs sudo to operate when user is not root)
+    sudo sed -i "s/^${keystr}=.*/${keystr}=${valuestr}/g" ${configFile}
+
+    /home/admin/config.scripts/lnd.unlock.sh unlock
+
+    # switch rescan off for the next unlock
+    valuestr="0"
+    sudo sed -i "s/^${keystr}=.*/${keystr}=${valuestr}/g" ${configFile}
+
+    echo
+    echo "To show the scanning progress in the background will follow the lnd.log with:" 
+    echo "'sudo tail -n 30 -f /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log'"
+    echo
+    echo "Press ENTER to continue"
+    echo "use CTRL+C any time to exit .. then use the command 'raspiblitz' to return to the menu"
+    echo "(the rescan will continue in the background)"
+    echo "#######################################################################################"
+    read key
+    sudo tail -n 30 -f /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log    
     ;;
 
 esac
