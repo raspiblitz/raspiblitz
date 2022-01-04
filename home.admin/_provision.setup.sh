@@ -26,6 +26,7 @@ source ${configFile}
 
 # log header
 echo "" > ${logFile}
+sudo chmod 640 ${logFile}
 echo "###################################" >> ${logFile}
 echo "# _provision.setup.sh" >> ${logFile}
 echo "###################################" >> ${logFile}

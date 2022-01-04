@@ -30,6 +30,7 @@ setupFile="/var/cache/raspiblitz/temp/raspiblitz.setup"
 # Init boostrap log file
 echo "Writing logs to: ${logFile}"
 echo "" > $logFile
+sudo chmod 640 ${logFile}
 echo "***********************************************" >> $logFile
 echo "Running RaspiBlitz Bootstrap ${codeVersion}" >> $logFile
 date >> $logFile

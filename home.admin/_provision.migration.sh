@@ -18,6 +18,7 @@ source /var/cache/raspiblitz/temp/raspiblitz.setup
 
 # log header
 echo "" > ${logFile}
+sudo chmod 640 ${logFile}
 echo "###################################" >> ${logFile}
 echo "# _provision.migration.sh" >> ${logFile}
 echo "###################################" >> ${logFile}
