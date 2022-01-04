@@ -572,7 +572,6 @@ if [ ${isMounted} -eq 0 ]; then
 
   # load fresh setup data
   echo "# Sourcing ${setupFile} " >> ${logFile}
-  cat ${setupFile} >> ${logFile}
   source ${setupFile}
 
   # make sure basic info is in raspiblitz.info
