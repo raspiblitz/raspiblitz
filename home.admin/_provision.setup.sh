@@ -282,11 +282,16 @@ if [ "${lightning}" == "lnd" ]; then
   /home/admin/_cache.sh set message "LND Credentials"
 
   # check if macaroon exists now - if not fail
-  macaroonExists=$(sudo -u bitcoin ls -la /home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon 2>/dev/null | grep -c admin.macaroon)
-  if [ ${macaroonExists} -eq 0 ]; then
+  attempt=0
+  while [ $(sudo -u bitcoin ls -la /home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon 2>/dev/null | grep -c admin.macaroon) -eq 0 ]; do
+    echo "Waiting 2 mins for LND to create macaroons ... (${attempt}0s)" >> ${logFile}
+    sleep 10
+    attempt=$((attempt+1))
+    if [ $attempt -eq 12 ];then
       /home/admin/config.scripts/blitz.error.sh _provision.setup.sh "lnd-no-macaroons" "lnd did not create macaroons" "/home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon --> missing" ${logFile}
       exit 14
-  fi
+    fi
+  done
 
   # now sync macaroons & TLS to other users
   /home/admin/config.scripts/lnd.credentials.sh sync >> ${logFile}
@@ -320,7 +325,7 @@ if [ "${lightning}" == "lnd" ]; then
     source <(/home/admin/config.scripts/lnd.initwallet.py scb "${chain}net" "/home/admin/channel.backup" "${macaroonPath}")
     if [ "${err}" != "" ]; then
       echo "lnd-wallet-seed+scb" "lnd.initwallet.py scb returned error" "/home/admin/config.scripts/lnd.initwallet.py scb mainnet ... --> ${err} + ${errMore}"  ${logFile}
-      if [ ${errMore} = "server is still in the process of starting" ]; then
+      if [ "${errMore}" = "server is still in the process of starting" ]; then
         echo "The SCB recovery is not possible now - use the RETRYSCB option the REPAIR-LND menu after LND is synced."  >> ${logFile}
         echo "Can repeat the SCB recovery until all peers have force closed the channels to this node." >> ${logFile}
       else

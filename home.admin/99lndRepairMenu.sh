@@ -119,11 +119,16 @@ syncAndCheckLND() # from _provision.setup.sh
   /home/admin/_cache.sh set message "LND Credentials"
 
   # check if macaroon exists now - if not fail
-  macaroonExists=$(sudo -u bitcoin ls -la /home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon 2>/dev/null | grep -c admin.macaroon)
-  if [ ${macaroonExists} -eq 0 ]; then
-      echo "lnd-no-macaroons" "lnd did not create macaroons" "/home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon --> missing"
+  attempt=0
+  while [ $(sudo -u bitcoin ls -la /home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon 2>/dev/null | grep -c admin.macaroon) -eq 0 ]; do
+    echo "Waiting 2 mins for LND to create macaroons ... (${attempt}0s)"
+    sleep 10
+    attempt=$((attempt+1))
+    if [ $attempt -eq 12 ];then
+      /home/admin/config.scripts/blitz.error.sh _provision.setup.sh "lnd-no-macaroons" "lnd did not create macaroons" "/home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon --> missing"
       exit 14
-  fi
+    fi
+  done
 
   # now sync macaroons & TLS to other users
   sudo /home/admin/config.scripts/lnd.credentials.sh sync
