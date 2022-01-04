@@ -463,7 +463,7 @@ echo -e "\n*** INSTALLING BlitzPy Version: ${blitzpy_version} ***"
 sudo -H /usr/bin/python -m pip install "/home/admin/raspiblitz/home.admin/BlitzPy/dist/${blitzpy_wheel}" >/dev/null 2>&1
 
 # make sure lndlibs are patched for compatibility for both Python2 and Python3
-file="/home/admin/config.scripts/lndlibs/rpc_pb2_grpc.py"
+file="/home/admin/config.scripts/lndlibs/lightning_pb2_grpc.py"
 ! grep -Fxq "from __future__ import absolute_import" "${file}" && sed -i -E '1 a from __future__ import absolute_import' "${file}"
 ! grep -Eq "^from . import.*" "${file}" && sed -i -E 's/^(import.*_pb2)/from . \1/' "${file}"
 
