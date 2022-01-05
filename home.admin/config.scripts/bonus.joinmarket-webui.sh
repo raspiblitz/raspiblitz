@@ -60,6 +60,13 @@ fi
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   isInstalled=$(sudo ls $HOME_DIR 2>/dev/null | grep -c "$APP_DIR")
   if [ ${isInstalled} -eq 0 ]; then
+    # check if joinmarket is installed
+    if [ -f "/home/joinmarket/.joinmarket/joinamrket.cfg" ]; then
+      echo "# JoinMarket is already installed and configured."
+    else
+      sudo /home/admin/config.scripts/bonus.joinmarket.sh on
+    fi
+
     echo "*** INSTALL JOINMARKET WEB UI ***"
 
     # install nodeJS
