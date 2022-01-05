@@ -124,7 +124,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       echo "AllowOutboundLocalhost 1" | sudo tee -a /etc/tor/torsocks.conf
       sudo systemctl reload tor@default
     fi
-
     # joinin.conf settings
     sudo -u joinmarket touch /home/joinmarket/joinin.conf
     # add default Tor value to joinin.conf if needed
@@ -135,6 +134,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     if grep -Eq "^runBehindTor=on" /mnt/hdd/raspiblitz.conf; then
       sudo -u joinmarket sed -i "s/^runBehindTor=.*/runBehindTor=on/g" /home/joinmarket/joinin.conf
     fi
+
     echo 
     echo "##########"
     echo "# Extras #"
@@ -167,10 +167,11 @@ if [ -z \"\$TMUX\" ]; then
 fi
 "   | sudo -u joinmarket tee -a /home/joinmarket/.bashrc
 
-    echo "######################"
-    echo "# Install JoinMarket #"
-    echo "######################"
-    sudo -u joinmarket /home/joinmarket/install.joinmarket.sh install
+    echo "##############################################"
+    echo "# Install JoinMarket and configure JoininBox #"
+    echo "##############################################"
+    echo
+    sudo -u joinmarket /home/joinmarket/start.joininbox.sh
 
   else
     echo "JoinMarket is already installed"
