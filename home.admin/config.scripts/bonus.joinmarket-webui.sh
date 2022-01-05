@@ -154,7 +154,7 @@ WantedBy=multi-user.target
     # Hidden Service for joinmarket-webui if Tor is active
     if [ "${runBehindTor}" = "on" ]; then
       # make sure to keep in sync with internet.tor.sh script
-      /home/admin/config.scripts/internet.hiddenservice.sh joinmarket-webui 80 7502 443 7503
+      /home/admin/config.scripts/tor.onion-service.sh joinmarket-webui 80 7502 443 7503
     fi
     source $RASPIBLITZ_INFO
     if [ "${state}" == "ready" ]; then
