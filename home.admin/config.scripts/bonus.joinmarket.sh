@@ -5,7 +5,8 @@
 # https://github.com/openoms/bitcoin-tutorials/tree/master/joinmarket
 # https://github.com/openoms/joininbox
 
-JBVERSION="v0.6.5" # with JoinMarket v0.9.4
+# JBVERSION="v0.6.5" # with JoinMarket v0.9.4
+JBVERSION="b0efe45" # dev
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -14,18 +15,6 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "Installs JoininBox $JBVERSION"
  exit 1
 fi
-
-PGPsigner="openoms"
-PGPpubkeyLink="https://github.com/openoms.gpg"
-PGPpubkeyFingerprint="13C688DB5B9C745DE4D2E4545BFB77609B081B65"
-
-# check if sudo
-if [ "$EUID" -ne 0 ]
-  then echo "Please run as root (with sudo)"
-  exit
-fi
-
-source /mnt/hdd/raspiblitz.conf
 
 # show info menu
 if [ "$1" = "menu" ]; then
@@ -37,6 +26,18 @@ https://github.com/openoms/bitcoin-tutorials/blob/master/joinmarket/README.md
 " 11 81
   exit 0
 fi
+
+# check if sudo
+if [ "$EUID" -ne 0 ]
+  then echo "Please run as root (with sudo)"
+  exit
+fi
+
+PGPsigner="openoms"
+PGPpubkeyLink="https://github.com/openoms.gpg"
+PGPpubkeyFingerprint="13C688DB5B9C745DE4D2E4545BFB77609B081B65"
+
+source /mnt/hdd/raspiblitz.conf
 
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then

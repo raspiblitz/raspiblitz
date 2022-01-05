@@ -268,7 +268,7 @@ case $CHOICE in
             /home/admin/config.scripts/bonus.specter.sh menu
             ;;
         JM)
-            sudo /home/admin/config.scripts/bonus.joinmarket.sh menu
+            /home/admin/config.scripts/bonus.joinmarket.sh menu
             ;;
         FARADAY)
             sudo /home/admin/config.scripts/bonus.faraday.sh menu
