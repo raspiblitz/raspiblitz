@@ -142,16 +142,16 @@ elif [ "$1" = backup-compact ];then
   dbPath="/home/bitcoin/.lightning/${CLNETWORK}/lightningd.sqlite3"
   backupPath="/home/bitcoin/${netprefix}lightningd.sqlite3.backup"
 
-  if sudo ls "${dbPath}"; then
+  if sudo ls "${dbPath}" >/dev/null; then
     dbSize=$(sudo du -m "${dbPath}" | awk '{print $1}')
     echo "$dbSize MB $dbPath"
-    backupSize=$(sudo du -m ${backupPath} | awk '{print $1}')
+    backupSize=$(sudo du -m "${backupPath}" | awk '{print $1}')
     echo "$backupSize MB $backupPath"
     if [ "$backupSize" -gt $((dbSize+200)) ] ; then
       echo "# The backup is 200MB+ larger than the db, running '${netprefix}lightning-cli backup-compact' ..."
       $lightningcli_alias backup-compact
     else
-      echo "The backup is not significantly larger than the db, there's no need to compact." 
+      echo "The backup is not significantly larger than the db, there is no need to compact." 
     fi
   else
     echo "# No ${dbPath} is present"
