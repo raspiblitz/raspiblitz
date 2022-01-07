@@ -1506,7 +1506,7 @@ if [ "$1" = "swap" ]; then
     fi
 
     >&2 echo "# Creating SWAP file .."
-    sudo dd if=/dev/zero of=$externalSwapPath count=2048 bs=1MiB 1>/dev/null
+    sudo dd if=/dev/zero of=$externalSwapPath count=4096 bs=1MiB 1>/dev/null
     sudo chmod 0600 $externalSwapPath 1>/dev/null
 
     >&2 echo "# Activating new SWAP"
