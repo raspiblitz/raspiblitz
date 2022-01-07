@@ -5,7 +5,8 @@
 # https://github.com/openoms/bitcoin-tutorials/tree/master/joinmarket
 # https://github.com/openoms/joininbox
 
-JBVERSION="v0.6.5" # with JoinMarket v0.9.4
+# JBVERSION="v0.6.5" # with JoinMarket v0.9.4
+JBVERSION="b0efe45" # dev
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -14,18 +15,6 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "Installs JoininBox $JBVERSION"
  exit 1
 fi
-
-PGPsigner="openoms"
-PGPpubkeyLink="https://github.com/openoms.gpg"
-PGPpubkeyFingerprint="13C688DB5B9C745DE4D2E4545BFB77609B081B65"
-
-# check if sudo
-if [ "$EUID" -ne 0 ]
-  then echo "Please run as root (with sudo)"
-  exit
-fi
-
-source /mnt/hdd/raspiblitz.conf
 
 # show info menu
 if [ "$1" = "menu" ]; then
@@ -37,6 +26,18 @@ https://github.com/openoms/bitcoin-tutorials/blob/master/joinmarket/README.md
 " 11 81
   exit 0
 fi
+
+# check if sudo
+if [ "$EUID" -ne 0 ]
+  then echo "Please run as root (with sudo)"
+  exit
+fi
+
+PGPsigner="openoms"
+PGPpubkeyLink="https://github.com/openoms.gpg"
+PGPpubkeyFingerprint="13C688DB5B9C745DE4D2E4545BFB77609B081B65"
+
+source /mnt/hdd/raspiblitz.conf
 
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
@@ -123,7 +124,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       echo "AllowOutboundLocalhost 1" | sudo tee -a /etc/tor/torsocks.conf
       sudo systemctl reload tor@default
     fi
-
     # joinin.conf settings
     sudo -u joinmarket touch /home/joinmarket/joinin.conf
     # add default Tor value to joinin.conf if needed
@@ -134,6 +134,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     if grep -Eq "^runBehindTor=on" /mnt/hdd/raspiblitz.conf; then
       sudo -u joinmarket sed -i "s/^runBehindTor=.*/runBehindTor=on/g" /home/joinmarket/joinin.conf
     fi
+
     echo 
     echo "##########"
     echo "# Extras #"
@@ -166,10 +167,11 @@ if [ -z \"\$TMUX\" ]; then
 fi
 "   | sudo -u joinmarket tee -a /home/joinmarket/.bashrc
 
-    echo "######################"
-    echo "# Install JoinMarket #"
-    echo "######################"
-    sudo -u joinmarket /home/joinmarket/install.joinmarket.sh install
+    echo "##############################################"
+    echo "# Install JoinMarket and configure JoininBox #"
+    echo "##############################################"
+    echo
+    sudo -u joinmarket /home/joinmarket/start.joininbox.sh
 
   else
     echo "JoinMarket is already installed"
