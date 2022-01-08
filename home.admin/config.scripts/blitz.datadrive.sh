@@ -1494,16 +1494,16 @@ if [ "$1" = "swap" ]; then
       >&2 echo "# Rewrite external SWAP config for BTRFS setup"
       sudo sed -i "s/^#CONF_SWAPFILE=/CONF_SWAPFILE=/g" /etc/dphys-swapfile  
       sudo sed -i "s/^CONF_SWAPFILE=.*/CONF_SWAPFILE=\/mnt\/temp\/swapfile/g" /etc/dphys-swapfile  
-      sudo sed -i "s/^CONF_SWAPSIZE=/#CONF_SWAPSIZE=/g" /etc/dphys-swapfile  
-    
+
     else
 
       >&2 echo "# Rewrite external SWAP config for EXT4 setup"
       sudo sed -i "s/^#CONF_SWAPFILE=/CONF_SWAPFILE=/g" /etc/dphys-swapfile  
       sudo sed -i "s/^CONF_SWAPFILE=.*/CONF_SWAPFILE=\/mnt\/hdd\/swapfile/g" /etc/dphys-swapfile  
-      sudo sed -i "s/^CONF_SWAPSIZE=/#CONF_SWAPSIZE=/g" /etc/dphys-swapfile  
 
     fi
+    sudo sed -i "s/^CONF_SWAPSIZE=/#CONF_SWAPSIZE=/g" /etc/dphys-swapfile 
+    sudo sed -i "s/^#CONF_MAXSWAP=.*/CONF_MAXSWAP=4096/g" /etc/dphys-swapfile
 
     >&2 echo "# Creating SWAP file .."
     sudo dd if=/dev/zero of=$externalSwapPath count=4096 bs=1MiB 1>/dev/null
