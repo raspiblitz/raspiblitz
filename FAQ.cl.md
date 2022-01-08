@@ -312,7 +312,7 @@ https://github.com/ZmnSCPxj/clboss#clboss-status
 ### Feeadjuster
 
 * Install:
-`config.scripts/cl-plugin.feedadjuster.sh on`
+`config.scripts/cl-plugin.feeadjuster.sh on`
 
 * to set the default fees add to the C-lightning `config` file:
   ```
