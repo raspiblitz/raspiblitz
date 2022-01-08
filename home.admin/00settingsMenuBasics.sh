@@ -31,7 +31,7 @@ if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ]; then
   clNode="on"
 fi
 
-echo "map nextcloudbackup to on/off"
+echo "# map nextcloudbackup to on/off"
 NextcloudBackup="off"
 if [ $nextcloudBackupServer ] && [ $nextcloudBackupUser ] && [ $nextcloudBackupPassword ]; then NextcloudBackup="on"; fi
 
@@ -77,13 +77,6 @@ else
   autoPilot="off"
 fi
 
-echo "# map keysend to on/off"
-keysend="on"
-source <(sudo /home/admin/config.scripts/lnd.keysend.sh status)
-if [ ${keysendOn} -eq 0 ]; then
-  keysend="off"
-fi
-
 echo "# map clboss to on/off"
 clbossMenu='off'
 if [ "${clboss}" == "on" ]; then
@@ -100,6 +93,13 @@ echo "# map clAutoUnlock to on/off"
 clAutoUnlockMenu='off'
 if [ "${clAutoUnlock}" == "on" ]; then
   clAutoUnlockMenu='on'
+fi
+
+echo "# map keysend to on/off (may take time)"
+keysend="on"
+source <(sudo /home/admin/config.scripts/lnd.keysend.sh status)
+if [ ${keysendOn} -eq 0 ]; then
+  keysend="off"
 fi
 
 # show select dialog
