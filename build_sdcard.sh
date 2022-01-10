@@ -1,4 +1,6 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
+
+#set -x
 
 #########################################################################
 # Build your SD card image based on: 2021-10-30-raspios-bullseye-arm64.zip
@@ -9,7 +11,137 @@
 # setup fresh SD card with image above - login per SSH and run this script:
 ##########################################################################
 
+defaultRepo="rootzoll"
 defaultBranch="v1.7"
+
+me="${0##/*}"
+
+nocolor="\033[0m"
+red="\033[31m"
+## default user message
+error_msg(){ printf %s"${red}${me}: ${1}${nocolor}\n"; exit 1; }
+
+## usage as a function be be called whenever there is a huge mistake on the options
+usage(){
+  printf %s"${me} [--option <argument>]
+
+Options:
+  -i, --interaction [0|1]                  interaction before proceeding with exection (default: 0)
+  -f, --fatpack [0|1]                      fatpack mode (default: 0)
+  -u, --github-user [rootzoll|other]       github user to be checked from the repo (default: rootzoll)
+  -b, --branch [v1.7|v1.8]                 branch to be built on (default: v1.7)
+  -d, --display [lcd|hdmi|headless]        display class (default: lcd)
+  -t, --tweak-boot-drive [0|1]             tweak boot drives (default: 1)
+  -w, --wifi-region [US|GB|other]          wifi iso code (default: US)
+
+Notes:
+  all options, long and short accept --opt=value mode also
+  [0|1] can also be referenced as [false|true]
+"
+  exit 1
+}
+[ -z "${1}" ] && usage
+
+## assign_value variable_name "${opt}"
+## it strips the dashes and assign the clean value to the variable
+## assign_value status --on IS status=on
+## variable_name is the name you want it to have
+## $opt being options with single or double dashes that don't require arguments
+assign_value(){
+  case "${2}" in
+    --*) value="${2#--}";;
+    -*) value="${2#-}";;
+    *) value="${2}"
+  esac
+  ## Escaping quotes is needed because else if will fail if the argument is quoted
+  # shellcheck disable=SC2140
+  eval "${1}"="\"${value}\""
+}
+
+## get_arg variable_name "${opt}" "${arg}"
+## get_arg service --service ssh
+## variable_name is the name you want it to have
+## $opt being options with single or double dashes
+## $arg is requiring and argument, else it fails
+## assign_value "${1}" "${3}" means it is assining the argument ($3) to the variable_name ($1)
+get_arg(){
+  case "${3}" in
+    ""|-*) error_msg "Option '${2}' requires an argument.";;
+  esac
+  assign_value "${1}" "${3}"
+}
+
+## hacky getopts
+## 1. if the option requires argument, and the option is preceeded by single or double dash and it
+##    can be it can be specified with '-s=ssh' or '-s ssh' or '--service=ssh' or '--service ssh'
+##    use: get_arg variable_name "${opt}" "${arg}"
+## 2. if a bunch of options that does different things are to be assigned to the same variable
+##    and the option is preceeded by single or double dash use: assign_value variable_name "${opt}"
+##    as this option does not require argument, specifu $shift_n=1
+## 3. if the option does not start with dash and does not require argument, assign to command manually.
+while :; do
+  case "${1}" in
+    -*=*) opt="${1%=*}"; arg="${1#*=}"; shift_n=1;;
+    -*) opt="${1}"; arg="${2}"; shift_n=2;;
+    *) opt="${1}"; arg="${2}"; shift_n=1;;
+  esac
+  case "${opt}" in
+    -i|-i=*|--interaction|--interaction=*) get_arg interaction "${opt}" "${arg}";;
+    -f|-f=*|--fatpack|--fatpack=*) get_arg fatpack "${opt}" "${arg}";;
+    -u|-u=*|--github-user|--github-user=*) get_arg github_user "${opt}" "${arg}";;
+    -b|-b=*|--branch|--branch=*) get_arg branch "${opt}" "${arg}";;
+    -d|-d=*|--display|--display=*) get_arg display "${opt}" "${arg}";;
+    -t|-t=*|--tweak-boot-drive|--tweak-boot-drive=*) get_arg tweak_boot_drive "${opt}" "${arg}";;
+    -w|-w=*|--wifi-region|--wifi-region=*) get_arg wifi_region "${opt}" "${arg}";;
+    "") break;;
+    *) error_msg "Invalid option: ${opt}";;
+  esac
+  shift "${shift_n}"
+done
+
+## if there is a limited option, check if the value of variable is within this range
+## $ range_argument variable_name possible_value_1 possible_value_2
+range_argument(){
+  name="${1}"
+  eval var='$'"${1}"
+  shift
+  if [ -n "${var:-}" ]; then
+    success=0
+    for tests in "${@}"; do
+      [ "${var}" = "${tests}" ] && success=1
+    done
+    [ ${success} -ne 1 ] && error_msg "Option '--${name}' cannot be '${var}'! It can only be: ${*}."
+  fi
+}
+
+## use default values for variables if empty
+: "${interaction:=false}"
+range_argument interaction "0" "1" "false" "true"
+
+: "${fatpack:=false}"
+range_argument fatpack "0" "1" "false" "true"
+
+: "${github_user:=rootzoll}"
+curl -s "https://api.github.com/repos/${github_user}/raspiblitz" | grep -q "\"message\": \"Not Found\"" && error_msg "Repository 'raspiblitz' not found for user '${github_user}"
+
+: "${branch:=v1.7}"
+curl -s "https://api.github.com/repos/${github_user}/raspiblitz/branches/${branch}" | grep -q "\"message\": \"Branch not found\"" && error_msg "Repository 'raspiblitz' for user '${github_user}' does not contain branch '${branch}'"
+
+: "${display:=lcd}"
+range_argument display "lcd" "hdmi" "headless"
+
+: "${tweak_boot_drive:=true}"
+range_argument tweak_boot_drive "0" "1" "false" "true"
+
+: "${wifi_region:=US}"
+
+
+for key in interaction fatpack github_user branch display tweak_boot_drive wifi_region; do
+  eval val='$'"${key}"
+  [ -n "${val}" ] && printf '%s\n' "${key}=${val}"
+done
+exit 1
+
 echo "*****************************************"
 echo "*     RASPIBLITZ SD CARD IMAGE SETUP    *"
 echo "*****************************************"
