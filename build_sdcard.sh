@@ -26,7 +26,8 @@ usage(){
   printf %s"${me} [--option <argument>]
 
 Options:
-  -i, --interaction [0|1]                  interaction before proceeding with exection (default: 0)
+  -h, --help                               this help info
+  -i, --interaction [0|1]                  interaction before proceeding with exection (default: 1)
   -f, --fatpack [0|1]                      fatpack mode (default: 0)
   -u, --github-user [rootzoll|other]       github user to be checked from the repo (default: rootzoll)
   -b, --branch [v1.7|v1.8]                 branch to be built on (default: v1.7)
@@ -40,7 +41,9 @@ Notes:
 "
   exit 1
 }
-[ -z "${1}" ] && usage
+
+allParamets="$*"
+[[ "${allParamets}" == *"-h"* ] || [ "${allParamets}" == *"--help"* ]] && usage
 
 ## assign_value variable_name "${opt}"
 ## it strips the dashes and assign the clean value to the variable
@@ -115,7 +118,7 @@ range_argument(){
 }
 
 ## use default values for variables if empty
-: "${interaction:=false}"
+: "${interaction:=true}"
 range_argument interaction "0" "1" "false" "true"
 
 : "${fatpack:=false}"
