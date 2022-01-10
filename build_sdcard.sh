@@ -186,7 +186,7 @@ done
 # AUTO-DETECTION: CPU-ARCHITECTURE
 # ---------------------------------------
 cpu="$(uname -m)" && echo "cpu=${cpu}"
-architecture="$(dpkg --print-architecture)" && echo "architecture=${architecture}"
+architecture="$(dpkg --print-architecture 2>/dev/null)" && echo "architecture=${architecture}"
 case "${cpu}" in
   arm*|aarch64|x86_64|amd64);;
   *) echo -e "!!! FAIL !!!\nCan only build on ARM, aarch64, x86_64 not on: cpu=${cpu}"; exit 1;;
@@ -194,7 +194,7 @@ esac
 
 # AUTO-DETECTION: OPERATINGSYSTEM
 # ---------------------------------------
-if [ $(grep -c 'Debian' /etc/os-release 2>/dev/null) -gt 0 ]; then
+if [ $(cat /etc/os-release 2>/dev/null | grep -c 'Debian') -gt 0 ]; then
   if [ $(uname -n | grep -c 'raspberrypi') -gt 0 ] && [ "${cpu}" = aarch64 ]; then
     # default image for RaspberryPi
     baseimage="raspios_arm64"
@@ -208,12 +208,12 @@ if [ $(grep -c 'Debian' /etc/os-release 2>/dev/null) -gt 0 ]; then
     # experimental: fallback for all debian on other CPUs
     baseimage="debian"
   fi
-elif [ $(grep -c 'Ubuntu' /etc/os-release 2>/dev/null) -gt 0 ]; then
+elif [ $(cat /etc/os-release 2>/dev/null | grep -c 'Ubuntu') -gt 0 ]; then
   baseimage="ubuntu"
 else
+  echo "\n!!! FAIL: Base Image cannot be detected or is not supported."
   cat /etc/os-release 2>/dev/null
   uname -a
-  echo "!!! FAIL: Base Image cannot be detected or is not supported."
   exit 1
 fi
 echo "baseimage=${baseimage}"
