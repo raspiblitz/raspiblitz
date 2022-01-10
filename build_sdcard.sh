@@ -43,7 +43,7 @@ Notes:
 }
 
 allParamets="$*"
-[[ "${allParamets}" == *"-h"* ] || [ "${allParamets}" == *"--help"* ]] && usage
+[ "${allParamets}" == *"-h"* ] || [ "${allParamets}" == *"--help"* ] && usage
 
 ## assign_value variable_name "${opt}"
 ## it strips the dashes and assign the clean value to the variable
