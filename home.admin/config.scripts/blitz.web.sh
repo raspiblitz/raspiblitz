@@ -43,6 +43,11 @@ elif [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # DO NOT EDIT! This file is generate by raspiblitz and will be overwritten
 [Unit]
 After=network.target nss-lookup.target mnt-hdd.mount
+
+[Service]
+Restart=on-failure
+TimeoutSec=120
+RestartSec=60
 EOF
 
   # make sure that it is enabled and started
