@@ -63,7 +63,9 @@ start_date=$(date -d "$date -$days days" +%s)
 declare -A pubKeyAliasLookup 
 while IFS= read -r pubKey
 do
-	alias=$(lncli --network $network --chain $chain getnodeinfo $pubKey | jq '.node.alias')
+  # strip the non-ascii characters with iconv
+	alias=$(lncli --network $network --chain $chain getnodeinfo $pubKey | jq '.node.alias'| iconv -f utf-8 -t ascii -c)
+  # remove quotes
 	alias=${alias:1:-1}
 	pubKeyAliasLookup[$pubKey]=$alias
 	# echo $pubKey : ${pubKeyAliasLookup[$pubKey]}
