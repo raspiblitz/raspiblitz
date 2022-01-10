@@ -13,13 +13,14 @@ WEBUI_VERSION=0.0.2
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "config script to switch joinmarket_webui on or off"
-  echo "bonus.joinmarket-webui.sh [on|off|menu|update|update commit]"
+  echo "bonus.joinmarket-webui.sh [on|off|menu|update|update commit|precheck]"
   exit 1
 fi
 
 # check and load raspiblitz config to know which network is running
 source $RASPIBLITZ_INFO
 source $RASPIBLITZ_CONF
+
 
 # show info menu
 if [ "$1" = "menu" ]; then
@@ -55,6 +56,7 @@ Activate TOR to access the web interface from outside your local network.
   fi
   exit 0
 fi
+
 
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
@@ -133,12 +135,18 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     ##################
 
     echo "# Install JoinMarket API systemd"
-    echo "
+    echo "\
 # Systemd unit for JoinMarket API
+
 [Unit]
 Description=JoinMarket API daemon
+# Make sure lnd starts after bitcoind is ready
+Requires=bitcoind.service
+After=bitcoind.service
+
 [Service]
 WorkingDirectory=$HOME_DIR/joinmarket-clientserver/scripts/
+ExecStartPre=/home/admin/config.scripts/bonus.joinmarket-webui.sh precheck
 ExecStart=/bin/sh -c '. $HOME_DIR/joinmarket-clientserver/jmvenv/bin/activate && python jmwalletd.py'
 User=joinmarket
 Group=joinmarket
@@ -150,6 +158,7 @@ PrivateTmp=true
 ProtectSystem=full
 NoNewPrivileges=true
 PrivateDevices=true
+
 [Install]
 WantedBy=multi-user.target
 " | sudo tee /etc/systemd/system/joinmarket-api.service
@@ -175,6 +184,19 @@ WantedBy=multi-user.target
   fi
   exit 0
 fi
+
+
+# precheck
+if [ "$1" = "precheck" ]; then
+  if [ $(/usr/local/bin/bitcoin-cli -conf=/mnt/hdd/bitcoin/bitcoin.conf listwallets | grep -c wallet.dat) -eq 0 ];then
+    echo "# Create wallet.dat" 
+    /usr/local/bin/bitcoin-cli -conf=/mnt/hdd/bitcoin/bitcoin.conf createwallet wallet.dat
+  else
+    echo "# The wallet.dat is loaded in bitcoind."
+  fi
+  exit 0
+fi
+
 
 # update
 if [ "$1" = "update" ]; then
@@ -228,6 +250,7 @@ if [ "$1" = "update" ]; then
 
   exit 0
 fi
+
 
 # switch off
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
