@@ -18,10 +18,8 @@ me="${0##/*}"
 
 nocolor="\033[0m"
 red="\033[31m"
-## default user message
-error_msg(){ printf %s"${red}${me}: ${1}${nocolor}\n"; exit 1; }
 
-## usage as a function be be called whenever there is a huge mistake on the options
+## usage as a function to be called whenever there is a huge mistake on the options
 usage(){
   printf %s"${me} [--option <argument>]
 
@@ -41,9 +39,13 @@ Notes:
 "
   exit 1
 }
+echo $*
+if [ $* == *"-h"* ] || [ $* == *"--help"* ]; then
+  usage
+fi
 
-allParamets="$*"
-[ "${allParamets}" == *"-h"* ] || [ "${allParamets}" == *"--help"* ] && usage
+## default user message
+error_msg(){ printf %s"${red}${me}: ${1}${nocolor}\n"; exit 1; }
 
 ## assign_value variable_name "${opt}"
 ## it strips the dashes and assign the clean value to the variable
