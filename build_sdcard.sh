@@ -26,12 +26,12 @@ usage(){
 Options:
   -h, --help                               this help info
   -i, --interaction [0|1]                  interaction before proceeding with exection (default: 1)
-  -f, --fatpack [0|1]                      fatpack mode (default: 0)
-  -u, --github-user [rootzoll|other]       github user to be checked from the repo (default: rootzoll)
-  -b, --branch [v1.7|v1.8]                 branch to be built on (default: v1.7)
+  -f, --fatpack [0|1]                      fatpack mode (default: 1)
+  -u, --github-user [rootzoll|other]       github user to be checked from the repo (default: ${defaultRepo})
+  -b, --branch [v1.7|v1.8]                 branch to be built on (default: ${defaultBranch})
   -d, --display [lcd|hdmi|headless]        display class (default: lcd)
   -t, --tweak-boot-drive [0|1]             tweak boot drives (default: 1)
-  -w, --wifi-region [US|GB|other]          wifi iso code (default: US)
+  -w, --wifi-region [off|US|GB|other]      wifi iso code (default: US) or 'off'
 
 Notes:
   all options, long and short accept --opt=value mode also
@@ -39,8 +39,7 @@ Notes:
 "
   exit 1
 }
-echo $*
-if [ $* == *"-h"* ] || [ $* == *"--help"* ]; then
+if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
   usage
 fi
 
@@ -120,124 +119,78 @@ range_argument(){
 }
 
 ## use default values for variables if empty
+
+# INTERACTION
+# ----------------------------------------
+# When 'false' then no questions will be asked on building .. so it can be used in build scripts
+# for containers or as part of other build scripts (default is true)
 : "${interaction:=true}"
 range_argument interaction "0" "1" "false" "true"
 
-: "${fatpack:=false}"
+# FATPACK
+# -------------------------------
+# could be 'true' (default) or 'false' 
+# When 'true' it will pre-install needed frameworks for additional apps and features
+# as a convenience to safe on install and update time for additional apps.
+# When 'false' it will just install the bare minimum and additional apps will just
+# install needed frameworks and libraries on demand when activated by user.
+# Use 'false' if you want to run your node without: go, dot-net, nodejs, docker, ...
+: "${fatpack:=true}"
 range_argument fatpack "0" "1" "false" "true"
 
-: "${github_user:=rootzoll}"
+# GITHUB-USERNAME
+# ---------------------------------------
+# could be any valid github-user that has a fork of the raspiblitz repo - 'rootzoll' is default
+# The 'raspiblitz' repo of this user is used to provisioning sd card with raspiblitz assets/scripts later on.
+: "${github_user:=$defaultRepo}"
 curl -s "https://api.github.com/repos/${github_user}/raspiblitz" | grep -q "\"message\": \"Not Found\"" && error_msg "Repository 'raspiblitz' not found for user '${github_user}"
 
-: "${branch:=v1.7}"
+# GITHUB-BRANCH
+# -------------------------------------
+# could be any valid branch or tag of the given GITHUB-USERNAME forked raspiblitz repo
+: "${branch:=$defaultBranch}"
 curl -s "https://api.github.com/repos/${github_user}/raspiblitz/branches/${branch}" | grep -q "\"message\": \"Branch not found\"" && error_msg "Repository 'raspiblitz' for user '${github_user}' does not contain branch '${branch}'"
 
+# DISPLAY-CLASS
+# ----------------------------------------
+# Could be 'hdmi', 'headless' or 'lcd' (lcd is default)
 : "${display:=lcd}"
 range_argument display "lcd" "hdmi" "headless"
 
+# TWEAK-BOOTDRIVE
+# ---------------------------------------
+# could be 'true' (default) or 'false'
+# If 'true' it will try (based on the base OS) to optimize the boot drive.
+# If 'false' this will skipped.
 : "${tweak_boot_drive:=true}"
 range_argument tweak_boot_drive "0" "1" "false" "true"
 
+
+# WIFI
+# ---------------------------------------
+# WIFI country code like 'US' (default)
+# If any valid wifi country code Wifi will be activated with that country code by default
 : "${wifi_region:=US}"
-
-
-for key in interaction fatpack github_user branch display tweak_boot_drive wifi_region; do
-  eval val='$'"${key}"
-  [ -n "${val}" ] && printf '%s\n' "${key}=${val}"
-done
-exit 1
 
 echo "*****************************************"
 echo "*     RASPIBLITZ SD CARD IMAGE SETUP    *"
 echo "*****************************************"
 echo "For details on optional parameters - see build script source code:"
 
-# 1st optional parameter: NO-INTERACTION
-# ----------------------------------------
-# When 'true' then no questions will be asked on building .. so it can be used in build scripts
-# for containers or as part of other build scripts (default is false)
-noInteraction="${1:-false}"
-if [ "${noInteraction}" != "true" ] && [ "${noInteraction}" != "false" ]; then
-  echo "ERROR: NO-INTERACTION parameter needs to be either 'true' or 'false'"
-  exit 1
-fi
-echo "1) NO-INTERACTION --> '${noInteraction}'"
-
-# 2nd optional parameter: FATPACK
-# -------------------------------
-# could be 'true' or 'false' (default)
-# When 'true' it will pre-install needed frameworks for additional apps and features
-# as a convenience to safe on install and update time for additional apps.
-# When 'false' it will just install the bare minimum and additional apps will just
-# install needed frameworks and libraries on demand when activated by user.
-# Use 'false' if you want to run your node without: go, dot-net, nodejs, docker, ...
-fatpack="${2:-false}"
-if [ "${fatpack}" != "true" ] && [ "${fatpack}" != "false" ]; then
-  echo "ERROR: FATPACK parameter needs to be either 'true' or 'false'"
-  exit 1
-fi
-echo "2) FATPACK --> '${fatpack}'"
-
-# 3rd optional parameter: GITHUB-USERNAME
-# ---------------------------------------
-# could be any valid github-user that has a fork of the raspiblitz repo - 'rootzoll' is default
-# The 'raspiblitz' repo of this user is used to provisioning sd card
-# with raspiblitz assets/scripts later on.
-# If this parameter is set also the branch needs to be given (see next parameter).
-githubUser="${3:-rootzoll}"
-echo "3) GITHUB-USERNAME --> '${githubUser}'"
-
-# 4th optional parameter: GITHUB-BRANCH
-# -------------------------------------
-# could be any valid branch or tag of the given GITHUB-USERNAME forked raspiblitz repo
-# https://github.com/rootzoll/raspiblitz/tags
-githubBranch="${4:-"${defaultBranch}"}"
-echo "4) GITHUB-BRANCH --> '${githubBranch}'"
-
-# 5th optional parameter: DISPLAY-CLASS
-# ----------------------------------------
-# Could be 'hdmi', 'headless' or 'lcd' (lcd is default)
-# On 'false' the standard video output is used (HDMI) by default.
-# https://github.com/rootzoll/raspiblitz/issues/1265#issuecomment-813369284
-displayClass="${5:-lcd}"
-[ "${displayClass}" = "false" ] && displayClass="hdmi"
-if [ "${displayClass}" != "hdmi" ] && [ "${displayClass}" != "lcd" ] && [ "${displayClass}" != "headless" ]; then
-  echo "ERROR: DISPLAY-CLASS parameter needs to be 'lcd', 'hdmi' or 'headless'"
-  exit 1
-fi
-echo "5) DISPLAY-CLASS --> '${displayClass}'"
-
-# 6th optional parameter: TWEAK-BOOTDRIVE
-# ---------------------------------------
-# could be 'true' (default) or 'false'
-# If 'true' it will try (based on the base OS) to optimize the boot drive.
-# If 'false' this will skipped.
-tweakBootdrives="${6:-true}"
-if [ "${tweakBootdrives}" != "true" ] && [ "${tweakBootdrives}" != "false" ]; then
-  echo "ERROR: TWEAK-BOOTDRIVE parameter needs to be either 'true' or 'false'"
-  exit 1
-fi
-echo "6) TWEAK-BOOTDRIVE --> '${tweakBootdrives}'"
-
-# 7th optional parameter: WIFI
-# ---------------------------------------
-# could be 'false' or 'true' (default) or a valid WIFI country code like 'US' (default)
-# If 'false' WIFI will be deactivated by default
-# If 'true' WIFI will be activated by with default country code 'US'
-# If any valid wifi country code Wifi will be activated with that country code by default
-modeWifi="${7:-US}"
-[ "${modeWifi}" = "true" ] && modeWifi="US"
-echo "7) WIFI --> '${modeWifi}'"
+# output 
+for key in interaction fatpack github_user branch display tweak_boot_drive wifi_region; do
+  eval val='$'"${key}"
+  [ -n "${val}" ] && printf '%s\n' "${key}=${val}"
+done
 
 # AUTO-DETECTION: CPU-ARCHITECTURE
 # ---------------------------------------
-cpu="$(uname -m)"
-architecture="$(dpkg --print-architecture)"
+cpu="$(uname -m)" && echo "cpu=${cpu}"
+architecture="$(dpkg --print-architecture)" && echo "architecture=${architecture}"
 case "${cpu}" in
   arm*|aarch64|x86_64|amd64);;
   *) echo -e "!!! FAIL !!!\nCan only build on ARM, aarch64, x86_64 not on: cpu=${cpu}"; exit 1;;
 esac
-echo "X) CPU-ARCHITECTURE --> '${cpu} (${architecture})'"
 
 # AUTO-DETECTION: OPERATINGSYSTEM
 # ---------------------------------------
@@ -263,16 +216,17 @@ else
   echo "!!! FAIL: Base Image cannot be detected or is not supported."
   exit 1
 fi
-echo "X) OPERATING-SYSTEM ---> '${baseimage}'"
+echo "baseimage=${baseimage}"
 
 # USER-CONFIRMATION
-if [ "${noInteraction}" != "true" ]; then
+if [ "${interaction}" == "true" ]; then
   echo -n "# Do you agree with all parameters above? (yes/no) "
   read -r installRaspiblitzAnswer
   [ "$installRaspiblitzAnswer" != "yes" ] && exit 1
 fi
 echo -e "Building RaspiBlitz ...\n"
 sleep 3 ## give time to cancel
+exit 1
 
 export DEBIAN_FRONTEND=noninteractive
 
@@ -378,7 +332,7 @@ if [ "${baseimage}" = "raspios_arm64" ] || [ "${baseimage}" = "debian_rpi64" ]; 
   sudo raspi-config nonint do_boot_wait 0
   # set WIFI country so boot does not block
   # this will undo the softblock of rfkill on RaspiOS
-  [ "${modeWifi}" != "false" ] && sudo raspi-config nonint do_wifi_country $modeWifi
+  [ "${wifi_region}" != "off" ] && sudo raspi-config nonint do_wifi_country $wifi_region
   # see https://github.com/rootzoll/raspiblitz/issues/428#issuecomment-472822840
 
   configFile="/boot/config.txt"
@@ -397,11 +351,11 @@ if [ "${baseimage}" = "raspios_arm64" ] || [ "${baseimage}" = "debian_rpi64" ]; 
   # see: https://github.com/rootzoll/raspiblitz/issues/782#issuecomment-564981630
   # see https://github.com/rootzoll/raspiblitz/issues/1053#issuecomment-600878695
   # use command to check last fsck check: sudo tune2fs -l /dev/mmcblk0p2
-  if [ "${tweakBootdrives}" == "true" ]; then
+  if [ "${tweak_boot_drive}" == "true" ]; then
     echo "* running tune2fs"
     sudo tune2fs -c 1 /dev/mmcblk0p2
   else
-    echo "* skipping tweakBootdrives"
+    echo "* skipping tweak_boot_drive"
   fi
 
   # edit kernel parameters
@@ -581,10 +535,10 @@ sudo /usr/sbin/groupadd --force --gid 9707 lndrouter
 echo -e "\n*** SHELL SCRIPTS & ASSETS ***"
 # copy raspiblitz repo from github
 cd /home/admin/ || exit 1
-sudo -u admin git config --global user.name "${githubUser}"
+sudo -u admin git config --global user.name "${github_user}"
 sudo -u admin git config --global user.email "johndoe@example.com"
 sudo -u admin rm -rf /home/admin/raspiblitz
-sudo -u admin git clone -b "${githubBranch}" https://github.com/${githubUser}/raspiblitz.git
+sudo -u admin git clone -b "${branch}" https://github.com/${github_user}/raspiblitz.git
 sudo -u admin cp -r /home/admin/raspiblitz/home.admin/*.* /home/admin
 sudo -u admin cp /home/admin/raspiblitz/home.admin/.tmux.conf /home/admin
 sudo -u admin cp -r /home/admin/raspiblitz/home.admin/assets /home/admin/
@@ -690,7 +644,7 @@ sudo /home/admin/_cache.sh keyvalue on
 # *** Wifi, Bluetooth & other RaspberryPi configs ***
 if [ "${baseimage}" = "raspios_arm64"  ] || [ "${baseimage}" = "debian_rpi64" ]; then
 
-  if [ "${modeWifi}" == "false" ]; then
+  if [ "${wifi_region}" == "off" ]; then
     echo -e "\n*** DISABLE WIFI ***"
     sudo systemctl disable wpa_supplicant.service
     sudo ifconfig wlan0 down
@@ -821,10 +775,10 @@ echo "1. login fresh --> user:admin password:raspiblitz"
 echo -e "2. run --> release\n"
 
 # (do last - because might trigger reboot)
-if [ "${displayClass}" != "headless" ] || [ "${baseimage}" = "raspios_arm64" ]; then
+if [ "${display}" != "headless" ] || [ "${baseimage}" = "raspios_arm64" ]; then
   echo "*** ADDITIONAL DISPLAY OPTIONS ***"
-  echo "- calling: blitz.display.sh set-display ${displayClass}"
-  sudo /home/admin/config.scripts/blitz.display.sh set-display ${displayClass}
+  echo "- calling: blitz.display.sh set-display ${display}"
+  sudo /home/admin/config.scripts/blitz.display.sh set-display ${display}
   sudo /home/admin/config.scripts/blitz.display.sh rotate 1
 fi
 
