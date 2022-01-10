@@ -220,7 +220,7 @@ After=network.target nss-lookup.target mnt-hdd.mount
   # enable tor services
   sudo systemctl unmask tor@default
   sudo systemctl daemon-reload
-  sudo systemctl enable --now tor@ tor@service
+  sudo systemctl enable --now tor@service
   sudo systemctl restart tor@default
 
   echo
