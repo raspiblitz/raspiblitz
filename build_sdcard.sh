@@ -1,4 +1,6 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
+
+#set -x
 
 #########################################################################
 # Build your SD card image based on: 2021-10-30-raspios-bullseye-arm64.zip
@@ -9,102 +11,190 @@
 # setup fresh SD card with image above - login per SSH and run this script:
 ##########################################################################
 
+defaultRepo="rootzoll"
 defaultBranch="v1.7"
-echo "*****************************************"
-echo "*     RASPIBLITZ SD CARD IMAGE SETUP    *"
-echo "*****************************************"
-echo "For details on optional parameters - see build script source code:"
 
-# 1st optional parameter: NO-INTERACTION
-# ----------------------------------------
-# When 'true' then no questions will be asked on building .. so it can be used in build scripts
-# for containers or as part of other build scripts (default is false)
-noInteraction="${1:-false}"
-if [ "${noInteraction}" != "true" ] && [ "${noInteraction}" != "false" ]; then
-  echo "ERROR: NO-INTERACTION parameter needs to be either 'true' or 'false'"
+me="${0##/*}"
+
+nocolor="\033[0m"
+red="\033[31m"
+
+## usage as a function to be called whenever there is a huge mistake on the options
+usage(){
+  printf %s"${me} [--option <argument>]
+
+Options:
+  -h, --help                               this help info
+  -i, --interaction [0|1]                  interaction before proceeding with exection (default: 1)
+  -f, --fatpack [0|1]                      fatpack mode (default: 1)
+  -u, --github-user [rootzoll|other]       github user to be checked from the repo (default: ${defaultRepo})
+  -b, --branch [v1.7|v1.8]                 branch to be built on (default: ${defaultBranch})
+  -d, --display [lcd|hdmi|headless]        display class (default: lcd)
+  -t, --tweak-boot-drive [0|1]             tweak boot drives (default: 1)
+  -w, --wifi-region [off|US|GB|other]      wifi iso code (default: US) or 'off'
+
+Notes:
+  all options, long and short accept --opt=value mode also
+  [0|1] can also be referenced as [false|true]
+"
   exit 1
+}
+if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+  usage
 fi
-echo "1) NO-INTERACTION --> '${noInteraction}'"
 
-# 2nd optional parameter: FATPACK
+## default user message
+error_msg(){ printf %s"${red}${me}: ${1}${nocolor}\n"; exit 1; }
+
+## assign_value variable_name "${opt}"
+## it strips the dashes and assign the clean value to the variable
+## assign_value status --on IS status=on
+## variable_name is the name you want it to have
+## $opt being options with single or double dashes that don't require arguments
+assign_value(){
+  case "${2}" in
+    --*) value="${2#--}";;
+    -*) value="${2#-}";;
+    *) value="${2}"
+  esac
+  ## Escaping quotes is needed because else if will fail if the argument is quoted
+  # shellcheck disable=SC2140
+  eval "${1}"="\"${value}\""
+}
+
+## get_arg variable_name "${opt}" "${arg}"
+## get_arg service --service ssh
+## variable_name is the name you want it to have
+## $opt being options with single or double dashes
+## $arg is requiring and argument, else it fails
+## assign_value "${1}" "${3}" means it is assining the argument ($3) to the variable_name ($1)
+get_arg(){
+  case "${3}" in
+    ""|-*) error_msg "Option '${2}' requires an argument.";;
+  esac
+  assign_value "${1}" "${3}"
+}
+
+## hacky getopts
+## 1. if the option requires argument, and the option is preceeded by single or double dash and it
+##    can be it can be specified with '-s=ssh' or '-s ssh' or '--service=ssh' or '--service ssh'
+##    use: get_arg variable_name "${opt}" "${arg}"
+## 2. if a bunch of options that does different things are to be assigned to the same variable
+##    and the option is preceeded by single or double dash use: assign_value variable_name "${opt}"
+##    as this option does not require argument, specifu $shift_n=1
+## 3. if the option does not start with dash and does not require argument, assign to command manually.
+while :; do
+  case "${1}" in
+    -*=*) opt="${1%=*}"; arg="${1#*=}"; shift_n=1;;
+    -*) opt="${1}"; arg="${2}"; shift_n=2;;
+    *) opt="${1}"; arg="${2}"; shift_n=1;;
+  esac
+  case "${opt}" in
+    -i|-i=*|--interaction|--interaction=*) get_arg interaction "${opt}" "${arg}";;
+    -f|-f=*|--fatpack|--fatpack=*) get_arg fatpack "${opt}" "${arg}";;
+    -u|-u=*|--github-user|--github-user=*) get_arg github_user "${opt}" "${arg}";;
+    -b|-b=*|--branch|--branch=*) get_arg branch "${opt}" "${arg}";;
+    -d|-d=*|--display|--display=*) get_arg display "${opt}" "${arg}";;
+    -t|-t=*|--tweak-boot-drive|--tweak-boot-drive=*) get_arg tweak_boot_drive "${opt}" "${arg}";;
+    -w|-w=*|--wifi-region|--wifi-region=*) get_arg wifi_region "${opt}" "${arg}";;
+    "") break;;
+    *) error_msg "Invalid option: ${opt}";;
+  esac
+  shift "${shift_n}"
+done
+
+## if there is a limited option, check if the value of variable is within this range
+## $ range_argument variable_name possible_value_1 possible_value_2
+range_argument(){
+  name="${1}"
+  eval var='$'"${1}"
+  shift
+  if [ -n "${var:-}" ]; then
+    success=0
+    for tests in "${@}"; do
+      [ "${var}" = "${tests}" ] && success=1
+    done
+    [ ${success} -ne 1 ] && error_msg "Option '--${name}' cannot be '${var}'! It can only be: ${*}."
+  fi
+}
+
+## use default values for variables if empty
+
+# INTERACTION
+# ----------------------------------------
+# When 'false' then no questions will be asked on building .. so it can be used in build scripts
+# for containers or as part of other build scripts (default is true)
+: "${interaction:=true}"
+range_argument interaction "0" "1" "false" "true"
+
+# FATPACK
 # -------------------------------
-# could be 'true' or 'false' (default)
+# could be 'true' (default) or 'false' 
 # When 'true' it will pre-install needed frameworks for additional apps and features
 # as a convenience to safe on install and update time for additional apps.
 # When 'false' it will just install the bare minimum and additional apps will just
 # install needed frameworks and libraries on demand when activated by user.
 # Use 'false' if you want to run your node without: go, dot-net, nodejs, docker, ...
-fatpack="${2:-false}"
-if [ "${fatpack}" != "true" ] && [ "${fatpack}" != "false" ]; then
-  echo "ERROR: FATPACK parameter needs to be either 'true' or 'false'"
-  exit 1
-fi
-echo "2) FATPACK --> '${fatpack}'"
+: "${fatpack:=true}"
+range_argument fatpack "0" "1" "false" "true"
 
-# 3rd optional parameter: GITHUB-USERNAME
+# GITHUB-USERNAME
 # ---------------------------------------
 # could be any valid github-user that has a fork of the raspiblitz repo - 'rootzoll' is default
-# The 'raspiblitz' repo of this user is used to provisioning sd card
-# with raspiblitz assets/scripts later on.
-# If this parameter is set also the branch needs to be given (see next parameter).
-githubUser="${3:-rootzoll}"
-echo "3) GITHUB-USERNAME --> '${githubUser}'"
+# The 'raspiblitz' repo of this user is used to provisioning sd card with raspiblitz assets/scripts later on.
+: "${github_user:=$defaultRepo}"
+curl -s "https://api.github.com/repos/${github_user}/raspiblitz" | grep -q "\"message\": \"Not Found\"" && error_msg "Repository 'raspiblitz' not found for user '${github_user}"
 
-# 4th optional parameter: GITHUB-BRANCH
+# GITHUB-BRANCH
 # -------------------------------------
 # could be any valid branch or tag of the given GITHUB-USERNAME forked raspiblitz repo
-# https://github.com/rootzoll/raspiblitz/tags
-githubBranch="${4:-"${defaultBranch}"}"
-echo "4) GITHUB-BRANCH --> '${githubBranch}'"
+: "${branch:=$defaultBranch}"
+curl -s "https://api.github.com/repos/${github_user}/raspiblitz/branches/${branch}" | grep -q "\"message\": \"Branch not found\"" && error_msg "Repository 'raspiblitz' for user '${github_user}' does not contain branch '${branch}'"
 
-# 5th optional parameter: DISPLAY-CLASS
+# DISPLAY-CLASS
 # ----------------------------------------
 # Could be 'hdmi', 'headless' or 'lcd' (lcd is default)
-# On 'false' the standard video output is used (HDMI) by default.
-# https://github.com/rootzoll/raspiblitz/issues/1265#issuecomment-813369284
-displayClass="${5:-lcd}"
-[ "${displayClass}" = "false" ] && displayClass="hdmi"
-if [ "${displayClass}" != "hdmi" ] && [ "${displayClass}" != "lcd" ] && [ "${displayClass}" != "headless" ]; then
-  echo "ERROR: DISPLAY-CLASS parameter needs to be 'lcd', 'hdmi' or 'headless'"
-  exit 1
-fi
-echo "5) DISPLAY-CLASS --> '${displayClass}'"
+: "${display:=lcd}"
+range_argument display "lcd" "hdmi" "headless"
 
-# 6th optional parameter: TWEAK-BOOTDRIVE
+# TWEAK-BOOTDRIVE
 # ---------------------------------------
 # could be 'true' (default) or 'false'
 # If 'true' it will try (based on the base OS) to optimize the boot drive.
 # If 'false' this will skipped.
-tweakBootdrives="${6:-true}"
-if [ "${tweakBootdrives}" != "true" ] && [ "${tweakBootdrives}" != "false" ]; then
-  echo "ERROR: TWEAK-BOOTDRIVE parameter needs to be either 'true' or 'false'"
-  exit 1
-fi
-echo "6) TWEAK-BOOTDRIVE --> '${tweakBootdrives}'"
+: "${tweak_boot_drive:=true}"
+range_argument tweak_boot_drive "0" "1" "false" "true"
 
-# 7th optional parameter: WIFI
+
+# WIFI
 # ---------------------------------------
-# could be 'false' or 'true' (default) or a valid WIFI country code like 'US' (default)
-# If 'false' WIFI will be deactivated by default
-# If 'true' WIFI will be activated by with default country code 'US'
+# WIFI country code like 'US' (default)
 # If any valid wifi country code Wifi will be activated with that country code by default
-modeWifi="${7:-US}"
-[ "${modeWifi}" = "true" ] && modeWifi="US"
-echo "7) WIFI --> '${modeWifi}'"
+: "${wifi_region:=US}"
+
+echo "*****************************************"
+echo "*     RASPIBLITZ SD CARD IMAGE SETUP    *"
+echo "*****************************************"
+echo "For details on optional parameters - call with '--help' or check source code."
+
+# output 
+for key in interaction fatpack github_user branch display tweak_boot_drive wifi_region; do
+  eval val='$'"${key}"
+  [ -n "${val}" ] && printf '%s\n' "${key}=${val}"
+done
 
 # AUTO-DETECTION: CPU-ARCHITECTURE
 # ---------------------------------------
-cpu="$(uname -m)"
-architecture="$(dpkg --print-architecture)"
+cpu="$(uname -m)" && echo "cpu=${cpu}"
+architecture="$(dpkg --print-architecture 2>/dev/null)" && echo "architecture=${architecture}"
 case "${cpu}" in
   arm*|aarch64|x86_64|amd64);;
   *) echo -e "!!! FAIL !!!\nCan only build on ARM, aarch64, x86_64 not on: cpu=${cpu}"; exit 1;;
 esac
-echo "X) CPU-ARCHITECTURE --> '${cpu} (${architecture})'"
 
 # AUTO-DETECTION: OPERATINGSYSTEM
 # ---------------------------------------
-if [ $(grep -c 'Debian' /etc/os-release 2>/dev/null) -gt 0 ]; then
+if [ $(cat /etc/os-release 2>/dev/null | grep -c 'Debian') -gt 0 ]; then
   if [ $(uname -n | grep -c 'raspberrypi') -gt 0 ] && [ "${cpu}" = aarch64 ]; then
     # default image for RaspberryPi
     baseimage="raspios_arm64"
@@ -118,18 +208,18 @@ if [ $(grep -c 'Debian' /etc/os-release 2>/dev/null) -gt 0 ]; then
     # experimental: fallback for all debian on other CPUs
     baseimage="debian"
   fi
-elif [ $(grep -c 'Ubuntu' /etc/os-release 2>/dev/null) -gt 0 ]; then
+elif [ $(cat /etc/os-release 2>/dev/null | grep -c 'Ubuntu') -gt 0 ]; then
   baseimage="ubuntu"
 else
+  echo "\n!!! FAIL: Base Image cannot be detected or is not supported."
   cat /etc/os-release 2>/dev/null
   uname -a
-  echo "!!! FAIL: Base Image cannot be detected or is not supported."
   exit 1
 fi
-echo "X) OPERATING-SYSTEM ---> '${baseimage}'"
+echo "baseimage=${baseimage}"
 
 # USER-CONFIRMATION
-if [ "${noInteraction}" != "true" ]; then
+if [ "${interaction}" = "true" ]; then
   echo -n "# Do you agree with all parameters above? (yes/no) "
   read -r installRaspiblitzAnswer
   [ "$installRaspiblitzAnswer" != "yes" ] && exit 1
@@ -241,7 +331,7 @@ if [ "${baseimage}" = "raspios_arm64" ] || [ "${baseimage}" = "debian_rpi64" ]; 
   sudo raspi-config nonint do_boot_wait 0
   # set WIFI country so boot does not block
   # this will undo the softblock of rfkill on RaspiOS
-  [ "${modeWifi}" != "false" ] && sudo raspi-config nonint do_wifi_country $modeWifi
+  [ "${wifi_region}" != "off" ] && sudo raspi-config nonint do_wifi_country $wifi_region
   # see https://github.com/rootzoll/raspiblitz/issues/428#issuecomment-472822840
 
   configFile="/boot/config.txt"
@@ -260,11 +350,11 @@ if [ "${baseimage}" = "raspios_arm64" ] || [ "${baseimage}" = "debian_rpi64" ]; 
   # see: https://github.com/rootzoll/raspiblitz/issues/782#issuecomment-564981630
   # see https://github.com/rootzoll/raspiblitz/issues/1053#issuecomment-600878695
   # use command to check last fsck check: sudo tune2fs -l /dev/mmcblk0p2
-  if [ "${tweakBootdrives}" == "true" ]; then
+  if [ "${tweak_boot_drive}" == "true" ]; then
     echo "* running tune2fs"
     sudo tune2fs -c 1 /dev/mmcblk0p2
   else
-    echo "* skipping tweakBootdrives"
+    echo "* skipping tweak_boot_drive"
   fi
 
   # edit kernel parameters
@@ -444,10 +534,10 @@ sudo /usr/sbin/groupadd --force --gid 9707 lndrouter
 echo -e "\n*** SHELL SCRIPTS & ASSETS ***"
 # copy raspiblitz repo from github
 cd /home/admin/ || exit 1
-sudo -u admin git config --global user.name "${githubUser}"
+sudo -u admin git config --global user.name "${github_user}"
 sudo -u admin git config --global user.email "johndoe@example.com"
 sudo -u admin rm -rf /home/admin/raspiblitz
-sudo -u admin git clone -b "${githubBranch}" https://github.com/${githubUser}/raspiblitz.git
+sudo -u admin git clone -b "${branch}" https://github.com/${github_user}/raspiblitz.git
 sudo -u admin cp -r /home/admin/raspiblitz/home.admin/*.* /home/admin
 sudo -u admin cp /home/admin/raspiblitz/home.admin/.tmux.conf /home/admin
 sudo -u admin cp -r /home/admin/raspiblitz/home.admin/assets /home/admin/
@@ -553,7 +643,7 @@ sudo /home/admin/_cache.sh keyvalue on
 # *** Wifi, Bluetooth & other RaspberryPi configs ***
 if [ "${baseimage}" = "raspios_arm64"  ] || [ "${baseimage}" = "debian_rpi64" ]; then
 
-  if [ "${modeWifi}" == "false" ]; then
+  if [ "${wifi_region}" == "off" ]; then
     echo -e "\n*** DISABLE WIFI ***"
     sudo systemctl disable wpa_supplicant.service
     sudo ifconfig wlan0 down
@@ -684,10 +774,10 @@ echo "1. login fresh --> user:admin password:raspiblitz"
 echo -e "2. run --> release\n"
 
 # (do last - because might trigger reboot)
-if [ "${displayClass}" != "headless" ] || [ "${baseimage}" = "raspios_arm64" ]; then
+if [ "${display}" != "headless" ] || [ "${baseimage}" = "raspios_arm64" ]; then
   echo "*** ADDITIONAL DISPLAY OPTIONS ***"
-  echo "- calling: blitz.display.sh set-display ${displayClass}"
-  sudo /home/admin/config.scripts/blitz.display.sh set-display ${displayClass}
+  echo "- calling: blitz.display.sh set-display ${display}"
+  sudo /home/admin/config.scripts/blitz.display.sh set-display ${display}
   sudo /home/admin/config.scripts/blitz.display.sh rotate 1
 fi
 
