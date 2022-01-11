@@ -117,7 +117,7 @@ RaspiBlitz might run an TOO OLD of an lightning version to migrate your nodes ch
 You have now two options:
 1) Shutdown, keep old Node system until RaspiBlitz offers an updated version
 2) Ignore this warning and try your luck (not recommended)
-      " 16 64
+      " 16 62
 
     result=$?
     echo "${result}"
