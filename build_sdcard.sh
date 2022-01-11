@@ -175,7 +175,7 @@ range_argument tweak_boot_drive "0" "1" "false" "true"
 echo "*****************************************"
 echo "*     RASPIBLITZ SD CARD IMAGE SETUP    *"
 echo "*****************************************"
-echo "For details on optional parameters - see build script source code:"
+echo "For details on optional parameters - see build script source code or call with '--help'"
 
 # output 
 for key in interaction fatpack github_user branch display tweak_boot_drive wifi_region; do
@@ -226,7 +226,6 @@ if [ "${interaction}" = "true" ]; then
 fi
 echo -e "Building RaspiBlitz ...\n"
 sleep 3 ## give time to cancel
-exit 1
 
 export DEBIAN_FRONTEND=noninteractive
 
