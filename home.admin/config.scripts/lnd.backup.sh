@@ -148,7 +148,7 @@ if [ ${mode} = "lnd-import" ]; then
   # lnd version of LND rescue file (thats packed as extra info in the file)
   # its included since RaspiBlitz v1.7.1 /mnt/hdd/lnd/version.info
   # this can happen if someone uses the manual LND update and then uploads to an old default LND 
-  # if so just signal this in the output
+  # if so just signal this in the output (but also this file might be empty, when LND was dead)
   
   echo "# DONE - lnd service is still stopped - start manually with command:"
   echo "# sudo systemctl start lnd"
