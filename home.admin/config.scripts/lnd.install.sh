@@ -26,6 +26,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ];then
   echo
   echo "Install or remove LND services on parallel chains"
   echo "lnd.install.sh install - called by the build_sdcard.sh"
+  echo "lnd.install.sh info [?compareVersion]"
   echo "lnd.install.sh on [mainnet|testnet|signet] [?initwallet]"
   echo "lnd.install.sh off [mainnet|testnet|signet]"
   echo "lnd.install.sh display-seed [mainnet|testnet|signet] [?delete]"
@@ -36,6 +37,46 @@ fi
 source <(/home/admin/_cache.sh get network)
 if [ "${network}" == "" ]; then
   network="bitcoin"
+fi
+
+if [ "$1" = "info" ] ; then
+  
+  # the version that this script installs by default
+  echo "lndDefaultInstallVersion='${lndVersion}'"
+
+  # the version that is installed
+  lndInstalledVersion=$(sudo -u admin lnd --version 2>/dev/null | cut -d " " -f3)
+  echo "lndInstalledVersion='${lndInstalledVersion}'"
+
+  # if a version string is given as second optional parameter - check update compatibility
+  # assumption: if the available version is one miner version lower then asked data is not compatible
+  compareVersion=$2
+  if [ "${compareVersion}" != "" ]; then
+    # use version thats either installed or can be installed
+    availableVersion="${lndInstalledVersion}"
+    if [ "${availableVersion}" == "" ]; then
+      availableVersion="${lndVersion}"
+    fi
+    # check major & miner version value
+    availableMajor=$(echo ${availableVersion} | cut -d "." -f1 | grep -o '[[:digit:]]*' | tail -n 1)
+    compareMajor=$(echo ${compareVersion} | cut -d "." -f1 | grep -o '[[:digit:]]*' | tail -n 1)
+    availableMiner=$(echo ${availableVersion} | cut -d "." -f2 | grep -o '[[:digit:]]*' | tail -n 1)
+    compareMiner=$(echo ${compareVersion} | cut -d "." -f2 | grep -o '[[:digit:]]*' | tail -n 1)
+    if [ "${compareMajor}" != "" ] && [ "${compareMiner}" != "" ]; then
+      # check major
+      if [ ${availableMajor} -lt ${compareMajor} ]; then
+       echo "compatible=0"
+      else
+        if [ ${availableMiner} -lt ${compareMiner} ]; then
+          echo "compatible=0"
+        else
+          echo "compatible=0"
+        fi
+      fi
+    fi
+  fi
+
+  exit 0
 fi
 
 if [ "$1" = "install" ] ; then
