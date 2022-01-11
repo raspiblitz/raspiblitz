@@ -62,6 +62,7 @@ if [ "$1" = "info" ] ; then
     compareMajor=$(echo ${compareVersion} | cut -d "." -f1 | grep -o '[[:digit:]]*' | tail -n 1)
     availableMiner=$(echo ${availableVersion} | cut -d "." -f2 | grep -o '[[:digit:]]*' | tail -n 1)
     compareMiner=$(echo ${compareVersion} | cut -d "." -f2 | grep -o '[[:digit:]]*' | tail -n 1)
+    echo "# ${availableMajor} ${compareMajor} ${availableMiner} ${compareMiner}"
     if [ "${compareMajor}" != "" ] && [ "${compareMiner}" != "" ]; then
       # check major
       if [ ${availableMajor} -lt ${compareMajor} ]; then
