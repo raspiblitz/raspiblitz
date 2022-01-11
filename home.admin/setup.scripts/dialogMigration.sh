@@ -13,24 +13,23 @@ source $SETUPFILE
 
 #########################
 # Parameters
-# this is useful for testing the dialog outside of the setup process
-# normally migrationOS & migrationVersion are provided by raspiblitz.info or raspiblitz.setup
 
-# 1st PARAMATER (optional): [raspiblitz|mynode|umbrel|citadel]
-if [ "${migrationOS}" == "" ]; then
-  migrationOS="$1"
-fi  
-
-# 2nd PARAMATER (optional): the version of the former fullnode OS if available
-if [ "${migrationVersion}" == "" ]; then
-  migrationVersion="$2"
-fi
-
-# check parameter values
+# 1st PARAMATER migrationOS: [raspiblitz|mynode|umbrel|citadel]
+migrationOS="$1"
 if [ "${migrationOS}" != "raspiblitz" ] && [ "${migrationOS}" != "mynode" ] && [ "${migrationOS}" != "umbrel" ] && [ "${migrationOS}" != "citadel" ]; then
     echo "# FAIL: the given migrationOS '${migrationOS}' is not supported yet"
     exit 1
+fi  
+
+# 2nd PARAMATER migrationMode (optional): [normal|outdatedLightning]
+migrationMode="$2"
+if [ "${migrationMode}" = "" ]; then
+  migrationMode="normal"
 fi
+if [ "${migrationMode}" != "normal" ] && [ "${migrationMode}" != "outdatedLightning" ]; then
+    echo "# FAIL: the given migrationMode '${migrationMode}' is not supported yet"
+    exit 1
+fi  
 
 ####################################################
 # RASPIBLITZ
@@ -103,6 +102,33 @@ if [ "${migrationOS}" == "raspiblitz" ]; then
   exit 0
 
 fi
+
+####################################################
+# WARNING: OUTDATED LIGHTNING
+# in case lightning version of RaspiBlitz is too old
+####################################################
+
+  # outdated warning
+  if [ "${migrationMode}" == "outdatedLightning" ]; then
+
+    whiptail --title " MIGRATION WARNING " --yes-button "Stop&Shutdown" --no-button "Try Anyway" --yesno " 
+
+RaspiBlitz might run an too old of an lightning version to migrate your nodes
+channels database automatically. You have now two options:
+
+1) Shutdown, keep old Node system until RaspiBlitz offers an updated version
+2) Ignore this warning and try your luck (not recommended)
+
+      " 16 58
+
+  result=$?
+  echo "${result}"
+  if [ "$?result" != "1" ]; then
+    # user cancel - signal by exit code
+    exit 1
+  fi
+
+  fi
 
 ####################################################
 # UMBREL
