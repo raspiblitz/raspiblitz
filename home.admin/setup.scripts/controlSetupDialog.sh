@@ -65,7 +65,18 @@ fi
 if [ "${setupPhase}" == "migration" ]; then
   # show recovery dialog
   echo "# Starting migration dialog (${hddGotMigrationData}) ..."
-  /home/admin/setup.scripts/dialogMigration.sh ${hddGotMigrationData}
+
+  # check if lightning is outdated
+  migrationMode="normal"
+  if [ "${lndVersion}" != "" ]; then
+    # get local lnd version & check compatibility
+    source <(/home/admin/config.scripts/lnd.install.sh info "${lndVersion}")
+    if [ "${compatible}" != "1" ]; then
+      migrationMode="outdatedLightning"
+    fi 
+  fi
+
+  /home/admin/setup.scripts/dialogMigration.sh ${hddGotMigrationData} ${migrationMode}
   if [ "$?" == "0" ]; then
     # mark migration to happen on provision
     echo "migrationOS='${hddGotMigrationData}'" >> $SETUPFILE
