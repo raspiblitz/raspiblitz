@@ -219,7 +219,7 @@ fi
 echo "baseimage=${baseimage}"
 
 # USER-CONFIRMATION
-if [ "${interaction}" == "true" ]; then
+if [ "${interaction}" = "true" ]; then
   echo -n "# Do you agree with all parameters above? (yes/no) "
   read -r installRaspiblitzAnswer
   [ "$installRaspiblitzAnswer" != "yes" ] && exit 1
