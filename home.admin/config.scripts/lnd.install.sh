@@ -70,7 +70,7 @@ if [ "$1" = "info" ] ; then
         if [ ${availableMiner} -lt ${compareMiner} ]; then
           echo "compatible=0"
         else
-          echo "compatible=0"
+          echo "compatible=1"
         fi
       fi
     fi
