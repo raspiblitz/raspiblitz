@@ -1,6 +1,4 @@
-#!/usr/bin/env sh
-
-#set -x
+#!/bin/bash
 
 #########################################################################
 # Build your SD card image based on: 2021-10-30-raspios-bullseye-arm64.zip
