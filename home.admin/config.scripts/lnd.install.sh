@@ -57,6 +57,7 @@ if [ "$1" = "info" ] ; then
     if [ "${availableVersion}" == "" ]; then
       availableVersion="${lndVersion}"
     fi
+    echo "# ${availableVersion}"
     # check major & miner version value
     availableMajor=$(echo ${availableVersion} | cut -d "." -f1 | grep -o '[[:digit:]]*' | tail -n 1)
     compareMajor=$(echo ${compareVersion} | cut -d "." -f1 | grep -o '[[:digit:]]*' | tail -n 1)
