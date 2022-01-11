@@ -311,7 +311,7 @@ if [ "$1" = "status" ]; then
             isMyNodeHDD=$(sudo ls /mnt/storage/mynode/bitcoin/bitcoin.conf 2>/dev/null | grep -c '.conf')
             if [ ${isUmbrelHDD} -gt 0 ]; then
               hddGotMigrationData="umbrel"
-              lndVersion=$(grep "lightninglabs/lnd" /mnt/hdd/umbrel/docker-compose.yml | sed 's/.*lnd://' | sed 's/@.*//')
+              lndVersion=$(grep "lightninglabs/lnd" /mnt/storage/umbrel/docker-compose.yml | sed 's/.*lnd://' | sed 's/@.*//')
               echo "lndVersion=${lndVersion}"
             elif [ ${isMyNodeHDD} -gt 0 ]; then
               hddGotMigrationData="mynode"
