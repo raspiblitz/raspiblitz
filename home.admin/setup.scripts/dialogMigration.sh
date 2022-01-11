@@ -112,21 +112,20 @@ fi
   if [ "${migrationMode}" == "outdatedLightning" ]; then
 
     whiptail --title " MIGRATION WARNING " --yes-button "Stop&Shutdown" --no-button "Try Anyway" --yesno " 
+RaspiBlitz might run an TOO OLD of an lightning version to migrate your nodes
+channels database automatically.
 
-RaspiBlitz might run an too old of an lightning version to migrate your nodes
-channels database automatically. You have now two options:
-
+You have now two options:
 1) Shutdown, keep old Node system until RaspiBlitz offers an updated version
 2) Ignore this warning and try your luck (not recommended)
-
       " 16 58
 
-  result=$?
-  echo "${result}"
-  if [ "$?result" != "1" ]; then
-    # user cancel - signal by exit code
-    exit 1
-  fi
+    result=$?
+    echo "${result}"
+    if [ "$?result" != "1" ]; then
+      # user cancel - signal by exit code
+      exit 1
+    fi
 
   fi
 
