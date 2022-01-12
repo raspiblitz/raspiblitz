@@ -14,7 +14,7 @@ fi
 
 PGPsigner="janoside"
 PGPpubkeyLink="https://github.com/janoside.gpg"
-PGPpubkeyFingerprint="F579929B39B119CC7B0BB71FB326ACF51F317B69"
+PGPpubkeyFingerprint="70C0B166321C0AF8"
 
 source /mnt/hdd/raspiblitz.conf
 
