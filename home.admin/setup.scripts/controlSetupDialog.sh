@@ -63,9 +63,23 @@ fi
 ############################################
 # QuickOption: Migration from other node
 if [ "${setupPhase}" == "migration" ]; then
+
+  source <(/home/admin/_cache.sh get hddGotMigrationData hddVersionLND)
+
   # show recovery dialog
   echo "# Starting migration dialog (${hddGotMigrationData}) ..."
-  /home/admin/setup.scripts/dialogMigration.sh ${hddGotMigrationData}
+
+  # check if lightning is outdated
+  migrationMode="normal"
+  if [ "${lndVersion}" != "" ]; then
+    # get local lnd version & check compatibility
+    source <(/home/admin/config.scripts/lnd.install.sh info "${lndVersion}")
+    if [ "${compatible}" != "1" ]; then
+      migrationMode="outdatedLightning"
+    fi 
+  fi
+
+  /home/admin/setup.scripts/dialogMigration.sh ${hddGotMigrationData} ${migrationMode}
   if [ "$?" == "0" ]; then
     # mark migration to happen on provision
     echo "migrationOS='${hddGotMigrationData}'" >> $SETUPFILE
@@ -77,6 +91,7 @@ if [ "${setupPhase}" == "migration" ]; then
     # on cancel - default to normal setup
     /home/admin/_cache.sh set setupPhase "setup"
     echo "# you refused node migration option - defaulting to normal setup"
+    /home/admin/00raspiblitz.sh
     exit 1
   fi
 
