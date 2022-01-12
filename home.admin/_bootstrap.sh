@@ -420,7 +420,7 @@ if [ ${isMounted} -eq 0 ]; then
   /home/admin/_cache.sh set hddBlocksBitcoin "${hddBlocksBitcoin}"
   /home/admin/_cache.sh set hddBlocksLitecoin "${hddBlocksLitecoin}"
   /home/admin/_cache.sh set hddGotMigrationData "${hddGotMigrationData}"
-  /home/admin/_cache.sh set hddVersionLND "$hddVersionLND}"
+  /home/admin/_cache.sh set hddVersionLND "${hddVersionLND}"
   echo ""
   echo "HDD is there but not AutoMounted yet - Waiting for user Setup/Update" >> $logFile
 

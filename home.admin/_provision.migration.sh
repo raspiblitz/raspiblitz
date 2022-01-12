@@ -16,6 +16,9 @@ source ${infoFile}
 # SETUPFILE - data from setup process
 source /var/cache/raspiblitz/temp/raspiblitz.setup
 
+# CACHEDATA - import needed data from cache 
+source <(/home/admin/_cache.sh get hddGotMigrationData hddVersionLND)
+
 # log header
 echo "" > ${logFile}
 sudo chmod 640 ${logFile}
@@ -23,8 +26,6 @@ echo "###################################" >> ${logFile}
 echo "# _provision.migration.sh" >> ${logFile}
 echo "###################################" >> ${logFile}
 /home/admin/_cache.sh set message "Provision Migration"
-
-source <(/home/admin/config.scripts/blitz.datadrive.sh status)
 
 if [ "${hddGotMigrationData}" == "" ]; then
   /home/admin/config.scripts/blitz.error.sh _provision.migration.sh "missing-hostnamemigrationdata" "missing hddGotMigrationData" "" ${logFile}
