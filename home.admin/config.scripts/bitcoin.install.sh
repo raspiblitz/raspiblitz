@@ -109,6 +109,11 @@ if [ "$1" = "install" ]; then
     echo "!!! BUILD FAILED --> Was not able to install bitcoind version(${bitcoinVersion})"
     exit 1
   fi
+  if [ "$(alias | grep -c "alias bitcoinlog")" -eq 0 ];then 
+    echo "alias bitcoinlog=\"sudo tail -n 30 -f /mnt/hdd/bitcoin/debug.log\""  | sudo tee -a /home/admin/_aliases
+  fi
+  sudo chown admin:admin /home/admin/_aliases
+
   echo "- Bitcoin install OK"
   exit 0
 fi
@@ -121,7 +126,7 @@ if [ "${CHAIN}" != signet ]&&[ "${CHAIN}" != testnet ]&&[ "${CHAIN}" != mainnet 
   exit 1
 fi
 # prefixes for parallel services
-if [ ${CHAIN} = testnet ];then
+if [ "${CHAIN}" = testnet ];then
   prefix="t"
   bitcoinprefix="test"
   zmqprefix=21  # zmqpubrawblock=21332 zmqpubrawtx=21333
@@ -137,6 +142,15 @@ elif [ ${CHAIN} = mainnet ];then
   zmqprefix=28
   rpcprefix=""
 fi
+# bitcoinlogpath
+if [ ${CHAIN} = signet ]; then
+  bitcoinlogpath="/mnt/hdd/bitcoin/signet/debug.log"
+elif [ ${CHAIN} = testnet ]; then
+  bitcoinlogpath="/mnt/hdd/bitcoin/testnet3/debug.log"
+elif [ ${CHAIN} = mainnet ]; then
+  bitcoinlogpath="/mnt/hdd/bitcoin/debug.log"      
+fi
+
 
 function removeParallelService() {
   if [ -f "/etc/systemd/system/${prefix}bitcoind.service" ];then
@@ -225,6 +239,7 @@ signet.addnode=nsgyo7begau4yecc46ljfecaykyzszcseapxmtu6adrfagfrrzrlngyd.onion:38
   fi
 
   removeParallelService
+
   if [ ${CHAIN} = mainnet ];then
     sudo cp /home/admin/assets/bitcoind.service /etc/systemd/system/bitcoind.service
   else 
@@ -244,7 +259,7 @@ ExecStart=/usr/local/bin/bitcoind -${CHAIN} \\
                                   -pid=/mnt/hdd/bitcoin/${prefix}bitcoind.pid \\
                                   -conf=/mnt/hdd/bitcoin/bitcoin.conf \\
                                   -datadir=/mnt/hdd/bitcoin \\
-                                  -debuglogfile=/mnt/hdd/bitcoin/${prefix}debug.log
+                                  -debuglogfile=${bitcoinlogpath}
 
 # Make sure the config directory is readable by the service user
 PermissionsStartOnly=true
@@ -294,21 +309,14 @@ WantedBy=multi-user.target
 
   echo "# Add aliases ${prefix}bitcoin-cli, ${prefix}bitcoind, ${prefix}bitcoinlog"
   sudo -u admin touch /home/admin/_aliases
-  if [ $(alias | grep -c "alias ${prefix}bitcoin-cli") -eq 0 ];then 
+  if [ "$(alias | grep -c "alias ${prefix}bitcoin-cli")" -eq 0 ];then 
     echo "\
 alias ${prefix}bitcoin-cli=\"/usr/local/bin/bitcoin-cli\
  -rpcport=${rpcprefix}8332\"
 alias ${prefix}bitcoind=\"/usr/local/bin/bitcoind -${CHAIN}\"\
 "  | sudo tee -a /home/admin/_aliases
   fi
-  if [ $(alias | grep -c "alias ${prefix}bitcoinlog") -eq 0 ];then 
-    if [ ${CHAIN} = signet ]; then
-      bitcoinlogpath="/mnt/hdd/bitcoin/signet/debug.log"
-    elif [ ${CHAIN} = testnet ]; then
-      bitcoinlogpath="/mnt/hdd/bitcoin/testnet3/debug.log"
-    elif [ ${CHAIN} = mainnet ]; then
-      bitcoinlogpath="/mnt/hdd/bitcoin/debug.log"      
-    fi
+  if [ "$(alias | grep -c "alias ${prefix}bitcoinlog")" -eq 0 ];then 
     echo "\
 alias ${prefix}bitcoinlog=\"sudo tail -n 30 -f ${bitcoinlogpath}\"\
 "  | sudo tee -a /home/admin/_aliases
