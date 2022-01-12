@@ -312,13 +312,13 @@ if [ "$1" = "status" ]; then
             if [ ${isUmbrelHDD} -gt 0 ]; then
               hddGotMigrationData="umbrel"
               lndVersion=$(grep "lightninglabs/lnd" /mnt/storage/umbrel/docker-compose.yml 2>/dev/null | sed 's/.*lnd://' | sed 's/@.*//')
-              echo "lndVersion='${lndVersion}'"
+              echo "hddVersionLND='${lndVersion}'"
             elif [ ${isMyNodeHDD} -gt 0 ]; then
               hddGotMigrationData="mynode"
             elif [ ${isCitadelHDD} -gt 0 ]; then
               hddGotMigrationData="citadel"
               lndVersion=$(grep "lightninglabs/lnd" /mnt/storage/citadel/docker-compose.yml 2>/dev/null | sed 's/.*lnd://' | sed 's/@.*//')
-              echo "lndVersion='${lndVersion}'"
+              echo "hddVersionLND='${lndVersion}'"
             fi
           else
             echo "# not an ext4 drive - all known fullnode packages use ext4 at the moment"

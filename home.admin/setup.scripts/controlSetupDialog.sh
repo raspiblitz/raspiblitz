@@ -63,6 +63,9 @@ fi
 ############################################
 # QuickOption: Migration from other node
 if [ "${setupPhase}" == "migration" ]; then
+
+  source <(/home/admin/_cache.sh get hddGotMigrationData hddVersionLND)
+
   # show recovery dialog
   echo "# Starting migration dialog (${hddGotMigrationData}) ..."
 
