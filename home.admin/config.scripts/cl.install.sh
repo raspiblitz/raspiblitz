@@ -44,9 +44,12 @@ function installDependencies()
    gettext
   # additional requirements
   sudo apt-get install -y postgresql libpq-dev
+  sudo pip3 install --user mrkd==0.2.0
+  sudo pip3 install --user mistune==0.8.4
+  # for pylightning
+  echo "- Install from the requirements.txt"
   sudo -u bitcoin pip3 install --user mrkd==0.2.0
   sudo -u bitcoin pip3 install --user mistune==0.8.4
-  echo "- Install from the requirements.txt"
   sudo -u bitcoin pip3 install --user -r requirements.txt
 }
 
