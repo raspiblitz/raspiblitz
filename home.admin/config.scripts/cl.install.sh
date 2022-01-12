@@ -330,6 +330,7 @@ always-use-proxy=true
   #############
   echo
   echo "# Set logrotate for ${netprefix}lightningd"
+  sudo -u bitcoin mkdir /home/bitcoin/.lightning/${CLNETWORK}/cl.log_old
   echo "\
 /home/bitcoin/.lightning/${CLNETWORK}/cl.log
 {
