@@ -111,11 +111,12 @@ fi
   # outdated warning
   if [ "${migrationMode}" == "outdatedLightning" ]; then
 
-    whiptail --title " MIGRATION WARNING " --yes-button "Stop&Shutdown" --no-button "Try Anyway" --yesno " 
+    whiptail --title " MIGRATION WARNING " --yes-button "Stop Migration" --no-button "Try Anyway" --yesno " 
 RaspiBlitz might run an TOO OLD of an lightning version to migrate your nodes channel data automatically.
 
 You have now two options:
-1) Shutdown, keep old Node system until RaspiBlitz offers an updated version
+1) Stop Migration, shutdown, keep your old node system
+   until RaspiBlitz offers an updated version
 2) Ignore this warning and try your luck (not recommended)
       " 16 62
 
@@ -136,7 +137,7 @@ You have now two options:
 if [ "${migrationOS}" == "umbrel" ]; then
 
   # infodialog
-  whiptail --title " UMBREL --> RASPIBLITZ " --yes-button "Start Migration" --no-button "No+Shutdown" --yesno "RaspiBlitz found data from UMBREL
+  whiptail --title " UMBREL --> RASPIBLITZ " --yes-button "Start Migration" --no-button "Cancel Migration" --yesno "RaspiBlitz found data from UMBREL
 
 You can migrate your blockchain & LND data (funds & channels) over to RaspiBlitz.
 
@@ -163,7 +164,7 @@ fi
 if [ "${migrationOS}" == "citadel" ]; then
 
   # infodialog
-  whiptail --title " CITADEL --> RASPIBLITZ " --yes-button "Start Migration" --no-button "No+Shutdown" --yesno "RaspiBlitz found data from CITADEL
+  whiptail --title " CITADEL --> RASPIBLITZ " --yes-button "Start Migration" --no-button "Cancel Migration" --yesno "RaspiBlitz found data from CITADEL
 
 You can migrate your blockchain & LND data (funds & channels) over to RaspiBlitz.
 
@@ -190,7 +191,7 @@ fi
 if [ "${migrationOS}" == "mynode" ]; then
 
   # infodialog
-  whiptail --title " MYNODE --> RASPIBLITZ " --yes-button "Start Migration" --no-button "No+Shutdown" --yesno "RaspiBlitz found data from MYNODE
+  whiptail --title " MYNODE --> RASPIBLITZ " --yes-button "Start Migration" --no-button "Cancel Migration" --yesno "RaspiBlitz found data from MYNODE
 
 You can migrate your blockchain & LND data (funds & channels) over to RaspiBlitz.
 

@@ -91,6 +91,7 @@ if [ "${setupPhase}" == "migration" ]; then
     # on cancel - default to normal setup
     /home/admin/_cache.sh set setupPhase "setup"
     echo "# you refused node migration option - defaulting to normal setup"
+    /home/admin/00raspiblitz.sh
     exit 1
   fi
 
