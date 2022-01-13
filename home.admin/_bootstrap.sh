@@ -30,6 +30,7 @@ setupFile="/var/cache/raspiblitz/temp/raspiblitz.setup"
 # Init boostrap log file
 echo "Writing logs to: ${logFile}"
 echo "" > $logFile
+sudo chmod 640 ${logFile}
 echo "***********************************************" >> $logFile
 echo "Running RaspiBlitz Bootstrap ${codeVersion}" >> $logFile
 date >> $logFile
@@ -419,6 +420,7 @@ if [ ${isMounted} -eq 0 ]; then
   /home/admin/_cache.sh set hddBlocksBitcoin "${hddBlocksBitcoin}"
   /home/admin/_cache.sh set hddBlocksLitecoin "${hddBlocksLitecoin}"
   /home/admin/_cache.sh set hddGotMigrationData "${hddGotMigrationData}"
+  /home/admin/_cache.sh set hddVersionLND "${hddVersionLND}"
   echo ""
   echo "HDD is there but not AutoMounted yet - Waiting for user Setup/Update" >> $logFile
 
@@ -572,7 +574,6 @@ if [ ${isMounted} -eq 0 ]; then
 
   # load fresh setup data
   echo "# Sourcing ${setupFile} " >> ${logFile}
-  cat ${setupFile} >> ${logFile}
   source ${setupFile}
 
   # make sure basic info is in raspiblitz.info

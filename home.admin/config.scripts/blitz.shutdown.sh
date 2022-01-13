@@ -39,16 +39,21 @@ sudo systemctl stop tlightningd 2>/dev/null
 sudo systemctl stop slnd 2>/dev/null
 sudo systemctl stop slightningd 2>/dev/null
 
-# stopping bitcoin (thru cli)
-echo "stop ${network}d (1) - please wait .."
-timeout 10 sudo -u bitcoin ${network}-cli stop 2>/dev/null
+if [ "${network}" != "" ]; then
 
-# stopping bitcoind (thru systemd)
-echo "stop ${network}d (2) - please wait .."
-sudo systemctl stop ${network}d 2>/dev/null
-sudo systemctl stop t${network}d 2>/dev/null
-sudo systemctl stop s${network}d 2>/dev/null
-sleep 3
+  # stopping bitcoin (thru cli)
+  echo "stop ${network}d (1) - please wait .."
+  timeout 10 sudo -u bitcoin ${network}-cli stop 2>/dev/null
+
+  # stopping bitcoind (thru systemd)
+  echo "stop ${network}d (2) - please wait .."
+  sudo systemctl stop ${network}d 2>/dev/null
+  sudo systemctl stop t${network}d 2>/dev/null
+  sudo systemctl stop s${network}d 2>/dev/null
+  sleep 3
+else
+  echo "skipping stopping layer1 (network=='' in cache)"
+fi
 
 # make sure drives are synced before shutdown
 source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
@@ -60,4 +65,17 @@ sync
 
 echo "starting shutdown ..."
 sudo shutdown ${shutdownParams}
+
+# detect missing DBUS 
+if [ "${$DBUS_SESSION_BUS_ADDRESS}" == "" ]; then
+  echo "WARN: Missing \$DBUS_SESSION_BUS_ADDRESS .. "
+  if [ "$1" = "reboot" ]; then
+    echo "RUNNING FALLBACK REBOOT .. "
+    sudo systemctl --force --force reboot
+  else
+    echo "RUNNING FALLBACK SHUTDOWN .. "
+    sudo systemctl --force --force poweroff
+  fi
+fi
+
 exit 0

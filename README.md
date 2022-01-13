@@ -1332,7 +1332,8 @@ Copy the following command into your terminal and execute:
 `wget https://raw.githubusercontent.com/rootzoll/raspiblitz/v1.7/build_sdcard.sh && sudo bash build_sdcard.sh`
 
 As you can see from the URL, you can find the build script in this Git repo under `build_sdcard.sh`.
-You can check what gets installed and configured in detail.
+
+You can check what gets installed and configured in detail with optional parameters.
 Feel free to post improvements as pull requests.
 
 The whole build process takes a while.

@@ -44,9 +44,12 @@ function installDependencies()
    gettext
   # additional requirements
   sudo apt-get install -y postgresql libpq-dev
+  sudo pip3 install mrkd==0.2.0
+  sudo pip3 install mistune==0.8.4
+  # for pylightning
+  echo "- Install from the requirements.txt"
   sudo -u bitcoin pip3 install --user mrkd==0.2.0
   sudo -u bitcoin pip3 install --user mistune==0.8.4
-  echo "- Install from the requirements.txt"
   sudo -u bitcoin pip3 install --user -r requirements.txt
 }
 
@@ -57,18 +60,18 @@ if [ "$1" = "install" ]; then
   echo "# no configuration, no systemd service"
 
   # check if the binary is already installed
-  if [ $(sudo -u admin lightningd 2>/dev/null --version | grep -c ".") -gt 0 ]; then
+  if [ $(sudo -u bitcoin lightning-cli --version 2>/dev/null | grep -c .) -gt 0 ]; then
     echo "c-lightning binary already installed - done"
     exit 1
   fi
 
   # prepare download dir
-  sudo rm -rf /home/admin/download/cl
-  sudo -u admin mkdir -p /home/admin/download/cl
-  cd /home/admin/download/cl || exit 1
+  sudo rm -rf /home/bitcoin/download
+  sudo -u bitcoin mkdir -p /home/bitcoin/download
+  cd /home/bitcoin/download || exit 1
 
-  sudo -u admin wget -O "pgp_keys.asc" ${PGPpkeys}
-  sudo -u admin gpg --import --import-options show-only ./pgp_keys.asc
+  sudo -u bitcoin wget -O "pgp_keys.asc" ${PGPpkeys}
+  sudo -u bitcoin gpg --import --import-options show-only ./pgp_keys.asc
   fingerprint=$(gpg "pgp_keys.asc" 2>/dev/null | grep "${PGPcheck}" -c)
   if [ ${fingerprint} -lt 1 ]; then
     echo
@@ -77,12 +80,12 @@ if [ "$1" = "install" ]; then
     echo "PRESS ENTER to TAKE THE RISK if you think all is OK"
     read key
   fi
-  sudo -u admin gpg --import ./pgp_keys.asc
+  sudo -u bitcoin gpg --import ./pgp_keys.asc
 
-  sudo -u admin wget https://github.com/ElementsProject/lightning/releases/download/${CLVERSION}/SHA256SUMS
-  sudo -u admin wget https://github.com/ElementsProject/lightning/releases/download/${CLVERSION}/SHA256SUMS.asc
+  sudo -u bitcoin wget https://github.com/ElementsProject/lightning/releases/download/${CLVERSION}/SHA256SUMS
+  sudo -u bitcoin wget https://github.com/ElementsProject/lightning/releases/download/${CLVERSION}/SHA256SUMS.asc
   
-  verifyResult=$(sudo -u admin gpg --verify SHA256SUMS.asc 2>&1)
+  verifyResult=$(sudo -u bitcoin gpg --verify SHA256SUMS.asc 2>&1)
 
   goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
   echo "goodSignature(${goodSignature})"
@@ -100,7 +103,7 @@ if [ "$1" = "install" ]; then
     echo 
   fi
   
-  sudo -u admin wget https://github.com/ElementsProject/lightning/releases/download/${CLVERSION}/clightning-${CLVERSION}.zip
+  sudo -u bitcoin wget https://github.com/ElementsProject/lightning/releases/download/${CLVERSION}/clightning-${CLVERSION}.zip
   
   hashCheckResult=$(sha256sum -c SHA256SUMS 2>&1)
   goodHash=$(echo ${hashCheckResult} | grep 'OK' -c)
@@ -117,21 +120,21 @@ if [ "$1" = "install" ]; then
     echo
   fi
   
-  sudo -u admin unzip clightning-${CLVERSION}.zip
+  sudo -u bitcoin unzip clightning-${CLVERSION}.zip
   cd clightning-${CLVERSION} || exit 1
 
   installDependencies
 
   echo "- Configuring EXPERIMENTAL_FEATURES enabled"
-  sudo -u admin ./configure --enable-experimental-features
+  sudo -u bitcoin ./configure --enable-experimental-features
   
   echo "- Building C-lightning from source"
-  sudo -u admin make
+  sudo -u bitcoin make
 
   echo "- Install to /usr/local/bin/"
   sudo make install || exit 1
   
-  installed=$(sudo -u admin lightning-cli --version)
+  installed=$(sudo -u bitcoin lightning-cli --version)
   if [ ${#installed} -eq 0 ]; then
     echo
     echo "!!! BUILD FAILED --> Was not able to install C-lightning"
@@ -142,7 +145,7 @@ if [ "$1" = "install" ]; then
   if [ ${correctVersion} -eq 0 ]; then
     echo
     echo "!!! BUILD FAILED --> installed C-lightning is not version ${CLVERSION}"
-    sudo -u admin lightning-cli --version
+    sudo -u bitcoin lightning-cli --version
     exit 1
   fi
   echo
@@ -327,6 +330,7 @@ always-use-proxy=true
   #############
   echo
   echo "# Set logrotate for ${netprefix}lightningd"
+  sudo -u bitcoin mkdir /home/bitcoin/.lightning/${CLNETWORK}/cl.log_old
   echo "\
 /home/bitcoin/.lightning/${CLNETWORK}/cl.log
 {

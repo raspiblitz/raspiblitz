@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# check if started with sudo
-if [ "$EUID" -ne 0 ]; then
+# check if run by root user
+if [ "$EUID" -ne 0 ]; then 
   echo "error='run as root'"
   exit 1
 fi
@@ -50,13 +50,13 @@ echo "### BASIC SYSTEM SETTINGS ###" >> ${logFile}
 /home/admin/_cache.sh set message "Setup System ."
 
 echo "# Make sure the user bitcoin is in the debian-tor group"
-sudo usermod -a -G debian-tor bitcoin
+usermod -a -G debian-tor bitcoin
 
 echo "# Optimizing log files: rotate daily, keep 2 weeks & compress old days " >> ${logFile}
-sudo sed -i "s/^weekly/daily/g" /etc/logrotate.conf >> ${logFile} 2>&1
-sudo sed -i "s/^rotate 4/rotate 14/g" /etc/logrotate.conf >> ${logFile} 2>&1
-sudo sed -i "s/^#compress/compress/g" /etc/logrotate.conf >> ${logFile} 2>&1
-sudo systemctl restart logrotate
+sed -i "s/^weekly/daily/g" /etc/logrotate.conf >> ${logFile} 2>&1
+sed -i "s/^rotate 4/rotate 14/g" /etc/logrotate.conf >> ${logFile} 2>&1
+sed -i "s/^#compress/compress/g" /etc/logrotate.conf >> ${logFile} 2>&1
+systemctl restart logrotate
 
 # make sure to have bitcoin core >=22 is backwards comp
 # see https://github.com/rootzoll/raspiblitz/issues/2546
@@ -64,34 +64,34 @@ sed -i '/^deprecatedrpc=.*/d' /mnt/hdd/bitcoin/bitcoin.conf 2>/dev/null
 echo "deprecatedrpc=addresses" >> /mnt/hdd/bitcoin/bitcoin.conf 2>/dev/null
 
 # backup SSH PubKeys
-sudo /home/admin/config.scripts/blitz.ssh.sh backup
+/home/admin/config.scripts/blitz.ssh.sh backup
 
 # optimze mempool if RAM >1GB
 kbSizeRAM=$(cat /proc/meminfo | grep "MemTotal" | sed 's/[^0-9]*//g')
 if [ ${kbSizeRAM} -gt 1500000 ]; then
   echo "Detected RAM >1GB --> optimizing ${network}.conf"
-  sudo sed -i "s/^maxmempool=.*/maxmempool=300/g" /mnt/hdd/${network}/${network}.conf
+  sed -i "s/^maxmempool=.*/maxmempool=300/g" /mnt/hdd/${network}/${network}.conf
 fi
 if [ ${kbSizeRAM} -gt 3500000 ]; then
   echo "Detected RAM >3GB --> optimizing ${network}.conf"
-  sudo sed -i "s/^maxmempool=.*/maxmempool=300/g" /mnt/hdd/${network}/${network}.conf
+  sed -i "s/^maxmempool=.*/maxmempool=300/g" /mnt/hdd/${network}/${network}.conf
 fi
 
 # link and copy HDD content into new OS on sd card
 echo "Copy HDD content for user admin" >> ${logFile}
-sudo mkdir /home/admin/.${network} >> ${logFile} 2>&1
-sudo cp /mnt/hdd/${network}/${network}.conf /home/admin/.${network}/${network}.conf >> ${logFile} 2>&1
-sudo mkdir /home/admin/.lnd >> ${logFile} 2>&1
-sudo cp /mnt/hdd/lnd/lnd.conf /home/admin/.lnd/lnd.conf >> ${logFile} 2>&1
-sudo cp /mnt/hdd/lnd/tls.cert /home/admin/.lnd/tls.cert >> ${logFile} 2>&1
-sudo mkdir /home/admin/.lnd/data >> ${logFile} 2>&1
-sudo cp -r /mnt/hdd/lnd/data/chain /home/admin/.lnd/data/chain >> ${logFile} 2>&1
-sudo chown -R admin:admin /home/admin/.${network} >> ${logFile} 2>&1
-sudo chown -R admin:admin /home/admin/.lnd >> ${logFile} 2>&1
-sudo cp /home/admin/assets/${network}d.service /etc/systemd/system/${network}d.service >> ${logFile} 2>&1
-sudo cp /home/admin/assets/tmux.conf.local /mnt/hdd/.tmux.conf.local >> ${logFile} 2>&1
-sudo chown admin:admin /mnt/hdd/.tmux.conf.local >> ${logFile} 2>&1
-sudo ln -s -f /mnt/hdd/.tmux.conf.local /home/admin/.tmux.conf.local >> ${logFile} 2>&1
+mkdir /home/admin/.${network} >> ${logFile} 2>&1
+cp /mnt/hdd/${network}/${network}.conf /home/admin/.${network}/${network}.conf >> ${logFile} 2>&1
+mkdir /home/admin/.lnd >> ${logFile} 2>&1
+cp /mnt/hdd/lnd/lnd.conf /home/admin/.lnd/lnd.conf >> ${logFile} 2>&1
+cp /mnt/hdd/lnd/tls.cert /home/admin/.lnd/tls.cert >> ${logFile} 2>&1
+mkdir /home/admin/.lnd/data >> ${logFile} 2>&1
+cp -r /mnt/hdd/lnd/data/chain /home/admin/.lnd/data/chain >> ${logFile} 2>&1
+chown -R admin:admin /home/admin/.${network} >> ${logFile} 2>&1
+chown -R admin:admin /home/admin/.lnd >> ${logFile} 2>&1
+cp /home/admin/assets/${network}d.service /etc/systemd/system/${network}d.service >> ${logFile} 2>&1
+cp /home/admin/assets/tmux.conf.local /mnt/hdd/.tmux.conf.local >> ${logFile} 2>&1
+chown admin:admin /mnt/hdd/.tmux.conf.local >> ${logFile} 2>&1
+ln -s -f /mnt/hdd/.tmux.conf.local /home/admin/.tmux.conf.local >> ${logFile} 2>&1
 
 
 # PREPARE LND (if activated)
@@ -99,10 +99,10 @@ if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
   # backup LND TLS certs
   # https://github.com/rootzoll/raspiblitz/issues/324
   echo "*** Make backup of LND TLS files" >> ${logFile}
-  sudo rm -r  /var/cache/raspiblitz/tls_backup 2>/dev/null
-  sudo mkdir /var/cache/raspiblitz/tls_backup 2>/dev/null
-  sudo cp /mnt/hdd/lnd/tls.cert /var/cache/raspiblitz/tls_backup/tls.cert >> ${logFile} 2>&1
-  sudo cp /mnt/hdd/lnd/tls.key /var/cache/raspiblitz/tls_backup/tls.key >> ${logFile} 2>&1
+  rm -r  /var/cache/raspiblitz/tls_backup 2>/dev/null
+  mkdir /var/cache/raspiblitz/tls_backup 2>/dev/null
+  cp /mnt/hdd/lnd/tls.cert /var/cache/raspiblitz/tls_backup/tls.cert >> ${logFile} 2>&1
+  cp /mnt/hdd/lnd/tls.key /var/cache/raspiblitz/tls_backup/tls.key >> ${logFile} 2>&1
 fi
 echo "" >> ${logFile}
 
@@ -119,17 +119,17 @@ cd /home/admin/tmpScriptDL
 echo "installing bash completion for bitcoin-cli and lncli"
 wget https://raw.githubusercontent.com/bitcoin/bitcoin/master/contrib/bitcoin-cli.bash-completion
 wget https://raw.githubusercontent.com/lightningnetwork/lnd/master/contrib/lncli.bash-completion
-sudo cp *.bash-completion /etc/bash_completion.d/
+cp *.bash-completion /etc/bash_completion.d/
 echo "OK - bash completion available after next login"
 echo "type \"bitcoin-cli getblockch\", press [Tab] → bitcoin-cli getblockchaininfo"
 rm -r /home/admin/tmpScriptDL
 cd
 
 ###### SWAP File
-source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
+source <(/home/admin/config.scripts/blitz.datadrive.sh status)
 if [ ${isSwapExternal} -eq 0 ]; then
   echo "No external SWAP found - creating ... "
-  sudo /home/admin/config.scripts/blitz.datadrive.sh swap on
+  /home/admin/config.scripts/blitz.datadrive.sh swap on
 else
   echo "SWAP already OK"
 fi
@@ -138,46 +138,46 @@ fi
 echo ""
 echo "*** Setting and Activating Firewall ***"
 echo "deny incoming connection on other ports"
-sudo ufw default deny incoming
+ufw default deny incoming
 echo "allow outgoing connections"
-sudo ufw default allow outgoing
+ufw default allow outgoing
 echo "allow: ssh"
-sudo ufw allow ssh
+ufw allow ssh
 echo "allow: bitcoin testnet"
-sudo ufw allow 18333 comment 'bitcoin testnet'
+ufw allow 18333 comment 'bitcoin testnet'
 echo "allow: bitcoin mainnet"
-sudo ufw allow 8333 comment 'bitcoin mainnet'
+ufw allow 8333 comment 'bitcoin mainnet'
 echo 'allow: lightning testnet'
-sudo ufw allow 19735 comment 'lightning testnet'
+ufw allow 19735 comment 'lightning testnet'
 echo "allow: lightning mainnet"
-sudo ufw allow 9735 comment 'lightning mainnet'
+ufw allow 9735 comment 'lightning mainnet'
 echo "allow: lightning gRPC"
-sudo ufw allow 10009 comment 'lightning gRPC'
+ufw allow 10009 comment 'lightning gRPC'
 echo "allow: lightning REST API"
-sudo ufw allow 8080 comment 'lightning REST API'
+ufw allow 8080 comment 'lightning REST API'
 echo "allow: public web HTTP"
-sudo ufw allow from any to any port 80 comment 'allow public web HTTP'
+ufw allow from any to any port 80 comment 'allow public web HTTP'
 echo "allow: local web admin HTTPS"
-sudo ufw allow from 10.0.0.0/8 to any port 443 comment 'allow local LAN HTTPS'
-sudo ufw allow from 172.16.0.0/12 to any port 443 comment 'allow local LAN HTTPS'
-sudo ufw allow from 192.168.0.0/16 to any port 443 comment 'allow local LAN HTTPS'
+ufw allow from 10.0.0.0/8 to any port 443 comment 'allow local LAN HTTPS'
+ufw allow from 172.16.0.0/12 to any port 443 comment 'allow local LAN HTTPS'
+ufw allow from 192.168.0.0/16 to any port 443 comment 'allow local LAN HTTPS'
 echo "open firewall for auto nat discover (see issue #129)"
-sudo ufw allow proto udp from 10.0.0.0/8 port 1900 to any comment 'allow local LAN SSDP for UPnP discovery'
-sudo ufw allow proto udp from 172.16.0.0/12 port 1900 to any comment 'allow local LAN SSDP for UPnP discovery'
-sudo ufw allow proto udp from 192.168.0.0/16 port 1900 to any comment 'allow local LAN SSDP for UPnP discovery'
+ufw allow proto udp from 10.0.0.0/8 port 1900 to any comment 'allow local LAN SSDP for UPnP discovery'
+ufw allow proto udp from 172.16.0.0/12 port 1900 to any comment 'allow local LAN SSDP for UPnP discovery'
+ufw allow proto udp from 192.168.0.0/16 port 1900 to any comment 'allow local LAN SSDP for UPnP discovery'
 echo "enable lazy firewall"
-sudo ufw --force enable
+ufw --force enable
 echo ""
 
 # update system
 echo ""
 echo "*** Update System ***"
-sudo apt-mark hold raspberrypi-bootloader
-sudo apt-get update -y
+apt-mark hold raspberrypi-bootloader
+apt-get update -y
 echo "OK - System is now up to date"
 
 # mark setup is done
-sudo sed -i "s/^setupStep=.*/setupStep=100/g" /home/admin/raspiblitz.info
+sed -i "s/^setupStep=.*/setupStep=100/g" /home/admin/raspiblitz.info
 
 ##########################
 # PROVISIONING SERVICES
@@ -196,13 +196,13 @@ if [ ${#bitcoinInterimsUpdate} -gt 0 ]; then
   if [ "${bitcoinInterimsUpdate}" == "reckless" ]; then
     # recklessly update Bitcoin Core to latest release on GitHub
     echo "Provisioning Bitcoin Core reckless interims update" >> ${logFile}
-    sudo /home/admin/config.scripts/bitcoin.update.sh reckless >> ${logFile}
+    /home/admin/config.scripts/bitcoin.update.sh reckless >> ${logFile}
   else
     # when installing the same sd image - this will re-trigger the secure interims update
     # if this a update with a newer RaspiBlitz version .. interims update will be ignored
     # because standard Bitcoin Core version is most more up to date
     echo "Provisioning Bitcoin Core tested interims update" >> ${logFile}
-    sudo /home/admin/config.scripts/bitcoin.update.sh tested ${bitcoinInterimsUpdate} >> ${logFile}
+    /home/admin/config.scripts/bitcoin.update.sh tested ${bitcoinInterimsUpdate} >> ${logFile}
   fi
 else
   echo "Provisioning Bitcoin Core interims update - keep default" >> ${logFile}
@@ -214,13 +214,13 @@ if [ ${#lndInterimsUpdate} -gt 0 ]; then
   if [ "${lndInterimsUpdate}" == "reckless" ]; then
     # recklessly update LND to latest release on GitHub (just for test & dev nodes)
     echo "Provisioning LND reckless interims update" >> ${logFile}
-    sudo /home/admin/config.scripts/lnd.update.sh reckless >> ${logFile}
+    /home/admin/config.scripts/lnd.update.sh reckless >> ${logFile}
   else
     # when installing the same sd image - this will re-trigger the secure interims update
     # if this a update with a newer RaspiBlitz version .. interims update will be ignored
     # because standard LND version is most more up to date
     echo "Provisioning LND verified interims update" >> ${logFile}
-    sudo /home/admin/config.scripts/lnd.update.sh verified ${lndInterimsUpdate} >> ${logFile}
+    /home/admin/config.scripts/lnd.update.sh verified ${lndInterimsUpdate} >> ${logFile}
   fi
 else
   echo "Provisioning LND interims update - keep default" >> ${logFile}
@@ -232,13 +232,13 @@ if [ ${#clInterimsUpdate} -gt 0 ]; then
   if [ "${clInterimsUpdate}" == "reckless" ]; then
     # recklessly update CL to latest release on GitHub (just for test & dev nodes)
     echo "Provisioning CL reckless interims update" >> ${logFile}
-    sudo /home/admin/config.scripts/cl.update.sh reckless >> ${logFile}
+    /home/admin/config.scripts/cl.update.sh reckless >> ${logFile}
   else
     # when installing the same sd image - this will re-trigger the secure interims update
     # if this a update with a newer RaspiBlitz version .. interims update will be ignored
     # because standard CL version is most more up to date
     echo "Provisioning CL verified interims update" >> ${logFile}
-    sudo /home/admin/config.scripts/cl.update.sh verified ${clInterimsUpdate} >> ${logFile}
+    /home/admin/config.scripts/cl.update.sh verified ${clInterimsUpdate} >> ${logFile}
   fi
 else
   echo "Provisioning CL interims update - keep default" >> ${logFile}
@@ -247,8 +247,8 @@ fi
 # Bitcoin Testnet
 if [ "${testnet}" == "on" ]; then
     echo "Provisioning ${network} Testnet - run config script" >> ${logFile}
-    sudo /home/admin/config.scripts/bitcoin.install.sh on testnet >> ${logFile} 2>&1
-    sudo systemctl start tbitcoind >> ${logFile} 2>&1
+    /home/admin/config.scripts/bitcoin.install.sh on testnet >> ${logFile} 2>&1
+    systemctl start tbitcoind >> ${logFile} 2>&1
 else
     echo "Provisioning ${network} Testnet - not active" >> ${logFile}
 fi
@@ -256,16 +256,25 @@ fi
 # Bitcoin Signet
 if [ "${signet}" == "on" ]; then
     echo "Provisioning ${network} Signet - run config script" >> ${logFile}
-    sudo /home/admin/config.scripts/bitcoin.install.sh on signet >> ${logFile} 2>&1
-    sudo systemctl start sbitcoind >> ${logFile} 2>&1
+    /home/admin/config.scripts/bitcoin.install.sh on signet >> ${logFile} 2>&1
+    systemctl start sbitcoind >> ${logFile} 2>&1
 else
     echo "Provisioning ${network} Signet - not active" >> ${logFile}
+fi
+
+# LND binary install
+if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ] || [ "${tlnd}" == "on" ] || [ "${slnd}" == "on" ]; then
+  # if already installed by fatpack will skip 
+  echo "Provisioning LND Binary - run config script" >> ${logFile}
+  /home/admin/config.scripts/lnd.install.sh install >> ${logFile} 2>&1
+else
+    echo "Provisioning LND Binary - not active" >> ${logFile}
 fi
 
 # LND Mainnet (when not main instance)
 if [ "${lnd}" == "on" ] && [ "${lightning}" != "lnd" ]; then
     echo "Provisioning LND Mainnet - run config script" >> ${logFile}
-    sudo /home/admin/config.scripts/lnd.install.sh on mainnet >> ${logFile} 2>&1
+    /home/admin/config.scripts/lnd.install.sh on mainnet >> ${logFile} 2>&1
 else
     echo "Provisioning LND Mainnet - not active as secondary option" >> ${logFile}
 fi
@@ -273,8 +282,8 @@ fi
 # LND Testnet
 if [ "${tlnd}" == "on" ]; then
     echo "Provisioning LND Testnet - run config script" >> ${logFile}
-    sudo /home/admin/config.scripts/lnd.install.sh on testnet >> ${logFile} 2>&1
-    sudo systemctl start tlnd >> ${logFile} 2>&1
+    /home/admin/config.scripts/lnd.install.sh on testnet >> ${logFile} 2>&1
+    systemctl start tlnd >> ${logFile} 2>&1
 else
     echo "Provisioning LND Testnet - not active" >> ${logFile}
 fi
@@ -282,16 +291,25 @@ fi
 # LND Signet
 if [ "${slnd}" == "on" ]; then
     echo "Provisioning LND Signet - run config script" >> ${logFile}
-    sudo /home/admin/config.scripts/lnd.install.sh on signet >> ${logFile} 2>&1
-    sudo systemctl start slnd >> ${logFile} 2>&1
+    /home/admin/config.scripts/lnd.install.sh on signet >> ${logFile} 2>&1
+    systemctl start slnd >> ${logFile} 2>&1
 else
   echo "Provisioning LND Signet - not active" >> ${logFile}
+fi
+
+# LND binary install
+if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ] || [ "${tcl}" == "on" ] || [ "${scl}" == "on" ]; then
+  # if already installed by fatpack will skip 
+  echo "Provisioning C-Lightning Binary - run config script" >> ${logFile}
+  /home/admin/config.scripts/cl.install.sh on install >> ${logFile} 2>&1
+else
+    echo "Provisioning C-Lightning Binary - not active" >> ${logFile}
 fi
 
 # CL Mainnet (when not main instance)
 if [ "${cl}" == "on" ] && [ "${lightning}" != "cl" ]; then
     echo "Provisioning CL Mainnet - run config script" >> ${logFile}
-    sudo /home/admin/config.scripts/cl.install.sh on mainnet >> ${logFile} 2>&1
+    /home/admin/config.scripts/cl.install.sh on mainnet >> ${logFile} 2>&1
 else
   echo "Provisioning CL Mainnet - not active as secondary option" >> ${logFile}
 fi
@@ -299,7 +317,7 @@ fi
 # CL Testnet
 if [ "${tcl}" == "on" ]; then
     echo "Provisioning CL Testnet - run config script" >> ${logFile}
-    sudo /home/admin/config.scripts/cl.install.sh on testnet >> ${logFile} 2>&1
+    /home/admin/config.scripts/cl.install.sh on testnet >> ${logFile} 2>&1
 else
     echo "Provisioning CL Testnet - not active" >> ${logFile}
 fi
@@ -307,7 +325,7 @@ fi
 # CL Signet
 if [ "${scl}" == "on" ]; then
     echo "Provisioning CL Signet - run config script" >> ${logFile}
-    sudo /home/admin/config.scripts/cl.install.sh on signet >> ${logFile} 2>&1
+    /home/admin/config.scripts/cl.install.sh on signet >> ${logFile} 2>&1
 else
     echo "Provisioning CL Signet - not active" >> ${logFile}
 fi
@@ -316,7 +334,7 @@ fi
 if [ "${runBehindTor}" == "on" ]; then
     echo "Provisioning TOR - run config script" >> ${logFile}
     /home/admin/_cache.sh set message "Setup Tor (takes time)"
-    sudo /home/admin/config.scripts/tor.network.sh on >> ${logFile} 2>&1
+    /home/admin/config.scripts/tor.network.sh on >> ${logFile} 2>&1
 else
     echo "Provisioning Tor - keep default" >> ${logFile}
 fi
@@ -325,7 +343,7 @@ fi
 if [ "${autoPilot}" = "on" ]; then
     echo "Provisioning AUTO PILOT - run config script" >> ${logFile}
     /home/admin/_cache.sh set message "Setup AutoPilot"
-    sudo /home/admin/config.scripts/lnd.autopilot.sh on >> ${logFile} 2>&1
+    /home/admin/config.scripts/lnd.autopilot.sh on >> ${logFile} 2>&1
 else
     echo "Provisioning AUTO PILOT - keep default" >> ${logFile}
 fi
@@ -334,7 +352,7 @@ fi
 if [ "${networkUPnP}" = "on" ]; then
     echo "Provisioning NETWORK UPnP - run config script" >> ${logFile}
     /home/admin/_cache.sh set message "Setup UPnP"
-    sudo /home/admin/config.scripts/network.upnp.sh on >> ${logFile} 2>&1
+    /home/admin/config.scripts/network.upnp.sh on >> ${logFile} 2>&1
 else
     echo "Provisioning NETWORK UPnP  - keep default" >> ${logFile}
 fi
@@ -343,7 +361,7 @@ fi
 if [ "${autoNatDiscovery}" = "on" ]; then
     echo "Provisioning LND AUTO NAT DISCOVERY - run config script" >> ${logFile}
     /home/admin/_cache.sh set message "Setup AutoNAT"
-    sudo /home/admin/config.scripts/lnd.autonat.sh on >> ${logFile} 2>&1
+    /home/admin/config.scripts/lnd.autonat.sh on >> ${logFile} 2>&1
 else
     echo "Provisioning AUTO NAT DISCOVERY - keep default" >> ${logFile}
 fi
@@ -352,7 +370,7 @@ fi
 if [ "${#dynDomain}" -gt 0 ]; then
     echo "Provisioning DYNAMIC DOMAIN - run config script" >> ${logFile}
     /home/admin/_cache.sh set message "Setup DynamicDomain"
-    sudo /home/admin/config.scripts/internet.dyndomain.sh on ${dynDomain} ${dynUpdateUrl} >> ${logFile} 2>&1
+    /home/admin/config.scripts/internet.dyndomain.sh on ${dynDomain} ${dynUpdateUrl} >> ${logFile} 2>&1
 else
     echo "Provisioning DYNAMIC DOMAIN - keep default" >> ${logFile}
 fi
@@ -453,12 +471,12 @@ fi
 # CUSTOM PORT
 echo "Provisioning LND Port" >> ${logFile}
 if [ ${#lndPort} -eq 0 ]; then
-  lndPort=$(sudo cat /mnt/hdd/lnd/lnd.conf | grep "^listen=*" | cut -f2 -d':')
+  lndPort=$(cat /mnt/hdd/lnd/lnd.conf | grep "^listen=*" | cut -f2 -d':')
 fi
 if [ ${#lndPort} -gt 0 ]; then
   if [ "${lndPort}" != "9735" ]; then
     echo "User is running custom LND port: ${lndPort}" >> ${logFile}
-    sudo /home/admin/config.scripts/lnd.setport.sh ${lndPort} >> ${logFile} 2>&1
+    /home/admin/config.scripts/lnd.setport.sh ${lndPort} >> ${logFile} 2>&1
   else
     echo "User is running standard LND port: ${lndPort}" >> ${logFile}
   fi
@@ -469,7 +487,7 @@ fi
 # DNS Server
 if [ ${#dnsServer} -gt 0 ]; then
     echo "Provisioning DNS Server - Setting DNS Server" >> ${logFile}
-    sudo /home/admin/config.scripts/internet.dns.sh ${dnsServer} >> ${logFile} 2>&1
+    /home/admin/config.scripts/internet.dns.sh ${dnsServer} >> ${logFile} 2>&1
 else
     echo "Provisioning DNS Server - keep default" >> ${logFile}
 fi
@@ -478,7 +496,7 @@ fi
 if [ "${chantools}" == "on" ]; then
     echo "Provisioning chantools - run config script" >> ${logFile}
     /home/admin/_cache.sh set message "Setup Chantools"
-    sudo /home/admin/config.scripts/bonus.chantools.sh on >> ${logFile} 2>&1
+    /home/admin/config.scripts/bonus.chantools.sh on >> ${logFile} 2>&1
 else
     echo "Provisioning chantools - keep default" >> ${logFile}
 fi
@@ -487,7 +505,7 @@ fi
 if [ "${#sshtunnel}" -gt 0 ]; then
     echo "Provisioning SSH Tunnel - run config script" >> ${logFile}
     /home/admin/_cache.sh set message "Setup SSH Tunnel"
-    sudo /home/admin/config.scripts/internet.sshtunnel.py restore ${sshtunnel} >> ${logFile} 2>&1
+    /home/admin/config.scripts/internet.sshtunnel.py restore ${sshtunnel} >> ${logFile} 2>&1
 else
     echo "Provisioning SSH Tunnel - not active" >> ${logFile}
 fi
@@ -496,7 +514,7 @@ fi
 if [ "${#zerotier}" -gt 0 ] && [ "${zerotier}" != "off" ]; then
     echo "Provisioning ZeroTier - run config script" >> ${logFile}
     /home/admin/_cache.sh set message "Setup ZeroTier"
-    sudo /home/admin/config.scripts/bonus.zerotier.sh on ${zerotier} >> ${logFile} 2>&1
+    /home/admin/config.scripts/bonus.zerotier.sh on ${zerotier} >> ${logFile} 2>&1
 else
     echo "Provisioning ZeroTier - not active" >> ${logFile}
 fi
@@ -509,7 +527,7 @@ fi
 if [ "${lcdrotate}" == "0" ]; then
   echo "Provisioning LCD rotate - run config script" >> ${logFile}
   /home/admin/_cache.sh set message "LCD Rotate"
-  sudo /home/admin/config.scripts/blitz.display.sh rotate ${lcdrotate} >> ${logFile} 2>&1
+  /home/admin/config.scripts/blitz.display.sh rotate ${lcdrotate} >> ${logFile} 2>&1
 else
   echo "Provisioning LCD rotate - not needed, keep default rotate on" >> ${logFile}
 fi
@@ -518,7 +536,7 @@ fi
 if [ "${#touchscreen}" -gt 0 ]; then
     echo "Provisioning Touchscreen - run config script" >> ${logFile}
     /home/admin/_cache.sh set message "Setup Touchscreen"
-    sudo /home/admin/config.scripts/blitz.touchscreen.sh ${touchscreen} >> ${logFile} 2>&1
+    /home/admin/config.scripts/blitz.touchscreen.sh ${touchscreen} >> ${logFile} 2>&1
 else
     echo "Provisioning Touchscreen - not active" >> ${logFile}
 fi
@@ -527,7 +545,7 @@ fi
 if [ "${#ups}" -gt 0 ]; then
     echo "Provisioning UPS - run config script" >> ${logFile}
     /home/admin/_cache.sh set message "Setup UPS"
-    sudo /home/admin/config.scripts/blitz.ups.sh on ${ups} >> ${logFile} 2>&1
+    /home/admin/config.scripts/blitz.ups.sh on ${ups} >> ${logFile} 2>&1
 else
     echo "Provisioning UPS - not active" >> ${logFile}
 fi
@@ -538,7 +556,7 @@ if [ "${LNBits}" = "on" ]; then
     LNBitsFunding="lnd"
   fi
   echo "Provisioning LNbits (${LNBitsFunding}) - run config script" >> ${logFile}
-  sudo sed -i "s/^message=.*/message='Setup LNbits (${LNBitsFunding})'/g" ${infoFile}
+  /home/admin/_cache.sh set message "Setup LNbits (${LNBitsFunding})"
   sudo -u admin /home/admin/config.scripts/bonus.lnbits.sh on ${LNBitsFunding} >> ${logFile} 2>&1
 else
   echo "Provisioning LNbits - keep default" >> ${logFile}
@@ -548,7 +566,7 @@ fi
 if [ "${joinmarket}" = "on" ]; then
   echo "Provisioning JoinMarket - run config script" >> ${logFile}
   /home/admin/_cache.sh set message "Setup JoinMarket"
-  sudo /home/admin/config.scripts/bonus.joinmarket.sh on >> ${logFile} 2>&1
+  /home/admin/config.scripts/bonus.joinmarket.sh on >> ${logFile} 2>&1
 else
   echo "Provisioning JoinMarket - keep default" >> ${logFile}
 fi
@@ -682,28 +700,28 @@ fi
 # tallycoin_connect
 if [ "${tallycoinConnect}" = "on" ]; then
   echo "Provisioning Tallycoin Connect - run config script" >> ${logFile}
-  sudo sed -i "s/^message=.*/message='Setup Tallycoin Connect'/g" ${infoFile}
+  /home/admin/_cache.sh set message "Setup Tallycoin Connect"
   sudo -u admin /home/admin/config.scripts/bonus.tallycoin-connect.sh on >> ${logFile} 2>&1
 else
   echo "Provisioning Tallycoin Connect - keep default" >> ${logFile}
 fi
 
 # custom install script from user
-customInstallAvailable=$(sudo ls /mnt/hdd/app-data/custom-installs.sh 2>/dev/null | grep -c "custom-installs.sh")
+customInstallAvailable=$(ls /mnt/hdd/app-data/custom-installs.sh 2>/dev/null | grep -c "custom-installs.sh")
 if [ ${customInstallAvailable} -gt 0 ]; then
   echo "Running the custom install script .." >> ${logFile}
   /home/admin/_cache.sh set message "Running Custom Install Script"
   # copy script over to admin (in case HDD is not allowing exec)
-  sudo cp -av /mnt/hdd/app-data/custom-installs.sh /home/admin/custom-installs.sh >> ${logFile}
+  cp -av /mnt/hdd/app-data/custom-installs.sh /home/admin/custom-installs.sh >> ${logFile}
   # make sure script is executable
-  sudo chmod +x /home/admin/custom-installs.sh >> ${logFile}
+  chmod +x /home/admin/custom-installs.sh >> ${logFile}
   # run it & delete it again
-  sudo /home/admin/custom-installs.sh >> ${logFile}
-  sudo rm /home/admin/custom-installs.sh >> ${logFile}
+  /home/admin/custom-installs.sh >> ${logFile}
+  rm /home/admin/custom-installs.sh >> ${logFile}
   echo "Done" >> ${logFile}
 else
   echo "No custom install script ... adding the placeholder." >> ${logFile}
-  sudo cp /home/admin/assets/custom-installs.sh /mnt/hdd/app-data/custom-installs.sh
+  cp /home/admin/assets/custom-installs.sh /mnt/hdd/app-data/custom-installs.sh
 fi
 
 # replay backup LND conf & tlscerts
@@ -713,9 +731,9 @@ echo "*** Replay backup of LND conf/tls" >> ${logFile}
 if [ -d "/var/cache/raspiblitz/tls_backup" ]; then
 
   echo "Copying TLS ..." >> ${logFile}
-  sudo cp /var/cache/raspiblitz/tls_backup/tls.cert /mnt/hdd/lnd/tls.cert >> ${logFile} 2>&1
-  sudo cp /var/cache/raspiblitz/tls_backup/tls.key /mnt/hdd/lnd/tls.key >> ${logFile} 2>&1
-  sudo chown -R bitcoin:bitcoin /mnt/hdd/lnd >> ${logFile} 2>&1
+  cp /var/cache/raspiblitz/tls_backup/tls.cert /mnt/hdd/lnd/tls.cert >> ${logFile} 2>&1
+  cp /var/cache/raspiblitz/tls_backup/tls.key /mnt/hdd/lnd/tls.key >> ${logFile} 2>&1
+  chown -R bitcoin:bitcoin /mnt/hdd/lnd >> ${logFile} 2>&1
   echo "On next final restart admin creds will be updated by _boostrap.sh" >> ${logFile}
 
   echo "DONE" >> ${logFile}
@@ -726,11 +744,11 @@ echo "" >> ${logFile}
 
 # repair Bitcoin conf if needed
 echo "*** Repair Bitcoin Conf (if needed)" >> ${logFile}
-confExists="$(sudo ls /mnt/hdd/${network} | grep -c "${network}.conf")"
+confExists="$(ls /mnt/hdd/${network} | grep -c "${network}.conf")"
 if [ ${confExists} -eq 0 ]; then
   echo "Doing init of ${network}.conf" >> ${logFile}
-  sudo cp /home/admin/assets/bitcoin.conf /mnt/hdd/bitcoin/bitcoin.conf
-  sudo chown bitcoin:bitcoin /mnt/hdd/bitcoin/bitcoin.conf
+  cp /home/admin/assets/bitcoin.conf /mnt/hdd/bitcoin/bitcoin.conf
+  chown bitcoin:bitcoin /mnt/hdd/bitcoin/bitcoin.conf
 fi
 
 # signal setup done
@@ -749,11 +767,11 @@ if [ ${#hostname} -gt 0 ]; then
     if [ "${setnetworkname}" == "1" ]; then
       echo "Setting new network hostname '$hostnameSanatized'" >> ${logFile}
       if [ "${baseimage}" == "raspios_arm64" ]; then
-         sudo raspi-config nonint do_hostname ${hostnameSanatized} >> ${logFile} 2>&1
+         raspi-config nonint do_hostname ${hostnameSanatized} >> ${logFile} 2>&1
       else
          hostnameCurrent=$(hostname)
-         sudo sed -i "s/${hostnameCurrent}/${hostnameSanatized}/g" /etc/hostname 2>&1
-         sudo sed -i "s/${hostnameCurrent}/${hostnameSanatized}/g" /etc/hosts 2>&1
+         sed -i "s/${hostnameCurrent}/${hostnameSanatized}/g" /etc/hostname 2>&1
+         sed -i "s/${hostnameCurrent}/${hostnameSanatized}/g" /etc/hosts 2>&1
       fi
     else
       echo "Not setting local network hostname" >> ${logFile}
@@ -769,34 +787,34 @@ fi
 # always at the end, because data drives will be just available again after a reboot
 echo "Prepare fstab for permanent data drive mounting .." >> ${logFile}
 # get info on data drive
-source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
+source <(/home/admin/config.scripts/blitz.datadrive.sh status)
 # update /etc/fstab
 echo "datadisk --> ${datadisk}" >> ${logFile}
 echo "datapartition --> ${datapartition}" >> ${logFile}
 if [ ${isBTRFS} -eq 0 ]; then
-  sudo /home/admin/config.scripts/blitz.datadrive.sh fstab ${datapartition} >> ${logFile}
+  /home/admin/config.scripts/blitz.datadrive.sh fstab ${datapartition} >> ${logFile}
 else
-  sudo /home/admin/config.scripts/blitz.datadrive.sh fstab ${datadisk} >> ${logFile}
+  /home/admin/config.scripts/blitz.datadrive.sh fstab ${datadisk} >> ${logFile}
 fi
 
 # MAKE SURE SERVICES ARE RUNNING
 echo "Make sure main services are running .." >> ${logFile}
-sudo systemctl start ${network}d
+systemctl start ${network}d
 if [ "${lightning}" == "lnd" ];then
-  sudo systemctl start lnd
+  systemctl start lnd
   # set password c if given in flag from migration prep
-  passwordFlagExists=$(sudo ls /mnt/hdd/passwordc.flag | grep -c "passwordc.flag")
+  passwordFlagExists=$(ls /mnt/hdd/passwordc.flag | grep -c "passwordc.flag")
   if [ "${passwordFlagExists}" == "1" ]; then
     echo "Found /mnt/hdd/passwordc.flag .. changing password" >> ${logFile}
-    oldPasswordC=$(sudo cat /mnt/hdd/passwordc.flag)
+    oldPasswordC=$(cat /mnt/hdd/passwordc.flag)
     if ! pip list | grep grpc; then sudo -H python3 -m pip install grpcio==1.38.1; fi
-    sudo /home/admin/config.scripts/lnd.initwallet.py change-password mainnet "${oldPasswordC}" "${passwordC}" >> ${logFile}
-    sudo shred -u /mnt/hdd/passwordc.flag
+    /home/admin/config.scripts/lnd.initwallet.py change-password mainnet "${oldPasswordC}" "${passwordC}" >> ${logFile}
+    shred -u /mnt/hdd/passwordc.flag
   else
     echo "No /mnt/hdd/passwordc.flag" >> ${logFile}
   fi
 elif [ "${lightning}" == "cl" ];then
-  sudo systemctl start lightningd
+  systemctl start lightningd
 fi
 
 echo "DONE - Give raspi some cool off time after hard building .... 5 secs sleep" >> ${logFile}

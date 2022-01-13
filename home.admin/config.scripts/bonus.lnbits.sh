@@ -395,42 +395,42 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   if [ "${fundingsource}" == "lnd" ]; then
     if [ "${lnd}" != "on" ]; then
-      echo "#FAIL: lnd mainnet needs to activated"
+      echo "# FAIL: lnd mainnet needs to be activated"
       exit 1
     fi
 
   elif [ "${fundingsource}" == "tlnd" ]; then
     if [ "${tlnd}" != "on" ]; then
-      echo "#FAIL: lnd testnet needs to activated"
+      echo "# FAIL: lnd testnet needs to be activated"
       exit 1
     fi
 
   elif [ "${fundingsource}" == "slnd" ]; then
     if [ "${slnd}" != "on" ]; then
-      echo "#FAIL: lnd signet needs to activated"
+      echo "# FAIL: lnd signet needs to be activated"
       exit 1
     fi
 
   elif [ "${fundingsource}" == "cl" ]; then
     if [ "${cl}" != "on" ]; then
-      echo "# FAIL: c-lightning mainnet needs to activated"
+      echo "# FAIL: c-lightning mainnet needs to be activated"
       exit 1
     fi
 
   elif [ "${fundingsource}" == "tcl" ]; then
     if [ "${tcl}" != "on" ]; then
-      echo "# FAIL: c-lightning testnet needs to activated"
+      echo "# FAIL: c-lightning testnet needs to be activated"
       exit 1
     fi
 
   elif [ "${fundingsource}" == "scl" ]; then
     if [ "${scl}" != "on" ]; then
-      echo "# FAIL: c-lightning signet needs to activated"
+      echo "# FAIL: c-lightning signet needs to be activated"
       exit 1
     fi
 
   else
-    echo "# FAIL: unvalid fundig source parameter"
+    echo "# FAIL: invalid funding source parameter"
     exit 1
   fi
 

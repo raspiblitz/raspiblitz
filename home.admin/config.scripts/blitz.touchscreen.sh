@@ -50,12 +50,12 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   /home/admin/python3-env-lnd/bin/pip install /home/admin/raspiblitz/home.admin/BlitzTUI/ 
 
   # make sure lndlibs are patched for compatibility for both Python2 and Python3
-  if ! grep -Fxq "from __future__ import absolute_import" /home/admin/config.scripts/lndlibs/rpc_pb2_grpc.py; then
-    sed -i -E '1 a from __future__ import absolute_import' /home/admin/config.scripts/lndlibs/rpc_pb2_grpc.py
+  if ! grep -Fxq "from __future__ import absolute_import" /home/admin/config.scripts/lndlibs/lightning_pb2_grpc.py; then
+    sed -i -E '1 a from __future__ import absolute_import' /home/admin/config.scripts/lndlibs/lightning_pb2_grpc.py
   fi
 
-  if ! grep -Eq "^from . import.*" /home/admin/config.scripts/lndlibs/rpc_pb2_grpc.py; then
-    sed -i -E 's/^(import.*_pb2)/from . \1/' /home/admin/config.scripts/lndlibs/rpc_pb2_grpc.py
+  if ! grep -Eq "^from . import.*" /home/admin/config.scripts/lndlibs/lightning_pb2_grpc.py; then
+    sed -i -E 's/^(import.*_pb2)/from . \1/' /home/admin/config.scripts/lndlibs/lightning_pb2_grpc.py
   fi
 
   # switch to desktop login

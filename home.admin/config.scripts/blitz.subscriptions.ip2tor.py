@@ -17,8 +17,8 @@ sys.path.append('/home/admin/raspiblitz/home.admin/BlitzPy/blitzpy')
 from config import RaspiBlitzConfig
 from exceptions import BlitzError
 
-from lndlibs import rpc_pb2 as lnrpc
-from lndlibs import rpc_pb2_grpc as rpcstub
+from lndlibs import lightning_pb2 as lnrpc
+from lndlibs import lightning_pb2_grpc as rpcstub
 
 #####################
 # SCRIPT INFO
@@ -151,6 +151,9 @@ def apiGetHosts(session, shopurl):
         response = session.get(url)
     except Exception as e:
         raise BlitzError("failed HTTP request", {'url': url}, e)
+    if response.status_code == 404:
+        raise BlitzError("failed HTTP code, cancel the old tor bridge subscription and create a new one",
+                         {'status_code': response.status_code})
     if response.status_code != 200:
         raise BlitzError("failed HTTP code", {'status_code': response.status_code})
 

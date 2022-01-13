@@ -63,8 +63,8 @@ case $CHOICE in
     echo "running: 'sudo tail -n 30 -f ${bitcoinlogpath}'"
     echo
     echo "Press ENTER to continue"
-    echo "use CTRL+C any time to abort .. then use command 'raspiblitz' to return to menu"
-    echo "###############################################################################"
+    echo "use CTRL+C any time to abort .. then use the command 'raspiblitz' to return to the menu"
+    echo "#######################################################################################"
     read key
     sudo tail -n 30 -f ${bitcoinlogpath};;
   ${network}CONF)
@@ -90,8 +90,8 @@ case $CHOICE in
     echo "running 'sudo tail -n 30 -f /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log'"
     echo
     echo "Press ENTER to continue"
-    echo "use CTRL+C any time to abort .. then use command 'raspiblitz' to return to menu"
-    echo "###############################################################################"
+    echo "use CTRL+C any time to abort .. then use the command 'raspiblitz' to return to the menu"
+    echo "#######################################################################################"
     read key
     sudo tail -n 30 -f /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log;;
   LNDCONF)
@@ -117,8 +117,8 @@ case $CHOICE in
     echo "running 'sudo tail -n 30 -f /home/bitcoin/.lightning/${CLNETWORK}/cl.log'"
     echo
     echo "Press ENTER to continue"
-    echo "use CTRL+C any time to abort .. then use command 'raspiblitz' to return to menu"
-    echo "###############################################################################"
+    echo "use CTRL+C any time to abort .. then use the command 'raspiblitz' to return to the menu"
+    echo "#######################################################################################"
     read key
     sudo tail -n 30 -f /home/bitcoin/.lightning/${CLNETWORK}/cl.log;;
   CLCONF)
@@ -170,8 +170,8 @@ thunderhub, tor@default, tor
     echo "Will show the logs with:"
     echo "'sudo journalctl -n 10 -fu $SERVICE'"
     echo
-    echo "use CTRL+C any time to abort .. then use command 'raspiblitz' to return to menu"
-    echo "###############################################################################"
+    echo "use CTRL+C any time to abort .. then use the command 'raspiblitz' to return to the menu"
+    echo "#######################################################################################"
     sudo journalctl -n 10 -fu $SERVICE;;
   CUSTOMRESTART)
     clear
@@ -195,7 +195,7 @@ thunderhub, tor@default, tor
     echo "Will show the logs with:"
     echo "'sudo journalctl -n 10 -fu $SERVICE'"
     echo
-    echo "use CTRL+C any time to abort .. then use command 'raspiblitz' to return to menu"
-    echo "###############################################################################"
+    echo "use CTRL+C any time to abort .. then use the command 'raspiblitz' to return to the menu"
+    echo "#######################################################################################"
     sudo journalctl -n 10 -fu $SERVICE;;
 esac
