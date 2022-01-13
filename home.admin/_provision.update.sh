@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# check if started with sudo
+# check if run by root user
 if [ "$EUID" -ne 0 ]; then 
   echo "error='run as root'"
   exit 1

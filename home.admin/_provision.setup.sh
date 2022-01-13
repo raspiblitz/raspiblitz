@@ -26,7 +26,7 @@ source ${configFile}
 
 # log header
 echo "" > ${logFile}
-sudo chmod 640 ${logFile}
+chmod 640 ${logFile}
 echo "###################################" >> ${logFile}
 echo "# _provision.setup.sh" >> ${logFile}
 echo "###################################" >> ${logFile}
@@ -143,7 +143,7 @@ if [ "${lightning}" != "lnd" ]; then
   # Remove LND from systemd
   echo "Remove LND" >> ${logFile}
   /home/admin/_cache.sh set message "Deactivate Lightning"
-  systemctl disable lnd
+  systemctl disable lnd 2>/dev/null
   rm /etc/systemd/system/lnd.service 2>/dev/null
   systemctl daemon-reload
 fi
@@ -160,6 +160,10 @@ if [ "${lightning}" == "lnd" ]; then
     /home/admin/config.scripts/blitz.error.sh _provision.setup.sh "missing-passwordc" "config: missing passwordC" "" ${logFile}
     exit 5
   fi
+
+  # install lnd if needed (sd card without fatpack)
+  # if already installed - it will just skip
+  /home/admin/config.scripts/lnd.install.sh install >> ${logFile}
 
   # if user uploaded an LND rescue file (raspiblitz.setup)
   if [ "${lndrescue}" != "" ]; then
@@ -353,9 +357,14 @@ if [ "${lightning}" == "cl" ]; then
   # c-lightning
   echo "############## c-lightning" >> ${logFile}
 
+  # install c-lightning (when not done by sd card fatpack)
+  # if already installed - will skip
   /home/admin/_cache.sh set message "C-Lightning Install"
-  /home/admin/config.scripts/cl.install.sh on mainnet >> ${logFile}
+  /home/admin/config.scripts/cl.install.sh install >> ${logFile}
+
+  # switch mainnet config on
   /home/admin/_cache.sh set message "C-Lightning Setup"
+  /home/admin/config.scripts/cl.install.sh on mainnet >> ${logFile}
 
   # OLD WALLET FROM CLIGHTNING RESCUE
   if [ "${clrescue}" != "" ]; then

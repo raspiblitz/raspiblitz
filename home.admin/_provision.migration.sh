@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# check if started with sudo
+# check if run by root user
 if [ "$EUID" -ne 0 ]; then 
   echo "error='run as root'"
   exit 1
@@ -21,7 +21,7 @@ source <(/home/admin/_cache.sh get hddGotMigrationData hddVersionLND)
 
 # log header
 echo "" > ${logFile}
-sudo chmod 640 ${logFile}
+chmod 640 ${logFile}
 echo "###################################" >> ${logFile}
 echo "# _provision.migration.sh" >> ${logFile}
 echo "###################################" >> ${logFile}
@@ -38,7 +38,7 @@ echo "**************************************************" >> ${logFile}
 echo "MIGRATION FROM ${nodenameUpperCase} TO RASPIBLITZ" >> ${logFile}
 echo "**************************************************" >> ${logFile}
 echo "- started ..." >> ${logFile}
-source <(sudo /home/admin/config.scripts/blitz.migration.sh migration-${hddGotMigrationData})
+source <(/home/admin/config.scripts/blitz.migration.sh migration-${hddGotMigrationData})
 if [ "${err}" != "" ]; then
     /home/admin/config.scripts/blitz.error.sh _provision.migration.sh "migration-failed" "${err}" "Recover funds with fresh sd card using seed words + static channel backup." ${logFile}
     exit 3
