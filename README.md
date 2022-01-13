@@ -981,7 +981,7 @@ To try out the IP2TOR tunnel choose in `MAINMENU` the extra menu point of the Se
 
 If you want a web service, like BTCPay Server or LNbits, to be available to the outside internet (like with IP2TOR) people expect you to offer an HTTPS address so that the communication between the client and your RaspiBlitz is encrypted.
 You could use the self-signed HTTPS certificate that RaspiBlitz is offering you, but this will give users Security Warnings in their browser and is not very user friendly.
-That's where you can use a LetsEncrypt Subscription to get a free valid HTTPS certificate that is excepted without warning from almost all common browsers 
+That's where you can use a LetsEncrypt Subscription to get a free valid HTTPS certificate that is accepted without warning by most browsers.
 
 Because you also need a domain name for that you will need to open a free account, the following are presently supported, would be good to add more with the help of the community: 
 [DuckDNS.org](https://www.duckdns.org)
