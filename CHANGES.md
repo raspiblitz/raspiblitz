@@ -23,6 +23,7 @@
 - Update: PyBlock to 1.1.8.5 (adapt to new install mechanism)
 - Update: Re-Add connecting node with Zap mobile wallet iOS & Android
 - Update: additional redaction of private data in debug logs
+- Info: All existing IP2Tor subscriptions need to be canceled & renewed to be functional again.
 
 ## What's new in Version 1.7.1 of RaspiBlitz?
 
