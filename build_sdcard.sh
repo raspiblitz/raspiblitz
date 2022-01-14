@@ -684,7 +684,7 @@ if [ "${baseimage}" = "raspios_arm64"  ] || [ "${baseimage}" = "debian_rpi64" ];
 fi
 
 # *** FATPACK *** (can be activated by parameter - see details at start of script)
-if [ "${fatpack}" == "true" ]; then
+if ${fatpack}; then
   echo -e "\n*** FATPACK ***"
   echo "* Adding nodeJS Framework ..."
   sudo /home/admin/config.scripts/bonus.nodejs.sh on
@@ -741,7 +741,7 @@ echo
 # LND #
 #######
 echo
-if [ "${fatpack}" == "true" ]; then
+if ${fatpack}; then
   /home/admin/config.scripts/lnd.install.sh install || exit 1
 else
   echo -e "\nSkipping LND install - let user install later if needed ..."
@@ -751,7 +751,7 @@ fi
 # C-LIGHTNING #
 ###############
 echo
-if [ "${fatpack}" == "true" ]; then
+if ${fatpack}; then
   /home/admin/config.scripts/cl.install.sh install || exit 1
 else
   echo -e "\nSkipping c-lightning install - let user install later if needed ..."
