@@ -13,24 +13,23 @@ source $SETUPFILE
 
 #########################
 # Parameters
-# this is useful for testing the dialog outside of the setup process
-# normally migrationOS & migrationVersion are provided by raspiblitz.info or raspiblitz.setup
 
-# 1st PARAMATER (optional): [raspiblitz|mynode|umbrel|citadel]
-if [ "${migrationOS}" == "" ]; then
-  migrationOS="$1"
-fi  
-
-# 2nd PARAMATER (optional): the version of the former fullnode OS if available
-if [ "${migrationVersion}" == "" ]; then
-  migrationVersion="$2"
-fi
-
-# check parameter values
+# 1st PARAMATER migrationOS: [raspiblitz|mynode|umbrel|citadel]
+migrationOS="$1"
 if [ "${migrationOS}" != "raspiblitz" ] && [ "${migrationOS}" != "mynode" ] && [ "${migrationOS}" != "umbrel" ] && [ "${migrationOS}" != "citadel" ]; then
     echo "# FAIL: the given migrationOS '${migrationOS}' is not supported yet"
     exit 1
+fi  
+
+# 2nd PARAMATER migrationMode (optional): [normal|outdatedLightning]
+migrationMode="$2"
+if [ "${migrationMode}" = "" ]; then
+  migrationMode="normal"
 fi
+if [ "${migrationMode}" != "normal" ] && [ "${migrationMode}" != "outdatedLightning" ]; then
+    echo "# FAIL: the given migrationMode '${migrationMode}' is not supported yet"
+    exit 1
+fi  
 
 ####################################################
 # RASPIBLITZ
@@ -105,6 +104,32 @@ if [ "${migrationOS}" == "raspiblitz" ]; then
 fi
 
 ####################################################
+# WARNING: OUTDATED LIGHTNING
+# in case lightning version of RaspiBlitz is too old
+####################################################
+
+  # outdated warning
+  if [ "${migrationMode}" == "outdatedLightning" ]; then
+
+    whiptail --title " MIGRATION WARNING " --yes-button "Stop Migration" --no-button "Try Anyway" --yesno " 
+RaspiBlitz might run an TOO OLD of an lightning version to migrate your nodes channel data automatically.
+
+You have now two options:
+1) Stop Migration, shutdown, keep your old node system
+   until RaspiBlitz offers an updated version
+2) Ignore this warning and try your luck (not recommended)
+      " 16 62
+
+    result=$?
+    echo "${result}"
+    if [ "$?result" != "1" ]; then
+      # user cancel - signal by exit code
+      exit 1
+    fi
+
+  fi
+
+####################################################
 # UMBREL
 # migrating from Umbrel to RaspiBlitz
 ####################################################
@@ -112,7 +137,7 @@ fi
 if [ "${migrationOS}" == "umbrel" ]; then
 
   # infodialog
-  whiptail --title " UMBREL --> RASPIBLITZ " --yes-button "Start Migration" --no-button "No+Shutdown" --yesno "RaspiBlitz found data from UMBREL
+  whiptail --title " UMBREL --> RASPIBLITZ " --yes-button "Start Migration" --no-button "Cancel Migration" --yesno "RaspiBlitz found data from UMBREL
 
 You can migrate your blockchain & LND data (funds & channels) over to RaspiBlitz.
 
@@ -139,7 +164,7 @@ fi
 if [ "${migrationOS}" == "citadel" ]; then
 
   # infodialog
-  whiptail --title " CITADEL --> RASPIBLITZ " --yes-button "Start Migration" --no-button "No+Shutdown" --yesno "RaspiBlitz found data from CITADEL
+  whiptail --title " CITADEL --> RASPIBLITZ " --yes-button "Start Migration" --no-button "Cancel Migration" --yesno "RaspiBlitz found data from CITADEL
 
 You can migrate your blockchain & LND data (funds & channels) over to RaspiBlitz.
 
@@ -166,7 +191,7 @@ fi
 if [ "${migrationOS}" == "mynode" ]; then
 
   # infodialog
-  whiptail --title " MYNODE --> RASPIBLITZ " --yes-button "Start Migration" --no-button "No+Shutdown" --yesno "RaspiBlitz found data from MYNODE
+  whiptail --title " MYNODE --> RASPIBLITZ " --yes-button "Start Migration" --no-button "Cancel Migration" --yesno "RaspiBlitz found data from MYNODE
 
 You can migrate your blockchain & LND data (funds & channels) over to RaspiBlitz.
 

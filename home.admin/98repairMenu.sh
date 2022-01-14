@@ -39,9 +39,9 @@ Download Lightning Data Backup now?
       fi
     else
       clear
-      echo "*****************************************"
-      echo "* JUST MAKING A BACKUP TO THE OLD SD CARD"
-      echo "*****************************************"
+      echo "*************************************"
+      echo "* JUST MAKING A BACKUP TO THE SD CARD"
+      echo "*************************************"
       echo "please wait .."
       sleep 2
       if [ "${lightning}" == "lnd" ] || [ "${lnd}" = "on" ]; then
@@ -69,9 +69,7 @@ OPTIONS=()
 #OPTIONS+=(HARDWARE "Run Hardwaretest")
 OPTIONS+=(SOFTWARE "Run Softwaretest (DebugReport)")
 if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
-  OPTIONS+=(BACKUP-LND "Backup your LND data (Rescue-File)")
-  OPTIONS+=(RESET-LND "Delete LND & start new node/wallet")
-  OPTIONS+=(COMPACT "Compact the LND channel.db")
+  OPTIONS+=(REPAIR-LND "Repair/Backup LND")
 fi
 if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ]; then
   OPTIONS+=(REPAIR-CL "Repair/Backup C-Lightning")
@@ -95,18 +93,8 @@ case $CHOICE in
     echo "Press ENTER to return to main menu."
     read key
     ;;
-  BACKUP-LND)
-    /home/admin/config.scripts/lnd.compact.sh interactive
-    sudo /home/admin/config.scripts/lnd.backup.sh lnd-export-gui
-    echo
-    echo "Press ENTER when your backup download is done to shutdown."
-    read key
-    /home/admin/config.scripts/blitz.shutdown.sh
-    ;;
-  COMPACT)
-    /home/admin/config.scripts/lnd.compact.sh interactive
-    echo "# Starting lnd.service ..."
-    sudo systemctl start lnd
+  REPAIR-LND)
+    sudo /home/admin/99lndRepairMenu.sh
     echo
     echo "Press ENTER to return to main menu."
     read key
@@ -127,45 +115,6 @@ case $CHOICE in
     /home/admin/98repairBlockchain.sh
     echo "For reboot type: sudo shutdown -r now"
     exit 1;
-    ;;
-  RESET-LND)
-    askBackupCopy
-    # ask for a new name so that network analysis has harder time to connect new node id with old
-    result=""
-    while [ ${#result} -eq 0 ]
-    do
-        trap 'rm -f "$_temp"' EXIT
-        _temp=$(mktemp -p /dev/shm/)
-        l1="Please enter the new name of your LND node:\n"
-        l2="different name is better for a fresh identity\n"
-        l3="one word, keep characters basic & not too long"
-        dialog --backtitle "RaspiBlitz - Setup (${network}/${chain})" --inputbox "$l1$l2$l3" 13 52 2>$_temp
-        result=$( cat $_temp | tr -dc '[:alnum:]-.' | tr -d ' ' )
-        echo "processing ..."
-        sleep 3
-    done
-
-    # make sure host is named like in the raspiblitz config
-    echo "Setting the Name/Alias/Hostname .."
-    sudo /home/admin/config.scripts/lnd.setname.sh mainnet ${result}
-    /home/admin/config.scripts/blitz.conf.sh set hostname "${result}"
-
-    echo "stopping lnd ..."
-    sudo systemctl stop lnd
-    sudo rm -r /mnt/hdd/lnd
-    # create wallet
-    /home/admin/config.scripts/lnd.install.sh on mainnet initwallet
-    # display and delete the seed for mainnet
-    sudo /home/admin/config.scripts/lnd.install.sh display-seed mainnet delete
-    if [ "${tlnd}" == "on" ];then
-      /home/admin/config.scripts/lnd.install.sh on testnet initwallet
-    fi
-    if [ "${slnd}" == "on" ];then
-      /home/admin/config.scripts/lnd.install.sh on signet initwallet
-    fi
-    # go back to main menu (and show)
-    /home/admin/00raspiblitz.sh
-    exit 0;
     ;;
   RESET-HDD)
     askBackupCopy

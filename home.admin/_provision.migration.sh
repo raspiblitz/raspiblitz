@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# check if started with sudo
+# check if run by root user
 if [ "$EUID" -ne 0 ]; then 
   echo "error='run as root'"
   exit 1
@@ -16,14 +16,16 @@ source ${infoFile}
 # SETUPFILE - data from setup process
 source /var/cache/raspiblitz/temp/raspiblitz.setup
 
+# CACHEDATA - import needed data from cache 
+source <(/home/admin/_cache.sh get hddGotMigrationData hddVersionLND)
+
 # log header
 echo "" > ${logFile}
+chmod 640 ${logFile}
 echo "###################################" >> ${logFile}
 echo "# _provision.migration.sh" >> ${logFile}
 echo "###################################" >> ${logFile}
 /home/admin/_cache.sh set message "Provision Migration"
-
-source <(/home/admin/config.scripts/blitz.datadrive.sh status)
 
 if [ "${hddGotMigrationData}" == "" ]; then
   /home/admin/config.scripts/blitz.error.sh _provision.migration.sh "missing-hostnamemigrationdata" "missing hddGotMigrationData" "" ${logFile}
@@ -36,7 +38,7 @@ echo "**************************************************" >> ${logFile}
 echo "MIGRATION FROM ${nodenameUpperCase} TO RASPIBLITZ" >> ${logFile}
 echo "**************************************************" >> ${logFile}
 echo "- started ..." >> ${logFile}
-source <(sudo /home/admin/config.scripts/blitz.migration.sh migration-${hddGotMigrationData})
+source <(/home/admin/config.scripts/blitz.migration.sh migration-${hddGotMigrationData})
 if [ "${err}" != "" ]; then
     /home/admin/config.scripts/blitz.error.sh _provision.migration.sh "migration-failed" "${err}" "Recover funds with fresh sd card using seed words + static channel backup." ${logFile}
     exit 3

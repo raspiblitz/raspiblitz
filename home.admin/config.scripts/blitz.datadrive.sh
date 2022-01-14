@@ -303,6 +303,7 @@ if [ "$1" = "status" ]; then
 
           # check if its another fullnode implementation data disk
           hddGotMigrationData=""
+          hddGotMigrationDataExtra=""
           if [ "${hddFormat}" = "ext4" ]; then
             # check for other node implementations
             isUmbrelHDD=$(sudo ls /mnt/storage/umbrel/info.json 2>/dev/null | grep -c '.json')
@@ -310,10 +311,14 @@ if [ "$1" = "status" ]; then
             isMyNodeHDD=$(sudo ls /mnt/storage/mynode/bitcoin/bitcoin.conf 2>/dev/null | grep -c '.conf')
             if [ ${isUmbrelHDD} -gt 0 ]; then
               hddGotMigrationData="umbrel"
+              lndVersion=$(grep "lightninglabs/lnd" /mnt/storage/umbrel/docker-compose.yml 2>/dev/null | sed 's/.*lnd://' | sed 's/@.*//')
+              echo "hddVersionLND='${lndVersion}'"
             elif [ ${isMyNodeHDD} -gt 0 ]; then
               hddGotMigrationData="mynode"
             elif [ ${isCitadelHDD} -gt 0 ]; then
               hddGotMigrationData="citadel"
+              lndVersion=$(grep "lightninglabs/lnd" /mnt/storage/citadel/docker-compose.yml 2>/dev/null | sed 's/.*lnd://' | sed 's/@.*//')
+              echo "hddVersionLND='${lndVersion}'"
             fi
           else
             echo "# not an ext4 drive - all known fullnode packages use ext4 at the moment"
@@ -1494,19 +1499,19 @@ if [ "$1" = "swap" ]; then
       >&2 echo "# Rewrite external SWAP config for BTRFS setup"
       sudo sed -i "s/^#CONF_SWAPFILE=/CONF_SWAPFILE=/g" /etc/dphys-swapfile  
       sudo sed -i "s/^CONF_SWAPFILE=.*/CONF_SWAPFILE=\/mnt\/temp\/swapfile/g" /etc/dphys-swapfile  
-      sudo sed -i "s/^CONF_SWAPSIZE=/#CONF_SWAPSIZE=/g" /etc/dphys-swapfile  
-    
+
     else
 
       >&2 echo "# Rewrite external SWAP config for EXT4 setup"
       sudo sed -i "s/^#CONF_SWAPFILE=/CONF_SWAPFILE=/g" /etc/dphys-swapfile  
       sudo sed -i "s/^CONF_SWAPFILE=.*/CONF_SWAPFILE=\/mnt\/hdd\/swapfile/g" /etc/dphys-swapfile  
-      sudo sed -i "s/^CONF_SWAPSIZE=/#CONF_SWAPSIZE=/g" /etc/dphys-swapfile  
 
     fi
+    sudo sed -i "s/^CONF_SWAPSIZE=/#CONF_SWAPSIZE=/g" /etc/dphys-swapfile 
+    sudo sed -i "s/^#CONF_MAXSWAP=.*/CONF_MAXSWAP=4096/g" /etc/dphys-swapfile
 
     >&2 echo "# Creating SWAP file .."
-    sudo dd if=/dev/zero of=$externalSwapPath count=2048 bs=1MiB 1>/dev/null
+    sudo dd if=/dev/zero of=$externalSwapPath count=4096 bs=1MiB 1>/dev/null
     sudo chmod 0600 $externalSwapPath 1>/dev/null
 
     >&2 echo "# Activating new SWAP"

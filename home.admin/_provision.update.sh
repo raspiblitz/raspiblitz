@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# check if started with sudo
+# check if run by root user
 if [ "$EUID" -ne 0 ]; then 
   echo "error='run as root'"
   exit 1
@@ -21,6 +21,7 @@ source ${setupFile}
 
 # log header
 echo "" > ${logFile}
+sudo chmod 640 ${logFile}
 echo "###################################" >> ${logFile}
 echo "# _provision.update.sh" >> ${logFile}
 echo "###################################" >> ${logFile}

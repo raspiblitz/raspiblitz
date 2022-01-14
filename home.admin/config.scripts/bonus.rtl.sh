@@ -1,6 +1,6 @@
 #!/bin/bash
 # https://github.com/Ride-The-Lightning/RTL
-RTLVERSION="v0.11.2"
+RTLVERSION="v0.12.0"
 
 # check and load raspiblitz config
 # to know which network is running
@@ -362,7 +362,7 @@ if [ "$1" = "prestart" ]; then
   configExists=$(ls /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json 2>/dev/null | grep -c "RTL-Config.json")
   if [ "${configExists}" == "0" ]; then
     # copy template
-    cp /home/rtl/RTL/docs/Sample-RTL-Config.json /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json
+    cp /home/rtl/RTL/.github/docs/Sample-RTL-Config.json /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json
     chmod 600 /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json
   fi
 
@@ -428,6 +428,9 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   echo "# making sure services are not running"
   sudo systemctl stop ${systemdService} 2>/dev/null
 
+  # remove config
+  sudo rm -f /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json
+
   # setting value in raspi blitz config
   /home/admin/config.scripts/blitz.conf.sh set ${configEntry} "off"
 
@@ -452,24 +455,26 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     echo "# Removing RTL for ${LNTYPE} ${CHAIN}"
     sudo systemctl disable ${systemdService}.service
     sudo rm /etc/systemd/system/${systemdService}.service
-
-    # only if 'purge' is an additional parameter (might otherwise other instances/services might need this)
-    if [ "$(echo "$@" | grep -c purge)" -gt 0 ];then
-      echo "# Removing the binaries"
-      echo "# Delete user and home directory"
-      sudo userdel -rf rtl
-      if [ $LNTYPE = cl ];then
-        /home/admin/config.scripts/cl.rest.sh off ${CHAIN}
-      fi
-    fi
-
     echo "# OK ${systemdService} removed."
+
   else
     echo "# ${systemdService} is not installed."
   fi
 
+  # only if 'purge' is an additional parameter (other instances/services might need this)
+  if [ "$(echo "$@" | grep -c purge)" -gt 0 ];then
+    echo "# Removing the binaries"
+    echo "# Delete user and home directory"
+    sudo userdel -rf rtl
+    if [ $LNTYPE = cl ];then
+      /home/admin/config.scripts/cl.rest.sh off ${CHAIN}
+    fi
+    echo "# Delete all configs"
+    sudo rm -rf /mnt/hdd/app-data/rtl
+  fi
+
   # close ports on firewall
-  sudo ufw deny ${RTLHTTP}
+  sudo ufw deny "${RTLHTTP}"
   sudo ufw deny $((RTLHTTP+1))
   exit 0
 fi

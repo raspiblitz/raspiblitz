@@ -983,7 +983,7 @@ To try out the IP2TOR tunnel choose in `MAINMENU` the extra menu point of the Se
 
 If you want a web service, like BTCPay Server or LNbits, to be available to the outside internet (like with IP2TOR) people expect you to offer an HTTPS address so that the communication between the client and your RaspiBlitz is encrypted.
 You could use the self-signed HTTPS certificate that RaspiBlitz is offering you, but this will give users Security Warnings in their browser and is not very user friendly.
-That's where you can use a LetsEncrypt Subscription to get a free valid HTTPS certificate that is excepted without warning from almost all common browsers 
+That's where you can use a LetsEncrypt Subscription to get a free valid HTTPS certificate that is accepted without warning by most browsers.
 
 Because you also need a domain name for that you will need to open a free account, the following are presently supported, would be good to add more with the help of the community:
 [DuckDNS.org](https://www.duckdns.org)
@@ -1331,7 +1331,8 @@ Copy the following command into your terminal and execute:
 `wget https://raw.githubusercontent.com/rootzoll/raspiblitz/v1.7/build_sdcard.sh && sudo bash build_sdcard.sh`
 
 As you can see from the URL, you can find the build script in this Git repo under `build_sdcard.sh`.
-You can check what gets installed and configured in detail.
+
+You can check what gets installed and configured in detail with optional parameters.
 Feel free to post improvements as pull requests.
 
 The whole build process takes a while.

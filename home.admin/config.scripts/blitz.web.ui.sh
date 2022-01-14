@@ -49,6 +49,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   /home/admin/config.scripts/bonus.nodejs.sh on
   source <(/home/admin/config.scripts/bonus.nodejs.sh info)
   sudo npm install --global yarn
+  ${NODEPATH}/yarn config set --home enableTelemetry 0
   ${NODEPATH}/yarn install
   ${NODEPATH}/yarn build
 
