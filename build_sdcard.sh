@@ -1,5 +1,4 @@
-#!/usr/bin/env sh
-#set -x
+#!/usr/bin/env bash
 
 #########################################################################
 # Build your SD card image based on: 2021-10-30-raspios-bullseye-arm64.zip
@@ -116,6 +115,10 @@ range_argument(){
     [ ${success} -ne 1 ] && error_msg "Option '--${name}' cannot be '${var}'! It can only be: ${*}."
   fi
 }
+
+echo -e "\n*** SOFTWARE UPDATE ***"
+general_utils="curl"
+sudo apt install -y ${general_utils}
 
 ## use default values for variables if empty
 
@@ -273,7 +276,7 @@ echo -e "\n*** SOFTWARE UPDATE ***"
 # psmisc -> install killall, fuser
 # ufw -> firewall
 # sqlite3 -> database
-general_utils="htop git curl bash-completion vim jq dphys-swapfile bsdmainutils autossh telnet vnstat parted dosfstools btrfs-progs fbi sysbench build-essential dialog bc python3-dialog"
+general_utils="htop git curl bash-completion vim jq dphys-swapfile bsdmainutils autossh telnet vnstat parted dosfstools btrfs-progs fbi sysbench build-essential dialog bc python3-dialog unzip"
 python_dependencies="python3-venv python3-dev python3-wheel python3-jinja2 python3-pip"
 server_utils="rsync net-tools xxd netcat openssh-client openssh-sftp-server sshpass psmisc ufw sqlite3"
 [ "${baseimage}" = "armbian" ] && armbian_dependencies="armbian-config" # add armbian-config
@@ -685,7 +688,7 @@ if [ "${baseimage}" = "raspios_arm64"  ] || [ "${baseimage}" = "debian_rpi64" ];
 fi
 
 # *** FATPACK *** (can be activated by parameter - see details at start of script)
-if [ "${fatpack}" == "true" ]; then
+if ${fatpack}; then
   echo -e "\n*** FATPACK ***"
   echo "* Adding nodeJS Framework ..."
   sudo /home/admin/config.scripts/bonus.nodejs.sh on
@@ -742,7 +745,7 @@ echo
 # LND #
 #######
 echo
-if [ "${fatpack}" == "true" ]; then
+if ${fatpack}; then
   /home/admin/config.scripts/lnd.install.sh install || exit 1
 else
   echo -e "\nSkipping LND install - let user install later if needed ..."
@@ -752,7 +755,7 @@ fi
 # C-LIGHTNING #
 ###############
 echo
-if [ "${fatpack}" == "true" ]; then
+if ${fatpack}; then
   /home/admin/config.scripts/cl.install.sh install || exit 1
 else
   echo -e "\nSkipping c-lightning install - let user install later if needed ..."

@@ -462,7 +462,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "# preparing env file"
   sudo rm /home/lnbits/lnbits/.env 2>/dev/null
   sudo -u lnbits touch /home/lnbits/lnbits/.env
-  sudo bash -c "echo 'QUART_APP=lnbits.app:create_app()' >> /home/lnbits/lnbits/.env"
   sudo bash -c "echo 'LNBITS_FORCE_HTTPS=0' >> /home/lnbits/lnbits/.env"
 
   # set database path to HDD data so that its survives updates and migrations
@@ -481,14 +480,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo -u lnbits python3 -m venv venv
   sudo -u lnbits ./venv/bin/pip install -r requirements.txt
   sudo -u lnbits ./venv/bin/pip install pylightning
-
-  # process assets
-  echo "# processing assets"
-  sudo -u lnbits ./venv/bin/quart assets
-
-  # update databases (if needed)
-  echo "# updating databases"
-  sudo -u lnbits ./venv/bin/quart migrate
 
   # open firewall
   echo
