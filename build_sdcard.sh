@@ -116,6 +116,10 @@ range_argument(){
   fi
 }
 
+echo -e "\n*** SOFTWARE UPDATE ***"
+general_utils="curl"
+sudo apt install -y ${general_utils}
+
 ## use default values for variables if empty
 
 # INTERACTION
@@ -272,7 +276,7 @@ echo -e "\n*** SOFTWARE UPDATE ***"
 # psmisc -> install killall, fuser
 # ufw -> firewall
 # sqlite3 -> database
-general_utils="htop git curl bash-completion vim jq dphys-swapfile bsdmainutils autossh telnet vnstat parted dosfstools btrfs-progs fbi sysbench build-essential dialog bc python3-dialog"
+general_utils="htop git curl bash-completion vim jq dphys-swapfile bsdmainutils autossh telnet vnstat parted dosfstools btrfs-progs fbi sysbench build-essential dialog bc python3-dialog unzip"
 python_dependencies="python3-venv python3-dev python3-wheel python3-jinja2 python3-pip"
 server_utils="rsync net-tools xxd netcat openssh-client openssh-sftp-server sshpass psmisc ufw sqlite3"
 [ "${baseimage}" = "armbian" ] && armbian_dependencies="armbian-config" # add armbian-config
