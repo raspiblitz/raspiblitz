@@ -11,10 +11,10 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ];then
 fi
 
 source <(/home/admin/config.scripts/network.aliases.sh getvars cl $2)
+plugin="feeadjuster"
 
 if [ "$1" = "on" ];then
 
-  plugin="feeadjuster"
   if [ ! -f "/home/bitcoin/cl-plugins-available/plugins/${plugin}/${plugin}.py" ]; then
     cd /home/bitcoin/cl-plugins-available || exit 1
     sudo -u bitcoin git clone https://github.com/lightningd/plugins.git
