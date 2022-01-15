@@ -571,6 +571,15 @@ else
   echo "Provisioning JoinMarket - keep default" >> ${logFile}
 fi
 
+# JoinMarket Web UI
+if [ "${joinmarketWebUI}" = "on" ]; then
+  echo "Provisioning JoinMarket Web UI - run config script" >> ${logFile}
+  sudo sed -i "s/^message=.*/message='Setup JoinMarket Web UI'/g" ${infoFile}
+  sudo /home/admin/config.scripts/bonus.joinmarket-webui.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning JoinMarket Web UI - keep default" >> ${logFile}
+fi
+
 # Specter
 if [ "${specter}" = "on" ]; then
   echo "Provisioning Specter - run config script" >> ${logFile}
