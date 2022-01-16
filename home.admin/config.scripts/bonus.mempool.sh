@@ -2,7 +2,7 @@
 
 # https://github.com/mempool/mempool
 
-pinnedVersion="v2.2.2"
+pinnedVersion="v2.3.0"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -42,13 +42,13 @@ This can take multiple hours.
 
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
 
-    # TOR
+    # Tor
     /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
     whiptail --title " Mempool " --msgbox "Open in your local web browser:
 http://${localip}:4080\n
 https://${localip}:4081 with Fingerprint:
 ${fingerprint}\n
-Hidden Service address for TOR Browser (QR see LCD):
+Hidden Service address for Tor Browser (QR see LCD):
 ${toraddress}
 " 16 67
     /home/admin/config.scripts/blitz.display.sh hide
@@ -301,48 +301,48 @@ fi
 # switch off
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
-  # setting value in raspi blitz config
-  /home/admin/config.scripts/blitz.conf.sh set mempoolExplorer "off"
+  # always delete user and home directory
+  sudo userdel -rf mempool
+
+  # always remove nginx symlinks
+  sudo rm -f /etc/nginx/snippets/mempool.conf
+  sudo rm -f /etc/nginx/snippets/mempool-http.conf
+  sudo rm -f /etc/nginx/sites-enabled/mempool_.conf
+  sudo rm -f /etc/nginx/sites-enabled/mempool_ssl.conf
+  sudo rm -f /etc/nginx/sites-enabled/mempool_tor.conf
+  sudo rm -f /etc/nginx/sites-enabled/mempool_tor_ssl.conf
+  sudo rm -f /etc/nginx/sites-available/mempool_.conf
+  sudo rm -f /etc/nginx/sites-available/mempool_ssl.conf
+  sudo rm -f /etc/nginx/sites-available/mempool_tor.conf
+  sudo rm -f /etc/nginx/sites-available/mempool_tor_ssl.conf
+  sudo nginx -t
+  sudo systemctl reload nginx
+  sudo rm -rf /var/www/mempool
+
+  # remove Hidden Service if Tor is active
+  if [ "${runBehindTor}" = "on" ]; then
+    # make sure to keep in sync with tor.network.sh script
+    /home/admin/config.scripts/tor.onion-service.sh off mempool
+  fi
+
+  # always close ports on firewall
+  sudo ufw deny 4080
+  sudo ufw deny 4081
 
   isInstalled=$(sudo ls /etc/systemd/system/mempool.service 2>/dev/null | grep -c 'mempool.service')
   if [ ${isInstalled} -eq 1 ]; then
     echo "# *** REMOVING Mempool ***"
     sudo systemctl disable mempool
     sudo rm /etc/systemd/system/mempool.service
-    # delete user and home directory
-    sudo userdel -rf mempool
-
-    # remove nginx symlinks
-    sudo rm -f /etc/nginx/snippets/mempool.conf
-    sudo rm -f /etc/nginx/snippets/mempool-http.conf
-    sudo rm -f /etc/nginx/sites-enabled/mempool_.conf
-    sudo rm -f /etc/nginx/sites-enabled/mempool_ssl.conf
-    sudo rm -f /etc/nginx/sites-enabled/mempool_tor.conf
-    sudo rm -f /etc/nginx/sites-enabled/mempool_tor_ssl.conf
-    sudo rm -f /etc/nginx/sites-available/mempool_.conf
-    sudo rm -f /etc/nginx/sites-available/mempool_ssl.conf
-    sudo rm -f /etc/nginx/sites-available/mempool_tor.conf
-    sudo rm -f /etc/nginx/sites-available/mempool_tor_ssl.conf
-    sudo nginx -t
-    sudo systemctl reload nginx
-
-    sudo rm -rf /var/www/mempool
-
-    # Hidden Service if Tor is active
-    if [ "${runBehindTor}" = "on" ]; then
-      # make sure to keep in sync with tor.network.sh script
-      /home/admin/config.scripts/tor.onion-service.sh off mempool
-    fi
-
     echo "# OK Mempool removed."
 
   else
     echo "# Mempool is not installed."
   fi
 
-  # close ports on firewall
-  sudo ufw deny 4080
-  sudo ufw deny 4081
+  # setting value in raspi blitz config
+  /home/admin/config.scripts/blitz.conf.sh set mempoolExplorer "off"
+
   exit 0
 fi
 
@@ -431,5 +431,5 @@ if [ "$1" = "update" ]; then
   exit 0
 fi
 
-echo "error='unknown parameter'
+echo "error='unknown parameter'"
 exit 1

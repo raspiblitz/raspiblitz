@@ -20,6 +20,7 @@
 - Update: Thunderhub v0.12.31 [details](https://github.com/apotdevin/thunderhub/releases/tag/v0.12.31)
 - Update: BTC-RPC-Explorer v3.3.0 [details](https://github.com/janoside/btc-rpc-explorer/blob/master/CHANGELOG.md#v330)
 - Update: Specter Desktop 1.7.2 [details](https://github.com/cryptoadvance/specter-desktop/releases/tag/v1.7.2)
+- Update: Mempool 2.3.0 [details](https://github.com/mempool/mempool/releases/tag/v2.3.0)
 - Update: PyBlock to 1.1.8.5 (adapt to new install mechanism)
 - Update: Re-Add connecting node with Zap mobile wallet iOS & Android
 - Update: additional redaction of private data in debug logs
