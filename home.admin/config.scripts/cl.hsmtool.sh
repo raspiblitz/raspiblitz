@@ -295,7 +295,13 @@ elif [ "$1" = "unlock" ]; then
     # fail
     elif [ $attempt -eq 12 ];then
       echo "# Failed to unlock the ${netprefix}lightningd wallet - giving up after 1 minute"
-      echo "# Check: sudo journalctl -u ${netprefix}lightningd"
+      echo
+      echo "# The last lines of the ${netprefix}lightningd logs ('sudo tail -n 5 /home/bitcoin/.lightning/${CLNETWORK}/cl.log'):"
+      sudo tail -n 5 /home/bitcoin/.lightning/${CLNETWORK}/cl.log
+      echo
+      echo "# The last lines of the ${netprefix}lightningd journal ('sudo journalctl -u ${netprefix}lightningd'):"
+      sudo journalctl -n 5 -u ${netprefix}lightningd
+      echo
       exit 1
     fi
     echo "# Waiting to unlock wallet ... "
