@@ -57,6 +57,16 @@ while [ $(sudo -u bitcoin lncli state 2>&1 | grep -c "connection refused") -gt 0
   echo "# Checking again in 10 seconds (${counter})"
   counter=$((counter+1))
   sleep 10
+
+  # give up after 60 tries (10 minutes)
+  if [ ${counter} -gt 60 ]; then
+      echo
+      echo "# FAIL: Takes too long ... giving up on --> Waiting for LND to start"
+      echo "# SEE LOG: ---------------------------------------------------------"
+      cat /home/admin/lnd.db.bolt.auto-compact.log
+      sleep 10
+      exit 1
+  fi
 done
 
 counter=0
@@ -67,6 +77,14 @@ while [ $(sudo -u bitcoin lncli state | grep -c "WAITING_TO_START") -gt 0 ]; do
   echo
   counter=$((counter+1))
   sleep 60
+  # give up after 60 tries (1 hour)
+  if [ ${counter} -gt 60 ]; then
+      echo "# FAIL: Takes too long ... giving up on --> Compacting channel.db"
+      echo "# SEE LOG: ---------------------------------------------------------"
+      cat /home/admin/lnd.db.bolt.auto-compact.log
+      sleep 10
+      exit 1
+  fi
 done
 
 echo "# LND state:"
