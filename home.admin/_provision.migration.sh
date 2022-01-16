@@ -22,6 +22,7 @@ source <(/home/admin/_cache.sh get hddGotMigrationData hddVersionLND)
 # log header
 echo "" > ${logFile}
 chmod 640 ${logFile}
+chown root:sudo ${logFile}
 echo "###################################" >> ${logFile}
 echo "# _provision.migration.sh" >> ${logFile}
 echo "###################################" >> ${logFile}
