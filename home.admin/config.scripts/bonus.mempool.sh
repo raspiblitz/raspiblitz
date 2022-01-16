@@ -130,7 +130,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo mariadb -e "CREATE DATABASE mempool;"
     sudo mariadb -e "GRANT ALL PRIVILEGES ON mempool.* TO 'mempool' IDENTIFIED BY 'mempool';"
     sudo mariadb -e "FLUSH PRIVILEGES;"
-    mariadb -umempool -pmempool mempool < mariadb-structure.sql
+    if [ -f "mariadb-structure.sql" ]; then
+      mariadb -umempool -pmempool mempool < mariadb-structure.sql
+    fi
 
     echo "# npm install for mempool explorer (frontend)"
 
