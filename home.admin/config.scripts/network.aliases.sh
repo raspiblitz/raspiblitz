@@ -21,7 +21,7 @@ fi
 source /home/admin/raspiblitz.info 
 source /mnt/hdd/raspiblitz.conf 2>/dev/null
 
-if [ $1 = getvars ];then
+if [ "$1" = getvars ];then
   
   # LNTYPE is: lnd | cl
   if [ $# -gt 1 ];then
@@ -40,7 +40,7 @@ if [ $1 = getvars ];then
     chain=main
   fi
   # CHAIN is: signet | testnet | mainnet
-  if [ $# -gt 2 ]&&[ $3 != net ];then
+  if [ $# -gt 2 ]&&[ "$3" != net ];then
     CHAIN=$3
     chain=${CHAIN::-3}
   else
@@ -89,6 +89,8 @@ if [ $1 = getvars ];then
     fi
     echo "CLCONF=${CLCONF}"
     typeprefix=c
+
+    echo "lightningcli_alias=\"sudo -u bitcoin /usr/local/bin/lightning-cli --conf=${CLCONF}\""
   fi
 
   # typeprefix is: "" | c
@@ -102,7 +104,6 @@ if [ $1 = getvars ];then
   echo "lncli_alias=\"sudo -u bitcoin /usr/local/bin/lncli -n=${chain}net --rpcserver localhost:1${L2rpcportmod}009\""
   # sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network}
   echo "bitcoincli_alias=\"/usr/local/bin/${network}-cli -datadir=/home/bitcoin/.${network} -rpcport=${L1rpcportmod}8332\""
-  echo "lightningcli_alias=\"sudo -u bitcoin /usr/local/bin/lightning-cli --conf=${CLCONF}\""
 
 fi
 

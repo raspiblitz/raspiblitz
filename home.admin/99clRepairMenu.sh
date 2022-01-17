@@ -7,7 +7,7 @@ source /mnt/hdd/raspiblitz.conf
 
 source <(/home/admin/config.scripts/network.aliases.sh getvars cl $1)
 
-NETclEncryptedHSM="${netprefix}clEncryptedHSM"
+sudo mkdir /var/cache/raspiblitz/temp 2>/dev/null
 
 # BASIC MENU INFO
 WIDTH=64

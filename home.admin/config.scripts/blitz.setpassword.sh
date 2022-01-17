@@ -368,7 +368,7 @@ elif [ "${abcd}" = "x" ]; then
     # second parameter is the flexible text
     text=$2
     resultFile=$3
-    shred -u $3 2>/dev/null
+    shred -u "$3" 2>/dev/null
 
     # ask user for new password (first time)
     password1=$(whiptail --passwordbox "\n${text}:\n(min 8chars, 1word, chars+number, no specials)" 10 52 "" --backtitle "RaspiBlitz" 3>&1 1>&2 2>&3)
@@ -413,7 +413,7 @@ elif [ "${abcd}" = "x" ]; then
     fi
 
     # store result is file
-    echo "${password1}" > ${resultFile}
+    echo "${password1}" > "${resultFile}"
 
 elif [ "${abcd}" = "cl" ]; then
   /home/admin/config.scripts/cl.hsmtool.sh change-password mainnet
