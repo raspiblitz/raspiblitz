@@ -273,7 +273,8 @@ elif [ "${abcd}" = "b" ]; then
   fi
 
   echo "# OK -> RPC Password B changed"
-  echo "# Reboot is needed"
+  echo "# Reboot is needed (will be triggered if interactive menu was called)"
+  sleep 3
 
 ############################
 # PASSWORD C
