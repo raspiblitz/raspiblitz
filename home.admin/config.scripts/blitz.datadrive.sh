@@ -231,7 +231,7 @@ if [ "$1" = "status" ]; then
             echo "hddRaspiVersion='${raspiBlitzVersion}'"
 
             # create hdd-inspect data dir on RAMDISK
-            mkdir /var/cache/raspiblitz/hdd-inspect
+            mkdir /var/cache/raspiblitz/hdd-inspect 2>/dev/null
 
             # make copy of raspiblitz.conf to RAMDISK
             cp -a /mnt/hdd${subVolumeDir}/raspiblitz.conf /var/cache/raspiblitz/hdd-inspect/raspiblitz.conf
