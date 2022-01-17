@@ -1454,10 +1454,9 @@ if [ "$1" = "link" ]; then
   sudo chown -R bitcoin:bitcoin /home/bitcoin/.bitcoin
   sudo chown -R bitcoin:bitcoin /mnt/hdd/app-storage
   sudo chown -R bitcoin:bitcoin /mnt/hdd/app-data
-  sudo chown -R bitcoin:bitcoin /mnt/hdd/temp 
-  sudo chmod -R 777 /mnt/temp
-  sudo chmod -R 777 /mnt/hdd/temp
-  sudo chmod 777 /mnt
+  sudo chown -R bitcoin:bitcoin /mnt/hdd/temp 2>/dev/null
+  sudo chmod -R 777 /mnt/temp 2>/dev/null
+  sudo chmod -R 777 /mnt/hdd/temp 2>/dev/null
 
   # write info files about what directories are for
 
