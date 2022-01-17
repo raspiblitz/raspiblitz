@@ -108,14 +108,13 @@ migrate_raspiblitz_conf () {
 
 if [ "$1" = "migration-umbrel" ]; then
 
-  source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
-
   # make sure data drive is mounted
+  source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
   if [ "${isMounted}" != "1" ]; then
-    source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddPartitionCandidate})
+    source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount)
   fi
   if [ "${isMounted}" == "1" ]; then
-    echo "# mounted ${hddPartitionCandidate} to /mnt/hdd"
+    echo "# mounted /mnt/hdd (hddFormat='${hddFormat}')"
   else
     echo "err='failed temp mounting disk'"
     exit 1
@@ -189,14 +188,13 @@ fi
 
 if [ "$1" = "migration-citadel" ]; then
 
-  source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
-
   # make sure data drive is mounted
+  source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
   if [ "${isMounted}" != "1" ]; then
-    source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddPartitionCandidate})
+    source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount)
   fi
   if [ "${isMounted}" == "1" ]; then
-    echo "# mounted ${hddPartitionCandidate} to /mnt/hdd"
+    echo "# mounted /mnt/hdd (hddFormat='${hddFormat}')"
   else
     echo "err='failed temp mounting disk'"
     exit 1
@@ -265,14 +263,13 @@ fi
 
 if [ "$1" = "migration-mynode" ]; then
 
-  source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
-
   # make sure data drive is mounted
+  source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
   if [ "${isMounted}" != "1" ]; then
-    source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddPartitionCandidate})
+    source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount)
   fi
   if [ "${isMounted}" == "1" ]; then
-    echo "# mounted ${hddPartitionCandidate} to /mnt/hdd"
+    echo "# mounted /mnt/hdd (hddFormat='${hddFormat}')"
   else
     echo "err='failed temp mounting disk'"
     exit 1

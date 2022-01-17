@@ -31,6 +31,7 @@ setupFile="/var/cache/raspiblitz/temp/raspiblitz.setup"
 echo "Writing logs to: ${logFile}"
 echo "" > $logFile
 sudo chmod 640 ${logFile}
+sudo chown root:sudo ${logFile}
 echo "***********************************************" >> $logFile
 echo "Running RaspiBlitz Bootstrap ${codeVersion}" >> $logFile
 date >> $logFile
@@ -406,12 +407,8 @@ echo "HDD already part of system: $isMounted" >> $logFile
 if [ ${isMounted} -eq 0 ]; then
 
   # temp mount the HDD
-  echo "Temp mounting (1) data drive ($hddCandidate)" >> $logFile
-  if [ "${hddFormat}" != "btrfs" ]; then
-    source <(/home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddPartitionCandidate})
-  else
-    source <(/home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddCandidate})
-  fi
+  echo "Temp mounting (1) data drive" >> $logFile
+  source <(/home/admin/config.scripts/blitz.datadrive.sh tempmount)
   echo "Temp mounting (1) result: ${isMounted}" >> $logFile
 
   # write data needed for setup process into raspiblitz.info
@@ -510,12 +507,8 @@ if [ ${isMounted} -eq 0 ]; then
 
   # make sure HDD is mounted (could be freshly formatted by user on last loop)
   source <(/home/admin/config.scripts/blitz.datadrive.sh status)
-  echo "Temp mounting (2) data drive ($hddCandidate)" >> ${logFile}
-  if [ "${hddFormat}" != "btrfs" ]; then
-    source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddPartitionCandidate})
-  else
-    source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddCandidate})
-  fi
+  echo "Temp mounting (2) data drive (hddFormat='${hddFormat}')" >> ${logFile}
+  source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount)
   echo "Temp mounting (2) result: ${isMounted}" >> ${logFile}
 
   # check that HDD was temp mounted

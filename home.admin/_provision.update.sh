@@ -22,6 +22,7 @@ source ${setupFile}
 # log header
 echo "" > ${logFile}
 sudo chmod 640 ${logFile}
+chown root:sudo ${logFile}
 echo "###################################" >> ${logFile}
 echo "# _provision.update.sh" >> ${logFile}
 echo "###################################" >> ${logFile}

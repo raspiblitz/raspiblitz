@@ -32,7 +32,7 @@ its recommended to make a backup of all your Lightning
 Channel Data and download that file to your laptop.
 
 Do you want to download Lightning Data Backup now?
-      " 12 58
+      " 12 62
     if [ $? -eq 0 ]; then
       if [ "${lightning}" == "lnd" ] || [ "${lnd}" = "on" ]; then
         clear

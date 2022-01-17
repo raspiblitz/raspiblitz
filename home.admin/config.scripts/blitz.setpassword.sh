@@ -228,6 +228,9 @@ elif [ "${abcd}" = "b" ]; then
   sed -i "s/^rpcpassword=.*/rpcpassword=${newPassword}/g" /mnt/hdd/${network}/${network}.conf 2>/dev/null
   sed -i "s/^rpcpassword=.*/rpcpassword=${newPassword}/g" /home/admin/.${network}/${network}.conf 2>/dev/null
 
+  # NOTE: now other bonus apps configs that need passwordB need to be adapted manually
+  # bonus apps that use a "prestart" will adapt themselves on service restart after reboot
+
   # blitzweb
   if ! [ -f /etc/nginx/.htpasswd ]; then
     echo "${newPassword}" | sudo htpasswd -ci /etc/nginx/.htpasswd admin
@@ -235,43 +238,11 @@ elif [ "${abcd}" = "b" ]; then
     echo "${newPassword}" | sudo htpasswd -i /etc/nginx/.htpasswd admin
   fi
 
-  # RTL - keep settings from current RTL-Config.json
-  if [ "${rtlWebinterface}" == "on" ]; then
-    echo "# changing RTL password"
-    cp /home/rtl/RTL/RTL-Config.json /home/rtl/RTL/backup-RTL-Config.json
-    # remove hashed old password
-    #sed -i "/\b\(multiPassHashed\)\b/d" ./RTL-Config.json
-    # set new password
-    cp /home/rtl/RTL/RTL-Config.json /home/admin/RTL-Config.json
-    chown admin:admin /home/admin/RTL-Config.json
-    chmod 600 /home/admin/RTL-Config.json || exit 1
-    node > /home/admin/RTL-Config.json <<EOF
-//Read data
-var data = require('/home/rtl/RTL/backup-RTL-Config.json');
-//Manipulate data
-data.multiPassHashed = null;
-data.multiPass = '$newPassword';
-//Output data
-console.log(JSON.stringify(data, null, 2));
-EOF
-    rm -f /home/rtl/RTL/backup-RTL-Config.json
-    rm -f /home/rtl/RTL/RTL-Config.json
-    mv /home/admin/RTL-Config.json /home/rtl/RTL/
-    chown rtl:rtl /home/rtl/RTL/RTL-Config.json
-  fi
-  
   # electrs
   if [ "${ElectRS}" == "on" ]; then
     echo "# changing the RPC password for ELECTRS"
     RPC_USER=$(cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcuser | cut -c 9-)
     sudo sed -i "s/^auth = \"$RPC_USER.*\"/auth = \"$RPC_USER:${newPassword}\"/g" /home/electrs/.electrs/config.toml
-  fi
-
-  # BTC-RPC-Explorer
-  if [ "${BTCRPCexplorer}" = "on" ]; then
-    echo "# changing the RPC password for BTCRPCEXPLORER"
-    sudo sed -i "s/^BTCEXP_BITCOIND_PASS=.*/BTCEXP_BITCOIND_PASS=${newPassword}/g" /home/btcrpcexplorer/.config/btc-rpc-explorer.env
-    sudo sed -i "s/^BTCEXP_BASIC_AUTH_PASSWORD=.*/BTCEXP_BASIC_AUTH_PASSWORD=${newPassword}/g" /home/btcrpcexplorer/.config/btc-rpc-explorer.env
   fi
 
   # BTCPayServer
@@ -302,7 +273,8 @@ EOF
   fi
 
   echo "# OK -> RPC Password B changed"
-  echo "# Reboot is needed"
+  echo "# Reboot is needed (will be triggered if interactive menu was called)"
+  sleep 3
 
 ############################
 # PASSWORD C

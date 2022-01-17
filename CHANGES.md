@@ -9,7 +9,7 @@
 - New: Switch LNbits between lnd & c-lightning [issue](https://github.com/rootzoll/raspiblitz/issues/2556)
 - Update: LND v0.14.1-beta [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.14.1-beta)
 - Update: C-lightning v0.10.2 [details](https://github.com/ElementsProject/lightning/releases/tag/v0.10.2)
-- Update: RTL v0.12.0 [details](https://github.com/Ride-The-Lightning/RTL/releases/tag/v0.12.0)
+- Update: RTL v0.12.1 [details](https://github.com/Ride-The-Lightning/RTL/releases/tag/v0.12.1)
 - Update: C-lightningREST v0.6.1 [details](https://github.com/Ride-The-Lightning/c-lightning-REST/releases/tag/v0.6.1)
 - Update: Lightning Terminal v0.6.1-alpha with Lightning Node Connect over Tor [details](https://github.com/lightninglabs/lightning-terminal/releases/tag/v0.6.1-alpha)
 - Update: Channel Tools (chantools) v0.10.1 [details](https://github.com/guggero/chantools/releases/tag/v0.10.1)
@@ -20,6 +20,7 @@
 - Update: Thunderhub v0.12.31 [details](https://github.com/apotdevin/thunderhub/releases/tag/v0.12.31)
 - Update: BTC-RPC-Explorer v3.3.0 [details](https://github.com/janoside/btc-rpc-explorer/blob/master/CHANGELOG.md#v330)
 - Update: Specter Desktop 1.7.2 [details](https://github.com/cryptoadvance/specter-desktop/releases/tag/v1.7.2)
+- Update: Mempool 2.3.0 [details](https://github.com/mempool/mempool/releases/tag/v2.3.0)
 - Update: PyBlock to 1.1.8.5 (adapt to new install mechanism)
 - Update: Re-Add connecting node with Zap mobile wallet iOS & Android
 - Update: additional redaction of private data in debug logs
