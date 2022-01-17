@@ -267,7 +267,7 @@ faraday.bitcoin.password=$PASSWORD_B
 
     # secure
     sudo chown lit:lit /mnt/hdd/app-data/.lit/lit.conf
-    sudo chmod 600 /mnt/hdd/app-data/.lit/lit.conf | exit 1
+    sudo chmod 600 /mnt/hdd/app-data/.lit/lit.conf || exit 1
 
     ############
     # service  #
