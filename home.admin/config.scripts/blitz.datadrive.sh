@@ -1470,7 +1470,7 @@ if [ "$1" = "link" ]; then
   echo "The /mnt/hdd/app-storage directory should be used by additional/optional apps and services installed to the RaspiBlitz for their non-critical and reproducible data (indexes, public blockchain, etc.) that does not need to survive an an import/export/backup. Data is critical should be in app-data." > ./README.txt
   sudo mv ./README.txt /mnt/hdd/app-storage/README.txt 2>/dev/null
 
-  >&2 echo "# OK - all symbolic links build"
+  >&2 echo "# OK - all symbolic links are built"
   exit 0
 
 fi
