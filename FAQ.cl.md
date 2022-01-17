@@ -30,6 +30,8 @@
 - [Backups](#backups)
   - [Seed](#seed)
   - [How to display the hsm_secret in a human-readable format?](#how-to-display-the-hsm_secret-in-a-human-readable-format)
+  - [How to test the seedwords?](#how-to-test-the-seedwords)
+  - [How to restore the hsm_secret from text?](#how-to-restore-the-hsm_secret-from-text)
   - [Channel database](#channel-database)
   - [Recovery](#recovery)
     - [Recover from a cl-rescue file](#recover-from-a-cl-rescue-file)
@@ -570,11 +572,44 @@ Will need to pay through a peer which supports the onion messages which means yo
 * Show manually with:  
 `sudo cat /home/bitcoin/.lightning/bitcoin/seedwords.info`
 * If there is no such file and you have not funded the C-lightning wallet yet can reset the wallet and the next wallet will be created with a seed.
+
 ### How to display the hsm_secret in a human-readable format?
-* If there is no seed available it is best to save the hsm_secret as a file with `scp`.
-To display it as text:
+* If there is no seed available it is best to save the hsm_secret as a file with `scp` or note down the alphanumeric characters in the two line displayed with:
     ```
-    sudo cat /home/bitcoin/.lightning/bitcoin/hsm_secret | xxd
+    sudo xxd /home/bitcoin/.lightning/bitcoin/hsm_secret
+    ```
+
+### How to test the seedwords?
+* The manual process:
+    ```
+    # display the hsm_secret in hex:
+    sudo -u bitcoin xxd /home/bitcoin/.lightning/bitcoin/hsm_secret
+
+    # input seed and generate an hsm_secret in a temporary location:
+    lightning-hsmtool generatehsm /dev/shm/test_hsm_secret
+
+    # compare
+    xxd /dev/shm/test_hsm_secret
+
+    # delete temp file
+    srm /dev/shm/test_hsm_secret
+    ```
+   
+### How to restore the hsm_secret from text?
+* example from https://lightning.readthedocs.io/BACKUP.html#backing-up-your-c-lightning-node:
+    ```
+    cat > hsm_secret_hex.txt <<HEX
+    00: 30cc f221 94e1 7f01 cd54 d68c a1ba f124
+    10: e1f3 1d45 d904 823c 77b7 1e18 fd93 1676
+    HEX
+    xxd -r hsm_secret_hex.txt > hsm_secret
+
+    # move in place (will overwrite! - remove the ##)
+    ## sudo mv /home/bitcoin/.lightning/bitcoin/hsm_secret
+
+    # fix the owner and tighten permissions
+    sudo chown bitcoin:bitcoin  /home/bitcoin/.lightning/bitcoin/hsm_secret
+    chmod 0400  /home/bitcoin/.lightning/bitcoin/hsm_secret
     ```
 
 ### Channel database
