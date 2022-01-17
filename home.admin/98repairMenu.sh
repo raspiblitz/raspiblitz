@@ -94,13 +94,13 @@ case $CHOICE in
     read key
     ;;
   REPAIR-LND)
-    sudo /home/admin/99lndRepairMenu.sh
+    /home/admin/99lndRepairMenu.sh
     echo
     echo "Press ENTER to return to main menu."
     read key
     ;;
   REPAIR-CL)
-    sudo /home/admin/99clRepairMenu.sh
+    /home/admin/99clRepairMenu.sh
     echo
     echo "Press ENTER to return to main menu."
     read key
@@ -143,3 +143,5 @@ case $CHOICE in
     /home/admin/config.scripts/lnd.unlock.sh
     ;;
 esac
+
+exit 0
