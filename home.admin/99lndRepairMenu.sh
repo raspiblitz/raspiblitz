@@ -199,8 +199,8 @@ or having a complete LND rescue-backup from your old node.
       /home/admin/_cache.sh set message "LND Wallet (SEED)"
       source <(/home/admin/config.scripts/lnd.initwallet.py seed "${chain}net" "${passwordC}" "${seedWords}" "${seedPassword}")
       if [ "${err}" != "" ]; then
-      echo "lnd-wallet-seed" "lnd.initwallet.py seed returned error" "/home/admin/config.scripts/lnd.initwallet.py seed ${chain}net ... --> ${err} + ${errMore}"
-      exit 12
+        echo "lnd-wallet-seed" "lnd.initwallet.py seed returned error" "/home/admin/config.scripts/lnd.initwallet.py seed ${chain}net ... --> ${err} + ${errMore}"
+        exit 12
       fi
     fi
 
