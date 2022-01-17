@@ -96,7 +96,7 @@ case $CHOICE in
     read key
     # reset
     sudo rm /home/bitcoin/.lightning/${CLNETWORK}/hsm_secret
-    sudo rm /home/bitcoin/.lightning/${CLNETWORK}/*.*
+    sudo rm -rf /home/bitcoin/.lightning/${CLNETWORK}/*.*
     # make sure the new hsm_secret is treated as unencrypted and clear autounlock
     /home/admin/config.scripts/blitz.conf.sh set ${netprefix}clEncryptedHSM "off"
     /home/admin/config.scripts/blitz.conf.sh set ${netprefix}clAutoUnlock "off"
@@ -130,7 +130,7 @@ case $CHOICE in
     read key
     # reset
     sudo rm /home/bitcoin/.lightning/${CLNETWORK}/hsm_secret
-    sudo rm /home/bitcoin/.lightning/${CLNETWORK}/*.*
+    sudo rm -rf /home/bitcoin/.lightning/${CLNETWORK}/*.*
     # import file
     _temp="/var/cache/raspiblitz/temp/.temp.tmp"
     clear
@@ -155,14 +155,18 @@ case $CHOICE in
     read key
     # reset
     sudo rm /home/bitcoin/.lightning/${CLNETWORK}/hsm_secret
-    sudo rm /home/bitcoin/.lightning/${CLNETWORK}/config
-    sudo rm /home/bitcoin/.lightning/${CLNETWORK}/*.*
+    sudo rm -f /home/bitcoin/.lightning/${CLNETWORK}/config
+    sudo rm -rf /home/bitcoin/.lightning/${CLNETWORK}/*.*
     # import seed
     _temp="/var/cache/raspiblitz/.temp.tmp"
     /home/admin/config.scripts/cl.backup.sh seed-import-gui $_temp
     source $_temp
     /home/admin/config.scripts/cl.hsmtool.sh seed-force "$CHAIN" "${seedWords}"
     sudo rm $_temp 2>/dev/null
+    if ! sudo ls /home/bitcoin/.lightning/${CLNETWORK}/hsm_secret; then
+      echo "# There was no hsm_secret created - exiting"
+      exit 15
+    fi
     # regenerate config
     /home/admin/config.scripts/cl.hsmtool.sh autounlock-off
     /home/admin/config.scripts/cl.hsmtool.sh decrypt

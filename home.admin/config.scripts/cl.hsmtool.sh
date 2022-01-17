@@ -223,6 +223,10 @@ if [ "$1" = "new" ] || [ "$1" = "new-force" ] || [ "$1" = "seed" ] || [ "$1" = "
     seedpassword="$4"
   fi
 
+  if [ "${seedwords}" = "" ]; then
+    echo "# No seedwords - exiting"
+    exit 14
+  fi
   # place the seedwords to /home/bitcoin/.lightning/${CLNETWORK}/seedwords.info
   sudo touch /home/bitcoin/.lightning/${CLNETWORK}/seedwords.info
   sudo chown bitcoin:bitcoin /home/bitcoin/.lightning/${CLNETWORK}/seedwords.info
