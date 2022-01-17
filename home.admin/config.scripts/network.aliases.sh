@@ -21,7 +21,7 @@ fi
 source /home/admin/raspiblitz.info 
 source /mnt/hdd/raspiblitz.conf 2>/dev/null
 
-if [ $1 = getvars ];then
+if [ "$1" = getvars ];then
   
   # LNTYPE is: lnd | cl
   if [ $# -gt 1 ];then
@@ -40,7 +40,7 @@ if [ $1 = getvars ];then
     chain=main
   fi
   # CHAIN is: signet | testnet | mainnet
-  if [ $# -gt 2 ]&&[ $3 != net ];then
+  if [ $# -gt 2 ]&&[ "$3" != net ];then
     CHAIN=$3
     chain=${CHAIN::-3}
   else
