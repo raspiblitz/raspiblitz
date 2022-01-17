@@ -5,7 +5,9 @@ echo "# get raspiblitz config"
 source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
 
-source <(/home/admin/config.scripts/network.aliases.sh getvars lnd $1)
+source <(/home/admin/config.scripts/network.aliases.sh getvars lnd "$1")
+
+sudo mkdir /var/cache/raspiblitz/temp
 
 if ! pip list | grep grpc; then sudo -H python3 -m pip install grpcio==1.38.1; fi
 
