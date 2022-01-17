@@ -89,6 +89,8 @@ if [ "$1" = getvars ];then
     fi
     echo "CLCONF=${CLCONF}"
     typeprefix=c
+
+    echo "lightningcli_alias=\"sudo -u bitcoin /usr/local/bin/lightning-cli --conf=${CLCONF}\""
   fi
 
   # typeprefix is: "" | c
@@ -102,7 +104,6 @@ if [ "$1" = getvars ];then
   echo "lncli_alias=\"sudo -u bitcoin /usr/local/bin/lncli -n=${chain}net --rpcserver localhost:1${L2rpcportmod}009\""
   # sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network}
   echo "bitcoincli_alias=\"/usr/local/bin/${network}-cli -datadir=/home/bitcoin/.${network} -rpcport=${L1rpcportmod}8332\""
-  echo "lightningcli_alias=\"sudo -u bitcoin /usr/local/bin/lightning-cli --conf=${CLCONF}\""
 
 fi
 
