@@ -295,11 +295,16 @@ if [ "$1" = "status" ]; then
             # BRTS
             hdd_data_free1Kblocks=$(df -h -k /dev/${hdd}1 | grep "/dev/${hdd}1" | sed -e's/  */ /g' | cut -d" " -f 4 | tr -dc '0-9')
           fi
-          hddDataFreeBytes=$((${hdd_data_free1Kblocks} * 1024))
-          hddDataFreeGB=$((${hdd_data_free1Kblocks} / (1024 * 1024)))
-          echo "hddDataFreeBytes=${hddDataFreeBytes}"
-          echo "hddDataFreeKB=${hdd_data_free1Kblocks}"
-          echo "hddDataFreeGB=${hddDataFreeGB}"
+          if [ "${hdd_data_free1Kblocks}" != "" ]; then
+            hddDataFreeBytes=$((${hdd_data_free1Kblocks} * 1024))
+            hddDataFreeGB=$((${hdd_data_free1Kblocks} / (1024 * 1024)))
+            echo "hddDataFreeBytes=${hddDataFreeBytes}"
+            echo "hddDataFreeKB=${hdd_data_free1Kblocks}"
+            echo "hddDataFreeGB=${hddDataFreeGB}"
+          else
+            echo "# ERROR: Was not able to determine hddDataFree space"
+          fi
+
 
           # check if its another fullnode implementation data disk
           hddGotMigrationData=""
