@@ -96,8 +96,12 @@ while [ ${fallback} -eq 0 ]
 
     loopCount=$(($loopCount +1))
     echo "# calling: lncli unlock"
+
+
+    # check if lnd is in recovery mode
+    source <(/home/admin/config.scripts/lnd.backup.sh mainnet recoverymode status)
     recoveryOption=""
-    if [ "${fundRecovery}" == "1" ]; then
+    if [ "${recoverymode}" == "1" ]; then
         recoveryOption="--recovery_window=5000 "
         echo "# running unlock with ${recoveryOption}"
     fi
@@ -167,7 +171,7 @@ do
     echo "############################"
     echo "Calling: ${netprefix}lncli unlock"
     echo "Please re-enter Password C:"
-    $lncli_alias unlock --recovery_window=1000
+    $lncli_alias unlock --recovery_window=5000
 
     # test unlock
     walletLocked=$($lncli_alias getinfo 2>&1 | grep -c unlock)

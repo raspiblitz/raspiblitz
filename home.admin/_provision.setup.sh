@@ -259,11 +259,10 @@ if [ "${lightning}" == "lnd" ]; then
       exit 12
     fi
     
-    # mark fundrecovery for restarts
-    /home/admin/config.scripts/blitz.conf.sh set fundRecovery 1 /home/admin/raspiblitz.info
+    # set lnd into recovery mode (gets activated after setup reboot)
+    /home/admin/config.scripts/lnd.backup.sh mainnet recoverymode on >> ${logFile}
+    echo "Rescanning will activate after setup-reboot ..." >> ${logFile}
 
-    echo "Rescanning addresses takes a long time" >> ${logFile}
-    echo "use the RESCAN option in the REPAIR-LND menu after LND is synced or 'lncli unlock ---recovery_window 5000'" >> ${logFile}
   
   # WALLET --> NEW
   else
@@ -346,11 +345,9 @@ if [ "${lightning}" == "lnd" ]; then
     fi
   fi
 
-  # mark fundrecovery for restarts
-  /home/admin/config.scripts/blitz.conf.sh set fundRecovery 1 /home/admin/raspiblitz.info
-
-  echo "Rescanning addresses takes a long time" >> ${logFile}
-  echo "use the RESCAN option in the REPAIR-LND menu after LND is synced or 'lncli unlock ---recovery_window 5000'" >> ${logFile}
+  # set lnd into recovery mode (gets activated after setup reboot)
+  /home/admin/config.scripts/lnd.backup.sh mainnet recoverymode on >> ${logFile}
+  echo "Rescanning will activate after setup-reboot ..." >> ${logFile}
 
   # stop lnd for the rest of the provision process
   echo "stopping lnd for the rest provision again (will start on next boot)" >> ${logFile}
