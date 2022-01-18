@@ -26,10 +26,10 @@ if [ "$1" == "mainnet" ]; then
   lndcli_alias="/usr/local/bin/lncli -n=mainnet --rpcserver=localhost:10009 --macaroonpath=${lndHomeDir}/data/chain/bitcoin/mainnet/readonly.macaroon --tlscertpath=${lndHomeDir}/tls.cert"
   netprefix=""
 elif [ "$1" == "testnet" ]; then
-  lndcli_alias="/usr/local/bin/lncli -n=mainnet --rpcserver=localhost:11009 --macaroonpath=${lndHomeDir}/data/chain/bitcoin/testnet/readonly.macaroon --tlscertpath=${lndHomeDir}/tls.cert"
+  lndcli_alias="/usr/local/bin/lncli -n=testnet --rpcserver=localhost:11009 --macaroonpath=${lndHomeDir}/data/chain/bitcoin/testnet/readonly.macaroon --tlscertpath=${lndHomeDir}/tls.cert"
   netprefix="t"
 elif [ "$1" == "signet" ]; then
-  lndcli_alias="/usr/local/bin/lncli -n=mainnet --rpcserver=localhost:13009 --macaroonpath=${lndHomeDir}/data/chain/bitcoin/signet/readonly.macaroon --tlscertpath=${lndHomeDir}/tls.cert"
+  lndcli_alias="/usr/local/bin/lncli -n=signet --rpcserver=localhost:13009 --macaroonpath=${lndHomeDir}/data/chain/bitcoin/signet/readonly.macaroon --tlscertpath=${lndHomeDir}/tls.cert"
   netprefix="s"
 else
   echo "error='not supported net'"
