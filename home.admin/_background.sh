@@ -223,6 +223,55 @@ do
     fi
   fi
 
+  ####################################################
+  # CHECK FOR End of Intial Blockhain & Lightning Sync
+  ####################################################
+
+  # check every 60secs
+  recheckIBD=$((($counter % 60)+1))
+  if [ ${recheckIBD} -eq 1 ]; then
+    # check if flag exists (got created on 50syncHDD.sh)
+    flagExists=$(ls /mnt/hdd/${network}/blocks/selfsync.flag 2>/dev/null | grep -c "selfsync.flag")
+    if [ ${flagExists} -eq 1 ]; then
+      source <(/home/admin/config.scripts/network.aliases.sh getvars)
+      finishedIBD=$($bitcoincli_alias getblockchaininfo | grep "initialblockdownload" | grep -c "false")
+      if [ ${finishedIBD} -eq 1 ]; then
+
+        echo "CHECK FOR END OF IBD --> reduce RAM for next reboot"
+
+        # remove flag
+        rm /mnt/hdd/${network}/blocks/selfsync.flag
+
+        # set dbcache back to normal (to give room for other apps after reboot in the future)
+        kbSizeRAM=$(cat /proc/meminfo | grep "MemTotal" | sed 's/[^0-9]*//g')
+
+        if [ ${kbSizeRAM} -gt 1500000 ]; then
+          echo "Detected RAM >1GB --> optimizing ${network}.conf"
+          sed -i "s/^dbcache=.*/dbcache=512/g" /mnt/hdd/${network}/${network}.conf
+        else
+          echo "Detected RAM 1GB --> optimizing ${network}.conf"
+          sed -i "s/^dbcache=.*/dbcache=128/g" /mnt/hdd/${network}/${network}.conf
+        fi
+
+        # relax sanning on sync progress (after 30 more secs)
+        /home/admin/_cache.sh focus btc_default_sync_progress 10 30
+
+      fi
+    fi
+  fi
+
+  #################################
+  # Lightning Sync Monitor
+  #################################
+
+  # check every 10sec 
+  recheckSync=$(($counter % 10))
+  if [ ${recheckSync} -eq 1 ] && [ "${fundRecovery}" == "1" ]; then
+    # fundRecovery is "1" when wallet was recovered by SEED and optional SCB file
+    # 
+    echo "Checking if Lightning sync "
+  fi
+
   ###############################
   # BlitzTUI Monitoring
   ###############################
@@ -405,43 +454,6 @@ do
 
         echo "STARTING AUTO-UNLOCK ..."
         /home/admin/config.scripts/lnd.unlock.sh
-
-      fi
-    fi
-  fi
-
-  ####################################################
-  # CHECK FOR END OF IBD (self validation)
-  ####################################################
-
-  # check every 60secs
-  recheckIBD=$((($counter % 60)+1))
-  if [ ${recheckIBD} -eq 1 ]; then
-    # check if flag exists (got created on 50syncHDD.sh)
-    flagExists=$(ls /mnt/hdd/${network}/blocks/selfsync.flag 2>/dev/null | grep -c "selfsync.flag")
-    if [ ${flagExists} -eq 1 ]; then
-      source <(/home/admin/config.scripts/network.aliases.sh getvars)
-      finishedIBD=$($bitcoincli_alias getblockchaininfo | grep "initialblockdownload" | grep -c "false")
-      if [ ${finishedIBD} -eq 1 ]; then
-
-        echo "CHECK FOR END OF IBD --> reduce RAM for next reboot"
-
-        # remove flag
-        rm /mnt/hdd/${network}/blocks/selfsync.flag
-
-        # set dbcache back to normal (to give room for other apps after reboot in the future)
-        kbSizeRAM=$(cat /proc/meminfo | grep "MemTotal" | sed 's/[^0-9]*//g')
-
-        if [ ${kbSizeRAM} -gt 1500000 ]; then
-          echo "Detected RAM >1GB --> optimizing ${network}.conf"
-          sed -i "s/^dbcache=.*/dbcache=512/g" /mnt/hdd/${network}/${network}.conf
-        else
-          echo "Detected RAM 1GB --> optimizing ${network}.conf"
-          sed -i "s/^dbcache=.*/dbcache=128/g" /mnt/hdd/${network}/${network}.conf
-        fi
-
-        # relax sanning on sync progress (after 30 more secs)
-        /home/admin/_cache.sh focus btc_default_sync_progress 10 30
 
       fi
     fi

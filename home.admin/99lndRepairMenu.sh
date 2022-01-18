@@ -261,6 +261,7 @@ function restoreSCB()
       fi
     fi
 
+    # mark that the system is back in fundRecovery mode
     syncAndCheckLND
 
     # LND was restarted so need to unlock
@@ -457,27 +458,14 @@ case $CHOICE in
     echo "Can use 'sudo pkill lnd' to shut down ungracefully."
     sudo systemctl restart lnd
 
-    # from blitz.conf.sh
-    configFile="/home/admin/raspiblitz.info"
-    keystr="fundRecovery"
-    valuestr="1"
-    # check if key needs to be added (prepare new entry)
-    entryExists=$(grep -c "^${keystr}=" ${configFile})
-    if [ ${entryExists} -eq 0 ]; then
-      echo "${keystr}=" | tee -a ${configFile}
-    fi
-    # add valuestr quotes if not standard values
-    if [ "${valuestr}" != "on" ] && [ "${valuestr}" != "off" ] && [ "${valuestr}" != "1" ] && [ "${valuestr}" != "0" ]; then
-      valuestr="'${valuestr}'"
-    fi
-    # set value (sed needs sudo to operate when user is not root)
-    sudo sed -i "s/^${keystr}=.*/${keystr}=${valuestr}/g" ${configFile}
+    # mark that the system is back in fundRecovery mode
+    /home/admin/config.scripts/blitz.conf.sh set fundRecovery 1 /home/admin/raspiblitz.info
 
+    # unlock with fundRecovery=1 again
     /home/admin/config.scripts/lnd.unlock.sh unlock
 
     # switch rescan off for the next unlock
-    valuestr="0"
-    sudo sed -i "s/^${keystr}=.*/${keystr}=${valuestr}/g" ${configFile}
+    /home/admin/config.scripts/blitz.conf.sh delete fundRecovery /home/admin/raspiblitz.info
 
     echo
     echo "To show the scanning progress in the background will follow the lnd.log with:" 

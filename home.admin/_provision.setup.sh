@@ -259,6 +259,9 @@ if [ "${lightning}" == "lnd" ]; then
       exit 12
     fi
     
+    # mark fundrecovery for restarts
+    /home/admin/config.scripts/blitz.conf.sh set fundRecovery 1 /home/admin/raspiblitz.info
+
     echo "Rescanning addresses takes a long time" >> ${logFile}
     echo "use the RESCAN option in the REPAIR-LND menu after LND is synced or 'lncli unlock ---recovery_window 5000'" >> ${logFile}
   
@@ -342,6 +345,9 @@ if [ "${lightning}" == "lnd" ]; then
       fi
     fi
   fi
+
+  # mark fundrecovery for restarts
+  /home/admin/config.scripts/blitz.conf.sh set fundRecovery 1 /home/admin/raspiblitz.info
 
   echo "Rescanning addresses takes a long time" >> ${logFile}
   echo "use the RESCAN option in the REPAIR-LND menu after LND is synced or 'lncli unlock ---recovery_window 5000'" >> ${logFile}

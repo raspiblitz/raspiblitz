@@ -58,9 +58,7 @@ if [ "$1" == "mainnet" ] || [ "$1" == "testnet" ] || [ "$1" == "signet" ]; then
       echo "recoverymode=${recoverymodeStatus}"
       exit 0
     fi
-
-    sudo cat /etc/systemd/system/lnd.service | grep -c "--reset-wallet-transactions"
-
+    
     # on
     if [ "$3" == "on" ]; then
       if [ "${recoverymodeStatus}" == "1" ]; then

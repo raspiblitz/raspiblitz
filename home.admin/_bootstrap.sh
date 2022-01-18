@@ -52,6 +52,7 @@ setupPhase='boot'
 setupStep=0
 fsexpanded=0
 fundRecovery=0
+initialLayer2Sync=0
 
 # load already persisted valued (overwriting defaults if exist)
 source ${infoFile} 2>/dev/null
@@ -64,7 +65,6 @@ echo "displayType=${displayType}" >> $infoFile
 echo "setupPhase=${setupPhase}" >> $infoFile
 echo "setupStep=${setupStep}" >> $infoFile
 echo "fundRecovery=${fundRecovery}" >> $infoFile
-echo "fsexpanded=${fsexpanded}" >> $infoFile
 echo "state=starting" >> $infoFile
 sudo chmod 664 ${infoFile}
 
