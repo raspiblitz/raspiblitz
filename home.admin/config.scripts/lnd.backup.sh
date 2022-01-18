@@ -21,10 +21,78 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "# ---------------------------------------------------"
  echo "# lnd.backup.sh seed-export-gui [lndseeddata]"
  echo "# lnd.backup.sh seed-import-gui [resultfile]"
+ echo "# ---------------------------------------------------"
+ echo "# RECOVERY"
+ echo "# ---------------------------------------------------"
+ echo "# lnd.backup.sh [mainnet|signet|testnet] recoverymode [on|off|status]"
  exit 1
 fi
 
-# 1st PRAMETER action
+# 1st PARAMETER [mainnet|signet|testnet]
+if [ "$1" == "mainnet" ] || [ "$1" == "testnet" ] || [ "$1" == "signet" ]; then
+
+  # prepare all chain dependent variables
+  lndChain="$1"
+  mode="$2"
+  lndService="lnd"
+  if [ "${lndChain}" == "testnet" ]; then
+    lndService="tlnd"
+  fi
+  if [ "${lndChain}" == "signet" ]; then
+    lndService="slnd"
+  fi
+
+  ################################
+  # RECOVERY
+  ################################
+
+  # LND is considered in "recoverymode" when it gets started with --reset-wallet-transactions parameter
+  # so it will forgets all the old on-chain transactions. This will trigger wallet unlock with
+  # recovery window to rescan for transactions and background process will monitor when finished
+
+  if [ ${mode} = "recoverymode" ]; then
+
+    # status
+    recoverymodeStatus=$(sudo cat /etc/systemd/system/${lndService}.service | grep -c "--reset-wallet-transactions")
+    if [ "$3" == "status" ]; then
+      echo "recoverymode=${recoverymodeStatus}"
+      exit 0
+    fi
+
+    # on
+    if [ "$3" == "on" ]; then
+      if [ "${recoverymodeStatus}" == "1" ]; then
+        echo "# recoverymode already on"
+        exit 0
+      fi
+
+      # add --reset-wallet-transactions parameter in systemd service
+      echo "# activating recovery mode ..."
+      sudo sed -i 's/ExecStart=\/usr\/local\/bin\/lnd/ExecStart=\/usr\/local\/bin\/lnd --reset-wallet-transactions/g' /etc/systemd/system/${lndService}.service
+      sudo systemctl daemon-reload
+      echo "# OK - restart/reboot needed for: ${lndService}.service"
+    fi
+
+    # off
+    if [ "$3" == "off" ]; then
+      if [ "${recoverymodeStatus}" == "0" ]; then
+        echo "# recoverymode already off"
+        exit 0
+      fi
+
+      # remove --reset-wallet-transactions parameter in systemd service
+      echo "# deactivating recovery mode ..."
+      sudo sed -i 's/ExecStart=\/usr\/local\/bin\/lnd --reset-wallet-transactions/ExecStart=\/usr\/local\/bin\/lnd/g' /etc/systemd/system/${lndService}.service
+      sudo systemctl daemon-reload
+      echo "# OK - restart/reboot needed for: ${lndService}.service"
+    fi
+
+  fi
+
+fi
+
+
+# 1st PARAMETER all other: action
 mode="$1"
 
 ################################
