@@ -53,11 +53,13 @@ if [ "$1" == "mainnet" ] || [ "$1" == "testnet" ] || [ "$1" == "signet" ]; then
   if [ ${mode} = "recoverymode" ]; then
 
     # status
-    recoverymodeStatus=$(sudo cat /etc/systemd/system/${lndService}.service | grep -c "--reset-wallet-transactions")
+    recoverymodeStatus=$(sudo cat /etc/systemd/system/${lndService}.service | grep -c "\-\-reset\-wallet\-transactions")
     if [ "$3" == "status" ]; then
       echo "recoverymode=${recoverymodeStatus}"
       exit 0
     fi
+
+    sudo cat /etc/systemd/system/lnd.service | grep -c "--reset-wallet-transactions"
 
     # on
     if [ "$3" == "on" ]; then
@@ -71,6 +73,7 @@ if [ "$1" == "mainnet" ] || [ "$1" == "testnet" ] || [ "$1" == "signet" ]; then
       sudo sed -i 's/ExecStart=\/usr\/local\/bin\/lnd/ExecStart=\/usr\/local\/bin\/lnd --reset-wallet-transactions/g' /etc/systemd/system/${lndService}.service
       sudo systemctl daemon-reload
       echo "# OK - restart/reboot needed for: ${lndService}.service"
+      exit 0
     fi
 
     # off
@@ -85,7 +88,12 @@ if [ "$1" == "mainnet" ] || [ "$1" == "testnet" ] || [ "$1" == "signet" ]; then
       sudo sed -i 's/ExecStart=\/usr\/local\/bin\/lnd --reset-wallet-transactions/ExecStart=\/usr\/local\/bin\/lnd/g' /etc/systemd/system/${lndService}.service
       sudo systemctl daemon-reload
       echo "# OK - restart/reboot needed for: ${lndService}.service"
+      exit 0
     fi
+
+    # parameter fallback
+    echo "error='unknown parameter'"
+    exit 1
 
   fi
 
