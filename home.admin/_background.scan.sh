@@ -339,9 +339,9 @@ do
       CYCLE_MID=60
       CYCLE_LONG=90
       if [ "${isDefaultChain}" != "1" ]; then
-        CYCLE_QUICK=90
-        CYCLE_MID=180
-        CYCLE_LONG=360
+        CYCLE_QUICK=150
+        CYCLE_MID=300
+        CYCLE_LONG=600
       fi
 
       # update basic status values always
@@ -525,9 +525,9 @@ do
     CYCLE_MID=60
     CYCLE_LONG=90
     if [ "${isDefaultChain}" != "1" ] || [ "${isDefaultLightning}" != "1" ]; then
-      CYCLE_QUICK=90
-      CYCLE_MID=180
-      CYCLE_LONG=360
+      CYCLE_QUICK=300
+      CYCLE_MID=600
+      CYCLE_LONG=900
     fi
 
     # update basic status values always
@@ -755,9 +755,9 @@ do
     CYCLE_MID=60
     CYCLE_LONG=90
     if [ "${isDefaultChain}" != "1" ] || [ "${isDefaultLightning}" != "1" ]; then
-      CYCLE_QUICK=90
-      CYCLE_MID=180
-      CYCLE_LONG=360
+      CYCLE_QUICK=300
+      CYCLE_MID=600
+      CYCLE_LONG=900
     fi
 
     # TODO: c-lightning is seen as "always unlocked" for now - needs to be implemented later #2691
