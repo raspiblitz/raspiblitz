@@ -285,28 +285,8 @@ do
   # data that may be based on setup phase or configuration
   ####################################################################
 
-  # by default will only scan the btc & lightning instances that are set to default
-  # but can scan/monitor all that are switched on when `system_scan_all=on` in config
-
   # read/update config values
   source /mnt/hdd/raspiblitz.conf
-
-  # check if a one time `system_scan_all_once=1` is set on cache
-  # will trigger a scan_all for one loop
-  source <(/home/admin/_cache.sh get system_scan_all_once)
-  if [ "${system_scan_all_once}" == "1" ]; then
-    echo "system_scan_all_once found --> TRIGGER system_scan_all for one loop"
-    /home/admin/_cache.sh set system_scan_all_once "0"
-    system_scan_all="on"
-  fi
-
-  # check if a temporary `system_scan_all_temp=1` is set on cache
-  # will trigger a scan_all until its gone or `0`
-  source <(/home/admin/_cache.sh get system_scan_all_temp)
-  if [ "${system_scan_all_temp}" == "1" ]; then
-    echo "system_scan_all_temp found --> TRIGGER system_scan_all"
-    system_scan_all="on"
-  fi
 
   ###################
   # HARDDRIVE
@@ -354,6 +334,16 @@ do
         continue
       fi
 
+      # set intervals for non default & non-default (in seconds)
+      CYCLE_QUICK=30
+      CYCLE_MID=60
+      CYCLE_LONG=90
+      if [ "${isDefaultChain}" != "1" ]; then
+        CYCLE_QUICK=90
+        CYCLE_MID=180
+        CYCLE_LONG=360
+      fi
+
       # update basic status values always
       source <(/home/admin/_cache.sh valid \
         btc_${CHAIN}net_version \
@@ -373,7 +363,7 @@ do
         btc_default_error_full \
         )
       fi
-      if [ "${stillvalid}" == "0" ] || [ ${age} -gt 30 ]; then
+      if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${CYCLE_QUICK} ]; then
         echo "updating: /home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net status"
         source <(/home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net status)
         /home/admin/_cache.sh set btc_${CHAIN}net_activated "1"
@@ -394,16 +384,6 @@ do
           /home/admin/_cache.sh set btc_default_error_short "${btc_error_short}"
           /home/admin/_cache.sh set btc_default_error_full "${btc_error_full}"
         fi
-      fi
-
-      # only scan non defaults in detail when set by parameter from config
-      if [ "${system_scan_all}" != "on" ]; then
-        if [ "${isDefaultChain}" != "1" ]; then
-          #echo "skip btc ${CHAIN}net scan - because its not default"
-          /home/admin/_cache.sh set btc_${CHAIN}net_skipdetails "1"
-          continue
-        fi
-        /home/admin/_cache.sh set btc_${CHAIN}net_skipdetails "0"
       fi
 
       # update detail infos only when ready (get as value from cache)
@@ -431,7 +411,7 @@ do
           btc_default_sync_initialblockdownload \
           )
         fi
-        if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE} ]; then
+        if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${CYCLE_MID} ]; then
           error=""
           echo "updating: /home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net info"
           source <(/home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net info)
@@ -470,7 +450,7 @@ do
           btc_default_port \
           )
         fi
-        if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE} ]; then
+        if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${CYCLE_MID} ]; then
           error=""
           echo "updating: /home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net network"
           source <(/home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net network)
@@ -497,7 +477,7 @@ do
           btc_default_mempool_transactions \
           )
         fi
-        if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE5} ]; then
+        if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${CYCLE_LONG} ]; then
           error=""
           echo "updating: /home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net mempool"
           source <(/home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net mempool)
@@ -540,6 +520,16 @@ do
     isDefaultChain=$(echo "${CHAIN}" | grep -c "${chain}")
     isDefaultLightning=$(echo "${lightning}" | grep -c "lnd")
 
+    # set intervals for non default & non-default (in seconds)
+    CYCLE_QUICK=30
+    CYCLE_MID=60
+    CYCLE_LONG=90
+    if [ "${isDefaultChain}" != "1" ] || [ "${isDefaultLightning}" != "1" ]; then
+      CYCLE_QUICK=90
+      CYCLE_MID=180
+      CYCLE_LONG=360
+    fi
+
     # update basic status values always
     source <(/home/admin/_cache.sh valid \
       ln_lnd_${CHAIN}net_locked \
@@ -561,7 +551,7 @@ do
       ln_default_error_full \
       )
     fi
-    if [ "${stillvalid}" == "0" ] || [ ${age} -gt 30 ]; then
+    if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${CYCLE_QUICK} ]; then
       echo "updating: /home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net status"
       source <(/home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net status)
       /home/admin/_cache.sh set ln_lnd_${CHAIN}net_activated "1"
@@ -584,23 +574,13 @@ do
       fi
     fi
 
-    # only scan non defaults details when set by parameter from config
-    if [ "${system_scan_all}" != "on" ]; then
-      if [ "${isDefaultChain}" != "1" ] || [ ${isDefaultLightning} != "1" ]; then
-        #echo "skip lnd ${CHAIN}net scan - because its not default"
-        /home/admin/_cache.sh set ln_lnd_${CHAIN}net_skipdetails "1"
-        continue
-      fi
-      /home/admin/_cache.sh set ln_lnd_${CHAIN}net_skipdetails "0"
-    fi
-
     # update detail infos only when ready
     source <(/home/admin/_cache.sh meta ln_lnd_${CHAIN}net_ready)
     if [ "${value}" == "1" ]; then
 
       # check if config needs update
       source <(/home/admin/_cache.sh valid ln_lnd_${CHAIN}net_alias)
-      if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE5} ]; then
+      if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${CYCLE_LONG} ]; then
         error=""
         echo "updating: /home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net config"
         source <(/home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net config)
@@ -643,7 +623,7 @@ do
         ln_default_recovery_done \
         )
       fi
-      if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE} ]; then
+      if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${CYCLE_MID} ]; then
         error=""
         echo "updating: /home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net info"
         source <(/home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net info)
@@ -693,7 +673,7 @@ do
         ln_default_wallet_channels_pending \
         )
       fi
-      if [ "${stillvalid}" == "0" ] || [ ${age} -gt 22 ]; then
+      if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${CYCLE_QUICK} ]; then
         error=""
         echo "updating: /home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net wallet"
         source <(/home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net wallet)
@@ -725,7 +705,7 @@ do
         ln_default_fees_total \
         )
       fi
-      if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE5} ]; then
+      if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${CYCLE_LONG} ]; then
         error=""
         echo "updating: /home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net fees"
         source <(/home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net fees)
@@ -770,12 +750,14 @@ do
     isDefaultChain=$(echo "${CHAIN}" | grep -c "${chain}")
     isDefaultLightning=$(echo "${lightning}" | grep -c "cl")
 
-    # only scan non defaults when set by parameter from config
-    if [ "${system_scan_all}" != "on" ]; then
-      if [ "${isDefaultChain}" != "1" ] || [ ${isDefaultLightning} != "1" ]; then
-        #echo "skip cl ${CHAIN}net scan - because its not default"
-        continue
-      fi
+    # set intervals for non default & non-default (in seconds)
+    CYCLE_QUICK=30
+    CYCLE_MID=60
+    CYCLE_LONG=90
+    if [ "${isDefaultChain}" != "1" ] || [ "${isDefaultLightning}" != "1" ]; then
+      CYCLE_QUICK=90
+      CYCLE_MID=180
+      CYCLE_LONG=360
     fi
 
     # TODO: c-lightning is seen as "always unlocked" for now - needs to be implemented later #2691
@@ -799,7 +781,7 @@ do
       ln_default_error_full \
       )
     fi
-    if [ "${stillvalid}" == "0" ] || [ ${age} -gt 30 ]; then
+    if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${CYCLE_QUICK} ]; then
       echo "updating: /home/admin/config.scripts/cl.monitor.sh ${CHAIN}net status"
       source <(/home/admin/config.scripts/cl.monitor.sh ${CHAIN}net status)
       /home/admin/_cache.sh set ln_cl_${CHAIN}net_activated "1"
@@ -853,7 +835,7 @@ do
         ln_default_fees_total \
         )
       fi
-      if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE} ]; then
+      if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${CYCLE_MID} ]; then
         error=""
         echo "updating: /home/admin/config.scripts/cl.monitor.sh ${CHAIN}net info"
         source <(/home/admin/config.scripts/cl.monitor.sh ${CHAIN}net info)
@@ -903,7 +885,7 @@ do
         ln_default_wallet_channels_pending \
         )
       fi
-      if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE} ]; then
+      if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${CYCLE_MID} ]; then
         error=""
         echo "updating: /home/admin/config.scripts/cl.monitor.sh ${CHAIN}net wallet"
         source <(/home/admin/config.scripts/cl.monitor.sh ${CHAIN}net wallet)
