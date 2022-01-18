@@ -354,14 +354,6 @@ do
         continue
       fi
 
-      # only scan non defaults when set by parameter from config
-      if [ "${system_scan_all}" != "on" ]; then
-        if [ "${isDefaultChain}" != "1" ]; then
-          #echo "skip btc ${CHAIN}net scan - because its not default"
-          continue
-        fi
-      fi
-
       # update basic status values always
       source <(/home/admin/_cache.sh valid \
         btc_${CHAIN}net_version \
@@ -402,6 +394,16 @@ do
           /home/admin/_cache.sh set btc_default_error_short "${btc_error_short}"
           /home/admin/_cache.sh set btc_default_error_full "${btc_error_full}"
         fi
+      fi
+
+      # only scan non defaults in detail when set by parameter from config
+      if [ "${system_scan_all}" != "on" ]; then
+        if [ "${isDefaultChain}" != "1" ]; then
+          #echo "skip btc ${CHAIN}net scan - because its not default"
+          /home/admin/_cache.sh set btc_${CHAIN}net_skipdetails "1"
+          continue
+        fi
+        /home/admin/_cache.sh set btc_${CHAIN}net_skipdetails "0"
       fi
 
       # update detail infos only when ready (get as value from cache)
@@ -538,14 +540,6 @@ do
     isDefaultChain=$(echo "${CHAIN}" | grep -c "${chain}")
     isDefaultLightning=$(echo "${lightning}" | grep -c "lnd")
 
-    # only scan non defaults when set by parameter from config
-    if [ "${system_scan_all}" != "on" ]; then
-      if [ "${isDefaultChain}" != "1" ] || [ ${isDefaultLightning} != "1" ]; then
-        #echo "skip lnd ${CHAIN}net scan - because its not default"
-        continue
-      fi
-    fi
-
     # update basic status values always
     source <(/home/admin/_cache.sh valid \
       ln_lnd_${CHAIN}net_locked \
@@ -590,6 +584,16 @@ do
       fi
     fi
 
+    # only scan non defaults details when set by parameter from config
+    if [ "${system_scan_all}" != "on" ]; then
+      if [ "${isDefaultChain}" != "1" ] || [ ${isDefaultLightning} != "1" ]; then
+        #echo "skip lnd ${CHAIN}net scan - because its not default"
+        /home/admin/_cache.sh set ln_lnd_${CHAIN}net_skipdetails "1"
+        continue
+      fi
+      /home/admin/_cache.sh set ln_lnd_${CHAIN}net_skipdetails "0"
+    fi
+
     # update detail infos only when ready
     source <(/home/admin/_cache.sh meta ln_lnd_${CHAIN}net_ready)
     if [ "${value}" == "1" ]; then
@@ -621,6 +625,8 @@ do
         ln_lnd_${CHAIN}net_channels_inactive \
         ln_lnd_${CHAIN}net_channels_total \
         ln_lnd_${CHAIN}net_peers \
+        ln_lnd_${CHAIN}net_recovery_mode \
+        ln_lnd_${CHAIN}net_recovery_done \
       )
       if [ "${isDefaultLightning}" == "1" ] && [ "${isDefaultChain}" == "1" ] && [ "${stillvalid}" == "1" ]; then
         source <(/home/admin/_cache.sh valid \
@@ -633,6 +639,8 @@ do
         ln_default_channels_inactive \
         ln_default_channels_total \
         ln_default_peers \
+        ln_default_recovery_mode \
+        ln_default_recovery_done \
         )
       fi
       if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE} ]; then
@@ -650,6 +658,8 @@ do
           /home/admin/_cache.sh set ln_lnd_${CHAIN}net_channels_inactive "${ln_lnd_channels_inactive}"
           /home/admin/_cache.sh set ln_lnd_${CHAIN}net_channels_total "${ln_lnd_channels_total}"
           /home/admin/_cache.sh set ln_lnd_${CHAIN}net_peers "${ln_lnd_peers}"
+          /home/admin/_cache.sh set ln_lnd_${CHAIN}net_recovery_mode "${ln_lnd_recovery_mode}"
+          /home/admin/_cache.sh set ln_lnd_${CHAIN}net_recovery_done "${ln_lnd_recovery_done}"
           if [ "${isDefaultLightning}" == "1" ] && [ "${isDefaultChain}" == "1" ]; then
             /home/admin/_cache.sh set ln_default_address "${ln_lnd_address}"
             /home/admin/_cache.sh set ln_default_tor "${ln_lnd_tor}"
@@ -660,6 +670,8 @@ do
             /home/admin/_cache.sh set ln_default_channels_inactive "${ln_lnd_channels_inactive}"
             /home/admin/_cache.sh set ln_default_channels_total "${ln_lnd_channels_total}"
             /home/admin/_cache.sh set ln_default_peers "${ln_lnd_peers}"
+            /home/admin/_cache.sh set ln_default_recovery_mode "${ln_lnd_recovery_mode}"
+            /home/admin/_cache.sh set ln_default_recovery_done "${ln_lnd_recovery_done}"
           fi
         else
           echo "!! ERROR --> ${error}"
