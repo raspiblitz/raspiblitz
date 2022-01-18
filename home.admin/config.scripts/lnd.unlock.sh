@@ -49,7 +49,7 @@ source <(/home/admin/config.scripts/network.aliases.sh getvars lnd ${chain}net)
 
 # check if wallet is already unlocked
 # echo "# checking LND wallet ... (can take some time)"
-lndError=$(sudo -u bitcoin lncli --chain=${network} --network=${chain}net getinfo 2>&1)
+lndError=$(${lncli_alias} getinfo 2>&1)
 walletLocked=$(echo "${lndError}" | grep -c "Wallet is encrypted")
 if [ "${walletLocked}" == "0" ]; then
     # test for new error message
