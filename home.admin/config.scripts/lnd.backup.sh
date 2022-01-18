@@ -35,6 +35,7 @@ if [ "$1" == "mainnet" ] || [ "$1" == "testnet" ] || [ "$1" == "signet" ]; then
   lndChain="$1"
   mode="$2"
   lndService="lnd"
+  lndConfig=""
   if [ "${lndChain}" == "testnet" ]; then
     lndService="tlnd"
   fi
@@ -52,13 +53,19 @@ if [ "$1" == "mainnet" ] || [ "$1" == "testnet" ] || [ "$1" == "signet" ]; then
 
   if [ ${mode} = "recoverymode" ]; then
 
+    # check if started with sudo
+    if [ "$EUID" -ne 0 ]; then 
+      echo "error='run as root'"
+      exit 1
+    fi
+
     # status
-    recoverymodeStatus=$(sudo cat /etc/systemd/system/${lndService}.service | grep -c "\-\-reset\-wallet\-transactions")
+    recoverymodeStatus=$(cat /etc/systemd/system/${lndService}.service | grep -c "\-\-reset\-wallet\-transactions")
     if [ "$3" == "status" ]; then
       echo "recoverymode=${recoverymodeStatus}"
       exit 0
     fi
-    
+
     # on
     if [ "$3" == "on" ]; then
       if [ "${recoverymodeStatus}" == "1" ]; then
@@ -66,10 +73,10 @@ if [ "$1" == "mainnet" ] || [ "$1" == "testnet" ] || [ "$1" == "signet" ]; then
         exit 0
       fi
 
-      # add --reset-wallet-transactions parameter in systemd service
+      # add/activate reset-wallet-transactions in lnd.conf
       echo "# activating recovery mode ..."
-      sudo sed -i 's/ExecStart=\/usr\/local\/bin\/lnd/ExecStart=\/usr\/local\/bin\/lnd --reset-wallet-transactions/g' /etc/systemd/system/${lndService}.service
-      sudo systemctl daemon-reload
+      sed -i 's/ExecStart=\/usr\/local\/bin\/lnd/ExecStart=\/usr\/local\/bin\/lnd --reset-wallet-transactions/g' /etc/systemd/system/${lndService}.service
+      systemctl daemon-reload
       echo "# OK - restart/reboot needed for: ${lndService}.service"
       exit 0
     fi
@@ -83,8 +90,8 @@ if [ "$1" == "mainnet" ] || [ "$1" == "testnet" ] || [ "$1" == "signet" ]; then
 
       # remove --reset-wallet-transactions parameter in systemd service
       echo "# deactivating recovery mode ..."
-      sudo sed -i 's/ExecStart=\/usr\/local\/bin\/lnd --reset-wallet-transactions/ExecStart=\/usr\/local\/bin\/lnd/g' /etc/systemd/system/${lndService}.service
-      sudo systemctl daemon-reload
+      sed -i 's/ExecStart=\/usr\/local\/bin\/lnd --reset-wallet-transactions/ExecStart=\/usr\/local\/bin\/lnd/g' /etc/systemd/system/${lndService}.service
+      systemctl daemon-reload
       echo "# OK - restart/reboot needed for: ${lndService}.service"
       exit 0
     fi
@@ -96,7 +103,6 @@ if [ "$1" == "mainnet" ] || [ "$1" == "testnet" ] || [ "$1" == "signet" ]; then
   fi
 
 fi
-
 
 # 1st PARAMETER all other: action
 mode="$1"

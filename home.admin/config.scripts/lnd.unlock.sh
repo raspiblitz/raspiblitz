@@ -99,7 +99,7 @@ while [ ${fallback} -eq 0 ]
 
 
     # check if lnd is in recovery mode
-    source <(/home/admin/config.scripts/lnd.backup.sh mainnet recoverymode status)
+    source <(sudo /home/admin/config.scripts/lnd.backup.sh mainnet recoverymode status)
     recoveryOption=""
     if [ "${recoverymode}" == "1" ]; then
         recoveryOption="--recovery_window=5000 "

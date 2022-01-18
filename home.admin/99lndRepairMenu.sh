@@ -206,6 +206,9 @@ or having a complete LND rescue-backup from your old node.
       fi
     fi
 
+    # set lnd back into recovery mode
+    sudo /home/admin/config.scripts/lnd.backup.sh mainnet recoverymode on
+
     syncAndCheckLND
 }
 
@@ -261,7 +264,6 @@ function restoreSCB()
       fi
     fi
 
-    # mark that the system is back in fundRecovery mode
     syncAndCheckLND
 
     # LND was restarted so need to unlock
@@ -453,19 +455,25 @@ case $CHOICE in
 
   RESCAN)
     clear
-    echo "Restart lnd to lock the wallet ..."
-    echo "If this takes very long LND might be already rescanning."
-    echo "Can use 'sudo pkill lnd' to shut down ungracefully."
-    sudo systemctl restart lnd
 
-    # mark that the system is back in fundRecovery mode
-    /home/admin/config.scripts/blitz.conf.sh set fundRecovery 1 /home/admin/raspiblitz.info
+    source <(sudo /home/admin/config.scripts/lnd.backup.sh mainnet recoverymode status)
+    if [ "${recoverymode}" == "0" ]; then
 
-    # unlock with fundRecovery=1 again
-    /home/admin/config.scripts/lnd.unlock.sh unlock
+      echo "Putting lnd back in recoverymode."
+      sudo /home/admin/config.scripts/lnd.backup.sh mainnet recoverymode on
+      echo "Restarting lnd ..."
+      sudo systemctl restart lnd
+      sleep 3
+      echo "Unlock Wallet ..."
+      /home/admin/config.scripts/lnd.unlock.sh
 
-    # switch rescan off for the next unlock
-    /home/admin/config.scripts/blitz.conf.sh delete fundRecovery /home/admin/raspiblitz.info
+    else
+
+      echo "lnd already in recoverymode."
+      echo "Unlock Wallet ..."
+      /home/admin/config.scripts/lnd.unlock.sh
+
+    fi
 
     echo
     echo "To show the scanning progress in the background will follow the lnd.log with:" 
