@@ -21,9 +21,20 @@ passwordC="$2"
 # chain-unlock --> unlock with re-arranged parameters
 CHAIN="${chain}net"
 if [ "${action}" == "chain-unlock" ]; then
-    action="unlock"
-    passwordC=""
     CHAIN=$2
+    if [ "${CHAIN}" == "mainnet" ]; then
+        chain="main"
+    elif [ "${CHAIN}" == "testnet" ]; then
+        chain="test"
+        passwordC=""
+    elif [ "${CHAIN}" == "signet" ]; then 
+        chain="sig"
+        passwordC=""
+    else
+        echo "# unkown chain parameter: ${CHAIN}"
+        sleep 1
+        exit 1
+    fi
 fi
 
 # dont if state is on reboot or shutdown
@@ -55,20 +66,8 @@ fi
 
 # if already unlocked all is done
 if [ ${walletLocked} -eq 0 ] && [ ${macaroonsMissing} -eq 0 ]; then
-    # echo "# OK LND wallet was already unlocked"
+    echo "# OK LND wallet was already unlocked"
     exit 0
-fi
-
-# check if LND is below 0.10 (has no STDIN password option)
-fallback=0
-source <(/home/admin/config.scripts/lnd.update.sh info)
-if [ ${lndInstalledVersionMajor} -eq 0 ] && [ ${lndInstalledVersionMain} -lt 10 ]; then
-    if [ ${#passwordC} -gt 0 ]; then
-        echo "error='lnd version too old'"
-        exit 1
-    else
-      fallback=1
-    fi
 fi
 
 # if no password check if stored for auto-unlock
