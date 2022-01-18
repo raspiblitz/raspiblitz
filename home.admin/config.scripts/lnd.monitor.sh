@@ -141,6 +141,7 @@ if [ "$2" = "info" ]; then
   # get data
   ln_getInfo=$($lndcli_alias getinfo 2>/dev/null)
   if [ "${ln_getInfo}" == "" ]; then
+    echo "command='$lndcli_alias getinfo'"
     echo "error='no data'"
     exit 1
   fi
@@ -175,6 +176,20 @@ if [ "$2" = "info" ]; then
     fi
   fi
 
+  # recovery info
+  source <(/home/admin/config.scripts/lnd.backup.sh $1 recoverymode status)
+  lnd_recovery_mode="${recoverymode}"
+  lnd_recovery_done="0"
+  if [ "${lnd_recovery_mode}" == "1" ]; then
+    ln_getrecoveryinfo=$($lndcli_alias getrecoveryinfo 2>/dev/null)
+    activated=$(echo "${ln_getrecoveryinfo}" | grep "recovery_mode" | grep "true" -c)
+    finsihed=$(echo "${ln_getrecoveryinfo}" | grep "recovery_finished" | grep "true" -c)
+    if [ "${activated}" == "1" ] && [ "${finsihed}" == "1" ]; then
+      lnd_recovery_done="1"
+    fi
+  fi
+  
+
   # print data
   echo "ln_lnd_address='${lnd_address}'"
   echo "ln_lnd_tor='${lnd_tor}'"
@@ -186,6 +201,8 @@ if [ "$2" = "info" ]; then
   echo "ln_lnd_channels_inactive='${lnd_channels_inactive}'"
   echo "ln_lnd_channels_total='${lnd_channels_total}'"
   echo "ln_lnd_peers='${lnd_peers}'"
+  echo "ln_lnd_recovery_mode='${lnd_recovery_mode}'"
+  echo "ln_lnd_recovery_done='${lnd_recovery_done}'"
   exit 0
   
 fi
