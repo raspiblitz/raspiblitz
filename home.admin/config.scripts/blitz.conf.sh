@@ -6,7 +6,7 @@ configFile="/mnt/hdd/raspiblitz.conf"
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ]; then
   echo "RaspiBlitz Config Edit - adds value to file & cache and creates entries if needed:"
   echo "blitz.conf.sh set [key] [value] [?conffile]"
-  echo "blitz.conf.sh delete [key] ?conffile]"
+  echo "blitz.conf.sh delete [key] [?conffile]"
   echo
   exit 1
 fi
@@ -44,7 +44,7 @@ if [ "$1" = "set" ]; then
   # check if key needs to be added (prepare new entry)
   entryExists=$(grep -c "^${keystr}=" ${configFile})
   if [ ${entryExists} -eq 0 ]; then
-    echo "${keystr}=" | sudo tee -a ${configFile}
+    echo "${keystr}=" | sudo tee -a ${configFile} 1>/dev/null
   fi
 
   # add valuestr quotes if not standard values
