@@ -5,9 +5,8 @@ configFile="/mnt/hdd/raspiblitz.conf"
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ]; then
   echo "RaspiBlitz Config Edit - adds value to file & cache and creates entries if needed:"
-  echo "blitz.conf.sh set [key] [value]"
-  echo "blitz.conf.sh delete [key]"
-  echo "To use values use in shell scripts: source ${configFile}"
+  echo "blitz.conf.sh set [key] [value] [?conffile]"
+  echo "blitz.conf.sh delete [key] ?conffile]"
   echo
   exit 1
 fi
@@ -17,7 +16,7 @@ if [ "$1" = "set" ]; then
   # get parameters
   keystr=$2
   valuestr=$3
-  overflow=$4
+  configfileAlternative=$4
 
   # check that key & value are given
   if [ "${keystr}" == "" ] || [ "${valuestr}" == "" ]; then
@@ -26,11 +25,9 @@ if [ "$1" = "set" ]; then
     exit 1
   fi
 
-  # check if input quotes are missing (there should be no 4th parameter)
-  if [ "${overflow}" != "" ]; then
-    echo "# blitz.conf.sh $@"
-    echo "# FAIL: possible missing quotes in value string"
-    exit 2
+  # optional another configfile
+  if [ "${configfileAlternative}" != "" ]; then
+    configFile="${configfileAlternative}"
   fi 
 
   # update config value in cache
@@ -63,12 +60,18 @@ elif [ "$1" = "delete" ]; then
 
   # get parameters
   keystr=$2
+  configfileAlternative=$3
 
   # check that key & value are given
   if [ "${keystr}" == "" ]; then
     echo "# FAIL: missing parameter"
     exit 1
   fi
+
+    # optional another configfile
+  if [ "${configfileAlternative}" != "" ]; then
+    configFile="${configfileAlternative}"
+  fi 
 
   # delete value
   sudo sed -i "/^${keystr}=/d" ${configFile} 2>/dev/null
