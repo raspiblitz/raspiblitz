@@ -3,13 +3,18 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ]; then
   echo "# script to check LND states"
-  echo "# lnd.check.sh basic-setup"
+  echo "# lnd.check.sh basic-setup [mainnet|testnet|signet]"
   echo "# lnd.check.sh prestart [mainnet|testnet|signet]"
   exit 1
 fi
 
 # load raspiblitz conf
 source /mnt/hdd/raspiblitz.conf
+source <(/home/admin/config.scripts/network.aliases.sh getvars lnd $2)
+
+# config file
+echo "# checking lnd config for ${targetchain}"
+echo "# lndConfFile(${lndConfFile})"
 
 ######################################################################
 # PRESTART
@@ -55,33 +60,6 @@ if [ "$1" == "prestart" ]; then
     # count start if that service is the main lightning client
     /home/admin/config.scripts/blitz.systemd.sh log lightning STARTED
   fi
-
-  # prefixes for parallel services
-  if [ "${targetchain}" = "mainnet" ];then
-    netprefix=""
-    portprefix=""
-    rpcportmod=0
-    zmqprefix=28
-  elif [ "${targetchain}" = "testnet" ];then
-    netprefix="t"
-    portprefix=1
-    rpcportmod=1
-    zmqprefix=21
-  elif [ "${targetchain}" = "signet" ];then
-    netprefix="s"
-    portprefix=3
-    rpcportmod=3
-    zmqprefix=23
-  else
-    echo "err='unvalid chain parameter on lnd.check.sh'"
-    exit 1
-  fi
-
-  # config file
-  echo "# checking lnd config for ${targetchain}"
-  lndConfFile="/mnt/hdd/lnd/${netprefix}lnd.conf"
-  echo "# lndConfFile(${lndConfFile})"
-
 
   ##### BITCOIN OPTIONS SECTION #####
 
@@ -185,7 +163,7 @@ if [ "$1" == "prestart" ]; then
   insertLine=$(expr $sectionLine + 1)
 
   # make sure API ports are set to standard
-  setting ${lndConfFile} ${insertLine} "rpclisten" "0\.0\.0\.0\:1${rpcportmod}009"
+  setting ${lndConfFile} ${insertLine} "rpclisten" "0\.0\.0\.0\:1${L2rpcportmod}009"
   setting ${lndConfFile} ${insertLine} "restlisten" "0\.0\.0\.0\:${portprefix}8080"
 
   # enforce LND port is set correctly (if set in raspiblitz.conf)
@@ -293,30 +271,30 @@ elif [ "$1" == "basic-setup" ]; then
   fi
 
   # check lnd.conf exists
-  lndConfExists=$(sudo ls /mnt/hdd/lnd/lnd.conf 2>/dev/null | grep -c 'lnd.conf')
+  lndConfExists=$(sudo ls ${lndConfFile} 2>/dev/null | grep -c "${netprefix}lnd.conf")
   if [ ${lndConfExists} -gt 0 ]; then
     echo "config=1"
   else
     echo "config=0"
-    echo "err='lnd.conf is missing in /mnt/hdd/lnd'"
+    echo "err='${netprefix}lnd.conf is missing in ${lndConfFile}'"
   fi
   # check lnd.conf exits (on SD card for admin)
-  lndConfExists=$(sudo ls /home/admin/.lnd/lnd.conf 2>/dev/null | grep -c 'lnd.conf')
+  lndConfExists=$(sudo ls /home/admin/.lnd/${netprefix}lnd.conf 2>/dev/null | grep -c 'lnd.conf')
   if [ ${lndConfExists} -gt 0 ]; then
     echo "configCopy=1"
     # check if the same
-    orgChecksum=$(sudo shasum -a 256 /mnt/hdd/lnd/lnd.conf 2>/dev/null | cut -d " " -f1)
-    cpyChecksum=$(sudo shasum -a 256 /home/admin/.lnd/lnd.conf 2>/dev/null | cut -d " " -f1)
+    orgChecksum=$(sudo shasum -a 256 ${lndConfFile} 2>/dev/null | cut -d " " -f1)
+    cpyChecksum=$(sudo shasum -a 256 /home/admin/.lnd/${netprefix}lnd.conf 2>/dev/null | cut -d " " -f1)
     if [ "${orgChecksum}" == "${cpyChecksum}" ]; then
       echo "configMismatch=0"
     else
       echo "configMismatch=1"
-      echo "err='lnd.conf for user admin is old'"
+      echo "err='${netprefix}lnd.conf for user admin is old'"
     fi
   else
     echo "configCopy=0"
     echo "configMismatch=0"
-    echo "err='lnd.conf is missing for user admin'"
+    echo "err='$(netprefix)lnd.conf is missing for user admin'"
   fi
 
   # get network from config (BLOCKCHAIN)
@@ -325,7 +303,7 @@ elif [ "$1" == "basic-setup" ]; then
 
   # check if network is same the raspiblitz config
   if [ "${network}" != "${lndNetwork}" ]; then
-    echo "err='lnd.conf: blockchain network in lnd.conf (${lndNetwork}) is different from raspiblitz.conf (${network})'"
+    echo "err='$(netprefix)lnd.conf: blockchain network in $(netprefix)lnd.conf (${lndNetwork}) is different from raspiblitz.conf (${network})'"
   fi
 
 #  # get chain from config (TESTNET / MAINNET)

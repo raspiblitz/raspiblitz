@@ -40,7 +40,7 @@ if [ "$1" = getvars ];then
     chain=main
   fi
   # CHAIN is: signet | testnet | mainnet
-  if [ $# -gt 2 ]&&[ "$3" != net ];then
+  if [ $# -gt 2 ]&&[ "$3" != net ]&&[ "$3" != "" ];then
     CHAIN=$3
     chain=${CHAIN::-3}
   else
@@ -49,29 +49,34 @@ if [ "$1" = getvars ];then
   echo "CHAIN=${chain}net"
   echo "chain=${chain}"
 
-  # netprefix is:     "" | t | s
-  # portprefix is:    "" | 1 | 3
-  # L2rpcportmod is:   0 | 1 | 3   
+  # netprefix is:     "" |  t | s
+  # portprefix is:    "" |  1 | 3
+  # L2rpcportmod is:   0 |  1 | 3
+  # zmqprefix is:     28 | 21 | 23
   if [ "${chain}" == "main" ];then
     netprefix=""
     L1rpcportmod=""
     L2rpcportmod=0
     portprefix=""
+    zmqprefix=28
   elif [ "${chain}" == "test" ];then
     netprefix="t"
     L1rpcportmod=1
     L2rpcportmod=1
     portprefix=1
+    zmqprefix=21
   elif [ "${chain}" == "sig" ];then
     netprefix="s"
     L1rpcportmod=3
     L2rpcportmod=3
     portprefix=3
+    zmqprefix=23
   fi
   echo "netprefix=${netprefix}"
   echo "portprefix=${portprefix}"
   echo "L2rpcportmod=${L2rpcportmod}"
-  
+  echo "zmqprefix=${zmqprefix}"
+
   if [ "${LNTYPE}" == "cl" ];then
     # CLNETWORK is: bitcoin / signet / testnet
     if [ "${chain}" == "main" ];then
@@ -96,8 +101,10 @@ if [ "$1" = getvars ];then
   # typeprefix is: "" | c
   if [ "${LNTYPE}" == "lnd" ];then
     typeprefix=''
+    lndConfFile="/mnt/hdd/lnd/${netprefix}lnd.conf"
   fi
   echo "typeprefix=${typeprefix}"
+  echo "lndConfFile=${lndConfFile}"
 
   # instead of all
   # sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net

@@ -89,9 +89,9 @@ syncAndCheckLND() # from _provision.setup.sh
   sudo /home/admin/config.scripts/blitz.datadrive.sh link
 
   # check if now a config exists
-  configLinkedCorrectly=$(ls /home/bitcoin/.lnd/lnd.conf | grep -c "lnd.conf")
+  configLinkedCorrectly=$(ls /home/bitcoin/.lnd/${netprefix}lnd.conf | grep -c "${netprefix}lnd.conf")
   if [ "${configLinkedCorrectly}" != "1" ]; then
-    echo "lnd-link-broken" "link /home/bitcoin/.lnd/lnd.conf broken" ""
+    echo "lnd-link-broken" "link /home/bitcoin/.lnd/${netprefix}lnd.conf broken" ""
     exit 7
   fi
 
@@ -103,7 +103,7 @@ syncAndCheckLND() # from _provision.setup.sh
   sudo systemctl stop ${netprefix}lnd 2>/dev/null
   sudo systemctl disable ${netprefix}lnd 2>/dev/null
 
-  # copy lnd service
+  # copy lnd service - note the same service is created with 'lnd.install.sh on mainnet'
   sudo cp /home/admin/assets/lnd.service /etc/systemd/system/lnd.service
 
   # start lnd up
@@ -138,9 +138,9 @@ syncAndCheckLND() # from _provision.setup.sh
   sudo /home/admin/config.scripts/lnd.credentials.sh sync
 
   # make a final lnd check
-  source <(/home/admin/config.scripts/lnd.check.sh basic-setup)
+  source <(/home/admin/config.scripts/lnd.check.sh basic-setup "${chain}net")
   if [ "${err}" != "" ]; then
-    echo "lnd-check-error" "lnd.check.sh basic-setup with error" "/home/admin/config.scripts/lnd.check.sh basic-setup --> ${err}"
+    echo "lnd-check-error" "lnd.check.sh basic-setup ${chain}net with error" "/home/admin/config.scripts/lnd.check.sh basic-setup ${chain}net --> ${err}"
     exit 15
   fi
 }
@@ -207,7 +207,7 @@ or having a complete LND rescue-backup from your old node.
     fi
 
     # set lnd back into recovery mode
-    sudo /home/admin/config.scripts/lnd.backup.sh mainnet recoverymode on
+    sudo /home/admin/config.scripts/lnd.backup.sh "${chain}net" recoverymode on
 
     syncAndCheckLND
 }
