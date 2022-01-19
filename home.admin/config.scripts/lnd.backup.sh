@@ -89,7 +89,7 @@ if [ "$1" == "mainnet" ] || [ "$1" == "testnet" ] || [ "$1" == "signet" ]; then
 
       # activate reset-wallet-transactions in lnd.conf
       echo "# activating recovery mode ..."
-      sed -i 's/^reset-wallet-transactions=*/reset-wallet-transactions=true/g' /mnt/hdd/lnd/${prefix}lnd.conf
+      sed -i 's/^reset-wallet-transactions=.*/reset-wallet-transactions=true/g' /mnt/hdd/lnd/${prefix}lnd.conf
       echo "# OK - restart/reboot needed for: ${lndService}.service"
       exit 0
     fi
@@ -103,7 +103,7 @@ if [ "$1" == "mainnet" ] || [ "$1" == "testnet" ] || [ "$1" == "signet" ]; then
 
       # remove --reset-wallet-transactions parameter in systemd service
       echo "# deactivating recovery mode ..."
-      sed -i 's/^reset-wallet-transactions=true/reset-wallet-transactions=false/g' /mnt/hdd/lnd/${prefix}lnd.conf
+      sed -i 's/^reset-wallet-transactions=.*/reset-wallet-transactions=false/g' /mnt/hdd/lnd/${prefix}lnd.conf
       
 
       echo "# OK - restart/reboot needed for: ${lndService}.service"
