@@ -1452,8 +1452,8 @@ if [ "$1" = "link" ]; then
   chown -R bitcoin:bitcoin /mnt/hdd/lnd
   chown -R bitcoin:bitcoin /home/bitcoin/.lnd
   chown -R bitcoin:bitcoin /home/bitcoin/.bitcoin
-  chown -R bitcoin:bitcoin /mnt/hdd/app-storage
-  chown -R bitcoin:bitcoin /mnt/hdd/app-data
+  chown bitcoin:bitcoin /mnt/hdd/app-storage
+  chown bitcoin:bitcoin /mnt/hdd/app-data
   chown -R bitcoin:bitcoin /mnt/hdd/temp 2>/dev/null
   chmod -R 777 /mnt/temp 2>/dev/null
   chmod -R 777 /mnt/hdd/temp 2>/dev/null
