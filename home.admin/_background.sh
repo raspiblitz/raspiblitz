@@ -280,7 +280,7 @@ do
     fi
     if [ "${tlnd}" == "on" ]; then
       source <(/home/admin/_cache.sh get ln_lnd_testnet_recovery_mode ln_lnd_testnet_recovery_done btc_testnet_sync_initialblockdownload)
-      echo "ln_lnd_testnet_recovery_mode(${ln_lnd_testnet_recovery_mode}) ln_lnd_testnet_recovery_done(${ln_lnd_testnet_recovery_done}) btc_testnet_sync_initialblockdownload(${btc_testnet_sync_initialblockdownload})"
+      #echo "ln_lnd_testnet_recovery_mode(${ln_lnd_testnet_recovery_mode}) ln_lnd_testnet_recovery_done(${ln_lnd_testnet_recovery_done}) btc_testnet_sync_initialblockdownload(${btc_testnet_sync_initialblockdownload})"
       if [ "${ln_lnd_testnet_recovery_mode}" == "1" ] && [ "${ln_lnd_testnet_recovery_done}" == "1" ] && [ "${btc_testnet_sync_initialblockdownload}" == "0" ]; then
         echo "OK lnd_testnet_recovery_mode finished"
         /home/admin/_cache.sh set ln_lnd_testnet_recovery_mode 0
@@ -289,7 +289,7 @@ do
     fi
     if [ "${slnd}" == "on" ]; then
       source <(/home/admin/_cache.sh get ln_lnd_signet_recovery_mode ln_lnd_signet_recovery_done btc_signet_sync_initialblockdownload)
-      echo "ln_lnd_signet_recovery_mode(${ln_lnd_signet_recovery_mode}) ln_lnd_signet_recovery_done(${ln_lnd_signet_recovery_done}) btc_signet_sync_initialblockdownload(${btc_signet_sync_initialblockdownload})"
+      #echo "ln_lnd_signet_recovery_mode(${ln_lnd_signet_recovery_mode}) ln_lnd_signet_recovery_done(${ln_lnd_signet_recovery_done}) btc_signet_sync_initialblockdownload(${btc_signet_sync_initialblockdownload})"
       if [ "${ln_lnd_signet_recovery_mode}" == "1" ] && [ "${ln_lnd_signet_recovery_done}" == "1" ] && [ "${btc_signet_sync_initialblockdownload}" == "0" ]; then
         echo "OK lnd_signet_recovery_mode finished"
         /home/admin/_cache.sh set ln_lnd_signet_recovery_mode 0
