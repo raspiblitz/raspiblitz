@@ -233,8 +233,8 @@ source /mnt/hdd/raspiblitz.conf
 
 function removeParallelService() {
   if [ -f "/etc/systemd/system/${netprefix}lnd.service" ];then
-    sudo -u bitcoin /usr/local/bin/lncli\
-     --rpcserver localhost:1${rpcportmod}009 stop
+    echo "# Stopping ${netprefix}lnd ..."
+    #sudo -u bitcoin /usr/local/bin/lncli --rpcserver localhost:1${rpcportmod}009 stop
     sudo systemctl stop ${netprefix}lnd
     sudo systemctl disable ${netprefix}lnd
     sudo rm /etc/systemd/system/${netprefix}lnd.service 2>/dev/null

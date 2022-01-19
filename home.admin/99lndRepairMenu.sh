@@ -172,21 +172,7 @@ or having a complete LND rescue-backup from your old node.
 
     getpasswordC
 
-    clear
-    echo  
-    echo "The next step WILL REMOVE the old LND wallets on ALL CHAINS"
-    echo "Press ENTER to continue or CTRL+C to abort"
-    read key
-    echo "Stopping ${netprefix}lnd ..."
-    sudo systemctl stop ${netprefix}lnd
-    if [ "${tlnd}" == "on" ];then
-      sudo systemctl stop tlnd
-    fi
-    if [ "${slnd}" == "on" ];then
-      sudo systemctl stop slnd
-    fi
-    echo "Reset wallet"
-    sudo rm -r /mnt/hdd/lnd
+    removeAllLNDwallets
 
     # creates fresh lnd.conf without an alias
     /home/admin/config.scripts/lnd.install.sh on $CHAIN
@@ -276,6 +262,27 @@ function restoreSCB()
     fi
 }
 
+function removeAllLNDwallets 
+{
+  clear
+  echo  
+  echo "The next step WILL REMOVE the old LND wallets on ALL CHAINS"
+  echo "Press ENTER to continue or CTRL+C to abort"
+  read key
+  echo "# Stopping lnd on mainnet ..."
+  sudo systemctl stop lnd
+  # don' t want to set CL as default if running parallel
+  #/home/admin/config.scripts/lnd.install.sh off mainnet
+  if [ "${tlnd}" == "on" ];then
+    /home/admin/config.scripts/lnd.install.sh off testnet
+  fi
+  if [ "${slnd}" == "on" ];then
+    /home/admin/config.scripts/lnd.install.sh off signet
+  fi
+  echo "Reset wallet"
+  sudo rm -r /mnt/hdd/lnd
+}
+
 # BASIC MENU INFO
 WIDTH=64
 BACKTITLE="RaspiBlitz"
@@ -346,21 +353,7 @@ case $CHOICE in
     # sudo /home/admin/config.scripts/lnd.setname.sh ${chain}net "${result}"
     # /home/admin/config.scripts/blitz.conf.sh set hostname "${result}"
 
-    clear
-    echo  
-    echo "The next step WILL REMOVE the old LND wallets on ALL CHAINS"
-    echo "Press ENTER to continue or CTRL+C to abort"
-    read key
-    echo "Stopping ${netprefix}lnd ..."
-    sudo systemctl stop ${netprefix}lnd
-    if [ "${tlnd}" == "on" ];then
-      sudo systemctl stop tlnd
-    fi
-    if [ "${slnd}" == "on" ];then
-      sudo systemctl stop slnd
-    fi
-    echo "Reset wallet"
-    sudo rm -r /mnt/hdd/lnd
+    removeAllLNDwallets
 
     # create wallet
     /home/admin/config.scripts/lnd.install.sh on ${chain}net initwallet
@@ -385,19 +378,7 @@ case $CHOICE in
   LNDRESCUE)
     askLNDbackupCopy
 
-    echo "The next step WILL REMOVE the old LND wallets on ALL CHAINS"
-    echo "Press ENTER to continue or CTRL+C to abort"
-    read key
-    echo "Stopping ${netprefix}lnd ..."
-    sudo systemctl stop ${netprefix}lnd
-    if [ "${tlnd}" == "on" ];then
-      sudo systemctl stop tlnd
-    fi
-    if [ "${slnd}" == "on" ];then
-      sudo systemctl stop slnd
-    fi
-    echo "Delete wallet"
-    sudo rm -r /mnt/hdd/lnd
+    removeAllLNDwallets
 
     ## from dialogLightningWallet.sh 
     # import file
