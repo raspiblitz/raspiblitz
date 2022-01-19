@@ -282,8 +282,9 @@ BACKTITLE="RaspiBlitz"
 TITLE="LND repair options for $CHAIN"
 MENU=""
 OPTIONS=()
-
-OPTIONS+=(COMPACT "Compact the LND channel.db")
+if [ "${chain}" = "main" ]; then
+  OPTIONS+=(COMPACT "Compact the LND channel.db")
+fi
 OPTIONS+=(BACKUP-LND "Backup your LND data (Rescue-File)")
 OPTIONS+=(RESET-LND "Delete LND & start new node/wallet")
 OPTIONS+=(LNDRESCUE "Restore from a rescue file")
@@ -456,22 +457,22 @@ case $CHOICE in
   RESCAN)
     clear
 
-    source <(sudo /home/admin/config.scripts/lnd.backup.sh mainnet recoverymode status)
+    source <(sudo /home/admin/config.scripts/lnd.backup.sh "${CHAIN}" recoverymode status)
     if [ "${recoverymode}" == "0" ]; then
 
       echo "Putting lnd back in recoverymode."
-      sudo /home/admin/config.scripts/lnd.backup.sh mainnet recoverymode on
+      sudo /home/admin/config.scripts/lnd.backup.sh "${CHAIN}" recoverymode on
       echo "Restarting lnd ..."
-      sudo systemctl restart lnd
+      sudo systemctl restart ${netprefix}lnd
       sleep 3
       echo "Unlock Wallet ..."
-      /home/admin/config.scripts/lnd.unlock.sh
+      /home/admin/config.scripts/lnd.unlock.sh "${CHAIN}"
 
     else
 
       echo "lnd already in recoverymode."
       echo "Unlock Wallet ..."
-      /home/admin/config.scripts/lnd.unlock.sh
+      /home/admin/config.scripts/lnd.unlock.sh "${CHAIN}"
 
     fi
 
