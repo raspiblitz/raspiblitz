@@ -174,7 +174,7 @@ or having a complete LND rescue-backup from your old node.
 
     clear
     echo  
-    echo "The next step will overwrite the old LND wallets on all chains"
+    echo "The next step WILL REMOVE the old LND wallets on ALL CHAINS"
     echo "Press ENTER to continue or CTRL+C to abort"
     read key
     echo "Stopping ${netprefix}lnd ..."
@@ -346,7 +346,12 @@ case $CHOICE in
     # sudo /home/admin/config.scripts/lnd.setname.sh ${chain}net "${result}"
     # /home/admin/config.scripts/blitz.conf.sh set hostname "${result}"
 
-    echo "stopping ${netprefix}lnd ..."
+    clear
+    echo  
+    echo "The next step WILL REMOVE the old LND wallets on ALL CHAINS"
+    echo "Press ENTER to continue or CTRL+C to abort"
+    read key
+    echo "Stopping ${netprefix}lnd ..."
     sudo systemctl stop ${netprefix}lnd
     if [ "${tlnd}" == "on" ];then
       sudo systemctl stop tlnd
@@ -354,8 +359,9 @@ case $CHOICE in
     if [ "${slnd}" == "on" ];then
       sudo systemctl stop slnd
     fi
-    echo "Delete wallet"
+    echo "Reset wallet"
     sudo rm -r /mnt/hdd/lnd
+
     # create wallet
     /home/admin/config.scripts/lnd.install.sh on ${chain}net initwallet
     # display and delete the seed for ${chain}net
@@ -378,7 +384,8 @@ case $CHOICE in
   
   LNDRESCUE)
     askLNDbackupCopy
-    echo "The next step will overwrite the old LND wallets on all chains"
+
+    echo "The next step WILL REMOVE the old LND wallets on ALL CHAINS"
     echo "Press ENTER to continue or CTRL+C to abort"
     read key
     echo "Stopping ${netprefix}lnd ..."
