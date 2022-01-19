@@ -207,7 +207,7 @@ if [ "${lightning}" != "" ]; then
   # lightning is still syncing
   elif [ "${ln_recovery_mode}" == "1" ] && [ "${ln_recovery_done}" == "0" ]; then
 
-    ln_baseInfo="${color_amber}Rescanning transactions ..."
+    ln_baseInfo="${color_amber}Rescanning transactions"
     ln_peersInfo=""
 
   # lightning is still syncing
