@@ -34,13 +34,12 @@ if [ "$1" == "mainnet" ] || [ "$1" == "testnet" ] || [ "$1" == "signet" ]; then
   # prepare all chain dependent variables
   lndChain="$1"
   mode="$2"
-  lndService="lnd"
-  lndConfig=""
+  prefix=""
   if [ "${lndChain}" == "testnet" ]; then
-    lndService="tlnd"
+    prefix="t"
   fi
   if [ "${lndChain}" == "signet" ]; then
-    lndService="slnd"
+    prefix="s"
   fi
 
   ################################
@@ -59,39 +58,54 @@ if [ "$1" == "mainnet" ] || [ "$1" == "testnet" ] || [ "$1" == "signet" ]; then
       exit 1
     fi
 
+    
+
     # status
-    recoverymodeStatus=$(cat /etc/systemd/system/${lndService}.service | grep -c "\-\-reset\-wallet\-transactions")
+    recoverymodeStatus=$(cat /mnt/hdd/lnd/${prefix}lnd.conf | grep -c "^reset-wallet-transactions=true")
     if [ "$3" == "status" ]; then
-      echo "recoverymode=${recoverymodeStatus}"
+      if [ ${recoverymodeStatus} -gt 0 ]; then
+        echo "recoverymode=1"
+      else
+        echo "recoverymode=0"
+      fi
       exit 0
     fi
 
     # on
     if [ "$3" == "on" ]; then
-      if [ "${recoverymodeStatus}" == "1" ]; then
+      if [ ${recoverymodeStatus} -gt 0 ]; then
         echo "# recoverymode already on"
         exit 0
       fi
 
-      # add/activate reset-wallet-transactions in lnd.conf
+      # make sure config entry exits
+      entryExists=$(cat /mnt/hdd/lnd/${prefix}lnd.conf | grep -c "^reset-wallet-transactions=")
+      if [ $entryExists -eq 0 ]; then
+        # find section
+        sectionLine=$(cat /mnt/hdd/lnd/${prefix}lnd.conf | grep -n "^\[Application Options\]" | cut -d ":" -f1)
+        insertLine=$(expr $sectionLine + 1)
+        sed -i "${insertLine}ireset-wallet-transactions=false" /mnt/hdd/lnd/${prefix}lnd.conf
+      fi
+
+      # activate reset-wallet-transactions in lnd.conf
       echo "# activating recovery mode ..."
-      sed -i 's/ExecStart=\/usr\/local\/bin\/lnd/ExecStart=\/usr\/local\/bin\/lnd --reset-wallet-transactions/g' /etc/systemd/system/${lndService}.service
-      systemctl daemon-reload
+      sed -i 's/^reset-wallet-transactions=*/reset-wallet-transactions=true/g' /mnt/hdd/lnd/${prefix}lnd.conf
       echo "# OK - restart/reboot needed for: ${lndService}.service"
       exit 0
     fi
 
     # off
     if [ "$3" == "off" ]; then
-      if [ "${recoverymodeStatus}" == "0" ]; then
+      if [ ${recoverymodeStatus} -eq 0 ]; then
         echo "# recoverymode already off"
         exit 0
       fi
 
       # remove --reset-wallet-transactions parameter in systemd service
       echo "# deactivating recovery mode ..."
-      sed -i 's/ExecStart=\/usr\/local\/bin\/lnd --reset-wallet-transactions/ExecStart=\/usr\/local\/bin\/lnd/g' /etc/systemd/system/${lndService}.service
-      systemctl daemon-reload
+      sed -i 's/^reset-wallet-transactions=true/reset-wallet-transactions=false/g' /mnt/hdd/lnd/${prefix}lnd.conf
+      
+
       echo "# OK - restart/reboot needed for: ${lndService}.service"
       exit 0
     fi
