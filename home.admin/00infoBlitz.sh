@@ -294,7 +294,7 @@ elif [ "${lightning}"  == "lnd" ]; then
 fi
 
 LNinfo=" + Lightning Network"
-if [ "${lightning}" == "" ]; then
+if [ "${lightning}" == "" ] || [ "${lightning}" == "none" ]; then
   LNinfo=""  
 fi
 
