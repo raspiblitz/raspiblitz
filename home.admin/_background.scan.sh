@@ -926,7 +926,7 @@ do
     # skip if this network is not switched on
     btc_service_name="${CHAIN}net"
     if [ "${!btc_service_name}" != "on" ]; then
-      echo "skipping because ${ln_service_name}=${!ln_service_name}"
+      echo "skipping because ${btc_service_name}=${!btc_service_name}"
       continue
     fi
 
