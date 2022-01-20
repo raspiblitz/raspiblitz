@@ -291,7 +291,7 @@ MENU=""
 OPTIONS=()
 if [ "${chain}" = "main" ]; then
   OPTIONS+=(COMPACT "Compact the LND channel.db")
-  OPTIONS+=(GETSCB "Download channel.backup (Static Channel Backup)")
+  OPTIONS+=(GETSCB "Download channel.backup (StaticChannelBackup)")
 fi
 OPTIONS+=(BACKUP-LND "Backup your LND data (Rescue-File)")
 OPTIONS+=(RESET-LND "Delete LND & start new node/wallet")
