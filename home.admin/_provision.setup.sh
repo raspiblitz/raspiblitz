@@ -314,37 +314,6 @@ if [ "${lightning}" == "lnd" ]; then
     exit 15
   fi
 
-  # restore SCB
-  if [ "${staticchannelbackup}" != "" ]; then
-
-    # LND was restarted so need to unlock
-    echo "WALLET --> UNLOCK WALLET - SCAN 0" >> ${logFile}
-    /home/admin/_cache.sh set message "LND Wallet Unlock - scan 0"
-    source <(/home/admin/config.scripts/lnd.initwallet.py unlock "${chain}net" "${passwordC}" 0)
-    if [ "${err}" != "" ]; then
-      echo "lnd-wallet-unlock" "lnd.initwallet.py unlock returned error" "/home/admin/config.scripts/lnd.initwallet.py unlock ${chain}net ... --> ${err} + ${errMore}"
-      if [ "${errMore}" = "wallet already unlocked, WalletUnlocker service is no longer available" ]; then
-        echo "The wallet is already unlocked, continue."
-      else
-        exit 11
-      fi
-    fi
-
-    echo "WALLET --> SCB" >> ${logFile}
-    /home/admin/_cache.sh set message "LND Wallet (SEED & SCB)"
-    macaroonPath="/home/admin/.lnd/data/chain/${network}/${chain}net/admin.macaroon"
-    source <(/home/admin/config.scripts/lnd.initwallet.py scb "${chain}net" "/home/admin/channel.backup" "${macaroonPath}")
-    if [ "${err}" != "" ]; then
-      echo "lnd-wallet-seed+scb" "lnd.initwallet.py scb returned error" "/home/admin/config.scripts/lnd.initwallet.py scb mainnet ... --> ${err} + ${errMore}"  ${logFile}
-      if [ "${errMore}" = "server is still in the process of starting" ]; then
-        echo "The SCB recovery is not possible now - use the RETRYSCB option the REPAIR-LND menu after LND is synced."  >> ${logFile}
-        echo "Can repeat the SCB recovery until all peers have force closed the channels to this node." >> ${logFile}
-      else
-        exit 12
-      fi
-    fi
-  fi
-
   # set lnd into recovery mode (gets activated after setup reboot)
   /home/admin/config.scripts/lnd.backup.sh mainnet recoverymode on >> ${logFile}
   echo "Rescanning will activate after setup-reboot ..." >> ${logFile}
