@@ -81,7 +81,7 @@ echo "# setting PASSWORD B" >> ${logFile}
 /home/admin/config.scripts/blitz.setpassword.sh b "${passwordB}" >> ${logFile}
 
 # optimize RAM for blockchain validation (bitcoin only)
-if [ "${network}" == "bitcoin" ] && [ "${hddBlocksBitcoin}" == "0" ]; then
+if [ "${network}" == "bitcoin" ]; then
   echo "*** Optimizing RAM for Sync ***" >> ${logFile}
   kbSizeRAM=$(cat /proc/meminfo | grep "MemTotal" | sed 's/[^0-9]*//g')
   echo "kbSizeRAM(${kbSizeRAM})" >> ${logFile}

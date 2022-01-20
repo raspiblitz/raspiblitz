@@ -432,6 +432,7 @@ do
               /home/admin/_cache.sh set btc_default_sync_percentage "${btc_sync_percentage}"
               /home/admin/_cache.sh set btc_default_sync_initialblockdownload "${btc_sync_initialblockdownload}"
             fi
+
           else
             echo "!! ERROR --> ${error}"
           fi
@@ -906,6 +907,90 @@ do
       fi
     fi
   done
+
+  ##################################
+  # DEFAULT & SUMMARIZED SYNC STATUS
+
+  btc_default_sync_initial_done=0
+  btc_all_sync_initial_done=1
+  ln_default_sync_initial_done=0
+  ln_all_sync_initial_done=1
+  blitz_sync_initial_done=0
+  networks=( "main" "test" "sig" )
+  sedondLayers=( "lnd" "cl" )
+
+  # loop over all chains
+  for CHAIN in "${networks[@]}"
+
+    # skip if this network is not switched on
+    btc_service_name="${CHAIN}net"
+    if [ "${!btc_service_name}" != "on" ]; then
+      echo "skipping because ${ln_service_name}=${!ln_service_name}"
+      continue
+    fi
+
+    # get values from cache
+    source <(/home/admin/_cache.sh meta btc_${CHAIN}net_sync_initial_done)
+    flagBtcDone="${value}"
+
+    # check if default
+    if [ "${CHAIN}" == "${chain}" ]; then
+      btc_default_sync_initial_done="${flagBtcDone}"
+    fi
+
+    # check for all btc sync
+    if [ "${flagBtcDone}" != "1" ]; then
+      btc_all_sync_initial_done=0
+    fi
+
+    # sub loop over all layer 2 on that chain
+    for LN in "${networks[@]}"
+
+      # skip if this variant is not switched on
+      ln_service_name="${LN}"
+      if [ "${CHAIN}" == "test" ]; then
+        ln_service_name="t${LN}"
+      fi
+      if [ "${CHAIN}" == "sig" ]; then
+        ln_service_name="s${LN}"
+      fi
+      if [ "${!ln_service_name}" != "on" ]; then
+        echo "skipping because ${ln_service_name}=${!ln_service_name}"
+        continue
+      fi
+
+      # get values from cache
+      source <(/home/admin/_cache.sh meta ln_${LN}_${CHAIN}net_sync_initial_done)
+      flagLNSyncDone="${value}"
+
+      # check if default
+      if [ "${CHAIN}" == "${chain}" ] && [ "${LN}" == "${lightning}" ]; then
+        ln_default_sync_initial_done="${flagLNSyncDone}"
+      fi
+
+      # check for all ln sync
+      if [ "${flagLNSyncDone}" != "1" ]; then
+        ln_all_sync_initial_done=0
+      fi
+
+    do
+  do
+
+  # finalize & writing results to cache
+  if [ "${lightning}" == "" ] || [ "${lightning}" == "" ]; then
+    ln_all_sync_initial_done=0
+    blitz_sync_initial_done="${btc_all_sync_initial_done}"
+  else
+    # only if all btc & ln sync done - the complete blitz has done syncing
+    if [ "${btc_all_sync_initial_done}" == "1" ] && [ "${ln_all_sync_initial_done}" == "1" ]; then
+      blitz_sync_initial_done="1"
+    fi
+  fi
+  /home/admin/_cache.sh set blitz_sync_initial_done "${blitz_sync_initial_done}"
+  /home/admin/_cache.sh set btc_default_sync_initial_done "${btc_default_sync_initial_done}"
+  /home/admin/_cache.sh set btc_all_sync_initial_done "${btc_all_sync_initial_done}"
+  /home/admin/_cache.sh set ln_default_sync_initial_done "${ln_default_sync_initial_done}"
+  /home/admin/_cache.sh set ln_all_sync_initial_done "${ln_all_sync_initial_done}"
 
   #################
   # DONE

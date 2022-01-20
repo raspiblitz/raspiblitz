@@ -224,76 +224,137 @@ do
   fi
 
   ####################################################
+  # MONITOR Initial Syncing of Bitcoin & Lightning
+  # - turn off recovery mode
+  ####################################################
+
+  recheckIBD=$((($counter % 10)+1))
+  if [ ${recheckIBD} -eq 1 ]; then
+    # loop thru mainet, testnet & signet
+    networks=( "main" "test" "sig" )
+    for CHAIN in "${networks[@]}"
+
+      # gat values from cache
+      source <(/home/admin/_cache.sh meta btc_${CHAIN}net_sync_initial_started)
+      flagBtcStarted="${value}"
+      source <(/home/admin/_cache.sh meta btc_${CHAIN}net_sync_initialblockdownload)
+      flagBtcActive="${value}"
+      source <(/home/admin/_cache.sh meta btc_${CHAIN}net_synced)
+      flagBtcSynced="${value}"
+      source <(/home/admin/_cache.sh meta btc_${CHAIN}net_sync_initial_done)
+      flagBtcDone="${value}"
+      echo "CHAIN(${CHAIN}) flagBtcStarted(${flagBtcStarted}) flagBtcActive(${flagBtcActive}) flagBtcActive(${flagBtcSynced}) flagBtcDone(${flagBtcDone})"
+
+      # first check if flags need to be reset (manually delete of blockchain)
+      if [ "${flagBtcDone}" == "1" ] && [ "${flagBtcActive}" == "1" ]; then
+        flagBtcDone=0
+        /home/admin/config.scripts/blitz.conf.sh set btc_${CHAIN}net_sync_initial_done ${flagBtcDone} /home/admin/raspiblitz.info      
+        echo "EVENT --> btc_${CHAIN}net_sync_initial_done changed to ${flagBtcDone}"
+      fi
+
+      # when started flag not set yet - but is now active --> set flag
+      if [ "${flagBtcStarted}" != "1" ] && [ "${flagBtcActive}" == "1" ]; then
+        flagBtcStarted=1
+        /home/admin/_cache.sh set btc_${CHAIN}net_sync_initial_started ${flagBtcStarted}
+        echo "EVENT --> btc_${CHAIN}net_sync_initial_started changed to ${flagBtcStarted}"
+      fi
+
+      # when started done is set - but not not active anymore --> end of IDB event detected
+      if [ "${flagBtcDone}" == "1" ] && [ "${flagBtcSynced}" == "1" ]; then
+        flagBtcDone=1
+        /home/admin/config.scripts/blitz.conf.sh set btc_${CHAIN}net_sync_initial_done ${flagBtcDone} /home/admin/raspiblitz.info      
+        echo "EVENT --> btc_${CHAIN}net_sync_initial_done changed to ${flagBtcDone}"
+      fi
+
+      # loop thru all second layers
+      sedondLayers=( "lnd" "cl" )
+      for LN in "${networks[@]}"
+
+        source <(/home/admin/_cache.sh meta ln_${LN}_${CHAIN}net_sync_chain)
+        flagLnSyncChain="${value}"
+        source <(/home/admin/_cache.sh meta ln_${LN}_${CHAIN}net_recovery_mode)
+        flagLNRecoveryMode="${value}"
+        source <(/home/admin/_cache.sh meta ln_${LN}_${CHAIN}net_recovery_done)
+        flagLNRecoveryDone="${value}"
+        source <(/home/admin/_cache.sh meta ln_${LN}_${CHAIN}net_sync_initial_done)
+        flagLNSyncDone="${value}"
+        echo "LN(${LN}) flagLnSyncChain(${flagLnSyncChain}) flagLNRecoveryMode(${flagLNRecoveryMode}) flagLNRecoveryDone(${flagLNRecoveryDone}) flagLNSyncDone(${flagLNSyncDone})"
+
+        # first check if flags need to be reset (manually a rescan was triggered)
+        if [ "${flagLNSyncDone}" == "1" ] && [ "${flagLNRecoveryMode}" == "1" ]; then
+          flagLNSyncDone=0
+          /home/admin/config.scripts/blitz.conf.sh set ln_${LN}_${CHAIN}net_sync_initial_done ${flagLNSyncDone} /home/admin/raspiblitz.info
+          echo "EVENT --> ln_${LN}_${CHAIN}net_sync_initial_done to ${flagLNSyncDone}"
+        fi
+
+        # when flag initial sync not done yet - but all chains are in sync with network
+        if [ "${flagLNSyncDone}" == "0" ] && [ "${flagBtcSynced}" == "1" ] && [ "${flagLnSyncChain}" == "1" ]; then
+
+          # then only finished if no LNRecoveryMode or LNRecoveryDone
+          if [ "${flagLNRecoveryMode}" == "0" ] || [ "${flagLNRecoveryDone}" == "1" ]; then
+
+            # write event
+            flagLNSyncDone=1
+            /home/admin/config.scripts/blitz.conf.sh set ln_${LN}_${CHAIN}net_sync_initial_done ${flagLNSyncDone} /home/admin/raspiblitz.info
+            echo "EVENT --> ln_${LN}_${CHAIN}net_sync_initial_done to ${flagLNSyncDone}"
+
+            # LND if recovery mode was on - deactivate now
+            if [ "${LN}" == "lnd" ] && [ "${flagLNRecoveryMode}" == "1" ]; then
+              /home/admin/_cache.sh set ln_lnd_mainnet_recovery_mode 0
+              /home/admin/config.scripts/lnd.backup.sh mainnet recoverymode off
+            fi
+
+          fi
+
+        fi
+
+      done
+
+    done
+  fi
+
+  ####################################################
   # CHECK FOR End of Intial Blockhain & Lightning Sync
+  # bitcoin mainnet only / special on dbcache size
   ####################################################
 
   # check every 60secs
   recheckIBD=$((($counter % 60)+1))
   if [ ${recheckIBD} -eq 1 ]; then
-    # check if flag exists (got created on 50syncHDD.sh)
-    flagExists=$(ls /mnt/hdd/${network}/blocks/selfsync.flag 2>/dev/null | grep -c "selfsync.flag")
+
+    # check if flag exists (gets created on setup)
+    # this flag signals that an initial blockchain sync/chatchup was happening
+    flagExists=$(ls /mnt/hdd/bitcoin/blocks/selfsync.flag 2>/dev/null | grep -c "selfsync.flag")
     if [ ${flagExists} -eq 1 ]; then
-      source <(/home/admin/config.scripts/network.aliases.sh getvars)
-      finishedIBD=$($bitcoincli_alias getblockchaininfo | grep "initialblockdownload" | grep -c "false")
-      if [ ${finishedIBD} -eq 1 ]; then
+    
+      source <(/home/admin/_cache.sh get btc_default_sync_initialblockdownload)
+      if [ "${btc_default_sync_initialblockdownload}" == "0" ]; then
 
         echo "CHECK FOR END OF IBD --> reduce RAM for next reboot"
 
         # remove flag
-        rm /mnt/hdd/${network}/blocks/selfsync.flag
+        rm /mnt/hdd/bitcoin/blocks/selfsync.flag
 
         # set dbcache back to normal (to give room for other apps after reboot in the future)
         kbSizeRAM=$(cat /proc/meminfo | grep "MemTotal" | sed 's/[^0-9]*//g')
 
-        if [ ${kbSizeRAM} -gt 1500000 ]; then
-          echo "Detected RAM >1GB --> optimizing ${network}.conf"
-          sed -i "s/^dbcache=.*/dbcache=512/g" /mnt/hdd/${network}/${network}.conf
+        # RP4 4GB
+        if [ ${kbSizeRAM} -gt 3500000 ]; then
+          echo "Detected RAM >=4GB --> normalizing bitcoin.conf"
+          sed -i "s/^dbcache=.*/dbcache=512/g" /mnt/hdd/bitcoin/bitcoin.conf
+        # RP4 2GB
+        elif [ ${kbSizeRAM} -gt 1500000 ]; then
+          echo "Detected RAM >=2GB --> normalizing bitcoin.conf"
+          sed -i "s/^dbcache=.*/dbcache=256/g" /mnt/hdd/bitcoin/bitcoin.conf
+        #RP3/4 1GB
         else
-          echo "Detected RAM 1GB --> optimizing ${network}.conf"
-          sed -i "s/^dbcache=.*/dbcache=128/g" /mnt/hdd/${network}/${network}.conf
+          echo "Detected RAM <=1GB --> normalizing bitcoin.conf"
+          sed -i "s/^dbcache=.*/dbcache=128/g" /mnt/hdd/bitcoin/bitcoin.conf
         fi
 
         # relax sanning on sync progress (after 30 more secs)
         /home/admin/_cache.sh focus btc_default_sync_progress 10 30
 
-      fi
-    fi
-  fi
-
-  ##################################
-  # LND Recoverymode (check if done)
-  ##################################
-
-  # check every 1 Minute
-  recheckSync=$(($counter % 60))
-  if [ ${recheckSync} -eq 1 ]; then
-    echo "Checking LND Recoverymode ..."
-    source <(/home/admin/_cache.sh get lnd tlnd slnd)
-    if [ "${lnd}" == "on" ]; then
-      source <(/home/admin/_cache.sh get ln_lnd_mainnet_recovery_mode ln_lnd_mainnet_recovery_done btc_mainnet_sync_initialblockdownload)
-      echo "ln_lnd_mainnet_recovery_mode(${ln_lnd_mainnet_recovery_mode}) ln_lnd_mainnet_recovery_done(${ln_lnd_mainnet_recovery_done}) btc_mainnet_sync_initialblockdownload(${btc_mainnet_sync_initialblockdownload})"
-      if [ "${ln_lnd_mainnet_recovery_mode}" == "1" ] && [ "${ln_lnd_mainnet_recovery_done}" == "1" ] && [ "${btc_mainnet_sync_initialblockdownload}" == "0" ]; then
-        echo "OK lnd_mainnet_recovery_mode finished"
-        /home/admin/_cache.sh set ln_lnd_mainnet_recovery_mode 0
-        /home/admin/config.scripts/lnd.backup.sh mainnet recoverymode off
-      fi
-    fi
-    if [ "${tlnd}" == "on" ]; then
-      source <(/home/admin/_cache.sh get ln_lnd_testnet_recovery_mode ln_lnd_testnet_recovery_done btc_testnet_sync_initialblockdownload)
-      #echo "ln_lnd_testnet_recovery_mode(${ln_lnd_testnet_recovery_mode}) ln_lnd_testnet_recovery_done(${ln_lnd_testnet_recovery_done}) btc_testnet_sync_initialblockdownload(${btc_testnet_sync_initialblockdownload})"
-      if [ "${ln_lnd_testnet_recovery_mode}" == "1" ] && [ "${ln_lnd_testnet_recovery_done}" == "1" ] && [ "${btc_testnet_sync_initialblockdownload}" == "0" ]; then
-        echo "OK lnd_testnet_recovery_mode finished"
-        /home/admin/_cache.sh set ln_lnd_testnet_recovery_mode 0
-        /home/admin/config.scripts/lnd.backup.sh testnet recoverymode off
-      fi
-    fi
-    if [ "${slnd}" == "on" ]; then
-      source <(/home/admin/_cache.sh get ln_lnd_signet_recovery_mode ln_lnd_signet_recovery_done btc_signet_sync_initialblockdownload)
-      #echo "ln_lnd_signet_recovery_mode(${ln_lnd_signet_recovery_mode}) ln_lnd_signet_recovery_done(${ln_lnd_signet_recovery_done}) btc_signet_sync_initialblockdownload(${btc_signet_sync_initialblockdownload})"
-      if [ "${ln_lnd_signet_recovery_mode}" == "1" ] && [ "${ln_lnd_signet_recovery_done}" == "1" ] && [ "${btc_signet_sync_initialblockdownload}" == "0" ]; then
-        echo "OK lnd_signet_recovery_mode finished"
-        /home/admin/_cache.sh set ln_lnd_signet_recovery_mode 0
-        /home/admin/config.scripts/lnd.backup.sh signet recoverymode off
       fi
     fi
   fi

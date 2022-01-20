@@ -48,10 +48,22 @@ sudo /home/admin/config.scripts/blitz.ssh.sh checkrepair >> ${logFile}
 echo "## INIT raspiblitz.info" >> $logFile
 
 # set default values for raspiblitz.info (that are not set by build_sdcard.sh)
+
 setupPhase='boot'
 setupStep=0
 fsexpanded=0
-initialLayer2Sync=0
+
+btc_mainnet_sync_initial_done=0
+btc_testnet_sync_initial_done=0
+btc_signet_sync_initial_done=0
+
+ln_lnd_mainnet_sync_initial_done=0
+ln_lnd_testnet_sync_initial_done=0
+ln_lnd_signet_sync_initial_done=0
+
+ln_cl_mainnet_sync_initial_done=0
+ln_cl_testnet_sync_initial_done=0
+ln_cl_signet_sync_initial_done=0
 
 # load already persisted valued (overwriting defaults if exist)
 source ${infoFile} 2>/dev/null
@@ -64,6 +76,17 @@ echo "displayType=${displayType}" >> $infoFile
 echo "setupPhase=${setupPhase}" >> $infoFile
 echo "setupStep=${setupStep}" >> $infoFile
 echo "state=starting" >> $infoFile
+echo "btc_mainnet_sync_initial_done=${btc_mainnet_sync_initial_done}" >> $infoFile
+echo "btc_testnet_sync_initial_done=${btc_testnet_sync_initial_done}" >> $infoFile
+echo "btc_signet_sync_initial_done=${btc_signet_sync_initial_done}" >> $infoFile
+echo "ln_lnd_mainnet_sync_initial_done=${ln_lnd_mainnet_sync_initial_done}" >> $infoFile
+echo "ln_lnd_testnet_sync_initial_done=${ln_lnd_testnet_sync_initial_done}" >> $infoFile
+echo "ln_lnd_signet_sync_initial_done=${ln_lnd_signet_sync_initial_done}" >> $infoFile
+echo "ln_cl_mainnet_sync_initial_done=${ln_cl_mainnet_sync_initial_done}" >> $infoFile
+echo "ln_cl_testnet_sync_initial_done=${ln_cl_testnet_sync_initial_done}" >> $infoFile
+echo "ln_cl_signet_sync_initial_done=${ln_cl_signet_sync_initial_done}" >> $infoFile
+
+
 sudo chmod 664 ${infoFile}
 
 # write content of raspiblitz.info to logs
