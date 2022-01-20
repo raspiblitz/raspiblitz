@@ -945,7 +945,7 @@ do
     fi
 
     # sub loop over all layer 2 on that chain
-    for LN in "${networks[@]}"
+    for LN in "${sedondLayers[@]}"
     do
 
       # skip if this variant is not switched on
