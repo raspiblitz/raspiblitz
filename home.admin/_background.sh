@@ -261,7 +261,7 @@ do
       fi
 
       # when started done is set - but not not active anymore --> end of IDB event detected
-      if [ "${flagBtcDone}" == "1" ] && [ "${flagBtcSynced}" == "1" ]; then
+      if [ "${flagBtcDone}" == "0" ] && [ "${flagBtcSynced}" == "1" ]; then
         flagBtcDone=1
         /home/admin/config.scripts/blitz.conf.sh set btc_${CHAIN}net_sync_initial_done ${flagBtcDone} /home/admin/raspiblitz.info      
         echo "EVENT --> btc_${CHAIN}net_sync_initial_done changed to ${flagBtcDone}"
