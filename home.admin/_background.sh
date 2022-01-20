@@ -244,7 +244,7 @@ do
       flagBtcSynced="${value}"
       source <(/home/admin/_cache.sh meta btc_${CHAIN}net_sync_initial_done)
       flagBtcDone="${value}"
-      echo "CHAIN(${CHAIN}) flagBtcStarted(${flagBtcStarted}) flagBtcActive(${flagBtcActive}) flagBtcSynced(${flagBtcSynced}) flagBtcDone(${flagBtcDone})"
+      #echo "CHAIN(${CHAIN}) flagBtcStarted(${flagBtcStarted}) flagBtcActive(${flagBtcActive}) flagBtcSynced(${flagBtcSynced}) flagBtcDone(${flagBtcDone})"
 
       # first check if flags need to be reset (manually delete of blockchain)
       if [ "${flagBtcDone}" == "1" ] && [ "${flagBtcActive}" == "1" ]; then
@@ -280,7 +280,7 @@ do
         flagLNRecoveryDone="${value}"
         source <(/home/admin/_cache.sh meta ln_${LN}_${CHAIN}net_sync_initial_done)
         flagLNSyncDone="${value}"
-        echo "LN(${LN}) flagLnSyncChain(${flagLnSyncChain}) flagLNRecoveryMode(${flagLNRecoveryMode}) flagLNRecoveryDone(${flagLNRecoveryDone}) flagLNSyncDone(${flagLNSyncDone})"
+        #echo "LN(${LN}) flagLnSyncChain(${flagLnSyncChain}) flagLNRecoveryMode(${flagLNRecoveryMode}) flagLNRecoveryDone(${flagLNRecoveryDone}) flagLNSyncDone(${flagLNSyncDone})"
 
         # first check if flags need to be reset (manually a rescan was triggered)
         if [ "${flagLNSyncDone}" == "1" ] && [ "${flagLNRecoveryMode}" == "1" ]; then
