@@ -124,8 +124,10 @@ if [ "$2" = "info" ]; then
   # sudo /usr/local/bin/lightning-cli --lightning-dir=/home/bitcoin/.lightning --conf=/home/bitcoin/.lightning/config getinfo
 
   # get data
-  ln_getInfo=$($lightningcli_alias getinfo 2>/dev/null)
+  command="$lightningcli_alias getinfo"
+  ln_getInfo=$(${command} 2>/dev/null)
   if [ "${ln_getInfo}" == "" ]; then
+    echo "command='${command}'"
     echo "error='no data'"
     exit 1
   fi
