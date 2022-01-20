@@ -527,19 +527,13 @@ if [ ${mode} = "scb-import-gui" ]; then
 
   # in setup scenario the final import is happening during provison
   if [ "${scenario}" == "setup" ]; then
-    # just add staticchannelbackup filename to give file
     echo "# result in: ${RESULTFILE} (remember to make clean delete once processed)"
     echo "staticchannelbackup='${filename}'" >> $RESULTFILE
-    exit 0
   fi
 
   # run import process
-  echo "OK importing channel.backup file ..."
   source <(sudo /home/admin/config.scripts/lnd.backup.sh scb-import "${filename}")
-
-  # give final info
-  echo "DONE - placed SCB file at /home/admin/channel.backup"
-  echo "Reboot and login to trigger import."
+  echo "# DONE - placed SCB file at /home/admin/channel.backup"
   exit 0
 fi
 
