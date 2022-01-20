@@ -99,6 +99,7 @@ do
     btc_default_synced \
     ln_default_sync_chain \
     ln_default_locked \
+    ln_default_sync_initial_done \
     message \
     network \
     chain \
@@ -185,14 +186,12 @@ do
   # MAKE SURE BLOCKCHAIN/LN IS SYNC 
   #####################################
   if [ "${setupPhase}" == "done" ] && [ "${state}" == "ready" ]; then
-    if [ "${btc_default_synced}" != "1" ] || [ "${ln_default_sync_chain}" != "1" ]; then
+    if [ "${btc_default_synced}" != "1" ] || [ "${ln_default_sync_chain}" == "0" ] || [ "${ln_default_sync_initial_done}" == "0" ]; then
       /home/admin/setup.scripts/eventBlockchainSync.sh ssh
       sleep 3
       continue
     fi
   fi
-
-
 
   #####################################
   # SCB ACTIVATION
