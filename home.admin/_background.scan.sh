@@ -921,6 +921,7 @@ do
 
   # loop over all chains
   for CHAIN in "${networks[@]}"
+  do
 
     # skip if this network is not switched on
     btc_service_name="${CHAIN}net"
@@ -945,6 +946,7 @@ do
 
     # sub loop over all layer 2 on that chain
     for LN in "${networks[@]}"
+    do
 
       # skip if this variant is not switched on
       ln_service_name="${LN}"

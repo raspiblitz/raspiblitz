@@ -233,6 +233,7 @@ do
     # loop thru mainet, testnet & signet
     networks=( "main" "test" "sig" )
     for CHAIN in "${networks[@]}"
+    do
 
       # gat values from cache
       source <(/home/admin/_cache.sh meta btc_${CHAIN}net_sync_initial_started)
@@ -269,6 +270,7 @@ do
       # loop thru all second layers
       sedondLayers=( "lnd" "cl" )
       for LN in "${networks[@]}"
+      do
 
         source <(/home/admin/_cache.sh meta ln_${LN}_${CHAIN}net_sync_chain)
         flagLnSyncChain="${value}"
