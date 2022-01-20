@@ -168,7 +168,18 @@ if [ "$2" = "info" ]; then
       cl_sync_chain=1
     fi
   fi
-  
+
+  # recovery info
+  source <(/home/admin/config.scripts/cl.backup.sh $1 recoverymode status)
+  cl_recovery_mode="${recoverymode}"
+  cl_recovery_done="0"
+  if [ "${cl_recovery_mode}" == "1" ]; then
+    scanning=$(echo "${ln_getInfo}" | grep "warning_lightningd_sync" | grep "Still loading latest blocks from bitcoind." -c)
+    if [ "${cl_recovery_mode}" == "1" ] && [ "${scanning}" == "0" ] && [ "${cl_sync_chain}" == "1" ]; then
+      cl_recovery_done="1"
+    fi
+  fi
+
   # print data
   echo "ln_cl_alias='${cl_alias}'"
   echo "ln_cl_address='${cl_address}'"
@@ -181,6 +192,8 @@ if [ "$2" = "info" ]; then
   echo "ln_cl_channels_inactive='${cl_channels_inactive}'"
   echo "ln_cl_channels_total='${cl_channels_total}'"
   echo "ln_cl_fees_total='${cl_fees_collected_msat//[^0-9.]/}'"
+  echo "ln_cl_recovery_mode='${cl_recovery_mode}'"
+  echo "ln_cl_recovery_done='${cl_recovery_done}'"
   exit 0
   
 fi

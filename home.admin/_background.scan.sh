@@ -855,6 +855,8 @@ do
           /home/admin/_cache.sh set ln_cl_${CHAIN}net_channels_inactive "${ln_cl_channels_inactive}"
           /home/admin/_cache.sh set ln_cl_${CHAIN}net_channels_total "${ln_cl_channels_total}"
           /home/admin/_cache.sh set ln_cl_${CHAIN}net_fees_total "${ln_cl_fees_total}"
+          /home/admin/_cache.sh set ln_cl_${CHAIN}net_recovery_mode "${ln_cl_recovery_mode}"
+          /home/admin/_cache.sh set ln_cl_${CHAIN}net_recovery_done "${ln_cl_recovery_done}"
 
           if [ "${isDefaultLightning}" == "1" ] && [ "${isDefaultChain}" == "1" ]; then
             /home/admin/_cache.sh set ln_default_alias "${ln_cl_alias}"
@@ -868,6 +870,8 @@ do
             /home/admin/_cache.sh set ln_default_channels_inactive "${ln_cl_channels_inactive}"
             /home/admin/_cache.sh set ln_default_channels_total "${ln_cl_channels_total}"
             /home/admin/_cache.sh set ln_default_fees_total "${ln_cl_fees_total}"
+            /home/admin/_cache.sh set ln_default_recovery_mode "${ln_cl_recovery_mode}"
+            /home/admin/_cache.sh set ln_default_recovery_done "${ln_cl_recovery_done}"
           fi
         else
           echo "!! ERROR --> ${error}"
