@@ -35,10 +35,7 @@ fi
 # BLOCKCHAIN INFO & OPTIONS
 
 # get fresh data
-source <(/home/admin/_cache.sh get \n
-  btc_default_sync_percentage \n
-  network \n
-)
+source <(/home/admin/_cache.sh get btc_default_sync_percentage network)
 syncProgressFull=$(echo "${btc_default_sync_percentage}" | cut -d "." -f1)
 if [ "${syncProgressFull}" != "" ] && [ "${network}" == "bitcoin" ] && [ ${syncProgressFull} -lt 75 ]; then
 
@@ -59,6 +56,10 @@ fi
 # check if there is a channel.backup to activate
 gotSCB=$(ls /home/admin/channel.backup 2>/dev/null | grep -c 'channel.backup')
 if [ "${gotSCB}" == "1" ]; then
+
+  # make sure LND wallet is unlocked
+  echo "Unlocking LND wallet ..."
+  /home/admin/config.scripts/lnd.unlock.sh unlock "${passwordC}"
 
   echo "*** channel.backup Recovery ***"
   lncli --chain=${network} restorechanbackup --multi_file=/home/admin/channel.backup 2>/home/admin/.error.tmp
