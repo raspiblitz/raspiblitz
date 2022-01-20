@@ -919,6 +919,11 @@ do
   networks=( "main" "test" "sig" )
   sedondLayers=( "lnd" "cl" )
 
+  # if default is mainnet, then consider mainnet=on
+  if [ "${chain}" == "main" ]; then
+    mainnet="on"
+  fi
+
   # loop over all chains
   for CHAIN in "${networks[@]}"
   do
