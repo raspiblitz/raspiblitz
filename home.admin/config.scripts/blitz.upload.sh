@@ -76,6 +76,7 @@ if [ "${action}" == "check-upload" ]; then
   if [ "${type}" == "scb" ]; then
 
     # general filename check
+    sudo mv ${defaultUploadPath}/channel-all.bak ${defaultUploadPath}/channel.backup 2>/dev/null
     typeCount=$(sudo ls ${defaultUploadPath}/*.backup 2>/dev/null | grep -c '.backup')
     if [ "${typeCount}" != "1" ]; then
       sudo rm ${defaultUploadPath}/* 2>/dev/null

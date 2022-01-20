@@ -484,7 +484,7 @@ if [ ${mode} = "scb-import-gui" ]; then
       echo "To make upload open a new terminal and change,"
       echo "into the directory where your lnd-rescue file is and"
       echo "COPY, PASTE AND EXECUTE THE FOLLOWING COMMAND:"
-      echo "scp ./*.backup ${defaultUploadUser}@${localip}:${defaultUploadPath}/"
+      echo "scp ./channel.backup ${defaultUploadUser}@${localip}:${defaultUploadPath}/"
       echo ""
       echo "Use ${passwordInfo} to authenticate file transfer."
       echo "PRESS ENTER when upload is done."
