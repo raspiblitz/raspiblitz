@@ -49,6 +49,7 @@ fi
 isMounted=$(df | grep -c /mnt/hdd)
 isBTRFS=$(btrfs filesystem show 2>/dev/null| grep -c 'BLITZSTORAGE')
 isRaid=$(btrfs filesystem df /mnt/hdd 2>/dev/null | grep -c "Data, RAID1")
+isZFS=$(zfs list 2>/dev/null | grep -c "/mnt/hdd")
 isSSD="0"
 
 # determine if swap is external on or not
@@ -345,9 +346,16 @@ if [ "$1" = "status" ]; then
     # STATUS INFO WHEN MOUNTED
 
     # output data drive
-    if [ ${isBTRFS} -eq 1 ]; then
+    if [ "${isBTRFS}" -gt 0 ]; then
       # on btrfs date the storage partition as the data partition
       hddDataPartition=$(df | grep "/mnt/storage$" | cut -d " " -f 1 | cut -d "/" -f 3)
+    elif [ "${isZFS}" -gt 0 ]; then
+      # a ZFS pool has no leading /
+      hddDataPartition=$(df | grep "/mnt/hdd$" | cut -d " " -f 1 | cut -d "/" -f 2)
+      if [ ${#hddDataPartition} -eq 0 ];then
+        # just a pool, no filesystem
+        hddDataPartition=$(df | grep "/mnt/hdd$" | cut -d " " -f 1 | cut -d "/" -f 1)
+      fi
     else
       # on ext4 its the whole /mnt/hdd
       hddDataPartition=$(df | grep "/mnt/hdd$" | cut -d " " -f 1 | cut -d "/" -f 3)
@@ -384,19 +392,18 @@ if [ "$1" = "status" ]; then
     fi
 
     # check size in bytes and GBs
-    sizeDataPartition=$(lsblk -o NAME,SIZE -b | grep "${hddDataPartition}" | awk '$1=$1' | cut -d " " -f 2)
+    if [ "${isZFS}" -gt 0 ]; then
+      sizeDataPartition=$(zpool list -pH | awk '{print $2}')
+      hddGigaBytes=$(echo "scale=0; ${sizeDataPartition}/1024/1024/1024" | bc -l)
+    else
+      sizeDataPartition=$(lsblk -o NAME,SIZE -b | grep "${hddDataPartition}" | awk '$1=$1' | cut -d " " -f 2)
+      hddGigaBytes=$(echo "scale=0; ${sizeDataPartition}/1024/1024/1024" | bc -l)
+    fi
     echo "hddBytes=${sizeDataPartition}"
-    hddGigaBytes=$(echo "scale=0; ${sizeDataPartition}/1024/1024/1024" | bc -l)
     echo "hddGigaBytes=${hddGigaBytes}"
 
     # used space - at the moment just string info to display
-    if [ ${isBTRFS} -eq 0 ]; then
-      # EXT4 calculations
-      hdd_used_space=$(df -h | grep "/dev/${hddDataPartitionExt4}" | sed -e's/  */ /g' | cut -d" " -f 3  2>/dev/null)
-      hdd_used_ratio=$(df -h | grep "/dev/${hddDataPartitionExt4}" | sed -e's/  */ /g' | cut -d" " -f 5 | tr -dc '0-9' 2>/dev/null)
-      hdd_data_free1Kblocks=$(df -h -k /dev/${hddDataPartitionExt4} | grep "/dev/${hddDataPartitionExt4}" | sed -e's/  */ /g' | cut -d" " -f 4 | tr -dc '0-9')
-      hddUsedInfo="${hdd_used_space} (${hdd_used_ratio}%)"
-    else
+    if [ "${isBTRFS}" -gt 0 ]; then
       # BTRFS calculations
       # TODO: this is the final/correct way - make better later
       # https://askubuntu.com/questions/170044/btrfs-and-missing-free-space
@@ -404,6 +411,18 @@ if [ "$1" = "status" ]; then
       storageDrive=$(df -h | grep "/dev/${hdd}2" | sed -e's/  */ /g' | cut -d" " -f 5)
       hdd_data_free1Kblocks=$(df -h -k /dev/${hdd}1 | grep "/dev/${hdd}1" | sed -e's/  */ /g' | cut -d" " -f 4 | tr -dc '0-9')
       hddUsedInfo="${datadrive} & ${storageDrive}"
+    elif [ "${isZFS}" -gt 0 ]; then
+      # ZFS calculations
+      hdd_used_space=$(zpool list -H | awk '{print $3}')
+      hdd_used_ratio=$((100 * ${hdd_used_space::-1} / hddGigaBytes))
+      hdd_data_free1Kblocks=$(($(zpool list -pH | awk '{print $4}') / 1024))
+      hddUsedInfo="${hdd_used_space} (${hdd_used_ratio}%)"
+    else
+      # EXT4 calculations
+      hdd_used_space=$(df -h | grep "/dev/${hddDataPartitionExt4}" | sed -e's/  */ /g' | cut -d" " -f 3  2>/dev/null)
+      hdd_used_ratio=$(df -h | grep "/dev/${hddDataPartitionExt4}" | sed -e's/  */ /g' | cut -d" " -f 5 | tr -dc '0-9' 2>/dev/null)
+      hdd_data_free1Kblocks=$(df -h -k /dev/${hddDataPartitionExt4} | grep "/dev/${hddDataPartitionExt4}" | sed -e's/  */ /g' | cut -d" " -f 4 | tr -dc '0-9')
+      hddUsedInfo="${hdd_used_space} (${hdd_used_ratio}%)"
     fi
     echo "hddUsedInfo='${hddUsedInfo}'"
     hddDataFreeBytes=$((${hdd_data_free1Kblocks} * 1024))
