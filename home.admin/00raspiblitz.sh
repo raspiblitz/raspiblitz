@@ -222,7 +222,6 @@ do
         # check if its possible to give background info on the error
         notMachtingSeed=$(echo $error | grep -c 'unable to unpack chan backup')
         if [ ${notMachtingSeed} -gt 0 ]; then
-          echo "# FAIL Static-Channel-Backup: seed not machting file" >> /home/admin/raspiblitz.log
           echo "--> ERROR BACKGROUND:"
           echo "The WORD SEED is not matching the channel.backup file."
           echo "Either there was an error in the word seed list or"
@@ -232,14 +231,14 @@ do
 
         # basic info on error
         echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-        echo 
-        echo "You can try after full setup to restore channel.backup file again with:"
-        echo "lncli --chain=${network} restorechanbackup --multi_file=/home/admin/channel.backup"
+        echo "To try upload of channel.backup again:"
+        echo "MAINMENU > REPAIR > REPAIR-LND > RETRYSCB"
         echo
         echo "Press ENTER to continue for now ..."
+        rm /home/admin/channel.backup
         read key
       else
-        mv /home/admin/channel.backup /home/admin/channel.backup.done
+        rm /home/admin/channel.backup
         dialog --title " OK channel.backup IMPORT " --msgbox "
 LND accepted the channel.backup file you uploaded. 
 It will now take around a hour until you can see,
