@@ -269,7 +269,7 @@ do
 
       # loop thru all second layers
       sedondLayers=( "lnd" "cl" )
-      for LN in "${networks[@]}"
+      for LN in "${sedondLayers[@]}"
       do
 
         source <(/home/admin/_cache.sh meta ln_${LN}_${CHAIN}net_sync_chain)
