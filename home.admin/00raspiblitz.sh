@@ -230,21 +230,22 @@ do
           echo 
         fi
 
-      # basic info on error
-      echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-      echo 
-      echo "You can try after full setup to restore channel.backup file again with:"
-      echo "lncli --chain=${network} restorechanbackup --multi_file=/home/admin/channel.backup"
-      echo
-      echo "Press ENTER to continue for now ..."
-      read key
-    else
-      mv /home/admin/channel.backup /home/admin/channel.backup.done
-      dialog --title " OK channel.backup IMPORT " --msgbox "
+        # basic info on error
+        echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        echo 
+        echo "You can try after full setup to restore channel.backup file again with:"
+        echo "lncli --chain=${network} restorechanbackup --multi_file=/home/admin/channel.backup"
+        echo
+        echo "Press ENTER to continue for now ..."
+        read key
+      else
+        mv /home/admin/channel.backup /home/admin/channel.backup.done
+        dialog --title " OK channel.backup IMPORT " --msgbox "
 LND accepted the channel.backup file you uploaded. 
 It will now take around a hour until you can see,
 if LND was able to recover funds from your channels.
     " 9 56
+      fi
     fi
   fi
 
