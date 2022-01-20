@@ -167,6 +167,7 @@ if [ ${uploadSCB} -eq 1 ]; then
   /home/admin/config.scripts/lnd.backup.sh scb-import-gui setup $_temp
   source $_temp 2>/dev/null
   sudo rm $_temp 2>/dev/null
+  sleep 2
 x
   # if user canceled the upload
   if [ "${staticchannelbackup}" == "" ]; then
