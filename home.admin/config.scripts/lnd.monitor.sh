@@ -157,7 +157,7 @@ if [ "$2" = "info" ]; then
   lnd_channels_total=$(( lnd_channels_pending + lnd_channels_active + lnd_channels_inactive ))
   lnd_peers=$(echo "${ln_getInfo}" | jq -r '.num_peers')
 
-  # calaculate the sync/scan progress
+  # calculate the sync/scan progress
   lnd_sync_progress=""
   scanTimestamp=$(echo "${ln_getInfo}" | jq -r '.best_header_timestamp')
   nowTimestamp=$(date +%s)
@@ -183,13 +183,12 @@ if [ "$2" = "info" ]; then
   if [ "${lnd_recovery_mode}" == "1" ]; then
     ln_getrecoveryinfo=$($lndcli_alias getrecoveryinfo 2>/dev/null)
     activated=$(echo "${ln_getrecoveryinfo}" | grep "recovery_mode" | grep "true" -c)
-    finsihed=$(echo "${ln_getrecoveryinfo}" | grep "recovery_finished" | grep "true" -c)
-    if [ "${activated}" == "1" ] && [ "${finsihed}" == "1" ]; then
+    finished=$(echo "${ln_getrecoveryinfo}" | grep "recovery_finished" | grep "true" -c)
+    if [ "${activated}" == "1" ] && [ "${finished}" == "1" ]; then
       lnd_recovery_done="1"
     fi
   fi
   
-
   # print data
   echo "ln_lnd_address='${lnd_address}'"
   echo "ln_lnd_tor='${lnd_tor}'"

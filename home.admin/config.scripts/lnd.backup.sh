@@ -88,7 +88,7 @@ if [ "$1" == "mainnet" ] || [ "$1" == "testnet" ] || [ "$1" == "signet" ]; then
       # activate reset-wallet-transactions in lnd.conf
       echo "# activating recovery mode ..."
       sed -i 's/^reset-wallet-transactions=.*/reset-wallet-transactions=true/g' /mnt/hdd/lnd/${netprefix}lnd.conf
-      echo "# OK - restart/reboot needed for: ${lndService}.service"
+      echo "# OK - restart/reboot needed for: ${netprefix}lnd.service"
       exit 0
     fi
 
@@ -104,7 +104,7 @@ if [ "$1" == "mainnet" ] || [ "$1" == "testnet" ] || [ "$1" == "signet" ]; then
       sed -i 's/^reset-wallet-transactions=.*/reset-wallet-transactions=false/g' /mnt/hdd/lnd/${netprefix}lnd.conf
       
 
-      echo "# OK - restart/reboot needed for: ${lndService}.service"
+      echo "# OK - restart/reboot needed for: ${netprefix}lnd.service"
       exit 0
     fi
 
