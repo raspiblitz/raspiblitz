@@ -70,6 +70,9 @@ WEEK=604800
 MONTH=2592000
 YEAR=31536000
 
+# make sure root is in group bitcoin and allowed to read macaroons
+usermod -G bitcoin root
+
 ####################################################################
 # INIT 
 ####################################################################
