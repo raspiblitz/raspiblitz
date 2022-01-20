@@ -77,13 +77,15 @@ if [ "${action}" == "check-upload" ]; then
 
     # general filename check
     sudo mv ${defaultUploadPath}/channel-all.bak ${defaultUploadPath}/channel.backup 2>/dev/null
-    typeCount=$(sudo ls ${defaultUploadPath}/*.backup 2>/dev/null | grep -c '.backup')
+    typeCount=$(sudo ls ${defaultUploadPath}/channel.backup 2>/dev/null | grep -c '.backup')
     if [ "${typeCount}" != "1" ]; then
       sudo rm ${defaultUploadPath}/* 2>/dev/null
       echo "error='invalid'"
       echo "errorDetail='not *.backup'"
       exit 1
     fi
+    filename="${defaultUploadPath}/channel.backup"
+    byteSize=$(ls -l ${filename} | awk '{print $5}')
   fi
 
   # LND-RESCUE check if file looks valid
