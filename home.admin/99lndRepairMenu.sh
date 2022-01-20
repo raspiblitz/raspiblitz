@@ -291,6 +291,7 @@ MENU=""
 OPTIONS=()
 if [ "${chain}" = "main" ]; then
   OPTIONS+=(COMPACT "Compact the LND channel.db")
+  OPTIONS+=(GETSCB "Download channel.backup (Static Channel Backup)")
 fi
 OPTIONS+=(BACKUP-LND "Backup your LND data (Rescue-File)")
 OPTIONS+=(RESET-LND "Delete LND & start new node/wallet")
@@ -321,6 +322,9 @@ case $CHOICE in
     echo
     echo "Press ENTER to return to main menu."
     read key
+    ;;
+  GETSCB)
+    /home/admin/config.scripts/lnd.backup.sh scb-export-gui
     ;;
   BACKUP-LND)
     /home/admin/config.scripts/lnd.compact.sh interactive
