@@ -975,8 +975,8 @@ do
         ln_all_sync_initial_done=0
       fi
 
-    do
-  do
+    done
+  done
 
   # finalize & writing results to cache
   if [ "${lightning}" == "" ] || [ "${lightning}" == "" ]; then
