@@ -119,6 +119,14 @@ while :
       continue
     fi
 
+    # when lightning is active - show sync until ln_default_sync_initial_done
+    if [ "${lightning}" != "" ] && [ "${lightning}" != "none" ] && [ "${ln_default_sync_initial_done}" == "0" ]; then
+      /home/admin/setup.scripts/eventBlockchainSync.sh lcd
+      sleep 3
+      continue
+    fi
+
+    # when btc not online or not synced - show sync screen
     if [ "${btc_default_synced}" != "1" ] || [ "${btc_default_online}" != "1" ]; then
       /home/admin/setup.scripts/eventBlockchainSync.sh lcd
       sleep 3
