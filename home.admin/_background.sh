@@ -276,13 +276,15 @@ do
 
         source <(/home/admin/_cache.sh meta ln_${LN}_${CHAIN}net_sync_chain)
         flagLnSyncChain="${value}"
+        source <(/home/admin/_cache.sh meta ln_${LN}_${CHAIN}net_online)
+        flagLnOnline="${value}"
         source <(/home/admin/_cache.sh meta ln_${LN}_${CHAIN}net_recovery_mode)
         flagLNRecoveryMode="${value}"
         source <(/home/admin/_cache.sh meta ln_${LN}_${CHAIN}net_recovery_done)
         flagLNRecoveryDone="${value}"
         source <(/home/admin/_cache.sh meta ln_${LN}_${CHAIN}net_sync_initial_done)
         flagLNSyncDone="${value}"
-        #echo "LN(${LN}) flagLnSyncChain(${flagLnSyncChain}) flagLNRecoveryMode(${flagLNRecoveryMode}) flagLNRecoveryDone(${flagLNRecoveryDone}) flagLNSyncDone(${flagLNSyncDone})"
+        #echo "LN(${LN}) flagLnSyncChain(${flagLnSyncChain}) flagLnOnline(${flagLnOnline}) flagLNRecoveryMode(${flagLNRecoveryMode}) flagLNRecoveryDone(${flagLNRecoveryDone}) flagLNSyncDone(${flagLNSyncDone})"
 
         # first check if flags need to be reset (manually a rescan was triggered)
         if [ "${flagLNSyncDone}" == "1" ] && [ "${flagLNRecoveryMode}" == "1" ]; then
@@ -292,7 +294,7 @@ do
         fi
 
         # when flag initial sync not done yet - but all chains are in sync with network
-        if [ "${flagLNSyncDone}" == "0" ] && [ "${flagBtcDone}" == "1" ] && [ "${flagLnSyncChain}" == "1" ]; then
+        if [ "${flagLNSyncDone}" == "0" ] && [ "${flagBtcDone}" == "1" ] && [ "${flagLnOnline}" == "1" ] && [ "${flagLnSyncChain}" == "1" ]; then
 
           # then only finished if no LNRecoveryMode or LNRecoveryDone
           if [ "${flagLNRecoveryMode}" == "0" ] || [ "${flagLNRecoveryDone}" == "1" ]; then
