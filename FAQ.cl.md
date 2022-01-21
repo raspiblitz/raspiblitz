@@ -37,6 +37,7 @@
     - [Recover from a cl-rescue file](#recover-from-a-cl-rescue-file)
     - [Recover from a seed](#recover-from-a-seed)
     - [Rescan the chain after restoring a used c-lightning wallet](#rescan-the-chain-after-restoring-a-used-c-lightning-wallet)
+    - [Guesstoremote to recover funds from force-closed channels](#guesstoremote-to-recover-funds-from-force-closed-channels)
 - [Update](#update)
   - [Update to a new C-lightning release](#update-to-a-new-c-lightning-release)
   - [Experimental update to the latest master](#experimental-update-to-the-latest-master)
@@ -626,26 +627,82 @@ Will need to pay through a peer which supports the onion messages which means yo
 * use the `REPAIR-CL` - `SEEDRESTORE` option in the menu for instructions to paste the seedwords to restore
 
 #### Rescan the chain after restoring a used c-lightning wallet
-* https://lightning.readthedocs.io/FAQ.html#rescanning-the-block-chain-for-lost-utxos
-* Stop `lightningd`:
-    ```
+
+* can use the `menu` -> `REPAIR` -> `REPAIR-CL` -> `RESCAN` option
+* or follow the manual process:  
+  <https://lightning.readthedocs.io/FAQ.html#rescanning-the-block-chain-for-lost-utxos>
+    ``` 
+    # stop `lightningd`:
     sudo systemctl stop lightningd
-    ```
-    An ungraceful method:
-    ```
+
+    # the ungraceful method:
     sudo killall ligthningd
-* Rescan from the block 700000
-    ```
+    
+    # Rescan from the block 700000
     sudo -u bitcoin lightningd --rescan -700000 --log-level debug
-    ```
-* Rescan the last 1000 blocks:
-    ```
+
+    # Rescan the last 1000 blocks:
     sudo -u bitcoin lightningd --rescan 1000 --log-level debug
     ```
 * can monitor in a new window using the shortcut:
     ```
     cllog
     ```
+
+#### Guesstoremote to recover funds from force-closed channels
+* <https://lightning.readthedocs.io/lightning-hsmtool.8.html>
+    ```
+    $ man lightning-hsmtool
+    guesstoremote  p2wpkh node_id max_channel_dbid hsm_secret [password]
+    Brute-force the private key to our funds from a remote unilateral close of a channel, in a case where we have lost all database data except for our hsm_secret.  The peer must be the one to close the channel (and the funds will remain unrecoverable until the channel is closed).  max_channel_dbid is your own guess on what the channel_dbid was, or at least the maximum possible value, and is usually no greater than the number of channels that the node has ever had.  Specify password if the hsm_secret is encrypted.
+    ```
+* Usage on the RaspiBlitz (example for mainnet):
+    ```
+    sudo -u bitcoin lightning-hsmtool guesstoremote p2wpkh-ADDRESS-bc1... PEER_NODE_ID 5000 /home/bitcoin/.lightning/bitcoin/hsm_secret
+    ```
+* The `p2wpkh-ADDRESS-bc1...` must a be a non-timelocked output. Shows with `OP_PUSHBYTES_20` in block explorers.
+* The `max_channel_dbid` = 5000 is usually plenty, can set any higher number
+* If the `hsm_secret` is encrypted give the password on the end
+
+* Output if unsuccessful (the private key is not known):
+    ```
+    Could not find any basepoint matching the provided witness programm.
+    Are you sure that the channel used `option_static_remotekey` ?
+    *** stack smashing detected ***: terminated
+    Aborted
+    ```
+* Output if successful:
+    ```
+    bech32      : bc1q......................................
+    pubkey hash : 0123456789abcdef0123456789abcdef01234567
+    pubkey      : 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef01 
+    privkey     : 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef 
+    ```
+* To import the private key of the address in Electrum Wallet will need to convert to base58
+    ```
+    git clone https://github.com/matja/bitcoin-tool
+    cd bitcoin-tool
+    make test
+
+    ./bitcoin-tool \
+     --network bitcoin \
+     --input-type private-key \
+     --input-format hex \
+     --input PASTE_THE_privkey_HERE \
+     --output-type private-key-wif \
+     --output-format base58check \
+     --public-key-compression compressed
+    ```
+* Example output:
+    ```
+    KwFvTne98E1t3mTNAr8pKx67eUzFJWdSNPqPSfxMEtrueW7PcQzL
+    ```
+* To import to teh Electrum Wallet use the `p2wpkh:` prefix:  
+  <https://bitcoinelectrum.com/importing-your-private-keys-into-electrum/>
+  ```
+  p2wpkh:KxacygL6usxP8T9cFSM2SRW5QsEg66bUQUEn997UWwCZANEe7NLT
+  ```
+
 
 ## Update
 ### Update to a new C-lightning release
