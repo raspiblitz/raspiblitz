@@ -242,9 +242,11 @@ do
       flagBtcActive="${value}"
       source <(/home/admin/_cache.sh meta btc_${CHAIN}net_synced)
       flagBtcSynced="${value}"
+      source <(/home/admin/_cache.sh meta btc_${CHAIN}net_online)
+      flagBtcOnline="${value}"
       source <(/home/admin/_cache.sh meta btc_${CHAIN}net_sync_initial_done)
       flagBtcDone="${value}"
-      #echo "CHAIN(${CHAIN}) flagBtcStarted(${flagBtcStarted}) flagBtcActive(${flagBtcActive}) flagBtcSynced(${flagBtcSynced}) flagBtcDone(${flagBtcDone})"
+      #echo "CHAIN(${CHAIN}) flagBtcStarted(${flagBtcStarted}) flagBtcActive(${flagBtcActive}) flagBtcSynced(${flagBtcSynced}) flagBtcOnline(${flagBtcOnline}) flagBtcDone(${flagBtcDone})"
 
       # first check if flags need to be reset (manually delete of blockchain)
       if [ "${flagBtcDone}" == "1" ] && [ "${flagBtcActive}" == "1" ]; then
@@ -261,7 +263,7 @@ do
       fi
 
       # when started done is set - but not not active anymore --> end of IDB event detected
-      if [ "${flagBtcDone}" == "0" ] && [ "${flagBtcSynced}" == "1" ]; then
+      if [ "${flagBtcDone}" == "0" ] && [ "${flagBtcOnline}" == "1" ] && [ "${flagBtcSynced}" == "1" ]; then
         flagBtcDone=1
         /home/admin/config.scripts/blitz.conf.sh set btc_${CHAIN}net_sync_initial_done ${flagBtcDone} /home/admin/raspiblitz.info      
         echo "EVENT --> btc_${CHAIN}net_sync_initial_done changed to ${flagBtcDone}"
@@ -290,7 +292,7 @@ do
         fi
 
         # when flag initial sync not done yet - but all chains are in sync with network
-        if [ "${flagLNSyncDone}" == "0" ] && [ "${flagBtcSynced}" == "1" ] && [ "${flagLnSyncChain}" == "1" ]; then
+        if [ "${flagLNSyncDone}" == "0" ] && [ "${flagBtcDone}" == "1" ] && [ "${flagLnSyncChain}" == "1" ]; then
 
           # then only finished if no LNRecoveryMode or LNRecoveryDone
           if [ "${flagLNRecoveryMode}" == "0" ] || [ "${flagLNRecoveryDone}" == "1" ]; then
