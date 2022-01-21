@@ -118,7 +118,7 @@ while :
       continue
     fi
 
-    if [ "${btc_default_synced}" != "1" ]; then
+    if [ "${btc_default_synced}" != "1" ] || [ "${btc_default_online}" != "1" ]; then
       /home/admin/setup.scripts/eventBlockchainSync.sh lcd
       sleep 3
       continue
