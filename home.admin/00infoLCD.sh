@@ -108,6 +108,7 @@ while :
       lightning \
       ln_default_locked \
       btc_default_synced \
+      btc_default_online \
       btc_default_sync_initialblockdownload \
       btc_default_blocks_behind \
     )
