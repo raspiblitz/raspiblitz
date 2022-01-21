@@ -66,6 +66,7 @@ if [ "$1" == "mainnet" ] || [ "$1" == "testnet" ] || [ "$1" == "signet" ]; then
 
       # clean
       sed -i 's/^rescan=.*//g' "${CLCONF}"
+      sed -i 's/^log-level=.*//g' "${CLCONF}"
 
       # activate rescan in cl config
       if [ $# -gt 3 ]; then
@@ -76,6 +77,8 @@ if [ "$1" == "mainnet" ] || [ "$1" == "testnet" ] || [ "$1" == "signet" ]; then
       fi
       echo "# activating recovery mode ..."
       echo "rescan=${scanFrom}" | tee -a  "${CLCONF}"
+      echo "# setting log-level=debug ..."
+      echo "log-level=debug" | tee -a  "${CLCONF}"
       echo "# OK - restart/reboot needed for: ${netprefix}lightningd.service"
       exit 0
     fi
@@ -90,7 +93,9 @@ if [ "$1" == "mainnet" ] || [ "$1" == "testnet" ] || [ "$1" == "signet" ]; then
       # remove --reset-wallet-transactions parameter in systemd service
       echo "# deactivating recovery mode ..."
       sed -i 's/^rescan=.*//g' "${CLCONF}"
-      
+      sed -i 's/^log-level=.*//g' "${CLCONF}"
+      echo "# setting log-level=info (default) ..."
+      echo "log-level=info" | tee -a  "${CLCONF}"
       echo "# OK - restart/reboot needed for: ${netprefix}lightningd.service"
       exit 0
     fi

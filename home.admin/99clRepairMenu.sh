@@ -31,6 +31,7 @@ fi
     OPTIONS+=(RESET "Reset the wallet and create new")
     OPTIONS+=(FILERESTORE "Restore from a rescue file")
     OPTIONS+=(SEEDRESTORE "Restore from a seed (onchain funds only)")
+    OPTIONS+=(RESCAN "Rescan for onchain funds from a given block")
 
 CHOICE_HEIGHT=$(("${#OPTIONS[@]}/2+1"))
 HEIGHT=$((CHOICE_HEIGHT+6))
@@ -173,6 +174,23 @@ case $CHOICE in
     /home/admin/config.scripts/cl.install.sh on $CHAIN
     ;;
 
+  RESCAN)
+    trap 'rm -f "$_temp"' EXIT
+    _temp=$(mktemp -p /dev/shm/)
+    dialog --backtitle "Choose the new gap limit" \
+    --title "Enter the rescan depth or blockheight (-)" \
+    --inputbox "
+Enter the number of blocks to rescan from the current tip 
+or use a negative number for the absolute blockheight to scan from.
+
+If left empty will start to rescan from the block 700000 (-700000).
+" 12 71 2> "$_temp"
+    BLOCK=$(cat "$_temp")
+    if [ ${#BLOCK} -eq 0 ]; then
+      BLOCK="-700000"
+    fi
+    sudo /home/admin/config.scripts/cl.backup.sh "${CHAIN}" recoverymode on "${BLOCK}"
+    ;;
 esac
 
 exit 0
