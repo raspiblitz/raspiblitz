@@ -124,7 +124,7 @@ if [ "$2" = "info" ]; then
   # sudo /usr/local/bin/lightning-cli --lightning-dir=/home/bitcoin/.lightning --conf=/home/bitcoin/.lightning/config getinfo
 
   # get data
-  command="$lightningcli_alias getinfo"
+  command="sudo -u bitcoin $lightningcli_alias getinfo"
   ln_getInfo=$(${command} 2>/dev/null)
   if [ "${ln_getInfo}" == "" ]; then
     echo "command='${command}'"
