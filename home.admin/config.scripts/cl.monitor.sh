@@ -208,8 +208,11 @@ if [ "$2" = "wallet" ]; then
   # /usr/local/bin/lightning-cli --lightning-dir=/home/bitcoin/.lightning --conf=/home/bitcoin/.lightning/config listfunds
 
   # get data
-  cl_listfunds=$($lightningcli_alias listfunds 2>/dev/null)
+  sudo -u bitcoin
+  command="sudo -u bitcoin $lightningcli_alias listfunds"
+  cl_listfunds=$(${command} 2>/dev/null)
   if [ "${cl_listfunds}" == "" ]; then
+    echo "command='${command}'"
     echo "error='no data'"
     exit 1
   fi
