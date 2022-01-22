@@ -172,7 +172,7 @@ or having a complete LND rescue-backup from your old node.
 
     getpasswordC
 
-    removeAllLNDwallets
+    removeLNDwallet
 
     # creates fresh lnd.conf without an alias
     /home/admin/config.scripts/lnd.install.sh on $CHAIN
@@ -262,25 +262,27 @@ function restoreSCB()
     fi
 }
 
-function removeAllLNDwallets 
+function removeLNDwallet 
 {
   clear
   echo  
-  echo "The next step WILL REMOVE the old LND wallets on ALL CHAINS"
+  echo "The next step WILL REMOVE the old LND wallet on ${CHAIN}"
   echo "Press ENTER to continue or CTRL+C to abort"
   read key
-  echo "# Stopping lnd on mainnet ..."
-  sudo systemctl stop lnd
-  # don' t want to set CL as default if running parallel
-  #/home/admin/config.scripts/lnd.install.sh off mainnet
-  if [ "${tlnd}" == "on" ];then
-    /home/admin/config.scripts/lnd.install.sh off testnet
-  fi
-  if [ "${slnd}" == "on" ];then
-    /home/admin/config.scripts/lnd.install.sh off signet
-  fi
-  echo "Reset wallet"
-  sudo rm -r /mnt/hdd/lnd
+  echo "# Stopping lnd on ${CHAIN} ..."
+  sudo systemctl stop ${netprefix}lnd
+  sudo systemctl disable ${netprefix}lnd
+  echo "Reset wallet on ${CHAIN}"
+  sudo rm -f /home/bitcoin/.lnd/${netprefix}lnd.conf
+  sudo rm -f /home/bitcoin/.lnd/${netprefix}v3_onion_private_key
+  sudo rm -f /mnt/hdd/lnd/data/chain/${network}/${CHAIN}/wallet.db
+  sudo rm -f /home/bitcoin/.lnd/data/graph/${CHAIN}/channel.db
+  sudo rm -f /home/bitcoin/.lnd/data/graph/${CHAIN}/sphinxreplay.db
+  
+  sudo rm -rf /mnt/hdd/lnd/data/chain/${network}/${CHAIN}
+  sudo rm -rf /home/bitcoin/.lnd/logs/${network}/${CHAIN}
+  sudo rm -rf /home/bitcoin/.lnd/data/graph/${CHAIN}
+  sudo rm -rf home/bitcoin/.lnd/data/watchtower/${CHAIN}
 }
 
 # BASIC MENU INFO
@@ -357,18 +359,12 @@ case $CHOICE in
     # sudo /home/admin/config.scripts/lnd.setname.sh ${chain}net "${result}"
     # /home/admin/config.scripts/blitz.conf.sh set hostname "${result}"
 
-    removeAllLNDwallets
+    removeLNDwallet
 
     # create wallet
     /home/admin/config.scripts/lnd.install.sh on ${chain}net initwallet
     # display and delete the seed for ${chain}net
     sudo /home/admin/config.scripts/lnd.install.sh display-seed ${chain}net delete
-    if [ "${tlnd}" == "on" ];then
-      /home/admin/config.scripts/lnd.install.sh on testnet initwallet
-    fi
-    if [ "${slnd}" == "on" ];then
-      /home/admin/config.scripts/lnd.install.sh on signet initwallet
-    fi
 
     syncAndCheckLND
 
@@ -382,7 +378,24 @@ case $CHOICE in
   LNDRESCUE)
     askLNDbackupCopy
 
-    removeAllLNDwallets
+    #removeAllLNDwallets 
+    clear
+    echo
+    echo "The next step WILL REMOVE the old LND wallets on ALL CHAINS"
+    echo "Press ENTER to continue or CTRL+C to abort"
+    read key
+    echo "# Stopping lnd on mainnet ..."
+    sudo systemctl stop lnd
+    # don' t want to set CL as default if running parallel
+    #/home/admin/config.scripts/lnd.install.sh off mainnet
+    if [ "${tlnd}" == "on" ];then
+      /home/admin/config.scripts/lnd.install.sh off testnet
+    fi
+    if [ "${slnd}" == "on" ];then
+      /home/admin/config.scripts/lnd.install.sh off signet
+    fi
+    echo "Reset wallet"
+    sudo rm -r /mnt/hdd/lnd
 
     ## from dialogLightningWallet.sh 
     # import file
