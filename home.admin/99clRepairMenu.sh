@@ -103,6 +103,8 @@ case $CHOICE in
     /home/admin/config.scripts/blitz.conf.sh set ${netprefix}clAutoUnlock "off"
     # new
     /home/admin/config.scripts/cl.hsmtool.sh new $CHAIN
+    # create config
+    /home/admin/config.scripts/cl.install.sh on $CHAIN
     # set the lightningd service file on each active network
     if [ "${cl}" == "on" ] || [ "${cl}" == "1" ]; then
       /home/admin/config.scripts/cl.install-service.sh mainnet
