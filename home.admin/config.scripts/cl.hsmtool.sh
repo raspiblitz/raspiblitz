@@ -14,13 +14,13 @@ if [ $# -lt 1 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]||\
   echo
   echo "Usage:"
   echo "Create new wallet:"
-  echo "cl.hsmtool.sh [new] [mainnet|testnet|signet] [?seedPassword]"  
-  echo "cl.hsmtool.sh [new-force] [mainnet|testnet|signet] [?seedPassword]"  
-  echo "There will be no seedPassword(passphrase) used by default"
+  echo "cl.hsmtool.sh [new] [mainnet|testnet|signet] [?seedpassword]"  
+  echo "cl.hsmtool.sh [new-force] [mainnet|testnet|signet] [?seedpassword]"  
+  echo "There will be no seedpassword(passphrase) used by default"
   echo "new-force will backup the old wallet and will work without interaction"
   echo
-  echo "cl.hsmtool.sh [seed] [mainnet|testnet|signet] [\"space-separated-seed-words\"] [?seedPassword]"  
-  echo "cl.hsmtool.sh [seed-force] [mainnet|testnet|signet] [\"space-separated-seed-words\"] [?seedPassword]"  
+  echo "cl.hsmtool.sh [seed] [mainnet|testnet|signet] [\"space-separated-seed-words\"] [?seedpassword]"  
+  echo "cl.hsmtool.sh [seed-force] [mainnet|testnet|signet] [\"space-separated-seed-words\"] [?seedpassword]"  
   echo "The new hsm_secret will be not encrypted if no NewPassword is given"
   echo "seed-force will delete any old wallet and will work without dialog"
   echo
@@ -38,7 +38,7 @@ source <(/home/admin/config.scripts/network.aliases.sh getvars cl $2)
 hsmSecretPath="/home/bitcoin/.lightning/${CLNETWORK}/hsm_secret"
 
 # password file is on the disk if encrypted and auto-unlock is enabled
-passwordFile=/dev/shm/.${netprefix}cl.pw
+passwordFile="/dev/shm/.${netprefix}cl.pw"
 if grep -Eq "${netprefix}clEncryptedHSM=on" /mnt/hdd/raspiblitz.conf;then
   if grep -Eq "${netprefix}clAutoUnlock=on" /mnt/hdd/raspiblitz.conf;then
     passwordFile=/home/bitcoin/.${netprefix}cl.pw
@@ -159,7 +159,8 @@ function decryptHSMsecret() {
 if [ "$1" = "new" ] || [ "$1" = "new-force" ] || [ "$1" = "seed" ] || [ "$1" = "seed-force" ]; then
 
   # make sure /home/bitcoin/.lightning/bitcoin exists (when lightningd was not run yet)
-  if ! sudo ls  /home/bitcoin/.lightning/bitcoin; then
+  if ! sudo ls /home/bitcoin/.lightning/bitcoin 1>/dev/null; then
+    echo "# Create /home/bitcoin/.lightning/bitcoin/"
     sudo -u bitcoin mkdir -p /home/bitcoin/.lightning/bitcoin/
   fi
 
@@ -205,7 +206,7 @@ if [ "$1" = "new" ] || [ "$1" = "new-force" ] || [ "$1" = "seed" ] || [ "$1" = "
   fi
 
   if [ "$1" = "new" ]; then
-    seedPassword="$3"
+    seedpassword="$3"
     # get 24 words
     source <(python /home/admin/config.scripts/blitz.mnemonic.py generate)
     #TODO seedwords to cl.backup.sh seed-export-gui
@@ -244,7 +245,7 @@ seedwords6x4='${seedwords6x4}'
     (echo "0"; echo "${seedwords}"; echo) | sudo -u bitcoin lightning-hsmtool \
      "generatehsm" $hsmSecretPath 1>&2
   else
-    # pass to 'hsmtool generatehsm hsm_secret' - confirm seedPassword
+    # pass to 'hsmtool generatehsm hsm_secret' - confirm seedpassword
     (echo "0"; echo "${seedwords}"; echo "$seedpassword"; echo "$seedpassword")\
      | sudo -u bitcoin lightning-hsmtool "generatehsm" $hsmSecretPath 1>&2
   fi

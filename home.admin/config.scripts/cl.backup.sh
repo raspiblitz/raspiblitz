@@ -350,9 +350,9 @@ if [ ${mode} = "cl-import-gui" ]; then
   echo "Write the word 'override' and press ENTER to CONTINUE:"
   read securityInput
   if [ "${securityInput}" != "override" ] && [ "${securityInput}" != "'override'" ]; then
-      echo
-      echo "CANCELED import of uploaded rescue file"
-      exit 1
+    echo
+    echo "CANCELED import of uploaded rescue file"
+    exit 1
   fi
   echo
 
@@ -417,7 +417,7 @@ if [ ${mode} = "seed-export-gui" ]; then
   # use text snippet for testing:
   # 
 
-  # 2nd PARAMETER: lnd seed data
+  # 2nd PARAMETER: cl seed data
   seedwords6x4=$2
   if [ "${seedwords6x4}" == "" ]; then
     echo "error='missing parameter'"
@@ -433,7 +433,7 @@ if [ ${mode} = "seed-export-gui" ]; then
       ack=1
     fi
   done
-
+  exit 0
 fi
 
 # Results will be stored on memory cache:
