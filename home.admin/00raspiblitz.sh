@@ -239,11 +239,16 @@ do
         read key
       else
         rm /home/admin/channel.backup
-        dialog --title " OK channel.backup IMPORT " --msgbox "
+        dialog --title " OK Static-Channel-Backup IMPORT " --msgbox "
 LND accepted the channel.backup file you uploaded. 
-It will now take around a hour until you can see,
+It can now take up to an hour until you can see,
 if LND was able to recover funds from your channels.
-    " 9 56
+
+If you dont see any pending on-chain incoming funds
+within the next hour or you still missing funds, you
+can always retry the upload again under:
+MAINMENU > REPAIR > REPAIR-LND > RETRYSCB
+" 14 58
       fi
     fi
   fi
