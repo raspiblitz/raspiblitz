@@ -89,6 +89,14 @@ if [ "$1" == "mainnet" ] || [ "$1" == "testnet" ] || [ "$1" == "signet" ]; then
       echo "# activating recovery mode ..."
       sed -i 's/^reset-wallet-transactions=.*/reset-wallet-transactions=true/g' /mnt/hdd/lnd/${netprefix}lnd.conf
       echo "# OK - restart/reboot needed for: ${netprefix}lnd.service"
+
+      # set system status
+      /home/admin/config.scripts/blitz.conf.sh set ln_lnd_${lndChain}_sync_initial_done 0 /home/admin/raspiblitz.info
+      source <(/home/admin/_cache.sh get chain lightning)
+      if [ "${lndChain}" == "${chain}net" ] && [ "${lightning}" == "lnd" ]; then
+        /home/admin/_cache.sh set ln_default_sync_initial_done 0
+      fi
+    
       exit 0
     fi
 
