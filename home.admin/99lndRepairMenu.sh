@@ -137,12 +137,14 @@ syncAndCheckLND() # from _provision.setup.sh
   # now sync macaroons & TLS to other users
   sudo /home/admin/config.scripts/lnd.credentials.sh sync
 
-  # make a final lnd check
-  source <(/home/admin/config.scripts/lnd.check.sh basic-setup "${chain}net")
-  if [ "${err}" != "" ]; then
-    echo "lnd-check-error" "lnd.check.sh basic-setup ${chain}net with error" "/home/admin/config.scripts/lnd.check.sh basic-setup ${chain}net --> ${err}"
-    exit 15
-  fi
+ # make a final lnd check
+ source <(/home/admin/config.scripts/lnd.check.sh basic-setup "${chain}net")
+ if [ "${err}" != "" ]; then
+   echo
+   echo "lnd-check-error" "lnd.check.sh basic-setup ${chain}net with error" "/home/admin/config.scripts/lnd.check.sh basic-setup ${chain}net --> ${err}"
+   echo
+   # exit 15
+ fi
 }
 
 function restoreFromSeed()
@@ -192,9 +194,6 @@ or having a complete LND rescue-backup from your old node.
       fi
     fi
 
-    # set lnd back into recovery mode
-    sudo /home/admin/config.scripts/lnd.backup.sh "${chain}net" recoverymode on
-
     syncAndCheckLND
 }
 
@@ -202,13 +201,14 @@ function restoreSCB()
 {
     # import SCB and get results
     _temp="/var/cache/raspiblitz/.temp.tmp"
-    /home/admin/config.scripts/lnd.backup.sh scb-import-gui setup $_temp
+    # 'production' to use passwordA
+    /home/admin/config.scripts/lnd.backup.sh scb-import-gui production $_temp
     source $_temp 2>/dev/null
     sudo rm $_temp 2>/dev/null
     
     # if user canceled the upload
-    if [ "${staticchannelbackup}" == "" ]; then
-      # signal cancel to the calling script by exit code (5 = exit on scb)
+    if ! ls -la /home/admin/channel.backup; then
+      echo "# signal cancel to the calling script by exit code (5 = exit on scb)"
       exit 5
     fi
     
@@ -220,7 +220,7 @@ function restoreSCB()
     read key
 
     # WALLET --> SEED + SCB 
-    if [ "${staticchannelbackup}" != "" ]; then
+    if ls -la /home/admin/channel.backup; then
 
       # LND was restarted so need to unlock
       echo "WALLET --> UNLOCK WALLET - SCAN 0"
@@ -241,25 +241,34 @@ function restoreSCB()
       source <(/home/admin/config.scripts/lnd.initwallet.py scb ${chain}net "/home/admin/channel.backup" "${macaroonPath}")
       if [ "${err}" != "" ]; then
         echo "lnd-wallet-seed+scb" "lnd.initwallet.py scb returned error" "/home/admin/config.scripts/lnd.initwallet.py scb ${chain}net ... --> ${err} + ${errMore}"
-        if [ "${errMore}" = "server is still in the process of starting" ]; then
-          echo "The SCB recovery is not possible now - use the RETRYSCB option the REPAIR-LND menu after LND is synced."
-          echo "Can repeat the SCB recovery until all peers have force closed the channels to this node."
-        else
-          exit 12
-        fi
+        while [ $(echo "${errMore}" | grep -c "RPC server is in the process of starting up") -gt 0 ]; do
+          echo "# ${errMore}"
+          echo "# waiting 10 seconds (${counter})"
+          counter=$((counter+1))
+          if [ ${counter} -eq 60 ]; then
+            echo "# Giving up after 10 minutes"
+            echo
+            echo "lnd-wallet-seed+scb" "lnd.initwallet.py scb returned error" "/home/admin/config.scripts/lnd.initwallet.py scb ${chain}net ... --> ${err} + ${errMore}"
+            echo
+            echo "The SCB recovery is not possible now - use the RETRYSCB option the REPAIR-LND menu after LND is synced."
+            echo "Can repeat the SCB recovery until all peers have force closed the channels to this node."
+            echo
+            echo "# ${netprefix}lnd error logs:"
+            sudo journalctl -u ${netprefix}lnd
+            echo
+            echo "# ${netprefix}lnd logs:"
+            sudo tail /home/bitcoin/.lnd/logs/bitcoin/${CHAIN}/lnd.log
+            exit 12
+          fi
+          sleep 10
+          source <(/home/admin/config.scripts/lnd.initwallet.py scb ${chain}net "/home/admin/channel.backup" "${macaroonPath}")
+        done
+
       fi
     fi
 
     syncAndCheckLND
 
-    # LND was restarted so need to unlock
-    echo "WALLET --> UNLOCK WALLET - SCAN 5000"
-    /home/admin/_cache.sh set message "LND Wallet Unlock - scan 5000"
-    source <(/home/admin/config.scripts/lnd.initwallet.py unlock ${chain}net "${passwordC}" 5000)
-    if [ "${err}" != "" ]; then
-      echo "lnd-wallet-unlock" "lnd.initwallet.py unlock returned error" "/home/admin/config.scripts/lnd.initwallet.py unlock ${chain}net ... --> ${err} + ${errMore}"
-      exit 50
-    fi
 }
 
 function removeLNDwallet 
@@ -422,6 +431,12 @@ case $CHOICE in
 
     restoreSCB
     
+    # set lnd to recovery mode
+    sudo /home/admin/config.scripts/lnd.backup.sh "${chain}net" recoverymode on
+
+    echo "# Unlock wallet ..."
+    /home/admin/config.scripts/lnd.unlock.sh "${CHAIN}"
+
     echo
     echo "Press ENTER to return to main menu."
     read key
@@ -431,8 +446,14 @@ case $CHOICE in
     ;;
 
   RETRYSCB)
+    #TODO ask for password only once
+    getpasswordC
+
     restoreSCB
-    
+
+    echo "# Unlock wallet ..."
+    /home/admin/config.scripts/lnd.unlock.sh "${CHAIN}"
+
     echo
     echo "Press ENTER to return to main menu."
     read key
@@ -444,13 +465,11 @@ case $CHOICE in
   ONLYSEED)
     restoreFromSeed
     
-    echo "WALLET --> UNLOCK WALLET - SCAN 5000"
-    /home/admin/_cache.sh set message "LND Wallet Unlock - scan 5000"
-    source <(/home/admin/config.scripts/lnd.initwallet.py unlock "${chain}net" "${passwordC}" 5000)
-    if [ "${err}" != "" ]; then
-      echo "lnd-wallet-unlock" "lnd.initwallet.py unlock returned error" "/home/admin/config.scripts/lnd.initwallet.py unlock ${chain}net ... --> ${err} + ${errMore}"
-      exit 50
-    fi
+    # set lnd to recovery mode
+    sudo /home/admin/config.scripts/lnd.backup.sh "${chain}net" recoverymode on
+
+    echo "# Unlock wallet ..."
+    /home/admin/config.scripts/lnd.unlock.sh "${CHAIN}"
 
     echo "Press ENTER to return to main menu."
     read key
@@ -470,16 +489,15 @@ case $CHOICE in
       echo "Restarting lnd ..."
       sudo systemctl restart ${netprefix}lnd
       sleep 3
-      echo "Unlock Wallet ..."
-      /home/admin/config.scripts/lnd.unlock.sh "${CHAIN}"
 
     else
 
       echo "lnd already in recoverymode."
-      echo "Unlock Wallet ..."
-      /home/admin/config.scripts/lnd.unlock.sh "${CHAIN}"
 
     fi
+
+    echo "# Unlock wallet ..."
+    /home/admin/config.scripts/lnd.unlock.sh "${CHAIN}"
 
     echo
     echo "To show the scanning progress in the background will follow the lnd.log with:" 
