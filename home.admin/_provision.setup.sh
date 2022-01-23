@@ -314,10 +314,6 @@ if [ "${lightning}" == "lnd" ]; then
     exit 15
   fi
 
-  # set lnd into recovery mode (gets activated after setup reboot)
-  /home/admin/config.scripts/lnd.backup.sh mainnet recoverymode on >> ${logFile}
-  echo "Rescanning will activate after setup-reboot ..." >> ${logFile}
-
   # stop lnd for the rest of the provision process
   echo "stopping lnd for the rest provision again (will start on next boot)" >> ${logFile}
   systemctl stop lnd >> ${logFile}
