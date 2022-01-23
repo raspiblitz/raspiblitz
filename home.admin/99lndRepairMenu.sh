@@ -475,16 +475,8 @@ case $CHOICE in
 
   RETRYSCB)
 
-    #TODO ask for password only once
-    getpasswordC
     restoreSCB
 
-    echo "# Unlock wallet ..."
-    /home/admin/config.scripts/lnd.unlock.sh "${CHAIN}"
-
-    echo
-    echo "Press ENTER to return to main menu."
-    read key
     # go back to main menu (and show)
     /home/admin/00raspiblitz.sh
     exit 0
