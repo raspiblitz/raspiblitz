@@ -246,7 +246,7 @@ function restoreSCB()
         fi
       fi
 
-      echo "WALLET --> SCB "
+      echo "WALLET --> SEED + SCB "
       /home/admin/_cache.sh set message "LND Wallet (SEED & SCB)"
       macaroonPath="/home/admin/.lnd/data/chain/${network}/${chain}net/admin.macaroon"
       source <(/home/admin/config.scripts/lnd.initwallet.py scb ${chain}net "/home/admin/channel.backup" "${macaroonPath}")

@@ -362,7 +362,7 @@ if [ "$1" = "prestart" ]; then
   configExists=$(ls /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json 2>/dev/null | grep -c "RTL-Config.json")
   if [ "${configExists}" == "0" ]; then
     # copy template
-    cp /home/rtl/RTL/.github/docs/Sample-RTL-Config.json /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json
+    cp /home/rtl/RTL/Sample-RTL-Config.json /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json
     chmod 600 /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json
   fi
 
