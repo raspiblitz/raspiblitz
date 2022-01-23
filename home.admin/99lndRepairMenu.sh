@@ -441,6 +441,8 @@ case $CHOICE in
     echo "# Unlock wallet ..."
     /home/admin/config.scripts/lnd.unlock.sh "${CHAIN}"
 
+    echo
+    echo "System will now go thru rescan for on-chain funds"
     echo "Press ENTER to return to main menu."
     read key
     # go back to main menu (and show)
@@ -460,7 +462,6 @@ case $CHOICE in
 
     echo "# Unlock wallet ..."
     /home/admin/config.scripts/lnd.unlock.sh "${CHAIN}"
-
 
     echo
     echo "System will now go thru rescan for on-chain funds and when done"
