@@ -991,7 +991,7 @@ do
   done
 
   # finalize & writing results to cache
-  if [ "${lightning}" == "" ] || [ "${lightning}" == "" ]; then
+  if [ "${lightning}" == "" ] || [ "${lightning}" == "none" ]; then
     ln_all_sync_initial_done=""
     ln_default_sync_initial_done=""
     blitz_sync_initial_done="${btc_all_sync_initial_done}"
