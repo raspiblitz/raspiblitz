@@ -9,6 +9,27 @@ source <(/home/admin/config.scripts/network.aliases.sh getvars cl $1)
 
 sudo mkdir /var/cache/raspiblitz/temp 2>/dev/null
 
+
+function clRescan() {
+  trap 'rm -f "$_temp"' EXIT
+  _temp=$(mktemp -p /dev/shm/)
+  dialog --backtitle "Choose the new gap limit" \
+  --title "Enter the rescan depth or blockheight (-)" \
+  --inputbox "
+Enter the number of blocks to rescan from the current tip 
+or use a negative number for the absolute blockheight to scan from.
+
+If left empty will start to rescan from the block 700000 (-700000).
+" 12 71 2> "$_temp"
+  BLOCK=$(cat "$_temp")
+  if [ ${#BLOCK} -eq 0 ]; then
+    BLOCK="-700000"
+  fi
+  sudo /home/admin/config.scripts/cl.backup.sh "${CHAIN}" recoverymode on "${BLOCK}"
+  sudo systemctl restart ${netprefix}lightningd
+}
+
+
 # BASIC MENU INFO
 WIDTH=64
 BACKTITLE="RaspiBlitz"
@@ -174,24 +195,12 @@ case $CHOICE in
     /home/admin/config.scripts/cl.hsmtool.sh autounlock-off
     /home/admin/config.scripts/cl.hsmtool.sh decrypt
     /home/admin/config.scripts/cl.install.sh on $CHAIN
+
+    clRescan
     ;;
 
   RESCAN)
-    trap 'rm -f "$_temp"' EXIT
-    _temp=$(mktemp -p /dev/shm/)
-    dialog --backtitle "Choose the new gap limit" \
-    --title "Enter the rescan depth or blockheight (-)" \
-    --inputbox "
-Enter the number of blocks to rescan from the current tip 
-or use a negative number for the absolute blockheight to scan from.
-
-If left empty will start to rescan from the block 700000 (-700000).
-" 12 71 2> "$_temp"
-    BLOCK=$(cat "$_temp")
-    if [ ${#BLOCK} -eq 0 ]; then
-      BLOCK="-700000"
-    fi
-    sudo /home/admin/config.scripts/cl.backup.sh "${CHAIN}" recoverymode on "${BLOCK}"
+    clRescan
     ;;
 esac
 
