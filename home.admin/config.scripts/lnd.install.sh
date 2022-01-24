@@ -446,9 +446,11 @@ alias ${netprefix}lndconf=\"sudo nano /home/bitcoin/.lnd/${netprefix}lnd.conf\"\
   /home/admin/config.scripts/blitz.conf.sh set ${netprefix}lnd "on"
 
   # if this is the first lightning mainnet turned on - make default
-  if [ "${CHAIN}" == "mainnet" ] && [ "${lightning}" == "" ]; then
-    echo "# LND is now default lighthning implementation"
-    /home/admin/config.scripts/blitz.conf.sh set lightning "lnd"
+  if [ "${CHAIN}" == "mainnet" ]; then
+    if [ "${lightning}" == "" ] || [ "${lightning}" == "none" ]; then
+      echo "# LND is now default lighthning implementation"
+      /home/admin/config.scripts/blitz.conf.sh set lightning "lnd"
+    fi
   fi
 
   exit 0
