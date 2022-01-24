@@ -213,9 +213,11 @@ function restoreSCB()
     fi
     
     echo
-    echo "The next step will attempt to trigger all online peers to force close the channels with this node."
-    echo "Restoring the channel.backup can be repeated again until all the channels are force closed."
-    echo "Contacting the peers and asking them to force close achieves the same."
+    echo "The next step will attempt to trigger all online peers to force close the channels."
+    echo "Restoring the channel.backup can be repeated until all the channels are force closed."
+    echo
+    echo "Make sure to enter the Raspiblitz menu to trigger the next step."
+    echo "If menu does not open automatically - use command: raspiblitz"
     echo "Press ENTER to continue or CTRL+C to abort"
     read key
 
@@ -480,6 +482,7 @@ case $CHOICE in
 
     # go back to main menu (and show)
     /home/admin/00raspiblitz.sh
+
     exit 0
     ;;
 
