@@ -32,6 +32,13 @@ echo "###################################" >> ${logFile}
 echo "# _provision.setup.sh" >> ${logFile}
 echo "###################################" >> ${logFile}
 
+# make sure a raspiblitz.conf exists
+confExists=$(ls /mnt/hdd/raspiblitz.conf 2>/dev/null | grep -c "raspiblitz.conf")
+if [ "${confExists}" != "1" ]; then
+    /home/admin/config.scripts/blitz.error.sh _provision.setup.sh "missing-config" "No raspiblitz.conf abvailable." ${logFile}
+    exit 6
+fi
+
 ###################################
 # Preserve SSH keys
 # just copy dont link anymore

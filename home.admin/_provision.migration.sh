@@ -48,7 +48,7 @@ fi
 # make sure a raspiblitz.conf exists after migration
 confExists=$(ls /mnt/hdd/raspiblitz.conf 2>/dev/null | grep -c "raspiblitz.conf")
 if [ "${confExists}" != "1" ]; then
-    /home/admin/config.scripts/blitz.error.sh _provision.migration.sh "migration-failed" "missing-config" "After runnign migration process - no raspiblitz.conf abvailable." ${logFile}
+    /home/admin/config.scripts/blitz.error.sh _provision.migration.sh "missing-config" "no /mnt/hdd/raspiblitz.conf" "After runningn migration process - no raspiblitz.conf abvailable." ${logFile}
     exit 6
 fi
 

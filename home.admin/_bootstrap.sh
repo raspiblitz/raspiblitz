@@ -562,9 +562,15 @@ if [ ${isMounted} -eq 0 ]; then
   echo "# lsblk -o NAME,FSTYPE,LABEL " >> ${logFile}
   lsblk -o NAME,FSTYPE,LABEL >> ${logFile}
 
-  # if migrationFile was uploaded - now import it
+  # load fresh setup data
+  echo "# Sourcing ${setupFile} " >> ${logFile}
+  source ${setupFile}
+
+  # if migrationFile was uploaded (value from raspiblitz.setup) - now import
   echo "# migrationFile(${migrationFile})" >> ${logFile}
   if [ "${migrationFile}" != "" ]; then
+
+    echo "##### IMPORT MIGRATIONFILE: ${migrationFile}" >> ${logFile}
 
     # unpack
     sed -i "s/^message=.*/message='Unpacking Migration Data'/g" ${infoFile}
