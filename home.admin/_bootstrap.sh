@@ -576,6 +576,13 @@ if [ ${isMounted} -eq 0 ]; then
       exit 1
     fi
 
+    # make sure a raspiblitz.conf exists after migration
+    confExists=$(ls /mnt/hdd/raspiblitz.conf 2>/dev/null | grep -c "raspiblitz.conf")
+    if [ "${confExists}" != "1" ]; then
+      /home/admin/config.scripts/blitz.error.sh _bootstrap.sh "migration-failed" "missing-config" "After runnign migration process - no raspiblitz.conf abvailable." ${logFile}
+      exit 1
+    fi
+
     # signal recovery provision phase
     setupPhase="recovery"
     /home/admin/_cache.sh set setupPhase "${setupPhase}"
