@@ -1006,7 +1006,6 @@ do
   /home/admin/_cache.sh set btc_all_sync_initial_done "${btc_all_sync_initial_done}"
   /home/admin/_cache.sh set ln_default_sync_initial_done "${ln_default_sync_initial_done}"
   /home/admin/_cache.sh set ln_all_sync_initial_done "${ln_all_sync_initial_done}"
-  /home/admin/_cache.sh set ln_default_sync_chain "${ln_default_sync_chain}"
 
   #################
   # DONE
