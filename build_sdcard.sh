@@ -121,9 +121,11 @@ range_argument(){
 }
 
 general_utils="curl"
+## loop all general_utils to see if program is installed (placed on PATH) and if not, add to the list of commands to be installed
 for prog in ${general_utils}; do
-  ! command -v ${prog} >/dev/null && general_utils_install="${general_utils_install} ${prog##*/}"
+  ! command -v ${prog} >/dev/null && general_utils_install="${general_utils_install} ${prog}"
 done
+## if any of the required programs are not installed, update and if successfull, install packages
 if [ -n "${general_utils_install}" ]; then
   echo -e "\n*** SOFTWARE UPDATE ***"
   sudo apt update -y && sudo apt install -y ${general_utils_install}
