@@ -121,9 +121,12 @@ range_argument(){
 }
 
 general_utils="curl"
-if ! command -v curl >/dev/null; then
+for prog in ${general_utils}; do
+  ! command -v ${prog} >/dev/null && general_utils_install="${general_utils_install} ${prog##*/}"
+done
+if [ -n "${general_utils_install}" ]; then
   echo -e "\n*** SOFTWARE UPDATE ***"
-  sudo apt update -y && sudo apt install -y ${general_utils}
+  sudo apt update -y && sudo apt install -y ${general_utils_install}
 fi
 
 ## use default values for variables if empty
