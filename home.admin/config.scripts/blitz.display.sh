@@ -203,11 +203,15 @@ fi
 #######################################
 
 function install_hdmi() {
-  echo "# nothing to install - hdmi is the default/clean mode"
+  echo "# hdmi install ... set framebuffer width/height"
+  sed -i "s/^#framebuffer_width=*/framebuffer_width=480/g" /boot/config.txt
+  sed -i "s/^#framebuffer_height=*/framebuffer_height=320/g" /boot/config.txt
 }
 
 function uninstall_hdmi() {
-  echo "# nothing to uninstall - hdmi is the default/clean mode"
+  echo "# hdmi uninstall ... reset framebuffer width/height"
+  sed -i "s/^framebuffer_width=*/#framebuffer_width=480/g" /boot/config.txt
+  sed -i "s/^framebuffer_height=*/#framebuffer_height=320/g" /boot/config.txt
 }
 
 function install_lcd() {
@@ -249,6 +253,9 @@ function install_lcd() {
     sed -i "s/^hdmi_force_hotplug=.*//g" /boot/config.txt 
     sed -i '/^hdmi_group=/d' /boot/config.txt 2>/dev/null
     sed -i "/^hdmi_mode=/d" /boot/config.txt 2>/dev/null
+
+    sed -i "s/^#framebuffer_width=*/framebuffer_width=480/g" /boot/config.txt
+    sed -i "s/^#framebuffer_height=*/framebuffer_height=320/g" /boot/config.txt
     #echo "hdmi_force_hotplug=1" >> /boot/config.txt
     sed -i "s/^dtparam=i2c_arm=.*//g" /boot/config.txt 
     # echo "dtparam=i2c_arm=on" >> /boot/config.txt --> this is to be called I2C errors - see: https://github.com/rootzoll/raspiblitz/issues/1058#issuecomment-739517713
@@ -274,9 +281,6 @@ function install_lcd() {
       echo "err='ended unclear state'"
       exit 1
     fi
-
-    # modify config.txt
-    sudo 
 
     # touch screen calibration
     apt-get install -y xserver-xorg-input-evdev
@@ -315,6 +319,8 @@ function uninstall_lcd() {
     sed -i '/^hdmi_group=/d' /boot/config.txt 2>/dev/null
     sed -i "/^hdmi_mode=/d" /boot/config.txt 2>/dev/null
     sed -i "s/^dtoverlay=.*//g" /boot/config.txt 2>/dev/null
+    sed -i "s/^framebuffer_width=*/#framebuffer_width=480/g" /boot/config.txt
+    sed -i "s/^framebuffer_height=*/#framebuffer_height=320/g" /boot/config.txt
     echo "hdmi_group=1" >> /boot/config.txt
     echo "hdmi_mode=3" >> /boot/config.txt
     echo "dtoverlay=pi3-disable-bt" >> /boot/config.txt
