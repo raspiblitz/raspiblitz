@@ -55,6 +55,10 @@ assign_value(){
     -*) value="${2#-}";;
     *) value="${2}"
   esac
+  case "${value}" in
+    0) value="false";;
+    1) value="true";;
+  esac
   ## Escaping quotes is needed because else if will fail if the argument is quoted
   # shellcheck disable=SC2140
   eval "${1}"="\"${value}\""
@@ -116,9 +120,11 @@ range_argument(){
   fi
 }
 
-echo -e "\n*** SOFTWARE UPDATE ***"
 general_utils="curl"
-sudo apt install -y ${general_utils}
+if ! command -v curl >/dev/null; then
+  echo -e "\n*** SOFTWARE UPDATE ***"
+  sudo apt update -y && sudo apt install -y ${general_utils}
+fi
 
 ## use default values for variables if empty
 
@@ -131,7 +137,7 @@ range_argument interaction "0" "1" "false" "true"
 
 # FATPACK
 # -------------------------------
-# could be 'true' (default) or 'false' 
+# could be 'true' (default) or 'false'
 # When 'true' it will pre-install needed frameworks for additional apps and features
 # as a convenience to safe on install and update time for additional apps.
 # When 'false' it will just install the bare minimum and additional apps will just
@@ -179,7 +185,7 @@ echo "*     RASPIBLITZ SD CARD IMAGE SETUP    *"
 echo "*****************************************"
 echo "For details on optional parameters - call with '--help' or check source code."
 
-# output 
+# output
 for key in interaction fatpack github_user branch display tweak_boot_drive wifi_region; do
   eval val='$'"${key}"
   [ -n "${val}" ] && printf '%s\n' "${key}=${val}"
