@@ -204,14 +204,14 @@ fi
 
 function install_hdmi() {
   echo "# hdmi install ... set framebuffer width/height"
-  sed -i "s/^#framebuffer_width=.*/framebuffer_width=480/g" /boot/config.txt
-  sed -i "s/^#framebuffer_height=.*/framebuffer_height=320/g" /boot/config.txt
+  #sed -i "s/^#framebuffer_width=.*/framebuffer_width=480/g" /boot/config.txt
+  #sed -i "s/^#framebuffer_height=.*/framebuffer_height=320/g" /boot/config.txt
 }
 
 function uninstall_hdmi() {
   echo "# hdmi uninstall ... reset framebuffer width/height"
-  sed -i "s/^framebuffer_width=.*/#framebuffer_width=480/g" /boot/config.txt
-  sed -i "s/^framebuffer_height=.*/#framebuffer_height=320/g" /boot/config.txt
+  #sed -i "s/^framebuffer_width=.*/#framebuffer_width=480/g" /boot/config.txt
+  #sed -i "s/^framebuffer_height=.*/#framebuffer_height=320/g" /boot/config.txt
 }
 
 function install_lcd() {
@@ -254,8 +254,8 @@ function install_lcd() {
     sed -i '/^hdmi_group=/d' /boot/config.txt 2>/dev/null
     sed -i "/^hdmi_mode=/d" /boot/config.txt 2>/dev/null
 
-    sed -i "s/^#framebuffer_width=.*/framebuffer_width=480/g" /boot/config.txt
-    sed -i "s/^#framebuffer_height=.*/framebuffer_height=320/g" /boot/config.txt
+    #sed -i "s/^#framebuffer_width=.*/framebuffer_width=480/g" /boot/config.txt
+    #sed -i "s/^#framebuffer_height=.*/framebuffer_height=320/g" /boot/config.txt
     #echo "hdmi_force_hotplug=1" >> /boot/config.txt
     sed -i "s/^dtparam=i2c_arm=.*//g" /boot/config.txt 
     # echo "dtparam=i2c_arm=on" >> /boot/config.txt --> this is to be called I2C errors - see: https://github.com/rootzoll/raspiblitz/issues/1058#issuecomment-739517713
@@ -319,8 +319,8 @@ function uninstall_lcd() {
     sed -i '/^hdmi_group=/d' /boot/config.txt 2>/dev/null
     sed -i "/^hdmi_mode=/d" /boot/config.txt 2>/dev/null
     sed -i "s/^dtoverlay=.*//g" /boot/config.txt 2>/dev/null
-    sed -i "s/^framebuffer_width=.*/#framebuffer_width=480/g" /boot/config.txt
-    sed -i "s/^framebuffer_height=.*/#framebuffer_height=320/g" /boot/config.txt
+    #sed -i "s/^framebuffer_width=.*/#framebuffer_width=480/g" /boot/config.txt
+    #sed -i "s/^framebuffer_height=.*/#framebuffer_height=320/g" /boot/config.txt
     echo "hdmi_group=1" >> /boot/config.txt
     echo "hdmi_mode=3" >> /boot/config.txt
     echo "dtoverlay=pi3-disable-bt" >> /boot/config.txt
