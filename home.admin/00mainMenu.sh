@@ -147,6 +147,12 @@ fi
 if [ "${circuitbreaker}" == "on" ]; then
   OPTIONS+=(CIRCUIT "Circuitbreaker (LND firewall)")
 fi
+if [ "${circuitbreaker}" == "on" ]; then
+  OPTIONS+=(CIRCUIT "Circuitbreaker (LND firewall)")
+fi
+if [ "${tallycoinConnect}" == "on" ]; then
+  OPTIONS+=(TALLY "Tallycoin Connect")
+fi
 
 # dont offer to switch to "testnet view for now" - so no wswitch back to mainnet needed
 #if [ ${chain} != "main" ]; then
@@ -281,6 +287,9 @@ case $CHOICE in
             ;;
         THUB)
             sudo /home/admin/config.scripts/bonus.thunderhub.sh menu
+            ;;
+        TALLY)
+            sudo /home/admin/config.scripts/bonus.tallycoin-connect.sh menu
             ;;
         ZEROTIER)
             sudo /home/admin/config.scripts/bonus.zerotier.sh menu

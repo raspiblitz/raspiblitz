@@ -7,6 +7,7 @@
 - New: Compact the LND channel.db on-demand from REPAIR and before backups [issue](https://github.com/rootzoll/raspiblitz/issues/2752)
 - New: Run C-lightning backup-compact regularly [issue](https://github.com/rootzoll/raspiblitz/issues/2869)
 - New: Switch LNbits between lnd & c-lightning [issue](https://github.com/rootzoll/raspiblitz/issues/2556)
+- New: Tallycoin Connect [details](https://github.com/djbooth007/tallycoin_connect#readme)
 - Update: LND v0.14.1-beta [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.14.1-beta)
 - Update: C-lightning v0.10.2 [details](https://github.com/ElementsProject/lightning/releases/tag/v0.10.2)
 - Update: RTL v0.12.1 [details](https://github.com/Ride-The-Lightning/RTL/releases/tag/v0.12.1)
