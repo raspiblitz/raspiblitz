@@ -274,7 +274,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
     # Hidden Service if Tor is active
     if [ "${runBehindTor}" = "on" ]; then
-      /home/admin/config.scripts/internet.hiddenservice.sh off joinmarket-webui
+      /home/admin/config.scripts/tor.onion-service.sh off joinmarket-webui
     fi
 
     # remove the app

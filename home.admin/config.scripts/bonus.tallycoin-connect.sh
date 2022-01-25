@@ -164,8 +164,8 @@ WantedBy=multi-user.target
 
     # Hidden Service for tallycoin-connect if Tor is active
     if [ "${runBehindTor}" = "on" ]; then
-      # make sure to keep in sync with internet.tor.sh script
-      /home/admin/config.scripts/internet.hiddenservice.sh tallycoin-connect 80 8125 443 8126
+      # make sure to keep in sync with tor.onion-service.sh script
+      /home/admin/config.scripts/tor.onion-service.sh tallycoin-connect 80 8125 443 8126
     fi
     source $RASPIBLITZ_INFO
     if [ "${state}" == "ready" ]; then

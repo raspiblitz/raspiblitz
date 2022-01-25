@@ -220,7 +220,7 @@ SSH is already encrypted, why would I want to use it with Tor?
 * Anonymized access - Someone sniffing the traffic don't know where the server you are establishing a connection is, not the server side knows where the client is.
 
 Create Hidden Service:
-`bash /home/admin/config.scripts/internet.hiddenservice.sh ssh 22 22`
+`bash /home/admin/config.scripts/tor.onion-service.sh ssh 22 22`
 
 SSH over Tor:
 `torsocks ssh admin@HiddenServiceAddress.onion`
