@@ -29,8 +29,19 @@ Can carry on straight to building the OS:
 ```
 # download the build script
 wget https://raw.githubusercontent.com/rootzoll/raspiblitz/dev/build_sdcard.sh
+
 # run
-sudo bash build_sdcard.sh false false rootzoll dev headless
+sudo bash build_sdcard.sh -f true -b dev -d headless -t false -w off
+
+# Options:
+#   -h, --help                               this help info
+#   -i, --interaction [0|1]                  interaction before proceeding with exection (default: 1)
+#   -f, --fatpack [0|1]                      fatpack mode (default: 1)
+#   -u, --github-user [rootzoll|other]       github user to be checked from the repo (default: rootzoll)
+#   -b, --branch [v1.7|v1.8]                 branch to be built on (default: v1.7)
+#   -d, --display [lcd|hdmi|headless]        display class (default: lcd)
+#   -t, --tweak-boot-drive [0|1]             tweak boot drives (default: 1)
+#   -w, --wifi-region [off|US|GB|other]      wifi iso code (default: US) or 'off'
 ```
 
 Switch off when ready   
