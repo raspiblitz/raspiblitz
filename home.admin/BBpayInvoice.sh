@@ -18,8 +18,6 @@ fi
 
 source <(/home/admin/config.scripts/network.aliases.sh getvars $1 $2)
 
-source <(/home/admin/config.scripts/network.aliases.sh getvars $LNTYPE ${chain}net)
-
 # check if chain is in sync
 if [ $LNTYPE = cl ];then
   lncommand="${netprefix}lightning-cli"

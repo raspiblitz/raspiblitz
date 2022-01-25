@@ -189,7 +189,6 @@ function status() {
   echo
   echo "Keep X pressed to EXIT loop ... (please wait)"
   echo
-  /home/admin/_cache.sh set system_scan_all_temp "1"
   sleep 4
   while :
   do
@@ -203,7 +202,6 @@ function status() {
     # check if user wants to abort session
     if [ "${keyPressed}" = "x" ]; then
       echo
-      /home/admin/_cache.sh set system_scan_all_temp "0"
       echo "Returning to menu ....."
       sleep 4
       break

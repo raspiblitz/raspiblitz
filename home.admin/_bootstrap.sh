@@ -48,10 +48,22 @@ sudo /home/admin/config.scripts/blitz.ssh.sh checkrepair >> ${logFile}
 echo "## INIT raspiblitz.info" >> $logFile
 
 # set default values for raspiblitz.info (that are not set by build_sdcard.sh)
+
 setupPhase='boot'
 setupStep=0
 fsexpanded=0
-fundRecovery=0
+
+btc_mainnet_sync_initial_done=0
+btc_testnet_sync_initial_done=0
+btc_signet_sync_initial_done=0
+
+ln_lnd_mainnet_sync_initial_done=0
+ln_lnd_testnet_sync_initial_done=0
+ln_lnd_signet_sync_initial_done=0
+
+ln_cl_mainnet_sync_initial_done=0
+ln_cl_testnet_sync_initial_done=0
+ln_cl_signet_sync_initial_done=0
 
 # load already persisted valued (overwriting defaults if exist)
 source ${infoFile} 2>/dev/null
@@ -63,9 +75,18 @@ echo "displayClass=${displayClass}" >> $infoFile
 echo "displayType=${displayType}" >> $infoFile
 echo "setupPhase=${setupPhase}" >> $infoFile
 echo "setupStep=${setupStep}" >> $infoFile
-echo "fundRecovery=${fundRecovery}" >> $infoFile
-echo "fsexpanded=${fsexpanded}" >> $infoFile
 echo "state=starting" >> $infoFile
+echo "btc_mainnet_sync_initial_done=${btc_mainnet_sync_initial_done}" >> $infoFile
+echo "btc_testnet_sync_initial_done=${btc_testnet_sync_initial_done}" >> $infoFile
+echo "btc_signet_sync_initial_done=${btc_signet_sync_initial_done}" >> $infoFile
+echo "ln_lnd_mainnet_sync_initial_done=${ln_lnd_mainnet_sync_initial_done}" >> $infoFile
+echo "ln_lnd_testnet_sync_initial_done=${ln_lnd_testnet_sync_initial_done}" >> $infoFile
+echo "ln_lnd_signet_sync_initial_done=${ln_lnd_signet_sync_initial_done}" >> $infoFile
+echo "ln_cl_mainnet_sync_initial_done=${ln_cl_mainnet_sync_initial_done}" >> $infoFile
+echo "ln_cl_testnet_sync_initial_done=${ln_cl_testnet_sync_initial_done}" >> $infoFile
+echo "ln_cl_signet_sync_initial_done=${ln_cl_signet_sync_initial_done}" >> $infoFile
+
+
 sudo chmod 664 ${infoFile}
 
 # write content of raspiblitz.info to logs
@@ -541,9 +562,15 @@ if [ ${isMounted} -eq 0 ]; then
   echo "# lsblk -o NAME,FSTYPE,LABEL " >> ${logFile}
   lsblk -o NAME,FSTYPE,LABEL >> ${logFile}
 
-  # if migrationFile was uploaded - now import it
+  # load fresh setup data
+  echo "# Sourcing ${setupFile} " >> ${logFile}
+  source ${setupFile}
+
+  # if migrationFile was uploaded (value from raspiblitz.setup) - now import
   echo "# migrationFile(${migrationFile})" >> ${logFile}
   if [ "${migrationFile}" != "" ]; then
+
+    echo "##### IMPORT MIGRATIONFILE: ${migrationFile}" >> ${logFile}
 
     # unpack
     sed -i "s/^message=.*/message='Unpacking Migration Data'/g" ${infoFile}
@@ -552,6 +579,13 @@ if [ ${isMounted} -eq 0 ]; then
     # check for errors
     if [ "${error}" != "" ]; then 
       /home/admin/config.scripts/blitz.error.sh _bootstrap.sh "migration-import-error" "blitz.migration.sh import exited with error" "/home/admin/config.scripts/blitz.migration.sh import ${migrationFile} --> ${error}" ${logFile}
+      exit 1
+    fi
+
+    # make sure a raspiblitz.conf exists after migration
+    confExists=$(ls /mnt/hdd/raspiblitz.conf 2>/dev/null | grep -c "raspiblitz.conf")
+    if [ "${confExists}" != "1" ]; then
+      /home/admin/config.scripts/blitz.error.sh _bootstrap.sh "migration-failed" "missing-config" "After runnign migration process - no raspiblitz.conf abvailable." ${logFile}
       exit 1
     fi
 

@@ -10,6 +10,10 @@ fi
 echo "###########################################"
 echo "# lnd.compact.sh"
 
+if ! sudo ls /mnt/hdd/lnd/data/graph/mainnet/channel.db; then
+  echo "# /mnt/hdd/lnd/data/graph/mainnet/channel.db does not exist - exiting"
+  exit 1
+fi
 
 # check if HDD/SSD has enough space to run compaction (at least again the size as the channel.db at the moment)
 channelDBsizeKB=$(sudo ls -l --block-size=K /mnt/hdd/lnd/data/graph/mainnet/channel.db | cut -d " " -f5 | tr -dc '0-9')
@@ -45,6 +49,8 @@ echo
 echo "# Stop LND"
 sudo systemctl stop lnd
 
+sudo touch /home/admin/lnd.db.bolt.auto-compact.log
+sudo chmod 777 /home/admin/lnd.db.bolt.auto-compact.log
 echo "# Run LND with --db.bolt.auto-compact"
 sudo -u bitcoin /usr/local/bin/lnd --configfile=/home/bitcoin/.lnd/lnd.conf --db.bolt.auto-compact > /home/admin/lnd.db.bolt.auto-compact.log &
 

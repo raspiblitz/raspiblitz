@@ -70,6 +70,9 @@ WEEK=604800
 MONTH=2592000
 YEAR=31536000
 
+# make sure root is in group bitcoin and allowed to read macaroons
+usermod -G bitcoin root
+
 ####################################################################
 # INIT 
 ####################################################################
@@ -285,28 +288,8 @@ do
   # data that may be based on setup phase or configuration
   ####################################################################
 
-  # by default will only scan the btc & lightning instances that are set to default
-  # but can scan/monitor all that are switched on when `system_scan_all=on` in config
-
   # read/update config values
   source /mnt/hdd/raspiblitz.conf
-
-  # check if a one time `system_scan_all_once=1` is set on cache
-  # will trigger a scan_all for one loop
-  source <(/home/admin/_cache.sh get system_scan_all_once)
-  if [ "${system_scan_all_once}" == "1" ]; then
-    echo "system_scan_all_once found --> TRIGGER system_scan_all for one loop"
-    /home/admin/_cache.sh set system_scan_all_once "0"
-    system_scan_all="on"
-  fi
-
-  # check if a temporary `system_scan_all_temp=1` is set on cache
-  # will trigger a scan_all until its gone or `0`
-  source <(/home/admin/_cache.sh get system_scan_all_temp)
-  if [ "${system_scan_all_temp}" == "1" ]; then
-    echo "system_scan_all_temp found --> TRIGGER system_scan_all"
-    system_scan_all="on"
-  fi
 
   ###################
   # HARDDRIVE
@@ -354,12 +337,14 @@ do
         continue
       fi
 
-      # only scan non defaults when set by parameter from config
-      if [ "${system_scan_all}" != "on" ]; then
-        if [ "${isDefaultChain}" != "1" ]; then
-          #echo "skip btc ${CHAIN}net scan - because its not default"
-          continue
-        fi
+      # set intervals for non default & non-default (in seconds)
+      CYCLE_QUICK=30
+      CYCLE_MID=60
+      CYCLE_LONG=90
+      if [ "${isDefaultChain}" != "1" ]; then
+        CYCLE_QUICK=150
+        CYCLE_MID=300
+        CYCLE_LONG=600
       fi
 
       # update basic status values always
@@ -381,7 +366,7 @@ do
         btc_default_error_full \
         )
       fi
-      if [ "${stillvalid}" == "0" ] || [ ${age} -gt 30 ]; then
+      if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${CYCLE_QUICK} ]; then
         echo "updating: /home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net status"
         source <(/home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net status)
         /home/admin/_cache.sh set btc_${CHAIN}net_activated "1"
@@ -429,7 +414,7 @@ do
           btc_default_sync_initialblockdownload \
           )
         fi
-        if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE} ]; then
+        if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${CYCLE_MID} ]; then
           error=""
           echo "updating: /home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net info"
           source <(/home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net info)
@@ -450,6 +435,7 @@ do
               /home/admin/_cache.sh set btc_default_sync_percentage "${btc_sync_percentage}"
               /home/admin/_cache.sh set btc_default_sync_initialblockdownload "${btc_sync_initialblockdownload}"
             fi
+
           else
             echo "!! ERROR --> ${error}"
           fi
@@ -468,7 +454,7 @@ do
           btc_default_port \
           )
         fi
-        if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE} ]; then
+        if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${CYCLE_MID} ]; then
           error=""
           echo "updating: /home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net network"
           source <(/home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net network)
@@ -495,7 +481,7 @@ do
           btc_default_mempool_transactions \
           )
         fi
-        if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE5} ]; then
+        if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${CYCLE_LONG} ]; then
           error=""
           echo "updating: /home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net mempool"
           source <(/home/admin/config.scripts/bitcoin.monitor.sh ${CHAIN}net mempool)
@@ -538,12 +524,14 @@ do
     isDefaultChain=$(echo "${CHAIN}" | grep -c "${chain}")
     isDefaultLightning=$(echo "${lightning}" | grep -c "lnd")
 
-    # only scan non defaults when set by parameter from config
-    if [ "${system_scan_all}" != "on" ]; then
-      if [ "${isDefaultChain}" != "1" ] || [ ${isDefaultLightning} != "1" ]; then
-        #echo "skip lnd ${CHAIN}net scan - because its not default"
-        continue
-      fi
+    # set intervals for non default & non-default (in seconds)
+    CYCLE_QUICK=30
+    CYCLE_MID=60
+    CYCLE_LONG=90
+    if [ "${isDefaultChain}" != "1" ] || [ "${isDefaultLightning}" != "1" ]; then
+      CYCLE_QUICK=300
+      CYCLE_MID=600
+      CYCLE_LONG=900
     fi
 
     # update basic status values always
@@ -567,7 +555,7 @@ do
       ln_default_error_full \
       )
     fi
-    if [ "${stillvalid}" == "0" ] || [ ${age} -gt 30 ]; then
+    if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${CYCLE_QUICK} ]; then
       echo "updating: /home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net status"
       source <(/home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net status)
       /home/admin/_cache.sh set ln_lnd_${CHAIN}net_activated "1"
@@ -596,7 +584,7 @@ do
 
       # check if config needs update
       source <(/home/admin/_cache.sh valid ln_lnd_${CHAIN}net_alias)
-      if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE5} ]; then
+      if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${CYCLE_LONG} ]; then
         error=""
         echo "updating: /home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net config"
         source <(/home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net config)
@@ -621,6 +609,8 @@ do
         ln_lnd_${CHAIN}net_channels_inactive \
         ln_lnd_${CHAIN}net_channels_total \
         ln_lnd_${CHAIN}net_peers \
+        ln_lnd_${CHAIN}net_recovery_mode \
+        ln_lnd_${CHAIN}net_recovery_done \
       )
       if [ "${isDefaultLightning}" == "1" ] && [ "${isDefaultChain}" == "1" ] && [ "${stillvalid}" == "1" ]; then
         source <(/home/admin/_cache.sh valid \
@@ -633,9 +623,11 @@ do
         ln_default_channels_inactive \
         ln_default_channels_total \
         ln_default_peers \
+        ln_default_recovery_mode \
+        ln_default_recovery_done \
         )
       fi
-      if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE} ]; then
+      if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${CYCLE_MID} ]; then
         error=""
         echo "updating: /home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net info"
         source <(/home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net info)
@@ -650,6 +642,8 @@ do
           /home/admin/_cache.sh set ln_lnd_${CHAIN}net_channels_inactive "${ln_lnd_channels_inactive}"
           /home/admin/_cache.sh set ln_lnd_${CHAIN}net_channels_total "${ln_lnd_channels_total}"
           /home/admin/_cache.sh set ln_lnd_${CHAIN}net_peers "${ln_lnd_peers}"
+          /home/admin/_cache.sh set ln_lnd_${CHAIN}net_recovery_mode "${ln_lnd_recovery_mode}"
+          /home/admin/_cache.sh set ln_lnd_${CHAIN}net_recovery_done "${ln_lnd_recovery_done}"
           if [ "${isDefaultLightning}" == "1" ] && [ "${isDefaultChain}" == "1" ]; then
             /home/admin/_cache.sh set ln_default_address "${ln_lnd_address}"
             /home/admin/_cache.sh set ln_default_tor "${ln_lnd_tor}"
@@ -660,6 +654,8 @@ do
             /home/admin/_cache.sh set ln_default_channels_inactive "${ln_lnd_channels_inactive}"
             /home/admin/_cache.sh set ln_default_channels_total "${ln_lnd_channels_total}"
             /home/admin/_cache.sh set ln_default_peers "${ln_lnd_peers}"
+            /home/admin/_cache.sh set ln_default_recovery_mode "${ln_lnd_recovery_mode}"
+            /home/admin/_cache.sh set ln_default_recovery_done "${ln_lnd_recovery_done}"
           fi
         else
           echo "!! ERROR --> ${error}"
@@ -681,7 +677,7 @@ do
         ln_default_wallet_channels_pending \
         )
       fi
-      if [ "${stillvalid}" == "0" ] || [ ${age} -gt 22 ]; then
+      if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${CYCLE_QUICK} ]; then
         error=""
         echo "updating: /home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net wallet"
         source <(/home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net wallet)
@@ -713,7 +709,7 @@ do
         ln_default_fees_total \
         )
       fi
-      if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE5} ]; then
+      if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${CYCLE_LONG} ]; then
         error=""
         echo "updating: /home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net fees"
         source <(/home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net fees)
@@ -758,12 +754,14 @@ do
     isDefaultChain=$(echo "${CHAIN}" | grep -c "${chain}")
     isDefaultLightning=$(echo "${lightning}" | grep -c "cl")
 
-    # only scan non defaults when set by parameter from config
-    if [ "${system_scan_all}" != "on" ]; then
-      if [ "${isDefaultChain}" != "1" ] || [ ${isDefaultLightning} != "1" ]; then
-        #echo "skip cl ${CHAIN}net scan - because its not default"
-        continue
-      fi
+    # set intervals for non default & non-default (in seconds)
+    CYCLE_QUICK=30
+    CYCLE_MID=60
+    CYCLE_LONG=90
+    if [ "${isDefaultChain}" != "1" ] || [ "${isDefaultLightning}" != "1" ]; then
+      CYCLE_QUICK=300
+      CYCLE_MID=600
+      CYCLE_LONG=900
     fi
 
     # TODO: c-lightning is seen as "always unlocked" for now - needs to be implemented later #2691
@@ -787,7 +785,7 @@ do
       ln_default_error_full \
       )
     fi
-    if [ "${stillvalid}" == "0" ] || [ ${age} -gt 30 ]; then
+    if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${CYCLE_QUICK} ]; then
       echo "updating: /home/admin/config.scripts/cl.monitor.sh ${CHAIN}net status"
       source <(/home/admin/config.scripts/cl.monitor.sh ${CHAIN}net status)
       /home/admin/_cache.sh set ln_cl_${CHAIN}net_activated "1"
@@ -841,7 +839,7 @@ do
         ln_default_fees_total \
         )
       fi
-      if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE} ]; then
+      if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${CYCLE_MID} ]; then
         error=""
         echo "updating: /home/admin/config.scripts/cl.monitor.sh ${CHAIN}net info"
         source <(/home/admin/config.scripts/cl.monitor.sh ${CHAIN}net info)
@@ -857,6 +855,8 @@ do
           /home/admin/_cache.sh set ln_cl_${CHAIN}net_channels_inactive "${ln_cl_channels_inactive}"
           /home/admin/_cache.sh set ln_cl_${CHAIN}net_channels_total "${ln_cl_channels_total}"
           /home/admin/_cache.sh set ln_cl_${CHAIN}net_fees_total "${ln_cl_fees_total}"
+          /home/admin/_cache.sh set ln_cl_${CHAIN}net_recovery_mode "${ln_cl_recovery_mode}"
+          /home/admin/_cache.sh set ln_cl_${CHAIN}net_recovery_done "${ln_cl_recovery_done}"
 
           if [ "${isDefaultLightning}" == "1" ] && [ "${isDefaultChain}" == "1" ]; then
             /home/admin/_cache.sh set ln_default_alias "${ln_cl_alias}"
@@ -870,6 +870,8 @@ do
             /home/admin/_cache.sh set ln_default_channels_inactive "${ln_cl_channels_inactive}"
             /home/admin/_cache.sh set ln_default_channels_total "${ln_cl_channels_total}"
             /home/admin/_cache.sh set ln_default_fees_total "${ln_cl_fees_total}"
+            /home/admin/_cache.sh set ln_default_recovery_mode "${ln_cl_recovery_mode}"
+            /home/admin/_cache.sh set ln_default_recovery_done "${ln_cl_recovery_done}"
           fi
         else
           echo "!! ERROR --> ${error}"
@@ -891,7 +893,7 @@ do
         ln_default_wallet_channels_pending \
         )
       fi
-      if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE} ]; then
+      if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${CYCLE_MID} ]; then
         error=""
         echo "updating: /home/admin/config.scripts/cl.monitor.sh ${CHAIN}net wallet"
         source <(/home/admin/config.scripts/cl.monitor.sh ${CHAIN}net wallet)
@@ -912,6 +914,98 @@ do
       fi
     fi
   done
+
+  ##################################
+  # DEFAULT & SUMMARIZED SYNC STATUS
+
+  btc_default_sync_initial_done=0
+  btc_all_sync_initial_done=1
+  ln_default_sync_initial_done=0
+  ln_all_sync_initial_done=1
+  blitz_sync_initial_done=0
+  networks=( "main" "test" "sig" )
+  sedondLayers=( "lnd" "cl" )
+
+  # if default is mainnet, then consider mainnet=on
+  if [ "${chain}" == "main" ]; then
+    mainnet="on"
+  fi
+
+  # loop over all chains
+  for CHAIN in "${networks[@]}"
+  do
+
+    # skip if this network is not switched on
+    btc_service_name="${CHAIN}net"
+    if [ "${!btc_service_name}" != "on" ]; then
+      echo "skipping because ${btc_service_name}=${!btc_service_name}"
+      continue
+    fi
+
+    # get values from cache
+    source <(/home/admin/_cache.sh meta btc_${CHAIN}net_sync_initial_done)
+    flagBtcDone="${value}"
+
+    # check if default
+    if [ "${CHAIN}" == "${chain}" ]; then
+      btc_default_sync_initial_done="${flagBtcDone}"
+    fi
+
+    # check for all btc sync
+    if [ "${flagBtcDone}" != "1" ]; then
+      btc_all_sync_initial_done=0
+    fi
+
+    # sub loop over all layer 2 on that chain
+    for LN in "${sedondLayers[@]}"
+    do
+
+      # skip if this variant is not switched on
+      ln_service_name="${LN}"
+      if [ "${CHAIN}" == "test" ]; then
+        ln_service_name="t${LN}"
+      fi
+      if [ "${CHAIN}" == "sig" ]; then
+        ln_service_name="s${LN}"
+      fi
+      if [ "${!ln_service_name}" != "on" ]; then
+        echo "skipping because ${ln_service_name}=${!ln_service_name}"
+        continue
+      fi
+
+      # get values from cache
+      source <(/home/admin/_cache.sh meta ln_${LN}_${CHAIN}net_sync_initial_done)
+      flagLNSyncDone="${value}"
+
+      # check if default
+      if [ "${CHAIN}" == "${chain}" ] && [ "${LN}" == "${lightning}" ]; then
+        ln_default_sync_initial_done="${flagLNSyncDone}"
+      fi
+
+      # check for all ln sync
+      if [ "${flagLNSyncDone}" != "1" ]; then
+        ln_all_sync_initial_done=0
+      fi
+
+    done
+  done
+
+  # finalize & writing results to cache
+  if [ "${lightning}" == "" ] || [ "${lightning}" == "none" ]; then
+    ln_all_sync_initial_done=""
+    ln_default_sync_initial_done=""
+    blitz_sync_initial_done="${btc_all_sync_initial_done}"
+  else
+    # only if all btc & ln sync done - the complete blitz has done syncing
+    if [ "${btc_all_sync_initial_done}" == "1" ] && [ "${ln_all_sync_initial_done}" == "1" ]; then
+      blitz_sync_initial_done="1"
+    fi
+  fi
+  /home/admin/_cache.sh set blitz_sync_initial_done "${blitz_sync_initial_done}"
+  /home/admin/_cache.sh set btc_default_sync_initial_done "${btc_default_sync_initial_done}"
+  /home/admin/_cache.sh set btc_all_sync_initial_done "${btc_all_sync_initial_done}"
+  /home/admin/_cache.sh set ln_default_sync_initial_done "${ln_default_sync_initial_done}"
+  /home/admin/_cache.sh set ln_all_sync_initial_done "${ln_all_sync_initial_done}"
 
   #################
   # DONE

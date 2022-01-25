@@ -32,6 +32,13 @@ echo "###################################" >> ${logFile}
 echo "# _provision.setup.sh" >> ${logFile}
 echo "###################################" >> ${logFile}
 
+# make sure a raspiblitz.conf exists
+confExists=$(ls /mnt/hdd/raspiblitz.conf 2>/dev/null | grep -c "raspiblitz.conf")
+if [ "${confExists}" != "1" ]; then
+    /home/admin/config.scripts/blitz.error.sh _provision.setup.sh "missing-config" "No raspiblitz.conf abvailable." ${logFile}
+    exit 6
+fi
+
 ###################################
 # Preserve SSH keys
 # just copy dont link anymore
@@ -81,7 +88,7 @@ echo "# setting PASSWORD B" >> ${logFile}
 /home/admin/config.scripts/blitz.setpassword.sh b "${passwordB}" >> ${logFile}
 
 # optimize RAM for blockchain validation (bitcoin only)
-if [ "${network}" == "bitcoin" ] && [ "${hddBlocksBitcoin}" == "0" ]; then
+if [ "${network}" == "bitcoin" ]; then
   echo "*** Optimizing RAM for Sync ***" >> ${logFile}
   kbSizeRAM=$(cat /proc/meminfo | grep "MemTotal" | sed 's/[^0-9]*//g')
   echo "kbSizeRAM(${kbSizeRAM})" >> ${logFile}
@@ -259,8 +266,10 @@ if [ "${lightning}" == "lnd" ]; then
       exit 12
     fi
     
-    echo "Rescanning addresses takes a long time" >> ${logFile}
-    echo "use the RESCAN option in the REPAIR-LND menu after LND is synced or 'lncli unlock ---recovery_window 5000'" >> ${logFile}
+    # set lnd into recovery mode (gets activated after setup reboot)
+    /home/admin/config.scripts/lnd.backup.sh mainnet recoverymode on >> ${logFile}
+    echo "Rescanning will activate after setup-reboot ..." >> ${logFile}
+
   
   # WALLET --> NEW
   else
@@ -311,40 +320,6 @@ if [ "${lightning}" == "lnd" ]; then
     /home/admin/config.scripts/blitz.error.sh _provision.setup.sh "lnd-check-error" "lnd.check.sh basic-setup with error" "/home/admin/config.scripts/lnd.check.sh basic-setup --> ${err}" ${logFile}
     exit 15
   fi
-
-  # restore SCB
-  if [ "${staticchannelbackup}" != "" ]; then
-
-    # LND was restarted so need to unlock
-    echo "WALLET --> UNLOCK WALLET - SCAN 0" >> ${logFile}
-    /home/admin/_cache.sh set message "LND Wallet Unlock - scan 0"
-    source <(/home/admin/config.scripts/lnd.initwallet.py unlock "${chain}net" "${passwordC}" 0)
-    if [ "${err}" != "" ]; then
-      echo "lnd-wallet-unlock" "lnd.initwallet.py unlock returned error" "/home/admin/config.scripts/lnd.initwallet.py unlock ${chain}net ... --> ${err} + ${errMore}"
-      if [ "${errMore}" = "wallet already unlocked, WalletUnlocker service is no longer available" ]; then
-        echo "The wallet is already unlocked, continue."
-      else
-        exit 11
-      fi
-    fi
-
-    echo "WALLET --> SCB" >> ${logFile}
-    /home/admin/_cache.sh set message "LND Wallet (SEED & SCB)"
-    macaroonPath="/home/admin/.lnd/data/chain/${network}/${chain}net/admin.macaroon"
-    source <(/home/admin/config.scripts/lnd.initwallet.py scb "${chain}net" "/home/admin/channel.backup" "${macaroonPath}")
-    if [ "${err}" != "" ]; then
-      echo "lnd-wallet-seed+scb" "lnd.initwallet.py scb returned error" "/home/admin/config.scripts/lnd.initwallet.py scb mainnet ... --> ${err} + ${errMore}"  ${logFile}
-      if [ "${errMore}" = "server is still in the process of starting" ]; then
-        echo "The SCB recovery is not possible now - use the RETRYSCB option the REPAIR-LND menu after LND is synced."  >> ${logFile}
-        echo "Can repeat the SCB recovery until all peers have force closed the channels to this node." >> ${logFile}
-      else
-        exit 12
-      fi
-    fi
-  fi
-
-  echo "Rescanning addresses takes a long time" >> ${logFile}
-  echo "use the RESCAN option in the REPAIR-LND menu after LND is synced or 'lncli unlock ---recovery_window 5000'" >> ${logFile}
 
   # stop lnd for the rest of the provision process
   echo "stopping lnd for the rest provision again (will start on next boot)" >> ${logFile}

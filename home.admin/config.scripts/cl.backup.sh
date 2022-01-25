@@ -13,10 +13,99 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "---------------------------------------------------"
  echo "SEED WORDS"
  echo "---------------------------------------------------"
- echo "cl.backup.sh seed-export-gui [lndseeddata]"
+ echo "cl.backup.sh seed-export-gui [clseeddata]"
  echo "cl.backup.sh seed-import-gui [resultfile]"
+ echo "---------------------------------------------------"
+ echo "RECOVERY"
+ echo "---------------------------------------------------"
+ echo "cl.backup.sh [mainnet|signet|testnet] recoverymode [on|off|status] <-rescanbockheight|rescandepth>"
  echo
  exit 1
+fi
+
+# 1st PARAMETER [mainnet|signet|testnet]
+if [ "$1" == "mainnet" ] || [ "$1" == "testnet" ] || [ "$1" == "signet" ]; then
+
+  # prepare all chain dependent variables
+  source <(/home/admin/config.scripts/network.aliases.sh getvars cl $1)
+  mode="$2"
+
+  ################################
+  # RECOVERY
+  ################################
+
+  # c-lightning is considered in "recoverymode" when it is scanning the chain
+  # and getinfo -H shows:  'warning_lightningd_sync=Still loading latest blocks from bitcoind.'
+  # and 'blockheight=lower-than-in-bitcoind'
+
+  if [ ${mode} = "recoverymode" ]; then
+
+    # check if started with sudo
+    if [ "$EUID" -ne 0 ]; then 
+      echo "error='run as root'"
+      exit 1
+    fi
+
+    # status
+    recoverymodeStatus=$(grep -c "^rescan=" < "${CLCONF}")
+    if [ "$3" == "status" ]; then
+      if [ ${recoverymodeStatus} -gt 0 ]; then
+        echo "recoverymode=1"
+      else
+        echo "recoverymode=0"
+      fi
+      exit 0
+    fi
+
+    # on
+    if [ "$3" == "on" ]; then
+      if [ ${recoverymodeStatus} -gt 0 ]; then
+        echo "# recoverymode already on"
+        exit 0
+      fi
+
+      # clean
+      sed -i 's/^rescan=.*//g' "${CLCONF}"
+      sed -i 's/^log-level=.*//g' "${CLCONF}"
+
+      # activate rescan in cl config
+      if [ $# -gt 3 ]; then
+        scanFrom="$4"
+      else
+        # scan from block 700000 by default
+        scanFrom="-700000"
+      fi
+      echo "# activating recovery mode ..."
+      echo "rescan=${scanFrom}" | tee -a  "${CLCONF}"
+      echo "# setting log-level=debug ..."
+      echo "log-level=debug" | tee -a  "${CLCONF}"
+      echo "# OK - restart/reboot needed for: ${netprefix}lightningd.service"
+      exit 0
+    fi
+
+    # off
+    if [ "$3" == "off" ]; then
+      if [ ${recoverymodeStatus} -eq 0 ]; then
+        echo "# recoverymode already off"
+        exit 0
+      fi
+
+      # remove --reset-wallet-transactions parameter in systemd service
+      echo "# deactivating recovery mode ..."
+      sed -i 's/^rescan=.*//g' "${CLCONF}"
+      sed -i 's/^log-level=.*//g' "${CLCONF}"
+      echo "# setting log-level=info (default) ..."
+      echo "log-level=info" | tee -a  "${CLCONF}"
+      echo "# OK - restart/reboot needed for: ${netprefix}lightningd.service"
+      exit 0
+    fi
+
+    # parameter fallback
+    echo "error='unknown parameter'"
+    exit 1
+
+  fi
+
 fi
 
 # 1st PARAMETER action
@@ -261,9 +350,9 @@ if [ ${mode} = "cl-import-gui" ]; then
   echo "Write the word 'override' and press ENTER to CONTINUE:"
   read securityInput
   if [ "${securityInput}" != "override" ] && [ "${securityInput}" != "'override'" ]; then
-      echo
-      echo "CANCELED import of uploaded rescue file"
-      exit 1
+    echo
+    echo "CANCELED import of uploaded rescue file"
+    exit 1
   fi
   echo
 
@@ -328,7 +417,7 @@ if [ ${mode} = "seed-export-gui" ]; then
   # use text snippet for testing:
   # 
 
-  # 2nd PARAMETER: lnd seed data
+  # 2nd PARAMETER: cl seed data
   seedwords6x4=$2
   if [ "${seedwords6x4}" == "" ]; then
     echo "error='missing parameter'"
@@ -344,7 +433,7 @@ if [ ${mode} = "seed-export-gui" ]; then
       ack=1
     fi
   done
-
+  exit 0
 fi
 
 # Results will be stored on memory cache:

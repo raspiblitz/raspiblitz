@@ -462,7 +462,7 @@ if [ "$1" = "import" ]; then
   # copy bitcoin data backups back to original places (if part of backup)
   if [ -d "/mnt/hdd/backup_bitcoin" ]; then
     echo "# Copying back bitcoin backup data .."
-    sudo mkdir /mnt/hdd/bitcoin
+    sudo mkdir /mnt/hdd/bitcoin 2>/dev/null
     sudo cp /mnt/hdd/backup_bitcoin/bitcoin.conf /mnt/hdd/bitcoin/bitcoin.conf
     sudo cp /mnt/hdd/backup_bitcoin/wallet.dat /mnt/hdd/bitcoin/wallet.dat  2>/dev/null
     sudo chown bitcoin:bitcoin -R /mnt/hdd/bitcoin

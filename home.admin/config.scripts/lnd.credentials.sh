@@ -9,6 +9,8 @@ fi
 
 # load data from config
 source /mnt/hdd/raspiblitz.conf
+# shellcheck disable=SC2154 # gets the ${chain} from the raspiblitz.conf
+source <(/home/admin/config.scripts/network.aliases.sh getvars lnd "${chain}net")
 
 ###########################
 # FUNCTIONS
@@ -34,7 +36,7 @@ do
   local n=${1:-bitcoin} # the network (e.g. bitcoin) defaults to bitcoin
   local c=${2:-main}    # the chain (e.g. main, test, sim, reg) defaults to main (for mainnet)
   if [ ! -f /mnt/hdd/app-data/lnd/data/chain/"${n}"/"${c}"net/"${macaroon}" ]; then
-    missing=$(($missing + 1))
+    missing=$((missing + 1))
     echo "# ${macaroon} is missing ($missing)"
   else
     echo "# ${macaroon} is present"
@@ -77,6 +79,7 @@ if [ "$1" = "reset" ]; then
     echo "## Resetting Macaroons"
     echo "# all your macaroons get deleted and recreated"
     cd || exit
+    # shellcheck disable=SC2154 # gets the ${network} from the raspiblitz.conf
     sudo find /mnt/hdd/app-data/lnd/data/chain/"${network}"/"${chain}"net/ -iname '*.macaroon' -delete
     sudo find /home/bitcoin/.lnd/data/chain/"${network}"/"${chain}"net/ -iname '*.macaroon' -delete
     if [ "${keepOldMacaroons}" != "1" ]; then
@@ -93,11 +96,12 @@ if [ "$1" = "reset" ]; then
 
   # unlock wallet after restart
   echo "# restarting LND ... wait 10 secs"
-  sudo systemctl start lnd
+  # shellcheck disable=SC2154
+  sudo systemctl start "${netprefix}lnd"
   sleep 10
 
   # unlock wallet after restart
-  sudo /home/admin/config.scripts/lnd.unlock.sh
+  sudo /home/admin/config.scripts/lnd.unlock.sh "${CHAIN}"
   sleep 10
 
   if [ ${resetMacaroons} -eq 1 ]; then
@@ -147,11 +151,11 @@ elif [ "$1" = "sync" ]; then
   fi
 
   echo "# make sure LND conf is readable and symlinked"
-  sudo chmod 644 "/mnt/hdd/lnd/lnd.conf"
-  sudo chown bitcoin:bitcoin "/mnt/hdd/lnd/lnd.conf"
-  if ! [[ -L "/mnt/hdd/app-data/lnd/lnd.conf" ]]; then
-    sudo rm -rf "/mnt/hdd/app-data/lnd/lnd.conf"                # not a symlink.. delete it silently
-    sudo ln -s "/mnt/hdd/lnd/lnd.conf" "/mnt/hdd/app-data/lnd/lnd.conf"  # and create symlink
+  sudo chmod 644 "/mnt/hdd/lnd/${netprefix}lnd.conf"
+  sudo chown bitcoin:bitcoin "/mnt/hdd/lnd/${netprefix}lnd.conf"
+  if ! [[ -L "/mnt/hdd/app-data/lnd/${netprefix}lnd.conf" ]]; then
+    sudo rm -rf "/mnt/hdd/app-data/lnd/${netprefix}lnd.conf"                # not a symlink.. delete it silently
+    sudo ln -s "/mnt/hdd/lnd/${netprefix}lnd.conf" "/mnt/hdd/app-data/lnd/${netprefix}lnd.conf"  # and create symlink
   fi
 
   echo "# make sure TLS certificate is readable and symlinked"
@@ -166,9 +170,9 @@ elif [ "$1" = "sync" ]; then
 # Check Macaroons and fix missing
 ###########################
 elif [ "$1" = "check" ]; then
-  check_macaroons ${network} ${chain}
+  check_macaroons "${network}" "${chain}"
   if [ $missing -gt 0 ]; then
-    /home/admin/config.scrips/lnd.creds.sh reset keepold
+    /home/admin/config.scrips/lnd.credentials.sh reset keepold
   fi
 
 ###########################
