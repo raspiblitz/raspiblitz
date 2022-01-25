@@ -120,7 +120,7 @@ else
     rhash=$(echo "$result" | grep r_hash | cut -d '"' -f4)
     payReq=$(echo "$result" | grep payment_request | cut -d '"' -f4)
   fi
-  sudo /home/admin/config.scripts/blitz.display.sh qr "${payReq}"
+  /home/admin/config.scripts/blitz.display.sh qr "${payReq}"
 
   if [ $(sudo dpkg-query -l | grep "ii  qrencode" | wc -l) = 0 ]; then
    sudo apt-get install qrencode -y > /dev/null
@@ -162,8 +162,8 @@ else
       echo $result
       echo
       echo "OK the Invoice was paid - returning to menu."
-      sudo /home/admin/config.scripts/blitz.display.sh hide
-      sudo /home/admin/config.scripts/blitz.display.sh image /home/admin/raspiblitz/pictures/ok.png
+      /home/admin/config.scripts/blitz.display.sh hide
+      /home/admin/config.scripts/blitz.display.sh image /home/admin/raspiblitz/pictures/ok.png
       sleep 2
       break
     fi
@@ -182,7 +182,7 @@ else
 
   done
 
-  sudo /home/admin/config.scripts/blitz.display.sh hide
+  /home/admin/config.scripts/blitz.display.sh hide
 
 fi
 echo "Press ENTER to return to main menu."

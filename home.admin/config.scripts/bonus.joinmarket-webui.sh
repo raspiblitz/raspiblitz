@@ -21,7 +21,6 @@ fi
 source $RASPIBLITZ_INFO
 source $RASPIBLITZ_CONF
 
-
 # show info menu
 if [ "$1" = "menu" ]; then
   isInstalled=$(sudo ls $HOME_DIR 2>/dev/null | grep -c "$APP_DIR")
