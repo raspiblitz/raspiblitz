@@ -22,7 +22,7 @@ fi
 # PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
 # PGPpubkeyFingerprint="F579929B39B119CC7B0BB71FB326ACF51F317B69"
 
-# Run with the insatting user to clear permissions:
+# Run with the installing user to clear permissions:
 # sudo -u btcrpcexplorer /home/admin/config.scripts/blitz.git-verify.sh \
 #  "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
 

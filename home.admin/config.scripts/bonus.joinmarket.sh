@@ -5,8 +5,7 @@
 # https://github.com/openoms/bitcoin-tutorials/tree/master/joinmarket
 # https://github.com/openoms/joininbox
 
-# JBVERSION="v0.6.5" # with JoinMarket v0.9.4
-JBVERSION="b0efe45" # dev
+JBVERSION="v0.6.6" # with JoinMarket v0.9.4
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
