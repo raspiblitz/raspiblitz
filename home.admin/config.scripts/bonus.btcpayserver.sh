@@ -295,7 +295,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       exit 1
     fi
 
-    dotNetName="dotnet-sdk-3.1.413-linux-${binaryVersion}.tar.gz"
+    dotNetName="dotnet-sdk-6.0.101-linux-${binaryVersion}.tar.gz"
     sudo rm /home/btcpay/${dotnetName} 2>/dev/null
     sudo -u btcpay wget "${dotNetdirectLink}"
     # check binary is was not manipulated (checksum test)
