@@ -278,18 +278,17 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # dependencies
     sudo apt-get -y install libunwind8 gettext libssl1.0
 
-    if [ "${cpu}" = "arm" ]; then
-      binaryVersion="arm"
-      dotNetdirectLink="https://download.visualstudio.microsoft.com/download/pr/40edd52f-b1ca-4f0c-8d50-34433202ce9d/2b8f5b881c239a706f271f010e56159c/dotnet-sdk-3.1.413-linux-arm.tar.gz"
-      dotNetChecksum="31f395b1e48e9ba53d4dc63db7ff1ea38bdcb612a1d54b483cde22a009c48fbae0303779f42cee32db0e51bd953c8abfdaa1620a43a7fd84e1f8e937b6675d59"
-    elif [ "${cpu}" = "aarch64" ]; then
+    if [ "${cpu}" = "aarch64" ]; then
       binaryVersion="arm64"
-      dotNetdirectLink="https://download.visualstudio.microsoft.com/download/pr/dfd0ad22-3e47-432f-9aa1-f65b11a2ced2/d096c5d1561732c1658543fa8fb7a31f/dotnet-sdk-3.1.413-linux-arm64.tar.gz"
-      dotNetChecksum="39f198f07577faf81f09ca621fb749d5aac38fc05e7e6bd6226009679abc7d001454068430ddb34b320901955f42de3951e2707e01bce825b5216df2bc0c8eca"
+      dotNetdirectLink="https://download.visualstudio.microsoft.com/download/pr/d3aaa7cc-a603-4693-871b-53b1537a4319/5981099ca17a113b3ce1c080462c50ef/dotnet-sdk-3.1.416-linux-arm64.tar.gz"
+      dotNetChecksum="0065c7afb129b1a0e0c11703309f3b45cf9a3c0ea156247f7cc61555f21c37054f215eb77add509dad77b1d388a4e6c585f8a8016109f31c5b64184b25e2c407"
     elif [ "${cpu}" = "x86_64" ]; then
       binaryVersion="x64"
-      dotNetdirectLink="https://download.visualstudio.microsoft.com/download/pr/70d12135-d65f-4f4c-9d96-a6ac0251fb1b/57856b7654e338027cfb53552b2c4d46/dotnet-sdk-3.1.413-linux-x64.tar.gz"
-      dotNetChecksum="2a0824f11aba0b79d3f9a36af0395649bc9b4137e61b240a48dccb671df0a5b8c2086054f8e495430b7ed6c344bb3f27ac3dfda5967d863718a6dadeca951a83"
+      dotNetdirectLink="https://download.visualstudio.microsoft.com/download/pr/3c98126b-50f5-4497-8ffd-18d17a3f6b95/044d0f20256fd9bf2971f8da9a0364e4/dotnet-sdk-3.1.416-linux-x64.tar.gz"
+      dotNetChecksum="dec1dcf326487031c45dec0849a046a0d034d6cbb43ab591da6d94c2faf72da8e31deeaf4d2165049181546d5296bb874a039ccc2f618cf95e68a26399da5e7f"
+    else
+      echo "# FAIL! CPU (${cpu}) not supported."
+      exit 1
     fi
 
     dotNetName="dotnet-sdk-3.1.413-linux-${binaryVersion}.tar.gz"
