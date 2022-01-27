@@ -429,8 +429,8 @@ btc.rpc.password=$PASSWORD_B
     sudo -u btcpay git clone https://github.com/btcpayserver/btcpayserver.git 2>/dev/null
     cd btcpayserver
     sudo -u btcpay git reset --hard $BTCPayVersion
-    sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh \
-     "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
+    sudo -u admin /home/admin/config.scripts/blitz.git-verify.sh \
+     "web-flow" "https://github.com/web-flow.gpg" "4AEE18F83AFDEB23" || exit 1
     echo "# Build BTCPayServer ..."
     # from the build.sh with path
     sudo -u btcpay /home/btcpay/dotnet/dotnet build -c Release /home/btcpay/btcpayserver/BTCPayServer/BTCPayServer.csproj
