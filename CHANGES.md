@@ -14,7 +14,7 @@
 - Update: C-lightningREST v0.6.1 [details](https://github.com/Ride-The-Lightning/c-lightning-REST/releases/tag/v0.6.1)
 - Update: Lightning Terminal v0.6.1-alpha with Lightning Node Connect over Tor [details](https://github.com/lightninglabs/lightning-terminal/releases/tag/v0.6.1-alpha)
 - Update: Channel Tools (chantools) v0.10.1 [details](https://github.com/guggero/chantools/releases/tag/v0.10.1)
-- Update: BTCPayServer v1.3.6 with UPDATE option [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.3.6)
+- Update: BTCPayServer v1.4.0 with UPDATE option [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.4.0)
 - Update: Electrum Server in Rust (electrs) v0.9.4 [details](https://github.com/romanz/electrs/blob/v0.9.4/RELEASE-NOTES.md)
 - Update: JoinMarket v0.9.4 [details](https://github.com/JoinMarket-Org/joinmarket-clientserver/releases/tag/v0.9.4)
 - Update: JoininBox v0.6.6 [details](https://github.com/openoms/joininbox/releases/tag/v0.6.6)
