@@ -75,6 +75,7 @@ echo "displayClass=${displayClass}" >> $infoFile
 echo "displayType=${displayType}" >> $infoFile
 echo "setupPhase=${setupPhase}" >> $infoFile
 echo "setupStep=${setupStep}" >> $infoFile
+echo "fsexpanded=${fsexpanded}" >> $infoFile
 echo "state=starting" >> $infoFile
 echo "btc_mainnet_sync_initial_done=${btc_mainnet_sync_initial_done}" >> $infoFile
 echo "btc_testnet_sync_initial_done=${btc_testnet_sync_initial_done}" >> $infoFile
