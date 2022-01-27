@@ -51,6 +51,7 @@ if [ $# -eq 3 ]; then
 elif [ $# -eq 4 ]; then
   gitCommand="git verify-tag $4"
 fi
+echo "# running: ${gitCommand}"
 if ${gitCommand} 2>&1 >&"$_temp"; then
   goodSignature=1
 else
