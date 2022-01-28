@@ -121,6 +121,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 # -----------
 LOG_LEVEL='debug'
 TOR_PROXY_SERVER='socks://127.0.0.1:9050'
+PORT=3010
 
 # -----------
 # Interface Configs
@@ -216,7 +217,7 @@ After=lnd.service
 
 [Service]
 WorkingDirectory=/home/thunderhub/thunderhub
-ExecStart=/usr/bin/npm run start -- -p 3010
+ExecStart=/usr/bin/npm run start
 User=thunderhub
 Restart=always
 TimeoutSec=120
