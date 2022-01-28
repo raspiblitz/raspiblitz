@@ -13,7 +13,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
 fi
 
 PGPsigner="wiz"
-PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
+PGPpubkeyLink="https://github.com/wiz.gpg"
 PGPpubkeyFingerprint="A394E332255A6173"
 
 source /mnt/hdd/raspiblitz.conf
