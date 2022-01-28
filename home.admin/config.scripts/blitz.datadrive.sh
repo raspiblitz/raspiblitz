@@ -253,8 +253,8 @@ if [ "$1" = "status" ]; then
             fi
 
             # make copy of SSH keys to RAMDISK (if available)
-            cp -a /mnt/hdd${subVolumeDir}/app-data/sshd /var/cache/raspiblitz/hdd-inspect/sshd 2>/dev/null
-            cp -a /mnt/hdd${subVolumeDir}/app-data/ssh-root /var/cache/raspiblitz/hdd-inspect/ssh-root 2>/dev/null
+            cp -a /mnt/hdd${subVolumeDir}/app-data/sshd /var/cache/raspiblitz/hdd-inspect 2>/dev/null
+            cp -a /mnt/hdd${subVolumeDir}/app-data/ssh-root /var/cache/raspiblitz/hdd-inspect 2>/dev/null
           fi
         
           # comment this line out if case to study the contect of the data section

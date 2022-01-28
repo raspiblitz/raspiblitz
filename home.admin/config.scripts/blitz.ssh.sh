@@ -147,10 +147,10 @@ if [ "$1" = "restore" ]; then
     fi
 
     # restore sshd keys
-    if [ $(sudo ls ${DEFAULT_BASEDIR}/sshd/ssh_host_rsa_key 2>/dev/null | grep -c "ssh_host_rsa_key") -gt 0 ]; then
+    if [ $(sudo ls ${DEFAULT_BASEDIR}/ssh_host_rsa_key 2>/dev/null | grep -c "ssh_host_rsa_key") -gt 0 ]; then
       echo "# restore sshd host keys from: $DEFAULT_BASEDIR/sshd"
       sudo rm -rf /etc/ssh/*
-      sudo cp -ra $DEFAULT_BASEDIR/sshd/* /etc/ssh/
+      sudo cp -ra $DEFAULT_BASEDIR/* /etc/ssh/
       sudo chown -R root:root /etc/ssh
       sudo dpkg-reconfigure openssh-server
       sudo systemctl restart sshd
