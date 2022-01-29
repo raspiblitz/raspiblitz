@@ -32,7 +32,7 @@ if [ ${valueExists} -eq 0 ]; then
   echo "# Adding autonat config defaults to /mnt/hdd/lnd/lnd.conf"
   applicationOptionsLineNumber=$(grep -n "\[Application Options\]" /mnt/hdd/lnd/lnd.conf | cut -d ":" -f1)
   applicationOptionsLineNumber="$(($applicationOptionsLineNumber+1))"
-  sed -i "${applicationOptionsLineNumber}inat=false" /mnt/hdd/lnd/lnd.conf
+  sudo sed -i "${applicationOptionsLineNumber}inat=false" /mnt/hdd/lnd/lnd.conf
 fi
 
 # delete nat is still in raspiblitz.conf (its OK when just in lnd.conf since v1.7.2)
