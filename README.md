@@ -143,7 +143,7 @@ Useful info:
 
 ## Write the SD-Card image to your SD Card
 
-You need to write the downloaded SD card image (the img.gz-file) to your SD card (16GB minimum) - you can use the very easy tool Balena Etcher for this: https://www.balena.io/etcher/.
+You need to write the downloaded SD card image (the img.gz-file) to your SD card (32GB minimum) - you can use the very easy tool Balena Etcher for this: https://www.balena.io/etcher/.
 It's available for Win, Mac & Linux.
 
 ## Boot your RaspiBlitz

@@ -255,7 +255,7 @@ if [ "${needsExpansion}" == "1" ] && [ "${fsexpanded}" == "0" ]; then
   /home/admin/_cache.sh set message "FSEXPAND"
 elif [ "${tooSmall}" == "1" ]; then
   echo "!!! FAIL !!!!!!!!!!!!!!!!!!!!" >> $logFile
-  echo "SDCARD TOO SMALL 16G minimum" >> $logFile
+  echo "SDCARD TOO SMALL 32GB minimum" >> $logFile
   echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" >> $logFile
   /home/admin/_cache.sh set state "sdtoosmall"
   echo "System stopped. Please cut power." >> $logFile
