@@ -109,9 +109,9 @@ elif [ "${eventID}" == "provision" ] || [ "${eventID}" == "recovering" ]; then
 Upgrade/Recover/Provision
 ---> ${contentString}
 
-Run 'tail -f ./raspiblitz.log' in
-new terminal to follow install logs.
-" 9 40
+Exit to Terminal: Press CTRL+c
+Follow Logs: tail -f ./raspiblitz.log
+" 9 42
 
     else
 
