@@ -4,6 +4,7 @@
 echo "get raspiblitz config"
 source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
+source <(/home/admin/config.scripts/lnd.autonat.sh info)
 
 echo "services default values"
 if [ ${#autoPilot} -eq 0 ]; then autoPilot="off"; fi

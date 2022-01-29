@@ -357,7 +357,7 @@ else
     echo "Provisioning NETWORK UPnP  - keep default" >> ${logFile}
 fi
 
-# LND AUTO NAT DISCOVERY
+# LND AUTO NAT DISCOVERY (deprecated: but keep in until version 2.0)
 if [ "${autoNatDiscovery}" = "on" ]; then
     echo "Provisioning LND AUTO NAT DISCOVERY - run config script" >> ${logFile}
     /home/admin/_cache.sh set message "Setup AutoNAT"
