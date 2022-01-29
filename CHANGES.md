@@ -2,8 +2,7 @@
 
 ## What's new in Version 1.7.2 of RaspiBlitz?
 
-- Security: Verify git commits and tags everywhere possible [issue](https://github.com/rootzoll/raspiblitz/issues/2686)
-- Fixed: LND repair options, SEED+SCB and rescue-file restore, RESET options [issue](https://github.com/rootzoll/raspiblitz/issues/2832)
+issues/2832)
 - New: Compact the LND channel.db on-demand from REPAIR and before backups [issue](https://github.com/rootzoll/raspiblitz/issues/2752)
 - New: Run C-lightning backup-compact regularly [issue](https://github.com/rootzoll/raspiblitz/issues/2869)
 - New: Switch LNbits between lnd & c-lightning [issue](https://github.com/rootzoll/raspiblitz/issues/2556)
@@ -25,7 +24,10 @@
 - Update: PyBlock to 1.1.8.5 (adapt to new install mechanism)
 - Update: Re-Add connecting node with Zap mobile wallet iOS & Android
 - Update: additional redaction of private data in debug logs
+- Security: Verify git commits and tags everywhere possible [issue](https://github.com/rootzoll/raspiblitz/issues/2686)
+- Fixed: LND repair options, SEED+SCB and rescue-file restore, RESET options [issue](https://github.com/rootzoll/raspiblitz/
 - Info: All existing IP2Tor subscriptions need to be canceled & renewed to be functional again.
+- Info: 32GB sd card is now required (was already long time recommended on shopping list)
 
 ## What's new in Version 1.7.1 of RaspiBlitz?
 
