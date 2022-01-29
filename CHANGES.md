@@ -19,7 +19,7 @@ issues/2832)
 - Update: JoininBox v0.6.6 [details](https://github.com/openoms/joininbox/releases/tag/v0.6.6)
 - Update: Thunderhub v0.13.1 [details](https://github.com/apotdevin/thunderhub/releases/tag/v0.13.1)
 - Update: BTC-RPC-Explorer v3.3.0 [details](https://github.com/janoside/btc-rpc-explorer/blob/master/CHANGELOG.md#v330)
-- Update: Specter Desktop 1.7.2 [details](https://github.com/cryptoadvance/specter-desktop/releases/tag/v1.7.2)
+- Update: Specter Desktop 1.8.0 [details](https://github.com/cryptoadvance/specter-desktop/releases/tag/v1.8.0)
 - Update: Mempool 2.3.1 [details](https://github.com/mempool/mempool/releases/tag/v2.3.1)
 - Update: PyBlock to 1.1.8.5 (adapt to new install mechanism)
 - Update: Re-Add connecting node with Zap mobile wallet iOS & Android
