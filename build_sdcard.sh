@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #########################################################################
-# Build your SD card image based on: 2021-10-30-raspios-bullseye-arm64.zip
+# Build your SD card image based on: 2022-01-28-raspios-bullseye-arm64.zip
 # https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2022-01-28/
 # SHA256: c6f583fab8ed8d84bdf272d095c821fa70d2a0b434ba78432648f69b661d3783
 # PGP fingerprint: 8738CD6B956F460C
