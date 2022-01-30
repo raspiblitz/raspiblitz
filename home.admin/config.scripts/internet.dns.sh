@@ -63,11 +63,7 @@ fi
 
 # setting DNS address
 echo "# Setting DNS server in /etc/dhcpcd.conf ..."
-# uncomment if needed
-#sudo sed -i "s/^#interface eth0/interface eth0/g" /etc/dhcpcd.conf
-sudo sed -i "s/^#static domain_name_servers=192.168.0.1.*/static domain_name_servers=${DNSSERVER}/g" /etc/dhcpcd.conf
-# change value
-sudo sed -i "s/^static domain_name_servers=.*/static domain_name_servers=${DNSSERVER}/g" /etc/dhcpcd.conf
+sudo /home/admin/config.scripts/blitz.conf.sh set "static domain_name_servers" "${DNSSERVER}" /etc/dhcpcd.conf
 echo "# OK"
 echo ""
 
