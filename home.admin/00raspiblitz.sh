@@ -79,6 +79,7 @@ trap quit TERM
 
 echo "# start ssh menu loop"
 # put some values on higher scan rate for 10 minute
+/home/admin/_cache.sh focus ln_default_ready 2 600 >/dev/null
 /home/admin/_cache.sh focus ln_default_locked 2 600 >/dev/null
 /home/admin/_cache.sh focus btc_default_synced 2 600 >/dev/null
 
@@ -186,7 +187,7 @@ do
   # MAKE SURE BLOCKCHAIN/LN IS SYNC 
   #####################################
   if [ "${setupPhase}" == "done" ] && [ "${state}" == "ready" ]; then
-    if [ "${btc_default_synced}" != "1" ] || [ "${ln_default_sync_chain}" == "0" ] || [ "${ln_default_sync_initial_done}" == "0" ]; then
+    if [ "${btc_default_synced}" != "1" ] || [ "${ln_default_ready}" == "0" ] || [ "${ln_default_sync_chain}" == "0" ] || [ "${ln_default_sync_initial_done}" == "0" ]; then
       /home/admin/setup.scripts/eventBlockchainSync.sh ssh
       sleep 3
       continue
