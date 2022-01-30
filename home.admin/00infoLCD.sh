@@ -134,7 +134,7 @@ while :
     fi
 
     # no special case - show status display
-    /home/admin/00infoBlitz.sh $lightning ${chain}net
+    /home/admin/00infoBlitz.sh ${chain}net $lightning
     sleep 5
 
 done

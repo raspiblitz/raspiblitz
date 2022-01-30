@@ -26,7 +26,19 @@ source <(/home/admin/_cache.sh get \
   BTCRPCexplorer \
 )
 
-# PARAMETER 1: forcing view on a lightning implementation
+# PARAMETER 1: forcing view on a given network
+PARAMETER_CHAIN=$2
+if [ "${PARAMETER_CHAIN}" == "mainnet" ]; then
+  chain="main"
+fi
+if [ "${PARAMETER_CHAIN}" == "testnet" ]; then
+  chain="test"
+fi
+if [ "${PARAMETER_CHAIN}" == "signet" ]; then
+  chain="sig"
+fi
+
+# PARAMETER 2: forcing view on a lightning implementation
 PARAMETER_LIGHTNING=$1
 if [ "${PARAMETER_LIGHTNING}" == "lnd" ]; then
   lightning="lnd"
@@ -38,17 +50,7 @@ if [ "${PARAMETER_LIGHTNING}" == "none" ]; then
   lightning=""
 fi
 
-# PARAMETER 2: forcing view on a given network
-PARAMETER_CHAIN=$2
-if [ "${PARAMETER_CHAIN}" == "mainnet" ]; then
-  chain="main"
-fi
-if [ "${PARAMETER_CHAIN}" == "testnet" ]; then
-  chain="test"
-fi
-if [ "${PARAMETER_CHAIN}" == "signet" ]; then
-  chain="sig"
-fi
+
 
 # generate netprefix
 netprefix=${chain:0:1}
