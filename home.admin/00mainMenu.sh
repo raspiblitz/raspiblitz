@@ -147,9 +147,6 @@ fi
 if [ "${circuitbreaker}" == "on" ]; then
   OPTIONS+=(CIRCUIT "Circuitbreaker (LND firewall)")
 fi
-if [ "${circuitbreaker}" == "on" ]; then
-  OPTIONS+=(CIRCUIT "Circuitbreaker (LND firewall)")
-fi
 if [ "${tallycoinConnect}" == "on" ]; then
   OPTIONS+=(TALLY "Tallycoin Connect")
 fi
