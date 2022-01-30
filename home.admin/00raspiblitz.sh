@@ -100,6 +100,7 @@ do
     btc_default_synced \
     ln_default_sync_chain \
     ln_default_locked \
+    ln_default_ready \
     ln_default_sync_initial_done \
     message \
     network \
