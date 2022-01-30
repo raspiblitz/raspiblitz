@@ -57,7 +57,7 @@ if [ "${walletLocked}" == "0" ]; then
 fi
 macaroonsMissing=$(echo "${lndError}" | grep -c "unable to read macaroon")
 
-# if action sis just status
+# if action is just status
 if [ "${action}" == "status" ]; then
     echo "locked=${walletLocked}"
     echo "missingMacaroons=${macaroonsMissing}"
