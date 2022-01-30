@@ -22,6 +22,7 @@ issues/2832)
 - Update: Specter Desktop 1.8.0 [details](https://github.com/cryptoadvance/specter-desktop/releases/tag/v1.8.0)
 - Update: Mempool 2.3.1 [details](https://github.com/mempool/mempool/releases/tag/v2.3.1)
 - Update: PyBlock to 1.1.8.5 (adapt to new install mechanism)
+- Update: Balance of Satoshis 11.40.0 (BOS) [details](https://github.com/alexbosworth/balanceofsatoshis/blob/master/CHANGELOG.md#11400)
 - Update: Re-Add connecting node with Zap mobile wallet iOS & Android
 - Update: additional redaction of private data in debug logs
 - Security: Verify git commits and tags everywhere possible [issue](https://github.com/rootzoll/raspiblitz/issues/2686)
