@@ -3,7 +3,7 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "config script to set a the DNS server that should be used"
- echo "internet.dns.sh [DNS-SERVER|test]"
+ echo "internet.dns.sh [DNS-SERVER|test|off]"
  exit 1
 fi
 
@@ -15,6 +15,16 @@ NODIALOG="$2"
 
 # just if auto reboot is needed after dialog
 autoreboot=0 
+
+if [ "${DNSSERVER}" = "off" ]; then
+  # setting DNS address
+  echo "# turning static DNS off"
+  sudo /home/admin/config.scripts/blitz.conf.sh delete "static domain_name_servers" /etc/dhcpcd.conf
+  /home/admin/config.scripts/blitz.conf.sh delete dnsServer
+  echo "# OK - needs reboot to activate"
+  echo ""
+  exit 0
+fi
 
 # run test if DNS is working (assuming that internet is working)
 if [ "${DNSSERVER}" = "test" ]; then
