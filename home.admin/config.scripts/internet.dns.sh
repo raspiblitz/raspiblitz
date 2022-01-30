@@ -63,6 +63,9 @@ fi
 
 # setting DNS address
 echo "# Setting DNS server in /etc/dhcpcd.conf ..."
+# uncomment if needed
+sudo sed -i "s/^#static domain_name_servers=.*/static domain_name_servers=${DNSSERVER}/g" /etc/dhcpcd.conf
+# change value
 sudo sed -i "s/^static domain_name_servers=.*/static domain_name_servers=${DNSSERVER}/g" /etc/dhcpcd.conf
 echo "# OK"
 echo ""
