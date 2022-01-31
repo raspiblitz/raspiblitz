@@ -64,19 +64,6 @@ This makes that data portable and independent from the OS similar to the combina
 * create a raw image of 500+ GB for best compatibility
 * if there are permission issues try to symlink the disk image to `/var/lib/libvirt/images`
 
-#### Mount a raw disk image on the host system to copy blockchain
-* this is not necessary, but faster than to copy over the network
-* from <https://support.hpe.com/hpesc/public/docDisplay?docId=emr_na-c02814204>
-
-    ```
-    losetup /dev/loop0 VirtualMachineImage.raw
-    sudo apt install kpartx -y  
-    kpartx -a /dev/loop0
-    sudo mkdir /mnt/rawdisk
-    mount /dev/mapper/loop0p1 /mnt/rawdisk
-    ```
-* the guest data-drive will be available in `/mnt/rawdisk`
----
 ## Armbian
 Many SBC-s are supported:
 https://www.armbian.com/download/
