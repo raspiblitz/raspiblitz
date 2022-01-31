@@ -684,9 +684,17 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     fi
   fi
   echo "# deleteData(${deleteData})"
+  echo "*** REMOVING LNbits ***"
 
-  # setting value in raspi blitz config
-  /home/admin/config.scripts/blitz.conf.sh set LNBits "off"
+  isInstalled=$(sudo ls /etc/systemd/system/lnbits.service 2>/dev/null | grep -c 'lnbits.service')
+  if [ ${isInstalled} -eq 1 ] || [ "${LNBits}" == "on" ]; then
+    sudo systemctl stop lnbits
+    sudo systemctl disable lnbits
+    sudo rm /etc/systemd/system/lnbits.service
+    echo "OK lnbits.service removed."
+  else
+    echo "lnbits.service is not installed."
+  fi
 
   # remove nginx symlinks
   sudo rm -f /etc/nginx/sites-enabled/lnbits_ssl.conf
@@ -703,25 +711,20 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     /home/admin/config.scripts/tor.onion-service.sh off lnbits
   fi
 
-  isInstalled=$(sudo ls /etc/systemd/system/lnbits.service 2>/dev/null | grep -c 'lnbits.service')
-  if [ ${isInstalled} -eq 1 ] || [ "${LNBits}" == "on" ]; then
-    echo "*** REMOVING LNbits ***"
-    sudo systemctl stop lnbits
-    sudo systemctl disable lnbits
-    sudo rm /etc/systemd/system/lnbits.service
-    sudo userdel -rf lnbits
+  # always clean
+  sudo userdel -rf lnbits
 
-    if [ ${deleteData} -eq 1 ]; then
-      echo "# deleting data"
-      sudo rm -R /mnt/hdd/app-data/LNBits
-    else
-      echo "# keeping data"
-    fi
-
-    echo "OK LNbits removed."
+  if [ ${deleteData} -eq 1 ]; then
+    echo "# deleting data"
+    sudo rm -R /mnt/hdd/app-data/LNBits
   else
-    echo "LNbits is not installed."
+    echo "# keeping data"
   fi
+
+  # setting value in raspi blitz config
+  /home/admin/config.scripts/blitz.conf.sh set LNBits "off"
+
+  echo "OK LNbits is uninstalled"
   exit 0
 fi
 
