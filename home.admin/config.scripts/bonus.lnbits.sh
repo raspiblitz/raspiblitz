@@ -15,6 +15,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   exit 1
 fi
 
+echo "# Running: 'bonus.lnbits.sh $*'"
 source /mnt/hdd/raspiblitz.conf
 
 # show info menu
@@ -445,7 +446,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     githubUser="$3"
   fi
   #githubBranch="tags/raspiblitz"
-  githubBranch="93e58f4c807006c26b675f34947a5bda9743cd86" #commit 23. December 2021
+  githubBranch="3ae6ef25a1fce6fc53d444c9352e4fe7972ed9a3" #commit 31. January 2022
   if [ "$4" != "" ]; then
     githubBranch="$4"
   fi
@@ -480,6 +481,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo -u lnbits python3 -m venv venv
   sudo -u lnbits ./venv/bin/pip install -r requirements.txt
   sudo -u lnbits ./venv/bin/pip install pylightning
+  sudo -u lnbits ./venv/bin/pip install secp256k1
 
   # open firewall
   echo
