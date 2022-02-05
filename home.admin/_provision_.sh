@@ -298,10 +298,10 @@ else
 fi
 
 # LND binary install
-if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ] || [ "${tcl}" == "on" ] || [ "${scl}" == "on" ]; then
+if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ] || [ "${tcl}" == "on" ] || [ "${scl}" == "on" ]; then
   # if already installed by fatpack will skip 
   echo "Provisioning C-Lightning Binary - run config script" >> ${logFile}
-  /home/admin/config.scripts/cl.install.sh on install >> ${logFile} 2>&1
+  /home/admin/config.scripts/cl.install.sh install >> ${logFile} 2>&1
 else
     echo "Provisioning C-Lightning Binary - not active" >> ${logFile}
 fi
