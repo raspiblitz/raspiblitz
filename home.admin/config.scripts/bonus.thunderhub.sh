@@ -41,9 +41,9 @@ Hidden Service address for TOR Browser (see LCD for QR):\n${toraddress}
     /home/admin/config.scripts/blitz.display.sh hide
   else
     # Info without TOR
-    whiptail --title " ThunderHub " --msgbox "Open in your local web browser & accept self-signed cert:
+    whiptail --title " ThunderHub " --msgbox "Open in your local web browser:
 http://${localip}:3010\n
-https://${localip}:3011 with Fingerprint:
+Or ttps://${localip}:3011 with Fingerprint:
 ${fingerprint}\n
 Use your Password B to login.\n
 Activate TOR to access the web interface from outside your local network.
