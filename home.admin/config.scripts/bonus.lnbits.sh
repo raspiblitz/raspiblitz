@@ -437,8 +437,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   # add lnbits user
   echo "*** Add the 'lnbits' user ***"
-  sudo adduser --disabled-password --gecos "" lnbits 2>/dev/null
+  sudo adduser --disabled-password --gecos "" lnbits
+  echo "# add the 'lnbits' user to the 'bitcoin' group"
   sudo /usr/sbin/usermod --append --groups bitcoin lnbits
+  echo "# check user"
+  id lnbits
 
   # get optional github parameter
   githubUser="lnbits"
@@ -653,6 +656,8 @@ if [ "$1" = "switch" ]; then
     echo "# allowing lnbits user as part of the bitcoin group to RW RPC hook"
     sudo chmod 770 /home/bitcoin/.lightning/bitcoin${clrpcsubdir}
     sudo chmod 660 /home/bitcoin/.lightning/bitcoin${clrpcsubdir}/lightning-rpc
+    echo "# check the lightning-rpc socket"
+    sudo ls -la /home/bitcoin/.lightning/bitcoin${clrpcsubdir}/lightning-rpc
 
     echo "# preparing lnbits config for c-lightning"
     sudo bash -c "echo 'LNBITS_BACKEND_WALLET_CLASS=CLightningWallet' >> /home/lnbits/lnbits/.env"
