@@ -1224,7 +1224,7 @@ To recover your funds this way you will need two things:
 You should have written down the word seed during wallet setup; keep it at a safe (offline) location.
 The `channel.backup` is stored on the HDD and updated by LND every time a new channel is opened or closed.
 The latest version of this file is needed to recover all your funds.
-In case your HDD gets damaged RaspiBlitz always keeps a copy of the latest version of the `channel.backup` file on the SD card within the sub-directories of: `/home/admin/.lnd/data/chain/`.
+In case your HDD gets damaged RaspiBlitz always keeps a copy of the latest version of the `channel.backup` file on the SD card: `/mnt/hdd/lnd/data/chain/bitcoin/mainnet/`.
 
 If you want to go one step further in securing your funds against total loss of the RaspiBlitz (gets completely damaged, stolen or lost), then you can additionally set up an off-location or cloud backup of the `channel.backup` file.
 The file itself is encrypted by your word seed so it's acceptable to store the file with untrusted third parties for backup purposes (if you want)
