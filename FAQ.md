@@ -658,7 +658,8 @@ By default just tested & selected SSD encasings/controller are running enabled w
 Work notes for the process of producing a new SD card image release:
 
 * Make sure you have the "Versioning" final in your RaspiBlitz Source Code
-* Start [`Ubuntu LIVE`](http://releases.ubuntu.com/18.04.3/ubuntu-18.04.3-desktop-amd64.iso) from USB stick on the Build Computer (press F12 on startup)
+* Start [`Ubuntu LIVE`](http://releases.ubuntu.com/18.04.3/ubuntu-18.04.3-desktop-amd64.iso) from USB stick
+* Under Settings: best to set correct keyboard language & power settings to prevent monitor turn off
 * Connect to a secure WiFi (hardware switch on) or LAN
 * Download the latest RaspiOS-64bit (zip & sig file) namend in the [build_sdcard.sh](./build_sdcard.sh) and note the SHA256 checksum
 * From the browser `Show All Downloads` and from the context menu select `Open Containing Folder`
@@ -687,6 +688,7 @@ Work notes for the process of producing a new SD card image release:
 * Remove `Ubuntu LIVE` USB stick and cut power from the RaspberryPi
 * Connect USB stick with latest `TAILS` (make it stay offline)
 * Boot Tails with extra setting of Admin-Passwort and remember (use later for sudo)
+* Menu > Systemtools > Settings > Energy -> best to set monitor to never turn off
 * Connect USB stick with GPG signing keys - decrypt drive if needed
 * Open Terminal and cd into directory of USB Stick under `/media/amnesia`
 * Run `gpg --import ./sub.key`, check and `exit`
