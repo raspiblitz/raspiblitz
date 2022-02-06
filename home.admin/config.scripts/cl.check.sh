@@ -55,3 +55,12 @@ if [ $(grep -c "^feeadjuster" < ${CLCONF}) -gt 0 ];then
     /home/admin/config.scripts/blitz.conf.sh set ${netprefix}feeadjuster "off"
   fi
 fi
+
+if [ ${CHAIN} = "testnet" ]; then 
+  clrpcsubdir="/testnet"
+elif [ ${CHAIN} = "signet" ]; then 
+  clrpcsubdir="/signet"
+fi
+# make the lightning-rpc socket group readable
+chmod 770 /home/bitcoin/.lightning/bitcoin${clrpcsubdir}
+chmod 660 /home/bitcoin/.lightning/bitcoin${clrpcsubdir}/lightning-rpc
