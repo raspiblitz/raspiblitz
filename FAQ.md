@@ -669,7 +669,8 @@ Work notes for the process of producing a new SD card image release:
 * The result should say "correct signature" and the fingerprint should end with `8738 CD6B 956F 460C`
 * Insert an NTFS formatted USB stick and use the file manager to move all files to the USB
 * Use in file manager context on NTFS USB stick `extract here` to unzip
-* Connect SD card reader with a 8GB SD card
+* Download script for later with `curl https://raw.githubusercontent.com/Drewsif/PiShrink/master/pishrink.sh > pishrink.sh`
+* Connect SD card reader with a SD card (16GB recommended)
 * In the file manager open context on the .img-file, select `Open With Disk Image Writer` and write the image to the SD card
 * In the file manager open context on `boot` drive free space `open in terminal`
 * Run the commands: `touch ssh` and `exit`
@@ -685,7 +686,7 @@ Work notes for the process of producing a new SD card image release:
 * Disconnect WiFi/LAN on build laptop (hardware switch off) and shutdown
 * Remove `Ubuntu LIVE` USB stick and cut power from the RaspberryPi
 * Connect USB stick with latest `TAILS` (make it stay offline)
-* Power on the Build Laptop (press F12 for boot menu)
+* Boot Tails with extra setting of Admin-Passwort and remember (use later for sudo)
 * Connect USB stick with GPG signing keys - decrypt drive if needed
 * Open Terminal and cd into directory of USB Stick under `/media/amnesia`
 * Run `gpg --import ./sub.key`, check and `exit`
@@ -694,8 +695,12 @@ Work notes for the process of producing a new SD card image release:
 * Click on `boot` volume once in the file manger
 * Connect the NTFS USB stick, open in file manager and delete old files
 * Open Terminal and cd into directory of NTFS USB stick under `/media/amnesia`
+* `sahsum -a 256 ./pishrink.sh` should be `e46e1e1e3c6e3555f9fff5435e2305e99b98aaa8dc28db1814cf861fbb472a69`
+* if not: review changes in latest pishrink script
 * Run `df` to check on the SD card device name (`boot` - ignore last partition number)
-* `dd if=/dev/[sdcarddevice] | gzip > ./raspiblitz-vX.X-YEAR-MONTH-DAY.img.gz`
+* `dd if=/dev/[sdcarddevice] of=./raspiblitz.img`
+* `chmod +x ./pishrink.sh | sudo ./pishrink.sh ./raspiblitz.img`
+* `gzip ./raspiblitz.img > ./raspiblitz-vX.X-YEAR-MONTH-DAY.img.gz`
 * When finished you should see that more then 7GB were copied
 * Then run `shasum -a 256 *.gz > sha256.txt`
 * Sign with `gpg --output raspiblitz-vX.X-YEAR-MONTH-DAY.img.gz.sig --detach-sign *.gz`
@@ -704,7 +709,6 @@ Work notes for the process of producing a new SD card image release:
 * Run tests on the new image
 * Upload the new image to the Download Server - put sig-file next to it
 * Copy SHA256-String into GitHub README and update the download link
-
 
 
 

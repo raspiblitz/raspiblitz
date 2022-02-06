@@ -321,7 +321,7 @@ elif [ "${eventID}" == "sdtoosmall" ]; then
     # contentWords[0] --> size string (for example '16GB')
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "
 PROBLEM: SD CARD IS TOO SMALL 
-Minimum of ${contentWords[0]} needed
+Capacity of 32GB recommended
 Cut power & create fresh sd card
 " 7 40
 
