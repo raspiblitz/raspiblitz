@@ -681,7 +681,7 @@ Work notes for the process of producing a new SD card image release:
 * In terminal `ssh pi@[IP-OF-RASPIBLITZ]`
 * Password is `raspberry`
 * Run the following command BUT REPLACE `[BRANCH]` with the branch-string of your latest version
-* `wget --no-cache https://raw.githubusercontent.com/rootzoll/raspiblitz/[BRANCH]/build_sdcard.sh && sudo bash build_sdcard.sh -b BRANCH]`
+* `wget --no-cache https://raw.githubusercontent.com/rootzoll/raspiblitz/[BRANCH]/build_sdcard.sh && sudo bash build_sdcard.sh -b [BRANCH]`
 * Monitor/Check outputs for warnings/errors - install LCD
 * Login new with `ssh admin@[IP-OF-RASPIBLITZ]` (pw: raspiblitz) and run `release`
 * Disconnect WiFi/LAN on build laptop (hardware switch off) and shutdown
@@ -702,7 +702,7 @@ Work notes for the process of producing a new SD card image release:
 * Run `df` to check on the SD card device name (`boot` - ignore last partition number)
 * `dd if=/dev/[sdcarddevice] of=./raspiblitz.img`
 * `chmod +x ./pishrink.sh | sudo ./pishrink.sh ./raspiblitz.img`
-* `gzip ./raspiblitz.img > ./raspiblitz-vX.X-YEAR-MONTH-DAY.img.gz`
+* `gzip -c ./raspiblitz.img > ./raspiblitz-vX.X-YEAR-MONTH-DAY.img.gz`
 * When finished you should see that more then 7GB were copied
 * Then run `shasum -a 256 *.gz > sha256.txt`
 * Sign with `gpg --output raspiblitz-vX.X-YEAR-MONTH-DAY.img.gz.sig --detach-sign *.gz`
