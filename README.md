@@ -2,7 +2,7 @@
 
 *Build your own Lightning & Bitcoin Fullnode on a RaspberryPi with a nice Display.*
 
-`Version 1.7.1 with lnd 0.13.3 & c-lightning 0.10.0 and bitcoin 22.0.0`
+`Version 1.7.1 with lnd 0.14.2 & c-lightning 0.10.2 and bitcoin 22.0.0`
 
 ![RaspiBlitz](pictures/raspiblitz.jpg)
 
