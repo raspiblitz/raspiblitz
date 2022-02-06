@@ -2,7 +2,7 @@
 
 *Build your own Lightning & Bitcoin Fullnode on a RaspberryPi with a nice Display.*
 
-`Version 1.7.1 with lnd 0.14.2 & c-lightning 0.10.2 and bitcoin 22.0.0`
+`Version 1.7.2rc2 with lnd 0.14.2 & c-lightning 0.10.2 and bitcoin 22.0.0`
 
 ![RaspiBlitz](pictures/raspiblitz.jpg)
 
@@ -121,12 +121,12 @@ In the end your RaspiBlitz should look like this:
 |Philosophy|Trust|Sovereignty|
 |Difficulty level|Easy|Medium|
 |Pros|Make Blitz accessible to everyone|You don't need to trust us, build from your own forked repository|
-|Instructions|[Download 1.7.2rc1f image](https://raspiblitz.fulmo.org/images/raspiblitz-v1.7.2rc1f-2022-01-29.img.gz) and [Flash the sd card](README.md#write-the-sd-card-image-to-your-sd-card)|[Build your own sd card image](#build-the-sd-card-image)|
+|Instructions|[Download 1.7.2rc2 image](https://raspiblitz.fulmo.org/images/raspiblitz-v1.7.2rc2-2022-02-05.img.gz) and [Flash the sd card](README.md#write-the-sd-card-image-to-your-sd-card)|[Build your own sd card image](#build-the-sd-card-image)|
 |Verify what?|[Signature file]() and [verify the Sig](FAQ.md#how-to-verify-the-sd-card-image-after-download) OR SHA-256 (below)|All of the code, don't trust, verify|
 
 If downloading the maintainer SD card image:
 * GPG 64-bit (main): 1C73 060C 7C17 6461 & (sub): AA9D D1B5 CC56 47DA
-* SHA-256: 4b986d7d2808d1e9438ad869ec55a7f67416ccd05f4ba1dc0d278dd6293cda46
+* SHA-256: 358eccd8ebccab68e4db6c534bd9d0a27d783cbc8d5e1341d52361dcbc7cbdef
 
 Which verification method should I used: Hash or Signature?
 * Signed file prove to you that the SD card image was actually built by the lead developer of the RaspiBlitz project. (Safest)
