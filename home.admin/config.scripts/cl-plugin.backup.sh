@@ -76,7 +76,7 @@ if [ "$1" = on ];then
 
   if [ $(crontab -u admin -l | grep -c "backup-compact $CHAIN") -eq 0 ]; then
     echo "Add weekly backup-compact as a cronjob"
-    cronjob="@weekly /home/admin/cl-plugin.backup.sh backup-compact $CHAIN"
+    cronjob="@weekly /home/admin/config.scripts/cl-plugin.backup.sh backup-compact $CHAIN"
     (crontab -u admin -l; echo "$cronjob" ) | crontab -u admin -
   fi
   echo "# The crontab for admin now is:"
