@@ -241,7 +241,8 @@ if [ "$1" = "status" ]; then
             cp -a /mnt/hdd${subVolumeDir}/app-data/wpa_supplicant.conf /var/cache/raspiblitz/hdd-inspect/wpa_supplicant.conf 2>/dev/null
 
             # Convert old ssh backup data structure (if needed)
-            if [ -d "/mnt/hdd/ssh" ]; then
+            oldDataExists=$(sudo ls /mnt/hdd/ssh/ssh_host_rsa_key 2>/dev/null | grep -c "ssh_host_rsa_key")
+            if [ "${oldDataExists}" != "0" ]; then
                 # make a complete backup of directory
                 cp -a /mnt/hdd/ssh /mnt/hdd/app-storage/ssh-old-backup
                 # delete old false sub directory (if exists)
