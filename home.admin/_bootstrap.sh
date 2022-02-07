@@ -658,6 +658,7 @@ if [ ${isMounted} -eq 0 ]; then
   # if update/recovery/migration-followup
   if [ "${setupPhase}" == "update" ] || [ "${setupPhase}" == "recovery" ] || [ "${setupPhase}" == "migration" ]; then
     echo "Calling _provision.update.sh .." >> $logFile
+    echo "Follow in a new terminal with: 'tail -f raspiblitz.provision-update.log'" >> $logFile
     sed -i "s/^message=.*/message='Provision Update/Recovery/Migration'/g" ${infoFile}
     /home/admin/_provision.update.sh
     errorState=$?
