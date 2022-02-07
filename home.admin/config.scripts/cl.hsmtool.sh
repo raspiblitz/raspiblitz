@@ -262,8 +262,13 @@ elif [ "$1" = "unlock" ]; then
   while [ $($lightningcli_alias getinfo 2>&1 | grep -c '"id":') -eq 0 ];do
     clError=$(sudo journalctl -n5 -u ${netprefix}lightningd)
     
+    # check passwordfile
+    if [ "$(eval echo \$${netprefix}clEncryptedHSM)" = "on" ] && [ ! -f $passwordFile ];then
+        passwordToFile
+        sudo systemctl restart ${netprefix}lightningd
+
     # getpassword
-    if [ $(echo "${clError}" | \
+    elif [ $(echo "${clError}" | \
       grep -c 'encrypted-hsm: Could not read pass from stdin.') -gt 0 ];then
       if [ ${justUnlocked} -eq 0 ];then 
         if [ -f $passwordFile ];then
