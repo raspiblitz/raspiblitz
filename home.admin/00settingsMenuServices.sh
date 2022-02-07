@@ -43,7 +43,7 @@ if [ "${network}" == "bitcoin" ]; then
   OPTIONS+=(a 'BTC Mempool Space' ${mempoolExplorer})
   OPTIONS+=(j 'BTC JoinMarket+JoininBox menu' ${joinmarket})
   OPTIONS+=(w 'BTC Download Bitcoin Whitepaper' ${whitepaper})
-  OPTIONS+=(v 'BTC BitcoinMinds.org in Local' ${bitcoinminds})
+  OPTIONS+=(v 'BTC Install BitcoinMinds.org' ${bitcoinminds})
 fi
 
 
