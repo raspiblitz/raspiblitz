@@ -103,6 +103,9 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     # Remove user and stuff here
     sudo userdel -rf bitcoinminds 2>/dev/null
 
+    # delete firewall entry
+    sudo ufw delete allow 11026 comment 'bitcoinminds'
+
     echo ""
     echo "# ***"
     echo "# OK - BitcoinMinds removed."
