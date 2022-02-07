@@ -241,16 +241,17 @@ if [ "$1" = "status" ]; then
             cp -a /mnt/hdd${subVolumeDir}/app-data/wpa_supplicant.conf /var/cache/raspiblitz/hdd-inspect/wpa_supplicant.conf 2>/dev/null
 
             # Convert old ssh backup data structure (if needed)
-            oldDataExists=$(sudo ls /mnt/hdd/ssh/ssh_host_rsa_key 2>/dev/null | grep -c "ssh_host_rsa_key")
+            oldDataExists=$(sudo ls /mnt/hdd${subVolumeDir}/ssh/ssh_host_rsa_key 2>/dev/null | grep -c "ssh_host_rsa_key")
             if [ "${oldDataExists}" != "0" ]; then
                 # make a complete backup of directory
-                cp -a /mnt/hdd/ssh /mnt/hdd/app-storage/ssh-old-backup
+                cp -a /mnt/hdd${subVolumeDir}/ssh /mnt/hdd${subVolumeDir}/app-storage/ssh-old-backup
                 # delete old false sub directory (if exists)
-                rm -r /mnt/hdd/ssh/ssh 2>/dev/null
+                rm -r /mnt/hdd${subVolumeDir}/ssh/ssh 2>/dev/null
                 # move ssh root keys into new directory (if exists)
-                mv /mnt/hdd/ssh/root_backup /mnt/hdd/app-data/ssh-root 2>/dev/null
+                mv /mnt/hdd${subVolumeDir}/ssh/root_backup /mnt/hdd${subVolumeDir}/app-data/ssh-root 2>/dev/null
                 # move sshd keys into new directory
-                mv /mnt/hdd/ssh /mnt/hdd/app-data/sshd/ssh
+                mkdir -p /mnt/hdd${subVolumeDir}/app-data/sshd 2>/dev/null
+                mv /mnt/hdd${subVolumeDir}/ssh /mnt/hdd${subVolumeDir}/app-data/sshd/ssh
             fi
 
             # make copy of SSH keys to RAMDISK (if available)
