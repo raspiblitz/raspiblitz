@@ -249,7 +249,7 @@ if [ "$1" = "status" ]; then
                 # move ssh root keys into new directory (if exists)
                 mv /mnt/hdd/ssh/root_backup /mnt/hdd/app-data/ssh-root 2>/dev/null
                 # move sshd keys into new directory
-                mv /mnt/hdd/ssh /mnt/hdd/app-data/sshd
+                mv /mnt/hdd/ssh /mnt/hdd/app-data/sshd/ssh
             fi
 
             # make copy of SSH keys to RAMDISK (if available)
