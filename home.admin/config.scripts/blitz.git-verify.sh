@@ -50,8 +50,10 @@ _temp="$(mktemp -p /dev/shm/)"
 if [ $# -eq 3 ]; then
   commitHash="$(git log --oneline | head -1 | awk '{print $1}')"
   gitCommand="git verify-commit $commitHash"
+  commitOrTag="$commitHash commit"
 elif [ $# -eq 4 ]; then
   gitCommand="git verify-tag $4"
+  commitOrTag="$4 tag"
 fi
 echo "# running: ${gitCommand}"
 if ${gitCommand} 2>&1 >&"$_temp"; then
@@ -60,7 +62,7 @@ else
   goodSignature=0
 fi
 echo
-cat $_temp
+cat "$_temp"
 echo "# goodSignature(${goodSignature})"
 
 correctKey=$(tr -d " \t\n\r" < "$_temp" | grep "${PGPpubkeyFingerprint}" -c)
@@ -73,7 +75,7 @@ if [ "${correctKey}" -lt 1 ] || [ "${goodSignature}" -lt 1 ]; then
 else
   echo
   echo "##########################################################################"
-  echo "# OK --> the PGP signature of the checked out $commitHash commit is correct"
+  echo "# OK --> the PGP signature of the checked out ${commitOrTag} is correct"
   echo "##########################################################################"
   echo
   exit 0
