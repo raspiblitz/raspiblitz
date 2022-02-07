@@ -75,6 +75,9 @@ npm run serve
    # setting value in raspi blitz config
     sudo sed -i "s/^bitcoinminds=.*/bitcoinminds=on/g" /mnt/hdd/raspiblitz.conf
    
+  # add a firewall entry so the web UI is accessible from the local network
+    sudo ufw allow 11026 comment 'bitcoinminds'
+
     echo ""
     echo "# ***"
     echo "# OK - BitcoinMinds installed. Type 'bm' in the console to start the environment."
