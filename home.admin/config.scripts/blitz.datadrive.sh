@@ -30,7 +30,7 @@ fi
 btrfsInstalled=$(btrfs --version 2>/dev/null | grep -c "btrfs-progs")
 if [ ${btrfsInstalled} -eq 0 ]; then
   >&2 echo "# Installing BTRFS ..."
-  apt-get install -y btrfs-tools 1>/dev/null
+  apt-get install -y btrfs-progs 1>/dev/null
 fi
 btrfsInstalled=$(btrfs --version 2>/dev/null | grep -c "btrfs-progs")
 if [ ${btrfsInstalled} -eq 0 ]; then
