@@ -53,6 +53,20 @@ function installDependencies()
   sudo -u bitcoin pip3 install --user -r requirements.txt
 }
 
+function buildAndInstallCLbinaries()
+{
+  echo "- Configuring EXPERIMENTAL_FEATURES enabled"
+  echo
+  sudo -u bitcoin ./configure --enable-experimental-features
+  echo
+  echo "- Building C-lightning from source"
+  echo
+  sudo -u bitcoin make
+  echo
+  echo "- Install to /usr/local/bin/"
+  sudo make install || exit 1
+}
+
 if [ "$1" = "install" ]; then
   
   echo "# *** INSTALL C-LIGHTNING ${CLVERSION} BINARY ***"
@@ -65,7 +79,7 @@ if [ "$1" = "install" ]; then
     exit 1
   fi
 
-## Install from zip
+## Download and verify zip
 #  # prepare download dir
 #  sudo rm -rf /home/bitcoin/download
 #  sudo -u bitcoin mkdir -p /home/bitcoin/download
@@ -124,6 +138,7 @@ if [ "$1" = "install" ]; then
 #  sudo -u bitcoin unzip clightning-${CLVERSION}.zip
 #  cd clightning-${CLVERSION} || exit 1
 
+  # download and verify the source from github
   cd /home/bitcoin || exit 1
   echo
   echo "- Cloning https://github.com/ElementsProject/lightning.git"
@@ -139,14 +154,7 @@ if [ "$1" = "install" ]; then
 
   installDependencies
 
-  echo "- Configuring EXPERIMENTAL_FEATURES enabled"
-  sudo -u bitcoin ./configure --enable-experimental-features
-  
-  echo "- Building C-lightning from source"
-  sudo -u bitcoin make
-
-  echo "- Install to /usr/local/bin/"
-  sudo make install || exit 1
+  buildAndInstallCLbinaries
   
   installed=$(sudo -u bitcoin lightning-cli --version)
   if [ ${#installed} -eq 0 ]; then
@@ -195,24 +203,14 @@ if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = testPR ];then
     exit 1
   fi
 
-  # make sure binary is installed (will skip if already done)
-  /home/admin/config.scripts/cl.install.sh install
+  if [ "$1" = "update" ]||[ "$1" = "testPR" ];then
 
-  if [ ! -f /usr/local/bin/lightningd ]||[ "$1" = "update" ]||[ "$1" = "testPR" ];then
-
-    ########################
-    # Install dependencies # 
-    ########################
     echo "# apt update"
     echo
     sudo apt-get update
 
-    ####################################
-    # Download and compile from source #
-    ####################################
-
     cd /home/bitcoin || exit 1
-    if [ "$1" = "update" ]||[ "$1" = "testPR" ]||[ "$1" = "experimental" ];then
+    if [ "$1" = "update" ]||[ "$1" = "testPR" ];then
       echo
       echo "# Deleting the old source code"
       sudo rm -rf lightning
@@ -243,40 +241,23 @@ if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = testPR ];then
       echo "# https://github.com/ElementsProject/lightning/pull/$PRnumber"
       sudo -u bitcoin git fetch origin pull/$PRnumber/head:pr$PRnumber || exit 1
       sudo -u bitcoin git checkout pr$PRnumber || exit 1
-
-    else
-      echo "# Installing the version $CLVERSION"
-      sudo -u bitcoin git reset --hard $CLVERSION
     fi
 
     installDependencies
 
-    echo "# Building with EXPERIMENTAL_FEATURES enabled"
-    echo
-    sudo -u bitcoin ./configure --enable-experimental-features
-    echo
     currentCLversion=$(cd /home/bitcoin/lightning 2>/dev/null; \
     git describe --tags 2>/dev/null)
     echo "# Building from source C-lightning $currentCLversion"
-    echo
-    sudo -u bitcoin make
-    echo
-    echo "# Built C-lightning $currentCLversion"
-    echo
-    echo "# Install to /usr/local/bin/"
-    echo
-    sudo make install || exit 1
-    # clean up
-    # cd .. && rm -rf lightning
-  
-  else
-    installedVersion=$(sudo -u bitcoin /usr/local/bin/lightningd --version)
-    echo "# C-lightning ${installedVersion} is already installed"
+
+    buildAndInstallCLbinaries
   fi
   
   ##########
   # Config #
   ##########
+
+  # make sure binary is installed (will skip if already done)
+  /home/admin/config.scripts/cl.install.sh install
 
   echo "# Make sure bitcoin is in the ${TORGROUP} group"
   sudo usermod -a -G ${TORGROUP} bitcoin
