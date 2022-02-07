@@ -68,7 +68,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "# ***"
     echo "
 cd /home/bitcoinminds/bitcoinminds/bitcoinminds-ui
-npm run serve
+npm run serve -- --port 11026
 " | sudo -u bitcoinminds tee -a /home/bitcoinminds/.bashrc
 
 
