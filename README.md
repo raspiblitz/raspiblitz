@@ -1235,36 +1235,11 @@ This video explains in detail how you can set further back Static Channel inform
 
 The following options are also explained here shortly:
 
-#### A) DropBox Backup Target
+#### A) Nextcloud
 
-Toggle the StaticChannelBackup option to DropBox in the `SETTINGS` menu of your RaspiBlitz.
-It will ask you for the Dropbox-Authtoken.
-This is how you can get this token:
+Nextcloud is an open-source project to host your own files: https://en.wikipedia.org/wiki/Nextcloud - in its basics its an open DropBox replacement ... but can do much much more. You can run it yourself or use a hosted Nextcloud server.
 
-Go to your web browser, do the following:
-
-1. Go to https://www.dropbox.com/developers/apps/create and sign in.
-
-1. Choose **Create App**.
-
-    ![Dropbox API 1](https://github.com/rootzoll/raspiblitz/raw/v1.6/pictures/dropbox-1.png)
-
-    Choose the 'Scoped Access' & 'App Folder' and set a unique name - for example `LNDbackup` with a random number behind it. Agree to Terms of Service and click 'Create App'.
-
-1. Set **Permissions**.
-
-    ![Dropbox API 2](https://github.com/rootzoll/raspiblitz/raw/v1.6/pictures/dropbox-2.png)
-
-    Its important first to select the `Permissions` tab and activate the `files.content.write` permission. Don't forget to `Submit` the change before continue.
-
-1. Generate **OAUth2 Token**.
-
-    ![Dropbox API 3](https://github.com/rootzoll/raspiblitz/raw/v1.6/pictures/dropbox-3.png)
-
-    Now go back to the 'Settings' tab and under 'OAuth2', choose 'no expiration' under 'Access token expiration' then click the 'Generate' button. You will now see a long string of letters and numbers appear. This is your **Dropbox-Authtoken**. Make sure to copy the complete token string .. there might be more if you scroll to the right in the token field.
-
-To test it, try opening or closing a channel and then check if you can find a copy of `channel.backup` in your Dropbox.
-You can check the background-script logs to see details on errors: `sudo journalctl -f -u background`
+Find free Nextcloud providers here to sign up: https://nextcloud.com/signup/
 
 #### B) SCP Backup Target
 
