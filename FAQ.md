@@ -703,7 +703,6 @@ Work notes for the process of producing a new SD card image release:
 * `dd if=/dev/[sdcarddevice] of=./raspiblitz.img`
 * `chmod +x ./pishrink.sh | sudo ./pishrink.sh ./raspiblitz.img`
 * `gzip -c ./raspiblitz.img > ./raspiblitz-vX.X-YEAR-MONTH-DAY.img.gz`
-* When finished you should see that more then 7GB were copied
 * Then run `shasum -a 256 *.gz > sha256.txt`
 * Sign with `gpg --output raspiblitz-vX.X-YEAR-MONTH-DAY.img.gz.sig --detach-sign *.gz`
 * Shutdown build computer
