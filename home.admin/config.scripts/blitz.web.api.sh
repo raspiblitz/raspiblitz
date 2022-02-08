@@ -88,8 +88,11 @@ WantedBy=multi-user.target
   # TODO: remove after experimental step
   sudo ufw allow 11111 comment 'WebAPI Develop'
 
+  source <(/home/admin/_cache.sh export internet_localip)
+
   # install info
-  echo "# the API doc should now be available under http://[LOCALHOST]/api/docs or try port 11111 for testing"
+  echo "# the API is now running on port 11111 & doc available under:"
+  echo "# http://${internet_localip}/api/docs"
   echo "# check for systemd:  sudo systemctl status blitzapi"
   echo "# check for logs:     sudo journalctl -f -u blitzapi"
 

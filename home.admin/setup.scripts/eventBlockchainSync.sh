@@ -46,6 +46,7 @@ source <(/home/admin/_cache.sh get \
     lightning \
     ln_default_ready \
     ln_default_sync_progress \
+    ln_default_recovery_mode \
     system_count_start_lightning \
 )
 
@@ -61,6 +62,8 @@ if [ "${lightning}" != ""  ] && [ "${ln_default_sync_progress}" == "" ]; then
     else
         scanProgress="waiting"
     fi
+elif [ "${ln_default_sync_progress}" == "100.00" ] && [ "${ln_default_recovery_mode}" == "1" ]; then
+    scanProgress="recoverscan"
 elif [ ${#ln_default_sync_progress} -lt 6 ]; then
     scanProgress=" ${ln_default_sync_progress} %"
 else

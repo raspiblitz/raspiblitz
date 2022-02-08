@@ -20,9 +20,9 @@ fi
 if [ $($lightningcli_alias | grep -c "summary") -eq 0 ];then
   echo "# Starting the summary plugin"
   # https://github.com/ElementsProject/lightning/tree/master/contrib/pylightning
-  sudo -u bitcoin pip install pylightning 1>/dev/null
+  sudo -u bitcoin pip install --user pylightning 1>/dev/null
   # https://github.com/lightningd/plugins#dynamic-plugin-initialization
-  sudo -u bitcoin pip install -r /home/bitcoin/cl-plugins-available/plugins/summary/requirements.txt 1>/dev/null
+  sudo -u bitcoin pip install --user -r /home/bitcoin/cl-plugins-available/plugins/summary/requirements.txt 1>/dev/null
   $lightningcli_alias plugin start -H /home/bitcoin/cl-plugins-available/plugins/summary/summary.py 1>/dev/null
 fi
 
@@ -41,5 +41,5 @@ $lightningcli_alias -H summary
 echo
 
 if [ "$(echo "$@" | grep -c "runonce")" -gt 0 ];then
-  $lightningcli_alias plugin stop -H /home/bitcoin/cl-plugins-available/plugins/summary/summary.py
+  $lightningcli_alias plugin stop /home/bitcoin/cl-plugins-available/plugins/summary/summary.py
 fi

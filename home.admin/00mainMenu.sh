@@ -147,6 +147,9 @@ fi
 if [ "${circuitbreaker}" == "on" ]; then
   OPTIONS+=(CIRCUIT "Circuitbreaker (LND firewall)")
 fi
+if [ "${tallycoinConnect}" == "on" ]; then
+  OPTIONS+=(TALLY "Tallycoin Connect")
+fi
 
 # dont offer to switch to "testnet view for now" - so no wswitch back to mainnet needed
 #if [ ${chain} != "main" ]; then
@@ -195,7 +198,7 @@ case $CHOICE in
               do
 
               # show the same info as on LCD screen
-              /home/admin/00infoBlitz.sh ${lightning} ${chain}net
+              /home/admin/00infoBlitz.sh ${chain}net ${lightning}
 
               # wait 6 seconds for user exiting loop
               echo ""
@@ -281,6 +284,9 @@ case $CHOICE in
             ;;
         THUB)
             sudo /home/admin/config.scripts/bonus.thunderhub.sh menu
+            ;;
+        TALLY)
+            sudo /home/admin/config.scripts/bonus.tallycoin-connect.sh menu
             ;;
         ZEROTIER)
             sudo /home/admin/config.scripts/bonus.zerotier.sh menu

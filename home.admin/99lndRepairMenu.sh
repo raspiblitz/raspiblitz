@@ -89,9 +89,9 @@ syncAndCheckLND() # from _provision.setup.sh
   sudo /home/admin/config.scripts/blitz.datadrive.sh link
 
   # check if now a config exists
-  configLinkedCorrectly=$(ls /home/bitcoin/.lnd/lnd.conf | grep -c "lnd.conf")
+  configLinkedCorrectly=$(ls /home/bitcoin/.lnd/${netprefix}lnd.conf | grep -c "${netprefix}lnd.conf")
   if [ "${configLinkedCorrectly}" != "1" ]; then
-    echo "lnd-link-broken" "link /home/bitcoin/.lnd/lnd.conf broken" ""
+    echo "lnd-link-broken" "link /home/bitcoin/.lnd/${netprefix}lnd.conf broken" ""
     exit 7
   fi
 
@@ -103,7 +103,7 @@ syncAndCheckLND() # from _provision.setup.sh
   sudo systemctl stop ${netprefix}lnd 2>/dev/null
   sudo systemctl disable ${netprefix}lnd 2>/dev/null
 
-  # copy lnd service
+  # copy lnd service - note the same service is created with 'lnd.install.sh on mainnet'
   sudo cp /home/admin/assets/lnd.service /etc/systemd/system/lnd.service
 
   # start lnd up
@@ -137,12 +137,14 @@ syncAndCheckLND() # from _provision.setup.sh
   # now sync macaroons & TLS to other users
   sudo /home/admin/config.scripts/lnd.credentials.sh sync
 
-  # make a final lnd check
-  source <(/home/admin/config.scripts/lnd.check.sh basic-setup)
-  if [ "${err}" != "" ]; then
-    echo "lnd-check-error" "lnd.check.sh basic-setup with error" "/home/admin/config.scripts/lnd.check.sh basic-setup --> ${err}"
-    exit 15
-  fi
+ # make a final lnd check
+ source <(/home/admin/config.scripts/lnd.check.sh basic-setup "${chain}net")
+ if [ "${err}" != "" ]; then
+   echo
+   echo "lnd-check-error" "lnd.check.sh basic-setup ${chain}net with error" "/home/admin/config.scripts/lnd.check.sh basic-setup ${chain}net --> ${err}"
+   echo
+   # exit 15
+ fi
 }
 
 function restoreFromSeed()
@@ -172,21 +174,7 @@ or having a complete LND rescue-backup from your old node.
 
     getpasswordC
 
-    clear
-    echo  
-    echo "The next step will overwrite the old LND wallets on all chains"
-    echo "Press ENTER to continue or CTRL+C to abort"
-    read key
-    echo "Stopping ${netprefix}lnd ..."
-    sudo systemctl stop ${netprefix}lnd
-    if [ "${tlnd}" == "on" ];then
-      sudo systemctl stop tlnd
-    fi
-    if [ "${slnd}" == "on" ];then
-      sudo systemctl stop slnd
-    fi
-    echo "Reset wallet"
-    sudo rm -r /mnt/hdd/lnd
+    removeLNDwallet
 
     # creates fresh lnd.conf without an alias
     /home/admin/config.scripts/lnd.install.sh on $CHAIN
@@ -213,64 +201,102 @@ function restoreSCB()
 {
     # import SCB and get results
     _temp="/var/cache/raspiblitz/.temp.tmp"
-    /home/admin/config.scripts/lnd.backup.sh scb-import-gui setup $_temp
+    # 'production' to use passwordA
+    /home/admin/config.scripts/lnd.backup.sh scb-import-gui production $_temp
     source $_temp 2>/dev/null
     sudo rm $_temp 2>/dev/null
     
     # if user canceled the upload
-    if [ "${staticchannelbackup}" == "" ]; then
-      # signal cancel to the calling script by exit code (5 = exit on scb)
+    if ! ls -la /home/admin/channel.backup; then
+      echo "# signal cancel to the calling script by exit code (5 = exit on scb)"
       exit 5
     fi
     
     echo
-    echo "The next step will attempt to trigger all online peers to force close the channels with this node."
-    echo "Restoring the channel.backup can be repeated again until all the channels are force closed."
-    echo "Contacting the peers and asking them to force close achieves the same."
+    echo "The next step will attempt to trigger all online peers to force close the channels."
+    echo "Restoring the channel.backup can be repeated until all the channels are force closed."
+    echo
+    echo "Make sure to enter the Raspiblitz menu to trigger the next step."
+    echo "If menu does not open automatically - use command: raspiblitz"
     echo "Press ENTER to continue or CTRL+C to abort"
     read key
 
-    # WALLET --> SEED + SCB 
-    if [ "${staticchannelbackup}" != "" ]; then
+### --> DEACTIVATED BECAUSE when a file is placed at /home/admin/channel.backup
+###     it will now automatically trigger a Static-Channel-Backup procedure after lnd recoverymode is done
+#
+#    # WALLET --> SEED + SCB 
+#    if ls -la /home/admin/channel.backup; then
+#
+#      # LND was restarted so need to unlock
+#      echo "WALLET --> UNLOCK WALLET - SCAN 0"
+#      /home/admin/_cache.sh set message "LND Wallet Unlock - scan 0"
+#      source <(/home/admin/config.scripts/lnd.initwallet.py unlock "${chain}net" "${passwordC}" 0)
+#      if [ "${err}" != "" ]; then
+#        echo "lnd-wallet-unlock" "lnd.initwallet.py unlock returned error" "/home/admin/config.scripts/lnd.initwallet.py unlock ${chain}net ... --> ${err} + ${errMore}"
+#        if [ "${errMore}" = "wallet already unlocked, WalletUnlocker service is no longer available" ]; then
+#          echo "The wallet is already unlocked, continue."
+#        else
+#          exit 11
+#        fi
+#      fi
+#
+#      echo "WALLET --> SEED + SCB "
+#      /home/admin/_cache.sh set message "LND Wallet (SEED & SCB)"
+#      macaroonPath="/home/admin/.lnd/data/chain/${network}/${chain}net/admin.macaroon"
+#      source <(/home/admin/config.scripts/lnd.initwallet.py scb ${chain}net "/home/admin/channel.backup" "${macaroonPath}")
+#      if [ "${err}" != "" ]; then
+#        echo "lnd-wallet-seed+scb" "lnd.initwallet.py scb returned error" "/home/admin/config.scripts/lnd.initwallet.py scb ${chain}net ... --> ${err} + ${errMore}"
+#        while [ $(echo "${errMore}" | grep -c "RPC server is in the process of starting up") -gt 0 ]; do
+#          echo "# ${errMore}"
+#          echo "# waiting 10 seconds (${counter})"
+#          counter=$((counter+1))
+#          if [ ${counter} -eq 60 ]; then
+#            echo "# Giving up after 10 minutes"
+#            echo
+#            echo "lnd-wallet-seed+scb" "lnd.initwallet.py scb returned error" "/home/admin/config.scripts/lnd.initwallet.py scb ${chain}net ... --> ${err} + ${errMore}"
+#            echo
+#            echo "The SCB recovery is not possible now - use the RETRYSCB option the REPAIR-LND menu after LND is synced."
+#            echo "Can repeat the SCB recovery until all peers have force closed the channels to this node."
+#            echo
+#            echo "# ${netprefix}lnd error logs:"
+#            sudo journalctl -u ${netprefix}lnd
+#            echo
+#            echo "# ${netprefix}lnd logs:"
+#            sudo tail /home/bitcoin/.lnd/logs/bitcoin/${CHAIN}/lnd.log
+#            exit 12
+#          fi
+#          sleep 10
+#          source <(/home/admin/config.scripts/lnd.initwallet.py scb ${chain}net "/home/admin/channel.backup" "${macaroonPath}")
+#        done
+#
+#      fi
+#    fi
+#
+#    syncAndCheckLND
 
-      # LND was restarted so need to unlock
-      echo "WALLET --> UNLOCK WALLET - SCAN 0"
-      /home/admin/_cache.sh set message "LND Wallet Unlock - scan 0"
-      source <(/home/admin/config.scripts/lnd.initwallet.py unlock "${chain}net" "${passwordC}" 0)
-      if [ "${err}" != "" ]; then
-        echo "lnd-wallet-unlock" "lnd.initwallet.py unlock returned error" "/home/admin/config.scripts/lnd.initwallet.py unlock ${chain}net ... --> ${err} + ${errMore}"
-        if [ "${errMore}" = "wallet already unlocked, WalletUnlocker service is no longer available" ]; then
-          echo "The wallet is already unlocked, continue."
-        else
-          exit 11
-        fi
-      fi
+}
 
-      echo "WALLET --> SEED + SCB "
-      /home/admin/_cache.sh set message "LND Wallet (SEED & SCB)"
-      macaroonPath="/home/admin/.lnd/data/chain/${network}/${chain}net/admin.macaroon"
-      source <(/home/admin/config.scripts/lnd.initwallet.py scb ${chain}net "/home/admin/channel.backup" "${macaroonPath}")
-      if [ "${err}" != "" ]; then
-        echo "lnd-wallet-seed+scb" "lnd.initwallet.py scb returned error" "/home/admin/config.scripts/lnd.initwallet.py scb ${chain}net ... --> ${err} + ${errMore}"
-        if [ "${errMore}" = "server is still in the process of starting" ]; then
-          echo "The SCB recovery is not possible now - use the RETRYSCB option the REPAIR-LND menu after LND is synced."
-          echo "Can repeat the SCB recovery until all peers have force closed the channels to this node."
-        else
-          exit 12
-        fi
-      fi
-    fi
-
-    syncAndCheckLND
-
-    # LND was restarted so need to unlock
-    echo "WALLET --> UNLOCK WALLET - SCAN 5000"
-    /home/admin/_cache.sh set message "LND Wallet Unlock - scan 5000"
-    source <(/home/admin/config.scripts/lnd.initwallet.py unlock ${chain}net "${passwordC}" 5000)
-    if [ "${err}" != "" ]; then
-      echo "lnd-wallet-unlock" "lnd.initwallet.py unlock returned error" "/home/admin/config.scripts/lnd.initwallet.py unlock ${chain}net ... --> ${err} + ${errMore}"
-      exit 50
-    fi
+function removeLNDwallet 
+{
+  clear
+  echo  
+  echo "The next step WILL REMOVE the old LND wallet on ${CHAIN}"
+  echo "Press ENTER to continue or CTRL+C to abort"
+  read key
+  echo "# Stopping lnd on ${CHAIN} ..."
+  sudo systemctl stop ${netprefix}lnd
+  sudo systemctl disable ${netprefix}lnd
+  echo "Reset wallet on ${CHAIN}"
+  sudo rm -f /home/bitcoin/.lnd/${netprefix}lnd.conf
+  sudo rm -f /home/bitcoin/.lnd/${netprefix}v3_onion_private_key
+  sudo rm -f /mnt/hdd/lnd/data/chain/${network}/${CHAIN}/wallet.db
+  sudo rm -f /home/bitcoin/.lnd/data/graph/${CHAIN}/channel.db
+  sudo rm -f /home/bitcoin/.lnd/data/graph/${CHAIN}/sphinxreplay.db
+  
+  sudo rm -rf /mnt/hdd/lnd/data/chain/${network}/${CHAIN}
+  sudo rm -rf /home/bitcoin/.lnd/logs/${network}/${CHAIN}
+  sudo rm -rf /home/bitcoin/.lnd/data/graph/${CHAIN}
+  sudo rm -rf home/bitcoin/.lnd/data/watchtower/${CHAIN}
 }
 
 # BASIC MENU INFO
@@ -279,8 +305,10 @@ BACKTITLE="RaspiBlitz"
 TITLE="LND repair options for $CHAIN"
 MENU=""
 OPTIONS=()
-
-OPTIONS+=(COMPACT "Compact the LND channel.db")
+if [ "${chain}" = "main" ]; then
+  OPTIONS+=(COMPACT "Compact the LND channel.db")
+  OPTIONS+=(GETSCB "Download channel.backup (StaticChannelBackup)")
+fi
 OPTIONS+=(BACKUP-LND "Backup your LND data (Rescue-File)")
 OPTIONS+=(RESET-LND "Delete LND & start new node/wallet")
 OPTIONS+=(LNDRESCUE "Restore from a rescue file")
@@ -310,6 +338,9 @@ case $CHOICE in
     echo
     echo "Press ENTER to return to main menu."
     read key
+    ;;
+  GETSCB)
+    /home/admin/config.scripts/lnd.backup.sh scb-export-gui
     ;;
   BACKUP-LND)
     /home/admin/config.scripts/lnd.compact.sh interactive
@@ -342,26 +373,12 @@ case $CHOICE in
     # sudo /home/admin/config.scripts/lnd.setname.sh ${chain}net "${result}"
     # /home/admin/config.scripts/blitz.conf.sh set hostname "${result}"
 
-    echo "stopping ${netprefix}lnd ..."
-    sudo systemctl stop ${netprefix}lnd
-    if [ "${tlnd}" == "on" ];then
-      sudo systemctl stop tlnd
-    fi
-    if [ "${slnd}" == "on" ];then
-      sudo systemctl stop slnd
-    fi
-    echo "Delete wallet"
-    sudo rm -r /mnt/hdd/lnd
+    removeLNDwallet
+
     # create wallet
     /home/admin/config.scripts/lnd.install.sh on ${chain}net initwallet
     # display and delete the seed for ${chain}net
     sudo /home/admin/config.scripts/lnd.install.sh display-seed ${chain}net delete
-    if [ "${tlnd}" == "on" ];then
-      /home/admin/config.scripts/lnd.install.sh on testnet initwallet
-    fi
-    if [ "${slnd}" == "on" ];then
-      /home/admin/config.scripts/lnd.install.sh on signet initwallet
-    fi
 
     syncAndCheckLND
 
@@ -374,18 +391,24 @@ case $CHOICE in
   
   LNDRESCUE)
     askLNDbackupCopy
-    echo "The next step will overwrite the old LND wallets on all chains"
+
+    #removeAllLNDwallets 
+    clear
+    echo
+    echo "The next step WILL REMOVE the old LND wallets on ALL CHAINS"
     echo "Press ENTER to continue or CTRL+C to abort"
     read key
-    echo "Stopping ${netprefix}lnd ..."
-    sudo systemctl stop ${netprefix}lnd
+    echo "# Stopping lnd on mainnet ..."
+    sudo systemctl stop lnd
+    # don' t want to set CL as default if running parallel
+    #/home/admin/config.scripts/lnd.install.sh off mainnet
     if [ "${tlnd}" == "on" ];then
-      sudo systemctl stop tlnd
+      /home/admin/config.scripts/lnd.install.sh off testnet
     fi
     if [ "${slnd}" == "on" ];then
-      sudo systemctl stop slnd
+      /home/admin/config.scripts/lnd.install.sh off signet
     fi
-    echo "Delete wallet"
+    echo "Reset wallet"
     sudo rm -r /mnt/hdd/lnd
 
     ## from dialogLightningWallet.sh 
@@ -408,76 +431,81 @@ case $CHOICE in
     exit 0
     ;;
 
-  SEED+SCB)
-    restoreFromSeed
+  ONLYSEED)
 
-    restoreSCB
+    restoreFromSeed
     
+    echo "Set lnd recovery mode & restart ..."
+    sudo /home/admin/config.scripts/lnd.backup.sh "${chain}net" recoverymode on
+    sudo systemctl restart ${netprefix}lnd
+    sleep 3
+
+    echo "# Unlock wallet ..."
+    /home/admin/config.scripts/lnd.unlock.sh "${CHAIN}"
+
     echo
+    echo "System will now go thru rescan for on-chain funds"
     echo "Press ENTER to return to main menu."
     read key
+    # go back to main menu (and show)
+    /home/admin/00raspiblitz.sh
+    exit 0
+    ;;
+
+  SEED+SCB)
+
+    restoreFromSeed
+    restoreSCB
+    
+    echo "Set lnd recovery mode & restart ..."
+    sudo /home/admin/config.scripts/lnd.backup.sh "${chain}net" recoverymode on
+    sudo systemctl restart ${netprefix}lnd
+    sleep 3
+
+    echo "# Unlock wallet ..."
+    /home/admin/config.scripts/lnd.unlock.sh "${CHAIN}"
+
+    echo
+    echo "System will now go thru rescan for on-chain funds and when done"
+    echo "the Static-Channel-Backup will trigger to recover off-chain funds."
+    echo "Press ENTER to return to main menu."
+    read key
+
     # go back to main menu (and show)
     /home/admin/00raspiblitz.sh
     exit 0
     ;;
 
   RETRYSCB)
+
     restoreSCB
-    
-    echo
-    echo "Press ENTER to return to main menu."
-    read key
+
     # go back to main menu (and show)
     /home/admin/00raspiblitz.sh
-    exit 0
-    ;;
 
-  ONLYSEED)
-    restoreFromSeed
-    
-    echo "WALLET --> UNLOCK WALLET - SCAN 5000"
-    /home/admin/_cache.sh set message "LND Wallet Unlock - scan 5000"
-    source <(/home/admin/config.scripts/lnd.initwallet.py unlock "${chain}net" "${passwordC}" 5000)
-    if [ "${err}" != "" ]; then
-      echo "lnd-wallet-unlock" "lnd.initwallet.py unlock returned error" "/home/admin/config.scripts/lnd.initwallet.py unlock ${chain}net ... --> ${err} + ${errMore}"
-      exit 50
-    fi
-
-    echo "Press ENTER to return to main menu."
-    read key
-    # go back to main menu (and show)
-    /home/admin/00raspiblitz.sh
     exit 0
     ;;
 
   RESCAN)
     clear
-    echo "Restart lnd to lock the wallet ..."
-    echo "If this takes very long LND might be already rescanning."
-    echo "Can use 'sudo pkill lnd' to shut down ungracefully."
-    sudo systemctl restart lnd
 
-    # from blitz.conf.sh
-    configFile="/home/admin/raspiblitz.info"
-    keystr="fundRecovery"
-    valuestr="1"
-    # check if key needs to be added (prepare new entry)
-    entryExists=$(grep -c "^${keystr}=" ${configFile})
-    if [ ${entryExists} -eq 0 ]; then
-      echo "${keystr}=" | tee -a ${configFile}
+    source <(sudo /home/admin/config.scripts/lnd.backup.sh "${CHAIN}" recoverymode status)
+    if [ "${recoverymode}" == "0" ]; then
+
+      echo "Putting lnd back in recoverymode."
+      sudo /home/admin/config.scripts/lnd.backup.sh "${CHAIN}" recoverymode on
+      echo "Restarting lnd ..."
+      sudo systemctl restart ${netprefix}lnd
+      sleep 3
+
+    else
+
+      echo "lnd already in recoverymode."
+
     fi
-    # add valuestr quotes if not standard values
-    if [ "${valuestr}" != "on" ] && [ "${valuestr}" != "off" ] && [ "${valuestr}" != "1" ] && [ "${valuestr}" != "0" ]; then
-      valuestr="'${valuestr}'"
-    fi
-    # set value (sed needs sudo to operate when user is not root)
-    sudo sed -i "s/^${keystr}=.*/${keystr}=${valuestr}/g" ${configFile}
 
-    /home/admin/config.scripts/lnd.unlock.sh unlock
-
-    # switch rescan off for the next unlock
-    valuestr="0"
-    sudo sed -i "s/^${keystr}=.*/${keystr}=${valuestr}/g" ${configFile}
+    echo "# Unlock wallet ..."
+    /home/admin/config.scripts/lnd.unlock.sh "${CHAIN}"
 
     echo
     echo "To show the scanning progress in the background will follow the lnd.log with:" 

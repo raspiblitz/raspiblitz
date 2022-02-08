@@ -26,7 +26,19 @@ source <(/home/admin/_cache.sh get \
   BTCRPCexplorer \
 )
 
-# PARAMETER 1: forcing view on a lightning implementation
+# PARAMETER 1: forcing view on a given network
+PARAMETER_CHAIN=$2
+if [ "${PARAMETER_CHAIN}" == "mainnet" ]; then
+  chain="main"
+fi
+if [ "${PARAMETER_CHAIN}" == "testnet" ]; then
+  chain="test"
+fi
+if [ "${PARAMETER_CHAIN}" == "signet" ]; then
+  chain="sig"
+fi
+
+# PARAMETER 2: forcing view on a lightning implementation
 PARAMETER_LIGHTNING=$1
 if [ "${PARAMETER_LIGHTNING}" == "lnd" ]; then
   lightning="lnd"
@@ -38,17 +50,7 @@ if [ "${PARAMETER_LIGHTNING}" == "none" ]; then
   lightning=""
 fi
 
-# PARAMETER 2: forcing view on a given network
-PARAMETER_CHAIN=$2
-if [ "${PARAMETER_CHAIN}" == "mainnet" ]; then
-  chain="main"
-fi
-if [ "${PARAMETER_CHAIN}" == "testnet" ]; then
-  chain="test"
-fi
-if [ "${PARAMETER_CHAIN}" == "signet" ]; then
-  chain="sig"
-fi
+
 
 # generate netprefix
 netprefix=${chain:0:1}
@@ -187,6 +189,10 @@ if [ "${lightning}" != "" ]; then
   ln_sync="${value}"
   source <(/home/admin/_cache.sh meta ln_${lightning}_${chain}net_locked)
   ln_locked="${value}"
+  source <(/home/admin/_cache.sh meta ln_${lightning}_${chain}net_recovery_mode)
+  ln_recovery_mode="${value}"
+  source <(/home/admin/_cache.sh meta ln_${lightning}_${chain}net_recovery_done)
+  ln_recovery_done="${value}"
 
   # lightning is still starting
   if [ "${ln_ready}" != "1" ]; then
@@ -198,6 +204,12 @@ if [ "${lightning}" != "" ]; then
   elif [ "${ln_locked}" == "1" ]; then
 
     ln_baseInfo="${color_amber}Wallet Locked"
+    ln_peersInfo=""
+
+  # lightning is still syncing
+  elif [ "${ln_recovery_mode}" == "1" ] && [ "${ln_recovery_done}" == "0" ]; then
+
+    ln_baseInfo="${color_amber}Rescanning transactions"
     ln_peersInfo=""
 
   # lightning is still syncing
@@ -284,7 +296,7 @@ elif [ "${lightning}"  == "lnd" ]; then
 fi
 
 LNinfo=" + Lightning Network"
-if [ "${lightning}" == "" ]; then
+if [ "${lightning}" == "" ] || [ "${lightning}" == "none" ]; then
   LNinfo=""  
 fi
 

@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
 #########################################################################
-# Build your SD card image based on: 2021-10-30-raspios-bullseye-arm64.zip
-# https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2021-11-08/
-# SHA256: b35425de5b4c5b08959aa9f29b9c0f730cd0819fe157c3e37c56a6d0c5c13ed8
+# Build your SD card image based on: 2022-01-28-raspios-bullseye-arm64.zip
+# https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2022-01-28/
+# SHA256: c6f583fab8ed8d84bdf272d095c821fa70d2a0b434ba78432648f69b661d3783
 # PGP fingerprint: 8738CD6B956F460C
 # PGP key: https://www.raspberrypi.org/raspberrypi_downloads.gpg.key
 # setup fresh SD card with image above - login per SSH and run this script:
@@ -54,6 +54,10 @@ assign_value(){
     --*) value="${2#--}";;
     -*) value="${2#-}";;
     *) value="${2}"
+  esac
+  case "${value}" in
+    0) value="false";;
+    1) value="true";;
   esac
   ## Escaping quotes is needed because else if will fail if the argument is quoted
   # shellcheck disable=SC2140
@@ -116,9 +120,16 @@ range_argument(){
   fi
 }
 
-echo -e "\n*** SOFTWARE UPDATE ***"
 general_utils="curl"
-sudo apt install -y ${general_utils}
+## loop all general_utils to see if program is installed (placed on PATH) and if not, add to the list of commands to be installed
+for prog in ${general_utils}; do
+  ! command -v ${prog} >/dev/null && general_utils_install="${general_utils_install} ${prog}"
+done
+## if any of the required programs are not installed, update and if successfull, install packages
+if [ -n "${general_utils_install}" ]; then
+  echo -e "\n*** SOFTWARE UPDATE ***"
+  sudo apt update -y && sudo apt install -y ${general_utils_install}
+fi
 
 ## use default values for variables if empty
 
@@ -131,7 +142,7 @@ range_argument interaction "0" "1" "false" "true"
 
 # FATPACK
 # -------------------------------
-# could be 'true' (default) or 'false' 
+# could be 'true' (default) or 'false'
 # When 'true' it will pre-install needed frameworks for additional apps and features
 # as a convenience to safe on install and update time for additional apps.
 # When 'false' it will just install the bare minimum and additional apps will just
@@ -179,7 +190,7 @@ echo "*     RASPIBLITZ SD CARD IMAGE SETUP    *"
 echo "*****************************************"
 echo "For details on optional parameters - call with '--help' or check source code."
 
-# output 
+# output
 for key in interaction fatpack github_user branch display tweak_boot_drive wifi_region; do
   eval val='$'"${key}"
   [ -n "${val}" ] && printf '%s\n' "${key}=${val}"
@@ -276,7 +287,7 @@ echo -e "\n*** SOFTWARE UPDATE ***"
 # psmisc -> install killall, fuser
 # ufw -> firewall
 # sqlite3 -> database
-general_utils="htop git curl bash-completion vim jq dphys-swapfile bsdmainutils autossh telnet vnstat parted dosfstools btrfs-progs fbi sysbench build-essential dialog bc python3-dialog unzip"
+general_utils="policykit-1 htop git curl bash-completion vim jq dphys-swapfile bsdmainutils autossh telnet vnstat parted dosfstools btrfs-progs fbi sysbench build-essential dialog bc python3-dialog unzip"
 python_dependencies="python3-venv python3-dev python3-wheel python3-jinja2 python3-pip"
 server_utils="rsync net-tools xxd netcat openssh-client openssh-sftp-server sshpass psmisc ufw sqlite3"
 [ "${baseimage}" = "armbian" ] && armbian_dependencies="armbian-config" # add armbian-config
@@ -413,6 +424,10 @@ if [ "${baseimage}" = "raspios_arm64" ] || [ "${baseimage}" = "debian_rpi64" ] |
 else
   echo "WARN: Script Autostart not available for baseimage(${baseimage}) - may just run on 'headless'"
 fi
+
+# limit journald system use
+sudo sed -i "s/^#SystemMaxUse=.*/SystemMaxUse=250M/g" /etc/systemd/journald.conf
+sudo sed -i "s/^#SystemMaxFileSize=.*/SystemMaxFileSize=50M/g" /etc/systemd/journald.conf
 
 # change log rotates
 # see https://github.com/rootzoll/raspiblitz/issues/394#issuecomment-471535483
@@ -697,7 +712,7 @@ if ${fatpack}; then
     exit 1
   fi
   echo "* Optional Packages (may be needed for extended features)"
-  sudo apt install -y qrencode btrfs-tools secure-delete fbi ssmtp unclutter xterm python3-pyqt5 xfonts-terminus apache2-utils nginx python3-jinja2 socat libatlas-base-dev hexyl autossh
+  sudo apt install -y qrencode secure-delete fbi ssmtp unclutter xterm python3-pyqt5 xfonts-terminus apache2-utils nginx python3-jinja2 socat libatlas-base-dev hexyl autossh
 
   # *** UPDATE FALLBACK NODE LIST (only as part of fatpack) *** see https://github.com/rootzoll/raspiblitz/issues/1888
   echo "*** FALLBACK NODE LIST ***"

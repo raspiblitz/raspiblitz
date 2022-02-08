@@ -13,7 +13,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ];
   echo "blitz.web.ui.sh on [?GITHUBUSER] [?REPO] [?BRANCH]"
   echo "blitz.web.ui.sh update"
   echo "blitz.web.ui.sh off"
-  exit 1
+  exit 0
 fi
 
 DEFAULT_GITHUB_USER="cstenglein"
@@ -57,7 +57,12 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo cp -r /home/admin/blitz_web/build/* /var/www/public
   sudo chown www-data:www-data -R /var/www/public
 
-  exit 1
+  # install info
+  source <(/home/admin/_cache.sh export internet_localip)
+  echo "# The WebUI is now available under:"
+  echo "# http://${internet_localip}"
+
+  exit 0
 fi
 
 ###################

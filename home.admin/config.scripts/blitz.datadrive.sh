@@ -30,7 +30,7 @@ fi
 btrfsInstalled=$(btrfs --version 2>/dev/null | grep -c "btrfs-progs")
 if [ ${btrfsInstalled} -eq 0 ]; then
   >&2 echo "# Installing BTRFS ..."
-  sudo apt-get install -y btrfs-tools 1>/dev/null
+  apt-get install -y btrfs-progs 1>/dev/null
 fi
 btrfsInstalled=$(btrfs --version 2>/dev/null | grep -c "btrfs-progs")
 if [ ${btrfsInstalled} -eq 0 ]; then
@@ -46,9 +46,10 @@ fi
 # is global so that also other parts of this script can use this
 
 # basics
-isMounted=$(sudo df | grep -c /mnt/hdd)
-isBTRFS=$(sudo btrfs filesystem show 2>/dev/null| grep -c 'BLITZSTORAGE')
+isMounted=$(df | grep -c /mnt/hdd)
+isBTRFS=$(btrfs filesystem show 2>/dev/null| grep -c 'BLITZSTORAGE')
 isRaid=$(btrfs filesystem df /mnt/hdd 2>/dev/null | grep -c "Data, RAID1")
+isZFS=$(zfs list 2>/dev/null | grep -c "/mnt/hdd")
 isSSD="0"
 
 # determine if swap is external on or not
@@ -82,12 +83,12 @@ if [ "$1" = "status" ]; then
     # will then be used to offer formatting and permanent mounting
     hdd=""
     sizeDataPartition=0
-    OSPartition=$(sudo df /usr 2>/dev/null | grep dev | cut -d " " -f 1 | sed "s#/dev/##g")
+    OSPartition=$(df /usr 2>/dev/null | grep dev | cut -d " " -f 1 | sed "s#/dev/##g")
     # detect boot partition on UEFI systems
-    bootPartition=$(sudo df /boot/efi 2>/dev/null | grep dev | cut -d " " -f 1 | sed "s#/dev/##g")
+    bootPartition=$(df /boot/efi 2>/dev/null | grep dev | cut -d " " -f 1 | sed "s#/dev/##g")
     if [ ${#bootPartition} -eq 0 ]; then
       # for non UEFI
-      bootPartition=$(sudo df /boot 2>/dev/null | grep dev | cut -d " " -f 1 | sed "s#/dev/##g")
+      bootPartition=$(df /boot 2>/dev/null | grep dev | cut -d " " -f 1 | sed "s#/dev/##g")
     fi
     lsblk -o NAME,SIZE -b | grep -P "[s|vn][dv][a-z][0-9]?" > .lsblk.tmp
     while read line; do
@@ -108,7 +109,7 @@ if [ "$1" = "status" ]; then
       # count partitions
       testpartitioncount=0
       if [ ${#testdevice} -gt 0 ]; then
-        testpartitioncount=$(sudo fdisk -l | grep /dev/$testdevice | wc -l)
+        testpartitioncount=$(fdisk -l | grep /dev/$testdevice | wc -l)
         # do not count line with disk info
         testpartitioncount=$((testpartitioncount-1))
       fi
@@ -147,7 +148,7 @@ if [ "$1" = "status" ]; then
 	      # make sure to use the biggest
         if [ ${testsize} -gt ${sizeDataPartition} ]; then
 	        # Partition to be created is smaller than disk so this is not correct (but close)
-          sizeDataPartition=$(sudo fdisk -l /dev/$testdevice | grep GiB | cut -d " " -f 5)
+          sizeDataPartition=$(fdisk -l /dev/$testdevice | grep GiB | cut -d " " -f 5)
           hddDataPartition="${testdevice}1"
           hdd="${testdevice}"
 	      fi
@@ -162,7 +163,7 @@ if [ "$1" = "status" ]; then
     fi
 
     # try to detect if its an SSD 
-    isSSD=$(sudo cat /sys/block/${hdd}/queue/rotational 2>/dev/null | grep -c 0)
+    isSSD=$(cat /sys/block/${hdd}/queue/rotational 2>/dev/null | grep -c 0)
     echo "isSSD=${isSSD}"
 
     # display results from hdd & partition detection
@@ -170,7 +171,7 @@ if [ "$1" = "status" ]; then
     hddBytes=0
     hddGigaBytes=0
     if [ "${hdd}" != "" ]; then
-      hddBytes=$(sudo fdisk -l /dev/$hdd | grep GiB | cut -d " " -f 5)
+      hddBytes=$(fdisk -l /dev/$hdd | grep GiB | cut -d " " -f 5)
       hddGigaBytes=$(echo "scale=0; ${hddBytes}/1024/1024/1024" | bc -l)
     fi
     echo "hddBytes=${hddBytes}"
@@ -200,14 +201,14 @@ if [ "$1" = "status" ]; then
 
         # temp mount data drive
         mountError=""
-        sudo mkdir -p /mnt/hdd
+        mkdir -p /mnt/hdd
         if [ "${hddFormat}" = "ext4" ]; then
 	        hddDataPartitionExt4=$hddDataPartition
-          mountError=$(sudo mount /dev/${hddDataPartitionExt4} /mnt/hdd 2>&1)
+          mountError=$(mount /dev/${hddDataPartitionExt4} /mnt/hdd 2>&1)
           isTempMounted=$(df | grep /mnt/hdd | grep -c ${hddDataPartitionExt4})
         fi
         if [ "${hddFormat}" = "btrfs" ]; then
-          mountError=$(sudo mount -o degraded /dev/${hdd}1 /mnt/hdd 2>&1)
+          mountError=$(mount -o degraded /dev/${hdd}1 /mnt/hdd 2>&1)
           isTempMounted=$(df | grep /mnt/hdd | grep -c ${hdd})
         fi
 
@@ -240,35 +241,37 @@ if [ "$1" = "status" ]; then
             cp -a /mnt/hdd${subVolumeDir}/app-data/wpa_supplicant.conf /var/cache/raspiblitz/hdd-inspect/wpa_supplicant.conf 2>/dev/null
 
             # Convert old ssh backup data structure (if needed)
-            if [ -d "/mnt/hdd/ssh" ]; then
+            oldDataExists=$(sudo ls /mnt/hdd${subVolumeDir}/ssh/ssh_host_rsa_key 2>/dev/null | grep -c "ssh_host_rsa_key")
+            if [ "${oldDataExists}" != "0" ]; then
                 # make a complete backup of directory
-                cp -a /mnt/hdd/ssh /mnt/hdd/app-storage/ssh-old-backup
+                cp -a /mnt/hdd${subVolumeDir}/ssh /mnt/hdd${subVolumeDir}/app-storage/ssh-old-backup
                 # delete old false sub directory (if exists)
-                rm -r /mnt/hdd/ssh/ssh 2>/dev/null
+                rm -r /mnt/hdd${subVolumeDir}/ssh/ssh 2>/dev/null
                 # move ssh root keys into new directory (if exists)
-                mv /mnt/hdd/ssh/root_backup /mnt/hdd/app-data/ssh-root 2>/dev/null
+                mv /mnt/hdd${subVolumeDir}/ssh/root_backup /mnt/hdd${subVolumeDir}/app-data/ssh-root 2>/dev/null
                 # move sshd keys into new directory
-                mv /mnt/hdd/ssh /mnt/hdd/app-data/sshd
+                mkdir -p /mnt/hdd${subVolumeDir}/app-data/sshd 2>/dev/null
+                mv /mnt/hdd${subVolumeDir}/ssh /mnt/hdd${subVolumeDir}/app-data/sshd/ssh
             fi
 
             # make copy of SSH keys to RAMDISK (if available)
-            cp -a /mnt/hdd${subVolumeDir}/app-data/sshd /var/cache/raspiblitz/hdd-inspect/sshd 2>/dev/null
-            cp -a /mnt/hdd${subVolumeDir}/app-data/ssh-root /var/cache/raspiblitz/hdd-inspect/ssh-root 2>/dev/null
+            cp -a /mnt/hdd${subVolumeDir}/app-data/sshd /var/cache/raspiblitz/hdd-inspect 2>/dev/null
+            cp -a /mnt/hdd${subVolumeDir}/app-data/ssh-root /var/cache/raspiblitz/hdd-inspect 2>/dev/null
           fi
         
           # comment this line out if case to study the contect of the data section
-          sudo umount /mnt/hdd
+          umount /mnt/hdd
         fi
 
         # temp storage data drive
-        sudo mkdir -p /mnt/storage
+        mkdir -p /mnt/storage
         if [ "${hddFormat}" = "btrfs" ]; then
           # in btrfs setup the second partition is storage partition
-          sudo mount /dev/${hdd}2 /mnt/storage 2>/dev/null
+          mount /dev/${hdd}2 /mnt/storage 2>/dev/null
           isTempMounted=$(df | grep /mnt/storage | grep -c ${hdd})
         else
           # in ext4 setup the partition is also the storage partition
-          sudo mount /dev/${hddDataPartitionExt4} /mnt/storage 2>/dev/null
+          mount /dev/${hddDataPartitionExt4} /mnt/storage 2>/dev/null
           isTempMounted=$(df | grep /mnt/storage | grep -c ${hddDataPartitionExt4})
         fi
         if [ ${isTempMounted} -eq 0 ]; then
@@ -279,7 +282,7 @@ if [ "$1" = "status" ]; then
           # Pre-Setup Invetigation of STORAGE-PART
 
           # check for blockchain data on storage
-          hddBlocksBitcoin=$(sudo ls /mnt/storage${subVolumeDir}/bitcoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
+          hddBlocksBitcoin=$(ls /mnt/storage${subVolumeDir}/bitcoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
           echo "hddBlocksBitcoin=${hddBlocksBitcoin}"
           if [ "${blockchainType}" = "bitcoin" ] && [ ${hddBlocksBitcoin} -eq 1 ]; then
             echo "hddGotBlockchain=1"
@@ -311,9 +314,9 @@ if [ "$1" = "status" ]; then
           hddGotMigrationDataExtra=""
           if [ "${hddFormat}" = "ext4" ]; then
             # check for other node implementations
-            isUmbrelHDD=$(sudo ls /mnt/storage/umbrel/info.json 2>/dev/null | grep -c '.json')
-            isCitadelHDD=$(sudo ls /mnt/storage/citadel/info.json 2>/dev/null | grep -c '.json')
-            isMyNodeHDD=$(sudo ls /mnt/storage/mynode/bitcoin/bitcoin.conf 2>/dev/null | grep -c '.conf')
+            isUmbrelHDD=$(ls /mnt/storage/umbrel/info.json 2>/dev/null | grep -c '.json')
+            isCitadelHDD=$(ls /mnt/storage/citadel/info.json 2>/dev/null | grep -c '.json')
+            isMyNodeHDD=$(ls /mnt/storage/mynode/bitcoin/bitcoin.conf 2>/dev/null | grep -c '.conf')
             if [ ${isUmbrelHDD} -gt 0 ]; then
               hddGotMigrationData="umbrel"
               lndVersion=$(grep "lightninglabs/lnd" /mnt/storage/umbrel/docker-compose.yml 2>/dev/null | sed 's/.*lnd://' | sed 's/@.*//')
@@ -331,7 +334,7 @@ if [ "$1" = "status" ]; then
           echo "hddGotMigrationData='${hddGotMigrationData}'"
 
           # comment this line out if case to study the contect of the storage section
-          sudo umount /mnt/storage
+          umount /mnt/storage
         fi
       else
         # if not ext4 or btrfs - there is no usable data
@@ -345,9 +348,16 @@ if [ "$1" = "status" ]; then
     # STATUS INFO WHEN MOUNTED
 
     # output data drive
-    if [ ${isBTRFS} -eq 1 ]; then
+    if [ "${isBTRFS}" -gt 0 ]; then
       # on btrfs date the storage partition as the data partition
       hddDataPartition=$(df | grep "/mnt/storage$" | cut -d " " -f 1 | cut -d "/" -f 3)
+    elif [ "${isZFS}" -gt 0 ]; then
+      # a ZFS pool has no leading /
+      hddDataPartition=$(df | grep "/mnt/hdd$" | cut -d " " -f 1 | cut -d "/" -f 2)
+      if [ ${#hddDataPartition} -eq 0 ];then
+        # just a pool, no filesystem
+        hddDataPartition=$(df | grep "/mnt/hdd$" | cut -d " " -f 1 | cut -d "/" -f 1)
+      fi
     else
       # on ext4 its the whole /mnt/hdd
       hddDataPartition=$(df | grep "/mnt/hdd$" | cut -d " " -f 1 | cut -d "/" -f 3)
@@ -357,7 +367,7 @@ if [ "$1" = "status" ]; then
     if [ "${hddFormat}" = "ext4" ]; then
        hddDataPartitionExt4=$hddDataPartition
     fi
-    hddRaspiData=$(sudo ls -l /mnt/hdd | grep -c raspiblitz.conf)
+    hddRaspiData=$(ls -l /mnt/hdd | grep -c raspiblitz.conf)
     echo "hddRaspiData=${hddRaspiData}"
     hddRaspiVersion=""
     if [ ${hddRaspiData} -eq 1 ]; then
@@ -366,7 +376,7 @@ if [ "$1" = "status" ]; then
     fi
     echo "hddRaspiVersion='${hddRaspiVersion}'"
 
-    isSSD=$(sudo cat /sys/block/${hdd}/queue/rotational 2>/dev/null | grep -c 0)
+    isSSD=$(cat /sys/block/${hdd}/queue/rotational 2>/dev/null | grep -c 0)
     echo "isSSD=${isSSD}"
 
     echo "datadisk='${hdd}'"
@@ -375,7 +385,7 @@ if [ "$1" = "status" ]; then
     echo "hddPartitionCandidate='${hddDataPartition}'"
 
     # check if blockchain data is available
-    hddBlocksBitcoin=$(sudo ls /mnt/hdd/bitcoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
+    hddBlocksBitcoin=$(ls /mnt/hdd/bitcoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
     echo "hddBlocksBitcoin=${hddBlocksBitcoin}"
     if [ "${blockchainType}" = "bitcoin" ] && [ ${hddBlocksBitcoin} -eq 1 ]; then
       echo "hddGotBlockchain=1"
@@ -384,19 +394,18 @@ if [ "$1" = "status" ]; then
     fi
 
     # check size in bytes and GBs
-    sizeDataPartition=$(lsblk -o NAME,SIZE -b | grep "${hddDataPartition}" | awk '$1=$1' | cut -d " " -f 2)
+    if [ "${isZFS}" -gt 0 ]; then
+      sizeDataPartition=$(zpool list -pH | awk '{print $2}')
+      hddGigaBytes=$(echo "scale=0; ${sizeDataPartition}/1024/1024/1024" | bc -l)
+    else
+      sizeDataPartition=$(lsblk -o NAME,SIZE -b | grep "${hddDataPartition}" | awk '$1=$1' | cut -d " " -f 2)
+      hddGigaBytes=$(echo "scale=0; ${sizeDataPartition}/1024/1024/1024" | bc -l)
+    fi
     echo "hddBytes=${sizeDataPartition}"
-    hddGigaBytes=$(echo "scale=0; ${sizeDataPartition}/1024/1024/1024" | bc -l)
     echo "hddGigaBytes=${hddGigaBytes}"
 
     # used space - at the moment just string info to display
-    if [ ${isBTRFS} -eq 0 ]; then
-      # EXT4 calculations
-      hdd_used_space=$(df -h | grep "/dev/${hddDataPartitionExt4}" | sed -e's/  */ /g' | cut -d" " -f 3  2>/dev/null)
-      hdd_used_ratio=$(df -h | grep "/dev/${hddDataPartitionExt4}" | sed -e's/  */ /g' | cut -d" " -f 5 | tr -dc '0-9' 2>/dev/null)
-      hdd_data_free1Kblocks=$(df -h -k /dev/${hddDataPartitionExt4} | grep "/dev/${hddDataPartitionExt4}" | sed -e's/  */ /g' | cut -d" " -f 4 | tr -dc '0-9')
-      hddUsedInfo="${hdd_used_space} (${hdd_used_ratio}%)"
-    else
+    if [ "${isBTRFS}" -gt 0 ]; then
       # BTRFS calculations
       # TODO: this is the final/correct way - make better later
       # https://askubuntu.com/questions/170044/btrfs-and-missing-free-space
@@ -404,6 +413,18 @@ if [ "$1" = "status" ]; then
       storageDrive=$(df -h | grep "/dev/${hdd}2" | sed -e's/  */ /g' | cut -d" " -f 5)
       hdd_data_free1Kblocks=$(df -h -k /dev/${hdd}1 | grep "/dev/${hdd}1" | sed -e's/  */ /g' | cut -d" " -f 4 | tr -dc '0-9')
       hddUsedInfo="${datadrive} & ${storageDrive}"
+    elif [ "${isZFS}" -gt 0 ]; then
+      # ZFS calculations
+      hdd_used_space=$(zpool list -H | awk '{print $3}')
+      hdd_used_ratio=$((100 * ${hdd_used_space::-1} / hddGigaBytes))
+      hdd_data_free1Kblocks=$(($(zpool list -pH | awk '{print $4}') / 1024))
+      hddUsedInfo="${hdd_used_space} (${hdd_used_ratio}%)"
+    else
+      # EXT4 calculations
+      hdd_used_space=$(df -h | grep "/dev/${hddDataPartitionExt4}" | sed -e's/  */ /g' | cut -d" " -f 3  2>/dev/null)
+      hdd_used_ratio=$(df -h | grep "/dev/${hddDataPartitionExt4}" | sed -e's/  */ /g' | cut -d" " -f 5 | tr -dc '0-9' 2>/dev/null)
+      hdd_data_free1Kblocks=$(df -h -k /dev/${hddDataPartitionExt4} | grep "/dev/${hddDataPartitionExt4}" | sed -e's/  */ /g' | cut -d" " -f 4 | tr -dc '0-9')
+      hddUsedInfo="${hdd_used_space} (${hdd_used_ratio}%)"
     fi
     echo "hddUsedInfo='${hddUsedInfo}'"
     hddDataFreeBytes=$((${hdd_data_free1Kblocks} * 1024))
@@ -463,7 +484,7 @@ if [ "$1" = "status" ]; then
 
     # show devices used for raid
     raidHddDev=$(lsblk -o NAME,MOUNTPOINT | grep "/mnt/hdd" | awk '$1=$1' | cut -d " " -f 1 | sed 's/[^0-9a-z]*//g')
-    raidUsbDev=$(sudo btrfs filesystem show /mnt/hdd | grep -F -v "${raidHddDev}" | grep "/dev/" | cut -d "/" --f 3)
+    raidUsbDev=$(btrfs filesystem show /mnt/hdd | grep -F -v "${raidHddDev}" | grep "/dev/" | cut -d "/" --f 3)
     echo "raidHddDev='${raidHddDev}'"
     echo "raidUsbDev='${raidUsbDev}'"
 
@@ -543,12 +564,12 @@ if [ "$1" = "format" ]; then
   fi
 
   # get basic info on data drive 
-  source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
+  source <(/home/admin/config.scripts/blitz.datadrive.sh status)
 
   if [ ${isSwapExternal} -eq 1 ] && [ "${hdd}" == "${datadisk}" ]; then
     >&2 echo "# Switching off external SWAP of system drive"
-    sudo dphys-swapfile swapoff 1>/dev/null
-    sudo dphys-swapfile uninstall 1>/dev/null
+    dphys-swapfile swapoff 1>/dev/null
+    dphys-swapfile uninstall 1>/dev/null
   fi
 
   >&2 echo "# Unmounting all partitions of this device"
@@ -556,19 +577,19 @@ if [ "$1" = "format" ]; then
   lsblk -o UUID,NAME | grep "${hdd}" | cut -d " " -f 1 | grep "-" | while read -r uuid ; do
     if [ ${#uuid} -gt 0 ]; then
       >&2 echo "# Cleaning /etc/fstab from ${uuid}"
-      sudo sed -i "/UUID=${uuid}/d" /etc/fstab
+      sed -i "/UUID=${uuid}/d" /etc/fstab
       sync
     else
       >&2 echo "# skipping empty result"
     fi
   done
-  sudo mount -a
+  mount -a
 
   if [ "${hdd}" == "${datadisk}" ]; then
     >&2 echo "# Make sure system drives are unmounted .."
-    sudo umount /mnt/hdd 2>/dev/null
-    sudo umount /mnt/temp 2>/dev/null
-    sudo umount /mnt/storage 2>/dev/null
+    umount /mnt/hdd 2>/dev/null
+    umount /mnt/temp 2>/dev/null
+    umount /mnt/storage 2>/dev/null
     unmounted1=$(df | grep -c "/mnt/hdd")
     if [ ${unmounted1} -gt 0 ]; then
       >&2 echo "# ERROR: failed to unmount /mnt/hdd"
@@ -606,14 +627,14 @@ if [ "$1" = "format" ]; then
   if [ $wipePartitions -eq 1 ]; then
      # wipe all partitions and write fresh GPT
      >&2 echo "# Wiping all partitions (sfdisk/wipefs)"
-     sudo sfdisk --delete /dev/${hdd}
+     sfdisk --delete /dev/${hdd}
      sleep 4
-     sudo wipefs -a /dev/${hdd}
+     wipefs -a /dev/${hdd}
      sleep 4
      partitions=$(lsblk | grep -c "─${hdd}")
      if [ ${partitions} -gt 0 ]; then
        >&2 echo "# WARNING: partitions are still not clean - try Quick & Dirty"
-       sudo dd if=/dev/zero of=/dev/${hdd} bs=512 count=1
+       dd if=/dev/zero of=/dev/${hdd} bs=512 count=1
      fi
      partitions=$(lsblk | grep -c "─${hdd}")
      if [ ${partitions} -gt 0 ]; then
@@ -621,7 +642,7 @@ if [ "$1" = "format" ]; then
        echo "error='partition cleaning failed'"
        exit 1
      fi
-     sudo parted -s /dev/${hdd} mklabel gpt 1>/dev/null 1>&2
+     parted -s /dev/${hdd} mklabel gpt 1>/dev/null 1>&2
      sleep 2
      sync
   fi
@@ -631,12 +652,12 @@ if [ "$1" = "format" ]; then
   if [ "$2" = "ext4" ]; then
 
      # prepare temp mount point
-     sudo mkdir -p /tmp/ext4 1>/dev/null
+     mkdir -p /tmp/ext4 1>/dev/null
 
      if [ $ext4IsPartition -eq 0 ]; then
         # write new EXT4 partition
         >&2 echo "# Creating the one big partition"
-        sudo parted -s /dev/${hdd} mkpart primary ext4 1024KiB 100% 1>&2
+        parted -s /dev/${hdd} mkpart primary ext4 1024KiB 100% 1>&2
         sleep 6
         sync
         # loop until the partition gets available
@@ -659,7 +680,7 @@ if [ "$1" = "format" ]; then
      fi
 
      # make sure /mnt/hdd is unmounted before formatting
-     sudo umount -f /tmp/ext4 2>/dev/null
+     umount -f /tmp/ext4 2>/dev/null
      unmounted=$(df | grep -c "/tmp/ext4")
      if [ ${unmounted} -gt 0 ]; then
        >&2 echo "# ERROR: failed to unmount /tmp/ext4"
@@ -669,9 +690,9 @@ if [ "$1" = "format" ]; then
 
      >&2 echo "# Formatting"
      if [ $ext4IsPartition -eq 0 ]; then
-        sudo mkfs.ext4 -F -L BLOCKCHAIN /dev/${hdd}1 1>/dev/null
+        mkfs.ext4 -F -L BLOCKCHAIN /dev/${hdd}1 1>/dev/null
      else
-        sudo mkfs.ext4 -F -L BLOCKCHAIN /dev/${hdd} 1>/dev/null
+        mkfs.ext4 -F -L BLOCKCHAIN /dev/${hdd} 1>/dev/null
      fi
      loopdone=0
      loopcount=0
@@ -692,9 +713,9 @@ if [ "$1" = "format" ]; then
      # setting fsk check interval to 1
      # see https://github.com/rootzoll/raspiblitz/issues/360#issuecomment-467567572
      if [ $ext4IsPartition -eq 0 ]; then
-        sudo tune2fs -c 1 /dev/${hdd}1
+        tune2fs -c 1 /dev/${hdd}1
      else
-        sudo tune2fs -c 1 /dev/${hdd}
+        tune2fs -c 1 /dev/${hdd}
      fi
 
      >&2 echo "# OK EXT 4 format done"
@@ -705,10 +726,10 @@ if [ "$1" = "format" ]; then
   if [ "$2" = "btrfs" ]; then
 
      # prepare temp mount point
-     sudo mkdir -p /tmp/btrfs 1>/dev/null
+     mkdir -p /tmp/btrfs 1>/dev/null
 
      >&2 echo "# Creating BLITZDATA (${hdd})"
-     sudo parted -s -- /dev/${hdd} mkpart primary btrfs 1024KiB 30GiB 1>/dev/null
+     parted -s -- /dev/${hdd} mkpart primary btrfs 1024KiB 30GiB 1>/dev/null
      sync
      sleep 6
      win=$(lsblk -o NAME | grep -c ${hdd}1)
@@ -716,7 +737,7 @@ if [ "$1" = "format" ]; then
        echo "error='partition failed'"
        exit 1
      fi
-     sudo mkfs.btrfs -f -L BLITZDATA /dev/${hdd}1 1>/dev/null
+     mkfs.btrfs -f -L BLITZDATA /dev/${hdd}1 1>/dev/null
      # check result
      loopdone=0
      loopcount=0
@@ -725,7 +746,7 @@ if [ "$1" = "format" ]; then
        >&2 echo "# waiting until formatted drives gets available"
        sleep 2
        sync
-       sudo parted -l
+       parted -l
        loopdone=$(lsblk -o NAME,LABEL | grep -c BLITZDATA)
        loopcount=$(($loopcount +1))
        if [ ${loopcount} -gt 60 ]; then
@@ -738,18 +759,18 @@ if [ "$1" = "format" ]; then
      >&2 echo "# OK BLITZDATA exists now"
   
      >&2 echo "# Creating SubVolume for Snapshots"
-     sudo mount /dev/${hdd}1 /tmp/btrfs 1>/dev/null
+     mount /dev/${hdd}1 /tmp/btrfs 1>/dev/null
      if [ $(df | grep -c "/tmp/btrfs") -eq 0 ]; then
        echo "error='mount ${hdd}1 failed'"
        exit 1
      fi
      cd /tmp/btrfs
-     sudo btrfs subvolume create WORKINGDIR
-     subVolDATA=$(sudo btrfs subvolume show /tmp/btrfs/WORKINGDIR | grep "Subvolume ID:" | awk '$1=$1' | cut -d " " -f 3)
-     cd && sudo umount /tmp/btrfs
+     btrfs subvolume create WORKINGDIR
+     subVolDATA=$(btrfs subvolume show /tmp/btrfs/WORKINGDIR | grep "Subvolume ID:" | awk '$1=$1' | cut -d " " -f 3)
+     cd && umount /tmp/btrfs
 
      >&2 echo "# Creating BLITZSTORAGE"
-     sudo parted -s -- /dev/${hdd} mkpart primary btrfs 30GiB -34GiB 1>/dev/null
+     parted -s -- /dev/${hdd} mkpart primary btrfs 30GiB -34GiB 1>/dev/null
      sync
      sleep 6
      win=$(lsblk -o NAME | grep -c ${hdd}2)
@@ -757,7 +778,7 @@ if [ "$1" = "format" ]; then
        echo "error='partition failed'"
        exit 1
      fi
-     sudo mkfs.btrfs -f -L BLITZSTORAGE /dev/${hdd}2 1>/dev/null
+     mkfs.btrfs -f -L BLITZSTORAGE /dev/${hdd}2 1>/dev/null
      # check result
      loopdone=0
      loopcount=0
@@ -766,7 +787,7 @@ if [ "$1" = "format" ]; then
        >&2 echo "# waiting until formatted drives gets available"
        sleep 2
        sync
-       sudo parted -l
+       parted -l
        loopdone=$(lsblk -o NAME,LABEL | grep -c BLITZSTORAGE)
        loopcount=$(($loopcount +1))
        if [ ${loopcount} -gt 60 ]; then
@@ -778,17 +799,17 @@ if [ "$1" = "format" ]; then
      >&2 echo "# OK BLITZSTORAGE exists now"
   
      >&2 echo "# Creating SubVolume for Snapshots"
-     sudo mount /dev/${hdd}2 /tmp/btrfs 1>/dev/null
+     mount /dev/${hdd}2 /tmp/btrfs 1>/dev/null
      if [ $(df | grep -c "/tmp/btrfs") -eq 0 ]; then
        echo "error='mount ${hdd}2 failed'"
        exit 1
      fi
      cd /tmp/btrfs
-     sudo btrfs subvolume create WORKINGDIR
-     cd && sudo umount /tmp/btrfs
+     btrfs subvolume create WORKINGDIR
+     cd && umount /tmp/btrfs
 
      >&2 echo "# Creating the FAT32 partition"
-     sudo parted -s -- /dev/${hdd} mkpart primary fat32 -34GiB 100% 1>/dev/null
+     parted -s -- /dev/${hdd} mkpart primary fat32 -34GiB 100% 1>/dev/null
      sync && sleep 3
      win=$(lsblk -o NAME | grep -c ${hdd}3)
      if [ ${win} -eq 0 ]; then 
@@ -797,7 +818,7 @@ if [ "$1" = "format" ]; then
      fi
  
      >&2 echo "# Creating Volume BLITZTEMP (format)"
-     sudo mkfs -t vfat -n BLITZTEMP /dev/${hdd}3 1>/dev/null
+     mkfs -t vfat -n BLITZTEMP /dev/${hdd}3 1>/dev/null
      # check result
      loopdone=0
      loopcount=0
@@ -806,7 +827,7 @@ if [ "$1" = "format" ]; then
        >&2 echo "# waiting until formatted drives gets available"
        sleep 2
        sync
-       sudo parted -l
+       parted -l
        loopdone=$(lsblk -o NAME,LABEL | grep -c BLITZTEMP)
        loopcount=$(($loopcount +1))
        if [ ${loopcount} -gt 60 ]; then
@@ -856,9 +877,9 @@ if [ "$1" = "fstab" ]; then
   # unmount
   if [ ${isMounted} -eq 1 ]; then
     echo "# unmounting all drives"
-    sudo umount /mnt/hdd > /dev/null 2>&1
-    sudo umount /mnt/storage > /dev/null 2>&1
-    sudo umount /mnt/temp > /dev/null 2>&1
+    umount /mnt/hdd > /dev/null 2>&1
+    umount /mnt/storage > /dev/null 2>&1
+    umount /mnt/temp > /dev/null 2>&1
   fi
 
   if [ "${hddFormat}" = "ext4" ]; then
@@ -884,15 +905,15 @@ if [ "$1" = "fstab" ]; then
 
     # write new /etc/fstab & mount
     echo "# mount /mnt/hdd"
-    sudo mkdir -p /mnt/hdd 1>/dev/null
+    mkdir -p /mnt/hdd 1>/dev/null
     updated=$(cat /etc/fstab | grep -c "/mnt/hdd")
     if [ $updated -eq 0 ]; then
        echo "# updating /etc/fstab"
-       sudo sed "/raspiblitz/ i UUID=${uuid1} /mnt/hdd ext4 noexec,defaults 0 2" -i /etc/fstab 1>/dev/null
+       sed "/raspiblitz/ i UUID=${uuid1} /mnt/hdd ext4 noexec,defaults 0 2" -i /etc/fstab 1>/dev/null
     fi
 
     sync
-    sudo mount -a 1>/dev/null
+    mount -a 1>/dev/null
 
     # loop mounts are available
     mountactive1=0
@@ -921,15 +942,15 @@ if [ "$1" = "fstab" ]; then
 
     # get info on: Data Drive
     uuidDATA=$(lsblk -o UUID,NAME,LABEL | grep "${hdd}" | grep "BLITZDATA" | cut -d " " -f 1 | grep "-")
-    sudo mkdir -p /tmp/btrfs
-    sudo mount /dev/${hdd}1 /tmp/btrfs 1>/dev/null
+    mkdir -p /tmp/btrfs
+    mount /dev/${hdd}1 /tmp/btrfs 1>/dev/null
     if [ $(df | grep -c "/tmp/btrfs") -eq 0 ]; then
       echo "error='mount ${hdd}1 failed'"
       exit 1
     fi
     cd /tmp/btrfs
-    subVolDATA=$(sudo btrfs subvolume show /tmp/btrfs/WORKINGDIR | grep "Subvolume ID:" | awk '$1=$1' | cut -d " " -f 3)
-    cd && sudo umount /tmp/btrfs
+    subVolDATA=$(btrfs subvolume show /tmp/btrfs/WORKINGDIR | grep "Subvolume ID:" | awk '$1=$1' | cut -d " " -f 3)
+    cd && umount /tmp/btrfs
     echo "uuidDATA='${uuidDATA}'"
     echo "subVolDATA='${subVolDATA}'"
     if [ ${#uuidDATA} -eq 0 ] || [ ${#subVolDATA} -eq 0 ]; then
@@ -939,14 +960,14 @@ if [ "$1" = "fstab" ]; then
   
     # get info on: Storage Drive
     uuidSTORAGE=$(lsblk -o UUID,NAME,LABEL | grep "${hdd}" | grep "BLITZSTORAGE" | cut -d " " -f 1 | grep "-")
-    sudo mount /dev/${hdd}2 /tmp/btrfs 1>/dev/null
+    mount /dev/${hdd}2 /tmp/btrfs 1>/dev/null
     if [ $(df | grep -c "/tmp/btrfs") -eq 0 ]; then
       echo "error='mount ${hdd}2 failed'"
       exit 1
     fi
     cd /tmp/btrfs
-    subVolSTORAGE=$(sudo btrfs subvolume show /tmp/btrfs/WORKINGDIR | grep "Subvolume ID:" | awk '$1=$1' | cut -d " " -f 3)
-    cd && sudo umount /tmp/btrfs
+    subVolSTORAGE=$(btrfs subvolume show /tmp/btrfs/WORKINGDIR | grep "Subvolume ID:" | awk '$1=$1' | cut -d " " -f 3)
+    cd && umount /tmp/btrfs
     echo "uuidSTORAGE='${uuidSTORAGE}'"
     echo "subVolSTORAGE='${subVolSTORAGE}'"
     if [ ${#uuidSTORAGE} -eq 0 ] || [ ${#subVolSTORAGE} -eq 0 ]; then
@@ -965,7 +986,7 @@ if [ "$1" = "fstab" ]; then
     # remove old entries from fstab
     lsblk -o UUID,NAME | grep "${hdd}" | cut -d " " -f 1 | grep "-" | while read -r uuid ; do
       >&2 echo "# Cleaning /etc/fstab from ${uuid}"
-      sudo sed -i "/UUID=${uuid}/d" /etc/fstab
+      sed -i "/UUID=${uuid}/d" /etc/fstab
       sync
     done
 
@@ -974,16 +995,16 @@ if [ "$1" = "fstab" ]; then
     bitcoinGID=$(id -g bitcoin)
 
     # modifying /etc/fstab & mount
-    sudo mkdir -p /mnt/hdd 1>/dev/null
+    mkdir -p /mnt/hdd 1>/dev/null
     fstabAdd1="UUID=${uuidDATA} /mnt/hdd btrfs noexec,defaults,subvolid=${subVolDATA} 0 2"
-    sudo sed "3 a ${fstabAdd1}" -i /etc/fstab 1>/dev/null
-    sudo mkdir -p /mnt/storage 1>/dev/null
+    sed "3 a ${fstabAdd1}" -i /etc/fstab 1>/dev/null
+    mkdir -p /mnt/storage 1>/dev/null
     fstabAdd2="UUID=${uuidSTORAGE} /mnt/storage btrfs noexec,defaults,subvolid=${subVolSTORAGE} 0 2"
-    sudo sed "4 a ${fstabAdd2}" -i /etc/fstab 1>/dev/null  
-    sudo mkdir -p /mnt/temp 1>/dev/null
+    sed "4 a ${fstabAdd2}" -i /etc/fstab 1>/dev/null  
+    mkdir -p /mnt/temp 1>/dev/null
     fstabAdd3="UUID=${uuidTEMP} /mnt/temp vfat noexec,defaults,uid=${bitcoinUID},gid=${bitcoinGID} 0 2"
-    sudo sed "5 a ${fstabAdd3}" -i /etc/fstab 1>/dev/null
-    sync && sudo mount -a 1>/dev/null
+    sed "5 a ${fstabAdd3}" -i /etc/fstab 1>/dev/null
+    sync && mount -a 1>/dev/null
 
     # test mount
     mountactive1=0
@@ -1098,7 +1119,7 @@ if [ "$1" = "raid" ] && [ "$2" = "on" ]; then
   # remove all partitions from device
   for v_partition in $(parted -s /dev/${usbdev} print|awk '/^ / {print $1}')
   do
-   sudo parted -s /dev/${usbdev} rm ${v_partition}
+   parted -s /dev/${usbdev} rm ${v_partition}
   done
 
   # check if usb device is at least 30GB big
@@ -1111,8 +1132,8 @@ if [ "$1" = "raid" ] && [ "$2" = "on" ]; then
 
   # add usb device as raid for data
   >&2 echo "# adding ${usbdev} as BTRFS raid1 for /mnt/hdd"
-  sudo btrfs device add -f /dev/${usbdev} /mnt/hdd 1>/dev/null
-  sudo btrfs filesystem balance start -dconvert=raid1 -mconvert=raid1 /mnt/hdd 1>/dev/null
+  btrfs device add -f /dev/${usbdev} /mnt/hdd 1>/dev/null
+  btrfs filesystem balance start -dconvert=raid1 -mconvert=raid1 /mnt/hdd 1>/dev/null
   
   >&2 echo "# OK - ${usbdev} is now part of a RAID1 for your RaspiBlitz data"
   exit 0
@@ -1123,7 +1144,7 @@ fi
 if [ "$1" = "raid" ] && [ "$2" = "off" ]; then
  
   # checking if BTRFS mode
-  isBTRFS=$(sudo btrfs filesystem show 2>/dev/null| grep -c 'BLITZSTORAGE')
+  isBTRFS=$(btrfs filesystem show 2>/dev/null| grep -c 'BLITZSTORAGE')
   if [ ${isBTRFS} -eq 0 ]; then
     echo "error='raid only BTRFS'"
     exit 1
@@ -1136,8 +1157,8 @@ if [ "$1" = "raid" ] && [ "$2" = "off" ]; then
   fi
 
   >&2 echo "# removing USB DEV from RAID"
-  sudo btrfs balance start -mconvert=dup -dconvert=single /mnt/hdd 1>/dev/null
-  sudo btrfs device remove ${deviceToBeRemoved} /mnt/hdd 1>/dev/null
+  btrfs balance start -mconvert=dup -dconvert=single /mnt/hdd 1>/dev/null
+  btrfs device remove ${deviceToBeRemoved} /mnt/hdd 1>/dev/null
   
   isRaid=$(btrfs filesystem df /mnt/hdd 2>/dev/null | grep -c "Data, RAID1")
   if [ ${isRaid} -eq 0 ]; then
@@ -1195,18 +1216,18 @@ if [ "$1" = "snapshot" ]; then
     >&2 echo "# Preparing Snapshot ..."
 
     # make sure backup folder exists
-    sudo mkdir -p ${subvolume}/snapshots
+    mkdir -p ${subvolume}/snapshots
 
     # delete old backup if existing
-    oldBackupExists=$(sudo ls ${subvolume}/snapshots | grep -c backup)
+    oldBackupExists=$(ls ${subvolume}/snapshots | grep -c backup)
     if [ ${oldBackupExists} -gt 0 ]; then
       >&2 echo "# Deleting old snapshot"
-      sudo btrfs subvolume delete ${subvolume}/snapshots/backup 1>/dev/null
+      btrfs subvolume delete ${subvolume}/snapshots/backup 1>/dev/null
     fi
 
     >&2 echo "# Creating Snapshot ..."
-    sudo btrfs subvolume snapshot ${subvolume} ${subvolume}/snapshots/backup 1>/dev/null
-    if [ $(sudo btrfs subvolume list ${subvolume} | grep -c snapshots/backup) -eq 0 ]; then
+    btrfs subvolume snapshot ${subvolume} ${subvolume}/snapshots/backup 1>/dev/null
+    if [ $(btrfs subvolume list ${subvolume} | grep -c snapshots/backup) -eq 0 ]; then
       echo "error='not created'"
       exit 1
     else
@@ -1217,25 +1238,25 @@ if [ "$1" = "snapshot" ]; then
   elif [ "$3" = "rollback" ]; then
 
     # check if an old snapshot exists
-    oldBackupExists=$(sudo ls ${subvolume}/snapshots | grep -c backup)
+    oldBackupExists=$(ls ${subvolume}/snapshots | grep -c backup)
     if [ ${oldBackupExists} -eq 0 ]; then
       echo "error='no old snapshot found'"
       exit 1
     fi
 
     >&2 echo "# Resetting state to old Snapshot ..."
-    sudo umount ${subvolume}
-    sudo mkdir -p /tmp/btrfs 1>/dev/null
-    sudo mount ${partition} /tmp/btrfs
-    sudo mv /tmp/btrfs/WORKINGDIR/snapshots/backup /tmp/btrfs/backup
-    sudo btrfs subvolume delete /tmp/btrfs/WORKINGDIR
-    sudo mv /tmp/btrfs/backup /tmp/btrfs/WORKINGDIR
-    subVolID=$(sudo btrfs subvolume show /tmp/btrfs/WORKINGDIR | grep "Subvolume ID:" | awk '$1=$1' | cut -d " " -f 3)
-    sudo sed -i "/${subvolumeESC}/d" /etc/fstab
+    umount ${subvolume}
+    mkdir -p /tmp/btrfs 1>/dev/null
+    mount ${partition} /tmp/btrfs
+    mv /tmp/btrfs/WORKINGDIR/snapshots/backup /tmp/btrfs/backup
+    btrfs subvolume delete /tmp/btrfs/WORKINGDIR
+    mv /tmp/btrfs/backup /tmp/btrfs/WORKINGDIR
+    subVolID=$(btrfs subvolume show /tmp/btrfs/WORKINGDIR | grep "Subvolume ID:" | awk '$1=$1' | cut -d " " -f 3)
+    sed -i "/${subvolumeESC}/d" /etc/fstab
     fstabAdd="UUID=${uuid} ${subvolume} btrfs noexec,defaults,subvolid=${subVolID} 0 2"
-    sudo sed "4 a ${fstabAdd}" -i /etc/fstab 1>/dev/null  
-    sudo umount /tmp/btrfs
-    sudo mount -a
+    sed "4 a ${fstabAdd}" -i /etc/fstab 1>/dev/null  
+    umount /tmp/btrfs
+    mount -a
     sync
     if [ $(df | grep -c "${subvolume}") -eq 0 ]; then
       >&2 echo "# check drive setting ... rollback seemed to "
@@ -1310,8 +1331,8 @@ if [ "$1" = "tempmount" ]; then
 
     # do EXT4 temp mount
     echo "# temp mount /dev/${hddDataPartitionExt4} --> /mnt/hdd"
-    sudo mkdir -p /mnt/hdd 1>/dev/null
-    sudo mount /dev/${hddDataPartitionExt4} /mnt/hdd
+    mkdir -p /mnt/hdd 1>/dev/null
+    mount /dev/${hddDataPartitionExt4} /mnt/hdd
 
     # check result
     isMounted=$(df | grep -c "/mnt/hdd")
@@ -1330,12 +1351,12 @@ if [ "$1" = "tempmount" ]; then
     bitcoinGID=$(id -g bitcoin)
 
     # do BTRFS temp mount
-    sudo mkdir -p /mnt/hdd 1>/dev/null
-    sudo mkdir -p /mnt/storage 1>/dev/null
-    sudo mkdir -p /mnt/temp 1>/dev/null
-    sudo mount -t btrfs -o degraded -o subvol=WORKINGDIR /dev/${hddBTRFS}1 /mnt/hdd
-    sudo mount -t btrfs -o subvol=WORKINGDIR /dev/${hddBTRFS}2 /mnt/storage
-    sudo mount -o umask=0000,uid=${bitcoinUID},gid=${bitcoinGID} /dev/${hddBTRFS}3 /mnt/temp 
+    mkdir -p /mnt/hdd 1>/dev/null
+    mkdir -p /mnt/storage 1>/dev/null
+    mkdir -p /mnt/temp 1>/dev/null
+    mount -t btrfs -o degraded -o subvol=WORKINGDIR /dev/${hddBTRFS}1 /mnt/hdd
+    mount -t btrfs -o subvol=WORKINGDIR /dev/${hddBTRFS}2 /mnt/storage
+    mount -o umask=0000,uid=${bitcoinUID},gid=${bitcoinGID} /dev/${hddBTRFS}3 /mnt/temp 
 
     # check result
     isMountedA=$(df | grep -c "/mnt/hdd")
@@ -1362,9 +1383,9 @@ if [ "$1" = "tempmount" ]; then
 fi
 
 if [ "$1" = "unmount" ]; then
-  sudo umount /mnt/hdd 2>/dev/null
-  sudo umount /mnt/storage 2>/dev/null
-  sudo umount /mnt/temp 2>/dev/null
+  umount /mnt/hdd 2>/dev/null
+  umount /mnt/storage 2>/dev/null
+  umount /mnt/temp 2>/dev/null
   echo "# OK done unmount"
   exit 1 
 fi
@@ -1381,93 +1402,93 @@ if [ "$1" = "link" ]; then
   fi
 
   # cleanups
-  if [ $(sudo ls -la /home/bitcoin/ | grep -c "bitcoin ->") -eq 0 ]; then
+  if [ $(ls -la /home/bitcoin/ | grep -c "bitcoin ->") -eq 0 ]; then
     >&2 echo "# - /home/bitcoin/.bitcoin -> is not a link, cleaning"
-    sudo rm -r /home/bitcoin/.bitcoin 2>/dev/null
+    rm -r /home/bitcoin/.bitcoin 2>/dev/null
   else
-    sudo rm /home/bitcoin/.bitcoin 2>/dev/null
+    rm /home/bitcoin/.bitcoin 2>/dev/null
   fi
 
   # make sure common base directory exits
-  sudo mkdir -p /mnt/hdd/lnd
-  sudo mkdir -p /mnt/hdd/app-data
+  mkdir -p /mnt/hdd/lnd
+  mkdir -p /mnt/hdd/app-data
 
   if [ ${isBTRFS} -eq 1 ]; then
     >&2 echo "# Creating BTRFS setup links"
     
     >&2 echo "# - linking blockchains into /mnt/hdd"
     if [ $(ls -F /mnt/hdd/bitcoin | grep -c '/mnt/hdd/bitcoin@') -eq 0 ]; then
-      sudo mkdir -p /mnt/storage/bitcoin
-      sudo cp -R /mnt/hdd/bitcoin/* /mnt/storage/bitcoin 2>/dev/null
-      sudo chown -R bitcoin:bitcoin /mnt/storage/bitcoin
-      sudo rm -r /mnt/hdd/bitcoin
-      sudo ln -s /mnt/storage/bitcoin /mnt/hdd/bitcoin
-      sudo rm /mnt/storage/bitcoin/bitcoin 2>/dev/null
+      mkdir -p /mnt/storage/bitcoin
+      cp -R /mnt/hdd/bitcoin/* /mnt/storage/bitcoin 2>/dev/null
+      chown -R bitcoin:bitcoin /mnt/storage/bitcoin
+      rm -r /mnt/hdd/bitcoin
+      ln -s /mnt/storage/bitcoin /mnt/hdd/bitcoin
+      rm /mnt/storage/bitcoin/bitcoin 2>/dev/null
     fi
 
     >&2 echo "# linking lnd for user bitcoin"
-    sudo rm /home/bitcoin/.lnd 2>/dev/null
-    sudo ln -s /mnt/hdd/lnd /home/bitcoin/.lnd
+    rm /home/bitcoin/.lnd 2>/dev/null
+    ln -s /mnt/hdd/lnd /home/bitcoin/.lnd
 
     >&2 echo "# - linking blockchain for user bitcoin"
-    sudo ln -s /mnt/storage/bitcoin /home/bitcoin/.bitcoin
+    ln -s /mnt/storage/bitcoin /home/bitcoin/.bitcoin
 
     >&2 echo "# - linking storage into /mnt/hdd"
-    sudo mkdir -p /mnt/storage/app-storage
-    sudo chown -R bitcoin:bitcoin /mnt/storage/app-storage
-    sudo rm /mnt/hdd/app-storage 2>/dev/null
-    sudo ln -s /mnt/storage/app-storage /mnt/hdd/app-storage
+    mkdir -p /mnt/storage/app-storage
+    chown -R bitcoin:bitcoin /mnt/storage/app-storage
+    rm /mnt/hdd/app-storage 2>/dev/null
+    ln -s /mnt/storage/app-storage /mnt/hdd/app-storage
 
     >&2 echo "# - linking temp into /mnt/hdd"
-    sudo rm /mnt/hdd/temp 2>/dev/null
-    sudo ln -s /mnt/temp /mnt/hdd/temp
-    sudo chown -R bitcoin:bitcoin /mnt/temp 
+    rm /mnt/hdd/temp 2>/dev/null
+    ln -s /mnt/temp /mnt/hdd/temp
+    chown -R bitcoin:bitcoin /mnt/temp 
 
     >&2 echo "# - creating snapshots folder"
-    sudo mkdir -p /mnt/hdd/snapshots
-    sudo mkdir -p /mnt/storage/snapshots
+    mkdir -p /mnt/hdd/snapshots
+    mkdir -p /mnt/storage/snapshots
 
   else
     >&2 echo "# Creating EXT4 setup links"
 
     >&2 echo "# opening blockchain into /mnt/hdd"
-    sudo mkdir -p /mnt/hdd/bitcoin
+    mkdir -p /mnt/hdd/bitcoin
 
     >&2 echo "# linking blockchain for user bitcoin"
-    sudo rm /home/bitcoin/.bitcoin 2>/dev/null
-    sudo ln -s /mnt/hdd/bitcoin /home/bitcoin/.bitcoin
+    rm /home/bitcoin/.bitcoin 2>/dev/null
+    ln -s /mnt/hdd/bitcoin /home/bitcoin/.bitcoin
     
     >&2 echo "# linking lnd for user bitcoin"
-    sudo rm /home/bitcoin/.lnd 2>/dev/null
-    sudo ln -s /mnt/hdd/lnd /home/bitcoin/.lnd
+    rm /home/bitcoin/.lnd 2>/dev/null
+    ln -s /mnt/hdd/lnd /home/bitcoin/.lnd
 
     >&2 echo "# creating default storage & temp folders"
-    sudo mkdir -p /mnt/hdd/app-storage
-    sudo mkdir -p /mnt/hdd/temp
+    mkdir -p /mnt/hdd/app-storage
+    mkdir -p /mnt/hdd/temp
     
   fi
 
   # fix ownership of linked files
-  sudo chown -R bitcoin:bitcoin /mnt/hdd/bitcoin
-  sudo chown -R bitcoin:bitcoin /mnt/hdd/lnd
-  sudo chown -R bitcoin:bitcoin /home/bitcoin/.lnd
-  sudo chown -R bitcoin:bitcoin /home/bitcoin/.bitcoin
-  sudo chown -R bitcoin:bitcoin /mnt/hdd/app-storage
-  sudo chown -R bitcoin:bitcoin /mnt/hdd/app-data
-  sudo chown -R bitcoin:bitcoin /mnt/hdd/temp 2>/dev/null
-  sudo chmod -R 777 /mnt/temp 2>/dev/null
-  sudo chmod -R 777 /mnt/hdd/temp 2>/dev/null
+  chown -R bitcoin:bitcoin /mnt/hdd/bitcoin
+  chown -R bitcoin:bitcoin /mnt/hdd/lnd
+  chown -R bitcoin:bitcoin /home/bitcoin/.lnd
+  chown -R bitcoin:bitcoin /home/bitcoin/.bitcoin
+  chown bitcoin:bitcoin /mnt/hdd/app-storage
+  chown bitcoin:bitcoin /mnt/hdd/app-data
+  chown -R bitcoin:bitcoin /mnt/hdd/temp 2>/dev/null
+  chmod -R 777 /mnt/temp 2>/dev/null
+  chmod -R 777 /mnt/hdd/temp 2>/dev/null
 
   # write info files about what directories are for
 
   echo "The /mnt/hdd/temp directory is for short time data and will get cleaned up on very start. Dont work with data here thats bigger then 25GB - because on BTRFS hdd layout this is a own partition with limited space. Also on BTRFS hdd layout the temp partition is an FAT format - so it can be easily mounted on Windows and OSx laptops by just connecting it to such laptops. Use this for easy export data. To import data make sure to work with the data before bootstrap is deleting the directory on startup." > ./README.txt
-  sudo mv ./README.txt /mnt/hdd/temp/README.txt 2>/dev/null
+  mv ./README.txt /mnt/hdd/temp/README.txt 2>/dev/null
 
   echo "The /mnt/hdd/app-data directory should be used by additional/optional apps and services installed to the RaspiBlitz for their data that should survive an import/export/backup. Data that can be reproduced (indexes, etc.) should be stored in app-storage." > ./README.txt
-  sudo mv ./README.txt /mnt/hdd/app-data/README.txt 2>/dev/null
+  mv ./README.txt /mnt/hdd/app-data/README.txt 2>/dev/null
 
   echo "The /mnt/hdd/app-storage directory should be used by additional/optional apps and services installed to the RaspiBlitz for their non-critical and reproducible data (indexes, public blockchain, etc.) that does not need to survive an an import/export/backup. Data is critical should be in app-data." > ./README.txt
-  sudo mv ./README.txt /mnt/hdd/app-storage/README.txt 2>/dev/null
+  mv ./README.txt /mnt/hdd/app-storage/README.txt 2>/dev/null
 
   >&2 echo "# OK - all symbolic links are built"
   exit 0
@@ -1495,33 +1516,33 @@ if [ "$1" = "swap" ]; then
     fi
 
     >&2 echo "# Switch off/uninstall old SWAP"
-    sudo dphys-swapfile swapoff 1>/dev/null
-    sudo dphys-swapfile uninstall 1>/dev/null
+    dphys-swapfile swapoff 1>/dev/null
+    dphys-swapfile uninstall 1>/dev/null
 
     if [ ${isBTRFS} -eq 1 ]; then
 
       >&2 echo "# Rewrite external SWAP config for BTRFS setup"
-      sudo sed -i "s/^#CONF_SWAPFILE=/CONF_SWAPFILE=/g" /etc/dphys-swapfile  
-      sudo sed -i "s/^CONF_SWAPFILE=.*/CONF_SWAPFILE=\/mnt\/temp\/swapfile/g" /etc/dphys-swapfile  
+      sed -i "s/^#CONF_SWAPFILE=/CONF_SWAPFILE=/g" /etc/dphys-swapfile  
+      sed -i "s/^CONF_SWAPFILE=.*/CONF_SWAPFILE=\/mnt\/temp\/swapfile/g" /etc/dphys-swapfile  
 
     else
 
       >&2 echo "# Rewrite external SWAP config for EXT4 setup"
-      sudo sed -i "s/^#CONF_SWAPFILE=/CONF_SWAPFILE=/g" /etc/dphys-swapfile  
-      sudo sed -i "s/^CONF_SWAPFILE=.*/CONF_SWAPFILE=\/mnt\/hdd\/swapfile/g" /etc/dphys-swapfile  
+      sed -i "s/^#CONF_SWAPFILE=/CONF_SWAPFILE=/g" /etc/dphys-swapfile  
+      sed -i "s/^CONF_SWAPFILE=.*/CONF_SWAPFILE=\/mnt\/hdd\/swapfile/g" /etc/dphys-swapfile  
 
     fi
-    sudo sed -i "s/^CONF_SWAPSIZE=/#CONF_SWAPSIZE=/g" /etc/dphys-swapfile 
-    sudo sed -i "s/^#CONF_MAXSWAP=.*/CONF_MAXSWAP=4096/g" /etc/dphys-swapfile
+    sed -i "s/^CONF_SWAPSIZE=/#CONF_SWAPSIZE=/g" /etc/dphys-swapfile 
+    sed -i "s/^#CONF_MAXSWAP=.*/CONF_MAXSWAP=4096/g" /etc/dphys-swapfile
 
     >&2 echo "# Creating SWAP file .."
-    sudo dd if=/dev/zero of=$externalSwapPath count=4096 bs=1MiB 1>/dev/null
-    sudo chmod 0600 $externalSwapPath 1>/dev/null
+    dd if=/dev/zero of=$externalSwapPath count=4096 bs=1MiB 1>/dev/null
+    chmod 0600 $externalSwapPath 1>/dev/null
 
     >&2 echo "# Activating new SWAP"
-    sudo mkswap $externalSwapPath
-    sudo dphys-swapfile setup 
-    sudo dphys-swapfile swapon
+    mkswap $externalSwapPath
+    dphys-swapfile setup 
+    dphys-swapfile swapon
 
     >&2 echo "# OK - Swap is now ON external"
     exit 0
@@ -1534,19 +1555,19 @@ if [ "$1" = "swap" ]; then
     fi
 
     >&2 echo "# Switch off/uninstall old SWAP"
-    sudo dphys-swapfile swapoff 1>/dev/null
-    sudo dphys-swapfile uninstall 1>/dev/null
+    dphys-swapfile swapoff 1>/dev/null
+    dphys-swapfile uninstall 1>/dev/null
 
     >&2 echo "# Rewrite SWAP config"
-    sudo sed -i "12s/.*/CONF_SWAPFILE=\/var\/swap/" /etc/dphys-swapfile
-    sudo sed -i "16s/.*/#CONF_SWAPSIZE=/" /etc/dphys-swapfile
-    sudo dd if=/dev/zero of=/var/swap count=256 bs=1MiB 1>/dev/null
-    sudo chmod 0600 /var/swap
+    sed -i "12s/.*/CONF_SWAPFILE=\/var\/swap/" /etc/dphys-swapfile
+    sed -i "16s/.*/#CONF_SWAPSIZE=/" /etc/dphys-swapfile
+    dd if=/dev/zero of=/var/swap count=256 bs=1MiB 1>/dev/null
+    chmod 0600 /var/swap
 
     >&2 echo "# Create and switch on new SWAP" 
-    sudo mkswap /var/swap 1>/dev/null
-    sudo dphys-swapfile setup 1>/dev/null
-    sudo dphys-swapfile swapon 1>/dev/null
+    mkswap /var/swap 1>/dev/null
+    dphys-swapfile setup 1>/dev/null
+    dphys-swapfile swapon 1>/dev/null
 
     >&2 echo "# OK - Swap is now OFF external"
     exit 0
@@ -1577,7 +1598,7 @@ if [ "$1" = "clean" ]; then
   fi
 
   >&2 echo "# Making sure 'secure-delete' is installed ..."
-  sudo apt-get install -y secure-delete 1>/dev/null
+  apt-get install -y secure-delete 1>/dev/null
 
   >&2 echo
   >&2 echo "# IMPORTANT: No 100% guarantee that sensitive data is completely deleted!"
@@ -1594,8 +1615,8 @@ if [ "$1" = "clean" ]; then
       >&2 echo "# Deleting personal Data .."
 
         # make sure swap is off
-        sudo dphys-swapfile swapoff 1>/dev/null
-        sudo dphys-swapfile uninstall 1>/dev/null
+        dphys-swapfile swapoff 1>/dev/null
+        dphys-swapfile uninstall 1>/dev/null
         sync
 
         # for all other data shred files selectively
@@ -1635,18 +1656,18 @@ if [ "$1" = "clean" ]; then
             if [ -d "/mnt/hdd/$entry" ]; then
               if [ ${whenDeleteSchredd} -eq 1 ]; then
                 >&2 echo "# shredding DIR  : ${entry}"
-                sudo srm -lr /mnt/hdd/$entry
+                srm -lr /mnt/hdd/$entry
               else
                 >&2 echo "# deleting DIR  : ${entry}"
-                sudo rm -r /mnt/hdd/$entry
+                rm -r /mnt/hdd/$entry
               fi
             else
               if [ ${whenDeleteSchredd} -eq 1 ]; then
                 >&2 echo "# shredding FILE : ${entry}"
-                sudo srm -l /mnt/hdd/$entry
+                srm -l /mnt/hdd/$entry
               else
                 >&2 echo "# deleting FILE : ${entry}"
-                sudo rm /mnt/hdd/$entry
+                rm /mnt/hdd/$entry
               fi
             fi
 
@@ -1664,7 +1685,7 @@ if [ "$1" = "clean" ]; then
             echo "Cleaning Blockchain: ${chain}"
 
             # take extra care if wallet.db exists
-            sudo srm -v /mnt/hdd/${chain}/wallet.db 2>/dev/null
+            srm -v /mnt/hdd/${chain}/wallet.db 2>/dev/null
 
             # the rest just delete (keep blocks and chainstate and testnet3)
             for entry in $(ls -A1 /mnt/hdd/${chain} 2>/dev/null)
@@ -1679,10 +1700,10 @@ if [ "$1" = "clean" ]; then
               if [ ${delete} -eq 1 ]; then
                 if [ -d "/mnt/hdd/${chain}/$entry" ]; then
                   >&2 echo "# Deleting DIR  : /mnt/hdd/${chain}/${entry}"
-                  sudo rm -r /mnt/hdd/${chain}/$entry
+                  rm -r /mnt/hdd/${chain}/$entry
                 else
                   >&2 echo "# deleting FILE : /mnt/hdd/${chain}/${entry}"
-                  sudo rm /mnt/hdd/${chain}/$entry
+                  rm /mnt/hdd/${chain}/$entry
                 fi
               else
                 >&2 echo "# keeping: ${entry}"
@@ -1702,10 +1723,10 @@ if [ "$1" = "clean" ]; then
                 if [ ${delete} -eq 1 ]; then
                   if [ -d "/mnt/hdd/bitcoin/testnet3/$entry" ]; then
                     >&2 echo "# Deleting DIR  : /mnt/hdd/bitcoin/testnet3/${entry}"
-                    sudo rm -r /mnt/hdd/bitcoin/testnet3/$entry
+                    rm -r /mnt/hdd/bitcoin/testnet3/$entry
                   else
                     >&2 echo "# deleting FILE : /mnt/hdd/bitcoin/testnet3/${entry}"
-                    sudo rm /mnt/hdd/bitcoin/testnet3/$entry
+                    rm /mnt/hdd/bitcoin/testnet3/$entry
                   fi
                 else
                   >&2 echo "# keeping: ${entry}"
@@ -1737,8 +1758,8 @@ if [ "$1" = "clean" ]; then
     fi
 
     # deleting the blocks and chainstate
-    sudo rm -R ${basePath}/bitcoin/blocks 1>/dev/null 2>/dev/null
-    sudo rm -R ${basePath}/bitcoin/chainstate 1>/dev/null 2>/dev/null
+    rm -R ${basePath}/bitcoin/blocks 1>/dev/null 2>/dev/null
+    rm -R ${basePath}/bitcoin/chainstate 1>/dev/null 2>/dev/null
 
     >&2 echo "# OK cleaning done."
     exit 1
@@ -1761,10 +1782,10 @@ if [ "$1" = "clean" ]; then
 
         if [ -d "${tempPath}/$entry" ]; then
           >&2 echo "# shredding DIR  : ${entry}"
-          sudo rm -r ${tempPath}/$entry
+          rm -r ${tempPath}/$entry
         else
           >&2 echo "# shredding FILE : ${entry}"
-          sudo rm ${tempPath}/$entry
+          rm ${tempPath}/$entry
         fi
 
       else
@@ -1794,18 +1815,18 @@ if [ "$1" = "uasp-fix" ]; then
 
   # check if UASP is already deactivated (on RaspiOS)
   # https://www.pragmaticlinux.com/2021/03/fix-for-getting-your-ssd-working-via-usb-3-on-your-raspberry-pi/
-  cmdlineExists=$(sudo ls /boot/cmdline.txt 2>/dev/null | grep -c "cmdline.txt")
+  cmdlineExists=$(ls /boot/cmdline.txt 2>/dev/null | grep -c "cmdline.txt")
   if [ ${cmdlineExists} -eq 1 ] && [ ${#hddAdapterUSB} -gt 0 ] && [ ${hddAdapterUSAP} -eq 0 ]; then
     echo "# Checking for UASP deactivation ..."
-    usbQuirkActive=$(sudo cat /boot/cmdline.txt | grep -c "usb-storage.quirks=")
-    usbQuirkDone=$(sudo cat /boot/cmdline.txt | grep -c "usb-storage.quirks=${hddAdapterUSB}:u")
+    usbQuirkActive=$(cat /boot/cmdline.txt | grep -c "usb-storage.quirks=")
+    usbQuirkDone=$(cat /boot/cmdline.txt | grep -c "usb-storage.quirks=${hddAdapterUSB}:u")
     if [ ${usbQuirkActive} -gt 0 ] && [ ${usbQuirkDone} -eq 0 ]; then
       # remove old usb-storage.quirks
-      sudo sed -i "s/usb-storage.quirks=[^ ]* //g" /boot/cmdline.txt
+      sed -i "s/usb-storage.quirks=[^ ]* //g" /boot/cmdline.txt
     fi 
     if [ ${usbQuirkDone} -eq 0 ]; then
       # add new usb-storage.quirks
-      sudo sed -i "s/^/usb-storage.quirks=${hddAdapterUSB}:u /" /boot/cmdline.txt
+      sed -i "s/^/usb-storage.quirks=${hddAdapterUSB}:u /" /boot/cmdline.txt
       # go into reboot to activate new setting
       echo "# DONE deactivating UASP for ${hddAdapterUSB} ... reboot needed"
       echo "neededReboot=1"

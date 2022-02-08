@@ -26,6 +26,7 @@ if [ ${#whitepaper} -eq 0 ]; then whitepaper="off"; fi
 if [ ${#chantools} -eq 0 ]; then chantools="off"; fi
 if [ ${#sparko} -eq 0 ]; then sparko="off"; fi
 if [ ${#spark} -eq 0 ]; then spark="off"; fi
+if [ ${#tallycoinConnect} -eq 0 ]; then tallycoinConnect="off"; fi
 
 # show select dialog
 echo "run dialog ..."
@@ -58,6 +59,7 @@ if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
   OPTIONS+=(y 'LND PyBLOCK' ${pyblock})
   OPTIONS+=(h 'LND ChannelTools (Fund Rescue)' ${chantools})
   OPTIONS+=(x 'LND Sphinx-Relay' ${sphinxrelay})
+  OPTIONS+=(d 'LND Tallycoin Connect' ${tallycoinConnect})
 fi
 
 # just available for CL
@@ -408,6 +410,23 @@ Use the new 'SPHINX' entry in Main Menu for more info.\n
   fi
 else
   echo "Sphinx Relay unchanged."
+fi
+
+# Tallycoin
+choice="off"; check=$(echo "${CHOICES}" | grep -c "d")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${tallycoinConnect}" != "${choice}" ]; then
+  echo "Tallycoin Setting changed .."
+  anychange=1
+  sudo -u admin /home/admin/config.scripts/bonus.tallycoin-connect.sh ${choice}
+  if [ "${choice}" =  "on" ]; then
+    whiptail --title " Installed Tallycoin-Connect" --msgbox "\
+Tallycoin-Connect was installed.\n
+Use the new 'TALLY' entry in Main Menu for more info.\n
+" 10 45
+  fi
+else
+  echo "Tallycoin Setting unchanged."
 fi
 
 # JoinMarket process choice

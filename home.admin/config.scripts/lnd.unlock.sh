@@ -21,9 +21,20 @@ passwordC="$2"
 # chain-unlock --> unlock with re-arranged parameters
 CHAIN="${chain}net"
 if [ "${action}" == "chain-unlock" ]; then
-    action="unlock"
-    passwordC=""
     CHAIN=$2
+    if [ "${CHAIN}" == "mainnet" ]; then
+        chain="main"
+    elif [ "${CHAIN}" == "testnet" ]; then
+        chain="test"
+        passwordC=""
+    elif [ "${CHAIN}" == "signet" ]; then 
+        chain="sig"
+        passwordC=""
+    else
+        echo "# unkown chain parameter: ${CHAIN}"
+        sleep 1
+        exit 1
+    fi
 fi
 
 # dont if state is on reboot or shutdown
@@ -38,7 +49,7 @@ source <(/home/admin/config.scripts/network.aliases.sh getvars lnd ${chain}net)
 
 # check if wallet is already unlocked
 # echo "# checking LND wallet ... (can take some time)"
-lndError=$(sudo -u bitcoin lncli --chain=${network} --network=${chain}net getinfo 2>&1)
+lndError=$(${lncli_alias} getinfo 2>&1)
 walletLocked=$(echo "${lndError}" | grep -c "Wallet is encrypted")
 if [ "${walletLocked}" == "0" ]; then
     # test for new error message
@@ -46,7 +57,7 @@ if [ "${walletLocked}" == "0" ]; then
 fi
 macaroonsMissing=$(echo "${lndError}" | grep -c "unable to read macaroon")
 
-# if action sis just status
+# if action is just status
 if [ "${action}" == "status" ]; then
     echo "locked=${walletLocked}"
     echo "missingMacaroons=${macaroonsMissing}"
@@ -55,20 +66,8 @@ fi
 
 # if already unlocked all is done
 if [ ${walletLocked} -eq 0 ] && [ ${macaroonsMissing} -eq 0 ]; then
-    # echo "# OK LND wallet was already unlocked"
+    echo "# OK LND wallet was already unlocked"
     exit 0
-fi
-
-# check if LND is below 0.10 (has no STDIN password option)
-fallback=0
-source <(/home/admin/config.scripts/lnd.update.sh info)
-if [ ${lndInstalledVersionMajor} -eq 0 ] && [ ${lndInstalledVersionMain} -lt 10 ]; then
-    if [ ${#passwordC} -gt 0 ]; then
-        echo "error='lnd version too old'"
-        exit 1
-    else
-      fallback=1
-    fi
 fi
 
 # if no password check if stored for auto-unlock
@@ -82,13 +81,14 @@ fi
 
 # if still no password get from user
 manualEntry=0
-if [ ${#passwordC} -eq 0 ] && [ ${fallback} -eq 0 ]; then
+if [ ${#passwordC} -eq 0 ]; then
     echo "# manual input"
     manualEntry=1
     passwordC=$(whiptail --passwordbox "\nEnter Password C to unlock wallet:\n" 9 52 "" --title " LND Wallet " --backtitle "RaspiBlitz" 3>&1 1>&2 2>&3)
 fi
 
 loopCount=0
+fallback=0
 while [ ${fallback} -eq 0 ]
   do
     
@@ -96,7 +96,16 @@ while [ ${fallback} -eq 0 ]
 
     loopCount=$(($loopCount +1))
     echo "# calling: lncli unlock"
-    result=$(echo "$passwordC" | $lncli_alias unlock --recovery_window=1000 --stdin 2>&1)
+
+
+    # check if lnd is in recovery mode
+    source <(sudo /home/admin/config.scripts/lnd.backup.sh mainnet recoverymode status)
+    recoveryOption=""
+    if [ "${recoverymode}" == "1" ]; then
+        recoveryOption="--recovery_window=5000 "
+        echo "# running unlock with ${recoveryOption}"
+    fi
+    result=$(echo "$passwordC" | $lncli_alias unlock ${recoveryOption}--stdin 2>&1)
     wasUnlocked=$(echo "${result}" | grep -c 'successfully unlocked')
     wrongPassword=$(echo "${result}" | grep -c 'invalid passphrase')
     if [ ${wasUnlocked} -gt 0 ]; then
@@ -162,7 +171,7 @@ do
     echo "############################"
     echo "Calling: ${netprefix}lncli unlock"
     echo "Please re-enter Password C:"
-    $lncli_alias unlock --recovery_window=1000
+    $lncli_alias unlock --recovery_window=5000
 
     # test unlock
     walletLocked=$($lncli_alias getinfo 2>&1 | grep -c unlock)

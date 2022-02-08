@@ -4,57 +4,55 @@
 
 if [ $# -eq 0 ]; then
  echo "small config script to switch the LND autoNatDiscovery on or off"
- echo "lnd.autonat.sh [on|off]"
+ echo "lnd.autonat.sh [on|off|info]"
  exit 1
 fi
 
 # check lnd.conf exits 
 lndConfExists=$(sudo ls /mnt/hdd/lnd/lnd.conf | grep -c 'lnd.conf')
 if [ ${lndConfExists} -eq 0 ]; then
-  echo "FAIL - /mnt/hdd/lnd/lnd.conf not found"
+  echo "# FAIL - /mnt/hdd/lnd/lnd.conf not found"
   exit 1
 fi
 
-# check if "nat=" exists in lnd config
-valueExists=$(sudo cat /mnt/hdd/lnd/lnd.conf | grep -c 'nat=')
-if [ ${valueExists} -eq 0 ]; then
-  echo "Adding autonat config defaults to /mnt/hdd/lnd/lnd.conf"
-  sudo sed -i '$ a nat=false' /mnt/hdd/lnd/lnd.conf
+# info
+if [ "$1" = "info" ]; then
+  natIsOn=$(sudo cat /mnt/hdd/lnd/lnd.conf | grep -c 'nat=true')
+  if [ "${natIsOn}" == "1" ]; then
+    echo "autoNatDiscovery=on"
+  else
+    echo "autoNatDiscovery=off"
+  fi
+  exit 0
 fi
 
-# stop services
-echo "making sure services are not running"
-sudo systemctl stop lnd 2>/dev/null
+# check if "nat" exists in lnd config
+valueExists=$(sudo cat /mnt/hdd/lnd/lnd.conf | grep -c 'nat=')
+if [ ${valueExists} -eq 0 ]; then
+  echo "# Adding autonat config defaults to /mnt/hdd/lnd/lnd.conf"
+  applicationOptionsLineNumber=$(grep -n "\[Application Options\]" /mnt/hdd/lnd/lnd.conf | cut -d ":" -f1)
+  applicationOptionsLineNumber="$(($applicationOptionsLineNumber+1))"
+  sudo sed -i "${applicationOptionsLineNumber}inat=false" /mnt/hdd/lnd/lnd.conf
+fi
 
-# add default value to raspi config if needed
-source /home/admin/raspiblitz.info
-source /mnt/hdd/raspiblitz.conf
+# delete nat is still in raspiblitz.conf (its OK when just in lnd.conf since v1.7.2)
+/home/admin/config.scripts/blitz.conf.sh delete autoNatDiscovery
 
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
-  echo "switching the LND autonat ON"
-  # editing lnd config
-  echo "editing /mnt/hdd/lnd/lnd.conf"
+  echo "# switching the LND autonat ON"
   sudo sed -i "s/^nat=.*/nat=true/g" /mnt/hdd/lnd/lnd.conf
-  # edit raspi blitz config
-  echo "editing /mnt/hdd/raspiblitz.conf"
-  /home/admin/config.scripts/blitz.conf.sh set autoNatDiscovery "on"
-  echo "OK - autonat is now ON"
-  echo "needs reboot to activate new setting"
+  echo "# OK - autonat is now ON"
+  echo "# needs reboot to activate new setting"
   exit 0
 fi
 
 # switch off
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
-  echo "switching the LND autonat OFF"
-  # editing lnd config
-  echo "editing /mnt/hdd/lnd/lnd.conf"
+  echo "# switching the LND autonat OFF"
   sudo sed -i "s/^nat=.*/nat=false/g" /mnt/hdd/lnd/lnd.conf
-  # edit raspi blitz config
-  echo "editing /mnt/hdd/raspiblitz.conf"
-  /home/admin/config.scripts/blitz.conf.sh set autoNatDiscovery "off"
-  echo "OK - autonat is now OFF"
-  echo "needs reboot to activate new setting"
+  echo "# OK - autonat is now OFF"
+  echo "# needs reboot to activate new setting"
   exit 0
 fi
 

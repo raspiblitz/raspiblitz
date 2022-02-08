@@ -4,7 +4,7 @@
 ## based on https://raspibolt.github.io/raspibolt/raspibolt_40_lnd.html#lightning-lnd
 ## see LND releases: https://github.com/lightningnetwork/lnd/releases
 ## !!!! If you change here - make sure to also change interims version in lnd.update.sh !!!
-lndVersion="0.14.1-beta"
+lndVersion="0.14.2-beta"
 
 # olaoluwa
 # PGPauthor="roasbeef"
@@ -233,8 +233,8 @@ source /mnt/hdd/raspiblitz.conf
 
 function removeParallelService() {
   if [ -f "/etc/systemd/system/${netprefix}lnd.service" ];then
-    sudo -u bitcoin /usr/local/bin/lncli\
-     --rpcserver localhost:1${rpcportmod}009 stop
+    echo "# Stopping ${netprefix}lnd ..."
+    #sudo -u bitcoin /usr/local/bin/lncli --rpcserver localhost:1${rpcportmod}009 stop
     sudo systemctl stop ${netprefix}lnd
     sudo systemctl disable ${netprefix}lnd
     sudo rm /etc/systemd/system/${netprefix}lnd.service 2>/dev/null
@@ -446,9 +446,11 @@ alias ${netprefix}lndconf=\"sudo nano /home/bitcoin/.lnd/${netprefix}lnd.conf\"\
   /home/admin/config.scripts/blitz.conf.sh set ${netprefix}lnd "on"
 
   # if this is the first lightning mainnet turned on - make default
-  if [ "${CHAIN}" == "mainnet" ] && [ "${lightning}" == "" ]; then
-    echo "# LND is now default lighthning implementation"
-    /home/admin/config.scripts/blitz.conf.sh set lightning "lnd"
+  if [ "${CHAIN}" == "mainnet" ]; then
+    if [ "${lightning}" == "" ] || [ "${lightning}" == "none" ]; then
+      echo "# LND is now default lighthning implementation"
+      /home/admin/config.scripts/blitz.conf.sh set lightning "lnd"
+    fi
   fi
 
   exit 0

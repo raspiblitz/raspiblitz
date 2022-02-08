@@ -10,12 +10,12 @@ CLVERSION=v0.10.2
 
 # https://github.com/ElementsProject/lightning/tree/master/contrib/keys
 # PGPsigner="rustyrussel"
-# PGPpkeys="https://raw.githubusercontent.com/ElementsProject/lightning/master/contrib/keys/rustyrussell.txt"
-# PGPcheck="D9200E6CD1ADB8F1"
+# PGPpubkeyLink="https://raw.githubusercontent.com/ElementsProject/lightning/master/contrib/keys/rustyrussell.txt"
+# PGPpubkeyFingerprint="D9200E6CD1ADB8F1"
 
 PGPsigner="cdecker"
-PGPpkeys="https://raw.githubusercontent.com/ElementsProject/lightning/master/contrib/keys/cdecker.txt"
-PGPcheck="A26D6D9FE088ED58"
+PGPpubkeyLink="https://raw.githubusercontent.com/ElementsProject/lightning/master/contrib/keys/${PGPsigner}.txt"
+PGPpubkeyFingerprint="A26D6D9FE088ED58"
 
 # help
 if [ $# -eq 0 ]||[ "$1" = "-h" ]||[ "$1" = "--help" ];then
@@ -53,6 +53,20 @@ function installDependencies()
   sudo -u bitcoin pip3 install --user -r requirements.txt
 }
 
+function buildAndInstallCLbinaries()
+{
+  echo "- Configuring EXPERIMENTAL_FEATURES enabled"
+  echo
+  sudo -u bitcoin ./configure --enable-experimental-features
+  echo
+  echo "- Building C-lightning from source"
+  echo
+  sudo -u bitcoin make
+  echo
+  echo "- Install to /usr/local/bin/"
+  sudo make install || exit 1
+}
+
 if [ "$1" = "install" ]; then
   
   echo "# *** INSTALL C-LIGHTNING ${CLVERSION} BINARY ***"
@@ -60,79 +74,87 @@ if [ "$1" = "install" ]; then
   echo "# no configuration, no systemd service"
 
   # check if the binary is already installed
-  if [ $(sudo -u bitcoin lightning-cli --version 2>/dev/null | grep -c .) -gt 0 ]; then
+  if [ -f /usr/local/bin/lightningd ]; then
     echo "c-lightning binary already installed - done"
     exit 1
   fi
 
-  # prepare download dir
-  sudo rm -rf /home/bitcoin/download
-  sudo -u bitcoin mkdir -p /home/bitcoin/download
-  cd /home/bitcoin/download || exit 1
+## Download and verify zip
+#  # prepare download dir
+#  sudo rm -rf /home/bitcoin/download
+#  sudo -u bitcoin mkdir -p /home/bitcoin/download
+#  cd /home/bitcoin/download || exit 1
+#
+#  sudo -u bitcoin wget -O "pgp_keys.asc" ${PGPpubkeyLink}
+#  sudo -u bitcoin gpg --import --import-options show-only ./pgp_keys.asc
+#  fingerprint=$(gpg "pgp_keys.asc" 2>/dev/null | grep "${PGPpubkeyFingerprint}" -c)
+#  if [ ${fingerprint} -lt 1 ]; then
+#    echo
+#    echo "!!! WARNING --> the PGP fingerprint is not as expected for ${PGPsigner}"
+#    echo "Should contain PGP: ${PGPpubkeyFingerprint}"
+#    echo "PRESS ENTER to TAKE THE RISK if you think all is OK"
+#    read key
+#  fi
+#  sudo -u bitcoin gpg --import ./pgp_keys.asc
+#
+#  sudo -u bitcoin wget https://github.com/ElementsProject/lightning/releases/download/${CLVERSION}/SHA256SUMS
+#  sudo -u bitcoin wget https://github.com/ElementsProject/lightning/releases/download/${CLVERSION}/SHA256SUMS.asc
+#  
+#  verifyResult=$(sudo -u bitcoin gpg --verify SHA256SUMS.asc 2>&1)
+#
+#  goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
+#  echo "goodSignature(${goodSignature})"
+#  correctKey=$(echo ${verifyResult} | tr -d " \t\n\r" | grep "${PGPpubkeyFingerprint}" -c)
+#  echo "correctKey(${correctKey})"
+#  if [ ${correctKey} -lt 1 ] || [ ${goodSignature} -lt 1 ]; then
+#    echo
+#    echo "!!! DOWNLOAD FAILED --> PGP verification not OK / signature(${goodSignature}) verify(${correctKey})"
+#    exit 1
+#  else
+#    echo 
+#    echo "****************************************************************"
+#    echo "OK --> the PGP signature of the C-lightning SHA256SUMS is correct"
+#    echo "****************************************************************"
+#    echo 
+#  fi
+#  
+#  sudo -u bitcoin wget https://github.com/ElementsProject/lightning/releases/download/${CLVERSION}/clightning-${CLVERSION}.zip
+#  
+#  hashCheckResult=$(sha256sum -c SHA256SUMS 2>&1)
+#  goodHash=$(echo ${hashCheckResult} | grep 'OK' -c)
+#  echo "goodHash(${goodHash})"
+#  if [ ${goodHash} -lt 1 ]; then
+#    echo
+#    echo "!!! BUILD FAILED --> Hash check not OK"
+#    exit 1
+#  else
+#    echo
+#    echo "********************************************************************"
+#    echo "OK --> the hash of the downloaded C-lightning source code is correct"
+#    echo "********************************************************************"
+#    echo
+#  fi
+#  
+#  sudo -u bitcoin unzip clightning-${CLVERSION}.zip
+#  cd clightning-${CLVERSION} || exit 1
 
-  sudo -u bitcoin wget -O "pgp_keys.asc" ${PGPpkeys}
-  sudo -u bitcoin gpg --import --import-options show-only ./pgp_keys.asc
-  fingerprint=$(gpg "pgp_keys.asc" 2>/dev/null | grep "${PGPcheck}" -c)
-  if [ ${fingerprint} -lt 1 ]; then
-    echo
-    echo "!!! WARNING --> the PGP fingerprint is not as expected for ${PGPsigner}"
-    echo "Should contain PGP: ${PGPcheck}"
-    echo "PRESS ENTER to TAKE THE RISK if you think all is OK"
-    read key
-  fi
-  sudo -u bitcoin gpg --import ./pgp_keys.asc
+  # download and verify the source from github
+  cd /home/bitcoin || exit 1
+  echo
+  echo "- Cloning https://github.com/ElementsProject/lightning.git"
+  echo
+  sudo -u bitcoin git clone https://github.com/ElementsProject/lightning.git
+  cd lightning || exit 1
+  echo
+  echo "- Reset to version $CLVERSION"
+  sudo -u bitcoin git reset --hard $CLVERSION
 
-  sudo -u bitcoin wget https://github.com/ElementsProject/lightning/releases/download/${CLVERSION}/SHA256SUMS
-  sudo -u bitcoin wget https://github.com/ElementsProject/lightning/releases/download/${CLVERSION}/SHA256SUMS.asc
-  
-  verifyResult=$(sudo -u bitcoin gpg --verify SHA256SUMS.asc 2>&1)
-
-  goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
-  echo "goodSignature(${goodSignature})"
-  correctKey=$(echo ${verifyResult} | tr -d " \t\n\r" | grep "${PGPcheck}" -c)
-  echo "correctKey(${correctKey})"
-  if [ ${correctKey} -lt 1 ] || [ ${goodSignature} -lt 1 ]; then
-    echo
-    echo "!!! DOWNLOAD FAILED --> PGP verification not OK / signature(${goodSignature}) verify(${correctKey})"
-    exit 1
-  else
-    echo 
-    echo "****************************************************************"
-    echo "OK --> the PGP signature of the C-lightning SHA256SUMS is correct"
-    echo "****************************************************************"
-    echo 
-  fi
-  
-  sudo -u bitcoin wget https://github.com/ElementsProject/lightning/releases/download/${CLVERSION}/clightning-${CLVERSION}.zip
-  
-  hashCheckResult=$(sha256sum -c SHA256SUMS 2>&1)
-  goodHash=$(echo ${hashCheckResult} | grep 'OK' -c)
-  echo "goodHash(${goodHash})"
-  if [ ${goodHash} -lt 1 ]; then
-    echo
-    echo "!!! BUILD FAILED --> Hash check not OK"
-    exit 1
-  else
-    echo
-    echo "********************************************************************"
-    echo "OK --> the hash of the downloaded C-lightning source code is correct"
-    echo "********************************************************************"
-    echo
-  fi
-  
-  sudo -u bitcoin unzip clightning-${CLVERSION}.zip
-  cd clightning-${CLVERSION} || exit 1
+  sudo -u bitcoin /home/admin/config.scripts/blitz.git-verify.sh \
+   "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" "${CLVERSION}" || exit 1
 
   installDependencies
 
-  echo "- Configuring EXPERIMENTAL_FEATURES enabled"
-  sudo -u bitcoin ./configure --enable-experimental-features
-  
-  echo "- Building C-lightning from source"
-  sudo -u bitcoin make
-
-  echo "- Install to /usr/local/bin/"
-  sudo make install || exit 1
+  buildAndInstallCLbinaries
   
   installed=$(sudo -u bitcoin lightning-cli --version)
   if [ ${#installed} -eq 0 ]; then
@@ -142,7 +164,7 @@ if [ "$1" = "install" ]; then
   fi
   
   correctVersion=$(echo "${installed}" | grep -c "${CLVERSION:1}")
-  if [ ${correctVersion} -eq 0 ]; then
+  if [ "${correctVersion}" -eq 0 ]; then
     echo
     echo "!!! BUILD FAILED --> installed C-lightning is not version ${CLVERSION}"
     sudo -u bitcoin lightning-cli --version
@@ -181,24 +203,14 @@ if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = testPR ];then
     exit 1
   fi
 
-  # make sure binary is installed (will skip if already done)
-  /home/admin/config.scripts/cl.install.sh install
+  if [ "$1" = "update" ]||[ "$1" = "testPR" ];then
 
-  if [ ! -f /usr/local/bin/lightningd ]||[ "$1" = "update" ]||[ "$1" = "testPR" ];then
-
-    ########################
-    # Install dependencies # 
-    ########################
     echo "# apt update"
     echo
     sudo apt-get update
 
-    ####################################
-    # Download and compile from source #
-    ####################################
-
     cd /home/bitcoin || exit 1
-    if [ "$1" = "update" ]||[ "$1" = "testPR" ]||[ "$1" = "experimental" ];then
+    if [ "$1" = "update" ]||[ "$1" = "testPR" ];then
       echo
       echo "# Deleting the old source code"
       sudo rm -rf lightning
@@ -229,40 +241,23 @@ if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = testPR ];then
       echo "# https://github.com/ElementsProject/lightning/pull/$PRnumber"
       sudo -u bitcoin git fetch origin pull/$PRnumber/head:pr$PRnumber || exit 1
       sudo -u bitcoin git checkout pr$PRnumber || exit 1
-
-    else
-      echo "# Installing the version $CLVERSION"
-      sudo -u bitcoin git reset --hard $CLVERSION
     fi
 
     installDependencies
 
-    echo "# Building with EXPERIMENTAL_FEATURES enabled"
-    echo
-    sudo -u bitcoin ./configure --enable-experimental-features
-    echo
     currentCLversion=$(cd /home/bitcoin/lightning 2>/dev/null; \
     git describe --tags 2>/dev/null)
     echo "# Building from source C-lightning $currentCLversion"
-    echo
-    sudo -u bitcoin make
-    echo
-    echo "# Built C-lightning $currentCLversion"
-    echo
-    echo "# Install to /usr/local/bin/"
-    echo
-    sudo make install || exit 1
-    # clean up
-    # cd .. && rm -rf lightning
-  
-  else
-    installedVersion=$(sudo -u bitcoin /usr/local/bin/lightningd --version)
-    echo "# C-lightning ${installedVersion} is already installed"
+
+    buildAndInstallCLbinaries
   fi
   
   ##########
   # Config #
   ##########
+
+  # make sure binary is installed (will skip if already done)
+  /home/admin/config.scripts/cl.install.sh install
 
   echo "# Make sure bitcoin is in the ${TORGROUP} group"
   sudo usermod -a -G ${TORGROUP} bitcoin

@@ -14,8 +14,8 @@ fi
 ###################
 
 # get required parameters
-script=$2
-shortcode=$3
+script=$1
+shortcode=$2
 
 # check reqired parameters
 if [ "${script}" == "" ]; then

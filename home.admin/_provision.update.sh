@@ -58,6 +58,13 @@ if [ "${entryExists}" != "1" ]; then
   lightning="lnd"
   echo "lightning=${lightning}" >> ${configFile}
 fi
+# make sure lnd / cl is set if lightning is on
+if [ "${lightning}" == "lnd" ] && [ "${lnd}" != "on" ]; then
+  /home/admin/config.scripts/blitz.conf.sh set lnd on
+fi
+if [ "${lightning}" == "cl" ] && [ "${cl}" != "on" ]; then
+  /home/admin/config.scripts/blitz.conf.sh set cl on
+fi
 
 # load codeVersion
 source /home/admin/_version.info

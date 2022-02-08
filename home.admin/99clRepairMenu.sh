@@ -9,6 +9,27 @@ source <(/home/admin/config.scripts/network.aliases.sh getvars cl $1)
 
 sudo mkdir /var/cache/raspiblitz/temp 2>/dev/null
 
+
+function clRescan() {
+  trap 'rm -f "$_temp"' EXIT
+  _temp=$(mktemp -p /dev/shm/)
+  dialog --backtitle "Choose the new gap limit" \
+  --title "Enter the rescan depth or blockheight (-)" \
+  --inputbox "
+Enter the number of blocks to rescan from the current tip 
+or use a negative number for the absolute blockheight to scan from.
+
+If left empty will start to rescan from the block 700000 (-700000).
+" 12 71 2> "$_temp"
+  BLOCK=$(cat "$_temp")
+  if [ ${#BLOCK} -eq 0 ]; then
+    BLOCK="-700000"
+  fi
+  sudo /home/admin/config.scripts/cl.backup.sh "${CHAIN}" recoverymode on "${BLOCK}"
+  sudo systemctl restart ${netprefix}lightningd
+}
+
+
 # BASIC MENU INFO
 WIDTH=64
 BACKTITLE="RaspiBlitz"
@@ -31,6 +52,7 @@ fi
     OPTIONS+=(RESET "Reset the wallet and create new")
     OPTIONS+=(FILERESTORE "Restore from a rescue file")
     OPTIONS+=(SEEDRESTORE "Restore from a seed (onchain funds only)")
+    OPTIONS+=(RESCAN "Rescan for onchain funds from a given block")
 
 CHOICE_HEIGHT=$(("${#OPTIONS[@]}/2+1"))
 HEIGHT=$((CHOICE_HEIGHT+6))
@@ -102,6 +124,8 @@ case $CHOICE in
     /home/admin/config.scripts/blitz.conf.sh set ${netprefix}clAutoUnlock "off"
     # new
     /home/admin/config.scripts/cl.hsmtool.sh new $CHAIN
+    # create config
+    /home/admin/config.scripts/cl.install.sh on $CHAIN
     # set the lightningd service file on each active network
     if [ "${cl}" == "on" ] || [ "${cl}" == "1" ]; then
       /home/admin/config.scripts/cl.install-service.sh mainnet
@@ -171,8 +195,13 @@ case $CHOICE in
     /home/admin/config.scripts/cl.hsmtool.sh autounlock-off
     /home/admin/config.scripts/cl.hsmtool.sh decrypt
     /home/admin/config.scripts/cl.install.sh on $CHAIN
+
+    clRescan
     ;;
 
+  RESCAN)
+    clRescan
+    ;;
 esac
 
 exit 0

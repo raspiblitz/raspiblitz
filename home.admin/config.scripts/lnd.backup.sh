@@ -21,10 +21,110 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "# ---------------------------------------------------"
  echo "# lnd.backup.sh seed-export-gui [lndseeddata]"
  echo "# lnd.backup.sh seed-import-gui [resultfile]"
+ echo "# ---------------------------------------------------"
+ echo "# RECOVERY"
+ echo "# ---------------------------------------------------"
+ echo "# lnd.backup.sh [mainnet|signet|testnet] recoverymode [on|off|status]"
  exit 1
 fi
 
-# 1st PRAMETER action
+# 1st PARAMETER [mainnet|signet|testnet]
+if [ "$1" == "mainnet" ] || [ "$1" == "testnet" ] || [ "$1" == "signet" ]; then
+
+  # prepare all chain dependent variables
+  lndChain="$1"
+  mode="$2"
+  netprefix=""
+  if [ "${lndChain}" == "testnet" ]; then
+    netprefix="t"
+  fi
+  if [ "${lndChain}" == "signet" ]; then
+    netprefix="s"
+  fi
+
+  ################################
+  # RECOVERY
+  ################################
+
+  # LND is considered in "recoverymode" when it gets started with --reset-wallet-transactions parameter
+  # so it will forgets all the old on-chain transactions. This will trigger wallet unlock with
+  # recovery window to rescan for transactions and background process will monitor when finished
+
+  if [ ${mode} = "recoverymode" ]; then
+
+    # check if started with sudo
+    if [ "$EUID" -ne 0 ]; then 
+      echo "error='run as root'"
+      exit 1
+    fi
+
+        # status
+    recoverymodeStatus=$(cat /mnt/hdd/lnd/${netprefix}lnd.conf | grep -c "^reset-wallet-transactions=true")
+    if [ "$3" == "status" ]; then
+      if [ ${recoverymodeStatus} -gt 0 ]; then
+        echo "recoverymode=1"
+      else
+        echo "recoverymode=0"
+      fi
+      exit 0
+    fi
+
+    # on
+    if [ "$3" == "on" ]; then
+      if [ ${recoverymodeStatus} -gt 0 ]; then
+        echo "# recoverymode already on"
+        exit 0
+      fi
+
+      # make sure config entry exits
+      entryExists=$(cat /mnt/hdd/lnd/${netprefix}lnd.conf | grep -c "^reset-wallet-transactions=")
+      if [ $entryExists -eq 0 ]; then
+        # find section
+        sectionLine=$(cat /mnt/hdd/lnd/${netprefix}lnd.conf | grep -n "^\[Application Options\]" | cut -d ":" -f1)
+        insertLine=$(expr $sectionLine + 1)
+        sed -i "${insertLine}ireset-wallet-transactions=false" /mnt/hdd/lnd/${netprefix}lnd.conf
+      fi
+
+      # activate reset-wallet-transactions in lnd.conf
+      echo "# activating recovery mode ..."
+      sed -i 's/^reset-wallet-transactions=.*/reset-wallet-transactions=true/g' /mnt/hdd/lnd/${netprefix}lnd.conf
+      echo "# OK - restart/reboot needed for: ${netprefix}lnd.service"
+
+      # set system status
+      /home/admin/config.scripts/blitz.conf.sh set ln_lnd_${lndChain}_sync_initial_done 0 /home/admin/raspiblitz.info
+      source <(/home/admin/_cache.sh get chain lightning)
+      if [ "${lndChain}" == "${chain}net" ] && [ "${lightning}" == "lnd" ]; then
+        /home/admin/_cache.sh set ln_default_sync_initial_done 0
+      fi
+    
+      exit 0
+    fi
+
+    # off
+    if [ "$3" == "off" ]; then
+      if [ ${recoverymodeStatus} -eq 0 ]; then
+        echo "# recoverymode already off"
+        exit 0
+      fi
+
+      # remove --reset-wallet-transactions parameter in systemd service
+      echo "# deactivating recovery mode ..."
+      sed -i 's/^reset-wallet-transactions=.*/reset-wallet-transactions=false/g' /mnt/hdd/lnd/${netprefix}lnd.conf
+      
+
+      echo "# OK - restart/reboot needed for: ${netprefix}lnd.service"
+      exit 0
+    fi
+
+    # parameter fallback
+    echo "error='unknown parameter'"
+    exit 1
+
+  fi
+
+fi
+
+# 1st PARAMETER all other: action
 mode="$1"
 
 ################################
@@ -392,7 +492,7 @@ if [ ${mode} = "scb-import-gui" ]; then
       echo "To make upload open a new terminal and change,"
       echo "into the directory where your lnd-rescue file is and"
       echo "COPY, PASTE AND EXECUTE THE FOLLOWING COMMAND:"
-      echo "scp ./*.backup ${defaultUploadUser}@${localip}:${defaultUploadPath}/"
+      echo "scp ./channel.backup ${defaultUploadUser}@${localip}:${defaultUploadPath}/"
       echo ""
       echo "Use ${passwordInfo} to authenticate file transfer."
       echo "PRESS ENTER when upload is done."
@@ -435,19 +535,13 @@ if [ ${mode} = "scb-import-gui" ]; then
 
   # in setup scenario the final import is happening during provison
   if [ "${scenario}" == "setup" ]; then
-    # just add staticchannelbackup filename to give file
     echo "# result in: ${RESULTFILE} (remember to make clean delete once processed)"
     echo "staticchannelbackup='${filename}'" >> $RESULTFILE
-    exit 0
   fi
 
   # run import process
-  echo "OK importing channel.backup file ..."
   source <(sudo /home/admin/config.scripts/lnd.backup.sh scb-import "${filename}")
-
-  # give final info
-  echo "DONE - placed SCB file at /home/admin/channel.backup"
-  echo "Reboot and login to trigger import."
+  echo "# DONE - placed SCB file at /home/admin/channel.backup"
   exit 0
 fi
 

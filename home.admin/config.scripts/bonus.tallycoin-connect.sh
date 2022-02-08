@@ -7,7 +7,6 @@ APP_DATA_DIR=/mnt/hdd/app-data/tallycoin-connect
 HOME_DIR=/home/$USERNAME
 CONFIG_FILE=$APP_DATA_DIR/tallycoin_api.key
 RASPIBLITZ_INFO=/home/admin/raspiblitz.info
-RASPIBLITZ_CONF=/mnt/hdd/raspiblitz.conf
 SERVICE_FILE=/etc/systemd/system/tallycoin-connect.service
 TC_VERSION=1.7.1
 
@@ -20,7 +19,7 @@ fi
 
 # check and load raspiblitz config to know which network is running
 source $RASPIBLITZ_INFO
-source $RASPIBLITZ_CONF
+source /mnt/hdd/raspiblitz.conf
 
 # show info menu
 if [ "$1" = "menu" ]; then
@@ -160,12 +159,12 @@ WantedBy=multi-user.target
     sudo systemctl enable tallycoin-connect
 
     # setting value in raspiblitz config
-    sudo sed -i "s/^tallycoinConnect=.*/tallycoinConnect=on/g" $RASPIBLITZ_CONF
+    /home/admin/config.scripts/blitz.conf.sh set tallycoinConnect "on"
 
     # Hidden Service for tallycoin-connect if Tor is active
     if [ "${runBehindTor}" = "on" ]; then
-      # make sure to keep in sync with internet.tor.sh script
-      /home/admin/config.scripts/internet.hiddenservice.sh tallycoin-connect 80 8125 443 8126
+      # make sure to keep in sync with tor.onion-service.sh script
+      /home/admin/config.scripts/tor.onion-service.sh tallycoin-connect 80 8125 443 8126
     fi
     source $RASPIBLITZ_INFO
     if [ "${state}" == "ready" ]; then
@@ -212,7 +211,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo userdel -rf $USERNAME
 
     # setting value in raspi blitz config
-    sudo sed -i "s/^tallycoinConnect=.*/tallycoinConnect=off/g" $RASPIBLITZ_CONF
+    /home/admin/config.scripts/blitz.conf.sh set tallycoinConnect "off"
 
     echo "OK TALLYCOIN CONNECT removed."
   else

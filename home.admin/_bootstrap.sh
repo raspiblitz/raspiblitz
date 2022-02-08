@@ -48,10 +48,22 @@ sudo /home/admin/config.scripts/blitz.ssh.sh checkrepair >> ${logFile}
 echo "## INIT raspiblitz.info" >> $logFile
 
 # set default values for raspiblitz.info (that are not set by build_sdcard.sh)
+
 setupPhase='boot'
 setupStep=0
 fsexpanded=0
-fundRecovery=0
+
+btc_mainnet_sync_initial_done=0
+btc_testnet_sync_initial_done=0
+btc_signet_sync_initial_done=0
+
+ln_lnd_mainnet_sync_initial_done=0
+ln_lnd_testnet_sync_initial_done=0
+ln_lnd_signet_sync_initial_done=0
+
+ln_cl_mainnet_sync_initial_done=0
+ln_cl_testnet_sync_initial_done=0
+ln_cl_signet_sync_initial_done=0
 
 # load already persisted valued (overwriting defaults if exist)
 source ${infoFile} 2>/dev/null
@@ -63,9 +75,19 @@ echo "displayClass=${displayClass}" >> $infoFile
 echo "displayType=${displayType}" >> $infoFile
 echo "setupPhase=${setupPhase}" >> $infoFile
 echo "setupStep=${setupStep}" >> $infoFile
-echo "fundRecovery=${fundRecovery}" >> $infoFile
 echo "fsexpanded=${fsexpanded}" >> $infoFile
 echo "state=starting" >> $infoFile
+echo "btc_mainnet_sync_initial_done=${btc_mainnet_sync_initial_done}" >> $infoFile
+echo "btc_testnet_sync_initial_done=${btc_testnet_sync_initial_done}" >> $infoFile
+echo "btc_signet_sync_initial_done=${btc_signet_sync_initial_done}" >> $infoFile
+echo "ln_lnd_mainnet_sync_initial_done=${ln_lnd_mainnet_sync_initial_done}" >> $infoFile
+echo "ln_lnd_testnet_sync_initial_done=${ln_lnd_testnet_sync_initial_done}" >> $infoFile
+echo "ln_lnd_signet_sync_initial_done=${ln_lnd_signet_sync_initial_done}" >> $infoFile
+echo "ln_cl_mainnet_sync_initial_done=${ln_cl_mainnet_sync_initial_done}" >> $infoFile
+echo "ln_cl_testnet_sync_initial_done=${ln_cl_testnet_sync_initial_done}" >> $infoFile
+echo "ln_cl_signet_sync_initial_done=${ln_cl_signet_sync_initial_done}" >> $infoFile
+
+
 sudo chmod 664 ${infoFile}
 
 # write content of raspiblitz.info to logs
@@ -233,7 +255,7 @@ if [ "${needsExpansion}" == "1" ] && [ "${fsexpanded}" == "0" ]; then
   /home/admin/_cache.sh set message "FSEXPAND"
 elif [ "${tooSmall}" == "1" ]; then
   echo "!!! FAIL !!!!!!!!!!!!!!!!!!!!" >> $logFile
-  echo "SDCARD TOO SMALL 16G minimum" >> $logFile
+  echo "SDCARD TOO SMALL 16GB minimum" >> $logFile
   echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" >> $logFile
   /home/admin/_cache.sh set state "sdtoosmall"
   echo "System stopped. Please cut power." >> $logFile
@@ -270,7 +292,7 @@ fi
 if [ -d "/var/cache/raspiblitz/hdd-inspect/sshd" ]; then
   # INIT OLD SSH HOST KEYS on Update/Recovery to prevent "Unknown Host" on ssh client
   echo "SSH SERVER CERTS RESTORE activating old SSH host keys" >> $logFile
-  /home/admin/config.scripts/blitz.ssh.sh restore /var/cache/raspiblitz/hdd-inspect >> $logFile
+  /home/admin/config.scripts/blitz.ssh.sh restore /var/cache/raspiblitz/hdd-inspect/sshd/ssh >> $logFile
 else
   echo "No SSH SERVER CERTS RESTORE because no /var/cache/raspiblitz/hdd-inspect" >> $logFile
 fi
@@ -541,9 +563,15 @@ if [ ${isMounted} -eq 0 ]; then
   echo "# lsblk -o NAME,FSTYPE,LABEL " >> ${logFile}
   lsblk -o NAME,FSTYPE,LABEL >> ${logFile}
 
-  # if migrationFile was uploaded - now import it
+  # load fresh setup data
+  echo "# Sourcing ${setupFile} " >> ${logFile}
+  source ${setupFile}
+
+  # if migrationFile was uploaded (value from raspiblitz.setup) - now import
   echo "# migrationFile(${migrationFile})" >> ${logFile}
   if [ "${migrationFile}" != "" ]; then
+
+    echo "##### IMPORT MIGRATIONFILE: ${migrationFile}" >> ${logFile}
 
     # unpack
     sed -i "s/^message=.*/message='Unpacking Migration Data'/g" ${infoFile}
@@ -552,6 +580,13 @@ if [ ${isMounted} -eq 0 ]; then
     # check for errors
     if [ "${error}" != "" ]; then 
       /home/admin/config.scripts/blitz.error.sh _bootstrap.sh "migration-import-error" "blitz.migration.sh import exited with error" "/home/admin/config.scripts/blitz.migration.sh import ${migrationFile} --> ${error}" ${logFile}
+      exit 1
+    fi
+
+    # make sure a raspiblitz.conf exists after migration
+    confExists=$(ls /mnt/hdd/raspiblitz.conf 2>/dev/null | grep -c "raspiblitz.conf")
+    if [ "${confExists}" != "1" ]; then
+      /home/admin/config.scripts/blitz.error.sh _bootstrap.sh "migration-failed" "missing-config" "After runnign migration process - no raspiblitz.conf abvailable." ${logFile}
       exit 1
     fi
 
@@ -623,6 +658,7 @@ if [ ${isMounted} -eq 0 ]; then
   # if update/recovery/migration-followup
   if [ "${setupPhase}" == "update" ] || [ "${setupPhase}" == "recovery" ] || [ "${setupPhase}" == "migration" ]; then
     echo "Calling _provision.update.sh .." >> $logFile
+    echo "Follow in a new terminal with: 'tail -f raspiblitz.provision-update.log'" >> $logFile
     sed -i "s/^message=.*/message='Provision Update/Recovery/Migration'/g" ${infoFile}
     /home/admin/_provision.update.sh
     errorState=$?

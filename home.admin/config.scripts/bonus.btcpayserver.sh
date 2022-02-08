@@ -3,9 +3,9 @@
 # Based on: https://gist.github.com/normandmickey/3f10fc077d15345fb469034e3697d0d0
 
 # https://github.com/dgarage/NBXplorer/tags
-NBXplorerVersion="v2.2.18"
+NBXplorerVersion="v2.2.20"
 # https://github.com/btcpayserver/btcpayserver/releases
-BTCPayVersion="v1.3.6"
+BTCPayVersion="v1.4.0"
 
 PGPsigner="nicolasdorier"
 PGPpubkeyLink="https://keybase.io/nicolasdorier/pgp_keys.asc"
@@ -274,25 +274,28 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo
     echo "# Installing .NET"
     echo
-    # https://dotnet.microsoft.com/download/dotnet-core/3.1
+    # https://dotnet.microsoft.com/en-us/download/dotnet/6.0
     # dependencies
     sudo apt-get -y install libunwind8 gettext libssl1.0
 
-    if [ "${cpu}" = "arm" ]; then
-      binaryVersion="arm"
-      dotNetdirectLink="https://download.visualstudio.microsoft.com/download/pr/40edd52f-b1ca-4f0c-8d50-34433202ce9d/2b8f5b881c239a706f271f010e56159c/dotnet-sdk-3.1.413-linux-arm.tar.gz"
-      dotNetChecksum="31f395b1e48e9ba53d4dc63db7ff1ea38bdcb612a1d54b483cde22a009c48fbae0303779f42cee32db0e51bd953c8abfdaa1620a43a7fd84e1f8e937b6675d59"
-    elif [ "${cpu}" = "aarch64" ]; then
+    if [ "${cpu}" = "aarch64" ]; then
       binaryVersion="arm64"
-      dotNetdirectLink="https://download.visualstudio.microsoft.com/download/pr/dfd0ad22-3e47-432f-9aa1-f65b11a2ced2/d096c5d1561732c1658543fa8fb7a31f/dotnet-sdk-3.1.413-linux-arm64.tar.gz"
-      dotNetChecksum="39f198f07577faf81f09ca621fb749d5aac38fc05e7e6bd6226009679abc7d001454068430ddb34b320901955f42de3951e2707e01bce825b5216df2bc0c8eca"
+      dotNetdirectLink="https://download.visualstudio.microsoft.com/download/pr/d43345e2-f0d7-4866-b56e-419071f30ebe/68debcece0276e9b25a65ec5798cf07b/dotnet-sdk-6.0.101-linux-arm64.tar.gz"
+      dotNetChecksum="04cd89279f412ae6b11170d1724c6ac42bb5d4fae8352020a1f28511086dd6d6af2106dd48ebe3b39d312a21ee8925115de51979687a9161819a3a29e270a954"
+      #dotNetdirectLink="https://download.visualstudio.microsoft.com/download/pr/d3aaa7cc-a603-4693-871b-53b1537a4319/5981099ca17a113b3ce1c080462c50ef/dotnet-sdk-3.1.416-linux-arm64.tar.gz"
+      #dotNetChecksum="0065c7afb129b1a0e0c11703309f3b45cf9a3c0ea156247f7cc61555f21c37054f215eb77add509dad77b1d388a4e6c585f8a8016109f31c5b64184b25e2c407"
     elif [ "${cpu}" = "x86_64" ]; then
       binaryVersion="x64"
-      dotNetdirectLink="https://download.visualstudio.microsoft.com/download/pr/70d12135-d65f-4f4c-9d96-a6ac0251fb1b/57856b7654e338027cfb53552b2c4d46/dotnet-sdk-3.1.413-linux-x64.tar.gz"
-      dotNetChecksum="2a0824f11aba0b79d3f9a36af0395649bc9b4137e61b240a48dccb671df0a5b8c2086054f8e495430b7ed6c344bb3f27ac3dfda5967d863718a6dadeca951a83"
+      dotNetdirectLink="https://download.visualstudio.microsoft.com/download/pr/ede8a287-3d61-4988-a356-32ff9129079e/bdb47b6b510ed0c4f0b132f7f4ad9d5a/dotnet-sdk-6.0.101-linux-x64.tar.gz"
+      dotNetChecksum="ca21345400bcaceadad6327345f5364e858059cfcbc1759f05d7df7701fec26f1ead297b6928afa01e46db6f84e50770c673146a10b9ff71e4c7f7bc76fbf709"
+      #dotNetdirectLink="https://download.visualstudio.microsoft.com/download/pr/3c98126b-50f5-4497-8ffd-18d17a3f6b95/044d0f20256fd9bf2971f8da9a0364e4/dotnet-sdk-3.1.416-linux-x64.tar.gz"
+      #dotNetChecksum="dec1dcf326487031c45dec0849a046a0d034d6cbb43ab591da6d94c2faf72da8e31deeaf4d2165049181546d5296bb874a039ccc2f618cf95e68a26399da5e7f"
+    else
+      echo "# FAIL! CPU (${cpu}) not supported."
+      exit 1
     fi
 
-    dotNetName="dotnet-sdk-3.1.413-linux-${binaryVersion}.tar.gz"
+    dotNetName="dotnet-sdk-6.0.101-linux-${binaryVersion}.tar.gz"
     sudo rm /home/btcpay/${dotnetName} 2>/dev/null
     sudo -u btcpay wget "${dotNetdirectLink}"
     # check binary is was not manipulated (checksum test)
@@ -427,7 +430,7 @@ btc.rpc.password=$PASSWORD_B
     cd btcpayserver
     sudo -u btcpay git reset --hard $BTCPayVersion
     sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh \
-     "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
+    "web-flow" "https://github.com/web-flow.gpg" "4AEE18F83AFDEB23" || exit 1
     echo "# Build BTCPayServer ..."
     # from the build.sh with path
     sudo -u btcpay /home/btcpay/dotnet/dotnet build -c Release /home/btcpay/btcpayserver/BTCPayServer/BTCPayServer.csproj

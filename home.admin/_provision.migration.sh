@@ -29,7 +29,7 @@ echo "###################################" >> ${logFile}
 /home/admin/_cache.sh set message "Provision Migration"
 
 if [ "${hddGotMigrationData}" == "" ]; then
-  /home/admin/config.scripts/blitz.error.sh _provision.migration.sh "missing-hostnamemigrationdata" "missing hddGotMigrationData" "" ${logFile}
+  /home/admin/config.scripts/blitz.error.sh _provision.migration.sh "missing-migrationdata" "missing hddGotMigrationData" "" ${logFile}
   exit 2
 fi
 
@@ -45,7 +45,14 @@ if [ "${err}" != "" ]; then
     exit 3
 fi
 
-# make sure for the rest of the seup info is set correctly
+# make sure a raspiblitz.conf exists after migration
+confExists=$(ls /mnt/hdd/raspiblitz.conf 2>/dev/null | grep -c "raspiblitz.conf")
+if [ "${confExists}" != "1" ]; then
+    /home/admin/config.scripts/blitz.error.sh _provision.migration.sh "missing-config" "no /mnt/hdd/raspiblitz.conf" "After runningn migration process - no raspiblitz.conf abvailable." ${logFile}
+    exit 6
+fi
+
+# make sure for the rest of the setup info is set correctly
 /home/admin/config.scripts/blitz.conf.sh set network "bitcoin"
 /home/admin/config.scripts/blitz.conf.sh set chain "main"
 

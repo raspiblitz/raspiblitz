@@ -89,12 +89,14 @@ def new(stub, wallet_password="", seed_entropy=None):
         print("err='InitWallet'")
         sys.exit(1)
 
-
+# init wallet with recovery_window=0 (to not trigger rescan)
+# but make sure to put lnd into recovery mode with lnd.backup.sh
+#  script after that
 def seed(stub, wallet_password="", seed_words="", seed_password=""):
     request = lnrpc.InitWalletRequest(
         wallet_password=wallet_password.encode(),
         cipher_seed_mnemonic=[x.encode() for x in seed_words],
-        recovery_window=5000,
+        recovery_window=0,
         aezeed_passphrase=seed_password.encode()
     )
 

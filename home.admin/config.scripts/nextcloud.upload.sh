@@ -39,9 +39,9 @@ on() {
   rm /var/cache/raspiblitz/.tmp
 
   if [ "${server}" ] && [ "${user}" ] && [ "${password}" ]; then
-    /home/admin/config.scripts/blitz.conf.sh set nextcloudBackupServer ${server}
-    /home/admin/config.scripts/blitz.conf.sh set nextcloudBackupUser ${user}
-    /home/admin/config.scripts/blitz.conf.sh set nextcloudBackupPassword ${password}
+    /home/admin/config.scripts/blitz.conf.sh set nextcloudBackupServer "${server}"
+    /home/admin/config.scripts/blitz.conf.sh set nextcloudBackupUser "${user}"
+    /home/admin/config.scripts/blitz.conf.sh set nextcloudBackupPassword "${password}"
   else
     echo "Please provide nextcloud server, username and password"
     exit 1

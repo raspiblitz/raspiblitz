@@ -43,9 +43,6 @@ if [ ${#newName} -eq 0 ]; then
   fi
 fi
 
-# lnd conf file
-lndConfFile="/mnt/hdd/lnd/${netprefix}lnd.conf"
-
 # check if lnd config file exists
 configExists=$(ls ${lndConfFile} | grep -c '.conf')
 if [ ${configExists} -eq 0 ]; then

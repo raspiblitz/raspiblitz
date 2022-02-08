@@ -2,7 +2,7 @@
 
 *Build your own Lightning & Bitcoin Fullnode on a RaspberryPi with a nice Display.*
 
-`Version 1.7.1 with lnd 0.13.3 & c-lightning 0.10.0 and bitcoin 22.0.0`
+`Version 1.7.2rc2 with lnd 0.14.2 & c-lightning 0.10.2 and bitcoin 22.0.0`
 
 ![RaspiBlitz](pictures/raspiblitz.jpg)
 
@@ -121,12 +121,12 @@ In the end your RaspiBlitz should look like this:
 |Philosophy|Trust|Sovereignty|
 |Difficulty level|Easy|Medium|
 |Pros|Make Blitz accessible to everyone|You don't need to trust us, build from your own forked repository|
-|Instructions|[Download 1.7.2rc1d image](https://raspiblitz.fulmo.org/images/raspiblitz-v1.7.2rc1d-2022-01-15.img.gz) and [Flash the sd card](README.md#write-the-sd-card-image-to-your-sd-card)|[Build your own sd card image](#build-the-sd-card-image)|
+|Instructions|[Download 1.7.2rc2 image](https://raspiblitz.fulmo.org/images/raspiblitz-v1.7.2rc2-2022-02-05.img.gz) and [Flash the sd card](README.md#write-the-sd-card-image-to-your-sd-card)|[Build your own sd card image](#build-the-sd-card-image)|
 |Verify what?|[Signature file]() and [verify the Sig](FAQ.md#how-to-verify-the-sd-card-image-after-download) OR SHA-256 (below)|All of the code, don't trust, verify|
 
 If downloading the maintainer SD card image:
 * GPG 64-bit (main): 1C73 060C 7C17 6461 & (sub): AA9D D1B5 CC56 47DA
-* SHA-256: c54d01e53a82d7d5cc9bb26185a27890a7ae8607acd3cdb75d565321d0a2358a
+* SHA-256: 358eccd8ebccab68e4db6c534bd9d0a27d783cbc8d5e1341d52361dcbc7cbdef
 
 Which verification method should I used: Hash or Signature?
 * Signed file prove to you that the SD card image was actually built by the lead developer of the RaspiBlitz project. (Safest)
@@ -143,7 +143,7 @@ Useful info:
 
 ## Write the SD-Card image to your SD Card
 
-You need to write the downloaded SD card image (the img.gz-file) to your SD card (16GB minimum) - you can use the very easy tool Balena Etcher for this: https://www.balena.io/etcher/.
+You need to write the downloaded SD card image (the img.gz-file) to your SD card (32GB minimum) - you can use the very easy tool Balena Etcher for this: https://www.balena.io/etcher/.
 It's available for Win, Mac & Linux.
 
 ## Boot your RaspiBlitz
@@ -1222,9 +1222,9 @@ To recover your funds this way you will need two things:
 - the latest `channel.backup` file
 
 You should have written down the word seed during wallet setup; keep it at a safe (offline) location.
-The `channel.backup` is stored on the HDD and updated by LND every time a new channel is opened or closed.
+The `channel.backup` is stored on the HDD (under `/mnt/hdd/lnd/data/chain/bitcoin/mainnet/`) and updated by LND every time a new channel is opened or closed.
 The latest version of this file is needed to recover all your funds.
-In case your HDD gets damaged RaspiBlitz always keeps a copy of the latest version of the `channel.backup` file on the SD card within the sub-directories of: `/home/admin/.lnd/data/chain/`.
+In case your HDD gets damaged RaspiBlitz always keeps a copy of the latest version of the `channel.backup` file on the SD card: `/home/admin/backups/scb/`.
 
 If you want to go one step further in securing your funds against total loss of the RaspiBlitz (gets completely damaged, stolen or lost), then you can additionally set up an off-location or cloud backup of the `channel.backup` file.
 The file itself is encrypted by your word seed so it's acceptable to store the file with untrusted third parties for backup purposes (if you want)
@@ -1235,36 +1235,11 @@ This video explains in detail how you can set further back Static Channel inform
 
 The following options are also explained here shortly:
 
-#### A) DropBox Backup Target
+#### A) Nextcloud
 
-Toggle the StaticChannelBackup option to DropBox in the `SETTINGS` menu of your RaspiBlitz.
-It will ask you for the Dropbox-Authtoken.
-This is how you can get this token:
+Nextcloud is an open-source project to host your own files: https://en.wikipedia.org/wiki/Nextcloud - in its basics its an open DropBox replacement ... but can do much much more. You can run it yourself or use a hosted Nextcloud server.
 
-Go to your web browser, do the following:
-
-1. Go to https://www.dropbox.com/developers/apps/create and sign in.
-
-1. Choose **Create App**.
-
-    ![Dropbox API 1](https://github.com/rootzoll/raspiblitz/raw/v1.6/pictures/dropbox-1.png)
-
-    Choose the 'Scoped Access' & 'App Folder' and set a unique name - for example `LNDbackup` with a random number behind it. Agree to Terms of Service and click 'Create App'.
-
-1. Set **Permissions**.
-
-    ![Dropbox API 2](https://github.com/rootzoll/raspiblitz/raw/v1.6/pictures/dropbox-2.png)
-
-    Its important first to select the `Permissions` tab and activate the `files.content.write` permission. Don't forget to `Submit` the change before continue.
-
-1. Generate **OAUth2 Token**.
-
-    ![Dropbox API 3](https://github.com/rootzoll/raspiblitz/raw/v1.6/pictures/dropbox-3.png)
-
-    Now go back to the 'Settings' tab and under 'OAuth2', choose 'no expiration' under 'Access token expiration' then click the 'Generate' button. You will now see a long string of letters and numbers appear. This is your **Dropbox-Authtoken**. Make sure to copy the complete token string .. there might be more if you scroll to the right in the token field.
-
-To test it, try opening or closing a channel and then check if you can find a copy of `channel.backup` in your Dropbox.
-You can check the background-script logs to see details on errors: `sudo journalctl -f -u background`
+Find free Nextcloud providers here to sign up: https://nextcloud.com/signup/
 
 #### B) SCP Backup Target
 

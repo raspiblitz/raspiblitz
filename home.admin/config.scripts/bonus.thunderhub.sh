@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # https://github.com/apotdevin/thunderhub
-THUBVERSION="v0.12.31"
+THUBVERSION="v0.13.6"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -41,9 +41,9 @@ Hidden Service address for TOR Browser (see LCD for QR):\n${toraddress}
     /home/admin/config.scripts/blitz.display.sh hide
   else
     # Info without TOR
-    whiptail --title " ThunderHub " --msgbox "Open in your local web browser & accept self-signed cert:
+    whiptail --title " ThunderHub " --msgbox "Open in your local web browser:
 http://${localip}:3010\n
-https://${localip}:3011 with Fingerprint:
+Or ttps://${localip}:3011 with Fingerprint:
 ${fingerprint}\n
 Use your Password B to login.\n
 Activate TOR to access the web interface from outside your local network.
@@ -124,6 +124,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 # -----------
 LOG_LEVEL='debug'
 TOR_PROXY_SERVER='socks://127.0.0.1:9050'
+PORT=3010
 
 # -----------
 # Interface Configs
@@ -221,7 +222,7 @@ After=lnd.service
 
 [Service]
 WorkingDirectory=/home/thunderhub/thunderhub
-ExecStart=/usr/bin/npm run start -- -p 3010
+ExecStart=/usr/bin/npm run start
 User=thunderhub
 Restart=always
 TimeoutSec=120

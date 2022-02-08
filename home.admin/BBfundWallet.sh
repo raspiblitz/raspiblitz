@@ -27,9 +27,9 @@ elif [ $LNTYPE = lnd ];then
 fi
 if [ ${chainOutSync} -eq 1 ]; then
   if [ $LNTYPE = cl ];then
-    echo "# FAIL PRECHECK - lncli getinfo shows 'synced_to_chain': false - wait until chain is sync "
+    echo "# FAIL PRECHECK - '$lightningcli_alias getinfo' blockheight is different from 'bitcoind getblockchaininfo' - wait until chain is sync "
   else
-    echo "# FAIL PRECHECK - 'lightning-cli getinfo' blockheight is different from 'bitcoind getblockchaininfo' - wait until chain is sync "
+    echo "# FAIL PRECHECK - '$lncli_alias getinfo' shows 'synced_to_chain': false - wait until chain is sync "
   fi
   echo 
   echo "# PRESS ENTER to return to menu"

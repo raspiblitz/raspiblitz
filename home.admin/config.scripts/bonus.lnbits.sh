@@ -15,6 +15,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   exit 1
 fi
 
+echo "# Running: 'bonus.lnbits.sh $*'"
 source /mnt/hdd/raspiblitz.conf
 
 # show info menu
@@ -436,8 +437,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   # add lnbits user
   echo "*** Add the 'lnbits' user ***"
-  sudo adduser --disabled-password --gecos "" lnbits 2>/dev/null
+  sudo adduser --disabled-password --gecos "" lnbits
+  echo "# add the 'lnbits' user to the 'bitcoin' group"
   sudo /usr/sbin/usermod --append --groups bitcoin lnbits
+  echo "# check user"
+  id lnbits
 
   # get optional github parameter
   githubUser="lnbits"
@@ -445,7 +449,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     githubUser="$3"
   fi
   #githubBranch="tags/raspiblitz"
-  githubBranch="93e58f4c807006c26b675f34947a5bda9743cd86" #commit 23. December 2021
+  githubBranch="3ae6ef25a1fce6fc53d444c9352e4fe7972ed9a3" #commit 31. January 2022
   if [ "$4" != "" ]; then
     githubBranch="$4"
   fi
@@ -480,6 +484,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo -u lnbits python3 -m venv venv
   sudo -u lnbits ./venv/bin/pip install -r requirements.txt
   sudo -u lnbits ./venv/bin/pip install pylightning
+  sudo -u lnbits ./venv/bin/pip install secp256k1
 
   # open firewall
   echo
@@ -651,6 +656,8 @@ if [ "$1" = "switch" ]; then
     echo "# allowing lnbits user as part of the bitcoin group to RW RPC hook"
     sudo chmod 770 /home/bitcoin/.lightning/bitcoin${clrpcsubdir}
     sudo chmod 660 /home/bitcoin/.lightning/bitcoin${clrpcsubdir}/lightning-rpc
+    echo "# check the lightning-rpc socket"
+    sudo ls -la /home/bitcoin/.lightning/bitcoin${clrpcsubdir}/lightning-rpc
 
     echo "# preparing lnbits config for c-lightning"
     sudo bash -c "echo 'LNBITS_BACKEND_WALLET_CLASS=CLightningWallet' >> /home/lnbits/lnbits/.env"
@@ -684,9 +691,17 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     fi
   fi
   echo "# deleteData(${deleteData})"
+  echo "*** REMOVING LNbits ***"
 
-  # setting value in raspi blitz config
-  /home/admin/config.scripts/blitz.conf.sh set LNBits "off"
+  isInstalled=$(sudo ls /etc/systemd/system/lnbits.service 2>/dev/null | grep -c 'lnbits.service')
+  if [ ${isInstalled} -eq 1 ] || [ "${LNBits}" == "on" ]; then
+    sudo systemctl stop lnbits
+    sudo systemctl disable lnbits
+    sudo rm /etc/systemd/system/lnbits.service
+    echo "OK lnbits.service removed."
+  else
+    echo "lnbits.service is not installed."
+  fi
 
   # remove nginx symlinks
   sudo rm -f /etc/nginx/sites-enabled/lnbits_ssl.conf
@@ -703,25 +718,20 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     /home/admin/config.scripts/tor.onion-service.sh off lnbits
   fi
 
-  isInstalled=$(sudo ls /etc/systemd/system/lnbits.service 2>/dev/null | grep -c 'lnbits.service')
-  if [ ${isInstalled} -eq 1 ] || [ "${LNBits}" == "on" ]; then
-    echo "*** REMOVING LNbits ***"
-    sudo systemctl stop lnbits
-    sudo systemctl disable lnbits
-    sudo rm /etc/systemd/system/lnbits.service
-    sudo userdel -rf lnbits
+  # always clean
+  sudo userdel -rf lnbits
 
-    if [ ${deleteData} -eq 1 ]; then
-      echo "# deleting data"
-      sudo rm -R /mnt/hdd/app-data/LNBits
-    else
-      echo "# keeping data"
-    fi
-
-    echo "OK LNbits removed."
+  if [ ${deleteData} -eq 1 ]; then
+    echo "# deleting data"
+    sudo rm -R /mnt/hdd/app-data/LNBits
   else
-    echo "LNbits is not installed."
+    echo "# keeping data"
   fi
+
+  # setting value in raspi blitz config
+  /home/admin/config.scripts/blitz.conf.sh set LNBits "off"
+
+  echo "OK LNbits is uninstalled"
   exit 0
 fi
 

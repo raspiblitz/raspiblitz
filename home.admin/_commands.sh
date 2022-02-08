@@ -189,12 +189,11 @@ function status() {
   echo
   echo "Keep X pressed to EXIT loop ... (please wait)"
   echo
-  /home/admin/_cache.sh set system_scan_all_temp "1"
   sleep 4
   while :
   do
     # show the same info as on LCD screen
-    # 00infoBlitz.sh <cl|lnd> <testnet|mainnet|signet>
+    # 00infoBlitz.sh <testnet|mainnet|signet> <cl|lnd>
     /home/admin/00infoBlitz.sh $1 $2
     # wait 6 seconds for user exiting loop
     #echo
@@ -203,7 +202,6 @@ function status() {
     # check if user wants to abort session
     if [ "${keyPressed}" = "x" ]; then
       echo
-      /home/admin/_cache.sh set system_scan_all_temp "0"
       echo "Returning to menu ....."
       sleep 4
       break
