@@ -63,7 +63,7 @@ migrate_lnd_conf () {
     nodename="raspiblitz"
   fi
 
-  # keep old conf als backup
+  # keep old conf as backup
   sudo mv /mnt/hdd/lnd/lnd.conf /mnt/hdd/lnd/lnd.conf.migration
   # start from fresh configuration template (user will set password B on recovery)
   sudo cp /home/admin/assets/lnd.bitcoin.conf /mnt/hdd/lnd/lnd.conf
@@ -357,7 +357,7 @@ if [ "$1" = "export" ]; then
   sudo tar -zcvf ${defaultUploadPath}/raspiblitz-export-temp.tar.gz -X ~/.exclude.temp /mnt/hdd 1>~/.include.temp 2>/dev/null
 
   # get md5 checksum
-  echo "# Building checksum (can take also a while) ..." 
+  echo "# Building checksum (can take a while) ..." 
   md5checksum=$(md5sum ${defaultUploadPath}/raspiblitz-export-temp.tar.gz | head -n1 | cut -d " " -f1)
   echo "md5checksum=${md5checksum}"
   
@@ -387,10 +387,36 @@ if [ "$1" = "export-gui" ]; then
   # cleaning old migration files from blitz
   sudo rm ${defaultUploadPath}/*.tar.gz 2>/dev/null
 
-  # stopping lnd / bitcoin
   echo "--> stopping services ..."
-  sudo systemctl stop lnd
+  source /mnt/hdd/raspiblitz.conf
+  # bitcoind
   sudo systemctl stop bitcoind
+  if [ "${testnet}" == "on" ] || [ "${cl}" == "1" ]; then
+    sudo systemctl stop tbitcoind
+  fi
+  if [ "${signet}" == "on" ] || [ "${tcl}" == "1" ]; then
+    sudo systemctl stop sbitcoind
+  fi
+  # lnd
+  if [ "${lnd}" == "on" ] || [ "${lnd}" == "1" ]; then
+    sudo systemctl stop lnd
+  fi
+  if [ "${tlnd}" == "on" ] || [ "${tlnd}" == "1" ]; then
+    sudo systemctl stop tlnd
+  fi
+  if [ "${slnd}" == "on" ] || [ "${slnd}" == "1" ]; then
+    sudo systemctl stop slnd
+  fi
+  # lightningd
+  if [ "${cl}" == "on" ] || [ "${cl}" == "1" ]; then
+    sudo systemctl stop lightningd
+  fi
+  if [ "${tcl}" == "on" ] || [ "${tcl}" == "1" ]; then
+    sudo systemctl stop tlightningd
+  fi
+  if [ "${scl}" == "on" ] || [ "${scl}" == "1" ]; then
+    sudo systemctl stop slightningd
+  fi
 
   # create new migration file
   clear
