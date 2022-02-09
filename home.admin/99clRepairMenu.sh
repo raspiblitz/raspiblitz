@@ -68,7 +68,7 @@ CHOICE=$(dialog --clear \
 
 case $CHOICE in
   ENCRYPT)
-    /home/admin/config.scripts/cl.hsmtool.sh encrypt $CHAIN
+    sudo /home/admin/config.scripts/cl.hsmtool.sh encrypt $CHAIN
     source /mnt/hdd/raspiblitz.conf
     ;;
 

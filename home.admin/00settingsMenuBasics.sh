@@ -458,7 +458,7 @@ if [ "${clEncryptedHSM}" != "${choice}" ] && [ "${clNode}" == "on" ]; then
   echo "clEncryptedHSM Setting changed .."
   anychange=1
   if [ "${choice}" == "on" ]; then
-    /home/admin/config.scripts/cl.hsmtool.sh encrypt mainnet
+    sudo /home/admin/config.scripts/cl.hsmtool.sh encrypt mainnet
   else
     /home/admin/config.scripts/cl.hsmtool.sh decrypt mainnet
   fi
