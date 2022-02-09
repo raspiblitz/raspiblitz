@@ -90,8 +90,14 @@ case $CHOICE in
     ;;
   
   BACKUP)
+    if [ "${cl}" == "on" ] || [ "${cl}" == "1" ] && [ "${clEncryptedHSM}" != "on" ] ; then
+      dialog \
+       --title "Encrypt the C-lightning wallet" \
+       --infobox "\nWill proceed to encrypt and lock the C-lightning wallet to prevent it from starting automatically after the backup" 7 55
+      sudo /home/admin/config.scripts/cl.hsmtool.sh encrypt mainnet
+      /home/admin/config.scripts/cl.hsmtool.sh lock mainnet
+    fi
     ## from dialogLightningWallet.sh 
-    # run upload dialog and get result
     _temp="/var/cache/raspiblitz/temp/.temp.tmp"
     clear
     /home/admin/config.scripts/cl.backup.sh cl-export-gui production $_temp

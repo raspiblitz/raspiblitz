@@ -106,6 +106,13 @@ case $CHOICE in
     read key
     ;;
   MIGRATION)
+    if [ "${cl}" == "on" ] || [ "${cl}" == "1" ] && [ "${clEncryptedHSM}" != "on" ] ; then
+      dialog \
+       --title "Encrypt the C-lightning wallet" \
+       --infobox "\nWill proceed to encrypt and lock the C-lightning wallet to prevent it from starting automatically after the backup" 7 55
+      sudo /home/admin/config.scripts/cl.hsmtool.sh encrypt mainnet
+      /home/admin/config.scripts/cl.hsmtool.sh lock mainnet
+    fi
     sudo /home/admin/config.scripts/blitz.migration.sh "export-gui"
     echo "Press ENTER to return to main menu."
     read key
