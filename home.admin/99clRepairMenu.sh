@@ -117,8 +117,9 @@ case $CHOICE in
     echo "Press ENTER to continue or CTRL+C to abort"
     read key
     # reset
-    sudo rm /home/bitcoin/.lightning/${CLNETWORK}/hsm_secret
-    sudo rm -rf /home/bitcoin/.lightning/${CLNETWORK}/*.*
+    echo "# Delete and recreate /home/bitcoin/.lightning/${CLNETWORK}"
+    sudo rm -rf /home/bitcoin/.lightning/${CLNETWORK}
+    sudo -u bitcoin mkdir /home/bitcoin/.lightning/${CLNETWORK}
     # make sure the new hsm_secret is treated as unencrypted and clear autounlock
     /home/admin/config.scripts/blitz.conf.sh set ${netprefix}clEncryptedHSM "off"
     /home/admin/config.scripts/blitz.conf.sh set ${netprefix}clAutoUnlock "off"
