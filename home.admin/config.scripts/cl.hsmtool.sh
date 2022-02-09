@@ -255,6 +255,7 @@ seedwords6x4='${seedwords6x4}'
 
   exit 0
 
+
 elif [ "$1" = "unlock" ]; then
   # check if unlocked
   attempt=0
@@ -280,7 +281,7 @@ elif [ "$1" = "unlock" ]; then
         sudo systemctl restart ${netprefix}lightningd
         justUnlocked=1
       else
-        echo "# Waiting to unlock wallet (2) ... "
+        echo "# waiting to unlock wallet (2) ... "
         sleep 5
       fi
 
@@ -314,17 +315,19 @@ elif [ "$1" = "unlock" ]; then
       echo
       exit 1
     fi
-    echo "# Waiting to unlock wallet ... "
+    echo "# waiting to unlock wallet ... $((attempt*5))"
     sleep 5
     attempt=$((attempt+1))
   done
   echo "# Ok the ${netprefix}lightningd wallet is unlocked"
   exit 0
 
+
 elif [ "$1" = "lock" ]; then
   shredPasswordFile
   sudo systemctl restart ${netprefix}lightningd
   exit 0
+
 
 elif [ "$1" = "encrypt" ]; then
 
@@ -367,8 +370,10 @@ elif [ "$1" = "encrypt" ]; then
   walletPassword=$3
   encryptHSMsecret $walletPassword
 
+
 elif [ "$1" = "decrypt" ]; then
   decryptHSMsecret
+
 
 elif [ "$1" = "autounlock-on" ]; then
   if grep -Eq "${netprefix}clEncryptedHSM=on" /mnt/hdd/raspiblitz.conf;then
@@ -383,6 +388,7 @@ elif [ "$1" = "autounlock-on" ]; then
 
   echo "# Autounlock is on for C-lightning $CHAIN"
 
+
 elif [ "$1" = "autounlock-off" ]; then
   if [ -f /home/bitcoin/.${netprefix}cl.pw ];then
     sudo cp /home/bitcoin/.${netprefix}cl.pw /dev/shm/.${netprefix}cl.pw
@@ -394,6 +400,7 @@ elif [ "$1" = "autounlock-off" ]; then
   /home/admin/config.scripts/blitz.conf.sh set ${netprefix}clAutoUnlock "off"
   echo "# Autounlock is off for C-lightning $CHAIN"
 
+
 elif [ "$1" = "change-password" ]; then
   decryptHSMsecret || exit 1
   walletPassword=$3
@@ -404,6 +411,7 @@ elif [ "$1" = "change-password" ]; then
     exit 1
   fi
   exit 0
+
 
 elif [ "$1" = "check" ]; then
   # TODO https://github.com/rootzoll/raspiblitz/issues/2897
