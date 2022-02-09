@@ -117,6 +117,8 @@ case $CHOICE in
     echo "Press ENTER to continue or CTRL+C to abort"
     read key
     # reset
+    echo "# Delete ${CLCONF}"
+    sudo rm -f ${CLCONF}
     echo "# Delete and recreate /home/bitcoin/.lightning/${CLNETWORK}"
     sudo rm -rf /home/bitcoin/.lightning/${CLNETWORK}
     sudo -u bitcoin mkdir /home/bitcoin/.lightning/${CLNETWORK}
