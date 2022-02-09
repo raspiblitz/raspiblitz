@@ -188,10 +188,18 @@ do
   # MAKE SURE BLOCKCHAIN/LN IS SYNC 
   #####################################
   if [ "${setupPhase}" == "done" ] && [ "${state}" == "ready" ]; then
-    if [ "${btc_default_synced}" != "1" ] || [ "${ln_default_ready}" == "0" ] || [ "${ln_default_sync_chain}" == "0" ] || [ "${ln_default_sync_initial_done}" == "0" ]; then
-      /home/admin/setup.scripts/eventBlockchainSync.sh ssh
-      sleep 3
-      continue
+    if [ "${lightning}" = "cl" ]; then
+      if [ "${btc_default_synced}" != "1" ] || [ "${ln_default_ready}" == "0" ] || [ "${ln_default_sync_chain}" == "0" ]; then
+        /home/admin/setup.scripts/eventBlockchainSync.sh ssh
+        sleep 3
+        continue
+      fi
+    else
+      if [ "${btc_default_synced}" != "1" ] || [ "${ln_default_ready}" == "0" ] || [ "${ln_default_sync_chain}" == "0" ] || [ "${ln_default_sync_initial_done}" == "0" ]; then
+        /home/admin/setup.scripts/eventBlockchainSync.sh ssh
+        sleep 3
+        continue
+      fi
     fi
   fi
 
