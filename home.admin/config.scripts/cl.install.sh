@@ -412,16 +412,23 @@ if [ "$1" = "display-seed" ]; then
     source ${seedwordFile}
     #echo "# seedwords(${seedwords})"
     #echo "# seedwords6x4(${seedwords6x4})"
-    ack=0
-    while [ ${ack} -eq 0 ]
-    do
-      whiptail --title "C-Lightning ${displayNetwork} Wallet" \
-        --msgbox "This is your C-Lightning ${displayNetwork} wallet seed. Store these numbered words in a safe location:\n\n${seedwords6x4}" 13 76
-      whiptail --title "Please Confirm" --yes-button "Show Again" --no-button "CONTINUE" --yesno "  Are you sure that you wrote down the word list?" 8 55
-      if [ $? -eq 1 ]; then
-        ack=1
-      fi
-    done
+    if [ ${#seedwords6x4} -gt 0 ];then
+      ack=0
+      while [ ${ack} -eq 0 ]
+      do
+        whiptail --title "C-Lightning ${displayNetwork} Wallet" \
+          --msgbox "This is your C-Lightning ${displayNetwork} wallet seed. Store these numbered words in a safe location:\n\n${seedwords6x4}" 13 76
+        whiptail --title "Please Confirm" --yes-button "Show Again" --no-button "CONTINUE" --yesno "  Are you sure that you wrote down the word list?" 8 55
+        if [ $? -eq 1 ]; then
+          ack=1
+        fi
+      done
+    else
+      dialog \
+       --title "C-Lightning ${displayNetwork} Wallet" \
+       --exit-label "exit" \
+       --textbox "${seedwordFile}" 14 92
+    fi
   else
     # hsmFile="/home/bitcoin/.lightning/${CLNETWORK}/hsm_secret"
     whiptail --title "C-Lightning ${displayNetwork} Wallet Info" --msgbox "Your C-Lightning ${displayNetwork} wallet was already created before - there are no seed words available.\n\nTo secure your wallet secret you can manually backup the file: /home/bitcoin/.lightning/${CLNETWORK}/hsm_secret" 11 76

@@ -355,12 +355,13 @@ elif [ "$1" = "encrypt" ]; then
     shred /home/bitcoin/.lightning/${CLNETWORK}/seedwords.info
   fi
   echo "
-# This file is placed by cl.hsmtool.sh .
+# This file was placed by cl.hsmtool.sh
 # The seed words from which the hsm_secret in the same directory was generated from
 # were $deletedWhen.
 # The words cannot be generated from the hsm_secret (one way function).
-# If you don't have the words the hsm_secret can be still backed up in hex:
+# If you don't have the words the hsm_secret can be still backed up as a file or in hex:
 # https://lightning.readthedocs.io/BACKUP.html#hsm-secret 
+# https://github.com/rootzoll/raspiblitz/blob/dev/FAQ.cl.md#seed
 " | sudo -u bitcoin tee /home/bitcoin/.lightning/${CLNETWORK}/seedwords.info
   # encrypt
   walletPassword=$3
