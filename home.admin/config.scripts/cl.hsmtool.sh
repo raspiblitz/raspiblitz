@@ -315,7 +315,7 @@ elif [ "$1" = "unlock" ]; then
       echo
       exit 1
     fi
-    echo "# waiting to unlock wallet ... $((attempt*5))"
+    echo "# waiting to unlock wallet ($((attempt*5))) ... "
     sleep 5
     attempt=$((attempt+1))
   done
