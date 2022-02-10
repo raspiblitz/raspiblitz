@@ -26,6 +26,9 @@ fi
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
+    # check and install NodeJS
+    /home/admin/config.scripts/bonus.nodejs.sh on
+
     echo ""
     echo "# ***"
     echo "# Installing BitcoinMinds.org in your Raspiblitz ..."
