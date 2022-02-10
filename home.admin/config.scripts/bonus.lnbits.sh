@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# https://github.com/lnbits/lnbits
+# https://github.com/lnbits/lnbits-legend
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "small config script to switch LNbits on or off"
-  echo "bonus.lnbits.sh on [lnd|tlnd|slnd|cl|tcl|scl] [?GITHUBUSER] [?BRANCH]"
+  echo "bonus.lnbits.sh on [lnd|tlnd|slnd|cl|tcl|scl] [?GITHUBUSER] [?BRANCH|?TAG]"
   echo "bonus.lnbits.sh switch [lnd|tlnd|slnd|cl|tcl|scl]"
   echo "bonus.lnbits.sh off"
   echo "bonus.lnbits.sh status"
@@ -444,19 +444,20 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   if [ "$3" != "" ]; then
     githubUser="$3"
   fi
-  #githubBranch="tags/raspiblitz"
-  githubBranch="3ae6ef25a1fce6fc53d444c9352e4fe7972ed9a3" #commit 31. January 2022
+  #tag="tags/raspiblitz"
+  # https://github.com/lnbits/lnbits-legend/releases
+  tag="0.6.0"
   if [ "$4" != "" ]; then
-    githubBranch="$4"
+    tag="$4"
   fi
 
   # install from GitHub
-  echo "# get the github code user(${githubUser}) branch(${githubBranch})"
+  echo "# get the github code user(${githubUser}) branch(${tag})"
   sudo rm -r /home/lnbits/lnbits 2>/dev/null
   cd /home/lnbits
   sudo -u lnbits git clone https://github.com/${githubUser}/lnbits-legend lnbits
   cd /home/lnbits/lnbits
-  sudo -u lnbits git checkout ${githubBranch}
+  sudo -u lnbits git checkout ${tag}
 
   # prepare .env file
   echo "# preparing env file"
