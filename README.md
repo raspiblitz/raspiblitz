@@ -763,6 +763,10 @@ After install, you will see a new `JMARKET` option in the SSH main menu - it wil
 
 Extract the original Bitcoin Whitepaper as PDF directly from the blockchain of your node.
 
+##### Bitcoinminds.org local on RaspiBlitz
+
+make the BitcoinMinds.org educational link collection locally available on your RaspiBlitz.
+
 ##### RTL Webinterface
 
 The RTL Webinterface is available as an LND & c-lightning control dashboard you can run in your browser with a nice GUI.
