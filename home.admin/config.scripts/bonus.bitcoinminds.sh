@@ -14,11 +14,6 @@ fi
 
 source /mnt/hdd/raspiblitz.conf
 
-# add default value to raspi config if needed
-if ! grep -Eq "^bitcoinminds=" /mnt/hdd/raspiblitz.conf; then
-  echo "bitcoinminds=off" >> /mnt/hdd/raspiblitz.conf
-fi
-
 # show info menu
 if [ "$1" = "menu" ]; then
   dialog --title " BitcoinMinds.org Info" --msgbox "
@@ -27,7 +22,6 @@ Use the command 'bm' from the console to start the server.
 " 11 78
   exit 0
 fi
-
 
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
@@ -72,8 +66,8 @@ npm run serve -- --port 11026
 " | sudo -u bitcoinminds tee -a /home/bitcoinminds/.bashrc
 
 
-   # setting value in raspi blitz config
-    sudo sed -i "s/^bitcoinminds=.*/bitcoinminds=on/g" /mnt/hdd/raspiblitz.conf
+  # setting value in raspi blitz config
+    sudo /home/admin/config.scripts/blitz.conf.sh set bitcoinminds on
    
   # add a firewall entry so the web UI is accessible from the local network
     sudo ufw allow 11026 comment 'bitcoinminds'
@@ -98,7 +92,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     echo "# ***"
     echo ""
     # setting value in raspi blitz config
-    sudo sed -i "s/^bitcoinminds=.*/bitcoinminds=off/g" /mnt/hdd/raspiblitz.conf
+    sudo /home/admin/config.scripts/blitz.conf.sh set bitcoinminds off
     
     # Remove user and stuff here
     sudo userdel -rf bitcoinminds 2>/dev/null
