@@ -141,6 +141,9 @@ fi
 if [ "${sphinxrelay}" == "on" ]; then
   OPTIONS+=(SPHINX "Sphinx Chat Relay")
 fi
+if [ "${helipad}" == "on" ]; then
+  OPTIONS+=(HELIPAD "Helipad")
+fi
 if [ "${chantools}" == "on" ]; then
   OPTIONS+=(CHANTOOLS "ChannelTools (Fund Rescue)")
 fi
@@ -296,6 +299,9 @@ case $CHOICE in
             ;;
         SPHINX)
             sudo /home/admin/config.scripts/bonus.sphinxrelay.sh menu
+            ;;
+        HELIPAD)
+            sudo /home/admin/config.scripts/bonus.helipad.sh menu
             ;;
         CHANTOOLS)
             sudo /home/admin/config.scripts/bonus.chantools.sh menu

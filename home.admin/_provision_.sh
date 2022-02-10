@@ -688,6 +688,15 @@ else
   echo "Sphinx-Relay - keep default" >> ${logFile}
 fi
 
+# helipad
+if [ "${helipad}" = "on" ]; then
+  echo "Helipad - run config script" >> ${logFile}
+  sudo sed -i "s/^message=.*/message='Setup Helipad'/g" ${infoFile}
+  sudo -u admin /home/admin/config.scripts/bonus/helipad.sh on >> ${logFile} 2>&1
+else
+  echo "Helipad - keep default" >> ${logFile}
+fi
+
 # circuitbreaker
 if [ "${circuitbreaker}" = "on" ]; then
   echo "Provisioning CircuitBreaker - run config script" >> ${logFile}

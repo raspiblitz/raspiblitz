@@ -27,6 +27,7 @@ if [ ${#chantools} -eq 0 ]; then chantools="off"; fi
 if [ ${#sparko} -eq 0 ]; then sparko="off"; fi
 if [ ${#spark} -eq 0 ]; then spark="off"; fi
 if [ ${#tallycoinConnect} -eq 0 ]; then tallycoinConnect="off"; fi
+if [ ${#helipad} -eq 0 ]; then helipad="off"; fi
 
 # show select dialog
 echo "run dialog ..."
@@ -59,6 +60,7 @@ if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
   OPTIONS+=(y 'LND PyBLOCK' ${pyblock})
   OPTIONS+=(h 'LND ChannelTools (Fund Rescue)' ${chantools})
   OPTIONS+=(x 'LND Sphinx-Relay' ${sphinxrelay})
+  OPTIONS+=(f 'LND Helipad (boostagram reader)' ${helipad})
   OPTIONS+=(d 'LND Tallycoin Connect' ${tallycoinConnect})
 fi
 
@@ -410,6 +412,21 @@ Use the new 'SPHINX' entry in Main Menu for more info.\n
   fi
 else
   echo "Sphinx Relay unchanged."
+fi
+
+# Helipad
+choice="off"; check=$(echo "${CHOICES}" | grep -c "d")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${helipad}" != "${choice}" ]; then
+  echo "Helipad setting changed .."
+  anychange=1
+  sudo -u admin /home/admin/config.scripts/bonus.helipad.sh ${choice}
+  if [ "${choice}" =  "on" ]; then
+    sudo systemctl start helipad
+    sudo -u admin /home/admin/config.scripts/bonus.helipad.sh menu
+  fi
+else
+  echo "Helipad setting unchanged."
 fi
 
 # Tallycoin
