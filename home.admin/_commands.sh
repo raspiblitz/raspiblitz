@@ -394,3 +394,20 @@ function qr() {
   echo "(To shrink QR code: MacOS press CMD- / Linux press CTRL-)"
   echo
 }
+
+# command: bm
+# switch to the bitcoinminds user for the 'BitcoinMinds.org' in your local environment
+function bm() {
+  if [ $(grep -c "bitcoinminds=on"  < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
+    echo ""
+    echo "# ***"
+    echo "# Switching to the bitcoinminds user with the command: 'sudo su - bitcoinminds'"
+    echo "# ***"
+    echo ""
+    sudo su - bitcoinminds
+    echo "# Use command 'raspiblitz' to return to menu"
+  else
+    echo "BitcoinMinds script is not installed - to install run:"
+    echo "sudo /home/admin/config.scripts/bonus.bitcoinminds.sh on"
+  fi
+}
