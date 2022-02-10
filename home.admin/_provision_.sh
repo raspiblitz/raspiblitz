@@ -760,10 +760,6 @@ fi
 if [ ${#hostname} -gt 0 ]; then
   hostnameSanatized=$(echo "${hostname}"| tr -dc '[:alnum:]\n\r')
   if [ ${#hostnameSanatized} -gt 0 ]; then
-    # by default set hostname for older versions on update
-    if [ ${#setnetworkname} -eq 0 ]; then
-      setnetworkname=1
-    fi
     if [ "${setnetworkname}" == "1" ]; then
       echo "Setting new network hostname '$hostnameSanatized'" >> ${logFile}
       if [ "${baseimage}" == "raspios_arm64" ]; then
