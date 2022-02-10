@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #https://github.com/shesek/spark-wallet/releases
-SPARKVERSION="v0.3.0rc"
+SPARKVERSION="v0.3.1"
 
 # command info
 if [ $# -lt 1 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ];then
