@@ -201,7 +201,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
     # Hidden Service if Tor is active
     if [ "${runBehindTor}" = "on" ]; then
-      /home/admin/config.scripts/internet.hiddenservice.sh off tallycoin-connect
+      /home/admin/config.scripts/tor.onion-service.sh off tallycoin-connect
     fi
 
     # remove config
