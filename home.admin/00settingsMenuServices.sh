@@ -28,6 +28,7 @@ if [ ${#sparko} -eq 0 ]; then sparko="off"; fi
 if [ ${#spark} -eq 0 ]; then spark="off"; fi
 if [ ${#tallycoinConnect} -eq 0 ]; then tallycoinConnect="off"; fi
 if [ ${#helipad} -eq 0 ]; then helipad="off"; fi
+if [ ${#bitcoinminds} -eq 0 ]; then bitcoinminds="off"; fi
 
 # show select dialog
 echo "run dialog ..."
@@ -43,6 +44,7 @@ if [ "${network}" == "bitcoin" ]; then
   OPTIONS+=(a 'BTC Mempool Space' ${mempoolExplorer})
   OPTIONS+=(j 'BTC JoinMarket+JoininBox menu' ${joinmarket})
   OPTIONS+=(w 'BTC Download Bitcoin Whitepaper' ${whitepaper})
+  OPTIONS+=(v 'BTC Install BitcoinMinds.org' ${bitcoinminds})
 fi
 
 
@@ -515,6 +517,21 @@ if [ "${whitepaper}" != "${choice}" ]; then
   fi
 else
   echo "Whitepaper setting unchanged."
+fi
+
+# BitcoinMinds process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "v")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${bitcoinminds}" != "${choice}" ]; then
+  echo "BitcoinMinds setting changed."
+  anychange=1
+  sudo -u admin /home/admin/config.scripts/bonus.bitcoinminds.sh ${choice}
+  source /mnt/hdd/raspiblitz.conf
+  if [ "${bitcoinminds}" =  "on" ]; then
+    sudo -u admin /home/admin/config.scripts/bonus.bitcoinminds.sh menu
+  fi
+else
+  echo "BitcoinMinds setting unchanged."
 fi
 
 # sparko process choice

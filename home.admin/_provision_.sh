@@ -715,6 +715,15 @@ else
   echo "Provisioning Tallycoin Connect - keep default" >> ${logFile}
 fi
 
+# bitcoinminds.org
+if [ "${bitcoinminds}" = "on" ]; then
+  echo "Provisioning bitcoinminds.org - run config script" >> ${logFile}
+  /home/admin/_cache.sh set message "Setup Bitcoinminds.org"
+  sudo -u admin /home/admin/config.scripts/bonus.bitcoinminds.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning bitcoinminds.org - keep default" >> ${logFile}
+fi
+
 # custom install script from user
 customInstallAvailable=$(ls /mnt/hdd/app-data/custom-installs.sh 2>/dev/null | grep -c "custom-installs.sh")
 if [ ${customInstallAvailable} -gt 0 ]; then
@@ -769,10 +778,6 @@ fi
 if [ ${#hostname} -gt 0 ]; then
   hostnameSanatized=$(echo "${hostname}"| tr -dc '[:alnum:]\n\r')
   if [ ${#hostnameSanatized} -gt 0 ]; then
-    # by default set hostname for older versions on update
-    if [ ${#setnetworkname} -eq 0 ]; then
-      setnetworkname=1
-    fi
     if [ "${setnetworkname}" == "1" ]; then
       echo "Setting new network hostname '$hostnameSanatized'" >> ${logFile}
       if [ "${baseimage}" == "raspios_arm64" ]; then
