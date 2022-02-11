@@ -191,8 +191,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     fi
 
     echo "# check gpg finger print"
-    gpg --keyid-format LONG ./pgp_keys.asc
-    fingerprint=$(gpg --keyid-format LONG "./pgp_keys.asc" 2>/dev/null \
+    gpg --show-keys --keyid-format LONG ./pgp_keys.asc
+    fingerprint=$(gpg --show-keys --keyid-format LONG "./pgp_keys.asc" 2>/dev/null \
     | grep "${PGPcheck}" -c)
     if [ ${fingerprint} -lt 1 ]; then
       echo ""
@@ -321,7 +321,7 @@ alias lit-frcli=\"frcli --rpcserver=localhost:8443 \
 
   # setting value in raspi blitz config
   /home/admin/config.scripts/blitz.conf.sh set lit "on"
-  
+
   # Hidden Service if Tor is active
   if [ "${runBehindTor}" = "on" ]; then
     # make sure to keep in sync with tor.network.sh script
@@ -333,7 +333,7 @@ alias lit-frcli=\"frcli --rpcserver=localhost:8443 \
     sudo /home/admin/config.scripts/bonus.rtl.sh connect-services
     sudo systemctl restart RTL 2>/dev/null
   fi
-  
+
   source <(/home/admin/_cache.sh get state)
   if [ "${state}" == "ready" ]; then
     echo "# OK - the litd.service is enabled, system is ready so starting service"

@@ -66,10 +66,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     OSversion="amd64"
   fi
   SHA256=$(grep -i "linux-$OSversion" manifest-v$pinnedVersion.txt | cut -d " " -f1)
-  echo 
+  echo
   echo "# Channel Tools v${pinnedVersion} for ${OSversion}"
   echo "# SHA256 hash: $SHA256"
-  echo 
+  echo
 
   # get binary
   binaryName="chantools-linux-${OSversion}-v${pinnedVersion}.tar.gz"
@@ -85,8 +85,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   fi
 
   # check gpg finger print
-  gpg ./pgp_keys.asc
-  fingerprint=$(sudo gpg "${downloadDir}/pgp_keys.asc" 2>/dev/null | grep "${PGPcheck}" -c)
+  gpg --show-keys ./pgp_keys.asc
+  fingerprint=$(sudo gpg --show-keys "${downloadDir}/pgp_keys.asc" 2>/dev/null | grep "${PGPcheck}" -c)
   if [ ${fingerprint} -lt 1 ]; then
     echo
     echo "# !!! BUILD WARNING --> Channel Tools PGP author not as expected"

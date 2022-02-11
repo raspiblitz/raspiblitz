@@ -33,7 +33,7 @@ PGPpubkeyFingerprint="$3"
 
 wget -O /var/cache/raspiblitz/pgp_keys_${PGPsigner}.asc "${PGPpubkeyLink}"
 gpg --import --import-options show-only /var/cache/raspiblitz/pgp_keys_${PGPsigner}.asc
-fingerprint=$(gpg /var/cache/raspiblitz/pgp_keys_${PGPsigner}.asc 2>/dev/null | grep "${PGPpubkeyFingerprint}" -c)
+fingerprint=$(gpg --show-keys /var/cache/raspiblitz/pgp_keys_${PGPsigner}.asc 2>/dev/null | grep "${PGPpubkeyFingerprint}" -c)
 if [ "${fingerprint}" -lt 1 ]; then
   echo
   echo "# !!! WARNING --> the PGP fingerprint is not as expected for ${PGPsigner}" >&2
