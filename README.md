@@ -243,12 +243,12 @@ In the end your RaspiBlitz should look like this:
 |Philosophy|Trust|Sovereignty|
 |Difficulty level|Easy|Medium|
 |Pros|Make Blitz accessible to everyone|You don't need to trust us, build from your own forked repository|
-|Instructions|[Download 1.7.2rc2b image](https://raspiblitz.fulmo.org/images/raspiblitz-v1.7.2rc2b-2022-02-08.img.gz) and [Flash the sd card](README.md#write-the-sd-card-image-to-your-sd-card)|[Build your own sd card image](#build-the-sd-card-image)|
+|Instructions|[Download 1.7.2rc2c image](https://raspiblitz.fulmo.org/images/raspiblitz-v1.7.2rc2c-2022-02-10.img.gz) and [Flash the sd card](README.md#write-the-sd-card-image-to-your-sd-card)|[Build your own sd card image](#build-the-sd-card-image)|
 |Verify what?|[Signature file]() and [verify the Sig](FAQ.md#how-to-verify-the-sd-card-image-after-download) OR SHA-256 (below)|All of the code, don't trust, verify|
 
 If downloading the maintainer SD card image:
 * GPG 64-bit (main): 1C73 060C 7C17 6461 & (sub): AA9D D1B5 CC56 47DA
-* SHA-256: 976484ab8a7884becf5d1e5f92df53c71f08b3df76ca8b96af1259b15b96dbce
+* SHA-256: 15abb9a656ce1025e104f62480a537d5455f894540a44d60b680c7fbfd776aed
 
 Which verification method should I used: Hash or Signature?
 * Signed file prove to you that the SD card image was actually built by the lead developer of the RaspiBlitz project. (Safest)
