@@ -2,6 +2,7 @@
 
 ## What's new in Version 1.7.2 of RaspiBlitz?
 
+- Refactor: Cache & Backgroundscan of Systeminfo
 - New: Compact the LND channel.db on-demand from REPAIR and before backups [issue](https://github.com/rootzoll/raspiblitz/issues/2752)
 - New: Run C-lightning backup-compact regularly [issue](https://github.com/rootzoll/raspiblitz/issues/2869)
 - New: Switch LNbits between lnd & c-lightning [issue](https://github.com/rootzoll/raspiblitz/issues/2556)
