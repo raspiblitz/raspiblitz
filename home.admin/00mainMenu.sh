@@ -142,7 +142,7 @@ if [ "${sphinxrelay}" == "on" ]; then
   OPTIONS+=(SPHINX "Sphinx Chat Relay")
 fi
 if [ "${helipad}" == "on" ]; then
-  OPTIONS+=(HELIPAD "Helipad")
+  OPTIONS+=(HELIPAD "Helipad Boostagram reader")
 fi
 if [ "${chantools}" == "on" ]; then
   OPTIONS+=(CHANTOOLS "ChannelTools (Fund Rescue)")
