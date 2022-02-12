@@ -90,13 +90,16 @@ case $CHOICE in
     ;;
   
   BACKUP)
-    if [ "${cl}" == "on" ] || [ "${cl}" == "1" ] && [ "${clEncryptedHSM}" != "on" ] ; then
+    if [ "${cl}" == "on" ] || [ "${cl}" == "1" ] && [ "${clEncryptedHSM}" != "on" ]; then
       dialog \
        --title "Encrypt the C-lightning wallet" \
        --msgbox "\nWill proceed to encrypt and lock the C-lightning wallet to prevent it from starting automatically after the backup" 9 55
       sudo /home/admin/config.scripts/cl.hsmtool.sh encrypt mainnet
-      /home/admin/config.scripts/cl.hsmtool.sh lock mainnet
     fi
+    if [ "${clAutoUnlock}" = "on" ]; then
+      /home/admin/config.scripts/cl.hsmtool.sh autounlock-off mainnet
+    fi
+    /home/admin/config.scripts/cl.hsmtool.sh lock mainnet
     ## from dialogLightningWallet.sh 
     _temp="/var/cache/raspiblitz/temp/.temp.tmp"
     clear
