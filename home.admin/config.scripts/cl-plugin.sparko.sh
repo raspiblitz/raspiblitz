@@ -4,7 +4,7 @@
 # built-in path dir: /usr/local/libexec/c-lightning/plugins/
 # added --plugin-dir=/home/bitcoin/${netprefix}cl-plugins-enabled
 
-SPARKOVERSION="v2.7"
+SPARKOVERSION="v2.8"
 
 # command info
 if [ $# -lt 1 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ];then
