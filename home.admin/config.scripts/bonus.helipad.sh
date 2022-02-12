@@ -22,8 +22,8 @@ source /mnt/hdd/raspiblitz.conf
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
- echo "config script to install or uninstall helipad"
- echo "$0 [on|off|menu]"
+ echo "config script to install, update or uninstall helipad"
+ echo "$0 [on|off|menu|update]"
  echo "install $HELIPAD_VERSION by default"
  exit 1
 fi
@@ -180,14 +180,47 @@ WantedBy=multi-user.target
   exit 0
 fi
 
+# update
+if [ "$1" = "update" ]; then
+  echo "# Updating Helipad"
+
+  # Remove Helipad, keeping database
+  /home/admin/config.scripts/bonus.helipad.sh off --keep-data
+
+  # Reinstall Helilpad w/ existing database
+  /home/admin/config.scripts/bonus.helipad.sh on
+
+  exit 0
+fi
+
 # switch off
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
+
+ # Keep or delete Helipad database?
+  deleteData=0
+  if [ "$2" = "--delete-data" ]; then
+    deleteData=1
+  elif [ "$2" = "--keep-data" ]; then
+    deleteData=0
+  else
+    if (whiptail --title " DELETE HELIPAD DATABASE? " --yesno "Do you want to delete\nthe Helipad database?" 8 30); then
+      deleteData=1
+   else
+      deleteData=0
+    fi
+  fi
+  echo "# deleteData(${deleteData})"
   echo "*** REMOVING HELIPAD ***"
   # remove systemd service
   sudo systemctl disable helipad
   sudo rm -f /etc/systemd/system/helipad.service
   sudo rm -fR $HELIPAD_BUILD_DIR
-  sudo rm -fR $HELIPAD_DATA_DIR
+  if [ ${deleteData} -eq 1 ]; then
+    echo "# deleting Helipad database"
+    sudo rm -fR $HELIPAD_DATA_DIR
+  else
+    echo "# keeping Helipad database"
+  fi
   # delete user and home directory
   sudo userdel -rf $HELIPAD_USER
   # close ports on firewall
