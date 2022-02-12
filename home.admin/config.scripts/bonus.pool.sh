@@ -32,7 +32,7 @@ sudo systemctl stop poold 2>/dev/null
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "# installing pool"
-  
+
   echo "# remove LiT to avoid interference with accounts (data is preserved)"
   /home/admin/config.scripts/bonus.lit.sh off
 
@@ -41,7 +41,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     # create dedicated user
     sudo adduser --disabled-password --gecos "" pool
-    
+
     echo "# persist settings in app-data"
     echo "# make sure the data directory exists"
     sudo mkdir -p /mnt/hdd/app-data/.pool
@@ -49,7 +49,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo rm -rf /home/pool/.pool # not a symlink.. delete it silently
     sudo ln -s /mnt/hdd/app-data/.pool/ /home/pool/.pool
     sudo chown pool:pool -R /mnt/hdd/app-data/.pool
-    
+
     # set PATH for the user
     sudo bash -c "echo 'PATH=$PATH:/home/pool/go/bin/' >> /home/pool/.profile"
 
@@ -77,7 +77,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       PGPcheck="03DB6322267C373B"
     fi
 
-    echo "Detect CPU architecture ..." 
+    echo "Detect CPU architecture ..."
     isARM=$(uname -m | grep -c 'arm')
     isAARCH64=$(uname -m | grep -c 'aarch64')
     isX86_64=$(uname -m | grep -c 'x86_64')
@@ -99,7 +99,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       OSversion="arm64"
     elif [ ${isX86_64} -eq 1 ] ; then
       OSversion="amd64"
-    fi 
+    fi
     SHA256=$(grep -i "linux-$OSversion" manifest-${poolVersion}.txt | cut -d " " -f1)
 
     echo
@@ -122,8 +122,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     fi
 
     echo "# check gpg finger print"
-    gpg --keyid-format LONG ./pgp_keys.asc
-    fingerprint=$(gpg --keyid-format LONG "./pgp_keys.asc" 2>/dev/null \
+    gpg --show-keys --keyid-format LONG ./pgp_keys.asc
+    fingerprint=$(gpg --show-keys --keyid-format LONG "./pgp_keys.asc" 2>/dev/null \
     | grep "${PGPcheck}" -c)
     if [ ${fingerprint} -lt 1 ]; then
       echo ""
@@ -156,10 +156,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # get Go vars
     # source /etc/profile
     # cd /home/pool
-    # 
+    #
     # sudo -u pool git clone https://github.com/lightninglabs/pool.git || exit 1
     # cd /home/pool/pool
-    # # pin version 
+    # # pin version
     # sudo -u pool git reset --hard $pinnedVersion
     # # install to /home/pool/go/bin/
     # sudo -u pool /usr/local/go/bin/go install ./... || exit 1
@@ -190,7 +190,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       proxy=""
     fi
 
-    # sudo nano /etc/systemd/system/poold.service 
+    # sudo nano /etc/systemd/system/poold.service
     echo "
 [Unit]
 Description=poold.service
@@ -217,7 +217,7 @@ WantedBy=multi-user.target
     sudo systemctl enable poold
     echo "# OK - the poold.service is now enabled"
 
-  else 
+  else
     echo "the poold.service already installed."
   fi
 
@@ -230,12 +230,12 @@ WantedBy=multi-user.target
   fi
   # setting value in raspi blitz config
   /home/admin/config.scripts/blitz.conf.sh set pool "on"
-  
+
   isInstalled=$(sudo -u pool /usr/local/bin/poold  | grep -c pool)
   if [ ${isInstalled} -gt 0 ]; then
     echo "
 # Usage and examples: https://github.com/lightninglabs/pool
-# Use the command: 'sudo su - pool' 
+# Use the command: 'sudo su - pool'
 # in the terminal to switch to the dedicated user.
 # Type 'pool' again to see the options.
 "
@@ -243,7 +243,7 @@ WantedBy=multi-user.target
     echo "# Failed to install Lightning Pool "
     exit 1
   fi
-  
+
   exit 0
 fi
 
@@ -265,7 +265,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     # delete the binary
     sudo rm /usr/local/bin/poold
     echo "# OK, the Pool Service is removed."
-  else 
+  else
     echo "# Pool is not installed."
   fi
 
@@ -284,7 +284,7 @@ fi
 #   UPSTREAM=${1:-'@{u}'}
 #   LOCAL=$(git rev-parse @)
 #   REMOTE=$(git rev-parse "$UPSTREAM")
-#   
+#
 #   if [ $LOCAL = $REMOTE ]; then
 #     TAG=$(git tag | sort -V | tail -1)
 #     echo "# You are up-to-date on version" $TAG
@@ -306,7 +306,7 @@ fi
 #       exit 1
 #     fi
 #   fi
-# 
+#
 #   echo "# At the latest in https://github.com/lightninglabs/pool/releases/"
 #   echo ""
 #   echo "# Starting the poold.service ... *** "
