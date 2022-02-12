@@ -17,7 +17,7 @@ fi
 mode="$1"
 
 # RECOMMENDED UPDATE BY RASPIBLITZ TEAM
-# comment will be shown as "BEWARE Info" when option is choosen (can be multiple lines) 
+# comment will be shown as "BEWARE Info" when option is choosen (can be multiple lines)
 lndUpdateVersion="" # example: 0.13.2-beta .. keep empty if no newer version as sd card build is available
 lndUpdateComment="Please keep in mind that downgrading afterwards is not tested. Also not all additional apps are fully tested with the this update - but it looked good on first tests."
 
@@ -27,7 +27,7 @@ PGPauthor="roasbeef"
 lndUpdatePGPpkeys="https://keybase.io/roasbeef/pgp_keys.asc"
 lndUpdatePGPcheck="4AB7F8DA6FAEBB3B70B1F903BC13F65E2DC84465"
 
-# bitconner 
+# bitconner
 # PGPauthor="bitconner"
 # lndUpdatePGPpkeys="https://keybase.io/bitconner/pgp_keys.asc"
 # lndUpdatePGPcheck="9C8D61868A7C492003B2744EE7D737B67FA592C7"
@@ -122,7 +122,7 @@ if [ "${mode}" = "verified" ]; then
 
   # check for optional second parameter: forced update version
   # --> only does the verified update if its the given version
-  # this is needed for recovery/update. 
+  # this is needed for recovery/update.
   fixedUpdateVersion="$2"
   if [ ${#fixedUpdateVersion} -gt 0 ]; then
     echo "# checking for fixed version update: askedFor(${fixedUpdateVersion}) available(${lndUpdateVersion})"
@@ -136,7 +136,7 @@ if [ "${mode}" = "verified" ]; then
     fi
   fi
 
-  echo 
+  echo
   echo "# clean & change into download directory"
   sudo rm -r ${downloadDir}/*
   cd "${downloadDir}" || exit 1
@@ -175,17 +175,17 @@ if [ "${mode}" = "verified" ]; then
     exit 1
   fi
 
-  echo 
+  echo
   echo "# getting gpg finger print"
-  gpg ./pgp_keys.asc
-  fingerprint=$(sudo gpg "${downloadDir}/pgp_keys.asc" 2>/dev/null | grep "${lndUpdatePGPcheck}" -c)
+  gpg --show-keys ./pgp_keys.asc
+  fingerprint=$(sudo gpg --show-keys "${downloadDir}/pgp_keys.asc" 2>/dev/null | grep "${lndUpdatePGPcheck}" -c)
   if [ ${fingerprint} -lt 1 ]; then
     echo "error='PGP author check failed'"
     exit 1
   fi
   echo "fingerprint='${fingerprint}'"
 
-  echo 
+  echo
   echo "# checking PGP finger print"
   gpg --import ./pgp_keys.asc
   sleep 3
@@ -225,11 +225,11 @@ if [ "${mode}" = "reckless" ]; then
       echo "error='no download link'"
       exit 1
     fi
-  
+
     # clean & change into download directory
     sudo rm -r ${downloadDir}/*
     cd "${downloadDir}" || exit 1
-  
+
     # download binary
     echo "# downloading binary"
     binaryName=$(basename "${lndLatestDownload}")
@@ -239,7 +239,7 @@ if [ "${mode}" = "reckless" ]; then
       echo "error='download binary failed'"
       exit 1
     fi
-  
+
     # prepare install
     lndInterimsUpdateNew="reckless"
 
