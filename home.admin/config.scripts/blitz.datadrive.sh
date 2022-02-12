@@ -467,6 +467,10 @@ if [ "$1" = "status" ]; then
       # UGREEN 2.5" External USB 3.0 Hard Disk Case with UASP support
       hddAdapterUSAP=1
     fi
+    if [ "${hddAdapter}" == "174c:1153" ]; then
+      # UGREEN 2.5" External USB 3.0 Hard Disk Case with UASP support, 2021+ version
+      hddAdapterUSAP=1
+    fi
     if [ "${hddAdapter}" == "0825:0001" ] || [ "${hddAdapter}" == "174c:0825" ]; then
       # SupTronics 2.5" SATA HDD Shield X825 v1.5
       hddAdapterUSAP=1
