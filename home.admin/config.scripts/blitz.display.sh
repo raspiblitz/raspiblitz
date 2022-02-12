@@ -4,6 +4,7 @@
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "# make changes to the LCD screen"
   echo
+  echo "# all commands need to run as root or with sudo"
   echo "# blitz.display.sh image [path]"
   echo "# blitz.display.sh qr [datastring]"
   echo "# blitz.display.sh qr-console [datastring]"
@@ -26,6 +27,37 @@ source /mnt/hdd/raspiblitz.conf 2>/dev/null
 # see https://github.com/rootzoll/raspiblitz/pull/1580
 # but basically this just says if the driver for GPIO LCD is installed - not if connected
 fb1Exists=$(ls /dev/fb1 2>/dev/null | grep -c "/dev/fb1")
+
+###################
+# QR CODE KONSOLE
+# fallback if no LCD is available
+###################
+
+if [ "${command}" == "qr-console" ]; then
+
+  datastring=$2
+  if [ ${#datastring} -eq 0 ]; then
+    echo "error='missing second parameter - see help'"
+    exit 1
+  fi
+
+  whiptail --title "Get ready" --backtitle "QR-Code in Terminal Window" --msgbox "Make this terminal window as large as possible - fullscreen would be best. \n\nThe QR-Code might be too large for your display. In that case, shrink the letters by pressing the keys Ctrl and Minus (or Cmd and Minus if you are on a Mac) \n\nPRESS ENTER when you are ready to see the QR-code." 15 60
+
+  clear
+  qrencode -t ANSI256 ${datastring}
+  echo "(To shrink QR code: macOS press CMD- / LINUX press CTRL-) Press ENTER when finished."
+  read key
+
+  clear
+  exit 0
+fi
+
+###########################################################################
+# All below here - needs to be run as root user or called with sudo
+if [ "$EUID" -ne 0 ]; then 
+  echo "error='run as root'"
+  exit 1
+fi
 
 ###################
 # IMAGE
@@ -83,30 +115,6 @@ if [ "${command}" == "qr" ]; then
 fi
 
 ###################
-# QR CODE KONSOLE
-# fallback if no LCD is available
-###################
-
-if [ "${command}" == "qr-console" ]; then
-
-  datastring=$2
-  if [ ${#datastring} -eq 0 ]; then
-    echo "error='missing second parameter - see help'"
-    exit 1
-  fi
-
-  whiptail --title "Get ready" --backtitle "QR-Code in Terminal Window" --msgbox "Make this terminal window as large as possible - fullscreen would be best. \n\nThe QR-Code might be too large for your display. In that case, shrink the letters by pressing the keys Ctrl and Minus (or Cmd and Minus if you are on a Mac) \n\nPRESS ENTER when you are ready to see the QR-code." 15 60
-
-  clear
-  qrencode -t ANSI256 ${datastring}
-  echo "(To shrink QR code: macOS press CMD- / LINUX press CTRL-) Press ENTER when finished."
-  read key
-
-  clear
-  exit 0
-fi
-
-###################
 # HIDE
 ###################
 
@@ -114,13 +122,6 @@ if [ "${command}" == "hide" ]; then
   killall -3 fbi
   rm /var/cache/raspiblitz/qr.png 2> /dev/null
   exit 0
-fi
-
-###########################################################################
-# All below here - needs to be run as root user or called with sudo
-if [ "$EUID" -ne 0 ]; then 
-  echo "error='run as root'"
-  exit 1
 fi
 
 ##################

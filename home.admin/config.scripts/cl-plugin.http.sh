@@ -30,7 +30,7 @@ if [ $1 = connect ];then
   url="http://lightning:${PASSWORD_B}@${toraddress}:9080"
   clear
   echo
-  /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
+  sudo /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
   echo "
 Connect Fully Noded
 
@@ -58,8 +58,8 @@ https://github.com/Fonta1n3/FullyNoded/blob/master/Docs/Lightning.md#connect-ful
   echo
   echo "# Press enter to continue to show the full connection URL with all the info above"
   read key
-  /home/admin/config.scripts/blitz.display.sh hide
-  /home/admin/config.scripts/blitz.display.sh qr "${url}"
+  sudo /home/admin/config.scripts/blitz.display.sh hide
+  sudo /home/admin/config.scripts/blitz.display.sh qr "${url}"
   clear
   echo "
 C-lightning connection URL code for Fully Noded:
@@ -70,7 +70,7 @@ $url
   echo
   echo "# Press enter to hide the QRcode from the LCD"
   read key
-  /home/admin/config.scripts/blitz.display.sh hide
+  sudo /home/admin/config.scripts/blitz.display.sh hide
   exit 0
 fi
 

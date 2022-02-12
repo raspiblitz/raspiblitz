@@ -66,7 +66,7 @@ if [ "$1" = "menu" ]; then
 
   # info with Tor
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
-    /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
+    sudo /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
     whiptail --title "Ride The Lightning (RTL - $LNTYPE - $CHAIN)" --msgbox "Open in your local web browser:
 http://${localip}:${RTLHTTP}\n
 https://${localip}:$((RTLHTTP+1)) with Fingerprint:
@@ -74,7 +74,7 @@ ${fingerprint}\n
 Use your Password B to login.\n
 Hidden Service address for Tor Browser (QRcode on LCD):\n${toraddress}
 " 16 67
-    /home/admin/config.scripts/blitz.display.sh hide
+    sudo /home/admin/config.scripts/blitz.display.sh hide
 
   # info without Tor
   else

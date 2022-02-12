@@ -57,7 +57,7 @@ You need to accept self-signed HTTPS cert with SHA1 Fingerprint:
 ${sslFingerprintIP}"
 
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
-    /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
+    sudo /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
     text="${text}\n
 TOR Browser Hidden Service address (QR see LCD):
 ${toraddress}"
@@ -81,7 +81,7 @@ Consider adding a IP2TOR Bridge under OPTIONS."
 
   whiptail --title " LNbits ${fundinginfo}" --yes-button "OK" --no-button "OPTIONS" --yesno "${text}" 18 69
   result=$?
-  /home/admin/config.scripts/blitz.display.sh hide
+  sudo /home/admin/config.scripts/blitz.display.sh hide
   echo "option (${result}) - please wait ..."
 
   # exit when user presses OK to close menu

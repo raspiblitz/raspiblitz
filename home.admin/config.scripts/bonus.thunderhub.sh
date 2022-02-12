@@ -30,7 +30,7 @@ if [ "$1" = "menu" ]; then
 
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
     # Info with TOR
-    /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
+    sudo /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
     whiptail --title " ThunderHub " --msgbox "Open in your local web browser:
 http://${localip}:3010\n
 https://${localip}:3011 with Fingerprint:
@@ -38,7 +38,7 @@ ${fingerprint}\n
 Use your Password B to login.\n
 Hidden Service address for TOR Browser (see LCD for QR):\n${toraddress}
 " 16 67
-    /home/admin/config.scripts/blitz.display.sh hide
+    sudo /home/admin/config.scripts/blitz.display.sh hide
   else
     # Info without TOR
     whiptail --title " ThunderHub " --msgbox "Open in your local web browser:

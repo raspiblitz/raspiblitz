@@ -30,7 +30,7 @@ if [ "$1" = "menu" ]; then
   if [ ${#toraddress} -eq 0 ];then
     toraddresstext="Activate Tor to access the web interface from outside of the local network."
   else
-    /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
+    sudo /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
   fi
   fingerprint=$(openssl x509 -in /home/bitcoin/.lightning/sparko-tls/cert.pem -fingerprint -noout | cut -d"=" -f2)
 
@@ -44,7 +44,7 @@ ${fingerprint}\n
 ${toraddresstext}
 " 17 67
 
-  /home/admin/config.scripts/blitz.display.sh hide
+  sudo /home/admin/config.scripts/blitz.display.sh hide
 
   echo "# please wait ..."
   exit 0
@@ -56,14 +56,14 @@ if [ $1 = connect ];then
   accesskey=$(sudo cat ${CLCONF} | grep "^sparko-keys=" | cut -d= -f2 | cut -d';' -f1)
   url="https://${localip}:${portprefix}9000/"
   #string="${url}?access-key=${accesskey}"
-  #/home/admin/config.scripts/blitz.display.sh qr "$string"
+  #sudo /home/admin/config.scripts/blitz.display.sh qr "$string"
   #clear
   #echo "connection string (shown as a QRcode on the top and on the LCD):"
   #echo "$string"
   #qrencode -t ANSIUTF8 "${string}"
   clear
   echo
-  /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
+  sudo /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
   echo "The Tor address is shown as a QRcode below and on the LCD"
   echo "Scan it to your phone with a QR scanner app and paste it to: 'Host'"
   echo
@@ -77,8 +77,8 @@ if [ $1 = connect ];then
   echo
   echo "# Press enter to continue to show the access key"
   read key
-  /home/admin/config.scripts/blitz.display.sh hide
-  /home/admin/config.scripts/blitz.display.sh qr "${accesskey}"
+  sudo /home/admin/config.scripts/blitz.display.sh hide
+  sudo /home/admin/config.scripts/blitz.display.sh qr "${accesskey}"
   clear
   echo
   echo "The Access Key is shown as a QRcode below and on the LCD"
@@ -90,7 +90,7 @@ if [ $1 = connect ];then
   echo
   echo "# Press enter to hide the QRcode from the LCD"
   read key
-  /home/admin/config.scripts/blitz.display.sh hide
+  sudo /home/admin/config.scripts/blitz.display.sh hide
   exit 0
 fi
 

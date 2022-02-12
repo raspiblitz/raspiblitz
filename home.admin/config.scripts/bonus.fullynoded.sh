@@ -37,11 +37,11 @@ echo "${hiddenService}"
 quickConnect="btcstandup://${RPC_USER}:${PASSWORD_B}@${hiddenService}:${BITCOINRPCPORT}/?label=${hostname}"
 echo
 echo "scan the QR Code with Fully Noded to connect to your node:"
-/home/admin/config.scripts/blitz.display.sh qr "${quickConnect}"
+sudo /home/admin/config.scripts/blitz.display.sh qr "${quickConnect}"
 qrencode -t ANSI256 $quickConnect
 echo "Press ENTER to return to the menu"
 read key
 
 # clean up
-/home/admin/config.scripts/blitz.display.sh hide
+sudo /home/admin/config.scripts/blitz.display.sh hide
 clear
