@@ -380,7 +380,9 @@ You don't need a LAN port on your laptop as long as you can connect over WLAN to
 ## Is it possible to connect the Blitz over Wifi instead of using a LAN cable?
 
 A LAN cable is recommended because it reduces a possible source of error on the network connection side. But how to setup WLAN when you don't have a LAN-Router/Switch available see here:
-https://raspibolt.github.io/raspibolt/raspibolt_20_pi.html#prepare-wifi
+https://www.raspberrypi-spy.co.uk/2017/04/manually-setting-up-pi-wifi-using-wpa_supplicant-conf/
+and in the video form:
+https://youtu.be/77BBQWg1n8w?t=393
 
 ## Can I directly connect the RaspiBlitz to my laptop?
 
