@@ -32,14 +32,14 @@ if [ "$1" = connect ];then
   hex_macaroon=$(xxd -plain /home/bitcoin/c-lightning-REST/certs/access.macaroon | tr -d '\n')
   url="https://${localip}:${portprefix}6100/"
   #string="${url}?${hex_macaroon}"
-  #/home/admin/config.scripts/blitz.display.sh qr "$string"
+  #sudo /home/admin/config.scripts/blitz.display.sh qr "$string"
   #clear
   #echo "connection string (shown as a QRcode on the top and on the LCD):"
   #echo "$string"
   #qrencode -t ANSIUTF8 "${string}"
   clear
   echo
-  /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
+  sudo /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
   echo "The Tor address is shown as a QRcode below and on the LCD"
   echo "Scan it to your phone with a QR scanner app and paste it to: 'Host'"
   echo
@@ -55,8 +55,8 @@ if [ "$1" = connect ];then
   echo
   echo "# Press enter to continue to show the Macaroon"
   read key
-  /home/admin/config.scripts/blitz.display.sh hide
-  /home/admin/config.scripts/blitz.display.sh qr "${hex_macaroon}"
+  sudo /home/admin/config.scripts/blitz.display.sh hide
+  sudo /home/admin/config.scripts/blitz.display.sh qr "${hex_macaroon}"
   clear
   echo
   echo "The Macaroon is shown as a QRcode below and on the LCD"
@@ -68,7 +68,7 @@ if [ "$1" = connect ];then
   echo
   echo "# Press enter to hide the QRcode from the LCD"
   read key
-  /home/admin/config.scripts/blitz.display.sh hide
+  sudo /home/admin/config.scripts/blitz.display.sh hide
   exit 0
 fi
 

@@ -43,7 +43,7 @@ This can take multiple hours.
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
 
     # Tor
-    /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
+    sudo /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
     whiptail --title " Mempool " --msgbox "Open in your local web browser:
 http://${localip}:4080\n
 https://${localip}:4081 with Fingerprint:
@@ -51,7 +51,7 @@ ${fingerprint}\n
 Hidden Service address for Tor Browser (QR see LCD):
 ${toraddress}
 " 16 67
-    /home/admin/config.scripts/blitz.display.sh hide
+    sudo /home/admin/config.scripts/blitz.display.sh hide
   else
 
     # IP + Domain

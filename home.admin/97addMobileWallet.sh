@@ -167,7 +167,7 @@ fi
 
 CHOICE=$(whiptail --clear --title "Choose Mobile Wallet" --menu "" 18 75 12 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
-/home/admin/config.scripts/blitz.display.sh hide
+sudo /home/admin/config.scripts/blitz.display.sh hide
 
 clear
 echo "creating install info ..."
@@ -195,39 +195,39 @@ case $CHOICE in
 	  ;;
   ZAP_IOS)
       appstoreLink="https://apps.apple.com/us/app/zap-bitcoin-lightning-wallet/id1406311960"
-      /home/admin/config.scripts/blitz.display.sh image /home/admin/raspiblitz/pictures/app_zap.png
+      sudo /home/admin/config.scripts/blitz.display.sh image /home/admin/raspiblitz/pictures/app_zap.png
 	  whiptail --title "Install Fully Noded on your iOS device" \
 		--yes-button "Continue" \
 		--no-button "StoreLink" \
 		--yesno "Open the Apple App Store on your mobile phone.\n\nSearch for --> 'Zap Bitcoin'\n\nCheck that logo is like on LCD & author: Zap Technologies LLC\nWhen app is installed and started --> Continue." 12 65
 	  if [ $? -eq 1 ]; then
-		/home/admin/config.scripts/blitz.display.sh qr ${appstoreLink}
+		sudo /home/admin/config.scripts/blitz.display.sh qr ${appstoreLink}
 		whiptail --title " App Store Link " --msgbox "\
 To install app open the following link:\n
 ${appstoreLink}\n
 Or scan the qr code on the LCD with your mobile phone.
 " 11 70
 	  fi
-	  /home/admin/config.scripts/blitz.display.sh hide
+	  sudo /home/admin/config.scripts/blitz.display.sh hide
   	  /home/admin/config.scripts/bonus.lndconnect.sh zap-ios tor
       exit 0;
     ;;
   ZAP_ANDROID)
       appstoreLink="https://play.google.com/store/apps/details?id=zapsolutions.zap"
-      /home/admin/config.scripts/blitz.display.sh image /home/admin/raspiblitz/pictures/app_zap.png
+      sudo /home/admin/config.scripts/blitz.display.sh image /home/admin/raspiblitz/pictures/app_zap.png
 	  whiptail --title "Install Zap on your Android Phone" \
 		--yes-button "Continue" \
 		--no-button "StoreLink" \
 		--yesno "Open the Android Play Store on your mobile phone.\n\nSearch for --> 'zap bitcoin app'\n\nCheck that logo is like on LCD and author is: Zap\nWhen app is installed and started --> Continue." 12 65
 	  if [ $? -eq 1 ]; then
-		/home/admin/config.scripts/blitz.display.sh qr ${appstoreLink}
+		sudo /home/admin/config.scripts/blitz.display.sh qr ${appstoreLink}
 		whiptail --title " App Store Link " --msgbox "\
 To install app open the following link:\n
 ${appstoreLink}\n
 Or scan the qr code on the LCD with your mobile phone.
 " 11 70
 	  fi
-	  /home/admin/config.scripts/blitz.display.sh hide
+	  sudo /home/admin/config.scripts/blitz.display.sh hide
   	  /home/admin/config.scripts/bonus.lndconnect.sh zap-android tor
       exit 0;
     ;;
@@ -250,85 +250,85 @@ Please go to MAINMENU > SERVICES and activate KEYSEND first.
 		--no-button "Link as QR code" \
 		--yesno "Download & install the SendMany APK (armeabi-v7) from GitHub:\n\n${appstoreLink}\n\nEasiest way to scan QR code on LCD and download/install.\n\nWhen installed and started -> continue." 13 65
 	  if [ $? -eq 1 ]; then
-	  	/home/admin/config.scripts/blitz.display.sh qr ${appstoreLink}
+	  	sudo /home/admin/config.scripts/blitz.display.sh qr ${appstoreLink}
 	    /home/admin/config.scripts/blitz.display.sh qr-console ${appstoreLink}
 	  fi
-	  /home/admin/config.scripts/blitz.display.sh hide
+	  sudo /home/admin/config.scripts/blitz.display.sh hide
 	  checkIP2TOR LND-GRPC-API
   	  /home/admin/config.scripts/bonus.lndconnect.sh sendmany-android ${connect}
       exit 0;
     ;;
   ZEUS_IOS)
       appstoreLink="https://apps.apple.com/us/app/zeus-ln/id1456038895"
-      /home/admin/config.scripts/blitz.display.sh image /home/admin/raspiblitz/pictures/app_zeus.png
+      sudo /home/admin/config.scripts/blitz.display.sh image /home/admin/raspiblitz/pictures/app_zeus.png
 	  whiptail --title "Install Zeus on your iOS device" \
 		--yes-button "Continue" \
 		--no-button "Link as QRcode" \
 		--yesno "Open the Apple App Store on your mobile phone.\n\nSearch for --> 'zeus ln'\n\nCheck that logo is like on LCD and author is: Zeus LN LLC\nWhen the app is installed and started --> Continue." 12 65
 	  if [ $? -eq 1 ]; then
-		/home/admin/config.scripts/blitz.display.sh qr ${appstoreLink}
+		sudo /home/admin/config.scripts/blitz.display.sh qr ${appstoreLink}
 		/home/admin/config.scripts/blitz.display.sh qr-console ${appstoreLink}
 	  fi
-	  /home/admin/config.scripts/blitz.display.sh hide
+	  sudo /home/admin/config.scripts/blitz.display.sh hide
   	  /home/admin/config.scripts/bonus.lndconnect.sh zeus-ios tor
   	  exit 0;
   	;;
   ZEUS_ANDROID)
       appstoreLink="https://play.google.com/store/apps/details?id=app.zeusln.zeus"
-      /home/admin/config.scripts/blitz.display.sh image /home/admin/raspiblitz/pictures/app_zeus.png
+      sudo /home/admin/config.scripts/blitz.display.sh image /home/admin/raspiblitz/pictures/app_zeus.png
 	  whiptail --title "Install Zeus on your Android Phone" \
 		--yes-button "Continue" \
 		--no-button "StoreLink" \
 		--yesno "Open the Android Play Store on your mobile phone.\n\nSearch for --> 'zeus ln'\n\nCheck that logo is like on LCD and author is: Evan Kaloudis\nWhen app is installed and started --> Continue." 12 65
 	  if [ $? -eq 1 ]; then
-		/home/admin/config.scripts/blitz.display.sh qr ${appstoreLink}
+		sudo /home/admin/config.scripts/blitz.display.sh qr ${appstoreLink}
 		whiptail --title " App Store Link " --msgbox "\
 To install app open the following link:\n
 ${appstoreLink}\n
 Or scan the qr code on the LCD with your mobile phone.
 " 11 70
 	  fi
-	  /home/admin/config.scripts/blitz.display.sh hide
+	  sudo /home/admin/config.scripts/blitz.display.sh hide
   	  /home/admin/config.scripts/bonus.lndconnect.sh zeus-android tor
   	  exit 0;
   	;;
 
   FULLYNODED_BTC)
       appstoreLink="https://apps.apple.com/us/app/fully-noded/id1436425586"
-      /home/admin/config.scripts/blitz.display.sh image /home/admin/raspiblitz/pictures/app_fullynoded.png
+      sudo /home/admin/config.scripts/blitz.display.sh image /home/admin/raspiblitz/pictures/app_fullynoded.png
 	  whiptail --title "Install Fully Noded on your iOS device" \
 		--yes-button "Continue" \
 		--no-button "StoreLink" \
 		--yesno "Open the Apple App Store on your mobile phone.\n\nSearch for --> 'fully noded'\n\nCheck that logo is like on LCD and author is: Denton LLC\nWhen app is installed and started --> Continue." 12 65
 	  if [ $? -eq 1 ]; then
-		/home/admin/config.scripts/blitz.display.sh qr ${appstoreLink}
+		sudo /home/admin/config.scripts/blitz.display.sh qr ${appstoreLink}
 		whiptail --title " App Store Link " --msgbox "\
 To install app open the following link:\n
 ${appstoreLink}\n
 Or scan the qr code on the LCD with your mobile phone.
 " 11 70
 	  fi
-	  /home/admin/config.scripts/blitz.display.sh hide
+	  sudo /home/admin/config.scripts/blitz.display.sh hide
   	  /home/admin/config.scripts/bonus.fullynoded.sh
   	  exit 0;
   	;;
 
   FULLYNODED_LND)
       appstoreLink="https://apps.apple.com/us/app/fully-noded/id1436425586"
-      /home/admin/config.scripts/blitz.display.sh image /home/admin/raspiblitz/pictures/app_fullynoded.png
+      sudo /home/admin/config.scripts/blitz.display.sh image /home/admin/raspiblitz/pictures/app_fullynoded.png
 	  whiptail --title "Install Fully Noded on your iOS device" \
 		--yes-button "Continue" \
 		--no-button "StoreLink" \
 		--yesno "Open the Apple App Store on your mobile phone.\n\nSearch for --> 'fully noded'\n\nCheck that logo is like on LCD and author is: Denton LLC\nWhen app is installed and started --> Continue." 12 65
 	  if [ $? -eq 1 ]; then
-		/home/admin/config.scripts/blitz.display.sh qr ${appstoreLink}
+		sudo /home/admin/config.scripts/blitz.display.sh qr ${appstoreLink}
 		whiptail --title " App Store Link " --msgbox "\
 To install app open the following link:\n
 ${appstoreLink}\n
 Or scan the qr code on the LCD with your mobile phone.
 " 11 70
 	  fi
-	  /home/admin/config.scripts/blitz.display.sh hide
+	  sudo /home/admin/config.scripts/blitz.display.sh hide
   	  /home/admin/config.scripts/bonus.lndconnect.sh fullynoded-lnd tor
   	  exit 0;
 	;;
@@ -338,26 +338,26 @@ Or scan the qr code on the LCD with your mobile phone.
 	    /home/admin/config.scripts/cl-plugin.http.sh on
 	  fi
       appstoreLink="https://apps.apple.com/us/app/fully-noded/id1436425586"
-      /home/admin/config.scripts/blitz.display.sh image /home/admin/raspiblitz/pictures/app_fullynoded.png
+      sudo /home/admin/config.scripts/blitz.display.sh image /home/admin/raspiblitz/pictures/app_fullynoded.png
 	  whiptail --title "Install Fully Noded on your iOS device" \
 		--yes-button "Continue" \
 		--no-button "StoreLink" \
 		--yesno "Open the Apple App Store on your mobile phone.\n\nSearch for --> 'fully noded'\n\nCheck that logo is like on LCD and author is: Denton LLC\nWhen app is installed and started --> Continue." 12 65
 	  if [ $? -eq 1 ]; then
-		/home/admin/config.scripts/blitz.display.sh qr ${appstoreLink}
+		sudo /home/admin/config.scripts/blitz.display.sh qr ${appstoreLink}
 		whiptail --title " App Store Link " --msgbox "\
 To install app open the following link:\n
 ${appstoreLink}\n
 Or scan the qr code on the LCD with your mobile phone.
 " 11 70
 	  fi
-	  /home/admin/config.scripts/blitz.display.sh hide
+	  sudo /home/admin/config.scripts/blitz.display.sh hide
   	  /home/admin/config.scripts/cl-plugin.http.sh connect
   	  exit 0;
   	;;
 
 ZEUS_CLREST)
-      /home/admin/config.scripts/blitz.display.sh image /home/admin/raspiblitz/pictures/app_zeus.png
+      sudo /home/admin/config.scripts/blitz.display.sh image /home/admin/raspiblitz/pictures/app_zeus.png
 	  whiptail --title "Install Zeus on your Android or iOS Phone" \
 		--yes-button "Continue" \
 		--no-button "Cancel" \
@@ -365,12 +365,12 @@ ZEUS_CLREST)
 	  if [ $? -eq 1 ]; then
 		exit 0
 	  fi
-	  /home/admin/config.scripts/blitz.display.sh hide
+	  sudo /home/admin/config.scripts/blitz.display.sh hide
   	  /home/admin/config.scripts/cl.rest.sh connect
   	  exit 0;
 	;;
 ZEUS_SPARK)
-      /home/admin/config.scripts/blitz.display.sh image /home/admin/raspiblitz/pictures/app_zeus.png
+      sudo /home/admin/config.scripts/blitz.display.sh image /home/admin/raspiblitz/pictures/app_zeus.png
 	  whiptail --title "Install Zeus on your Android or iOS Phone" \
 		--yes-button "Continue" \
 		--no-button "Cancel" \
@@ -378,26 +378,26 @@ ZEUS_SPARK)
 	  if [ $? -eq 1 ]; then
 		exit 0
 	  fi
-	  /home/admin/config.scripts/blitz.display.sh hide
+	  sudo /home/admin/config.scripts/blitz.display.sh hide
   	  /home/admin/config.scripts/cl-plugin.sparko.sh connect
   	  exit 0;
 	;;
 SPARK)
       appstoreLink="https://github.com/shesek/spark-wallet#mobile-app"
-      /home/admin/config.scripts/blitz.display.sh image /home/admin/raspiblitz/pictures/app_zeus.png
+      sudo /home/admin/config.scripts/blitz.display.sh image /home/admin/raspiblitz/pictures/app_zeus.png
 	  whiptail --title "Install Zeus on your Android Phone" \
 		--yes-button "Continue" \
 		--no-button "GitHub link" \
 		--yesno "Open the ${appstoreLink} on Android to find the App Store link or binary for your phone.\n\nWhen the app is installed and started --> Continue." 12 65
 	  if [ $? -eq 1 ]; then
-		/home/admin/config.scripts/blitz.display.sh qr ${appstoreLink}
+		sudo /home/admin/config.scripts/blitz.display.sh qr ${appstoreLink}
 		whiptail --title " GitHub link " --msgbox "\
 To install app open the following link:\n
 ${appstoreLink}\n
 Or scan the QR code on the LCD with your mobile phone.
 " 11 70
 	  fi
-	  /home/admin/config.scripts/blitz.display.sh hide
+	  sudo /home/admin/config.scripts/blitz.display.sh hide
   	  /home/admin/config.scripts/cl-plugin.sparko.sh connect
   	  exit 0;
 ;;
