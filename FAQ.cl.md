@@ -9,7 +9,7 @@ Table of Contents
     - [Can I run LND and C-lightning connected to the same node?](#can-i-run-lnd-and-c-lightning-connected-to-the-same-node)
     - [Can I convert an LND node to C-lightning (or the opposite)?](#can-i-convert-an-lnd-node-to-c-lightning-or-the-opposite)
     - [Is there a table to quickly compare LND and C-Lightning?](#is-there-a-table-to-quickly-compare-lnd-and-c-lightning)
-  - [C-lightning official documentation](#c-lightning-official-documentation)
+  - [C-lightning official documentation and support channels](#c-lightning-official-documentation-and-support-channels)
   - [Commands and aliases](#commands-and-aliases)
   - [Directories](#directories)
   - [Config file](#config-file)
@@ -64,9 +64,12 @@ The channels would need to be closed to use the same funds in an other node.
 
 ---
 
-## C-lightning official documentation
+## C-lightning official documentation and support channels
 * https://lightning.readthedocs.io/
-
+* https://github.com/ElementsProject/lightning
+* Telegram: https://t.me/lightningd
+* Discord: https://discord.gg/YGdpyj2aXj
+* IRC: #c-lightning on libera.chat or https://matrix.to/#/#c-lightning:libera.chat
 ## Commands and aliases
 * Check if the C-lightning daemon is running:
     ```
