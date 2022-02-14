@@ -24,6 +24,7 @@ source <(/home/admin/_cache.sh get \
   ups \
   ElectRS \
   BTCRPCexplorer \
+  joinmarket \
 )
 
 # PARAMETER 1: forcing view on a given network
@@ -267,26 +268,28 @@ if [ "${lightning}" != "" ]; then
 
 fi
 
-# show JoinMarket stats in place of the LND URI only if the Yield Generator is running
-source /home/joinmarket/joinin.conf 2>/dev/null
-if [ "${joinmarket}" = "on" ] && [ $(sudo -u joinmarket pgrep -f "python yg-privacyenhanced.py $YGwallet --wallet-password-stdin" 2>/dev/null | wc -l) -gt 2 ]; then
-  trap 'rm -f "$JMstats"' EXIT
-  JMstats=$(mktemp -p /dev/shm)
-  sudo -u joinmarket /home/joinmarket/info.stats.sh > $JMstats
-  JMstatsL1=$(sed -n 1p < "$JMstats")
-  JMstatsL2=$(sed -n 2p < "$JMstats")
-  JMstatsL3=$(sed -n 3p < "$JMstats")
-  JMstatsL4=$(sed -n 4p < "$JMstats")
+
   lastLine="\
+${color_yellow}
+${color_yellow}${ln_publicColor}${ln_external}${color_gray}"
+
+if [ "${joinmarket}" = "on" ];then 
+  # show JoinMarket stats in place of the LND URI only if the Yield Generator is running
+  if [ $(sudo -u joinmarket pgrep -f "yg-privacyenhanced.py" 2>/dev/null | wc -l) -gt 2 ]; then
+    trap 'rm -f "$JMstats"' EXIT
+    JMstats=$(mktemp -p /dev/shm)
+    sudo -u joinmarket /home/joinmarket/info.stats.sh > $JMstats
+    JMstatsL1=$(sed -n 1p < "$JMstats")
+    JMstatsL2=$(sed -n 2p < "$JMstats")
+    JMstatsL3=$(sed -n 3p < "$JMstats")
+    JMstatsL4=$(sed -n 4p < "$JMstats")
+    lastLine="\
 ${color_gray}
 ${color_gray}     ╦╔╦╗      ${color_gray}$JMstatsL1
 ${color_gray}     ║║║║      ${color_gray}$JMstatsL2
 ${color_gray}    ╚╝╩ ╩      ${color_gray}$JMstatsL3
 ${color_gray}  ◎=◎=◎=◎=◎    ${color_gray}$JMstatsL4"
-else
-    lastLine="\
-${color_yellow}
-${color_yellow}${ln_publicColor}${ln_external}${color_gray}"
+  fi
 fi
 
 if [ "${lightning}" == "cl" ]; then
