@@ -1,34 +1,52 @@
 #!/bin/bash
 
-https://github.com/cculianu/Fulcrum/releases
+# https://github.com/cculianu/Fulcrum/releases
 fulcrumVersion="1.6.0"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "config script to switch the Fulcrum electrum server on or off"
-  echo "bonus.fulcrum.sh status [?showAddress]"
-  echo "bonus.fulcrum.sh [on|off|menu]"
+  # echo "bonus.fulcrum.sh status [?showAddress]"
+  echo "bonus.fulcrum.sh [on|off]"
   echo "installs the version $fulcrumVersion"
   exit 1
 fi
 
+# will use blitz.conf.sh in v1.7.2
+function setConf {
+  keystr=$1
+  valuestr=$2
+  configFile=$3
+  # check if key needs to be added (prepare new entry)
+  entryExists=$(grep -c "^${keystr}=" ${configFile})
+  if [ ${entryExists} -eq 0 ]; then
+    echo "${keystr}=" | sudo tee -a ${configFile}  # set value (sed needs sudo to operate when user is not root)  1>/dev/null
+  fi
+  # set value (sed needs sudo to operate when user is not root)
+  sudo sed -i "s/^${keystr}=.*/${keystr}=${valuestr}/g" ${configFile}
+}
+
 if [ "$1" = on ]; then
-  # edit bitcoin.conf
+  # ?wait until txindex finishes?
   /home/admin/config.scripts/network.txindex.sh on
+
+  # ?activate zram?
+  # https://github.com/rootzoll/raspiblitz/issues/2905
 
   # rpcworkqueue=512
   # rpcthreads=128
   # zmqpubhashblock=tcp://0.0.0.0:8433
-  /home/admin/config.scripts/blitz.conf.sh set rpcworkqueue 512 /mnt/hdd/bitcoin/bitcoin.conf
-  /home/admin/config.scripts/blitz.conf.sh set rpcthreads 128 /mnt/hdd/bitcoin/bitcoin.conf
-  /home/admin/config.scripts/blitz.conf.sh set zmqpubhashblock "tcp://0.0.0.0:8433" /mnt/hdd/bitcoin/bitcoin.conf
-  source <(/home/admin/_cache.sh get state)
-  if [ "${state}" == "ready" ]; then
+  #/home/admin/config.scripts/blitz.conf.sh set rpcworkqueue 512 /mnt/hdd/bitcoin/bitcoin.conf noquotes
+  #/home/admin/config.scripts/blitz.conf.sh set rpcthreads 128 /mnt/hdd/bitcoin/bitcoin.conf noquotes
+  #/home/admin/config.scripts/blitz.conf.sh set zmqpubhashblock 'tcp:\/\/0.0.0.0:8433' /mnt/hdd/bitcoin/bitcoin.conf noquotes
+  setConf rpcworkqueue 512 /mnt/hdd/bitcoin/bitcoin.conf
+  setConf rpcthreads 128 /mnt/hdd/bitcoin/bitcoin.conf
+  setConf zmqpubhashblock 'tcp:\/\/0.0.0.0:8433' /mnt/hdd/bitcoin/bitcoin.conf
+  # enable for provision
+  #source <(/home/admin/_cache.sh get state)
+  #if [ "${state}" == "ready" ]; then
     sudo systemctl restart bitcoind
-  fi
-
-  # activate zram
-  # https://github.com/rootzoll/raspiblitz/issues/2905
+  #fi
 
   # create a dedicated user
   sudo adduser --disabled-password --gecos "" fulcrum
