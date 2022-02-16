@@ -106,16 +106,16 @@ rpcpassword = ${PASSWORD_B}
 # RPi optimizations
 # avoid 'bitcoind request timed out'
 bitcoind_timeout = 300
-# reduce load
+# reduce load (4 cores only)
 bitcoind_clients = 1
-worker_threads = 2
+worker_threads = 1
 db_mem=1024
 
-# settings tested with 4GB RAM + ZRAM
+# for 4GB RAM
 db_max_open_files=200
 fast-sync = 1024
 
-# settings testetd with 8GB RAM + ZRAM
+# for 8GB RAM
 #db_max_open_files=500
 #fast-sync = 2048
 
@@ -124,9 +124,7 @@ fast-sync = 1024
 peering = false
 announce = false
 tcp = 0.0.0.0:50021
-#cert = /path/to/server-cert.pem
-#key = /path/to/server-key.pem
-#ssl = 0.0.0.0:50022
+# ssl via nginx
 " | sudo -u fulcrum tee /home/fulcrum/.fulcrum/fulcrum.conf
 
   # Create a systemd service
