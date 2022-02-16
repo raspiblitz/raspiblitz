@@ -7,6 +7,7 @@
 - New: Run C-lightning backup-compact regularly [issue](https://github.com/rootzoll/raspiblitz/issues/2869)
 - New: Switch LNbits between lnd & c-lightning [issue](https://github.com/rootzoll/raspiblitz/issues/2556)
 - New: Tallycoin Connect [details](https://github.com/djbooth007/tallycoin_connect#readme)
+- New: Migration from Citadel to RaspiBlitz [details](https://github.com/rootzoll/raspiblitz/issues/2642)
 - New: Bitcoinminds.org local on RaspiBlitz [details](https://github.com/raulcano/bitcoinminds)
 - Update: LND v0.14.2-beta [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.14.2-beta)
 - Update: C-lightning v0.10.2 [details](https://github.com/ElementsProject/lightning/releases/tag/v0.10.2)
