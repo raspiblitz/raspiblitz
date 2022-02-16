@@ -132,7 +132,7 @@ curl https://keybase.io/rootzoll/pgp_keys.asc | gpg --import
 
 Next, download the "signature file" for the SD card image. It's the same download link as for the image file - just added a `.sig` at the end. You should also always find the download link for the signature file in the README right below the image download link following the `SIGNATURE` link.
 
-If you know have all the three elements needed - the imported public key, the image signature and the image file itself - you can verify the download with:
+If you now have all the three elements needed - the imported public key, the image signature and the image file itself - you can verify the download with:
 
 ```
 gpg --verify [SIGNATURE-FILE] [IMAGE-FILE]
