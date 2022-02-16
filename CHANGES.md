@@ -2,31 +2,35 @@
 
 ## What's new in Version 1.7.2 of RaspiBlitz?
 
-issues/2832)
+- Refactor: Cache & Backgroundscan of Systeminfo
 - New: Compact the LND channel.db on-demand from REPAIR and before backups [issue](https://github.com/rootzoll/raspiblitz/issues/2752)
 - New: Run C-lightning backup-compact regularly [issue](https://github.com/rootzoll/raspiblitz/issues/2869)
 - New: Switch LNbits between lnd & c-lightning [issue](https://github.com/rootzoll/raspiblitz/issues/2556)
 - New: Tallycoin Connect [details](https://github.com/djbooth007/tallycoin_connect#readme)
+- New: Bitcoinminds.org local on RaspiBlitz [details](https://github.com/raulcano/bitcoinminds)
 - Update: LND v0.14.2-beta [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.14.2-beta)
 - Update: C-lightning v0.10.2 [details](https://github.com/ElementsProject/lightning/releases/tag/v0.10.2)
+- Update: LNbits 0.6.0 [details](https://github.com/lnbits/lnbits-legend/releases/tag/0.6.0)
 - Update: RTL v0.12.1 [details](https://github.com/Ride-The-Lightning/RTL/releases/tag/v0.12.1)
 - Update: C-lightningREST v0.6.1 [details](https://github.com/Ride-The-Lightning/c-lightning-REST/releases/tag/v0.6.1)
+- Update: CL Spark Wallet v0.3.1 [details](https://github.com/shesek/spark-wallet/releases/tag/v0.3.1)
+- Update: CL Sparko plugin v0.2.8 [details](https://github.com/fiatjaf/sparko/releases/tag/v2.8)
 - Update: Lightning Terminal v0.6.1-alpha with Lightning Node Connect over Tor [details](https://github.com/lightninglabs/lightning-terminal/releases/tag/v0.6.1-alpha)
 - Update: Channel Tools (chantools) v0.10.1 [details](https://github.com/guggero/chantools/releases/tag/v0.10.1)
-- Update: BTCPayServer v1.4.0 with UPDATE option [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.4.0)
-- Update: Electrum Server in Rust (electrs) v0.9.4 [details](https://github.com/romanz/electrs/blob/v0.9.4/RELEASE-NOTES.md)
+- Update: BTCPayServer v1.4.4 with UPDATE option [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.4.4)
+- Update: Electrum Server in Rust (electrs) v0.9.5 [details](https://github.com/romanz/electrs/blob/master/RELEASE-NOTES.md#095-feb-4-2022)
 - Update: JoinMarket v0.9.4 [details](https://github.com/JoinMarket-Org/joinmarket-clientserver/releases/tag/v0.9.4)
 - Update: JoininBox v0.6.6 [details](https://github.com/openoms/joininbox/releases/tag/v0.6.6)
 - Update: Thunderhub v0.13.6 [details](https://github.com/apotdevin/thunderhub/releases/tag/v0.13.6)
 - Update: BTC-RPC-Explorer v3.3.0 [details](https://github.com/janoside/btc-rpc-explorer/blob/master/CHANGELOG.md#v330)
-- Update: Specter Desktop 1.8.0 [details](https://github.com/cryptoadvance/specter-desktop/releases/tag/v1.8.0)
+- Update: Specter Desktop 1.8.1 [details](https://github.com/cryptoadvance/specter-desktop/releases/tag/v1.8.1)
 - Update: Mempool 2.3.1 [details](https://github.com/mempool/mempool/releases/tag/v2.3.1)
 - Update: PyBlock to 1.1.8.5 (adapt to new install mechanism)
-- Update: Balance of Satoshis 11.40.0 (BOS) [details](https://github.com/alexbosworth/balanceofsatoshis/blob/master/CHANGELOG.md#11400)
+- Update: Balance of Satoshis 11.50.0 (BOS) [details](https://github.com/alexbosworth/balanceofsatoshis/blob/master/CHANGELOG.md#11500)
 - Update: Re-Add connecting node with Zap mobile wallet iOS & Android
 - Update: additional redaction of private data in debug logs
 - Security: Verify git commits and tags everywhere possible [issue](https://github.com/rootzoll/raspiblitz/issues/2686)
-- Fixed: LND repair options, SEED+SCB and rescue-file restore, RESET options [issue](https://github.com/rootzoll/raspiblitz/
+- Fixed: LND repair options, SEED+SCB and rescue-file restore, RESET options [issue](https://github.com/rootzoll/raspiblitz/issues/2832)
 - Info: All existing IP2Tor subscriptions need to be canceled & renewed to be functional again.
 - Info: 32GB sd card is now required (was already long time recommended on shopping list)
 

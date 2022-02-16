@@ -68,7 +68,7 @@ CHOICE=$(dialog --clear \
 
 case $CHOICE in
   ENCRYPT)
-    /home/admin/config.scripts/cl.hsmtool.sh encrypt $CHAIN
+    sudo /home/admin/config.scripts/cl.hsmtool.sh encrypt $CHAIN
     source /mnt/hdd/raspiblitz.conf
     ;;
 
@@ -90,8 +90,17 @@ case $CHOICE in
     ;;
   
   BACKUP)
+    if [ "${cl}" == "on" ] || [ "${cl}" == "1" ] && [ "${clEncryptedHSM}" != "on" ]; then
+      dialog \
+       --title "Encrypt the C-lightning wallet" \
+       --msgbox "\nWill proceed to encrypt and lock the C-lightning wallet to prevent it from starting automatically after the backup" 9 55
+      sudo /home/admin/config.scripts/cl.hsmtool.sh encrypt mainnet
+    fi
+    if [ "${clAutoUnlock}" = "on" ]; then
+      /home/admin/config.scripts/cl.hsmtool.sh autounlock-off mainnet
+    fi
+    /home/admin/config.scripts/cl.hsmtool.sh lock mainnet
     ## from dialogLightningWallet.sh 
-    # run upload dialog and get result
     _temp="/var/cache/raspiblitz/temp/.temp.tmp"
     clear
     /home/admin/config.scripts/cl.backup.sh cl-export-gui production $_temp
@@ -117,8 +126,11 @@ case $CHOICE in
     echo "Press ENTER to continue or CTRL+C to abort"
     read key
     # reset
-    sudo rm /home/bitcoin/.lightning/${CLNETWORK}/hsm_secret
-    sudo rm -rf /home/bitcoin/.lightning/${CLNETWORK}/*.*
+    echo "# Delete ${CLCONF}"
+    sudo rm -f ${CLCONF}
+    echo "# Delete and recreate /home/bitcoin/.lightning/${CLNETWORK}"
+    sudo rm -rf /home/bitcoin/.lightning/${CLNETWORK}
+    sudo -u bitcoin mkdir /home/bitcoin/.lightning/${CLNETWORK}
     # make sure the new hsm_secret is treated as unencrypted and clear autounlock
     /home/admin/config.scripts/blitz.conf.sh set ${netprefix}clEncryptedHSM "off"
     /home/admin/config.scripts/blitz.conf.sh set ${netprefix}clAutoUnlock "off"

@@ -40,7 +40,7 @@ if [ "${network}" == "" ]; then
 fi
 
 if [ "$1" = "info" ] ; then
-  
+
   # the version that this script installs by default
   echo "lndDefaultInstallVersion='${lndVersion}'"
 
@@ -91,10 +91,10 @@ if [ "$1" = "install" ] ; then
     echo "lnd binary already installed - done"
     exit 1
   fi
-  
+
   # get LND resources
   cd /home/admin/download || exit 1
-  
+
   # download lnd binary checksum manifest
   sudo -u admin wget -N https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/manifest-v${lndVersion}.txt
 
@@ -102,7 +102,7 @@ if [ "$1" = "install" ] ; then
   sudo -u admin wget -N https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/manifest-${PGPauthor}-v${lndVersion}.sig
   sudo -u admin wget --no-check-certificate -N -O "pgp_keys.asc" ${PGPpkeys}
   gpg --import --import-options show-only ./pgp_keys.asc
-  fingerprint=$(sudo gpg "pgp_keys.asc" 2>/dev/null | grep "${PGPcheck}" -c)
+  fingerprint=$(sudo gpg --show-keys "pgp_keys.asc" 2>/dev/null | grep "${PGPcheck}" -c)
   if [ ${fingerprint} -lt 1 ]; then
     echo ""
     echo "!!! BUILD WARNING --> LND PGP author not as expected"
@@ -144,7 +144,7 @@ if [ "$1" = "install" ] ; then
   echo "*** LND v${lndVersion} for ${lndOSversion} ***"
   echo "SHA256 hash: $lndSHA256"
   echo
-  
+
   # get LND binary
   binaryName="lnd-linux-${lndOSversion}-v${lndVersion}.tar.gz"
   if [ ! -f "./${binaryName}" ]; then
@@ -155,7 +155,7 @@ if [ "$1" = "install" ] ; then
   else
     echo "- using existing lnd binary"
   fi
-  
+
   # check binary was not manipulated (checksum test)
   echo "- checksum test"
   binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
@@ -174,7 +174,7 @@ if [ "$1" = "install" ] ; then
     echo
     sleep 10
   fi
-  
+
   # install
   echo "- install LND binary"
   sudo -u admin tar -xzf ${binaryName}
@@ -186,7 +186,7 @@ if [ "$1" = "install" ] ; then
     echo "!!! BUILD FAILED --> Was not able to install LND"
     exit 1
   fi
-  
+
   correctVersion=$(sudo -u admin lnd --version | grep -c "${lndVersion}")
   if [ ${correctVersion} -eq 0 ]; then
     echo ""
@@ -298,9 +298,9 @@ rpclisten=0.0.0.0:1${rpcportmod}009
 restlisten=0.0.0.0:${portprefix}8080
 nat=false
 debuglevel=debug
-gc-canceled-invoices-on-startup=true 
-gc-canceled-invoices-on-the-fly=true 
-ignore-historical-gossip-filters=1 
+gc-canceled-invoices-on-startup=true
+gc-canceled-invoices-on-the-fly=true
+ignore-historical-gossip-filters=1
 sync-freelist=true
 stagger-initial-reconnect=true
 tlsautorefresh=1
@@ -317,7 +317,7 @@ bitcoin.node=bitcoind
     echo "# The file /home/bitcoin/.lnd/${netprefix}lnd.conf is already present"
   fi
 
-  # systemd service  
+  # systemd service
   removeParallelService
   echo "# Create /etc/systemd/system/.lnd.service"
   # based on https://github.com/lightningnetwork/lnd/blob/master/contrib/init/lnd.service
@@ -374,7 +374,7 @@ PrivateTmp=true
 [Install]
 WantedBy=multi-user.target
 " | sudo tee /etc/systemd/system/${netprefix}lnd.service
-  sudo systemctl enable ${netprefix}lnd 
+  sudo systemctl enable ${netprefix}lnd
   echo "# Enabled the ${netprefix}lnd.service"
   if [ "${state}" == "ready" ]; then
     sudo systemctl start ${netprefix}lnd
@@ -384,18 +384,18 @@ WantedBy=multi-user.target
   echo
   echo "# Add aliases ${netprefix}lncli, ${netprefix}lndlog, ${netprefix}lndconf"
   sudo -u admin touch /home/admin/_aliases
-  if [ $(grep -c "alias ${netprefix}lncli" < /home/admin/_aliases) -eq 0 ];then  
+  if [ $(grep -c "alias ${netprefix}lncli" < /home/admin/_aliases) -eq 0 ];then
     echo "\
 alias ${netprefix}lncli=\"sudo -u bitcoin /usr/local/bin/lncli\
  -n=${CHAIN} --rpcserver localhost:1${rpcportmod}009\"\
 " | sudo tee -a /home/admin/_aliases
   fi
-  if [ $(grep -c "alias ${netprefix}lndlog" < /home/admin/_aliases) -eq 0 ];then 
+  if [ $(grep -c "alias ${netprefix}lndlog" < /home/admin/_aliases) -eq 0 ];then
     echo "\
 alias ${netprefix}lndlog=\"sudo tail -n 30 -f /mnt/hdd/lnd/logs/${network}/${CHAIN}/lnd.log\"\
 " | sudo tee -a /home/admin/_aliases
   fi
-  if [ $(grep -c "alias ${netprefix}lndconf" < /home/admin/_aliases) -eq 0 ];then 
+  if [ $(grep -c "alias ${netprefix}lndconf" < /home/admin/_aliases) -eq 0 ];then
     echo "\
 alias ${netprefix}lndconf=\"sudo nano /home/bitcoin/.lnd/${netprefix}lnd.conf\"\
 " | sudo tee -a /home/admin/_aliases
@@ -405,7 +405,7 @@ alias ${netprefix}lndconf=\"sudo nano /home/bitcoin/.lnd/${netprefix}lnd.conf\"\
   walletExists=$(sudo ls /mnt/hdd/lnd/data/chain/${network}/${CHAIN}/wallet.db 2>/dev/null | grep -c "wallet.db")
   if [ "${initwallet}" == "1" ] && [ "${walletExists}" == "0" ]; then
       # only ask on mainnet for passwordC - for the testnet/signet its default 'raspiblitz'
-      if [ "${CHAIN}" == "mainnet" ]; then      
+      if [ "${CHAIN}" == "mainnet" ]; then
         tempFile="/var/cache/raspiblitz/passwordc.tmp"
         sudo /home/admin/config.scripts/blitz.setpassword.sh x "PASSWORD C - LND Wallet Password" ${tempFile}
         passwordC=$(sudo cat ${tempFile})
@@ -430,7 +430,7 @@ alias ${netprefix}lndconf=\"sudo nano /home/bitcoin/.lnd/${netprefix}lnd.conf\"\
 
   echo
   echo "# The installed LND version is: $(sudo -u bitcoin /usr/local/bin/lnd --version)"
-  echo   
+  echo
   echo "# To activate the aliases reopen the terminal or use:"
   echo "source ~/_aliases"
   echo "# Monitor the ${netprefix}lnd with:"
@@ -457,7 +457,7 @@ alias ${netprefix}lndconf=\"sudo nano /home/bitcoin/.lnd/${netprefix}lnd.conf\"\
 fi
 
 if [ "$1" = "display-seed" ]; then
-  
+
   # check if sudo
   if [ "$EUID" -ne 0 ]; then
     echo "Please run as root (with sudo)"
@@ -520,7 +520,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   /home/admin/config.scripts/blitz.conf.sh set ${netprefix}lnd "off"
   echo "# ${netprefix}lnd --> off"
 
-  # if lnd mainnet was default - remove 
+  # if lnd mainnet was default - remove
   if [ "${CHAIN}" == "mainnet" ] && [ "${lightning}" == "lnd" ]; then
     echo "# LND is REMOVED as default lightning implementation"
     /home/admin/config.scripts/blitz.conf.sh set lightning ""

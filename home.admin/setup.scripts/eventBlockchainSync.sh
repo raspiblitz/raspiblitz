@@ -2,7 +2,7 @@
 # this is an dialog that handles all UI events during setup that require a "info & wait" with no interaction
 
 # get basic system information
-# these are the same set of infos the WebGUI dialog/controler has
+# these are the same set of infos the WebGUI dialog/controller has
 source /home/admin/_version.info
 source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf 2>/dev/null

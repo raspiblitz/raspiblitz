@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# https://github.com/lnbits/lnbits
+# https://github.com/lnbits/lnbits-legend
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "small config script to switch LNbits on or off"
-  echo "bonus.lnbits.sh on [lnd|tlnd|slnd|cl|tcl|scl] [?GITHUBUSER] [?BRANCH]"
+  echo "bonus.lnbits.sh on [lnd|tlnd|slnd|cl|tcl|scl] [?GITHUBUSER] [?BRANCH|?TAG]"
   echo "bonus.lnbits.sh switch [lnd|tlnd|slnd|cl|tcl|scl]"
   echo "bonus.lnbits.sh off"
   echo "bonus.lnbits.sh status"
@@ -57,7 +57,7 @@ You need to accept self-signed HTTPS cert with SHA1 Fingerprint:
 ${sslFingerprintIP}"
 
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
-    /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
+    sudo /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
     text="${text}\n
 TOR Browser Hidden Service address (QR see LCD):
 ${toraddress}"
@@ -81,7 +81,7 @@ Consider adding a IP2TOR Bridge under OPTIONS."
 
   whiptail --title " LNbits ${fundinginfo}" --yes-button "OK" --no-button "OPTIONS" --yesno "${text}" 18 69
   result=$?
-  /home/admin/config.scripts/blitz.display.sh hide
+  sudo /home/admin/config.scripts/blitz.display.sh hide
   echo "option (${result}) - please wait ..."
 
   # exit when user presses OK to close menu
@@ -438,29 +438,26 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # add lnbits user
   echo "*** Add the 'lnbits' user ***"
   sudo adduser --disabled-password --gecos "" lnbits
-  echo "# add the 'lnbits' user to the 'bitcoin' group"
-  sudo /usr/sbin/usermod --append --groups bitcoin lnbits
-  echo "# check user"
-  id lnbits
 
   # get optional github parameter
   githubUser="lnbits"
   if [ "$3" != "" ]; then
     githubUser="$3"
   fi
-  #githubBranch="tags/raspiblitz"
-  githubBranch="3ae6ef25a1fce6fc53d444c9352e4fe7972ed9a3" #commit 31. January 2022
+  #tag="tags/raspiblitz"
+  # https://github.com/lnbits/lnbits-legend/releases
+  tag="0.6.0"
   if [ "$4" != "" ]; then
-    githubBranch="$4"
+    tag="$4"
   fi
 
   # install from GitHub
-  echo "# get the github code user(${githubUser}) branch(${githubBranch})"
+  echo "# get the github code user(${githubUser}) branch(${tag})"
   sudo rm -r /home/lnbits/lnbits 2>/dev/null
   cd /home/lnbits
   sudo -u lnbits git clone https://github.com/${githubUser}/lnbits-legend lnbits
   cd /home/lnbits/lnbits
-  sudo -u lnbits git checkout ${githubBranch}
+  sudo -u lnbits git checkout ${tag}
 
   # prepare .env file
   echo "# preparing env file"
@@ -653,6 +650,11 @@ if [ "$1" = "switch" ]; then
 
   if [ "${fundingsource}" == "cl" ] || [ "${fundingsource}" == "tcl" ] || [ "${fundingsource}" == "scl" ]; then
   
+    echo "# add the 'lnbits' user to the 'bitcoin' group"
+    sudo /usr/sbin/usermod --append --groups bitcoin lnbits
+    echo "# check user"
+    id lnbits
+
     echo "# allowing lnbits user as part of the bitcoin group to RW RPC hook"
     sudo chmod 770 /home/bitcoin/.lightning/bitcoin${clrpcsubdir}
     sudo chmod 660 /home/bitcoin/.lightning/bitcoin${clrpcsubdir}/lightning-rpc

@@ -1,7 +1,7 @@
 #!/bin/bash
 # https://github.com/cryptoadvance/specter-desktop
 
-pinnedVersion="1.8.0"
+pinnedVersion="1.8.1"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -59,7 +59,7 @@ if [ "$1" = "menu" ]; then
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
 
     # Tor
-    /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
+    sudo /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
     whiptail --title " Specter Desktop " --msgbox "Open in your local web browser & accept self-signed cert:
 https://${localip}:25441
 
@@ -72,7 +72,7 @@ Hidden Service address for TOR Browser (QR see LCD):
 https://${toraddress}
 Unfortunately the camera is currently not usable via Tor, though.
 " 18 74
-    /home/admin/config.scripts/blitz.display.sh hide
+    sudo /home/admin/config.scripts/blitz.display.sh hide
   else
 
     # IP + Domain

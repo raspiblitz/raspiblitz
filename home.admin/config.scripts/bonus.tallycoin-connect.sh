@@ -30,7 +30,7 @@ if [ "$1" = "menu" ]; then
 
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
     # Info with TOR
-    /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
+    sudo /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
     whiptail --title " Tallycoin Connect " --msgbox "Open in your local web browser:
 http://${localip}:8123\n
 https://${localip}:8124 with Fingerprint:
@@ -38,7 +38,7 @@ ${fingerprint}\n
 Use your Password B to login.\n
 Hidden Service address for TOR Browser (see LCD for QR):\n${toraddress}
 " 16 72
-    /home/admin/config.scripts/blitz.display.sh hide
+    sudo /home/admin/config.scripts/blitz.display.sh hide
   else
     # Info without TOR
     whiptail --title " Tallycoin Connect " --msgbox "Open in your local web browser & accept self-signed cert:
@@ -201,7 +201,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
     # Hidden Service if Tor is active
     if [ "${runBehindTor}" = "on" ]; then
-      /home/admin/config.scripts/internet.hiddenservice.sh off tallycoin-connect
+      /home/admin/config.scripts/tor.onion-service.sh off tallycoin-connect
     fi
 
     # remove config

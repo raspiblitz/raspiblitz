@@ -79,7 +79,7 @@ if [ "$chain" = "test" ]; then
 fi
 
 echo "generating QR code ... please wait"
-/home/admin/config.scripts/blitz.display.sh qr "$network:${address}"
+sudo /home/admin/config.scripts/blitz.display.sh qr "$network:${address}"
 
 # raise high focus on onchain wallet balance & pending for the next 15min
 /home/admin/_cache.sh focus ln_${LNTYPE}_${chain}net_wallet_onchain_pending 0 900
@@ -98,7 +98,7 @@ if [ $? -eq 1 ]; then
 fi
 
 # clean up
-/home/admin/config.scripts/blitz.display.sh hide
+sudo /home/admin/config.scripts/blitz.display.sh hide
 
 # follow up info
 if [ $LNTYPE = cl ];then

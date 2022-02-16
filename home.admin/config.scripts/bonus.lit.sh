@@ -34,7 +34,7 @@ if [ "$1" = "menu" ]; then
 
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
     # Info with TOR
-    /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
+    sudo /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
     whiptail --title " Lightning Terminal " --msgbox "Open in your local web browser & accept self-signed cert:
 https://${localip}:8443\n
 SHA1 Thumb/Fingerprint:
@@ -45,7 +45,7 @@ https://${toraddress}\n
 For the command line switch to 'lit' user with: 'sudo su - lit'
 use the commands: 'lncli', 'lit-loop', 'lit-pool' and 'lit-frcli'.
 " 19 74
-    /home/admin/config.scripts/blitz.display.sh hide
+    sudo /home/admin/config.scripts/blitz.display.sh hide
   else
     # Info without TOR
     whiptail --title " Lightning Terminal " --msgbox "Open in your local web browser & accept self-signed cert:
@@ -191,8 +191,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     fi
 
     echo "# check gpg finger print"
-    gpg --keyid-format LONG ./pgp_keys.asc
-    fingerprint=$(gpg --keyid-format LONG "./pgp_keys.asc" 2>/dev/null \
+    gpg --show-keys --keyid-format LONG ./pgp_keys.asc
+    fingerprint=$(gpg --show-keys --keyid-format LONG "./pgp_keys.asc" 2>/dev/null \
     | grep "${PGPcheck}" -c)
     if [ ${fingerprint} -lt 1 ]; then
       echo ""
@@ -321,7 +321,7 @@ alias lit-frcli=\"frcli --rpcserver=localhost:8443 \
 
   # setting value in raspi blitz config
   /home/admin/config.scripts/blitz.conf.sh set lit "on"
-  
+
   # Hidden Service if Tor is active
   if [ "${runBehindTor}" = "on" ]; then
     # make sure to keep in sync with tor.network.sh script
@@ -333,7 +333,7 @@ alias lit-frcli=\"frcli --rpcserver=localhost:8443 \
     sudo /home/admin/config.scripts/bonus.rtl.sh connect-services
     sudo systemctl restart RTL 2>/dev/null
   fi
-  
+
   source <(/home/admin/_cache.sh get state)
   if [ "${state}" == "ready" ]; then
     echo "# OK - the litd.service is enabled, system is ready so starting service"

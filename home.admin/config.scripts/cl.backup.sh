@@ -333,7 +333,7 @@ if [ ${mode} = "cl-import-gui" ]; then
 
   done
 
-  # in setup scenario the final import is happening during provison
+  # in setup scenario the final import is happening during provision
   if [ "${scenario}" == "setup" ]; then
     # just add clrescue filename to give file
     echo "# result in: ${RESULTFILE} (remember to make clean delete once processed)"
@@ -381,7 +381,7 @@ if [ ${mode} = "cl-import-gui" ]; then
   else
     cat $output
     echo "# Starting cl.hsmtool.sh unlock"
-    /home/admin/config.scripts/cl.hsmtool.sh unlock # there are mutiple wallets possible, need to check for non-default ones too
+    /home/admin/config.scripts/cl.hsmtool.sh unlock $CHAIN
   fi
 
   # set the lightningd service file on each active network

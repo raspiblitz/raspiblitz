@@ -48,10 +48,42 @@ if [ "$2" = "status" ]; then
   cl_running=$(systemctl status ${netprefix}lightningd 2>/dev/null | grep -c "active (running)")
   cl_ready="0"
   cl_online="0"
+  cl_locked="0"
   cl_error_short=""
   cl_error_full=""
+  
+  if [ "${cl_running}" = "0" ]; then
+    # check if error because wallet is locked
+    # the next release will have soecific error code for decryption  error
+    # https://github.com/ElementsProject/lightning/pull/4908
+    source /mnt/hdd/raspiblitz.conf
+    # password file is on the disk if encrypted and auto-unlock is enabled
+    passwordFile="/dev/shm/.${netprefix}cl.pw"
+    if grep -Eq "${netprefix}clEncryptedHSM=on" /mnt/hdd/raspiblitz.conf;then
+      if grep -Eq "${netprefix}clAutoUnlock=on" /mnt/hdd/raspiblitz.conf;then
+        passwordFile=/home/bitcoin/.${netprefix}cl.pw
+      fi
+    fi
+    clError=$(sudo journalctl -n5 -u ${netprefix}lightningd)
+ 
+    # cases from 'cl.hsmtool.sh unlock'
+    if \
+    [ "$(eval echo \$${netprefix}clEncryptedHSM)" = "on" ] && [ ! -f $passwordFile ] || \
+    [ $(echo "${clError}" | \
+     grep -c 'encrypted-hsm: Could not read pass from stdin.') -gt 0 ] || \
+    [ $(echo "${clError}" | \
+     grep -c 'hsm_secret is encrypted, you need to pass the --encrypted-hsm startup option.') -gt 0 ] || \
+    [ $(echo "${clError}" | \
+      grep -c 'Wrong password for encrypted hsm_secret.') -gt 0 ]; then
+    
+      # signal wallet locked
+      cl_locked="1"
+      # dont report it as error
+      cl_error_short=""
+      cl_error_full=""
+    fi
 
-  if [ "${cl_running}" != "0" ]; then
+  elif [ "${cl_running}" != "0" ]; then
     cl_running="1"
 
     # test connection - record win & fail info
@@ -89,6 +121,7 @@ if [ "$2" = "status" ]; then
   echo "ln_cl_running='${cl_running}'"
   echo "ln_cl_ready='${cl_ready}'"
   echo "ln_cl_online='${cl_online}'"
+  echo "ln_cl_locked='${cl_locked}'"
   echo "ln_cl_error_short='${cl_error_short}'"
   echo "ln_cl_error_full='${cl_error_full}'"
 

@@ -372,6 +372,8 @@ if [ "${lightning}" == "cl" ]; then
       /home/admin/config.scripts/blitz.conf.sh set "${netprefix}clEncryptedHSM" "off"
     fi
 
+    # update from raspiblitz.conf
+    source ${configFile}
     # set the lightningd service file on each active network
     # init backup plugin, restart cl
     if [ "${cl}" == "on" ] || [ "${cl}" == "1" ]; then

@@ -13,7 +13,7 @@ fi
 
 source /mnt/hdd/raspiblitz.conf
 
-tor_conf_dir="/mnt/hdd/app-data/tor/"
+tor_conf_dir="/mnt/hdd/app-data/tor"
 torrc_services="${tor_conf_dir}/torrc.d/services"
 
 # delete a hidden service

@@ -5,7 +5,7 @@
 # https://github.com/dgarage/NBXplorer/tags
 NBXplorerVersion="v2.2.20"
 # https://github.com/btcpayserver/btcpayserver/releases
-BTCPayVersion="v1.4.0"
+BTCPayVersion="v1.4.4"
 
 PGPsigner="nicolasdorier"
 PGPpubkeyLink="https://keybase.io/nicolasdorier/pgp_keys.asc"
@@ -131,7 +131,7 @@ port forwarding on router needs to be active & may change port"
 SHA1 ${sslFingerprintIP}"
 
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
-    /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
+    sudo /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
     text="${text}\n
 TOR Browser Hidden Service address (see the QR onLCD):
 ${toraddress}"
@@ -158,7 +158,7 @@ MAINMENU > CONNECT > BTCPay Server"
 
   whiptail --title " BTCPay Server " --msgbox "${text}" 17 69
 
-  /home/admin/config.scripts/blitz.display.sh hide
+  sudo /home/admin/config.scripts/blitz.display.sh hide
   echo "# please wait ..."
   exit 0
 fi
@@ -257,7 +257,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   isInstalled=$(sudo ls /etc/systemd/system/btcpayserver.service 2>/dev/null | grep -c 'btcpayserver.service')
   if [ ${isInstalled} -eq 0 ]; then
     # create btcpay user
-    sudo adduser --disabled-password --gecos "" btcpay  || exit 1
+    sudo adduser --disabled-password --gecos "" btcpay
     cd /home/btcpay || exit 1
 
     # store BTCpay data on HDD
@@ -429,8 +429,12 @@ btc.rpc.password=$PASSWORD_B
     sudo -u btcpay git clone https://github.com/btcpayserver/btcpayserver.git 2>/dev/null
     cd btcpayserver
     sudo -u btcpay git reset --hard $BTCPayVersion
+    
+    # sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh \
+    #  "web-flow" "https://github.com/web-flow.gpg" "4AEE18F83AFDEB23" || exit 1
     sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh \
-    "web-flow" "https://github.com/web-flow.gpg" "4AEE18F83AFDEB23" || exit 1
+     "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
+
     echo "# Build BTCPayServer ..."
     # from the build.sh with path
     sudo -u btcpay /home/btcpay/dotnet/dotnet build -c Release /home/btcpay/btcpayserver/BTCPayServer/BTCPayServer.csproj

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # https://github.com/romanz/electrs/releases
-ELECTRSVERSION="v0.9.4"
+ELECTRSVERSION="v0.9.5"
 # https://github.com/romanz/electrs/commits/master
 # ELECTRSVERSION="3041e89cd2fb377541b929d852ef6298c2d4e60a"
 
@@ -211,7 +211,7 @@ Check 'sudo nginx -t' for a detailed error message.
       echo
       echo "To connect through TOR open the Tor Browser and start with the options:"
       echo "electrum --oneserver --server ${TORaddress}:50002:s --proxy socks5:127.0.0.1:9150"
-      /home/admin/config.scripts/blitz.display.sh qr "${TORaddress}"
+      sudo /home/admin/config.scripts/blitz.display.sh qr "${TORaddress}"
     fi
     echo
     echo "For more details check the RaspiBlitz README on ElectRS:"
@@ -219,7 +219,7 @@ Check 'sudo nginx -t' for a detailed error message.
     echo
     echo "Press ENTER to get back to main menu."
     read key
-    /home/admin/config.scripts/blitz.display.sh hide
+    sudo /home/admin/config.scripts/blitz.display.sh hide
     ;;
     STATUS)
     sudo /home/admin/config.scripts/bonus.electrs.sh status

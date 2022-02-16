@@ -233,8 +233,8 @@ if [ "$1" = "new" ] || [ "$1" = "new-force" ] || [ "$1" = "seed" ] || [ "$1" = "
   sudo chown bitcoin:bitcoin /home/bitcoin/.lightning/${CLNETWORK}/seedwords.info
   sudo chmod 600 /home/bitcoin/.lightning/${CLNETWORK}/seedwords.info
   echo "
-# This file was placed by cl.hsmtool.sh .
-# Contains the seed words from which the hsm_secret in the same directory was generated
+# This file was placed by cl.hsmtool.sh
+# Contains the seed words from which the hsm_secret in the same directory was generated from
 seedwords='${seedwords}'
 seedwords6x4='${seedwords6x4}'
 # Will be removed safely when the hsm_secret is encrypted.
@@ -254,6 +254,7 @@ seedwords6x4='${seedwords6x4}'
   /home/admin/config.scripts/cl-plugin.backup.sh on $CHAIN
 
   exit 0
+
 
 elif [ "$1" = "unlock" ]; then
   # check if unlocked
@@ -280,7 +281,7 @@ elif [ "$1" = "unlock" ]; then
         sudo systemctl restart ${netprefix}lightningd
         justUnlocked=1
       else
-        echo "# Waiting to unlock wallet (2) ... "
+        echo "# waiting to unlock wallet (2) ... "
         sleep 5
       fi
 
@@ -314,21 +315,30 @@ elif [ "$1" = "unlock" ]; then
       echo
       exit 1
     fi
-    echo "# Waiting to unlock wallet ... "
+    echo "# waiting to unlock wallet ($((attempt*5))) ... "
     sleep 5
     attempt=$((attempt+1))
   done
   echo "# Ok the ${netprefix}lightningd wallet is unlocked"
   exit 0
 
+
 elif [ "$1" = "lock" ]; then
   shredPasswordFile
   sudo systemctl restart ${netprefix}lightningd
   exit 0
 
+
 elif [ "$1" = "encrypt" ]; then
-  if [ -f  /home/bitcoin/.lightning/${CLNETWORK}/seedwords.info ];then
-    source <(sudo -u bitcoin cat /home/bitcoin/.lightning/${CLNETWORK}/seedwords.info)
+
+   # check if sudo
+  if [ "$EUID" -ne 0 ]; then
+    echo "Please run as root (with sudo)"
+    exit 1
+  fi
+
+  if [ -f /home/bitcoin/.lightning/${CLNETWORK}/seedwords.info ]; then
+    source /home/bitcoin/.lightning/${CLNETWORK}/seedwords.info
     if [ ${#seedwords6x4} -gt 0 ];then
       # show the words one last time
       ack=0
@@ -344,23 +354,26 @@ elif [ "$1" = "encrypt" ]; then
     else
       deletedWhen="not available any more"
     fi
-    # delete seedwords.info
-    sudo -u bitcoin shred /home/bitcoin/.lightning/${CLNETWORK}/seedwords.info
+    # shred seedwords.info
+    shred /home/bitcoin/.lightning/${CLNETWORK}/seedwords.info
   fi
   echo "
-# This file is placed by cl.hsmtool.sh .
-# The seed words from which the hsm_secret in the same directory was generated
+# This file was placed by cl.hsmtool.sh
+# The seed words from which the hsm_secret in the same directory was generated from
 # were $deletedWhen.
 # The words cannot be generated from the hsm_secret (one way function).
-# If you don't have the words the hsm_secret can be still backed up in hex:
+# If you don't have the words the hsm_secret can be still backed up as a file or in hex:
 # https://lightning.readthedocs.io/BACKUP.html#hsm-secret 
+# https://github.com/rootzoll/raspiblitz/blob/dev/FAQ.cl.md#seed
 " | sudo -u bitcoin tee /home/bitcoin/.lightning/${CLNETWORK}/seedwords.info
   # encrypt
   walletPassword=$3
   encryptHSMsecret $walletPassword
 
+
 elif [ "$1" = "decrypt" ]; then
   decryptHSMsecret
+
 
 elif [ "$1" = "autounlock-on" ]; then
   if grep -Eq "${netprefix}clEncryptedHSM=on" /mnt/hdd/raspiblitz.conf;then
@@ -375,6 +388,7 @@ elif [ "$1" = "autounlock-on" ]; then
 
   echo "# Autounlock is on for C-lightning $CHAIN"
 
+
 elif [ "$1" = "autounlock-off" ]; then
   if [ -f /home/bitcoin/.${netprefix}cl.pw ];then
     sudo cp /home/bitcoin/.${netprefix}cl.pw /dev/shm/.${netprefix}cl.pw
@@ -386,19 +400,21 @@ elif [ "$1" = "autounlock-off" ]; then
   /home/admin/config.scripts/blitz.conf.sh set ${netprefix}clAutoUnlock "off"
   echo "# Autounlock is off for C-lightning $CHAIN"
 
+
 elif [ "$1" = "change-password" ]; then
   decryptHSMsecret || exit 1
   walletPassword=$3
   if ! encryptHSMsecret "$walletPassword"; then
     echo "# Warning: the hsm_secret is left unencrypted."
     echo "# To fix run:"
-    echo "/home/admin/config.scripts/cl.hsmtool encrypt $2"
+    echo "sudo /home/admin/config.scripts/cl.hsmtool encrypt $2"
     exit 1
   fi
   exit 0
 
+
 elif [ "$1" = "check" ]; then
-  # TODO
+  # TODO https://github.com/rootzoll/raspiblitz/issues/2897
   # dumponchaindescriptors <path/to/hsm_secret> [network]
   # get current descriptors
   sudo -u bitcoin /home/bitcoin/lightning/tools/hsmtool dumponchaindescriptors \

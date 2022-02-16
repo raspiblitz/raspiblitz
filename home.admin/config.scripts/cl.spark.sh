@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #https://github.com/shesek/spark-wallet/releases
-SPARKVERSION="v0.3.0rc"
+SPARKVERSION="v0.3.1"
 
 # command info
 if [ $# -lt 1 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ];then
@@ -28,7 +28,7 @@ if [ "$1" = "menu" ]; then
   if [ ${#toraddress} -eq 0 ];then
     toraddresstext="Activate Tor to access the web interface from outside of the local network."
   else
-    /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
+    sudo /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
   fi
   fingerprint=$(openssl x509 -in /home/bitcoin/.spark-wallet/tls/cert.pem -fingerprint -noout | cut -d"=" -f2)
 
@@ -42,7 +42,7 @@ ${fingerprint}\n
 ${toraddresstext}
 " 17 67
 
-  /home/admin/config.scripts/blitz.display.sh hide
+  sudo /home/admin/config.scripts/blitz.display.sh hide
 
   echo "# please wait ..."
   exit 0
