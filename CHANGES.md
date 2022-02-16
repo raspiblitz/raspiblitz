@@ -15,7 +15,7 @@
 - Update: C-lightningREST v0.6.1 [details](https://github.com/Ride-The-Lightning/c-lightning-REST/releases/tag/v0.6.1)
 - Update: CL Spark Wallet v0.3.1 [details](https://github.com/shesek/spark-wallet/releases/tag/v0.3.1)
 - Update: CL Sparko plugin v0.2.8 [details](https://github.com/fiatjaf/sparko/releases/tag/v2.8)
-- Update: Lightning Terminal v0.6.1-alpha with Lightning Node Connect over Tor [details](https://github.com/lightninglabs/lightning-terminal/releases/tag/v0.6.1-alpha)
+- Update: Lightning Terminal v0.6.3-alpha with Lightning Node Connect over Tor [details](https://github.com/lightninglabs/lightning-terminal/releases/tag/v0.6.3-alpha)
 - Update: Channel Tools (chantools) v0.10.1 [details](https://github.com/guggero/chantools/releases/tag/v0.10.1)
 - Update: BTCPayServer v1.4.4 with UPDATE option [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.4.4)
 - Update: Electrum Server in Rust (electrs) v0.9.5 [details](https://github.com/romanz/electrs/blob/master/RELEASE-NOTES.md#095-feb-4-2022)
