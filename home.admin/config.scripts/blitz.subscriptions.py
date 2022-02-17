@@ -348,13 +348,13 @@ def main():
         if tag == "REST":
             # get TOR address for REST
             service_name = SERVICE_LND_REST_API
-            tor_address = subprocess.run(['sudo', 'cat', '/mnt/hdd/tor/lndrest8080/hostname'],
+            tor_address = subprocess.run(['sudo', 'cat', '/mnt/hdd/tor/lndrest/hostname'],
                                          stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
             tor_port = 8080
         if tag == "GRPC":
             # get TOR address for GRPC
             service_name = SERVICE_LND_GRPC_API
-            tor_address = subprocess.run(['sudo', 'cat', '/mnt/hdd/tor/lndrpc10009/hostname'],
+            tor_address = subprocess.run(['sudo', 'cat', '/mnt/hdd/tor/lndrpc/hostname'],
                                          stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
             tor_port = 10009
         if tag == "LNBITS":

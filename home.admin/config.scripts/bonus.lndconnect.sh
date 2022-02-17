@@ -157,16 +157,25 @@ fi
 if [ ${forceTOR} -eq 1 ]; then
   # depending on RPC or REST use different TOR address
   if [ "${port}" == "10009" ]; then
-    host=$(sudo cat /mnt/hdd/tor/lndrpc10009/hostname)
-    port="10009"
-    echo "# using TOR LND RPC --> host ${host} port ${port}"
+    echo "# TOR LND RPC"
+    host=$(sudo cat /mnt/hdd/tor/lndrpc/hostname)
+    if [ "${host}" == "" ]; then
+      echo "# setting up onion service ..."
+      /home/admin/config.scripts/tor.onion-service.sh lndrpc 10009 10009
+      host=$(sudo cat /mnt/hdd/tor/lndrpc/hostname)
+    fi
   elif [ "${port}" == "8080" ]; then
-    host=$(sudo cat /mnt/hdd/tor/lndrest8080/hostname)
-    port="8080"
-    echo "# using TOR LND REST --> host ${host} port ${port}"
+    echo "# TOR LND REST"
+    host=$(sudo cat /mnt/hdd/tor/lndrest/hostname)
+    if [ "${host}" == "" ]; then
+      echo "# setting up onion service ..."
+      /home/admin/config.scripts/tor.onion-service.sh lndrest 8080 8080
+      host=$(sudo cat /mnt/hdd/tor/lndrest/hostname)
+    fi
   fi
+  echo "# TOR --> host ${host} port ${port}"
 fi
-  
+
 # tunnel thru SSH-Reverse-Tunnel if activated for that port
 if [ ${#sshtunnel} -gt 0 ]; then
   isForwarded=$(echo ${sshtunnel} | grep -c "${port}<")

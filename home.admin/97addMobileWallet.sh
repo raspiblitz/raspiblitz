@@ -12,23 +12,21 @@ if [ "$1" = "-h" ] || [ "$1" = "-help" ];then
   echo "chain=${chain}"
 fi
 
-justLocal=1
-aks4IP2TOR=0
-
 source <(/home/admin/config.scripts/network.aliases.sh getvars $1 $2)
+
+
+justLocal=1
 
 # if TOR is activated then outside reach is possible (no notice)
 if [ "${runBehindTor}" = "on" ]; then
   echo "# runBehindTor ON"
   justLocal=0
-  aks4IP2TOR=1
 fi
 
 # if dynDomain is set connect from outside is possible (no notice)
 if [ ${#dynDomain} -gt 0 ]; then
   echo "# dynDomain ON"
   justLocal=0
-  aks4IP2TOR=0
 fi
 
 # if sshtunnel to 10009/8080 then outside reach is possible (no notice)
@@ -36,18 +34,13 @@ isForwarded=$(echo ${sshtunnel} | grep -c "10009<")
 if [ ${isForwarded} -gt 0 ]; then
   echo "# forward 10009 ON"
   justLocal=0
-  aks4IP2TOR=0
 fi
+
 isForwarded=$(echo ${sshtunnel} | grep -c "8080<")
 if [ ${isForwarded} -gt 0 ]; then
   echo "# forward 8080 ON"
   justLocal=0
-  aks4IP2TOR=0
 fi
-
-# echo "# justLocal(${justLocal})"
-# echo "# aks4IP2TOR(${aks4IP2TOR})"
-# read key
 
 # check if dynamic domain is set
 if [ ${justLocal} -eq 1 ]; then
@@ -74,73 +67,6 @@ For full support switch to mainnet.
 fi
 
 # function to call for wallets that support TOR
-connect="ip"
-choose_IP_or_TOR()
-{
-  whiptail --title " How to Connect? " \
-	--yes-button "TOR" \
-	--no-button "IP/Domain" \
-	--yesno "The mobile wallet you selected supports TOR.\nDo you want to connect over TOR to your RaspiBlitz or fallback to Domain/IP?" 9 60
-	if [ $? -eq 0 ]; then
-	  echo "# yes-button -> TOR"
-	  connect="tor" 
-	else
-	  echo "# no-button -> IP"
-	  connect="ip"
-	fi
-}
-
-# function to if already activated or user wants to activate IP2TOR
-# needs parameter: #1 "LND-REST-API" or "LND-GRPC-API"
-ip2tor=""
-checkIP2TOR()
-{
-
-  # check if IP2TOR service is already available
-  error=""
-  ip2tor=""
-  source <(/home/admin/config.scripts/blitz.subscriptions.ip2tor.py subscription-by-service $1)
-  if [ ${#error} -eq 0 ]; then
-    ip2tor="$1"
-  fi
-
-  #echo "# ip2tor(${ip2tor})"
-  #echo "# aks4IP2TOR(${aks4IP2TOR})"
-  #read key
-  
-  # if IP2TOR is not already available:
-  # and the checks from above showed there is SSH forwarding / dynDNS
-  # then ask user if IP2TOR subscription is wanted
-  if [ ${#ip2tor} -eq 0 ] && [ ${aks4IP2TOR} -eq 1 ]; then
-    whiptail --title " Want to use a IP2TOR Bridge? " --yes-button "Go To Shop" --no-button "No Thanks" --yesno "It can be hard to connect to your RaspiBlitz when away from home.\n\nDo you like to subscribe to a IP2TOR bridge service (that will give you a public IP while hidden behind TOR) and make it more easy to connect your mobile wallet?" 12 60
-  	if [ $? -eq 0 ]; then
-  	  echo "# yes-button -> Send To Shop"
-	  port="10009"
-	  toraddress=$(sudo cat /mnt/hdd/tor/lndrpc10009/hostname)
-	  if [ "$1" == "LND-REST-API" ]; then
-	    port="8080"
-		toraddress=$(sudo cat /mnt/hdd/tor/lndrest8080/hostname)
-	  fi
-
-	  userHasActiveChannels=$(sudo -u bitcoin lncli listchannels | grep -c '"active": true')
-	  if [ ${userHasActiveChannels} -gt 0 ]; then
-	    sudo -u admin /home/admin/config.scripts/blitz.subscriptions.ip2tor.py create-ssh-dialog "$1" "$toraddress" "$port"
-	  else
-	  	whiptail --title " Lightning not Ready " --msgbox "\nYou need at least one active Lightning channel.\n\nPlease make sure that your node is funded and\nyou have a confirmed and active channel running.\nThen try again to connect the mobile wallet." 13 52
-	  	exit 0
-	  fi
-      clear
-	fi
-  fi
-
-  # check again if IP2TOR service is now already available
-  error=""
-  source <(/home/admin/config.scripts/blitz.subscriptions.ip2tor.py subscription-by-service "$1")
-  if [ ${#error} -eq 0 ]; then
-    ip2tor="$1"
-  fi
-}
-
 OPTIONS=()
 
 if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
@@ -254,8 +180,7 @@ Please go to MAINMENU > SERVICES and activate KEYSEND first.
 	    /home/admin/config.scripts/blitz.display.sh qr-console ${appstoreLink}
 	  fi
 	  sudo /home/admin/config.scripts/blitz.display.sh hide
-	  checkIP2TOR LND-GRPC-API
-  	  /home/admin/config.scripts/bonus.lndconnect.sh sendmany-android ${connect}
+  	  /home/admin/config.scripts/bonus.lndconnect.sh sendmany-android ip
       exit 0;
     ;;
   ZEUS_IOS)
