@@ -121,6 +121,25 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo chown $HELIPAD_USER: $HELIPAD_DATA_DIR
     sudo -u $HELIPAD_USER touch $HELIPAD_DB
 
+    ##################
+    # NGINX
+    ##################
+    # setup nginx symlinks
+    if ! [ -f /etc/nginx/sites-available/helipad_ssl.conf ]; then
+       sudo cp -f /home/admin/assets/nginx/sites-available/helipad_ssl.conf /etc/nginx/sites-available/helipad_ssl.conf
+    fi
+    if ! [ -f /etc/nginx/sites-available/helipad_tor.conf ]; then
+       sudo cp /home/admin/assets/nginx/sites-available/helipad_tor.conf /etc/nginx/sites-available/helipad_tor.conf
+    fi
+    if ! [ -f /etc/nginx/sites-available/helipad_tor_ssl.conf ]; then
+       sudo cp /home/admin/assets/nginx/sites-available/helipad_tor_ssl.conf /etc/nginx/sites-available/helipad_tor_ssl.conf
+    fi
+    sudo ln -sf /etc/nginx/sites-available/helipad_ssl.conf /etc/nginx/sites-enabled/
+    sudo ln -sf /etc/nginx/sites-available/helipad_tor.conf /etc/nginx/sites-enabled/
+    sudo ln -sf /etc/nginx/sites-available/helipad_tor_ssl.conf /etc/nginx/sites-enabled/
+    sudo nginx -t
+    sudo systemctl reload nginx
+
     #################
     # FIREWALL
     #################
@@ -226,6 +245,16 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # close ports on firewall
   sudo ufw deny $HELIPAD_HTTP_PORT
   sudo ufw deny $HELIPAD_HTTPS_PORT
+
+  # remove nginx symlinks
+  sudo rm -f /etc/nginx/sites-enabled/helipad_ssl.conf
+  sudo rm -f /etc/nginx/sites-enabled/helipad_tor.conf
+  sudo rm -f /etc/nginx/sites-enabled/helipad_tor_ssl.conf
+  sudo rm -f /etc/nginx/sites-available/helipad_ssl.conf
+  sudo rm -f /etc/nginx/sites-available/helipad_tor.conf
+  sudo rm -f /etc/nginx/sites-available/helipad_tor_ssl.conf
+  sudo nginx -t
+  sudo systemctl reload nginx
 
   # Hidden Service if Tor is active
   if [ "${runBehindTor}" = "on" ]; then
