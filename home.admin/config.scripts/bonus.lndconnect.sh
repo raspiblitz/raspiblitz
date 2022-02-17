@@ -62,7 +62,7 @@ if [ "${targetWallet}" = "zap-ios" ]; then
     port="8080"
     addcert=0
   else
-    # normal ZAP uses gRPC ports
+    # ZAP uses gRPC ports
     port="10009"
   fi
   if [ ${#ip2torGRPC_IP} -gt 0 ]; then
@@ -75,14 +75,8 @@ if [ "${targetWallet}" = "zap-ios" ]; then
   
 elif [ "${targetWallet}" = "zap-android" ]; then
   connectInfo="- start the Zap Wallet --> SETUP WALLET\n  or choose new Wallet in app menu\n- scan the QR code \n- confirm host address"
-  if [ ${forceTOR} -eq 1 ]; then
-    # when ZAP runs on TOR it uses gRPC
-    port="10009"
-    connectInfo="${connectInfo}\n- install & connect Orbot App (VPN mode)"
-  else
-    # normal ZAP uses gRPC ports
-    port="10009"
-  fi
+  # ZAP uses gRPC ports
+  port="10009"
   if [ ${#ip2torGRPC_IP} -gt 0 ]; then
     # when IP2TOR bridge is available - force using that
     usingIP2TOR="LND-GRPC-API"
@@ -175,7 +169,7 @@ if [ ${forceTOR} -eq 1 ]; then
   fi
   echo "# TOR --> host ${host} port ${port}"
 fi
-
+  
 # tunnel thru SSH-Reverse-Tunnel if activated for that port
 if [ ${#sshtunnel} -gt 0 ]; then
   isForwarded=$(echo ${sshtunnel} | grep -c "${port}<")
