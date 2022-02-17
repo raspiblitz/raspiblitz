@@ -32,6 +32,7 @@ ip2torREST_PORT=""
 error=""
 source <(/home/admin/config.scripts/blitz.subscriptions.ip2tor.py subscription-by-service LND-REST-API)
 if [ ${#error} -eq 0 ]; then
+  echo "# using ip2torREST: IP(${ip}) PORT(${port})"
   ip2torREST_IP="${ip}"
   ip2torREST_PORT="${port}"
 fi
@@ -40,6 +41,7 @@ ip2torGRPC_PORT=""
 error=""
 source <(/home/admin/config.scripts/blitz.subscriptions.ip2tor.py subscription-by-service LND-GRPC-API)
 if [ ${#error} -eq 0 ]; then
+  echo "# using ip2torGRPC: IP(${ip}) PORT(${port})"
   ip2torGRPC_IP="${ip}"
   ip2torGRPC_PORT="${port}"
 fi
@@ -157,11 +159,11 @@ if [ ${forceTOR} -eq 1 ]; then
   if [ "${port}" == "10009" ]; then
     host=$(sudo cat /mnt/hdd/tor/lndrpc10009/hostname)
     port="10009"
-    echo "# using TOR --> host ${host} port ${port}"
+    echo "# using TOR LND RPC --> host ${host} port ${port}"
   elif [ "${port}" == "8080" ]; then
     host=$(sudo cat /mnt/hdd/tor/lndrest8080/hostname)
     port="8080"
-    echo "# using TOR --> host ${host} port ${port}"
+    echo "# using TOR LND REST --> host ${host} port ${port}"
   fi
 fi
   
