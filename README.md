@@ -655,6 +655,8 @@ It will enable 4 touch buttons on the left hand side of the screen.
 - Invoice - creates an Invoice-QR code that can be used for payments
 - Off - Shutdown or Restart the RaspiBlitz
 
+Please mind that the touchscreen is still experimental and with recent changes can make the system unstable. This might take still until v1.8.1 release where the touchscreen is planned for a refactor/rewrite.
+
 ##### LCD Rotate
 
 If you switch this on you can rotate the LCD of your RaspiBlitz 180 degrees.

@@ -34,6 +34,7 @@
 - Fixed: LND repair options, SEED+SCB and rescue-file restore, RESET options [issue](https://github.com/rootzoll/raspiblitz/issues/2832)
 - Info: All existing IP2Tor subscriptions need to be canceled & renewed to be functional again.
 - Info: 32GB sd card is now required (was already long time recommended on shopping list)
+- Info: Also the touchscreen graphical mode is not recommended to run at the moment - can make system unstable. This might take until v1.8.1 where the touchscreen will get a refactor/rewritwe.
 
 ## What's new in Version 1.7.1 of RaspiBlitz?
 
