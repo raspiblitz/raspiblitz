@@ -143,7 +143,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     #################
     # FIREWALL
     #################
-
     # open the firewall
     echo "*** Updating Firewall ***"
     sudo ufw allow from any to any port $HELIPAD_HTTP_PORT comment 'allow Helipad HTTP'
