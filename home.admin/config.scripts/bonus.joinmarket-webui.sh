@@ -8,7 +8,7 @@ REPO=joinmarket-webui/joinmarket-webui
 APP_DIR=webui
 RASPIBLITZ_INFO=/home/admin/raspiblitz.info
 RASPIBLITZ_CONF=/mnt/hdd/raspiblitz.conf
-WEBUI_VERSION=0.0.2
+WEBUI_VERSION=0.0.3
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -34,8 +34,8 @@ if [ "$1" = "menu" ]; then
       # Info with TOR
       sudo /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
       whiptail --title " JoinMarket Web UI " --msgbox "Open in your local web browser:
-http://${localip}:7500\n
-https://${localip}:7501 with Fingerprint:
+https://${localip}:7501\n
+with Fingerprint:
 ${fingerprint}\n
 Hidden Service address for TOR Browser (see LCD for QR):\n${toraddress}
 " 16 67
@@ -43,8 +43,8 @@ Hidden Service address for TOR Browser (see LCD for QR):\n${toraddress}
     else
       # Info without TOR
       whiptail --title " JoinMarket Web UI " --msgbox "Open in your local web browser & accept self-signed cert:
-http://${localip}:7500\n
-https://${localip}:7501 with Fingerprint:
+https://${localip}:7501\n
+with Fingerprint:
 ${fingerprint}\n
 Activate TOR to access the web interface from outside your local network.
 " 15 57
