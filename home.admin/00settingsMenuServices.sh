@@ -73,7 +73,7 @@ fi
 
 CHOICES=$(dialog --title ' Additional Mainnet Services ' \
           --checklist ' use spacebar to activate/de-activate ' \
-          25 55 18  "${OPTIONS[@]}" 2>&1 >/dev/tty)
+          27 55 20  "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
 dialogcancel=$?
 echo "done dialog"
