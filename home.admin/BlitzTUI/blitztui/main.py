@@ -154,6 +154,8 @@ class AppWindow(QMainWindow):
         process.readyReadStandardOutput.connect(
             lambda: log.info(str(process.readAllStandardOutput().data().decode('utf-8'))))
 
+        # test by connecting to the raspiblitz 'ssh -X admin@LAN_IP' and run:
+        # uxterm -fa Terminus -fs 9 -fn fixed +sb -hold -e 'bash -c "sudo -u pi /home/admin/00infoLCD.sh --pause 0"'
         process.start('uxterm', ['-fa', 'Terminus', '-fs', '9', '-fn', 'fixed', '-into', str(int(self.ui.widget.winId())),
                                 '+sb', '-hold', '-e', 'bash -c \"/home/admin/00infoLCD.sh --pause {}\"'.format(pause)])
 

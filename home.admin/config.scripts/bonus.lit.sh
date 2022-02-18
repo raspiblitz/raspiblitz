@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # https://github.com/lightninglabs/lightning-terminal/releases
-LITVERSION="0.6.1-alpha"
+LITVERSION="0.6.3-alpha"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -284,8 +284,10 @@ User=lit
 Group=lit
 Type=simple
 TimeoutSec=60
-Restart=always
+Restart=on-failure
 RestartSec=60
+StandardOutput=journal
+StandardError=journal
 
 # Hardening measures
 PrivateTmp=true

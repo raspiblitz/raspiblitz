@@ -2,7 +2,7 @@
 
 *Build your own Lightning & Bitcoin Fullnode on a RaspberryPi with a nice Display.*
 
-`Version 1.7.2rc2 with lnd 0.14.2 & c-lightning 0.10.2 and bitcoin 22.0.0`
+`Version 1.7.2 with lnd 0.14.2 & c-lightning 0.10.2 and bitcoin 22.0.0`
 
 ![RaspiBlitz](pictures/raspiblitz.jpg)
 
@@ -120,7 +120,7 @@ Table of Contents
       - [OFF: PowerOff RaspiBlitz](#off-poweroff-raspiblitz)
       - [EXIT: Console Terminal](#exit-console-terminal)
   - [Import a Migration File](#import-a-migration-file)
-  - [Make a RaspiBlitz out of your Umbrel or MyNode](#make-a-raspiblitz-out-of-your-umbrel-or-mynode)
+  - [Make a RaspiBlitz out of your Umbrel, Citadel or MyNode](#make-a-raspiblitz-out-of-your-umbrel-citadel-or-mynode)
   - [Interface / APIs](#interface--apis)
     - [Bitcoin](#bitcoin)
     - [LND-Lightning](#lnd-lightning)
@@ -184,7 +184,7 @@ When it comes fully assembled with an up-to-date synced blockchain, it's possibl
 
 If you start at home ordering the parts from Amazon (see shopping list below) then it's a weekend project with a lot of downloading and syncing time where you can do other stuff while checking on the progress from time to time.
 
-If you already run a Umbrel or myNode you have basically all the hardware needed and you can make the [Migration to RaspiBlitz from Umbrel/myNode](#make-a-raspiblitz-out-of-your-umbrel-or-mynode) under one hour.
+If you already run a Umbrel, Citadel or myNode you have basically all the hardware needed and you can make the [Migration to RaspiBlitz from Umbrel/Citadel/myNode](#make-a-raspiblitz-out-of-your-umbrel-citadel-or-mynode) under one hour.
 
 ## Hardware Needed
 
@@ -654,6 +654,8 @@ It will enable 4 touch buttons on the left hand side of the screen.
 - Node - shows the nodeID/uri as QR code (used to open channels from mobile wallets)
 - Invoice - creates an Invoice-QR code that can be used for payments
 - Off - Shutdown or Restart the RaspiBlitz
+
+Please mind that the touchscreen is still experimental and with recent changes is missing certain UI fixes. This might take still until v1.8.1 release where the touchscreen is planned for a refactor/rewrite.
 
 ##### LCD Rotate
 
@@ -1280,9 +1282,9 @@ Then RaspiBlitz might give you the option again to self-sync or copy the blockch
 
 Then the blockchain needs to sync up and you should be back to normal.
 
-## Make a RaspiBlitz out of your Umbrel or MyNode
+## Make a RaspiBlitz out of your Umbrel, Citadel or MyNode
 
-Another kind of migration is when you already run a full node with the Umbrel or myNode software and you like to change it to RaspiBlitz without closing channels.
+Another kind of migration is when you already run a full node with the Umbrel, Citadel or myNode software and you like to change it to RaspiBlitz without closing channels.
 You basically have all the hardware needed and just need to change software.
 You don't need the [LCD from the shopping list](#amazon-shopping-list-buy-parts--build-it-yourself) - RaspiBlitz can also run without an LCD.
 

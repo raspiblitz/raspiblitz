@@ -5,8 +5,9 @@ configFile="/mnt/hdd/raspiblitz.conf"
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ]; then
   echo "RaspiBlitz Config Edit - adds value to file & cache and creates entries if needed:"
-  echo "blitz.conf.sh set [key] [value] [?conffile]"
+  echo "blitz.conf.sh set [key] [value] [?conffile] <noquotes>"
   echo "blitz.conf.sh delete [key] [?conffile]"
+  echo "note: use quotes and escape special characters for sed"
   echo
   exit 1
 fi
@@ -28,7 +29,7 @@ if [ "$1" = "set" ]; then
   # optional another configfile
   if [ "${configfileAlternative}" != "" ]; then
     configFile="${configfileAlternative}"
-  fi 
+  fi
 
   # update config value in cache
   /home/admin/_cache.sh set ${keystr} "${valuestr}"
@@ -47,8 +48,8 @@ if [ "$1" = "set" ]; then
     echo "${keystr}=" | sudo tee -a ${configFile} 1>/dev/null
   fi
 
-  # add valuestr quotes if not standard values
-  if [ "${valuestr}" != "on" ] && [ "${valuestr}" != "off" ] && [ "${valuestr}" != "1" ] && [ "${valuestr}" != "0" ]; then
+  # add valuestr in quotes if not standard values and "$5" != "noquotes"
+  if [ "${valuestr}" != "on" ] && [ "${valuestr}" != "off" ] && [ "${valuestr}" != "1" ] && [ "${valuestr}" != "0" ] && [ "$5" != "noquotes" ]; then
     valuestr="'${valuestr}'"
   fi
 
@@ -71,7 +72,7 @@ elif [ "$1" = "delete" ]; then
     # optional another configfile
   if [ "${configfileAlternative}" != "" ]; then
     configFile="${configfileAlternative}"
-  fi 
+  fi
 
   # delete value
   sudo sed -i "/^${keystr}=/d" ${configFile} 2>/dev/null

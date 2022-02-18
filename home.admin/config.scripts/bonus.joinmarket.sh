@@ -5,13 +5,13 @@
 # https://github.com/openoms/bitcoin-tutorials/tree/master/joinmarket
 # https://github.com/openoms/joininbox
 
-JBVERSION="v0.6.6" # with JoinMarket v0.9.4
+JBVERSION="v0.6.7"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "JoinMarket install script to switch JoinMarket on or off"
  echo "sudo /home/admin/config.scrips/bonus.joinmarket.sh on|off"
- echo "Installs JoininBox $JBVERSION"
+ echo "Installs JoininBox $JBVERSION with JoinMarket v0.9.5"
  exit 1
 fi
 
@@ -69,8 +69,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     adduser joinmarket sudo
     # configure sudo for usage without password entry for the joinmarket user
     echo 'joinmarket ALL=(ALL) NOPASSWD:ALL' | EDITOR='tee -a' visudo
-    
-    # make a folder for authorized keys 
+
+    # make a folder for authorized keys
     sudo -u joinmarket mkdir -p /home/joinmarket/.ssh
     chmod -R 700 /home/joinmarket/.ssh
 
@@ -119,7 +119,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       echo "CookieAuthentication 1" | sudo tee -a /etc/tor/torrc
       sudo systemctl reload tor@default
     fi
-    if ! grep -Eq "^AllowOutboundLocalhost 1" /etc/tor/torsocks.conf; then          
+    if ! grep -Eq "^AllowOutboundLocalhost 1" /etc/tor/torsocks.conf; then
       echo "AllowOutboundLocalhost 1" | sudo tee -a /etc/tor/torsocks.conf
       sudo systemctl reload tor@default
     fi
@@ -134,20 +134,20 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       sudo -u joinmarket sed -i "s/^runBehindTor=.*/runBehindTor=on/g" /home/joinmarket/joinin.conf
     fi
 
-    echo 
+    echo
     echo "##########"
     echo "# Extras #"
     echo "##########"
-    echo 
+    echo
     # install a command-line fuzzy finder (https://github.com/junegunn/fzf)
     apt -y install fzf
     bash -c "echo 'source /usr/share/doc/fzf/examples/key-bindings.bash' >> \
     /home/joinmarket/.bashrc"
-    
+
     # install tmux
     apt -y install tmux
-    
-    echo 
+
+    echo
     echo "#############"
     echo "# Autostart #"
     echo "#############"
@@ -175,8 +175,8 @@ fi
   else
     echo "JoinMarket is already installed"
     echo
-  fi    
-  
+  fi
+
   if [ -f "/home/joinmarket/joinmarket-clientserver/jmvenv/bin/activate" ] ; then
     # setting value in raspi blitz config
     /home/admin/config.scripts/blitz.conf.sh set joinmarket "on"
@@ -185,7 +185,7 @@ fi
     echo "# Start to use by logging in to the 'joinmarket' user with:"
     echo "# 'sudo su joinmarket' or use the shortcut 'jm'"
     echo
-  
+
   else
     echo " Failed to install JoinMarket"
     exit 1
@@ -204,7 +204,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     echo "# REMOVING JOINMARKET"
     sudo userdel -rf joinmarket 2>/dev/null
     echo "# OK JoinMarket is removed"
-  else 
+  else
     echo "JoinMarket is not installed."
   fi
 

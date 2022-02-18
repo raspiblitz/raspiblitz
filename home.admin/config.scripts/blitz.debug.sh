@@ -17,7 +17,7 @@ if [ "$1" == "redact" ]; then
   fi
 
   # redact nodeIDs
-  sed -i 's/[a-z0-9]*@/***@/' ${redactFile}
+  sed -i 's/[a-z0-9]+@/***@/' ${redactFile}
 
   # redact IPv4s
   sed -i 's/[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}/*.*.*.*/' ${redactFile}
@@ -35,6 +35,11 @@ if [ "$1" == "redact" ]; then
   sed -i 's/balance=[^\r\n]*/balance=****/' ${redactFile}
   sed -i 's/Server started with public key .+/Server started with public key ****/' ${redactFile}
   
+  # c-lightning self info in logs
+  sed -i 's/alias [A-Za-z0-9]* /alias *** /' ${redactFile}
+  sed -i 's/public key [a-z0-9]*,/public key *** /' ${redactFile}
+  sed -i 's/[a-z0-9][a-z0-9]*.onion/###.onion/' ${redactFile}
+
   exit 0
 fi
 
