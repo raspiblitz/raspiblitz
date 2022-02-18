@@ -370,7 +370,7 @@ case $CHOICE in
     #TODO the new hostname is not taken into account on init (user can change set the lnd name in menu later)
     # make sure host is named like in the raspiblitz config
     # echo "Setting the Name/Alias/Hostname .."
-    # sudo /home/admin/config.scripts/lnd.setname.sh ${chain}net "${result}"
+    sudo /home/admin/config.scripts/lnd.setname.sh ${chain}net "${result}"
     # /home/admin/config.scripts/blitz.conf.sh set hostname "${result}"
 
     removeLNDwallet
