@@ -367,18 +367,18 @@ case $CHOICE in
         sleep 3
     done
 
-    #TODO the new hostname is not taken into account on init (user can change set the lnd name in menu later)
-    # make sure host is named like in the raspiblitz config
-    # echo "Setting the Name/Alias/Hostname .."
-    sudo /home/admin/config.scripts/lnd.setname.sh ${chain}net "${result}"
-    # /home/admin/config.scripts/blitz.conf.sh set hostname "${result}"
-
     removeLNDwallet
 
     # create wallet
     /home/admin/config.scripts/lnd.install.sh on ${chain}net initwallet
     # display and delete the seed for ${chain}net
     sudo /home/admin/config.scripts/lnd.install.sh display-seed ${chain}net delete
+
+    #TODO the new hostname is not taken into account on init (user can change set the lnd name in menu later)
+    # make sure host is named like in the raspiblitz config
+    # echo "Setting the Name/Alias/Hostname .."
+    sudo /home/admin/config.scripts/lnd.setname.sh ${chain}net "${result}"
+    # /home/admin/config.scripts/blitz.conf.sh set hostname "${result}"
 
     syncAndCheckLND
 
