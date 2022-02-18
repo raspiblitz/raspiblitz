@@ -124,6 +124,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     ##################
     # NGINX
     ##################
+    
     # setup nginx symlinks
     if ! [ -f /etc/nginx/sites-available/helipad_ssl.conf ]; then
        sudo cp -f /home/admin/assets/nginx/sites-available/helipad_ssl.conf /etc/nginx/sites-available/helipad_ssl.conf
