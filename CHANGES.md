@@ -10,6 +10,7 @@
 - New: Migration from Citadel to RaspiBlitz [details](https://github.com/rootzoll/raspiblitz/issues/2642)
 - New: Bitcoinminds.org local on RaspiBlitz [details](https://github.com/raulcano/bitcoinminds)
 - New: JoinMarket Web UI v0.0.3 (CLI install of the first public alpha release) [details](https://github.com/joinmarket-webui/joinmarket-webui/releases/tag/v0.0.3)
+- New: Fulcrum Electrum server v1.6.0 (CLI install script) [issue](https://github.com/rootzoll/raspiblitz/issues/2924)
 - Update: LND v0.14.2-beta [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.14.2-beta)
 - Update: C-lightning v0.10.2 [details](https://github.com/ElementsProject/lightning/releases/tag/v0.10.2)
 - Update: LNbits 0.6.0 [details](https://github.com/lnbits/lnbits-legend/releases/tag/0.6.0)
