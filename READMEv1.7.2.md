@@ -2,7 +2,7 @@
 
 *Build your own Lightning & Bitcoin Fullnode on a RaspberryPi with a nice Display.*
 
-`Version 1.7.1 with lnd 0.13.3 & c-lightning 0.10.0 and bitcoin 22.0.0`
+`Version 1.7.2 with lnd 0.14.2 & c-lightning 0.10.2 and bitcoin 22.0.0`
 
 ![RaspiBlitz](pictures/raspiblitz.jpg)
 
@@ -11,6 +11,128 @@
 RaspiBlitz is mainly targeted for learning how to run your own node decentralized from home - because: Not your Node, Not your Rules.
 Discover & develop the growing ecosystem of the Lightning Network by becoming a full part of it.
 Build it as part of a [workshop](WORKSHOP.md) or as a weekend project yourself.
+
+---
+Table of Contents
+---
+  - [Feature Overview](#feature-overview)
+  - [DeepDive Video (July 2020)](#deepdive-video-july-2020)
+  - [Time Estimate to Set Up a RaspiBlitz](#time-estimate-to-set-up-a-raspiblitz)
+  - [Hardware Needed](#hardware-needed)
+    - [Buy a ready-2-go RaspiBlitz (Germany, EU and International)](#buy-a-ready-2-go-raspiblitz-germany-eu-and-international)
+    - [Amazon Shopping List (buy parts & build it yourself)](#amazon-shopping-list-buy-parts--build-it-yourself)
+  - [Assemble your RaspiBlitz](#assemble-your-raspiblitz)
+  - [Downloading the Software](#downloading-the-software)
+  - [Write the SD-Card image to your SD Card](#write-the-sd-card-image-to-your-sd-card)
+  - [Boot your RaspiBlitz](#boot-your-raspiblitz)
+  - [Support](#support)
+    - [Documentation](#documentation)
+    - [Groups](#groups)
+  - [Setup Process (Detailed Documentation)](#setup-process-detailed-documentation)
+    - [Basic Setup](#basic-setup)
+         - [LNDRESCUE LND tar.gz-Backupfile (BEST)](#lndrescue-lnd-tar.gz-backupfile-best)
+         - [SEED+SCB Words Seed & channel.backup file (OK)](#seedscb-words-seed--channel.backup-file-ok)
+         - [ONLY SEED Only Seed Word List (Fallback)](#only-seed-only-seed-word-list-fallback)
+    - [Final Setup](#final-setup)
+      - [1. SYNC - Self validate all Blocks](#self-validate-all-blocks)
+      - [2. COPY - Copy from Laptop or another RaspiBlitz over Local Network](#copy-from-laptop-or-another-raspiblitz-over-local-network)
+    - [Main Menu](#main-menu)
+    - [Feature Documentation](#feature-documentation)
+      - [INFO: Raspiblitz Status Screen](#info-raspiblitz-status-screen)
+      - [LIGHTNING (Basic Node Management)](#lightning-basic-node-management)
+         - [FUNDING: Fund your on-chain Wallet](#funding-fund-your-on-chain-wallet)
+         - [CONNECT: Connect to a Peer](#connect-connect-to-a-peer)
+         - [CHANNEL: Open a Channel with Peer](#channel-open-a-channel-with-peer)
+         - [SEND: Pay an Invoice/PaymentRequest](#send-pay-an-invoicepaymentrequest)
+         - [RECEIVE: Create Invoice/PaymentRequest](#receive-create-invoicepaymentrequest)
+         - [NAME: Change name of your Node](#name-change-name-of-your-node)
+         - [CLOSE ALL: Closing all open Channels](#close-all-closing-all-open-channels)
+         - [CASHOUT: Remove Funds from on-chain Wallet](#cashout-remove-funds-from-on-chain-wallet)
+      - [SETTINGS: Basic Settings of RaspiBlitz](#settings-basic-settings-of-raspiblitz)
+         - [Touchscreen (experimental)](#touchscreen-experimental)
+         - [LCD Rotate](#lcd-rotate)
+         - [Run behind Tor](#run-behind-tor)
+         - [Parallel Testnet/Signet](#parallel-testnetsignet)
+         - [ZeroTier](#zerotier)
+         - [LND LIGHTNING LABS NODE](#lnd-lightning-labs-node)
+         - [LND Channel Autopilot](#lnd-channel-autopilot)
+         - [LND Accept Keysend](#lnd-accept-keysend)
+         - [LND Circuitbreaker (Firewall for LND)](#lnd-circuitbreaker-firewall-for-lnd)
+         - [LND Auto-Unlock](#lnd-auto-unlock)
+         - [LND StaticChannelBackup on Nextcloud](#lnd-staticchannelbackup-on-nextcloud)
+         - [StaticChannelBackup on USB Drive](#staticchannelbackup-on-usb-drive)
+         - [StaticChannelBackup per SCP/SSH to other server](#staticchannelbackup-per-scpssh-to-other-server)
+         - [C-LIGHTNING NODE](#c-lightning-node)
+         - [CL CLBOSS Automatic Node Manager](#cl-clboss-automatic-node-manager)
+         - [CL Wallet Encryption](#cl-wallet-encryption)
+      - [SERVICES: Activate/Deactivate Services](#services-activatedeactivate-services)
+         - [Electrum Rust Server](#electrum-rust-server)
+         - [BTCPayServer](#btcpayserver)
+         - [BTC-RPC-Explorer](#btc-rpc-explorer)
+         - [Specter Desktop](#specter-desktop)
+         - [Mempool Space](#mempool-space)
+         - [JoinMarket](#joinmarket)
+         - [Download Bitcoin Whitepaper](#download-bitcoin-whitepaper)
+         - [RTL Webinterface](#rtl-webinterface)
+         - [ThunderHub](#thunderhub)
+         - [Lightning Terminal (LIT) with loop, pool & faraday](#lightning-terminal-lit-with-loop-pool--faraday)
+         - [LNbits](#lnbits)
+         - [Balance of Satoshi](#balance-of-satoshi)
+         - [PyBlock](#pyblock)
+         - [Channel Tools (chantools)](#channel-tools-chantools)
+         - [Sphinx Relay Server](#sphinx-relay-server)
+         - [C-Lightning RTL Webinterface](#c-lightning-rtl-webinterface)
+         - [C-Lightning Sparko Webwallet](#c-lightning-sparko-webwallet)
+         - [C-Lightning Spark Webwallet](#c-lightning-spark-webwallet)
+      - [SYSTEM: Monitoring & Configuration](#system-monitoring--configuration)
+      - [CONNECT: Connect Apps & Credentials](#connect-connect-apps--credentials)
+         - [MOBILE: Mobile Wallet Apps (Smartphone)](#mobile-mobile-wallet-apps-smartphone)
+         - [Electrum Rust Server](#electrum-rust-server-1)
+         - [BTCPAY: Get the connection string for the BTCPay Server](#btcpay-get-the-connection-string-for-the-btcpay-server)
+         - [bitcoinRPC](#bitcoinrpc)
+         - [BISQ: Use your node with BISQ](#bisq-use-your-node-with-bisq)
+         - [EXPORT: Macaroons and TLS.cert](#export-macaroons-and-tls.cert)
+            - [SSH Download](#ssh-download)
+            - [Browser download](#browser-download)
+            - [Hex-String](#hex-string)
+      - [SUBSCRIBE: Subscription Services](#subscribe-subscription-services)
+         - [IP2TOR (paid)](#ip2tor-paid)
+         - [HTTPS with LetsEncrypt (free)](#https-with-letsencrypt-free)
+      - [PASSWORD: Change Passwords](#password-change-passwords)
+      - [REPAIR: Options to test, repair and reset your RaspiBlitz](#repair-options-to-test-repair-and-reset-your-raspiblitz)
+         - [SOFTWARE: Run Software Tests (DebugReport)](#software-run-software-tests-debugreport)
+         - [BACKUP-LND: Backup your LND data (Rescue-File)](#backup-lnd-backup-your-lnd-data-rescue-file)
+         - [RESET-LND: Delete LND & start a node/wallet](#reset-lnd-delete-lnd--start-a-nodewallet)
+         - [REPAIR-CL: Repair/Backup C-Lightning](#repair-cl-repairbackup-c-lightning)
+         - [MIGRATION: Migrate Blitz Data to new Hardware](#migration-migrate-blitz-data-to-new-hardware)
+         - [COPY-SOURCE: Offer your Blockchain to another RaspiBlitz for Setup](#copy-source-offer-your-blockchain-to-another-raspiblitz-for-setup)
+         - [RESET-CHAIN: Delete Blockchain and Re-Download](#reset-chain-delete-blockchain-and-re-download)
+         - [RESET-HDD: Delete HDD data but keep blockchain](#reset-hdd-delete-hdd-data-but-keep-blockchain)
+         - [RESET-ALL: Delete HDD completely & start fresh](#reset-all-delete-hdd-completely--start-fresh)
+         - [DELETE-ELEC: Delete Electrum Index](#delete-elec-delete-electrum-index)
+         - [DELETE-INDEX: Delete Bitcoin TX-Index](#delete-index-delete-bitcoin-tx-index)
+      - [UPDATE: Check/Prepare RaspiBlitz Update](#update-checkprepare-raspiblitz-update)
+         - [RELEASE: Update RaspiBlitz to a new Version](#release-update-raspiblitz-to-a-new-version)
+         - [PATCH: Patch RaspiBlitz code](#patch-patch-raspiblitz-code)
+         - [LND: Interim LND Update](#lnd-interim-lnd-update)
+         - [BITCOIN: Interim Bitcoin Update](#bitcoin-interim-bitcoin-update)
+      - [REBOOT: Reboot RaspiBlitz](#reboot-reboot-raspiblitz)
+      - [OFF: PowerOff RaspiBlitz](#off-poweroff-raspiblitz)
+      - [EXIT: Console Terminal](#exit-console-terminal)
+  - [Import a Migration File](#import-a-migration-file)
+  - [Make a RaspiBlitz out of your Umbrel, Citadel or MyNode](#make-a-raspiblitz-out-of-your-umbrel-citadel-or-mynode)
+  - [Interface / APIs](#interface--apis)
+    - [Bitcoin](#bitcoin)
+    - [LND-Lightning](#lnd-lightning)
+    - [Backup for On-Chain- & Channel-Funds](#-channel-funds)
+      - [A) Nextcloud](#a-nextcloud)
+      - [B) SCP Backup Target](#b-scp-backup-target)
+      - [C) Local Backup Target (USB Thumbdrive)](#c-local-backup-target-usb-thumbdrive)
+  - [Updating RaspiBlitz to new Version](#updating-raspiblitz-to-new-version)
+  - [Build the SD Card Image](#build-the-sd-card-image)
+  - [FAQ](#faq)
+  - [Community Development](#community-development)
+---
 
 ## Feature Overview
 
@@ -24,6 +146,7 @@ There are further Services that can be switched on:
 * **SpecterDesktop** (Multisig Trezor, Ledger, COLDCARDwallet & Specter-DIY) [details](https://github.com/cryptoadvance/specter-desktop) [app connection guide](https://d11n.net/connect-specter-desktor-with-raspiblitz.html)
 * **Lightning Terminal (Loop, Pool & Faraday)** (Manage Channel Liquidity) [details](https://github.com/lightninglabs/lightning-terminal#lightning-terminal-lit)
 * **JoinMarket** (CoinJoin Service) [details](https://github.com/JoinMarket-Org/joinmarket-clientserver)
+* **JoinMarket Web UI** (Browser-based interface for JoinMarket) [details](https://github.com/joinmarket-webui/joinmarket-webui)
 * **ThunderHub** (Lightning Node Manager WebUI) [details](https://www.thunderhub.io/)
 * **Balance Of Satoshis** (Commands for working with LND balances) [details](https://github.com/alexbosworth/balanceofsatoshis/blob/master/README.md)
 * **Kindle Display** (Bitcoin Status Display made with a jailbroken Kindle) [details](https://github.com/dennisreimann/kindle-display)
@@ -35,13 +158,16 @@ There are further Services that can be switched on:
 * **Telegraf metrics** [details](https://github.com/rootzoll/raspiblitz/issues/1369)
 * **Chantools** (Fund Rescue) [details](https://github.com/guggero/chantools/blob/master/README.md)
 * **Suez** (Channel Visualization for LND & CL) [details](https://github.com/prusnak/suez#suez)
+* **Helipad** (Podcasting 2.0 Boostagram reader) [details](https://github.com/Podcastindex-org/helipad)
 * **CL Spark Wallet** (WalletUI with BOLT12 offers) [details](https://github.com/shesek/spark-wallet#progressive-web-app)
 * **CL plugin: Sparko** (WalletUI & HTTP-RPC bridge) [details](https://github.com/fiatjaf/sparko#the-sparko-plugin)
 * **CL plugin: CLBOSS** (Automated Node Manager) [details](https://github.com/ZmnSCPxj/clboss#clboss-the-c-lightning-node-manager)
+* **Tallycoin Connect** (Use Tallycoin with your own node) [details](https://github.com/djbooth007/tallycoin_connect)
 
 You can connect the following Wallet-Apps to your RaspiBlitz:
 
 * **Zeus** (Android & iOS) [details](https://zeusln.app)
+* **Zap** (Android & iOS) [details](https://www.zaphq.io)
 * **Fully Noded** (iOS) [details](https://apps.apple.com/us/app/fully-noded/id1436425586)
 * **SendMany** (Android) [details](https://github.com/fusion44/sendmany/blob/master/README.md)
 * **Sphinx Chat App** (Android & iOS) [details](https://sphinx.chat)
@@ -59,8 +185,7 @@ When it comes fully assembled with an up-to-date synced blockchain, it's possibl
 
 If you start at home ordering the parts from Amazon (see shopping list below) then it's a weekend project with a lot of downloading and syncing time where you can do other stuff while checking on the progress from time to time.
 
-If you already run a Umbrel or myNode you have basically all the hardware needed and you can make the [Migration to RaspiBlitz from Umbrel/myNode](#make-a-raspiblitz-out-of-your-umbrel-or-mynode) under one hour.
-
+If you already run a Umbrel, Citadel or myNode you have basically all the hardware needed and you can make the [Migration to RaspiBlitz from Umbrel/Citadel/myNode](#make-a-raspiblitz-out-of-your-umbrel-citadel-or-mynode) under one hour.
 
 ## Hardware Needed
 
@@ -93,7 +218,7 @@ The idea of the shopping lists is to provide you the best tested hardware compon
   - Quimat 3,5'' Zoll Inch Touch
   - ELEGOO Display 3.5" Zoll TFT LCD
   - kuman 3.5 Inch Touch Screen TFT Monitor
-  - Waveshare 3.5inch Display for Raspberry Pi 
+  - Waveshare 3.5inch Display for Raspberry Pi
 
 *You can even pay for your RaspiBlitz Amazon Shopping with Bitcoin & Lightning through [Bitrefill](https://blog.bitrefill.com/its-here-buy-amazon-vouchers-with-bitcoin-on-bitrefill-bb2a4449724a).*
 
@@ -115,16 +240,16 @@ In the end your RaspiBlitz should look like this:
 ## Downloading the Software
 
 |Method|Install the image|Build the sd card|
-|------|-----------------|-----------------|   
+|------|-----------------|-----------------|
 |Philosophy|Trust|Sovereignty|
 |Difficulty level|Easy|Medium|
 |Pros|Make Blitz accessible to everyone|You don't need to trust us, build from your own forked repository|
-|Instructions|[Download 1.7.1 image](https://raspiblitz.fulmo.org/images/raspiblitz-v1.7.1-2021-10-28.img.gz) and [Flash the sd card](README.md#write-the-sd-card-image-to-your-sd-card)|[Build your own sd card image](#build-the-sd-card-image)|
-|Verify what?|[Signature file](https://raspiblitz.fulmo.org/images/raspiblitz-v1.7.1-2021-10-28.img.gz.sig) and [verify the Sig](FAQ.md#how-to-verify-the-sd-card-image-after-download) OR SHA-256 (below)|All of the code, don't trust, verify|
+|Instructions|[Download 1.7.2rc2c image](https://raspiblitz.fulmo.org/images/raspiblitz-v1.7.2rc2c-2022-02-10.img.gz) and [Flash the sd card](README.md#write-the-sd-card-image-to-your-sd-card)|[Build your own sd card image](#build-the-sd-card-image)|
+|Verify what?|[Signature file - only on final release] and [verify the Sig](FAQ.md#how-to-verify-the-sd-card-image-after-download) OR SHA-256 (below)|All of the code, don't trust, verify|
 
 If downloading the maintainer SD card image:
 * GPG 64-bit (main): 1C73 060C 7C17 6461 & (sub): AA9D D1B5 CC56 47DA
-* SHA-256: 6d06813860ccb9ba335086a0e53fb01f80c9ae699a59bfffdb8a89ae94087aad
+* SHA-256: 15abb9a656ce1025e104f62480a537d5455f894540a44d60b680c7fbfd776aed
 
 Which verification method should I used: Hash or Signature?
 * Signed file prove to you that the SD card image was actually built by the lead developer of the RaspiBlitz project. (Safest)
@@ -134,14 +259,14 @@ The maintainer sd card image can also be downloaded via torrent:
 * [assets/raspiblitz-v1.7.1-2021-10-28.img.gz.torrent](https://github.com/rootzoll/raspiblitz/raw/v1.7/home.admin/assets/raspiblitz-v1.7.1-2021-10-28.img.gz.torrent)
 
 Useful info:
-* [What's new in Version 1.7.1 of RaspiBlitz?](CHANGES.md#whats-new-in-version-171-of-raspiblitz)
+* [What's new in Version 1.7.2 of RaspiBlitz?](CHANGES.md#whats-new-in-version-172-of-raspiblitz)
 * [How to update my RaspiBlitz?](README.md#updating-raspiblitz-to-new-version)
 * [How to migrate to RaspiBlitz from Umbrel/myNode](#make-a-raspiblitz-out-of-your-umbrel-or-mynode)
 * [How to verify the SD card image after download?](FAQ.md#how-to-verify-the-sd-card-image-after-download)
 
 ## Write the SD-Card image to your SD Card
 
-You need to write the downloaded SD card image (the img.gz-file) to your SD card (16GB minimum) - you can use the very easy tool Balena Etcher for this: https://www.balena.io/etcher/.
+You need to write the downloaded SD card image (the img.gz-file) to your SD card (32GB minimum) - you can use the very easy tool Balena Etcher for this: https://www.balena.io/etcher/.
 It's available for Win, Mac & Linux.
 
 ## Boot your RaspiBlitz
@@ -295,7 +420,7 @@ For each password please choose unique, single strings, without spaces and speci
 
 You can use this [RaspiBlitz Recovery Sheet (PDF)](https://github.com/rootzoll/raspiblitz/raw/v1.7/home.admin/assets/RaspiBlitzRecoverySheet.pdf) to write those passwords down for safe storage and also use it later on for your Seed Words.
 
-*The password A,B,C idea is based on the [RaspiBolt Guide Preparations](https://raspibolt.github.io/raspibolt/raspibolt_10_preparations.html#write-down-your-passwords) - check out for more background.*
+*The password A,B,C idea is based on the [RaspiBolt Guide Preparations](https://raspibolt.org/preparations.html#write-down-your-passwords) - check out for more background.*
 
 First, password A is requested - this is the password which will be used for SSH login and it's also set for the existing users: admin, root, bitcoin & pi.
 
@@ -346,7 +471,7 @@ A RaspberryPi 3 has a very low power CPU and syncing+validating the blockchain d
 #### 2. COPY - Copy from Laptop or another RaspiBlitz over Local Network
 
 If you have a friend that is already running a synced RaspiBlitz or you have a laptop with enough free space on the hard drive that can download & validate the Blockchain much faster you can also choose the `COPY` option.
-You can then delete existing blockchain your RaspiBlitz already started syncing for you 
+You can then delete existing blockchain your RaspiBlitz already started syncing for you
 
 ![SSH4](pictures/ssh4-copy.png)
 
@@ -531,6 +656,8 @@ It will enable 4 touch buttons on the left hand side of the screen.
 - Invoice - creates an Invoice-QR code that can be used for payments
 - Off - Shutdown or Restart the RaspiBlitz
 
+Please mind that the touchscreen is still experimental and with recent changes is missing certain UI fixes. This might take still until v1.8.1 release where the touchscreen is planned for a refactor/rewrite.
+
 ##### LCD Rotate
 
 If you switch this on you can rotate the LCD of your RaspiBlitz 180 degrees.
@@ -576,7 +703,7 @@ To get some bitcoin testnet coins, you can use "faucets" from different places o
 
 You can read more about TESTNET and Bitcoin faucets here: https://kuttler.eu/code/bitcoin-testnet-blockchain-size-in-2020/
 
-##### ZeroTier 
+##### ZeroTier
 
 With ZeroTier you can add your RaspiBlitz to a software defined network - see for details: https://en.wikipedia.org/wiki/ZeroTier
 
@@ -611,7 +738,7 @@ For details see: https://github.com/lightningequipment/circuitbreaker/blob/maste
 
 The RaspiBlitz will automatically unlock the LND wallet upon every start.
 
-This feature is based on [https://raspibolt.github.io/raspibolt/raspibolt_6A_auto-unlock.html].
+This feature is based on [https://raspibolt.org/bonus/lightning/auto-unlock.html#bonus-guide-auto-unlock-lnd-on-startup].
 
 It can be activated under "Services" -> "Auto-unlock LND".
 We recommend that it be turned on when DynamicDNS is used.
@@ -761,6 +888,10 @@ After install, you will see a new `JMARKET` option in the SSH main menu - it wil
 
 Extract the original Bitcoin Whitepaper as PDF directly from the blockchain of your node.
 
+##### Bitcoinminds.org local on RaspiBlitz
+
+make the BitcoinMinds.org educational link collection locally available on your RaspiBlitz.
+
 ##### RTL Webinterface
 
 The RTL Webinterface is available as an LND & c-lightning control dashboard you can run in your browser with a nice GUI.
@@ -830,7 +961,7 @@ Dashboard Bitcoin information program (needs LND).
 
 ![PYBLOCK](pictures/pyblock.png)
 
-https://github.com/curly60e/pyblock/blob/master/README.md 
+https://github.com/curly60e/pyblock/blob/master/README.md
 
 ##### Channel Tools (chantools)
 
@@ -885,6 +1016,7 @@ This feature should support connecting your RaspiBlitz to a mobile wallets or ot
 At the moment the following mobile wallets are supported - some are only available if LND or c-lightning is activated:
 
 * [Zeus (iOS/Android)](https://github.com/ZeusLN/zeus) (LND & c-lightning)
+* [Zap (iOS/Android)](https://www.zaphq.io/) (only LND)
 * [Fully Noded (iOS over Tor)](https://apps.apple.com/us/app/fully-noded/id1436425586)
 * [SendMany (Android)](https://github.com/fusion44/sendmany/blob/master/README.md) (only LND)
 * [Sphinx Chat App (iOS/Android)](https://sphinx.chat/) (only LND)
@@ -963,7 +1095,7 @@ IP2TOR is a tunnel service where you can run your RaspiBlitz anonymously behind 
 You don't need to care about your local router or firewall settings.
 You can pay for this service directly through Lightning from your RaspiBlitz as subscription.
 
-At first you select what services of your RaspiBlitz you like to tunnel through a IP2TOR bridge. 
+At first you select what services of your RaspiBlitz you like to tunnel through a IP2TOR bridge.
 
 You will get a list of available IP2TOR bridge offerings.
 Select `OK` on an IP2TOR bridge offering and you will see more details on it, such as how many satoshis the subscription will cost you.
@@ -981,9 +1113,10 @@ To try out the IP2TOR tunnel choose in `MAINMENU` the extra menu point of the Se
 
 If you want a web service, like BTCPay Server or LNbits, to be available to the outside internet (like with IP2TOR) people expect you to offer an HTTPS address so that the communication between the client and your RaspiBlitz is encrypted.
 You could use the self-signed HTTPS certificate that RaspiBlitz is offering you, but this will give users Security Warnings in their browser and is not very user friendly.
-That's where you can use a LetsEncrypt Subscription to get a free valid HTTPS certificate that is accepted without warning by most browsers.
 
-Because you also need a domain name for that you will need to open a free account, the following are presently supported, would be good to add more with the help of the community: 
+That's where you can use a LetsEncrypt Subscription to get a free valid HTTPS certificate that is excepted without warning from almost all common browsers
+
+Because you also need a domain name for that you will need to open a free account, the following are presently supported, would be good to add more with the help of the community:
 [DuckDNS.org](https://www.duckdns.org)
 [DYNU.com](https://www.dynu.com) (AT THE MOMENT NOT AVAILABLE)
 
@@ -1150,9 +1283,9 @@ Then RaspiBlitz might give you the option again to self-sync or copy the blockch
 
 Then the blockchain needs to sync up and you should be back to normal.
 
-## Make a RaspiBlitz out of your Umbrel or MyNode
+## Make a RaspiBlitz out of your Umbrel, Citadel or MyNode
 
-Another kind of migration is when you already run a full node with the Umbrel or myNode software and you like to change it to RaspiBlitz without closing channels.
+Another kind of migration is when you already run a full node with the Umbrel, Citadel or myNode software and you like to change it to RaspiBlitz without closing channels.
 You basically have all the hardware needed and just need to change software.
 You don't need the [LCD from the shopping list](#amazon-shopping-list-buy-parts--build-it-yourself) - RaspiBlitz can also run without an LCD.
 
@@ -1171,7 +1304,7 @@ Instructions for Migration:
 * shutdown your old node
 * remove the SD card
 * [download the latest Raspiblitz sd card image & flash it to your sd card](#downloading-the-software)
-* if you want to use a HDMI monitor for status & progress, create a empty file called `hdmi` (without any ending) on the SD card while connected to your laptop 
+* if you want to use a HDMI monitor for status & progress, create a empty file called `hdmi` (without any ending) on the SD card while connected to your laptop
 * [insert sd card, boot up & login by SSH](#boot-your-raspiblitz)
 
 Now RaspiBlitz should show you that old data from your node was detected and offer to do the migration for you.
@@ -1218,12 +1351,12 @@ To recover your funds this way you will need two things:
 - the latest `channel.backup` file
 
 You should have written down the word seed during wallet setup; keep it at a safe (offline) location.
-The `channel.backup` is stored on the HDD and updated by LND every time a new channel is opened or closed.
+The `channel.backup` is stored on the HDD (under `/mnt/hdd/lnd/data/chain/bitcoin/mainnet/`) and updated by LND every time a new channel is opened or closed.
 The latest version of this file is needed to recover all your funds.
-In case your HDD gets damaged RaspiBlitz always keeps a copy of the latest version of the `channel.backup` file on the SD card within the sub-directories of: `/home/admin/.lnd/data/chain/`.
+In case your HDD gets damaged RaspiBlitz always keeps a copy of the latest version of the `channel.backup` file on the SD card: `/home/admin/backups/scb/`.
 
 If you want to go one step further in securing your funds against total loss of the RaspiBlitz (gets completely damaged, stolen or lost), then you can additionally set up an off-location or cloud backup of the `channel.backup` file.
-The file itself is encrypted by your word seed so it's acceptable to store the file with untrusted third parties for backup purposes (if you want) 
+The file itself is encrypted by your word seed so it's acceptable to store the file with untrusted third parties for backup purposes (if you want)
 
 This video explains in detail how you can set further back Static Channel information:
 
@@ -1231,36 +1364,11 @@ This video explains in detail how you can set further back Static Channel inform
 
 The following options are also explained here shortly:
 
-#### A) DropBox Backup Target
+#### A) Nextcloud
 
-Toggle the StaticChannelBackup option to DropBox in the `SETTINGS` menu of your RaspiBlitz.
-It will ask you for the Dropbox-Authtoken.
-This is how you can get this token:
+Nextcloud is an open-source project to host your own files: https://en.wikipedia.org/wiki/Nextcloud - in its basics its an open DropBox replacement ... but can do much much more. You can run it yourself or use a hosted Nextcloud server.
 
-Go to your web browser, do the following:
-
-1. Go to https://www.dropbox.com/developers/apps/create and sign in.
-
-1. Choose **Create App**.
-
-    ![Dropbox API 1](https://github.com/rootzoll/raspiblitz/raw/v1.6/pictures/dropbox-1.png)
-
-    Choose the 'Scoped Access' & 'App Folder' and set a unique name - for example `LNDbackup` with a random number behind it. Agree to Terms of Service and click 'Create App'.
-
-1. Set **Permissions**.
-
-    ![Dropbox API 2](https://github.com/rootzoll/raspiblitz/raw/v1.6/pictures/dropbox-2.png)
-
-    Its important first to select the `Permissions` tab and activate the `files.content.write` permission. Don't forget to `Submit` the change before continue.
-
-1. Generate **OAUth2 Token**.
-
-    ![Dropbox API 3](https://github.com/rootzoll/raspiblitz/raw/v1.6/pictures/dropbox-3.png)
-
-    Now go back to the 'Settings' tab and under 'OAuth2', choose 'no expiration' under 'Access token expiration' then click the 'Generate' button. You will now see a long string of letters and numbers appear. This is your **Dropbox-Authtoken**. Make sure to copy the complete token string .. there might be more if you scroll to the right in the token field. 
-
-To test it, try opening or closing a channel and then check if you can find a copy of `channel.backup` in your Dropbox.
-You can check the background-script logs to see details on errors: `sudo journalctl -f -u background`
+Find free Nextcloud providers here to sign up: https://nextcloud.com/signup/
 
 #### B) SCP Backup Target
 
@@ -1269,7 +1377,7 @@ You can check the background-script logs to see details on errors: `sudo journal
 In the `/mnt/hdd/raspiblitz.conf` the parameter `scpBackupTarget='[USER]@[SERVER]:[DIRPATH-WITHOUT-ENDING-/]'` can be set to activate this feature.
 On the remote server, the public key of the RaspiBlitz root user needs to be added to the `authorized_keys` file so that no password is needed for the background script to make the backup.
 
-The script `/home/admin/config.scripts/internet.sshpubkey.sh` helps on initialization (init); it will show and transfer ssh-pubkey to a remote server.
+The script `/home/admin/config.scripts/blitz.ssh.sh` show (`root-get`) and transfer ssh-pubkey (`root-transfer`) to a remote server.
 
 To test it, try opening or closing a channel and then check if you can find a copy of `channel.backup` on your remote server.
 You can check the background-script logs to see details on errors: `sudo journalctl -f -u background`
@@ -1329,7 +1437,8 @@ Copy the following command into your terminal and execute:
 `wget https://raw.githubusercontent.com/rootzoll/raspiblitz/v1.7/build_sdcard.sh && sudo bash build_sdcard.sh`
 
 As you can see from the URL, you can find the build script in this Git repo under `build_sdcard.sh`.
-You can check what gets installed and configured in detail.
+
+You can check what gets installed and configured in detail with optional parameters.
 Feel free to post improvements as pull requests.
 
 The whole build process takes a while.
