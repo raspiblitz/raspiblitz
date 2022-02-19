@@ -52,7 +52,7 @@ Hidden Service address for TOR Browser (see LCD for QR):\n${toraddress}
     /home/admin/config.scripts/blitz.display.sh hide
   else
     # Info without TOR
-    whiptail --title " Helipad " --msgbox "Open in your local web browser & accept self-signed cert:
+    whiptail --title " Helipad " --msgbox "Open in your local web browser:
 http://${localip}:${HELIPAD_HTTP_PORT}\n
 https://${localip}:${HELIPAD_HTTPS_PORT} with Fingerprint:
 ${fingerprint}\n
