@@ -535,8 +535,8 @@ if [ ${isMounted} -eq 0 ]; then
 
   # check that HDD was temp mounted
   if [ "${isMounted}" != "1" ]; then
-    sed -i "s/^state=.*/state=errorHDD/g" ${infoFile}
-    sed -i "s/^message=.*/message='Was not able to mount HDD (2)'/g" ${infoFile}
+    /home/admin/_cache.sh set state "errorHDD"
+    /home/admin/_cache.sh set message "Was not able to mount HDD (2)"
     exit 1
   fi
 
@@ -574,7 +574,7 @@ if [ ${isMounted} -eq 0 ]; then
     echo "##### IMPORT MIGRATIONFILE: ${migrationFile}" >> ${logFile}
 
     # unpack
-    sed -i "s/^message=.*/message='Unpacking Migration Data'/g" ${infoFile}
+    /home/admin/_cache.sh set message "Unpacking Migration Data"
     source <(/home/admin/config.scripts/blitz.migration.sh import "${migrationFile}")
 
     # check for errors
@@ -624,7 +624,7 @@ if [ ${isMounted} -eq 0 ]; then
   if [ "${setupPhase}" == "setup" ]; then
     echo "Calling _provision.setup.sh for basic setup tasks .." >> $logFile
     echo "Follow in a new terminal with: 'tail -f raspiblitz.provision-setup.log'" >> $logFile
-    sed -i "s/^message=.*/message='Provision Setup'/g" ${infoFile}
+    /home/admin/_cache.sh set message "Provision Setup"
     /home/admin/_provision.setup.sh
     errorState=$?
     sudo cat /home/admin/raspiblitz.provision-setup.log
@@ -641,7 +641,7 @@ if [ ${isMounted} -eq 0 ]; then
   # if migration from other nodes - run the migration provision first
   if [ "${setupPhase}" == "migration" ]; then
     echo "Calling _provision.migration.sh for possible migrations .." >> $logFile
-    sed -i "s/^message=.*/message='Provision migration'/g" ${infoFile}
+    /home/admin/_cache.sh set message "Provision migration"
     /home/admin/_provision.migration.sh
     errorState=$?
     cat /home/admin/raspiblitz.provision-migration.log
@@ -659,7 +659,7 @@ if [ ${isMounted} -eq 0 ]; then
   if [ "${setupPhase}" == "update" ] || [ "${setupPhase}" == "recovery" ] || [ "${setupPhase}" == "migration" ]; then
     echo "Calling _provision.update.sh .." >> $logFile
     echo "Follow in a new terminal with: 'tail -f raspiblitz.provision-update.log'" >> $logFile
-    sed -i "s/^message=.*/message='Provision Update/Recovery/Migration'/g" ${infoFile}
+    /home/admin/_cache.sh set message "Provision Update/Recovery/Migration"
     /home/admin/_provision.update.sh
     errorState=$?
     cat /home/admin/raspiblitz.provision-update.log
@@ -675,7 +675,7 @@ if [ ${isMounted} -eq 0 ]; then
   
   # finalize provisioning
   echo "Calling _bootstrap.provision.sh for general system provisioning (${setupPhase}) .." >> $logFile
-  sed -i "s/^message=.*/message='Provision Basics'/g" ${infoFile}
+  /home/admin/_cache.sh set message "Provision Basics"
   /home/admin/_provision_.sh
   errorState=$?
   if [ "$errorState" != "0" ]; then

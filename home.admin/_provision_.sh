@@ -574,7 +574,7 @@ fi
 # JoinMarket Web UI
 if [ "${joinmarketWebUI}" = "on" ]; then
   echo "Provisioning JoinMarket Web UI - run config script" >> ${logFile}
-  sudo sed -i "s/^message=.*/message='Setup JoinMarket Web UI'/g" ${infoFile}
+  /home/admin/_cache.sh set message "Setup JoinMarket Web UI"
   sudo /home/admin/config.scripts/bonus.joinmarket-webui.sh on >> ${logFile} 2>&1
 else
   echo "Provisioning JoinMarket Web UI - keep default" >> ${logFile}
@@ -691,7 +691,7 @@ fi
 # helipad
 if [ "${helipad}" = "on" ]; then
   echo "Helipad - run config script" >> ${logFile}
-  sudo sed -i "s/^message=.*/message='Setup Helipad'/g" ${infoFile}
+  /home/admin/_cache.sh set message "Setup Helipad"
   sudo -u admin /home/admin/config.scripts/bonus.helipad.sh on >> ${logFile} 2>&1
 else
   echo "Helipad - keep default" >> ${logFile}

@@ -111,7 +111,7 @@ fi
 # start network service
 echo ""
 echo "*** Start ${network} (SETUP) ***" >> ${logFile}
-sed -i "s/^message=.*/message='Blockchain Testrun'/g" ${infoFile}
+/home/admin/_cache.sh set message "Blockchain Testrun"
 echo "- This can take a while .." >> ${logFile}
 cp /home/admin/assets/${network}d.service /etc/systemd/system/${network}d.service
 systemctl enable ${network}d.service
