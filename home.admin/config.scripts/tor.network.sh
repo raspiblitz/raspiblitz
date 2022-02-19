@@ -127,7 +127,7 @@ case "$1" in
       sudo -u sphinxrelay bash -c "echo '${toraddress}' > /home/sphinxrelay/sphinx-relay/dist/toraddress.txt"
     fi
     if [ "${helipad}" = "on" ]; then
-    /home/admin/config.scripts/internet.hiddenservice.sh helipad 2112 2113
+    /home/admin/config.scripts/tor.onion-service.sh helipad 2112 2113
     fi
 
     echo "Setup logrotate"

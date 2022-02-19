@@ -417,7 +417,7 @@ else
 fi
 
 # Helipad
-choice="off"; check=$(echo "${CHOICES}" | grep -c "d")
+choice="off"; check=$(echo "${CHOICES}" | grep -c "f")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${helipad}" != "${choice}" ]; then
   echo "Helipad setting changed .."

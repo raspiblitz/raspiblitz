@@ -64,11 +64,6 @@ Activate TOR to access the web interface from outside your local network.
   exit 0
 fi
 
-# add default value to raspi config if needed
-if ! grep -Eq "^helipad=" /mnt/hdd/raspiblitz.conf; then
-  echo "helipad=off" >> /mnt/hdd/raspiblitz.conf
-fi
-
 # stop services
 echo "making sure services are not running"
 sudo systemctl stop helipad 2>/dev/null
@@ -178,13 +173,13 @@ WantedBy=multi-user.target
 
     sudo systemctl enable helipad
 
-    # setting value in raspiblitz config
-    sudo sed -i "s/^helipad=.*/helipad=on/g" /mnt/hdd/raspiblitz.conf
+    # setting value in raspiblitz conf
+    /home/admin/config.scripts/blitz.conf.sh set helipad "on"
 
     # Hidden Service for Helipad if Tor is active
     if [ "${runBehindTor}" = "on" ]; then
         # make sure to keep in sync with internet.tor.sh script
-        /home/admin/config.scripts/internet.hiddenservice.sh helipad 80 $HELIPAD_HTTP_PORT 443 $HELIPAD_HTTPS_PORT
+        /home/admin/config.scripts/tor.onion-service.sh helipad 80 $HELIPAD_HTTP_PORT 443 $HELIPAD_HTTPS_PORT
     fi
 
     source /home/admin/raspiblitz.info
@@ -258,13 +253,13 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # Hidden Service if Tor is active
   if [ "${runBehindTor}" = "on" ]; then
-    /home/admin/config.scripts/internet.hiddenservice.sh off helipad
+    /home/admin/config.scripts/tor.onion-service.sh off helipad
   fi
 
   echo "OK Helipad removed."
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^helipad=.*/helipad=off/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set helipad "off"
 
   exit 0
 fi
