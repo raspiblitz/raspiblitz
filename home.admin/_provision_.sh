@@ -692,7 +692,7 @@ fi
 if [ "${helipad}" = "on" ]; then
   echo "Helipad - run config script" >> ${logFile}
   sudo sed -i "s/^message=.*/message='Setup Helipad'/g" ${infoFile}
-  sudo -u admin /home/admin/config.scripts/bonus/helipad.sh on >> ${logFile} 2>&1
+  sudo -u admin /home/admin/config.scripts/bonus.helipad.sh on >> ${logFile} 2>&1
 else
   echo "Helipad - keep default" >> ${logFile}
 fi
