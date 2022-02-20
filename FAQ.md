@@ -679,8 +679,20 @@ Work notes for the process of producing a new SD card image release:
 * Run tests on the new image
 * Upload the new image to the Download Server - put sig-file next to it
 * Copy SHA256-String into GitHub README and update the download link
+* Create Torrent file from image (for example with Transmission) and place in in the `home.admin/assets` folder & link on README
 
-
+This is a recommended tracker list to be used with the torrent:
+```
+udp://tracker.coppersurfer.tk:6969/announce
+http://tracker.yoshi210.com:6969/announce
+http://open.acgtracker.com:1096/announce
+http://tracker.skyts.net:6969/announce
+udp://9.rarbg.me:2780/announce
+http://tracker2.itzmx.com:6961/announce
+udp://exodus.desync.com:6969/announce
+http://pow7.com:80/announce
+udp://tracker.leechers-paradise.org:6969
+```
 
 ### How can I customize my RaspiBlitz or add other software?
 
