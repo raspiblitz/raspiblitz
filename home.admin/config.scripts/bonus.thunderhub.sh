@@ -227,7 +227,7 @@ User=thunderhub
 Restart=always
 TimeoutSec=120
 RestartSec=30
-StandardOutput=null
+StandardOutput=journal
 StandardError=journal
 
 # Hardening measures

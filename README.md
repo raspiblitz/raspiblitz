@@ -2,7 +2,7 @@
 
 *Build your own Lightning & Bitcoin Fullnode on a RaspberryPi with a nice Display.*
 
-`Version 1.7.2rc2 with lnd 0.14.2 & c-lightning 0.10.2 and bitcoin 22.0.0`
+`Version 1.7.2 with lnd 0.14.2 & c-lightning 0.10.2 and bitcoin 22.0.0`
 
 ![RaspiBlitz](pictures/raspiblitz.jpg)
 
@@ -120,7 +120,7 @@ Table of Contents
       - [OFF: PowerOff RaspiBlitz](#off-poweroff-raspiblitz)
       - [EXIT: Console Terminal](#exit-console-terminal)
   - [Import a Migration File](#import-a-migration-file)
-  - [Make a RaspiBlitz out of your Umbrel or MyNode](#make-a-raspiblitz-out-of-your-umbrel-or-mynode)
+  - [Make a RaspiBlitz out of your Umbrel, Citadel or MyNode](#make-a-raspiblitz-out-of-your-umbrel-citadel-or-mynode)
   - [Interface / APIs](#interface--apis)
     - [Bitcoin](#bitcoin)
     - [LND-Lightning](#lnd-lightning)
@@ -158,6 +158,7 @@ There are further Services that can be switched on:
 * **Telegraf metrics** [details](https://github.com/rootzoll/raspiblitz/issues/1369)
 * **Chantools** (Fund Rescue) [details](https://github.com/guggero/chantools/blob/master/README.md)
 * **Suez** (Channel Visualization for LND & CL) [details](https://github.com/prusnak/suez#suez)
+* **Helipad** (Podcasting 2.0 Boostagram reader) [details](https://github.com/Podcastindex-org/helipad)
 * **CL Spark Wallet** (WalletUI with BOLT12 offers) [details](https://github.com/shesek/spark-wallet#progressive-web-app)
 * **CL plugin: Sparko** (WalletUI & HTTP-RPC bridge) [details](https://github.com/fiatjaf/sparko#the-sparko-plugin)
 * **CL plugin: CLBOSS** (Automated Node Manager) [details](https://github.com/ZmnSCPxj/clboss#clboss-the-c-lightning-node-manager)
@@ -184,7 +185,7 @@ When it comes fully assembled with an up-to-date synced blockchain, it's possibl
 
 If you start at home ordering the parts from Amazon (see shopping list below) then it's a weekend project with a lot of downloading and syncing time where you can do other stuff while checking on the progress from time to time.
 
-If you already run a Umbrel or myNode you have basically all the hardware needed and you can make the [Migration to RaspiBlitz from Umbrel/myNode](#make-a-raspiblitz-out-of-your-umbrel-or-mynode) under one hour.
+If you already run a Umbrel, Citadel or myNode you have basically all the hardware needed and you can make the [Migration to RaspiBlitz from Umbrel/Citadel/myNode](#make-a-raspiblitz-out-of-your-umbrel-citadel-or-mynode) under one hour.
 
 ## Hardware Needed
 
@@ -243,19 +244,19 @@ In the end your RaspiBlitz should look like this:
 |Philosophy|Trust|Sovereignty|
 |Difficulty level|Easy|Medium|
 |Pros|Make Blitz accessible to everyone|You don't need to trust us, build from your own forked repository|
-|Instructions|[Download 1.7.2rc2c image](https://raspiblitz.fulmo.org/images/raspiblitz-v1.7.2rc2c-2022-02-10.img.gz) and [Flash the sd card](README.md#write-the-sd-card-image-to-your-sd-card)|[Build your own sd card image](#build-the-sd-card-image)|
-|Verify what?|[Signature file - only on final release] and [verify the Sig](FAQ.md#how-to-verify-the-sd-card-image-after-download) OR SHA-256 (below)|All of the code, don't trust, verify|
+|Instructions|[Download 1.7.2 image](https://raspiblitz.fulmo.org/images/raspiblitz-v1.7.2-2022-02-20.img.gz) and [Flash the sd card](README.md#write-the-sd-card-image-to-your-sd-card)|[Build your own sd card image](#build-the-sd-card-image)|
+|Verify what?|[Signature file](https://raspiblitz.fulmo.org/images/raspiblitz-v1.7.2-2022-02-20.img.gz.sig) and [verify the Sig](FAQ.md#how-to-verify-the-sd-card-image-after-download) OR SHA-256 (below)|All of the code, don't trust, verify|
 
 If downloading the maintainer SD card image:
 * GPG 64-bit (main): 1C73 060C 7C17 6461 & (sub): AA9D D1B5 CC56 47DA
-* SHA-256: 15abb9a656ce1025e104f62480a537d5455f894540a44d60b680c7fbfd776aed
+* SHA-256: bea47c5c3f84bbca2d802b14a797dc292abd14c0f836d4afa87a05877eb34db2
 
 Which verification method should I used: Hash or Signature?
 * Signed file prove to you that the SD card image was actually built by the lead developer of the RaspiBlitz project. (Safest)
 * Hash function checks file integrity. (Secure)
 
 The maintainer sd card image can also be downloaded via torrent:
-* [assets/raspiblitz-v1.7.1-2021-10-28.img.gz.torrent](https://github.com/rootzoll/raspiblitz/raw/v1.7/home.admin/assets/raspiblitz-v1.7.1-2021-10-28.img.gz.torrent)
+* [assets/raspiblitz-v1.7.2-2022-02-20.img.gz.torrent](https://github.com/rootzoll/raspiblitz/raw/dev/home.admin/assets/raspiblitz-v1.7.2-2022-02-20.img.gz.torrent)
 
 Useful info:
 * [What's new in Version 1.7.2 of RaspiBlitz?](CHANGES.md#whats-new-in-version-172-of-raspiblitz)
@@ -654,6 +655,8 @@ It will enable 4 touch buttons on the left hand side of the screen.
 - Node - shows the nodeID/uri as QR code (used to open channels from mobile wallets)
 - Invoice - creates an Invoice-QR code that can be used for payments
 - Off - Shutdown or Restart the RaspiBlitz
+
+Please mind that the touchscreen is still experimental and with recent changes is missing certain UI fixes. This might take still until v1.8.1 release where the touchscreen is planned for a refactor/rewrite.
 
 ##### LCD Rotate
 
@@ -1280,9 +1283,9 @@ Then RaspiBlitz might give you the option again to self-sync or copy the blockch
 
 Then the blockchain needs to sync up and you should be back to normal.
 
-## Make a RaspiBlitz out of your Umbrel or MyNode
+## Make a RaspiBlitz out of your Umbrel, Citadel or MyNode
 
-Another kind of migration is when you already run a full node with the Umbrel or myNode software and you like to change it to RaspiBlitz without closing channels.
+Another kind of migration is when you already run a full node with the Umbrel, Citadel or myNode software and you like to change it to RaspiBlitz without closing channels.
 You basically have all the hardware needed and just need to change software.
 You don't need the [LCD from the shopping list](#amazon-shopping-list-buy-parts--build-it-yourself) - RaspiBlitz can also run without an LCD.
 

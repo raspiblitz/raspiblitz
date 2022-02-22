@@ -77,8 +77,8 @@ if [ "$1" = "target" ]; then
   esac
 
   # setting copy state
-  sed -i "s/^state=.*/state=copytarget/g" /home/admin/raspiblitz.info
-  sed -i "s/^message=.*/message='Receiving Blockchain over LAN'/g" /home/admin/raspiblitz.info
+  /home/admin/_cache.sh set state "copytarget"
+  /home/admin/_cache.sh set message "Receiving Blockchain over LAN"
 
   echo "stopping services ..."
   sudo systemctl stop lnd 2>/dev/null
@@ -289,8 +289,8 @@ if [ "$1" = "target" ]; then
   sleep 10
 
   # setting copy state
-  sed -i "s/^state=.*/state=ready/g" /home/admin/raspiblitz.info
-  sed -i "s/^message=.*/message='Node Running'/g" /home/admin/raspiblitz.info
+  /home/admin/_cache.sh set state "ready"
+  /home/admin/_cache.sh set message "Node Running"
 fi
 
 ###################

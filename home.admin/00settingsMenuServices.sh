@@ -27,6 +27,7 @@ if [ ${#chantools} -eq 0 ]; then chantools="off"; fi
 if [ ${#sparko} -eq 0 ]; then sparko="off"; fi
 if [ ${#spark} -eq 0 ]; then spark="off"; fi
 if [ ${#tallycoinConnect} -eq 0 ]; then tallycoinConnect="off"; fi
+if [ ${#helipad} -eq 0 ]; then helipad="off"; fi
 if [ ${#bitcoinminds} -eq 0 ]; then bitcoinminds="off"; fi
 
 # show select dialog
@@ -61,6 +62,7 @@ if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
   OPTIONS+=(y 'LND PyBLOCK' ${pyblock})
   OPTIONS+=(h 'LND ChannelTools (Fund Rescue)' ${chantools})
   OPTIONS+=(x 'LND Sphinx-Relay' ${sphinxrelay})
+  OPTIONS+=(f 'LND Helipad Boostagram reader' ${helipad})
   OPTIONS+=(d 'LND Tallycoin Connect' ${tallycoinConnect})
 fi
 
@@ -73,7 +75,7 @@ fi
 
 CHOICES=$(dialog --title ' Additional Mainnet Services ' \
           --checklist ' use spacebar to activate/de-activate ' \
-          25 55 18  "${OPTIONS[@]}" 2>&1 >/dev/tty)
+          27 55 20  "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
 dialogcancel=$?
 echo "done dialog"
@@ -412,6 +414,21 @@ Use the new 'SPHINX' entry in Main Menu for more info.\n
   fi
 else
   echo "Sphinx Relay unchanged."
+fi
+
+# Helipad
+choice="off"; check=$(echo "${CHOICES}" | grep -c "f")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${helipad}" != "${choice}" ]; then
+  echo "Helipad setting changed .."
+  anychange=1
+  sudo -u admin /home/admin/config.scripts/bonus.helipad.sh ${choice}
+  if [ "${choice}" =  "on" ]; then
+    sudo systemctl start helipad
+    sudo -u admin /home/admin/config.scripts/bonus.helipad.sh menu
+  fi
+else
+  echo "Helipad setting unchanged."
 fi
 
 # Tallycoin

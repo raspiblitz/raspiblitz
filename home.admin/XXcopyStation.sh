@@ -135,8 +135,7 @@ do
 
     # sync bitcoin
     echo "# Syncing Bitcoin to template folder ..."
-
-    sed -i "s/^message=.*/message='Updating Template: Bitcoin'/g" /home/admin/raspiblitz.info
+    /home/admin/_cache.sh set message "Updating Template: Bitcoin"
 
     # make sure the bitcoin directory in template folder exists
     if [ ! -d "$pathTemplateHDD/bitcoin" ]; then
@@ -189,13 +188,13 @@ do
         echo "size: ${size}"
         if [ ${size} -lt 900000000000 ]; then
             echo "!! THE HDD/SSD IS TOO SMALL <900GB - use at least 1TB"
-            sed -i "s/^message=.*/message='HDD smaller than 1TB: ${detectedDrive}'/g" /home/admin/raspiblitz.info
+            /home/admin/_cache.sh set message "HDD smaller than 1TB: ${detectedDrive}"
             echo
             sleep 10
         else
 
           choice=0
-          sed -i "s/^message=.*/message='Formatting new HDD: ${detectedDrive}'/g" /home/admin/raspiblitz.info
+          /home/admin/_cache.sh set message "Formatting new HDD: ${detectedDrive}"
 
           # format the HDD
           echo "Starting Formatting of device ${detectedDrive} ..."
@@ -225,7 +224,7 @@ do
         mountOK=$(lsblk -o NAME,MOUNTPOINT | grep "${detectedDrive}" | grep -c "/mnt/hdd2")
         if [ ${mountOK} -eq 1 ]; then
           hddsInfoString=$(cat /var/cache/raspiblitz/copystationHddsInfoString.tmp | tr '\n' ' ')
-          sed -i "s/^message=.*/message='${hddsInfoString} ${partition}>SYNC'/g" /home/admin/raspiblitz.info
+          /home/admin/_cache.sh set message "${hddsInfoString} ${partition}>SYNC"
           rsync -a --info=progress2 --delete ${pathTemplateHDD}/* /mnt/hdd2
           chmod -R 777 /mnt/hdd2
           rm -r /mnt/hdd2/lost+found 2>/dev/null
@@ -269,7 +268,7 @@ do
     echo "To stop copystation script: CTRL+c and then 'restart'"
     echo "You can close SSH terminal and script will run in background can can be re-entered."
 
-    sed -i "s/^message=.*/message='No target HDDs connected - connect USB Hub'/g" /home/admin/raspiblitz.info
+    /home/admin/_cache.sh set message "No target HDDs connected - connect USB Hub"
     firstLoop=1
     sleep 30
 
@@ -285,7 +284,7 @@ do
     echo "To stop copystation script: CTRL+c and then 'restart'"
     echo "You can close SSH terminal and script will run in background can can be re-entered."
 
-    sed -i "s/^message=.*/message='Ready HDDs: ${hddsInfoString}'/g" /home/admin/raspiblitz.info
+    /home/admin/_cache.sh set message "Ready HDDs: ${hddsInfoString}"
     sleep 25
 
   fi 

@@ -446,7 +446,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   fi
   #tag="tags/raspiblitz"
   # https://github.com/lnbits/lnbits-legend/releases
-  tag="0.6.0"
+  tag="0.7.0"
   if [ "$4" != "" ]; then
     tag="$4"
   fi

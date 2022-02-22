@@ -104,7 +104,7 @@ if [ "$1" == "prestart" ]; then
   # SET/UPDATE bitcoin.node
   echo "# ${network}.node insert/update"
   setting ${lndConfFile} ${insertLine} "${network}\.node" "${network}d"
-  
+
 
   ##### BITCOIND OPTIONS SECTION #####
 
@@ -185,6 +185,28 @@ if [ "$1" == "prestart" ]; then
   if [ "${lndKeysend}" == "on" ]; then
     setting ${lndConfFile} ${insertLine} "accept-keysend" "true"
   fi
+
+  ##### BOLT SECTION #####
+  # https://github.com/lightningnetwork/lnd/blob/0aa0831619cb320dbb74883c37a80ccbdde7f320/sample-lnd.conf#L1205
+  sectionName="bolt"
+  echo "# [${sectionName}] config ..."
+  # make sure lnd config has a [bolt] section
+  sectionExists=$(cat ${lndConfFile} | grep -c "^\[${sectionName}\]")
+  echo "# sectionExists(${sectionExists})"
+  if [ "${sectionExists}" == "0" ]; then
+    echo "# adding section [${sectionName}]"
+    echo "
+[${sectionName}]
+" | tee -a ${lndConfFile}
+  fi
+
+  sectionLine=$(cat ${lndConfFile} | grep -n "^\[bolt\]" | cut -d ":" -f1)
+  echo "# sectionLine(${sectionLine})"
+  insertLine=$(expr $sectionLine + 1)
+
+  # make sure API ports are set to standard
+  setting ${lndConfFile} ${insertLine} "db.bolt.auto-compact-min-age" "672h"
+  setting ${lndConfFile} ${insertLine} "db.bolt.auto-compact" "true"
 
   ##### TOR SECTION #####
 

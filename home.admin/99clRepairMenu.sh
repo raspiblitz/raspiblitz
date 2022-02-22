@@ -48,7 +48,7 @@ elif [ "$(eval echo \$${netprefix}clEncryptedHSM)"  = "on" ];then
     OPTIONS+=(AUTOUNLOCK-OFF "Do not auto-decrypt the hsm_secret after boot")
   fi
 fi
-    OPTIONS+=(BACKUP "Full backup (hsm_secret + lightningd.sqlite3")
+    OPTIONS+=(BACKUP "Full backup (hsm_secret + lightningd.sqlite3)")
     OPTIONS+=(RESET "Reset the wallet and create new")
     OPTIONS+=(FILERESTORE "Restore from a rescue file")
     OPTIONS+=(SEEDRESTORE "Restore from a seed (onchain funds only)")

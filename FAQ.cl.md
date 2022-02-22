@@ -600,7 +600,6 @@ Will need to pay through a peer which supports the onion messages which means yo
     # delete temp file
     srm /dev/shm/test_hsm_secret
     ```
-
 ### How to restore the hsm_secret from text?
 * example from https://lightning.readthedocs.io/BACKUP.html#backing-up-your-c-lightning-node:
     ```
@@ -624,7 +623,6 @@ Will need to pay through a peer which supports the onion messages which means yo
 ### Recovery
 * https://lightning.readthedocs.io/FAQ.html#database-corruption-channel-state-lost
 * https://lightning.readthedocs.io/FAQ.html#loss
-
 #### Recover from a cl-rescue file
 * use the `REPAIR-CL` - `FILERESTORE` option in the menu for instructions to upload
 
@@ -708,6 +706,15 @@ Will need to pay through a peer which supports the onion messages which means yo
   p2wpkh:KxacygL6usxP8T9cFSM2SRW5QsEg66bUQUEn997UWwCZANEe7NLT
   ```
 
+## sqlite3 queries
+* Query the reasons for force closes
+    ```
+    sudo -u bitcoin sqlite3 /home/bitcoin/.lightning/bitcoin/lightningd.sqlite3 'select short_channel_id, timestamp, cause, message from channel_state_changes inner join channels on channel_id = id where new_state = 7 order by timestamp'
+    ```
+* Query the reasons for cooperative channel closes
+    ```
+    sudo -u bitcoin sqlite3 /home/bitcoin/.lightning/bitcoin/lightningd.sqlite3 'select short_channel_id, timestamp, cause, message from channel_state_changes inner join channels on channel_id = id where new_state = 4 order by timestamp'
+    ```
 
 ## Update
 ### Update to a new C-lightning release
