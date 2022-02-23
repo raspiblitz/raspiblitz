@@ -111,13 +111,14 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo ""
 
     # SSL
-    if ! [ -f $HOME_DIR/.joinmarket/ssl/cert.pem ]; then
-      subj="/C=US/ST=Utah/L=Lehi/O=Your Company, Inc./OU=IT/CN=example.com"
-      sudo -u $USERNAME mkdir -p $HOME_DIR/.joinmarket/ssl/ \
-        && pushd "$_" \
-        && sudo -u $USERNAME openssl req -newkey rsa:4096 -x509 -sha256 -days 3650 -nodes -out cert.pem -keyout key.pem -subj "$subj" \
-        && popd
+    if [ -d $HOME_DIR/.joinmarket/ssl]; then
+      sudo -u $USERNAME rm -rf $HOME_DIR/.joinmarket/ssl
     fi
+    subj="/C=US/ST=Utah/L=Lehi/O=Your Company, Inc./OU=IT/CN=example.com"
+    sudo -u $USERNAME mkdir -p $HOME_DIR/.joinmarket/ssl/ \
+      && pushd "$_" \
+      && sudo -u $USERNAME openssl req -newkey rsa:4096 -x509 -sha256 -days 3650 -nodes -out cert.pem -keyout key.pem -subj "$subj" \
+      && popd
 
     ##################
     # SYSTEMD SERVICE
