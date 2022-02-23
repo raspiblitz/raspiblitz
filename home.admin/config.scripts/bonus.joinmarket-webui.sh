@@ -95,15 +95,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # NGINX
     ##################
     # setup nginx symlinks
-    if ! [ -f /etc/nginx/sites-available/joinmarket_webui_ssl.conf ]; then
-       sudo cp -f /home/admin/assets/nginx/sites-available/joinmarket_webui_ssl.conf /etc/nginx/sites-available/joinmarket_webui_ssl.conf
-    fi
-    if ! [ -f /etc/nginx/sites-available/joinmarket_webui_tor.conf ]; then
-       sudo cp /home/admin/assets/nginx/sites-available/joinmarket_webui_tor.conf /etc/nginx/sites-available/joinmarket_webui_tor.conf
-    fi
-    if ! [ -f /etc/nginx/sites-available/joinmarket_webui_tor_ssl.conf ]; then
-       sudo cp /home/admin/assets/nginx/sites-available/joinmarket_webui_tor_ssl.conf /etc/nginx/sites-available/joinmarket_webui_tor_ssl.conf
-    fi
+    sudo cp -f /home/admin/assets/nginx/sites-available/joinmarket_webui_ssl.conf /etc/nginx/sites-available/joinmarket_webui_ssl.conf
+    sudo cp -f /home/admin/assets/nginx/sites-available/joinmarket_webui_tor.conf /etc/nginx/sites-available/joinmarket_webui_tor.conf
+    sudo cp -f /home/admin/assets/nginx/sites-available/joinmarket_webui_tor_ssl.conf /etc/nginx/sites-available/joinmarket_webui_tor_ssl.conf
     sudo ln -sf /etc/nginx/sites-available/joinmarket_webui_ssl.conf /etc/nginx/sites-enabled/
     sudo ln -sf /etc/nginx/sites-available/joinmarket_webui_tor.conf /etc/nginx/sites-enabled/
     sudo ln -sf /etc/nginx/sites-available/joinmarket_webui_tor_ssl.conf /etc/nginx/sites-enabled/
