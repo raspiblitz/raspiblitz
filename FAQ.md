@@ -777,6 +777,10 @@ Now to sync your branch namend BRANCH on your forked repo with your RaspiBlitz, 
 
 So your workflow can go like this: You write code on your local computer. Commit to your local repo, push it to your forked repo and use the sync-script above to get the code to your RaspiBlitz.
 
+### How to add an app to the RaspiBlitz?
+
+To add your app you can fork the raspiblitz repo, follow the `/home.admin/config.scripts/bonus.template.sh` script [see code](https://github.com/rootzoll/raspiblitz/blob/dev/home.admin/config.scripts/bonus.template.sh), copy/adapt it, test it on your RaspiBlitz and make a PR back to the main repo.
+
 ### How contribute a feature/change from my forked branch back to the RaspiBlitz repo?
 
 In the same way as described above, you can build a new feature or test a change. Once you have something ready that you want to contribute back, you make sure it's pushed to your forked GitHub repo, and then start a pull request from your forked repo to the RaspiBlitz repo.
