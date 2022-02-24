@@ -8,10 +8,10 @@
 
 # id string of your app (short single string unique in raspiblitz)
 # should be same as used in name if script
-APPID="TEMPLATE" # one-word lower-case no-specials  
+APPID="template" # one-word lower-case no-specials  
 
 # the git repo to get the source code from for install
-GITHUB_REPO="https://github.com/rootzoll/raspiblitz-template"
+GITHUB_REPO="https://github.com/rootzoll/webapp-template"
 
 # the github tag of the version of the source code to install
 # can also be a commit hash 
@@ -19,13 +19,17 @@ GITHUB_REPO="https://github.com/rootzoll/raspiblitz-template"
 GITHUB_VERSION="v0.1"
 
 # the github signature to verify the author
-# if empty verifying the git author will be 
-GITHUB_SIGNATURE=""
+# leave GITHUB_SIGN_AUTHOR empty to skip verifying 
+GITHUB_SIGN_AUTHOR="web-flow" 
+GITHUB_SIGN_PUBKEYLINK="https://github.com/web-flow.gpg"
+GITHUB_SIGN_FINGERPRINT="4AEE18F83AFDEB23" 
 
 # port numbers the app should run on
 # delete if not an web app
-PORT_NATIVE="12345"
+PORT_CLEAR="12345"
 PORT_SSL="12346"
+PORT_TOR_CLEAR="12347"
+PORT_TOR_SSL="12348"
 
 # BASIC COMMANDLINE OPTIONS
 # you can add more actions or parameters if needed - for example see the bonus.rtl.sh
@@ -78,11 +82,12 @@ if [ "$1" = "menu" ]; then
   echo "isInstalled=${isInstalled}"
   echo "isRunning=${isRunning}"
   if [ "${isInstalled}" == "1" ]; then
-    echo "portBASIC=${PORT_NATIVE}"
+    echo "portCLEAR=${PORT_CLEAR}"
     echo "portSSL=${PORT_SSL}"
     echo "localIP='${localIP}'"
     echo "toraddress='${toraddress}'"
     echo "fingerprint='${fingerprint}'"
+    echo "toraddress='${toraddress}'"
   fi
   exit
 fi
@@ -104,137 +109,132 @@ fi
 if [ "$1" = "menu" ]; then
 
 
-  # TODO construct menu based if tor address is available ....
+  # set the title for the dialog
+  dialogTitle=" ${APPID} "
 
-
-  # info with Tor
-  if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
-    sudo /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
-    whiptail --title "Ride The Lightning (RTL - $LNTYPE - $CHAIN)" --msgbox "Open in your local web browser:
-http://${localip}:${RTLHTTP}\n
-https://${localip}:$((RTLHTTP+1)) with Fingerprint:
+  # basic info text - for an web app how to call with http & self-signed https
+  dialogText="Open in your local web browser:
+http://${localIP}:${PORT_CLEAR}\n
+https://${localIP}:${PORT_SSL} with Fingerprint:
 ${fingerprint}\n
 Use your Password B to login.\n
-Hidden Service address for Tor Browser (QRcode on LCD):\n${toraddress}
-" 16 67
-    sudo /home/admin/config.scripts/blitz.display.sh hide
+"
 
-  # info without Tor
-  else
-    whiptail --title "Ride The Lightning (RTL - $LNTYPE - $CHAIN)" --msgbox "Open in your local web browser & accept self-signed cert:
-http://${localip}:${RTLHTTP}\n
-https://${localip}:$((RTLHTTP+1)) with Fingerprint:
-${fingerprint}\n
-Use your Password B to login.\n
-Activate Tor to access the web interface from outside your local network.
-" 15 67
-  fi
+  # add tor info (if available)
+  if [ "${toraddress}" != "" ]; then
+    dialogText="${dialogText}Hidden Service address for Tor Browser (QRcode on LCD):\n${toraddress}"
+  fi 
+
+  # use whiptail to show SSH dialog & exit
+  whiptail --title "${dialogTitle}" --msgbox "${dialogText}" 18 67
   echo "please wait ..."
   exit 0
 fi
 
 ##########################
-# ON
+# ON / INSTALL
 #########################
+
+# This section takes care of installing the app.
+# The template contains some basic steps but also look at other install scripts
+# to see how special cases are solved.
 
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
-  # check that parameters are set
-  if [ "${LNTYPE}" == "" ] || [ "${CHAIN}" == "" ]; then
-    echo "# missing parameter"
-    exit 1
-  fi
-
-  # check that is installed
-  isInstalled=$(sudo ls /etc/systemd/system/${systemdService}.service 2>/dev/null | grep -c "${systemdService}.service")
+  # dont run install if already installed
   if [ ${isInstalled} -eq 1 ]; then
-    echo "# OK, the ${netprefix}${typeprefix}RTL.service is already installed."
+    echo "# ${APPID}.service is already installed."
     exit 1
   fi
 
-  echo "# Installing RTL for ${LNTYPE} ${CHAIN}"
+  echo "# Installing ${APPID} ..."
 
-  # check and install NodeJS
+  # check and install NodeJS - if already installed it will skip
   /home/admin/config.scripts/bonus.nodejs.sh on
 
-  # create rtl user (one for all instances)
-  if [ $(compgen -u | grep -c rtl) -eq 0 ];then
-    sudo adduser --disabled-password --gecos "" rtl || exit 1
-  fi
-  echo "# Make sure symlink to central app-data directory exists"
-  if ! [[ -L "/home/rtl/.lnd" ]]; then
-    sudo rm -rf "/home/rtl/.lnd" 2>/dev/null              # not a symlink.. delete it silently
-    sudo ln -s "/mnt/hdd/app-data/lnd/" "/home/rtl/.lnd"  # and create symlink
-  fi
-  if [ "${LNTYPE}" == "lnd" ]; then
-    # for LND make sure user rtl is allowed to access admin macaroons
-    echo "# adding user rtl to group lndadmin"
-    sudo /usr/sbin/usermod --append --groups lndadmin rtl
-  fi
+  # create a dedicated user for the app 
+  # BACKGROUND is here to seperate running apps by unix users
+  # and only give file write access to the rest of the system where needed.
+  echo "# create user"
+  sudo adduser --disabled-password --gecos "" ${APPID} || exit 1
 
-  # source code (one place for all instances)
-  if [ -f /home/rtl/RTL/LICENSE ];then
-    echo "# OK - the RTL code is already present"
-    cd /home/rtl/RTL
+  # add user to speical groups with special access rights
+  # BACKGROUND there are some unix groups available that will give the access to
+  # like for example to the lnd admin macaroons - to check all groups available use:
+  # `cut -d: -f1 /etc/group | sort` command on raspiblitz commandline
+  echo "# add use to special groups"
+  sudo /usr/sbin/usermod --append --groups lndadmin ${APPID}
+  
+  # create a data directory on /mnt/hdd/app-data/ for the app
+  # BACKGROUND is that any critical data that needs to survive an update should
+  # be stored in that app-data directory. All data there will also be part of
+  # any raspiblitz data migration. Also on install handle the case that there
+  # is already data from a pervious install available the user wants to 
+  # continue to use and even may come from an older version from your app.
+
+  if ! [ -d /mnt/hdd/app-data/${APPID} ]; then
+
+    echo "# create app-data directory"
+    sudo mkdir /mnt/hdd/app-data/${APPID} 2>/dev/null
+    sudo chown ${APPID}:${APPID} -R /mnt/hdd/app-data/${APPID}
+
   else
-    # download source code and set to tag release
-    echo "# Get the RTL Source Code"
-    sudo -u rtl rm -rf /home/rtl/RTL 2>/dev/null
-    sudo -u rtl git clone https://github.com/ShahanaFarooqui/RTL.git /home/rtl/RTL
-    cd /home/rtl/RTL
-    # check https://github.com/Ride-The-Lightning/RTL/releases/
-    sudo -u rtl git reset --hard $RTLVERSION
-    PGPsigner="saubyk"
-    PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
-    PGPpubkeyFingerprint="00C9E2BC2E45666F"
-    sudo -u rtl /home/admin/config.scripts/blitz.git-verify.sh \
-     "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" "${RTLVERSION}" || exit 1
-    # from https://github.com/Ride-The-Lightning/RTL/commits/master
-    # git checkout 917feebfa4fb583360c140e817c266649307ef72
-    if [ -f /home/rtl/RTL/LICENSE ]; then
-      echo "# OK - RTL code copy looks good"
-    else
-      echo "# FAIL - RTL code not available"
-      echo "err='code download falied'"
-      exit 1
-    fi
-    # install
-    echo "# Run: npm install"
-    export NG_CLI_ANALYTICS=false
-    sudo -u rtl npm install --only=prod --logLevel warn
-    if ! [ $? -eq 0 ]; then
-      echo "# FAIL - npm install did not run correctly - deleting code and exit"
-      sudo rm -r /home/rtl/RTL
-      exit 1
-    else
-      echo "# OK - RTL install looks good"
-      echo
-    fi
+
+    echo "# reuse existing app-directory"
+    sudo chown ${APPID}:${APPID} -R /mnt/hdd/app-data/${APPID}
+
   fi
+  
+  # make sure needed debian packages are installed
+  # 'fbi' is here just an example - change to what you need or delete
+  echo "# install from source code"
+  sudo apt install -y fbi
 
-  echo "# Updating Firewall"
-  sudo ufw allow ${RTLHTTP} comment "${systemdService} HTTP"
-  sudo ufw allow $((RTLHTTP+1)) comment "${systemdService} HTTPS"
-  echo
+  # download source code and verify
+  # BACKGROUND is that now you download the code from github, reset to a given version tag/commit,
+  # verify the author. If you app provides its source/binaries in another way, may check
+  # other install scripts to see how that implement code download & verify.
+  echo "# download from source code & verify"
+  sudo -u ${APPID} git clone ${GITHUB_REPO} /home/${APPID}/${APPID}
+  cd /home/${APPID}/${APPID} 
+  sudo -u ${APPID} git reset --hard $GITHUB_VERSION
+  sudo -u ${APPID} /home/admin/config.scripts/blitz.git-verify.sh \
+     "${GITHUB_SIGN_AUTHOR}" "${GITHUB_SIGN_PUBKEYLINK}" "${GITHUB_SIGN_FINGERPRINT}" "${GITHUB_VERSION}" || exit 1
+  
 
-  # make sure config directory exists
-  sudo mkdir -p /mnt/hdd/app-data/rtl 2>/dev/null
-  sudo chown -R rtl:rtl /mnt/hdd/app-data/rtl
+  # compile/install the app
+  # BACKGROUND on this example is a web app that compiles with NodeJS. But of course
+  # your app could have a complete other way to install - check other instal screipts as examples.
+  echo "# compile/install the app"
+  cd /home/${APPID}/${APPID} 
+  sudo -u ${APPID} npm install --only=prod --logLevel warn
+  if ! [ $? -eq 0 ]; then
+      echo "# FAIL - npm install did not run correctly - deleting code & exit"
+      sudo rm -r /home/${APPID}/${APPID}
+      exit 1
+  fi
+    
+  # open the ports in the firewall
+  echo "# updating Firewall"
+  sudo ufw allow ${PORT_CLEAR} comment "${APPID} HTTP"
+  sudo ufw allow ${PORT_SSL} comment "${APPID} HTTPS"
 
-  echo "# Create Systemd Service: ${systemdService}.service (Template)"
+
+  # every app should have their own systemd service that cares about starting & 
+  # running the app in the background - see the PRESTART section for adhoc config
+  # please config this systemd template to your needs
+  echo "# create systemd service: ${APPID}.service"
   echo "
-# Systemd unit for ${systemdService}
-
 [Unit]
-Description=${systemdService} Webinterface
-Wants=
-After=
+Description=${APPID}
+Wants=bitcoind
+After=bitcoind
 
 [Service]
-Environment=\"RTL_CONFIG_PATH=/mnt/hdd/app-data/rtl/${systemdService}/\"
-ExecStartPre=-/home/admin/config.scripts/bonus.rtl.sh prestart ${LNTYPE} ${CHAIN}
-ExecStart=/usr/bin/node /home/rtl/RTL/rtl
-User=rtl
+Environment=\"HOME_PATH=/mnt/hdd/app-data/${APPID}\"
+ExecStartPre=-/home/admin/config.scripts/bonus.${APPID}.sh prestart
+ExecStart=/usr/bin/node /home/${APPID}/${APPID}/${APPID}
+User=${APPID}
 Restart=always
 TimeoutSec=120
 RestartSec=30
@@ -249,325 +249,182 @@ PrivateDevices=true
 
 [Install]
 WantedBy=multi-user.target
-" | sudo tee /etc/systemd/system/${systemdService}.service
-  sudo chown root:root /etc/systemd/system/${systemdService}.service
+" | sudo tee /etc/systemd/system/${APPID}.service
+  sudo chown root:root /etc/systemd/system/${APPID}.service
 
-  # adapt systemd service template for LND
-  if [ "${LNTYPE}" == "lnd" ]; then
-    echo "# modifying ${systemdService}.service for LND"
-    sudo sed -i "s/^Wants=.*/Wants=${netprefix}lnd.service/g" /etc/systemd/system/${systemdService}.service
-    sudo sed -i "s/^After=.*/After=${netprefix}lnd.service/g" /etc/systemd/system/${systemdService}.service
-  fi
-  # adapt systemd service template for
-  if [ "${LNTYPE}" == "cl" ]; then
-    echo "# modifying ${systemdService}.service for CL"
-    sudo sed -i "s/^Wants=.*/Wants=${netprefix}lightningd.service/g" /etc/systemd/system/${systemdService}.service
-    sudo sed -i "s/^After=.*/After=${netprefix}lightningd.service/g" /etc/systemd/system/${systemdService}.service
-
-    # set up C-LightningREST
-    /home/admin/config.scripts/cl.rest.sh on ${CHAIN}
-  fi
-
-  # Note about RTL config file
-  echo "# NOTE: the RTL config for this instance will be done on the fly as a prestart in systemd"
-
-  # Hidden Service for RTL if Tor is active
+  # when tor is set on also install the hidden service
   if [ "${runBehindTor}" = "on" ]; then
-    # make sure to keep in sync with tor.network.sh script
-    /home/admin/config.scripts/tor.onion-service.sh ${netprefix}${typeprefix}RTL 80 $((RTLHTTP+2)) 443 $((RTLHTTP+3))
+    # activating tor hidden service
+    /home/admin/config.scripts/tor.onion-service.sh ${APPID} 80 ${PORT_TOR_CLEAR} 443 ${PORT_TOR_SSL}
   fi
 
   # nginx configuration
-  echo "# Setup nginx confs"
-  sudo cp /home/admin/assets/nginx/sites-available/rtl_ssl.conf /etc/nginx/sites-available/${netprefix}${typeprefix}rtl_ssl.conf
-  sudo cp /home/admin/assets/nginx/sites-available/rtl_tor.conf /etc/nginx/sites-available/${netprefix}${typeprefix}rtl_tor.conf
-  sudo cp /home/admin/assets/nginx/sites-available/rtl_tor_ssl.conf /etc/nginx/sites-available/${netprefix}${typeprefix}rtl_tor_ssl.conf
-  sudo sed -i "s/3000/$RTLHTTP/g" /etc/nginx/sites-available/${netprefix}${typeprefix}rtl_ssl.conf
-  sudo sed -i "s/3001/$((RTLHTTP+1))/g" /etc/nginx/sites-available/${netprefix}${typeprefix}rtl_ssl.conf
-  sudo sed -i "s/3000/$RTLHTTP/g" /etc/nginx/sites-available/${netprefix}${typeprefix}rtl_tor.conf
-  sudo sed -i "s/3002/$((RTLHTTP+2))/g" /etc/nginx/sites-available/${netprefix}${typeprefix}rtl_tor.conf
-  sudo sed -i "s/3000/$RTLHTTP/g" /etc/nginx/sites-available/${netprefix}${typeprefix}rtl_tor_ssl.conf
-  sudo sed -i "s/3003/$((RTLHTTP+3))/g" /etc/nginx/sites-available/${netprefix}${typeprefix}rtl_tor_ssl.conf
-  sudo ln -sf /etc/nginx/sites-available/${netprefix}${typeprefix}rtl_ssl.conf /etc/nginx/sites-enabled/
-  sudo ln -sf /etc/nginx/sites-available/${netprefix}${typeprefix}rtl_tor.conf /etc/nginx/sites-enabled/
-  sudo ln -sf /etc/nginx/sites-available/${netprefix}${typeprefix}rtl_tor_ssl.conf /etc/nginx/sites-enabled/
+  # BACKGROUND is that the plain HTTP is served by your web app, but thru the nginx proxy it will be avaibale
+  # with (self-signed) HTTPS and with sepereate configs for Tor & Tor+HTTPS.
+  
+  echo "# setup nginx confing"
+
+  # write the HTTPS config
+  echo "
+server {
+    listen ${PORT_SSL} ssl;
+    listen [::]:${PORT_SSL} ssl;
+    server_name _;
+    include /etc/nginx/snippets/ssl-params.conf;
+    include /etc/nginx/snippets/ssl-certificate-app-data.conf;
+    access_log /var/log/nginx/access_${APPID}.log;
+    error_log /var/log/nginx/error_${APPID}.log;
+    location / {
+        proxy_pass http://127.0.0.1:${PORT_CLEAR};
+        include /etc/nginx/snippets/ssl-proxy-params.conf;
+    }
+}
+" | sudo tee /etc/nginx/sites-available/${APPID}_ssl.conf
+  sudo ln -sf /etc/nginx/sites-available/${APPID}_ssl.conf /etc/nginx/sites-enabled/
+
+  # write the TOR config
+  echo "
+server {
+    listen localhost:${PORT_TOR_CLEAR};
+    server_name _;
+    access_log /var/log/nginx/access_${APPID}.log;
+    error_log /var/log/nginx/error_${APPID}.log;
+    location / {
+        proxy_pass http://127.0.0.1:${PORT_CLEAR};
+        include /etc/nginx/snippets/ssl-proxy-params.conf;
+    }
+}
+" | sudo tee /etc/nginx/sites-available/${APPID}_tor.conf
+  sudo ln -sf /etc/nginx/sites-available/${APPID}_tor.conf /etc/nginx/sites-enabled/
+
+  # write the TOR+HTTPS config
+  echo "
+server {
+    listen localhost:${PORT_TOR_SSL} ssl;
+    server_name _;
+    include /etc/nginx/snippets/ssl-params.conf;
+    include /etc/nginx/snippets/ssl-certificate-app-data-tor.conf;
+    access_log /var/log/nginx/access_${appID}.log;
+    error_log /var/log/nginx/error_${appID}.log;
+    location / {
+        proxy_pass http://127.0.0.1:${PORT_CLEAR};
+        include /etc/nginx/snippets/ssl-proxy-params.conf;
+    }
+}
+" | sudo tee /etc/nginx/sites-available/${APPID}_tor_ssl.conf
+  sudo ln -sf /etc/nginx/sites-available/${APPID}_tor_ssl.conf /etc/nginx/sites-enabled/
+
+  # test nginx config & activate thru reload
   sudo nginx -t
   sudo systemctl reload nginx
 
-  # run config as root to connect prepare services (lit, pool, ...)
-  sudo /home/admin/config.scripts/bonus.rtl.sh connect-services
+  # mark app as installed in raspiblitz config
+  /home/admin/config.scripts/blitz.conf.sh set ${APPID} "on"
 
-  # ig
-  /home/admin/config.scripts/blitz.conf.sh set ${configEntry} "on"
-
-  sudo systemctl enable ${systemdService}
-  sudo systemctl start ${systemdService}
-  echo "# OK - the ${systemdService}.service is now enabled & started"
-  echo "# Monitor with: sudo journalctl -f -u ${systemdService}"
+  # start app up thru systemd
+  sudo systemctl enable ${APPID}
+  sudo systemctl start ${APPID}
+  echo "# OK - the ${APPID}.service is now enabled & started"
+  echo "# Monitor with: sudo journalctl -f -u ${APPID}"
   exit 0
-fi
 
-##########################
-# CONNECT SERVICES
-# will be called by lit or loop services to make sure services
-# are connected or on RTL install/update
-#########################
+  # OK so your app is now installed, but there please also check the following parts to ensure a propper integration
+  # into the raspiblitz system:
 
-if [ "$1" = "connect-services" ]; then
+  # PROVISION - reinstall on updates & recovery 
+  # Take a look at `_provision_.sh` script - you can see that there all bonus apps install scripts get called if
+  # they have an active entry in the raspiblitz config. This is needed so that on sd card image update or recovery
+  # all apps get installed again. So add your app there accordantly so its install will survive an sd card update.
 
-  # has to run as use root or sudo
-  if [ "$USER" != "root" ] && [ "$USER" != "admin" ]; then
-    echo "# FAIL: run as user root or admin"
-    exit 1
-  fi
+  # DEBUGLOGS - add some status information
+  # Take a look at the `blitz.debug.sh` script - you can see there that apps if they are installed give some
+  # information on their latest logs and where to find them in the case that the user is searching for an  error.
+  # So its best practice to also add your app there with some small info to help on debug & finding error logs.
 
-  # only run when RTL is installed
-  if [ -d /home/rtl ]; then
-    echo "## RTL CONNECT-SERVICES"
-  else
-    echo "# no RTL installed - no need to connect any services"
-    exit
-  fi
-
-  # LIT & LOOP Swap Server
-  echo "# checking of swap server ..."
-  if [ "${lit}" = "on" ]; then
-    echo "# LIT DETECTED"
-    echo "# Add the rtl user to the lit group"
-    sudo /usr/sbin/usermod --append --groups lit rtl
-    echo "# Symlink the lit-loop.macaroon"
-    sudo rm -rf "/home/rtl/.loop"                    #  delete symlink
-    sudo ln -s "/home/lit/.loop/" "/home/rtl/.loop"  # create symlink
-    echo "# Make the loop macaroon group readable"
-    sudo chmod 640 /home/rtl/.loop/mainnet/macaroons.db
-  elif [ "${loop}" = "on" ]; then
-    echo "# LOOP DETECTED"
-    echo "# Add the rtl user to the loop group"
-    sudo /usr/sbin/usermod --append --groups loop rtl
-    echo "# Symlink the loop.macaroon"
-    sudo rm -rf "/home/rtl/.loop"                     # delete symlink
-    sudo ln -s "/home/loop/.loop/" "/home/rtl/.loop"  # create symlink
-    echo "# Make the loop macaroon group readable"
-    sudo chmod 640 /home/rtl/.loop/mainnet/macaroons.db
-  else
-    echo "# No lit or loop single detected"
-  fi
-
-  echo "# RTL CONNECT-SERVICES done"
-  exit 0
+  # PRESTART & DEINSTALL
+  # see the following sections of the template
 
 fi
 
 ##########################
 # PRESTART
-# - will be called as prestart by systemd service (as user rtl)
-#########################
+##########################
+
+# BACKGROUND is that this script will be called with `prestart` on every start & restart
+# of this apps systemd service. This has the benefit that right before the app is started
+# config parameters for this app can be updated so that it always starts with the most updated
+# values. With such an "adhoc config" it is for example possible to check right before start
+# what other apps are installed and configure connections. Even if those configs outdate later
+# while the app is running with the next restart they will then autmatically update their config
+# again. If you dont need such "adhoc" config for your app - just leave it empty as it is, so
+# you maybe later on have the option to use it.
 
 if [ "$1" = "prestart" ]; then
 
-  # check that parameters are set
-  if [ "${LNTYPE}" == "" ] || [ "${CHAIN}" == "" ]; then
-    echo "# missing parameter"
+  # needs to be run as the app user - stop if not run as the app user
+  # keep in mind that in the prestart section you cannot use `sudo` command
+  if [ "$USER" != "${APPID}" ]; then
+    echo "# FAIL: run as user ${APPID}"
     exit 1
   fi
 
-  # users need to be `rtl` so that it can be run by systemd as prestart (no SUDO available)
-  if [ "$USER" != "rtl" ]; then
-    echo "# FAIL: run as user rtl"
-    exit 1
-  fi
+  echo "## PRESTART CONFIG START for ${APPID} (called by systemd prestart)"
 
-  echo "## RTL PRESTART CONFIG (called by systemd prestart)"
+  # so if you have anything to configrure before service starts, do it here
+  echo "# no need for adhoc config needed so far"
 
-  # getting the up-to-date RPC password
-  RPCPASSWORD=$(cat /mnt/hdd/${network}/${network}.conf | grep "^rpcpassword=" | cut -d "=" -f2)
-  echo "# Using RPCPASSWORD(${RPCPASSWORD})"
-
-  # determine correct loop swap server port (lit over loop single)
-  if [ "${lit}" = "on" ]; then
-      echo "# use lit loop port"
-      SWAPSERVERPORT=8443
-  elif [ "${loop}" = "on" ]; then
-      echo "# use loop single instance port"
-      SWAPSERVERPORT=8081
-  else
-      echo "# No lit or loop single detected"
-      SWAPSERVERPORT=""
-  fi
-
-  # prepare RTL-Config.json file
-  echo "# PREPARE /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json"
-
-  # make sure directory exists
-  mkdir -p /mnt/hdd/app-data/rtl/${systemdService} 2>/dev/null
-
-  # check if RTL-Config.json exists
-  configExists=$(ls /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json 2>/dev/null | grep -c "RTL-Config.json")
-  if [ "${configExists}" == "0" ]; then
-    # copy template
-    cp /home/rtl/RTL/Sample-RTL-Config.json /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json
-    chmod 600 /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json
-  fi
-
-  # LND changes of config
-  if [ "${LNTYPE}" == "lnd" ]; then
-    echo "# LND Config"
-    cat /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json | \
-    jq ".port = \"${RTLHTTP}\"" | \
-    jq ".multiPass = \"${RPCPASSWORD}\"" | \
-    jq ".multiPassHashed = \"\"" | \
-    jq ".nodes[0].lnNode = \"${hostname}\"" | \
-    jq ".nodes[0].lnImplementation = \"LND\"" | \
-    jq ".nodes[0].Authentication.macaroonPath = \"/home/rtl/.lnd/data/chain/${network}/${CHAIN}/\"" | \
-    jq ".nodes[0].Authentication.configPath = \"/home/rtl/.lnd/${netprefix}lnd.conf\"" | \
-    jq ".nodes[0].Authentication.swapMacaroonPath = \"/home/rtl/.loop/${CHAIN}/\"" | \
-    jq ".nodes[0].Authentication.boltzMacaroonPath = \"/home/rtl/.boltz-lnd/macaroons/\"" | \
-    jq ".nodes[0].Settings.userPersona = \"OPERATOR\"" | \
-    jq ".nodes[0].Settings.lnServerUrl = \"https://localhost:${portprefix}8080\"" | \
-    jq ".nodes[0].Settings.channelBackupPath = \"/mnt/hdd/app-data/rtl/${systemdService}-SCB-backup-$hostname\"" | \
-    jq ".nodes[0].Settings.swapServerUrl = \"https://localhost:${SWAPSERVERPORT}\"" > /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json.tmp
-    mv /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json.tmp /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json
-  fi
-
-  # C-Lightning changes of config
-  # https://github.com/Ride-The-Lightning/RTL/blob/master/docs/C-Lightning-setup.md
-  if [ "${LNTYPE}" == "cl" ]; then
-    echo "# CL Config"
-    cat /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json | \
-    jq ".port = \"${RTLHTTP}\"" | \
-    jq ".multiPass = \"${RPCPASSWORD}\"" | \
-    jq ".multiPassHashed = \"\"" | \
-    jq ".nodes[0].lnNode = \"${hostname}\"" | \
-    jq ".nodes[0].lnImplementation = \"CLT\"" | \
-    jq ".nodes[0].Authentication.macaroonPath = \"/home/bitcoin/c-lightning-REST/certs\"" | \
-    jq ".nodes[0].Authentication.configPath = \"${CLCONF}\"" | \
-    jq ".nodes[0].Authentication.swapMacaroonPath = \"/home/rtl/.loop/${CHAIN}/\"" | \
-    jq ".nodes[0].Authentication.boltzMacaroonPath = \"/home/rtl/.boltz-lnd/macaroons/\"" | \
-    jq ".nodes[0].Settings.userPersona = \"OPERATOR\"" | \
-    jq ".nodes[0].Settings.lnServerUrl = \"https://localhost:${portprefix}6100\"" | \
-    jq ".nodes[0].Settings.channelBackupPath = \"/mnt/hdd/app-data/rtl/${systemdService}-SCB-backup-$hostname\"" | \
-    jq ".nodes[0].Settings.swapServerUrl = \"https://localhost:${SWAPSERVERPORT}\"" > /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json.tmp
-    mv /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json.tmp /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json
-  fi
-
-  echo "# RTL prestart config done"
+  echo "## PRESTART CONFIG DONE for ${APPID}"
   exit 0
 fi
 
-##########################
-# OFF
-#########################
+###########################################
+# OFF / DEINSTALL
+# call with parameter `delete-data` to also
+# delete the persistent data directory
+###########################################
+
+# BACKGROUND is that this section removes entries in systemd, nginx, etc and then
+# deletes the user with its home directory to nuke all installed code
 
 # switch off
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
-  # check that parameters are set
-  if [ "${LNTYPE}" == "" ] || [ "${CHAIN}" == "" ]; then
-    echo "# missing parameter"
-    exit 1
-  fi
+  echo "# stop & remove systemd service"
+  sudo systemctl stop ${APPID} 2>/dev/null  
+  sudo systemctl disable ${APPID}.service
+  sudo rm /etc/systemd/system/${APPID}.service
 
-  # stop services
-  echo "# making sure services are not running"
-  sudo systemctl stop ${systemdService} 2>/dev/null
-
-  # remove config
-  sudo rm -f /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json
-
-  # setting value in raspi blitz config
-  /home/admin/config.scripts/blitz.conf.sh set ${configEntry} "off"
-
-  # remove nginx symlinks
-  sudo rm -f /etc/nginx/sites-enabled/${netprefix}${typeprefix}rtl_ssl.conf 2>/dev/null
-  sudo rm -f /etc/nginx/sites-enabled/${netprefix}${typeprefix}rtl_tor.conf 2>/dev/null
-  sudo rm -f /etc/nginx/sites-enabled/${netprefix}${typeprefix}rtl_tor_ssl.conf 2>/dev/null
-  sudo rm -f /etc/nginx/sites-available/${netprefix}${typeprefix}rtl_ssl.conf 2>/dev/null
-  sudo rm -f /etc/nginx/sites-available/${netprefix}${typeprefix}rtl_tor.conf 2>/dev/null
-  sudo rm -f /etc/nginx/sites-available/${netprefix}${typeprefix}rtl_tor_ssl.conf 2>/dev/null
+  echo "# remove nginx symlinks"
+  sudo rm -f /etc/nginx/sites-enabled/${APPID}_ssl.conf 2>/dev/null
+  sudo rm -f /etc/nginx/sites-enabled/${APPID}_tor.conf 2>/dev/null
+  sudo rm -f /etc/nginx/sites-enabled/${APPID}_tor_ssl.conf 2>/dev/null
+  sudo rm -f /etc/nginx/sites-available/${APPID}_ssl.conf 2>/dev/null
+  sudo rm -f /etc/nginx/sites-available/${APPID}_tor.conf 2>/dev/null
+  sudo rm -f /etc/nginx/sites-available/${APPID}_tor_ssl.conf 2>/dev/null
   sudo nginx -t
   sudo systemctl reload nginx
 
-  # Hidden Service if Tor is active
-  if [ "${runBehindTor}" = "on" ]; then
-    /home/admin/config.scripts/tor.onion-service.sh off ${systemdService}
+  echo "# close ports on firewall"
+  sudo ufw deny "${PORT_CLEAR}"
+  sudo ufw deny "${PORT_SSL}"
+ 
+  echo "# removing Tor hidden service (if active)"
+  /home/admin/config.scripts/tor.onion-service.sh off ${APPID}  
+
+  echo "# mark app as uninstalled in raspiblitz config"
+  /home/admin/config.scripts/blitz.conf.sh set ${APPID} "off"
+
+  # only if 'delete-data' is an additional parameter then also the data directory gets deleted
+  if [ "$(echo "$@" | grep -c delete-data)" -gt 0 ]; then
+    echo "# found 'delete-data' parameter --> also deleting the app-data"
+    sudo rm -r /mnt/hdd/app-data/${APPID}
   fi
 
-  isInstalled=$(sudo ls /etc/systemd/system/${systemdService}.service 2>/dev/null | grep -c "${systemdService}.service")
-  if [ ${isInstalled} -eq 1 ]; then
-
-    echo "# Removing RTL for ${LNTYPE} ${CHAIN}"
-    sudo systemctl disable ${systemdService}.service
-    sudo rm /etc/systemd/system/${systemdService}.service
-    echo "# OK ${systemdService} removed."
-
-  else
-    echo "# ${systemdService} is not installed."
-  fi
-
-  # only if 'purge' is an additional parameter (other instances/services might need this)
-  if [ "$(echo "$@" | grep -c purge)" -gt 0 ];then
-    echo "# Removing the binaries"
-    echo "# Delete user and home directory"
-    sudo userdel -rf rtl
-    if [ $LNTYPE = cl ];then
-      /home/admin/config.scripts/cl.rest.sh off ${CHAIN}
-    fi
-    echo "# Delete all configs"
-    sudo rm -rf /mnt/hdd/app-data/rtl
-  fi
-
-  # close ports on firewall
-  sudo ufw deny "${RTLHTTP}"
-  sudo ufw deny $((RTLHTTP+1))
+  echo "# OK - app should be deinstalled now"
   exit 0
+
 fi
 
-# DEACTIVATED FOR NOW:
-# - parameter scheme is conflicting with setting all prefixes etc
-# - also just updating to latest has high change of breaking
-#if [ "$1" = "update" ]; then
-#  echo "# UPDATING RTL"
-#  cd /home/rtl/RTL
-#  updateOption="$2"
-#  if [ ${#updateOption} -eq 0 ]; then
-#    # from https://github.com/apotdevin/thunderhub/blob/master/scripts/updateToLatest.sh
-#    # fetch latest master
-#    sudo -u rtl git fetch
-#    # unset $1
-#    set --
-#    UPSTREAM=${1:-'@{u}'}
-#    LOCAL=$(git rev-parse @)
-#    REMOTE=$(git rev-parse "$UPSTREAM")
-#    if [ $LOCAL = $REMOTE ]; then
-#      TAG=$(git tag | sort -V | tail -1)
-#      echo "# You are up-to-date on version" $TAG
-#    else
-#      echo "# Pulling latest changes..."
-#      sudo -u rtl git pull -p
-#      echo "# Reset to the latest release tag"
-#      TAG=$(git tag | sort -V | tail -1)
-#      sudo -u rtl git reset --hard $TAG
-#      echo "# updating to the latest"
-#      # https://github.com/Ride-The-Lightning/RTL#or-update-existing-dependencies
-#      sudo -u rtl npm install --only=prod
-#      echo "# Updated to version" $TAG
-#    fi
-#  elif [ "$updateOption" = "commit" ]; then
-#    echo "# updating to the latest commit in https://github.com/Ride-The-Lightning/RTL"
-#    sudo -u rtl git pull -p
-#    sudo -u rtl npm install --only=prod
-#    currentRTLcommit=$(cd /home/rtl/RTL; git describe --tags)
-#    echo "# Updated RTL to $currentRTLcommit"
-#  else
-#    echo "# Unknown option: $updateOption"
-#  fi
-#
-#  echo
-#  echo "# Starting the RTL service ... "
-#  sudo systemctl start RTL
-#  exit 0
-#fi
-
+# just a basic error message when unknow action parameter was given  
 echo "# FAIL - Unknown Parameter $1"
-echo "# may need reboot to run normal again"
 exit 1
