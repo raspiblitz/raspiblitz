@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# This is a template bonus script you can use to add your app to RaspiBlitz.
+# This is a template bonus script you can use to add your own app to RaspiBlitz.
 # So just copy it within the `/home.admin/config.scripts` directory and
 # rename it for your app - example: `bonus.myapp.sh`.
 # Then go thru this script and delete parts/comments you dont need or add
@@ -99,8 +99,8 @@ fi
 # The `menu` action should give at least a SSH info dialog - when an webapp show
 # URL to call (http & https+fingerprint) otherwise some instruction how to start it.
 
-# This SSH dialog can be added to MAIN MENU to be available to the user
-# when app is istalled (see/edit 00mainmenu.sh script).
+# This SSH dialog will be later called by the MAIN MENU to be available to the user
+# when app is istalled.
 
 # This menu can also have some more complex structure if you want to make it easy
 # to the user to set configurations or maintance options - example bonus.lnbits.sh
@@ -336,6 +336,14 @@ server {
   # they have an active entry in the raspiblitz config. This is needed so that on sd card image update or recovery
   # all apps get installed again. So add your app there accordantly so its install will survive an sd card update.
 
+  # MAINMENU - show users that app is installed
+  # Take a look at the `00mainmenu.sh` script - you can see there almost all bonus apps add a menu entry there if
+  # they are installed that then is calling this script with the `menu` parameter. Add your app accordantly.
+
+  # SERVICES MENU - add your app for onclick install
+  # Take a look at the `00settingsMenuServices.sh` script - you can there almost all bonus apps added themselves
+  # as an option in to be easily installed & deinstalled. Add your app there accordantly.
+
   # DEBUGLOGS - add some status information
   # Take a look at the `blitz.debug.sh` script - you can see there that apps if they are installed give some
   # information on their latest logs and where to find them in the case that the user is searching for an  error.
@@ -428,3 +436,7 @@ fi
 # just a basic error message when unknow action parameter was given  
 echo "# FAIL - Unknown Parameter $1"
 exit 1
+
+# LAST NOTES:
+# Best is to contribute a new app install script as a PR to the raspiblitz GitHub repo. 
+# Please base your PR on the `dev` branch - not on the default branch displayed.
