@@ -133,7 +133,7 @@ fi
 
 ##########################
 # ON / INSTALL
-#########################
+##########################
 
 # This section takes care of installing the app.
 # The template contains some basic steps but also look at other install scripts
@@ -198,9 +198,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo -u ${APPID} git clone ${GITHUB_REPO} /home/${APPID}/${APPID}
   cd /home/${APPID}/${APPID} 
   sudo -u ${APPID} git reset --hard $GITHUB_VERSION
-  sudo -u ${APPID} /home/admin/config.scripts/blitz.git-verify.sh \
+  if [ "${GITHUB_SIGN_AUTHOR}" != "" ]; then
+    sudo -u ${APPID} /home/admin/config.scripts/blitz.git-verify.sh \
      "${GITHUB_SIGN_AUTHOR}" "${GITHUB_SIGN_PUBKEYLINK}" "${GITHUB_SIGN_FINGERPRINT}" "${GITHUB_VERSION}" || exit 1
-  
+  fi
 
   # compile/install the app
   # BACKGROUND on this example is a web app that compiles with NodeJS. But of course
