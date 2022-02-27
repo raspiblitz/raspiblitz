@@ -347,7 +347,6 @@ fi
 if [ "${baseimage}" = "raspios_arm64" ] || [ "${baseimage}" = "debian_rpi64" ]; then
     
   echo -e "\n*** PREPARE RASPBERRY OS VARIANTS ***"    
-  #sudo apt install -y raspi-config
   apt_install raspi-config
   # do memory split (16MB)
   sudo raspi-config nonint do_memory_split 16
