@@ -596,7 +596,7 @@ echo -e "\n*** RASPIBLITZ EXTRAS ***"
 # screen for background processes
 # tmux for multiple (detachable/background) sessions when using SSH https://github.com/rootzoll/raspiblitz/issues/990
 # fzf install a command-line fuzzy finder (https://github.com/junegunn/fzf)
-sudo apt -y install tmux screen fzf
+apt_install tmux screen fzf
 
 sudo bash -c "echo '' >> /home/admin/.bashrc"
 sudo bash -c "echo '# https://github.com/rootzoll/raspiblitz/issues/1784' >> /home/admin/.bashrc"
