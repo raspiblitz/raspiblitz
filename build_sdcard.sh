@@ -301,7 +301,7 @@ general_utils="policykit-1 htop git curl bash-completion vim jq dphys-swapfile b
 python_dependencies="python3-venv python3-dev python3-wheel python3-jinja2 python3-pip"
 server_utils="rsync net-tools xxd netcat openssh-client openssh-sftp-server sshpass psmisc ufw sqlite3"
 [ "${baseimage}" = "armbian" ] && armbian_dependencies="armbian-config" # add armbian-config
-sudo apt_install ${general_utils} ${python_dependencies} ${server_utils} ${armbian_dependencies}
+apt_install ${general_utils} ${python_dependencies} ${server_utils} ${armbian_dependencies}
 sudo apt clean -y
 sudo apt autoremove -y
 
