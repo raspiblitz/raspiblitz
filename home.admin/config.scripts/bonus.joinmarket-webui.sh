@@ -31,22 +31,22 @@ if [ "$1" = "menu" ]; then
     fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
 
     if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
-      # Info with TOR
+      # Info with Tor
       sudo /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
       whiptail --title " JoinMarket Web UI " --msgbox "Open in your local web browser:
 https://${localip}:7501\n
 with Fingerprint:
 ${fingerprint}\n
-Hidden Service address for TOR Browser (see LCD for QR):\n${toraddress}
+Hidden Service address for Tor Browser (see LCD for QR):\n${toraddress}
 " 16 67
       sudo /home/admin/config.scripts/blitz.display.sh hide
     else
-      # Info without TOR
+      # Info without Tor
       whiptail --title " JoinMarket Web UI " --msgbox "Open in your local web browser & accept self-signed cert:
 https://${localip}:7501\n
 with Fingerprint:
 ${fingerprint}\n
-Activate TOR to access the web interface from outside your local network.
+Activate Tor to access the web interface from outside your local network.
 " 15 57
     fi
     echo "please wait ..."
@@ -74,19 +74,26 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     /home/admin/config.scripts/bonus.nodejs.sh on
 
     # install JoinMarket Web UI
-    cd $HOME_DIR
+    cd $HOME_DIR || exit 1
 
-    sudo -u $USERNAME wget https://github.com/$REPO/archive/refs/tags/v$WEBUI_VERSION.tar.gz
-    sudo -u $USERNAME tar -xzf v$WEBUI_VERSION.tar.gz
-    sudo -u $USERNAME rm v$WEBUI_VERSION.tar.gz
-    sudo -u $USERNAME mv joinmarket-webui-$WEBUI_VERSION $APP_DIR
+    sudo -u $USERNAME git clone https://github.com/$REPO
 
-    cd $APP_DIR
+    cd joinmarket-webui || exit 1
+    sudo -u $USERNAME git reset --hard v${WEBUI_VERSION}
+
+    GITHUB_SIGN_AUTHOR="web-flow"
+    GITHUB_SIGN_PUBKEYLINK="https://github.com/web-flow.gpg"
+    GITHUB_SIGN_FINGERPRINT="4AEE18F83AFDEB23"
+    sudo -u $USERNAME /home/admin/config.scripts/blitz.git-verify.sh \
+     "${GITHUB_SIGN_AUTHOR}" "${GITHUB_SIGN_PUBKEYLINK}" "${GITHUB_SIGN_FINGERPRINT}" || exit 1
+
+    cd $HOME_DIR || exit 1
+    sudo -u $USERNAME mv joinmarket-webui $APP_DIR
+    cd $APP_DIR || exit 1
     sudo -u $USERNAME rm -rf docker
-    sudo -u $USERNAME npm install
-    if ! [ $? -eq 0 ]; then
-        echo "FAIL - npm install did not run correctly, aborting"
-        exit 1
+    if ! sudo -u $USERNAME npm install; then
+      echo "FAIL - npm install did not run correctly, aborting"
+      exit 1
     fi
 
     sudo -u $USERNAME npm run build
@@ -111,14 +118,14 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo ""
 
     # SSL
-    if [ -d $HOME_DIR/.joinmarket/ssl]; then
+    if [ -d $HOME_DIR/.joinmarket/ssl ]; then
       sudo -u $USERNAME rm -rf $HOME_DIR/.joinmarket/ssl
     fi
     subj="/C=US/ST=Utah/L=Lehi/O=Your Company, Inc./OU=IT/CN=example.com"
     sudo -u $USERNAME mkdir -p $HOME_DIR/.joinmarket/ssl/ \
       && pushd "$_" \
       && sudo -u $USERNAME openssl req -newkey rsa:4096 -x509 -sha256 -days 3650 -nodes -out cert.pem -keyout key.pem -subj "$subj" \
-      && popd
+      && popd || exit 1
 
     ##################
     # SYSTEMD SERVICE
@@ -215,7 +222,7 @@ if [ "$1" = "update" ]; then
       sudo -u $USERNAME mv joinmarket-webui-$version $APP_DIR-update
     fi
 
-    cd $APP_DIR-update
+    cd $APP_DIR-update || exit 1
     sudo -u $USERNAME rm -rf docker
     sudo -u $USERNAME npm install
     if ! [ $? -eq 0 ]; then
@@ -244,7 +251,7 @@ fi
 # switch off
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   isInstalled=$(sudo ls $HOME_DIR 2>/dev/null | grep -c "$APP_DIR")
-  if [ ${isInstalled} -eq 1 ]; then
+  if [ "${isInstalled}" -eq 1 ]; then
     echo "*** UNINSTALL JOINMARKET WEB UI ***"
 
     # remove systemd service
