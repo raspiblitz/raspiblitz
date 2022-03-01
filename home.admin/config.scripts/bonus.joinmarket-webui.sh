@@ -95,15 +95,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # NGINX
     ##################
     # setup nginx symlinks
-    if ! [ -f /etc/nginx/sites-available/joinmarket_webui_ssl.conf ]; then
-       sudo cp -f /home/admin/assets/nginx/sites-available/joinmarket_webui_ssl.conf /etc/nginx/sites-available/joinmarket_webui_ssl.conf
-    fi
-    if ! [ -f /etc/nginx/sites-available/joinmarket_webui_tor.conf ]; then
-       sudo cp /home/admin/assets/nginx/sites-available/joinmarket_webui_tor.conf /etc/nginx/sites-available/joinmarket_webui_tor.conf
-    fi
-    if ! [ -f /etc/nginx/sites-available/joinmarket_webui_tor_ssl.conf ]; then
-       sudo cp /home/admin/assets/nginx/sites-available/joinmarket_webui_tor_ssl.conf /etc/nginx/sites-available/joinmarket_webui_tor_ssl.conf
-    fi
+    sudo cp -f /home/admin/assets/nginx/sites-available/joinmarket_webui_ssl.conf /etc/nginx/sites-available/joinmarket_webui_ssl.conf
+    sudo cp -f /home/admin/assets/nginx/sites-available/joinmarket_webui_tor.conf /etc/nginx/sites-available/joinmarket_webui_tor.conf
+    sudo cp -f /home/admin/assets/nginx/sites-available/joinmarket_webui_tor_ssl.conf /etc/nginx/sites-available/joinmarket_webui_tor_ssl.conf
     sudo ln -sf /etc/nginx/sites-available/joinmarket_webui_ssl.conf /etc/nginx/sites-enabled/
     sudo ln -sf /etc/nginx/sites-available/joinmarket_webui_tor.conf /etc/nginx/sites-enabled/
     sudo ln -sf /etc/nginx/sites-available/joinmarket_webui_tor_ssl.conf /etc/nginx/sites-enabled/
@@ -117,17 +111,14 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo ""
 
     # SSL
-    if ! [ -d $HOME_DIR/.joinmarket/ssl ]; then
-      sudo -u $USERNAME mkdir -p $HOME_DIR/.joinmarket/ssl
+    if [ -d $HOME_DIR/.joinmarket/ssl]; then
+      sudo -u $USERNAME rm -rf $HOME_DIR/.joinmarket/ssl
     fi
-    if ! [ -f $HOME_DIR/.joinmarket/ssl/cert.pem ]; then
-      sudo ln -sf /mnt/hdd/app-data/nginx/tls.cert $HOME_DIR/.joinmarket/ssl/cert.pem
-      sudo chown $USERNAME:$USERNAME $HOME_DIR/.joinmarket/ssl/cert.pem
-    fi
-    if ! [ -f $HOME_DIR/.joinmarket/ssl/key.pem ]; then
-      sudo ln -sf /mnt/hdd/app-data/nginx/tls.key $HOME_DIR/.joinmarket/ssl/key.pem
-      sudo chown $USERNAME:$USERNAME $HOME_DIR/.joinmarket/ssl/key.pem
-    fi
+    subj="/C=US/ST=Utah/L=Lehi/O=Your Company, Inc./OU=IT/CN=example.com"
+    sudo -u $USERNAME mkdir -p $HOME_DIR/.joinmarket/ssl/ \
+      && pushd "$_" \
+      && sudo -u $USERNAME openssl req -newkey rsa:4096 -x509 -sha256 -days 3650 -nodes -out cert.pem -keyout key.pem -subj "$subj" \
+      && popd
 
     ##################
     # SYSTEMD SERVICE
@@ -139,7 +130,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
 [Unit]
 Description=JoinMarket API daemon
-# Make sure lnd starts after bitcoind is ready
 Requires=bitcoind.service
 After=bitcoind.service
 
@@ -188,7 +178,7 @@ fi
 # precheck
 if [ "$1" = "precheck" ]; then
   if [ $(/usr/local/bin/bitcoin-cli -conf=/mnt/hdd/bitcoin/bitcoin.conf listwallets | grep -c wallet.dat) -eq 0 ];then
-    echo "# Create wallet.dat" 
+    echo "# Create wallet.dat"
     /usr/local/bin/bitcoin-cli -conf=/mnt/hdd/bitcoin/bitcoin.conf createwallet wallet.dat
   else
     echo "# The wallet.dat is loaded in bitcoind."
