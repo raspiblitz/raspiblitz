@@ -10,6 +10,10 @@ RASPIBLITZ_INFO=/home/admin/raspiblitz.info
 RASPIBLITZ_CONF=/mnt/hdd/raspiblitz.conf
 WEBUI_VERSION=0.0.3
 
+GITHUB_SIGN_AUTHOR="web-flow"
+GITHUB_SIGN_PUBKEYLINK="https://github.com/web-flow.gpg"
+GITHUB_SIGN_FINGERPRINT="4AEE18F83AFDEB23"
+
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "config script to switch joinmarket_webui on or off"
@@ -80,12 +84,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     cd joinmarket-webui || exit 1
     sudo -u $USERNAME git reset --hard v${WEBUI_VERSION}
-
-    GITHUB_SIGN_AUTHOR="web-flow"
-    GITHUB_SIGN_PUBKEYLINK="https://github.com/web-flow.gpg"
-    GITHUB_SIGN_FINGERPRINT="4AEE18F83AFDEB23"
     sudo -u $USERNAME /home/admin/config.scripts/blitz.git-verify.sh \
-     "${GITHUB_SIGN_AUTHOR}" "${GITHUB_SIGN_PUBKEYLINK}" "${GITHUB_SIGN_FINGERPRINT}" || exit 1
+      "${GITHUB_SIGN_AUTHOR}" "${GITHUB_SIGN_PUBKEYLINK}" "${GITHUB_SIGN_FINGERPRINT}" || exit 1
 
     cd $HOME_DIR || exit 1
     sudo -u $USERNAME mv joinmarket-webui $APP_DIR
@@ -203,31 +203,25 @@ if [ "$1" = "update" ]; then
   isInstalled=$(sudo ls $HOME_DIR 2>/dev/null | grep -c "$APP_DIR")
   if [ ${isInstalled} -eq 1 ]; then
     echo "*** UPDATE JOINMARKET WEB UI ***"
-    cd $HOME_DIR
+    cd $HOME_DIR/$APP_DIR || exit 1
 
+    sudo -u $USERNAME git fetch origin
     if [ "$2" = "commit" ]; then
-      echo "# Updating to the latest commit in the default branch"
-      sudo -u $USERNAME wget https://github.com/$REPO/archive/refs/heads/master.tar.gz
-      sudo -u $USERNAME tar -xzf master.tar.gz
-      sudo -u $USERNAME rm -rf master.tar.gz
-      sudo -u $USERNAME mv joinmarket-webui-master $APP_DIR-update
+      echo "# Updating to the latest commit in the master branch"
+
+      sudo -u $USERNAME git reset --hard
+      sudo -u $USERNAME git pull origin master --rebase
+      sudo -u $USERNAME /home/admin/config.scripts/blitz.git-verify.sh \
+        "${GITHUB_SIGN_AUTHOR}" "${GITHUB_SIGN_PUBKEYLINK}" "${GITHUB_SIGN_FINGERPRINT}" || exit 1
     else
-      version=$(curl --silent "https://api.github.com/repos/$REPO/releases/latest" | grep '"tag_name":' | sed -E 's/.*"v([^"]+)".*/\1/')
-      cd $APP_DIR
-      current=$(node -p "require('./package.json').version")
-      cd ..
-      if [ "$current" = "$version" ]; then
-        echo "*** JOINMARKET WEB UI IS ALREADY UPDATED TO LATEST VERSION ***"
-        exit 0
-      fi
-      sudo -u $USERNAME wget https://github.com/$REPO/archive/refs/tags/v$version.tar.gz
-      sudo -u $USERNAME tar -xzf v$version.tar.gz
-      sudo -u $USERNAME rm v$version.tar.gz
-      sudo -u $USERNAME mv joinmarket-webui-$version $APP_DIR-update
+      TAG=$(git tag | sort -V | tail -1)
+      echo "# Updating to $TAG"
+
+      sudo -u $USERNAME git reset --hard ${TAG}
+      sudo -u $USERNAME /home/admin/config.scripts/blitz.git-verify.sh \
+        "${GITHUB_SIGN_AUTHOR}" "${GITHUB_SIGN_PUBKEYLINK}" "${GITHUB_SIGN_FINGERPRINT}" || exit 1
     fi
 
-    cd $APP_DIR-update || exit 1
-    sudo -u $USERNAME rm -rf docker
     sudo -u $USERNAME npm install
     if ! [ $? -eq 0 ]; then
       echo "FAIL - npm install did not run correctly, aborting"
@@ -239,10 +233,6 @@ if [ "$1" = "update" ]; then
       echo "FAIL - npm run build did not run correctly, aborting"
       exit 1
     fi
-    cd ..
-    sudo -u $USERNAME rm -rf $APP_DIR
-    sudo -u $USERNAME mv $APP_DIR-update $APP_DIR
-
     echo "*** JOINMARKET WEB UI UPDATED ***"
   else
     echo "*** JOINMARKET WEB UI NOT INSTALLED ***"
