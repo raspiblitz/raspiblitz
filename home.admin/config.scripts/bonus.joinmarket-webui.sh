@@ -178,6 +178,10 @@ WantedBy=multi-user.target
   else
     echo "*** JOINMARKET WEB UI ALREADY INSTALLED ***"
   fi
+  echo
+  echo "# For the connection details run:"
+  echo "/home/admin/config.scripts/bonus.joinmarket-webui.sh menu"
+  echo
   exit 0
 fi
 
