@@ -22,7 +22,7 @@ SERVICE_LNBITS = "LNBITS"
 SERVICE_BTCPAY = "BTCPAY"
 SERVICE_SPHINX = "SPHINX"
 
-# load config 
+# load config
 cfg = RaspiBlitzConfig()
 cfg.reload()
 
@@ -312,11 +312,11 @@ def main():
         # check if Sphinx-Relay is installed
         sphinx_relay = False
         try:
-            status_data = subprocess.run(['/home/admin/config.scripts/bonus.sphinxrelay.sh', 'status'], 
+            status_data = subprocess.run(['/home/admin/config.scripts/bonus.sphinxrelay.sh', 'status'],
                 stdout=subprocess.PIPE, timeout=10).stdout.decode('utf-8').strip()
         except Exception as e:
             print(e)
-            
+
         if status_data.find("installed=1") > -1:
             sphinx_relay = True
 

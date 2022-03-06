@@ -46,7 +46,7 @@ def add6x4(seedwords):
 def test(words):
 
     mnemo = Mnemonic("english")
-    if mnemo.check(words): 
+    if mnemo.check(words):
         print("valid=1")
     else:
         print("valid=0")

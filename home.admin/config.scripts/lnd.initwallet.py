@@ -26,11 +26,11 @@ if mode == "scb":
     import codecs
     from lndlibs import lightning_pb2 as lnrpc
     from lndlibs import lightning_pb2_grpc as lightningstub
-    
+
 else:
     from lndlibs import walletunlocker_pb2 as lnrpc
     from lndlibs import walletunlocker_pb2_grpc as rpcstub
-    
+
 
 def new(stub, wallet_password="", seed_entropy=None):
     if seed_entropy:
@@ -293,7 +293,7 @@ def parse_args():
         else:
             print("err='not correct amount of parameter  - missing filepathSCB'")
             sys.exit(1)
-        
+
         if len(sys.argv) > 4:
             macaroon_path = sys.argv[4]
             macaroon_file = Path(macaroon_path)

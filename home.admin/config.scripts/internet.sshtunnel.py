@@ -142,7 +142,7 @@ def on(restore_on_update=False):
     # generate custom service config
     service_data = SERVICE_TEMPLATE.replace("[PLACEHOLDER]", additional_parameters)
     service_data = service_data.replace("[MONITORING-PORT]", monitoringPort)
-    
+
     # debug print out service
     print()
     print("*** New systemd service: {}".format(SERVICE_NAME))

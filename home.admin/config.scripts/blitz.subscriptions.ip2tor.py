@@ -123,7 +123,7 @@ def normalizeShopUrl(shopurlUserInput):
     if shopurlUserInput.find("://") > 0:
         shopurlUserInput = shopurlUserInput[shopurlUserInput.find("://") + 3:]
 
-    # remove all path after domain 
+    # remove all path after domain
     if shopurlUserInput.find("/") > 0:
         shopurlUserInput = shopurlUserInput[:shopurlUserInput.find("/")]
 
@@ -172,7 +172,7 @@ def apiGetHosts(session, shopurl):
             # ignore if duration is less than an hour
             if hostEntry['tor_bridge_duration'] < 3600:
                 continue
-            # add duration per hour value 
+            # add duration per hour value
             hostEntry['tor_bridge_duration_hours'] = math.floor(hostEntry['tor_bridge_duration'] / 3600)
             # ignore if prices are negative or below one sat (maybe msats later)
             if hostEntry['tor_bridge_price_initial'] < 1000:
