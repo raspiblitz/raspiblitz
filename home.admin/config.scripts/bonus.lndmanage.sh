@@ -34,7 +34,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sleep 3
     exit 1
   fi
-  
+
   echo "*** INSTALL LNDMANAGE ***"
 
   # make sure needed os dependencies are installed
@@ -103,7 +103,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # setting value in raspi blitz config
   /home/admin/config.scripts/blitz.conf.sh set lndmanage "off"
-  
+
   echo "*** REMOVING LNDMANAGE ***"
   sudo rm -rf /home/admin/lndmanage
   echo "# OK, lndmanage is removed."

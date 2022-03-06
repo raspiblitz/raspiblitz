@@ -10,10 +10,10 @@ specialOption=$1 # (optional - can be 'update', 'recovery' or 'migration' )
 OPTIONS=()
 OPTIONS+=(FRESHSETUP "Setup a new RaspiBlitz")
 if [ "${specialOption}" == "update" ] || [ "${specialOption}" == "recovery" ]; then
-  OPTIONS+=(RECOVER "Recover/Update RaspiBlitz")  
+  OPTIONS+=(RECOVER "Recover/Update RaspiBlitz")
 fi
 if [ "${specialOption}" == "migration" ]; then
-  OPTIONS+=(CONVERT "Make Node a RaspiBlitz")  
+  OPTIONS+=(CONVERT "Make Node a RaspiBlitz")
 fi
 OPTIONS+=(FROMBACKUP "Upload Migration Backup")
 OPTIONS+=(SHUTDOWN "Shutdown without Changes")
@@ -25,7 +25,7 @@ CHOICE=$(dialog --clear --backtitle "RaspiBlitz ${codeVersion} - Setup" --title 
 
 case $CHOICE in
         FRESHSETUP)
-            # 0 --> FRESH SETUP 
+            # 0 --> FRESH SETUP
             exit 0;
             ;;
         FROMBACKUP)

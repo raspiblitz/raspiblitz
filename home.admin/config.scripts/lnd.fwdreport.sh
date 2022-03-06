@@ -30,7 +30,7 @@ _input=$(cat $_temp | xargs )
   if [ ${#_input} -eq 0 ]; then
     exit 1
   fi
-  
+
   clear
   /home/admin/config.scripts/lnd.fwdreport.sh -n ${chain}net -c ${network} -- ${_input}
   exit
@@ -60,7 +60,7 @@ fi
 days=${1:-1}
 start_date=$(date -d "$date -$days days" +%s)
 
-declare -A pubKeyAliasLookup 
+declare -A pubKeyAliasLookup
 while IFS= read -r pubKey
 do
   # strip the non-ascii characters with iconv
@@ -87,8 +87,8 @@ while :
 do
 	events=$(lncli --network $network --chain $chain fwdinghistory --start_time $start_date --index_offset $index_offset \
 		| jq -r '(([.last_offset_index, (.forwarding_events | length)]) | @csv),
-			   (.forwarding_events[] 
-			   | [(.timestamp | tonumber | strftime("%a %d %h %H:%M")), .chan_id_in, .chan_id_out, .amt_out, .fee] 
+			   (.forwarding_events[]
+			   | [(.timestamp | tonumber | strftime("%a %d %h %H:%M")), .chan_id_in, .chan_id_out, .amt_out, .fee]
 			   | @csv)' \
 		| tr -d '"')
  	IFS=, read last_offset_index event_count <<< "$events"
@@ -98,13 +98,13 @@ do
  		channelInPubKey=${channelIdPubKeyLookup[$channelIdIn]}
  		channelOutPubKey=${channelIdPubKeyLookup[$channelIdOut]}
  		OUTPUT="${OUTPUT}
-${eventDate},${pubKeyAliasLookup[$channelInPubKey]},${pubKeyAliasLookup[$channelOutPubKey]},$amountIn,$fee" 
+${eventDate},${pubKeyAliasLookup[$channelInPubKey]},${pubKeyAliasLookup[$channelOutPubKey]},$amountIn,$fee"
 
 	done < <(tail -n +2 <<< $events)
 
 	if [ $event_count -lt 100 ]; then break; fi
 	index_offset=$last_offset_index
 
-done 
+done
 
 column -t -s',' <<< "$OUTPUT"

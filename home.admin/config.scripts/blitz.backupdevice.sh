@@ -37,7 +37,7 @@ if [ "$1" = "status" ]; then
 
     # get info on possible already existing BTRFS RAID1 usb drive
     source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
-    
+
     # get all the devices that are not mounted and possible candidates
     drivecounter=0
     for disk in $(lsblk -o NAME,TYPE | grep "disk" | awk '$1=$1' | cut -d " " -f 1)
@@ -60,7 +60,7 @@ if [ "$1" = "status" ]; then
 fi
 
 # check if started with sudo
-if [ "$EUID" -ne 0 ]; then 
+if [ "$EUID" -ne 0 ]; then
   echo "error='missing sudo'"
   exit 1
 fi
@@ -90,7 +90,7 @@ if [ "$1" = "on" ]; then
     if [ ${backupCandidates} -eq 0 ]; then
       dialog --title ' Adding Backup Device ' --msgbox 'Please connect now the backup device\nFor example a thumb drive bigger than 120 MB.\nDont use a second HDD/SSD for that.\nBest on a USB2 port (not the blue ones).\nThen press OK.' 9 50
       clear
-      echo 
+      echo
       echo "detecting device ... (please wait)"
       sleep 3
       source <(sudo /home/admin/config.scripts/blitz.backupdevice.sh status)

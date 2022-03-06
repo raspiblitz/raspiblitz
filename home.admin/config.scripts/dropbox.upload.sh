@@ -21,7 +21,7 @@ source /mnt/hdd/raspiblitz.conf
 # get first parameter
 MODE="$1"
 if [ "${MODE}" == "on" ]; then
-  
+
   # second parameter: dropbox auth token
   authtoken="$2"
 

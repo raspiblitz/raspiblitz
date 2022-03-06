@@ -38,7 +38,7 @@ while [ "${chainInSync}" == "0" ]; do
 	 --ok-label "Try now" \
 	 --cancel-label "Give up" \
 	 --pause "\n\n'$lncommand getinfo' shows 'synced_to_chain': false\n\nTry again in a few seconds." 15 60 5
-  
+
   if [ $? -gt 0 ]; then
       exit 0
   fi
@@ -53,12 +53,12 @@ elif [ $LNTYPE = lnd ];then
   openChannels=$($lncli_alias  listchannels 2>/dev/null | grep chan_id -c)
 fi
 if [ ${openChannels} -eq 0 ]; then
-  echo 
+  echo
   echo "!!!!!!!!!!!!!!!!!!!"
   echo "FAIL - You have NO ESTABLISHED CHANNELS .. open a channel first."
   echo "!!!!!!!!!!!!!!!!!!!"
   sleep 3
-  echo 
+  echo
   exit 0
 fi
 
@@ -112,7 +112,7 @@ echo "Pay Invoice / Payment Request"
 echo "This script is an example using lightning in the command line."
 echo "It is not optimized for performance or error handling."
 echo "************************************************************"
-echo 
+echo
 echo "COMMAND LINE: "
 echo $command
 echo

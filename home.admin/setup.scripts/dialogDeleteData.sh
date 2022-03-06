@@ -11,7 +11,7 @@ if [ "${blockchainName}" != "" ]; then
 
 Using existing blockchain data can reduce the setup/sync time. But if you didnt validated the blockchain yourself there is a level of trust involved.
 
-Do you want to use that blockchain data and run ${blockchainName}? 
+Do you want to use that blockchain data and run ${blockchainName}?
       " 14 68
 
     if [ "$?" == "0" ]; then

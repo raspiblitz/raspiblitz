@@ -54,7 +54,7 @@ echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
 echo "${errorReport}"
 echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
 
-# C) write error report to given logfile (optional) 
+# C) write error report to given logfile (optional)
 logfile=$6
 if [ "${logfile}" !=  "" ]; then
   echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" >> ${logFile}

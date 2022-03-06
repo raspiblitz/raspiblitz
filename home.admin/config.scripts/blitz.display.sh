@@ -54,7 +54,7 @@ fi
 
 ###########################################################################
 # All below here - needs to be run as root user or called with sudo
-if [ "$EUID" -ne 0 ]; then 
+if [ "$EUID" -ne 0 ]; then
   echo "error='run as root'"
   exit 1
 fi
@@ -64,7 +64,7 @@ fi
 ###################
 
 if [ "${command}" == "image" ]; then
-  
+
   imagePath=$2
   if [ ${#imagePath} -eq 0 ]; then
     echo "error='missing second parameter - see help'"
@@ -164,7 +164,7 @@ EOF
     fi
 
     # update raspiblitz conf
-    /home/admin/config.scripts/blitz.conf.sh set lcdrotate 0  
+    /home/admin/config.scripts/blitz.conf.sh set lcdrotate 0
     echo "OK - a restart is needed: sudo shutdown -r now"
 
   else
@@ -223,9 +223,9 @@ function install_lcd() {
 
     # set font
     sed -i "s/^CHARMAP=.*/CHARMAP=\"UTF-8\"/" /etc/default/console-setup
-    sed -i "s/^CODESET=.*/CODESET=\"guess\"/" /etc/default/console-setup 
+    sed -i "s/^CODESET=.*/CODESET=\"guess\"/" /etc/default/console-setup
     sed -i "s/^FONTFACE=.*/FONTFACE=\"TerminusBoldVGA\"/" /etc/default/console-setup
-    sed -i "s/^FONTSIZE=.*/FONTSIZE=\"8x16\"/" /etc/default/console-setup 
+    sed -i "s/^FONTSIZE=.*/FONTSIZE=\"8x16\"/" /etc/default/console-setup
 
     # hold bootloader
     sudo apt-mark hold raspberrypi-bootloader
@@ -250,23 +250,23 @@ function install_lcd() {
     # add waveshare mod
     cp ./waveshare35a.dtbo /boot/overlays/
 
-    # modify /boot/config.txt 
-    sed -i "s/^hdmi_force_hotplug=.*//g" /boot/config.txt 
+    # modify /boot/config.txt
+    sed -i "s/^hdmi_force_hotplug=.*//g" /boot/config.txt
     sed -i '/^hdmi_group=/d' /boot/config.txt 2>/dev/null
     sed -i "/^hdmi_mode=/d" /boot/config.txt 2>/dev/null
 
     #sed -i "s/^#framebuffer_width=.*/framebuffer_width=480/g" /boot/config.txt
     #sed -i "s/^#framebuffer_height=.*/framebuffer_height=320/g" /boot/config.txt
     #echo "hdmi_force_hotplug=1" >> /boot/config.txt
-    sed -i "s/^dtparam=i2c_arm=.*//g" /boot/config.txt 
+    sed -i "s/^dtparam=i2c_arm=.*//g" /boot/config.txt
     # echo "dtparam=i2c_arm=on" >> /boot/config.txt --> this is to be called I2C errors - see: https://github.com/rootzoll/raspiblitz/issues/1058#issuecomment-739517713
     # don't enable SPI and UART ports by default
     # echo "dtparam=spi=on" >> /boot/config.txt
     # echo "enable_uart=1" >> /boot/config.txt
-    sed -i "s/^dtoverlay=.*//g" /boot/config.txt 
+    sed -i "s/^dtoverlay=.*//g" /boot/config.txt
     echo "dtoverlay=waveshare35a:rotate=90" >> /boot/config.txt
 
-    # modify cmdline.txt 
+    # modify cmdline.txt
     modification="dwc_otg.lpm_enable=0 quiet fbcon=map:10 fbcon=font:ProFont6x11 logo.nologo"
     containsModification=$(grep -c "${modification}" /boot/cmdline.txt)
     if [ ${containsModification} -eq 0 ]; then
@@ -424,7 +424,7 @@ if [ "${command}" == "set-display" ]; then
   echo "baseimage(${baseimage})"
 
   # check if started with sudo
-  if [ "$EUID" -ne 0 ]; then 
+  if [ "$EUID" -ne 0 ]; then
     echo "error='missing sudo'"
     exit 1
   fi

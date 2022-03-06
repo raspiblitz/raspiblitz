@@ -41,7 +41,7 @@ if [ "$1" == "mainnet" ] || [ "$1" == "testnet" ] || [ "$1" == "signet" ]; then
   if [ ${mode} = "recoverymode" ]; then
 
     # check if started with sudo
-    if [ "$EUID" -ne 0 ]; then 
+    if [ "$EUID" -ne 0 ]; then
       echo "error='run as root'"
       exit 1
     fi
@@ -134,7 +134,7 @@ if [ ${mode} = "cl-export" ]; then
   fi
   sleep 5
   echo "# OK"
-  echo 
+  echo
 
   # add cl version info into lnd dir (to detect needed updates later)
   clVersion=$(sudo -u bitcoin lightning-cli --version | cut -d '-' -f1 | cut -d 'v' -f2)
@@ -186,7 +186,7 @@ if [ ${mode} = "cl-export-gui" ]; then
   echo "****************************************"
   echo "* DOWNLOAD THE C-LIGHTNING RESCUE FILE *"
   echo "****************************************"
-  echo 
+  echo
   echo "ON YOUR MAC & LINUX LAPTOP - RUN IN NEW TERMINAL:"
   echo "scp '${fileowner}@${localip}:${filename}' ./"
   echo "ON WINDOWS USE:"
@@ -262,7 +262,7 @@ if [ ${mode} = "cl-import-gui" ]; then
     RESULTFILE=$3
     if [ "${RESULTFILE}" == "" ]; then
       echo "error='missing parameter'"
-      exit 1 
+      exit 1
     fi
   fi
 
@@ -279,7 +279,7 @@ if [ ${mode} = "cl-import-gui" ]; then
   filename=""
   while [ "${filename}" == "" ]
     do
-      clear 
+      clear
       echo "**************************************"
       echo "* UPLOAD THE C-LIGHTNING RESCUE FILE *"
       echo "**************************************"
@@ -343,7 +343,7 @@ if [ ${mode} = "cl-import-gui" ]; then
 
   # in production now start restoring CL data based on file
   source /mnt/hdd/raspiblitz.conf
-  
+
   # ask security question before deleting old wallet
   echo "WARNING: This will delete/overwrite the C-Lightning state/funds of this RaspiBlitz."
   echo
@@ -366,7 +366,7 @@ if [ ${mode} = "cl-import-gui" ]; then
   /home/admin/config.scripts/cl.hsmtool.sh autounlock-off
 
   # detect if the imported hsm_secret is encrypted
-  # use the variables for the default network 
+  # use the variables for the default network
   source <(/home/admin/config.scripts/network.aliases.sh getvars cl)
   hsmSecretPath="/home/bitcoin/.lightning/${CLNETWORK}/hsm_secret"
   # check if encrypted
@@ -398,7 +398,7 @@ if [ ${mode} = "cl-import-gui" ]; then
     /home/admin/config.scripts/cl.install-service.sh signet
     /home/admin/config.scripts/cl-plugin.backup.sh on signet
   fi
- 
+
   # give final info
   echo
   echo "# DONE - lightningd is now starting"
@@ -415,13 +415,13 @@ fi
 if [ ${mode} = "seed-export-gui" ]; then
 
   # use text snippet for testing:
-  # 
+  #
 
   # 2nd PARAMETER: cl seed data
   seedwords6x4=$2
   if [ "${seedwords6x4}" == "" ]; then
     echo "error='missing parameter'"
-    exit 1 
+    exit 1
   fi
 
   ack=0
@@ -460,7 +460,7 @@ if [ ${mode} = "seed-import-gui" ]; then
   while [ ${wordsCorrect} -eq 0 ]
     do
 
-      # prepare temp file 
+      # prepare temp file
       sudo rm /var/cache/raspiblitz/.seed.tmp 2>/dev/null
       sudo touch /var/cache/raspiblitz/.seed.tmp
       sudo chown admin:admin /var/cache/raspiblitz/.seed.tmp
@@ -470,7 +470,7 @@ if [ ${mode} = "seed-import-gui" ]; then
       wordstring=$(cat /var/cache/raspiblitz/.seed.tmp | sed 's/[^a-zA-Z0-9 ]//g')
       sudo shred -u /var/cache/raspiblitz/.seed.tmp 2>/dev/null
       echo "processing ..."
-      
+
       # check correct number of words
       wordcount=$(echo "${wordstring}" | wc -w)
       if [ ${wordcount} -eq 24 ]; then
@@ -502,7 +502,7 @@ Please check for typos.
 The word list has ${wordcount} words. But it must be 24.
 Please check your list and try again.
 
-Best is to write words in external editor 
+Best is to write words in external editor
 and then copy and paste them into dialog.
 
 The word list should look like this:

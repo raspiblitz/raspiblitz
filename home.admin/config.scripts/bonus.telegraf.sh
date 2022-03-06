@@ -65,7 +65,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # get the repository public key for apt-get
   curl -sL https://repos.influxdata.com/influxdb.key | sudo apt-key add -
   DISTRIB_ID=$(lsb_release -c -s)
-  # 
+  #
   # changed according suggestion from @frennkie in #1501
   echo "deb https://repos.influxdata.com/debian ${DISTRIB_ID} stable" | sudo tee -a /etc/apt/sources.list.d/influxdb.list >/dev/null
   sudo apt-get update

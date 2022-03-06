@@ -7,7 +7,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "bonus.zerotier.sh off"
  echo "bonus.zerotier.sh menu"
  exit 1
-fi 
+fi
 
 source /mnt/hdd/raspiblitz.conf
 

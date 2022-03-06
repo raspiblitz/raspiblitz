@@ -47,7 +47,7 @@ if [ "${wantedBranch}" = "-run" ]; then
   wantedGitHubUser="${activeGitHubUser}"
   # detect if running in vagrant VM
   vagrant=$(df | grep -c "/vagrant")
-  if [ "$2" = "git" ]; then 
+  if [ "$2" = "git" ]; then
     echo "# forcing github over vagrant sync"
     vagrant=0
   fi
@@ -157,7 +157,7 @@ sudo rm -rf assets
 sudo -u admin cp -R /home/admin/raspiblitz/home.admin/assets /home/admin/assets
 echo "# - config.scripts directory"
 sudo rm -rf /home/admin/config.scripts
-sudo -u admin cp -R /home/admin/raspiblitz/home.admin/config.scripts /home/admin/config.scripts 
+sudo -u admin cp -R /home/admin/raspiblitz/home.admin/config.scripts /home/admin/config.scripts
 sudo -u admin chmod 755 /home/admin/config.scripts/*.sh
 sudo -u admin chmod 755 /home/admin/config.scripts/*.py
 echo "# - setup.scripts directory"

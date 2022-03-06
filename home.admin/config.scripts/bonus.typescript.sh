@@ -38,9 +38,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     # install
 	npm install typescript -g
-    sudo ln -sf /usr/local/lib/nodejs/node-$VERSION-$DISTRO/bin/tsc /usr/bin/tsc 
+    sudo ln -sf /usr/local/lib/nodejs/node-$VERSION-$DISTRO/bin/tsc /usr/bin/tsc
     sudo ln -sf /usr/local/lib/nodejs/node-$VERSION-$DISTRO/bin/tsserver /usr/bin/tsserver
-  
+
     # check if nodeJS was installed
     typescriptInstalled=$(tsc -v | grep -c "Version ")
     if [ ${typescriptInstalled} -eq 0 ]; then

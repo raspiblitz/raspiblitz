@@ -19,16 +19,16 @@ if [ "${turn}" = "on" ] && [ ${#passwordC} -eq 0 ]; then
 
   dialog --backtitle "LND Auto-Unlock" --inputbox "ENTER your PASSWORD C:
 
-For more details see chapter in GitHub README 
+For more details see chapter in GitHub README
 'Auto-unlock LND on startup'
 https://github.com/rootzoll/raspiblitz
 
 Password C will be stored on the device.
 " 13 52 2>./.tmp
- 
+
   wasCancel=$( echo $? )
   passwordC=$( cat ./.tmp )
-  
+
   if [ ${wasCancel} -eq 1 ]; then
     echo "# CANCEL LND Auto-Unlock"
     sleep 2

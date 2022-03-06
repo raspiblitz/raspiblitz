@@ -8,7 +8,7 @@ if [ $# -eq 0 ]; then
  exit 1
 fi
 
-# check lnd.conf exits 
+# check lnd.conf exits
 lndConfExists=$(sudo ls /mnt/hdd/lnd/lnd.conf | grep -c 'lnd.conf')
 if [ ${lndConfExists} -eq 0 ]; then
   echo "# FAIL - /mnt/hdd/lnd/lnd.conf not found"

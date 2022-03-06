@@ -437,7 +437,7 @@ WantedBy=multi-user.target
     echo "whitelist=download@127.0.0.1" | sudo tee -a /mnt/hdd/bitcoin/bitcoin.conf
     bitcoindRestart=yes
   fi
-  
+
   source <(/home/admin/_cache.sh get state)
   if [ "${state}" == "ready" ]; then
     if [ "${bitcoindRestart}" == "yes" ]; then

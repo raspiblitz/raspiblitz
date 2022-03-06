@@ -55,7 +55,7 @@ case $CHOICE in
     elif [ ${CHAIN} = testnet ]; then
       bitcoinlogpath="/mnt/hdd/bitcoin/testnet3/debug.log"
     elif [ ${CHAIN} = mainnet ]; then
-      bitcoinlogpath="/mnt/hdd/bitcoin/debug.log"      
+      bitcoinlogpath="/mnt/hdd/bitcoin/debug.log"
     fi
     clear
     echo
@@ -136,7 +136,7 @@ case $CHOICE in
       fi
      else
       echo "# No change made"
-    fi;;              
+    fi;;
   TORLOG)
     sudo -u debian-tor nyx;;
   TORRC)
@@ -158,13 +158,13 @@ case $CHOICE in
   CUSTOMLOG)
     clear
     echo
-    echo "Example list: 
+    echo "Example list:
 btc-rpc-explorer, btcpayserver, circuitbreaker,
 specter, getty@tty1, electrs, litd,
 lnbits, mempool, nbxlorer, nginx, RTL, telegraf,
 thunderhub, tor@default, tor
 "
-    echo "Type the name of the service you would like to monitor:"  
+    echo "Type the name of the service you would like to monitor:"
     read SERVICE
     echo
     echo "Will show the logs with:"
@@ -176,13 +176,13 @@ thunderhub, tor@default, tor
   CUSTOMRESTART)
     clear
     echo
-    echo "Example list: 
+    echo "Example list:
 btc-rpc-explorer, btcpayserver, circuitbreaker,
 specter, getty@tty1, electrs, litd,
 lnbits, mempool, nbxlorer, nginx, RTL, telegraf,
 thunderhub, tor@default, tor
 "
-    echo "Type the name of the service you would like to restart:" 
+    echo "Type the name of the service you would like to restart:"
     read SERVICE
     echo
     echo "Will use the command:"

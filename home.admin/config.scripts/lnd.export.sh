@@ -15,8 +15,8 @@ if [ "$1" = "" ] || [ $# -eq 0 ]; then
     OPTIONS=()
     OPTIONS+=(SCP "SSH Download (Commands)")
     OPTIONS+=(HTTP "Browserdownload (bit risky)")
-    OPTIONS+=(HEX "Hex-String (Copy+Paste)")   
-    OPTIONS+=(STR "BTCPay Connection String") 
+    OPTIONS+=(HEX "Hex-String (Copy+Paste)")
+    OPTIONS+=(STR "BTCPay Connection String")
     CHOICE=$(dialog --clear \
                 --backtitle "RaspiBlitz" \
                 --title "Export Macaroons & TLS.cert" \
@@ -154,7 +154,7 @@ elif [ "${exportType}" = "http" ]; then
   echo ""
   echo "Temp HTTP Server is running - use CTRL+C to stop when you are done"
   echo ""
-  cd 
+  cd
   randomFolderName=$(shuf -i 100000000-900000000 -n 1)
   mkdir ${randomFolderName}
   sudo cp /home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon ./${randomFolderName}/admin.macaroon

@@ -31,7 +31,7 @@ if [ ${chainOutSync} -eq 1 ]; then
   else
     echo "# FAIL PRECHECK - '$lncli_alias getinfo' shows 'synced_to_chain': false - wait until chain is sync "
   fi
-  echo 
+  echo
   echo "# PRESS ENTER to return to menu"
   read key
   exit 0
@@ -108,4 +108,4 @@ elif [ $LNTYPE = lnd ];then
 fi
 whiptail --backtitle "Fund your onchain wallet" \
        --title "What's next?" \
-       --msgbox "$string" 0 0 
+       --msgbox "$string" 0 0

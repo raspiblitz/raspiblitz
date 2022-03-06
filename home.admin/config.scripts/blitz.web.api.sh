@@ -128,7 +128,7 @@ if [ "$1" = "update-config" ]; then
   sed -i "s/^bitcoind_ip_testnet=.*/bitcoind_ip_testnet=127.0.0.1/g" ./.env
   sed -i "s/^bitcoind_user=.*/bitcoind_user=${RPCUSER}/g" ./.env
   sed -i "s/^bitcoind_pw=.*/bitcoind_pw=${RPCPASS}/g" ./.env
-  
+
   # configure LND
   if [ "${lightning}" == "lnd" ]; then
 
@@ -154,10 +154,10 @@ if [ "$1" = "update-config" ]; then
 
   # configure CL
   elif [ "${lightning}" == "cl" ]; then
-    
+
     echo "# CONFIG Web API Lightning --> CL"
     sed -i "s/^ln_node=.*/ln_node=cl/g" ./.env
-    
+
     # TODO: ADD C-Lightning config as soon as available
     echo "# MISSING CL CONFIG YET"
 

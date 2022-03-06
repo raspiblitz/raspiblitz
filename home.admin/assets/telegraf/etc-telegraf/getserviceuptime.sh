@@ -18,7 +18,7 @@
  btcrpexp_uptime=$(ps -p `pgrep -f "sh -c node ./bin/www"`                                  -o etimes='' 2>/dev/null | tr -d '[:space:]')
   mempool_uptime=$(ps -p `pgrep -f "/usr/bin/node --max-old-space-size=2048 dist/index.js"` -o etimes='' 2>/dev/null | tr -d '[:space:]')
 
-# 
+#
 # whenever a variable contains a valid integer...spit out a line in influx-line-format
 # (see https://stackoverflow.com/a/19116862 for details "Test whether string is a valid integer")
 #

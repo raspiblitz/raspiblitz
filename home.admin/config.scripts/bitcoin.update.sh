@@ -17,7 +17,7 @@ fi
 mode="$1"
 
 # RECOMMENDED UPDATE BY RASPIBLITZ TEAM
-# comment will be shown as "BEWARE Info" when option is choosen (can be multiple lines) 
+# comment will be shown as "BEWARE Info" when option is choosen (can be multiple lines)
 bitcoinVersion="" # example: 22.0 .. keep empty if no newer version as sd card build is available
 
 # needed to check code signing
@@ -75,7 +75,7 @@ if [ "${mode}" = "tested" ]; then
 
   # check for optional second parameter: forced update version
   # --> only does the tested update if its the given version
-  # this is needed for recovery/update. 
+  # this is needed for recovery/update.
   fixedBitcoinVersion="$2"
   if [ ${#fixedBitcoinVersion} -gt 0 ]; then
     echo "# checking for fixed version update: askedFor(${bitcoinVersion}) available(${bitcoinVersion})"
@@ -123,7 +123,7 @@ elif [ "${mode}" = "custom" ]; then
     echo "# OK version exists at https://bitcoincore.org/bin/bitcoin-core-${pathVersion}"
     echo "# Press ENTER to proceed to install Bitcoin Core $bitcoinVersion or CTRL+C to abort."
     read key
-  else 
+  else
     echo "# FAIL $bitcoinVersion does not exist"
     echo
     echo "# Press ENTER to return to the main menu"
@@ -134,7 +134,7 @@ fi
 
 # JOINED INSTALL
 if [ "${mode}" = "tested" ]||[ "${mode}" = "reckless" ]||[ "${mode}" = "custom" ]; then
-  
+
   displayInfo
 
   if [ $installedVersion = $bitcoinVersion ];then
@@ -143,7 +143,7 @@ if [ "${mode}" = "tested" ]||[ "${mode}" = "reckless" ]||[ "${mode}" = "custom" 
     exit 0
   fi
 
-  echo 
+  echo
   echo "# clean & change into download directory"
   sudo rm -rf "${downloadDir}"
   mkdir -p "${downloadDir}"
@@ -172,11 +172,11 @@ if [ "${mode}" = "tested" ]||[ "${mode}" = "reckless" ]||[ "${mode}" = "custom" 
     echo
     echo "See the signers of this release:"
     echo
-    gpg --verify SHA256SUMS.asc 
+    gpg --verify SHA256SUMS.asc
     echo
     exit 1
   fi
-  
+
   verifyResult=$(gpg --verify SHA256SUMS.asc 2>&1)
   goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
   echo "goodSignature(${goodSignature})"
@@ -217,7 +217,7 @@ if [ "${mode}" = "tested" ]||[ "${mode}" = "reckless" ]||[ "${mode}" = "custom" 
     echo "# OK --> VERIFIED BITCOIN CORE BINARY CHECKSUM IS CORRECT"
     echo
   fi
-fi 
+fi
 
 if [ "${mode}" = "tested" ]||[ "${mode}" = "custom" ]; then
   bitcoinInterimsUpdateNew="${bitcoinVersion}"

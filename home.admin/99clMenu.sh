@@ -36,7 +36,7 @@ fi
   OPTIONS+=(REPAIR-CL "Repair options for C-lightning")
 if [ "${lightning}" != "cl" ] && [ "${CHAIN}" == "mainnet" ]; then
   OPTIONS+=(SWITCHLN  "Use C-lightning as default")
-fi  
+fi
 
 CHOICE_HEIGHT=$(("${#OPTIONS[@]}/2+1"))
 HEIGHT=$((CHOICE_HEIGHT+6))
@@ -105,7 +105,7 @@ case $CHOICE in
       /home/admin/99clRepairMenu.sh $CHAIN
       ;;
   SWITCHLN)
-      clear 
+      clear
       echo
       # setting value in the raspiblitz.conf
       /home/admin/config.scripts/blitz.conf.sh set lightning "cl"

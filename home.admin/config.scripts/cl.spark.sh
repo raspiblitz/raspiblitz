@@ -146,7 +146,7 @@ WantedBy=multi-user.target
 
   # setting value in raspi blitz config
   /home/admin/config.scripts/blitz.conf.sh set ${netprefix}spark "on"
-  
+
   sudo systemctl enable ${systemdService}
   sudo systemctl start ${systemdService}
   echo "# OK - the ${systemdService}.service is now enabled & started"

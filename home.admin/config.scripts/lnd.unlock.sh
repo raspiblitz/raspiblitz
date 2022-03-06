@@ -27,7 +27,7 @@ if [ "${action}" == "chain-unlock" ]; then
     elif [ "${CHAIN}" == "testnet" ]; then
         chain="test"
         passwordC=""
-    elif [ "${CHAIN}" == "signet" ]; then 
+    elif [ "${CHAIN}" == "signet" ]; then
         chain="sig"
         passwordC=""
     else
@@ -91,7 +91,7 @@ loopCount=0
 fallback=0
 while [ ${fallback} -eq 0 ]
   do
-    
+
     # TRY TO UNLOCK ...
 
     loopCount=$(($loopCount +1))

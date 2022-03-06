@@ -50,12 +50,12 @@ source <(/home/admin/_cache.sh get \
     system_count_start_lightning \
 )
 
-# formatting LIGHTNING SCAN PROGRESS  
+# formatting LIGHTNING SCAN PROGRESS
 if [ "${lightning}" != ""  ] && [ "${ln_default_sync_progress}" == "" ]; then
     # in case of LND RPC is not ready yet
     if [ "${ln_default_ready}" != "" ]; then
         scanProgress="prepare sync"
-    # in case LND restarting >2  
+    # in case LND restarting >2
     elif [ "${system_count_start_lightning}" != "" ] && [ ${system_count_start_lightning} -gt 2 ]; then
         scanProgress="${system_count_start_lightning} restarts"
     # unkown cases
@@ -72,14 +72,14 @@ fi
 
 # setting info string
 infoStr=" Blockchain Progress : ${syncProgress}\n"
-    
+
 if [ "${lightning}" == "lnd" ] || [ "${lightning}" == "cl" ]; then
     infoStr="${infoStr} Lightning Progress  : ${scanProgress}\n ${actionString}"
 else
     # if lightning is deactivated (leave line clear)
     infoStr="${infoStr} \n ${actionString}"
 fi
-    
+
 # get data from cache
 source <(/home/admin/_cache.sh get \
     internet_localip \

@@ -364,7 +364,7 @@ EOF
 
   # setting value in raspi blitz config
   /home/admin/config.scripts/blitz.conf.sh set specter "on"
-  
+
   # Hidden Service for SERVICE if Tor is active
   if [ "${runBehindTor}" = "on" ]; then
     # make sure to keep in sync with tor.network.sh script

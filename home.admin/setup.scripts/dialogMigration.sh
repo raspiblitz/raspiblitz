@@ -19,7 +19,7 @@ migrationOS="$1"
 if [ "${migrationOS}" != "raspiblitz" ] && [ "${migrationOS}" != "mynode" ] && [ "${migrationOS}" != "umbrel" ] && [ "${migrationOS}" != "citadel" ]; then
     echo "# FAIL: the given migrationOS '${migrationOS}' is not supported yet"
     exit 1
-fi  
+fi
 
 # 2nd PARAMATER migrationMode (optional): [normal|outdatedLightning]
 migrationMode="$2"
@@ -29,7 +29,7 @@ fi
 if [ "${migrationMode}" != "normal" ] && [ "${migrationMode}" != "outdatedLightning" ]; then
     echo "# FAIL: the given migrationMode '${migrationMode}' is not supported yet"
     exit 1
-fi  
+fi
 
 ####################################################
 # RASPIBLITZ
@@ -111,7 +111,7 @@ fi
   # outdated warning
   if [ "${migrationMode}" == "outdatedLightning" ]; then
 
-    whiptail --title " MIGRATION WARNING " --yes-button "Stop Migration" --no-button "Try Anyway" --yesno " 
+    whiptail --title " MIGRATION WARNING " --yes-button "Stop Migration" --no-button "Try Anyway" --yesno "
 RaspiBlitz might run an TOO OLD of an lightning version to migrate your nodes channel data automatically.
 
 You have now two options:
@@ -150,7 +150,7 @@ Do you want to start migration to RaspiBlitz now?
     # user cancel - signal by exit code
     exit 1
   fi
-  
+
   # signal that user wants to proceed with migration
   exit 0
 
@@ -177,7 +177,7 @@ Do you want to start migration to RaspiBlitz now?
     # user cancel - signal by exit code
     exit 1
   fi
-  
+
   # signal that user wants to proceed with migration
   exit 0
 

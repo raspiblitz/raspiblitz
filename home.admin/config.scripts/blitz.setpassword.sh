@@ -20,7 +20,7 @@ fi
 # trap to delete on any exit
 trap 'rm -f $_temp' EXIT
 
-# tempfile 
+# tempfile
 _temp=$(mktemp -p /dev/shm/)
 
 # load raspiblitz config (if available)
@@ -144,7 +144,7 @@ if [ "${abcd}" = "a" ]; then
     # use entered password now as parameter
     newPassword="${password1}"
 
-  fi  
+  fi
 
   # change user passwords and then change hostname
   echo "pi:$newPassword" | sudo chpasswd

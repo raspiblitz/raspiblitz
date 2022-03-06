@@ -66,7 +66,7 @@ sync
 echo "starting shutdown ..."
 sudo shutdown ${shutdownParams}
 
-# detect missing DBUS 
+# detect missing DBUS
 if [ "${DBUS_SESSION_BUS_ADDRESS}" == "" ]; then
   echo "WARN: Missing \$DBUS_SESSION_BUS_ADDRESS .. "
   if [ "$1" = "reboot" ]; then

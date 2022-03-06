@@ -117,10 +117,10 @@ if [ "${value}" != "" ]; then
 fi
 
 # construct blockinfo string
-if [ "${btc_blocks_behind}" == "" ]; then 
+if [ "${btc_blocks_behind}" == "" ]; then
   sync="WAIT"
   sync_color="${color_yellow}"
-elif [ ${btc_blocks_behind} -lt 2 ]; then 
+elif [ ${btc_blocks_behind} -lt 2 ]; then
   sync="OK"
   sync_color="${color_green}"
 else
@@ -273,7 +273,7 @@ fi
 ${color_yellow}
 ${color_yellow}${ln_publicColor}${ln_external}${color_gray}"
 
-if [ "${joinmarket}" = "on" ];then 
+if [ "${joinmarket}" = "on" ];then
   # show JoinMarket stats in place of the LND URI only if the Yield Generator is running
   if [ $(sudo -u joinmarket pgrep -f "yg-privacyenhanced.py" 2>/dev/null | wc -l) -gt 2 ]; then
     trap 'rm -f "$JMstats"' EXIT
@@ -300,7 +300,7 @@ fi
 
 LNinfo=" + Lightning Network"
 if [ "${lightning}" == "" ] || [ "${lightning}" == "none" ]; then
-  LNinfo=""  
+  LNinfo=""
 fi
 
 datetime=$(date -R)

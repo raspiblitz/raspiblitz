@@ -82,7 +82,7 @@ while :
 
     ###########################
     # CHECK BASIC DATA
-    ###########################   
+    ###########################
 
     # get config info if already available (with state value)
     source ${infoFile}

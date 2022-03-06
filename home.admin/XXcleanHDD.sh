@@ -49,7 +49,7 @@ elif [ "${extraParameter}" = "-blockchain" ]; then
     sudo chown -R bitcoin:bitcoin /mnt/hdd/bitcoin
 
     echo "OK Blockchain data deleted - you may want now run: /home/admin/98repairBlockchain.sh"
-    
+
 else
 
     echo "!!!! This will DELETE your personal data & POSSIBLE FUNDS from the HDD !!!!"

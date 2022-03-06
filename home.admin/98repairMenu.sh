@@ -60,7 +60,7 @@ infoResetSDCard()
 OK Reset of HDD is done.
 System will now shutdown.
 
-To start fresh please write a fresh 
+To start fresh please write a fresh
 RaspiBlitz image to your SD card.
 " 12 40
 }

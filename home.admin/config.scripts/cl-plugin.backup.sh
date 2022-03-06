@@ -30,7 +30,7 @@ function install() {
     cd /home/bitcoin/cl-plugins-available || exit 1
     sudo -u bitcoin git clone https://github.com/lightningd/plugins.git
   fi
-  
+
   if [ $($lightningcli_alias plugin list 2>/dev/null | grep -c "${plugin}") -eq 0 ];then
     echo "# Checking dependencies"
     sudo -u bitcoin pip install --user -r ${plugindir}/${plugin}/requirements.txt 1>/dev/null
@@ -50,12 +50,12 @@ function install() {
 }
 
 if [ "$1" = on ];then
-  
+
   install
 
   echo "# Stop the ${netprefix}lightningd.service"
   sudo systemctl stop ${netprefix}lightningd
-  
+
   # don't overwrite old backup
   if [ -f /home/bitcoin/${netprefix}lightningd.sqlite3.backup ];then
     echo "# Backup the existing old backup on the SDcard"
@@ -107,12 +107,12 @@ elif [ "$1" = restore ];then
 
   #look for a backup to restore
   if sudo ls /home/bitcoin/${netprefix}lightningd.sqlite3.backup; then
-    
+
     sudo systemctl stop ${netprefix}lightningd
-  
+
     # https://github.com/lightningd/plugins/tree/master/backup#restoring-a-backup
     # ./backup-cli restore file:///mnt/external/location ~/.lightning/bitcoin/lightningd.sqlite3
-    
+
     # make sure to not overwrite old database
     if sudo ls /home/bitcoin/.lightning/${CLNETWORK}/lightningd.sqlite3;then
       now=$(date +"%Y_%m_%d_%H%M%S")
@@ -123,12 +123,12 @@ elif [ "$1" = restore ];then
         sudo rm /home/bitcoin/.lightning/${CLNETWORK}/lightningd.sqlite3
       fi
     fi
-  
+
     # restore
     sudo -u bitcoin ${plugindir}/backup/backup-cli restore \
       file:///home/bitcoin/${netprefix}lightningd.sqlite3.backup \
       /home/bitcoin/.lightning/${CLNETWORK}/lightningd.sqlite3
-    
+
     source <(/home/admin/_cache.sh get state)
     if [ "${state}" == "ready" ]; then
       sudo systemctl start ${netprefix}lightningd
@@ -151,11 +151,11 @@ elif [ "$1" = backup-compact ];then
       echo "# The backup is 200MB+ larger than the db, running '${netprefix}lightning-cli backup-compact' ..."
       $lightningcli_alias backup-compact
     else
-      echo "The backup is not significantly larger than the db, there is no need to compact." 
+      echo "The backup is not significantly larger than the db, there is no need to compact."
     fi
   else
     echo "# No ${dbPath} is present"
-    echo "# Run 'config.scripts/cl-plugin.backup.sh on ${CLNETWORK}' first"    
+    echo "# Run 'config.scripts/cl-plugin.backup.sh on ${CLNETWORK}' first"
   fi
 
 else

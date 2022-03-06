@@ -53,7 +53,7 @@ updateDynDNS()
     curl -s --connect-timeout 6 ${dynUpdateUrl} 1>&2
   else
     echo "# dynUpdateUrl not set - not updating"
-  fi 
+  fi
 }
 
 # UPDATE

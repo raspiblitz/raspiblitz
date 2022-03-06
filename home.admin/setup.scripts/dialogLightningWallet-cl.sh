@@ -23,7 +23,7 @@ if [ "${CHOICE}" == "NEW" ]; then
   sudo sed -i '/^setPasswordB=/d' $SETUPFILE
   sudo sed -i '/^setPasswordC=/d' $SETUPFILE
 
-  # mark all passwords to be set - passwordc wallet encryption not for cl 
+  # mark all passwords to be set - passwordc wallet encryption not for cl
   echo "setPasswordA=1" >> $SETUPFILE
   echo "setPasswordB=1" >> $SETUPFILE
   echo "setPasswordC=0" >> $SETUPFILE
@@ -62,7 +62,7 @@ Using JUST SEED WORDS will only recover your on-chain funds.
 To recover also your channel funds a complete rescue-backup
 from your old node would be recommended.
       " 11 65
-      
+
       if [ $? -eq 1 ]; then
         # when user wants to go back
         CHOICESUB=""

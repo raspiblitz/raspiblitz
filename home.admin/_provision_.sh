@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # check if run by root user
-if [ "$EUID" -ne 0 ]; then 
+if [ "$EUID" -ne 0 ]; then
   echo "error='run as root'"
   exit 1
 fi
@@ -264,7 +264,7 @@ fi
 
 # LND binary install
 if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ] || [ "${tlnd}" == "on" ] || [ "${slnd}" == "on" ]; then
-  # if already installed by fatpack will skip 
+  # if already installed by fatpack will skip
   echo "Provisioning LND Binary - run config script" >> ${logFile}
   /home/admin/config.scripts/lnd.install.sh install >> ${logFile} 2>&1
 else
@@ -299,7 +299,7 @@ fi
 
 # LND binary install
 if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ] || [ "${tcl}" == "on" ] || [ "${scl}" == "on" ]; then
-  # if already installed by fatpack will skip 
+  # if already installed by fatpack will skip
   echo "Provisioning C-Lightning Binary - run config script" >> ${logFile}
   /home/admin/config.scripts/cl.install.sh install >> ${logFile} 2>&1
 else

@@ -36,7 +36,7 @@ echo "${pubkey}@${toraddress}:${port}"
 echo
 echo "# Running:"
 echo "${netprefix}lightning-cli -H summary"
-echo 
+echo
 $lightningcli_alias -H summary
 echo
 

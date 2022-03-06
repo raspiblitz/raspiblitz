@@ -15,7 +15,7 @@ on() {
 
   local server="${1}"
   local user="${2}"
-  local password="${3}" 
+  local password="${3}"
 
   sudo touch /var/cache/raspiblitz/.tmp
   sudo chmod 777 /var/cache/raspiblitz/.tmp
@@ -68,7 +68,7 @@ upload() {
   fi
 
   local remoteDirUrl="$nextcloudBackupServer/remote.php/dav/files/$nextcloudBackupUser/raspiblitz/"
-  
+
   # checking if remote directory exists
   local response
   response=$(curl "${remoteDirUrl}" \

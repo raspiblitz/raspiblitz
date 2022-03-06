@@ -16,26 +16,26 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ];
   echo
   echo "_cache.sh set [key] [value] [?expire-seconds]"
   echo "_cache.sh get [key1] [?key2] [?key3] ..."
-  echo 
+  echo
   echo "_cache.sh increment [key1]"
   echo
   echo "_cache.sh focus [key] [update-seconds] [?duration-seconds]"
   echo "# set in how many seconds value is marked to be rescanned"
-  echo "# -1 = slowest default update cycle"  
+  echo "# -1 = slowest default update cycle"
   echo "# 0  = update on every cycle"
   echo "# set a 'duration-seconds' after defaults to -1 (optional)"
-  echo 
+  echo
   echo "_cache.sh meta [key] [?default]"
   echo "# get single key with additional metadata:"
   echo "# updateseconds= see above"
   echo "# stillvalid=0/1 if value is still valid or outdated"
   echo "# lasttouch= last update timestamp in unix seconds"
-  echo 
+  echo
   echo "_cache.sh valid [key1] [?key2] [?key3] ..."
   echo "# check multiple keys if all are still not outdated"
   echo "# use for example to check if a complex call needs"
   echo "# to be made that covers multiple single data points"
-  echo 
+  echo
   echo "_cache.sh import [bash-keyvalue-file]"
   echo "# import a bash style key-value file into store"
   echo
@@ -46,7 +46,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ];
   exit 1
 fi
 
-# BACKGROUND: we need to build outdated meta info manually, 
+# BACKGROUND: we need to build outdated meta info manually,
 # because there is nothing as "AGE" in redis: https://github.com/redis/redis/issues/1147
 # only feature that can be used uis the EXPIRE feature to determine if a value is still valid
 
@@ -167,7 +167,7 @@ elif [ "$1" = "set" ]; then
   outdatesecs=$(redis-cli get ${keystr}${META_OUTDATED_SECONDS})
   if [ "${outdatesecs}" == "" ]; then
     outdatesecs="-1"
-  fi 
+  fi
   #echo "# outdatesecs(${outdatesecs})"
   if [ "${outdatesecs}" != "-1" ]; then
     # set exipire valid flag (if its gone - value is considered as outdated)
@@ -186,7 +186,7 @@ elif [ "$1" = "get" ]; then
   position=0
   for keystr in $@
   do
-    
+
     # skip first parameter
     ((position++))
     if [ $position -eq 1 ]; then
@@ -309,7 +309,7 @@ elif [ "$1" = "focus" ]; then
     for key in "${arr[@]}";do
       if [ "${key}" == "" ]; then
         continue
-      fi 
+      fi
       keyClean=$(echo $key | cut -d ":" -f1)
       value=$(redis-cli get "${key}")
       echo "${keyClean}=${value}"
@@ -363,8 +363,8 @@ elif [ "$1" = "meta" ]; then
     echo "# Fail: missing parameter"
     exit 1
   fi
-  
-  # get redis basic value 
+
+  # get redis basic value
   valuestr=$(redis-cli get ${keystr})
   echo "value=\"${valuestr}\""
 
@@ -380,7 +380,7 @@ elif [ "$1" = "meta" ]; then
   # get META_OUTDATED_SECONDS
   outdatesecs=$(redis-cli get ${keystr}${META_OUTDATED_SECONDS})
   if [ "${outdatesecs}" == "" ]; then
-    # default is -1 --> never outdate 
+    # default is -1 --> never outdate
     outdatesecs="-1"
   fi
   echo "outdatesecs=\"${outdatesecs}\""
@@ -406,7 +406,7 @@ elif [ "$1" = "valid" ]; then
   lasttouch_overall=""
   for keystr in $@
   do
-    
+
     # skip first parameter from script - thats the action string
     ((position++))
     if [ $position -eq 1 ]; then
@@ -436,7 +436,7 @@ elif [ "$1" = "valid" ]; then
     # get outdate police of value (outdated = not valid anymore)
     outdatesecs=$(redis-cli get ${keystr}${META_OUTDATED_SECONDS})
     #echo "# ${keystr}${META_OUTDATED_SECONDS}=\"${outdatesecs}\""
-    
+
     # if outdate policy is default or -1 ==> never outdated
     if [ "${outdatesecs}" == "" ] || [ "${outdatesecs}" == "-1" ]; then
       continue
@@ -453,7 +453,7 @@ elif [ "$1" = "valid" ]; then
 
     # so valid flag does not exists anymore
     # ==> this means value is outdated
-    # break loop and 
+    # break loop and
     echo "stillvalid=\"0\""
     exit 0
 

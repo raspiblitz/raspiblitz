@@ -80,11 +80,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   isInstalled=$(sudo ls /etc/systemd/system/helipad.service 2>/dev/null | grep -c 'helipad.service')
   if ! [ ${isInstalled} -eq 0 ]; then
     echo "Helipad already installed."
-  else 
+  else
     ###############
     # INSTALL
     ###############
-    
+
     # create helipad user:
     sudo adduser --disabled-password --gecos "" $HELIPAD_USER
 
@@ -119,7 +119,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     ##################
     # NGINX
     ##################
-    
+
     # setup nginx symlinks
     if ! [ -f /etc/nginx/sites-available/helipad_ssl.conf ]; then
        sudo cp -f /home/admin/assets/nginx/sites-available/helipad_ssl.conf /etc/nginx/sites-available/helipad_ssl.conf
@@ -148,7 +148,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     ##################
     # SYSTEMD SERVICE
     ##################
-    
+
     echo "# Install Helipad systemd for ${network} on ${chain}"
     echo "
 # Systemd unit for Helipad

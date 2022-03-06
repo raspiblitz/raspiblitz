@@ -207,7 +207,7 @@ case $CHOICE in
               echo ""
               echo -en "Screen is updating in a loop .... press 'x' now to get back to menu."
               read -n 1 -t 6 keyPressed
-              echo -en "\rGathering information to update info ... please wait.                \n"  
+              echo -en "\rGathering information to update info ... please wait.                \n"
 
               # check if user wants to abort session
               if [ "${keyPressed}" = "x" ]; then
@@ -311,7 +311,7 @@ case $CHOICE in
             ;;
         TESTNETS)
             /home/admin/00parallelChainsMenu.sh
-            ;;  
+            ;;
         SUBSCRIBE)
             /home/admin/config.scripts/blitz.subscriptions.py
             ;;

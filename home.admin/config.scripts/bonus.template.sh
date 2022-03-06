@@ -8,21 +8,21 @@
 
 # id string of your app (short single string unique in raspiblitz)
 # should be same as used in name if script
-APPID="template" # one-word lower-case no-specials  
+APPID="template" # one-word lower-case no-specials
 
 # the git repo to get the source code from for install
 GITHUB_REPO="https://github.com/rootzoll/webapp-template"
 
 # the github tag of the version of the source code to install
-# can also be a commit hash 
+# can also be a commit hash
 # if empty it will use the latest source version
 GITHUB_VERSION="v0.1"
 
 # the github signature to verify the author
-# leave GITHUB_SIGN_AUTHOR empty to skip verifying 
-GITHUB_SIGN_AUTHOR="web-flow" 
+# leave GITHUB_SIGN_AUTHOR empty to skip verifying
+GITHUB_SIGN_AUTHOR="web-flow"
 GITHUB_SIGN_PUBKEYLINK="https://github.com/web-flow.gpg"
-GITHUB_SIGN_FINGERPRINT="4AEE18F83AFDEB23" 
+GITHUB_SIGN_FINGERPRINT="4AEE18F83AFDEB23"
 
 # port numbers the app should run on
 # delete if not an web app
@@ -44,7 +44,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   exit 1
 fi
 
-# echoing comments is useful for logs - but start output with # when not a key=value 
+# echoing comments is useful for logs - but start output with # when not a key=value
 echo "# Running: 'bonus.${APPID}.sh $*'"
 
 # check & load raspiblitz config
@@ -78,7 +78,7 @@ if [ "$1" = "menu" ]; then
   echo "appID='${APPID}'"
   echo "githubRepo='${GITHUB_REPO}'"
   echo "githubVersion='${GITHUB_VERSION}'"
-  echo "githubSignature='${GITHUB_SIGNATURE}'"  
+  echo "githubSignature='${GITHUB_SIGNATURE}'"
   echo "isInstalled=${isInstalled}"
   echo "isRunning=${isRunning}"
   if [ "${isInstalled}" == "1" ]; then
@@ -123,7 +123,7 @@ Use your Password B to login.\n
   # add tor info (if available)
   if [ "${toraddress}" != "" ]; then
     dialogText="${dialogText}Hidden Service address for Tor Browser (QRcode on LCD):\n${toraddress}"
-  fi 
+  fi
 
   # use whiptail to show SSH dialog & exit
   whiptail --title "${dialogTitle}" --msgbox "${dialogText}" 18 67
@@ -152,7 +152,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # check and install NodeJS - if already installed it will skip
   /home/admin/config.scripts/bonus.nodejs.sh on
 
-  # create a dedicated user for the app 
+  # create a dedicated user for the app
   # BACKGROUND is here to seperate running apps by unix users
   # and only give file write access to the rest of the system where needed.
   echo "# create user"
@@ -164,12 +164,12 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # `cut -d: -f1 /etc/group | sort` command on raspiblitz commandline
   echo "# add use to special groups"
   sudo /usr/sbin/usermod --append --groups lndadmin ${APPID}
-  
+
   # create a data directory on /mnt/hdd/app-data/ for the app
   # BACKGROUND is that any critical data that needs to survive an update should
   # be stored in that app-data directory. All data there will also be part of
   # any raspiblitz data migration. Also on install handle the case that there
-  # is already data from a pervious install available the user wants to 
+  # is already data from a pervious install available the user wants to
   # continue to use and even may come from an older version from your app.
 
   if ! [ -d /mnt/hdd/app-data/${APPID} ]; then
@@ -184,7 +184,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo chown ${APPID}:${APPID} -R /mnt/hdd/app-data/${APPID}
 
   fi
-  
+
   # make sure needed debian packages are installed
   # 'fbi' is here just an example - change to what you need or delete
   echo "# install from source code"
@@ -196,7 +196,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # other install scripts to see how that implement code download & verify.
   echo "# download from source code & verify"
   sudo -u ${APPID} git clone ${GITHUB_REPO} /home/${APPID}/${APPID}
-  cd /home/${APPID}/${APPID} 
+  cd /home/${APPID}/${APPID}
   sudo -u ${APPID} git reset --hard $GITHUB_VERSION
   if [ "${GITHUB_SIGN_AUTHOR}" != "" ]; then
     sudo -u ${APPID} /home/admin/config.scripts/blitz.git-verify.sh \
@@ -207,21 +207,21 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # BACKGROUND on this example is a web app that compiles with NodeJS. But of course
   # your app could have a complete other way to install - check other instal screipts as examples.
   echo "# compile/install the app"
-  cd /home/${APPID}/${APPID} 
+  cd /home/${APPID}/${APPID}
   sudo -u ${APPID} npm install --only=prod --logLevel warn
   if ! [ $? -eq 0 ]; then
       echo "# FAIL - npm install did not run correctly - deleting code & exit"
       sudo rm -r /home/${APPID}/${APPID}
       exit 1
   fi
-    
+
   # open the ports in the firewall
   echo "# updating Firewall"
   sudo ufw allow ${PORT_CLEAR} comment "${APPID} HTTP"
   sudo ufw allow ${PORT_SSL} comment "${APPID} HTTPS"
 
 
-  # every app should have their own systemd service that cares about starting & 
+  # every app should have their own systemd service that cares about starting &
   # running the app in the background - see the PRESTART section for adhoc config
   # please config this systemd template to your needs
   echo "# create systemd service: ${APPID}.service"
@@ -262,7 +262,7 @@ WantedBy=multi-user.target
   # nginx configuration
   # BACKGROUND is that the plain HTTP is served by your web app, but thru the nginx proxy it will be avaibale
   # with (self-signed) HTTPS and with sepereate configs for Tor & Tor+HTTPS.
-  
+
   echo "# setup nginx confing"
 
   # write the HTTPS config
@@ -332,7 +332,7 @@ server {
   # OK so your app is now installed, but there please also check the following parts to ensure a propper integration
   # into the raspiblitz system:
 
-  # PROVISION - reinstall on updates & recovery 
+  # PROVISION - reinstall on updates & recovery
   # Take a look at `_provision_.sh` script - you can see that there all bonus apps install scripts get called if
   # they have an active entry in the raspiblitz config. This is needed so that on sd card image update or recovery
   # all apps get installed again. So add your app there accordantly so its install will survive an sd card update.
@@ -399,7 +399,7 @@ fi
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   echo "# stop & remove systemd service"
-  sudo systemctl stop ${APPID} 2>/dev/null  
+  sudo systemctl stop ${APPID} 2>/dev/null
   sudo systemctl disable ${APPID}.service
   sudo rm /etc/systemd/system/${APPID}.service
 
@@ -416,9 +416,9 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   echo "# close ports on firewall"
   sudo ufw deny "${PORT_CLEAR}"
   sudo ufw deny "${PORT_SSL}"
- 
+
   echo "# removing Tor hidden service (if active)"
-  /home/admin/config.scripts/tor.onion-service.sh off ${APPID}  
+  /home/admin/config.scripts/tor.onion-service.sh off ${APPID}
 
   echo "# mark app as uninstalled in raspiblitz config"
   /home/admin/config.scripts/blitz.conf.sh set ${APPID} "off"
@@ -434,10 +434,10 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
 fi
 
-# just a basic error message when unknow action parameter was given  
+# just a basic error message when unknow action parameter was given
 echo "# FAIL - Unknown Parameter $1"
 exit 1
 
 # LAST NOTES:
-# Best is to contribute a new app install script as a PR to the raspiblitz GitHub repo. 
+# Best is to contribute a new app install script as a PR to the raspiblitz GitHub repo.
 # Please base your PR on the `dev` branch - not on the default branch displayed.

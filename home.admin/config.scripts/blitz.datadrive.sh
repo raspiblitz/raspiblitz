@@ -21,7 +21,7 @@ fi
 #    this directory should get cleaned on every start (except from swap)
 
 # check if started with sudo
-if [ "$EUID" -ne 0 ]; then 
+if [ "$EUID" -ne 0 ]; then
   echo "error='run as root'"
   exit 1
 fi
@@ -65,7 +65,7 @@ if [ "$1" = "status" ]; then
   # optional second parameter can be 'bitcoin'
   blockchainType=$2
 
-  echo "# RASPIBLITZ DATA DRIVE Status"  
+  echo "# RASPIBLITZ DATA DRIVE Status"
   echo
 
   echo "# BASICS"
@@ -162,7 +162,7 @@ if [ "$1" = "status" ]; then
       hddDataPartition=""
     fi
 
-    # try to detect if its an SSD 
+    # try to detect if its an SSD
     isSSD=$(cat /sys/block/${hdd}/queue/rotational 2>/dev/null | grep -c 0)
     echo "isSSD=${isSSD}"
 
@@ -177,7 +177,7 @@ if [ "$1" = "status" ]; then
     echo "hddBytes=${hddBytes}"
     echo "hddGigaBytes=${hddGigaBytes}"
     echo "hddPartitionCandidate='${hddDataPartition}'"
-    
+
     # if positive deliver more data
     if [ ${#hddDataPartition} -gt 0 ]; then
 
@@ -185,7 +185,7 @@ if [ "$1" = "status" ]; then
       echo "hddDataPartitionBytes=${sizeDataPartition}"
       hddDataPartitionGigaBytes=$(echo "scale=0; ${sizeDataPartition}/1024/1024/1024" | bc -l)
       echo "hddPartitionGigaBytes=${hddDataPartitionGigaBytes}"
-  
+
       # check format of devices partition
       hddFormat=$(lsblk -o FSTYPE,NAME,TYPE | grep part | grep "${hddDataPartition}" | cut -d " " -f 1)
       echo "hddFormat='${hddFormat}'"
@@ -219,9 +219,9 @@ if [ "$1" = "status" ]; then
 
           #####################################
           # Pre-Setup Investigation of DATA-PART
-          # make copy of raspiblitz.conf & 
+          # make copy of raspiblitz.conf &
 
-          # check for recoverable RaspiBlitz data (if config file exists) and raid 
+          # check for recoverable RaspiBlitz data (if config file exists) and raid
           hddRaspiData=$(ls -l /mnt/hdd${subVolumeDir} 2>/dev/null | grep -c raspiblitz.conf)
           echo "hddRaspiData=${hddRaspiData}"
           hddRaspiVersion=""
@@ -258,7 +258,7 @@ if [ "$1" = "status" ]; then
             cp -a /mnt/hdd${subVolumeDir}/app-data/sshd /var/cache/raspiblitz/hdd-inspect 2>/dev/null
             cp -a /mnt/hdd${subVolumeDir}/app-data/ssh-root /var/cache/raspiblitz/hdd-inspect 2>/dev/null
           fi
-        
+
           # comment this line out if case to study the contect of the data section
           umount /mnt/hdd
         fi
@@ -440,7 +440,7 @@ if [ "$1" = "status" ]; then
   # only check if lsusb command is availabe
   if [ ${#hdd} -gt 0 ] && [ "$(type -t lsusb | grep -c file)" -gt 0 ]; then
 
-    # determine USB HDD adapter model ID 
+    # determine USB HDD adapter model ID
     hddAdapter=$(lsusb | grep "SATA" | head -1 | cut -d " " -f6)
     if [ "${hddAdapter}" == "" ]; then
       hddAdapter=$(lsusb | grep "GC Protronics" | head -1 | cut -d " " -f6)
@@ -451,7 +451,7 @@ if [ "$1" = "status" ]; then
     echo "hddAdapterUSB='${hddAdapter}'"
 
     hddAdapterUSAP=0
-    
+
     # check if force UASP flag is set on sd card
     if [ -f "/boot/uasp.force" ]; then
       hddAdapterUSAP=1
@@ -496,7 +496,7 @@ if [ "$1" = "status" ]; then
 
     # RAID is OFF - give information about possible drives to activate
 
-    # find the possible drives that can be used as 
+    # find the possible drives that can be used as
     drivecounter=0
     for disk in $(lsblk -o NAME,TYPE | grep "disk" | awk '$1=$1' | cut -d " " -f 1)
     do
@@ -532,7 +532,7 @@ fi
 
 # check basics for formatting
 if [ "$1" = "format" ]; then
-  
+
   # check valid format
   if [ "$2" = "btrfs" ]; then
     >&2 echo "# DATA DRIVE - FORMATTING to BTRFS layout (new)"
@@ -567,7 +567,7 @@ if [ "$1" = "format" ]; then
     exit 1
   fi
 
-  # get basic info on data drive 
+  # get basic info on data drive
   source <(/home/admin/config.scripts/blitz.datadrive.sh status)
 
   if [ ${isSwapExternal} -eq 1 ] && [ "${hdd}" == "${datadisk}" ]; then
@@ -737,7 +737,7 @@ if [ "$1" = "format" ]; then
      sync
      sleep 6
      win=$(lsblk -o NAME | grep -c ${hdd}1)
-     if [ ${win} -eq 0 ]; then 
+     if [ ${win} -eq 0 ]; then
        echo "error='partition failed'"
        exit 1
      fi
@@ -761,7 +761,7 @@ if [ "$1" = "format" ]; then
        fi
      done
      >&2 echo "# OK BLITZDATA exists now"
-  
+
      >&2 echo "# Creating SubVolume for Snapshots"
      mount /dev/${hdd}1 /tmp/btrfs 1>/dev/null
      if [ $(df | grep -c "/tmp/btrfs") -eq 0 ]; then
@@ -778,7 +778,7 @@ if [ "$1" = "format" ]; then
      sync
      sleep 6
      win=$(lsblk -o NAME | grep -c ${hdd}2)
-     if [ ${win} -eq 0 ]; then 
+     if [ ${win} -eq 0 ]; then
        echo "error='partition failed'"
        exit 1
      fi
@@ -801,7 +801,7 @@ if [ "$1" = "format" ]; then
        fi
      done
      >&2 echo "# OK BLITZSTORAGE exists now"
-  
+
      >&2 echo "# Creating SubVolume for Snapshots"
      mount /dev/${hdd}2 /tmp/btrfs 1>/dev/null
      if [ $(df | grep -c "/tmp/btrfs") -eq 0 ]; then
@@ -816,11 +816,11 @@ if [ "$1" = "format" ]; then
      parted -s -- /dev/${hdd} mkpart primary fat32 -34GiB 100% 1>/dev/null
      sync && sleep 3
      win=$(lsblk -o NAME | grep -c ${hdd}3)
-     if [ ${win} -eq 0 ]; then 
+     if [ ${win} -eq 0 ]; then
        echo "error='partition failed'"
        exit 1
      fi
- 
+
      >&2 echo "# Creating Volume BLITZTEMP (format)"
      mkfs -t vfat -n BLITZTEMP /dev/${hdd}3 1>/dev/null
      # check result
@@ -852,7 +852,7 @@ fi
 ########################################
 
 if [ "$1" = "fstab" ]; then
-  
+
   # get device to temp mount
   hdd=$2
   if [ ${#hdd} -eq 0 ]; then
@@ -961,7 +961,7 @@ if [ "$1" = "fstab" ]; then
       echo "error='no datadrive uuids'"
       exit 1
     fi
-  
+
     # get info on: Storage Drive
     uuidSTORAGE=$(lsblk -o UUID,NAME,LABEL | grep "${hdd}" | grep "BLITZSTORAGE" | cut -d " " -f 1 | grep "-")
     mount /dev/${hdd}2 /tmp/btrfs 1>/dev/null
@@ -1004,7 +1004,7 @@ if [ "$1" = "fstab" ]; then
     sed "3 a ${fstabAdd1}" -i /etc/fstab 1>/dev/null
     mkdir -p /mnt/storage 1>/dev/null
     fstabAdd2="UUID=${uuidSTORAGE} /mnt/storage btrfs noexec,defaults,subvolid=${subVolSTORAGE} 0 2"
-    sed "4 a ${fstabAdd2}" -i /etc/fstab 1>/dev/null  
+    sed "4 a ${fstabAdd2}" -i /etc/fstab 1>/dev/null
     mkdir -p /mnt/temp 1>/dev/null
     fstabAdd3="UUID=${uuidTEMP} /mnt/temp vfat noexec,defaults,uid=${bitcoinUID},gid=${bitcoinGID} 0 2"
     sed "5 a ${fstabAdd3}" -i /etc/fstab 1>/dev/null
@@ -1022,7 +1022,7 @@ if [ "$1" = "fstab" ]; then
       sync
       mountactive1=$(df | grep -c /mnt/hdd)
       mountactive2=$(df | grep -c /mnt/temp)
-      mountactive3=$(df | grep -c /mnt/storage)  
+      mountactive3=$(df | grep -c /mnt/storage)
       loopcount=$(($loopcount +1))
       if [ ${loopcount} -gt 10 ]; then
         >&2 echo "# WARNING was not able freshly mount new devices - might need reboot or check /etc/fstab"
@@ -1061,9 +1061,9 @@ if [ "$1" = "raid" ]; then
      fi
      >&2 echo "# RAID - Adding raid drive to RaspiBlitz data drive"
   elif [ "$2" = "off" ]; then
-     >&2 echo "# RAID - Removing raid drive to RaspiBlitz data drive"  
+     >&2 echo "# RAID - Removing raid drive to RaspiBlitz data drive"
   else
-     >&2 echo "# possible 2nd parameter is 'on' or 'off'"  
+     >&2 echo "# possible 2nd parameter is 'on' or 'off'"
      echo "error='unknown parameter'"
      exit 1
   fi
@@ -1138,7 +1138,7 @@ if [ "$1" = "raid" ] && [ "$2" = "on" ]; then
   >&2 echo "# adding ${usbdev} as BTRFS raid1 for /mnt/hdd"
   btrfs device add -f /dev/${usbdev} /mnt/hdd 1>/dev/null
   btrfs filesystem balance start -dconvert=raid1 -mconvert=raid1 /mnt/hdd 1>/dev/null
-  
+
   >&2 echo "# OK - ${usbdev} is now part of a RAID1 for your RaspiBlitz data"
   exit 0
 
@@ -1146,7 +1146,7 @@ fi
 
 # RAID --> OFF
 if [ "$1" = "raid" ] && [ "$2" = "off" ]; then
- 
+
   # checking if BTRFS mode
   isBTRFS=$(btrfs filesystem show 2>/dev/null| grep -c 'BLITZSTORAGE')
   if [ ${isBTRFS} -eq 0 ]; then
@@ -1163,7 +1163,7 @@ if [ "$1" = "raid" ] && [ "$2" = "off" ]; then
   >&2 echo "# removing USB DEV from RAID"
   btrfs balance start -mconvert=dup -dconvert=single /mnt/hdd 1>/dev/null
   btrfs device remove ${deviceToBeRemoved} /mnt/hdd 1>/dev/null
-  
+
   isRaid=$(btrfs filesystem df /mnt/hdd 2>/dev/null | grep -c "Data, RAID1")
   if [ ${isRaid} -eq 0 ]; then
     >&2 echo "# OK - RaspiBlitz data is not running in RAID1 anymore"
@@ -1209,7 +1209,7 @@ if [ "$1" = "snapshot" ]; then
     echo "error='unknown parameter'"
     exit 1
   fi
-  
+
   >&2 echo "# RASPIBLITZ SNAPSHOTS"
   partition=$(df | grep "${subvolume}" | cut -d " " -f 1)
   echo "subvolume='${subvolume}'"
@@ -1258,7 +1258,7 @@ if [ "$1" = "snapshot" ]; then
     subVolID=$(btrfs subvolume show /tmp/btrfs/WORKINGDIR | grep "Subvolume ID:" | awk '$1=$1' | cut -d " " -f 3)
     sed -i "/${subvolumeESC}/d" /etc/fstab
     fstabAdd="UUID=${uuid} ${subvolume} btrfs noexec,defaults,subvolid=${subVolID} 0 2"
-    sed "4 a ${fstabAdd}" -i /etc/fstab 1>/dev/null  
+    sed "4 a ${fstabAdd}" -i /etc/fstab 1>/dev/null
     umount /tmp/btrfs
     mount -a
     sync
@@ -1273,7 +1273,7 @@ if [ "$1" = "snapshot" ]; then
   else
     >&2 echo "# third parameter needs to be 'create' or 'rollback'"
     echo "error='unknown parameter'"
-    exit 1 
+    exit 1
   fi
 
 
@@ -1347,7 +1347,7 @@ if [ "$1" = "tempmount" ]; then
       isMounted=1
       isBTRFS=0
     fi
-    
+
   elif [ "${hddFormat}" = "btrfs" ]; then
 
     # get user and groupid if usr/group bitcoin
@@ -1360,7 +1360,7 @@ if [ "$1" = "tempmount" ]; then
     mkdir -p /mnt/temp 1>/dev/null
     mount -t btrfs -o degraded -o subvol=WORKINGDIR /dev/${hddBTRFS}1 /mnt/hdd
     mount -t btrfs -o subvol=WORKINGDIR /dev/${hddBTRFS}2 /mnt/storage
-    mount -o umask=0000,uid=${bitcoinUID},gid=${bitcoinGID} /dev/${hddBTRFS}3 /mnt/temp 
+    mount -o umask=0000,uid=${bitcoinUID},gid=${bitcoinGID} /dev/${hddBTRFS}3 /mnt/temp
 
     # check result
     isMountedA=$(df | grep -c "/mnt/hdd")
@@ -1391,7 +1391,7 @@ if [ "$1" = "unmount" ]; then
   umount /mnt/storage 2>/dev/null
   umount /mnt/temp 2>/dev/null
   echo "# OK done unmount"
-  exit 1 
+  exit 1
 fi
 
 ########################################
@@ -1419,7 +1419,7 @@ if [ "$1" = "link" ]; then
 
   if [ ${isBTRFS} -eq 1 ]; then
     >&2 echo "# Creating BTRFS setup links"
-    
+
     >&2 echo "# - linking blockchains into /mnt/hdd"
     if [ $(ls -F /mnt/hdd/bitcoin | grep -c '/mnt/hdd/bitcoin@') -eq 0 ]; then
       mkdir -p /mnt/storage/bitcoin
@@ -1446,7 +1446,7 @@ if [ "$1" = "link" ]; then
     >&2 echo "# - linking temp into /mnt/hdd"
     rm /mnt/hdd/temp 2>/dev/null
     ln -s /mnt/temp /mnt/hdd/temp
-    chown -R bitcoin:bitcoin /mnt/temp 
+    chown -R bitcoin:bitcoin /mnt/temp
 
     >&2 echo "# - creating snapshots folder"
     mkdir -p /mnt/hdd/snapshots
@@ -1461,7 +1461,7 @@ if [ "$1" = "link" ]; then
     >&2 echo "# linking blockchain for user bitcoin"
     rm /home/bitcoin/.bitcoin 2>/dev/null
     ln -s /mnt/hdd/bitcoin /home/bitcoin/.bitcoin
-    
+
     >&2 echo "# linking lnd for user bitcoin"
     rm /home/bitcoin/.lnd 2>/dev/null
     ln -s /mnt/hdd/lnd /home/bitcoin/.lnd
@@ -1469,7 +1469,7 @@ if [ "$1" = "link" ]; then
     >&2 echo "# creating default storage & temp folders"
     mkdir -p /mnt/hdd/app-storage
     mkdir -p /mnt/hdd/temp
-    
+
   fi
 
   # fix ownership of linked files
@@ -1526,17 +1526,17 @@ if [ "$1" = "swap" ]; then
     if [ ${isBTRFS} -eq 1 ]; then
 
       >&2 echo "# Rewrite external SWAP config for BTRFS setup"
-      sed -i "s/^#CONF_SWAPFILE=/CONF_SWAPFILE=/g" /etc/dphys-swapfile  
-      sed -i "s/^CONF_SWAPFILE=.*/CONF_SWAPFILE=\/mnt\/temp\/swapfile/g" /etc/dphys-swapfile  
+      sed -i "s/^#CONF_SWAPFILE=/CONF_SWAPFILE=/g" /etc/dphys-swapfile
+      sed -i "s/^CONF_SWAPFILE=.*/CONF_SWAPFILE=\/mnt\/temp\/swapfile/g" /etc/dphys-swapfile
 
     else
 
       >&2 echo "# Rewrite external SWAP config for EXT4 setup"
-      sed -i "s/^#CONF_SWAPFILE=/CONF_SWAPFILE=/g" /etc/dphys-swapfile  
-      sed -i "s/^CONF_SWAPFILE=.*/CONF_SWAPFILE=\/mnt\/hdd\/swapfile/g" /etc/dphys-swapfile  
+      sed -i "s/^#CONF_SWAPFILE=/CONF_SWAPFILE=/g" /etc/dphys-swapfile
+      sed -i "s/^CONF_SWAPFILE=.*/CONF_SWAPFILE=\/mnt\/hdd\/swapfile/g" /etc/dphys-swapfile
 
     fi
-    sed -i "s/^CONF_SWAPSIZE=/#CONF_SWAPSIZE=/g" /etc/dphys-swapfile 
+    sed -i "s/^CONF_SWAPSIZE=/#CONF_SWAPSIZE=/g" /etc/dphys-swapfile
     sed -i "s/^#CONF_MAXSWAP=.*/CONF_MAXSWAP=4096/g" /etc/dphys-swapfile
 
     >&2 echo "# Creating SWAP file .."
@@ -1545,14 +1545,14 @@ if [ "$1" = "swap" ]; then
 
     >&2 echo "# Activating new SWAP"
     mkswap $externalSwapPath
-    dphys-swapfile setup 
+    dphys-swapfile setup
     dphys-swapfile swapon
 
     >&2 echo "# OK - Swap is now ON external"
     exit 0
 
   elif [ "$2" = "off" ]; then
-  
+
     if [ ${isSwapExternal} -eq 0 ]; then
       >&2 echo "# OK - already OFF"
       exit 1
@@ -1568,7 +1568,7 @@ if [ "$1" = "swap" ]; then
     dd if=/dev/zero of=/var/swap count=256 bs=1MiB 1>/dev/null
     chmod 0600 /var/swap
 
-    >&2 echo "# Create and switch on new SWAP" 
+    >&2 echo "# Create and switch on new SWAP"
     mkswap /var/swap 1>/dev/null
     dphys-swapfile setup 1>/dev/null
     dphys-swapfile swapon 1>/dev/null
@@ -1609,11 +1609,11 @@ if [ "$1" = "clean" ]; then
   # see: https://www.davescomputers.com/securely-deleting-files-solid-state-drive/"
   # see: https://unix.stackexchange.com/questions/62345/securely-delete-files-on-btrfs-filesystem"
   >&2 echo "# --> Dont resell or gift data drive. Destroy physically if needed."
-  >&2 echo  
+  >&2 echo
 
   # DELETE ALL DATA (with option to keep blockchain)
   if [ "$2" = "all" ]; then
-    
+
     if [ "$3" = "-total" ] || [ "$3" = "-keepblockchain" ]; then
 
       >&2 echo "# Deleting personal Data .."
@@ -1736,7 +1736,7 @@ if [ "$1" = "clean" ]; then
                   >&2 echo "# keeping: ${entry}"
                 fi
               done
-            fi  
+            fi
           done
         fi
 
@@ -1746,11 +1746,11 @@ if [ "$1" = "clean" ]; then
     else
       >&2 echo "# FAIL unknown third parameter try '-total' or '-keepblockchain'"
       echo "error='unknown parameter'"
-      exit 1    
+      exit 1
     fi
 
   # RESET BLOCKCHAIN (e.g to rebuilt blockchain )
-  elif [ "$2" = "blockchain" ]; then  
+  elif [ "$2" = "blockchain" ]; then
 
     # here is no secure delete needed - because not sensitive data
     >&2 echo "# Deleting all Blockchain Data (blocks/chainstate) from storage .."
@@ -1767,13 +1767,13 @@ if [ "$1" = "clean" ]; then
 
     >&2 echo "# OK cleaning done."
     exit 1
-  
-  # RESET TEMP (keep swapfile)
-  elif [ "$2" = "temp" ]; then  
 
-    >&2 echo "# Deleting the temp folder/drive (keeping SWAP file) .."  
+  # RESET TEMP (keep swapfile)
+  elif [ "$2" = "temp" ]; then
+
+    >&2 echo "# Deleting the temp folder/drive (keeping SWAP file) .."
     tempPath="/mnt/hdd/temp"
-        
+
     for entry in $(ls -A1 ${tempPath} 2>/dev/null)
     do
       # sorting file
@@ -1799,14 +1799,14 @@ if [ "$1" = "clean" ]; then
 
     >&2 echo "# OK cleaning done."
     exit 1
-  
+
   else
     >&2 echo "# FAIL unknown second parameter - try 'all','blockchain' or 'temp'"
     echo "error='unknown parameter'"
     exit 1
   fi
 
-fi  
+fi
 
 ########################################
 # UASP-fix
@@ -1827,7 +1827,7 @@ if [ "$1" = "uasp-fix" ]; then
     if [ ${usbQuirkActive} -gt 0 ] && [ ${usbQuirkDone} -eq 0 ]; then
       # remove old usb-storage.quirks
       sed -i "s/usb-storage.quirks=[^ ]* //g" /boot/cmdline.txt
-    fi 
+    fi
     if [ ${usbQuirkDone} -eq 0 ]; then
       # add new usb-storage.quirks
       sed -i "s/^/usb-storage.quirks=${hddAdapterUSB}:u /" /boot/cmdline.txt

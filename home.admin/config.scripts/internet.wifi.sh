@@ -81,7 +81,7 @@ update_config=1"
 # or when WIFI is inactive but a wpa_supplicant.conf exists restore this
 elif [ "$1" == "backup-restore" ]; then
 
-  # print wifi state 
+  # print wifi state
   echo "wifiIsSet=${wifiIsSet}"
 
   # check if HDD backup location is available (for backup or restore)
@@ -102,7 +102,7 @@ elif [ "$1" == "backup-restore" ]; then
   if [ ${wifiIsSet} -eq 1 ]; then
     # BACKUP latest wifi settings to HDD if available
     if [ ${hddBackupLocationAvailable} -eq 1 ]; then
-      sudo cp /etc/wpa_supplicant/wpa_supplicant.conf /mnt/hdd/app-data/wpa_supplicant.conf 
+      sudo cp /etc/wpa_supplicant/wpa_supplicant.conf /mnt/hdd/app-data/wpa_supplicant.conf
       echo "wifiRestore=0"
       echo "wifiBackup=1"
     else

@@ -8,7 +8,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
 fi
 
 # check if started with sudo
-if [ "$EUID" -ne 0 ]; then 
+if [ "$EUID" -ne 0 ]; then
   echo "error='missing sudo'"
   exit 1
 fi
@@ -51,11 +51,11 @@ fi
 migrate_btc_conf () {
   # keep old conf als backup
   sudo mv /mnt/hdd/bitcoin/bitcoin.conf /mnt/hdd/bitcoin/bitcoin.conf.migration
-  # start from fresh configuration template 
+  # start from fresh configuration template
   sudo cp /home/admin/assets/bitcoin.conf /mnt/hdd/bitcoin/bitcoin.conf
 }
 
-migrate_lnd_conf () { 
+migrate_lnd_conf () {
 
   # 1st parameter can be an alias to set
   nodename=$1
@@ -82,7 +82,7 @@ migrate_raspiblitz_conf () {
   if [ ${#nodename} -eq 0 ]; then
     nodename="raspiblitz"
   fi
-  
+
   # write default raspiblitz config
   source /home/admin/_version.info
   echo "# RASPIBLITZ CONFIG FILE" > /home/admin/raspiblitz.conf
@@ -320,13 +320,13 @@ if [ "$1" = "export" ]; then
 
   # collect files to exclude in export in temp file
   echo "*.tar.gz" > ~/.exclude.temp
-  echo "/mnt/hdd/bitcoin" >> ~/.exclude.temp 
+  echo "/mnt/hdd/bitcoin" >> ~/.exclude.temp
   echo "/mnt/hdd/litecoin" >> ~/.exclude.temp # keep for legacy reasons
-  echo "/mnt/hdd/swapfile" >> ~/.exclude.temp 
+  echo "/mnt/hdd/swapfile" >> ~/.exclude.temp
   echo "/mnt/hdd/temp" >> ~/.exclude.temp
-  echo "/mnt/hdd/lost+found" >> ~/.exclude.temp 
-  echo "/mnt/hdd/snapshots" >> ~/.exclude.temp 
-  echo "/mnt/hdd/torrent" >> ~/.exclude.temp 
+  echo "/mnt/hdd/lost+found" >> ~/.exclude.temp
+  echo "/mnt/hdd/snapshots" >> ~/.exclude.temp
+  echo "/mnt/hdd/torrent" >> ~/.exclude.temp
   echo "/mnt/hdd/app-storage" >> ~/.exclude.temp
 
   # copy bitcoin data files to backup dir (if bitcoin active)
@@ -357,15 +357,15 @@ if [ "$1" = "export" ]; then
   sudo tar -zcvf ${defaultUploadPath}/raspiblitz-export-temp.tar.gz -X ~/.exclude.temp /mnt/hdd 1>~/.include.temp 2>/dev/null
 
   # get md5 checksum
-  echo "# Building checksum (can take a while) ..." 
+  echo "# Building checksum (can take a while) ..."
   md5checksum=$(md5sum ${defaultUploadPath}/raspiblitz-export-temp.tar.gz | head -n1 | cut -d " " -f1)
   echo "md5checksum=${md5checksum}"
-  
+
   # get byte size
   bytesize=$(wc -c ${defaultUploadPath}/raspiblitz-export-temp.tar.gz | cut -d " " -f 1)
   echo "bytesize=${bytesize}"
 
-  # final renaming 
+  # final renaming
   name="raspiblitz${blitzname}${datestamp}-${md5checksum}.tar.gz"
   echo "exportpath='${defaultUploadPath}'"
   echo "filename='${name}'"
@@ -375,9 +375,9 @@ if [ "$1" = "export" ]; then
   # delete temp files
   rm ~/.exclude.temp
   rm ~/.include.temp
-  
+
   echo "scpDownloadUnix=\"${scpDownloadUnix}\""
-  echo "scpDownloadWin=\"${scpDownloadWin}\""  
+  echo "scpDownloadWin=\"${scpDownloadWin}\""
   echo "# OK - Export done"
   exit 0
 fi
@@ -433,18 +433,18 @@ if [ "$1" = "export-gui" ]; then
   echo "*******************************"
   echo "* DOWNLOAD THE MIGRATION FILE *"
   echo "*******************************"
-  echo 
+  echo
   echo "On your Linux or MacOS Laptop - RUN IN NEW TERMINAL:"
   echo "${scpDownloadUnix}"
   echo "On Windows use command:"
   echo "${scpDownloadWin}"
   echo ""
   echo "Use password A to authenticate file transfer."
-  echo 
+  echo
   echo "To check if you downloaded the file correctly:"
   echo "md5-checksum --> ${md5checksum}"
   echo "byte-size --> ${bytesize}"
-  echo 
+  echo
   echo "Your Lightning node is now stopped. After download press ENTER to shutdown your raspiblitz."
   echo "To complete the data migration follow then instructions on the github FAQ."
   echo
@@ -495,7 +495,7 @@ if [ "$1" = "import" ]; then
     sudo chown bitcoin:bitcoin -R /mnt/storage/bitcoin 2>/dev/null
   fi
 
-  # check migration 
+  # check migration
   raspiblitzConfExists=$(sudo ls /mnt/hdd/raspiblitz.conf | grep -c "raspiblitz.conf")
   if [ "${raspiblitzConfExists}" != "1" ]; then
     echo "error='no raspiblitz.conf after unzip migration file'"

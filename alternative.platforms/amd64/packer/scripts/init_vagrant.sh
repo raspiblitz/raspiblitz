@@ -18,4 +18,4 @@ echo "vagrant ssh --> ssh into your RaspiBlitzVM"
 echo "ssh admin@${localip} --> ssh into with password A"
 echo "vagrant provision --> trigger code sync from outside VM"
 echo "patch --> trigger code sync from inside the VM"
-echo 
+echo

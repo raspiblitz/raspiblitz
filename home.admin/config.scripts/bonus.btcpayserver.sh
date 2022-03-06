@@ -429,7 +429,7 @@ btc.rpc.password=$PASSWORD_B
     sudo -u btcpay git clone https://github.com/btcpayserver/btcpayserver.git 2>/dev/null
     cd btcpayserver
     sudo -u btcpay git reset --hard $BTCPayVersion
-    
+
     # sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh \
     #  "web-flow" "https://github.com/web-flow.gpg" "4AEE18F83AFDEB23" || exit 1
     sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh \
@@ -618,7 +618,7 @@ if [ "$1" = "update" ]; then
       echo "# Restarting bitcoind"
       sudo systemctl restart bitcoind
     fi
-   
+
     sudo systemctl start nbxplorer
     echo "# Updated NBXplorer to $TAG"
   fi
@@ -637,7 +637,7 @@ if [ "$1" = "update" ]; then
   UPSTREAM=${1:-'@{u}'}
   LOCAL=$(git rev-parse @)
   REMOTE=$(git rev-parse "$UPSTREAM")
-  
+
   if [ $LOCAL = $REMOTE ]; then
     TAG=$(git tag | grep v1 | sort -V | tail -1)
     echo "# Up-to-date on version $TAG"

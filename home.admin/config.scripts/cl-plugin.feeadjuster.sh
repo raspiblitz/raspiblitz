@@ -44,7 +44,7 @@ if [ "$1" = "off" ];then
 
   echo "# delete symlink"
   sudo rm -rf /home/bitcoin/${netprefix}cl-plugins-enabled/${plugin}.py
-  
+
   echo "# Edit ${CLCONF}"
   sudo sed -i "/^feeadjuster/d" ${CLCONF}
 

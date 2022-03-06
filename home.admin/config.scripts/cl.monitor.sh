@@ -11,7 +11,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
 fi
 
 # check if started with sudo
-if [ "$EUID" -ne 0 ]; then 
+if [ "$EUID" -ne 0 ]; then
   echo "error='run as root'"
   exit 1
 fi
@@ -51,7 +51,7 @@ if [ "$2" = "status" ]; then
   cl_locked="0"
   cl_error_short=""
   cl_error_full=""
-  
+
   if [ "${cl_running}" = "0" ]; then
     # check if error because wallet is locked
     # the next release will have soecific error code for decryption  error
@@ -65,7 +65,7 @@ if [ "$2" = "status" ]; then
       fi
     fi
     clError=$(sudo journalctl -n5 -u ${netprefix}lightningd)
- 
+
     # cases from 'cl.hsmtool.sh unlock'
     if \
     [ "$(eval echo \$${netprefix}clEncryptedHSM)" = "on" ] && [ ! -f $passwordFile ] || \
@@ -75,7 +75,7 @@ if [ "$2" = "status" ]; then
      grep -c 'hsm_secret is encrypted, you need to pass the --encrypted-hsm startup option.') -gt 0 ] || \
     [ $(echo "${clError}" | \
       grep -c 'Wrong password for encrypted hsm_secret.') -gt 0 ]; then
-    
+
       # signal wallet locked
       cl_locked="1"
       # dont report it as error
@@ -114,7 +114,7 @@ if [ "$2" = "status" ]; then
       fi
     fi
 
-  fi 
+  fi
 
   # print results
   echo "ln_cl_version='${cl_version}'"
@@ -126,7 +126,7 @@ if [ "$2" = "status" ]; then
   echo "ln_cl_error_full='${cl_error_full}'"
 
   exit 0
-fi   
+fi
 
 ######################################################
 # CONFIG
@@ -228,7 +228,7 @@ if [ "$2" = "info" ]; then
   echo "ln_cl_recovery_mode='${cl_recovery_mode}'"
   echo "ln_cl_recovery_done='${cl_recovery_done}'"
   exit 0
-  
+
 fi
 
 ######################################################
@@ -277,7 +277,7 @@ if [ "$2" = "wallet" ]; then
   done
   ln_channelbalance_pending=$((ln_channelbalance_all-ln_channelbalance-ln_closedchannelbalance))
   if [ ${#ln_channelbalance_pending} -gt 0 ]; then ln_channelbalance_pending=" (+${ln_channelbalance_pending})"; fi
-  
+
   # print data
   echo "ln_cl_wallet_onchain_balance='${ln_walletbalance//[^0-9.]/}'"
   echo "ln_cl_wallet_onchain_pending='${ln_pendingonchain//[^0-9.]/}'"

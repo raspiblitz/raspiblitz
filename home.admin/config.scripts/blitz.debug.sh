@@ -34,7 +34,7 @@ if [ "$1" == "redact" ]; then
   sed -i 's/[0-9]*.[0-9]* BTC/* BTC/' ${redactFile}
   sed -i 's/balance=[^\r\n]*/balance=****/' ${redactFile}
   sed -i 's/Server started with public key .+/Server started with public key ****/' ${redactFile}
-  
+
   # c-lightning self info in logs
   sed -i 's/alias [A-Za-z0-9]* /alias *** /' ${redactFile}
   sed -i 's/public key [a-z0-9]*,/public key *** /' ${redactFile}

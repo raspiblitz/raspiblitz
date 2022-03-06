@@ -34,14 +34,14 @@ if [ "$1" = "on" ];then
       echo "# Symlink to /home/bitcoin/${netprefix}cl-plugins-enabled"
       sudo ln -s /home/bitcoin/cl-plugins-available/plugins/${plugin}/${plugin}.py \
                  /home/bitcoin/${netprefix}cl-plugins-enabled
-      
+
       source <(/home/admin/_cache.sh get state)
       if [ "${state}" == "ready" ]; then
         echo "# Restart the ${netprefix}lightningd.service to activate the ${plugin} plugin"
         sudo systemctl restart ${netprefix}lightningd
       fi
     fi
-  
+
   else
     if [ $($lightningcli_alias | grep -c "${plugin}") -eq 0 ];then
       echo "# Just start the ${plugin} plugin"
@@ -49,7 +49,7 @@ if [ "$1" = "on" ];then
       $lightningcli_alias plugin start /home/bitcoin/cl-plugins-available/plugins/${plugin}/${plugin}.py
     fi
   fi
-  
+
   echo
   echo "Node URI:"
   ln_getinfo=$($lightningcli_alias -H getinfo 2>/dev/null)
@@ -60,7 +60,7 @@ if [ "$1" = "on" ];then
   echo
   echo "# Running:"
   echo "${netprefix}lightning-cli ${plugin}"
-  echo 
+  echo
   $lightningcli_alias ${plugin}
   echo
 

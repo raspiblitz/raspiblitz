@@ -581,7 +581,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # setting value in raspi blitz config
   /home/admin/config.scripts/blitz.conf.sh set sphinxrelay "off"
   /home/admin/config.scripts/blitz.conf.sh delete sphinxrelay_connection
-  
+
   # remove nginx symlinks
   sudo rm -f /etc/nginx/sites-enabled/sphinxrelay_ssl.conf
   sudo rm -f /etc/nginx/sites-enabled/sphinxrelay_tor.conf

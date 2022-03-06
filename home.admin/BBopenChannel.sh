@@ -33,9 +33,9 @@ if [ ${chainOutSync} -eq 1 ]; then
   if [ $LNTYPE = cl ];then
     echo "# FAIL PRECHECK - 'lightning-cli getinfo' blockheight is different from 'bitcoind getblockchaininfo' - wait until chain is sync "
   elif [ $LNTYPE = lnd ];then
-    echo "# FAIL PRECHECK - lncli getinfo shows 'synced_to_chain': false - wait until chain is sync "  
+    echo "# FAIL PRECHECK - lncli getinfo shows 'synced_to_chain': false - wait until chain is sync "
   fi
-  echo 
+  echo
   echo "# PRESS ENTER to return to menu"
   read key
   exit 0
@@ -113,13 +113,13 @@ pubKey=$(dialog --clear \
 clear
 if [ ${#pubKey} -eq 0 ]; then
   clear
-  echo 
+  echo
   echo "no channel selected - returning to menu ..."
   sleep 4
   exit 0
 fi
 
-# find out what is the minimum amount 
+# find out what is the minimum amount
 # TODO find a better way - also consider dust and channel reserve
 # details see here: https://github.com/btcontract/lnwallet/issues/52
 minSat=20000

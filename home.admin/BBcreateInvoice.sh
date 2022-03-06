@@ -39,7 +39,7 @@ while [ "${chainInSync}" == "0" ]; do
 	 --ok-label "Try now" \
 	 --cancel-label "Give up" \
 	 --pause "\n\n'$lncommand getinfo' shows 'synced_to_chain': false\n\nTry again in a few seconds." 15 60 5
-  
+
   if [ $? -gt 0 ]; then
       exit 0
   fi
@@ -54,7 +54,7 @@ elif [ $LNTYPE = lnd ];then
   openChannels=$($lncli_alias  listchannels 2>/dev/null | grep chan_id -c)
 fi
 if [ ${openChannels} -eq 0 ]; then
-  echo 
+  echo
   echo "!!!!!!!!!!!!!!!!!!!"
   echo "FAIL - You have NO ESTABLISHED CHANNELS .. open a channel first."
   echo "!!!!!!!!!!!!!!!!!!!"
@@ -158,7 +158,7 @@ else
       wasPayed=$(echo $result | grep -c '"settled": true')
     fi
     if [ ${wasPayed} -gt 0 ]; then
-      echo 
+      echo
       echo $result
       echo
       echo "OK the Invoice was paid - returning to menu."
@@ -167,13 +167,13 @@ else
       sleep 2
       break
     fi
- 
+
     # wait 2 seconds for key input
     read -n 1 -t 2 keyPressed
 
     # check if user wants to abort session
     if [ "${keyPressed}" = "x" ]; then
-      echo 
+      echo
       echo $result
       echo
       echo "Returning to menu - invoice was not payed yet."

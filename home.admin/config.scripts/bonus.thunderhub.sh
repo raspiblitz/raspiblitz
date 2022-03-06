@@ -329,7 +329,7 @@ if [ "$1" = "update" ]; then
         exit 1
     fi
 
-    # opt out of telemetry 
+    # opt out of telemetry
     echo "# opt out of telemetry .. "
     sudo -u thunderhub npx next telemetry disable
 

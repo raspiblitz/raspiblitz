@@ -15,10 +15,10 @@ LNDCONF="/mnt/hdd/lnd/lnd.conf"
 
 ### ADD IP
 
-if [ "$1" = "ip-add" ]; then 
+if [ "$1" = "ip-add" ]; then
 
   echo "# lnd.tlscert.sh $1"
-  
+
   # 2. parameter: ip
   ip=$2
   if [ ${#ip} -eq 0 ]; then
@@ -49,7 +49,7 @@ fi
 
 ### REMOVE IP
 
-if [ "$1" = "ip-remove" ]; then 
+if [ "$1" = "ip-remove" ]; then
 
   echo "# lnd.tlscert.sh $1"
 
@@ -82,7 +82,7 @@ fi
 
 ### ADD DOMAIN
 
-if [ "$1" = "domain-add" ]; then 
+if [ "$1" = "domain-add" ]; then
 
   echo "# lnd.tlscert.sh $1"
 
@@ -116,7 +116,7 @@ fi
 
 ### REMOVE DOMAIN
 
-if [ "$1" = "domain-remove" ]; then 
+if [ "$1" = "domain-remove" ]; then
 
   echo "# lnd.tlscert.sh $1"
 
@@ -149,7 +149,7 @@ fi
 
 ### REFRESH
 
-if [ "$1" = "refresh" ]; then 
+if [ "$1" = "refresh" ]; then
 
   echo "# checking if LND is running"
   lndEnabled=$(sudo systemctl status lnd | grep -c 'enabled')
@@ -165,8 +165,8 @@ if [ "$1" = "refresh" ]; then
   echo "# keep old tls data as backup"
   sudo rm ${TLSPATH}/tls.cert.old 2>/dev/null
   sudo rm ${TLSPATH}/tls.key.old 2>/dev/null
-  sudo mv ${TLSPATH}/tls.cert ${TLSPATH}/tls.cert.old 
-  sudo mv ${TLSPATH}/tls.key ${TLSPATH}/tls.key.old 
+  sudo mv ${TLSPATH}/tls.cert ${TLSPATH}/tls.cert.old
+  sudo mv ${TLSPATH}/tls.key ${TLSPATH}/tls.key.old
 
   echo "# start to create new generate new TLSCert"
   sudo systemctl start lnd

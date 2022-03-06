@@ -13,7 +13,7 @@ if [ "$1" == "only-one-loop" ]; then
 fi
 # start with parameter "install" (to setup service as systemd background running)
 if [ "$1" == "install" ]; then
-  
+
   # write systemd service
   cat > /etc/systemd/system/background.scan.service <<EOF
 # Monitor the RaspiBlitz State
@@ -74,7 +74,7 @@ YEAR=31536000
 usermod -G bitcoin root
 
 ####################################################################
-# INIT 
+# INIT
 ####################################################################
 
 # init values
@@ -128,8 +128,8 @@ while [ 1 ]
 do
 
   ####################################################################
-  # LOOP DATA (BASIC SYSTEM) 
-  # data that is always available 
+  # LOOP DATA (BASIC SYSTEM)
+  # data that is always available
   ####################################################################
 
   # check that redis contains init data (detect possible restart of redis)
@@ -143,7 +143,7 @@ do
   startTime=$(date +%s)
 
   #################
-  # BASIC SYSTEM 
+  # BASIC SYSTEM
 
   # uptime just do on every run
   system_up=$(cat /proc/uptime | grep -o '^[0-9]\+')
@@ -391,7 +391,7 @@ do
 
       # update detail infos only when ready (get as value from cache)
       source <(/home/admin/_cache.sh meta btc_${CHAIN}net_ready)
-      if [ "${value}" == "1" ]; then 
+      if [ "${value}" == "1" ]; then
 
         # check if network needs update
         source <(/home/admin/_cache.sh valid \
@@ -1030,7 +1030,7 @@ do
   # if was started with special parameter
   if [ "${ONLY_ONE_LOOP}" == "1" ]; then
     echo "Exiting because ONLY_ONE_LOOP==1"
-    exit 0 
+    exit 0
   fi
 
 done

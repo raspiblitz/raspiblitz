@@ -165,7 +165,7 @@ elif [ "$1" = "sync" ]; then
     sudo rm -rf "/mnt/hdd/app-data/lnd/tls.cert"                    # not a symlink.. delete it silently
     sudo ln -s "/mnt/hdd/lnd/tls.cert" "/mnt/hdd/app-data/lnd/tls.cert"  # and create symlink
   fi
-  
+
 ###########################
 # Check Macaroons and fix missing
 ###########################

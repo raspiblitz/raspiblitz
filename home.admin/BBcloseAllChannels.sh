@@ -57,9 +57,9 @@ if [ ${chainOutSync} -eq 1 ]; then
   if [ $LNTYPE = cl ];then
     echo "# FAIL PRECHECK - '${netprefix}lightning-cli getinfo' blockheight is different from '${netprefix}bitcoind getblockchaininfo' - wait until chain is sync "
   elif [ $LNTYPE = lnd ];then
-    echo "# FAIL PRECHECK - ${netprefix}lncli getinfo shows 'synced_to_chain': false - wait until chain is sync "  
+    echo "# FAIL PRECHECK - ${netprefix}lncli getinfo shows 'synced_to_chain': false - wait until chain is sync "
   fi
-  echo 
+  echo
   echo "# PRESS ENTER to return to menu"
   read key
   exit 0
@@ -75,17 +75,17 @@ fi
 echo "#####################################"
 echo "# Closing All Channels (EXPERIMENTAL)"
 echo "#####################################"
-echo 
+echo
 echo "# COMMAND LINE: "
 echo $command
-echo 
+echo
 echo "# RESULT:"
 
 # execute command
 if [ ${#command} -gt 0 ]; then
   if [ $LNTYPE = cl ];then
     cl_closeall
-  elif [ $LNTYPE = lnd ];then  
+  elif [ $LNTYPE = lnd ];then
     ${command}
   fi
 fi

@@ -2,7 +2,7 @@
 
 # command info
 if [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
-  echo 
+  echo
   echo "Config script to set the alias of the C-lightning node"
   echo "cl.setname.sh [mainnet|testnet|signet] [?newName]"
   echo
@@ -35,7 +35,7 @@ if ! sudo ls ${CLCONF}; then
   exit 1
 fi
 
-# make sure entry line for 'alias' exists 
+# make sure entry line for 'alias' exists
 entryExists=$(cat ${CLCONF} | grep -c "alias=")
 if [ ${entryExists} -eq 0 ]; then
   echo "alias=" >> ${CLCONF}

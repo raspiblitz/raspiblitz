@@ -25,9 +25,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sleep 3
     exit 1
   fi
-  
+
   echo "*** INSTALL pyblocks***"
-  
+
   # create pyblock user
   sudo adduser --disabled-password --gecos "" pyblock
   cd /home/pyblock
@@ -37,14 +37,14 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo apt-get install hexyl html2text
 
   # install via pip
-  sudo -u pyblock pip3 install pybitblock 
+  sudo -u pyblock pip3 install pybitblock
 
   # set PATH for the user
   sudo bash -c "echo 'PATH=\$PATH:/home/pyblock/.local/bin/' >> /home/pyblock/.profile"
-  
+
   # add user to group with admin access to lnd
   sudo /usr/sbin/usermod --append --groups lndadmin pyblock
-  
+
   sudo rm -rf /home/pyblock/.bitcoin  # not a symlink.. delete it silently
   sudo -u pyblock mkdir /home/pyblock/.bitcoin
   sudo cp /mnt/hdd/bitcoin/bitcoin.conf /home/pyblock/.bitcoin/
@@ -54,7 +54,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo rm -rf /home/pyblock/.lnd  # not a symlink.. delete it silently
   # create symlink
   sudo ln -s "/mnt/hdd/app-data/lnd/" "/home/pyblock/.lnd"
-  
+
   ## Create conf
   # from xxd -p bclock.conf | tr -d '\n'
   echo 80037d710028580700000069705f706f727471015807000000687474703a2f2f710258070000007270637573657271035800000000710458070000007270637061737371056804580a000000626974636f696e636c697106581a0000002f7573722f6c6f63616c2f62696e2f626974636f696e2d636c697107752e0a | xxd -r -p -  ~/bclock.conf
@@ -79,7 +79,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # setting value in raspi blitz config
   /home/admin/config.scripts/blitz.conf.sh set pyblock "off"
-  
+
   echo "*** REMOVING PyBLOCK ***"
   sudo userdel -rf pyblock
   echo "# OK, pyblock is removed."

@@ -76,7 +76,7 @@ if [ "${setupPhase}" == "migration" ]; then
     source <(/home/admin/config.scripts/lnd.install.sh info "${lndVersion}")
     if [ "${compatible}" != "1" ]; then
       migrationMode="outdatedLightning"
-    fi 
+    fi
   fi
 
   /home/admin/setup.scripts/dialogMigration.sh ${hddGotMigrationData} ${migrationMode}
@@ -116,7 +116,7 @@ if [ "${setupPhase}" == "setup" ]; then
     echo "# OK update process starting .."
     echo "setPasswordA=1" >> $SETUPFILE
   fi
-  
+
   # menu MIGRATE menu option
   if [ "${menuresult}" == "5" ]; then
     setupPhase="${orgSetupPhase}"
@@ -141,7 +141,7 @@ if [ "${setupPhase}" == "setup" ]; then
   fi
 
   ###############################################
-  # FORMAT DRIVE on NEW SETUP or MIGRATION UPLOAD 
+  # FORMAT DRIVE on NEW SETUP or MIGRATION UPLOAD
   if [ "${menuresult}" == "0" ] || [ "${menuresult}" == "1" ]; then
 
     source <(/home/admin/_cache.sh get hddGotMigrationData hddBlocksBitcoin hddBlocksLitecoin hddCandidate)
@@ -182,7 +182,7 @@ if [ "${setupPhase}" == "setup" ]; then
     elif [ "${userChoice}" == "2" ]; then
 
       # KEEP BLOCKCHAIN + DELETE ALL THE REST
-      
+
       # when blockchain comes from another node migrate data first
       if [ "${hddGotMigrationData}" != "" ]; then
           clear
@@ -270,7 +270,7 @@ if [ "${setupPhase}" == "setup" ]; then
       lightningWalletDone=1
       # also disable asking for password c if no lightning implementation was chosen
       sed -i "s/^setPasswordC=.*/setPasswordC=0/g" ${SETUPFILE}
-    fi 
+    fi
     while [ "${lightningWalletDone}" == "0" ]
     do
 
@@ -341,7 +341,7 @@ echo "# Starting passwords dialog ..."
 
 # set flag for bootstrap process to kick-off provision process
 /home/admin/_cache.sh set state "waitprovision"
-  
+
 clear
 echo "# setup dialog done - results in:"
 echo "# $SETUPFILE"

@@ -61,9 +61,9 @@ if [ $(grep -c "^feeadjuster" < ${CLCONF}) -gt 0 ];then
   fi
 fi
 
-if [ ${CHAIN} = "testnet" ]; then 
+if [ ${CHAIN} = "testnet" ]; then
   clrpcsubdir="/testnet"
-elif [ ${CHAIN} = "signet" ]; then 
+elif [ ${CHAIN} = "signet" ]; then
   clrpcsubdir="/signet"
 fi
 # make the lightning-rpc socket group readable

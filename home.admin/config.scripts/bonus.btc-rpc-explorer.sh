@@ -310,7 +310,7 @@ EOF
 
   # setting value in raspi blitz config
   /home/admin/config.scripts/blitz.conf.sh set BTCRPCexplorer "on"
-  
+
   echo "# needs to finish creating txindex to be functional"
   echo "# monitor with: sudo tail -n 20 -f /mnt/hdd/bitcoin/debug.log"
   echo "# npm audi fix"

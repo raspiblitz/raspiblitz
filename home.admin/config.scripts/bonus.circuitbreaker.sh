@@ -61,7 +61,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     # sync all macaroons and unix groups for access
     /home/admin/config.scripts/lnd.credentials.sh sync
-    # macaroons will be checked after install  
+    # macaroons will be checked after install
 
     # add user to group with admin access to lnd
     sudo /usr/sbin/usermod --append --groups lndadmin circuitbreaker
@@ -114,7 +114,7 @@ WantedBy=multi-user.target
     sudo systemctl enable circuitbreaker
     echo "# OK - the circuitbreaker.service is now enabled"
 
-  else 
+  else
     echo "# The circuitbreaker.service is already installed."
   fi
 
@@ -138,7 +138,7 @@ WantedBy=multi-user.target
     echo "# Failed to install circuitbreaker "
     exit 1
   fi
-  
+
   exit 0
 fi
 

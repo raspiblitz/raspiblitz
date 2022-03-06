@@ -157,7 +157,7 @@ if [ "$1" == "prestart" ]; then
   setting ${lndConfFile} ${insertLine} "${network}d\.rpchost" "127\.0\.0\.1\:${portprefix}8332"
 
   ##### APPLICATION OPTIONS SECTION #####
-  
+
   sectionLine=$(cat ${lndConfFile} | grep -n "^\[Application Options\]" | cut -d ":" -f1)
   echo "# sectionLine(${sectionLine})"
   insertLine=$(expr $sectionLine + 1)

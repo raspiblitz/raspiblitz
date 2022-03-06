@@ -42,13 +42,13 @@ sudo systemctl stop loopd 2>/dev/null
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "# Install Lightning Loop"
-  
+
   isInstalled=$(sudo ls /etc/systemd/system/loopd.service 2>/dev/null | grep -c 'loopd.service')
   if [ ${isInstalled} -eq 0 ]; then
 
     # install Go
     /home/admin/config.scripts/bonus.go.sh on
-    
+
     # get Go vars
     source /etc/profile
 
@@ -109,7 +109,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       proxy=""
     fi
 
-    # sudo nano /etc/systemd/system/loopd.service 
+    # sudo nano /etc/systemd/system/loopd.service
     echo "
 [Unit]
 Description=Loopd Service
@@ -137,7 +137,7 @@ WantedBy=multi-user.target
     sudo systemctl enable loopd
     echo "# OK - the Lightning Loop service is now enabled"
 
-  else 
+  else
     echo "# The Loop service already installed."
   fi
 
@@ -146,7 +146,7 @@ WantedBy=multi-user.target
 
   # setting value in raspi blitz config
   /home/admin/config.scripts/blitz.conf.sh set loop "on"
-  
+
   isInstalled=$(sudo -u loop /home/loop/go/bin/loop | grep -c loop)
   if [ ${isInstalled} -gt 0 ] ; then
     echo "# Find info on how to use on https://github.com/lightninglabs/loop#loop-out-swaps"
@@ -154,7 +154,7 @@ WantedBy=multi-user.target
     echo "# Failed to install Lightning Loop "
     exit 1
   fi
-  
+
   exit 0
 fi
 
@@ -174,7 +174,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     # delete user and it's home directory
     sudo userdel -rf loop
     echo "# OK, the Loop Service is removed."
-  else 
+  else
     echo "# Loop is not installed."
   fi
 
@@ -229,4 +229,3 @@ fi
 echo "# FAIL - Unknown Parameter $1"
 echo "# may need reboot to run normal again"
 exit 1
-  

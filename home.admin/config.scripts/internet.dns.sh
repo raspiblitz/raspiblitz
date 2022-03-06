@@ -14,7 +14,7 @@ DNSSERVER="$1"
 NODIALOG="$2"
 
 # just if auto reboot is needed after dialog
-autoreboot=0 
+autoreboot=0
 
 if [ "${DNSSERVER}" = "off" ]; then
   # setting DNS address
@@ -48,7 +48,7 @@ Do you want to set the fixed DNS 1.1.1.1 by Cloudflare (they claim they provide 
   else
     echo "# Ignoring DNS-Test fail"
   fi
-  
+
 fi
 
 echo "The DNS server you want to set is: ${DNSSERVER}"

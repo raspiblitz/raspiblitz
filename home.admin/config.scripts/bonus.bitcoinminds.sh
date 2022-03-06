@@ -71,7 +71,7 @@ npm run serve -- --port 11026
 
   # setting value in raspi blitz config
     sudo /home/admin/config.scripts/blitz.conf.sh set bitcoinminds on
-   
+
   # add a firewall entry so the web UI is accessible from the local network
     sudo ufw allow 11026 comment 'bitcoinminds'
 
@@ -88,7 +88,7 @@ fi
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   isInstalled=1
   if [ ${isInstalled} -eq 1 ]; then
-    
+
     echo ""
     echo "# ***"
     echo "# Removing BitcoinMinds..."
@@ -96,7 +96,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     echo ""
     # setting value in raspi blitz config
     sudo /home/admin/config.scripts/blitz.conf.sh set bitcoinminds off
-    
+
     # Remove user and stuff here
     sudo userdel -rf bitcoinminds 2>/dev/null
 

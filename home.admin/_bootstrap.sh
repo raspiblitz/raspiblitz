@@ -12,7 +12,7 @@ source /home/admin/_version.info
 
 # CONFIGFILE - configuration of RaspiBlitz
 # used by fresh SD image to recover configuration
-# and delivers basic config info for scripts 
+# and delivers basic config info for scripts
 configFile="/mnt/hdd/raspiblitz.conf"
 
 # LOGFILE - store debug logs of bootstrap
@@ -188,7 +188,7 @@ source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
 ################################
 
 echo "Waiting for HDD/SSD ..." >> $logFile
-sudo ls -la /etc/ssh >> $logFile 
+sudo ls -la /etc/ssh >> $logFile
 until [ ${isMounted} -eq 1 ] || [ ${#hddCandidate} -gt 0 ]
 do
 
@@ -324,7 +324,7 @@ fi
 if [ -f "/var/cache/raspiblitz/hdd-inspect/raspiblitz.conf" ]; then
 
   echo "check that display class in raspiblitz.conf from HDD is different from as it is now in raspiblitz.info ..." >> $logFile
-  
+
   # get display class value from raspiblitz.info
   source <(cat ${infoFile} | grep "^displayClass=")
   infoFileDisplayClass="${displayClass}"
@@ -423,7 +423,7 @@ echo "HDD already part of system: $isMounted" >> $logFile
 
 ############################
 ############################
-# WHEN SETUP IS NEEDED  
+# WHEN SETUP IS NEEDED
 ############################
 
 if [ ${isMounted} -eq 0 ]; then
@@ -578,7 +578,7 @@ if [ ${isMounted} -eq 0 ]; then
     source <(/home/admin/config.scripts/blitz.migration.sh import "${migrationFile}")
 
     # check for errors
-    if [ "${error}" != "" ]; then 
+    if [ "${error}" != "" ]; then
       /home/admin/config.scripts/blitz.error.sh _bootstrap.sh "migration-import-error" "blitz.migration.sh import exited with error" "/home/admin/config.scripts/blitz.migration.sh import ${migrationFile} --> ${error}" ${logFile}
       exit 1
     fi
@@ -611,7 +611,7 @@ if [ ${isMounted} -eq 0 ]; then
 
   ###################################
   # Set Password A (in all cases)
-  
+
   if [ "${passwordA}" == "" ]; then
     /home/admin/config.scripts/blitz.error.sh _bootstrap.sh "missing-passworda" "missing passwordA in (${setupFile})" "" ${logFile}
     exit 1
@@ -672,7 +672,7 @@ if [ ${isMounted} -eq 0 ]; then
       exit 1
     fi
   fi
-  
+
   # finalize provisioning
   echo "Calling _bootstrap.provision.sh for general system provisioning (${setupPhase}) .." >> $logFile
   /home/admin/_cache.sh set message "Provision Basics"
@@ -776,7 +776,7 @@ fi
 if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
   echo "running LND users credentials update" >> $logFile
   /home/admin/config.scripts/lnd.credentials.sh sync >> $logFile
-else 
+else
   echo "skipping LND credentials sync" >> $logFile
 fi
 

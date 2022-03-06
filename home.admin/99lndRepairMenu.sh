@@ -53,7 +53,7 @@ getpasswordC() # from dialogPasswords.sh
   dialog --backtitle "RaspiBlitz - Setup" --msgbox "\nThanks - Password C accepted.\n\nAlways use this password to \nunlock your Lightning Wallet." 10 34
 }
 
-lndHealthCheck() 
+lndHealthCheck()
 {
   # check that lnd started
   lndRunning=0
@@ -110,8 +110,8 @@ syncAndCheckLND() # from _provision.setup.sh
   echo "Starting LND Service ..."
   sudo systemctl enable ${netprefix}lnd
   sudo systemctl start ${netprefix}lnd
-  echo "Starting LND Service ... executed"  
-  
+  echo "Starting LND Service ... executed"
+
   if [ $(sudo -u bitcoin ls /mnt/hdd/lnd/data/chain/bitcoin/${chain}net/wallet.db 2>/dev/null | grep -c wallet.db) -gt 0 ]; then
     echo "# OK, there is an LND wallet present"
   else
@@ -151,7 +151,7 @@ function restoreFromSeed()
 {
     askLNDbackupCopy
 
-    ## from dialogLightningWallet.sh 
+    ## from dialogLightningWallet.sh
     # let people know about the difference between SEED & SEED+SCB
     whiptail --title "IMPORTANT INFO" --yes-button "ENTER SEED" --no-button "Go Back" --yesno "
 Using JUST SEED WORDS will only recover your on-chain funds.
@@ -159,7 +159,7 @@ To also try to recover the open channel funds you need the
 channel.backup file (since RaspiBlitz v1.2 / LND 0.6-beta)
 or having a complete LND rescue-backup from your old node.
     " 11 65
-    
+
     # start seed input and get results
     _temp="/var/cache/raspiblitz/.temp.tmp"
     /home/admin/config.scripts/lnd.backup.sh seed-import-gui $_temp
@@ -205,13 +205,13 @@ function restoreSCB()
     /home/admin/config.scripts/lnd.backup.sh scb-import-gui production $_temp
     source $_temp 2>/dev/null
     sudo rm $_temp 2>/dev/null
-    
+
     # if user canceled the upload
     if ! ls -la /home/admin/channel.backup; then
       echo "# signal cancel to the calling script by exit code (5 = exit on scb)"
       exit 5
     fi
-    
+
     echo
     echo "The next step will attempt to trigger all online peers to force close the channels."
     echo "Restoring the channel.backup can be repeated until all the channels are force closed."
@@ -224,7 +224,7 @@ function restoreSCB()
 ### --> DEACTIVATED BECAUSE when a file is placed at /home/admin/channel.backup
 ###     it will now automatically trigger a Static-Channel-Backup procedure after lnd recoverymode is done
 #
-#    # WALLET --> SEED + SCB 
+#    # WALLET --> SEED + SCB
 #    if ls -la /home/admin/channel.backup; then
 #
 #      # LND was restarted so need to unlock
@@ -276,10 +276,10 @@ function restoreSCB()
 
 }
 
-function removeLNDwallet 
+function removeLNDwallet
 {
   clear
-  echo  
+  echo
   echo "The next step WILL REMOVE the old LND wallet on ${CHAIN}"
   echo "Press ENTER to continue or CTRL+C to abort"
   read key
@@ -292,7 +292,7 @@ function removeLNDwallet
   sudo rm -f /mnt/hdd/lnd/data/chain/${network}/${CHAIN}/wallet.db
   sudo rm -f /home/bitcoin/.lnd/data/graph/${CHAIN}/channel.db
   sudo rm -f /home/bitcoin/.lnd/data/graph/${CHAIN}/sphinxreplay.db
-  
+
   sudo rm -rf /mnt/hdd/lnd/data/chain/${network}/${CHAIN}
   sudo rm -rf /home/bitcoin/.lnd/logs/${network}/${CHAIN}
   sudo rm -rf /home/bitcoin/.lnd/data/graph/${CHAIN}
@@ -383,16 +383,16 @@ case $CHOICE in
     syncAndCheckLND
 
     echo "Press ENTER to return to main menu."
-    read key    
+    read key
     # go back to main menu (and show)
     /home/admin/00raspiblitz.sh
     exit 0
     ;;
-  
+
   LNDRESCUE)
     askLNDbackupCopy
 
-    #removeAllLNDwallets 
+    #removeAllLNDwallets
     clear
     echo
     echo "The next step WILL REMOVE the old LND wallets on ALL CHAINS"
@@ -411,7 +411,7 @@ case $CHOICE in
     echo "Reset wallet"
     sudo rm -r /mnt/hdd/lnd
 
-    ## from dialogLightningWallet.sh 
+    ## from dialogLightningWallet.sh
     # import file
     # run upload dialog and get result
     _temp="/var/cache/raspiblitz/temp/.temp.tmp"
@@ -421,9 +421,9 @@ case $CHOICE in
 
     /home/admin/config.scripts/lnd.install.sh on ${CHAIN}
     sudo systemctl start ${netprefix}lnd
-    
+
     syncAndCheckLND
-    
+
     echo "Press ENTER to return to main menu."
     read key
     # go back to main menu (and show)
@@ -434,7 +434,7 @@ case $CHOICE in
   ONLYSEED)
 
     restoreFromSeed
-    
+
     echo "Set lnd recovery mode & restart ..."
     sudo /home/admin/config.scripts/lnd.backup.sh "${chain}net" recoverymode on
     sudo systemctl restart ${netprefix}lnd
@@ -456,7 +456,7 @@ case $CHOICE in
 
     restoreFromSeed
     restoreSCB
-    
+
     echo "Set lnd recovery mode & restart ..."
     sudo /home/admin/config.scripts/lnd.backup.sh "${chain}net" recoverymode on
     sudo systemctl restart ${netprefix}lnd
@@ -508,7 +508,7 @@ case $CHOICE in
     /home/admin/config.scripts/lnd.unlock.sh "${CHAIN}"
 
     echo
-    echo "To show the scanning progress in the background will follow the lnd.log with:" 
+    echo "To show the scanning progress in the background will follow the lnd.log with:"
     echo "'sudo tail -n 30 -f /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log'"
     echo
     echo "Press ENTER to continue"
@@ -516,7 +516,7 @@ case $CHOICE in
     echo "(the rescan will continue in the background)"
     echo "#######################################################################################"
     read key
-    sudo tail -n 30 -f /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log    
+    sudo tail -n 30 -f /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log
     ;;
 
 esac

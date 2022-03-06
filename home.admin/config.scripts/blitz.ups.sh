@@ -21,7 +21,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "Turn ON: UPS"
 
   if [ "$2" = "apcusb" ]; then
-   
+
     # MODEL: APC with USB connection
     # see video: https://www.youtube.com/watch?v=6UrknowJ12o
 
@@ -48,7 +48,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo sed -i "s/^WALL=.*/#WALL=wall/g" /etc/apcupsd/apccontrol
     sudo systemctl enable apcupsd
     sudo systemctl start apcupsd
-    
+
     # set ups config value (in case of update)
     /home/admin/config.scripts/blitz.conf.sh set ups "apcusb"
 
@@ -67,7 +67,7 @@ fi
 ###################
 
 if [ "$1" = "status" ]; then
-  
+
   # check if already activated
   if [ ${#ups} -eq 0 ] || [ "${ups}" = "off" ]; then
     echo "upsStatus='OFF'"

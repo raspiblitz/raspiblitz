@@ -118,7 +118,7 @@ do
   fi
 
   #####################################
-  # ALWAYS: Handle System States 
+  # ALWAYS: Handle System States
   #####################################
 
   ############################
@@ -143,7 +143,7 @@ do
   # SETUP MENU
   #####################################
 
-  # when is needed & bootstrap process signals that it waits for user dialog 
+  # when is needed & bootstrap process signals that it waits for user dialog
   if [ "${setupPhase}" != "done" ] && [ "${state}" == "waitsetup" ]; then
     # push user to main menu
     echo "# controlSetupDialog.sh"
@@ -158,14 +158,14 @@ do
   # SETUP DONE DIALOGS
   #####################################
 
-  # when is needed & bootstrap process signals that it waits for user dialog 
+  # when is needed & bootstrap process signals that it waits for user dialog
   if [ "${setupPhase}" != "done" ] && [ "${state}" == "waitfinal" ]; then
     # push to final setup gui dialogs
     #echo "# controlFinalDialog.sh"
     /home/admin/setup.scripts/controlFinalDialog.sh
     # exit because controller will reboot at the end
     exit 0
-  fi  
+  fi
 
   # exit loop/script in case if system shutting down
   if [ "${state}" == "reboot" ] || [ "${state}" == "shutdown" ]; then
@@ -185,7 +185,7 @@ do
   fi
 
   #####################################
-  # MAKE SURE BLOCKCHAIN/LN IS SYNC 
+  # MAKE SURE BLOCKCHAIN/LN IS SYNC
   #####################################
   if [ "${setupPhase}" == "done" ] && [ "${state}" == "ready" ]; then
     if [ "${lightning}" = "cl" ]; then
@@ -236,7 +236,7 @@ do
           echo "The WORD SEED is not matching the channel.backup file."
           echo "Either there was an error in the word seed list or"
           echo "or the channel.backup file is from another RaspiBlitz."
-          echo 
+          echo
         fi
 
         # basic info on error
@@ -250,7 +250,7 @@ do
       else
         rm /home/admin/channel.backup
         dialog --title " OK Static-Channel-Backup IMPORT " --msgbox "
-LND accepted the channel.backup file you uploaded. 
+LND accepted the channel.backup file you uploaded.
 It can now take up to an hour until you can see,
 if LND was able to recover funds from your channels.
 
@@ -282,7 +282,7 @@ MAINMENU > REPAIR > REPAIR-LND > RETRYSCB
   fi
 
   #####################################
-  # DURING SETUP: Handle System States 
+  # DURING SETUP: Handle System States
   #####################################
 
   if [ "${setupPhase}" != "done" ]; then

@@ -37,7 +37,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo apt-get update >/dev/null
   sudo apt-get install -y unclutter xterm python3-pyqt5 >/dev/null
   sudo apt-get install -y xfonts-terminus >/dev/null
-  sudo apt-get install -y xinput-calibrator 
+  sudo apt-get install -y xinput-calibrator
 
   # check if python3 env exists - if not install it
   if [ ! -d /home/admin/python3-env-lnd ]; then
@@ -47,7 +47,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   fi
 
   echo "installing BlitzTUI (including python dependencies)"
-  /home/admin/python3-env-lnd/bin/pip install /home/admin/raspiblitz/home.admin/BlitzTUI/ 
+  /home/admin/python3-env-lnd/bin/pip install /home/admin/raspiblitz/home.admin/BlitzTUI/
 
   # make sure lndlibs are patched for compatibility for both Python2 and Python3
   if ! grep -Fxq "from __future__ import absolute_import" /home/admin/config.scripts/lndlibs/lightning_pb2_grpc.py; then
@@ -63,12 +63,12 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   # set user pi user for autostart
   sudo sed -i 's/^autologin-user=.*/autologin-user=pi/g' /etc/lightdm/lightdm.conf
-  
+
   # disable display-setup script
   if grep -Eq "^display-setup-script=" /etc/lightdm/lightdm.conf; then
     sed -i -E 's/^(display-setup-script=.*)/#\1/' /etc/lightdm/lightdm.conf
   fi
-  
+
   sudo sed -i 's/--autologin root/--autologin pi/' /etc/systemd/system/getty@tty1.service.d/autologin.conf
   sudo sed -i 's/--autologin admin/--autologin pi/' /etc/systemd/system/getty@tty1.service.d/autologin.conf
 
@@ -157,7 +157,7 @@ fi
 ###################
 
 if [ "$1" = "calibrate" ]; then
-  
+
   # check that touchscreen is on
   if [ "${touchscreen}" == "1" ]; then
     echo "# calibrating touchscreen ..."
@@ -169,7 +169,7 @@ if [ "$1" = "calibrate" ]; then
   # run calibrate screen
   sudo rm /tmp/99-calibration.conf 2>/dev/null
   sudo -u pi DISPLAY=:0.0 xinput_calibrator --output-filename /tmp/99-calibration.conf
-  
+
   # check if calibration was done of user
   calibrationDone=$(sudo ls /tmp/99-calibration.conf 2>/dev/null | grep -c "99-calibration.conf")
   if [ ${calibrationDone} -eq 0 ]; then

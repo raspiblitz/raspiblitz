@@ -1,5 +1,5 @@
-# Use this format to build the SDcard with the Raspiblitz script:  
-# wget https://raw.githubusercontent.com/[GITHUB-USERNAME]/raspiblitz/[BRANCH]/build_sdcard.sh && sudo bash build_sdcard.sh [BRANCH] [GITHUB-USERNAME]`  
+# Use this format to build the SDcard with the Raspiblitz script:
+# wget https://raw.githubusercontent.com/[GITHUB-USERNAME]/raspiblitz/[BRANCH]/build_sdcard.sh && sudo bash build_sdcard.sh [BRANCH] [GITHUB-USERNAME]`
 # If you are working from a forked repo be aware of that the fork needs to be called `raspiblitz` for the git downloads to work.
 
 # Uncomment the line with the branch you want to build the SDcard from:

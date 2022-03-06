@@ -13,7 +13,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
 fi
 
 # check if started with sudo
-if [ "$EUID" -ne 0 ]; then 
+if [ "$EUID" -ne 0 ]; then
   echo "error='run as root'"
   exit 1
 fi
@@ -78,7 +78,7 @@ if [ "$2" = "status" ]; then
       fi
     fi
 
-  fi 
+  fi
 
   # print results
   echo "btc_version='${btc_version}'"
@@ -89,7 +89,7 @@ if [ "$2" = "status" ]; then
   echo "btc_error_full='${btc_error_full}'"
 
   exit 0
-fi   
+fi
 
 ######################################################
 # NETWORK
@@ -104,7 +104,7 @@ if [ "$2" = "network" ]; then
     echo "error='no data'"
     exit 1
   fi
-   
+
 
   # parse data
   btc_peers=$(echo "${getnetworkinfo}" | grep "connections\"" | tr -cd '[[:digit:]]')
@@ -117,7 +117,7 @@ if [ "$2" = "network" ]; then
   echo "btc_address='${btc_address}'"
   echo "btc_port='${btc_port}'"
   exit 0
-  
+
 fi
 
 ######################################################
@@ -160,7 +160,7 @@ if [ "$2" = "info" ]; then
   echo "btc_sync_percentage='${btc_sync_percentage//[^0-9\..]/}'"
   echo "btc_sync_initialblockdownload='${btc_sync_initialblockdownload}'"
   exit 0
-  
+
 fi
 
 ######################################################
@@ -182,7 +182,7 @@ if [ "$2" = "mempool" ]; then
   # print data
   echo "btc_mempool_transactions=${btc_mempool_transactions}"
   exit 0
-  
+
 fi
 
 ###################
@@ -192,7 +192,7 @@ fi
 if [ "$2" = "peer-kickstart" ]; then
 
   # check calling only for mainnet
-  if [ "$1" != "mainnet" ]; then 
+  if [ "$1" != "mainnet" ]; then
     echo "error='only available for mainnet yet'"
     exit 1
   fi
@@ -275,7 +275,7 @@ if [ "$2" = "peer-kickstart" ]; then
   fi
   echo "newpeer='${nodeAddress}'"
 
-  # kick start node with 
+  # kick start node with
   $bitcoincli_alias addnode "${nodeAddress}" "onetry" 1>/dev/null
   echo "exitcode=$?"
 
@@ -289,13 +289,13 @@ fi
 if [ "$2" = "peer-disconnectall" ]; then
 
   # check calling only for mainnet
-  if [ "$1" != "mainnet" ]; then 
+  if [ "$1" != "mainnet" ]; then
     echo "error='only available for mainnet yet'"
     exit 1
   fi
 
   # get all peer id and disconnect them
-  $bitcoincli_alias getpeerinfo | grep '"addr": "' | while read line 
+  $bitcoincli_alias getpeerinfo | grep '"addr": "' | while read line
   do
     peerID=$(echo $line | cut -d '"' -f4)
     echo "# disconnecting peer with ID: ${peerID}"

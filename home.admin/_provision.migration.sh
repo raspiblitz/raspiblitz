@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # check if run by root user
-if [ "$EUID" -ne 0 ]; then 
+if [ "$EUID" -ne 0 ]; then
   echo "error='run as root'"
   exit 1
 fi
@@ -16,7 +16,7 @@ source ${infoFile}
 # SETUPFILE - data from setup process
 source /var/cache/raspiblitz/temp/raspiblitz.setup
 
-# CACHEDATA - import needed data from cache 
+# CACHEDATA - import needed data from cache
 source <(/home/admin/_cache.sh get hddGotMigrationData hddVersionLND)
 
 # log header

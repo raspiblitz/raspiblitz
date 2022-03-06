@@ -8,9 +8,9 @@ if [ $# -eq 0 ]; then
  exit 1
 fi
 
-# note: this script is not run during provision/recovery 
+# note: this script is not run during provision/recovery
 # because if the lnd extra parameter is set in raspiblitz.conf,
-# it will automatically be used by the service 
+# it will automatically be used by the service
 
 source /mnt/hdd/raspiblitz.conf
 

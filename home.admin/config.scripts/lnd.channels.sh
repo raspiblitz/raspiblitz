@@ -1,7 +1,7 @@
 #!/bin/bash
 # RaspiBolt channel overview display, by robclark56
 
-# make executable & copy to 
+# make executable & copy to
 # /usr/local/bin/lnchannels
 # current user must be able to execute bitcoin-cli and lncli
 
@@ -82,9 +82,9 @@ for (( i=0; i<=$(( $total -1 )); i++ ));do
  active_short=$(echo ${a_active[$i]} | cut -c1)
  # get fee report details
  base_fee_msat=$(${lncli} feereport | jq -r ".channel_fees[] | select(.channel_point | test(\"${a_channel_point[$i]}\")) | .base_fee_msat")
- fee_per_mil=$(${lncli} feereport | jq -r ".channel_fees[] | select(.channel_point | 
+ fee_per_mil=$(${lncli} feereport | jq -r ".channel_fees[] | select(.channel_point |
  test(\"${a_channel_point[$i]}\")) | .fee_per_mil")
- # Display line 
+ # Display line
  printf "${color_line}%-21s %12s %6s %12s %12s %5s %6s\r%-21s\n" \
         "" "${a_capacity[$i]}" "${a_commit_fee[$i]}" "${a_local_balance[$i]}" \
         "${a_remote_balance[$i]}" "${base_fee_msat}" "${fee_per_mil}"  "${alias_short}"

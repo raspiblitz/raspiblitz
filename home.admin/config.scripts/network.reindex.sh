@@ -79,7 +79,7 @@ done
 echo "*************************"
 if [ ${finished} -eq 0 ]; then
   echo "Re-Index CANCELED"
-else 
+else
   echo "Re-Index finished"
 fi
 echo "Starting reboot ..."

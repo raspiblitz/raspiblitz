@@ -12,7 +12,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ];
   echo "blitz.ssh.sh sessions    --> count open sessions"
   echo "blitz.ssh.sh restore [?backup-root]"
   echo "                         --> restore ssh keys from backup (if exist)"
-  echo 
+  echo
   echo "## SSH ROOT USER #######"
   echo "blitz.ssh.sh root-get    --> return root user pubkey"
   echo "blitz.ssh.sh root-transfer [REMOTEUSER]@[REMOTESERVER]"
@@ -22,7 +22,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ];
 fi
 
 # check if started with sudo
-if [ "$EUID" -ne 0 ]; then 
+if [ "$EUID" -ne 0 ]; then
   echo "error='missing sudo'"
   exit 1
 fi
@@ -65,12 +65,12 @@ fi
 ###################
 if [ "$1" = "checkrepair" ]; then
   echo "# *** $0 $1"
-  
+
   # check if sshd host keys are missing / need generation
   countKeyFiles=$(ls -la /etc/ssh/ssh_host_* 2>/dev/null | grep -c "/etc/ssh/ssh_host")
   echo "# countKeyFiles(${countKeyFiles})"
   if [ ${countKeyFiles} -lt 8 ]; then
-  
+
     echo "# DETECTED: MISSING SSHD KEYFILES --> Generating new ones"
     systemctl stop ssh
     echo "# ssh-keygen1"
@@ -86,7 +86,7 @@ if [ "$1" = "checkrepair" ]; then
     else
       echo "# OK: New sshd host keys generated"
     fi
-    
+
   fi
 
   # check if SSHD service is NOT running & active
@@ -171,7 +171,7 @@ if [ "$1" = "restore" ]; then
     else
       echo "# INFO - ssh-root keys backup not available"
     fi
-    
+
   exit 0
 fi
 

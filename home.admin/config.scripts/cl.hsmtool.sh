@@ -14,13 +14,13 @@ if [ $# -lt 1 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]||\
   echo
   echo "Usage:"
   echo "Create new wallet:"
-  echo "cl.hsmtool.sh [new] [mainnet|testnet|signet] [?seedpassword]"  
-  echo "cl.hsmtool.sh [new-force] [mainnet|testnet|signet] [?seedpassword]"  
+  echo "cl.hsmtool.sh [new] [mainnet|testnet|signet] [?seedpassword]"
+  echo "cl.hsmtool.sh [new-force] [mainnet|testnet|signet] [?seedpassword]"
   echo "There will be no seedpassword(passphrase) used by default"
   echo "new-force will backup the old wallet and will work without interaction"
   echo
-  echo "cl.hsmtool.sh [seed] [mainnet|testnet|signet] [\"space-separated-seed-words\"] [?seedpassword]"  
-  echo "cl.hsmtool.sh [seed-force] [mainnet|testnet|signet] [\"space-separated-seed-words\"] [?seedpassword]"  
+  echo "cl.hsmtool.sh [seed] [mainnet|testnet|signet] [\"space-separated-seed-words\"] [?seedpassword]"
+  echo "cl.hsmtool.sh [seed-force] [mainnet|testnet|signet] [\"space-separated-seed-words\"] [?seedpassword]"
   echo "The new hsm_secret will be not encrypted if no NewPassword is given"
   echo "seed-force will delete any old wallet and will work without dialog"
   echo
@@ -109,7 +109,7 @@ function encryptHSMsecret() {
     sudo chown bitcoin:bitcoin $passwordFile
     sudo chmod 600 $passwordFile
     walletPassword=$(sudo cat $passwordFile)
-  fi  
+  fi
   (echo $walletPassword; echo $walletPassword) | \
    sudo -u bitcoin lightning-hsmtool encrypt $hsmSecretPath || exit 1
   # setting value in raspiblitz.conf
@@ -118,7 +118,7 @@ function encryptHSMsecret() {
 }
 
 function decryptHSMsecret() {
- 
+
   # check if encrypted
   trap 'rm -f "$output"' EXIT
   output=$(mktemp -p /dev/shm/)
@@ -155,7 +155,7 @@ function decryptHSMsecret() {
 
 ###########
 # Options #
-########### 
+###########
 if [ "$1" = "new" ] || [ "$1" = "new-force" ] || [ "$1" = "seed" ] || [ "$1" = "seed-force" ]; then
 
   # make sure /home/bitcoin/.lightning/bitcoin exists (when lightningd was not run yet)
@@ -175,7 +175,7 @@ if [ "$1" = "new" ] || [ "$1" = "new-force" ] || [ "$1" = "seed" ] || [ "$1" = "
     if sudo ls $hsmSecretPath 2>1 1>/dev/null; then
       echo "# The hsm_secret is already present at $hsmSecretPath."
       if [ ${CHAIN} = "mainnet" ]; then
-        if sudo ls /home/bitcoin/.lightning/${CLNETWORK}/seedwords.info 2>1 1>/dev/null; then 
+        if sudo ls /home/bitcoin/.lightning/${CLNETWORK}/seedwords.info 2>1 1>/dev/null; then
           echo "# There is a /home/bitcoin/.lightning/${CLNETWORK}/seedwords.info so don't create new"
           # show seed
           sudo /home/admin/config.scripts/cl.install.sh display-seed mainnet
@@ -262,7 +262,7 @@ elif [ "$1" = "unlock" ]; then
   justUnlocked=0
   while [ $($lightningcli_alias getinfo 2>&1 | grep -c '"id":') -eq 0 ];do
     clError=$(sudo journalctl -n5 -u ${netprefix}lightningd)
-    
+
     # check passwordfile
     if [ "$(eval echo \$${netprefix}clEncryptedHSM)" = "on" ] && [ ! -f $passwordFile ];then
         passwordToFile
@@ -271,7 +271,7 @@ elif [ "$1" = "unlock" ]; then
     # getpassword
     elif [ $(echo "${clError}" | \
       grep -c 'encrypted-hsm: Could not read pass from stdin.') -gt 0 ];then
-      if [ ${justUnlocked} -eq 0 ];then 
+      if [ ${justUnlocked} -eq 0 ];then
         if [ -f $passwordFile ];then
           echo "# Wrong passwordFile is present"
         else
@@ -285,7 +285,7 @@ elif [ "$1" = "unlock" ]; then
         sleep 5
       fi
 
-    # configure --encrypted-hsm 
+    # configure --encrypted-hsm
     elif [ $(echo "${clError}" | \
       grep -c 'hsm_secret is encrypted, you need to pass the --encrypted-hsm startup option.') -gt 0 ];then
 
@@ -294,15 +294,15 @@ elif [ "$1" = "unlock" ]; then
         # setting value in raspiblitz config
         /home/admin/config.scripts/blitz.conf.sh set ${netprefix}clEncryptedHSM "on"
         /home/admin/config.scripts/cl.install-service.sh $CHAIN
-    
-    # get new password 
+
+    # get new password
     elif [ $(echo "${clError}" | \
       grep -c 'Wrong password for encrypted hsm_secret.') -gt 0 ];then
       echo "# Wrong password"
       sudo rm -f $passwordFile
       passwordToFile "Wrong password - type the decryption password for the $CHAIN C-lightning wallet"
       sudo systemctl restart ${netprefix}lightningd
-    
+
     # fail
     elif [ $attempt -eq 12 ];then
       echo "# Failed to unlock the ${netprefix}lightningd wallet - giving up after 1 minute"
@@ -363,7 +363,7 @@ elif [ "$1" = "encrypt" ]; then
 # were $deletedWhen.
 # The words cannot be generated from the hsm_secret (one way function).
 # If you don't have the words the hsm_secret can be still backed up as a file or in hex:
-# https://lightning.readthedocs.io/BACKUP.html#hsm-secret 
+# https://lightning.readthedocs.io/BACKUP.html#hsm-secret
 # https://github.com/rootzoll/raspiblitz/blob/dev/FAQ.cl.md#seed
 " | sudo -u bitcoin tee /home/bitcoin/.lightning/${CLNETWORK}/seedwords.info
   # encrypt

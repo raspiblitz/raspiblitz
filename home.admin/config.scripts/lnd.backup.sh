@@ -53,7 +53,7 @@ if [ "$1" == "mainnet" ] || [ "$1" == "testnet" ] || [ "$1" == "signet" ]; then
   if [ ${mode} = "recoverymode" ]; then
 
     # check if started with sudo
-    if [ "$EUID" -ne 0 ]; then 
+    if [ "$EUID" -ne 0 ]; then
       echo "error='run as root'"
       exit 1
     fi
@@ -96,7 +96,7 @@ if [ "$1" == "mainnet" ] || [ "$1" == "testnet" ] || [ "$1" == "signet" ]; then
       if [ "${lndChain}" == "${chain}net" ] && [ "${lightning}" == "lnd" ]; then
         /home/admin/_cache.sh set ln_default_sync_initial_done 0
       fi
-    
+
       exit 0
     fi
 
@@ -110,7 +110,7 @@ if [ "$1" == "mainnet" ] || [ "$1" == "testnet" ] || [ "$1" == "signet" ]; then
       # remove --reset-wallet-transactions parameter in systemd service
       echo "# deactivating recovery mode ..."
       sed -i 's/^reset-wallet-transactions=.*/reset-wallet-transactions=false/g' /mnt/hdd/lnd/${netprefix}lnd.conf
-      
+
 
       echo "# OK - restart/reboot needed for: ${netprefix}lnd.service"
       exit 0
@@ -149,7 +149,7 @@ if [ ${mode} = "lnd-export" ]; then
   sudo systemctl stop lnd 2>/dev/null
   sleep 5
   echo "# OK"
-  echo 
+  echo
 
   # zip it
   sudo tar -zcvf ${downloadPath}/lnd-rescue.tar.gz /mnt/hdd/lnd 1>&2
@@ -180,7 +180,7 @@ fi
 if [ ${mode} = "lnd-export-gui" ]; then
 
   # create lnd rescue file
-  echo "# lnd.backup lnd-export-gui ..." 
+  echo "# lnd.backup lnd-export-gui ..."
   source <(/home/admin/config.scripts/lnd.backup.sh lnd-export)
   if [ "${error}" != "" ]; then
     echo "error='${error}'"
@@ -196,7 +196,7 @@ if [ ${mode} = "lnd-export-gui" ]; then
   echo "********************************"
   echo "* DOWNLOAD THE LND RESCUE FILE *"
   echo "********************************"
-  echo 
+  echo
   echo "ON YOUR MAC & LINUX LAPTOP - RUN IN NEW TERMINAL:"
   echo "scp '${fileowner}@${localip}:${filename}' ./"
   echo "ON WINDOWS USE:"
@@ -247,9 +247,9 @@ if [ ${mode} = "lnd-import" ]; then
 
   # lnd version of LND rescue file (thats packed as extra info in the file)
   # its included since RaspiBlitz v1.7.1 /mnt/hdd/lnd/version.info
-  # this can happen if someone uses the manual LND update and then uploads to an old default LND 
+  # this can happen if someone uses the manual LND update and then uploads to an old default LND
   # if so just signal this in the output (but also this file might be empty, when LND was dead)
-  
+
   echo "# DONE - lnd service is still stopped - start manually with command:"
   echo "# sudo systemctl start lnd"
   exit 0
@@ -270,7 +270,7 @@ if [ ${mode} = "lnd-import-gui" ]; then
     RESULTFILE=$3
     if [ "${RESULTFILE}" == "" ]; then
       echo "error='missing parameter'"
-      exit 1 
+      exit 1
     fi
   fi
 
@@ -287,7 +287,7 @@ if [ ${mode} = "lnd-import-gui" ]; then
   filename=""
   while [ "${filename}" == "" ]
     do
-      clear 
+      clear
       echo "******************************"
       echo "* UPLOAD THE LND RESCUE FILE *"
       echo "******************************"
@@ -351,7 +351,7 @@ if [ ${mode} = "lnd-import-gui" ]; then
 
   # in production now start restoring LND data based on file
   source /mnt/hdd/raspiblitz.conf
-  
+
   # ask security question before deleting old wallet
   echo "WARNING: This will delete/overwrite the LND state/funds of this RaspiBlitz."
   echo
@@ -374,7 +374,7 @@ if [ ${mode} = "lnd-import-gui" ]; then
   if [ "${autoUnlock}" == "on" ]; then
     /home/admin/config.scripts/lnd.autounlock.sh off
   fi
-  
+
   # restarting lnd & give final info
   sudo systemctl start lnd
   echo "DONE - lnd is now restarting .. Password C is now like within your rescue file"
@@ -411,15 +411,15 @@ if [ ${mode} = "scb-export-gui" ]; then
   echo "**************************************"
   echo "* DOWNLOAD STATIC CHANEL BACKUP FILE *"
   echo "**************************************"
-  echo 
+  echo
   echo "RUN THE FOLLOWING COMMAND ON YOUR LAPTOP IN NEW TERMINAL:"
   echo "scp -r ${fileuser}@${localip}:${filename} ./"
   echo ""
   echo "Use password A to authenticate file transfer."
   echo
-  echo "NOTE: Use this file when setting up a fresh RaspiBlitz by choosing" 
-  echo "option OLD WALLET and then SCB+SEED -> Seed & channel.backup file" 
-  echo "Will just recover on-chain & channel-funds, but closing all channels" 
+  echo "NOTE: Use this file when setting up a fresh RaspiBlitz by choosing"
+  echo "option OLD WALLET and then SCB+SEED -> Seed & channel.backup file"
+  echo "Will just recover on-chain & channel-funds, but closing all channels"
   exit 0
 fi
 
@@ -463,7 +463,7 @@ if [ ${mode} = "scb-import-gui" ]; then
     RESULTFILE=$3
     if [ "${RESULTFILE}" == "" ]; then
       echo "error='missing parameter'"
-      exit 1 
+      exit 1
     fi
   fi
 
@@ -480,7 +480,7 @@ if [ ${mode} = "scb-import-gui" ]; then
   filename=""
   while [ "${filename}" == "" ]
     do
-    
+
       clear
       echo "**********************************"
       echo "* UPLOAD THE channel.backup FILE *"
@@ -552,13 +552,13 @@ fi
 if [ ${mode} = "seed-export-gui" ]; then
 
   # use text snippet for testing:
-  # 
+  #
 
   # 2nd PARAMETER: lnd seed data
   seedwords6x4=$2
   if [ "${seedwords6x4}" == "" ]; then
     echo "error='missing parameter'"
-    exit 1 
+    exit 1
   fi
 
   ack=0
@@ -597,7 +597,7 @@ if [ ${mode} = "seed-import-gui" ]; then
   while [ ${wordsCorrect} -eq 0 ]
     do
 
-      # prepare temp file 
+      # prepare temp file
       sudo rm /var/cache/raspiblitz/.seed.tmp 2>/dev/null
       sudo touch /var/cache/raspiblitz/.seed.tmp
       sudo chown admin:admin /var/cache/raspiblitz/.seed.tmp
@@ -607,7 +607,7 @@ if [ ${mode} = "seed-import-gui" ]; then
       wordstring=$(cat /var/cache/raspiblitz/.seed.tmp | sed 's/[^a-zA-Z0-9 ]//g')
       sudo shred -u /var/cache/raspiblitz/.seed.tmp 2>/dev/null
       echo "processing ..."
-      
+
       # check correct number of words
       wordcount=$(echo "${wordstring}" | wc -w)
       if [ ${wordcount} -eq 24 ]; then
@@ -621,7 +621,7 @@ if [ ${mode} = "seed-import-gui" ]; then
 The word list has ${wordcount} words. But it must be 24.
 Please check your list and try again.
 
-Best is to write words in an external editor 
+Best is to write words in an external editor
 and then copy and paste them into the dialog.
 
 The word list should look like this:

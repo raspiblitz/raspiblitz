@@ -5,7 +5,7 @@ source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
 
 if [ "$1" = "-h" ] || [ "$1" = "-help" ];then
-  echo "Usage:" 
+  echo "Usage:"
   echo "97addMobileWallet.sh <lnd|cl> <mainnet|testnet|signet>"
   echo "defaults from the configs are:"
   echo "ligthning=${lightning}"
@@ -45,7 +45,7 @@ fi
 # check if dynamic domain is set
 if [ ${justLocal} -eq 1 ]; then
   whiptail --title " Just Local Network? " --yesno "If you want to connect with your RaspiBlitz
-also from outside your local network you need to 
+also from outside your local network you need to
 activate 'Services' -> 'DynamicDNS' FIRST.
 OR use SSH tunnel forwarding for port 10009
 OR have TOR activated.
@@ -76,7 +76,7 @@ if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
 	OPTIONS+=(ZAP_ANDROID "Zap to LND (Android)")
 	OPTIONS+=(SPHINX "Sphinx Chat to LND (Android/iOS)")
   	OPTIONS+=(SENDMANY_ANDROID "SendMany to LND (Android)")
-	OPTIONS+=(FULLYNODED_LND "Fully Noded to LND REST (iOS+Tor)") 
+	OPTIONS+=(FULLYNODED_LND "Fully Noded to LND REST (iOS+Tor)")
 fi
 
 if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ]; then
@@ -88,7 +88,7 @@ fi
 
 # Additional Options with Tor
 if [ "${runBehindTor}" = "on" ]; then
-  OPTIONS+=(FULLYNODED_BTC "Fully Noded to bitcoinRPC (iOS+Tor)") 
+  OPTIONS+=(FULLYNODED_BTC "Fully Noded to bitcoinRPC (iOS+Tor)")
 fi
 
 CHOICE=$(whiptail --clear --title "Choose Mobile Wallet" --menu "" 18 75 12 "${OPTIONS[@]}" 2>&1 >/dev/tty)

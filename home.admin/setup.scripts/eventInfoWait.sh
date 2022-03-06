@@ -18,7 +18,7 @@ fi
 
 # 2nd PARAMETER (optional): dynamic content that can be used in two ways
 # 1) contentWords[] --> if eventID is known & well defined between backend & frontend, then use the single words of this string as dynamic content for static text info
-# 2) contentString  --> if eventID is new and not well defined yet, then just show a generic info and use the complete string as info message 
+# 2) contentString  --> if eventID is new and not well defined yet, then just show a generic info and use the complete string as info message
 # just see examples of this two use cases below
 contentWords=($2)
 contentString=$2
@@ -312,7 +312,7 @@ elif [ "${eventID}" == "errorNetwork" ]; then
 
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "
 PROBLEM: LOST NETWORK
-Shutting down ... 
+Shutting down ...
 Manual restart needed.
 " 7 35
 
@@ -320,7 +320,7 @@ elif [ "${eventID}" == "sdtoosmall" ]; then
 
     # contentWords[0] --> size string (for example '16GB')
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "
-PROBLEM: SD CARD IS TOO SMALL 
+PROBLEM: SD CARD IS TOO SMALL
 Capacity of 32GB recommended
 Cut power & create fresh sd card
 " 7 40

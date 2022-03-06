@@ -51,10 +51,10 @@ fi
 
 # make sure that its running in screen
 # call with '-foreground' to prevent running in screen
-if [ "$1" != "-foreground" ]; then 
+if [ "$1" != "-foreground" ]; then
   screenPID=$(screen -ls | grep "copystation" | cut -d "." -f1 | xargs)
   if [ ${#screenPID} -eq 0 ]; then
-    # start copystation in screen 
+    # start copystation in screen
     echo "# starting copystation screen session"
     screen -S copystation -dm /home/admin/XXcopyStation.sh -foreground
     screen -d -r
@@ -101,7 +101,7 @@ echo
 # 3. sync HDDs with template data
 # repeat
 
-echo 
+echo
 echo "*** RUNNING ***"
 lastBlockchainUpdateTimestamp=1
 firstLoop=1
@@ -112,7 +112,7 @@ do
   # reset external data stores (needed because local vars dont work in deeper while loops)
   echo "" > /var/cache/raspiblitz/copystationHddsInfoString.tmp
   rm /var/cache/raspiblitz/copystationFoundTargets.flag
-  
+
   ################################################
   # 1. get fresh data from bitcoind for template data (skip on first loop)
 
@@ -123,7 +123,7 @@ do
   echo
 
   if [ ${secondsDiff} -gt 3000 ]; then
-  
+
     echo "******************************"
     echo "Bitcoin Blockchain Update"
     echo "******************************"
@@ -173,7 +173,7 @@ do
       # check if drives 1st partition is named BLOCKCHAIN & in EXT4 format
       isNamedBlockchain=$(lsblk -o NAME,FSTYPE,LABEL | grep "${detectedDrive}" | grep -c "BLOCKCHAIN")
       isFormatExt4=$(lsblk -o NAME,FSTYPE,LABEL | grep "${detectedDrive}" | grep -c "ext4")
-      
+
       # init a fresh device
       if [ ${isNamedBlockchain} -eq 0 ] || [ ${isFormatExt4} -eq 0 ]; then
 
@@ -232,10 +232,10 @@ do
         else
           echo "# FAIL: was not able to mount --> ${partition}"
         fi
-        
+
         # unmount device
         umount -l /mnt/hdd2
-        
+
       fi
 
     fi
@@ -287,10 +287,10 @@ do
     /home/admin/_cache.sh set message "Ready HDDs: ${hddsInfoString}"
     sleep 25
 
-  fi 
+  fi
 
   clear
   echo "starting new sync loop"
   sleep 5
-  
+
 done

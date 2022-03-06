@@ -19,7 +19,7 @@ fi
 mode="$1"
 
 # RECOMMENDED UPDATE BY RASPIBLITZ TEAM
-# comment will be shown as "BEWARE Info" when option is choosen (can be multiple lines) 
+# comment will be shown as "BEWARE Info" when option is choosen (can be multiple lines)
 clUpdateVersion="0.10.2" # example: 0.10.1 .. keep empty if no newer version as sd card build is available
 clUpdateComment="Please keep in mind that downgrading afterwards is not tested. Also not all additional apps are fully tested with the this update - but it looked good on first tests."
 
@@ -65,7 +65,7 @@ if [ "${mode}" = "verified" ]; then
 
   # check for optional second parameter: forced update version
   # --> only does the verified update if its the given version
-  # this is needed for recovery/update. 
+  # this is needed for recovery/update.
   fixedUpdateVersion="$2"
   if [ ${#fixedUpdateVersion} -gt 0 ]; then
     echo "# checking for fixed version update: askedFor(${fixedUpdateVersion}) available(${clUpdateVersion})"
@@ -78,7 +78,7 @@ if [ "${mode}" = "verified" ]; then
       echo "# OK - update version is matching"
     fi
   fi
-  
+
 
   if [ ${#clUpdateVersion} -gt 0 ];then
     /home/admin/config.scripts/cl.install.sh update v${clUpdateVersion}

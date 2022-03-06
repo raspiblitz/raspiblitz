@@ -41,7 +41,7 @@ OPTIONS+=(CASHOUT "Withdraw all funds from LND on $CHAIN")
 
 if [ "${lightning}" != "lnd" ]; then
   OPTIONS+=(SWITCHLN  "Use LND as default")
-fi  
+fi
 
 CHOICE_HEIGHT=$(("${#OPTIONS[@]}/2+1"))
 HEIGHT=$((CHOICE_HEIGHT+6))
@@ -116,7 +116,7 @@ case $CHOICE in
       if [ ! -f /home/bitcoin/suez/suez ];then
         /home/admin/config.scripts/bonus.suez.sh on
       fi
-      cd /home/bitcoin/suez || exit 1 
+      cd /home/bitcoin/suez || exit 1
       sudo -u bitcoin /home/bitcoin/.local/bin/poetry run ./suez \
         --client-args=-n=${CHAIN} \
         --client-args=--rpcserver=localhost:1${L2rpcportmod}009
@@ -130,7 +130,7 @@ case $CHOICE in
       read key
       ;;
   SWITCHLN)
-      clear 
+      clear
       echo
       # setting value in raspi blitz config
       /home/admin/config.scripts/blitz.conf.sh set lightning "lnd"

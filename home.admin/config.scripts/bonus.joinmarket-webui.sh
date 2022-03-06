@@ -188,7 +188,7 @@ fi
 # precheck
 if [ "$1" = "precheck" ]; then
   if [ $(/usr/local/bin/bitcoin-cli -conf=/mnt/hdd/bitcoin/bitcoin.conf listwallets | grep -c wallet.dat) -eq 0 ];then
-    echo "# Create wallet.dat" 
+    echo "# Create wallet.dat"
     /usr/local/bin/bitcoin-cli -conf=/mnt/hdd/bitcoin/bitcoin.conf createwallet wallet.dat
   else
     echo "# The wallet.dat is loaded in bitcoind."

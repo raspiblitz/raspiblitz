@@ -16,7 +16,7 @@ function clRescan() {
   dialog --backtitle "Choose the new gap limit" \
   --title "Enter the rescan depth or blockheight (-)" \
   --inputbox "
-Enter the number of blocks to rescan from the current tip 
+Enter the number of blocks to rescan from the current tip
 or use a negative number for the absolute blockheight to scan from.
 
 If left empty will start to rescan from the block 700000 (-700000).
@@ -76,19 +76,19 @@ case $CHOICE in
     /home/admin/config.scripts/cl.hsmtool.sh decrypt $CHAIN
     source /mnt/hdd/raspiblitz.conf
     ;;
-  
+
   PASSWORD_C)
     /home/admin/config.scripts/cl.hsmtool.sh change-password $CHAIN
     ;;
-  
+
   AUTOUNLOCK-ON)
     /home/admin/config.scripts/cl.hsmtool.sh autounlock-on $CHAIN
     ;;
-  
+
   AUTOUNLOCK-OFF)
     /home/admin/config.scripts/cl.hsmtool.sh autounlock-off $CHAIN
     ;;
-  
+
   BACKUP)
     if [ "${cl}" == "on" ] || [ "${cl}" == "1" ] && [ "${clEncryptedHSM}" != "on" ]; then
       dialog \
@@ -100,7 +100,7 @@ case $CHOICE in
       /home/admin/config.scripts/cl.hsmtool.sh autounlock-off mainnet
     fi
     /home/admin/config.scripts/cl.hsmtool.sh lock mainnet
-    ## from dialogLightningWallet.sh 
+    ## from dialogLightningWallet.sh
     _temp="/var/cache/raspiblitz/temp/.temp.tmp"
     clear
     /home/admin/config.scripts/cl.backup.sh cl-export-gui production $_temp
@@ -110,10 +110,10 @@ case $CHOICE in
     echo "Press ENTER when finished downloading."
     read key
     ;;
-  
+
   RESET)
     # backup
-    ## from dialogLightningWallet.sh 
+    ## from dialogLightningWallet.sh
     _temp="/var/cache/raspiblitz/temp/.temp.tmp"
     clear
     /home/admin/config.scripts/cl.backup.sh cl-export-gui production $_temp
@@ -149,10 +149,10 @@ case $CHOICE in
       /home/admin/config.scripts/cl.install-service.sh signet
     fi
     ;;
-  
+
   FILERESTORE)
     # backup
-    ## from dialogLightningWallet.sh 
+    ## from dialogLightningWallet.sh
     _temp="/var/cache/raspiblitz/temp/.temp.tmp"
     clear
     /home/admin/config.scripts/cl.backup.sh cl-export-gui production $_temp
@@ -174,10 +174,10 @@ case $CHOICE in
     source $_temp 2>/dev/null
     sudo rm $_temp 2>/dev/null
     ;;
-  
+
   SEEDRESTORE)
     # backup
-    ## from dialogLightningWallet.sh 
+    ## from dialogLightningWallet.sh
     _temp="/var/cache/raspiblitz/temp/.temp.tmp"
     clear
     /home/admin/config.scripts/cl.backup.sh cl-export-gui production $_temp

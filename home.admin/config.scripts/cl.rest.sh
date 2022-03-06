@@ -83,13 +83,13 @@ if [ "$1" = on ];then
     sudo -u bitcoin git clone https://github.com/saubyk/c-lightning-REST
     cd c-lightning-REST || exit 1
     sudo -u bitcoin git reset --hard $CLRESTVERSION
-    
+
     PGPsigner="saubyk"
     PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
     PGPpubkeyFingerprint="00C9E2BC2E45666F"
     sudo -u bitcoin /home/admin/config.scripts/blitz.git-verify.sh \
      "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
-    
+
     sudo -u bitcoin npm install
   fi
 

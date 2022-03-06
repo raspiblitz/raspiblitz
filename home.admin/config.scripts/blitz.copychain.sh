@@ -89,7 +89,7 @@ if [ "$1" = "target" ]; then
   # check if old blockchain data exists (1 Block is 1KB)
   deleteOldBlockchain=0
   sizeBlocks=$(sudo du -s /mnt/hdd/bitcoin/blocks 2>/dev/null | tr -dc '[0-9]')
-  if [ "${sizeBlocks}" == "" ] || [ ${sizeBlocks} -lt 250000 ]; then 
+  if [ "${sizeBlocks}" == "" ] || [ ${sizeBlocks} -lt 250000 ]; then
     # blockchain block data is below 250MB ... assume just to be deleted and start copy fresh
     deleteOldBlockchain=1
   else
@@ -120,7 +120,7 @@ if [ "$1" = "target" ]; then
   # allow all users write to it
   sudo chmod 777 /mnt/hdd/bitcoin
 
-  echo 
+  echo
   clear
   if [ "${CHOICE}" = "WINDOWS" ]; then
     echo "****************************************************************************"
@@ -198,7 +198,7 @@ if [ "$1" = "target" ]; then
     echo ""
     echo "The LOCAL IP of this target RaspiBlitz is: ${localip}"
   fi
-  echo "" 
+  echo ""
   echo "It can take multiple hours until transfer is complete - be patient."
   echo "****************************************************************************"
   echo "PRESS ENTER if transfers is done OR if you want to choose another option."
@@ -272,7 +272,7 @@ if [ "$1" = "target" ]; then
     case $response in
       1) quickCheckOK=1 ;;
     esac
-  
+
   fi
 
   if [ ${quickCheckOK} -eq 0 ]; then
@@ -282,8 +282,8 @@ if [ "$1" = "target" ]; then
   fi
 
   echo "restarting services ... (please wait)"
-  sudo systemctl enable bitcoind 
-  sudo systemctl start bitcoind 
+  sudo systemctl enable bitcoind
+  sudo systemctl start bitcoind
   sudo systemctl start lnd 2>/dev/null
   sudo systemctl start lightningd 2>/dev/null
   sleep 10
@@ -319,7 +319,7 @@ if [ "$1" = "source" ]; then
     whiptail --msgbox "Was not able to contact/ping: ${targetIP}\n\n- check if IP of target RaspiBlitz is correct.\n- check to be on the same local network.\n- try again ..." 11 58 "" --title " Testing Target IP " --backtitle "RaspiBlitz - Copy Blockchain"
     exit 1
   fi
-  
+
   echo "# get Password of RaspiBlitz to copy to ..."
   targetPassword=$(whiptail --passwordbox "\nPlease enter the PASSWORD A of the\nRaspiBlitz to copy Blockchain to:" 10 38 "" --title "Target Password" --backtitle "RaspiBlitz - Copy Blockchain" 3>&1 1>&2 2>&3)
   if [ ${#targetPassword} -eq 0 ]; then
@@ -365,7 +365,7 @@ if [ "$1" = "source" ]; then
       # the idea is even after successfull transfer the loop will run a second time
       # but on the second time there will be no files transfered (log lines are below 4)
       # thats the signal that its done
-      linesInLogFile=$(wc -l ./transferred.rsync | cut -d " " -f 1) 
+      linesInLogFile=$(wc -l ./transferred.rsync | cut -d " " -f 1)
       if [ ${linesInLogFile} -lt 4 ]; then
         echo ""
         echo "OK all files transfered. DONE"
@@ -386,7 +386,7 @@ if [ "$1" = "source" ]; then
       fi
 
     done
-  
+
   # transfere end flag
   sed -i "s/^state=.*/state=ready/g" /home/admin/raspiblitz.info
   date +%s > /home/admin/copy_end.time

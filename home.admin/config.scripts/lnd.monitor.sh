@@ -13,7 +13,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
 fi
 
 # check if started with sudo
-if [ "$EUID" -ne 0 ]; then 
+if [ "$EUID" -ne 0 ]; then
   echo "error='run as root'"
   exit 1
 fi
@@ -71,7 +71,7 @@ if [ "$2" = "status" ]; then
     if [ "${failData}" != "" ]; then
       lnd_ready="0"
 
-      # store error messages 
+      # store error messages
       lnd_error_short=""
       lnd_error_full=$(echo ${failData} | tr -d "'" | tr -d '"')
 
@@ -93,7 +93,7 @@ if [ "$2" = "status" ]; then
       fi
     fi
 
-  fi 
+  fi
 
   # print results
   echo "ln_lnd_version='${lnd_version}'"
@@ -105,7 +105,7 @@ if [ "$2" = "status" ]; then
   echo "ln_lnd_error_full='${lnd_error_full}'"
 
   exit 0
-fi   
+fi
 
 ######################################################
 # CONFIG
@@ -188,7 +188,7 @@ if [ "$2" = "info" ]; then
       lnd_recovery_done="1"
     fi
   fi
-  
+
   # print data
   echo "ln_lnd_address='${lnd_address}'"
   echo "ln_lnd_tor='${lnd_tor}'"
@@ -203,7 +203,7 @@ if [ "$2" = "info" ]; then
   echo "ln_lnd_recovery_mode='${lnd_recovery_mode}'"
   echo "ln_lnd_recovery_done='${lnd_recovery_done}'"
   exit 0
-  
+
 fi
 
 ######################################################
@@ -267,7 +267,7 @@ if [ "$2" = "channels" ]; then
   # print data
   echo "ln_lnd_channels_total='${lnd_channels_total}'"
   exit 0
-  
+
 fi
 
 ######################################################
@@ -298,7 +298,7 @@ if [ "$2" = "fees" ]; then
   echo "ln_lnd_fees_month='${lnd_fees_month}'"
   echo "ln_lnd_fees_total='${lnd_fees_total}'"
   exit 0
-  
+
 fi
 
 echo "FAIL - Unknown Parameter $2"

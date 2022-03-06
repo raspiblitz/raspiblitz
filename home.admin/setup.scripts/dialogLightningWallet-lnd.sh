@@ -81,7 +81,7 @@ To also try to recover the open channel funds you need the
 channel.backup file (since RaspiBlitz v1.2 / LND 0.6-beta)
 or having a complete LND rescue-backup from your old node.
       " 11 65
-      
+
       if [ $? -eq 1 ]; then
         # when user wants to go back
         CHOICESUB=""
