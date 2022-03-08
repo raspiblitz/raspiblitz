@@ -61,11 +61,9 @@ if [ $(grep -c "^feeadjuster" < ${CLCONF}) -gt 0 ];then
   fi
 fi
 
-if [ ${CHAIN} = "testnet" ]; then 
-  clrpcsubdir="/testnet"
-elif [ ${CHAIN} = "signet" ]; then 
-  clrpcsubdir="/signet"
+if [ "${LNBitsFunding}" = "${netprefix}cl" ]; then
+  # https://github.com/rootzoll/raspiblitz/issues/3007
+  if [ $(grep -c "^rpc-file-mode=0660" < ${CLCONF}) -eq 0 ]; then
+    echo "rpc-file-mode=0660" | tee -a ${CLCONF}
+  fi
 fi
-# make the lightning-rpc socket group readable
-chmod 770 /home/bitcoin/.lightning/bitcoin${clrpcsubdir}
-chmod 660 /home/bitcoin/.lightning/bitcoin${clrpcsubdir}/lightning-rpc

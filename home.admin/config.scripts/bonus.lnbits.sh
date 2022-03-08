@@ -658,8 +658,15 @@ if [ "$1" = "switch" ]; then
     echo "# allowing lnbits user as part of the bitcoin group to RW RPC hook"
     sudo chmod 770 /home/bitcoin/.lightning/bitcoin${clrpcsubdir}
     sudo chmod 660 /home/bitcoin/.lightning/bitcoin${clrpcsubdir}/lightning-rpc
-    echo "# check the lightning-rpc socket"
-    sudo ls -la /home/bitcoin/.lightning/bitcoin${clrpcsubdir}/lightning-rpc
+    if [ "${fundingsource}" == "cl" ]; then
+      CLCONF="/home/bitcoin/.lightning/config"
+    else
+      CLCONF="/home/bitcoin/.lightning${clrpcsubdir}/config"
+    fi
+    # https://github.com/rootzoll/raspiblitz/issues/3007
+    if [ "$(sudo cat ${CLCONF} | grep -c "^rpc-file-mode=0660")" -eq 0 ]; then
+      echo "rpc-file-mode=0660" | sudo tee -a ${CLCONF}
+    fi
 
     echo "# preparing lnbits config for c-lightning"
     sudo bash -c "echo 'LNBITS_BACKEND_WALLET_CLASS=CLightningWallet' >> /home/lnbits/lnbits/.env"
@@ -670,7 +677,7 @@ if [ "$1" = "switch" ]; then
   /home/admin/config.scripts/blitz.conf.sh set LNBitsFunding "${fundingsource}"
 
   echo "##############"
-  echo "# OK new fundig source set - does need restart or call: sudo systemctl restart lnbits"
+  echo "# OK new funding source set - does need restart or call: sudo systemctl restart lnbits"
   echo "##############"
 
   exit 0
