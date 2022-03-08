@@ -61,7 +61,7 @@ if [ $(grep -c "^feeadjuster" < ${CLCONF}) -gt 0 ];then
   fi
 fi
 
-if [ "${LNBitsFunding}" = "cl" ]; then
+if [ "${LNBitsFunding}" = "${netprefix}cl" ]; then
   # https://github.com/rootzoll/raspiblitz/issues/3007
   if [ $(grep -c "^rpc-file-mode=0660" < ${CLCONF}) -eq 0 ]; then
     echo "rpc-file-mode=0660" | tee -a ${CLCONF}
