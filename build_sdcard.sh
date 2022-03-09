@@ -318,6 +318,11 @@ elif [ -f "/usr/bin/python3.10" ]; then
   sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.10 1
   sudo ln -s /usr/bin/python3.10 /usr/bin/python3.9
   echo "python calls python3.10"
+elif [ -f "/usr/bin/python3.8" ]; then
+  # use python 3.8 if available
+  sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.8 1
+  echo "python calls python3.8"
+  sudo make altinstall
 else
   echo "!!! FAIL !!!"
   echo "There is no tested version of python present"
