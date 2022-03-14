@@ -647,9 +647,10 @@ if [ "$1" = "update" ]; then
     TAG=$(git tag | grep v1 | sort -V | tail -1)
     echo "# Reset to the latest release tag: $TAG"
     sudo -u btcpay git reset --hard $TAG
-    # PGP verify
-    sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh \
-     "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
+    # PGP verify - disabled for the update
+    # https://github.com/rootzoll/raspiblitz/issues/3025
+    # sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh \
+    #  "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
     echo "# Build BTCPayServer ..."
     # from the build.sh with path
     sudo systemctl stop btcpayserver
