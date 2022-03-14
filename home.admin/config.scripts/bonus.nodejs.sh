@@ -45,9 +45,9 @@ fi
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # check if nodeJS was installed
-  nodeJSInstalled=$(node -v 2>/dev/null | grep -c "v1.")
+  nodeJSInstalled=$(node -v 2>/dev/null | grep -c "$VERSION")
   if ! [ ${nodeJSInstalled} -eq 0 ]; then
-    echo "nodeJS is already installed"
+    echo "nodeJS $VERSION is already installed"
   else
 
     # install latest nodejs
@@ -73,7 +73,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # install
     sudo mkdir -p /usr/local/lib/nodejs
     sudo tar -xJvf node-$VERSION-$DISTRO.tar.xz -C /usr/local/lib/nodejs
-    rm -f node-$VERSION-$DISTRO.tar.xz* 
+    rm -f node-$VERSION-$DISTRO.tar.xz*
     export PATH=/usr/local/lib/nodejs/node-$VERSION-$DISTRO/bin:$PATH
     sudo ln -sf /usr/local/lib/nodejs/node-$VERSION-$DISTRO/bin/node /usr/bin/node
     sudo ln -sf /usr/local/lib/nodejs/node-$VERSION-$DISTRO/bin/npm /usr/bin/npm
@@ -81,7 +81,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # add to PATH permanently
     sudo bash -c "echo 'PATH=\$PATH:/usr/local/lib/nodejs/node-${VERSION}-${DISTRO}/bin/' >> /etc/profile"
     echo ""
-  
+
     # check if nodeJS was installed
     nodeJSInstalled=$(node -v | grep -c "v1.")
     if [ ${nodeJSInstalled} -eq 0 ]; then
