@@ -14,10 +14,10 @@ fi
 # checking password a
 if [ $1 == "check-a" ]; then
 
-  #if [ $(id -u) -eq 0 ]; then
-  #  echo "FAIL: this function should not be run as root." 1>&2
-  #  exit 1
-  #fi
+  if [ $(id -u) -eq 0 ]; then
+    echo "FAIL: this function cannot not be run as root." 1>&2
+    exit 1
+  fi
 
   passwordToCheck=$2
   echo "# checking password a based on your input"
