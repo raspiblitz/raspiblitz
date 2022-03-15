@@ -21,7 +21,7 @@ if [ $1 == "check-a" ]; then
 
   passwordToCheck=$2
   echo "# checking password a based on your input"
-  result=$(echo "${passwordToCheck}" | su bitcoin -c "echo 'test'" | grep -c "test")
+  result=$(echo "${passwordToCheck}" | su bitcoin -c "echo 'test'" 2>/dev/null | grep -c "test")
   if [ ${result} -eq 1 ]; then
     echo "correct=1"
   else
