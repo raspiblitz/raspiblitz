@@ -77,14 +77,10 @@ case $CHOICE in
     --no-button "Website" \
     --yesno "Visit the website and install the browser extension then click --> Continue." 12 65
     if [ $? -eq 1 ]; then
-    sudo /home/admin/config.scripts/blitz.display.sh qr ${websiteLink}
     whiptail --title " Website Link " --msgbox "\
 To install app open the following link:\n
-${websiteLink}\n
-Or scan the qr code on the LCD with your mobile phone.
-" 11 70
+${websiteLink}\n" 11 70
     fi
-    sudo /home/admin/config.scripts/blitz.display.sh hide
     /home/admin/config.scripts/bonus.lndconnect.sh alby tor
     exit 0;
   ;;
