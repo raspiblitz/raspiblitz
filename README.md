@@ -171,6 +171,7 @@ You can connect the following Wallet-Apps to your RaspiBlitz:
 * **Fully Noded** (iOS) [details](https://apps.apple.com/us/app/fully-noded/id1436425586)
 * **SendMany** (Android) [details](https://github.com/fusion44/sendmany/blob/master/README.md)
 * **Sphinx Chat App** (Android & iOS) [details](https://sphinx.chat)
+*	**Alby** (Desktop) [details](https://getalby.com)
 
 Also many more features like Touchscreen, Channels Autopilot, Backup, DynDNS, SSH-Tunneling, UPS Support, ...
 
