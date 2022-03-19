@@ -64,20 +64,13 @@ fi
 # QuickOption: Migration from other node
 if [ "${setupPhase}" == "migration" ]; then
 
-  source <(/home/admin/_cache.sh get hddGotMigrationData hddVersionLND)
-
-  # show recovery dialog
-  echo "# Starting migration dialog (${hddGotMigrationData}) ..."
-
-  # check if lightning is outdated
-  migrationMode="normal"
-  if [ "${lndVersion}" != "" ]; then
-    # get local lnd version & check compatibility
-    source <(/home/admin/config.scripts/lnd.install.sh info "${lndVersion}")
-    if [ "${compatible}" != "1" ]; then
-      migrationMode="outdatedLightning"
-    fi 
+  source <(/home/admin/_cache.sh get hddGotMigrationData migrationMode)
+  if [ "${migrationMode}" == "" ]; then
+    migrationMode = "normal"
   fi
+  
+  # show recovery dialog
+  echo "# Starting migration dialog (${hddGotMigrationData}) (${migrationMode})..."
 
   /home/admin/setup.scripts/dialogMigration.sh ${hddGotMigrationData} ${migrationMode}
   if [ "$?" == "0" ]; then

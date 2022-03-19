@@ -454,9 +454,21 @@ if [ ${isMounted} -eq 0 ]; then
   # determine correct setup phase
   infoMessage="Please Login for Setup"
   setupPhase="setup"
+  
   if [ "${hddGotMigrationData}" != "" ]; then
     infoMessage="Please Login for Migration"
     setupPhase="migration"
+    # check if lightning is outdated
+    migrationMode="normal"
+    if [ "${hddVersionLND}" != "" ]; then
+      # get local lnd version & check compatibility
+      source <(/home/admin/config.scripts/lnd.install.sh info "${hddVersionLND}")
+      if [ "${compatible}" != "1" ]; then
+        migrationMode="outdatedLightning"
+      fi 
+    fi
+    /home/admin/_cache.sh set migrationMode "${migrationMode}"
+
   elif [ "${hddRaspiData}" == "1" ]; then
 
     # determine if this is a recovery or an update
