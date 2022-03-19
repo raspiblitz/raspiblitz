@@ -709,12 +709,14 @@ fi
 # *** FATPACK *** (can be activated by parameter - see details at start of script)
 if ${fatpack}; then
   echo -e "\n*** FATPACK ***"
+
   echo "* Adding nodeJS Framework ..."
   sudo /home/admin/config.scripts/bonus.nodejs.sh on
   if [ "$?" != "0" ]; then
     echo "FATPACK FAILED"
     exit 1
   fi
+
   echo "* Optional Packages (may be needed for extended features)"
   sudo apt install -y qrencode secure-delete fbi ssmtp unclutter xterm python3-pyqt5 xfonts-terminus apache2-utils nginx python3-jinja2 socat libatlas-base-dev hexyl autossh
 
@@ -728,6 +730,12 @@ if ${fatpack}; then
     sudo cp /home/admin/assets/fallback.nodes /home/admin/fallback.nodes
   fi
   sudo chown admin:admin /home/admin/fallback.nodes
+
+  echo "* Adding Raspiblitz API ..."
+  sudo /home/admin/config.scripts/blitz.web.api.sh on
+
+  echo "* Adding Raspiblitz WebUI ..."
+  sudo /home/admin/config.scripts/blitz.web.ui.sh on
 
 else
   echo "* skipping FATPACK"
