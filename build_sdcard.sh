@@ -733,16 +733,6 @@ echo
 echo
 /home/admin/config.scripts/bitcoin.install.sh install || exit 1
 
-#######
-# LND #
-#######
-echo
-if ${fatpack}; then
-  
-else
-  echo -e "\nSkipping LND install - let user install later if needed ..."
-fi
-
 # *** BLITZ WEB SERVICE ***
 echo "Provisioning BLITZ WEB SERVICE" >> ${logFile}
 /home/admin/config.scripts/blitz.web.sh on >> ${logFile} 2>&1
