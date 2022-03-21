@@ -769,10 +769,10 @@ if ${fatpack}; then
   sudo chown admin:admin /home/admin/fallback.nodes
 
   echo "* Adding Raspiblitz API ..."
-  sudo /home/admin/config.scripts/blitz.web.api.sh on
+  sudo -u admin /home/admin/config.scripts/blitz.web.api.sh on
 
   echo "* Adding Raspiblitz WebUI ..."
-  sudo /home/admin/config.scripts/blitz.web.ui.sh on
+  sudo -u admin /home/admin/config.scripts/blitz.web.ui.sh on
 
 else
   echo "* skipping FATPACK"
