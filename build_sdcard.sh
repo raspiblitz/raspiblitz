@@ -734,8 +734,8 @@ echo
 /home/admin/config.scripts/bitcoin.install.sh install || exit 1
 
 # *** BLITZ WEB SERVICE ***
-echo "Provisioning BLITZ WEB SERVICE" >> ${logFile}
-/home/admin/config.scripts/blitz.web.sh http-on >> ${logFile} 2>&1
+echo "Provisioning BLITZ WEB SERVICE" 
+/home/admin/config.scripts/blitz.web.sh http-on
 
 # *** FATPACK *** (can be activated by parameter - see details at start of script)
 if ${fatpack}; then
