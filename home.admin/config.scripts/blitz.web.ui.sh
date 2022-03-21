@@ -58,9 +58,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo chown www-data:www-data -R /var/www/public
 
   # install info
-  source <(/home/admin/_cache.sh export internet_localip)
   echo "# The WebUI is now available under:"
-  echo "# http://${internet_localip}"
+  echo "# http://[LOCAIP]"
 
   exit 0
 fi
