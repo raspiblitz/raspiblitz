@@ -186,10 +186,6 @@ sed -i "s/^setupStep=.*/setupStep=100/g" /home/admin/raspiblitz.info
 
 echo "### RUNNING PROVISIONING SERVICES ###" >> ${logFile}
 
-# BLITZ WEB SERVICE
-echo "Provisioning BLITZ WEB SERVICE - run config script" >> ${logFile}
-/home/admin/config.scripts/blitz.web.sh on >> ${logFile} 2>&1
-
 # BITCOIN INTERIMS UPDATE
 if [ ${#bitcoinInterimsUpdate} -gt 0 ]; then
   /home/admin/_cache.sh set message "Provisioning Bitcoin Core update"

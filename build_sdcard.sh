@@ -706,41 +706,6 @@ if [ "${baseimage}" = "raspios_arm64"  ] || [ "${baseimage}" = "debian_rpi64" ];
   sudo sed -i "s/^dtparam=i2c_arm=.*//g" /boot/config.txt
 fi
 
-# *** FATPACK *** (can be activated by parameter - see details at start of script)
-if ${fatpack}; then
-  echo -e "\n*** FATPACK ***"
-
-  echo "* Adding nodeJS Framework ..."
-  sudo /home/admin/config.scripts/bonus.nodejs.sh on
-  if [ "$?" != "0" ]; then
-    echo "FATPACK FAILED"
-    exit 1
-  fi
-
-  echo "* Optional Packages (may be needed for extended features)"
-  sudo apt install -y qrencode secure-delete fbi ssmtp unclutter xterm python3-pyqt5 xfonts-terminus apache2-utils nginx python3-jinja2 socat libatlas-base-dev hexyl autossh
-
-  # *** UPDATE FALLBACK NODE LIST (only as part of fatpack) *** see https://github.com/rootzoll/raspiblitz/issues/1888
-  echo "*** FALLBACK NODE LIST ***"
-  sudo -u admin curl -H "Accept: application/json; indent=4" https://bitnodes.io/api/v1/snapshots/latest/ -o /home/admin/fallback.nodes
-  byteSizeList=$(sudo -u admin stat -c %s /home/admin/fallback.nodes)
-  if [ ${#byteSizeList} -eq 0 ] || [ ${byteSizeList} -lt 10240 ]; then
-    echo "WARN: Failed downloading fresh FALLBACK NODE LIST --> https://bitnodes.io/api/v1/snapshots/latest/"
-    sudo rm /home/admin/fallback.nodes 2>/dev/null
-    sudo cp /home/admin/assets/fallback.nodes /home/admin/fallback.nodes
-  fi
-  sudo chown admin:admin /home/admin/fallback.nodes
-
-  echo "* Adding Raspiblitz API ..."
-  sudo /home/admin/config.scripts/blitz.web.api.sh on
-
-  echo "* Adding Raspiblitz WebUI ..."
-  sudo /home/admin/config.scripts/blitz.web.ui.sh on
-
-else
-  echo "* skipping FATPACK"
-fi
-
 # *** BOOTSTRAP ***
 echo -e "\n*** RASPI BOOTSTRAP SERVICE ***"
 sudo chmod +x /home/admin/_bootstrap.sh
@@ -773,19 +738,54 @@ echo
 #######
 echo
 if ${fatpack}; then
-  /home/admin/config.scripts/lnd.install.sh install || exit 1
+  
 else
   echo -e "\nSkipping LND install - let user install later if needed ..."
 fi
 
-###############
-# C-LIGHTNING #
-###############
-echo
+# *** BLITZ WEB SERVICE ***
+echo "Provisioning BLITZ WEB SERVICE" >> ${logFile}
+/home/admin/config.scripts/blitz.web.sh on >> ${logFile} 2>&1
+
+# *** FATPACK *** (can be activated by parameter - see details at start of script)
 if ${fatpack}; then
+  echo -e "\n*** FATPACK ***"
+
+  echo "* Adding nodeJS Framework ..."
+  sudo /home/admin/config.scripts/bonus.nodejs.sh on
+  if [ "$?" != "0" ]; then
+    echo "FATPACK FAILED"
+    exit 1
+  fi
+
+  echo "* Optional Packages (may be needed for extended features)"
+  sudo apt install -y qrencode secure-delete fbi ssmtp unclutter xterm python3-pyqt5 xfonts-terminus apache2-utils nginx python3-jinja2 socat libatlas-base-dev hexyl autossh
+
+  echo "* Adding lnd ..."
+  /home/admin/config.scripts/lnd.install.sh install || exit 1
+
+  echo "* Adding c-lightning ..."
   /home/admin/config.scripts/cl.install.sh install || exit 1
+
+  # *** UPDATE FALLBACK NODE LIST (only as part of fatpack) *** see https://github.com/rootzoll/raspiblitz/issues/1888
+  echo "*** FALLBACK NODE LIST ***"
+  sudo -u admin curl -H "Accept: application/json; indent=4" https://bitnodes.io/api/v1/snapshots/latest/ -o /home/admin/fallback.nodes
+  byteSizeList=$(sudo -u admin stat -c %s /home/admin/fallback.nodes)
+  if [ ${#byteSizeList} -eq 0 ] || [ ${byteSizeList} -lt 10240 ]; then
+    echo "WARN: Failed downloading fresh FALLBACK NODE LIST --> https://bitnodes.io/api/v1/snapshots/latest/"
+    sudo rm /home/admin/fallback.nodes 2>/dev/null
+    sudo cp /home/admin/assets/fallback.nodes /home/admin/fallback.nodes
+  fi
+  sudo chown admin:admin /home/admin/fallback.nodes
+
+  echo "* Adding Raspiblitz API ..."
+  sudo /home/admin/config.scripts/blitz.web.api.sh on
+
+  echo "* Adding Raspiblitz WebUI ..."
+  sudo /home/admin/config.scripts/blitz.web.ui.sh on
+
 else
-  echo -e "\nSkipping c-lightning install - let user install later if needed ..."
+  echo "* skipping FATPACK"
 fi
 
 echo
