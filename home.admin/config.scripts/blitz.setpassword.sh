@@ -16,8 +16,9 @@ fi
 if [ "$1" == "check-a" ]; then
 
   if [ $(id -u) -eq 0 ]; then
-    echo "FAIL: this function cannot not be run as root." 1>&2
-    exit 1
+    echo "# recall as user admin"
+    sudo -u admin /home/admin/config.scripts/blitz.setpassword.sh check-a "$2"
+    exit
   fi
 
   # brute force protection
