@@ -25,7 +25,7 @@ if [ "$1" == "check-a" ]; then
   source <(/home/admin/_cache.sh meta system_password_bruteforceprotection)
   /home/admin/_cache.sh set system_password_bruteforceprotection on 60
   if [ "${value}" == "on" ] && [ "${stillvalid}" == "1" ]; then
-    echo "# ,ultiple tries within last minute - respond slow"
+    echo "# multiple tries within last minute - respond slow"
     sleep 5 # advanced brute force protection
   else
     echo "# first try within last minute - respond fast"
