@@ -6,6 +6,7 @@ if [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "blitz.setpassword.sh a [?newpassword] "
  echo "blitz.setpassword.sh b [?newpassword] "
  echo "blitz.setpassword.sh c [?oldpassword] [?newpassword] "
+ echo "blitz.setpassword.sh check-a [passwordToCheck]"
  echo "or just as a password enter dialog (result as file)"
  echo "blitz.setpassword.sh [x] [text] [result-file] [?empty-allowed]"
  exit 1
@@ -30,42 +31,6 @@ if [ $1 == "check-a" ]; then
   exit
 
 fi 
-
-#!/bin/bash
-#
-# login.sh $USERNAME $PASSWORD
-
-#this script doesn't work if it is run as root, since then we don't have to specify a pw for 'su'
-
-
-
-
-USERNAME=$1
-PASSWORD=$2
-
-# Setting the language to English for the expected "Password:" string, see http://askubuntu.com/a/264709/18014
-export LC_ALL=C
-
-#since we use expect inside a bash-script, we have to escape tcl-$.
-expect << EOF
-spawn su $USERNAME -c "exit" 
-expect "Password:"
-send "$PASSWORD\r"
-#expect eof
-
-set wait_result  [wait]
-
-# check if it is an OS error or a return code from our command
-#   index 2 should be -1 for OS erro, 0 for command return code
-if {[lindex \$wait_result 2] == 0} {
-        exit [lindex \$wait_result 3]
-} 
-else {
-        exit 1 
-}
-EOF
-
-
 
 # check if sudo
 if [ "$EUID" -ne 0 ]
