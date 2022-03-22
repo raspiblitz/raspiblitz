@@ -299,6 +299,9 @@ if [ "${setupPhase}" == "setup" ]; then
 
     done
 
+    # remember setup type 
+    echo "setupType=${setupPhase}" >> $SETUPFILE
+
     echo "# CREATING raspiblitz.conf from your setup choices"
 
     # source the raspiblitz version

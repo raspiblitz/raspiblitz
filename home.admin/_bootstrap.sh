@@ -40,6 +40,10 @@ echo "***********************************************" >> $logFile
 # make sure SSH server is configured & running
 sudo /home/admin/config.scripts/blitz.ssh.sh checkrepair >> ${logFile}
 
+# make sure /var/cache/raspiblitz/temp exists
+sudo mkdir -p /var/cache/raspiblitz/temp
+sudo chmod 777 /var/cache/raspiblitz/temp
+
 ################################
 # INIT raspiblitz.info
 ################################
