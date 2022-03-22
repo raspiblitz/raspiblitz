@@ -95,8 +95,10 @@ echo "SSH again into system with:"
 echo "ssh admin@${internet_localip}"
 echo "Use your password A"
 echo "***********************************************************"
-echo "# final setup reboot ..." >> /home/admin/raspiblitz.log
-
+sleep 5
+echo "When green activity light stays dark and LCD turns white then shutdown is complete."
+sleep 10
+echo "Please wait for shutdown ..."
 sleep 120
 echo "FAIL: automatic final reboot didnt worked .. please report to dev team and try to reboot manually"
 exit 0
