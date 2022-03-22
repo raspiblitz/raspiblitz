@@ -15,11 +15,13 @@ fi
 # checking password a
 if [ "$1" == "check-a" ]; then
 
-  if [ $(id -u) -eq 0 ]; then
+  userID=$(id -u)
+  if [ "${userID}" == "0" ]; then
     echo "# recall as user admin"
     sudo -u admin /home/admin/config.scripts/blitz.setpassword.sh check-a "$2"
     exit
   fi
+  echo "# userid(${userID})"
 
   # brute force protection
   # if there was another try within last minute add another 3 seconds delay protection
