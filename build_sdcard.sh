@@ -773,6 +773,11 @@ if ${fatpack}; then
 
   echo "* Adding Raspiblitz WebUI ..."
   sudo -u admin /home/admin/config.scripts/blitz.web.ui.sh on
+  # set build code as new default
+  sudo rm -r /home/admin/assets/nginx/www_public
+  sudo cp -a /home/admin/blitz_web/build/* /home/admin/assets/nginx/www_public
+  sudo chown admin:admin /home/admin/assets/nginx/www_public
+  sudo rm -r /home/admin/blitz_web/build/*
 
 else
   echo "* skipping FATPACK"
