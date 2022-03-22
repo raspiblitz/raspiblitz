@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # command info
-if [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
+if [ "$1" == "" ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "small config script to set a passwords A,B,C & D"
  echo "blitz.setpassword.sh a [?newpassword] "
  echo "blitz.setpassword.sh b [?newpassword] "
