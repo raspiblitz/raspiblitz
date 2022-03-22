@@ -33,6 +33,7 @@
 - Update: Balance of Satoshis 11.50.0 (BOS) [details](https://github.com/alexbosworth/balanceofsatoshis/blob/master/CHANGELOG.md#11500)
 - Update: Re-Add connecting node with Zap mobile wallet iOS & Android
 - Update: additional redaction of private data in debug logs
+- Update: Channel Tools (chantools) v0.10.4 [details](https://github.com/guggero/chantools/releases/tag/v0.10.4)
 - Security: Verify git commits and tags everywhere possible [issue](https://github.com/rootzoll/raspiblitz/issues/2686)
 - Fixed: LND repair options, SEED+SCB and rescue-file restore, RESET options [issue](https://github.com/rootzoll/raspiblitz/issues/2832)
 - Info: All existing IP2Tor subscriptions need to be canceled & renewed to be functional again.
