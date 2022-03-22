@@ -13,7 +13,7 @@ if [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
 fi
 
 # checking password a
-if [ $1 == "check-a" ]; then
+if [ "$1" == "check-a" ]; then
 
   if [ $(id -u) -eq 0 ]; then
     echo "FAIL: this function cannot not be run as root." 1>&2
