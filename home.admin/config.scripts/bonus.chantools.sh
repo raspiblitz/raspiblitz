@@ -6,7 +6,7 @@
 
 lndVersion=$(lncli -v | cut -d " " -f 3 | cut -d"." -f2)
 if [ $lndVersion -eq 14 ]; then
-  pinnedVersion="0.10.1"
+  pinnedVersion="0.10.3"
 else
   echo "# LND not installed or a version not tested with chantools"
   lncli -v
