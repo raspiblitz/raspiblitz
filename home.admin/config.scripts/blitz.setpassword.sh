@@ -20,9 +20,22 @@ if [ "$1" == "check-a" ]; then
     exit 1
   fi
 
+  # brute force protection
+  # if there was another try within last minute add another 3 seconds delay protection
+  source <(/home/admin/_cache.sh meta system_password_bruteforceprotection)
+  /home/admin/_cache.sh set system_password_bruteforceprotection on 60
+  if [ "${value}" == "on" ] && [ "${stillvalid}" == "1" ]; then
+    echo "# ,ultiple tries within last minute - respond slow"
+    sleep 5 # advanced brute force protection
+  else
+    echo "# first try within last minute - respond fast"
+    sleep 1 # basic brute force protection
+  fi
+
   passwordToCheck=$2
   echo "# checking password a based on your input"
   result=$(echo "${passwordToCheck}" | su bitcoin -c "echo 'test'" 2>/dev/null | grep -c "test")
+
   if [ ${result} -eq 1 ]; then
     echo "correct=1"
   else
