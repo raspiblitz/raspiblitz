@@ -82,7 +82,7 @@ After the final reboot there might now be some waiting time until your Blockchai
 fi
 
 # trigger after final setup tasks & reboot
-/home/admin/_cache.sh set sate "waitfinal"
+/home/admin/_cache.sh set sate "donefinal"
 
 sleep 2
 clear

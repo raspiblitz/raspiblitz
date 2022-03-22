@@ -59,7 +59,7 @@ do
   # Trigger Final Setup
   ####################################################
 
-  if [ "${setupPhase}" != "done" ] && [ "${state}" == "waitfinal" ]; then
+  if [ "${setupPhase}" != "done" ] && [ "${state}" == "donefinal" ]; then
     echo "trigger final setup tasks & reboot ..."
     /home/admin/_provision.xfinal.sh
     sleep 120
