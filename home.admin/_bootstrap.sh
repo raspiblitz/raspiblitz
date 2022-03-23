@@ -545,7 +545,7 @@ if [ ${isMounted} -eq 0 ]; then
 
   # get fresh data from setup file & data drive
   source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
-  source <(${setupFile})
+  source ${setupFile}
 
   # special setup tasks (triggered by api/webui thru setupfile)
   if [ "${setupPhase}" == "setup" ]; then
