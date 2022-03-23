@@ -563,6 +563,7 @@ if [ ${isMounted} -eq 0 ]; then
       fi
 
       # run formatting
+      error=""
       echo "Running Format: (${filesystem}) (${hddCandidate})" >> ${logFile}
       source <(sudo /home/admin/config.scripts/blitz.datadrive.sh format ${filesystem} ${hddCandidate})
       if [ "${error}" != "" ]; then

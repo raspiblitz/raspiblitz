@@ -1326,7 +1326,7 @@ if [ "$1" = "tempmount" ]; then
     exit 1
   fi
 
-  if [ "${hddFormat}" = "ext4" ]; then
+  if [ "${hddFormat}" == "ext4" ]; then
 
     if [ "${hddDataPartitionExt4}" == "" ]; then
       echo "error='parameter is no partition'"
@@ -1348,7 +1348,7 @@ if [ "$1" = "tempmount" ]; then
       isBTRFS=0
     fi
     
-  elif [ "${hddFormat}" = "btrfs" ]; then
+  elif [ "${hddFormat}" == "btrfs" ]; then
 
     # get user and groupid if usr/group bitcoin
     bitcoinUID=$(id -u bitcoin)
