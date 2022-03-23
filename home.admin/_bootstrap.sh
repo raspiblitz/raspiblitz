@@ -610,6 +610,33 @@ if [ ${isMounted} -eq 0 ]; then
 
     fi
 
+    echo "# CREATING raspiblitz.conf from your setup choices" >> ${logFile}
+    if [ "${network}" == "" ]; then
+      network="bitcoin"
+    fi
+    if [ "${chain}" == "" ]; then
+      chain="main"
+    fi
+
+    # source the raspiblitz version
+    source /home/admin/_version.info
+
+    # prepare & write basic config file
+    # will first be created and in cache drive
+    # and some lines below copied to hdd when mounted
+    TEMPCONFIGFILE="/var/cache/raspiblitz/temp/raspiblitz.conf"
+    sudo rm $TEMPCONFIGFILE 2>/dev/null
+    sudo touch $TEMPCONFIGFILE
+    sudo chown admin:admin $TEMPCONFIGFILE
+    sudo chmod 777 $TEMPCONFIGFILE
+    echo "# RASPIBLITZ CONFIG FILE" > $TEMPCONFIGFILE
+    echo "raspiBlitzVersion='${codeVersion}'" >> $TEMPCONFIGFILE
+    echo "lcdrotate='1'" >> $TEMPCONFIGFILE
+    echo "lightning='${lightning}'" >> $TEMPCONFIGFILE
+    echo "network='${network}'" >> $TEMPCONFIGFILE
+    echo "chain='${chain}'" >> $TEMPCONFIGFILE
+    echo "hostname='${hostname}'" >> $TEMPCONFIGFILE
+    echo "runBehindTor='on'" >> $TEMPCONFIGFILE
   fi
 
   # make sure HDD is mounted (could be freshly formatted by user on last loop)
