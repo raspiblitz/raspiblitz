@@ -1630,6 +1630,12 @@ if [ "$1" = "clean" ]; then
           delete=1
           whenDeleteSchredd=1
 
+          # dont delete temp - will be deleted on every boot anyway
+          # but keep in case during setup a migration file was uploaded there
+          if [ "${entry}" = "temp" ]; then
+            delete=0
+          fi
+
           # deactivate delete if a blockchain directory (if -keepblockchain)
           if [ "$3" = "-keepblockchain" ]; then
             if [ "${entry}" = "bitcoin" ]; then
