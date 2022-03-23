@@ -548,69 +548,74 @@ if [ ${isMounted} -eq 0 ]; then
   source ${setupFile}
 
   # special setup tasks (triggered by api/webui thru setupfile)
-  if [ "${setupPhase}" == "setup" ]; then
-
-    # FORMAT DATA DRIVE
-    if [ "${formatHDD}" == "1" ]; then
-      echo "# special setup tasks: FORMAT DATA DRIVE" >> ${logFile}
+  
+  # FORMAT DATA DRIVE
+  if [ "${formatHDD}" == "1" ]; then
+    echo "# special setup tasks: FORMAT DATA DRIVE" >> ${logFile}
       
-      # check if there is a flag set on sd card boot section to format as btrfs (experimental)
-      filesystem="ext4"
-      flagBTRFS=$(sudo ls /boot/btrfs* 2>/dev/null | grep -c btrfs)
-      if [ "${flagBTRFS}" != "0" ]; then
-        echo "Found BTRFS flag ---> formatting with experimental BTRFS filesystem" >> ${logFile}
-        filesystem="btrfs"
-      fi
-
-      # run formatting
-      error=""
-      /home/admin/_cache.sh set state "formathdd"
-      echo "Running Format: (${filesystem}) (${hddCandidate})" >> ${logFile}
-      source <(sudo /home/admin/config.scripts/blitz.datadrive.sh format ${filesystem} ${hddCandidate})
-      if [ "${error}" != "" ]; then
-        echo "FAIL ON FORMATTING THE DRIVE:" >> ${logFile}
-        echo "${error}" >> ${logFile}
-        echo "Please report as issue on the raspiblitz github." >> ${logFile}
-        /home/admin/_cache.sh set state "errorHDD"
-        /home/admin/_cache.sh set message "Fail Format (${filesystem})"
-        exit 1
-      fi
+    # check if there is a flag set on sd card boot section to format as btrfs (experimental)
+    filesystem="ext4"
+    flagBTRFS=$(sudo ls /boot/btrfs* 2>/dev/null | grep -c btrfs)
+    if [ "${flagBTRFS}" != "0" ]; then
+      echo "Found BTRFS flag ---> formatting with experimental BTRFS filesystem" >> ${logFile}
+      filesystem="btrfs"
     fi
 
-    # CLEAN DRIVE & KEEP BLOCKCHAIN
-    if [ "${cleanHDD}" == "1" ]; then
-      echo "# special setup tasks: CLEAN DRIVE & KEEP BLOCKCHAIN" >> ${logFile}
-
-      # when blockchain comes from another node migrate data first
-      if [ "${hddGotMigrationData}" != "" ]; then
-          clear
-          echo "Migrating Blockchain of ${hddGotMigrationData}'" >> ${logFile}
-          source <(sudo /home/admin/config.scripts/blitz.migration.sh migration-${hddGotMigrationData})
-          if [ "${err}" != "" ]; then
-            echo "MIGRATION OF BLOCKHAIN FAILED: ${err}" >> ${logFile}
-            echo "Format data disk on laptop & recover funds with fresh sd card using seed words + static channel backup." >> ${logFile}
-            /home/admin/_cache.sh set state "errorHDD"
-            /home/admin/_cache.sh set message "Fail Migrate Blockchain (${hddGotMigrationData})"
-            exit 1
-          fi
-      fi
-
-      # delete everything but blockchain
-      echo "Deleting everything on HDD/SSD while keeping blockchain ..." >> ${logFile}
-      sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount 1>/dev/null 2>/dev/null
-      sudo /home/admin/config.scripts/blitz.datadrive.sh clean all -keepblockchain >> ${logFile}
-      if [ "${error}" != "" ]; then
-        echo "CLEANING HDD FAILED:" >> ${logFile}
-        echo "${error}" >> ${logFile}
-        echo "Please report as issue on the raspiblitz github." >> ${logFile}
-        /home/admin/_cache.sh set state "errorHDD"
-        /home/admin/_cache.sh set message "Fail Cleaning HDD"
-        exit 1
-      fi
-      sudo /home/admin/config.scripts/blitz.datadrive.sh unmount >> ${logFile}
-      sleep 2
-
+    # run formatting
+    error=""
+    /home/admin/_cache.sh set state "formathdd"
+    echo "Running Format: (${filesystem}) (${hddCandidate})" >> ${logFile}
+    source <(sudo /home/admin/config.scripts/blitz.datadrive.sh format ${filesystem} ${hddCandidate})
+    if [ "${error}" != "" ]; then
+      echo "FAIL ON FORMATTING THE DRIVE:" >> ${logFile}
+      echo "${error}" >> ${logFile}
+      echo "Please report as issue on the raspiblitz github." >> ${logFile}
+      /home/admin/_cache.sh set state "errorHDD"
+      /home/admin/_cache.sh set message "Fail Format (${filesystem})"
+      exit 1
     fi
+    /home/admin/_cache.sh set setupPhase "setup"
+  fi
+
+  # CLEAN DRIVE & KEEP BLOCKCHAIN
+  if [ "${cleanHDD}" == "1" ]; then
+    echo "# special setup tasks: CLEAN DRIVE & KEEP BLOCKCHAIN" >> ${logFile}
+
+    # when blockchain comes from another node migrate data first
+    if [ "${hddGotMigrationData}" != "" ]; then
+        clear
+        echo "Migrating Blockchain of ${hddGotMigrationData}'" >> ${logFile}
+        source <(sudo /home/admin/config.scripts/blitz.migration.sh migration-${hddGotMigrationData})
+        if [ "${err}" != "" ]; then
+          echo "MIGRATION OF BLOCKHAIN FAILED: ${err}" >> ${logFile}
+          echo "Format data disk on laptop & recover funds with fresh sd card using seed words + static channel backup." >> ${logFile}
+          /home/admin/_cache.sh set state "errorHDD"
+          /home/admin/_cache.sh set message "Fail Migrate Blockchain (${hddGotMigrationData})"
+          exit 1
+        fi
+    fi
+
+    # delete everything but blockchain
+    echo "Deleting everything on HDD/SSD while keeping blockchain ..." >> ${logFile}
+    sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount 1>/dev/null 2>/dev/null
+    sudo /home/admin/config.scripts/blitz.datadrive.sh clean all -keepblockchain >> ${logFile}
+    if [ "${error}" != "" ]; then
+       echo "CLEANING HDD FAILED:" >> ${logFile}
+      echo "${error}" >> ${logFile}
+      echo "Please report as issue on the raspiblitz github." >> ${logFile}
+      /home/admin/_cache.sh set state "errorHDD"
+      /home/admin/_cache.sh set message "Fail Cleaning HDD"
+      exit 1
+    fi
+    sudo /home/admin/config.scripts/blitz.datadrive.sh unmount >> ${logFile}
+    /home/admin/_cache.sh set setupPhase "setup"
+
+    sleep 2
+
+  fi
+
+  source <(/home/admin/_cache.sh get state setupPhase)
+  if [ "${setupPhase}" == "setup" ]; then
 
     echo "# CREATING raspiblitz.conf from your setup choices" >> ${logFile}
     if [ "${network}" == "" ]; then
