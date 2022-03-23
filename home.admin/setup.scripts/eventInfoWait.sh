@@ -60,6 +60,13 @@ Preparing Blockchain Sync
 Please wait ...
 " 6 30
 
+elif [ "${eventID}" == "formathdd" ]; then
+
+    dialog --backtitle "${backtitle}" --cr-wrap --infobox "
+Format HDD/SSD 
+Please wait ...
+" 6 30
+
 elif [ "${eventID}" == "reboot" ] && [ "${contentString}" == "finalsetup" ]; then
 
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "
