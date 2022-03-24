@@ -769,15 +769,15 @@ if ${fatpack}; then
   sudo chown admin:admin /home/admin/fallback.nodes
 
   echo "* Adding Raspiblitz API ..."
-  sudo -u admin /home/admin/config.scripts/blitz.web.api.sh on
+  sudo /home/admin/config.scripts/blitz.web.api.sh on
 
   echo "* Adding Raspiblitz WebUI ..."
-  sudo -u admin /home/admin/config.scripts/blitz.web.ui.sh on
+  sudo /home/admin/config.scripts/blitz.web.ui.sh on
   # set build code as new default
   sudo rm -r /home/admin/assets/nginx/www_public
-  sudo cp -a /home/admin/blitz_web/build/* /home/admin/assets/nginx/www_public
+  sudo cp -a /root/blitz_web/build/* /home/admin/assets/nginx/www_public
   sudo chown admin:admin /home/admin/assets/nginx/www_public
-  sudo rm -r /home/admin/blitz_web/build/*
+  sudo rm -r /root/blitz_web/build/*
 
 else
   echo "* skipping FATPACK"
