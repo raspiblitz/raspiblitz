@@ -20,7 +20,7 @@ if [ $(df | grep -c "/mnt/hdd") -gt 0 ]; then
   if [ $(sudo ls ${pathHashedPasswordStorage}/salt.txt | grep -c "salt.txt") -eq 0 ]; then
     echo "# creating salt & pathHashedPasswordStorage ..."
     sudo mkdir -p ${pathHashedPasswordStorage}
-    echo "$RANDOM-$(date +%N)" | shasum -a 512 | cut -d " " -f1 > /var/cache/raspiblitz/salt.txt
+    echo "$RANDOM-$(date +%N)" | shasum -a 512 | cut -d " " -f1 | cut -c 1-16 > /var/cache/raspiblitz/salt.txt
     sudo mv /var/cache/raspiblitz/salt.txt ${pathHashedPasswordStorage}/salt.txt
     sudo chown root:root ${pathHashedPasswordStorage}/salt.txt
     sudo chmod 660 -R ${pathHashedPasswordStorage}
