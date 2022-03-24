@@ -19,11 +19,9 @@ if [ $(df | grep -c "/mnt/hdd") -gt 0 ]; then
   # check if path & salt file exists
   if [ $(ls ${hashedPasswordStoragePath}/salt.txt | grep -c "salt.txt") -eq 0 ]; then
     echo "# creating salt & hashedPasswordStoragePath ..."
-    sudo mkdir -p ${hashedPasswordStoragePath}
-    echo "$RANDOM-$(date +%N)" | shasum -a 512 | cut -d " " -f1 | cut -c 1-16 > /var/cache/raspiblitz/salt.txt
-    sudo mv /var/cache/raspiblitz/salt.txt ${hashedPasswordStoragePath}/salt.txt
-    sudo chown root:sudo ${hashedPasswordStoragePath}/salt.txt
-    sudo chmod 660 -R ${hashedPasswordStoragePath}
+    mkdir -p ${hashedPasswordStoragePath}
+    echo "$RANDOM-$(date +%N)" | shasum -a 512 | cut -d " " -f1 | cut -c 1-16 > ${hashedPasswordStoragePath}/salt.txt
+    chown -R admin:admin ${hashedPasswordStoragePath}
   else
     echo "# salt file exists"
   fi
@@ -223,10 +221,8 @@ if [ "${abcd}" = "a" ]; then
   fi  
 
   # store password hash
-  mkpasswd -m sha-512 "${newPassword}" -S "${hashedPasswordSalt}" > /var/cache/raspiblitz/password.hash
-  sudo mv -f /var/cache/raspiblitz/password.hash ${hashedPasswordStoragePath}/a.hash
-  sudo chown root:sudo ${hashedPasswordStoragePath}/a.hash
-  sudo chmod 660 -R ${hashedPasswordStoragePath}
+  mkpasswd -m sha-512 "${newPassword}" -S "${hashedPasswordSalt}" > ${hashedPasswordStoragePath}/a.hash
+  chown -R admin:admin ${hashedPasswordStoragePath}
 
   # change user passwords and then change hostname
   echo "pi:$newPassword" | sudo chpasswd
@@ -304,10 +300,8 @@ elif [ "${abcd}" = "b" ]; then
   fi
 
   # store password hash
-  mkpasswd -m sha-512 "${newPassword}" -S "${hashedPasswordSalt}" > /var/cache/raspiblitz/password.hash
-  sudo mv -f /var/cache/raspiblitz/password.hash ${hashedPasswordStoragePath}/b.hash
-  sudo chown root:sudo ${hashedPasswordStoragePath}/b.hash
-  sudo chmod 660 -R ${hashedPasswordStoragePath}
+  mkpasswd -m sha-512 "${newPassword}" -S "${hashedPasswordSalt}" > ${hashedPasswordStoragePath}/b.hash
+  chown -R admin:admin ${hashedPasswordStoragePath}
 
   # change in assets (just in case this is used on setup)
   sed -i "s/^rpcpassword=.*/rpcpassword=${newPassword}/g" /home/admin/assets/${network}.conf 2>/dev/null
@@ -441,10 +435,8 @@ elif [ "${abcd}" = "c" ]; then
   fi
 
   # store password hash
-  mkpasswd -m sha-512 "${newPassword}" -S "${hashedPasswordSalt}" > /var/cache/raspiblitz/password.hash
-  sudo mv -f /var/cache/raspiblitz/password.hash ${hashedPasswordStoragePath}/c.hash
-  sudo chown root:sudo ${hashedPasswordStoragePath}/c.hash
-  sudo chmod 660 -R ${hashedPasswordStoragePath}
+  mkpasswd -m sha-512 "${newPassword}" -S "${hashedPasswordSalt}" > ${hashedPasswordStoragePath}/c.hash
+  chown -R admin:admin ${hashedPasswordStoragePath}
 
   # final user output
   echo ""
