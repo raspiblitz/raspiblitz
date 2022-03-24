@@ -50,7 +50,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   npm install --global yarn
   ${NODEPATH}/yarn config set --home enableTelemetry 0
   ${NODEPATH}/yarn install
-  ${NODEPATH}/yarn build:production
+  ${NODEPATH}/yarn build
 
   rm -r /var/www/public/* 2>/dev/null
   cp -r /root/blitz_web/build/* /var/www/public
