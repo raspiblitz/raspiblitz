@@ -13,21 +13,21 @@ if [ "$1" == "" ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
 fi
 
 # prepare hased password storage
-pathHashedPasswordSalt=""
-pathHashedPasswordStorage="/mnt/hdd/app-data/passwords"
+hashedPasswordSalt=""
+hashedPasswordStoragePath="/mnt/hdd/app-data/passwords"
 if [ $(df | grep -c "/mnt/hdd") -gt 0 ]; then
   # check if path & salt file exists
-  if [ $(sudo ls ${pathHashedPasswordStorage}/salt.txt | grep -c "salt.txt") -eq 0 ]; then
-    echo "# creating salt & pathHashedPasswordStorage ..."
-    sudo mkdir -p ${pathHashedPasswordStorage}
+  if [ $(sudo ls ${hashedPasswordStoragePath}/salt.txt | grep -c "salt.txt") -eq 0 ]; then
+    echo "# creating salt & hashedPasswordStoragePath ..."
+    sudo mkdir -p ${hashedPasswordStoragePath}
     echo "$RANDOM-$(date +%N)" | shasum -a 512 | cut -d " " -f1 | cut -c 1-16 > /var/cache/raspiblitz/salt.txt
-    sudo mv /var/cache/raspiblitz/salt.txt ${pathHashedPasswordStorage}/salt.txt
-    sudo chown root:root ${pathHashedPasswordStorage}/salt.txt
-    sudo chmod 660 -R ${pathHashedPasswordStorage}
+    sudo mv /var/cache/raspiblitz/salt.txt ${hashedPasswordStoragePath}/salt.txt
+    sudo chown root:root ${hashedPasswordStoragePath}/salt.txt
+    sudo chmod 660 -R ${hashedPasswordStoragePath}
   else
     echo "# salt file exists"
   fi
-  pathHashedPasswordSalt=$(sudo cat ${pathHashedPasswordStorage}/salt.txt)
+  hashedPasswordSalt=$(sudo cat ${hashedPasswordStoragePath}/salt.txt)
 else
   echo "error='hdd not mounted yet - cannot set/check blitz passwords yet'"
   echo "correct=0"
@@ -67,9 +67,11 @@ if [ "$1" == "check" ]; then
     exit 1
   fi
 
-  passwordHashSystem=$(sudo cat ${pathHashedPasswordStorage}/${typeOfPassword}.hash 2>/dev/null)
-  passwordHashTest=$(mkpasswd -m sha-512 "${passwordToCheck}" -S "${pathHashedPasswordSalt}")
-
+  echo "hashedPasswordSalt(${hashedPasswordSalt})"
+  passwordHashSystem=$(sudo cat ${hashedPasswordStoragePath}/${typeOfPassword}.hash 2>/dev/null)
+  echo "passwordHashSystem(${passwordHashSystem})"
+  passwordHashTest=$(mkpasswd -m sha-512 "${passwordToCheck}" -S "${hashedPasswordSalt}")
+  echo "passwordHashTest(${passwordHashTest})"
   if [ ${#passwordHashSystem} -eq 0 ]; then
     echo "error='password cannot be checked - no hash available'"
     echo "correct=0"
@@ -225,10 +227,10 @@ if [ "${abcd}" = "a" ]; then
   fi  
 
   # store password hash
-  mkpasswd -m sha-512 "${newPassword}" -S "${pathHashedPasswordSalt}" > /var/cache/raspiblitz/password.hash
-  sudo mv -f /var/cache/raspiblitz/password.hash ${pathHashedPasswordStorage}/a.hash
-  sudo chown root:root ${pathHashedPasswordStorage}/a.hash
-  sudo chmod 660 -R ${pathHashedPasswordStorage}
+  mkpasswd -m sha-512 "${newPassword}" -S "${hashedPasswordSalt}" > /var/cache/raspiblitz/password.hash
+  sudo mv -f /var/cache/raspiblitz/password.hash ${hashedPasswordStoragePath}/a.hash
+  sudo chown root:root ${hashedPasswordStoragePath}/a.hash
+  sudo chmod 660 -R ${hashedPasswordStoragePath}
 
   # change user passwords and then change hostname
   echo "pi:$newPassword" | sudo chpasswd
@@ -306,10 +308,10 @@ elif [ "${abcd}" = "b" ]; then
   fi
 
   # store password hash
-  mkpasswd -m sha-512 "${newPassword}" -S "${pathHashedPasswordSalt}" > /var/cache/raspiblitz/password.hash
-  sudo mv -f /var/cache/raspiblitz/password.hash ${pathHashedPasswordStorage}/b.hash
-  sudo chown root:root ${pathHashedPasswordStorage}/b.hash
-  sudo chmod 660 -R ${pathHashedPasswordStorage}
+  mkpasswd -m sha-512 "${newPassword}" -S "${hashedPasswordSalt}" > /var/cache/raspiblitz/password.hash
+  sudo mv -f /var/cache/raspiblitz/password.hash ${hashedPasswordStoragePath}/b.hash
+  sudo chown root:root ${hashedPasswordStoragePath}/b.hash
+  sudo chmod 660 -R ${hashedPasswordStoragePath}
 
   # change in assets (just in case this is used on setup)
   sed -i "s/^rpcpassword=.*/rpcpassword=${newPassword}/g" /home/admin/assets/${network}.conf 2>/dev/null
@@ -443,10 +445,10 @@ elif [ "${abcd}" = "c" ]; then
   fi
 
   # store password hash
-  mkpasswd -m sha-512 "${newPassword}" -S "${pathHashedPasswordSalt}" > /var/cache/raspiblitz/password.hash
-  sudo mv -f /var/cache/raspiblitz/password.hash ${pathHashedPasswordStorage}/c.hash
-  sudo chown root:root ${pathHashedPasswordStorage}/c.hash
-  sudo chmod 660 -R ${pathHashedPasswordStorage}
+  mkpasswd -m sha-512 "${newPassword}" -S "${hashedPasswordSalt}" > /var/cache/raspiblitz/password.hash
+  sudo mv -f /var/cache/raspiblitz/password.hash ${hashedPasswordStoragePath}/c.hash
+  sudo chown root:root ${hashedPasswordStoragePath}/c.hash
+  sudo chmod 660 -R ${hashedPasswordStoragePath}
 
   # final user output
   echo ""

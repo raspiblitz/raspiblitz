@@ -325,7 +325,7 @@ case $CHOICE in
             /home/admin/98repairMenu.sh
             ;;
         PASSWORD)
-            sudo /home/admin/config.scripts/blitz.passwords.sh
+            sudo /home/admin/config.scripts/blitz.passwords.sh set
             ;;
         UPDATE)
             /home/admin/99updateMenu.sh
