@@ -40,6 +40,8 @@ fi
 
 if [ "$1" == "check" ]; then
 
+  echo "# userid($EUID)"
+
   # brute force protection
   # if there was another try within last minute add another 3 seconds delay protection
   source <(/home/admin/_cache.sh meta system_password_bruteforceprotection)
