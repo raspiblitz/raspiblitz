@@ -30,6 +30,7 @@ if [ $(df | grep -c "/mnt/hdd") -gt 0 ]; then
   pathHashedPasswordSalt=$(sudo cat ${pathHashedPasswordStorage}/salt.txt)
 else
   echo "error='hdd not mounted yet - cannot set/check blitz passwords yet'"
+  echo "correct=0"
   exit 1
 fi 
 
@@ -51,13 +52,15 @@ if [ "$1" == "check" ]; then
   typeOfPassword=$2
   if [ "${typeOfPassword}" != "a" ] && [ "${typeOfPassword}" != "b" ] && [ "${typeOfPassword}" != "c" ]; then
     echo "error='unknown password to check'"
+    echo "correct=0"
     exit 1
   fi
 
   passwordToCheck=$3
-  clearedPassword=$(echo "${newPassword}" | tr -dc '[:alnum:]-.' | tr -d ' ')
+  clearedPassword=$(echo "${passwordToCheck}" | tr -dc '[:alnum:]-.' | tr -d ' ')
   if [ ${#clearedPassword} -lt ${#passwordToCheck} ]; then
     echo "error='password to check contains unvalid chars'"
+    echo "correct=0"
     exit 1
   fi
 
