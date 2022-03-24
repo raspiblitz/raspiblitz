@@ -64,13 +64,13 @@ if [ "$1" == "check" ]; then
     echo "correct=0"
     exit 1
   fi
-
-  echo "#passwordToCheck(${passwordToCheck})"
+  
   passwordHashSystem=$(cat ${hashedPasswordStoragePath}/${typeOfPassword}.hash 2>/dev/null)
-  echo "#passwordHashSystem(${passwordHashSystem})"
-  echo "#hashedPasswordSalt(${hashedPasswordSalt})"
   passwordHashTest=$(mkpasswd -m sha-512 "${passwordToCheck}" -S "${hashedPasswordSalt}")
-  echo "#passwordHashTest(${passwordHashTest})"
+  #echo "# passwordToCheck(${passwordToCheck})"
+  #echo "# passwordHashSystem(${passwordHashSystem})"
+  #echo "# hashedPasswordSalt(${hashedPasswordSalt})"
+  #echo "# passwordHashTest(${passwordHashTest})"
   if [ ${#passwordHashSystem} -eq 0 ]; then
     echo "error='password cannot be checked - no hash available'"
     echo "correct=0"
