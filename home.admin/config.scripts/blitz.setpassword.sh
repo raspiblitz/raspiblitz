@@ -64,7 +64,7 @@ if [ "$1" == "check" ]; then
     exit 1
   fi
 
-  passwordHashSystem=$(sudo cat ${pathHashedPasswordStorage}/${typeOfPassword}.hash)
+  passwordHashSystem=$(sudo cat ${pathHashedPasswordStorage}/${typeOfPassword}.hash 2>/dev/null)
   passwordHashTest=$(mkpasswd -m sha-512 "${passwordToCheck}" -S "${pathHashedPasswordSalt}")
 
   if [ ${#passwordHashSystem} -eq 0 ]; then
