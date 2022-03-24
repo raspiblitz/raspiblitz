@@ -411,7 +411,7 @@ alias ${netprefix}lndconf=\"sudo nano /home/bitcoin/.lnd/${netprefix}lnd.conf\"\
       # only ask on mainnet for passwordC - for the testnet/signet its default 'raspiblitz'
       if [ "${CHAIN}" == "mainnet" ]; then
         tempFile="/var/cache/raspiblitz/passwordc.tmp"
-        sudo /home/admin/config.scripts/blitz.setpassword.sh x "PASSWORD C - LND Wallet Password" ${tempFile}
+        sudo /home/admin/config.scripts/blitz.passwords.sh set x "PASSWORD C - LND Wallet Password" ${tempFile}
         passwordC=$(sudo cat ${tempFile})
         sudo rm ${tempFile}
       else

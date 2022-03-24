@@ -548,7 +548,7 @@ if [ ${isMounted} -eq 0 ]; then
   source ${setupFile}
 
   # special setup tasks (triggered by api/webui thru setupfile)
-  
+
   # FORMAT DATA DRIVE
   if [ "${formatHDD}" == "1" ]; then
     echo "# special setup tasks: FORMAT DATA DRIVE" >> ${logFile}
@@ -737,7 +737,7 @@ if [ ${isMounted} -eq 0 ]; then
   fi
 
   echo "# setting PASSWORD A" >> ${logFile}
-  sudo /home/admin/config.scripts/blitz.setpassword.sh a "${passwordA}" >> ${logFile}
+  sudo /home/admin/config.scripts/blitz.passwords.sh set a "${passwordA}" >> ${logFile}
 
   # if setup - run provision setup first
   if [ "${setupPhase}" == "setup" ]; then

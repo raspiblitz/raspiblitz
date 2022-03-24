@@ -103,7 +103,7 @@ function encryptHSMsecret() {
   walletPassword=$3
   if [ ${#walletPassword} -eq 0 ];then
     # ask for password in dialog if $walletPassword is not given in $3
-    sudo /home/admin/config.scripts/blitz.setpassword.sh x \
+    sudo /home/admin/config.scripts/blitz.passwords.sh set x \
      "Enter the password C to encrypt the C-lightning wallet file (hsm_secret)" \
      "$passwordFile"
     sudo chown bitcoin:bitcoin $passwordFile

@@ -3,12 +3,12 @@
 # command info
 if [ "$1" == "" ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "small config script to set a passwords A,B,C & D"
- echo "blitz.setpassword.sh a [?newpassword] "
- echo "blitz.setpassword.sh b [?newpassword] "
- echo "blitz.setpassword.sh c [?oldpassword] [?newpassword] "
- echo "blitz.setpassword.sh check [a|b|c] [passwordToCheck]"
+ echo "blitz.passwords.sh set a [?newpassword] "
+ echo "blitz.passwords.sh set b [?newpassword] "
+ echo "blitz.passwords.sh set c [?oldpassword] [?newpassword] "
+ echo "blitz.passwords.sh check [a|b|c] [passwordToCheck]"
  echo "or just as a password enter dialog (result as file)"
- echo "blitz.setpassword.sh [x] [text] [result-file] [?empty-allowed]"
+ echo "blitz.passworda.sh set [x] [text] [result-file] [?empty-allowed]"
  exit 1
 fi
 
@@ -34,7 +34,10 @@ else
   exit 1
 fi 
 
-# checking passwords
+############################
+# CHECKING PASSWORDS
+############################
+
 if [ "$1" == "check" ]; then
 
   # brute force protection
@@ -56,7 +59,7 @@ if [ "$1" == "check" ]; then
     exit 1
   fi
 
-  passwordToCheck=$3
+  passwordToCheck=$4
   clearedPassword=$(echo "${passwordToCheck}" | tr -dc '[:alnum:]-.' | tr -d ' ')
   if [ ${#clearedPassword} -lt ${#passwordToCheck} ]; then
     echo "error='password to check contains unvalid chars'"
@@ -82,17 +85,21 @@ if [ "$1" == "check" ]; then
 
 fi 
 
-# check if sudo
+
+############################
+# SETTING PASSWORDS
+############################
+
+if [ "$1" != "set" ]; then
+    echo "error='unkown parameter'"
+    exit 1
+fi
+
+# for all other calls user needs to be root
 if [ "$EUID" -ne 0 ]
   then echo "Please run as root (with sudo)"
   exit
 fi
-
-# trap to delete on any exit
-trap 'rm -f $_temp' EXIT
-
-# tempfile 
-_temp=$(mktemp -p /dev/shm/)
 
 # load raspiblitz config (if available)
 source /home/admin/raspiblitz.info
@@ -105,7 +112,7 @@ if [ ${#chain} -eq 0 ]; then
 fi
 
 # 1. parameter [?a|b|c]
-abcd=$1
+abcd=$2
 
 # run interactive if no further parameters
 reboot=0;
@@ -155,7 +162,7 @@ fi
 # PASSWORD A
 if [ "${abcd}" = "a" ]; then
 
-  newPassword=$2
+  newPassword=$3
 
   # if no password given by parameter - ask by dialog
   if [ ${#newPassword} -eq 0 ]; then
@@ -186,14 +193,14 @@ if [ "${abcd}" = "a" ]; then
     # check if passwords match
     if [ "${password1}" != "${password2}" ]; then
       dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Passwords dont Match\nPlease try again ..." 6 52
-      sudo /home/admin/config.scripts/blitz.setpassword.sh a
+      sudo /home/admin/config.scripts/blitz.passwords.sh set a
       exit 0
     fi
 
     # password zero
     if [ ${#password1} -eq 0 ]; then
       dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Password cannot be empty\nPlease try again ..." 6 52
-      sudo /home/admin/config.scripts/blitz.setpassword.sh a
+      sudo /home/admin/config.scripts/blitz.passwords.sh set a
       exit 0
     fi
 
@@ -201,14 +208,14 @@ if [ "${abcd}" = "a" ]; then
     clearedResult=$(echo "${password1}" | tr -dc '[:alnum:]-.' | tr -d ' ')
     if [ ${#clearedResult} != ${#password1} ] || [ ${#clearedResult} -eq 0 ]; then
       dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Contains bad characters (spaces, special chars)\nPlease try again ..." 6 52
-      sudo /home/admin/config.scripts/blitz.setpassword.sh a
+      sudo /home/admin/config.scripts/blitz.passwords.sh set a
       exit 0
     fi
 
     # password longer than 8
     if [ ${#password1} -lt 8 ]; then
       dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Password length under 8\nPlease try again ..." 6 52
-      sudo /home/admin/config.scripts/blitz.setpassword.sh a
+      sudo /home/admin/config.scripts/blitz.passwords.sh set a
       exit 0
     fi
 
@@ -216,6 +223,12 @@ if [ "${abcd}" = "a" ]; then
     newPassword="${password1}"
 
   fi  
+
+  # store password hash
+  mkpasswd -m sha-512 "${newPassword}" -S "${pathHashedPasswordSalt}" > /var/cache/raspiblitz/password.hash
+  sudo mv -f /var/cache/raspiblitz/password.hash ${pathHashedPasswordStorage}/a.hash
+  sudo chown root:root ${pathHashedPasswordStorage}/a.hash
+  sudo chmod 660 -R ${pathHashedPasswordStorage}
 
   # change user passwords and then change hostname
   echo "pi:$newPassword" | sudo chpasswd
@@ -231,7 +244,7 @@ if [ "${abcd}" = "a" ]; then
 # PASSWORD B
 elif [ "${abcd}" = "b" ]; then
 
-  newPassword=$2
+  newPassword=$3
 
   # if no password given by parameter - ask by dialog
   if [ ${#newPassword} -eq 0 ]; then
@@ -262,14 +275,14 @@ elif [ "${abcd}" = "b" ]; then
     # check if passwords match
     if [ "${password1}" != "${password2}" ]; then
       dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Passwords dont Match\nPlease try again ..." 6 52
-      sudo /home/admin/config.scripts/blitz.setpassword.sh b
+      sudo /home/admin/config.scripts/blitz.passwords.sh set b
       exit 0
     fi
 
     # password zero
     if [ ${#password1} -eq 0 ]; then
       dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Password cannot be empty\nPlease try again ..." 6 52
-      sudo /home/admin/config.scripts/blitz.setpassword.sh b
+      sudo /home/admin/config.scripts/blitz.passwords.sh set b
       exit 0
     fi
 
@@ -277,20 +290,26 @@ elif [ "${abcd}" = "b" ]; then
     clearedResult=$(echo "${password1}" | tr -dc '[:alnum:]-.' | tr -d ' ')
     if [ ${#clearedResult} != ${#password1} ] || [ ${#clearedResult} -eq 0 ]; then
       dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Contains bad characters (spaces, special chars)\nPlease try again ..." 6 52
-      sudo /home/admin/config.scripts/blitz.setpassword.sh b
+      sudo /home/admin/config.scripts/blitz.passwords.sh set b
       exit 0
     fi
 
     # password longer than 8
     if [ ${#password1} -lt 8 ]; then
       dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Password length under 8\nPlease try again ..." 6 52
-      sudo /home/admin/config.scripts/blitz.setpassword.sh b
+      sudo /home/admin/config.scripts/blitz.passwords.sh set b
       exit 0
     fi
 
     # use entered password now as parameter
     newPassword="${password1}"
   fi
+
+  # store password hash
+  mkpasswd -m sha-512 "${newPassword}" -S "${pathHashedPasswordSalt}" > /var/cache/raspiblitz/password.hash
+  sudo mv -f /var/cache/raspiblitz/password.hash ${pathHashedPasswordStorage}/b.hash
+  sudo chown root:root ${pathHashedPasswordStorage}/b.hash
+  sudo chmod 660 -R ${pathHashedPasswordStorage}
 
   # change in assets (just in case this is used on setup)
   sed -i "s/^rpcpassword=.*/rpcpassword=${newPassword}/g" /home/admin/assets/${network}.conf 2>/dev/null
@@ -351,15 +370,15 @@ elif [ "${abcd}" = "b" ]; then
 # PASSWORD C
 elif [ "${abcd}" = "c" ]; then
 
-  oldPassword=$2
-  newPassword=$3
+  oldPassword=$3
+  newPassword=$4
 
   if [ "${oldPassword}" == "" ]; then
     # ask user for old password c
     clear
     oldPassword=$(whiptail --passwordbox "\nEnter old Password C:\n" 10 52 "" --title "Old Password C" --backtitle "RaspiBlitz - Passwords" 3>&1 1>&2 2>&3)
     if [ $? -eq 1 ] || [ "${oldPassword}" == "" ]; then
-      sudo /home/admin/config.scripts/blitz.setpassword.sh c
+      sudo /home/admin/config.scripts/blitz.passwords.sh set c
     fi
     echo "OK ... processing"
   fi
@@ -370,34 +389,34 @@ elif [ "${abcd}" = "c" ]; then
     # ask user for new password c
     newPassword=$(whiptail --passwordbox "\nEnter new Password C:\n" 10 52 "" --title "New Password C" --backtitle "RaspiBlitz - Passwords" 3>&1 1>&2 2>&3)
     if [ $? -eq 1 ] || [ "${newPassword}" == "" ]; then
-      sudo /home/admin/config.scripts/blitz.setpassword.sh c ${oldPassword}
+      sudo /home/admin/config.scripts/blitz.passwords.sh set c ${oldPassword}
       exit 0
     fi
     # check new password does not contain bad characters
     clearedResult=$(echo "${newPassword}" | tr -dc '[:alnum:]-.' | tr -d ' ')
     if [ ${#clearedResult} != ${#newPassword} ] || [ ${#clearedResult} -eq 0 ]; then
       dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Contains bad characters (spaces, special chars)" 6 52
-      sudo /home/admin/config.scripts/blitz.setpassword.sh c ${oldPassword}
+      sudo /home/admin/config.scripts/blitz.password.sh set c ${oldPassword}
       exit 0
     fi
     # check new password longer than 8
     if [ ${#newPassword} -lt 8 ]; then
       dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Password length under 8" 6 52
-      sudo /home/admin/config.scripts/blitz.setpassword.sh c ${oldPassword}
+      sudo /home/admin/config.scripts/blitz.password.sh set c ${oldPassword}
       exit 0
     fi
 
     # ask user to retype new password c
     newPassword2=$(whiptail --passwordbox "\nEnter again new Password C:\n" 10 52 "" --title "New Password C (repeat)" --backtitle "RaspiBlitz - Passwords" 3>&1 1>&2 2>&3)
     if [ $? -eq 1 ] || [ "${newPassword}" == "" ]; then
-      sudo /home/admin/config.scripts/blitz.setpassword.sh c ${oldPassword}
+      sudo /home/admin/config.scripts/blitz.passwords.sh set c ${oldPassword}
       exit 0
     fi
     echo "OK ... processing"
     # check if passwords match
     if [ "${newPassword}" != "${newPassword2}" ]; then
       dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Passwords dont Match" 6 52
-      sudo /home/admin/config.scripts/blitz.setpassword.sh c ${oldPassword}
+      sudo /home/admin/config.scripts/blitz.passwords.sh set c ${oldPassword}
       exit 0
     fi
     echo "OK ... processing"
@@ -423,6 +442,12 @@ elif [ "${abcd}" = "c" ]; then
     exit 0
   fi
 
+  # store password hash
+  mkpasswd -m sha-512 "${newPassword}" -S "${pathHashedPasswordSalt}" > /var/cache/raspiblitz/password.hash
+  sudo mv -f /var/cache/raspiblitz/password.hash ${pathHashedPasswordStorage}/c.hash
+  sudo chown root:root ${pathHashedPasswordStorage}/c.hash
+  sudo chmod 660 -R ${pathHashedPasswordStorage}
+
   # final user output
   echo ""
   echo "OK"
@@ -432,14 +457,14 @@ elif [ "${abcd}" = "c" ]; then
 elif [ "${abcd}" = "x" ]; then
 
     emptyAllowed=0
-    if [ "$4" == "empty-allowed" ]; then
+    if [ "$5" == "empty-allowed" ]; then
       emptyAllowed=1
     fi
 
     # second parameter is the flexible text
-    text=$2
-    resultFile=$3
-    shred -u "$3" 2>/dev/null
+    text=$3
+    resultFile=$4
+    shred -u "$4" 2>/dev/null
 
     # ask user for new password (first time)
     password1=$(whiptail --passwordbox "\n${text}:\n(min 8chars, 1word, chars+number, no specials)" 10 52 "" --backtitle "RaspiBlitz" 3>&1 1>&2 2>&3)
@@ -453,7 +478,7 @@ elif [ "${abcd}" = "x" ]; then
     # check if passwords match
     if [ "${password1}" != "${password2}" ]; then
       dialog --backtitle "RaspiBlitz" --msgbox "FAIL -> Passwords dont Match\nPlease try again ..." 6 52
-      sudo /home/admin/config.scripts/blitz.setpassword.sh x "$2" "$3" "$4"
+      sudo /home/admin/config.scripts/blitz.passwords.sh set x "$3" "$4" "$5"
       exit 0
     fi
 
@@ -462,7 +487,7 @@ elif [ "${abcd}" = "x" ]; then
       # password zero
       if [ ${#password1} -eq 0 ]; then
         dialog --backtitle "RaspiBlitz" --msgbox "FAIL -> Password cannot be empty\nPlease try again ..." 6 52
-        sudo /home/admin/config.scripts/blitz.setpassword.sh x "$2" "$3" "$4"
+        sudo /home/admin/config.scripts/blitz.passwords.sh set x "$3" "$4" "$5"
         exit 0
       fi
 
@@ -470,14 +495,14 @@ elif [ "${abcd}" = "x" ]; then
       clearedResult=$(echo "${password1}" | tr -dc '[:alnum:]-.' | tr -d ' ')
       if [ ${#clearedResult} != ${#password1} ] || [ ${#clearedResult} -eq 0 ]; then
         dialog --backtitle "RaspiBlitz" --msgbox "FAIL -> Contains bad characters (spaces, special chars)\nPlease try again ..." 6 62
-        sudo /home/admin/config.scripts/blitz.setpassword.sh x "$2" "$3" "$4"
+        sudo /home/admin/config.scripts/blitz.password.sh set x "$3" "$4" "$5"
         exit 0
       fi
 
       # password longer than 8
       if [ ${#password1} -lt 8 ]; then
         dialog --backtitle "RaspiBlitz" --msgbox "FAIL -> Password length under 8\nPlease try again ..." 6 52
-        sudo /home/admin/config.scripts/blitz.setpassword.sh x "$2" "$3" "$4"
+        sudo /home/admin/config.scripts/blitz.passwords.sh set x "$3" "$4" "$5"
         exit 0
       fi
 
