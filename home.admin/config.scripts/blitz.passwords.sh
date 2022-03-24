@@ -21,6 +21,7 @@ if [ $(df | grep -c "/mnt/hdd") -gt 0 ]; then
     echo "# creating salt & hashedPasswordStoragePath ..."
     mkdir -p ${hashedPasswordStoragePath}
     echo "$RANDOM-$(date +%N)" | shasum -a 512 | cut -d " " -f1 | cut -c 1-16 > ${hashedPasswordStoragePath}/salt.txt
+    chmod 660 ${hashedPasswordStoragePath}/salt.txt
     chown -R admin:admin ${hashedPasswordStoragePath}
   else
     echo "# salt file exists"
@@ -222,7 +223,8 @@ if [ "${abcd}" = "a" ]; then
 
   # store password hash
   mkpasswd -m sha-512 "${newPassword}" -S "${hashedPasswordSalt}" > ${hashedPasswordStoragePath}/a.hash
-  chown -R admin:admin ${hashedPasswordStoragePath}
+  chown admin:admin ${hashedPasswordStoragePath}/a.hash
+  chmod 660 ${hashedPasswordStoragePath}/a.hash
 
   # change user passwords and then change hostname
   echo "pi:$newPassword" | sudo chpasswd
@@ -301,7 +303,8 @@ elif [ "${abcd}" = "b" ]; then
 
   # store password hash
   mkpasswd -m sha-512 "${newPassword}" -S "${hashedPasswordSalt}" > ${hashedPasswordStoragePath}/b.hash
-  chown -R admin:admin ${hashedPasswordStoragePath}
+  chown admin:admin ${hashedPasswordStoragePath}/b.hash
+  chmod 660 ${hashedPasswordStoragePath}/b.hash
 
   # change in assets (just in case this is used on setup)
   sed -i "s/^rpcpassword=.*/rpcpassword=${newPassword}/g" /home/admin/assets/${network}.conf 2>/dev/null
@@ -436,7 +439,8 @@ elif [ "${abcd}" = "c" ]; then
 
   # store password hash
   mkpasswd -m sha-512 "${newPassword}" -S "${hashedPasswordSalt}" > ${hashedPasswordStoragePath}/c.hash
-  chown -R admin:admin ${hashedPasswordStoragePath}
+  chown admin:admin ${hashedPasswordStoragePath}/c.hash
+  chmod 660 ${hashedPasswordStoragePath}/c.hash
 
   # final user output
   echo ""
