@@ -17,6 +17,12 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ];
   exit 1
 fi
 
+# check if started with sudo
+if [ "$EUID" -ne 0 ]; then 
+  echo "error='run as root'"
+  exit 1
+fi
+
 DEFAULT_GITHUB_USER="fusion44"
 DEFAULT_GITHUB_REPO="blitz_api"
 DEFAULT_GITHUB_BRANCH="main"
@@ -39,11 +45,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   fi
 
   echo "# INSTALL Web API ..."
-  sudo apt install -y redis
-  sudo rm -r /home/admin/blitz_api 2>/dev/null
-  cd /home/admin
+  rm -r /root/blitz_api 2>/dev/null
+  cd /root
   # git clone https://github.com/fusion44/blitz_api.git /home/admin/blitz_api
-  git clone https://github.com/${DEFAULT_GITHUB_USER}/${DEFAULT_GITHUB_REPO}.git /home/admin/blitz_api
+  git clone https://github.com/${DEFAULT_GITHUB_USER}/${DEFAULT_GITHUB_REPO}.git /root/blitz_api
   cd blitz_api
   git checkout ${DEFAULT_GITHUB_BRANCH}
   pip install -r requirements.txt
@@ -64,7 +69,7 @@ After=network.target
 WorkingDirectory=/home/admin/blitz_api
 # before every start update the config with latest credentials/settings
 ExecStartPre=-/home/admin/config.scripts/blitz.web.api.sh update-config
-ExecStart=sudo -u admin /usr/bin/python -m uvicorn app.main:app --port 11111 --host=0.0.0.0 --root-path /api
+ExecStart=/usr/bin/python -m uvicorn app.main:app --port 11111 --host=0.0.0.0 --root-path /api
 User=root
 Group=root
 Type=simple
@@ -80,13 +85,13 @@ PrivateDevices=true
 
 [Install]
 WantedBy=multi-user.target
-" | sudo tee /etc/systemd/system/blitzapi.service
+" | tee /etc/systemd/system/blitzapi.service
 
-  sudo systemctl enable blitzapi
-  sudo systemctl start blitzapi
+  systemctl enable blitzapi
+  systemctl start blitzapi
 
-  # TODO: remove after experimental step
-  sudo ufw allow 11111 comment 'WebAPI Develop'
+  # TODO: remove after experimental step (only have forward on nginx:80 /api)
+  ufw allow 11111 comment 'WebAPI Develop'
 
   source <(/home/admin/_cache.sh export internet_localip)
 
