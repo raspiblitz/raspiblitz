@@ -70,6 +70,7 @@ if [ "$1" == "check" ]; then
   echo "hashedPasswordSalt(${hashedPasswordSalt})"
   passwordHashSystem=$(sudo cat ${hashedPasswordStoragePath}/${typeOfPassword}.hash 2>/dev/null)
   echo "passwordHashSystem(${passwordHashSystem})"
+  echo "passwordToCheck(${passwordToCheck})"
   passwordHashTest=$(mkpasswd -m sha-512 "${passwordToCheck}" -S "${hashedPasswordSalt}")
   echo "passwordHashTest(${passwordHashTest})"
   if [ ${#passwordHashSystem} -eq 0 ]; then
@@ -227,6 +228,8 @@ if [ "${abcd}" = "a" ]; then
   fi  
 
   # store password hash
+  echo "newPassword(${newPassword})"
+  echo "hashedPasswordSalt(${hashedPasswordSalt})"
   mkpasswd -m sha-512 "${newPassword}" -S "${hashedPasswordSalt}" > /var/cache/raspiblitz/password.hash
   sudo mv -f /var/cache/raspiblitz/password.hash ${hashedPasswordStoragePath}/a.hash
   sudo chown root:root ${hashedPasswordStoragePath}/a.hash
