@@ -26,7 +26,7 @@ if [ $(df | grep -c "/mnt/hdd") -gt 0 ]; then
   else
     echo "# salt file exists"
   fi
-  hashedPasswordSalt=$(sudo cat ${hashedPasswordStoragePath}/salt.txt)
+  hashedPasswordSalt=$(cat ${hashedPasswordStoragePath}/salt.txt)
 else
   echo "error='hdd not mounted yet - cannot set/check blitz passwords yet'"
   echo "correct=0"
@@ -68,6 +68,7 @@ if [ "$1" == "check" ]; then
   echo "#passwordToCheck(${passwordToCheck})"
   passwordHashSystem=$(cat ${hashedPasswordStoragePath}/${typeOfPassword}.hash 2>/dev/null)
   echo "#passwordHashSystem(${passwordHashSystem})"
+  echo "#hashedPasswordSalt(${hashedPasswordSalt})"
   passwordHashTest=$(mkpasswd -m sha-512 "${passwordToCheck}" -S "${hashedPasswordSalt}")
   echo "#passwordHashTest(${passwordHashTest})"
   if [ ${#passwordHashSystem} -eq 0 ]; then
