@@ -59,7 +59,7 @@ if [ "$1" == "check" ]; then
     exit 1
   fi
 
-  passwordToCheck=$4
+  passwordToCheck=$3
   clearedPassword=$(echo "${passwordToCheck}" | tr -dc '[:alnum:]-.' | tr -d ' ')
   if [ ${#clearedPassword} -lt ${#passwordToCheck} ]; then
     echo "error='password to check contains unvalid chars'"
