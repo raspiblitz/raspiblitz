@@ -128,7 +128,9 @@ if [ "$1" = "update-config" ]; then
   sed -i "s/^bitcoind_ip_testnet=.*/bitcoind_ip_testnet=127.0.0.1/g" ./.env
   sed -i "s/^bitcoind_user=.*/bitcoind_user=${RPCUSER}/g" ./.env
   sed -i "s/^bitcoind_pw=.*/bitcoind_pw=${RPCPASS}/g" ./.env
-  
+  sed -i "s/^# platform=.*/platform=raspiblitz/g" ./.env
+  sed -i "s/^platform=.*/platform=raspiblitz/g" ./.env
+
   # configure LND
   if [ "${lightning}" == "lnd" ]; then
 
