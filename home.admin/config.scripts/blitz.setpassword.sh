@@ -6,22 +6,35 @@ if [ "$1" == "" ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "blitz.setpassword.sh a [?newpassword] "
  echo "blitz.setpassword.sh b [?newpassword] "
  echo "blitz.setpassword.sh c [?oldpassword] [?newpassword] "
- echo "blitz.setpassword.sh check-a [passwordToCheck]"
+ echo "blitz.setpassword.sh check [a|b|c] [passwordToCheck]"
  echo "or just as a password enter dialog (result as file)"
  echo "blitz.setpassword.sh [x] [text] [result-file] [?empty-allowed]"
  exit 1
 fi
 
-# checking password a
-if [ "$1" == "check-a" ]; then
-
-  userID=$(id -u)
-  if [ "${userID}" == "0" ]; then
-    echo "# recall as user admin"
-    sudo -u admin /home/admin/config.scripts/blitz.setpassword.sh check-a "$2"
-    exit
+# prepare hased password storage
+pathHashedPasswordSalt=""
+pathHashedPasswordStorage="/mnt/hdd/app-data/passwords"
+if [ $(df | grep -c "/mnt/hdd") -gt 0 ]; then
+  # check if path & salt file exists
+  if [ $(sudo ls ${pathHashedPasswordStorage}/salt.txt | grep -c "salt.txt") -eq 0 ]; then
+    echo "# creating salt & pathHashedPasswordStorage ..."
+    sudo mkdir -p ${pathHashedPasswordStorage}
+    echo "$RANDOM-$(date +%N)" | shasum -a 512 | cut -d " " -f1 > /var/cache/raspiblitz/salt.txt
+    sudo mv /var/cache/raspiblitz/salt.txt ${pathHashedPasswordStorage}/salt.txt
+    sudo chown root:root ${pathHashedPasswordStorage}/salt.txt
+    sudo chmod 660 -R ${pathHashedPasswordStorage}
+  else
+    echo "# salt file exists"
   fi
-  echo "# userid(${userID})"
+  pathHashedPasswordSalt=$(sudo cat ${pathHashedPasswordStorage}/salt.txt)
+else
+  echo "error='hdd not mounted yet - cannot set/check blitz passwords yet'"
+  exit 1
+fi 
+
+# checking passwords
+if [ "$1" == "check" ]; then
 
   # brute force protection
   # if there was another try within last minute add another 3 seconds delay protection
@@ -35,11 +48,29 @@ if [ "$1" == "check-a" ]; then
     sleep 1 # basic brute force protection
   fi
 
-  passwordToCheck=$2
-  echo "# checking password a based on your input"
-  result=$(echo "${passwordToCheck}" | su bitcoin -c "echo 'test'" 2>/dev/null | grep -c "test")
+  typeOfPassword=$2
+  if [ "${typeOfPassword}" != "a" ] && [ "${typeOfPassword}" != "b" ] && [ "${typeOfPassword}" != "c" ]; then
+    echo "error='unknown password to check'"
+    exit 1
+  fi
 
-  if [ ${result} -eq 1 ]; then
+  passwordToCheck=$3
+  clearedPassword=$(echo "${newPassword}" | tr -dc '[:alnum:]-.' | tr -d ' ')
+  if [ ${#clearedPassword} -lt ${#passwordToCheck} ]; then
+    echo "error='password to check contains unvalid chars'"
+    exit 1
+  fi
+
+  passwordHashSystem=$(sudo cat ${pathHashedPasswordStorage}/${typeOfPassword}.hash)
+  passwordHashTest=$(mkpasswd -m sha-512 "${passwordToCheck}" -S "${pathHashedPasswordSalt}")
+
+  if [ ${#passwordHashSystem} -eq 0 ]; then
+    echo "error='password cannot be checked - no hash available'"
+    echo "correct=0"
+    exit 1
+  fi
+
+  if [ "${passwordHashSystem}" == "${passwordHashTest}" ]; then
     echo "correct=1"
   else
     echo "correct=0"
