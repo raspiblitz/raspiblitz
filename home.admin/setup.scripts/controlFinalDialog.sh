@@ -82,17 +82,15 @@ After the final reboot there might now be some waiting time until your Blockchai
 fi
 
 # trigger after final setup tasks & reboot
-/home/admin/_cache.sh set sate "donefinal"
+/home/admin/_cache.sh set state "donefinal"
 
 sleep 2
 clear
-source <(/home/admin/_cache.sh get internet_localip)
 echo "***********************************************************"
 echo "RaspiBlitz going to reboot"
 echo "***********************************************************"
 echo "This is the final setup reboot - you will get disconnected."
-echo "SSH again into system with:"
-echo "ssh admin@${internet_localip}"
+echo "SSH again into system after restart."
 echo "Use your password A"
 echo "***********************************************************"
 sleep 5
