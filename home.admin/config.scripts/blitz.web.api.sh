@@ -204,10 +204,10 @@ fi
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   echo "# UNINSTALL Web API"
-  sudo systemctl stop blitzapi
-  sudo systemctl disable blitzapi
-  sudo rm /etc/systemd/system/blitzapi.service
-  sudo rm -r /home/admin/blitz_api
+  systemctl stop blitzapi
+  systemctl disable blitzapi
+  rm /etc/systemd/system/blitzapi.service
+  rm -r /root/blitz_api
   exit 0
 
 fi
