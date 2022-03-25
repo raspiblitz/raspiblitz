@@ -208,6 +208,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   systemctl disable blitzapi
   rm /etc/systemd/system/blitzapi.service
   rm -r /root/blitz_api
+  rm -r /root/.blitz_api 2>/dev/null
   exit 0
 
 fi
