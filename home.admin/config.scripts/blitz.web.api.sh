@@ -52,6 +52,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   cd blitz_api
   git checkout ${DEFAULT_GITHUB_BRANCH}
   pip install -r requirements.txt
+  chown -R admin:admin /root/blitz_api
+  chmod -R ug+x /root/blitz_api
+  find /root/blitz_api -type d -exec chmod a+x {} \;
 
   # build the config and set unique secret (its OK to be a new secret every install/upadte)
   /home/admin/config.scripts/blitz.web.api.sh update-config
