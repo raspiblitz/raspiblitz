@@ -47,7 +47,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "# INSTALL Web API ..."
   rm -r /root/blitz_api 2>/dev/null
   cd /root
-  # git clone https://github.com/fusion44/blitz_api.git /home/admin/blitz_api
+  # git clone https://github.com/fusion44/blitz_api.git /root/blitz_api
   git clone https://github.com/${DEFAULT_GITHUB_USER}/${DEFAULT_GITHUB_REPO}.git /root/blitz_api
   cd blitz_api
   git checkout ${DEFAULT_GITHUB_BRANCH}
@@ -119,7 +119,7 @@ if [ "$1" = "update-config" ]; then
     chain="main"
   fi
 
-  cd /home/admin/blitz_api
+  cd /root/blitz_api
   cp ./.env_sample ./.env
   dateStr=$(date)
   echo "# Update Web API CONFIG (${dateStr})"
@@ -188,7 +188,7 @@ if [ "$1" = "update-code" ]; then
 
   echo "# Update Web API CODE"
   sudo systemctl stop blitzapi
-  cd /home/admin/blitz_api
+  cd /root/blitz_api
   git fetch
   git pull
   pip install -r requirements.txt
