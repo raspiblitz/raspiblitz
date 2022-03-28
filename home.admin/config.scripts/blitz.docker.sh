@@ -86,13 +86,13 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "Docker Compose V2 is not installed"
     exit 1
   fi
-  curl -fL $COMPOSE_SWITCH_URL -o /usr/local/bin/compose-switch
-  chmod +x /usr/local/bin/compose-switch
+  sudo curl -fL $COMPOSE_SWITCH_URL -o /usr/local/bin/compose-switch
+  sudo chmod +x /usr/local/bin/compose-switch
   COMPOSE=$(command -v docker-compose)
   if [ "$COMPOSE" = /usr/local/bin/docker-compose ]; then
     # This is a manual installation of docker-compose
     # so, safe for us to rename binary
-    mv /usr/local/bin/docker-compose /usr/local/bin/docker-compose-v1
+    sudo mv /usr/local/bin/docker-compose /usr/local/bin/docker-compose-v1
     COMPOSE=/usr/local/bin/docker-compose-v1
   fi
   ALTERNATIVES="update-alternatives"
@@ -101,9 +101,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   fi
   echo "Configuring docker-compose alternatives"
   if [ -n "$COMPOSE" ]; then
-    $ALTERNATIVES --install /usr/local/bin/docker-compose docker-compose $COMPOSE 1
+    sudo $ALTERNATIVES --install /usr/local/bin/docker-compose docker-compose $COMPOSE 1
   fi
-  $ALTERNATIVES --install /usr/local/bin/docker-compose docker-compose /usr/local/bin/compose-switch 99
+  sudo $ALTERNATIVES --install /usr/local/bin/docker-compose docker-compose /usr/local/bin/compose-switch 99
   echo "'docker-compose' is now set to run Compose V2"
   echo "use '$ALTERNATIVES --config docker-compose' if you want to switch back to Compose V1"
 
@@ -113,11 +113,15 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo systemctl stop docker.socket
 
   # keep the docker dir on the OS drive if the disk is ZFS - needs special config
-  # https://docs.docker.com/storage/storagedriver/zfs-driver/#configure-docker-with-the-zfs-storage-driver
-  isZFS=$(zfs list 2>/dev/null | grep -c "/mnt/hdd")
+   isZFS=$(zfs list 2>/dev/null | grep -c "/mnt/hdd")
   if [ "${isZFS}" -eq 0 ]; then
-    sudo mv /var/lib/docker /mnt/hdd/
-    sudo ln -s /var/lib/docker /mnt/hdd/docker
+    sudo mv -f /var/lib/docker /mnt/hdd/
+    sudo ln -s /mnt/hdd/docker /var/lib/docker
+  # move to a different partition or configure docker with ZFS
+  # https://docs.docker.com/storage/storagedriver/zfs-driver/#configure-docker-with-the-zfs-storage-driver
+  #else
+  #  sudo mv -f /var/lib/docker /home/admin/
+  #  sudo ln -s /home/admin/docker /var/lib/docker
   fi
   sudo systemctl start docker
   sudo systemctl start docker.socket
