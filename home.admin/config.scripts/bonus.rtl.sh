@@ -49,6 +49,22 @@ echo "# systemdService(${systemdService})"
 #########################
 
 # show info menu
+if [ "$1" = "status" ] || [ "$1" = "menu" ]; then
+
+  # get network info
+  isInstalled=$(sudo ls /etc/systemd/system/${netprefix}${typeprefix}RTL.service 2>/dev/null | grep -c 'RTL.service')
+  localip=$(hostname -I | awk '{print $1}')
+  toraddress=$(sudo cat /mnt/hdd/tor/${netprefix}${typeprefix}RTL/hostname 2>/dev/null)
+  fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
+
+  echo "installed='${isInstalled}'"
+  echo "localIP='${localIP}'"
+  echo "httpPort='23000'"
+  echo "httpsPort='23001'"
+
+fi
+
+# show info menu
 if [ "$1" = "menu" ]; then
 
   # check that parameters are set
@@ -58,11 +74,6 @@ if [ "$1" = "menu" ]; then
     sleep 2
     exit 1
   fi
-
-  # get network info
-  localip=$(hostname -I | awk '{print $1}')
-  toraddress=$(sudo cat /mnt/hdd/tor/${netprefix}${typeprefix}RTL/hostname 2>/dev/null)
-  fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
 
   # info with Tor
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then

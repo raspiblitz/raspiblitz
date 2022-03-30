@@ -38,6 +38,7 @@ if [ "$1" = "status" ]; then
 
     localIP=$(hostname -I | awk '{print $1}')
     echo "localIP='${localIP}'"
+    echo "httpPort='23000'"
     echo "httpsPort='23001'"
     echo "publicIP='${publicIP}'"
 
