@@ -57,10 +57,12 @@ if [ "$1" = "status" ] || [ "$1" = "menu" ]; then
   toraddress=$(sudo cat /mnt/hdd/tor/${netprefix}${typeprefix}RTL/hostname 2>/dev/null)
   fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
 
-  echo "installed='${isInstalled}'"
-  echo "localIP='${localip}'"
-  echo "httpPort='${RTLHTTP}'"
-
+  if [ "$1" = "status" ]; then
+    echo "installed='${isInstalled}'"
+    echo "localIP='${localip}'"
+    echo "httpPort='${RTLHTTP}'"
+    exit
+  fi
 fi
 
 # show info menu
