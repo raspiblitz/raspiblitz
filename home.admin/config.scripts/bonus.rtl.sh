@@ -58,9 +58,8 @@ if [ "$1" = "status" ] || [ "$1" = "menu" ]; then
   fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
 
   echo "installed='${isInstalled}'"
-  echo "localIP='${localIP}'"
-  echo "httpPort='23000'"
-  echo "httpsPort='23001'"
+  echo "localIP='${localip}'"
+  echo "httpPort='${RTLHTTP}'"
 
 fi
 
