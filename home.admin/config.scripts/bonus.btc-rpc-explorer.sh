@@ -39,11 +39,6 @@ This can take multiple hours.
     exit 0
   fi
 
-  # get network info
-  localip=$(ip addr | grep 'state UP' -A2 | grep -E -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
-  toraddress=$(sudo cat /mnt/hdd/tor/btc-rpc-explorer/hostname 2>/dev/null)
-  fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
-
   # check if password protected
   isBitcoinWalletOff=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep -c "^disablewallet=1")
   passwordInfo=""
@@ -86,10 +81,26 @@ if [ "$1" = "status" ]; then
   if [ "${BTCRPCexplorer}" = "on" ]; then
     echo "configured=1"
 
+    installed=$(sudo ls /etc/systemd/system/btc-rpc-explorer.service 2>/dev/null | grep -c 'btc-rpc-explorer.service')
+    echo "installed=${installed}"
+
+    # get network info
+    localip=$(ip addr | grep 'state UP' -A2 | grep -E -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+    toraddress=$(sudo cat /mnt/hdd/tor/btc-rpc-explorer/hostname 2>/dev/null)
+    fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
+
+    echo "localIP='${localip}'"
+    echo "httpPort='3020'"
+    echo "httpsPort='3021'"
+    echo "toraddress='${toraddress}'"
+    echo "fingerprint='${fingerprint}'"
+
     # check indexing
     source <(sudo /home/admin/config.scripts/network.txindex.sh status)
     echo "isIndexed=${isIndexed}"
     echo "indexInfo='${indexInfo}'"
+
+
 
     # check for error
     isDead=$(sudo systemctl status btc-rpc-explorer | grep -c 'inactive (dead)')
@@ -100,6 +111,7 @@ if [ "$1" = "status" ]; then
 
   else
     echo "configured=0"
+    echo "installed=0"
   fi
   exit 0
 fi
