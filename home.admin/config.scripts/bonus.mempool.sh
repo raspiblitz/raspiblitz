@@ -35,18 +35,13 @@ This can take multiple hours.
     exit 0
   fi
 
-  # get network info
-  localip=$(hostname -I | awk '{print $1}')
-  toraddress=$(sudo cat /mnt/hdd/tor/mempool/hostname 2>/dev/null)
-  fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
-
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
 
     # Tor
     sudo /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
     whiptail --title " Mempool " --msgbox "Open in your local web browser:
-http://${localip}:4080\n
-https://${localip}:4081 with Fingerprint:
+http://${localIP}:${httpPort}\n
+https://${localIP}:${httpsPort} with Fingerprint:
 ${fingerprint}\n
 Hidden Service address for Tor Browser (QR see LCD):
 ${toraddress}
@@ -56,8 +51,8 @@ ${toraddress}
 
     # IP + Domain
     whiptail --title " Mempool " --msgbox "Open in your local web browser:
-http://${localip}:4080\n
-https://${localip}:4081 with Fingerprint:
+http://${localIP}:${httpPort}\n
+https://${localIP}:${httpsPort} with Fingerprint:
 ${fingerprint}\n
 Activate TOR to access the web block explorer from outside your local network.
 " 16 54
@@ -73,6 +68,18 @@ if [ "$1" = "status" ]; then
   if [ "${mempoolExplorer}" = "on" ]; then
     echo "configured=1"
 
+    # get network info
+    localIP=$(hostname -I | awk '{print $1}')
+    toraddress=$(sudo cat /mnt/hdd/tor/mempool/hostname 2>/dev/null)
+    fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
+
+    echo "installed=1"
+    echo "localIP='${localIP}'"
+    echo "httpPort='4080'"
+    echo "httpsPort='4081'"
+    echo "fingerprint='${fingerprint}'"
+    echo "toraddress='${toraddress}'"
+
     # check indexing
     source <(sudo /home/admin/config.scripts/network.txindex.sh status)
     echo "isIndexed=${isIndexed}"
@@ -86,6 +93,7 @@ if [ "$1" = "status" ]; then
     fi
 
   else
+    echo "installed=0"
     echo "configured=0"
   fi
   exit 0
