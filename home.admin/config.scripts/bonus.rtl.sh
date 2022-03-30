@@ -61,7 +61,7 @@ if [ "$1" = "status" ] || [ "$1" = "menu" ]; then
     echo "installed='${isInstalled}'"
     echo "localIP='${localip}'"
     echo "httpPort='${RTLHTTP}'"
-    echo "toraddres='${toraddres}'"
+    echo "toraddreds='${toraddres}'"
     exit
   fi
 fi
