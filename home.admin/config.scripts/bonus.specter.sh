@@ -26,11 +26,16 @@ if [ "$1" = "status" ]; then
 
     echo "configured=1"
 
+    installed=$(sudo ls /etc/systemd/system/specter.service 2>/dev/null | grep -c 'specter.service')
+    echo "installed=${installed}"
+
     # get network info
     localip=$(hostname -I | awk '{print $1}')
     toraddress=$(sudo cat /mnt/hdd/tor/specter/hostname 2>/dev/null)
     fingerprint=$(openssl x509 -in /home/specter/.specter/cert.pem -fingerprint -noout | cut -d"=" -f2)
-    echo "localip='${localip}'"
+    echo "localIP='${localip}'"
+    echo "httpPort=''"
+    echo "httpsPort='25441'"
     echo "toraddress='${toraddress}'"
     echo "fingerprint='${fingerprint}'"
 
@@ -43,6 +48,7 @@ if [ "$1" = "status" ]; then
 
   else
     echo "configured=0"
+    echo "installed=0"
   fi
 
   exit 0
@@ -61,7 +67,7 @@ if [ "$1" = "menu" ]; then
     # Tor
     sudo /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
     whiptail --title " Specter Desktop " --msgbox "Open in your local web browser & accept self-signed cert:
-https://${localip}:25441
+https://${localIP}:25441
 
 SHA1 Thumb/Fingerprint:
 ${fingerprint}
@@ -77,7 +83,7 @@ Unfortunately the camera is currently not usable via Tor, though.
 
     # IP + Domain
     whiptail --title " Specter Desktop " --msgbox "Open in your local web browser & accept self-signed cert:
-https://${localip}:25441
+https://${localIP}:25441
 
 SHA1 Thumb/Fingerprint:
 ${fingerprint}
