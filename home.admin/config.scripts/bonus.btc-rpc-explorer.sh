@@ -100,8 +100,6 @@ if [ "$1" = "status" ]; then
     echo "isIndexed=${isIndexed}"
     echo "indexInfo='${indexInfo}'"
 
-
-
     # check for error
     isDead=$(sudo systemctl status btc-rpc-explorer | grep -c 'inactive (dead)')
     if [ ${isDead} -eq 1 ]; then
