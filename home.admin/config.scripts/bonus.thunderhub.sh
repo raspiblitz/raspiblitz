@@ -20,7 +20,7 @@ PGPpubkeyFingerprint="4403F1DFBE779457"
 source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
 
-if [ "$1" = "status" ] || [ "$1" = "menu" ]; then
+if [ "$1" = "status" ] || [ "$1" = "menu" ]; then
 
   # get network info
   isInstalled=$(sudo ls /etc/systemd/system/thunderhub.service 2>/dev/null | grep -c 'thunderhub.service')
