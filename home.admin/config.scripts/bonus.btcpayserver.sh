@@ -504,6 +504,9 @@ WantedBy=multi-user.target
 
   # setting value in raspi blitz config
   /home/admin/config.scripts/blitz.conf.sh set BTCPayServer "on"
+
+  # needed for API/WebUI as signal that install ran thru 
+  echo "result='OK'"
   exit 0
 fi
 
@@ -577,7 +580,9 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   else
     echo "# BTCPayServer is not installed."
   fi
-  exit 0
+
+  # needed for API/WebUI as signal that install ran thru 
+  echo "result='OK'"
 fi
 
 if [ "$1" = "update" ]; then

@@ -305,6 +305,9 @@ EOF
     # make sure to keep in sync with tor.network.sh script
     /home/admin/config.scripts/tor.onion-service.sh mempool 80 4082 443 4083
   fi
+
+  # needed for API/WebUI as signal that install ran thru 
+  echo "result='OK'"
   exit 0
 fi
 
@@ -353,6 +356,8 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # setting value in raspi blitz config
   /home/admin/config.scripts/blitz.conf.sh set mempoolExplorer "off"
 
+  # needed for API/WebUI as signal that install ran thru 
+  echo "result='OK'"
   exit 0
 fi
 

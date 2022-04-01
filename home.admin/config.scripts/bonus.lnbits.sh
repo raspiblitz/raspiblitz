@@ -559,6 +559,9 @@ EOF
   fi
 
   echo "# OK install done ... might need to restart or call: sudo systemctl start lnbits"
+  
+  # needed for API/WebUI as signal that install ran thru 
+  echo "result='OK'"
   exit 0
 fi
 
@@ -740,7 +743,8 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # setting value in raspi blitz config
   /home/admin/config.scripts/blitz.conf.sh set LNBits "off"
 
-  echo "OK LNbits is uninstalled"
+  # needed for API/WebUI as signal that install ran thru 
+  echo "result='OK'"
   exit 0
 fi
 

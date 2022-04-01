@@ -273,6 +273,9 @@ WantedBy=multi-user.target
       echo "# OK - the thunderhub.service is enabled, to start manually use: 'sudo systemctl start thunderhub'"
     fi
   fi
+
+  # needed for API/WebUI as signal that install ran thru 
+  echo "result='OK'"
   exit 0
 fi
 
@@ -309,6 +312,8 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # setting value in raspi blitz config
   /home/admin/config.scripts/blitz.conf.sh set thunderhub "off"
 
+  # needed for API/WebUI as signal that install ran thru 
+  echo "result='OK'"
   exit 0
 fi
 

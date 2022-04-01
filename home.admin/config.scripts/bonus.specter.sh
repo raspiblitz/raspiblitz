@@ -400,6 +400,8 @@ EOF
     echo "# blockfilterindex is already active"
   fi
 
+  # needed for API/WebUI as signal that install ran thru 
+  echo "result='OK'"
   exit 0
 fi
 
@@ -457,6 +459,9 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   else
     echo "#    --> Specter Desktop is not installed."
   fi
+
+  # needed for API/WebUI as signal that install ran thru 
+  echo "result='OK'"
   exit 0
 fi
 

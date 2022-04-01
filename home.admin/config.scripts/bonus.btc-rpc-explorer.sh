@@ -333,6 +333,9 @@ EOF
     # make sure to keep in sync with tor.network.sh script
     /home/admin/config.scripts/tor.onion-service.sh btc-rpc-explorer 80 3022 443 3023
   fi
+
+  # needed for API/WebUI as signal that install ran thru 
+  echo "result='OK'"
   exit 0
 fi
 
@@ -379,6 +382,9 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # close ports on firewall
   sudo ufw deny 3020
   sudo ufw deny 3021
+
+  # needed for API/WebUI as signal that install ran thru 
+  echo "result='OK'"
   exit 0
 fi
 

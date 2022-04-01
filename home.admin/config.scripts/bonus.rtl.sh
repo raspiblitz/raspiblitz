@@ -276,6 +276,9 @@ WantedBy=multi-user.target
   sudo systemctl start ${systemdService}
   echo "# OK - the ${systemdService}.service is now enabled & started"
   echo "# Monitor with: sudo journalctl -f -u ${systemdService}"
+
+  # needed for API/WebUI as signal that install ran thru 
+  echo "result='OK'"
   exit 0
 fi
 
@@ -491,6 +494,9 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # close ports on firewall
   sudo ufw deny "${RTLHTTP}"
   sudo ufw deny $((RTLHTTP+1))
+
+  # needed for API/WebUI as signal that install ran thru 
+  echo "result='OK'"
   exit 0
 fi
 
