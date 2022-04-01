@@ -212,7 +212,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo apt-get install -y virtualenv libffi-dev libusb-1.0.0-dev libudev-dev
 
     sudo adduser --disabled-password --gecos "" specter
-    if [ "$(ls /home | grep -c "rtl")" == "0" ]; then
+    if [ "$(ls /home | grep -c "specter")" == "0" ]; then
       echo "error='was not able to create user specter'"
       exit 1
     fi
