@@ -17,7 +17,7 @@ fi
 
 DEFAULT_GITHUB_USER="cstenglein"
 DEFAULT_GITHUB_REPO="raspiblitz-web"
-DEFAULT_GITHUB_BRANCH="master"
+DEFAULT_GITHUB_BRANCH="setupui"
 
 ###################
 # ON / INSTALL

@@ -25,7 +25,7 @@ fi
 
 DEFAULT_GITHUB_USER="fusion44"
 DEFAULT_GITHUB_REPO="blitz_api"
-DEFAULT_GITHUB_BRANCH="main"
+DEFAULT_GITHUB_BRANCH="installapps"
 
 ###################
 # ON / INSTALL
