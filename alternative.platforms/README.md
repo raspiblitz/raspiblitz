@@ -64,18 +64,18 @@ All testers are welcome. Open an issue for your specific board to collaborate an
 ### Download
  * raspiblitz-amd64-v1.7.2-2022-04-03
    * manually created with the [process described below](#Create-an-image-release-for-amd64) from the [`dev` branch](https://github.com/rootzoll/raspiblitz/tree/dev) at [43c7384](https://github.com/rootzoll/raspiblitz/tree/43c7384cb70523c57990e0c409d51cfd7b818a10)
-   * Torrent [file](/home.admin/assets/raspiblitz-amd64-v1.7.2-2022-04-03.torrent) and [magnet link](magnet:?xt=urn:btih:7885922bd94ccbed5572628931e8b2a5d5b7212a&dn=raspiblitz-amd64-v1.7.2-2022-04-03&tr=http%3a%2f%2ftracker.skyts.net%3a6969%2fannounce&tr=http%3a%2f%2ftracker.yoshi210.com%3a6969%2fannounce&tr=udp%3a%2f%2ftracker.leechers-paradise.org%3a6969&tr=http%3a%2f%2ftracker2.itzmx.com%3a6961%2fannounce&tr=udp%3a%2f%2f9.rarbg.me%3a2780%2fannounce&tr=http%3a%2f%2fpow7.com%3a80%2fannounce&tr=udp%3a%2f%2fexodus.desync.com%3a6969%2fannounce&tr=udp%3a%2f%2ftracker.coppersurfer.tk%3a6969%2fannounce&tr=http%3a%2f%2fopen.acgtracker.com%3a1096%2fannounce)
+   * Torrent [file](/home.admin/assets/raspiblitz-amd64-v1.7.2-2022-04-03.torrent) and [magnet link](/home.admin/assets/raspiblitz-amd64-v1.7.2-2022-04-03.magnet)
    * Direct downloads:
      * https://mega.nz/folder/AlsC0A4L#mTPOke2OLJIGU4iMyAqwBw
      * https://keybase.pub/oms/images/raspiblitz-amd64-v1.7.2-2022-04-03
 
 ### [Verify](#Verify-the-downloaded-image)
 ### Write the image to the OS disk
-* On a spearwte computer: write the image to the USB connected OSdisk or SDcard with [Balena Etcher](https://www.balena.io/etcher/)
+* On a separate computer: write the image to the USB connected OSdisk or SDcard with [Balena Etcher](https://www.balena.io/etcher/)
 * On the same computer: boot an Ubuntu Live from USB with which the image can be downloaded, verified and flashed on an internal or USB connected OS disk
 
 ### Start the Raspiblitz setup
-* assemble and start the computer.
+* Assemble and start the computer.
 * Log in with admin and open a terminal on the local desktop or log in with ssh (username `admin` password: `raspiblitz`)
 * Continue the setup as described in the [main readme](https://github.com/rootzoll/raspiblitz#setup-process-detailed-documentation)
 
