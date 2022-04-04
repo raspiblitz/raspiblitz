@@ -2,6 +2,12 @@
 # ⚡️ Alternative platforms for the RaspiBlitz ⚡️
 - [Minimum requirements](#minimum-requirements)
   - [Recommended specs](#recommended-specs)
+- [amd64 image](#amd64-image)
+  - [Requirements](#requirements)
+  - [Download](#download)
+  - [Verify](#verify)
+  - [Write the image to the OS disk](#write-the-image-to-the-os-disk)
+  - [Start the Raspiblitz setup](#start-the-raspiblitz-setup)
 - [Virtual Machine](#virtual-machine)
   - [Create the base image](#create-the-base-image)
   - [Building the Raspiblitz scripts](#building-the-raspiblitz-scripts)
@@ -11,7 +17,7 @@
 - [Ubuntu](#ubuntu)
 - [Python upgrade](#python-upgrade)
 - [Create an image release for amd64](#create-an-image-release-for-amd64)
-  - [Requirements:](#requirements)
+  - [Requirements:](#requirements-1)
   - [Create an NTFS formatted USB Stick / USB disk](#create-an-ntfs-formatted-usb-stick--usb-disk)
   - [Boot Ubuntu Live from USB](#boot-ubuntu-live-from-usb)
   - [Download and verify the base image](#download-and-verify-the-base-image)
@@ -23,7 +29,7 @@
     - [Start Tails](#start-tails)
     - [Import the signing keys](#import-the-signing-keys)
       - [Prepare the disk](#prepare-the-disk)
-- [Verify the downloaded the image](#verify-the-downloaded-the-image)
+- [Verify the downloaded image](#verify-the-downloaded-image)
   - [Linux instructions](#linux-instructions)
 - [Create a torrent](#create-a-torrent)
 
@@ -41,6 +47,36 @@
 Specifications of the tested hardware: [hw_comparison.md](hw_comparison.md)
 
 All testers are welcome. Open an issue for your specific board to collaborate and share your experience.
+
+## amd64 image
+
+### Requirements
+* amd64 Laptop, Desktop or Server connected to the internet via a LAN cable
+
+* `OS disk`: min 32 GB SSD is recommended to run the system on
+    * if the computer can boot from an SDcard an Endurance type card can be used similar to the RPi setup
+    * USB SSD recommendation: [Sandisk Extreme Pro USB 128 GB](https://www.amazon.co.uk/SanDisk-Extreme-Solid-State-Flash/dp/B01MU8TZRV)
+    * if the laptop has an optical drive an [Optical Drive Bay Caddy / adapter](https://www.amazon.co.uk/dp/B07SHSCVC7/) can be used to change it to a second SSD instead.
+* `Data disk`: a new, minimum 1TB SSD is recommended - stores data independent of the operating system
+    * usually placed internally
+
+
+### Download
+ * raspiblitz-amd64-v1.7.2-2022-04-03
+   * Torrent [file](/home.admin/assets/raspiblitz-amd64-v1.7.2-2022-04-03.torrent) and [magnet link](magnet:?xt=urn:btih:7885922bd94ccbed5572628931e8b2a5d5b7212a&dn=raspiblitz-amd64-v1.7.2-2022-04-03&tr=http%3a%2f%2ftracker.skyts.net%3a6969%2fannounce&tr=http%3a%2f%2ftracker.yoshi210.com%3a6969%2fannounce&tr=udp%3a%2f%2ftracker.leechers-paradise.org%3a6969&tr=http%3a%2f%2ftracker2.itzmx.com%3a6961%2fannounce&tr=udp%3a%2f%2f9.rarbg.me%3a2780%2fannounce&tr=http%3a%2f%2fpow7.com%3a80%2fannounce&tr=udp%3a%2f%2fexodus.desync.com%3a6969%2fannounce&tr=udp%3a%2f%2ftracker.coppersurfer.tk%3a6969%2fannounce&tr=http%3a%2f%2fopen.acgtracker.com%3a1096%2fannounce)
+   * Direct downloads:
+     * https://mega.nz/folder/AlsC0A4L#mTPOke2OLJIGU4iMyAqwBw
+     * https://keybase.pub/oms/images/raspiblitz-amd64-v1.7.2-2022-04-03
+
+### [Verify](#Verify-the-downloaded-image)
+### Write the image to the OS disk
+* On a spearwte computer: write the image to the USB connected OSdisk or SDcard with [Balena Etcher](https://www.balena.io/etcher/)
+* On the same computer: boot an Ubuntu Live from USB with which the image can be downloaded, verified and flashed on an internal or USB connected OS disk
+
+### Start the Raspiblitz setup
+* assemble and start the computer.
+* Log in with admin and open a terminal on the local desktop or log in with ssh (username `admin` password: `raspiblitz`)
+* Continue the setup as described in the [main readme](https://github.com/rootzoll/raspiblitz#setup-process-detailed-documentation)
 
 ## Virtual Machine
 
@@ -184,7 +220,7 @@ Work notes partially based on: https://github.com/rootzoll/raspiblitz/blob/v1.7/
 * amd64 Laptop or Server connected to the internet via a LAN cable
 * [`Ubuntu Live`](https://releases.ubuntu.com/focal/ubuntu-20.04.4-desktop-amd64.iso) USB Stick to start on a clean system
 * `Installation medium`: min 8GB SDcard / USB stick to install the base image from
-* `OS disk`: min 32 GB Endurance type SDcard or USB SSD to run the opearting system on
+* `OS disk`: min 32 GB Endurance type SDcard or USB SSD to run the operating system on
 * (`Data disk`: a new, minimum 1TB SSD is recommended - not needed to create the image release)
 * [`Tails USB Stick`](https://tails.boum.org/install/download/) to sign the image offline
 * PGP keys on an USB stick to sign the image
@@ -329,7 +365,7 @@ Work notes partially based on: https://github.com/rootzoll/raspiblitz/blob/v1.7/
 * Upload the new image to server - put the .sig file and .sha256 next to it
 * Copy the sha256sum to GitHub README and update the download link
 
-## Verify the downloaded the image
+## Verify the downloaded image
 ### Linux instructions
 * Open a terminal in the directory with the downloaded files
     ```
@@ -360,7 +396,7 @@ Work notes partially based on: https://github.com/rootzoll/raspiblitz/blob/v1.7/
   ```
 
 ## Create a torrent
-* Create Torrent file from image (for example with Transmission) and place in the `home.admin/assets` folder & link on README
+* Create Torrent file from image (for example with Transmission / qbBittorrent) and place in the `home.admin/assets` folder & link on README
 * Tracker list recommended to be used with the torrent:
     ```
     udp://tracker.coppersurfer.tk:6969/announce
