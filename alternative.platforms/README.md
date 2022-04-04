@@ -1,12 +1,12 @@
 <!-- omit in toc -->
 # ⚡️ Alternative platforms for the RaspiBlitz ⚡️
 - [Minimum requirements](#minimum-requirements)
-  - [Desirable:](#desirable)
+  - [Recommended specs](#recommended-specs)
 - [Virtual Machine](#virtual-machine)
   - [Create the base image](#create-the-base-image)
   - [Building the Raspiblitz scripts](#building-the-raspiblitz-scripts)
-  - [Notes:](#notes)
-    - [Data drive:](#data-drive)
+  - [Notes](#notes)
+    - [Data drive](#data-drive)
 - [Armbian](#armbian)
 - [Ubuntu](#ubuntu)
 - [Python upgrade](#python-upgrade)
@@ -17,8 +17,12 @@
   - [Download and verify the base image](#download-and-verify-the-base-image)
   - [Flash the base image to the installation medium](#flash-the-base-image-to-the-installation-medium)
   - [Install Debian to the OS disk](#install-debian-to-the-os-disk)
-    - [Install the RaspiBlitz Scripts](#install-the-raspiblitz-scripts)
-    - [Prepare the release](#prepare-the-release)
+  - [Install the RaspiBlitz Scripts](#install-the-raspiblitz-scripts)
+  - [Prepare the release](#prepare-the-release)
+    - [Clean and shutdown the build machine](#clean-and-shutdown-the-build-machine)
+    - [Start Tails](#start-tails)
+    - [Import the signing keys](#import-the-signing-keys)
+      - [Prepare the disk](#prepare-the-disk)
 - [Verify the downloaded the image](#verify-the-downloaded-the-image)
   - [Linux instructions](#linux-instructions)
 - [Create a torrent](#create-a-torrent)
@@ -29,7 +33,7 @@
 * 500 GB HDD
 * Python >=3.9 (see [how to upgrade below](#python-upgrade) )
 
-### Desirable:
+### Recommended specs
 * \> 2GB DDR3 ECC RAM (8GB+ if using ZFS)
 * USB 3.0 / SATA / PCIE / NVME connectors
 * SSD - multiple disks for redundancy
@@ -59,7 +63,7 @@ These not need installation, password: `osboxes.org`
 ### Building the Raspiblitz scripts
 * Run the build script in the terminal of the guest OS (with sudo access):
 
-    ```
+    ```bash
     # download the build script
     wget https://raw.githubusercontent.com/rootzoll/raspiblitz/dev/build_sdcard.sh
     # run
@@ -80,9 +84,9 @@ These not need installation, password: `osboxes.org`
 The second virtual disk will be used as the BLOCKCHAIN drive.
 This makes that data portable and independent from the OS similar to the combination of the SDcard and separate SSD.
 
-### Notes:
+### Notes
 
-#### Data drive:
+#### Data drive
 * create a raw image of 500+ GB for best compatibility
 * if there are permission issues try to symlink the disk image to `/var/lib/libvirt/images`
 
@@ -142,7 +146,7 @@ Continue with building the SDcard: https://github.com/rootzoll/raspiblitz#build-
 
 ## Python upgrade
 
-```
+```bash
 # select version
 pythonVersion="3.10.1"
 majorPythonVersion=$(echo "$pythonVersion" | awk -F. '{print $1"."$2}' )
@@ -177,26 +181,22 @@ ls -la /usr/bin/python${majorPythonVersion}
 Work notes partially based on: https://github.com/rootzoll/raspiblitz/blob/v1.7/FAQ.md#what-is-the-process-of-creating-a-new-sd-card-image-release
 
 ### Requirements:
-* amd64 Laptop or Server
+* amd64 Laptop or Server connected to the internet via a LAN cable
 * [`Ubuntu Live`](https://releases.ubuntu.com/focal/ubuntu-20.04.4-desktop-amd64.iso) USB Stick to start on a clean system
-* Installation medium: min 8GB SDcard / USB stick to install the base image from
-* OS disk: min 32 GB Endurance type SDcard or USB SSD to run the opearting system on
-* (Data disk: a new, minimum 1TB SSD is recommended - not needed to create the image release)
-* [Tails USB Stick](https://tails.boum.org/install/download/) to sign the image offline
+* `Installation medium`: min 8GB SDcard / USB stick to install the base image from
+* `OS disk`: min 32 GB Endurance type SDcard or USB SSD to run the opearting system on
+* (`Data disk`: a new, minimum 1TB SSD is recommended - not needed to create the image release)
+* [`Tails USB Stick`](https://tails.boum.org/install/download/) to sign the image offline
 * PGP keys on an USB stick to sign the image
 * NTFS formatted USB Stick or disk to store the signed image (can reuse the Installation medium)
 
 ### Create an NTFS formatted USB Stick / USB disk
 * can be prepared any time on a separate computer and can reuse the Installation medium
-* download the pishrink script to it:
-```
-curl https://raw.githubusercontent.com/Drewsif/PiShrink/master/pishrink.sh > pishrink.sh
-```
 
 ### Boot Ubuntu Live from USB
-* Start [`Ubuntu LIVE`](https://releases.ubuntu.com/focal/ubuntu-20.04.4-desktop-amd64.iso) from USB stick
+* Start [`Ubuntu Live`](https://releases.ubuntu.com/focal/ubuntu-20.04.4-desktop-amd64.iso) from USB stick
 * Under Settings: best to set correct keyboard language & power settings to prevent monitor turn off
-****
+
 ### Download and verify the base image
 * Download the latest [Debian Desktop netinst.io, SHA512SUMS and Signature](https://www.debian.org/download) and verify the [downloaded image](https://www.debian.org/CD/verify)
 * In a terminal can use the following commands (see the comments for the explanations and an example output)
@@ -231,51 +231,78 @@ curl https://raw.githubusercontent.com/Drewsif/PiShrink/master/pishrink.sh > pis
     # debian-11.3.0-amd64-netinst.iso: OK
     ```
 ### Flash the base image to the installation medium
-* Connect an SDcard reader with a 8GB SDcard or an USB stick.
+* Connect an SDcard reader with a min 8GB SDcard or an USB stick.
 * In the file manager open the context menu (right click) on the `netinst.iso` file.
-* Select the option `Open With Disk Image Writer`.
-* Write the image to the SDcard / USB SSD.
+* Select the option `Open With Other Application` and choose `Open With Disk Image Writer`.
+* Write the image to the SDcard / USB SSD (Installation medium).
+* Shut down the Laptop now and remove the `Ubuntu Live` USB Stick.
 
 ### Install Debian to the OS disk
-* Connect the Laptop / Server to the network with the OS disk only, insert the installation medium and power up
+* Connect the Laptop / Server to the LAN (with cable) with only the OS disk connected (no Data disk)
+* Insert the installation medium to the USB and power up - boot from USB.
 * Continue to work on the screen of the laptop or a connected monitor
-* Install Debian with the defaults - use a single partition for the OS
-* During the setup create a new user called `pi`, set the password to `raspiblitz`
+* Install Debian with the defaults:
+    * leave the root oassword empty (root user disabled)
+    * create a new user called `pi`, set the password to `raspiblitz`
+    * use a single partition for the OS
+      * Choose: `Guided - use entire disk`
+      * Select the OS disk
+      * All files in one partition
+      * Can remove the `Swap` partition - a swap file will be created on the Data disk later
+* At the `Software selection` choose:
+    * Debian dekstop environment
+    * GNOME (could be other as preferred)
+    * SSH server
+    * standard system utilities
+* Install GRUB on the primary partition (OS Disk)
 
-#### Install the RaspiBlitz Scripts
-* once the setup is finished log in with the `pi` user
-* Run the following command to build from the `dev` branch or `dev` with the branch-string of your version:
-    ```
+
+### Install the RaspiBlitz Scripts
+* Once the setup is finished reboot and log in with the `pi` user (pw: `raspiblitz`)
+* Run the following commands to build from the `dev` branch or change `dev` with the branch name of your version:
+    ```bash
+    # download
     wget https://raw.githubusercontent.com/rootzoll/raspiblitz/dev/build_sdcard.sh
     # run
     sudo bash build_sdcard.sh -f true -b dev -d headless -t false -w off
     ```
+* The `[sudo] password for pi:` is `raspiblitz`
+* Confirm the chosen parameters
 * Monitor/Check outputs for warnings/errors
+* (Optional for development - copy the output to a build_sdcard.sh.log)
 
-#### Prepare the release
-* switch to the admin user (pw: raspiblitz) and run the shortcut:
+* Useful settings:
+  * In Settings - Power - Automatic Suspend - Plugged In - Off
+  * In Tweaks - General - Suspend when laptop lid is closed - Off
+
+
+### Prepare the release
+#### Clean and shutdown the build machine
+* run the command (same as running `release` under `admin`):
+    ```bash
+    sudo -u admin /home/admin/config.scripts/blitz.preparerelease.sh
     ```
-    release
-    ```
-* Disconnect WiFi/LAN on your laptop / server (hardware switch off) and shutdown
-* Remove `Installation medium and the Ubuntu Live USB stick and cut power from the Laptop / Server
-* Connect USB stick with latest `Tails` (make it stay offline)
-* Boot Tails with extra setting of Admin-Password and remember (use later for sudo)
-* Menu > Systemtools > Settings > Energy -> best to set monitor to never turn off
+* This will shut down the laptop.
+* Remove the `Installation medium` and the `Ubuntu Live` USB stick and the LAN cable
+#### Start Tails
+* Connect the `Tails USB Stick` (make it stay offline)
+* Boot Tails and set and Admin password in Additioanl Settings (will need it to work with the disk)
+* Set the screen to not switch off: Settings > Power -> Blank screen - Never
+#### Import the signing keys
 * Connect USB stick with GPG signing keys - decrypt drive if needed
 * Open Terminal and cd into directory of USB Stick under `/media/amnesia`
-* Run `gpg --import ./sub.key`, check and `exit`
+* Run `gpg --import ./secret-key-backup.key`, check and `exit`
 * Disconnect USB stick with GPG keys
-
-* Run `lsblk` to check on the built on the OS disk device name (ignore last partition number)
+##### Prepare the disk
+* Start Disks and resize the OS disk partition to 10GB
 * Connect the NTFS USB stick, open in file manager and delete old files
-
-* Clone the OS disk:
-  ```bash
-  dd if=/dev/[OSdiskddevice] | gzip > raspiblitz-amd64-vX.X.X-YEAR-MONTH-DAY.img.gz
-  ```
-
-* When finished you should see that more than 7GB was copied.
+* Open a terminal from the NTFS disk with right click
+* Run `lsblk` in a terminal to double check the OS disk device name (ignore last partition number)
+* Clone and compress the OS disk image (copy 11GB so the 10GB sized partition is comfortably included):
+    ```bash
+    sudo dd if=/dev/[OSdiskddevice] bs=1G count=11 status=progress | gzip > raspiblitz-amd64-vX.X.X-YEAR-MONTH-DAY.img.gz
+    ```
+* When finished you should see that 30GB was copied (the resulting compressed file is less than 3GB).
 * Create sha256 hash of the image:
     ```bash
     sha256sum *.gz > raspiblitz-amd64-vX.X.X-YEAR-MONTH-DAY.img.gz.sha256
@@ -291,8 +318,15 @@ curl https://raw.githubusercontent.com/Drewsif/PiShrink/master/pishrink.sh > pis
     raspiblitz-amd64-vX.X.X-YEAR-MONTH-DAY.img.gz.sha256
     raspiblitz-amd64-vX.X.X-YEAR-MONTH-DAY.img.gz.sha256.asc
   ```
+
+* Test with:
+    ```bash
+    gpg --verify *.asc
+    shasum -c *.sha256
+    ```
+
 * Shutdown the build computer
-* Upload the new image to server - put the .sig file and sha256sum.txt next to it
+* Upload the new image to server - put the .sig file and .sha256 next to it
 * Copy the sha256sum to GitHub README and update the download link
 
 ## Verify the downloaded the image
@@ -326,7 +360,7 @@ curl https://raw.githubusercontent.com/Drewsif/PiShrink/master/pishrink.sh > pis
   ```
 
 ## Create a torrent
-* Create Torrent file from image (for example with Transmission) and place in in the `home.admin/assets` folder & link on README
+* Create Torrent file from image (for example with Transmission) and place in the `home.admin/assets` folder & link on README
 * Tracker list recommended to be used with the torrent:
     ```
     udp://tracker.coppersurfer.tk:6969/announce
@@ -338,4 +372,23 @@ curl https://raw.githubusercontent.com/Drewsif/PiShrink/master/pishrink.sh > pis
     udp://exodus.desync.com:6969/announce
     http://pow7.com:80/announce
     udp://tracker.leechers-paradise.org:6969
+    ```
+* Comments:
+    ```
+    raspiblitz-raspiblitz-amd64-vX.X.X-YEAR-MONTH-DAY
+
+    raspiblitz-raspiblitz-amd64-vX.X.X-YEAR-MONTH-DAY image, sha256sum and signature
+
+    Find more info at: https://github.com/rootzoll/raspiblitz/tree/dev/alternative.platforms
+
+    # Import the signing pubkey:
+    curl https://keybase.io/oms/pgp_keys.asc | gpg --import
+    gpg --verify *.asc
+
+    # Verify the signature of the sha256 hash (Look for the output 'Good signature'):
+    gpg --verify *.asc
+    # Look for the output 'Good signature'
+
+    # Compare the sha256 hash to the hash of the image file (Look for the output 'OK'):
+    shasum -c *.sha256
     ```
