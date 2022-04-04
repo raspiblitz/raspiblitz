@@ -38,6 +38,14 @@ fi
 ############################
 
 if [ "$1" == "check" ]; then
+
+  # check if started with sudo
+  echo "runningUser='$EUID'"
+  if [ "$EUID" -ne 0 ]; then 
+    echo "error='run as root'"
+    exit 1
+  fi
+
   # brute force protection
   # if there was another try within last minute add another 3 seconds delay protection
   source <(/home/admin/_cache.sh meta system_password_bruteforceprotection)
