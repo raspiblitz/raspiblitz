@@ -12,6 +12,13 @@ if [ "$1" == "" ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  exit 1
 fi
 
+# check if started with sudo
+echo "runningUser='$EUID'"
+if [ "$EUID" -ne 0 ]; then 
+  echo "error='need user root'"
+  exit 1
+fi
+
 # prepare hased password storage
 hashedPasswordSalt=""
 hashedPasswordStoragePath="/mnt/hdd/app-data/passwords"
@@ -38,13 +45,6 @@ fi
 ############################
 
 if [ "$1" == "check" ]; then
-
-  # check if started with sudo
-  echo "runningUser='$EUID'"
-  if [ "$EUID" -ne 0 ]; then 
-    echo "error='run as root'"
-    exit 1
-  fi
 
   # brute force protection
   # if there was another try within last minute add another 3 seconds delay protection
