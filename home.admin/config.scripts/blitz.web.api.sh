@@ -82,7 +82,6 @@ StandardError=journal
 
 # Hardening measures
 PrivateTmp=true
-ProtectSystem=full
 NoNewPrivileges=true
 PrivateDevices=true
 
