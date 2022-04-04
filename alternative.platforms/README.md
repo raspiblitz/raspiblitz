@@ -53,7 +53,7 @@ All testers are welcome. Open an issue for your specific board to collaborate an
 ### Requirements
 * amd64 Laptop, Desktop or Server connected to the internet via a LAN cable
 
-* `OS disk`: min 32 GB SSD is recommended to run the system on
+* `OS disk`: min 32GB SSD is recommended to run the system on
     * if the computer can boot from an SDcard an Endurance type card can be used similar to the RPi setup
     * USB SSD recommendation: [Sandisk Extreme Pro USB 128 GB](https://www.amazon.co.uk/SanDisk-Extreme-Solid-State-Flash/dp/B01MU8TZRV)
     * if the laptop has an optical drive an [Optical Drive Bay Caddy / adapter](https://www.amazon.co.uk/dp/B07SHSCVC7/) can be used to change it to a second SSD instead.
@@ -63,6 +63,7 @@ All testers are welcome. Open an issue for your specific board to collaborate an
 
 ### Download
  * raspiblitz-amd64-v1.7.2-2022-04-03
+   * manually created with the [process described below](#Create-an-image-release-for-amd64) from the [`dev` branch](https://github.com/rootzoll/raspiblitz/tree/dev) at [43c7384](https://github.com/rootzoll/raspiblitz/tree/43c7384cb70523c57990e0c409d51cfd7b818a10)
    * Torrent [file](/home.admin/assets/raspiblitz-amd64-v1.7.2-2022-04-03.torrent) and [magnet link](magnet:?xt=urn:btih:7885922bd94ccbed5572628931e8b2a5d5b7212a&dn=raspiblitz-amd64-v1.7.2-2022-04-03&tr=http%3a%2f%2ftracker.skyts.net%3a6969%2fannounce&tr=http%3a%2f%2ftracker.yoshi210.com%3a6969%2fannounce&tr=udp%3a%2f%2ftracker.leechers-paradise.org%3a6969&tr=http%3a%2f%2ftracker2.itzmx.com%3a6961%2fannounce&tr=udp%3a%2f%2f9.rarbg.me%3a2780%2fannounce&tr=http%3a%2f%2fpow7.com%3a80%2fannounce&tr=udp%3a%2f%2fexodus.desync.com%3a6969%2fannounce&tr=udp%3a%2f%2ftracker.coppersurfer.tk%3a6969%2fannounce&tr=http%3a%2f%2fopen.acgtracker.com%3a1096%2fannounce)
    * Direct downloads:
      * https://mega.nz/folder/AlsC0A4L#mTPOke2OLJIGU4iMyAqwBw
