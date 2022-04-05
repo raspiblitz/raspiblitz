@@ -68,6 +68,14 @@ All testers are welcome. Open an issue for your specific board to collaborate an
    * Direct downloads:
      * https://mega.nz/folder/AlsC0A4L#mTPOke2OLJIGU4iMyAqwBw
      * https://keybase.pub/oms/images/raspiblitz-amd64-v1.7.2-2022-04-03
+      ```
+      # download from keybase using the command line
+      mkdir raspiblitz-amd64-v1.7.2-2022-04-03
+      cd raspiblitz-amd64-v1.7.2-2022-04-03
+      wget -c https://oms.keybase.pub/images/raspiblitz-amd64-v1.7.2-2022-04-03/raspiblitz-amd64-v1.7.2-2022-04-03.img.gz
+      wget -c https://oms.keybase.pub/images/raspiblitz-amd64-v1.7.2-2022-04-03/raspiblitz-amd64-v1.7.2-2022-04-03.img.gz.sha256
+      wget -c https://oms.keybase.pub/images/raspiblitz-amd64-v1.7.2-2022-04-03/raspiblitz-amd64-v1.7.2-2022-04-03.img.gz.sha256.asc
+      ```
 
 ### [Verify](#Verify-the-downloaded-image)
 ### Write the image to the OS disk
