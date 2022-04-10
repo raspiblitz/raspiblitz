@@ -245,7 +245,7 @@ if [ "${lightning}" != "" ]; then
     ln_onchain_pending="${value}"
     if [ "${ln_onchain_pending}" != "" ] && [ ${ln_onchain_pending} -gt 0 ]; then ln_pendingonchain=" (+${ln_onchain_pending})"; fi
     source <(/home/admin/_cache.sh meta ln_${lightning}_${chain}net_wallet_onchain_balance)
-    ln_walletbalance="${value}"
+    ln_walletbalance=$(printf "%'d" "${value}")
     ln_baseInfo="${color_gray}Wallet ${ln_walletbalance} ${netprefix}sat ${ln_pendingonchain}"
 
     # channel pending info
@@ -256,7 +256,7 @@ if [ "${lightning}" != "" ]; then
 
     # get channel infos
     source <(/home/admin/_cache.sh meta ln_${lightning}_${chain}net_wallet_channels_balance)
-    ln_channels_balance="${value}"
+    ln_channels_balance=$(printf "%'d" "${value}")
     source <(/home/admin/_cache.sh meta ln_${lightning}_${chain}net_channels_active)
     ln_channels_online="${value}"
     source <(/home/admin/_cache.sh meta ln_${lightning}_${chain}net_channels_total)
