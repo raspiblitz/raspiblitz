@@ -64,7 +64,7 @@ upsInfo=""
 if [ "${system_ups_status}" = "ONLINE" ]; then
   upsInfo="${color_gray}${upsBattery}"
 fi
-if [ "$system_ups_status}" = "ONBATT" ]; then
+if [ "${system_ups_status}" = "ONBATT" ]; then
   upsInfo="${color_red}${upsBattery}"
 fi
 if [ "${system_ups_status}" = "SHUTTING DOWN" ]; then
