@@ -813,9 +813,11 @@ To change back to the code:
 
 A UPS (Uninterruptible Power Supply) is used to protect the RaspiBlitz against power outages. Normally you put it just between your normal power outlet and your RaspiBlitz and you are set. But some UPS offer a way to communicate with devices. This can be very useful for example if on a longer power outage the battery of the UPS runs low the RaspiBlitz could detect this and power down in a clean way - instead of a sudden stop that risks data loss or corruption.
 
-There is an experimental script to connect the RaspiBlitz to a UPS over USB cable build by APC - the Model tested with was [APC Back-UPS BX - BX700U-GR](https://www.amazon.de/APC-Back-UPS-Unterbrechungsfreie-Stromversorgung-BX700U-GR/dp/B00T7BYRCK) but it should work with every APC model offering a USB port.
-
+ - There is an experimental script to connect the RaspiBlitz to a UPS over USB cable build by APC - the Model tested with was [APC Back-UPS BX - BX700U-GR](https://www.amazon.de/APC-Back-UPS-Unterbrechungsfreie-Stromversorgung-BX700U-GR/dp/B00T7BYRCK) but it should work with every APC model offering a USB port. \
 To turn it on run from terminal: `/home/admin/config.scripts/blitz.ups.sh on apcusb`
+
+- There is also a script dealing with Geekworm/Suptronics [X708 UPS HAT](https://www.amazon.com/Geekworm-Raspberry-Management-Detection-Shutdown/dp/B08DNRYM4Y/). The tested model was x708v1.2. \
+To turn it on run from terminal: `/home/admin/config.scripts/blitz.ups.sh on x708`
 
 If you have other UPS models or ways to connect ... feel free to extend this script.
 
