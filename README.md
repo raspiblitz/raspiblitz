@@ -261,7 +261,7 @@ The maintainer sd card image can also be downloaded via torrent:
 Useful info:
 * [What's new in Version 1.7.2 of RaspiBlitz?](CHANGES.md#whats-new-in-version-172-of-raspiblitz)
 * [How to update my RaspiBlitz?](README.md#updating-raspiblitz-to-new-version)
-* [How to migrate to RaspiBlitz from Umbrel/myNode](#make-a-raspiblitz-out-of-your-umbrel-or-mynode)
+* [How to migrate to RaspiBlitz from Umbrel/myNode/Citadel](#make-a-raspiblitz-out-of-your-umbrel-citadel-or-mynode)
 * [How to verify the SD card image after download?](FAQ.md#how-to-verify-the-sd-card-image-after-download)
 
 ## Write the SD-Card image to your SD Card
