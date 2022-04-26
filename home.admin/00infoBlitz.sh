@@ -17,6 +17,7 @@ source <(/home/admin/_cache.sh get \
   system_ram_available_mb \
   system_ram_mb \
   system_ups_status \
+  system_ups_battery \
   system_cpu_load \
   system_temp_celsius \
   system_temp_fahrenheit \
@@ -62,10 +63,10 @@ fi
 ## get UPS info
 upsInfo=""
 if [ "${system_ups_status}" = "ONLINE" ]; then
-  upsInfo="${color_gray}${upsBattery}"
+  upsInfo="${color_gray}${system_ups_battery}"
 fi
 if [ "${system_ups_status}" = "ONBATT" ]; then
-  upsInfo="${color_red}${upsBattery}"
+  upsInfo="${color_red}${system_ups_battery}"
 fi
 if [ "${system_ups_status}" = "SHUTTING DOWN" ]; then
   upsInfo="${color_red}DOWN"

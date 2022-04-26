@@ -193,6 +193,7 @@ do
     echo "updating: /home/admin/config.scripts/blitz.ups.sh status"
     source <(/home/admin/config.scripts/blitz.ups.sh status)
     /home/admin/_cache.sh set system_ups_status "${upsStatus}"
+    /home/admin/_cache.sh set system_ups_battery "${upsBattery}"
   fi
 
   #################
