@@ -40,7 +40,7 @@ fi
 
 if [ "$2" = "status" ]; then
 
-  btc_version=$($bitcoincli_alias -version 2>/dev/null | cut -d ' ' -f6)
+  btc_version=$($bitcoincli_alias -version 2>/dev/null | head -1 | cut -d ' ' -f6)
   btc_running=$(systemctl status $service_alias 2>/dev/null | grep -c "active (running)")
   btc_ready="0"
   btc_online="0"
