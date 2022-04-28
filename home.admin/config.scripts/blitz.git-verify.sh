@@ -31,7 +31,7 @@ PGPpubkeyLink="$2"
 PGPpubkeyFingerprint="$3"
 
 
-wget -O /var/cache/raspiblitz/pgp_keys_${PGPsigner}.asc "${PGPpubkeyLink}"
+wget -O /dev/shm/pgp_keys_${PGPsigner}.asc "${PGPpubkeyLink}"
 gpg --import --import-options show-only /var/cache/raspiblitz/pgp_keys_${PGPsigner}.asc
 fingerprint=$(gpg --show-keys /var/cache/raspiblitz/pgp_keys_${PGPsigner}.asc 2>/dev/null | grep "${PGPpubkeyFingerprint}" -c)
 if [ "${fingerprint}" -lt 1 ]; then
