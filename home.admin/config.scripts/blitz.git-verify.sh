@@ -32,8 +32,8 @@ PGPpubkeyFingerprint="$3"
 
 
 wget -O /dev/shm/pgp_keys_${PGPsigner}.asc "${PGPpubkeyLink}"
-gpg --import --import-options show-only /var/cache/raspiblitz/pgp_keys_${PGPsigner}.asc
-fingerprint=$(gpg --show-keys /var/cache/raspiblitz/pgp_keys_${PGPsigner}.asc 2>/dev/null | grep "${PGPpubkeyFingerprint}" -c)
+gpg --import --import-options show-only /dev/shm/pgp_keys_${PGPsigner}.asc
+fingerprint=$(gpg --show-keys /dev/shm/pgp_keys_${PGPsigner}.asc 2>/dev/null | grep "${PGPpubkeyFingerprint}" -c)
 if [ "${fingerprint}" -lt 1 ]; then
   echo
   echo "# !!! WARNING --> the PGP fingerprint is not as expected for ${PGPsigner}" >&2
@@ -41,8 +41,8 @@ if [ "${fingerprint}" -lt 1 ]; then
   echo "# Exiting" >&2
   exit 7
 fi
-gpg --import /var/cache/raspiblitz/pgp_keys_${PGPsigner}.asc
-rm /var/cache/raspiblitz/pgp_keys_${PGPsigner}.asc
+gpg --import /dev/shm/pgp_keys_${PGPsigner}.asc
+rm /dev/shm/pgp_keys_${PGPsigner}.asc
 
 trap 'rm -f "$_temp"' EXIT
 _temp="$(mktemp -p /dev/shm/)"
