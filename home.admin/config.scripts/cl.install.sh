@@ -149,7 +149,7 @@ if [ "$1" = "install" ]; then
   echo "- Reset to version $CLVERSION"
   sudo -u bitcoin git reset --hard $CLVERSION
 
-  sudo -u admin /home/admin/config.scripts/blitz.git-verify.sh \
+  sudo -u bitcoin /home/admin/config.scripts/blitz.git-verify.sh \
    "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" "${CLVERSION}" || exit 1
 
   installDependencies
