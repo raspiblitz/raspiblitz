@@ -281,7 +281,7 @@ fi
 # for fresh setup & migration
 
 echo "# Starting passwords dialog ..."
-/home/admin/setup.scripts/dialogPasswords.sh
+sudo /home/admin/setup.scripts/dialogPasswords.sh
 
 # set flag for bootstrap process to kick-off provision process
 /home/admin/_cache.sh set state "waitprovision"

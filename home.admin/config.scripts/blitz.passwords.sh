@@ -12,6 +12,13 @@ if [ "$1" == "" ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  exit 1
 fi
 
+# check if started with sudo
+echo "runningUser='$EUID'"
+if [ "$EUID" -ne 0 ]; then 
+  echo "error='need user root'"
+  exit 1
+fi
+
 # prepare hased password storage
 hashedPasswordSalt=""
 hashedPasswordStoragePath="/mnt/hdd/app-data/passwords"
@@ -38,6 +45,7 @@ fi
 ############################
 
 if [ "$1" == "check" ]; then
+
   # brute force protection
   # if there was another try within last minute add another 3 seconds delay protection
   source <(/home/admin/_cache.sh meta system_password_bruteforceprotection)
@@ -66,7 +74,7 @@ if [ "$1" == "check" ]; then
   fi
   
   passwordHashSystem=$(cat ${hashedPasswordStoragePath}/${typeOfPassword}.hash 2>/dev/null)
-  passwordHashTest=$(mkpasswd -m sha-512 "${passwordToCheck}" -S "${hashedPasswordSalt}")
+  passwordHashTest=$(mkpasswd -m sha-512 "${passwordToCheck}" -S "${hashedPasswordSalt:0:16}")
   #echo "# passwordToCheck(${passwordToCheck})"
   #echo "# passwordHashSystem(${passwordHashSystem})"
   #echo "# hashedPasswordSalt(${hashedPasswordSalt})"
@@ -226,7 +234,7 @@ if [ "${abcd}" = "a" ]; then
   fi  
 
   # store password hash
-  mkpasswd -m sha-512 "${newPassword}" -S "${hashedPasswordSalt}" > ${hashedPasswordStoragePath}/a.hash
+  mkpasswd -m sha-512 "${newPassword}" -S "${hashedPasswordSalt:0:16}" > ${hashedPasswordStoragePath}/a.hash
   chown admin:admin ${hashedPasswordStoragePath}/a.hash
   chmod 660 ${hashedPasswordStoragePath}/a.hash
 
@@ -306,7 +314,7 @@ elif [ "${abcd}" = "b" ]; then
   fi
 
   # store password hash
-  mkpasswd -m sha-512 "${newPassword}" -S "${hashedPasswordSalt}" > ${hashedPasswordStoragePath}/b.hash
+  mkpasswd -m sha-512 "${newPassword}" -S "${hashedPasswordSalt:0:16}" > ${hashedPasswordStoragePath}/b.hash
   chown admin:admin ${hashedPasswordStoragePath}/b.hash
   chmod 660 ${hashedPasswordStoragePath}/b.hash
 
@@ -442,7 +450,7 @@ elif [ "${abcd}" = "c" ]; then
   fi
 
   # store password hash
-  mkpasswd -m sha-512 "${newPassword}" -S "${hashedPasswordSalt}" > ${hashedPasswordStoragePath}/c.hash
+  mkpasswd -m sha-512 "${newPassword}" -S "${hashedPasswordSalt:0:16}" > ${hashedPasswordStoragePath}/c.hash
   chown admin:admin ${hashedPasswordStoragePath}/c.hash
   chmod 660 ${hashedPasswordStoragePath}/c.hash
 
