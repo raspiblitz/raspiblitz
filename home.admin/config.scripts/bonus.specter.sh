@@ -428,7 +428,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   sudo systemctl stop specter
   sudo systemctl disable specter
   sudo rm /etc/systemd/system/specter.service
-  sudo -u specter /home/specter/.env/bin/python3 -m pip uninstall --yes cryptoadvance.specter
+  sudo -u specter /home/specter/.env/bin/python3 -m pip uninstall --yes cryptoadvance.specter 1>&2
 
   # get delete data status - either by parameter or if not set by user dialog
   deleteData=""
