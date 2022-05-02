@@ -413,53 +413,65 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # Hidden Service if Tor is active
   if [ "${runBehindTor}" = "on" ]; then
+    echo "# Removing Tor hidden service for specter ..."
     /home/admin/config.scripts/tor.onion-service.sh off specter
   fi
 
   isInstalled=$(sudo ls /etc/systemd/system/specter.service 2>/dev/null | grep -c 'specter.service')
-  if [ ${isInstalled} -eq 1 ]; then
-
-    echo "#    --> REMOVING Specter Desktop"
-    sudo systemctl stop specter
-    sudo systemctl disable specter
-    sudo rm /etc/systemd/system/specter.service
-    sudo -u specter /home/specter/.env/bin/python3 -m pip uninstall --yes cryptoadvance.specter
-
-    if whiptail --defaultno --yesno "Do you want to delete all Data related to specter? This includes also Bitcoin-Core-Wallets managed by specter?" 0 0; then
-      echo "#    --> Removing wallets in core"
-      bitcoin-cli listwallets | jq -r .[] | tail -n +2
-      for i in $(bitcoin-cli listwallets | jq -r .[] | tail -n +2)
-      do
-	name=$(echo $i | cut -d"/" -f2)
-       	bitcoin-cli unloadwallet specter/$name
-      done
-      echo "#    --> Removing the /mnt/hdd/app-data/.specter"
-      sudo rm -rf /mnt/hdd/app-data/.specter
-      echo "#    --> Removing the specter user and home directory "
-      sudo userdel -rf specter
-      echo "#     --> Removing blockfilterindex"
-      echo "# changing config ..."
-      sudo systemctl stop ${network}d
-      sudo sed -i "s/^blockfilterindex=.*/blockfilterindex=0/g" /mnt/hdd/${network}/${network}.conf
-      echo "# deleting blockfilterindex ..."
-      sudo rm -r /mnt/hdd/${network}/indexes/blockfilter
-      echo "# restarting bitcoind ..."
-      sudo systemctl restart ${network}d
-    else
-      echo "#    --> Removing the specter user and home directory"
-      echo "#    --> /mnt/hdd/app-data/.specter is preserved on the disk"
-      sudo userdel -rf specter
-      echo "#     --> Switch off the blockfilterindex"
-      sudo sed -i "s/^blockfilterindex=.*/blockfilterindex=0/g" /mnt/hdd/${network}/${network}.conf
-      echo "# restarting bitcoind ..."
-      sudo systemctl restart ${network}d
-    fi
-
-    echo "#    --> OK Specter Desktop removed."
-  else
-    echo "#    --> Specter Desktop is not installed."
+  if [ ${isInstalled} -eq 0 ]; then
+    echo "error='was not installed'"
+    exit 1
   fi
 
+  # removing base systemd service & code
+  echo "#    --> REMOVING Specter Desktop"
+  sudo systemctl stop specter
+  sudo systemctl disable specter
+  sudo rm /etc/systemd/system/specter.service
+  sudo -u specter /home/specter/.env/bin/python3 -m pip uninstall --yes cryptoadvance.specter
+
+  # get delete data status - either by parameter or if not set by user dialog
+  deleteData=""
+  if [ "$2" == "--delete-data" ]; then
+    deleteData="1"
+  fi
+  if [ "$2" == "--keep-data" ]; then
+    deleteData="0"
+  fi
+  if [ "${deleteData}" == "" ]; then
+    deleteData=whiptail --defaultno --yesno "Do you want to delete all Data related to specter? This includes also Bitcoin-Core-Wallets managed by specter?" 0 0
+  fi
+
+  # execute on delete data
+  if [ "${deleteData}" == "1" ]; then
+    echo "#    --> Removing wallets in core"
+    bitcoin-cli listwallets | jq -r .[] | tail -n +2
+    for i in $(bitcoin-cli listwallets | jq -r .[] | tail -n +2)
+    do
+	    name=$(echo $i | cut -d"/" -f2)
+      bitcoin-cli unloadwallet specter/$name
+    done
+    echo "#    --> Removing the /mnt/hdd/app-data/.specter"
+    sudo rm -rf /mnt/hdd/app-data/.specter
+    echo "#    --> Removing the specter user and home directory "
+    sudo userdel -rf specter
+    echo "#     --> Removing blockfilterindex"
+    echo "# changing config ..."
+    sudo systemctl stop ${network}d
+    sudo sed -i "s/^blockfilterindex=.*/blockfilterindex=0/g" /mnt/hdd/${network}/${network}.conf
+    echo "# deleting blockfilterindex ..."
+    sudo rm -r /mnt/hdd/${network}/indexes/blockfilter
+    echo "# restarting bitcoind ..."
+    sudo systemctl restart ${network}d
+  else
+    echo "#    --> wallets in core are preserved on the disk (if exist)"
+    echo "#    --> /mnt/hdd/app-data/.specter is preserved on the disk"
+  fi
+
+  echo "#    --> Removing the specter user and home directory"
+  sudo userdel -rf specter
+  echo "#    --> OK Specter Desktop removed."
+    
   # needed for API/WebUI as signal that install ran thru 
   echo "result='OK'"
   exit 0
