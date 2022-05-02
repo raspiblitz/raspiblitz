@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # https://github.com/Ride-The-Lightning/c-lightning-REST/releases/
-CLRESTVERSION="v0.6.1"
+CLRESTVERSION="v0.7.0"
 
 # help
 if [ $# -eq 0 ]||[ "$1" = "-h" ]||[ "$1" = "--help" ];then
@@ -16,6 +16,15 @@ if [ $# -eq 0 ]||[ "$1" = "-h" ]||[ "$1" = "--help" ];then
   echo
   exit 1
 fi
+
+# Example for commits created on GitHub:
+#PGPsigner="web-flow"
+#PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
+#PGPpubkeyFingerprint="4AEE18F83AFDEB23"
+
+PGPsigner="saubyk"
+PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
+PGPpubkeyFingerprint="00C9E2BC2E45666F"
 
 source <(/home/admin/config.scripts/network.aliases.sh getvars cl $2)
 
@@ -83,13 +92,10 @@ if [ "$1" = on ];then
     sudo -u bitcoin git clone https://github.com/saubyk/c-lightning-REST
     cd c-lightning-REST || exit 1
     sudo -u bitcoin git reset --hard $CLRESTVERSION
-    
-    PGPsigner="saubyk"
-    PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
-    PGPpubkeyFingerprint="00C9E2BC2E45666F"
+
     sudo -u bitcoin /home/admin/config.scripts/blitz.git-verify.sh \
-     "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
-    
+     "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" "${CLRESTVERSION}" || exit 1
+
     sudo -u bitcoin npm install
   fi
 
