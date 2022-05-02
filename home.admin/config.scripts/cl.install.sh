@@ -2,7 +2,7 @@
 # https://lightning.readthedocs.io/
 
 # https://github.com/ElementsProject/lightning/releases
-CLVERSION=v0.10.2
+CLVERSION=v0.11.0.1
 
 # install the latest master by using the last commit id
 # https://github.com/ElementsProject/lightning/commit/master
@@ -34,7 +34,7 @@ if [ $# -eq 0 ]||[ "$1" = "-h" ]||[ "$1" = "--help" ];then
   exit 1
 fi
 
-function installDependencies() 
+function installDependencies()
 {
   echo "- Install build dependencies"
   # from https://lightning.readthedocs.io/INSTALL.html#to-build-on-ubuntu
@@ -44,13 +44,15 @@ function installDependencies()
    gettext
   # additional requirements
   sudo apt-get install -y postgresql libpq-dev
-  sudo pip3 install mrkd==0.2.0
-  sudo pip3 install mistune==0.8.4
   # for pylightning
   echo "- Install from the requirements.txt"
   sudo -u bitcoin pip3 install --user mrkd==0.2.0
   sudo -u bitcoin pip3 install --user mistune==0.8.4
-  sudo -u bitcoin pip3 install --user -r requirements.txt
+  sudo -u bitcoin pip3 install --user poetry
+  if ! grep -Eq '^PATH="$HOME/.local/bin:$PATH"' /mnt/hdd/raspiblitz.conf; then
+    echo 'PATH="$HOME/.local/bin:$PATH"' >> /home/bitcoin/.bashrc
+  fi
+  sudo -u bitcoin /home/bitcoin/.local/bin/poetry install
 }
 
 function buildAndInstallCLbinaries()
@@ -68,7 +70,7 @@ function buildAndInstallCLbinaries()
 }
 
 if [ "$1" = "install" ]; then
-  
+
   echo "# *** INSTALL C-LIGHTNING ${CLVERSION} BINARY ***"
   echo "# only binary install to system"
   echo "# no configuration, no systemd service"
@@ -99,7 +101,7 @@ if [ "$1" = "install" ]; then
 #
 #  sudo -u bitcoin wget https://github.com/ElementsProject/lightning/releases/download/${CLVERSION}/SHA256SUMS
 #  sudo -u bitcoin wget https://github.com/ElementsProject/lightning/releases/download/${CLVERSION}/SHA256SUMS.asc
-#  
+#
 #  verifyResult=$(sudo -u bitcoin gpg --verify SHA256SUMS.asc 2>&1)
 #
 #  goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
@@ -111,15 +113,15 @@ if [ "$1" = "install" ]; then
 #    echo "!!! DOWNLOAD FAILED --> PGP verification not OK / signature(${goodSignature}) verify(${correctKey})"
 #    exit 1
 #  else
-#    echo 
+#    echo
 #    echo "****************************************************************"
 #    echo "OK --> the PGP signature of the C-lightning SHA256SUMS is correct"
 #    echo "****************************************************************"
-#    echo 
+#    echo
 #  fi
-#  
+#
 #  sudo -u bitcoin wget https://github.com/ElementsProject/lightning/releases/download/${CLVERSION}/clightning-${CLVERSION}.zip
-#  
+#
 #  hashCheckResult=$(sha256sum -c SHA256SUMS 2>&1)
 #  goodHash=$(echo ${hashCheckResult} | grep 'OK' -c)
 #  echo "goodHash(${goodHash})"
@@ -134,7 +136,7 @@ if [ "$1" = "install" ]; then
 #    echo "********************************************************************"
 #    echo
 #  fi
-#  
+#
 #  sudo -u bitcoin unzip clightning-${CLVERSION}.zip
 #  cd clightning-${CLVERSION} || exit 1
 
@@ -155,14 +157,14 @@ if [ "$1" = "install" ]; then
   installDependencies
 
   buildAndInstallCLbinaries
-  
+
   installed=$(sudo -u bitcoin lightning-cli --version)
   if [ ${#installed} -eq 0 ]; then
     echo
     echo "!!! BUILD FAILED --> Was not able to install C-lightning"
     exit 1
   fi
-  
+
   correctVersion=$(echo "${installed}" | grep -c "${CLVERSION:1}")
   if [ "${correctVersion}" -eq 0 ]; then
     echo
@@ -221,7 +223,7 @@ if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = testPR ];then
     sudo -u bitcoin git clone https://github.com/ElementsProject/lightning.git
     cd lightning || exit 1
     echo
-    
+
     if [ "$1" = "update" ]; then
       if [ $# -gt 1 ];then
         CLVERSION=$2
@@ -234,7 +236,7 @@ if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = testPR ];then
         echo "# Press ENTER to continue or CTRL+C to abort the update"
         read -r key
       fi
-    
+
     elif [ "$1" = "testPR" ]; then
       PRnumber=$2 || exit 1
       echo "# Using the PR:"
@@ -251,7 +253,7 @@ if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = testPR ];then
 
     buildAndInstallCLbinaries
   fi
-  
+
   ##########
   # Config #
   ##########
@@ -277,7 +279,7 @@ if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = testPR ];then
   if [ ${CLNETWORK} != "bitcoin" ] && [ ! -d /home/bitcoin/.lightning/${CLNETWORK} ] ;then
     sudo -u bitcoin mkdir /home/bitcoin/.lightning/${CLNETWORK}
   fi
-  
+
   if ! sudo ls ${CLCONF};then
     echo "# Create ${CLCONF}"
     echo "# lightningd configuration for ${network} ${CHAIN}
@@ -297,7 +299,7 @@ always-use-proxy=true
     echo "# The file ${CLCONF} is already present"
   fi
   sudo chown -R bitcoin:bitcoin /mnt/hdd/app-data/.lightning
-  sudo chown -R bitcoin:bitcoin /home/bitcoin/  
+  sudo chown -R bitcoin:bitcoin /home/bitcoin/
 
   ## Create a wallet from seedwords for mainnet
   if [ ${CHAIN} = "mainnet" ]; then
@@ -343,8 +345,8 @@ always-use-proxy=true
         #endscript
         su bitcoin bitcoin
 }" | sudo tee /etc/logrotate.d/${netprefix}lightningd
-  # debug: 
-  # sudo logrotate --debug /etc/logrotate.d/lightningd 
+  # debug:
+  # sudo logrotate --debug /etc/logrotate.d/lightningd
 
   echo
   sudo -u admin touch /home/admin/_aliases
@@ -364,7 +366,7 @@ alias ${netprefix}clconf=\"sudo\
   fi
 
   echo "# The installed C-lightning version is: $(sudo -u bitcoin /usr/local/bin/lightningd --version)"
-  echo   
+  echo
   echo "# To activate the aliases reopen the terminal or use:"
   echo "source ~/_aliases"
   echo "# Monitor the ${netprefix}lightningd with:"
@@ -389,7 +391,7 @@ alias ${netprefix}clconf=\"sudo\
 fi
 
 if [ "$1" = "display-seed" ]; then
-  
+
   # check if sudo
   if [ "$EUID" -ne 0 ]; then
     echo "Please run as root (with sudo)"
@@ -452,7 +454,7 @@ if [ "$1" = "off" ];then
   # setting value in the raspiblitz.conf
   /home/admin/config.scripts/blitz.conf.sh set ${netprefix}cl "off"
 
-  # if cl mainnet was default - remove 
+  # if cl mainnet was default - remove
   if [ "${CHAIN}" == "mainnet" ] && [ "${lightning}" == "cl" ]; then
     echo "# CL is REMOVED as the default lightning implementation"
     /home/admin/config.scripts/blitz.conf.sh set lightning ""
