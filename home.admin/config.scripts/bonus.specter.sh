@@ -453,16 +453,6 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     done
     echo "#    --> Removing the /mnt/hdd/app-data/.specter"
     sudo rm -rf /mnt/hdd/app-data/.specter
-    echo "#    --> Removing the specter user and home directory "
-    sudo userdel -rf specter
-    echo "#     --> Removing blockfilterindex"
-    echo "# changing config ..."
-    sudo systemctl stop ${network}d
-    sudo sed -i "s/^blockfilterindex=.*/blockfilterindex=0/g" /mnt/hdd/${network}/${network}.conf
-    echo "# deleting blockfilterindex ..."
-    sudo rm -r /mnt/hdd/${network}/indexes/blockfilter
-    echo "# restarting bitcoind ..."
-    sudo systemctl restart ${network}d
   else
     echo "#    --> wallets in core are preserved on the disk (if exist)"
     echo "#    --> /mnt/hdd/app-data/.specter is preserved on the disk"
