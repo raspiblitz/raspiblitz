@@ -52,7 +52,12 @@ if [ "${PARAMETER_LIGHTNING}" == "none" ]; then
   lightning=""
 fi
 
-
+# set colors
+color_red='\033[0;31m'
+color_green='\033[0;32m'
+color_amber='\033[0;33m'
+color_yellow='\033[1;93m'
+color_gray='\033[0;37m'
 
 # generate netprefix
 netprefix=${chain:0:1}
@@ -71,13 +76,6 @@ fi
 if [ "${system_ups_status}" = "SHUTTING DOWN" ]; then
   upsInfo="${color_red}DOWN"
 fi
-
-# set colors
-color_red='\033[0;31m'
-color_green='\033[0;32m'
-color_amber='\033[0;33m'
-color_yellow='\033[1;93m'
-color_gray='\033[0;37m'
 
 # check hostname
 if [ ${#hostname} -eq 0 ]; then hostname="raspiblitz"; fi
