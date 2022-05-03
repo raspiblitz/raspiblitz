@@ -335,6 +335,14 @@ EOF
     /home/admin/config.scripts/tor.onion-service.sh btc-rpc-explorer 80 3022 443 3023
   fi
 
+  source <(/home/admin/_cache.sh get state)
+  if [ "${state}" == "ready" ]; then
+    # start service
+    echo "# starting service ..."
+    sudo systemctl start btc-rpc-explorer 2>/dev/null
+    sleep 10
+  fi
+
   # needed for API/WebUI as signal that install ran thru 
   echo "result='OK'"
   exit 0
