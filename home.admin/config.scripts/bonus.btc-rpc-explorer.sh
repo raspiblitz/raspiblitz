@@ -295,7 +295,6 @@ StartLimitIntervalSec=0
 
 [Service]
 User=btcrpcexplorer
-TimeoutStartUSec=infinity
 ExecStartPre=/home/admin/config.scripts/bonus.btc-rpc-explorer.sh prestart
 WorkingDirectory=/home/btcrpcexplorer/btc-rpc-explorer
 ExecStart=/usr/bin/npm start
