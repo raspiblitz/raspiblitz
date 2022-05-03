@@ -395,7 +395,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   fundingsource="$2"
 
   # run with default funding source if not given as parameter
-  if [ ${fundingsource} == "" ]; then
+  if [ "${fundingsource}" == "" ]; then
     echo "# running with default lightning as funing source: ${lightning}"
     fundingsource="${lightning}"
   fi
