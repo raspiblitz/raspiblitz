@@ -154,7 +154,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     fi
     sudo -u mempool NG_CLI_ANALYTICS=false npm run build
     if ! [ $? -eq 0 ]; then
-        echo "FAIL - npm run build did not run correctly, aborting"
+        echo "FAIL - npm run build did not run correctly, aborting (1)"
         exit 1
     fi
 
@@ -168,7 +168,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     fi
     sudo -u mempool NG_CLI_ANALYTICS=false npm run build
     if ! [ $? -eq 0 ]; then
-        echo "FAIL - npm run build did not run correctly, aborting"
+        echo "FAIL - npm run build did not run correctly, aborting (2)"
         exit 1
     fi
 
@@ -394,7 +394,7 @@ if [ "$1" = "update" ]; then
       fi
       sudo -u mempool NG_CLI_ANALYTICS=false npm run build
       if ! [ $? -eq 0 ]; then
-          echo "FAIL - npm run build did not run correctly, aborting"
+          echo "FAIL - npm run build did not run correctly, aborting (3)"
           exit 1
       fi
 
@@ -408,7 +408,7 @@ if [ "$1" = "update" ]; then
       fi
       sudo -u mempool NG_CLI_ANALYTICS=false npm run build
       if ! [ $? -eq 0 ]; then
-          echo "FAIL - npm run build did not run correctly, aborting"
+          echo "FAIL - npm run build did not run correctly, aborting (4)"
           exit 1
       fi
 
