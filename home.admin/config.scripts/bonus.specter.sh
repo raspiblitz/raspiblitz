@@ -36,6 +36,8 @@ if [ "$1" = "status" ]; then
     echo "localIP='${localip}'"
     echo "httpPort=''"
     echo "httpsPort='25441'"
+    echo "httpsFored=1"
+    echo "httpsSelfsigned=1"
     echo "toraddress='${toraddress}'"
     echo "fingerprint='${fingerprint}'"
 
