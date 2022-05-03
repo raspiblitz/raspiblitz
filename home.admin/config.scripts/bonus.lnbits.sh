@@ -228,7 +228,7 @@ if [ "$1" = "status" ]; then
     isDead=$(sudo systemctl status lnbits | grep -c 'inactive (dead)')
     if [ ${isDead} -eq 1 ]; then
       echo "error='Service Failed'"
-      exit 1
+      exit 0
     fi
 
   else
