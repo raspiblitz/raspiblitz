@@ -79,6 +79,7 @@ if [ "$1" = "status" ]; then
     echo "httpsPort='4081'"
     echo "httpsForced='0'"
     echo "httpsSelfsigned='1'"
+    echo "authMethod='none'"
     echo "fingerprint='${fingerprint}'"
     echo "toraddress='${toraddress}'"
 

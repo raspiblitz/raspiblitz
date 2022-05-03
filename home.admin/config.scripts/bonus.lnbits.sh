@@ -182,6 +182,7 @@ if [ "$1" = "status" ]; then
     echo "httpsPort='5001'"
     echo "httpsForced='1'"
     echo "httpsSelfsigned='1'"
+    echo "authMethod='none'"
     echo "publicIP='${publicIP}'"
 
     # check funding source

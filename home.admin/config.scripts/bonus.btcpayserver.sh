@@ -42,6 +42,7 @@ if [ "$1" = "status" ]; then
     echo "httpsPort='23001'"
     echo "httpsForced='1'"
     echo "httpsSelfsigned='1'"
+    echo "authMethod='userdefined'"
     echo "publicIP='${publicIP}'"
 
     # check for LetsEncryptDomain for DynDns

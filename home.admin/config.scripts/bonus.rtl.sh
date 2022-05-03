@@ -65,6 +65,7 @@ if [ "$1" = "status" ] || [ "$1" = "menu" ]; then
     echo "httpsPort='${RTLHTTPS}'"
     echo "httpsForced='0'"
     echo "httpsSelfsigned='1'"
+    echo "authMethod='password_b'"
     echo "toraddress='${toraddress}'"
     exit
   fi
