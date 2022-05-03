@@ -479,11 +479,11 @@ WantedBy=multi-user.target
       sudo systemctl start btcpayserver
       echo "# Checking for btcpayserver config"
       while [ ! -f "/home/btcpay/.btcpayserver/Main/settings.config" ]; do
-        echo "# Waiting for btcpayserver to start - CTRL+C to abort"
-        sleep 10
+        echo "# Waiting for btcpayserver to start - CTRL+C to abort .."
+        sleep 30
         hasFailed=$(sudo systemctl status btcpayserver  | grep -c "Active: failed")
         if [ ${hasFailed} -eq 1 ]; then
-          echo "# seems like starting btcpayserver  service has failed - see: systemctl status btcpayserver"
+          echo "# seems like starting btcpayserver service has failed - see: systemctl status btcpayserver"
           echo "# maybe report here: https://github.com/rootzoll/raspiblitz/issues/214"
         fi
       done
