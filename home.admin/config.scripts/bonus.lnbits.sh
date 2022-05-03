@@ -394,6 +394,12 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # get funding source and check that its available
   fundingsource="$2"
 
+  # run with default funding source if not given as parameter
+  if [ ${fundingsource} == "" ]; then
+    echo "# running with default lightning as funing source: ${lightning}"
+    fundingsource="${lightning}"
+  fi
+
   if [ "${fundingsource}" == "lnd" ]; then
     if [ "${lnd}" != "on" ]; then
       echo "# FAIL: lnd mainnet needs to be activated"
