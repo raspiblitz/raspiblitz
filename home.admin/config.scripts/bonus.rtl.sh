@@ -63,7 +63,7 @@ if [ "$1" = "status" ] || [ "$1" = "menu" ]; then
     echo "localIP='${localip}'"
     echo "httpPort='${RTLHTTP}'"
     echo "httpsPort='${RTLHTTPS}'"
-    echo "httpsFored=0"
+    echo "httpsForced=0"
     echo "httpsSelfsigned=1"
     echo "toraddress='${toraddress}'"
     exit
