@@ -180,6 +180,8 @@ if [ "$1" = "status" ]; then
     echo "localIP='${localIP}'"
     echo "httpPort='5000'"
     echo "httpsPort='5001'"
+    echo "httpsForced='1'"
+    echo "httpsSelfsigned='1'"
     echo "publicIP='${publicIP}'"
 
     # check funding source
