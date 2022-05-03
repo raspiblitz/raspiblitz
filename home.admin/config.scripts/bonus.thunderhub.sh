@@ -35,6 +35,8 @@ if [ "$1" = "status" ] || [ "$1" = "menu" ]; then
     echo "localIP='${localip}'"
     echo "httpPort='${httpPort}'"
     echo "httpsPort='${httpsPort}'"
+    echo "httpsForced='0'"
+    echo "httpsSelfsigned='1'"
     echo "toraddress='${toraddress}'"
     exit
   fi

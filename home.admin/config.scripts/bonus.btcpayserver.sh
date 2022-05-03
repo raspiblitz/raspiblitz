@@ -40,6 +40,8 @@ if [ "$1" = "status" ]; then
     echo "localIP='${localIP}'"
     echo "httpPort='23000'"
     echo "httpsPort='23001'"
+    echo "httpsForced='1'"
+    echo "httpsSelfsigned='1'"
     echo "publicIP='${publicIP}'"
 
     # check for LetsEncryptDomain for DynDns
