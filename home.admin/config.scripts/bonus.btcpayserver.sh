@@ -41,7 +41,7 @@ if [ "$1" = "status" ]; then
     echo "httpPort='23000'"
     echo "httpsPort='23001'"
     echo "httpsForced='1'"
-    echo "httpsSelfsigned='1'"
+    echo "httpsSelfsigned='1'" # TODO: change later if IP2Tor+LetsEncrypt is active
     echo "authMethod='userdefined'"
     echo "publicIP='${publicIP}'"
 
