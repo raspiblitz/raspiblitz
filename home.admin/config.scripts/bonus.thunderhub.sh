@@ -271,6 +271,8 @@ WantedBy=multi-user.target
     if [ "${state}" == "ready" ]; then
       echo "# OK - the thunderhub.service is enabled, system is ready so starting service"
       sudo systemctl start thunderhub
+      echo "# Wait startup grace period 60 secs ... "
+      sleep 60
     else
       echo "# OK - the thunderhub.service is enabled, to start manually use: 'sudo systemctl start thunderhub'"
     fi
@@ -367,6 +369,7 @@ if [ "$1" = "update" ]; then
   echo
   echo "# Starting the ThunderHub service ... *** "
   sudo systemctl start thunderhub
+
   exit 0
 fi
 
