@@ -638,13 +638,13 @@ Work notes for the process of producing a new SD card image release:
 * Check signature: `curl https://www.raspberrypi.org/raspberrypi_downloads.gpg.key | gpg --import && gpg --verify *.sig`
 * The result should say "correct signature" and the fingerprint should end with `8738 CD6B 956F 460C`
 * Insert an NTFS formatted USB stick and use the file manager to move all files to the USB
-* Use in file manager context on NTFS USB stick `extract here` to unzip
+* If image is an ZIP file use in file manager context on NTFS USB stick `extract here` to unzip
 * Download script for later with `curl https://raw.githubusercontent.com/Drewsif/PiShrink/master/pishrink.sh > pishrink.sh`
 * Connect SD card reader with a SD card (16GB recommended)
 * In the file manager open context on the .img-file, select `Open With Disk Image Writer` and write the image to the SD card
 * In the file manager open context on `boot` drive free space `open in terminal`
 * Run the commands `touch ssh`
-* Run the command: `echo "pi:$6$p2DNwHsYzR06mVFX$jwZnOo5Jl/6pEMFFowpUBqM7E0Rz8vEtXtupwxuXZA7eqyKxDk8barhYZ24ei/JEP4e8Jr0mOvRThASuUxIAZ0" > userconf` and `exit`
+* Run the command: `echo "pi:\$6\$p2DNwHsYzR06mVFX\$jwZnOo5Jl6pEMFFowpUBqM7E0Rz8vEtXtupwxuXZA7eqyKxDk8barhYZ24eiJEP4e8Jr0mOvRThASuUxIAZ0" > userconf` and `exit`
 * Eject the `boot` and the `NTFS` volume
 * Connect a RaspiBlitz (without HDD) to network, insert sd card and power up
 * Find the IP of the RaspiBlitz (arp -a or check router)
