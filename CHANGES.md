@@ -1,5 +1,11 @@
 # CHANGES between Releases
 
+## What's new in Version 1.8.0 of RaspiBlitz?
+
+- New: WebUI
+- New: BackendAPI
+- Update: C-lightning v0.11.0.1 [details](https://github.com/ElementsProject/lightning/releases/tag/v0.11.0.1)
+
 ## What's new in Version 1.7.2 of RaspiBlitz?
 
 - Refactor: Cache & Backgroundscan of Systeminfo
