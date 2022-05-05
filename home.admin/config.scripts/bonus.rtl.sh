@@ -49,6 +49,29 @@ echo "# systemdService(${systemdService})"
 #########################
 
 # show info menu
+if [ "$1" = "status" ] || [ "$1" = "menu" ]; then
+
+  # get network info
+  isInstalled=$(sudo ls /etc/systemd/system/${netprefix}${typeprefix}RTL.service 2>/dev/null | grep -c 'RTL.service')
+  localip=$(hostname -I | awk '{print $1}')
+  toraddress=$(sudo cat /mnt/hdd/tor/${netprefix}${typeprefix}RTL/hostname 2>/dev/null)
+  fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
+  RTLHTTPS=$((RTLHTTP+1))
+
+  if [ "$1" = "status" ]; then
+    echo "installed='${isInstalled}'"
+    echo "localIP='${localip}'"
+    echo "httpPort='${RTLHTTP}'"
+    echo "httpsPort='${RTLHTTPS}'"
+    echo "httpsForced='0'"
+    echo "httpsSelfsigned='1'"
+    echo "authMethod='password_b'"
+    echo "toraddress='${toraddress}'"
+    exit
+  fi
+fi
+
+# show info menu
 if [ "$1" = "menu" ]; then
 
   # check that parameters are set
@@ -58,11 +81,6 @@ if [ "$1" = "menu" ]; then
     sleep 2
     exit 1
   fi
-
-  # get network info
-  localip=$(hostname -I | awk '{print $1}')
-  toraddress=$(sudo cat /mnt/hdd/tor/${netprefix}${typeprefix}RTL/hostname 2>/dev/null)
-  fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
 
   # info with Tor
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
@@ -261,6 +279,9 @@ WantedBy=multi-user.target
   sudo systemctl start ${systemdService}
   echo "# OK - the ${systemdService}.service is now enabled & started"
   echo "# Monitor with: sudo journalctl -f -u ${systemdService}"
+
+  # needed for API/WebUI as signal that install ran thru 
+  echo "result='OK'"
   exit 0
 fi
 
@@ -476,6 +497,9 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # close ports on firewall
   sudo ufw deny "${RTLHTTP}"
   sudo ufw deny $((RTLHTTP+1))
+
+  # needed for API/WebUI as signal that install ran thru 
+  echo "result='OK'"
   exit 0
 fi
 

@@ -38,7 +38,11 @@ if [ "$1" = "status" ]; then
 
     localIP=$(hostname -I | awk '{print $1}')
     echo "localIP='${localIP}'"
+    echo "httpPort='23000'"
     echo "httpsPort='23001'"
+    echo "httpsForced='1'"
+    echo "httpsSelfsigned='1'" # TODO: change later if IP2Tor+LetsEncrypt is active
+    echo "authMethod='userdefined'"
     echo "publicIP='${publicIP}'"
 
     # check for LetsEncryptDomain for DynDns
@@ -476,11 +480,11 @@ WantedBy=multi-user.target
       sudo systemctl start btcpayserver
       echo "# Checking for btcpayserver config"
       while [ ! -f "/home/btcpay/.btcpayserver/Main/settings.config" ]; do
-        echo "# Waiting for btcpayserver to start - CTRL+C to abort"
-        sleep 10
+        echo "# Waiting for btcpayserver to start - CTRL+C to abort .."
+        sleep 30
         hasFailed=$(sudo systemctl status btcpayserver  | grep -c "Active: failed")
         if [ ${hasFailed} -eq 1 ]; then
-          echo "# seems like starting btcpayserver  service has failed - see: systemctl status btcpayserver"
+          echo "# seems like starting btcpayserver service has failed - see: systemctl status btcpayserver"
           echo "# maybe report here: https://github.com/rootzoll/raspiblitz/issues/214"
         fi
       done
@@ -503,6 +507,9 @@ WantedBy=multi-user.target
 
   # setting value in raspi blitz config
   /home/admin/config.scripts/blitz.conf.sh set BTCPayServer "on"
+
+  # needed for API/WebUI as signal that install ran thru 
+  echo "result='OK'"
   exit 0
 fi
 
@@ -576,7 +583,9 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   else
     echo "# BTCPayServer is not installed."
   fi
-  exit 0
+
+  # needed for API/WebUI as signal that install ran thru 
+  echo "result='OK'"
 fi
 
 if [ "$1" = "update" ]; then

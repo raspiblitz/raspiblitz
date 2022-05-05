@@ -630,7 +630,7 @@ Work notes for the process of producing a new SD card image release:
 * Start [`Ubuntu LIVE`](http://releases.ubuntu.com/18.04.3/ubuntu-18.04.3-desktop-amd64.iso) from USB stick
 * Under Settings: best to set correct keyboard language & power settings to prevent monitor turn off
 * Connect to a secure WiFi (hardware switch on) or LAN
-* Download the latest RaspiOS-64bit (zip & sig file) namend in the [build_sdcard.sh](./build_sdcard.sh) and note the SHA256 checksum
+* Download the latest RaspiOS-64bit (zip/xz & sig file) namend in the [build_sdcard.sh](./build_sdcard.sh) and note the SHA256 checksum
 * From the browser `Show All Downloads` and from the context menu select `Open Containing Folder`
 * On that file manager open context (right click) on the white-space and select `Open in Terminal`
 * Compare the checksum with the one you just made note of, using `shasum -a 256 *.zip`
@@ -643,7 +643,8 @@ Work notes for the process of producing a new SD card image release:
 * Connect SD card reader with a SD card (16GB recommended)
 * In the file manager open context on the .img-file, select `Open With Disk Image Writer` and write the image to the SD card
 * In the file manager open context on `boot` drive free space `open in terminal`
-* Run the commands: `touch ssh` and `exit`
+* Run the commands `touch ssh`
+* Run the command: `echo "pi:$6$p2DNwHsYzR06mVFX$jwZnOo5Jl/6pEMFFowpUBqM7E0Rz8vEtXtupwxuXZA7eqyKxDk8barhYZ24ei/JEP4e8Jr0mOvRThASuUxIAZ0" > userconf` and `exit`
 * Eject the `boot` and the `NTFS` volume
 * Connect a RaspiBlitz (without HDD) to network, insert sd card and power up
 * Find the IP of the RaspiBlitz (arp -a or check router)

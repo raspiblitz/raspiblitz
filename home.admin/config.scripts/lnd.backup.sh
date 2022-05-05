@@ -649,7 +649,7 @@ to protect the seed words. Most users did not set this.
     sudo rm /var/cache/raspiblitz/.pass.tmp 2>/dev/null
     sudo touch /var/cache/raspiblitz/.pass.tmp
     sudo chown admin:admin /var/cache/raspiblitz/.pass.tmp
-    sudo /home/admin/config.scripts/blitz.setpassword.sh x "Enter extra Password D" /var/cache/raspiblitz/.pass.tmp empty-allowed
+    sudo /home/admin/config.scripts/blitz.password.sh set x "Enter extra Password D" /var/cache/raspiblitz/.pass.tmp empty-allowed
     passwordD=$(sudo cat /var/cache/raspiblitz/.pass.tmp)
     sudo shred -u /var/cache/raspiblitz/.pass.tmp 2>/dev/null
   fi

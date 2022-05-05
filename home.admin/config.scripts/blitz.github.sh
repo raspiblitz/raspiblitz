@@ -168,9 +168,15 @@ sudo -u admin chmod 755 /home/admin/config.scripts/*.py
 echo "# ******************************************"
 
 echo "# Syncing Webcontent .."
-if [ -d /var/www/public ]; then
+sudo mkdir -p /var/www/public
+webuiexists=$(ls /home/admin/blitz_web/build/index.html | grep -c "index.html")
+if [ ${webuiexists} -eq 0 ]; then
+  # copy github compiled webui
+  echo "- update webui with latest default compiled from github"
   sudo cp -a /home/admin/assets/nginx/www_public/* /var/www/public
   sudo chown www-data:www-data /var/www/public
+else
+  echo "- found user compiled webui (dont overwrite with compiled webui from github)"
 fi
 
 echo "# Checking if the content of BlitzPy changed .."

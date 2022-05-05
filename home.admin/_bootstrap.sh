@@ -40,6 +40,10 @@ echo "***********************************************" >> $logFile
 # make sure SSH server is configured & running
 sudo /home/admin/config.scripts/blitz.ssh.sh checkrepair >> ${logFile}
 
+# make sure /var/cache/raspiblitz/temp exists
+sudo mkdir -p /var/cache/raspiblitz/temp
+sudo chmod 777 /var/cache/raspiblitz/temp
+
 ################################
 # INIT raspiblitz.info
 ################################
@@ -454,9 +458,21 @@ if [ ${isMounted} -eq 0 ]; then
   # determine correct setup phase
   infoMessage="Please Login for Setup"
   setupPhase="setup"
+  
   if [ "${hddGotMigrationData}" != "" ]; then
     infoMessage="Please Login for Migration"
     setupPhase="migration"
+    # check if lightning is outdated
+    migrationMode="normal"
+    if [ "${hddVersionLND}" != "" ]; then
+      # get local lnd version & check compatibility
+      source <(/home/admin/config.scripts/lnd.install.sh info "${hddVersionLND}")
+      if [ "${compatible}" != "1" ]; then
+        migrationMode="outdatedLightning"
+      fi 
+    fi
+    /home/admin/_cache.sh set migrationMode "${migrationMode}"
+
   elif [ "${hddRaspiData}" == "1" ]; then
 
     # determine if this is a recovery or an update
@@ -526,6 +542,109 @@ if [ ${isMounted} -eq 0 ]; then
 
   # mark system on sd card as in setup process
   echo "the provision process was started but did not finish yet" > /home/admin/provision.flag
+
+  # get fresh data from setup file & data drive
+  source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
+  source ${setupFile}
+
+  # special setup tasks (triggered by api/webui thru setupfile)
+
+  # FORMAT DATA DRIVE
+  if [ "${formatHDD}" == "1" ]; then
+    echo "# special setup tasks: FORMAT DATA DRIVE" >> ${logFile}
+      
+    # check if there is a flag set on sd card boot section to format as btrfs (experimental)
+    filesystem="ext4"
+    flagBTRFS=$(sudo ls /boot/btrfs* 2>/dev/null | grep -c btrfs)
+    if [ "${flagBTRFS}" != "0" ]; then
+      echo "Found BTRFS flag ---> formatting with experimental BTRFS filesystem" >> ${logFile}
+      filesystem="btrfs"
+    fi
+
+    # run formatting
+    error=""
+    /home/admin/_cache.sh set state "formathdd"
+    echo "Running Format: (${filesystem}) (${hddCandidate})" >> ${logFile}
+    source <(sudo /home/admin/config.scripts/blitz.datadrive.sh format ${filesystem} ${hddCandidate})
+    if [ "${error}" != "" ]; then
+      echo "FAIL ON FORMATTING THE DRIVE:" >> ${logFile}
+      echo "${error}" >> ${logFile}
+      echo "Please report as issue on the raspiblitz github." >> ${logFile}
+      /home/admin/_cache.sh set state "errorHDD"
+      /home/admin/_cache.sh set message "Fail Format (${filesystem})"
+      exit 1
+    fi
+    /home/admin/_cache.sh set setupPhase "setup"
+  fi
+
+  # CLEAN DRIVE & KEEP BLOCKCHAIN
+  if [ "${cleanHDD}" == "1" ]; then
+    echo "# special setup tasks: CLEAN DRIVE & KEEP BLOCKCHAIN" >> ${logFile}
+
+    # when blockchain comes from another node migrate data first
+    if [ "${hddGotMigrationData}" != "" ]; then
+        clear
+        echo "Migrating Blockchain of ${hddGotMigrationData}'" >> ${logFile}
+        source <(sudo /home/admin/config.scripts/blitz.migration.sh migration-${hddGotMigrationData})
+        if [ "${err}" != "" ]; then
+          echo "MIGRATION OF BLOCKHAIN FAILED: ${err}" >> ${logFile}
+          echo "Format data disk on laptop & recover funds with fresh sd card using seed words + static channel backup." >> ${logFile}
+          /home/admin/_cache.sh set state "errorHDD"
+          /home/admin/_cache.sh set message "Fail Migrate Blockchain (${hddGotMigrationData})"
+          exit 1
+        fi
+    fi
+
+    # delete everything but blockchain
+    echo "Deleting everything on HDD/SSD while keeping blockchain ..." >> ${logFile}
+    sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount 1>/dev/null 2>/dev/null
+    sudo /home/admin/config.scripts/blitz.datadrive.sh clean all -keepblockchain >> ${logFile}
+    if [ "${error}" != "" ]; then
+       echo "CLEANING HDD FAILED:" >> ${logFile}
+      echo "${error}" >> ${logFile}
+      echo "Please report as issue on the raspiblitz github." >> ${logFile}
+      /home/admin/_cache.sh set state "errorHDD"
+      /home/admin/_cache.sh set message "Fail Cleaning HDD"
+      exit 1
+    fi
+    sudo /home/admin/config.scripts/blitz.datadrive.sh unmount >> ${logFile}
+    /home/admin/_cache.sh set setupPhase "setup"
+
+    sleep 2
+
+  fi
+
+  source <(/home/admin/_cache.sh get state setupPhase)
+  if [ "${setupPhase}" == "setup" ]; then
+
+    echo "# CREATING raspiblitz.conf from your setup choices" >> ${logFile}
+    if [ "${network}" == "" ]; then
+      network="bitcoin"
+    fi
+    if [ "${chain}" == "" ]; then
+      chain="main"
+    fi
+
+    # source the raspiblitz version
+    source /home/admin/_version.info
+
+    # prepare & write basic config file
+    # will first be created and in cache drive
+    # and some lines below copied to hdd when mounted
+    TEMPCONFIGFILE="/var/cache/raspiblitz/temp/raspiblitz.conf"
+    sudo rm $TEMPCONFIGFILE 2>/dev/null
+    sudo touch $TEMPCONFIGFILE
+    sudo chown admin:admin $TEMPCONFIGFILE
+    sudo chmod 777 $TEMPCONFIGFILE
+    echo "# RASPIBLITZ CONFIG FILE" > $TEMPCONFIGFILE
+    echo "raspiBlitzVersion='${codeVersion}'" >> $TEMPCONFIGFILE
+    echo "lcdrotate='1'" >> $TEMPCONFIGFILE
+    echo "lightning='${lightning}'" >> $TEMPCONFIGFILE
+    echo "network='${network}'" >> $TEMPCONFIGFILE
+    echo "chain='${chain}'" >> $TEMPCONFIGFILE
+    echo "hostname='${hostname}'" >> $TEMPCONFIGFILE
+    echo "runBehindTor='on'" >> $TEMPCONFIGFILE
+  fi
 
   # make sure HDD is mounted (could be freshly formatted by user on last loop)
   source <(/home/admin/config.scripts/blitz.datadrive.sh status)
@@ -618,7 +737,7 @@ if [ ${isMounted} -eq 0 ]; then
   fi
 
   echo "# setting PASSWORD A" >> ${logFile}
-  sudo /home/admin/config.scripts/blitz.setpassword.sh a "${passwordA}" >> ${logFile}
+  sudo /home/admin/config.scripts/blitz.passwords.sh set a "${passwordA}" >> ${logFile}
 
   # if setup - run provision setup first
   if [ "${setupPhase}" == "setup" ]; then

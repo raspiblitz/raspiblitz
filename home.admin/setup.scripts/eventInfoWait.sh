@@ -60,6 +60,13 @@ Preparing Blockchain Sync
 Please wait ...
 " 6 30
 
+elif [ "${eventID}" == "formathdd" ]; then
+
+    dialog --backtitle "${backtitle}" --cr-wrap --infobox "
+Format HDD/SSD 
+Please wait ...
+" 6 30
+
 elif [ "${eventID}" == "reboot" ] && [ "${contentString}" == "finalsetup" ]; then
 
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "
@@ -207,9 +214,9 @@ elif [ "${eventID}" == "waitsetup" ] && [ "${mode}" == "lcd" ]; then
         dialog --backtitle "${backtitle}" --cr-wrap --infobox "
 ${welcomeline}
 ------------------------------------
-Use terminal command to login:
-ssh admin@${internet_localip}
-password: raspiblitz
+browser:  http://${internet_localip}
+terminal: ssh admin@${internet_localip}
+          password: raspiblitz
 " 9 41
 
     else

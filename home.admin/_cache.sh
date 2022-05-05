@@ -180,6 +180,9 @@ elif [ "$1" = "set" ]; then
     sudo sed -i "s/^${keystr}=.*/${keystr}='${valuestr}'/g" ${infoFile}
   fi
 
+  # TODO:
+  # also publish new set values on a redis channel called `system`
+
 # get
 elif [ "$1" = "get" ]; then
 
