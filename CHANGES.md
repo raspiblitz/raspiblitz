@@ -5,7 +5,8 @@
 - New: WebUI
 - New: BackendAPI
 - Update: Bitcoin Core v23.0 [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-23.0.md)
-- Update: C-lightning v0.11.0.1 [details](https://github.com/ElementsProject/lightning/releases/tag/v0.11.0.1)
+- Update: Core Lightning v0.11.0.1 [details](https://github.com/ElementsProject/lightning/releases/tag/v0.11.0.1)
+- Update: LND 0.14.3-beta [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.14.3-beta)
 
 ## What's new in Version 1.7.2 of RaspiBlitz?
 
