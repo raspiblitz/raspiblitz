@@ -644,7 +644,7 @@ Work notes for the process of producing a new SD card image release:
 * In the file manager open context on the .img-file, select `Open With Disk Image Writer` and write the image to the SD card
 * In the file manager open context on `boot` drive free space `open in terminal`
 * Run the commands `touch ssh`
-* Run the command: `echo "pi:\$6\$p2DNwHsYzR06mVFX\$jwZnOo5Jl6pEMFFowpUBqM7E0Rz8vEtXtupwxuXZA7eqyKxDk8barhYZ24eiJEP4e8Jr0mOvRThASuUxIAZ0" > userconf` and `exit`
+* Run the command: `echo "pi:\$6\$TE7HmruYY9EaNiKP\$Vz0inJ6gaoJgJvQrC5z/HMDRMTN2jKhiEnG83tc1Jsw7lli5MYdeA83g3NOVCsBaTVW4mUBiT/1ZRWYdofVQX0" > userconf` and `exit`
 * Eject the `boot` and the `NTFS` volume
 * Connect a RaspiBlitz (without HDD) to network, insert sd card and power up
 * Find the IP of the RaspiBlitz (arp -a or check router)
