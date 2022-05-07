@@ -60,7 +60,7 @@ Pin: release o=Debian
 Pin-Priority: -10
 " | sudo tee /etc/apt/preferences
   if ! grep -Eq '^deb http://deb.debian.org/debian/ unstable main' /etc/apt/sources.list; then
-    echo "deb http://deb.debian.org/debian/ unstable main" | /etc/apt/sources.list
+    echo "deb http://deb.debian.org/debian/ unstable main" | sudo tee -a /etc/apt/sources.list
   fi
   sudo apt update
   sudo apt-get -t unstable install -y rustfmt
