@@ -48,8 +48,8 @@ function installDependencies()
   sudo apt-get install -y cargo rustfmt
   # for pylightning
   echo "- Install from the requirements.txt"
-  sudo -u bitcoin pip3 install --user mrkd==0.2.0
-  sudo -u bitcoin pip3 install --user mistune==0.8.4
+  sudo pip3 install --user mrkd==0.2.0
+  sudo pip3 install --user mistune==0.8.4
   sudo -u bitcoin pip3 install --user poetry
   if ! grep -Eq '^PATH="$HOME/.local/bin:$PATH"' /mnt/hdd/raspiblitz.conf; then
     echo 'PATH="$HOME/.local/bin:$PATH"' | sudo tee -a /home/bitcoin/.bashrc
