@@ -52,7 +52,7 @@ function installDependencies()
   sudo -u bitcoin pip3 install --user mistune==0.8.4
   sudo -u bitcoin pip3 install --user poetry
   if ! grep -Eq '^PATH="$HOME/.local/bin:$PATH"' /mnt/hdd/raspiblitz.conf; then
-    echo 'PATH="$HOME/.local/bin:$PATH"' >> /home/bitcoin/.bashrc
+    echo 'PATH="$HOME/.local/bin:$PATH"' | sudo tee -a /home/bitcoin/.bashrc
   fi
   sudo -u bitcoin /home/bitcoin/.local/bin/poetry install
 }
