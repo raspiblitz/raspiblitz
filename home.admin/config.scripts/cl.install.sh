@@ -47,6 +47,7 @@ function installDependencies()
   # for cln-grpc
   sudo apt-get install -y cargo
   # rustfmt from sid(unstable) repo in Debian
+  echo "  - rustfmt"
   echo "\
 Explanation: Uninstall or do not install any Debian-originated
 Explanation: package versions other than those in the stable distro
