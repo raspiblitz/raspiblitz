@@ -5,7 +5,7 @@
 # https://github.com/dgarage/NBXplorer/tags
 NBXplorerVersion="v2.2.20"
 # https://github.com/btcpayserver/btcpayserver/releases
-BTCPayVersion="v1.4.4"
+BTCPayVersion="v1.5.1"
 
 PGPsigner="nicolasdorier"
 PGPpubkeyLink="https://keybase.io/nicolasdorier/pgp_keys.asc"
