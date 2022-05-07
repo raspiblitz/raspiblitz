@@ -9,13 +9,13 @@ CLVERSION=v0.11.0.1
 # CLVERSION="063366ed7e3b7cc12a8d1681acc2b639cf07fa23"
 
 # https://github.com/ElementsProject/lightning/tree/master/contrib/keys
-# PGPsigner="rustyrussel"
-# PGPpubkeyLink="https://raw.githubusercontent.com/ElementsProject/lightning/master/contrib/keys/rustyrussell.txt"
-# PGPpubkeyFingerprint="D9200E6CD1ADB8F1"
+PGPsigner="rustyrussel"
+PGPpubkeyLink="https://raw.githubusercontent.com/ElementsProject/lightning/master/contrib/keys/rustyrussell.txt"
+PGPpubkeyFingerprint="D9200E6CD1ADB8F1"
 
-PGPsigner="cdecker"
-PGPpubkeyLink="https://raw.githubusercontent.com/ElementsProject/lightning/master/contrib/keys/${PGPsigner}.txt"
-PGPpubkeyFingerprint="A26D6D9FE088ED58"
+#PGPsigner="cdecker"
+#PGPpubkeyLink="https://raw.githubusercontent.com/ElementsProject/lightning/master/contrib/keys/${PGPsigner}.txt"
+#PGPpubkeyFingerprint="A26D6D9FE088ED58"
 
 # help
 if [ $# -eq 0 ]||[ "$1" = "-h" ]||[ "$1" = "--help" ];then
