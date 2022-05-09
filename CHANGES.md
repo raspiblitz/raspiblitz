@@ -7,6 +7,7 @@
 - Update: Bitcoin Core v23.0 [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-23.0.md)
 - Update: C-lightning v0.11.0.1 [details](https://github.com/ElementsProject/lightning/releases/tag/v0.11.0.1)
 - Update: BTCPayServer v1.5.1 [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.5.1)
+- Info: Run RaspiBlitz on VirtualBox & TrueNAS [details](https://github.com/rootzoll/raspiblitz/tree/dev/alternative.platforms)
 
 ## What's new in Version 1.7.2 of RaspiBlitz?
 
