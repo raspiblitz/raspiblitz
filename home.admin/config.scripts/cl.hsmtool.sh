@@ -133,7 +133,7 @@ function decryptHSMsecret() {
   else
     # setting value in raspiblitz.conf
     /home/admin/config.scripts/blitz.conf.sh set ${netprefix}clEncryptedHSM "on"
-    if [ "${passwortParameter}" != "" ]; then
+    if [ "${password}" != "" ]; then
       echo "# using the password from parameter"
     elif [ -f $passwordFile ];then
       echo "# Getting the password from $passwordFile"
