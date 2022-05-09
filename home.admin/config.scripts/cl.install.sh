@@ -44,35 +44,17 @@ function installDependencies()
    gettext
   # additional requirements
   sudo apt-get install -y postgresql libpq-dev
-  # for cln-grpc
-  sudo apt-get install -y cargo
-  # rustfmt from sid(unstable) repo in Debian
-  echo "  - rustfmt"
-  echo "\
-Explanation: Uninstall or do not install any Debian-originated
-Explanation: package versions other than those in the stable distro
-Package: *
-Pin: release a=stable
-Pin-Priority: 900
-
-Package: *
-Pin: release o=Debian
-Pin-Priority: -10
-" | sudo tee /etc/apt/preferences
-  if ! grep -Eq '^deb http://deb.debian.org/debian/ unstable main' /etc/apt/sources.list; then
-    echo "deb http://deb.debian.org/debian/ unstable main" | sudo tee -a /etc/apt/sources.list
-  fi
-  sudo apt update
-  sudo apt-get -t unstable install -y rustfmt
-
-  # for pylightning
-  echo "- Install from the requirements.txt"
-  sudo pip3 install --user mrkd==0.2.0
-  sudo pip3 install --user mistune==0.8.4
+  # rust for cln-grpc, includes rustfmt
+  sudo -u bitcoin curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sudo -u bitcoin sh -s -- -y
+  # mrkd and mistune needs to be globally available for the build
+  sudo pip3 install mrkd==0.2.0
+  sudo pip3 install mistune==0.8.4
+  # poetry
   sudo -u bitcoin pip3 install --user poetry
   if ! grep -Eq '^PATH="$HOME/.local/bin:$PATH"' /mnt/hdd/raspiblitz.conf; then
-    echo 'PATH="$HOME/.local/bin:$PATH"' | sudo tee -a /home/bitcoin/.bashrc
+    echo 'PATH="$HOME/.local/bin:$PATH"' | sudo tee -a /home/bitcoin/.profile
   fi
+  export PATH="home/bitcoin/.local/bin:$PATH"
   sudo -u bitcoin /home/bitcoin/.local/bin/poetry install
 }
 
