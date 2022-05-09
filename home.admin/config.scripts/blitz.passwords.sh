@@ -469,12 +469,9 @@ elif [ "${abcd}" = "c" ]; then
 
     echo "# CHANGE CORE LIGHTNING - PASSWORD C (only mainnet)"
 
-    source <(sudo /home/admin/config.scripts/cl.hsmtool.sh change-password mainnet $oldPassword $newPassword)
-    if [ "${err}" != "" ]; then
-      echo "error='Was not able to change password'"
-      sleep 2
-      exit 0
-    fi
+    # run in sub shell to prevent stdout prints to make problems with parsing of caller script
+    $(sudo /home/admin/config.scripts/cl.hsmtool.sh change-password mainnet $oldPassword $newPassword)
+    #TODO: test success
 
   else
     echo "# CORE LIGHTNING not installed/active/encrypted"
