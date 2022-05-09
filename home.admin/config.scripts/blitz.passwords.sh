@@ -469,8 +469,7 @@ elif [ "${abcd}" = "c" ]; then
 
     echo "# CHANGE CORE LIGHTNING - PASSWORD C (only mainnet)"
 
-    # run in sub shell to prevent stdout prints to make problems with parsing of caller script
-    $(sudo /home/admin/config.scripts/cl.hsmtool.sh change-password mainnet $oldPassword $newPassword)
+    sudo /home/admin/config.scripts/cl.hsmtool.sh change-password mainnet $oldPassword $newPassword
     #TODO: test success
 
   else
