@@ -28,7 +28,7 @@ if [ $# -lt 1 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]||\
   echo "cl.hsmtool.sh [encrypt|decrypt] <mainnet|testnet|signet>"
   echo "cl.hsmtool.sh [autounlock-on|autounlock-off] <mainnet|testnet|signet>"
   echo
-  echo "cl.hsmtool.sh [change-password] <mainnet|testnet|signet> <NewPassword>"
+  echo "cl.hsmtool.sh [change-password] <mainnet|testnet|signet> <OldPassword> <NewPassword>"
   echo
   exit 1
 fi
@@ -101,10 +101,7 @@ function shredPasswordFile() {
 
 function encryptHSMsecret() {
   walletPassword=$1
-  echo "encryptHSMsecret walletPassword(${walletPassword})"
-  sleep 5
   if [ ${#walletPassword} -eq 0 ];then
-    # ask for password in dialog if $walletPassword is not given in $3
     sudo /home/admin/config.scripts/blitz.passwords.sh set x \
      "Enter the password C to encrypt the C-lightning wallet file (hsm_secret)" \
      "$passwordFile"
@@ -121,6 +118,9 @@ function encryptHSMsecret() {
 
 function decryptHSMsecret() {
  
+  # optional to give this function the decrypt password
+  password=$1
+
   # check if encrypted
   trap 'rm -f "$output"' EXIT
   output=$(mktemp -p /dev/shm/)
@@ -133,12 +133,16 @@ function decryptHSMsecret() {
   else
     # setting value in raspiblitz.conf
     /home/admin/config.scripts/blitz.conf.sh set ${netprefix}clEncryptedHSM "on"
-    if [ -f $passwordFile ];then
+    if [ "${passwortParameter}" != "" ]; then
+      echo "# using the password from parameter"
+    elif [ -f $passwordFile ];then
       echo "# Getting the password from $passwordFile"
+      password=$(cat sudo cat $passwordFile)
     else
       passwordToFile
+      password=$(cat sudo cat $passwordFile)
     fi
-    if sudo cat $passwordFile | sudo -u bitcoin lightning-hsmtool decrypt \
+    if echo "${password}" | sudo -u bitcoin lightning-hsmtool decrypt \
      "$hsmSecretPath"; then
       echo "# Decrypted successfully"
     else
@@ -369,7 +373,7 @@ elif [ "$1" = "encrypt" ]; then
 # https://github.com/rootzoll/raspiblitz/blob/dev/FAQ.cl.md#seed
 " | sudo -u bitcoin tee /home/bitcoin/.lightning/${CLNETWORK}/seedwords.info
   # encrypt
-  walletPassword=$3
+  walletPassword=$4
   encryptHSMsecret "$walletPassword"
 
 
@@ -404,8 +408,8 @@ elif [ "$1" = "autounlock-off" ]; then
 
 
 elif [ "$1" = "change-password" ]; then
-  decryptHSMsecret || exit 1
-  walletPassword=$3
+  decryptHSMsecret "$3"|| exit 1
+  walletPassword=$4
   if ! encryptHSMsecret "$walletPassword"; then
     echo "# Warning: the hsm_secret is left unencrypted."
     echo "# To fix run:"
