@@ -100,7 +100,7 @@ function shredPasswordFile() {
 }
 
 function encryptHSMsecret() {
-  walletPassword=$3
+  walletPassword=$1
   echo "encryptHSMsecret walletPassword(${walletPassword})"
   sleep 5
   if [ ${#walletPassword} -eq 0 ];then
@@ -370,7 +370,7 @@ elif [ "$1" = "encrypt" ]; then
 " | sudo -u bitcoin tee /home/bitcoin/.lightning/${CLNETWORK}/seedwords.info
   # encrypt
   walletPassword=$3
-  encryptHSMsecret $walletPassword
+  encryptHSMsecret "$walletPassword"
 
 
 elif [ "$1" = "decrypt" ]; then
