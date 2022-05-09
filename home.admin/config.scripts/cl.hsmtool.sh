@@ -101,6 +101,8 @@ function shredPasswordFile() {
 
 function encryptHSMsecret() {
   walletPassword=$3
+  echo "encryptHSMsecret walletPassword(${walletPassword})"
+  sleep 5
   if [ ${#walletPassword} -eq 0 ];then
     # ask for password in dialog if $walletPassword is not given in $3
     sudo /home/admin/config.scripts/blitz.passwords.sh set x \
