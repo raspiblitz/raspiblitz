@@ -452,7 +452,7 @@ elif [ "${abcd}" = "c" ]; then
     sleep 2
 
     err=""
-    if ! pip list | grep grpc; then sudo -H python3 -m pip install grpcio==1.38.1; fi
+    if ! pip list | grep grpc; then sudo -H python3 -m pip install grpcio==1.38.1 1>/dev/null; fi
     source <(sudo /home/admin/config.scripts/lnd.initwallet.py change-password mainnet $oldPassword $newPassword)
     if [ "${err}" != "" ]; then
       echo "error='Was not able to change password'"
