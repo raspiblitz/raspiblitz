@@ -104,12 +104,6 @@ if [ "$1" != "set" ]; then
     exit 1
 fi
 
-# for all other calls user needs to be root
-if [ "$EUID" -ne 0 ]
-  then echo "Please run as root (with sudo)"
-  exit
-fi
-
 # load raspiblitz config (if available)
 source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
@@ -181,7 +175,7 @@ if [ "${abcd}" = "a" ]; then
     password1=$(whiptail --passwordbox "\nSet new Admin/SSH Password A:\n(min 8chars, 1word, chars+number, no specials)" 10 52 "" --title "Password A" --backtitle "RaspiBlitz - Setup" 3>&1 1>&2 2>&3)
     if [ $? -eq 1 ]; then
       if [ ${emptyAllowed} -eq 0 ]; then
-        echo "CANCEL not possible"
+        echo "# CANCEL not possible"
         sleep 2
       else
         exit 0
@@ -192,7 +186,7 @@ if [ "${abcd}" = "a" ]; then
     password2=$(whiptail --passwordbox "\nRe-Enter Password A:\n(This is new password to login per SSH)" 10 52 "" --title "Password A" --backtitle "RaspiBlitz - Setup" 3>&1 1>&2 2>&3)
     if [ $? -eq 1 ]; then
       if [ ${emptyAllowed} -eq 0 ]; then
-        echo "CANCEL not possible"
+        echo "# CANCEL not possible"
         sleep 2
       else
         exit 0
@@ -246,7 +240,8 @@ if [ "${abcd}" = "a" ]; then
   sleep 1
 
   echo ""
-  echo "OK - password A changed for user pi, root, admin & bitcoin"
+  echo "# OK - password A changed for user pi, root, admin & bitcoin"
+  echo "error=''"
 
 ############################
 # PASSWORD B
@@ -262,7 +257,7 @@ elif [ "${abcd}" = "b" ]; then
     password1=$(whiptail --passwordbox "\nPlease enter your new Password B:\n(min 8chars, 1word, chars+number, no specials)" 10 52 "" --title "Password B" --backtitle "RaspiBlitz - Setup" 3>&1 1>&2 2>&3)
     if [ $? -eq 1 ]; then
       if [ "${emptyAllowed}" == "0" ]; then
-        echo "CANCEL not possible"
+        echo "# CANCEL not possible"
         sleep 2
       else
         exit 0
@@ -273,7 +268,7 @@ elif [ "${abcd}" = "b" ]; then
     password2=$(whiptail --passwordbox "\nRe-Enter Password B:\n" 10 52 "" --title "Password B" --backtitle "RaspiBlitz - Setup" 3>&1 1>&2 2>&3)
     if [ $? -eq 1 ]; then
       if [ "${emptyAllowed}" == "0" ]; then
-        echo "CANCEL not possible"
+        echo "# CANCEL not possible"
         sleep 2
       else
         exit 0
@@ -371,6 +366,7 @@ elif [ "${abcd}" = "b" ]; then
 
   echo "# OK -> RPC Password B changed"
   echo "# Reboot is needed (will be triggered if interactive menu was called)"
+  echo "error=''"
   sleep 3
 
 ############################
@@ -387,7 +383,7 @@ elif [ "${abcd}" = "c" ]; then
     if [ $? -eq 1 ] || [ "${oldPassword}" == "" ]; then
       sudo /home/admin/config.scripts/blitz.passwords.sh set c
     fi
-    echo "OK ... processing"
+    echo "# OK ... processing"
   fi
 
   if [ "${newPassword}" == "" ]; then
@@ -419,23 +415,20 @@ elif [ "${abcd}" = "c" ]; then
       sudo /home/admin/config.scripts/blitz.passwords.sh set c ${oldPassword}
       exit 0
     fi
-    echo "OK ... processing"
+    echo "# OK ... processing"
     # check if passwords match
     if [ "${newPassword}" != "${newPassword2}" ]; then
       dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Passwords dont Match" 6 52
       sudo /home/admin/config.scripts/blitz.passwords.sh set c ${oldPassword}
       exit 0
     fi
-    echo "OK ... processing"
+    echo "# OK ... processing"
   fi
-
-  #echo "oldPassword: ${oldPassword}"
-  #echo "newPassword: ${newPassword}"
 
   echo "# Make sure Auto-Unlocks off"
   sudo /home/admin/config.scripts/lnd.autounlock.sh off
 
-  echo "LND needs to be restarted to lock wallet first .. (please wait)"
+  echo "# LND needs to be restarted to lock wallet first .. (please wait)"
   sudo systemctl restart lnd
   sleep 2
 
@@ -445,7 +438,7 @@ elif [ "${abcd}" = "c" ]; then
   if [ "${err}" != "" ]; then
     dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Was not able to change password\n\n${err}\n${errMore}" 10 52
     clear
-    echo "# FAIL: Was not able to change password"
+    echo "error='Was not able to change password'"
     exit 0
   fi
 
@@ -456,7 +449,8 @@ elif [ "${abcd}" = "c" ]; then
 
   # final user output
   echo ""
-  echo "OK"
+  echo "#OK"
+  echo "error=''"
 
 ############################
 # PASSWORD X
@@ -524,14 +518,13 @@ elif [ "${abcd}" = "cl" ]; then
 
 # everything else
 else
-  echo "FAIL: there is no password '${abcd}' (reminder: use lower case)"
+  echo "# FAIL: there is no password '${abcd}' (reminder: use lower case)"
+  echo "error='no password ${abcd}'"
   exit 0
 fi
 
 # when started with menu ... reboot when done
 if [ "${reboot}" == "1" ]; then
-  echo "Now rebooting to activate changes ..."
+  echo "# Now rebooting to activate changes ..."
   sudo /home/admin/config.scripts/blitz.shutdown.sh reboot
-else
-  echo "..."
 fi
