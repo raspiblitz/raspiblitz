@@ -44,16 +44,17 @@ function installDependencies()
    gettext
   # additional requirements
   sudo apt-get install -y postgresql libpq-dev
-  # for cln-grpc
-  sudo apt-get install -y cargo rustfmt
-  # for pylightning
-  echo "- Install from the requirements.txt"
-  sudo -u bitcoin pip3 install --user mrkd==0.2.0
-  sudo -u bitcoin pip3 install --user mistune==0.8.4
+  # rust for cln-grpc, includes rustfmt
+  sudo -u bitcoin curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sudo -u bitcoin sh -s -- -y
+  # mrkd and mistune needs to be globally available for the build
+  sudo pip3 install mrkd==0.2.0
+  sudo pip3 install mistune==0.8.4
+  # poetry
   sudo -u bitcoin pip3 install --user poetry
   if ! grep -Eq '^PATH="$HOME/.local/bin:$PATH"' /mnt/hdd/raspiblitz.conf; then
-    echo 'PATH="$HOME/.local/bin:$PATH"' | sudo tee -a /home/bitcoin/.bashrc
+    echo 'PATH="$HOME/.local/bin:$PATH"' | sudo tee -a /home/bitcoin/.profile
   fi
+  export PATH="home/bitcoin/.local/bin:$PATH"
   sudo -u bitcoin /home/bitcoin/.local/bin/poetry install
 }
 
