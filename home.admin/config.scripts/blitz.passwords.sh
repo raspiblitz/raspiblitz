@@ -5,7 +5,7 @@ if [ "$1" == "" ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "small config script to set a passwords A,B,C & D"
  echo "blitz.passwords.sh set a [?newpassword] "
  echo "blitz.passwords.sh set b [?newpassword] "
- echo "blitz.passwords.sh set c [?oldpassword] [?newpassword] "
+ echo "blitz.passwords.sh set c [?oldpassword] [?newpassword] " # will change lnd & core lightning if installed
  echo "blitz.passwords.sh check [a|b|c] [passwordToCheck]"
  echo "or just as a password enter dialog (result as file)"
  echo "blitz.passworda.sh set [x] [text] [result-file] [?empty-allowed]"
@@ -104,12 +104,6 @@ if [ "$1" != "set" ]; then
     exit 1
 fi
 
-# for all other calls user needs to be root
-if [ "$EUID" -ne 0 ]
-  then echo "Please run as root (with sudo)"
-  exit
-fi
-
 # load raspiblitz config (if available)
 source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
@@ -181,7 +175,7 @@ if [ "${abcd}" = "a" ]; then
     password1=$(whiptail --passwordbox "\nSet new Admin/SSH Password A:\n(min 8chars, 1word, chars+number, no specials)" 10 52 "" --title "Password A" --backtitle "RaspiBlitz - Setup" 3>&1 1>&2 2>&3)
     if [ $? -eq 1 ]; then
       if [ ${emptyAllowed} -eq 0 ]; then
-        echo "CANCEL not possible"
+        echo "# CANCEL not possible"
         sleep 2
       else
         exit 0
@@ -192,7 +186,7 @@ if [ "${abcd}" = "a" ]; then
     password2=$(whiptail --passwordbox "\nRe-Enter Password A:\n(This is new password to login per SSH)" 10 52 "" --title "Password A" --backtitle "RaspiBlitz - Setup" 3>&1 1>&2 2>&3)
     if [ $? -eq 1 ]; then
       if [ ${emptyAllowed} -eq 0 ]; then
-        echo "CANCEL not possible"
+        echo "# CANCEL not possible"
         sleep 2
       else
         exit 0
@@ -202,14 +196,16 @@ if [ "${abcd}" = "a" ]; then
     # check if passwords match
     if [ "${password1}" != "${password2}" ]; then
       dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Passwords dont Match\nPlease try again ..." 6 52
-      sudo /home/admin/config.scripts/blitz.passwords.sh set a
+      # calling recursive repeat
+      /home/admin/config.scripts/blitz.passwords.sh set a
       exit 0
     fi
 
     # password zero
     if [ ${#password1} -eq 0 ]; then
       dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Password cannot be empty\nPlease try again ..." 6 52
-      sudo /home/admin/config.scripts/blitz.passwords.sh set a
+      # calling recursive repeat
+      /home/admin/config.scripts/blitz.passwords.sh set a
       exit 0
     fi
 
@@ -217,14 +213,16 @@ if [ "${abcd}" = "a" ]; then
     clearedResult=$(echo "${password1}" | tr -dc '[:alnum:]-.' | tr -d ' ')
     if [ ${#clearedResult} != ${#password1} ] || [ ${#clearedResult} -eq 0 ]; then
       dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Contains bad characters (spaces, special chars)\nPlease try again ..." 6 52
-      sudo /home/admin/config.scripts/blitz.passwords.sh set a
+      # calling recursive repeat
+      /home/admin/config.scripts/blitz.passwords.sh set a
       exit 0
     fi
 
     # password longer than 8
     if [ ${#password1} -lt 8 ]; then
       dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Password length under 8\nPlease try again ..." 6 52
-      sudo /home/admin/config.scripts/blitz.passwords.sh set a
+      # calling recursive repeat
+      /home/admin/config.scripts/blitz.passwords.sh set a
       exit 0
     fi
 
@@ -245,8 +243,8 @@ if [ "${abcd}" = "a" ]; then
   echo "admin:$newPassword" | sudo chpasswd
   sleep 1
 
-  echo ""
-  echo "OK - password A changed for user pi, root, admin & bitcoin"
+  echo "# OK - password A changed for user pi, root, admin & bitcoin"
+  echo "error=''"
 
 ############################
 # PASSWORD B
@@ -262,7 +260,7 @@ elif [ "${abcd}" = "b" ]; then
     password1=$(whiptail --passwordbox "\nPlease enter your new Password B:\n(min 8chars, 1word, chars+number, no specials)" 10 52 "" --title "Password B" --backtitle "RaspiBlitz - Setup" 3>&1 1>&2 2>&3)
     if [ $? -eq 1 ]; then
       if [ "${emptyAllowed}" == "0" ]; then
-        echo "CANCEL not possible"
+        echo "# CANCEL not possible"
         sleep 2
       else
         exit 0
@@ -273,7 +271,7 @@ elif [ "${abcd}" = "b" ]; then
     password2=$(whiptail --passwordbox "\nRe-Enter Password B:\n" 10 52 "" --title "Password B" --backtitle "RaspiBlitz - Setup" 3>&1 1>&2 2>&3)
     if [ $? -eq 1 ]; then
       if [ "${emptyAllowed}" == "0" ]; then
-        echo "CANCEL not possible"
+        echo "# CANCEL not possible"
         sleep 2
       else
         exit 0
@@ -283,14 +281,16 @@ elif [ "${abcd}" = "b" ]; then
     # check if passwords match
     if [ "${password1}" != "${password2}" ]; then
       dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Passwords dont Match\nPlease try again ..." 6 52
-      sudo /home/admin/config.scripts/blitz.passwords.sh set b
+      # calling recursive repeat
+      /home/admin/config.scripts/blitz.passwords.sh set b
       exit 0
     fi
 
     # password zero
     if [ ${#password1} -eq 0 ]; then
       dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Password cannot be empty\nPlease try again ..." 6 52
-      sudo /home/admin/config.scripts/blitz.passwords.sh set b
+      # calling recursive repeat
+      /home/admin/config.scripts/blitz.passwords.sh set b
       exit 0
     fi
 
@@ -298,14 +298,16 @@ elif [ "${abcd}" = "b" ]; then
     clearedResult=$(echo "${password1}" | tr -dc '[:alnum:]-.' | tr -d ' ')
     if [ ${#clearedResult} != ${#password1} ] || [ ${#clearedResult} -eq 0 ]; then
       dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Contains bad characters (spaces, special chars)\nPlease try again ..." 6 52
-      sudo /home/admin/config.scripts/blitz.passwords.sh set b
+      # calling recursive repeat
+      /home/admin/config.scripts/blitz.passwords.sh set b
       exit 0
     fi
 
     # password longer than 8
     if [ ${#password1} -lt 8 ]; then
       dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Password length under 8\nPlease try again ..." 6 52
-      sudo /home/admin/config.scripts/blitz.passwords.sh set b
+      # calling recursive repeat
+      /home/admin/config.scripts/blitz.passwords.sh set b
       exit 0
     fi
 
@@ -371,10 +373,12 @@ elif [ "${abcd}" = "b" ]; then
 
   echo "# OK -> RPC Password B changed"
   echo "# Reboot is needed (will be triggered if interactive menu was called)"
+  echo "error=''"
   sleep 3
 
 ############################
 # PASSWORD C
+# will change both (lnd & core lightning) if installed
 elif [ "${abcd}" = "c" ]; then
 
   oldPassword=$3
@@ -385,9 +389,10 @@ elif [ "${abcd}" = "c" ]; then
     clear
     oldPassword=$(whiptail --passwordbox "\nEnter old Password C:\n" 10 52 "" --title "Old Password C" --backtitle "RaspiBlitz - Passwords" 3>&1 1>&2 2>&3)
     if [ $? -eq 1 ] || [ "${oldPassword}" == "" ]; then
+      # calling recursive repeat
       sudo /home/admin/config.scripts/blitz.passwords.sh set c
     fi
-    echo "OK ... processing"
+    echo "# OK ... processing"
   fi
 
   if [ "${newPassword}" == "" ]; then
@@ -396,57 +401,82 @@ elif [ "${abcd}" = "c" ]; then
     # ask user for new password c
     newPassword=$(whiptail --passwordbox "\nEnter new Password C:\n" 10 52 "" --title "New Password C" --backtitle "RaspiBlitz - Passwords" 3>&1 1>&2 2>&3)
     if [ $? -eq 1 ] || [ "${newPassword}" == "" ]; then
-      sudo /home/admin/config.scripts/blitz.passwords.sh set c ${oldPassword}
+      # calling recursive repeat
+      /home/admin/config.scripts/blitz.passwords.sh set c ${oldPassword}
       exit 0
     fi
     # check new password does not contain bad characters
     clearedResult=$(echo "${newPassword}" | tr -dc '[:alnum:]-.' | tr -d ' ')
     if [ ${#clearedResult} != ${#newPassword} ] || [ ${#clearedResult} -eq 0 ]; then
       dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Contains bad characters (spaces, special chars)" 6 52
-      sudo /home/admin/config.scripts/blitz.password.sh set c ${oldPassword}
+      # calling recursive repeat
+      /home/admin/config.scripts/blitz.password.sh set c ${oldPassword}
       exit 0
     fi
     # check new password longer than 8
     if [ ${#newPassword} -lt 8 ]; then
       dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Password length under 8" 6 52
-      sudo /home/admin/config.scripts/blitz.password.sh set c ${oldPassword}
+      # calling recursive repeat
+      /home/admin/config.scripts/blitz.password.sh set c ${oldPassword}
       exit 0
     fi
 
     # ask user to retype new password c
     newPassword2=$(whiptail --passwordbox "\nEnter again new Password C:\n" 10 52 "" --title "New Password C (repeat)" --backtitle "RaspiBlitz - Passwords" 3>&1 1>&2 2>&3)
     if [ $? -eq 1 ] || [ "${newPassword}" == "" ]; then
-      sudo /home/admin/config.scripts/blitz.passwords.sh set c ${oldPassword}
+      # calling recursive repeat
+      /home/admin/config.scripts/blitz.passwords.sh set c ${oldPassword}
       exit 0
     fi
-    echo "OK ... processing"
+    echo "# OK ... processing"
     # check if passwords match
     if [ "${newPassword}" != "${newPassword2}" ]; then
       dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Passwords dont Match" 6 52
-      sudo /home/admin/config.scripts/blitz.passwords.sh set c ${oldPassword}
+      # calling recursive repeat
+      /home/admin/config.scripts/blitz.passwords.sh set c ${oldPassword}
       exit 0
     fi
-    echo "OK ... processing"
+    echo "# OK ... processing"
   fi
 
-  #echo "oldPassword: ${oldPassword}"
-  #echo "newPassword: ${newPassword}"
+  # CHANGE LND WALLET PASSWORD
+  if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
 
-  echo "# Make sure Auto-Unlocks off"
-  sudo /home/admin/config.scripts/lnd.autounlock.sh off
+    echo "# CHANGE LND - PASSWORD C (only mainnet)"
 
-  echo "LND needs to be restarted to lock wallet first .. (please wait)"
-  sudo systemctl restart lnd
-  sleep 2
+    echo "# Make sure Auto-Unlocks off"
+    sudo /home/admin/config.scripts/lnd.autounlock.sh off
 
-  err=""
-  if ! pip list | grep grpc; then sudo -H python3 -m pip install grpcio==1.38.1; fi
-  source <(sudo /home/admin/config.scripts/lnd.initwallet.py change-password mainnet $oldPassword $newPassword)
-  if [ "${err}" != "" ]; then
-    dialog --backtitle "RaspiBlitz - Setup" --msgbox "FAIL -> Was not able to change password\n\n${err}\n${errMore}" 10 52
-    clear
-    echo "# FAIL: Was not able to change password"
-    exit 0
+    echo "# LND needs to be restarted to lock wallet first .. (please wait)"
+    sudo systemctl restart lnd
+    sleep 2
+
+    err=""
+    if ! pip list | grep grpc; then
+      echo "# pip install grpc"
+      sudo -H python3 -m pip install grpcio==1.38.1 1>/dev/null 2>/dev/null
+    fi
+    source <(sudo /home/admin/config.scripts/lnd.initwallet.py change-password mainnet $oldPassword $newPassword)
+    if [ "${err}" != "" ]; then
+      echo "error='Was not able to change password'"
+      sleep 2
+      exit 0
+    fi
+
+  else
+    echo "# LND not installed/active"
+  fi
+
+  # CHANGE CORE LIGHTNING WALLET PASSWORD
+  if [ "${cl}" == "on" ] && [ "${clEncryptedHSM}" == "on" ]; then
+
+    echo "# CHANGE CORE LIGHTNING - PASSWORD C (only mainnet)"
+
+    sudo /home/admin/config.scripts/cl.hsmtool.sh change-password mainnet $oldPassword $newPassword
+    #TODO: test success
+
+  else
+    echo "# CORE LIGHTNING not installed/active/encrypted"
   fi
 
   # store password hash
@@ -456,7 +486,8 @@ elif [ "${abcd}" = "c" ]; then
 
   # final user output
   echo ""
-  echo "OK"
+  echo "#OK"
+  echo "error=''"
 
 ############################
 # PASSWORD X
@@ -484,7 +515,8 @@ elif [ "${abcd}" = "x" ]; then
     # check if passwords match
     if [ "${password1}" != "${password2}" ]; then
       dialog --backtitle "RaspiBlitz" --msgbox "FAIL -> Passwords dont Match\nPlease try again ..." 6 52
-      sudo /home/admin/config.scripts/blitz.passwords.sh set x "$3" "$4" "$5"
+      # calling recursive repeat
+      /home/admin/config.scripts/blitz.passwords.sh set x "$3" "$4" "$5"
       exit 0
     fi
 
@@ -493,7 +525,8 @@ elif [ "${abcd}" = "x" ]; then
       # password zero
       if [ ${#password1} -eq 0 ]; then
         dialog --backtitle "RaspiBlitz" --msgbox "FAIL -> Password cannot be empty\nPlease try again ..." 6 52
-        sudo /home/admin/config.scripts/blitz.passwords.sh set x "$3" "$4" "$5"
+        # calling recursive repeat
+        /home/admin/config.scripts/blitz.passwords.sh set x "$3" "$4" "$5"
         exit 0
       fi
 
@@ -501,14 +534,16 @@ elif [ "${abcd}" = "x" ]; then
       clearedResult=$(echo "${password1}" | tr -dc '[:alnum:]-.' | tr -d ' ')
       if [ ${#clearedResult} != ${#password1} ] || [ ${#clearedResult} -eq 0 ]; then
         dialog --backtitle "RaspiBlitz" --msgbox "FAIL -> Contains bad characters (spaces, special chars)\nPlease try again ..." 6 62
-        sudo /home/admin/config.scripts/blitz.password.sh set x "$3" "$4" "$5"
+        # calling recursive repeat
+        /home/admin/config.scripts/blitz.password.sh set x "$3" "$4" "$5"
         exit 0
       fi
 
       # password longer than 8
       if [ ${#password1} -lt 8 ]; then
         dialog --backtitle "RaspiBlitz" --msgbox "FAIL -> Password length under 8\nPlease try again ..." 6 52
-        sudo /home/admin/config.scripts/blitz.passwords.sh set x "$3" "$4" "$5"
+        # calling recursive repeat
+        /home/admin/config.scripts/blitz.passwords.sh set x "$3" "$4" "$5"
         exit 0
       fi
 
@@ -517,21 +552,14 @@ elif [ "${abcd}" = "x" ]; then
     # store result is file
     echo "${password1}" > "${resultFile}"
 
-elif [ "${abcd}" = "cl" ]; then
-  /home/admin/config.scripts/cl.hsmtool.sh change-password mainnet
-  # do not reboot for cl password
-  reboot=0
-
-# everything else
 else
-  echo "FAIL: there is no password '${abcd}' (reminder: use lower case)"
+  echo "# FAIL: there is no password '${abcd}' (reminder: use lower case)"
+  echo "error='no password ${abcd}'"
   exit 0
 fi
 
 # when started with menu ... reboot when done
 if [ "${reboot}" == "1" ]; then
-  echo "Now rebooting to activate changes ..."
+  echo "# Now rebooting to activate changes ..."
   sudo /home/admin/config.scripts/blitz.shutdown.sh reboot
-else
-  echo "..."
 fi
