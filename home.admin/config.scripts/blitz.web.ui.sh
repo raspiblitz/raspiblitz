@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# main repo: https://github.com/cstenglein/raspiblitz-web
+
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ]; then
   echo "Manage RaspiBlitz Web UI"
@@ -17,7 +19,7 @@ fi
 
 DEFAULT_GITHUB_USER="cstenglein"
 DEFAULT_GITHUB_REPO="raspiblitz-web"
-DEFAULT_GITHUB_BRANCH="setupui"
+DEFAULT_GITHUB_BRANCH="master"
 
 ###################
 # ON / INSTALL

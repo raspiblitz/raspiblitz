@@ -9,13 +9,13 @@ CLVERSION=v0.11.0.1
 # CLVERSION="063366ed7e3b7cc12a8d1681acc2b639cf07fa23"
 
 # https://github.com/ElementsProject/lightning/tree/master/contrib/keys
-# PGPsigner="rustyrussel"
-# PGPpubkeyLink="https://raw.githubusercontent.com/ElementsProject/lightning/master/contrib/keys/rustyrussell.txt"
-# PGPpubkeyFingerprint="D9200E6CD1ADB8F1"
+PGPsigner="rustyrussel"
+PGPpubkeyLink="https://raw.githubusercontent.com/ElementsProject/lightning/master/contrib/keys/rustyrussell.txt"
+PGPpubkeyFingerprint="D9200E6CD1ADB8F1"
 
-PGPsigner="cdecker"
-PGPpubkeyLink="https://raw.githubusercontent.com/ElementsProject/lightning/master/contrib/keys/${PGPsigner}.txt"
-PGPpubkeyFingerprint="A26D6D9FE088ED58"
+#PGPsigner="cdecker"
+#PGPpubkeyLink="https://raw.githubusercontent.com/ElementsProject/lightning/master/contrib/keys/${PGPsigner}.txt"
+#PGPpubkeyFingerprint="A26D6D9FE088ED58"
 
 # help
 if [ $# -eq 0 ]||[ "$1" = "-h" ]||[ "$1" = "--help" ];then
@@ -44,14 +44,17 @@ function installDependencies()
    gettext
   # additional requirements
   sudo apt-get install -y postgresql libpq-dev
-  # for pylightning
-  echo "- Install from the requirements.txt"
-  sudo -u bitcoin pip3 install --user mrkd==0.2.0
-  sudo -u bitcoin pip3 install --user mistune==0.8.4
+  # rust for cln-grpc, includes rustfmt
+  sudo -u bitcoin curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sudo -u bitcoin sh -s -- -y
+  # mrkd and mistune needs to be globally available for the build
+  sudo pip3 install mrkd==0.2.0
+  sudo pip3 install mistune==0.8.4
+  # poetry
   sudo -u bitcoin pip3 install --user poetry
   if ! grep -Eq '^PATH="$HOME/.local/bin:$PATH"' /mnt/hdd/raspiblitz.conf; then
-    echo 'PATH="$HOME/.local/bin:$PATH"' >> /home/bitcoin/.bashrc
+    echo 'PATH="$HOME/.local/bin:$PATH"' | sudo tee -a /home/bitcoin/.profile
   fi
+  export PATH="home/bitcoin/.local/bin:$PATH"
   sudo -u bitcoin /home/bitcoin/.local/bin/poetry install
 }
 
