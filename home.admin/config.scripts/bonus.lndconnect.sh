@@ -8,6 +8,13 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  exit 1
 fi
 
+# check if lnd is on
+source <(/home/admin/_cache.sh get lnd)
+if [ "${lnd}" != on ]; then
+  echo "error='lnd not active'"
+  exit 1
+fi
+
 # make sure commandline tool is available
 sudo apt-get install -y qrencode 1>/dev/null 2>/dev/null
 
