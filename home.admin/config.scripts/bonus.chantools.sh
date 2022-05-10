@@ -6,7 +6,7 @@
 
 lndVersion=$(lncli -v | cut -d " " -f 3 | cut -d"." -f2)
 if [ $lndVersion -eq 14 ]; then
-  pinnedVersion="0.10.1"
+  pinnedVersion="0.10.4"
 else
   echo "# LND not installed or a version not tested with chantools"
   lncli -v
@@ -37,7 +37,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   downloadDir="/home/admin/download"  # edit your download directory
   PGPpkeys="https://keybase.io/guggero/pgp_keys.asc"
-  PGPcheck="4FC70F07310028424EFC20A8E4256593F177720"
+  PGPcheck="F4FC70F07310028424EFC20A8E4256593F177720"
 
   echo "Detect CPU architecture ..."
   isARM=$(uname -m | grep -c 'arm')
@@ -113,10 +113,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   # install
   sudo -u admin tar -xzf ${binaryName}
-  sudo -u bitcoin mkdir -p /home/bitcoin/bin 2>/dev/null
-  sudo install -m 0755 -o bitcoin -g bitcoin -t /home/bitcoin/bin chantools-linux-${OSversion}-v${pinnedVersion}/*
+  sudo install -m 0755 -o root -g root -t /usr/local/bin/ chantools-linux-${OSversion}-v${pinnedVersion}/*
   sleep 3
-  installed=$(sudo -u bitcoin /home/bitcoin/bin/chantools --version)
+  installed=$(sudo -u bitcoin chantools --version)
   if [ ${#installed} -eq 0 ]; then
     echo
     echo "# !!! BUILD FAILED --> Was not able to install Channel Tools"
@@ -138,16 +137,14 @@ fi
 
 # switch off
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
-
   # setting value in raspi blitz config
   /home/admin/config.scripts/blitz.conf.sh set chantools "off"
 
   echo "# REMOVING Channel Tools"
   sudo rm -rf /home/admin/download/chantools*
-  sudo rm -rf /home/bitcoin/bin/chantools*
+  sudo rm -rf /usr/local/bin/chantools*
   echo "# OK, chantools is removed."
   exit 0
-
 fi
 
 echo "# FAIL - Unknown Parameter $1"

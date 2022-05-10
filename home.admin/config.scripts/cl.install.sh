@@ -36,7 +36,7 @@ fi
 
 function installDependencies()
 {
-  echo "- Install build dependencies"
+  echo "- installDependencies()"
   # from https://lightning.readthedocs.io/INSTALL.html#to-build-on-ubuntu
   sudo apt-get install -y \
    autoconf automake build-essential git libtool libgmp-dev \
