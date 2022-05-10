@@ -5,9 +5,13 @@
 - New: WebUI
 - New: BackendAPI
 - Update: Bitcoin Core v23.0 [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-23.0.md)
-- Update: C-lightning v0.11.0.1 [details](https://github.com/ElementsProject/lightning/releases/tag/v0.11.0.1)
-- Update: LND 0.14.3-beta [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.14.3-beta)
+- Update: Core Lightning (CLN - formerly C-lightning) v0.11.0.1 [details](https://github.com/ElementsProject/lightning/releases/tag/v0.11.0.1)
+- Update: LND v0.14.3 [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.14.3-beta)
+- Update: RTL v0.12.3 [details](https://github.com/Ride-The-Lightning/RTL/releases/tag/v0.12.3)
+- Update: C-lightningREST v0.7.0 [details](https://github.com/Ride-The-Lightning/c-lightning-REST/releases/tag/v0.7.0)
+- Update: Channel Tools (chantools) v0.10.4 [details](https://github.com/guggero/chantools/blob/master/README.md)
 - Update: BTCPayServer v1.5.1 [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.5.1)
+- Info: Run RaspiBlitz on VirtualBox & TrueNAS [details](https://github.com/rootzoll/raspiblitz/tree/dev/alternative.platforms)
 
 ## What's new in Version 1.7.2 of RaspiBlitz?
 
