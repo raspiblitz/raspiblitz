@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # https://github.com/romanz/electrs/releases
-ELECTRSVERSION="v0.9.5"
+ELECTRSVERSION="v0.9.7"
 # https://github.com/romanz/electrs/commits/master
 # ELECTRSVERSION="3041e89cd2fb377541b929d852ef6298c2d4e60a"
 
@@ -437,7 +437,7 @@ WantedBy=multi-user.target
     echo "whitelist=download@127.0.0.1" | sudo tee -a /mnt/hdd/bitcoin/bitcoin.conf
     bitcoindRestart=yes
   fi
-  
+
   source <(/home/admin/_cache.sh get state)
   if [ "${state}" == "ready" ]; then
     if [ "${bitcoindRestart}" == "yes" ]; then
