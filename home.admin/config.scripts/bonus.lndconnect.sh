@@ -4,7 +4,7 @@
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "# config script to connect mobile apps with lnd connect"
  echo "# will autodetect dyndns, sshtunnel or TOR"
- echo "# bonus.lndconnect.sh [zap-ios|zap-android|zeus-ios|zeus-android|shango-ios|shango-android|sendmany-android|fullynoded-lnd] [?ip|tor]"
+ echo "# bonus.lndconnect.sh [zap-ios|zap-android|zeus-ios|zeus-android|shango-ios|shango-android|sendmany-android|fullynoded-lnd] [?ip|tor] [?key-value]"
  exit 1
 fi
 
@@ -205,6 +205,11 @@ fi
 # build lndconnect
 # see spec here: https://github.com/LN-Zap/lndconnect/blob/master/lnd_connect_uri.md
 lndconnect="lndconnect://${host}:${port}${macaroonParameter}${certParameter}"
+
+if [ "$3" == "key-value" ]; then
+  echo "lndconnect='${lndconnect}'"
+  exit 0
+fi
 
 # display qr code image on LCD
 sudo /home/admin/config.scripts/blitz.display.sh qr "${lndconnect}"

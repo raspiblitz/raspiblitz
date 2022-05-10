@@ -66,13 +66,14 @@ if [ ${#exportType} -eq 0 ]; then
 ########################
 elif [ "${exportType}" = "hexstring" ]; then
 
+  adminMacaroon=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/${network}/${chain}net/admin.macaroon)
+  invoiceMacaroon=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/${network}/${chain}net/invoice.macaroon)
+  readonlyMacaroon=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/${network}/${chain}net/readonly.macaroon)
   clear
   echo "###### HEXSTRING EXPORT ######"
   echo ""
-  adminMacaroon=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/${network}/${chain}net/admin.macaroon)
   echo "adminMacaroon=${adminMacaroon}"
   echo ""
-  invoiceMacaroon=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/${network}/${chain}net/invoice.macaroon)
   echo "invoiceMacaroon=${invoiceMacaroon}"
   echo ""
   readonlyMacaroon=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/${network}/${chain}net/readonly.macaroon)
@@ -110,7 +111,6 @@ elif [ "${exportType}" = "btcpay" ]; then
 
   if [ "$2" == "key-value" ]; then
     echo "connectionString='${connectionString}'"
-    echo "error=''"
     exit 1
   fi
 
