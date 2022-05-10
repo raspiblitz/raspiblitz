@@ -1,0 +1,56 @@
+#!/bin/bash
+
+# using https://github.com/foundObjects/zram-swap
+VERSION="205ea1ec5b169f566e5e98ead794e9daf90cf245"
+
+# command info
+if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
+  echo "config script to install zram"
+  echo "blitz.zram.sh [on|off]"
+  echo "using https://github.com/foundObjects/zram-swap"
+  exit 1
+fi
+
+mkdir /home/admin/download 2>/dev/null
+cd /home/admin/download || exit 1
+if [ ! -d zram-swap ]; then
+  sudo -u admin git clone https://github.com/foundObjects/zram-swap.git
+  cd zram-swap || exit 1
+  git reset --hard $VERSION || exit 1
+else
+  cd zram-swap || exit 1
+fi
+
+if [ "$1" = on ]; then
+  if [ $(sudo cat /proc/swaps | grep -c zram) -eq 0 ]; then
+    # install zram to 1/2 of RAM, activate and prioritize
+    sudo /home/admin/download/zram-swap/install.sh
+
+    # make better use of zram
+    echo "\
+vm.vfs_cache_pressure=500
+vm.swappiness=100
+vm.dirty_background_ratio=1
+vm.dirty_ratio=50
+" | sudo tee -a  /etc/sysctl.conf
+
+    # apply
+    sudo sysctl --system
+
+  else
+    echo "# zram is already installed and active:"
+    sudo cat /proc/swaps
+  fi
+
+  exit 0
+fi
+
+if [ "$1" = off ]; then
+  sudo /home/admin/download/zram-swap/install --uninstall
+  sudo rm /etc/default/zram-swap
+  sudo rm -rf /home/admin/download/zram-swap
+  exit 0
+fi
+
+echo "FAIL - Unknown Parameter $1"
+exit 1
