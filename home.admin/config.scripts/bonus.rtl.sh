@@ -160,7 +160,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       exit 1
     fi
     # install
-    echo "# Run: npm install"
+    echo "# Running npm install ..."
     export NG_CLI_ANALYTICS=false
     sudo -u rtl npm install --only=prod --logLevel warn
     if ! [ $? -eq 0 ]; then
@@ -183,7 +183,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo chown -R rtl:rtl /mnt/hdd/app-data/rtl
 
   echo "# Create Systemd Service: ${systemdService}.service (Template)"
-  echo "
+  echo "\
 # Systemd unit for ${systemdService}
 
 [Unit]
