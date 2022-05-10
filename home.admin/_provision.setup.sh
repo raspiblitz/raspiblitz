@@ -85,7 +85,7 @@ echo "File Exists: /mnt/hdd/${network}/${network}.conf --> ${confExists}" >> ${l
 
 # set password B as RPC password (from setup file)
 echo "# setting PASSWORD B" >> ${logFile}
-/home/admin/config.scripts/blitz.setpassword.sh b "${passwordB}" >> ${logFile}
+/home/admin/config.scripts/blitz.passwords.sh set b "${passwordB}" >> ${logFile}
 
 # optimize RAM for blockchain validation (bitcoin only)
 if [ "${network}" == "bitcoin" ]; then

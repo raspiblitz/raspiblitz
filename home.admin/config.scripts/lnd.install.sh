@@ -4,17 +4,17 @@
 ## based on https://raspibolt.github.io/raspibolt/raspibolt_40_lnd.html#lightning-lnd
 ## see LND releases: https://github.com/lightningnetwork/lnd/releases
 ## !!!! If you change here - make sure to also change interims version in lnd.update.sh !!!
-lndVersion="0.14.2-beta"
+lndVersion="0.14.3-beta"
 
 # olaoluwa
-# PGPauthor="roasbeef"
-# PGPpkeys="https://keybase.io/roasbeef/pgp_keys.asc"
-# PGPcheck="E4D85299674B2D31FAA1892E372CBD7633C61696"
+PGPauthor="roasbeef"
+PGPpkeys="https://keybase.io/roasbeef/pgp_keys.asc"
+PGPcheck="E4D85299674B2D31FAA1892E372CBD7633C61696"
 
 # guggero
-PGPauthor="guggero"
-PGPpkeys="https://keybase.io/guggero/pgp_keys.asc"
-PGPcheck="F4FC70F07310028424EFC20A8E4256593F177720"
+# PGPauthor="guggero"
+# PGPpkeys="https://keybase.io/guggero/pgp_keys.asc"
+# PGPcheck="F4FC70F07310028424EFC20A8E4256593F177720"
 
 # bitconner
 #PGPauthor="bitconner"
@@ -411,7 +411,7 @@ alias ${netprefix}lndconf=\"sudo nano /home/bitcoin/.lnd/${netprefix}lnd.conf\"\
       # only ask on mainnet for passwordC - for the testnet/signet its default 'raspiblitz'
       if [ "${CHAIN}" == "mainnet" ]; then
         tempFile="/var/cache/raspiblitz/passwordc.tmp"
-        sudo /home/admin/config.scripts/blitz.setpassword.sh x "PASSWORD C - LND Wallet Password" ${tempFile}
+        sudo /home/admin/config.scripts/blitz.passwords.sh set x "PASSWORD C - LND Wallet Password" ${tempFile}
         passwordC=$(sudo cat ${tempFile})
         sudo rm ${tempFile}
       else

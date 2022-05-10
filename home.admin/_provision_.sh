@@ -184,11 +184,11 @@ sed -i "s/^setupStep=.*/setupStep=100/g" /home/admin/raspiblitz.info
 ##########################
 /home/admin/_cache.sh set message "Installing Services"
 
-echo "### RUNNING PROVISIONING SERVICES ###" >> ${logFile}
-
 # BLITZ WEB SERVICE
 echo "Provisioning BLITZ WEB SERVICE - run config script" >> ${logFile}
-/home/admin/config.scripts/blitz.web.sh on >> ${logFile} 2>&1
+/home/admin/config.scripts/blitz.web.sh https-on >> ${logFile} 2>&1
+
+echo "### RUNNING PROVISIONING SERVICES ###" >> ${logFile}
 
 # BITCOIN INTERIMS UPDATE
 if [ ${#bitcoinInterimsUpdate} -gt 0 ]; then

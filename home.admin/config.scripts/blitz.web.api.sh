@@ -17,6 +17,12 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ];
   exit 1
 fi
 
+# check if started with sudo
+if [ "$EUID" -ne 0 ]; then 
+  echo "error='run as root'"
+  exit 1
+fi
+
 DEFAULT_GITHUB_USER="fusion44"
 DEFAULT_GITHUB_REPO="blitz_api"
 DEFAULT_GITHUB_BRANCH="main"
@@ -39,14 +45,16 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   fi
 
   echo "# INSTALL Web API ..."
-  sudo apt install -y redis
-  sudo rm -r /home/admin/blitz_api 2>/dev/null
-  cd /home/admin
-  # git clone https://github.com/fusion44/blitz_api.git /home/admin/blitz_api
-  git clone https://github.com/${DEFAULT_GITHUB_USER}/${DEFAULT_GITHUB_REPO}.git /home/admin/blitz_api
+  rm -r /root/blitz_api 2>/dev/null
+  cd /root
+  # git clone https://github.com/fusion44/blitz_api.git /root/blitz_api
+  git clone https://github.com/${DEFAULT_GITHUB_USER}/${DEFAULT_GITHUB_REPO}.git /root/blitz_api
   cd blitz_api
   git checkout ${DEFAULT_GITHUB_BRANCH}
   pip install -r requirements.txt
+  chown -R admin:admin /root/blitz_api
+  chmod a+x /root
+  chmod -R a+x /root/blitz_api
 
   # build the config and set unique secret (its OK to be a new secret every install/upadte)
   /home/admin/config.scripts/blitz.web.api.sh update-config
@@ -61,10 +69,10 @@ Wants=network.target
 After=network.target
 
 [Service]
-WorkingDirectory=/home/admin/blitz_api
+WorkingDirectory=/root/blitz_api
 # before every start update the config with latest credentials/settings
 ExecStartPre=-/home/admin/config.scripts/blitz.web.api.sh update-config
-ExecStart=sudo -u admin /usr/bin/python -m uvicorn app.main:app --port 11111 --host=0.0.0.0 --root-path /api
+ExecStart=/usr/bin/python -m uvicorn app.main:app --port 11111 --host=0.0.0.0 --root-path /api
 User=root
 Group=root
 Type=simple
@@ -74,19 +82,18 @@ StandardError=journal
 
 # Hardening measures
 PrivateTmp=true
-ProtectSystem=full
 NoNewPrivileges=true
 PrivateDevices=true
 
 [Install]
 WantedBy=multi-user.target
-" | sudo tee /etc/systemd/system/blitzapi.service
+" | tee /etc/systemd/system/blitzapi.service
 
-  sudo systemctl enable blitzapi
-  sudo systemctl start blitzapi
+  systemctl enable blitzapi
+  systemctl start blitzapi
 
-  # TODO: remove after experimental step
-  sudo ufw allow 11111 comment 'WebAPI Develop'
+  # TODO: remove after experimental step (only have forward on nginx:80 /api)
+  ufw allow 11111 comment 'WebAPI Develop'
 
   source <(/home/admin/_cache.sh export internet_localip)
 
@@ -111,12 +118,12 @@ if [ "$1" = "update-config" ]; then
     chain="main"
   fi
 
-  cd /home/admin/blitz_api
+  cd /root/blitz_api
   cp ./.env_sample ./.env
   dateStr=$(date)
   echo "# Update Web API CONFIG (${dateStr})"
-  RPCUSER=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcuser | cut -c 9-)
-  RPCPASS=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
+  RPCUSER=$(sudo cat /mnt/hdd/${network}/${network}.conf 2>/dev/null | grep rpcuser | cut -c 9-)
+  RPCPASS=$(sudo cat /mnt/hdd/${network}/${network}.conf 2>/dev/null | grep rpcpassword | cut -c 13-)
   if [ "${RPCUSER}" == "" ]; then
     RPCUSER="raspibolt"
   fi
@@ -128,7 +135,9 @@ if [ "$1" = "update-config" ]; then
   sed -i "s/^bitcoind_ip_testnet=.*/bitcoind_ip_testnet=127.0.0.1/g" ./.env
   sed -i "s/^bitcoind_user=.*/bitcoind_user=${RPCUSER}/g" ./.env
   sed -i "s/^bitcoind_pw=.*/bitcoind_pw=${RPCPASS}/g" ./.env
-  
+  sed -i "s/^# platform=.*/platform=raspiblitz/g" ./.env
+  sed -i "s/^platform=.*/platform=raspiblitz/g" ./.env
+
   # configure LND
   if [ "${lightning}" == "lnd" ]; then
 
@@ -178,7 +187,7 @@ if [ "$1" = "update-code" ]; then
 
   echo "# Update Web API CODE"
   sudo systemctl stop blitzapi
-  cd /home/admin/blitz_api
+  cd /root/blitz_api
   git fetch
   git pull
   pip install -r requirements.txt
@@ -194,10 +203,11 @@ fi
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   echo "# UNINSTALL Web API"
-  sudo systemctl stop blitzapi
-  sudo systemctl disable blitzapi
-  sudo rm /etc/systemd/system/blitzapi.service
-  sudo rm -r /home/admin/blitz_api
+  systemctl stop blitzapi
+  systemctl disable blitzapi
+  rm /etc/systemd/system/blitzapi.service
+  rm -r /root/blitz_api
+  rm -r /root/.blitz_api 2>/dev/null
   exit 0
 
 fi

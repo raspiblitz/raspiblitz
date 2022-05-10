@@ -62,7 +62,7 @@ if [ "${setPasswordB}" == "1" ]; then
  if [ "${passwordB}" != "" ]; then
     # set password B as RPC password
     echo "# setting PASSWORD B" >> ${logFile}
-    /home/admin/config.scripts/blitz.setpassword.sh b "${passwordB}" >> ${logFile}
+    /home/admin/config.scripts/blitz.passwords.sh set b "${passwordB}" >> ${logFile}
  else
     /home/admin/config.scripts/blitz.error.sh _provision.migration.sh "missing-passwordb" "FAIL: Password B should be set but was empty! Running with default." "" ${logFile}
     exit 4

@@ -180,6 +180,9 @@ if [ "$1" = "status" ]; then
     echo "localIP='${localIP}'"
     echo "httpPort='5000'"
     echo "httpsPort='5001'"
+    echo "httpsForced='1'"
+    echo "httpsSelfsigned='1'" # TODO: change later if IP2Tor+LetsEncrypt is active
+    echo "authMethod='none'"
     echo "publicIP='${publicIP}'"
 
     # check funding source
@@ -228,7 +231,7 @@ if [ "$1" = "status" ]; then
     isDead=$(sudo systemctl status lnbits | grep -c 'inactive (dead)')
     if [ ${isDead} -eq 1 ]; then
       echo "error='Service Failed'"
-      exit 1
+      exit 0
     fi
 
   else
@@ -393,6 +396,12 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   # get funding source and check that its available
   fundingsource="$2"
+
+  # run with default funding source if not given as parameter
+  if [ "${fundingsource}" == "" ]; then
+    echo "# running with default lightning as funing source: ${lightning}"
+    fundingsource="${lightning}"
+  fi
 
   if [ "${fundingsource}" == "lnd" ]; then
     if [ "${lnd}" != "on" ]; then
@@ -559,6 +568,9 @@ EOF
   fi
 
   echo "# OK install done ... might need to restart or call: sudo systemctl start lnbits"
+  
+  # needed for API/WebUI as signal that install ran thru 
+  echo "result='OK'"
   exit 0
 fi
 
@@ -740,7 +752,8 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # setting value in raspi blitz config
   /home/admin/config.scripts/blitz.conf.sh set LNBits "off"
 
-  echo "OK LNbits is uninstalled"
+  # needed for API/WebUI as signal that install ran thru 
+  echo "result='OK'"
   exit 0
 fi
 

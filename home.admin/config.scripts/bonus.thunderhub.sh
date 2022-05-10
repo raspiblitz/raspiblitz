@@ -6,7 +6,7 @@ THUBVERSION="v0.13.6"
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "config script to install, update or uninstall ThunderHub"
- echo "bonus.thunderhub.sh [on|off|menu|update]"
+ echo "bonus.thunderhub.sh [on|off|menu|update|status]"
  echo "install $THUBVERSION by default"
  exit 1
 fi
@@ -20,20 +20,39 @@ PGPpubkeyFingerprint="4403F1DFBE779457"
 source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
 
-# show info menu
-if [ "$1" = "menu" ]; then
+if [ "$1" = "status" ] || [ "$1" = "menu" ]; then
 
   # get network info
+  isInstalled=$(sudo ls /etc/systemd/system/thunderhub.service 2>/dev/null | grep -c 'thunderhub.service')
   localip=$(hostname -I | awk '{print $1}')
   toraddress=$(sudo cat /mnt/hdd/tor/thunderhub/hostname 2>/dev/null)
   fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
+  httpPort="3010"
+  httpsPort="3011"
+
+  if [ "$1" = "status" ]; then
+    echo "installed='${isInstalled}'"
+    echo "localIP='${localip}'"
+    echo "httpPort='${httpPort}'"
+    echo "httpsPort='${httpsPort}'"
+    echo "httpsForced='0'"
+    echo "httpsSelfsigned='1'"
+    echo "authMethod='password_b'"
+    echo "toraddress='${toraddress}'"
+    exit
+  fi
+
+fi
+
+# show info menu
+if [ "$1" = "menu" ]; then
 
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
     # Info with TOR
     sudo /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
     whiptail --title " ThunderHub " --msgbox "Open in your local web browser:
-http://${localip}:3010\n
-https://${localip}:3011 with Fingerprint:
+http://${localip}:${httpPort}\n
+https://${localip}:${httpsPort} with Fingerprint:
 ${fingerprint}\n
 Use your Password B to login.\n
 Hidden Service address for TOR Browser (see LCD for QR):\n${toraddress}
@@ -42,8 +61,8 @@ Hidden Service address for TOR Browser (see LCD for QR):\n${toraddress}
   else
     # Info without TOR
     whiptail --title " ThunderHub " --msgbox "Open in your local web browser:
-http://${localip}:3010\n
-Or ttps://${localip}:3011 with Fingerprint:
+http://${localip}:${httpPort}\n
+Or ttps://${localip}:${httpsPort} with Fingerprint:
 ${fingerprint}\n
 Use your Password B to login.\n
 Activate TOR to access the web interface from outside your local network.
@@ -253,10 +272,15 @@ WantedBy=multi-user.target
     if [ "${state}" == "ready" ]; then
       echo "# OK - the thunderhub.service is enabled, system is ready so starting service"
       sudo systemctl start thunderhub
+      echo "# Wait startup grace period 60 secs ... "
+      sleep 60
     else
       echo "# OK - the thunderhub.service is enabled, to start manually use: 'sudo systemctl start thunderhub'"
     fi
   fi
+
+  # needed for API/WebUI as signal that install ran thru 
+  echo "result='OK'"
   exit 0
 fi
 
@@ -293,6 +317,8 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # setting value in raspi blitz config
   /home/admin/config.scripts/blitz.conf.sh set thunderhub "off"
 
+  # needed for API/WebUI as signal that install ran thru 
+  echo "result='OK'"
   exit 0
 fi
 
@@ -344,6 +370,7 @@ if [ "$1" = "update" ]; then
   echo
   echo "# Starting the ThunderHub service ... *** "
   sudo systemctl start thunderhub
+
   exit 0
 fi
 
