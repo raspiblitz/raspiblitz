@@ -5,7 +5,7 @@ VERSION="205ea1ec5b169f566e5e98ead794e9daf90cf245"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
-  echo "config script to install zram"
+  echo "config script to install ZRAM"
   echo "blitz.zram.sh [on|off]"
   echo "using https://github.com/foundObjects/zram-swap"
   exit 1
@@ -36,19 +36,23 @@ vm.dirty_ratio=50
 
     # apply
     sudo sysctl --system
-
+    echo "# ZRAM is installed and activated"
   else
-    echo "# zram is already installed and active:"
-    sudo cat /proc/swaps
+    echo "# ZRAM was already installed and active."
   fi
 
+  echo "Current swap usage:"
+  sudo cat /proc/swaps
   exit 0
 fi
 
 if [ "$1" = off ]; then
-  sudo /home/admin/download/zram-swap/install --uninstall
+  sudo /home/admin/download/zram-swap/install.sh --uninstall
   sudo rm /etc/default/zram-swap
   sudo rm -rf /home/admin/download/zram-swap
+  echo "ZRAM was removed"
+  echo "Current swap usage:"
+  sudo cat /proc/swaps
   exit 0
 fi
 
