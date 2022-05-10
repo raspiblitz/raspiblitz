@@ -3,8 +3,15 @@
 # command info
 if [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "tool to export macaroons & tls.cert"
- echo "lnd.export.sh [hexstring|scp|http|btcpay]"
+ echo "lnd.export.sh [hexstring|scp|http|btcpay] [?key-value]"
  exit 1
+fi
+
+# check if lnd is on
+source <(/home/admin/_cache.sh get lnd)
+if [ "${lnd}" != on ]; then
+  echo "error='lnd not active'"
+  exit 1
 fi
 
 # 1. parameter -> the type of export
@@ -100,6 +107,12 @@ elif [ "${exportType}" = "btcpay" ]; then
 
   # construct connection string
   connectionString="type=lnd-rest;server=https://${ip}:${port}/;macaroon=${macaroon};certthumbprint=${certthumb}"
+
+  if [ "$2" == "key-value" ]; then
+    echo "connectionString='${connectionString}'"
+    echo "error=''"
+    exit 1
+  fi
 
   clear
   echo "###### BTCPAY CONNECTION STRING ######"
