@@ -37,7 +37,6 @@ if [ $(grep -c "^sparko" < ${CLCONF}) -gt 0 ];then
     echo "# The Sparko plugin is not present but in config"
     sed -i "/^sparko/d" ${CLCONF}
     rm -rf /home/bitcoin/${netprefix}cl-plugins-enabled/sparko
-    /home/admin/config.scripts/blitz.conf.sh set ${netprefix}sparko "off"
   fi
 fi
 
@@ -47,7 +46,6 @@ if [ $(grep -c "^http-pass" < ${CLCONF}) -gt 0 ];then
     echo "# The clHTTPplugin is not present but in config"
     sed -i "/^http-pass/d" ${CLCONF}
     rm -rf /home/bitcoin/cl-plugins-enabled/c-lightning-http-plugin
-    /home/admin/config.scripts/blitz.conf.sh set clHTTPplugin "off"
   fi
 fi
 
@@ -57,7 +55,6 @@ if [ $(grep -c "^feeadjuster" < ${CLCONF}) -gt 0 ];then
     echo "# The feeadjuster plugin is not present but in config"
     sed -i "/^feeadjuster/d" ${CLCONF}
     rm -rf /home/bitcoin/${netprefix}cl-plugins-enabled/feeadjuster.py
-    /home/admin/config.scripts/blitz.conf.sh set ${netprefix}feeadjuster "off"
   fi
 fi
 
@@ -65,5 +62,14 @@ if [ "${LNBitsFunding}" = "${netprefix}cl" ]; then
   # https://github.com/rootzoll/raspiblitz/issues/3007
   if [ $(grep -c "^rpc-file-mode=0660" < ${CLCONF}) -eq 0 ]; then
     echo "rpc-file-mode=0660" | tee -a ${CLCONF}
+  fi
+fi
+
+if [ $(grep -c "^grpc-port" < ${CLCONF}) -gt 0 ];then
+  if [ ! -f /home/bitcoin/${netprefix}cl-plugins-enabled/cln-grpc ]\
+    || [ "$(eval echo \$${netprefix}cln-grpc-port)" = "off" ]; then
+    echo "# The cln-grpc plugin is not present but in config"
+    sed -i "/^grpc-port/d" ${CLCONF}
+    rm -rf /home/bitcoin/${netprefix}cl-plugins-enabled/cln-grpc
   fi
 fi
