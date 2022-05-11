@@ -23,10 +23,10 @@ echo "# Running 'cl.rest.sh $*'"
 
 if [ "$1" = connect ];then
   echo "# Allowing port ${portprefix}6100 through the firewall"
-  sudo ufw allow "${portprefix}6100" comment "${netprefix}clrest"
+  sudo ufw allow "${portprefix}6100" comment "${netprefix}clrest" 1>/dev/null
   localip=$(ip addr | grep 'state UP' -A2 | grep -E -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
   # hidden service to https://xx.onion
-  /home/admin/config.scripts/tor.onion-service.sh ${netprefix}clrest 443 ${portprefix}6100
+  /home/admin/config.scripts/tor.onion-service.sh ${netprefix}clrest 443 ${portprefix}6100 1>/dev/null
 
   toraddress=$(sudo cat /mnt/hdd/tor/${netprefix}clrest/hostname)
   hex_macaroon=$(xxd -plain /home/bitcoin/c-lightning-REST/certs/access.macaroon | tr -d '\n')
