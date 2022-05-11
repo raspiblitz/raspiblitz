@@ -12,7 +12,7 @@ if [ $# -eq 0 ]||[ "$1" = "-h" ]||[ "$1" = "--help" ];then
   echo "The same macaroon and certs will be used for the parallel networks"
   echo
   echo "Usage:"
-  echo "cl.rest.sh [on|off|connect] <mainnet|testnet|signet>"
+  echo "cl.rest.sh [on|off|connect] <mainnet|testnet|signet> [?key-value]"
   echo
   exit 1
 fi
@@ -31,6 +31,16 @@ if [ "$1" = connect ];then
   toraddress=$(sudo cat /mnt/hdd/tor/${netprefix}clrest/hostname)
   hex_macaroon=$(xxd -plain /home/bitcoin/c-lightning-REST/certs/access.macaroon | tr -d '\n')
   url="https://${localip}:${portprefix}6100/"
+  lndconnect="lndconnect://${toraddress}:443?macaroon=${hex_macaroon}"
+
+  if [ "$3" == "key-value" ]; then
+    echo "toraddress='${toraddress}'"
+    echo "local='${url}'"
+    echo "macaroon='${hex_macaroon}'"
+    echo "connectstring='${lndconnect}'"
+    exit 0
+  fi
+
   #string="${url}?${hex_macaroon}"
   #sudo /home/admin/config.scripts/blitz.display.sh qr "$string"
   #clear
