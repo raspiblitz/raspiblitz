@@ -44,8 +44,6 @@ function installDependencies()
    gettext
   # additional requirements
   sudo apt-get install -y postgresql libpq-dev
-  # rust for cln-grpc, includes rustfmt
-  sudo -u bitcoin curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sudo -u bitcoin sh -s -- -y
   # mrkd and mistune needs to be globally available for the build
   sudo pip3 install mrkd==0.2.0
   sudo pip3 install mistune==0.8.4
