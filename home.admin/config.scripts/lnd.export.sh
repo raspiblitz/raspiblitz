@@ -88,6 +88,13 @@ elif [ "${exportType}" = "hexstring" ]; then
 ########################
 elif [ "${exportType}" = "btcpay" ]; then
 
+  # lnd needs to be unlocked
+  source <(/home/admin/_cache.sh get ln_lnd_mainnet_locked)
+  if [ "${ln_lnd_mainnet_locked}" == "1" ]; then
+    echo "error='lnd wallet needs to be unlocked'"
+    exit 1
+  fi
+
   # take public IP as default
   # TODO: IP2TOR --> check if there is a forwarding for LND REST oe ask user to set one up
   #ip="${publicIP}"
