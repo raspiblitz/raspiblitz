@@ -34,7 +34,7 @@ if [ "$1" = connect ];then
   lndconnect="lndconnect://${toraddress}:443?macaroon=${hex_macaroon}"
 
   if [ "$3" == "key-value" ]; then
-    echo "toraddress='${toraddress}'"
+    echo "toraddress='${toraddress}:443'"
     echo "local='${url}'"
     echo "macaroon='${hex_macaroon}'"
     echo "connectstring='${lndconnect}'"
