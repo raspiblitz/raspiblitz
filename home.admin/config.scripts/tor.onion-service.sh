@@ -102,8 +102,8 @@ HiddenServicePort $toPort 127.0.0.1:$fromPort" | sudo tee -a "${torrc_services}"
   sudo cp "${torrc_services}" /var/cache/raspiblitz/tmp
   sudo chmod 777 /var/cache/raspiblitz/tmp
   sudo chown -R admin:admin /var/cache/raspiblitz/tmp
-  sudo awk 'NF > 0 {blank=0} NF == 0 {blank++} blank < 2' "${torrc_services}" > /var/cache/raspiblitz/tmp
-  sudo mv /var/cache/raspiblitz/tmp "${torrc_services}"
+  sudo awk 'NF > 0 {blank=0} NF == 0 {blank++} blank < 2' "${torrc_services}" > /var/cache/raspiblitz/tmp/services
+  sudo mv /var/cache/raspiblitz/tmp/services "${torrc_services}"
   sudo chmod 644 "${torrc_services}"
   sudo chown bitcoin:bitcoin "${torrc_services}"
 

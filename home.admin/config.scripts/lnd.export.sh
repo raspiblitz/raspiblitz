@@ -3,8 +3,15 @@
 # command info
 if [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "tool to export macaroons & tls.cert"
- echo "lnd.export.sh [hexstring|scp|http|btcpay]"
+ echo "lnd.export.sh [hexstring|scp|http|btcpay] [?key-value]"
  exit 1
+fi
+
+# check if lnd is on
+source <(/home/admin/_cache.sh get lnd)
+if [ "${lnd}" != on ]; then
+  echo "error='lnd not active'"
+  exit 1
 fi
 
 # 1. parameter -> the type of export
@@ -59,13 +66,14 @@ if [ ${#exportType} -eq 0 ]; then
 ########################
 elif [ "${exportType}" = "hexstring" ]; then
 
+  adminMacaroon=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/${network}/${chain}net/admin.macaroon)
+  invoiceMacaroon=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/${network}/${chain}net/invoice.macaroon)
+  readonlyMacaroon=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/${network}/${chain}net/readonly.macaroon)
   clear
   echo "###### HEXSTRING EXPORT ######"
   echo ""
-  adminMacaroon=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/${network}/${chain}net/admin.macaroon)
   echo "adminMacaroon=${adminMacaroon}"
   echo ""
-  invoiceMacaroon=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/${network}/${chain}net/invoice.macaroon)
   echo "invoiceMacaroon=${invoiceMacaroon}"
   echo ""
   readonlyMacaroon=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/${network}/${chain}net/readonly.macaroon)
@@ -79,6 +87,13 @@ elif [ "${exportType}" = "hexstring" ]; then
 # BTCPAY Connection String
 ########################
 elif [ "${exportType}" = "btcpay" ]; then
+
+  # lnd needs to be unlocked
+  source <(/home/admin/_cache.sh get ln_lnd_mainnet_locked)
+  if [ "${ln_lnd_mainnet_locked}" == "1" ]; then
+    echo "error='lnd wallet needs to be unlocked'"
+    exit 1
+  fi
 
   # take public IP as default
   # TODO: IP2TOR --> check if there is a forwarding for LND REST oe ask user to set one up
@@ -100,6 +115,11 @@ elif [ "${exportType}" = "btcpay" ]; then
 
   # construct connection string
   connectionString="type=lnd-rest;server=https://${ip}:${port}/;macaroon=${macaroon};certthumbprint=${certthumb}"
+
+  if [ "$2" == "key-value" ]; then
+    echo "connectionString='${connectionString}'"
+    exit 1
+  fi
 
   clear
   echo "###### BTCPAY CONNECTION STRING ######"
