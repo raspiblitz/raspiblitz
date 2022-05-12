@@ -137,8 +137,9 @@ if [ "$1" = "prestart" ]; then
   if [ "${ElectRS}" == "on" ]; then
 
     # CHECK THAT ELECTRS INDEX IS BUILD (WAITLOOP)
-    # electrs listening in port 50001 means index is build
-    isElectrumReady=$(netstat -n | grep -c "50001")
+    # electrs listening in port 50001 means index is build 
+    # Use flags: t = tcp protocol only  /  a = list all connection states (includes LISTEN)  /  n = don't resolve names => no dns spam
+    isElectrumReady=$(netstat -tan | grep -c "50001")
     if [ "${isElectrumReady}" == "0" ]; then
       echo "# electrs is ON but not ready .. might still building index - kick systemd service into fail/wait/restart"
       exit 1
