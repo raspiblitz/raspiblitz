@@ -2,7 +2,7 @@
 # https://github.com/ZmnSCPxj/clboss#operating
 
 # https://github.com/ZmnSCPxj/clboss/releases
-CLBOSSVERSION="0.12"
+CLBOSSVERSION="0.13A"
 
 # command info
 if [ $# -lt 1 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ];then
