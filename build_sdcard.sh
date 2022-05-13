@@ -751,11 +751,13 @@ if ${fatpack}; then
   echo "* Optional Packages (may be needed for extended features)"
   sudo apt install -y qrencode secure-delete fbi ssmtp unclutter xterm python3-pyqt5 xfonts-terminus apache2-utils nginx python3-jinja2 socat libatlas-base-dev hexyl autossh
 
-  echo "* Adding lnd ..."
+  echo "* Adding LND ..."
   /home/admin/config.scripts/lnd.install.sh install || exit 1
 
-  echo "* Adding c-lightning ..."
+  echo "* Adding Core Lightning ..."
   /home/admin/config.scripts/cl.install.sh install || exit 1
+  echo "* Adding the cln-grpc plugin ..."
+  /home/admin/config.scripts/cl-plugin.cln-grpc.sh install || exit 1
 
   # *** UPDATE FALLBACK NODE LIST (only as part of fatpack) *** see https://github.com/rootzoll/raspiblitz/issues/1888
   echo "*** FALLBACK NODE LIST ***"

@@ -44,8 +44,6 @@ function installDependencies()
    gettext
   # additional requirements
   sudo apt-get install -y postgresql libpq-dev
-  # rust for cln-grpc, includes rustfmt
-  sudo -u bitcoin curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sudo -u bitcoin sh -s -- -y
   # mrkd and mistune needs to be globally available for the build
   sudo pip3 install mrkd==0.2.0
   sudo pip3 install mistune==0.8.4
@@ -381,8 +379,21 @@ alias ${netprefix}clconf=\"sudo\
   echo "${netprefix}lightning-cli help"
   echo
 
-  # setting value in the raspiblitz.conf
+  # setting values in the raspiblitz.conf
   /home/admin/config.scripts/blitz.conf.sh set ${netprefix}cl on
+  # blitz.conf.sh needs sudo access - cannot be run in cl.check.sh
+  if [ ! -f /home/bitcoin/${netprefix}cl-plugins-enabled/sparko ];then
+    /home/admin/config.scripts/blitz.conf.sh set ${netprefix}sparko "off"
+  fi
+  if [ ! -f /home/bitcoin/cl-plugins-enabled/c-lightning-http-plugin ];then
+    /home/admin/config.scripts/blitz.conf.sh set clHTTPplugin "off"
+  fi
+  if [ ! -f /home/bitcoin/${netprefix}cl-plugins-enabled/feeadjuster.py ]; then
+    /home/admin/config.scripts/blitz.conf.sh set ${netprefix}feeadjuster "off"
+  fi
+  if [ ! -f /home/bitcoin/${netprefix}cl-plugins-enabled/cln-grpc ];then
+    /home/admin/config.scripts/blitz.conf.sh set ${netprefix}cln-grpc "off"
+  fi
 
   # if this is the first lightning mainnet turned on - make default
   if [ "${CHAIN}" == "mainnet" ] && [ "${lightning}" == "" ]; then
