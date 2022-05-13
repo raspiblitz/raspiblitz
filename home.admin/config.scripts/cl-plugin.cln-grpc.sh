@@ -18,11 +18,11 @@ source <(/home/admin/config.scripts/network.aliases.sh getvars cl $2)
 PORT="${portprefix}4772"
 
 function buildGRPCplugin() {
-  echo "- build the cln-grpc plugin"
+  echo "- Build the cln-grpc plugin"
   if [ ! -f /home/bitcoin/cl-plugins-available/cln-grpc/debug/cln-grpc ]; then
     # check if the source code is present
     if [ ! -d /home/bitcoin/lightning/plugins/grpc-plugin ];then
-      echo "* Adding c-lightning ..."
+      echo "* Adding Core Lightning ..."
       /home/admin/config.scripts/cl.install.sh install || exit 1
     fi
     # rust for cln-grpc, includes rustfmt
@@ -47,13 +47,13 @@ elif [ "$1" = on ]; then
    /home/bitcoin/${netprefix}cl-plugins-enabled/
 
   # blitz.conf.sh set [key] [value] [?conffile] <noquotes>
-  /home/admin/config.scripts/blitz.conf.sh set grpc-port "${PORT}" "${CLCONF}" noquotes
-  /home/admin/config.scripts/blitz.conf.sh set "${netprefix}cln-grpc-port" "${PORT}"
+  /home/admin/config.scripts/blitz.conf.sh set "grpc-port" "${PORT}" "${CLCONF}" noquotes
+  /home/admin/config.scripts/blitz.conf.sh set "${netprefix}clnGRPCport" "${PORT}"
 
   # firewall
-  sudo ufw allow "${PORT}" comment "${netprefix}cln-grpc-port"
+  sudo ufw allow "${PORT}" comment "${netprefix}clnGRPCport"
   # Tor
-  /home/admin/config.scripts/tor.onion-service.sh "${netprefix}cln-grpc-port" "${PORT}" "${PORT}"
+  /home/admin/config.scripts/tor.onion-service.sh "${netprefix}clnGRPCport" "${PORT}" "${PORT}"
   exit 0
 
 elif [ "$1" = off ]; then
@@ -61,7 +61,7 @@ elif [ "$1" = off ]; then
   rm -rf /home/bitcoin/${netprefix}cl-plugins-enabled/cln-grpc
   /home/admin/config.scripts/blitz.conf.sh set ${netprefix}cln-grpc-port "off"
   # firewall
-  sudo ufw deny "${PORT}" comment "cln-grpc-port"
+  sudo ufw deny "${PORT}" comment "clnGRPCport"
   # Tor
   /home/admin/config.scripts/tor.onion-service.sh off ${netprefix}cln-grpc-port
   exit 0
