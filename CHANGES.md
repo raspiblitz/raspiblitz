@@ -10,6 +10,7 @@
 - Update: LND v0.14.3 [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.14.3-beta)
 - Update: RTL v0.12.3 [details](https://github.com/Ride-The-Lightning/RTL/releases/tag/v0.12.3)
 - Update: C-lightningREST v0.7.0 [details](https://github.com/Ride-The-Lightning/c-lightning-REST/releases/tag/v0.7.0)
+- Update: CLBOSS 0.13A [details](https://github.com/ZmnSCPxj/clboss/releases/tag/0.13A)
 - Update: Channel Tools (chantools) v0.10.4 [details](https://github.com/guggero/chantools/blob/master/README.md)
 - Update: Electrum Server in Rust (electrs) v0.9.7 [details](https://github.com/romanz/electrs/blob/master/RELEASE-NOTES.md#097-apr-30-2022)
 - Update: BTCPayServer v1.5.1 [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.5.1)
