@@ -31,6 +31,10 @@ source <(/home/admin/config.scripts/network.aliases.sh getvars cl $2)
 echo "# Running 'cl.rest.sh $*'"
 
 if [ "$1" = connect ];then
+  if ! systemctl is-active --quiet ${netprefix}clrest; then
+    /home/admin/config.scripts/cl.rest.sh on ${CHAIN}
+  fi
+
   echo "# Allowing port ${portprefix}6100 through the firewall"
   sudo ufw allow "${portprefix}6100" comment "${netprefix}clrest" 1>/dev/null
   localip=$(ip addr | grep 'state UP' -A2 | grep -E -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
@@ -91,7 +95,7 @@ if [ "$1" = connect ];then
   exit 0
 fi
 
-if [ "$1" = on ];then
+if [ "$1" = on ]; then
   echo "# Setting up c-lightning-REST for $CHAIN"
 
   sudo systemctl stop ${netprefix}clrest
@@ -164,7 +168,7 @@ WantedBy=multi-user.target
   echo
 fi
 
-if [ $1 = off ];then
+if [ "$1" = off ];then
   echo "# Removing c-lightning-REST for ${CHAIN}"
   sudo systemctl stop ${netprefix}clrest
   sudo systemctl disable ${netprefix}clrest
