@@ -1,6 +1,7 @@
 #!/bin/bash
-# https://github.com/Ride-The-Lightning/RTL
-RTLVERSION="v0.12.1"
+
+# https://github.com/Ride-The-Lightning/RTL/releases
+RTLVERSION="v0.12.3"
 
 # check and load raspiblitz config
 # to know which network is running
@@ -11,11 +12,15 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "# config script for RideTheLightning $RTLVERSION WebInterface"
   echo "# able to run intances for lnd and cl parallel"
   echo "# mainnet and testnet instances can run parallel"
-  echo "# bonus.rtl.sh [on|off|menu] <lnd|cl> <mainnet|testnet|signet>"
+  echo "# bonus.rtl.sh [on|off|menu] <lnd|cl> <mainnet|testnet|signet> <purge>"
   echo "# bonus.rtl.sh connect-services"
   echo "# bonus.rtl.sh prestart <lnd|cl> <mainnet|testnet|signet>"
   exit 1
 fi
+
+PGPsigner="saubyk"
+PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
+PGPpubkeyFingerprint="00C9E2BC2E45666F"
 
 echo "# Running: 'bonus.rtl.sh $*'"
 
@@ -159,11 +164,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     cd /home/rtl/RTL
     # check https://github.com/Ride-The-Lightning/RTL/releases/
     sudo -u rtl git reset --hard $RTLVERSION
-    PGPsigner="saubyk"
-    PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
-    PGPpubkeyFingerprint="00C9E2BC2E45666F"
+
     sudo -u rtl /home/admin/config.scripts/blitz.git-verify.sh \
      "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" "${RTLVERSION}" || exit 1
+
     # from https://github.com/Ride-The-Lightning/RTL/commits/master
     # git checkout 917feebfa4fb583360c140e817c266649307ef72
     if [ -f /home/rtl/RTL/LICENSE ]; then
@@ -174,7 +178,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       exit 1
     fi
     # install
-    echo "# Run: npm install"
+    echo "# Running npm install ..."
     export NG_CLI_ANALYTICS=false
     sudo -u rtl npm install --only=prod --logLevel warn
     if ! [ $? -eq 0 ]; then
@@ -197,7 +201,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo chown -R rtl:rtl /mnt/hdd/app-data/rtl
 
   echo "# Create Systemd Service: ${systemdService}.service (Template)"
-  echo "
+  echo "\
 # Systemd unit for ${systemdService}
 
 [Unit]

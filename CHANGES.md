@@ -11,6 +11,7 @@
 - Update: RTL v0.12.3 [details](https://github.com/Ride-The-Lightning/RTL/releases/tag/v0.12.3)
 - Update: C-lightningREST v0.7.0 [details](https://github.com/Ride-The-Lightning/c-lightning-REST/releases/tag/v0.7.0)
 - Update: Channel Tools (chantools) v0.10.4 [details](https://github.com/guggero/chantools/blob/master/README.md)
+- Update: Electrum Server in Rust (electrs) v0.9.7 [details](https://github.com/romanz/electrs/blob/master/RELEASE-NOTES.md#097-apr-30-2022)
 - Update: BTCPayServer v1.5.1 [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.5.1)
 - Info: Run RaspiBlitz on VirtualBox & TrueNAS [details](https://github.com/rootzoll/raspiblitz/tree/dev/alternative.platforms)
 
