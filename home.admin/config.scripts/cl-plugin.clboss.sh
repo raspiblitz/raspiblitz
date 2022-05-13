@@ -2,7 +2,7 @@
 # https://github.com/ZmnSCPxj/clboss#operating
 
 # https://github.com/ZmnSCPxj/clboss/releases
-CLBOSSVERSION="0.10"
+CLBOSSVERSION="0.12"
 
 # command info
 if [ $# -lt 1 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ];then
@@ -24,7 +24,7 @@ if [ $1 = on ];then
    
     # download tarball
     sudo -u bitcoin wget \
-     https://github.com/ZmnSCPxj/clboss/releases/download/v${CLBOSSVERSION}/clboss-${CLBOSSVERSION}.tar.gz \
+     https://github.com/ZmnSCPxj/clboss/releases/download/${CLBOSSVERSION}/clboss-${CLBOSSVERSION}.tar.gz \
      -O /home/bitcoin/cl-plugins-available/clboss-${CLBOSSVERSION}.tar.gz || exit 1
   fi
 
