@@ -5,6 +5,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ];then
   echo
   echo "Install the cln-grpc plugin for CLN"
   echo "Usage:"
+  echo "cl-plugin.cln-grpc.sh install - called by build_sdcard.sh"
   echo "cl-plugin.cln-grpc.sh [on|off] <testnet|mainnet|signet>"
   echo
   exit 1
@@ -36,29 +37,34 @@ function buildGRPCplugin() {
 
 if [ "$1" = install ]; then
   buildGRPCplugin
+  exit 0
 
 elif [ "$1" = on ]; then
   buildGRPCplugin
+
+  # symlink to plugin directory
   sudo ln -s /home/bitcoin/cl-plugins-available/cln-grpc/debug/cln-grpc \
    /home/bitcoin/${netprefix}cl-plugins-enabled/
 
   # blitz.conf.sh set [key] [value] [?conffile] <noquotes>
-  /home/admin/config.scripts/blitz.conf.sh set grpc-port "${PORT}" ${CLCONF} noquotes
-  /home/admin/config.scripts/blitz.conf.sh set ${netprefix}cln-grpc-port "${PORT}"
+  /home/admin/config.scripts/blitz.conf.sh set grpc-port "${PORT}" "${CLCONF}" noquotes
+  /home/admin/config.scripts/blitz.conf.sh set "${netprefix}cln-grpc-port" "${PORT}"
 
   # firewall
   sudo ufw allow "${PORT}" comment "${netprefix}cln-grpc-port"
   # Tor
   /home/admin/config.scripts/tor.onion-service.sh "${netprefix}cln-grpc-port" "${PORT}" "${PORT}"
+  exit 0
 
 elif [ "$1" = off ]; then
-  sed -i "/^grpc-port/d" ${CLCONF}
+  sed -i "/^grpc-port/d" "${CLCONF}"
   rm -rf /home/bitcoin/${netprefix}cl-plugins-enabled/cln-grpc
   /home/admin/config.scripts/blitz.conf.sh set ${netprefix}cln-grpc-port "off"
   # firewall
   sudo ufw deny "${PORT}" comment "cln-grpc-port"
   # Tor
   /home/admin/config.scripts/tor.onion-service.sh off ${netprefix}cln-grpc-port
+  exit 0
 
 else
   echo "FAIL - Unknown Parameter $1"
