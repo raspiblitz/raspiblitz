@@ -190,36 +190,36 @@ Continue with building the SDcard: https://github.com/rootzoll/raspiblitz#build-
 ---
 
 ## Python upgrade
-
-```bash
-# select version
-pythonVersion="3.10.1"
-majorPythonVersion=$(echo "$pythonVersion" | awk -F. '{print $1"."$2}' )
-# update and upgrade
-sudo apt update
-sudo apt upgrade -y
-# dependencies
-sudo apt install wget software-properties-common build-essential libnss3-dev zlib1g-dev libgdbm-dev libncurses5-dev libssl-dev libffi-dev libreadline-dev libsqlite3-dev libbz2-dev -y
-# download
-wget https://www.python.org/ftp/python/${pythonVersion}/Python-${pythonVersion}.tgz
-# optional signature for verification
-wget https://www.python.org/ftp/python/${pythonVersion}/Python-${pythonVersion}.tgz.asc
-# get PGP pubkey of Pablo Galindo Salgado
-gpg --recv-key CFDCA245B1043CF2A5F97865FFE87404168BD847
-# check for: Good signature from "Pablo Galindo Salgado <pablogsal@gmail.com>"
-gpg --verify Python-${pythonVersion}.tgz.asc
-# unzip
-tar xvf Python-${pythonVersion}.tgz
-cd Python-${pythonVersion}
-# configure
-./configure --enable-optimizations
-# install
-sudo make altinstall
-# move the python binary to the expected directory
-sudo mv $(which python${majorPythonVersion}) /usr/bin/
-# check
-ls -la /usr/bin/python${majorPythonVersion}
-```
+* run the commands below in the terminal line-by-line
+  ```bash
+  # select version
+  pythonVersion="3.10.4"
+  majorPythonVersion=$(echo "$pythonVersion" | awk -F. '{print $1"."$2}' )
+  # update and upgrade
+  sudo apt update
+  sudo apt upgrade -y
+  # dependencies
+  sudo apt install wget software-properties-common build-essential libnss3-dev zlib1g-dev libgdbm-dev libncurses5-dev libssl-dev libffi-dev libreadline-dev libsqlite3-dev libbz2-dev -y
+  # download
+  wget https://www.python.org/ftp/python/${pythonVersion}/Python-${pythonVersion}.tgz
+  # optional signature for verification
+  wget https://www.python.org/ftp/python/${pythonVersion}/Python-${pythonVersion}.tgz.asc
+  # get PGP pubkey of Pablo Galindo Salgado
+  gpg --recv-key CFDCA245B1043CF2A5F97865FFE87404168BD847
+  # check for: Good signature from "Pablo Galindo Salgado <pablogsal@gmail.com>"
+  gpg --verify Python-${pythonVersion}.tgz.asc
+  # unzip
+  tar xvf Python-${pythonVersion}.tgz
+  cd Python-${pythonVersion}
+  # configure
+  ./configure --enable-optimizations
+  # install
+  sudo make altinstall
+  # move the python binary to the expected directory
+  sudo mv $(which python${majorPythonVersion}) /usr/bin/
+  # check
+  ls -la /usr/bin/python${majorPythonVersion}
+  ```
 
 ## Create an image release for amd64
 
