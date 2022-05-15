@@ -7,6 +7,7 @@
   - [Download](#download)
   - [Verify](#verify)
   - [Write the image to the OS disk](#write-the-image-to-the-os-disk)
+  - [Extend the partition](#extend-the-partition)
   - [Start the Raspiblitz setup](#start-the-raspiblitz-setup)
 - [Virtual Machine](#virtual-machine)
   - [Create the base image](#create-the-base-image)
@@ -32,6 +33,7 @@
 - [Verify the downloaded image](#verify-the-downloaded-image)
   - [Linux instructions](#linux-instructions)
 - [Create a torrent](#create-a-torrent)
+- [Switch off sleep, suspend and hibernation](#switch-off-sleep-suspend-and-hibernation)
 
 ## Minimum requirements
 * ARMv8 or x86 processor (64 bit)
@@ -81,6 +83,8 @@ All testers are welcome. Open an issue for your specific board to collaborate an
 ### Write the image to the OS disk
 * On a separate computer: write the image to the USB connected OSdisk or SDcard with [Balena Etcher](https://www.balena.io/etcher/)
 * On the same computer: boot an Ubuntu Live from USB with which the image can be downloaded, verified and flashed on an internal or USB connected OS disk
+### Extend the partition
+* start Disks or any partition manager and extend the partition to the full size of the disk on the OS disk (just flashed)
 
 ### Start the Raspiblitz setup
 * Assemble and start the computer.
@@ -444,3 +448,8 @@ Work notes partially based on: https://github.com/rootzoll/raspiblitz/blob/v1.7/
     # Compare the sha256 hash to the hash of the image file (Look for the output 'OK'):
     shasum -c *.sha256
     ```
+## Switch off sleep, suspend and hibernation
+* Run in the terminal:
+  ```
+  sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
+  ```
