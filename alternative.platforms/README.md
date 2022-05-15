@@ -219,6 +219,13 @@ Continue with building the SDcard: https://github.com/rootzoll/raspiblitz#build-
   sudo mv $(which python${majorPythonVersion}) /usr/bin/
   # check
   ls -la /usr/bin/python${majorPythonVersion}
+  # make the new version the default
+  sudo rm /etc/alternatives/python
+  sudo update-alternatives --install /usr/bin/python python /usr/bin/python${majorPythonVersion} 1
+  sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python${majorPythonVersion} 1
+  # check
+  python --version
+  python3 --version
   ```
 
 ## Create an image release for amd64
