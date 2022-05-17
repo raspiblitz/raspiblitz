@@ -475,6 +475,14 @@ if [ "$1" = "status" ]; then
       # SupTronics 2.5" SATA HDD Shield X825 v1.5
       hddAdapterUSAP=1
     fi
+    if [ "${hddAdapter}" == "2109:0715" ]; then
+      # ICY BOX IB-247-C31 Type-C Enclosure for 2.5inch SATA Drives
+      hddAdapterUSAP=1
+    fi
+    if [ "${hddAdapter}" == "174c:235c" ]; then
+      # Cable Matters USB 3.1 Type-C Gen2 External SATA SSD Enclosure
+      hddAdapterUSAP=1
+    fi
 
     echo "hddAdapterUSAP=${hddAdapterUSAP}"
   fi
