@@ -120,6 +120,15 @@ range_argument(){
   fi
 }
 
+apt_install(){
+    sudo apt install -y ${@}
+    if [ $? -eq 100 ]; then
+        echo "FAIL! apt failed to install needed packages!"
+        echo ${@}
+        exit 1
+    fi
+}
+
 general_utils="curl"
 ## loop all general_utils to see if program is installed (placed on PATH) and if not, add to the list of commands to be installed
 for prog in ${general_utils}; do
@@ -128,7 +137,8 @@ done
 ## if any of the required programs are not installed, update and if successfull, install packages
 if [ -n "${general_utils_install}" ]; then
   echo -e "\n*** SOFTWARE UPDATE ***"
-  sudo apt update -y && sudo apt install -y ${general_utils_install}
+  sudo apt update -y || exit 1
+  apt_install ${general_utils_install}
 fi
 
 ## use default values for variables if empty
@@ -291,7 +301,7 @@ general_utils="policykit-1 htop git curl bash-completion vim jq dphys-swapfile b
 python_dependencies="python3-venv python3-dev python3-wheel python3-jinja2 python3-pip"
 server_utils="rsync net-tools xxd netcat openssh-client openssh-sftp-server sshpass psmisc ufw sqlite3"
 [ "${baseimage}" = "armbian" ] && armbian_dependencies="armbian-config" # add armbian-config
-sudo apt install -y ${general_utils} ${python_dependencies} ${server_utils} ${armbian_dependencies}
+apt_install ${general_utils} ${python_dependencies} ${server_utils} ${armbian_dependencies}
 sudo apt clean -y
 sudo apt autoremove -y
 
@@ -339,9 +349,9 @@ fi
 
 # special prepare when Raspbian
 if [ "${baseimage}" = "raspios_arm64" ] || [ "${baseimage}" = "debian_rpi64" ]; then
-
-  echo -e "\n*** PREPARE RASPBERRY OS VARIANTS ***"
-  sudo apt install -y raspi-config
+    
+  echo -e "\n*** PREPARE RASPBERRY OS VARIANTS ***"    
+  apt_install raspi-config
   # do memory split (16MB)
   sudo raspi-config nonint do_memory_split 16
   # set to wait until network is available on boot (0 seems to yes)
@@ -590,7 +600,7 @@ echo -e "\n*** RASPIBLITZ EXTRAS ***"
 # screen for background processes
 # tmux for multiple (detachable/background) sessions when using SSH https://github.com/rootzoll/raspiblitz/issues/990
 # fzf install a command-line fuzzy finder (https://github.com/junegunn/fzf)
-sudo apt -y install tmux screen fzf
+apt_install tmux screen fzf
 
 sudo bash -c "echo '' >> /home/admin/.bashrc"
 sudo bash -c "echo '# https://github.com/rootzoll/raspiblitz/issues/1784' >> /home/admin/.bashrc"
@@ -654,7 +664,7 @@ sudo bash -c "echo '# end of pam-auth-update config' >> /etc/pam.d/common-sessio
 # *** fail2ban ***
 # based on https://raspibolt.org/security.html#fail2ban
 echo "*** HARDENING ***"
-sudo apt install -y --no-install-recommends python3-systemd fail2ban
+apt_install --no-install-recommends python3-systemd fail2ban
 
 # *** CACHE DISK IN RAM & KEYVALUE-STORE***
 echo "Activating CACHE RAM DISK ... "
@@ -742,14 +752,10 @@ if ${fatpack}; then
   echo -e "\n*** FATPACK ***"
 
   echo "* Adding nodeJS Framework ..."
-  sudo /home/admin/config.scripts/bonus.nodejs.sh on
-  if [ "$?" != "0" ]; then
-    echo "FATPACK FAILED"
-    exit 1
-  fi
+  sudo /home/admin/config.scripts/bonus.nodejs.sh on || exit 1
 
   echo "* Optional Packages (may be needed for extended features)"
-  sudo apt install -y qrencode secure-delete fbi ssmtp unclutter xterm python3-pyqt5 xfonts-terminus apache2-utils nginx python3-jinja2 socat libatlas-base-dev hexyl autossh
+  apt_install qrencode secure-delete fbi ssmtp unclutter xterm python3-pyqt5 xfonts-terminus apache2-utils nginx python3-jinja2 socat libatlas-base-dev hexyl autossh
 
   echo "* Adding LND ..."
   /home/admin/config.scripts/lnd.install.sh install || exit 1
