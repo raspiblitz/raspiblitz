@@ -4,13 +4,11 @@
 echo "get raspiblitz config"
 source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
-source <(/home/admin/config.scripts/lnd.autonat.sh info)
 
 echo "services default values"
 if [ ${#autoPilot} -eq 0 ]; then autoPilot="off"; fi
 if [ ${#autoUnlock} -eq 0 ]; then autoUnlock="off"; fi
 if [ ${#runBehindTor} -eq 0 ]; then runBehindTor="off"; fi
-if [ ${#autoNatDiscovery} -eq 0 ]; then autoNatDiscovery="off"; fi
 if [ ${#networkUPnP} -eq 0 ]; then networkUPnP="off"; fi
 if [ ${#touchscreen} -eq 0 ]; then touchscreen=0; fi
 if [ ${#lcdrotate} -eq 0 ]; then lcdrotate=0; fi
@@ -134,7 +132,6 @@ if [ "${lndNode}" == "on" ]; then
   OPTIONS+=(u '-LND Auto-Unlock' ${autoUnlock})
   OPTIONS+=(x '-LND StaticChannelBackup on Nextcloud' ${NextcloudBackup})
   OPTIONS+=(e '-LND StaticChannelBackup USB Drive' ${LocalBackup})
-  OPTIONS+=(l '-LND UPnP (AutoNAT)' ${autoNatDiscovery})
 fi
 
 # C-Lightning & options/PlugIns
@@ -211,27 +208,6 @@ else
   echo "BTC UPnP Setting unchanged."
 fi
 
-# LND AutoNAT
-choice="off"; check=$(echo "${CHOICES}" | grep -c "l")
-if [ ${check} -eq 1 ]; then choice="on"; fi
-if [ "${autoNatDiscovery}" != "${choice}" ] && [ "${lndNode}" == "on" ]; then
-  echo "AUTO NAT Setting changed .."
-  anychange=1
-  if [ "${choice}" = "on" ]; then
-    echo "Starting autoNAT ..."
-    /home/admin/config.scripts/lnd.autonat.sh on
-    autoNatDiscovery="on"
-    needsReboot=1
-  else
-    echo "Stopping autoNAT ..."
-    /home/admin/config.scripts/lnd.autonat.sh off
-    autoNatDiscovery="off"
-    needsReboot=1
-  fi
-else
-  echo "LND AUTONAT Setting unchanged."
-fi
-
 # Tor process choice
 choice="off"; check=$(echo "${CHOICES}" | grep -c "t")
 if [ ${check} -eq 1 ]; then choice="on"; fi
@@ -248,8 +224,6 @@ RaspiBlitz will now install/activate Tor & after reboot run behind it.
 Please keep in mind that thru your LND node id & your previous IP history with your internet provider your lightning node could still be linked to your personal id even when running behind Tor. To unlink you from that IP history its recommended that after the switch/reboot to Tor you also use the REPAIR > RESET-LND option to create a fresh LND wallet. That might involve closing all channels & move your funds out of RaspiBlitz before that RESET-LND.
 " 16 76
 
-    # make sure AutoNAT & UPnP is off
-    /home/admin/config.scripts/lnd.autonat.sh off
     /home/admin/config.scripts/network.upnp.sh off
   fi
 
