@@ -22,16 +22,16 @@ if IS_WIN32_ENV:
 else:
     sys.path.insert(1, '/home/admin/config.scripts')
 
-from lndlibs import rpc_pb2 as ln
+from lndlibs import lightning_pb2 as ln
 try:
-    from lndlibs import rpc_pb2_grpc as lnrpc
+    from lndlibs import lightning_pb2_grpc as lnrpc
 except ModuleNotFoundError as err:
     log.error("ModuleNotFoundError - most likely an issue with incompatible Python3 import.\n"
               "Please run the following two lines to fix this: \n"
               "\n"
               "sed -i -E '1 a from __future__ import absolute_import' "
-              "/home/admin/config.scripts/lndlibs/rpc_pb2_grpc.py\n"
-              "sed -i -E 's/^(import.*_pb2)/from . \\1/' /home/admin/config.scripts/lndlibs/rpc_pb2_grpc.py")
+              "/home/admin/config.scripts/lndlibs/lightning_pb2_grpc.py\n"
+              "sed -i -E 's/^(import.*_pb2)/from . \\1/' /home/admin/config.scripts/lndlibs/lightning_pb2_grpc.py")
     sys.exit(1)
 
 if not IS_WIN32_ENV:

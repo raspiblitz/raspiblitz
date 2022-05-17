@@ -1,7 +1,6 @@
 #!/bin/bash
 # see issue: https://github.com/rootzoll/raspiblitz/issues/646
 # and issue: https://github.com/rootzoll/raspiblitz/issues/809
-# to work it needs to be based on Raspbian Desktop base image
 # to check debug logs: sudo cat /home/pi/.cache/lxsession/LXDE-pi/run.log
 
 source /home/admin/raspiblitz.info
@@ -51,12 +50,12 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   /home/admin/python3-env-lnd/bin/pip install /home/admin/raspiblitz/home.admin/BlitzTUI/ 
 
   # make sure lndlibs are patched for compatibility for both Python2 and Python3
-  if ! grep -Fxq "from __future__ import absolute_import" /home/admin/config.scripts/lndlibs/rpc_pb2_grpc.py; then
-    sed -i -E '1 a from __future__ import absolute_import' /home/admin/config.scripts/lndlibs/rpc_pb2_grpc.py
+  if ! grep -Fxq "from __future__ import absolute_import" /home/admin/config.scripts/lndlibs/lightning_pb2_grpc.py; then
+    sed -i -E '1 a from __future__ import absolute_import' /home/admin/config.scripts/lndlibs/lightning_pb2_grpc.py
   fi
 
-  if ! grep -Eq "^from . import.*" /home/admin/config.scripts/lndlibs/rpc_pb2_grpc.py; then
-    sed -i -E 's/^(import.*_pb2)/from . \1/' /home/admin/config.scripts/lndlibs/rpc_pb2_grpc.py
+  if ! grep -Eq "^from . import.*" /home/admin/config.scripts/lndlibs/lightning_pb2_grpc.py; then
+    sed -i -E 's/^(import.*_pb2)/from . \1/' /home/admin/config.scripts/lndlibs/lightning_pb2_grpc.py
   fi
 
   # switch to desktop login
@@ -136,11 +135,7 @@ EOF
     echo "LCD is rotated into default - no touchscreen rotate"
   fi
 
-  # mark touchscreen as switched ON in config
-  if [ ${#touchscreen} -eq 0 ]; then
-    echo "touchscreen=0" >> /mnt/hdd/raspiblitz.conf
-  fi
-  sudo sed -i 's/^touchscreen=.*/touchscreen=1/g' /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set touchscreen "1"
 
   echo "OK - a restart is needed: sudo shutdown -r now"
   exit 0
@@ -236,7 +231,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   sudo rm -f /etc/X11/xorg.conf.d/40-libinput.conf >/dev/null
 
   # mark touchscreen as switched OFF in config
-  sudo sed -i 's/^touchscreen=.*/touchscreen=0/g' /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set touchscreen "0"
 
   echo "OK - a restart is needed: sudo shutdown -r now"
   exit 0

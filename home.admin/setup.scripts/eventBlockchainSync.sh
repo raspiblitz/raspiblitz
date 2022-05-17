@@ -2,92 +2,101 @@
 # this is an dialog that handles all UI events during setup that require a "info & wait" with no interaction
 
 # get basic system information
-# these are the same set of infos the WebGUI dialog/controler has
+# these are the same set of infos the WebGUI dialog/controller has
 source /home/admin/_version.info
 source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf 2>/dev/null
 
 # 1st PARAMETER: ssh|lcd
-lcd=0
+PRAMETER_LCD=0
 if [ "$1" == "lcd" ]; then
-    lcd=1
+    PRAMETER_LCD=1
 fi
 
-# 2nd PARAMETER (optional): -loop-until-synced
-loopUntilSynced=0
-if [ "$2" == "loop" ]; then
-    loopUntilSynced=1
+# get data from cache
+source <(/home/admin/_cache.sh get \
+  btc_default_ready \
+  btc_default_sync_percentage \
+  btc_default_peers \
+  system_count_start_blockchain \
+)
+
+# display blockchain sync
+height=6
+width=45
+actionString="Please wait - this can take some time"
+
+# formatting BLOCKCHAIN SYNC PROGRESS
+if [ "${btc_default_ready}" == "0" ] || [ "${btc_default_peers}" == "" ]; then
+    if [ ${system_count_start_blockchain} -gt 1 ]; then
+        syncProgress="${system_count_start_blockchain} restarts"
+    else
+        syncProgress="waiting for start"
+    fi
+elif [ "${btc_default_peers}" == "0" ]; then
+    syncProgress="waiting for peers"
+elif [ ${#btc_default_sync_percentage} -lt 6 ]; then
+    syncProgress=" ${btc_default_sync_percentage} % ${btc_default_peers} peers"
+else
+    syncProgress="${btc_default_sync_percentage} % ${btc_default_peers} peers"
 fi
 
-loop=1
-while [ ${loop} -eq 1 ]
-do
+# get data from cache
+source <(/home/admin/_cache.sh get \
+    lightning \
+    ln_default_ready \
+    ln_default_sync_progress \
+    ln_default_recovery_mode \
+    system_count_start_lightning \
+)
 
-    # get fresh data
-    source <(sudo /home/admin/config.scripts/blitz.statusscan.sh)
-
-    # display blockchain sync
-    height=6
-    width=45
-    actionString="Please wait - this can take some time"
-
-    # formatting BLOCKCHAIN SYNC PROGRESS
-    if [ "${syncProgress}" == "" ]; then
-        if [ ${startcountBlockchain} -lt 2 ]; then
-            syncProgress="waiting"
-        else
-            syncProgress="${startcountBlockchain} restarts"
-        fi
-    elif [ ${#syncProgress} -lt 6 ]; then
-        syncProgress=" ${syncProgress} % ${blockchainPeers} peers"
+# formatting LIGHTNING SCAN PROGRESS  
+if [ "${lightning}" != ""  ] && [ "${ln_default_sync_progress}" == "" ]; then
+    # in case of LND RPC is not ready yet
+    if [ "${ln_default_ready}" != "" ]; then
+        scanProgress="prepare sync"
+    # in case LND restarting >2  
+    elif [ "${system_count_start_lightning}" != "" ] && [ ${system_count_start_lightning} -gt 2 ]; then
+        scanProgress="${system_count_start_lightning} restarts"
+    # unkown cases
     else
-        syncProgress="${syncProgress} % ${blockchainPeers} peers"
+        scanProgress="waiting"
     fi
+elif [ "${ln_default_sync_progress}" == "100.00" ] && [ "${ln_default_recovery_mode}" == "1" ]; then
+    scanProgress="recoverscan"
+elif [ ${#ln_default_sync_progress} -lt 6 ]; then
+    scanProgress=" ${ln_default_sync_progress} %"
+else
+    scanProgress="${ln_default_sync_progress} %"
+fi
 
-    # formatting LIGHTNING SCAN PROGRESS  
-    if [ "${lightning}" != ""  ] && [ "${scanProgress}" == "" ]; then
-        # in case of LND RPC is not ready yet
-        if [ "${scanTimestamp}" != "" ] && [ ${scanTimestamp} -eq -2 ]; then
-            scanProgress="prepare sync"
-        # in case LND restarting >2  
-        elif [ "${startcountLightning}" != "" ] && [ ${startcountLightning} -gt 2 ]; then
-            scanProgress="${startcountLightning} restarts"
-        # unkown cases
-        else
-            scanProgress="waiting"
-        fi
-    elif [ ${#scanProgress} -lt 6 ]; then
-        scanProgress=" ${scanProgress} %"
-    else
-        scanProgress="${scanProgress} %"
-    fi
-
-    # setting info string
-    infoStr=" Blockchain Progress : ${syncProgress}\n"
+# setting info string
+infoStr=" Blockchain Progress : ${syncProgress}\n"
     
-    if [ "${lightning}" == "lnd" ] || [ "${lightning}" == "cln" ]; then
-       infoStr="${infoStr} Lightning Progress  : ${scanProgress}\n ${actionString}"
-    else
-       # if lightning is deactivated (leave line clear)
-       infoStr="${infoStr} \n ${actionString}"
-    fi
+if [ "${lightning}" == "lnd" ] || [ "${lightning}" == "cl" ]; then
+    infoStr="${infoStr} Lightning Progress  : ${scanProgress}\n ${actionString}"
+else
+    # if lightning is deactivated (leave line clear)
+    infoStr="${infoStr} \n ${actionString}"
+fi
     
-    # set admin string
-    if [ ${lcd} -eq 1 ]; then
-        adminStr="ssh admin@${localip} -> Password A"
-    else
-        adminStr="Use CTRL+c to EXIT to Terminal"
-    fi
+# get data from cache
+source <(/home/admin/_cache.sh get \
+    internet_localip \
+    codeVersion \
+    system_temp_celsius \
+    system_temp_fahrenheit \
+    hostname \
+    network \
+)
 
-    # display info to user
-    time=$(date '+%H:%M:%S')
-    dialog --title " Node is Syncing (${time}) " --backtitle "RaspiBlitz ${codeVersion} ${tempCelsius}°C / ${hostname} / ${network} / ${chain}" --infobox "${infoStr}\n ${adminStr}" ${height} ${width}
+# set admin string
+if [ ${PRAMETER_LCD} -eq 1 ]; then
+    adminStr="ssh admin@${internet_localip} -> Password A"
+else
+    adminStr="CTRL+C -> exit to terminal"
+fi
 
-    # determine to loop or not
-    loop=0
-    if [ ${loopUntilSynced} -eq 1 ] && [ "${syncedToChain}" == "0" ]; then
-        # loop until synced to chain
-        loop=1
-        sleep 3
-    fi
-done
+# display info to user
+time=$(date '+%H:%M:%S')
+dialog --title " Node is Syncing (${time}) " --backtitle "RaspiBlitz ${codeVersion} / ${system_temp_celsius}°C / ${system_temp_fahrenheit}°F / ${hostname}" --infobox "${infoStr}\n ${adminStr}" ${height} ${width}

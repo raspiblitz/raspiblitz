@@ -22,9 +22,3 @@ wget --no-check-certificate \
      -O /home/vagrant/.ssh/authorized_keys
 chmod 0600 /home/vagrant/.ssh/authorized_keys
 chown -R vagrant /home/vagrant/.ssh
-
-# disable apparmor - tor will not work with raspiblitz customization
-mkdir -p /etc/default/grub.d
-echo 'GRUB_CMDLINE_LINUX_DEFAULT="$GRUB_CMDLINE_LINUX_DEFAULT apparmor=0"' \
-    | tee /etc/default/grub.d/apparmor.cfg
-update-grub

@@ -3,13 +3,18 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ]; then
   echo "# script to check LND states"
-  echo "# lnd.check.sh basic-setup"
+  echo "# lnd.check.sh basic-setup [mainnet|testnet|signet]"
   echo "# lnd.check.sh prestart [mainnet|testnet|signet]"
   exit 1
 fi
 
 # load raspiblitz conf
 source /mnt/hdd/raspiblitz.conf
+source <(/home/admin/config.scripts/network.aliases.sh getvars lnd $2)
+
+# config file
+echo "# checking lnd config for ${targetchain}"
+echo "# lndConfFile(${lndConfFile})"
 
 ######################################################################
 # PRESTART
@@ -24,6 +29,7 @@ function setting() # FILE LINENUMBER NAME VALUE
   NAME=$3
   VALUE=$4
   settingExists=$(cat ${FILE} | grep -c "^${NAME}=")
+  echo "# setting ${FILE} ${LINENUMBER} ${NAME} ${VALUE}"
   echo "# ${NAME} exists->(${settingExists})"
   if [ "${settingExists}" == "0" ]; then
     echo "# adding setting (${NAME})"
@@ -55,37 +61,56 @@ if [ "$1" == "prestart" ]; then
     /home/admin/config.scripts/blitz.systemd.sh log lightning STARTED
   fi
 
-  # prefixes for parallel services
-  if [ "${targetchain}" = "mainnet" ];then
-    netprefix=""
-    portprefix=""
-    rpcportmod=0
-    zmqprefix=28
-  elif [ "${targetchain}" = "testnet" ];then
-    netprefix="t"
-    portprefix=1
-    rpcportmod=1
-    zmqprefix=21
-  elif [ "${targetchain}" = "signet" ];then
-    netprefix="s"
-    portprefix=3
-    rpcportmod=3
-    zmqprefix=23
-  else
-    echo "err='unvalid chain parameter on lnd.check.sh'"
-    exit 1
+  ##### BITCOIN OPTIONS SECTION #####
+
+  # [bitcoin]
+  sectionName="[Bb]itcoin"
+  if [ "${network}" != "bitcoin" ] && [ "${network}" != "" ]; then
+    sectionName="${network}"
+  fi
+  echo "# [${sectionName}] config ..."
+
+  # make sure lnd config has a [bitcoind] section
+  sectionExists=$(cat ${lndConfFile} | grep -c "^\[${sectionName}\]")
+  echo "# sectionExists(${sectionExists})"
+  if [ "${sectionExists}" == "0" ]; then
+    echo "# adding section [${network}]"
+    echo "
+[${network}]
+" | tee -a ${lndConfFile}
   fi
 
-  # config file
-  echo "# checking lnd config for ${targetchain}"
-  lndConfFile="/mnt/hdd/lnd/${netprefix}lnd.conf"
-  echo "# lndConfFile(${lndConfFile})"
+  # get line number of [bitcoin] section
+  sectionLine=$(cat ${lndConfFile} | grep -n "^\[${sectionName}\]" | cut -d ":" -f1)
+  echo "# sectionLine(${sectionLine})"
+  insertLine=$(expr $sectionLine + 1)
+  echo "# insertLine(${insertLine})"
+  fileLines=$(wc -l ${lndConfFile} | cut -d " " -f1)
+  echo "# fileLines(${fileLines})"
+  if [ ${fileLines} -lt ${insertLine} ]; then
+    echo "# adding new line for inserts"
+    echo "
+" | tee -a ${lndConfFile}
+  fi
+
+  # SET/UPDATE bitcoin.active
+  echo "# ${network}.active insert/update"
+  setting ${lndConfFile} ${insertLine} "${network}\.active" "1"
+
+  # SET/UPDATE bitcoin.mainnet
+  echo "# ${network}.${targetchain} insert/update"
+  setting ${lndConfFile} ${insertLine} "${network}\.${targetchain}" "1"
+
+  # SET/UPDATE bitcoin.node
+  echo "# ${network}.node insert/update"
+  setting ${lndConfFile} ${insertLine} "${network}\.node" "${network}d"
+
 
   ##### BITCOIND OPTIONS SECTION #####
 
   # [bitcoind]
   sectionName="[Bb]itcoind"
-  if [ "${network}" != "bitcoin" ]; then
+  if [ "${network}" != "bitcoin" ] && [ "${network}" != "" ]; then
     sectionName="${network}d"
   fi
   echo "# [${sectionName}] config ..."
@@ -114,6 +139,7 @@ if [ "$1" == "prestart" ]; then
   fi
 
   # SET/UPDATE zmqpubrawtx
+  echo "# zmqpubrawtx insert/update"
   setting ${lndConfFile} ${insertLine} "${network}d\.zmqpubrawtx" "tcp\:\/\/127\.0\.0\.1\:${zmqprefix}333"
 
   # SET/UPDATE zmqpubrawblock
@@ -131,13 +157,13 @@ if [ "$1" == "prestart" ]; then
   setting ${lndConfFile} ${insertLine} "${network}d\.rpchost" "127\.0\.0\.1\:${portprefix}8332"
 
   ##### APPLICATION OPTIONS SECTION #####
-  
+
   sectionLine=$(cat ${lndConfFile} | grep -n "^\[Application Options\]" | cut -d ":" -f1)
   echo "# sectionLine(${sectionLine})"
   insertLine=$(expr $sectionLine + 1)
 
   # make sure API ports are set to standard
-  setting ${lndConfFile} ${insertLine} "rpclisten" "0\.0\.0\.0\:1${rpcportmod}009"
+  setting ${lndConfFile} ${insertLine} "rpclisten" "0\.0\.0\.0\:1${L2rpcportmod}009"
   setting ${lndConfFile} ${insertLine} "restlisten" "0\.0\.0\.0\:${portprefix}8080"
 
   # enforce LND port is set correctly (if set in raspiblitz.conf)
@@ -159,6 +185,28 @@ if [ "$1" == "prestart" ]; then
   if [ "${lndKeysend}" == "on" ]; then
     setting ${lndConfFile} ${insertLine} "accept-keysend" "true"
   fi
+
+  ##### BOLT SECTION #####
+  # https://github.com/lightningnetwork/lnd/blob/0aa0831619cb320dbb74883c37a80ccbdde7f320/sample-lnd.conf#L1205
+  sectionName="bolt"
+  echo "# [${sectionName}] config ..."
+  # make sure lnd config has a [bolt] section
+  sectionExists=$(cat ${lndConfFile} | grep -c "^\[${sectionName}\]")
+  echo "# sectionExists(${sectionExists})"
+  if [ "${sectionExists}" == "0" ]; then
+    echo "# adding section [${sectionName}]"
+    echo "
+[${sectionName}]
+" | tee -a ${lndConfFile}
+  fi
+
+  sectionLine=$(cat ${lndConfFile} | grep -n "^\[bolt\]" | cut -d ":" -f1)
+  echo "# sectionLine(${sectionLine})"
+  insertLine=$(expr $sectionLine + 1)
+
+  # make sure API ports are set to standard
+  setting ${lndConfFile} ${insertLine} "db.bolt.auto-compact-min-age" "672h"
+  setting ${lndConfFile} ${insertLine} "db.bolt.auto-compact" "true"
 
   ##### TOR SECTION #####
 
@@ -191,9 +239,14 @@ if [ "$1" == "prestart" ]; then
     setting ${lndConfFile} ${insertLine} "tor.control" "9051"
     setting ${lndConfFile} ${insertLine} "tor.socks" "9050"
     setting ${lndConfFile} ${insertLine} "tor.privatekeypath" "\/mnt\/hdd\/lnd\/${netprefix}v3_onion_private_key"
-    setting ${lndConfFile} ${insertLine} "tor.streamisolation" "true"
     setting ${lndConfFile} ${insertLine} "tor.v3" "true"
     setting ${lndConfFile} ${insertLine} "tor.active" "true"
+
+    # take care of incompatible settings https://github.com/rootzoll/raspiblitz/issues/2787#issuecomment-991245694
+    if [ $(cat ${lndConfFile} | grep -c "^tor.skip-proxy-for-clearnet-targets=true") -gt 0 ] ||
+       [ $(cat ${lndConfFile} | grep -c "^tor.skip-proxy-for-clearnet-targets=1") -gt 0 ]; then
+      setting ${lndConfFile} ${insertLine} "tor.streamisolation" "false"
+    fi
 
     # deprecate Tor password (remove if in lnd.conf)
     sed -i '/^tor.password=*/d' ${lndConfFile}
@@ -238,50 +291,39 @@ elif [ "$1" == "basic-setup" ]; then
   fi
 
   # check lnd.conf exists
-  lndConfExists=$(sudo ls /mnt/hdd/lnd/lnd.conf 2>/dev/null | grep -c 'lnd.conf')
+  lndConfExists=$(sudo ls ${lndConfFile} 2>/dev/null | grep -c "${netprefix}lnd.conf")
   if [ ${lndConfExists} -gt 0 ]; then
     echo "config=1"
   else
     echo "config=0"
-    echo "err='lnd.conf is missing in /mnt/hdd/lnd'"
+    echo "err='${netprefix}lnd.conf is missing in ${lndConfFile}'"
   fi
   # check lnd.conf exits (on SD card for admin)
-  lndConfExists=$(sudo ls /home/admin/.lnd/lnd.conf 2>/dev/null | grep -c 'lnd.conf')
+  lndConfExists=$(sudo ls /home/admin/.lnd/${netprefix}lnd.conf 2>/dev/null | grep -c 'lnd.conf')
   if [ ${lndConfExists} -gt 0 ]; then
     echo "configCopy=1"
     # check if the same
-    orgChecksum=$(sudo shasum -a 256 /mnt/hdd/lnd/lnd.conf 2>/dev/null | cut -d " " -f1)
-    cpyChecksum=$(sudo shasum -a 256 /home/admin/.lnd/lnd.conf 2>/dev/null | cut -d " " -f1)
+    orgChecksum=$(sudo shasum -a 256 ${lndConfFile} 2>/dev/null | cut -d " " -f1)
+    cpyChecksum=$(sudo shasum -a 256 /home/admin/.lnd/${netprefix}lnd.conf 2>/dev/null | cut -d " " -f1)
     if [ "${orgChecksum}" == "${cpyChecksum}" ]; then
       echo "configMismatch=0"
     else
       echo "configMismatch=1"
-      echo "err='lnd.conf for user admin is old'"
+      echo "err='${netprefix}lnd.conf for user admin is old'"
     fi
   else
     echo "configCopy=0"
     echo "configMismatch=0"
-    echo "err='lnd.conf is missing for user admin'"
+    echo "err='$(netprefix)lnd.conf is missing for user admin'"
   fi
 
   # get network from config (BLOCKCHAIN)
-  lndNetwork=""
-  source <(sudo cat /mnt/hdd/lnd/lnd.conf 2>/dev/null | grep 'bitcoin.active' | sed 's/^[a-z]*\./bitcoin_/g')
-  source <(sudo cat /mnt/hdd/lnd/lnd.conf 2>/dev/null | grep 'litecoin.active' | sed 's/^[a-z]*\./litecoin_/g')
-  if [ "${bitcoin_active}" == "1" ] && [ "${litecoin_active}" == "1" ]; then
-    echo "err='lnd.conf: bitcoin and litecoin are set active at the same time'"
-  elif [ "${bitcoin_active}" == "1" ]; then
-    lndNetwork="bitcoin"
-  elif [ "${litecoin_active}" == "1" ]; then
-    lndNetwork="litecoin"
-  else
-    echo "err='lnd.conf: no blockchain network is set'"
-  fi
+  lndNetwork="bitcoin"
   echo "network='${lndNetwork}'"
 
   # check if network is same the raspiblitz config
   if [ "${network}" != "${lndNetwork}" ]; then
-    echo "err='lnd.conf: blockchain network in lnd.conf (${lndNetwork}) is different from raspiblitz.conf (${network})'"
+    echo "err='$(netprefix)lnd.conf: blockchain network in $(netprefix)lnd.conf (${lndNetwork}) is different from raspiblitz.conf (${network})'"
   fi
 
 #  # get chain from config (TESTNET / MAINNET)

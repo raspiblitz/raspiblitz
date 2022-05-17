@@ -4,8 +4,15 @@
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "# config script to connect mobile apps with lnd connect"
  echo "# will autodetect dyndns, sshtunnel or TOR"
- echo "# bonus.lndconnect.sh [zap-ios|zap-android|zeus-ios|zeus-android|shango-ios|shango-android|sendmany-android] [?ip|tor]"
+ echo "# bonus.lndconnect.sh [zap-ios|zap-android|zeus-ios|zeus-android|shango-ios|shango-android|sendmany-android|fullynoded-lnd] [?ip|tor] [?key-value]"
  exit 1
+fi
+
+# check if lnd is on
+source <(/home/admin/_cache.sh get lnd)
+if [ "${lnd}" != on ]; then
+  echo "error='lnd not active'"
+  exit 1
 fi
 
 # make sure commandline tool is available
@@ -32,6 +39,7 @@ ip2torREST_PORT=""
 error=""
 source <(/home/admin/config.scripts/blitz.subscriptions.ip2tor.py subscription-by-service LND-REST-API)
 if [ ${#error} -eq 0 ]; then
+  echo "# using ip2torREST: IP(${ip}) PORT(${port})"
   ip2torREST_IP="${ip}"
   ip2torREST_PORT="${port}"
 fi
@@ -40,6 +48,7 @@ ip2torGRPC_PORT=""
 error=""
 source <(/home/admin/config.scripts/blitz.subscriptions.ip2tor.py subscription-by-service LND-GRPC-API)
 if [ ${#error} -eq 0 ]; then
+  echo "# using ip2torGRPC: IP(${ip}) PORT(${port})"
   ip2torGRPC_IP="${ip}"
   ip2torGRPC_PORT="${port}"
 fi
@@ -60,7 +69,7 @@ if [ "${targetWallet}" = "zap-ios" ]; then
     port="8080"
     addcert=0
   else
-    # normal ZAP uses gRPC ports
+    # ZAP uses gRPC ports
     port="10009"
   fi
   if [ ${#ip2torGRPC_IP} -gt 0 ]; then
@@ -73,14 +82,8 @@ if [ "${targetWallet}" = "zap-ios" ]; then
   
 elif [ "${targetWallet}" = "zap-android" ]; then
   connectInfo="- start the Zap Wallet --> SETUP WALLET\n  or choose new Wallet in app menu\n- scan the QR code \n- confirm host address"
-  if [ ${forceTOR} -eq 1 ]; then
-    # when ZAP runs on TOR it uses gRPC
-    port="10009"
-    connectInfo="${connectInfo}\n- install & connect Orbot App (VPN mode)"
-  else
-    # normal ZAP uses gRPC ports
-    port="10009"
-  fi
+  # ZAP uses gRPC ports
+  port="10009"
   if [ ${#ip2torGRPC_IP} -gt 0 ]; then
     # when IP2TOR bridge is available - force using that
     usingIP2TOR="LND-GRPC-API"
@@ -126,6 +129,14 @@ elif [ "${targetWallet}" = "sendmany-android" ]; then
     port="${ip2torGRPC_PORT}"
   fi  
 
+elif [ "${targetWallet}" = "fullynoded-lnd" ]; then
+
+    port="8080"
+    usingIP2TOR="LND-REST-API"
+    forceTOR=1
+    host=$(sudo cat /mnt/hdd/tor/lndrest8080/hostname)
+    connectInfo="- start Fully Noded and go to:\n Settings' -> 'Node Manger' -> 'scan QR'"
+
 else
   echo "error='unknown target wallet'"
   exit 1
@@ -147,14 +158,23 @@ fi
 if [ ${forceTOR} -eq 1 ]; then
   # depending on RPC or REST use different TOR address
   if [ "${port}" == "10009" ]; then
-    host=$(sudo cat /mnt/hdd/tor/lndrpc10009/hostname)
-    port="10009"
-    echo "# using TOR --> host ${host} port ${port}"
+    echo "# TOR LND RPC"
+    host=$(sudo cat /mnt/hdd/tor/lndrpc/hostname)
+    if [ "${host}" == "" ]; then
+      echo "# setting up onion service ..."
+      /home/admin/config.scripts/tor.onion-service.sh lndrpc 10009 10009
+      host=$(sudo cat /mnt/hdd/tor/lndrpc/hostname)
+    fi
   elif [ "${port}" == "8080" ]; then
-    host=$(sudo cat /mnt/hdd/tor/lndrest8080/hostname)
-    port="8080"
-    echo "# using TOR --> host ${host} port ${port}"
+    echo "# TOR LND REST"
+    host=$(sudo cat /mnt/hdd/tor/lndrest/hostname)
+    if [ "${host}" == "" ]; then
+      echo "# setting up onion service ..."
+      /home/admin/config.scripts/tor.onion-service.sh lndrest 8080 8080
+      host=$(sudo cat /mnt/hdd/tor/lndrest/hostname)
+    fi
   fi
+  echo "# TOR --> host ${host} port ${port}"
 fi
   
 # tunnel thru SSH-Reverse-Tunnel if activated for that port
@@ -193,8 +213,13 @@ fi
 # see spec here: https://github.com/LN-Zap/lndconnect/blob/master/lnd_connect_uri.md
 lndconnect="lndconnect://${host}:${port}${macaroonParameter}${certParameter}"
 
+if [ "$3" == "key-value" ]; then
+  echo "lndconnect='${lndconnect}'"
+  exit 0
+fi
+
 # display qr code image on LCD
-/home/admin/config.scripts/blitz.display.sh qr "${lndconnect}"
+sudo /home/admin/config.scripts/blitz.display.sh qr "${lndconnect}"
 
 # show pairing info dialog
 msg=""
@@ -221,7 +246,7 @@ if [ $? -eq 1 ]; then
 fi
 
 # clean up
-/home/admin/config.scripts/blitz.display.sh hide
+sudo /home/admin/config.scripts/blitz.display.sh hide
 
 echo "------------------------------"
 echo "If the connection was not working:"

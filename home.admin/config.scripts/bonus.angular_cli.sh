@@ -9,11 +9,6 @@ fi
 
 source /mnt/hdd/raspiblitz.conf
 
-# add default value to raspi config if needed
-if ! grep -Eq "^angular_cli=" /mnt/hdd/raspiblitz.conf; then
-  echo "angular_cli=off" >> /mnt/hdd/raspiblitz.conf
-fi
-
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # check if angular_cli was installed
@@ -62,7 +57,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     fi
   fi
   # setting value in raspi blitz config
-  sudo sed -i "s/^angular_cli=.*/angular_cli=on/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set angular_cli "on"
   echo "Installed angular_cli $(node -v)"
   exit 0
 fi
@@ -70,7 +65,7 @@ fi
 # switch off
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # setting value in raspiblitz config
-  sudo sed -i "s/^angular_cli=.*/angular_cli=off/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set angular_cli "off"
   echo "*** REMOVING angular_cli ***"
   npm uninstall @angular/cli -g
   echo "OK angular_cli removed."

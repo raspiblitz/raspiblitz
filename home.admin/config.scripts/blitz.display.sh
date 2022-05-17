@@ -3,147 +3,30 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "# make changes to the LCD screen"
-  echo "# blitz.display.sh rotate [on|off]"
+  echo
+  echo "# all commands need to run as root or with sudo"
   echo "# blitz.display.sh image [path]"
   echo "# blitz.display.sh qr [datastring]"
   echo "# blitz.display.sh qr-console [datastring]"
   echo "# blitz.display.sh hide"
-  echo "# blitz.display.sh hdmi [on|off] ---> DEPRECATED use set-display"
-  echo "# blitz.display.sh test-lcd-connect"
-  echo "# blitz.display.sh set-display [hdmi|lcd|headless]"
+  echo
+  echo "# sudo blitz.display.sh rotate [on|off]"
+  echo "# sudo blitz.display.sh test-lcd-connect"
+  echo "# sudo blitz.display.sh set-display [hdmi|lcd|headless]"
   exit 1
-fi
-
-# load config
-source /home/admin/raspiblitz.info 2>/dev/null
-source /mnt/hdd/raspiblitz.conf 2>/dev/null
-
-# Make sure needed packages are installed
-if [ $(sudo dpkg-query -l | grep "ii  fbi" | wc -l) = 0 ]; then
-   sudo apt-get install fbi -y > /dev/null
-fi
-if [ $(sudo dpkg-query -l | grep "ii  qrencode" | wc -l) = 0 ]; then
-   sudo apt-get install qrencode -y > /dev/null
 fi
 
 # 1. Parameter: lcd command
 command=$1
 
+# its OK if its not exist yet
+source /home/admin/raspiblitz.info
+source /mnt/hdd/raspiblitz.conf 2>/dev/null
+
 # check if LCD (/dev/fb1) or HDMI (/dev/fb0)
 # see https://github.com/rootzoll/raspiblitz/pull/1580
 # but basically this just says if the driver for GPIO LCD is installed - not if connected
-lcdExists=$(sudo ls /dev/fb1 2>/dev/null | grep -c "/dev/fb1")
-
-##################
-# ROTATE
-# see issue: https://github.com/rootzoll/raspiblitz/issues/681
-###################
-
-if [ "${command}" == "rotate" ]; then
-
-  # TURN ROTATE ON (the new default)
-  if [ "$2" = "1" ] || [ "$2" = "on" ]; then
-
-    # add default 'lcdrotate' raspiblitz.conf if needed
-    if [ ${#lcdrotate} -eq 0 ]; then
-      echo "lcdrotate=0" >> /mnt/hdd/raspiblitz.conf
-    fi
-
-    # change rotation config
-    echo "# Turn ON: LCD ROTATE"
-    sudo sed -i "s/^dtoverlay=.*/dtoverlay=waveshare35a:rotate=90/g" /boot/config.txt
-    sudo rm /etc/X11/xorg.conf.d/40-libinput.conf >/dev/null
-
-    # update raspiblitz conf file
-    sudo sed -i "s/^lcdrotate=.*/lcdrotate=1/g" /mnt/hdd/raspiblitz.conf
-    echo "# OK - a restart is needed: sudo shutdown -r now"
-
-  # TURN ROTATE OFF
-  elif [ "$2" = "0" ] || [ "$2" = "off" ]; then
-
-    # change rotation config
-    echo "#Turn OFF: LCD ROTATE"
-    sudo sed -i "s/^dtoverlay=.*/dtoverlay=waveshare35a:rotate=270/g" /boot/config.txt
-
-    # if touchscreen is on
-    if [ "${touchscreen}" = "1" ]; then
-      echo "# also rotate touchscreen ..."
-      cat << EOF | sudo tee /etc/X11/xorg.conf.d/40-libinput.conf >/dev/null
-Section "InputClass"
-        Identifier "libinput touchscreen catchall"
-        MatchIsTouchscreen "on"
-        Option "CalibrationMatrix" "0 1 0 -1 0 1 0 0 1"
-        MatchDevicePath "/dev/input/event*"
-        Driver "libinput"
-EndSection
-EOF
-    fi
-
-    # update raspiblitz conf file
-    sudo sed -i "s/^lcdrotate=.*/lcdrotate=0/g" /mnt/hdd/raspiblitz.conf
-    echo "OK - a restart is needed: sudo shutdown -r now"
-
-  else
-    echo "error='missing second parameter - see help'"
-    exit 1
-  fi
-  exit 0
-fi
-
-###################
-# IMAGE
-###################
-
-if [ "${command}" == "image" ]; then
-  
-  imagePath=$2
-  if [ ${#imagePath} -eq 0 ]; then
-    echo "error='missing second parameter - see help'"
-    exit 1
-  else
-    # test the image path - if file exists
-    if [ -f "$imagePath" ]; then
-      echo "# OK - file exists: ${imagePath}"
-    else
-      echo "error='file does not exist'"
-      exit 1
-    fi
-  fi
-
-  # see https://github.com/rootzoll/raspiblitz/pull/1580
-  if [ ${lcdExists} -eq 1 ] ; then
-    # LCD
-    sudo fbi -a -T 1 -d /dev/fb1 --noverbose ${imagePath} 2> /dev/null
-  else
-    # HDMI
-    sudo fbi -a -T 1 -d /dev/fb0 --noverbose ${imagePath} 2> /dev/null
-  fi
-  exit 0
-fi
-
-###################
-# QR CODE
-###################
-
-if [ "${command}" == "qr" ]; then
-
-  datastring=$2
-  if [ ${#datastring} -eq 0 ]; then
-    echo "error='missing second parameter - see help'"
-    exit 1
-  fi
-
-  qrencode -l L -o /home/admin/qr.png "${datastring}" > /dev/null
-  # see https://github.com/rootzoll/raspiblitz/pull/1580
-  if [ ${lcdExists} -eq 1 ] ; then
-    # LCD
-    sudo fbi -a -T 1 -d /dev/fb1 --noverbose /home/admin/qr.png 2> /dev/null
-  else
-    # HDMI
-    sudo fbi -a -T 1 -d /dev/fb0 --noverbose /home/admin/qr.png 2> /dev/null
-  fi
-  exit 0
-fi
+fb1Exists=$(ls /dev/fb1 2>/dev/null | grep -c "/dev/fb1")
 
 ###################
 # QR CODE KONSOLE
@@ -169,13 +52,125 @@ if [ "${command}" == "qr-console" ]; then
   exit 0
 fi
 
+###########################################################################
+# All below here - needs to be run as root user or called with sudo
+if [ "$EUID" -ne 0 ]; then 
+  echo "error='run as root'"
+  exit 1
+fi
+
+###################
+# IMAGE
+###################
+
+if [ "${command}" == "image" ]; then
+  
+  imagePath=$2
+  if [ ${#imagePath} -eq 0 ]; then
+    echo "error='missing second parameter - see help'"
+    exit 1
+  else
+    # test the image path - if file exists
+    if [ -f "$imagePath" ]; then
+      echo "# OK - file exists: ${imagePath}"
+    else
+      echo "error='file does not exist'"
+      exit 1
+    fi
+  fi
+
+  # see https://github.com/rootzoll/raspiblitz/pull/1580
+  if [ ${fb1Exists} -eq 1 ] ; then
+    # LCD
+    fbi -a -T 1 -d /dev/fb1 --noverbose ${imagePath} 2> /dev/null
+  else
+    # HDMI
+    fbi -a -T 1 -d /dev/fb0 --noverbose ${imagePath} 2> /dev/null
+  fi
+  exit 0
+fi
+
+###################
+# QR CODE
+###################
+
+if [ "${command}" == "qr" ]; then
+
+  datastring=$2
+  if [ ${#datastring} -eq 0 ]; then
+    echo "error='missing second parameter - see help'"
+    exit 1
+  fi
+
+  qrencode -l L -o /var/cache/raspiblitz/qr.png "${datastring}" > /dev/null
+  # see https://github.com/rootzoll/raspiblitz/pull/1580
+  if [ ${fb1Exists} -eq 1 ] ; then
+    # LCD
+    fbi -a -T 1 -d /dev/fb1 --noverbose /var/cache/raspiblitz/qr.png 2> /dev/null
+  else
+    # HDMI
+    fbi -a -T 1 -d /dev/fb0 --noverbose /var/cache/raspiblitz/qr.png 2> /dev/null
+  fi
+  exit 0
+fi
+
 ###################
 # HIDE
 ###################
 
 if [ "${command}" == "hide" ]; then
-  sudo killall -3 fbi
-  shred -u /home/admin/qr.png 2> /dev/null
+  killall -3 fbi
+  rm /var/cache/raspiblitz/qr.png 2> /dev/null
+  exit 0
+fi
+
+##################
+# ROTATE
+# see issue: https://github.com/rootzoll/raspiblitz/issues/681
+###################
+
+if [ "${command}" == "rotate" ]; then
+
+  # TURN ROTATE ON (the new default)
+  if [ "$2" = "1" ] || [ "$2" = "on" ]; then
+
+    # change rotation config
+    echo "# Turn ON: LCD ROTATE"
+    sed -i "s/^dtoverlay=.*/dtoverlay=waveshare35a:rotate=90/g" /boot/config.txt
+    rm /etc/X11/xorg.conf.d/40-libinput.conf >/dev/null
+
+    /home/admin/config.scripts/blitz.conf.sh set lcdrotate 1
+    echo "# OK - a restart is needed: sudo shutdown -r now"
+
+  # TURN ROTATE OFF
+  elif [ "$2" = "0" ] || [ "$2" = "off" ]; then
+
+    # change rotation config
+    echo "#Turn OFF: LCD ROTATE"
+    sed -i "s/^dtoverlay=.*/dtoverlay=waveshare35a:rotate=270/g" /boot/config.txt
+
+    # if touchscreen is on
+    if [ "${touchscreen}" = "1" ]; then
+      echo "# also rotate touchscreen ..."
+      cat << EOF | sudo tee /etc/X11/xorg.conf.d/40-libinput.conf >/dev/null
+Section "InputClass"
+        Identifier "libinput touchscreen catchall"
+        MatchIsTouchscreen "on"
+        Option "CalibrationMatrix" "0 1 0 -1 0 1 0 0 1"
+        MatchDevicePath "/dev/input/event*"
+        Driver "libinput"
+EndSection
+EOF
+    fi
+
+    # update raspiblitz conf
+    /home/admin/config.scripts/blitz.conf.sh set lcdrotate 0  
+    echo "OK - a restart is needed: sudo shutdown -r now"
+
+  else
+    echo "error='missing second parameter - see help'"
+    exit 1
+  fi
   exit 0
 fi
 
@@ -201,22 +196,6 @@ if [ "${command}" == "test-lcd-connect" ]; then
    exit 0
 fi
 
-###############################
-# HDMI (deprecated - redirect)
-###############################
-if [ "${command}" == "hdmi" ]; then
-  secondParameter=$2
-  if [ "${secondParameter}" == "on" ]; then
-    sudo /home/admin/config.scripts/blitz.display.sh set-display hdmi
-  elif [ "${secondParameter}" == "off" ]; then
-    sudo /home/admin/config.scripts/blitz.display.sh set-display lcd
-  else
-    echo "error='unknown second parameter'"
-    exit 1
-  fi
-  exit 0
-fi
-
 #######################################
 # DISPLAY TYPED INSTALLS & UN-INSTALLS
 # HDMI is the default - every added
@@ -225,11 +204,15 @@ fi
 #######################################
 
 function install_hdmi() {
-  echo "# nothing to install - hdmi is the default/clean mode"
+  echo "# hdmi install ... set framebuffer width/height"
+  #sed -i "s/^#framebuffer_width=.*/framebuffer_width=480/g" /boot/config.txt
+  #sed -i "s/^#framebuffer_height=.*/framebuffer_height=320/g" /boot/config.txt
 }
 
 function uninstall_hdmi() {
-  echo "# nothing to uninstall - hdmi is the default/clean mode"
+  echo "# hdmi uninstall ... reset framebuffer width/height"
+  #sed -i "s/^framebuffer_width=.*/#framebuffer_width=480/g" /boot/config.txt
+  #sed -i "s/^framebuffer_height=.*/#framebuffer_height=320/g" /boot/config.txt
 }
 
 function install_lcd() {
@@ -239,10 +222,10 @@ function install_lcd() {
     echo "# INSTALL 64bit LCD DRIVER"
 
     # set font
-    sudo sed -i "s/^CHARMAP=.*/CHARMAP=\"UTF-8\"/" /etc/default/console-setup
-    sudo sed -i "s/^CODESET=.*/CODESET=\"guess\"/" /etc/default/console-setup 
-    sudo sed -i "s/^FONTFACE=.*/FONTFACE=\"TerminusBoldVGA\"/" /etc/default/console-setup
-    sudo sed -i "s/^FONTSIZE=.*/FONTSIZE=\"8x16\"/" /etc/default/console-setup 
+    sed -i "s/^CHARMAP=.*/CHARMAP=\"UTF-8\"/" /etc/default/console-setup
+    sed -i "s/^CODESET=.*/CODESET=\"guess\"/" /etc/default/console-setup 
+    sed -i "s/^FONTFACE=.*/FONTFACE=\"TerminusBoldVGA\"/" /etc/default/console-setup
+    sed -i "s/^FONTSIZE=.*/FONTSIZE=\"8x16\"/" /etc/default/console-setup 
 
     # hold bootloader
     sudo apt-mark hold raspberrypi-bootloader
@@ -254,41 +237,46 @@ function install_lcd() {
     sudo -u admin chown -R admin:admin wavesharelcd-64bit-rpi
     cd /home/admin/wavesharelcd-64bit-rpi
     sudo -u admin git reset --hard 5a206a7 || exit 1
+    sudo -u admin /home/admin/config.scripts/blitz.git-verify.sh \
+     'GitHub' 'https://github.com/web-flow.gpg' '4AEE18F83AFDEB23' || exit 1
 
     # customized from https://github.com/tux1c/wavesharelcd-64bit-rpi/blob/master/install.sh
     # prepare X11
-    sudo mkdir -p /etc/X11/xorg.conf.d
-    sudo mv /etc/X11/xorg.conf.d/40-libinput.conf /home/admin/wavesharelcd-64bit-rpi/40-libinput.conf 2>/dev/null
-    sudo cp -rf ./99-calibration.conf /etc/X11/xorg.conf.d/99-calibration.conf
+    mkdir -p /etc/X11/xorg.conf.d
+    mv /etc/X11/xorg.conf.d/40-libinput.conf /home/admin/wavesharelcd-64bit-rpi/40-libinput.conf 2>/dev/null
+    cp -rf ./99-calibration.conf /etc/X11/xorg.conf.d/99-calibration.conf
     # sudo cp -rf ./99-fbturbo.conf  /etc/X11/xorg.conf.d/99-fbturbo.conf # there is no such file
 
     # add waveshare mod
-    sudo cp ./waveshare35a.dtbo /boot/overlays/
+    cp ./waveshare35a.dtbo /boot/overlays/
 
     # modify /boot/config.txt 
-    sudo sed -i "s/^hdmi_force_hotplug=.*//g" /boot/config.txt 
-    sudo sed -i '/^hdmi_group=/d' /boot/config.txt 2>/dev/null
-    sudo sed -i "/^hdmi_mode=/d" /boot/config.txt 2>/dev/null
+    sed -i "s/^hdmi_force_hotplug=.*//g" /boot/config.txt 
+    sed -i '/^hdmi_group=/d' /boot/config.txt 2>/dev/null
+    sed -i "/^hdmi_mode=/d" /boot/config.txt 2>/dev/null
+
+    #sed -i "s/^#framebuffer_width=.*/framebuffer_width=480/g" /boot/config.txt
+    #sed -i "s/^#framebuffer_height=.*/framebuffer_height=320/g" /boot/config.txt
     #echo "hdmi_force_hotplug=1" >> /boot/config.txt
-    sudo sed -i "s/^dtparam=i2c_arm=.*//g" /boot/config.txt 
+    sed -i "s/^dtparam=i2c_arm=.*//g" /boot/config.txt 
     # echo "dtparam=i2c_arm=on" >> /boot/config.txt --> this is to be called I2C errors - see: https://github.com/rootzoll/raspiblitz/issues/1058#issuecomment-739517713
     # don't enable SPI and UART ports by default
     # echo "dtparam=spi=on" >> /boot/config.txt
     # echo "enable_uart=1" >> /boot/config.txt
-    sudo sed -i "s/^dtoverlay=.*//g" /boot/config.txt 
+    sed -i "s/^dtoverlay=.*//g" /boot/config.txt 
     echo "dtoverlay=waveshare35a:rotate=90" >> /boot/config.txt
 
     # modify cmdline.txt 
     modification="dwc_otg.lpm_enable=0 quiet fbcon=map:10 fbcon=font:ProFont6x11 logo.nologo"
-    containsModification=$(sudo grep -c "${modification}" /boot/cmdline.txt)
+    containsModification=$(grep -c "${modification}" /boot/cmdline.txt)
     if [ ${containsModification} -eq 0 ]; then
       echo "# adding modification to /boot/cmdline.txt"
-      cmdlineContent=$(sudo cat /boot/cmdline.txt)
+      cmdlineContent=$(cat /boot/cmdline.txt)
       echo "${cmdlineContent} ${modification}" > /boot/cmdline.txt
     else
       echo "# /boot/cmdline.txt already contains modification"
     fi
-    containsModification=$(sudo grep -c "${modification}" /boot/cmdline.txt)
+    containsModification=$(grep -c "${modification}" /boot/cmdline.txt)
     if [ ${containsModification} -eq 0 ]; then
       echo "# FAIL: was not able to modify /boot/cmdline.txt"
       echo "err='ended unclear state'"
@@ -304,7 +292,7 @@ function install_lcd() {
     # set font that fits the LCD screen
     # https://github.com/rootzoll/raspiblitz/issues/244#issuecomment-476713706
     # there can be a different font for different types of LCDs with using the displayType parameter in the future
-    sudo setfont /usr/share/consolefonts/Uni3-TerminusBold16.psf.gz
+    setfont /usr/share/consolefonts/Uni3-TerminusBold16.psf.gz
 
     echo "# OK install of LCD done ... reboot needed"
 
@@ -322,30 +310,32 @@ function uninstall_lcd() {
     echo "# UNINSTALL 64bit LCD DRIVER"
 
     # hold bootloader
-    sudo apt-mark hold raspberrypi-bootloader
+    apt-mark hold raspberrypi-bootloader
 
     # make sure xinput-calibrator is installed
-    sudo apt-get install -y xinput-calibrator
+    apt-get install -y xinput-calibrator
 
     # remove modifications of config.txt
-    sudo sed -i '/^hdmi_force_hotplug=/d' /boot/config.txt 2>/dev/null
-    sudo sed -i '/^hdmi_group=/d' /boot/config.txt 2>/dev/null
-    sudo sed -i "/^hdmi_mode=/d" /boot/config.txt 2>/dev/null
-    sudo sed -i "s/^dtoverlay=.*//g" /boot/config.txt 2>/dev/null
+    sed -i '/^hdmi_force_hotplug=/d' /boot/config.txt 2>/dev/null
+    sed -i '/^hdmi_group=/d' /boot/config.txt 2>/dev/null
+    sed -i "/^hdmi_mode=/d" /boot/config.txt 2>/dev/null
+    sed -i "s/^dtoverlay=.*//g" /boot/config.txt 2>/dev/null
+    #sed -i "s/^framebuffer_width=.*/#framebuffer_width=480/g" /boot/config.txt
+    #sed -i "s/^framebuffer_height=.*/#framebuffer_height=320/g" /boot/config.txt
     echo "hdmi_group=1" >> /boot/config.txt
     echo "hdmi_mode=3" >> /boot/config.txt
     echo "dtoverlay=pi3-disable-bt" >> /boot/config.txt
     echo "dtoverlay=disable-bt" >> /boot/config.txt
 
     # remove modification of cmdline.txt
-    sudo sed -i "s/ dwc_otg.lpm_enable=0 quiet fbcon=map:10 fbcon=font:ProFont6x11 logo.nologo//g" /boot/cmdline.txt
+    sed -i "s/ dwc_otg.lpm_enable=0 quiet fbcon=map:10 fbcon=font:ProFont6x11 logo.nologo//g" /boot/cmdline.txt
 
     # un-prepare X11
-    sudo mv /home/admin/wavesharelcd-64bit-rpi/40-libinput.conf /etc/X11/xorg.conf.d/40-libinput.conf 2>/dev/null
-    sudo rm -rf /etc/X11/xorg.conf.d/99-calibration.conf
+    mv /home/admin/wavesharelcd-64bit-rpi/40-libinput.conf /etc/X11/xorg.conf.d/40-libinput.conf 2>/dev/null
+    rm -rf /etc/X11/xorg.conf.d/99-calibration.conf
 
     # remove github code of LCD drivers
-    sudo rm -r /home/admin/wavesharelcd-64bit-rpi
+    rm -r /home/admin/wavesharelcd-64bit-rpi
 
     echo "# OK uninstall LCD done ... reboot needed"
 
@@ -355,105 +345,13 @@ function uninstall_lcd() {
   fi
 }
 
-# not being used - can be deleted after mid 2021
-function install_lcd_legacy() {
-
-  if [ "${baseimage}" = "raspbian" ] || [ "${baseimage}" = "dietpi" ]; then
-    echo "*** 32bit LCD DRIVER ***"
-    echo "--> Downloading LCD Driver from Github"
-    cd /home/admin/
-    sudo -u admin git clone https://github.com/MrYacha/LCD-show.git
-    sudo -u admin chmod -R 755 LCD-show
-    sudo -u admin chown -R admin:admin LCD-show
-    cd LCD-show/
-    sudo -u admin git reset --hard 53dd0bf || exit 1
-    # install xinput calibrator package
-    echo "--> install xinput calibrator package"
-    sudo apt install -y libxi6
-    sudo dpkg -i xinput-calibrator_0.7.5-1_armhf.deb
- 
-    if [ "${baseimage}" = "dietpi" ]; then
-      echo "--> dietpi preparations"
-      sudo rm -rf /etc/X11/xorg.conf.d/40-libinput.conf
-      sudo mkdir /etc/X11/xorg.conf.d
-      sudo cp ./usr/tft35a-overlay.dtb /boot/overlays/
-      sudo cp ./usr/tft35a-overlay.dtb /boot/overlays/tft35a.dtbo
-      sudo cp -rf ./usr/99-calibration.conf-35  /etc/X11/xorg.conf.d/99-calibration.conf
-      sudo cp -rf ./usr/99-fbturbo.conf  /usr/share/X11/xorg.conf.d/
-      sudo cp ./usr/cmdline.txt /DietPi/
-      sudo cp ./usr/inittab /etc/
-      sudo cp ./boot/config-35.txt /DietPi/config.txt
-      # make LCD screen rotation correct
-      sudo sed -i "s/dtoverlay=tft35a/dtoverlay=tft35a:rotate=270/" /DietPi/config.txt
-    fi
-  elif [ "${baseimage}" = "raspios_arm64"  ] || [ "${baseimage}" = "debian_rpi64" ]; then
-    echo "*** 64bit LCD DRIVER ***"
-    echo "--> Downloading LCD Driver from Github"
-    cd /home/admin/
-    sudo -u admin git clone https://github.com/tux1c/wavesharelcd-64bit-rpi.git
-    sudo -u admin chmod -R 755 wavesharelcd-64bit-rpi
-    sudo -u admin chown -R admin:admin wavesharelcd-64bit-rpi
-    cd /home/admin/wavesharelcd-64bit-rpi
-    sudo -u admin git reset --hard 5a206a7 || exit 1
-
-    # from https://github.com/tux1c/wavesharelcd-64bit-rpi/blob/master/install.sh
-    # prepare X11
-    sudo rm -rf /etc/X11/xorg.conf.d/40-libinput.conf
-    sudo mkdir -p /etc/X11/xorg.conf.d
-    sudo cp -rf ./99-calibration.conf /etc/X11/xorg.conf.d/99-calibration.conf
-    # sudo cp -rf ./99-fbturbo.conf  /etc/X11/xorg.conf.d/99-fbturbo.conf # there is no such file
-
-    # add waveshare mod
-    sudo cp ./waveshare35a.dtbo /boot/overlays/
-
-    # modify /boot/config.txt
-    sudo sed -i "s/^hdmi_force_hotplug=.*//g" /boot/config.txt 
-    #echo "hdmi_force_hotplug=1" >> /boot/config.txt
-    sudo sed -i "s/^dtparam=i2c_arm=.*//g" /boot/config.txt 
-    echo "dtparam=i2c_arm=on" >> /boot/config.txt
-    # don't enable SPI and UART ports by default
-    # echo "dtparam=spi=on" >> /boot/config.txt
-    # echo "enable_uart=1" >> /boot/config.txt
-    sudo sed -i "s/^dtoverlay=.*//g" /boot/config.txt 
-    echo "dtoverlay=waveshare35a:rotate=90" >> /boot/config.txt
-
-    # use modified cmdline.txt 
-    sudo cp ./cmdline.txt /boot/
-
-    # touch screen calibration
-    apt-get install -y xserver-xorg-input-evdev
-    cp -rf /usr/share/X11/xorg.conf.d/10-evdev.conf /usr/share/X11/xorg.conf.d/45-evdev.conf
-    # TODO manual touchscreen calibration option
-    # https://github.com/tux1c/wavesharelcd-64bit-rpi#adapting-guide-to-other-lcds
-  fi
-
-  # activate LCD and trigger reboot
-  # dont do this on dietpi to allow for automatic build
-  if [ "${baseimage}" = "raspbian" ]; then
-    echo "Installing 32-bit LCD drivers ..."
-    sudo chmod +x -R /home/admin/LCD-show
-    cd /home/admin/LCD-show/
-    sudo apt-mark hold raspberrypi-bootloader
-    sudo ./LCD35-show
-  elif [ "${baseimage}" = "raspios_arm64" ] || [ "${baseimage}" = "debian_rpi64" ]; then
-    echo "Installing 64-bit LCD drivers ..."
-    sudo chmod +x -R /home/admin/wavesharelcd-64bit-rpi
-    cd /home/admin/wavesharelcd-64bit-rpi
-    sudo apt-mark hold raspberrypi-bootloader
-    sudo ./install.sh
-  else
-    echo "Use 'sudo reboot' to restart manually."
-  fi
-
-}
-
 function install_headless() {
-  if [ "${baseimage}" = "raspbian" ]||[ "${baseimage}" = "raspios_arm64" ]|| [ "${baseimage}" = "debian_rpi64" ]; then
-    modificationExists=$(sudo cat /etc/systemd/system/getty@tty1.service.d/autologin.conf | grep -c "autologin pi")
+  if [ "${baseimage}" = "raspios_arm64" ]|| [ "${baseimage}" = "debian_rpi64" ]; then
+    modificationExists=$(cat /etc/systemd/system/getty@tty1.service.d/autologin.conf | grep -c "autologin pi")
     if [ "${modificationExists}" == "1" ]; then
       echo "# deactivating auto-login of pi user"
       # set Raspi to deactivate auto-login (will delete /etc/systemd/system/getty@tty1.service.d/autologin.conf)
-      sudo raspi-config nonint do_boot_behaviour B1
+      raspi-config nonint do_boot_behaviour B1
     else
       echo "# auto-login of pi user is already deactivated"
     fi
@@ -472,17 +370,17 @@ function install_headless() {
 }
 
 function uninstall_headless() {
-  if [ "${baseimage}" = "raspbian" ]||[ "${baseimage}" = "raspios_arm64" ]|| [ "${baseimage}" = "debian_rpi64" ]; then
+  if [ "${baseimage}" = "raspios_arm64" ] || [ "${baseimage}" = "debian_rpi64" ]; then
     # activate auto-login
-    sudo raspi-config nonint do_boot_behaviour B2
-    modificationExists=$(sudo cat /etc/systemd/system/getty@tty1.service.d/autologin.conf | grep -c "autologin pi")
+    raspi-config nonint do_boot_behaviour B2
+    modificationExists=$(cat /etc/systemd/system/getty@tty1.service.d/autologin.conf | grep -c "autologin pi")
     if [ "${modificationExists}" == "0" ]; then
       echo "# activating auto-login of pi user again"
       # set Raspi to boot up automatically with user pi
       # https://www.raspberrypi.org/forums/viewtopic.php?t=21632
-      sudo bash -c "echo '[Service]' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
-      sudo bash -c "echo 'ExecStart=' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
-      sudo bash -c "echo 'ExecStart=-/sbin/agetty --autologin pi --noclear %I 38400 linux' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
+      bash -c "echo '[Service]' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
+      bash -c "echo 'ExecStart=' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
+      bash -c "echo 'ExecStart=-/sbin/agetty --autologin pi --noclear %I 38400 linux' >> /etc/systemd/system/getty@tty1.service.d/autologin.conf"
     else
       echo "# auto-login of pi user already active"
     fi
@@ -490,13 +388,13 @@ function uninstall_headless() {
       # set DietPi to boot up automatically with user pi (for the LCD)
       # requires AUTO_SETUP_AUTOSTART_TARGET_INDEX=7 in the dietpi.txt
       # /DietPi/dietpi/dietpi-autostart overwrites /etc/systemd/system/getty@tty1.service.d/dietpi-autologin.conf on reboot
-      sudo sed -i 's/agetty --autologin root %I $TERM/agetty --autologin pi --noclear %I 38400 linux/' /DietPi/dietpi/dietpi-autostart
+      sed -i 's/agetty --autologin root %I $TERM/agetty --autologin pi --noclear %I 38400 linux/' /DietPi/dietpi/dietpi-autostart
    elif [ "${baseimage}" = "ubuntu" ] || [ "${baseimage}" = "armbian" ]; then
-      modificationExists=$(sudo cat /lib/systemd/system/getty@.service | grep -c "autologin pi")
+      modificationExists=$(cat /lib/systemd/system/getty@.service | grep -c "autologin pi")
       if [ "${modificationExists}" == "0" ]; then
-        sudo bash -c "echo '[Service]' >> /lib/systemd/system/getty@.service"
-        sudo bash -c "echo 'ExecStart=' >> /lib/systemd/system/getty@.service"
-        sudo bash -c "echo 'ExecStart=-/sbin/agetty --autologin pi --noclear %I 38400 linux' >> /lib/systemd/system/getty@.service"
+        bash -c "echo '[Service]' >> /lib/systemd/system/getty@.service"
+        bash -c "echo 'ExecStart=' >> /lib/systemd/system/getty@.service"
+        bash -c "echo 'ExecStart=-/sbin/agetty --autologin pi --noclear %I 38400 linux' >> /lib/systemd/system/getty@.service"
       else
         echo "# auto-login of pi user already active"
       fi
@@ -506,32 +404,34 @@ function uninstall_headless() {
   fi
 }
 
-function prepareDisplayClassEntryRaspiblitzConf() {
-  # check if file exists / hdd is mounted
-  if [ -f "/mnt/hdd/raspiblitz.conf" ]; then
-    echo "file does exists"
-    entryExists=$(grep -c "displayClass=" /mnt/hdd/raspiblitz.conf)
-    if [ ${entryExists} -eq 0 ]; then
-      echo "displayClass=${displayClass}" >> /mnt/hdd/raspiblitz.conf
-    fi
-  else
-    echo "# /mnt/hdd/raspiblitz.conf does not exists (yet) - change is just part of raspiblitz.info"
-  fi
-}
-
 ###################
 # SET DISPLAY TYPE
 ###################
 
 if [ "${command}" == "set-display" ]; then
 
+  # Make sure needed packages are installed
+  if [ $(dpkg-query -l | grep "ii  fbi" | wc -l) = 0 ]; then
+    sudo apt-get install fbi -y > /dev/null
+  fi
+  if [ $(dpkg-query -l | grep "ii  qrencode" | wc -l) = 0 ]; then
+    sudo apt-get install qrencode -y > /dev/null
+  fi
+
   paramDisplayClass=$2
   paramDisplayType=$3
   echo "# blitz.display.sh set-display ${paramDisplayClass} ${paramDisplayType}"
+  echo "baseimage(${baseimage})"
 
   # check if started with sudo
   if [ "$EUID" -ne 0 ]; then 
     echo "error='missing sudo'"
+    exit 1
+  fi
+
+  # check if display class parameter is given
+  if [ "${baseimage}" == "" ]; then
+    echo "err='missing baseimage info'"
     exit 1
   fi
 
@@ -557,10 +457,9 @@ if [ "${command}" == "set-display" ]; then
     exit 1
   fi
 
-  # mark new display class in configs
-  prepareDisplayClassEntryRaspiblitzConf
-  sudo sed -i "s/^displayClass=.*/displayClass=${paramDisplayClass}/g" /home/admin/raspiblitz.info
-  sudo sed -i "s/^displayClass=.*/displayClass=${paramDisplayClass}/g" /mnt/hdd/raspiblitz.conf 2>/dev/null
+  # mark new display class in config (if exist)
+  /home/admin/config.scripts/blitz.conf.sh set displayClass ${paramDisplayClass}
+  sed -i "s/^displayClass=.*/displayClass=${paramDisplayClass}/g" /home/admin/raspiblitz.info
   exit 0
 
 fi

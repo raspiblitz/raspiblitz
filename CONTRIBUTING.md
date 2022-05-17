@@ -2,7 +2,7 @@
 Everybody is welcome to join, improve, and extend the RaspiBlitz - it's a work in progress. Check the issues if you wanna help out or add new ideas. You can find the scripts used for RaspiBlitz interactions on the device at /home/admin or in this Git repo's subfolder home.admin.
 
 ## Understanding Blitz project
-RaspiBlitz is insipired by the [RaspiBolt guide](https://stadicus.github.io/RaspiBolt/). Tutorial on how to build a lightning node on the RaspberryPi. So much thx to Stadicus :)
+RaspiBlitz is insipired by the [RaspiBolt guide](https://raspibolt.github.io/raspibolt/). Tutorial on how to build a lightning node on the RaspberryPi. So much thx to Stadicus :)
 To start your Deep Dive into the RaspiBlitz project, watch [this video](https://www.youtube.com/watch?v=QXUGg45CWLo).
 
 ### Blitz philosophy

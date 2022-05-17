@@ -1,7 +1,9 @@
 #!/bin/bash
 
-# https://github.com/romanz/electrs/blob/master/doc/usage.md
-ELECTRSVERSION=v0.8.11
+# https://github.com/romanz/electrs/releases
+ELECTRSVERSION="v0.9.7"
+# https://github.com/romanz/electrs/commits/master
+# ELECTRSVERSION="3041e89cd2fb377541b929d852ef6298c2d4e60a"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -11,6 +13,10 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "installs the version $ELECTRSVERSION"
  exit 1
 fi
+
+PGPsigner="romanz"
+PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
+PGPpubkeyFingerprint="87CAE5FA46917CBB"
 
 source /mnt/hdd/raspiblitz.conf
 
@@ -39,9 +45,14 @@ if [ "$1" = "status" ]; then
   if [ ${serviceRunning} -eq 1 ]; then
 
     # Experimental try to get sync Info
-    syncedToBlock=$(sudo journalctl -u electrs --no-pager -n100 | grep "new headers from height" | tail -n 1 | cut -d " " -f 16 | sed 's/[^0-9]*//g')
+    syncedToBlock=$(sudo journalctl -u electrs --no-pager -n2000 | grep "height=" | tail -n1| cut -d= -f3)
     blockchainHeight=$(sudo -u bitcoin ${network}-cli getblockchaininfo 2>/dev/null | jq -r '.headers' | sed 's/[^0-9]*//g')
     lastBlockchainHeight=$(($blockchainHeight -1))
+    syncProgress=0
+    if [ "${syncedToBlock}" != "" ] && [ "${blockchainHeight}" != "" ] && [ "${blockchainHeight}" != "0" ]; then
+      syncProgress="$(echo "$syncedToBlock" "$blockchainHeight" | awk '{printf "%.2f", $1 / $2 * 100}')"
+    fi
+    echo "syncProgress=${syncProgress}%"
     if [ "${syncedToBlock}" = "${blockchainHeight}" ] || [ "${syncedToBlock}" = "${lastBlockchainHeight}" ]; then
       echo "tipSynced=1"
     else
@@ -86,7 +97,7 @@ if [ "$1" = "status" ]; then
       # no answer on that port
       echo "publicTCPPortAnswering=0"
     fi
-    echo "portHTTP='50002'"
+    echo "portSSL='50002'"
     localPortRunning=$(sudo netstat -an | grep -c '0.0.0.0:50002')
     echo "localHTTPPortActive=${localPortRunning}"
     publicPortRunning=$(nc -z -w6 ${publicip} 50002 2>/dev/null; echo $?)
@@ -99,13 +110,13 @@ if [ "$1" = "status" ]; then
     fi
     # add TOR info
     if [ "${runBehindTor}" == "on" ]; then
-      echo "TORrunning=1"
+      echo "TorRunning=1"
       if [ "$2" = "showAddress" ]; then
         TORaddress=$(sudo cat /mnt/hdd/tor/electrs/hostname)
         echo "TORaddress='${TORaddress}'"
       fi
     else
-      echo "TORrunning=0"
+      echo "TorRunning=0"
     fi
     # check Nginx
     nginxTest=$(sudo nginx -t 2>&1 | grep -c "test is successful")
@@ -151,7 +162,7 @@ This can take multiple hours.
       " 9 48
     exit 0
   fi
-  
+
   if [ ${nginxTest} -eq 0 ]; then
      dialog --title "Testing nginx.conf has failed" --msgbox "
 Nginx is in a failed state. Will attempt to fix.
@@ -188,31 +199,31 @@ Check 'sudo nginx -t' for a detailed error message.
     echo
     echo "On Network Settings > Server menu:"
     echo "- deactivate automatic server selection"
-    echo "- as manual server set '${localip}' & '${portHTTP}'"
+    echo "- as manual server set '${localip}' & '${portSSL}'"
     echo "- laptop and RaspiBlitz need to be within same local network"
-    echo 
+    echo
     echo "To start directly from laptop terminal use:"
-    echo "electrum --oneserver --server ${localip}:${portHTTP}:s"
-    if [ ${TORrunning} -eq 1 ]; then
+    echo "electrum --oneserver --server ${localip}:${portSSL}:s"
+    if [ ${TorRunning} -eq 1 ]; then
       echo
       echo "The Tor Hidden Service address for electrs is (see LCD for QR code):"
       echo "${TORaddress}"
       echo
-      echo "To connect through TOR open the Tor Browser and start with the options:" 
+      echo "To connect through TOR open the Tor Browser and start with the options:"
       echo "electrum --oneserver --server ${TORaddress}:50002:s --proxy socks5:127.0.0.1:9150"
-      /home/admin/config.scripts/blitz.display.sh qr "${TORaddress}"
+      sudo /home/admin/config.scripts/blitz.display.sh qr "${TORaddress}"
     fi
     echo
     echo "For more details check the RaspiBlitz README on ElectRS:"
     echo "https://github.com/rootzoll/raspiblitz"
-    echo 
+    echo
     echo "Press ENTER to get back to main menu."
     read key
-    /home/admin/config.scripts/blitz.display.sh hide
+    sudo /home/admin/config.scripts/blitz.display.sh hide
     ;;
     STATUS)
     sudo /home/admin/config.scripts/bonus.electrs.sh status
-    echo 
+    echo
     echo "Press ENTER to get back to main menu."
     read key
     ;;
@@ -226,18 +237,13 @@ Check 'sudo nginx -t' for a detailed error message.
     echo "# starting service"
     sudo systemctl start electrs
     echo "# ok"
-    echo 
+    echo
     echo "Press ENTER to get back to main menu."
     read key
     ;;
   esac
 
   exit 0
-fi
-
-# add default value to raspi config if needed
-if ! grep -Eq "^ElectRS=" /mnt/hdd/raspiblitz.conf; then
-  echo "ElectRS=off" >> /mnt/hdd/raspiblitz.conf
 fi
 
 # stop service
@@ -252,7 +258,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   if [ ${isInstalled} -eq 0 ]; then
 
     #cleanup
-    sudo rm -f /home/electrs/.electrs/config.toml 
+    sudo rm -f /home/electrs/.electrs/config.toml
 
     echo
     echo "# Creating the electrs user"
@@ -261,31 +267,25 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     cd /home/electrs
 
     echo
-    echo "# Installing Rust"
+    echo "# Installing Rust for the electrs user"
     echo
     # https://github.com/romanz/electrs/blob/master/doc/usage.md#build-dependencies
-    #sudo -u electrs curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sudo -u electrs sh -s -- --default-toolchain 1.39.0 -y
-    sudo apt update
-    sudo apt install -y cargo
+    sudo -u electrs curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sudo -u electrs sh -s -- --default-toolchain none -y
     sudo apt install -y clang cmake build-essential  # for building 'rust-rocksdb'
 
     echo
-    echo "# Downloading and building electrs $ELECTRSVERSION. This will take ~30 minutes" # ~22 min on an Odroid XU4
+    echo "# Downloading and building electrs $ELECTRSVERSION. This will take ~40 minutes"
     echo
     sudo -u electrs git clone https://github.com/romanz/electrs
-    cd /home/electrs/electrs || exit 1 
+    cd /home/electrs/electrs || exit 1
     sudo -u electrs git reset --hard $ELECTRSVERSION
-    sudo -u electrs cargo build --release || exit 1 
+    sudo -u electrs /home/admin/config.scripts/blitz.git-verify.sh \
+     "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
+    sudo -u electrs /home/electrs/.cargo/bin/cargo build --locked --release || exit 1
 
     echo
     echo "# The electrs database will be built in /mnt/hdd/app-storage/electrs/db. Takes ~18 hours and ~50Gb diskspace"
     echo
-    # move old-database if present
-    if [ -d "/mnt/hdd/electrs/db" ]; then
-      echo "Moving existing ElectRS index to /mnt/hdd/app-storage/electrs..."
-      sudo mv -f /mnt/hdd/electrs /mnt/hdd/app-storage/
-    fi
-
     sudo mkdir /mnt/hdd/app-storage/electrs 2>/dev/null
     sudo chown -R electrs:electrs /mnt/hdd/app-storage/electrs
 
@@ -302,16 +302,17 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # generate setting file: https://github.com/romanz/electrs/issues/170#issuecomment-530080134
     # https://github.com/romanz/electrs/blob/master/doc/usage.md#configuration-files-and-environment-variables
     sudo -u electrs mkdir /home/electrs/.electrs 2>/dev/null
-    echo "
-verbose = 4
+    echo "\
+log_filters = \"INFO\"
 timestamp = true
 jsonrpc_import = true
+index-batch-size = 10
+wait_duration_secs = 10
+jsonrpc_timeout_secs = 15
 db_dir = \"/mnt/hdd/app-storage/electrs/db\"
-auth = \"$RPC_USER:$PASSWORD_B\"
+auth = \"${RPC_USER}:${PASSWORD_B}\"
 # allow BTC-RPC-explorer show tx-s for addresses with a history of more than 100
 txid_limit = 1000
-# https://github.com/Stadicus/RaspiBolt/issues/646
-wait_duration_secs = 20
 server_banner = \"Welcome to electrs $ELECTRSVERSION - the Electrum Rust Server on your RaspiBlitz\"
 " | sudo tee /home/electrs/.electrs/config.toml
     sudo chmod 600 /home/electrs/.electrs/config.toml
@@ -381,8 +382,6 @@ stream {
             fi
     fi
 
-    sudo systemctl restart nginx
-
     echo
     echo "# Open ports 50001 and 5002 on UFW "
     echo
@@ -392,15 +391,15 @@ stream {
     echo
     echo "# Installing the systemd service"
     echo
-    # sudo nano /etc/systemd/system/electrs.service 
+    # sudo nano /etc/systemd/system/electrs.service
     echo "
 [Unit]
 Description=Electrs
-After=lnd.service
+After=bitcoind.service
 
 [Service]
 WorkingDirectory=/home/electrs/electrs
-ExecStart=/home/electrs/electrs/target/release/electrs --index-batch-size=10 --electrum-rpc-addr=\"0.0.0.0:50001\"
+ExecStart=/home/electrs/electrs/target/release/electrs --electrum-rpc-addr=\"0.0.0.0:50001\"
 User=electrs
 Group=electrs
 Type=simple
@@ -420,27 +419,43 @@ WantedBy=multi-user.target
     sudo systemctl enable electrs
     # manual start:
     # sudo -u electrs /home/electrs/.cargo/bin/cargo run --release -- --index-batch-size=10 --electrum-rpc-addr="0.0.0.0:50001"
-  else 
+  else
     echo "# ElectRS is already installed."
   fi
 
   # setting value in raspiblitz config
-  sudo sed -i "s/^ElectRS=.*/ElectRS=on/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set ElectRS "on"
 
   # Hidden Service for electrs if Tor active
   if [ "${runBehindTor}" = "on" ]; then
-    # make sure to keep in sync with internet.tor.sh script
-    /home/admin/config.scripts/internet.hiddenservice.sh electrs 50002 50002 50001 50001
+    # make sure to keep in sync with tor.network.sh script
+    /home/admin/config.scripts/tor.onion-service.sh electrs 50002 50002 50001 50001
   fi
 
-  ## Enable BTCEXP_ADDRESS_API if BTC-RPC-Explorer is active
-  # see /home/admin/config.scripts/bonus.electrsexplorer.sh
-  # run every 10 min by _background.sh
-  
+  # whitelist downloading to localhost from bitcoind
+  if ! sudo grep -Eq "^whitelist=download@127.0.0.1" /mnt/hdd/bitcoin/bitcoin.conf;then
+    echo "whitelist=download@127.0.0.1" | sudo tee -a /mnt/hdd/bitcoin/bitcoin.conf
+    bitcoindRestart=yes
+  fi
+
+  source <(/home/admin/_cache.sh get state)
+  if [ "${state}" == "ready" ]; then
+    if [ "${bitcoindRestart}" == "yes" ]; then
+      sudo systemctl restart bitcoind
+    fi
+    sudo systemctl restart nginx
+    sudo systemctl start electrs
+    # restart BTC-RPC-Explorer to reconfigure itself to use electrs for address API
+    if [ "${BTCRPCexplorer}" == "on" ]; then
+      sudo systemctl restart btc-rpc-explorer
+      echo "# BTC-RPC-Explorer restarted"
+    fi
+  fi
+
   echo
   echo "# To connect through SSL from outside of the local network make sure the port 50002 is forwarded on the router"
   echo
-  
+
   exit 0
 fi
 
@@ -448,7 +463,7 @@ fi
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # setting value in raspiblitz config
-  sudo sed -i "s/^ElectRS=.*/ElectRS=off/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set ElectRS "off"
 
   # if second parameter is "deleteindex"
   if [ "$2" == "deleteindex" ]; then
@@ -458,7 +473,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # Hidden Service if Tor is active
   if [ "${runBehindTor}" = "on" ]; then
-    /home/admin/config.scripts/internet.hiddenservice.sh off electrs
+    /home/admin/config.scripts/tor.onion-service.sh off electrs
   fi
 
   isInstalled=$(sudo ls /etc/systemd/system/electrs.service 2>/dev/null | grep -c 'electrs.service')
@@ -468,15 +483,19 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo systemctl disable electrs
     sudo rm /etc/systemd/system/electrs.service
     # delete user and home directory
-    sudo userdel -rf electrs 
+    sudo userdel -rf electrs
     # close ports on firewall
     sudo ufw deny 50001
-    sudo ufw deny 50002 
+    sudo ufw deny 50002
     echo "# OK ElectRS removed."
-    
-    ## Disable BTCEXP_ADDRESS_API if BTC-RPC-Explorer is active
-    /home/admin/config.scripts/bonus.electrsexplorer.sh
-  else 
+
+    # restart BTC-RPC-Explorer to reconfigure itself to use electrs for address API
+    if [ "${BTCRPCexplorer}" == "on" ]; then
+      sudo systemctl restart btc-rpc-explorer
+      echo "# BTC-RPC-Explorer restarted"
+    fi
+
+  else
     echo "# ElectRS is not installed."
   fi
   exit 0

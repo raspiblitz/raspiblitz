@@ -10,7 +10,7 @@ cp /vagrant/home.admin/config.scripts/blitz.github.sh /home/admin/config.scripts
 # execute 'patch' command to sync laptop with VM
 /home/admin/config.scripts/blitz.github.sh -run
 
-source <(/home/admin/config.scripts/internet.sh status)
+source <(/home/admin/config.scripts/internet.sh status local)
 
 echo
 echo "************* NEXT ********************"

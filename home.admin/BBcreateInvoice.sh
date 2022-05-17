@@ -17,11 +17,10 @@ if [ ${#chain} -eq 0 ]; then
 fi
 
 source <(/home/admin/config.scripts/network.aliases.sh getvars $1 $2)
-
 source <(/home/admin/config.scripts/network.aliases.sh getvars $LNTYPE ${chain}net)
 
 # check if chain is in sync
-if [ $LNTYPE = cln ];then
+if [ $LNTYPE = cl ];then
   lncommand="${netprefix}lightning-cli"
   BLOCKHEIGHT=$($bitcoincli_alias getblockchaininfo|grep blocks|awk '{print $2}'|cut -d, -f1)
   CLHEIGHT=$($lightningcli_alias getinfo | jq .blockheight)
@@ -49,7 +48,7 @@ done
 
 # check number of connected peers
 echo "check for open channels"
-if [ $LNTYPE = cln ];then
+if [ $LNTYPE = cl ];then
   openChannels=$($lightningcli_alias listpeers | grep -c "CHANNELD_NORMAL")
 elif [ $LNTYPE = lnd ];then
   openChannels=$($lncli_alias  listchannels 2>/dev/null | grep chan_id -c)
@@ -81,7 +80,7 @@ fi
 # TODO let user enter a description
 
 # build command
-if [ $LNTYPE = cln ];then
+if [ $LNTYPE = cl ];then
   label=$(date +%s) # seconds since 1970-01-01 00:00:00 UTC
   # invoice msatoshi label description [expiry] [fallbacks] [preimage] [exposeprivatechannels] [cltv]
   command="$lightningcli_alias invoice ${amount}sat $label ''"
@@ -115,17 +114,20 @@ if [ ${#error} -gt 0 ]; then
   echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
   echo "${error}"
 else
-  if [ $LNTYPE = cln ];then
+  if [ $LNTYPE = cl ];then
     payReq=$(echo "$result" | grep bolt11 | cut -d '"' -f4)
   elif [ $LNTYPE = lnd ];then
     rhash=$(echo "$result" | grep r_hash | cut -d '"' -f4)
     payReq=$(echo "$result" | grep payment_request | cut -d '"' -f4)
   fi
-  /home/admin/config.scripts/blitz.display.sh qr "${payReq}"
+  sudo /home/admin/config.scripts/blitz.display.sh qr "${payReq}"
 
   if [ $(sudo dpkg-query -l | grep "ii  qrencode" | wc -l) = 0 ]; then
    sudo apt-get install qrencode -y > /dev/null
   fi
+
+  # raise high focus on lightning channel balance next 5min
+  /home/admin/_cache.sh focus ln_${LNTYPE}_${CHAIN}_channels_balance 0 300
 
   echo
   echo "********************"
@@ -139,7 +141,7 @@ else
   echo "${payReq}"
   echo
   echo "Monitoring the Incoming Payment with:"
-  if [ $LNTYPE = cln ];then
+  if [ $LNTYPE = cl ];then
     echo "$lightningcli_alias waitinvoice $label"
   elif [ $LNTYPE = lnd ];then
     echo "$lncli_alias lookupinvoice ${rhash}"
@@ -148,7 +150,7 @@ else
 
   while :
     do
-    if [ $LNTYPE = cln ];then
+    if [ $LNTYPE = cl ];then
       result=$($lightningcli_alias waitinvoice $label)
       wasPayed=$(echo $result | grep -c 'paid')
     elif [ $LNTYPE = lnd ];then
@@ -160,8 +162,8 @@ else
       echo $result
       echo
       echo "OK the Invoice was paid - returning to menu."
-      /home/admin/config.scripts/blitz.display.sh hide
-      /home/admin/config.scripts/blitz.display.sh image /home/admin/raspiblitz/pictures/ok.png
+      sudo /home/admin/config.scripts/blitz.display.sh hide
+      sudo /home/admin/config.scripts/blitz.display.sh image /home/admin/raspiblitz/pictures/ok.png
       sleep 2
       break
     fi
@@ -180,7 +182,7 @@ else
 
   done
 
-  /home/admin/config.scripts/blitz.display.sh hide
+  sudo /home/admin/config.scripts/blitz.display.sh hide
 
 fi
 echo "Press ENTER to return to main menu."

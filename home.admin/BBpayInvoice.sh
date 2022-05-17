@@ -18,10 +18,8 @@ fi
 
 source <(/home/admin/config.scripts/network.aliases.sh getvars $1 $2)
 
-source <(/home/admin/config.scripts/network.aliases.sh getvars $LNTYPE ${chain}net)
-
 # check if chain is in sync
-if [ $LNTYPE = cln ];then
+if [ $LNTYPE = cl ];then
   lncommand="${netprefix}lightning-cli"
   BLOCKHEIGHT=$($bitcoincli_alias getblockchaininfo|grep blocks|awk '{print $2}'|cut -d, -f1)
   CLHEIGHT=$($lightningcli_alias getinfo | jq .blockheight)
@@ -49,7 +47,7 @@ done
 
 # check number of connected peers
 echo "check for open channels"
-if [ $LNTYPE = cln ];then
+if [ $LNTYPE = cl ];then
   openChannels=$($lightningcli_alias listpeers | grep -c "CHANNELD_NORMAL")
 elif [ $LNTYPE = lnd ];then
   openChannels=$($lncli_alias  listchannels 2>/dev/null | grep chan_id -c)
@@ -65,25 +63,17 @@ if [ ${openChannels} -eq 0 ]; then
 fi
 
 paymentRequestStart="???"
-if [ "${network}" = "bitcoin" ]; then
-  if [ "${chain}" = "main" ]; then
-    paymentRequestStart="lnbc"
-  else
-    paymentRequestStart="lntb"
-  fi
-elif [ "${network}" = "litecoin" ]; then
-    paymentRequestStart="lnltc"
+if [ "${chain}" = "main" ]; then
+  paymentRequestStart="lnbc"
+else
+  paymentRequestStart="lntb"
 fi
 
 testSite="???"
-if [ "${network}" = "bitcoin" ]; then
-  if [ "${chain}" = "main" ]; then
-    testSite="https://satoshis.place"
-  else
-    testSite="https://starblocks.acinq.co/"
-  fi
-elif [ "${network}" = "litecoin" ]; then
-    testSite="https://millionlitecoinhomepage.net"
+if [ "${chain}" = "main" ]; then
+  testSite="https://satoshis.place"
+else
+  testSite="https://starblocks.acinq.co/"
 fi
 
 # let user enter the invoice
@@ -105,19 +95,22 @@ fi
 # TODO: maybe try/show the decoded info first by using https://api.lightning.community/#decodepayreq
 
 # build command
-if [ $LNTYPE = cln ];then
+if [ $LNTYPE = cl ];then
   # pay bolt11 [msatoshi] [label] [riskfactor] [maxfeepercent] [retry_for] [maxdelay] [exemptfee]
   command="$lightningcli_alias pay ${invoice}"
 elif [ $LNTYPE = lnd ];then
   command="$lncli_alias sendpayment --force --pay_req=${invoice}"
 fi
 
+# raise high focus on lightning channel balance next 5min
+/home/admin/_cache.sh focus ln_${LNTYPE}_${CHAIN}_channels_balance 0 300
+
 # info output
 clear
 echo "************************************************************"
 echo "Pay Invoice / Payment Request"
-echo "This script is as an example how to use the lncli interface."
-echo "Its not optimized for performance or error handling."
+echo "This script is an example using lightning in the command line."
+echo "It is not optimized for performance or error handling."
 echo "************************************************************"
 echo 
 echo "COMMAND LINE: "
@@ -132,7 +125,7 @@ error=$(cat ${_error})
 #echo "result(${result})"
 #echo "error(${error})"
 
-if [ $LNTYPE = cln ];then
+if [ $LNTYPE = cl ];then
   resultIsError=$(echo "${result}" | grep -c '"code":')
 elif [ $LNTYPE = lnd ];then
   resultIsError=$(echo "${result}" | grep -c "payment_error")

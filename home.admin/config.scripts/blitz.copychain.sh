@@ -12,8 +12,8 @@ source /home/admin/raspiblitz.info 2>/dev/null
 source /mnt/hdd/raspiblitz.conf 2>/dev/null
 
 # check that blockchain is set & supported
-if [ "${network}" != "bitcoin" ] && [ "${network}" != "litecoin" ]; then
-  echo "blockchain='{$network}'"
+if [ "${network}" != "bitcoin" ]; then
+  echo "blockchain='${network}'"
   echo "error='blockchain type missing or not supported'"
   exit 1
 fi
@@ -28,6 +28,9 @@ fi
 ###################
 # STATUS
 ###################
+
+# get values from cache
+source <(/home/admin/_cache.sh get internet_localip)
 
 # check if copy is in progress
 copyBeginTime=$(cat /mnt/hdd/${network}/copy_begin.time 2>/dev/null | tr -cd '[[:digit:]]')
@@ -77,33 +80,38 @@ if [ "$1" = "target" ]; then
   esac
 
   # setting copy state
-  sed -i "s/^state=.*/state=copytarget/g" /home/admin/raspiblitz.info
-  sed -i "s/^message=.*/message='Receiving Blockchain over LAN'/g" /home/admin/raspiblitz.info
+  /home/admin/_cache.sh set state "copytarget"
+  /home/admin/_cache.sh set message "Receiving Blockchain over LAN"
 
   echo "stopping services ..."
+  sudo systemctl stop lnd 2>/dev/null
+  sudo systemctl stop lightningd 2>/dev/null
   sudo systemctl stop bitcoind 2>/dev/null
   sudo systemctl disable bitcoind 2>/dev/null
 
-  # check if old blockchain data exists
-  hasOldBlockchainData=0
+  # check if old blockchain data exists (1 Block is 1KB)
+  deleteOldBlockchain=0
   sizeBlocks=$(sudo du -s /mnt/hdd/bitcoin/blocks 2>/dev/null | tr -dc '[0-9]')
-  if [ ${#sizeBlocks} -gt 0 ] && [ ${sizeBlocks} -gt 0 ]; then
-    hasOldBlockchainData=1
-  fi
-  sizeChainstate=$(sudo du -s /mnt/hdd/bitcoin/chainstate 2>/dev/null | tr -dc '[0-9]')
-  if [ ${#sizeChainstate} -gt 0 ] && [ ${sizeChainstate} -gt 0 ]; then
-    hasOldBlockchainData=1
+  if [ "${sizeBlocks}" == "" ] || [ ${sizeBlocks} -lt 250000 ]; then 
+    # blockchain block data is below 250MB ... assume just to be deleted and start copy fresh
+    deleteOldBlockchain=1
+  else
+    # ask if existing blockchain data should be deleted for not before copy start
+    dialog --title " Old Blockchain Data Found " --yesno "\nDo you want to delete the existing blockchain data now?" 7 60
+    response=$?
+    clear
+    echo "response(${response})"
+    if [ "${response}" = "1" ]; then
+      echo "OK - keep old blockchain - just try to repair by copying over it"
+      sleep 3
+    else
+      echo "OK - mark old blockchain to be deleted"
+      deleteOldBlockchain=1
+    fi
   fi
 
-  dialog --title " Old Blockchain Data Found " --yesno "\nDo you want to delete the existing blockchain data now?" 7 60
-  response=$?
-  clear
-  echo "response(${response})"
-  if [ "${response}" = "1" ]; then
-    echo "OK - keep old blockchain - just try to repair by copying over it"
-    sleep 3
-  else
-    echo "OK - delete old blockchain"
+  # delete ald blockchain data
+  if [ "${deleteOldBlockchain}" == "1" ]; then
     sudo rm -rfv /mnt/hdd/bitcoin/blocks/* 2>/dev/null
     sudo rm -rfv /mnt/hdd/bitcoin/chainstate/* 2>/dev/null
     sleep 3
@@ -133,7 +141,7 @@ if [ "$1" = "target" ]; then
     echo "Make sure that the Bitcoin Core Wallet is not running in the background anymore."
     echo ""
     echo "COPY, PASTE & EXECUTE the following command on your Windows computer terminal:"
-    echo "scp -r ./chainstate ./blocks bitcoin@${localip}:/mnt/hdd/bitcoin"
+    echo "scp -r ./chainstate ./blocks bitcoin@${internet_localip}:/mnt/hdd/bitcoin"
     echo ""
     echo "If asked for a password use PASSWORD A (or 'raspiblitz')."
   fi
@@ -153,7 +161,7 @@ if [ "$1" = "target" ]; then
     echo "Make sure that the Bitcoin Core Wallet is not running in the background anymore."
     echo ""
     echo "COPY, PASTE & EXECUTE the following command on your MacOSX terminal:"
-    echo "sudo rsync -avhW --progress ./chainstate ./blocks bitcoin@${localip}:/mnt/hdd/bitcoin"
+    echo "sudo rsync -avhW --progress ./chainstate ./blocks bitcoin@${internet_localip}:/mnt/hdd/bitcoin"
     echo ""
     echo "You will be asked for passwords. First can be the user password of your MacOSX"
     echo "computer and the last is the PASSWORD A (or 'raspiblitz') of this RaspiBlitz."
@@ -174,7 +182,7 @@ if [ "$1" = "target" ]; then
     echo "Make sure that the Bitcoin Core Wallet is not running in the background anymore."
     echo ""
     echo "COPY, PASTE & EXECUTE the following command on your Linux terminal:"
-    echo "sudo rsync -avhW --progress ./chainstate ./blocks bitcoin@${localip}:/mnt/hdd/bitcoin"
+    echo "sudo rsync -avhW --progress ./chainstate ./blocks bitcoin@${internet_localip}:/mnt/hdd/bitcoin"
     echo ""
     echo "You will be asked for passwords. First can be the user password of your Linux"
     echo "computer and the last is the PASSWORD A (or 'raspiblitz') of this RaspiBlitz."
@@ -191,7 +199,7 @@ if [ "$1" = "target" ]; then
     echo "Once in the main menu go: MAINMENU > REPAIR > COPY-SOURCE"
     echo "Follow the given instructions ..."
     echo ""
-    echo "The LOCAL IP of this target RaspiBlitz is: ${localip}"
+    echo "The LOCAL IP of this target RaspiBlitz is: ${internet_localip}"
   fi
   echo "" 
   echo "It can take multiple hours until transfer is complete - be patient."
@@ -257,7 +265,7 @@ if [ "$1" = "target" ]; then
     response=$?
     echo "response(${response})"
     if [ "${response}" == "0" ]; then
-      /home/admin/config.scripts/blitz.copychain.sh
+      /home/admin/config.scripts/blitz.copychain.sh target
       exit 0
     fi
 
@@ -279,11 +287,13 @@ if [ "$1" = "target" ]; then
   echo "restarting services ... (please wait)"
   sudo systemctl enable bitcoind 
   sudo systemctl start bitcoind 
+  sudo systemctl start lnd 2>/dev/null
+  sudo systemctl start lightningd 2>/dev/null
   sleep 10
 
   # setting copy state
-  sed -i "s/^state=.*/state=ready/g" /home/admin/raspiblitz.info
-  sed -i "s/^message=.*/message='Node Running'/g" /home/admin/raspiblitz.info
+  /home/admin/_cache.sh set state "ready"
+  /home/admin/_cache.sh set message "Node Running"
 fi
 
 ###################
@@ -299,11 +309,10 @@ if [ "$1" = "source" ]; then
   echo "# get IP of RaspiBlitz to copy to ..."
   targetIP=$(whiptail --inputbox "\nPlease enter the LOCAL IP of the\nRaspiBlitz to copy Blockchain to:" 10 38 "" --title " Target IP " --backtitle "RaspiBlitz - Copy Blockchain" 3>&1 1>&2 2>&3)
   targetIP=$(echo "${targetIP[0]}")
-  localIP=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
   if [ ${#targetIP} -eq 0 ]; then
     exit 1
   fi
-  if [ "${localIP}" == "${targetIP}" ]; then
+  if [ "${internet_localip}" == "${targetIP}" ]; then
     whiptail --msgbox "Dont type in the local IP of this RaspiBlitz,\nthe LOCAL IP of the other RaspiBlitz is needed." 8 54 "" --title " Testing Target IP " --backtitle "RaspiBlitz - Copy Blockchain"
     exit 1
   fi
@@ -327,13 +336,12 @@ if [ "$1" = "source" ]; then
   fi
 
   echo "# stopping services ..."
-  sudo systemctl stop background
-  sudo systemctl stop lnd
+  sudo systemctl stop lnd 2>/dev/null
+  sudo systemctl stop lightningd 2>/dev/null
   sudo systemctl stop ${network}d
   sudo systemctl disable ${network}d
   sleep 5
-  sudo systemctl stop bitcoind 2>/dev/null
-  
+
   clear
   echo
   echo "# Starting copy over LAN (around 4-6 hours) ..."
@@ -390,8 +398,8 @@ if [ "$1" = "source" ]; then
   echo "# start services again ..."
   sudo systemctl enable ${network}d
   sudo systemctl start ${network}d
-  sudo systemctl start lnd
-  sudo systemctl start background
+  sudo systemctl start lnd 2>/dev/null
+  sudo systemctl start lightningd 2>/dev/null
 
   echo "# show final message"
   whiptail --msgbox "OK - Copy Process Finished.\n\nNow check on the target RaspiBlitz if it was sucessful." 10 40 "" --title " DONE " --backtitle "RaspiBlitz - Copy Blockchain"

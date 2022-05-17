@@ -3,7 +3,7 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "config script to set a the DNS server that should be used"
- echo "internet.dns.sh [DNS-SERVER|test]"
+ echo "internet.dns.sh [DNS-SERVER|test|off]"
  exit 1
 fi
 
@@ -15,6 +15,16 @@ NODIALOG="$2"
 
 # just if auto reboot is needed after dialog
 autoreboot=0 
+
+if [ "${DNSSERVER}" = "off" ]; then
+  # setting DNS address
+  echo "# turning static DNS off"
+  sudo /home/admin/config.scripts/blitz.conf.sh delete "static domain_name_servers" /etc/dhcpcd.conf
+  /home/admin/config.scripts/blitz.conf.sh delete dnsServer
+  echo "# OK - needs reboot to activate"
+  echo ""
+  exit 0
+fi
 
 # run test if DNS is working (assuming that internet is working)
 if [ "${DNSSERVER}" = "test" ]; then
@@ -63,19 +73,12 @@ fi
 
 # setting DNS address
 echo "# Setting DNS server in /etc/dhcpcd.conf ..."
-sudo sed -i "s/^static domain_name_servers=.*/static domain_name_servers=${DNSSERVER}/g" /etc/dhcpcd.conf
+sudo /home/admin/config.scripts/blitz.conf.sh set "static domain_name_servers" "${DNSSERVER}" /etc/dhcpcd.conf
 echo "# OK"
 echo ""
 
 # make sure entry in raspiblitz.conf exists
-source /mnt/hdd/raspiblitz.conf
-if [ ${#dnsServer} -eq 0 ]; then
-  echo "# Adding value to /mnt/hdd/raspiblitz.conf"
-  echo "dnsServer=${DNSSERVER}" >> /mnt/hdd/raspiblitz.conf
-else
-  echo "# Updating value in /mnt/hdd/raspiblitz.conf"
-  sudo sed -i "s/^dnsServer=.*/dnsServer=${DNSSERVER}/g" /mnt/hdd/raspiblitz.conf
-fi
+/home/admin/config.scripts/blitz.conf.sh set dnsServer "${DNSSERVER}"
 echo "# OK"
 echo ""
 

@@ -1,18 +1,23 @@
 #!/bin/bash
-# https://github.com/cryptoadvance/specter-desktop  
+# https://github.com/cryptoadvance/specter-desktop
 
-pinnedVersion="1.6.0"
+pinnedVersion="1.8.1"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "config script to switch Specter Desktop on, off, configure or update"
- echo "bonus.specter.sh [status|on|off|config|update]"
+ echo "bonus.specter.sh [status|on|off|config|update] <mainnet|testnet|signet>"
  echo "installing the version $pinnedVersion by default"
  exit 1
 fi
 
+echo "# bonus.specter.sh $1 $2"
+
 source /mnt/hdd/raspiblitz.conf
-echo "# bonus.specter.sh $1"
+if [ $# -gt 1 ];then
+  CHAIN=$2
+  chain=${CHAIN::-3}
+fi
 
 # get status key/values
 if [ "$1" = "status" ]; then
@@ -21,11 +26,18 @@ if [ "$1" = "status" ]; then
 
     echo "configured=1"
 
+    installed=$(sudo ls /etc/systemd/system/specter.service 2>/dev/null | grep -c 'specter.service')
+    echo "installed=${installed}"
+
     # get network info
     localip=$(hostname -I | awk '{print $1}')
     toraddress=$(sudo cat /mnt/hdd/tor/specter/hostname 2>/dev/null)
     fingerprint=$(openssl x509 -in /home/specter/.specter/cert.pem -fingerprint -noout | cut -d"=" -f2)
-    echo "localip='${localip}'"
+    echo "localIP='${localip}'"
+    echo "httpPort=''"
+    echo "httpsPort='25441'"
+    echo "httpsForced='1'"
+    echo "httpsSelfsigned='1'"
     echo "toraddress='${toraddress}'"
     echo "fingerprint='${fingerprint}'"
 
@@ -38,8 +50,9 @@ if [ "$1" = "status" ]; then
 
   else
     echo "configured=0"
+    echo "installed=0"
   fi
-  
+
   exit 0
 fi
 
@@ -54,9 +67,9 @@ if [ "$1" = "menu" ]; then
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
 
     # Tor
-    /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
+    sudo /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
     whiptail --title " Specter Desktop " --msgbox "Open in your local web browser & accept self-signed cert:
-https://${localip}:25441
+https://${localIP}:25441
 
 SHA1 Thumb/Fingerprint:
 ${fingerprint}
@@ -67,12 +80,12 @@ Hidden Service address for TOR Browser (QR see LCD):
 https://${toraddress}
 Unfortunately the camera is currently not usable via Tor, though.
 " 18 74
-    /home/admin/config.scripts/blitz.display.sh hide
+    sudo /home/admin/config.scripts/blitz.display.sh hide
   else
 
     # IP + Domain
     whiptail --title " Specter Desktop " --msgbox "Open in your local web browser & accept self-signed cert:
-https://${localip}:25441
+https://${localIP}:25441
 
 SHA1 Thumb/Fingerprint:
 ${fingerprint}
@@ -84,11 +97,6 @@ Activate TOR to access the web block explorer from outside your local network.
 
   echo "# please wait ..."
   exit 0
-fi
-
-# add default value to raspi config if needed
-if ! grep -Eq "^specter=" /mnt/hdd/raspiblitz.conf; then
-  echo "specter=off" >> /mnt/hdd/raspiblitz.conf
 fi
 
 # blockfilterindex
@@ -115,34 +123,56 @@ function configure_specter {
     "auth": {
         "method": "rpcpasswordaspin",
         "password_min_chars": 6,
-        "rate_limit": "10",
-        "registration_link_timeout": "1"
+        "rate_limit": 10,
+        "registration_link_timeout": 1
     },
     "active_node_alias": "raspiblitz_${chain}net",
     "proxy_url": "${proxy}",
-    "only_tor": ${torOnly},
+    "only_tor": "${torOnly}",
     "tor_control_port": "${tor_control_port}",
-    "tor_status": false,
-    "hwi_bridge_url": "/hwi/api/",
+    "tor_status": true,
+    "hwi_bridge_url": "/hwi/api/"
 }
 EOF
+  sudo mkdir -p /home/specter/.specter/nodes
   sudo mv /home/admin/config.json /home/specter/.specter/config.json
-  sudo chown -R specter:specter /home/specter/.specter
+  sudo chown -RL specter:specter /home/specter/
 
   echo "# Adding the raspiblitz_${chain}net node to Specter"
   RPCUSER=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcuser | cut -c 9-)
   PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
-  if [ ${chain} = "main" ];then
-    portprefix=""
-  elif [ ${chain} = "test" ];then
-    portprefix=1
-  elif [ ${chain} = "sig" ];then
-    portprefix=3
-  fi
-  PORT="${portprefix}8332"
-  cat > /home/admin/raspiblitz_${chain}net.json <<EOF    
+
+  echo "# Connect Specter to the default mainnet node"
+  cat > /home/admin/default.json <<EOF
 {
-    "name": "Bitcoin Core",
+    "name": "raspiblitz_mainnet",
+    "alias": "default",
+    "autodetect": false,
+    "datadir": "",
+    "user": "${RPCUSER}",
+    "password": "${PASSWORD_B}",
+    "port": "8332",
+    "host": "localhost",
+    "protocol": "http",
+    "external_node": true,
+    "fullpath": "/home/specter/.specter/nodes/default.json"
+}
+EOF
+    sudo mv /home/admin/default.json /home/specter/.specter/nodes/default.json
+    sudo chown -RL specter:specter /home/specter/
+
+    if [ "${chain}" != "main" ]; then
+      if [ "${chain}" = "test" ];then
+        portprefix=1
+      elif [ "${chain}" = "sig" ];then
+        portprefix=3
+      fi
+      PORT="${portprefix}8332"
+
+      echo "# Connect Specter to the raspiblitz_${chain}net node"
+      cat > /home/admin/raspiblitz_${chain}net.json <<EOF
+{
+    "name": "raspiblitz_${chain}net",
     "alias": "raspiblitz_${chain}net",
     "autodetect": false,
     "datadir": "",
@@ -155,13 +185,18 @@ EOF
     "fullpath": "/home/specter/.specter/nodes/raspiblitz_${chain}net.json"
 }
 EOF
-    sudo mv /home/admin/raspiblitz_${chain}net.json.json /home/specter/.specter/nodes/raspiblitz_${chain}net.json
-    sudo chown -R specter:specter /home/specter/.specter
+      sudo mv /home/admin/raspiblitz_${chain}net.json /home/specter/.specter/nodes/raspiblitz_${chain}net.json
+      sudo chown -RL specter:specter /home/specter/
+    fi
 }
+
 
 # config
 if [ "$1" = "config" ]; then
   configure_specter
+  echo "# Restarting Specter - reload it's page to log in with the new settings"
+  sudo systemctl restart specter
+  exit 0
 fi
 
 # switch on
@@ -176,10 +211,14 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     echo "#    --> Installing prerequisites"
     sudo apt update
-    sudo apt install -y libusb-1.0.0-dev libudev-dev virtualenv libffi-dev
+    sudo apt-get install -y virtualenv libffi-dev libusb-1.0.0-dev libudev-dev
 
     sudo adduser --disabled-password --gecos "" specter
-    
+    if [ "$(ls /home | grep -c "specter")" == "0" ]; then
+      echo "error='was not able to create user specter'"
+      exit 1
+    fi
+
     echo "# add the user to the debian-tor group"
     sudo usermod -a -G debian-tor specter
 
@@ -193,15 +232,15 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo ln -s /mnt/hdd/app-data/.specter /home/specter/ 2>/dev/null
     sudo chown -R specter:specter /home/specter/.specter
 
-    # activating Authentication here ...
-    configure_specter
-
     echo "#    --> creating a virtualenv"
     sudo -u specter virtualenv --python=python3 /home/specter/.env
 
     echo "#    --> pip-installing specter"
-    sudo -u specter /home/specter/.env/bin/python3 -m pip install --upgrade cryptoadvance.specter==$pinnedVersion
-    
+    sudo -u specter /home/specter/.env/bin/python3 -m pip install --upgrade cryptoadvance.specter==$pinnedVersion || exit 1
+
+    # activating Authentication here ...
+    configure_specter
+
     # Mandatory as the camera doesn't work without https
     echo "#    --> Creating self-signed certificate"
     openssl req -x509 -newkey rsa:4096 -nodes -out /tmp/cert.pem -keyout /tmp/key.pem -days 365 -subj "/C=US/ST=Nooneknows/L=Springfield/O=Dis/CN=www.fakeurl.com"
@@ -214,10 +253,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "#    --> Updating Firewall"
     sudo ufw allow 25441 comment 'specter'
     sudo ufw --force enable
-    echo ""
+    echo
 
     echo "#    --> Installing udev-rules for hardware-wallets"
-    
+
     # Ledger
     cat > /home/admin/20-hw1.rules <<EOF
  HW.1 / Nano
@@ -233,7 +272,7 @@ SUBSYSTEMS=="usb", ATTRS{idVendor}=="2c97", ATTRS{idProduct}=="0003|3000|3001|30
 # Nano X
 SUBSYSTEMS=="usb", ATTRS{idVendor}=="2c97", ATTRS{idProduct}=="0004|4000|4001|4002|4003|4004|4005|4006|4007|4008|4009|400a|400b|400c|400d|400e|400f|4010|4011|4012|4013|4014|4015|4016|4017|4018|4019|401a|401b|401c|401d|401e|401f", TAG+="uaccess", TAG+="udev-acl", OWNER="specter"
 EOF
-    
+
     # ColdCard
     cat > /home/admin/51-coinkite.rules <<EOF
 # Linux udev support file.
@@ -252,7 +291,7 @@ SUBSYSTEMS=="usb", ATTRS{idVendor}=="d13e", ATTRS{idProduct}=="cc10", GROUP="plu
 # from <https://github.com/signal11/hidapi/blob/master/udev/99-hid.rules>
 KERNEL=="hidraw*", ATTRS{idVendor}=="d13e", ATTRS{idProduct}=="cc10", GROUP="plugdev", MODE="0666"
 EOF
-    
+
     # Trezor
     cat > /home/admin/51-trezor.rules <<EOF
 # Trezor: The Original Hardware Wallet
@@ -273,7 +312,7 @@ SUBSYSTEM=="usb", ATTR{idVendor}=="1209", ATTR{idProduct}=="53c0", MODE="0660", 
 SUBSYSTEM=="usb", ATTR{idVendor}=="1209", ATTR{idProduct}=="53c1", MODE="0660", GROUP="plugdev", TAG+="uaccess", TAG+="udev-acl", SYMLINK+="trezor%n"
 KERNEL=="hidraw*", ATTRS{idVendor}=="1209", ATTRS{idProduct}=="53c1", MODE="0660", GROUP="plugdev", TAG+="uaccess", TAG+="udev-acl"
 EOF
-    
+
     # KeepKey
     cat > /home/admin/51-usb-keepkey.rules <<EOF
 # KeepKey: Your Private Bitcoin Vault
@@ -331,19 +370,18 @@ EOF
     sudo systemctl enable specter
 
     echo "#    --> OK - the specter service is now enabled and started"
-  else 
+  else
     echo "#    --> specter already installed."
   fi
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^specter=.*/specter=on/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set specter "on"
   
   # Hidden Service for SERVICE if Tor is active
-  source /mnt/hdd/raspiblitz.conf
   if [ "${runBehindTor}" = "on" ]; then
-    # make sure to keep in sync with internet.tor.sh script
+    # make sure to keep in sync with tor.network.sh script
     # port 25441 is HTTPS with self-signed cert - specte only makes sense to be served over HTTPS
-    /home/admin/config.scripts/internet.hiddenservice.sh specter 443 25441
+    /home/admin/config.scripts/tor.onion-service.sh specter 443 25441
   fi
 
   # blockfilterindex on
@@ -364,6 +402,8 @@ EOF
     echo "# blockfilterindex is already active"
   fi
 
+  # needed for API/WebUI as signal that install ran thru 
+  echo "result='OK'"
   exit 0
 fi
 
@@ -371,56 +411,61 @@ fi
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^specter=.*/specter=off/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set specter "off"
 
   # Hidden Service if Tor is active
   if [ "${runBehindTor}" = "on" ]; then
-    /home/admin/config.scripts/internet.hiddenservice.sh off specter
+    echo "# Removing Tor hidden service for specter ..."
+    /home/admin/config.scripts/tor.onion-service.sh off specter
   fi
 
   isInstalled=$(sudo ls /etc/systemd/system/specter.service 2>/dev/null | grep -c 'specter.service')
-  if [ ${isInstalled} -eq 1 ]; then
-
-    echo "#    --> REMOVING Specter Desktop"
-    sudo systemctl stop specter
-    sudo systemctl disable specter
-    sudo rm /etc/systemd/system/specter.service
-    sudo -u specter /home/specter/.env/bin/python3 -m pip uninstall --yes cryptoadvance.specter
-
-    if whiptail --defaultno --yesno "Do you want to delete all Data related to specter? This includes also Bitcoin-Core-Wallets managed by specter?" 0 0; then
-      echo "#    --> Removing wallets in core"
-      bitcoin-cli listwallets | jq -r .[] | tail -n +2
-      for i in $(bitcoin-cli listwallets | jq -r .[] | tail -n +2) 
-      do  
-	name=$(echo $i | cut -d"/" -f2)
-       	bitcoin-cli unloadwallet specter/$name 
-      done
-      echo "#    --> Removing the /mnt/hdd/app-data/.specter"
-      sudo rm -rf /mnt/hdd/app-data/.specter
-      echo "#    --> Removing the specter user and home directory "
-      sudo userdel -rf specter
-      echo "#     --> Removing blockfilterindex"
-      echo "# changing config ..."
-      sudo systemctl stop ${network}d
-      sudo sed -i "s/^blockfilterindex=.*/blockfilterindex=0/g" /mnt/hdd/${network}/${network}.conf
-      echo "# deleting blockfilterindex ..."
-      sudo rm -r /mnt/hdd/${network}/indexes/blockfilter
-      echo "# restarting bitcoind ..."
-      sudo systemctl restart ${network}d
-    else
-      echo "#    --> Removing the specter user and home directory"
-      echo "#    --> /mnt/hdd/app-data/.specter is preserved on the disk"
-      sudo userdel -rf specter
-      echo "#     --> Switch off the blockfilterindex"
-      sudo sed -i "s/^blockfilterindex=.*/blockfilterindex=0/g" /mnt/hdd/${network}/${network}.conf
-      echo "# restarting bitcoind ..."
-      sudo systemctl restart ${network}d
-    fi
-
-    echo "#    --> OK Specter Desktop removed."
-  else 
-    echo "#    --> Specter Desktop is not installed."
+  if [ ${isInstalled} -eq 0 ]; then
+    echo "error='was not installed'"
+    exit 1
   fi
+
+  # removing base systemd service & code
+  echo "#    --> REMOVING Specter Desktop"
+  sudo systemctl stop specter
+  sudo systemctl disable specter
+  sudo rm /etc/systemd/system/specter.service
+  sudo -u specter /home/specter/.env/bin/python3 -m pip uninstall --yes cryptoadvance.specter 1>&2
+
+  # get delete data status - either by parameter or if not set by user dialog
+  deleteData=""
+  if [ "$2" == "--delete-data" ]; then
+    deleteData="1"
+  fi
+  if [ "$2" == "--keep-data" ]; then
+    deleteData="0"
+  fi
+  if [ "${deleteData}" == "" ]; then
+    deleteData=whiptail --defaultno --yesno "Do you want to delete all Data related to specter? This includes also Bitcoin-Core-Wallets managed by specter?" 0 0
+  fi
+
+  # execute on delete data
+  if [ "${deleteData}" == "1" ]; then
+    echo "#    --> Removing wallets in core"
+    bitcoin-cli listwallets | jq -r .[] | tail -n +2
+    for i in $(bitcoin-cli listwallets | jq -r .[] | tail -n +2)
+    do
+	    name=$(echo $i | cut -d"/" -f2)
+      bitcoin-cli unloadwallet specter/$name
+    done
+    echo "#    --> Removing the /mnt/hdd/app-data/.specter"
+    sudo rm -rf /mnt/hdd/app-data/.specter
+  else
+    echo "#    --> wallets in core are preserved on the disk (if exist)"
+    echo "#    --> /mnt/hdd/app-data/.specter is preserved on the disk"
+  fi
+
+  echo "#    --> Removing the specter user and home directory"
+  sudo userdel -rf specter
+  echo "#    --> OK Specter Desktop removed."
+    
+  # needed for API/WebUI as signal that install ran thru 
+  echo "result='OK'"
   exit 0
 fi
 

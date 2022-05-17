@@ -43,7 +43,6 @@ Password C will be stored on the device.
 
   # test if correct
   echo "# testing password .. please wait"
-  echo "SYSTEMD RESTART LOG: lightning (LND)" > /home/admin/systemd.lightning.log
   sudo systemctl restart lnd
   sleep 4
   error=""
@@ -57,24 +56,8 @@ Password C will be stored on the device.
   shred -u ./.tmp
 fi
 
-# config file
-configFile="/mnt/hdd/raspiblitz.conf"
-
 # lnd conf file
 lndConfig="/mnt/hdd/lnd/lnd.conf"
-
-# check if config file exists
-configExists=$(ls ${configFile} | grep -c '.conf')
-if [ ${configExists} -eq 0 ]; then
- echo "err='missing ${configFile}''"
- exit 1
-fi
-
-# make sure entry line for 'autoUnlock' exists 
-entryExists=$(cat ${configFile} | grep -c 'autoUnlock=')
-if [ ${entryExists} -eq 0 ]; then
-  echo "autoUnlock=" >> ${configFile}
-fi
 
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
@@ -82,7 +65,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "# switching the Auto-Unlock ON"
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^autoUnlock=.*/autoUnlock=on/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set autoUnlock "on"
 
   # password C needs to be stored on RaspiBlitz
   echo "# storing password for root in /root/lnd.autounlock.pwd"
@@ -100,7 +83,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   echo "# switching the Auto-Unlock OFF"
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^autoUnlock=.*/autoUnlock=off/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set autoUnlock "off"
 
   # delete password C securely
   echo "# shredding password on for RaspiBlitz Auto-Unlock"

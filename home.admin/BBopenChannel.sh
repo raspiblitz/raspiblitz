@@ -18,7 +18,7 @@ source <(/home/admin/config.scripts/network.aliases.sh getvars $1 $2)
 
 echo
 echo "# Precheck" # PRECHECK) check if chain is in sync
-if [ $LNTYPE = cln ];then
+if [ $LNTYPE = cl ];then
   BLOCKHEIGHT=$($bitcoincli_alias getblockchaininfo|grep blocks|awk '{print $2}'|cut -d, -f1)
   CLHEIGHT=$($lightningcli_alias getinfo | jq .blockheight)
   if [ $BLOCKHEIGHT -eq $CLHEIGHT ];then
@@ -30,12 +30,12 @@ elif [ $LNTYPE = lnd ];then
   chainOutSync=$($lncli_alias getinfo | grep '"synced_to_chain": false' -c)
 fi
 if [ ${chainOutSync} -eq 1 ]; then
-  if [ $LNTYPE = cln ];then
+  if [ $LNTYPE = cl ];then
     echo "# FAIL PRECHECK - 'lightning-cli getinfo' blockheight is different from 'bitcoind getblockchaininfo' - wait until chain is sync "
   elif [ $LNTYPE = lnd ];then
-    echo "# FAIL PRECHECK - lncli getinfo shows 'synced_to_chain': false - wait until chain is sync "  
+    echo "# FAIL PRECHECK - lncli getinfo shows 'synced_to_chain': false - wait until chain is sync "
   fi
-  echo 
+  echo
   echo "# PRESS ENTER to return to menu"
   read key
   exit 0
@@ -44,13 +44,13 @@ else
 fi
 
 # check available funding
-if [ $LNTYPE = cln ];then
+if [ $LNTYPE = cl ];then
   for i in $($lightningcli_alias \
   listfunds|jq .outputs[]|jq 'select(.status=="confirmed")'|grep value|awk '{print $2}'|cut -d, -f1);do
     confirmedBalance=$((confirmedBalance+i))
   done
 elif [ $LNTYPE = lnd ];then
-  confirmedBalance=$($lncli_alias walletbalance | grep '"confirmed_balance"' | cut -d '"' -f4)
+  confirmedBalance=$($lncli_alias walletbalance | jq -r .confirmed_balance)
 fi
 
 if [ ${confirmedBalance} -eq 0 ]; then
@@ -63,7 +63,7 @@ if [ ${confirmedBalance} -eq 0 ]; then
 fi
 
 # check number of connected peers
-if [ $LNTYPE = cln ];then
+if [ $LNTYPE = cl ];then
   numConnectedPeers=$($lightningcli_alias listpeers | grep -c '"id":')
 elif [ $LNTYPE = lnd ];then
   numConnectedPeers=$($lncli_alias listpeers | grep pub_key -c)
@@ -79,9 +79,14 @@ if [ ${numConnectedPeers} -eq 0 ]; then
   exit 0
 fi
 
+# raise high focus on lightning channels next 1 hour
+/home/admin/_cache.sh focus ln_${LNTYPE}_${CHAIN}_channels_pending 0 3600
+/home/admin/_cache.sh focus ln_${LNTYPE}_${CHAIN}_channels_total 0 3600
+/home/admin/_cache.sh focus ln_${LNTYPE}_${CHAIN}_channels_active 0 3600
+
 # let user pick a peer to open a channels with
 OPTIONS=()
-if [ $LNTYPE = cln ];then
+if [ $LNTYPE = cl ];then
   while IFS= read -r grepLine
   do
     pubKey=$(echo ${grepLine} | cut -d '"' -f4)
@@ -108,13 +113,13 @@ pubKey=$(dialog --clear \
 clear
 if [ ${#pubKey} -eq 0 ]; then
   clear
-  echo 
+  echo
   echo "no channel selected - returning to menu ..."
   sleep 4
   exit 0
 fi
 
-# find out what is the minimum amount 
+# find out what is the minimum amount
 # TODO find a better way - also consider dust and channel reserve
 # details see here: https://github.com/btcontract/lnwallet/issues/52
 minSat=20000
@@ -160,7 +165,7 @@ if [ ${#conf_target} -eq 0 ]; then
 fi
 
 # build command
-if [ $LNTYPE = cln ];then
+if [ $LNTYPE = cl ];then
   # fundchannel id amount [feerate] [announce] [minconf] [utxos] [push_msat] [close_to]
   feerate=$($bitcoincli_alias estimatesmartfee $conf_target |grep feerate|awk '{print $2}'|cut -c 5-7|bc)
   command="$lightningcli_alias fundchannel ${pubKey} ${amount} $feerate"
@@ -197,7 +202,7 @@ else
   echo "${result}"
   echo
   echo "What's next? --> You need to wait 3 confirmations for the channel to be ready."
-  if [ $LNTYPE = cln ];then
+  if [ $LNTYPE = cl ];then
     fundingTX=$(echo "${result}" | grep 'txid' | cut -d '"' -f4)
   elif [ $LNTYPE = lnd ];then
     fundingTX=$(echo "${result}" | grep 'funding_txid' | cut -d '"' -f4)
@@ -217,9 +222,6 @@ else
     elif [ "${chain}" = "test" ]||[ "${chain}" = "sig" ]; then
       echo "http://mempoolhqx4isw62xs7abwphsq7ldayuidyx2v2oethdhhj6mlo2r6ad.onion/${chain}net/tx/${fundingTX}"
     fi
-  fi
-  if [ "${network}" = "litecoin" ]; then
-    echo "https://live.blockcypher.com/ltc/tx/${fundingTX}/"
   fi
 fi
 echo

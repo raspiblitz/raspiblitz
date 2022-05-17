@@ -16,6 +16,9 @@ fi
 
 source <(/home/admin/config.scripts/network.aliases.sh getvars $1 $2)
 
+# raise high focus on lightning peers next 5min
+/home/admin/_cache.sh focus ln_${LNTYPE}_${CHAIN}_peers 0 300
+
 # let user enter a <pubkey>@host
 l1="Enter the node pubkey address with host information:"
 l2="example -----> 024ddf33[...]1f5f9f3@91.65.1.38:9735"
@@ -41,7 +44,7 @@ pubkey=$(echo "${_input}"|cut -d@ -f1)
 # address=$(echo "${_input}"|cut -d@ -f2|cut -d: -f1)
 # port=$(echo "${_input}"|cut -d: -f2)
 # build command
-if [ $LNTYPE = cln ];then
+if [ $LNTYPE = cl ];then
   # connect id [host port]
   command="$lightningcli_alias connect ${_input}"
 elif [ $LNTYPE = lnd ];then
@@ -104,7 +107,7 @@ else
   echo "$result"
 
   # check if the node is now in peer list
-  if [ $LNTYPE = cln ];then
+  if [ $LNTYPE = cl ];then
     isPeer=$($lightningcli_alias listpeers 2>/dev/null| grep "${pubkey}" -c)
   elif [ $LNTYPE = lnd ];then
     isPeer=$($lncli_alias listpeers 2>/dev/null| grep "${pubkey}" -c)

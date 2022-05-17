@@ -61,7 +61,7 @@ if [ "${action}" == "fsexpand" ]; then
     echo "# starting expand of file system of sd card"
     sudo sed -i "s/^fsexpanded=.*/fsexpanded=1/g" /home/admin/raspiblitz.info
 
-    if [ "${baseimage}" = "raspbian" ] || [ "${baseimage}" = "raspios_arm64" ]; then
+    if [ "${baseimage}" = "raspios_arm64" ]; then
         resizeRaspbian="/usr/bin/raspi-config"
         if [ -x ${resizeRaspbian} ]; then
             echo "# RUNNING EXPAND RASPBERRYPI: ${resizeRaspbian}"

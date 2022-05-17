@@ -21,10 +21,110 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "# ---------------------------------------------------"
  echo "# lnd.backup.sh seed-export-gui [lndseeddata]"
  echo "# lnd.backup.sh seed-import-gui [resultfile]"
+ echo "# ---------------------------------------------------"
+ echo "# RECOVERY"
+ echo "# ---------------------------------------------------"
+ echo "# lnd.backup.sh [mainnet|signet|testnet] recoverymode [on|off|status]"
  exit 1
 fi
 
-# 1st PRAMETER action
+# 1st PARAMETER [mainnet|signet|testnet]
+if [ "$1" == "mainnet" ] || [ "$1" == "testnet" ] || [ "$1" == "signet" ]; then
+
+  # prepare all chain dependent variables
+  lndChain="$1"
+  mode="$2"
+  netprefix=""
+  if [ "${lndChain}" == "testnet" ]; then
+    netprefix="t"
+  fi
+  if [ "${lndChain}" == "signet" ]; then
+    netprefix="s"
+  fi
+
+  ################################
+  # RECOVERY
+  ################################
+
+  # LND is considered in "recoverymode" when it gets started with --reset-wallet-transactions parameter
+  # so it will forgets all the old on-chain transactions. This will trigger wallet unlock with
+  # recovery window to rescan for transactions and background process will monitor when finished
+
+  if [ ${mode} = "recoverymode" ]; then
+
+    # check if started with sudo
+    if [ "$EUID" -ne 0 ]; then 
+      echo "error='run as root'"
+      exit 1
+    fi
+
+        # status
+    recoverymodeStatus=$(cat /mnt/hdd/lnd/${netprefix}lnd.conf | grep -c "^reset-wallet-transactions=true")
+    if [ "$3" == "status" ]; then
+      if [ ${recoverymodeStatus} -gt 0 ]; then
+        echo "recoverymode=1"
+      else
+        echo "recoverymode=0"
+      fi
+      exit 0
+    fi
+
+    # on
+    if [ "$3" == "on" ]; then
+      if [ ${recoverymodeStatus} -gt 0 ]; then
+        echo "# recoverymode already on"
+        exit 0
+      fi
+
+      # make sure config entry exits
+      entryExists=$(cat /mnt/hdd/lnd/${netprefix}lnd.conf | grep -c "^reset-wallet-transactions=")
+      if [ $entryExists -eq 0 ]; then
+        # find section
+        sectionLine=$(cat /mnt/hdd/lnd/${netprefix}lnd.conf | grep -n "^\[Application Options\]" | cut -d ":" -f1)
+        insertLine=$(expr $sectionLine + 1)
+        sed -i "${insertLine}ireset-wallet-transactions=false" /mnt/hdd/lnd/${netprefix}lnd.conf
+      fi
+
+      # activate reset-wallet-transactions in lnd.conf
+      echo "# activating recovery mode ..."
+      sed -i 's/^reset-wallet-transactions=.*/reset-wallet-transactions=true/g' /mnt/hdd/lnd/${netprefix}lnd.conf
+      echo "# OK - restart/reboot needed for: ${netprefix}lnd.service"
+
+      # set system status
+      /home/admin/config.scripts/blitz.conf.sh set ln_lnd_${lndChain}_sync_initial_done 0 /home/admin/raspiblitz.info
+      source <(/home/admin/_cache.sh get chain lightning)
+      if [ "${lndChain}" == "${chain}net" ] && [ "${lightning}" == "lnd" ]; then
+        /home/admin/_cache.sh set ln_default_sync_initial_done 0
+      fi
+    
+      exit 0
+    fi
+
+    # off
+    if [ "$3" == "off" ]; then
+      if [ ${recoverymodeStatus} -eq 0 ]; then
+        echo "# recoverymode already off"
+        exit 0
+      fi
+
+      # remove --reset-wallet-transactions parameter in systemd service
+      echo "# deactivating recovery mode ..."
+      sed -i 's/^reset-wallet-transactions=.*/reset-wallet-transactions=false/g' /mnt/hdd/lnd/${netprefix}lnd.conf
+      
+
+      echo "# OK - restart/reboot needed for: ${netprefix}lnd.service"
+      exit 0
+    fi
+
+    # parameter fallback
+    echo "error='unknown parameter'"
+    exit 1
+
+  fi
+
+fi
+
+# 1st PARAMETER all other: action
 mode="$1"
 
 ################################
@@ -37,19 +137,19 @@ if [ ${mode} = "lnd-export" ]; then
   downloadPath="/home/admin"
   fileowner="admin"
 
-  # stop LND
-  echo "# Stopping lnd..."
-  sudo systemctl stop lnd
-  sleep 5
-  echo "# OK"
-  echo 
-
   # add lnd version info into lnd dir (to detect needed updates later)
-  lndVersion=$(sudo -u bitcoin lncli getinfo | jq -r ".version" | cut -d ' ' -f1)
+  lndVersion=$(sudo -u bitcoin lncli getinfo 2>/dev/null | jq -r ".version" | cut -d ' ' -f1)
   sudo rm /mnt/hdd/lnd/version.info 2>/dev/null
   echo "${lndVersion}" > /home/admin/lnd.version.info
   sudo mv /home/admin/lnd.version.info /mnt/hdd/lnd/version.info
   sudo chown bitcoin:bitcoin /mnt/hdd/lnd/version.info
+
+  # stop LND
+  echo "# Stopping lnd..."
+  sudo systemctl stop lnd 2>/dev/null
+  sleep 5
+  echo "# OK"
+  echo 
 
   # zip it
   sudo tar -zcvf ${downloadPath}/lnd-rescue.tar.gz /mnt/hdd/lnd 1>&2
@@ -80,6 +180,7 @@ fi
 if [ ${mode} = "lnd-export-gui" ]; then
 
   # create lnd rescue file
+  echo "# lnd.backup lnd-export-gui ..." 
   source <(/home/admin/config.scripts/lnd.backup.sh lnd-export)
   if [ "${error}" != "" ]; then
     echo "error='${error}'"
@@ -92,16 +193,16 @@ if [ ${mode} = "lnd-export-gui" ]; then
   # offer SCP for download
   clear
   echo
-  echo "****************************"
-  echo "* DOWNLOAD THE RESCUE FILE *"
-  echo "****************************"
+  echo "********************************"
+  echo "* DOWNLOAD THE LND RESCUE FILE *"
+  echo "********************************"
   echo 
   echo "ON YOUR MAC & LINUX LAPTOP - RUN IN NEW TERMINAL:"
   echo "scp '${fileowner}@${localip}:${filename}' ./"
   echo "ON WINDOWS USE:"
   echo "scp ${fileowner}@${localip}:${filename} ."
   echo "Use password A to authenticate file transfer."
-  echo ""
+  echo
   echo "Check for correct file size after transfer: ${size} byte"
   echo "Use command: stat lnd-rescue-*.tar.gz"
   echo
@@ -147,7 +248,7 @@ if [ ${mode} = "lnd-import" ]; then
   # lnd version of LND rescue file (thats packed as extra info in the file)
   # its included since RaspiBlitz v1.7.1 /mnt/hdd/lnd/version.info
   # this can happen if someone uses the manual LND update and then uploads to an old default LND 
-  # if so just signal this in the output
+  # if so just signal this in the output (but also this file might be empty, when LND was dead)
   
   echo "# DONE - lnd service is still stopped - start manually with command:"
   echo "# sudo systemctl start lnd"
@@ -160,7 +261,7 @@ if [ ${mode} = "lnd-import-gui" ]; then
   # get by second parameter if this call if happening during setup or production
   scenario=$2
   if [ "${scenario}" != "setup" ] && [ "${scenario}" != "production" ]; then
-    echo "error='mising parameter'"
+    echo "error='missing parameter'"
     exit 1
   fi
 
@@ -168,7 +269,7 @@ if [ ${mode} = "lnd-import-gui" ]; then
   if [ "${scenario}" == "setup" ]; then
     RESULTFILE=$3
     if [ "${RESULTFILE}" == "" ]; then
-      echo "error='mising parameter'"
+      echo "error='missing parameter'"
       exit 1 
     fi
   fi
@@ -187,9 +288,9 @@ if [ ${mode} = "lnd-import-gui" ]; then
   while [ "${filename}" == "" ]
     do
       clear 
-      echo "**************************"
-      echo "* UPLOAD THE RESCUE FILE *"
-      echo "**************************"
+      echo "******************************"
+      echo "* UPLOAD THE LND RESCUE FILE *"
+      echo "******************************"
       echo "If you have a lnd-rescue backup file on your laptop you can now"
       echo "upload it and restore your latest LND state."
       echo
@@ -199,7 +300,7 @@ if [ ${mode} = "lnd-import-gui" ]; then
       echo "change into the directory where your lnd-rescue file is and"
       echo "COPY, PASTE AND EXECUTE THE FOLLOWING COMMAND:"
       echo "scp -r ./lnd-rescue-*.tar.gz ${defaultUploadUser}@${localip}:${defaultUploadPath}/"
-      echo ""
+      echo
       echo "Use ${passwordInfo} to authenticate file transfer."
       echo "PRESS ENTER when upload is done"
       read key
@@ -353,7 +454,7 @@ if [ ${mode} = "scb-import-gui" ]; then
   # get by second parameter if this call if happening during setup or production
   scenario=$2
   if [ "${scenario}" != "setup" ] && [ "${scenario}" != "production" ]; then
-    echo "error='mising parameter'"
+    echo "error='missing parameter'"
     exit 1
   fi
 
@@ -361,7 +462,7 @@ if [ ${mode} = "scb-import-gui" ]; then
   if [ "${scenario}" == "setup" ]; then
     RESULTFILE=$3
     if [ "${RESULTFILE}" == "" ]; then
-      echo "error='mising parameter'"
+      echo "error='missing parameter'"
       exit 1 
     fi
   fi
@@ -391,7 +492,7 @@ if [ ${mode} = "scb-import-gui" ]; then
       echo "To make upload open a new terminal and change,"
       echo "into the directory where your lnd-rescue file is and"
       echo "COPY, PASTE AND EXECUTE THE FOLLOWING COMMAND:"
-      echo "scp ./*.backup ${defaultUploadUser}@${localip}:${defaultUploadPath}/"
+      echo "scp ./channel.backup ${defaultUploadUser}@${localip}:${defaultUploadPath}/"
       echo ""
       echo "Use ${passwordInfo} to authenticate file transfer."
       echo "PRESS ENTER when upload is done."
@@ -434,19 +535,13 @@ if [ ${mode} = "scb-import-gui" ]; then
 
   # in setup scenario the final import is happening during provison
   if [ "${scenario}" == "setup" ]; then
-    # just add staticchannelbackup filename to give file
     echo "# result in: ${RESULTFILE} (remember to make clean delete once processed)"
     echo "staticchannelbackup='${filename}'" >> $RESULTFILE
-    exit 0
   fi
 
   # run import process
-  echo "OK importing channel.backup file ..."
-  source <(sudo /home/admin/config.scripts/lnd.backup.sh scb-import ${filename})
-
-  # give final info
-  echo "DONE - placed SCB file at /home/admin/channel.backup"
-  echo "Reboot and login to trigger import."
+  source <(sudo /home/admin/config.scripts/lnd.backup.sh scb-import "${filename}")
+  echo "# DONE - placed SCB file at /home/admin/channel.backup"
   exit 0
 fi
 
@@ -462,7 +557,7 @@ if [ ${mode} = "seed-export-gui" ]; then
   # 2nd PARAMETER: lnd seed data
   seedwords6x4=$2
   if [ "${seedwords6x4}" == "" ]; then
-    echo "error='mising parameter'"
+    echo "error='missing parameter'"
     exit 1 
   fi
 
@@ -488,7 +583,7 @@ if [ ${mode} = "seed-import-gui" ]; then
   # scenario setup needs a 3rd parameter - the RESULTFILE to store results in
   RESULTFILE=$2
   if [ "${RESULTFILE}" == "" ]; then
-    echo "error='mising parameter'"
+    echo "error='missing parameter'"
     exit 1
   fi
 
@@ -508,7 +603,7 @@ if [ ${mode} = "seed-import-gui" ]; then
       sudo chown admin:admin /var/cache/raspiblitz/.seed.tmp
 
       # dialog to enter
-      dialog --backtitle "RaspiBlitz - Seed Recover" --inputbox "Please enter/paste the SEED WORD LIST:\n(just the words, seperated by spaces, in correct order as numbered)" 9 78 2>/var/cache/raspiblitz/.seed.tmp
+      dialog --backtitle "RaspiBlitz - Recover from LND seed" --inputbox "Please enter/paste the SEED WORD LIST:\n(just the words, seperated by spaces, in correct order as numbered)" 9 78 2>/var/cache/raspiblitz/.seed.tmp
       wordstring=$(cat /var/cache/raspiblitz/.seed.tmp | sed 's/[^a-zA-Z0-9 ]//g')
       sudo shred -u /var/cache/raspiblitz/.seed.tmp 2>/dev/null
       echo "processing ..."
@@ -516,26 +611,8 @@ if [ ${mode} = "seed-import-gui" ]; then
       # check correct number of words
       wordcount=$(echo "${wordstring}" | wc -w)
       if [ ${wordcount} -eq 24 ]; then
-
-        # check if words are valid seed
-        source <(python /home/admin/config.scripts/blitz.mnemonic.py test "${wordstring}")
-        if [ "${valid}" == "0" ]; then
-          whiptail --title " WARNING " --yes-button "Try Again" --no-button "Cancel" --yesno "
-The word list has 24 words BUT its not a
-valid seed word list by our test.
-
-Please check for typos.
-
-" 12 52
-	        if [ $? -eq 1 ]; then
-            clear
-            echo "# CANCEL empty results in: ${RESULTFILE}"
-            exit 1
-	        fi
-        else
           echo "OK - 24 words"
           wordsCorrect=1
-        fi
       else
         whiptail --title " WARNING " \
 			  --yes-button "Try Again" \
@@ -544,11 +621,11 @@ Please check for typos.
 The word list has ${wordcount} words. But it must be 24.
 Please check your list and try again.
 
-Best is to write words in external editor 
-and then copy and paste them into dialog.
+Best is to write words in an external editor 
+and then copy and paste them into the dialog.
 
-The Word list should look like this:
-wordone wordtweo wordthree ...
+The word list should look like this:
+wordone wordtwo wordthree ...
 
 " 16 52
 
@@ -572,7 +649,7 @@ to protect the seed words. Most users did not set this.
     sudo rm /var/cache/raspiblitz/.pass.tmp 2>/dev/null
     sudo touch /var/cache/raspiblitz/.pass.tmp
     sudo chown admin:admin /var/cache/raspiblitz/.pass.tmp
-    sudo /home/admin/config.scripts/blitz.setpassword.sh x "Enter extra Password D" /var/cache/raspiblitz/.pass.tmp empty-allowed
+    sudo /home/admin/config.scripts/blitz.password.sh set x "Enter extra Password D" /var/cache/raspiblitz/.pass.tmp empty-allowed
     passwordD=$(sudo cat /var/cache/raspiblitz/.pass.tmp)
     sudo shred -u /var/cache/raspiblitz/.pass.tmp 2>/dev/null
   fi

@@ -2,7 +2,7 @@
 
 # https://github.com/mempool/mempool
 
-pinnedVersion="v2.2.2"
+pinnedVersion="v2.3.1"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -11,6 +11,10 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "# bonus.mempool.sh [status|on|off]"
   exit 1
 fi
+
+PGPsigner="wiz"
+PGPpubkeyLink="https://github.com/wiz.gpg"
+PGPpubkeyFingerprint="A394E332255A6173"
 
 source /mnt/hdd/raspiblitz.conf
 
@@ -31,29 +35,24 @@ This can take multiple hours.
     exit 0
   fi
 
-  # get network info
-  localip=$(hostname -I | awk '{print $1}')
-  toraddress=$(sudo cat /mnt/hdd/tor/mempool/hostname 2>/dev/null)
-  fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
-
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
 
-    # TOR
-    /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
+    # Tor
+    sudo /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
     whiptail --title " Mempool " --msgbox "Open in your local web browser:
-http://${localip}:4080\n
-https://${localip}:4081 with Fingerprint:
+http://${localIP}:${httpPort}\n
+https://${localIP}:${httpsPort} with Fingerprint:
 ${fingerprint}\n
-Hidden Service address for TOR Browser (QR see LCD):
+Hidden Service address for Tor Browser (QR see LCD):
 ${toraddress}
 " 16 67
-    /home/admin/config.scripts/blitz.display.sh hide
+    sudo /home/admin/config.scripts/blitz.display.sh hide
   else
 
     # IP + Domain
     whiptail --title " Mempool " --msgbox "Open in your local web browser:
-http://${localip}:4080\n
-https://${localip}:4081 with Fingerprint:
+http://${localIP}:${httpPort}\n
+https://${localIP}:${httpsPort} with Fingerprint:
 ${fingerprint}\n
 Activate TOR to access the web block explorer from outside your local network.
 " 16 54
@@ -63,16 +62,26 @@ Activate TOR to access the web block explorer from outside your local network.
   exit 0
 fi
 
-# add default value to raspi config if needed
-if ! grep -Eq "^mempoolExplorer=" /mnt/hdd/raspiblitz.conf; then
-  echo "mempoolExplorer=off" >> /mnt/hdd/raspiblitz.conf
-fi
-
 # status
 if [ "$1" = "status" ]; then
 
   if [ "${mempoolExplorer}" = "on" ]; then
     echo "configured=1"
+
+    # get network info
+    localIP=$(hostname -I | awk '{print $1}')
+    toraddress=$(sudo cat /mnt/hdd/tor/mempool/hostname 2>/dev/null)
+    fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
+
+    echo "installed=1"
+    echo "localIP='${localIP}'"
+    echo "httpPort='4080'"
+    echo "httpsPort='4081'"
+    echo "httpsForced='0'"
+    echo "httpsSelfsigned='1'"
+    echo "authMethod='none'"
+    echo "fingerprint='${fingerprint}'"
+    echo "toraddress='${toraddress}'"
 
     # check indexing
     source <(sudo /home/admin/config.scripts/network.txindex.sh status)
@@ -87,6 +96,7 @@ if [ "$1" = "status" ]; then
     fi
 
   else
+    echo "installed=0"
     echo "configured=0"
   fi
   exit 0
@@ -120,6 +130,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u mempool git clone https://github.com/mempool/mempool.git
     cd mempool
     sudo -u mempool git reset --hard $pinnedVersion
+    sudo -u mempool /home/admin/config.scripts/blitz.git-verify.sh \
+     "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
 
     # modify an
     #echo "# try to suppress question on statistics report .."
@@ -129,7 +141,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo mariadb -e "CREATE DATABASE mempool;"
     sudo mariadb -e "GRANT ALL PRIVILEGES ON mempool.* TO 'mempool' IDENTIFIED BY 'mempool';"
     sudo mariadb -e "FLUSH PRIVILEGES;"
-    mariadb -umempool -pmempool mempool < mariadb-structure.sql
+    if [ -f "mariadb-structure.sql" ]; then
+      mariadb -umempool -pmempool mempool < mariadb-structure.sql
+    fi
 
     echo "# npm install for mempool explorer (frontend)"
 
@@ -141,7 +155,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     fi
     sudo -u mempool NG_CLI_ANALYTICS=false npm run build
     if ! [ $? -eq 0 ]; then
-        echo "FAIL - npm run build did not run correctly, aborting"
+        echo "FAIL - npm run build did not run correctly, aborting (1)"
         exit 1
     fi
 
@@ -155,7 +169,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     fi
     sudo -u mempool NG_CLI_ANALYTICS=false npm run build
     if ! [ $? -eq 0 ]; then
-        echo "FAIL - npm run build did not run correctly, aborting"
+        echo "FAIL - npm run build did not run correctly, aborting (2)"
         exit 1
     fi
 
@@ -274,7 +288,7 @@ EOF
   fi
 
   # start the service if ready
-  source /home/admin/raspiblitz.info
+  source <(/home/admin/_cache.sh get state)
   if [ "${state}" == "ready" ]; then
     echo "# OK - the mempool.service is enabled, system is on ready so starting service"
     sudo systemctl start mempool
@@ -283,80 +297,84 @@ EOF
   fi
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^mempoolExplorer=.*/mempoolExplorer=on/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set mempoolExplorer "on"
 
   echo "# needs to finish creating txindex to be functional"
   echo "# monitor with: sudo tail -n 20 -f /mnt/hdd/bitcoin/debug.log"
 
 
   # Hidden Service for Mempool if Tor is active
-  source /mnt/hdd/raspiblitz.conf
   if [ "${runBehindTor}" = "on" ]; then
-    # make sure to keep in sync with internet.tor.sh script
-    /home/admin/config.scripts/internet.hiddenservice.sh mempool 80 4082 443 4083
+    # make sure to keep in sync with tor.network.sh script
+    /home/admin/config.scripts/tor.onion-service.sh mempool 80 4082 443 4083
   fi
+
+  # needed for API/WebUI as signal that install ran thru 
+  echo "result='OK'"
   exit 0
 fi
 
 # switch off
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
-  # setting value in raspi blitz config
-  sudo sed -i "s/^mempoolExplorer=.*/mempoolExplorer=off/g" /mnt/hdd/raspiblitz.conf
+  # always delete user and home directory
+  sudo userdel -rf mempool
+
+  # always remove nginx symlinks
+  sudo rm -f /etc/nginx/snippets/mempool.conf
+  sudo rm -f /etc/nginx/snippets/mempool-http.conf
+  sudo rm -f /etc/nginx/sites-enabled/mempool_.conf
+  sudo rm -f /etc/nginx/sites-enabled/mempool_ssl.conf
+  sudo rm -f /etc/nginx/sites-enabled/mempool_tor.conf
+  sudo rm -f /etc/nginx/sites-enabled/mempool_tor_ssl.conf
+  sudo rm -f /etc/nginx/sites-available/mempool_.conf
+  sudo rm -f /etc/nginx/sites-available/mempool_ssl.conf
+  sudo rm -f /etc/nginx/sites-available/mempool_tor.conf
+  sudo rm -f /etc/nginx/sites-available/mempool_tor_ssl.conf
+  sudo nginx -t
+  sudo systemctl reload nginx
+  sudo rm -rf /var/www/mempool
+
+  # remove Hidden Service if Tor is active
+  if [ "${runBehindTor}" = "on" ]; then
+    # make sure to keep in sync with tor.network.sh script
+    /home/admin/config.scripts/tor.onion-service.sh off mempool
+  fi
+
+  # always close ports on firewall
+  sudo ufw deny 4080
+  sudo ufw deny 4081
 
   isInstalled=$(sudo ls /etc/systemd/system/mempool.service 2>/dev/null | grep -c 'mempool.service')
   if [ ${isInstalled} -eq 1 ]; then
     echo "# *** REMOVING Mempool ***"
     sudo systemctl disable mempool
     sudo rm /etc/systemd/system/mempool.service
-    # delete user and home directory
-    sudo userdel -rf mempool
-
-    # remove nginx symlinks
-    sudo rm -f /etc/nginx/snippets/mempool.conf
-    sudo rm -f /etc/nginx/snippets/mempool-http.conf
-    sudo rm -f /etc/nginx/sites-enabled/mempool_.conf
-    sudo rm -f /etc/nginx/sites-enabled/mempool_ssl.conf
-    sudo rm -f /etc/nginx/sites-enabled/mempool_tor.conf
-    sudo rm -f /etc/nginx/sites-enabled/mempool_tor_ssl.conf
-    sudo rm -f /etc/nginx/sites-available/mempool_.conf
-    sudo rm -f /etc/nginx/sites-available/mempool_ssl.conf
-    sudo rm -f /etc/nginx/sites-available/mempool_tor.conf
-    sudo rm -f /etc/nginx/sites-available/mempool_tor_ssl.conf
-    sudo nginx -t
-    sudo systemctl reload nginx
-
-    sudo rm -rf /var/www/mempool
-
-    # Hidden Service if Tor is active
-    if [ "${runBehindTor}" = "on" ]; then
-      # make sure to keep in sync with internet.tor.sh script
-      /home/admin/config.scripts/internet.hiddenservice.sh off mempool
-    fi
-
     echo "# OK Mempool removed."
 
   else
     echo "# Mempool is not installed."
   fi
 
-  # close ports on firewall
-  sudo ufw deny 4080
-  sudo ufw deny 4081
+  # setting value in raspi blitz config
+  /home/admin/config.scripts/blitz.conf.sh set mempoolExplorer "off"
+
+  # needed for API/WebUI as signal that install ran thru 
+  echo "result='OK'"
   exit 0
 fi
 
 # update
 if [ "$1" = "update" ]; then
   echo "*** Checking Mempool Explorer Version ***"
-  
+
   cd /home/mempool/mempool
 
   localVersion=$(git describe --tag)
   updateVersion=$(curl -s https://api.github.com/repos/mempool/mempool/releases/latest|grep tag_name|head -1|cut -d '"' -f4)
 
   if [ $localVersion = $updateVersion ]; then
-      echo "***  You are up-to-date on version $localVersion ***" 
+      echo "***  You are up-to-date on version $localVersion ***"
       sudo systemctl restart mempool 2>/dev/null
       echo "***  Restarting Mempool  ***"
   else
@@ -377,7 +395,7 @@ if [ "$1" = "update" ]; then
       fi
       sudo -u mempool NG_CLI_ANALYTICS=false npm run build
       if ! [ $? -eq 0 ]; then
-          echo "FAIL - npm run build did not run correctly, aborting"
+          echo "FAIL - npm run build did not run correctly, aborting (3)"
           exit 1
       fi
 
@@ -391,7 +409,7 @@ if [ "$1" = "update" ]; then
       fi
       sudo -u mempool NG_CLI_ANALYTICS=false npm run build
       if ! [ $? -eq 0 ]; then
-          echo "FAIL - npm run build did not run correctly, aborting"
+          echo "FAIL - npm run build did not run correctly, aborting (4)"
           exit 1
       fi
 
@@ -399,7 +417,7 @@ if [ "$1" = "update" ]; then
       sudo chown mempool:mempool /home/mempool/mempool/backend/mempool-config.json
 
 
-      # Restore frontend files 
+      # Restore frontend files
       cd /home/mempool/mempool/frontend
       sudo rsync -I -av --delete dist/mempool/ /var/www/mempool/
       sudo chown -R www-data:www-data /var/www/mempool
@@ -431,5 +449,5 @@ if [ "$1" = "update" ]; then
   exit 0
 fi
 
-echo "error='unknown parameter'
+echo "error='unknown parameter'"
 exit 1

@@ -1,27 +1,32 @@
 #!/bin/bash
-RTLVERSION="v0.11.2"
+
+# https://github.com/Ride-The-Lightning/RTL/releases
+RTLVERSION="v0.12.3"
 
 # check and load raspiblitz config
 # to know which network is running
-source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "# config script for RideTheLightning $RTLVERSION WebInterface"
-  echo "# able to run intances for lnd and cln parallel"
+  echo "# able to run intances for lnd and cl parallel"
   echo "# mainnet and testnet instances can run parallel"
-  echo "# bonus.rtl.sh [on|off|menu] <lnd|cln> <mainnet|testnet|signet>"
+  echo "# bonus.rtl.sh [on|off|menu] <lnd|cl> <mainnet|testnet|signet> <purge>"
   echo "# bonus.rtl.sh connect-services"
-  echo "# bonus.rtl.sh prestart <mainnet|testnet|signet>"
+  echo "# bonus.rtl.sh prestart <lnd|cl> <mainnet|testnet|signet>"
   exit 1
 fi
+
+PGPsigner="saubyk"
+PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
+PGPpubkeyFingerprint="00C9E2BC2E45666F"
 
 echo "# Running: 'bonus.rtl.sh $*'"
 
 source <(/home/admin/config.scripts/network.aliases.sh getvars $2 $3)
 
-# LNTYPE is lnd | cln
+# LNTYPE is lnd | cl
 echo "# LNTYPE(${LNTYPE})"
 # CHAIN is signet | testnet | mainnet
 echo "# CHAIN(${CHAIN})"
@@ -31,7 +36,7 @@ echo "# portprefix(${portprefix})"
 echo "# typeprefix(${typeprefix})"
 
 # prefix for parallel lightning impl
-if [ "${LNTYPE}" == "cln" ]; then
+if [ "${LNTYPE}" == "cl" ]; then
   RTLHTTP=${portprefix}7000
 elif [ "${LNTYPE}" == "lnd" ]; then
   RTLHTTP=${portprefix}3000
@@ -49,6 +54,29 @@ echo "# systemdService(${systemdService})"
 #########################
 
 # show info menu
+if [ "$1" = "status" ] || [ "$1" = "menu" ]; then
+
+  # get network info
+  isInstalled=$(sudo ls /etc/systemd/system/${netprefix}${typeprefix}RTL.service 2>/dev/null | grep -c 'RTL.service')
+  localip=$(hostname -I | awk '{print $1}')
+  toraddress=$(sudo cat /mnt/hdd/tor/${netprefix}${typeprefix}RTL/hostname 2>/dev/null)
+  fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
+  RTLHTTPS=$((RTLHTTP+1))
+
+  if [ "$1" = "status" ]; then
+    echo "installed='${isInstalled}'"
+    echo "localIP='${localip}'"
+    echo "httpPort='${RTLHTTP}'"
+    echo "httpsPort='${RTLHTTPS}'"
+    echo "httpsForced='0'"
+    echo "httpsSelfsigned='1'"
+    echo "authMethod='password_b'"
+    echo "toraddress='${toraddress}'"
+    exit
+  fi
+fi
+
+# show info menu
 if [ "$1" = "menu" ]; then
 
   # check that parameters are set
@@ -59,14 +87,9 @@ if [ "$1" = "menu" ]; then
     exit 1
   fi
 
-  # get network info
-  localip=$(hostname -I | awk '{print $1}')
-  toraddress=$(sudo cat /mnt/hdd/tor/${netprefix}${typeprefix}RTL/hostname 2>/dev/null)
-  fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
-
   # info with Tor
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
-    /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
+    sudo /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
     whiptail --title "Ride The Lightning (RTL - $LNTYPE - $CHAIN)" --msgbox "Open in your local web browser:
 http://${localip}:${RTLHTTP}\n
 https://${localip}:$((RTLHTTP+1)) with Fingerprint:
@@ -74,7 +97,7 @@ ${fingerprint}\n
 Use your Password B to login.\n
 Hidden Service address for Tor Browser (QRcode on LCD):\n${toraddress}
 " 16 67
-    /home/admin/config.scripts/blitz.display.sh hide
+    sudo /home/admin/config.scripts/blitz.display.sh hide
 
   # info without Tor
   else
@@ -111,15 +134,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   echo "# Installing RTL for ${LNTYPE} ${CHAIN}"
 
-  # prepare raspiblitz.conf --> add default value
-  configEntryExists=$(sudo cat /mnt/hdd/raspiblitz.conf | grep -c "${configEntry}")
-  if [ "${configEntryExists}" == "0" ]; then
-    echo "# adding default config entry for '${configEntry}'"
-    sudo /bin/sh -c "echo '${configEntry}=off' >> /mnt/hdd/raspiblitz.conf"
-  else
-    echo "# default config entry for '${configEntry}' exists"
-  fi
-
   # check and install NodeJS
   /home/admin/config.scripts/bonus.nodejs.sh on
 
@@ -150,6 +164,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     cd /home/rtl/RTL
     # check https://github.com/Ride-The-Lightning/RTL/releases/
     sudo -u rtl git reset --hard $RTLVERSION
+
+    sudo -u rtl /home/admin/config.scripts/blitz.git-verify.sh \
+     "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" "${RTLVERSION}" || exit 1
+
     # from https://github.com/Ride-The-Lightning/RTL/commits/master
     # git checkout 917feebfa4fb583360c140e817c266649307ef72
     if [ -f /home/rtl/RTL/LICENSE ]; then
@@ -160,9 +178,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       exit 1
     fi
     # install
-    echo "# Run: npm install"
+    echo "# Running npm install ..."
     export NG_CLI_ANALYTICS=false
-    sudo -u rtl npm install --only=prod
+    sudo -u rtl npm install --only=prod --logLevel warn
     if ! [ $? -eq 0 ]; then
       echo "# FAIL - npm install did not run correctly - deleting code and exit"
       sudo rm -r /home/rtl/RTL
@@ -172,14 +190,18 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       echo
     fi
   fi
-    
+
   echo "# Updating Firewall"
   sudo ufw allow ${RTLHTTP} comment "${systemdService} HTTP"
   sudo ufw allow $((RTLHTTP+1)) comment "${systemdService} HTTPS"
   echo
 
+  # make sure config directory exists
+  sudo mkdir -p /mnt/hdd/app-data/rtl 2>/dev/null
+  sudo chown -R rtl:rtl /mnt/hdd/app-data/rtl
+
   echo "# Create Systemd Service: ${systemdService}.service (Template)"
-  echo "
+  echo "\
 # Systemd unit for ${systemdService}
 
 [Unit]
@@ -188,7 +210,7 @@ Wants=
 After=
 
 [Service]
-Environment=\"RTL_CONFIG_PATH=/home/rtl/${systemdService}/\"
+Environment=\"RTL_CONFIG_PATH=/mnt/hdd/app-data/rtl/${systemdService}/\"
 ExecStartPre=-/home/admin/config.scripts/bonus.rtl.sh prestart ${LNTYPE} ${CHAIN}
 ExecStart=/usr/bin/node /home/rtl/RTL/rtl
 User=rtl
@@ -215,15 +237,14 @@ WantedBy=multi-user.target
     sudo sed -i "s/^Wants=.*/Wants=${netprefix}lnd.service/g" /etc/systemd/system/${systemdService}.service
     sudo sed -i "s/^After=.*/After=${netprefix}lnd.service/g" /etc/systemd/system/${systemdService}.service
   fi
-
-  # adapt systemd service template for CLN
-  if [ "${LNTYPE}" == "cln" ]; then
-    echo "# modifying ${systemdService}.service for CLN"
+  # adapt systemd service template for
+  if [ "${LNTYPE}" == "cl" ]; then
+    echo "# modifying ${systemdService}.service for CL"
     sudo sed -i "s/^Wants=.*/Wants=${netprefix}lightningd.service/g" /etc/systemd/system/${systemdService}.service
     sudo sed -i "s/^After=.*/After=${netprefix}lightningd.service/g" /etc/systemd/system/${systemdService}.service
 
-    # set up C-LightningREST  
-    /home/admin/config.scripts/cln.rest.sh on ${CHAIN}
+    # set up C-LightningREST
+    /home/admin/config.scripts/cl.rest.sh on ${CHAIN}
   fi
 
   # Note about RTL config file
@@ -231,8 +252,8 @@ WantedBy=multi-user.target
 
   # Hidden Service for RTL if Tor is active
   if [ "${runBehindTor}" = "on" ]; then
-    # make sure to keep in sync with internet.tor.sh script
-    /home/admin/config.scripts/internet.hiddenservice.sh ${netprefix}${typeprefix}RTL 80 $((RTLHTTP+2)) 443 $((RTLHTTP+3))
+    # make sure to keep in sync with tor.network.sh script
+    /home/admin/config.scripts/tor.onion-service.sh ${netprefix}${typeprefix}RTL 80 $((RTLHTTP+2)) 443 $((RTLHTTP+3))
   fi
 
   # nginx configuration
@@ -255,19 +276,22 @@ WantedBy=multi-user.target
   # run config as root to connect prepare services (lit, pool, ...)
   sudo /home/admin/config.scripts/bonus.rtl.sh connect-services
 
-  # raspiblitz.config
-  sudo sed -i "s/^${configEntry}=.*/${configEntry}=on/g" /mnt/hdd/raspiblitz.conf
+  # ig
+  /home/admin/config.scripts/blitz.conf.sh set ${configEntry} "on"
 
   sudo systemctl enable ${systemdService}
   sudo systemctl start ${systemdService}
   echo "# OK - the ${systemdService}.service is now enabled & started"
   echo "# Monitor with: sudo journalctl -f -u ${systemdService}"
+
+  # needed for API/WebUI as signal that install ran thru 
+  echo "result='OK'"
   exit 0
 fi
 
 ##########################
 # CONNECT SERVICES
-# will be called by lit or loop services to make sure services 
+# will be called by lit or loop services to make sure services
 # are connected or on RTL install/update
 #########################
 
@@ -281,7 +305,7 @@ if [ "$1" = "connect-services" ]; then
 
   # only run when RTL is installed
   if [ -d /home/rtl ]; then
-    echo "## RTL CONNECT-SERVICES" 
+    echo "## RTL CONNECT-SERVICES"
   else
     echo "# no RTL installed - no need to connect any services"
     exit
@@ -311,7 +335,7 @@ if [ "$1" = "connect-services" ]; then
     echo "# No lit or loop single detected"
   fi
 
-  echo "# RTL CONNECT-SERVICES done" 
+  echo "# RTL CONNECT-SERVICES done"
   exit 0
 
 fi
@@ -335,7 +359,7 @@ if [ "$1" = "prestart" ]; then
     exit 1
   fi
 
-  echo "## RTL PRESTART CONFIG (called by systemd prestart)" 
+  echo "## RTL PRESTART CONFIG (called by systemd prestart)"
 
   # getting the up-to-date RPC password
   RPCPASSWORD=$(cat /mnt/hdd/${network}/${network}.conf | grep "^rpcpassword=" | cut -d "=" -f2)
@@ -354,20 +378,26 @@ if [ "$1" = "prestart" ]; then
   fi
 
   # prepare RTL-Config.json file
-  echo "# PREPARE /home/rtl/${systemdService}/RTL-Config.json"
-  # make and clean directory
-  mkdir -p /home/rtl/${systemdService}
-  rm -f /home/rtl/${systemdService}/RTL-Config.json 2>/dev/null 
-  # copy template
-  cp /home/rtl/RTL/docs/Sample-RTL-Config.json /home/rtl/${systemdService}/RTL-Config.json
-  chmod 600 /home/rtl/${systemdService}/RTL-Config.json
+  echo "# PREPARE /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json"
+
+  # make sure directory exists
+  mkdir -p /mnt/hdd/app-data/rtl/${systemdService} 2>/dev/null
+
+  # check if RTL-Config.json exists
+  configExists=$(ls /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json 2>/dev/null | grep -c "RTL-Config.json")
+  if [ "${configExists}" == "0" ]; then
+    # copy template
+    cp /home/rtl/RTL/Sample-RTL-Config.json /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json
+    chmod 600 /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json
+  fi
 
   # LND changes of config
   if [ "${LNTYPE}" == "lnd" ]; then
     echo "# LND Config"
-    cat /home/rtl/${systemdService}/RTL-Config.json | \
+    cat /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json | \
     jq ".port = \"${RTLHTTP}\"" | \
     jq ".multiPass = \"${RPCPASSWORD}\"" | \
+    jq ".multiPassHashed = \"\"" | \
     jq ".nodes[0].lnNode = \"${hostname}\"" | \
     jq ".nodes[0].lnImplementation = \"LND\"" | \
     jq ".nodes[0].Authentication.macaroonPath = \"/home/rtl/.lnd/data/chain/${network}/${CHAIN}/\"" | \
@@ -375,29 +405,31 @@ if [ "$1" = "prestart" ]; then
     jq ".nodes[0].Authentication.swapMacaroonPath = \"/home/rtl/.loop/${CHAIN}/\"" | \
     jq ".nodes[0].Authentication.boltzMacaroonPath = \"/home/rtl/.boltz-lnd/macaroons/\"" | \
     jq ".nodes[0].Settings.userPersona = \"OPERATOR\"" | \
-    jq ".nodes[0].Settings.channelBackupPath = \"/home/rtl/${systemdService}-SCB-backup-$hostname\"" | \
-    jq ".nodes[0].Settings.swapServerUrl = \"https://localhost:${SWAPSERVERPORT}\"" > /home/rtl/${systemdService}/RTL-Config.json.tmp
-    mv /home/rtl/${systemdService}/RTL-Config.json.tmp /home/rtl/${systemdService}/RTL-Config.json
+    jq ".nodes[0].Settings.lnServerUrl = \"https://localhost:${portprefix}8080\"" | \
+    jq ".nodes[0].Settings.channelBackupPath = \"/mnt/hdd/app-data/rtl/${systemdService}-SCB-backup-$hostname\"" | \
+    jq ".nodes[0].Settings.swapServerUrl = \"https://localhost:${SWAPSERVERPORT}\"" > /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json.tmp
+    mv /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json.tmp /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json
   fi
 
   # C-Lightning changes of config
   # https://github.com/Ride-The-Lightning/RTL/blob/master/docs/C-Lightning-setup.md
-  if [ "${LNTYPE}" == "cln" ]; then
-    echo "# CLN Config"
-    cat /home/rtl/${systemdService}/RTL-Config.json | \
+  if [ "${LNTYPE}" == "cl" ]; then
+    echo "# CL Config"
+    cat /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json | \
     jq ".port = \"${RTLHTTP}\"" | \
     jq ".multiPass = \"${RPCPASSWORD}\"" | \
+    jq ".multiPassHashed = \"\"" | \
     jq ".nodes[0].lnNode = \"${hostname}\"" | \
     jq ".nodes[0].lnImplementation = \"CLT\"" | \
     jq ".nodes[0].Authentication.macaroonPath = \"/home/bitcoin/c-lightning-REST/certs\"" | \
-    jq ".nodes[0].Authentication.configPath = \"${CLNCONF}\"" | \
+    jq ".nodes[0].Authentication.configPath = \"${CLCONF}\"" | \
     jq ".nodes[0].Authentication.swapMacaroonPath = \"/home/rtl/.loop/${CHAIN}/\"" | \
     jq ".nodes[0].Authentication.boltzMacaroonPath = \"/home/rtl/.boltz-lnd/macaroons/\"" | \
     jq ".nodes[0].Settings.userPersona = \"OPERATOR\"" | \
     jq ".nodes[0].Settings.lnServerUrl = \"https://localhost:${portprefix}6100\"" | \
-    jq ".nodes[0].Settings.channelBackupPath = \"/home/rtl/${systemdService}-SCB-backup-$hostname\"" | \
-    jq ".nodes[0].Settings.swapServerUrl = \"https://localhost:${SWAPSERVERPORT}\"" > /home/rtl/${systemdService}/RTL-Config.json.tmp
-    mv /home/rtl/${systemdService}/RTL-Config.json.tmp /home/rtl/${systemdService}/RTL-Config.json
+    jq ".nodes[0].Settings.channelBackupPath = \"/mnt/hdd/app-data/rtl/${systemdService}-SCB-backup-$hostname\"" | \
+    jq ".nodes[0].Settings.swapServerUrl = \"https://localhost:${SWAPSERVERPORT}\"" > /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json.tmp
+    mv /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json.tmp /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json
   fi
 
   echo "# RTL prestart config done"
@@ -421,8 +453,11 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   echo "# making sure services are not running"
   sudo systemctl stop ${systemdService} 2>/dev/null
 
+  # remove config
+  sudo rm -f /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json
+
   # setting value in raspi blitz config
-  sudo sed -i "s/^${configEntry}=.*/${configEntry}=off/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set ${configEntry} "off"
 
   # remove nginx symlinks
   sudo rm -f /etc/nginx/sites-enabled/${netprefix}${typeprefix}rtl_ssl.conf 2>/dev/null
@@ -436,7 +471,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # Hidden Service if Tor is active
   if [ "${runBehindTor}" = "on" ]; then
-    /home/admin/config.scripts/internet.hiddenservice.sh off ${systemdService}
+    /home/admin/config.scripts/tor.onion-service.sh off ${systemdService}
   fi
 
   isInstalled=$(sudo ls /etc/systemd/system/${systemdService}.service 2>/dev/null | grep -c "${systemdService}.service")
@@ -445,30 +480,35 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     echo "# Removing RTL for ${LNTYPE} ${CHAIN}"
     sudo systemctl disable ${systemdService}.service
     sudo rm /etc/systemd/system/${systemdService}.service
-
-    # only if 'purge' is an additional parameter (might otherwise other instances/services might need this)
-    if [ "$(echo "$@" | grep -c purge)" -gt 0 ];then
-      echo "# Removing the binaries"
-      echo "# Delete user and home directory"
-      sudo userdel -rf rtl
-      if [ $LNTYPE = cln ];then
-        /home/admin/config.scripts/cln.rest.sh off ${CHAIN}
-      fi
-    fi
-
     echo "# OK ${systemdService} removed."
+
   else
     echo "# ${systemdService} is not installed."
   fi
 
+  # only if 'purge' is an additional parameter (other instances/services might need this)
+  if [ "$(echo "$@" | grep -c purge)" -gt 0 ];then
+    echo "# Removing the binaries"
+    echo "# Delete user and home directory"
+    sudo userdel -rf rtl
+    if [ $LNTYPE = cl ];then
+      /home/admin/config.scripts/cl.rest.sh off ${CHAIN}
+    fi
+    echo "# Delete all configs"
+    sudo rm -rf /mnt/hdd/app-data/rtl
+  fi
+
   # close ports on firewall
-  sudo ufw deny ${RTLHTTP}
+  sudo ufw deny "${RTLHTTP}"
   sudo ufw deny $((RTLHTTP+1))
+
+  # needed for API/WebUI as signal that install ran thru 
+  echo "result='OK'"
   exit 0
 fi
 
 # DEACTIVATED FOR NOW:
-# - parameter scheme is conflicting with setting all perfixes etc
+# - parameter scheme is conflicting with setting all prefixes etc
 # - also just updating to latest has high change of breaking
 #if [ "$1" = "update" ]; then
 #  echo "# UPDATING RTL"
@@ -503,7 +543,7 @@ fi
 #    sudo -u rtl npm install --only=prod
 #    currentRTLcommit=$(cd /home/rtl/RTL; git describe --tags)
 #    echo "# Updated RTL to $currentRTLcommit"
-#  else 
+#  else
 #    echo "# Unknown option: $updateOption"
 #  fi
 #

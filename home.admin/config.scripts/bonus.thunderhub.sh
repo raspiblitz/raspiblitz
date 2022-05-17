@@ -1,48 +1,68 @@
 #!/bin/bash
 
-THUBVERSION="v0.12.13"
+# https://github.com/apotdevin/thunderhub
+THUBVERSION="v0.13.6"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "config script to install, update or uninstall ThunderHub"
- echo "bonus.thunderhub.sh [on|off|menu|update]"
+ echo "bonus.thunderhub.sh [on|off|menu|update|status]"
  echo "install $THUBVERSION by default"
  exit 1
 fi
+
+PGPsigner="apotdevin"
+PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
+PGPpubkeyFingerprint="4403F1DFBE779457"
 
 # check and load raspiblitz config
 # to know which network is running
 source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
-if [ ${#network} -eq 0 ]; then
- echo "FAIL - missing /mnt/hdd/raspiblitz.conf"
- exit 1
+
+if [ "$1" = "status" ] || [ "$1" = "menu" ]; then
+
+  # get network info
+  isInstalled=$(sudo ls /etc/systemd/system/thunderhub.service 2>/dev/null | grep -c 'thunderhub.service')
+  localip=$(hostname -I | awk '{print $1}')
+  toraddress=$(sudo cat /mnt/hdd/tor/thunderhub/hostname 2>/dev/null)
+  fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
+  httpPort="3010"
+  httpsPort="3011"
+
+  if [ "$1" = "status" ]; then
+    echo "installed='${isInstalled}'"
+    echo "localIP='${localip}'"
+    echo "httpPort='${httpPort}'"
+    echo "httpsPort='${httpsPort}'"
+    echo "httpsForced='0'"
+    echo "httpsSelfsigned='1'"
+    echo "authMethod='password_b'"
+    echo "toraddress='${toraddress}'"
+    exit
+  fi
+
 fi
 
 # show info menu
 if [ "$1" = "menu" ]; then
 
-  # get network info
-  localip=$(hostname -I | awk '{print $1}')
-  toraddress=$(sudo cat /mnt/hdd/tor/thunderhub/hostname 2>/dev/null)
-  fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
-
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
     # Info with TOR
-    /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
+    sudo /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
     whiptail --title " ThunderHub " --msgbox "Open in your local web browser:
-http://${localip}:3010\n
-https://${localip}:3011 with Fingerprint:
+http://${localip}:${httpPort}\n
+https://${localip}:${httpsPort} with Fingerprint:
 ${fingerprint}\n
 Use your Password B to login.\n
 Hidden Service address for TOR Browser (see LCD for QR):\n${toraddress}
 " 16 67
-    /home/admin/config.scripts/blitz.display.sh hide
+    sudo /home/admin/config.scripts/blitz.display.sh hide
   else
     # Info without TOR
-    whiptail --title " ThunderHub " --msgbox "Open in your local web browser & accept self-signed cert:
-http://${localip}:3010\n
-https://${localip}:3011 with Fingerprint:
+    whiptail --title " ThunderHub " --msgbox "Open in your local web browser:
+http://${localip}:${httpPort}\n
+Or ttps://${localip}:${httpsPort} with Fingerprint:
 ${fingerprint}\n
 Use your Password B to login.\n
 Activate TOR to access the web interface from outside your local network.
@@ -50,11 +70,6 @@ Activate TOR to access the web interface from outside your local network.
   fi
   echo "please wait ..."
   exit 0
-fi
-
-# add default value to raspi config if needed
-if ! grep -Eq "^thunderhub=" /mnt/hdd/raspiblitz.conf; then
-  echo "thunderhub=off" >> /mnt/hdd/raspiblitz.conf
 fi
 
 # stop services
@@ -68,7 +83,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   isInstalled=$(sudo ls /etc/systemd/system/thunderhub.service 2>/dev/null | grep -c 'thunderhub.service')
   if ! [ ${isInstalled} -eq 0 ]; then
     echo "ThunderHub already installed."
-  else 
+  else
     ###############
     # INSTALL
     ###############
@@ -85,13 +100,21 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     cd /home/thunderhub/thunderhub || exit 1
     # https://github.com/apotdevin/thunderhub/releases
     sudo -u thunderhub git reset --hard $THUBVERSION
-    echo "Running npm install and run build..."
-    sudo -u thunderhub npm install
-    if ! [ $? -eq 0 ]; then
-        echo "FAIL - npm install did not run correctly, aborting"
-        exit 1
+
+    sudo -u thunderhub /home/admin/config.scripts/blitz.git-verify.sh \
+     "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
+
+    echo "Running npm install ..."
+    sudo rm -r /home/thunderhub/thunderhub/node_modules 2>/dev/null
+    if ! sudo -u thunderhub npm install; then
+      echo "FAIL - npm install did not run correctly, aborting"
+      exit 1
     fi
 
+    echo "# opt out of telemetry ..."
+    sudo -u thunderhub npx next telemetry disable
+
+    echo "# run build ..."
     sudo -u thunderhub npm run build
 
     ###############
@@ -120,6 +143,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 # -----------
 LOG_LEVEL='debug'
 TOR_PROXY_SERVER='socks://127.0.0.1:9050'
+PORT=3010
 
 # -----------
 # Interface Configs
@@ -135,6 +159,8 @@ FETCH_FEES = false
 DISABLE_LINKS = true
 DISABLE_LNMARKETS = true
 NO_VERSION_CHECK = true
+# https://nextjs.org/telemetry#how-do-i-opt-out
+NEXT_TELEMETRY_DISABLED=1
 
 # -----------
 # Account Configs
@@ -173,7 +199,7 @@ EOF
     sudo chmod 600 /mnt/hdd/app-data/thunderhub/thubConfig.yaml | exit 1
     # symlink
     sudo ln -s /mnt/hdd/app-data/thunderhub/thubConfig.yaml /home/thunderhub/
-    
+
     ##################
     # NGINX
     ##################
@@ -192,13 +218,13 @@ EOF
     sudo ln -sf /etc/nginx/sites-available/thub_tor_ssl.conf /etc/nginx/sites-enabled/
     sudo nginx -t
     sudo systemctl reload nginx
-    
+
     # open the firewall
     echo "*** Updating Firewall ***"
     sudo ufw allow from any to any port 3010 comment 'allow ThunderHub HTTP'
     sudo ufw allow from any to any port 3011 comment 'allow ThunderHub HTTPS'
     echo ""
-        
+
     ##################
     # SYSTEMD SERVICE
     ##################
@@ -215,12 +241,12 @@ After=lnd.service
 
 [Service]
 WorkingDirectory=/home/thunderhub/thunderhub
-ExecStart=/usr/bin/npm run start -- -p 3010
+ExecStart=/usr/bin/npm run start
 User=thunderhub
 Restart=always
 TimeoutSec=120
 RestartSec=30
-StandardOutput=null
+StandardOutput=journal
 StandardError=journal
 
 # Hardening measures
@@ -235,27 +261,32 @@ WantedBy=multi-user.target
     sudo systemctl enable thunderhub
 
     # setting value in raspiblitz config
-    sudo sed -i "s/^thunderhub=.*/thunderhub=on/g" /mnt/hdd/raspiblitz.conf
+    /home/admin/config.scripts/blitz.conf.sh set thunderhub "on"
 
     # Hidden Service for thunderhub if Tor is active
     if [ "${runBehindTor}" = "on" ]; then
-      # make sure to keep in sync with internet.tor.sh script
-      /home/admin/config.scripts/internet.hiddenservice.sh thunderhub 80 3012 443 3013
+      # make sure to keep in sync with tor.network.sh script
+      /home/admin/config.scripts/tor.onion-service.sh thunderhub 80 3012 443 3013
     fi
-    source /home/admin/raspiblitz.info
+    source <(/home/admin/_cache.sh get state)
     if [ "${state}" == "ready" ]; then
       echo "# OK - the thunderhub.service is enabled, system is ready so starting service"
       sudo systemctl start thunderhub
+      echo "# Wait startup grace period 60 secs ... "
+      sleep 60
     else
       echo "# OK - the thunderhub.service is enabled, to start manually use: 'sudo systemctl start thunderhub'"
     fi
   fi
+
+  # needed for API/WebUI as signal that install ran thru 
+  echo "result='OK'"
   exit 0
 fi
 
 # switch off
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
-  
+
   echo "*** REMOVING THUNDERHUB ***"
   # remove systemd service
   sudo systemctl disable thunderhub
@@ -278,14 +309,16 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # Hidden Service if Tor is active
   if [ "${runBehindTor}" = "on" ]; then
-    /home/admin/config.scripts/internet.hiddenservice.sh off thunderhub
+    /home/admin/config.scripts/tor.onion-service.sh off thunderhub
   fi
 
   echo "OK ThunderHub removed."
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^thunderhub=.*/thunderhub=off/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set thunderhub "off"
 
+  # needed for API/WebUI as signal that install ran thru 
+  echo "result='OK'"
   exit 0
 fi
 
@@ -301,7 +334,7 @@ if [ "$1" = "update" ]; then
   UPSTREAM=${1:-'@{u}'}
   LOCAL=$(git rev-parse @)
   REMOTE=$(git rev-parse "$UPSTREAM")
-  
+
   if [ $LOCAL = $REMOTE ]; then
     TAG=$(git tag | sort -V | tail -1)
     echo "# Up-to-date on version" $TAG
@@ -311,14 +344,20 @@ if [ "$1" = "update" ]; then
     echo "# Reset to the latest release tag"
     TAG=$(git tag | sort -V | tail -1)
     sudo -u thunderhub git reset --hard $TAG
+    sudo -u thunderhub /home/admin/config.scripts/blitz.git-verify.sh \
+     "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
 
     # install deps
     echo "# Installing dependencies..."
-    sudo -u thunderhub npm install --quiet
+    sudo -u thunderhub npm install --quiet --yes
     if ! [ $? -eq 0 ]; then
         echo "# FAIL - npm install did not run correctly, aborting"
         exit 1
     fi
+
+    # opt out of telemetry 
+    echo "# opt out of telemetry .. "
+    sudo -u thunderhub npx next telemetry disable
 
     # build nextjs
     echo "# Building application..."
@@ -328,9 +367,10 @@ if [ "$1" = "update" ]; then
   fi
 
   echo "# Updated to the release in https://github.com/apotdevin/thunderhub"
-  echo ""
+  echo
   echo "# Starting the ThunderHub service ... *** "
   sudo systemctl start thunderhub
+
   exit 0
 fi
 

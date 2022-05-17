@@ -86,6 +86,8 @@ while :
 
     # get config info if already available (with state value)
     source ${infoFile}
+    source <(/home/admin/_cache.sh get state message)
+
     configExists=$(ls ${configFile} 2>/dev/null | grep -c '.conf')
     if [ ${configExists} -eq 1 ]; then
       source ${configFile}
@@ -101,23 +103,38 @@ while :
 
     fi
 
-    # TODO: ALSO SEPARATE GUI/ACTION FOR THE SCANNING / WALLET UNLOCK / ERROR DETECTION 
     # if lightning is syncing or scanning
-    source <(sudo /home/admin/config.scripts/blitz.statusscan.sh $lightning)
-    if [ "${walletLocked}" == "1" ]; then
+    source <(/home/admin/_cache.sh get \
+      lightning \
+      ln_default_locked \
+      btc_default_synced \
+      btc_default_online \
+      btc_default_sync_initialblockdownload \
+      btc_default_blocks_behind \
+    )
+
+    if [ "${lightning}" != "" ] && [ "${lightning}" != "none" ] && [ "${ln_default_locked}" == "1" ]; then
       /home/admin/setup.scripts/eventInfoWait.sh "walletlocked" "" lcd
       sleep 3
       continue
     fi
 
-    if [ "${syncedToChain}" != "1" ]; then
+    # when lightning is active - show sync until ln_default_sync_initial_done
+    if [ "${lightning}" != "" ] && [ "${lightning}" != "none" ] && [ "${ln_default_sync_initial_done}" == "0" ]; then
       /home/admin/setup.scripts/eventBlockchainSync.sh lcd
-      sleep 10
+      sleep 3
+      continue
+    fi
+
+    # when btc not online or not synced - show sync screen
+    if [ "${btc_default_synced}" != "1" ] || [ "${btc_default_online}" != "1" ]; then
+      /home/admin/setup.scripts/eventBlockchainSync.sh lcd
+      sleep 3
       continue
     fi
 
     # no special case - show status display
-    /home/admin/00infoBlitz.sh $lightning ${chain}net
+    /home/admin/00infoBlitz.sh ${chain}net $lightning
     sleep 5
 
 done

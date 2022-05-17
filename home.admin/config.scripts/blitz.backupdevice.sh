@@ -169,11 +169,7 @@ THIS WILL DELETE ALL DATA ON THAT DEVICE!
   fi
 
   # change raspiblitz.conf
-  entryExists=$(cat /mnt/hdd/raspiblitz.conf | grep -c 'localBackupDeviceUUID=')
-  if [ ${entryExists} -eq 0 ]; then
-    echo "localBackupDeviceUUID='off'" >> /mnt/hdd/raspiblitz.conf
-  fi
-  sudo sed -i "s/^localBackupDeviceUUID=.*/localBackupDeviceUUID='${uuid}'/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set localBackupDeviceUUID "${uuid}"
   echo "activated=1"
 
   # mount device (so that no reboot is needed)
@@ -188,7 +184,7 @@ THIS WILL DELETE ALL DATA ON THAT DEVICE!
 
   if [ ${userinteraction} -eq 1 ]; then
     if [ ${isMounted} -eq 0 ]; then
-      sudo sed -i "s/^localBackupDeviceUUID=.*/localBackupDeviceUUID=off/g" /mnt/hdd/raspiblitz.conf
+      /home/admin/config.scripts/blitz.conf.sh set localBackupDeviceUUID "off"
       dialog --title ' Adding Backup Device ' --msgbox '\nFAIL - Not able to add device.' 7 40
     else
       dialog --title ' Adding Backup Device ' --msgbox '\nOK - Device added for Backup.' 7 40
@@ -240,7 +236,7 @@ fi
 
 if [ "$1" = "off" ]; then
   echo "# BACKUP DEVICE REMOVE"
-  sudo sed -i "s/^localBackupDeviceUUID=.*/localBackupDeviceUUID=off/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set localBackupDeviceUUID "off"
   sudo umount /mnt/backup 2>/dev/null
   echo "# OK backup device is off"
   exit 0

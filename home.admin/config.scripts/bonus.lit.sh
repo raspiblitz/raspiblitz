@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # https://github.com/lightninglabs/lightning-terminal/releases
-LITVERSION="0.5.0-alpha"
+LITVERSION="0.6.3-alpha"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -12,7 +12,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
 fi
 
 # check who signed the release in https://github.com/lightninglabs/lightning-terminal/releases
-PGPsigner="roasbeef" 
+PGPsigner="guggero"
 
 if [ $PGPsigner = guggero ];then
   PGPpkeys="https://keybase.io/guggero/pgp_keys.asc"
@@ -24,11 +24,6 @@ fi
 
 source /mnt/hdd/raspiblitz.conf
 
-# add default value to raspi config if needed
-if ! grep -Eq "^lit=" /mnt/hdd/raspiblitz.conf; then
-  echo "lit=off" >> /mnt/hdd/raspiblitz.conf
-fi
-
 # show info menu
 if [ "$1" = "menu" ]; then
 
@@ -39,7 +34,7 @@ if [ "$1" = "menu" ]; then
 
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
     # Info with TOR
-    /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
+    sudo /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
     whiptail --title " Lightning Terminal " --msgbox "Open in your local web browser & accept self-signed cert:
 https://${localip}:8443\n
 SHA1 Thumb/Fingerprint:
@@ -50,7 +45,7 @@ https://${toraddress}\n
 For the command line switch to 'lit' user with: 'sudo su - lit'
 use the commands: 'lncli', 'lit-loop', 'lit-pool' and 'lit-frcli'.
 " 19 74
-    /home/admin/config.scripts/blitz.display.sh hide
+    sudo /home/admin/config.scripts/blitz.display.sh hide
   else
     # Info without TOR
     whiptail --title " Lightning Terminal " --msgbox "Open in your local web browser & accept self-signed cert:
@@ -88,13 +83,12 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       echo "# Replacing single install of: FARADAY"
       /home/admin/config.scripts/bonus.faraday.sh off
   fi
-  
+
   isInstalled=$(sudo ls /etc/systemd/system/litd.service 2>/dev/null | grep -c 'litd.service')
   if [ ${isInstalled} -eq 0 ]; then
- 
-    # create dedicated user
-    sudo adduser --disabled-password --gecos "" lit || exit 1
 
+    # create dedicated user
+    sudo adduser --disabled-password --gecos "" lit
     # make sure symlink to central app-data directory exists
     sudo rm -rf /home/lit/.lnd  # not a symlink.. delete it silently
     # create symlink
@@ -139,7 +133,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo rm -rf /home/lit/.loop # not a symlink.. delete it silently
     sudo ln -s /mnt/hdd/app-data/.loop/ /home/lit/.loop
     sudo chown lit:lit -R /mnt/hdd/app-data/.loop
-    
+
     echo "# Pool"
     echo "# remove so can't be used parallel with LiT"
     config.scripts/bonus.pool.sh off
@@ -150,7 +144,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo ln -s /mnt/hdd/app-data/.pool/ /home/lit/.pool
     sudo chown lit:lit -R /mnt/hdd/app-data/.pool
 
-    echo "Detect CPU architecture ..." 
+    echo "Detect CPU architecture ..."
     isARM=$(uname -m | grep -c 'arm')
     isAARCH64=$(uname -m | grep -c 'aarch64')
     isX86_64=$(uname -m | grep -c 'x86_64')
@@ -176,7 +170,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       OSversion="arm64"
     elif [ ${isX86_64} -eq 1 ] ; then
       OSversion="amd64"
-    fi 
+    fi
     SHA256=$(grep -i "linux-$OSversion" manifest-v$LITVERSION.txt | cut -d " " -f1)
 
     echo
@@ -188,7 +182,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     wget -N https://github.com/lightninglabs/lightning-terminal/releases/download/v${LITVERSION}/${binaryName}
 
     echo "# check binary was not manipulated (checksum test)"
-    wget -N https://github.com/lightninglabs/lightning-terminal/releases/download/v${LITVERSION}/manifest-${PGPsigner}-v${LITVERSION}.sig
+    wget -N https://github.com/lightninglabs/lightning-terminal/releases/download/v${LITVERSION}/manifest-v${LITVERSION}.sig
     wget --no-check-certificate ${PGPpkeys}
     binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
     if [ "${binaryChecksum}" != "${SHA256}" ]; then
@@ -197,8 +191,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     fi
 
     echo "# check gpg finger print"
-    gpg --keyid-format LONG ./pgp_keys.asc
-    fingerprint=$(gpg --keyid-format LONG "./pgp_keys.asc" 2>/dev/null \
+    gpg --show-keys --keyid-format LONG ./pgp_keys.asc
+    fingerprint=$(gpg --show-keys --keyid-format LONG "./pgp_keys.asc" 2>/dev/null \
     | grep "${PGPcheck}" -c)
     if [ ${fingerprint} -lt 1 ]; then
       echo ""
@@ -209,7 +203,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     fi
     gpg --import ./pgp_keys.asc
     sleep 3
-    verifyResult=$(gpg --verify manifest-${PGPsigner}-v${LITVERSION}.sig manifest-v${LITVERSION}.txt 2>&1)
+    verifyResult=$(gpg --verify manifest-v${LITVERSION}.sig manifest-v${LITVERSION}.txt 2>&1)
     goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
     echo "goodSignature(${goodSignature})"
     correctKey=$(echo ${verifyResult} | tr -d " \t\n\r" | grep "${GPGcheck}" -c)
@@ -229,13 +223,15 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # config  #
     ###########
     if [ "${runBehindTor}" = "on" ]; then
-      echo "# Connect to the Pool server through Tor"
+      echo "# Connect to the Pool, Loop and Terminal server through Tor"
       LOOPPROXY="loop.server.proxy=127.0.0.1:9050"
       POOLPROXY="pool.proxy=127.0.0.1:9050"
+      runLitd="torsocks /usr/local/bin/litd"
     else
-      echo "# Connect to Pool and Loop server through clearnet"
+      echo "# Connect to Pool, Loop and Terminal server through clearnet"
       LOOPPROXY=""
       POOLPROXY=""
+      runLitd="/usr/local/bin/litd"
     fi
     PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
     echo "
@@ -271,7 +267,7 @@ faraday.bitcoin.password=$PASSWORD_B
 
     # secure
     sudo chown lit:lit /mnt/hdd/app-data/.lit/lit.conf
-    sudo chmod 600 /mnt/hdd/app-data/.lit/lit.conf | exit 1
+    sudo chmod 600 /mnt/hdd/app-data/.lit/lit.conf || exit 1
 
     ############
     # service  #
@@ -283,13 +279,15 @@ Description=litd Service
 After=lnd.service
 
 [Service]
-ExecStart=/usr/local/bin/litd
+ExecStart=${runLitd}
 User=lit
 Group=lit
 Type=simple
 TimeoutSec=60
-Restart=always
+Restart=on-failure
 RestartSec=60
+StandardOutput=journal
+StandardError=journal
 
 # Hardening measures
 PrivateTmp=true
@@ -303,7 +301,7 @@ WantedBy=multi-user.target
     sudo systemctl enable litd
     echo "OK - the Lightning lit service is now enabled"
 
-  else 
+  else
     echo "# The Lightning Terminal is already installed."
   fi
 
@@ -324,12 +322,12 @@ alias lit-frcli=\"frcli --rpcserver=localhost:8443 \
   sudo ufw allow 8443 comment "Lightning Terminal"
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^lit=.*/lit=on/g" /mnt/hdd/raspiblitz.conf
-  
+  /home/admin/config.scripts/blitz.conf.sh set lit "on"
+
   # Hidden Service if Tor is active
   if [ "${runBehindTor}" = "on" ]; then
-    # make sure to keep in sync with internet.tor.sh script
-    /home/admin/config.scripts/internet.hiddenservice.sh lit 443 8443
+    # make sure to keep in sync with tor.network.sh script
+    /home/admin/config.scripts/tor.onion-service.sh lit 443 8443
   fi
 
   # in case RTL is installed - check to connect
@@ -338,7 +336,7 @@ alias lit-frcli=\"frcli --rpcserver=localhost:8443 \
     sudo systemctl restart RTL 2>/dev/null
   fi
 
-  source /home/admin/raspiblitz.info
+  source <(/home/admin/_cache.sh get state)
   if [ "${state}" == "ready" ]; then
     echo "# OK - the litd.service is enabled, system is ready so starting service"
     sudo systemctl start litd
@@ -366,19 +364,19 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     echo "# OK, the lit.service is removed."
     # Hidden Service if Tor is active
     if [ "${runBehindTor}" = "on" ]; then
-      /home/admin/config.scripts/internet.hiddenservice.sh off lit
+      /home/admin/config.scripts/tor.onion-service.sh off lit
     fi
-  else 
+  else
     echo "# LiT is not installed."
   fi
-  
+
   # clean up anyway
-  # delete user 
+  # delete user
   sudo userdel -rf lit
   # delete group
   sudo groupdel lit
   # setting value in raspi blitz config
-  sudo sed -i "s/^lit=.*/lit=off/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set lit "off"
 
   exit 0
 fi
@@ -386,4 +384,4 @@ fi
 echo "FAIL - Unknown Parameter $1"
 echo "may need reboot to run normal again"
 exit 1
-  
+

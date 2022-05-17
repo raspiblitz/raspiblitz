@@ -5,8 +5,9 @@ echo "get raspiblitz config"
 source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
 
-# get the local network IP to be displayed on the LCD
-source <(/home/admin/config.scripts/internet.sh status local)
+source <(/home/admin/_cache.sh get internet_localip internet_localiprange)
+localIP="${internet_localip}"
+localIPrange="${internet_localiprange}"
 
 # BASIC MENU INFO
 WIDTH=64
@@ -76,7 +77,7 @@ case $CHOICE in
     if [ $(grep -c "peerbloomfilters=1" < /mnt/hdd/bitcoin/bitcoin.conf) -gt 0 ]&&\
     [ $(grep -c Bisq < /etc/tor/torrc) -gt 0 ];then
       OPTIONS+=(SHOWBISQ "Show the Hidden Service to connect Bisq")
-      OPTIONS+=(REMOVEBISQ "Remove the Hidden Service for bisq")
+      OPTIONS+=(REMOVEBISQ "Remove the Hidden Service for Bisq")
     fi
     CHOICE=$(dialog --clear \
                 --backtitle "" \
@@ -103,12 +104,12 @@ case $CHOICE in
           if [ $(grep -c Bisq < /etc/tor/torrc) -eq 0 ];then
             echo "# Creating the Hidden Service for Bisq"
             echo "
-# Hidden Service for Bisq (bitcoin RPC v2)
+# Hidden Service for Bisq (bitcoin P2P v3)
 HiddenServiceDir /mnt/hdd/tor/bisq
-HiddenServiceVersion 2
+HiddenServiceVersion 3
 HiddenServicePort 8333 127.0.0.1:8333" | sudo tee -a /etc/tor/torrc
-            echo "# Restarting Tor"
-            sudo systemctl restart tor
+            echo "# Reloading Tor"
+            sudo systemctl reload tor@default
             sleep 10
             TOR_ADDRESS=$(sudo cat /mnt/hdd/tor/bisq/hostname)
               if [ -z "$TOR_ADDRESS" ]; then
@@ -135,7 +136,7 @@ HiddenServicePort 8333 127.0.0.1:8333" | sudo tee -a /etc/tor/torrc
         REMOVEBISQ)
           sudo sed -i '/Bisq/{N;N;N;d}'  /etc/tor/torrc
           echo "# Restarting Tor"
-          sudo systemctl restart tor;;
+          sudo systemctl reload tor@default;;
         SHOWBISQ)
           clear
           TOR_ADDRESS=$(sudo cat /mnt/hdd/tor/bisq/hostname)
@@ -163,10 +164,6 @@ HiddenServicePort 8333 127.0.0.1:8333" | sudo tee -a /etc/tor/torrc
     fi
     echo "# Running on ${chain}net"
     echo
-    localIPrange=$(ip addr | grep 'state UP' -A2 | grep -E -v 'docker0|veth' |\
-    grep 'eth0\|wlan0\|enp0\|inet' | tail -n1 | awk '{print $2}' |\
-    awk -F. '{print $1"."$2"."$3".0/24"}')
-    localIP=$(hostname -I | awk '{print $1}')
     allowIPrange=$(grep -c "rpcallowip=$localIPrange" <  /mnt/hdd/${network}/${network}.conf)
     bindIP=$(grep -c "${chain}.rpcbind=$localIP" <  /mnt/hdd/${network}/${network}.conf)
     rpcTorService=$(grep -c "HiddenServicePort ${BITCOINRPCPORT} 127.0.0.1:${BITCOINRPCPORT}"  < /etc/tor/torrc)
@@ -226,10 +223,10 @@ HiddenServicePort 8333 127.0.0.1:8333" | sudo tee -a /etc/tor/torrc
 
     case $CHOICE in
       ADDRPCLAN)
-        clear       
+        clear
         echo "# Make sure the bitcoind wallet is on"
         /home/admin/config.scripts/network.wallet.sh on
-      
+
         restartCore=0
         if [ $allowIPrange -eq 0 ]; then
           echo "rpcallowip=$localIPrange" | sudo tee -a /mnt/hdd/${network}/${network}.conf
@@ -254,7 +251,7 @@ HiddenServicePort 8333 127.0.0.1:8333" | sudo tee -a /etc/tor/torrc
         clear
         echo "# Make sure the bitcoind wallet is on"
         /home/admin/config.scripts/network.wallet.sh on
-        /home/admin/config.scripts/internet.hiddenservice.sh bitcoin${BITCOINRPCPORT} ${BITCOINRPCPORT} ${BITCOINRPCPORT}
+        /home/admin/config.scripts/tor.onion-service.sh bitcoin${BITCOINRPCPORT} ${BITCOINRPCPORT} ${BITCOINRPCPORT}
         echo
         echo "The address of the local node is: $TorRPCaddress"
         echo
@@ -267,7 +264,7 @@ HiddenServicePort 8333 127.0.0.1:8333" | sudo tee -a /etc/tor/torrc
       CREDENTIALS)
         clear
         showRPCcredentials
-        echo          
+        echo
         echo "Press ENTER to return to the menu."
         read key
         ;;
@@ -275,7 +272,7 @@ HiddenServicePort 8333 127.0.0.1:8333" | sudo tee -a /etc/tor/torrc
         # remove old entry
         sudo sed -i "/# Hidden Service for BITCOIN RPC (mainnet, testnet, signet)/,/^\s*$/{d}" /etc/tor/torrc
         # remove Hidden Service
-        /home/admin/config.scripts/internet.hiddenservice.sh off bitcoin${BITCOINRPCPORT}
+        /home/admin/config.scripts/tor.onion-service.sh off bitcoin${BITCOINRPCPORT}
         sudo ufw deny from $localIPrange to any port ${BITCOINRPCPORT}
         restartCore=0
         if [ $allowIPrange -gt 0 ]; then

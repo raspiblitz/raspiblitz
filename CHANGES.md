@@ -1,27 +1,96 @@
 # CHANGES between Releases
 
+## What's new in Version 1.8.0 of RaspiBlitz?
+
+- New: WebUI
+- New: BackendAPI
+- New: ZRAM - compressed swap in memory [details](https://github.com/rootzoll/raspiblitz/issues/2905)
+- New: Core Lightning GRPC plugin [details](https://github.com/rootzoll/raspiblitz/pull/3109)
+- Update: Bitcoin Core v23.0 [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-23.0.md)
+- Update: Core Lightning (CLN - formerly C-lightning) v0.11.0.1 [details](https://github.com/ElementsProject/lightning/releases/tag/v0.11.0.1)
+- Update: LND v0.14.3 [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.14.3-beta)
+- Update: RTL v0.12.3 [details](https://github.com/Ride-The-Lightning/RTL/releases/tag/v0.12.3)
+- Update: LNbits 0.8.0 [details](https://github.com/lnbits/lnbits-legend/releases/tag/0.8.0)
+- Update: C-lightningREST v0.7.0 [details](https://github.com/Ride-The-Lightning/c-lightning-REST/releases/tag/v0.7.0)
+- Update: CLBOSS 0.13A [details](https://github.com/ZmnSCPxj/clboss/releases/tag/0.13A)
+- Update: Channel Tools (chantools) v0.10.4 [details](https://github.com/guggero/chantools/blob/master/README.md)
+- Update: Electrum Server in Rust (electrs) v0.9.7 [details](https://github.com/romanz/electrs/blob/master/RELEASE-NOTES.md#097-apr-30-2022)
+- Update: BTCPayServer v1.5.1 [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.5.1)
+- Info: Run RaspiBlitz on VirtualBox & TrueNAS [details](https://github.com/rootzoll/raspiblitz/tree/dev/alternative.platforms)
+
+## What's new in Version 1.7.2 of RaspiBlitz?
+
+- Refactor: Cache & Backgroundscan of Systeminfo
+- New: Compact the LND channel.db monthly on restart, on-demand from menu and before backups [issue](https://github.com/rootzoll/raspiblitz/issues/2752)
+- New: Run C-lightning backup-compact regularly [issue](https://github.com/rootzoll/raspiblitz/issues/2869)
+- New: Switch LNbits between lnd & c-lightning [issue](https://github.com/rootzoll/raspiblitz/issues/2556)
+- New: Tallycoin Connect [details](https://github.com/djbooth007/tallycoin_connect#readme)
+- New: Helipad (Podcasting 2.0 Boostagram reader) [details](https://github.com/Podcastindex-org/helipad)
+- New: Migration from Citadel to RaspiBlitz [details](https://github.com/rootzoll/raspiblitz/issues/2642)
+- New: Bitcoinminds.org local on RaspiBlitz [details](https://github.com/raulcano/bitcoinminds)
+- New: JoinMarket Web UI v0.0.3 (CLI install of the first public alpha release) [details](https://github.com/joinmarket-webui/joinmarket-webui/releases/tag/v0.0.3)
+- New: Fulcrum Electrum server v1.6.0 (CLI install script) [issue](https://github.com/rootzoll/raspiblitz/issues/2924)
+- Update: LND v0.14.2-beta [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.14.2-beta)
+- Update: C-lightning v0.10.2 [details](https://github.com/ElementsProject/lightning/releases/tag/v0.10.2)
+- Update: LNbits 0.7.0 [details](https://github.com/lnbits/lnbits-legend/releases/tag/0.7.0)
+- Update: RTL v0.12.1 [details](https://github.com/Ride-The-Lightning/RTL/releases/tag/v0.12.1)
+- Update: C-lightningREST v0.6.1 [details](https://github.com/Ride-The-Lightning/c-lightning-REST/releases/tag/v0.6.1)
+- Update: CL Spark Wallet v0.3.1 [details](https://github.com/shesek/spark-wallet/releases/tag/v0.3.1)
+- Update: CL Sparko plugin v0.2.8 [details](https://github.com/fiatjaf/sparko/releases/tag/v2.8)
+- Update: Lightning Terminal v0.6.3-alpha with Lightning Node Connect over Tor [details](https://github.com/lightninglabs/lightning-terminal/releases/tag/v0.6.3-alpha)
+- Update: Channel Tools (chantools) v0.10.1 [details](https://github.com/guggero/chantools/releases/tag/v0.10.1)
+- Update: BTCPayServer v1.4.4 with UPDATE option [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.4.4)
+- Update: Electrum Server in Rust (electrs) v0.9.5 [details](https://github.com/romanz/electrs/blob/master/RELEASE-NOTES.md#095-feb-4-2022)
+- Update: JoinMarket v0.9.5 [details](https://github.com/JoinMarket-Org/joinmarket-clientserver/releases/tag/v0.9.5)
+- Update: JoininBox v0.6.7 [details](https://github.com/openoms/joininbox/releases/tag/v0.6.7)
+- Update: Thunderhub v0.13.6 [details](https://github.com/apotdevin/thunderhub/releases/tag/v0.13.6)
+- Update: BTC-RPC-Explorer v3.3.0 [details](https://github.com/janoside/btc-rpc-explorer/blob/master/CHANGELOG.md#v330)
+- Update: Specter Desktop 1.8.1 [details](https://github.com/cryptoadvance/specter-desktop/releases/tag/v1.8.1)
+- Update: Mempool 2.3.1 [details](https://github.com/mempool/mempool/releases/tag/v2.3.1)
+- Update: PyBlock to 1.1.8.5 (adapt to new install mechanism)
+- Update: Balance of Satoshis 11.50.0 (BOS) [details](https://github.com/alexbosworth/balanceofsatoshis/blob/master/CHANGELOG.md#11500)
+- Update: Re-Add connecting node with Zap mobile wallet iOS & Android
+- Update: additional redaction of private data in debug logs
+- Security: Verify git commits and tags everywhere possible [issue](https://github.com/rootzoll/raspiblitz/issues/2686)
+- Fixed: LND repair options, SEED+SCB and rescue-file restore, RESET options [issue](https://github.com/rootzoll/raspiblitz/issues/2832)
+- Info: All existing IP2Tor subscriptions need to be canceled & renewed to be functional again.
+- Info: 32GB sd card is now required (was already long time recommended on shopping list)
+- Info: The touchscreen graphical mode is back to experimental for now and missing some UI fixes. This might take until v1.8.1 where the touchscreen will get a refactor/rewrite.
+
 ## What's new in Version 1.7.1 of RaspiBlitz?
+
+There was a small patch-update with raspiblitz-v1.7.1-2021-10-28.img.gz to fix a restart-loop after blockchain was self-synced.
 
 - New: C-lightning v0.10.1 [details](https://github.com/ElementsProject/lightning/releases/tag/v0.10.1)
 - New: C-lightningREST v0.5.1 [details](https://github.com/Ride-The-Lightning/c-lightning-REST/releases/tag/v0.5.1)
-- New: CLN plugin: Sparko [details](https://github.com/fiatjaf/sparko)
-- New: Suez - channel visualization for LND and CLN [details](https://github.com/prusnak/suez)
-- New: Homer Dashboard 21.03.2[details](https://github.com/bastienwirtz/homer/blob/main/README.md)
-- Update: Bitcoin Core v0.21.1 [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-0.21.1.md)
-- Update: LND v0.13.1 [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.13.1-beta)
-- Update: RTL 0.11.2 [details](https://github.com/Ride-The-Lightning/RTL/releases/tag/v0.11.2)
+- New: CL Spark Wallet v0.3.0rc with BOLT12 offers [details](https://github.com/shesek/spark-wallet/releases)
+- New: CL plugin: Sparko [details](https://github.com/fiatjaf/sparko)
+- New: CL plugin: CLBOSS The C-Lightning Node Manager [details](https://github.com/ZmnSCPxj/clboss#clboss-the-c-lightning-node-manager)
+- New: Refactored Setup-Process [details](https://github.com/rootzoll/raspiblitz/issues/1126#issuecomment-829757665)
+- New: Suez - channel visualization for LND and CL [info](https://github.com/rootzoll/raspiblitz/issues/2366#issuecomment-939521302)[details](https://github.com/prusnak/suez)
+- New: LND Static Channel Backup to Nextcloud
+- New: Allow SphinxApp to connect over Tor
+- New: Parallel TESTNET & SIGNET services 
+- Update: Bitcoin Core v22.0 [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-22.0.md)
+- Update: LND v0.13.3 [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.13.3-beta)
 - Update: Specter Desktop 1.6.0 [details](https://github.com/cryptoadvance/specter-desktop/blob/master/README.md)
-- Update: Lightning Terminal v0.5.0-alpha [details](https://github.com/lightninglabs/lightning-terminal/releases/tag/v0.5.0-alpha)
-- Update: Pool CLI v0.5.1-alpha [details](https://github.com/lightninglabs/pool/releases/tag/v0.5.1-alpha)
-- Update: Balance of Satoshis 10.7.8 (BOS) + keep data on reinstall [details](https://github.com/alexbosworth/balanceofsatoshis/blob/master/CHANGELOG.md#version-8010)
-- Update: Circuitbreaker v0.3.0 [details](https://github.com/lightningequipment/circuitbreaker/blob/master/README.md)
-- Update: JoinMarket v0.9.1 [details](https://github.com/JoinMarket-Org/joinmarket-clientserver/#joinmarket-clientserver)
-- Update: JoininBox v0.6.0 [details](https://github.com/openoms/joininbox/tree/master#joininbox)
-- Update: Electrum Server in Rust (electrs) v0.8.11 [details](https://github.com/romanz/electrs/blob/v0.8.11/RELEASE-NOTES.md#0811-18-aug-2021)
+- Update: JoinMarket v0.9.2 [details](https://github.com/JoinMarket-Org/joinmarket-clientserver/releases/tag/v0.9.2)
+- Update: JoininBox v0.6.1 [details](https://github.com/openoms/joininbox/releases/tag/v0.6.1)
+- Update: Electrum Server in Rust (electrs) v0.9.0 [details](https://github.com/romanz/electrs/blob/v0.9.0/RELEASE-NOTES.md)
 - Update: Mempool 2.2.2 [details](https://github.com/mempool/mempool)
 - Update: BTC-RPC-Explorer v3.2.0 [details](https://github.com/janoside/btc-rpc-explorer/blob/master/CHANGELOG.md#v320)
 - Update: stacking-sats-kraken 0.4.4 [details](https://github.com/dennisreimann/stacking-sats-kraken/blob/master/README.md)
-
+- Update: BTCPayServer 1.2.3 [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.2.3)
+- Update: Lightning Terminal v0.5.1-alpha [details](https://github.com/lightninglabs/lightning-terminal/releases/tag/v0.5.1-alpha)
+- Update: RTL 0.11.2 [details](https://github.com/Ride-The-Lightning/RTL/releases/tag/v0.11.2)
+- Update: Lightning Terminal v0.5.0-alpha [details](https://github.com/lightninglabs/lightning-terminal/releases/tag/v0.5.0-alpha)
+- Update: Thunderhub v0.12.30 [details](https://github.com/apotdevin/thunderhub/releases/tag/v0.12.30)
+- Update: Pool CLI v0.5.1-alpha [details](https://github.com/lightninglabs/pool/releases/tag/v0.5.1-alpha)
+- Update: Balance of Satoshis 10.7.8 (BOS) + keep data on reinstall [details](https://github.com/alexbosworth/balanceofsatoshis/blob/master/CHANGELOG.md#version-8010)
+- Update: Channel Tools (chantools) v0.9.3 [details](https://github.com/guggero/chantools/blob/master/README.md)
+- Update: Circuitbreaker v0.3.0 [details](https://github.com/lightningequipment/circuitbreaker/blob/master/README.md)
+- Remove: DropBox Backup (its recommended to change to Nextcloud Backup)
+- Remove: Litecoin (fork recommended) [details](https://github.com/rootzoll/raspiblitz/issues/2542)
 
 ## What's new in Version 1.7.0 of RaspiBlitz?
 

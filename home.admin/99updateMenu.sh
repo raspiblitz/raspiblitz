@@ -14,7 +14,7 @@ release()
 - Download the new SD card image to your laptop:
   https://github.com/rootzoll/raspiblitz
 - Flash that SD card image to a new SD card (best)
-  or override old SD card after shutdown (fallback) 
+  or override old SD card after shutdown (fallback)
 - Choose 'Start Update' below.
 
 No need to close channels or download blockchain again.
@@ -32,39 +32,45 @@ its recommended to make a backup of all your Lightning
 Channel Data and download that file to your laptop.
 
 Do you want to download Lightning Data Backup now?
-      " 12 58
+      " 12 62
     if [ $? -eq 0 ]; then
-      clear
-      echo "*************************************"
-      echo "* PREPARING LIGHTNING BACKUP DOWNLOAD"
-      echo "*************************************"
-      echo "please wait .."
-      sleep 2
-      if [ "${lightning}" == "lnd" ]; then
+      if [ "${lightning}" == "lnd" ] || [ "${lnd}" = "on" ]; then
+        clear
+        echo "***********************************"
+        echo "* PREPARING THE LND BACKUP DOWNLOAD"
+        echo "***********************************"
+        echo "please wait .."
+        /home/admin/config.scripts/lnd.compact.sh interactive
         /home/admin/config.scripts/lnd.backup.sh lnd-export-gui
-      elif [ "${lightning}" == "cln" ]; then
-        /home/admin/config.scripts/cln.backup.sh cln-export-gui
-      else
-        echo "TODO: Implement Data Backup for '${lightning}'"
+        echo
+        echo "PRESS ENTER to continue once you're done downloading."
+        read key
       fi
-      echo
-      echo "PRESS ENTER to continue once you're done downloading."
-      read key
+      if [ "${lightning}" == "cl" ] || [ "${cl}" = "on" ]; then
+        clear
+        echo "*******************************************"
+        echo "* PREPARING THE C-LIGHTNING BACKUP DOWNLOAD"
+        echo "*******************************************"
+        echo "please wait .."
+        /home/admin/config.scripts/cl.backup.sh cl-export-gui
+        echo
+        echo "PRESS ENTER to continue once you're done downloading."
+        read key
+      fi
     else
       clear
-      echo "*************************************"
-      echo "* JUST MAKING BACKUP TO OLD SD CARD"
-      echo "*************************************"
+      echo "*****************************************"
+      echo "* JUST MAKING A BACKUP TO THE OLD SD CARD"
+      echo "*****************************************"
       echo "please wait .."
       sleep 2
-      if [ "${lightning}" == "lnd" ]; then
+      if [ "${lightning}" == "lnd" ] || [ "${lnd}" = "on" ]; then
         /home/admin/config.scripts/lnd.backup.sh lnd-export
-      elif [ "${lightning}" == "cln" ]; then
-        /home/admin/config.scripts/cln.backup.sh cln-export
-      else
-        echo "TODO: Implement Data Backup for '${lightning}'"
-        sleep 3
       fi
+      if [ "${lightning}" == "cl" ] || [ "${cl}" = "on" ]; then
+        /home/admin/config.scripts/cl.backup.sh cl-export
+      fi
+      sleep 3
     fi
   fi
 
@@ -99,9 +105,9 @@ patchNotice()
 It means it will sync the program code with the
 GitHub repo for your version branch v${codeVersion}.
 
-This can be useful if there are important updates 
+This can be useful if there are important updates
 in between releases to fix severe bugs. It can also
-be used to sync your own code with your RaspiBlitz 
+be used to sync your own code with your RaspiBlitz
 if you are developing on your own GitHub Repo.
 
 BUT BEWARE: This means RaspiBlitz will contact GitHub,
@@ -127,7 +133,7 @@ patch()
            PR "Checkout a PullRequest to test"
 	)
 
-  CHOICE=$(whiptail --clear --title "GitHub-User: ${activeGitHubUser} Branch: ${activeBranch}" --menu "" 11 55 4 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+  CHOICE=$(whiptail --clear --title " GitHub user:${activeGitHubUser} branch:${activeBranch} (${commitHashShort})" --menu "" 11 60 4 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
   clear
   case $CHOICE in
@@ -160,7 +166,7 @@ patch()
         newGitHubUser=$(echo "${newGitHubUser}" | cut -d " " -f1)
         echo "--> " ${newGitHubUser}
         error=""
-        source <(sudo -u admin /home/admin/config.scripts/blitz.github.sh -clean ${activeBranch} ${newGitHubUser})
+        source <(sudo -u admin /home/admin/config.scripts/blitz.github.sh ${activeBranch} ${newGitHubUser})
         if [ ${#error} -gt 0 ]; then
           whiptail --title "ERROR" --msgbox "${error}" 8 30
         fi
@@ -267,7 +273,7 @@ grab the latest LND release published on the LND GitHub page (also release candi
 There will be no security checks on signature, etc.
 
 This update mode is only recommended for testing and
-development nodes with no serious funding. 
+development nodes with no serious funding.
 
 Do you really want to update LND now?
       " 16 58
@@ -282,6 +288,75 @@ Do you really want to update LND now?
       else
         /home/admin/config.scripts/blitz.shutdown.sh reboot
         sleep 8
+      fi
+      ;;
+  esac
+}
+
+cl()
+{
+
+  # get cl info
+  source <(sudo -u admin /home/admin/config.scripts/cl.update.sh info)
+
+  # C-lightning Update Options
+  OPTIONS=()
+  if [ ${clUpdateInstalled} -eq 0 ]; then
+    OPTIONS+=(VERIFIED "Optional C-lightning update to ${clUpdateVersion}")
+  fi
+  OPTIONS+=(RECKLESS "Experimental C-lightning update to ${clLatestVersion}")
+
+  CHOICE=$(whiptail --clear --title "Update C-lightning Options" --menu "" 9 60 2 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+
+  clear
+  case $CHOICE in
+    VERIFIED)
+      if [ ${clUpdateInstalled} -eq 1 ]; then
+        whiptail --title "ALREADY INSTALLED" --msgbox "The C-lightning version ${clUpdateVersion} is already installed." 8 30
+        exit 0
+      fi
+      whiptail --title "OPTIONAL C-lightning UPDATE" --yes-button "Cancel" --no-button "Update" --yesno "BEWARE on updating to C-lightning v${clUpdateVersion}:
+
+${clUpdateComment}
+
+Do you really want to update C-lightning now?
+      " 16 58
+      if [ $? -eq 0 ]; then
+        echo "# cancel update"
+        exit 0
+      fi
+      error=""
+      warn=""
+      source <(sudo -u admin /home/admin/config.scripts/cl.update.sh verified)
+      if [ ${#error} -gt 0 ]; then
+        whiptail --title "ERROR" --msgbox "${error}" 8 30
+      else
+        echo "# C-lightning was updated successfully"
+        exit 0
+      fi
+      ;;
+    RECKLESS)
+      whiptail --title "RECKLESS C-lightning UPDATE to ${clLatestVersion}" --yes-button "Cancel" --no-button "Update" --yesno "Using the 'RECKLESS' C-lightning update will simply
+grab the latest C-lightning release published on the C-lightning GitHub page (also release candidates).
+
+There will be no security checks on signature, etc.
+
+This update mode is only recommended for testing and
+development nodes with no serious funding.
+
+Do you really want to update C-lightning now?
+      " 16 58
+      if [ $? -eq 0 ]; then
+        echo "# cancel update"
+        exit 0
+      fi
+      error=""
+      source <(sudo -u admin /home/admin/config.scripts/cl.update.sh reckless)
+      if [ ${#error} -gt 0 ]; then
+        whiptail --title "ERROR" --msgbox "${error}" 8 30
+      else
+        echo "# C-lightning was updated successfully"
+        exit 0
       fi
       ;;
   esac
@@ -334,9 +409,8 @@ Do you really want to update Bitcoin Core now?
       source <(sudo -u admin /home/admin/config.scripts/bitcoin.update.sh tested)
       if [ ${#error} -gt 0 ]; then
         whiptail --title "ERROR" --msgbox "${error}" 8 30
-      else
-        sleep 8
       fi
+      /home/admin/config.scripts/blitz.shutdown.sh reboot
       ;;
     RECKLESS)
       whiptail --title "UNTESTED Bitcoin Core update to ${bitcoinLatestVersion}" --yes-button "Cancel" \
@@ -356,12 +430,12 @@ Do you really want to update Bitcoin Core now?
       source <(sudo -u admin /home/admin/config.scripts/bitcoin.update.sh reckless)
       if [ ${#error} -gt 0 ]; then
         whiptail --title "ERROR" --msgbox "${error}" 8 30
-      else
-        sleep 8
       fi
+      /home/admin/config.scripts/blitz.shutdown.sh reboot
       ;;
     CUSTOM)
       sudo -u admin /home/admin/config.scripts/bitcoin.update.sh custom
+      /home/admin/config.scripts/blitz.shutdown.sh reboot
       ;;
   esac
 }
@@ -383,6 +457,10 @@ if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
   OPTIONS+=(LND "Interim LND Update Options")
 fi
 
+if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ]; then
+  OPTIONS+=(CL "Interim C-lightning Update Options")
+fi
+
 if [ "${bos}" == "on" ]; then
   OPTIONS+=(BOS "Update Balance of Satoshis")
 fi
@@ -395,12 +473,12 @@ if [ "${specter}" == "on" ]; then
   OPTIONS+=(SPECTER "Update Specter Desktop")
 fi
 
-if [ "${sphinxrelay}" == "on" ]; then
-  OPTIONS+=(SPHINX "Update Sphinx Server Relay")
+if [ "${BTCPayServer}" == "on" ]; then
+  OPTIONS+=(BTCPAY "Update BTCPayServer")
 fi
 
-if [ "${pyblock}" == "on" ]; then
-  OPTIONS+=(PYBLOCK "Update PyBLOCK")
+if [ "${sphinxrelay}" == "on" ]; then
+  OPTIONS+=(SPHINX "Update Sphinx Server Relay")
 fi
 
 if [ "${homer}" == "on" ]; then
@@ -416,7 +494,7 @@ if [ "${runBehindTor}" == "on" ]; then
 fi
 
 CHOICE_HEIGHT=$(("${#OPTIONS[@]}/2+1"))
-HEIGHT=$((CHOICE_HEIGHT+6))  
+HEIGHT=$((CHOICE_HEIGHT+6))
 CHOICE=$(dialog --clear \
                 --backtitle "" \
                 --title " Update Options " \
@@ -437,6 +515,9 @@ case $CHOICE in
   LND)
     lnd
     ;;
+  CL)
+    cl
+    ;;
   BITCOIN)
     bitcoinUpdate
     ;;
@@ -449,19 +530,19 @@ case $CHOICE in
   SPECTER)
     /home/admin/config.scripts/bonus.specter.sh update
     ;;
+  BTCPAY)
+    /home/admin/config.scripts/bonus.btcpayserver.sh update
+    ;;
   SPHINX)
     /home/admin/config.scripts/bonus.sphinxrelay.sh update
     ;;
-  PYBLOCK)
-    /home/admin/config.scripts/bonus.pyblock.sh update
-    ;;
   TOR)
-    sudo /home/admin/config.scripts/internet.tor.sh update  
+    sudo /home/admin/config.scripts/tor.network.sh update
     ;;
   HOMER)
     /home/admin/config.scripts/bonus.homer.sh update
     ;;
   MEMPOOL)
-    /home/admin/config.scripts/bonus.mempool.sh update 
+    /home/admin/config.scripts/bonus.mempool.sh update
     ;;
 esac

@@ -5,13 +5,12 @@
 # see https://github.com/guggero/chantools/releases
 
 lndVersion=$(lncli -v | cut -d " " -f 3 | cut -d"." -f2)
-if [ $lndVersion -eq 12 ]; then
-  pinnedVersion="0.8.2"
-elif [ $lndVersion -eq 11 ]; then
-  pinnedVersion="0.7.1" 
+if [ $lndVersion -eq 14 ]; then
+  pinnedVersion="0.10.4"
 else
   echo "# LND not installed or a version not tested with chantools"
   lncli -v
+  exit 1
 fi
 
 # command info
@@ -20,11 +19,6 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "/home/admin/config.scripts/bonus.chantools.sh on|off|menu"
  echo "Installs the version $pinnedVersion by default."
  exit 1
-fi
-
-# add default value to raspi config if needed
-if ! grep -Eq "^chantools=" /mnt/hdd/raspiblitz.conf; then
-  echo "chantools=off" >> /mnt/hdd/raspiblitz.conf
 fi
 
 # show info menu
@@ -43,7 +37,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   downloadDir="/home/admin/download"  # edit your download directory
   PGPpkeys="https://keybase.io/guggero/pgp_keys.asc"
-  PGPcheck="4FC70F07310028424EFC20A8E4256593F177720"
+  PGPcheck="F4FC70F07310028424EFC20A8E4256593F177720"
 
   echo "Detect CPU architecture ..."
   isARM=$(uname -m | grep -c 'arm')
@@ -72,17 +66,17 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     OSversion="amd64"
   fi
   SHA256=$(grep -i "linux-$OSversion" manifest-v$pinnedVersion.txt | cut -d " " -f1)
-  echo 
+  echo
   echo "# Channel Tools v${pinnedVersion} for ${OSversion}"
   echo "# SHA256 hash: $SHA256"
-  echo 
+  echo
 
   # get binary
   binaryName="chantools-linux-${OSversion}-v${pinnedVersion}.tar.gz"
   sudo -u admin wget -N https://github.com/guggero/chantools/releases/download/v${pinnedVersion}/${binaryName}
 
   # check binary was not manipulated (checksum test)
-  sudo -u admin wget -N https://github.com/guggero/chantools/releases/download/v${pinnedVersion}/manifest-v${pinnedVersion}.txt.asc
+  sudo -u admin wget -N https://github.com/guggero/chantools/releases/download/v${pinnedVersion}/manifest-v${pinnedVersion}.txt
   sudo -u admin wget --no-check-certificate -N -O "${downloadDir}/pgp_keys.asc" ${PGPpkeys}
   binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
   if [ "${binaryChecksum}" != "${SHA256}" ]; then
@@ -91,8 +85,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   fi
 
   # check gpg finger print
-  gpg ./pgp_keys.asc
-  fingerprint=$(sudo gpg "${downloadDir}/pgp_keys.asc" 2>/dev/null | grep "${PGPcheck}" -c)
+  gpg --show-keys ./pgp_keys.asc
+  fingerprint=$(sudo gpg --show-keys "${downloadDir}/pgp_keys.asc" 2>/dev/null | grep "${PGPcheck}" -c)
   if [ ${fingerprint} -lt 1 ]; then
     echo
     echo "# !!! BUILD WARNING --> Channel Tools PGP author not as expected"
@@ -102,7 +96,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   fi
   gpg --import ./pgp_keys.asc
   sleep 3
-  verifyResult=$(gpg --verify manifest-v${pinnedVersion}.txt.asc 2>&1)
+  sudo -u admin wget -N https://github.com/guggero/chantools/releases/download/v${pinnedVersion}/manifest-v${pinnedVersion}.sig
+
+  echo "# running: gpg --verify manifest-v${pinnedVersion}.sig manifest-v${pinnedVersion}.txt"
+  verifyResult=$(gpg --verify manifest-v${pinnedVersion}.sig manifest-v${pinnedVersion}.txt 2>&1)
+  echo "# verifyResult(${verifyResult})"
   goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
   echo "# goodSignature(${goodSignature})"
   correctKey=$(echo ${verifyResult} | tr -d " \t\n\r" | grep "${GPGcheck}" -c)
@@ -115,17 +113,16 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   # install
   sudo -u admin tar -xzf ${binaryName}
-  sudo -u bitcoin mkdir -p /home/bitcoin/bin 2>/dev/null
-  sudo install -m 0755 -o bitcoin -g bitcoin -t /home/bitcoin/bin chantools-linux-${OSversion}-v${pinnedVersion}/*
+  sudo install -m 0755 -o root -g root -t /usr/local/bin/ chantools-linux-${OSversion}-v${pinnedVersion}/*
   sleep 3
-  installed=$(sudo -u bitcoin /home/bitcoin/bin/chantools --version)
+  installed=$(sudo -u bitcoin chantools --version)
   if [ ${#installed} -eq 0 ]; then
     echo
     echo "# !!! BUILD FAILED --> Was not able to install Channel Tools"
     exit 1
   fi
   # setting value in raspi blitz config
-  sudo sed -i "s/^chantools=.*/chantools=on/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set chantools "on"
 
   echo
   echo "Installed ${installed}"
@@ -140,16 +137,14 @@ fi
 
 # switch off
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
-
   # setting value in raspi blitz config
-  sudo sed -i "s/^chantools=.*/chantools=off/g" /mnt/hdd/raspiblitz.conf
-  
+  /home/admin/config.scripts/blitz.conf.sh set chantools "off"
+
   echo "# REMOVING Channel Tools"
   sudo rm -rf /home/admin/download/chantools*
-  sudo rm -rf /home/bitcoin/bin/chantools*
+  sudo rm -rf /usr/local/bin/chantools*
   echo "# OK, chantools is removed."
   exit 0
-
 fi
 
 echo "# FAIL - Unknown Parameter $1"

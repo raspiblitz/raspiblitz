@@ -15,11 +15,6 @@ gpgFingerprint="0453B9F5071261A40FDB34181965063FC13BEBE2"
 
 source /mnt/hdd/raspiblitz.conf
 
-# add default value to raspi config if needed
-if ! grep -Eq "^lndmanage=" /mnt/hdd/raspiblitz.conf; then
-  echo "lndmanage=off" >> /mnt/hdd/raspiblitz.conf
-fi
-
 # show info menu
 if [ "$1" = "menu" ]; then
   dialog --title " Info lndmanage " --msgbox "\n\
@@ -92,7 +87,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   fi
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^lndmanage=.*/lndmanage=on/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set lndmanage "on"
   echo "#######################################################################"
   echo "# OK install done"
   echo "#######################################################################"
@@ -107,7 +102,7 @@ fi
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^lndmanage=.*/lndmanage=off/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set lndmanage "off"
   
   echo "*** REMOVING LNDMANAGE ***"
   sudo rm -rf /home/admin/lndmanage

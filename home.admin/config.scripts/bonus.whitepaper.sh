@@ -16,11 +16,6 @@ fi
 
 source /mnt/hdd/raspiblitz.conf
 
-# add default value to raspi config if needed
-if ! grep -Eq "^whitepaper=" /mnt/hdd/raspiblitz.conf; then
-  echo "whitepaper=off" >> /mnt/hdd/raspiblitz.conf
-fi
-
 # show info menu
 if [ "$1" = "menu" ]; then
   dialog --title " Whitepaper Info" --msgbox "
@@ -50,7 +45,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # transfor pdf to txt to view with less through the terminal
     pdftotext $DownloadPath$WhitepaperFilename
     # setting value in raspi blitz config
-    sudo sed -i "s/^whitepaper=.*/whitepaper=on/g" /mnt/hdd/raspiblitz.conf
+    /home/admin/config.scripts/blitz.conf.sh set whitepaper "on"
     echo "# OK - Whitepaper downloaded to $DownloadPath$WhitepaperFilename"
   exit 0
 fi
@@ -65,7 +60,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     echo "# ***"
     echo ""
     # setting value in raspi blitz config
-    sudo sed -i "s/^whitepaper=.*/whitepaper=off/g" /mnt/hdd/raspiblitz.conf
+    /home/admin/config.scripts/blitz.conf.sh set whitepaper "off"
     rm $DownloadPath$WhitepaperFilename
     rm $DownloadPath/bitcoin.txt
     echo "# OK - Whitepaper removed."

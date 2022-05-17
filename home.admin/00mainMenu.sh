@@ -2,15 +2,9 @@
 
 echo "Starting the main menu ..."
 
-# CONFIGFILE - configuration of RaspiBlitz
-configFile="/mnt/hdd/raspiblitz.conf"
-
-# INFOFILE - state data from bootstrap
-infoFile="/home/admin/raspiblitz.info"
-
 # MAIN MENU AFTER SETUP
-source ${infoFile}
-source ${configFile}
+source /home/admin/raspiblitz.info
+source /mnt/hdd/raspiblitz.conf
 
 # FUNCTIONS
 
@@ -38,7 +32,7 @@ confirmation()
 }
 
 # get the local network IP to be displayed on the LCD
-source <(/home/admin/config.scripts/internet.sh status local)
+source <(/home/admin/_cache.sh get internet_localip)
 
 if [ ${chain} = test ];then
   netprefix="t"
@@ -64,10 +58,20 @@ fi
 if [ ${#lightning} -gt 0 ]; then
   plus="/ ${lightning} ${plus}"
 fi
-BACKTITLE="${localip} / ${hostname} / ${network} ${plus}"
+BACKTITLE="${internet_localip} / ${hostname} / ${network} ${plus}"
 
 # Basic Options
 OPTIONS+=(INFO "RaspiBlitz Status Screen")
+
+# if LND is active
+if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
+  OPTIONS+=(LND "LND Wallet Options")
+fi
+
+# if C-Lightning is active
+if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ]; then
+  OPTIONS+=(CL "C-lightning Wallet Options")
+fi
 
 # Activated Apps/Services
 if [ "${rtlWebinterface}" == "on" ]; then
@@ -85,6 +89,9 @@ fi
 if [ "${sparko}" == "on" ]; then
   OPTIONS+=(SPARKO "Sparko Webwallet")
 fi
+if [ "${spark}" == "on" ]; then
+  OPTIONS+=(SPARK "Spark Wallet")
+fi
 if [ "${ElectRS}" == "on" ]; then
   OPTIONS+=(ELECTRS "Electrum Rust Server")
 fi
@@ -92,7 +99,11 @@ if [ "${BTCRPCexplorer}" == "on" ]; then
   OPTIONS+=(EXPLORE "BTC RPC Explorer")
 fi
 if [ "${LNBits}" == "on" ]; then
-  OPTIONS+=(LNBITS "LNbits Server")
+  if [ "${LNBitsFunding}" == "lnd" ] || [ "${LNBitsFunding}" == "tlnd" ] || [ "${LNBitsFunding}" == "slnd" ] || [ "${LNBitsFunding}" == "" ]; then
+    OPTIONS+=(LNBITS "LNbits on LND")
+  elif [ "${LNBitsFunding}" == "cl" ] || [ "${LNBitsFunding}" == "tcl" ] || [ "${LNBitsFunding}" == "scl" ]; then
+    OPTIONS+=(LNBITS "LNbits on c-lightning")
+  fi
 fi
 if [ "${lndmanage}" == "on" ]; then
   OPTIONS+=(LNDMANAGE "LND Manage Script")
@@ -107,7 +118,7 @@ if [ "${specter}" == "on" ]; then
   OPTIONS+=(SPECTER "Specter Desktop")
 fi
 if [ "${joinmarket}" == "on" ]; then
-  OPTIONS+=(JMARKET "JoinMarket")
+  OPTIONS+=(JM "JoinMarket with JoininBox")
 fi
 if [ "${faraday}" == "on" ]; then
   OPTIONS+=(FARADAY "Faraday Channel Management")
@@ -130,6 +141,9 @@ fi
 if [ "${sphinxrelay}" == "on" ]; then
   OPTIONS+=(SPHINX "Sphinx Chat Relay")
 fi
+if [ "${helipad}" == "on" ]; then
+  OPTIONS+=(HELIPAD "Helipad Boostagram reader")
+fi
 if [ "${chantools}" == "on" ]; then
   OPTIONS+=(CHANTOOLS "ChannelTools (Fund Rescue)")
 fi
@@ -140,21 +154,14 @@ fi
 if [ "${circuitbreaker}" == "on" ]; then
   OPTIONS+=(CIRCUIT "Circuitbreaker (LND firewall)")
 fi
+if [ "${tallycoinConnect}" == "on" ]; then
+  OPTIONS+=(TALLY "Tallycoin Connect")
+fi
 
 # dont offer to switch to "testnet view for now" - so no wswitch back to mainnet needed
 #if [ ${chain} != "main" ]; then
 #  OPTIONS+=(MAINNET "Mainnet Service Options")
 #fi
-
-# if LND is active
-if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
-  OPTIONS+=(LND "LND Wallet Options")
-fi
-
-# if C-Lightning is active
-if [ "${lightning}" == "cln" ] || [ "${cln}" == "on" ]; then
-  OPTIONS+=(CLN "C-lightning Wallet Options")
-fi
 
 if [ "${testnet}" == "on" ]; then
   OPTIONS+=(TESTNETS "Testnet/Signet Options")
@@ -198,7 +205,7 @@ case $CHOICE in
               do
 
               # show the same info as on LCD screen
-              /home/admin/00infoBlitz.sh ${lightning} ${chain}net
+              /home/admin/00infoBlitz.sh ${chain}net ${lightning}
 
               # wait 6 seconds for user exiting loop
               echo ""
@@ -218,8 +225,8 @@ case $CHOICE in
         LND)
             /home/admin/99lndMenu.sh
             ;;
-        CLN)
-            /home/admin/99clnMenu.sh ${chain}net
+        CL)
+            /home/admin/99clMenu.sh ${chain}net
             ;;
         CONNECT)
             /home/admin/99connectMenu.sh
@@ -235,7 +242,7 @@ case $CHOICE in
             /home/admin/config.scripts/bonus.rtl.sh menu lnd mainnet
             ;;
         CRTL)
-            /home/admin/config.scripts/bonus.rtl.sh menu cln mainnet
+            /home/admin/config.scripts/bonus.rtl.sh menu cl mainnet
             ;;
         BTCPAY)
             /home/admin/config.scripts/bonus.btcpayserver.sh menu
@@ -250,7 +257,10 @@ case $CHOICE in
             /home/admin/config.scripts/bonus.lit.sh menu
             ;;
         SPARKO)
-            /home/admin/config.scripts/cln-plugin.sparko.sh menu mainnet
+            /home/admin/config.scripts/cl-plugin.sparko.sh menu mainnet
+            ;;
+        SPARK)
+            /home/admin/config.scripts/cl.spark.sh menu mainnet
             ;;
         LNBITS)
             /home/admin/config.scripts/bonus.lnbits.sh menu
@@ -267,8 +277,8 @@ case $CHOICE in
         SPECTER)
             /home/admin/config.scripts/bonus.specter.sh menu
             ;;
-        JMARKET)
-            sudo /home/admin/config.scripts/bonus.joinmarket.sh menu
+        JM)
+            /home/admin/config.scripts/bonus.joinmarket.sh menu
             ;;
         FARADAY)
             sudo /home/admin/config.scripts/bonus.faraday.sh menu
@@ -282,6 +292,9 @@ case $CHOICE in
         THUB)
             sudo /home/admin/config.scripts/bonus.thunderhub.sh menu
             ;;
+        TALLY)
+            sudo /home/admin/config.scripts/bonus.tallycoin-connect.sh menu
+            ;;
         ZEROTIER)
             sudo /home/admin/config.scripts/bonus.zerotier.sh menu
             ;;
@@ -290,6 +303,9 @@ case $CHOICE in
             ;;
         SPHINX)
             sudo /home/admin/config.scripts/bonus.sphinxrelay.sh menu
+            ;;
+        HELIPAD)
+            sudo /home/admin/config.scripts/bonus.helipad.sh menu
             ;;
         CHANTOOLS)
             sudo /home/admin/config.scripts/bonus.chantools.sh menu
@@ -316,7 +332,7 @@ case $CHOICE in
             /home/admin/98repairMenu.sh
             ;;
         PASSWORD)
-            sudo /home/admin/config.scripts/blitz.setpassword.sh
+            sudo /home/admin/config.scripts/blitz.passwords.sh set
             ;;
         UPDATE)
             /home/admin/99updateMenu.sh

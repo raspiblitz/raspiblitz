@@ -13,21 +13,11 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  exit 1
 fi
 
-# CONFIGFILE - configuration of RaspiBlitz
-configFile="/mnt/hdd/raspiblitz.conf"
-
-# Check if HDD contains configuration
-configExists=$(ls ${configFile} | grep -c '.conf')
-if [ ${configExists} -ne 1 ]; then
- echo "RaspiBlitz config file '${configFile}' not found"
- exit 1
-fi
 # at this point the config file exists and can be sourced
-source ${configFile}
+source /mnt/hdd/raspiblitz.conf
 
 # this variables is used repeatedly in this script
 resources_dir=/home/admin/assets/telegraf/etc-telegraf
-
 
 ###############################
 # give status
@@ -147,9 +137,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sleep 2
   sudo systemctl status telegraf.service --no-page 2>/dev/null
 
-  echo "*** telegraf installation: set 'telegrafMonitoring=on' in config file '${configFile}'"
-  sudo sed -i "s/^telegrafMonitoring=.*/telegrafMonitoring=on/g" ${configFile}
-
+  echo "*** telegraf installation: set 'telegrafMonitoring=on' in config file 'raspiblitz.conf'"
+  /home/admin/config.scripts/blitz.conf.sh set telegrafMonitoring "on"
 
   echo "*** install telegraf done ***"
 
@@ -165,8 +154,8 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # let apt-get remove the package
   sudo apt-get remove -y telegraf
 
-  echo "*** telegraf remove: set 'telegrafMonitoring=off' in config file '${configFile}'"
-  sudo sed -i "s/^telegrafMonitoring=.*/telegrafMonitoring=off/g" ${configFile}
+  echo "*** telegraf remove: set 'telegrafMonitoring=off' in config file 'raspiblitz.conf'"
+  /home/admin/config.scripts/blitz.conf.sh set telegrafMonitoring "off"
 
   echo "*** remove telegraf done ***"
 

@@ -1,13 +1,13 @@
 
 # ⚡️ RaspiBlitz-on-DietPi ⚡️
-# For the Odroid HC1 / HC2 / XU3 / XU4
+# For the Odroid HC1 / HC2 / XU3 / XU4 / MC1
 
 ![](pictures/DroidBlitz.jpg)
 
 ## There are 3 options provided:
 * a trusted fully prebuilt SDcard image
 * Automated building process.
-* Build your own SDcard from the image downloaded from [Dietpi.com](dietpi.com#download)
+* Build your own SDcard from the image downloaded from [dietpi.com](https://dietpi.com/#download)
 ---
 ### Download the fully prebuilt RaspiBlitz-on-DietPi SDcard image
 
@@ -30,15 +30,15 @@ The setup continues with the [RaspiBlitz Setup Process](https://github.com/rootz
 ---
 ### The automated building process:
 
-1) Download the DietPi image for the Odroid HC1 / HC2 / XU3 / XU4:   
-https://dietpi.com/downloads/images/DietPi_OdroidXU4-ARMv7-Stretch.7z
+1) Download the DietPi image for the Odroid HC1 / HC2 / XU3 / XU4 / MC1:   
+https://dietpi.com/downloads/images/DietPi_OdroidXU4-ARMv7-Buster.7z
 2) Burn it to the SD card with [Etcher](https://www.balena.io/etcher/)
 
-3) Right click and download the following two files: [DietPi.txt](https://raw.githubusercontent.com/rootzoll/raspiblitz/master/alternative.platforms/dietpi/boot/dietpi.txt), [Automation_Custom_Script.sh](https://raw.githubusercontent.com/rootzoll/raspiblitz/dev/alternative.platforms/dietpi/boot/Automation_Custom_Script.sh)
+3) Right click and download the following two files: [dietpi.txt](https://raw.githubusercontent.com/rootzoll/raspiblitz/master/alternative.platforms/dietpi/boot/dietpi.txt), [Automation_Custom_Script.sh](https://raw.githubusercontent.com/rootzoll/raspiblitz/dev/alternative.platforms/dietpi/boot/Automation_Custom_Script.sh)
 
 4) Copy them to the /boot directory of the DietPi SDcard
 
-    [DietPi.txt](https://raw.githubusercontent.com/rootzoll/raspiblitz/master/alternative.platforms/dietpi/boot/dietpi.txt): Overwrites the default dietpi.txt. Modified the settings to automate the DietPi setup. (see the details [here](https://github.com/rootzoll/raspiblitz/tree/dev/alternative.platforms/dietpi#excerpts-from-the-customized-dietpitxt))
+    [dietpi.txt](https://raw.githubusercontent.com/rootzoll/raspiblitz/master/alternative.platforms/dietpi/boot/dietpi.txt): Overwrites the default dietpi.txt. Modified the settings to automate the DietPi setup. (see the details [here](https://github.com/rootzoll/raspiblitz/tree/dev/alternative.platforms/dietpi#excerpts-from-the-customized-dietpitxt))
 
     [Automation_Custom_Script.sh](https://raw.githubusercontent.com/rootzoll/raspiblitz/dev/alternative.platforms/dietpi/boot/Automation_Custom_Script.sh): Runs after DietPi installation is completed. Contains the link to download and run the build_sdcard.sh from the dev branch of @rootzoll.  
     (Optionally open the file with a text editor and uncomment (remove the `#` from the front of) the line with the branch you want to build the SDcard from.) 
@@ -53,14 +53,6 @@ https://dietpi.com/downloads/images/DietPi_OdroidXU4-ARMv7-Stretch.7z
     `tail -n1000 -f /tmp/DietPi-Update/dietpi-update.log` - follow the dietpi-update process  
     `tail -n1000 -f /var/tmp/dietpi/logs/dietpi-automation_custom_script.log` follow the output of the build_sdcard.sh  
 
-    Starting from a v6.14 DietPi image is causing a bootloop after the first restart. See the issue: https://github.com/MichaIng/DietPi/issues/2495. This will be sorted out once a new image version is uploaded for the Odroids to dietpi.com.
-    To get past it:
-     * Log in with root after the first restart (when the loop is ongoing - without any output to the HDMI screen)
-    * CTRL+C, run `dietpi-update` and update
-    * `reboot` once finished
-    * from then the Automation_Custom_Script.sh is carrying on
-
-
 6) When the setup is finished log in as `admin`:  
 `ssh admin@[IP-OF-RASPIBLITZ]`  
 password: `raspiblitz`
@@ -71,12 +63,8 @@ password: `raspiblitz`
 
 ### Build your own DietPi image:
 
-Watch out this is an arduous process. 
-Updating from a v6.14 DietPi image is causing a bootloop after the first restart. See the issue: https://github.com/MichaIng/DietPi/issues/2495.
-This will be sorted out once a new image version is uploaded for the Odroids to dietpi.com
-
-* For the Odroid HC1 / HC2 / XU3 / XU4 the start is this image:   
-https://dietpi.com/downloads/images/DietPi_OdroidXU4-ARMv7-Stretch.7z  
+* For the Odroid HC1 / HC2 / XU3 / XU4 / MC1 the start is this image:   
+https://dietpi.com/downloads/images/DietPi_OdroidXU4-ARMv7-Buster.7z  
 * Burn it to the SD with [Etcher](https://www.balena.io/etcher/)
 
 * Insert the SD card, connect the HDD, the network cable and power supply to boot up the Odroid: 
@@ -84,50 +72,19 @@ https://dietpi.com/downloads/images/DietPi_OdroidXU4-ARMv7-Stretch.7z
 * In the desktop terminal on Linux / MacOS or Putty on Windows:  
 `ssh root@[IP-OF-DIETPI]`  
 password: `dietpi`  
-Getting started with DietPi: https://dietpi.com/phpbb/viewtopic.php?f=8&t=9#p9  
+Getting started with DietPi: https://dietpi.com/docs/install/#4-first-logon-on-dietpi
 
-* Ok > Cancel > Cancel  
-automatic apt update & apt upgrade and asks to reboot
-![](pictures/dietpi_1st_reboot.png)  
-
-* Log back in:
-`ssh root@[IP-OF-DIETPI]`  
-password: `dietpi`  
-* after the update the ssh keys might change:
-@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  
-@ WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED! @  
-@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  
-run (can be copied from the terminal output):   
-`ssh-keygen -f "/home/[your-linux-username]/.ssh/known_hosts" -R "dietpi.IP"`  
-`ssh root@[IP-OF-DIETPI]`   
-yes >   
-password: `dietpi`  
-
-* At this point if the DietPi OS was not updated from 6.14 it does not manage to save settings going forward.  
-Exit the software installer (press Tab to jump to Exit)
-![](pictures/dietpi-software_exit.png)  
-
-* in the bash prompt run:  
-`dietpi-update`  
-Ok > Cancel the recovery point   
-update > Opt out of survey > Ok  
-Reboots
-
-* Log back in:  
-`ssh root@[IP-OF-DIETPI]`  
-password: `dietpi` 
 * In the DietPi software menu install fail2ban and make OpenSSH server the default SSH server.  
 Ok > Cancel > Cancel  
 Search `fail2ban` > Space to select > Enter  
 SSH server > switch from Dropbear to the OpenSSH-server  
 Install > Ok  
-Opt out of survey > Ok  
 Reboots again
 
 * Log back in:  
 `ssh root@[IP-OF-DIETPI]`  
 password: `dietpi`  
-Changing the SSH server will change the SSH keys again. To clear:  
+Changing the SSH server will change the SSH keys. To clear:  
 `ssh-keygen -f "/home/[your-linux-username]/.ssh/known_hosts" -R "dietpi.IP"`
 
 

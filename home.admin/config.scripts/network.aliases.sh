@@ -3,12 +3,12 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ];then
   echo "# Usage:"
-  echo "# source <(/home/admin/config.scripts/network.aliases.sh getvars <lnd|cln> <mainnet|testnet|signet>)"
+  echo "# source <(/home/admin/config.scripts/network.aliases.sh getvars <lnd|cl> <mainnet|testnet|signet>)"
   echo "# if no values given uses the default values from the raspiblitz.conf"
   echo
   echo "# chain is: main | test ; from raspiblitz.conf or raspiblitz.info or defaults to main"
   echo
-  echo "# LNTYPE is: lnd | cln ; default: lnd"
+  echo "# LNTYPE is: lnd | cl ; default: lnd"
   echo "# typeprefix is: "" | c"
   echo
   echo "# CHAIN is: mainnet | testnet | signet"
@@ -21,9 +21,9 @@ fi
 source /home/admin/raspiblitz.info 
 source /mnt/hdd/raspiblitz.conf 2>/dev/null
 
-if [ $1 = getvars ];then
+if [ "$1" = getvars ];then
   
-  # LNTYPE is: lnd | cln
+  # LNTYPE is: lnd | cl
   if [ $# -gt 1 ];then
     LNTYPE=$2
   else
@@ -40,7 +40,7 @@ if [ $1 = getvars ];then
     chain=main
   fi
   # CHAIN is: signet | testnet | mainnet
-  if [ $# -gt 2 ]&&[ $3 != net ];then
+  if [ $# -gt 2 ]&&[ "$3" != net ]&&[ "$3" != "" ];then
     CHAIN=$3
     chain=${CHAIN::-3}
   else
@@ -49,30 +49,35 @@ if [ $1 = getvars ];then
   echo "CHAIN=${chain}net"
   echo "chain=${chain}"
 
-  # netprefix is:     "" | t | s
-  # portprefix is:    "" | 1 | 3
-  # L2rpcportmod is:   0 | 1 | 3   
+  # netprefix is:     "" |  t | s
+  # portprefix is:    "" |  1 | 3
+  # L2rpcportmod is:   0 |  1 | 3
+  # zmqprefix is:     28 | 21 | 23
   if [ "${chain}" == "main" ];then
     netprefix=""
     L1rpcportmod=""
     L2rpcportmod=0
     portprefix=""
+    zmqprefix=28
   elif [ "${chain}" == "test" ];then
     netprefix="t"
     L1rpcportmod=1
     L2rpcportmod=1
     portprefix=1
+    zmqprefix=21
   elif [ "${chain}" == "sig" ];then
     netprefix="s"
     L1rpcportmod=3
     L2rpcportmod=3
     portprefix=3
+    zmqprefix=23
   fi
   echo "netprefix=${netprefix}"
   echo "portprefix=${portprefix}"
   echo "L2rpcportmod=${L2rpcportmod}"
-  
-  if [ "${LNTYPE}" == "cln" ];then
+  echo "zmqprefix=${zmqprefix}"
+
+  if [ "${LNTYPE}" == "cl" ];then
     # CLNETWORK is: bitcoin / signet / testnet
     if [ "${chain}" == "main" ];then
       CLNETWORK=${network}
@@ -81,28 +86,31 @@ if [ $1 = getvars ];then
     fi
     echo "CLNETWORK=${CLNETWORK}"
 
-    # CLNCONF is the path to the config
+    # CLCONF is the path to the config
     if [ "${CLNETWORK}" == "bitcoin" ]; then
-      CLNCONF="/home/bitcoin/.lightning/config"
+      CLCONF="/home/bitcoin/.lightning/config"
     else
-      CLNCONF="/home/bitcoin/.lightning/${CLNETWORK}/config"
+      CLCONF="/home/bitcoin/.lightning/${CLNETWORK}/config"
     fi
-    echo "CLNCONF=${CLNCONF}"
+    echo "CLCONF=${CLCONF}"
     typeprefix=c
+
+    echo "lightningcli_alias=\"sudo -u bitcoin /usr/local/bin/lightning-cli --conf=${CLCONF}\""
   fi
 
   # typeprefix is: "" | c
   if [ "${LNTYPE}" == "lnd" ];then
     typeprefix=''
+    lndConfFile="/mnt/hdd/lnd/${netprefix}lnd.conf"
   fi
   echo "typeprefix=${typeprefix}"
+  echo "lndConfFile=${lndConfFile}"
 
   # instead of all
   # sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net
   echo "lncli_alias=\"sudo -u bitcoin /usr/local/bin/lncli -n=${chain}net --rpcserver localhost:1${L2rpcportmod}009\""
   # sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network}
   echo "bitcoincli_alias=\"/usr/local/bin/${network}-cli -datadir=/home/bitcoin/.${network} -rpcport=${L1rpcportmod}8332\""
-  echo "lightningcli_alias=\"sudo -u bitcoin /usr/local/bin/lightning-cli --conf=${CLNCONF}\""
 
 fi
 

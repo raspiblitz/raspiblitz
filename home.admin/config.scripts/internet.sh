@@ -3,7 +3,7 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "# handle the internet connection"
- echo "# internet.sh status [local|global]"
+ echo "# internet.sh status [local|online|global]"
  echo "# internet.sh ipv6 [on|off]"
  echo "# internet.sh update-publicip [?domain]"
  exit 1
@@ -11,7 +11,12 @@ fi
 
 # check when to global check
 runGlobal=0
+runOnline=0
+if [ "$2" == "online" ]; then
+  runOnline=1
+fi
 if [ "$2" == "global" ]; then
+  runOnline=0
   runGlobal=1
 fi
 if [ "$1" == "update-publicip" ]; then
@@ -73,6 +78,10 @@ if [ ${#localip_LAN} -gt 0 ]; then
 fi
 
 #############################################
+# get local IP Range
+localiprange=$(ip addr | grep 'state UP' -A2 | grep -E -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0\|inet' | tail -n1 | awk '{print $2}' | awk -F. '{print $1"."$2"."$3".0/24"}')
+
+#############################################
 # check DHCP
 dhcp=1
 if [ "${localip:0:4}" = "169." ]; then
@@ -80,46 +89,79 @@ if [ "${localip:0:4}" = "169." ]; then
 fi
 
 #############################################
-# check for internet connection
+# check for Wifi
+configWifiExists=0
+if [ "$EUID" -eq 0 ]; then
+  configWifiExists=$(cat /etc/wpa_supplicant/wpa_supplicant.conf 2>/dev/null| grep -c "network=")
+else
+  configWifiExists=$(sudo cat /etc/wpa_supplicant/wpa_supplicant.conf 2>/dev/null| grep -c "network=")
+fi
 
-# first quick check if bitcoind has peers - if so the client is online
-# if not then recheck by pinging different sources if online
-# used cached results to not delay (cache will be updated by background process)
-source <(/home/admin/config.scripts/network.monitor.sh peer-status cached)
 
+#############################################
+## check for internet connection
 online=0
 if [ "${peers}" != "0" ] && [ "${peers}" != "" ]; then
   # bitcoind has peers - so device is online
   online=1
 fi
-if [ ${online} -eq 0 ] && [ "${dnsServer}" != "" ]; then
-  # re-test with user set dns server
-  online=$(ping ${dnsServer} -c 1 -W 2 2>/dev/null | grep -c '1 received')
+
+if [ ${runOnline} -eq 1 ]; then
+
+  if [ "$EUID" -eq 0 ]; then
+    # first quick check if bitcoind has peers - if so the client is online
+    # if not then recheck by pinging different sources if online
+    btc_online="0"
+    source <(timeout 2 /home/admin/config.scripts/bitcoin.monitor.sh mainnet status)
+    if [ "${btc_online}" == "1" ]; then
+      # bitcoind has peers - so device is online
+      online=1
+    fi
+  fi
+
+  # next try if tor test site can be called
+  if [ ${online} -eq 0 ]; then
+    torFunctional="0"
+    source <(timeout 5 /home/admin/config.scripts/tor.network.sh status)
+    if [ "${torFunctional}" == "1" ]; then
+      # tor delivers content
+      online=1
+    fi
+  fi
+  if [ ${online} -eq 0 ] && [ "${dnsServer}" != "" ]; then
+    # test with netcat to avoid firewall issues with ICMP packets
+    online=$(nc -v -z -w 3 ${dnsServer} 53 &> /dev/null && echo "1" || echo "0")
+  fi
+  if [ ${online} -eq 0 ]; then
+    # test with netcat to avoid firewall issues with ICMP packets
+    online=$(nc -v -z -w 8.8.8.8 53 &> /dev/null && echo "1" || echo "0")
+  fi
+  if [ ${online} -eq 0 ]; then
+    # re-test with other server
+    online=$(ping 1.0.0.1 -c 1 -W 2 2>/dev/null | grep -c '1 received')
+  fi
+  if [ ${online} -eq 0 ]; then
+    # re-test with other server
+    online=$(ping 8.8.8.8 -c 1 -W 2 2>/dev/null | grep -c '1 received')
+  fi
+  if [ ${online} -eq 0 ]; then
+    # re-test with other server (IPv6)
+    online=$(ping 2620:119:35::35 -c 1 -W 2 2>/dev/null | grep -c '1 received')
+  fi
+  if [ ${online} -eq 0 ]; then
+    # re-test with other server
+    online=$(ping 208.67.222.222 -c 1 -W 2 2>/dev/null | grep -c '1 received')
+  fi
+  if [ ${online} -eq 0 ]; then
+    # re-test with other server (IPv6)
+    online=$(ping 2001:4860:4860::8844 -c 1 -W 2 2>/dev/null | grep -c '1 received')
+  fi
+  if [ ${online} -eq 0 ]; then
+    # re-test with other server
+    online=$(ping 1.1.1.1 -c 1 -W 2 2>/dev/null | grep -c '1 received')
+  fi
 fi
-if [ ${online} -eq 0 ]; then
-  # re-test with other server
-  online=$(ping 1.0.0.1 -c 1 -W 2 2>/dev/null | grep -c '1 received')
-fi
-if [ ${online} -eq 0 ]; then
-  # re-test with other server
-  online=$(ping 8.8.8.8 -c 1 -W 2 2>/dev/null | grep -c '1 received')
-fi
-if [ ${online} -eq 0 ]; then
-  # re-test with other server (IPv6)
-  online=$(ping 2620:119:35::35 -c 1 -W 2 2>/dev/null | grep -c '1 received')
-fi
-if [ ${online} -eq 0 ]; then
-  # re-test with other server
-  online=$(ping 208.67.222.222 -c 1 -W 2 2>/dev/null | grep -c '1 received')
-fi
-if [ ${online} -eq 0 ]; then
-  # re-test with other server (IPv6)
-  online=$(ping 2001:4860:4860::8844 -c 1 -W 2 2>/dev/null | grep -c '1 received')
-fi
-if [ ${online} -eq 0 ]; then
-  # re-test with other server
-  online=$(ping 1.1.1.1 -c 1 -W 2 2>/dev/null | grep -c '1 received')
-fi
+
 
 #############################################
 # check for internet connection
@@ -187,13 +229,16 @@ if [ "$1" == "status" ]; then
 
   echo "### LOCAL INTERNET ###"
   echo "localip=${localip}"
+  echo "localiprange=${localiprange}"
   echo "dhcp=${dhcp}"
   echo "configWifiExists=${configWifiExists}"
   echo "network_device=${networkDevice}"
   echo "network_rx='${network_rx}'"
   echo "network_tx='${network_tx}'"
   echo "### GLOBAL INTERNET ###"
-  echo "online=${online}"
+  if [ ${runOnline} -eq 1 ]; then
+    echo "online=${online}"
+  fi
   if [ ${runGlobal} -eq 1 ]; then
     echo "ipv6=${ipv6}"
     echo "# globalip --> ip detected from the outside"
@@ -227,16 +272,7 @@ elif [ "$1" == "update-publicip" ]; then
   fi
 
   # store to raspiblitz.conf new publiciP
-  publicIPValueExists=$(sudo cat /mnt/hdd/raspiblitz.conf | grep -c 'publicIP=')
-  if [ ${publicIPValueExists} -gt 1 ]; then
-    # more then one publiIp entry - removing one
-    sudo sed -i "s/^publicIP=.*//g" /mnt/hdd/raspiblitz.conf
-  fi
-  if [ ${publicIPValueExists} -eq 0 ]; then
-    echo "publicIP='${publicIP}'" >> /mnt/hdd/raspiblitz.conf
-  else
-    sudo sed -i "s/^publicIP=.*/publicIP='${publicIP}'/g" /mnt/hdd/raspiblitz.conf
-  fi
+  /home/admin/config.scripts/blitz.conf.sh set publicIP "${publicIP}"
   exit 0
 
 #############################################
@@ -247,11 +283,7 @@ elif [ "$1" == "ipv6" ]; then
     echo "# Switching IPv6 ON"
 
     # set config
-    if ! grep -Eq "^ipv6=" /mnt/hdd/raspiblitz.conf; then
-      echo "ipv6=on" >> /mnt/hdd/raspiblitz.conf
-    else
-      sudo sed -i "s/^ipv6=.*/ipv6=on/g" /mnt/hdd/raspiblitz.conf
-    fi
+    /home/admin/config.scripts/blitz.conf.sh set ipv6 "on"
     exit 0
 
   elif [ "$2" == "off" ]; then
@@ -259,7 +291,8 @@ elif [ "$1" == "ipv6" ]; then
     echo "# Switching IPv6 OFF"
 
     # set config
-    sudo sed -i "s/^ipv6=.*/ipv6=off/g" /mnt/hdd/raspiblitz.conf
+    /home/admin/config.scripts/blitz.conf.sh set ipv6 "off"
+
     exit 0
 
   else

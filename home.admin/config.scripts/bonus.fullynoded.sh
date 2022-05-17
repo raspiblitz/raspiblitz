@@ -21,8 +21,8 @@ elif [ "${chain}net" == "signet" ]; then
   BITCOINRPCPORT=38332
 fi
 
-# check and set up the HS    
-/home/admin/config.scripts/internet.hiddenservice.sh bitcoin${BITCOINRPCPORT} ${BITCOINRPCPORT} ${BITCOINRPCPORT}
+# check and set up the HS
+/home/admin/config.scripts/tor.onion-service.sh bitcoin${BITCOINRPCPORT} ${BITCOINRPCPORT} ${BITCOINRPCPORT}
 
 hiddenService=$(sudo cat /mnt/hdd/tor/bitcoin${BITCOINRPCPORT}/hostname)
 # https://github.com/rootzoll/raspiblitz/issues/2339
@@ -33,15 +33,15 @@ fi
 echo "# The Hidden Service for bitcoind port ${BITCOINRPCPORT} is:"
 echo "${hiddenService}"
 
-# btcstandup://<rpcuser>:<rpcpassword>@<hidden service hostname>:<hidden service port>/?label=<optional node label> 
+# btcstandup://<rpcuser>:<rpcpassword>@<hidden service hostname>:<hidden service port>/?label=<optional node label>
 quickConnect="btcstandup://${RPC_USER}:${PASSWORD_B}@${hiddenService}:${BITCOINRPCPORT}/?label=${hostname}"
 echo
 echo "scan the QR Code with Fully Noded to connect to your node:"
-/home/admin/config.scripts/blitz.display.sh qr "${quickConnect}"
+sudo /home/admin/config.scripts/blitz.display.sh qr "${quickConnect}"
 qrencode -t ANSI256 $quickConnect
 echo "Press ENTER to return to the menu"
 read key
 
 # clean up
-/home/admin/config.scripts/blitz.display.sh hide
+sudo /home/admin/config.scripts/blitz.display.sh hide
 clear

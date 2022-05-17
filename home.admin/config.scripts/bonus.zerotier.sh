@@ -9,10 +9,6 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  exit 1
 fi 
 
-# add default value to raspi config if needed
-if ! grep -Eq "^zerotier=" /mnt/hdd/raspiblitz.conf; then
-  echo "zerotier=off" >> /mnt/hdd/raspiblitz.conf
-fi
 source /mnt/hdd/raspiblitz.conf
 
 # show info menu
@@ -66,7 +62,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "# OK - joined"
 
     # setting value in raspi blitz config
-    sudo sed -i "s/^zerotier=.*/zerotier=${networkID}/g" /mnt/hdd/raspiblitz.conf
+
+    /home/admin/config.scripts/blitz.conf.sh set zerotier "${networkID}"
 
     # adding zero tier IP to LND TLS cert
     # sudo /home/admin/config.scripts/lnd.tlscert.sh ip-add 172.X
@@ -90,7 +87,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   sudo -u admin sudo apt -y purge zerotier-one 1>&2
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^zerotier=.*/zerotier=off/g" /mnt/hdd/raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set zerotier "off"
 
   echo "# OK, ZeroTier is removed."
   exit 0

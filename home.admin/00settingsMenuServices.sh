@@ -26,6 +26,10 @@ if [ ${#whitepaper} -eq 0 ]; then whitepaper="off"; fi
 if [ ${#chantools} -eq 0 ]; then chantools="off"; fi
 if [ ${#homer} -eq 0 ]; then homer="off"; fi
 if [ ${#sparko} -eq 0 ]; then sparko="off"; fi
+if [ ${#spark} -eq 0 ]; then spark="off"; fi
+if [ ${#tallycoinConnect} -eq 0 ]; then tallycoinConnect="off"; fi
+if [ ${#helipad} -eq 0 ]; then helipad="off"; fi
+if [ ${#bitcoinminds} -eq 0 ]; then bitcoinminds="off"; fi
 
 # show select dialog
 echo "run dialog ..."
@@ -41,6 +45,13 @@ if [ "${network}" == "bitcoin" ]; then
   OPTIONS+=(a 'BTC Mempool Space' ${mempoolExplorer})
   OPTIONS+=(j 'BTC JoinMarket+JoininBox menu' ${joinmarket})
   OPTIONS+=(w 'BTC Download Bitcoin Whitepaper' ${whitepaper})
+  OPTIONS+=(v 'BTC Install BitcoinMinds.org' ${bitcoinminds})
+fi
+
+
+# available for both LND & c-lightning
+if [ "${lnd}" == "on" ] || [ "${cl}" == "on" ]; then
+  OPTIONS+=(i 'LNbits (Lightning Accounts)' ${LNBits})
 fi
 
 # just available for LND
@@ -48,24 +59,26 @@ if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
   OPTIONS+=(r 'LND RTL Webinterface' ${rtlWebinterface})
   OPTIONS+=(t 'LND ThunderHub' ${thunderhub})
   OPTIONS+=(l 'LND LIT (loop, pool, faraday)' ${lit})
-  OPTIONS+=(i 'LND LNbits' ${LNBits})
   OPTIONS+=(o 'LND Balance of Satoshis' ${bos})
   OPTIONS+=(y 'LND PyBLOCK' ${pyblock})
   OPTIONS+=(h 'LND ChannelTools (Fund Rescue)' ${chantools})
   OPTIONS+=(x 'LND Sphinx-Relay' ${sphinxrelay})
+  OPTIONS+=(f 'LND Helipad Boostagram reader' ${helipad})
+  OPTIONS+=(d 'LND Tallycoin Connect' ${tallycoinConnect})
 fi
 
-# just available for CLN
-if [ "${lightning}" == "cln" ] || [ "${cln}" == "on" ]; then
+# just available for CL
+if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ]; then
   OPTIONS+=(c 'C-Lightning RTL Webinterface' ${crtlWebinterface})
   OPTIONS+=(k 'C-Lightning Sparko WebWallet' ${sparko})
+  OPTIONS+=(n 'C-Lightning Spark Wallet' ${spark})
 fi
 
-OPTIONS+=(d 'Homer Dashboard' ${homer})
+OPTIONS+=(m 'Homer Dashboard' ${homer})
 
 CHOICES=$(dialog --title ' Additional Mainnet Services ' \
           --checklist ' use spacebar to activate/de-activate ' \
-          24 55 17  "${OPTIONS[@]}" 2>&1 >/dev/tty)
+          27 55 20  "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
 dialogcancel=$?
 echo "done dialog"
@@ -114,25 +127,25 @@ fi
 choice="off"; check=$(echo "${CHOICES}" | grep -c "c")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${crtlWebinterface}" != "${choice}" ]; then
-  echo "RTL-cln Webinterface Setting changed .."
+  echo "RTL-cl Webinterface Setting changed .."
   anychange=1
-  /home/admin/config.scripts/bonus.rtl.sh ${choice} cln mainnet
+  /home/admin/config.scripts/bonus.rtl.sh ${choice} cl mainnet
   errorOnInstall=$?
   if [ "${choice}" =  "on" ]; then
     if [ ${errorOnInstall} -eq 0 ]; then
       sudo systemctl start RTL
       echo "waiting 10 secs .."
       sleep 10
-      /home/admin/config.scripts/bonus.rtl.sh menu cln mainnet
+      /home/admin/config.scripts/bonus.rtl.sh menu cl mainnet
     else
       l1="!!! FAIL on RTL C-Lightning install !!!"
       l2="Try manual install on terminal after reboot with:"
-      l3="/home/admin/config.scripts/bonus.rtl.sh on cln mainnet"
+      l3="/home/admin/config.scripts/bonus.rtl.sh on cl mainnet"
       dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
     fi
   fi
 else
-  echo "RTL-cln Webinterface Setting unchanged."
+  echo "RTL-cl Webinterface Setting unchanged."
 fi
 
 # BTC-RPC-Explorer process choice
@@ -212,7 +225,7 @@ The index database needs to be created before Electrum Server can be used.\n
 This can take hours/days depending on your RaspiBlitz. Monitor the progress on the LCD.\n
 When finished use the new 'ELECTRS' entry in Main Menu for more info.\n
 " 14 50
-      needsReboot=1
+      needsReboot=0
       else
         l1="!!! FAIL on ElectRS install !!!"
         l2="Try manual install on terminal after reboot with:"
@@ -363,7 +376,7 @@ if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${LNBits}" != "${choice}" ]; then
   echo "LNbits Setting changed .."
   anychange=1
-  sudo -u admin /home/admin/config.scripts/bonus.lnbits.sh ${choice}
+  sudo -u admin /home/admin/config.scripts/bonus.lnbits.sh ${choice} ${lightning}
   if [ "${choice}" =  "on" ]; then
     sudo systemctl start lnbits
     sudo -u admin /home/admin/config.scripts/bonus.lnbits.sh menu
@@ -404,6 +417,38 @@ Use the new 'SPHINX' entry in Main Menu for more info.\n
   fi
 else
   echo "Sphinx Relay unchanged."
+fi
+
+# Helipad
+choice="off"; check=$(echo "${CHOICES}" | grep -c "f")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${helipad}" != "${choice}" ]; then
+  echo "Helipad setting changed .."
+  anychange=1
+  sudo -u admin /home/admin/config.scripts/bonus.helipad.sh ${choice}
+  if [ "${choice}" =  "on" ]; then
+    sudo systemctl start helipad
+    sudo -u admin /home/admin/config.scripts/bonus.helipad.sh menu
+  fi
+else
+  echo "Helipad setting unchanged."
+fi
+
+# Tallycoin
+choice="off"; check=$(echo "${CHOICES}" | grep -c "d")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${tallycoinConnect}" != "${choice}" ]; then
+  echo "Tallycoin Setting changed .."
+  anychange=1
+  sudo -u admin /home/admin/config.scripts/bonus.tallycoin-connect.sh ${choice}
+  if [ "${choice}" =  "on" ]; then
+    whiptail --title " Installed Tallycoin-Connect" --msgbox "\
+Tallycoin-Connect was installed.\n
+Use the new 'TALLY' entry in Main Menu for more info.\n
+" 10 45
+  fi
+else
+  echo "Tallycoin Setting unchanged."
 fi
 
 # JoinMarket process choice
@@ -478,7 +523,7 @@ else
 fi
 
 # Homer process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "d")
+choice="off"; check=$(echo "${CHOICES}" | grep -c "m")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${homer}" != "${choice}" ]; then
   echo "Homer settings changed .."
@@ -495,26 +540,63 @@ else
   echo "Homer Setting unchanged."
 fi
 
+# BitcoinMinds process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "v")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${bitcoinminds}" != "${choice}" ]; then
+  echo "BitcoinMinds setting changed."
+  anychange=1
+  sudo -u admin /home/admin/config.scripts/bonus.bitcoinminds.sh ${choice}
+  source /mnt/hdd/raspiblitz.conf
+  if [ "${bitcoinminds}" =  "on" ]; then
+    sudo -u admin /home/admin/config.scripts/bonus.bitcoinminds.sh menu
+  fi
+else
+  echo "BitcoinMinds setting unchanged."
+fi
+
 # sparko process choice
 choice="off"; check=$(echo "${CHOICES}" | grep -c "k")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${sparko}" != "${choice}" ]; then
   echo "# Sparko on mainnet Setting changed .."
   anychange=1
-  /home/admin/config.scripts/cln-plugin.sparko.sh ${choice} mainnet
+  /home/admin/config.scripts/cl-plugin.sparko.sh ${choice} mainnet
   errorOnInstall=$?
   if [ "${choice}" =  "on" ]; then
     if [ ${errorOnInstall} -eq 0 ]; then
-      /home/admin/config.scripts/cln-plugin.sparko.sh menu mainnet
+      /home/admin/config.scripts/cl-plugin.sparko.sh menu mainnet
     else
       l1="# !!! FAIL on Sparko on mainnet install !!!"
       l2="# Try manual install on terminal after reboot with:"
-      l3="/home/admin/config.scripts/cln-plugin.sparko.sh on mainnet"
+      l3="/home/admin/config.scripts/cl-plugin.sparko.sh on mainnet"
       dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
     fi
   fi
 else
   echo "# Sparko on mainnet Setting unchanged."
+fi
+
+# spark wallet process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "n")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${spark}" != "${choice}" ]; then
+  echo "# Spark Wallet on mainnet Setting changed .."
+  anychange=1
+  /home/admin/config.scripts/cl.spark.sh ${choice} mainnet
+  errorOnInstall=$?
+  if [ "${choice}" =  "on" ]; then
+    if [ ${errorOnInstall} -eq 0 ]; then
+      /home/admin/config.scripts/cl.spark.sh menu mainnet
+    else
+      l1="# !!! FAIL on Spark Wallet on mainnet install !!!"
+      l2="# Try manual install on terminal after reboot with:"
+      l3="/home/admin/config.scripts/cl.spark.sh on mainnet"
+      dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
+    fi
+  fi
+else
+  echo "# Spark Wallet on mainnet Setting unchanged."
 fi
 
 if [ ${anychange} -eq 0 ]; then
