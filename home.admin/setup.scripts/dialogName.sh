@@ -24,7 +24,7 @@ while [ ${#result} -eq 0 ]
     l2="one word, keep characters basic & max 32chars"
     dialog --backtitle "RaspiBlitz - Setup" --inputbox "$l1$l2" 11 52 2>$_temp
     result=$( cat $_temp | tr -dc '[:alnum:]-.' | tr -d ' ' )
-    result="${result:0:31}"
+    result="${result:0:32}"
     sudo rm $_temp
   done
 
