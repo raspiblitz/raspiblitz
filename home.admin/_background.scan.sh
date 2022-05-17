@@ -1032,7 +1032,7 @@ do
   fi
 
   # small sleep before next loop
-  sleep 2
+  sleep 3
 
   # if was started with special parameter
   if [ "${ONLY_ONE_LOOP}" == "1" ]; then
