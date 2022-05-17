@@ -26,6 +26,7 @@ fi
 OPTIONS+=(${network}RPC "Connect Specter Desktop or JoinMarket")
 OPTIONS+=(BISQ "Connect Bisq to this node")
 if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
+  OPTIONS+=(ALBY "Connect Alby to this node")
   OPTIONS+=(EXPORT "Get Macaroons and TLS.cert")
   OPTIONS+=(RESET "Recreate LND Macaroons & tls.cert")
   OPTIONS+=(SYNC "Sync Macaroons & tls.cert with Apps/Users")
@@ -67,6 +68,22 @@ case $CHOICE in
   EXPORT)
     sudo /home/admin/config.scripts/lnd.export.sh
     exit 0;;
+
+  ALBY)
+      websiteLink="https://getalby.com"
+      sudo /home/admin/config.scripts/blitz.display.sh image /home/admin/raspiblitz/pictures/app_alby.png
+    whiptail --title "Install Alby on your web browser" \
+    --yes-button "Continue" \
+    --no-button "Website" \
+    --yesno "Visit the website and install the browser extension then click --> Continue." 12 65
+    if [ $? -eq 1 ]; then
+    whiptail --title " Website Link " --msgbox "\
+To install app open the following link:\n
+${websiteLink}\n" 11 70
+    fi
+    /home/admin/config.scripts/bonus.lndconnect.sh alby tor
+    exit 0;
+  ;;
 
   BISQ)
     OPTIONS=()
