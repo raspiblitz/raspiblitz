@@ -66,7 +66,7 @@ echo "deprecatedrpc=addresses" >> /mnt/hdd/bitcoin/bitcoin.conf 2>/dev/null
 # backup SSH PubKeys
 /home/admin/config.scripts/blitz.ssh.sh backup
 
-# optimze mempool if RAM >1GB
+# optimize mempool if RAM >1GB
 kbSizeRAM=$(cat /proc/meminfo | grep "MemTotal" | sed 's/[^0-9]*//g')
 if [ ${kbSizeRAM} -gt 1500000 ]; then
   echo "Detected RAM >1GB --> optimizing ${network}.conf"
@@ -76,6 +76,9 @@ if [ ${kbSizeRAM} -gt 3500000 ]; then
   echo "Detected RAM >3GB --> optimizing ${network}.conf"
   sed -i "s/^maxmempool=.*/maxmempool=300/g" /mnt/hdd/${network}/${network}.conf
 fi
+
+# zram on for all devices
+/home/admin/config.scripts/blitz.zram.sh on
 
 # link and copy HDD content into new OS on sd card
 echo "Copy HDD content for user admin" >> ${logFile}
