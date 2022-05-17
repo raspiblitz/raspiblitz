@@ -271,7 +271,7 @@ if [ "${baseimage}" = "raspios_arm64" ]||[ "${baseimage}" = "debian_rpi64" ]; th
 fi
 
 echo "*** Remove unnecessary packages ***"
-sudo apt remove --purge -y libreoffice* oracle-java* chromium-browser nuscratch scratch sonic-pi plymouth python2 vlc
+sudo apt remove --purge -y libreoffice* oracle-java* chromium-browser nuscratch scratch sonic-pi plymouth python2 vlc cups
 sudo apt clean -y
 sudo apt autoremove -y
 
