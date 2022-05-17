@@ -56,6 +56,7 @@ Table of Contents
   - [My blockchain data is corrupted - what can I do?](#what-can-i-do)
   - [I have two RaspiBlitz in my network - can they both be public?](#can-they-both-be-public)
   - [How can I enforce UASP mode for my SSD controller?](#how-can-i-enforce-uasp-mode-for-my-ssd-controller)
+  - [I am facing maintenance/emergency mode on boot. How do I fix it?](#i-am-facing-maintenanceemergency-mode-on-boot.-how-do-i-fix-it)
 - [Development](#development)
   - [What is the process of creating a new SD card image release?](#what-is-the-process-of-creating-a-new-sd-card-image-release)
   - [How can I customize my RaspiBlitz or add other software?](#how-can-i-customize-my-raspiblitz-or-add-other-software)
@@ -618,6 +619,12 @@ Yes but you need to change the port number (for example to 9736) on at least one
 ### How can I enforce UASP mode for my SSD controller?
 
 By default just tested & selected SSD encasings/controller are running enabled with UASP in RaspiBlitz. UASP brings a speed up for the SSD but also if not well supported by the SSD encasing/controller can lead to system halts. If you know for sure that your SSD encasing/controller is supporting UASP fully you can place a file called `uasp.force` on the sd card boot section after flashing the image with your laptop. See details or report errors on issue [#2488](https://github.com/rootzoll/raspiblitz/issues/2488)
+
+### I am facing maintenance/emergency mode on boot. How do I fix it?
+
+This behavior is caused by either the software that flashes the RaspiBlitz image onto the sd card, or by a faulty sd-card. The only solution is to try switching the software/computer you use for flashing and/or trying another sd card.
+
+See issues #3039, #1053 & #782
 
 
 ## Development
