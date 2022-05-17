@@ -395,6 +395,10 @@ echo "*** SYSTEM CACHE STATUS ***"
 /home/admin/_cache.sh "export" ln_default | grep -v "ln_default_address"
 /home/admin/_cache.sh "export" btc_default | grep -v "btc_default_address"
 
+echo "*** LOGFILES ***"
+sudo journalctl --disk-usage
+sudo du -sh /var/log
+
 echo
 echo "*** OPTION: SHARE THIS DEBUG OUTPUT ***"
 echo "An easy way to share this debug output on GitHub or on a support chat"

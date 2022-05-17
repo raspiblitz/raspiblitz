@@ -52,9 +52,9 @@ echo "### BASIC SYSTEM SETTINGS ###" >> ${logFile}
 echo "# Make sure the user bitcoin is in the debian-tor group"
 usermod -a -G debian-tor bitcoin
 
-echo "# Optimizing log files: rotate daily, keep 2 weeks & compress old days " >> ${logFile}
+echo "# Optimizing log files: rotate daily, keep 1 week & compress old days " >> ${logFile}
 sed -i "s/^weekly/daily/g" /etc/logrotate.conf >> ${logFile} 2>&1
-sed -i "s/^rotate 4/rotate 14/g" /etc/logrotate.conf >> ${logFile} 2>&1
+sed -i "s/^rotate 4/rotate 7/g" /etc/logrotate.conf >> ${logFile} 2>&1
 sed -i "s/^#compress/compress/g" /etc/logrotate.conf >> ${logFile} 2>&1
 systemctl restart logrotate
 
