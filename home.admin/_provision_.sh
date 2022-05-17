@@ -700,6 +700,15 @@ else
   echo "Provisioning CircuitBreaker - keep default" >> ${logFile}
 fi
 
+# homer
+if [ "${homer}" = "on" ]; then
+  echo "Provisioning Homer - run config script" >> ${logFile}
+  sudo sed -i "s/^message=.*/message='Setup Homer'/g" ${infoFile}
+  sudo -u admin /home/admin/config.scripts/bonus.homer.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning Homer - keep default" >> ${logFile}
+fi
+
 # tallycoin_connect
 if [ "${tallycoinConnect}" = "on" ]; then
   echo "Provisioning Tallycoin Connect - run config script" >> ${logFile}

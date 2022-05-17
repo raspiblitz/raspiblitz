@@ -159,6 +159,7 @@ There are further Services that can be switched on:
 * **Chantools** (Fund Rescue) [details](https://github.com/guggero/chantools/blob/master/README.md)
 * **Suez** (Channel Visualization for LND & CL) [details](https://github.com/prusnak/suez#suez)
 * **Helipad** (Podcasting 2.0 Boostagram reader) [details](https://github.com/Podcastindex-org/helipad)
+* **Homer** (Web Dashboard) [details](https://github.com/bastienwirtz/homer#readme)
 * **CL Spark Wallet** (WalletUI with BOLT12 offers) [details](https://github.com/shesek/spark-wallet#progressive-web-app)
 * **CL plugin: Sparko** (WalletUI & HTTP-RPC bridge) [details](https://github.com/fiatjaf/sparko#the-sparko-plugin)
 * **CL plugin: CLBOSS** (Automated Node Manager) [details](https://github.com/ZmnSCPxj/clboss#clboss-the-c-lightning-node-manager)

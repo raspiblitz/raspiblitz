@@ -481,6 +481,10 @@ if [ "${sphinxrelay}" == "on" ]; then
   OPTIONS+=(SPHINX "Update Sphinx Server Relay")
 fi
 
+if [ "${homer}" == "on" ]; then
+  OPTIONS+=(HOMER "Update Homer")
+fi
+
 if [ "${mempoolExplorer}" == "on" ]; then
   OPTIONS+=(MEMPOOL "Update Mempool Explorer")
 fi
@@ -534,6 +538,9 @@ case $CHOICE in
     ;;
   TOR)
     sudo /home/admin/config.scripts/tor.network.sh update
+    ;;
+  HOMER)
+    /home/admin/config.scripts/bonus.homer.sh update
     ;;
   MEMPOOL)
     /home/admin/config.scripts/bonus.mempool.sh update
