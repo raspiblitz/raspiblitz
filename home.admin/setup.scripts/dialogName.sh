@@ -21,9 +21,10 @@ result=""
 while [ ${#result} -eq 0 ]
   do
     l1="Please enter the name of your new RaspiBlitz:\n"
-    l2="one word, keep characters basic & not too long"
+    l2="one word, keep characters basic & max 32chars"
     dialog --backtitle "RaspiBlitz - Setup" --inputbox "$l1$l2" 11 52 2>$_temp
     result=$( cat $_temp | tr -dc '[:alnum:]-.' | tr -d ' ' )
+    result="${result:0:31}"
     sudo rm $_temp
   done
 
