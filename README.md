@@ -1104,9 +1104,6 @@ You will get a list of available IP2TOR bridge offerings.
 Select `OK` on an IP2TOR bridge offering and you will see more details on it, such as how many satoshis the subscription will cost you.
 Your node should be funded and have channels open already at this point.
 
-Then you get a list of available IP2TOR bridge offerings.
-By selecting `OK` on a IP2TOR bridge offering you can get more details on it and you will also see how many satoshis the subscription will cost you - your node should be funded and you should have channels open at this point.
-
 If you choose `AGREE` on the details of a IP2TOR bridge offering the RaspiBlitz tries for you to setup the IP2TOR bridge.
 If everything worked you will find now the subscription under `MAINMENU` > `SUBSCRIBE` > `LIST My Subscriptions` where you can cancel it again.
 
