@@ -97,11 +97,11 @@ do
 	do
  		channelInPubKey=${channelIdPubKeyLookup[$channelIdIn]}
  		channelOutPubKey=${channelIdPubKeyLookup[$channelIdOut]}
-    channelInPubKeyLookup="${$channelInPubKey}"
+    channelInPubKeyLookup="${channelInPubKey}"
     if [ "${channelInPubKey}" != "" ]; then
       channelInPubKeyLookup="${pubKeyAliasLookup[$channelInPubKey]}"
     fi
-    channelOutPubKeyLookup="${$channelOutPubKey}"
+    channelOutPubKeyLookup="${channelOutPubKey}"
     if [ "${channelInPubKey}" != "" ]; then
       channelOutPubKeyLookup="${pubKeyAliasLookup[$channelOutPubKey]}"
     fi
