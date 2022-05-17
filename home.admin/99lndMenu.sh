@@ -134,6 +134,7 @@ case $CHOICE in
       echo
       # setting value in raspi blitz config
       /home/admin/config.scripts/blitz.conf.sh set lightning "lnd"
+      sudo systemctl restart blitzapi 2>/dev/null
       echo "# OK - lightning=lnd is set in /mnt/hdd/raspiblitz.conf"
       echo
       echo "Press ENTER to return to main menu."

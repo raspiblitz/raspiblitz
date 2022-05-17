@@ -109,6 +109,7 @@ case $CHOICE in
       echo
       # setting value in the raspiblitz.conf
       /home/admin/config.scripts/blitz.conf.sh set lightning "cl"
+      sudo systemctl restart blitzapi 2>/dev/null
       echo "# OK - lightning=cl is set in /mnt/hdd/raspiblitz.conf"
       echo
       echo "Press ENTER to return to main menu."
