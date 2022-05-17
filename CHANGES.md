@@ -4,6 +4,7 @@
 
 - New: WebUI
 - New: BackendAPI
+- New: ZRAM - compressed swap in memory [details](https://github.com/rootzoll/raspiblitz/issues/2905)
 - New: Core Lightning GRPC plugin [details](https://github.com/rootzoll/raspiblitz/pull/3109)
 - Update: Bitcoin Core v23.0 [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-23.0.md)
 - Update: Core Lightning (CLN - formerly C-lightning) v0.11.0.1 [details](https://github.com/ElementsProject/lightning/releases/tag/v0.11.0.1)
