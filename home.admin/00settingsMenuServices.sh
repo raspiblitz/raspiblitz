@@ -30,6 +30,7 @@ if [ ${#spark} -eq 0 ]; then spark="off"; fi
 if [ ${#tallycoinConnect} -eq 0 ]; then tallycoinConnect="off"; fi
 if [ ${#helipad} -eq 0 ]; then helipad="off"; fi
 if [ ${#bitcoinminds} -eq 0 ]; then bitcoinminds="off"; fi
+if [ ${#squeaknode} -eq 0 ]; then squeaknode="off"; fi
 
 # show select dialog
 echo "run dialog ..."
@@ -65,6 +66,7 @@ if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
   OPTIONS+=(x 'LND Sphinx-Relay' ${sphinxrelay})
   OPTIONS+=(f 'LND Helipad Boostagram reader' ${helipad})
   OPTIONS+=(d 'LND Tallycoin Connect' ${tallycoinConnect})
+  OPTIONS+=(q 'LND Squeaknode' ${squeaknode})
 fi
 
 # just available for CL
@@ -597,6 +599,21 @@ if [ "${spark}" != "${choice}" ]; then
   fi
 else
   echo "# Spark Wallet on mainnet Setting unchanged."
+fi
+
+# squeaknode process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "q")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${squeaknode}" != "${choice}" ]; then
+  echo "squeaknode Setting changed .."
+  anychange=1
+  sudo -u admin /home/admin/config.scripts/bonus.squeaknode.sh ${choice}
+  if [ "${choice}" =  "on" ]; then
+    sudo systemctl start squeaknode
+    sudo -u admin /home/admin/config.scripts/bonus.squeaknode.sh menu
+  fi
+else
+  echo "squeaknode setting unchanged."
 fi
 
 if [ ${anychange} -eq 0 ]; then
