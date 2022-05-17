@@ -453,9 +453,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   if [ "$3" != "" ]; then
     githubUser="$3"
   fi
-  #tag="tags/raspiblitz"
   # https://github.com/lnbits/lnbits-legend/releases
-  tag="0.7.0"
+  tag="0.8.0"
   if [ "$4" != "" ]; then
     tag="$4"
   fi
@@ -466,7 +465,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   cd /home/lnbits
   sudo -u lnbits git clone https://github.com/${githubUser}/lnbits-legend lnbits
   cd /home/lnbits/lnbits
-  sudo -u lnbits git checkout ${tag}
+  sudo -u lnbits git checkout ${tag} || exit 1
 
   # prepare .env file
   echo "# preparing env file"
