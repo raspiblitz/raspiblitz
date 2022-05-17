@@ -89,12 +89,18 @@ if [ "$1" = "status" ]; then
     toraddress=$(sudo cat /mnt/hdd/tor/btc-rpc-explorer/hostname 2>/dev/null)
     fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
 
+    authMethod="user_admin_password_b"
+    isBitcoinWalletOff=$(cat /mnt/hdd/bitcoin/bitcoin.conf | grep -c "^disablewallet=1")
+    if [ "${isBitcoinWalletOff}" == "1" ]; then
+      authMethod="none"
+    fi
+
     echo "localIP='${localip}'"
     echo "httpPort='3020'"
     echo "httpsPort='3021'"
     echo "httpsForced='0'"
     echo "httpsSelfsigned='1'"
-    echo "authMethod='user_admin_password_b'"
+    echo "authMethod='${authMethod}'"
     echo "toraddress='${toraddress}'"
     echo "fingerprint='${fingerprint}'"
 
