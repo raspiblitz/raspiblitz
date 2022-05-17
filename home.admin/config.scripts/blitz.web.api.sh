@@ -166,9 +166,21 @@ if [ "$1" = "update-config" ]; then
     
     echo "# CONFIG Web API Lightning --> CL"
     sed -i "s/^ln_node=.*/ln_node=cl/g" ./.env
-    
-    # TODO: ADD C-Lightning config as soon as available
-    echo "# MISSING CL CONFIG YET"
+
+    # get hex values of pem files
+    hexClient=$(xxd -p -c2000 /home/bitcoin/.lightning/bitcoin/client.pem)
+    hexClientKey=$(xxd -p -c2000 /home/bitcoin/.lightning/bitcoin/client-key.pem)
+    hexCa=$(xxd -p -c2000 /home/bitcoin/.lightning/bitcoin/ca.pem)
+    if [ "${hexClient}" == "" ]; then
+        echo "# FAIL /home/bitcoin/.lightning/bitcoin/*.pem files maybe missing"
+    fi
+
+    # update config with hex values
+    sed -i "s/^cln_grpc_cert=.*/cln_grpc_cert=${hexClient}/g" ./.env
+    sed -i "s/^cln_grpc_key=.*/cln_grpc_key=${hexClientKey}/g" ./.env
+    sed -i "s/^cln_grpc_ca=.*/cln_grpc_ca=${hexCa}/g" ./.env
+    sed -i "s/^cln_grpc_ip=.*/cln_grpc_ip=127.0.0.1/g" ./.env
+    sed -i "s/^cln_grpc_port=.*/cln_grpc_port=9537/g" ./.env
 
   else
     echo "# CONFIG Web API Lightning --> OFF"
