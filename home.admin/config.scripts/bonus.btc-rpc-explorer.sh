@@ -245,7 +245,7 @@ BTCEXP_BITCOIND_RPC_TIMEOUT=10000
 BTCEXP_PRIVACY_MODE=true
 # Password protection for site via basic auth (enter any username, only the password is checked)
 # Default: none
-BTCEXP_BASIC_AUTH_PASSWORD=$PASSWORD_B
+#BTCEXP_BASIC_AUTH_PASSWORD=$PASSWORD_B
 # Select optional "address API" to display address tx lists and balances
 # Options: electrumx, blockchain.com, blockchair.com, blockcypher.com
 # If electrumx set, the BTCEXP_ELECTRUMX_SERVERS variable must also be
