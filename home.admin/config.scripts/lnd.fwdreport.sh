@@ -99,11 +99,11 @@ do
  		channelOutPubKey=${channelIdPubKeyLookup[$channelIdOut]}
     channelInPubKeyLookup=""
     if [ "${channelInPubKey}" != "" ]; then
-      channelInPubKeyLookup=pubKeyAliasLookup[$channelInPubKey]
+      channelInPubKeyLookup=$pubKeyAliasLookup[$channelInPubKey]
     fi
     channelOutPubKeyLookup=""
     if [ "${channelInPubKey}" != "" ]; then
-      channelOutPubKeyLookup=pubKeyAliasLookup[$channelOutPubKey]
+      channelOutPubKeyLookup=$pubKeyAliasLookup[$channelOutPubKey]
     fi
  		OUTPUT="${OUTPUT}
 ${eventDate},${channelInPubKeyLookup},${channelOutPubKeyLookup},$amountIn,$fee" 
