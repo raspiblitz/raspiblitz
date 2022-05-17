@@ -534,7 +534,7 @@ else
 fi
 
 echo -e "\n*** ADDING SERVICE USER bitcoin"
-# based on https://raspibolt.org/system-configuration.html#add-users
+# based on https://raspibolt.org/guide/raspberry-pi/system-configuration.html
 # create user and set default password for user
 sudo adduser --disabled-password --gecos "" bitcoin
 echo "bitcoin:raspiblitz" | sudo chpasswd
