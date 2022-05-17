@@ -2,7 +2,7 @@
 # https://github.com/ZmnSCPxj/clboss#operating
 
 # https://github.com/ZmnSCPxj/clboss/releases
-CLBOSSVERSION="0.10"
+CLBOSSVERSION="0.13A"
 
 # command info
 if [ $# -lt 1 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ];then
@@ -18,13 +18,13 @@ fi
 # source <(/home/admin/config.scripts/network.aliases.sh getvars cl <mainnet|testnet|signet>)
 source <(/home/admin/config.scripts/network.aliases.sh getvars cl $2)
 
-if [ $1 = on ];then
+if [ "$1" = on ];then
 
   if [ ! -f /home/bitcoin/cl-plugins-available/clboss-${CLBOSSVERSION}.tar.gz ];then
-   
+
     # download tarball
     sudo -u bitcoin wget \
-     https://github.com/ZmnSCPxj/clboss/releases/download/v${CLBOSSVERSION}/clboss-${CLBOSSVERSION}.tar.gz \
+     https://github.com/ZmnSCPxj/clboss/releases/download/${CLBOSSVERSION}/clboss-${CLBOSSVERSION}.tar.gz \
      -O /home/bitcoin/cl-plugins-available/clboss-${CLBOSSVERSION}.tar.gz || exit 1
   fi
 
@@ -34,9 +34,9 @@ if [ $1 = on ];then
      libcurl4-gnutls-dev libsqlite3-dev dnsutils
 
     # install
-    cd /home/bitcoin/cl-plugins-available/ || exit 1 
+    cd /home/bitcoin/cl-plugins-available/ || exit 1
     sudo -u bitcoin tar -xvf clboss-${CLBOSSVERSION}.tar.gz
-    cd clboss-${CLBOSSVERSION} || exit 1 
+    cd clboss-${CLBOSSVERSION} || exit 1
     sudo -u bitcoin ./configure && sudo -u bitcoin make
     # sudo make install # installs to /usr/local/bin/clboss
   fi
@@ -61,13 +61,13 @@ if [ $1 = on ];then
   echo "sudo tail -n 100 -f /home/bitcoin/.lightning/${CLNETWORK}/cl.log | grep clboss"
   echo "${netprefix}cl clboss-status"
   echo "https://github.com/ZmnSCPxj/clboss#operating"
-  
+
 fi
 
-if [ $1 = off ];then
+if [ "$1" = off ];then
   # delete symlink
   sudo rm -rf /home/bitcoin/${netprefix}cl-plugins-enabled/clboss
-  
+
   echo "# Restart the ${netprefix}lightningd.service to deactivate clboss"
   sudo systemctl restart ${netprefix}lightningd
 

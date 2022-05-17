@@ -60,6 +60,13 @@ Preparing Blockchain Sync
 Please wait ...
 " 6 30
 
+elif [ "${eventID}" == "formathdd" ]; then
+
+    dialog --backtitle "${backtitle}" --cr-wrap --infobox "
+Format HDD/SSD 
+Please wait ...
+" 6 30
+
 elif [ "${eventID}" == "reboot" ] && [ "${contentString}" == "finalsetup" ]; then
 
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "
@@ -176,13 +183,13 @@ elif [ "${eventID}" == "waitsetup" ] && [ "${mode}" == "lcd" ]; then
     if [ "${setupPhase}" == "setup" ] || [ "${setupPhase}" == "update" ] || [ "${setupPhase}" == "recovery" ] || [ "${setupPhase}" == "migration" ]; then
 
         # get values from cache
-        source <(/home/admin/_cache.sh get ramGB hddGigaBytes hddBlocksBitcoin hddBlocksLitecoin setupPhase)
+        source <(/home/admin/_cache.sh get system_ram_gb hddGigaBytes hddBlocksBitcoin hddBlocksLitecoin setupPhase)
 
         # custom backtitle for this dialog
         backtitle="RaspiBlitz ${codeVersion}"
 
         # display if RAM size
-        backtitle="${backtitle} / ${ramGB}GB RAM"
+        backtitle="${backtitle} / ${system_ram_gb}GB RAM"
 
         # display if HDD conatains blockhain or not
         if [ "${hddBlocksBitcoin}" == "1" ]; then
@@ -207,9 +214,9 @@ elif [ "${eventID}" == "waitsetup" ] && [ "${mode}" == "lcd" ]; then
         dialog --backtitle "${backtitle}" --cr-wrap --infobox "
 ${welcomeline}
 ------------------------------------
-Use terminal command to login:
-ssh admin@${internet_localip}
-password: raspiblitz
+browser:  http://${internet_localip}
+terminal: ssh admin@${internet_localip}
+          password: raspiblitz
 " 9 41
 
     else

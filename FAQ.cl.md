@@ -316,6 +316,11 @@ Neither the CLBOSS nor the RaspiBlitz developers can take resposibility for lost
 * Advanced usage
 https://github.com/ZmnSCPxj/clboss#clboss-status
 * Stopping CLBOSS will leave the node in the last state. No channels will be closed or funds removed when CLBOSS is uninstalled.
+* Check the running version:
+    ```
+    /home/bitcoin/cl-plugins-enabled/clboss --version
+    ```
+
 
 ### Feeadjuster
 

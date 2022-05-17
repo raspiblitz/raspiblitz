@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # https://github.com/prusnak/suez/commits/master
-SUEZVERSION="335d43029cdb9da42b5ad55ad2df4cdfeafe0405"
+SUEZVERSION="e402edbddb45d8a53af346b8582243f4068ece6c"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -32,15 +32,15 @@ fi
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "# INSTALL SUEZ"
 
-  cd /home/bitcoin || exit 1 
+  cd /home/bitcoin || exit 1
 
   # dependency
   sudo -u bitcoin curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py\
     | sudo -u bitcoin python -
-  
+
   # download source code
   sudo -u bitcoin git clone https://github.com/prusnak/suez.git
-  cd suez || exit 1 
+  cd suez || exit 1
   sudo -u bitcoin git reset --hard $SUEZVERSION
   sudo -u bitcoin /home/admin/config.scripts/blitz.git-verify.sh \
    "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
@@ -80,7 +80,7 @@ fi
 # update
 if [ "$1" = "update" ]; then
   echo "# UPDATE SUEZ"
-  cd /home/bitcoin || exit 1 
+  cd /home/bitcoin || exit 1
   # dependency
   sudo -u bitcoin curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py\
     | sudo -u bitcoin python -

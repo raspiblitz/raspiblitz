@@ -52,9 +52,9 @@ echo "### BASIC SYSTEM SETTINGS ###" >> ${logFile}
 echo "# Make sure the user bitcoin is in the debian-tor group"
 usermod -a -G debian-tor bitcoin
 
-echo "# Optimizing log files: rotate daily, keep 2 weeks & compress old days " >> ${logFile}
+echo "# Optimizing log files: rotate daily, keep 1 week & compress old days " >> ${logFile}
 sed -i "s/^weekly/daily/g" /etc/logrotate.conf >> ${logFile} 2>&1
-sed -i "s/^rotate 4/rotate 14/g" /etc/logrotate.conf >> ${logFile} 2>&1
+sed -i "s/^rotate 4/rotate 7/g" /etc/logrotate.conf >> ${logFile} 2>&1
 sed -i "s/^#compress/compress/g" /etc/logrotate.conf >> ${logFile} 2>&1
 systemctl restart logrotate
 
@@ -66,7 +66,7 @@ echo "deprecatedrpc=addresses" >> /mnt/hdd/bitcoin/bitcoin.conf 2>/dev/null
 # backup SSH PubKeys
 /home/admin/config.scripts/blitz.ssh.sh backup
 
-# optimze mempool if RAM >1GB
+# optimize mempool if RAM >1GB
 kbSizeRAM=$(cat /proc/meminfo | grep "MemTotal" | sed 's/[^0-9]*//g')
 if [ ${kbSizeRAM} -gt 1500000 ]; then
   echo "Detected RAM >1GB --> optimizing ${network}.conf"
@@ -76,6 +76,9 @@ if [ ${kbSizeRAM} -gt 3500000 ]; then
   echo "Detected RAM >3GB --> optimizing ${network}.conf"
   sed -i "s/^maxmempool=.*/maxmempool=300/g" /mnt/hdd/${network}/${network}.conf
 fi
+
+# zram on for all devices
+/home/admin/config.scripts/blitz.zram.sh on
 
 # link and copy HDD content into new OS on sd card
 echo "Copy HDD content for user admin" >> ${logFile}
@@ -184,11 +187,11 @@ sed -i "s/^setupStep=.*/setupStep=100/g" /home/admin/raspiblitz.info
 ##########################
 /home/admin/_cache.sh set message "Installing Services"
 
-echo "### RUNNING PROVISIONING SERVICES ###" >> ${logFile}
-
 # BLITZ WEB SERVICE
 echo "Provisioning BLITZ WEB SERVICE - run config script" >> ${logFile}
-/home/admin/config.scripts/blitz.web.sh on >> ${logFile} 2>&1
+/home/admin/config.scripts/blitz.web.sh https-on >> ${logFile} 2>&1
+
+echo "### RUNNING PROVISIONING SERVICES ###" >> ${logFile}
 
 # BITCOIN INTERIMS UPDATE
 if [ ${#bitcoinInterimsUpdate} -gt 0 ]; then

@@ -39,11 +39,6 @@ This can take multiple hours.
     exit 0
   fi
 
-  # get network info
-  localip=$(ip addr | grep 'state UP' -A2 | grep -E -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
-  toraddress=$(sudo cat /mnt/hdd/tor/btc-rpc-explorer/hostname 2>/dev/null)
-  fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
-
   # check if password protected
   isBitcoinWalletOff=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep -c "^disablewallet=1")
   passwordInfo=""
@@ -86,6 +81,23 @@ if [ "$1" = "status" ]; then
   if [ "${BTCRPCexplorer}" = "on" ]; then
     echo "configured=1"
 
+    installed=$(sudo ls /etc/systemd/system/btc-rpc-explorer.service 2>/dev/null | grep -c 'btc-rpc-explorer.service')
+    echo "installed=${installed}"
+
+    # get network info
+    localip=$(ip addr | grep 'state UP' -A2 | grep -E -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+    toraddress=$(sudo cat /mnt/hdd/tor/btc-rpc-explorer/hostname 2>/dev/null)
+    fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
+
+    echo "localIP='${localip}'"
+    echo "httpPort='3020'"
+    echo "httpsPort='3021'"
+    echo "httpsForced='0'"
+    echo "httpsSelfsigned='1'"
+    echo "authMethod='user_admin_password_b'"
+    echo "toraddress='${toraddress}'"
+    echo "fingerprint='${fingerprint}'"
+
     # check indexing
     source <(sudo /home/admin/config.scripts/network.txindex.sh status)
     echo "isIndexed=${isIndexed}"
@@ -100,6 +112,7 @@ if [ "$1" = "status" ]; then
 
   else
     echo "configured=0"
+    echo "installed=0"
   fi
   exit 0
 fi
@@ -124,8 +137,9 @@ if [ "$1" = "prestart" ]; then
   if [ "${ElectRS}" == "on" ]; then
 
     # CHECK THAT ELECTRS INDEX IS BUILD (WAITLOOP)
-    # electrs listening in port 50001 means index is build
-    isElectrumReady=$(netstat | grep -c "50001")
+    # electrs listening in port 50001 means index is build 
+    # Use flags: t = tcp protocol only  /  a = list all connection states (includes LISTEN)  /  n = don't resolve names => no dns spam
+    isElectrumReady=$(netstat -tan | grep -c "50001")
     if [ "${isElectrumReady}" == "0" ]; then
       echo "# electrs is ON but not ready .. might still building index - kick systemd service into fail/wait/restart"
       exit 1
@@ -283,7 +297,6 @@ StartLimitIntervalSec=0
 
 [Service]
 User=btcrpcexplorer
-TimeoutStartUSec=infinity
 ExecStartPre=/home/admin/config.scripts/bonus.btc-rpc-explorer.sh prestart
 WorkingDirectory=/home/btcrpcexplorer/btc-rpc-explorer
 ExecStart=/usr/bin/npm start
@@ -323,6 +336,17 @@ EOF
     # make sure to keep in sync with tor.network.sh script
     /home/admin/config.scripts/tor.onion-service.sh btc-rpc-explorer 80 3022 443 3023
   fi
+
+  source <(/home/admin/_cache.sh get state)
+  if [ "${state}" == "ready" ]; then
+    # start service
+    echo "# starting service ..."
+    sudo systemctl start btc-rpc-explorer 2>/dev/null
+    sleep 10
+  fi
+
+  # needed for API/WebUI as signal that install ran thru 
+  echo "result='OK'"
   exit 0
 fi
 
@@ -369,6 +393,9 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # close ports on firewall
   sudo ufw deny 3020
   sudo ufw deny 3021
+
+  # needed for API/WebUI as signal that install ran thru 
+  echo "result='OK'"
   exit 0
 fi
 

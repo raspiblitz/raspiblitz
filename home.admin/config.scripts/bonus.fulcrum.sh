@@ -30,8 +30,8 @@ if [ "$1" = on ]; then
   # ?wait until txindex finishes?
   /home/admin/config.scripts/network.txindex.sh on
 
-  # ?activate zram?
-  # https://github.com/rootzoll/raspiblitz/issues/2905
+  # activate zram
+  /home/admin/config.scripts/blitz.zram.sh on
 
   # rpcworkqueue=512
   # rpcthreads=128
@@ -115,7 +115,7 @@ db_mem=1024
 db_max_open_files=200
 fast-sync = 1024
 
-# for 8GB RAM
+# for 8GB RAM - use settings as for 4GB
 #db_max_open_files=500
 #fast-sync = 2048
 

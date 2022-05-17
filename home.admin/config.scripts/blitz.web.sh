@@ -2,13 +2,14 @@
 
 # TODO: later on this script will be run on build sdcard - make sure that the self-signed tls cert get created fresh on every new RaspiBlitz
 
-source /mnt/hdd/raspiblitz.conf
+source /mnt/hdd/raspiblitz.conf 2>/dev/null
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ]; then
   printf "Manage RaspiBlitz Web Interface(s)\n\n"
   printf "blitz.web.sh check \t\tprint operational nginx listen status (lsof)\n"
-  printf "blitz.web.sh on \t\tturn on\n"
+  printf "blitz.web.sh http-on \t\tturn on basic http & api\n"
+  printf "blitz.web.sh https-on \t\tturn on https (needs hdd)\n"
   printf "blitz.web.sh off \t\tturn off\n"
   exit 1
 fi
@@ -27,11 +28,11 @@ if [ "$1" = "check" ]; then
   echo "${active}" | awk '{ if($2 == "*") print $3 "\tany\t\t" $1; else print $3 "\t" $2 "\t" $1 }'
 
 ###################
-# SWITCH ON
+# SWITCH ON-BASICS
 ###################
-elif [ "$1" = "1" ] || [ "$1" = "on" ]; then
+elif [ "$1" = "http-on" ]; then
 
-  echo "Turning ON: Web"
+  echo "Turning ON: Web HTTP"
 
   # install
   sudo apt-get update
@@ -42,20 +43,13 @@ elif [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo tee /etc/systemd/system/nginx.service.d/raspiblitz.conf >/dev/null <<EOF
     # DO NOT EDIT! This file is generate by raspiblitz and will be overwritten
 [Unit]
-After=network.target nss-lookup.target mnt-hdd.mount
+After=network.target nss-lookup.target
 
 [Service]
 Restart=on-failure
 TimeoutSec=120
 RestartSec=60
 EOF
-
-  # make sure that it is enabled and started
-  sudo systemctl enable nginx 
-  sudo systemctl start nginx
-
-  # create nginx app-data dir
-  sudo mkdir /mnt/hdd/app-data/nginx/ 2>/dev/null
 
   # general nginx settings
   if ! grep -Eq '^\s*server_names_hash_bucket_size.*$' /etc/nginx/nginx.conf; then
@@ -66,6 +60,32 @@ EOF
     sudo sed -i "s/# server_tokens off;/server_tokens off;/g" /etc/nginx/nginx.conf
   fi
 
+  ### Welcome Server on HTTP Port 80
+  sudo rm -f /etc/nginx/sites-enabled/default
+  sudo rm -f /var/www/html/index.nginx-debian.html
+  sudo mkdir -p /var/www/letsencrypt/.well-known/acme-challenge
+  sudo chown -R admin:www-data /var/www/letsencrypt
+  sudo cp -a /home/admin/assets/nginx/www_public/ /var/www/public
+  sudo chown www-data:www-data /var/www/public
+
+  # enable public site & API redirect
+  sudo cp /home/admin/assets/nginx/sites-available/public.conf /etc/nginx/sites-available/public.conf
+  sudo ln -sf /etc/nginx/sites-available/public.conf /etc/nginx/sites-enabled/public.conf
+
+  # make sure that it is enabled and started
+  sudo systemctl enable nginx 
+  sudo systemctl start nginx
+
+###################
+# SWITCH ON
+###################
+elif [ "$1" = "https-on" ]; then
+
+  echo "Turning ON: Web HTTPS"
+
+  # create nginx app-data dir
+  sudo mkdir /mnt/hdd/app-data/nginx/ 2>/dev/null
+
   echo "# Checking dhparam.pem ..."
   if [ ! -f /etc/ssl/certs/dhparam.pem ]; then
 
@@ -75,7 +95,6 @@ EOF
       # generate dhparam.pem - can take +10 minutes on a Raspberry Pi
       echo "Generating a complete new dhparam.pem"
       echo "Running \"sudo openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048\" next."
-      echo "This can take 5-10 minutes on a Raspberry Pi 3 - please be patient!"
       sudo openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048
       sudo cp /etc/ssl/certs/dhparam.pem /mnt/hdd/app-data/nginx/dhparam.pem
     else
@@ -88,47 +107,10 @@ EOF
     echo "# skip - dhparam.pem exists"
   fi
 
+  # copy snippets
   sudo cp /home/admin/assets/nginx/snippets/* /etc/nginx/snippets/
 
-  ### Welcome Server on HTTP Port 80
-  sudo rm -f /etc/nginx/sites-enabled/default
-  sudo rm -f /var/www/html/index.nginx-debian.html
-
-  if ! [ -f /etc/nginx/sites-available/public.conf ]; then
-    echo "# copy /etc/nginx/sites-available/public.conf"
-    sudo cp /home/admin/assets/nginx/sites-available/public.conf /etc/nginx/sites-available/public.conf
-  else
-    echo "# exists /etc/nginx/sites-available/public.conf"
-  fi
-
-  if ! [ -d /var/www/letsencrypt/.well-known/acme-challenge ]; then
-    sudo mkdir -p /var/www/letsencrypt/.well-known/acme-challenge
-  fi
-
-  # make sure admin can write here even without sudo
-  sudo chown -R admin:www-data /var/www/letsencrypt
-
-  # copy webroot
-  if ! [ -d /var/www/public ]; then
-    echo "# copy /var/www/public"
-    sudo cp -a /home/admin/assets/nginx/www_public/ /var/www/public
-    sudo chown www-data:www-data /var/www/public
-  else
-    echo "# exists /var/www/public"
-  fi
-
-  sudo ln -sf /etc/nginx/sites-available/public.conf /etc/nginx/sites-enabled/public.conf
-
   ### RaspiBlitz Webserver on HTTPS 443
-
-  # copy compiled webUI (TODO: do later)
-  if ! [ -d /var/www/public/ui ]; then
-      echo "# copy precompiled webui TODO: implement"
-      sudo cp -a /home/admin/blitz_web_compiled /var/www/public/ui
-      sudo chown www-data:www-data /var/www/public/ui
-  else
-    echo "# exists /var/www/public/ui"
-  fi
 
   if ! [ -f /mnt/hdd/app-data/nginx/tls.cert ];then
 

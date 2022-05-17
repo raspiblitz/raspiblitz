@@ -475,6 +475,14 @@ if [ "$1" = "status" ]; then
       # SupTronics 2.5" SATA HDD Shield X825 v1.5
       hddAdapterUSAP=1
     fi
+    if [ "${hddAdapter}" == "2109:0715" ]; then
+      # ICY BOX IB-247-C31 Type-C Enclosure for 2.5inch SATA Drives
+      hddAdapterUSAP=1
+    fi
+    if [ "${hddAdapter}" == "174c:235c" ]; then
+      # Cable Matters USB 3.1 Type-C Gen2 External SATA SSD Enclosure
+      hddAdapterUSAP=1
+    fi
 
     echo "hddAdapterUSAP=${hddAdapterUSAP}"
   fi
@@ -1326,7 +1334,7 @@ if [ "$1" = "tempmount" ]; then
     exit 1
   fi
 
-  if [ "${hddFormat}" = "ext4" ]; then
+  if [ "${hddFormat}" == "ext4" ]; then
 
     if [ "${hddDataPartitionExt4}" == "" ]; then
       echo "error='parameter is no partition'"
@@ -1348,7 +1356,7 @@ if [ "$1" = "tempmount" ]; then
       isBTRFS=0
     fi
     
-  elif [ "${hddFormat}" = "btrfs" ]; then
+  elif [ "${hddFormat}" == "btrfs" ]; then
 
     # get user and groupid if usr/group bitcoin
     bitcoinUID=$(id -u bitcoin)
@@ -1629,6 +1637,12 @@ if [ "$1" = "clean" ]; then
 
           delete=1
           whenDeleteSchredd=1
+
+          # dont delete temp - will be deleted on every boot anyway
+          # but keep in case during setup a migration file was uploaded there
+          if [ "${entry}" = "temp" ]; then
+            delete=0
+          fi
 
           # deactivate delete if a blockchain directory (if -keepblockchain)
           if [ "$3" = "-keepblockchain" ]; then

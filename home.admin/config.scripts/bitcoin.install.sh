@@ -15,7 +15,7 @@ if [ "$1" = "install" ]; then
 
   # set version (change if update is available)
   # https://bitcoincore.org/en/download/
-  bitcoinVersion="22.0"
+  bitcoinVersion="23.0"
   
   # needed to check code signing
   # https://github.com/laanwj
@@ -253,10 +253,8 @@ After=network-online.target
 Wants=network-online.target
 
 [Service]
-PIDFile=/mnt/hdd/bitcoin/${prefix}bitcoind.pid
 ExecStart=/usr/local/bin/bitcoind -${CHAIN} \\
                                   -daemonwait \\
-                                  -pid=/mnt/hdd/bitcoin/${prefix}bitcoind.pid \\
                                   -conf=/mnt/hdd/bitcoin/bitcoin.conf \\
                                   -datadir=/mnt/hdd/bitcoin \\
                                   -debuglogfile=${bitcoinlogpath}
@@ -268,7 +266,6 @@ ExecStartPre=/bin/chgrp bitcoin /mnt/hdd/bitcoin
 # Process management
 ####################
 Type=forking
-PIDFile=/mnt/hdd/bitcoin/${prefix}bitcoind.pid
 Restart=on-failure
 TimeoutStartSec=infinity
 TimeoutStopSec=600

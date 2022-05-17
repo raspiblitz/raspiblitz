@@ -12,7 +12,6 @@ Wants=network-online.target
 [Service]
 ExecStartPre=-/home/admin/config.scripts/blitz.systemd.sh log blockchain STARTED
 ExecStart=/usr/local/bin/bitcoind -daemonwait \
-                                  -pid=/mnt/hdd/bitcoin/bitcoind.pid \
                                   -conf=/mnt/hdd/bitcoin/bitcoin.conf \
                                   -datadir=/mnt/hdd/bitcoin \
                                   -debuglogfile=/mnt/hdd/bitcoin/debug.log
@@ -24,7 +23,6 @@ ExecStartPre=/bin/chgrp bitcoin /mnt/hdd/bitcoin
 # Process management
 ####################
 Type=forking
-PIDFile=/mnt/hdd/bitcoin/bitcoind.pid
 Restart=on-failure
 TimeoutStartSec=infinity
 TimeoutStopSec=600

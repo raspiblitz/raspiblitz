@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # https://github.com/Ride-The-Lightning/c-lightning-REST/releases/
-CLRESTVERSION="v0.6.1"
+CLRESTVERSION="v0.7.0"
 
 # help
 if [ $# -eq 0 ]||[ "$1" = "-h" ]||[ "$1" = "--help" ];then
@@ -12,25 +12,48 @@ if [ $# -eq 0 ]||[ "$1" = "-h" ]||[ "$1" = "--help" ];then
   echo "The same macaroon and certs will be used for the parallel networks"
   echo
   echo "Usage:"
-  echo "cl.rest.sh [on|off|connect] <mainnet|testnet|signet>"
+  echo "cl.rest.sh [on|off|connect] <mainnet|testnet|signet> [?key-value]"
   echo
   exit 1
 fi
+
+# Example for commits created on GitHub:
+#PGPsigner="web-flow"
+#PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
+#PGPpubkeyFingerprint="4AEE18F83AFDEB23"
+
+PGPsigner="saubyk"
+PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
+PGPpubkeyFingerprint="00C9E2BC2E45666F"
 
 source <(/home/admin/config.scripts/network.aliases.sh getvars cl $2)
 
 echo "# Running 'cl.rest.sh $*'"
 
 if [ "$1" = connect ];then
+  if ! systemctl is-active --quiet ${netprefix}clrest; then
+    /home/admin/config.scripts/cl.rest.sh on ${CHAIN}
+  fi
+
   echo "# Allowing port ${portprefix}6100 through the firewall"
-  sudo ufw allow "${portprefix}6100" comment "${netprefix}clrest"
+  sudo ufw allow "${portprefix}6100" comment "${netprefix}clrest" 1>/dev/null
   localip=$(ip addr | grep 'state UP' -A2 | grep -E -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
   # hidden service to https://xx.onion
-  /home/admin/config.scripts/tor.onion-service.sh ${netprefix}clrest 443 ${portprefix}6100
+  /home/admin/config.scripts/tor.onion-service.sh ${netprefix}clrest 443 ${portprefix}6100 1>/dev/null
 
   toraddress=$(sudo cat /mnt/hdd/tor/${netprefix}clrest/hostname)
   hex_macaroon=$(xxd -plain /home/bitcoin/c-lightning-REST/certs/access.macaroon | tr -d '\n')
   url="https://${localip}:${portprefix}6100/"
+  lndconnect="lndconnect://${toraddress}:443?macaroon=${hex_macaroon}"
+
+  if [ "$3" == "key-value" ]; then
+    echo "toraddress='${toraddress}:443'"
+    echo "local='${url}'"
+    echo "macaroon='${hex_macaroon}'"
+    echo "connectstring='${lndconnect}'"
+    exit 0
+  fi
+
   #string="${url}?${hex_macaroon}"
   #sudo /home/admin/config.scripts/blitz.display.sh qr "$string"
   #clear
@@ -72,7 +95,7 @@ if [ "$1" = connect ];then
   exit 0
 fi
 
-if [ "$1" = on ];then
+if [ "$1" = on ]; then
   echo "# Setting up c-lightning-REST for $CHAIN"
 
   sudo systemctl stop ${netprefix}clrest
@@ -83,13 +106,10 @@ if [ "$1" = on ];then
     sudo -u bitcoin git clone https://github.com/saubyk/c-lightning-REST
     cd c-lightning-REST || exit 1
     sudo -u bitcoin git reset --hard $CLRESTVERSION
-    
-    PGPsigner="saubyk"
-    PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
-    PGPpubkeyFingerprint="00C9E2BC2E45666F"
+
     sudo -u bitcoin /home/admin/config.scripts/blitz.git-verify.sh \
-     "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
-    
+     "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" "${CLRESTVERSION}" || exit 1
+
     sudo -u bitcoin npm install
   fi
 
@@ -148,7 +168,7 @@ WantedBy=multi-user.target
   echo
 fi
 
-if [ $1 = off ];then
+if [ "$1" = off ];then
   echo "# Removing c-lightning-REST for ${CHAIN}"
   sudo systemctl stop ${netprefix}clrest
   sudo systemctl disable ${netprefix}clrest

@@ -1,6 +1,7 @@
 #!/bin/bash
-# https://github.com/Ride-The-Lightning/RTL
-RTLVERSION="v0.12.1"
+
+# https://github.com/Ride-The-Lightning/RTL/releases
+RTLVERSION="v0.12.3"
 
 # check and load raspiblitz config
 # to know which network is running
@@ -11,11 +12,15 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "# config script for RideTheLightning $RTLVERSION WebInterface"
   echo "# able to run intances for lnd and cl parallel"
   echo "# mainnet and testnet instances can run parallel"
-  echo "# bonus.rtl.sh [on|off|menu] <lnd|cl> <mainnet|testnet|signet>"
+  echo "# bonus.rtl.sh [on|off|menu] <lnd|cl> <mainnet|testnet|signet> <purge>"
   echo "# bonus.rtl.sh connect-services"
   echo "# bonus.rtl.sh prestart <lnd|cl> <mainnet|testnet|signet>"
   exit 1
 fi
+
+PGPsigner="saubyk"
+PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
+PGPpubkeyFingerprint="00C9E2BC2E45666F"
 
 echo "# Running: 'bonus.rtl.sh $*'"
 
@@ -49,6 +54,29 @@ echo "# systemdService(${systemdService})"
 #########################
 
 # show info menu
+if [ "$1" = "status" ] || [ "$1" = "menu" ]; then
+
+  # get network info
+  isInstalled=$(sudo ls /etc/systemd/system/${netprefix}${typeprefix}RTL.service 2>/dev/null | grep -c 'RTL.service')
+  localip=$(hostname -I | awk '{print $1}')
+  toraddress=$(sudo cat /mnt/hdd/tor/${netprefix}${typeprefix}RTL/hostname 2>/dev/null)
+  fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
+  RTLHTTPS=$((RTLHTTP+1))
+
+  if [ "$1" = "status" ]; then
+    echo "installed='${isInstalled}'"
+    echo "localIP='${localip}'"
+    echo "httpPort='${RTLHTTP}'"
+    echo "httpsPort='${RTLHTTPS}'"
+    echo "httpsForced='0'"
+    echo "httpsSelfsigned='1'"
+    echo "authMethod='password_b'"
+    echo "toraddress='${toraddress}'"
+    exit
+  fi
+fi
+
+# show info menu
 if [ "$1" = "menu" ]; then
 
   # check that parameters are set
@@ -58,11 +86,6 @@ if [ "$1" = "menu" ]; then
     sleep 2
     exit 1
   fi
-
-  # get network info
-  localip=$(hostname -I | awk '{print $1}')
-  toraddress=$(sudo cat /mnt/hdd/tor/${netprefix}${typeprefix}RTL/hostname 2>/dev/null)
-  fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
 
   # info with Tor
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
@@ -141,11 +164,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     cd /home/rtl/RTL
     # check https://github.com/Ride-The-Lightning/RTL/releases/
     sudo -u rtl git reset --hard $RTLVERSION
-    PGPsigner="saubyk"
-    PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
-    PGPpubkeyFingerprint="00C9E2BC2E45666F"
+
     sudo -u rtl /home/admin/config.scripts/blitz.git-verify.sh \
      "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" "${RTLVERSION}" || exit 1
+
     # from https://github.com/Ride-The-Lightning/RTL/commits/master
     # git checkout 917feebfa4fb583360c140e817c266649307ef72
     if [ -f /home/rtl/RTL/LICENSE ]; then
@@ -156,7 +178,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       exit 1
     fi
     # install
-    echo "# Run: npm install"
+    echo "# Running npm install ..."
     export NG_CLI_ANALYTICS=false
     sudo -u rtl npm install --only=prod --logLevel warn
     if ! [ $? -eq 0 ]; then
@@ -179,7 +201,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo chown -R rtl:rtl /mnt/hdd/app-data/rtl
 
   echo "# Create Systemd Service: ${systemdService}.service (Template)"
-  echo "
+  echo "\
 # Systemd unit for ${systemdService}
 
 [Unit]
@@ -261,6 +283,9 @@ WantedBy=multi-user.target
   sudo systemctl start ${systemdService}
   echo "# OK - the ${systemdService}.service is now enabled & started"
   echo "# Monitor with: sudo journalctl -f -u ${systemdService}"
+
+  # needed for API/WebUI as signal that install ran thru 
+  echo "result='OK'"
   exit 0
 fi
 
@@ -476,6 +501,9 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # close ports on firewall
   sudo ufw deny "${RTLHTTP}"
   sudo ufw deny $((RTLHTTP+1))
+
+  # needed for API/WebUI as signal that install ran thru 
+  echo "result='OK'"
   exit 0
 fi
 

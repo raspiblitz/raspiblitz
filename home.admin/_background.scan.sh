@@ -193,6 +193,7 @@ do
     echo "updating: /home/admin/config.scripts/blitz.ups.sh status"
     source <(/home/admin/config.scripts/blitz.ups.sh status)
     /home/admin/_cache.sh set system_ups_status "${upsStatus}"
+    /home/admin/_cache.sh set system_ups_battery "${upsBattery}"
   fi
 
   #################
@@ -995,13 +996,19 @@ do
     ln_all_sync_initial_done=""
     ln_default_sync_initial_done=""
     blitz_sync_initial_done="${btc_all_sync_initial_done}"
+    blitz_default_sync_initial_done="${btc_default_sync_initial_done}"
   else
-    # only if all btc & ln sync done - the complete blitz has done syncing
+    # only if ALL btc & ln sync done (multiple can be active) - the complete blitz has done syncing
     if [ "${btc_all_sync_initial_done}" == "1" ] && [ "${ln_all_sync_initial_done}" == "1" ]; then
       blitz_sync_initial_done="1"
     fi
+    # only if DEFAULT btc & ln sync done - the complete blitz has done syncing
+    if [ "${btc_default_sync_initial_done}" == "1" ] && [ "${ln_default_sync_initial_done}" == "1" ]; then
+      blitz_default_sync_initial_done="1"
+    fi
   fi
   /home/admin/_cache.sh set blitz_sync_initial_done "${blitz_sync_initial_done}"
+  /home/admin/_cache.sh set blitz_default_sync_initial_done "${blitz_default_sync_initial_done}"
   /home/admin/_cache.sh set btc_default_sync_initial_done "${btc_default_sync_initial_done}"
   /home/admin/_cache.sh set btc_all_sync_initial_done "${btc_all_sync_initial_done}"
   /home/admin/_cache.sh set ln_default_sync_initial_done "${ln_default_sync_initial_done}"

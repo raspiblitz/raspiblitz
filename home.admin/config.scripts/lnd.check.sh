@@ -157,7 +157,7 @@ if [ "$1" == "prestart" ]; then
   setting ${lndConfFile} ${insertLine} "${network}d\.rpchost" "127\.0\.0\.1\:${portprefix}8332"
 
   ##### APPLICATION OPTIONS SECTION #####
-  
+
   sectionLine=$(cat ${lndConfFile} | grep -n "^\[Application Options\]" | cut -d ":" -f1)
   echo "# sectionLine(${sectionLine})"
   insertLine=$(expr $sectionLine + 1)
@@ -243,11 +243,9 @@ if [ "$1" == "prestart" ]; then
     setting ${lndConfFile} ${insertLine} "tor.active" "true"
 
     # take care of incompatible settings https://github.com/rootzoll/raspiblitz/issues/2787#issuecomment-991245694
-    if [ $(cat ${lndConfFile} | grep -c "tor.skip-proxy-for-clearnet-targets=true") -gt 0 ] ||
-       [ $(cat ${lndConfFile} | grep -c "tor.skip-proxy-for-clearnet-targets=1") -gt 0 ]; then
+    if [ $(cat ${lndConfFile} | grep -c "^tor.skip-proxy-for-clearnet-targets=true") -gt 0 ] ||
+       [ $(cat ${lndConfFile} | grep -c "^tor.skip-proxy-for-clearnet-targets=1") -gt 0 ]; then
       setting ${lndConfFile} ${insertLine} "tor.streamisolation" "false"
-    else
-      setting ${lndConfFile} ${insertLine} "tor.streamisolation" "true"
     fi
 
     # deprecate Tor password (remove if in lnd.conf)

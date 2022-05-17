@@ -56,6 +56,17 @@ do
   fi
 
   ####################################################
+  # Trigger Final Setup
+  ####################################################
+
+  if [ "${setupPhase}" != "done" ] && [ "${state}" == "donefinal" ]; then
+    echo "trigger final setup tasks & reboot ..."
+    /home/admin/_provision.xfinal.sh
+    sleep 120
+    exit
+  fi
+
+  ####################################################
   # SKIP REST OF THE TASKS IF STILL IN SETUP PHASE
   ####################################################
 

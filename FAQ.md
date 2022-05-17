@@ -56,6 +56,7 @@ Table of Contents
   - [My blockchain data is corrupted - what can I do?](#what-can-i-do)
   - [I have two RaspiBlitz in my network - can they both be public?](#can-they-both-be-public)
   - [How can I enforce UASP mode for my SSD controller?](#how-can-i-enforce-uasp-mode-for-my-ssd-controller)
+  - [I am facing maintenance/emergency mode on boot. How do I fix it?](#i-am-facing-maintenanceemergency-mode-on-boot.-how-do-i-fix-it)
 - [Development](#development)
   - [What is the process of creating a new SD card image release?](#what-is-the-process-of-creating-a-new-sd-card-image-release)
   - [How can I customize my RaspiBlitz or add other software?](#how-can-i-customize-my-raspiblitz-or-add-other-software)
@@ -619,6 +620,12 @@ Yes but you need to change the port number (for example to 9736) on at least one
 
 By default just tested & selected SSD encasings/controller are running enabled with UASP in RaspiBlitz. UASP brings a speed up for the SSD but also if not well supported by the SSD encasing/controller can lead to system halts. If you know for sure that your SSD encasing/controller is supporting UASP fully you can place a file called `uasp.force` on the sd card boot section after flashing the image with your laptop. See details or report errors on issue [#2488](https://github.com/rootzoll/raspiblitz/issues/2488)
 
+### I am facing maintenance/emergency mode on boot. How do I fix it?
+
+This behavior is caused by either the software that flashes the RaspiBlitz image onto the sd card, or by a faulty sd-card. The only solution is to try switching the software/computer you use for flashing and/or trying another sd card.
+
+See issues #3039, #1053 & #782
+
 
 ## Development
 
@@ -630,7 +637,7 @@ Work notes for the process of producing a new SD card image release:
 * Start [`Ubuntu LIVE`](http://releases.ubuntu.com/18.04.3/ubuntu-18.04.3-desktop-amd64.iso) from USB stick
 * Under Settings: best to set correct keyboard language & power settings to prevent monitor turn off
 * Connect to a secure WiFi (hardware switch on) or LAN
-* Download the latest RaspiOS-64bit (zip & sig file) namend in the [build_sdcard.sh](./build_sdcard.sh) and note the SHA256 checksum
+* Download the latest RaspiOS-64bit (zip/xz & sig file) namend in the [build_sdcard.sh](./build_sdcard.sh) and note the SHA256 checksum
 * From the browser `Show All Downloads` and from the context menu select `Open Containing Folder`
 * On that file manager open context (right click) on the white-space and select `Open in Terminal`
 * Compare the checksum with the one you just made note of, using `shasum -a 256 *.zip`
@@ -638,12 +645,13 @@ Work notes for the process of producing a new SD card image release:
 * Check signature: `curl https://www.raspberrypi.org/raspberrypi_downloads.gpg.key | gpg --import && gpg --verify *.sig`
 * The result should say "correct signature" and the fingerprint should end with `8738 CD6B 956F 460C`
 * Insert an NTFS formatted USB stick and use the file manager to move all files to the USB
-* Use in file manager context on NTFS USB stick `extract here` to unzip
+* If image is an ZIP file use in file manager context on NTFS USB stick `extract here` to unzip
 * Download script for later with `curl https://raw.githubusercontent.com/Drewsif/PiShrink/master/pishrink.sh > pishrink.sh`
 * Connect SD card reader with a SD card (16GB recommended)
 * In the file manager open context on the .img-file, select `Open With Disk Image Writer` and write the image to the SD card
 * In the file manager open context on `boot` drive free space `open in terminal`
-* Run the commands: `touch ssh` and `exit`
+* Run the commands `touch ssh`
+* Run the command: `echo "pi:\$6\$TE7HmruYY9EaNiKP\$Vz0inJ6gaoJgJvQrC5z/HMDRMTN2jKhiEnG83tc1Jsw7lli5MYdeA83g3NOVCsBaTVW4mUBiT/1ZRWYdofVQX0" > userconf` and `exit`
 * Eject the `boot` and the `NTFS` volume
 * Connect a RaspiBlitz (without HDD) to network, insert sd card and power up
 * Find the IP of the RaspiBlitz (arp -a or check router)

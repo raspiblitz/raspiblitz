@@ -17,6 +17,7 @@ source <(/home/admin/_cache.sh get \
   system_ram_available_mb \
   system_ram_mb \
   system_ups_status \
+  system_ups_battery \
   system_cpu_load \
   system_temp_celsius \
   system_temp_fahrenheit \
@@ -51,7 +52,12 @@ if [ "${PARAMETER_LIGHTNING}" == "none" ]; then
   lightning=""
 fi
 
-
+# set colors
+color_red='\033[0;31m'
+color_green='\033[0;32m'
+color_amber='\033[0;33m'
+color_yellow='\033[1;93m'
+color_gray='\033[0;37m'
 
 # generate netprefix
 netprefix=${chain:0:1}
@@ -62,21 +68,14 @@ fi
 ## get UPS info
 upsInfo=""
 if [ "${system_ups_status}" = "ONLINE" ]; then
-  upsInfo="${color_gray}${upsBattery}"
+  upsInfo="${color_gray}${system_ups_battery}"
 fi
-if [ "$system_ups_status}" = "ONBATT" ]; then
-  upsInfo="${color_red}${upsBattery}"
+if [ "${system_ups_status}" = "ONBATT" ]; then
+  upsInfo="${color_red}${system_ups_battery}"
 fi
 if [ "${system_ups_status}" = "SHUTTING DOWN" ]; then
   upsInfo="${color_red}DOWN"
 fi
-
-# set colors
-color_red='\033[0;31m'
-color_green='\033[0;32m'
-color_amber='\033[0;33m'
-color_yellow='\033[1;93m'
-color_gray='\033[0;37m'
 
 # check hostname
 if [ ${#hostname} -eq 0 ]; then hostname="raspiblitz"; fi
@@ -236,7 +235,7 @@ if [ "${lightning}" != "" ]; then
     else
       source <(/home/admin/_cache.sh meta ln_${lightning}_${chain}net_fees_total)
       ln_totalfees="${value}"
-      ln_feeReport="Fee Report: ${color_green}${ln_totalfees} ${color_gray}${netprefix}sat"
+      ln_feeReport="Fee Report: ${color_green}${ln_totalfees} ${color_gray}${netprefix}msat"
     fi
 
     # on-chain wallet info
