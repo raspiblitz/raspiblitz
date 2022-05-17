@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #https://github.com/Podcastindex-org/helipad
-HELIPAD_VERSION="v0.1.9"
+HELIPAD_VERSION="v0.1.10"
 HELIPAD_USER=helipad
 HELIPAD_HOME_DIR=/home/$HELIPAD_USER
 HELIPAD_DATA_DIR=/mnt/hdd/app-data/helipad
