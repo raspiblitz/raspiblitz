@@ -59,11 +59,11 @@ elif [ "$1" = on ]; then
 elif [ "$1" = off ]; then
   sed -i "/^grpc-port/d" "${CLCONF}"
   rm -rf /home/bitcoin/${netprefix}cl-plugins-enabled/cln-grpc
-  /home/admin/config.scripts/blitz.conf.sh set ${netprefix}cln-grpc-port "off"
+  /home/admin/config.scripts/blitz.conf.sh set ${netprefix}clngrpcport "off"
   # firewall
   sudo ufw deny "${PORT}" comment "clnGRPCport"
   # Tor
-  /home/admin/config.scripts/tor.onion-service.sh off ${netprefix}cln-grpc-port
+  /home/admin/config.scripts/tor.onion-service.sh off ${netprefix}clnGRPCport
   exit 0
 
 else
