@@ -153,6 +153,9 @@ fi
 if [ "${tallycoinConnect}" == "on" ]; then
   OPTIONS+=(TALLY "Tallycoin Connect")
 fi
+if [ "${itchysats}" == "on" ]; then
+  OPTIONS+=(ITCHYSATS "ItchySats")
+fi
 
 # dont offer to switch to "testnet view for now" - so no wswitch back to mainnet needed
 #if [ ${chain} != "main" ]; then
@@ -302,6 +305,9 @@ case $CHOICE in
             ;;
         HELIPAD)
             sudo /home/admin/config.scripts/bonus.helipad.sh menu
+            ;;
+        ITCHYSATS)
+            sudo /home/admin/config.scripts/bonus.itchysats.sh menu
             ;;
         CHANTOOLS)
             sudo /home/admin/config.scripts/bonus.chantools.sh menu
