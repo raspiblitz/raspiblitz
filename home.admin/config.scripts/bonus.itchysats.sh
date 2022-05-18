@@ -129,6 +129,25 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo mkdir -p $ITCHYSATS_DATA_DIR
     sudo chown $ITCHYSATS_USER: $ITCHYSATS_DATA_DIR
 
+    ##################
+    # NGINX
+    ##################
+    # setup nginx symlinks
+    if ! [ -f /etc/nginx/sites-available/itchysats_ssl.conf ]; then
+       sudo cp -f /home/admin/assets/nginx/sites-available/itchysats_ssl.conf /etc/nginx/sites-available/itchysats_ssl.conf
+    fi
+    if ! [ -f /etc/nginx/sites-available/itchysats_tor.conf ]; then
+       sudo cp /home/admin/assets/nginx/sites-available/itchysats_tor.conf /etc/nginx/sites-available/itchysats_tor.conf
+    fi
+    if ! [ -f /etc/nginx/sites-available/itchysats_tor_ssl.conf ]; then
+       sudo cp /home/admin/assets/nginx/sites-available/itchysats_tor_ssl.conf /etc/nginx/sites-available/itchysats_tor_ssl.conf
+    fi
+    sudo ln -sf /etc/nginx/sites-available/itchysats_ssl.conf /etc/nginx/sites-enabled/
+    sudo ln -sf /etc/nginx/sites-available/itchysats_tor.conf /etc/nginx/sites-enabled/
+    sudo ln -sf /etc/nginx/sites-available/itchysats_tor_ssl.conf /etc/nginx/sites-enabled/
+    sudo nginx -t
+    sudo systemctl reload nginx
+
     #################
     # FIREWALL
     #################
@@ -250,6 +269,16 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # close ports on firewall
   sudo ufw deny $ITCHYSATS_HTTP_PORT
   sudo ufw deny $ITCHYSATS_HTTPS_PORT
+
+  # remove nginx symlinks
+  sudo rm -f /etc/nginx/sites-enabled/itchysats_ssl.conf
+  sudo rm -f /etc/nginx/sites-enabled/itchysats_tor.conf
+  sudo rm -f /etc/nginx/sites-enabled/itchysats_tor_ssl.conf
+  sudo rm -f /etc/nginx/sites-available/itchysats_ssl.conf
+  sudo rm -f /etc/nginx/sites-available/itchysats_tor.conf
+  sudo rm -f /etc/nginx/sites-available/itchysats_tor_ssl.conf
+  sudo nginx -t
+  sudo systemctl reload nginx
 
   # Hidden Service if Tor is active
   if [ "${runBehindTor}" = "on" ]; then
