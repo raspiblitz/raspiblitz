@@ -156,6 +156,7 @@ function patch() {
     sudo /home/admin/config.scripts/blitz.web.ui.sh update
   fi
 
+  echo
 }
 
 # command: off
