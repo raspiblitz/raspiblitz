@@ -116,7 +116,8 @@ function release() {
 
 # command: debug
 function debug() {
-  echo "Printing debug logs. Be patient, this should take maximum 2 minutes ..."
+  echo "Printing debug logs. Be patient, this should take maximum 2 minutes .."
+  rm /var/cache/raspiblitz/debug.log 2>/dev/null
   /home/admin/config.scripts/blitz.debug.sh > /var/cache/raspiblitz/debug.log
   /home/admin/config.scripts/blitz.debug.sh redact /var/cache/raspiblitz/debug.log
   sudo chmod 640 /var/cache/raspiblitz/debug.log
