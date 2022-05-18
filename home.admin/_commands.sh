@@ -35,7 +35,10 @@ function blitzhelp() {
   echo "  status       informational Blitz status screen"
   echo "  sourcemode   copy blockchain source modus"
   echo "  check        check if Blitz configuration files are correct"
-  echo "  patch        sync scripts with latest set github and branch"
+  echo "  patch        sync all scripts with latest from github and branch"
+  echo "  patch blitz  sync only blitz scripts with latest from github and branch"
+  echo "  patch api    sync only Blitz-API with latest from github and branch"
+  echo "  patch web    sync only Blitz-WebUI with latest from github and branch"
   echo "  cache        check on chache system state"
   echo "  github       jumping directly into the options to change branch/repo/pr"
   echo
@@ -131,7 +134,22 @@ function debug() {
 # syncs script with latest set github and branch
 function patch() {
   cd /home/admin
-  /home/admin/config.scripts/blitz.github.sh -run
+
+  if [ "$1" == "" ] || [ "$1" == "blitz" ]; then
+    echo "### UPDATE BLITZ SCRIPTS"
+    /home/admin/config.scripts/blitz.github.sh -run
+  fi
+
+  if [ "$1" == "" ] || [ "$1" == "api" ]; then
+    echo "### UPDATE BLITZ API"
+    sudo /home/admin/config.scripts/blitz.web.api.sh update-code
+  fi
+
+  if [ "$1" == "" ] || [ "$1" == "web" ]; then
+    echo "### UPDATE BLITZ WEBUI"
+    sudo /home/admin/config.scripts/blitz.web.ui.sh update
+  fi
+
 }
 
 # command: off

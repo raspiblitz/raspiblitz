@@ -89,20 +89,26 @@ fi
 # UPDATE
 ###################
 if [ "$1" = "update" ]; then
-
-  echo "# Update Web API"
-  cd /root/blitz_web
-  git fetch
-  git pull
-  source <(/home/admin/config.scripts/bonus.nodejs.sh info)
-  ${NODEPATH}/yarn install
-  ${NODEPATH}/yarn build
-  sudo rm -r /var/www/public/* 2>/dev/null
-  sudo cp -r /root/blitz_web/build/* /var/www/public
-  sudo chown www-data:www-data -R /var/www/public
-  echo "# blitzapi updates and restarted"
-  exit 0
-
+  webuiActive=$(sudo ls /root/blitz_web/README.md | grep -c "README")
+  if [ "${webuiActive}" != "0" ]; then
+    echo "# Update Web API"
+    cd /root/blitz_web
+    currentBranch=$(git rev-parse --abbrev-ref HEAD)
+    echo "# BRANCH ---> ${currentBranch}"
+    git fetch
+    git pull
+    source <(/home/admin/config.scripts/bonus.nodejs.sh info)
+    ${NODEPATH}/yarn install
+    ${NODEPATH}/yarn build
+    sudo rm -r /var/www/public/* 2>/dev/null
+    sudo cp -r /root/blitz_web/build/* /var/www/public
+    sudo chown www-data:www-data -R /var/www/public
+    echo "# blitzapi updates and restarted"
+    exit 0
+  else
+    echo "# webui not active"
+    exit 1
+  fi
 fi
 
 ###################
