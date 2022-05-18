@@ -227,7 +227,8 @@ if [ "$1" = "update-code" ]; then
     fi
     sudo systemctl start blitzapi
     git show -s --format=%s
-    echo "# installed commit -> ${newCommit}"
+    echo "# old commit -> ${oldCommit}"
+    echo "# new commit -> ${newCommit}"
     echo "# blitzapi updates and restarted"
     exit 0
   else

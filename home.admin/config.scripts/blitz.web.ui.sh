@@ -109,8 +109,9 @@ if [ "$1" = "update" ]; then
     else
       echo "# no code changes"
     fi
-    echo "# installed commit -> ${newCommit}"
-    echo "# blitzapi updates and restarted"
+    echo "# old commit -> ${oldCommit}"
+    echo "# new commit -> ${newCommit}"
+    echo "# reload WebUI in your browser"
     exit 0
   else
     echo "# webui not active"
