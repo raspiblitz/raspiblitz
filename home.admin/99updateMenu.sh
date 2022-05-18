@@ -138,8 +138,8 @@ patch()
   clear
   case $CHOICE in
     PATCH)
-      sudo -u admin /home/admin/config.scripts/blitz.github.sh -run
-      sleep 4
+      patch
+      sleep 5
       whiptail --title " Patching/Syncing " --yes-button "Reboot" --no-button "Skip Reboot" --yesno "  OK patching/syncing done.
 
   By default a reboot is advised.
