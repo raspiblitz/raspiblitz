@@ -209,16 +209,32 @@ fi
 ###################
 if [ "$1" = "update-code" ]; then
 
-  echo "# Update Web API CODE"
-  sudo systemctl stop blitzapi
-  cd /root/blitz_api
-  git fetch
-  git pull
-  pip install -r requirements.txt
-  sudo systemctl start blitzapi
-  echo "# blitzapi updates and restarted"
-  exit 0
-
+  apiActive=$(sudo ls /etc/systemd/system/blitzapi.service | grep -c blitzapi.service)
+  if [ "${apiActive}" != "0" ]; then
+    echo "# Update Web API CODE"
+    sudo systemctl stop blitzapi
+    cd /root/blitz_api
+    currentBranch=$(git rev-parse --abbrev-ref HEAD)
+    echo "# updating local repo ..."
+    oldCommit=$(git rev-parse HEAD)
+    git fetch
+    git reset --hard origin/${currentBranch}
+    newCommit=$(git rev-parse HEAD)
+    if [ "${oldCommit}" != "${newCommit}" ]; then
+      pip install -r requirements.txt
+    else
+      echo "# no code changes"
+    fi
+    sudo systemctl start blitzapi
+    echo "# BRANCH ---> ${currentBranch}"
+    echo "# old commit -> ${oldCommit}"
+    echo "# new commit -> ${newCommit}"
+    echo "# blitzapi updates and restarted"
+    exit 0
+  else
+    echo "# blitzapi not active"
+    exit 1
+  fi
 fi
 
 ###################

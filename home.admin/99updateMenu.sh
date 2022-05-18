@@ -138,8 +138,19 @@ patch()
   clear
   case $CHOICE in
     PATCH)
-      sudo -u admin /home/admin/config.scripts/blitz.github.sh -run
-      sleep 4
+      echo
+      echo "#######################################################"
+      echo "### UPDATE BLITZ --> SCRIPTS (code)"
+      /home/admin/config.scripts/blitz.github.sh -run
+      echo
+      echo "#######################################################"
+      echo "### UPDATE BLITZ --> API"
+      sudo /home/admin/config.scripts/blitz.web.api.sh update-code
+      echo
+      echo "#######################################################"
+      echo "### UPDATE BLITZ --> WEBUI"
+      sudo /home/admin/config.scripts/blitz.web.ui.sh update
+      sleep 5
       whiptail --title " Patching/Syncing " --yes-button "Reboot" --no-button "Skip Reboot" --yesno "  OK patching/syncing done.
 
   By default a reboot is advised.
