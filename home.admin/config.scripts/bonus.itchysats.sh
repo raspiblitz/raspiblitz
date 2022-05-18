@@ -5,15 +5,13 @@
 ITCHYSATS_USER=itchsyats
 ITCHYSATS_HOME_DIR=/home/$ITCHYSATS_USER
 ITCHYSATS_DATA_DIR=/mnt/hdd/app-data/itchysats
-ITCHYSATS_BUILD_DIR=$ITCHYSATS_HOME_DIR/itchysats
+ITCHYSATS_DOWNLOAD_DIR=$ITCHYSATS_HOME_DIR/download
 ITCHYSATS_HTTP_PORT=8888
 ITCHYSATS_HTTPS_PORT=8889
-ITCHYSATS_CARGO_BIN=/home/$ITCHYSATS_USER/.cargo/bin/cargo
-ITCHYSATS_BIN=$ITCHYSATS_HOME_DIR/.cargo/bin/taker
+ITCHYSATS_BIN=$ITCHYSATS_HOME_DIR/bin/taker
 
 
 ITCHYSATS_VERSION=$( curl -s https://api.github.com/repos/itchysats/itchysats/releases | jq -r '.[].tag_name' | grep -v "rc" | head -n1)
-ITCHYSATS_REPOSITORY_URL="https://github.com/itchysats/itchysats"
 
 # check and load raspiblitz config
 # to know which network is running
@@ -96,27 +94,58 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # create itchysats user:
     sudo adduser --disabled-password --gecos "" $ITCHYSATS_USER
 
-    # install Rust dependencies:
     echo
-    echo "*** Installing rustup for the ItchySats user ***"
+    echo "*** Detect CPU architecture ..."
     echo
-    curl --proto '=https' --tlsv1.2 -sSs https://sh.rustup.rs | sudo -u $ITCHYSATS_USER sh -s -- -y
+    architecture=$(uname -m)
+    isAARCH64=$(uname -m | grep -c 'aarch64')
+    isX86_64=$(uname -m | grep -c 'x86_64')
+    if [ ${isAARCH64} -eq 0 ] && [ ${isX86_64} -eq 0 ] ; then
+        echo "*** !!! FAIL !!!"
+        echo "*** Can only build on aarch64 or x86_64 not on:"
+        uname -m
+        exit 1
+    else
+        echo "*** OK running on $architecture architecture."
+    fi
 
-    # download source
-    sudo -u $ITCHYSATS_USER mkdir -p $ITCHYSATS_BUILD_DIR
-    sudo rm -fR $ITCHYSATS_BUILD_DIR/*
-    cd $ITCHYSATS_BUILD_DIR || exit 1
-    sudo -u $ITCHYSATS_USER git clone $ITCHYSATS_REPOSITORY_URL
-    cd itchysats || exit 1
-
-    # checkout latest version
-    sudo -u $ITCHYSATS_USER git reset --hard $ITCHYSATS_VERSION
+    # create directories
+    sudo -u $ITCHYSATS_USER mkdir -p $ITCHYSATS_DOWNLOAD_DIR
+    sudo rm -fR $ITCHYSATS_DOWNLOAD_DIR/*
+    cd $ITCHYSATS_DOWNLOAD_DIR || exit 1
 
     echo
-    echo "*** Building ItchySats $ITCHYSATS_VERSION. This will take some time.."
+    echo "*** Downloading Binary"
     echo
-    # build from source
-    sudo -u $ITCHYSATS_USER $ITCHYSATS_CARGO_BIN install --path taker --locked || exit 1
+    binaryName="taker_${ITCHYSATS_VERSION}_Linux_${architecture}.tar"
+    sudo -u $ITCHYSATS_USER wget -N https://github.com/itchysats/itchysats/releases/download/${ITCHYSATS_VERSION}/${binaryName}
+    checkDownload=$(ls ${binaryName} 2>/dev/null | grep -c ${binaryName})
+    if [ ${checkDownload} -eq 0 ]; then
+        echo "*** !!! FAIL !!!"
+        echo "*** Downloading the binary failed"
+        exit 1
+    fi
+
+    # set PATH for the user
+    sudo bash -c "echo 'PATH=\$PATH:/home/itchysats/bin/' >> /home/itchysats/.profile"
+
+    # install
+    echo
+    echo "*** unzip binary: ${binaryName}"
+    echo
+    sudo -u $ITCHYSATS_USER tar -xvf ${binaryName}
+    echo
+    echo "*** install binary"
+    echo
+    sudo -u $ITCHYSATS_USER mkdir -p $ITCHYSATS_HOME_DIR/bin
+    sudo install -m 0755 -o $ITCHYSATS_USER -g $ITCHYSATS_USER -t $ITCHYSATS_HOME_DIR/bin taker
+    sleep 3
+
+    installed=$(sudo -u $ITCHYSATS_USER $ITCHYSATS_BIN --help)
+    if [ ${#installed} -eq 0 ]; then
+        echo "error='install failed'"
+        exit 1
+    fi
 
     ###############
     # CONFIG
@@ -181,7 +210,7 @@ Description=ItchySats daemon
 Wants=bitcoind.service
 After=bitcoind.service
 [Service]
-WorkingDirectory=$ITCHYSATS_BUILD_DIR/
+WorkingDirectory=$ITCHYSATS_HOME_DIR/
 ExecStart=$ITCHYSATS_BIN --http-address=0.0.0.0:$ITCHYSATS_HTTP_PORT --password=$PASSWORD_B ${itchysats_network}
 User=$ITCHYSATS_USER
 Restart=always
@@ -257,10 +286,10 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # remove systemd service
   sudo systemctl disable itchysats
   sudo rm -f /etc/systemd/system/itchysats.service
-  sudo rm -fR $ITCHYSATS_BUILD_DIR
+  sudo rm -fR $ITCHYSATS_DOWNLOAD_DIR
   if [ ${deleteData} -eq 1 ]; then
     echo "# deleting ItchySats data"
-    sudo rm -fR $ITCHYSATS_DATA_DIR
+  sudo rm -fR $ITCHYSATS_DATA_DIR
   else
     echo "# keeping ItchySats data"
   fi
