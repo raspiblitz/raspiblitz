@@ -94,7 +94,6 @@ if [ "$1" = "update" ]; then
     echo "# Update Web API"
     cd /root/blitz_web
     currentBranch=$(git rev-parse --abbrev-ref HEAD)
-    echo "# BRANCH ---> ${currentBranch}"
     echo "# updating local repo ..."
     oldCommit=$(git rev-parse HEAD)
     git fetch
@@ -110,6 +109,7 @@ if [ "$1" = "update" ]; then
     else
       echo "# no code changes"
     fi
+    echo "# BRANCH ---> ${currentBranch}"
     echo "# old commit -> ${oldCommit}"
     echo "# new commit -> ${newCommit}"
     echo "# reload WebUI in your browser"

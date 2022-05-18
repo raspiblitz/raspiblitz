@@ -215,7 +215,6 @@ if [ "$1" = "update-code" ]; then
     sudo systemctl stop blitzapi
     cd /root/blitz_api
     currentBranch=$(git rev-parse --abbrev-ref HEAD)
-    echo "# BRANCH ---> ${currentBranch}"
     echo "# updating local repo ..."
     oldCommit=$(git rev-parse HEAD)
     git fetch
@@ -227,7 +226,7 @@ if [ "$1" = "update-code" ]; then
       echo "# no code changes"
     fi
     sudo systemctl start blitzapi
-    git show -s --format=%s
+    echo "# BRANCH ---> ${currentBranch}"
     echo "# old commit -> ${oldCommit}"
     echo "# new commit -> ${newCommit}"
     echo "# blitzapi updates and restarted"
