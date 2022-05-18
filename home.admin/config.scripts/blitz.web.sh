@@ -140,6 +140,9 @@ elif [ "$1" = "https-on" ]; then
     echo "# exists /mnt/hdd/app-data/nginx/tls.cert"
   fi
 
+  # make sure nginx process has permissions
+  sudo chmod 744 /mnt/hdd/lnd/tls.key
+
   # restart NGINX
   sudo systemctl restart nginx
 

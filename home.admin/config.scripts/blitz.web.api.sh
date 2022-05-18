@@ -49,9 +49,21 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   cd /root
   # git clone https://github.com/fusion44/blitz_api.git /root/blitz_api
   git clone https://github.com/${DEFAULT_GITHUB_USER}/${DEFAULT_GITHUB_REPO}.git /root/blitz_api
+  if [ "$?" != "0"]; then
+    echo "error='git clone failed'"
+    exit 1
+  fi
   cd blitz_api
   git checkout ${DEFAULT_GITHUB_BRANCH}
+  if [ "$?" != "0"]; then
+    echo "error='git checkout failed'"
+    exit 1
+  fi
   pip install -r requirements.txt
+  if [ "$?" != "0"]; then
+    echo "error='pip install failed'"
+    exit 1
+  fi
   chown -R admin:admin /root/blitz_api
   chmod a+x /root
   chmod -R a+x /root/blitz_api

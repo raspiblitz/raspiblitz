@@ -43,16 +43,36 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   cd /root
   # git clone https://github.com/cstenglein/raspiblitz-web.git /home/admin/blitz_web
   git clone https://github.com/${DEFAULT_GITHUB_USER}/${DEFAULT_GITHUB_REPO}.git /root/blitz_web
+  if [ "$?" != "0"]; then
+    echo "error='git clone failed'"
+    exit 1
+  fi
   cd blitz_web
   git checkout ${DEFAULT_GITHUB_BRANCH}
+  if [ "$?" != "0"]; then
+    echo "error='git checkout failed'"
+    exit 1
+  fi
 
   echo "# Compile WebUI"
   /home/admin/config.scripts/bonus.nodejs.sh on
   source <(/home/admin/config.scripts/bonus.nodejs.sh info)
   npm install --global yarn
+  if [ "$?" != "0"]; then
+    echo "error='install yarn failed'"
+    exit 1
+  fi
   ${NODEPATH}/yarn config set --home enableTelemetry 0
   ${NODEPATH}/yarn install
+  if [ "$?" != "0"]; then
+    echo "error='yarn install failed'"
+    exit 1
+  fi
   ${NODEPATH}/yarn build
+  if [ "$?" != "0"]; then
+    echo "error='yarn build failed'"
+    exit 1
+  fi
 
   rm -r /var/www/public/* 2>/dev/null
   cp -r /root/blitz_web/build/* /var/www/public
