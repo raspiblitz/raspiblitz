@@ -95,14 +95,21 @@ if [ "$1" = "update" ]; then
     cd /root/blitz_web
     currentBranch=$(git rev-parse --abbrev-ref HEAD)
     echo "# BRANCH ---> ${currentBranch}"
+    oldCommit=$(git rev-parse HEAD)
     git fetch
     git pull
-    source <(/home/admin/config.scripts/bonus.nodejs.sh info)
-    ${NODEPATH}/yarn install
-    ${NODEPATH}/yarn build
-    sudo rm -r /var/www/public/* 2>/dev/null
-    sudo cp -r /root/blitz_web/build/* /var/www/public
-    sudo chown www-data:www-data -R /var/www/public
+    newCommit=$(git rev-parse HEAD)
+    if [ "${oldCommit}" != "${newCommit}" ]; then
+      source <(/home/admin/config.scripts/bonus.nodejs.sh info)
+      ${NODEPATH}/yarn install
+      ${NODEPATH}/yarn build
+      sudo rm -r /var/www/public/* 2>/dev/null
+      sudo cp -r /root/blitz_web/build/* /var/www/public
+      sudo chown www-data:www-data -R /var/www/public
+    else
+      echo "# no code changes"
+    fi
+    echo "# installed commit -> ${newCommit}"
     echo "# blitzapi updates and restarted"
     exit 0
   else

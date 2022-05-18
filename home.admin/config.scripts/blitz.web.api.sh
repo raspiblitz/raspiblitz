@@ -216,11 +216,18 @@ if [ "$1" = "update-code" ]; then
     cd /root/blitz_api
     currentBranch=$(git rev-parse --abbrev-ref HEAD)
     echo "# BRANCH ---> ${currentBranch}"
+    oldCommit=$(git rev-parse HEAD)
     git fetch
     git pull
-    pip install -r requirements.txt
+    newCommit=$(git rev-parse HEAD)
+    if [ "${oldCommit}" != "${newCommit}" ]; then
+      pip install -r requirements.txt
+    else
+      echo "# no code changes"
+    fi
     sudo systemctl start blitzapi
     git show -s --format=%s
+    echo "# installed commit -> ${newCommit}"
     echo "# blitzapi updates and restarted"
     exit 0
   else
