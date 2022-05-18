@@ -219,7 +219,7 @@ if [ "$1" = "update-code" ]; then
     echo "# updating local repo ..."
     oldCommit=$(git rev-parse HEAD)
     git fetch
-    git pull --force
+    git reset --hard origin/${currentBranch}
     newCommit=$(git rev-parse HEAD)
     if [ "${oldCommit}" != "${newCommit}" ]; then
       pip install -r requirements.txt
