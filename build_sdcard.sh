@@ -745,7 +745,7 @@ echo
 
 # *** BLITZ WEB SERVICE ***
 echo "Provisioning BLITZ WEB SERVICE" 
-/home/admin/config.scripts/blitz.web.sh http-on
+/home/admin/config.scripts/blitz.web.sh http-on || exit 1
 
 # *** FATPACK *** (can be activated by parameter - see details at start of script)
 if ${fatpack}; then

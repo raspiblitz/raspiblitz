@@ -26,6 +26,7 @@ if [ "$1" = "check" ]; then
   printf "Proto\tInterface\tPort\n"
   printf "=====\t=========\t====\n"
   echo "${active}" | awk '{ if($2 == "*") print $3 "\tany\t\t" $1; else print $3 "\t" $2 "\t" $1 }'
+  exit 0
 
 ###################
 # SWITCH ON-BASICS
@@ -37,6 +38,10 @@ elif [ "$1" = "http-on" ]; then
   # install
   sudo apt-get update
   sudo apt-get install -y nginx apache2-utils
+  if [ "$?" != "0"]; then
+    echo "error='nginx install failed'"
+    exit 1
+  fi
 
   # additional config
   sudo mkdir -p /etc/systemd/system/nginx.service.d
@@ -52,6 +57,7 @@ RestartSec=60
 EOF
 
   # general nginx settings
+  sudo sed -i "s/^user www-data;/#user www-data;/g" /etc/nginx/nginx.conf
   if ! grep -Eq '^\s*server_names_hash_bucket_size.*$' /etc/nginx/nginx.conf; then
     # ToDo(frennkie) verify this
     sudo sed -i -E '/^.*server_names_hash_bucket_size [0-9]*;$/a \\tserver_names_hash_bucket_size 128;' /etc/nginx/nginx.conf
@@ -67,21 +73,31 @@ EOF
   sudo chown -R admin:www-data /var/www/letsencrypt
   sudo cp -a /home/admin/assets/nginx/www_public/ /var/www/public
   sudo chown www-data:www-data /var/www/public
+  sudo cp /home/admin/assets/nginx/snippets/* /etc/nginx/snippets/
 
   # enable public site & API redirect
-  sudo cp /home/admin/assets/nginx/sites-available/public.conf /etc/nginx/sites-available/public.conf
+  sudo cp /home/admin/assets/nginx/sites-available/public.httponly.conf /etc/nginx/sites-available/public.conf
   sudo ln -sf /etc/nginx/sites-available/public.conf /etc/nginx/sites-enabled/public.conf
+
+  # test nginx config
+  sudo nginx -t
+  if [ "$?" != "0"]; then
+    echo "# FAIL ----> sudo nginx -t"
+    echo "error='nginx config failed'"
+    exit 1
+  fi
 
   # make sure that it is enabled and started
   sudo systemctl enable nginx 
   sudo systemctl start nginx
+  exit 0
 
 ###################
 # SWITCH ON
 ###################
 elif [ "$1" = "https-on" ]; then
 
-  echo "Turning ON: Web HTTPS"
+  echo "# Turning ON: Web HTTPS"
 
   # create nginx app-data dir
   sudo mkdir /mnt/hdd/app-data/nginx/ 2>/dev/null
@@ -93,22 +109,19 @@ elif [ "$1" = "https-on" ]; then
     userFileExists=$(sudo ls /mnt/hdd/app-data/nginx/dhparam.pem 2>/dev/null | grep -c dhparam.pem)
     if [ ${userFileExists} -eq 0 ]; then
       # generate dhparam.pem - can take +10 minutes on a Raspberry Pi
-      echo "Generating a complete new dhparam.pem"
-      echo "Running \"sudo openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048\" next."
+      echo "# Generating a complete new dhparam.pem"
+      echo "# Running \"sudo openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048\" next."
       sudo openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048
       sudo cp /etc/ssl/certs/dhparam.pem /mnt/hdd/app-data/nginx/dhparam.pem
     else
       # just copy the already user generated dhparam.pem into nginx
-      echo "Copying the user generetad /mnt/hdd/app-data/nginx/dhparam.pem"
+      echo "# Copying the user generetad /mnt/hdd/app-data/nginx/dhparam.pem"
       sudo cp /mnt/hdd/app-data/nginx/dhparam.pem /etc/ssl/certs/dhparam.pem
     fi
 
   else
     echo "# skip - dhparam.pem exists"
   fi
-
-  # copy snippets
-  sudo cp /home/admin/assets/nginx/snippets/* /etc/nginx/snippets/
 
   ### RaspiBlitz Webserver on HTTPS 443
 
@@ -143,9 +156,15 @@ elif [ "$1" = "https-on" ]; then
   # make sure nginx process has permissions
   sudo chmod 744 /mnt/hdd/lnd/tls.key
 
+  # replace public conf to - now with https version
+  sudo rm /etc/nginx/sites-enabled/public.conf
+  sudo rm /etc/nginx/sites-available/public.conf
+  sudo cp /home/admin/assets/nginx/sites-available/public.conf /etc/nginx/sites-available/public.conf
+  sudo ln -sf /etc/nginx/sites-available/public.conf /etc/nginx/sites-enabled/public.conf
+
   # restart NGINX
   sudo systemctl restart nginx
-
+  exit 0
 
 ###################
 # SWITCH OFF
@@ -156,7 +175,9 @@ elif [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   sudo systemctl stop nginx
   sudo systemctl disable nginx >/dev/null
+  exit 0
 
 else
   echo "# FAIL: parameter not known - run with -h for help"
+  exit 1
 fi
