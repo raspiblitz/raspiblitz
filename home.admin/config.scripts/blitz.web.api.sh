@@ -218,7 +218,7 @@ if [ "$1" = "update-code" ]; then
     echo "# BRANCH ---> ${currentBranch}"
     oldCommit=$(git rev-parse HEAD)
     git fetch
-    git pull
+    git pull --force
     newCommit=$(git rev-parse HEAD)
     if [ "${oldCommit}" != "${newCommit}" ]; then
       pip install -r requirements.txt

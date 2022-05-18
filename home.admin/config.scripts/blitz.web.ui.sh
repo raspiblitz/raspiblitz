@@ -97,7 +97,7 @@ if [ "$1" = "update" ]; then
     echo "# BRANCH ---> ${currentBranch}"
     oldCommit=$(git rev-parse HEAD)
     git fetch
-    git pull
+    git pull --force
     newCommit=$(git rev-parse HEAD)
     if [ "${oldCommit}" != "${newCommit}" ]; then
       source <(/home/admin/config.scripts/bonus.nodejs.sh info)
