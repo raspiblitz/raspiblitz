@@ -392,7 +392,7 @@ alias ${netprefix}clconf=\"sudo\
     /home/admin/config.scripts/blitz.conf.sh set ${netprefix}feeadjuster "off"
   fi
   if [ ! -f /home/bitcoin/${netprefix}cl-plugins-enabled/cln-grpc ];then
-    /home/admin/config.scripts/blitz.conf.sh set ${netprefix}clngrpc "off"
+    /home/admin/config.scripts/blitz.conf.sh set "${netprefix}clnGRPCport" "off"
   fi
 
   # if this is the first lightning mainnet turned on - make default
