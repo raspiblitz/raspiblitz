@@ -47,7 +47,7 @@ elif [ "$1" = on ]; then
    /home/bitcoin/${netprefix}cl-plugins-enabled/
 
   # blitz.conf.sh set [key] [value] [?conffile] <noquotes>
-  /home/admin/config.scripts/blitz.conf.sh set "grpc-port" "${PORT}" "${CLCONF}" noquotes
+  /home/admin/config.scripts/blitz.conf.sh set "grpc-port" "${PORT}" "${CLCONF}" "noquotes"
   /home/admin/config.scripts/blitz.conf.sh set "${netprefix}clnGRPCport" "${PORT}"
 
   # firewall
@@ -58,12 +58,12 @@ elif [ "$1" = on ]; then
 
 elif [ "$1" = off ]; then
   sed -i "/^grpc-port/d" "${CLCONF}"
-  rm -rf /home/bitcoin/${netprefix}cl-plugins-enabled/cln-grpc
-  /home/admin/config.scripts/blitz.conf.sh set ${netprefix}clngrpcport "off"
+  sudo rm -rf /home/bitcoin/${netprefix}cl-plugins-enabled/cln-grpc
+  /home/admin/config.scripts/blitz.conf.sh set "${netprefix}clnGRPCport" "off"
   # firewall
-  sudo ufw deny "${PORT}" comment "clnGRPCport"
+  sudo ufw deny "${PORT}" comment "${netprefix}clnGRPCport"
   # Tor
-  /home/admin/config.scripts/tor.onion-service.sh off ${netprefix}clnGRPCport
+  /home/admin/config.scripts/tor.onion-service.sh off "${netprefix}clnGRPCport"
   exit 0
 
 else
