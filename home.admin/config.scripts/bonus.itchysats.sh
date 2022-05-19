@@ -102,9 +102,9 @@ downloadBinary() {
     echo
     echo "*** Downloading Binary"
     echo
-    binaryName="taker_${ITCHYSATS_VERSION}_Linux_${architecture}.tar"
-    sudo -u $ITCHYSATS_USER wget -N https://github.com/itchysats/itchysats/releases/download/${ITCHYSATS_VERSION}/${binaryName}
-    checkDownload=$(ls ${binaryName} 2>/dev/null | grep -c ${binaryName})
+    archiveName="taker_${ITCHYSATS_VERSION}_Linux_${architecture}.tar"
+    sudo -u $ITCHYSATS_USER wget -N https://github.com/itchysats/itchysats/releases/download/${ITCHYSATS_VERSION}/${archiveName}
+    checkDownload=$(ls ${archiveName} 2>/dev/null | grep -c ${archiveName})
     if [ ${checkDownload} -eq 0 ]; then
         echo "*** !!! FAIL !!!"
         echo "*** Downloading the binary failed"
@@ -113,9 +113,9 @@ downloadBinary() {
 
     # install
     echo
-    echo "*** unzip binary: ${binaryName}"
+    echo "*** unzip binary: ${archiveName}"
     echo
-    sudo -u $ITCHYSATS_USER tar -xvf ${binaryName}
+    sudo -u $ITCHYSATS_USER tar -xvf ${archiveName}
     echo
     echo "*** install binary"
     echo
@@ -128,6 +128,13 @@ downloadBinary() {
         echo "error='install failed'"
         exit 1
     fi
+
+    echo
+    echo "*** Cleaning up download artifacts"
+    echo
+
+    sudo -u $ITCHYSATS_USER rm -f "${archiveName}"
+    sudo -u $ITCHYSATS_USER rm -f taker
 }
 
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
