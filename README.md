@@ -2,7 +2,7 @@
 
 *Build your own Lightning & Bitcoin Fullnode on a RaspberryPi with a nice Display.*
 
-`Version 1.7.2 with lnd 0.14.2 & c-lightning 0.10.2 and bitcoin 22.0.0`
+`Version 1.8.0 with lnd 0.14.3 & c-lightning 0.11.0.1 and bitcoin 23.0.0`
 
 ![RaspiBlitz](pictures/raspiblitz.jpg)
 
@@ -242,13 +242,15 @@ In the end your RaspiBlitz should look like this:
 
 ## Downloading the Software
 
+*WARNING: This realease is not ready yet! Release Candidates should only be used with you use explicitly for testing and dont have serious funds on them.*
+
 |Method|Install the image|Build the sd card|
 |------|-----------------|-----------------|
 |Philosophy|Trust|Sovereignty|
 |Difficulty level|Easy|Medium|
 |Pros|Make Blitz accessible to everyone|You don't need to trust us, build from your own forked repository|
-|Instructions|[Download 1.7.2 image](https://raspiblitz.fulmo.org/images/raspiblitz-v1.7.2-2022-02-20.img.gz) and [Flash the sd card](README.md#write-the-sd-card-image-to-your-sd-card)|[Build your own sd card image](#build-the-sd-card-image)|
-|Verify what?|[Signature file](https://raspiblitz.fulmo.org/images/raspiblitz-v1.7.2-2022-02-20.img.gz.sig) and [verify the Sig](FAQ.md#how-to-verify-the-sd-card-image-after-download) OR SHA-256 (below)|All of the code, don't trust, verify|
+|Instructions|[Download 1.8.0rc1 image](https://raspiblitz.fulmo.org/images/raspiblitz-v1.8.0rc1-2022-05-19.img.gz) and [Flash the sd card](README.md#write-the-sd-card-image-to-your-sd-card)|[Build your own sd card image](#build-the-sd-card-image)|
+|Verify what?|[Signature file](#) and [verify the Sig](FAQ.md#how-to-verify-the-sd-card-image-after-download) OR SHA-256 (below)|All of the code, don't trust, verify|
 
 If downloading the maintainer SD card image:
 * GPG 64-bit (main): 1C73 060C 7C17 6461 & (sub): AA9D D1B5 CC56 47DA
@@ -262,7 +264,7 @@ The maintainer sd card image can also be downloaded via torrent:
 * [assets/raspiblitz-v1.7.2-2022-02-20.img.gz.torrent](https://github.com/rootzoll/raspiblitz/raw/dev/home.admin/assets/raspiblitz-v1.7.2-2022-02-20.img.gz.torrent)
 
 Useful info:
-* [What's new in Version 1.7.2 of RaspiBlitz?](CHANGES.md#whats-new-in-version-172-of-raspiblitz)
+* [What's new in Version 1.8.0 of RaspiBlitz?](CHANGES.md#whats-new-in-version-180-of-raspiblitz)
 * [How to update my RaspiBlitz?](README.md#updating-raspiblitz-to-new-version)
 * [How to migrate to RaspiBlitz from Umbrel/myNode/Citadel](#make-a-raspiblitz-out-of-your-umbrel-citadel-or-mynode)
 * [How to verify the SD card image after download?](FAQ.md#how-to-verify-the-sd-card-image-after-download)
