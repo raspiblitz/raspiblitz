@@ -78,22 +78,7 @@ sudo systemctl stop itchysats 2>/dev/null
 
 #check if install exists:
 
-if [ "$1" = "1" ] || [ "$1" = "on" ]; then
-  echo
-  echo "*** INSTALL ITCHYSATS ***"
-  echo
-
-  isInstalled=$(sudo ls /etc/systemd/system/itchysats.service 2>/dev/null | grep -c 'itchysats.service')
-  if ! [ ${isInstalled} -eq 0 ]; then
-    echo "ItchySats already installed."
-  else 
-    ###############
-    # INSTALL
-    ###############
-
-    # create itchysats user:
-    sudo adduser --disabled-password --gecos "" $ITCHYSATS_USER
-
+downloadBinary() {
     echo
     echo "*** Detect CPU architecture ..."
     echo
@@ -126,9 +111,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
         exit 1
     fi
 
-    # set PATH for the user
-    sudo bash -c "echo 'PATH=\$PATH:/home/itchysats/bin/' >> /home/itchysats/.profile"
-
     # install
     echo
     echo "*** unzip binary: ${binaryName}"
@@ -146,6 +128,37 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
         echo "error='install failed'"
         exit 1
     fi
+}
+
+if [ "$1" = "1" ] || [ "$1" = "on" ]; then
+  echo
+  echo "*** INSTALL ITCHYSATS ***"
+  echo
+
+  isInstalled=$(sudo ls /etc/systemd/system/itchysats.service 2>/dev/null | grep -c 'itchysats.service')
+  if ! [ ${isInstalled} -eq 0 ]; then
+    echo "ItchySats already installed."
+  else 
+    ###############
+    # INSTALL
+    ###############
+
+    # create itchysats user:
+    sudo adduser --disabled-password --gecos "" $ITCHYSATS_USER
+
+    if downloadBinary; then
+      echo
+      echo "*** Download successful"
+      echo
+    else
+      echo
+      echo "*** Download binary failed"
+      echo
+      exit 1
+    fi
+
+    # set PATH for the user
+    sudo bash -c "echo 'PATH=\$PATH:/home/itchysats/bin/' >> /home/itchysats/.profile"
 
     ###############
     # CONFIG
@@ -250,15 +263,35 @@ fi
 #  UPDATE
 ###############
 if [ "$1" = "update" ]; then
-  echo "# Updating ItchySats"
+    echo
+    echo "*** Updating ItchySats"
+    echo
 
-  # Remove ItchySats, keeping database
-  /home/admin/config.scripts/bonus.itchysats.sh off --keep-data
+    echo
+    echo "*** Making sure service is not running"
+    echo
+    sudo systemctl stop itchysats
 
-  # Reinstall ItchySats witch existing database
-  /home/admin/config.scripts/bonus.itchysats.sh on
+    echo
+    echo "*** Removing old binary and downloading new"
+    echo
+    if downloadBinary; then
+      echo
+      echo "*** Upgrade successful"
+      echo
+    else
+      echo
+      echo "*** Upgrade failed"
+      echo
+      exit 1
+    fi
 
-  exit 0
+    echo
+    echo "*** Restarting service"
+    echo
+    sudo systemctl start itchysats
+
+    exit 0
 fi
 
 ###############

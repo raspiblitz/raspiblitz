@@ -489,6 +489,10 @@ if [ "${runBehindTor}" == "on" ]; then
   OPTIONS+=(TOR "Update Tor from the source code")
 fi
 
+if [ "${itchysats}" == "on" ]; then
+  OPTIONS+=(ITCHYSATS "Update ItchySats")
+fi
+
 CHOICE_HEIGHT=$(("${#OPTIONS[@]}/2+1"))
 HEIGHT=$((CHOICE_HEIGHT+6))
 CHOICE=$(dialog --clear \
@@ -537,5 +541,8 @@ case $CHOICE in
     ;;
   MEMPOOL)
     /home/admin/config.scripts/bonus.mempool.sh update
+    ;;
+  ITCHYSATS)
+    /home/admin/config.scripts/bonus.itchysats.sh update
     ;;
 esac
