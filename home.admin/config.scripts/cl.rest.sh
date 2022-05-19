@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # https://github.com/Ride-The-Lightning/c-lightning-REST/releases/
-CLRESTVERSION="v0.7.0"
+CLRESTVERSION="v0.7.2"
 
 # help
 if [ $# -eq 0 ]||[ "$1" = "-h" ]||[ "$1" = "--help" ];then
@@ -9,7 +9,6 @@ if [ $# -eq 0 ]||[ "$1" = "-h" ]||[ "$1" = "--help" ];then
   echo "C-lightning-REST install script"
   echo "The default version is: $CLRESTVERSION"
   echo "mainnet | testnet | signet instances can run parallel"
-  echo "The same macaroon and certs will be used for the parallel networks"
   echo
   echo "Usage:"
   echo "cl.rest.sh [on|off|connect] <mainnet|testnet|signet> [?key-value]"
@@ -42,7 +41,7 @@ if [ "$1" = connect ];then
   /home/admin/config.scripts/tor.onion-service.sh ${netprefix}clrest 443 ${portprefix}6100 1>/dev/null
 
   toraddress=$(sudo cat /mnt/hdd/tor/${netprefix}clrest/hostname)
-  hex_macaroon=$(xxd -plain /home/bitcoin/c-lightning-REST/certs/access.macaroon | tr -d '\n')
+  hex_macaroon=$(xxd -plain /home/bitcoin/c-lightning-REST/${CLNETWORK}/certs//access.macaroon | tr -d '\n')
   url="https://${localip}:${portprefix}6100/"
   lndconnect="lndconnect://${toraddress}:443?macaroon=${hex_macaroon}"
 
@@ -126,6 +125,11 @@ if [ "$1" = on ]; then
     \"RPCCOMMANDS\": [\"*\"]
 }" | sudo -u bitcoin tee ./${CLNETWORK}/cl-rest-config.json
 
+  # copy clrest to a CLNETWORK subdor to make parallel networks possible
+  sudo -u bitcoin mkdir /home/bitcoin/c-lightning-REST/${CLNETWORK}
+  sudo -u bitcoin cp -r /home/bitcoin/c-lightning-REST/* \
+   /home/bitcoin/c-lightning-REST/${CLNETWORK}
+
   echo "
 # systemd unit for c-lightning-REST for ${CHAIN}
 # /etc/systemd/system/${netprefix}clrest.service
@@ -135,8 +139,7 @@ Wants=${netprefix}lightningd.service
 After=${netprefix}lightningd.service
 
 [Service]
-WorkingDirectory=/home/bitcoin/c-lightning-REST/${CLNETWORK}
-ExecStart=/usr/bin/node /home/bitcoin/c-lightning-REST/cl-rest.js
+ExecStart=/usr/bin/node /home/bitcoin/c-lightning-REST/${CLNETWORK}/cl-rest.js
 User=bitcoin
 Restart=always
 TimeoutSec=120
