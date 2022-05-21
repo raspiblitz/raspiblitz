@@ -100,10 +100,10 @@ fi
 # URL to call (http & https+fingerprint) otherwise some instruction how to start it.
 
 # This SSH dialog will be later called by the MAIN MENU to be available to the user
-# when app is istalled.
+# when app is installed.
 
 # This menu can also have some more complex structure if you want to make it easy
-# to the user to set configurations or maintance options - example bonus.lnbits.sh
+# to the user to set configurations or maintenance options - example bonus.lnbits.sh
 
 # show info menu
 if [ "$1" = "menu" ]; then
@@ -153,12 +153,12 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   /home/admin/config.scripts/bonus.nodejs.sh on
 
   # create a dedicated user for the app 
-  # BACKGROUND is here to seperate running apps by unix users
+  # BACKGROUND is here to separate running apps by unix users
   # and only give file write access to the rest of the system where needed.
   echo "# create user"
   sudo adduser --disabled-password --gecos "" ${APPID} || exit 1
 
-  # add user to speical groups with special access rights
+  # add user to special groups with special access rights
   # BACKGROUND there are some unix groups available that will give the access to
   # like for example to the lnd admin macaroons - to check all groups available use:
   # `cut -d: -f1 /etc/group | sort` command on raspiblitz commandline
@@ -169,7 +169,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # BACKGROUND is that any critical data that needs to survive an update should
   # be stored in that app-data directory. All data there will also be part of
   # any raspiblitz data migration. Also on install handle the case that there
-  # is already data from a pervious install available the user wants to 
+  # is already data from a previous install available the user wants to
   # continue to use and even may come from an older version from your app.
 
   if ! [ -d /mnt/hdd/app-data/${APPID} ]; then
@@ -205,7 +205,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   # compile/install the app
   # BACKGROUND on this example is a web app that compiles with NodeJS. But of course
-  # your app could have a complete other way to install - check other instal screipts as examples.
+  # your app could have a complete other way to install - check other install scripts as examples.
   echo "# compile/install the app"
   cd /home/${APPID}/${APPID} 
   sudo -u ${APPID} npm install --only=prod --logLevel warn
@@ -260,8 +260,8 @@ WantedBy=multi-user.target
   fi
 
   # nginx configuration
-  # BACKGROUND is that the plain HTTP is served by your web app, but thru the nginx proxy it will be avaibale
-  # with (self-signed) HTTPS and with sepereate configs for Tor & Tor+HTTPS.
+  # BACKGROUND is that the plain HTTP is served by your web app, but thru the nginx proxy it will be available
+  # with (self-signed) HTTPS and with separate configs for Tor & Tor+HTTPS.
   
   echo "# setup nginx confing"
 
@@ -305,8 +305,8 @@ server {
     server_name _;
     include /etc/nginx/snippets/ssl-params.conf;
     include /etc/nginx/snippets/ssl-certificate-app-data-tor.conf;
-    access_log /var/log/nginx/access_${appID}.log;
-    error_log /var/log/nginx/error_${appID}.log;
+    access_log /var/log/nginx/access_${APPID}.log;
+    error_log /var/log/nginx/error_${APPID}.log;
     location / {
         proxy_pass http://127.0.0.1:${PORT_CLEAR};
         include /etc/nginx/snippets/ssl-proxy-params.conf;
@@ -364,7 +364,7 @@ fi
 # config parameters for this app can be updated so that it always starts with the most updated
 # values. With such an "adhoc config" it is for example possible to check right before start
 # what other apps are installed and configure connections. Even if those configs outdate later
-# while the app is running with the next restart they will then autmatically update their config
+# while the app is running with the next restart they will then automatically update their config
 # again. If you dont need such "adhoc" config for your app - just leave it empty as it is, so
 # you maybe later on have the option to use it.
 
@@ -379,7 +379,7 @@ if [ "$1" = "prestart" ]; then
 
   echo "## PRESTART CONFIG START for ${APPID} (called by systemd prestart)"
 
-  # so if you have anything to configrure before service starts, do it here
+  # so if you have anything to configure before service starts, do it here
   echo "# no need for adhoc config needed so far"
 
   echo "## PRESTART CONFIG DONE for ${APPID}"
@@ -434,7 +434,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
 fi
 
-# just a basic error message when unknow action parameter was given  
+# just a basic error message when unknown action parameter was given
 echo "# FAIL - Unknown Parameter $1"
 exit 1
 
