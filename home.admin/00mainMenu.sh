@@ -68,9 +68,9 @@ if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
   OPTIONS+=(LND "LND Wallet Options")
 fi
 
-# if C-Lightning is active
+# if Core Lightning is active
 if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ]; then
-  OPTIONS+=(CL "C-lightning Wallet Options")
+  OPTIONS+=(CLN "Core Lightning Wallet Options")
 fi
 
 # Activated Apps/Services
@@ -78,7 +78,7 @@ if [ "${rtlWebinterface}" == "on" ]; then
   OPTIONS+=(LRTL "LND RTL Webinterface")
 fi
 if [ "${crtlWebinterface}" == "on" ]; then
-  OPTIONS+=(CRTL "C-Lightning RTL Webinterface")
+  OPTIONS+=(CRTL "Core Lightning RTL Webinterface")
 fi
 if [ "${BTCPayServer}" == "on" ]; then
   OPTIONS+=(BTCPAY "BTCPay Server Info")
@@ -102,7 +102,7 @@ if [ "${LNBits}" == "on" ]; then
   if [ "${LNBitsFunding}" == "lnd" ] || [ "${LNBitsFunding}" == "tlnd" ] || [ "${LNBitsFunding}" == "slnd" ] || [ "${LNBitsFunding}" == "" ]; then
     OPTIONS+=(LNBITS "LNbits on LND")
   elif [ "${LNBitsFunding}" == "cl" ] || [ "${LNBitsFunding}" == "tcl" ] || [ "${LNBitsFunding}" == "scl" ]; then
-    OPTIONS+=(LNBITS "LNbits on c-lightning")
+    OPTIONS+=(LNBITS "LNbits on Core Lightning")
   fi
 fi
 if [ "${lndmanage}" == "on" ]; then
@@ -228,7 +228,7 @@ case $CHOICE in
         LND)
             /home/admin/99lndMenu.sh
             ;;
-        CL)
+        CLN)
             /home/admin/99clMenu.sh ${chain}net
             ;;
         CONNECT)
