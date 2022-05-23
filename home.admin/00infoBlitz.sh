@@ -272,7 +272,7 @@ fi
 ${color_yellow}
 ${color_yellow}${ln_publicColor}${ln_external}${color_gray}"
 
-if [ "${joinmarket}" = "on" ];then 
+if [ "${joinmarket}" = "on" ];then
   # show JoinMarket stats in place of the LND URI only if the Yield Generator is running
   if [ $(sudo -u joinmarket pgrep -f "yg-privacyenhanced.py" 2>/dev/null | wc -l) -gt 2 ]; then
     trap 'rm -f "$JMstats"' EXIT
@@ -292,14 +292,14 @@ ${color_gray}  ◎=◎=◎=◎=◎    ${color_gray}$JMstatsL4"
 fi
 
 if [ "${lightning}" == "cl" ]; then
-  LNline="C-LIGHTNING ${color_green}${ln_version} ${ln_baseInfo}"
+  LNline="CLN ${color_green}${ln_version} ${ln_baseInfo}"
 elif [ "${lightning}"  == "lnd" ]; then
   LNline="LND ${color_green}${ln_version} ${ln_baseInfo}"
 fi
 
 LNinfo=" + Lightning Network"
 if [ "${lightning}" == "" ] || [ "${lightning}" == "none" ]; then
-  LNinfo=""  
+  LNinfo=""
 fi
 
 datetime=$(date -R)
