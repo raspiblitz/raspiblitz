@@ -52,7 +52,7 @@ sudo systemctl stop lnd
 sudo touch /home/admin/lnd.db.bolt.auto-compact.log
 sudo chmod 777 /home/admin/lnd.db.bolt.auto-compact.log
 echo "# Run LND with --db.bolt.auto-compact"
-sudo -u bitcoin /usr/local/bin/lnd --configfile=/home/bitcoin/.lnd/lnd.conf --db.bolt.auto-compact > /home/admin/lnd.db.bolt.auto-compact.log &
+sudo -u bitcoin /usr/local/bin/lnd --configfile=/home/bitcoin/.lnd/lnd.conf --db.bolt.auto-compact --db.bolt.auto-compact-min-age=0 > /home/admin/lnd.db.bolt.auto-compact.log &
 
 echo "# Compacting channel.db, this can take a long time"
 
