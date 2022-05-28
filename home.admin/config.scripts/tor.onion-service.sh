@@ -29,12 +29,13 @@ if [ "$1" == "off" ]; then
   sudo sed -i "/# Hidden Service for ${service}/,/^\s*$/{d}" "${torrc_services}"
 
   # remove double empty lines
+  _temp=$(mktemp -p /dev/shm/)
   sudo mkdir /var/cache/raspiblitz/tmp 2>/dev/null
   sudo cp "${torrc_services}" /var/cache/raspiblitz/tmp
   sudo chmod 777 /var/cache/raspiblitz/tmp
   sudo chown -R admin:admin /var/cache/raspiblitz/tmp
-  sudo awk 'NF > 0 {blank=0} NF == 0 {blank++} blank < 2' "${torrc_services}" > /var/cache/raspiblitz/tmp
-  sudo mv /var/cache/raspiblitz/tmp "${torrc_services}"
+  sudo awk 'NF > 0 {blank=0} NF == 0 {blank++} blank < 2' "${torrc_services}" > "${_temp}"
+  sudo mv "${_temp}" "${torrc_services}"
   sudo chmod 644 "${torrc_services}"
   sudo chown bitcoin:bitcoin "${torrc_services}"
 
