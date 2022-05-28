@@ -254,7 +254,7 @@ In the end your RaspiBlitz should look like this:
 
 If downloading the maintainer SD card image:
 * GPG 64-bit (main): 1C73 060C 7C17 6461 & (sub): AA9D D1B5 CC56 47DA
-* SHA-256: bea47c5c3f84bbca2d802b14a797dc292abd14c0f836d4afa87a05877eb34db2
+* SHA-256: 4c742e7877e5eee2c67d2d4eb7f8cab12e6d300566512bbc1e97f7e6f512a6f4
 
 Which verification method should I used: Hash or Signature?
 * Signed file prove to you that the SD card image was actually built by the lead developer of the RaspiBlitz project. (Safest)
