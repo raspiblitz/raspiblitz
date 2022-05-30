@@ -9,6 +9,7 @@
 - New: Alby (Connection Menu) [details](https://getalby.com/)
 - New: Squeaknode [details](https://github.com/squeaknode/squeaknode#readme)
 - New: Homer Dashboard [details](https://github.com/bastienwirtz/homer#readme)
+- New: ItchySats [details](https://github.com/itchysats/itchysats/)
 - Update: Bitcoin Core v23.0 [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-23.0.md)
 - Update: Core Lightning (CLN - formerly C-lightning) v0.11.1 [details](https://github.com/ElementsProject/lightning/releases/tag/v0.11.1)
 - Update: LND v0.14.3 [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.14.3-beta)
