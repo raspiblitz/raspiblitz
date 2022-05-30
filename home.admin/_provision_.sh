@@ -736,6 +736,15 @@ else
   echo "Provisioning Squeaknode - keep default" >> ${logFile}
 fi
 
+# itchysats
+if [ "${itchysats}" = "on" ]; then
+  echo "Provisioning ItchySats - run config script" >> ${logFile}
+  sudo sed -i "s/^message=.*/message='Setup ItchySats'/g" ${infoFile}
+  sudo -u admin /home/admin/config.scripts/bonus/itchysats.sh on >> ${logFile} 2>&1
+else
+  echo "ItchySats - keep default" >> ${logFile}
+fi
+
 # custom install script from user
 customInstallAvailable=$(ls /mnt/hdd/app-data/custom-installs.sh 2>/dev/null | grep -c "custom-installs.sh")
 if [ ${customInstallAvailable} -gt 0 ]; then

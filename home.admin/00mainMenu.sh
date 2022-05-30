@@ -156,9 +156,12 @@ if [ "${circuitbreaker}" == "on" ]; then
 fi
 if [ "${tallycoinConnect}" == "on" ]; then
   OPTIONS+=(TALLY "Tallycoin Connect")
-fi  
+fi
 if [ "${squeaknode}" == "on" ]; then
   OPTIONS+=(SQUEAKNODE "Squeaknode")
+fi
+if [ "${itchysats}" == "on" ]; then
+  OPTIONS+=(ITCHYSATS "Show ItchySats details")
 fi
 
 # dont offer to switch to "testnet view for now" - so no wswitch back to mainnet needed
@@ -313,6 +316,9 @@ case $CHOICE in
 
         SQUEAKNODE)
             /home/admin/config.scripts/bonus.squeaknode.sh menu
+            ;;
+        ITCHYSATS)
+            sudo /home/admin/config.scripts/bonus.itchysats.sh menu
             ;;
         CHANTOOLS)
             sudo /home/admin/config.scripts/bonus.chantools.sh menu
