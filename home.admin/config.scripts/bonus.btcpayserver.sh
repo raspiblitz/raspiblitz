@@ -5,11 +5,7 @@
 # https://github.com/dgarage/NBXplorer/tags
 NBXplorerVersion="v2.2.20"
 # https://github.com/btcpayserver/btcpayserver/releases
-BTCPayVersion="v1.5.1"
-
-PGPsigner="nicolasdorier"
-PGPpubkeyLink="https://keybase.io/nicolasdorier/pgp_keys.asc"
-PGPpubkeyFingerprint="AB4CFA9895ACA0DBE27F6B346618763EF09186FE"
+BTCPayVersion="v1.5.4"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -340,6 +336,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     cd NBXplorer || exit 1
     sudo -u btcpay git reset --hard $NBXplorerVersion
     # PGP verify
+
+    PGPsigner="nicolasdorier"
+    PGPpubkeyLink="https://keybase.io/nicolasdorier/pgp_keys.asc"
+    PGPpubkeyFingerprint="AB4CFA9895ACA0DBE27F6B346618763EF09186FE"
+
     sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh \
      "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
     echo "# Build NBXplorer ..."
@@ -436,6 +437,10 @@ btc.rpc.password=$PASSWORD_B
 
     # sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh \
     #  "web-flow" "https://github.com/web-flow.gpg" "4AEE18F83AFDEB23" || exit 1
+    PGPsigner="Kukks"
+    PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
+    PGPpubkeyFingerprint="8E5530D9D1C93097"
+
     sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh \
      "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
 
@@ -547,45 +552,48 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo systemctl stop btcpayserver
     sudo systemctl disable btcpayserver
     sudo rm /etc/systemd/system/btcpayserver.service
-    # nbxplorer
-    sudo systemctl stop nbxplorer
-    sudo systemctl disable nbxplorer
-    sudo rm /etc/systemd/system/nbxplorer.service
-    # clear dotnet cache
-    /home/btcpay/dotnet/dotnet nuget locals all --clear
-    sudo rm -rf /tmp/NuGetScratch
-    # remove dotnet
-    sudo rm -rf /usr/share/dotnet
-    # clear app config (not user data)
-    sudo rm -f /home/btcpay/.nbxplorer/Main/settings.config
-    sudo rm -f /home/btcpay/.btcpayserver/Main/settings.config
-    # clear nginx config (from btcpaysetdomain)
-    sudo rm -f /etc/nginx/sites-enabled/btcpayserver
-    sudo rm -f /etc/nginx/sites-available/btcpayserver
-    # remove nginx symlinks
-    sudo rm -f /etc/nginx/sites-enabled/btcpay_ssl.conf
-    sudo rm -f /etc/nginx/sites-enabled/btcpay_tor.conf
-    sudo rm -f /etc/nginx/sites-enabled/btcpay_tor_ssl.conf
-    sudo rm -f /etc/nginx/sites-available/btcpay_ssl.conf
-    sudo rm -f /etc/nginx/sites-available/btcpay_tor.conf
-    sudo rm -f /etc/nginx/sites-available/btcpay_tor_ssl.conf
-    sudo nginx -t
-    sudo systemctl reload nginx
-    # nuke user
-    sudo userdel -rf btcpay 2>/dev/null
-    if [ ${deleteData} -eq 1 ]; then
-      echo "# deleting data"
-      sudo rm -R /mnt/hdd/app-data/.btcpayserver/
-    else
-      echo "# keeping data"
-    fi
-    echo "# OK BTCPayServer removed."
   else
-    echo "# BTCPayServer is not installed."
+    echo "# The btcpayserver.service is not installed."
   fi
+
+  # nbxplorer
+  sudo systemctl stop nbxplorer
+  sudo systemctl disable nbxplorer
+  sudo rm /etc/systemd/system/nbxplorer.service
+  # clear dotnet cache
+  /home/btcpay/dotnet/dotnet nuget locals all --clear
+  sudo rm -rf /tmp/NuGetScratch
+  # remove dotnet
+  sudo rm -rf /usr/share/dotnet
+  # clear app config (not user data)
+  sudo rm -f /home/btcpay/.nbxplorer/Main/settings.config
+  sudo rm -f /home/btcpay/.btcpayserver/Main/settings.config
+  # clear nginx config (from btcpaysetdomain)
+  sudo rm -f /etc/nginx/sites-enabled/btcpayserver
+  sudo rm -f /etc/nginx/sites-available/btcpayserver
+  # remove nginx symlinks
+  sudo rm -f /etc/nginx/sites-enabled/btcpay_ssl.conf
+  sudo rm -f /etc/nginx/sites-enabled/btcpay_tor.conf
+  sudo rm -f /etc/nginx/sites-enabled/btcpay_tor_ssl.conf
+  sudo rm -f /etc/nginx/sites-available/btcpay_ssl.conf
+  sudo rm -f /etc/nginx/sites-available/btcpay_tor.conf
+  sudo rm -f /etc/nginx/sites-available/btcpay_tor_ssl.conf
+  sudo nginx -t
+  sudo systemctl reload nginx
+  # nuke user
+  sudo userdel -rf btcpay 2>/dev/null
+  if [ ${deleteData} -eq 1 ]; then
+    echo "# deleting data"
+    sudo rm -R /mnt/hdd/app-data/.btcpayserver/
+  else
+    echo "# keeping data"
+  fi
+  echo "# OK BTCPayServer removed."
 
   # needed for API/WebUI as signal that install ran thru
   echo "result='OK'"
+
+  exit 0
 fi
 
 if [ "$1" = "update" ]; then
