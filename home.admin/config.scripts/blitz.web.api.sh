@@ -91,6 +91,7 @@ Type=simple
 Restart=always
 StandardOutput=journal
 StandardError=journal
+RestartSec=60
 
 # Hardening measures
 PrivateTmp=true
