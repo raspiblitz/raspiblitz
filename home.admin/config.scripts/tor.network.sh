@@ -129,6 +129,7 @@ case "$1" in
     if [ "${helipad}" = "on" ]; then
     /home/admin/config.scripts/tor.onion-service.sh helipad 2112 2113
     fi
+    [ "${itchysats}" = "on" ] && /home/admin/config.scripts/tor.onion-service.sh itchysats 80 8890 443 8891
 
     echo "Setup logrotate"
     # add logrotate config for modified Tor dir on ext. disk
