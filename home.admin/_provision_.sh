@@ -740,7 +740,7 @@ fi
 if [ "${itchysats}" = "on" ]; then
   echo "Provisioning ItchySats - run config script" >> ${logFile}
   sudo sed -i "s/^message=.*/message='Setup ItchySats'/g" ${infoFile}
-  sudo -u admin /home/admin/config.scripts/bonus/itchysats.sh on >> ${logFile} 2>&1
+  sudo -u admin /home/admin/config.scripts/bonus.itchysats.sh on --download >> ${logFile} 2>&1
 else
   echo "ItchySats - keep default" >> ${logFile}
 fi
