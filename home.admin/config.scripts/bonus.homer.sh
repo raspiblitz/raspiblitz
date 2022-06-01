@@ -27,7 +27,7 @@ if [ "$1" = "menu" ]; then
   toraddress=$(sudo cat /mnt/hdd/tor/homer/hostname 2>/dev/null)
   fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
 
-  additionalInfo="Edit /mnt/hdd/app-data/homer/config.yml to customize Homer"
+  additionalInfo="Config file: /mnt/hdd/app-data/homer/config.yml"
 
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
 
@@ -38,7 +38,8 @@ https://${localip}:4091\n
 SHA1 Thumb/Fingerprint:
 ${fingerprint}\n
 Hidden Service address for TOR Browser (QR see LCD):
-${toraddress}
+${toraddress}\n
+${additionalInfo}
 " 16 67
     /home/admin/config.scripts/blitz.display.sh hide
   else
@@ -48,7 +49,8 @@ ${toraddress}
 https://${localip}:4091\n
 SHA1 Thumb/Fingerprint:
 ${fingerprint}\n
-Activate TOR to access the web block explorer from outside your local network.
+Activate TOR to access the web block explorer from outside your local network.\n
+${additionalInfo}
 " 16 54
   fi
 
