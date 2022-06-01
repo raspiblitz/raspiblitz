@@ -22,11 +22,12 @@ if [ "$1" = "menu" ]; then
   echo "# collecting status info ... (please wait)"
   source <(sudo /home/admin/config.scripts/bonus.homer.sh status)
 
-
   # get network info
   localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
   toraddress=$(sudo cat /mnt/hdd/tor/homer/hostname 2>/dev/null)
   fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
+
+  additionalInfo="Edit /mnt/hdd/app-data/homer/config.yml to customize Homer"
 
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
 
@@ -200,7 +201,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   source /mnt/hdd/raspiblitz.conf
   if [ "${runBehindTor}" = "on" ]; then
     # make sure to keep in sync with internet.tor.sh script
-    /home/admin/config.scripts/internet.hiddenservice.sh homer 80 4092 443 4093
+    /home/admin/config.scripts/tor.onion-service.sh homer 80 4092 443 4093
   fi
   exit 0
 fi
@@ -239,7 +240,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     # Hidden Service if Tor is active
     if [ "${runBehindTor}" = "on" ]; then
       # make sure to keep in sync with internet.tor.sh script
-      /home/admin/config.scripts/internet.hiddenservice.sh off homer
+      /home/admin/config.scripts/tor.onion-service.sh off homer
     fi
 
     echo "# OK Homer removed."

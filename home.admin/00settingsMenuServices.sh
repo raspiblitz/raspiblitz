@@ -289,7 +289,7 @@ else
 fi
 
 # LNDMANAGE process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "m")
+choice="off"; check=$(echo "${CHOICES}" | grep -c "ä")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${lndmanage}" != "${choice}" ]; then
   echo "lndmanage Setting changed .."
