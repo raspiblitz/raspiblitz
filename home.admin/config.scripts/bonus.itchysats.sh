@@ -100,101 +100,6 @@ if [ "$1" = "info" ]; then
 fi
 
 ##########################
-# Helper funcitons
-#########################
-
-
-buildFromSource() {
-    # make sure needed debian packages are installed
-    # 'fbi' is here just an example - change to what you need or delete
-    echo "# Install from source code"
-
-    # install Rust dependencies:
-    echo "# Installing rustup for the ${APPID} user"
-    cd /home/${APPID} || exit 1
-    curl --proto '=https' --tlsv1.2 -sSs https://sh.rustup.rs | sudo -u ${APPID} sh -s -- -y
-
-    # download source code and verify
-    # BACKGROUND is that now you download the code from github, reset to a given version tag/commit,
-    # verify the author. If you app provides its source/binaries in another way, may check
-    # other install scripts to see how that implement code download & verify.
-    echo "# download from source code & verify"
-    sudo -u ${APPID} git clone ${GITHUB_REPO} /home/${APPID}/${APPID}
-    cd /home/${APPID}/${APPID} || exit 1
-
-    sudo -u ${APPID} git reset --hard "$GITHUB_VERSION"
-    if [ "${GITHUB_SIGN_AUTHOR}" != "" ]; then
-      sudo -u ${APPID} /home/admin/config.scripts/blitz.git-verify.sh \
-       "${GITHUB_SIGN_AUTHOR}" "${GITHUB_SIGN_PUBKEYLINK}" "${GITHUB_SIGN_FINGERPRINT}" "${GITHUB_VERSION}" || exit 1
-    fi
-
-    # compile/install the app
-    # BACKGROUND on this example is a web app that compiles with NodeJS. But of course
-    # your app could have a complete other way to install - check other instal screipts as examples.
-    echo "# compile/install the app. This will take a long time"
-    sudo -u ${APPID} /home/${APPID}/.cargo/bin/cargo install --path taker --locked --target-dir /home/${APPID}/bin/
-    exitCode=$?
-    if ! [ ${exitCode} -eq 0 ]; then
-        echo "# FAIL - cargo install did not run correctly - deleting code & exit"
-        sudo rm -r /home/${APPID}/${APPID}
-        exit 1
-    fi
-}
-
-downloadBinary() {
-    echo "# Detect CPU architecture ..."
-    architecture=$(uname -m)
-    isAARCH64=$(uname -m | grep -c 'aarch64')
-    isX86_64=$(uname -m | grep -c 'x86_64')
-    if [ ${isAARCH64} -eq 0 ] && [ ${isX86_64} -eq 0 ] ; then
-        echo "# !!! FAIL !!!"
-        echo "# Can only build on aarch64 or x86_64 not on:"
-        uname -m
-        exit 1
-    else
-        echo "# OK running on $architecture architecture."
-    fi
-
-    # create directories
-    sudo -u ${APPID} mkdir -p /home/${APPID}/downloads
-    sudo rm -fR /home/${APPID}/downloads/*
-    cd /home/${APPID}/downloads/ || exit 1
-
-    echo "# Downloading Binary"
-    archiveName="taker_${GITHUB_VERSION}_Linux_${architecture}.tar"
-    sudo -u ${APPID} wget -N ${GITHUB_REPO}/releases/download/"${GITHUB_VERSION}"/"${archiveName}"
-    checkDownload=$(ls "${archiveName}" 2>/dev/null | grep -c "${archiveName}")
-    if [ "${checkDownload}" -eq 0 ]; then
-        echo "# !!! FAIL !!!"
-        echo "# Downloading the binary failed"
-        exit 1
-    fi
-
-    # install
-    echo "# unzip binary: ${archiveName}"
-    sudo -u ${APPID} tar -xvf "${archiveName}"
-    echo "# install binary"
-    sudo -u ${APPID} mkdir -p /home/${APPID}/bin
-    sudo install -m 0755 -o ${APPID} -g ${APPID} -t /home/${APPID}/bin taker
-    sleep 3
-
-    sudo -u ${APPID} "${ITCHYSATS_BIN_DIR}" --help 1> /dev/null
-    exitstatus=$?
-    if [ "${exitstatus}" -ne 0 ]; then
-        echo "# !!! FAIL !!!"
-        echo "# install failed"
-        exit 1
-    fi
-
-    echo
-    echo "# Cleaning up download artifacts"
-    echo
-
-    sudo -u ${APPID} rm -f "${archiveName}"
-    sudo -u ${APPID} rm -f taker
-}
-
-##########################
 # MENU
 #########################
 
@@ -292,9 +197,91 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   echo "# Build var set to (${build})"
   if [ ${build} -eq 1 ]; then
-    buildFromSource
+    # make sure needed debian packages are installed
+    # 'fbi' is here just an example - change to what you need or delete
+    echo "# Install from source code"
+
+    # install Rust dependencies:
+    echo "# Installing rustup for the ${APPID} user"
+    cd /home/${APPID} || exit 1
+    curl --proto '=https' --tlsv1.2 -sSs https://sh.rustup.rs | sudo -u ${APPID} sh -s -- -y
+
+    # download source code and verify
+    # BACKGROUND is that now you download the code from github, reset to a given version tag/commit,
+    # verify the author. If you app provides its source/binaries in another way, may check
+    # other install scripts to see how that implement code download & verify.
+    echo "# download from source code & verify"
+    sudo -u ${APPID} git clone ${GITHUB_REPO} /home/${APPID}/${APPID}
+    cd /home/${APPID}/${APPID} || exit 1
+
+    sudo -u ${APPID} git reset --hard "$GITHUB_VERSION"
+    if [ "${GITHUB_SIGN_AUTHOR}" != "" ]; then
+      sudo -u ${APPID} /home/admin/config.scripts/blitz.git-verify.sh \
+       "${GITHUB_SIGN_AUTHOR}" "${GITHUB_SIGN_PUBKEYLINK}" "${GITHUB_SIGN_FINGERPRINT}" "${GITHUB_VERSION}" || exit 1
+    fi
+
+    # compile/install the app
+    # BACKGROUND on this example is a web app that compiles with NodeJS. But of course
+    # your app could have a complete other way to install - check other instal screipts as examples.
+    echo "# compile/install the app. This will take a long time"
+    sudo -u ${APPID} /home/${APPID}/.cargo/bin/cargo install --path taker --locked --target-dir /home/${APPID}/bin/
+    exitCode=$?
+    if ! [ ${exitCode} -eq 0 ]; then
+        echo "# FAIL - cargo install did not run correctly - deleting code & exit"
+        sudo rm -r /home/${APPID}/${APPID}
+        exit 1
+    fi
   else
-    downloadBinary
+    echo "# Detect CPU architecture ..."
+    architecture=$(uname -m)
+    isAARCH64=$(uname -m | grep -c 'aarch64')
+    isX86_64=$(uname -m | grep -c 'x86_64')
+    if [ ${isAARCH64} -eq 0 ] && [ ${isX86_64} -eq 0 ] ; then
+        echo "# !!! FAIL !!!"
+        echo "# Can only build on aarch64 or x86_64 not on:"
+        uname -m
+        exit 1
+    else
+        echo "# OK running on $architecture architecture."
+    fi
+
+    # create directories
+    sudo -u ${APPID} mkdir -p /home/${APPID}/downloads
+    sudo rm -fR /home/${APPID}/downloads/*
+    cd /home/${APPID}/downloads/ || exit 1
+
+    echo "# Downloading Binary"
+    archiveName="taker_${GITHUB_VERSION}_Linux_${architecture}.tar"
+    sudo -u ${APPID} wget -N ${GITHUB_REPO}/releases/download/"${GITHUB_VERSION}"/"${archiveName}"
+    checkDownload=$(ls "${archiveName}" 2>/dev/null | grep -c "${archiveName}")
+    if [ "${checkDownload}" -eq 0 ]; then
+        echo "# !!! FAIL !!!"
+        echo "# Downloading the binary failed"
+        exit 1
+    fi
+
+    # install
+    echo "# unzip binary: ${archiveName}"
+    sudo -u ${APPID} tar -xvf "${archiveName}"
+    echo "# install binary"
+    sudo -u ${APPID} mkdir -p /home/${APPID}/bin
+    sudo install -m 0755 -o ${APPID} -g ${APPID} -t /home/${APPID}/bin taker
+    sleep 3
+
+    sudo -u ${APPID} "${ITCHYSATS_BIN_DIR}" --help 1> /dev/null
+    exitstatus=$?
+    if [ "${exitstatus}" -ne 0 ]; then
+        echo "# !!! FAIL !!!"
+        echo "# install failed"
+        exit 1
+    fi
+
+    echo
+    echo "# Cleaning up download artifacts"
+    echo
+
+    sudo -u ${APPID} rm -f "${archiveName}"
+    sudo -u ${APPID} rm -f taker
   fi
   exitstatus=$?
   if [ "${exitstatus}" -ne 0 ]; then
