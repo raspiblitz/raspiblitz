@@ -623,7 +623,7 @@ if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${itchysats}" != "${choice}" ]; then
   echo "ItchySats setting changed .."
   anychange=1
-  sudo -u admin /home/admin/config.scripts/bonus.itchysats.sh ${choice}
+  sudo -u admin /home/admin/config.scripts/bonus.itchysats.sh ${choice} --download
   if [ "${choice}" =  "on" ]; then
     sudo systemctl start itchysats
     sudo -u admin /home/admin/config.scripts/bonus.itchysats.sh menu

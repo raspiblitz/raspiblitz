@@ -476,7 +476,7 @@ if [ "$1" = "update" ]; then
     /home/admin/config.scripts/bonus.itchysats.sh off --keep-data
 
     # Reinstall ItchySats with existing data
-    if /home/admin/config.scripts/bonus.itchysats.sh on; then
+    if /home/admin/config.scripts/bonus.itchysats.sh on --download; then
         echo "# Updating successful"
     else
         echo "# Updating ItchySats failed :("
