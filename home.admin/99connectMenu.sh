@@ -20,8 +20,11 @@ OPTIONS+=(MOBILE "Connect Mobile Wallet")
 if [ "${ElectRS}" == "on" ]; then
   OPTIONS+=(ELECTRS "Electrum Rust Server")
 fi
-if [ "${BTCPayServer}" == "on" ]; then
-  OPTIONS+=(BTCPAY "Show LND connection string")
+if [ "${BTCPayServer}" == "on" ] && [ "${lnd}" = "on" ]; then
+  OPTIONS+=(BTCPAY-LND "Show LND connection string")
+fi
+if [ "${BTCPayServer}" == "on" ] && [ "${cl}" = "on" ]; then
+  OPTIONS+=(BTCPAY-CLN "Show CLN connection string")
 fi
 OPTIONS+=(${network}RPC "Connect Specter Desktop or JoinMarket")
 OPTIONS+=(BISQ "Connect Bisq to this node")
@@ -50,8 +53,13 @@ case $CHOICE in
     /home/admin/97addMobileWallet.sh;;
   ELECTRS)
     /home/admin/config.scripts/bonus.electrs.sh menu;;
-  BTCPAY)
+  BTCPAY-LND)
     /home/admin/config.scripts/lnd.export.sh btcpay
+    echo "Press ENTER to return to main menu."
+    read key
+    exit 0;;
+  BTCPAY-CLN)
+    /home/admin/config.scripts/bonus.btcpayserver.sh cln-lightning-rpc-access
     echo "Press ENTER to return to main menu."
     read key
     exit 0;;

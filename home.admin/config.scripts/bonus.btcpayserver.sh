@@ -11,7 +11,7 @@ BTCPayVersion="v1.5.4"
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "Config script to switch BTCPay Server on or off"
   echo "Usage:"
-  echo "bonus.btcpayserver.sh [on|off|menu|write-tls-macaroon]"
+  echo "bonus.btcpayserver.sh [on|off|menu|write-tls-macaroon|cln-lightning-rpc-access]"
   echo "installs BTCPayServer $BTCPayVersion with NBXplorer $NBXplorerVersion"
   echo "To update to the latest release published on github run:"
   echo "bonus.btcpayserver.sh update"
@@ -208,6 +208,38 @@ BTC.lightning=type=lnd-rest;server=https://127.0.0.1:8080/;macaroonfilepath=/hom
   if [ "${state}" == "ready" ]; then
     sudo systemctl restart btcpayserver
   fi
+  exit 0
+fi
+
+# cln-lightning-rpc-access
+if [ "$1" = "cln-lightning-rpc-access" ]; then
+  if [ "${cl}" = "on" ]; then
+    source <(/home/admin/config.scripts/network.aliases.sh getvars cl mainnet)
+
+    if [ $(grep -c "^rpc-file-mode=0660" < ${CLCONF}) -eq 0 ]; then
+      echo "rpc-file-mode=0660" | tee -a ${CLCONF}
+      if [ "${state}" == "ready" ]; then
+        sudo systemctl restart lightningd
+      fi
+    fi
+
+    echo "# make sure btcpay is member of the bitcoin group"
+    sudo /usr/sbin/usermod --append --groups bitcoin btcpay
+
+    if [ "${state}" == "ready" ]; then
+      sudo systemctl restart btcpayserver
+    fi
+  else
+    echo "# Install CLN first"
+    exit 1
+  fi
+
+  echo "
+In the BTCPayServer Lightning Wallet settings 'Connect to a Lightning node' page 
+fill in the 'Connection configuration for your custom Lightning node:' box on with:
+
+type=clightning;server=unix:///home/bitcoin/.lightning/bitcoin/lightning-rpc
+"
   exit 0
 fi
 
@@ -498,8 +530,12 @@ WantedBy=multi-user.target
     fi
 
     sudo -u btcpay mkdir -p /home/btcpay/.btcpayserver/Main/
-    /home/admin/config.scripts/bonus.btcpayserver.sh write-tls-macaroon
-
+    if [ ${lnd} = on ]; then
+      /home/admin/config.scripts/bonus.btcpayserver.sh write-tls-macaroon
+    fi
+    if [ ${cl} = on ]; then
+      /home/admin/config.scripts/bonus.btcpayserver.sh cln-lightning-rpc-access
+    fi
   else
     echo "# BTCPay Server is already installed."
     if [ "${state}" == "ready" ]; then
