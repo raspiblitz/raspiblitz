@@ -67,6 +67,7 @@ function blitzhelp() {
   echo "  lit          Lightning Terminal"
   echo "  jm           JoinMarket"
   echo "  pyblock      PyBlock"
+  echo "  ckbunker     CKbunker"
   echo
   echo "Extras:"
   echo "  whitepaper   download the whitepaper from the blockchain to /home/admin/bitcoin.pdf"
@@ -308,6 +309,19 @@ function jm() {
   else
     echo "JoinMarket is not installed - to install run:"
     echo "sudo /home/admin/config.scripts/bonus.joinmarket.sh on"
+  fi
+}
+
+# command: ckbunker
+# switch to the ckbunker user
+function ckbunker() {
+  if [ $(grep -c "ckbunker=on"  < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
+    echo "# switching to the ckbunker user with the command: 'sudo su - ckbunker'"
+    sudo su - ckbunker
+    echo "# use command 'raspiblitz' to return to menu"
+  else
+    echo "ckbunker is not installed - to install run:"
+    echo "sudo /home/admin/config.scripts/bonus.ckbunker.sh on"
   fi
 }
 
