@@ -67,7 +67,7 @@ if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
   OPTIONS+=(x 'LND Sphinx-Relay' ${sphinxrelay})
   OPTIONS+=(f 'LND Helipad Boostagram reader' ${helipad})
   OPTIONS+=(d 'LND Tallycoin Connect' ${tallycoinConnect})
-  OPTIONS+=(q 'LND Squeaknode' ${squeaknode})
+  #OPTIONS+=(q 'LND Squeaknode' ${squeaknode})
 fi
 
 # just available for CL

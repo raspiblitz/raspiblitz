@@ -7,7 +7,6 @@
 - New: ZRAM - compressed swap in memory [details](https://github.com/rootzoll/raspiblitz/issues/2905)
 - New: Core Lightning GRPC plugin [details](https://github.com/rootzoll/raspiblitz/pull/3109)
 - New: Alby (Connection Menu) [details](https://getalby.com/)
-- New: Squeaknode [details](https://github.com/squeaknode/squeaknode#readme)
 - New: Homer Dashboard [details](https://github.com/bastienwirtz/homer#readme)
 - New: ItchySats [details](https://github.com/itchysats/itchysats/)
 - Update: Bitcoin Core v23.0 [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-23.0.md)
