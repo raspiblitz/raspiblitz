@@ -24,7 +24,7 @@ hashedPasswordSalt=""
 hashedPasswordStoragePath="/mnt/hdd/app-data/passwords"
 if [ $(df | grep -c "/mnt/hdd") -gt 0 ]; then
   # check if path & salt file exists
-  if [ $(ls ${hashedPasswordStoragePath}/salt.txt | grep -c "salt.txt") -eq 0 ]; then
+  if [ $(ls ${hashedPasswordStoragePath}/salt.txt grep -c "salt.txt") -eq 0 ]; then
     echo "# creating salt & hashedPasswordStoragePath ..."
     mkdir -p ${hashedPasswordStoragePath}
     echo "$RANDOM-$(date +%N)" | shasum -a 512 | cut -d " " -f1 | cut -c 1-16 > ${hashedPasswordStoragePath}/salt.txt
@@ -34,6 +34,7 @@ if [ $(df | grep -c "/mnt/hdd") -gt 0 ]; then
     echo "# salt file exists"
   fi
   hashedPasswordSalt=$(cat ${hashedPasswordStoragePath}/salt.txt)
+  echo "# hashedPasswordSalt(${hashedPasswordSalt})"
 else
   echo "error='hdd not mounted yet - cannot set/check blitz passwords yet'"
   echo "correct=0"
