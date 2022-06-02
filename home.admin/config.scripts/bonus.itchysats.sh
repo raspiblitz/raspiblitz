@@ -32,7 +32,7 @@ PORT_TOR_SSL="8891"
 # lightning implementation or testnets - but this should be OK for a start:
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "# bonus.${APPID}.sh status   -> status information (key=value)"
-  echo "# bonus.${APPID}.sh on       -> install the app. Takes as argument '--build' to build from source or '--download' to download the binary from Github"
+  echo "# bonus.${APPID}.sh on       -> install the app. Takes as argument '--build VERSION' to build from source or '--download VERSION' to download the binary from Github with the provided VERSION"
   echo "# bonus.${APPID}.sh off      -> uninstall the app"
   echo "# bonus.${APPID}.sh menu     -> SSH menu dialog"
   echo "# bonus.${APPID}.sh update   -> update the app to latest version"
@@ -106,6 +106,9 @@ fi
 
 
 buildFromSource() {
+    VERSION=$1
+    echo "# Building Binary $VERSION"
+
     # make sure needed debian packages are installed
     # 'fbi' is here just an example - change to what you need or delete
     echo "# Install from source code"
@@ -123,10 +126,10 @@ buildFromSource() {
     sudo -u ${APPID} git clone ${GITHUB_REPO} /home/${APPID}/${APPID}
     cd /home/${APPID}/${APPID} || exit 1
 
-    sudo -u ${APPID} git reset --hard "$GITHUB_VERSION"
+    sudo -u ${APPID} git reset --hard "$VERSION"
     if [ "${GITHUB_SIGN_AUTHOR}" != "" ]; then
       sudo -u ${APPID} /home/admin/config.scripts/blitz.git-verify.sh \
-       "${GITHUB_SIGN_AUTHOR}" "${GITHUB_SIGN_PUBKEYLINK}" "${GITHUB_SIGN_FINGERPRINT}" "${GITHUB_VERSION}" || exit 1
+       "${GITHUB_SIGN_AUTHOR}" "${GITHUB_SIGN_PUBKEYLINK}" "${GITHUB_SIGN_FINGERPRINT}" "${VERSION}" || exit 1
     fi
 
     # compile/install the app
@@ -143,6 +146,9 @@ buildFromSource() {
 }
 
 downloadBinary() {
+    VERSION=${1}
+    echo "# Downloading Binary $VERSION"
+
     echo "# Detect CPU architecture ..."
     architecture=$(uname -m)
     isAARCH64=$(uname -m | grep -c 'aarch64')
@@ -161,9 +167,8 @@ downloadBinary() {
     sudo rm -fR /home/${APPID}/downloads/*
     cd /home/${APPID}/downloads/ || exit 1
 
-    echo "# Downloading Binary"
-    archiveName="taker_${GITHUB_VERSION}_Linux_${architecture}.tar"
-    sudo -u ${APPID} wget -N ${GITHUB_REPO}/releases/download/"${GITHUB_VERSION}"/"${archiveName}"
+    archiveName="taker_${VERSION}_Linux_${architecture}.tar"
+    sudo -u ${APPID} wget -N ${GITHUB_REPO}/releases/download/"${VERSION}"/"${archiveName}"
     checkDownload=$(ls "${archiveName}" 2>/dev/null | grep -c "${archiveName}")
     if [ "${checkDownload}" -eq 0 ]; then
         echo "# !!! FAIL !!!"
@@ -292,10 +297,15 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   fi
 
   echo "# Build var set to (${build})"
+
+  VERSION="$GITHUB_VERSION"
+  if [ -n "$3" ]; then
+    VERSION=$3
+  fi
   if [ ${build} -eq 1 ]; then
-    buildFromSource
+    buildFromSource "$VERSION"
   else
-    downloadBinary
+    downloadBinary "$VERSION"
   fi
   exitstatus=$?
   if [ "${exitstatus}" -ne 0 ]; then
@@ -321,6 +331,7 @@ After=bitcoind.service
 
 [Service]
 Environment=\"HOME_PATH=/mnt/hdd/app-data/${APPID}\"
+Environment=\"ITCHYSATS_ENV=raspiblitz\"
 ExecStartPre=-/home/admin/config.scripts/bonus.${APPID}.sh prestart
 ExecStart=$ITCHYSATS_BIN_DIR --http-address=0.0.0.0:$PORT_CLEAR --data-dir=/mnt/hdd/app-data/${APPID} --password=$PASSWORD_B ${ITCHYSATS_NETWORK}
 User=${APPID}
@@ -468,7 +479,8 @@ fi
 #  UPDATE
 ###############
 if [ "$1" = "update" ]; then
-    echo "# Updating ItchySats"
+    LATEST_VERSION=$( curl -s https://api.github.com/repos/itchysats/itchysats/releases | jq -r '.[].tag_name' | grep -v "rc" | head -n1)
+    echo "# Updating ItchySats to $LATEST_VERSION"
 
     echo "# Making sure service is not running"
     sudo systemctl stop itchysats
@@ -477,7 +489,7 @@ if [ "$1" = "update" ]; then
     /home/admin/config.scripts/bonus.itchysats.sh off --keep-data
 
     # Reinstall ItchySats with existing data
-    if /home/admin/config.scripts/bonus.itchysats.sh on --download; then
+    if /home/admin/config.scripts/bonus.itchysats.sh on --download "$LATEST_VERSION"; then
         echo "# Updating successful"
     else
         echo "# Updating ItchySats failed :("
@@ -511,10 +523,6 @@ if [ "$1" = "prestart" ]; then
   fi
 
   echo "## PRESTART CONFIG START for ${APPID} (called by systemd prestart)"
-
-  # configure the itchysats environment to be raspiblitz
-  echo "set ITCHYSATS_ENV variable to raspiblitz"
-  export ITCHYSATS_ENV=raspiblitz
 
   echo "## PRESTART CONFIG DONE for ${APPID}"
   exit 0
