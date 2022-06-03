@@ -36,9 +36,7 @@ if [ $(df | grep -c "/mnt/hdd") -gt 0 ]; then
   hashedPasswordSalt=$(cat ${hashedPasswordStoragePath}/salt.txt)
   echo "# hashedPasswordSalt(${hashedPasswordSalt})"
 else
-  echo "error='hdd not mounted yet - cannot set/check blitz passwords yet'"
-  echo "correct=0"
-  exit 1
+  echo "# hashedPasswordSalt - not available yet (no HDD yet)"
 fi 
 
 ############################
@@ -166,6 +164,12 @@ fi
 # PASSWORD A
 if [ "${abcd}" = "a" ]; then
 
+  if [ "${hashedPasswordSalt}" == "" ]; then
+    echo "error='hdd not mounted yet - cannot set/check blitz passwords yet'"
+    echo "correct=0"
+    exit 1
+  fi
+
   newPassword=$3
 
   # if no password given by parameter - ask by dialog
@@ -250,6 +254,12 @@ if [ "${abcd}" = "a" ]; then
 ############################
 # PASSWORD B
 elif [ "${abcd}" = "b" ]; then
+
+  if [ "${hashedPasswordSalt}" == "" ]; then
+    echo "error='hdd not mounted yet - cannot set/check blitz passwords yet'"
+    echo "correct=0"
+    exit 1
+  fi
 
   newPassword=$3
 
@@ -381,6 +391,12 @@ elif [ "${abcd}" = "b" ]; then
 # PASSWORD C
 # will change both (lnd & core lightning) if installed
 elif [ "${abcd}" = "c" ]; then
+
+  if [ "${hashedPasswordSalt}" == "" ]; then
+    echo "error='hdd not mounted yet - cannot set/check blitz passwords yet'"
+    echo "correct=0"
+    exit 1
+  fi
 
   oldPassword=$3
   newPassword=$4
