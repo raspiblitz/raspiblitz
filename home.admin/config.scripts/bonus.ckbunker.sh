@@ -26,6 +26,7 @@ PORT_SSL="9824"
 PORT_TOR_CLEAR="9825"
 PORT_TOR_SSL="9826"
 
+localIP=$(hostname -I | awk '{print $1}')
 
 # check if app is already installed
 isInstalled=$(sudo ls /etc/systemd/system/ckbunker.service 2>/dev/null | grep -c "ckbunker.service")
@@ -36,7 +37,6 @@ isRunning=$(systemctl status ckbunker 2>/dev/null | grep -c 'active (running)')
 if [ "${isInstalled}" == "1" ]; then
 
   # gather address info (whats needed to call the app)
-  localIP=$(hostname -I | awk '{print $1}')
   toraddress=$(sudo cat /mnt/hdd/tor/ckbunker/hostname 2>/dev/null)
   fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
 
@@ -62,33 +62,24 @@ fi
 
 # show info menu
 if [ "$1" = "menu" ]; then
-  # basic info text - for an web app how to call with http & self-signed https
-  firstSetupText="To set up on the first use:
-Stop the ckbunker service: 'sudo systemctl stop ckbunker'
-Switch to the user: 'sudo su - ckbunker'
-Run: 'ckbunker setup'
-Open in your local web browser:
-https://${localIP}:${PORT_SSL}/setup
-and follow the guide at:
-https://ckbunker.com/setup.html"
-
-dialogText="http://${localIP}:${PORT_CLEAR}\n
-https://${localIP}:${PORT_SSL} with Fingerprint:
+  dialogTitle="CKbunker setup"
+  dialogText="# To set up first switch to the 'ckbunker' user:
+sudo su - ckbunker
+# run:
+ckbunker setup
+# open in your local web browser:
+https://${localIP}:${PORT_SSL}/setup with Fingerprint:
 ${fingerprint}\n
-Use your Password B to login."
+# follow the guide at:
+https://ckbunker.com/setup.html
+(save your password)
 
-  # add tor info (if available)
-  if [ "${toraddress}" != "" ]; then
-    dialogText="${dialogText}Hidden Service address for Tor Browser (QRcode on LCD):\n${toraddress}"
-  fi
-  dialogText="${firstSetupText}\n
-${dialogText}
-Usage and examples: https://github.com/Coldcard/ckbunker
-For the CLI: use the shortcut 'ckbunker' in the terminal to switch to the dedicated user.
-Type 'ckbunker' again to see the available options."
+# When the setup is done start the service in the background:
+sudo systemctl enable ckbunker
+sudo systemctl start ckbunker"
 
   # use whiptail to show SSH dialog & exit
-  whiptail --title "${dialogTitle}" --msgbox "${dialogText}" 25 67
+  whiptail --title "${dialogTitle}" --msgbox "${dialogText}" 21 67
   echo "please wait ..."
   exit 0
 fi
@@ -141,8 +132,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo udevadm control --reload-rules && sudo udevadm trigger
 
   echo "source /home/ckbunker/ckbunker/ENV/bin/activate" | sudo -u ckbunker tee -a /home/ckbunker/.bashrc
-  echo "PATH=\$PATH:~/ckbunker/ENV/bin/"  | sudo -u ckbunker tee -a /home/ckbunker/.bashrc
-  echo "cd /home/ckbunker/ckbunker"  | sudo -u ckbunker tee -a /home/ckbunker/.bashrc
+  echo "PATH=\$PATH:~/ckbunker/ENV/bin/" | sudo -u ckbunker tee -a /home/ckbunker/.bashrc
+  echo "cd /home/ckbunker/ckbunker" | sudo -u ckbunker tee -a /home/ckbunker/.bashrc
 
   echo "# updating Firewall"
   sudo ufw allow ${PORT_CLEAR} comment "ckbunker HTTP"
@@ -241,13 +232,8 @@ server {
   # mark app as installed in raspiblitz config
   /home/admin/config.scripts/blitz.conf.sh set ckbunker "on"
 
-  sudo systemctl enable ckbunker
-  sudo systemctl start ckbunker
-  echo "# OK - the ckbunker.service is now enabled & started"
-  echo "# Monitor with: sudo journalctl -f -u ckbunker"
-  echo "# To set up on first use:
-# stop the ckbunker service:
-sudo systemctl stop ckbunker
+  echo "# OK - CKbunker is now installed"
+  echo "# To set up:
 # switch to the user
 sudo su - ckbunker
 # run:
@@ -256,6 +242,10 @@ ckbunker setup
 https://${localIP}:${PORT_SSL}/setup
 # and follow the guide at:
 https://ckbunker.com/setup.html
+
+# When the setup is done run the service in the backgound with:
+sudo systemctl enable ckbunker
+sudo systemctl start ckbunker
 "
   exit 0
 fi
@@ -298,7 +288,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo rm -r /mnt/hdd/app-data/ckbunker
   fi
 
-  echo "# OK - app should be uninstalled now"
+  echo "# OK - CKbunker is uninstalled now"
   exit 0
 fi
 
