@@ -133,6 +133,15 @@ if [ "$2" = "info" ]; then
     exit 1
   fi
 
+  subfolder=""
+  if [ "$1" == "testnet" ]; then
+    subfolder="testnet3/"
+  fi
+  if [ "$1" == "signet" ]; then
+    subfolder="signet/"
+  fi
+  btc_blocks_data_kb=$(sudo du -s /mnt/hdd/bitcoin/${subfolder}blocks | cut -f1)
+
   # parse data
   btc_blocks_headers=$(echo "${blockchaininfo}" | jq -r '.headers')
   btc_blocks_verified=$(echo "${blockchaininfo}" | jq -r '.blocks')
@@ -144,6 +153,7 @@ if [ "$2" = "info" ]; then
     btc_sync_percentage="100.00"
   fi
 
+  
   # determine if synced (tolerate falling 1 block behind)
   # and be sure that initial blockdownload is done
   btc_synced=0
@@ -156,6 +166,7 @@ if [ "$2" = "info" ]; then
   echo "btc_blocks_headers='${btc_blocks_headers}'"
   echo "btc_blocks_verified='${btc_blocks_verified}'"
   echo "btc_blocks_behind='${btc_blocks_behind}'"
+  echo "btc_blocks_data_kb='${btc_blocks_data_kb}'"
   echo "btc_sync_progress='${btc_sync_progress}'"
   echo "btc_sync_percentage='${btc_sync_percentage//[^0-9\..]/}'"
   echo "btc_sync_initialblockdownload='${btc_sync_initialblockdownload}'"

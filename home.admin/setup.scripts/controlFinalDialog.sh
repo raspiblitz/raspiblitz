@@ -35,9 +35,10 @@ fi
 # BLOCKCHAIN INFO & OPTIONS
 
 # get fresh data
-source <(/home/admin/_cache.sh get btc_default_sync_percentage network)
-syncProgressFull=$(echo "${btc_default_sync_percentage}" | cut -d "." -f1)
-if [ "${syncProgressFull}" != "" ] && [ "${network}" == "bitcoin" ] && [ ${syncProgressFull} -lt 75 ]; then
+source <(/home/admin/_cache.sh get btc_default_sync_percentage btc_default_blocks_data_kb network)
+#syncProgressFull=$(echo "${btc_default_sync_percentage}" | cut -d "." -f1)
+#if [ "${syncProgressFull}" != "" ] && [ "${network}" == "bitcoin" ] && [ ${syncProgressFull} -lt 75 ]; then
+if [ "${btc_default_blocks_data_kb}" != "" ] && [ ${btc_default_blocks_data_kb} -lt 250000000 ]; then
 
   # offer choice to copy blockchain over LAN
   OPTIONS=()
