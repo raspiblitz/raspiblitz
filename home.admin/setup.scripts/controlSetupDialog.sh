@@ -176,7 +176,7 @@ if [ "${setupPhase}" == "setup" ]; then
 
       # KEEP BLOCKCHAIN + DELETE ALL THE REST
       # will be done by bootstrap later triggered by setup file entry
-      echo "cleanHDD=1'" >> $SETUPFILE
+      echo "cleanHDD=1" >> $SETUPFILE
 
     else
 
