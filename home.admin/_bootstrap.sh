@@ -827,6 +827,11 @@ if [ ${isMounted} -eq 0 ]; then
     sleep 2
   done
 
+  # one time add info on blockchain sync to chache
+  source <(/home/admin/_cache.sh get chain)
+  source <(/home/admin/config.scripts/bitcoin.monitor.sh ${chain}net info)
+  /home/admin/_cache.sh set btc_default_blocks_data_kb "${btc_blocks_data_kb}"
+
   ###################################################
   # HANDOVER TO FINAL SETUP CONTROLLER
   ###################################################
