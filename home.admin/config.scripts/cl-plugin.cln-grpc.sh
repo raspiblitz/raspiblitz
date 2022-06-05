@@ -11,6 +11,8 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ];then
   exit 1
 fi
 
+echo "# cl-plugin.cln-grpc.sh $1"
+
 source <(/home/admin/config.scripts/network.aliases.sh getvars cl $2)
 
 # netprefix is:     "" |  t | s
@@ -18,7 +20,7 @@ source <(/home/admin/config.scripts/network.aliases.sh getvars cl $2)
 PORT="${portprefix}4772"
 
 function buildGRPCplugin() {
-  echo "- Build the cln-grpc plugin"
+  echo "# - Build the cln-grpc plugin"
   if [ ! -f /home/bitcoin/cl-plugins-available/cln-grpc/debug/cln-grpc ]; then
     # check if the source code is present
     if [ ! -d /home/bitcoin/lightning/plugins/grpc-plugin ];then
@@ -32,19 +34,22 @@ function buildGRPCplugin() {
     # build
     sudo -u bitcoin /home/bitcoin/.cargo/bin/cargo build \
      --target-dir /home/bitcoin/cl-plugins-available/cln-grpc
+  else
+    echo "# - cln-grpc plugin already build/installed"
   fi
 }
 
 if [ "$1" = install ]; then
   buildGRPCplugin
+  echo "# cl-plugin.cln-grpc.sh install --> done"
   exit 0
 
 elif [ "$1" = on ]; then
   buildGRPCplugin
 
   # symlink to plugin directory
-  sudo ln -s /home/bitcoin/cl-plugins-available/cln-grpc/debug/cln-grpc \
-   /home/bitcoin/${netprefix}cl-plugins-enabled/
+  sudo ln -s /home/bitcoin/cl-plugins-available/cln-grpc/debug/cln-grpc /home/bitcoin/${netprefix}cl-plugins-enabled/
+  echo "# cln-grpc moved to /home/bitcoin/${netprefix}cl-plugins-enabled/"
 
   # blitz.conf.sh set [key] [value] [?conffile] <noquotes>
   /home/admin/config.scripts/blitz.conf.sh set "grpc-port" "${PORT}" "${CLCONF}" "noquotes"
@@ -54,6 +59,7 @@ elif [ "$1" = on ]; then
   sudo ufw allow "${PORT}" comment "${netprefix}clnGRPCport"
   # Tor
   /home/admin/config.scripts/tor.onion-service.sh "${netprefix}clnGRPCport" "${PORT}" "${PORT}"
+  echo "# cl-plugin.cln-grpc.sh on --> done"
   exit 0
 
 elif [ "$1" = off ]; then

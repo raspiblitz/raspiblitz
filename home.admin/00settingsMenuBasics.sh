@@ -398,8 +398,8 @@ if [ "${clNode}" != "${choice}" ]; then
     /home/admin/config.scripts/cl-plugin.cln-grpc.sh on
 
     /home/admin/config.scripts/cl.install.sh on mainnet
-    # generate wallet from seedwords or just display
-    /home/admin/config.scripts/cl.hsmtool.sh new mainnet
+    # generate wallet from seedwords or just display (write to dev/null to not write seed words to logs)
+    /home/admin/config.scripts/cl.hsmtool.sh new mainnet 1>/dev/null
     if [ "${testnet}" == "on" ]; then
       # no seed for testnet
       /home/admin/config.scripts/cl.install.sh on testnet
