@@ -337,6 +337,8 @@ if [ "${lightning}" == "cl" ]; then
   # if already installed - will skip
   /home/admin/_cache.sh set message "C-Lightning Install"
   /home/admin/config.scripts/cl.install.sh install >> ${logFile}
+  /home/admin/config.scripts/cl-plugin.cln-grpc.sh install >> ${logFile}
+  /home/admin/config.scripts/cl-plugin.cln-grpc.sh on >> ${logFile}
 
   # switch mainnet config on
   /home/admin/_cache.sh set message "C-Lightning Setup"

@@ -392,6 +392,11 @@ if [ "${clNode}" != "${choice}" ]; then
   echo "# C-Lightning NODE Setting changed .."
   if [ "${choice}" = "on" ]; then
     echo "# turning ON"
+
+    # also make sure that CLN GRPC is on for WebAPI
+    /home/admin/config.scripts/cl-plugin.cln-grpc.sh install
+    /home/admin/config.scripts/cl-plugin.cln-grpc.sh on
+
     /home/admin/config.scripts/cl.install.sh on mainnet
     # generate wallet from seedwords or just display
     /home/admin/config.scripts/cl.hsmtool.sh new mainnet
@@ -405,6 +410,7 @@ if [ "${clNode}" != "${choice}" ]; then
     fi
   else
     echo "# turning OFF"
+    /home/admin/config.scripts/cl-plugin.cln-grpc.sh off
     /home/admin/config.scripts/cl.install.sh off mainnet
     /home/admin/config.scripts/cl.install.sh off testnet
     /home/admin/config.scripts/cl.install.sh off signet
