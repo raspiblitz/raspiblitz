@@ -178,7 +178,7 @@ if [ "$1" = "update-config" ]; then
   elif [ "${lightning}" == "cl" ]; then
     
     echo "# CONFIG Web API Lightning --> CL"
-    sed -i "s/^ln_node=.*/ln_node=cl/g" ./.env
+    sed -i "s/^ln_node=.*/ln_node=cln_grpc/g" ./.env
 
     # get hex values of pem files
     hexClient=$(xxd -p -c2000 /home/bitcoin/.lightning/bitcoin/client.pem)
