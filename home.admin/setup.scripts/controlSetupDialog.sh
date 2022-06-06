@@ -124,6 +124,7 @@ if [ "${setupPhase}" == "setup" ]; then
 
   # exit to terminal
   if [ "${menuresult}" == "3" ]; then
+    /home/admin/_cache.sh set setupPhase "${orgSetupPhase}"
     exit 1
   fi
 
