@@ -802,13 +802,13 @@ do
       /home/admin/_cache.sh set ln_cl_${CHAIN}net_error_full "${ln_cl_error_full}"
       if [ "${isDefaultLightning}" == "1" ] && [ "${isDefaultChain}" == "1" ]; then
         /home/admin/_cache.sh set ln_default_activated "1"
-        /home/admin/_cache.sh set ln_default_version "${cl_lnd_version}"
-        /home/admin/_cache.sh set ln_default_running "${lc_running}"
-        /home/admin/_cache.sh set ln_default_ready "${cl_ready}"
-        /home/admin/_cache.sh set ln_default_online "${cl_online}"
+        /home/admin/_cache.sh set ln_default_version "${ln_cl_version}"
+        /home/admin/_cache.sh set ln_default_running "${ln_cl_running}"
+        /home/admin/_cache.sh set ln_default_ready "${ln_cl_ready}"
+        /home/admin/_cache.sh set ln_default_online "${ln_cl_online}"
         /home/admin/_cache.sh set ln_default_locked "${ln_cl_locked}"
-        /home/admin/_cache.sh set ln_default_error_short "${cl_error_short}"
-        /home/admin/_cache.sh set ln_default_error_full "${cl_error_full}"
+        /home/admin/_cache.sh set ln_default_error_short "${ln_cl_error_short}"
+        /home/admin/_cache.sh set ln_default_error_full "${ln_cl_error_full}"
       fi
     fi
 
