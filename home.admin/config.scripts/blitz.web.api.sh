@@ -131,73 +131,86 @@ if [ "$1" = "update-config" ]; then
     chain="main"
   fi
 
+  # get actual state of system
+  source <(/home/admin/_cache.sh get setupPhase)
+
+  # prepare config update
   cd /root/blitz_api
   cp ./.env_sample ./.env
   dateStr=$(date)
   echo "# Update Web API CONFIG (${dateStr})"
-  RPCUSER=$(sudo cat /mnt/hdd/${network}/${network}.conf 2>/dev/null | grep rpcuser | cut -c 9-)
-  RPCPASS=$(sudo cat /mnt/hdd/${network}/${network}.conf 2>/dev/null | grep rpcpassword | cut -c 13-)
-  if [ "${RPCUSER}" == "" ]; then
-    RPCUSER="raspibolt"
-  fi
-  if [ "${RPCPASS}" == "" ]; then
-    RPCPASS="passwordB"
-  fi
-  sed -i "s/^network=.*/network=mainnet/g" ./.env
-  sed -i "s/^bitcoind_ip_mainnet=.*/bitcoind_ip_mainnet=127.0.0.1/g" ./.env
-  sed -i "s/^bitcoind_ip_testnet=.*/bitcoind_ip_testnet=127.0.0.1/g" ./.env
-  sed -i "s/^bitcoind_user=.*/bitcoind_user=${RPCUSER}/g" ./.env
-  sed -i "s/^bitcoind_pw=.*/bitcoind_pw=${RPCPASS}/g" ./.env
   sed -i "s/^# platform=.*/platform=raspiblitz/g" ./.env
   sed -i "s/^platform=.*/platform=raspiblitz/g" ./.env
 
-  # configure LND
-  if [ "${lightning}" == "lnd" ]; then
+  if [ "${setupPhase}" == "done" ]; then
 
-    echo "# CONFIG Web API Lightning --> LND"
-    tlsCert=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/tls.cert)
-    adminMacaroon=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/bitcoin/${chain}net/admin.macaroon)
-    sed -i "s/^ln_node=.*/ln_node=lnd_grpc/g" ./.env
-    sed -i "s/^lnd_grpc_ip=.*/lnd_grpc_ip=127.0.0.1/g" ./.env
-    sed -i "s/^lnd_macaroon=.*/lnd_macaroon=${adminMacaroon}/g" ./.env
-    sed -i "s/^lnd_cert=.*/lnd_cert=${tlsCert}/g" ./.env
-    if [ "${chain}" == "main" ];then
-      L2rpcportmod=0
-      portprefix=""
-    elif [ "${chain}" == "test" ];then
-      L2rpcportmod=1
-      portprefix=1
-    elif [ "${chain}" == "sig" ];then
-      L2rpcportmod=3
-      portprefix=3
+    # configure bitcoin
+    RPCUSER=$(sudo cat /mnt/hdd/${network}/${network}.conf 2>/dev/null | grep rpcuser | cut -c 9-)
+    RPCPASS=$(sudo cat /mnt/hdd/${network}/${network}.conf 2>/dev/null | grep rpcpassword | cut -c 13-)
+    if [ "${RPCUSER}" == "" ]; then
+      RPCUSER="raspibolt"
     fi
-    lnd_grpc_port=1${L2rpcportmod}009
-    lnd_rest_port=${portprefix}8080
+    if [ "${RPCPASS}" == "" ]; then
+      RPCPASS="passwordB"
+    fi
+    sed -i "s/^network=.*/network=mainnet/g" ./.env
+    sed -i "s/^bitcoind_ip_mainnet=.*/bitcoind_ip_mainnet=127.0.0.1/g" ./.env
+    sed -i "s/^bitcoind_ip_testnet=.*/bitcoind_ip_testnet=127.0.0.1/g" ./.env
+    sed -i "s/^bitcoind_user=.*/bitcoind_user=${RPCUSER}/g" ./.env
+    sed -i "s/^bitcoind_pw=.*/bitcoind_pw=${RPCPASS}/g" ./.env
 
-  # configure CL
-  elif [ "${lightning}" == "cl" ]; then
+
+    # configure LND
+    if [ "${lightning}" == "lnd" ]; then
+
+      echo "# CONFIG Web API Lightning --> LND"
+      tlsCert=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/tls.cert)
+      adminMacaroon=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/bitcoin/${chain}net/admin.macaroon)
+      sed -i "s/^ln_node=.*/ln_node=lnd_grpc/g" ./.env
+      sed -i "s/^lnd_grpc_ip=.*/lnd_grpc_ip=127.0.0.1/g" ./.env
+      sed -i "s/^lnd_macaroon=.*/lnd_macaroon=${adminMacaroon}/g" ./.env
+      sed -i "s/^lnd_cert=.*/lnd_cert=${tlsCert}/g" ./.env
+      if [ "${chain}" == "main" ];then
+        L2rpcportmod=0
+        portprefix=""
+      elif [ "${chain}" == "test" ];then
+        L2rpcportmod=1
+        portprefix=1
+      elif [ "${chain}" == "sig" ];then
+        L2rpcportmod=3
+        portprefix=3
+      fi
+      lnd_grpc_port=1${L2rpcportmod}009
+      lnd_rest_port=${portprefix}8080
+
+    # configure CL
+    elif [ "${lightning}" == "cl" ]; then
     
-    echo "# CONFIG Web API Lightning --> CL"
-    sed -i "s/^ln_node=.*/ln_node=cln_grpc/g" ./.env
+      echo "# CONFIG Web API Lightning --> CL"
+      sed -i "s/^ln_node=.*/ln_node=cln_grpc/g" ./.env
 
-    # get hex values of pem files
-    hexClient=$(xxd -p -c2000 /home/bitcoin/.lightning/bitcoin/client.pem)
-    hexClientKey=$(xxd -p -c2000 /home/bitcoin/.lightning/bitcoin/client-key.pem)
-    hexCa=$(xxd -p -c2000 /home/bitcoin/.lightning/bitcoin/ca.pem)
-    if [ "${hexClient}" == "" ]; then
+      # get hex values of pem files
+      hexClient=$(xxd -p -c2000 /home/bitcoin/.lightning/bitcoin/client.pem)
+      hexClientKey=$(xxd -p -c2000 /home/bitcoin/.lightning/bitcoin/client-key.pem)
+      hexCa=$(xxd -p -c2000 /home/bitcoin/.lightning/bitcoin/ca.pem)
+      if [ "${hexClient}" == "" ]; then
         echo "# FAIL /home/bitcoin/.lightning/bitcoin/*.pem files maybe missing"
-    fi
+      fi
 
-    # update config with hex values
-    sed -i "s/^cln_grpc_cert=.*/cln_grpc_cert=${hexClient}/g" ./.env
-    sed -i "s/^cln_grpc_key=.*/cln_grpc_key=${hexClientKey}/g" ./.env
-    sed -i "s/^cln_grpc_ca=.*/cln_grpc_ca=${hexCa}/g" ./.env
-    sed -i "s/^cln_grpc_ip=.*/cln_grpc_ip=127.0.0.1/g" ./.env
-    sed -i "s/^cln_grpc_port=.*/cln_grpc_port=9537/g" ./.env
+      # update config with hex values
+      sed -i "s/^cln_grpc_cert=.*/cln_grpc_cert=${hexClient}/g" ./.env
+      sed -i "s/^cln_grpc_key=.*/cln_grpc_key=${hexClientKey}/g" ./.env
+      sed -i "s/^cln_grpc_ca=.*/cln_grpc_ca=${hexCa}/g" ./.env
+      sed -i "s/^cln_grpc_ip=.*/cln_grpc_ip=127.0.0.1/g" ./.env
+      sed -i "s/^cln_grpc_port=.*/cln_grpc_port=9537/g" ./.env
+
+    else
+      echo "# CONFIG Web API Lightning --> OFF"
+      sed -i "s/^ln_node=.*/ln_node=/g" ./.env
+    fi
 
   else
-    echo "# CONFIG Web API Lightning --> OFF"
-    sed -i "s/^ln_node=.*/ln_node=/g" ./.env
+      echo "# CONFIG Web API ... still in setup, skip bitcoin & lightning"
   fi
 
   echo "# '.env' config updates - blitzapi maybe needs to be restarted"
