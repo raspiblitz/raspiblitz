@@ -339,7 +339,7 @@ server {
 
   # MAINMENU - show users that app is installed
   # Take a look at the `00mainmenu.sh` script - you can see there almost all bonus apps add a menu entry there if
-  # they are installed that then is calling this script with the `menu` parameter. Add your app accordantly.
+  # they are installed that then is calling this script with the `menu` parameter. Add your app accordingly.
 
   # SERVICES MENU - add your app for onclick install
   # Take a look at the `00settingsMenuServices.sh` script - you can there almost all bonus apps added themselves
