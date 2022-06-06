@@ -40,6 +40,15 @@ if [ $(grep -c "^sparko" < ${CLCONF}) -gt 0 ];then
   fi
 fi
 
+if [ $(grep -c "^clboss" < ${CLCONF}) -gt 0 ];then
+  if [ ! -f /home/bitcoin/${netprefix}cl-plugins-enabled/clboss ]\
+    || [ "$(eval echo \$${netprefix}sparko)" != "on" ]; then
+    echo "# The clboss plugin is not present but in config"
+    sed -i "/^clboss/d" ${CLCONF}
+    rm -rf /home/bitcoin/${netprefix}cl-plugins-enabled/clboss
+  fi
+fi
+
 if [ $(grep -c "^http-pass" < ${CLCONF}) -gt 0 ];then
   if [ ! -f /home/bitcoin/cl-plugins-enabled/c-lightning-http-plugin ]\
     || [ "${clHTTPplugin}" != "on" ]; then
