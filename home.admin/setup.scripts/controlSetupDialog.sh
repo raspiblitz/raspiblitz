@@ -176,7 +176,7 @@ if [ "${setupPhase}" == "setup" ]; then
 
       # KEEP BLOCKCHAIN + DELETE ALL THE REST
       # will be done by bootstrap later triggered by setup file entry
-      echo "cleanHDD=1'" >> $SETUPFILE
+      echo "cleanHDD=1" >> $SETUPFILE
 
     else
 
@@ -281,7 +281,7 @@ fi
 # for fresh setup & migration
 
 echo "# Starting passwords dialog ..."
-sudo /home/admin/setup.scripts/dialogPasswords.sh
+sudo /home/admin/setup.scripts/dialogPasswords.sh || exit 1
 
 # set flag for bootstrap process to kick-off provision process
 /home/admin/_cache.sh set state "waitprovision"

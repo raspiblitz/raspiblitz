@@ -16,7 +16,7 @@ if [ "$1" = "set" ]; then
 
   # get parameters
   keystr=$2
-  valuestr=$3
+  valuestr=$(echo "${3}" | sed 's/\//\\\//g')
   configfileAlternative=$4
 
   # check that key & value are given

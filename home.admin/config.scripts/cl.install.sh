@@ -309,7 +309,7 @@ always-use-proxy=true
       echo "# $hsmSecretPath is already present"
     else
       echo "Create a wallet from seedwords for mainnet"
-      /home/admin/config.scripts/cl.hsmtool.sh new-force mainnet
+      /home/admin/config.scripts/cl.hsmtool.sh new-force mainnet 1>/dev/null 2>/dev/null
     fi
   fi
 

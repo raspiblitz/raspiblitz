@@ -91,6 +91,7 @@ Type=simple
 Restart=always
 StandardOutput=journal
 StandardError=journal
+RestartSec=60
 
 # Hardening measures
 PrivateTmp=true
@@ -156,7 +157,7 @@ if [ "$1" = "update-config" ]; then
     echo "# CONFIG Web API Lightning --> LND"
     tlsCert=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/tls.cert)
     adminMacaroon=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/bitcoin/${chain}net/admin.macaroon)
-    sed -i "s/^ln_node=.*/ln_node=lnd/g" ./.env
+    sed -i "s/^ln_node=.*/ln_node=lnd_grpc/g" ./.env
     sed -i "s/^lnd_grpc_ip=.*/lnd_grpc_ip=127.0.0.1/g" ./.env
     sed -i "s/^lnd_macaroon=.*/lnd_macaroon=${adminMacaroon}/g" ./.env
     sed -i "s/^lnd_cert=.*/lnd_cert=${tlsCert}/g" ./.env
@@ -177,7 +178,7 @@ if [ "$1" = "update-config" ]; then
   elif [ "${lightning}" == "cl" ]; then
     
     echo "# CONFIG Web API Lightning --> CL"
-    sed -i "s/^ln_node=.*/ln_node=cl/g" ./.env
+    sed -i "s/^ln_node=.*/ln_node=cln_grpc/g" ./.env
 
     # get hex values of pem files
     hexClient=$(xxd -p -c2000 /home/bitcoin/.lightning/bitcoin/client.pem)

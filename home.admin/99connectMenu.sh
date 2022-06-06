@@ -20,8 +20,11 @@ OPTIONS+=(MOBILE "Connect Mobile Wallet")
 if [ "${ElectRS}" == "on" ]; then
   OPTIONS+=(ELECTRS "Electrum Rust Server")
 fi
-if [ "${BTCPayServer}" == "on" ]; then
-  OPTIONS+=(BTCPAY "Show LND connection string")
+if [ "${BTCPayServer}" == "on" ] && [ "${lnd}" = "on" ]; then
+  OPTIONS+=(BTCPAY-LND "Show LND connection string")
+fi
+if [ "${BTCPayServer}" == "on" ] && [ "${cl}" = "on" ]; then
+  OPTIONS+=(BTCPAY-CLN "Show CLN connection string")
 fi
 OPTIONS+=(${network}RPC "Connect Specter Desktop or JoinMarket")
 OPTIONS+=(BISQ "Connect Bisq to this node")
@@ -50,8 +53,13 @@ case $CHOICE in
     /home/admin/97addMobileWallet.sh;;
   ELECTRS)
     /home/admin/config.scripts/bonus.electrs.sh menu;;
-  BTCPAY)
+  BTCPAY-LND)
     /home/admin/config.scripts/lnd.export.sh btcpay
+    echo "Press ENTER to return to main menu."
+    read key
+    exit 0;;
+  BTCPAY-CLN)
+    /home/admin/config.scripts/bonus.btcpayserver.sh cln-lightning-rpc-access
     echo "Press ENTER to return to main menu."
     read key
     exit 0;;
@@ -70,18 +78,7 @@ case $CHOICE in
     exit 0;;
 
   ALBY)
-      websiteLink="https://getalby.com"
-      sudo /home/admin/config.scripts/blitz.display.sh image /home/admin/raspiblitz/pictures/app_alby.png
-    whiptail --title "Install Alby on your web browser" \
-    --yes-button "Continue" \
-    --no-button "Website" \
-    --yesno "Visit the website and install the browser extension then click --> Continue." 12 65
-    if [ $? -eq 1 ]; then
-    whiptail --title " Website Link " --msgbox "\
-To install app open the following link:\n
-${websiteLink}\n" 11 70
-    fi
-    /home/admin/config.scripts/bonus.lndconnect.sh alby tor
+    /home/admin/config.scripts/bonus.alby.sh
     exit 0;
   ;;
 

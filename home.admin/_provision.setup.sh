@@ -274,7 +274,7 @@ if [ "${lightning}" == "lnd" ]; then
   # WALLET --> NEW
   else
 
-    echo "WALLET --> NEW" >> ${logFile}
+    echo "# WALLET --> NEW" >> ${logFile}
     /home/admin/_cache.sh set message "LND Wallet (NEW)"
     if ! pip list | grep grpc; then sudo -H python3 -m pip install grpcio==1.38.1; fi 
     source <(/home/admin/config.scripts/lnd.initwallet.py new mainnet "${passwordC}")
@@ -290,6 +290,7 @@ if [ "${lightning}" == "lnd" ]; then
     fi
 
     # write created seedwords into SETUPFILE to be displayed to user on final setup later
+    echo "# writing seed info to setup file" >> ${logFile}
     echo "seedwordsNEW='${seedwords}'" >> ${setupFile}
     echo "seedwords6x4NEW='${seedwords6x4}'" >> ${setupFile}
 
@@ -342,6 +343,9 @@ if [ "${lightning}" == "cl" ]; then
   /home/admin/_cache.sh set message "C-Lightning Setup"
   /home/admin/config.scripts/cl.install.sh on mainnet >> ${logFile}
 
+  # switch cln-grpc on
+  /home/admin/config.scripts/cl-plugin.cln-grpc.sh on >> ${logFile}
+
   # OLD WALLET FROM CLIGHTNING RESCUE
   if [ "${clrescue}" != "" ]; then
 
@@ -392,7 +396,7 @@ if [ "${lightning}" == "cl" ]; then
   # OLD WALLET FROM SEEDWORDS
   elif [ "${seedWords}" != "" ]; then
 
-    echo "Restore CL wallet from seedWords ..." >> ${logFile}
+    echo "# Restore CL wallet from seedWords ..." >> ${logFile}
     source <(/home/admin/config.scripts/cl.hsmtool.sh seed-force mainnet "${seedWords}" "${seedPassword}")
 
     # check if wallet really got created 
@@ -405,7 +409,7 @@ if [ "${lightning}" == "cl" ]; then
   # NEW WALLET
   else
 
-    echo "Generate new CL wallet ..." >> ${logFile}
+    echo "# Generate new CL wallet ..." >> ${logFile}
 
     # a new wallet is generated in /home/admin/config.scripts/cl.install.sh on mainnet
     walletExistsNow=$(ls /home/bitcoin/.lightning/bitcoin/hsm_secret 2>/dev/null | grep -c "hsm_secret")
@@ -432,6 +436,7 @@ if [ "${lightning}" == "cl" ]; then
     fi
 
     # write created seedwords into SETUPFILE to be displayed to user on final setup later
+    echo "# writing seed info to setup file" >> ${logFile}
     echo "seedwordsNEW='${seedwords}'" >> ${setupFile}
     echo "seedwords6x4NEW='${seedwords6x4}'" >> ${setupFile}
 

@@ -74,6 +74,13 @@ if [ "${LNBitsFunding}" = "${netprefix}cl" ]; then
   fi
 fi
 
+if [ "${BTCPayServer}" = "on" ] && [ "${CHAIN}" = "mainnet" ] ; then
+  # https://github.com/rootzoll/raspiblitz/issues/3007
+  if [ $(grep -c "^rpc-file-mode=0660" < ${CLCONF}) -eq 0 ]; then
+    echo "rpc-file-mode=0660" | tee -a ${CLCONF}
+  fi
+fi
+
 if [ $(grep -c "^grpc-port" < ${CLCONF}) -gt 0 ];then
   if [ ! -f /home/bitcoin/${netprefix}cl-plugins-enabled/cln-grpc ]\
     || [ "$(eval echo \$${netprefix}cln-grpc-port)" = "off" ]; then

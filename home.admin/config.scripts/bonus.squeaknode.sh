@@ -101,8 +101,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   if [ "${runBehindTor}" = "on" ]; then
     # make sure to keep in sync with internet.tor.sh script
-    /home/admin/config.scripts/internet.hiddenservice.sh squeaknode-p2p-mainnet 8555 8555
-    /home/admin/config.scripts/internet.hiddenservice.sh squeaknode-p2p-testnet 18555 18555
+    /home/admin/config.scripts/tor.onion-service.sh squeaknode-p2p-mainnet 8555 8555
+    /home/admin/config.scripts/tor.onion-service.sh squeaknode-p2p-testnet 18555 18555
+    
   fi
 
   isInstalled=$(sudo ls /etc/systemd/system/squeaknode.service 2>/dev/null | grep -c 'squeaknode.service')
@@ -274,8 +275,8 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # Hidden Service if Tor is active
   if [ "${runBehindTor}" = "on" ]; then
-    /home/admin/config.scripts/internet.hiddenservice.sh off squeaknode-p2p-mainnet
-    /home/admin/config.scripts/internet.hiddenservice.sh off squeaknode-p2p-testnet
+    /home/admin/config.scripts/tor.onion-service.sh off squeaknode-p2p-mainnet
+    /home/admin/config.scripts/tor.onion-service.sh off squeaknode-p2p-testnet
   fi
 
   isInstalled=$(sudo ls /etc/systemd/system/squeaknode.service 2>/dev/null | grep -c 'squeaknode.service')

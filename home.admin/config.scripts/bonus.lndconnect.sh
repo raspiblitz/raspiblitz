@@ -4,7 +4,7 @@
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "# config script to connect mobile apps with lnd connect"
  echo "# will autodetect dyndns, sshtunnel or TOR"
- echo "# bonus.lndconnect.sh [zap-ios|zap-android|zeus-ios|zeus-android|shango-ios|shango-android|sendmany-android|fullynoded-lnd|alby] [?ip|tor] [?key-value]"
+ echo "# bonus.lndconnect.sh [zap-ios|zap-android|zeus-ios|zeus-android|shango-ios|shango-android|sendmany-android|fullynoded-lnd] [?ip|tor] [?key-value]"
  exit 1
 fi
 
@@ -107,14 +107,6 @@ elif [ "${targetWallet}" = "zeus-android" ]; then
     forceTOR=1
     host=$(sudo cat /mnt/hdd/tor/lndrest8080/hostname)
     connectInfo="- start the Zeus Wallet --> lndconnect\n- scan the QR code \n- activate 'Tor' option \n- activate 'Certification Verification' option\n- save Node Config"
-
-elif [ "${targetWallet}" = "alby" ]; then
-
-    port="8080"
-    usingIP2TOR="LND-REST-API"
-    forceTOR=1
-    host=$(sudo cat /mnt/hdd/tor/lndrest8080/hostname)
-    connectInfo="- open Alby --> enter password \n- select RaspiBlitz from connectors \n- enter lndconnect URL \n- Continue \n- Alby companion app required for Tor"
 
 elif [ "${targetWallet}" = "sendmany-android" ]; then
 

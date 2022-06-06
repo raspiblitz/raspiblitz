@@ -31,6 +31,7 @@ if [ ${#tallycoinConnect} -eq 0 ]; then tallycoinConnect="off"; fi
 if [ ${#helipad} -eq 0 ]; then helipad="off"; fi
 if [ ${#bitcoinminds} -eq 0 ]; then bitcoinminds="off"; fi
 if [ ${#squeaknode} -eq 0 ]; then squeaknode="off"; fi
+if [ ${#itchysats} -eq 0 ]; then itchysats="off"; fi
 
 # show select dialog
 echo "run dialog ..."
@@ -47,8 +48,8 @@ if [ "${network}" == "bitcoin" ]; then
   OPTIONS+=(j 'BTC JoinMarket+JoininBox menu' ${joinmarket})
   OPTIONS+=(w 'BTC Download Bitcoin Whitepaper' ${whitepaper})
   OPTIONS+=(v 'BTC Install BitcoinMinds.org' ${bitcoinminds})
+  OPTIONS+=(u 'BTC Install ItchySats' ${itchysats})
 fi
-
 
 # available for both LND & c-lightning
 if [ "${lnd}" == "on" ] || [ "${cl}" == "on" ]; then
@@ -66,7 +67,7 @@ if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
   OPTIONS+=(x 'LND Sphinx-Relay' ${sphinxrelay})
   OPTIONS+=(f 'LND Helipad Boostagram reader' ${helipad})
   OPTIONS+=(d 'LND Tallycoin Connect' ${tallycoinConnect})
-  OPTIONS+=(q 'LND Squeaknode' ${squeaknode})
+  #OPTIONS+=(q 'LND Squeaknode' ${squeaknode})
 fi
 
 # just available for CL
@@ -288,7 +289,7 @@ else
 fi
 
 # LNDMANAGE process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "m")
+choice="off"; check=$(echo "${CHOICES}" | grep -c "ä")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${lndmanage}" != "${choice}" ]; then
   echo "lndmanage Setting changed .."
@@ -614,6 +615,21 @@ if [ "${squeaknode}" != "${choice}" ]; then
   fi
 else
   echo "squeaknode setting unchanged."
+fi
+
+# ItchySats process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "u")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${itchysats}" != "${choice}" ]; then
+  echo "ItchySats setting changed .."
+  anychange=1
+  sudo -u admin /home/admin/config.scripts/bonus.itchysats.sh ${choice} --download
+  if [ "${choice}" =  "on" ]; then
+    sudo systemctl start itchysats
+    sudo -u admin /home/admin/config.scripts/bonus.itchysats.sh menu
+  fi
+else
+  echo "ItchySats setting unchanged."
 fi
 
 if [ ${anychange} -eq 0 ]; then

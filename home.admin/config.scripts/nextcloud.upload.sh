@@ -36,7 +36,7 @@ on() {
   fi
 
   # normal delete is OK because it a mem drive
-  rm /var/cache/raspiblitz/.tmp
+  sudo rm -f /var/cache/raspiblitz/.tmp
 
   if [ "${server}" ] && [ "${user}" ] && [ "${password}" ]; then
     /home/admin/config.scripts/blitz.conf.sh set nextcloudBackupServer "${server}"
