@@ -313,6 +313,8 @@ fi
 if [ "${cl}" == "on" ] && [ "${lightning}" != "cl" ]; then
     echo "Provisioning CL Mainnet - run config script" >> ${logFile}
     /home/admin/config.scripts/cl.install.sh on mainnet >> ${logFile} 2>&1
+    echo "Provisioning cl-plugin.cln-grpc.sh - run config script" >> ${logFile}
+    /home/admin/config.scripts/cl-plugin.cln-grpc.sh on >> ${logFile} >> ${logFile}
 else
   echo "Provisioning CL Mainnet - not active as secondary option" >> ${logFile}
 fi
