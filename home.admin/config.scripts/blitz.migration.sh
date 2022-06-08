@@ -108,6 +108,10 @@ migrate_raspiblitz_conf () {
 
 if [ "$1" = "migration-umbrel" ]; then
 
+  source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
+  if [ "${isMounted}" == "1" ]; then
+    source <(sudo /home/admin/config.scripts/blitz.datadrive.sh unmount)
+  fi
   # make sure data drive is mounted
   source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
   if [ "${isMounted}" != "1" ]; then
