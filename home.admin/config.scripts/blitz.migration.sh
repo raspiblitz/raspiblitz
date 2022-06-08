@@ -159,6 +159,9 @@ if [ "$1" = "migration-umbrel" ]; then
   # extract detailed data
   nameNode=$(sudo jq -r '.name' /mnt/hdd/umbrel/db/user.json)
 
+  # call function for final migration
+  migrate_raspiblitz_conf ${nameNode}
+
   # move bitcoin/blockchain & call function to migrate config
   sudo mv /mnt/hdd/bitcoin /mnt/hdd/backup_bitcoin 2>/dev/null
   sudo mv /mnt/hdd/umbrel/bitcoin /mnt/hdd/
@@ -166,17 +169,53 @@ if [ "$1" = "migration-umbrel" ]; then
   sudo chown bitcoin:bitcoin -R /mnt/hdd/bitcoin
   migrate_btc_conf
 
-  # move lnd & call function to migrate config
-  sudo mv /mnt/hdd/lnd /mnt/hdd/backup_lnd 2>/dev/null
-  sudo mv /mnt/hdd/umbrel/lnd /mnt/hdd/
-  sudo chown bitcoin:bitcoin -R /mnt/hdd/lnd
-  migrate_lnd_conf ${nameNode}
+  # CORE LIGHTNING since 0.5.0 umbrel has core lightning
+  echo "### CORE LIGHTNING ###"
+  if [ ${versionMajor} -eq 0 ] && [ ${versionMiner} -gt 4 ]; then
+    clnExists=$(sudo ls /mnt/hdd/umbrel/app-data/lightning/data/lnd/lnd.conf | grep -c "lnd.conf")
+    if [ "${clnExists}" == "1" ]; then 
+      echo "# moving cln data >=0.5.0"
+      sudo mv /mnt/hdd/app-data/.lightning /mnt/hdd/app-data/backup_lightning 2>/dev/null
+      sudo mkdir /mnt/hdd/app-data/.lightning 2>/dev/null
+      sudo mv /mnt/hdd/umbrel/app-data/core-lightning/data/lightningd/bitcoin /mnt/hdd/app-data/.lightning/
+      sudo chown bitcoin:bitcoin -R /mnt/hdd/app-data/.lightning
+      /home/admin/config.scripts/blitz.conf.sh set cl on
+      /home/admin/config.scripts/blitz.conf.sh set lightning "cl"
+    else
+      echo "# no cln data found >=0.5.0"
+    fi
+  else
+    echo "# no core lightning <0.5.0"
+  fi
+
+  # LND since 0.5.0 umbrel uses a different data structure
+  echo "### LND ###"
+  if [ ${versionMajor} -eq 0 ] && [ ${versionMiner} -gt 4 ]; then
+    # new way - lnd might even not exist because its optional 
+    lndExists=$(sudo ls /mnt/hdd/umbrel/app-data/lightning/data/lnd/lnd.conf | grep -c "lnd.conf")
+    if [ "${lndExists}" == "1" ]; then
+      echo "# moving lnd data >=0.5.0"
+      sudo mv /mnt/hdd/lnd /mnt/hdd/backup_lnd 2>/dev/null
+      sudo mv /mnt/hdd/umbrel/app-data/lightning/data/lnd /mnt/hdd/
+      sudo chown bitcoin:bitcoin -R /mnt/hdd/lnd 
+      migrate_lnd_conf ${nameNode}
+      /home/admin/config.scripts/blitz.conf.sh set lnd on
+      /home/admin/config.scripts/blitz.conf.sh set lightning "lnd"
+    else
+      echo "# no lnd data found >=0.5.0"
+    fi
+  else
+    echo "# moving old lnd data <0.5.0"
+    sudo mv /mnt/hdd/lnd /mnt/hdd/backup_lnd 2>/dev/null
+    sudo mv /mnt/hdd/umbrel/lnd /mnt/hdd/
+    sudo chown bitcoin:bitcoin -R /mnt/hdd/lnd
+    migrate_lnd_conf ${nameNode}
+    /home/admin/config.scripts/blitz.conf.sh set lnd on
+    /home/admin/config.scripts/blitz.conf.sh set lightning "lnd"
+  fi
 
   # backup & rename the rest of the data
   sudo mv /mnt/hdd/umbrel /mnt/hdd/backup_migration
-
-  # call function for final migration
-  migrate_raspiblitz_conf ${nameNode}
 
   echo "# OK ... data disk converted to RaspiBlitz"
   exit 0
