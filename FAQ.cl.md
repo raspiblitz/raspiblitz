@@ -1,77 +1,80 @@
 <!-- omit in toc -->
-# C-lightning on the RaspiBlitz FAQ
+# Core Lightning on the RaspiBlitz FAQ
 
 ---
 Table of Contents
 ---
-  - [Common questions about the different Lightning Network implementations](#common-questions-about-the-different-lightning-network-implementations)
-    - [Can LND and C-lightning nodes open channels to each other and route payments?](#can-lnd-and-c-lightning-nodes-open-channels-to-each-other-and-route-payments)
-    - [Can I run LND and C-lightning connected to the same node?](#can-i-run-lnd-and-c-lightning-connected-to-the-same-node)
-    - [Can I convert an LND node to C-lightning (or the opposite)?](#can-i-convert-an-lnd-node-to-c-lightning-or-the-opposite)
-    - [Is there a table to quickly compare LND and C-Lightning?](#is-there-a-table-to-quickly-compare-lnd-and-c-lightning)
-  - [C-lightning official documentation and support channels](#c-lightning-official-documentation-and-support-channels)
-  - [Commands and aliases](#commands-and-aliases)
-  - [Directories](#directories)
-  - [Config file](#config-file)
-    - [Default values](#default-values)
-    - [All possible config settings](#all-possible-config-settings)
-  - [Plug-ins](#plug-ins)
-    - [General info](#general-info)
-    - [Directories](#directories-1)
-    - [Implemented plugins](#implemented-plugins)
-    - [Add a custom plugin](#add-a-custom-plugin)
-    - [CLBOSS](#clboss)
-    - [Feeadjuster](#feeadjuster)
-    - [Dual funded channels](#dual-funded-channels)
-      - [Reading](#reading)
-      - [Setting up](#setting-up)
-      - [Open a dual funded channel](#open-a-dual-funded-channel)
-      - [Fundchannel syntax](#fundchannel-syntax)
-    - [Offers](#offers)
-    - [About the feature bits](#about-the-feature-bits)
-  - [Testnets](#testnets)
-  - [Backups](#backups)
-    - [Seed](#seed)
-    - [How to display the hsm_secret in a human-readable format?](#how-to-display-the-hsm_secret-in-a-human-readable-format)
-    - [How to test the seedwords?](#how-to-test-the-seedwords)
-    - [How to restore the hsm_secret from text?](#how-to-restore-the-hsm_secret-from-text)
-    - [Channel database](#channel-database)
-    - [Recovery](#recovery)
-      - [Recover from a cl-rescue file](#recover-from-a-cl-rescue-file)
-      - [Recover from a seed](#recover-from-a-seed)
-      - [Rescan the chain after restoring a used c-lightning wallet](#rescan-the-chain-after-restoring-a-used-c-lightning-wallet)
-      - [Guesstoremote to recover funds from force-closed channels](#guesstoremote-to-recover-funds-from-force-closed-channels)
-  - [Update](#update)
-    - [Update to a new C-lightning release](#update-to-a-new-c-lightning-release)
-    - [Experimental update to the latest master](#experimental-update-to-the-latest-master)
-  - [sqlite3 queries](#sqlite3-queries)
-  - [Script file help list](#script-file-help-list)
+- [Table of Contents](#table-of-contents)
+- [Common questions about the different Lightning Network implementations](#common-questions-about-the-different-lightning-network-implementations)
+  - [Can LND and CLN nodes open channels to each other and route payments?](#can-lnd-and-cln-nodes-open-channels-to-each-other-and-route-payments)
+  - [Can I run LND and CLN connected to the same node?](#can-i-run-lnd-and-cln-connected-to-the-same-node)
+  - [Can I convert an LND node to CLN (or the opposite)?](#can-i-convert-an-lnd-node-to-cln-or-the-opposite)
+  - [Is there a table to quickly compare LND and CLN?](#is-there-a-table-to-quickly-compare-lnd-and-cln)
+- [CLN official documentation and support channels](#cln-official-documentation-and-support-channels)
+- [Commands and aliases](#commands-and-aliases)
+- [Directories](#directories)
+- [Config file](#config-file)
+  - [Default values](#default-values)
+  - [All possible config settings](#all-possible-config-settings)
+- [Plug-ins](#plug-ins)
+  - [General info](#general-info)
+  - [Directories](#directories-1)
+  - [Implemented plugins](#implemented-plugins)
+  - [Add a custom plugin](#add-a-custom-plugin)
+  - [CLBOSS](#clboss)
+  - [Feeadjuster](#feeadjuster)
+  - [Dual funded channels](#dual-funded-channels)
+    - [Reading](#reading)
+    - [Setting up](#setting-up)
+    - [Open a dual funded channel](#open-a-dual-funded-channel)
+    - [Fundchannel syntax](#fundchannel-syntax)
+    - [Multifundchannel syntax](#multifundchannel-syntax)
+  - [Offers](#offers)
+  - [About the feature bits](#about-the-feature-bits)
+- [Testnets](#testnets)
+- [Backups](#backups)
+  - [Seed](#seed)
+  - [How to display the hsm\_secret in a human-readable format?](#how-to-display-the-hsm_secret-in-a-human-readable-format)
+  - [How to test the seedwords?](#how-to-test-the-seedwords)
+  - [How to restore the hsm\_secret from text?](#how-to-restore-the-hsm_secret-from-text)
+  - [Channel database](#channel-database)
+  - [Recovery](#recovery)
+    - [Recover from a cl-rescue file](#recover-from-a-cl-rescue-file)
+    - [Recover from a seed](#recover-from-a-seed)
+    - [Rescan the chain after restoring a used CLN wallet](#rescan-the-chain-after-restoring-a-used-cln-wallet)
+    - [Guesstoremote to recover funds from force-closed channels](#guesstoremote-to-recover-funds-from-force-closed-channels)
+- [sqlite3 queries](#sqlite3-queries)
+- [Update](#update)
+  - [Update to a new CLN release](#update-to-a-new-cln-release)
+  - [Experimental update to the latest master](#experimental-update-to-the-latest-master)
+- [sqlite3 queries](#sqlite3-queries-1)
+- [Script file help list](#script-file-help-list)
 ---
 ## Common questions about the different Lightning Network implementations
 
-### Can LND and C-lightning nodes open channels to each other and route payments?
+### Can LND and CLN nodes open channels to each other and route payments?
 * Yes, all [BOLT specification](https://github.com/lightningnetwork/lightning-rfc) compliant implementations can open channels to each other and route payments.
 
-### Can I run LND and C-lightning connected to the same node?
+### Can I run LND and CLN connected to the same node?
 * Yes, both can run parallel on a RaspiBlitz and even have channels witch each other.
 
-### Can I convert an LND node to C-lightning (or the opposite)?
+### Can I convert an LND node to CLN (or the opposite)?
 * No, currently there are no tools available to convert between the databases storing the channel states.
 The channels would need to be closed to use the same funds in an other node.
 
-### Is there a table to quickly compare LND and C-Lightning?
+### Is there a table to quickly compare LND and CLN?
 * see [github.com/openoms/lightning-node-management/blob/master/node-types/comparison.md](https://github.com/openoms/lightning-node-management/blob/master/node-types/comparison.md)
 
 ---
 
-## C-lightning official documentation and support channels
+## CLN official documentation and support channels
 * https://lightning.readthedocs.io/
 * https://github.com/ElementsProject/lightning
 * Telegram: https://t.me/lightningd
 * Discord: https://discord.gg/YGdpyj2aXj
 * IRC: #c-lightning on libera.chat or https://matrix.to/#/#c-lightning:libera.chat
 ## Commands and aliases
-* Check if the C-lightning daemon is running:
+* Check if the CLN daemon is running:
     ```
     sudo systemctl status lightningd
     ```
@@ -295,14 +298,14 @@ or with the alias: `cllog`
 
 ### CLBOSS
 A plugin for automatic LN node management.
-CLBOSS only requires to have funds deposited  to the onchain wallet of C-lightning.
+CLBOSS only requires to have funds deposited  to the onchain wallet of CLN.
 The recommended amount to start is ~ 10 million satoshis (0.1 BTC).
 
 It does automatically:
 
 * generate outbound capacity - opens channels
 * generate inbound capacity - submarine swaps through the boltz.exchange API
-* aware of onchain fees and mempool through c-lightning and makes transactions when fees are low
+* aware of onchain fees and mempool through CLN and makes transactions when fees are low
 * manages rebalancing - performs probing
 * closes bad channels (inactive or low traffic) - this function needs to activated manually
 
@@ -327,72 +330,34 @@ https://github.com/ZmnSCPxj/clboss#clboss-status
 * Install:
 `config.scripts/cl-plugin.feeadjuster.sh on`
 
-* to set the default fees add to the C-lightning `config` file:
+* to set the default fees add to the CLN config file (`clconf`)
   ```
   fee-base=BASEFEE_IN_MILLISATS
   fee-per-satoshi=PPM_FEE_IN_SATS
   ```
-* more options for the feeadjuster to be set in the c-lightning config can be seen in the [code](https://github.com/lightningd/plugins/blob/c16c564c2c5549b8f7236815490260c49e9e9bf4/feeadjuster/feeadjuster.py#L318):
+
+* example feeadjuster options
     ```
-    plugin.add_option(
-        "feeadjuster-deactivate-fuzz",
-        False,
-        "Deactivate update threshold randomization and hysterisis.",
-        "flag"
-    )
-    plugin.add_option(
-        "feeadjuster-deactivate-fee-update",
-        False,
-        "Deactivate automatic fee updates for forward events.",
-        "flag"
-    )
-    plugin.add_option(
-        "feeadjuster-threshold",
-        "0.05",
-        "Relative channel balance delta at which to trigger an update. Default 0.05 means 5%. "
-        "Note: it's also fuzzed by 1.5%",
-        "string"
-    )
-    plugin.add_option(
-        "feeadjuster-threshold-abs",
-        "0.001btc",
-        "Absolute channel balance delta at which to always trigger an update. "
-        "Note: it's also fuzzed by 1.5%",
-        "string"
-    )
-    plugin.add_option(
-        "feeadjuster-enough-liquidity",
-        "0msat",
-        "Beyond this liquidity do not adjust fees. "
-        "This also modifies the fee curve to achieve having this amount of liquidity. "
-        "Default: '0msat' (turned off).",
-        "string"
-    )
-    plugin.add_option(
-        "feeadjuster-adjustment-method",
-        "default",
-        "Adjustment method to calculate channel fee"
-        "Can be 'default', 'soft' for less difference or 'hard' for higher difference"
-        "string"
-    )
-    plugin.add_option(
-        "feeadjuster-imbalance",
-        "0.5",
-        "Ratio at which channel imbalance the feeadjuster should start acting. "
-        "Default: 0.5 (always). Set higher or lower values to limit feeadjuster's "
-        "activity to more imbalanced channels. "
-        "E.g. 0.3 for '70/30'% or 0.6 for '40/60'%.",
-        "string"
-    )
-    plugin.add_option(
-        "feeadjuster-feestrategy",
-        "global",
-        "Sets the per channel fee selection strategy. "
-        "Can be 'global' to use global config or default values, "
-        "or 'median' to use the median fees from peers of peer "
-        "Default: 'global'.",
-        "string"
+    fee-base=0
+    fee-per-satoshi=200
+    feeadjuster-imbalance=0.2
+    feeadjuster-threshold=0.10
+    feeadjuster-threshold-abs=0.01btc
+    feeadjuster-enough-liquidity=1000000000msat
+    feeadjuster-deactivate-fee-update
+    feeadjuster-adjustment-method=hard
     ```
+* effect displayed in the logs (`cllog`)
+    ```
+    plugin-feeadjuster.py:
+    Plugin feeadjuster initialized (0 base / 200 ppm) with an imbalance of 20%/80%,
+    update_threshold: 10%, update_threshold_abs: 1000000000msat,
+    enough_liquidity: 1000000000msat, deactivate_fuzz: None,
+    forward_event_subscription: False, adjustment_method: get_ratio_hard,
+    fee_strategy: get_fees_global, listchannels_by_dst: True
+    ```
+
+* more options for the feeadjuster to be set in the CLN config can be seen in the [code](https://github.com/lightningd/plugins/blob/master/feeadjuster/feeadjuster.py#L323)
 
 * start the feeadjuster
     ```
@@ -431,7 +396,7 @@ Add the line:
     ```
     experimental-dual-fund
     ```
-    Save and restart C-lightning.
+    Save and restart CLN.
 
 * set up a liquidity ad:
     ```
@@ -491,6 +456,61 @@ list the utxo-s with `lightning-cli listfunds`, can list multiple
 the feerate is in `perkb` by default, e.g. use 1000 for 1 sat/byte
     ```
     lightning-cli fundchannel feerate=PERKB_FEERATE utxos='["TRANSACTION_ID:INDDEX_NUMBER"]' -k id=NODE_ID amount=OWN_AMOUNTsat request_amt=PEER_CONTRIBUTION_AMOUNTsat compact_lease=COMPACT_LEASE
+    ```
+
+#### Multifundchannel syntax
+* discussed in https://github.com/ElementsProject/lightning/issues/4642#issuecomment-1149657371
+* see a good format (json autoformatting tools help - like `CTRL`+`SHIFT`+`i` in VSCode):
+    ```
+    ₿ lightning-cli multifundchannel '[
+        {
+            "id": "nodeID1",
+            "amount": "amount_in_sats"
+        },
+        {
+            "id": "nodeID2",
+            "amount": "amount_in_sats"
+        },
+        {
+            "id": "nodeID3",
+            "amount": "amount_in_sats"
+        },
+        {
+            "id": "nodeID4",
+            "amount": "amount_in_sats",
+        }
+    ]' 1000perkb
+    ```
+
+* The returned output:
+    ```
+    {
+        "tx": "RAW............TX",
+        "txid": "TX................ID",
+        "channel_ids": [
+            {
+                "id": "nodeID1",
+                "channel_id": "CHANNEL_ID2",
+                "outnum": 3
+            },
+            {
+                "id": "nodeID2",
+                "channel_id": "CHANNEL_ID1",
+                "outnum": 4
+            },
+            {
+                "id": "nodeID3",
+                "channel_id": "CHANNEL_ID4",
+                "outnum": 1
+            },
+            {
+                "id": "nodeID4",
+                "channel_id": "CHANNEL_ID3",
+                "outnum": 2
+            }
+        ],
+        "failed": []
+    }
     ```
 
 ### Offers
@@ -582,7 +602,7 @@ Will need to pay through a peer which supports the onion messages which means yo
 * The file where the seed is stored (until encrypted) is on the disk: `/home/bitcoin/.lightning/bitcoin/seedwords.info`
 * Show manually with:
 `sudo cat /home/bitcoin/.lightning/bitcoin/seedwords.info`
-* If there is no such file and you have not funded the C-lightning wallet yet can reset the wallet and the next wallet will be created with a seed.
+* If there is no such file and you have not funded the CLN wallet yet can reset the wallet and the next wallet will be created with a seed.
 
 ### How to display the hsm_secret in a human-readable format?
 * If there is no seed available it is best to save the hsm_secret as a file with `scp` or note down the alphanumeric characters in the two line displayed with:
@@ -634,7 +654,7 @@ Will need to pay through a peer which supports the onion messages which means yo
 #### Recover from a seed
 * use the `REPAIR-CL` - `SEEDRESTORE` option in the menu for instructions to paste the seedwords to restore
 
-#### Rescan the chain after restoring a used c-lightning wallet
+#### Rescan the chain after restoring a used CLN wallet
 
 * can use the `menu` -> `REPAIR` -> `REPAIR-CL` -> `RESCAN` option
 * or follow the manual process:
@@ -722,8 +742,8 @@ Will need to pay through a peer which supports the onion messages which means yo
     ```
 
 ## Update
-### Update to a new C-lightning release
-* See the tagged releases by the C-lightning team: [github.com/ElementsProject/lightning/releases](https://github.com/ElementsProject/lightning/releases)
+### Update to a new CLN release
+* See the tagged releases by the CLN team: [github.com/ElementsProject/lightning/releases](https://github.com/ElementsProject/lightning/releases)
 * Will be able to update to new releases from the menu - `UPDATE` - `CL`
 * Since downgrading the lightning database is not allowed the updated version will persist if the SDcard is reflashed.
 
@@ -812,13 +832,13 @@ cl.hsmtool.sh [change-password] <mainnet|testnet|signet> <NewPassword>
 
 + ./cl.install-service.sh -h
 
-Script to set up or update the C-lightning systemd service
+Script to set up or update the CLN systemd service
 Usage:
 /home/admin/config.scripts/cl.install-service.sh <mainnet|testnet|signet>
 
 + ./cl.install.sh -h
 
-C-lightning install script
+CLN install script
 The default version is: v0.10.1
 Setting up on mainnet unless otherwise specified
 mainnet / testnet / signet instances can run parallel
@@ -831,7 +851,7 @@ cl.install.sh display-seed <mainnet|testnet|signet>
 
 + ./cl-plugin.backup.sh -h
 
-Install the backup plugin for C-lightning
+Install the backup plugin for CLN
 Replicates the lightningd.sqlite3 database on the SDcard
 
 Usage:
@@ -843,14 +863,14 @@ https://github.com/lightningd/plugins/tree/master/backup
 
 + ./cl-plugin.clboss.sh -h
 
-Install or remove the CLBOSS C-lightning plugin
+Install or remove the CLBOSS CLN plugin
 version: v0.10
 Usage:
 cl-plugin.clboss.sh [on|off] [testnet|mainnet|signet]
 
 + ./cl-plugin.feeadjuster.sh -h
 
-Install the feeadjuster plugin for C-lightning
+Install the feeadjuster plugin for CLN
 Usage:
 cl-plugin.feeadjuster.sh [on|off] <testnet|mainnet|signet>
 
@@ -864,14 +884,14 @@ cl-plugin.http.sh [on|off|connect] <norestart>
 
 + ./cl-plugin.sparko.sh -h
 
-Install, remove, connect or get info about the Sparko plugin for C-lightning
+Install, remove, connect or get info about the Sparko plugin for CLN
 version: v2.7
 Usage:
 cl-plugin.sparko.sh [on|off|menu|connect] [testnet|mainnet|signet] [norestart]
 
 + ./cl-plugin.standard-python.sh -h
 
-Install and show the output of the chosen plugin for C-lightning
+Install and show the output of the chosen plugin for CLN
 Usage:
 cl-plugin.standard-python.sh on [plugin-name] <testnet|mainnet|signet> <persist|runonce>
 
@@ -883,7 +903,7 @@ https://github.com/lightningd/plugins
 
 + ./cl-plugin.summary.sh -h
 
-Install and show the output if the summary plugin for C-lightning
+Install and show the output if the summary plugin for CLN
 Usage:
 cl-plugin.summary.sh [testnet|mainnet|signet] [runonce]
 
@@ -899,25 +919,25 @@ cl.rest.sh [on|off|connect] <mainnet|testnet|signet>
 
 + ./cl.setname.sh -h
 
-Config script to set the alias of the C-lightning node
+Config script to set the alias of the CLN node
 cl.setname.sh [mainnet|testnet|signet] [?newName]
 
 + ./cl.spark.sh -h
 
-Install, remove or get info about the Spark Wallet for C-lightning
+Install, remove or get info about the Spark Wallet for CLN
 version: v0.3.0rc
 Usage:
 cl.spark.sh [on|off|menu] <testnet|mainnet|signet>
 
 + ./cl.update.sh -h
 
-Interim optional C-lightning updates between RaspiBlitz releases.
+Interim optional CLN updates between RaspiBlitz releases.
 cl.update.sh [info|verified|reckless]
 info -> get actual state and possible actions
 verified -> only do recommended updates by RaspiBlitz team
   binary will be checked by signature and checksum
 reckless -> if you just want to update to the latest release
-  published on C-lightning GitHub releases (RC or final) without any
+  published on CLN GitHub releases (RC or final) without any
   testing or security checks.
 
 ```
