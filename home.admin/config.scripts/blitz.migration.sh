@@ -120,7 +120,7 @@ if [ "$1" = "migration-umbrel" ]; then
   if [ "${isMounted}" == "1" ]; then
     echo "# mounted /mnt/hdd (hddFormat='${hddFormat}')"
   else
-    echo "err='failed temp mounting disk'"
+    echo "error'failed temp mounting disk'"
     exit 1
   fi
 
@@ -130,7 +130,7 @@ if [ "$1" = "migration-umbrel" ]; then
   elif [ "${hddVersionBTC}" != "" ] || [ "${hddVersionLND}" != "" ] || [ "${hddVersionCLN}" != "" ]; then
     echo "# found umbrel data >=0.5.0"
   else
-    echo "err='umbrel data layout changed'"
+    echo "error='umbrel data layout changed'"
     exit 1
   fi
 
@@ -139,14 +139,14 @@ if [ "$1" = "migration-umbrel" ]; then
   # determine version
   version=$(sudo cat /mnt/hdd/umbrel/info.json | jq -r '.version')
   if [ "${version}" == "" ]; then
-    echo "err='not able to get version'"
+    echo "error='not able to get version'"
     exit 1
   fi
   versionMajor=$(echo "${version}" | cut -d "." -f1)
   versionMiner=$(echo "${version}" | cut -d "." -f2)
   versionPatch=$(echo "${version}" | cut -d "." -f3)
   if [ "${versionMajor}" == "" ] || [ "${versionMiner}" == "" ] || [ "${versionPatch}" == "" ]; then
-    echo "err='not able processing version'"
+    echo "error='not able processing version'"
     exit 1
   fi
 
@@ -252,7 +252,7 @@ if [ "$1" = "migration-citadel" ]; then
   if [ "${isMounted}" == "1" ]; then
     echo "# mounted /mnt/hdd (hddFormat='${hddFormat}')"
   else
-    echo "err='failed temp mounting disk'"
+    echo "error='failed temp mounting disk'"
     exit 1
   fi
 
@@ -260,7 +260,7 @@ if [ "$1" = "migration-citadel" ]; then
   if [ -f /mnt/hdd/citadel/bitcoin/bitcoin.conf ] && [ -f /mnt/hdd/citadel/lnd/lnd.conf ]; then
     echo "# found bitcoin & lnd data"
   else
-    echo "err='citadel data layout changed'"
+    echo "error='citadel data layout changed'"
     exit 1
   fi
 
@@ -269,14 +269,14 @@ if [ "$1" = "migration-citadel" ]; then
   # determine version
   version=$(sudo cat /mnt/hdd/citadel/info.json | jq -r '.version')
   if [ "${version}" == "" ]; then
-    echo "err='not able to get version'"
+    echo "error='not able to get version'"
     exit 1
   fi
   versionMajor=$(echo "${version}" | cut -d "." -f1)
   versionMiner=$(echo "${version}" | cut -d "." -f2)
   versionPatch=$(echo "${version}" | cut -d "." -f3)
   if [ "${versionMajor}" == "" ] || [ "${versionMiner}" == "" ] || [ "${versionPatch}" == "" ]; then
-    echo "err='not able processing version'"
+    echo "error='not able processing version'"
     exit 1
   fi
 
@@ -327,7 +327,7 @@ if [ "$1" = "migration-mynode" ]; then
   if [ "${isMounted}" == "1" ]; then
     echo "# mounted /mnt/hdd (hddFormat='${hddFormat}')"
   else
-    echo "err='failed temp mounting disk'"
+    echo "error='failed temp mounting disk'"
     exit 1
   fi
 
@@ -335,7 +335,7 @@ if [ "$1" = "migration-mynode" ]; then
   if [ -f /mnt/hdd/mynode/bitcoin/bitcoin.conf ] && [ -f /mnt/hdd/mynode/lnd/lnd.conf ]; then
     echo "# found bitcoin & lnd data"
   else
-    echo "err='mynode data layout changed'"
+    echo "error='mynode data layout changed'"
     exit 1
   fi
 
