@@ -169,11 +169,22 @@ if [ "$1" = "migration-umbrel" ]; then
   migrate_raspiblitz_conf ${nameNode}
 
   # move bitcoin/blockchain & call function to migrate config
-  sudo mv /mnt/hdd/bitcoin /mnt/hdd/backup_bitcoin 2>/dev/null
-  sudo mv /mnt/hdd/umbrel/bitcoin /mnt/hdd/
-  sudo rm /mnt/hdd/bitcoin/.walletlock 2>/dev/null
-  sudo chown bitcoin:bitcoin -R /mnt/hdd/bitcoin
-  migrate_btc_conf
+  echo "### BITCOIN ###"
+  if [ ${versionMajor} -eq 0 ] && [ ${versionMiner} -gt 4 ]; then
+    echo "# moving new bitcoin data >=0.5.0"
+    sudo rm -R /mnt/hdd/bitcoin 2>/dev/null
+    sudo mv /mnt/hdd/umbrel/app-data/bitcoin/data/bitcoin /mnt/hdd/
+    sudo rm /mnt/hdd/bitcoin/.walletlock 2>/dev/null
+    sudo chown bitcoin:bitcoin -R /mnt/hdd/bitcoin
+    migrate_btc_conf
+  else
+    echo "# moving old bitcoin data <0.5.0"
+    sudo mv /mnt/hdd/bitcoin /mnt/hdd/backup_bitcoin 2>/dev/null
+    sudo mv /mnt/hdd/umbrel/bitcoin /mnt/hdd/
+    sudo rm /mnt/hdd/bitcoin/.walletlock 2>/dev/null
+    sudo chown bitcoin:bitcoin -R /mnt/hdd/bitcoin
+    migrate_btc_conf
+  fi
 
   # CORE LIGHTNING since 0.5.0 umbrel has core lightning
   echo "### CORE LIGHTNING ###"
