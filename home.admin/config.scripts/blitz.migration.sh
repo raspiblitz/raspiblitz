@@ -122,7 +122,9 @@ if [ "$1" = "migration-umbrel" ]; then
 
   # checking basic data disk layout
   if [ -f /mnt/hdd/umbrel/bitcoin/bitcoin.conf ] && [ -f /mnt/hdd/umbrel/lnd/lnd.conf ]; then
-    echo "# found bitcoin & lnd data"
+    echo "# found bitcoin & lnd data <0.5.0"
+  elif [ "${hddVersionBTC}" != "" ] || [ "${hddVersionLND}" != "" ] || [ "${hddVersionCLN}" != "" ]; then
+    echo "# found umbrel data >=0.5.0"
   else
     echo "err='umbrel data layout changed'"
     exit 1
