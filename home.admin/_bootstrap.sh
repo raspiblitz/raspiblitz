@@ -586,7 +586,7 @@ if [ ${isMounted} -eq 0 ]; then
         clear
         echo "Migrating Blockchain of ${hddGotMigrationData}'" >> ${logFile}
         source <(sudo /home/admin/config.scripts/blitz.migration.sh migration-${hddGotMigrationData})
-        if [ "${err}" != "" ]; then
+        if [ "${error}" != "0" ]; then
           echo "MIGRATION OF BLOCKHAIN FAILED: ${err}" >> ${logFile}
           echo "Format data disk on laptop & recover funds with fresh sd card using seed words + static channel backup." >> ${logFile}
           /home/admin/_cache.sh set state "errorHDD"

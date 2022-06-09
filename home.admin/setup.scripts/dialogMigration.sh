@@ -139,7 +139,7 @@ if [ "${migrationOS}" == "umbrel" ]; then
   # infodialog
   whiptail --title " UMBREL --> RASPIBLITZ " --yes-button "Start Migration" --no-button "Cancel Migration" --yesno "RaspiBlitz found data from UMBREL
 
-You can migrate your blockchain & LND data (funds & channels) over to RaspiBlitz.
+You can migrate your blockchain & lightning data (funds & channels) over to RaspiBlitz.
 
 Please make sure to have your UMBREL seed words & static channel backup file (just in case). Also any data of additional apps you had installed on UMBREL might get lost.
 

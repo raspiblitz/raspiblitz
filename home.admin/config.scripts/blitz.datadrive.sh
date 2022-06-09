@@ -308,7 +308,6 @@ if [ "$1" = "status" ]; then
             echo "# ERROR: Was not able to determine hddDataFree space"
           fi
 
-
           # check if its another fullnode implementation data disk
           hddGotMigrationData=""
           hddGotMigrationDataExtra=""
@@ -318,9 +317,18 @@ if [ "$1" = "status" ]; then
             isCitadelHDD=$(ls /mnt/storage/citadel/info.json 2>/dev/null | grep -c '.json')
             isMyNodeHDD=$(ls /mnt/storage/mynode/bitcoin/bitcoin.conf 2>/dev/null | grep -c '.conf')
             if [ ${isUmbrelHDD} -gt 0 ]; then
+              # sudo cat /mnt/hdd/umbrel/app-data/bitcoin/umbrel-app.yml | grep "version:" | cut -d ":" -f2 | tr -d \" | xargs
               hddGotMigrationData="umbrel"
-              lndVersion=$(grep "lightninglabs/lnd" /mnt/storage/umbrel/docker-compose.yml 2>/dev/null | sed 's/.*lnd://' | sed 's/@.*//')
-              echo "hddVersionLND='${lndVersion}'"
+              btcVersion=$(grep "lncm/bitcoind" /mnt/storage/umbrel/app-data/bitcoin/docker-compose.yml 2>/dev/null | sed 's/.*bitcoind://' | sed 's/@.*//')
+              clnVersion=$(grep "lncm/clightning" /mnt/storage/umbrel/app-data/core-lightning/docker-compose.yml 2>/dev/null | sed 's/.*clightning://' | sed 's/@.*//')
+              lndVersion=$(grep "lightninglabs/lnd" /mnt/storage/umbrel/app-data/lightning/docker-compose.yml 2>/dev/null | sed 's/.*lnd://' | sed 's/@.*//')
+              # umbrel <0.5.0 (old structure)
+              if [ "${lndVersion}" == "" ]; then
+                lndVersion=$(grep "lightninglabs/lnd" /mnt/storage/umbrel/docker-compose.yml 2>/dev/null | sed 's/.*lnd://' | sed 's/@.*//')
+              fi
+              echo "hddVersionBTC='${btcVersion}'"
+              echo "hddVersionLND='${clnVersion}'"
+              echo "hddVersionCLN='${lndVersion}'"
             elif [ ${isMyNodeHDD} -gt 0 ]; then
               hddGotMigrationData="mynode"
             elif [ ${isCitadelHDD} -gt 0 ]; then
