@@ -102,23 +102,16 @@ datadir = /home/fulcrum/.fulcrum/db
 bitcoind = 127.0.0.1:8332
 rpcuser = ${RPC_USER}
 rpcpassword = ${PASSWORD_B}
-
 # RPi optimizations
 # avoid 'bitcoind request timed out'
-bitcoind_timeout = 300
+bitcoind_timeout = 600
 # reduce load (4 cores only)
 bitcoind_clients = 1
 worker_threads = 1
 db_mem=1024
-
 # for 4GB RAM
 db_max_open_files=200
 fast-sync = 1024
-
-# for 8GB RAM - use settings as for 4GB
-#db_max_open_files=500
-#fast-sync = 2048
-
 # server connections
 # disable peer discovery and public server options
 peering = false
@@ -132,12 +125,16 @@ tcp = 0.0.0.0:50021
 [Unit]
 Description=Fulcrum
 After=network.target bitcoind.service
+StartLimitBurst=2
+StartLimitIntervalSec=20
 
 [Service]
 ExecStart=/home/fulcrum/Fulcrum-${fulcrumVersion}-${build}/Fulcrum /home/fulcrum/.fulcrum/fulcrum.conf
+KillSignal=SIGINT
 User=fulcrum
 LimitNOFILE=8192
-TimeoutStopSec=30min
+TimeoutStopSec=300
+RestartSec=5
 Restart=on-failure
 
 [Install]
