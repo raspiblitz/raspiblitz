@@ -177,6 +177,7 @@ if [ "$1" = "migration-umbrel" ]; then
     sudo rm /mnt/hdd/bitcoin/.walletlock 2>/dev/null
     sudo chown bitcoin:bitcoin -R /mnt/hdd/bitcoin
     migrate_btc_conf
+    /home/admin/config.scripts/blitz.conf.sh set lightning "none"
   else
     echo "# moving old bitcoin data <0.5.0"
     sudo mv /mnt/hdd/bitcoin /mnt/hdd/backup_bitcoin 2>/dev/null
