@@ -189,7 +189,7 @@ if [ "$1" = "migration-umbrel" ]; then
   # CORE LIGHTNING since 0.5.0 umbrel has core lightning
   echo "### CORE LIGHTNING ###"
   if [ ${versionMajor} -eq 0 ] && [ ${versionMiner} -gt 4 ]; then
-    clnExists=$(sudo ls /mnt/hdd/umbrel/app-data/lightning/data/lnd/lnd.conf | grep -c "lnd.conf")
+    clnExists=$(sudo ls /mnt/hdd/umbrel/app-data/core-lightning/data/lightningd/bitcoin/hsm_secret | grep -c "hsm_secret")
     if [ "${clnExists}" == "1" ]; then 
       echo "# moving cln data >=0.5.0"
       sudo mv /mnt/hdd/app-data/.lightning /mnt/hdd/app-data/backup_lightning 2>/dev/null
