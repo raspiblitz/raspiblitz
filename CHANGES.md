@@ -20,6 +20,7 @@
 - Update: Channel Tools (chantools) v0.10.4 [details](https://github.com/guggero/chantools/blob/master/README.md)
 - Update: Electrum Server in Rust (electrs) v0.9.7 [details](https://github.com/romanz/electrs/blob/master/RELEASE-NOTES.md#097-apr-30-2022)
 - Update: BTCPayServer v1.5.4 [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.5.4)
+- Update: Mempool 2.4.0 [details](hhttps://github.com/mempool/mempool/releases/tag/v2.4.0)
 - Update: Helipad (Podcasting 2.0 Boostagram reader) v0.1.10 [details](https://github.com/Podcastindex-org/helipad/releases/tag/v0.1.10)
 - Update: Adapted Umbrel Migration for new 0.5.0 version with core lightning
 - Info: Run RaspiBlitz on amd64 bare metal and virtual machines [details](https://github.com/rootzoll/raspiblitz/tree/dev/alternative.platforms)
