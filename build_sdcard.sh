@@ -314,7 +314,7 @@ sudo update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
 # pytesseract mechanize PySocks urwid Pillow requests
 # 3. Nyx
 # setuptools
-python_libs="grpcio==1.42.0 googleapis-common-protos==1.53.0 toml==0.10.2 j2cli==0.3.10 requests[socks]==2.21.0"
+python_libs="grpcio==1.42.0 googleapis-common-protos==1.53.0 toml==0.10.2 j2cli==0.3.10 requests[socks]==2.21.0 protobuf==3.20.1"
 torbox_libs="pytesseract mechanize PySocks urwid Pillow requests setuptools"
 sudo -H python3 -m pip install --upgrade pip
 sudo -H python3 -m pip install ${python_libs} ${torbox_libs}
