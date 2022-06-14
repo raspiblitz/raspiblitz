@@ -131,9 +131,6 @@ if [ "$1" = "update-config" ]; then
     chain="main"
   fi
 
-  # get actual state of system
-  source <(/home/admin/_cache.sh get setupPhase)
-
   # prepare config update
   cd /root/blitz_api
   cp ./.env_sample ./.env
@@ -142,11 +139,12 @@ if [ "$1" = "update-config" ]; then
   sed -i "s/^# platform=.*/platform=raspiblitz/g" ./.env
   sed -i "s/^platform=.*/platform=raspiblitz/g" ./.env
 
-  if [ "${setupPhase}" == "done" ]; then
+  source <(/home/admin/config.scripts/blitz.datadrive.sh status)
+  if [ "${isMounted}" == "1" ]; then
 
     # configure bitcoin
-    RPCUSER=$(sudo cat /mnt/hdd/${network}/${network}.conf 2>/dev/null | grep rpcuser | cut -c 9-)
-    RPCPASS=$(sudo cat /mnt/hdd/${network}/${network}.conf 2>/dev/null | grep rpcpassword | cut -c 13-)
+    RPCUSER=$(cat /mnt/hdd/${network}/${network}.conf 2>/dev/null | grep rpcuser | cut -c 9-)
+    RPCPASS=$(cat /mnt/hdd/${network}/${network}.conf 2>/dev/null | grep rpcpassword | cut -c 13-)
     if [ "${RPCUSER}" == "" ]; then
       RPCUSER="raspibolt"
     fi
@@ -164,8 +162,8 @@ if [ "$1" = "update-config" ]; then
     if [ "${lightning}" == "lnd" ]; then
 
       echo "# CONFIG Web API Lightning --> LND"
-      tlsCert=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/tls.cert)
-      adminMacaroon=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/bitcoin/${chain}net/admin.macaroon)
+      tlsCert=$(xxd -ps -u -c 1000 /mnt/hdd/lnd/tls.cert)
+      adminMacaroon=$(xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/bitcoin/${chain}net/admin.macaroon)
       sed -i "s/^ln_node=.*/ln_node=lnd_grpc/g" ./.env
       sed -i "s/^lnd_grpc_ip=.*/lnd_grpc_ip=127.0.0.1/g" ./.env
       sed -i "s/^lnd_macaroon=.*/lnd_macaroon=${adminMacaroon}/g" ./.env
@@ -225,10 +223,10 @@ fi
 ###################
 if [ "$1" = "update-code" ]; then
 
-  apiActive=$(sudo ls /etc/systemd/system/blitzapi.service | grep -c blitzapi.service)
+  apiActive=$(ls /etc/systemd/system/blitzapi.service | grep -c blitzapi.service)
   if [ "${apiActive}" != "0" ]; then
     echo "# Update Web API CODE"
-    sudo systemctl stop blitzapi
+    systemctl stop blitzapi
     cd /root/blitz_api
     currentBranch=$(git rev-parse --abbrev-ref HEAD)
     echo "# updating local repo ..."
@@ -241,7 +239,7 @@ if [ "$1" = "update-code" ]; then
     else
       echo "# no code changes"
     fi
-    sudo systemctl start blitzapi
+    systemctl start blitzapi
     echo "# BRANCH ---> ${currentBranch}"
     echo "# old commit -> ${oldCommit}"
     echo "# new commit -> ${newCommit}"
