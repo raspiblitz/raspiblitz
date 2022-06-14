@@ -212,7 +212,7 @@ if [ "$1" = "update-config" ]; then
   else
       echo "# CONFIG Web API ... still in setup, skip bitcoin & lightning"
       sed -i "s/^network=.*/network=/g" ./.env
-      sed -i "s/^ln_node=.*/ln_node=none/g" ./.env
+      sed -i "s/^ln_node=.*/ln_node=/g" ./.env
   fi
 
   echo "# '.env' config updates - blitzapi maybe needs to be restarted"
