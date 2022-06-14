@@ -78,7 +78,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 [Unit]
 Description=BlitzBackendAPI
 Wants=network.target
-After=network.target
+After=network.target mnt-hdd.mount
 
 [Service]
 WorkingDirectory=/root/blitz_api
