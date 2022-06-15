@@ -344,6 +344,7 @@ if [ "${lightning}" == "cl" ]; then
   /home/admin/config.scripts/cl.install.sh on mainnet >> ${logFile}
 
   # switch cln-grpc on
+  /home/admin/config.scripts/cl-plugin.cln-grpc.sh install >> ${logFile}
   /home/admin/config.scripts/cl-plugin.cln-grpc.sh on >> ${logFile}
 
   # OLD WALLET FROM CLIGHTNING RESCUE
