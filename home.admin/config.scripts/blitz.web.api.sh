@@ -200,7 +200,7 @@ if [ "$1" = "update-config" ]; then
       sed -i "s/^cln_grpc_key=.*/cln_grpc_key=${hexClientKey}/g" ./.env
       sed -i "s/^cln_grpc_ca=.*/cln_grpc_ca=${hexCa}/g" ./.env
       sed -i "s/^cln_grpc_ip=.*/cln_grpc_ip=127.0.0.1/g" ./.env
-      sed -i "s/^cln_grpc_port=.*/cln_grpc_port=9537/g" ./.env
+      sed -i "s/^cln_grpc_port=.*/cln_grpc_port=4772/g" ./.env
 
     else
       echo "# CONFIG Web API Lightning --> OFF"
