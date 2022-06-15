@@ -339,11 +339,11 @@ if [ "${lightning}" == "cl" ]; then
   /home/admin/_cache.sh set message "C-Lightning Install"
   /home/admin/config.scripts/cl.install.sh install >> ${logFile}
 
-  # switch mainnet config on
+  echo "# switch mainnet config on" >> ${logFile}
   /home/admin/_cache.sh set message "C-Lightning Setup"
   /home/admin/config.scripts/cl.install.sh on mainnet >> ${logFile}
 
-  # switch cln-grpc on
+  echo "# switch cln-grpc on" >> ${logFile}
   /home/admin/config.scripts/cl-plugin.cln-grpc.sh install >> ${logFile}
   /home/admin/config.scripts/cl-plugin.cln-grpc.sh on >> ${logFile}
 
