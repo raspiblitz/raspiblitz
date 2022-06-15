@@ -7,6 +7,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ];then
   echo "Usage:"
   echo "cl-plugin.cln-grpc.sh install - called by build_sdcard.sh"
   echo "cl-plugin.cln-grpc.sh [on|off] <testnet|mainnet|signet>"
+  echo "cl-plugin.cln-grpc.sh status <testnet|mainnet|signet>"
   echo
   exit 1
 fi
@@ -42,6 +43,13 @@ function buildGRPCplugin() {
 if [ "$1" = install ]; then
   buildGRPCplugin
   echo "# cl-plugin.cln-grpc.sh install --> done"
+  exit 0
+
+elif [ "$1" = status ]; then
+
+  portActive=$(nc -vz 127.0.0.1 $PORT 2>&1 | grep -c "succeeded")
+  echo "port=${PORT}"
+  echo "portActive=${portActive}"
   exit 0
 
 elif [ "$1" = on ]; then
