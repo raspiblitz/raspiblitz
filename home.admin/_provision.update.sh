@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # check if run by root user
-if [ "$EUID" -ne 0 ]; then 
+if [ "$EUID" -ne 0 ]; then
   echo "error='run as root'"
   exit 1
 fi
@@ -79,7 +79,7 @@ echo "prechecks OK"  >> ${logFile}
 
 # MIGRATION - DATA CONVERSION when updating config
 # this is the place if on a future version change
-# a conversion of config data or app data is needed 
+# a conversion of config data or app data is needed
 
 # if old bitcoin.conf exists ...
 configExists=$(sudo ls /mnt/hdd/bitcoin/bitcoin.conf | grep -c '.conf')
@@ -245,7 +245,7 @@ if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
       else
         echo " - OK 'tlsdisableautofill' exists (${configParamExists})" >> ${logFile}
       fi
-    
+
     else
       echo " - WARN: section '[Application Options]' not found in lnd.conf" >> ${logFile}
     fi
@@ -262,10 +262,10 @@ fi
 
 if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ]; then
 
-  echo "Install C-lightning on update" >> ${logFile}
-  /home/admin/_cache.sh set message "C-Lightning Install"
+  echo "Install Core Lightning on update" >> ${logFile}
+  /home/admin/_cache.sh set message "Core Lightning install"
   /home/admin/config.scripts/cl.install.sh on mainnet >> ${logFile}
-  /home/admin/_cache.sh set message "C-Lightning Setup"
+  /home/admin/_cache.sh set message "Core Lightning Setup"
 
 fi
 
