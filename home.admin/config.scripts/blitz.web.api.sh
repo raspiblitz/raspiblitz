@@ -57,7 +57,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "error='git checkout failed'"
     exit 1
   fi
-  if ! pip install -r requirements.txt; then
+  if ! pip install -r requirements.txt --no-deps; then
     echo "error='pip install failed'"
     exit 1
   fi
