@@ -1,4 +1,4 @@
-![RaspiBlitz](pictures/raspilogo_tile_400px.png)
+# ![RaspiBlitz](pictures/raspilogo_tile_400px.png)
 
 _Build your own Lightning & Bitcoin Fullnode on a RaspberryPi with a nice Display._
 
@@ -88,7 +88,7 @@ Build it as part of a [workshop](WORKSHOP.md) or as a weekend project yourself.
     - [SYSTEM: Monitoring & Configuration](#system-monitoring--configuration)
     - [CONNECT: Connect Apps & Credentials](#connect-connect-apps--credentials)
       - [MOBILE: Mobile Wallet Apps (Smartphone)](#mobile-mobile-wallet-apps-smartphone)
-      - [Electrum Rust Server](#electrum-rust-server-1)
+      - [Electrum Rust Server](#electrum-rust-server-instructions)
       - [BTCPAY: Get the connection string for the BTCPay Server](#btcpay-get-the-connection-string-for-the-btcpay-server)
       - [bitcoinRPC](#bitcoinrpc)
       - [BISQ: Use your node with BISQ](#bisq-use-your-node-with-bisq)
@@ -182,7 +182,7 @@ Also many more features like Touchscreen, Channels Autopilot, Backup, DynDNS, SS
 
 ## DeepDive Video (July 2020)
 
-<a href="https://www.youtube.com/watch?v=QXUGg45CWLo" target="_blank"><img src="pictures/raspiblitz-deepdive.png" alt="Video Tutorial" width="400"></a><br>--watch--> <https://www.youtube.com/watch?v=QXUGg45CWLo>
+[![Video Tutorial](pictures/raspiblitz-deepdive.png)](https://www.youtube.com/watch?v=QXUGg45CWLo)
 
 ## Time Estimate to Set Up a RaspiBlitz
 
@@ -916,7 +916,7 @@ It's recommended to give it a try.
 
 Get all the details on how to manage your channels with RTL in this video:
 
-<a href="https://www.youtube.com/watch?v=pESO_Pm0v10" target="_blank"><img src="pictures/video-rtl.png" alt="Video Tutorial" width="400"></a><br>--watch--> <https://www.youtube.com/watch?v=pESO_Pm0v10>
+[![Video Tutorial](pictures/video-rtl.png)](https://www.youtube.com/watch?v=pESO_Pm0v10)
 
 Read an Intro-Tutorial to RTL: <https://medium.com/@suheb.khan/how-to-ride-the-lightning-447af999dcd2>
 
@@ -1041,7 +1041,7 @@ First you need to install the apps on your phone - a QR code with the links to t
 Then you need to `pair` them with your RaspiBlitz - also via a QR code displayed on the LCD.
 If you run your RaspiBlitz without an LCD, there is the fallback option to display that QR code on the terminal as ASCII code (which might involve lowering your terminal's font size).
 
-##### Electrum Rust Server
+##### Electrum Rust Server Instructions
 
 Information how to connect to Electrum Rust Server (if installed).
 
