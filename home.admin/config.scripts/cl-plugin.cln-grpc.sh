@@ -36,7 +36,7 @@ function buildGRPCplugin() {
     sudo -u bitcoin /home/bitcoin/.cargo/bin/cargo build \
      --target-dir /home/bitcoin/cl-plugins-available/cln-grpc
   else
-    echo "# - cln-grpc plugin already build/installed"
+    echo "# - cln-grpc plugin was already built/installed"
   fi
 }
 
@@ -53,21 +53,30 @@ elif [ "$1" = status ]; then
   exit 0
 
 elif [ "$1" = on ]; then
-  buildGRPCplugin
+  if ! "$lightningcli_alias" plugin list | grep "/home/bitcoin/${netprefix}cl-plugins-enabled/cln-grpc"; then
+    buildGRPCplugin
 
-  # symlink to plugin directory
-  sudo ln -s /home/bitcoin/cl-plugins-available/cln-grpc/debug/cln-grpc /home/bitcoin/${netprefix}cl-plugins-enabled/
-  echo "# cln-grpc moved to /home/bitcoin/${netprefix}cl-plugins-enabled/"
+    # symlink to plugin directory
+    sudo ln -s /home/bitcoin/cl-plugins-available/cln-grpc/debug/cln-grpc /home/bitcoin/${netprefix}cl-plugins-enabled/
+    echo "# cln-grpc moved to /home/bitcoin/${netprefix}cl-plugins-enabled/"
 
-  # blitz.conf.sh set [key] [value] [?conffile] <noquotes>
-  /home/admin/config.scripts/blitz.conf.sh set "grpc-port" "${PORT}" "${CLCONF}" "noquotes"
-  /home/admin/config.scripts/blitz.conf.sh set "${netprefix}clnGRPCport" "${PORT}"
+    # blitz.conf.sh set [key] [value] [?conffile] <noquotes>
+    /home/admin/config.scripts/blitz.conf.sh set "grpc-port" "${PORT}" "${CLCONF}" "noquotes"
+    /home/admin/config.scripts/blitz.conf.sh set "${netprefix}clnGRPCport" "${PORT}"
 
-  # firewall
-  sudo ufw allow "${PORT}" comment "${netprefix}clnGRPCport"
-  # Tor
-  /home/admin/config.scripts/tor.onion-service.sh "${netprefix}clnGRPCport" "${PORT}" "${PORT}"
-  echo "# cl-plugin.cln-grpc.sh on --> done"
+    # firewall
+    sudo ufw allow "${PORT}" comment "${netprefix}clnGRPCport"
+    # Tor
+    /home/admin/config.scripts/tor.onion-service.sh "${netprefix}clnGRPCport" "${PORT}" "${PORT}"
+    source <(/home/admin/_cache.sh get state)
+    if [ "${state}" == "ready" ]; then
+      sudo systemctl restart ${netprefix}lightningd
+    fi
+    echo "# cl-plugin.cln-grpc.sh on --> done"
+
+  else
+    echo "# cl-plugin.cln-grpc.sh on --> already installed and running"
+  fi
   exit 0
 
 elif [ "$1" = off ]; then

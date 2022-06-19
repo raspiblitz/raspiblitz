@@ -184,6 +184,9 @@ if [ "$1" = "update-config" ]; then
       echo "# CONFIG Web API Lightning --> CL"
       sed -i "s/^ln_node=.*/ln_node=cln_grpc/g" ./.env
 
+      # make sure cln-grpc is on
+      /home/admin/config.scripts/cl-plugin.cln-grpc.sh on mainnet
+
       # get hex values of pem files
       hexClient=$(xxd -p -c2000 /home/bitcoin/.lightning/bitcoin/client.pem)
       hexClientKey=$(xxd -p -c2000 /home/bitcoin/.lightning/bitcoin/client-key.pem)
