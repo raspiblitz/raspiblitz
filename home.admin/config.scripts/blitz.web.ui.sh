@@ -41,17 +41,14 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "# INSTALL WebUI"
   rm -r /root/blitz_web 2>/dev/null
   rm -r /root/${DEFAULT_GITHUB_REPO} 2>/dev/null
-  cd /root
-  # git clone https://github.com/cstenglein/raspiblitz-web.git /home/admin/blitz_web
-  git clone https://github.com/${DEFAULT_GITHUB_USER}/${DEFAULT_GITHUB_REPO}.git /root/blitz_web
-  if [ "$?" != "0"]; then
+  cd /root || exit 1
+  if ! git clone https://github.com/${DEFAULT_GITHUB_USER}/${DEFAULT_GITHUB_REPO}.git; then
     echo "error='git clone failed'"
     exit 1
   fi
   mv /root/${DEFAULT_GITHUB_REPO} /root/blitz_web
-  cd blitz_web
-  git checkout ${DEFAULT_GITHUB_BRANCH}
-  if [ "$?" != "0"]; then
+  cd blitz_web || exit 1
+  if ! git checkout ${DEFAULT_GITHUB_BRANCH}; then
     echo "error='git checkout failed'"
     exit 1
   fi
@@ -59,19 +56,16 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "# Compile WebUI"
   /home/admin/config.scripts/bonus.nodejs.sh on
   source <(/home/admin/config.scripts/bonus.nodejs.sh info)
-  npm install --global yarn
-  if [ "$?" != "0"]; then
+  if ! npm install --global yarn; then
     echo "error='install yarn failed'"
     exit 1
   fi
   ${NODEPATH}/yarn config set --home enableTelemetry 0
-  ${NODEPATH}/yarn install
-  if [ "$?" != "0"]; then
+  if ! ${NODEPATH}/yarn install; then
     echo "error='yarn install failed'"
     exit 1
   fi
-  ${NODEPATH}/yarn build
-  if [ "$?" != "0"]; then
+  if ! ${NODEPATH}/yarn build; then
     echo "error='yarn build failed'"
     exit 1
   fi

@@ -18,7 +18,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ];
 fi
 
 # check if started with sudo
-if [ "$EUID" -ne 0 ]; then 
+if [ "$EUID" -ne 0 ]; then
   echo "error='run as root'"
   exit 1
 fi
@@ -46,21 +46,18 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   echo "# INSTALL Web API ..."
   rm -r /root/blitz_api 2>/dev/null
-  cd /root
+  cd /root || exit 1
   # git clone https://github.com/fusion44/blitz_api.git /root/blitz_api
-  git clone https://github.com/${DEFAULT_GITHUB_USER}/${DEFAULT_GITHUB_REPO}.git /root/blitz_api
-  if [ "$?" != "0"]; then
+  if ! git clone https://github.com/${DEFAULT_GITHUB_USER}/${DEFAULT_GITHUB_REPO}.git /root/blitz_api; then
     echo "error='git clone failed'"
     exit 1
   fi
-  cd blitz_api
-  git checkout ${DEFAULT_GITHUB_BRANCH}
-  if [ "$?" != "0"]; then
+  cd blitz_api || exit 1
+  if ! git checkout ${DEFAULT_GITHUB_BRANCH}; then
     echo "error='git checkout failed'"
     exit 1
   fi
-  pip install -r requirements.txt
-  if [ "$?" != "0"]; then
+  if ! pip install -r requirements.txt --no-deps; then
     echo "error='pip install failed'"
     exit 1
   fi
@@ -183,9 +180,12 @@ if [ "$1" = "update-config" ]; then
 
     # configure CL
     elif [ "${lightning}" == "cl" ]; then
-    
+
       echo "# CONFIG Web API Lightning --> CL"
       sed -i "s/^ln_node=.*/ln_node=cln_grpc/g" ./.env
+
+      # make sure cln-grpc is on
+      /home/admin/config.scripts/cl-plugin.cln-grpc.sh on mainnet
 
       # get hex values of pem files
       hexClient=$(xxd -p -c2000 /home/bitcoin/.lightning/bitcoin/client.pem)
