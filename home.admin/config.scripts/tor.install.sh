@@ -286,7 +286,7 @@ if [ "${action}" = "update" ]; then
         sudo systemctl start tor
         echo "# Installed $(tor --version)"
       ;;
-      *) sudo apt update -y && sudo apt upgrade -y tor;;
+      *) sudo apt update && sudo apt install tor && sudo systemctl restart tor;;
     esac
   echo
   exit

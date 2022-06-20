@@ -199,14 +199,20 @@ EOF
 
 
   update)
-    /home/admin/config.scripts/tor.install.sh update source
-    if [ "$(sudo systemctl is-active lnd | grep -c "active")" -gt 0 ];then
-      echo "# LND needs to be restarted"
+    /home/admin/config.scripts/tor.install.sh update
+    if sudo systemctl is-active lnd ;then
+      echo "# LND will be restarted"
       sudo systemctl restart lnd
       sudo systemctl restart tlnd 2>/dev/null
       sudo systemctl restart slnd 2>/dev/null
       sleep 10
       lncli unlock
+    fi
+      if sudo systemctl is-active lightningd; then
+      echo "# CLN will be restarted"
+      sudo systemctl restart lightningd
+      sudo systemctl restart tlightningd 2>/dev/null
+      sudo systemctl restart slightningd 2>/dev/null
     fi
   ;;
 
