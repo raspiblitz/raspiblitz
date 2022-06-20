@@ -139,8 +139,8 @@ if [ "$1" = "update-config" ]; then
   sed -i "s/^# platform=.*/platform=raspiblitz/g" ./.env
   sed -i "s/^platform=.*/platform=raspiblitz/g" ./.env
 
-  source <(/home/admin/config.scripts/blitz.datadrive.sh status)
-  if [ "${isMounted}" == "1" ]; then
+  source <(/home/admin/_cache.sh get setupPhase)
+  if [ "${setupPhase}" == "done" ]; then
 
     # configure bitcoin
     RPCUSER=$(cat /mnt/hdd/${network}/${network}.conf 2>/dev/null | grep rpcuser | cut -c 9-)
