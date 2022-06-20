@@ -40,13 +40,13 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   echo "# INSTALL WebUI"
   rm -r /root/blitz_web 2>/dev/null
+  rm -r /root/${DEFAULT_GITHUB_REPO} 2>/dev/null
   cd /root || exit 1
-  # git clone https://github.com/cstenglein/raspiblitz-web.git /home/admin/blitz_web
-  git clone https://github.com/${DEFAULT_GITHUB_USER}/${DEFAULT_GITHUB_REPO}.git /root/blitz_web
-  if ! git clone https://github.com/${DEFAULT_GITHUB_USER}/${DEFAULT_GITHUB_REPO}.git /root/blitz_web; then
+  if ! git clone https://github.com/${DEFAULT_GITHUB_USER}/${DEFAULT_GITHUB_REPO}.git; then
     echo "error='git clone failed'"
     exit 1
   fi
+  mv /root/${DEFAULT_GITHUB_REPO} /root/blitz_web
   cd blitz_web || exit 1
   if ! git checkout ${DEFAULT_GITHUB_BRANCH}; then
     echo "error='git checkout failed'"
