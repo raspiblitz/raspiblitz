@@ -136,7 +136,7 @@ if [ "$1" = "update-config" ]; then
   sed -i "s/^# platform=.*/platform=raspiblitz/g" ./.env
   sed -i "s/^platform=.*/platform=raspiblitz/g" ./.env
 
-  source <(/home/admin/_cache.sh get setupPhase)
+  source /home/admin/raspiblitz.info 2>/dev/null
   if [ "${setupPhase}" == "done" ]; then
 
     # configure bitcoin
