@@ -6,15 +6,22 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ];then
   echo "Install the cln-grpc plugin for CLN"
   echo "Usage:"
   echo "cl-plugin.cln-grpc.sh install - called by build_sdcard.sh"
-  echo "cl-plugin.cln-grpc.sh [on|off] <testnet|mainnet|signet>"
+  echo "cl-plugin.cln-grpc.sh on <testnet|mainnet|signet>"
+  echo "cl-plugin.cln-grpc.sh off <testnet|mainnet|signet> <purge>"
   echo "cl-plugin.cln-grpc.sh status <testnet|mainnet|signet>"
+  echo "cl-plugin.cln-grpc.sh update <source>"
   echo
   exit 1
 fi
 
-echo "# cl-plugin.cln-grpc.sh $1"
+echo "# cl-plugin.cln-grpc.sh $*"
 
-source <(/home/admin/config.scripts/network.aliases.sh getvars cl $2)
+if [ "$2" = testnet ] || [ "$2" = signet ]; then
+  NETWORK=$2
+else
+  NETWORK=mainnet
+fi
+source <(/home/admin/config.scripts/network.aliases.sh getvars cl $NETWORK)
 
 # netprefix is:     "" |  t | s
 # portprefix is:    "" |  1 | 3
@@ -40,19 +47,7 @@ function buildGRPCplugin() {
   fi
 }
 
-if [ "$1" = install ]; then
-  buildGRPCplugin
-  echo "# cl-plugin.cln-grpc.sh install --> done"
-  exit 0
-
-elif [ "$1" = status ]; then
-
-  portActive=$(nc -vz 127.0.0.1 $PORT 2>&1 | grep -c "succeeded")
-  echo "port=${PORT}"
-  echo "portActive=${portActive}"
-  exit 0
-
-elif [ "$1" = on ]; then
+function switchOn() {
   if ! "$lightningcli_alias" plugin list | grep "/home/bitcoin/${netprefix}cl-plugins-enabled/cln-grpc"; then
     buildGRPCplugin
 
@@ -78,16 +73,46 @@ elif [ "$1" = on ]; then
     echo "# cl-plugin.cln-grpc.sh on --> already installed and running"
   fi
   exit 0
+}
+
+if [ "$1" = install ]; then
+  buildGRPCplugin
+  echo "# cl-plugin.cln-grpc.sh install --> done"
+  exit 0
+
+elif [ "$1" = status ]; then
+
+  portActive=$(nc -vz 127.0.0.1 $PORT 2>&1 | grep -c "succeeded")
+  echo "port=${PORT}"
+  echo "portActive=${portActive}"
+  exit 0
+
+elif [ "$1" = on ]; then
+  switchOn
 
 elif [ "$1" = off ]; then
   sed -i "/^grpc-port/d" "${CLCONF}"
   sudo rm -rf /home/bitcoin/${netprefix}cl-plugins-enabled/cln-grpc
+  if [ "$(echo "$@" | grep -c purge)" -gt 0 ];then
+    sudo rm -rf /home/bitcoin/cl-plugins-available/cln-grpc
+  fi
   /home/admin/config.scripts/blitz.conf.sh set "${netprefix}clnGRPCport" "off"
   # firewall
   sudo ufw deny "${PORT}" comment "${netprefix}clnGRPCport"
   # Tor
   /home/admin/config.scripts/tor.onion-service.sh off "${netprefix}clnGRPCport"
   exit 0
+
+elif [ "$1" = update ]; then
+  if [ "$(echo "$@" | grep -c source)" -gt 0 ];then
+    cd /home/bitcoin/lightning/ || (echo " The source is not present"; exit 1)
+    sudo -u bitcoin git pull
+  fi
+  sudo rm -rf /home/bitcoin/cl-plugins-available/cln-grpc
+  buildGRPCplugin
+  sudo systemctl stop ${netprefix}lightningd
+  switchOn
+  echo "# cl-plugin.cln-grpc.sh update  --> done"
 
 else
   echo "FAIL - Unknown Parameter $1"
