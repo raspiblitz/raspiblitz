@@ -501,7 +501,7 @@ if [ "${mempoolExplorer}" == "on" ]; then
 fi
 
 if [ "${runBehindTor}" == "on" ]; then
-  OPTIONS+=(TOR "Update Tor from the source code")
+  OPTIONS+=(TOR "Update Tor from the Torproject repo")
 fi
 
 if [ "${itchysats}" == "on" ]; then
