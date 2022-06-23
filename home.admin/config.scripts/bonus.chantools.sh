@@ -99,7 +99,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo -u admin wget -N https://github.com/guggero/chantools/releases/download/v${pinnedVersion}/manifest-v${pinnedVersion}.sig
 
   echo "# running: gpg --verify manifest-v${pinnedVersion}.sig manifest-v${pinnedVersion}.txt"
-  verifyResult=$(gpg --verify manifest-v${pinnedVersion}.sig manifest-v${pinnedVersion}.txt 2>&1)
+  verifyResult=$(LANG=en_US.utf8; gpg --verify manifest-v${pinnedVersion}.sig manifest-v${pinnedVersion}.txt 2>&1)
   echo "# verifyResult(${verifyResult})"
   goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
   echo "# goodSignature(${goodSignature})"

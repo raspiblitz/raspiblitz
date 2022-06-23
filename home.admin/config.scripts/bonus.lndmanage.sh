@@ -52,7 +52,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   echo "# checking signing keys ..."
   gpg --import sigingkey.gpg
-  verifyResult=$(gpg --verify lndmanage-${lndmanageVersion}-py3-none-any.whl.asc 2>&1)
+  verifyResult=$(LANG=en_US.utf8; gpg --verify lndmanage-${lndmanageVersion}-py3-none-any.whl.asc 2>&1)
   goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
   correctKey=$(echo ${verifyResult} | tr -d " \t\n\r" | grep "${gpgFingerprint}" -c)
   echo "goodSignature='${goodSignature}'"
