@@ -20,7 +20,7 @@ PGPpubkeyFingerprint="D9200E6CD1ADB8F1"
 # help
 if [ $# -eq 0 ]||[ "$1" = "-h" ]||[ "$1" = "--help" ];then
   echo
-  echo "C-lightning install script"
+  echo "Core Lightning install script"
   echo "The default version is: $CLVERSION"
   echo "mainnet / testnet / signet instances can run parallel"
   echo
@@ -62,7 +62,7 @@ function buildAndInstallCLbinaries()
   echo
   sudo -u bitcoin ./configure --enable-experimental-features
   echo
-  echo "- Building C-lightning from source"
+  echo "- Building Core lightning from source"
   echo
   sudo -u bitcoin make
   echo
@@ -72,13 +72,13 @@ function buildAndInstallCLbinaries()
 
 if [ "$1" = "install" ]; then
 
-  echo "# *** INSTALL C-LIGHTNING ${CLVERSION} BINARY ***"
+  echo "# *** INSTALL CORE LIGHTNING ${CLVERSION} BINARY ***"
   echo "# only binary install to system"
   echo "# no configuration, no systemd service"
 
   # check if the binary is already installed
   if [ -f /usr/local/bin/lightningd ]; then
-    echo "c-lightning binary already installed - done"
+    echo "Core Lightning binary already installed - done"
     exit 1
   fi
 
@@ -103,7 +103,7 @@ if [ "$1" = "install" ]; then
 #  sudo -u bitcoin wget https://github.com/ElementsProject/lightning/releases/download/${CLVERSION}/SHA256SUMS
 #  sudo -u bitcoin wget https://github.com/ElementsProject/lightning/releases/download/${CLVERSION}/SHA256SUMS.asc
 #
-#  verifyResult=$(sudo -u bitcoin gpg --verify SHA256SUMS.asc 2>&1)
+#  verifyResult=$(LANG=en_US.utf8; sudo -u bitcoin gpg --verify SHA256SUMS.asc 2>&1)
 #
 #  goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
 #  echo "goodSignature(${goodSignature})"
@@ -116,7 +116,7 @@ if [ "$1" = "install" ]; then
 #  else
 #    echo
 #    echo "****************************************************************"
-#    echo "OK --> the PGP signature of the C-lightning SHA256SUMS is correct"
+#    echo "OK --> the PGP signature of the Core Lightning SHA256SUMS is correct"
 #    echo "****************************************************************"
 #    echo
 #  fi
@@ -133,7 +133,7 @@ if [ "$1" = "install" ]; then
 #  else
 #    echo
 #    echo "********************************************************************"
-#    echo "OK --> the hash of the downloaded C-lightning source code is correct"
+#    echo "OK --> the hash of the downloaded Core Lightning source code is correct"
 #    echo "********************************************************************"
 #    echo
 #  fi
@@ -162,19 +162,19 @@ if [ "$1" = "install" ]; then
   installed=$(sudo -u bitcoin lightning-cli --version)
   if [ ${#installed} -eq 0 ]; then
     echo
-    echo "!!! BUILD FAILED --> Was not able to install C-lightning"
+    echo "!!! BUILD FAILED --> Was not able to install Core Lightning"
     exit 1
   fi
 
   correctVersion=$(echo "${installed}" | grep -c "${CLVERSION:1}")
   if [ "${correctVersion}" -eq 0 ]; then
     echo
-    echo "!!! BUILD FAILED --> installed C-lightning is not version ${CLVERSION}"
+    echo "!!! BUILD FAILED --> installed Core Lightning is not version ${CLVERSION}"
     sudo -u bitcoin lightning-cli --version
     exit 1
   fi
   echo
-  echo "- OK the installation of C-lightning v${installed} is successful"
+  echo "- OK the installation of Core Lightning v${installed} is successful"
   exit 0
 fi
 
@@ -250,7 +250,7 @@ if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = testPR ];then
 
     currentCLversion=$(cd /home/bitcoin/lightning 2>/dev/null; \
     git describe --tags 2>/dev/null)
-    echo "# Building from source C-lightning $currentCLversion"
+    echo "# Building from source Core Lightning $currentCLversion"
 
     buildAndInstallCLbinaries
   fi
@@ -366,7 +366,7 @@ alias ${netprefix}clconf=\"sudo\
     sudo chown admin:admin /home/admin/_aliases
   fi
 
-  echo "# The installed C-lightning version is: $(sudo -u bitcoin /usr/local/bin/lightningd --version)"
+  echo "# The installed Core Lightning version is: $(sudo -u bitcoin /usr/local/bin/lightningd --version)"
   echo
   echo "# To activate the aliases reopen the terminal or use:"
   echo "source ~/_aliases"
@@ -470,7 +470,7 @@ if [ "$1" = "off" ];then
 
   # if cl mainnet was default - remove
   if [ "${CHAIN}" == "mainnet" ] && [ "${lightning}" == "cl" ]; then
-    echo "# CL is REMOVED as the default lightning implementation"
+    echo "# Core Lightning is REMOVED as the default lightning implementation"
     /home/admin/config.scripts/blitz.conf.sh set lightning ""
     if [ "${lnd}" == "on" ]; then
       echo "# LND is now the new default lightning implementation"
