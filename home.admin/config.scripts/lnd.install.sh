@@ -280,6 +280,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo mkdir /mnt/hdd/lnd
   fi
   sudo chown -R bitcoin:bitcoin /mnt/hdd/lnd
+  sudo chmod 755 /mnt/hdd/lnd
   if [ ! -L /home/bitcoin/.lnd ];then
     echo "# Linking lnd for user bitcoin"
     sudo rm /home/bitcoin/.lnd 2>/dev/null
