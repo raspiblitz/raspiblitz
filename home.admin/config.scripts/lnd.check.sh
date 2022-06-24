@@ -208,6 +208,31 @@ if [ "$1" == "prestart" ]; then
   setting ${lndConfFile} ${insertLine} "db.bolt.auto-compact-min-age" "672h"
   setting ${lndConfFile} ${insertLine} "db.bolt.auto-compact" "true"
 
+  ##### WORKERS SECTION #####
+  # https://github.com/lightningnetwork/lnd/blob/5c36d96c9cbe8b27c29f9682dcbdab7928ae870f/sample-lnd.conf#L1131
+  cores=$(nproc)
+  if [ "${cores}" -lt 8 ]; then
+    sectionName="workers"
+    echo "# [${sectionName}] config ..."
+    # make sure lnd config has a [bolt] section
+    sectionExists=$(cat ${lndConfFile} | grep -c "^\[${sectionName}\]")
+    echo "# sectionExists(${sectionExists})"
+    if [ "${sectionExists}" == "0" ]; then
+      echo "# adding section [${sectionName}]"
+      echo "
+[${sectionName}]
+" | tee -a ${lndConfFile}
+    fi
+
+    sectionLine=$(cat ${lndConfFile} | grep -n "^\[workers\]" | cut -d ":" -f1)
+    echo "# sectionLine(${sectionLine})"
+    insertLine=$(expr $sectionLine + 1)
+
+    # limit workers to the number of cores
+    setting ${lndConfFile} ${insertLine} "workers.write" "${cores}"
+    setting ${lndConfFile} ${insertLine} "workers.sig" "${cores}"
+fi
+
   ##### TOR SECTION #####
 
   if [ "${runBehindTor}" == "on" ]; then
