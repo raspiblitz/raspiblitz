@@ -13,7 +13,7 @@
 - New: ckbunker CLI install script (experimental) [details](https://github.com/rootzoll/raspiblitz/issues/1062)
 - Update: Bitcoin Core v23.0 [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-23.0.md)
 - Update: Core Lightning (CLN - formerly C-lightning) v0.11.1 [details](https://github.com/ElementsProject/lightning/releases/tag/v0.11.1)
-- Update: LND v0.14.3 [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.14.3-beta)
+- Update: LND v0.15.0 [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.15.0-beta)
 - Update: RTL v0.12.3 [details](https://github.com/Ride-The-Lightning/RTL/releases/tag/v0.12.3)
 - Update: LNbits 0.8.0 [details](https://github.com/lnbits/lnbits-legend/releases/tag/0.8.0)
 - Update: C-lightningREST v0.7.2 [details](https://github.com/Ride-The-Lightning/c-lightning-REST/releases/tag/v0.7.2)

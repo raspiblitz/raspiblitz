@@ -1,8 +1,9 @@
+<!-- omit in toc -->
 # ![RaspiBlitz](pictures/raspilogo_tile_400px.png)
 
 _Build your own Lightning & Bitcoin Fullnode on a RaspberryPi with a nice Display._
 
-`Version 1.8.0 with lnd 0.14.3 & c-lightning 0.11.0.1 and bitcoin 23.0.0`
+`Version 1.8.0 with lnd 0.15.0 & c-lightning 0.11.1 and bitcoin 23.0.0`
 
 ![RaspiBlitz](pictures/raspiblitz.webp)
 
@@ -13,7 +14,7 @@ Discover & develop the growing ecosystem of the Lightning Network by becoming a 
 Build it as part of a [workshop](WORKSHOP.md) or as a weekend project yourself.
 
 ---
-
+<!-- omit in toc -->
 ## Table of Contents
 
 - [Feature Overview](#feature-overview)
@@ -35,8 +36,8 @@ Build it as part of a [workshop](WORKSHOP.md) or as a weekend project yourself.
     - [SEED+SCB Words Seed & channel.backup file (OK)](#seedscb-words-seed--channelbackup-file-ok)
     - [ONLY SEED Only Seed Word List (Fallback)](#only-seed-only-seed-word-list-fallback)
   - [Final Setup](#final-setup)
-    - [1. SYNC - Self validate all Blocks](#self-validate-all-blocks)
-    - [2. COPY - Copy from Laptop or another RaspiBlitz over Local Network](#copy-from-laptop-or-another-raspiblitz-over-local-network)
+    - [1. SYNC - Self validate all Blocks](#1-sync---self-validate-all-blocks)
+    - [2. COPY - Copy from Laptop or another RaspiBlitz over Local Network](#2-copy---copy-from-laptop-or-another-raspiblitz-over-local-network)
   - [Main Menu](#main-menu)
   - [Feature Documentation](#feature-documentation)
     - [INFO: Raspiblitz Status Screen](#info-raspiblitz-status-screen)
@@ -74,6 +75,7 @@ Build it as part of a [workshop](WORKSHOP.md) or as a weekend project yourself.
       - [Mempool Space](#mempool-space)
       - [JoinMarket](#joinmarket)
       - [Download Bitcoin Whitepaper](#download-bitcoin-whitepaper)
+      - [Bitcoinminds.org local on RaspiBlitz](#bitcoinmindsorg-local-on-raspiblitz)
       - [RTL Webinterface](#rtl-webinterface)
       - [ThunderHub](#thunderhub)
       - [Lightning Terminal (LIT) with loop, pool & faraday](#lightning-terminal-lit-with-loop-pool--faraday)
@@ -88,11 +90,11 @@ Build it as part of a [workshop](WORKSHOP.md) or as a weekend project yourself.
     - [SYSTEM: Monitoring & Configuration](#system-monitoring--configuration)
     - [CONNECT: Connect Apps & Credentials](#connect-connect-apps--credentials)
       - [MOBILE: Mobile Wallet Apps (Smartphone)](#mobile-mobile-wallet-apps-smartphone)
-      - [Electrum Rust Server](#electrum-rust-server-instructions)
+      - [Electrum Rust Server Instructions](#electrum-rust-server-instructions)
       - [BTCPAY: Get the connection string for the BTCPay Server](#btcpay-get-the-connection-string-for-the-btcpay-server)
       - [bitcoinRPC](#bitcoinrpc)
       - [BISQ: Use your node with BISQ](#bisq-use-your-node-with-bisq)
-      - [EXPORT: Macaroons and TLS.cert](#export-macaroons-and-tls.cert)
+      - [EXPORT: Macaroons and TLS.cert](#export-macaroons-and-tlscert)
         - [SSH Download](#ssh-download)
         - [Browser download](#browser-download)
         - [Hex-String](#hex-string)
@@ -125,7 +127,7 @@ Build it as part of a [workshop](WORKSHOP.md) or as a weekend project yourself.
 - [Interface / APIs](#interface--apis)
   - [Bitcoin](#bitcoin)
   - [LND-Lightning](#lnd-lightning)
-  - [Backup for On-Chain- & Channel-Funds](#-channel-funds)
+  - [Backup for On-Chain- & Channel-Funds](#backup-for-on-chain---channel-funds)
     - [A) Nextcloud](#a-nextcloud)
     - [B) SCP Backup Target](#b-scp-backup-target)
     - [C) Local Backup Target (USB Thumbdrive)](#c-local-backup-target-usb-thumbdrive)
