@@ -281,6 +281,8 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   systemctl disable blitzapi
   rm /etc/systemd/system/blitzapi.service
   userdel -rf blitzapi
+  # clean old source
+  rm -r /root/blitz_api 2>/dev/null
 
   # setting value in raspi blitz config
   /home/admin/config.scripts/blitz.conf.sh set blitzapi "off"
