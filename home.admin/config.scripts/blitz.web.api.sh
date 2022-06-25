@@ -52,6 +52,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # create user
   adduser --disabled-password --gecos "" blitzapi
 
+  # sudo capability for manipulating passwords
+  /usr/sbin/usermod --append --groups sudo blitzapi
   # access password hash and salt
   /usr/sbin/usermod --append --groups admin blitzapi
   # access lnd creds
@@ -107,10 +109,8 @@ StandardOutput=journal
 StandardError=journal
 RestartSec=60
 
-# Hardening measures
+# Hardening
 PrivateTmp=true
-NoNewPrivileges=true
-PrivateDevices=true
 
 [Install]
 WantedBy=multi-user.target
