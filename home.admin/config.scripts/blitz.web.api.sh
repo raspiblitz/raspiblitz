@@ -45,10 +45,30 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   fi
 
   echo "# INSTALL Web API ..."
+  # clean old source
   rm -r /root/blitz_api 2>/dev/null
-  cd /root || exit 1
-  # git clone https://github.com/fusion44/blitz_api.git /root/blitz_api
-  if ! git clone https://github.com/${DEFAULT_GITHUB_USER}/${DEFAULT_GITHUB_REPO}.git /root/blitz_api; then
+  rm -r /home/blitzapi/blitz_api 2>/dev/null
+
+  # create user
+  adduser --disabled-password --gecos "" blitzapi
+
+  # access password hash and salt
+  /usr/sbin/usermod --append --groups admin blitzapi
+  # access lnd creds
+  /usr/sbin/usermod --append --groups lndadmin blitzapi
+  # access cln creds
+  /usr/sbin/usermod --append --groups bitcoin blitzapi
+  echo "# allowing user as part of the bitcoin group to RW RPC hook"
+  chmod 770 /home/bitcoin/.lightning/bitcoin
+  chmod 660 /home/bitcoin/.lightning/bitcoin/lightning-rpc
+  CLCONF="/home/bitcoin/.lightning/config"
+  if [ "$(cat ${CLCONF} | grep -c "^rpc-file-mode=0660")" -eq 0 ]; then
+    echo "rpc-file-mode=0660" | tee -a ${CLCONF}
+  fi
+
+  cd /home/blitzapi || exit 1
+  # git clone https://github.com/fusion44/blitz_api.git /home/blitzapi/blitz_api
+  if ! git clone https://github.com/${DEFAULT_GITHUB_USER}/${DEFAULT_GITHUB_REPO}.git /home/blitzapi/blitz_api; then
     echo "error='git clone failed'"
     exit 1
   fi
@@ -61,9 +81,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "error='pip install failed'"
     exit 1
   fi
-  chown -R admin:admin /root/blitz_api
-  chmod a+x /root
-  chmod -R a+x /root/blitz_api
 
   # build the config and set unique secret (its OK to be a new secret every install/upadte)
   /home/admin/config.scripts/blitz.web.api.sh update-config
@@ -78,12 +95,12 @@ Wants=network.target
 After=network.target mnt-hdd.mount
 
 [Service]
-WorkingDirectory=/root/blitz_api
+WorkingDirectory=/home/blitzapi/blitz_api
 # before every start update the config with latest credentials/settings
 ExecStartPre=-/home/admin/config.scripts/blitz.web.api.sh update-config
 ExecStart=/usr/bin/python -m uvicorn app.main:app --port 11111 --host=0.0.0.0 --root-path /api
-User=root
-Group=root
+User=blitzapi
+Group=blitzapi
 Type=simple
 Restart=always
 StandardOutput=journal
@@ -129,7 +146,7 @@ if [ "$1" = "update-config" ]; then
   fi
 
   # prepare config update
-  cd /root/blitz_api
+  cd /home/blitzapi/blitz_api
   cp ./.env_sample ./.env
   dateStr=$(date)
   echo "# Update Web API CONFIG (${dateStr})"
@@ -213,6 +230,9 @@ if [ "$1" = "update-config" ]; then
       sed -i "s/^ln_node=.*/ln_node=/g" ./.env
   fi
 
+  # setting value in raspi blitz config
+  /home/admin/config.scripts/blitz.conf.sh set blitzapi "on"
+
   echo "# '.env' config updates - blitzapi maybe needs to be restarted"
   exit 0
 
@@ -227,7 +247,7 @@ if [ "$1" = "update-code" ]; then
   if [ "${apiActive}" != "0" ]; then
     echo "# Update Web API CODE"
     systemctl stop blitzapi
-    cd /root/blitz_api
+    cd /home/blitzapi/blitz_api
     currentBranch=$(git rev-parse --abbrev-ref HEAD)
     echo "# updating local repo ..."
     oldCommit=$(git rev-parse HEAD)
@@ -260,8 +280,11 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   systemctl stop blitzapi
   systemctl disable blitzapi
   rm /etc/systemd/system/blitzapi.service
-  rm -r /root/blitz_api
-  rm -r /root/.blitz_api 2>/dev/null
+  userdel -rf blitzapi
+
+  # setting value in raspi blitz config
+  /home/admin/config.scripts/blitz.conf.sh set blitzapi "off"
+
   exit 0
 
 fi
