@@ -79,7 +79,7 @@ if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ]; then
 fi
 
 OPTIONS+=(m 'Homer Dashboard' ${homer})
-OPTIONS+=(u 'Blitz API + webUI' ${blitzapi})
+OPTIONS+=(A 'Blitz API + webUI' ${blitzapi})
 
 CHOICES=$(dialog --title ' Additional Mainnet Services ' \
           --checklist ' use spacebar to activate/de-activate ' \
@@ -546,13 +546,13 @@ else
 fi
 
 # Blitz API + webUI process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "u")
+choice="off"; check=$(echo "${CHOICES}" | grep -c "A")
 if [ ${check} -eq 1 ]; then choice="on"; fi
-if [ "${homer}" != "${choice}" ]; then
+if [ "${blitzapi}" != "${choice}" ]; then
   echo "Blitz API + webUI settings changed .."
   anychange=1
-  /home/admin/config.scripts/bonus.web.api.sh ${choice} && \
-  /home/admin/config.scripts/bonus.web.ui.sh ${choice}
+  sudo /home/admin/config.scripts/blitz.web.api.sh ${choice}
+  sudo /home/admin/config.scripts/blitz.web.ui.sh ${choice}
   errorOnInstall=$?
   if [ "${choice}" =  "on" ]; then
     whiptail --title " Installed Blitz API + webUI" --msgbox "\
