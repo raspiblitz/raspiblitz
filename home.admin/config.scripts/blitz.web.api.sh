@@ -152,6 +152,7 @@ if [ "$1" = "update-config" ]; then
 
   # prepare config update
   cd /home/blitzapi/blitz_api
+  secret=$(cat ./.env 2>/dev/null | grep "secret=" | cut -d "=" -f2)
   cp ./.env_sample ./.env
   dateStr=$(date)
   echo "# Update Web API CONFIG (${dateStr})"
@@ -159,14 +160,14 @@ if [ "$1" = "update-config" ]; then
   sed -i "s/^platform=.*/platform=raspiblitz/g" ./.env
 
   # configure access token secret
-  secretNeedsInit=$(cat ./.env | grep -c "=please_please_update_me_please")
-  if [ ${secretNeedsInit} > 0 ]; then
+  secretNeedsInit=$(cat ./.env 2>/dev/null| grep -c "=please_please_update_me_please")
+  if [ "${secret}" == "" ] || [ "${secret}" == "please_please_update_me_please" ]; then
     echo "# init secret ..."
     secret=$(dd if=/dev/urandom bs=256 count=1 2> /dev/null | shasum -a256 | cut -d " " -f1)
-    sed -i "s/^secret=.*/secret=${secret}/g" ./.env
   else
-    echo "# secret already initialized"
+    echo "# use existing secret"
   fi
+  sed -i "s/^secret=.*/secret=${secret}/g" ./.env
 
   source /home/admin/raspiblitz.info 2>/dev/null
   if [ "${setupPhase}" == "done" ]; then
