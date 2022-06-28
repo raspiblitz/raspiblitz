@@ -5,6 +5,7 @@ import grpc
 
 from . import walletunlocker_pb2 as walletunlocker__pb2
 
+
 class WalletUnlockerStub(object):
     """
     Comments in this file will be directly parsed into the API
