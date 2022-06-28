@@ -39,14 +39,18 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   fi
 
   echo "# INSTALL WebUI"
+  # clean all source
   rm -r /root/blitz_web 2>/dev/null
   rm -r /root/${DEFAULT_GITHUB_REPO} 2>/dev/null
-  cd /root || exit 1
+  rm -r /home/blitzapi/blitz_web 2>/dev/null
+  rm -r /home/blitzapi/${DEFAULT_GITHUB_REPO} 2>/dev/null
+  
+  cd /home/blitzapi || exit 1
   if ! git clone https://github.com/${DEFAULT_GITHUB_USER}/${DEFAULT_GITHUB_REPO}.git; then
     echo "error='git clone failed'"
     exit 1
   fi
-  mv /root/${DEFAULT_GITHUB_REPO} /root/blitz_web
+  mv /home/blitzapi/${DEFAULT_GITHUB_REPO} /home/blitzapi/blitz_web
   cd blitz_web || exit 1
   if ! git checkout ${DEFAULT_GITHUB_BRANCH}; then
     echo "error='git checkout failed'"
@@ -71,7 +75,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   fi
 
   rm -r /var/www/public/* 2>/dev/null
-  cp -r /root/blitz_web/build/* /var/www/public
+  cp -r /home/blitzapi/blitz_web/build/* /var/www/public
   chown www-data:www-data -R /var/www/public
 
   # install info
@@ -85,10 +89,10 @@ fi
 # UPDATE
 ###################
 if [ "$1" = "update" ]; then
-  webuiActive=$(sudo ls /root/blitz_web/README.md | grep -c "README")
+  webuiActive=$(sudo ls /home/blitzapi/blitz_web/README.md | grep -c "README")
   if [ "${webuiActive}" != "0" ]; then
     echo "# Update Web API"
-    cd /root/blitz_web
+    cd /home/blitzapi/blitz_web
     currentBranch=$(git rev-parse --abbrev-ref HEAD)
     echo "# updating local repo ..."
     oldCommit=$(git rev-parse HEAD)
@@ -100,7 +104,7 @@ if [ "$1" = "update" ]; then
       ${NODEPATH}/yarn install
       ${NODEPATH}/yarn build
       sudo rm -r /var/www/public/* 2>/dev/null
-      sudo cp -r /root/blitz_web/build/* /var/www/public
+      sudo cp -r /home/blitzapi/blitz_web/build/* /var/www/public
       sudo chown www-data:www-data -R /var/www/public
     else
       echo "# no code changes"
@@ -123,6 +127,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   echo "# UNINSTALL WebUI"
   sudo rm -r /root/blitz_web 2>/dev/null
+  sudo rm -r /home/blitzapi/blitz_web 2>/dev/null
   sudo rm -r /var/www/public/* 2>/dev/null
   exit 0
 fi

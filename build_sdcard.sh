@@ -786,9 +786,9 @@ if ${fatpack}; then
 
   # set build code as new default
   sudo rm -r /home/admin/assets/nginx/www_public
-  sudo cp -a /root/blitz_web/build/* /home/admin/assets/nginx/www_public
+  sudo cp -a /home/blitzapi/blitz_web/build/* /home/admin/assets/nginx/www_public
   sudo chown admin:admin /home/admin/assets/nginx/www_public
-  sudo rm -r /root/blitz_web/build/*
+  sudo rm -r /home/blitzapi/blitz_web/build/*
 
 else
   echo "* skipping FATPACK"
