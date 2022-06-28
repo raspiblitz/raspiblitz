@@ -38,7 +38,7 @@ if [ "$1" = "install" ]; then
   
   # download signed binary sha256 hash sum file and check
   sudo -u admin wget https://bitcoincore.org/bin/bitcoin-core-${bitcoinVersion}/SHA256SUMS.asc
-  verifyResult=$(gpg --verify SHA256SUMS.asc 2>&1)
+  verifyResult=$(LANG=en_US.utf8; gpg --verify SHA256SUMS.asc 2>&1)
   goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
   echo "goodSignature(${goodSignature})"
   correctKey=$(echo ${verifyResult} | grep "${laanwjPGP}" -c)

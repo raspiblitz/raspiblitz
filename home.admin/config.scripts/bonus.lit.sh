@@ -203,7 +203,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     fi
     gpg --import ./pgp_keys.asc
     sleep 3
-    verifyResult=$(gpg --verify manifest-v${LITVERSION}.sig manifest-v${LITVERSION}.txt 2>&1)
+    verifyResult=$(LANG=en_US.utf8; gpg --verify manifest-v${LITVERSION}.sig manifest-v${LITVERSION}.txt 2>&1)
     goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
     echo "goodSignature(${goodSignature})"
     correctKey=$(echo ${verifyResult} | tr -d " \t\n\r" | grep "${GPGcheck}" -c)
