@@ -138,6 +138,11 @@ fi
 ###################
 if [ "$1" = "update-config" ]; then
 
+###################
+# UPDATE CONFIG
+###################
+if [ "$1" = "update-config" ]; then
+
   # prepare configs data
   source /mnt/hdd/raspiblitz.conf 2>/dev/null
   if [ "${network}" = "" ]; then
@@ -152,6 +157,16 @@ if [ "$1" = "update-config" ]; then
   echo "# Update Web API CONFIG (${dateStr})"
   sed -i "s/^# platform=.*/platform=raspiblitz/g" ./.env
   sed -i "s/^platform=.*/platform=raspiblitz/g" ./.env
+
+  # configure access token secret
+  secretNeedsInit=$(cat ./.env | grep -c "=please_please_update_me_please")
+  if [ ${secretNeedsInit} > 0 ]; then
+    echo "# init secret ..."
+    secret=$(dd if=/dev/urandom bs=256 count=1 2> /dev/null | shasum -a256 | cut -d " " -f1)
+    sed -i "s/^secret=.*/secret=${secret}/g" ./.env
+  else
+    echo "# secret already initialized"
+  fi
 
   source /home/admin/raspiblitz.info 2>/dev/null
   if [ "${setupPhase}" == "done" ]; then
