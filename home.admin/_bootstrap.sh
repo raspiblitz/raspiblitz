@@ -56,6 +56,7 @@ echo "## INIT raspiblitz.info" >> $logFile
 setupPhase='boot'
 setupStep=0
 fsexpanded=0
+blitzapi='off'
 
 btc_mainnet_sync_initial_done=0
 btc_testnet_sync_initial_done=0
@@ -75,6 +76,7 @@ source ${infoFile} 2>/dev/null
 # write fresh raspiblitz.info file
 echo "baseimage=${baseimage}" > $infoFile
 echo "cpu=${cpu}" >> $infoFile
+echo "blitzapi=${blitzapi}" >> $infoFile
 echo "displayClass=${displayClass}" >> $infoFile
 echo "displayType=${displayType}" >> $infoFile
 echo "setupPhase=${setupPhase}" >> $infoFile
@@ -90,7 +92,6 @@ echo "ln_lnd_signet_sync_initial_done=${ln_lnd_signet_sync_initial_done}" >> $in
 echo "ln_cl_mainnet_sync_initial_done=${ln_cl_mainnet_sync_initial_done}" >> $infoFile
 echo "ln_cl_testnet_sync_initial_done=${ln_cl_testnet_sync_initial_done}" >> $infoFile
 echo "ln_cl_signet_sync_initial_done=${ln_cl_signet_sync_initial_done}" >> $infoFile
-
 
 sudo chmod 664 ${infoFile}
 

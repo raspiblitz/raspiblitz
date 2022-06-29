@@ -129,6 +129,7 @@ if [ "$1" = "update-config" ]; then
 
   # setting value in raspi blitz config
   /home/admin/config.scripts/blitz.conf.sh set blitzapi "on"
+  /home/admin/raspiblitz.info set blitzapi "on"
 
   echo "# '.env' config updates - blitzapi maybe needs to be restarted"
   exit 0
@@ -297,6 +298,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # setting value in raspi blitz config
   /home/admin/config.scripts/blitz.conf.sh set blitzapi "off"
+  /home/admin/raspiblitz.info set blitzapi "off"
 
   exit 0
 
