@@ -1,4 +1,4 @@
-Documentation focused on install for dev environment with macos. Do not rely on this setup for nodes on mainnet. 
+Documentation focused on install for macos dev environment. Do not rely on this setup for mainnet nodes. 
 
 1. Download [Debian 10.4 Minimal Image](https://mac.getutm.app/gallery/debian-10-4-minimal)
 2. Resize the image container to 30GB
