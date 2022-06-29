@@ -101,6 +101,7 @@ Tested with:
 * Ubuntu image in VirtualBox and linux virt-manager / [cockpit-machines](https://github.com/cockpit-project/cockpit-machines)
 * Debian image in VirtualBox https://github.com/rootzoll/raspiblitz/issues/2756#issuecomment-983532237
 * TrueNAS (FreeBSD bhyve) with an Ubuntu VM: https://github.com/rootzoll/raspiblitz/issues/2104#issuecomment-917444238
+* [QEMU+UTM](https://github.com/rootzoll/raspiblitz/blob/dev/alternative.platforms/QEMU/raspiblitz-on-qemu.md)
 
 ### Create the base image
 * Download and install the base OS on an at least 32GB drive
