@@ -6,7 +6,7 @@
 source /home/admin/raspiblitz.info 2>/dev/null
 
 # get values from cache
-source <(/home/admin/_cache.sh get codeVersion internet_localip)
+source <(/home/admin/_cache.sh get codeVersion internet_localip blitzapi)
 
 # 1st PARAMETER: eventID
 # fixed ID string for a certain event
@@ -210,13 +210,18 @@ elif [ "${eventID}" == "waitsetup" ] && [ "${mode}" == "lcd" ]; then
             welcomeline="Ready for migration to RaspiBlitz"
         fi
 
+        browserline="Login thru SSH to setup ..."
+        if [ "${blitzapi}" == "on" ]; then
+            browserline="browser:  http://${internet_localip}"
+        fi
+
         # show default login help info
         dialog --backtitle "${backtitle}" --cr-wrap --infobox "
 ${welcomeline}
 ------------------------------------
-browser:  http://${internet_localip}
+${browserline}
 terminal: ssh admin@${internet_localip}
-          password: raspiblitz
+password: raspiblitz
 " 9 41
 
     else
