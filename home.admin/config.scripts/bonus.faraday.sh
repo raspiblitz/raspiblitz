@@ -145,7 +145,7 @@ if [ "${mode}" = "on" ] || [ "${mode}" = "1" ]; then
   echo "# checking PGP finger print"
   gpg --import ./pgp_keys.asc
   sleep 3
-  verifyResult=$(gpg --verify manifest-v${version}.txt.sig 2>&1)
+  verifyResult=$(LANG=en_US.utf8; gpg --verify manifest-v${version}.txt.sig 2>&1)
   goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
   echo "goodSignature='${goodSignature}'"
   correctKey=$(echo ${verifyResult} | tr -d " \t\n\r" | grep "${PGPcheck}" -c)

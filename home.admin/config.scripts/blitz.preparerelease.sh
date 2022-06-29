@@ -32,6 +32,11 @@ echo "deleting local DNS confs ..."
 sudo rm /etc/resolv.conf
 echo "OK"
 
+echo
+echo "deleting old API conf ..."
+sudo rm /home/blitzapi/blitz_api/.env 2>/dev/null
+echo "OK"
+
 # https://github.com/rootzoll/raspiblitz/issues/1371
 echo
 echo "deleting local WIFI conf ..."

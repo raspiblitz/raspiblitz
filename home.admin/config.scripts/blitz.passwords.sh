@@ -12,13 +12,6 @@ if [ "$1" == "" ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  exit 1
 fi
 
-# check if started with sudo
-echo "runningUser='$EUID'"
-if [ "$EUID" -ne 0 ]; then 
-  echo "error='need user root'"
-  exit 1
-fi
-
 # prepare hased password storage
 hashedPasswordSalt=""
 hashedPasswordStoragePath="/mnt/hdd/app-data/passwords"
@@ -98,6 +91,13 @@ fi
 # SETTING PASSWORDS
 ############################
 
+# check if started with sudo
+echo "runningUser='$EUID'"
+if [ "$EUID" -ne 0 ]; then 
+  echo "error='need user root'"
+  exit 1
+fi
+
 if [ "$1" != "set" ]; then
     echo "error='unkown parameter'"
     exit 1
@@ -128,7 +128,7 @@ if [ ${#abcd} -eq 0 ]; then
       OPTIONS+=(C "LND Lightning Wallet Password")
     fi
     if [ "${cl}" == "on" ] && [ "${clEncryptedHSM}" == "on" ]; then
-      OPTIONS+=(CL "C-Lightning Wallet Password")
+      OPTIONS+=(CL "Core Lightning Wallet Password")
     fi
     CHOICE=$(dialog --clear \
                 --backtitle "RaspiBlitz" \

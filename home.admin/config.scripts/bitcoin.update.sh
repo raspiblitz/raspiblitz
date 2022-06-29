@@ -177,7 +177,7 @@ if [ "${mode}" = "tested" ]||[ "${mode}" = "reckless" ]||[ "${mode}" = "custom" 
     exit 1
   fi
   
-  verifyResult=$(gpg --verify SHA256SUMS.asc 2>&1)
+  verifyResult=$(LANG=en_US.utf8; gpg --verify SHA256SUMS.asc 2>&1)
   goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
   echo "goodSignature(${goodSignature})"
   correctKey=$(echo ${verifyResult} | grep "${customKey}" -c)

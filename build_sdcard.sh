@@ -651,7 +651,7 @@ sudo dphys-swapfile swapoff
 sudo dphys-swapfile uninstall
 
 echo -e "\n*** INCREASE OPEN FILE LIMIT ***"
-# based on https://raspibolt.org/security.html#increase-your-open-files-limit
+# based on https://raspibolt.org/guide/raspberry-pi/security.html#increase-your-open-files-limit
 sudo sed --in-place -i "56s/.*/*    soft nofile 256000/" /etc/security/limits.conf
 sudo bash -c "echo '*    hard nofile 256000' >> /etc/security/limits.conf"
 sudo bash -c "echo 'root soft nofile 256000' >> /etc/security/limits.conf"
@@ -660,6 +660,8 @@ sudo bash -c "echo '# End of file' >> /etc/security/limits.conf"
 sudo sed --in-place -i "23s/.*/session required pam_limits.so/" /etc/pam.d/common-session
 sudo sed --in-place -i "25s/.*/session required pam_limits.so/" /etc/pam.d/common-session-noninteractive
 sudo bash -c "echo '# end of pam-auth-update config' >> /etc/pam.d/common-session-noninteractive"
+# increase the possible number of running processes from 128
+sudo bash -c "echo 'fs.inotify.max_user_instances=4096'" >> /etc/sysctl.conf
 
 # *** fail2ban ***
 # based on https://raspibolt.org/security.html#fail2ban
@@ -784,9 +786,9 @@ if ${fatpack}; then
 
   # set build code as new default
   sudo rm -r /home/admin/assets/nginx/www_public
-  sudo cp -a /root/blitz_web/build/* /home/admin/assets/nginx/www_public
+  sudo cp -a /home/blitzapi/blitz_web/build/* /home/admin/assets/nginx/www_public
   sudo chown admin:admin /home/admin/assets/nginx/www_public
-  sudo rm -r /root/blitz_web/build/*
+  sudo rm -r /home/blitzapi/blitz_web/build/*
 
 else
   echo "* skipping FATPACK"

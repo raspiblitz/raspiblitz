@@ -2,10 +2,8 @@
 
 # main repo: https://github.com/fusion44/blitz_api
 
-# restart the systemd `blitzapi` when credentials of lnd or bitcoind are changeing and it will
+# restart the systemd `blitzapi` when credentials of lnd or bitcoind are changed and it will
 # excute the `update-config` automatically before restarting
-
-# TODO: On sd card install there might be no Bitcoin & Lightning confs - make sure backend runs without
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ]; then
@@ -17,104 +15,9 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ];
   exit 1
 fi
 
-# check if started with sudo
-if [ "$EUID" -ne 0 ]; then
-  echo "error='run as root'"
-  exit 1
-fi
-
 DEFAULT_GITHUB_USER="fusion44"
 DEFAULT_GITHUB_REPO="blitz_api"
 DEFAULT_GITHUB_BRANCH="main"
-
-###################
-# ON / INSTALL
-###################
-if [ "$1" = "1" ] || [ "$1" = "on" ]; then
-
-  if [ "$2" != "" ]; then
-    DEFAULT_GITHUB_USER="$2"
-  fi
-
-  if [ "$3" != "" ]; then
-    DEFAULT_GITHUB_REPO="$3"
-  fi
-
-  if [ "$4" != "" ]; then
-    DEFAULT_GITHUB_BRANCH="$4"
-  fi
-
-  echo "# INSTALL Web API ..."
-  rm -r /root/blitz_api 2>/dev/null
-  cd /root || exit 1
-  # git clone https://github.com/fusion44/blitz_api.git /root/blitz_api
-  if ! git clone https://github.com/${DEFAULT_GITHUB_USER}/${DEFAULT_GITHUB_REPO}.git /root/blitz_api; then
-    echo "error='git clone failed'"
-    exit 1
-  fi
-  cd blitz_api || exit 1
-  if ! git checkout ${DEFAULT_GITHUB_BRANCH}; then
-    echo "error='git checkout failed'"
-    exit 1
-  fi
-  if ! pip install -r requirements.txt --no-deps; then
-    echo "error='pip install failed'"
-    exit 1
-  fi
-  chown -R admin:admin /root/blitz_api
-  chmod a+x /root
-  chmod -R a+x /root/blitz_api
-
-  # build the config and set unique secret (its OK to be a new secret every install/upadte)
-  /home/admin/config.scripts/blitz.web.api.sh update-config
-  secret=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 64 ; echo '')
-  sed -i "s/^secret=.*/secret=${secret}/g" ./.env
-
-  # prepare systemd service
-  echo "
-[Unit]
-Description=BlitzBackendAPI
-Wants=network.target
-After=network.target mnt-hdd.mount
-
-[Service]
-WorkingDirectory=/root/blitz_api
-# before every start update the config with latest credentials/settings
-ExecStartPre=-/home/admin/config.scripts/blitz.web.api.sh update-config
-ExecStart=/usr/bin/python -m uvicorn app.main:app --port 11111 --host=0.0.0.0 --root-path /api
-User=root
-Group=root
-Type=simple
-Restart=always
-StandardOutput=journal
-StandardError=journal
-RestartSec=60
-
-# Hardening measures
-PrivateTmp=true
-NoNewPrivileges=true
-PrivateDevices=true
-
-[Install]
-WantedBy=multi-user.target
-" | tee /etc/systemd/system/blitzapi.service
-
-  systemctl enable blitzapi
-  systemctl start blitzapi
-
-  # TODO: remove after experimental step (only have forward on nginx:80 /api)
-  ufw allow 11111 comment 'WebAPI Develop'
-
-  source <(/home/admin/_cache.sh export internet_localip)
-
-  # install info
-  echo "# the API is now running on port 11111 & doc available under:"
-  echo "# http://${internet_localip}/api/docs"
-  echo "# check for systemd:  sudo systemctl status blitzapi"
-  echo "# check for logs:     sudo journalctl -f -u blitzapi"
-
-  exit 0
-fi
 
 ###################
 # UPDATE CONFIG
@@ -129,12 +32,23 @@ if [ "$1" = "update-config" ]; then
   fi
 
   # prepare config update
-  cd /root/blitz_api
+  cd /home/blitzapi/blitz_api
+  secret=$(cat ./.env 2>/dev/null | grep "secret=" | cut -d "=" -f2)
   cp ./.env_sample ./.env
   dateStr=$(date)
   echo "# Update Web API CONFIG (${dateStr})"
   sed -i "s/^# platform=.*/platform=raspiblitz/g" ./.env
   sed -i "s/^platform=.*/platform=raspiblitz/g" ./.env
+
+  # configure access token secret
+  secretNeedsInit=$(cat ./.env 2>/dev/null| grep -c "=please_please_update_me_please")
+  if [ "${secret}" == "" ] || [ "${secret}" == "please_please_update_me_please" ]; then
+    echo "# init secret ..."
+    secret=$(dd if=/dev/urandom bs=256 count=1 2> /dev/null | shasum -a256 | cut -d " " -f1)
+  else
+    echo "# use existing secret"
+  fi
+  sed -i "s/^secret=.*/secret=${secret}/g" ./.env
 
   source /home/admin/raspiblitz.info 2>/dev/null
   if [ "${setupPhase}" == "done" ]; then
@@ -213,9 +127,126 @@ if [ "$1" = "update-config" ]; then
       sed -i "s/^ln_node=.*/ln_node=/g" ./.env
   fi
 
+  # setting value in raspi blitz config
+  /home/admin/config.scripts/blitz.conf.sh set blitzapi "on"
+
   echo "# '.env' config updates - blitzapi maybe needs to be restarted"
   exit 0
 
+fi
+
+# all other actions need to be sudo
+if [ "$EUID" -ne 0 ]; then
+  echo "error='run as root'"
+  exit 1
+fi
+
+###################
+# ON / INSTALL
+###################
+if [ "$1" = "1" ] || [ "$1" = "on" ]; then
+
+  if [ "$2" != "" ]; then
+    DEFAULT_GITHUB_USER="$2"
+  fi
+
+  if [ "$3" != "" ]; then
+    DEFAULT_GITHUB_REPO="$3"
+  fi
+
+  if [ "$4" != "" ]; then
+    DEFAULT_GITHUB_BRANCH="$4"
+  fi
+
+  echo "# INSTALL Web API ..."
+  # clean old source
+  rm -r /root/blitz_api 2>/dev/null
+  rm -r /home/blitzapi/blitz_api 2>/dev/null
+
+  # create user
+  adduser --disabled-password --gecos "" blitzapi
+
+  # sudo capability for manipulating passwords
+  /usr/sbin/usermod --append --groups sudo blitzapi
+  # access password hash and salt
+  /usr/sbin/usermod --append --groups admin blitzapi
+  # access lnd creds
+  /usr/sbin/usermod --append --groups lndadmin blitzapi
+  # access cln creds
+  /usr/sbin/usermod --append --groups bitcoin blitzapi
+  echo "# allowing user as part of the bitcoin group to RW RPC hook"
+  chmod 770 /home/bitcoin/.lightning/bitcoin
+  chmod 660 /home/bitcoin/.lightning/bitcoin/lightning-rpc
+  CLCONF="/home/bitcoin/.lightning/config"
+  if [ "$(cat ${CLCONF} | grep -c "^rpc-file-mode=0660")" -eq 0 ]; then
+    echo "rpc-file-mode=0660" | tee -a ${CLCONF}
+  fi
+
+  cd /home/blitzapi || exit 1
+  # git clone https://github.com/fusion44/blitz_api.git /home/blitzapi/blitz_api
+  if ! git clone https://github.com/${DEFAULT_GITHUB_USER}/${DEFAULT_GITHUB_REPO}.git /home/blitzapi/blitz_api; then
+    echo "error='git clone failed'"
+    exit 1
+  fi
+  cd blitz_api || exit 1
+  if ! git checkout ${DEFAULT_GITHUB_BRANCH}; then
+    echo "error='git checkout failed'"
+    exit 1
+  fi
+  if ! pip install -r requirements.txt --no-deps; then
+    echo "error='pip install failed'"
+    exit 1
+  fi
+
+  # build the config and set unique secret (its OK to be a new secret every install/upadte)
+  /home/admin/config.scripts/blitz.web.api.sh update-config
+  secret=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 64 ; echo '')
+  sed -i "s/^secret=.*/secret=${secret}/g" ./.env
+
+  # prepare systemd service
+  echo "
+[Unit]
+Description=BlitzBackendAPI
+Wants=network.target
+After=network.target mnt-hdd.mount
+
+[Service]
+WorkingDirectory=/home/blitzapi/blitz_api
+# before every start update the config with latest credentials/settings
+ExecStartPre=-/home/admin/config.scripts/blitz.web.api.sh update-config
+ExecStart=/usr/bin/python -m uvicorn app.main:app --port 11111 --host=0.0.0.0 --root-path /api
+User=blitzapi
+Group=blitzapi
+Type=simple
+Restart=always
+StandardOutput=journal
+StandardError=journal
+RestartSec=60
+
+# Hardening
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
+" | tee /etc/systemd/system/blitzapi.service
+
+  chown -R blitzapi:blitzapi /home/blitzapi/blitz_api
+
+  systemctl enable blitzapi
+  systemctl start blitzapi
+
+  # TODO: remove after experimental step (only have forward on nginx:80 /api)
+  ufw allow 11111 comment 'WebAPI Develop'
+
+  source <(/home/admin/_cache.sh export internet_localip)
+
+  # install info
+  echo "# the API is now running on port 11111 & doc available under:"
+  echo "# http://${internet_localip}/api/docs"
+  echo "# check for systemd:  sudo systemctl status blitzapi"
+  echo "# check for logs:     sudo journalctl -f -u blitzapi"
+
+  exit 0
 fi
 
 ###################
@@ -227,7 +258,7 @@ if [ "$1" = "update-code" ]; then
   if [ "${apiActive}" != "0" ]; then
     echo "# Update Web API CODE"
     systemctl stop blitzapi
-    cd /root/blitz_api
+    cd /home/blitzapi/blitz_api
     currentBranch=$(git rev-parse --abbrev-ref HEAD)
     echo "# updating local repo ..."
     oldCommit=$(git rev-parse HEAD)
@@ -260,8 +291,13 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   systemctl stop blitzapi
   systemctl disable blitzapi
   rm /etc/systemd/system/blitzapi.service
-  rm -r /root/blitz_api
-  rm -r /root/.blitz_api 2>/dev/null
+  userdel -rf blitzapi
+  # clean old source
+  rm -r /root/blitz_api 2>/dev/null
+
+  # setting value in raspi blitz config
+  /home/admin/config.scripts/blitz.conf.sh set blitzapi "off"
+
   exit 0
 
 fi

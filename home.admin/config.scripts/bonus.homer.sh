@@ -2,7 +2,7 @@
 
 # https://github.com/bastienwirtz/homer
 
-installVersion="v21.03.2"
+installVersion="v22.06.1"
 remoteVersion=$(curl -s https://api.github.com/repos/bastienwirtz/homer/releases/latest|grep tag_name|head -1|cut -d '"' -f4)
 
 # command info
@@ -80,7 +80,7 @@ if [ "$1" = "update" ]; then
 
   cd /home/homer/homer
   sudo -u homer git fetch
-  # Comment out until official release that fixes issue #206 
+  # Comment out until official release that fixes issue #206
   # sudo -u homer git reset --hard $remoteVersion
 
   # Save config file
@@ -99,7 +99,7 @@ if [ "$1" = "update" ]; then
   if ! [ $? -eq 0 ]; then
       echo "FAIL - npm run build did not run correctly, aborting"
       exit 1
-  fi    
+  fi
 
   # remove conf link
   sudo rm /var/www/homer/assets/config.yml
@@ -145,7 +145,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     if ! [ $? -eq 0 ]; then
         echo "FAIL - npm run build did not run correctly, aborting"
         exit 1
-    fi    
+    fi
 
     sudo mkdir -p /var/www/homer
     sudo rsync -av --delete dist/ /var/www/homer/
@@ -189,7 +189,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo ufw allow from any to any port 4091 comment 'allow homer HTTPS'
     echo ""
 
-  else 
+  else
     echo "# homer is already installed."
   fi
 
@@ -198,7 +198,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   # setting value in raspi blitz config
   sudo sed -i "s/^homer=.*/homer=on/g" /mnt/hdd/raspiblitz.conf
-  
+
   # Hidden Service for Mempool if Tor is active
   source /mnt/hdd/raspiblitz.conf
   if [ "${runBehindTor}" = "on" ]; then
@@ -246,8 +246,8 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     fi
 
     echo "# OK Homer removed."
-  
-  else 
+
+  else
     echo "# Homer is not installed."
   fi
 

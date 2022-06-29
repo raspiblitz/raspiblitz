@@ -32,6 +32,7 @@ if [ ${#helipad} -eq 0 ]; then helipad="off"; fi
 if [ ${#bitcoinminds} -eq 0 ]; then bitcoinminds="off"; fi
 if [ ${#squeaknode} -eq 0 ]; then squeaknode="off"; fi
 if [ ${#itchysats} -eq 0 ]; then itchysats="off"; fi
+if [ ${#blitzapi} -eq 0 ]; then blitzapi="off"; fi
 
 # show select dialog
 echo "run dialog ..."
@@ -78,6 +79,7 @@ if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ]; then
 fi
 
 OPTIONS+=(m 'Homer Dashboard' ${homer})
+OPTIONS+=(A 'Blitz API + webUI' ${blitzapi})
 
 CHOICES=$(dialog --title ' Additional Mainnet Services ' \
           --checklist ' use spacebar to activate/de-activate ' \
@@ -541,6 +543,25 @@ Use the new 'Homer' entry in Main Menu for more info.\n
   fi
 else
   echo "Homer Setting unchanged."
+fi
+
+# Blitz API + webUI process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "A")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${blitzapi}" != "${choice}" ]; then
+  echo "Blitz API + webUI settings changed .."
+  anychange=1
+  sudo /home/admin/config.scripts/blitz.web.api.sh ${choice}
+  sudo /home/admin/config.scripts/blitz.web.ui.sh ${choice}
+  errorOnInstall=$?
+  if [ "${choice}" =  "on" ]; then
+    whiptail --title " Installed Blitz API + webUI" --msgbox "\
+The Blitz API + webUI was installed.\n
+See the status screen for more info.\n
+" 10 35
+  fi
+else
+  echo "Blitz API + webUI Setting unchanged."
 fi
 
 # BitcoinMinds process choice
