@@ -2,10 +2,8 @@
 
 # main repo: https://github.com/fusion44/blitz_api
 
-# restart the systemd `blitzapi` when credentials of lnd or bitcoind are changeing and it will
+# restart the systemd `blitzapi` when credentials of lnd or bitcoind are changed and it will
 # excute the `update-config` automatically before restarting
-
-# TODO: On sd card install there might be no Bitcoin & Lightning confs - make sure backend runs without
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ]; then
@@ -14,12 +12,6 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ];
   echo "blitz.web.api.sh update-config"
   echo "blitz.web.api.sh update-code"
   echo "blitz.web.api.sh off"
-  exit 1
-fi
-
-# check if started with sudo
-if [ "$EUID" -ne 0 ]; then
-  echo "error='run as root'"
   exit 1
 fi
 
