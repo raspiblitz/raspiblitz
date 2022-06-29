@@ -17,6 +17,7 @@ if [ ${#circuitbreaker} -eq 0 ]; then circuitbreaker="off"; fi
 if [ ${#clboss} -eq 0 ]; then clboss="off"; fi
 if [ ${#clEncryptedHSM} -eq 0 ]; then clEncryptedHSM="off"; fi
 if [ ${#clAutoUnlock} -eq 0 ]; then clAutoUnlock="off"; fi
+if [ ${#blitzapi} -eq 0 ]; then blitzapi="off"; fi
 
 echo "# map LND to on/off"
 lndNode="off"
@@ -107,6 +108,8 @@ echo "run dialog ..."
 # BASIC MENU INFO
 OPTIONS=()
 
+OPTIONS+=(A 'Blitz API + WebUI' ${blitzapi})
+
 # LCD options (only when running with LCD screen)
 if [ "${displayClass}" == "lcd" ]; then
   OPTIONS+=(s 'Touchscreen (experimental)' ${touchscreenMenu})
@@ -162,6 +165,25 @@ fi
 
 needsReboot=0
 anychange=0
+
+# Blitz API + webUI process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "A")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${blitzapi}" != "${choice}" ]; then
+  echo "Blitz API + webUI settings changed .."
+  anychange=1
+  sudo /home/admin/config.scripts/blitz.web.api.sh ${choice}
+  sudo /home/admin/config.scripts/blitz.web.ui.sh ${choice}
+  errorOnInstall=$?
+  if [ "${choice}" =  "on" ]; then
+    whiptail --title " Installed Blitz API + webUI" --msgbox "\
+The Blitz API + webUI was installed.\n
+See the status screen for more info.\n
+" 10 35
+  fi
+else
+  echo "Blitz API + webUI Setting unchanged."
+fi
 
 # LND AUTOPILOT process choice
 choice="off"; check=$(echo "${CHOICES}" | grep -c "a")

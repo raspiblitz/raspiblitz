@@ -889,6 +889,18 @@ fi
 echo "load configfile data" >> $logFile
 source ${configFile}
 
+# write webapi state if not part of config yet
+if [ "${blitzapi}" == "" ]; then
+  blitzApiInstalled=$(systemctl status blitzapi | grep -c "loaded")
+  echo "Init config value blitzapi (${blitzApiInstalled})" >> $logFile
+  if [ $blitzApiInstalled -eq 0 ]; then
+    /home/admin/config.scripts/blitz.conf.sh set blitzapi "off"
+  else
+    /home/admin/config.scripts/blitz.conf.sh set blitzapi "on"
+  fi
+  source ${configFile}
+fi
+
 # if a WIFI config exists backup to HDD
 source <(/home/admin/config.scripts/internet.sh status)
 if [ ${configWifiExists} -eq 1 ]; then
