@@ -17,6 +17,7 @@ echo "cleaning raspiblitz.info"
 source /home/admin/raspiblitz.info
 echo "baseimage=${baseimage}" > /home/admin/raspiblitz.info
 echo "cpu=${cpu}" >> /home/admin/raspiblitz.info
+echo "blitzapi=${blitzapi}" >> /home/admin/raspiblitz.info
 echo "displayClass=${displayClass}" >> /home/admin/raspiblitz.info
 
 # SSH Pubkeys (make unique for every sd card image install)
