@@ -345,6 +345,17 @@ else
     echo "Provisioning Tor - keep default" >> ${logFile}
 fi
 
+# WebAPI & UI (in case image was not fatpack - but webapi was switchen on)
+blitzApiInstalled=$(systemctl status blitzapi | grep -c "loaded")
+if [ "${blitzapi}" == "on" ] && [ $blitzApiInstalled -eq 0 ]; then
+    echo "Provisioning BlitzAPI - run config script" >> ${logFile}
+    /home/admin/_cache.sh set message "Setup BlitzAPI (takes time)"
+    /home/admin/config.scripts/blitz.web.api.sh on >> ${logFile} 2>&1    
+    /home/admin/config.scripts/blitz.web.ui.sh on >> ${logFile} 2>&1   
+else
+    echo "Provisioning BlitzAPI - keep default" >> ${logFile}
+fi
+
 # AUTO PILOT
 if [ "${autoPilot}" = "on" ]; then
     echo "Provisioning AUTO PILOT - run config script" >> ${logFile}
