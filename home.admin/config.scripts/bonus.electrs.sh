@@ -21,11 +21,11 @@ PGPpubkeyFingerprint="87CAE5FA46917CBB"
 
 source /mnt/hdd/raspiblitz.conf
 
-# get local and global internet info
-source <(/home/admin/config.scripts/internet.sh status global)
-
 # give status (dont call regularly - just on occasions)
 if [ "$1" = "status" ]; then
+
+  # get local and global internet info
+  source <(/home/admin/config.scripts/internet.sh status global)
 
   echo "##### STATUS ELECTRS SERVICE"
 
