@@ -8,7 +8,7 @@ ELECTRSVERSION="v0.9.7"
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "config script to switch the Electrum Rust Server on or off"
- echo "bonus.electrs.sh status [?showAddress] -> dont call in loops"
+ echo "bonus.electrs.sh status -> dont call in loops"
  echo "bonus.electrs.sh status-sync"
  echo "bonus.electrs.sh [on|off|menu]"
  echo "installs the version $ELECTRSVERSION"
@@ -47,9 +47,7 @@ if [ "$1" = "status" ]; then
 
     # check local IPv4 port
     echo "localIP='${localip}'"
-    if [ "$2" = "showAddress" ]; then
-      echo "publicIP='${cleanip}'"
-    fi
+    echo "publicIP='${cleanip}'"
     echo "portTCP='50001'"
     localPortRunning=$(sudo netstat -an | grep -c '0.0.0.0:50001')
     echo "localTCPPortActive=${localPortRunning}"
@@ -147,7 +145,7 @@ if [ "$1" = "menu" ]; then
 
   # get status
   echo "# collecting status info ... (please wait)"
-  source <(sudo /home/admin/config.scripts/bonus.electrs.sh status showAddress)
+  source <(sudo /home/admin/config.scripts/bonus.electrs.sh status)
 
   if [ ${serviceInstalled} -eq 0 ]; then
     echo "# FAIL not installed"
