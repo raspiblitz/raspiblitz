@@ -17,7 +17,7 @@ hashedPasswordSalt=""
 hashedPasswordStoragePath="/mnt/hdd/app-data/passwords"
 if [ $(df | grep -c "/mnt/hdd") -gt 0 ]; then
   # check if path & salt file exists
-  if [ $(ls ${hashedPasswordStoragePath}/salt.txt | grep -c "salt.txt") -eq 0 ]; then
+  if [ $(sudo ls ${hashedPasswordStoragePath}/salt.txt | grep -c "salt.txt") -eq 0 ]; then
     echo "# creating salt & hashedPasswordStoragePath ..."
     mkdir -p ${hashedPasswordStoragePath}
     echo "$RANDOM-$(date +%N)" | shasum -a 512 | cut -d " " -f1 | cut -c 1-16 > ${hashedPasswordStoragePath}/salt.txt
@@ -26,7 +26,7 @@ if [ $(df | grep -c "/mnt/hdd") -gt 0 ]; then
   else
     echo "# salt file exists"
   fi
-  hashedPasswordSalt=$(cat ${hashedPasswordStoragePath}/salt.txt)
+  hashedPasswordSalt=$(sudo cat ${hashedPasswordStoragePath}/salt.txt)
   echo "# hashedPasswordSalt(${hashedPasswordSalt})"
 else
   echo "# hashedPasswordSalt - not available yet (no HDD yet)"
@@ -38,7 +38,7 @@ fi
 
 if [ "$1" == "check" ]; then
 
-  # brute force protection
+  # brute force protection (just effective to oustide callers)
   # if there was another try within last minute add another 3 seconds delay protection
   source <(/home/admin/_cache.sh meta system_password_bruteforceprotection)
   /home/admin/_cache.sh set system_password_bruteforceprotection on 60
@@ -65,7 +65,7 @@ if [ "$1" == "check" ]; then
     exit 1
   fi
   
-  passwordHashSystem=$(cat ${hashedPasswordStoragePath}/${typeOfPassword}.hash 2>/dev/null)
+  passwordHashSystem=$(sudo cat ${hashedPasswordStoragePath}/${typeOfPassword}.hash 2>/dev/null)
   passwordHashTest=$(mkpasswd -m sha-512 "${passwordToCheck}" -S "${hashedPasswordSalt:0:16}")
   #echo "# passwordToCheck(${passwordToCheck})"
   #echo "# passwordHashSystem(${passwordHashSystem})"
