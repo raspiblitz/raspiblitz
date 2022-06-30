@@ -8,7 +8,8 @@ ELECTRSVERSION="v0.9.7"
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "config script to switch the Electrum Rust Server on or off"
- echo "bonus.electrs.sh status [?showAddress]"
+ echo "bonus.electrs.sh status [?showAddress] -> dont call in loops"
+ echo "bonus.electrs.sh status-sync"
  echo "bonus.electrs.sh [on|off|menu]"
  echo "installs the version $ELECTRSVERSION"
  exit 1
@@ -23,7 +24,7 @@ source /mnt/hdd/raspiblitz.conf
 # get local and global internet info
 source <(/home/admin/config.scripts/internet.sh status global)
 
-# give status
+# give status (dont call regularly - just on occasions)
 if [ "$1" = "status" ]; then
 
   echo "##### STATUS ELECTRS SERVICE"
@@ -43,42 +44,6 @@ if [ "$1" = "status" ]; then
   serviceRunning=$(sudo systemctl status electrs --no-page 2>/dev/null | grep -c "active (running)")
   echo "serviceRunning=${serviceRunning}"
   if [ ${serviceRunning} -eq 1 ]; then
-
-    # Experimental try to get sync Info
-    syncedToBlock=$(sudo journalctl -u electrs --no-pager -n2000 | grep "height=" | tail -n1| cut -d= -f3)
-    blockchainHeight=$(sudo -u bitcoin ${network}-cli getblockchaininfo 2>/dev/null | jq -r '.headers' | sed 's/[^0-9]*//g')
-    lastBlockchainHeight=$(($blockchainHeight -1))
-    syncProgress=0
-    if [ "${syncedToBlock}" != "" ] && [ "${blockchainHeight}" != "" ] && [ "${blockchainHeight}" != "0" ]; then
-      syncProgress="$(echo "$syncedToBlock" "$blockchainHeight" | awk '{printf "%.2f", $1 / $2 * 100}')"
-    fi
-    echo "syncProgress=${syncProgress}%"
-    if [ "${syncedToBlock}" = "${blockchainHeight}" ] || [ "${syncedToBlock}" = "${lastBlockchainHeight}" ]; then
-      echo "tipSynced=1"
-    else
-      echo "tipSynced=0"
-    fi
-
-    # check if initial sync was done, by setting a file as once electrs is the first time responding on port 50001
-    electrumResponding=$(echo '{"jsonrpc":"2.0","method":"server.ping","params":[],"id":"electrs-check"}' | netcat -w 2 127.0.0.1 50001 | grep -c "result")
-    if [ ${electrumResponding} -gt 1 ]; then
-      electrumResponding=1
-    fi
-    echo "electrumResponding=${electrumResponding}"
-
-    fileFlagExists=$(sudo ls /mnt/hdd/app-storage/electrs/initial-sync.done 2>/dev/null | grep -c 'initial-sync.done')
-    if [ ${fileFlagExists} -eq 0 ] && [ ${electrumResponding} -gt 0 ]; then
-      # set file flag for the future
-      sudo touch /mnt/hdd/app-storage/electrs/initial-sync.done
-      sudo chmod 544 /mnt/hdd/app-storage/electrs/initial-sync.done
-      fileFlagExists=1
-    fi
-    if [ ${fileFlagExists} -eq 0 ]; then
-      echo "initialSynced=0"
-      echo "infoSync='Building Index (please wait)'"
-    else
-      echo "initialSynced=1"
-    fi
 
     # check local IPv4 port
     echo "localIP='${localip}'"
@@ -122,13 +87,59 @@ if [ "$1" = "status" ]; then
     nginxTest=$(sudo nginx -t 2>&1 | grep -c "test is successful")
     echo "nginxTest=$nginxTest"
 
+  fi
+
+fi
+
+# give sync-status (can be called regularly)
+if [ "$1" = "status-sync" ] || [ "$1" = "status" ]; then
+
+  serviceRunning=$(sudo systemctl status electrs --no-page 2>/dev/null | grep -c "active (running)")
+  echo "serviceRunning=${serviceRunning}"
+  if [ ${serviceRunning} -eq 1 ]; then
+
+    # Experimental try to get sync Info
+    syncedToBlock=$(sudo journalctl -u electrs --no-pager -n2000 | grep "height=" | tail -n1| cut -d= -f3)
+    blockchainHeight=$(sudo -u bitcoin ${network}-cli getblockchaininfo 2>/dev/null | jq -r '.headers' | sed 's/[^0-9]*//g')
+    lastBlockchainHeight=$(($blockchainHeight -1))
+    syncProgress=0
+    if [ "${syncedToBlock}" != "" ] && [ "${blockchainHeight}" != "" ] && [ "${blockchainHeight}" != "0" ]; then
+      syncProgress="$(echo "$syncedToBlock" "$blockchainHeight" | awk '{printf "%.2f", $1 / $2 * 100}')"
+    fi
+    echo "syncProgress=${syncProgress}%"
+    if [ "${syncedToBlock}" = "${blockchainHeight}" ] || [ "${syncedToBlock}" = "${lastBlockchainHeight}" ]; then
+      echo "tipSynced=1"
+    else
+      echo "tipSynced=0"
+    fi
+
+    # check if initial sync was done, by setting a file as once electrs is the first time responding on port 50001
+    electrumResponding=$(echo '{"jsonrpc":"2.0","method":"server.ping","params":[],"id":"electrs-check"}' | netcat -w 2 127.0.0.1 50001 | grep -c "result")
+    if [ ${electrumResponding} -gt 1 ]; then
+      electrumResponding=1
+    fi
+    echo "electrumResponding=${electrumResponding}"
+
+    fileFlagExists=$(sudo ls /mnt/hdd/app-storage/electrs/initial-sync.done 2>/dev/null | grep -c 'initial-sync.done')
+    if [ ${fileFlagExists} -eq 0 ] && [ ${electrumResponding} -gt 0 ]; then
+      # set file flag for the future
+      sudo touch /mnt/hdd/app-storage/electrs/initial-sync.done
+      sudo chmod 544 /mnt/hdd/app-storage/electrs/initial-sync.done
+      fileFlagExists=1
+    fi
+    if [ ${fileFlagExists} -eq 0 ]; then
+      echo "initialSynced=0"
+      echo "infoSync='Building Index (please wait)'"
+    else
+      echo "initialSynced=1"
+    fi
+
   else
     echo "tipSynced=0"
     echo "initialSynced=0"
     echo "electrumResponding=0"
     echo "infoSync='Not running - check: sudo journalctl -u electrs'"
   fi
-
   exit 0
 fi
 

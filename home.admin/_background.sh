@@ -111,7 +111,7 @@ do
 
   # every 15min - not too often
   # because its a ping to external service
-  recheckPublicIP=$((($counter % 900)+1))
+  recheckPublicIP=$((($counter % 1800)+1))
 
   # prevent when lndAddress is set
   if [ ${#lndAddress} -gt 3 ]; then

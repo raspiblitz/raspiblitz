@@ -346,7 +346,7 @@ else
   # Electrum Server - electrs
   if [ "${ElectRS}" = "on" ]; then
     error=""
-    source <(sudo /home/admin/config.scripts/bonus.electrs.sh status 2>/dev/null)
+    source <(sudo /home/admin/config.scripts/bonus.electrs.sh status-sync 2>/dev/null)
     if [ ${#infoSync} -gt 0 ]; then
       appInfoLine="Electrum: ${infoSync}"
     fi
