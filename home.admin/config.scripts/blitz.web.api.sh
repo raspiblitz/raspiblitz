@@ -54,8 +54,8 @@ if [ "$1" = "update-config" ]; then
   if [ "${setupPhase}" == "done" ]; then
 
     # configure bitcoin
-    RPCUSER=$(cat /mnt/hdd/${network}/${network}.conf 2>/dev/null | grep rpcuser | cut -c 9-)
-    RPCPASS=$(cat /mnt/hdd/${network}/${network}.conf 2>/dev/null | grep rpcpassword | cut -c 13-)
+    RPCUSER=$(sudo cat /mnt/hdd/${network}/${network}.conf 2>/dev/null | grep rpcuser | cut -c 9-)
+    RPCPASS=$(sudo cat /mnt/hdd/${network}/${network}.conf 2>/dev/null | grep rpcpassword | cut -c 13-)
     if [ "${RPCUSER}" == "" ]; then
       RPCUSER="raspibolt"
     fi
@@ -73,8 +73,8 @@ if [ "$1" = "update-config" ]; then
     if [ "${lightning}" == "lnd" ]; then
 
       echo "# CONFIG Web API Lightning --> LND"
-      tlsCert=$(xxd -ps -u -c 1000 /mnt/hdd/lnd/tls.cert)
-      adminMacaroon=$(xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/bitcoin/${chain}net/admin.macaroon)
+      tlsCert=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/tls.cert)
+      adminMacaroon=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/bitcoin/${chain}net/admin.macaroon)
       sed -i "s/^ln_node=.*/ln_node=lnd_grpc/g" ./.env
       sed -i "s/^lnd_grpc_ip=.*/lnd_grpc_ip=127.0.0.1/g" ./.env
       sed -i "s/^lnd_macaroon=.*/lnd_macaroon=${adminMacaroon}/g" ./.env
@@ -99,12 +99,12 @@ if [ "$1" = "update-config" ]; then
       sed -i "s/^ln_node=.*/ln_node=cln_grpc/g" ./.env
 
       # make sure cln-grpc is on
-      /home/admin/config.scripts/cl-plugin.cln-grpc.sh on mainnet
+      sudo /home/admin/config.scripts/cl-plugin.cln-grpc.sh on mainnet
 
       # get hex values of pem files
-      hexClient=$(xxd -p -c2000 /home/bitcoin/.lightning/bitcoin/client.pem)
-      hexClientKey=$(xxd -p -c2000 /home/bitcoin/.lightning/bitcoin/client-key.pem)
-      hexCa=$(xxd -p -c2000 /home/bitcoin/.lightning/bitcoin/ca.pem)
+      hexClient=$(sudo xxd -p -c2000 /home/bitcoin/.lightning/bitcoin/client.pem)
+      hexClientKey=$(sudo xxd -p -c2000 /home/bitcoin/.lightning/bitcoin/client-key.pem)
+      hexCa=$(sudo xxd -p -c2000 /home/bitcoin/.lightning/bitcoin/ca.pem)
       if [ "${hexClient}" == "" ]; then
         echo "# FAIL /home/bitcoin/.lightning/bitcoin/*.pem files maybe missing"
       fi
@@ -126,10 +126,6 @@ if [ "$1" = "update-config" ]; then
       sed -i "s/^network=.*/network=/g" ./.env
       sed -i "s/^ln_node=.*/ln_node=/g" ./.env
   fi
-
-  # setting value in raspi blitz config
-  /home/admin/config.scripts/blitz.conf.sh set blitzapi "on"
-  /home/admin/raspiblitz.info set blitzapi "on"
 
   echo "# '.env' config updates - blitzapi maybe needs to be restarted"
   exit 0
@@ -246,6 +242,10 @@ WantedBy=multi-user.target
   echo "# http://${internet_localip}/api/docs"
   echo "# check for systemd:  sudo systemctl status blitzapi"
   echo "# check for logs:     sudo journalctl -f -u blitzapi"
+
+  # setting value in raspi blitz config
+  /home/admin/config.scripts/blitz.conf.sh set blitzapi "on"
+  /home/admin/raspiblitz.info set blitzapi "on"
 
   exit 0
 fi
