@@ -245,7 +245,7 @@ WantedBy=multi-user.target
 
   # setting value in raspi blitz config
   /home/admin/config.scripts/blitz.conf.sh set blitzapi "on"
-  /home/admin/raspiblitz.info set blitzapi "on"
+  /home/admin/config.scripts/blitz.conf.sh set blitzapi "on" /home/admin/raspiblitz.info
 
   exit 0
 fi
@@ -298,7 +298,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # setting value in raspi blitz config
   /home/admin/config.scripts/blitz.conf.sh set blitzapi "off"
-  /home/admin/raspiblitz.info set blitzapi "off"
+  /home/admin/config.scripts/blitz.conf.sh set blitzapi "off" /home/admin/raspiblitz.info
 
   exit 0
 
