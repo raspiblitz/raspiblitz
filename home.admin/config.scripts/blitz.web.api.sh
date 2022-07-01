@@ -178,6 +178,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   if [ "$(cat ${CLCONF} | grep -c "^rpc-file-mode=0660")" -eq 0 ]; then
     echo "rpc-file-mode=0660" | tee -a ${CLCONF}
   fi
+  /usr/sbin/usermod --append --groups bitcoin blitzapi
 
   cd /home/blitzapi || exit 1
   # git clone https://github.com/fusion44/blitz_api.git /home/blitzapi/blitz_api
