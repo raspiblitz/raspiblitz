@@ -695,6 +695,7 @@ if [ ${isMounted} -eq 0 ]; then
 
     # unpack
     /home/admin/_cache.sh set message "Unpacking Migration Data"
+    error=""
     source <(/home/admin/config.scripts/blitz.migration.sh import "${migrationFile}")
 
     # check for errors
