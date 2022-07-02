@@ -284,16 +284,17 @@ if [ "$1" = "target" ]; then
     sleep 2
   fi
 
-  echo "restarting services ... (please wait)"
-  sudo systemctl enable bitcoind 
-  sudo systemctl start bitcoind 
-  sudo systemctl start lnd 2>/dev/null
-  sudo systemctl start lightningd 2>/dev/null
-  sleep 10
-
   # setting copy state
   /home/admin/_cache.sh set state "ready"
   /home/admin/_cache.sh set message "Node Running"
+
+  echo "restarting services ... (please wait)"
+  sudo systemctl enable bitcoind 
+
+  echo "rebooting"
+  /home/admin/config.scripts/blitz.shutdown.sh reboot
+  exit
+
 fi
 
 ###################
