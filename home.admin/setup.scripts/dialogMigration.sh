@@ -55,7 +55,7 @@ if [ "${migrationOS}" == "raspiblitz" ]; then
       echo "ON YOUR LAPTOP open a new terminal and change into"
       echo "the directory where your migration file is and"
       echo "COPY, PASTE AND EXECUTE THE FOLLOWING COMMAND:"
-      echo "scp -r ./raspiblitz-*.tar.gz ${defaultUploadUser}@${localip}:${defaultUploadPath}/"
+      echo "sftp -r ./raspiblitz-*.tar.gz ${defaultUploadUser}@${localip}:${defaultUploadPath}/"
       echo ""
       echo "Use password 'raspiblitz' to authenticate file transfer."
       echo "PRESS ENTER when upload is done."

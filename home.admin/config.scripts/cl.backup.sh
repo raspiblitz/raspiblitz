@@ -180,7 +180,7 @@ if [ ${mode} = "cl-export-gui" ]; then
   # get local ip info
   source <(/home/admin/config.scripts/internet.sh status local)
 
-  # offer SCP for download
+  # offer SFTP for download
   clear
   echo
   echo "****************************************"
@@ -188,9 +188,9 @@ if [ ${mode} = "cl-export-gui" ]; then
   echo "****************************************"
   echo 
   echo "ON YOUR MAC & LINUX LAPTOP - RUN IN NEW TERMINAL:"
-  echo "scp '${fileowner}@${localip}:${filename}' ./"
+  echo "sftp '${fileowner}@${localip}:${filename}' ./"
   echo "ON WINDOWS USE:"
-  echo "scp ${fileowner}@${localip}:${filename} ."
+  echo "sftp ${fileowner}@${localip}:${filename} ."
   echo
   echo "Use password A to authenticate file transfer."
   echo "Check for correct file size after transfer: ${size} byte"
@@ -291,7 +291,7 @@ if [ ${mode} = "cl-import-gui" ]; then
       echo "To make upload open a new terminal on your laptop,"
       echo "change into the directory where your cl-rescue file is and"
       echo "COPY, PASTE AND EXECUTE THE FOLLOWING COMMAND:"
-      echo "scp -r ./cl-rescue-*.tar.gz ${defaultUploadUser}@${localip}:${defaultUploadPath}/"
+      echo "sftp -r ./cl-rescue-*.tar.gz ${defaultUploadUser}@${localip}:${defaultUploadPath}/"
       echo
       echo "Use ${passwordInfo} to authenticate file transfer."
       echo "PRESS ENTER when upload is done"

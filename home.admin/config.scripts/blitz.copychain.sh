@@ -141,7 +141,7 @@ if [ "$1" = "target" ]; then
     echo "Make sure that the Bitcoin Core Wallet is not running in the background anymore."
     echo ""
     echo "COPY, PASTE & EXECUTE the following command on your Windows computer terminal:"
-    echo "scp -r ./chainstate ./blocks bitcoin@${internet_localip}:/mnt/hdd/bitcoin"
+    echo "sftp -r ./chainstate ./blocks bitcoin@${localip}:/mnt/hdd/bitcoin"
     echo ""
     echo "If asked for a password use PASSWORD A (or 'raspiblitz')."
   fi

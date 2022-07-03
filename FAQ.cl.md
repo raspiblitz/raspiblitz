@@ -605,7 +605,7 @@ Will need to pay through a peer which supports the onion messages which means yo
 * If there is no such file and you have not funded the CLN wallet yet can reset the wallet and the next wallet will be created with a seed.
 
 ### How to display the hsm_secret in a human-readable format?
-* If there is no seed available it is best to save the hsm_secret as a file with `scp` or note down the alphanumeric characters in the two line displayed with:
+* If there is no seed available it is best to save the hsm_secret as a file with `sftp` or note down the alphanumeric characters in the two line displayed with:
     ```
     sudo xxd /home/bitcoin/.lightning/bitcoin/hsm_secret
     ```
