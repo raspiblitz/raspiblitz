@@ -1,0 +1,110 @@
+# This is a basic workflow to help you get started with Actions
+
+name: ⚡️ Raspiblitz Build
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "dev" branch
+  push:
+    branches: [ "dev" ]
+    paths-ignore:
+      - '*.md'
+      - '.gitignore'
+  pull_request:
+    branches: [ "dev" ]
+    paths-ignore:
+      - '*.md'
+      - '.gitignore'
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  packer:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      # - uses: actions/checkout@v3
+
+      # Runs a single command using the runners shell
+      - name: Hello Blitz
+        run: echo Building Raspiblitz image!
+
+      # Create a stage 'raspibuild-stage' to build Raspiblitz environment.
+      - run: |
+          mkdir -p raspibuild-stage/package-test &&
+          {
+          cat > raspibuild-stage/package-test/00-run-chroot.sh <<-EOF
+          #!/bin/bash
+          sudo touch /ssh
+          sudo apt-get install -y wget
+          wget https://raw.githubusercontent.com/rootzoll/raspiblitz/v1.7/build_sdcard.sh && sudo bash build_sdcard.sh
+          EOF
+          } &&
+          chmod +x raspibuild-stage/package-test/00-run-chroot.sh &&
+          {
+          cat > raspibuild-stage/prerun.sh <<-EOF
+          #!/bin/bash -e
+          if [ ! -d "\${ROOTFS_DIR}" ]; then
+            copy_previous
+          fi
+          EOF
+          } &&
+          chmod +x raspibuild-stage/prerun.sh
+
+      - name: pi-gen-action
+        uses: usimd/pi-gen-action@v1
+        with:
+          image-name: raspiblitz-test-image
+          # Use qcow2 images to reduce space and runtime requirements.
+          use-qcow2: 1 # optional, default is 1
+
+          # List of stage name to execute in given order. Relative and absolute paths to custom stage directories are allowed here.
+          # Note that by default pi-gen exports images in stage2 (lite), stage4 and stage5. You probably want to hook in custom stages
+          # before one of the exported stages. Otherwise, the action will make sure any custom stage will include an image export directive
+          stage-list: stage0 stage1 stage2 ./raspibuild-stage # optional, default is stage0 stage1 stage2
+
+          # The release version to build images against. Valid values are jessie, stretch, buster, bullseye, and testing.
+          release: bullseye # optional, default is bullseye
+
+          # Compression to apply on final image (either "none", "zip", "xz" or "gz").
+          compression: none # optional, default is zip
+
+          # Host name of the image.
+          hostname: raspiblitz # optional, default is raspberrypi
+
+          # If this feature is enabled, the action will configure pi-gen to not export any stage as image but the last one
+          # defined in property 'stage-list'. This is helpful when building a single image flavor (in contrast to building
+          # a lite/server and full-blown desktop image), since it speeds up the build process significantly.
+          export-last-stage-only: true # optional, default is true
+
+          # Release version of pi-gen to use. This can both be a branch or tag name known in the pi-gen repository.
+          pi-gen-version: arm64 # optional, default is arm64
+
+          # Set whether a NOOBS image should be built as well. If enabled, the output directory containing the NOOBS files will be saved as output variable 'image-noobs-path'.
+          enable-noobs: false # optional
+
+          # Comma or whitespace separated list of additional packages to install on host before running pi-gen.
+          # Use this list to add any packages your custom stages may require. Note that this is not affecting the final image. In order to add additional packages, you need to add a respective 'XX-packages' file in your custom stage.
+          extra-host-dependencies: '' # optional, default is 
+
+          # Comma or whitespace separated list of additional modules to load on host before running pi-gen.
+          # If your custom stage requires additional software or kernel modules to be loaded, add them here. Note that this is not meant to configure modules to be loaded in the target image.
+          extra-host-modules: '' # optional, default is 
+
+          # Path where selected pi-gen ref will be checked out to. If the path does not yet exist, it will be created (including its parents).
+          pi-gen-dir: pi-gen # optional, default is pi-gen
+
+          pi-gen-repository: RPi-Distro/pi-gen
+
+          # Print all output from pi-gen.
+          verbose-output: true 
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: pi-gen-image
+          path: ${{ steps.build.outputs.image-path }}
