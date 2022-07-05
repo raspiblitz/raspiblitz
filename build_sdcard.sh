@@ -661,7 +661,7 @@ sudo sed --in-place -i "23s/.*/session required pam_limits.so/" /etc/pam.d/commo
 sudo sed --in-place -i "25s/.*/session required pam_limits.so/" /etc/pam.d/common-session-noninteractive
 sudo bash -c "echo '# end of pam-auth-update config' >> /etc/pam.d/common-session-noninteractive"
 # increase the possible number of running processes from 128
-sudo bash -c "echo 'fs.inotify.max_user_instances=4096'" >> /etc/sysctl.conf
+sudo bash -c "echo 'fs.inotify.max_user_instances=4096' >> /etc/sysctl.conf"
 
 # *** fail2ban ***
 # based on https://raspibolt.org/security.html#fail2ban
