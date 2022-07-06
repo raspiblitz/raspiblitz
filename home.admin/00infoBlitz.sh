@@ -26,6 +26,7 @@ source <(/home/admin/_cache.sh get \
   ElectRS \
   BTCRPCexplorer \
   joinmarket \
+  blitzapi \
 )
 
 # PARAMETER 1: forcing view on a given network
@@ -302,6 +303,12 @@ if [ "${lightning}" == "" ] || [ "${lightning}" == "none" ]; then
   LNinfo=""
 fi
 
+webuiinfo=""
+source <(/home/admin/_cache.sh meta ln_${lightning}_${chain}net_recovery_done)
+if [ "${blitzapi}" == "on" ]; then
+ webuiinfo="WEB http://${internet_localip}"
+fi
+
 datetime=$(date -R)
 
 stty sane
@@ -318,8 +325,8 @@ ${color_yellow}        ,/     ${color_yellow}%s
 ${color_yellow}      ,'/      ${color_gray}%s
 ${color_yellow}    ,' /       ${color_gray}%s, temp %s°C %s°F
 ${color_yellow}  ,'  /_____   ${color_gray}Free Mem ${color_ram}${ram} ${color_gray} HDDuse ${color_hdd}%s${color_gray}
-${color_yellow},'_____    ,'  ${color_gray}SSH admin@${color_green}${internet_localip}${color_gray} d${internet_rx} u${internet_tx}
-${color_yellow}      /  ,'    ${color_gray}
+${color_yellow},'_____    ,'  ${color_gray}SSH admin@${internet_localip}${color_gray} d${internet_rx} u${internet_tx}
+${color_yellow}      /  ,'    ${color_gray}${webuiinfo} 
 ${color_yellow}     / ,'      ${color_gray}${network} ${color_green}${networkVersion}${color_gray}${chain}net ${networkConnectionsInfo}
 ${color_yellow}    /,'        ${color_gray}${blockInfo} %s
 ${color_yellow}   /'          ${color_gray}
