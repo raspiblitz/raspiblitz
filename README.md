@@ -5,7 +5,7 @@ _Build your own Lightning & Bitcoin Fullnode on a RaspberryPi with a nice Displa
 
 `Version 1.8.0 with lnd 0.15.0 & c-lightning 0.11.2 and bitcoin 23.0.0`
 
-![RaspiBlitz](pictures/raspiblitz.webp)
+![RaspiBlitz](pictures/raspiblitz.jpg)
 
 **The RaspiBlitz is a do-it-yourself Lightning Node (LND and/or c-lightning) running together with a Bitcoin-Fullnode on a RaspberryPi (1TB SSD) and a nice display for easy setup & monitoring.**
 
