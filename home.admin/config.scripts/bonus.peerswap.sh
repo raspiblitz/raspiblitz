@@ -95,7 +95,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       # symlink
       sudo -u bitcoin ln -s /home/bitcoin/cl-plugins-available/peerswap-plugin /home/bitcoin/${netprefix}cl-plugins-enabled/
 
-      # # General
+
+      # log-level=debug:plugin-peerswap-plugin
+      #
       # peerswap-db-path ## Path to swap db file (default: $HOME/.lightning/<network>/peerswap/swap)
       # peerswap-policy-path ## Path to policy file (default: $HOME/.lightning/<network>/peerswap/policy.conf)
       #
@@ -110,6 +112,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       RPC_USER=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcuser | cut -c 9-)
       PASSWORD_B=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcpassword | cut -c 13-)
       # blitz.conf.sh set [key] [value] [?conffile] <noquotes>
+      /home/admin/config.scripts/blitz.conf.sh set "log-level" "debug:plugin-peerswap-plugin" "${CLCONF}" noquotes
       /home/admin/config.scripts/blitz.conf.sh set "peerswap-bitcoin-rpchost" "localhost" "${CLCONF}" noquotes
       /home/admin/config.scripts/blitz.conf.sh set "peerswap-bitcoin-rpcport" "${portprefix}8332" "${CLCONF}" noquotes
       /home/admin/config.scripts/blitz.conf.sh set "peerswap-bitcoin-rpcuser" "${RPC_USER}" "${CLCONF}" noquotes
