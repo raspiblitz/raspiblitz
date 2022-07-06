@@ -306,7 +306,7 @@ fi
 webuiinfo=""
 source <(/home/admin/_cache.sh meta ln_${lightning}_${chain}net_recovery_done)
 if [ "${blitzapi}" == "on" ]; then
- webuiinfo="WEB http://${internet_localip}"
+ webuiinfo="Web Admin --> http://${internet_localip}"
 fi
 
 datetime=$(date -R)
