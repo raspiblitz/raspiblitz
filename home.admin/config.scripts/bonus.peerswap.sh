@@ -113,10 +113,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       PASSWORD_B=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcpassword | cut -c 13-)
       # blitz.conf.sh set [key] [value] [?conffile] <noquotes>
       /home/admin/config.scripts/blitz.conf.sh set "log-level" "debug:plugin-peerswap-plugin" "${CLCONF}" noquotes
-      /home/admin/config.scripts/blitz.conf.sh set "peerswap-bitcoin-rpchost" "localhost" "${CLCONF}" noquotes
-      /home/admin/config.scripts/blitz.conf.sh set "peerswap-bitcoin-rpcport" "${portprefix}8332" "${CLCONF}" noquotes
-      /home/admin/config.scripts/blitz.conf.sh set "peerswap-bitcoin-rpcuser" "${RPC_USER}" "${CLCONF}" noquotes
-      /home/admin/config.scripts/blitz.conf.sh set "peerswap-bitcoin-rpcpassword" "${PASSWORD_B}" "${CLCONF}" noquotes
+      /home/admin/config.scripts/blitz.conf.sh set "bitcoin-rpcconnect" "localhost" "${CLCONF}" noquotes
+      /home/admin/config.scripts/blitz.conf.sh set "bitcoin-rpcport" "${portprefix}8332" "${CLCONF}" noquotes
+      /home/admin/config.scripts/blitz.conf.sh set "bitcoin-rpcuser" "${RPC_USER}" "${CLCONF}" noquotes
+      /home/admin/config.scripts/blitz.conf.sh set "bitcoin-rpcpassword" "${PASSWORD_B}" "${CLCONF}" noquotes
       /home/admin/config.scripts/blitz.conf.sh set "peerswap-elementsd-enabled" "false" "${CLCONF}" noquotes
 
       sudo -u bitcoin mkdir /home/bitcoin/.lightning/${CLNETWORK}/peerswap/
