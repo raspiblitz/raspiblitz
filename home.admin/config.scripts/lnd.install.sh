@@ -433,6 +433,18 @@ alias ${netprefix}lndconf=\"sudo nano /home/bitcoin/.lnd/${netprefix}lnd.conf\"\
       fi
   fi
 
+  if [ "${CHAIN}" != "mainnet" ]; then
+    passwordFile="/mnt/hdd/lnd/data/chain/${network}/${CHAIN}/password.info"
+    # create passwordfile
+    if ! sudo ls ${passwordFile} 2>/dev/null; then
+      echo "raspiblitz" | sudo -u bitcoin tee ${passwordFile} 1>/dev/null
+    fi
+    # add autounlock to lnd.conf
+    if ! grep "wallet-unlock-password-file=${passwordFile}" < ${lndConfFile}; then
+      sudo sed -i "/^\[Application Options\]$/awallet-unlock-password-file=${passwordFile}" ${lndConfFile}
+    fi
+  fi
+
   echo
   echo "# The installed LND version is: $(sudo -u bitcoin /usr/local/bin/lnd --version)"
   echo
