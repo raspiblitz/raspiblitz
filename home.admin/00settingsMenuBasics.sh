@@ -448,7 +448,16 @@ if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${clboss}" != "${choice}" ] && [ "${clNode}" == "on" ]; then
   echo "CLBOSS Setting changed .."
   anychange=1
-  sudo /home/admin/config.scripts/cl-plugin.clboss.sh ${choice}
+  if [ ${choice} = on ]; then
+    if /home/admin/config.scripts/cl-plugin.clboss.sh info; then
+      sudo /home/admin/config.scripts/cl-plugin.clboss.sh on
+    else
+      echo "CLBOSS install was cancelled."
+      sleep 2
+    fi
+  else
+    sudo /home/admin/config.scripts/cl-plugin.clboss.sh off
+  fi
   needsReboot=0
 else
   echo "CLBOSS Setting unchanged."

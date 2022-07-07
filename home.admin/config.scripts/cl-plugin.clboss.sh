@@ -7,16 +7,39 @@ CLBOSSVERSION="0.13A"
 # command info
 if [ $# -lt 1 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ];then
   echo
-  echo "Install or remove the CLBOSS C-lightning plugin"
+  echo "Install or remove the CLBOSS Core Lightning plugin"
   echo "version: v${CLBOSSVERSION}"
   echo "Usage:"
   echo "cl-plugin.clboss.sh [on|off] [testnet|mainnet|signet]"
+  echo "cl-plugin.clboss.sh [info]"
   echo
   exit 1
 fi
 
 # source <(/home/admin/config.scripts/network.aliases.sh getvars cl <mainnet|testnet|signet>)
 source <(/home/admin/config.scripts/network.aliases.sh getvars cl $2)
+
+if [ "$1" = info ]; then
+	whiptail --title " CLBOSS WARNING " \
+    --yes-button "Install" \
+		--no-button "Cancel" \
+		--yesno "
+The goal of CLBOSS is to make the node able to pay and receive payments
+on the lightning network reliably without needing active management.
+It is not a tool to run a profitable lightning node and it can lose some sats on fees.
+
+CLBOSS does the following automatically:
+- Open channels to other, useful nodes when fees are low and there are onchain funds
+- Acquire incoming capacity via boltz.exchange swaps (these funds return onchain)
+- Rebalance open channels by self-payment (including JIT rebalancer)
+- Set forwarding fees so that they're competitive to other nodes
+
+Links with more info:
+https://github.com/rootzoll/raspiblitz/blob/dev/FAQ.cl.md#clboss
+https://github.com/ZmnSCPxj/clboss#operating
+" 0 0
+fi
+
 
 if [ "$1" = on ];then
 
