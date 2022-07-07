@@ -441,7 +441,13 @@ alias ${netprefix}lndconf=\"sudo nano /home/bitcoin/.lnd/${netprefix}lnd.conf\"\
     fi
     # add autounlock to lnd.conf
     if ! grep "wallet-unlock-password-file=${passwordFile}" < ${lndConfFile}; then
-      sudo sed -i "/^\[Application Options\]$/awallet-unlock-password-file=${passwordFile}" ${lndConfFile}
+      if ! grep "^\[Application Options\]" < ${lndConfFile}; then
+        # add under header
+        sudo sed -i "/^\[Application Options\]$/awallet-unlock-password-file=${passwordFile}" ${lndConfFile}
+      else
+        # just append if no headers used
+        echo "wallet-unlock-password-file=${passwordFile}" |  sudo -u bitcoin tee ${lndConfFile}
+      fi
     fi
   fi
 
