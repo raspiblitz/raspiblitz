@@ -442,7 +442,7 @@ alias ${netprefix}lndconf=\"sudo nano /home/bitcoin/.lnd/${netprefix}lnd.conf\"\
       echo "raspiblitz" | sudo -u bitcoin tee ${passwordFile} 1>/dev/null
     fi
     # add autounlock to lnd.conf
-    if ! grep "wallet-unlock-password-file=${passwordFile}" < ${lndConfFile}; then
+    if ! grep "^wallet-unlock-password-file=${passwordFile}" < ${lndConfFile}; then
       if grep "^\[Application Options\]" < ${lndConfFile} &>/dev/null; then
         # add under header
         sudo sed -i "/^\[Application Options\]$/awallet-unlock-password-file=${passwordFile}" ${lndConfFile}
