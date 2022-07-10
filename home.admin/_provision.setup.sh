@@ -313,7 +313,7 @@ if [ "${lightning}" == "lnd" ]; then
   done
 
   # now sync macaroons & TLS to other users
-  /home/admin/config.scripts/lnd.credentials.sh sync >> ${logFile}
+  /home/admin/config.scripts/lnd.credentials.sh sync "${chain:-main}net" >> ${logFile}
 
   # make a final lnd check
   source <(/home/admin/config.scripts/lnd.check.sh basic-setup)

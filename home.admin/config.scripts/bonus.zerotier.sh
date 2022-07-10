@@ -67,8 +67,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     # adding zero tier IP to LND TLS cert
     # sudo /home/admin/config.scripts/lnd.tlscert.sh ip-add 172.X
-    # sudo /home/admin/config.scripts/lnd.credentials.sh reset tls
-    # sudo /home/admin/config.scripts/lnd.credentials.sh sync
+    # sudo /home/admin/config.scripts/lnd.credentials.sh reset "${chain:-main}net" tls 
+    # sudo /home/admin/config.scripts/lnd.credentials.sh sync "${chain:-main}net"
 
   else
     sudo -u admin sudo apt -y purge zerotier-one 1>&2

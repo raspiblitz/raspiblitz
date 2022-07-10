@@ -135,7 +135,7 @@ syncAndCheckLND() # from _provision.setup.sh
   done
 
   # now sync macaroons & TLS to other users
-  sudo /home/admin/config.scripts/lnd.credentials.sh sync
+  sudo /home/admin/config.scripts/lnd.credentials.sh sync ${chain}net
 
  # make a final lnd check
  source <(/home/admin/config.scripts/lnd.check.sh basic-setup "${chain}net")

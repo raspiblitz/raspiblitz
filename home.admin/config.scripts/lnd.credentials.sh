@@ -3,14 +3,21 @@
 # command info
 if [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "tool to reset or sync credentials (e.g. macaroons)"
-  echo "lnd.credentials.sh [reset|sync|check] [?tls|macaroons|keepold]"
+  echo "lnd.credentials.sh [reset|sync|check] <mainnet|testnet|signet> <?tls|macaroons|keepold>"
   exit 1
 fi
 
 # load data from config
 source /mnt/hdd/raspiblitz.conf
-# shellcheck disable=SC2154 # gets the ${chain} from the raspiblitz.conf
-source <(/home/admin/config.scripts/network.aliases.sh getvars lnd "${chain}net")
+
+if [ $# -gt 1 ];  then
+  CHAIN=$2
+  chain=${CHAIN::-3}
+else
+  CHAIN=${chain}net
+fi
+
+source <(/home/admin/config.scripts/network.aliases.sh getvars lnd ${CHAIN})
 
 ###########################
 # FUNCTIONS
@@ -50,25 +57,25 @@ done
 if [ "$1" = "reset" ]; then
 
   clear
-  echo "### lnd.credentials.sh reset"
+  echo "### lnd.credentials.sh reset ${CHAIN}"
 
   # default reset both
   resetTLS=1
   resetMacaroons=1
 
   # optional second paramter to just reset one on them
-  if [ "$2" == "tls" ]; then
+  if [ "$3" == "tls" ]; then
     echo "# just resetting TLS"
     resetTLS=1
     resetMacaroons=0
   fi
-  if [ "$2" == "macaroons" ]; then
+  if [ "$3" == "macaroons" ]; then
     echo "# just resetting macaroons"
     resetTLS=0
     resetMacaroons=1
     keepOldMacaroons=0
   fi
-  if [ "$2" == "keepold" ]; then
+  if [ "$3" == "keepold" ]; then
     echo "# add the missing default macaroons without de-authenticating the old ones"
     resetTLS=0
     resetMacaroons=1
@@ -112,7 +119,7 @@ if [ "$1" = "reset" ]; then
     echo "# OK DONE"
   fi
 
-  /home/admin/config.scripts/lnd.credentials.sh sync
+  /home/admin/config.scripts/lnd.credentials.sh sync "${CHAIN}"
 
 ###########################
 # SYNC
@@ -172,7 +179,7 @@ elif [ "$1" = "sync" ]; then
 elif [ "$1" = "check" ]; then
   check_macaroons "${network}" "${chain}"
   if [ $missing -gt 0 ]; then
-    /home/admin/config.scrips/lnd.credentials.sh reset keepold
+    /home/admin/config.scrips/lnd.credentials.sh reset "${CHAIN}" keepold
   fi
 
 ###########################
