@@ -219,7 +219,7 @@ PrivateDevices=true
 
 [Install]
 WantedBy=multi-user.target
-"   | sudo tee -a /etc/systemd/system/peerswapd.service
+"   | sudo tee /etc/systemd/system/peerswapd.service
       sudo systemctl enable peerswapd
       echo "# OK - the peerswap service is now enabled"
       source <(/home/admin/_cache.sh get state)
