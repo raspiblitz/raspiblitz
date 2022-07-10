@@ -899,8 +899,8 @@ fi
 # make sure users have latest credentials (if lnd is on)
 if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
   echo "running LND users credentials update" >> $logFile
-  /home/admin/config.scripts/lnd.credentials.sh sync >> $logFile
-else 
+  /home/admin/config.scripts/lnd.credentials.sh sync "${chain:-main}net" >> $logFile
+else
   echo "skipping LND credentials sync" >> $logFile
 fi
 
