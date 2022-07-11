@@ -22,7 +22,7 @@ if [ "$1" = on ]; then
 
   /home/admin/config.scripts/blitz.conf.sh set rpcworkqueue 512 /mnt/hdd/bitcoin/bitcoin.conf noquotes
   /home/admin/config.scripts/blitz.conf.sh set rpcthreads 128 /mnt/hdd/bitcoin/bitcoin.conf noquotes
-  /home/admin/config.scripts/blitz.conf.sh set zmqpubhashblock 'tcp://0.0.0.0:8433' /mnt/hdd/bitcoin/bitcoin.conf noquotes
+  /home/admin/config.scripts/blitz.conf.sh set 'main.zmqpubhashblock' 'tcp://0.0.0.0:8433' /mnt/hdd/bitcoin/bitcoin.conf noquotes
 
   source <(/home/admin/_cache.sh get state)
   if [ "${state}" == "ready" ]; then
