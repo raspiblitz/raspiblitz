@@ -5,13 +5,14 @@ pinnedVersion="7b78ebc48869f176a18dc5b36d7ed5392e0552e4"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
- echo "Config script to switch the PeerSwap Service on,off or update."
- echo "Can run with CLN and LND parallel, but only on one network each."
- echo "Usage:"
- echo "bonus.peerswap.sh [on] <lnd|cl> <mainnet|testnet|signet>"
- echo "bonus.peerswap.sh [menu|update]"
- echo "bonus.peerswap.sh [off] <purge>"
- exit 1
+  echo "Config script to switch the PeerSwap Service on,off or update."
+  echo "Can run with CLN and LND parallel, but only on one network each."
+  echo "Usage:"
+  echo "bonus.peerswap.sh on <lnd|cl> <mainnet|testnet|signet>"
+  echo "bonus.peerswap.sh menu <lnd|cl> <mainnet|testnet|signet>"
+  echo "bonus.peerswap.sh update <lnd|cl> <mainnet|testnet|signet> <testPR> <PRnumber>"
+  echo "bonus.peerswap.sh off <purge>"
+  exit 1
 fi
 
 echo
@@ -116,7 +117,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       PASSWORD_B=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcpassword | cut -c 13-)
       # blitz.conf.sh set [key] [value] [?conffile] <noquotes>
       /home/admin/config.scripts/blitz.conf.sh set "log-level" "debug:plugin-peerswap-plugin" "${CLCONF}" noquotes
-      /home/admin/config.scripts/blitz.conf.sh set "bitcoin-rpcconnect" "localhost" "${CLCONF}" noquotes
+      /home/admin/config.scripts/blitz.conf.sh set "bitcoin-rpcconnect" "127.0.0.1" "${CLCONF}" noquotes
       /home/admin/config.scripts/blitz.conf.sh set "bitcoin-rpcport" "${portprefix}8332" "${CLCONF}" noquotes
       /home/admin/config.scripts/blitz.conf.sh set "bitcoin-rpcuser" "${RPC_USER}" "${CLCONF}" noquotes
       /home/admin/config.scripts/blitz.conf.sh set "bitcoin-rpcpassword" "${PASSWORD_B}" "${CLCONF}" noquotes
@@ -316,6 +317,13 @@ if [ "$1" = "update" ]; then
   cd /home/peerswap || exit 1
   sudo -u peerswap git clone https://github.com/ElementsProject/peerswap.git
   cd /home/peerswap/peerswap || exit 1
+  if [ "$4" = "testPR" ]; then
+    PRnumber=$5 || (echo "# no PRnumber was provided"; exit 1)
+    echo "# Using the PR:"
+    echo "# https://github.com/ElementsProject/peerswap/pull/$PRnumber"
+    sudo -u peerswap git fetch origin pull/$PRnumber/head:pr$PRnumber || exit 1
+    sudo -u peerswap git checkout pr$PRnumber || exit 1
+  fi
 
   if [ "${LNTYPE}" = "cl" ]; then
     # build
