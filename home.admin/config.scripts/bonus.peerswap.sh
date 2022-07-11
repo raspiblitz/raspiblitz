@@ -62,6 +62,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   isPlugin=$(sudo ls /home/bitcoin/${netprefix}cl-plugins-enabled/peerswap-plugin | grep -c peerswap-plugin)
   if [ ${isInstalled} -eq 0 ] || [ ${isPlugin} -eq 0 ]; then
 
+  function getSource() {
     # install Go
     /home/admin/config.scripts/bonus.go.sh on
 
@@ -81,10 +82,12 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     sudo -u peerswap /home/admin/config.scripts/blitz.git-verify.sh \
      "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
+  }
 
     if [ ${LNTYPE} = cl ]; then
       # https://github.com/ElementsProject/peerswap/blob/master/docs/setup_cln.md
       if [ ! -f /home/bitcoin/cl-plugins-available/peerswap-plugin ]; then
+        getSource
         # build
         sudo -u peerswap bash -c 'PATH=/usr/local/go/bin/:$PATH; make cln-release'|| exit 1
         # install
@@ -126,6 +129,14 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
         echo "accept_all_peers=true" | sudo -u bitcoin tee /home/bitcoin/.lightning/${CLNETWORK}/peerswap/policy.conf
       fi
 
+      source <(/home/admin/_cache.sh get state)
+      if [ "${state}" == "ready" ]; then
+        echo "# OK - peerswapd-plugin is enabled, system is on ready so restarting ${netprefix}lightningd"
+        sudo systemctl restart ${netprefix}lightningd
+      else
+        echo "# OK - peerswapd-plugin is enabled, but needs reboot or manual starting: sudo systemctl start ${netprefix}lightningd"
+      fi
+
       # setting value in raspiblitz.conf
       /home/admin/config.scripts/blitz.conf.sh set peerswapcln "on"
 
@@ -134,7 +145,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     elif [ ${LNTYPE} = lnd ]; then
       # https://github.com/ElementsProject/peerswap/blob/master/docs/setup_lnd.md
-
+      getSource
       echo "# persist settings in app-data"
       # move old data if present
       sudo mv /home/peerswap/.peerswap /mnt/hdd/app-data/ 2>/dev/null
@@ -261,7 +272,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     /home/admin/config.scripts/blitz.conf.sh set peerswapcln "off"
     # remove symlink
     sudo rm /home/bitcoin/${netprefix}cl-plugins-enabled/peerswap-plugin
-    sed -i "/^peerswap/d" ${CLCONF}
+    sudo sed -i "/^peerswap/d" ${CLCONF}
 
   elif [ "${LNTYPE}" = "lnd" ]; then
     /home/admin/config.scripts/blitz.conf.sh set peerswaplnd "off"
