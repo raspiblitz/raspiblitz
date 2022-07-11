@@ -145,8 +145,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       exit 0
 
     elif [ ${LNTYPE} = lnd ]; then
-      # https://github.com/ElementsProject/peerswap/blob/master/docs/setup_lnd.md
-      getSource
       echo "# persist settings in app-data"
       # move old data if present
       sudo mv /home/peerswap/.peerswap /mnt/hdd/app-data/ 2>/dev/null
@@ -158,6 +156,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       sudo chown peerswap:peerswap -R /mnt/hdd/app-data/.peerswap
 
       if [ ! -f /usr/local/bin/peerswapd ]; then
+        # https://github.com/ElementsProject/peerswap/blob/master/docs/setup_lnd.md
+        getSource
         # build
         sudo -u peerswap bash -c 'PATH=/usr/local/go/bin/:$PATH; make lnd-release'|| exit 1
         # install
@@ -293,15 +293,21 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # only if 'purge' is an additional parameter (other instances/services might need this)
   if [ "$(echo "$@" | grep -c purge)" -gt 0 ];then
     # cl
+    echo "# Removing the binaries"
     sudo rm /home/bitcoin/cl-plugins-available/peerswap-plugin
-    sudo rm /home/bitcoin/.lightning/${CLNETWORK}/peerswap/policy.conf
+    echo "# Delete swaps data"
     sudo rm /home/bitcoin/.lightning/${CLNETWORK}/peerswap/swap
+    echo "# Delete policy.conf"
+    sudo rm /home/bitcoin/.lightning/${CLNETWORK}/peerswap/policy.conf
+    echo "# Delete all peerswap data"
     sudo rm -rf /home/bitcoin/.lightning/${CLNETWORK}/peerswap
     # lnd
     echo "# Removing the binaries"
     echo "# Delete user and home directory"
     sudo userdel -rf peerswap
-    echo "# Delete all configs"
+    echo "# Delete swaps data"
+    sudo rm /mnt/hdd/app-data/.peerswap/swaps
+    echo "# Delete all peerswap data"
     sudo rm -rf /mnt/hdd/app-data/.peerswap
   fi
   exit 0
@@ -344,7 +350,11 @@ if [ "$1" = "update" ]; then
     sudo systemctl start peerswapd
   fi
 
-  echo "# Updated to the latest in https://github.com/ElementsProject/peerswap/commits/master"
+  if [ "$4" = "testPR" ]; then
+    echo "# Updated to the latest in https://github.com/ElementsProject/peerswap/pull/$PRnumber"
+  else
+    echo "# Updated to the latest in https://github.com/ElementsProject/peerswap/commits/master"
+  fi
   echo
   exit 0
 fi
