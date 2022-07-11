@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # https://github.com/ElementsProject/peerswap/commits/master
-pinnedVersion="baf6e4c38d16dcd922f94e777bcd892db5b0bc5f"
+pinnedVersion="7b78ebc48869f176a18dc5b36d7ed5392e0552e4"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
