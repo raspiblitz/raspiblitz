@@ -64,12 +64,12 @@ case $CHOICE in
     read key
     exit 0;;
   RESET)
-    sudo /home/admin/config.scripts/lnd.credentials.sh reset
-    sudo /home/admin/config.scripts/lnd.credentials.sh sync
+    sudo /home/admin/config.scripts/lnd.credentials.sh reset "${chain:-main}net"
+    sudo /home/admin/config.scripts/lnd.credentials.sh sync "${chain:-main}net"
     sudo /home/admin/config.scripts/blitz.shutdown.sh reboot
     exit 0;;
   SYNC)
-    sudo /home/admin/config.scripts/lnd.credentials.sh sync
+    sudo /home/admin/config.scripts/lnd.credentials.sh sync "${chain:-main}net"
     echo "Press ENTER to return to main menu."
     read key
     exit 0;;
@@ -176,10 +176,10 @@ HiddenServicePort 8333 127.0.0.1:8333" | sudo tee -a /etc/tor/torrc
       # have this to signal that selection went wrong
       BITCOINRPCPORT=0
     fi
-    echo "# Running on ${chain}net"
+    echo "# Running on ${chain:-main}net"
     echo
     allowIPrange=$(grep -c "rpcallowip=$localIPrange" <  /mnt/hdd/${network}/${network}.conf)
-    bindIP=$(grep -c "${chain}.rpcbind=$localIP" <  /mnt/hdd/${network}/${network}.conf)
+    bindIP=$(grep -c "${chain:-main}.rpcbind=$localIP" <  /mnt/hdd/${network}/${network}.conf)
     rpcTorService=$(grep -c "HiddenServicePort ${BITCOINRPCPORT} 127.0.0.1:${BITCOINRPCPORT}"  < /etc/tor/torrc)
     TorRPCaddress=$(sudo cat /mnt/hdd/tor/bitcoin${BITCOINRPCPORT}/hostname)
 

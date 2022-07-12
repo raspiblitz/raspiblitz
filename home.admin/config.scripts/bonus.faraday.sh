@@ -184,7 +184,7 @@ if [ "${mode}" = "on" ] || [ "${mode}" = "1" ]; then
   # create symlink
   sudo ln -s /mnt/hdd/app-data/lnd/ /home/faraday/.lnd
   # sync all macaroons and unix groups for access
-  /home/admin/config.scripts/lnd.credentials.sh sync
+  /home/admin/config.scripts/lnd.credentials.sh sync "${chain:-main}net"
   # macaroons will be checked after install
   # add user to group with admin access to lnd
   sudo /usr/sbin/usermod --append --groups lndadmin faraday

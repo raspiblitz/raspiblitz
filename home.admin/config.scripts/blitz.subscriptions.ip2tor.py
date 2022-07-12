@@ -810,8 +810,8 @@ Message: {1}
     # if LND REST or LND GRPC service ... add bridge IP to TLS
     if blitzServiceName == SERVICE_LND_REST_API or blitzServiceName == SERVICE_LND_GRPC_API:
         os.system("sudo /home/admin/config.scripts/lnd.tlscert.sh ip-add {0}".format(subscription['ip']))
-        os.system("sudo /home/admin/config.scripts/lnd.credentials.sh reset tls")
-        os.system("sudo /home/admin/config.scripts/lnd.credentials.sh sync")
+        os.system("sudo /home/admin/config.scripts/lnd.credentials.sh reset mainnet tls")
+        os.system("sudo /home/admin/config.scripts/lnd.credentials.sh sync mainnet")
 
     # warn user if not delivered as advertised
     if subscription['contract_breached']:
