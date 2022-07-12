@@ -130,6 +130,14 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
         echo "accept_all_peers=true" | sudo -u bitcoin tee /home/bitcoin/.lightning/${CLNETWORK}/peerswap/policy.conf
       fi
 
+      # wumbo
+      if grep "^large-channels" < ${CLCONF} || grep "^wumbo" < ${CLCONF} &>/dev/null; then
+        echo "# large-channels are configured in ${CLCONF}"
+      else
+        echo "large-channels" | sudo -u bitcoin tee -a ${CLCONF}
+        echo "# Changed ${CLCONF} to accept large-channels"
+      fi
+
       source <(/home/admin/_cache.sh get state)
       if [ "${state}" == "ready" ]; then
         echo "# OK - peerswapd-plugin is enabled, system is on ready so restarting ${netprefix}lightningd"
@@ -188,6 +196,25 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       sudo /usr/sbin/usermod --append --groups lndsigner peerswap
       sudo /usr/sbin/usermod --append --groups lndwalletkit peerswap
       sudo /usr/sbin/usermod --append --groups lndrouter peerswap
+
+      echo "# Enable wumbo" # not restarting for it yet
+      if ! grep "^protocol.wumbo-channels=true" < ${lndConfFile} &>/dev/null; then
+        # are headers used ?
+        if grep "^\[Application Options\]" < ${lndConfFile} &>/dev/null; then
+          # check header
+          if grep "^\[protocol\]" < ${lndConfFile} &>/dev/null; then
+            # add under header
+            sudo sed -i "/^\[protocol\]$/aprotocol.wumbo-channels=true" ${lndConfFile}
+          else
+            # append with header
+            echo "[protocol]" | sudo -u bitcoin tee ${lndConfFile}
+            echo "protocol.wumbo-channels=true" | sudo -u bitcoin tee ${lndConfFile}
+          fi
+        else
+          # just append if no headers used
+          echo "protocol.wumbo-channels=true" | sudo -u bitcoin tee ${lndConfFile}
+        fi
+      fi
 
       echo "\
 # PeerSwap config for ${LNTYPE} on ${CHAIN}
