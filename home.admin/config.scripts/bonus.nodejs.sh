@@ -3,11 +3,11 @@
 # consider installing with apt when updated next
 # https://github.com/nodesource/distributions/blob/master/README.md#installation-instructions
 
-VERSION="v16.10.0"
+VERSION="v18.5.0"
 # get checksums from -> https://nodejs.org/dist/vx.y.z/SHASUMS256.txt (tar.xs files)
-CHECKSUM_linux_arm64="a9b477ea5c376729d59b39ecbb9bc5597b792a00ec11afbdf1e502b9b2557fb2"
-CHECKSUM_linux_armv7l="b52d3be99a05a4975ce492f4e010274f66ff6449824accd57a87fd29ab5d054a"
-CHECKSUM_linux_x64="00c4de617038fe7bd60efd9303b83abe5a5df830a9221687e20408404e307c4e"
+CHECKSUM_linux_arm64="cb16406a059882928de74359c20eb1daa272efcb8160495ea02c9a162f3ce33c"
+CHECKSUM_linux_armv7l="ed31d680a918437e4ca0b9137af03d96b0b984048eac456f9611fe110df9eaf8"
+CHECKSUM_linux_x64="3b3a8775397c8a7c7c2975801d15e436c628811cbe7344a0cd218ae0d3c3f368"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
