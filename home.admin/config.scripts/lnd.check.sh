@@ -61,6 +61,14 @@ if [ "$1" == "prestart" ]; then
     /home/admin/config.scripts/blitz.systemd.sh log lightning STARTED
   fi
 
+  ##### APPLICATION OPTIONS SECTION #####
+
+  # delete autounlock if passwordFile not present
+  passwordFile="/mnt/hdd/lnd/data/chain/${network}/${CHAIN}/password.info"
+  if ! ls ${passwordFile} &>/dev/null; then
+    sed -i "/^wallet-unlock-password-file=/d" ${lndConfFile}
+  fi
+
   ##### BITCOIN OPTIONS SECTION #####
 
   # [bitcoin]
