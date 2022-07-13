@@ -7,7 +7,7 @@ VERSION="v18.5.0"
 # get checksums from -> https://nodejs.org/dist/vx.y.z/SHASUMS256.txt (tar.xs files)
 CHECKSUM_linux_arm64="cb16406a059882928de74359c20eb1daa272efcb8160495ea02c9a162f3ce33c"
 CHECKSUM_linux_armv7l="ed31d680a918437e4ca0b9137af03d96b0b984048eac456f9611fe110df9eaf8"
-CHECKSUM_linux_x64="3b3a8775397c8a7c7c2975801d15e436c628811cbe7344a0cd218ae0d3c3f368"
+CHECKSUM_linux_x64="3a64a0d2f86831d56fbfd9b59f61fe84f639d24772c5eaba0bfac23219a6d74d"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
