@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# !! NOTICE: Pool is now part of the 'bonus.lit.sh' bundle
+# NOTICE: Pool is now part of the 'bonus.lit.sh' bundle
 # this single install script will still be available for now
 # but main focus for the future development should be on LIT
 
@@ -82,7 +82,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     isAARCH64=$(uname -m | grep -c 'aarch64')
     isX86_64=$(uname -m | grep -c 'x86_64')
     if [ ${isARM} -eq 0 ] && [ ${isAARCH64} -eq 0 ] && [ ${isX86_64} -eq 0 ]; then
-      echo "!!! FAIL !!!"
+      echo "# FAIL #"
       echo "Can only build on ARM, aarch64, x86_64 or i386 not on:"
       uname -m
       exit 1
@@ -117,7 +117,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     #wget --no-check-certificate ${PGPpkeys}
     binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
     if [ "${binaryChecksum}" != "${SHA256}" ]; then
-      echo "!!! FAIL !!! Downloaded Pool BINARY not matching SHA256 checksum: ${SHA256}"
+      echo "# FAIL # Downloaded Pool BINARY not matching SHA256 checksum: ${SHA256}"
       exit 1
     fi
 
@@ -127,7 +127,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     | grep "${PGPcheck}" -c)
     if [ ${fingerprint} -lt 1 ]; then
       echo ""
-      echo "!!! BUILD WARNING --> Pool PGP author not as expected"
+      echo "# BUILD WARNING --> Pool PGP author not as expected"
       echo "Should contain PGP: ${PGPcheck}"
       echo "PRESS ENTER to TAKE THE RISK if you think all is OK"
       read key
@@ -141,7 +141,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "correctKey(${correctKey})"
     if [ ${correctKey} -lt 1 ] || [ ${goodSignature} -lt 1 ]; then
       echo ""
-      echo "!!! BUILD FAILED --> PGP verification failed / signature(${goodSignature}) verify(${correctKey})"
+      echo "# BUILD FAILED --> PGP verification failed / signature(${goodSignature}) verify(${correctKey})"
       exit 1
     fi
     ###########
@@ -159,9 +159,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     #
     # sudo -u pool git clone https://github.com/lightninglabs/pool.git || exit 1
     # cd /home/pool/pool
-    # # pin version
+    # pin version
     # sudo -u pool git reset --hard $pinnedVersion
-    # # install to /home/pool/go/bin/
+    # install to /home/pool/go/bin/
     # sudo -u pool /usr/local/go/bin/go install ./... || exit 1
 
     # sync all macaroons and unix groups for access
@@ -272,7 +272,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   exit 0
 fi
 
-# # update
+# update
 # if [ "$1" = "update" ]; then
 #   echo "# Updating Pool "
 #   cd /home/pool/pool

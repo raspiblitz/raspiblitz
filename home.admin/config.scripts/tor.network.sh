@@ -98,7 +98,7 @@ case "$1" in
 
     # make sure the network was set (by sourcing raspiblitz.conf)
     if [ ${#network} -eq 0 ]; then
-      echo "!! FAIL - unknown network due to missing /mnt/hdd/raspiblitz.conf"
+      echo "# FAIL - unknown network due to missing /mnt/hdd/raspiblitz.conf"
       echo "# switching Tor config on for RaspiBlitz services is just possible after basic hdd/ssd setup"
       echo "# but with new 'Tor by default' basic Tor socks will already be available from the start"
       exit 1

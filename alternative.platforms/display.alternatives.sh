@@ -21,7 +21,7 @@ if [ ${isDietPi} -gt 0 ]; then
 fi
 if [ "${baseimage}" = "?" ]; then
   cat /etc/os-release 2>/dev/null
-  echo "!!! FAIL !!!"
+  echo "# FAIL #"
   echo "Base Image cannot be detected or is not supported."
   exit 1
 else

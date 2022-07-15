@@ -55,9 +55,9 @@ elif [ $LNTYPE = lnd ];then
 fi
 if [ ${openChannels} -eq 0 ]; then
   echo 
-  echo "!!!!!!!!!!!!!!!!!!!"
+  echo "#########"
   echo "FAIL - You have NO ESTABLISHED CHANNELS .. open a channel first."
-  echo "!!!!!!!!!!!!!!!!!!!"
+  echo "#########"
   sleep 3
   exit 0
 fi
@@ -109,9 +109,9 @@ error=$(cat ${_error} 2>/dev/null)
 #echo "error(${error})"
 
 if [ ${#error} -gt 0 ]; then
-  echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+  echo "###############"
   echo "FAIL"
-  echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+  echo "###############"
   echo "${error}"
 else
   if [ $LNTYPE = cl ];then

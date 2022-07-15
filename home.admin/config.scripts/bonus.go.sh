@@ -30,7 +30,7 @@ case "$1" in
       printf %s"\n*** Installing Go v${goVersion} for ${goOSversion} \n***"
       wget https://dl.google.com/go/go${goVersion}.linux-${goOSversion}.tar.gz -P ${downloadFolder}
       if [ ! -f "${downloadFolder}/go${goVersion}.linux-${goOSversion}.tar.gz" ]; then
-        printf "!!! FAIL !!! Download failed.\n"
+        printf "# FAIL # Download failed.\n"
         rm -fv go${goVersion}.linux-${goOSversion}.tar.gz*
         exit 1
       fi

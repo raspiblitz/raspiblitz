@@ -212,7 +212,7 @@ cpu="$(uname -m)" && echo "cpu=${cpu}"
 architecture="$(dpkg --print-architecture 2>/dev/null)" && echo "architecture=${architecture}"
 case "${cpu}" in
   arm*|aarch64|x86_64|amd64);;
-  *) echo -e "!!! FAIL !!!\nCan only build on ARM, aarch64, x86_64 not on: cpu=${cpu}"; exit 1;;
+  *) echo -e "# FAIL #\nCan only build on ARM, aarch64, x86_64 not on: cpu=${cpu}"; exit 1;;
 esac
 
 # AUTO-DETECTION: OPERATINGSYSTEM
@@ -234,7 +234,7 @@ if [ $(cat /etc/os-release 2>/dev/null | grep -c 'Debian') -gt 0 ]; then
 elif [ $(cat /etc/os-release 2>/dev/null | grep -c 'Ubuntu') -gt 0 ]; then
   baseimage="ubuntu"
 else
-  echo "\n!!! FAIL: Base Image cannot be detected or is not supported."
+  echo "\n# FAIL: Base Image cannot be detected or is not supported."
   cat /etc/os-release 2>/dev/null
   uname -a
   exit 1
@@ -333,7 +333,7 @@ elif [ -f "/usr/bin/python3.8" ]; then
   sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.8 1
   echo "python calls python3.8"
 else
-  echo "!!! FAIL !!!"
+  echo "# FAIL #"
   echo "There is no tested version of python present"
   exit 1
 fi

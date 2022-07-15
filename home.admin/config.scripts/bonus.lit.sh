@@ -149,7 +149,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     isAARCH64=$(uname -m | grep -c 'aarch64')
     isX86_64=$(uname -m | grep -c 'x86_64')
     if [ ${isARM} -eq 0 ] && [ ${isAARCH64} -eq 0 ] && [ ${isX86_64} -eq 0 ]; then
-      echo "!!! FAIL !!!"
+      echo "# FAIL #"
       echo "Can only build on ARM, aarch64, x86_64 or i386 not on:"
       uname -m
       exit 1
@@ -186,7 +186,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     wget --no-check-certificate ${PGPpkeys}
     binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
     if [ "${binaryChecksum}" != "${SHA256}" ]; then
-      echo "!!! FAIL !!! Downloaded LiT BINARY not matching SHA256 checksum: ${SHA256}"
+      echo "# FAIL # Downloaded LiT BINARY not matching SHA256 checksum: ${SHA256}"
       exit 1
     fi
 
@@ -196,7 +196,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     | grep "${PGPcheck}" -c)
     if [ ${fingerprint} -lt 1 ]; then
       echo ""
-      echo "!!! BUILD WARNING --> LiT PGP author not as expected"
+      echo "# BUILD WARNING --> LiT PGP author not as expected"
       echo "Should contain PGP: ${PGPcheck}"
       echo "PRESS ENTER to TAKE THE RISK if you think all is OK"
       read key
@@ -210,7 +210,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "correctKey(${correctKey})"
     if [ ${correctKey} -lt 1 ] || [ ${goodSignature} -lt 1 ]; then
       echo ""
-      echo "!!! BUILD FAILED --> LND PGP Verify not OK / signature(${goodSignature}) verify(${correctKey})"
+      echo "# BUILD FAILED --> LND PGP Verify not OK / signature(${goodSignature}) verify(${correctKey})"
       exit 1
     fi
     ###########

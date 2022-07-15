@@ -172,12 +172,12 @@ sleep 5
 echo "*** Checking Log Size ***"
 logsMegaByte=$(sudo du -c -m /var/log | grep "total" | awk '{print $1;}')
 if [ ${logsMegaByte} -gt 1000 ]; then
-  echo "WARN !! Logs /var/log in are bigger then 1GB" >> $logFile
+  echo "WARN # Logs /var/log in are bigger then 1GB" >> $logFile
   # dont delete directories - can make services crash
   sudo rm /var/log/*
   sudo service rsyslog restart
   /home/admin/_cache.sh set message "WARNING: /var/log/ >1GB"
-  echo "WARN !! Logs in /var/log in were bigger then 1GB and got emergency delete to prevent fillup." >> $logFile
+  echo "WARN # Logs in /var/log in were bigger then 1GB and got emergency delete to prevent fillup." >> $logFile
   echo "If you see this in the logs please report to the GitHub issues, so LOG config needs to be optimized." >> $logFile
   sleep 10
 else
@@ -259,9 +259,9 @@ if [ "${needsExpansion}" == "1" ] && [ "${fsexpanded}" == "0" ]; then
   systemInitReboot=1
   /home/admin/_cache.sh set message "FSEXPAND"
 elif [ "${tooSmall}" == "1" ]; then
-  echo "!!! FAIL !!!!!!!!!!!!!!!!!!!!" >> $logFile
+  echo "# FAIL #######" >> $logFile
   echo "SDCARD TOO SMALL 16GB minimum" >> $logFile
-  echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" >> $logFile
+  echo "##############" >> $logFile
   /home/admin/_cache.sh set state "sdtoosmall"
   echo "System stopped. Please cut power." >> $logFile
   sleep 6000

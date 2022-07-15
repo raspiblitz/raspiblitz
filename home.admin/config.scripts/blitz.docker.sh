@@ -62,9 +62,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo
   echo "### 2) INSTALL docker compose ###"
 
-  # # add docker compose
+  # add docker compose
   # sudo pip3 install docker-compose
-  # # add bash completion  https://docs.docker.com/compose/completion/
+  # add bash completion  https://docs.docker.com/compose/completion/
   # sudo curl \
   #  -L https://raw.githubusercontent.com/docker/compose/1.29.0/contrib/completion/bash/docker-compose \
   #  -o /etc/bash_completion.d/docker-compose

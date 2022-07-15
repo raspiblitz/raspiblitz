@@ -396,7 +396,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # check binary is was not manipulated (checksum test)
     actualChecksum=$(sha512sum /home/btcpay/${dotNetName} | cut -d " " -f1)
     if [ "${actualChecksum}" != "${dotNetChecksum}" ]; then
-      echo "# !!! FAIL !!! Downloaded ${dotNetName} not matching SHA512 checksum: ${dotNetChecksum}"
+      echo "# FAIL # Downloaded ${dotNetName} not matching SHA512 checksum: ${dotNetChecksum}"
       exit 1
     fi
 
