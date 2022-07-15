@@ -8,7 +8,7 @@ REPO=joinmarket-webui/joinmarket-webui
 APP_DIR=webui
 RASPIBLITZ_INFO=/home/admin/raspiblitz.info
 RASPIBLITZ_CONF=/mnt/hdd/raspiblitz.conf
-WEBUI_VERSION=0.0.3
+WEBUI_VERSION=0.0.9
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
