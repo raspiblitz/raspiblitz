@@ -44,14 +44,18 @@ architecture=$(dpkg --print-architecture)
 
 add_tor_sources(){
   echo -e "\n*** Adding deb.torproject.org keyring ***"
-  if ! curl -s -x socks5h://127.0.0.1:9050 --connect-timeout 10 "${tor_deb_repo_clean}/torproject.org/${tor_deb_repo_pgp_fingerprint}.asc" | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/torproject.gpg >/dev/null; then
-    echo "!!! FAIL: Was not able to import deb.torproject.org key";
+  curl -s -x socks5h://127.0.0.1:9050 --connect-timeout 60 \
+   "${tor_deb_repo_clean}/torproject.org/${tor_deb_repo_pgp_fingerprint}.asc" \
+   | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/torproject.gpg 1>/dev/null
+  if [ -s /etc/apt/trusted.gpg.d/torproject.gpg ]; then
+    echo "- OK key added"
+  else
+    echo "! FAIL: Was not able to import deb.torproject.org key";
     exit 1
   fi
-  echo "- OK key added"
 
   echo -e "\n*** Adding Tor Sources ***"
-  echo "
+  echo "\
 deb [arch=${architecture}] ${tor_deb_repo}/torproject.org ${distribution} main
 deb-src [arch=${architecture}] ${tor_deb_repo}/torproject.org  ${distribution} main
 " | sudo tee /etc/apt/sources.list.d/tor.list
