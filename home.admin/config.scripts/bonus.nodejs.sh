@@ -3,7 +3,7 @@
 # consider installing with apt when updated next
 # https://github.com/nodesource/distributions/blob/master/README.md#installation-instructions
 
-VERSION="v16.4.2"
+VERSION="v16.14.2"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -50,13 +50,13 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "VERSION: ${VERSION}"
     echo "DISTRO: ${DISTRO}"
     echo "CHECKSUM: ${CHECKSUM}"
-    echo ""
+    echo
 
     # download
     cd /home/admin/download || exit 1
-    wget https://nodejs.org/dist/$VERSION/node-$VERSION-$DISTRO.tar.xz
+    wget -O node-$VERSION-$DISTRO.tar.xz https://nodejs.org/dist/$VERSION/node-$VERSION-$DISTRO.tar.xz
     # checksum
-    wget https://nodejs.org/dist/$VERSION/SHASUMS256.txt
+    wget -O SHASUMS256.txt https://nodejs.org/dist/$VERSION/SHASUMS256.txt
     if ! sha256sum -c SHASUMS256.txt --ignore-missing; then
       echo "FAIL: The checksum of node-$VERSION-$DISTRO.tar.xz is not found in the SHASUMS256.txt"
       rm -f node-$VERSION-$DISTRO.tar.xz*
@@ -74,7 +74,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo ln -sf /usr/local/lib/nodejs/node-$VERSION-$DISTRO/bin/npx /usr/bin/npx
     # add to PATH permanently
     sudo bash -c "echo 'PATH=\$PATH:/usr/local/lib/nodejs/node-${VERSION}-${DISTRO}/bin/' >> /etc/profile"
-    echo ""
+    echo
 
     # check if nodeJS was installed
     if node -v; then
