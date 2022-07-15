@@ -3,11 +3,7 @@
 # consider installing with apt when updated next
 # https://github.com/nodesource/distributions/blob/master/README.md#installation-instructions
 
-VERSION="v18.5.0"
-# get checksums from -> https://nodejs.org/dist/vx.y.z/SHASUMS256.txt (tar.xs files)
-CHECKSUM_linux_arm64="cb16406a059882928de74359c20eb1daa272efcb8160495ea02c9a162f3ce33c"
-CHECKSUM_linux_armv7l="ed31d680a918437e4ca0b9137af03d96b0b984048eac456f9611fe110df9eaf8"
-CHECKSUM_linux_x64="3a64a0d2f86831d56fbfd9b59f61fe84f639d24772c5eaba0bfac23219a6d74d"
+VERSION="v16.4.2"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -45,11 +41,9 @@ fi
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # check if nodeJS was installed
-  nodeJSInstalled=$(node -v 2>/dev/null | grep -c "$VERSION")
-  if ! [ ${nodeJSInstalled} -eq 0 ]; then
+  if [ "$(node -v)" = "${VERSION}" ]; then
     echo "nodeJS $VERSION is already installed"
   else
-
     # install latest nodejs
     # https://github.com/nodejs/help/wiki/Installation
     echo "*** Install NodeJS $VERSION-$DISTRO ***"
@@ -59,12 +53,12 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo ""
 
     # download
-    cd /home/admin/download
+    cd /home/admin/download || exit 1
     wget https://nodejs.org/dist/$VERSION/node-$VERSION-$DISTRO.tar.xz
     # checksum
-    isChecksumValid=$(sha256sum node-$VERSION-$DISTRO.tar.xz | grep -c "${CHECKSUM}")
-    if [ ${isChecksumValid} -eq 0 ]; then
-      echo "FAIL: The checksum of node-$VERSION-$DISTRO.tar.xz is NOT ${CHECKSUM}"
+    wget https://nodejs.org/dist/$VERSION/SHASUMS256.txt
+    if ! sha256sum -c SHASUMS256.txt --ignore-missing; then
+      echo "FAIL: The checksum of node-$VERSION-$DISTRO.tar.xz is not found in the SHASUMS256.txt"
       rm -f node-$VERSION-$DISTRO.tar.xz*
       exit 1
     fi
@@ -83,15 +77,15 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo ""
 
     # check if nodeJS was installed
-    nodeJSInstalled=$(node -v | grep -c "v1.")
-    if [ ${nodeJSInstalled} -eq 0 ]; then
+    if node -v; then
+      echo "Installed nodeJS $(node -v)"
+    else
       echo "FAIL - Was not able to install nodeJS"
       echo "ABORT - nodeJs install"
       exit 1
     fi
   fi
 
-  echo "Installed nodeJS $(node -v)"
   exit 0
 fi
 
