@@ -44,21 +44,20 @@ if [ "$1" = connect ];then
   hex_macaroon=$(xxd -plain /home/bitcoin/c-lightning-REST/${CLNETWORK}/certs//access.macaroon | tr -d '\n')
   url="https://${localip}:${portprefix}6100/"
   lndconnect="lndconnect://${toraddress}:443?macaroon=${hex_macaroon}"
+  # c-lightning-rest://http://your_hidden_service.onion:your_port?&macaroon=your_macaroon_file_in_HEX&protocol=http
+  clrestlan="c-lightning-rest://${localip}:${portprefix}6100?&macaroon=${hex_macaroon}&protocol=http"
+  clresttor="c-lightning-rest://${toraddress}:443?&macaroon=${hex_macaroon}&protocol=http"
 
   if [ "$3" == "key-value" ]; then
     echo "toraddress='${toraddress}:443'"
     echo "local='${url}'"
     echo "macaroon='${hex_macaroon}'"
-    echo "connectstring='${lndconnect}'"
+    echo "connectstring='${clresttor}'"
     exit 0
   fi
 
-  #string="${url}?${hex_macaroon}"
-  #sudo /home/admin/config.scripts/blitz.display.sh qr "$string"
-  #clear
-  #echo "connection string (shown as a QRcode on the top and on the LCD):"
-  #echo "$string"
-  #qrencode -t ANSIUTF8 "${string}"
+  # deactivated
+  function showStepByStepQR() {
   clear
   echo
   sudo /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
@@ -92,6 +91,45 @@ if [ "$1" = connect ];then
   read key
   sudo /home/admin/config.scripts/blitz.display.sh hide
   exit 0
+  }
+
+  function showClRestQr() {
+  # c-lightning-rest://http://your_hidden_service.onion:your_port?&macaroon=your_macaroon_file_in_HEX&protocol=http
+  clear
+  echo
+  sudo /home/admin/config.scripts/blitz.display.sh qr "${clresttor}"
+  echo "The string to connect over Tor is shown as a QRcode below and on the LCD"
+  echo "Scan it to Zeus using the c-lightning-REST option"
+  echo
+  echo "c-lightning-REST connection string:"
+  echo "${clresttor}"
+  echo
+  qrencode -t ANSIUTF8 "${clresttor}"
+  echo
+  echo "# Press enter to show the string to connect over LAN"
+  read key
+  sudo /home/admin/config.scripts/blitz.display.sh hide
+  sudo /home/admin/config.scripts/blitz.display.sh qr "${clrestlan}"
+  clear
+  echo
+  echo "The string to connect over the local the network is shown as a QRcode below and on the LCD"
+  echo "Scan it to Zeus using the c-lightning-REST option"
+  echo "This will only work if your node si connected to the same network"
+  echo "To connect reemotely consider using a VPN like ZeroTier or Tailscale"
+  echo
+  echo "c-lightning-REST connection string:"
+  echo "${clrestlan}"
+  echo
+  qrencode -t ANSIUTF8 "${clrestlan}"
+  echo
+  echo "# Press enter to hide the QRcode from the LCD"
+  read key
+  sudo /home/admin/config.scripts/blitz.display.sh hide
+  exit 0
+  }
+
+  showClRestQr
+
 fi
 
 if [ "$1" = on ]; then
