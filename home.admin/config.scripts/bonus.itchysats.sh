@@ -154,7 +154,7 @@ downloadBinary() {
     isAARCH64=$(uname -m | grep -c 'aarch64')
     isX86_64=$(uname -m | grep -c 'x86_64')
     if [ ${isAARCH64} -eq 0 ] && [ ${isX86_64} -eq 0 ] ; then
-        echo "# !!! FAIL !!!"
+        echo "# FAIL #"
         echo "# Can only build on aarch64 or x86_64 not on:"
         uname -m
         exit 1
@@ -171,7 +171,7 @@ downloadBinary() {
     sudo -u ${APPID} wget -N ${GITHUB_REPO}/releases/download/"${VERSION}"/"${archiveName}"
     checkDownload=$(ls "${archiveName}" 2>/dev/null | grep -c "${archiveName}")
     if [ "${checkDownload}" -eq 0 ]; then
-        echo "# !!! FAIL !!!"
+        echo "# FAIL #"
         echo "# Downloading the binary failed"
         exit 1
     fi
@@ -187,7 +187,7 @@ downloadBinary() {
     sudo -u ${APPID} "${ITCHYSATS_BIN_DIR}" --help 1> /dev/null
     exitstatus=$?
     if [ "${exitstatus}" -ne 0 ]; then
-        echo "# !!! FAIL !!!"
+        echo "# FAIL #"
         echo "# install failed"
         exit 1
     fi

@@ -3,7 +3,7 @@
 # "*** LND ***"
 ## based on https://raspibolt.github.io/raspibolt/raspibolt_40_lnd.html#lightning-lnd
 ## see LND releases: https://github.com/lightningnetwork/lnd/releases
-## !!!! If you change here - make sure to also change interims version in lnd.update.sh !!!
+### If you change here - make sure to also change interims version in lnd.update.sh #!
 lndVersion="0.15.0-beta"
 
 # olaoluwa
@@ -105,7 +105,7 @@ if [ "$1" = "install" ] ; then
   fingerprint=$(sudo gpg --show-keys "pgp_keys.asc" 2>/dev/null | grep "${PGPcheck}" -c)
   if [ ${fingerprint} -lt 1 ]; then
     echo ""
-    echo "!!! BUILD WARNING --> LND PGP author not as expected"
+    echo "# BUILD WARNING --> LND PGP author not as expected"
     echo "Should contain PGP: ${PGPcheck}"
     echo "PRESS ENTER to TAKE THE RISK if you think all is OK"
     read key
@@ -119,7 +119,7 @@ if [ "$1" = "install" ] ; then
   echo "correctKey(${correctKey})"
   if [ ${correctKey} -lt 1 ] || [ ${goodSignature} -lt 1 ]; then
     echo
-    echo "!!! BUILD FAILED --> LND PGP Verify not OK / signature(${goodSignature}) verify(${correctKey})"
+    echo "# BUILD FAILED --> LND PGP Verify not OK / signature(${goodSignature}) verify(${correctKey})"
     exit 1
   else
     echo
@@ -163,7 +163,7 @@ if [ "$1" = "install" ] ; then
   echo "Downloaded binary SHA256 checksum: ${binaryChecksum}"
   checksumCorrect=$(echo "${lndSHA256}" | grep -c "${binaryChecksum}")
   if [ "${checksumCorrect}" != "1" ]; then
-    echo "!!! FAIL !!! Downloaded LND BINARY not matching SHA256 checksum in manifest: ${lndSHA256}"
+    echo "# FAIL # Downloaded LND BINARY not matching SHA256 checksum in manifest: ${lndSHA256}"
     rm -v ./${binaryName}
     exit 1
   else
@@ -183,14 +183,14 @@ if [ "$1" = "install" ] ; then
   installed=$(sudo -u admin lnd --version)
   if [ ${#installed} -eq 0 ]; then
     echo
-    echo "!!! BUILD FAILED --> Was not able to install LND"
+    echo "# BUILD FAILED --> Was not able to install LND"
     exit 1
   fi
 
   correctVersion=$(sudo -u admin lnd --version | grep -c "${lndVersion}")
   if [ ${correctVersion} -eq 0 ]; then
     echo ""
-    echo "!!! BUILD FAILED --> installed LND is not version ${lndVersion}"
+    echo "# BUILD FAILED --> installed LND is not version ${lndVersion}"
     sudo -u admin lnd --version
     exit 1
   fi
@@ -422,7 +422,7 @@ alias ${netprefix}lndconf=\"sudo nano /home/bitcoin/.lnd/${netprefix}lnd.conf\"\
       source <(sudo /home/admin/config.scripts/lnd.initwallet.py new ${CHAIN} ${passwordC})
       if [ "${err}" != "" ]; then
         clear
-        echo "# !!! LND ${CHAIN} wallet creation failed"
+        echo "# LND ${CHAIN} wallet creation failed"
         echo "# ${err}"
         echo "# press ENTER to continue"
         read key

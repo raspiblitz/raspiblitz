@@ -93,7 +93,7 @@ if [ "$1" = "install" ]; then
 #  fingerprint=$(gpg "pgp_keys.asc" 2>/dev/null | grep "${PGPpubkeyFingerprint}" -c)
 #  if [ ${fingerprint} -lt 1 ]; then
 #    echo
-#    echo "!!! WARNING --> the PGP fingerprint is not as expected for ${PGPsigner}"
+#    echo "# WARNING --> the PGP fingerprint is not as expected for ${PGPsigner}"
 #    echo "Should contain PGP: ${PGPpubkeyFingerprint}"
 #    echo "PRESS ENTER to TAKE THE RISK if you think all is OK"
 #    read key
@@ -111,7 +111,7 @@ if [ "$1" = "install" ]; then
 #  echo "correctKey(${correctKey})"
 #  if [ ${correctKey} -lt 1 ] || [ ${goodSignature} -lt 1 ]; then
 #    echo
-#    echo "!!! DOWNLOAD FAILED --> PGP verification not OK / signature(${goodSignature}) verify(${correctKey})"
+#    echo "# DOWNLOAD FAILED --> PGP verification not OK / signature(${goodSignature}) verify(${correctKey})"
 #    exit 1
 #  else
 #    echo
@@ -128,7 +128,7 @@ if [ "$1" = "install" ]; then
 #  echo "goodHash(${goodHash})"
 #  if [ ${goodHash} -lt 1 ]; then
 #    echo
-#    echo "!!! BUILD FAILED --> Hash check not OK"
+#    echo "# BUILD FAILED --> Hash check not OK"
 #    exit 1
 #  else
 #    echo
@@ -162,14 +162,14 @@ if [ "$1" = "install" ]; then
   installed=$(sudo -u bitcoin lightning-cli --version)
   if [ ${#installed} -eq 0 ]; then
     echo
-    echo "!!! BUILD FAILED --> Was not able to install Core Lightning"
+    echo "# BUILD FAILED --> Was not able to install Core Lightning"
     exit 1
   fi
 
   correctVersion=$(echo "${installed}" | grep -c "${CLVERSION:1}")
   if [ "${correctVersion}" -eq 0 ]; then
     echo
-    echo "!!! BUILD FAILED --> installed Core Lightning is not version ${CLVERSION}"
+    echo "# BUILD FAILED --> installed Core Lightning is not version ${CLVERSION}"
     sudo -u bitcoin lightning-cli --version
     exit 1
   fi

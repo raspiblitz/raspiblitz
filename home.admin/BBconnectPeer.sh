@@ -137,9 +137,9 @@ if [ ${win} -eq 1 ]; then
   echo
   echo "What's next? --> Open a channel with that node."
 else
-  echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+  echo "###############"
   echo "FAIL"
-  echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+  echo "###############"
   echo "${info}"
 fi
 

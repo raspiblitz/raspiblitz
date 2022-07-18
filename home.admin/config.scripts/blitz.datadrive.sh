@@ -1130,7 +1130,7 @@ if [ "$1" = "raid" ] && [ "$2" = "on" ]; then
   if [ ${usbdevBTRFS} -eq 1 ]; then
     # edge case: already contains BTRFS data
     # TODO: once implemented -> also make sure that dev1 is named "DATASTORE" and if 2nd is other -> format and add as raid
-    >&2 echo "# ERROR: !! NOT IMPLEMENTED YET -> devices seem contain old data"
+    >&2 echo "# ERROR: # NOT IMPLEMENTED YET -> devices seem contain old data"
     >&2 echo "# if you dont care about that data: format on other computer with FAT"
     echo "error='old data on dev'"
     exit 1

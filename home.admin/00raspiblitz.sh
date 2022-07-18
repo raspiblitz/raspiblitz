@@ -226,7 +226,7 @@ do
 
         # output error message
         echo ""
-        echo "!!! FAIL !!! SOMETHING WENT WRONG:"
+        echo "# FAIL # SOMETHING WENT WRONG:"
         echo "${error}"
 
         # check if its possible to give background info on the error
@@ -240,7 +240,7 @@ do
         fi
 
         # basic info on error
-        echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        echo "#################"
         echo "To try upload of channel.backup again:"
         echo "MAINMENU > REPAIR > REPAIR-LND > RETRYSCB"
         echo
