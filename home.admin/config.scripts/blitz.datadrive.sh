@@ -1462,7 +1462,7 @@ if [ "$1" = "link" ]; then
     >&2 echo "# - linking temp into /mnt/hdd"
     rm /mnt/hdd/temp 2>/dev/null
     ln -s /mnt/temp /mnt/hdd/temp
-    chown -R bitcoin:bitcoin /mnt/temp 
+    chown -R bitcoin:bitcoin  
 
     >&2 echo "# - creating snapshots folder"
     mkdir -p /mnt/hdd/snapshots
@@ -1553,10 +1553,10 @@ if [ "$1" = "swap" ]; then
 
     fi
     sed -i "s/^CONF_SWAPSIZE=/#CONF_SWAPSIZE=/g" /etc/dphys-swapfile 
-    sed -i "s/^#CONF_MAXSWAP=.*/CONF_MAXSWAP=4096/g" /etc/dphys-swapfile
+    sed -i "s/^#CONF_MAXSWAP=.*/CONF_MAXSWAP=3072/g" /etc/dphys-swapfile
 
     >&2 echo "# Creating SWAP file .."
-    dd if=/dev/zero of=$externalSwapPath count=4096 bs=1MiB 1>/dev/null
+    dd if=/dev/zero of=$externalSwapPath count=3072 bs=1MiB 1>/dev/null
     chmod 0600 $externalSwapPath 1>/dev/null
 
     >&2 echo "# Activating new SWAP"
