@@ -1462,7 +1462,7 @@ if [ "$1" = "link" ]; then
     >&2 echo "# - linking temp into /mnt/hdd"
     rm /mnt/hdd/temp 2>/dev/null
     ln -s /mnt/temp /mnt/hdd/temp
-    chown -R bitcoin:bitcoin  
+    chown -R bitcoin:bitcoin /mnt/temp
 
     >&2 echo "# - creating snapshots folder"
     mkdir -p /mnt/hdd/snapshots
