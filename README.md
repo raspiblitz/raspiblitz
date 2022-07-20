@@ -255,13 +255,13 @@ _WARNING: This realease is not ready yet! Release Candidates should only be used
 | Philosophy       | Trust                                                                                                                                                                            | Sovereignty                                                       |
 | Difficulty level | Easy                                                                                                                                                                             | Medium                                                            |
 | Pros             | Make Blitz accessible to everyone                                                                                                                                                | You don't need to trust us, build from your own forked repository |
-| Instructions     | [Download 1.8.0rc3 image](https://raspiblitz.fulmo.org/images/raspiblitz-v1.8.0rc3-2022-07-04.img.gz) and [Flash the sd card](README.md#write-the-sd-card-image-to-your-sd-card) | [Build your own sd card image](#build-the-sd-card-image)          |
+| Instructions     | [Download 1.8.0rc4 image](https://raspiblitz.fulmo.org/images/raspiblitz-v1.8.0rc4-2022-07-20.img.gz) and [Flash the sd card](README.md#write-the-sd-card-image-to-your-sd-card) | [Build your own sd card image](#build-the-sd-card-image)          |
 | Verify what?     | [Signature file](#) and [verify the Sig](FAQ.md#how-to-verify-the-sd-card-image-after-download) OR SHA-256 (below)                                                               | All of the code, don't trust, verify                              |
 
 If downloading the maintainer SD card image:
 
 - GPG 64-bit (main): 1C73 060C 7C17 6461 & (sub): AA9D D1B5 CC56 47DA
-- SHA-256: ec0c48252063d8c28f77013adfb9804c2187eaf9942cd20ad70daddd3d4c05f4
+- SHA-256: 29b44d94f8d9b454d65999b59dfe2975b693150ed3d23fb61f6c254e1aca541a
 
 Which verification method should I used: Hash or Signature?
 
