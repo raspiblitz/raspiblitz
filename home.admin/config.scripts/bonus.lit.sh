@@ -217,7 +217,13 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # install #
     ###########
     tar -xzf ${binaryName}
-    sudo install -m 0755 -o root -g root -t /usr/local/bin lightning-terminal-linux-${OSversion}-v${LITVERSION}/*
+    cd lightning-terminal-linux-${OSversion}-v${LITVERSION} || exit 1
+    # do not overwrite lncli
+    sudo install -m 0755 -o root -g root -t /usr/local/bin frcli
+    sudo install -m 0755 -o root -g root -t /usr/local/bin litcli
+    sudo install -m 0755 -o root -g root -t /usr/local/bin litd
+    sudo install -m 0755 -o root -g root -t /usr/local/bin loop
+    sudo install -m 0755 -o root -g root -t /usr/local/bin pool
 
     ###########
     # config  #
