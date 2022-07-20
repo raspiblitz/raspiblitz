@@ -86,6 +86,7 @@ usermod -G bitcoin root
 /home/admin/_cache.sh set system_count_start_lightning "0"
 /home/admin/_cache.sh set system_count_start_tui "0"
 /home/admin/_cache.sh set btc_default_peers "0"
+/home/admin/_cache.sh set btc_default_sync_percentage "0"
 /home/admin/_cache.sh set btc_default_address ""
 /home/admin/_cache.sh set btc_default_port ""
 
