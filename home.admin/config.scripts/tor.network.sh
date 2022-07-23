@@ -197,22 +197,26 @@ EOF
     echo
   ;;
 
-
   update)
-    /home/admin/config.scripts/tor.install.sh update
-    if sudo systemctl is-active lnd ;then
-      echo "# LND will be restarted"
-      sudo systemctl restart lnd
-      sudo systemctl restart tlnd 2>/dev/null
-      sudo systemctl restart slnd 2>/dev/null
-      sleep 10
-      lncli unlock
-    fi
-      if sudo systemctl is-active lightningd; then
-      echo "# CLN will be restarted"
-      sudo systemctl restart lightningd
-      sudo systemctl restart tlightningd 2>/dev/null
-      sudo systemctl restart slightningd 2>/dev/null
+    if /home/admin/config.scripts/tor.install.sh update; then
+      echo "# Tor was updated to $(tor --version)"
+      if systemctl is-active lnd ;then
+        echo "# LND will be restarted"
+        sudo systemctl restart lnd
+        sudo systemctl restart tlnd 2>/dev/null
+        sudo systemctl restart slnd 2>/dev/null
+        sleep 10
+        lncli unlock
+      fi
+      if systemctl is-active lightningd; then
+        echo "# CLN will be restarted"
+        sudo systemctl restart lightningd
+        sudo systemctl restart tlightningd 2>/dev/null
+        sudo systemctl restart slightningd 2>/dev/null
+      fi
+    else
+      echo "# Tor was not updated"
+      tor --version
     fi
   ;;
 
