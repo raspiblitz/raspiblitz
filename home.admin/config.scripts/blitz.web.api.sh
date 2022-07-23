@@ -182,7 +182,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # symlink the CLN data dir for blitzapi
   sudo rm -rf /home/blitzapi/.lightning  # not a symlink.. delete it silently
   # create symlink
-  sudo - u blitzapi ln -s /mnt/hdd/app-data/.lightning /home/blitzapi/
+  sudo -u blitzapi ln -s /mnt/hdd/app-data/.lightning /home/blitzapi/
 
   cd /home/blitzapi || exit 1
   # git clone https://github.com/fusion44/blitz_api.git /home/blitzapi/blitz_api
