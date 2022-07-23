@@ -156,7 +156,7 @@ if [ ${mode} = "lnd-export" ]; then
   sudo chown ${fileowner}:${fileowner} ${downloadPath}/lnd-rescue.tar.gz 1>&2
 
   # delete old backups
-  rm ${downloadPath}/lnd-rescue-*.tar.gz 2>/dev/null 1>/dev/null
+  # rm ${downloadPath}/lnd-rescue-*.tar.gz 2>/dev/null 1>/dev/null
 
   # name with md5 checksum
   md5checksum=$(md5sum ${downloadPath}/lnd-rescue.tar.gz | head -n1 | cut -d " " -f1)

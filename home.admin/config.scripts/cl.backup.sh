@@ -148,7 +148,7 @@ if [ ${mode} = "cl-export" ]; then
   sudo chown ${fileowner}:${fileowner} ${downloadPath}/cl-rescue.tar.gz 1>&2
 
   # delete old backups
-  rm ${downloadPath}/cl-rescue-*.tar.gz 2>/dev/null 1>/dev/null
+  # rm ${downloadPath}/cl-rescue-*.tar.gz 2>/dev/null 1>/dev/null
 
   # name with md5 checksum
   md5checksum=$(md5sum ${downloadPath}/cl-rescue.tar.gz | head -n1 | cut -d " " -f1)
