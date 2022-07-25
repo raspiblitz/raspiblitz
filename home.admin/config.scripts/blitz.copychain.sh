@@ -214,7 +214,7 @@ if [ "$1" = "target" ]; then
     anyDataAtAll=1
   fi
   if [ ${count} -lt 300 ]; then
-    echo "FAIL: transfer seems invalid - less then 300 .dat files (${count})"
+    echo "FAIL: transfer seems invalid - less than 300 .dat files (${count})"
     quickCheckOK=0
   fi
   count=$(sudo find /mnt/hdd/bitcoin/ -iname *.ldb -type f | wc -l)
@@ -223,7 +223,7 @@ if [ "$1" = "target" ]; then
     anyDataAtAll=1
   fi
   if [ ${count} -lt 700 ]; then
-    echo "FAIL: transfer seems invalid - less then 700 .ldb files (${count})"
+    echo "FAIL: transfer seems invalid - less than 700 .ldb files (${count})"
     quickCheckOK=0
   fi
 
