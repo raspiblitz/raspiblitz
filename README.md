@@ -767,7 +767,7 @@ If there is a public IP change on your router LND restarts automatically, and wi
 See [below on this README](README.md#backup-for-on-chain---channel-funds) for your Backup options when it comes to securing your funds against accidental loss.
 Storing the encrypted Static Channel Backup file to your Nextcloud account is an easy and secure way to do this.
 
-Nextcloud is an open-source project to host your own files: <https://en.wikipedia.org/wiki/Nextcloud> - in its basics its an open DropBox replacement ... but can do much much more.
+Nextcloud is an open-source project to host your own files: <https://en.wikipedia.org/wiki/Nextcloud> - in its basics it's an open DropBox replacement... but can do much much more.
 You can run it yourself or use a hosted Nextcloud server.
 Find free Nextcloud providers here to sign up: <https://nextcloud.com/signup/>
 
