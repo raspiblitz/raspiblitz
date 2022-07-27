@@ -51,8 +51,8 @@ This can take multiple hours.
     # TOR
     sudo /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
     whiptail --title " BTC-RPC-Explorer " --msgbox "Open in your local web browser:
-http://${localip}:3020\n
-https://${localip}:3021 with Fingerprint:
+http://${localIP}:3020\n
+https://${localIP}:3021 with Fingerprint:
 ${fingerprint}\n
 ${passwordInfo}\n
 Hidden Service address for TOR Browser (QR see LCD):
@@ -63,8 +63,8 @@ ${toraddress}
 
     # IP + Domain
     whiptail --title " BTC-RPC-Explorer " --msgbox "Open in your local web browser:
-http://${localip}:3020\n
-https://${localip}:3021 with Fingerprint:
+http://${localIP}:3020\n
+https://${localIP}:3021 with Fingerprint:
 ${fingerprint}\n
 ${passwordInfo}\n
 Activate TOR to access the web block explorer from outside your local network.
@@ -85,7 +85,7 @@ if [ "$1" = "status" ]; then
     echo "installed=${installed}"
 
     # get network info
-    localip=$(ip addr | grep 'state UP' -A2 | grep -E -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+    localIP=$(ip addr | grep 'state UP' -A2 | grep -E -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
     toraddress=$(sudo cat /mnt/hdd/tor/btc-rpc-explorer/hostname 2>/dev/null)
     fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
 
@@ -95,7 +95,7 @@ if [ "$1" = "status" ]; then
       authMethod="none"
     fi
 
-    echo "localIP='${localip}'"
+    echo "localIP='${localIP}'"
     echo "httpPort='3020'"
     echo "httpsPort='3021'"
     echo "httpsForced='0'"
