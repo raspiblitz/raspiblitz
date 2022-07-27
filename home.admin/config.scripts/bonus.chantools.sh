@@ -5,7 +5,7 @@
 # see https://github.com/guggero/chantools/releases
 
 lndVersion=$(lncli -v | cut -d " " -f 3 | cut -d"." -f2)
-if [ $lndVersion -eq 14 ]; then
+if [ $lndVersion -eq 15 ]; then
   pinnedVersion="0.10.4"
 else
   echo "# LND not installed or a version not tested with chantools"
