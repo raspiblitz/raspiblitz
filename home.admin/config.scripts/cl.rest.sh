@@ -6,7 +6,7 @@ CLRESTVERSION="v0.7.2"
 # help
 if [ $# -eq 0 ]||[ "$1" = "-h" ]||[ "$1" = "--help" ];then
   echo
-  echo "C-lightning-REST install script"
+  echo "Core-Lightning-REST install script"
   echo "The default version is: $CLRESTVERSION"
   echo "mainnet | testnet | signet instances can run parallel"
   echo

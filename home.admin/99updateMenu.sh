@@ -310,27 +310,27 @@ cl()
   # get cl info
   source <(sudo -u admin /home/admin/config.scripts/cl.update.sh info)
 
-  # C-lightning Update Options
+  # Core Lightning Update Options
   OPTIONS=()
   if [ ${clUpdateInstalled} -eq 0 ]; then
-    OPTIONS+=(VERIFIED "Optional C-lightning update to ${clUpdateVersion}")
+    OPTIONS+=(VERIFIED "Optional Core Lightning update to ${clUpdateVersion}")
   fi
-  OPTIONS+=(RECKLESS "Experimental C-lightning update to ${clLatestVersion}")
+  OPTIONS+=(RECKLESS "Experimental Core Lightning update to ${clLatestVersion}")
 
-  CHOICE=$(whiptail --clear --title "Update C-lightning Options" --menu "" 9 60 2 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+  CHOICE=$(whiptail --clear --title "Update Core Lightning Options" --menu "" 9 60 2 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
   clear
   case $CHOICE in
     VERIFIED)
       if [ ${clUpdateInstalled} -eq 1 ]; then
-        whiptail --title "ALREADY INSTALLED" --msgbox "The C-lightning version ${clUpdateVersion} is already installed." 8 30
+        whiptail --title "ALREADY INSTALLED" --msgbox "The Core Lightning version ${clUpdateVersion} is already installed." 8 30
         exit 0
       fi
-      whiptail --title "OPTIONAL C-lightning UPDATE" --yes-button "Cancel" --no-button "Update" --yesno "BEWARE on updating to C-lightning v${clUpdateVersion}:
+      whiptail --title "OPTIONAL Core Lightning UPDATE" --yes-button "Cancel" --no-button "Update" --yesno "BEWARE on updating to Core Lightning v${clUpdateVersion}:
 
 ${clUpdateComment}
 
-Do you really want to update C-lightning now?
+Do you really want to update Core Lightning now?
       " 16 58
       if [ $? -eq 0 ]; then
         echo "# cancel update"
@@ -342,20 +342,20 @@ Do you really want to update C-lightning now?
       if [ ${#error} -gt 0 ]; then
         whiptail --title "ERROR" --msgbox "${error}" 8 30
       else
-        echo "# C-lightning was updated successfully"
+        echo "# Core Lightning was updated successfully"
         exit 0
       fi
       ;;
     RECKLESS)
-      whiptail --title "RECKLESS C-lightning UPDATE to ${clLatestVersion}" --yes-button "Cancel" --no-button "Update" --yesno "Using the 'RECKLESS' C-lightning update will simply
-grab the latest C-lightning release published on the C-lightning GitHub page (also release candidates).
+      whiptail --title "RECKLESS Core Lightning UPDATE to ${clLatestVersion}" --yes-button "Cancel" --no-button "Update" --yesno "Using the 'RECKLESS' Core Lightning update will simply
+grab the latest Core Lightning release published on the Core Lightning GitHub page (also release candidates).
 
 There will be no security checks on signature, etc.
 
 This update mode is only recommended for testing and
 development nodes with no serious funding.
 
-Do you really want to update C-lightning now?
+Do you really want to update Core Lightning now?
       " 16 58
       if [ $? -eq 0 ]; then
         echo "# cancel update"
@@ -366,7 +366,7 @@ Do you really want to update C-lightning now?
       if [ ${#error} -gt 0 ]; then
         whiptail --title "ERROR" --msgbox "${error}" 8 30
       else
-        echo "# C-lightning was updated successfully"
+        echo "# Core Lightning was updated successfully"
         exit 0
       fi
       ;;
@@ -469,7 +469,7 @@ if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
 fi
 
 if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ]; then
-  OPTIONS+=(CL "Interim C-lightning Update Options")
+  OPTIONS+=(CL "Interim Core Lightning Update Options")
 fi
 
 if [ "${bos}" == "on" ]; then

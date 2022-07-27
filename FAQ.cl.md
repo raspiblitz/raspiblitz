@@ -707,7 +707,7 @@ Will need to pay through a peer which supports the onion messages which means yo
 
     + ./cl.install-service.sh -h
 
-    Script to set up or update the C-lightning systemd service
+    Script to set up or update the Core Lightning systemd service
     Usage:
     /home/admin/config.scripts/cl.install-service.sh <mainnet|testnet|signet>
 
@@ -732,7 +732,7 @@ Will need to pay through a peer which supports the onion messages which means yo
     cl.monitor.sh [mainnet|testnet|signet] wallet
     + ./cl-plugin.backup.sh -h
 
-    Install the backup plugin for C-lightning
+    Install the backup plugin for Core Lightning
     Replicates the lightningd.sqlite3 database on the SDcard
 
     Usage:
@@ -762,7 +762,7 @@ Will need to pay through a peer which supports the onion messages which means yo
 
     + ./cl-plugin.feeadjuster.sh -h
 
-    Install the feeadjuster plugin for C-lightning
+    Install the feeadjuster plugin for Core Lightning
     Usage:
     cl-plugin.feeadjuster.sh [on|off] <testnet|mainnet|signet>
 
@@ -776,14 +776,14 @@ Will need to pay through a peer which supports the onion messages which means yo
 
     + ./cl-plugin.sparko.sh -h
 
-    Install, remove, connect or get info about the Sparko plugin for C-lightning
+    Install, remove, connect or get info about the Sparko plugin for Core Lightning
     version: v2.8
     Usage:
     cl-plugin.sparko.sh [on|off|menu|connect] [testnet|mainnet|signet] [norestart]
 
     + ./cl-plugin.standard-python.sh -h
 
-    Install and show the output of the chosen plugin for C-lightning
+    Install and show the output of the chosen plugin for Core Lightning
     Usage:
     cl-plugin.standard-python.sh on [plugin-name] <testnet|mainnet|signet> <persist|runonce>
 
@@ -795,13 +795,13 @@ Will need to pay through a peer which supports the onion messages which means yo
 
     + ./cl-plugin.summary.sh -h
 
-    Install and show the output if the summary plugin for C-lightning
+    Install and show the output if the summary plugin for Core Lightning
     Usage:
     cl-plugin.summary.sh [testnet|mainnet|signet] [runonce]
 
     + ./cl.rest.sh -h
 
-    C-lightning-REST install script
+    Core Lightning-REST install script
     The default version is: v0.7.2
     mainnet | testnet | signet instances can run parallel
 
@@ -810,25 +810,25 @@ Will need to pay through a peer which supports the onion messages which means yo
 
     + ./cl.setname.sh -h
 
-    Config script to set the alias of the C-lightning node
+    Config script to set the alias of the Core Lightning node
     cl.setname.sh [mainnet|testnet|signet] [?newName]
 
     + ./cl.spark.sh -h
 
-    Install, remove or get info about the Spark Wallet for C-lightning
+    Install, remove or get info about the Spark Wallet for Core Lightning
     version: v0.3.1
     Usage:
     cl.spark.sh [on|off|menu] <testnet|mainnet|signet> 
 
     + ./cl.update.sh -h
 
-    Interim optional C-lightning updates between RaspiBlitz releases.
+    Interim optional Core Lightning updates between RaspiBlitz releases.
     cl.update.sh [info|verified|reckless]
     info -> get actual state and possible actions
     verified -> only do recommended updates by RaspiBlitz team
     binary will be checked by signature and checksum
     reckless -> if you just want to update to the latest release
-    published on C-lightning GitHub releases (RC or final) without any
+    published on Core Lightning GitHub releases (RC or final) without any
     testing or security checks.
     ```
 

@@ -22,7 +22,7 @@ echo "run dialog ..."
 OPTIONS=()
 OPTIONS+=(l "LND on $CHAIN" ${tlnd})
 OPTIONS+=(r "RTL for LND $CHAIN" ${trtlWebinterface})
-OPTIONS+=(c "C-lightning on $CHAIN" ${tcl})
+OPTIONS+=(c "Core Lightning on $CHAIN" ${tcl})
 OPTIONS+=(t "RTL for CL on $CHAIN" ${tcrtlWebinterface})
 OPTIONS+=(s "Sparko for CL on $CHAIN" ${tsparko})
 OPTIONS+=(m "Spark Wallet fro CL on $CHAIN" ${tspark})

@@ -108,8 +108,8 @@ case $CHOICE in
   MIGRATION)
     if [ "${cl}" == "on" ] || [ "${cl}" == "1" ] && [ "${clEncryptedHSM}" != "on" ] ; then
       dialog \
-       --title "Encrypt the C-lightning wallet" \
-       --msgbox "\nWill proceed to encrypt and lock the C-lightning wallet to prevent it from starting automatically after the backup" 9 55
+       --title "Encrypt the Core Lightning wallet" \
+       --msgbox "\nWill proceed to encrypt and lock the Core Lightning wallet to prevent it from starting automatically after the backup" 9 55
       sudo /home/admin/config.scripts/cl.hsmtool.sh encrypt mainnet
     fi
     if [ "${clAutoUnlock}" = "on" ]; then

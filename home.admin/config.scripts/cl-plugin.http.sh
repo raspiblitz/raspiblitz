@@ -62,7 +62,7 @@ https://github.com/Fonta1n3/FullyNoded/blob/master/Docs/Lightning.md#connect-ful
   sudo /home/admin/config.scripts/blitz.display.sh qr "${url}"
   clear
   echo "
-C-lightning connection URL code for Fully Noded:
+Core Lightning connection URL code for Fully Noded:
 The string shown is:
 $url
 "

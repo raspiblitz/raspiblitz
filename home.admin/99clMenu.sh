@@ -16,7 +16,7 @@ BACKTITLE="RaspiBlitz"
 TITLE=" Core Lightning Options (${CHAIN})"
 MENU=""
 OPTIONS=()
-  OPTIONS+=(FUNDING "Fund the C-lightning wallet onchain")
+  OPTIONS+=(FUNDING "Fund the Core Lightning wallet onchain")
   OPTIONS+=(PEERING "Connect to a peer")
   OPTIONS+=(CHANNEL "Open a channel with peer")
   OPTIONS+=(SEND "Pay an invoice / payment request")
@@ -33,9 +33,9 @@ if [ ${#openChannels} -gt 0 ] && [ ${openChannels} -gt 0 ]; then
 fi
   OPTIONS+=(CASHOUT "Withdraw all funds onchain ($CHAIN)")
   OPTIONS+=(SEED "Show Wallet Seed Words")
-  OPTIONS+=(REPAIR-CL "Repair options for C-lightning")
+  OPTIONS+=(REPAIR-CL "Repair options for Core Lightning")
 if [ "${lightning}" != "cl" ] && [ "${CHAIN}" == "mainnet" ]; then
-  OPTIONS+=(SWITCHLN  "Use C-lightning as default")
+  OPTIONS+=(SWITCHLN  "Use Core Lightning as default")
 fi  
 
 CHOICE_HEIGHT=$(("${#OPTIONS[@]}/2+1"))

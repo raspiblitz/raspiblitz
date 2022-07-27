@@ -3,7 +3,7 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ];then
   echo
-  echo "Install the feeadjuster plugin for C-lightning"
+  echo "Install the feeadjuster plugin for Core Lightning"
   echo "Usage:"
   echo "cl-plugin.feeadjuster.sh [on|off] <testnet|mainnet|signet>"
   echo

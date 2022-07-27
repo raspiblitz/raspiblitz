@@ -9,7 +9,7 @@ SPARKOVERSION="v2.8"
 # command info
 if [ $# -lt 1 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ];then
   echo
-  echo "Install, remove, connect or get info about the Sparko plugin for C-lightning"
+  echo "Install, remove, connect or get info about the Sparko plugin for Core Lightning"
   echo "version: $SPARKOVERSION"
   echo "Usage:"
   echo "cl-plugin.sparko.sh [on|off|menu|connect] [testnet|mainnet|signet] [norestart]"

@@ -16,7 +16,7 @@ sudo chmod 777 /home/admin/raspiblitz.log
 if [ "${lightning}" == "lnd" ]; then
   walletName="LND"
 elif [ "${lightning}" == "cl" ]; then
-  walletName="C-lightning"
+  walletName="Core Lightning"
 fi
 if [ "${setupPhase}" == "setup" ] && [ "${seedwords6x4NEW}" != "" ]; then
     ack=0

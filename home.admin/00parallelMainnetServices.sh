@@ -22,7 +22,7 @@ echo "run dialog ..."
 OPTIONS=()
 OPTIONS+=(l "LND on $CHAIN" ${lnd})
 OPTIONS+=(r "RTL for LND $CHAIN" ${rtlWebinterface})
-OPTIONS+=(c "C-lightning on $CHAIN" ${cl})
+OPTIONS+=(c "Core Lightning on $CHAIN" ${cl})
 OPTIONS+=(t "RTL for CL on $CHAIN" ${crtlWebinterface})
 OPTIONS+=(s "Sparko for CL on $CHAIN" ${sparko})
 OPTIONS+=(m "Spark for CL on $CHAIN" ${spark})
