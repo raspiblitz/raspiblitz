@@ -179,9 +179,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     RPC_USER=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcuser | cut -c 9-)
     PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
 
-    touch /home/admin/mempool-config.json
+    sudo touch /home/admin/mempool-config.json
     sudo chmod 600 /home/admin/mempool-config.json || exit 1
-    cat > /home/admin/mempool-config.json <<EOF
+    sudo cat > /home/admin/mempool-config.json <<EOF
 {
   "MEMPOOL": {
     "NETWORK": "mainnet",
