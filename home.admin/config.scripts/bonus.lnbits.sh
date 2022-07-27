@@ -454,7 +454,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     githubUser="$3"
   fi
   # https://github.com/lnbits/lnbits-legend/releases
-  tag="0.8.0"
+  tag="0.9.0"
   if [ "$4" != "" ]; then
     tag="$4"
   fi
