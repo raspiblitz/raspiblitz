@@ -226,9 +226,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     RPC_USER=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcuser | cut -c 9-)
     PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
 
-    touch /home/admin/btc-rpc-explorer.env
+    sudo touch /home/admin/btc-rpc-explorer.env
     sudo chmod 600 /home/admin/btc-rpc-explorer.env || exit 1
-    cat > /home/admin/btc-rpc-explorer.env <<EOF
+    sudo cat > /home/admin/btc-rpc-explorer.env <<EOF
 # Host/Port to bind to
 # Defaults: shown
 BTCEXP_HOST=0.0.0.0
