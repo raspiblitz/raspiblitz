@@ -226,9 +226,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     RPC_USER=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcuser | cut -c 9-)
     PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
 
-    sudo touch /home/admin/btc-rpc-explorer.env
-    sudo chmod 600 /home/admin/btc-rpc-explorer.env || exit 1
-    sudo cat > /home/admin/btc-rpc-explorer.env <<EOF
+    sudo touch /var/cache/raspiblitz/btc-rpc-explorer.env
+    sudo chmod 600 /var/cache/raspiblitz/btc-rpc-explorer.env || exit 1
+    sudo cat > /var/cache/raspiblitz/btc-rpc-explorer.env <<EOF
 # Host/Port to bind to
 # Defaults: shown
 BTCEXP_HOST=0.0.0.0
@@ -261,7 +261,7 @@ BTCEXP_ADDRESS_API=none
 BTCEXP_ELECTRUMX_SERVERS=tcp://127.0.0.1:50001
 EOF
     sudo -u btcrpcexplorer mkdir /home/btcrpcexplorer/.config
-    sudo mv /home/admin/btc-rpc-explorer.env /home/btcrpcexplorer/.config/btc-rpc-explorer.env
+    sudo mv /var/cache/raspiblitz/btc-rpc-explorer.env /home/btcrpcexplorer/.config/btc-rpc-explorer.env
     sudo chown btcrpcexplorer:btcrpcexplorer /home/btcrpcexplorer/.config/btc-rpc-explorer.env
 
     # open firewall
@@ -292,7 +292,7 @@ EOF
 
     # install service
     echo "*** Install btc-rpc-explorer systemd ***"
-    cat > /home/admin/btc-rpc-explorer.service <<EOF
+    sudo cat > /var/cache/raspiblitz/btc-rpc-explorer.service <<EOF
 # systemd unit for BTC RPC Explorer
 
 [Unit]
@@ -319,7 +319,7 @@ PrivateDevices=true
 WantedBy=multi-user.target
 EOF
 
-    sudo mv /home/admin/btc-rpc-explorer.service /etc/systemd/system/btc-rpc-explorer.service
+    sudo mv /var/cache/raspiblitz/btc-rpc-explorer.service /etc/systemd/system/btc-rpc-explorer.service
     sudo systemctl enable btc-rpc-explorer
     echo "# OK - the BTC-RPC-explorer service is now enabled"
 
