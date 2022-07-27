@@ -243,7 +243,7 @@ WantedBy=multi-user.target
     sudo sed -i "s/^Wants=.*/Wants=${netprefix}lightningd.service/g" /etc/systemd/system/${systemdService}.service
     sudo sed -i "s/^After=.*/After=${netprefix}lightningd.service/g" /etc/systemd/system/${systemdService}.service
 
-    # set up C-LightningREST
+    # set up Core LightningREST
     /home/admin/config.scripts/cl.rest.sh on ${CHAIN}
   fi
 
@@ -411,7 +411,7 @@ if [ "$1" = "prestart" ]; then
     mv /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json.tmp /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json
   fi
 
-  # C-Lightning changes of config
+  # Core Lightning changes of config
   # https://github.com/Ride-The-Lightning/RTL/blob/master/docs/C-Lightning-setup.md
   if [ "${LNTYPE}" == "cl" ]; then
     echo "# CL Config"

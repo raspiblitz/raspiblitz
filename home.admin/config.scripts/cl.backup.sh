@@ -183,9 +183,9 @@ if [ ${mode} = "cl-export-gui" ]; then
   # offer SCP for download
   clear
   echo
-  echo "****************************************"
-  echo "* DOWNLOAD THE C-LIGHTNING RESCUE FILE *"
-  echo "****************************************"
+  echo "*******************************************"
+  echo "* DOWNLOAD THE CORE LIGHTNING RESCUE FILE *"
+  echo "*******************************************"
   echo 
   echo "ON YOUR MAC & LINUX LAPTOP - RUN IN NEW TERMINAL:"
   echo "scp '${fileowner}@${localip}:${filename}' ./"
@@ -280,11 +280,11 @@ if [ ${mode} = "cl-import-gui" ]; then
   while [ "${filename}" == "" ]
     do
       clear 
-      echo "**************************************"
-      echo "* UPLOAD THE C-LIGHTNING RESCUE FILE *"
-      echo "**************************************"
+      echo "*****************************************"
+      echo "* UPLOAD THE CORE LIGHTNING RESCUE FILE *"
+      echo "*****************************************"
       echo "If you have a cl-rescue backup file on your laptop you can now"
-      echo "upload it and restore your latest C-Lightning state."
+      echo "upload it and restore your latest Core Lightning state."
       echo
       echo "CAUTION: Don't restore outdated states - risk of loosing funds!"
       echo
@@ -345,7 +345,7 @@ if [ ${mode} = "cl-import-gui" ]; then
   source /mnt/hdd/raspiblitz.conf
   
   # ask security question before deleting old wallet
-  echo "WARNING: This will delete/overwrite the C-Lightning state/funds of this RaspiBlitz."
+  echo "WARNING: This will delete/overwrite the Core Lightning state/funds of this RaspiBlitz."
   echo
   echo "Write the word 'override' and press ENTER to CONTINUE:"
   read securityInput

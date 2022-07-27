@@ -72,9 +72,9 @@ fi
 
 # just available for CL
 if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ]; then
-  OPTIONS+=(c 'C-Lightning RTL Webinterface' ${crtlWebinterface})
-  OPTIONS+=(k 'C-Lightning Sparko WebWallet' ${sparko})
-  OPTIONS+=(n 'C-Lightning Spark Wallet' ${spark})
+  OPTIONS+=(c 'Core Lightning RTL Webinterface' ${crtlWebinterface})
+  OPTIONS+=(k 'Core Lightning Sparko WebWallet' ${sparko})
+  OPTIONS+=(n 'Core Lightning Spark Wallet' ${spark})
 fi
 
 OPTIONS+=(m 'Homer Dashboard' ${homer})
@@ -126,7 +126,7 @@ else
   echo "RTL-lnd Webinterface Setting unchanged."
 fi
 
-# RTL process choice (C-Lightning)
+# RTL process choice (Core Lightning)
 choice="off"; check=$(echo "${CHOICES}" | grep -c "c")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${crtlWebinterface}" != "${choice}" ]; then
@@ -141,7 +141,7 @@ if [ "${crtlWebinterface}" != "${choice}" ]; then
       sleep 10
       /home/admin/config.scripts/bonus.rtl.sh menu cl mainnet
     else
-      l1="# FAIL on RTL C-Lightning install #"
+      l1="# FAIL on RTL Core Lightning install #"
       l2="Try manual install on terminal after reboot with:"
       l3="/home/admin/config.scripts/bonus.rtl.sh on cl mainnet"
       dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65

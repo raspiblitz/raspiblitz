@@ -3,11 +3,11 @@
 
 _Build your own Lightning & Bitcoin Fullnode on a RaspberryPi with a nice Display._
 
-`Version 1.8.0 with lnd 0.15.0 & c-lightning 0.11.2 and bitcoin 23.0.0`
+`Version 1.8.0 with lnd 0.15.0 & Core Lightning 0.11.2 and bitcoin 23.0.0`
 
 ![RaspiBlitz](pictures/raspiblitz.jpg)
 
-**The RaspiBlitz is a do-it-yourself Lightning Node (LND and/or c-lightning) running together with a Bitcoin-Fullnode on a RaspberryPi (1TB SSD) and a nice display for easy setup & monitoring.**
+**The RaspiBlitz is a do-it-yourself Lightning Node (LND and/or Core Lightning) running together with a Bitcoin-Fullnode on a RaspberryPi (1TB SSD) and a nice display for easy setup & monitoring.**
 
 RaspiBlitz is mainly targeted for learning how to run your own node decentralized from home - because: Not your Node, Not your Rules.
 Discover & develop the growing ecosystem of the Lightning Network by becoming a full part of it.
@@ -64,7 +64,7 @@ Build it as part of a [workshop](WORKSHOP.md) or as a weekend project yourself.
       - [LND StaticChannelBackup on Nextcloud](#lnd-staticchannelbackup-on-nextcloud)
       - [StaticChannelBackup on USB Drive](#staticchannelbackup-on-usb-drive)
       - [StaticChannelBackup per SCP/SSH to other server](#staticchannelbackup-per-scpssh-to-other-server)
-      - [C-LIGHTNING NODE](#c-lightning-node)
+      - [CORE LIGHTNING NODE](#c-lightning-node)
       - [CL CLBOSS Automatic Node Manager](#cl-clboss-automatic-node-manager)
       - [CL Wallet Encryption](#cl-wallet-encryption)
     - [SERVICES: Activate/Deactivate Services](#services-activatedeactivate-services)
@@ -84,9 +84,9 @@ Build it as part of a [workshop](WORKSHOP.md) or as a weekend project yourself.
       - [PyBlock](#pyblock)
       - [Channel Tools (chantools)](#channel-tools-chantools)
       - [Sphinx Relay Server](#sphinx-relay-server)
-      - [C-Lightning RTL Webinterface](#c-lightning-rtl-webinterface)
-      - [C-Lightning Sparko Webwallet](#c-lightning-sparko-webwallet)
-      - [C-Lightning Spark Webwallet](#c-lightning-spark-webwallet)
+      - [Core Lightning RTL Webinterface](#c-lightning-rtl-webinterface)
+      - [Core Lightning Sparko Webwallet](#c-lightning-sparko-webwallet)
+      - [Core Lightning Spark Webwallet](#c-lightning-spark-webwallet)
     - [SYSTEM: Monitoring & Configuration](#system-monitoring--configuration)
     - [CONNECT: Connect Apps & Credentials](#connect-connect-apps--credentials)
       - [MOBILE: Mobile Wallet Apps (Smartphone)](#mobile-mobile-wallet-apps-smartphone)
@@ -106,7 +106,7 @@ Build it as part of a [workshop](WORKSHOP.md) or as a weekend project yourself.
       - [SOFTWARE: Run Software Tests (DebugReport)](#software-run-software-tests-debugreport)
       - [BACKUP-LND: Backup your LND data (Rescue-File)](#backup-lnd-backup-your-lnd-data-rescue-file)
       - [RESET-LND: Delete LND & start a node/wallet](#reset-lnd-delete-lnd--start-a-nodewallet)
-      - [REPAIR-CL: Repair/Backup C-Lightning](#repair-cl-repairbackup-c-lightning)
+      - [REPAIR-CL: Repair/Backup Core Lightning](#repair-cl-repairbackup-c-lightning)
       - [MIGRATION: Migrate Blitz Data to new Hardware](#migration-migrate-blitz-data-to-new-hardware)
       - [COPY-SOURCE: Offer your Blockchain to another RaspiBlitz for Setup](#copy-source-offer-your-blockchain-to-another-raspiblitz-for-setup)
       - [RESET-CHAIN: Delete Blockchain and Re-Download](#reset-chain-delete-blockchain-and-re-download)
@@ -325,7 +325,7 @@ Also check the [setup documentation](#setup-process-detailed-documentation) for 
 
 2. If you have a hardware problem, please check that your hardware parts are exactly the parts recommended in the shopping list above. Different screens or even SSD-casings can cause problems.
 
-3. Please determine if your problem/question is about RaspiBlitz or for example with LND or c-lightning. For example if you can't route a payment or get an error when opening a channel that is an LND/c-lightning question/problem and is best answered by the [LND dev community](https://dev.lightning.community) or the [c-lightning documentation](https://lightning.readthedocs.io/)
+3. Please determine if your problem/question is about RaspiBlitz or for example with LND or Core Lightning. For example if you can't route a payment or get an error when opening a channel that is an LND/Core Lightning question/problem and is best answered by the [LND dev community](https://dev.lightning.community) or the [Core Lightning documentation](https://lightning.readthedocs.io/)
 
 4. Go to the GitHub issues of the RaspiBlitz: [https://github.com/rootzoll/raspiblitz/issues](https://github.com/rootzoll/raspiblitz/issues) Do a search there. Also check closed issues by removing 'is:open' from the filter/search-box.
 
@@ -387,7 +387,7 @@ The name you choose for your RaspiBlitz will also be used as your public alias o
 
 Then you can choose which Lightning implementation you want to run on top of your Bitcoin Fullnode.
 RaspiBlitz started with `LND` from Lightning Labs which is used by most other RaspberryPi lightning nodes and works with most additional apps.
-But you can now also choose `CL` for c-lightning by Blockstream which is a good choice for more experienced node operators & lightning developers that want to use the highly customizable plugin structure that c-lightning offers.
+But you can now also choose `CL` for Core Lightning by Blockstream which is a good choice for more experienced node operators & lightning developers that want to use the highly customizable plugin structure that Core Lightning offers.
 
 It's also possible to use both lightning node implementations in parallel on your RaspiBlitz later on - just pick one to start with for now.
 
@@ -395,7 +395,7 @@ Choose `NONE` if you're only interested in running a Bitcoin full node without L
 
 ![SSH1](pictures/ssh1-layer2.png)
 
-_In the following we show the setup with LND - which is very similar to the steps with c-lightning._
+_In the following we show the setup with LND - which is very similar to the steps with Core Lightning._
 
 If you chose to use one of the lightning implementations you will now be asked if you want to start a `NEW` wallet/lightning node or if you have an `OLD` lightning wallet/node that you want to re-create.
 
@@ -407,12 +407,12 @@ Normally you just chose `NEW` here, but to recover an old wallet you have the fo
 
 #### LNDRESCUE LND tar.gz-Backupfile (BEST)
 
-Choose this option if you have made a complete backup of the LND or c-lightning data and have a tar.gz file starting with the word 'lnd-rescue' or 'cl-rescue' available.
+Choose this option if you have made a complete backup of the LND or Core Lightning data and have a tar.gz file starting with the word 'lnd-rescue' or 'cl-rescue' available.
 It will recover all your on-chain funds and open channels you had.
 But you have to make sure that the rescue backup you have is really the latest version - otherwise you might lose channel funds.
 
 _If you have tar.gz file that starts with 'raspiblitz', that's a migration file.
-That also includes your old LND/c-lightning wallet, but you import that file at the beginning of the setup process with 'FROMBACKUP - Upload Migration Backup' instead choosing FRESHSETUP_
+That also includes your old LND/Core Lightning wallet, but you import that file at the beginning of the setup process with 'FROMBACKUP - Upload Migration Backup' instead choosing FRESHSETUP_
 
 #### SEED+SCB Words Seed & channel.backup file (OK)
 
@@ -576,7 +576,7 @@ It's just for one-time info._
 
 #### LIGHTNING (Basic Node Management)
 
-Under `LND/c-lightning Wallet options` you will find some basic tools for managing your Lightning node.
+Under `LND/Core Lightning Wallet options` you will find some basic tools for managing your Lightning node.
 These are very simplified in the RaspiBlitz SSH menu for learning purposes.
 For more advanced management of your Lightning node see additional apps under `SERVICES`.
 
@@ -726,7 +726,7 @@ With ZeroTier you can add your RaspiBlitz to a software defined network - see fo
 ##### LND LIGHTNING LABS NODE
 
 This needs to be switched on to see the sub-settings options for LND.
-If switched on it means the LND lightning node implementation is installed and running on your RaspiBlitz - it can run in parallel to c-lightning.
+If switched on it means the LND lightning node implementation is installed and running on your RaspiBlitz - it can run in parallel to Core Lightning.
 If activated you will find an additional option in the SSH Main Menu that offers you more options for operating the LND node.
 Also under `SERVICES` some apps might only be available if LND is activated.
 
@@ -789,31 +789,31 @@ and you can optionally set custom options for the SCP command (for example to se
 
 On the target server add the root ssh public key of your RaspiBlitz to the `authorized_keys` file for the user - how to do this see: <https://www.linode.com/docs/security/authentication/use-public-key-authentication-with-ssh/>
 
-##### C-LIGHTNING NODE
+##### CORE LIGHTNING NODE
 
-This needs to be switched on to see the sub-settings options for c-lightning.
+This needs to be switched on to see the sub-settings options for Core Lightning.
 If switched on it means the c-lighting node implementation is installed and running on your RaspiBlitz - it can run in parallel to LND.
-If activated you will find an additional option in the SSH main menu that offers you more options to operate the c-lightning node.
-Also under `SERVICES` some apps might only be available if c-lightning is activated.
+If activated you will find an additional option in the SSH main menu that offers you more options to operate the Core Lightning node.
+Also under `SERVICES` some apps might only be available if Core Lightning is activated.
 
-For more details on this lightning node implementation go to the [c-lightning FAQ page](FAQ.cl.md).
+For more details on this lightning node implementation go to the [Core Lightning FAQ page](FAQ.cl.md).
 
 ##### CL CLBOSS Automatic Node Manager
 
-CLBOSS is an automated manager for C-Lightning routing payments nodes.
+CLBOSS is an automated manager for Core Lightning routing payments nodes.
 CLBOSS is effectively a bunch of heuristics modules wired together to a regular clock to continuously monitor your node.
 
 Find more info at the [CLBOSS GitHub](https://github.com/ZmnSCPxj/clboss).
 
 ##### CL Wallet Encryption
 
-You can protect your c-lightning wallet by encrypting it with your password C.
-On every system restart you will need to decrypt/unlock with that password before c-lightning can use the wallet.
+You can protect your Core Lightning wallet by encrypting it with your password C.
+On every system restart you will need to decrypt/unlock with that password before Core Lightning can use the wallet.
 This adds some physical security for example in case your node get stolen.
 
 #### SERVICES: Activate/Deactivate Services
 
-The RaspiBlitz offers further Services, Apps and configuration (scroll down to see all options in the RaspiBlitz) also some Apps & Services might just be available if you installed/activated LND or c-lightning:
+The RaspiBlitz offers further Services, Apps and configuration (scroll down to see all options in the RaspiBlitz) also some Apps & Services might just be available if you installed/activated LND or Core Lightning:
 
 ![MainMenu-Services](pictures/services.png)
 
@@ -910,7 +910,7 @@ make the BitcoinMinds.org educational link collection locally available on your 
 
 ##### RTL Webinterface
 
-The RTL Webinterface is available as an LND & c-lightning control dashboard you can run in your browser with a nice GUI.
+The RTL Webinterface is available as an LND & Core Lightning control dashboard you can run in your browser with a nice GUI.
 It offers much more control over your Lightning node than the RaspiBlitz SSH menus.
 It's recommended to give it a try.
 
@@ -996,21 +996,21 @@ To use the mobile app with your own RaspiBlitz you need to install the [Sphinx R
 
 After install, you will see a new `SPHINX` option in the SSH main menu - it will give you all the information you need to start using it.
 
-##### C-Lightning RTL Webinterface
+##### Core Lightning RTL Webinterface
 
-The same RTL as above but running with c-lightning node.
+The same RTL as above but running with Core Lightning node.
 Can run parallel to the LND version.
 See details above.
 
-##### C-Lightning Sparko Webwallet
+##### Core Lightning Sparko Webwallet
 
-WalletUI & HTTP-RPC bridge for c-lightning
+WalletUI & HTTP-RPC bridge for Core Lightning
 
 <https://github.com/fiatjaf/sparko#the-sparko-plugin>
 
-##### C-Lightning Spark Webwallet
+##### Core Lightning Spark Webwallet
 
-WalletUI for c-lightning with BOLT12 offers
+WalletUI for Core Lightning with BOLT12 offers
 
 <https://github.com/shesek/spark-wallet#progressive-web-app>
 
@@ -1030,9 +1030,9 @@ This feature should support connecting your RaspiBlitz to a mobile wallets or ot
 
 ![MOBILE](pictures/mobile.png)
 
-At the moment the following mobile wallets are supported - some are only available if LND or c-lightning is activated:
+At the moment the following mobile wallets are supported - some are only available if LND or Core Lightning is activated:
 
-- [Zeus (iOS/Android)](https://github.com/ZeusLN/zeus) (LND & c-lightning)
+- [Zeus (iOS/Android)](https://github.com/ZeusLN/zeus) (LND & Core Lightning)
 - [Zap (iOS/Android)](https://www.zaphq.io/) (only LND)
 - [Fully Noded (iOS over Tor)](https://apps.apple.com/us/app/fully-noded/id1436425586)
 - [SendMany (Android)](https://github.com/fusion44/sendmany/blob/master/README.md) (only LND)
@@ -1177,7 +1177,7 @@ Use this only if you have closed all channels and removed all funds._
 
 Use this option if you want to start with a fresh LND node id & wallet.
 
-##### REPAIR-CL: Repair/Backup C-Lightning
+##### REPAIR-CL: Repair/Backup Core Lightning
 
 Multiple options to repair/backup your c-lightning node:
 

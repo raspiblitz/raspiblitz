@@ -13,7 +13,7 @@ source <(/home/admin/config.scripts/network.aliases.sh getvars cl $1)
 # BASIC MENU INFO
 WIDTH=64
 BACKTITLE="RaspiBlitz"
-TITLE=" C-Lightning Options (${CHAIN})"
+TITLE=" Core Lightning Options (${CHAIN})"
 MENU=""
 OPTIONS=()
   OPTIONS+=(FUNDING "Fund the C-lightning wallet onchain")

@@ -28,9 +28,9 @@ Download Lightning Data Backup now?
       fi
       if [ "${lightning}" == "cl" ] || [ "${cl}" = "on" ]; then
         clear
-        echo "*******************************************"
-        echo "* PREPARING THE C-LIGHTNING BACKUP DOWNLOAD"
-        echo "*******************************************"
+        echo "**********************************************"
+        echo "* PREPARING THE CORE LIGHTNING BACKUP DOWNLOAD"
+        echo "**********************************************"
         echo "please wait .."
         /home/admin/config.scripts/cl.backup.sh cl-export-gui
         echo
@@ -72,7 +72,7 @@ if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
   OPTIONS+=(REPAIR-LND "Repair/Backup LND")
 fi
 if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ]; then
-  OPTIONS+=(REPAIR-CL "Repair/Backup C-Lightning")
+  OPTIONS+=(REPAIR-CL "Repair/Backup Core Lightning")
 fi
 OPTIONS+=(MIGRATION "Migrate Blitz Data to new Hardware")
 OPTIONS+=(COPY-SOURCE "Copy Blockchain Source Modus")

@@ -28,7 +28,7 @@
 - Update: BTCPayServer 1.6.1 [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.6.1)
 - Update: Mempool 2.4.0 [details](hhttps://github.com/mempool/mempool/releases/tag/v2.4.0)
 - Update: Helipad (Podcasting 2.0 Boostagram reader) v0.1.10 [details](https://github.com/Podcastindex-org/helipad/releases/tag/v0.1.10)
-- Update: Adapted Umbrel Migration for new 0.5.0 version with core lightning
+- Update: Adapted Umbrel Migration for new 0.5.0 version with Core Lightning
 - Info: Run RaspiBlitz on amd64 bare metal and virtual machines [details](https://github.com/rootzoll/raspiblitz/tree/dev/alternative.platforms)
 
 ## What's new in Version 1.7.2 of RaspiBlitz?
@@ -78,7 +78,7 @@ There was a small patch-update with raspiblitz-v1.7.1-2021-10-28.img.gz to fix a
 - New: C-lightningREST v0.5.1 [details](https://github.com/Ride-The-Lightning/c-lightning-REST/releases/tag/v0.5.1)
 - New: CL Spark Wallet v0.3.0rc with BOLT12 offers [details](https://github.com/shesek/spark-wallet/releases)
 - New: CL plugin: Sparko [details](https://github.com/fiatjaf/sparko)
-- New: CL plugin: CLBOSS The C-Lightning Node Manager [details](https://github.com/ZmnSCPxj/clboss#clboss-the-c-lightning-node-manager)
+- New: CL plugin: CLBOSS The Core Lightning Node Manager [details](https://github.com/ZmnSCPxj/clboss#clboss-the-c-lightning-node-manager)
 - New: Refactored Setup-Process [details](https://github.com/rootzoll/raspiblitz/issues/1126#issuecomment-829757665)
 - New: Suez - channel visualization for LND and CL [info](https://github.com/rootzoll/raspiblitz/issues/2366#issuecomment-939521302)[details](https://github.com/prusnak/suez)
 - New: LND Static Channel Backup to Nextcloud

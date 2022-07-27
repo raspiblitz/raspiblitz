@@ -49,7 +49,7 @@ Do you want to download Lightning Data Backup now?
       if [ "${lightning}" == "cl" ] || [ "${cl}" = "on" ]; then
         clear
         echo "*******************************************"
-        echo "* PREPARING THE C-LIGHTNING BACKUP DOWNLOAD"
+        echo "* PREPARING THE CORE LIGHTNING BACKUP DOWNLOAD"
         echo "*******************************************"
         echo "please wait .."
         /home/admin/config.scripts/cl.backup.sh cl-export-gui

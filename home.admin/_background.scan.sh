@@ -737,7 +737,7 @@ do
   done
 
   ###################
-  # Lightning (c-lightning)
+  # Lightning (Core Lightning)
 
   # loop thru mainet, testnet & signet
   networks=( "main" "test" "sig" )

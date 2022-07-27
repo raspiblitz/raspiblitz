@@ -382,7 +382,7 @@ if [ "${setupPhase}" == "done" ]; then
     echo "LND command line options: lncli -h"
   fi
   if [ "${lightning}" == "cl" ]; then
-    echo "C-Lightning command line options: lightning-cli help"
+    echo "Core Lightning command line options: lightning-cli help"
   fi
 else
   echo "Your setup is not finished."
