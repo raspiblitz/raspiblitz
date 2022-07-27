@@ -15,7 +15,7 @@
 - Update: Core Lightning (CLN - formerly C-lightning) v0.11.2 [details](https://github.com/ElementsProject/lightning/releases/tag/v0.11.2)
 - Update: LND v0.15.0 [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.15.0-beta)
 - Update: RTL v0.12.3 [details](https://github.com/Ride-The-Lightning/RTL/releases/tag/v0.12.3)
-- Update: LNbits 0.9.0 [details](https://github.com/lnbits/lnbits-legend/releases/tag/0.9.0)
+- Update: LNbits 0.8.0 [details](https://github.com/lnbits/lnbits-legend/releases/tag/0.9.0)
 - Update: C-lightningREST v0.7.2 [details](https://github.com/Ride-The-Lightning/c-lightning-REST/releases/tag/v0.7.2)
 - Update: CLBOSS 0.13A [details](https://github.com/ZmnSCPxj/clboss/releases/tag/0.13A)
 - Update: Channel Tools (chantools) v0.10.4 [details](https://github.com/guggero/chantools/blob/master/README.md)
