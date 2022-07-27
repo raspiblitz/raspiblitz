@@ -179,9 +179,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     RPC_USER=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcuser | cut -c 9-)
     PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
 
-    sudo touch /home/admin/mempool-config.json
-    sudo chmod 600 /home/admin/mempool-config.json || exit 1
-    sudo cat > /home/admin/mempool-config.json <<EOF
+    touch /var/cache/raspiblitz/mempool-config.json
+    chmod 600 /var/cache/raspiblitz/mempool-config.json || exit 1
+    cat > /var/cache/raspiblitz/mempool-config.json <<EOF
 {
   "MEMPOOL": {
     "NETWORK": "mainnet",
@@ -214,7 +214,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   }
 }
 EOF
-    sudo mv /home/admin/mempool-config.json /home/mempool/mempool/backend/mempool-config.json
+    sudo mv /var/cache/raspiblitz/mempool-config.json /home/mempool/mempool/backend/mempool-config.json
     sudo chown mempool:mempool /home/mempool/mempool/backend/mempool-config.json
     cd /home/mempool/mempool/frontend
 
@@ -252,7 +252,7 @@ EOF
 
     # install service
     echo "*** Install mempool systemd ***"
-    cat > /home/admin/mempool.service <<EOF
+    cat > /var/cache/raspiblitz/mempool.service <<EOF
 # systemd unit for Mempool
 
 [Unit]
@@ -279,7 +279,7 @@ PrivateDevices=true
 WantedBy=multi-user.target
 EOF
 
-    sudo mv /home/admin/mempool.service /etc/systemd/system/mempool.service
+    sudo mv /var/cache/raspiblitz/mempool.service /etc/systemd/system/mempool.service
     sudo systemctl enable mempool
     echo "# OK - the mempool service is now enabled"
 
