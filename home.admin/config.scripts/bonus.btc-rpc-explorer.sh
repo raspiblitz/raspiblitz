@@ -292,7 +292,7 @@ EOF
 
     # install service
     echo "*** Install btc-rpc-explorer systemd ***"
-    sudo cat > /var/cache/raspiblitz/btc-rpc-explorer.service <<EOF
+    cat > /var/cache/raspiblitz/btc-rpc-explorer.service <<EOF
 # systemd unit for BTC RPC Explorer
 
 [Unit]
