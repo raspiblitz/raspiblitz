@@ -492,7 +492,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo -u lnbits ./venv/bin/pip install secp256k1
 
   # build
-  ./venv/bin/python build.py
+  sudo -u lnbits ./venv/bin/python build.py
 
   # open firewall
   echo
