@@ -248,20 +248,18 @@ In the end your RaspiBlitz should look like this:
 
 ## Downloading the Software
 
-_WARNING: This realease is not ready yet! Release Candidates should only be used with you use explicitly for testing and dont have serious funds on them._
-
 | Method           | Install the image                                                                                                                                                                | Build the sd card                                                 |
 | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
 | Philosophy       | Trust                                                                                                                                                                            | Sovereignty                                                       |
 | Difficulty level | Easy                                                                                                                                                                             | Medium                                                            |
 | Pros             | Make Blitz accessible to everyone                                                                                                                                                | You don't need to trust us, build from your own forked repository |
-| Instructions     | [Download 1.8.0rc4 image](https://raspiblitz.fulmo.org/images/raspiblitz-v1.8.0rc4-2022-07-20.img.gz) and [Flash the sd card](README.md#write-the-sd-card-image-to-your-sd-card) | [Build your own sd card image](#build-the-sd-card-image)          |
+| Instructions     | [Download 1.8.0 image](https://raspiblitz.fulmo.org/images/raspiblitz-v1.8.0-2022-07-28.img.gz) and [Flash the sd card](README.md#write-the-sd-card-image-to-your-sd-card) | [Build your own sd card image](#build-the-sd-card-image)          |
 | Verify what?     | [Signature file](#) and [verify the Sig](FAQ.md#how-to-verify-the-sd-card-image-after-download) OR SHA-256 (below)                                                               | All of the code, don't trust, verify                              |
 
 If downloading the maintainer SD card image:
 
 - GPG 64-bit (main): 1C73 060C 7C17 6461 & (sub): AA9D D1B5 CC56 47DA
-- SHA-256: 29b44d94f8d9b454d65999b59dfe2975b693150ed3d23fb61f6c254e1aca541a
+- SHA-256: 
 
 Which verification method should I used: Hash or Signature?
 
@@ -270,7 +268,7 @@ Which verification method should I used: Hash or Signature?
 
 The maintainer sd card image can also be downloaded via torrent:
 
-- [assets/raspiblitz-v1.7.2-2022-02-20.img.gz.torrent](https://github.com/rootzoll/raspiblitz/raw/dev/home.admin/assets/raspiblitz-v1.7.2-2022-02-20.img.gz.torrent)
+- [assets/raspiblitz-v1.8.0-2022-07-28.img.gz.torrent](https://github.com/rootzoll/raspiblitz/raw/dev/home.admin/assets/raspiblitz-v1.8.0-2022-07-28.img.gz.torrent)
 
 Useful info:
 
