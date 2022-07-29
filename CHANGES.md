@@ -2,8 +2,8 @@
 
 ## What's new in Version 1.8.0 of RaspiBlitz?
 
-- New: WebUI
-- New: BackendAPI
+- New: Multilanguage WebUI [details](https://github.com/cstenglein/raspiblitz-web)
+- New: BackendAPI [details](https://github.com/fusion44/blitz_api)
 - New: ZRAM - compressed swap in memory [details](https://github.com/rootzoll/raspiblitz/issues/2905)
 - New: Core Lightning GRPC plugin [details](https://github.com/rootzoll/raspiblitz/pull/3109)
 - New: Core Lightning connection to BTCPayServer (CONNECT menu) [details](https://github.com/rootzoll/raspiblitz/issues/3155)
