@@ -158,12 +158,20 @@ if [ "$1" == "prestart" ]; then
   if [ "${RPCPSW}" == "" ]; then
     RPCPSW=$(cat /mnt/hdd/${network}/${network}.conf | grep "^${network}d.rpcpassword=" | cut -d "=" -f2 | tail -n 1)
   fi
+  if [ "${RPCPSW}" == "" ]; then
+    1>&2 echo "FAIL: 'rpcpassword' not found in /mnt/hdd/${network}/${network}.conf"
+    exit 11
+  fi
   setting ${lndConfFile} ${insertLine} "${network}d\.rpcpass" "${RPCPSW}"
 
   # SET/UPDATE rpcuser
   RPCUSER=$(cat /mnt/hdd/${network}/${network}.conf | grep "^rpcuser=" | cut -d "=" -f2 | tail -n 1)
   if [ "${RPCUSER}" == "" ]; then
     RPCUSER=$(cat /mnt/hdd/${network}/${network}.conf | grep "^${network}d.rpcuser=" | cut -d "=" -f2 | tail -n 1)
+  fi
+  if [ "${RPCUSER}" == "" ]; then
+    1>&2 echo "FAIL: 'rpcuser' not found in /mnt/hdd/${network}/${network}.conf"
+    exit 12
   fi
   setting ${lndConfFile} ${insertLine} "${network}d\.rpcuser" "${RPCUSER}"
 
