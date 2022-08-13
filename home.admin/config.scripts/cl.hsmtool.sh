@@ -143,10 +143,10 @@ function decryptHSMsecret() {
       echo "# using the password from parameter"
     elif [ -f $passwordFile ];then
       echo "# Getting the password from $passwordFile"
-      password=$(cat sudo cat $passwordFile)
+      password=$(sudo cat $passwordFile)
     else
       passwordToFile
-      password=$(cat sudo cat $passwordFile)
+      password=$(sudo cat $passwordFile)
     fi
     if echo "${password}" | sudo -u bitcoin lightning-hsmtool decrypt \
      "$hsmSecretPath"; then
