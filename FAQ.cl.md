@@ -13,6 +13,7 @@
 - [Directories](#directories)
 - [Config file](#config-file)
   - [Default values](#default-values)
+- [CLN cheatsheet](#cln-cheatsheet)
 - [Plug-ins](#plug-ins)
   - [General info](#general-info)
   - [Directories](#directories-1)
@@ -27,7 +28,8 @@
     - [Fundchannel syntax](#fundchannel-syntax)
     - [Multifundchannel syntax](#multifundchannel-syntax)
   - [Offers](#offers)
-  - [About the feature bits](#about-the-feature-bits)
+  - [Poncho - hosted channels](#poncho---hosted-channels)
+- [Feature bits](#feature-bits)
 - [Testnets](#testnets)
 - [Backups](#backups)
   - [Backup strategy](#backup-strategy)
@@ -43,6 +45,7 @@
     - [Rescan the chain after restoring a used CLN wallet](#rescan-the-chain-after-restoring-a-used-cln-wallet)
     - [Guesstoremote to recover funds from force-closed channels](#guesstoremote-to-recover-funds-from-force-closed-channels)
 - [sqlite3 queries](#sqlite3-queries)
+- [Extract the private and public key from the hsm_secret file](#extract-the-private-and-public-key-from-the-hsm_secret-file)
 - [Update](#update)
   - [Update to a new CLN release](#update-to-a-new-cln-release)
   - [Experimental update to the latest master](#experimental-update-to-the-latest-master)
@@ -90,7 +93,6 @@ or with the alias: `cllog`
     alias clconf='sudo nano /home/bitcoin/.lightning/config'
     alias cllog='sudo tail -n 30 -f /home/bitcoin/.lightning/bitcoin/cl.log'
     ```
-
 ## Directories
 * All data is stored on the disk in:
 `/mnt/hdd/app-data/.lightningd`
@@ -114,6 +116,9 @@ or with the alias: `cllog`
   always-use-proxy=true
   ```
 * find [all the possible config options](#all-possible-config-options) below.
+
+## CLN cheatsheet
+<https://github.com/grubles/cln-cheatsheet>
 
 ## Plug-ins
 
@@ -412,9 +417,13 @@ Will need to pay through a peer which supports the onion messages which means yo
     ```
     The `pay_index` will increase as the offer gets reused.
 
-### About the feature bits
-* https://bitcoin.stackexchange.com/questions/107484/how-can-i-decode-the-feature-string-of-a-lightning-node-with-bolt-9
-* Convert the hex number from `lightning-cli listpeers` to binary: https://www.binaryhexconverter.com/hex-to-binary-converter and count the position of the bits from the right.
+### Poncho - hosted channels
+* <https://github.com/fiatjaf/poncho/>
+* <https://github.com/rootzoll/raspiblitz/issues/3269>
+
+## Feature bits
+* <https://bitcoin.stackexchange.com/questions/107484/how-can-i-decode-the-feature-string-of-a-lightning-node-with-bolt-9>
+* Convert the hex number from `lightning-cli listpeers` to binary: <https://www.binaryhexconverter.com/hex-to-binary-converter> and count the position of the bits from the right.
 
 ## Testnets
 * for testnet and signet there are prefixes `t` and `s` used for the aliases, daemons and their own plugin directory names.
@@ -448,11 +457,11 @@ Will need to pay through a peer which supports the onion messages which means yo
     ```
 
 ## Backups
-* https://lightning.readthedocs.io/FAQ.html#how-to-backup-my-wallet
-* General details: https://lightning.readthedocs.io/BACKUP.html
+*<> https://lightning.readthedocs.io/FAQ.html#how-to-backup-my-wallet>
+* General details: <https://lightning.readthedocs.io/BACKUP.html>
 
 ### Backup strategy
-* discussed in https://github.com/rootzoll/raspiblitz/issues/2983
+* discussed in <https://github.com/rootzoll/raspiblitz/issues/2983>
 
 * store your seed (or the `hsm_secret` HEX) as text.
 * the channel database (`lightningd.sqlite3`) is replicated to the SDcard real-time.
@@ -608,6 +617,9 @@ Will need to pay through a peer which supports the onion messages which means yo
     ```
     sudo -u bitcoin sqlite3 /home/bitcoin/.lightning/bitcoin/lightningd.sqlite3 'select short_channel_id, timestamp, cause, message from channel_state_changes inner join channels on channel_id = id where new_state = 4 order by timestamp'
     ```
+
+## Extract the private and public key from the hsm_secret file
+<https://gist.github.com/openoms/0844cf2db807b85fbcffacf1a3fb53bd#file-readme-md>
 
 ## Update
 ### Update to a new CLN release
