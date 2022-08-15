@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # check if started with sudo
-if [ "$EUID" -ne 0 ]; then 
+if [ "$EUID" -ne 0 ]; then
   echo "error='run as root'"
   exit 1
 fi
@@ -85,7 +85,7 @@ echo "File Exists: /mnt/hdd/${network}/${network}.conf --> ${confExists}" >> ${l
 
 # set password B as RPC password (from setup file)
 echo "# setting PASSWORD B" >> ${logFile}
-/home/admin/config.scripts/blitz.setpassword.sh b "${passwordB}" >> ${logFile}
+/home/admin/config.scripts/blitz.passwords.sh set b "${passwordB}" >> ${logFile}
 
 # optimize RAM for blockchain validation (bitcoin only)
 if [ "${network}" == "bitcoin" ]; then
@@ -145,7 +145,7 @@ if [ "${hostname}" == "" ]; then
   exit 41
 fi
 
-if [ "${lightning}" != "lnd" ]; then 
+if [ "${lightning}" != "lnd" ]; then
 
   ###################################
   # Remove LND from systemd
@@ -156,7 +156,7 @@ if [ "${lightning}" != "lnd" ]; then
   systemctl daemon-reload
 fi
 
-if [ "${lightning}" == "lnd" ]; then 
+if [ "${lightning}" == "lnd" ]; then
 
   ###################################
   # LND
@@ -256,27 +256,27 @@ if [ "${lightning}" == "lnd" ]; then
 
   # WALLET --> SEED (+ SCB to be restored later)
   elif [ "${seedWords}" != "" ]; then
-    
-    echo "WALLET --> SEED" >> ${logFile} 
+
+    echo "WALLET --> SEED" >> ${logFile}
     /home/admin/_cache.sh set message "LND Wallet (SEED)"
-    if ! pip list | grep grpc; then sudo -H python3 -m pip install grpcio==1.38.1; fi  
+    if ! pip list | grep grpc; then sudo -H python3 -m pip install grpcio==1.38.1; fi
     source <(/home/admin/config.scripts/lnd.initwallet.py seed mainnet "${passwordC}" "${seedWords}" "${seedPassword}")
     if [ "${err}" != "" ]; then
       /home/admin/config.scripts/blitz.error.sh _provision.setup.sh "lnd-wallet-seed" "lnd.initwallet.py seed returned error" "/home/admin/config.scripts/lnd.initwallet.py seed mainnet ... --> ${err} + ${errMore}" ${logFile}
       exit 12
     fi
-    
+
     # set lnd into recovery mode (gets activated after setup reboot)
     /home/admin/config.scripts/lnd.backup.sh mainnet recoverymode on >> ${logFile}
     echo "Rescanning will activate after setup-reboot ..." >> ${logFile}
 
-  
+
   # WALLET --> NEW
   else
 
-    echo "WALLET --> NEW" >> ${logFile}
+    echo "# WALLET --> NEW" >> ${logFile}
     /home/admin/_cache.sh set message "LND Wallet (NEW)"
-    if ! pip list | grep grpc; then sudo -H python3 -m pip install grpcio==1.38.1; fi 
+    if ! pip list | grep grpc; then sudo -H python3 -m pip install grpcio==1.38.1; fi
     source <(/home/admin/config.scripts/lnd.initwallet.py new mainnet "${passwordC}")
     if [ "${err}" != "" ]; then
       /home/admin/config.scripts/blitz.error.sh _provision.setup.sh "lnd-wallet-new" "lnd.initwallet.py new returned error" "/home/admin/config.scripts/lnd.initwallet.py new mainnet ... --> ${err} + ${errMore}" ${logFile}
@@ -290,6 +290,7 @@ if [ "${lightning}" == "lnd" ]; then
     fi
 
     # write created seedwords into SETUPFILE to be displayed to user on final setup later
+    echo "# writing seed info to setup file" >> ${logFile}
     echo "seedwordsNEW='${seedwords}'" >> ${setupFile}
     echo "seedwords6x4NEW='${seedwords6x4}'" >> ${setupFile}
 
@@ -312,7 +313,7 @@ if [ "${lightning}" == "lnd" ]; then
   done
 
   # now sync macaroons & TLS to other users
-  /home/admin/config.scripts/lnd.credentials.sh sync >> ${logFile}
+  /home/admin/config.scripts/lnd.credentials.sh sync "${chain:-main}net" >> ${logFile}
 
   # make a final lnd check
   source <(/home/admin/config.scripts/lnd.check.sh basic-setup)
@@ -327,7 +328,7 @@ if [ "${lightning}" == "lnd" ]; then
 
 fi
 
-if [ "${lightning}" == "cl" ]; then 
+if [ "${lightning}" == "cl" ]; then
 
   ###################################
   # c-lightning
@@ -335,12 +336,16 @@ if [ "${lightning}" == "cl" ]; then
 
   # install c-lightning (when not done by sd card fatpack)
   # if already installed - will skip
-  /home/admin/_cache.sh set message "C-Lightning Install"
+  /home/admin/_cache.sh set message "Core Lightning Install"
   /home/admin/config.scripts/cl.install.sh install >> ${logFile}
 
-  # switch mainnet config on
-  /home/admin/_cache.sh set message "C-Lightning Setup"
+  echo "# switch mainnet config on" >> ${logFile}
+  /home/admin/_cache.sh set message "Core Lightning Setup"
   /home/admin/config.scripts/cl.install.sh on mainnet >> ${logFile}
+
+  echo "# switch cln-grpc on" >> ${logFile}
+  /home/admin/config.scripts/cl-plugin.cln-grpc.sh install >> ${logFile}
+  /home/admin/config.scripts/cl-plugin.cln-grpc.sh on >> ${logFile}
 
   # OLD WALLET FROM CLIGHTNING RESCUE
   if [ "${clrescue}" != "" ]; then
@@ -353,7 +358,7 @@ if [ "${lightning}" == "cl" ]; then
     fi
 
     # detect if the imported hsm_secret is encrypted and set in raspiblitz.conf
-    # use the variables for the default network 
+    # use the variables for the default network
     source <(/home/admin/config.scripts/network.aliases.sh getvars cl mainnet)
     hsmSecretPath="/home/bitcoin/.lightning/bitcoin/hsm_secret"
     # check if encrypted
@@ -392,10 +397,10 @@ if [ "${lightning}" == "cl" ]; then
   # OLD WALLET FROM SEEDWORDS
   elif [ "${seedWords}" != "" ]; then
 
-    echo "Restore CL wallet from seedWords ..." >> ${logFile}
+    echo "# Restore CL wallet from seedWords ..." >> ${logFile}
     source <(/home/admin/config.scripts/cl.hsmtool.sh seed-force mainnet "${seedWords}" "${seedPassword}")
 
-    # check if wallet really got created 
+    # check if wallet really got created
     walletExistsNow=$(ls /home/bitcoin/.lightning/bitcoin/hsm_secret 2>/dev/null | grep -c "hsm_secret")
     if [ $walletExistsNow -eq 0 ]; then
       /home/admin/config.scripts/blitz.error.sh _provision.setup.sh "cl-wallet-seed" "cl.hsmtool.sh seed-force not created wallet" "ls /home/bitcoin/.lightning/bitcoin/hsm_secret --> 0" ${logFile}
@@ -405,7 +410,7 @@ if [ "${lightning}" == "cl" ]; then
   # NEW WALLET
   else
 
-    echo "Generate new CL wallet ..." >> ${logFile}
+    echo "# Generate new CL wallet ..." >> ${logFile}
 
     # a new wallet is generated in /home/admin/config.scripts/cl.install.sh on mainnet
     walletExistsNow=$(ls /home/bitcoin/.lightning/bitcoin/hsm_secret 2>/dev/null | grep -c "hsm_secret")
@@ -424,7 +429,7 @@ if [ "${lightning}" == "cl" ]; then
       exit 18
     fi
 
-    # check if wallet really got created 
+    # check if wallet really got created
     walletExistsNow=$(ls /home/bitcoin/.lightning/bitcoin/hsm_secret 2>/dev/null | grep -c "hsm_secret")
     if [ $walletExistsNow -eq 0 ]; then
       /home/admin/config.scripts/blitz.error.sh _provision.setup.sh "cl-wallet-new-nowallet" "cl.hsmtool.sh new-force did not create wallet" "/home/bitcoin/.lightning/bitcoin/hsm_secret --> missing" ${logFile}
@@ -432,6 +437,7 @@ if [ "${lightning}" == "cl" ]; then
     fi
 
     # write created seedwords into SETUPFILE to be displayed to user on final setup later
+    echo "# writing seed info to setup file" >> ${logFile}
     echo "seedwordsNEW='${seedwords}'" >> ${setupFile}
     echo "seedwords6x4NEW='${seedwords6x4}'" >> ${setupFile}
 

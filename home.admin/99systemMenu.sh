@@ -126,10 +126,10 @@ case $CHOICE in
     then
       whiptail \
         --title "Restart" --yes-button "Restart" --no-button "Not now" \
-        --yesno "To apply the new settings C-lightning needs to restart.
-        Do you want to restart C-lightning now?" 0 0
+        --yesno "To apply the new settings Core Lightning needs to restart.
+        Do you want to restart Core Lightning now?" 0 0
       if [ $? -eq 0 ]; then
-        echo "# Restarting C-lightning"
+        echo "# Restarting Core Lightning"
         sudo systemctl restart ${netprefix}lightningd
       else
         echo "# Continue without restarting."

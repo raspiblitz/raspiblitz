@@ -2,7 +2,7 @@
 
 # https://github.com/mempool/mempool
 
-pinnedVersion="v2.3.1"
+pinnedVersion="v2.4.0"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -35,18 +35,13 @@ This can take multiple hours.
     exit 0
   fi
 
-  # get network info
-  localip=$(hostname -I | awk '{print $1}')
-  toraddress=$(sudo cat /mnt/hdd/tor/mempool/hostname 2>/dev/null)
-  fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
-
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
 
     # Tor
     sudo /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
     whiptail --title " Mempool " --msgbox "Open in your local web browser:
-http://${localip}:4080\n
-https://${localip}:4081 with Fingerprint:
+http://${localIP}:${httpPort}\n
+https://${localIP}:${httpsPort} with Fingerprint:
 ${fingerprint}\n
 Hidden Service address for Tor Browser (QR see LCD):
 ${toraddress}
@@ -56,8 +51,8 @@ ${toraddress}
 
     # IP + Domain
     whiptail --title " Mempool " --msgbox "Open in your local web browser:
-http://${localip}:4080\n
-https://${localip}:4081 with Fingerprint:
+http://${localIP}:${httpPort}\n
+https://${localIP}:${httpsPort} with Fingerprint:
 ${fingerprint}\n
 Activate TOR to access the web block explorer from outside your local network.
 " 16 54
@@ -73,6 +68,21 @@ if [ "$1" = "status" ]; then
   if [ "${mempoolExplorer}" = "on" ]; then
     echo "configured=1"
 
+    # get network info
+    localIP=$(hostname -I | awk '{print $1}')
+    toraddress=$(sudo cat /mnt/hdd/tor/mempool/hostname 2>/dev/null)
+    fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
+
+    echo "installed=1"
+    echo "localIP='${localIP}'"
+    echo "httpPort='4080'"
+    echo "httpsPort='4081'"
+    echo "httpsForced='0'"
+    echo "httpsSelfsigned='1'"
+    echo "authMethod='none'"
+    echo "fingerprint='${fingerprint}'"
+    echo "toraddress='${toraddress}'"
+
     # check indexing
     source <(sudo /home/admin/config.scripts/network.txindex.sh status)
     echo "isIndexed=${isIndexed}"
@@ -86,6 +96,7 @@ if [ "$1" = "status" ]; then
     fi
 
   else
+    echo "installed=0"
     echo "configured=0"
   fi
   exit 0
@@ -144,7 +155,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     fi
     sudo -u mempool NG_CLI_ANALYTICS=false npm run build
     if ! [ $? -eq 0 ]; then
-        echo "FAIL - npm run build did not run correctly, aborting"
+        echo "FAIL - npm run build did not run correctly, aborting (1)"
         exit 1
     fi
 
@@ -158,7 +169,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     fi
     sudo -u mempool NG_CLI_ANALYTICS=false npm run build
     if ! [ $? -eq 0 ]; then
-        echo "FAIL - npm run build did not run correctly, aborting"
+        echo "FAIL - npm run build did not run correctly, aborting (2)"
         exit 1
     fi
 
@@ -168,9 +179,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     RPC_USER=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcuser | cut -c 9-)
     PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
 
-    touch /home/admin/mempool-config.json
-    sudo chmod 600 /home/admin/mempool-config.json || exit 1
-    cat > /home/admin/mempool-config.json <<EOF
+    touch /var/cache/raspiblitz/mempool-config.json
+    chmod 600 /var/cache/raspiblitz/mempool-config.json || exit 1
+    cat > /var/cache/raspiblitz/mempool-config.json <<EOF
 {
   "MEMPOOL": {
     "NETWORK": "mainnet",
@@ -203,7 +214,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   }
 }
 EOF
-    sudo mv /home/admin/mempool-config.json /home/mempool/mempool/backend/mempool-config.json
+    sudo mv /var/cache/raspiblitz/mempool-config.json /home/mempool/mempool/backend/mempool-config.json
     sudo chown mempool:mempool /home/mempool/mempool/backend/mempool-config.json
     cd /home/mempool/mempool/frontend
 
@@ -241,7 +252,7 @@ EOF
 
     # install service
     echo "*** Install mempool systemd ***"
-    cat > /home/admin/mempool.service <<EOF
+    cat > /var/cache/raspiblitz/mempool.service <<EOF
 # systemd unit for Mempool
 
 [Unit]
@@ -268,7 +279,7 @@ PrivateDevices=true
 WantedBy=multi-user.target
 EOF
 
-    sudo mv /home/admin/mempool.service /etc/systemd/system/mempool.service
+    sudo mv /var/cache/raspiblitz/mempool.service /etc/systemd/system/mempool.service
     sudo systemctl enable mempool
     echo "# OK - the mempool service is now enabled"
 
@@ -297,6 +308,9 @@ EOF
     # make sure to keep in sync with tor.network.sh script
     /home/admin/config.scripts/tor.onion-service.sh mempool 80 4082 443 4083
   fi
+
+  # needed for API/WebUI as signal that install ran thru 
+  echo "result='OK'"
   exit 0
 fi
 
@@ -345,6 +359,8 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # setting value in raspi blitz config
   /home/admin/config.scripts/blitz.conf.sh set mempoolExplorer "off"
 
+  # needed for API/WebUI as signal that install ran thru 
+  echo "result='OK'"
   exit 0
 fi
 
@@ -379,7 +395,7 @@ if [ "$1" = "update" ]; then
       fi
       sudo -u mempool NG_CLI_ANALYTICS=false npm run build
       if ! [ $? -eq 0 ]; then
-          echo "FAIL - npm run build did not run correctly, aborting"
+          echo "FAIL - npm run build did not run correctly, aborting (3)"
           exit 1
       fi
 
@@ -393,7 +409,7 @@ if [ "$1" = "update" ]; then
       fi
       sudo -u mempool NG_CLI_ANALYTICS=false npm run build
       if ! [ $? -eq 0 ]; then
-          echo "FAIL - npm run build did not run correctly, aborting"
+          echo "FAIL - npm run build did not run correctly, aborting (4)"
           exit 1
       fi
 

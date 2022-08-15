@@ -4,8 +4,15 @@
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "# config script to connect mobile apps with lnd connect"
  echo "# will autodetect dyndns, sshtunnel or TOR"
- echo "# bonus.lndconnect.sh [zap-ios|zap-android|zeus-ios|zeus-android|shango-ios|shango-android|sendmany-android|fullynoded-lnd] [?ip|tor]"
+ echo "# bonus.lndconnect.sh [zap-ios|zap-android|zeus-ios|zeus-android|shango-ios|shango-android|sendmany-android|fullynoded-lnd] [?ip|tor] [?key-value]"
  exit 1
+fi
+
+# check if lnd is on
+source <(/home/admin/_cache.sh get lnd)
+if [ "${lnd}" != on ]; then
+  echo "error='lnd not active'"
+  exit 1
 fi
 
 # make sure commandline tool is available
@@ -46,7 +53,7 @@ if [ ${#error} -eq 0 ]; then
   ip2torGRPC_PORT="${port}"
 fi
 
-#### ADAPT PARAMETERS BASED TARGETWALLET 
+#### ADAPT PARAMETERS BASED TARGETWALLET
 
 # defaults
 host=""
@@ -71,8 +78,8 @@ if [ "${targetWallet}" = "zap-ios" ]; then
     forceTOR=0
     host="${ip2torGRPC_IP}"
     port="${ip2torGRPC_PORT}"
-  fi  
-  
+  fi
+
 elif [ "${targetWallet}" = "zap-android" ]; then
   connectInfo="- start the Zap Wallet --> SETUP WALLET\n  or choose new Wallet in app menu\n- scan the QR code \n- confirm host address"
   # ZAP uses gRPC ports
@@ -83,7 +90,7 @@ elif [ "${targetWallet}" = "zap-android" ]; then
     forceTOR=1
     host="${ip2torGRPC_IP}"
     port="${ip2torGRPC_PORT}"
-  fi 
+  fi
 
 elif [ "${targetWallet}" = "zeus-ios" ]; then
 
@@ -120,7 +127,7 @@ elif [ "${targetWallet}" = "sendmany-android" ]; then
     forceTOR=0
     host="${ip2torGRPC_IP}"
     port="${ip2torGRPC_PORT}"
-  fi  
+  fi
 
 elif [ "${targetWallet}" = "fullynoded-lnd" ]; then
 
@@ -169,7 +176,7 @@ if [ ${forceTOR} -eq 1 ]; then
   fi
   echo "# TOR --> host ${host} port ${port}"
 fi
-  
+
 # tunnel thru SSH-Reverse-Tunnel if activated for that port
 if [ ${#sshtunnel} -gt 0 ]; then
   isForwarded=$(echo ${sshtunnel} | grep -c "${port}<")
@@ -205,6 +212,11 @@ fi
 # build lndconnect
 # see spec here: https://github.com/LN-Zap/lndconnect/blob/master/lnd_connect_uri.md
 lndconnect="lndconnect://${host}:${port}${macaroonParameter}${certParameter}"
+
+if [ "$3" == "key-value" ]; then
+  echo "lndconnect='${lndconnect}'"
+  exit 0
+fi
 
 # display qr code image on LCD
 sudo /home/admin/config.scripts/blitz.display.sh qr "${lndconnect}"

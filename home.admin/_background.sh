@@ -56,6 +56,17 @@ do
   fi
 
   ####################################################
+  # Trigger Final Setup
+  ####################################################
+
+  if [ "${setupPhase}" != "done" ] && [ "${state}" == "donefinal" ]; then
+    echo "trigger final setup tasks & reboot ..."
+    /home/admin/_provision.xfinal.sh
+    sleep 120
+    exit
+  fi
+
+  ####################################################
   # SKIP REST OF THE TASKS IF STILL IN SETUP PHASE
   ####################################################
 
@@ -100,7 +111,7 @@ do
 
   # every 15min - not too often
   # because its a ping to external service
-  recheckPublicIP=$((($counter % 900)+1))
+  recheckPublicIP=$((($counter % 1800)+1))
 
   # prevent when lndAddress is set
   if [ ${#lndAddress} -gt 3 ]; then

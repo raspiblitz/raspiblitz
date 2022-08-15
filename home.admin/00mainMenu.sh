@@ -68,9 +68,9 @@ if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
   OPTIONS+=(LND "LND Wallet Options")
 fi
 
-# if C-Lightning is active
+# if Core Lightning is active
 if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ]; then
-  OPTIONS+=(CL "C-lightning Wallet Options")
+  OPTIONS+=(CLN "Core Lightning Wallet Options")
 fi
 
 # Activated Apps/Services
@@ -78,7 +78,7 @@ if [ "${rtlWebinterface}" == "on" ]; then
   OPTIONS+=(LRTL "LND RTL Webinterface")
 fi
 if [ "${crtlWebinterface}" == "on" ]; then
-  OPTIONS+=(CRTL "C-Lightning RTL Webinterface")
+  OPTIONS+=(CRTL "Core Lightning RTL Webinterface")
 fi
 if [ "${BTCPayServer}" == "on" ]; then
   OPTIONS+=(BTCPAY "BTCPay Server Info")
@@ -102,7 +102,7 @@ if [ "${LNBits}" == "on" ]; then
   if [ "${LNBitsFunding}" == "lnd" ] || [ "${LNBitsFunding}" == "tlnd" ] || [ "${LNBitsFunding}" == "slnd" ] || [ "${LNBitsFunding}" == "" ]; then
     OPTIONS+=(LNBITS "LNbits on LND")
   elif [ "${LNBitsFunding}" == "cl" ] || [ "${LNBitsFunding}" == "tcl" ] || [ "${LNBitsFunding}" == "scl" ]; then
-    OPTIONS+=(LNBITS "LNbits on c-lightning")
+    OPTIONS+=(LNBITS "LNbits on Core Lightning")
   fi
 fi
 if [ "${lndmanage}" == "on" ]; then
@@ -147,11 +147,21 @@ fi
 if [ "${chantools}" == "on" ]; then
   OPTIONS+=(CHANTOOLS "ChannelTools (Fund Rescue)")
 fi
+if [ "${homer}" == "on" ]; then
+  OPTIONS+=(HOMER "Homer Dashboard")
+  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
+fi
 if [ "${circuitbreaker}" == "on" ]; then
   OPTIONS+=(CIRCUIT "Circuitbreaker (LND firewall)")
 fi
 if [ "${tallycoinConnect}" == "on" ]; then
   OPTIONS+=(TALLY "Tallycoin Connect")
+fi
+if [ "${squeaknode}" == "on" ]; then
+  OPTIONS+=(SQUEAKNODE "Squeaknode")
+fi
+if [ "${itchysats}" == "on" ]; then
+  OPTIONS+=(ITCHYSATS "Show ItchySats details")
 fi
 
 # dont offer to switch to "testnet view for now" - so no wswitch back to mainnet needed
@@ -221,7 +231,7 @@ case $CHOICE in
         LND)
             /home/admin/99lndMenu.sh
             ;;
-        CL)
+        CLN)
             /home/admin/99clMenu.sh ${chain}net
             ;;
         CONNECT)
@@ -303,6 +313,13 @@ case $CHOICE in
         HELIPAD)
             sudo /home/admin/config.scripts/bonus.helipad.sh menu
             ;;
+
+        SQUEAKNODE)
+            /home/admin/config.scripts/bonus.squeaknode.sh menu
+            ;;
+        ITCHYSATS)
+            sudo /home/admin/config.scripts/bonus.itchysats.sh menu
+            ;;
         CHANTOOLS)
             sudo /home/admin/config.scripts/bonus.chantools.sh menu
             ;;
@@ -315,6 +332,9 @@ case $CHOICE in
         SUBSCRIBE)
             /home/admin/config.scripts/blitz.subscriptions.py
             ;;
+        HOMER)
+            sudo /home/admin/config.scripts/bonus.homer.sh menu
+            ;;
         SERVICES)
             /home/admin/00settingsMenuServices.sh
             ;;
@@ -325,7 +345,7 @@ case $CHOICE in
             /home/admin/98repairMenu.sh
             ;;
         PASSWORD)
-            sudo /home/admin/config.scripts/blitz.setpassword.sh
+            sudo /home/admin/config.scripts/blitz.passwords.sh set
             ;;
         UPDATE)
             /home/admin/99updateMenu.sh

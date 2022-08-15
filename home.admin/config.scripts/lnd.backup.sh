@@ -156,7 +156,7 @@ if [ ${mode} = "lnd-export" ]; then
   sudo chown ${fileowner}:${fileowner} ${downloadPath}/lnd-rescue.tar.gz 1>&2
 
   # delete old backups
-  rm ${downloadPath}/lnd-rescue-*.tar.gz 2>/dev/null 1>/dev/null
+  # rm ${downloadPath}/lnd-rescue-*.tar.gz 2>/dev/null 1>/dev/null
 
   # name with md5 checksum
   md5checksum=$(md5sum ${downloadPath}/lnd-rescue.tar.gz | head -n1 | cut -d " " -f1)
@@ -312,24 +312,24 @@ if [ ${mode} = "lnd-import-gui" ]; then
         echo "PRESS ENTER to continue."
         read key
       elif [ "${error}" == "not-found" ]; then
-        echo "!! WARNING !!"
+        echo "# WARNING #"
         echo "There was no upload found in ${defaultUploadPath}"
         echo "PRESS ENTER to continue & retry ... or 'x'+ ENTER to cancel"
         read keyRetry
       elif [ "${error}" == "multiple" ]; then
-        echo "!! WARNING !!"
+        echo "# WARNING #"
         echo "There are multiple lnd-rescue files in directory ${defaultUploadPath}"
         echo "Make sure you upload only one tar.gz-file and start again."
         echo "PRESS ENTER to continue & retry ... or 'x'+ ENTER to cancel"
         read keyRetry
       elif [ "${error}" == "invalid" ]; then
-        echo "!! WARNING !!"
+        echo "# WARNING #"
         echo "The file uploaded is not a valid (complete upload failed or not correct file)."
         echo "PRESS ENTER to continue & retry ... or 'x'+ ENTER to cancel"
         read keyRetry
       else
         # create no result file and exit
-        echo "!! WARNING !! Unknown State (report to devs)"
+        echo "# WARNING # Unknown State (report to devs)"
         exit 1
       fi
 
@@ -505,23 +505,23 @@ if [ ${mode} = "scb-import-gui" ]; then
         echo "PRESS ENTER to continue."
         read key
       elif [ "${error}" == "not-found" ]; then
-        echo "!! WARNING !!"
+        echo "# WARNING #"
         echo "There was no upload found in ${defaultUploadPath}"
         echo "PRESS ENTER to continue & retry ... or 'x'+ ENTER to cancel"
         read keyRetry
       elif [ "${error}" == "multiple" ]; then
-        echo "!! WARNING !!"
+        echo "# WARNING #"
         echo "There are multiple lnd-rescue files in directory ${defaultUploadPath}"
         echo "Make sure you upload only one tar.gz-file and start again."
         echo "PRESS ENTER to continue & retry ... or 'x'+ ENTER to cancel"
         read keyRetry
       elif [ "${error}" == "invalid" ]; then
-        echo "!! WARNING !!"
+        echo "# WARNING #"
         echo "The file uploaded is not a valid (complete upload failed or not correct file)."
         echo "PRESS ENTER to continue & retry ... or 'x'+ ENTER to cancel"
         read keyRetry
       else
-        echo "!! WARNING !! Unknown State (report to devs)"
+        echo "# WARNING # Unknown State (report to devs)"
         exit 1
       fi
 
@@ -649,7 +649,7 @@ to protect the seed words. Most users did not set this.
     sudo rm /var/cache/raspiblitz/.pass.tmp 2>/dev/null
     sudo touch /var/cache/raspiblitz/.pass.tmp
     sudo chown admin:admin /var/cache/raspiblitz/.pass.tmp
-    sudo /home/admin/config.scripts/blitz.setpassword.sh x "Enter extra Password D" /var/cache/raspiblitz/.pass.tmp empty-allowed
+    sudo /home/admin/config.scripts/blitz.password.sh set x "Enter extra Password D" /var/cache/raspiblitz/.pass.tmp empty-allowed
     passwordD=$(sudo cat /var/cache/raspiblitz/.pass.tmp)
     sudo shred -u /var/cache/raspiblitz/.pass.tmp 2>/dev/null
   fi

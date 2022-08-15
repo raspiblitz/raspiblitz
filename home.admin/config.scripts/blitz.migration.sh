@@ -108,6 +108,10 @@ migrate_raspiblitz_conf () {
 
 if [ "$1" = "migration-umbrel" ]; then
 
+  source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
+  if [ "${isMounted}" == "1" ]; then
+    source <(sudo /home/admin/config.scripts/blitz.datadrive.sh unmount)
+  fi
   # make sure data drive is mounted
   source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
   if [ "${isMounted}" != "1" ]; then
@@ -116,15 +120,17 @@ if [ "$1" = "migration-umbrel" ]; then
   if [ "${isMounted}" == "1" ]; then
     echo "# mounted /mnt/hdd (hddFormat='${hddFormat}')"
   else
-    echo "err='failed temp mounting disk'"
+    echo "error'failed temp mounting disk'"
     exit 1
   fi
 
   # checking basic data disk layout
   if [ -f /mnt/hdd/umbrel/bitcoin/bitcoin.conf ] && [ -f /mnt/hdd/umbrel/lnd/lnd.conf ]; then
-    echo "# found bitcoin & lnd data"
+    echo "# found bitcoin & lnd data <0.5.0"
+  elif [ "${hddVersionBTC}" != "" ] || [ "${hddVersionLND}" != "" ] || [ "${hddVersionCLN}" != "" ]; then
+    echo "# found umbrel data >=0.5.0"
   else
-    echo "err='umbrel data layout changed'"
+    echo "error='umbrel data layout changed'"
     exit 1
   fi
 
@@ -133,14 +139,14 @@ if [ "$1" = "migration-umbrel" ]; then
   # determine version
   version=$(sudo cat /mnt/hdd/umbrel/info.json | jq -r '.version')
   if [ "${version}" == "" ]; then
-    echo "err='not able to get version'"
+    echo "error='not able to get version'"
     exit 1
   fi
   versionMajor=$(echo "${version}" | cut -d "." -f1)
   versionMiner=$(echo "${version}" | cut -d "." -f2)
   versionPatch=$(echo "${version}" | cut -d "." -f3)
   if [ "${versionMajor}" == "" ] || [ "${versionMiner}" == "" ] || [ "${versionPatch}" == "" ]; then
-    echo "err='not able processing version'"
+    echo "error='not able processing version'"
     exit 1
   fi
 
@@ -159,24 +165,75 @@ if [ "$1" = "migration-umbrel" ]; then
   # extract detailed data
   nameNode=$(sudo jq -r '.name' /mnt/hdd/umbrel/db/user.json)
 
-  # move bitcoin/blockchain & call function to migrate config
-  sudo mv /mnt/hdd/bitcoin /mnt/hdd/backup_bitcoin 2>/dev/null
-  sudo mv /mnt/hdd/umbrel/bitcoin /mnt/hdd/
-  sudo rm /mnt/hdd/bitcoin/.walletlock 2>/dev/null
-  sudo chown bitcoin:bitcoin -R /mnt/hdd/bitcoin
-  migrate_btc_conf
+  # call function for final migration
+  migrate_raspiblitz_conf ${nameNode}
 
-  # move lnd & call function to migrate config
-  sudo mv /mnt/hdd/lnd /mnt/hdd/backup_lnd 2>/dev/null
-  sudo mv /mnt/hdd/umbrel/lnd /mnt/hdd/
-  sudo chown bitcoin:bitcoin -R /mnt/hdd/lnd
-  migrate_lnd_conf ${nameNode}
+  # move bitcoin/blockchain & call function to migrate config
+  echo "### BITCOIN ###"
+  if [ ${versionMajor} -eq 0 ] && [ ${versionMiner} -gt 4 ]; then
+    echo "# moving new bitcoin data >=0.5.0"
+    sudo rm -R /mnt/hdd/bitcoin 2>/dev/null
+    sudo mv /mnt/hdd/umbrel/app-data/bitcoin/data/bitcoin /mnt/hdd/
+    sudo rm /mnt/hdd/bitcoin/.walletlock 2>/dev/null
+    sudo chown bitcoin:bitcoin -R /mnt/hdd/bitcoin
+    migrate_btc_conf
+    /home/admin/config.scripts/blitz.conf.sh set lightning "none"
+  else
+    echo "# moving old bitcoin data <0.5.0"
+    sudo mv /mnt/hdd/bitcoin /mnt/hdd/backup_bitcoin 2>/dev/null
+    sudo mv /mnt/hdd/umbrel/bitcoin /mnt/hdd/
+    sudo rm /mnt/hdd/bitcoin/.walletlock 2>/dev/null
+    sudo chown bitcoin:bitcoin -R /mnt/hdd/bitcoin
+    migrate_btc_conf
+  fi
+
+  # CORE LIGHTNING since 0.5.0 umbrel has core lightning
+  echo "### CORE LIGHTNING ###"
+  if [ ${versionMajor} -eq 0 ] && [ ${versionMiner} -gt 4 ]; then
+    clnExists=$(sudo ls /mnt/hdd/umbrel/app-data/core-lightning/data/lightningd/bitcoin/hsm_secret | grep -c "hsm_secret")
+    if [ "${clnExists}" == "1" ]; then 
+      echo "# moving cln data >=0.5.0"
+      sudo mv /mnt/hdd/app-data/.lightning /mnt/hdd/app-data/backup_lightning 2>/dev/null
+      sudo mkdir /mnt/hdd/app-data/.lightning 2>/dev/null
+      sudo mv /mnt/hdd/umbrel/app-data/core-lightning/data/lightningd/bitcoin /mnt/hdd/app-data/.lightning/
+      sudo chown bitcoin:bitcoin -R /mnt/hdd/app-data/.lightning
+      /home/admin/config.scripts/blitz.conf.sh set cl on
+      /home/admin/config.scripts/blitz.conf.sh set lightning "cl"
+    else
+      echo "# no cln data found >=0.5.0"
+    fi
+  else
+    echo "# no core lightning <0.5.0"
+  fi
+
+  # LND since 0.5.0 umbrel uses a different data structure
+  echo "### LND ###"
+  if [ ${versionMajor} -eq 0 ] && [ ${versionMiner} -gt 4 ]; then
+    # new way - lnd might even not exist because its optional 
+    lndExists=$(sudo ls /mnt/hdd/umbrel/app-data/lightning/data/lnd/lnd.conf | grep -c "lnd.conf")
+    if [ "${lndExists}" == "1" ]; then
+      echo "# moving lnd data >=0.5.0"
+      sudo mv /mnt/hdd/lnd /mnt/hdd/backup_lnd 2>/dev/null
+      sudo mv /mnt/hdd/umbrel/app-data/lightning/data/lnd /mnt/hdd/
+      sudo chown bitcoin:bitcoin -R /mnt/hdd/lnd 
+      migrate_lnd_conf ${nameNode}
+      /home/admin/config.scripts/blitz.conf.sh set lnd on
+      /home/admin/config.scripts/blitz.conf.sh set lightning "lnd"
+    else
+      echo "# no lnd data found >=0.5.0"
+    fi
+  else
+    echo "# moving old lnd data <0.5.0"
+    sudo mv /mnt/hdd/lnd /mnt/hdd/backup_lnd 2>/dev/null
+    sudo mv /mnt/hdd/umbrel/lnd /mnt/hdd/
+    sudo chown bitcoin:bitcoin -R /mnt/hdd/lnd
+    migrate_lnd_conf ${nameNode}
+    /home/admin/config.scripts/blitz.conf.sh set lnd on
+    /home/admin/config.scripts/blitz.conf.sh set lightning "lnd"
+  fi
 
   # backup & rename the rest of the data
   sudo mv /mnt/hdd/umbrel /mnt/hdd/backup_migration
-
-  # call function for final migration
-  migrate_raspiblitz_conf ${nameNode}
 
   echo "# OK ... data disk converted to RaspiBlitz"
   exit 0
@@ -196,7 +253,7 @@ if [ "$1" = "migration-citadel" ]; then
   if [ "${isMounted}" == "1" ]; then
     echo "# mounted /mnt/hdd (hddFormat='${hddFormat}')"
   else
-    echo "err='failed temp mounting disk'"
+    echo "error='failed temp mounting disk'"
     exit 1
   fi
 
@@ -204,7 +261,7 @@ if [ "$1" = "migration-citadel" ]; then
   if [ -f /mnt/hdd/citadel/bitcoin/bitcoin.conf ] && [ -f /mnt/hdd/citadel/lnd/lnd.conf ]; then
     echo "# found bitcoin & lnd data"
   else
-    echo "err='citadel data layout changed'"
+    echo "error='citadel data layout changed'"
     exit 1
   fi
 
@@ -213,14 +270,14 @@ if [ "$1" = "migration-citadel" ]; then
   # determine version
   version=$(sudo cat /mnt/hdd/citadel/info.json | jq -r '.version')
   if [ "${version}" == "" ]; then
-    echo "err='not able to get version'"
+    echo "error='not able to get version'"
     exit 1
   fi
   versionMajor=$(echo "${version}" | cut -d "." -f1)
   versionMiner=$(echo "${version}" | cut -d "." -f2)
   versionPatch=$(echo "${version}" | cut -d "." -f3)
   if [ "${versionMajor}" == "" ] || [ "${versionMiner}" == "" ] || [ "${versionPatch}" == "" ]; then
-    echo "err='not able processing version'"
+    echo "error='not able processing version'"
     exit 1
   fi
 
@@ -271,7 +328,7 @@ if [ "$1" = "migration-mynode" ]; then
   if [ "${isMounted}" == "1" ]; then
     echo "# mounted /mnt/hdd (hddFormat='${hddFormat}')"
   else
-    echo "err='failed temp mounting disk'"
+    echo "error='failed temp mounting disk'"
     exit 1
   fi
 
@@ -279,7 +336,7 @@ if [ "$1" = "migration-mynode" ]; then
   if [ -f /mnt/hdd/mynode/bitcoin/bitcoin.conf ] && [ -f /mnt/hdd/mynode/lnd/lnd.conf ]; then
     echo "# found bitcoin & lnd data"
   else
-    echo "err='mynode data layout changed'"
+    echo "error='mynode data layout changed'"
     exit 1
   fi
 

@@ -20,12 +20,16 @@ OPTIONS+=(MOBILE "Connect Mobile Wallet")
 if [ "${ElectRS}" == "on" ]; then
   OPTIONS+=(ELECTRS "Electrum Rust Server")
 fi
-if [ "${BTCPayServer}" == "on" ]; then
-  OPTIONS+=(BTCPAY "Show LND connection string")
+if [ "${BTCPayServer}" == "on" ] && [ "${lnd}" = "on" ]; then
+  OPTIONS+=(BTCPAY-LND "Show LND connection string")
+fi
+if [ "${BTCPayServer}" == "on" ] && [ "${cl}" = "on" ]; then
+  OPTIONS+=(BTCPAY-CLN "Show CLN connection string")
 fi
 OPTIONS+=(${network}RPC "Connect Specter Desktop or JoinMarket")
 OPTIONS+=(BISQ "Connect Bisq to this node")
 if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
+  OPTIONS+=(ALBY "Connect Alby to this node")
   OPTIONS+=(EXPORT "Get Macaroons and TLS.cert")
   OPTIONS+=(RESET "Recreate LND Macaroons & tls.cert")
   OPTIONS+=(SYNC "Sync Macaroons & tls.cert with Apps/Users")
@@ -49,24 +53,34 @@ case $CHOICE in
     /home/admin/97addMobileWallet.sh;;
   ELECTRS)
     /home/admin/config.scripts/bonus.electrs.sh menu;;
-  BTCPAY)
+  BTCPAY-LND)
     /home/admin/config.scripts/lnd.export.sh btcpay
     echo "Press ENTER to return to main menu."
     read key
     exit 0;;
+  BTCPAY-CLN)
+    /home/admin/config.scripts/bonus.btcpayserver.sh cln-lightning-rpc-access
+    echo "Press ENTER to return to main menu."
+    read key
+    exit 0;;
   RESET)
-    sudo /home/admin/config.scripts/lnd.credentials.sh reset
-    sudo /home/admin/config.scripts/lnd.credentials.sh sync
+    sudo /home/admin/config.scripts/lnd.credentials.sh reset "${chain:-main}net"
+    sudo /home/admin/config.scripts/lnd.credentials.sh sync "${chain:-main}net"
     sudo /home/admin/config.scripts/blitz.shutdown.sh reboot
     exit 0;;
   SYNC)
-    sudo /home/admin/config.scripts/lnd.credentials.sh sync
+    sudo /home/admin/config.scripts/lnd.credentials.sh sync "${chain:-main}net"
     echo "Press ENTER to return to main menu."
     read key
     exit 0;;
   EXPORT)
     sudo /home/admin/config.scripts/lnd.export.sh
     exit 0;;
+
+  ALBY)
+    /home/admin/config.scripts/bonus.alby.sh
+    exit 0;
+  ;;
 
   BISQ)
     OPTIONS=()
@@ -162,10 +176,10 @@ HiddenServicePort 8333 127.0.0.1:8333" | sudo tee -a /etc/tor/torrc
       # have this to signal that selection went wrong
       BITCOINRPCPORT=0
     fi
-    echo "# Running on ${chain}net"
+    echo "# Running on ${chain:-main}net"
     echo
     allowIPrange=$(grep -c "rpcallowip=$localIPrange" <  /mnt/hdd/${network}/${network}.conf)
-    bindIP=$(grep -c "${chain}.rpcbind=$localIP" <  /mnt/hdd/${network}/${network}.conf)
+    bindIP=$(grep -c "${chain:-main}.rpcbind=$localIP" <  /mnt/hdd/${network}/${network}.conf)
     rpcTorService=$(grep -c "HiddenServicePort ${BITCOINRPCPORT} 127.0.0.1:${BITCOINRPCPORT}"  < /etc/tor/torrc)
     TorRPCaddress=$(sudo cat /mnt/hdd/tor/bitcoin${BITCOINRPCPORT}/hostname)
 

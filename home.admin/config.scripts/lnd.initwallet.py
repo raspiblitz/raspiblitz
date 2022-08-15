@@ -35,7 +35,7 @@ else:
 def new(stub, wallet_password="", seed_entropy=None):
     if seed_entropy:
         # provide 16-bytes of static data to get reproducible seeds for TESTING!)
-        print("WARNING: Use this for testing only!!")
+        print("WARNING: Use this for testing only")
         request = lnrpc.GenSeedRequest(seed_entropy=seed_entropy)
     else:
         request = lnrpc.GenSeedRequest()

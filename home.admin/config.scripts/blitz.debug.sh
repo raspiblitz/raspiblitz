@@ -119,11 +119,12 @@ else
 fi
 echo
 
-echo "*** C-LIGHTNING (MAINNET) SYSTEMD STATUS ***"
+echo "*** CORE LIGHTNING (MAINNET) SYSTEMD STATUS ***"
 if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ] || [ "${cl}" == "1" ]; then
   sudo systemctl status lightningd -n2 --no-pager
   echo
-  echo "*** LAST 30 C-LIGHTNING (MAINNET) INFO LOGS ***"
+  echo "*** LAST 30 CORE LIGHTNING (MAINNET) INFO LOGS ***"
+  echo "For details also use command --> cllog"
   echo "sudo tail -n 30 /home/bitcoin/.lightning/${network}/cl.log"
   sudo tail -n 30 /home/bitcoin/.lightning/${network}/cl.log
 else
@@ -163,11 +164,11 @@ else
 fi
 echo
 
-echo "*** C-LIGHTNING (TESTNET) SYSTEMD STATUS ***"
+echo "*** CORE LIGHTNING (TESTNET) SYSTEMD STATUS ***"
 if [ "${tcl}" == "on" ] || [ "${tcl}" == "1" ]; then
   sudo systemctl status tlightningd -n2 --no-pager
   echo
-  echo "*** LAST 30 C-LIGHTNING (TESTNET) INFO LOGS ***"
+  echo "*** LAST 30 CORE LIGHTNING (TESTNET) INFO LOGS ***"
   echo "sudo tail -n 30 /home/bitcoin/.lightning/testnet/cl.log"
   sudo tail -n 30 /home/bitcoin/.lightning/testnet/cl.log
 else
@@ -207,11 +208,11 @@ else
 fi
 echo
 
-echo "*** C-LIGHTNING (SIGNET) SYSTEMD STATUS ***"
+echo "*** CORE LIGHTNING (SIGNET) SYSTEMD STATUS ***"
 if [ "${scl}" == "on" ] || [ "${scl}" == "1" ]; then
   sudo systemctl status slightningd -n2 --no-pager
   echo
-  echo "*** LAST 30 C-LIGHTNING (SIGNET) INFO LOGS ***"
+  echo "*** LAST 30 CORE LIGHTNING (SIGNET) INFO LOGS ***"
   echo "sudo tail -n 30 /home/bitcoin/.lightning/signet/cl.log"
   sudo tail -n 30 /home/bitcoin/.lightning/signet/cl.log
 else
@@ -239,7 +240,7 @@ else
 
   echo "*** LAST BLITZAPI LOGS ***"
   echo "sudo journalctl -u blitzapi -b --no-pager -n20"
-  sudo journalctl -u nginx -b --no-pager -n20
+  sudo journalctl -u blitzapi -b --no-pager -n20
   echo
 fi
 
@@ -394,6 +395,11 @@ echo "*** SYSTEM CACHE STATUS ***"
 /home/admin/_cache.sh "export" system_
 /home/admin/_cache.sh "export" ln_default | grep -v "ln_default_address"
 /home/admin/_cache.sh "export" btc_default | grep -v "btc_default_address"
+
+echo
+echo "*** LOGFILES ***"
+sudo journalctl --disk-usage
+sudo du -sh /var/log
 
 echo
 echo "*** OPTION: SHARE THIS DEBUG OUTPUT ***"

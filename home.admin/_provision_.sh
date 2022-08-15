@@ -52,9 +52,9 @@ echo "### BASIC SYSTEM SETTINGS ###" >> ${logFile}
 echo "# Make sure the user bitcoin is in the debian-tor group"
 usermod -a -G debian-tor bitcoin
 
-echo "# Optimizing log files: rotate daily, keep 2 weeks & compress old days " >> ${logFile}
+echo "# Optimizing log files: rotate daily, keep 1 week & compress old days " >> ${logFile}
 sed -i "s/^weekly/daily/g" /etc/logrotate.conf >> ${logFile} 2>&1
-sed -i "s/^rotate 4/rotate 14/g" /etc/logrotate.conf >> ${logFile} 2>&1
+sed -i "s/^rotate 4/rotate 7/g" /etc/logrotate.conf >> ${logFile} 2>&1
 sed -i "s/^#compress/compress/g" /etc/logrotate.conf >> ${logFile} 2>&1
 systemctl restart logrotate
 
@@ -66,7 +66,7 @@ echo "deprecatedrpc=addresses" >> /mnt/hdd/bitcoin/bitcoin.conf 2>/dev/null
 # backup SSH PubKeys
 /home/admin/config.scripts/blitz.ssh.sh backup
 
-# optimze mempool if RAM >1GB
+# optimize mempool if RAM >1GB
 kbSizeRAM=$(cat /proc/meminfo | grep "MemTotal" | sed 's/[^0-9]*//g')
 if [ ${kbSizeRAM} -gt 1500000 ]; then
   echo "Detected RAM >1GB --> optimizing ${network}.conf"
@@ -76,6 +76,9 @@ if [ ${kbSizeRAM} -gt 3500000 ]; then
   echo "Detected RAM >3GB --> optimizing ${network}.conf"
   sed -i "s/^maxmempool=.*/maxmempool=300/g" /mnt/hdd/${network}/${network}.conf
 fi
+
+# zram on for all devices
+/home/admin/config.scripts/blitz.zram.sh on
 
 # link and copy HDD content into new OS on sd card
 echo "Copy HDD content for user admin" >> ${logFile}
@@ -184,11 +187,11 @@ sed -i "s/^setupStep=.*/setupStep=100/g" /home/admin/raspiblitz.info
 ##########################
 /home/admin/_cache.sh set message "Installing Services"
 
-echo "### RUNNING PROVISIONING SERVICES ###" >> ${logFile}
-
 # BLITZ WEB SERVICE
 echo "Provisioning BLITZ WEB SERVICE - run config script" >> ${logFile}
-/home/admin/config.scripts/blitz.web.sh on >> ${logFile} 2>&1
+/home/admin/config.scripts/blitz.web.sh https-on >> ${logFile} 2>&1
+
+echo "### RUNNING PROVISIONING SERVICES ###" >> ${logFile}
 
 # BITCOIN INTERIMS UPDATE
 if [ ${#bitcoinInterimsUpdate} -gt 0 ]; then
@@ -297,21 +300,24 @@ else
   echo "Provisioning LND Signet - not active" >> ${logFile}
 fi
 
-# LND binary install
+# CORE LIGHTNING binary install
 if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ] || [ "${tcl}" == "on" ] || [ "${scl}" == "on" ]; then
   # if already installed by fatpack will skip 
-  echo "Provisioning C-Lightning Binary - run config script" >> ${logFile}
+  echo "Provisioning Core Lightning Binary - run config script" >> ${logFile}
   /home/admin/config.scripts/cl.install.sh install >> ${logFile} 2>&1
+  echo "Provisioning cl-plugin.cln-grpc.sh - run config script" >> ${logFile}
+  /home/admin/config.scripts/cl-plugin.cln-grpc.sh install >> ${logFile}
+  /home/admin/config.scripts/cl-plugin.cln-grpc.sh on >> ${logFile}
 else
-    echo "Provisioning C-Lightning Binary - not active" >> ${logFile}
+    echo "Provisioning Core Lightning Binary - not active" >> ${logFile}
 fi
 
-# CL Mainnet (when not main instance)
-if [ "${cl}" == "on" ] && [ "${lightning}" != "cl" ]; then
+# CL Mainnet
+if [ "${cl}" == "on" ]; then
     echo "Provisioning CL Mainnet - run config script" >> ${logFile}
     /home/admin/config.scripts/cl.install.sh on mainnet >> ${logFile} 2>&1
 else
-  echo "Provisioning CL Mainnet - not active as secondary option" >> ${logFile}
+  echo "Provisioning CL Mainnet - not active" >> ${logFile}
 fi
 
 # CL Testnet
@@ -339,6 +345,17 @@ else
     echo "Provisioning Tor - keep default" >> ${logFile}
 fi
 
+# WebAPI & UI (in case image was not fatpack - but webapi was switchen on)
+blitzApiInstalled=$(systemctl status blitzapi | grep -c "loaded")
+if [ "${blitzapi}" == "on" ] && [ $blitzApiInstalled -eq 0 ]; then
+    echo "Provisioning BlitzAPI - run config script" >> ${logFile}
+    /home/admin/_cache.sh set message "Setup BlitzAPI (takes time)"
+    /home/admin/config.scripts/blitz.web.api.sh on >> ${logFile} 2>&1    
+    /home/admin/config.scripts/blitz.web.ui.sh on >> ${logFile} 2>&1   
+else
+    echo "Provisioning BlitzAPI - keep default" >> ${logFile}
+fi
+
 # AUTO PILOT
 if [ "${autoPilot}" = "on" ]; then
     echo "Provisioning AUTO PILOT - run config script" >> ${logFile}
@@ -355,15 +372,6 @@ if [ "${networkUPnP}" = "on" ]; then
     /home/admin/config.scripts/network.upnp.sh on >> ${logFile} 2>&1
 else
     echo "Provisioning NETWORK UPnP  - keep default" >> ${logFile}
-fi
-
-# LND AUTO NAT DISCOVERY (deprecated: but keep in until version 2.0)
-if [ "${autoNatDiscovery}" = "on" ]; then
-    echo "Provisioning LND AUTO NAT DISCOVERY - run config script" >> ${logFile}
-    /home/admin/_cache.sh set message "Setup AutoNAT"
-    /home/admin/config.scripts/lnd.autonat.sh on >> ${logFile} 2>&1
-else
-    echo "Provisioning AUTO NAT DISCOVERY - keep default" >> ${logFile}
 fi
 
 # DYNAMIC DOMAIN
@@ -706,6 +714,15 @@ else
   echo "Provisioning CircuitBreaker - keep default" >> ${logFile}
 fi
 
+# homer
+if [ "${homer}" = "on" ]; then
+  echo "Provisioning Homer - run config script" >> ${logFile}
+  sudo sed -i "s/^message=.*/message='Setup Homer'/g" ${infoFile}
+  sudo -u admin /home/admin/config.scripts/bonus.homer.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning Homer - keep default" >> ${logFile}
+fi
+
 # tallycoin_connect
 if [ "${tallycoinConnect}" = "on" ]; then
   echo "Provisioning Tallycoin Connect - run config script" >> ${logFile}
@@ -722,6 +739,24 @@ if [ "${bitcoinminds}" = "on" ]; then
   sudo -u admin /home/admin/config.scripts/bonus.bitcoinminds.sh on >> ${logFile} 2>&1
 else
   echo "Provisioning bitcoinminds.org - keep default" >> ${logFile}
+fi
+
+# squeaknode
+if [ "${squeaknode}" = "on" ]; then
+  echo "Provisioning Squeaknode - run config script" >> ${logFile}
+  sudo sed -i "s/^message=.*/message='Setup Squeaknode '/g" ${infoFile}
+  sudo -u admin /home/admin/config.scripts/bonus.squeaknode.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning Squeaknode - keep default" >> ${logFile}
+fi
+
+# itchysats
+if [ "${itchysats}" = "on" ]; then
+  echo "Provisioning ItchySats - run config script" >> ${logFile}
+  sudo sed -i "s/^message=.*/message='Setup ItchySats'/g" ${infoFile}
+  sudo -u admin /home/admin/config.scripts/bonus.itchysats.sh on --download >> ${logFile} 2>&1
+else
+  echo "ItchySats - keep default" >> ${logFile}
 fi
 
 # custom install script from user

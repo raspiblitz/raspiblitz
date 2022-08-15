@@ -16,7 +16,7 @@ sudo chmod 777 /home/admin/raspiblitz.log
 if [ "${lightning}" == "lnd" ]; then
   walletName="LND"
 elif [ "${lightning}" == "cl" ]; then
-  walletName="C-lightning"
+  walletName="Core Lightning"
 fi
 if [ "${setupPhase}" == "setup" ] && [ "${seedwords6x4NEW}" != "" ]; then
     ack=0
@@ -35,15 +35,16 @@ fi
 # BLOCKCHAIN INFO & OPTIONS
 
 # get fresh data
-source <(/home/admin/_cache.sh get btc_default_sync_percentage network)
-syncProgressFull=$(echo "${btc_default_sync_percentage}" | cut -d "." -f1)
-if [ "${syncProgressFull}" != "" ] && [ "${network}" == "bitcoin" ] && [ ${syncProgressFull} -lt 75 ]; then
+source <(/home/admin/_cache.sh get btc_default_sync_percentage btc_default_blocks_data_kb network)
+#syncProgressFull=$(echo "${btc_default_sync_percentage}" | cut -d "." -f1)
+#if [ "${syncProgressFull}" != "" ] && [ "${network}" == "bitcoin" ] && [ ${syncProgressFull} -lt 75 ]; then
+if [ "${btc_default_blocks_data_kb}" != "" ] && [ ${btc_default_blocks_data_kb} -lt 250000000 ]; then
 
   # offer choice to copy blockchain over LAN
   OPTIONS=()
   OPTIONS+=(SELFSYNC "Run full self sync/validation (takes long)")
   OPTIONS+=(COPY "Copy from Computer/RaspiBlitz over LAN (3-10h)")
-  CHOICESUB=$(dialog --backtitle "RaspiBlitz" --clear --title " Blockchain Sync/Validation " --menu "\nYour Blockchain sync is just at ${syncProgress}%\nThe full validation might take multiple days to finish.\n\nHow do you want to proceed:" 13 66 7 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+  CHOICESUB=$(dialog --backtitle "RaspiBlitz" --clear --title " Blockchain Sync/Validation " --menu "\nYour Blockchain is not fully synced yet.\nThe full validation might take multiple days to finish.\n\nHow do you want to proceed:" 13 66 7 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
   if [ "${CHOICESUB}" == "COPY" ]; then
     /home/admin/config.scripts/blitz.copychain.sh target
@@ -81,58 +82,22 @@ After the final reboot there might now be some waiting time until your Blockchai
 " 11 65
 fi
 
-########################################
-# AFTER FINAL SETUP TASKS
-echo "# AFTER FINAL SETUP TASKS" >> /home/admin/raspiblitz.log
-
-# source info fresh
-source /home/admin/raspiblitz.info
-echo "# source /home/admin/raspiblitz.info" >> /home/admin/raspiblitz.log
-cat /home/admin/raspiblitz.info >> /home/admin/raspiblitz.log
-
-# make sure network defaults to bitcoin
-if [ "${network}" == "" ]; then
-  echo "# WARN: default network to bitcoin" >> /home/admin/raspiblitz.log
-  network="bitcoin"
-fi
-
-# make sure for future starts that blockchain service gets started after bootstrap
-# so deamon reloas needed ... system will go into reboot after last loop
-# needs to be after wait loop because otherwise the "restart" on COPY OVER LAN will not work
-echo "# Updating service ${network}d.service ..."
-sudo sed -i "s/^Wants=.*/Wants=bootstrap.service/g" /etc/systemd/system/${network}d.service
-sudo sed -i "s/^After=.*/After=bootstrap.service/g" /etc/systemd/system/${network}d.service
-sudo systemctl daemon-reload 2>/dev/null
-
-# delete setup data from RAM
-sudo rm /var/cache/raspiblitz/temp/raspiblitz.setup
-
-# signal that setup phase is over
-/home/admin/_cache.sh set setupPhase "done"
+# trigger after final setup tasks & reboot
+/home/admin/_cache.sh set state "donefinal"
 
 sleep 2
 clear
-source <(/home/admin/_cache.sh get internet_localip)
-/home/admin/_cache.sh set setupPhase "done"
 echo "***********************************************************"
 echo "RaspiBlitz going to reboot"
 echo "***********************************************************"
 echo "This is the final setup reboot - you will get disconnected."
-echo "SSH again into system with:"
-echo "ssh admin@${internet_localip}"
+echo "SSH again into system after restart."
 echo "Use your password A"
 echo "***********************************************************"
-echo "# final setup reboot ..." >> /home/admin/raspiblitz.log
-
-########################################
-# AFTER SETUP REBOOT
-# touchscreen activation, start with configured SWAP, fix LCD text bug
-sudo cp /home/admin/raspiblitz.log /home/admin/raspiblitz.setup.log
-sudo chmod 640 /home/admin/raspiblitz.setup.log
-sudo chown root:sudo /home/admin/raspiblitz.setup.log
-timeout 120 /home/admin/config.scripts/blitz.shutdown.sh reboot finalsetup
-# if system has not rebooted yet - force reboot directly
-sudo shutdown -r now
+sleep 5
+echo "When green activity light stays dark and LCD turns white then shutdown is complete."
+sleep 10
+echo "Please wait for shutdown ..."
 sleep 120
 echo "FAIL: automatic final reboot didnt worked .. please report to dev team and try to reboot manually"
 exit 0

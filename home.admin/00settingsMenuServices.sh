@@ -24,11 +24,14 @@ if [ ${#sphinxrelay} -eq 0 ]; then sphinxrelay="off"; fi
 if [ ${#lit} -eq 0 ]; then lit="off"; fi
 if [ ${#whitepaper} -eq 0 ]; then whitepaper="off"; fi
 if [ ${#chantools} -eq 0 ]; then chantools="off"; fi
+if [ ${#homer} -eq 0 ]; then homer="off"; fi
 if [ ${#sparko} -eq 0 ]; then sparko="off"; fi
 if [ ${#spark} -eq 0 ]; then spark="off"; fi
 if [ ${#tallycoinConnect} -eq 0 ]; then tallycoinConnect="off"; fi
 if [ ${#helipad} -eq 0 ]; then helipad="off"; fi
 if [ ${#bitcoinminds} -eq 0 ]; then bitcoinminds="off"; fi
+if [ ${#squeaknode} -eq 0 ]; then squeaknode="off"; fi
+if [ ${#itchysats} -eq 0 ]; then itchysats="off"; fi
 
 # show select dialog
 echo "run dialog ..."
@@ -45,8 +48,8 @@ if [ "${network}" == "bitcoin" ]; then
   OPTIONS+=(j 'BTC JoinMarket+JoininBox menu' ${joinmarket})
   OPTIONS+=(w 'BTC Download Bitcoin Whitepaper' ${whitepaper})
   OPTIONS+=(v 'BTC Install BitcoinMinds.org' ${bitcoinminds})
+  OPTIONS+=(u 'BTC Install ItchySats' ${itchysats})
 fi
-
 
 # available for both LND & c-lightning
 if [ "${lnd}" == "on" ] || [ "${cl}" == "on" ]; then
@@ -64,14 +67,17 @@ if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
   OPTIONS+=(x 'LND Sphinx-Relay' ${sphinxrelay})
   OPTIONS+=(f 'LND Helipad Boostagram reader' ${helipad})
   OPTIONS+=(d 'LND Tallycoin Connect' ${tallycoinConnect})
+  #OPTIONS+=(q 'LND Squeaknode' ${squeaknode})
 fi
 
 # just available for CL
 if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ]; then
-  OPTIONS+=(c 'C-Lightning RTL Webinterface' ${crtlWebinterface})
-  OPTIONS+=(k 'C-Lightning Sparko WebWallet' ${sparko})
-  OPTIONS+=(n 'C-Lightning Spark Wallet' ${spark})
+  OPTIONS+=(c 'Core Lightning RTL Webinterface' ${crtlWebinterface})
+  OPTIONS+=(k 'Core Lightning Sparko WebWallet' ${sparko})
+  OPTIONS+=(n 'Core Lightning Spark Wallet' ${spark})
 fi
+
+OPTIONS+=(m 'Homer Dashboard' ${homer})
 
 CHOICES=$(dialog --title ' Additional Mainnet Services ' \
           --checklist ' use spacebar to activate/de-activate ' \
@@ -110,7 +116,7 @@ if [ "${rtlWebinterface}" != "${choice}" ]; then
       sleep 10
       /home/admin/config.scripts/bonus.rtl.sh menu lnd mainnet
     else
-      l1="!!! FAIL on RTL lnd install !!!"
+      l1="# FAIL on RTL lnd install #"
       l2="Try manual install on terminal after reboot with:"
       l3="/home/admin/config.scripts/bonus.rtl.sh on lnd mainnet"
       dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
@@ -120,7 +126,7 @@ else
   echo "RTL-lnd Webinterface Setting unchanged."
 fi
 
-# RTL process choice (C-Lightning)
+# RTL process choice (Core Lightning)
 choice="off"; check=$(echo "${CHOICES}" | grep -c "c")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${crtlWebinterface}" != "${choice}" ]; then
@@ -135,7 +141,7 @@ if [ "${crtlWebinterface}" != "${choice}" ]; then
       sleep 10
       /home/admin/config.scripts/bonus.rtl.sh menu cl mainnet
     else
-      l1="!!! FAIL on RTL C-Lightning install !!!"
+      l1="# FAIL on RTL Core Lightning install #"
       l2="Try manual install on terminal after reboot with:"
       l3="/home/admin/config.scripts/bonus.rtl.sh on cl mainnet"
       dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
@@ -163,7 +169,7 @@ When finished use the new 'EXPLORE' entry in Main Menu for more info.\n
 " 14 50
       needsReboot=1
     else
-      l1="!!! FAIL on BTC-RPC-Explorer install !!!"
+      l1="# FAIL on BTC-RPC-Explorer install #"
       l2="Try manual install on terminal after reboot with:"
       l3="/home/admin/config.scripts/bonus.btc-rpc-explorer.sh on"
       dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
@@ -186,7 +192,7 @@ if [ "${specter}" != "${choice}" ]; then
       sudo systemctl start specter
       /home/admin/config.scripts/bonus.specter.sh menu
     else
-      l1="!!! FAIL on Specter Desktop install !!!"
+      l1="# FAIL on Specter Desktop install #"
       l2="Try manual install on terminal after reboot with:"
       l3="/home/admin/config.scripts/bonus.specter.sh on"
       dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
@@ -224,7 +230,7 @@ When finished use the new 'ELECTRS' entry in Main Menu for more info.\n
 " 14 50
       needsReboot=0
       else
-        l1="!!! FAIL on ElectRS install !!!"
+        l1="# FAIL on ElectRS install #"
         l2="Try manual install on terminal after reboot with:"
         l3="/home/admin/config.scripts/bonus.electrs.sh on"
         dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
@@ -283,7 +289,7 @@ else
 fi
 
 # LNDMANAGE process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "m")
+choice="off"; check=$(echo "${CHOICES}" | grep -c "ä")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${lndmanage}" != "${choice}" ]; then
   echo "lndmanage Setting changed .."
@@ -357,7 +363,7 @@ if [ "${thunderhub}" != "${choice}" ]; then
       sleep 10
       /home/admin/config.scripts/bonus.thunderhub.sh menu
     else
-      l1="!!! FAIL on ThunderHub install !!!"
+      l1="# FAIL on ThunderHub install #"
       l2="Try manual install on terminal after reboot with:"
       l3="/home/admin/config.scripts/bonus.thunderhub.sh on"
       dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
@@ -494,7 +500,7 @@ This can take ~7 hours on a RPi4 with SSD. Monitor the progress on the LCD.\n
 When finished use the new 'MEMPOOL' entry in Main Menu for more info.\n
 " 14 50
     else
-      l1="!!! FAIL on Mempool Explorer install !!!"
+      l1="# FAIL on Mempool Explorer install #"
       l2="Try manual install on terminal after reboot with:"
       l3="/home/admin/config.scripts/bonus.mempool.sh on"
       dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
@@ -517,6 +523,24 @@ if [ "${whitepaper}" != "${choice}" ]; then
   fi
 else
   echo "Whitepaper setting unchanged."
+fi
+
+# Homer process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "m")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${homer}" != "${choice}" ]; then
+  echo "Homer settings changed .."
+  anychange=1
+  /home/admin/config.scripts/bonus.homer.sh ${choice}
+  errorOnInstall=$?
+  if [ "${choice}" =  "on" ]; then
+    whiptail --title " Installed Homer" --msgbox "\
+Homer was installed.\n
+Use the new 'Homer' entry in Main Menu for more info.\n
+" 10 35
+  fi
+else
+  echo "Homer Setting unchanged."
 fi
 
 # BitcoinMinds process choice
@@ -546,7 +570,7 @@ if [ "${sparko}" != "${choice}" ]; then
     if [ ${errorOnInstall} -eq 0 ]; then
       /home/admin/config.scripts/cl-plugin.sparko.sh menu mainnet
     else
-      l1="# !!! FAIL on Sparko on mainnet install !!!"
+      l1="# FAIL on Sparko on mainnet install #"
       l2="# Try manual install on terminal after reboot with:"
       l3="/home/admin/config.scripts/cl-plugin.sparko.sh on mainnet"
       dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
@@ -568,7 +592,7 @@ if [ "${spark}" != "${choice}" ]; then
     if [ ${errorOnInstall} -eq 0 ]; then
       /home/admin/config.scripts/cl.spark.sh menu mainnet
     else
-      l1="# !!! FAIL on Spark Wallet on mainnet install !!!"
+      l1="# FAIL on Spark Wallet on mainnet install #"
       l2="# Try manual install on terminal after reboot with:"
       l3="/home/admin/config.scripts/cl.spark.sh on mainnet"
       dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
@@ -576,6 +600,36 @@ if [ "${spark}" != "${choice}" ]; then
   fi
 else
   echo "# Spark Wallet on mainnet Setting unchanged."
+fi
+
+# squeaknode process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "q")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${squeaknode}" != "${choice}" ]; then
+  echo "squeaknode Setting changed .."
+  anychange=1
+  sudo -u admin /home/admin/config.scripts/bonus.squeaknode.sh ${choice}
+  if [ "${choice}" =  "on" ]; then
+    sudo systemctl start squeaknode
+    sudo -u admin /home/admin/config.scripts/bonus.squeaknode.sh menu
+  fi
+else
+  echo "squeaknode setting unchanged."
+fi
+
+# ItchySats process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "u")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${itchysats}" != "${choice}" ]; then
+  echo "ItchySats setting changed .."
+  anychange=1
+  sudo -u admin /home/admin/config.scripts/bonus.itchysats.sh ${choice} --download
+  if [ "${choice}" =  "on" ]; then
+    sudo systemctl start itchysats
+    sudo -u admin /home/admin/config.scripts/bonus.itchysats.sh menu
+  fi
+else
+  echo "ItchySats setting unchanged."
 fi
 
 if [ ${anychange} -eq 0 ]; then

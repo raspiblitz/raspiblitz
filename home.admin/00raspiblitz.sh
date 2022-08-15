@@ -226,7 +226,7 @@ do
 
         # output error message
         echo ""
-        echo "!!! FAIL !!! SOMETHING WENT WRONG:"
+        echo "# FAIL # SOMETHING WENT WRONG:"
         echo "${error}"
 
         # check if its possible to give background info on the error
@@ -240,7 +240,7 @@ do
         fi
 
         # basic info on error
-        echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        echo "#################"
         echo "To try upload of channel.backup again:"
         echo "MAINMENU > REPAIR > REPAIR-LND > RETRYSCB"
         echo
@@ -382,7 +382,7 @@ if [ "${setupPhase}" == "done" ]; then
     echo "LND command line options: lncli -h"
   fi
   if [ "${lightning}" == "cl" ]; then
-    echo "C-Lightning command line options: lightning-cli help"
+    echo "Core Lightning command line options: lightning-cli help"
   fi
 else
   echo "Your setup is not finished."

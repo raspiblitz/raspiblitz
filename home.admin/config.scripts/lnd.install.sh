@@ -3,18 +3,18 @@
 # "*** LND ***"
 ## based on https://raspibolt.github.io/raspibolt/raspibolt_40_lnd.html#lightning-lnd
 ## see LND releases: https://github.com/lightningnetwork/lnd/releases
-## !!!! If you change here - make sure to also change interims version in lnd.update.sh !!!
-lndVersion="0.14.2-beta"
+### If you change here - make sure to also change interims version in lnd.update.sh #!
+lndVersion="0.15.0-beta"
 
 # olaoluwa
-# PGPauthor="roasbeef"
-# PGPpkeys="https://keybase.io/roasbeef/pgp_keys.asc"
-# PGPcheck="E4D85299674B2D31FAA1892E372CBD7633C61696"
+PGPauthor="roasbeef"
+PGPpkeys="https://keybase.io/roasbeef/pgp_keys.asc"
+PGPcheck="E4D85299674B2D31FAA1892E372CBD7633C61696"
 
 # guggero
-PGPauthor="guggero"
-PGPpkeys="https://keybase.io/guggero/pgp_keys.asc"
-PGPcheck="F4FC70F07310028424EFC20A8E4256593F177720"
+# PGPauthor="guggero"
+# PGPpkeys="https://keybase.io/guggero/pgp_keys.asc"
+# PGPcheck="F4FC70F07310028424EFC20A8E4256593F177720"
 
 # bitconner
 #PGPauthor="bitconner"
@@ -105,21 +105,21 @@ if [ "$1" = "install" ] ; then
   fingerprint=$(sudo gpg --show-keys "pgp_keys.asc" 2>/dev/null | grep "${PGPcheck}" -c)
   if [ ${fingerprint} -lt 1 ]; then
     echo ""
-    echo "!!! BUILD WARNING --> LND PGP author not as expected"
+    echo "# BUILD WARNING --> LND PGP author not as expected"
     echo "Should contain PGP: ${PGPcheck}"
     echo "PRESS ENTER to TAKE THE RISK if you think all is OK"
     read key
   fi
   gpg --import ./pgp_keys.asc
   sleep 3
-  verifyResult=$(gpg --verify manifest-${PGPauthor}-v${lndVersion}.sig manifest-v${lndVersion}.txt 2>&1)
+  verifyResult=$(LANG=en_US.utf8; gpg --verify manifest-${PGPauthor}-v${lndVersion}.sig manifest-v${lndVersion}.txt 2>&1)
   goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
   echo "goodSignature(${goodSignature})"
   correctKey=$(echo ${verifyResult} | tr -d " \t\n\r" | grep "${PGPcheck}" -c)
   echo "correctKey(${correctKey})"
   if [ ${correctKey} -lt 1 ] || [ ${goodSignature} -lt 1 ]; then
     echo
-    echo "!!! BUILD FAILED --> LND PGP Verify not OK / signature(${goodSignature}) verify(${correctKey})"
+    echo "# BUILD FAILED --> LND PGP Verify not OK / signature(${goodSignature}) verify(${correctKey})"
     exit 1
   else
     echo
@@ -163,7 +163,7 @@ if [ "$1" = "install" ] ; then
   echo "Downloaded binary SHA256 checksum: ${binaryChecksum}"
   checksumCorrect=$(echo "${lndSHA256}" | grep -c "${binaryChecksum}")
   if [ "${checksumCorrect}" != "1" ]; then
-    echo "!!! FAIL !!! Downloaded LND BINARY not matching SHA256 checksum in manifest: ${lndSHA256}"
+    echo "# FAIL # Downloaded LND BINARY not matching SHA256 checksum in manifest: ${lndSHA256}"
     rm -v ./${binaryName}
     exit 1
   else
@@ -183,14 +183,14 @@ if [ "$1" = "install" ] ; then
   installed=$(sudo -u admin lnd --version)
   if [ ${#installed} -eq 0 ]; then
     echo
-    echo "!!! BUILD FAILED --> Was not able to install LND"
+    echo "# BUILD FAILED --> Was not able to install LND"
     exit 1
   fi
 
   correctVersion=$(sudo -u admin lnd --version | grep -c "${lndVersion}")
   if [ ${correctVersion} -eq 0 ]; then
     echo ""
-    echo "!!! BUILD FAILED --> installed LND is not version ${lndVersion}"
+    echo "# BUILD FAILED --> installed LND is not version ${lndVersion}"
     sudo -u admin lnd --version
     exit 1
   fi
@@ -280,6 +280,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo mkdir /mnt/hdd/lnd
   fi
   sudo chown -R bitcoin:bitcoin /mnt/hdd/lnd
+  sudo chmod 755 /mnt/hdd/lnd
   if [ ! -L /home/bitcoin/.lnd ];then
     echo "# Linking lnd for user bitcoin"
     sudo rm /home/bitcoin/.lnd 2>/dev/null
@@ -411,7 +412,7 @@ alias ${netprefix}lndconf=\"sudo nano /home/bitcoin/.lnd/${netprefix}lnd.conf\"\
       # only ask on mainnet for passwordC - for the testnet/signet its default 'raspiblitz'
       if [ "${CHAIN}" == "mainnet" ]; then
         tempFile="/var/cache/raspiblitz/passwordc.tmp"
-        sudo /home/admin/config.scripts/blitz.setpassword.sh x "PASSWORD C - LND Wallet Password" ${tempFile}
+        sudo /home/admin/config.scripts/blitz.passwords.sh set x "PASSWORD C - LND Wallet Password" ${tempFile}
         passwordC=$(sudo cat ${tempFile})
         sudo rm ${tempFile}
       else
@@ -421,7 +422,7 @@ alias ${netprefix}lndconf=\"sudo nano /home/bitcoin/.lnd/${netprefix}lnd.conf\"\
       source <(sudo /home/admin/config.scripts/lnd.initwallet.py new ${CHAIN} ${passwordC})
       if [ "${err}" != "" ]; then
         clear
-        echo "# !!! LND ${CHAIN} wallet creation failed"
+        echo "# LND ${CHAIN} wallet creation failed"
         echo "# ${err}"
         echo "# press ENTER to continue"
         read key
@@ -430,6 +431,26 @@ alias ${netprefix}lndconf=\"sudo nano /home/bitcoin/.lnd/${netprefix}lnd.conf\"\
         echo "seedwords='${seedwords}'" | sudo tee ${seedFile}
         echo "seedwords6x4='${seedwords6x4}'" | sudo tee -a ${seedFile}
       fi
+  fi
+
+  if [ "${CHAIN}" != "mainnet" ]; then
+    echo "# Setting autounlock for ${CHAIN}"
+    source <(/home/admin/config.scripts/network.aliases.sh getvars lnd ${CHAIN})
+    passwordFile="/mnt/hdd/lnd/data/chain/${network}/${CHAIN}/password.info"
+    # create passwordfile
+    if ! sudo ls ${passwordFile} &>/dev/null; then
+      echo "raspiblitz" | sudo -u bitcoin tee ${passwordFile} 1>/dev/null
+    fi
+    # add autounlock to lnd.conf
+    if ! grep "^wallet-unlock-password-file=${passwordFile}" < ${lndConfFile}; then
+      if grep "^\[Application Options\]" < ${lndConfFile} &>/dev/null; then
+        # add under header
+        sudo sed -i "/^\[Application Options\]$/awallet-unlock-password-file=${passwordFile}" ${lndConfFile}
+      else
+        # just append if no headers used
+        echo "wallet-unlock-password-file=${passwordFile}" | sudo -u bitcoin tee ${lndConfFile}
+      fi
+    fi
   fi
 
   echo

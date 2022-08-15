@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # https://github.com/cculianu/Fulcrum/releases
-fulcrumVersion="1.6.0"
+fulcrumVersion="1.7.0"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -12,51 +12,27 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   exit 1
 fi
 
-# will use blitz.conf.sh in v1.7.2
-function setConf {
-  keystr=$1
-  valuestr=$2
-  configFile=$3
-  # check if key needs to be added (prepare new entry)
-  entryExists=$(grep -c "^${keystr}=" ${configFile})
-  if [ ${entryExists} -eq 0 ]; then
-    echo "${keystr}=" | sudo tee -a ${configFile}  # set value (sed needs sudo to operate when user is not root)  1>/dev/null
-  fi
-  # set value (sed needs sudo to operate when user is not root)
-  sudo sed -i "s/^${keystr}=.*/${keystr}=${valuestr}/g" ${configFile}
-}
 
 if [ "$1" = on ]; then
   # ?wait until txindex finishes?
   /home/admin/config.scripts/network.txindex.sh on
 
-  # ?activate zram?
-  # https://github.com/rootzoll/raspiblitz/issues/2905
+  # activate zram
+  /home/admin/config.scripts/blitz.zram.sh on
 
-  # rpcworkqueue=512
-  # rpcthreads=128
-  # zmqpubhashblock=tcp://0.0.0.0:8433
-  #/home/admin/config.scripts/blitz.conf.sh set rpcworkqueue 512 /mnt/hdd/bitcoin/bitcoin.conf noquotes
-  #/home/admin/config.scripts/blitz.conf.sh set rpcthreads 128 /mnt/hdd/bitcoin/bitcoin.conf noquotes
-  #/home/admin/config.scripts/blitz.conf.sh set zmqpubhashblock 'tcp:\/\/0.0.0.0:8433' /mnt/hdd/bitcoin/bitcoin.conf noquotes
-  setConf rpcworkqueue 512 /mnt/hdd/bitcoin/bitcoin.conf
-  setConf rpcthreads 128 /mnt/hdd/bitcoin/bitcoin.conf
-  setConf zmqpubhashblock 'tcp:\/\/0.0.0.0:8433' /mnt/hdd/bitcoin/bitcoin.conf
-  # enable for provision
-  #source <(/home/admin/_cache.sh get state)
-  #if [ "${state}" == "ready" ]; then
+  /home/admin/config.scripts/blitz.conf.sh set rpcworkqueue 512 /mnt/hdd/bitcoin/bitcoin.conf noquotes
+  /home/admin/config.scripts/blitz.conf.sh set rpcthreads 128 /mnt/hdd/bitcoin/bitcoin.conf noquotes
+  /home/admin/config.scripts/blitz.conf.sh set 'main.zmqpubhashblock' 'tcp://0.0.0.0:8433' /mnt/hdd/bitcoin/bitcoin.conf noquotes
+
+  source <(/home/admin/_cache.sh get state)
+  if [ "${state}" == "ready" ]; then
     sudo systemctl restart bitcoind
-  #fi
+  fi
 
   # create a dedicated user
   sudo adduser --disabled-password --gecos "" fulcrum
-  cd /home/fulcrum
+  cd /home/fulcrum || exit 1
 
-  # sudo -u fulcrum git clone https://github.com/cculianu/Fulcrum
-  # cd fulcrum
-
-  # dependencies
-  # sudo apt install -y libzmq3-dev
   sudo apt install -y libssl-dev # was needed on Debian Bullseye
 
   # set the platform
@@ -76,10 +52,10 @@ if [ "$1" = on ]; then
   curl https://raw.githubusercontent.com/Electron-Cash/keys-n-hashes/master/pubkeys/calinkey.txt | sudo -u fulcrum gpg --import
 
   # look for 'Good signature'
-  sudo -u fulcrum gpg --verify Fulcrum-${fulcrumVersion}-${build}.tar.gz.asc || exit 1
+  sudo -u fulcrum gpg --verify Fulcrum-${fulcrumVersion}-${build}.tar.gz.asc || (echo "Failed to verify the GPG signature of Fulcrum-${fulcrumVersion}-${build}.tar.gz"; exit 1)
 
   # look for 'OK'
-  sudo -u fulcrum sha256sum -c Fulcrum-${fulcrumVersion}-${build}.tar.gz.sha256sum || exit 1
+  sudo -u fulcrum sha256sum -c Fulcrum-${fulcrumVersion}-${build}.tar.gz.sha256sum --ignore-missing || (echo "Failed to verify the sha256 hash of Fulcrum-${fulcrumVersion}-${build}.tar.gz"; exit 1)
 
   # decompress
   sudo -u fulcrum tar -xvf Fulcrum-${fulcrumVersion}-${build}.tar.gz
@@ -102,23 +78,16 @@ datadir = /home/fulcrum/.fulcrum/db
 bitcoind = 127.0.0.1:8332
 rpcuser = ${RPC_USER}
 rpcpassword = ${PASSWORD_B}
-
 # RPi optimizations
 # avoid 'bitcoind request timed out'
-bitcoind_timeout = 300
+bitcoind_timeout = 600
 # reduce load (4 cores only)
 bitcoind_clients = 1
 worker_threads = 1
 db_mem=1024
-
 # for 4GB RAM
 db_max_open_files=200
 fast-sync = 1024
-
-# for 8GB RAM
-#db_max_open_files=500
-#fast-sync = 2048
-
 # server connections
 # disable peer discovery and public server options
 peering = false
@@ -132,12 +101,16 @@ tcp = 0.0.0.0:50021
 [Unit]
 Description=Fulcrum
 After=network.target bitcoind.service
+StartLimitBurst=2
+StartLimitIntervalSec=20
 
 [Service]
 ExecStart=/home/fulcrum/Fulcrum-${fulcrumVersion}-${build}/Fulcrum /home/fulcrum/.fulcrum/fulcrum.conf
+KillSignal=SIGINT
 User=fulcrum
 LimitNOFILE=8192
-TimeoutStopSec=30min
+TimeoutStopSec=300
+RestartSec=5
 Restart=on-failure
 
 [Install]
@@ -145,7 +118,9 @@ WantedBy=multi-user.target
 " | sudo tee /etc/systemd/system/fulcrum.service
 
   sudo systemctl enable fulcrum
-  sudo systemctl start fulcrum
+  if [ "${state}" == "ready" ]; then
+    sudo systemctl start fulcrum
+  fi
 
   # sudo journalctl -fu fulcrum
   # sudo systemctl status fulcrum
@@ -153,43 +128,7 @@ WantedBy=multi-user.target
   sudo ufw allow 50021 comment 'Fulcrum TCP'
   sudo ufw allow 50022 comment 'Fulcrum SSL'
 
-  # Set up SSL
-  cd /home/fulcrum/.fulcrum
-
-  # Create a self signed SSL certificate
-  sudo -u fulcrum openssl genrsa -out selfsigned.key 2048
-
-  echo "\
-[req]
-prompt             = no
-default_bits       = 2048
-default_keyfile    = selfsigned.key
-distinguished_name = req_distinguished_name
-req_extensions     = req_ext
-x509_extensions    = v3_ca
-
-[req_distinguished_name]
-C = US
-ST = Texas
-L = Fulcrum
-O = RaspiBlitz
-CN = RaspiBlitz
-
-[req_ext]
-subjectAltName = @alt_names
-
-[v3_ca]
-subjectAltName = @alt_names
-
-[alt_names]
-DNS.1   = localhost
-DNS.2   = 127.0.0.1
-" | sudo -u fulcrum tee localhost.conf
-
-  sudo -u fulcrum openssl req -new -x509 -sha256 -key selfsigned.key \
-    -out selfsigned.cert -days 3650 -config localhost.conf
-
-  # Setting up the nginx.conf
+  # Setting up the nginx.conf with the existing SSL cert
   isConfigured=$(sudo cat /etc/nginx/nginx.conf 2>/dev/null | grep -c 'upstream fulcrum')
   if [ ${isConfigured} -gt 0 ]; then
     echo "fulcrum is already configured with Nginx. To edit manually run 'sudo nano /etc/nginx/nginx.conf'"
@@ -204,8 +143,8 @@ stream {
         server {
                 listen 50022 ssl;
                 proxy_pass fulcrum;
-                ssl_certificate /home/fulcrum/.fulcrum/selfsigned.cert;
-                ssl_certificate_key /home/fulcrum/.fulcrum/selfsigned.key;
+                ssl_certificate /mnt/hdd/app-data/nginx/tls.cert;
+                ssl_certificate_key /mnt/hdd/app-data/nginx/tls.key;
                 ssl_session_cache shared:SSL-fulcrum:1m;
                 ssl_session_timeout 4h;
                 ssl_protocols TLSv1 TLSv1.1 TLSv1.2 TLSv1.3;
@@ -222,8 +161,8 @@ stream {
         server {
                 listen 50022 ssl;
                 proxy_pass fulcrum;
-                ssl_certificate /home/fulcrum/.fulcrum/selfsigned.cert;
-                ssl_certificate_key /home/fulcrum/.fulcrum/selfsigned.key;
+                ssl_certificate /mnt/hdd/app-data/nginx/tls.cert;
+                ssl_certificate_key /mnt/hdd/app-data/nginx/tls.key;
                 ssl_session_cache shared:SSL-fulcrum:1m;
                 ssl_session_timeout 4h;
                 ssl_protocols TLSv1 TLSv1.1 TLSv1.2 TLSv1.3;
@@ -242,7 +181,11 @@ stream {
 
   # Tor
   /home/admin/config.scripts/tor.onion-service.sh fulcrum 50021 50021 50022 50022
+
+  # setting value in raspiblitz config
+  /home/admin/config.scripts/blitz.conf.sh set fulcrum "on"
 fi
+
 
 if [ "$1" = off ]; then
   sudo systemctl disable fulcrum
@@ -255,4 +198,6 @@ if [ "$1" = off ]; then
   sudo ufw deny 50022
   # to remove the database directory:
   # sudo rm -rf /mnt/hdd/app-storage/fulcrum
+  # setting value in raspiblitz config
+  /home/admin/config.scripts/blitz.conf.sh set fulcrum "off"
 fi

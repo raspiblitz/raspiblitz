@@ -95,7 +95,10 @@ set -e
 export NODE_OPTIONS="--no-deprecation"
 
 # load config
-set -a; source /mnt/hdd/app-data/stacking-sats-kraken/.env; set +a
+env="/mnt/hdd/app-data/stacking-sats-kraken/.env"
+set -a; . ${env}; set +a
+# alternative config
+test -f "${env}-"${2} && { set -a; . "${env}-"${2}; set +a; }
 
 # switch directory
 cd $(cd `dirname $0` && pwd)

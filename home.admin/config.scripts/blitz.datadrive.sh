@@ -308,7 +308,6 @@ if [ "$1" = "status" ]; then
             echo "# ERROR: Was not able to determine hddDataFree space"
           fi
 
-
           # check if its another fullnode implementation data disk
           hddGotMigrationData=""
           hddGotMigrationDataExtra=""
@@ -318,9 +317,18 @@ if [ "$1" = "status" ]; then
             isCitadelHDD=$(ls /mnt/storage/citadel/info.json 2>/dev/null | grep -c '.json')
             isMyNodeHDD=$(ls /mnt/storage/mynode/bitcoin/bitcoin.conf 2>/dev/null | grep -c '.conf')
             if [ ${isUmbrelHDD} -gt 0 ]; then
+              # sudo cat /mnt/hdd/umbrel/app-data/bitcoin/umbrel-app.yml | grep "version:" | cut -d ":" -f2 | tr -d \" | xargs
               hddGotMigrationData="umbrel"
-              lndVersion=$(grep "lightninglabs/lnd" /mnt/storage/umbrel/docker-compose.yml 2>/dev/null | sed 's/.*lnd://' | sed 's/@.*//')
-              echo "hddVersionLND='${lndVersion}'"
+              btcVersion=$(grep "lncm/bitcoind" /mnt/storage/umbrel/app-data/bitcoin/docker-compose.yml 2>/dev/null | sed 's/.*bitcoind://' | sed 's/@.*//')
+              clnVersion=$(grep "lncm/clightning" /mnt/storage/umbrel/app-data/core-lightning/docker-compose.yml 2>/dev/null | sed 's/.*clightning://' | sed 's/@.*//')
+              lndVersion=$(grep "lightninglabs/lnd" /mnt/storage/umbrel/app-data/lightning/docker-compose.yml 2>/dev/null | sed 's/.*lnd://' | sed 's/@.*//')
+              # umbrel <0.5.0 (old structure)
+              if [ "${lndVersion}" == "" ]; then
+                lndVersion=$(grep "lightninglabs/lnd" /mnt/storage/umbrel/docker-compose.yml 2>/dev/null | sed 's/.*lnd://' | sed 's/@.*//')
+              fi
+              echo "hddVersionBTC='${btcVersion}'"
+              echo "hddVersionLND='${clnVersion}'"
+              echo "hddVersionCLN='${lndVersion}'"
             elif [ ${isMyNodeHDD} -gt 0 ]; then
               hddGotMigrationData="mynode"
             elif [ ${isCitadelHDD} -gt 0 ]; then
@@ -415,8 +423,8 @@ if [ "$1" = "status" ]; then
       hddUsedInfo="${datadrive} & ${storageDrive}"
     elif [ "${isZFS}" -gt 0 ]; then
       # ZFS calculations
-      hdd_used_space=$(zpool list -H | awk '{print $3}')
-      hdd_used_ratio=$((100 * ${hdd_used_space::-1} / hddGigaBytes))
+      hdd_used_space=$(($(zpool list -pH | awk '{print $3}')/1024/1024/1024))
+      hdd_used_ratio=$((100 * hdd_used_space / hddGigaBytes))
       hdd_data_free1Kblocks=$(($(zpool list -pH | awk '{print $4}') / 1024))
       hddUsedInfo="${hdd_used_space} (${hdd_used_ratio}%)"
     else
@@ -473,6 +481,14 @@ if [ "$1" = "status" ]; then
     fi
     if [ "${hddAdapter}" == "0825:0001" ] || [ "${hddAdapter}" == "174c:0825" ]; then
       # SupTronics 2.5" SATA HDD Shield X825 v1.5
+      hddAdapterUSAP=1
+    fi
+    if [ "${hddAdapter}" == "2109:0715" ]; then
+      # ICY BOX IB-247-C31 Type-C Enclosure for 2.5inch SATA Drives
+      hddAdapterUSAP=1
+    fi
+    if [ "${hddAdapter}" == "174c:235c" ]; then
+      # Cable Matters USB 3.1 Type-C Gen2 External SATA SSD Enclosure
       hddAdapterUSAP=1
     fi
 
@@ -1114,7 +1130,7 @@ if [ "$1" = "raid" ] && [ "$2" = "on" ]; then
   if [ ${usbdevBTRFS} -eq 1 ]; then
     # edge case: already contains BTRFS data
     # TODO: once implemented -> also make sure that dev1 is named "DATASTORE" and if 2nd is other -> format and add as raid
-    >&2 echo "# ERROR: !! NOT IMPLEMENTED YET -> devices seem contain old data"
+    >&2 echo "# ERROR: # NOT IMPLEMENTED YET -> devices seem contain old data"
     >&2 echo "# if you dont care about that data: format on other computer with FAT"
     echo "error='old data on dev'"
     exit 1
@@ -1326,7 +1342,7 @@ if [ "$1" = "tempmount" ]; then
     exit 1
   fi
 
-  if [ "${hddFormat}" = "ext4" ]; then
+  if [ "${hddFormat}" == "ext4" ]; then
 
     if [ "${hddDataPartitionExt4}" == "" ]; then
       echo "error='parameter is no partition'"
@@ -1348,7 +1364,7 @@ if [ "$1" = "tempmount" ]; then
       isBTRFS=0
     fi
     
-  elif [ "${hddFormat}" = "btrfs" ]; then
+  elif [ "${hddFormat}" == "btrfs" ]; then
 
     # get user and groupid if usr/group bitcoin
     bitcoinUID=$(id -u bitcoin)
@@ -1446,7 +1462,7 @@ if [ "$1" = "link" ]; then
     >&2 echo "# - linking temp into /mnt/hdd"
     rm /mnt/hdd/temp 2>/dev/null
     ln -s /mnt/temp /mnt/hdd/temp
-    chown -R bitcoin:bitcoin /mnt/temp 
+    chown -R bitcoin:bitcoin /mnt/temp
 
     >&2 echo "# - creating snapshots folder"
     mkdir -p /mnt/hdd/snapshots
@@ -1537,10 +1553,10 @@ if [ "$1" = "swap" ]; then
 
     fi
     sed -i "s/^CONF_SWAPSIZE=/#CONF_SWAPSIZE=/g" /etc/dphys-swapfile 
-    sed -i "s/^#CONF_MAXSWAP=.*/CONF_MAXSWAP=4096/g" /etc/dphys-swapfile
+    sed -i "s/^#CONF_MAXSWAP=.*/CONF_MAXSWAP=3072/g" /etc/dphys-swapfile
 
     >&2 echo "# Creating SWAP file .."
-    dd if=/dev/zero of=$externalSwapPath count=4096 bs=1MiB 1>/dev/null
+    dd if=/dev/zero of=$externalSwapPath count=3072 bs=1MiB 1>/dev/null
     chmod 0600 $externalSwapPath 1>/dev/null
 
     >&2 echo "# Activating new SWAP"
@@ -1629,6 +1645,12 @@ if [ "$1" = "clean" ]; then
 
           delete=1
           whenDeleteSchredd=1
+
+          # dont delete temp - will be deleted on every boot anyway
+          # but keep in case during setup a migration file was uploaded there
+          if [ "${entry}" = "temp" ]; then
+            delete=0
+          fi
 
           # deactivate delete if a blockchain directory (if -keepblockchain)
           if [ "$3" = "-keepblockchain" ]; then

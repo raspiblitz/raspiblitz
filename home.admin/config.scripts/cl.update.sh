@@ -3,13 +3,13 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo
-  echo "Interim optional C-lightning updates between RaspiBlitz releases."
+  echo "Interim optional Core Lightning updates between RaspiBlitz releases."
   echo "cl.update.sh [info|verified|reckless]"
   echo "info -> get actual state and possible actions"
   echo "verified -> only do recommended updates by RaspiBlitz team"
   echo "  binary will be checked by signature and checksum"
   echo "reckless -> if you just want to update to the latest release"
-  echo "  published on C-lightning GitHub releases (RC or final) without any"
+  echo "  published on Core Lightning GitHub releases (RC or final) without any"
   echo "  testing or security checks."
   echo
   exit 1
@@ -25,7 +25,7 @@ clUpdateComment="Please keep in mind that downgrading afterwards is not tested. 
 
 # GATHER DATA
 
-# installed C-lightning version
+# installed Core Lightning version
 clInstalledVersion=$(sudo -u bitcoin lightning-cli --version)
 clInstalledVersionMajor=$(echo "${clInstalledVersion}" | cut -d "-" -f1 | cut -d "." -f1)
 clInstalledVersionMain=$(echo "${clInstalledVersion}" | cut -d "-" -f1 | cut -d "." -f2)
@@ -34,7 +34,7 @@ clInstalledVersionMinor=$(echo "${clInstalledVersion}" | cut -d "-" -f1 | cut -d
 # test if the installed version already the verified/recommended update version
 clUpdateInstalled=$(echo "${clInstalledVersion}" | grep -c "${clUpdateVersion}")
 
-# get latest release from C-lightning GitHub releases without release candidates
+# get latest release from Core Lightning GitHub releases without release candidates
 clLatestVersion=$(curl -s https://api.github.com/repos/ElementsProject/lightning/releases | jq -r '.[].tag_name' | grep -v "rc" | head -n1)
 # example: v0.10.2
 
@@ -52,7 +52,7 @@ if [ "${mode}" = "info" ]; then
   echo "clUpdateVersion='${clUpdateVersion}'"
   echo "clUpdateComment='${clUpdateComment}'"
 
-  echo "# reckless update option (latest C-lightning release from GitHub)"
+  echo "# reckless update option (latest Core Lightning release from GitHub)"
   echo "clLatestVersion='${clLatestVersion}'"
 
   exit 1
@@ -117,7 +117,7 @@ if [ "${mode}" = "verified" ] || [ "${mode}" = "reckless" ]; then
   echo "# flag update in raspiblitz config"
   /home/admin/config.scripts/blitz.conf.sh set clInterimsUpdate "${clInterimsUpdateNew}"
 
-  echo "# OK C-lightning is installed"
+  echo "# OK Core Lightning is installed"
   echo "# NOTE: RaspiBlitz may need to reboot now"
   exit 1
 

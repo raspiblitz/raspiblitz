@@ -98,7 +98,7 @@ case "$1" in
 
     # make sure the network was set (by sourcing raspiblitz.conf)
     if [ ${#network} -eq 0 ]; then
-      echo "!! FAIL - unknown network due to missing /mnt/hdd/raspiblitz.conf"
+      echo "# FAIL - unknown network due to missing /mnt/hdd/raspiblitz.conf"
       echo "# switching Tor config on for RaspiBlitz services is just possible after basic hdd/ssd setup"
       echo "# but with new 'Tor by default' basic Tor socks will already be available from the start"
       exit 1
@@ -112,7 +112,7 @@ case "$1" in
 
     # ACTIVATE APPS OVER TOR
     . /mnt/hdd/raspiblitz.conf 2>/dev/null
-    /home/admin/config.scripts/tor.onion-service.sh web80 80 80
+    /home/admin/config.scripts/tor.onion-service.sh web80 80 80 443 443
     /home/admin/config.scripts/tor.onion-service.sh debuglogs 80 6969
     [ "${BTCRPCexplorer}" = "on" ] && /home/admin/config.scripts/tor.onion-service.sh btc-rpc-explorer 80 3022 443 3023
     [ "${rtlWebinterface}" = "on" ] && /home/admin/config.scripts/tor.onion-service.sh RTL 80 3002 443 3003
@@ -129,6 +129,7 @@ case "$1" in
     if [ "${helipad}" = "on" ]; then
     /home/admin/config.scripts/tor.onion-service.sh helipad 2112 2113
     fi
+    [ "${itchysats}" = "on" ] && /home/admin/config.scripts/tor.onion-service.sh itchysats 80 8890 443 8891
 
     echo "Setup logrotate"
     # add logrotate config for modified Tor dir on ext. disk
@@ -196,16 +197,26 @@ EOF
     echo
   ;;
 
-
   update)
-    /home/admin/config.scripts/tor.install.sh update source
-    if [ "$(sudo systemctl is-active lnd | grep -c "active")" -gt 0 ];then
-      echo "# LND needs to be restarted"
-      sudo systemctl restart lnd
-      sudo systemctl restart tlnd 2>/dev/null
-      sudo systemctl restart slnd 2>/dev/null
-      sleep 10
-      lncli unlock
+    if /home/admin/config.scripts/tor.install.sh update; then
+      echo "# Tor was updated to $(tor --version)"
+      if systemctl is-active lnd ;then
+        echo "# LND will be restarted"
+        sudo systemctl restart lnd
+        sudo systemctl restart tlnd 2>/dev/null
+        sudo systemctl restart slnd 2>/dev/null
+        sleep 10
+        lncli unlock
+      fi
+      if systemctl is-active lightningd; then
+        echo "# CLN will be restarted"
+        sudo systemctl restart lightningd
+        sudo systemctl restart tlightningd 2>/dev/null
+        sudo systemctl restart slightningd 2>/dev/null
+      fi
+    else
+      echo "# Tor was not updated"
+      tor --version
     fi
   ;;
 

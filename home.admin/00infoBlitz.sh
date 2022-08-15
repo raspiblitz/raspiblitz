@@ -17,6 +17,7 @@ source <(/home/admin/_cache.sh get \
   system_ram_available_mb \
   system_ram_mb \
   system_ups_status \
+  system_ups_battery \
   system_cpu_load \
   system_temp_celsius \
   system_temp_fahrenheit \
@@ -25,6 +26,7 @@ source <(/home/admin/_cache.sh get \
   ElectRS \
   BTCRPCexplorer \
   joinmarket \
+  blitzapi \
 )
 
 # PARAMETER 1: forcing view on a given network
@@ -51,7 +53,12 @@ if [ "${PARAMETER_LIGHTNING}" == "none" ]; then
   lightning=""
 fi
 
-
+# set colors
+color_red='\033[0;31m'
+color_green='\033[0;32m'
+color_amber='\033[0;33m'
+color_yellow='\033[1;93m'
+color_gray='\033[0;37m'
 
 # generate netprefix
 netprefix=${chain:0:1}
@@ -62,21 +69,14 @@ fi
 ## get UPS info
 upsInfo=""
 if [ "${system_ups_status}" = "ONLINE" ]; then
-  upsInfo="${color_gray}${upsBattery}"
+  upsInfo="${color_gray}${system_ups_battery}"
 fi
-if [ "$system_ups_status}" = "ONBATT" ]; then
-  upsInfo="${color_red}${upsBattery}"
+if [ "${system_ups_status}" = "ONBATT" ]; then
+  upsInfo="${color_red}${system_ups_battery}"
 fi
 if [ "${system_ups_status}" = "SHUTTING DOWN" ]; then
   upsInfo="${color_red}DOWN"
 fi
-
-# set colors
-color_red='\033[0;31m'
-color_green='\033[0;32m'
-color_amber='\033[0;33m'
-color_yellow='\033[1;93m'
-color_gray='\033[0;37m'
 
 # check hostname
 if [ ${#hostname} -eq 0 ]; then hostname="raspiblitz"; fi
@@ -236,7 +236,7 @@ if [ "${lightning}" != "" ]; then
     else
       source <(/home/admin/_cache.sh meta ln_${lightning}_${chain}net_fees_total)
       ln_totalfees="${value}"
-      ln_feeReport="Fee Report: ${color_green}${ln_totalfees} ${color_gray}${netprefix}sat"
+      ln_feeReport="Fee Report: ${color_green}${ln_totalfees} ${color_gray}${netprefix}msat"
     fi
 
     # on-chain wallet info
@@ -245,7 +245,7 @@ if [ "${lightning}" != "" ]; then
     ln_onchain_pending="${value}"
     if [ "${ln_onchain_pending}" != "" ] && [ ${ln_onchain_pending} -gt 0 ]; then ln_pendingonchain=" (+${ln_onchain_pending})"; fi
     source <(/home/admin/_cache.sh meta ln_${lightning}_${chain}net_wallet_onchain_balance)
-    ln_walletbalance="${value}"
+    ln_walletbalance=$(printf "%'d" "${value}")
     ln_baseInfo="${color_gray}Wallet ${ln_walletbalance} ${netprefix}sat ${ln_pendingonchain}"
 
     # channel pending info
@@ -256,7 +256,7 @@ if [ "${lightning}" != "" ]; then
 
     # get channel infos
     source <(/home/admin/_cache.sh meta ln_${lightning}_${chain}net_wallet_channels_balance)
-    ln_channels_balance="${value}"
+    ln_channels_balance=$(printf "%'d" "${value}")
     source <(/home/admin/_cache.sh meta ln_${lightning}_${chain}net_channels_active)
     ln_channels_online="${value}"
     source <(/home/admin/_cache.sh meta ln_${lightning}_${chain}net_channels_total)
@@ -273,7 +273,7 @@ fi
 ${color_yellow}
 ${color_yellow}${ln_publicColor}${ln_external}${color_gray}"
 
-if [ "${joinmarket}" = "on" ];then 
+if [ "${joinmarket}" = "on" ];then
   # show JoinMarket stats in place of the LND URI only if the Yield Generator is running
   if [ $(sudo -u joinmarket pgrep -f "yg-privacyenhanced.py" 2>/dev/null | wc -l) -gt 2 ]; then
     trap 'rm -f "$JMstats"' EXIT
@@ -293,14 +293,20 @@ ${color_gray}  ◎=◎=◎=◎=◎    ${color_gray}$JMstatsL4"
 fi
 
 if [ "${lightning}" == "cl" ]; then
-  LNline="C-LIGHTNING ${color_green}${ln_version} ${ln_baseInfo}"
+  LNline="CLN ${color_green}${ln_version} ${ln_baseInfo}"
 elif [ "${lightning}"  == "lnd" ]; then
   LNline="LND ${color_green}${ln_version} ${ln_baseInfo}"
 fi
 
 LNinfo=" + Lightning Network"
 if [ "${lightning}" == "" ] || [ "${lightning}" == "none" ]; then
-  LNinfo=""  
+  LNinfo=""
+fi
+
+webuiinfo=""
+source <(/home/admin/_cache.sh meta ln_${lightning}_${chain}net_recovery_done)
+if [ "${blitzapi}" == "on" ]; then
+ webuiinfo="Web Admin --> http://${internet_localip}"
 fi
 
 datetime=$(date -R)
@@ -319,8 +325,8 @@ ${color_yellow}        ,/     ${color_yellow}%s
 ${color_yellow}      ,'/      ${color_gray}%s
 ${color_yellow}    ,' /       ${color_gray}%s, temp %s°C %s°F
 ${color_yellow}  ,'  /_____   ${color_gray}Free Mem ${color_ram}${ram} ${color_gray} HDDuse ${color_hdd}%s${color_gray}
-${color_yellow},'_____    ,'  ${color_gray}SSH admin@${color_green}${internet_localip}${color_gray} d${internet_rx} u${internet_tx}
-${color_yellow}      /  ,'    ${color_gray}
+${color_yellow},'_____    ,'  ${color_gray}SSH admin@${internet_localip}${color_gray} d${internet_rx} u${internet_tx}
+${color_yellow}      /  ,'    ${color_gray}${webuiinfo} 
 ${color_yellow}     / ,'      ${color_gray}${network} ${color_green}${networkVersion}${color_gray}${chain}net ${networkConnectionsInfo}
 ${color_yellow}    /,'        ${color_gray}${blockInfo} %s
 ${color_yellow}   /'          ${color_gray}
@@ -347,7 +353,7 @@ else
   # Electrum Server - electrs
   if [ "${ElectRS}" = "on" ]; then
     error=""
-    source <(sudo /home/admin/config.scripts/bonus.electrs.sh status 2>/dev/null)
+    source <(sudo /home/admin/config.scripts/bonus.electrs.sh status-sync 2>/dev/null)
     if [ ${#infoSync} -gt 0 ]; then
       appInfoLine="Electrum: ${infoSync}"
     fi

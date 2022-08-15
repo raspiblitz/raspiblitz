@@ -3,7 +3,7 @@
 # help
 if [ "$1" = "-h" ]||[ "$1" = "--help" ];then
   echo
-  echo "Script to set up or update the C-lightning systemd service"
+  echo "Script to set up or update the Core Lightning systemd service"
   echo "Usage:"
   echo "/home/admin/config.scripts/cl.install-service.sh <mainnet|testnet|signet>"
   echo

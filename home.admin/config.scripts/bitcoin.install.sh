@@ -15,7 +15,7 @@ if [ "$1" = "install" ]; then
 
   # set version (change if update is available)
   # https://bitcoincore.org/en/download/
-  bitcoinVersion="22.0"
+  bitcoinVersion="23.0"
   
   # needed to check code signing
   # https://github.com/laanwj
@@ -29,7 +29,7 @@ if [ "$1" = "install" ]; then
   # receive signer key
   if ! gpg --keyserver hkp://keyserver.ubuntu.com --recv-key "71A3 B167 3540 5025 D447 E8F2 7481 0B01 2346 C9A6"
   then
-    echo "!!! FAIL !!! Couldn't download Wladimir J. van der Laan's PGP pubkey"
+    echo "# FAIL # Couldn't download Wladimir J. van der Laan's PGP pubkey"
     exit 1
   fi
   
@@ -38,14 +38,14 @@ if [ "$1" = "install" ]; then
   
   # download signed binary sha256 hash sum file and check
   sudo -u admin wget https://bitcoincore.org/bin/bitcoin-core-${bitcoinVersion}/SHA256SUMS.asc
-  verifyResult=$(gpg --verify SHA256SUMS.asc 2>&1)
+  verifyResult=$(LANG=en_US.utf8; gpg --verify SHA256SUMS.asc 2>&1)
   goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
   echo "goodSignature(${goodSignature})"
   correctKey=$(echo ${verifyResult} | grep "${laanwjPGP}" -c)
   echo "correctKey(${correctKey})"
   if [ ${correctKey} -lt 1 ] || [ ${goodSignature} -lt 1 ]; then
     echo
-    echo "!!! BUILD FAILED --> PGP Verify not OK / signature(${goodSignature}) verify(${correctKey})"
+    echo "# BUILD FAILED --> PGP Verify not OK / signature(${goodSignature}) verify(${correctKey})"
     exit 1
   else
     echo
@@ -73,7 +73,7 @@ if [ "$1" = "install" ]; then
      sudo -u admin wget https://bitcoincore.org/bin/bitcoin-core-${bitcoinVersion}/${binaryName}
   fi
   if [ ! -f "./${binaryName}" ]; then
-     echo "!!! FAIL !!! Could not download the BITCOIN BINARY"
+     echo "# FAIL # Could not download the BITCOIN BINARY"
      exit 1
   else
   
@@ -85,7 +85,7 @@ if [ "$1" = "install" ]; then
     echo "Valid SHA256 checksum should be: ${bitcoinSHA256}"
     echo "Downloaded binary SHA256 checksum: ${binaryChecksum}"
     if [ "${binaryChecksum}" != "${bitcoinSHA256}" ]; then
-      echo "!!! FAIL !!! Downloaded BITCOIN BINARY not matching SHA256 checksum: ${bitcoinSHA256}"
+      echo "# FAIL # Downloaded BITCOIN BINARY not matching SHA256 checksum: ${bitcoinSHA256}"
       rm -v ./${binaryName}
       exit 1
     else
@@ -106,7 +106,7 @@ if [ "$1" = "install" ]; then
   installed=$(sudo -u admin bitcoind --version | grep "${bitcoinVersion}" -c)
   if [ ${installed} -lt 1 ]; then
     echo
-    echo "!!! BUILD FAILED --> Was not able to install bitcoind version(${bitcoinVersion})"
+    echo "# BUILD FAILED --> Was not able to install bitcoind version(${bitcoinVersion})"
     exit 1
   fi
   if [ "$(alias | grep -c "alias bitcoinlog")" -eq 0 ];then 
@@ -129,7 +129,7 @@ fi
 if [ "${CHAIN}" = testnet ];then
   prefix="t"
   bitcoinprefix="test"
-  zmqprefix=21  # zmqpubrawblock=21332 zmqpubrawtx=21333
+  zmqprefix=21  # zmqpubrawblock=21332 zmqpubrawtx=21333 zmqpubhashblock=21334
   rpcprefix=1   # rpcport=18332
 elif [ ${CHAIN} = signet ];then
   prefix="s"
@@ -188,6 +188,7 @@ rpcuser=raspiblitz
 rpcpassword=$randomRPCpass
 ${bitcoinprefix}.zmqpubrawblock=tcp://127.0.0.1:${zmqprefix}332
 ${bitcoinprefix}.zmqpubrawtx=tcp://127.0.0.1:${zmqprefix}333
+${bitcoinprefix}.zmqpubhashblock=tcp://127.0.0.1:${zmqprefix}334
 
 onlynet=onion
 proxy=127.0.0.1:9050
@@ -253,10 +254,8 @@ After=network-online.target
 Wants=network-online.target
 
 [Service]
-PIDFile=/mnt/hdd/bitcoin/${prefix}bitcoind.pid
 ExecStart=/usr/local/bin/bitcoind -${CHAIN} \\
                                   -daemonwait \\
-                                  -pid=/mnt/hdd/bitcoin/${prefix}bitcoind.pid \\
                                   -conf=/mnt/hdd/bitcoin/bitcoin.conf \\
                                   -datadir=/mnt/hdd/bitcoin \\
                                   -debuglogfile=${bitcoinlogpath}
@@ -268,7 +267,6 @@ ExecStartPre=/bin/chgrp bitcoin /mnt/hdd/bitcoin
 # Process management
 ####################
 Type=forking
-PIDFile=/mnt/hdd/bitcoin/${prefix}bitcoind.pid
 Restart=on-failure
 TimeoutStartSec=infinity
 TimeoutStopSec=600

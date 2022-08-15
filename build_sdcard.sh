@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
 #########################################################################
-# Build your SD card image based on: 2022-01-28-raspios-bullseye-arm64.zip
-# https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2022-01-28/
-# SHA256: c6f583fab8ed8d84bdf272d095c821fa70d2a0b434ba78432648f69b661d3783
+# Build your SD card image based on: 2022-04-04-raspios-bullseye-arm64.img.xz
+# https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2022-04-07/
+# SHA256: 5adcab7a063310734856adcdd2041c8d58f65c185a3383132bc758886528a93d
 # PGP fingerprint: 8738CD6B956F460C
 # PGP key: https://www.raspberrypi.org/raspberrypi_downloads.gpg.key
 # setup fresh SD card with image above - login per SSH and run this script:
@@ -120,6 +120,15 @@ range_argument(){
   fi
 }
 
+apt_install(){
+    sudo apt install -y ${@}
+    if [ $? -eq 100 ]; then
+        echo "FAIL! apt failed to install needed packages!"
+        echo ${@}
+        exit 1
+    fi
+}
+
 general_utils="curl"
 ## loop all general_utils to see if program is installed (placed on PATH) and if not, add to the list of commands to be installed
 for prog in ${general_utils}; do
@@ -128,7 +137,8 @@ done
 ## if any of the required programs are not installed, update and if successfull, install packages
 if [ -n "${general_utils_install}" ]; then
   echo -e "\n*** SOFTWARE UPDATE ***"
-  sudo apt update -y && sudo apt install -y ${general_utils_install}
+  sudo apt update -y || exit 1
+  apt_install ${general_utils_install}
 fi
 
 ## use default values for variables if empty
@@ -202,7 +212,7 @@ cpu="$(uname -m)" && echo "cpu=${cpu}"
 architecture="$(dpkg --print-architecture 2>/dev/null)" && echo "architecture=${architecture}"
 case "${cpu}" in
   arm*|aarch64|x86_64|amd64);;
-  *) echo -e "!!! FAIL !!!\nCan only build on ARM, aarch64, x86_64 not on: cpu=${cpu}"; exit 1;;
+  *) echo -e "# FAIL #\nCan only build on ARM, aarch64, x86_64 not on: cpu=${cpu}"; exit 1;;
 esac
 
 # AUTO-DETECTION: OPERATINGSYSTEM
@@ -224,7 +234,7 @@ if [ $(cat /etc/os-release 2>/dev/null | grep -c 'Debian') -gt 0 ]; then
 elif [ $(cat /etc/os-release 2>/dev/null | grep -c 'Ubuntu') -gt 0 ]; then
   baseimage="ubuntu"
 else
-  echo "\n!!! FAIL: Base Image cannot be detected or is not supported."
+  echo "\n# FAIL: Base Image cannot be detected or is not supported."
   cat /etc/os-release 2>/dev/null
   uname -a
   exit 1
@@ -261,7 +271,7 @@ if [ "${baseimage}" = "raspios_arm64" ]||[ "${baseimage}" = "debian_rpi64" ]; th
 fi
 
 echo "*** Remove unnecessary packages ***"
-sudo apt remove --purge -y libreoffice* oracle-java* chromium-browser nuscratch scratch sonic-pi plymouth python2 vlc
+sudo apt remove --purge -y libreoffice* oracle-java* chromium-browser nuscratch scratch sonic-pi plymouth python2 vlc cups
 sudo apt clean -y
 sudo apt autoremove -y
 
@@ -287,11 +297,12 @@ echo -e "\n*** SOFTWARE UPDATE ***"
 # psmisc -> install killall, fuser
 # ufw -> firewall
 # sqlite3 -> database
-general_utils="policykit-1 htop git curl bash-completion vim jq dphys-swapfile bsdmainutils autossh telnet vnstat parted dosfstools btrfs-progs fbi sysbench build-essential dialog bc python3-dialog unzip"
+# lsb-release -> needed to know which distro version we're running to add APT sources
+general_utils="policykit-1 htop git curl bash-completion vim jq dphys-swapfile bsdmainutils autossh telnet vnstat parted dosfstools btrfs-progs fbi sysbench build-essential dialog bc python3-dialog unzip whois lsb-release"
 python_dependencies="python3-venv python3-dev python3-wheel python3-jinja2 python3-pip"
 server_utils="rsync net-tools xxd netcat openssh-client openssh-sftp-server sshpass psmisc ufw sqlite3"
 [ "${baseimage}" = "armbian" ] && armbian_dependencies="armbian-config" # add armbian-config
-sudo apt install -y ${general_utils} ${python_dependencies} ${server_utils} ${armbian_dependencies}
+apt_install ${general_utils} ${python_dependencies} ${server_utils} ${armbian_dependencies}
 sudo apt clean -y
 sudo apt autoremove -y
 
@@ -304,7 +315,7 @@ sudo update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
 # pytesseract mechanize PySocks urwid Pillow requests
 # 3. Nyx
 # setuptools
-python_libs="grpcio==1.42.0 googleapis-common-protos==1.53.0 toml==0.10.2 j2cli==0.3.10 requests[socks]==2.21.0"
+python_libs="grpcio==1.42.0 googleapis-common-protos==1.53.0 toml==0.10.2 j2cli==0.3.10 requests[socks]==2.21.0 protobuf==3.20.1"
 torbox_libs="pytesseract mechanize PySocks urwid Pillow requests setuptools"
 sudo -H python3 -m pip install --upgrade pip
 sudo -H python3 -m pip install ${python_libs} ${torbox_libs}
@@ -318,8 +329,12 @@ elif [ -f "/usr/bin/python3.10" ]; then
   sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.10 1
   sudo ln -s /usr/bin/python3.10 /usr/bin/python3.9
   echo "python calls python3.10"
+elif [ -f "/usr/bin/python3.8" ]; then
+  # use python 3.8 if available
+  sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.8 1
+  echo "python calls python3.8"
 else
-  echo "!!! FAIL !!!"
+  echo "# FAIL #"
   echo "There is no tested version of python present"
   exit 1
 fi
@@ -335,9 +350,9 @@ fi
 
 # special prepare when Raspbian
 if [ "${baseimage}" = "raspios_arm64" ] || [ "${baseimage}" = "debian_rpi64" ]; then
-
-  echo -e "\n*** PREPARE RASPBERRY OS VARIANTS ***"
-  sudo apt install -y raspi-config
+    
+  echo -e "\n*** PREPARE RASPBERRY OS VARIANTS ***"    
+  apt_install raspi-config
   # do memory split (16MB)
   sudo raspi-config nonint do_memory_split 16
   # set to wait until network is available on boot (0 seems to yes)
@@ -520,7 +535,7 @@ else
 fi
 
 echo -e "\n*** ADDING SERVICE USER bitcoin"
-# based on https://raspibolt.org/system-configuration.html#add-users
+# based on https://raspibolt.org/guide/raspberry-pi/system-configuration.html
 # create user and set default password for user
 sudo adduser --disabled-password --gecos "" bitcoin
 echo "bitcoin:raspiblitz" | sudo chpasswd
@@ -586,7 +601,7 @@ echo -e "\n*** RASPIBLITZ EXTRAS ***"
 # screen for background processes
 # tmux for multiple (detachable/background) sessions when using SSH https://github.com/rootzoll/raspiblitz/issues/990
 # fzf install a command-line fuzzy finder (https://github.com/junegunn/fzf)
-sudo apt -y install tmux screen fzf
+apt_install tmux screen fzf
 
 sudo bash -c "echo '' >> /home/admin/.bashrc"
 sudo bash -c "echo '# https://github.com/rootzoll/raspiblitz/issues/1784' >> /home/admin/.bashrc"
@@ -637,7 +652,7 @@ sudo dphys-swapfile swapoff
 sudo dphys-swapfile uninstall
 
 echo -e "\n*** INCREASE OPEN FILE LIMIT ***"
-# based on https://raspibolt.org/security.html#increase-your-open-files-limit
+# based on https://raspibolt.org/guide/raspberry-pi/security.html#increase-your-open-files-limit
 sudo sed --in-place -i "56s/.*/*    soft nofile 256000/" /etc/security/limits.conf
 sudo bash -c "echo '*    hard nofile 256000' >> /etc/security/limits.conf"
 sudo bash -c "echo 'root soft nofile 256000' >> /etc/security/limits.conf"
@@ -646,11 +661,13 @@ sudo bash -c "echo '# End of file' >> /etc/security/limits.conf"
 sudo sed --in-place -i "23s/.*/session required pam_limits.so/" /etc/pam.d/common-session
 sudo sed --in-place -i "25s/.*/session required pam_limits.so/" /etc/pam.d/common-session-noninteractive
 sudo bash -c "echo '# end of pam-auth-update config' >> /etc/pam.d/common-session-noninteractive"
+# increase the possible number of running processes from 128
+sudo bash -c "echo 'fs.inotify.max_user_instances=4096' >> /etc/sysctl.conf"
 
 # *** fail2ban ***
 # based on https://raspibolt.org/security.html#fail2ban
 echo "*** HARDENING ***"
-sudo apt install -y --no-install-recommends python3-systemd fail2ban
+apt_install --no-install-recommends python3-systemd fail2ban
 
 # *** CACHE DISK IN RAM & KEYVALUE-STORE***
 echo "Activating CACHE RAM DISK ... "
@@ -702,33 +719,6 @@ if [ "${baseimage}" = "raspios_arm64"  ] || [ "${baseimage}" = "debian_rpi64" ];
   sudo sed -i "s/^dtparam=i2c_arm=.*//g" /boot/config.txt
 fi
 
-# *** FATPACK *** (can be activated by parameter - see details at start of script)
-if ${fatpack}; then
-  echo -e "\n*** FATPACK ***"
-  echo "* Adding nodeJS Framework ..."
-  sudo /home/admin/config.scripts/bonus.nodejs.sh on
-  if [ "$?" != "0" ]; then
-    echo "FATPACK FAILED"
-    exit 1
-  fi
-  echo "* Optional Packages (may be needed for extended features)"
-  sudo apt install -y qrencode secure-delete fbi ssmtp unclutter xterm python3-pyqt5 xfonts-terminus apache2-utils nginx python3-jinja2 socat libatlas-base-dev hexyl autossh
-
-  # *** UPDATE FALLBACK NODE LIST (only as part of fatpack) *** see https://github.com/rootzoll/raspiblitz/issues/1888
-  echo "*** FALLBACK NODE LIST ***"
-  sudo -u admin curl -H "Accept: application/json; indent=4" https://bitnodes.io/api/v1/snapshots/latest/ -o /home/admin/fallback.nodes
-  byteSizeList=$(sudo -u admin stat -c %s /home/admin/fallback.nodes)
-  if [ ${#byteSizeList} -eq 0 ] || [ ${byteSizeList} -lt 10240 ]; then
-    echo "WARN: Failed downloading fresh FALLBACK NODE LIST --> https://bitnodes.io/api/v1/snapshots/latest/"
-    sudo rm /home/admin/fallback.nodes 2>/dev/null
-    sudo cp /home/admin/assets/fallback.nodes /home/admin/fallback.nodes
-  fi
-  sudo chown admin:admin /home/admin/fallback.nodes
-
-else
-  echo "* skipping FATPACK"
-fi
-
 # *** BOOTSTRAP ***
 echo -e "\n*** RASPI BOOTSTRAP SERVICE ***"
 sudo chmod +x /home/admin/_bootstrap.sh
@@ -756,24 +746,53 @@ echo
 echo
 /home/admin/config.scripts/bitcoin.install.sh install || exit 1
 
-#######
-# LND #
-#######
-echo
-if ${fatpack}; then
-  /home/admin/config.scripts/lnd.install.sh install || exit 1
-else
-  echo -e "\nSkipping LND install - let user install later if needed ..."
-fi
+# *** BLITZ WEB SERVICE ***
+echo "Provisioning BLITZ WEB SERVICE" 
+/home/admin/config.scripts/blitz.web.sh http-on || exit 1
 
-###############
-# C-LIGHTNING #
-###############
-echo
+# *** FATPACK *** (can be activated by parameter - see details at start of script)
 if ${fatpack}; then
+  echo -e "\n*** FATPACK ***"
+
+  echo "* Adding nodeJS Framework ..."
+  sudo /home/admin/config.scripts/bonus.nodejs.sh on || exit 1
+
+  echo "* Optional Packages (may be needed for extended features)"
+  apt_install qrencode secure-delete fbi ssmtp unclutter xterm python3-pyqt5 xfonts-terminus apache2-utils nginx python3-jinja2 socat libatlas-base-dev hexyl autossh
+
+  echo "* Adding LND ..."
+  /home/admin/config.scripts/lnd.install.sh install || exit 1
+
+  echo "* Adding Core Lightning ..."
   /home/admin/config.scripts/cl.install.sh install || exit 1
+  echo "* Adding the cln-grpc plugin ..."
+  /home/admin/config.scripts/cl-plugin.cln-grpc.sh install || exit 1
+
+  # *** UPDATE FALLBACK NODE LIST (only as part of fatpack) *** see https://github.com/rootzoll/raspiblitz/issues/1888
+  echo "*** FALLBACK NODE LIST ***"
+  sudo -u admin curl -H "Accept: application/json; indent=4" https://bitnodes.io/api/v1/snapshots/latest/ -o /home/admin/fallback.nodes
+  byteSizeList=$(sudo -u admin stat -c %s /home/admin/fallback.nodes)
+  if [ ${#byteSizeList} -eq 0 ] || [ ${byteSizeList} -lt 10240 ]; then
+    echo "WARN: Failed downloading fresh FALLBACK NODE LIST --> https://bitnodes.io/api/v1/snapshots/latest/"
+    sudo rm /home/admin/fallback.nodes 2>/dev/null
+    sudo cp /home/admin/assets/fallback.nodes /home/admin/fallback.nodes
+  fi
+  sudo chown admin:admin /home/admin/fallback.nodes
+
+  echo "* Adding Raspiblitz API ..."
+  sudo /home/admin/config.scripts/blitz.web.api.sh on || exit 1
+
+  echo "* Adding Raspiblitz WebUI ..."
+  sudo /home/admin/config.scripts/blitz.web.ui.sh on || exit 1
+
+  # set build code as new default
+  sudo rm -r /home/admin/assets/nginx/www_public
+  sudo cp -a /home/blitzapi/blitz_web/build/* /home/admin/assets/nginx/www_public
+  sudo chown admin:admin /home/admin/assets/nginx/www_public
+  sudo rm -r /home/blitzapi/blitz_web/build/*
+
 else
-  echo -e "\nSkipping c-lightning install - let user install later if needed ..."
+  echo "* skipping FATPACK"
 fi
 
 echo

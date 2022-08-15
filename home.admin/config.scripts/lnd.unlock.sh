@@ -24,6 +24,7 @@ if [ "${action}" == "chain-unlock" ]; then
     CHAIN=$2
     if [ "${CHAIN}" == "mainnet" ]; then
         chain="main"
+        passwordC="$3"
     elif [ "${CHAIN}" == "testnet" ]; then
         chain="test"
         passwordC=""

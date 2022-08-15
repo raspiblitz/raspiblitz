@@ -1,42 +1,63 @@
 #!/bin/bash
 
 # https://github.com/Ride-The-Lightning/c-lightning-REST/releases/
-CLRESTVERSION="v0.6.1"
+CLRESTVERSION="v0.7.2"
 
 # help
 if [ $# -eq 0 ]||[ "$1" = "-h" ]||[ "$1" = "--help" ];then
   echo
-  echo "C-lightning-REST install script"
+  echo "Core-Lightning-REST install script"
   echo "The default version is: $CLRESTVERSION"
   echo "mainnet | testnet | signet instances can run parallel"
-  echo "The same macaroon and certs will be used for the parallel networks"
   echo
   echo "Usage:"
-  echo "cl.rest.sh [on|off|connect] <mainnet|testnet|signet>"
+  echo "cl.rest.sh [on|off|connect] <mainnet|testnet|signet> [?key-value]"
   echo
   exit 1
 fi
+
+# Example for commits created on GitHub:
+#PGPsigner="web-flow"
+#PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
+#PGPpubkeyFingerprint="4AEE18F83AFDEB23"
+
+PGPsigner="saubyk"
+PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
+PGPpubkeyFingerprint="00C9E2BC2E45666F"
 
 source <(/home/admin/config.scripts/network.aliases.sh getvars cl $2)
 
 echo "# Running 'cl.rest.sh $*'"
 
 if [ "$1" = connect ];then
+  if ! systemctl is-active --quiet ${netprefix}clrest; then
+    /home/admin/config.scripts/cl.rest.sh on ${CHAIN}
+  fi
+
   echo "# Allowing port ${portprefix}6100 through the firewall"
-  sudo ufw allow "${portprefix}6100" comment "${netprefix}clrest"
+  sudo ufw allow "${portprefix}6100" comment "${netprefix}clrest" 1>/dev/null
   localip=$(ip addr | grep 'state UP' -A2 | grep -E -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
   # hidden service to https://xx.onion
-  /home/admin/config.scripts/tor.onion-service.sh ${netprefix}clrest 443 ${portprefix}6100
+  /home/admin/config.scripts/tor.onion-service.sh ${netprefix}clrest 443 ${portprefix}6100 1>/dev/null
 
   toraddress=$(sudo cat /mnt/hdd/tor/${netprefix}clrest/hostname)
-  hex_macaroon=$(xxd -plain /home/bitcoin/c-lightning-REST/certs/access.macaroon | tr -d '\n')
+  hex_macaroon=$(xxd -plain /home/bitcoin/c-lightning-REST/${CLNETWORK}/certs//access.macaroon | tr -d '\n')
   url="https://${localip}:${portprefix}6100/"
-  #string="${url}?${hex_macaroon}"
-  #sudo /home/admin/config.scripts/blitz.display.sh qr "$string"
-  #clear
-  #echo "connection string (shown as a QRcode on the top and on the LCD):"
-  #echo "$string"
-  #qrencode -t ANSIUTF8 "${string}"
+  lndconnect="lndconnect://${toraddress}:443?macaroon=${hex_macaroon}"
+  # c-lightning-rest://http://your_hidden_service.onion:your_port?&macaroon=your_macaroon_file_in_HEX&protocol=http
+  clrestlan="c-lightning-rest://${localip}:${portprefix}6100?&macaroon=${hex_macaroon}&protocol=http"
+  clresttor="c-lightning-rest://${toraddress}:443?&macaroon=${hex_macaroon}&protocol=http"
+
+  if [ "$3" == "key-value" ]; then
+    echo "toraddress='${toraddress}:443'"
+    echo "local='${url}'"
+    echo "macaroon='${hex_macaroon}'"
+    echo "connectstring='${clresttor}'"
+    exit 0
+  fi
+
+  # deactivated
+  function showStepByStepQR() {
   clear
   echo
   sudo /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
@@ -70,9 +91,48 @@ if [ "$1" = connect ];then
   read key
   sudo /home/admin/config.scripts/blitz.display.sh hide
   exit 0
+  }
+
+  function showClRestQr() {
+  # c-lightning-rest://http://your_hidden_service.onion:your_port?&macaroon=your_macaroon_file_in_HEX&protocol=http
+  clear
+  echo
+  sudo /home/admin/config.scripts/blitz.display.sh qr "${clresttor}"
+  echo "The string to connect over Tor is shown as a QRcode below and on the LCD"
+  echo "Scan it to Zeus using the c-lightning-REST option"
+  echo
+  echo "c-lightning-REST connection string:"
+  echo "${clresttor}"
+  echo
+  qrencode -t ANSIUTF8 "${clresttor}"
+  echo
+  echo "# Press enter to show the string to connect over LAN"
+  read key
+  sudo /home/admin/config.scripts/blitz.display.sh hide
+  sudo /home/admin/config.scripts/blitz.display.sh qr "${clrestlan}"
+  clear
+  echo
+  echo "The string to connect over the local the network is shown as a QRcode below and on the LCD"
+  echo "Scan it to Zeus using the c-lightning-REST option"
+  echo "This will only work if your node si connected to the same network"
+  echo "To connect reemotely consider using a VPN like ZeroTier or Tailscale"
+  echo
+  echo "c-lightning-REST connection string:"
+  echo "${clrestlan}"
+  echo
+  qrencode -t ANSIUTF8 "${clrestlan}"
+  echo
+  echo "# Press enter to hide the QRcode from the LCD"
+  read key
+  sudo /home/admin/config.scripts/blitz.display.sh hide
+  exit 0
+  }
+
+  showClRestQr
+
 fi
 
-if [ "$1" = on ];then
+if [ "$1" = on ]; then
   echo "# Setting up c-lightning-REST for $CHAIN"
 
   sudo systemctl stop ${netprefix}clrest
@@ -83,13 +143,10 @@ if [ "$1" = on ];then
     sudo -u bitcoin git clone https://github.com/saubyk/c-lightning-REST
     cd c-lightning-REST || exit 1
     sudo -u bitcoin git reset --hard $CLRESTVERSION
-    
-    PGPsigner="saubyk"
-    PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
-    PGPpubkeyFingerprint="00C9E2BC2E45666F"
+
     sudo -u bitcoin /home/admin/config.scripts/blitz.git-verify.sh \
-     "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
-    
+     "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" "${CLRESTVERSION}" || exit 1
+
     sudo -u bitcoin npm install
   fi
 
@@ -106,6 +163,11 @@ if [ "$1" = on ];then
     \"RPCCOMMANDS\": [\"*\"]
 }" | sudo -u bitcoin tee ./${CLNETWORK}/cl-rest-config.json
 
+  # copy clrest to a CLNETWORK subdor to make parallel networks possible
+  sudo -u bitcoin mkdir /home/bitcoin/c-lightning-REST/${CLNETWORK}
+  sudo -u bitcoin cp -r /home/bitcoin/c-lightning-REST/* \
+   /home/bitcoin/c-lightning-REST/${CLNETWORK}
+
   echo "
 # systemd unit for c-lightning-REST for ${CHAIN}
 # /etc/systemd/system/${netprefix}clrest.service
@@ -115,8 +177,7 @@ Wants=${netprefix}lightningd.service
 After=${netprefix}lightningd.service
 
 [Service]
-WorkingDirectory=/home/bitcoin/c-lightning-REST/${CLNETWORK}
-ExecStart=/usr/bin/node /home/bitcoin/c-lightning-REST/cl-rest.js
+ExecStart=/usr/bin/node /home/bitcoin/c-lightning-REST/${CLNETWORK}/cl-rest.js
 User=bitcoin
 Restart=always
 TimeoutSec=120
@@ -148,7 +209,7 @@ WantedBy=multi-user.target
   echo
 fi
 
-if [ $1 = off ];then
+if [ "$1" = off ];then
   echo "# Removing c-lightning-REST for ${CHAIN}"
   sudo systemctl stop ${netprefix}clrest
   sudo systemctl disable ${netprefix}clrest

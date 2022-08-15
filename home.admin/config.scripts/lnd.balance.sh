@@ -24,7 +24,7 @@ LN_COMMIT_FEES=$(lncli listchannels | jq -r '.[][] | select(.initiator==true) | 
 LN_INVOICES=$(lncli listinvoices | jq -r '.invoices[] | select(.settled==true) | .value' | awk '{s+=$1} END {print s}')
 LN_PAYMENTS=$(lncli listpayments | jq -r '.payments[] | select(.status=="SUCCEEDED") | .value' | awk '{s+=$1} END {print s}')
 LN_PAYMENTS_FEES=$(lncli listpayments | jq -r '.payments[] | select(.status=="SUCCEEDED") | .fee' | awk '{s+=$1} END {print s}')
-LN_EARNED_FEES_IN_MSATS=$(lncli fwdinghistory 0 --max_events -1 | jq -r '.forwarding_events[] | .fee_msat' | awk '{s+=$1} END {print s}')
+LN_EARNED_FEES_IN_MSATS=$(lncli fwdinghistory 0 --max_events 50000 | jq -r '.forwarding_events[] | .fee_msat' | awk '{s+=$1} END {print s}')
 LN_EARNED_FEES_IN_SATS=$((LN_EARNED_FEES_IN_MSATS / 1000))
 
 ONCHAIN_FUNDS_CONFIRMED=$(lncli walletbalance | jq -r '.confirmed_balance')

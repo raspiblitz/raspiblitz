@@ -13,10 +13,10 @@ source <(/home/admin/config.scripts/network.aliases.sh getvars cl $1)
 # BASIC MENU INFO
 WIDTH=64
 BACKTITLE="RaspiBlitz"
-TITLE=" C-Lightning Options (${CHAIN})"
+TITLE=" Core Lightning Options (${CHAIN})"
 MENU=""
 OPTIONS=()
-  OPTIONS+=(FUNDING "Fund the C-lightning wallet onchain")
+  OPTIONS+=(FUNDING "Fund the Core Lightning wallet onchain")
   OPTIONS+=(PEERING "Connect to a peer")
   OPTIONS+=(CHANNEL "Open a channel with peer")
   OPTIONS+=(SEND "Pay an invoice / payment request")
@@ -33,9 +33,9 @@ if [ ${#openChannels} -gt 0 ] && [ ${openChannels} -gt 0 ]; then
 fi
   OPTIONS+=(CASHOUT "Withdraw all funds onchain ($CHAIN)")
   OPTIONS+=(SEED "Show Wallet Seed Words")
-  OPTIONS+=(REPAIR-CL "Repair options for C-lightning")
+  OPTIONS+=(REPAIR-CL "Repair options for Core Lightning")
 if [ "${lightning}" != "cl" ] && [ "${CHAIN}" == "mainnet" ]; then
-  OPTIONS+=(SWITCHLN  "Use C-lightning as default")
+  OPTIONS+=(SWITCHLN  "Use Core Lightning as default")
 fi  
 
 CHOICE_HEIGHT=$(("${#OPTIONS[@]}/2+1"))
@@ -109,6 +109,7 @@ case $CHOICE in
       echo
       # setting value in the raspiblitz.conf
       /home/admin/config.scripts/blitz.conf.sh set lightning "cl"
+      sudo systemctl restart blitzapi 2>/dev/null
       echo "# OK - lightning=cl is set in /mnt/hdd/raspiblitz.conf"
       echo
       echo "Press ENTER to return to main menu."

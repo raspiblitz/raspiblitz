@@ -50,16 +50,16 @@ chown admin:admin ${filename}
 
 # B) write error to std outs
 >&2 echo "${errorReport} --> ${filename}"
-echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+echo "##################"
 echo "${errorReport}"
-echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+echo "##################"
 
 # C) write error report to given logfile (optional) 
 logfile=$6
 if [ "${logfile}" !=  "" ]; then
-  echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" >> ${logFile}
+  echo "##################" >> ${logFile}
   echo "${errorReport}" >> ${logFile}
-  echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" >> ${logFile}
+  echo "##################" >> ${logFile}
 fi
 
 # on serial calls make sure that at least a second is between error reports

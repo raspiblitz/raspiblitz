@@ -61,6 +61,14 @@ if [ "$1" == "prestart" ]; then
     /home/admin/config.scripts/blitz.systemd.sh log lightning STARTED
   fi
 
+  ##### APPLICATION OPTIONS SECTION #####
+
+  # delete autounlock if passwordFile not present
+  passwordFile="/mnt/hdd/lnd/data/chain/${network}/${CHAIN}/password.info"
+  if ! ls ${passwordFile} &>/dev/null; then
+    sed -i "/^wallet-unlock-password-file=/d" ${lndConfFile}
+  fi
+
   ##### BITCOIN OPTIONS SECTION #####
 
   # [bitcoin]
@@ -157,7 +165,7 @@ if [ "$1" == "prestart" ]; then
   setting ${lndConfFile} ${insertLine} "${network}d\.rpchost" "127\.0\.0\.1\:${portprefix}8332"
 
   ##### APPLICATION OPTIONS SECTION #####
-  
+
   sectionLine=$(cat ${lndConfFile} | grep -n "^\[Application Options\]" | cut -d ":" -f1)
   echo "# sectionLine(${sectionLine})"
   insertLine=$(expr $sectionLine + 1)
@@ -208,6 +216,31 @@ if [ "$1" == "prestart" ]; then
   setting ${lndConfFile} ${insertLine} "db.bolt.auto-compact-min-age" "672h"
   setting ${lndConfFile} ${insertLine} "db.bolt.auto-compact" "true"
 
+  ##### WORKERS SECTION #####
+  # https://github.com/lightningnetwork/lnd/blob/5c36d96c9cbe8b27c29f9682dcbdab7928ae870f/sample-lnd.conf#L1131
+  cores=$(nproc)
+  if [ "${cores}" -lt 8 ]; then
+    sectionName="workers"
+    echo "# [${sectionName}] config ..."
+    # make sure lnd config has a [bolt] section
+    sectionExists=$(cat ${lndConfFile} | grep -c "^\[${sectionName}\]")
+    echo "# sectionExists(${sectionExists})"
+    if [ "${sectionExists}" == "0" ]; then
+      echo "# adding section [${sectionName}]"
+      echo "
+[${sectionName}]
+" | tee -a ${lndConfFile}
+    fi
+
+    sectionLine=$(cat ${lndConfFile} | grep -n "^\[workers\]" | cut -d ":" -f1)
+    echo "# sectionLine(${sectionLine})"
+    insertLine=$(expr $sectionLine + 1)
+
+    # limit workers to the number of cores
+    setting ${lndConfFile} ${insertLine} "workers.write" "${cores}"
+    setting ${lndConfFile} ${insertLine} "workers.sig" "${cores}"
+fi
+
   ##### TOR SECTION #####
 
   if [ "${runBehindTor}" == "on" ]; then
@@ -243,11 +276,9 @@ if [ "$1" == "prestart" ]; then
     setting ${lndConfFile} ${insertLine} "tor.active" "true"
 
     # take care of incompatible settings https://github.com/rootzoll/raspiblitz/issues/2787#issuecomment-991245694
-    if [ $(cat ${lndConfFile} | grep -c "tor.skip-proxy-for-clearnet-targets=true") -gt 0 ] ||
-       [ $(cat ${lndConfFile} | grep -c "tor.skip-proxy-for-clearnet-targets=1") -gt 0 ]; then
+    if [ $(cat ${lndConfFile} | grep -c "^tor.skip-proxy-for-clearnet-targets=true") -gt 0 ] ||
+       [ $(cat ${lndConfFile} | grep -c "^tor.skip-proxy-for-clearnet-targets=1") -gt 0 ]; then
       setting ${lndConfFile} ${insertLine} "tor.streamisolation" "false"
-    else
-      setting ${lndConfFile} ${insertLine} "tor.streamisolation" "true"
     fi
 
     # deprecate Tor password (remove if in lnd.conf)

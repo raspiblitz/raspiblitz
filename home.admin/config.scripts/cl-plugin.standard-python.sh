@@ -3,7 +3,7 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ];then
   echo
-  echo "Install and show the output of the chosen plugin for C-lightning"
+  echo "Install and show the output of the chosen plugin for Core Lightning"
   echo "Usage:"
   echo "cl-plugin.standard-python.sh on [plugin-name] <testnet|mainnet|signet> <persist|runonce>"
   echo

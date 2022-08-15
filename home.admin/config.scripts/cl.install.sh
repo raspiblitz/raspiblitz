@@ -2,25 +2,25 @@
 # https://lightning.readthedocs.io/
 
 # https://github.com/ElementsProject/lightning/releases
-CLVERSION=v0.10.2
+CLVERSION=v0.11.2
 
 # install the latest master by using the last commit id
 # https://github.com/ElementsProject/lightning/commit/master
 # CLVERSION="063366ed7e3b7cc12a8d1681acc2b639cf07fa23"
 
 # https://github.com/ElementsProject/lightning/tree/master/contrib/keys
-# PGPsigner="rustyrussel"
-# PGPpubkeyLink="https://raw.githubusercontent.com/ElementsProject/lightning/master/contrib/keys/rustyrussell.txt"
-# PGPpubkeyFingerprint="D9200E6CD1ADB8F1"
+PGPsigner="rustyrussel"
+PGPpubkeyLink="https://raw.githubusercontent.com/ElementsProject/lightning/master/contrib/keys/rustyrussell.txt"
+PGPpubkeyFingerprint="D9200E6CD1ADB8F1"
 
-PGPsigner="cdecker"
-PGPpubkeyLink="https://raw.githubusercontent.com/ElementsProject/lightning/master/contrib/keys/${PGPsigner}.txt"
-PGPpubkeyFingerprint="A26D6D9FE088ED58"
+#PGPsigner="cdecker"
+#PGPpubkeyLink="https://raw.githubusercontent.com/ElementsProject/lightning/master/contrib/keys/${PGPsigner}.txt"
+#PGPpubkeyFingerprint="A26D6D9FE088ED58"
 
 # help
 if [ $# -eq 0 ]||[ "$1" = "-h" ]||[ "$1" = "--help" ];then
   echo
-  echo "C-lightning install script"
+  echo "Core Lightning install script"
   echo "The default version is: $CLVERSION"
   echo "mainnet / testnet / signet instances can run parallel"
   echo
@@ -34,9 +34,9 @@ if [ $# -eq 0 ]||[ "$1" = "-h" ]||[ "$1" = "--help" ];then
   exit 1
 fi
 
-function installDependencies() 
+function installDependencies()
 {
-  echo "- Install build dependencies"
+  echo "- installDependencies()"
   # from https://lightning.readthedocs.io/INSTALL.html#to-build-on-ubuntu
   sudo apt-get install -y \
    autoconf automake build-essential git libtool libgmp-dev \
@@ -44,13 +44,16 @@ function installDependencies()
    gettext
   # additional requirements
   sudo apt-get install -y postgresql libpq-dev
+  # mrkd and mistune needs to be globally available for the build
   sudo pip3 install mrkd==0.2.0
   sudo pip3 install mistune==0.8.4
-  # for pylightning
-  echo "- Install from the requirements.txt"
-  sudo -u bitcoin pip3 install --user mrkd==0.2.0
-  sudo -u bitcoin pip3 install --user mistune==0.8.4
-  sudo -u bitcoin pip3 install --user -r requirements.txt
+  # poetry
+  sudo -u bitcoin pip3 install --user poetry
+  if ! grep -Eq '^PATH="$HOME/.local/bin:$PATH"' /mnt/hdd/raspiblitz.conf; then
+    echo 'PATH="$HOME/.local/bin:$PATH"' | sudo tee -a /home/bitcoin/.profile
+  fi
+  export PATH="home/bitcoin/.local/bin:$PATH"
+  sudo -u bitcoin /home/bitcoin/.local/bin/poetry install
 }
 
 function buildAndInstallCLbinaries()
@@ -59,7 +62,7 @@ function buildAndInstallCLbinaries()
   echo
   sudo -u bitcoin ./configure --enable-experimental-features
   echo
-  echo "- Building C-lightning from source"
+  echo "- Building Core lightning from source"
   echo
   sudo -u bitcoin make
   echo
@@ -68,14 +71,14 @@ function buildAndInstallCLbinaries()
 }
 
 if [ "$1" = "install" ]; then
-  
-  echo "# *** INSTALL C-LIGHTNING ${CLVERSION} BINARY ***"
+
+  echo "# *** INSTALL CORE LIGHTNING ${CLVERSION} BINARY ***"
   echo "# only binary install to system"
   echo "# no configuration, no systemd service"
 
   # check if the binary is already installed
   if [ -f /usr/local/bin/lightningd ]; then
-    echo "c-lightning binary already installed - done"
+    echo "Core Lightning binary already installed - done"
     exit 1
   fi
 
@@ -90,7 +93,7 @@ if [ "$1" = "install" ]; then
 #  fingerprint=$(gpg "pgp_keys.asc" 2>/dev/null | grep "${PGPpubkeyFingerprint}" -c)
 #  if [ ${fingerprint} -lt 1 ]; then
 #    echo
-#    echo "!!! WARNING --> the PGP fingerprint is not as expected for ${PGPsigner}"
+#    echo "# WARNING --> the PGP fingerprint is not as expected for ${PGPsigner}"
 #    echo "Should contain PGP: ${PGPpubkeyFingerprint}"
 #    echo "PRESS ENTER to TAKE THE RISK if you think all is OK"
 #    read key
@@ -99,8 +102,8 @@ if [ "$1" = "install" ]; then
 #
 #  sudo -u bitcoin wget https://github.com/ElementsProject/lightning/releases/download/${CLVERSION}/SHA256SUMS
 #  sudo -u bitcoin wget https://github.com/ElementsProject/lightning/releases/download/${CLVERSION}/SHA256SUMS.asc
-#  
-#  verifyResult=$(sudo -u bitcoin gpg --verify SHA256SUMS.asc 2>&1)
+#
+#  verifyResult=$(LANG=en_US.utf8; sudo -u bitcoin gpg --verify SHA256SUMS.asc 2>&1)
 #
 #  goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
 #  echo "goodSignature(${goodSignature})"
@@ -108,33 +111,33 @@ if [ "$1" = "install" ]; then
 #  echo "correctKey(${correctKey})"
 #  if [ ${correctKey} -lt 1 ] || [ ${goodSignature} -lt 1 ]; then
 #    echo
-#    echo "!!! DOWNLOAD FAILED --> PGP verification not OK / signature(${goodSignature}) verify(${correctKey})"
+#    echo "# DOWNLOAD FAILED --> PGP verification not OK / signature(${goodSignature}) verify(${correctKey})"
 #    exit 1
 #  else
-#    echo 
+#    echo
 #    echo "****************************************************************"
-#    echo "OK --> the PGP signature of the C-lightning SHA256SUMS is correct"
+#    echo "OK --> the PGP signature of the Core Lightning SHA256SUMS is correct"
 #    echo "****************************************************************"
-#    echo 
+#    echo
 #  fi
-#  
+#
 #  sudo -u bitcoin wget https://github.com/ElementsProject/lightning/releases/download/${CLVERSION}/clightning-${CLVERSION}.zip
-#  
+#
 #  hashCheckResult=$(sha256sum -c SHA256SUMS 2>&1)
 #  goodHash=$(echo ${hashCheckResult} | grep 'OK' -c)
 #  echo "goodHash(${goodHash})"
 #  if [ ${goodHash} -lt 1 ]; then
 #    echo
-#    echo "!!! BUILD FAILED --> Hash check not OK"
+#    echo "# BUILD FAILED --> Hash check not OK"
 #    exit 1
 #  else
 #    echo
 #    echo "********************************************************************"
-#    echo "OK --> the hash of the downloaded C-lightning source code is correct"
+#    echo "OK --> the hash of the downloaded Core Lightning source code is correct"
 #    echo "********************************************************************"
 #    echo
 #  fi
-#  
+#
 #  sudo -u bitcoin unzip clightning-${CLVERSION}.zip
 #  cd clightning-${CLVERSION} || exit 1
 
@@ -155,23 +158,23 @@ if [ "$1" = "install" ]; then
   installDependencies
 
   buildAndInstallCLbinaries
-  
+
   installed=$(sudo -u bitcoin lightning-cli --version)
   if [ ${#installed} -eq 0 ]; then
     echo
-    echo "!!! BUILD FAILED --> Was not able to install C-lightning"
+    echo "# BUILD FAILED --> Was not able to install Core Lightning"
     exit 1
   fi
-  
+
   correctVersion=$(echo "${installed}" | grep -c "${CLVERSION:1}")
   if [ "${correctVersion}" -eq 0 ]; then
     echo
-    echo "!!! BUILD FAILED --> installed C-lightning is not version ${CLVERSION}"
+    echo "# BUILD FAILED --> installed Core Lightning is not version ${CLVERSION}"
     sudo -u bitcoin lightning-cli --version
     exit 1
   fi
   echo
-  echo "- OK the installation of C-lightning v${installed} is successful"
+  echo "- OK the installation of Core Lightning v${installed} is successful"
   exit 0
 fi
 
@@ -221,7 +224,7 @@ if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = testPR ];then
     sudo -u bitcoin git clone https://github.com/ElementsProject/lightning.git
     cd lightning || exit 1
     echo
-    
+
     if [ "$1" = "update" ]; then
       if [ $# -gt 1 ];then
         CLVERSION=$2
@@ -234,7 +237,7 @@ if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = testPR ];then
         echo "# Press ENTER to continue or CTRL+C to abort the update"
         read -r key
       fi
-    
+
     elif [ "$1" = "testPR" ]; then
       PRnumber=$2 || exit 1
       echo "# Using the PR:"
@@ -247,11 +250,11 @@ if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = testPR ];then
 
     currentCLversion=$(cd /home/bitcoin/lightning 2>/dev/null; \
     git describe --tags 2>/dev/null)
-    echo "# Building from source C-lightning $currentCLversion"
+    echo "# Building from source Core Lightning $currentCLversion"
 
     buildAndInstallCLbinaries
   fi
-  
+
   ##########
   # Config #
   ##########
@@ -277,7 +280,7 @@ if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = testPR ];then
   if [ ${CLNETWORK} != "bitcoin" ] && [ ! -d /home/bitcoin/.lightning/${CLNETWORK} ] ;then
     sudo -u bitcoin mkdir /home/bitcoin/.lightning/${CLNETWORK}
   fi
-  
+
   if ! sudo ls ${CLCONF};then
     echo "# Create ${CLCONF}"
     echo "# lightningd configuration for ${network} ${CHAIN}
@@ -297,7 +300,7 @@ always-use-proxy=true
     echo "# The file ${CLCONF} is already present"
   fi
   sudo chown -R bitcoin:bitcoin /mnt/hdd/app-data/.lightning
-  sudo chown -R bitcoin:bitcoin /home/bitcoin/  
+  sudo chown -R bitcoin:bitcoin /home/bitcoin/
 
   ## Create a wallet from seedwords for mainnet
   if [ ${CHAIN} = "mainnet" ]; then
@@ -306,7 +309,7 @@ always-use-proxy=true
       echo "# $hsmSecretPath is already present"
     else
       echo "Create a wallet from seedwords for mainnet"
-      /home/admin/config.scripts/cl.hsmtool.sh new-force mainnet
+      /home/admin/config.scripts/cl.hsmtool.sh new-force mainnet 1>/dev/null 2>/dev/null
     fi
   fi
 
@@ -343,8 +346,8 @@ always-use-proxy=true
         #endscript
         su bitcoin bitcoin
 }" | sudo tee /etc/logrotate.d/${netprefix}lightningd
-  # debug: 
-  # sudo logrotate --debug /etc/logrotate.d/lightningd 
+  # debug:
+  # sudo logrotate --debug /etc/logrotate.d/lightningd
 
   echo
   sudo -u admin touch /home/admin/_aliases
@@ -363,8 +366,8 @@ alias ${netprefix}clconf=\"sudo\
     sudo chown admin:admin /home/admin/_aliases
   fi
 
-  echo "# The installed C-lightning version is: $(sudo -u bitcoin /usr/local/bin/lightningd --version)"
-  echo   
+  echo "# The installed Core Lightning version is: $(sudo -u bitcoin /usr/local/bin/lightningd --version)"
+  echo
   echo "# To activate the aliases reopen the terminal or use:"
   echo "source ~/_aliases"
   echo "# Monitor the ${netprefix}lightningd with:"
@@ -376,8 +379,21 @@ alias ${netprefix}clconf=\"sudo\
   echo "${netprefix}lightning-cli help"
   echo
 
-  # setting value in the raspiblitz.conf
+  # setting values in the raspiblitz.conf
   /home/admin/config.scripts/blitz.conf.sh set ${netprefix}cl on
+  # blitz.conf.sh needs sudo access - cannot be run in cl.check.sh
+  if [ ! -f /home/bitcoin/${netprefix}cl-plugins-enabled/sparko ];then
+    /home/admin/config.scripts/blitz.conf.sh set ${netprefix}sparko "off"
+  fi
+  if [ ! -f /home/bitcoin/cl-plugins-enabled/c-lightning-http-plugin ];then
+    /home/admin/config.scripts/blitz.conf.sh set clHTTPplugin "off"
+  fi
+  if [ ! -f /home/bitcoin/${netprefix}cl-plugins-enabled/feeadjuster.py ]; then
+    /home/admin/config.scripts/blitz.conf.sh set ${netprefix}feeadjuster "off"
+  fi
+  if [ ! -f /home/bitcoin/${netprefix}cl-plugins-enabled/cln-grpc ];then
+    /home/admin/config.scripts/blitz.conf.sh set "${netprefix}clnGRPCport" "off"
+  fi
 
   # if this is the first lightning mainnet turned on - make default
   if [ "${CHAIN}" == "mainnet" ] && [ "${lightning}" == "" ]; then
@@ -389,7 +405,7 @@ alias ${netprefix}clconf=\"sudo\
 fi
 
 if [ "$1" = "display-seed" ]; then
-  
+
   # check if sudo
   if [ "$EUID" -ne 0 ]; then
     echo "Please run as root (with sudo)"
@@ -416,8 +432,8 @@ if [ "$1" = "display-seed" ]; then
       ack=0
       while [ ${ack} -eq 0 ]
       do
-        whiptail --title "C-Lightning ${displayNetwork} Wallet" \
-          --msgbox "This is your C-Lightning ${displayNetwork} wallet seed. Store these numbered words in a safe location:\n\n${seedwords6x4}" 13 76
+        whiptail --title "Core Lightning ${displayNetwork} Wallet" \
+          --msgbox "This is your Core Lightning ${displayNetwork} wallet seed. Store these numbered words in a safe location:\n\n${seedwords6x4}" 13 76
         whiptail --title "Please Confirm" --yes-button "Show Again" --no-button "CONTINUE" --yesno "  Are you sure that you wrote down the word list?" 8 55
         if [ $? -eq 1 ]; then
           ack=1
@@ -425,13 +441,13 @@ if [ "$1" = "display-seed" ]; then
       done
     else
       dialog \
-       --title "C-Lightning ${displayNetwork} Wallet" \
+       --title "Core Lightning ${displayNetwork} Wallet" \
        --exit-label "exit" \
        --textbox "${seedwordFile}" 14 92
     fi
   else
     # hsmFile="/home/bitcoin/.lightning/${CLNETWORK}/hsm_secret"
-    whiptail --title "C-Lightning ${displayNetwork} Wallet Info" --msgbox "Your C-Lightning ${displayNetwork} wallet was already created before - there are no seed words available.\n\nTo secure your wallet secret you can manually backup the file: /home/bitcoin/.lightning/${CLNETWORK}/hsm_secret" 11 76
+    whiptail --title "Core Lightning ${displayNetwork} Wallet Info" --msgbox "Your Core Lightning ${displayNetwork} wallet was already created before - there are no seed words available.\n\nTo secure your wallet secret you can manually backup the file: /home/bitcoin/.lightning/${CLNETWORK}/hsm_secret" 11 76
   fi
 
   exit 0
@@ -452,9 +468,9 @@ if [ "$1" = "off" ];then
   # setting value in the raspiblitz.conf
   /home/admin/config.scripts/blitz.conf.sh set ${netprefix}cl "off"
 
-  # if cl mainnet was default - remove 
+  # if cl mainnet was default - remove
   if [ "${CHAIN}" == "mainnet" ] && [ "${lightning}" == "cl" ]; then
-    echo "# CL is REMOVED as the default lightning implementation"
+    echo "# Core Lightning is REMOVED as the default lightning implementation"
     /home/admin/config.scripts/blitz.conf.sh set lightning ""
     if [ "${lnd}" == "on" ]; then
       echo "# LND is now the new default lightning implementation"

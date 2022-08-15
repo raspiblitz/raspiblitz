@@ -68,9 +68,13 @@ _temp="/var/cache/raspiblitz/temp/.temp.tmp"
 # PASSWORD A
 if [ "${setPasswordA}" == "1" ]; then
   clear
-  sudo /home/admin/config.scripts/blitz.setpassword.sh x "PASSWORD A - Main User Password" $_temp
+  sudo /home/admin/config.scripts/blitz.passwords.sh set x "PASSWORD A - Main User Password" $_temp
   password=$(sudo cat $_temp)
   sudo rm $_temp
+  if [ "${password}" == "" ]; then
+    echo "FAIL password A cannot be empty - stopped setup"
+    exit 1
+  fi
   sudo sed -i '/^passwordA=/d' $SETUPFILE
   echo "passwordA='${password}'" >> $SETUPFILE
   dialog --backtitle "RaspiBlitz - Setup" --msgbox "\nThanks - Password A accepted.\n\nUse this password for future SSH or Web-Admin logins to your RaspiBlitz & for sudo commands." 11 35
@@ -79,9 +83,13 @@ fi
 # PASSWORD B
 if [ "${setPasswordB}" == "1" ]; then
   clear
-  sudo /home/admin/config.scripts/blitz.setpassword.sh x "PASSWORD B - APP Password" $_temp
+  sudo /home/admin/config.scripts/blitz.passwords.sh set x "PASSWORD B - APP Password" $_temp
   password=$(sudo cat $_temp)
   sudo rm $_temp
+  if [ "${password}" == "" ]; then
+    echo "FAIL password B cannot be empty - stopped setup"
+    exit 1
+  fi
   sudo sed -i '/^passwordB=/d' $SETUPFILE
   echo "passwordB='${password}'" >> $SETUPFILE
   dialog --backtitle "RaspiBlitz - Setup" --msgbox "\nThanks - Password B accepted.\n\nUse this password as login for\nadditial Apps & API access." 10 34
@@ -90,9 +98,13 @@ fi
 # PASSWORD C
 if [ "${setPasswordC}" == "1" ]; then
   clear
-  sudo /home/admin/config.scripts/blitz.setpassword.sh x "PASSWORD C - Lightning Wallet Password" $_temp
+  sudo /home/admin/config.scripts/blitz.passwords.sh set x "PASSWORD C - Lightning Wallet Password" $_temp
   password=$(sudo cat $_temp)
   sudo rm $_temp
+  if [ "${password}" == "" ]; then
+    echo "FAIL password C cannot be empty - stopped setup"
+    exit 1
+  fi
   sudo sed -i '/^passwordC=/d' $SETUPFILE
   echo "passwordC='${password}'" >> $SETUPFILE
   dialog --backtitle "RaspiBlitz - Setup" --msgbox "\nThanks - Password C accepted.\n\nAlways use this password to \nunlock your Lightning Wallet." 10 34

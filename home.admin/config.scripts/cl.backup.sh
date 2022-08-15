@@ -148,7 +148,7 @@ if [ ${mode} = "cl-export" ]; then
   sudo chown ${fileowner}:${fileowner} ${downloadPath}/cl-rescue.tar.gz 1>&2
 
   # delete old backups
-  rm ${downloadPath}/cl-rescue-*.tar.gz 2>/dev/null 1>/dev/null
+  # rm ${downloadPath}/cl-rescue-*.tar.gz 2>/dev/null 1>/dev/null
 
   # name with md5 checksum
   md5checksum=$(md5sum ${downloadPath}/cl-rescue.tar.gz | head -n1 | cut -d " " -f1)
@@ -183,9 +183,9 @@ if [ ${mode} = "cl-export-gui" ]; then
   # offer SCP for download
   clear
   echo
-  echo "****************************************"
-  echo "* DOWNLOAD THE C-LIGHTNING RESCUE FILE *"
-  echo "****************************************"
+  echo "*******************************************"
+  echo "* DOWNLOAD THE CORE LIGHTNING RESCUE FILE *"
+  echo "*******************************************"
   echo 
   echo "ON YOUR MAC & LINUX LAPTOP - RUN IN NEW TERMINAL:"
   echo "scp '${fileowner}@${localip}:${filename}' ./"
@@ -280,11 +280,11 @@ if [ ${mode} = "cl-import-gui" ]; then
   while [ "${filename}" == "" ]
     do
       clear 
-      echo "**************************************"
-      echo "* UPLOAD THE C-LIGHTNING RESCUE FILE *"
-      echo "**************************************"
+      echo "*****************************************"
+      echo "* UPLOAD THE CORE LIGHTNING RESCUE FILE *"
+      echo "*****************************************"
       echo "If you have a cl-rescue backup file on your laptop you can now"
-      echo "upload it and restore your latest C-Lightning state."
+      echo "upload it and restore your latest Core Lightning state."
       echo
       echo "CAUTION: Don't restore outdated states - risk of loosing funds!"
       echo
@@ -304,24 +304,24 @@ if [ ${mode} = "cl-import-gui" ]; then
         echo "PRESS ENTER to continue."
         read key
       elif [ "${error}" == "not-found" ]; then
-        echo "!! WARNING !!"
+        echo "# WARNING #"
         echo "There was no upload found in ${defaultUploadPath}"
         echo "PRESS ENTER to continue & retry ... or 'x'+ ENTER to cancel"
         read keyRetry
       elif [ "${error}" == "multiple" ]; then
-        echo "!! WARNING !!"
+        echo "# WARNING #"
         echo "There are multiple cl-rescue files in directory ${defaultUploadPath}"
         echo "Make sure you upload only one tar.gz-file and start again."
         echo "PRESS ENTER to continue & retry ... or 'x'+ ENTER to cancel"
         read keyRetry
       elif [ "${error}" == "invalid" ]; then
-        echo "!! WARNING !!"
+        echo "# WARNING #"
         echo "The file uploaded is not a valid (complete upload failed or not correct file)."
         echo "PRESS ENTER to continue & retry ... or 'x'+ ENTER to cancel"
         read keyRetry
       else
         # create no result file and exit
-        echo "!! WARNING !! Unknown State (report to devs)"
+        echo "# WARNING # Unknown State (report to devs)"
         exit 1
       fi
 
@@ -345,7 +345,7 @@ if [ ${mode} = "cl-import-gui" ]; then
   source /mnt/hdd/raspiblitz.conf
   
   # ask security question before deleting old wallet
-  echo "WARNING: This will delete/overwrite the C-Lightning state/funds of this RaspiBlitz."
+  echo "WARNING: This will delete/overwrite the Core Lightning state/funds of this RaspiBlitz."
   echo
   echo "Write the word 'override' and press ENTER to CONTINUE:"
   read securityInput
@@ -427,7 +427,7 @@ if [ ${mode} = "seed-export-gui" ]; then
   ack=0
   while [ ${ack} -eq 0 ]
   do
-    whiptail --title "IMPORTANT SEED WORDS - PLEASE WRITE DOWN" --msgbox "Created a new C-lightning wallet. Store these numbered 24 words in a safe location:\n\n${seedwords6x4}" 13 76
+    whiptail --title "IMPORTANT SEED WORDS - PLEASE WRITE DOWN" --msgbox "Created a new Core Lightning wallet. Store these numbered 24 words in a safe location:\n\n${seedwords6x4}" 13 76
     whiptail --title "Please Confirm" --yes-button "Show Again" --no-button "CONTINUE" --yesno "  Are you sure that you wrote down the word list?" 8 55
     if [ $? -eq 1 ]; then
       ack=1
@@ -466,7 +466,7 @@ if [ ${mode} = "seed-import-gui" ]; then
       sudo chown admin:admin /var/cache/raspiblitz/.seed.tmp
 
       # dialog to enter
-      dialog --backtitle "RaspiBlitz - Recover from C-lightning seed" --inputbox "Please enter/paste the SEED WORD LIST:\n(just the words, seperated by spaces, in correct order as numbered)" 9 78 2>/var/cache/raspiblitz/.seed.tmp
+      dialog --backtitle "RaspiBlitz - Recover from Core Lightning seed" --inputbox "Please enter/paste the SEED WORD LIST:\n(just the words, seperated by spaces, in correct order as numbered)" 9 78 2>/var/cache/raspiblitz/.seed.tmp
       wordstring=$(cat /var/cache/raspiblitz/.seed.tmp | sed 's/[^a-zA-Z0-9 ]//g')
       sudo shred -u /var/cache/raspiblitz/.seed.tmp 2>/dev/null
       echo "processing ..."

@@ -85,6 +85,10 @@ usermod -G bitcoin root
 /home/admin/_cache.sh set system_count_start_blockchain "0"
 /home/admin/_cache.sh set system_count_start_lightning "0"
 /home/admin/_cache.sh set system_count_start_tui "0"
+/home/admin/_cache.sh set btc_default_peers "0"
+/home/admin/_cache.sh set btc_default_sync_percentage "0"
+/home/admin/_cache.sh set btc_default_address ""
+/home/admin/_cache.sh set btc_default_port ""
 
 # import all base values from raspiblitz.info
 echo "importing: ${infoFile}"
@@ -193,6 +197,7 @@ do
     echo "updating: /home/admin/config.scripts/blitz.ups.sh status"
     source <(/home/admin/config.scripts/blitz.ups.sh status)
     /home/admin/_cache.sh set system_ups_status "${upsStatus}"
+    /home/admin/_cache.sh set system_ups_battery "${upsBattery}"
   fi
 
   #################
@@ -423,21 +428,24 @@ do
             /home/admin/_cache.sh set btc_${CHAIN}net_blocks_headers "${btc_blocks_headers}"
             /home/admin/_cache.sh set btc_${CHAIN}net_blocks_verified "${btc_blocks_verified}"
             /home/admin/_cache.sh set btc_${CHAIN}net_blocks_behind "${btc_blocks_behind}"
+            /home/admin/_cache.sh set btc_${CHAIN}net_blocks_data_kb "${btc_blocks_data_kb}"
             /home/admin/_cache.sh set btc_${CHAIN}net_sync_progress "${btc_sync_progress}"
             /home/admin/_cache.sh set btc_${CHAIN}net_sync_percentage "${btc_sync_percentage}"
             /home/admin/_cache.sh set btc_${CHAIN}net_sync_initialblockdownload "${btc_sync_initialblockdownload}"
+            
             if [ "${isDefaultChain}" == "1" ]; then
               /home/admin/_cache.sh set btc_default_synced "${btc_synced}"
               /home/admin/_cache.sh set btc_default_blocks_headers "${btc_blocks_headers}"
               /home/admin/_cache.sh set btc_default_blocks_verified "${btc_blocks_verified}"
               /home/admin/_cache.sh set btc_default_blocks_behind "${btc_blocks_behind}"
+              /home/admin/_cache.sh set btc_default_blocks_data_kb "${btc_blocks_data_kb}"
               /home/admin/_cache.sh set btc_default_sync_progress "${btc_sync_progress}"
               /home/admin/_cache.sh set btc_default_sync_percentage "${btc_sync_percentage}"
               /home/admin/_cache.sh set btc_default_sync_initialblockdownload "${btc_sync_initialblockdownload}"
             fi
 
           else
-            echo "!! ERROR --> ${error}"
+            echo "# ERROR --> ${error}"
           fi
         fi
 
@@ -468,7 +476,7 @@ do
               /home/admin/_cache.sh set btc_default_port "${btc_port}"
             fi
           else
-            echo "!! ERROR --> ${error}"
+            echo "# ERROR --> ${error}"
           fi
         fi
 
@@ -491,7 +499,7 @@ do
               /home/admin/_cache.sh set btc_default_mempool_transactions "${btc_mempool_transactions}"
             fi
           else
-            echo "!! ERROR --> ${error}"
+            echo "# ERROR --> ${error}"
           fi
         fi
       fi
@@ -594,7 +602,7 @@ do
             /home/admin/_cache.sh set ln_default_alias "${ln_lnd_alias}"
           fi
         else
-          echo "!! ERROR --> ${error}"
+          echo "# ERROR --> ${error}"
         fi
       fi
 
@@ -658,7 +666,7 @@ do
             /home/admin/_cache.sh set ln_default_recovery_done "${ln_lnd_recovery_done}"
           fi
         else
-          echo "!! ERROR --> ${error}"
+          echo "# ERROR --> ${error}"
         fi
       fi
 
@@ -693,7 +701,7 @@ do
             /home/admin/_cache.sh set ln_default_wallet_channels_pending "${ln_lnd_wallet_channels_pending}"
           fi
         else
-          echo "!! ERROR --> ${error}"
+          echo "# ERROR --> ${error}"
         fi
       fi
 
@@ -722,14 +730,14 @@ do
             /home/admin/_cache.sh set ln_default_fees_total "${ln_lnd_fees_total}"
           fi
         else
-          echo "!! ERROR --> ${error}"
+          echo "# ERROR --> ${error}"
         fi
       fi
     fi
   done
 
   ###################
-  # Lightning (c-lightning)
+  # Lightning (Core Lightning)
 
   # loop thru mainet, testnet & signet
   networks=( "main" "test" "sig" )
@@ -798,13 +806,13 @@ do
       /home/admin/_cache.sh set ln_cl_${CHAIN}net_error_full "${ln_cl_error_full}"
       if [ "${isDefaultLightning}" == "1" ] && [ "${isDefaultChain}" == "1" ]; then
         /home/admin/_cache.sh set ln_default_activated "1"
-        /home/admin/_cache.sh set ln_default_version "${cl_lnd_version}"
-        /home/admin/_cache.sh set ln_default_running "${lc_running}"
-        /home/admin/_cache.sh set ln_default_ready "${cl_ready}"
-        /home/admin/_cache.sh set ln_default_online "${cl_online}"
+        /home/admin/_cache.sh set ln_default_version "${ln_cl_version}"
+        /home/admin/_cache.sh set ln_default_running "${ln_cl_running}"
+        /home/admin/_cache.sh set ln_default_ready "${ln_cl_ready}"
+        /home/admin/_cache.sh set ln_default_online "${ln_cl_online}"
         /home/admin/_cache.sh set ln_default_locked "${ln_cl_locked}"
-        /home/admin/_cache.sh set ln_default_error_short "${cl_error_short}"
-        /home/admin/_cache.sh set ln_default_error_full "${cl_error_full}"
+        /home/admin/_cache.sh set ln_default_error_short "${ln_cl_error_short}"
+        /home/admin/_cache.sh set ln_default_error_full "${ln_cl_error_full}"
       fi
     fi
 
@@ -874,7 +882,7 @@ do
             /home/admin/_cache.sh set ln_default_recovery_done "${ln_cl_recovery_done}"
           fi
         else
-          echo "!! ERROR --> ${error}"
+          echo "# ERROR --> ${error}"
         fi
       fi
 
@@ -909,7 +917,7 @@ do
             /home/admin/_cache.sh set ln_default_wallet_channels_pending "${ln_cl_wallet_channels_pending}"
           fi
         else
-          echo "!! ERROR --> ${error}"
+          echo "# ERROR --> ${error}"
         fi
       fi
     fi
@@ -995,13 +1003,19 @@ do
     ln_all_sync_initial_done=""
     ln_default_sync_initial_done=""
     blitz_sync_initial_done="${btc_all_sync_initial_done}"
+    blitz_default_sync_initial_done="${btc_default_sync_initial_done}"
   else
-    # only if all btc & ln sync done - the complete blitz has done syncing
+    # only if ALL btc & ln sync done (multiple can be active) - the complete blitz has done syncing
     if [ "${btc_all_sync_initial_done}" == "1" ] && [ "${ln_all_sync_initial_done}" == "1" ]; then
       blitz_sync_initial_done="1"
     fi
+    # only if DEFAULT btc & ln sync done - the complete blitz has done syncing
+    if [ "${btc_default_sync_initial_done}" == "1" ] && [ "${ln_default_sync_initial_done}" == "1" ]; then
+      blitz_default_sync_initial_done="1"
+    fi
   fi
   /home/admin/_cache.sh set blitz_sync_initial_done "${blitz_sync_initial_done}"
+  /home/admin/_cache.sh set blitz_default_sync_initial_done "${blitz_default_sync_initial_done}"
   /home/admin/_cache.sh set btc_default_sync_initial_done "${btc_default_sync_initial_done}"
   /home/admin/_cache.sh set btc_all_sync_initial_done "${btc_all_sync_initial_done}"
   /home/admin/_cache.sh set ln_default_sync_initial_done "${ln_default_sync_initial_done}"
@@ -1025,7 +1039,7 @@ do
   fi
 
   # small sleep before next loop
-  sleep 2
+  sleep 3
 
   # if was started with special parameter
   if [ "${ONLY_ONE_LOOP}" == "1" ]; then

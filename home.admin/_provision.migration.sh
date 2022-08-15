@@ -39,9 +39,9 @@ echo "**************************************************" >> ${logFile}
 echo "MIGRATION FROM ${nodenameUpperCase} TO RASPIBLITZ" >> ${logFile}
 echo "**************************************************" >> ${logFile}
 echo "- started ..." >> ${logFile}
-source <(/home/admin/config.scripts/blitz.migration.sh migration-${hddGotMigrationData})
-if [ "${err}" != "" ]; then
-    /home/admin/config.scripts/blitz.error.sh _provision.migration.sh "migration-failed" "${err}" "Recover funds with fresh sd card using seed words + static channel backup." ${logFile}
+/home/admin/config.scripts/blitz.migration.sh migration-${hddGotMigrationData} >> ${logFile}
+if [ "$?" != "0" ]; then
+    /home/admin/config.scripts/blitz.error.sh _provision.migration.sh "migration-failed" "see provision migration logs" "Recover funds with fresh sd card using seed words + static channel backup." ${logFile}
     exit 3
 fi
 
@@ -62,7 +62,7 @@ if [ "${setPasswordB}" == "1" ]; then
  if [ "${passwordB}" != "" ]; then
     # set password B as RPC password
     echo "# setting PASSWORD B" >> ${logFile}
-    /home/admin/config.scripts/blitz.setpassword.sh b "${passwordB}" >> ${logFile}
+    /home/admin/config.scripts/blitz.passwords.sh set b "${passwordB}" >> ${logFile}
  else
     /home/admin/config.scripts/blitz.error.sh _provision.migration.sh "missing-passwordb" "FAIL: Password B should be set but was empty! Running with default." "" ${logFile}
     exit 4

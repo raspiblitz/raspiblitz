@@ -3,7 +3,7 @@
 # command info
 if [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo 
-  echo "Config script to set the alias of the C-lightning node"
+  echo "Config script to set the alias of the Core Lightning node"
   echo "cl.setname.sh [mainnet|testnet|signet] [?newName]"
   echo
   exit 1
@@ -19,7 +19,7 @@ source <(/home/admin/config.scripts/network.aliases.sh getvars cl $1)
 if [ ${#newName} -eq 0 ]; then
 
   sudo rm ./.tmp
-  dialog --backtitle "Set CL Name/Alias" --inputbox "ENTER the new Name/Alias for the C-lightning node:
+  dialog --backtitle "Set CL Name/Alias" --inputbox "ENTER the new Name/Alias for the Core Lightning node:
 (free to choose, one word up to 32 basic characters)
 " 8 56 2>./.tmp
   newName=$( cat ./.tmp | tr -dc '[:alnum:]\n\r' )

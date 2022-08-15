@@ -7,9 +7,9 @@
 ## $1 = FILE.md
 
 red="\033[31m"
-#nocolor="\033[0m"
+nocolor="\033[0m"
 
-error_msg(){ printf %s"${red}ERROR: ${1}\n" >&2; exit 1; }
+error_msg(){ printf %s"${red}ERROR: ${1}\n${nocolor}" >&2; exit 1; }
 
 test -f "${1}" || error_msg "file '${1}' doesn't exist"
 
@@ -59,7 +59,7 @@ while IFS="$(printf '\n')" read -r line; do
   ## set header indentation
   line_md="$(printf '%s\n' "${line_md}" | sed "s|######|            -|;s|#####|         -|;s|####|      -|;s|###|    -|;s|##|  -|;s|#|-|")"
   ## set link content
-  line_content="$(printf '%s\n' "${line_md}" | sed "s/.*- /#/;s| |-|g;s|'||g;s|]||g;s/|/-/g" | tr "[:upper:]" "[:lower:]" | tr -cd "[:alnum:]-._")"
+  line_content="$(printf '%s\n' "${line_md}" | sed "s/.*- /#/;s| |-|g;s|'||g;s|]||g;s/|/-/g" | tr "[:upper:]" "[:lower:]" | tr -cd "[:alnum:]-_" | tr -d ".")"
   ## set link reference
   line_md="$(printf '%s\n' "${line_md}" | sed "s|- |- [|;s|$|](#${line_content}${line_repeated_index})|")"
   ## print header

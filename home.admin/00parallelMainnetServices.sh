@@ -22,7 +22,7 @@ echo "run dialog ..."
 OPTIONS=()
 OPTIONS+=(l "LND on $CHAIN" ${lnd})
 OPTIONS+=(r "RTL for LND $CHAIN" ${rtlWebinterface})
-OPTIONS+=(c "C-lightning on $CHAIN" ${cl})
+OPTIONS+=(c "Core Lightning on $CHAIN" ${cl})
 OPTIONS+=(t "RTL for CL on $CHAIN" ${crtlWebinterface})
 OPTIONS+=(s "Sparko for CL on $CHAIN" ${sparko})
 OPTIONS+=(m "Spark for CL on $CHAIN" ${spark})
@@ -60,7 +60,7 @@ if [ "${lnd}" != "${choice}" ]; then
     if [ ${errorOnInstall} -eq 0 ]; then
       echo "# Successfully installed LND on $CHAIN"
     else
-      l1="# !!! FAIL on LND on $CHAIN install !!!"
+      l1="# FAIL on LND on $CHAIN install #"
       l2="# Try manual install on terminal after reboot with:"
       l3="/home/admin/config.scripts/lnd.install.sh on $CHAIN"
       dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
@@ -85,7 +85,7 @@ if [ "${cl}" != "${choice}" ]; then
       # generate wallet from seedwords
       /home/admin/config.scripts/cl.hsmtool.sh new $CHAIN
     else
-      l1="# !!! FAIL on CL on $CHAIN install !!!"
+      l1="# FAIL on CL on $CHAIN install #"
       l2="# Try manual install on terminal after reboot with:"
       l3="/home/admin/config.scripts/cl.install.sh on $CHAIN"
       dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
@@ -110,7 +110,7 @@ if [ "${rtlWebinterface}" != "${choice}" ]; then
       sleep 10
       /home/admin/config.scripts/bonus.rtl.sh menu lnd $CHAIN
     else
-      l1="# !!! FAIL on RTL for LND $CHAIN install !!!"
+      l1="# FAIL on RTL for LND $CHAIN install #"
       l2="# Try manual install on terminal after reboot with:"
       l3="/home/admin/config.scripts/bonus.rtl.sh on lnd $CHAIN"
       dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
@@ -135,7 +135,7 @@ if [ "${crtlWebinterface}" != "${choice}" ]; then
       sleep 10
       /home/admin/config.scripts/bonus.rtl.sh menu cl $CHAIN
     else
-      l1="!!! FAIL on RTL for CL $CHAIN install !!!"
+      l1="# FAIL on RTL for CL $CHAIN install #"
       l2="Try manual install on terminal after reboot with:"
       l3="/home/admin/config.scripts/bonus.rtl.sh on cl $CHAIN"
       dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
@@ -157,7 +157,7 @@ if [ "${sparko}" != "${choice}" ]; then
     if [ ${errorOnInstall} -eq 0 ]; then
       /home/admin/config.scripts/cl-plugin.sparko.sh menu $CHAIN
     else
-      l1="# !!! FAIL on Sparko on $CHAIN install !!!"
+      l1="# FAIL on Sparko on $CHAIN install #"
       l2="# Try manual install on terminal after reboot with:"
       l3="/home/admin/config.scripts/cl-plugin.sparko.sh on $CHAIN"
       dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
@@ -179,7 +179,7 @@ if [ "${spark}" != "${choice}" ]; then
     if [ ${errorOnInstall} -eq 0 ]; then
       /home/admin/config.scripts/cl.spark.sh menu $CHAIN
     else
-      l1="# !!! FAIL on Spark Wallet on $CHAIN install !!!"
+      l1="# FAIL on Spark Wallet on $CHAIN install #"
       l2="# Try manual install on terminal after reboot with:"
       l3="/home/admin/config.scripts/cl.spark.sh on $CHAIN"
       dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65

@@ -60,8 +60,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo ln -s /mnt/hdd/app-data/lnd/ /home/circuitbreaker/.lnd
 
     # sync all macaroons and unix groups for access
-    /home/admin/config.scripts/lnd.credentials.sh sync
-    # macaroons will be checked after install  
+    /home/admin/config.scripts/lnd.credentials.sh sync "${chain:-main}net"
+    # macaroons will be checked after install
 
     # add user to group with admin access to lnd
     sudo /usr/sbin/usermod --append --groups lndadmin circuitbreaker

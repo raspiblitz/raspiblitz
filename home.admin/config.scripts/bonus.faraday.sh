@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# !! NOTICE: Faraday is now prt of the 'bonus.lit.sh' bundle
+# NOTICE: Faraday is now prt of the 'bonus.lit.sh' bundle
 # this single install script will still be available for now
 # but main focus for the future development should be on LIT
 
@@ -8,7 +8,7 @@
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "Bonus App: faraday -> https://github.com/lightninglabs/faraday"
  echo "lnd.faraday.sh [status|on|off]"
- echo "!! DEPRECATED use instead: bonus.lit.sh"
+ echo "# DEPRECATED use instead: bonus.lit.sh"
  exit 1
 fi
 
@@ -145,7 +145,7 @@ if [ "${mode}" = "on" ] || [ "${mode}" = "1" ]; then
   echo "# checking PGP finger print"
   gpg --import ./pgp_keys.asc
   sleep 3
-  verifyResult=$(gpg --verify manifest-v${version}.txt.sig 2>&1)
+  verifyResult=$(LANG=en_US.utf8; gpg --verify manifest-v${version}.txt.sig 2>&1)
   goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
   echo "goodSignature='${goodSignature}'"
   correctKey=$(echo ${verifyResult} | tr -d " \t\n\r" | grep "${PGPcheck}" -c)
@@ -184,7 +184,7 @@ if [ "${mode}" = "on" ] || [ "${mode}" = "1" ]; then
   # create symlink
   sudo ln -s /mnt/hdd/app-data/lnd/ /home/faraday/.lnd
   # sync all macaroons and unix groups for access
-  /home/admin/config.scripts/lnd.credentials.sh sync
+  /home/admin/config.scripts/lnd.credentials.sh sync "${chain:-main}net"
   # macaroons will be checked after install
   # add user to group with admin access to lnd
   sudo /usr/sbin/usermod --append --groups lndadmin faraday

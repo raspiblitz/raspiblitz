@@ -42,6 +42,25 @@ architecture=$(dpkg --print-architecture)
 
 #### FUNCTIONS ####
 
+add_tor_sources(){
+  echo -e "\n*** Adding deb.torproject.org keyring ***"
+  curl -s -x socks5h://127.0.0.1:9050 --connect-timeout 60 \
+   "${tor_deb_repo_clean}/torproject.org/${tor_deb_repo_pgp_fingerprint}.asc" \
+   | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/torproject.gpg 1>/dev/null
+  if [ -s /etc/apt/trusted.gpg.d/torproject.gpg ]; then
+    echo "- OK key added"
+  else
+    echo "! FAIL: Was not able to import deb.torproject.org key";
+    exit 1
+  fi
+
+  echo -e "\n*** Adding Tor Sources ***"
+  echo "\
+deb [arch=${architecture}] ${tor_deb_repo}/torproject.org ${distribution} main
+deb-src [arch=${architecture}] ${tor_deb_repo}/torproject.org  ${distribution} main
+" | sudo tee /etc/apt/sources.list.d/tor.list
+  echo "- OK sources added"
+}
 
 configure_default_torrc(){
   echo -e "\n*** updating Tor config ${torrc} ***"
@@ -140,19 +159,7 @@ if [ "${action}" = "install" ]; then
   # shellcheck disable=SC2086
   sudo apt install -y ${tor_pkgs}
 
-  echo -e "\n*** Adding deb.torproject.org keyring ***"
-  if ! curl -s -x socks5h://127.0.0.1:9050 --connect-timeout 10 "${tor_deb_repo_clean}/torproject.org/${tor_deb_repo_pgp_fingerprint}.asc" | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/torproject.gpg >/dev/null; then
-    echo "!!! FAIL: Was not able to import deb.torproject.org key";
-    exit 1
-  fi
-  echo "- OK key added"
-
-  echo -e "\n*** Adding Tor Sources ***"
-  echo "
-deb [arch=${architecture}] ${tor_deb_repo}/torproject.org ${distribution} main
-deb-src [arch=${architecture}] ${tor_deb_repo}/torproject.org  ${distribution} main
-" | sudo tee /etc/apt/sources.list.d/tor.list
-  echo "- OK sources added"
+  add_tor_sources
 
   echo -e "\n*** Reinstall ***"
   sudo apt update -y
@@ -286,7 +293,10 @@ if [ "${action}" = "update" ]; then
         sudo systemctl start tor
         echo "# Installed $(tor --version)"
       ;;
-      *) sudo apt update -y && sudo apt upgrade -y tor;;
+      *)
+        add_tor_sources
+        sudo apt update && sudo apt install tor && sudo systemctl restart tor
+      ;;
     esac
   echo
   exit

@@ -4,85 +4,74 @@
 ---
 Table of Contents
 ---
-- [Upgrade](#upgrade)
-  - [How to verify the SD card image after download?](#how-to-verify-the-sd-card-image-after-download)
-  - [What changed on every upgrade?](#what-changed-on-every-upgrade)
-  - [How do I upgrade my RaspiBlitz?](#how-do-i-upgrade-my-raspiblitz)
-  - [Why do I need to re-burn my SD card for an update?](#why-do-i-need-to-re-burn-my-sd-card-for-an-update)
-  - [How can I update LND or bitcoind even before the next RaspiBlitz update?](#how-can-i-update-lnd-or-bitcoind-even-before-the-next-raspiblitz-update)
-- [SSH](#ssh)
-  - [What to do when on SSH I see "WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!"](#what-to-do-when-on-ssh-i-see-warning-remote-host-identification-has-changed)
-  - [How do I unplug/shutdown safely without SSH](#how-do-i-unplugshutdown-safely-without-ssh)
-  - [I cannot connect via SSH to my RaspiBlitz. What do I do?](#i-cannot-connect-via-ssh-to-my-raspiblitz.-what-do-i-do)
-  - [How to SSH over Tor?](#how-to-ssh-over-tor)
-  - [How to setup port-forwarding with a SSH tunnel?](#how-to-setup-port-forwarding-with-a-ssh-tunnel)
-  - [How do I setup just a port-forwarding user on my public server?](#how-do-i-setup-just-a-port-forwarding-user-on-my-public-server)
-- [Display](#display)
-  - [Can I flip the screen?](#can-i-flip-the-screen)
-  - [How to fix my upside down LCD after update?](#how-to-fix-my-upside-down-lcd-after-update)
-  - [Can I run the RaspiBlitz without a display/LCD?](#can-i-run-the-raspiblitz-without-a-displaylcd)
-  - [How do I find the IP address when running without a display?](#how-do-i-find-the-ip-address-when-running-without-a-display)
-- [Debug](#debug)
-  - [I have the full blockchain on another storage. How do I copy it to the RaspiBlitz?](#i-have-the-full-blockchain-on-another-storage.-how-do-i-copy-it-to-the-raspiblitz)
-  - [How do I generate a Debug Report?](#how-do-i-generate-a-debug-report)
-  - [Why is my "final sync" taking so long?](#why-is-my-final-sync-taking-so-long)
-  - [How do I backup my Lightning Node?](#how-do-i-backup-my-lightning-node)
-    - [1) Securing your On-Chain- and Channel-Funds during Operation](#and-channel-funds-during-operation)
-    - [2) Making a complete LND data backup](#2-making-a-complete-lnd-data-backup)
-  - [How can I recover my coins from a failing RaspiBlitz?](#how-can-i-recover-my-coins-from-a-failing-raspiblitz)
-    - [1) Recover LND data](#1-recover-lnd-data)
-    - [2) Recover from Wallet Seed](#2-recover-from-wallet-seed)
-  - [How do I move funds & channels from RaspiBlitz to LND Lightning Desktop App?](#how-do-i-move-funds--channels-from-raspiblitz-to-lnd-lightning-desktop-app)
-  - [How do I change the Name/Alias of my lightning node](#how-do-i-change-the-namealias-of-my-lightning-node)
-  - [How do I change the public port LND/Lightning node is running on?](#how-do-i-change-the-public-port-lndlightning-node-is-running-on)
-  - [How do I solve a "signature mismatch after caveat verification" error?](#how-do-i-solve-a-signature-mismatch-after-caveat-verification-error)
-  - [Why is my node not routing?](#why-is-my-node-not-routing)
-  - [When using Auto-Unlock, how much security do I lose?](#when-using-auto-unlock-how-much-security-do-i-lose)
-  - [I connected my HDD but it still says 'Connect HDD' on the display?](#i-connected-my-hdd-but-it-still-says-connect-hdd-on-the-display)
-  - [How do I shrink the QR code for connecting my Shango/Zap/Zeus mobile phone?](#how-do-i-shrink-the-qr-code-for-connecting-my-shangozapzeus-mobile-phone)
-  - [Why is my bitcoin IP on the display red?](#why-is-my-bitcoin-ip-on-the-display-red)
-  - [Why is my node address on the display red?](#why-is-my-node-address-on-the-display-red)
-  - [Why is my node address on the display yellow (not green)?](#why-is-my-node-address-on-the-display-yellow-not-green)
-  - [How do I fix a displayed Error in my Config?](#how-do-i-fix-a-displayed-error-in-my-config)
-  - [Can I run the RaspiBlitz as Backend for BTCPayServer?](#can-i-run-the-raspiblitz-as-backend-for-btcpayserver)
-  - [I don't have a LAN port on my Laptop - how do I connect to my RaspiBlitz?](#how-do-i-connect-to-my-raspiblitz)
-  - [Is it possible to connect the Blitz over Wifi instead of using a LAN cable?](#is-it-possible-to-connect-the-blitz-over-wifi-instead-of-using-a-lan-cable)
-  - [Can I directly connect the RaspiBlitz to my laptop?](#can-i-directly-connect-the-raspiblitz-to-my-laptop)
-  - [How to attach the RaspberryPi to the HDD?](#how-to-attach-the-raspberrypi-to-the-hdd)
-  - [What other case options do I have?](#what-other-case-options-do-i-have)
-  - [Are those "Under-Voltage detected" warnings a problem?](#are-those-under-voltage-detected-warnings-a-problem)
-  - [How do I return to the menu after exiting to the command line](#how-do-i-return-to-the-menu-after-exiting-to-the-command-line)
-  - [How do I setup fresh/clean/reset and without going into recovery mode?](#how-do-i-setup-freshcleanreset-and-without-going-into-recovery-mode)
-  - [My blockchain data is corrupted - what can I do?](#what-can-i-do)
-  - [I have two RaspiBlitz in my network - can they both be public?](#can-they-both-be-public)
-  - [How can I enforce UASP mode for my SSD controller?](#how-can-i-enforce-uasp-mode-for-my-ssd-controller)
-- [Development](#development)
-  - [What is the process of creating a new SD card image release?](#what-is-the-process-of-creating-a-new-sd-card-image-release)
-  - [How can I customize my RaspiBlitz or add other software?](#how-can-i-customize-my-raspiblitz-or-add-other-software)
-  - [Versioning](#versioning)
-  - [GitHub Workflow](#github-workflow)
-  - [Can I run RaspiBlitz on other computers than RaspberryPi?](#can-i-run-raspiblitz-on-other-computers-than-raspberrypi)
-  - [How can I build an SD card from another branch?](#how-can-i-build-an-sd-card-from-another-branch)
-  - [How can I build an SD card from my forked GitHub Repo?](#how-can-i-build-an-sd-card-from-my-forked-github-repo)
-  - [How can I checkout a new branch from the RaspiBlitz repo to my forked repo?](#how-can-i-checkout-a-new-branch-from-the-raspiblitz-repo-to-my-forked-repo)
-  - [How can I sync a branch of my forked GitHub with my local RaspiBlitz?](#how-can-i-sync-a-branch-of-my-forked-github-with-my-local-raspiblitz)
-  - [How contribute a feature/change from my forked branch back to the RaspiBlitz repo?](#how-contribute-a-featurechange-from-my-forked-branch-back-to-the-raspiblitz-repo)
-  - [How can I help testing a Pull Request?](#how-can-i-help-testing-a-pull-request)
-- [Extras](#extras)
-  - [How do I connect a UPS to the RaspiBlitz?](#how-do-i-connect-a-ups-to-the-raspiblitz)
-  - [Can I run my RaspiBlitz on Solar Energy?](#can-i-run-my-raspiblitz-on-solar-energy)
-  - [How to use the Let's Encrypt client](#how-to-use-the-lets-encrypt-client)
-    - [Let's Encrypt - HTTP-01](#http-01)
-    - [Let's Encrypt - DNS-01](#dns-01)
-    - [Let's Encrypt - eMail Address](#email-address)
-    - [Let's Encrypt - Installation details](#installation-details)
-  - [What is this mnemonic seed word list?](#what-is-this-mnemonic-seed-word-list)
-  - [How do I set up VNC?](#how-do-i-set-up-vnc)
-  - [Why use BTRFS on RaspiBlitz?](#why-use-btrfs-on-raspiblitz)
-    - [Storing your important Data in RAID1 with a USB Thumb Drive](#storing-your-important-data-in-raid1-with-a-usb-thumb-drive)
-    - [Snapshotting the Blockchain](#snapshotting-the-blockchain)
-    - [How do I use BTRFS on RaspiBlitz?](#how-do-i-use-btrfs-on-raspiblitz)
-    - [How to recover a BTRFS partition?](#how-to-recover-a-btrfs-partition)
+  - [Upgrade](#upgrade)
+    - [How to verify the SD card image after download?](#how-to-verify-the-sd-card-image-after-download)
+    - [What changed on every upgrade?](#what-changed-on-every-upgrade)
+    - [How do I upgrade my RaspiBlitz?](#how-do-i-upgrade-my-raspiblitz)
+    - [Why do I need to re-burn my SD card for an update?](#why-do-i-need-to-re-burn-my-sd-card-for-an-update)
+    - [How can I update LND or bitcoind even before the next RaspiBlitz update?](#how-can-i-update-lnd-or-bitcoind-even-before-the-next-raspiblitz-update)
+  - [SSH](#ssh)
+    - [What to do when on SSH I see "WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!"](#what-to-do-when-on-ssh-i-see-warning-remote-host-identification-has-changed)
+    - [How do I unplug/shutdown safely without SSH](#how-do-i-unplugshutdown-safely-without-ssh)
+    - [I cannot connect via SSH to my RaspiBlitz. What do I do?](#i-cannot-connect-via-ssh-to-my-raspiblitz-what-do-i-do)
+    - [How to SSH over Tor?](#how-to-ssh-over-tor)
+    - [How to setup port-forwarding with a SSH tunnel?](#how-to-setup-port-forwarding-with-a-ssh-tunnel)
+    - [How do I setup just a port-forwarding user on my public server?](#how-do-i-setup-just-a-port-forwarding-user-on-my-public-server)
+  - [Display](#display)
+    - [Can I flip the screen?](#can-i-flip-the-screen)
+    - [How to fix my upside down LCD after update?](#how-to-fix-my-upside-down-lcd-after-update)
+    - [Can I run the RaspiBlitz without a display/LCD?](#can-i-run-the-raspiblitz-without-a-displaylcd)
+    - [How do I find the IP address when running without a display?](#how-do-i-find-the-ip-address-when-running-without-a-display)
+  - [Debug](#debug)
+    - [I have the full blockchain on another storage. How do I copy it to the RaspiBlitz?](#i-have-the-full-blockchain-on-another-storage-how-do-i-copy-it-to-the-raspiblitz)
+    - [How do I generate a Debug Report?](#how-do-i-generate-a-debug-report)
+    - [Why is my "final sync" taking so long?](#why-is-my-final-sync-taking-so-long)
+    - [How do I backup my Lightning Node?](#how-do-i-backup-my-lightning-node)
+      - [1) Securing your On-Chain- and Channel-Funds during Operation](#and-channel-funds-during-operation)
+      - [2) Making a complete LND data backup](#2-making-a-complete-lnd-data-backup)
+    - [How can I recover my coins from a failing RaspiBlitz?](#how-can-i-recover-my-coins-from-a-failing-raspiblitz)
+      - [1) Recover LND data](#1-recover-lnd-data)
+      - [2) Recover from Wallet Seed](#2-recover-from-wallet-seed)
+    - [How do I move funds & channels from RaspiBlitz to LND Lightning Desktop App?](#how-do-i-move-funds--channels-from-raspiblitz-to-lnd-lightning-desktop-app)
+    - [How do I change the Name/Alias of my lightning node](#how-do-i-change-the-namealias-of-my-lightning-node)
+    - [How do I change the public port LND/Lightning node is running on?](#how-do-i-change-the-public-port-lndlightning-node-is-running-on)
+    - [How do I solve a "signature mismatch after caveat verification" error?](#how-do-i-solve-a-signature-mismatch-after-caveat-verification-error)
+    - [Why is my node not routing?](#why-is-my-node-not-routing)
+    - [When using Auto-Unlock, how much security do I lose?](#when-using-auto-unlock-how-much-security-do-i-lose)
+    - [I connected my HDD but it still says 'Connect HDD' on the display?](#i-connected-my-hdd-but-it-still-says-connect-hdd-on-the-display)
+    - [How do I shrink the QR code for connecting my Shango/Zap/Zeus mobile phone?](#how-do-i-shrink-the-qr-code-for-connecting-my-shangozapzeus-mobile-phone)
+    - [Why is my bitcoin IP on the display red?](#why-is-my-bitcoin-ip-on-the-display-red)
+    - [Why is my node address on the display red?](#why-is-my-node-address-on-the-display-red)
+    - [Why is my node address on the display yellow (not green)?](#why-is-my-node-address-on-the-display-yellow-not-green)
+    - [How do I fix a displayed Error in my Config?](#how-do-i-fix-a-displayed-error-in-my-config)
+    - [Can I run the RaspiBlitz as Backend for BTCPayServer?](#can-i-run-the-raspiblitz-as-backend-for-btcpayserver)
+    - [I don't have a LAN port on my Laptop - how do I connect to my RaspiBlitz?](#how-do-i-connect-to-my-raspiblitz)
+    - [Is it possible to connect the Blitz over Wifi instead of using a LAN cable?](#is-it-possible-to-connect-the-blitz-over-wifi-instead-of-using-a-lan-cable)
+    - [Can I directly connect the RaspiBlitz to my laptop?](#can-i-directly-connect-the-raspiblitz-to-my-laptop)
+    - [How to attach the RaspberryPi to the HDD?](#how-to-attach-the-raspberrypi-to-the-hdd)
+    - [What other case options do I have?](#what-other-case-options-do-i-have)
+    - [Are those "Under-Voltage detected" warnings a problem?](#are-those-under-voltage-detected-warnings-a-problem)
+    - [How do I return to the menu after exiting to the command line](#how-do-i-return-to-the-menu-after-exiting-to-the-command-line)
+    - [How do I setup fresh/clean/reset and without going into recovery mode?](#how-do-i-setup-freshcleanreset-and-without-going-into-recovery-mode)
+    - [My blockchain data is corrupted - what can I do?](#what-can-i-do)
+    - [I have two RaspiBlitz in my network - can they both be public?](#can-they-both-be-public)
+    - [How can I enforce UASP mode for my SSD controller?](#how-can-i-enforce-uasp-mode-for-my-ssd-controller)
+    - [I am facing maintenance/emergency mode on boot. How do I fix it?](#i-am-facing-maintenanceemergency-mode-on-boot-how-do-i-fix-it)
+  - [Extras](#extras)
+    - [How do I connect a UPS to the RaspiBlitz?](#how-do-i-connect-a-ups-to-the-raspiblitz)
+    - [Can I run my RaspiBlitz on Solar Energy?](#can-i-run-my-raspiblitz-on-solar-energy)
+    - [How to use the Let's Encrypt client](#how-to-use-the-lets-encrypt-client)
+      - [Let's Encrypt - HTTP-01](#http-01)
+      - [Let's Encrypt - DNS-01](#dns-01)
+      - [Let's Encrypt - eMail Address](#email-address)
+      - [Let's Encrypt - Installation details](#installation-details)
+    - [What is this mnemonic seed word list?](#what-is-this-mnemonic-seed-word-list)
+    - [How do I set up VNC?](#how-do-i-set-up-vnc)
+    - [Why use BTRFS on RaspiBlitz?](#why-use-btrfs-on-raspiblitz)
+      - [Storing your important Data in RAID1 with a USB Thumb Drive](#storing-your-important-data-in-raid1-with-a-usb-thumb-drive)
+      - [Snapshotting the Blockchain](#snapshotting-the-blockchain)
+      - [How do I use BTRFS on RaspiBlitz?](#how-do-i-use-btrfs-on-raspiblitz)
+      - [How to recover a BTRFS partition?](#how-to-recover-a-btrfs-partition)
 ---
 
 ## Upgrade
@@ -619,189 +608,11 @@ Yes but you need to change the port number (for example to 9736) on at least one
 
 By default just tested & selected SSD encasings/controller are running enabled with UASP in RaspiBlitz. UASP brings a speed up for the SSD but also if not well supported by the SSD encasing/controller can lead to system halts. If you know for sure that your SSD encasing/controller is supporting UASP fully you can place a file called `uasp.force` on the sd card boot section after flashing the image with your laptop. See details or report errors on issue [#2488](https://github.com/rootzoll/raspiblitz/issues/2488)
 
+### I am facing maintenance/emergency mode on boot. How do I fix it?
 
-## Development
+This behavior is caused by either the software that flashes the RaspiBlitz image onto the sd card, or by a faulty sd-card. The only solution is to try switching the software/computer you use for flashing and/or trying another sd card.
 
-### What is the process of creating a new SD card image release?
-
-Work notes for the process of producing a new SD card image release:
-
-* Make sure you have the "Versioning" final in your RaspiBlitz Source Code
-* Start [`Ubuntu LIVE`](http://releases.ubuntu.com/18.04.3/ubuntu-18.04.3-desktop-amd64.iso) from USB stick
-* Under Settings: best to set correct keyboard language & power settings to prevent monitor turn off
-* Connect to a secure WiFi (hardware switch on) or LAN
-* Download the latest RaspiOS-64bit (zip & sig file) namend in the [build_sdcard.sh](./build_sdcard.sh) and note the SHA256 checksum
-* From the browser `Show All Downloads` and from the context menu select `Open Containing Folder`
-* On that file manager open context (right click) on the white-space and select `Open in Terminal`
-* Compare the checksum with the one you just made note of, using `shasum -a 256 *.zip`
-* Install curl if needed `sudo apt-get install -f curl net-tools`
-* Check signature: `curl https://www.raspberrypi.org/raspberrypi_downloads.gpg.key | gpg --import && gpg --verify *.sig`
-* The result should say "correct signature" and the fingerprint should end with `8738 CD6B 956F 460C`
-* Insert an NTFS formatted USB stick and use the file manager to move all files to the USB
-* Use in file manager context on NTFS USB stick `extract here` to unzip
-* Download script for later with `curl https://raw.githubusercontent.com/Drewsif/PiShrink/master/pishrink.sh > pishrink.sh`
-* Connect SD card reader with a SD card (16GB recommended)
-* In the file manager open context on the .img-file, select `Open With Disk Image Writer` and write the image to the SD card
-* In the file manager open context on `boot` drive free space `open in terminal`
-* Run the commands: `touch ssh` and `exit`
-* Eject the `boot` and the `NTFS` volume
-* Connect a RaspiBlitz (without HDD) to network, insert sd card and power up
-* Find the IP of the RaspiBlitz (arp -a or check router)
-* In terminal `ssh pi@[IP-OF-RASPIBLITZ]`
-* Password is `raspberry`
-* Run the following command BUT REPLACE `[BRANCH]` with the branch-string of your latest version
-* `wget --no-cache https://raw.githubusercontent.com/rootzoll/raspiblitz/[BRANCH]/build_sdcard.sh && sudo bash build_sdcard.sh -b [BRANCH]`
-* Monitor/Check outputs for warnings/errors - install LCD
-* Login new with `ssh admin@[IP-OF-RASPIBLITZ]` (pw: raspiblitz) and run `release`
-* Disconnect WiFi/LAN on build laptop (hardware switch off) and shutdown
-* Remove `Ubuntu LIVE` USB stick and cut power from the RaspberryPi
-* Connect USB stick with latest `TAILS` (make it stay offline)
-* Boot Tails with extra setting of Admin-Passwort and remember (use later for sudo)
-* Menu > Systemtools > Settings > Energy -> best to set monitor to never turn off
-* Connect USB stick with GPG signing keys - decrypt drive if needed
-* Open Terminal and cd into directory of USB Stick under `/media/amnesia`
-* Run `gpg --import ./sub.key`, check and `exit`
-* Disconnect USB stick with GPG keys
-* Take the SD card from the RaspberryPi and connect with an external SD card reader to the laptop
-* Click on `boot` volume once in the file manger
-* Connect the NTFS USB stick, open in file manager and delete old files
-* Open Terminal and cd into directory of NTFS USB stick under `/media/amnesia`
-* `sahsum -a 256 ./pishrink.sh` should be `e46e1e1e3c6e3555f9fff5435e2305e99b98aaa8dc28db1814cf861fbb472a69`
-* if not: review changes in latest pishrink script
-* Run `df` to check on the SD card device name (`boot` - ignore last partition number)
-* `dd if=/dev/[sdcarddevice] of=./raspiblitz.img`
-* `chmod +x ./pishrink.sh | sudo ./pishrink.sh ./raspiblitz.img`
-* `gzip -c ./raspiblitz.img > ./raspiblitz-vX.X-YEAR-MONTH-DAY.img.gz`
-* Then run `shasum -a 256 *.gz > sha256.txt`
-* Sign with `gpg --output raspiblitz-vX.X-YEAR-MONTH-DAY.img.gz.sig --detach-sign *.gz`
-* Shutdown build computer
-* Connect the NTFS USB stick to MacOS (it is just read-only)
-* Run tests on the new image
-* Upload the new image to the Download Server - put sig-file next to it
-* Copy SHA256-String into GitHub README and update the download link
-* Create Torrent file from image (for example with Transmission) and place in in the `home.admin/assets` folder & link on README
-
-This is a recommended tracker list to be used with the torrent:
-```
-udp://tracker.coppersurfer.tk:6969/announce
-http://tracker.yoshi210.com:6969/announce
-http://open.acgtracker.com:1096/announce
-http://tracker.skyts.net:6969/announce
-udp://9.rarbg.me:2780/announce
-http://tracker2.itzmx.com:6961/announce
-udp://exodus.desync.com:6969/announce
-http://pow7.com:80/announce
-udp://tracker.leechers-paradise.org:6969
-```
-
-### How can I customize my RaspiBlitz or add other software?
-
-The RaspiBlitz is your computer to experiment with. Feel free to add your own scripts, edit the system or install further software from the command line. Just keep in mind that after an update/recovery the RaspiBlitz starts with a fresh and clean operating system again. So all your editings and installs might be gone. To prevent this you should do the following:
-
-- place your own scripts and data that should survive an update/recovery into the `/mnt/hdd/app-data` directory
-- put all install commands & modification of the system into the script `/mnt/hdd/app-data/custom-installs.sh` which will be started automatically on a recovery/update.
-
-### Versioning
-
-* Major Updates: 1.0.0, 2.0.0, 3.0.0, ... are epic updates signaling that the software reached a new era.
-* Main Updates: 1.1.0, 1.2.0, 1.3.0, ... are breaking updates - the reflashing of the sd ard is mandatory.
-* Minor Updates: 1.3.0, 1.3.1, 1.3.2, ... are soft updates - can be done by 'patching' the scripts & code, but new sd card reflash is still advised.
-
-### GitHub Workflow
-
-- Development is done on the 'dev' branch, new features should be done on single feature branches and merged into 'dev' once ready.
-- When a release of a new main-update (see above) comes closer, a new release branch gets created from 'dev' with the first release candidate - the RCs and the final release sd card will be build from this branch.
-- All minor-releases will basically all work with the same 'build_sdcard.sh' script so that the code could be updated by just calling 'patch'. Emergency updates on lnd & bitcoin may break this guideline, but basic structure & packaging should stay mostly consistent over a main-update version.
-- Once a release is ready, that release branch will be set as the "default" branch on GitHub (so its shown as main page)
-- Hot fixes & new features for minor verisons will be created as single branches from the release branch, and once ready will be merged back into that release branch as a Pull Request using 'Squash-Merge' AND then, this 'Squash-Merge' (one single commit) will get cherry-picked into the  'dev' branch ('git cherry-pick COMMITHASH' - may call 'git fetch' & 'git pull' before to make a clean cherry-pick into dev).
-
-### Can I run RaspiBlitz on other computers than RaspberryPi?
-
-There is an experimental section in this GitHub that tries to build for other SingleBoardComputers. Feel free to try it out and share your experience: [alternative.platforms/README.md](alternative.platforms/README.md)
-
-### How can I build an SD card from another branch?
-
-There might be new, but not released features in development that are not yet in the default version branch - but you want to try them out.
-
-To build a SD card image from another branch than master, you follow the [Build the SD Card Image](README.md#build-the-sd-card-image) from the README, but execute the build script from the other branch and add the name of that branch as a parameter to the build script.
-
-For example if you want to make a build from the 'dev' branch you execute the following command:
-
-`wget --no-cache https://raw.githubusercontent.com/rootzoll/raspiblitz/dev/build_sdcard.sh && sudo bash build_sdcard.sh -b dev`
-
-If you want to see all the optional parameters for building your sd card, just answere `no` on first question and call `sudo bash build_sdcard.sh --help`.
-
-### How can I build an SD card from my forked GitHub Repo?
-
-If you fork the RaspiBlitz repo (much welcome) and you want to run that code on your RaspiBlitz, there are two ways to do that:
-
-* The quick way: For small changes in a single script, go to `/home/admin` on your running RaspiBlitz, delete the old git with `sudo rm -r raspiblitz` then replace it with your code `git clone [YOURREPO]` and `patch`
-
-* The long way: If you like to install/remove/change services and system configurations you need to build a SD card from your own code. Prepare like in [Build the SD Card Image](README.md#build-the-sd-card-image) from the README but in the end run the command:
-
-`wget --no-cache https://raw.githubusercontent.com/[GITHUB-USERNAME]/raspiblitz/[BRANCH]/build_sdcard.sh && sudo bash build_sdcard.sh -b [BRANCH]`
-
-If you are then working in your forked repo and want to update the scripts on your RaspiBlitz with your latest repo changes, run `patch` - That's OK as long as you don't make changes to the SD card build script - for that you would need to build a fresh SD card again from your repo.
-
-### How can I checkout a new branch from the RaspiBlitz repo to my forked repo?
-
-You need to have your forked repo checked-out on your laptop. There your should see your forked repo as `origin` when you run `git remote -v`. If you don't see an additional `upstream` remote yet, then create it with the following command: `git remote add upstream https://github.com/rootzoll/raspiblitz.git`.
-
-So, first checkout the new branch named `BRANCH` from the original RaspBlitz repo to your local computer with: `git fetch upstream` and then `git checkout -b BRANCH upstream/BRANCH`.
-
-Now push the new branch to your forked GitHub repo with `git push -u origin BRANCH`.
-
-Once the branch is available and synced between the RaspiBlitz GitHub repo, your forked GitHub repo and your local computer git repo, you can start developing.
-
-### How can I sync a branch of my forked GitHub with my local RaspiBlitz?
-
-Since v1.5 of RaspiBlitz there has been an easy way thru the SSH menus: Under `MAIN MENU > UPDATE > PATCH` you have the option to change the GitHub repository and and branch to sync with. You change the GitHub Reposity by setting the GitHub username where you forked the Repo.
-
-So for example: If you forked the RaspiBlitz project (rootzoll/raspiblitz) on GitHub and your GitHub project page is now called: https://github.com/raumi75/raspiblitz ... then just change the repo to sync/patch with to your username `raumi75`.
-
-Now you can use the `Patch/Sync RaspiBlitz with GitHub Repo` to easily keep your RaspiBlitz in sync with your forked repository and develop your own customizations and features.
-
-Background info and doing it manually:
-
-There is a git copy of the original RaspiBlitz GitHub repo on your physical RaspiBlitz in the folder `/home/admin/raspiblitz`. If you change into that folder and run `git remote -v` you can see the set origin repo.
-
-You need to change that origin repo to your forked repo. You do that with:
-```
-git remote set-url origin [THE-URL-OF-YOUR-FORKED-REPO]
-```
-
-Now to sync your branch namend BRANCH on your forked repo with your RaspiBlitz, you always just run:
-```
-/home/admin/config.scripts/blitz.github.sh BRANCH
-```
-
-So your workflow can go like this: You write code on your local computer. Commit to your local repo, push it to your forked repo and use the sync-script above to get the code to your RaspiBlitz.
-
-### How contribute a feature/change from my forked branch back to the RaspiBlitz repo?
-
-In the same way as described above, you can build a new feature or test a change. Once you have something ready that you want to contribute back, you make sure it's pushed to your forked GitHub repo, and then start a pull request from your forked repo to the RaspiBlitz repo.
-
-See more info: https://yangsu.github.io/pull-request-tutorial/
-
-### How can I help testing a Pull Request?
-
-Make sure to have the correct base image.
-Then go to the command line and create a branch for the PR:
-
-```
-cd /home/admin/raspiblitz
-git fetch origin pull/[PRNUMBER]/head:pr[PRNUMBER]
-git checkout pr[PRNUMBER]
-cd /home/admin
-/home/admin/config.scripts/blitz.github.sh -justinstall
-```
-
-Now you have the code of the PR active - depending on what scripts are changed you might need to reboot.
-
-To change back to the code:
-```
-/home/admin/config.scripts/blitz.github.sh master
-```
+See issues #3039, #1053 & #782
 
 ## Extras
 

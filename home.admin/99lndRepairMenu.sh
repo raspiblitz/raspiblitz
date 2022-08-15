@@ -47,7 +47,7 @@ getpasswordC() # from dialogPasswords.sh
 {
   # temp file for password results
   _temp="/var/cache/raspiblitz/temp/.temp.tmp"
-  sudo /home/admin/config.scripts/blitz.setpassword.sh x "PASSWORD C - Lightning Wallet Password" $_temp
+  sudo /home/admin/config.scripts/blitz.passwords.sh set x "PASSWORD C - Lightning Wallet Password" $_temp
   passwordC=$(sudo cat $_temp)
   sudo rm $_temp
   dialog --backtitle "RaspiBlitz - Setup" --msgbox "\nThanks - Password C accepted.\n\nAlways use this password to \nunlock your Lightning Wallet." 10 34
@@ -135,7 +135,7 @@ syncAndCheckLND() # from _provision.setup.sh
   done
 
   # now sync macaroons & TLS to other users
-  sudo /home/admin/config.scripts/lnd.credentials.sh sync
+  sudo /home/admin/config.scripts/lnd.credentials.sh sync ${chain}net
 
  # make a final lnd check
  source <(/home/admin/config.scripts/lnd.check.sh basic-setup "${chain}net")

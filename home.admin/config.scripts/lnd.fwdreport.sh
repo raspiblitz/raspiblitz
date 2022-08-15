@@ -97,8 +97,16 @@ do
 	do
  		channelInPubKey=${channelIdPubKeyLookup[$channelIdIn]}
  		channelOutPubKey=${channelIdPubKeyLookup[$channelIdOut]}
+    channelInPubKeyLookup="${channelInPubKey}"
+    if [ "${channelInPubKey}" != "" ]; then
+      channelInPubKeyLookup="${pubKeyAliasLookup[$channelInPubKey]}"
+    fi
+    channelOutPubKeyLookup="${channelOutPubKey}"
+    if [ "${channelInPubKey}" != "" ]; then
+      channelOutPubKeyLookup="${pubKeyAliasLookup[$channelOutPubKey]}"
+    fi
  		OUTPUT="${OUTPUT}
-${eventDate},${pubKeyAliasLookup[$channelInPubKey]},${pubKeyAliasLookup[$channelOutPubKey]},$amountIn,$fee" 
+${eventDate},${channelInPubKeyLookup},${channelOutPubKeyLookup},$amountIn,$fee" 
 
 	done < <(tail -n +2 <<< $events)
 

@@ -2,7 +2,7 @@
 
 function help(){
   echo
-  echo "Install the backup plugin for C-lightning"
+  echo "Install the backup plugin for Core Lightning"
   echo "Replicates the lightningd.sqlite3 database on the SDcard"
   echo
   echo "Usage:"
@@ -14,6 +14,10 @@ function help(){
   echo
   exit 1
 }
+
+# https://github.com/lightningd/plugins/commits/master/backup
+# use the version beore the migration to poetry
+pinnedVersion="3da5778dcf408ff075515b4956aef405aa18f81a"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ];then
@@ -30,6 +34,8 @@ function install() {
     cd /home/bitcoin/cl-plugins-available || exit 1
     sudo -u bitcoin git clone https://github.com/lightningd/plugins.git
   fi
+  cd ${plugindir} || exit 1
+  sudo -u bitcoin git reset --hard ${pinnedVersion}
   
   if [ $($lightningcli_alias plugin list 2>/dev/null | grep -c "${plugin}") -eq 0 ];then
     echo "# Checking dependencies"
@@ -112,7 +118,7 @@ elif [ "$1" = restore ];then
   
     # https://github.com/lightningd/plugins/tree/master/backup#restoring-a-backup
     # ./backup-cli restore file:///mnt/external/location ~/.lightning/bitcoin/lightningd.sqlite3
-    
+
     # make sure to not overwrite old database
     if sudo ls /home/bitcoin/.lightning/${CLNETWORK}/lightningd.sqlite3;then
       now=$(date +"%Y_%m_%d_%H%M%S")

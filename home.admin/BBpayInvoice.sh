@@ -54,9 +54,9 @@ elif [ $LNTYPE = lnd ];then
 fi
 if [ ${openChannels} -eq 0 ]; then
   echo 
-  echo "!!!!!!!!!!!!!!!!!!!"
+  echo "#########"
   echo "FAIL - You have NO ESTABLISHED CHANNELS .. open a channel first."
-  echo "!!!!!!!!!!!!!!!!!!!"
+  echo "#########"
   sleep 3
   echo 
   exit 0
@@ -135,10 +135,10 @@ if [ ${resultIsError} -gt 0 ]; then
 fi
 
 if [ ${#error} -gt 0 ]; then
-  echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+  echo "###############"
   echo "FAIL"
   echo "try with a wallet app or the RTL WebGUI (see services)"
-  echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+  echo "###############"
   echo "${error}"
 else
   echo "${result}"

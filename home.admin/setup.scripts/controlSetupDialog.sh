@@ -64,20 +64,13 @@ fi
 # QuickOption: Migration from other node
 if [ "${setupPhase}" == "migration" ]; then
 
-  source <(/home/admin/_cache.sh get hddGotMigrationData hddVersionLND)
-
-  # show recovery dialog
-  echo "# Starting migration dialog (${hddGotMigrationData}) ..."
-
-  # check if lightning is outdated
-  migrationMode="normal"
-  if [ "${lndVersion}" != "" ]; then
-    # get local lnd version & check compatibility
-    source <(/home/admin/config.scripts/lnd.install.sh info "${lndVersion}")
-    if [ "${compatible}" != "1" ]; then
-      migrationMode="outdatedLightning"
-    fi 
+  source <(/home/admin/_cache.sh get hddGotMigrationData migrationMode)
+  if [ "${migrationMode}" == "" ]; then
+    migrationMode = "normal"
   fi
+  
+  # show recovery dialog
+  echo "# Starting migration dialog (${hddGotMigrationData}) (${migrationMode})..."
 
   /home/admin/setup.scripts/dialogMigration.sh ${hddGotMigrationData} ${migrationMode}
   if [ "$?" == "0" ]; then
@@ -131,6 +124,7 @@ if [ "${setupPhase}" == "setup" ]; then
 
   # exit to terminal
   if [ "${menuresult}" == "3" ]; then
+    /home/admin/_cache.sh set setupPhase "${orgSetupPhase}"
     exit 1
   fi
 
@@ -182,35 +176,8 @@ if [ "${setupPhase}" == "setup" ]; then
     elif [ "${userChoice}" == "2" ]; then
 
       # KEEP BLOCKCHAIN + DELETE ALL THE REST
-      
-      # when blockchain comes from another node migrate data first
-      if [ "${hddGotMigrationData}" != "" ]; then
-          clear
-          echo "Migrating Blockchain of ${hddGotMigrationData}'"
-          source <(sudo /home/admin/config.scripts/blitz.migration.sh migration-${hddGotMigrationData})
-          if [ "${err}" != "" ]; then
-            echo "MIGRATION OF BLOCKHAIN FAILED: ${err}"
-            echo "Format data disk on laptop & recover funds with fresh sd card using seed words + static channel backup."
-            exit 1
-          fi
-      fi
-
-      # delete everything but blockchain
-      echo "Deleting everything on HDD/SSD while keeping blockchain ..."
-      sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount 1>/dev/null 2>/dev/null
-      sudo /home/admin/config.scripts/blitz.datadrive.sh clean all -keepblockchain
-      if [ "${error}" != "" ]; then
-        echo "CLEANING HDD FAILED:"
-        echo "${error}"
-        echo "Please report as issue on the raspiblitz github."
-        exit 1
-      fi
-      sudo /home/admin/config.scripts/blitz.datadrive.sh unmount
-      sleep 2
-
-      # by keeping that blockchain - user chose already the blockchain type
-      echo "Selecting as blockchain network automatically .."
-      echo "network=bitcoin" >> $SETUPFILE
+      # will be done by bootstrap later triggered by setup file entry
+      echo "cleanHDD=1" >> $SETUPFILE
 
     else
 
@@ -282,7 +249,7 @@ if [ "${setupPhase}" == "setup" ]; then
 
       elif [ "${lightning}" == "cl" ]; then
 
-        echo "# Starting lightning wallet dialog for C-LIGHTNING ..."
+        echo "# Starting lightning wallet dialog for CORE LIGHTNING ..."
         /home/admin/setup.scripts/dialogLightningWallet-cl.sh
         dialogResult=$?
 
@@ -306,28 +273,6 @@ if [ "${setupPhase}" == "setup" ]; then
 
     done
 
-    echo "# CREATING raspiblitz.conf from your setup choices"
-
-    # source the raspiblitz version
-    source /home/admin/_version.info
-
-    # source the setup state fresh
-    source $SETUPFILE
-
-    # prepare & write basic config file (on temp mem drive)
-    CONFIGFILE="/var/cache/raspiblitz/temp/raspiblitz.conf"
-    sudo rm $CONFIGFILE 2>/dev/null
-    sudo touch $CONFIGFILE
-    sudo chown admin:admin $CONFIGFILE
-    sudo chmod 777 $CONFIGFILE
-    echo "# RASPIBLITZ CONFIG FILE" > $CONFIGFILE
-    echo "raspiBlitzVersion='${codeVersion}'" >> $CONFIGFILE
-    echo "lcdrotate='1'" >> $CONFIGFILE
-    echo "lightning='${lightning}'" >> $CONFIGFILE
-    echo "network='${network}'" >> $CONFIGFILE
-    echo "chain='main'" >> $CONFIGFILE
-    echo "hostname='${hostname}'" >> $CONFIGFILE
-    echo "runBehindTor='on'" >> $CONFIGFILE
   fi
 
 fi
@@ -337,12 +282,9 @@ fi
 # for fresh setup & migration
 
 echo "# Starting passwords dialog ..."
-/home/admin/setup.scripts/dialogPasswords.sh
+sudo /home/admin/setup.scripts/dialogPasswords.sh || exit 1
 
 # set flag for bootstrap process to kick-off provision process
 /home/admin/_cache.sh set state "waitprovision"
-  
+
 clear
-echo "# setup dialog done - results in:"
-echo "# $SETUPFILE"
-echo "# $CONFIGFILE"

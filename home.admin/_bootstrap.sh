@@ -40,6 +40,10 @@ echo "***********************************************" >> $logFile
 # make sure SSH server is configured & running
 sudo /home/admin/config.scripts/blitz.ssh.sh checkrepair >> ${logFile}
 
+# make sure /var/cache/raspiblitz/temp exists
+sudo mkdir -p /var/cache/raspiblitz/temp
+sudo chmod 777 /var/cache/raspiblitz/temp
+
 ################################
 # INIT raspiblitz.info
 ################################
@@ -52,6 +56,7 @@ echo "## INIT raspiblitz.info" >> $logFile
 setupPhase='boot'
 setupStep=0
 fsexpanded=0
+blitzapi='off'
 
 btc_mainnet_sync_initial_done=0
 btc_testnet_sync_initial_done=0
@@ -71,6 +76,7 @@ source ${infoFile} 2>/dev/null
 # write fresh raspiblitz.info file
 echo "baseimage=${baseimage}" > $infoFile
 echo "cpu=${cpu}" >> $infoFile
+echo "blitzapi=${blitzapi}" >> $infoFile
 echo "displayClass=${displayClass}" >> $infoFile
 echo "displayType=${displayType}" >> $infoFile
 echo "setupPhase=${setupPhase}" >> $infoFile
@@ -86,7 +92,6 @@ echo "ln_lnd_signet_sync_initial_done=${ln_lnd_signet_sync_initial_done}" >> $in
 echo "ln_cl_mainnet_sync_initial_done=${ln_cl_mainnet_sync_initial_done}" >> $infoFile
 echo "ln_cl_testnet_sync_initial_done=${ln_cl_testnet_sync_initial_done}" >> $infoFile
 echo "ln_cl_signet_sync_initial_done=${ln_cl_signet_sync_initial_done}" >> $infoFile
-
 
 sudo chmod 664 ${infoFile}
 
@@ -167,12 +172,12 @@ sleep 5
 echo "*** Checking Log Size ***"
 logsMegaByte=$(sudo du -c -m /var/log | grep "total" | awk '{print $1;}')
 if [ ${logsMegaByte} -gt 1000 ]; then
-  echo "WARN !! Logs /var/log in are bigger then 1GB" >> $logFile
+  echo "WARN # Logs /var/log in are bigger then 1GB" >> $logFile
   # dont delete directories - can make services crash
   sudo rm /var/log/*
   sudo service rsyslog restart
   /home/admin/_cache.sh set message "WARNING: /var/log/ >1GB"
-  echo "WARN !! Logs in /var/log in were bigger then 1GB and got emergency delete to prevent fillup." >> $logFile
+  echo "WARN # Logs in /var/log in were bigger then 1GB and got emergency delete to prevent fillup." >> $logFile
   echo "If you see this in the logs please report to the GitHub issues, so LOG config needs to be optimized." >> $logFile
   sleep 10
 else
@@ -254,9 +259,9 @@ if [ "${needsExpansion}" == "1" ] && [ "${fsexpanded}" == "0" ]; then
   systemInitReboot=1
   /home/admin/_cache.sh set message "FSEXPAND"
 elif [ "${tooSmall}" == "1" ]; then
-  echo "!!! FAIL !!!!!!!!!!!!!!!!!!!!" >> $logFile
+  echo "# FAIL #######" >> $logFile
   echo "SDCARD TOO SMALL 16GB minimum" >> $logFile
-  echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" >> $logFile
+  echo "##############" >> $logFile
   /home/admin/_cache.sh set state "sdtoosmall"
   echo "System stopped. Please cut power." >> $logFile
   sleep 6000
@@ -454,9 +459,21 @@ if [ ${isMounted} -eq 0 ]; then
   # determine correct setup phase
   infoMessage="Please Login for Setup"
   setupPhase="setup"
+  
   if [ "${hddGotMigrationData}" != "" ]; then
     infoMessage="Please Login for Migration"
     setupPhase="migration"
+    # check if lightning is outdated
+    migrationMode="normal"
+    if [ "${hddVersionLND}" != "" ]; then
+      # get local lnd version & check compatibility
+      source <(/home/admin/config.scripts/lnd.install.sh info "${hddVersionLND}")
+      if [ "${compatible}" != "1" ]; then
+        migrationMode="outdatedLightning"
+      fi 
+    fi
+    /home/admin/_cache.sh set migrationMode "${migrationMode}"
+
   elif [ "${hddRaspiData}" == "1" ]; then
 
     # determine if this is a recovery or an update
@@ -527,6 +544,109 @@ if [ ${isMounted} -eq 0 ]; then
   # mark system on sd card as in setup process
   echo "the provision process was started but did not finish yet" > /home/admin/provision.flag
 
+  # get fresh data from setup file & data drive
+  source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
+  source ${setupFile}
+
+  # special setup tasks (triggered by api/webui thru setupfile)
+
+  # FORMAT DATA DRIVE
+  if [ "${formatHDD}" == "1" ]; then
+    echo "# special setup tasks: FORMAT DATA DRIVE" >> ${logFile}
+      
+    # check if there is a flag set on sd card boot section to format as btrfs (experimental)
+    filesystem="ext4"
+    flagBTRFS=$(sudo ls /boot/btrfs* 2>/dev/null | grep -c btrfs)
+    if [ "${flagBTRFS}" != "0" ]; then
+      echo "Found BTRFS flag ---> formatting with experimental BTRFS filesystem" >> ${logFile}
+      filesystem="btrfs"
+    fi
+
+    # run formatting
+    error=""
+    /home/admin/_cache.sh set state "formathdd"
+    echo "Running Format: (${filesystem}) (${hddCandidate})" >> ${logFile}
+    source <(sudo /home/admin/config.scripts/blitz.datadrive.sh format ${filesystem} ${hddCandidate})
+    if [ "${error}" != "" ]; then
+      echo "FAIL ON FORMATTING THE DRIVE:" >> ${logFile}
+      echo "${error}" >> ${logFile}
+      echo "Please report as issue on the raspiblitz github." >> ${logFile}
+      /home/admin/_cache.sh set state "errorHDD"
+      /home/admin/_cache.sh set message "Fail Format (${filesystem})"
+      exit 1
+    fi
+    /home/admin/_cache.sh set setupPhase "setup"
+  fi
+
+  # CLEAN DRIVE & KEEP BLOCKCHAIN
+  if [ "${cleanHDD}" == "1" ]; then
+    echo "# special setup tasks: CLEAN DRIVE & KEEP BLOCKCHAIN" >> ${logFile}
+
+    # when blockchain comes from another node migrate data first
+    if [ "${hddGotMigrationData}" != "" ]; then
+        clear
+        echo "Migrating Blockchain of ${hddGotMigrationData}'" >> ${logFile}
+        source <(sudo /home/admin/config.scripts/blitz.migration.sh migration-${hddGotMigrationData})
+        if [ "${error}" != "0" ]; then
+          echo "MIGRATION OF BLOCKHAIN FAILED: ${err}" >> ${logFile}
+          echo "Format data disk on laptop & recover funds with fresh sd card using seed words + static channel backup." >> ${logFile}
+          /home/admin/_cache.sh set state "errorHDD"
+          /home/admin/_cache.sh set message "Fail Migrate Blockchain (${hddGotMigrationData})"
+          exit 1
+        fi
+    fi
+
+    # delete everything but blockchain
+    echo "Deleting everything on HDD/SSD while keeping blockchain ..." >> ${logFile}
+    sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount 1>/dev/null 2>/dev/null
+    sudo /home/admin/config.scripts/blitz.datadrive.sh clean all -keepblockchain >> ${logFile}
+    if [ "${error}" != "" ]; then
+       echo "CLEANING HDD FAILED:" >> ${logFile}
+      echo "${error}" >> ${logFile}
+      echo "Please report as issue on the raspiblitz github." >> ${logFile}
+      /home/admin/_cache.sh set state "errorHDD"
+      /home/admin/_cache.sh set message "Fail Cleaning HDD"
+      exit 1
+    fi
+    sudo /home/admin/config.scripts/blitz.datadrive.sh unmount >> ${logFile}
+    /home/admin/_cache.sh set setupPhase "setup"
+
+    sleep 2
+
+  fi
+
+  source <(/home/admin/_cache.sh get state setupPhase)
+  if [ "${setupPhase}" == "setup" ]; then
+
+    echo "# CREATING raspiblitz.conf from your setup choices" >> ${logFile}
+    if [ "${network}" == "" ]; then
+      network="bitcoin"
+    fi
+    if [ "${chain}" == "" ]; then
+      chain="main"
+    fi
+
+    # source the raspiblitz version
+    source /home/admin/_version.info
+
+    # prepare & write basic config file
+    # will first be created and in cache drive
+    # and some lines below copied to hdd when mounted
+    TEMPCONFIGFILE="/var/cache/raspiblitz/temp/raspiblitz.conf"
+    sudo rm $TEMPCONFIGFILE 2>/dev/null
+    sudo touch $TEMPCONFIGFILE
+    sudo chown admin:admin $TEMPCONFIGFILE
+    sudo chmod 777 $TEMPCONFIGFILE
+    echo "# RASPIBLITZ CONFIG FILE" > $TEMPCONFIGFILE
+    echo "raspiBlitzVersion='${codeVersion}'" >> $TEMPCONFIGFILE
+    echo "lcdrotate='1'" >> $TEMPCONFIGFILE
+    echo "lightning='${lightning}'" >> $TEMPCONFIGFILE
+    echo "network='${network}'" >> $TEMPCONFIGFILE
+    echo "chain='${chain}'" >> $TEMPCONFIGFILE
+    echo "hostname='${hostname}'" >> $TEMPCONFIGFILE
+    echo "runBehindTor='on'" >> $TEMPCONFIGFILE
+  fi
+
   # make sure HDD is mounted (could be freshly formatted by user on last loop)
   source <(/home/admin/config.scripts/blitz.datadrive.sh status)
   echo "Temp mounting (2) data drive (hddFormat='${hddFormat}')" >> ${logFile}
@@ -575,6 +695,7 @@ if [ ${isMounted} -eq 0 ]; then
 
     # unpack
     /home/admin/_cache.sh set message "Unpacking Migration Data"
+    error=""
     source <(/home/admin/config.scripts/blitz.migration.sh import "${migrationFile}")
 
     # check for errors
@@ -618,7 +739,7 @@ if [ ${isMounted} -eq 0 ]; then
   fi
 
   echo "# setting PASSWORD A" >> ${logFile}
-  sudo /home/admin/config.scripts/blitz.setpassword.sh a "${passwordA}" >> ${logFile}
+  sudo /home/admin/config.scripts/blitz.passwords.sh set a "${passwordA}" >> ${logFile}
 
   # if setup - run provision setup first
   if [ "${setupPhase}" == "setup" ]; then
@@ -708,6 +829,11 @@ if [ ${isMounted} -eq 0 ]; then
     sleep 2
   done
 
+  # one time add info on blockchain sync to chache
+  source <(/home/admin/_cache.sh get chain)
+  source <(/home/admin/config.scripts/bitcoin.monitor.sh ${chain}net info)
+  /home/admin/_cache.sh set btc_default_blocks_data_kb "${btc_blocks_data_kb}"
+
   ###################################################
   # HANDOVER TO FINAL SETUP CONTROLLER
   ###################################################
@@ -775,8 +901,8 @@ fi
 # make sure users have latest credentials (if lnd is on)
 if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
   echo "running LND users credentials update" >> $logFile
-  /home/admin/config.scripts/lnd.credentials.sh sync >> $logFile
-else 
+  /home/admin/config.scripts/lnd.credentials.sh sync "${chain:-main}net" >> $logFile
+else
   echo "skipping LND credentials sync" >> $logFile
 fi
 
@@ -855,6 +981,10 @@ if [ "${btc_default_sync_initialblockdownload}" == "1" ]; then
   echo "Node is still in IBD .. refresh btc_default_sync_progress faster" >> $logFile
   /home/admin/_cache.sh focus btc_default_sync_progress 0
 fi
+
+# notify about (re)start if activated
+source <(/home/admin/_cache.sh get hostname)
+/home/admin/config.scripts/blitz.notify.sh send "RaspiBlitz '${hostname}' (re)started" >> $logFile
 
 echo "DONE BOOTSTRAP" >> $logFile
 exit 0

@@ -1,14 +1,15 @@
 #!/bin/bash
 
 # https://github.com/romanz/electrs/releases
-ELECTRSVERSION="v0.9.5"
+ELECTRSVERSION="v0.9.7"
 # https://github.com/romanz/electrs/commits/master
 # ELECTRSVERSION="3041e89cd2fb377541b929d852ef6298c2d4e60a"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "config script to switch the Electrum Rust Server on or off"
- echo "bonus.electrs.sh status [?showAddress]"
+ echo "bonus.electrs.sh status -> dont call in loops"
+ echo "bonus.electrs.sh status-sync"
  echo "bonus.electrs.sh [on|off|menu]"
  echo "installs the version $ELECTRSVERSION"
  exit 1
@@ -20,11 +21,11 @@ PGPpubkeyFingerprint="87CAE5FA46917CBB"
 
 source /mnt/hdd/raspiblitz.conf
 
-# get local and global internet info
-source <(/home/admin/config.scripts/internet.sh status global)
-
-# give status
+# give status (dont call regularly - just on occasions)
 if [ "$1" = "status" ]; then
+
+  # get local and global internet info
+  source <(/home/admin/config.scripts/internet.sh status global)
 
   echo "##### STATUS ELECTRS SERVICE"
 
@@ -39,6 +40,57 @@ if [ "$1" = "status" ]; then
   if [ ${serviceInstalled} -eq 0 ]; then
     echo "infoSync='Service not installed'"
   fi
+
+  serviceRunning=$(sudo systemctl status electrs --no-page 2>/dev/null | grep -c "active (running)")
+  echo "serviceRunning=${serviceRunning}"
+  if [ ${serviceRunning} -eq 1 ]; then
+
+    # check local IPv4 port
+    echo "localIP='${localip}'"
+    echo "publicIP='${cleanip}'"
+    echo "portTCP='50001'"
+    localPortRunning=$(sudo netstat -an | grep -c '0.0.0.0:50001')
+    echo "localTCPPortActive=${localPortRunning}"
+
+    publicPortRunning=$(nc -z -w6 ${publicip} 50001 2>/dev/null; echo $?)
+    if [ "${publicPortRunning}" == "0" ]; then
+      # OK looks good - but just means that something is answering on that port
+      echo "publicTCPPortAnswering=1"
+    else
+      # no answer on that port
+      echo "publicTCPPortAnswering=0"
+    fi
+    echo "portSSL='50002'"
+    localPortRunning=$(sudo netstat -an | grep -c '0.0.0.0:50002')
+    echo "localHTTPPortActive=${localPortRunning}"
+    publicPortRunning=$(nc -z -w6 ${publicip} 50002 2>/dev/null; echo $?)
+    if [ "${publicPortRunning}" == "0" ]; then
+      # OK looks good - but just means that something is answering on that port
+      echo "publicHTTPPortAnswering=1"
+    else
+      # no answer on that port
+      echo "publicHTTPPortAnswering=0"
+    fi
+    # add TOR info
+    if [ "${runBehindTor}" == "on" ]; then
+      echo "TorRunning=1"
+      if [ "$2" = "showAddress" ]; then
+        TORaddress=$(sudo cat /mnt/hdd/tor/electrs/hostname)
+        echo "TORaddress='${TORaddress}'"
+      fi
+    else
+      echo "TorRunning=0"
+    fi
+    # check Nginx
+    nginxTest=$(sudo nginx -t 2>&1 | grep -c "test is successful")
+    echo "nginxTest=$nginxTest"
+
+  fi
+
+fi
+
+# give sync-status (can be called regularly)
+if [ "$1" = "status-sync" ] || [ "$1" = "status" ]; then
 
   serviceRunning=$(sudo systemctl status electrs --no-page 2>/dev/null | grep -c "active (running)")
   echo "serviceRunning=${serviceRunning}"
@@ -80,55 +132,12 @@ if [ "$1" = "status" ]; then
       echo "initialSynced=1"
     fi
 
-    # check local IPv4 port
-    echo "localIP='${localip}'"
-    if [ "$2" = "showAddress" ]; then
-      echo "publicIP='${cleanip}'"
-    fi
-    echo "portTCP='50001'"
-    localPortRunning=$(sudo netstat -an | grep -c '0.0.0.0:50001')
-    echo "localTCPPortActive=${localPortRunning}"
-
-    publicPortRunning=$(nc -z -w6 ${publicip} 50001 2>/dev/null; echo $?)
-    if [ "${publicPortRunning}" == "0" ]; then
-      # OK looks good - but just means that something is answering on that port
-      echo "publicTCPPortAnswering=1"
-    else
-      # no answer on that port
-      echo "publicTCPPortAnswering=0"
-    fi
-    echo "portSSL='50002'"
-    localPortRunning=$(sudo netstat -an | grep -c '0.0.0.0:50002')
-    echo "localHTTPPortActive=${localPortRunning}"
-    publicPortRunning=$(nc -z -w6 ${publicip} 50002 2>/dev/null; echo $?)
-    if [ "${publicPortRunning}" == "0" ]; then
-      # OK looks good - but just means that something is answering on that port
-      echo "publicHTTPPortAnswering=1"
-    else
-      # no answer on that port
-      echo "publicHTTPPortAnswering=0"
-    fi
-    # add TOR info
-    if [ "${runBehindTor}" == "on" ]; then
-      echo "TorRunning=1"
-      if [ "$2" = "showAddress" ]; then
-        TORaddress=$(sudo cat /mnt/hdd/tor/electrs/hostname)
-        echo "TORaddress='${TORaddress}'"
-      fi
-    else
-      echo "TorRunning=0"
-    fi
-    # check Nginx
-    nginxTest=$(sudo nginx -t 2>&1 | grep -c "test is successful")
-    echo "nginxTest=$nginxTest"
-
   else
     echo "tipSynced=0"
     echo "initialSynced=0"
     echo "electrumResponding=0"
     echo "infoSync='Not running - check: sudo journalctl -u electrs'"
   fi
-
   exit 0
 fi
 
@@ -136,7 +145,7 @@ if [ "$1" = "menu" ]; then
 
   # get status
   echo "# collecting status info ... (please wait)"
-  source <(sudo /home/admin/config.scripts/bonus.electrs.sh status showAddress)
+  source <(sudo /home/admin/config.scripts/bonus.electrs.sh status)
 
   if [ ${serviceInstalled} -eq 0 ]; then
     echo "# FAIL not installed"
@@ -437,7 +446,7 @@ WantedBy=multi-user.target
     echo "whitelist=download@127.0.0.1" | sudo tee -a /mnt/hdd/bitcoin/bitcoin.conf
     bitcoindRestart=yes
   fi
-  
+
   source <(/home/admin/_cache.sh get state)
   if [ "${state}" == "ready" ]; then
     if [ "${bitcoindRestart}" == "yes" ]; then

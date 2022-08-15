@@ -180,6 +180,9 @@ if [ "$1" = "status" ]; then
     echo "localIP='${localIP}'"
     echo "httpPort='5000'"
     echo "httpsPort='5001'"
+    echo "httpsForced='1'"
+    echo "httpsSelfsigned='1'" # TODO: change later if IP2Tor+LetsEncrypt is active
+    echo "authMethod='none'"
     echo "publicIP='${publicIP}'"
 
     # check funding source
@@ -228,7 +231,7 @@ if [ "$1" = "status" ]; then
     isDead=$(sudo systemctl status lnbits | grep -c 'inactive (dead)')
     if [ ${isDead} -eq 1 ]; then
       echo "error='Service Failed'"
-      exit 1
+      exit 0
     fi
 
   else
@@ -394,6 +397,12 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # get funding source and check that its available
   fundingsource="$2"
 
+  # run with default funding source if not given as parameter
+  if [ "${fundingsource}" == "" ]; then
+    echo "# running with default lightning as funing source: ${lightning}"
+    fundingsource="${lightning}"
+  fi
+
   if [ "${fundingsource}" == "lnd" ]; then
     if [ "${lnd}" != "on" ]; then
       echo "# FAIL: lnd mainnet needs to be activated"
@@ -444,9 +453,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   if [ "$3" != "" ]; then
     githubUser="$3"
   fi
-  #tag="tags/raspiblitz"
   # https://github.com/lnbits/lnbits-legend/releases
-  tag="0.7.0"
+  tag="0.9.1"
   if [ "$4" != "" ]; then
     tag="$4"
   fi
@@ -457,7 +465,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   cd /home/lnbits
   sudo -u lnbits git clone https://github.com/${githubUser}/lnbits-legend lnbits
   cd /home/lnbits/lnbits
-  sudo -u lnbits git checkout ${tag}
+  sudo -u lnbits git checkout ${tag} || exit 1
 
   # prepare .env file
   echo "# preparing env file"
@@ -482,6 +490,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo -u lnbits ./venv/bin/pip install -r requirements.txt
   sudo -u lnbits ./venv/bin/pip install pylightning
   sudo -u lnbits ./venv/bin/pip install secp256k1
+
+  # build
+  sudo -u lnbits ./venv/bin/python build.py
 
   # open firewall
   echo
@@ -559,6 +570,9 @@ EOF
   fi
 
   echo "# OK install done ... might need to restart or call: sudo systemctl start lnbits"
+  
+  # needed for API/WebUI as signal that install ran thru 
+  echo "result='OK'"
   exit 0
 fi
 
@@ -658,8 +672,15 @@ if [ "$1" = "switch" ]; then
     echo "# allowing lnbits user as part of the bitcoin group to RW RPC hook"
     sudo chmod 770 /home/bitcoin/.lightning/bitcoin${clrpcsubdir}
     sudo chmod 660 /home/bitcoin/.lightning/bitcoin${clrpcsubdir}/lightning-rpc
-    echo "# check the lightning-rpc socket"
-    sudo ls -la /home/bitcoin/.lightning/bitcoin${clrpcsubdir}/lightning-rpc
+    if [ "${fundingsource}" == "cl" ]; then
+      CLCONF="/home/bitcoin/.lightning/config"
+    else
+      CLCONF="/home/bitcoin/.lightning${clrpcsubdir}/config"
+    fi
+    # https://github.com/rootzoll/raspiblitz/issues/3007
+    if [ "$(sudo cat ${CLCONF} | grep -c "^rpc-file-mode=0660")" -eq 0 ]; then
+      echo "rpc-file-mode=0660" | sudo tee -a ${CLCONF}
+    fi
 
     echo "# preparing lnbits config for c-lightning"
     sudo bash -c "echo 'LNBITS_BACKEND_WALLET_CLASS=CLightningWallet' >> /home/lnbits/lnbits/.env"
@@ -670,7 +691,7 @@ if [ "$1" = "switch" ]; then
   /home/admin/config.scripts/blitz.conf.sh set LNBitsFunding "${fundingsource}"
 
   echo "##############"
-  echo "# OK new fundig source set - does need restart or call: sudo systemctl restart lnbits"
+  echo "# OK new funding source set - does need restart or call: sudo systemctl restart lnbits"
   echo "##############"
 
   exit 0
@@ -733,7 +754,8 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # setting value in raspi blitz config
   /home/admin/config.scripts/blitz.conf.sh set LNBits "off"
 
-  echo "OK LNbits is uninstalled"
+  # needed for API/WebUI as signal that install ran thru 
+  echo "result='OK'"
   exit 0
 fi
 

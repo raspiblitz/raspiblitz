@@ -39,11 +39,6 @@ This can take multiple hours.
     exit 0
   fi
 
-  # get network info
-  localip=$(ip addr | grep 'state UP' -A2 | grep -E -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
-  toraddress=$(sudo cat /mnt/hdd/tor/btc-rpc-explorer/hostname 2>/dev/null)
-  fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
-
   # check if password protected
   isBitcoinWalletOff=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep -c "^disablewallet=1")
   passwordInfo=""
@@ -56,8 +51,8 @@ This can take multiple hours.
     # TOR
     sudo /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
     whiptail --title " BTC-RPC-Explorer " --msgbox "Open in your local web browser:
-http://${localip}:3020\n
-https://${localip}:3021 with Fingerprint:
+http://${localIP}:3020\n
+https://${localIP}:3021 with Fingerprint:
 ${fingerprint}\n
 ${passwordInfo}\n
 Hidden Service address for TOR Browser (QR see LCD):
@@ -68,8 +63,8 @@ ${toraddress}
 
     # IP + Domain
     whiptail --title " BTC-RPC-Explorer " --msgbox "Open in your local web browser:
-http://${localip}:3020\n
-https://${localip}:3021 with Fingerprint:
+http://${localIP}:3020\n
+https://${localIP}:3021 with Fingerprint:
 ${fingerprint}\n
 ${passwordInfo}\n
 Activate TOR to access the web block explorer from outside your local network.
@@ -86,6 +81,29 @@ if [ "$1" = "status" ]; then
   if [ "${BTCRPCexplorer}" = "on" ]; then
     echo "configured=1"
 
+    installed=$(sudo ls /etc/systemd/system/btc-rpc-explorer.service 2>/dev/null | grep -c 'btc-rpc-explorer.service')
+    echo "installed=${installed}"
+
+    # get network info
+    localIP=$(ip addr | grep 'state UP' -A2 | grep -E -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+    toraddress=$(sudo cat /mnt/hdd/tor/btc-rpc-explorer/hostname 2>/dev/null)
+    fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
+
+    authMethod="user_admin_password_b"
+    isBitcoinWalletOff=$(cat /mnt/hdd/bitcoin/bitcoin.conf | grep -c "^disablewallet=1")
+    if [ "${isBitcoinWalletOff}" == "1" ]; then
+      authMethod="none"
+    fi
+
+    echo "localIP='${localIP}'"
+    echo "httpPort='3020'"
+    echo "httpsPort='3021'"
+    echo "httpsForced='0'"
+    echo "httpsSelfsigned='1'"
+    echo "authMethod='${authMethod}'"
+    echo "toraddress='${toraddress}'"
+    echo "fingerprint='${fingerprint}'"
+
     # check indexing
     source <(sudo /home/admin/config.scripts/network.txindex.sh status)
     echo "isIndexed=${isIndexed}"
@@ -100,6 +118,7 @@ if [ "$1" = "status" ]; then
 
   else
     echo "configured=0"
+    echo "installed=0"
   fi
   exit 0
 fi
@@ -124,8 +143,9 @@ if [ "$1" = "prestart" ]; then
   if [ "${ElectRS}" == "on" ]; then
 
     # CHECK THAT ELECTRS INDEX IS BUILD (WAITLOOP)
-    # electrs listening in port 50001 means index is build
-    isElectrumReady=$(netstat | grep -c "50001")
+    # electrs listening in port 50001 means index is build 
+    # Use flags: t = tcp protocol only  /  a = list all connection states (includes LISTEN)  /  n = don't resolve names => no dns spam
+    isElectrumReady=$(netstat -tan | grep -c "50001")
     if [ "${isElectrumReady}" == "0" ]; then
       echo "# electrs is ON but not ready .. might still building index - kick systemd service into fail/wait/restart"
       exit 1
@@ -206,9 +226,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     RPC_USER=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcuser | cut -c 9-)
     PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
 
-    touch /home/admin/btc-rpc-explorer.env
-    sudo chmod 600 /home/admin/btc-rpc-explorer.env || exit 1
-    cat > /home/admin/btc-rpc-explorer.env <<EOF
+    touch /var/cache/raspiblitz/btc-rpc-explorer.env
+    chmod 600 /var/cache/raspiblitz/btc-rpc-explorer.env || exit 1
+    cat > /var/cache/raspiblitz/btc-rpc-explorer.env <<EOF
 # Host/Port to bind to
 # Defaults: shown
 BTCEXP_HOST=0.0.0.0
@@ -231,7 +251,7 @@ BTCEXP_BITCOIND_RPC_TIMEOUT=10000
 BTCEXP_PRIVACY_MODE=true
 # Password protection for site via basic auth (enter any username, only the password is checked)
 # Default: none
-BTCEXP_BASIC_AUTH_PASSWORD=$PASSWORD_B
+#BTCEXP_BASIC_AUTH_PASSWORD=$PASSWORD_B
 # Select optional "address API" to display address tx lists and balances
 # Options: electrumx, blockchain.com, blockchair.com, blockcypher.com
 # If electrumx set, the BTCEXP_ELECTRUMX_SERVERS variable must also be
@@ -241,7 +261,7 @@ BTCEXP_ADDRESS_API=none
 BTCEXP_ELECTRUMX_SERVERS=tcp://127.0.0.1:50001
 EOF
     sudo -u btcrpcexplorer mkdir /home/btcrpcexplorer/.config
-    sudo mv /home/admin/btc-rpc-explorer.env /home/btcrpcexplorer/.config/btc-rpc-explorer.env
+    sudo mv /var/cache/raspiblitz/btc-rpc-explorer.env /home/btcrpcexplorer/.config/btc-rpc-explorer.env
     sudo chown btcrpcexplorer:btcrpcexplorer /home/btcrpcexplorer/.config/btc-rpc-explorer.env
 
     # open firewall
@@ -272,7 +292,7 @@ EOF
 
     # install service
     echo "*** Install btc-rpc-explorer systemd ***"
-    cat > /home/admin/btc-rpc-explorer.service <<EOF
+    cat > /var/cache/raspiblitz/btc-rpc-explorer.service <<EOF
 # systemd unit for BTC RPC Explorer
 
 [Unit]
@@ -283,7 +303,6 @@ StartLimitIntervalSec=0
 
 [Service]
 User=btcrpcexplorer
-TimeoutStartUSec=infinity
 ExecStartPre=/home/admin/config.scripts/bonus.btc-rpc-explorer.sh prestart
 WorkingDirectory=/home/btcrpcexplorer/btc-rpc-explorer
 ExecStart=/usr/bin/npm start
@@ -300,7 +319,7 @@ PrivateDevices=true
 WantedBy=multi-user.target
 EOF
 
-    sudo mv /home/admin/btc-rpc-explorer.service /etc/systemd/system/btc-rpc-explorer.service
+    sudo mv /var/cache/raspiblitz/btc-rpc-explorer.service /etc/systemd/system/btc-rpc-explorer.service
     sudo systemctl enable btc-rpc-explorer
     echo "# OK - the BTC-RPC-explorer service is now enabled"
 
@@ -309,7 +328,7 @@ EOF
   fi
 
   # setting value in raspi blitz config
-  /home/admin/config.scripts/blitz.conf.sh set BTCRPCexplorer "on"
+  sudo /home/admin/config.scripts/blitz.conf.sh set BTCRPCexplorer "on"
   
   echo "# needs to finish creating txindex to be functional"
   echo "# monitor with: sudo tail -n 20 -f /mnt/hdd/bitcoin/debug.log"
@@ -321,8 +340,19 @@ EOF
   source /mnt/hdd/raspiblitz.conf
   if [ "${runBehindTor}" = "on" ]; then
     # make sure to keep in sync with tor.network.sh script
-    /home/admin/config.scripts/tor.onion-service.sh btc-rpc-explorer 80 3022 443 3023
+    sudo /home/admin/config.scripts/tor.onion-service.sh btc-rpc-explorer 80 3022 443 3023
   fi
+
+  source <(/home/admin/_cache.sh get state)
+  if [ "${state}" == "ready" ]; then
+    # start service
+    echo "# starting service ..."
+    sudo systemctl start btc-rpc-explorer 2>/dev/null
+    sleep 10
+  fi
+
+  # needed for API/WebUI as signal that install ran thru 
+  echo "result='OK'"
   exit 0
 fi
 
@@ -334,7 +364,7 @@ fi
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # setting value in raspi blitz config
-  /home/admin/config.scripts/blitz.conf.sh set BTCRPCexplorer "off"
+  sudo /home/admin/config.scripts/blitz.conf.sh set BTCRPCexplorer "off"
 
   isInstalled=$(sudo ls /etc/systemd/system/btc-rpc-explorer.service 2>/dev/null | grep -c 'btc-rpc-explorer.service')
   if [ ${isInstalled} -eq 1 ]; then
@@ -357,7 +387,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     # Hidden Service if Tor is active
     if [ "${runBehindTor}" = "on" ]; then
       # make sure to keep in sync with tor.network.sh script
-      /home/admin/config.scripts/tor.onion-service.sh off btc-rpc-explorer
+      sudo /home/admin/config.scripts/tor.onion-service.sh off btc-rpc-explorer
     fi
 
     echo "# OK BTC-RPC-explorer removed."
@@ -369,6 +399,9 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # close ports on firewall
   sudo ufw deny 3020
   sudo ufw deny 3021
+
+  # needed for API/WebUI as signal that install ran thru 
+  echo "result='OK'"
   exit 0
 fi
 

@@ -17,6 +17,7 @@ echo "cleaning raspiblitz.info"
 source /home/admin/raspiblitz.info
 echo "baseimage=${baseimage}" > /home/admin/raspiblitz.info
 echo "cpu=${cpu}" >> /home/admin/raspiblitz.info
+echo "blitzapi=${blitzapi}" >> /home/admin/raspiblitz.info
 echo "displayClass=${displayClass}" >> /home/admin/raspiblitz.info
 
 # SSH Pubkeys (make unique for every sd card image install)
@@ -30,6 +31,11 @@ echo "OK"
 echo
 echo "deleting local DNS confs ..."
 sudo rm /etc/resolv.conf
+echo "OK"
+
+echo
+echo "deleting old API conf ..."
+sudo rm /home/blitzapi/blitz_api/.env 2>/dev/null
 echo "OK"
 
 # https://github.com/rootzoll/raspiblitz/issues/1371

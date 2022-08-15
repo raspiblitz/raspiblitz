@@ -5,7 +5,7 @@
 # https://github.com/openoms/bitcoin-tutorials/tree/master/joinmarket
 # https://github.com/openoms/joininbox
 
-JBVERSION="v0.6.7"
+JBVERSION="v0.6.8" # installs JoinMarket v0.9.6
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -53,6 +53,22 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   # make sure the Bitcoin Core wallet is on
   /home/admin/config.scripts/network.wallet.sh on
+  if [ $(/usr/local/bin/bitcoin-cli -conf=/mnt/hdd/bitcoin/bitcoin.conf listwallets | grep -c wallet.dat) -eq 0 ];then
+    echo "# Create a non-descriptor wallet.dat"
+    /usr/local/bin/bitcoin-cli -conf=/mnt/hdd/bitcoin/bitcoin.conf -named createwallet wallet_name=wallet.dat descriptors=false
+  else
+    isDescriptor=$(/usr/local/bin/bitcoin-cli -conf=/mnt/hdd/bitcoin/bitcoin.conf -rpcwallet=wallet.dat getwalletinfo | grep -c '"descriptors": true,')
+    if [ "$isDescriptor" -gt 0 ]; then
+      # unload
+      bitcoin-cli unloadwallet wallet.dat
+      echo "# Move the wallet.dat with descriptors to /mnt/hdd/bitcoin/descriptors"
+      sudo mv /mnt/hdd/bitcoin/wallet.dat /mnt/hdd/bitcoin/descriptors
+      echo "# Create a non-descriptor wallet.dat"
+      bitcoin-cli -conf=/mnt/hdd/bitcoin/bitcoin.conf -named createwallet wallet_name=wallet.dat descriptors=false
+    else
+      echo "# The non-descriptor wallet.dat is loaded in bitcoind."
+    fi
+  fi
 
   if [ ! -f "/home/joinmarket/joinmarket-clientserver/jmvenv/bin/activate" ] ; then
 

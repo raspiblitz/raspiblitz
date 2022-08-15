@@ -29,6 +29,9 @@ fi
 # STATUS
 ###################
 
+# get values from cache
+source <(/home/admin/_cache.sh get internet_localip)
+
 # check if copy is in progress
 copyBeginTime=$(cat /mnt/hdd/${network}/copy_begin.time 2>/dev/null | tr -cd '[[:digit:]]')
 if [ ${#copyBeginTime} -eq 0 ]; then
@@ -138,7 +141,7 @@ if [ "$1" = "target" ]; then
     echo "Make sure that the Bitcoin Core Wallet is not running in the background anymore."
     echo ""
     echo "COPY, PASTE & EXECUTE the following command on your Windows computer terminal:"
-    echo "scp -r ./chainstate ./blocks bitcoin@${localip}:/mnt/hdd/bitcoin"
+    echo "scp -r ./chainstate ./blocks bitcoin@${internet_localip}:/mnt/hdd/bitcoin"
     echo ""
     echo "If asked for a password use PASSWORD A (or 'raspiblitz')."
   fi
@@ -158,7 +161,7 @@ if [ "$1" = "target" ]; then
     echo "Make sure that the Bitcoin Core Wallet is not running in the background anymore."
     echo ""
     echo "COPY, PASTE & EXECUTE the following command on your MacOSX terminal:"
-    echo "sudo rsync -avhW --progress ./chainstate ./blocks bitcoin@${localip}:/mnt/hdd/bitcoin"
+    echo "sudo rsync -avhW --progress ./chainstate ./blocks bitcoin@${internet_localip}:/mnt/hdd/bitcoin"
     echo ""
     echo "You will be asked for passwords. First can be the user password of your MacOSX"
     echo "computer and the last is the PASSWORD A (or 'raspiblitz') of this RaspiBlitz."
@@ -179,7 +182,7 @@ if [ "$1" = "target" ]; then
     echo "Make sure that the Bitcoin Core Wallet is not running in the background anymore."
     echo ""
     echo "COPY, PASTE & EXECUTE the following command on your Linux terminal:"
-    echo "sudo rsync -avhW --progress ./chainstate ./blocks bitcoin@${localip}:/mnt/hdd/bitcoin"
+    echo "sudo rsync -avhW --progress ./chainstate ./blocks bitcoin@${internet_localip}:/mnt/hdd/bitcoin"
     echo ""
     echo "You will be asked for passwords. First can be the user password of your Linux"
     echo "computer and the last is the PASSWORD A (or 'raspiblitz') of this RaspiBlitz."
@@ -196,7 +199,7 @@ if [ "$1" = "target" ]; then
     echo "Once in the main menu go: MAINMENU > REPAIR > COPY-SOURCE"
     echo "Follow the given instructions ..."
     echo ""
-    echo "The LOCAL IP of this target RaspiBlitz is: ${localip}"
+    echo "The LOCAL IP of this target RaspiBlitz is: ${internet_localip}"
   fi
   echo "" 
   echo "It can take multiple hours until transfer is complete - be patient."
@@ -281,16 +284,17 @@ if [ "$1" = "target" ]; then
     sleep 2
   fi
 
-  echo "restarting services ... (please wait)"
-  sudo systemctl enable bitcoind 
-  sudo systemctl start bitcoind 
-  sudo systemctl start lnd 2>/dev/null
-  sudo systemctl start lightningd 2>/dev/null
-  sleep 10
-
   # setting copy state
   /home/admin/_cache.sh set state "ready"
   /home/admin/_cache.sh set message "Node Running"
+
+  echo "restarting services ... (please wait)"
+  sudo systemctl enable bitcoind 
+
+  echo "rebooting"
+  /home/admin/config.scripts/blitz.shutdown.sh reboot
+  exit
+
 fi
 
 ###################
@@ -306,11 +310,10 @@ if [ "$1" = "source" ]; then
   echo "# get IP of RaspiBlitz to copy to ..."
   targetIP=$(whiptail --inputbox "\nPlease enter the LOCAL IP of the\nRaspiBlitz to copy Blockchain to:" 10 38 "" --title " Target IP " --backtitle "RaspiBlitz - Copy Blockchain" 3>&1 1>&2 2>&3)
   targetIP=$(echo "${targetIP[0]}")
-  localIP=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
   if [ ${#targetIP} -eq 0 ]; then
     exit 1
   fi
-  if [ "${localIP}" == "${targetIP}" ]; then
+  if [ "${internet_localip}" == "${targetIP}" ]; then
     whiptail --msgbox "Dont type in the local IP of this RaspiBlitz,\nthe LOCAL IP of the other RaspiBlitz is needed." 8 54 "" --title " Testing Target IP " --backtitle "RaspiBlitz - Copy Blockchain"
     exit 1
   fi
