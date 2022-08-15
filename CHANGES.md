@@ -1,5 +1,9 @@
 # CHANGES between Releases
 
+## What's new in Version 1.8.1 of RaspiBlitz?
+
+- Update: RTL v0.13.0 with update option [details](https://github.com/Ride-The-Lightning/RTL/releases/tag/v0.12.3)
+
 ## What's new in Version 1.8.0 of RaspiBlitz?
 
 - New: Multilanguage WebUI [details](https://github.com/cstenglein/raspiblitz-web)
