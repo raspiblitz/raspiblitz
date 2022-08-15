@@ -48,10 +48,17 @@ add_tor_sources(){
    "${tor_deb_repo_clean}/torproject.org/${tor_deb_repo_pgp_fingerprint}.asc" \
    | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/torproject.gpg 1>/dev/null
   if [ -s /etc/apt/trusted.gpg.d/torproject.gpg ]; then
-    echo "- OK key added"
+    echo "- OK key added over Tor"
   else
-    echo "! FAIL: Was not able to import deb.torproject.org key";
-    exit 1
+    echo "WARN: Was not able to import deb.torproject.org key over Tor";
+    curl -s "https://deb.torproject.org/torproject.org/${tor_deb_repo_pgp_fingerprint}.asc" \
+     | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/torproject.gpg 1>/dev/null
+    if [ -s /etc/apt/trusted.gpg.d/torproject.gpg ]; then
+      echo "- OK key added over clearnet"
+    else
+      echo "! FAIL: Was not able to import deb.torproject.org key over clearnet";
+      exit 1
+    fi
   fi
 
   echo -e "\n*** Adding Tor Sources ***"
