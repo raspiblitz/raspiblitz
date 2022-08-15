@@ -252,6 +252,9 @@ sleep 3 ## give time to cancel
 
 export DEBIAN_FRONTEND=noninteractive
 
+echo "*** Prevent sleep ***" # on all platforms
+sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
+
 # FIXING LOCALES
 # https://github.com/rootzoll/raspiblitz/issues/138
 # https://daker.me/2014/10/how-to-fix-perl-warning-setting-locale-failed-in-raspbian.html
