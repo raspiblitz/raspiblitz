@@ -180,7 +180,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # install
     echo "# Running npm install ..."
     export NG_CLI_ANALYTICS=false
-    sudo -u rtl npm install --only=prod --logLevel warn
+    sudo -u rtl npm install --legacy-peer-deps --only=prod --logLevel warn
     if ! [ $? -eq 0 ]; then
       echo "# FAIL - npm install did not run correctly - deleting code and exit"
       sudo rm -r /home/rtl/RTL
