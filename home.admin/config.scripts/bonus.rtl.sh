@@ -181,7 +181,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # install
     echo "# Running npm install ..."
     export NG_CLI_ANALYTICS=false
-    sudo -u rtl npm install --only=prod --logLevel warn
+    sudo -u rtl npm install --omit=dev
     if ! [ $? -eq 0 ]; then
       echo "# FAIL - npm install did not run correctly - deleting code and exit"
       sudo rm -r /home/rtl/RTL
@@ -535,7 +535,7 @@ if [ "$1" = "update" ]; then
       # https://github.com/Ride-The-Lightning/RTL#or-update-existing-dependencies
       echo "# Running npm install ..."
       export NG_CLI_ANALYTICS=false
-      sudo -u rtl npm install --only=prod --logLevel warn
+      sudo -u rtl npm install --omit=dev
       if ! [ $? -eq 0 ]; then
         echo "# FAIL - npm install did not run correctly - deleting code and exit"
         sudo rm -r /home/rtl/RTL
