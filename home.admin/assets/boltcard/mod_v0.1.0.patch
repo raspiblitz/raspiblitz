@@ -1,0 +1,85 @@
+diff --git a/createboltcard/main.go b/createboltcard/main.go
+index b32fa26..9c605a9 100644
+--- a/createboltcard/main.go
++++ b/createboltcard/main.go
+@@ -8,6 +8,7 @@ import (
+ 	log "github.com/sirupsen/logrus"
+ 	qrcode "github.com/skip2/go-qrcode"
+ 	"os"
++	"strings"
+ )
+ 
+ func random_hex() string {
+@@ -69,7 +70,13 @@ func main() {
+ 	// show a QR code on the console for the URI + one_time_code
+ 
+ 	hostdomain := os.Getenv("HOST_DOMAIN")
+-	url := "https://" + hostdomain + "/new?a=" + one_time_code
++	url := ""
++	if strings.HasSuffix(hostdomain, ".onion") {
++		url = "http://" + hostdomain + "/new?a=" + one_time_code
++	} else {
++		url = "https://" + hostdomain + "/new?a=" + one_time_code
++	}
++	
+ 	fmt.Println()
+ 	fmt.Println(url)
+ 	fmt.Println()
+diff --git a/lnurlw_request.go b/lnurlw_request.go
+index aebe6a5..853cdac 100644
+--- a/lnurlw_request.go
++++ b/lnurlw_request.go
+@@ -8,6 +8,7 @@ import (
+ 	"net/http"
+ 	"os"
+ 	"strconv"
++	"strings"
+ )
+ 
+ type Response struct {
+@@ -271,8 +272,12 @@ func lnurlw_response(w http.ResponseWriter, req *http.Request) {
+ 		return
+ 	}
+ 
+-	host_domain := os.Getenv("HOST_DOMAIN")
+-	lnurlw_cb_url := "https://" + host_domain + "/cb"
++	lnurlw_cb_url := ""
++	if strings.HasSuffix(req.Host, ".onion") {
++		lnurlw_cb_url = "http://" + req.Host + "/cb"
++	} else {
++		lnurlw_cb_url = "https://" + req.Host + "/cb"
++	}
+ 
+ 	min_withdraw_sats_str := os.Getenv("MIN_WITHDRAW_SATS")
+ 	min_withdraw_sats, err := strconv.Atoi(min_withdraw_sats_str)
+diff --git a/main.go b/main.go
+index dc746db..1f2e873 100644
+--- a/main.go
++++ b/main.go
+@@ -40,6 +40,11 @@ func main() {
+ 	mux.HandleFunc("/ln", lnurlw_response)
+ 	mux.HandleFunc("/cb", lnurlw_callback)
+ 
+-	err := http.ListenAndServe(":9000", mux)
++	port := os.Getenv("HOST_PORT")
++	if len(port) == 0 {
++		port = "9000"
++	}
++	
++	err := http.ListenAndServe(":" + port, mux)
+ 	log.Fatal(err)
+ }
+diff --git a/new_card_request.go b/new_card_request.go
+index ec11b01..8b71fcd 100644
+--- a/new_card_request.go
++++ b/new_card_request.go
+@@ -52,8 +52,7 @@ func new_card_request(w http.ResponseWriter, req *http.Request) {
+ 
+ 	a := params_a[0]
+ 
+-	host_domain := os.Getenv("HOST_DOMAIN")
+-	lnurlw_base := "lnurlw://" + host_domain + "/ln"
++	lnurlw_base := "lnurlw://" + req.Host + "/ln"
+ 
+ 	c, err := db_get_new_card(a)
+ 
