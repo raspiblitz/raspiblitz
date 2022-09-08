@@ -480,6 +480,10 @@ if [ "${thunderhub}" == "on" ]; then
   OPTIONS+=(THUB "Update ThunderHub")
 fi
 
+if [ "${lndg}" == "on" ]; then
+  OPTIONS+=(LNDG "Update LNDg")
+fi
+
 if [ "${specter}" == "on" ]; then
   OPTIONS+=(SPECTER "Update Specter Desktop")
 fi
@@ -541,6 +545,9 @@ case $CHOICE in
     ;;
   THUB)
     /home/admin/config.scripts/bonus.thunderhub.sh update
+    ;;
+  LNDG)
+    /home/admin/config.scripts/bonus.lndg.sh update
     ;;
   SPECTER)
     /home/admin/config.scripts/bonus.specter.sh update
