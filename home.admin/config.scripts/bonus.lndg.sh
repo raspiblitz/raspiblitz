@@ -27,7 +27,7 @@ if [ "$1" = "status" ] || [ "$1" = "menu" ]; then
     echo "localIP='${localip}'"
     echo "httpPort='${httpPort}'"
     echo "authMethod='password_b'"
-    echo "toraddress='${toraddress}:${httpPort}'"
+    echo "toraddress='${toraddress}'"
     exit
   fi
 
@@ -38,16 +38,16 @@ if [ "$1" = "menu" ]; then
 
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
     # Info with TOR
-    sudo /home/admin/config.scripts/blitz.display.sh qr "${toraddress}:${httpPort}"
+    sudo /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
     whiptail --title " LNDg " --msgbox "Open in your local web browser:
 http://${localip}:${httpPort}\n
 Use your Password B to login.\n
-Hidden Service address for TOR Browser (see LCD for QR):\n${toraddress}:${httpPort}
+Hidden Service address for TOR Browser (see LCD for QR):\n${toraddress}
 " 16 67
     sudo /home/admin/config.scripts/blitz.display.sh hide
   else
     # Info without TOR
-    whiptail --title " ThunderHub " --msgbox "Open in your local web browser:
+    whiptail --title " LNDg " --msgbox "Open in your local web browser:
 http://${localip}:${httpPort}\n
 Use your Password B to login.\n
 Activate TOR to access the web interface from outside your local network.
@@ -73,180 +73,169 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo adduser --disabled-password --gecos "" lndg
     # add user to group with admin access to lnd
     sudo /usr/sbin/usermod --append --groups lndadmin lndg
+    # make sure symlink to central app-data directory exists
+    sudo rm -rf /home/lndg/.lnd  # not a symlink.. delete it silently
+    # create symlink
+    sudo ln -s /mnt/hdd/app-data/lnd/ /home/lndg/.lnd
 
     # download and install
     sudo -u lndg git clone https://github.com/cryptosharks131/lndg.git /home/lndg/lndg/
     cd /home/lndg/lndg/ || exit 1
-    sudo -u lndg apt install virtualenv
+    sudo apt install virtualenv
     sudo -u lndg virtualenv -p python3 .venv
     sudo -u lndg .venv/bin/pip install -r requirements.txt
     PASSWORD_B=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcpassword | cut -c 13-)
     sudo -u lndg .venv/bin/python initialize.py -pw $PASSWORD_B
     sudo -u lndg .venv/bin/python jobs.py
 
+    # set database path to HDD data so that its survives updates and migrations
+    # first check and see if a database exists
+    isDatabase=$(sudo ls /mnt/hdd/app-data/lndg/data/db.sqlite3 2>/dev/null | grep -c 'db.sqlite3')
+    if ! [ ${isDatabase} -eq 0 ]; then
+      #database exists, so remove newly created database and link to existing one
+      echo "Database already exists, using existing database"
+      sudo rm /home/lndg/lndg/data/db.sqlite3
+      sudo -u lndg ln -sf /mnt/hdd/app-data/lndg/data/db.sqlite3 /home/lndg/lndg/data/db.sqlite3
+      sudo chown lndg:lndg /home/lndg/lndg/data/db.sqlite3
+    else
+      #database doesn't exist, so move to HDD and simlink
+      sudo mkdir /mnt/hdd/app-data/lndg
+      sudo mkdir /mnt/hdd/app-data/lndg/data
+      sudo cp -p /home/lndg/lndg/data/db.sqlite3 /mnt/hdd/app-data/lndg/data/db.sqlite3
+      sudo rm /home/lndg/lndg/data/db.sqlite3
+      sudo ln -sf /mnt/hdd/app-data/lndg/data/db.sqlite3 /home/lndg/lndg/data/db.sqlite3
+      sudo chown lndg:lndg -R /mnt/hdd/app-data/lndg/
+      sudo chown lndg:lndg /home/lndg/lndg/data/db.sqlite3
+    fi
+    cd /home/admin/
+
     ##################
     # NGINX
     ##################
 
-    INSTALL_USER="lndg"
-    NODE_IP=$(hostname -I | cut -d' ' -f1)
-    RED='\033[0;31m'
-    NC='\033[0m'
-    HOME_DIR="/home/lndg"
+    sudo apt install -y python3-dev >/dev/null 2>&1
+    sudo apt install -y build-essential python >/dev/null 2>&1
+    sudo apt install -y uwsgi >/dev/null 2>&1
+    sudo apt install -y nginx >/dev/null 2>&1
+    sudo /home/lndg/lndg/.venv/bin/python -m pip install uwsgi >/dev/null 2>&1
 
-    function install_deps() {
-      #apt install -y python3-dev >/dev/null 2>&1
-      #apt install -y build-essential python >/dev/null 2>&1
-      apt install -y uwsgi >/dev/null 2>&1
-      #apt install -y nginx >/dev/null 2>&1
-      $HOME_DIR/lndg/.venv/bin/python -m pip install uwsgi >/dev/null 2>&1
-    }
+    echo "# Install lndg.ini and uwsgi.service for uwsgi"
+    echo "
+# lndg.ini file
+[uwsgi]
 
-    function setup_uwsgi() {
-      cat << EOF > $HOME_DIR/lndg/lndg.ini
-    # lndg.ini file
-    [uwsgi]
+# Django-related settings
+# the base directory (full path)
+chdir           = /home/lndg/lndg
+# Django's wsgi file
+module          = lndg.wsgi
+# the virtualenv (full path)
+home            = /home/lndg/lndg/.venv
+#location of log files
+logto           = /var/log/uwsgi/%n.log
 
-    # Django-related settings
-    # the base directory (full path)
-    chdir           = $HOME_DIR/lndg
-    # Django's wsgi file
-    module          = lndg.wsgi
-    # the virtualenv (full path)
-    home            = $HOME_DIR/lndg/.venv
-    #location of log files
-    logto           = /var/log/uwsgi/%n.log
+# process-related settings
+# master
+master          = true
+# maximum number of worker processes
+processes       = 1
+# the socket (use the full path to be safe
+socket          = /home/lndg/lndg/lndg.sock
+# ... with appropriate permissions - may be needed
+chmod-socket    = 660
+# clear environment on exit
+vacuum          = true
+" | sudo tee "/home/lndg/lndg/lndg.ini"
 
-    # process-related settings
-    # master
-    master          = true
-    # maximum number of worker processes
-    processes       = 1
-    # the socket (use the full path to be safe
-    socket          = $HOME_DIR/lndg/lndg.sock
-    # ... with appropriate permissions - may be needed
-    chmod-socket    = 660
-    # clear environment on exit
-    vacuum          = true
-    EOF
-      cat <<\EOF > $HOME_DIR/lndg/uwsgi_params
+    echo '
+uwsgi_param  QUERY_STRING       $query_string;
+uwsgi_param  REQUEST_METHOD     $request_method;
+uwsgi_param  CONTENT_TYPE       $content_type;
+uwsgi_param  CONTENT_LENGTH     $content_length;
 
-    uwsgi_param  QUERY_STRING       $query_string;
-    uwsgi_param  REQUEST_METHOD     $request_method;
-    uwsgi_param  CONTENT_TYPE       $content_type;
-    uwsgi_param  CONTENT_LENGTH     $content_length;
+uwsgi_param  REQUEST_URI        "$request_uri";
+uwsgi_param  PATH_INFO          "$document_uri";
+uwsgi_param  DOCUMENT_ROOT      "$document_root";
+uwsgi_param  SERVER_PROTOCOL    "$server_protocol";
+uwsgi_param  REQUEST_SCHEME     "$scheme";
+uwsgi_param  HTTPS              "$https if_not_empty";
 
-    uwsgi_param  REQUEST_URI        "$request_uri";
-    uwsgi_param  PATH_INFO          "$document_uri";
-    uwsgi_param  DOCUMENT_ROOT      "$document_root";
-    uwsgi_param  SERVER_PROTOCOL    "$server_protocol";
-    uwsgi_param  REQUEST_SCHEME     "$scheme";
-    uwsgi_param  HTTPS              "$https if_not_empty";
+uwsgi_param  REMOTE_ADDR        "$remote_addr";
+uwsgi_param  REMOTE_PORT        "$remote_port";
+uwsgi_param  SERVER_PORT        "$server_port";
+uwsgi_param  SERVER_NAME        "$server_name";
+' | sudo tee "/home/lndg/lndg/uwsgi_params"
 
-    uwsgi_param  REMOTE_ADDR        "$remote_addr";
-    uwsgi_param  REMOTE_PORT        "$remote_port";
-    uwsgi_param  SERVER_PORT        "$server_port";
-    uwsgi_param  SERVER_NAME        "$server_name";
-    EOF
-      cat << EOF > /etc/systemd/system/uwsgi.service
-    [Unit]
-    Description=Lndg uWSGI app
-    After=lnd.service
+    echo "
+[Unit]
+Description=Lndg uWSGI app
+After=lnd.service
 
-    [Service]
-    ExecStart=$HOME_DIR/lndg/.venv/bin/uwsgi \
-    --ini $HOME_DIR/lndg/lndg.ini
-    User=$INSTALL_USER
-    Group=www-data
-    Restart=always
-    KillSignal=SIGQUIT
-    Type=notify
-    StandardError=syslog
-    NotifyAccess=all
+[Service]
+ExecStart=/home/lndg/lndg/.venv/bin/uwsgi \
+--ini /home/lndg/lndg/lndg.ini
+User=lndg
+Group=www-data
+Restart=always
+KillSignal=SIGQUIT
+Type=notify
+StandardError=syslog
+NotifyAccess=all
 
-    [Install]
-    WantedBy=sockets.target
-    EOF
-      usermod -a -G www-data $INSTALL_USER
-    }
+[Install]
+WantedBy=sockets.target
+" | sudo tee "/etc/systemd/system/uwsgi.service"
 
-    function setup_nginx() {
-      cat << EOF > /etc/nginx/sites-available/lndg.conf
-    user $INSTALL_USER
+    sudo usermod -a -G www-data lndg
 
-    upstream django {
-      server unix://$HOME_DIR/lndg/lndg.sock; # for a file socket
-    }
+    echo "
+#user lndg
 
-    server {
-      # the port your site will be served on, use port 80 unless setting up ssl certs, then 443
-      listen      8889;
-      # optional settings for ssl setup
-      #ssl on;
-      #ssl_certificate /<path_to_certs>/fullchain.pem;
-      #ssl_certificate_key /<path_to_certs>/privkey.pem;
-      # the domain name it will serve for
-      server_name _; # you can substitute your node IP address or a custom domain like lndg.local (just make sure to update your local hosts file)
-      charset     utf-8;
+upstream django {
+  server unix:///home/lndg/lndg/lndg.sock; # for a file socket
+}
 
-      # max upload size
-      client_max_body_size 75M;   # adjust to taste
+server {
+  # the port your site will be served on, use port 80 unless setting up ssl certs, then 443
+  listen      8889;
+  # optional settings for ssl setup
+  #ssl on;
+  #ssl_certificate /<path_to_certs>/fullchain.pem;
+  #ssl_certificate_key /<path_to_certs>/privkey.pem;
+  # the domain name it will serve for
+  server_name _; # you can substitute your node IP address or a custom domain like lndg.local (just make sure to update your local hosts file)
+  charset     utf-8;
 
-      # max wait for django time
-      proxy_read_timeout 180;
+  # max upload size
+  client_max_body_size 75M;   # adjust to taste
 
-      # Django media
-      location /static {
-        alias $HOME_DIR/lndg/gui/static; # your Django project's static files - amend as required
-      }
+  # max wait for django time
+  proxy_read_timeout 180;
 
-      # Finally, send all non-media requests to the Django server.
-      location / {
-        uwsgi_pass  django;
-        include     $HOME_DIR/lndg/uwsgi_params; # the uwsgi_params file
-        }
-      }
-    EOF
-    }
+  # Django media
+  location /static {
+    alias /home/lndg/lndg/gui/static; # your Django project's static files - amend as required
+  }
 
-    function start_services() {
-      touch /var/log/uwsgi/lndg.log
-      touch $HOME_DIR/lndg/lndg.sock
-      chgrp www-data /var/log/uwsgi/lndg.log
-      chgrp www-data $HOME_DIR/lndg/lndg.sock
-      chmod 660 /var/log/uwsgi/lndg.log
-      sudo systemctl enable uwsgi.service
-      systemctl start uwsgi.service
-    }
+  # Finally, send all non-media requests to the Django server.
+  location / {
+    uwsgi_pass  django;
+    include     /home/lndg/lndg/uwsgi_params; # the uwsgi_params file
+  }
+}
+" | sudo tee "/etc/nginx/sites-available/lndg.conf"
 
-    function report_information() {
-      echo -e ""
-      echo -e "================================================================================================================================"
-      echo -e "Nginx service setup using user account $INSTALL_USER and an address of $NODE_IP:8889."
-      echo -e "You can update the IP or port used by modifying this configuration file and restarting nginx: /etc/nginx/sites-enabled/lndg"
-      echo -e ""
-      echo -e "uWSGI Status: ${RED}sudo systemctl status uwsgi.service${NC}"
-      echo -e "Nginx Status: ${RED}sudo systemctl status nginx.service${NC}"
-      echo -e ""
-      echo -e "To disable your webserver, use the following commands."
-      echo -e "Disable uWSGI: ${RED}sudo systemctl disable uwsgi.service${NC}"
-      echo -e "Disable Nginx: ${RED}sudo systemctl disable nginx.service${NC}"
-      echo -e "Stop uWSGI: ${RED}sudo systemctl stop uwsgi.service${NC}"
-      echo -e "Stop Nginx: ${RED}sudo systemctl stop nginx.service${NC}"
-      echo -e ""
-      echo -e "To re-enable these services, simply replace the disable/stop commands with enable/start."
-      echo -e "================================================================================================================================"
-    }
+    sudo touch /var/log/uwsgi/lndg.log
+    sudo touch /home/lndg/lndg/lndg.sock
+    sudo chgrp www-data /var/log/uwsgi/lndg.log
+    sudo chgrp www-data /home/lndg/lndg/lndg.sock
+    sudo chmod 771 /home/lndg/lndg/lndg.sock
+    sudo chmod 660 /var/log/uwsgi/lndg.log
+    sudo systemctl enable uwsgi.service
+    sudo systemctl start uwsgi.service
 
-    ##### Main #####
-    echo -e "Setting up, this may take a few minutes..."
-    install_deps
-    setup_uwsgi
-    setup_nginx
-    start_services
-    report_information
     # setup nginx symlinks
-    sudo ln -sf /etc/nginx/sites-available/lndg.conf /etc/nginx/sites-enabled/
+    sudo ln -sf /etc/nginx/sites-available/lndg.conf /etc/nginx/sites-enabled/lndg.conf
     sudo nginx -t
     sudo systemctl reload nginx
 
@@ -394,6 +383,7 @@ fi
 # update
 if [ "$1" = "update" ]; then
   echo "# UPDATING LNDG"
+  echo "# Updated to the release in https://github.com/cryptosharks131/lndg"
   cd /home/lndg/lndg || exit 1
   sudo -u lndg git pull
   sudo -u lndg .venv/bin/pip install requests
@@ -401,13 +391,10 @@ if [ "$1" = "update" ]; then
   sudo systemctl restart nginx
   sudo systemctl restart uwsgi.service
 
-  echo "# Updated to the release in https://github.com/cryptosharks131/lndg"
-  echo
+  echo ""
   echo "# Starting the LNDg services ... *** "
   sudo systemctl start jobs-lndg.timer
   sudo systemctl start rebalancer-lndg.timer
-  sudo systemctl start jobs-lndg.service
-  sudo systemctl start rebalancer-lndg.service
   sudo systemctl start htlc-stream-lndg.service
 
   exit 0

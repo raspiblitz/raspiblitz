@@ -687,6 +687,15 @@ else
   echo "Provisioning LIT - keep default" >> ${logFile}
 fi
 
+# lndg
+if [ "${lndg}" = "on" ]; then
+  echo "Provisioning LNDg - run config script" >> ${logFile}
+  /home/admin/_cache.sh set message "Setup LNDg"
+  sudo -u admin /home/admin/config.scripts/bonus.lndg.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning LNDg - keep default" >> ${logFile}
+fi
+
 # sphinxrelay
 if [ "${sphinxrelay}" = "on" ]; then
   echo "Sphinx-Relay - run config script" >> ${logFile}
