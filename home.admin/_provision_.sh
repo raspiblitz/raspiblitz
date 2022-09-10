@@ -5,7 +5,7 @@ if [ "$EUID" -ne 0 ]; then
   echo "error='run as root'"
   exit 1
 fi
-
+ 
 # This script gets called from a fresh SD card
 # starting up that has an config file on HDD
 # from old RaspiBlitz or manufacturer to

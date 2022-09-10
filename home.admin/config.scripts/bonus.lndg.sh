@@ -1,5 +1,5 @@
 #!/bin/bash
-
+ 
 # https://github.com/cryptosharks131/lndg
 
 # command info
@@ -20,12 +20,16 @@ if [ "$1" = "status" ] || [ "$1" = "menu" ]; then
   isInstalled=$(sudo ls /etc/systemd/system/jobs-lndg.service 2>/dev/null | grep -c 'jobs-lndg.service')
   localip=$(hostname -I | awk '{print $1}')
   toraddress=$(sudo cat /mnt/hdd/tor/lndg/hostname 2>/dev/null)
+  fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
   httpPort="8889"
+  httpsPort="8888"
 
   if [ "$1" = "status" ]; then
     echo "installed='${isInstalled}'"
     echo "localIP='${localip}'"
     echo "httpPort='${httpPort}'"
+    echo "httpsForced='0'"
+    echo "httpsSelfsigned='1'"
     echo "authMethod='password_b'"
     echo "toraddress='${toraddress}'"
     exit
@@ -41,6 +45,8 @@ if [ "$1" = "menu" ]; then
     sudo /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
     whiptail --title " LNDg " --msgbox "Open in your local web browser:
 http://${localip}:${httpPort}\n
+https://${localip}:${httpsPort} with Fingerprint:
+${fingerprint}\n
 Use your Password B to login.\n
 Hidden Service address for TOR Browser (see LCD for QR):\n${toraddress}
 " 16 67
@@ -49,6 +55,8 @@ Hidden Service address for TOR Browser (see LCD for QR):\n${toraddress}
     # Info without TOR
     whiptail --title " LNDg " --msgbox "Open in your local web browser:
 http://${localip}:${httpPort}\n
+Or https://${localip}:${httpsPort} with Fingerprint:
+${fingerprint}\n
 Use your Password B to login.\n
 Activate TOR to access the web interface from outside your local network.
 " 15 57
@@ -92,21 +100,28 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # first check and see if a database exists
     isDatabase=$(sudo ls /mnt/hdd/app-data/lndg/data/db.sqlite3 2>/dev/null | grep -c 'db.sqlite3')
     if ! [ ${isDatabase} -eq 0 ]; then
-      #database exists, so remove newly created database and link to existing one
+
+      # database exists, so remove newly created database and link to existing one
       echo "Database already exists, using existing database"
       sudo rm /home/lndg/lndg/data/db.sqlite3
       sudo -u lndg ln -sf /mnt/hdd/app-data/lndg/data/db.sqlite3 /home/lndg/lndg/data/db.sqlite3
-      sudo chown lndg:lndg /home/lndg/lndg/data/db.sqlite3
     else
-      #database doesn't exist, so move to HDD and simlink
-      sudo mkdir /mnt/hdd/app-data/lndg
-      sudo mkdir /mnt/hdd/app-data/lndg/data
-      sudo cp -p /home/lndg/lndg/data/db.sqlite3 /mnt/hdd/app-data/lndg/data/db.sqlite3
-      sudo rm /home/lndg/lndg/data/db.sqlite3
-      sudo ln -sf /mnt/hdd/app-data/lndg/data/db.sqlite3 /home/lndg/lndg/data/db.sqlite3
-      sudo chown lndg:lndg -R /mnt/hdd/app-data/lndg/
-      sudo chown lndg:lndg /home/lndg/lndg/data/db.sqlite3
+
+      # database doesn't exist, so move to HDD and simlink
+      sudo mkdir -p /mnt/hdd/app-data/lndg
+      sudo cp -p -r /home/lndg/lndg/data /mnt/hdd/app-data/lndg/data
+      
+      # check again to confirm database exists at /mnt/hdd/app-data/lndg/data/
+      isDatabase=$(sudo ls /mnt/hdd/app-data/lndg/data/db.sqlite3 2>/dev/null | grep -c 'db.sqlite3')
+      if ! [ ${isDatabase} -eq 0 ]; then
+        sudo rm /home/lndg/lndg/data/db.sqlite3
+        sudo ln -sf /mnt/hdd/app-data/lndg/data/db.sqlite3 /home/lndg/lndg/data/db.sqlite3
+        sudo chown lndg:lndg -R /mnt/hdd/app-data/lndg/
+      else
+        exit 1
+      fi
     fi
+    sudo chown lndg:lndg /home/lndg/lndg/data/db.sqlite3
     cd /home/admin/
 
     ##################
@@ -188,43 +203,25 @@ WantedBy=sockets.target
 
     sudo usermod -a -G www-data lndg
 
-    echo "
-#user lndg
+    # setup nginx .conf files
+    if ! [ -f /etc/nginx/sites-available/lndg_ssl.conf ]; then
+       sudo cp -f /home/admin/assets/nginx/sites-available/lndg_ssl.conf /etc/nginx/sites-available/lndg_ssl.conf
+    fi
+    if ! [ -f /etc/nginx/sites-available/lndg_tor.conf ]; then
+       sudo cp /home/admin/assets/nginx/sites-available/lndg_tor.conf /etc/nginx/sites-available/lndg_tor.conf
+    fi
+    if ! [ -f /etc/nginx/sites-available/lndg_tor_ssl.conf ]; then
+       sudo cp /home/admin/assets/nginx/sites-available/lndg_tor_ssl.conf /etc/nginx/sites-available/lndg_tor_ssl.conf
+    fi
 
-upstream django {
-  server unix:///home/lndg/lndg/lndg.sock; # for a file socket
-}
+    # setup nginx symlinks
+    sudo ln -sf /etc/nginx/sites-available/lndg_ssl.conf /etc/nginx/sites-enabled/lndg_ssl.conf
+    sudo ln -sf /etc/nginx/sites-available/lndg_tor.conf /etc/nginx/sites-enabled/lndg_tor.conf
+    sudo ln -sf /etc/nginx/sites-available/lndg_tor_ssl.conf /etc/nginx/sites-enabled/lndg_tor_ssl.conf
+    sudo nginx -t
+    sudo systemctl reload nginx
 
-server {
-  # the port your site will be served on, use port 80 unless setting up ssl certs, then 443
-  listen      8889;
-  # optional settings for ssl setup
-  #ssl on;
-  #ssl_certificate /<path_to_certs>/fullchain.pem;
-  #ssl_certificate_key /<path_to_certs>/privkey.pem;
-  # the domain name it will serve for
-  server_name _; # you can substitute your node IP address or a custom domain like lndg.local (just make sure to update your local hosts file)
-  charset     utf-8;
-
-  # max upload size
-  client_max_body_size 75M;   # adjust to taste
-
-  # max wait for django time
-  proxy_read_timeout 180;
-
-  # Django media
-  location /static {
-    alias /home/lndg/lndg/gui/static; # your Django project's static files - amend as required
-  }
-
-  # Finally, send all non-media requests to the Django server.
-  location / {
-    uwsgi_pass  django;
-    include     /home/lndg/lndg/uwsgi_params; # the uwsgi_params file
-  }
-}
-" | sudo tee "/etc/nginx/sites-available/lndg.conf"
-
+    # start nginx and uwsgi services
     sudo touch /var/log/uwsgi/lndg.log
     sudo touch /home/lndg/lndg/lndg.sock
     sudo chgrp www-data /var/log/uwsgi/lndg.log
@@ -234,14 +231,12 @@ server {
     sudo systemctl enable uwsgi.service
     sudo systemctl start uwsgi.service
 
-    # setup nginx symlinks
-    sudo ln -sf /etc/nginx/sites-available/lndg.conf /etc/nginx/sites-enabled/lndg.conf
-    sudo nginx -t
-    sudo systemctl reload nginx
+
 
     # open the firewall
     echo "*** Updating Firewall ***"
     sudo ufw allow from any to any port 8889 comment 'allow LNDg HTTP'
+    sudo ufw allow from any to any port 8888 comment 'allow LNDg HTTPS'
     echo ""
 
     ##################
@@ -332,9 +327,12 @@ WantedBy=timers.target
     # Hidden Service for LNDg if Tor is active
     if [ "${runBehindTor}" = "on" ]; then
       # make sure to keep in sync with tor.network.sh script
-      /home/admin/config.scripts/tor.onion-service.sh lndg 80 8889
+      /home/admin/config.scripts/tor.onion-service.sh lndg 80 8889 443 8887
     fi
   fi
+
+  echo "# LNDg install OK!"
+  sleep 5
 
   # needed for API/WebUI as signal that install ran thru 
   echo "result='OK'"
@@ -358,10 +356,15 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   sudo userdel -rf lndg
   # close ports on firewall
   sudo ufw deny 8889
+  sudo ufw deny 8888
 
   # remove nginx symlinks
-  sudo rm -f /etc/nginx/sites-enabled/lndg.conf
-  sudo rm -f /etc/nginx/sites-available/lndg.conf
+  sudo rm -f /etc/nginx/sites-enabled/lndg_ssl.conf
+  sudo rm -f /etc/nginx/sites-enabled/lndg_tor.conf
+  sudo rm -f /etc/nginx/sites-enabled/lndg_tor_ssl.conf
+  sudo rm -f /etc/nginx/sites-available/lndg_ssl.conf
+  sudo rm -f /etc/nginx/sites-available/lndg_tor.conf
+  sudo rm -f /etc/nginx/sites-available/lndg_tor_ssl.conf
   sudo nginx -t
   sudo systemctl reload nginx
 

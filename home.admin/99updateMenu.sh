@@ -1,5 +1,5 @@
 #!/bin/bash
-
+ 
 # load raspiblitz config data
 source /home/admin/_version.info
 source /home/admin/raspiblitz.info

@@ -1,5 +1,5 @@
 #!/bin/bash
-
+ 
 # get raspiblitz config
 echo "get raspiblitz config"
 source /home/admin/raspiblitz.info
