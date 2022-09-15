@@ -1,5 +1,7 @@
 # CHANGES between Releases
 
+- Update: LND v0.15.1 [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.15.1-beta)
+
 ## What's new in Version 1.8.0 of RaspiBlitz?
 
 - New: Multilanguage WebUI [details](https://github.com/cstenglein/raspiblitz-web)
