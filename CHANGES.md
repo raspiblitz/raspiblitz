@@ -1,5 +1,9 @@
 # CHANGES between Releases
 
+## What's new in Version 1.8.1 of RaspiBlitz?
+
+- Update: Core Lightning v0.12.0 [details](https://github.com/ElementsProject/lightning/releases/tag/v0.12.0)
+
 ## What's new in Version 1.8.0 of RaspiBlitz?
 
 - New: Multilanguage WebUI [details](https://github.com/cstenglein/raspiblitz-web)
