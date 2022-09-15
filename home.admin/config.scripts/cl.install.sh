@@ -467,7 +467,7 @@ if [ "$1" = "off" ];then
   # if cl mainnet was default - remove
   if [ "${CHAIN}" == "mainnet" ] && [ "${lightning}" == "cl" ]; then
     echo "# Core Lightning is REMOVED as the default lightning implementation"
-    /home/admin/config.scripts/blitz.conf.sh set lightning ""
+    /home/admin/config.scripts/blitz.conf.sh set lightning "none"
     if [ "${lnd}" == "on" ]; then
       echo "# LND is now the new default lightning implementation"
       /home/admin/config.scripts/blitz.conf.sh set lightning "lnd"
