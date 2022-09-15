@@ -1,10 +1,9 @@
 #!/bin/bash
 
-# https://github.com/joinmarket-webui/joinmarket-webui
+# https://github.com/joinmarket-webui/jam
 
-USERNAME=joinmarket
 HOME_DIR=/home/$USERNAME
-REPO=joinmarket-webui/joinmarket-webui
+REPO=joinmarket-webui/jam
 APP_DIR=webui
 RASPIBLITZ_INFO=/home/admin/raspiblitz.info
 RASPIBLITZ_CONF=/mnt/hdd/raspiblitz.conf
@@ -33,7 +32,7 @@ if [ "$1" = "menu" ]; then
     if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
       # Info with Tor
       sudo /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
-      whiptail --title " JoinMarket Web UI " --msgbox "Open in your local web browser:
+      whiptail --title " JAM (JoinMarket Web UI) " --msgbox "Open in your local web browser:
 https://${localip}:7501\n
 with Fingerprint:
 ${fingerprint}\n
@@ -42,7 +41,7 @@ Hidden Service address for Tor Browser (see LCD for QR):\n${toraddress}
       sudo /home/admin/config.scripts/blitz.display.sh hide
     else
       # Info without Tor
-      whiptail --title " JoinMarket Web UI " --msgbox "Open in your local web browser & accept self-signed cert:
+      whiptail --title " JAM (JoinMarket Web UI) " --msgbox "Open in your local web browser & accept self-signed cert:
 https://${localip}:7501\n
 with Fingerprint:
 ${fingerprint}\n
@@ -51,7 +50,7 @@ Activate Tor to access the web interface from outside your local network.
     fi
     echo "please wait ..."
   else
-    echo "*** JOINMARKET WEB UI NOT INSTALLED ***"
+    echo "*** JAM NOT INSTALLED ***"
   fi
   exit 0
 fi
@@ -68,12 +67,12 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       sudo /home/admin/config.scripts/bonus.joinmarket.sh on
     fi
 
-    echo "*** INSTALL JOINMARKET WEB UI ***"
+    echo "*** INSTALL JAM ***"
 
     # install nodeJS
     /home/admin/config.scripts/bonus.nodejs.sh on
 
-    # install JoinMarket Web UI
+    # install JAM
     cd $HOME_DIR || exit 1
 
     sudo -u $USERNAME git clone https://github.com/$REPO
@@ -176,7 +175,7 @@ WantedBy=multi-user.target
       echo "# OK - the joinmarket-api.service is enabled, to start manually use: 'sudo systemctl start joinmarket-api'"
     fi
   else
-    echo "*** JOINMARKET WEB UI ALREADY INSTALLED ***"
+    echo "*** JAM ALREADY INSTALLED ***"
   fi
   echo
   echo "# For the connection details run:"
@@ -212,28 +211,28 @@ fi
 if [ "$1" = "update" ]; then
   isInstalled=$(sudo ls $HOME_DIR 2>/dev/null | grep -c "$APP_DIR")
   if [ ${isInstalled} -eq 1 ]; then
-    echo "*** UPDATE JOINMARKET WEB UI ***"
+    echo "*** UPDATE JAM ***"
     cd $HOME_DIR
 
     if [ "$2" = "commit" ]; then
       echo "# Updating to the latest commit in the default branch"
-      sudo -u $USERNAME wget https://github.com/$REPO/archive/refs/heads/master.tar.gz
+      sudo -u $USERNAME wget https://github.com/$REPO/archive/refs/heads/master.tar.gz -O master.tar.gz
       sudo -u $USERNAME tar -xzf master.tar.gz
       sudo -u $USERNAME rm -rf master.tar.gz
-      sudo -u $USERNAME mv joinmarket-webui-master $APP_DIR-update
+      sudo -u $USERNAME mv jam-master $APP_DIR-update
     else
       version=$(curl --silent "https://api.github.com/repos/$REPO/releases/latest" | grep '"tag_name":' | sed -E 's/.*"v([^"]+)".*/\1/')
       cd $APP_DIR
       current=$(node -p "require('./package.json').version")
       cd ..
       if [ "$current" = "$version" ]; then
-        echo "*** JOINMARKET WEB UI IS ALREADY UPDATED TO LATEST VERSION ***"
+        echo "*** JAM IS ALREADY UPDATED TO LATEST VERSION ***"
         exit 0
       fi
-      sudo -u $USERNAME wget https://github.com/$REPO/archive/refs/tags/v$version.tar.gz
+      sudo -u $USERNAME wget https://github.com/$REPO/archive/refs/tags/v$version.tar.gz -O v$version.tar.gz
       sudo -u $USERNAME tar -xzf v$version.tar.gz
       sudo -u $USERNAME rm v$version.tar.gz
-      sudo -u $USERNAME mv joinmarket-webui-$version $APP_DIR-update
+      sudo -u $USERNAME mv jam-$version $APP_DIR-update
     fi
 
     cd $APP_DIR-update || exit 1
@@ -253,9 +252,9 @@ if [ "$1" = "update" ]; then
     sudo -u $USERNAME rm -rf $APP_DIR
     sudo -u $USERNAME mv $APP_DIR-update $APP_DIR
 
-    echo "*** JOINMARKET WEB UI UPDATED ***"
+    echo "*** JAM UPDATED ***"
   else
-    echo "*** JOINMARKET WEB UI NOT INSTALLED ***"
+    echo "*** JAM NOT INSTALLED ***"
   fi
 
   exit 0
@@ -266,7 +265,7 @@ fi
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   isInstalled=$(sudo ls $HOME_DIR 2>/dev/null | grep -c "$APP_DIR")
   if [ "${isInstalled}" -eq 1 ]; then
-    echo "*** UNINSTALL JOINMARKET WEB UI ***"
+    echo "*** UNINSTALL JAM ***"
 
     # remove systemd service
     sudo systemctl stop joinmarket-api
@@ -297,9 +296,9 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     # setting value in raspi blitz config
     sudo sed -i "s/^joinmarketWebUI=.*/joinmarketWebUI=off/g" $RASPIBLITZ_CONF
 
-    echo "OK JOINMARKET WEB UI removed."
+    echo "OK JAM removed."
   else
-    echo "*** JOINMARKET WEB UI NOT INSTALLED ***"
+    echo "*** JAM NOT INSTALLED ***"
   fi
 
   exit 0
