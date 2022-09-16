@@ -2,17 +2,18 @@
 
 # https://github.com/joinmarket-webui/jam
 
-HOME_DIR=/home/$USERNAME
+WEBUI_VERSION=0.1.0
 REPO=joinmarket-webui/jam
+USERNAME=joinmarket
+HOME_DIR=/home/$USERNAME
 APP_DIR=webui
 RASPIBLITZ_INFO=/home/admin/raspiblitz.info
 RASPIBLITZ_CONF=/mnt/hdd/raspiblitz.conf
-WEBUI_VERSION=0.0.9
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "config script to switch joinmarket_webui on or off"
-  echo "bonus.joinmarket-webui.sh [on|off|menu|update|update commit|precheck]"
+  echo "bonus.jam.sh [on|off|menu|update|update commit|precheck]"
   exit 1
 fi
 
@@ -77,7 +78,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     sudo -u $USERNAME git clone https://github.com/$REPO
 
-    cd joinmarket-webui || exit 1
+    cd jam || exit 1
     sudo -u $USERNAME git reset --hard v${WEBUI_VERSION}
 
     GITHUB_SIGN_AUTHOR="web-flow"
@@ -87,7 +88,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
      "${GITHUB_SIGN_AUTHOR}" "${GITHUB_SIGN_PUBKEYLINK}" "${GITHUB_SIGN_FINGERPRINT}" || exit 1
 
     cd $HOME_DIR || exit 1
-    sudo -u $USERNAME mv joinmarket-webui $APP_DIR
+    sudo -u $USERNAME mv jam $APP_DIR
     cd $APP_DIR || exit 1
     sudo -u $USERNAME rm -rf docker
     if ! sudo -u $USERNAME npm install; then
@@ -141,7 +142,7 @@ After=bitcoind.service
 
 [Service]
 WorkingDirectory=$HOME_DIR/joinmarket-clientserver/scripts/
-ExecStartPre=/home/admin/config.scripts/bonus.joinmarket-webui.sh precheck
+ExecStartPre=-/home/admin/config.scripts/bonus.jam.sh precheck
 ExecStart=/bin/sh -c '. $HOME_DIR/joinmarket-clientserver/jmvenv/bin/activate && python jmwalletd.py'
 User=joinmarket
 Group=joinmarket
@@ -162,7 +163,7 @@ WantedBy=multi-user.target
     # setting value in raspiblitz config
     sudo sed -i "s/^joinmarketWebUI=.*/joinmarketWebUI=on/g" $RASPIBLITZ_CONF
 
-    # Hidden Service for joinmarket-webui if Tor is active
+    # Hidden Service for jam if Tor is active
     if [ "${runBehindTor}" = "on" ]; then
       # make sure to keep in sync with internet.tor.sh script
       /home/admin/config.scripts/tor.onion-service.sh joinmarket-webui 80 7502 443 7503
@@ -179,7 +180,7 @@ WantedBy=multi-user.target
   fi
   echo
   echo "# For the connection details run:"
-  echo "/home/admin/config.scripts/bonus.joinmarket-webui.sh menu"
+  echo "/home/admin/config.scripts/bonus.jam.sh menu"
   echo
   exit 0
 fi
