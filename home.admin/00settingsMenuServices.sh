@@ -411,7 +411,28 @@ if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${lndg}" != "${choice}" ]; then
   echo "LNDg Setting changed .."
   anychange=1
-  sudo -u admin /home/admin/config.scripts/bonus.lndg.sh ${choice}
+  databasechoice=""
+  isDatabase=$(sudo ls /mnt/hdd/app-data/lndg/data/db.sqlite3 2>/dev/null | grep -c 'db.sqlite3')
+  if ! [ ${isDatabase} -eq 0 ]; then
+    if [ "${choice}" = "off" ]; then
+      whiptail --title "Delete LNDg Database?" \
+      --yes-button "Keep Database" \
+      --no-button "Delete Database" \
+      --yesno "LNDg is getting uninstalled. If you keep the database, you will be able to reuse the data should you choose to re-install. Do you wish to keep the database?" 10 80
+      if [ $? -eq 1 ]; then
+        databasechoice="deletedatabase"
+      fi
+    else
+      whiptail --title "Use Existing LNDg Database?" \
+      --yes-button "Use existing database" \
+      --no-button "Start a new database" \
+      --yesno "LNDg is getting installed, and there is an existing database. You may use the existing database, which will include your old password and all of your old data, or you may start with a clean database. Do you wish to use the existing database?" 10 110
+      if [ $? -eq 1 ]; then
+        databasechoice="deletedatabase"
+      fi
+    fi
+  fi
+  sudo -u admin /home/admin/config.scripts/bonus.lndg.sh ${choice} ${databasechoice}
   if [ "${choice}" =  "on" ]; then
     sudo -u admin /home/admin/config.scripts/bonus.lndg.sh menu
   fi

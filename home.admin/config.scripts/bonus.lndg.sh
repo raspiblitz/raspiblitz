@@ -47,9 +47,11 @@ if [ "$1" = "menu" ]; then
 http://${localip}:${httpPort}\n
 https://${localip}:${httpsPort} with Fingerprint:
 ${fingerprint}\n
-Use your Password B to login.\n
+Default username is lndg-admin. Use your Password B to login.\n
+To change username, login using default username and go to:
+http://${localip}:${httpPort}/lndg-admin\n
 Hidden Service address for TOR Browser (see LCD for QR):\n${toraddress}
-" 16 67
+" 20 67
     sudo /home/admin/config.scripts/blitz.display.sh hide
   else
     # Info without TOR
@@ -57,9 +59,11 @@ Hidden Service address for TOR Browser (see LCD for QR):\n${toraddress}
 http://${localip}:${httpPort}\n
 Or https://${localip}:${httpsPort} with Fingerprint:
 ${fingerprint}\n
-Use your Password B to login.\n
+Default username is lndg-admin. Use your Password B to login.\n
+To change username, login using default username and go to:
+http://${localip}:${httpPort}/lndg-admin\n
 Activate TOR to access the web interface from outside your local network.
-" 15 57
+" 19 67
   fi
   echo "please wait ..."
   exit 0
@@ -100,106 +104,69 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # first check and see if a database exists
     isDatabase=$(sudo ls /mnt/hdd/app-data/lndg/data/db.sqlite3 2>/dev/null | grep -c 'db.sqlite3')
     if ! [ ${isDatabase} -eq 0 ]; then
-
-      # database exists, so remove newly created database and link to existing one
-      echo "Database already exists, using existing database"
-      sudo rm /home/lndg/lndg/data/db.sqlite3
-      sudo -u lndg ln -sf /mnt/hdd/app-data/lndg/data/db.sqlite3 /home/lndg/lndg/data/db.sqlite3
-    else
-
-      # database doesn't exist, so move to HDD and simlink
-      sudo mkdir -p /mnt/hdd/app-data/lndg
-      sudo cp -p -r /home/lndg/lndg/data /mnt/hdd/app-data/lndg/data
-      
-      # check again to confirm database exists at /mnt/hdd/app-data/lndg/data/
-      isDatabase=$(sudo ls /mnt/hdd/app-data/lndg/data/db.sqlite3 2>/dev/null | grep -c 'db.sqlite3')
-      if ! [ ${isDatabase} -eq 0 ]; then
+	  if [ "$2" == "deletedatabase" ]; then
+	  
+	    # deleting old database and moving new database
+		echo "Deleting existing database and creating new one"
+        sudo rm -rf /mnt/hdd/app-data/lndg/data
+        sudo cp -p -r /home/lndg/lndg/data /mnt/hdd/app-data/lndg/data
         sudo rm /home/lndg/lndg/data/db.sqlite3
         sudo ln -sf /mnt/hdd/app-data/lndg/data/db.sqlite3 /home/lndg/lndg/data/db.sqlite3
         sudo chown lndg:lndg -R /mnt/hdd/app-data/lndg/
-      else
-        exit 1
+      else		
+	  
+        # using existing database, so remove newly created database and link to existing one
+        echo "Database already exists, using existing database"
+        sudo rm /home/lndg/lndg/data/db.sqlite3
+        sudo -u lndg ln -sf /mnt/hdd/app-data/lndg/data/db.sqlite3 /home/lndg/lndg/data/db.sqlite3
       fi
+    else
+	
+      # database doesn't exist, so move to HDD and simlink
+      sudo mkdir -p /mnt/hdd/app-data/lndg
+      sudo cp -p -r /home/lndg/lndg/data /mnt/hdd/app-data/lndg/data
+      sudo rm /home/lndg/lndg/data/db.sqlite3
+      sudo ln -sf /mnt/hdd/app-data/lndg/data/db.sqlite3 /home/lndg/lndg/data/db.sqlite3
+      sudo chown lndg:lndg -R /mnt/hdd/app-data/lndg/
     fi
     sudo chown lndg:lndg /home/lndg/lndg/data/db.sqlite3
-    cd /home/admin/
 
     ##################
-    # NGINX
+    # gunicorn install
     ##################
 
-    sudo apt install -y python3-dev >/dev/null 2>&1
-    sudo apt install -y build-essential python >/dev/null 2>&1
-    sudo apt install -y uwsgi >/dev/null 2>&1
-    sudo apt install -y nginx >/dev/null 2>&1
-    sudo /home/lndg/lndg/.venv/bin/python -m pip install uwsgi >/dev/null 2>&1
+    # first install and configure whitenoise
+    sudo /home/lndg/lndg/.venv/bin/pip install whitenoise 
+    sudo rm /home/lndg/lndg/lndg/settings.py 
+    sudo /home/lndg/lndg/.venv/bin/python initialize.py -wn
+	
+	# install gunicorn application server
+    sudo /home/lndg/lndg/.venv/bin/python -m pip install 'gunicorn==20.1.*'
+	
+	# switch back to home directory
+	cd /home/admin/
 
-    echo "# Install lndg.ini and uwsgi.service for uwsgi"
-    echo "
-# lndg.ini file
-[uwsgi]
-
-# Django-related settings
-# the base directory (full path)
-chdir           = /home/lndg/lndg
-# Django's wsgi file
-module          = lndg.wsgi
-# the virtualenv (full path)
-home            = /home/lndg/lndg/.venv
-#location of log files
-logto           = /var/log/uwsgi/%n.log
-
-# process-related settings
-# master
-master          = true
-# maximum number of worker processes
-processes       = 1
-# the socket (use the full path to be safe
-socket          = /home/lndg/lndg/lndg.sock
-# ... with appropriate permissions - may be needed
-chmod-socket    = 660
-# clear environment on exit
-vacuum          = true
-" | sudo tee "/home/lndg/lndg/lndg.ini"
-
-    echo '
-uwsgi_param  QUERY_STRING       $query_string;
-uwsgi_param  REQUEST_METHOD     $request_method;
-uwsgi_param  CONTENT_TYPE       $content_type;
-uwsgi_param  CONTENT_LENGTH     $content_length;
-
-uwsgi_param  REQUEST_URI        "$request_uri";
-uwsgi_param  PATH_INFO          "$document_uri";
-uwsgi_param  DOCUMENT_ROOT      "$document_root";
-uwsgi_param  SERVER_PROTOCOL    "$server_protocol";
-uwsgi_param  REQUEST_SCHEME     "$scheme";
-uwsgi_param  HTTPS              "$https if_not_empty";
-
-uwsgi_param  REMOTE_ADDR        "$remote_addr";
-uwsgi_param  REMOTE_PORT        "$remote_port";
-uwsgi_param  SERVER_PORT        "$server_port";
-uwsgi_param  SERVER_NAME        "$server_name";
-' | sudo tee "/home/lndg/lndg/uwsgi_params"
-
+    echo "# Install gunicorn.service file for gunicorn lndg.wsgi application server"
     echo "
 [Unit]
-Description=Lndg uWSGI app
+Description=Lndg guincorn app
 After=lnd.service
 
 [Service]
-ExecStart=/home/lndg/lndg/.venv/bin/uwsgi \
---ini /home/lndg/lndg/lndg.ini
 User=lndg
-Group=www-data
+Group=lndg
+WorkingDirectory=/home/lndg/lndg
+ExecStart=/home/lndg/lndg/.venv/bin/gunicorn lndg.wsgi -b 0.0.0.0:8889
 Restart=always
 KillSignal=SIGQUIT
 Type=notify
 StandardError=syslog
 NotifyAccess=all
+RestartSec=60s
 
 [Install]
-WantedBy=sockets.target
-" | sudo tee "/etc/systemd/system/uwsgi.service"
+WantedBy=multi-user.target
+" | sudo tee "/etc/systemd/system/gunicorn.service"
 
     sudo usermod -a -G www-data lndg
 
@@ -208,10 +175,10 @@ WantedBy=sockets.target
        sudo cp -f /home/admin/assets/nginx/sites-available/lndg_ssl.conf /etc/nginx/sites-available/lndg_ssl.conf
     fi
     if ! [ -f /etc/nginx/sites-available/lndg_tor.conf ]; then
-       sudo cp /home/admin/assets/nginx/sites-available/lndg_tor.conf /etc/nginx/sites-available/lndg_tor.conf
+       sudo cp -f /home/admin/assets/nginx/sites-available/lndg_tor.conf /etc/nginx/sites-available/lndg_tor.conf
     fi
     if ! [ -f /etc/nginx/sites-available/lndg_tor_ssl.conf ]; then
-       sudo cp /home/admin/assets/nginx/sites-available/lndg_tor_ssl.conf /etc/nginx/sites-available/lndg_tor_ssl.conf
+       sudo cp -f /home/admin/assets/nginx/sites-available/lndg_tor_ssl.conf /etc/nginx/sites-available/lndg_tor_ssl.conf
     fi
 
     # setup nginx symlinks
@@ -228,10 +195,8 @@ WantedBy=sockets.target
     sudo chgrp www-data /home/lndg/lndg/lndg.sock
     sudo chmod 771 /home/lndg/lndg/lndg.sock
     sudo chmod 660 /var/log/uwsgi/lndg.log
-    sudo systemctl enable uwsgi.service
-    sudo systemctl start uwsgi.service
-
-
+    sudo systemctl enable gunicorn.service
+    sudo systemctl start gunicorn.service
 
     # open the firewall
     echo "*** Updating Firewall ***"
@@ -327,7 +292,7 @@ WantedBy=timers.target
     # Hidden Service for LNDg if Tor is active
     if [ "${runBehindTor}" = "on" ]; then
       # make sure to keep in sync with tor.network.sh script
-      /home/admin/config.scripts/tor.onion-service.sh lndg 80 8889 443 8887
+      /home/admin/config.scripts/tor.onion-service.sh lndg 80 8886 443 8887
     fi
   fi
 
@@ -343,15 +308,17 @@ fi
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   echo "*** REMOVING LNDG ***"
-  # remove systemd service
+  # remove systemd services
   sudo systemctl disable jobs-lndg.timer
   sudo systemctl disable rebalancer-lndg.timer
   sudo systemctl disable htlc-stream-lndg.service
+  sudo systemctl disable gunicorn.service
   sudo rm -f /etc/systemd/system/jobs-lndg.timer
   sudo rm -f /etc/systemd/system/rebalancer-lndg.timer
   sudo rm -f /etc/systemd/system/jobs-lndg.service
   sudo rm -f /etc/systemd/system/rebalancer-lndg.service
   sudo rm -f /etc/systemd/system/htlc-stream-lndg.service
+  sudo rm -f /etc/systemd/system/gunicorn.service
   # delete user and home directory
   sudo userdel -rf lndg
   # close ports on firewall
@@ -368,11 +335,17 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   sudo nginx -t
   sudo systemctl reload nginx
 
-  # Hidden Service if Tor is active
+  # hidden Service if Tor is active
   if [ "${runBehindTor}" = "on" ]; then
     /home/admin/config.scripts/tor.onion-service.sh off lndg
   fi
-
+  
+  # database removal (if selected)
+  if [ "$2" == "deletedatabase" ]; then
+    echo "Deleting database"
+    sudo rm -rf /mnt/hdd/app-data/lndg
+  fi
+  
   echo "OK LNDg removed."
 
   # setting value in raspi blitz config
@@ -392,7 +365,7 @@ if [ "$1" = "update" ]; then
   sudo -u lndg .venv/bin/pip install requests
   sudo -u lndg .venv/bin/python manage.py migrate
   sudo systemctl restart nginx
-  sudo systemctl restart uwsgi.service
+  sudo systemctl restart gunicorn.service
 
   echo ""
   echo "# Starting the LNDg services ... *** "
