@@ -554,6 +554,10 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo rm -r /mnt/hdd/app-data/${APPID}
   fi
 
+  # Remove user and stuff here
+  echo "# deleting user"
+  sudo userdel -rf ${APPID} 2>/dev/null
+
   echo "# OK - app should be uninstalled now"
   exit 0
 
