@@ -63,7 +63,7 @@ Existing data in postgres may be lost if a later version of postgres is installe
   fi
 
   echo "*** REMOVING postgres ***"
-  sudo apt remove -y postgresql-common postgres-client-common
+  sudo apt remove -y postgresql-common postgresql-client-common
   echo "OK postgres removed."
   exit 0
 fi
