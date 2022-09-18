@@ -123,11 +123,11 @@ Please check the following debug info.
     exit 0
   fi
 
-    # Options (available without TOR)
+  # Options (available without TOR)
   OPTIONS=( \
-        CONFIGURE "Edit config file" \
-        NEWCARD "Setup new card" \
-        STATUS "Status Info"
+    CONFIGURE "Edit config file" \
+    NEWCARD "Setup new card" \
+    STATUS "Status Info" \
 	)
 
   CHOICE=$(whiptail --clear --title "Electrum Rust Server" --menu "menu" 10 50 4 "${OPTIONS[@]}" 2>&1 >/dev/tty)
@@ -332,10 +332,10 @@ MIN_WITHDRAW_SATS=1
 MAX_WITHDRAW_SATS=1000000
 EOF
 
-  sudo mv /tmp/${APPID}.env /mnt/hdd/app-data/${APPID}/.env
-  sudo chown ${APPID}:${APPID} /mnt/hdd/app-data/${APPID}/.env
-  sudo ln -s /mnt/hdd/app-data/${APPID}/.env /home/${APPID}/
-
+    sudo mv /tmp/${APPID}.env /mnt/hdd/app-data/${APPID}/.env
+    sudo chown ${APPID}:${APPID} /mnt/hdd/app-data/${APPID}/.env
+    sudo ln -s /mnt/hdd/app-data/${APPID}/.env /home/${APPID}/
+  fi
 
   echo "# create systemd service: ${APPID}.service"
   echo "
