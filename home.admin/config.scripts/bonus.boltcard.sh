@@ -179,7 +179,8 @@ Please check the following debug info.
         export $(grep -v '^#' /home/boltcard/.env | xargs)
         export HOST_DOMAIN="$HOST_DOMAIN"
         sudo -u ${APPID} /usr/local/go/bin/go build
-        ./createboltcard -enable -tx_max=$TX_MAX -day_max=$DAY_MAX -name=$NAME
+        echo "./createboltcard -enable -tx_max=\"$TX_MAX\" -day_max=\"$DAY_MAX\" -name=\"$NAME\""
+        ./createboltcard -enable -tx_max="$TX_MAX" -day_max="$DAY_MAX" -name="$NAME"
       )
       popd
 
