@@ -178,7 +178,7 @@ Please check the following debug info.
       (
         export $(grep -v '^#' /home/boltcard/.env | xargs)
         export HOST_DOMAIN="$HOST_DOMAIN"
-        go build
+        sudo -u ${APPID} /usr/local/go/bin/go build
         ./createboltcard -enable -tx_max=$TX_MAX -day_max=$DAY_MAX -name=$NAME
       )
       popd
@@ -283,7 +283,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u ${APPID} psql postgres -f create_db.sql
   fi
 
-  sudo -u ${APPID} go build
+  sudo -u ${APPID} /usr/local/go/bin/go build
 
   # open the ports in the firewall
   echo "# updating Firewall"
