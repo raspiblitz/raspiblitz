@@ -32,6 +32,7 @@ if [ ${#helipad} -eq 0 ]; then helipad="off"; fi
 if [ ${#bitcoinminds} -eq 0 ]; then bitcoinminds="off"; fi
 if [ ${#squeaknode} -eq 0 ]; then squeaknode="off"; fi
 if [ ${#itchysats} -eq 0 ]; then itchysats="off"; fi
+if [ ${#boltcard} -eq 0 ]; then boltcard="off"; fi
 
 # show select dialog
 echo "run dialog ..."
@@ -68,6 +69,7 @@ if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
   OPTIONS+=(f 'LND Helipad Boostagram reader' ${helipad})
   OPTIONS+=(d 'LND Tallycoin Connect' ${tallycoinConnect})
   #OPTIONS+=(q 'LND Squeaknode' ${squeaknode})
+  OPTIONS+=(z 'LND Boltcard' ${boltcard})
 fi
 
 # just available for CL
@@ -200,6 +202,29 @@ if [ "${specter}" != "${choice}" ]; then
   fi
 else
   echo "Specter Desktop Setting unchanged."
+fi
+
+# Boltcard process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "s")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${boltcard}" != "${choice}" ]; then
+  echo "Boltcard Setting changed .."
+  anychange=1
+  /home/admin/config.scripts/bonus.boltcard.sh ${choice}
+  errorOnInstall=$?
+  if [ "${choice}" =  "on" ]; then
+    if [ ${errorOnInstall} -eq 0 ]; then
+      sudo systemctl start boltcard
+      /home/admin/config.scripts/bonus.boltcard.sh menu
+    else
+      l1="# FAIL on Boltcard install #"
+      l2="Try manual install on terminal after reboot with:"
+      l3="/home/admin/config.scripts/bonus.boltcard.sh on"
+      dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
+    fi
+  fi
+else
+  echo "Boltcard Setting unchanged."
 fi
 
 # ElectRS process choice

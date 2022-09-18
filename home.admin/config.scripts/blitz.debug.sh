@@ -366,6 +366,16 @@ else
   echo "- SPHINX is OFF by config"
 fi
 
+if [ "${boltcard}" == "on" ]; then
+  echo
+  echo "*** LAST 20 BOLTCARD LOGS ***"
+  echo "sudo journalctl -u boltcard -b --no-pager -n20"
+  sudo journalctl -u boltcard -b --no-pager -n20
+  echo
+else
+  echo "- SPHINX is OFF by config"
+fi
+
 echo
 echo "*** MOUNTED DRIVES ***"
 df -T -h

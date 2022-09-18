@@ -1,176 +1,324 @@
 #!/bin/bash
 
-# https://github.com/boltcard/boltcard
-VERSION="v0.1.0"
+APPID="boltcard" # one-word lower-case no-specials
 
-# command info
+# the git repo to get the source code from for install
+GITHUB_REPO="https://github.com/boltcard/boltcard"
+
+# the github tag of the version of the source code to install
+# can also be a commit hash
+# if empty it will use the latest source version
+GITHUB_VERSION="d6724d416e977b835f9058ca86298000316d863e"
+
+# the github signature to verify the author
+# leave GITHUB_SIGN_AUTHOR empty to skip verifying
+# GITHUB_SIGN_AUTHOR="web-flow"
+# GITHUB_SIGN_PUBKEYLINK="https://github.com/web-flow.gpg"
+# GITHUB_SIGN_FINGERPRINT="4AEE18F83AFDEB23"
+
+# port numbers the app should run on
+PORT_CLEAR="59000"
+PORT_SSL="59001"
+PORT_TOR_CLEAR="59002"
+PORT_TOR_SSL="59003"
+
+# db variables
+DB_NAME="card_db"
+DB_USER="cardapp"
+
+# BASIC COMMANDLINE OPTIONS
+# you can add more actions or parameters if needed - for example see the bonus.rtl.sh
+# to see how you can deal with an app that installs multiple instances depending on
+# lightning implementation or testnets - but this should be OK for a start:
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
- echo "config script to install, update or uninstall Boltcard server"
- echo "bonus.boltcard.sh [on|off|newcard|menu|update|status]"
- echo "install $VERSION by default"
- exit 1
+  echo "# bonus.${APPID}.sh status   -> status information (key=value)"
+  echo "# bonus.${APPID}.sh on       -> install the app"
+  echo "# bonus.${APPID}.sh off      -> uninstall the app"
+  echo "# bonus.${APPID}.sh menu     -> SSH menu dialog"
+  echo "# bonus.${APPID}.sh prestart -> will be called by systemd before start"
+  exit 1
 fi
 
-# check and load raspiblitz config
-# to know which network is running
-source /home/admin/raspiblitz.info
+# echoing comments is useful for logs - but start output with # when not a key=value
+echo "# Running: 'bonus.${APPID}.sh $*'"
+
+# check & load raspiblitz config
 source /mnt/hdd/raspiblitz.conf
 
-if [ "$1" = "status" ] || [ "$1" = "menu" ]; then
+#########################
+# INFO
+#########################
 
-  # get network info
-  isInstalled=$(sudo ls /etc/systemd/system/boltcard.service 2>/dev/null | grep -c 'boltcard.service')
-  localip=$(hostname -I | awk '{print $1}')
-  toraddress=$(sudo cat /mnt/hdd/tor/boltcard/hostname 2>/dev/null)
+# this section is always executed to gather status information that
+# all the following commands can use & execute on
+
+# check if app is already installed
+isInstalled=$(sudo ls /etc/systemd/system/${APPID}.service 2>/dev/null | grep -c "${APPID}.service")
+
+# check if service is running
+isRunning=$(systemctl status ${APPID} 2>/dev/null | grep -c 'active (running)')
+
+if [ "${isInstalled}" == "1" ]; then
+
+  # gather address info (whats needed to call the app)
+  localIP=$(hostname -I | awk '{print $1}')
+  toraddress=$(sudo cat /mnt/hdd/tor/${APPID}/hostname 2>/dev/null)
   fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
-  httpPort="59000"
-  httpsPort="59001"
 
-  if [ "$1" = "status" ]; then
-    echo "installed='${isInstalled}'"
-    echo "localIP='${localip}'"
-    echo "httpPort='${httpPort}'"
-    echo "httpsPort='${httpsPort}'"
-    echo "httpsForced='0'"
-    echo "httpsSelfsigned='1'"
+fi
+
+# if the action parameter `status` was called - just stop here and output all
+# status information as a key=value list
+if [ "$1" = "status" ]; then
+  echo "appID='${APPID}'"
+  echo "githubRepo='${GITHUB_REPO}'"
+  echo "githubVersion='${GITHUB_VERSION}'"
+  echo "githubSignature='${GITHUB_SIGNATURE}'"
+  echo "isInstalled=${isInstalled}"
+  echo "isRunning=${isRunning}"
+  if [ "${isInstalled}" == "1" ]; then
+    echo "portCLEAR=${PORT_CLEAR}"
+    echo "portSSL=${PORT_SSL}"
+    echo "localIP='${localIP}'"
     echo "toraddress='${toraddress}'"
-    exit
+    echo "fingerprint='${fingerprint}'"
+    echo "toraddress='${toraddress}'"
   fi
-
+  exit
 fi
 
-if [ "$1" = "newcard" ]; then
+##########################
+# MENU
+#########################
 
-  pushd /home/boltcard/boltcard/createboltcard
+# The `menu` action should give at least a SSH info dialog - when an webapp show
+# URL to call (http & https+fingerprint) otherwise some instruction how to start it.
 
-  toraddress=$(sudo cat /mnt/hdd/tor/boltcard/hostname 2>/dev/null)
-  (
-    export $(grep -v '^#' /home/boltcard/.env | xargs)
-    export HOST_DOMAIN="$toraddress"
-    sudo -u boltcard /usr/local/go/bin/go build
-    echo "buold"
-    sudo -u boltcard ./createboltcard -enable -tx_max 50000 -day_max=500000 -name=my_card_1
-  )
+# This SSH dialog will be later called by the MAIN MENU to be available to the user
+# when app is installed.
 
-  echo "New card created. Scan the QR code above using the createboltcard mobile app to register your new card."
-  popd
-  exit 0
-
-fi
+# This menu can also have some more complex structure if you want to make it easy
+# to the user to set configurations or maintenance options - example bonus.lnbits.sh
 
 # show info menu
 if [ "$1" = "menu" ]; then
-  echo "WORK IN PROGRESS"
-  exit
 
+  # get status
+  echo "# collecting status info ... (please wait)"
+  source <(sudo /home/admin/config.scripts/bonus.boltcard.sh status)
 
-  if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
-    # Info with TOR
-    sudo /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
-    whiptail --title " Boltcard " --msgbox "Open in your local web browser:
-http://${localip}:${httpPort}\n
-https://${localip}:${httpsPort} with Fingerprint:
-${fingerprint}\n
-Use your Password B to login.\n
-Hidden Service address for TOR Browser (see LCD for QR):\n${toraddress}
-" 16 67
-    sudo /home/admin/config.scripts/blitz.display.sh hide
-  else
-    # Info without TOR
-    whiptail --title " ThunderHub " --msgbox "Open in your local web browser:
-http://${localip}:${httpPort}\n
-Or ttps://${localip}:${httpsPort} with Fingerprint:
-${fingerprint}\n
-Use your Password B to login.\n
-Activate TOR to access the web interface from outside your local network.
-" 15 57
+  if [ ${isInstalled} -eq 0 ]; then
+    echo "# FAIL not installed"
+    exit 1
   fi
-  echo "please wait ..."
+
+  if [ ${isRunning} -eq 0 ]; then
+    dialog --title "Boltcard Not Running" --msgbox "
+The boltcard service is not running.
+Please check the following debug info.
+      " 8 48
+    /home/admin/config.scripts/blitz.debug.sh
+    echo "Press ENTER to get back to main menu."
+    read key
+    exit 0
+  fi
+
+    # Options (available without TOR)
+  OPTIONS=( \
+        CONFIGURE "Edit config file" \
+        NEWCARD "Setup new card" \
+        STATUS "Status Info"
+	)
+
+  CHOICE=$(whiptail --clear --title "Electrum Rust Server" --menu "menu" 10 50 4 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+  clear
+
+  case $CHOICE in
+    CONFIGURE)
+      if /home/admin/config.scripts/blitz.setconf.sh "/home/${APPID}/.env" "${APPID}"
+      then
+        whiptail \
+          --title "Restart" --yes-button "Restart" --no-button "Not now" \
+          --yesno "To apply the new settings ${APPID} may need to restart.
+          Do you want to restart the ${APPID} service now?" 10 55
+        if [ $? -eq 0 ]; then
+          echo "# Restarting ${APPID}"
+          sudo systemctl restart ${APPID}
+        else
+          echo "# Continue without restarting."
+        fi
+      else
+        echo "# No change made"
+      fi
+    ;;
+    NEWCARD)
+      OPTIONS=()
+      if [ "${toraddress}" != "" ]; then
+        OPTIONS+=(TOR "${toraddress}")
+      fi
+      OPTIONS+=(HTTPS "https://${localIP}:${PORT_SSL}")
+      
+      CHOICE=$(dialog --clear --title "Setup new boltcard" --menu "\nChoose a server:" 11 50 7 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+
+      HOST_DOMAIN=""
+      case $CHOICE in
+        TOR)
+          HOST_DOMAIN="${toraddress}"
+        ;;
+        HTTPS)
+          HOST_DOMAIN="${localIP}:${PORT_SSL}"
+        ;;
+      esac
+
+      NAME=$(whiptail --clear --title "Setup new boltcard" --inputbox "\nChoose a name for your card" 11 50 2>&1 >/dev/tty)
+      TX_MAX=$(whiptail --clear --title "Setup new boltcard" --inputbox "\nEnter the maximum allowed per transaction in satoshis" 11 50 2>&1 >/dev/tty)
+      DAY_MAX=$(whiptail --clear --title "Setup new boltcard" --inputbox "\nEnter the maximum allowed per day in satoshis" 11 50 2>&1 >/dev/tty)
+
+      pushd /home/${APPID}/${APPID}/createboltcard
+      (
+        export $(grep -v '^#' /home/boltcard/.env | xargs)
+        export HOST_DOMAIN="$HOST_DOMAIN"
+        go build
+        ./createboltcard -enable -tx_max=$TX_MAX -day_max=$DAY_MAX -name=$NAME
+      )
+      popd
+
+    ;;
+    STATUS)
+      # set the title for the dialog
+      dialogTitle=" ${APPID} "
+
+      # basic info text - for an web app how to call with http & self-signed https
+      dialogText="To see logs of the Boltcard service, run:
+sudo journalctl -fu boltcard
+
+Boltcard API is hosted at:
+http://${localIP}:${PORT_CLEAR} [avoid if possible] \n
+https://${localIP}:${PORT_SSL} with Fingerprint:
+${fingerprint}\n
+"
+
+      # add tor info (if available)
+      if [ "${toraddress}" != "" ]; then
+        dialogText="${dialogText}Hidden Service address for Tor Browser (QRcode on LCD):\n${toraddress}"
+      fi
+
+      whiptail --title "${dialogTitle}" --msgbox "${dialogText}" 18 67
+      echo "please wait ..."
+      exit 0
+    ;;
+  esac
+
   exit 0
 fi
 
-# stop services
-echo "making sure services are not running"
-sudo systemctl stop boltcard 2>/dev/null
+##########################
+# ON / INSTALL
+##########################
 
-# switch on
+# This section takes care of installing the app.
+# The template contains some basic steps but also look at other install scripts
+# to see how special cases are solved.
+
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
-  echo "*** INSTALL BOLTCARD ***"
 
-  isInstalled=$(sudo ls /etc/systemd/system/boltcard.service 2>/dev/null | grep -c 'boltcard.service')
-  if ! [ ${isInstalled} -eq 0 ]; then
-    echo "Boltcard already installed."
+  # dont run install if already installed
+  if [ ${isInstalled} -eq 1 ]; then
+    echo "# ${APPID}.service is already installed."
+    exit 1
+  fi
+
+  echo "# Installing ${APPID} ..."
+
+  # check and install Go - if already installed it will skip
+  /home/admin/config.scripts/bonus.go.sh on
+  # check and install PostgreSQL - if already installed it will skip
+  /home/admin/config.scripts/bonus.postgres.sh on
+
+  # create a dedicated user for the app
+  echo "# create user"
+  sudo adduser --disabled-password --gecos "" ${APPID} || exit 1
+
+  echo "# Make sure symlink to central app-data .lnd directory exists"
+  if ! [[ -L "/home/${APPID}/.lnd" ]]; then
+    sudo rm -rf "/home/${APPID}/.lnd" 2>/dev/null              # not a symlink.. delete it silently
+    sudo ln -s "/mnt/hdd/app-data/lnd/" "/home/${APPID}/.lnd"  # and create symlink
+  fi
+
+  # add user to special groups with special access rights
+  echo "# add use to special groups"
+  sudo /usr/sbin/usermod --append --groups lndsigner ${APPID}
+
+  # create a data directory on /mnt/hdd/app-data/ for the app
+  if ! [ -d /mnt/hdd/app-data/${APPID} ]; then
+
+    echo "# create app-data directory"
+    sudo mkdir /mnt/hdd/app-data/${APPID} 2>/dev/null
+    sudo chown ${APPID}:${APPID} -R /mnt/hdd/app-data/${APPID}
+
   else
-    ###############
-    # INSTALL
-    ###############
 
-    # Preparations
-    # check and install NodeJS
-    /home/admin/config.scripts/bonus.go.sh on
+    echo "# reuse existing app-directory"
+    sudo chown ${APPID}:${APPID} -R /mnt/hdd/app-data/${APPID}
 
-    # create boltcard user
-    sudo adduser --disabled-password --gecos "" boltcard
+  fi
 
-    # download and install
-    sudo -u boltcard git clone https://github.com/boltcard/boltcard.git /home/boltcard/boltcard
-    cd /home/boltcard/boltcard || exit 1
-    # https://github.com/boltcard/boltcard/releases
-    sudo -u boltcard git reset --hard $VERSION
+  # download source code and verify
+  echo "# download the source code & verify"
+  sudo -u ${APPID} git clone ${GITHUB_REPO} /home/${APPID}/${APPID}
+  cd /home/${APPID}/${APPID}
+  sudo -u ${APPID} git reset --hard $GITHUB_VERSION
+  if [ "${GITHUB_SIGN_AUTHOR}" != "" ]; then
+    sudo -u ${APPID} /home/admin/config.scripts/blitz.git-verify.sh \
+     "${GITHUB_SIGN_AUTHOR}" "${GITHUB_SIGN_PUBKEYLINK}" "${GITHUB_SIGN_FINGERPRINT}" "${GITHUB_VERSION}" || exit 1
+  fi
 
-    sudo -u postgres createuser -s boltcard
-    sudo -u boltcard psql postgres -f create_db.sql
+  # compile/install the app
+  echo "# compile/install the app"
+  cd /home/${APPID}/${APPID}
+  
+  dbExists = $(sudo -u postgres psql -l | awk '{print $1}' | grep "${DB_NAME}" | wc -l)
+  if [ "$dbExists" -gt "0" ]; then
+    sudo -u postgres createuser -s ${APPID}
+    sudo -u ${APPID} psql postgres -f create_db.sql
+  fi
 
-    # PATCH to allow configurable port
-    patchFile = "/home/admin/assets/boltcard/mod.$VERSION.patch"
-    if [ -f "$patchFile" ]; then
-      sudo  -u boltcard git apply "$patchFile"
-    fi
+  sudo -u ${APPID} go build
 
-    go build
+  # open the ports in the firewall
+  echo "# updating Firewall"
+  sudo ufw allow ${PORT_CLEAR} comment "${APPID} HTTP"
+  sudo ufw allow ${PORT_SSL} comment "${APPID} HTTPS"
 
-    ###############
-    # LND PERMISSIONS
-    ###############
 
-    # make sure symlink to central app-data directory exists ***"
-    echo "*** create .lnd link ***"
-    sudo rm -rf /home/boltcard/.lnd  # not a symlink.. delete it silently
-    # create symlink
-    sudo ln -s "/mnt/hdd/app-data/lnd/" "/home/boltcard/.lnd"
+  # create .env file
+  echo "# create .env file"
 
-    # Creating lncli macaroons
-    echo "*** create boltcard macaroon ***"
-    lncli bakemacaroon uri:/routerrpc.Router/SendPaymentV2 > /tmp/boltcard.macaroon.hex
-    xxd -r -p /tmp/boltcard.macaroon.hex /tmp/boltcard.macaroon
-    chown boltcard:boltcard /tmp/boltcard.macaroon
-    sudo mv /tmp/boltcard.macaroon /mnt/hdd/app-data/lnd/data/chain/bitcoin/mainnet/boltcard.macaroon
-    sudo rm /tmp/boltcard.macaroon.hex /tmp/boltcard.macaroon
+  # remove symlink or old file
+  sudo rm -f /home/${APPID}/.env
+  # make app-data dir if missing
+  sudo mkdir -p /mnt/hdd/app-data/${APPID}
 
-    #################
-    # .env
-    #################
-
-  # TODO: Use PasswordB? and ensure setup sql files use the same passwords 
-  DB_PASSWORD="database_password"
-    echo "*** create boltcard .env file ***"
-    cat > /tmp/boltcard.env <<EOF
+  if [ -f /mnt/hdd/app-data/${APPID}/.env ]; then
+    echo "# skipping: .env file already exists"
+  else
+    cat > /tmp/${APPID}.env <<EOF
 # -----------
 # DB Config
 # -----------
 DB_HOST=localhost
 DB_PORT=5432
-DB_USER=cardapp
-DB_PASSWORD=$DB_PASSWORD
-DB_NAME=card_db
+DB_USER=${DB_USER}
+DB_PASSWORD=database_password
+DB_NAME=${DB_NAME}
 
 # -----------
 # LND Config
 # -----------
 LN_HOST=localhost
 LN_PORT=10009
-LN_TLS_FILE=/home/boltcard/.lnd/tls.cert
-LN_MACAROON_FILE=/home/boltcard/.lnd/data/chain/bitcoin/mainnet/boltcard.macaroon
+LN_TLS_FILE=/home/${APPID}/.lnd/tls.cert
+LN_MACAROON_FILE=/home/${APPID}/.lnd/data/chain/bitcoin/mainnet/signer.macaroon
 FEE_LIMIT_SAT=10
 
 # -----------
@@ -183,62 +331,32 @@ AES_DECRYPT_KEY=00000000000000000000000000000000
 MIN_WITHDRAW_SATS=1
 MAX_WITHDRAW_SATS=1000000
 EOF
-    # remove symlink or old file
-    sudo rm -f /home/boltcard/.env
-    # move to app-data
-    sudo mkdir -p /mnt/hdd/app-data/boltcard
-    sudo mv /tmp/boltcard.env /mnt/hdd/app-data/boltcard/.env
-    sudo chown boltcard:boltcard /mnt/hdd/app-data/boltcard/.env
-    # symlink to app directory
-    sudo ln -s /mnt/hdd/app-data/boltcard/.env /home/boltcard/
 
-    ##################
-    # NGINX
-    ##################
-    # setup nginx symlinks
-    if ! [ -f /etc/nginx/sites-available/boltcard_ssl.conf ]; then
-       sudo cp -f /home/admin/assets/nginx/sites-available/boltcard_ssl.conf /etc/nginx/sites-available/boltcard_ssl.conf
-    fi
-    if ! [ -f /etc/nginx/sites-available/boltcard_tor.conf ]; then
-       sudo cp /home/admin/assets/nginx/sites-available/boltcard_tor.conf /etc/nginx/sites-available/boltcard_tor.conf
-    fi
-    if ! [ -f /etc/nginx/sites-available/boltcard_tor_ssl.conf ]; then
-       sudo cp /home/admin/assets/nginx/sites-available/boltcard_tor_ssl.conf /etc/nginx/sites-available/boltcard_tor_ssl.conf
-    fi
-    sudo ln -sf /etc/nginx/sites-available/boltcard_ssl.conf /etc/nginx/sites-enabled/
-    sudo ln -sf /etc/nginx/sites-available/boltcard_tor.conf /etc/nginx/sites-enabled/
-    sudo ln -sf /etc/nginx/sites-available/boltcard_tor_ssl.conf /etc/nginx/sites-enabled/
-    sudo nginx -t
-    sudo systemctl reload nginx
+  sudo mv /tmp/${APPID}.env /mnt/hdd/app-data/${APPID}/.env
+  sudo chown ${APPID}:${APPID} /mnt/hdd/app-data/${APPID}/.env
+  sudo ln -s /mnt/hdd/app-data/${APPID}/.env /home/${APPID}/
 
-    # open the firewall
-    echo "*** Updating Firewall ***"
-    sudo ufw allow from any to any port 59000 comment 'allow Boltcard HTTP'
-    sudo ufw allow from any to any port 59001 comment 'allow Boltcard HTTPS'
-    echo ""
 
-    ##################
-    # SYSTEMD SERVICE
-    ##################
-
-    echo "# Install ThunderHub systemd for ${network} on ${chain}"
-    echo "
-# Systemd unit for boltcard
-# /etc/systemd/system/boltcard.service
+  echo "# create systemd service: ${APPID}.service"
+  echo "
 [Unit]
-Description=bolt card service
-After=network.target network-online.target
+Description=${APPID}
+After=network.target network-online.target lnd
 Requires=network-online.target
 StartLimitIntervalSec=0
 
 [Service]
-Type=simple
+Environment=\"HOME_PATH=/mnt/hdd/app-data/${APPID}\"
+EnvironmentFile=/home/${APPID}/.env
+WorkingDirectory=/home/${APPID}/${APPID}
+ExecStartPre=!/home/admin/config.scripts/bonus.${APPID}.sh prestart
+ExecStart=/home/${APPID}/${APPID}/${APPID}
+User=${APPID}
 Restart=always
-RestartSec=10
-User=boltcard
-EnvironmentFile=/home/boltcard/.env
-WorkingDirectory=/home/boltcard/boltcard
-ExecStart=/home/boltcard/boltcard/boltcard
+TimeoutSec=120
+RestartSec=30
+StandardOutput=null
+StandardError=journal
 
 # Hardening measures
 PrivateTmp=true
@@ -248,124 +366,203 @@ PrivateDevices=true
 
 [Install]
 WantedBy=multi-user.target
-" | sudo tee /etc/systemd/system/boltcard.service
-    sudo systemctl enable boltcard
+" | sudo tee /etc/systemd/system/${APPID}.service
+  sudo chown root:root /etc/systemd/system/${APPID}.service
 
-    # setting value in raspiblitz config
-    /home/admin/config.scripts/blitz.conf.sh set boltcard "on"
-
-    # Hidden Service for boltcard if Tor is active
-    if [ "${runBehindTor}" = "on" ]; then
-      # make sure to keep in sync with tor.network.sh script
-      /home/admin/config.scripts/tor.onion-service.sh boltcard 80 59002 443 59003
-    fi
-    source <(/home/admin/_cache.sh get state)
-    if [ "${state}" == "ready" ]; then
-      echo "# OK - the boltcard.service is enabled, system is ready so starting service"
-      sudo systemctl start boltcard
-      echo "# Wait startup grace period 60 secs ... "
-      sleep 60
-    else
-      echo "# OK - the boltcard.service is enabled, to start manually use: 'sudo systemctl start boltcard'"
-    fi
+  # when tor is set on also install the hidden service
+  if [ "${runBehindTor}" = "on" ]; then
+    # activating tor hidden service
+    /home/admin/config.scripts/tor.onion-service.sh ${APPID} 80 ${PORT_TOR_CLEAR} 443 ${PORT_TOR_SSL}
   fi
 
-  # needed for API/WebUI as signal that install ran thru 
-  echo "result='OK'"
+  # nginx configuration
+  # BACKGROUND is that the plain HTTP is served by your web app, but thru the nginx proxy it will be available
+  # with (self-signed) HTTPS and with separate configs for Tor & Tor+HTTPS.
+  
+  echo "# setup nginx confing"
+
+  # write the HTTPS config
+  echo "
+server {
+    listen ${PORT_SSL} ssl;
+    listen [::]:${PORT_SSL} ssl;
+    server_name _;
+    include /etc/nginx/snippets/ssl-params.conf;
+    include /etc/nginx/snippets/ssl-certificate-app-data.conf;
+    access_log /var/log/nginx/access_${APPID}.log;
+    error_log /var/log/nginx/error_${APPID}.log;
+    location / {
+        proxy_pass http://127.0.0.1:${PORT_CLEAR};
+        include /etc/nginx/snippets/ssl-proxy-params.conf;
+    }
+}
+" | sudo tee /etc/nginx/sites-available/${APPID}_ssl.conf
+  sudo ln -sf /etc/nginx/sites-available/${APPID}_ssl.conf /etc/nginx/sites-enabled/
+
+  # write the Tor config
+  echo "
+server {
+    listen ${PORT_TOR_CLEAR};
+    server_name _;
+    access_log /var/log/nginx/access_${APPID}.log;
+    error_log /var/log/nginx/error_${APPID}.log;
+    location / {
+        proxy_pass http://127.0.0.1:${PORT_CLEAR};
+        include /etc/nginx/snippets/ssl-proxy-params.conf;
+    }
+}
+" | sudo tee /etc/nginx/sites-available/${APPID}_tor.conf
+  sudo ln -sf /etc/nginx/sites-available/${APPID}_tor.conf /etc/nginx/sites-enabled/
+
+  # write the Tor+HTTPS config
+  echo "
+server {
+    listen ${PORT_TOR_SSL} ssl;
+    server_name _;
+    include /etc/nginx/snippets/ssl-params.conf;
+    include /etc/nginx/snippets/ssl-certificate-app-data-tor.conf;
+    access_log /var/log/nginx/access_${APPID}.log;
+    error_log /var/log/nginx/error_${APPID}.log;
+    location / {
+        proxy_pass http://127.0.0.1:${PORT_CLEAR};
+        include /etc/nginx/snippets/ssl-proxy-params.conf;
+    }
+}
+" | sudo tee /etc/nginx/sites-available/${APPID}_tor_ssl.conf
+  sudo ln -sf /etc/nginx/sites-available/${APPID}_tor_ssl.conf /etc/nginx/sites-enabled/
+
+  # test nginx config & activate thru reload
+  sudo nginx -t
+  sudo systemctl reload nginx
+
+  # mark app as installed in raspiblitz config
+  /home/admin/config.scripts/blitz.conf.sh set ${APPID} "on"
+
+  # start app up thru systemd
+  sudo systemctl enable ${APPID}
+  sudo systemctl start ${APPID}
+  echo "# OK - the ${APPID}.service is now enabled & started"
+  echo "# Monitor with: sudo journalctl -f -u ${APPID}"
+  exit 0
+
+  # OK so your app is now installed, but there please also check the following parts to ensure a propper integration
+  # into the raspiblitz system:
+
+  # PROVISION - reinstall on updates & recovery
+  # Take a look at `_provision_.sh` script - you can see that there all bonus apps install scripts get called if
+  # they have an active entry in the raspiblitz config. This is needed so that on sd card image update or recovery
+  # all apps get installed again. So add your app there accordantly so its install will survive an sd card update.
+
+  # MAINMENU - show users that app is installed
+  # Take a look at the `00mainmenu.sh` script - you can see there almost all bonus apps add a menu entry there if
+  # they are installed that then is calling this script with the `menu` parameter. Add your app accordingly.
+
+  # SERVICES MENU - add your app for onclick install
+  # Take a look at the `00settingsMenuServices.sh` script - you can there almost all bonus apps added themselves
+  # as an option in to be easily installed & deinstalled. Add your app there accordantly.
+
+  # DEBUGLOGS - add some status information
+  # Take a look at the `blitz.debug.sh` script - you can see there that apps if they are installed give some
+  # information on their latest logs and where to find them in the case that the user is searching for an  error.
+  # So its best practice to also add your app there with some small info to help on debug & finding error logs.
+
+  # PRESTART & DEINSTALL
+  # see the following sections of the template
+
+fi
+
+##########################
+# PRESTART
+##########################
+
+# BACKGROUND is that this script will be called with `prestart` on every start & restart
+# of this apps systemd service. This has the benefit that right before the app is started
+# config parameters for this app can be updated so that it always starts with the most updated
+# values. With such an "adhoc config" it is for example possible to check right before start
+# what other apps are installed and configure connections. Even if those configs outdate later
+# while the app is running with the next restart they will then automatically update their config
+# again. If you dont need such "adhoc" config for your app - just leave it empty as it is, so
+# you maybe later on have the option to use it.
+
+if [ "$1" = "prestart" ]; then
+
+  # needs to be run as the app user - stop if not run as the app user
+  # keep in mind that in the prestart section you cannot use `sudo` command
+  if [ "$USER" != "${APPID}" ]; then
+    echo "# FAIL: run as user ${APPID}"
+    exit 1
+  fi
+
+  echo "## PRESTART CONFIG START for ${APPID} (called by systemd prestart)"
+
+  # so if you have anything to configure before service starts, do it here
+  PASSWORD_B=$(cat /mnt/hdd/bitcoin/bitcoin.conf | grep "^rpcpassword=" | cut -d "=" -f2)
+  echo "# updating database password to PASSWORD_B"
+  sudo -u postgres psql -c "ALTER ROLE ${DB_USER} WITH PASSWORD '${PASSWORD_B}';"
+  echo "# updating .env conf to use PASSWORD_B for db connection"
+  sed -i "s/DB_PASSWORD=*/DB_PASSWORD=${PASSWORD_B}/g" /home/${APPID}/.env
+
+  echo "## PRESTART CONFIG DONE for ${APPID}"
   exit 0
 fi
+
+###########################################
+# OFF / UNINSTALL
+# call with parameter `delete-data` to also
+# delete the persistent data directory
+###########################################
+
+# BACKGROUND is that this section removes entries in systemd, nginx, etc and then
+# deletes the user with its home directory to nuke all installed code
 
 # switch off
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
-  # TODO: Remove DB??
+  echo "# stop & remove systemd service"
+  sudo systemctl stop ${APPID} 2>/dev/null
+  sudo systemctl disable ${APPID}.service
+  sudo rm /etc/systemd/system/${APPID}.service
 
-  echo "*** REMOVING BOLTCARD ***"
-  # remove systemd service
-  sudo systemctl disable boltcard
-  sudo rm -f /etc/systemd/system/boltcard.service
-  # delete user and home directory
-  sudo userdel -rf boltcard
-  # close ports on firewall
-  sudo ufw deny 59000
-  sudo ufw deny 59001
-
-  # remove nginx symlinks
-  sudo rm -f /etc/nginx/sites-enabled/boltcard_ssl.conf
-  sudo rm -f /etc/nginx/sites-enabled/boltcard_tor.conf
-  sudo rm -f /etc/nginx/sites-enabled/boltcard_tor_ssl.conf
-  sudo rm -f /etc/nginx/sites-available/boltcard_ssl.conf
-  sudo rm -f /etc/nginx/sites-available/boltcard_tor.conf
-  sudo rm -f /etc/nginx/sites-available/boltcard_tor_ssl.conf
+  echo "# remove nginx symlinks"
+  sudo rm -f /etc/nginx/sites-enabled/${APPID}_ssl.conf 2>/dev/null
+  sudo rm -f /etc/nginx/sites-enabled/${APPID}_tor.conf 2>/dev/null
+  sudo rm -f /etc/nginx/sites-enabled/${APPID}_tor_ssl.conf 2>/dev/null
+  sudo rm -f /etc/nginx/sites-available/${APPID}_ssl.conf 2>/dev/null
+  sudo rm -f /etc/nginx/sites-available/${APPID}_tor.conf 2>/dev/null
+  sudo rm -f /etc/nginx/sites-available/${APPID}_tor_ssl.conf 2>/dev/null
   sudo nginx -t
   sudo systemctl reload nginx
 
-  # Hidden Service if Tor is active
-  if [ "${runBehindTor}" = "on" ]; then
-    /home/admin/config.scripts/tor.onion-service.sh off boltcard
+  echo "# close ports on firewall"
+  sudo ufw deny "${PORT_CLEAR}"
+  sudo ufw deny "${PORT_SSL}"
+
+  echo "# removing Tor hidden service (if active)"
+  /home/admin/config.scripts/tor.onion-service.sh off ${APPID}
+
+  echo "# mark app as uninstalled in raspiblitz config"
+  /home/admin/config.scripts/blitz.conf.sh set ${APPID} "off"
+
+  # only if 'delete-data' is an additional parameter then also the data directory gets deleted
+  if [ "$(echo "$@" | grep -c delete-data)" -gt 0 ]; then
+    echo "# found 'delete-data' parameter"
+
+    echo "# deleting the db data"
+    sudo -u postgres dropdb -e --if-exists "${DB_NAME}"
+
+    echo "# deleting the app-data files"
+    sudo rm -r /mnt/hdd/app-data/${APPID}
   fi
 
-  echo "OK Boltcard removed."
-
-  # setting value in raspi blitz config
-  /home/admin/config.scripts/blitz.conf.sh set boltcard "off"
-
-  # needed for API/WebUI as signal that install ran thru 
-  echo "result='OK'"
+  echo "# OK - app should be uninstalled now"
   exit 0
+
 fi
 
-# update
-if [ "$1" = "update" ]; then
-  echo "WORK IN PROGRESS"
-  exit
-
-  echo "# UPDATING BOLTCARD"
-  cd /home/boltcard/boltcard || exit 1
-  # fetch latest master
-  sudo -u boltcard git fetch
-  # unset $1
-  set --
-  UPSTREAM=${1:-'@{u}'}
-  LOCAL=$(git rev-parse @)
-  REMOTE=$(git rev-parse "$UPSTREAM")
-
-  if [ $LOCAL = $REMOTE ]; then
-    TAG=$(git tag | sort -V | tail -1)
-    echo "# Up-to-date on version" $TAG
-  else
-    echo "# Pulling latest changes..."
-    sudo -u boltcard git pull -p
-    echo "# Reset to the latest release tag"
-    TAG=$(git tag | sort -V | tail -1)
-    sudo -u boltcard git reset --hard $TAG
-
-    # install deps
-    echo "# Installing dependencies..."
-    sudo -u boltcard npm install --quiet --yes
-    if ! [ $? -eq 0 ]; then
-        echo "# FAIL - npm install did not run correctly, aborting"
-        exit 1
-    fi
-
-    # opt out of telemetry 
-    echo "# opt out of telemetry .. "
-    sudo -u thunderhub npx next telemetry disable
-
-    # build nextjs
-    echo "# Building application..."
-    sudo -u thunderhub npm run build
-
-    echo "# Updated to version" $TAG
-  fi
-
-  echo "# Updated to the release in https://github.com/apotdevin/thunderhub"
-  echo
-  echo "# Starting the ThunderHub service ... *** "
-  sudo systemctl start thunderhub
-
-  exit 0
-fi
-
-echo "FAIL - Unknown Parameter $1"
+# just a basic error message when unknown action parameter was given
+echo "# FAIL - Unknown Parameter $1"
 exit 1
+
+# LAST NOTES:
+# Best is to contribute a new app install script as a PR to the raspiblitz GitHub repo.
+# Please base your PR on the `dev` branch - not on the default branch displayed.
