@@ -278,7 +278,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "# compile/install the app"
   cd /home/${APPID}/${APPID}
   
-  dbExists = $(sudo -u postgres psql -l | awk '{print $1}' | grep "${DB_NAME}" | wc -l)
+  dbExists=$(sudo -u postgres psql -l | awk '{print $1}' | grep "${DB_NAME}" | wc -l)
   if [ "$dbExists" -gt "0" ]; then
     sudo -u postgres createuser -s ${APPID}
     sudo -u ${APPID} psql postgres -f create_db.sql
