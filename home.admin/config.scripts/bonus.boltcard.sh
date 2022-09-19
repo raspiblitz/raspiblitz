@@ -501,7 +501,7 @@ if [ "$1" = "prestart" ]; then
   echo "# updating database password to PASSWORD_B"
   sudo -u postgres psql -c "ALTER ROLE ${DB_USER} WITH PASSWORD '${PASSWORD_B}';"
   echo "# updating .env conf to use PASSWORD_B for db connection"
-  sed -i "s/DB_PASSWORD=*/DB_PASSWORD=${PASSWORD_B}/g" /home/${APPID}/.env
+  sed -i "s/^DB_PASSWORD=.*/DB_PASSWORD=${PASSWORD_B}/g" /home/${APPID}/.env
 
   echo "## PRESTART CONFIG DONE for ${APPID}"
   exit 0
