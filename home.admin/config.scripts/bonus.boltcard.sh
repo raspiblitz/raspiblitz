@@ -178,7 +178,7 @@ Please check the following debug info.
       (
         export $(grep -v '^#' /home/${APPID}/.env | xargs)
         export HOST_DOMAIN="$CHOSEN_HOST_DOMAIN"
-        sudo -E -u ${APPID} /usr/local/go/bin/go build
+        sudo -u ${APPID} /usr/local/go/bin/go build
         echo "sudo -E -u ${APPID} ./createboltcard -enable -tx_max=\"$TX_MAX\" -day_max=\"$DAY_MAX\" -name=\"$NAME\""
         sudo -E -u ${APPID} ./createboltcard -enable -tx_max="$TX_MAX" -day_max="$DAY_MAX" -name="$NAME"
       )
