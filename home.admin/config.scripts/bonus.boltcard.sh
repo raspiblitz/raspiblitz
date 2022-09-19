@@ -334,9 +334,10 @@ MAX_WITHDRAW_SATS=1000000
 EOF
 
     sudo mv /tmp/${APPID}.env /mnt/hdd/app-data/${APPID}/.env
-    sudo chown ${APPID}:${APPID} /mnt/hdd/app-data/${APPID}/.env
-    sudo ln -s /mnt/hdd/app-data/${APPID}/.env /home/${APPID}/
   fi
+
+  sudo chown ${APPID}:${APPID} /mnt/hdd/app-data/${APPID}/.env
+  sudo ln -s /mnt/hdd/app-data/${APPID}/.env /home/${APPID}/
 
   echo "# create systemd service: ${APPID}.service"
   echo "
