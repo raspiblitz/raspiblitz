@@ -160,13 +160,13 @@ Please check the following debug info.
       
       CHOICE=$(dialog --clear --title "Setup new boltcard" --menu "\nChoose a server:" 11 50 7 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
-      HOST_DOMAIN=""
+      CHOSEN_HOST_DOMAIN=""
       case $CHOICE in
         TOR)
-          HOST_DOMAIN="${toraddress}"
+          CHOSEN_HOST_DOMAIN="${toraddress}"
         ;;
         HTTPS)
-          HOST_DOMAIN="${localIP}:${PORT_SSL}"
+          CHOSEN_HOST_DOMAIN="${localIP}:${PORT_SSL}"
         ;;
       esac
 
@@ -176,11 +176,11 @@ Please check the following debug info.
 
       pushd /home/${APPID}/${APPID}/createboltcard
       (
-        export $(grep -v '^#' /home/boltcard/.env | xargs)
-        export HOST_DOMAIN="$HOST_DOMAIN"
-        sudo -u ${APPID} /usr/local/go/bin/go build
-        echo "./createboltcard -enable -tx_max=\"$TX_MAX\" -day_max=\"$DAY_MAX\" -name=\"$NAME\""
-        ./createboltcard -enable -tx_max="$TX_MAX" -day_max="$DAY_MAX" -name="$NAME"
+        export $(grep -v '^#' /home/${APPID}/.env | xargs)
+        export HOST_DOMAIN="$CHOSEN_HOST_DOMAIN"
+        sudo -E -u ${APPID} /usr/local/go/bin/go build
+        echo "sudo -E -u ${APPID} ./createboltcard -enable -tx_max=\"$TX_MAX\" -day_max=\"$DAY_MAX\" -name=\"$NAME\""
+        sudo -E -u ${APPID} ./createboltcard -enable -tx_max="$TX_MAX" -day_max="$DAY_MAX" -name="$NAME"
       )
       popd
 

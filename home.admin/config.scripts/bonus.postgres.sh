@@ -32,8 +32,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   fi
   sudo systemctl stop postgresql 2>/dev/null
   sudo rsync -av /var/lib/postgresql /mnt/hdd/app-data
-  sudo mv /var/lib/postgresql /var/lib/postgresql.bak
+  sudo mv -b /var/lib/postgresql /var/lib/postgresql.bak
   sudo rm -rf /var/lib/postgresql # not a symlink.. delete it silently
+  sudo chown -R postgres:postgres /mnt/hdd/app-data/postgresql
   sudo ln -s /mnt/hdd/app-data/postgresql /var/lib/
 
   sudo systemctl enable postgresql
