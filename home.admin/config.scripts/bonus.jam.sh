@@ -33,7 +33,7 @@ if [ "$1" = "menu" ]; then
     if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
       # Info with Tor
       sudo /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
-      whiptail --title " JAM (JoinMarket Web UI) " --msgbox "Open in your local web browser:
+      whiptail --title " Jam (JoinMarket Web UI) " --msgbox "Open in your local web browser:
 https://${localip}:7501\n
 with Fingerprint:
 ${fingerprint}\n
