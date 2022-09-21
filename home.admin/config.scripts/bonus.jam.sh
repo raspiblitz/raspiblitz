@@ -42,7 +42,7 @@ Hidden Service address for Tor Browser (see LCD for QR):\n${toraddress}
       sudo /home/admin/config.scripts/blitz.display.sh hide
     else
       # Info without Tor
-      whiptail --title " JAM (JoinMarket Web UI) " --msgbox "Open in your local web browser & accept self-signed cert:
+      whiptail --title " Jam (JoinMarket Web UI) " --msgbox "Open in your local web browser & accept self-signed cert:
 https://${localip}:7501\n
 with Fingerprint:
 ${fingerprint}\n
