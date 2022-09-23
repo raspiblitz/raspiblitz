@@ -1,5 +1,9 @@
 # CHANGES between Releases
 
+## What's new in Version 1.8.1 of RaspiBlitz?
+
+- Info: Run RaspiBlitz on Proxmox [details](https://github.com/rootzoll/raspiblitz/tree/dev/alternative.platforms/Proxmox)
+
 ## What's new in Version 1.8.0 of RaspiBlitz?
 
 - New: Multilanguage WebUI [details](https://github.com/cstenglein/raspiblitz-web)
