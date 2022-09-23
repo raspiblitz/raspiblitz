@@ -2,7 +2,7 @@
 # https://lightning.readthedocs.io/
 
 # https://github.com/ElementsProject/lightning/releases
-CLVERSION=v0.12.0
+CLVERSION=v0.12.1
 
 # install the latest master by using the last commit id
 # https://github.com/ElementsProject/lightning/commit/master
