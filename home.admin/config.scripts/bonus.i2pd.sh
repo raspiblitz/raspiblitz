@@ -120,7 +120,7 @@ fi
 
 if [ "$1" = "addseednodes" ]; then
 
-  /home/admin/conf.scripts/bonus.i2pd.sh on
+  /home/admin/config.scripts/bonus.i2pd.sh on
 
   echo "Add all I2P seed nodes from: https://github.com/bitcoin/bitcoin/blob/master/contrib/seeds/nodes_main.txt"
   i2pSeedNodeList=$(curl -sS https://raw.githubusercontent.com/bitcoin/bitcoin/master/contrib/seeds/nodes_main.txt | grep .b32.i2p:0)
