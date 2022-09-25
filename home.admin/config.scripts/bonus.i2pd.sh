@@ -68,18 +68,14 @@ function add_repo {
 echo "# Running: 'bonus.i2pd.sh $*'"
 source /mnt/hdd/raspiblitz.conf
 
-isInstalled=$(systemctl is-active --quiet i2pd.service)
-isRunning=$(systemctl status i2pd 2>/dev/null | grep -c 'active (running)')
-
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
-  # dont run install if already installed
-  if [ ${isInstalled} -gt 0 ]; then
+  if systemctl is-active --quiet i2pd.service; then
     echo "# i2pd.service is already installed."
     exit 1
   fi
 
-echo "# Installing i2pd ..."
+  echo "# Installing i2pd ..."
 
   add_repo
 
@@ -97,15 +93,12 @@ echo "# Installing i2pd ..."
   # Restart bitcoind and start i2p
   source <(/home/admin/_cache.sh get state)
   if [ "${state}" == "ready" ]; then
-    sudo systemctl restart bitcoind 2>/dev/null
-    sleep 10
-
-    echo "# starting i2pd service ..."
+    echo "# Starting i2pd service ..."
     sudo systemctl start i2pd
 
-    echo "# monitor i2p in bitcoind"
-    sudo tail -n 100 /mnt/hdd/bitcoin/debug.log | grep i2p
-    bitcoin-cli -netinfo 4
+    echo "# Restart bitcoind ..."
+    sudo systemctl restart bitcoind 2>/dev/null
+    sleep 10
   fi
 
   if i2pd --version; then
@@ -117,6 +110,10 @@ echo "# Installing i2pd ..."
 
   # setting value in raspiblitz.conf
   /home/admin/config.scripts/blitz.conf.sh set i2pd "on"
+
+  echo "# Monitor i2p in bitcoind:"
+  echo "sudo tail -n 100 /mnt/hdd/bitcoin/debug.log | grep i2p"
+  echo "bitcoin-cli -netinfo 4"
 
   exit 0
 fi
