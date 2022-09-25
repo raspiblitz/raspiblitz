@@ -36,13 +36,12 @@ function installDependencies()
   # from https://lightning.readthedocs.io/INSTALL.html#to-build-on-ubuntu
   sudo apt-get install -y \
    autoconf automake build-essential git libtool libgmp-dev \
-   libsqlite3-dev python3 python3-mako net-tools zlib1g-dev libsodium-dev \
+   libsqlite3-dev python3 net-tools zlib1g-dev libsodium-dev \
    gettext
   # additional requirements
   sudo apt-get install -y postgresql libpq-dev
-  # mrkd and mistune needs to be globally available for the build
-  sudo pip3 install mrkd==0.2.0
-  sudo pip3 install mistune==0.8.4
+  # upgrade pip
+  sudo pip3 install --upgrade pip
   # poetry
   sudo -u bitcoin pip3 install --user poetry
   if ! grep -Eq '^PATH="$HOME/.local/bin:$PATH"' /mnt/hdd/raspiblitz.conf; then
