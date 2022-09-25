@@ -115,6 +115,9 @@ echo "# Installing i2pd ..."
     exit 1
   fi
 
+  # setting value in raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set i2pd "on"
+
   exit 0
 fi
 
@@ -161,6 +164,9 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     echo "# i2pd is still installed"
     exit 1
   fi
+
+  # setting value in raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set i2pd "off"
 
   exit 0
 fi
