@@ -9,6 +9,8 @@
 - Update: LNbits 0.9.2 [details](https://github.com/lnbits/lnbits-legend/releases/tag/0.9.2)
 - Update: ItchySats 0.7.0 [details](https://github.com/itchysats/itchysats/releases/tag/0.7.0)
 - Update: Jam (JoinMarket Web UI) v0.1.1 [details](https://github.com/joinmarket-webui/joinmarket-webui/releases/tag/v0.1.0)
+- Update: JoinMarket v0.9.8 [details](https://github.com/JoinMarket-Org/joinmarket-clientserver/releases/tag/v0.9.8)
+- Update: JoininBox v0.7.3 [details](https://github.com/openoms/joininbox/releases/tag/v0.7.3)
 - Info: Run RaspiBlitz on Proxmox [details](https://github.com/rootzoll/raspiblitz/tree/dev/alternative.platforms/Proxmox)
 
 ## What's new in Version 1.8.0 of RaspiBlitz?
