@@ -10,7 +10,7 @@ fi
 function add_repo {
   # Add repo for the latest version
   # i2pd — https://repo.i2pd.xyz/.help/readme.txt
-  #https://repo.i2pd.xyz/.help/add_repo
+  # https://repo.i2pd.xyz/.help/add_repo
 
   source /etc/os-release
   DIST=$ID
@@ -68,7 +68,7 @@ function add_repo {
 echo "# Running: 'bonus.i2pd.sh $*'"
 source /mnt/hdd/raspiblitz.conf
 
-isInstalled=$(sudo ls /etc/systemd/system/i2pd.service 2>/dev/null | grep -c "i2pd.service")
+isInstalled=$(systemctl is-active --quiet i2pd.service)
 isRunning=$(systemctl status i2pd 2>/dev/null | grep -c 'active (running)')
 
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
@@ -141,7 +141,6 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   echo "# stop & remove systemd service"
   sudo systemctl stop i2pd 2>/dev/null
   sudo systemctl disable i2pd.service
-  sudo rm /etc/systemd/system/i2pd.service
 
   echo "# Uninstall with apt"
   sudo apt remove -y i2pd
@@ -153,6 +152,8 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   /home/admin/config.scripts/blitz.conf.sh delete i2pacceptincoming  /mnt/hdd/bitcoin/bitcoin.conf
   /home/admin/config.scripts/blitz.conf.sh delete onlynet  /mnt/hdd/bitcoin/bitcoin.conf
   /home/admin/config.scripts/blitz.conf.sh set onlynet tor /mnt/hdd/bitcoin/bitcoin.conf
+
+  sudo rm /etc/systemd/system/i2pd.service
 
   if ! i2pd --version 2>/dev/null; then
     echo "# OK - i2pd is not installed now"

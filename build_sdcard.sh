@@ -752,6 +752,12 @@ echo
 echo
 /home/admin/config.scripts/bitcoin.install.sh install || exit 1
 
+#######
+# I2P #
+#######
+echo
+/home/admin/config.scripts/bonus.i2pd.sh on || exit 1
+
 # *** BLITZ WEB SERVICE ***
 echo "Provisioning BLITZ WEB SERVICE"
 /home/admin/config.scripts/blitz.web.sh http-on || exit 1
