@@ -127,12 +127,15 @@ if [ "$1" = "addseednodes" ]; then
   for i2pSeedNode in ${i2pSeedNodeList}; do
     bitcoin-cli addnode "$i2pSeedNode" "onetry"
   done
+
   echo
   echo "# Display sudo tail -n 100 /mnt/hdd/bitcoin/debug.log | grep i2p"
   sudo tail -n 100 /mnt/hdd/bitcoin/debug.log | grep i2p
   echo
   echo "# Display bitcoin-cli -netinfo 4"
   bitcoin-cli -netinfo 4
+
+  exit 0
 fi
 
 # switch off
