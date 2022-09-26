@@ -77,10 +77,32 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   echo "# Installing i2pd ..."
 
-  add_repo
+  if [ $(dpkg --print-architecture) = arm64 ]; then
 
-  sudo apt-get update
-  sudo apt-get install -y i2pd
+    add_repo
+    sudo apt-get update
+    sudo apt-get install -y i2pd
+
+  else
+    # https://github.com/PurpleI2P/i2pd/releases
+    VERSION=2.43.0
+    DISTRO=$(lsb_release -cs)
+    ARCHITECTURE=$(dpkg --print-architecture)
+
+    mkdir -p download/i2pd
+    cd download/i2pd
+    wget -O i2pd_${VERSION}-1${DISTRO}1_${ARCHITECTURE}.deb https://github.com/PurpleI2P/i2pd/releases/download/${VERSION}/i2pd_${VERSION}-1${DISTRO}1_${ARCHITECTURE}.deb
+
+    # verify
+    wget -O SHA512SUMS https://github.com/PurpleI2P/i2pd/releases/download/${VERSION}/SHA512SUMS
+    wget -O SHA512SUMS.asc https://github.com/PurpleI2P/i2pd/releases/download/${VERSION}/SHA512SUMS.asc
+    curl https://repo.i2pd.xyz/r4sas.gpg | gpg --import
+    gpg --verify SHA512SUMS.asc || (echo "# pgp signature mismatch"; exit 5)
+
+    # install
+    sudo dpkg -i --force-confnew i2pd_${VERSION}-1${DISTRO}1_${ARCHITECTURE}.deb
+  fi
+
   sudo systemctl enable i2pd
 
   /home/admin/config.scripts/blitz.conf.sh set debug tor /mnt/hdd/bitcoin/bitcoin.conf noquotes
