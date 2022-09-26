@@ -85,10 +85,41 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   /home/admin/config.scripts/blitz.conf.sh set debug tor /mnt/hdd/bitcoin/bitcoin.conf noquotes
   /home/admin/config.scripts/blitz.conf.sh add debug i2p /mnt/hdd/bitcoin/bitcoin.conf noquotes
-  /home/admin/config.scripts/blitz.conf.sh set ipsam 127.0.0.1:7656 /mnt/hdd/bitcoin/bitcoin.conf noquotes
+  /home/admin/config.scripts/blitz.conf.sh set i2psam 127.0.0.1:7656 /mnt/hdd/bitcoin/bitcoin.conf noquotes
   /home/admin/config.scripts/blitz.conf.sh set i2pacceptincoming 1 /mnt/hdd/bitcoin/bitcoin.conf noquotes
   /home/admin/config.scripts/blitz.conf.sh set onlynet tor /mnt/hdd/bitcoin/bitcoin.conf noquotes
   /home/admin/config.scripts/blitz.conf.sh add onlynet i2p /mnt/hdd/bitcoin/bitcoin.conf noquotes
+
+  # config
+  localip=$(hostname -I | awk '{print $1}')
+  cat << EOF | sudo tee /etc/i2pd/i2pd.conf
+# i2pd settings for the RaspiBlitz
+# for the defaults see:
+# https://github.com/PurpleI2P/i2pd/blob/openssl/contrib/i2pd.conf
+# Explanation for these custom settings:
+# https://github.com/seth586/guides/blob/master/FreeNAS/bitcoin/freenas_3_tor.md#install--configure-i2pd
+loglevel = none
+[http]
+enabled = true
+address = ${localip}
+port = 7070
+[httpproxy]
+enabled = false
+[socksproxy]
+enabled = false
+[sam]
+enabled = true
+[bob]
+enabled = false
+[i2cp]
+enabled = false
+[i2pcontrol]
+enabled = false
+[upnp]
+enabled = false
+EOF
+
+  sudo ufw allow 7070 comment "i2pd-webconsole"
 
   # Restart bitcoind and start i2p
   source <(/home/admin/_cache.sh get state)
@@ -111,6 +142,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # setting value in raspiblitz.conf
   /home/admin/config.scripts/blitz.conf.sh set i2pd "on"
 
+  echo "# Config: /etc/i2pd/i2pd.conf"
+  echo "# i2pd web console: ${localip}:7070"
   echo "# Monitor i2p in bitcoind:"
   echo "sudo tail -n 100 /mnt/hdd/bitcoin/debug.log | grep i2p"
   echo "bitcoin-cli -netinfo 4"
@@ -157,6 +190,8 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   /home/admin/config.scripts/blitz.conf.sh set onlynet tor /mnt/hdd/bitcoin/bitcoin.conf
 
   sudo rm /etc/systemd/system/i2pd.service
+
+  sudo ufw delete allow 7070
 
   if ! i2pd --version 2>/dev/null; then
     echo "# OK - i2pd is not installed now"
