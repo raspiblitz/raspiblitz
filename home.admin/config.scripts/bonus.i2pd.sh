@@ -76,18 +76,19 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   fi
 
   echo "# Installing i2pd ..."
-
-  if [ $(dpkg --print-architecture) = arm64 ]; then
+  ARCHITECTURE=$(dpkg --print-architecture)
+  if [ ${ARCHITECTURE} = arm64 ]; then
+    # use the deb repo
 
     add_repo
+
     sudo apt-get update
     sudo apt-get install -y i2pd
-
   else
+    # install from github
     # https://github.com/PurpleI2P/i2pd/releases
     VERSION=2.43.0
     DISTRO=$(lsb_release -cs)
-    ARCHITECTURE=$(dpkg --print-architecture)
 
     mkdir -p download/i2pd
     cd download/i2pd
@@ -97,7 +98,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     wget -O SHA512SUMS https://github.com/PurpleI2P/i2pd/releases/download/${VERSION}/SHA512SUMS
     wget -O SHA512SUMS.asc https://github.com/PurpleI2P/i2pd/releases/download/${VERSION}/SHA512SUMS.asc
     curl https://repo.i2pd.xyz/r4sas.gpg | gpg --import
-    gpg --verify SHA512SUMS.asc || (echo "# pgp signature mismatch"; exit 5)
+    gpg --verify SHA512SUMS.asc || (echo "# PGP signature error"; exit 5)
+    sha512sum -c SHA512SUMS --ignore-missing || (echo "# Checksum error"; exit 6)
 
     # install
     sudo dpkg -i --force-confnew i2pd_${VERSION}-1${DISTRO}1_${ARCHITECTURE}.deb
@@ -206,9 +208,9 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   echo "# Remove settings from bitcoind"
   /home/admin/config.scripts/blitz.conf.sh delete debug /mnt/hdd/bitcoin/bitcoin.conf
   /home/admin/config.scripts/blitz.conf.sh set debug tor /mnt/hdd/bitcoin/bitcoin.conf
-  /home/admin/config.scripts/blitz.conf.sh delete ipsam /mnt/hdd/bitcoin/bitcoin.conf
-  /home/admin/config.scripts/blitz.conf.sh delete i2pacceptincoming  /mnt/hdd/bitcoin/bitcoin.conf
-  /home/admin/config.scripts/blitz.conf.sh delete onlynet  /mnt/hdd/bitcoin/bitcoin.conf
+  /home/admin/config.scripts/blitz.conf.sh delete i2psam /mnt/hdd/bitcoin/bitcoin.conf
+  /home/admin/config.scripts/blitz.conf.sh delete i2pacceptincoming /mnt/hdd/bitcoin/bitcoin.conf
+  /home/admin/config.scripts/blitz.conf.sh delete onlynet /mnt/hdd/bitcoin/bitcoin.conf
   /home/admin/config.scripts/blitz.conf.sh set onlynet tor /mnt/hdd/bitcoin/bitcoin.conf
 
   sudo rm /etc/systemd/system/i2pd.service
