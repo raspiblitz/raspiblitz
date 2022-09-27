@@ -1,9 +1,14 @@
 #!/bin/bash
 
+# https://i2pd.readthedocs.io
+
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
-  echo "# bonus.i2pd.sh on       -> install the i2pd"
-  echo "# bonus.i2pd.sh off      -> uninstall the i2pd"
-  echo "# bonus.i2pd.sh addseednodes -> Add all I2P seed nodes from: https://github.com/bitcoin/bitcoin/blob/master/contrib/seeds/nodes_main.txt"
+  echo "I2P Daemon install script"
+  echo "More info at https://i2pd.readthedocs.io"
+  echo "Usage:"
+  echo "bonus.i2pd.sh on           -> install the i2pd"
+  echo "bonus.i2pd.sh off          -> uninstall the i2pd"
+  echo "bonus.i2pd.sh addseednodes -> Add all I2P seed nodes from: https://github.com/bitcoin/bitcoin/blob/master/contrib/seeds/nodes_main.txt"
   exit 1
 fi
 
