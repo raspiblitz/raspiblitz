@@ -129,9 +129,13 @@ elif [ "$1" = "list-add" ]; then
   listvalues=($listvalues)
   echo "# number of elements(${#listvalues[@]})"
 
+  # prevent double entries
   for value in "${listvalues[@]}"
   do
-     echo $value
+     if [ "${value}" == "${valuestr}" ]; then
+      echo "# blitz.conf.sh --> value(${valuestr}) already part of list with key(${keystr})"
+      exit 1
+     fi
   done
 
   # add value
