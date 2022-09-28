@@ -452,3 +452,18 @@ function bm() {
     echo "sudo /home/admin/config.scripts/bonus.bitcoinminds.sh on"
   fi
 }
+
+# command: lnproxy
+function lnproxy() {
+  if [ $(cat /mnt/hdd/raspiblitz.conf 2>/dev/null | grep -c "runBehindTor=on") -eq 1 ]; then
+    echo
+    echo "Requesting a wrapped invoice from rdq6tvulanl7aqtupmoboyk2z3suzkdwurejwyjyjf4itr3zhxrm2lad.onion ..."
+    echo
+    torify curl http://rdq6tvulanl7aqtupmoboyk2z3suzkdwurejwyjyjf4itr3zhxrm2lad.onion/api/${1}
+  else
+    echo
+    echo "Requesting a wrapped invoice from https://lnproxy.org ..."
+    echo
+    curl https://lnproxy.org/api/${1}
+  fi
+}
