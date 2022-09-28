@@ -3,7 +3,7 @@
 # https://github.com/lnbits/lnbits-legend
 
 # https://github.com/lnbits/lnbits-legend/releases
-tag="0.9.1"
+tag="0.9.2"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
