@@ -138,7 +138,7 @@ elif [ "$1" = "list-add" ]; then
      fi
   done
 
-  # add value
+  # add value to list
   listvalues+=("${valuestr}")
   
   # set updated value (make sure to be in single quotes)
@@ -165,7 +165,28 @@ elif [ "$1" = "list-remove" ]; then
     configFile="${configfileAlternative}"
   fi
 
-  echo "# TODO"
+  # get list value
+  source ${configFile}
+  listvalues="${!keystr}"
+  echo "# old listvalues(${listvalues})"
+
+  # convert list values to array
+  listvalues=($listvalues)
+  echo "# number of elements(${#listvalues[@]})"
+
+  # sort old value out
+  newlistvalues=()
+  for value in "${listvalues[@]}"
+  do
+     if [ "${value}" != "${valuestr}" ]; then
+      newlistvalues+=("${value}")
+     fi
+  done
+  
+  # set updated value (make sure to be in single quotes)
+  listvalues=$( IFS=$' '; echo "${newlistvalues[*]}" )
+  echo "# new listvalues(${listvalues})"
+  sudo sed -i "s/^${keystr}=.*/${keystr}='${listvalues}'/g" ${configFile}
 
 else
   echo "# FAIL: parameter not known - run with -h for help"
