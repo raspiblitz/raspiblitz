@@ -125,7 +125,7 @@ elif [ "$1" = "list-add" ]; then
   listvalues="${!keystr}"
   echo "# old listvalues(${listvalues})"
 
-  if [ "${}" == "" ]; then
+  if [ "${listvalues}" == "" ]; then
     # add first list value
     listvalues="${valuestr}"
   else
