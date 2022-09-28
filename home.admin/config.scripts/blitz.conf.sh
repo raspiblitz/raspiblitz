@@ -7,6 +7,8 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ];
   echo "RaspiBlitz Config Edit - adds value to file & cache and creates entries if needed:"
   echo "blitz.conf.sh set [key] [value] [?conffile] <noquotes>"
   echo "blitz.conf.sh delete [key] [?conffile]"
+  echo "blitz.conf.sh list-add [key] [value] [?conffile]"
+  echo "blitz.conf.sh list-remove [key] [value] [?conffile]"
   echo "note: use quotes and escape special characters for sed"
   echo
   exit 1
@@ -74,9 +76,89 @@ elif [ "$1" = "delete" ]; then
     configFile="${configfileAlternative}"
   fi
 
+  # check that config file exists
+  raspiblitzConfExists=$(ls ${configFile} 2>/dev/null | grep -c "${configFile}")
+  if [ ${raspiblitzConfExists} -eq 0 ]; then
+    echo "# blitz.conf.sh $@"
+    echo "# FAIL: missing config file: ${configFile}"
+    exit 3
+  fi
+
   # delete value
   sudo sed -i "/^${keystr}=/d" ${configFile} 2>/dev/null
+
+elif [ "$1" = "list-add" ]; then
+
+  # get parameters
+  keystr=$2
+  valuestr=$(echo "${3}" | sed 's/\//\\\//g')
+  configfileAlternative=$4
+
+  # check that key & value are given
+  if [ "${keystr}" == "" ] || [ "${valuestr}" == "" ]; then
+    echo "# blitz.conf.sh $@"
+    echo "# FAIL: missing parameter"
+    exit 1
+  fi
+
+  # optional another configfile
+  if [ "${configfileAlternative}" != "" ]; then
+    configFile="${configfileAlternative}"
+  fi
+
+  # check that config file exists
+  raspiblitzConfExists=$(ls ${configFile} 2>/dev/null | grep -c "${configFile}")
+  if [ ${raspiblitzConfExists} -eq 0 ]; then
+    echo "# blitz.conf.sh $@"
+    echo "# FAIL: missing config file: ${configFile}"
+    exit 3
+  fi
+
+  # check if key needs to be added (prepare new entry)
+  entryExists=$(grep -c "^${keystr}=" ${configFile})
+  if [ ${entryExists} -eq 0 ]; then
+    echo "${keystr}=" | sudo tee -a ${configFile} 1>/dev/null
+  fi
+
+  # get list value
+  source ${configFile}
+  listvalues="${!keystr}"
+  echo "# old listvalues(${listvalues})"
+
+  if [ "${}" == "" ]; then
+    # add first list value
+    listvalues="${valuestr}"
+  else
+    # add another list value
+    listvalues="${listvalues},${valuestr}"
+  fi
+  echo "# new listvalues(${listvalues})"
+  
+  # set updated value
+  sudo sed -i "s/^${keystr}=.*/${keystr}=${listvalues}/g" ${configFile}
+
+elif [ "$1" = "list-remove" ]; then
+
+  # get parameters
+  keystr=$2
+  valuestr=$(echo "${3}" | sed 's/\//\\\//g')
+  configfileAlternative=$4
+
+  # check that key & value are given
+  if [ "${keystr}" == "" ] || [ "${valuestr}" == "" ]; then
+    echo "# blitz.conf.sh $@"
+    echo "# FAIL: missing parameter"
+    exit 1
+  fi
+
+  # optional another configfile
+  if [ "${configfileAlternative}" != "" ]; then
+    configFile="${configfileAlternative}"
+  fi
+
+  echo "# TODO"
 
 else
   echo "# FAIL: parameter not known - run with -h for help"
 fi
+
