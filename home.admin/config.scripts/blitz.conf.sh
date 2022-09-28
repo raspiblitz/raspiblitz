@@ -125,17 +125,16 @@ elif [ "$1" = "list-add" ]; then
   listvalues="${!keystr}"
   echo "# old listvalues(${listvalues})"
 
-  if [ "${listvalues}" == "" ]; then
-    # add first list value
-    listvalues="${valuestr}"
-  else
-    # add another list value
-    listvalues="${listvalues},${valuestr}"
-  fi
+  # convert list values to array
+  listvalues=($listvalues)
+  echo "# number of elements(${#listvalues[@]})"
+
+  # add value
+  listvalues+=("${valuestr}")
   echo "# new listvalues(${listvalues})"
   
-  # set updated value
-  sudo sed -i "s/^${keystr}=.*/${keystr}=${listvalues}/g" ${configFile}
+  # set updated value (make sure to be in single quotes)
+  sudo sed -i "s/^${keystr}=.*/${keystr}='${listvalues}'/g" ${configFile}
 
 elif [ "$1" = "list-remove" ]; then
 
