@@ -129,11 +129,17 @@ elif [ "$1" = "list-add" ]; then
   listvalues=($listvalues)
   echo "# number of elements(${#listvalues[@]})"
 
+  for value in "${listvalues[@]}"
+  do
+     echo $value
+  done
+
   # add value
   listvalues+=("${valuestr}")
-  echo "# new listvalues(${listvalues})"
   
   # set updated value (make sure to be in single quotes)
+  listvalues=$( IFS=$' '; echo "${listvalues[*]}" )
+  echo "# new listvalues(${listvalues})"
   sudo sed -i "s/^${keystr}=.*/${keystr}='${listvalues}'/g" ${configFile}
 
 elif [ "$1" = "list-remove" ]; then
