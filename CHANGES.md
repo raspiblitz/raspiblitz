@@ -2,6 +2,7 @@
 
 ## What's new in Version 1.8.1 of RaspiBlitz?
 
+- Update: LNbits 0.9.2 [details](https://github.com/lnbits/lnbits-legend/releases/tag/0.9.2)
 - Info: Run RaspiBlitz on Proxmox [details](https://github.com/rootzoll/raspiblitz/tree/dev/alternative.platforms/Proxmox)
 
 ## What's new in Version 1.8.0 of RaspiBlitz?
