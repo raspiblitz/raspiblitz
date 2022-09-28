@@ -73,7 +73,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # install nodeJS
     /home/admin/config.scripts/bonus.nodejs.sh on
 
-    # install JAM
+    # install
     cd $HOME_DIR || exit 1
 
     sudo -u $USERNAME git clone https://github.com/$REPO
@@ -204,6 +204,8 @@ if [ "$1" = "precheck" ]; then
       echo "# The non-descriptor wallet.dat is loaded in bitcoind."
     fi
   fi
+  echo "# Start the joinmarket ob-watcher.service with '/home/joinmarket/menu.orderbook.sh startOrderBookService'"
+  sudo -u joinmarket /home/joinmarket/menu.orderbook.sh startOrderBookService
   exit 0
 fi
 
@@ -297,7 +299,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     # setting value in raspi blitz config
     sudo sed -i "s/^joinmarketWebUI=.*/joinmarketWebUI=off/g" $RASPIBLITZ_CONF
 
-    echo "OK JAM removed."
+    echo "OK Jam is removed."
   else
     echo "*** JAM NOT INSTALLED ***"
   fi
