@@ -130,6 +130,9 @@ elif [ "$1" = "list-add" ]; then
   echo "# new listvalues(${listvalues})"
   sudo sed -i "s/^${keystr}=.*/${keystr}='${listvalues}'/g" ${configFile}
 
+  # update config value in cache
+  /home/admin/_cache.sh set ${keystr} "${listvalues}"
+
 elif [ "$1" = "list-remove" ]; then
 
   # get parameters
@@ -171,6 +174,9 @@ elif [ "$1" = "list-remove" ]; then
   listvalues=$( IFS=$' '; echo "${newlistvalues[*]}" )
   echo "# new listvalues(${listvalues})"
   sudo sed -i "s/^${keystr}=.*/${keystr}='${listvalues}'/g" ${configFile}
+
+  # update config value in cache
+  /home/admin/_cache.sh set ${keystr} "${listvalues}"
 
 else
   echo "# FAIL: parameter not known - run with -h for help"
