@@ -76,14 +76,6 @@ elif [ "$1" = "delete" ]; then
     configFile="${configfileAlternative}"
   fi
 
-  # check that config file exists
-  raspiblitzConfExists=$(ls ${configFile} 2>/dev/null | grep -c "${configFile}")
-  if [ ${raspiblitzConfExists} -eq 0 ]; then
-    echo "# blitz.conf.sh $@"
-    echo "# FAIL: missing config file: ${configFile}"
-    exit 3
-  fi
-
   # delete value
   sudo sed -i "/^${keystr}=/d" ${configFile} 2>/dev/null
 
@@ -104,14 +96,6 @@ elif [ "$1" = "list-add" ]; then
   # optional another configfile
   if [ "${configfileAlternative}" != "" ]; then
     configFile="${configfileAlternative}"
-  fi
-
-  # check that config file exists
-  raspiblitzConfExists=$(ls ${configFile} 2>/dev/null | grep -c "${configFile}")
-  if [ ${raspiblitzConfExists} -eq 0 ]; then
-    echo "# blitz.conf.sh $@"
-    echo "# FAIL: missing config file: ${configFile}"
-    exit 3
   fi
 
   # check if key needs to be added (prepare new entry)
@@ -182,7 +166,7 @@ elif [ "$1" = "list-remove" ]; then
       newlistvalues+=("${value}")
      fi
   done
-  
+
   # set updated value (make sure to be in single quotes)
   listvalues=$( IFS=$' '; echo "${newlistvalues[*]}" )
   echo "# new listvalues(${listvalues})"
