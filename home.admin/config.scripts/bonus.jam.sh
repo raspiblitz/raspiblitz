@@ -176,8 +176,11 @@ WantedBy=multi-user.target
       echo "# OK - the joinmarket-api.service is enabled, to start manually use: 'sudo systemctl start joinmarket-api'"
     fi
   else
-    echo "*** JAM ALREADY INSTALLED ***"
+    echo "*** JAM IS ALREADY INSTALLED ***"
   fi
+  echo
+  echo "# Start the joinmarket ob-watcher.service"
+  sudo -u joinmarket /home/joinmarket/menu.orderbook.sh startOrderBookService
   echo
   echo "# For the connection details run:"
   echo "/home/admin/config.scripts/bonus.jam.sh menu"
@@ -204,8 +207,6 @@ if [ "$1" = "precheck" ]; then
       echo "# The non-descriptor wallet.dat is loaded in bitcoind."
     fi
   fi
-  echo "# Start the joinmarket ob-watcher.service with '/home/joinmarket/menu.orderbook.sh startOrderBookService'"
-  /home/joinmarket/menu.orderbook.sh startOrderBookService
   echo "# Make sure max_cj_fee_abs and max_cj_fee_rel are set"
   # max_cj_fee_abs between 5000 - 10000 sats
   sed -i "s/#max_cj_fee_abs = x/max_cj_fee_abs = $(shuf -i 5000-10000 -n1)/g" /home/joinmarket/.joinmarket/joinmarket.cfg
