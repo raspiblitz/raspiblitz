@@ -3,7 +3,8 @@
 # command info
 if [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "tool to export macaroons & tls.cert"
- echo "lnd.export.sh [hexstring|scp|http|btcpay] [?key-value]"
+ echo "lnd.export.sh [hexstring|sftp|http|btcpay] [?key-value]"
+
  exit 1
 fi
 
@@ -20,7 +21,7 @@ exportType=$1
 # interactive choose type of export if not set
 if [ "$1" = "" ] || [ $# -eq 0 ]; then
     OPTIONS=()
-    OPTIONS+=(SCP "SSH Download (Commands)")
+    OPTIONS+=(SFTP "SSH Download (Commands)")
     OPTIONS+=(HTTP "Browserdownload (bit risky)")
     OPTIONS+=(HEX "Hex-String (Copy+Paste)")   
     OPTIONS+=(STR "BTCPay Connection String") 
@@ -39,8 +40,8 @@ if [ "$1" = "" ] || [ $# -eq 0 ]; then
         STR)
           exportType='btcpay';
           ;;
-        SCP)
-          exportType='scp';
+        SFTP)
+          exportType='sftp';
           ;;
         HTTP)
           exportType='http';
@@ -142,21 +143,21 @@ elif [ "${exportType}" = "btcpay" ]; then
   echo ""
 
 ###########################
-# SHH / SCP File Download
+# SHH / SFTP File Download
 ###########################
-elif [ "${exportType}" = "scp" ]; then
+elif [ "${exportType}" = "sftp" ]; then
 
   local_ip=$(hostname -I | awk '{print $1}')
   clear
-  echo "###### DOWNLOAD BY SCP ######"
+  echo "###### DOWNLOAD BY SFTP ######"
   echo "Copy, paste and execute these commands in your client terminal to download the files."
   echo "The password needed during download is your Password A."
   echo ""
   echo "Macaroons:"
-  echo "scp bitcoin@${local_ip}:/home/bitcoin/.lnd/data/chain/${network}/${chain}net/\*.macaroon ./"
+  echo "sftp bitcoin@${local_ip}:/home/bitcoin/.lnd/data/chain/${network}/${chain}net/\*.macaroon ./"
   echo ""
   echo "TLS Certificate:"
-  echo "scp bitcoin@${local_ip}:/home/bitcoin/.lnd/tls.cert ./"
+  echo "sftp bitcoin@${local_ip}:/home/bitcoin/.lnd/tls.cert ./"
   echo ""
 
 ###########################

@@ -26,21 +26,21 @@ defaultUploadPath="/mnt/hdd/temp/migration"
 # get local ip
 source <(/home/admin/config.scripts/internet.sh status local)
 
-# SCP download and upload links
-scpDownloadUnix="scp -r 'bitcoin@${localip}:${defaultUploadPath}/raspiblitz-*.tar.gz' ./"
-scpDownloadWin="scp -r bitcoin@${localip}:${defaultUploadPath}/raspiblitz-*.tar.gz ."
-scpUploadUnix="scp -r ./raspiblitz-*.tar.gz bitcoin@${localip}:${defaultUploadPath}"
-scpUploadWin="scp -r ./raspiblitz-*.tar.gz bitcoin@${localip}:${defaultUploadPath}"
+# SFTP download and upload links
+sftpDownloadUnix="sftp -r 'bitcoin@${localip}:${defaultUploadPath}/raspiblitz-*.tar.gz' ./"
+sftpDownloadWin="sftp -r bitcoin@${localip}:${defaultUploadPath}/raspiblitz-*.tar.gz ."
+sftpUploadUnix="sftp -r ./raspiblitz-*.tar.gz bitcoin@${localip}:${defaultUploadPath}"
+sftpUploadWin="sftp -r ./raspiblitz-*.tar.gz bitcoin@${localip}:${defaultUploadPath}"
 
 # output status data & exit
 if [ "$1" = "status" ]; then
   echo "# RASPIBLITZ Data Import & Export"
   echo "localip=\"${localip}\""
   echo "defaultUploadPath=\"${defaultUploadPath}\""
-  echo "scpDownloadUnix=\"${scpDownloadUnix}\""
-  echo "scpUploadUnix=\"${scpUploadUnix}\""
-  echo "scpDownloadWin=\"${scpDownloadWin}\""
-  echo "scpUploadWin=\"${scpUploadWin}\""
+  echo "sftpDownloadUnix=\"${sftpDownloadUnix}\""
+  echo "sftpUploadUnix=\"${sftpUploadUnix}\""
+  echo "sftpDownloadWin=\"${sftpDownloadWin}\""
+  echo "sftpUploadWin=\"${sftpUploadWin}\""
   exit 1
 fi
 
@@ -433,8 +433,8 @@ if [ "$1" = "export" ]; then
   rm ~/.exclude.temp
   rm ~/.include.temp
   
-  echo "scpDownloadUnix=\"${scpDownloadUnix}\""
-  echo "scpDownloadWin=\"${scpDownloadWin}\""  
+  echo "sftpDownloadUnix=\"${sftpDownloadUnix}\""
+  echo "sftpDownloadWin=\"${sftpDownloadWin}\""  
   echo "# OK - Export done"
   exit 0
 fi
@@ -492,9 +492,9 @@ if [ "$1" = "export-gui" ]; then
   echo "*******************************"
   echo 
   echo "On your Linux or MacOS Laptop - RUN IN NEW TERMINAL:"
-  echo "${scpDownloadUnix}"
+  echo "${sftpDownloadUnix}"
   echo "On Windows use command:"
-  echo "${scpDownloadWin}"
+  echo "${sftpDownloadWin}"
   echo ""
   echo "Use password A to authenticate file transfer."
   echo 

@@ -19,9 +19,9 @@ cp ./*.proto ./protobuffs
 
 *NOTE: If LND master branch is already a version ahead .. use the rpc.proto from the version tagged branch.*
 
-Now copy the generated RPC libs per SCP over to your Laptop and add them to the `/home/admin/config.scripts/lndlibs`.
+Now copy the generated RPC libs per SFTP over to your Laptop and add them to the `/home/admin/config.scripts/lndlibs`.
 
-scp -r admin@192.168.X.X:/home/admin/protobuffs ./protobuffs
+sftp -r admin@192.168.X.X:/home/admin/protobuffs ./protobuffs
 
 Make sure the first lines (ignore comments) of the `lightning_pb2_grpc.py` look like the following for python3 compatibility:
 ```
