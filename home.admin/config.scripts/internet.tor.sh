@@ -7,8 +7,8 @@
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
- echo "small config script to switch TOR on or off"
- echo "internet.tor.sh [status|on|off|prepare|btcconf-on|btcconf-off|lndconf-on]"
+ echo "script to switch TOR on or off"
+ echo "internet.tor.sh [status|on|off|prepare|btcconf-on|btcconf-off|lndconf-on|update]"
  exit 1
 fi
 
@@ -44,6 +44,7 @@ fi
 # function: install keys & sources
 prepareTorSources()
 {
+
     # Prepare for TOR service
     echo "*** INSTALL TOR REPO ***"
     echo ""
@@ -53,10 +54,16 @@ prepareTorSources()
     echo ""
 
     echo "*** Adding KEYS deb.torproject.org ***"
+
+    # fix for v1.6 base image https://github.com/rootzoll/raspiblitz/issues/1906#issuecomment-755299759
+    # force update keys
+    wget -qO- https://deb.torproject.org/torproject.org/A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89.asc | sudo gpg --import
+    sudo gpg --export A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89 | sudo apt-key add -
+
     torKeyAvailable=$(sudo gpg --list-keys | grep -c "A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89")
     echo "torKeyAvailable=${torKeyAvailable}"
     if [ ${torKeyAvailable} -eq 0 ]; then
-      curl https://deb.torproject.org/torproject.org/A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89.asc | sudo gpg --import
+      wget -qO- https://deb.torproject.org/torproject.org/A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89.asc | sudo gpg --import
       sudo gpg --export A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89 | sudo apt-key add -
       echo "OK"
     else
@@ -193,12 +200,6 @@ if [ -f "/mnt/hdd/raspiblitz.conf" ]; then
   source /mnt/hdd/raspiblitz.conf
 fi
 
-# make sure the network was set (by sourcing raspiblitz.conf)
-if [ ${#network} -eq 0 ]; then
- echo "FAIL - unknwon network due to missing /mnt/hdd/raspiblitz.conf"
- exit 1
-fi
-
 # if started with status
 if [ "$1" = "status" ]; then
   # is Tor activated
@@ -239,15 +240,23 @@ fi
 # make sure /etc/tor exists
 sudo mkdir /etc/tor 2>/dev/null
 
-# stop services (if running)
-echo "making sure services are not running"
-sudo systemctl stop lnd 2>/dev/null
-sudo systemctl stop ${network}d 2>/dev/null
-sudo systemctl stop tor@default 2>/dev/null
+if [ "$1" != "update" ]; then 
+  # stop services (if running)
+  echo "making sure services are not running"
+  sudo systemctl stop lnd 2>/dev/null
+  sudo systemctl stop ${network}d 2>/dev/null
+  sudo systemctl stop tor@default 2>/dev/null
+fi
 
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "switching the TOR ON"
+
+  # make sure the network was set (by sourcing raspiblitz.conf)
+  if [ ${#network} -eq 0 ]; then
+    echo "FAIL - unknwon network due to missing /mnt/hdd/raspiblitz.conf"
+    exit 1
+  fi
 
   # setting value in raspi blitz config
   sudo sed -i "s/^runBehindTor=.*/runBehindTor=on/g" /mnt/hdd/raspiblitz.conf
@@ -274,11 +283,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     prepareTorSources
 
     echo "*** Updating System ***"
-    sudo apt-get update -y
+    sudo apt update -y
     echo ""
 
     echo "*** Install Tor & NYX ***"
-    sudo apt install tor tor-arm -y
+    sudo apt install tor tor-arm torsocks -y
 
     echo ""
     echo "*** Tor Config ***"
@@ -355,6 +364,8 @@ EOF
     # DO NOT EDIT! This file is generate by raspiblitz and will be overwritten
 [Service]
 ReadWriteDirectories=-/mnt/hdd/tor
+[Unit]
+After=network.target nss-lookup.target mnt-hdd.mount
 EOF
 
   else
@@ -397,6 +408,15 @@ EOF
     # specter makes only sense to be served over https
     /home/admin/config.scripts/internet.hiddenservice.sh cryptoadvance-specter 443 25441
   fi
+  if [ "${sphinxrelay}" = "on" ]; then
+    /home/admin/config.scripts/internet.hiddenservice.sh sphinxrelay 80 3302 443 3303
+    toraddress=$(sudo cat /mnt/hdd/tor/sphinxrelay/hostname 2>/dev/null)
+    sudo -u sphinxrelay bash -c "echo '${toraddress}' > /home/sphinxrelay/sphinx-relay/dist/toraddress.txt"
+  fi
+
+    # get TOR address and store it readable for sphixrelay user
+    toraddress=$(sudo cat /mnt/hdd/tor/sphinxrelay/hostname 2>/dev/null)
+    sudo -u sphinxrelay bash -c "echo '${toraddress}' > /home/sphinxrelay/sphinx-relay/dist/toraddress.txt"
 
   echo "Setup logrotate"
   # add logrotate config for modified Tor dir on ext. disk
@@ -448,6 +468,8 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   sudo sed -i '/\[Tor\]*/d' /mnt/hdd/lnd/lnd.conf
   sudo sed -i '/^tor.password=*/d' /mnt/hdd/lnd/lnd.conf
 
+  sudo /home/admin/config.scripts/internet.sh update-publicip
+
   sudo systemctl enable lnd
   echo "OK"
   echo ""
@@ -463,6 +485,32 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   fi
 
   echo "needs reboot to activate new setting"
+  exit 0
+fi
+
+# update
+if [ "$1" = "update" ]; then
+  # as in https://2019.www.torproject.org/docs/debian#source
+  prepareTorSources
+  echo "# Install the dependencies"
+  sudo apt update
+  sudo apt install -y build-essential fakeroot devscripts
+  sudo apt build-dep -y tor deb.torproject.org-keyring
+  rm -rf /home/admin/download/debian-packages
+  mkdir -p /home/admin/download/debian-packages
+  cd /home/admin/download/debian-packages
+  echo "# Building Tor from the source code ..."
+  apt source tor
+  cd tor-*
+  debuild -rfakeroot -uc -us
+  cd ..
+  echo "# Stopping the tor.service before updating"
+  sudo systemctl stop tor
+  echo "# Update ..."
+  sudo dpkg -i tor_*.deb
+  echo "# Starting the tor.service "
+  sudo systemctl start tor
+  echo "# Installed $(tor --version)"
   exit 0
 fi
 

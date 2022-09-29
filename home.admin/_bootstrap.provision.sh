@@ -26,6 +26,12 @@ if [ ${configExists} -eq 0 ]; then
   exit 1
 fi
 
+# check that default parameter exist in config
+parameterExists=$(cat /mnt/hdd/raspiblitz.conf | grep -c "lndExtraParameter=")
+if [ ${parameterExists} -eq 0 ]; then
+  echo "lndExtraParameter=''" >> ${configFile}
+fi
+
 # check if file system was expanded to full capacity and sd card is bigger than 8GB
 # see: https://github.com/rootzoll/raspiblitz/issues/936
 echo "CHECK IF SD CARD NEEDS EXPANSION" >> ${logFile}
@@ -126,13 +132,17 @@ sudo sed -i "s/^alias=.*/alias=${hostname}/g" /home/admin/assets/lnd.${network}.
 # link old SSH PubKeys
 # so that client ssh_known_hosts is not complaining after update
 if [ -d "/mnt/hdd/ssh" ]; then
-  echo "Old SSH PubKey exists on HDD > just linking them" >> ${logFile}
+  echo "Old SSH PubKey exists on HDD > copy them HDD to SD card for next start" >> ${logFile}
+  sudo cp -r /mnt/hdd/ssh/* /etc/ssh/ >> ${logFile} 2>&1
 else
-  echo "No SSH PubKey exists on HDD > copy from SD card and linking them" >> ${logFile}
+  echo "No SSH PubKey exists on HDD > copy from SD card to HDD as backup" >> ${logFile}
   sudo cp -r /etc/ssh /mnt/hdd/ssh >> ${logFile} 2>&1
 fi
-sudo rm -rf /etc/ssh >> ${logFile} 2>&1
-sudo ln -s /mnt/hdd/ssh /etc/ssh >> ${logFile} 2>&1
+# just copy - dont link anymore so that sshd will also start without HDD connected
+# see: https://github.com/rootzoll/raspiblitz/issues/1798
+#sudo rm -rf /etc/ssh >> ${logFile} 2>&1
+#sudo ln -s /mnt/hdd/ssh /etc/ssh >> ${logFile} 2>&1
+#sudo /home/admin/config.scripts/blitz.systemd.sh update-sshd >> ${logFile} 2>&1
 
 # optimze if RAM >1GB
 kbSizeRAM=$(cat /proc/meminfo | grep "MemTotal" | sed 's/[^0-9]*//g')
@@ -140,6 +150,10 @@ if [ ${kbSizeRAM} -gt 1500000 ]; then
   echo "Detected RAM >1GB --> optimizing ${network}.conf"
   sudo sed -i "s/^dbcache=.*/dbcache=1024/g" /mnt/hdd/${network}/${network}.conf
   sudo sed -i "s/^maxmempool=.*/maxmempool=256/g" /mnt/hdd/${network}/${network}.conf
+fi
+if [ ${kbSizeRAM} -gt 3500000 ]; then
+  echo "Detected RAM >3GB --> optimizing ${network}.conf"
+  sudo sed -i "s/^maxmempool=.*/maxmempool=512/g" /mnt/hdd/${network}/${network}.conf
 fi
 
 # link and copy HDD content into new OS on sd card
@@ -222,7 +236,7 @@ fi
 # TOR
 if [ "${runBehindTor}" = "on" ]; then
     echo "Provisioning TOR - run config script" >> ${logFile}
-    sudo sed -i "s/^message=.*/message='Setup TOR (takes time)'/g" ${infoFile}
+    sudo sed -i "s/^message=.*/message='Setup Tor (takes time)'/g" ${infoFile}
     sudo /home/admin/config.scripts/internet.tor.sh on >> ${logFile} 2>&1
 else
     echo "Provisioning TOR - keep default" >> ${logFile}
@@ -464,10 +478,10 @@ else
   echo "Provisioning ThunderHub - keep default" >> ${logFile}
 fi
 
-# mempool explorer
+# mempool space
 if [ "${mempoolExplorer}" = "on" ]; then
-  echo "Provisioning MempoolExplorer - run config script" >> ${logFile}
-  sudo sed -i "s/^message=.*/message='Setup Mempool Explorer'/g" ${infoFile}
+  echo "Provisioning MempoolSpace - run config script" >> ${logFile}
+  sudo sed -i "s/^message=.*/message='Setup Mempool Space'/g" ${infoFile}
   sudo -u admin /home/admin/config.scripts/bonus.mempool.sh on >> ${logFile} 2>&1
 else
   echo "Provisioning Mempool Explorer - keep default" >> ${logFile}
@@ -491,6 +505,15 @@ else
   echo "Provisioning kindle-display - keep default" >> ${logFile}
 fi
 
+# pyblock
+if [ "${pyblock}" = "on" ]; then
+  echo "Provisioning pyblock - run config script" >> ${logFile}
+  sudo sed -i "s/^message=.*/message='Setup pyblock'/g" ${infoFile}
+  sudo -u admin /home/admin/config.scripts/bonus.pyblock.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning pyblock - keep default" >> ${logFile}
+fi
+
 # stacking-sats-kraken
 if [ "${stackingSatsKraken}" = "on" ]; then
   echo "Provisioning Stacking Sats Kraken - run config script" >> ${logFile}
@@ -498,6 +521,33 @@ if [ "${stackingSatsKraken}" = "on" ]; then
   sudo -u admin /home/admin/config.scripts/bonus.stacking-sats-kraken.sh on >> ${logFile} 2>&1
 else
   echo "Provisioning Stacking Sats Kraken - keep default" >> ${logFile}
+fi
+
+# pool
+if [ "${pool}" = "on" ]; then
+  echo "Provisioning Pool - run config script" >> ${logFile}
+  sudo sed -i "s/^message=.*/message='Setup Pool'/g" ${infoFile}
+  sudo -u admin /home/admin/config.scripts/bonus.pool.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning Pool - keep default" >> ${logFile}
+fi
+
+# sphinxrelay
+if [ "${sphinxrelay}" = "on" ]; then
+  echo "Sphinx-Relay - run config script" >> ${logFile}
+  sudo sed -i "s/^message=.*/message='Setup Sphinx-Relay'/g" ${infoFile}
+  sudo -u admin /home/admin/config.scripts/bonus.sphinxrelay.sh on >> ${logFile} 2>&1
+else
+  echo "Sphinx-Relay - keep default" >> ${logFile}
+fi
+
+# circuitbreaker
+if [ "${circuitbreaker}" = "on" ]; then
+  echo "Provisioning CircuitBreaker - run config script" >> ${logFile}
+  sudo sed -i "s/^message=.*/message='Setup CircuitBreaker'/g" ${infoFile}
+  sudo -u admin /home/admin/config.scripts/bonus.circuitbreaker.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning CircuitBreaker - keep default" >> ${logFile}
 fi
 
 # custom install script from user
@@ -581,7 +631,11 @@ source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
 # update /etc/fstab
 echo "datadisk --> ${datadisk}" >> ${logFile}
 echo "datapartition --> ${datapartition}" >> ${logFile}
-sudo /home/admin/config.scripts/blitz.datadrive.sh fstab ${datapartition} >> ${logFile}
+if [ ${isBTRFS} -eq 0 ]; then
+  sudo /home/admin/config.scripts/blitz.datadrive.sh fstab ${datapartition} >> ${logFile}
+else
+  sudo /home/admin/config.scripts/blitz.datadrive.sh fstab ${datadisk} >> ${logFile}
+fi
 
 echo "DONE - Give raspi some cool off time after hard building .... 5 secs sleep" >> ${logFile}
 sleep 5

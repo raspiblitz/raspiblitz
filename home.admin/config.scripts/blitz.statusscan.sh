@@ -214,6 +214,10 @@ if [ ${lndRunning} -eq 1 ]; then
       echo "walletLocked=0"
     fi
 
+    # number of lnd peers
+    lndPeers=$(echo ${lndinfo} | jq -r '.num_peers')
+    echo "lndPeers=${lndPeers}"
+
     # synced to chain
     syncedToChain=$(echo ${lndinfo} | jq -r '.synced_to_chain' | grep -c 'true')
     echo "syncedToChain=${syncedToChain}"

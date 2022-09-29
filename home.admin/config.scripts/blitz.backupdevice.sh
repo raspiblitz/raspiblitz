@@ -34,14 +34,17 @@ if [ "$1" = "status" ]; then
 
   else
     echo "backupdevice=0"
+
+    # get info on possible already existing BTRFS RAID1 usb drive
+    source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
     
     # get all the devices that are not mounted and possible candidates
     drivecounter=0
     for disk in $(lsblk -o NAME,TYPE | grep "disk" | awk '$1=$1' | cut -d " " -f 1)
     do
       devMounted=$(lsblk -o MOUNTPOINT,NAME | grep "$disk" | grep -c "^/")
-      # is raid candidate when not mounted and not the data drive cadidate (hdd/ssd)
-      if [ ${devMounted} -eq 0 ] && [ "${disk}" != "${hdd}" ]; then
+      # is raid candidate when: not mounted & not the data drive cadidate (hdd/ssd) & not BTRFS RAID
+      if [ ${devMounted} -eq 0 ] && [ "${disk}" != "${hdd}" ] && [ "${disk}" != "${raidUsbDev}" ]; then
         sizeBytes=$(lsblk -o NAME,SIZE -b | grep "^${disk}" | awk '$1=$1' | cut -d " " -f 2)
         sizeGigaBytes=$(echo "scale=0; ${sizeBytes}/1024/1024/1024" | bc -l)
         vedorname=$(lsblk -o NAME,VENDOR | grep "^${disk}" | awk '$1=$1' | cut -d " " -f 2)

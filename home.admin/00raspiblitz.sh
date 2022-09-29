@@ -33,6 +33,10 @@ if [ ${isMounted} -eq 0 ] && [ ${#hddCandidate} -eq 0 ]; then
       echo "a VDI with a presynced blockchain to speed up setup. If you dont have 900GB"
       echo "space on your laptop you can store the VDI file on an external drive."
       echo "***********************************************************"
+    else
+      echo "If HDD is connected - please report the result of the following command:"
+      echo "sudo /home/admin/config.scripts/blitz.datadrive.sh status"
+      echo "***********************************************************"
     fi
     exit
 fi
@@ -64,6 +68,14 @@ if [ "${state}" = "copysource" ]; then
   echo "a) continue/check progress with command: sourcemode"
   echo "b) return to normal mode with command: restart"
   echo "***********************************************************"
+  exit
+fi
+
+# check if copy blockchain over LAN to this RaspiBlitz was running
+source <(/home/admin/config.scripts/blitz.copyblockchain.sh status)
+if [ "${copyInProgress}" = "1" ]; then
+  echo "Detected interrupted COPY blochain process ..."
+  /home/admin/50copyHDD.sh
   exit
 fi
 
@@ -228,6 +240,7 @@ How do you want to continue?
               echo "please wait ... update to next screen can be slow"
             else
               /home/admin/80scanLND.sh lightning-error
+              sudo rm /home/admin/systemd.lightning.log
               echo "(exit after too much restarts/unlocks - restart to try again)"
               exit 0
             fi
@@ -408,6 +421,17 @@ case $CHOICE in
             ;; 
         MIGRATION)
             sudo /home/admin/config.scripts/blitz.migration.sh "import-gui"
+            # on error clean & repeat
+            if [ "$?" = "1" ]; then
+              echo
+              echo "# clean and unmount for next try"
+              sudo rm -f ${defaultZipPath}/raspiblitz-*.tar.gz 2>/dev/null
+              sudo umount /mnt/hdd 2>/dev/null
+              sudo umount /mnt/storage 2>/dev/null
+              sudo umount /mnt/temp 2>/dev/null
+              sleep 2
+              /home/admin/00raspiblitz.sh
+            fi
             exit 0
             ;;
         CONTINUE)

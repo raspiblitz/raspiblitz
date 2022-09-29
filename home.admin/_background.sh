@@ -177,6 +177,21 @@ do
   fi
 
   ###############################
+  # Blockchain Sync Monitor
+  ###############################
+
+  # check every 1min
+  recheckSync=$(($counter % 60))
+  if [ ${recheckSync} -eq 1 ]; then
+    source <(sudo -u admin /home/admin/config.scripts/network.monitor.sh peer-status)
+    echo "Blockchain Sync Monitoring: peers=${peers}"
+    if [ "${peers}" == "0" ]; then
+      echo "Blockchain Sync Monitoring: ZERO PEERS DETECTED .. doing out-of-band kickstart"
+      sudo /home/admin/config.scripts/network.monitor.sh peer-kickstart
+    fi
+  fi
+
+  ###############################
   # BlitzTUI Monitoring
   ###############################
 
@@ -376,11 +391,8 @@ do
   if [ ${updateDynDomain} -eq 1 ]; then
     echo "*** UPDATE DYNAMIC DOMAIN ***"
     # check if update URL for dyn Domain is set
-    if [ ${#dynUpdateUrl} -gt 6 ]; then
-      # calling the update url
-      echo "calling: ${dynUpdateUrl}"
-      echo "to update domain: ${dynDomain}"
-      curl -s --connect-timeout 6 ${dynUpdateUrl} 2>/dev/null
+    if [ ${#dynUpdateUrl} -gt 0 ]; then
+      /home/admin/config.scripts/internet.dyndomain.sh update
     else
       echo "'dynUpdateUrl' not set in ${configFile}"
     fi

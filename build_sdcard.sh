@@ -369,6 +369,9 @@ sudo apt install -y htop git curl bash-completion vim jq dphys-swapfile bsdmainu
 # installs bandwidth monitoring for future statistics
 sudo apt install -y vnstat
 
+# prepare for format data drive
+sudo apt install -y parted dosfstools
+
 # prepare for BTRFS data drive raid
 sudo apt install -y btrfs-progs btrfs-tools
 
@@ -933,7 +936,7 @@ if [ "${lcdInstalled}" == "true" ]; then
 else
    echo "Your SD Card Image for RaspiBlitz is ready."
 fi
-echo "Take the chance & look thru the output above if you can spot any errror."
+echo "Take the chance & look thru the output above if you can spot any error."
 echo ""
 if [ "${lcdInstalled}" == "true" ]; then
    echo "After final reboot - your SD Card Image is ready."

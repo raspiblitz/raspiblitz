@@ -1,15 +1,3 @@
-echo ""
-echo "*** Adding: raspibolt_67_additional-scripts.md"
-echo "Creating the command lnbalance as well as lnchannels which will give you a nicer output"
-cd
-cd /home/admin/assets
-chmod +x lnbalance.sh
-chmod +x lnchannels.sh
-chmod +x lnfwdreport.sh
-sudo cp lnbalance.sh /usr/local/bin/lnbalance
-sudo cp lnchannels.sh /usr/local/bin/lnchannels
-sudo cp lnfwdreport.sh /usr/local/bin/lnfwdreport
-echo "OK"
 
 mkdir /home/admin/tmpScriptDL
 cd /home/admin/tmpScriptDL

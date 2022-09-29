@@ -13,11 +13,11 @@ release()
 
 - Download the new SD card image to your laptop:
   https://github.com/rootzoll/raspiblitz
-- Flash that SD card image to a new SD card
+- Flash that SD card image to a new SD card (best)
+  or override old SD card after shutdown (fallback) 
 - Choose 'Start Update' below.
 
 No need to close channels or download blockchain again.
-
 Do you want to start the Update now?
       " 16 62
   if [ $? -eq 0 ]; then
@@ -82,8 +82,8 @@ patchNotice()
 It means it will sync the program code with the
 GitHub repo for your version branch v${codeVersion}.
 
-This can be usefull if there are important updates 
-inbetween releases to fix severe bugs. It can also
+This can be useful if there are important updates 
+in between releases to fix severe bugs. It can also
 be used to sync your own code with your RaspiBlitz 
 if you are developing on your own GitHub Repo.
 
@@ -294,6 +294,21 @@ fi
 if [ "${rtlWebinterface}" == "on" ]; then
   OPTIONS+=(RTL "Update RTL")
 fi
+if [ "${pyblock}" == "on" ]; then
+  OPTIONS+=(PYBLOCK "Update PyBLOCK")
+fi
+if [ "${pool}" == "on" ]; then
+  OPTIONS+=(POOL "Update Lightning Pool")
+fi
+if [ "${loop}" == "on" ]; then
+  OPTIONS+=(LOOP "Update Lightning Loop")
+fi
+if [ "${runBehindTor}" == "on" ]; then
+  OPTIONS+=(TOR "Update Tor from the source code")
+fi
+if [ "${sphinxrelay}" == "on" ]; then
+  OPTIONS+=(SPHINX "Update Sphinx Server Relay")
+fi
 
 CHOICE=$(whiptail --clear --title "Update Options" --menu "" 13 55 6 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
@@ -320,5 +335,20 @@ case $CHOICE in
     ;;
   RTL)
     /home/admin/config.scripts/bonus.rtl.sh update
+    ;;
+  SPHINX)
+    /home/admin/config.scripts/bonus.sphinxrelay.sh update
+    ;;
+  PYBLOCK)
+    /home/admin/config.scripts/bonus.pyblock.sh update
+    ;;
+  POOL)
+    /home/admin/config.scripts/bonus.pool.sh update  
+    ;;
+  LOOP)
+    /home/admin/config.scripts/bonus.loop.sh update  
+    ;;
+  TOR)
+    sudo /home/admin/config.scripts/internet.tor.sh update  
     ;;
 esac

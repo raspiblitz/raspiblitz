@@ -117,6 +117,26 @@ function status() {
   sudo -u pi /home/admin/00infoLCD.sh --pause 0
 }
 
+# command: lnbalance
+# show balance report
+function balance() {
+  echo "*** YOUR SATOSHI BALANCES ***"
+  /home/admin/config.scripts/lnd.balance.sh
+}
+
+# command: lnchannels
+# show channel listing
+function channels() {
+  echo "*** YOUR LIGHTNING CHANNELS ***"
+  /home/admin/config.scripts/lnd.channels.sh
+}
+
+# command: lnfwdreport
+# show forwarding report
+function fwdreport() {
+  /home/admin/config.scripts/lnd.fwdreport.sh -menu
+}
+
 # command: bos
 # switch to the bos user for Balance of Satoshis
 function bos() {
@@ -129,12 +149,25 @@ function bos() {
   fi
 }
 
+# command: pyblock
+# switch to the pyblock user for PyBLOCK
+function pyblock() {
+  if [ $(grep -c "pyblock=on" < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
+    echo "# switching to the pyblock user with the command: 'sudo su - pyblock'"
+    sudo su - pyblock
+  else
+    echo "PyBlock is not installed - to install run:"
+    echo "/home/admin/config.scripts/bonus.pyblock.sh on"
+  fi
+}
+
 # command: jm
 # switch to the joinmarket user for the JoininBox menu
 function jm() {
   if [ $(grep -c "joinmarket=on"  < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
     echo "# switching to the joinmarket user with the command: 'sudo su - joinmarket'"
     sudo su - joinmarket
+    echo "# use command 'raspiblitz' to return to menu"
   else
     echo "JoinMarket is not installed - to install run:"
     echo "sudo /home/admin/config.scripts/bonus.joinmarket.sh on"
@@ -146,8 +179,8 @@ function jm() {
 function faraday() {
   if [ $(grep -c "faraday=on"  < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
     echo "# switching to the faraday user with the command: 'sudo su - faraday'"
-    echo "# when done use command 'exit' to return to admin user"
-    echo "# see faraday options with --> frcli -help"
+    echo "# use command 'exit' and then 'raspiblitz' to return to menu"
+    echo "# use command 'frcli --help' now to get more info"
     sudo su - faraday
   else
     echo "Faraday is not installed - to install run:"
@@ -160,10 +193,26 @@ function faraday() {
 function loop() {
   if [ $(grep -c "loop=on"  < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
     echo "# switching to the loop user with the command: 'sudo su - loop'"
+    echo "# use command 'exit' and then 'raspiblitz' to return to menu"
+    echo "# use command 'loop --help' now to get more info"
     sudo su - loop
   else
     echo "Lightning Loop is not installed - to install run:"
     echo "/home/admin/config.scripts/bonus.loop.sh on"
+  fi
+}
+
+# command: pool
+# switch to the pool user for the Pool Service
+function pool() {
+  if [ $(grep -c "pool=on"  < /mnt/hdd/raspiblitz.conf) -gt 0 ]; then
+    echo "# switching to the pool user with the command: 'sudo su - pool'"
+    echo "# use command 'exit' and then 'raspiblitz' to return to menu"
+    echo "# use command 'pool --help' now to get more info"
+    sudo su - pool
+  else
+    echo "Pool is not installed - to install run:"
+    echo "/home/admin/config.scripts/bonus.pool.sh on"
   fi
 }
 

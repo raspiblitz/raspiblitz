@@ -10,7 +10,7 @@ fi
 
 # check parameter
 if [ "${1}" != "log" ]; then
-  echo "# FAIL: unkown parameter"
+  echo "# FAIL: unknown parameter"
 fi
 
 # writing log file entry

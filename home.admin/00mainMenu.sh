@@ -38,7 +38,7 @@ confirmation()
 }
 
 # get the local network IP to be displayed on the LCD
-localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+source <(/home/admin/config.scripts/internet.sh status local)
 
 # BASIC MENU INFO
 HEIGHT=17
@@ -101,11 +101,20 @@ fi
 if [ "${bos}" == "on" ]; then
   OPTIONS+=(BOS "Balance of Satoshis")
 fi
+if [ "${pyblock}" == "on" ]; then
+  OPTIONS+=(PYBLOCK "PyBlock")
+fi
 if [ "${thunderhub}" == "on" ]; then
   OPTIONS+=(THUB "ThunderHub")
 fi
 if [ "${zerotier}" == "on" ]; then
   OPTIONS+=(ZEROTIER "ZeroTier")
+fi
+if [ "${pool}" == "on" ]; then
+  OPTIONS+=(POOL "Lightning Pool")
+fi
+if [ "${sphinxrelay}" == "on" ]; then
+  OPTIONS+=(SPHINX "Sphinx Chat Relay")
 fi
 
 # Basic Options
@@ -237,11 +246,20 @@ case $CHOICE in
         BOS)
             sudo /home/admin/config.scripts/bonus.bos.sh menu
             ;;
+		    PYBLOCK)
+            sudo /home/admin/config.scripts/bonus.pyblock.sh menu
+            ;;
         THUB)
             sudo /home/admin/config.scripts/bonus.thunderhub.sh menu
             ;;
         ZEROTIER)
             sudo /home/admin/config.scripts/bonus.zerotier.sh menu
+            ;;
+        POOL)
+            sudo /home/admin/config.scripts/bonus.pool.sh menu
+            ;;
+        SPHINX)
+            sudo /home/admin/config.scripts/bonus.sphinxrelay.sh menu
             ;;
         SUBSCRIBE)
             /home/admin/config.scripts/blitz.subscriptions.py
@@ -249,22 +267,28 @@ case $CHOICE in
         lnbalance)
             clear
             echo "*** YOUR SATOSHI BALANCES ***"
-            lnbalance ${network}
+            /home/admin/config.scripts/lnd.balance.sh ${network}
             echo "Press ENTER to return to main menu."
             read key
             ;;
         lnchannels)
             clear
             echo "*** YOUR LIGHTNING CHANNELS ***"
-            lnchannels ${network}
+            echo ""
+            echo "Capacity -> total sats in the channel (their side + your side)"
+            echo "Commit-Fee -> the fee that's charged if either side of the channel closes"
+            echo "Balance-Local -> sats on your side of the channel (outbound liquidity)"
+            echo "Balance-Remote -> sats on their side of the channel (inbound liquidity)"
+            echo "Fee-Base -> fixed fee (in millisatoshis) per forwarding on channel"
+            echo "Fee-PerMil -> amount based fee (millisatoshis per 1 satoshi) on forwarding"
+            /home/admin/config.scripts/lnd.channels.sh ${network}
             echo "Press ENTER to return to main menu."
             read key
             ;;
         lnfwdreport)
-            ./XXlnfwdreport.sh
+            /home/admin/config.scripts/lnd.fwdreport.sh -menu
             echo "Press ENTER to return to main menu."
             read key
-            ./00mainMenu.sh
             ;;
         CONNECT)
             /home/admin/BBconnectPeer.sh
@@ -364,6 +388,7 @@ case $CHOICE in
             echo "* RaspiBlitz Commandline"
             echo "* Here be dragons .. have fun :)"
             echo "***********************************"
+	    echo "Bitcoin command line options: bitcoin-cli help"
             echo "LND command line options: lncli -h"
             echo "Back to main menu use command: raspiblitz"
             echo

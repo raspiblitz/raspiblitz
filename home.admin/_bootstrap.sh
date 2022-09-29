@@ -57,29 +57,6 @@ function wait_for_local_network() {
   done
 }
 
-# wait until raspberry pi gets a local IP
-function wait_for_internet() {
-  online=0
-  until [ ${online} -eq 1 ]
-  do
-    # check for internet connection
-    online=$(ping 1.0.0.1 -c 1 -W 2 | grep -c '1 received')
-    if [ ${online} -eq 0 ]; then
-      # re-test with other server
-      online=$(ping 8.8.8.8 -c 1 -W 2 | grep -c '1 received')
-    fi
-    if [ ${online} -eq 0 ]; then
-      # re-test with other server
-      online=$(ping 208.67.222.222 -c 1 -W 2 | grep -c '1 received')
-    fi
-    if [ ${online} -eq 0 ]; then
-      sed -i "s/^state=.*/state=noInternet/g" ${infoFile}
-      sed -i "s/^message=.*/message='Network OK but NO Internet'/g" ${infoFile}
-    fi
-    sleep 1
-  done
-}
-
 echo "Writing logs to: ${logFile}"
 echo "" > $logFile
 echo "***********************************************" >> $logFile
@@ -275,7 +252,7 @@ fi
 # SSH SERVER CERTS RESET
 # if a file called 'ssh.reset' gets
 # placed onto the boot part of
-# the sd card - switch to hdmi
+# the sd card - delete old ssh data
 ################################
 
 sshReset=$(sudo ls /boot/ssh.reset* 2>/dev/null | grep -c reset)
@@ -345,7 +322,11 @@ if [ ${isMounted} -eq 0 ]; then
 
   # temp mount the HDD
   echo "Temp mounting data drive ($hddCandidate)" >> $logFile
-  source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddPartitionCandidate})
+  if [ "${hddFormat}" != "btrfs" ]; then
+    source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddPartitionCandidate})
+  else
+    source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount ${hddCandidate})
+  fi
   if [ ${#error} -gt 0 ]; then
     echo "Failed to tempmount the HDD .. awaiting user setup." >> $logFile
     sed -i "s/^state=.*/state=waitsetup/g" ${infoFile}
@@ -409,12 +390,11 @@ if [ ${isMounted} -eq 0 ]; then
     echo "rebooting" >> $logFile
     # set flag that system is freshly recovered and needs setup dialogs
     echo "state=recovered" >> /home/admin/raspiblitz.recover.info
+    echo "shutdown in 1min" >> $logFile
     # save log file for inspection before reboot
     cp $logFile /home/admin/raspiblitz.recover.log
-    echo "shutdown in 1min" >> $logFile
     sync
-
-    sudo shutdown -r -F +1
+    sudo shutdown -r -F -t 60
     exit 0
   else 
     echo "OK - No config file found: ${configFile}" >> $logFile
@@ -475,9 +455,28 @@ if [ ${configExists} -eq 1 ]; then
   # load values
   echo "load and update publicIP" >> $logFile
   source ${configFile}
+
+  # if not running TOR before starting LND internet connection with a valid public IP is needed
+  waitForPublicIP=1
+  if [ "${runBehindTor}" = "on" ] || [ "${runBehindTor}" = "1" ]; then
+    echo "# no need to wait for internet - public Tor address already known" >> $logFile
+    waitForPublicIP=0
+  fi
+  while [ ${waitForPublicIP} -eq 1 ]
+    do
+      source <(/home/admin/config.scripts/internet.sh status)
+      if [ ${online} -eq 0 ]; then
+        echo "# (loop) waiting for internet ... " >> $logFile
+        sed -i "s/^state=.*/state=nointernet/g" ${infoFile}
+        sed -i "s/^message=.*/message='Waiting for Internet'/g" ${infoFile}
+        sleep 4
+      else
+        echo "# OK internet detected ... continue" >> $logFile
+        waitForPublicIP=0
+      fi
+    done
   
   # update public IP on boot - set to domain is available
-  sleep 3  
   /home/admin/config.scripts/internet.sh update-publicip ${lndAddress} 
 
 fi
@@ -487,6 +486,14 @@ fi
 # https://github.com/rootzoll/raspiblitz/issues/239#issuecomment-450887567
 #################################
 sudo chown bitcoin:bitcoin -R /mnt/hdd/bitcoin 2>/dev/null
+
+
+#################################
+# FIX BLOCKING FILES (just in case)
+# https://github.com/rootzoll/raspiblitz/issues/1901#issue-774279088
+# https://github.com/rootzoll/raspiblitz/issues/1836#issue-755342375
+sudo rm -f /home/bitcoin/.bitcoin/bitcoind.pid 2>/dev/null
+sudo rm -f /mnt/hdd/bitcoin/.lock 2>/dev/null
 
 
 #################################
@@ -557,7 +564,7 @@ if [ ${loaded} -gt 0 ]; then
 fi
 
 ################################
-# DELETE LOG FILES
+# DELETE LOG & LOCK FILES
 ################################
 # LND and Blockchain Errors will be still in systemd journals
 
@@ -565,6 +572,8 @@ fi
 sudo rm /mnt/hdd/${network}/debug.log 2>/dev/null
 # /mnt/hdd/lnd/logs/bitcoin/mainnet/lnd.log
 sudo rm /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2>/dev/null
+# https://github.com/rootzoll/raspiblitz/issues/1700
+sudo rm /mnt/storage/app-storage/electrs/db/mainnet/LOCK 2>/dev/null
 
 #####################################
 # CLEAN HDD TEMP

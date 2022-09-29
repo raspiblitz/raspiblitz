@@ -27,7 +27,7 @@ You will need to connect a virtual data drive to the RaspiBlitzVM ... todo so:
 - make sure VM is stopped: use command `off` when within VM or from outside `vagrant halt`
 - no open the VirtualBox Manager GUI and use `change` on the RaspiBlitzVM
 - Go to the `mass storage` section and add a second disc as `primary slave` to the already existing controller
-- create a new dynamic VDI with around 900GB .. choose as storage path for the VDI an external drive if you dont have that much space on your laptop.
+- Use the [torrent-downloaded VDI](https://raw.githubusercontent.com/rootzoll/raspiblitz/dev/alternative.platforms/amd64/raspiblitzHDD.vdi.torrent) file or create a new dynamic VDI with around 900GB .. choose as storage path for the VDI an external drive if you dont have that much space on your laptop.
 - now start the VM again with `vagrant up` and `vagrangt ssh` to run thru the setup process
 
 **Note**

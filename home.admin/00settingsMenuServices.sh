@@ -19,7 +19,10 @@ if [ ${#LNBits} -eq 0 ]; then LNBits="off"; fi
 if [ ${#mempoolExplorer} -eq 0 ]; then mempoolExplorer="off"; fi
 if [ ${#faraday} -eq 0 ]; then faraday="off"; fi
 if [ ${#bos} -eq 0 ]; then bos="off"; fi
+if [ ${#pyblock} -eq 0 ]; then pyblock="off"; fi
 if [ ${#thunderhub} -eq 0 ]; then thunderhub="off"; fi
+if [ ${#pool} -eq 0 ]; then pool="off"; fi
+if [ ${#sphinxrelay} -eq 0 ]; then sphinxrelay="off"; fi
 
 # show select dialog
 echo "run dialog ..."
@@ -33,12 +36,16 @@ OPTIONS+=(i 'LNbits' ${LNBits})
 OPTIONS+=(b 'BTC-RPC-Explorer' ${BTCRPCexplorer})
 OPTIONS+=(s 'Cryptoadvance Specter' ${specter})
 OPTIONS+=(w 'Specter WARDEN' ${warden})
-OPTIONS+=(a 'Mempool Explorer' ${mempoolExplorer})
+OPTIONS+=(a 'Mempool Space' ${mempoolExplorer})
+
 OPTIONS+=(j 'JoinMarket' ${joinmarket})
 OPTIONS+=(l 'Lightning Loop' ${loop})
 OPTIONS+=(o 'Balance of Satoshis' ${bos})
 OPTIONS+=(f 'Faraday' ${faraday})
+OPTIONS+=(c 'Lightning Pool' ${pool})
+OPTIONS+=(y 'PyBLOCK' ${pyblock})
 OPTIONS+=(m 'lndmanage' ${lndmanage})
+OPTIONS+=(x 'Sphinx-Relay' ${sphinxrelay})
 
 CHOICES=$(dialog --title ' Additional Services ' --checklist ' use spacebar to activate/de-activate ' 20 45 12  "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
@@ -210,6 +217,7 @@ The index database needs to be created before Electrum Server can be used.\n
 This can take hours/days depending on your RaspiBlitz. Monitor the progress on the LCD.\n
 When finished use the new 'ELECTRS' entry in Main Menu for more info.\n
 " 14 50
+      needsReboot=1
       else
         l1="!!! FAIL on ElectRS install !!!"
         l2="Try manual install on terminal after reboot with:"
@@ -315,6 +323,21 @@ else
   echo "Balance of Satoshis setting unchanged."
 fi
 
+# PyBLOCK process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "y")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${pyblock}" != "${choice}" ]; then
+  echo "PyBLOCK Setting changed .."
+  anychange=1
+  sudo -u admin /home/admin/config.scripts/bonus.pyblock.sh ${choice}
+  source /mnt/hdd/raspiblitz.conf
+  if [ "${pyblock}" =  "on" ]; then
+    sudo -u admin /home/admin/config.scripts/bonus.pyblock.sh menu
+  fi
+else
+  echo "PyBLOCK setting unchanged."
+fi
+
 # thunderhub process choice
 choice="off"; check=$(echo "${CHOICES}" | grep -c "t")
 if [ ${check} -eq 1 ]; then choice="on"; fi
@@ -353,6 +376,38 @@ if [ "${LNBits}" != "${choice}" ]; then
   fi
 else
   echo "LNbits setting unchanged."
+fi
+
+# Lightning Pool
+choice="off"; check=$(echo "${CHOICES}" | grep -c "c")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${pool}" != "${choice}" ]; then
+  echo "Pool Setting changed .."
+  anychange=1
+  sudo -u admin /home/admin/config.scripts/bonus.pool.sh ${choice}
+  if [ "${choice}" =  "on" ]; then
+    sudo systemctl start poold
+    sudo -u admin /home/admin/config.scripts/bonus.pool.sh menu
+  fi
+else
+  echo "Pool setting unchanged."
+fi
+
+# Sphinx Relay
+choice="off"; check=$(echo "${CHOICES}" | grep -c "x")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${sphinxrelay}" != "${choice}" ]; then
+  echo "Sphinx-Relay Setting changed .."
+  anychange=1
+  sudo -u admin /home/admin/config.scripts/bonus.sphinxrelay.sh ${choice}
+  if [ "${choice}" =  "on" ]; then
+    whiptail --title " Installed Sphinx Server" --msgbox "\
+Sphinx Server was installed.\n
+Use the new 'SPHINX' entry in Main Menu for more info.\n
+" 10 35
+  fi
+else
+  echo "Sphinx Relay unchanged."
 fi
 
 # JoinMarket process choice
@@ -394,11 +449,11 @@ if [ "${mempoolExplorer}" != "${choice}" ]; then
   errorOnInstall=$?
   if [ "${choice}" =  "on" ]; then
     if [ ${errorOnInstall} -eq 0 ]; then
-      sudo sytemctl start mempool
+      sudo systemctl start mempool
       whiptail --title " Installed Mempool Space " --msgbox "\
 The txindex may need to be created before Mempool can be active.\n
 This can take ~7 hours on a RPi4 with SSD. Monitor the progress on the LCD.\n
-When finished use the new 'EXPLORE' entry in Main Menu for more info.\n
+When finished use the new 'MEMPOOL' entry in Main Menu for more info.\n
 " 14 50
     else
       l1="!!! FAIL on Mempool Explorer install !!!"

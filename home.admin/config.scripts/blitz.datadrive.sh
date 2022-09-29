@@ -82,7 +82,6 @@ if [ "$1" = "status" ]; then
     hdd=""
     sizeDataPartition=0
     OSPartition=$(sudo df /usr | grep dev | cut -d " " -f 1 | sed "s/\/dev\///g")
-    #echo "# OSPartition(${OSPartition})"
 
     lsblk -o NAME,SIZE -b | grep -P "[s|v]d[a-z][0-9]?" > .lsblk.tmp
     while read line; do
@@ -96,18 +95,26 @@ if [ "$1" = "status" ]; then
       else
          testsize=0
       fi
+
       #echo "# line($line)"
       #echo "# testname(${testname}) testdevice(${testdevice}) testpartition(${testpartition}) testsize(${testsize})"
-      
+
       # count partitions
-      testpartitioncount=$(sudo fdisk -l | grep /dev/$testdevice | wc -l)
-      # do not count line with disk info
-      testpartitioncount=$((testpartitioncount-1))
+      testpartitioncount=0
+      if [ ${#testdevice} -gt 0 ]; then
+        testpartitioncount=$(sudo fdisk -l | grep /dev/$testdevice | wc -l)
+        # do not count line with disk info
+        testpartitioncount=$((testpartitioncount-1))
+      fi
+
+      #echo "# testpartitioncount($testpartitioncount)"
+      #echo "# testpartitioncount(${testpartitioncount})"
+      #echo "# OSPartition(${OSPartition})"
+      #echo "# hdd(${hdd})"
 
       if [ $testpartitioncount -gt 0 ]; then
-         # if a partition was found - make sure to skip OS partition & if <=32gb
-         if [ "$testpartition" != "$OSPartition" ] && [ ${testsize} -gt 32900000000 ]; then
-
+         # if a partition was found - make sure to skip OS partition
+         if [ "$testpartition" != "$OSPartition" ]; then
             # make sure to use the biggest
             if [ ${testsize} -gt ${sizeDataPartition} ]; then
                sizeDataPartition=${testsize}
@@ -116,31 +123,50 @@ if [ "$1" = "status" ]; then
             fi
          fi
       else
-	       # Partion to be created is smaller than disk so this is not correct (but close)
-	       sizeDataPartition=$(sudo fdisk -l /dev/$testdevice | grep GiB | cut -d " " -f 5)
-         hddDataPartition="${testdevice}1"
-         hdd="${testdevice}"
+
+         # default hdd set, when there is no OSpartition and there might ne no partitions at all
+         if [ "${OSPartition}" = "root" ] && [ "${hdd}" = "" ] && [ "${testdevice}" != "" ]; then
+          hdd="${testdevice}"
+         fi
+
+	       # make sure to use the biggest
+         if [ ${testsize} -gt ${sizeDataPartition} ]; then
+	        # Partion to be created is smaller than disk so this is not correct (but close)
+            sizeDataPartition=$(sudo fdisk -l /dev/$testdevice | grep GiB | cut -d " " -f 5)
+            hddDataPartition="${testdevice}1"
+            hdd="${testdevice}"
+	       fi
       fi
       
     done < .lsblk.tmp
     rm -f .lsblk.tmp 1>/dev/null 2>/dev/null
 
-    if [ ${#hddDataPartition} -lt 4 ]; then
-      echo "# WARNING: found invalid partition (${ddDataPartition}) - redacting"
+    if [ "${hddPartitionCandidate}" != "" ] && [ ${#hddDataPartition} -lt 4 ]; then
+      echo "# WARNING: found invalid partition (${hddDataPartition}) - redacting"
       hddDataPartition=""
     fi
-    isSSD=$(sudo cat /sys/block/${hdd}/queue/rotational 2>/dev/null | grep -c 0)
 
-    echo "hddCandidate='${hdd}'"
-    echo "hddPartitionCandidate='${hddDataPartition}'"
+    isSSD=$(sudo cat /sys/block/${hdd}/queue/rotational 2>/dev/null | grep -c 0)
     echo "isSSD=${isSSD}"
 
+    echo "hddCandidate='${hdd}'"
+    hddBytes=0
+    hddGigaBytes=0
+    if [ "${hdd}" != "" ]; then
+      hddBytes=$(sudo fdisk -l /dev/$hdd | grep GiB | cut -d " " -f 5)
+      hddGigaBytes=$(echo "scale=0; ${hddBytes}/1024/1024/1024" | bc -l)
+    fi
+    echo "hddBytes=${hddBytes}"
+    echo "hddGigaBytes=${hddGigaBytes}"
+
+    echo "hddPartitionCandidate='${hddDataPartition}'"
+    
     if [ ${#hddDataPartition} -gt 0 ]; then
 
       # check partition size in bytes and GBs
       echo "hddDataPartitionBytes=${sizeDataPartition}"
       hddDataPartitionGigaBytes=$(echo "scale=0; ${sizeDataPartition}/1024/1024/1024" | bc -l)
-      echo "hddGigaBytes=${hddDataPartitionGigaBytes}"
+      echo "hddPartitionGigaBytes=${hddDataPartitionGigaBytes}"
   
       # check if single drive with that size
       hddCount=0
@@ -181,7 +207,7 @@ if [ "$1" = "status" ]; then
         else
 
             # check for recoverable RaspiBlitz data (if config file exists) and raid 
-            hddRaspiData=$(sudo ls -l /mnt/hdd${subVolumeDir} | grep -c raspiblitz.conf)
+            hddRaspiData=$(sudo ls -l /mnt/hdd${subVolumeDir} 2>/dev/null | grep -c raspiblitz.conf)
             isRaid=$(btrfs filesystem df /mnt/hdd 2>/dev/null | grep -c "Data, RAID1")
             echo "hddRaspiData=${hddRaspiData}"
             sudo umount /mnt/hdd
@@ -228,7 +254,13 @@ if [ "$1" = "status" ]; then
     # STATUS INFO WHEN MOUNTED
 
     # output data drive
-    hddDataPartition=$(df | grep "/mnt/hdd$" | cut -d " " -f 1 | cut -d "/" -f 3)
+    if [ ${isBTRFS} -eq 1 ]; then
+      # on btrfs date the storage partition as the data partition
+      hddDataPartition=$(df | grep "/mnt/storage$" | cut -d " " -f 1 | cut -d "/" -f 3)
+    else
+      # on ext4 its the whole /mnt/hdd
+      hddDataPartition=$(df | grep "/mnt/hdd$" | cut -d " " -f 1 | cut -d "/" -f 3)
+    fi
     hdd=$(echo $hddDataPartition | sed 's/[0-9]*//g')
     hddFormat=$(lsblk -o FSTYPE,NAME,TYPE | grep part | grep "${hddDataPartition}" | cut -d " " -f 1)
     if [ "${hddFormat}" = "ext4" ]; then
@@ -303,7 +335,7 @@ if [ "$1" = "status" ]; then
     do
       devMounted=$(lsblk -o MOUNTPOINT,NAME | grep "$disk" | grep -c "^/")
       # is raid candidate when not mounted and not the data drive cadidate (hdd/ssd)
-      if [ ${devMounted} -eq 0 ] && [ "${disk}" != "${hdd}" ]; then
+      if [ ${devMounted} -eq 0 ] && [ "${disk}" != "${hdd}" ] && [ "${hdd}" != "" ]; then
         sizeBytes=$(lsblk -o NAME,SIZE -b | grep "^${disk}" | awk '$1=$1' | cut -d " " -f 2)
         sizeGigaBytes=$(echo "scale=0; ${sizeBytes}/1024/1024/1024" | bc -l)
         vedorname=$(lsblk -o NAME,VENDOR | grep "^${disk}" | awk '$1=$1' | cut -d " " -f 2)
@@ -354,10 +386,15 @@ if [ "$1" = "format" ]; then
     exit 1
   fi
 
-  # check if device is existing and a disk (not a partition)
-  isValid=$(lsblk -o NAME,TYPE | grep disk | grep -c "${hdd}")
+  if [ "$2" = "btrfs" ]; then
+     # check if device is existing and a disk (not a partition)
+     isValid=$(lsblk -o NAME,TYPE | grep disk | grep -c "${hdd}")
+  else
+     # check if device is existing (its OK when its a partition)
+     isValid=$(lsblk -o NAME,TYPE | grep -c "${hdd}")
+  fi
   if [ ${isValid} -eq 0 ]; then
-    >&2 echo "# either given device was not found"
+    >&2 echo "# given device was not found"
     >&2 echo "# or is not of type disk - see 'lsblk'"
     echo "error='device not valid'"
     exit 1
@@ -410,55 +447,74 @@ if [ "$1" = "format" ]; then
     fi
   fi
 
-  # wipe all partitions and write fresh GPT
-  >&2 echo "# Wiping all partitions (sfdisk/wipefs)"
-  sudo sfdisk --delete /dev/${hdd}
-  sleep 4
-  sudo wipefs -a /dev/${hdd}
-  sleep 4
-  partitions=$(lsblk | grep -c "─${hdd}")
-  if [ ${partitions} -gt 0 ]; then
-    >&2 echo "# WARNING: partitions are still not clean - try Quick & Dirty"
-    sudo dd if=/dev/zero of=/dev/${hdd} bs=512 count=1
+  if [[ $hdd =~ [0-9] ]]; then
+     ext4IsPartition=1
+  else
+     ext4IsPartition=0
   fi
-  partitions=$(lsblk | grep -c "─${hdd}")
-  if [ ${partitions} -gt 0 ]; then
-    >&2 echo "# ERROR: partition cleaning failed"
-    echo "error='partition cleaning failed'"
-    exit 1
+
+  wipePartitions=0
+  if [ "$2" = "btrfs" ]; then
+     wipePartitions=1
   fi
-  sudo parted -s /dev/${hdd} mklabel gpt 1>/dev/null 1>&2
-  sleep 2
-  sync
+  if [ "$2" = "ext4" ] && [ $ext4IsPartition -eq 0 ]; then
+     wipePartitions=1
+  fi
+
+  if [ $wipePartitions -eq 1 ]; then
+     # wipe all partitions and write fresh GPT
+     >&2 echo "# Wiping all partitions (sfdisk/wipefs)"
+     sudo sfdisk --delete /dev/${hdd}
+     sleep 4
+     sudo wipefs -a /dev/${hdd}
+     sleep 4
+     partitions=$(lsblk | grep -c "─${hdd}")
+     if [ ${partitions} -gt 0 ]; then
+       >&2 echo "# WARNING: partitions are still not clean - try Quick & Dirty"
+       sudo dd if=/dev/zero of=/dev/${hdd} bs=512 count=1
+     fi
+     partitions=$(lsblk | grep -c "─${hdd}")
+     if [ ${partitions} -gt 0 ]; then
+       >&2 echo "# ERROR: partition cleaning failed"
+       echo "error='partition cleaning failed'"
+       exit 1
+     fi
+     sudo parted -s /dev/${hdd} mklabel gpt 1>/dev/null 1>&2
+     sleep 2
+     sync
+  fi
 
   # formatting old: EXT4
+
   if [ "$2" = "ext4" ]; then
 
      # prepare temp mount point
      sudo mkdir -p /tmp/ext4 1>/dev/null
 
-     # write new EXT4 partition
-     >&2 echo "# Creating the one big partition"
-     sudo parted /dev/${hdd} mkpart primary ext4 0% 100% 1>&2
-     sleep 6
-     sync
-     # loop until the partion gets available
-     loopdone=0
-     loopcount=0
-     while [ ${loopdone} -eq 0 ]
-     do
-       >&2 echo "# waiting until the partion gets available"
-       sleep 2
-       sync
-       loopdone=$(lsblk -o NAME | grep -c ${hdd}1)
-       loopcount=$(($loopcount +1))
-       if [ ${loopcount} -gt 10 ]; then
-         >&2 echo "# partion failed"
-         echo "error='partition failed'"
-         exit 1
-       fi
-     done
-     >&2 echo "# partion available"
+     if [ $ext4IsPartition -eq 0 ]; then
+        # write new EXT4 partition
+        >&2 echo "# Creating the one big partition"
+        sudo parted /dev/${hdd} mkpart primary ext4 0% 100% 1>&2
+        sleep 6
+        sync
+        # loop until the partition gets available
+        loopdone=0
+        loopcount=0
+        while [ ${loopdone} -eq 0 ]
+        do
+          >&2 echo "# waiting until the partition gets available"
+          sleep 2
+          sync
+          loopdone=$(lsblk -o NAME | grep -c ${hdd}1)
+          loopcount=$(($loopcount +1))
+          if [ ${loopcount} -gt 10 ]; then
+            >&2 echo "# partition failed"
+            echo "error='partition failed'"
+            exit 1
+          fi
+        done
+        >&2 echo "# partition available"
+     fi
 
      # make sure /mnt/hdd is unmounted before formatting
      sudo umount -f /tmp/ext4 2>/dev/null
@@ -470,7 +526,11 @@ if [ "$1" = "format" ]; then
      fi
 
      >&2 echo "# Formatting"
-     sudo mkfs.ext4 -F -L BLOCKCHAIN /dev/${hdd}1 1>/dev/null
+     if [ $ext4IsPartition -eq 0 ]; then
+        sudo mkfs.ext4 -F -L BLOCKCHAIN /dev/${hdd}1 1>/dev/null
+     else
+        sudo mkfs.ext4 -F -L BLOCKCHAIN /dev/${hdd} 1>/dev/null
+     fi
      loopdone=0
      loopcount=0
      while [ ${loopdone} -eq 0 ]
@@ -489,7 +549,11 @@ if [ "$1" = "format" ]; then
 
      # setting fsk check intervall to 1
      # see https://github.com/rootzoll/raspiblitz/issues/360#issuecomment-467567572
-     sudo tune2fs -c 1 /dev/${hdd}1
+     if [ $ext4IsPartition -eq 0 ]; then
+        sudo tune2fs -c 1 /dev/${hdd}1
+     else
+        sudo tune2fs -c 1 /dev/${hdd}
+     fi
 
      >&2 echo "# OK EXT 4 format done"
      exit 0
@@ -498,24 +562,36 @@ if [ "$1" = "format" ]; then
   # formatting new: BTRFS layout - this consists of 3 volmunes:
   if [ "$2" = "btrfs" ]; then
 
-     # prepare temo mount point
+     # prepare temp mount point
      sudo mkdir -p /tmp/btrfs 1>/dev/null
 
-     >&2 echo "# Creating BLITZDATA"
+     >&2 echo "# Creating BLITZDATA (${hdd})"
      sudo parted -s -a optimal -- /dev/${hdd} mkpart primary btrfs 0% 30GiB 1>/dev/null
-     sync && sleep 3
+     sync
+     sleep 6
      win=$(lsblk -o NAME | grep -c ${hdd}1)
      if [ ${win} -eq 0 ]; then 
        echo "error='partition failed'"
        exit 1
      fi
      sudo mkfs.btrfs -f -L BLITZDATA /dev/${hdd}1 1>/dev/null
-     sync && sleep 3
-     win=$(lsblk -o NAME,LABEL | grep -c BLITZDATA)
-     if [ ${win} -eq 0 ]; then 
-       echo "error='formatting failed'"
-       exit 1
-     fi
+     # check result
+     loopdone=0
+     loopcount=0
+     while [ ${loopdone} -eq 0 ]
+     do
+       >&2 echo "# waiting until formatted drives gets available"
+       sleep 2
+       sync
+       loopdone=$(lsblk -o NAME,LABEL | grep -c BLITZDATA)
+       loopcount=$(($loopcount +1))
+       if [ ${loopcount} -gt 60 ]; then
+         >&2 echo "# ERROR: formatting BTRFS failed (BLITZDATA)"
+         >&2 echo "# check with: lsblk -o NAME,LABEL | grep -c BLITZDATA"
+         echo "error='formatting failed'"
+         exit 1
+       fi
+     done
      >&2 echo "# OK BLITZDATA exists now"
   
      >&2 echo "# Creating SubVolume for Snapshots"
@@ -531,19 +607,30 @@ if [ "$1" = "format" ]; then
 
      >&2 echo "# Creating BLITZSTORAGE"
      sudo parted -s -a optimal -- /dev/${hdd} mkpart primary btrfs 30GiB -34GiB 1>/dev/null
-     sync && sleep 3
+     sync
+     sleep 6
      win=$(lsblk -o NAME | grep -c ${hdd}2)
      if [ ${win} -eq 0 ]; then 
        echo "error='partition failed'"
        exit 1
      fi
      sudo mkfs.btrfs -f -L BLITZSTORAGE /dev/${hdd}2 1>/dev/null
-     sync && sleep 3
-     win=$(lsblk -o NAME,LABEL | grep -c BLITZSTORAGE)
-     if [ ${win} -eq 0 ]; then 
-       echo "error='formatting failed'"
-       exit 1
-     fi
+     # check result
+     loopdone=0
+     loopcount=0
+     while [ ${loopdone} -eq 0 ]
+     do
+       >&2 echo "# waiting until formatted drives gets available"
+       sleep 2
+       sync
+       loopdone=$(lsblk -o NAME,LABEL | grep -c BLITZSTORAGE)
+       loopcount=$(($loopcount +1))
+       if [ ${loopcount} -gt 60 ]; then
+         >&2 echo "# ERROR: formatting BTRFS failed (BLITZSTORAGE)"
+         echo "error='formatting failed'"
+         exit 1
+       fi
+     done
      >&2 echo "# OK BLITZSTORAGE exists now"
   
      >&2 echo "# Creating SubVolume for Snapshots"
@@ -567,12 +654,22 @@ if [ "$1" = "format" ]; then
  
      >&2 echo "# Creating Volume BLITZTEMP (format)"
      sudo mkfs -t vfat -n BLITZTEMP /dev/${hdd}3 1>/dev/null
-     sync && sleep 3
-     win=$(lsblk -o NAME,LABEL | grep -c BLITZTEMP)
-     if [ ${win} -eq 0 ]; then 
-       echo "error='formatting failed'"
-       exit 1
-     fi
+     # check result
+     loopdone=0
+     loopcount=0
+     while [ ${loopdone} -eq 0 ]
+     do
+       >&2 echo "# waiting until formatted drives gets available"
+       sleep 2
+       sync
+       loopdone=$(lsblk -o NAME,LABEL | grep -c BLITZTEMP)
+       loopcount=$(($loopcount +1))
+       if [ ${loopcount} -gt 60 ]; then
+         >&2 echo "# ERROR: formatting vfat failed (BLITZTEMP)"
+         echo "error='formatting failed'"
+         exit 1
+       fi
+     done
      >&2 echo "# OK BLITZTEMP exists now"
 
      >&2 echo "# OK BTRFS format done"
@@ -596,7 +693,15 @@ if [ "$1" = "fstab" ]; then
   fi
 
   # check if exist and which format
-  hddFormat=$(lsblk -o FSTYPE,NAME | grep ${hdd} | cut -d ' ' -f 1)
+  # if hdd is a partition (ext4)
+  if [[ $hdd =~ [0-9] ]]; then
+     # ext4
+     hddFormat=$(lsblk -o FSTYPE,NAME | grep ${hdd} | cut -d ' ' -f 1)
+  else
+     # btrfs
+     hddFormat=$(lsblk -o FSTYPE,NAME | grep ${hdd}1 | cut -d ' ' -f 1)
+  fi
+
   if [ ${#hddFormat} -eq 0 ]; then
     echo "# FAIL given device/partition not found"
     echo "error='device not found'"
@@ -638,7 +743,9 @@ if [ "$1" = "fstab" ]; then
     updated=$(cat /etc/fstab | grep -c "/mnt/hdd")
     if [ $updated -eq 0 ]; then
        echo "# updating /etc/fstab"
-       sudo sed "/raspiblitz/ i UUID=${uuid1} /mnt/hdd ext4 noexec,defaults 0 2" -i /etc/fstab 1>/dev/null
+       #sudo sed "/raspiblitz/ i UUID=${uuid1} /mnt/hdd ext4 noexec,defaults 0 2" -i /etc/fstab 1>/dev/null
+       # changing to the RaspiBolt recommended fstab options for the ext4 HDD
+       sudo sed "/raspiblitz/ i UUID=${uuid1} /mnt/hdd ext4 rw,nosuid,dev,noexec,noatime,nodiratime,auto,nouser,async,nofail 0 2" -i /etc/fstab 1>/dev/null
     fi
 
     sync
@@ -851,10 +958,10 @@ if [ "$1" = "raid" ] && [ "$2" = "on" ]; then
    sudo parted -s /dev/${usbdev} rm ${v_partition}
   done
 
-  # check if usb device is at least 30GB groß
+  # check if usb device is at least 30GB big
   usbdevsize=$(lsblk -o NAME,SIZE -b | grep "^${usbdev}" | awk '$1=$1' | cut -d " " -f 2)
   if [ ${usbdevsize} -lt 30000000000 ]; then
-    >&2 echo "# FAIL ${usbdev} is smaller then the minumum 30GB"
+    >&2 echo "# FAIL ${usbdev} is smaller than the minimum 30GB"
     echo "error='dev too small'"
     exit 1
   fi
@@ -1016,15 +1123,24 @@ if [ "$1" = "tempmount" ]; then
   fi
 
   # get device to temp mount
-  hddDataPartition=$2
-  if [ ${#hddDataPartition} -eq 0 ]; then
+  hdd=$2
+  if [ ${#hdd} -eq 0 ]; then
     >&2 echo "# FAIL which device should be temp mounted (e.g. sda)"
     >&2 echo "# run 'status' to see device candidates"
     echo "error='missing second parameter'"
     exit 1
   fi
 
-  hddFormat=$(lsblk -o FSTYPE,NAME | grep ${hddDataPartition} | cut -d ' ' -f 1)
+  # if hdd is a partition
+  if [[ $hdd =~ [0-9] ]]; then
+     hddDataPartition=$hdd
+     hddDataPartitionExt4=$hddDataPartition
+     hddFormat=$(lsblk -o FSTYPE,NAME | grep ${hddDataPartitionExt4} | cut -d ' ' -f 1)
+  else
+     hddBTRFS=$hdd
+     hddFormat=$(lsblk -o FSTYPE,NAME | grep ${hddBTRFS}1 | cut -d ' ' -f 1)
+  fi
+
   if [ ${#hddFormat} -eq 0 ]; then
     >&2 echo "# FAIL given device not found"
     echo "error='device not found'"
@@ -1032,7 +1148,6 @@ if [ "$1" = "tempmount" ]; then
   fi
 
   if [ "${hddFormat}" = "ext4" ]; then
-     hddDataPartitionExt4=$hddDataPartition
 
     # do EXT4 temp mount
     sudo mkdir -p /mnt/hdd 1>/dev/null
@@ -1049,7 +1164,6 @@ if [ "$1" = "tempmount" ]; then
     fi
     
   elif [ "${hddFormat}" = "btrfs" ]; then
-    hdd=$hddDataPartition
 
     # get user and grouid if usr/group bitcoin
     bitcoinUID=$(id -u bitcoin)
@@ -1059,9 +1173,9 @@ if [ "$1" = "tempmount" ]; then
     sudo mkdir -p /mnt/hdd 1>/dev/null
     sudo mkdir -p /mnt/storage 1>/dev/null
     sudo mkdir -p /mnt/temp 1>/dev/null
-    sudo mount -t btrfs -o degraded -o subvol=WORKINGDIR /dev/${hdd}1 /mnt/hdd
-    sudo mount -t btrfs -o subvol=WORKINGDIR /dev/${hdd}2 /mnt/storage
-    sudo mount -o uid=${bitcoinUID},gid=${bitcoinGID} /dev/${hdd}3 /mnt/temp 
+    sudo mount -t btrfs -o degraded -o subvol=WORKINGDIR /dev/${hddBTRFS}1 /mnt/hdd
+    sudo mount -t btrfs -o subvol=WORKINGDIR /dev/${hddBTRFS}2 /mnt/storage
+    sudo mount -o umask=0000,uid=${bitcoinUID},gid=${bitcoinGID} /dev/${hddBTRFS}3 /mnt/temp 
 
     # check result
     isMountedA=$(df | grep -c "/mnt/hdd")
@@ -1120,15 +1234,19 @@ if [ "$1" = "link" ]; then
     >&2 echo "# Creating BTRFS setup links"
     
     >&2 echo "# - linking blockchains into /mnt/hdd"
-    if [ $(ls /mnt/hdd/bitcoin 2>/dev/null | grep -c 'bitcoin') -eq 0 ]; then
+    if [ $(ls -F /mnt/hdd/bitcoin | grep -c '/mnt/hdd/bitcoin@') -eq 0 ]; then
       sudo mkdir -p /mnt/storage/bitcoin
+      sudo cp -R /mnt/hdd/bitcoin/* /mnt/storage/bitcoin 2>/dev/null
       sudo chown -R bitcoin:bitcoin /mnt/storage/bitcoin
+      sudo rm -r /mnt/hdd/bitcoin
       sudo ln -s /mnt/storage/bitcoin /mnt/hdd/bitcoin
       sudo rm /mnt/storage/bitcoin/bitcoin 2>/dev/null
     fi
-    if [ $(ls /mnt/hdd/litecoin 2>/dev/null | grep -c 'litecoin') -eq 0 ]; then
+    if [ $(ls -F /mnt/hdd/litecoin | grep -c '/mnt/hdd/litecoin@') -eq 0 ]; then
       sudo mkdir -p /mnt/storage/litecoin
+      sudo cp -R /mnt/hdd/litecoin/* /mnt/storage/litecoin 2>/dev/null
       sudo chown -R bitcoin:bitcoin /mnt/storage/litecoin
+      sudo rm -r /mnt/hdd/litecoin
       sudo ln -s /mnt/storage/litecoin /mnt/hdd/litecoin
       sudo rm /mnt/storage/litecoin/litecoin 2>/dev/null
     fi
@@ -1190,7 +1308,9 @@ if [ "$1" = "link" ]; then
   sudo chown -R bitcoin:bitcoin /mnt/hdd/app-storage
   sudo chown -R bitcoin:bitcoin /mnt/hdd/app-data
   sudo chown -R bitcoin:bitcoin /mnt/hdd/temp 
-  sudo chmod -R 766 /mnt/hdd/temp
+  sudo chmod -R 777 /mnt/temp
+  sudo chmod -R 777 /mnt/hdd/temp
+  sudo chmod 777 /mnt
 
   # write info files about what directories are for
 

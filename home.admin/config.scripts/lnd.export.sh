@@ -89,11 +89,11 @@ elif [ "${exportType}" = "btcpay" ]; then
   # will overwrite ip & port if IP2TOR tunnel is available
   source <(sudo /home/admin/config.scripts/blitz.subscriptions.ip2tor.py subscription-by-service LND-REST-API)
 
-  # check if there is a IP2TOR for LND REST
+  # bake macaroon that just can create invoices and monitor them
+  macaroon=$(sudo -u admin lncli bakemacaroon address:read address:write info:read invoices:read invoices:write onchain:read)
 
-  # get macaroon
-  # TODO: best would be not to use admin macaroon here in the future
-  macaroon=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/${network}/${chain}net/admin.macaroon)
+  # old: admin macaroon (remove after v1.6.3 release)
+  #macaroon=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/${network}/${chain}net/admin.macaroon)
 
   # get certificate thumb
   certthumb=$(sudo openssl x509 -noout -fingerprint -sha256 -inform pem -in /mnt/hdd/lnd/tls.cert | cut -d "=" -f 2)

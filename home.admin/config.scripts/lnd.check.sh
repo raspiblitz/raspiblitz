@@ -174,6 +174,12 @@ if [ "$1" == "basic-setup" ]; then
   fi
   echo "rpcpasscorrect=${rpcpasscorrect}"
 
+  # check basic LND logs
+  torConnectionProblem=$(sudo journalctl -u lnd -b --no-pager -n14 | grep "lnd\[" | grep -c "dial tcp 127.0.0.1:9050: connect: connection refused")
+  if [ ${torConnectionProblem} -gt 0 ]; then
+    echo "err='Tor tcp connection refused'"
+  fi
+
 else
   echo "# FAIL: parameter not known - run with -h for help"
   exit 1
