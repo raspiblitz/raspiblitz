@@ -205,7 +205,12 @@ if [ "$1" = "precheck" ]; then
     fi
   fi
   echo "# Start the joinmarket ob-watcher.service with '/home/joinmarket/menu.orderbook.sh startOrderBookService'"
-  sudo -u joinmarket /home/joinmarket/menu.orderbook.sh startOrderBookService
+  /home/joinmarket/menu.orderbook.sh startOrderBookService
+  echo "# Make sure max_cj_fee_abs and max_cj_fee_rel are set"
+  # max_cj_fee_abs between 5000 - 10000 sats
+  sed -i "s/#max_cj_fee_abs = x/max_cj_fee_abs = $(shuf -i 5000-10000 -n1)/g" /home/joinmarket/.joinmarket/joinmarket.cfg
+  # max_cj_fee_rel between 0.01 - 0.03%
+  sed -i "s/#max_cj_fee_rel = x/max_cj_fee_rel = 0.000$((RANDOM%3+1))/g" /home/joinmarket/.joinmarket/joinmarket.cfg
   exit 0
 fi
 
