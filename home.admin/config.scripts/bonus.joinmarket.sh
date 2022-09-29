@@ -7,7 +7,7 @@
 
 # https://github.com/openoms/joininbox/releases
 # https://github.com/openoms/joininbox/commits/master
-JBVERSION="3937f9cdd26be30cc67b2671079836faeb78a468" # v0.7.3+ # installs JoinMarket v0.9.8
+JBVERSION="9feec63" # v0.7.3+ # installs JoinMarket v0.9.8
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
