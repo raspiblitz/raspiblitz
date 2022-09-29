@@ -476,6 +476,10 @@ if [ "${bos}" == "on" ]; then
   OPTIONS+=(BOS "Update Balance of Satoshis")
 fi
 
+if [ "${RTL}" == "on" ]||[ "${cRTL}" == "on" ]; then
+  OPTIONS+=(RTL "Update RTL")
+fi
+
 if [ "${thunderhub}" == "on" ]; then
   OPTIONS+=(THUB "Update ThunderHub")
 fi
@@ -538,6 +542,9 @@ case $CHOICE in
     ;;
   BOS)
     /home/admin/config.scripts/bonus.bos.sh update
+    ;;
+  RTL)
+    /home/admin/config.scripts/bonus.rtl.sh update
     ;;
   THUB)
     /home/admin/config.scripts/bonus.thunderhub.sh update
