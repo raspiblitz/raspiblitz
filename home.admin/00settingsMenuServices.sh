@@ -205,7 +205,7 @@ else
 fi
 
 # Boltcard process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "s")
+choice="off"; check=$(echo "${CHOICES}" | grep -c "z")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${boltcard}" != "${choice}" ]; then
   echo "Boltcard Setting changed .."

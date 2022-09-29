@@ -373,7 +373,7 @@ if [ "${boltcard}" == "on" ]; then
   sudo journalctl -u boltcard -b --no-pager -n20
   echo
 else
-  echo "- SPHINX is OFF by config"
+  echo "- BOLTCARD is OFF by config"
 fi
 
 echo
