@@ -252,11 +252,14 @@ sleep 3 ## give time to cancel
 
 export DEBIAN_FRONTEND=noninteractive
 
+echo "*** Prevent sleep ***" # on all platforms
+sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
+
 # FIXING LOCALES
 # https://github.com/rootzoll/raspiblitz/issues/138
 # https://daker.me/2014/10/how-to-fix-perl-warning-setting-locale-failed-in-raspbian.html
 # https://stackoverflow.com/questions/38188762/generate-all-locales-in-a-docker-image
-if [ "${baseimage}" = "raspios_arm64" ]||[ "${baseimage}" = "debian_rpi64" ]; then
+if [ "${baseimage}" = "raspios_arm64" ]||[ "${baseimage}" = "debian_rpi64" ]||[ "${baseimage}" = "armbian" ]; then
   echo -e "\n*** FIXING LOCALES FOR BUILD ***"
 
   sudo sed -i "s/^# en_US.UTF-8 UTF-8.*/en_US.UTF-8 UTF-8/g" /etc/locale.gen
