@@ -90,7 +90,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     # install system dependencies:
     sudo apt --assume-yes update
-    sudo apt --assume-yes --show-upgraded install libssl-dev libsqlite3-dev
+    sudo apt --assume-yes --show-upgraded install libssl-dev libsqlite3-dev pkg-config
 
     # install Rust dependencies:
     echo "*** Installing rustup for the Helipad user ***"
