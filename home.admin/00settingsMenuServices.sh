@@ -72,9 +72,9 @@ fi
 
 # just available for CL
 if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ]; then
-  OPTIONS+=(c 'C-Lightning RTL Webinterface' ${crtlWebinterface})
-  OPTIONS+=(k 'C-Lightning Sparko WebWallet' ${sparko})
-  OPTIONS+=(n 'C-Lightning Spark Wallet' ${spark})
+  OPTIONS+=(c 'Core Lightning RTL Webinterface' ${crtlWebinterface})
+  OPTIONS+=(k 'Core Lightning Sparko WebWallet' ${sparko})
+  OPTIONS+=(n 'Core Lightning Spark Wallet' ${spark})
 fi
 
 OPTIONS+=(m 'Homer Dashboard' ${homer})
@@ -116,7 +116,7 @@ if [ "${rtlWebinterface}" != "${choice}" ]; then
       sleep 10
       /home/admin/config.scripts/bonus.rtl.sh menu lnd mainnet
     else
-      l1="!!! FAIL on RTL lnd install !!!"
+      l1="# FAIL on RTL lnd install #"
       l2="Try manual install on terminal after reboot with:"
       l3="/home/admin/config.scripts/bonus.rtl.sh on lnd mainnet"
       dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
@@ -126,7 +126,7 @@ else
   echo "RTL-lnd Webinterface Setting unchanged."
 fi
 
-# RTL process choice (C-Lightning)
+# RTL process choice (Core Lightning)
 choice="off"; check=$(echo "${CHOICES}" | grep -c "c")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${crtlWebinterface}" != "${choice}" ]; then
@@ -141,7 +141,7 @@ if [ "${crtlWebinterface}" != "${choice}" ]; then
       sleep 10
       /home/admin/config.scripts/bonus.rtl.sh menu cl mainnet
     else
-      l1="!!! FAIL on RTL C-Lightning install !!!"
+      l1="# FAIL on RTL Core Lightning install #"
       l2="Try manual install on terminal after reboot with:"
       l3="/home/admin/config.scripts/bonus.rtl.sh on cl mainnet"
       dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
@@ -169,7 +169,7 @@ When finished use the new 'EXPLORE' entry in Main Menu for more info.\n
 " 14 50
       needsReboot=1
     else
-      l1="!!! FAIL on BTC-RPC-Explorer install !!!"
+      l1="# FAIL on BTC-RPC-Explorer install #"
       l2="Try manual install on terminal after reboot with:"
       l3="/home/admin/config.scripts/bonus.btc-rpc-explorer.sh on"
       dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
@@ -192,7 +192,7 @@ if [ "${specter}" != "${choice}" ]; then
       sudo systemctl start specter
       /home/admin/config.scripts/bonus.specter.sh menu
     else
-      l1="!!! FAIL on Specter Desktop install !!!"
+      l1="# FAIL on Specter Desktop install #"
       l2="Try manual install on terminal after reboot with:"
       l3="/home/admin/config.scripts/bonus.specter.sh on"
       dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
@@ -230,7 +230,7 @@ When finished use the new 'ELECTRS' entry in Main Menu for more info.\n
 " 14 50
       needsReboot=0
       else
-        l1="!!! FAIL on ElectRS install !!!"
+        l1="# FAIL on ElectRS install #"
         l2="Try manual install on terminal after reboot with:"
         l3="/home/admin/config.scripts/bonus.electrs.sh on"
         dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
@@ -363,7 +363,7 @@ if [ "${thunderhub}" != "${choice}" ]; then
       sleep 10
       /home/admin/config.scripts/bonus.thunderhub.sh menu
     else
-      l1="!!! FAIL on ThunderHub install !!!"
+      l1="# FAIL on ThunderHub install #"
       l2="Try manual install on terminal after reboot with:"
       l3="/home/admin/config.scripts/bonus.thunderhub.sh on"
       dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
@@ -500,7 +500,7 @@ This can take ~7 hours on a RPi4 with SSD. Monitor the progress on the LCD.\n
 When finished use the new 'MEMPOOL' entry in Main Menu for more info.\n
 " 14 50
     else
-      l1="!!! FAIL on Mempool Explorer install !!!"
+      l1="# FAIL on Mempool Explorer install #"
       l2="Try manual install on terminal after reboot with:"
       l3="/home/admin/config.scripts/bonus.mempool.sh on"
       dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
@@ -570,7 +570,7 @@ if [ "${sparko}" != "${choice}" ]; then
     if [ ${errorOnInstall} -eq 0 ]; then
       /home/admin/config.scripts/cl-plugin.sparko.sh menu mainnet
     else
-      l1="# !!! FAIL on Sparko on mainnet install !!!"
+      l1="# FAIL on Sparko on mainnet install #"
       l2="# Try manual install on terminal after reboot with:"
       l3="/home/admin/config.scripts/cl-plugin.sparko.sh on mainnet"
       dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
@@ -592,7 +592,7 @@ if [ "${spark}" != "${choice}" ]; then
     if [ ${errorOnInstall} -eq 0 ]; then
       /home/admin/config.scripts/cl.spark.sh menu mainnet
     else
-      l1="# !!! FAIL on Spark Wallet on mainnet install !!!"
+      l1="# FAIL on Spark Wallet on mainnet install #"
       l2="# Try manual install on terminal after reboot with:"
       l3="/home/admin/config.scripts/cl.spark.sh on mainnet"
       dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65

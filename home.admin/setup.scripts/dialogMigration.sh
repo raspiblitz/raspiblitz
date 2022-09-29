@@ -55,7 +55,7 @@ if [ "${migrationOS}" == "raspiblitz" ]; then
       echo "ON YOUR LAPTOP open a new terminal and change into"
       echo "the directory where your migration file is and"
       echo "COPY, PASTE AND EXECUTE THE FOLLOWING COMMAND:"
-      echo "scp -r ./raspiblitz-*.tar.gz ${defaultUploadUser}@${localip}:${defaultUploadPath}/"
+      echo "sftp -r ./raspiblitz-*.tar.gz ${defaultUploadUser}@${localip}:${defaultUploadPath}/"
       echo ""
       echo "Use password 'raspiblitz' to authenticate file transfer."
       echo "PRESS ENTER when upload is done."
@@ -68,24 +68,24 @@ if [ "${migrationOS}" == "raspiblitz" ]; then
         echo "PRESS ENTER to continue."
         read key
       elif [ "${error}" == "not-found" ]; then
-        echo "!! WARNING !!"
+        echo "# WARNING #"
         echo "There was no upload found in ${defaultUploadPath}"
         echo "PRESS ENTER to continue & retry ... or 'x'+ ENTER to cancel"
         read keyRetry
       elif [ "${error}" == "multiple" ]; then
-        echo "!! WARNING !!"
+        echo "# WARNING #"
         echo "There are multiple lnd-rescue files in directory ${defaultUploadPath}"
         echo "Make sure you upload only one tar.gz-file and start again."
         echo "PRESS ENTER to continue & retry ... or 'x'+ ENTER to cancel"
         read keyRetry
       elif [ "${error}" == "invalid" ]; then
-        echo "!! WARNING !!"
+        echo "# WARNING #"
         echo "The file uploaded is not a valid (complete upload failed or not correct file)."
         echo "PRESS ENTER to continue & retry ... or 'x'+ ENTER to cancel"
         read keyRetry
       else
         # create no result file and exit
-        echo "!! WARNING !! Unknown State (report to devs) error(${error})"
+        echo "# WARNING # Unknown State (report to devs) error(${error})"
         exit 1
       fi
 

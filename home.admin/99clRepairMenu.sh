@@ -16,7 +16,7 @@ function clRescan() {
   dialog --backtitle "Choose the new gap limit" \
   --title "Enter the rescan depth or blockheight (-)" \
   --inputbox "
-Enter the number of blocks to rescan from the current tip 
+Enter the number of blocks to rescan from the current tip
 or use a negative number for the absolute blockheight to scan from.
 
 If left empty will start to rescan from the block 700000 (-700000).
@@ -29,11 +29,18 @@ If left empty will start to rescan from the block 700000 (-700000).
   sudo systemctl restart ${netprefix}lightningd
 }
 
+function resetWallet() {
+    echo "# Delete ${CLCONF}"
+    sudo rm -f ${CLCONF}
+    echo "# Delete and recreate /home/bitcoin/.lightning/${CLNETWORK}"
+    sudo rm -rf /home/bitcoin/.lightning/${CLNETWORK}
+    sudo -u bitcoin mkdir /home/bitcoin/.lightning/${CLNETWORK}
+}
 
 # BASIC MENU INFO
 WIDTH=64
 BACKTITLE="RaspiBlitz"
-TITLE="C-lightning repair options for $CHAIN"
+TITLE="Core Lightning repair options for $CHAIN"
 MENU=""
 OPTIONS=()
 
@@ -76,31 +83,33 @@ case $CHOICE in
     /home/admin/config.scripts/cl.hsmtool.sh decrypt $CHAIN
     source /mnt/hdd/raspiblitz.conf
     ;;
-  
+
   PASSWORD_C)
     /home/admin/config.scripts/cl.hsmtool.sh change-password $CHAIN
     ;;
-  
+
   AUTOUNLOCK-ON)
     /home/admin/config.scripts/cl.hsmtool.sh autounlock-on $CHAIN
     ;;
-  
+
   AUTOUNLOCK-OFF)
     /home/admin/config.scripts/cl.hsmtool.sh autounlock-off $CHAIN
     ;;
-  
+
   BACKUP)
     if [ "${cl}" == "on" ] || [ "${cl}" == "1" ] && [ "${clEncryptedHSM}" != "on" ]; then
       dialog \
-       --title "Encrypt the C-lightning wallet" \
-       --msgbox "\nWill proceed to encrypt and lock the C-lightning wallet to prevent it from starting automatically after the backup" 9 55
+       --title "Encrypt the Core Lightning wallet" \
+       --msgbox "
+Will proceed to encrypt and lock the Core Lightning wallet to prevent it from starting automatically after the backup.
+Save this password as it will be needed to restore the backup (same as the Password C for CLN)." 10 55
       sudo /home/admin/config.scripts/cl.hsmtool.sh encrypt mainnet
     fi
     if [ "${clAutoUnlock}" = "on" ]; then
       /home/admin/config.scripts/cl.hsmtool.sh autounlock-off mainnet
     fi
     /home/admin/config.scripts/cl.hsmtool.sh lock mainnet
-    ## from dialogLightningWallet.sh 
+    ## from dialogLightningWallet.sh
     _temp="/var/cache/raspiblitz/temp/.temp.tmp"
     clear
     /home/admin/config.scripts/cl.backup.sh cl-export-gui production $_temp
@@ -110,10 +119,10 @@ case $CHOICE in
     echo "Press ENTER when finished downloading."
     read key
     ;;
-  
+
   RESET)
     # backup
-    ## from dialogLightningWallet.sh 
+    ## from dialogLightningWallet.sh
     _temp="/var/cache/raspiblitz/temp/.temp.tmp"
     clear
     /home/admin/config.scripts/cl.backup.sh cl-export-gui production $_temp
@@ -122,15 +131,12 @@ case $CHOICE in
     echo
     echo "The rescue file is stored on the SDcard named cl-rescue.*.tar.gz just in case."
     echo
-    echo "The next step will overwrite the old C-lighthning $CHAIN wallet"
+    echo "The next step will overwrite the old Core Lightning $CHAIN wallet"
     echo "Press ENTER to continue or CTRL+C to abort"
     read key
-    # reset
-    echo "# Delete ${CLCONF}"
-    sudo rm -f ${CLCONF}
-    echo "# Delete and recreate /home/bitcoin/.lightning/${CLNETWORK}"
-    sudo rm -rf /home/bitcoin/.lightning/${CLNETWORK}
-    sudo -u bitcoin mkdir /home/bitcoin/.lightning/${CLNETWORK}
+
+    resetWallet
+
     # make sure the new hsm_secret is treated as unencrypted and clear autounlock
     /home/admin/config.scripts/blitz.conf.sh set ${netprefix}clEncryptedHSM "off"
     /home/admin/config.scripts/blitz.conf.sh set ${netprefix}clAutoUnlock "off"
@@ -149,10 +155,10 @@ case $CHOICE in
       /home/admin/config.scripts/cl.install-service.sh signet
     fi
     ;;
-  
+
   FILERESTORE)
     # backup
-    ## from dialogLightningWallet.sh 
+    ## from dialogLightningWallet.sh
     _temp="/var/cache/raspiblitz/temp/.temp.tmp"
     clear
     /home/admin/config.scripts/cl.backup.sh cl-export-gui production $_temp
@@ -161,12 +167,12 @@ case $CHOICE in
     echo
     echo "The rescue file is stored on the SDcard named cl-rescue.*.tar.gz just in case."
     echo
-    echo "The next step will overwrite the old C-lighthning $CHAIN wallet"
+    echo "The next step will overwrite the old Core Lightning $CHAIN wallet"
     echo "Press ENTER to continue or CTRL+C to abort"
     read key
-    # reset
-    sudo rm /home/bitcoin/.lightning/${CLNETWORK}/hsm_secret
-    sudo rm -rf /home/bitcoin/.lightning/${CLNETWORK}/*.*
+
+    resetWallet
+
     # import file
     _temp="/var/cache/raspiblitz/temp/.temp.tmp"
     clear
@@ -174,10 +180,10 @@ case $CHOICE in
     source $_temp 2>/dev/null
     sudo rm $_temp 2>/dev/null
     ;;
-  
+
   SEEDRESTORE)
     # backup
-    ## from dialogLightningWallet.sh 
+    ## from dialogLightningWallet.sh
     _temp="/var/cache/raspiblitz/temp/.temp.tmp"
     clear
     /home/admin/config.scripts/cl.backup.sh cl-export-gui production $_temp
@@ -186,13 +192,12 @@ case $CHOICE in
     echo
     echo "The rescue file is stored on the SDcard named cl-rescue.*.tar.gz just in case."
     echo
-    echo "The next step will overwrite the old C-lighthning $CHAIN wallet"
+    echo "The next step will overwrite the old Core Lightning $CHAIN wallet"
     echo "Press ENTER to continue or CTRL+C to abort"
     read key
-    # reset
-    sudo rm /home/bitcoin/.lightning/${CLNETWORK}/hsm_secret
-    sudo rm -f /home/bitcoin/.lightning/${CLNETWORK}/config
-    sudo rm -rf /home/bitcoin/.lightning/${CLNETWORK}/*.*
+
+    resetWallet
+
     # import seed
     _temp="/var/cache/raspiblitz/.temp.tmp"
     /home/admin/config.scripts/cl.backup.sh seed-import-gui $_temp

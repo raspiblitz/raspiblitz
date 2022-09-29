@@ -137,8 +137,8 @@ if [ "${lndNode}" == "on" ]; then
   OPTIONS+=(e '-LND StaticChannelBackup USB Drive' ${LocalBackup})
 fi
 
-# C-Lightning & options/PlugIns
-OPTIONS+=(n 'CL C-LIGHTNING NODE' ${clNode})
+# Core Lightning & options/PlugIns
+OPTIONS+=(n 'CL CORE LIGHTNING NODE' ${clNode})
 if [ "${clNode}" == "on" ]; then
   OPTIONS+=(o '-CL CLBOSS Automatic Node Manager' ${clbossMenu})
   OPTIONS+=(h '-CL Wallet Encryption' ${clEncryptedHSMMenu})
@@ -411,7 +411,7 @@ choice="off"; check=$(echo "${CHOICES}" | grep -c "n")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${clNode}" != "${choice}" ]; then
   anychange=1
-  echo "# C-Lightning NODE Setting changed .."
+  echo "# Core Lightning NODE Setting changed .."
   if [ "${choice}" = "on" ]; then
     echo "# turning ON"
 
@@ -439,7 +439,7 @@ if [ "${clNode}" != "${choice}" ]; then
     /home/admin/config.scripts/cl.install.sh off signet
   fi
 else
-  echo "C-Lightning NODE setting unchanged."
+  echo "Core Lightning NODE setting unchanged."
 fi
 
 # CLBOSS process choice

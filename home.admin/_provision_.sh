@@ -303,13 +303,13 @@ fi
 # CORE LIGHTNING binary install
 if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ] || [ "${tcl}" == "on" ] || [ "${scl}" == "on" ]; then
   # if already installed by fatpack will skip 
-  echo "Provisioning C-Lightning Binary - run config script" >> ${logFile}
+  echo "Provisioning Core Lightning Binary - run config script" >> ${logFile}
   /home/admin/config.scripts/cl.install.sh install >> ${logFile} 2>&1
   echo "Provisioning cl-plugin.cln-grpc.sh - run config script" >> ${logFile}
   /home/admin/config.scripts/cl-plugin.cln-grpc.sh install >> ${logFile}
   /home/admin/config.scripts/cl-plugin.cln-grpc.sh on >> ${logFile}
 else
-    echo "Provisioning C-Lightning Binary - not active" >> ${logFile}
+    echo "Provisioning Core Lightning Binary - not active" >> ${logFile}
 fi
 
 # CL Mainnet

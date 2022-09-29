@@ -108,9 +108,9 @@ echo
 if [ ${#error} -gt 0 ]; then
     echo "FAIL: $error"
     echo
-    echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+    echo "#################################"
     echo "FAIL --> Was not able to send transaction (see error above)"
-    echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+    echo "#################################"
 else
     echo "Result: $result"
     echo

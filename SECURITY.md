@@ -82,7 +82,7 @@ Some apps (like Fully Noded or JoinMarket) activate the Bitcoin core wallet and 
 
 Please note that there is no perfect backup concept for the funds in your lightning channels yet. We strongly recommend using the `Static Channel Backup` provided by LND and consider off-line location backup of that file to have the best chances to recover Lightning funds in a case of recovering from a disaster.
 
-The C-ligthning lightning.sqlite3 is replicated on the SDcard from the disk in real time. See more details in the [C-lightning FAQ](FAQ.cl.md#backups)
+The C-ligthning lightning.sqlite3 is replicated on the SDcard from the disk in real time. See more details in the [Core Lightning FAQ](FAQ.cl.md#backups)
 
 
 For more practical information on this topic see: [Backup Channel Funds](README.md#backup-for-on-chain---channel-funds)

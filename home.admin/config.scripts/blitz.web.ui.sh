@@ -80,7 +80,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   # install info
   echo "# The WebUI is now available under:"
-  echo "# http://[LOCAIP]"
+  echo "# http://[LOCALIP]"
 
   exit 0
 fi
@@ -131,8 +131,3 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   sudo rm -r /var/www/public/* 2>/dev/null
   exit 0
 fi
-
-
-
-
-

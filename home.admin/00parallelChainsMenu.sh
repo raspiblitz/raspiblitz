@@ -17,7 +17,7 @@ plus=""
 if [ "${testnet}" == "on" ]; then
   OPTIONS+=(tSYS "TESTNET Monitoring & Configuration")
   if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then OPTIONS+=(tLND "TESTNET LND Wallet Options"); fi
-  if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ]; then OPTIONS+=(tCL "TESTNET C-Lightning Wallet Options"); fi
+  if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ]; then OPTIONS+=(tCL "TESTNET Core Lightning Wallet Options"); fi
 fi
 
 # just an optical splitter - ignored on select
@@ -25,7 +25,7 @@ OPTIONS+=(--- "----------------------------------")
 
 if [ "${signet}" == "on" ]; then
   OPTIONS+=(sSYS "SIGNET Monitoring & Configuration")
-  if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ]; then OPTIONS+=(sCL "SIGNET C-Lightning Wallet Options"); fi
+  if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ]; then OPTIONS+=(sCL "SIGNET Core Lightning Wallet Options"); fi
 fi
 
 # DONT OFFER SERVICES FOR TESTNET RIGHT NOW

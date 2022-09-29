@@ -10,7 +10,7 @@
 ##########################################################################
 
 defaultRepo="rootzoll"
-defaultBranch="v1.7"
+defaultBranch="v1.8"
 
 me="${0##/*}"
 
@@ -212,7 +212,7 @@ cpu="$(uname -m)" && echo "cpu=${cpu}"
 architecture="$(dpkg --print-architecture 2>/dev/null)" && echo "architecture=${architecture}"
 case "${cpu}" in
   arm*|aarch64|x86_64|amd64);;
-  *) echo -e "!!! FAIL !!!\nCan only build on ARM, aarch64, x86_64 not on: cpu=${cpu}"; exit 1;;
+  *) echo -e "# FAIL #\nCan only build on ARM, aarch64, x86_64 not on: cpu=${cpu}"; exit 1;;
 esac
 
 # AUTO-DETECTION: OPERATINGSYSTEM
@@ -234,7 +234,7 @@ if [ $(cat /etc/os-release 2>/dev/null | grep -c 'Debian') -gt 0 ]; then
 elif [ $(cat /etc/os-release 2>/dev/null | grep -c 'Ubuntu') -gt 0 ]; then
   baseimage="ubuntu"
 else
-  echo "\n!!! FAIL: Base Image cannot be detected or is not supported."
+  echo "\n# FAIL: Base Image cannot be detected or is not supported."
   cat /etc/os-release 2>/dev/null
   uname -a
   exit 1
@@ -298,7 +298,9 @@ echo -e "\n*** SOFTWARE UPDATE ***"
 # ufw -> firewall
 # sqlite3 -> database
 # fdisk -> create partitions
-general_utils="policykit-1 htop git curl bash-completion vim jq dphys-swapfile bsdmainutils autossh telnet vnstat parted dosfstools btrfs-progs fbi sysbench build-essential dialog bc python3-dialog unzip whois fdisk"
+# lsb-release -> needed to know which distro version we're running to add APT sources
+general_utils="policykit-1 htop git curl bash-completion vim jq dphys-swapfile bsdmainutils autossh telnet vnstat parted dosfstools btrfs-progs fbi sysbench build-essential dialog bc python3-dialog unzip whois fdisk lsb-release""
+
 python_dependencies="python3-venv python3-dev python3-wheel python3-jinja2 python3-pip"
 server_utils="rsync net-tools xxd netcat openssh-client openssh-sftp-server sshpass psmisc ufw sqlite3"
 [ "${baseimage}" = "armbian" ] && armbian_dependencies="armbian-config" # add armbian-config
@@ -334,7 +336,7 @@ elif [ -f "/usr/bin/python3.8" ]; then
   sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.8 1
   echo "python calls python3.8"
 else
-  echo "!!! FAIL !!!"
+  echo "# FAIL #"
   echo "There is no tested version of python present"
   exit 1
 fi

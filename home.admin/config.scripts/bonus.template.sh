@@ -286,7 +286,7 @@ server {
   # write the Tor config
   echo "
 server {
-    listen localhost:${PORT_TOR_CLEAR};
+    listen ${PORT_TOR_CLEAR};
     server_name _;
     access_log /var/log/nginx/access_${APPID}.log;
     error_log /var/log/nginx/error_${APPID}.log;
@@ -301,7 +301,7 @@ server {
   # write the Tor+HTTPS config
   echo "
 server {
-    listen localhost:${PORT_TOR_SSL} ssl;
+    listen ${PORT_TOR_SSL} ssl;
     server_name _;
     include /etc/nginx/snippets/ssl-params.conf;
     include /etc/nginx/snippets/ssl-certificate-app-data-tor.conf;

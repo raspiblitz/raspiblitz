@@ -156,7 +156,7 @@ if [ ${mode} = "lnd-export" ]; then
   sudo chown ${fileowner}:${fileowner} ${downloadPath}/lnd-rescue.tar.gz 1>&2
 
   # delete old backups
-  rm ${downloadPath}/lnd-rescue-*.tar.gz 2>/dev/null 1>/dev/null
+  # rm ${downloadPath}/lnd-rescue-*.tar.gz 2>/dev/null 1>/dev/null
 
   # name with md5 checksum
   md5checksum=$(md5sum ${downloadPath}/lnd-rescue.tar.gz | head -n1 | cut -d " " -f1)
@@ -190,7 +190,7 @@ if [ ${mode} = "lnd-export-gui" ]; then
   # get local ip info
   source <(/home/admin/config.scripts/internet.sh status local)
 
-  # offer SCP for download
+  # offer SFTP for download
   clear
   echo
   echo "********************************"
@@ -198,9 +198,9 @@ if [ ${mode} = "lnd-export-gui" ]; then
   echo "********************************"
   echo 
   echo "ON YOUR MAC & LINUX LAPTOP - RUN IN NEW TERMINAL:"
-  echo "scp '${fileowner}@${localip}:${filename}' ./"
+  echo "sftp '${fileowner}@${localip}:${filename}' ./"
   echo "ON WINDOWS USE:"
-  echo "scp ${fileowner}@${localip}:${filename} ."
+  echo "sftp ${fileowner}@${localip}:${filename} ."
   echo "Use password A to authenticate file transfer."
   echo
   echo "Check for correct file size after transfer: ${size} byte"
@@ -299,7 +299,7 @@ if [ ${mode} = "lnd-import-gui" ]; then
       echo "To make upload open a new terminal on your laptop,"
       echo "change into the directory where your lnd-rescue file is and"
       echo "COPY, PASTE AND EXECUTE THE FOLLOWING COMMAND:"
-      echo "scp -r ./lnd-rescue-*.tar.gz ${defaultUploadUser}@${localip}:${defaultUploadPath}/"
+      echo "sftp -r ./lnd-rescue-*.tar.gz ${defaultUploadUser}@${localip}:${defaultUploadPath}/"
       echo
       echo "Use ${passwordInfo} to authenticate file transfer."
       echo "PRESS ENTER when upload is done"
@@ -312,24 +312,24 @@ if [ ${mode} = "lnd-import-gui" ]; then
         echo "PRESS ENTER to continue."
         read key
       elif [ "${error}" == "not-found" ]; then
-        echo "!! WARNING !!"
+        echo "# WARNING #"
         echo "There was no upload found in ${defaultUploadPath}"
         echo "PRESS ENTER to continue & retry ... or 'x'+ ENTER to cancel"
         read keyRetry
       elif [ "${error}" == "multiple" ]; then
-        echo "!! WARNING !!"
+        echo "# WARNING #"
         echo "There are multiple lnd-rescue files in directory ${defaultUploadPath}"
         echo "Make sure you upload only one tar.gz-file and start again."
         echo "PRESS ENTER to continue & retry ... or 'x'+ ENTER to cancel"
         read keyRetry
       elif [ "${error}" == "invalid" ]; then
-        echo "!! WARNING !!"
+        echo "# WARNING #"
         echo "The file uploaded is not a valid (complete upload failed or not correct file)."
         echo "PRESS ENTER to continue & retry ... or 'x'+ ENTER to cancel"
         read keyRetry
       else
         # create no result file and exit
-        echo "!! WARNING !! Unknown State (report to devs)"
+        echo "# WARNING # Unknown State (report to devs)"
         exit 1
       fi
 
@@ -413,7 +413,7 @@ if [ ${mode} = "scb-export-gui" ]; then
   echo "**************************************"
   echo 
   echo "RUN THE FOLLOWING COMMAND ON YOUR LAPTOP IN NEW TERMINAL:"
-  echo "scp -r ${fileuser}@${localip}:${filename} ./"
+  echo "sftp -r ${fileuser}@${localip}:${filename} ./"
   echo ""
   echo "Use password A to authenticate file transfer."
   echo
@@ -492,7 +492,7 @@ if [ ${mode} = "scb-import-gui" ]; then
       echo "To make upload open a new terminal and change,"
       echo "into the directory where your lnd-rescue file is and"
       echo "COPY, PASTE AND EXECUTE THE FOLLOWING COMMAND:"
-      echo "scp ./channel.backup ${defaultUploadUser}@${localip}:${defaultUploadPath}/"
+      echo "sftp ./channel.backup ${defaultUploadUser}@${localip}:${defaultUploadPath}/"
       echo ""
       echo "Use ${passwordInfo} to authenticate file transfer."
       echo "PRESS ENTER when upload is done."
@@ -505,23 +505,23 @@ if [ ${mode} = "scb-import-gui" ]; then
         echo "PRESS ENTER to continue."
         read key
       elif [ "${error}" == "not-found" ]; then
-        echo "!! WARNING !!"
+        echo "# WARNING #"
         echo "There was no upload found in ${defaultUploadPath}"
         echo "PRESS ENTER to continue & retry ... or 'x'+ ENTER to cancel"
         read keyRetry
       elif [ "${error}" == "multiple" ]; then
-        echo "!! WARNING !!"
+        echo "# WARNING #"
         echo "There are multiple lnd-rescue files in directory ${defaultUploadPath}"
         echo "Make sure you upload only one tar.gz-file and start again."
         echo "PRESS ENTER to continue & retry ... or 'x'+ ENTER to cancel"
         read keyRetry
       elif [ "${error}" == "invalid" ]; then
-        echo "!! WARNING !!"
+        echo "# WARNING #"
         echo "The file uploaded is not a valid (complete upload failed or not correct file)."
         echo "PRESS ENTER to continue & retry ... or 'x'+ ENTER to cancel"
         read keyRetry
       else
-        echo "!! WARNING !! Unknown State (report to devs)"
+        echo "# WARNING # Unknown State (report to devs)"
         exit 1
       fi
 

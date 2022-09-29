@@ -191,9 +191,9 @@ error=$(cat ${_error})
 #echo "error(${error})"
 
 if [ ${#error} -gt 0 ]; then
-  echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+  echo "###############"
   echo "FAIL"
-  echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+  echo "###############"
   echo "${error}"
 else
   echo "******************************"

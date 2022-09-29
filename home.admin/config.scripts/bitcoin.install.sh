@@ -29,7 +29,7 @@ if [ "$1" = "install" ]; then
   # receive signer key
   if ! gpg --keyserver hkp://keyserver.ubuntu.com --recv-key "71A3 B167 3540 5025 D447 E8F2 7481 0B01 2346 C9A6"
   then
-    echo "!!! FAIL !!! Couldn't download Wladimir J. van der Laan's PGP pubkey"
+    echo "# FAIL # Couldn't download Wladimir J. van der Laan's PGP pubkey"
     exit 1
   fi
   
@@ -45,7 +45,7 @@ if [ "$1" = "install" ]; then
   echo "correctKey(${correctKey})"
   if [ ${correctKey} -lt 1 ] || [ ${goodSignature} -lt 1 ]; then
     echo
-    echo "!!! BUILD FAILED --> PGP Verify not OK / signature(${goodSignature}) verify(${correctKey})"
+    echo "# BUILD FAILED --> PGP Verify not OK / signature(${goodSignature}) verify(${correctKey})"
     exit 1
   else
     echo
@@ -73,7 +73,7 @@ if [ "$1" = "install" ]; then
      sudo -u admin wget https://bitcoincore.org/bin/bitcoin-core-${bitcoinVersion}/${binaryName}
   fi
   if [ ! -f "./${binaryName}" ]; then
-     echo "!!! FAIL !!! Could not download the BITCOIN BINARY"
+     echo "# FAIL # Could not download the BITCOIN BINARY"
      exit 1
   else
   
@@ -85,7 +85,7 @@ if [ "$1" = "install" ]; then
     echo "Valid SHA256 checksum should be: ${bitcoinSHA256}"
     echo "Downloaded binary SHA256 checksum: ${binaryChecksum}"
     if [ "${binaryChecksum}" != "${bitcoinSHA256}" ]; then
-      echo "!!! FAIL !!! Downloaded BITCOIN BINARY not matching SHA256 checksum: ${bitcoinSHA256}"
+      echo "# FAIL # Downloaded BITCOIN BINARY not matching SHA256 checksum: ${bitcoinSHA256}"
       rm -v ./${binaryName}
       exit 1
     else
@@ -106,7 +106,7 @@ if [ "$1" = "install" ]; then
   installed=$(sudo -u admin bitcoind --version | grep "${bitcoinVersion}" -c)
   if [ ${installed} -lt 1 ]; then
     echo
-    echo "!!! BUILD FAILED --> Was not able to install bitcoind version(${bitcoinVersion})"
+    echo "# BUILD FAILED --> Was not able to install bitcoind version(${bitcoinVersion})"
     exit 1
   fi
   if [ "$(alias | grep -c "alias bitcoinlog")" -eq 0 ];then 

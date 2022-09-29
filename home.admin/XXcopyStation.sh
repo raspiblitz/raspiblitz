@@ -187,7 +187,7 @@ do
         size=$(lsblk -o NAME,SIZE -b | grep "^${detectedDrive}" | awk '$1=$1' | cut -d " " -f 2)
         echo "size: ${size}"
         if [ ${size} -lt 900000000000 ]; then
-            echo "!! THE HDD/SSD IS TOO SMALL <900GB - use at least 1TB"
+            echo "# THE HDD/SSD IS TOO SMALL <900GB - use at least 1TB"
             /home/admin/_cache.sh set message "HDD smaller than 1TB: ${detectedDrive}"
             echo
             sleep 10

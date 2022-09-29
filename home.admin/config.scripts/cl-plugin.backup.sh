@@ -2,7 +2,7 @@
 
 function help(){
   echo
-  echo "Install the backup plugin for C-lightning"
+  echo "Install the backup plugin for Core Lightning"
   echo "Replicates the lightningd.sqlite3 database on the SDcard"
   echo
   echo "Usage:"

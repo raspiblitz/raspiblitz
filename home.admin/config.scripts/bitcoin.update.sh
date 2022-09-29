@@ -168,7 +168,7 @@ if [ "${mode}" = "tested" ]||[ "${mode}" = "reckless" ]||[ "${mode}" = "custom" 
   if ! gpg --recv-key "$customKey"
   then
     echo
-    echo "!!! FAIL !!! Could not download the PGP pubkey"
+    echo "# FAIL # Could not download the PGP pubkey"
     echo
     echo "See the signers of this release:"
     echo
@@ -184,7 +184,7 @@ if [ "${mode}" = "tested" ]||[ "${mode}" = "reckless" ]||[ "${mode}" = "custom" 
   echo "correctKey(${correctKey})"
   if [ ${correctKey} -lt 1 ] || [ ${goodSignature} -lt 1 ]; then
     echo
-    echo "# !!! BUILD FAILED --> PGP Verify not OK / signature(${goodSignature}) verify(${correctKey})"
+    echo "# BUILD FAILED --> PGP Verify not OK / signature(${goodSignature}) verify(${correctKey})"
     exit 1
   else
     echo
@@ -197,7 +197,7 @@ if [ "${mode}" = "tested" ]||[ "${mode}" = "reckless" ]||[ "${mode}" = "custom" 
   wget https://bitcoincore.org/bin/bitcoin-core-${pathVersion}/${binaryName}
   if [ ! -f "./${binaryName}" ]
   then
-    echo "# !!! FAIL !!! Downloading BITCOIN BINARY did not succeed."
+    echo "# FAIL # Downloading BITCOIN BINARY did not succeed."
     exit 1
   fi
 
@@ -207,7 +207,7 @@ if [ "${mode}" = "tested" ]||[ "${mode}" = "reckless" ]||[ "${mode}" = "custom" 
   if [ "${checksumTest}" -eq 0 ]; then
     # get the sha256 value for the corresponding platform from signed hash sum file
     bitcoinSHA256=$(grep -i "${binaryName}}" SHA256SUMS | cut -d " " -f1)
-    echo "!!! FAIL !!! Downloaded BITCOIN BINARY CHECKSUM:"
+    echo "# FAIL # Downloaded BITCOIN BINARY CHECKSUM:"
     echo "$(sha256sum ${binaryName})"
     echo "NOT matching SHA256 checksum:"
     echo "${bitcoinSHA256}"
@@ -241,7 +241,7 @@ if [ "${mode}" = "tested" ]||[ "${mode}" = "reckless" ]||[ "${mode}" = "custom" 
   installed=$(bitcoind --version | grep "${bitcoinVersion}" -c)
   if [ ${installed} -lt 1 ]; then
     echo
-    echo "# !!! BUILD FAILED --> Was not able to install bitcoind version(${bitcoinVersion})"
+    echo "# BUILD FAILED --> Was not able to install bitcoind version(${bitcoinVersion})"
     exit 1
   fi
 

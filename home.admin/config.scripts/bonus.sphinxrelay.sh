@@ -187,7 +187,7 @@ fi
 # IMPORTANT: all this needs to work without sudo because will run from systemd as sphinxrelay user
 if [ "$1" = "write-environment" ]; then
 
-  # !! all this needs to run (be called as) user: sphinxrelay
+  # all this needs to run (be called as) user: sphinxrelay
 
   # get basic data from status
   source <(/home/admin/config.scripts/bonus.sphinxrelay.sh status)

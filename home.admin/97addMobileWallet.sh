@@ -80,7 +80,7 @@ if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
 fi
 
 if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ]; then
-	OPTIONS+=(ZEUS_CLREST "Zeus to C-lightningREST (Android or iOS)")
+	OPTIONS+=(ZEUS_CLREST "Zeus to Core LightningREST (Android or iOS)")
 	OPTIONS+=(ZEUS_SPARK "Zeus to Sparko (Android or iOS)")
 	OPTIONS+=(SPARK "Spark Wallet to Sparko (Android - EXPERIMENTAL)" )
 	OPTIONS+=(FULLYNODED_CL "Fully Noded to CL REST (iOS+Tor)")

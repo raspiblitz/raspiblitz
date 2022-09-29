@@ -2,20 +2,16 @@
 # https://lightning.readthedocs.io/
 
 # https://github.com/ElementsProject/lightning/releases
-CLVERSION=v0.11.2
+CLVERSION=v0.12.1
 
 # install the latest master by using the last commit id
 # https://github.com/ElementsProject/lightning/commit/master
 # CLVERSION="063366ed7e3b7cc12a8d1681acc2b639cf07fa23"
 
 # https://github.com/ElementsProject/lightning/tree/master/contrib/keys
-PGPsigner="rustyrussel"
-PGPpubkeyLink="https://raw.githubusercontent.com/ElementsProject/lightning/master/contrib/keys/rustyrussell.txt"
-PGPpubkeyFingerprint="D9200E6CD1ADB8F1"
-
-#PGPsigner="cdecker"
-#PGPpubkeyLink="https://raw.githubusercontent.com/ElementsProject/lightning/master/contrib/keys/${PGPsigner}.txt"
-#PGPpubkeyFingerprint="A26D6D9FE088ED58"
+PGPsigner="niftynei" # rustyrussel D9200E6CD1ADB8F1 # cdecker A26D6D9FE088ED58
+PGPpubkeyLink="https://raw.githubusercontent.com/ElementsProject/lightning/master/contrib/keys/${PGPsigner}.txt"
+PGPpubkeyFingerprint="BFF0F67810C1EED1"
 
 # help
 if [ $# -eq 0 ]||[ "$1" = "-h" ]||[ "$1" = "--help" ];then
@@ -40,13 +36,12 @@ function installDependencies()
   # from https://lightning.readthedocs.io/INSTALL.html#to-build-on-ubuntu
   sudo apt-get install -y \
    autoconf automake build-essential git libtool libgmp-dev \
-   libsqlite3-dev python3 python3-mako net-tools zlib1g-dev libsodium-dev \
+   libsqlite3-dev python3 net-tools zlib1g-dev libsodium-dev \
    gettext
   # additional requirements
   sudo apt-get install -y postgresql libpq-dev
-  # mrkd and mistune needs to be globally available for the build
-  sudo pip3 install mrkd==0.2.0
-  sudo pip3 install mistune==0.8.4
+  # upgrade pip
+  sudo pip3 install --upgrade pip
   # poetry
   sudo -u bitcoin pip3 install --user poetry
   if ! grep -Eq '^PATH="$HOME/.local/bin:$PATH"' /mnt/hdd/raspiblitz.conf; then
@@ -93,7 +88,7 @@ if [ "$1" = "install" ]; then
 #  fingerprint=$(gpg "pgp_keys.asc" 2>/dev/null | grep "${PGPpubkeyFingerprint}" -c)
 #  if [ ${fingerprint} -lt 1 ]; then
 #    echo
-#    echo "!!! WARNING --> the PGP fingerprint is not as expected for ${PGPsigner}"
+#    echo "# WARNING --> the PGP fingerprint is not as expected for ${PGPsigner}"
 #    echo "Should contain PGP: ${PGPpubkeyFingerprint}"
 #    echo "PRESS ENTER to TAKE THE RISK if you think all is OK"
 #    read key
@@ -111,7 +106,7 @@ if [ "$1" = "install" ]; then
 #  echo "correctKey(${correctKey})"
 #  if [ ${correctKey} -lt 1 ] || [ ${goodSignature} -lt 1 ]; then
 #    echo
-#    echo "!!! DOWNLOAD FAILED --> PGP verification not OK / signature(${goodSignature}) verify(${correctKey})"
+#    echo "# DOWNLOAD FAILED --> PGP verification not OK / signature(${goodSignature}) verify(${correctKey})"
 #    exit 1
 #  else
 #    echo
@@ -128,7 +123,7 @@ if [ "$1" = "install" ]; then
 #  echo "goodHash(${goodHash})"
 #  if [ ${goodHash} -lt 1 ]; then
 #    echo
-#    echo "!!! BUILD FAILED --> Hash check not OK"
+#    echo "# BUILD FAILED --> Hash check not OK"
 #    exit 1
 #  else
 #    echo
@@ -162,14 +157,14 @@ if [ "$1" = "install" ]; then
   installed=$(sudo -u bitcoin lightning-cli --version)
   if [ ${#installed} -eq 0 ]; then
     echo
-    echo "!!! BUILD FAILED --> Was not able to install Core Lightning"
+    echo "# BUILD FAILED --> Was not able to install Core Lightning"
     exit 1
   fi
 
   correctVersion=$(echo "${installed}" | grep -c "${CLVERSION:1}")
   if [ "${correctVersion}" -eq 0 ]; then
     echo
-    echo "!!! BUILD FAILED --> installed Core Lightning is not version ${CLVERSION}"
+    echo "# BUILD FAILED --> installed Core Lightning is not version ${CLVERSION}"
     sudo -u bitcoin lightning-cli --version
     exit 1
   fi
@@ -432,8 +427,8 @@ if [ "$1" = "display-seed" ]; then
       ack=0
       while [ ${ack} -eq 0 ]
       do
-        whiptail --title "C-Lightning ${displayNetwork} Wallet" \
-          --msgbox "This is your C-Lightning ${displayNetwork} wallet seed. Store these numbered words in a safe location:\n\n${seedwords6x4}" 13 76
+        whiptail --title "Core Lightning ${displayNetwork} Wallet" \
+          --msgbox "This is your Core Lightning ${displayNetwork} wallet seed. Store these numbered words in a safe location:\n\n${seedwords6x4}" 13 76
         whiptail --title "Please Confirm" --yes-button "Show Again" --no-button "CONTINUE" --yesno "  Are you sure that you wrote down the word list?" 8 55
         if [ $? -eq 1 ]; then
           ack=1
@@ -441,13 +436,13 @@ if [ "$1" = "display-seed" ]; then
       done
     else
       dialog \
-       --title "C-Lightning ${displayNetwork} Wallet" \
+       --title "Core Lightning ${displayNetwork} Wallet" \
        --exit-label "exit" \
        --textbox "${seedwordFile}" 14 92
     fi
   else
     # hsmFile="/home/bitcoin/.lightning/${CLNETWORK}/hsm_secret"
-    whiptail --title "C-Lightning ${displayNetwork} Wallet Info" --msgbox "Your C-Lightning ${displayNetwork} wallet was already created before - there are no seed words available.\n\nTo secure your wallet secret you can manually backup the file: /home/bitcoin/.lightning/${CLNETWORK}/hsm_secret" 11 76
+    whiptail --title "Core Lightning ${displayNetwork} Wallet Info" --msgbox "Your Core Lightning ${displayNetwork} wallet was already created before - there are no seed words available.\n\nTo secure your wallet secret you can manually backup the file: /home/bitcoin/.lightning/${CLNETWORK}/hsm_secret" 11 76
   fi
 
   exit 0
@@ -471,7 +466,7 @@ if [ "$1" = "off" ];then
   # if cl mainnet was default - remove
   if [ "${CHAIN}" == "mainnet" ] && [ "${lightning}" == "cl" ]; then
     echo "# Core Lightning is REMOVED as the default lightning implementation"
-    /home/admin/config.scripts/blitz.conf.sh set lightning ""
+    /home/admin/config.scripts/blitz.conf.sh set lightning "none"
     if [ "${lnd}" == "on" ]; then
       echo "# LND is now the new default lightning implementation"
       /home/admin/config.scripts/blitz.conf.sh set lightning "lnd"

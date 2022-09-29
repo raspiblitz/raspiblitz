@@ -6,7 +6,7 @@ SPARKVERSION="v0.3.1"
 # command info
 if [ $# -lt 1 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ];then
   echo
-  echo "Install, remove or get info about the Spark Wallet for C-lightning"
+  echo "Install, remove or get info about the Spark Wallet for Core Lightning"
   echo "version: $SPARKVERSION"
   echo "Usage:"
   echo "cl.spark.sh [on|off|menu] <testnet|mainnet|signet> "

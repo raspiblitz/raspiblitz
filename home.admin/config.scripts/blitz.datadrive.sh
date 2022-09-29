@@ -1130,7 +1130,7 @@ if [ "$1" = "raid" ] && [ "$2" = "on" ]; then
   if [ ${usbdevBTRFS} -eq 1 ]; then
     # edge case: already contains BTRFS data
     # TODO: once implemented -> also make sure that dev1 is named "DATASTORE" and if 2nd is other -> format and add as raid
-    >&2 echo "# ERROR: !! NOT IMPLEMENTED YET -> devices seem contain old data"
+    >&2 echo "# ERROR: # NOT IMPLEMENTED YET -> devices seem contain old data"
     >&2 echo "# if you dont care about that data: format on other computer with FAT"
     echo "error='old data on dev'"
     exit 1
@@ -1462,7 +1462,7 @@ if [ "$1" = "link" ]; then
     >&2 echo "# - linking temp into /mnt/hdd"
     rm /mnt/hdd/temp 2>/dev/null
     ln -s /mnt/temp /mnt/hdd/temp
-    chown -R bitcoin:bitcoin /mnt/temp 
+    chown -R bitcoin:bitcoin /mnt/temp
 
     >&2 echo "# - creating snapshots folder"
     mkdir -p /mnt/hdd/snapshots
@@ -1553,10 +1553,10 @@ if [ "$1" = "swap" ]; then
 
     fi
     sed -i "s/^CONF_SWAPSIZE=/#CONF_SWAPSIZE=/g" /etc/dphys-swapfile 
-    sed -i "s/^#CONF_MAXSWAP=.*/CONF_MAXSWAP=4096/g" /etc/dphys-swapfile
+    sed -i "s/^#CONF_MAXSWAP=.*/CONF_MAXSWAP=3072/g" /etc/dphys-swapfile
 
     >&2 echo "# Creating SWAP file .."
-    dd if=/dev/zero of=$externalSwapPath count=4096 bs=1MiB 1>/dev/null
+    dd if=/dev/zero of=$externalSwapPath count=3072 bs=1MiB 1>/dev/null
     chmod 0600 $externalSwapPath 1>/dev/null
 
     >&2 echo "# Activating new SWAP"

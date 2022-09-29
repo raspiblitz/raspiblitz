@@ -85,6 +85,10 @@ usermod -G bitcoin root
 /home/admin/_cache.sh set system_count_start_blockchain "0"
 /home/admin/_cache.sh set system_count_start_lightning "0"
 /home/admin/_cache.sh set system_count_start_tui "0"
+/home/admin/_cache.sh set btc_default_peers "0"
+/home/admin/_cache.sh set btc_default_sync_percentage "0"
+/home/admin/_cache.sh set btc_default_address ""
+/home/admin/_cache.sh set btc_default_port ""
 
 # import all base values from raspiblitz.info
 echo "importing: ${infoFile}"
@@ -441,7 +445,7 @@ do
             fi
 
           else
-            echo "!! ERROR --> ${error}"
+            echo "# ERROR --> ${error}"
           fi
         fi
 
@@ -472,7 +476,7 @@ do
               /home/admin/_cache.sh set btc_default_port "${btc_port}"
             fi
           else
-            echo "!! ERROR --> ${error}"
+            echo "# ERROR --> ${error}"
           fi
         fi
 
@@ -495,7 +499,7 @@ do
               /home/admin/_cache.sh set btc_default_mempool_transactions "${btc_mempool_transactions}"
             fi
           else
-            echo "!! ERROR --> ${error}"
+            echo "# ERROR --> ${error}"
           fi
         fi
       fi
@@ -598,7 +602,7 @@ do
             /home/admin/_cache.sh set ln_default_alias "${ln_lnd_alias}"
           fi
         else
-          echo "!! ERROR --> ${error}"
+          echo "# ERROR --> ${error}"
         fi
       fi
 
@@ -662,7 +666,7 @@ do
             /home/admin/_cache.sh set ln_default_recovery_done "${ln_lnd_recovery_done}"
           fi
         else
-          echo "!! ERROR --> ${error}"
+          echo "# ERROR --> ${error}"
         fi
       fi
 
@@ -697,7 +701,7 @@ do
             /home/admin/_cache.sh set ln_default_wallet_channels_pending "${ln_lnd_wallet_channels_pending}"
           fi
         else
-          echo "!! ERROR --> ${error}"
+          echo "# ERROR --> ${error}"
         fi
       fi
 
@@ -726,14 +730,14 @@ do
             /home/admin/_cache.sh set ln_default_fees_total "${ln_lnd_fees_total}"
           fi
         else
-          echo "!! ERROR --> ${error}"
+          echo "# ERROR --> ${error}"
         fi
       fi
     fi
   done
 
   ###################
-  # Lightning (c-lightning)
+  # Lightning (Core Lightning)
 
   # loop thru mainet, testnet & signet
   networks=( "main" "test" "sig" )
@@ -878,7 +882,7 @@ do
             /home/admin/_cache.sh set ln_default_recovery_done "${ln_cl_recovery_done}"
           fi
         else
-          echo "!! ERROR --> ${error}"
+          echo "# ERROR --> ${error}"
         fi
       fi
 
@@ -913,7 +917,7 @@ do
             /home/admin/_cache.sh set ln_default_wallet_channels_pending "${ln_cl_wallet_channels_pending}"
           fi
         else
-          echo "!! ERROR --> ${error}"
+          echo "# ERROR --> ${error}"
         fi
       fi
     fi

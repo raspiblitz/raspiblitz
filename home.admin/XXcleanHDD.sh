@@ -4,7 +4,7 @@ extraParameter="$1"
 forceParameter="$2"
 if [ "${extraParameter}" = "-all" ]; then
 
-    echo "# !!!! This will DELETE ALL DATA & POSSIBLE FUNDS from the HDD !!!!"
+    echo "## This will DELETE ALL DATA & POSSIBLE FUNDS from the HDD ##"
     echo "# Press ENTER to really continue - CTRL+c to CANCEL (last chance)"
     read key
 
@@ -52,7 +52,7 @@ elif [ "${extraParameter}" = "-blockchain" ]; then
     
 else
 
-    echo "!!!! This will DELETE your personal data & POSSIBLE FUNDS from the HDD !!!!"
+    echo "## This will DELETE your personal data & POSSIBLE FUNDS from the HDD ##"
     echo "--> It will keep Blockchain data - so you dont have to download/copy again."
     echo "Press ENTER to really continue - CTRL+c to CANCEL (last chance)"
     read key
