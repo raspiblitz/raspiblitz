@@ -4,10 +4,11 @@
  
 - New: Support of X708 UPS HAT [details](https://github.com/rootzoll/raspiblitz/pull/3087)
 - Update: LND v0.15.1 [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.15.1-beta
+- Update: Core Lightning v0.12.1 [details](https://github.com/ElementsProject/lightning/releases/tag/v0.12.1)
 - Update: RTL v0.13.0 with update option [details](https://github.com/Ride-The-Lightning/RTL/releases/tag/v0.12.3)
 - Update: LNbits 0.9.2 [details](https://github.com/lnbits/lnbits-legend/releases/tag/0.9.2)
+- Update: ItchySats 0.6.1 [details](https://github.com/itchysats/itchysats/)
 - Info: Run RaspiBlitz on Proxmox [details](https://github.com/rootzoll/raspiblitz/tree/dev/alternative.platforms/Proxmox)
-- Update: Core Lightning v0.12.1 [details](https://github.com/ElementsProject/lightning/releases/tag/v0.12.1)
 
 ## What's new in Version 1.8.0 of RaspiBlitz?
 
