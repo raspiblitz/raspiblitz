@@ -102,19 +102,19 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # NGINX
     ##################
     # setup nginx symlinks
-    sudo cp -f /home/admin/assets/nginx/sites-available/joinmarket_webui_ssl.conf /etc/nginx/sites-available/joinmarket_webui_ssl.conf
-    sudo cp -f /home/admin/assets/nginx/sites-available/joinmarket_webui_tor.conf /etc/nginx/sites-available/joinmarket_webui_tor.conf
-    sudo cp -f /home/admin/assets/nginx/sites-available/joinmarket_webui_tor_ssl.conf /etc/nginx/sites-available/joinmarket_webui_tor_ssl.conf
-    sudo ln -sf /etc/nginx/sites-available/joinmarket_webui_ssl.conf /etc/nginx/sites-enabled/
-    sudo ln -sf /etc/nginx/sites-available/joinmarket_webui_tor.conf /etc/nginx/sites-enabled/
-    sudo ln -sf /etc/nginx/sites-available/joinmarket_webui_tor_ssl.conf /etc/nginx/sites-enabled/
+    sudo cp -f /home/admin/assets/nginx/sites-available/jam_ssl.conf /etc/nginx/sites-available/jam_ssl.conf
+    sudo cp -f /home/admin/assets/nginx/sites-available/jam_tor.conf /etc/nginx/sites-available/jam_tor.conf
+    sudo cp -f /home/admin/assets/nginx/sites-available/jam_tor_ssl.conf /etc/nginx/sites-available/jam_tor_ssl.conf
+    sudo ln -sf /etc/nginx/sites-available/jam_ssl.conf /etc/nginx/sites-enabled/
+    sudo ln -sf /etc/nginx/sites-available/jam_tor.conf /etc/nginx/sites-enabled/
+    sudo ln -sf /etc/nginx/sites-available/jam_tor_ssl.conf /etc/nginx/sites-enabled/
     sudo nginx -t
     sudo systemctl reload nginx
 
     # open the firewall
     echo "*** Updating Firewall ***"
-    sudo ufw allow from any to any port 7500 comment 'allow JoinMarket Web UI HTTP'
-    sudo ufw allow from any to any port 7501 comment 'allow JoinMarket Web UI HTTPS'
+    sudo ufw allow from any to any port 7500 comment 'allow Jam HTTP'
+    sudo ufw allow from any to any port 7501 comment 'allow Jam HTTPS'
     echo ""
 
     # SSL
@@ -160,8 +160,10 @@ WantedBy=multi-user.target
 " | sudo tee /etc/systemd/system/joinmarket-api.service
     sudo systemctl enable joinmarket-api
 
+    # remove legacy name
+    /home/admin/config.scripts/blitz.conf.sh delete joinmarketWebUI $RASPIBLITZ_CONF
     # setting value in raspiblitz config
-    sudo sed -i "s/^joinmarketWebUI=.*/joinmarketWebUI=on/g" $RASPIBLITZ_CONF
+    /home/admin/config.scripts/blitz.conf.sh set jam on $RASPIBLITZ_CONF
 
     # Hidden Service for jam if Tor is active
     if [ "${runBehindTor}" = "on" ]; then
@@ -282,12 +284,12 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo rm -f /etc/systemd/system/joinmarket-api.service
 
     # close ports on firewall
-    sudo ufw delete allow from any to any port 7500 comment 'allow JoinMarket Web UI HTTP'
-    sudo ufw delete allow from any to any port 7501 comment 'allow JoinMarket Web UI HTTPS'
+    sudo ufw delete allow from any to any port 7500
+    sudo ufw delete allow from any to any port 7501
 
     # remove nginx symlinks
-    sudo rm -f /etc/nginx/sites-enabled/joinmarket_webui_*
-    sudo rm -f /etc/nginx/sites-available/joinmarket_webui_*
+    sudo rm -f /etc/nginx/sites-enabled/jam_*
+    sudo rm -f /etc/nginx/sites-available/jam_*
     sudo nginx -t
     sudo systemctl reload nginx
 
@@ -303,7 +305,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo rm -rf $HOME_DIR/.joinmarket/ssl
 
     # setting value in raspi blitz config
-    sudo sed -i "s/^joinmarketWebUI=.*/joinmarketWebUI=off/g" $RASPIBLITZ_CONF
+    /home/admin/config.scripts/blitz.conf.sh delete jam $RASPIBLITZ_CONF
 
     echo "OK Jam is removed."
   else
