@@ -27,7 +27,7 @@ if [ "$1" = "menu" ]; then
   if [ ${isInstalled} -eq 1 ]; then
     # get network info
     localip=$(hostname -I | awk '{print $1}')
-    toraddress=$(sudo cat /mnt/hdd/tor/joinmarket-webui/hostname 2>/dev/null)
+    toraddress=$(sudo cat /mnt/hdd/tor/jam/hostname 2>/dev/null)
     fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
 
     if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
@@ -170,8 +170,11 @@ WantedBy=multi-user.target
 
     # Hidden Service for jam if Tor is active
     if [ "${runBehindTor}" = "on" ]; then
-      # make sure to keep in sync with internet.tor.sh script
-      /home/admin/config.scripts/tor.onion-service.sh joinmarket-webui 80 7502 443 7503
+      # remove legacy
+      /home/admin/config.scripts/tor.onion-service.sh off joinmarket-webui
+      # add jam
+      /home/admin/config.scripts/tor.onion-service.sh jam 80 7502 443 7503
+
     fi
     source $RASPIBLITZ_INFO
     if [ "${state}" == "ready" ]; then
@@ -298,7 +301,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
     # Hidden Service if Tor is active
     if [ "${runBehindTor}" = "on" ]; then
-      /home/admin/config.scripts/tor.onion-service.sh off joinmarket-webui
+      /home/admin/config.scripts/tor.onion-service.sh off jam
     fi
 
     # remove the app
