@@ -11,7 +11,7 @@ GITHUB_REPO="https://github.com/itchysats/itchysats"
 # can also be a commit hash 
 # if empty it will use the latest source version
 # GITHUB_VERSION=$( curl -s https://api.github.com/repos/itchysats/itchysats/releases | jq -r '.[].tag_name' | grep -v "rc" | head -n1)
-GITHUB_VERSION="0.6.1"
+GITHUB_VERSION="0.7.0"
 
 # the github signature to verify the author
 # leave GITHUB_SIGN_AUTHOR empty to skip verifying 
