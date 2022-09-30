@@ -12,7 +12,7 @@ RASPIBLITZ_CONF=/mnt/hdd/raspiblitz.conf
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
-  echo "config script to switch joinmarket_webui on or off"
+  echo "config script to switch Jam on or off"
   echo "bonus.jam.sh [on|off|menu|update|update commit|precheck]"
   exit 1
 fi
@@ -101,6 +101,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     ##################
     # NGINX
     ##################
+    # remove legacy nginx symlinks and configs
+    sudo rm -f /etc/nginx/sites-enabled/joinmarket_webui_*
+    sudo rm -f /etc/nginx/sites-available/joinmarket_webui_*
     # setup nginx symlinks
     sudo cp -f /home/admin/assets/nginx/sites-available/jam_ssl.conf /etc/nginx/sites-available/jam_ssl.conf
     sudo cp -f /home/admin/assets/nginx/sites-available/jam_tor.conf /etc/nginx/sites-available/jam_tor.conf
@@ -287,7 +290,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo ufw delete allow from any to any port 7500
     sudo ufw delete allow from any to any port 7501
 
-    # remove nginx symlinks
+    # remove nginx symlinks and configs
     sudo rm -f /etc/nginx/sites-enabled/jam_*
     sudo rm -f /etc/nginx/sites-available/jam_*
     sudo nginx -t
