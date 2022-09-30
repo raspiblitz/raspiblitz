@@ -120,6 +120,9 @@ fi
 if [ "${joinmarket}" == "on" ]; then
   OPTIONS+=(JM "JoinMarket with JoininBox")
 fi
+if [ "${jam}" == "on" ]; then
+  OPTIONS+=(JAM "Jam (JoinMarket WebUI)")
+fi
 if [ "${faraday}" == "on" ]; then
   OPTIONS+=(FARADAY "Faraday Channel Management")
 fi
@@ -217,7 +220,7 @@ case $CHOICE in
               echo ""
               echo -en "Screen is updating in a loop .... press 'x' now to get back to menu."
               read -n 1 -t 6 keyPressed
-              echo -en "\rGathering information to update info ... please wait.                \n"  
+              echo -en "\rGathering information to update info ... please wait.                \n"
 
               # check if user wants to abort session
               if [ "${keyPressed}" = "x" ]; then
@@ -286,6 +289,9 @@ case $CHOICE in
         JM)
             /home/admin/config.scripts/bonus.joinmarket.sh menu
             ;;
+        JAM)
+            /home/admin/config.scripts/bonus.jam.sh menu
+            ;;
         FARADAY)
             sudo /home/admin/config.scripts/bonus.faraday.sh menu
             ;;
@@ -328,7 +334,7 @@ case $CHOICE in
             ;;
         TESTNETS)
             /home/admin/00parallelChainsMenu.sh
-            ;;  
+            ;;
         SUBSCRIBE)
             /home/admin/config.scripts/blitz.subscriptions.py
             ;;
