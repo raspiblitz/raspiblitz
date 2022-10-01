@@ -140,8 +140,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
 [Unit]
 Description=JoinMarket API daemon
-Requires=bitcoind.service
-After=bitcoind.service
 
 [Service]
 WorkingDirectory=$HOME_DIR/joinmarket-clientserver/scripts/
@@ -151,7 +149,7 @@ User=joinmarket
 Group=joinmarket
 Restart=always
 TimeoutSec=120
-RestartSec=30
+RestartSec=60
 # Hardening measures
 PrivateTmp=true
 ProtectSystem=full
