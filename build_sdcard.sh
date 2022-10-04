@@ -302,7 +302,7 @@ echo -e "\n*** SOFTWARE UPDATE ***"
 # sqlite3 -> database
 # fdisk -> create partitions
 # lsb-release -> needed to know which distro version we're running to add APT sources
-general_utils="policykit-1 htop git curl bash-completion vim jq dphys-swapfile bsdmainutils autossh telnet vnstat parted dosfstools btrfs-progs fbi sysbench build-essential dialog bc python3-dialog unzip whois fdisk lsb-release""
+general_utils="policykit-1 htop git curl bash-completion vim jq dphys-swapfile bsdmainutils autossh telnet vnstat parted dosfstools btrfs-progs fbi sysbench build-essential dialog bc python3-dialog unzip whois fdisk lsb-release"
 
 python_dependencies="python3-venv python3-dev python3-wheel python3-jinja2 python3-pip"
 server_utils="rsync net-tools xxd netcat openssh-client openssh-sftp-server sshpass psmisc ufw sqlite3"
@@ -355,8 +355,8 @@ fi
 
 # special prepare when Raspbian
 if [ "${baseimage}" = "raspios_arm64" ] || [ "${baseimage}" = "debian_rpi64" ]; then
-    
-  echo -e "\n*** PREPARE RASPBERRY OS VARIANTS ***"    
+
+  echo -e "\n*** PREPARE RASPBERRY OS VARIANTS ***"
   apt_install raspi-config
   # do memory split (16MB)
   sudo raspi-config nonint do_memory_split 16
@@ -752,7 +752,7 @@ echo
 /home/admin/config.scripts/bitcoin.install.sh install || exit 1
 
 # *** BLITZ WEB SERVICE ***
-echo "Provisioning BLITZ WEB SERVICE" 
+echo "Provisioning BLITZ WEB SERVICE"
 /home/admin/config.scripts/blitz.web.sh http-on || exit 1
 
 # *** FATPACK *** (can be activated by parameter - see details at start of script)
