@@ -2,7 +2,7 @@
 
 # https://github.com/joinmarket-webui/jam
 
-WEBUI_VERSION=0.1.0
+WEBUI_VERSION=0.1.1
 REPO=joinmarket-webui/jam
 USERNAME=joinmarket
 HOME_DIR=/home/$USERNAME
@@ -225,7 +225,7 @@ fi
 # update
 if [ "$1" = "update" ]; then
   isInstalled=$(sudo ls $HOME_DIR 2>/dev/null | grep -c "$APP_DIR")
-  if [ ${isInstalled} -eq 1 ]; then
+  if [ ${isInstalled} -gt 0 ]; then
     echo "*** UPDATE JAM ***"
     cd $HOME_DIR
 
@@ -279,7 +279,7 @@ fi
 # switch off
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   isInstalled=$(sudo ls $HOME_DIR 2>/dev/null | grep -c "$APP_DIR")
-  if [ "${isInstalled}" -eq 1 ]; then
+  if [ "${isInstalled}" -gt 0 ]; then
     echo "*** UNINSTALL JAM ***"
 
     # remove systemd service
