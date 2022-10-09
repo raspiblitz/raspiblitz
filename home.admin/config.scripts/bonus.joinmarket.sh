@@ -5,15 +5,14 @@
 # https://github.com/openoms/bitcoin-tutorials/tree/master/joinmarket
 # https://github.com/openoms/joininbox
 
-# https://github.com/openoms/joininbox/releases
-# https://github.com/openoms/joininbox/commits/master
-JBVERSION="9feec63" # v0.7.3+ # installs JoinMarket v0.9.8
+# https://github.com/openoms/joininbox/tags
+JBTAG="v0.7.4" # installs JoinMarket v0.9.8
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "JoinMarket install script to switch JoinMarket on or off"
  echo "sudo /home/admin/config.scrips/bonus.joinmarket.sh on|off"
- echo "Installs JoininBox $JBVERSION with JoinMarket v0.9.5"
+ echo "Installs JoininBox $JBTAG with JoinMarket v0.9.5"
  exit 1
 fi
 
@@ -116,7 +115,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # check the latest at:
     cd /home/joinmarket/joininbox || exit 1
     # https://github.com/openoms/joininbox/releases/
-    sudo -u joinmarket git reset --hard $JBVERSION
+    sudo -u joinmarket git reset --hard $JBTAG
     sudo -u joinmarket /home/admin/config.scripts/blitz.git-verify.sh \
      "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
 
