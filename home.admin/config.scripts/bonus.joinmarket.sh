@@ -115,9 +115,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # check the latest at:
     cd /home/joinmarket/joininbox || exit 1
     # https://github.com/openoms/joininbox/releases/
-    sudo -u joinmarket git reset --hard $JBTAG
+    sudo -u joinmarket git reset --hard ${JBTAG}
     sudo -u joinmarket /home/admin/config.scripts/blitz.git-verify.sh \
-     "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
+     "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" "${JBTAG}" || exit 1
 
     # copy the scripts in place
     sudo -u joinmarket cp /home/joinmarket/joininbox/scripts/* /home/joinmarket/
