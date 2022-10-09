@@ -259,17 +259,18 @@ if [ "$1" = "update" ]; then
        "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" "v${version}" || exit 1
 
       cd $HOME_DIR || exit 1
-      sudo -u $USERNAME mv jam $APP_DIR
-      cd $APP_DIR || exit 1
-      sudo -u $USERNAME rm -rf docker
-      if ! sudo -u $USERNAME npm install; then
-        echo "FAIL - npm install did not run correctly, aborting"
-        exit 1
-      fi
-
-      sudo -u $USERNAME npm run build
-      echo "*** JAM UPDATED to $version ***"
     fi
+
+    sudo -u $USERNAME mv jam $APP_DIR
+    cd $APP_DIR || exit 1
+    sudo -u $USERNAME rm -rf docker
+    if ! sudo -u $USERNAME npm install; then
+      echo "FAIL - npm install did not run correctly, aborting"
+      exit 1
+    fi
+
+    sudo -u $USERNAME npm run build
+    echo "*** JAM UPDATED to $version ***"
   else
     echo "*** JAM IS NOT INSTALLED ***"
   fi
