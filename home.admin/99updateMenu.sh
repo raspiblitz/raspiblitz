@@ -504,6 +504,10 @@ if [ "${mempoolExplorer}" == "on" ]; then
   OPTIONS+=(MEMPOOL "Update Mempool Explorer")
 fi
 
+if [ "${jam}" == "on" ]; then
+  OPTIONS+=(JAM "Update Jam (JoinMarket WebUI)")
+fi
+
 if [ "${runBehindTor}" == "on" ]; then
   OPTIONS+=(TOR "Update Tor from the Torproject repo")
 fi
@@ -566,6 +570,9 @@ case $CHOICE in
     ;;
   MEMPOOL)
     /home/admin/config.scripts/bonus.mempool.sh update
+    ;;
+  JAM)
+    /home/admin/config.scripts/bonus.jam.sh update
     ;;
   ITCHYSATS)
     /home/admin/config.scripts/bonus.itchysats.sh update
