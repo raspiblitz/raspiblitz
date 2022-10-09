@@ -4,11 +4,15 @@
 
 WEBUI_VERSION=0.1.1
 REPO=joinmarket-webui/jam
-USERNAME=joinmarket
+USERNAME=jam
 HOME_DIR=/home/$USERNAME
 APP_DIR=webui
 RASPIBLITZ_INFO=/home/admin/raspiblitz.info
 RASPIBLITZ_CONF=/mnt/hdd/raspiblitz.conf
+
+PGPsigner="dergigi"
+PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
+PGPpubkeyFingerprint="89C4A25E69A5DE7F"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -70,6 +74,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     echo "*** INSTALL JAM ***"
 
+    echo "# Creating the ${USERNAME} user"
+    echo
+    sudo adduser --disabled-password --gecos "" ${USERNAME}
+
     # install nodeJS
     /home/admin/config.scripts/bonus.nodejs.sh on
 
@@ -81,11 +89,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     cd jam || exit 1
     sudo -u $USERNAME git reset --hard v${WEBUI_VERSION}
 
-    GITHUB_SIGN_AUTHOR="web-flow"
-    GITHUB_SIGN_PUBKEYLINK="https://github.com/web-flow.gpg"
-    GITHUB_SIGN_FINGERPRINT="4AEE18F83AFDEB23"
     sudo -u $USERNAME /home/admin/config.scripts/blitz.git-verify.sh \
-     "${GITHUB_SIGN_AUTHOR}" "${GITHUB_SIGN_PUBKEYLINK}" "${GITHUB_SIGN_FINGERPRINT}" || exit 1
+     "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" "v${WEBUI_VERSION}" || exit 1
 
     cd $HOME_DIR || exit 1
     sudo -u $USERNAME mv jam $APP_DIR
@@ -120,20 +125,20 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo ufw allow from any to any port 7501 comment 'allow Jam HTTPS'
     echo ""
 
+    #########################
+    ## JOINMARKET-API SERVICE
+    #########################
     # SSL
-    if [ -d $HOME_DIR/.joinmarket/ssl ]; then
-      sudo -u $USERNAME rm -rf $HOME_DIR/.joinmarket/ssl
+    if [ -d /home/joinmarket/.joinmarket/ssl ]; then
+      sudo -u joinmarket rm -rf /home/joinmarket/.joinmarket/ssl
     fi
     subj="/C=US/ST=Utah/L=Lehi/O=Your Company, Inc./OU=IT/CN=example.com"
-    sudo -u $USERNAME mkdir -p $HOME_DIR/.joinmarket/ssl/ \
+    sudo -u joinmarket mkdir -p /home/joinmarket/.joinmarket/ssl/ \
       && pushd "$_" \
-      && sudo -u $USERNAME openssl req -newkey rsa:4096 -x509 -sha256 -days 3650 -nodes -out cert.pem -keyout key.pem -subj "$subj" \
+      && sudo -u joinmarket openssl req -newkey rsa:4096 -x509 -sha256 -days 3650 -nodes -out cert.pem -keyout key.pem -subj "$subj" \
       && popd || exit 1
 
-    ##################
     # SYSTEMD SERVICE
-    ##################
-
     echo "# Install JoinMarket API systemd"
     echo "\
 # Systemd unit for JoinMarket API
@@ -142,9 +147,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 Description=JoinMarket API daemon
 
 [Service]
-WorkingDirectory=$HOME_DIR/joinmarket-clientserver/scripts/
+WorkingDirectory=/home/joinmarket/joinmarket-clientserver/scripts/
 ExecStartPre=-/home/admin/config.scripts/bonus.jam.sh precheck
-ExecStart=/bin/sh -c '. $HOME_DIR/joinmarket-clientserver/jmvenv/bin/activate && python jmwalletd.py'
+ExecStart=/bin/sh -c '. /home/joinmarket/joinmarket-clientserver/jmvenv/bin/activate && python jmwalletd.py'
 User=joinmarket
 Group=joinmarket
 Restart=always
@@ -227,49 +232,46 @@ if [ "$1" = "update" ]; then
   isInstalled=$(sudo ls $HOME_DIR 2>/dev/null | grep -c "$APP_DIR")
   if [ ${isInstalled} -gt 0 ]; then
     echo "*** UPDATE JAM ***"
-    cd $HOME_DIR
+    cd $HOME_DIR || exit 1
 
     if [ "$2" = "commit" ]; then
-      echo "# Updating to the latest commit in the default branch"
-      sudo -u $USERNAME wget https://github.com/$REPO/archive/refs/heads/master.tar.gz -O master.tar.gz
-      sudo -u $USERNAME tar -xzf master.tar.gz
-      sudo -u $USERNAME rm -rf master.tar.gz
-      sudo -u $USERNAME mv jam-master $APP_DIR-update
+      echo "# Remove old source code"
+      sudo rm -rf jam
+      echo "# Downloading the latest commit in the default branch of $REPO"
+      sudo -u $USERNAME git clone https://github.com/$REPO
     else
       version=$(curl --silent "https://api.github.com/repos/$REPO/releases/latest" | grep '"tag_name":' | sed -E 's/.*"v([^"]+)".*/\1/')
-      cd $APP_DIR
+      cd $APP_DIR || exit 1
       current=$(node -p "require('./package.json').version")
       cd ..
       if [ "$current" = "$version" ]; then
-        echo "*** JAM IS ALREADY UPDATED TO LATEST VERSION ***"
+        echo "*** JAM IS ALREADY UPDATED TO LATEST RELEASE ***"
         exit 0
       fi
-      sudo -u $USERNAME wget https://github.com/$REPO/archive/refs/tags/v$version.tar.gz -O v$version.tar.gz
-      sudo -u $USERNAME tar -xzf v$version.tar.gz
-      sudo -u $USERNAME rm v$version.tar.gz
-      sudo -u $USERNAME mv jam-$version $APP_DIR-update
-    fi
 
-    cd $APP_DIR-update || exit 1
-    sudo -u $USERNAME rm -rf docker
-    sudo -u $USERNAME npm install
-    if ! [ $? -eq 0 ]; then
-      echo "FAIL - npm install did not run correctly, aborting"
-      exit 1
-    fi
+      echo "# Remove old source code"
+      sudo rm -rf jam
+      sudo -u $USERNAME git clone https://github.com/$REPO
+      cd jam || exit 1
+      sudo -u $USERNAME git reset --hard v${version}
 
-    sudo -u $USERNAME npm run build
-    if ! [ $? -eq 0 ]; then
-      echo "FAIL - npm run build did not run correctly, aborting"
-      exit 1
-    fi
-    cd ..
-    sudo -u $USERNAME rm -rf $APP_DIR
-    sudo -u $USERNAME mv $APP_DIR-update $APP_DIR
+      sudo -u $USERNAME /home/admin/config.scripts/blitz.git-verify.sh \
+       "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" "v${version}" || exit 1
 
-    echo "*** JAM UPDATED ***"
+      cd $HOME_DIR || exit 1
+      sudo -u $USERNAME mv jam $APP_DIR
+      cd $APP_DIR || exit 1
+      sudo -u $USERNAME rm -rf docker
+      if ! sudo -u $USERNAME npm install; then
+        echo "FAIL - npm install did not run correctly, aborting"
+        exit 1
+      fi
+
+      sudo -u $USERNAME npm run build
+      echo "*** JAM UPDATED to $version ***"
+    fi
   else
-    echo "*** JAM NOT INSTALLED ***"
+    echo "*** JAM IS NOT INSTALLED ***"
   fi
 
   exit 0
@@ -307,6 +309,8 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
     # remove SSL
     sudo rm -rf $HOME_DIR/.joinmarket/ssl
+
+    sudo userdel -rf jam 2>/dev/null
 
     # setting value in raspi blitz config
     /home/admin/config.scripts/blitz.conf.sh delete jam $RASPIBLITZ_CONF
