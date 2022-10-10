@@ -3,7 +3,7 @@
 
 _Build your own Lightning & Bitcoin Fullnode on a RaspberryPi with a nice Display._
 
-`Version 1.8.0 with lnd 0.15.0 & Core Lightning 0.11.2 and bitcoin 23.0.0`
+`Version 1.8.0b with lnd 0.15.2 & Core Lightning 0.11.2 and bitcoin 23.0.0`
 
 ![RaspiBlitz](pictures/raspiblitz.jpg)
 
@@ -253,13 +253,13 @@ In the end your RaspiBlitz should look like this:
 | Philosophy       | Trust                                                                                                                                                                            | Sovereignty                                                       |
 | Difficulty level | Easy                                                                                                                                                                             | Medium                                                            |
 | Pros             | Make Blitz accessible to everyone                                                                                                                                                | You don't need to trust us, build from your own forked repository |
-| Instructions     | [Download 1.8.0 image](https://raspiblitz.fulmo.org/images/raspiblitz-v1.8.0-2022-07-28.img.gz) and [Flash the sd card](README.md#write-the-sd-card-image-to-your-sd-card) | [Build your own sd card image](#build-the-sd-card-image)          |
-| Verify what?     | [Signature file](https://raspiblitz.fulmo.org/images/raspiblitz-v1.8.0-2022-07-28.img.gz.sig) and [verify the Sig](FAQ.md#how-to-verify-the-sd-card-image-after-download) OR SHA-256 (below)                                                               | All of the code, don't trust, verify                              |
+| Instructions     | [Download 1.8.0b image (with lnd-bug fix)](https://raspiblitz.fulmo.org/images/raspiblitz-v1.8.0b-2022-10-10.img.gz) and [Flash the sd card](README.md#write-the-sd-card-image-to-your-sd-card) | [Build your own sd card image](#build-the-sd-card-image)          |
+| Verify what?     | [Signature file](https://raspiblitz.fulmo.org/images/raspiblitz-v1.8.0b-2022-10-10.img.gz.sig) and [verify the Sig](FAQ.md#how-to-verify-the-sd-card-image-after-download) OR SHA-256 (below)                                                               | All of the code, don't trust, verify                              |
 
 If downloading the maintainer SD card image:
 
 - GPG 64-bit (main): 1C73 060C 7C17 6461 & (sub): AA9D D1B5 CC56 47DA
-- SHA-256: 7711e371aba78097411b48d132c9c1fee35f1776e8faa6165dc59492fa2938f9
+- SHA-256: 42c96fb29e03eb8276b40861f77b141bde30a2ff461947e107cff7d24c5a8096
 
 Which verification method should I used: Hash or Signature?
 
