@@ -281,45 +281,48 @@ fi
 
 # switch off
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
+  echo "*** UNINSTALL JAM ***"
+
   isInstalled=$(sudo ls $HOME_DIR 2>/dev/null | grep -c "$APP_DIR")
   if [ "${isInstalled}" -gt 0 ]; then
-    echo "*** UNINSTALL JAM ***"
-
-    # remove systemd service
-    sudo systemctl stop joinmarket-api
-    sudo systemctl disable joinmarket-api
-    sudo rm -f /etc/systemd/system/joinmarket-api.service
-
-    # close ports on firewall
-    sudo ufw delete allow from any to any port 7500
-    sudo ufw delete allow from any to any port 7501
-
-    # remove nginx symlinks and configs
-    sudo rm -f /etc/nginx/sites-enabled/jam_*
-    sudo rm -f /etc/nginx/sites-available/jam_*
-    sudo nginx -t
-    sudo systemctl reload nginx
-
-    # Hidden Service if Tor is active
-    if [ "${runBehindTor}" = "on" ]; then
-      /home/admin/config.scripts/tor.onion-service.sh off jam
-    fi
-
-    # remove the app
-    sudo rm -rf $HOME_DIR/$APP_DIR
-
-    # remove SSL
-    sudo rm -rf $HOME_DIR/.joinmarket/ssl
-
+    # use jam here to make sure the joinmarket user is not removed
     sudo userdel -rf jam 2>/dev/null
-
-    # setting value in raspi blitz config
-    /home/admin/config.scripts/blitz.conf.sh delete jam $RASPIBLITZ_CONF
-
-    echo "OK Jam is removed."
+    echo "Removed the jam user"
   else
-    echo "*** JAM NOT INSTALLED ***"
+    echo "There is no $HOME_DIR present"
   fi
+
+  echo "Cleaning up Jam install ..."
+  # remove systemd service
+  sudo systemctl stop joinmarket-api 2>/dev/null
+  sudo systemctl disable joinmarket-api 2>/dev/null
+  sudo rm -f /etc/systemd/system/joinmarket-api.service
+
+  # close ports on firewall
+  sudo ufw delete allow from any to any port 7500
+  sudo ufw delete allow from any to any port 7501
+
+  # remove nginx symlinks and configs
+  sudo rm -f /etc/nginx/sites-enabled/jam_*
+  sudo rm -f /etc/nginx/sites-available/jam_*
+  sudo nginx -t
+  sudo systemctl reload nginx
+
+  # Hidden Service if Tor is active
+  if [ "${runBehindTor}" = "on" ]; then
+    /home/admin/config.scripts/tor.onion-service.sh off jam
+  fi
+
+  # remove the app
+  sudo rm -rf $HOME_DIR/$APP_DIR 2>/dev/null
+
+  # remove SSL
+  sudo rm -rf $HOME_DIR/.joinmarket/ssl
+
+  # setting value in raspi blitz config
+  /home/admin/config.scripts/blitz.conf.sh delete jam $RASPIBLITZ_CONF
+
+  echo "OK, Jam is removed"
 
   exit 0
 fi
