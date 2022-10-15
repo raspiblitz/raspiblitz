@@ -3,7 +3,7 @@
 # https://github.com/lnbits/lnbits-legend
 
 # https://github.com/lnbits/lnbits-legend/releases
-tag="0.9.2"
+tag="0.9.4"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -362,9 +362,11 @@ if [ "$1" = "repo" ]; then
     exit 1
   fi
 
+  # fix permissions
+  sudo chown -R lnbits:lnbits /home/lnbits/lnbits
   # change origin repo of lnbits code
   echo "# changing LNbits github repo(${githubUser}) branch(${githubBranch})"
-  cd /home/lnbits/lnbits
+  cd /home/lnbits/lnbits || exit 1
   sudo -u lnbits git remote remove origin
   sudo -u lnbits git remote add origin ${githubRepo}
   sudo -u lnbits git fetch
@@ -375,8 +377,10 @@ fi
 
 if [ "$1" = "sync" ] || [ "$1" = "repo" ]; then
   echo "# pull all changes from github repo"
+  # fix permissions
+  sudo chown -R lnbits:lnbits /home/lnbits/lnbits
   # output basic info
-  cd /home/lnbits/lnbits
+  cd /home/lnbits/lnbits || exit 1
   sudo -u lnbits git remote -v
   sudo -u lnbits git branch -v
   # pull latest code
@@ -476,9 +480,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # install from GitHub
   echo "# get the github code user(${githubUser}) branch(${tag})"
   sudo rm -r /home/lnbits/lnbits 2>/dev/null
-  cd /home/lnbits
+  cd /home/lnbits  || exit 1
   sudo -u lnbits git clone https://github.com/${githubUser}/lnbits-legend lnbits
-  cd /home/lnbits/lnbits
+  cd /home/lnbits/lnbits || exit 1
   sudo -u lnbits git checkout ${tag} || exit 1
 
   # prepare .env file
@@ -497,7 +501,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   # to the install
   echo "# installing application dependencies"
-  cd /home/lnbits/lnbits
+  cd /home/lnbits/lnbits  || exit 1
 
   # do install like this
   sudo -u lnbits python3 -m venv venv
@@ -514,7 +518,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "*** Updating Firewall ***"
   sudo ufw allow 5000 comment 'lnbits HTTP'
   sudo ufw allow 5001 comment 'lnbits HTTPS'
-  echo ""
+  echo
 
     # install service
     echo "*** Install systemd ***"
@@ -740,6 +744,10 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   else
     echo "lnbits.service is not installed."
   fi
+
+  echo "Cleaning up LNbits install ..."
+  sudo delete ufw allow 5000
+  sudo delete ufw allow 5001
 
   # remove nginx symlinks
   sudo rm -f /etc/nginx/sites-enabled/lnbits_ssl.conf
