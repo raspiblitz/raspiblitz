@@ -217,13 +217,14 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # setting value in raspi blitz config
   /home/admin/config.scripts/blitz.conf.sh set joinmarket "off"
 
-  if [ -f "/home/joinmarket/joinmarket-clientserver/jmvenv/bin/activate" ] ; then
-    echo "# REMOVING JOINMARKET"
+  if [ -d /home/joinmarket ]; then
+    echo "Removing the joinmarket user"
     sudo userdel -rf joinmarket 2>/dev/null
-    echo "# OK JoinMarket is removed"
   else
     echo "JoinMarket is not installed."
   fi
+
+  /home/admin/bonus.jam.sh off
 
   exit 0
 fi

@@ -283,13 +283,11 @@ fi
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   echo "*** UNINSTALL JAM ***"
 
-  isInstalled=$(sudo ls $HOME_DIR 2>/dev/null | grep -c "$APP_DIR")
-  if [ "${isInstalled}" -gt 0 ]; then
-    # use jam here to make sure the joinmarket user is not removed
-    sudo userdel -rf jam 2>/dev/null
-    echo "Removed the jam user"
+  if [ -d /home/$USERNAME ]; then
+    sudo userdel -rf $USERNAME 2>/dev/null
+    echo "Removed the $USERNAME user"
   else
-    echo "There is no $HOME_DIR present"
+    echo "There is no /home/$USERNAME present"
   fi
 
   echo "Cleaning up Jam install ..."
