@@ -2,7 +2,7 @@
 
 ## What's new in Version 1.8.0b of RaspiBlitz?
 
-- Update: LND v0.15.2 (emergency hotfix release) [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.15.0-beta)
+- Update: LND v0.15.2 (emergency hotfix release) [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.15.2-beta)
 
 ## What's new in Version 1.8.0 of RaspiBlitz?
 
