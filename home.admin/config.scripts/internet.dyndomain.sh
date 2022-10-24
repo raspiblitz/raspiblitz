@@ -47,13 +47,17 @@ fi
 # FUNCTION updating dyndomain (if update URL is set)
 updateDynDNS()
 {
-  if [ ${#dynUpdateUrl} -gt 0 ]; then
-    echo "# calling: ${dynUpdateUrl}"
-    echo "# to update domain: ${dynDomain}"
-    curl -s --connect-timeout 6 ${dynUpdateUrl} 1>&2
+  if [ "${staticIP}" == "" ]; then
+    if [ ${#dynUpdateUrl} -gt 0 ]; then
+      echo "# calling: ${dynUpdateUrl}"
+      echo "# to update domain: ${dynDomain}"
+      curl -s --connect-timeout 6 ${dynUpdateUrl} 1>&2
+    else
+      echo "# dynUpdateUrl not set - not updating"
+    fi
   else
-    echo "# dynUpdateUrl not set - not updating"
-  fi 
+    echo "# staticIP is set - not updating"
+  fi
 }
 
 # UPDATE
