@@ -211,7 +211,10 @@ if [ ${runGlobal} -eq 1 ]; then
       globalIP="::1"
     else
       if [ "${staticIP}" == "" ]; then
-        globalIP="127.0.0.1"
+        # only if publicIP is empty, dont prefer 127.0.0.1
+        if [ "${publicIP}" == "" ]; then
+          globalIP="127.0.0.1"
+        fi
       else
         globalIP="${staticIP}"
       fi
