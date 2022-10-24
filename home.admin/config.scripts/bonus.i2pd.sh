@@ -6,9 +6,10 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "I2P Daemon install script"
   echo "More info at https://i2pd.readthedocs.io"
   echo "Usage:"
-  echo "bonus.i2pd.sh on           -> install the i2pd"
-  echo "bonus.i2pd.sh off          -> uninstall the i2pd"
+  echo "bonus.i2pd.sh on           -> Install i2pd"
+  echo "bonus.i2pd.sh off          -> Uninstall i2pd"
   echo "bonus.i2pd.sh addseednodes -> Add all I2P seed nodes from: https://github.com/bitcoin/bitcoin/blob/master/contrib/seeds/nodes_main.txt"
+  echo "bonus.i2pd.sh status       -> I2P related logs from bitcoind, bitcoin-cli -netinfo 4 and webconsole access"
   exit 1
 fi
 
@@ -86,6 +87,26 @@ function add_repo {
   echo "deb-src https://repo.i2pd.xyz/$DIST $RELEASE main" | sudo tee -a /etc/apt/sources.list.d/i2pd.list
 }
 
+function bitcoinI2Pstatus {
+  echo "# I2P related logs from the bitcoin debug log"
+  echo "# Follow live with the command:"
+  echo "sudo tail -n 1000 -f /mnt/hdd/bitcoin/debug.log | grep i2p"
+  echo
+  sudo cat  /mnt/hdd/bitcoin/debug.log | grep i2p
+  echo
+  echo "# Running the command:"
+  echo "bitcoin-cli -netinfo 4"
+  echo
+  bitcoin-cli -netinfo 4
+  echo
+  echo "# i2pd webconsole:"
+  localip=$(hostname -I | awk '{print $1}')
+  echo "http://${localip}:7070"
+  echo "# Username: i2pd"
+  echo "# Password: your passwordB"
+  echo
+}
+
 
 echo "# Running: 'bonus.i2pd.sh $*'"
 source /mnt/hdd/raspiblitz.conf
@@ -137,18 +158,21 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   confAdd onlynet i2p /mnt/hdd/bitcoin/bitcoin.conf
 
   # config
-  localip=$(hostname -I | awk '{print $1}')
+  PASSWORD_B=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcpassword | cut -c 13-)
   cat << EOF | sudo tee /etc/i2pd/i2pd.conf
 # i2pd settings for the RaspiBlitz
 # for the defaults see:
 # https://github.com/PurpleI2P/i2pd/blob/openssl/contrib/i2pd.conf
-# Explanation for these custom settings:
-# https://github.com/seth586/guides/blob/master/FreeNAS/bitcoin/freenas_3_tor.md#install--configure-i2pd
+# Docs:
+# https://i2pd.readthedocs.io/en/latest/user-guide/configuration/
 loglevel = none
 [http]
-enabled = true
-address = ${localip}
+address=0.0.0.0
+strictheaders = false
 port = 7070
+auth = true
+user = i2pd
+pass = ${PASSWORD_B}
 [httpproxy]
 enabled = false
 [socksproxy]
@@ -249,6 +273,11 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # setting value in raspiblitz.conf
   /home/admin/config.scripts/blitz.conf.sh set i2pd "off"
 
+  exit 0
+fi
+
+if [ "$1" = "status" ]; then
+  bitcoinI2Pstatus
   exit 0
 fi
 
