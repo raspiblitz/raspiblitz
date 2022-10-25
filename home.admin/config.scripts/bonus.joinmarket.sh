@@ -224,7 +224,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     echo "JoinMarket is not installed."
   fi
 
-  /home/admin/bonus.jam.sh off
+  /home/admin/config.scripts/bonus.jam.sh off
 
   exit 0
 fi
