@@ -54,16 +54,21 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # create dedicated user
     sudo adduser --disabled-password --gecos "" lightningtipbot
 
-    # set PATH for the user
-    sudo bash -c "echo 'PATH=\$PATH:/home/lightningtipbot/go/bin/' >> /home/lightningtipbot/.profile"
-
     # install from source
     cd /home/lightningtipbot
     sudo -u lightningtipbot git clone https://github.com/LightningTipBot/LightningTipBot.git
     cd LightningTipBot
     sudo -u lightningtipbot git reset --hard $BOTVERSION
     sudo -u lightningtipbot /usr/local/go/bin/go build . || exit 1
-    cp config.yaml.example config.yaml
+
+    # set database path to HDD data so that its survives updates and migrations
+    sudo mkdir /mnt/hdd/app-data/LightningTipBot 2>/dev/null
+    cp config.yaml.example /mnt/hdd/app-data/LightningTipBot/config.yaml
+    cp -r data/ /mnt/hdd/app-data/LightningTipBot/
+    sudo chown lightningtipbot:lightningtipbot -R /mnt/hdd/app-data/LightningTipBot
+    # create symbolic links
+    sudo ln -s /mnt/hdd/app-data/LightningTipBot/config.yaml /home/lightningtipbot/LightningTipBot/config.yaml
+    sudo ln -s /mnt/hdd/app-data/LightningTipBot/data/ /home/lightningtipbot/LightningTipBot/
 
     echo "
 [Unit]
@@ -115,8 +120,20 @@ fi
 # switch off
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
-  # setting value in raspi blitz config
-  /home/admin/config.scripts/blitz.conf.sh set lightningtipbot "off"
+  # check for second parameter: should data be deleted?
+  deleteData=0
+  if [ "$2" = "--delete-data" ]; then
+    deleteData=1
+  elif [ "$2" = "--keep-data" ]; then
+    deleteData=0
+  else
+    if (whiptail --title " DELETE DATA? " --yesno "Do you want to delete\nthe LightningTipBot config and data?" 8 30); then
+      deleteData=1
+   else
+      deleteData=0
+    fi
+  fi
+  echo "# deleteData(${deleteData})"
 
   isInstalled=$(sudo ls /etc/systemd/system/lightningtipbot.service 2>/dev/null | grep -c 'lightningtipbot.service')
   if [ ${isInstalled} -eq 1 ]; then
@@ -128,9 +145,20 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     # delete user and it's home directory
     sudo userdel -rf lightningtipbot
     echo "# OK, the LightningTipBot Service is removed."
+
+    if [ ${deleteData} -eq 1 ]; then
+      echo "# deleting data"
+      sudo rm -R /mnt/hdd/app-data/LightningTipBot
+    else
+      echo "# keeping data"
+    fi
+    
   else 
     echo "# LightningTipBot is not installed."
   fi
+
+  # setting value in raspi blitz config
+  /home/admin/config.scripts/blitz.conf.sh set lightningtipbot "off"
 
   exit 0
 fi
