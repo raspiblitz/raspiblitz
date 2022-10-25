@@ -759,6 +759,15 @@ else
   echo "ItchySats - keep default" >> ${logFile}
 fi
 
+# LightningTipBot
+if [ "${lightningtipbot}" = "on" ]; then
+  echo "Provisioning LightningTipBot - run config script" >> ${logFile}
+  /home/admin/_cache.sh set message "Setup LightningTipBot"
+  sudo -u admin /home/admin/config.scripts/bonus.lightningtipbot.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning LightningTipBot - keep default" >> ${logFile}
+fi
+
 # custom install script from user
 customInstallAvailable=$(ls /mnt/hdd/app-data/custom-installs.sh 2>/dev/null | grep -c "custom-installs.sh")
 if [ ${customInstallAvailable} -gt 0 ]; then
