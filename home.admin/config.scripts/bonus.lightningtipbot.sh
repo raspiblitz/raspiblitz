@@ -63,9 +63,21 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     # set database path to HDD data so that its survives updates and migrations
     sudo mkdir /mnt/hdd/app-data/LightningTipBot 2>/dev/null
-    cp config.yaml.example /mnt/hdd/app-data/LightningTipBot/config.yaml
-    cp -r data/ /mnt/hdd/app-data/LightningTipBot/
+
+    # check if data exists
+    dataExists=$(ls /mnt/hdd/app-data/LightningTipBot/config.yaml 2>/dev/null | grep -c "config.yaml")
+    if [ "${dataExists}" == "0" ]; then
+      sudo cp config.yaml.example /mnt/hdd/app-data/LightningTipBot/config.yaml
+      sudo cp -r data/ /mnt/hdd/app-data/LightningTipBot/
+    fi
+    
+    # backup just in case
+    sudo mv data/ data.old
+    sudo mv config.yaml config.yaml.old
+
+    # set permissions on data
     sudo chown lightningtipbot:lightningtipbot -R /mnt/hdd/app-data/LightningTipBot
+
     # create symbolic links
     sudo ln -s /mnt/hdd/app-data/LightningTipBot/config.yaml /home/lightningtipbot/LightningTipBot/config.yaml
     sudo ln -s /mnt/hdd/app-data/LightningTipBot/data/ /home/lightningtipbot/LightningTipBot/
@@ -101,13 +113,13 @@ WantedBy=multi-user.target
     echo "# The LightningTipBot service already installed."
   fi
 
-  # setting value in raspi blitz config
-  /home/admin/config.scripts/blitz.conf.sh set lightningtipbot "on"
-
   isInstalled=$(sudo -u lightningtipbot /home/lightningtipbot/go/bin/LightningTipBot | grep -c LightningTipBot)
   if [ ${isInstalled} -gt 0 ] ; then
     echo "# Find info on how to use on https://github.com/LightningTipBot/LightningTipBot/tree/$BOTVERSION#set-up-lnbits"
     echo "Please edit your config file: /home/lightningtipbot/config.yaml"
+    
+    # setting value in raspi blitz config
+    /home/admin/config.scripts/blitz.conf.sh set lightningtipbot "on"
   else
     echo "# Failed to install LightningTipBot "
     exit 1
@@ -152,7 +164,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     else
       echo "# keeping data"
     fi
-    
+
   else 
     echo "# LightningTipBot is not installed."
   fi
