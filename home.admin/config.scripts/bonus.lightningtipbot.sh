@@ -192,8 +192,6 @@ if [ "$1" = "update" ]; then
   REMOTE=$(git rev-parse "$UPSTREAM")
   if [ $LOCAL = $REMOTE ]; then
     echo "# LightningTipBot is up-to-date"
-    sudo systemctl start lightningtipbot
-    exit 0
   else
     echo "# Pulling latest changes..."
     sudo -u lightningtipbot git pull -p
