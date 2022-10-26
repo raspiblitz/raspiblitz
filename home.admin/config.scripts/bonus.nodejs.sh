@@ -3,7 +3,7 @@
 # consider installing with apt when updated next
 # https://github.com/nodesource/distributions/blob/master/README.md#installation-instructions
 
-VERSION="v16.14.2"
+VERSION="v18.12.0"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -18,13 +18,10 @@ isAARCH64=$(uname -m | grep -c 'aarch64')
 isX86_64=$(uname -m | grep -c 'x86_64')
 if [ ${isARM} -eq 1 ] ; then
   DISTRO="linux-armv7l"
-  CHECKSUM="${CHECKSUM_linux_armv7l}"
 elif [ ${isAARCH64} -eq 1 ] ; then
   DISTRO="linux-arm64"
-  CHECKSUM="${CHECKSUM_linux_arm64}"
 elif [ ${isX86_64} -eq 1 ] ; then
   DISTRO="linux-x64"
-  CHECKSUM="${CHECKSUM_linux_x64}"
 elif [ ${#DISTRO} -eq 0 ]; then
   echo "# FAIL: Was not able to determine architecture"
   exit 1
@@ -49,7 +46,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "*** Install NodeJS $VERSION-$DISTRO ***"
     echo "VERSION: ${VERSION}"
     echo "DISTRO: ${DISTRO}"
-    echo "CHECKSUM: ${CHECKSUM}"
     echo
 
     # download
@@ -62,7 +58,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       rm -f node-$VERSION-$DISTRO.tar.xz*
       exit 1
     fi
-    echo "OK CHECKSUM of nodeJS is OK"
+    echo "OK the checkdum of nodeJS is OK"
     sleep 3
     # install
     sudo mkdir -p /usr/local/lib/nodejs
