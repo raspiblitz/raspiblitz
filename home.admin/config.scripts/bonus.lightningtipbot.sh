@@ -7,7 +7,7 @@ BOTVERSION="v0.5"
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo
   echo "config script to install or uninstall LightningTipBot"
-  echo "bonus.LightningTipBot.sh [on|off|menu]"
+  echo "bonus.LightningTipBot.sh [on|off|update|menu]"
   echo
   echo "Version to be installed by default: $BOTVERSION"
   echo "Source: https://github.com/LightningTipBot/LightningTipBot/"
@@ -35,7 +35,7 @@ https://github.com/LightningTipBot/LightningTipBot/blob/$BOTVERSION/README.md
   exit 0
 fi
 
-# stop services
+# stop service
 echo "making sure the LightningTipBot service is not running"
 sudo systemctl stop lightningtipbot 2>/dev/null
 
@@ -59,6 +59,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u lightningtipbot git clone https://github.com/LightningTipBot/LightningTipBot.git
     cd LightningTipBot
     sudo -u lightningtipbot git reset --hard $BOTVERSION
+
+    # Remove the old binary
+    sudo rm -f LightningTipBot 2>/dev/null
+    # Build the new binary
     sudo -u lightningtipbot /usr/local/go/bin/go build . || exit 1
 
     # set database path to HDD data so that its survives updates and migrations
@@ -108,20 +112,19 @@ WantedBy=multi-user.target
 " | sudo tee -a /etc/systemd/system/lightningtipbot.service
     sudo systemctl enable lightningtipbot
     echo "# OK - the LightningTipBot service is now enabled"
-
   else 
-    echo "# The LightningTipBot service already installed."
+    echo "# The LightningTipBot service is already installed."
   fi
 
-  isInstalled=$(sudo -u lightningtipbot /home/lightningtipbot/go/bin/LightningTipBot | grep -c LightningTipBot)
+  isInstalled=$(sudo ls /home/lightningtipbot/LightningTipBot/ 2>/dev/null | grep -c LightningTipBot)
   if [ ${isInstalled} -gt 0 ] ; then
     echo "# Find info on how to use on https://github.com/LightningTipBot/LightningTipBot/tree/$BOTVERSION#set-up-lnbits"
-    echo "Please edit your config file: /home/lightningtipbot/config.yaml"
-    
+    echo "Please edit your config file: sudo nano /home/lightningtipbot/LightningTipBot/config.yaml"
+    echo "Start the service when done: sudo systemctl start lightningtipbot"
     # setting value in raspi blitz config
     /home/admin/config.scripts/blitz.conf.sh set lightningtipbot "on"
   else
-    echo "# Failed to install LightningTipBot "
+    echo "# Failed to build LightningTipBot"
     exit 1
   fi
   
@@ -151,7 +154,6 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   if [ ${isInstalled} -eq 1 ]; then
     echo "# Removing the LightningTipBot service"
     # remove the systemd service
-    sudo systemctl stop lightningtipbot
     sudo systemctl disable lightningtipbot
     sudo rm /etc/systemd/system/lightningtipbot.service
     # delete user and it's home directory
@@ -175,6 +177,38 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   exit 0
 fi
 
+# update
+if [ "$1" = "update" ]; then
+  echo "# Updating LightningTipBot"
+  cd /home/lightningtipbot/LightningTipBot
+
+  # fetch latest master
+  sudo -u lightningtipbot git fetch
+
+  # unset $1
+  set --
+  UPSTREAM=${1:-'@{u}'}
+  LOCAL=$(git rev-parse @)
+  REMOTE=$(git rev-parse "$UPSTREAM")
+  if [ $LOCAL = $REMOTE ]; then
+    echo "# LightningTipBot is up-to-date"
+    sudo systemctl start lightningtipbot
+    exit 0
+  else
+    echo "# Pulling latest changes..."
+    sudo -u lightningtipbot git pull -p
+
+    # Remove the old binary
+    sudo rm -f LightningTipBot 2>/dev/null
+    echo "# Build the new binary"
+    sudo -u lightningtipbot /usr/local/go/bin/go build . || exit 1
+  fi
+
+  echo "# Start service"
+  sudo systemctl start lightningtipbot
+  echo "# Monitor with: 'sudo journalctl -fu lightningtipbot'"
+  exit 0
+fi
 
 echo "FAIL - Unknown Parameter $1"
 exit
