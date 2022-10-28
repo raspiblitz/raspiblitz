@@ -43,12 +43,13 @@ if [ "$1" = "status" ]; then
     for disk in $(lsblk -o NAME,TYPE | grep "disk" | awk '$1=$1' | cut -d " " -f 1)
     do
       devMounted=$(lsblk -o MOUNTPOINT,NAME | grep "$disk" | grep -c "^/")
-      # is raid candidate when: not mounted & not the data drive candidate (hdd/ssd) & not BTRFS RAID
-      if [ ${devMounted} -eq 0 ] && [ "${disk}" != "${hdd}" ] && [ "${disk}" != "${raidUsbDev}" ]; then
+      # is raid candidate when: not mounted & not the data drive candidate (hdd/ssd) & not BTRFS RAID & not zram
+      if [ "${devMounted}" -eq 0 ] && [ "${disk}" != "${hdd}" ] && \
+         [ "${disk}" != "${raidUsbDev}" ] && ! echo "${disk}" | grep "zram" 1>/dev/null; then
         sizeBytes=$(lsblk -o NAME,SIZE -b | grep "^${disk}" | awk '$1=$1' | cut -d " " -f 2)
         sizeGigaBytes=$(echo "scale=0; ${sizeBytes}/1024/1024/1024" | bc -l)
-        vedorname=$(lsblk -o NAME,VENDOR | grep "^${disk}" | awk '$1=$1' | cut -d " " -f 2)
-        mountoption="${disk} ${sizeGigaBytes} GB ${vedorname}"
+        vendorname=$(lsblk -o NAME,VENDOR | grep "^${disk}" | awk '$1=$1' | cut -d " " -f 2)
+        mountoption="${disk} ${sizeGigaBytes} GB ${vendorname}"
         echo "backupCandidate[${drivecounter}]='${mountoption}'"
         drivecounter=$(($drivecounter +1))
       fi
