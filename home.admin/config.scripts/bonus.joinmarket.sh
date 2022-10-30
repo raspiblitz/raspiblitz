@@ -18,12 +18,18 @@ fi
 
 # show info menu
 if [ "$1" = "menu" ]; then
-  whiptail --title " JoinMarket info " --msgbox "
-Type: 'jm' in the command line to switch to the dedicated user
-and start the JoininBox menu.
-Notes on usage:
+  whiptail --title " JoinMarket info " \
+  --yes-button "Start Joininbox" \
+  --no-button "Cancel" \
+  --yesno "Usage notes:
 https://github.com/openoms/bitcoin-tutorials/blob/master/joinmarket/README.md
+
+Can also type: 'jm' in the command line to switch to the dedicated user,
+and start the JoininBox menu.
 " 11 81
+  if [ $? -eq 0 ]; then
+    sudo su - joinmarket
+  fi
   exit 0
 fi
 
