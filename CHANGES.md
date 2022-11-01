@@ -13,6 +13,15 @@
 - Update: JoininBox v0.7.4 [details](https://github.com/openoms/joininbox/releases/tag/v0.7.3)
 - Info: Run RaspiBlitz on Proxmox [details](https://github.com/rootzoll/raspiblitz/tree/dev/alternative.platforms/Proxmox)
 
+## What's new in Version 1.8.0c of RaspiBlitz?
+
+- Update: LND v0.15.4 (emergency hotfix release) [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.15.4-beta)
+- Update: Electrum Server in Rust (electrs) v0.9.9 [details](https://github.com/romanz/electrs/blob/master/RELEASE-NOTES.md#099-jul-12-2022)
+
+## What's new in Version 1.8.0b of RaspiBlitz?
+
+- Update: LND v0.15.2 (emergency hotfix release) [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.15.2-beta)
+
 ## What's new in Version 1.8.0 of RaspiBlitz?
 
 - New: Multilanguage WebUI [details](https://github.com/cstenglein/raspiblitz-web)
