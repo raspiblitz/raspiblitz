@@ -579,13 +579,13 @@ else
   echo "Provisioning JoinMarket - keep default" >> ${logFile}
 fi
 
-# JoinMarket Web UI
-if [ "${joinmarketWebUI}" = "on" ]; then
-  echo "Provisioning JoinMarket Web UI - run config script" >> ${logFile}
-  /home/admin/_cache.sh set message "Setup JoinMarket Web UI"
-  sudo /home/admin/config.scripts/bonus.joinmarket-webui.sh on >> ${logFile} 2>&1
+# Jam
+if [ "${jam}" = "on" ]; then
+  echo "Provisioning Jam - run config script" >> ${logFile}
+  /home/admin/_cache.sh set message "Setup Jam"
+  sudo /home/admin/config.scripts/bonus.jam.sh on >> ${logFile} 2>&1
 else
-  echo "Provisioning JoinMarket Web UI - keep default" >> ${logFile}
+  echo "Provisioning Jam - keep default" >> ${logFile}
 fi
 
 # Specter

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # https://github.com/Ride-The-Lightning/RTL/releases
-RTLVERSION="v0.12.3"
+RTLVERSION="v0.13.0"
 
 # check and load raspiblitz config
 # to know which network is running
@@ -15,6 +15,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "# bonus.rtl.sh [on|off|menu] <lnd|cl> <mainnet|testnet|signet> <purge>"
   echo "# bonus.rtl.sh connect-services"
   echo "# bonus.rtl.sh prestart <lnd|cl> <mainnet|testnet|signet>"
+  echo "# bonus.rtl.sh update <commit>"
   exit 1
 fi
 
@@ -180,7 +181,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # install
     echo "# Running npm install ..."
     export NG_CLI_ANALYTICS=false
-    sudo -u rtl npm install --only=prod --logLevel warn
+    sudo -u rtl npm install --omit=dev
     if ! [ $? -eq 0 ]; then
       echo "# FAIL - npm install did not run correctly - deleting code and exit"
       sudo rm -r /home/rtl/RTL
@@ -507,51 +508,69 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   exit 0
 fi
 
-# DEACTIVATED FOR NOW:
-# - parameter scheme is conflicting with setting all prefixes etc
-# - also just updating to latest has high change of breaking
-#if [ "$1" = "update" ]; then
-#  echo "# UPDATING RTL"
-#  cd /home/rtl/RTL
-#  updateOption="$2"
-#  if [ ${#updateOption} -eq 0 ]; then
-#    # from https://github.com/apotdevin/thunderhub/blob/master/scripts/updateToLatest.sh
-#    # fetch latest master
-#    sudo -u rtl git fetch
-#    # unset $1
-#    set --
-#    UPSTREAM=${1:-'@{u}'}
-#    LOCAL=$(git rev-parse @)
-#    REMOTE=$(git rev-parse "$UPSTREAM")
-#    if [ $LOCAL = $REMOTE ]; then
-#      TAG=$(git tag | sort -V | tail -1)
-#      echo "# You are up-to-date on version" $TAG
-#    else
-#      echo "# Pulling latest changes..."
-#      sudo -u rtl git pull -p
-#      echo "# Reset to the latest release tag"
-#      TAG=$(git tag | sort -V | tail -1)
-#      sudo -u rtl git reset --hard $TAG
-#      echo "# updating to the latest"
-#      # https://github.com/Ride-The-Lightning/RTL#or-update-existing-dependencies
-#      sudo -u rtl npm install --only=prod
-#      echo "# Updated to version" $TAG
-#    fi
-#  elif [ "$updateOption" = "commit" ]; then
-#    echo "# updating to the latest commit in https://github.com/Ride-The-Lightning/RTL"
-#    sudo -u rtl git pull -p
-#    sudo -u rtl npm install --only=prod
-#    currentRTLcommit=$(cd /home/rtl/RTL; git describe --tags)
-#    echo "# Updated RTL to $currentRTLcommit"
-#  else
-#    echo "# Unknown option: $updateOption"
-#  fi
-#
-#  echo
-#  echo "# Starting the RTL service ... "
-#  sudo systemctl start RTL
-#  exit 0
-#fi
+
+if [ "$1" = "update" ]; then
+  echo "# UPDATING RTL"
+  cd /home/rtl/RTL || exit 1
+  updateOption="$2"
+  if [ ${#updateOption} -eq 0 ]; then
+    # from https://github.com/apotdevin/thunderhub/blob/master/scripts/updateToLatest.sh
+    # fetch latest master
+    sudo -u rtl git fetch
+    # unset $1
+    set --
+    UPSTREAM=${1:-'@{u}'}
+    LOCAL=$(git rev-parse @)
+    REMOTE=$(git rev-parse "$UPSTREAM")
+    if [ $LOCAL = $REMOTE ]; then
+      TAG=$(git tag | sort -V | grep -v rc | tail -1)
+      echo "# You are up-to-date on version" $TAG
+    else
+      echo "# Pulling latest changes..."
+      sudo -u rtl git pull -p
+      echo "# Reset to the latest release tag"
+      TAG=$(git tag | sort -V | grep -v rc | tail -1)
+      sudo -u rtl git reset --hard $TAG
+      echo "# updating to the latest"
+      # https://github.com/Ride-The-Lightning/RTL#or-update-existing-dependencies
+      echo "# Running npm install ..."
+      export NG_CLI_ANALYTICS=false
+      sudo -u rtl npm install --omit=dev
+      if ! [ $? -eq 0 ]; then
+        echo "# FAIL - npm install did not run correctly - deleting code and exit"
+        sudo rm -r /home/rtl/RTL
+        exit 1
+      else
+        echo "# OK - RTL install looks good"
+        echo
+      fi
+      echo "# Updated to version" $TAG
+    fi
+  elif [ "$updateOption" = "commit" ]; then
+    echo "# updating to the latest commit in https://github.com/Ride-The-Lightning/RTL"
+    sudo -u rtl git pull -p
+    echo "# Running npm install ..."
+    export NG_CLI_ANALYTICS=false
+    sudo -u rtl npm install --only=prod --logLevel warn
+    if ! [ $? -eq 0 ]; then
+      echo "# FAIL - npm install did not run correctly - deleting code and exit"
+      sudo rm -r /home/rtl/RTL
+      exit 1
+    else
+      echo "# OK - RTL install looks good"
+      echo
+    fi
+    currentRTLcommit=$(cd /home/rtl/RTL; git describe --tags)
+    echo "# Updated RTL to $currentRTLcommit"
+  else
+    echo "# Unknown option: $updateOption"
+  fi
+
+  echo
+  echo "# Starting the ${systemdService} service ... "
+  sudo systemctl restart ${systemdService}
+  exit 0
+fi
 
 echo "# FAIL - Unknown Parameter $1"
 echo "# may need reboot to run normal again"

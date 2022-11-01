@@ -2,7 +2,7 @@
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
- echo "# use to prepare & check scp or web file upload to RaspiBlitz"
+ echo "# use to prepare & check sftp or web file upload to RaspiBlitz"
  echo "# blitz.upload.sh prepare-upload"
  echo "# blitz.upload.sh check-upload ?[scb|lnd-rescue|migration]"
  exit 0

@@ -2,16 +2,22 @@
 
 # https://github.com/lnbits/lnbits-legend
 
+# https://github.com/lnbits/lnbits-legend/releases
+tag="0.9.4"
+
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
-  echo "small config script to switch LNbits on or off"
+  echo "Config script to switch LNbits on or off."
+  echo "Installs the version ${tag} by default."
+  echo "Usage:"
   echo "bonus.lnbits.sh on [lnd|tlnd|slnd|cl|tcl|scl] [?GITHUBUSER] [?BRANCH|?TAG]"
   echo "bonus.lnbits.sh switch [lnd|tlnd|slnd|cl|tcl|scl]"
   echo "bonus.lnbits.sh off"
   echo "bonus.lnbits.sh status"
   echo "bonus.lnbits.sh menu"
-  echo "bonus.lnbits.sh prestart" 
-  echo "bonus.lnbits.sh githubsync"
+  echo "bonus.lnbits.sh prestart"
+  echo "bonus.lnbits.sh repo [githubuser] [branch]"
+  echo "bonus.lnbits.sh sync"
   exit 1
 fi
 
@@ -157,7 +163,7 @@ Consider adding a IP2TOR Bridge under OPTIONS."
             echo "Restarting LNbits ..."
             sudo systemctl restart lnbits
             echo
-            echo "OK new funding source for LNbits active." 
+            echo "OK new funding source for LNbits active."
             echo "PRESS ENTER to continue"
             read key
             exit 0
@@ -348,7 +354,7 @@ if [ "$1" = "repo" ]; then
   # check if repo exists
   #githubRepo="https://github.com/${githubUser}/lnbits"
   githubRepo="https://github.com/${githubUser}/lnbits-legend"
-  
+
   httpcode=$(curl -s -o /dev/null -w "%{http_code}" ${githubRepo})
   if [ "${httpcode}" != "200" ]; then
     echo "# tested github repo: ${githubRepo}"
@@ -356,25 +362,39 @@ if [ "$1" = "repo" ]; then
     exit 1
   fi
 
+  # fix permissions
+  sudo chown -R lnbits:lnbits /home/lnbits/lnbits
   # change origin repo of lnbits code
   echo "# changing LNbits github repo(${githubUser}) branch(${githubBranch})"
-  cd /home/lnbits/lnbits
-  sudo git remote remove origin
-  sudo git remote add origin ${githubRepo}
-  sudo git fetch
-  sudo git checkout ${githubBranch}
-  sudo git branch --set-upstream-to=origin/${githubBranch} ${githubBranch}
+  cd /home/lnbits/lnbits || exit 1
+  sudo -u lnbits git remote remove origin
+  sudo -u lnbits git remote add origin ${githubRepo}
+  sudo -u lnbits git fetch
+  sudo -u lnbits git checkout ${githubBranch}
+  sudo -u lnbits git branch --set-upstream-to=origin/${githubBranch} ${githubBranch}
 
 fi
 
 if [ "$1" = "sync" ] || [ "$1" = "repo" ]; then
   echo "# pull all changes from github repo"
+  # fix permissions
+  sudo chown -R lnbits:lnbits /home/lnbits/lnbits
   # output basic info
-  cd /home/lnbits/lnbits
-  sudo git remote -v
-  sudo git branch -v
+  cd /home/lnbits/lnbits || exit 1
+  sudo -u lnbits git remote -v
+  sudo -u lnbits git branch -v
   # pull latest code
-  sudo git pull
+  sudo -u lnbits git pull
+
+  # install
+  sudo -u lnbits python3 -m venv venv
+  sudo -u lnbits ./venv/bin/pip install -r requirements.txt
+  sudo -u lnbits ./venv/bin/pip install pylightning
+  sudo -u lnbits ./venv/bin/pip install secp256k1
+  sudo -u lnbits ./venv/bin/pip install pyln-client
+
+  # build
+  sudo -u lnbits ./venv/bin/python build.py
   # restart lnbits service
   sudo systemctl restart lnbits
   echo "# server is restarting ... maybe takes some seconds until available"
@@ -453,8 +473,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   if [ "$3" != "" ]; then
     githubUser="$3"
   fi
-  # https://github.com/lnbits/lnbits-legend/releases
-  tag="0.9.1"
   if [ "$4" != "" ]; then
     tag="$4"
   fi
@@ -462,9 +480,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # install from GitHub
   echo "# get the github code user(${githubUser}) branch(${tag})"
   sudo rm -r /home/lnbits/lnbits 2>/dev/null
-  cd /home/lnbits
+  cd /home/lnbits  || exit 1
   sudo -u lnbits git clone https://github.com/${githubUser}/lnbits-legend lnbits
-  cd /home/lnbits/lnbits
+  cd /home/lnbits/lnbits || exit 1
   sudo -u lnbits git checkout ${tag} || exit 1
 
   # prepare .env file
@@ -478,18 +496,19 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo chown lnbits:lnbits -R /mnt/hdd/app-data/LNBits
   sudo bash -c "echo 'LNBITS_DATA_FOLDER=/mnt/hdd/app-data/LNBits' >> /home/lnbits/lnbits/.env"
 
-  # let switch command part do the detail config 
+  # let switch command part do the detail config
   /home/admin/config.scripts/bonus.lnbits.sh switch ${fundingsource}
 
   # to the install
   echo "# installing application dependencies"
-  cd /home/lnbits/lnbits
+  cd /home/lnbits/lnbits  || exit 1
 
   # do install like this
   sudo -u lnbits python3 -m venv venv
   sudo -u lnbits ./venv/bin/pip install -r requirements.txt
   sudo -u lnbits ./venv/bin/pip install pylightning
   sudo -u lnbits ./venv/bin/pip install secp256k1
+  sudo -u lnbits ./venv/bin/pip install pyln-client
 
   # build
   sudo -u lnbits ./venv/bin/python build.py
@@ -499,7 +518,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "*** Updating Firewall ***"
   sudo ufw allow 5000 comment 'lnbits HTTP'
   sudo ufw allow 5001 comment 'lnbits HTTPS'
-  echo ""
+  echo
 
     # install service
     echo "*** Install systemd ***"
@@ -570,8 +589,8 @@ EOF
   fi
 
   echo "# OK install done ... might need to restart or call: sudo systemctl start lnbits"
-  
-  # needed for API/WebUI as signal that install ran thru 
+
+  # needed for API/WebUI as signal that install ran thru
   echo "result='OK'"
   exit 0
 fi
@@ -660,10 +679,10 @@ if [ "$1" = "switch" ]; then
     sudo bash -c "echo 'LND_REST_INVOICE_MACAROON=' >> /home/lnbits/lnbits/.env"
     sudo bash -c "echo 'LND_REST_READ_MACAROON=' >> /home/lnbits/lnbits/.env"
 
-  fi  
+  fi
 
   if [ "${fundingsource}" == "cl" ] || [ "${fundingsource}" == "tcl" ] || [ "${fundingsource}" == "scl" ]; then
-  
+
     echo "# add the 'lnbits' user to the 'bitcoin' group"
     sudo /usr/sbin/usermod --append --groups bitcoin lnbits
     echo "# check user"
@@ -726,6 +745,10 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     echo "lnbits.service is not installed."
   fi
 
+  echo "Cleaning up LNbits install ..."
+  sudo delete ufw allow 5000
+  sudo delete ufw allow 5001
+
   # remove nginx symlinks
   sudo rm -f /etc/nginx/sites-enabled/lnbits_ssl.conf
   sudo rm -f /etc/nginx/sites-enabled/lnbits_tor.conf
@@ -754,7 +777,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # setting value in raspi blitz config
   /home/admin/config.scripts/blitz.conf.sh set LNBits "off"
 
-  # needed for API/WebUI as signal that install ran thru 
+  # needed for API/WebUI as signal that install ran thru
   echo "result='OK'"
   exit 0
 fi

@@ -21,9 +21,9 @@ LN_REMOTE_BALANCE=$(lncli listchannels | jq -r '.[][].remote_balance' | awk '{s+
 LN_LOCAL_BALANCE=$(lncli listchannels | jq -r '.[][].local_balance' | awk '{s+=$1} END {print s}')
 LN_TOTAL_BALANCE=$((LN_REMOTE_BALANCE + LN_LOCAL_BALANCE))
 LN_COMMIT_FEES=$(lncli listchannels | jq -r '.[][] | select(.initiator==true) | .commit_fee' | awk '{s+=$1} END {print s}')
-LN_INVOICES=$(lncli listinvoices | jq -r '.invoices[] | select(.settled==true) | .value' | awk '{s+=$1} END {print s}')
-LN_PAYMENTS=$(lncli listpayments | jq -r '.payments[] | select(.status=="SUCCEEDED") | .value' | awk '{s+=$1} END {print s}')
-LN_PAYMENTS_FEES=$(lncli listpayments | jq -r '.payments[] | select(.status=="SUCCEEDED") | .fee' | awk '{s+=$1} END {print s}')
+LN_INVOICES=$(lncli listinvoices | jq -r '.invoices[] | select(.settled==true) | .value_msat' | awk '{s+=$1} END {printf "%.0f", s/1000}')
+LN_PAYMENTS=$(lncli listpayments | jq -r '.payments[] | select(.status=="SUCCEEDED") | .value_msat' | awk '{s+=$1} END {printf "%.0f", s/1000}')
+LN_PAYMENTS_FEES=$(lncli listpayments | jq -r '.payments[] | select(.status=="SUCCEEDED") | .fee_msat' | awk '{s+=$1} END {printf "%.0f", s/1000}')
 LN_EARNED_FEES_IN_MSATS=$(lncli fwdinghistory 0 --max_events 50000 | jq -r '.forwarding_events[] | .fee_msat' | awk '{s+=$1} END {print s}')
 LN_EARNED_FEES_IN_SATS=$((LN_EARNED_FEES_IN_MSATS / 1000))
 

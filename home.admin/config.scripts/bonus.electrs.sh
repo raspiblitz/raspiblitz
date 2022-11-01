@@ -3,7 +3,7 @@
 # https://github.com/romanz/electrs/releases
 ELECTRSVERSION="v0.9.9"
 # https://github.com/romanz/electrs/commits/master
-# ELECTRSVERSION="3041e89cd2fb377541b929d852ef6298c2d4e60a"
+# ELECTRSVERSION="446858ea621416916f84cbce61be92b748e8133e"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then

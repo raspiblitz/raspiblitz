@@ -2,20 +2,16 @@
 # https://lightning.readthedocs.io/
 
 # https://github.com/ElementsProject/lightning/releases
-CLVERSION=v0.11.2
+CLVERSION=v0.12.1
 
 # install the latest master by using the last commit id
 # https://github.com/ElementsProject/lightning/commit/master
 # CLVERSION="063366ed7e3b7cc12a8d1681acc2b639cf07fa23"
 
 # https://github.com/ElementsProject/lightning/tree/master/contrib/keys
-PGPsigner="rustyrussel"
-PGPpubkeyLink="https://raw.githubusercontent.com/ElementsProject/lightning/master/contrib/keys/rustyrussell.txt"
-PGPpubkeyFingerprint="D9200E6CD1ADB8F1"
-
-#PGPsigner="cdecker"
-#PGPpubkeyLink="https://raw.githubusercontent.com/ElementsProject/lightning/master/contrib/keys/${PGPsigner}.txt"
-#PGPpubkeyFingerprint="A26D6D9FE088ED58"
+PGPsigner="niftynei" # rustyrussel D9200E6CD1ADB8F1 # cdecker A26D6D9FE088ED58
+PGPpubkeyLink="https://raw.githubusercontent.com/ElementsProject/lightning/master/contrib/keys/${PGPsigner}.txt"
+PGPpubkeyFingerprint="BFF0F67810C1EED1"
 
 # help
 if [ $# -eq 0 ]||[ "$1" = "-h" ]||[ "$1" = "--help" ];then
@@ -40,13 +36,12 @@ function installDependencies()
   # from https://lightning.readthedocs.io/INSTALL.html#to-build-on-ubuntu
   sudo apt-get install -y \
    autoconf automake build-essential git libtool libgmp-dev \
-   libsqlite3-dev python3 python3-mako net-tools zlib1g-dev libsodium-dev \
+   libsqlite3-dev python3 net-tools zlib1g-dev libsodium-dev \
    gettext
   # additional requirements
   sudo apt-get install -y postgresql libpq-dev
-  # mrkd and mistune needs to be globally available for the build
-  sudo pip3 install mrkd==0.2.0
-  sudo pip3 install mistune==0.8.4
+  # upgrade pip
+  sudo pip3 install --upgrade pip
   # poetry
   sudo -u bitcoin pip3 install --user poetry
   if ! grep -Eq '^PATH="$HOME/.local/bin:$PATH"' /mnt/hdd/raspiblitz.conf; then
@@ -471,7 +466,7 @@ if [ "$1" = "off" ];then
   # if cl mainnet was default - remove
   if [ "${CHAIN}" == "mainnet" ] && [ "${lightning}" == "cl" ]; then
     echo "# Core Lightning is REMOVED as the default lightning implementation"
-    /home/admin/config.scripts/blitz.conf.sh set lightning ""
+    /home/admin/config.scripts/blitz.conf.sh set lightning "none"
     if [ "${lnd}" == "on" ]; then
       echo "# LND is now the new default lightning implementation"
       /home/admin/config.scripts/blitz.conf.sh set lightning "lnd"
