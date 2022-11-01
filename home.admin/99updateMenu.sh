@@ -476,6 +476,10 @@ if [ "${bos}" == "on" ]; then
   OPTIONS+=(BOS "Update Balance of Satoshis")
 fi
 
+if [ "${ElectRS}" == "on" ]; then
+  OPTIONS+=(ELECTRS "Update Electrs")
+fi
+
 if [ "${RTL}" == "on" ]||[ "${cRTL}" == "on" ]; then
   OPTIONS+=(RTL "Update RTL")
 fi
@@ -547,6 +551,9 @@ case $CHOICE in
   BOS)
     /home/admin/config.scripts/bonus.bos.sh update
     ;;
+  ELECTRS)
+    /home/admin/config.scripts/bonus.electrs.sh update
+    ;;    
   RTL)
     /home/admin/config.scripts/bonus.rtl.sh update
     ;;
