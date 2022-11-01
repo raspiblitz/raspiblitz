@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # https://github.com/romanz/electrs/releases
-ELECTRSVERSION="v0.9.7"
+ELECTRSVERSION="v0.9.9"
 # https://github.com/romanz/electrs/commits/master
 # ELECTRSVERSION="3041e89cd2fb377541b929d852ef6298c2d4e60a"
 
@@ -10,7 +10,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "config script to switch the Electrum Rust Server on or off"
  echo "bonus.electrs.sh status -> dont call in loops"
  echo "bonus.electrs.sh status-sync"
- echo "bonus.electrs.sh [on|off|menu]"
+ echo "bonus.electrs.sh [on|off|menu|update]"
  echo "installs the version $ELECTRSVERSION"
  exit 1
 fi
@@ -507,6 +507,18 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   else
     echo "# ElectRS is not installed."
   fi
+  exit 0
+fi
+
+if [ "$1" = "update" ]; then
+  cd /home/electrs/electrs || exit 1
+  sudo -u electrs git reset --hard $ELECTRSVERSION
+  sudo -u electrs /home/admin/config.scripts/blitz.git-verify.sh \
+   "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
+  sudo -u electrs /home/electrs/.cargo/bin/cargo build --locked --release || exit 1
+  echo "# Update Done"
+  echo "# restart service"
+  sudo systemctl restart electrs
   exit 0
 fi
 

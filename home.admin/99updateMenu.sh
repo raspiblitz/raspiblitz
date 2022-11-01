@@ -476,6 +476,10 @@ if [ "${bos}" == "on" ]; then
   OPTIONS+=(BOS "Update Balance of Satoshis")
 fi
 
+if [ "${ElectRS}" == "on" ]; then
+  OPTIONS+=(ELECTRS "Update Electrs")
+fi
+
 if [ "${thunderhub}" == "on" ]; then
   OPTIONS+=(THUB "Update ThunderHub")
 fi
@@ -563,4 +567,7 @@ case $CHOICE in
   ITCHYSATS)
     /home/admin/config.scripts/bonus.itchysats.sh update
     ;;
+  ELECTRS)
+    /home/admin/config.scripts/bonus.electrs.sh update
+    ;;    
 esac
