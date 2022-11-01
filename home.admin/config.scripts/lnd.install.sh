@@ -4,17 +4,17 @@
 ## based on https://raspibolt.github.io/raspibolt/raspibolt_40_lnd.html#lightning-lnd
 ## see LND releases: https://github.com/lightningnetwork/lnd/releases
 ### If you change here - make sure to also change interims version in lnd.update.sh #!
-lndVersion="0.15.2-beta"
+lndVersion="0.15.4-beta"
 
 # olaoluwa
-PGPauthor="roasbeef"
-PGPpkeys="https://keybase.io/roasbeef/pgp_keys.asc"
-PGPcheck="E4D85299674B2D31FAA1892E372CBD7633C61696"
+#PGPauthor="roasbeef"
+#PGPpkeys="https://keybase.io/roasbeef/pgp_keys.asc"
+#PGPcheck="E4D85299674B2D31FAA1892E372CBD7633C61696"
 
 # guggero
-# PGPauthor="guggero"
-# PGPpkeys="https://keybase.io/guggero/pgp_keys.asc"
-# PGPcheck="F4FC70F07310028424EFC20A8E4256593F177720"
+PGPauthor="guggero"
+PGPpkeys="https://keybase.io/guggero/pgp_keys.asc"
+PGPcheck="F4FC70F07310028424EFC20A8E4256593F177720"
 
 # bitconner
 #PGPauthor="bitconner"
