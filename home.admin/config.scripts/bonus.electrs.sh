@@ -514,26 +514,23 @@ if [ "$1" = "update" ]; then
   echo "# Update Electrs"
   cd /home/electrs/electrs || exit 1
   sudo -u electrs git fetch
-  
-  # unset $1
-  set --
-  UPSTREAM=${1:-'@{u}'}
-  LOCAL=$(git rev-parse @)
-  REMOTE=$(git rev-parse "$UPSTREAM")
 
-  if [ $LOCAL = $REMOTE ]; then
+  localVersion=$(git describe --tag)
+  updateVersion=$(curl -s https://api.github.com/repos/romanz/electrs/releases/latest|grep tag_name|head -1|cut -d '"' -f4)
+
+  if [ $localVersion = $updateVersion ]; then
     TAG=$(git tag | sort -V | tail -1)
-    echo "# Up-to-date on version $TAG"
+    echo "# Up-to-date on version $localVersion"
   else
     echo "# Pulling latest changes..."
     sudo -u electrs git pull -p
     TAG=$(git tag | sort -V | tail -1)
-    echo "# Reset to the latest release tag: $TAG"
-    sudo -u electrs git reset --hard $TAG
+    echo "# Reset to the latest release tag: $updateVersion"
+    sudo -u electrs git reset --hard $updateVersion
     echo "# Build Electrs ..."
     sudo -u electrs /home/electrs/.cargo/bin/cargo build --locked --release || exit 1
-    echo "# Updated Electrs to $TAG"
-  fi  
+    echo "# Updated Electrs to $updateVersion"
+  fi
   sudo systemctl start electrs
   exit 0
 fi
