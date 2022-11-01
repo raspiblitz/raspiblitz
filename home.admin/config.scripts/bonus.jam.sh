@@ -237,6 +237,7 @@ if [ "$1" = "update" ]; then
     if [ "$2" = "commit" ]; then
       echo "# Remove old source code"
       sudo rm -rf jam
+      sudo rm -rf $APP_DIR
       echo "# Downloading the latest commit in the default branch of $REPO"
       sudo -u $USERNAME git clone https://github.com/$REPO
     else
@@ -251,6 +252,7 @@ if [ "$1" = "update" ]; then
 
       echo "# Remove old source code"
       sudo rm -rf jam
+      sudo rm -rf $APP_DIR
       sudo -u $USERNAME git clone https://github.com/$REPO
       cd jam || exit 1
       sudo -u $USERNAME git reset --hard v${version}
