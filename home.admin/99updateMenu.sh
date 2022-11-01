@@ -131,7 +131,7 @@ patch()
            REPO "Change GitHub Repo to sync with" \
            BRANCH "Change GitHub Branch to sync with" \
            PR "Checkout a PullRequest to test"
-	)
+    )
 
   CHOICE=$(whiptail --clear --title " GitHub user:${activeGitHubUser} branch:${activeBranch} (${commitHashShort})" --menu "" 11 60 4 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
@@ -476,6 +476,10 @@ if [ "${bos}" == "on" ]; then
   OPTIONS+=(BOS "Update Balance of Satoshis")
 fi
 
+if [ "${ElectRS}" == "on" ]; then
+  OPTIONS+=(ELECTRS "Update Electrs")
+fi
+
 if [ "${thunderhub}" == "on" ]; then
   OPTIONS+=(THUB "Update ThunderHub")
 fi
@@ -563,4 +567,7 @@ case $CHOICE in
   ITCHYSATS)
     /home/admin/config.scripts/bonus.itchysats.sh update
     ;;
+  ELECTRS)
+    /home/admin/config.scripts/bonus.electrs.sh update
+    ;;    
 esac
