@@ -268,7 +268,7 @@ Which verification method should I used: Hash or Signature?
 
 The maintainer sd card image can also be downloaded via torrent:
 
-- [assets/raspiblitz-v1.8.0c-2022-11-01.img.gz.torrent](https://github.com/rootzoll/raspiblitz/raw/dev/home.admin/assets/raspiblitz-v1.8.0c-2022-11-01.img.gz.torrent)
+- [assets/raspiblitz-v1.8.0c-2022-11-01.img.gz.torrent](https://github.com/rootzoll/raspiblitz/raw/v1.8/home.admin/assets/raspiblitz-v1.8.0c-2022-11-01.img.gz.torrent)
 
 Useful info:
 
