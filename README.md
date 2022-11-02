@@ -3,7 +3,7 @@
 
 _Build your own Lightning & Bitcoin Fullnode on a RaspberryPi with a nice Display._
 
-`Version 1.8.0b with lnd 0.15.2 & Core Lightning 0.11.2 and bitcoin 23.0.0`
+`Version 1.8.0c with lnd 0.15.4 & Core Lightning 0.11.2 and bitcoin 23.0.0`
 
 ![RaspiBlitz](pictures/raspiblitz.jpg)
 
@@ -253,13 +253,13 @@ In the end your RaspiBlitz should look like this:
 | Philosophy       | Trust                                                                                                                                                                            | Sovereignty                                                       |
 | Difficulty level | Easy                                                                                                                                                                             | Medium                                                            |
 | Pros             | Make Blitz accessible to everyone                                                                                                                                                | You don't need to trust us, build from your own forked repository |
-| Instructions     | [Download 1.8.0b image (with lnd-bug fix)](https://raspiblitz.fulmo.org/images/raspiblitz-v1.8.0b-2022-10-10.img.gz) and [Flash the sd card](README.md#write-the-sd-card-image-to-your-sd-card) | [Build your own sd card image](#build-the-sd-card-image)          |
-| Verify what?     | [Signature file](https://raspiblitz.fulmo.org/images/raspiblitz-v1.8.0b-2022-10-10.img.gz.sig) and [verify the Sig](FAQ.md#how-to-verify-the-sd-card-image-after-download) OR SHA-256 (below)                                                               | All of the code, don't trust, verify                              |
+| Instructions     | [Download 1.8.0c image (with both lnd hot fixes)](https://raspiblitz.fulmo.org/images/raspiblitz-v1.8.0c-2022-11-01.img.gz) and [Flash the sd card](README.md#write-the-sd-card-image-to-your-sd-card) | [Build your own sd card image](#build-the-sd-card-image)          |
+| Verify what?     | [Signature file](https://raspiblitz.fulmo.org/images/raspiblitz-v1.8.0c-2022-11-01.img.gz.sig) and [verify the Sig](FAQ.md#how-to-verify-the-sd-card-image-after-download) OR SHA-256 (below)                                                               | All of the code, don't trust, verify                              |
 
 If downloading the maintainer SD card image:
 
 - GPG 64-bit (main): 1C73 060C 7C17 6461 & (sub): AA9D D1B5 CC56 47DA
-- SHA-256: 42c96fb29e03eb8276b40861f77b141bde30a2ff461947e107cff7d24c5a8096
+- SHA-256: 402cc47dd7546ffdf8c5e2a8c0269bbb4d3fe7fedb73ac5a3dad7559edf76eea
 
 Which verification method should I used: Hash or Signature?
 
@@ -268,11 +268,11 @@ Which verification method should I used: Hash or Signature?
 
 The maintainer sd card image can also be downloaded via torrent:
 
-- [assets/raspiblitz-v1.8.0-2022-07-28.img.gz.torrent](https://github.com/rootzoll/raspiblitz/raw/dev/home.admin/assets/raspiblitz-v1.8.0-2022-07-28.img.gz.torrent)
+- [assets/raspiblitz-v1.8.0c-2022-11-01.img.gz.torrent](https://github.com/rootzoll/raspiblitz/raw/dev/home.admin/assets/raspiblitz-v1.8.0c-2022-11-01.img.gz.torrent)
 
 Useful info:
 
-- [What's new in Version 1.8.0 of RaspiBlitz?](CHANGES.md#whats-new-in-version-180-of-raspiblitz)
+- [What's new in Version 1.8.0 of RaspiBlitz?](CHANGES.md#whats-new-in-version-180c-of-raspiblitz)
 - [How to update my RaspiBlitz?](README.md#updating-raspiblitz-to-new-version)
 - [How to migrate to RaspiBlitz from Umbrel/myNode/Citadel](#make-a-raspiblitz-out-of-your-umbrel-citadel-or-mynode)
 - [How to verify the SD card image after download?](FAQ.md#how-to-verify-the-sd-card-image-after-download)
