@@ -18,6 +18,8 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "bonus.lnbits.sh prestart"
   echo "bonus.lnbits.sh repo [githubuser] [branch]"
   echo "bonus.lnbits.sh sync"
+  echo "bonus.lnbits.sh backup"
+  echo "bonus.lnbits.sh restore"    
   exit 1
 fi
 
@@ -117,6 +119,12 @@ Consider adding a IP2TOR Bridge under OPTIONS."
     OPTIONS+=(SWITCH-LND "Switch: Use LND as funding source")
   fi
 
+  # Backup database
+  OPTIONS+=(BACKUP "Backup database")
+  if [ -d /mnt/hdd/app-data/backup ]; then
+    OPTIONS+=(RESTORE "Restore database")
+  fi
+
   WIDTH=66
   CHOICE_HEIGHT=$(("${#OPTIONS[@]}/2+1"))
   HEIGHT=$((CHOICE_HEIGHT+7))
@@ -164,6 +172,24 @@ Consider adding a IP2TOR Bridge under OPTIONS."
             sudo systemctl restart lnbits
             echo
             echo "OK new funding source for LNbits active."
+            echo "PRESS ENTER to continue"
+            read key
+            exit 0
+            ;;
+        BACKUP)
+            clear
+            /home/admin/config.scripts/bonus.lnbits.sh backup
+            echo
+            echo "Backup done"
+            echo "PRESS ENTER to continue"
+            read key
+            exit 0
+            ;;
+        RESTORE)
+            clear
+            /home/admin/config.scripts/bonus.lnbits.sh restore
+            echo
+            echo "Restore done"
             echo "PRESS ENTER to continue"
             read key
             exit 0
@@ -779,6 +805,51 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # needed for API/WebUI as signal that install ran thru
   echo "result='OK'"
+  exit 0
+fi
+
+if [ "$1" = "backup" ]; then
+  if [ ! -d /mnt/hdd/app-data/backup ]; then
+    sudo mkdir /mnt/hdd/app-data/backup
+  fi
+
+  if [ -d /mnt/hdd/app-data/LNBits/ ]; then
+    echo "# Backup SQLite database"
+    sudo tar -cf /mnt/hdd/app-data/backup/LNBits_db_backup.tar -C /mnt/hdd/app-data LNBits/    
+  else
+    echo "# Backup PostgreSQL database"
+    sudo tar -cf /mnt/hdd/app-data/backup/postgresql_backup.tar -C /mnt/hdd/app-data postgresql/
+  fi
+
+  sudo systemctl start lnbits
+  exit 0
+fi
+
+if [ "$1" = "restore" ]; then
+  if [ ! -d /mnt/hdd/app-data/backup ]; then
+    echo "# No backups found"
+  else
+    cd /mnt/hdd/app-data/backup
+    if [ -d /mnt/hdd/app-data/LNBits/ ]; then
+      echo "# Restore SQLite database"
+      sudo tar -xf /mnt/hdd/app-data/backup/LNBits_db_backup.tar
+      sudo chown -R lnbits:lnbits LNBits/
+      sudo tar -cf /mnt/hdd/app-data/backup/LNBits_db_backup.1.tar -C /mnt/hdd/app-data LNBits/
+      sudo rm -R ../LNBits/
+      sudo mv LNBits/ ../
+    else
+      echo "# Restore PostgreSQL database"
+      sudo tar -xf /mnt/hdd/app-data/backup/postgresql_backup.tar
+      sudo chown -R postgres:postgres postgresql/
+      sudo systemctl stop postgresql 2>/dev/null
+      sudo tar -cf /mnt/hdd/app-data/backup/postgresql_backup.1.tar -C /mnt/hdd/app-data postgresql/
+      sudo rm -R ../postgresql
+      sudo mv postgresql/ ../
+      sudo systemctl start postgresql 2>/dev/null
+    fi
+  fi
+
+  sudo systemctl start lnbits
   exit 0
 fi
 
