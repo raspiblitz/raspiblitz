@@ -18,11 +18,45 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "bonus.lnbits.sh prestart"
   echo "bonus.lnbits.sh repo [githubuser] [branch]"
   echo "bonus.lnbits.sh sync"
+  echo "bonus.lnbits.sh migrate"
   exit 1
 fi
 
 echo "# Running: 'bonus.lnbits.sh $*'"
 source /mnt/hdd/raspiblitz.conf
+
+function postgresConfig() {
+  echo "# Install postgres"
+
+  sudo apt install -y postgresql
+
+  if [ ! -d /var/lib/postgresql ]; then
+    echo "# Create postgres data"
+    sudo mkdir -p /var/lib/postgresql/13/main
+    sudo chown -R postgres:postgres /var/lib/postgresql
+    # sudo pg_dropcluster 13 main
+    sudo pg_createcluster 13 main --start
+  fi
+
+  if [ ! -d /mnt/hdd/app-data/postgres ]; then
+    echo "# Move the postgres data to /mnt/hdd/app-data/postgresql"
+    sudo systemctl stop postgresql 2>/dev/null
+    sudo rsync -av /var/lib/postgresql /mnt/hdd/app-data
+    sudo mv /var/lib/postgresql /var/lib/postgresql.bak
+    sudo rm -rf /var/lib/postgresql # not a symlink.. delete it silently
+    sudo ln -s /mnt/hdd/app-data/postgresql /var/lib/
+    sudo systemctl enable postgresql
+    sudo systemctl start postgresql
+  fi
+
+  echo "# Generate the database lnbits_db"
+  sudo -u postgres psql -c "create database lnbits_db;"
+  sudo -u postgres psql -c "create user lnbits_user with encrypted password 'raspiblitz';"
+  sudo -u postgres psql -c "grant all privileges on database lnbits_db to lnbits_user;"
+  
+  # example: postgres://<user>:<password>@<host>/<database>
+  sudo bash -c "echo 'LNBITS_DATABASE_URL=postgres://lnbits_user:raspiblitz@localhost:5432/lnbits_db' >> /home/lnbits/lnbits/.env"
+}
 
 # show info menu
 if [ "$1" = "menu" ]; then
@@ -117,6 +151,11 @@ Consider adding a IP2TOR Bridge under OPTIONS."
     OPTIONS+=(SWITCH-LND "Switch: Use LND as funding source")
   fi
 
+  # Migrate SQLite to PostgreSQL
+  if [ -d /mnt/hdd/app-data/LNBits ]; then
+    OPTIONS+=(MIGRATE-DB "Migrate SQLite to PostgreSQL database")
+  fi
+
   WIDTH=66
   CHOICE_HEIGHT=$(("${#OPTIONS[@]}/2+1"))
   HEIGHT=$((CHOICE_HEIGHT+7))
@@ -168,6 +207,17 @@ Consider adding a IP2TOR Bridge under OPTIONS."
             read key
             exit 0
             ;;
+        MIGRATE-DB)
+            clear
+            /home/admin/config.scripts/bonus.lnbits.sh migrate
+            echo "Restarting LNbits ..."
+            sudo systemctl restart lnbits
+            echo
+            echo "OK new database source for LNbits active."
+            echo "PRESS ENTER to continue"
+            read key
+            exit 0
+            ;;            
         *)
             clear
             exit 0
@@ -491,10 +541,15 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo -u lnbits touch /home/lnbits/lnbits/.env
   sudo bash -c "echo 'LNBITS_FORCE_HTTPS=0' >> /home/lnbits/lnbits/.env"
 
-  # set database path to HDD data so that its survives updates and migrations
-  sudo mkdir /mnt/hdd/app-data/LNBits 2>/dev/null
-  sudo chown lnbits:lnbits -R /mnt/hdd/app-data/LNBits
-  sudo bash -c "echo 'LNBITS_DATA_FOLDER=/mnt/hdd/app-data/LNBits' >> /home/lnbits/lnbits/.env"
+  if [ ! -d /mnt/hdd/app-data/LNBits ]; then
+    # POSTGRES
+    postgresConfig
+  else
+    # old db found
+    sudo chown lnbits:lnbits -R /mnt/hdd/app-data/LNBits
+    # set data folder for sqli database migration
+    sudo bash -c "echo 'LNBITS_DATA_FOLDER=/mnt/hdd/app-data/LNBits' >> /home/lnbits/lnbits/.env"
+  fi
 
   # let switch command part do the detail config
   /home/admin/config.scripts/bonus.lnbits.sh switch ${fundingsource}
@@ -509,6 +564,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo -u lnbits ./venv/bin/pip install pylightning
   sudo -u lnbits ./venv/bin/pip install secp256k1
   sudo -u lnbits ./venv/bin/pip install pyln-client
+  sudo -u lnbits ./venv/bin/pip install psycopg2 # for postgres migration
 
   # build
   sudo -u lnbits ./venv/bin/python build.py
@@ -520,9 +576,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo ufw allow 5001 comment 'lnbits HTTPS'
   echo
 
-    # install service
-    echo "*** Install systemd ***"
-    cat <<EOF | sudo tee /etc/systemd/system/lnbits.service >/dev/null
+  # install service
+  echo "*** Install systemd ***"
+  cat <<EOF | sudo tee /etc/systemd/system/lnbits.service >/dev/null
 # systemd unit for lnbits
 
 [Unit]
@@ -552,15 +608,15 @@ PrivateDevices=true
 WantedBy=multi-user.target
 EOF
 
-    sudo systemctl enable lnbits
+  sudo systemctl enable lnbits
 
-    source <(/home/admin/_cache.sh get state)
-    if [ "${state}" == "ready" ]; then
-      echo "# OK - lnbits service is enabled, system is on ready so starting lnbits service"
-      sudo systemctl start lnbits
-    else
-      echo "# OK - lnbits service is enabled, but needs reboot or manual starting: sudo systemctl start lnbits"
-    fi
+  source <(/home/admin/_cache.sh get state)
+  if [ "${state}" == "ready" ]; then
+    echo "# OK - lnbits service is enabled, system is on ready so starting lnbits service"
+    sudo systemctl start lnbits
+  else
+    echo "# OK - lnbits service is enabled, but needs reboot or manual starting: sudo systemctl start lnbits"
+  fi
 
   # setup nginx symlinks
   if ! [ -f /etc/nginx/sites-available/lnbits_ssl.conf ]; then
@@ -769,6 +825,8 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   if [ ${deleteData} -eq 1 ]; then
     echo "# deleting data"
+    sudo -u postgres psql -c "drop database lnbits_db;"
+    sudo -u postgres psql -c "drop user lnbits_user;"
     sudo rm -R /mnt/hdd/app-data/LNBits
   else
     echo "# keeping data"
@@ -779,6 +837,32 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # needed for API/WebUI as signal that install ran thru
   echo "result='OK'"
+  exit 0
+fi
+
+if [ "$1" = "migrate" ]; then
+
+  if [ -d /mnt/hdd/app-data/LNBits/ ]; then
+    # POSTGRES
+    postgresConfig
+    # clean start on new db prior migration
+    sudo systemctl start lnbits
+
+    echo "# SQLite to PostgreSQL migration"
+    # backup old sqlite database
+    sudo tar -cf /mnt/hdd/app-data/LNBits_db_backup.tar -C /mnt/hdd/app-data LNBits/    
+    # start convert database to postgres
+    cd /home/lnbits/lnbits || exit 1
+    sudo systemctl stop lnbits
+    sudo -u lnbits ./venv/bin/python tools/conv.py || exit 1
+    # cleanup
+    sudo rm -R /mnt/hdd/app-data/LNBits/
+    sudo sed -i "/^LNBITS_DATA_FOLDER=/d" /home/lnbits/lnbits/.env 2>/dev/null
+  else
+    echo "# No SQLite data found to migrate from"
+  fi
+
+  sudo systemctl start lnbits
   exit 0
 fi
 
