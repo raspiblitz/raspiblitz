@@ -808,42 +808,50 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   exit 0
 fi
 
-if [ "$1" = "backup" ]; then
-  if [ ! -d /mnt/hdd/app-data/backup ]; then
-    sudo mkdir /mnt/hdd/app-data/backup
-  fi
+# backup & restore vars
+backup_folder=""
+backup_path="/mnt/hdd/app-data"
+backup_target="/mnt/backup_manual"
 
+if [ "$1" = "backup" ]; then
+  if [ ! -d $backup_target ]; then
+    sudo mkdir -p $backup_target 1>&2
+  fi
+fi
+
+if [ "$1" = "backup" ]; then
   if [ -d /mnt/hdd/app-data/LNBits/ ]; then
     echo "# Backup SQLite database"
-    sudo tar -cf /mnt/hdd/app-data/backup/LNBits_db_backup.tar -C /mnt/hdd/app-data LNBits/    
+    backup_folder="LNBits/"
   else
     echo "# Backup PostgreSQL database"
-    sudo tar -cf /mnt/hdd/app-data/backup/postgresql_backup.tar -C /mnt/hdd/app-data postgresql/
+    backup_folder="postgresql/"
   fi
+  sudo tar -cf $backup_target/LNBits_db_backup.tar -C $backup_path $backup_folder
+  echo "$backup_target/LNBits_db_backup.tar created from $backup_path/$backup_folder"
 
   sudo systemctl start lnbits
   exit 0
 fi
 
 if [ "$1" = "restore" ]; then
-  if [ ! -d /mnt/hdd/app-data/backup ]; then
+  if [ ! -d $backup_target ]; then
     echo "# No backups found"
   else
-    cd /mnt/hdd/app-data/backup
+    cd $backup_target
+    sudo tar -xf $backup_target/LNBits_db_backup.tar
     if [ -d /mnt/hdd/app-data/LNBits/ ]; then
       echo "# Restore SQLite database"
-      sudo tar -xf /mnt/hdd/app-data/backup/LNBits_db_backup.tar
       sudo chown -R lnbits:lnbits LNBits/
-      sudo tar -cf /mnt/hdd/app-data/backup/LNBits_db_backup.1.tar -C /mnt/hdd/app-data LNBits/
+      sudo tar -cf $backup_target/LNBits_db_backup.1.tar -C $backup_path LNBits/
       sudo rm -R ../LNBits/
       sudo mv LNBits/ ../
     else
       echo "# Restore PostgreSQL database"
-      sudo tar -xf /mnt/hdd/app-data/backup/postgresql_backup.tar
       sudo chown -R postgres:postgres postgresql/
       sudo systemctl stop postgresql 2>/dev/null
-      sudo tar -cf /mnt/hdd/app-data/backup/postgresql_backup.1.tar -C /mnt/hdd/app-data postgresql/
-      sudo rm -R ../postgresql
+      sudo tar -cf $backup_target/postgresql_backup.1.tar -C $backup_path postgresql/
+      sudo rm -R ../postgresql/
       sudo mv postgresql/ ../
       sudo systemctl start postgresql 2>/dev/null
     fi
