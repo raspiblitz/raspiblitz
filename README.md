@@ -1351,7 +1351,7 @@ To develop your own scripts/apps and connect other services/apps to your RaspiBl
 - `lncli` command line interface on the terminal [DOC](https://api.lightning.community/)
 - `lnd` running on port 9735 (public)
 - `gRPC` running on port 10009 (public) [DOC](https://api.lightning.community/)
-- `REST` running on port 8080 (public) [DOC](https://api.lightning.community/rest/index.html)
+- `REST` running on port 8080 (public) [DOC](https://api.lightning.community/#lnd-rest-api-reference)
 
 If you activate Tor then your LND gRPC & REST APIs will also be reachable publicly as a Hidden Service.
 
