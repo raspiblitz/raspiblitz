@@ -299,7 +299,7 @@ Work notes partially based on: https://github.com/rootzoll/raspiblitz/blob/v1.7/
 * Insert the installation medium to the USB and power up - boot from USB.
 * Continue to work on the screen of the laptop or a connected monitor
 * Install Debian with the defaults:
-    * leave the root oassword empty (root user disabled)
+    * leave the root password empty (root user disabled)
     * create a new user called `pi`, set the password to `raspiblitz`
     * use a single partition for the OS
       * Choose: `Guided - use entire disk`
