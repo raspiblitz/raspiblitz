@@ -3,14 +3,14 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "config script to install PostgreSQL"
- echo "bonus.postgresel.sh [on|off]"
+ echo "bonus.postgresql.sh [on|off]"
  exit 1
 fi
 
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # https://github.com/rootzoll/raspiblitz/issues/3218
-  echo "# Install postgres"
+  echo "# Install PostgreSQL"
 
   sudo apt install -y postgresql
   postgres_datadir="/var/lib/postgresql" # default data dir
@@ -18,7 +18,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # sudo -u postgres psql -c "show data_directory"
   #  /var/lib/postgresql/13/main
   if [ ! -d $postgres_datadir ]; then
-    echo "# Create postgres data"
+    echo "# Create PostgreSQL data"
     sudo  mkdir -p $postgres_datadir/13/main
     sudo chown -R postgres:postgres $postgres_datadir
     # sudo pg_dropcluster 13 main
@@ -42,7 +42,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   fi
 
   if [ fix_postgres = 1 ] || [ ! -d /mnt/hdd/app-data/postgresql ]; then
-    echo "# Move the postgres data to /mnt/hdd/app-data/postgresql"
+    echo "# Move the PostgreSQL data to /mnt/hdd/app-data/postgresql"
     sudo systemctl stop postgresql 2>/dev/null
     sudo rsync -av $postgres_datadir /mnt/hdd/app-data
     sudo mv $postgres_datadir /var/lib/postgresql.bak
