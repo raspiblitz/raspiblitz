@@ -348,12 +348,11 @@ if [ "$1" = "repo" ]; then
   fi
   githubBranch="$3"
   if [ ${#githubBranch} -eq 0 ]; then
-    githubBranch="master"
+    githubBranch="main"
   fi
 
   # check if repo exists
-  #githubRepo="https://github.com/${githubUser}/lnbits"
-  githubRepo="https://github.com/${githubUser}/lnbits-legend"
+  githubRepo="https://github.com/${githubUser}/lnbits"
 
   httpcode=$(curl -s -o /dev/null -w "%{http_code}" ${githubRepo})
   if [ "${httpcode}" != "200" ]; then
