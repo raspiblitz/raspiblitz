@@ -239,7 +239,7 @@ Work notes partially based on: https://github.com/rootzoll/raspiblitz/blob/v1.7/
 
 ### Requirements:
 * amd64 Laptop or Server connected to the internet via a LAN cable
-* [`Ubuntu Live`](https://releases.ubuntu.com/focal/ubuntu-20.04.4-desktop-amd64.iso) USB Stick to start on a clean system
+* [`Ubuntu Live`](https://releases.ubuntu.com/focal/ubuntu-20.04.5-desktop-amd64.iso) USB Stick to start on a clean system
 * `Installation medium`: min 8GB SDcard / USB stick to install the base image from
 * `OS disk`: min 32 GB Endurance type SDcard or USB SSD to run the operating system on
 * (`Data disk`: a new, minimum 1TB SSD is recommended - not needed to create the image release)
@@ -251,7 +251,7 @@ Work notes partially based on: https://github.com/rootzoll/raspiblitz/blob/v1.7/
 * can be prepared any time on a separate computer and can reuse the Installation medium
 
 ### Boot Ubuntu Live from USB
-* Start [`Ubuntu Live`](https://releases.ubuntu.com/focal/ubuntu-20.04.4-desktop-amd64.iso) from USB stick
+* Start [`Ubuntu Live`](https://releases.ubuntu.com/focal/ubuntu-20.04.5-desktop-amd64.iso) from USB stick
 * Under Settings: best to set correct keyboard language & power settings to prevent monitor turn off
 
 ### Download and verify the base image
