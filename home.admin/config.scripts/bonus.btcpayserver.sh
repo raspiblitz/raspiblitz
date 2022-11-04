@@ -24,39 +24,6 @@ source /mnt/hdd/raspiblitz.conf
 source /home/admin/raspiblitz.info
 source <(/home/admin/_cache.sh get state)
 
-function postgresConfig() {
-  # https://github.com/rootzoll/raspiblitz/issues/3218
-  echo "# Install postgres"
-  sudo apt install -y postgresql
-
-  echo "# Move the postgres data to /mnt/hdd/app-data/postgresql"
-  # sudo -u postgres psql -c "show data_directory"
-  #  /var/lib/postgresql/13/main
-  if [ ! -d /var/lib/postgresql ]; then
-    sudo  mkdir -p /var/lib/postgresql/13/main
-    sudo chown -R postgres:postgres /var/lib/postgresql
-    # sudo pg_dropcluster 13 main
-    sudo pg_createcluster 13 main --start
-  fi
-  sudo systemctl stop postgresql 2>/dev/null
-  sudo rsync -av /var/lib/postgresql /mnt/hdd/app-data
-  sudo mv /var/lib/postgresql /var/lib/postgresql.bak
-  sudo rm -rf /var/lib/postgresql # not a symlink.. delete it silently
-  sudo ln -s /mnt/hdd/app-data/postgresql /var/lib/
-
-  sudo systemctl enable postgresql
-  sudo systemctl start postgresql
-
-  echo "# Generate the database"
-  sudo -u postgres psql -c "create database nbxplorermainnet;"
-  sudo -u postgres psql -c "create user nbxplorer with encrypted password 'raspiblitz';"
-  # change to ${newPassword} or use Passfile=
-  # sudo -u postgres psql -c "alter user btcpay with encrypted password '${newPassword}';"
-  # sudo -u btcpay sed -i "s/Password=*/Password='${newPassword}';/g" /home/btcpay/.nbxplorer/Main/settings.config
-  # sudo -u btcpay sed -i "s/Password=*/Password='${newPassword}';/g" /home/btcpay/.btcpayserver/Main/settings.config
-  sudo -u postgres psql -c "grant all privileges on database nbxplorermainnet to nbxplorer;"
-}
-
 function NBXplorerConfig() {
   # https://docs.btcpayserver.org/Deployment/ManualDeploymentExtended/#4-create-a-configuration-file
   echo
@@ -363,7 +330,15 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo chown -R btcpay:btcpay /home/btcpay/.btcpayserver
 
     # POSTGRES
-    postgresConfig
+    sudo /home/admin/config.scripts/bonus.postgresql.sh on || exit 1
+    echo "# Generate the database"
+    sudo -u postgres psql -c "create database nbxplorermainnet;"
+    sudo -u postgres psql -c "create user nbxplorer with encrypted password 'raspiblitz';"
+    # change to ${newPassword} or use Passfile=
+    # sudo -u postgres psql -c "alter user btcpay with encrypted password '${newPassword}';"
+    # sudo -u btcpay sed -i "s/Password=*/Password='${newPassword}';/g" /home/btcpay/.nbxplorer/Main/settings.config
+    # sudo -u btcpay sed -i "s/Password=*/Password='${newPassword}';/g" /home/btcpay/.btcpayserver/Main/settings.config
+    sudo -u postgres psql -c "grant all privileges on database nbxplorermainnet to nbxplorer;"
 
     # .NET
     echo

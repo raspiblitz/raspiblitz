@@ -25,39 +25,6 @@ fi
 echo "# Running: 'bonus.lnbits.sh $*'"
 source /mnt/hdd/raspiblitz.conf
 
-function postgresConfig() {
-  echo "# Install postgres"
-
-  sudo apt install -y postgresql
-
-  if [ ! -d /var/lib/postgresql ]; then
-    echo "# Create postgres data"
-    sudo mkdir -p /var/lib/postgresql/13/main
-    sudo chown -R postgres:postgres /var/lib/postgresql
-    # sudo pg_dropcluster 13 main
-    sudo pg_createcluster 13 main --start
-  fi
-
-  if [ ! -d /mnt/hdd/app-data/postgres ]; then
-    echo "# Move the postgres data to /mnt/hdd/app-data/postgresql"
-    sudo systemctl stop postgresql 2>/dev/null
-    sudo rsync -av /var/lib/postgresql /mnt/hdd/app-data
-    sudo mv /var/lib/postgresql /var/lib/postgresql.bak
-    sudo rm -rf /var/lib/postgresql # not a symlink.. delete it silently
-    sudo ln -s /mnt/hdd/app-data/postgresql /var/lib/
-    sudo systemctl enable postgresql
-    sudo systemctl start postgresql
-  fi
-
-  echo "# Generate the database lnbits_db"
-  sudo -u postgres psql -c "create database lnbits_db;"
-  sudo -u postgres psql -c "create user lnbits_user with encrypted password 'raspiblitz';"
-  sudo -u postgres psql -c "grant all privileges on database lnbits_db to lnbits_user;"
-  
-  # example: postgres://<user>:<password>@<host>/<database>
-  sudo bash -c "echo 'LNBITS_DATABASE_URL=postgres://lnbits_user:raspiblitz@localhost:5432/lnbits_db' >> /home/lnbits/lnbits/.env"
-}
-
 # show info menu
 if [ "$1" = "menu" ]; then
 
@@ -543,7 +510,14 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   if [ ! -d /mnt/hdd/app-data/LNBits ]; then
     # POSTGRES
-    postgresConfig
+    sudo /home/admin/config.scripts/bonus.postgresql.sh on || exit 1
+    echo "# Generate the database lnbits_db"
+    sudo -u postgres psql -c "create database lnbits_db;"
+    sudo -u postgres psql -c "create user lnbits_user with encrypted password 'raspiblitz';"
+    sudo -u postgres psql -c "grant all privileges on database lnbits_db to lnbits_user;"
+    
+    # example: postgres://<user>:<password>@<host>/<database>
+    sudo bash -c "echo 'LNBITS_DATABASE_URL=postgres://lnbits_user:raspiblitz@localhost:5432/lnbits_db' >> /home/lnbits/lnbits/.env"    
   else
     # old db found
     sudo chown lnbits:lnbits -R /mnt/hdd/app-data/LNBits
