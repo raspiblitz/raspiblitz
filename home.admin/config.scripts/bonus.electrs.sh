@@ -10,7 +10,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "config script to switch the Electrum Rust Server on or off"
  echo "bonus.electrs.sh status -> dont call in loops"
  echo "bonus.electrs.sh status-sync"
- echo "bonus.electrs.sh [on|off|menu]"
+ echo "bonus.electrs.sh [on|off|menu|update]"
  echo "installs the version $ELECTRSVERSION"
  exit 1
 fi
@@ -507,6 +507,29 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   else
     echo "# ElectRS is not installed."
   fi
+  exit 0
+fi
+
+if [ "$1" = "update" ]; then
+  echo "# Update Electrs"
+  cd /home/electrs/electrs || exit 1
+  sudo -u electrs git fetch
+
+  localVersion=$(git describe --tag)
+  updateVersion=$(curl -s https://api.github.com/repos/romanz/electrs/releases/latest|grep tag_name|head -1|cut -d '"' -f4)
+
+  if [ $localVersion = $updateVersion ]; then
+    echo "# Up-to-date on version $localVersion"
+  else
+    echo "# Pulling latest changes..."
+    sudo -u electrs git pull -p
+    echo "# Reset to the latest release tag: $updateVersion"
+    sudo -u electrs git reset --hard $updateVersion
+    echo "# Build Electrs ..."
+    sudo -u electrs /home/electrs/.cargo/bin/cargo build --locked --release || exit 1
+    echo "# Updated Electrs to $updateVersion"
+  fi
+  sudo systemctl start electrs
   exit 0
 fi
 
