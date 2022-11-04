@@ -746,8 +746,8 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   fi
 
   echo "Cleaning up LNbits install ..."
-  sudo delete ufw allow 5000
-  sudo delete ufw allow 5001
+  sudo ufw delete allow 5000
+  sudo ufw delete allow 5001
 
   # remove nginx symlinks
   sudo rm -f /etc/nginx/sites-enabled/lnbits_ssl.conf
