@@ -6,6 +6,7 @@
 - Update: LND v0.15.3 [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.15.3-beta
 - Update: Core Lightning v0.12.1 [details](https://github.com/ElementsProject/lightning/releases/tag/v0.12.1)
 - Update: RTL v0.13.0 with update option [details](https://github.com/Ride-The-Lightning/RTL/releases/tag/v0.12.3)
+- Update: Thunderhub v0.13.16 with balance sharing disabled [details](https://github.com/apotdevin/thunderhub/releases/tag/v0.13.16)
 - Update: LNbits 0.9.4 [details](https://github.com/lnbits/lnbits-legend/releases/tag/0.9.2)
 - Update: ItchySats 0.7.0 [details](https://github.com/itchysats/itchysats/releases/tag/0.7.0)
 - Update: Jam (JoinMarket Web UI) v0.1.2 [details](https://github.com/joinmarket-webui/joinmarket-webui/releases/tag/v0.1.0)

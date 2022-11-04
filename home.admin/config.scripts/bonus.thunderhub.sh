@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # https://github.com/apotdevin/thunderhub
-THUBVERSION="v0.13.6"
+THUBVERSION="v0.13.16"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -161,6 +161,8 @@ DISABLE_LNMARKETS = true
 NO_VERSION_CHECK = true
 # https://nextjs.org/telemetry#how-do-i-opt-out
 NEXT_TELEMETRY_DISABLED=1
+# disable balance sharing server side
+DISABLE_BALANCE_PUSHES = true
 
 # -----------
 # Account Configs
@@ -279,7 +281,7 @@ WantedBy=multi-user.target
     fi
   fi
 
-  # needed for API/WebUI as signal that install ran thru 
+  # needed for API/WebUI as signal that install ran thru
   echo "result='OK'"
   exit 0
 fi
@@ -314,10 +316,10 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   echo "OK ThunderHub removed."
 
-  # setting value in raspi blitz config
-  /home/admin/config.scripts/blitz.conf.sh set thunderhub "off"
+  # disable balance sharing server side
+  /home/admin/config.scripts/blitz.conf.sh set DISABLE_BALANCE_PUSHES true /mnt/hdd/app-data/thunderhub/.env.local noquotes
 
-  # needed for API/WebUI as signal that install ran thru 
+  # needed for API/WebUI as signal that install ran thru
   echo "result='OK'"
   exit 0
 fi
@@ -355,9 +357,12 @@ if [ "$1" = "update" ]; then
         exit 1
     fi
 
-    # opt out of telemetry 
+    # opt out of telemetry
     echo "# opt out of telemetry .. "
     sudo -u thunderhub npx next telemetry disable
+
+    # disable balance sharing server side
+    /home/admin/config.scripts/blitz.conf.sh set blitzapi "on" /home/admin/raspiblitz.info
 
     # build nextjs
     echo "# Building application..."
