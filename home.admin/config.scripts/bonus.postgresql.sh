@@ -83,6 +83,7 @@ fi
 
 # backup
 backup_target="/mnt/backup_manual/$db_name"
+backup_file="${db_name}_`date +%d`-`date +%m`-`date +%Y`_`date +%H`-`date +%M`_dump"
 if [ ! -d $backup_target ]; then
     sudo mkdir -p $backup_target 1>&2
 fi
@@ -90,7 +91,9 @@ fi
 # https://www.postgresql.org/docs/current/backup-dump.html
 if [ "$command" = "backup" ] && [ "$db_name" != "" ]; then
   echo "*** BACKUP POSTGRESQL $db_name ***"
-  sudo -u postgres pg_dump $db_name > $backup_target/${db_name}_dump.sql || exit 1
+  sudo -u postgres pg_dump $db_name > $backup_target/${backup_file}.sql || exit 1
+  # Delete old backups (keep last 3 backups)
+  sudo ls -tp $backup_target/*.sql | grep -v '/$' | tail -n +4 | tr '\n' '\0' | xargs -0 rm --
   echo "OK database $db_name backup done."
   exit 0
 fi
@@ -98,8 +101,10 @@ fi
 # restore
 if [ "$command" = "restore" ] && [ "$db_name" != "" ] && [ "$db_user" != "" ] && [ "$db_user_pw" != "" ]; then
   echo "*** RESTORE POSTGRESQL $db_name ***"
-  if [ ! -e $backup_target/${db_name}_dump.sql ]; then
-    echo "FAIL - Database dump not found in $backup_target/${db_name}_dump.sql"
+  # find recent backup
+  backup_file=$(ls -t $backup_target/*.sql | head -n1)
+  if [ ! -e $backup_file ]; then
+    echo "FAIL - Database backup not found in ${backup_target}"
     echo "ABORT - PostgreSQL restore"
     exit 1
   fi
@@ -117,8 +122,9 @@ if [ "$command" = "restore" ] && [ "$db_name" != "" ] && [ "$db_user" != "" ] &&
 
   # restore dump
   echo "# Import SQL Dump"
-  sudo -u postgres psql $db_name < $backup_target/${db_name}_dump.sql > $backup_target/${db_name}_dump.log || exit 1
-  echo "$backup_target/${db_name}_dump.log written"
+  sudo mkdir -p $backup_target/logs 1>&2
+  sudo -u postgres psql $db_name < ${backup_file} > $backup_target/logs/sql_import.log || exit 1
+  echo "$backup_target/sql_import.log written"
   echo "OK database $db_name restored."
   exit 0
 fi
