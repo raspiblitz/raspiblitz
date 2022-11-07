@@ -831,11 +831,11 @@ if [ "$1" = "restore" ]; then
   if [ ! -d $backup_target ]; then
     echo "# No backups found"
   else
-    cd $backup_target
-    # unpack backup file
-    sudo tar -xf $backup_target/LNBits_db_backup.tar
     if [ -d /mnt/hdd/app-data/LNBits/ ]; then
       echo "# Restore SQLite database"
+      cd $backup_target
+      # unpack backup file
+      sudo tar -xf $backup_target/LNBits_db_backup.tar      
       sudo chown -R lnbits:lnbits LNBits/
       # backup current db
       sudo tar -cf $backup_target/LNBits_db_backup.1.tar -C "/mnt/hdd/app-data" LNBits/
