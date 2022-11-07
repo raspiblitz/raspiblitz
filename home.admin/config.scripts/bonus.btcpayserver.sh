@@ -24,6 +24,18 @@ source /mnt/hdd/raspiblitz.conf
 source /home/admin/raspiblitz.info
 source <(/home/admin/_cache.sh get state)
 
+function postgresConfig() {
+  sudo /home/admin/config.scripts/bonus.postgresql.sh on || exit 1
+  echo "# Generate the database"
+  sudo -u postgres psql -c "create database nbxplorermainnet;"
+  sudo -u postgres psql -c "create user nbxplorer with encrypted password 'raspiblitz';"
+  # change to ${newPassword} or use Passfile=
+  # sudo -u postgres psql -c "alter user btcpay with encrypted password '${newPassword}';"
+  # sudo -u btcpay sed -i "s/Password=*/Password='${newPassword}';/g" /home/btcpay/.nbxplorer/Main/settings.config
+  # sudo -u btcpay sed -i "s/Password=*/Password='${newPassword}';/g" /home/btcpay/.btcpayserver/Main/settings.config
+  sudo -u postgres psql -c "grant all privileges on database nbxplorermainnet to nbxplorer;"
+}
+
 function NBXplorerConfig() {
   # https://docs.btcpayserver.org/Deployment/ManualDeploymentExtended/#4-create-a-configuration-file
   echo
@@ -330,15 +342,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo chown -R btcpay:btcpay /home/btcpay/.btcpayserver
 
     # POSTGRES
-    sudo /home/admin/config.scripts/bonus.postgresql.sh on || exit 1
-    echo "# Generate the database"
-    sudo -u postgres psql -c "create database nbxplorermainnet;"
-    sudo -u postgres psql -c "create user nbxplorer with encrypted password 'raspiblitz';"
-    # change to ${newPassword} or use Passfile=
-    # sudo -u postgres psql -c "alter user btcpay with encrypted password '${newPassword}';"
-    # sudo -u btcpay sed -i "s/Password=*/Password='${newPassword}';/g" /home/btcpay/.nbxplorer/Main/settings.config
-    # sudo -u btcpay sed -i "s/Password=*/Password='${newPassword}';/g" /home/btcpay/.btcpayserver/Main/settings.config
-    sudo -u postgres psql -c "grant all privileges on database nbxplorermainnet to nbxplorer;"
+    postgresConfig
 
     # .NET
     echo
@@ -706,6 +710,7 @@ if [ "$1" = "update" ]; then
       sudo systemctl restart bitcoind
     fi
 
+    # POSTGRES
     postgresConfig
 
     NBXplorerConfig

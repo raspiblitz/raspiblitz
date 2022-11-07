@@ -25,6 +25,14 @@ fi
 echo "# Running: 'bonus.lnbits.sh $*'"
 source /mnt/hdd/raspiblitz.conf
 
+function postgresConfig() {
+  sudo /home/admin/config.scripts/bonus.postgresql.sh on || exit 1
+  echo "# Generate the database lnbits_db"
+  sudo -u postgres psql -c "create database lnbits_db;"
+  sudo -u postgres psql -c "create user lnbits_user with encrypted password 'raspiblitz';"
+  sudo -u postgres psql -c "grant all privileges on database lnbits_db to lnbits_user;"
+}
+
 # show info menu
 if [ "$1" = "menu" ]; then
 
@@ -510,11 +518,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   if [ ! -d /mnt/hdd/app-data/LNBits ]; then
     # POSTGRES
-    sudo /home/admin/config.scripts/bonus.postgresql.sh on || exit 1
-    echo "# Generate the database lnbits_db"
-    sudo -u postgres psql -c "create database lnbits_db;"
-    sudo -u postgres psql -c "create user lnbits_user with encrypted password 'raspiblitz';"
-    sudo -u postgres psql -c "grant all privileges on database lnbits_db to lnbits_user;"
+    postgresConfig
     
     # example: postgres://<user>:<password>@<host>/<database>
     sudo bash -c "echo 'LNBITS_DATABASE_URL=postgres://lnbits_user:raspiblitz@localhost:5432/lnbits_db' >> /home/lnbits/lnbits/.env"    
@@ -538,7 +542,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo -u lnbits ./venv/bin/pip install pylightning
   sudo -u lnbits ./venv/bin/pip install secp256k1
   sudo -u lnbits ./venv/bin/pip install pyln-client
-  sudo -u lnbits ./venv/bin/pip install psycopg2 # for postgres migration
+  sudo -u lnbits ./venv/bin/pip install psycopg2 # conv.py postgres migration dependency
 
   # build
   sudo -u lnbits ./venv/bin/python build.py
@@ -819,17 +823,19 @@ if [ "$1" = "migrate" ]; then
   if [ -d /mnt/hdd/app-data/LNBits/ ]; then
     # POSTGRES
     postgresConfig
-    # clean start on new db prior migration
+    
+    # backup old sqlite database
+    sudo tar -cf /mnt/hdd/app-data/LNBits_sqlitedb_backup.tar -C /mnt/hdd/app-data LNBits/     
+    
+    # clean start on new postgres db prior migration 
     sudo systemctl start lnbits
 
     echo "# SQLite to PostgreSQL migration"
-    # backup old sqlite database
-    sudo tar -cf /mnt/hdd/app-data/LNBits_db_backup.tar -C /mnt/hdd/app-data LNBits/    
-    # start convert database to postgres
     cd /home/lnbits/lnbits || exit 1
     sudo systemctl stop lnbits
     sudo -u lnbits ./venv/bin/python tools/conv.py || exit 1
-    # cleanup
+
+    # cleanup old sqlite data directory
     sudo rm -R /mnt/hdd/app-data/LNBits/
     sudo sed -i "/^LNBITS_DATA_FOLDER=/d" /home/lnbits/lnbits/.env 2>/dev/null
   else
