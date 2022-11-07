@@ -264,6 +264,7 @@ if [ "$1" = "prestart" ]; then
   echo "# --> /home/lnbits/lnbits/.env"
 
   # set values based in funding source in raspiblitz config
+  # portprefix is "" |  1 | 3
   LNBitsNetwork="bitcoin"
   LNBitsChain=""
   LNBitsLightning=""
@@ -271,12 +272,15 @@ if [ "$1" = "prestart" ]; then
     LNBitsFunding="lnd"
     LNBitsLightning="lnd"
     LNBitsChain="main"
+    portprefix=""
   elif [ "${LNBitsFunding}" == "tlnd" ]; then
     LNBitsLightning="lnd"
     LNBitsChain="test"
+    portprefix="1"
   elif [ "${LNBitsFunding}" == "slnd" ]; then
     LNBitsLightning="lnd"
     LNBitsChain="sig"
+    portprefix="3"
   elif [ "${LNBitsFunding}" == "cl" ]; then
     LNBitsLightning="cl"
     LNBitsChain="main"
@@ -318,6 +322,7 @@ if [ "$1" = "prestart" ]; then
     sed -i "s/^LND_REST_ADMIN_MACAROON=.*/LND_REST_ADMIN_MACAROON=${macaroonAdminHex}/g" /home/lnbits/lnbits/.env
     sed -i "s/^LND_REST_INVOICE_MACAROON=.*/LND_REST_INVOICE_MACAROON=${macaroonInvoiceHex}/g" /home/lnbits/lnbits/.env
     sed -i "s/^LND_REST_READ_MACAROON=.*/LND_REST_READ_MACAROON=${macaroonReadHex}/g" /home/lnbits/lnbits/.env
+    sed -i "s/^LND_REST_ENDPOINT=.*/LND_REST_ENDPOINT=https://127.0.0.1:${portprefix}8080/g" /home/lnbits/lnbits/.env
 
   elif [ "${LNBitsLightning}" == "cl" ]; then
 
