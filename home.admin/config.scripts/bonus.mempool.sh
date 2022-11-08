@@ -189,7 +189,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     "HTTP_PORT": 8999,
     "API_URL_PREFIX": "/api/v1/",
     "CACHE_DIR": "/mnt/hdd/app-storage/mempool/cache",
-    "POLL_RATE_MS": 2000
+    "POLL_RATE_MS": 2000,
+    "STDOUT_LOG_MIN_PRIORITY": "info"
   },
   "CORE_RPC": {
     "USERNAME": "$RPC_USER",
