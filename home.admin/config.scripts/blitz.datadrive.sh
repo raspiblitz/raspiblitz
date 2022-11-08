@@ -163,7 +163,7 @@ if [ "$1" = "status" ]; then
     fi
 
     # try to detect if its an SSD 
-    isSSD=$(cat /sys/block/${hdd}/queue/rotational 2>/dev/null | grep -c 0)
+    isSSD=$(sudo smartctl -a /dev/sda | grep 'Rotation Rate' | grep -c "Solid State")
     echo "isSSD=${isSSD}"
 
     # display results from hdd & partition detection
@@ -384,7 +384,7 @@ if [ "$1" = "status" ]; then
     fi
     echo "hddRaspiVersion='${hddRaspiVersion}'"
 
-    isSSD=$(cat /sys/block/${hdd}/queue/rotational 2>/dev/null | grep -c 0)
+    isSSD=$(sudo smartctl -a /dev/sda | grep 'Rotation Rate' | grep -c "Solid State")
     echo "isSSD=${isSSD}"
 
     echo "datadisk='${hdd}'"
