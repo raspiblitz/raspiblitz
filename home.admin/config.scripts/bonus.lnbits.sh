@@ -52,8 +52,8 @@ function migrateMsg() {
   echo "sudo systemctl stop lnbits"
   echo "sudo mv /mnt/hdd/app-data/LNBits /mnt/hdd/app-data/LNBits_backup"
   echo "sudo tar -xf /mnt/hdd/app-data/LNBits_sqlitedb_backup.tar"
-  echo "sudo sed -i \"/^LNBITS_DATABASE_URL=/d\" /home/lnbits/lnbits/.env 2>/dev/null"
-  echo "sudo sed -i \"/^LNBITS_DATA_FOLDER=/d\" /home/lnbits/lnbits/.env 2>/dev/null"
+  echo "sudo sed -i \"/^LNBITS_DATABASE_URL=/d\" /home/lnbits/lnbits/.env"
+  echo "sudo sed -i \"/^LNBITS_DATA_FOLDER=/d\" /home/lnbits/lnbits/.env"
   echo "sudo bash -c \"echo 'LNBITS_DATA_FOLDER=/mnt/hdd/app-data/LNBits' >> /home/lnbits/lnbits/.env\""
   echo "sudo chown lnbits:lnbits -R /mnt/hdd/app-data/LNBits"
   echo "sudo systemctl start lnbits"
@@ -847,8 +847,11 @@ fi
 if [ "$1" = "migrate" ]; then
 
   if [ -e /mnt/hdd/app-data/LNBits/database.sqlite3 ]; then
-    # backup old sqlite database
-    sudo tar -cf /mnt/hdd/app-data/LNBits_sqlitedb_backup.tar -C /mnt/hdd/app-data LNBits/  
+    # backup old sqlite database, but dont overwrite
+    if [ ! -e /mnt/hdd/app-data/LNBits_sqlitedb_backup.tar ]; then
+      echo "# Backup SQLite database"
+      sudo tar -cf /mnt/hdd/app-data/LNBits_sqlitedb_backup.tar -C /mnt/hdd/app-data LNBits/
+    fi
 
     # update to expected tag
     cd /home/lnbits/lnbits || exit 1
