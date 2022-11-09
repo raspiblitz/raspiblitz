@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # https://github.com/lightninglabs/lightning-terminal/releases
-LITVERSION="0.7.0-alpha"
+LITVERSION="0.8.3-alpha"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -12,13 +12,16 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
 fi
 
 # check who signed the release in https://github.com/lightninglabs/lightning-terminal/releases
-PGPsigner="guggero"
+PGPsigner="ellemouton"
 
-if [ $PGPsigner = guggero ];then
-  PGPpkeys="https://keybase.io/guggero/pgp_keys.asc"
+if [ $PGPsigner = ellemouton ];then
+  PGPpkeys="https://github.com/${PGPsigner}.gpg"
+  PGPcheck="D7D916376026F177"
+elif [ $PGPsigner = guggero ];then
+  PGPpkeys="https://keybase.io/${PGPsigner}/pgp_keys.asc"
   PGPcheck="03DB6322267C373B"
 elif [ $PGPsigner = roasbeef ];then
-  PGPpkeys="https://keybase.io/roasbeef/pgp_keys.asc "
+  PGPpkeys="https://keybase.io/${PGPsigner}/pgp_keys.asc "
   PGPcheck="3BBD59E99B280306"
 fi
 

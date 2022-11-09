@@ -3,7 +3,8 @@
 ## What's new in Version 1.8.1 of RaspiBlitz?
 
 - New: Support of X708 UPS HAT [details](https://github.com/rootzoll/raspiblitz/pull/3087)
-- Update: LND v0.15.3 [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.15.3-beta
+- Update: LND v0.15.4 [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.15.4-beta
+- Update: Lightning Terminal v0.8.3-alpha [details](https://github.com/lightninglabs/lightning-terminal/releases/tag/v0.8.3-alpha)
 - Update: Core Lightning v0.12.1 [details](https://github.com/ElementsProject/lightning/releases/tag/v0.12.1)
 - Update: RTL v0.13.0 with update option [details](https://github.com/Ride-The-Lightning/RTL/releases/tag/v0.12.3)
 - Update: Thunderhub v0.13.16 with balance sharing disabled [details](https://github.com/apotdevin/thunderhub/releases/tag/v0.13.16)
@@ -12,6 +13,7 @@
 - Update: Jam (JoinMarket Web UI) v0.1.2 [details](https://github.com/joinmarket-webui/joinmarket-webui/releases/tag/v0.1.0)
 - Update: JoinMarket v0.9.8 [details](https://github.com/JoinMarket-Org/joinmarket-clientserver/releases/tag/v0.9.8)
 - Update: JoininBox v0.7.4 [details](https://github.com/openoms/joininbox/releases/tag/v0.7.3)
+- Update: Electrum Server in Rust (electrs) v0.9.9 [details](https://github.com/romanz/electrs/blob/master/RELEASE-NOTES.md#099-jul-12-2022)
 - Info: Run RaspiBlitz on Proxmox [details](https://github.com/rootzoll/raspiblitz/tree/dev/alternative.platforms/Proxmox)
 
 ## What's new in Version 1.8.0c of RaspiBlitz?
