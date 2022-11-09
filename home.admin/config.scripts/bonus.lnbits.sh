@@ -543,19 +543,23 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo -u lnbits touch /home/lnbits/lnbits/.env
   sudo bash -c "echo 'LNBITS_FORCE_HTTPS=0' >> /home/lnbits/lnbits/.env"
 
-  if [ ! -d /mnt/hdd/app-data/LNBits ] || [ -d /mnt/hdd/app-data/LNBits/data ]; then
+  if [ ! -e /mnt/hdd/app-data/LNBits/database.sqlite3 ]; then
     # POSTGRES
     postgresConfig
-    
+
+    # new data directory
+    sudo mkdir -p /mnt/hdd/app-data/LNBits/data
+
     # example: postgres://<user>:<password>@<host>/<database>
     sudo bash -c "echo 'LNBITS_DATABASE_URL=postgres://lnbits_user:raspiblitz@localhost:5432/lnbits_db' >> /home/lnbits/lnbits/.env"
     sudo bash -c "echo 'LNBITS_DATA_FOLDER=/mnt/hdd/app-data/LNBits/data' >> /home/lnbits/lnbits/.env"  
   else
     # old db found
-    sudo chown lnbits:lnbits -R /mnt/hdd/app-data/LNBits
+    sudo mkdir -p /mnt/hdd/app-data/LNBits
     # set data folder for sqli database migration
     sudo bash -c "echo 'LNBITS_DATA_FOLDER=/mnt/hdd/app-data/LNBits' >> /home/lnbits/lnbits/.env"
   fi
+  sudo chown lnbits:lnbits -R /mnt/hdd/app-data/LNBits
 
   # let switch command part do the detail config
   /home/admin/config.scripts/bonus.lnbits.sh switch ${fundingsource}
