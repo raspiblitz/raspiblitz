@@ -862,8 +862,11 @@ if [ "$1" = "migrate" ]; then
     # update to expected tag
     cd /home/lnbits/lnbits || exit 1
 
-    # remove existent postgres config
+    # remove existent config for database
     sudo sed -i "/^LNBITS_DATABASE_URL=/d" /home/lnbits/lnbits/.env 2>/dev/null
+    sudo sed -i "/^LNBITS_DATA_FOLDER=/d" /home/lnbits/lnbits/.env 2>/dev/null
+    # restore sqlite database config
+    sudo bash -c "echo 'LNBITS_DATA_FOLDER=/mnt/hdd/app-data/LNBits' >> /home/lnbits/lnbits/.env"
 
     sudo -u lnbits git checkout ${tag}
     /home/admin/config.scripts/bonus.lnbits.sh sync || exit 1
@@ -914,7 +917,6 @@ if [ "$1" = "migrate" ]; then
     sudo bash -c "echo 'LNBITS_DATA_FOLDER=/mnt/hdd/app-data/LNBits/data' >> /home/lnbits/lnbits/.env"
 
     echo "# OK migration done"
-    migrateMsg
   else
     echo "# No SQLite data found to migrate from"
   fi
