@@ -417,6 +417,7 @@ if [ "$1" = "sync" ] || [ "$1" = "repo" ]; then
   sudo -u lnbits ./venv/bin/pip install pylightning
   sudo -u lnbits ./venv/bin/pip install secp256k1
   sudo -u lnbits ./venv/bin/pip install pyln-client
+  sudo -u lnbits ./venv/bin/pip install psycopg2 # conv.py postgres migration dependency
 
   # build
   sudo -u lnbits ./venv/bin/python build.py
@@ -821,46 +822,48 @@ fi
 
 if [ "$1" = "migrate" ]; then
 
-  if [ -d /mnt/hdd/app-data/LNBits/ ]; then
+  if [ -e /mnt/hdd/app-data/LNBits/database.sqlite3 ]; then
     # backup old sqlite database
     sudo tar -cf /mnt/hdd/app-data/LNBits_sqlitedb_backup.tar -C /mnt/hdd/app-data LNBits/  
 
     # update to expected tag
     cd /home/lnbits/lnbits || exit 1
     sudo -u lnbits git checkout ${tag}
-    sudo -u lnbits git pull
-
-    # build
-    sudo -u lnbits ./venv/bin/pip install -r requirements.txt
-    sudo -u lnbits ./venv/bin/pip install psycopg2 
-    sudo -u lnbits ./venv/bin/python build.py
-
-    # clean start with new version and old db
-    sudo systemctl start lnbits || exit 1
-    sudo systemctl stop lnbits
+    /home/admin/config.scripts/bonus.lnbits.sh sync
 
     # POSTGRES
     postgresConfig
 
-    # example: postgres://<user>:<password>@<host>/<database>
+    # remove existent postgres config
     sudo sed -i "/^LNBITS_DATABASE_URL=/d" /home/lnbits/lnbits/.env 2>/dev/null
+    # example: postgres://<user>:<password>@<host>/<database>
+    # add new postgres config
     sudo bash -c "echo 'LNBITS_DATABASE_URL=postgres://lnbits_user:raspiblitz@localhost:5432/lnbits_db' >> /home/lnbits/lnbits/.env"
     
     # clean start on new postgres db prior migration 
     sudo systemctl start lnbits || exit 1
+    sudo systemctl stop lnbits
 
     echo "# SQLite to PostgreSQL migration"
-    sudo systemctl stop lnbits
-    
     sudo -u lnbits ./venv/bin/python tools/conv.py || exit 1
 
     # cleanup old sqlite data directory
-    # sudo rm -R /mnt/hdd/app-data/LNBits/
+    sudo rm -R /mnt/hdd/app-data/LNBits/
 
     # new data directory
     sudo -u lnbits mkdir -p /mnt/hdd/app-data/LNBits/data
     sudo sed -i "/^LNBITS_DATA_FOLDER=/d" /home/lnbits/lnbits/.env 2>/dev/null
-    sudo bash -c "echo 'LNBITS_DATA_FOLDER=/mnt/hdd/app-data/LNBits/data' >> /home/lnbits/lnbits/.env"  
+    sudo bash -c "echo 'LNBITS_DATA_FOLDER=/mnt/hdd/app-data/LNBits/data' >> /home/lnbits/lnbits/.env"
+    echo "# OK migration done"
+    echo "You can still revert back to sqlite. Open a new session and enter the commands as follows:"
+    echo "sudo systemctl stop lnbits"
+    echo "sudo mv /mnt/hdd/app-data/LNBits /mnt/hdd/app-data/LNBits_backup"
+    echo "sudo tar -xf /mnt/hdd/app-data/LNBits_sqlitedb_backup.tar"
+    echo "sudo sed -i \"/^LNBITS_DATABASE_URL=/d\" /home/lnbits/lnbits/.env 2>/dev/null"
+    echo "sudo sed -i \"/^LNBITS_DATA_FOLDER=/d\" /home/lnbits/lnbits/.env 2>/dev/null"
+    echo "sudo bash -c \"echo 'LNBITS_DATA_FOLDER=/mnt/hdd/app-data/LNBits' >> /home/lnbits/lnbits/.env\""
+    echo "sudo chown lnbits:lnbits -R /mnt/hdd/app-data/LNBits"
+    echo "sudo systemctl start lnbits"
   else
     echo "# No SQLite data found to migrate from"
   fi
