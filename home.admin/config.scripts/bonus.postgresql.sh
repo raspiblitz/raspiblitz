@@ -19,7 +19,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   #  /var/lib/postgresql/13/main
   if [ ! -d $postgres_datadir ]; then
     echo "# Create PostgreSQL data"
-    sudo  mkdir -p $postgres_datadir/13/main
+    sudo mkdir -p $postgres_datadir/13/main
     sudo chown -R postgres:postgres $postgres_datadir
     # sudo pg_dropcluster 13 main
     sudo pg_createcluster 13 main --start
@@ -48,12 +48,26 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo mv $postgres_datadir /var/lib/postgresql.bak
     sudo rm -rf $postgres_datadir # not a symlink.. delete it silently
     sudo ln -s /mnt/hdd/app-data/postgresql /var/lib/
-    sudo systemctl enable postgresql
-    sudo systemctl start postgresql
   fi
+  sudo systemctl enable postgresql
+  sudo systemctl start postgresql
 
   # check if PostgreSQL was installed
   if psql --version; then
+    # wait for the postgres server to start
+    count=0
+    count_max=30
+    while ! nc -zv 127.0.0.1 5432 2>/dev/null;
+    do
+      count=`expr $count + 1`
+      echo "sleep $count/$count_max"
+      sleep 1
+      if [ $count = $count_max ]; then
+        sudo systemctl status postgresql
+        echo "FAIL - Was not able to start PostgreSQL service"
+        exit 1
+      fi
+    done
     echo "Installed PostgreSQL $(psql --version)"
   else
     echo "FAIL - Was not able to install PostgreSQL"
@@ -69,6 +83,8 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # setting value in raspiblitz config
   echo "*** REMOVING POSTGRESQL ***"
   sudo apt remove -y postgresql
+  sudo systemctl stop postgresql 2>/dev/null
+  sudo systemctl disable postgresql
   echo "OK PostgreSQL removed."
   exit 0
 fi
