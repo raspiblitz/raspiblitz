@@ -38,6 +38,18 @@ if [ ${btrfsInstalled} -eq 0 ]; then
   exit 1
 fi
 
+# install smartmontools if needed
+smartmontoolsInstalled=$(dpkg -s smartmontools 2>/dev/null | grep -c "install ok installed")
+if [ ${smartmontoolsInstalled} -eq 0 ]; then
+  >&2 echo "# Installing smartmontools ..."
+  apt-get install -y smartmontools 1>/dev/null
+fi
+smartmontoolsInstalled=$(dpkg -s smartmontools 2>/dev/null | grep -c "install ok installed")
+if [ ${smartmontoolsInstalled} -eq 0 ]; then
+  echo "error='missing smartmontools package'"
+  exit 1
+fi
+
 ###################
 # STATUS
 ###################
