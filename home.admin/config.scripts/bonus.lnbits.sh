@@ -212,6 +212,8 @@ Consider adding a IP2TOR Bridge under OPTIONS."
             clear
             /home/admin/config.scripts/bonus.lnbits.sh migrate
             echo
+            migrateMsg
+            echo
             echo "OK new database source for LNbits active."
             echo "PRESS ENTER to continue"
             read key
