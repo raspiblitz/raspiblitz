@@ -137,7 +137,7 @@ if [ "${mode}" = "tested" ]||[ "${mode}" = "reckless" ]||[ "${mode}" = "custom" 
   
   displayInfo
 
-  if [ $installedVersion = $bitcoinVersion ];then
+  if [ "$installedVersion" = "$bitcoinVersion" ]; then
     echo "# installedVersion = bitcoinVersion"
     echo "# exiting script"
     exit 0
