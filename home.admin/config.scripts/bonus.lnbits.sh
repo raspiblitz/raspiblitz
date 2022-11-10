@@ -29,7 +29,13 @@ function postgresConfig() {
   sudo /home/admin/config.scripts/bonus.postgresql.sh on || exit 1
   echo "# Generate the database lnbits_db"
 
-  # create database
+  # migrate clean up
+  source <(/home/admin/_cache.sh get LNBitsMigrate)
+  if [ "${LNBitsMigrate}" == "on" ]; then
+    sudo -u postgres psql -c "drop database lnbits_db;"
+    sudo -u postgres psql -c "drop user lnbits_user;"
+  fi
+  # create database for new installations and keep old
   sudo -u postgres psql -c "create database lnbits_db;"
   sudo -u postgres psql -c "create user lnbits_user with encrypted password 'raspiblitz';"
   sudo -u postgres psql -c "grant all privileges on database lnbits_db to lnbits_user;"
@@ -40,6 +46,9 @@ function postgresConfig() {
     echo "# postgresConfig failed -> SELECT datname FROM pg_database;"
     exit 1
   fi
+
+  /home/admin/config.scripts/blitz.conf.sh set LNBitsDB "PostgreSQL"
+
   echo "# postgresConfig done -> $check"
 }
 
@@ -550,9 +559,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo bash -c "echo 'LNBITS_DATABASE_URL=postgres://lnbits_user:raspiblitz@localhost:5432/lnbits_db' >> /home/lnbits/lnbits/.env"
     sudo bash -c "echo 'LNBITS_DATA_FOLDER=/mnt/hdd/app-data/LNBits/data' >> /home/lnbits/lnbits/.env"  
   else
-    # old db found
+    /home/admin/config.scripts/blitz.conf.sh set LNBitsDB "SQLite"
+    # old SQLite db found
     sudo mkdir -p /mnt/hdd/app-data/LNBits
-    # set data folder for sqli database migration
+    # set data directory
     sudo bash -c "echo 'LNBITS_DATA_FOLDER=/mnt/hdd/app-data/LNBits' >> /home/lnbits/lnbits/.env"
   fi
   sudo chown lnbits:lnbits -R /mnt/hdd/app-data/LNBits
@@ -869,12 +879,10 @@ if [ "$1" = "migrate" ]; then
     # stop after sync was done
     sudo systemctl stop lnbits
 
+    /home/admin/config.scripts/blitz.conf.sh set LNBitsMigrate "on"
+
     # POSTGRES
     postgresConfig
-    
-    # clean up
-    sudo -u postgres psql -c "drop database lnbits_db;"
-    sudo -u postgres psql -c "drop user lnbits_user;"     
 
     # example: postgres://<user>:<password>@<host>/<database>
     # add new postgres config
@@ -916,6 +924,9 @@ if [ "$1" = "migrate" ]; then
     sudo sed -i "/^LNBITS_DATA_FOLDER=/d" /home/lnbits/lnbits/.env 2>/dev/null
     sudo bash -c "echo 'LNBITS_DATA_FOLDER=/mnt/hdd/app-data/LNBits/data' >> /home/lnbits/lnbits/.env"
 
+    # setting value in raspi blitz config
+    /home/admin/config.scripts/blitz.conf.sh set LNBitsMigrate "off"
+    
     echo "# OK migration done"
   else
     echo "# No SQLite data found to migrate from"
