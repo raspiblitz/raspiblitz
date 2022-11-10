@@ -53,15 +53,40 @@ function postgresConfig() {
 }
 
 function migrateMsg() {
-  echo "You can still revert back to sqlite. Open a new session and enter the commands as follows:"
-  echo "sudo systemctl stop lnbits"
-  echo "sudo mv /mnt/hdd/app-data/LNBits /mnt/hdd/app-data/LNBits_backup"
-  echo "sudo tar -xf /mnt/hdd/app-data/LNBits_sqlitedb_backup.tar"
-  echo "sudo sed -i \"/^LNBITS_DATABASE_URL=/d\" /home/lnbits/lnbits/.env"
-  echo "sudo sed -i \"/^LNBITS_DATA_FOLDER=/d\" /home/lnbits/lnbits/.env"
-  echo "sudo bash -c \"echo 'LNBITS_DATA_FOLDER=/mnt/hdd/app-data/LNBits' >> /home/lnbits/lnbits/.env\""
-  echo "sudo chown lnbits:lnbits -R /mnt/hdd/app-data/LNBits"
-  echo "sudo systemctl start lnbits"
+  echo "You can still revert back to sqlite. Open a new session and enter the command as follows:"
+  echo
+  echo "/home/admin/config.scripts/bonus.lnbits.sh migrate revert"
+}
+
+function revertMigration() {
+  source <(/home/admin/_cache.sh get LNBitsMigrate)
+  if [ "${LNBitsMigrate}" == "on" ]; then
+    echo "# Revert migration, restore SQLite..."
+    sudo systemctl stop lnbits
+    if [ -e /mnt/hdd/app-data/LNBits_sqlitedb_backup.tar ]; then
+      echo "# Move LNBits folder"
+      sudo mv /mnt/hdd/app-data/LNBits /mnt/hdd/app-data/LNBits_backup
+      echo "# Unpack Backup"
+      cd /mnt/hdd/app-data/
+      sudo tar -xf /mnt/hdd/app-data/LNBits_sqlitedb_backup.tar
+      sudo chown lnbits:lnbits -R /mnt/hdd/app-data/LNBits
+    else
+      echo "# No backup file found!"
+    fi
+    echo "# Configure .env"
+    # clean up
+    sudo sed -i "/^LNBITS_DATABASE_URL=/d" /home/lnbits/lnbits/.env
+    sudo sed -i "/^LNBITS_DATA_FOLDER=/d" /home/lnbits/lnbits/.env
+    sudo bash -c "echo 'LNBITS_DATA_FOLDER=/mnt/hdd/app-data/LNBits' >> /home/lnbits/lnbits/.env"
+    echo "# Start LNBits"
+    sudo systemctl start lnbits
+
+    /home/admin/config.scripts/blitz.conf.sh set LNBitsMigrate "off"
+    exit 0
+  else
+    echo "# No migration started yet, nothing to do."
+    exit 0
+  fi
 }
 
 # show info menu
@@ -215,13 +240,22 @@ Consider adding a IP2TOR Bridge under OPTIONS."
             ;;
         MIGRATE-DB)
             clear
-            /home/admin/config.scripts/bonus.lnbits.sh migrate
-            echo
-            migrateMsg
-            echo
-            echo "OK new database source for LNbits active."
-            echo "PRESS ENTER to continue"
-            read key
+            dialog --title "MIGRATE LNBITS" --yesno "
+Do you want to proceed the migration?
+
+Try to migrate your LNBits SQLite database to PostgreSQL. 
+
+This can fail for unknown circumstances. Revert of this process is possible afterwards, a backup will be saved.
+            " 12 65
+            if [ $? -eq 0 ]; then            
+              /home/admin/config.scripts/bonus.lnbits.sh migrate
+              echo
+              migrateMsg
+              echo
+              echo "OK please test your LNBits installation."
+              echo "PRESS ENTER to continue"
+              read key              
+            fi
             exit 0
             ;;            
         *)
@@ -856,6 +890,10 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   exit 0
 fi
 
+if [ "$1" = "migrate" ] && [ "$2" = "revert" ]; then
+  revertMigration
+fi
+
 if [ "$1" = "migrate" ]; then
 
   if [ -e /mnt/hdd/app-data/LNBits/database.sqlite3 ]; then
@@ -898,12 +936,12 @@ if [ "$1" = "migrate" ]; then
     while ! nc -zv 127.0.0.1 5000 2>/dev/null;
     do
       count=`expr $count + 1`
-      echo "sleep $count/$count_max"
+      echo "wait for LNBIts start (${count}s/${count_max}s)"
       sleep 1
       if [ $count = $count_max ]; then
         sudo systemctl status lnbits
-        echo "# LNBits service was not able to start"
-        migrateMsg
+        echo "# FAIL - LNBits service was not able to start"
+        revertMigration
         exit 1;
       fi
     done
@@ -926,7 +964,7 @@ if [ "$1" = "migrate" ]; then
 
     # setting value in raspi blitz config
     /home/admin/config.scripts/blitz.conf.sh set LNBitsMigrate "off"
-    
+
     echo "# OK migration done"
   else
     echo "# No SQLite data found to migrate from"
