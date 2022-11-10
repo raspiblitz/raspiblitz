@@ -29,10 +29,6 @@ function postgresConfig() {
   sudo /home/admin/config.scripts/bonus.postgresql.sh on || exit 1
   echo "# Generate the database lnbits_db"
 
-  # just in case of aborted migration, clean up
-  sudo -u postgres psql -c "drop database lnbits_db;"
-  sudo -u postgres psql -c "drop user lnbits_user;" 
-
   # create database
   sudo -u postgres psql -c "create database lnbits_db;"
   sudo -u postgres psql -c "create user lnbits_user with encrypted password 'raspiblitz';"
@@ -875,6 +871,10 @@ if [ "$1" = "migrate" ]; then
 
     # POSTGRES
     postgresConfig
+    
+    # clean up
+    sudo -u postgres psql -c "drop database lnbits_db;"
+    sudo -u postgres psql -c "drop user lnbits_user;"     
 
     # example: postgres://<user>:<password>@<host>/<database>
     # add new postgres config
