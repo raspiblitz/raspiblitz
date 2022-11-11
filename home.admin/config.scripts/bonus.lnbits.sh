@@ -82,10 +82,8 @@ function revertMigration() {
     sudo systemctl start lnbits
 
     /home/admin/config.scripts/blitz.conf.sh set LNBitsMigrate "off"
-    exit 0
   else
     echo "# No migration started yet, nothing to do."
-    exit 0
   fi
 }
 
@@ -892,6 +890,7 @@ fi
 
 if [ "$1" = "migrate" ] && [ "$2" = "revert" ]; then
   revertMigration
+  exit 0
 fi
 
 if [ "$1" = "migrate" ]; then
@@ -942,7 +941,7 @@ if [ "$1" = "migrate" ]; then
         sudo systemctl status lnbits
         echo "# FAIL - LNBits service was not able to start"
         revertMigration
-        exit 1;
+        exit 1
       fi
     done
     # wait a sec for "✔ All migrations done." (TODO make it pretty)
@@ -950,15 +949,23 @@ if [ "$1" = "migrate" ]; then
     echo "# LNBits service looks good"
     sudo systemctl stop lnbits
 
-    echo "# SQLite to PostgreSQL migration"
-    sudo -u lnbits ./venv/bin/python tools/conv.py || exit 1
+    echo "# Start convert old SQLite to new PostgreSQL"
+    if ! sudo -u lnbits ./venv/bin/python tools/conv.py; then
+      echo "FAIL - Convert failed, revert migration process"
+      revertMigration
+      exit 1
+    else
+      echo "# Convert successful"
+    fi
 
     # cleanup old sqlite data directory
+    echo "# Cleanup old data directory"
     sudo rm -R /mnt/hdd/app-data/LNBits/
-
     # new data directory
     sudo mkdir -p /mnt/hdd/app-data/LNBits/data
     sudo chown lnbits:lnbits -R /mnt/hdd/app-data/LNBits/
+
+    echo "# Configure .env"
     sudo sed -i "/^LNBITS_DATA_FOLDER=/d" /home/lnbits/lnbits/.env 2>/dev/null
     sudo bash -c "echo 'LNBITS_DATA_FOLDER=/mnt/hdd/app-data/LNBits/data' >> /home/lnbits/lnbits/.env"
 
