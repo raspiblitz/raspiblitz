@@ -67,8 +67,13 @@ function revertMigration() {
     echo "# Revert migration, restore SQLite..."
     sudo systemctl stop lnbits
     if [ -e /mnt/hdd/app-data/LNBits_sqlitedb_backup.tar ]; then
-      echo "# Move LNBits folder"
-      sudo mv /mnt/hdd/app-data/LNBits /mnt/hdd/app-data/LNBits_backup
+      if [ -d /mnt/hdd/app-data/LNBits_postgre_backup ]; then
+        echo "# LNBits folder (new) already saved, clean up"
+        sudo rm -R /mnt/hdd/app-data/LNBits
+      else
+        echo "# Move LNBits folder"
+        sudo mv /mnt/hdd/app-data/LNBits /mnt/hdd/app-data/LNBits_postgre_backup
+      fi
       echo "# Unpack Backup"
       cd /mnt/hdd/app-data/
       sudo tar -xf /mnt/hdd/app-data/LNBits_sqlitedb_backup.tar
@@ -87,6 +92,10 @@ function revertMigration() {
     /home/admin/config.scripts/blitz.conf.sh set LNBitsMigrate "off"
     /home/admin/config.scripts/blitz.conf.sh set LNBitsDB "SQLite"
     echo "# OK revert migration done"
+    echo
+    echo "Backups:"
+    echo "SQLite: /mnt/hdd/app-data/LNBits_sqlitedb_backup.tar"
+    echo "PostgreSQL: /mnt/hdd/app-data/LNBits_postgre_backup"
   else
     echo "# No migration started yet, nothing to do."
   fi
