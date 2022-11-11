@@ -49,13 +49,16 @@ function postgresConfig() {
 
   /home/admin/config.scripts/blitz.conf.sh set LNBitsDB "PostgreSQL"
 
-  echo "# postgresConfig done -> $check"
+  echo "# Setup PostgreSQL successful, new database found: $check"
 }
 
 function migrateMsg() {
-  echo "You can still revert back to sqlite. Open a new session and enter the command as follows:"
-  echo
-  echo "/home/admin/config.scripts/bonus.lnbits.sh migrate revert"
+  source <(/home/admin/config.scripts/blitz.conf.sh get LNBitsDB)
+  if [ "${LNBitsDB}" == "PostgreSQL" ]; then
+    echo "You can still revert back to sqlite. Open a new session and enter the command as follows:"
+    echo
+    echo "/home/admin/config.scripts/bonus.lnbits.sh migrate revert"
+  fi
 }
 
 function revertMigration() {
@@ -82,6 +85,8 @@ function revertMigration() {
     sudo systemctl start lnbits
 
     /home/admin/config.scripts/blitz.conf.sh set LNBitsMigrate "off"
+    /home/admin/config.scripts/blitz.conf.sh set LNBitsDB "SQLite"
+    echo "# OK revert migration done"
   else
     echo "# No migration started yet, nothing to do."
   fi
@@ -245,7 +250,8 @@ Try to migrate your LNBits SQLite database to PostgreSQL.
 
 This can fail for unknown circumstances. Revert of this process is possible afterwards, a backup will be saved.
             " 12 65
-            if [ $? -eq 0 ]; then            
+            if [ $? -eq 0 ]; then
+              clear     
               /home/admin/config.scripts/bonus.lnbits.sh migrate
               echo
               migrateMsg
@@ -935,7 +941,7 @@ if [ "$1" = "migrate" ]; then
     while ! nc -zv 127.0.0.1 5000 2>/dev/null;
     do
       count=`expr $count + 1`
-      echo "wait for LNBIts start (${count}s/${count_max}s)"
+      echo "wait for LNBIts to start (${count}s/${count_max}s)"
       sleep 1
       if [ $count = $count_max ]; then
         sudo systemctl status lnbits
