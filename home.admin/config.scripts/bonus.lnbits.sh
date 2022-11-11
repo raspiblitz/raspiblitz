@@ -53,7 +53,7 @@ function postgresConfig() {
 }
 
 function migrateMsg() {
-  source <(/home/admin/config.scripts/blitz.conf.sh get LNBitsDB)
+  source <(/home/admin/_cache.sh get LNBitsDB)
   if [ "${LNBitsDB}" == "PostgreSQL" ]; then
     echo "You can still revert back to sqlite. Open a new session and enter the command as follows:"
     echo
