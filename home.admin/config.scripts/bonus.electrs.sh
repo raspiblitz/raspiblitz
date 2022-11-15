@@ -145,7 +145,7 @@ if [ "$1" = "menu" ]; then
 
   # get status
   echo "# collecting status info ... (please wait)"
-  source <(sudo /home/admin/config.scripts/bonus.electrs.sh status)
+  source <(sudo /home/admin/config.scripts/bonus.electrs.sh status showAddress)
 
   if [ ${serviceInstalled} -eq 0 ]; then
     echo "# FAIL not installed"
@@ -208,11 +208,11 @@ Check 'sudo nginx -t' for a detailed error message.
     echo
     echo "On Network Settings > Server menu:"
     echo "- deactivate automatic server selection"
-    echo "- as manual server set '${localip}' & '${portSSL}'"
+    echo "- as manual server set '${localIP}' & '${portSSL}'"
     echo "- laptop and RaspiBlitz need to be within same local network"
     echo
     echo "To start directly from laptop terminal use:"
-    echo "electrum --oneserver --server ${localip}:${portSSL}:s"
+    echo "electrum --oneserver --server ${localIP}:${portSSL}:s"
     if [ ${TorRunning} -eq 1 ]; then
       echo
       echo "The Tor Hidden Service address for electrs is (see LCD for QR code):"
