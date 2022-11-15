@@ -166,6 +166,9 @@ fi
 if [ "${itchysats}" == "on" ]; then
   OPTIONS+=(ITCHYSATS "Show ItchySats details")
 fi
+if [ "${lightningtipbot}" == "on" ]; then
+  OPTIONS+=(LIGHTNINGTIPBOT "Show LightningTipBot details")
+fi
 
 # dont offer to switch to "testnet view for now" - so no wswitch back to mainnet needed
 #if [ ${chain} != "main" ]; then
@@ -277,6 +280,9 @@ case $CHOICE in
         LNDMANAGE)
             /home/admin/config.scripts/bonus.lndmanage.sh menu
             ;;
+        LIGHTNINGTIPBOT)
+            /home/admin/config.scripts/bonus.lightningtipbot.sh menu
+            ;;            
         LOOP)
             /home/admin/config.scripts/bonus.loop.sh menu
             ;;
