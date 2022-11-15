@@ -5,24 +5,31 @@
 # https://github.com/openoms/bitcoin-tutorials/tree/master/joinmarket
 # https://github.com/openoms/joininbox
 
-JBVERSION="v0.6.8" # installs JoinMarket v0.9.6
+# https://github.com/openoms/joininbox/tags
+JBTAG="v0.7.4" # installs JoinMarket v0.9.8
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "JoinMarket install script to switch JoinMarket on or off"
  echo "sudo /home/admin/config.scrips/bonus.joinmarket.sh on|off"
- echo "Installs JoininBox $JBVERSION with JoinMarket v0.9.5"
+ echo "Installs JoininBox $JBTAG with JoinMarket v0.9.5"
  exit 1
 fi
 
 # show info menu
 if [ "$1" = "menu" ]; then
-  whiptail --title " JoinMarket info " --msgbox "
-Type: 'jm' in the command line to switch to the dedicated user
-and start the JoininBox menu.
-Notes on usage:
+  whiptail --title " JoinMarket info " \
+  --yes-button "Start Joininbox" \
+  --no-button "Cancel" \
+  --yesno "Usage notes:
 https://github.com/openoms/bitcoin-tutorials/blob/master/joinmarket/README.md
+
+Can also type: 'jm' in the command line to switch to the dedicated user,
+and start the JoininBox menu.
 " 11 81
+  if [ $? -eq 0 ]; then
+    sudo su - joinmarket
+  fi
   exit 0
 fi
 
@@ -114,9 +121,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # check the latest at:
     cd /home/joinmarket/joininbox || exit 1
     # https://github.com/openoms/joininbox/releases/
-    sudo -u joinmarket git reset --hard $JBVERSION
+    sudo -u joinmarket git reset --hard ${JBTAG}
     sudo -u joinmarket /home/admin/config.scripts/blitz.git-verify.sh \
-     "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
+     "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" "${JBTAG}" || exit 1
 
     # copy the scripts in place
     sudo -u joinmarket cp /home/joinmarket/joininbox/scripts/* /home/joinmarket/
@@ -216,13 +223,14 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # setting value in raspi blitz config
   /home/admin/config.scripts/blitz.conf.sh set joinmarket "off"
 
-  if [ -f "/home/joinmarket/joinmarket-clientserver/jmvenv/bin/activate" ] ; then
-    echo "# REMOVING JOINMARKET"
+  if [ -d /home/joinmarket ]; then
+    echo "Removing the joinmarket user"
     sudo userdel -rf joinmarket 2>/dev/null
-    echo "# OK JoinMarket is removed"
   else
     echo "JoinMarket is not installed."
   fi
+
+  /home/admin/config.scripts/bonus.jam.sh off
 
   exit 0
 fi

@@ -5,7 +5,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "set a dynamic domain like freeDNS"
  echo "internet.dyndomain.sh status"
  echo "internet.dyndomain.sh on --> interactive setup"
- echo "internet.dyndomain.sh [domainName] [?updateURL]"
+ echo "internet.dyndomain.sh on [domainName] [?updateURL]"
  echo "internet.dyndomain.sh update"
  echo "internet.dyndomain.sh off"
  exit 1

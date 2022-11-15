@@ -15,6 +15,7 @@ if [ ${#BTCPayServer} -eq 0 ]; then BTCPayServer="off"; fi
 if [ ${#ElectRS} -eq 0 ]; then ElectRS="off"; fi
 if [ ${#lndmanage} -eq 0 ]; then lndmanage="off"; fi
 if [ ${#joinmarket} -eq 0 ]; then joinmarket="off"; fi
+if [ ${#jam} -eq 0 ]; then jam="off"; fi
 if [ ${#LNBits} -eq 0 ]; then LNBits="off"; fi
 if [ ${#mempoolExplorer} -eq 0 ]; then mempoolExplorer="off"; fi
 if [ ${#bos} -eq 0 ]; then bos="off"; fi
@@ -46,6 +47,7 @@ if [ "${network}" == "bitcoin" ]; then
   OPTIONS+=(s 'BTC Specter Desktop' ${specter})
   OPTIONS+=(a 'BTC Mempool Space' ${mempoolExplorer})
   OPTIONS+=(j 'BTC JoinMarket+JoininBox menu' ${joinmarket})
+  OPTIONS+=(z 'BTC Jam (JoinMarket WebUI)' ${jam})
   OPTIONS+=(w 'BTC Download Bitcoin Whitepaper' ${whitepaper})
   OPTIONS+=(v 'BTC Install BitcoinMinds.org' ${bitcoinminds})
   OPTIONS+=(u 'BTC Install ItchySats' ${itchysats})
@@ -481,6 +483,35 @@ Then try activating JoinMarket again in SERVICES.\n
   fi
 else
   echo "JoinMarket not changed."
+fi
+
+# Jam process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "z")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${jam}" != "${choice}" ]; then
+  echo "Jam setting changed .."
+  # check if TOR is installed
+  source /mnt/hdd/raspiblitz.conf
+  if [ "${choice}" =  "on" ] && [ "${runBehindTor}" = "off" ]; then
+    whiptail --title " Use Tor with Jam" --msgbox "\
+It is highly recommended to use Tor with Jam.\n
+Please activate TOR in SERVICES first.\n
+Then try activating Jam again in SERVICES.\n
+" 13 42
+  else
+    anychange=1
+    sudo /home/admin/config.scripts/bonus.jam.sh ${choice}
+    errorOnInstall=$?
+    if [ "${choice}" =  "on" ]; then
+      if [ ${errorOnInstall} -eq 0 ]; then
+         sudo /home/admin/config.scripts/bonus.jam.sh menu
+      else
+        whiptail --title 'FAIL' --msgbox "Jam installation is cancelled\nTry again from the menu or install from the terminal with:\nsudo /home/admin/config.scripts/bonus.jam.sh on" 9 65
+      fi
+    fi
+  fi
+else
+  echo "Jam not changed."
 fi
 
 # Mempool process choice

@@ -476,6 +476,10 @@ if [ "${bos}" == "on" ]; then
   OPTIONS+=(BOS "Update Balance of Satoshis")
 fi
 
+if [ "${ElectRS}" == "on" ]; then
+  OPTIONS+=(ELECTRS "Update Electrs")
+fi
+
 if [ "${RTL}" == "on" ]||[ "${cRTL}" == "on" ]; then
   OPTIONS+=(RTL "Update RTL")
 fi
@@ -502,6 +506,10 @@ fi
 
 if [ "${mempoolExplorer}" == "on" ]; then
   OPTIONS+=(MEMPOOL "Update Mempool Explorer")
+fi
+
+if [ "${jam}" == "on" ]; then
+  OPTIONS+=(JAM "Update Jam (JoinMarket WebUI)")
 fi
 
 if [ "${runBehindTor}" == "on" ]; then
@@ -543,6 +551,9 @@ case $CHOICE in
   BOS)
     /home/admin/config.scripts/bonus.bos.sh update
     ;;
+  ELECTRS)
+    /home/admin/config.scripts/bonus.electrs.sh update
+    ;;    
   RTL)
     /home/admin/config.scripts/bonus.rtl.sh update
     ;;
@@ -566,6 +577,9 @@ case $CHOICE in
     ;;
   MEMPOOL)
     /home/admin/config.scripts/bonus.mempool.sh update
+    ;;
+  JAM)
+    /home/admin/config.scripts/bonus.jam.sh update
     ;;
   ITCHYSATS)
     /home/admin/config.scripts/bonus.itchysats.sh update

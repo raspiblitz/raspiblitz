@@ -39,7 +39,8 @@ if [ "$1" == "redact" ]; then
   sed -i 's/alias [A-Za-z0-9]* /alias *** /' ${redactFile}
   sed -i 's/public key [a-z0-9]*,/public key *** /' ${redactFile}
   sed -i 's/[a-z0-9][a-z0-9]*.onion/###.onion/' ${redactFile}
-
+  sed -i 's/alias=[^\r\n]*/alias=****/' ${redactFile}
+  
   exit 0
 fi
 
