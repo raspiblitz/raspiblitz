@@ -109,6 +109,7 @@ function repair() {
 
 # command: restart
 function restart() {
+  echo "Command to restart your RaspiBlitz"
   confirmMsg restart
   /home/admin/config.scripts/blitz.shutdown.sh reboot
 }
@@ -125,6 +126,14 @@ function check() {
 
 # command: release
 function release() {
+  echo "Command to prepare your RaspiBlitz installation for sd card image:"
+  echo "- delete logs"
+  echo "- clean raspiblitz.info"
+  echo "- delete SSH Pub keys"
+  echo "- delete local DNS confs"
+  echo "- delete old API conf"
+  echo "- delete local WIFI conf"
+  echo "- shutdown"
   confirmMsg release
   /home/admin/config.scripts/blitz.preparerelease.sh
 }
@@ -150,6 +159,7 @@ function debug() {
 # command: patch
 # syncs script with latest set github and branch
 function patch() {
+  echo "Command to patch your RaspiBlitz from github"
   confirmMsg patch
   cd /home/admin
 
@@ -179,6 +189,7 @@ function patch() {
 
 # command: off
 function off() {
+  echo "Command to power off your RaspiBlitz"
   confirmMsg off
   /home/admin/config.scripts/blitz.shutdown.sh
 }
@@ -192,6 +203,7 @@ function github() {
 
 # command: hdmi
 function hdmi() {
+  echo "Command to switch video output of your RaspiBlitz to hdmi"
   confirmMsg hdmi
   echo "# SWITCHING VIDEO OUTPUT TO --> HDMI"
   sudo /home/admin/config.scripts/blitz.display.sh set-display hdmi
@@ -200,6 +212,7 @@ function hdmi() {
 
 # command: lcd
 function lcd() {
+  echo "Command to switch video output of your RaspiBlitz to lcd"
   confirmMsg lcd
   echo "# SWITCHING VIDEO OUTPUT TO --> LCD"
   sudo /home/admin/config.scripts/blitz.display.sh set-display lcd
@@ -208,6 +221,7 @@ function lcd() {
 
 # command: headless
 function headless() {
+  echo "Command to switch off any video output of your RaspiBlitz (ssh only)"
   confirmMsg headless
   echo "# SWITCHING VIDEO OUTPUT TO --> HEADLESS"
   sudo /home/admin/config.scripts/blitz.display.sh set-display headless
