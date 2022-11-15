@@ -5,6 +5,18 @@ if [ -f /home/admin/_aliases ];then
   source /home/admin/_aliases
 fi
 
+# confirm interrupting commands
+function confirmMsg() {
+  while true; do
+    read -p "$(echo -e "Execute the blitz command '$1'? (y/n): ")" yn
+    case $yn in
+        [Yy]* ) break;;
+        [Nn]* ) exit;;
+        * ) echo "Please answer yes or no.";;
+    esac
+  done
+}
+
 # SHORTCUT COMMANDS you can call as user 'admin' from terminal
 
 # command: blitz
@@ -97,6 +109,7 @@ function repair() {
 
 # command: restart
 function restart() {
+  confirmMsg restart
   /home/admin/config.scripts/blitz.shutdown.sh reboot
 }
 
@@ -112,6 +125,7 @@ function check() {
 
 # command: release
 function release() {
+  confirmMsg release
   /home/admin/config.scripts/blitz.preparerelease.sh
 }
 
@@ -136,6 +150,7 @@ function debug() {
 # command: patch
 # syncs script with latest set github and branch
 function patch() {
+  confirmMsg patch
   cd /home/admin
 
   if [ "$1" == "" ] || [ "$1" == "code" ]; then
@@ -164,6 +179,7 @@ function patch() {
 
 # command: off
 function off() {
+  confirmMsg off
   /home/admin/config.scripts/blitz.shutdown.sh
 }
 
@@ -176,6 +192,7 @@ function github() {
 
 # command: hdmi
 function hdmi() {
+  confirmMsg hdmi
   echo "# SWITCHING VIDEO OUTPUT TO --> HDMI"
   sudo /home/admin/config.scripts/blitz.display.sh set-display hdmi
   restart
@@ -183,6 +200,7 @@ function hdmi() {
 
 # command: lcd
 function lcd() {
+  confirmMsg lcd
   echo "# SWITCHING VIDEO OUTPUT TO --> LCD"
   sudo /home/admin/config.scripts/blitz.display.sh set-display lcd
   restart
@@ -190,6 +208,7 @@ function lcd() {
 
 # command: headless
 function headless() {
+  confirmMsg headless
   echo "# SWITCHING VIDEO OUTPUT TO --> HEADLESS"
   sudo /home/admin/config.scripts/blitz.display.sh set-display headless
   restart
