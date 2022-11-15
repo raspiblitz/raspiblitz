@@ -10,6 +10,7 @@
 - Update: Thunderhub v0.13.16 with balance sharing disabled [details](https://github.com/apotdevin/thunderhub/releases/tag/v0.13.16)
 - Update: LNbits 0.9.4 [details](https://github.com/lnbits/lnbits-legend/releases/tag/0.9.2)
 - Update: ItchySats 0.7.0 [details](https://github.com/itchysats/itchysats/releases/tag/0.7.0)
+- Update: Channel Tools (chantools) v0.10.5 [details](https://github.com/guggero/chantools/releases/tag/v0.10.5)
 - Update: Jam (JoinMarket Web UI) v0.1.2 [details](https://github.com/joinmarket-webui/joinmarket-webui/releases/tag/v0.1.0)
 - Update: JoinMarket v0.9.8 [details](https://github.com/JoinMarket-Org/joinmarket-clientserver/releases/tag/v0.9.8)
 - Update: JoininBox v0.7.4 [details](https://github.com/openoms/joininbox/releases/tag/v0.7.3)
