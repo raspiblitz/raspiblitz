@@ -176,7 +176,7 @@ if [ "$1" = "status" ]; then
     fi
 
     # try to detect if its an SSD
-    isSMART=$(sudo smartctl -a /dev/{hdd} | grep -c "Rotation Rate:")
+    isSMART=$(sudo smartctl -a /dev/${hdd} | grep -c "Rotation Rate:")
     if [ ${isSMART} -gt 0 ]; then
     	#detect using smartmontools (preferred)
         isSSD=$(sudo smartctl -a /dev/${hdd} | grep 'Rotation Rate:' | grep -c "Solid State")
@@ -405,7 +405,7 @@ if [ "$1" = "status" ]; then
     echo "hddRaspiVersion='${hddRaspiVersion}'"
 
     # try to detect if its an SSD
-    isSMART=$(sudo smartctl -a /dev/{hdd} | grep -c "Rotation Rate:")
+    isSMART=$(sudo smartctl -a /dev/${hdd} | grep -c "Rotation Rate:")
     if [ ${isSMART} -gt 0 ]; then
     	#detect using smartmontools (preferred)
         isSSD=$(sudo smartctl -a /dev/${hdd} | grep 'Rotation Rate:' | grep -c "Solid State")
