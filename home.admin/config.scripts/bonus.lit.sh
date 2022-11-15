@@ -186,7 +186,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     echo "# check binary was not manipulated (checksum test)"
     wget -N https://github.com/lightninglabs/lightning-terminal/releases/download/v${LITVERSION}/manifest-v${LITVERSION}.sig
-    wget --no-check-certificate ${PGPpkeys}
+    wget --no-check-certificate -O ./pgp_keys.asc ${PGPpkeys}
     binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
     if [ "${binaryChecksum}" != "${SHA256}" ]; then
       echo "# FAIL # Downloaded LiT BINARY not matching SHA256 checksum: ${SHA256}"
