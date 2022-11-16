@@ -65,24 +65,20 @@ https://github.com/alexbosworth/balanceofsatoshis/blob/master/README.md
             ;;
         TELEGRAM-SETUP)
             clear
-            echo "..."
-            text="
-Connect to a Telegram bot. Create bot: tg://resolve?domain=botfather
-
-After creating the bot start chatting with the bot for connect code (/connect)
-
-Please enter the CONNECT CODE from your telegram bot
-"
-            connectCode=$(whiptail --inputbox "$text" 14 62 --title "Connect Telegram Bot" 3>&1 1>&2 2>&3)
-            exitstatus=$?
-            if [ $exitstatus = 0 ]; then
-              connectCode=$(echo "${connectCode}" | cut -d " " -f1)
-              /home/admin/config.scripts/bonus.bos.sh telegram on $connectCode
-              echo
-              echo "OK telegram active."
-              echo "PRESS ENTER to continue"
-              read key
-            fi
+            whiptail --title " First time setup instructions " \
+            --yes-button "Back" \
+            --no-button "Connect" \
+            --yesno "Create bot: https://t.me/botfather\n
+Start a new session and type: 'bos' in the command line to switch to the dedicated user.\n
+Run 'bos telegram' and enter the HTTP API Token given from Botfather" 14 72
+            if [ "$?" != "1" ]; then
+              exit 0
+            fi            
+            /home/admin/config.scripts/bonus.bos.sh telegram on
+            echo
+            echo "OK telegram active."
+            echo "PRESS ENTER to continue"
+            read key
             exit 0
             ;;
         *)
@@ -94,7 +90,20 @@ Please enter the CONNECT CODE from your telegram bot
 fi
 
 #telegram on
-if [ "$1" = "telegram" ] && [ "$2" = "on" ] && [ "$3" != "" ]; then
+if [ "$1" = "telegram" ] && [ "$2" = "on" ]; then
+  connectMsg="
+Start chatting with the bot for connect code (/connect)
+
+Please enter the CONNECT CODE from your telegram bot
+"
+  connectCode=$(whiptail --inputbox "$connectMsg" 14 62 --title "Connect Telegram Bot" 3>&1 1>&2 2>&3)
+  exitstatus=$?
+  if [ $exitstatus = 0 ]; then
+    connectCode=$(echo "${connectCode}" | cut -d " " -f1)
+  else
+    exit 0
+  fi
+
   sudo rm /etc/systemd/system/bos-telegram.service 2>/dev/null
 
   # install service
@@ -110,7 +119,7 @@ After=network-online.target
 [Service]
 Type=simple
 WorkingDirectory=/home/bos/balanceofsatoshis
-ExecStart=/home/bos/.npm-global/bin/bos telegram --connect $3 -v
+ExecStart=/home/bos/.npm-global/bin/bos telegram --connect ${connectCode} -v
 User=bos
 Group=bos
 Restart=always
