@@ -35,10 +35,11 @@ https://github.com/alexbosworth/balanceofsatoshis/blob/master/README.md
 
   # Balance of Satoshis OPTIONS menu
   OPTIONS=()
+  OPTIONS+=(TELEGRAM-SETUP "Setup or renew BoS telegram bot")
   if [ -e /etc/systemd/system/bos-telegram.service ]; then
-    OPTIONS+=(TELEGRAM-DISABLE "Disable telegram bot")
+    OPTIONS+=(TELEGRAM-DISABLE "Remove BoS telegram bot service")
   else
-    OPTIONS+=(TELEGRAM-SETUP "Connect a telegram bot")
+    OPTIONS+=(TELEGRAM-SERVICE "Install BoS telegram bot as a service")
   fi
 
   WIDTH=66
@@ -67,16 +68,37 @@ https://github.com/alexbosworth/balanceofsatoshis/blob/master/README.md
             clear
             whiptail --title " First time setup instructions " \
             --yes-button "Back" \
-            --no-button "Connect" \
-            --yesno "Create bot: https://t.me/botfather\n
-Start a new session and type: 'bos' in the command line to switch to the dedicated user.\n
-Run 'bos telegram' and enter the HTTP API Token given from Botfather" 14 72
+            --no-button "Setup" \
+            --yesno "1. Create your telegram bot: https://t.me/botfather\n
+2. BoS asks for HTTP API Token given from telegram.\n
+3. BoS asks for your connection code (Bot command: /connect)\n
+Start BoS telegram setup now?" 14 72
             if [ "$?" != "1" ]; then
               exit 0
             fi            
-            /home/admin/config.scripts/bonus.bos.sh telegram on
+            sudo bash /home/admin/config.scripts/bonus.bos.sh telegram setup
             echo
-            echo "OK telegram active."
+            echo "OK Balance of Satoshis telegram setup done."
+            echo "PRESS ENTER to continue"
+            read key
+            exit 0
+            ;;            
+        TELEGRAM-SERVICE)
+            clear
+            connectMsg="
+Start chatting with the bot for connect code (/connect)\n
+Please enter the CONNECT CODE from your telegram bot
+"
+            connectCode=$(whiptail --inputbox "$connectMsg" 14 62 --title "Connect Telegram Bot" 3>&1 1>&2 2>&3)
+            exitstatus=$?
+            if [ $exitstatus = 0 ]; then
+              connectCode=$(echo "${connectCode}" | cut -d " " -f1)
+            else
+              exit 0
+            fi        
+            /home/admin/config.scripts/bonus.bos.sh telegram on ${connectCode}
+            echo
+            echo "OK BoS telegram service active."
             echo "PRESS ENTER to continue"
             read key
             exit 0
@@ -89,25 +111,12 @@ Run 'bos telegram' and enter the HTTP API Token given from Botfather" 14 72
   exit 0
 fi
 
-#telegram on
-if [ "$1" = "telegram" ] && [ "$2" = "on" ]; then
-  connectMsg="
-Start chatting with the bot for connect code (/connect)
-
-Please enter the CONNECT CODE from your telegram bot
-"
-  connectCode=$(whiptail --inputbox "$connectMsg" 14 62 --title "Connect Telegram Bot" 3>&1 1>&2 2>&3)
-  exitstatus=$?
-  if [ $exitstatus = 0 ]; then
-    connectCode=$(echo "${connectCode}" | cut -d " " -f1)
-  else
-    exit 0
-  fi
-
+# telegram on
+if [ "$1" = "telegram" ] && [ "$2" = "on" ] && [ "$3" != "" ] ; then
   sudo rm /etc/systemd/system/bos-telegram.service 2>/dev/null
 
   # install service
-  echo "*** Install systemd ***"
+  echo "*** INSTALL BoS Telegram ***"
   cat <<EOF | sudo tee /etc/systemd/system/bos-telegram.service >/dev/null
 # systemd unit for bos telegram
 
@@ -119,7 +128,7 @@ After=network-online.target
 [Service]
 Type=simple
 WorkingDirectory=/home/bos/balanceofsatoshis
-ExecStart=/home/bos/.npm-global/bin/bos telegram --connect ${connectCode} -v
+ExecStart=/home/bos/.npm-global/bin/bos telegram --connect $3 -v
 User=bos
 Group=bos
 Restart=always
@@ -160,6 +169,13 @@ if [ "$1" = "telegram" ] && [ "$2" = "off" ]; then
   exit 0
 fi
 
+# telegram bot setup
+if [ "$1" = "telegram" ] && [ "$2" = "setup" ]; then
+  /home/admin/config.scripts/bonus.bos.sh telegram off
+  echo "*** SETUP BoS Telegram ***"
+  echo "Wait to start 'bos telegram --reset-api-key' (CTRL + C when done) ..."
+  sudo -u bos /home/bos/.npm-global/bin/bos telegram --reset-api-key
+fi
 
 # install
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
