@@ -6,7 +6,7 @@ BOSVERSION="11.50.0"
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "config script to install, update or uninstall Balance of Satoshis"
- echo "bonus.bos.sh [on|off|menu|update]"
+ echo "bonus.bos.sh [on|off|menu|update|telegram]"
  echo "installs the version $BOSVERSION by default"
  exit 1
 fi
@@ -15,12 +15,139 @@ source /mnt/hdd/raspiblitz.conf
 
 # show info menu
 if [ "$1" = "menu" ]; then
-  dialog --title " Info Balance of Satoshis " --msgbox "
+
+  text="
 Balance of Satoshis is a command line tool.
 Type: 'bos' in the command line to switch to the dedicated user.
 Then see 'bos help' for the options. Usage:
 https://github.com/alexbosworth/balanceofsatoshis/blob/master/README.md
-" 10 75
+"
+
+  whiptail --title " Info Balance of Satoshis" --yes-button "OK" --no-button "OPTIONS" --yesno "${text}" 10 75
+  result=$?
+  sudo /home/admin/config.scripts/blitz.display.sh hide
+  echo "option (${result}) - please wait ..."
+
+  # exit when user presses OK to close menu
+  if [ ${result} -eq 0 ]; then
+    exit 0
+  fi
+
+  # Balance of Satoshis OPTIONS menu
+  OPTIONS=()
+  if [ -e /etc/systemd/system/bos-telegram.service ]; then
+    OPTIONS+=(TELEGRAM-DISABLE "Disable telegram bot")
+  else
+    OPTIONS+=(TELEGRAM-SETUP "Connect a telegram bot")
+  fi
+
+  WIDTH=66
+  CHOICE_HEIGHT=$(("${#OPTIONS[@]}/2+1"))
+  HEIGHT=$((CHOICE_HEIGHT+7))
+  CHOICE=$(dialog --clear \
+                --title " BoS - Options" \
+                --ok-label "Select" \
+                --cancel-label "Back" \
+                --menu "Choose one of the following options:" \
+                $HEIGHT $WIDTH $CHOICE_HEIGHT \
+                "${OPTIONS[@]}" \
+                2>&1 >/dev/tty)
+
+  case $CHOICE in
+        TELEGRAM-DISABLE)
+            clear
+            /home/admin/config.scripts/bonus.bos.sh telegram off
+            echo
+            echo "OK telegram disabled."
+            echo "PRESS ENTER to continue"
+            read key
+            exit 0
+            ;;
+        TELEGRAM-SETUP)
+            clear
+            echo "..."
+            text="
+Connect to a Telegram bot. Create bot: tg://resolve?domain=botfather
+
+After creating the bot start chatting with the bot for connect code (/connect)
+
+Please enter the CONNECT CODE from your telegram bot
+"
+            connectCode=$(whiptail --inputbox "$text" 14 62 --title "Connect Telegram Bot" 3>&1 1>&2 2>&3)
+            exitstatus=$?
+            if [ $exitstatus = 0 ]; then
+              connectCode=$(echo "${connectCode}" | cut -d " " -f1)
+              /home/admin/config.scripts/bonus.bos.sh telegram on $connectCode
+              echo
+              echo "OK telegram active."
+              echo "PRESS ENTER to continue"
+              read key
+            fi
+            exit 0
+            ;;
+        *)
+            clear
+            exit 0
+  esac
+
+  exit 0
+fi
+
+#telegram on
+if [ "$1" = "telegram" ] && [ "$2" = "on" ] && [ "$3" != "" ]; then
+  sudo rm /etc/systemd/system/bos-telegram.service 2>/dev/null
+
+  # install service
+  echo "*** Install systemd ***"
+  cat <<EOF | sudo tee /etc/systemd/system/bos-telegram.service >/dev/null
+# systemd unit for bos telegram
+
+[Unit]
+Description=Balance of Satoshis Telegram Bot
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/bos/balanceofsatoshis
+ExecStart=/home/bos/.npm-global/bin/bos telegram --connect $3 -v
+User=bos
+Group=bos
+Restart=always
+TimeoutSec=120
+RestartSec=15
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+  sudo systemctl enable bos-telegram
+  sudo systemctl start bos-telegram
+
+  # check for error
+  isDead=$(sudo systemctl status bos-telegram | grep -c 'inactive (dead)')
+  if [ ${isDead} -eq 1 ]; then
+    echo "error='Service Failed'"
+    exit 0
+  fi
+
+  exit 0
+fi
+
+# telegram off
+if [ "$1" = "telegram" ] && [ "$2" = "off" ]; then
+  echo "*** DISABLE BoS Telegram ***"
+  isInstalled=$(sudo ls /etc/systemd/system/bos-telegram.service 2>/dev/null | grep -c 'bos-telegram.service')
+  if [ ${isInstalled} -eq 1 ]; then
+    sudo systemctl stop bos-telegram
+    sudo systemctl disable bos-telegram
+    sudo rm /etc/systemd/system/bos-telegram.service
+    echo "OK bos-telegram.service removed."
+  else
+    echo "bos-telegram.service is not installed."
+  fi
+
+  echo "result='OK'"
   exit 0
 fi
 
