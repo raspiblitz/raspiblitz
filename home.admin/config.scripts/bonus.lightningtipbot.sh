@@ -26,8 +26,8 @@ if [ "$1" = "menu" ]; then
 Its a service running in the background - use to monitor:
 sudo journalctl -fu lightningtipbot\n
 For more details and further information see:
-https://github.com/LightningTipBot/LightningTipBot/blob/$BOTVERSION/README.md
-" 13 78
+https://github.com/LightningTipBot/LightningTipBot/blob/$BOTVERSION/README.md\n
+Config file: /mnt/hdd/app-data/LightningTipBot/config.yaml" 15 78
     clear
   else
     echo "# LightningTipBot is not installed."
