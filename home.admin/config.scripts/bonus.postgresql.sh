@@ -53,7 +53,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo systemctl start postgresql
 
   # check if PostgreSQL was installed
-  if psql --version; then
+  if psql --version 2>/dev/null; then
     # wait for the postgres server to start
     count=0
     count_max=30

@@ -55,9 +55,24 @@ function postgresConfig() {
 function migrateMsg() {
   source <(/home/admin/_cache.sh get LNBitsDB)
   if [ "${LNBitsDB}" == "PostgreSQL" ]; then
-    echo "You can still revert back to sqlite. Open a new session and enter the command as follows:"
-    echo
-    echo "/home/admin/config.scripts/bonus.lnbits.sh migrate revert"
+    if [ -e /mnt/hdd/app-data/LNBits_sqlitedb_backup.tar ]; then
+      echo "SUCCESS - A backup file was found. The migrate progress will revert automatically on failure."
+      echo "For yet unknown reasons, this could be done manually with unpacking the SQLite backup file."
+      echo
+      echo "/home/admin/config.scripts/bonus.lnbits.sh migrate revert"
+      echo
+      echo "********************************************************"
+      echo "*                                                      *"
+      echo "* Revert: /mnt/hdd/app-data/LNBits_sqlitedb_backup.tar *"
+      echo "*                                                      *"
+      echo "********************************************************"
+      echo
+    else
+      echo "You dont have any migration backup files!"
+    fi
+  else
+    echo "ABORT - Your LNBits is still running on old SQLite database."
+    echo "Check for errors, '.dump' and fix your database manually and try again"
   fi
 }
 
@@ -66,36 +81,35 @@ function revertMigration() {
   if [ "${LNBitsMigrate}" == "on" ]; then
     echo "# Revert migration, restore SQLite..."
     sudo systemctl stop lnbits
+
+    # check current backup
     if [ -e /mnt/hdd/app-data/LNBits_sqlitedb_backup.tar ]; then
-      if [ -d /mnt/hdd/app-data/LNBits_postgre_backup ]; then
-        echo "# LNBits folder (new) already saved, clean up"
-        sudo rm -R /mnt/hdd/app-data/LNBits
-      else
-        echo "# Move LNBits folder"
-        sudo mv /mnt/hdd/app-data/LNBits /mnt/hdd/app-data/LNBits_postgre_backup
-      fi
       echo "# Unpack Backup"
       cd /mnt/hdd/app-data/
+      sudo rm -R /mnt/hdd/app-data/LNBits
       sudo tar -xf /mnt/hdd/app-data/LNBits_sqlitedb_backup.tar
       sudo chown lnbits:lnbits -R /mnt/hdd/app-data/LNBits
     else
       echo "# No backup file found!"
     fi
-    echo "# Configure .env"
+
+    # update config 
+    echo "# Configure config .env"
+    
     # clean up
     sudo sed -i "/^LNBITS_DATABASE_URL=/d" /home/lnbits/lnbits/.env
     sudo sed -i "/^LNBITS_DATA_FOLDER=/d" /home/lnbits/lnbits/.env
     sudo bash -c "echo 'LNBITS_DATA_FOLDER=/mnt/hdd/app-data/LNBits' >> /home/lnbits/lnbits/.env"
+
+    # start service
     echo "# Start LNBits"
     sudo systemctl start lnbits
 
+    # set blitz config
     /home/admin/config.scripts/blitz.conf.sh set LNBitsMigrate "off"
     /home/admin/config.scripts/blitz.conf.sh set LNBitsDB "SQLite"
+
     echo "# OK revert migration done"
-    echo
-    echo "Backups:"
-    echo "SQLite: /mnt/hdd/app-data/LNBits_sqlitedb_backup.tar"
-    echo "PostgreSQL: /mnt/hdd/app-data/LNBits_postgre_backup"
   else
     echo "# No migration started yet, nothing to do."
   fi
@@ -596,20 +610,25 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo bash -c "echo 'LNBITS_FORCE_HTTPS=0' >> /home/lnbits/lnbits/.env"
 
   if [ ! -e /mnt/hdd/app-data/LNBits/database.sqlite3 ]; then
+    echo "# install database: PostgreSQL"
     # POSTGRES
     postgresConfig
 
     # new data directory
     sudo mkdir -p /mnt/hdd/app-data/LNBits/data
 
+    # config update
     # example: postgres://<user>:<password>@<host>/<database>
     sudo bash -c "echo 'LNBITS_DATABASE_URL=postgres://lnbits_user:raspiblitz@localhost:5432/lnbits_db' >> /home/lnbits/lnbits/.env"
     sudo bash -c "echo 'LNBITS_DATA_FOLDER=/mnt/hdd/app-data/LNBits/data' >> /home/lnbits/lnbits/.env"  
   else
+    echo "# install database: SQLite"
     /home/admin/config.scripts/blitz.conf.sh set LNBitsDB "SQLite"
-    # old SQLite db found
+    
+    # new data directory
     sudo mkdir -p /mnt/hdd/app-data/LNBits
-    # set data directory
+
+    # config update
     sudo bash -c "echo 'LNBITS_DATA_FOLDER=/mnt/hdd/app-data/LNBits' >> /home/lnbits/lnbits/.env"
   fi
   sudo chown lnbits:lnbits -R /mnt/hdd/app-data/LNBits
@@ -904,6 +923,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 fi
 
 if [ "$1" = "migrate" ] && [ "$2" = "revert" ]; then
+  /home/admin/config.scripts/blitz.conf.sh set LNBitsMigrate "on"
   revertMigration
   exit 0
 fi
@@ -911,11 +931,18 @@ fi
 if [ "$1" = "migrate" ]; then
 
   if [ -e /mnt/hdd/app-data/LNBits/database.sqlite3 ]; then
-    # backup old sqlite database, but dont overwrite
-    if [ ! -e /mnt/hdd/app-data/LNBits_sqlitedb_backup.tar ]; then
-      echo "# Backup SQLite database"
-      sudo tar -cf /mnt/hdd/app-data/LNBits_sqlitedb_backup.tar -C /mnt/hdd/app-data LNBits/
+    echo "# Backup SQLite database"
+    # backup current database, but dont overwrite last backup
+    if [ -e /mnt/hdd/app-data/LNBits_sqlitedb_backup.tar ]; then
+      if [ -e /mnt/hdd/app-data/LNBits_sqlitedb_backup.tar.old ]; then
+        echo "# Remove old backup file"
+        sudo rm -f /mnt/hdd/app-data/LNBits_sqlitedb_backup.tar.old
+      fi
+      # keep the last backup as old backup
+      sudo mv /mnt/hdd/app-data/LNBits_sqlitedb_backup.tar /mnt/hdd/app-data/LNBits_sqlitedb_backup.tar.old
     fi
+    # create new backup
+    sudo tar -cf /mnt/hdd/app-data/LNBits_sqlitedb_backup.tar -C /mnt/hdd/app-data LNBits/
 
     # update to expected tag
     cd /home/lnbits/lnbits || exit 1
