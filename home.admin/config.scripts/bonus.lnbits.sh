@@ -36,20 +36,20 @@ function postgresConfig() {
     sudo -u postgres psql -c "drop user lnbits_user;"
   fi
   # create database for new installations and keep old
-  sudo -u postgres psql -c "create database lnbits_db;"
-  sudo -u postgres psql -c "create user lnbits_user with encrypted password 'raspiblitz';"
-  sudo -u postgres psql -c "grant all privileges on database lnbits_db to lnbits_user;"
+  sudo -u postgres psql -c "create database lnbits_db;" 2>/dev/null
+  sudo -u postgres psql -c "create user lnbits_user with encrypted password 'raspiblitz';" 2>/dev/null
+  sudo -u postgres psql -c "grant all privileges on database lnbits_db to lnbits_user;" 2>/dev/null
 
   # check
   check=$(sudo -u postgres psql -c "SELECT datname FROM pg_database;" | grep lnbits_db)
   if [ "$check" = "" ]; then
     echo "# postgresConfig failed -> SELECT datname FROM pg_database;"
     exit 1
+  else
+    echo "# Setup PostgreSQL successful, new database found: $check"
   fi
 
-  /home/admin/config.scripts/blitz.conf.sh set LNBitsDB "PostgreSQL"
-
-  echo "# Setup PostgreSQL successful, new database found: $check"
+  /home/admin/config.scripts/blitz.conf.sh set LNBitsDB "PostgreSQL"  
 }
 
 function migrateMsg() {
@@ -72,7 +72,7 @@ function migrateMsg() {
     fi
   else
     echo "ABORT - Your LNBits is still running on old SQLite database."
-    echo "Check for errors, '.dump' and fix your database manually and try again"
+    echo "Check for errors, '.dump' and fix your database manually and try again."
   fi
 }
 
