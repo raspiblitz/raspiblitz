@@ -53,7 +53,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo systemctl start postgresql
 
   # check if PostgreSQL was installed
-  if psql --version 2>/dev/null; then
+  if psql --version; then
     # wait for the postgres server to start
     count=0
     count_max=30
@@ -68,7 +68,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
         exit 1
       fi
     done
-    echo "Installed PostgreSQL $(psql --version)"
+    echo "OK PostgreSQL installed"
   else
     echo "FAIL - Was not able to install PostgreSQL"
     echo "ABORT - PostgreSQL install"
