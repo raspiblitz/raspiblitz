@@ -6,12 +6,13 @@ if [ -f /home/admin/_aliases ];then
 fi
 
 # confirm interrupting commands
+confirm=0
 function confirmMsg() {
   while true; do
     read -p "$(echo -e "Execute the blitz command '$1'? (y/n): ")" yn
     case $yn in
-        [Yy]* ) break;;
-        [Nn]* ) exit;;
+        [Yy]* ) confirm=1;break;;
+        [Nn]* ) break;;
         * ) echo "Please answer yes or no.";;
     esac
   done
@@ -47,7 +48,7 @@ function blitzhelp() {
   echo "  status       informational Blitz status screen"
   echo "  sourcemode   copy blockchain source modus"
   echo "  check        check if Blitz configuration files are correct"
-  echo "  patch        sync all scripts with latest from github and branch"
+  echo "  patch [all]  sync all scripts with latest from github and branch"
   echo "  patch code   sync only blitz scripts with latest from github and branch"
   echo "  patch api    sync only Blitz-API with latest from github and branch"
   echo "  patch web    sync only Blitz-WebUI with latest from github and branch"
@@ -111,7 +112,9 @@ function repair() {
 function restart() {
   echo "Command to restart your RaspiBlitz"
   confirmMsg restart
-  /home/admin/config.scripts/blitz.shutdown.sh reboot
+  if [ $confirm -eq 1 ]; then
+    /home/admin/config.scripts/blitz.shutdown.sh reboot
+  fi
 }
 
 # command: sourcemode
@@ -135,7 +138,9 @@ function release() {
   echo "- delete local WIFI conf"
   echo "- shutdown"
   confirmMsg release
-  /home/admin/config.scripts/blitz.preparerelease.sh
+  if [ $confirm -eq 1 ]; then
+    /home/admin/config.scripts/blitz.preparerelease.sh
+  fi
 }
 
 # command: debug
@@ -159,23 +164,31 @@ function debug() {
 # command: patch
 # syncs script with latest set github and branch
 function patch() {
+  if [ "$1" == "" ]; then
+    echo "Command to patch your RaspiBlitz from github"
+    confirmMsg patch
+    if [ $confirm -eq 1 ]; then
+      patch all
+    fi
+  fi
+
   cd /home/admin
 
-  if [ "$1" == "" ] || [ "$1" == "code" ]; then
+  if [ "$1" == "all" ] || [ "$1" == "code" ]; then
     echo
     echo "#######################################################"
     echo "### UPDATE BLITZ --> SCRIPTS (code)"
     /home/admin/config.scripts/blitz.github.sh -run
   fi
 
-  if [ "$1" == "" ] || [ "$1" == "api" ]; then
+  if [ "$1" == "all" ] || [ "$1" == "api" ]; then
     echo
     echo "#######################################################"
     echo "### UPDATE BLITZ --> API"
     sudo /home/admin/config.scripts/blitz.web.api.sh update-code
   fi
 
-  if [ "$1" == "" ] || [ "$1" == "web" ]; then
+  if [ "$1" == "all" ] || [ "$1" == "web" ]; then
     echo
     echo "#######################################################"
     echo "### UPDATE BLITZ --> WEBUI"
@@ -189,7 +202,9 @@ function patch() {
 function off() {
   echo "Command to power off your RaspiBlitz"
   confirmMsg off
-  /home/admin/config.scripts/blitz.shutdown.sh
+  if [ $confirm -eq 1 ]; then
+    /home/admin/config.scripts/blitz.shutdown.sh
+  fi
 }
 
 # command: github
@@ -203,27 +218,33 @@ function github() {
 function hdmi() {
   echo "Command to switch video output of your RaspiBlitz to hdmi"
   confirmMsg hdmi
-  echo "# SWITCHING VIDEO OUTPUT TO --> HDMI"
-  sudo /home/admin/config.scripts/blitz.display.sh set-display hdmi
-  restart
+  if [ $confirm -eq 1 ]; then
+    echo "# SWITCHING VIDEO OUTPUT TO --> HDMI"
+    sudo /home/admin/config.scripts/blitz.display.sh set-display hdmi
+    restart
+  fi
 }
 
 # command: lcd
 function lcd() {
   echo "Command to switch video output of your RaspiBlitz to lcd"
   confirmMsg lcd
-  echo "# SWITCHING VIDEO OUTPUT TO --> LCD"
-  sudo /home/admin/config.scripts/blitz.display.sh set-display lcd
-  restart
+  if [ $confirm -eq 1 ]; then
+    echo "# SWITCHING VIDEO OUTPUT TO --> LCD"
+    sudo /home/admin/config.scripts/blitz.display.sh set-display lcd
+    restart
+  fi
 }
 
 # command: headless
 function headless() {
   echo "Command to switch off any video output of your RaspiBlitz (ssh only)"
   confirmMsg headless
-  echo "# SWITCHING VIDEO OUTPUT TO --> HEADLESS"
-  sudo /home/admin/config.scripts/blitz.display.sh set-display headless
-  restart
+  if [ $confirm -eq 1 ]; then
+    echo "# SWITCHING VIDEO OUTPUT TO --> HEADLESS"
+    sudo /home/admin/config.scripts/blitz.display.sh set-display headless
+    restart
+  fi
 }
 
 # command: cache
