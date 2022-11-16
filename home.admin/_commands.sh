@@ -159,8 +159,6 @@ function debug() {
 # command: patch
 # syncs script with latest set github and branch
 function patch() {
-  echo "Command to patch your RaspiBlitz from github"
-  confirmMsg patch
   cd /home/admin
 
   if [ "$1" == "" ] || [ "$1" == "code" ]; then
