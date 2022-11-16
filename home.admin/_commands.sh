@@ -12,7 +12,7 @@ function confirmMsg() {
     read -p "$(echo -e "Execute the blitz command '$1'? (y/n): ")" yn
     case $yn in
         [Yy]* ) confirm=1;break;;
-        [Nn]* ) break;;
+        [Nn]* ) confirm=0;break;;
         * ) echo "Please answer yes or no.";;
     esac
   done
