@@ -9,6 +9,7 @@
 - Update: LNbits 0.9.4 [details](https://github.com/lnbits/lnbits-legend/releases/tag/0.9.2)
 - Update: ItchySats 0.7.0 [details](https://github.com/itchysats/itchysats/releases/tag/0.7.0)
 - Info: Run RaspiBlitz on Proxmox [details](https://github.com/rootzoll/raspiblitz/tree/dev/alternative.platforms/Proxmox)
+- Fixed: SCB/Emergency-Backup to USB drive (now also with cln emergency file)
 
 ## What's new in Version 1.8.0 of RaspiBlitz?
 
