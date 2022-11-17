@@ -15,6 +15,7 @@
 - Update: JoinMarket v0.9.8 [details](https://github.com/JoinMarket-Org/joinmarket-clientserver/releases/tag/v0.9.8)
 - Update: JoininBox v0.7.4 [details](https://github.com/openoms/joininbox/releases/tag/v0.7.3)
 - Update: Electrum Server in Rust (electrs) v0.9.9 [details](https://github.com/romanz/electrs/blob/master/RELEASE-NOTES.md#099-jul-12-2022)
+- Update: Balance of Satoshis 13.6.0 (BOS) [details](https://github.com/alexbosworth/balanceofsatoshis/blob/master/CHANGELOG.md#1360)
 - Info: Run RaspiBlitz on Proxmox [details](https://github.com/rootzoll/raspiblitz/tree/dev/alternative.platforms/Proxmox)
 
 ## What's new in Version 1.8.0c of RaspiBlitz?
