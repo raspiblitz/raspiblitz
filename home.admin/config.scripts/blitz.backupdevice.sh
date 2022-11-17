@@ -37,18 +37,19 @@ if [ "$1" = "status" ]; then
 
     # get info on possible already existing BTRFS RAID1 usb drive
     source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
-    
+
     # get all the devices that are not mounted and possible candidates
     drivecounter=0
     for disk in $(lsblk -o NAME,TYPE | grep "disk" | awk '$1=$1' | cut -d " " -f 1)
     do
       devMounted=$(lsblk -o MOUNTPOINT,NAME | grep "$disk" | grep -c "^/")
-      # is raid candidate when: not mounted & not the data drive candidate (hdd/ssd) & not BTRFS RAID
-      if [ ${devMounted} -eq 0 ] && [ "${disk}" != "${hdd}" ] && [ "${disk}" != "${raidUsbDev}" ]; then
+      # is raid candidate when: not mounted & not the data drive candidate (hdd/ssd) & not BTRFS RAID & not zram
+      if [ "${devMounted}" -eq 0 ] && [ "${disk}" != "${hdd}" ] && \
+         [ "${disk}" != "${raidUsbDev}" ] && ! echo "${disk}" | grep "zram" 1>/dev/null; then
         sizeBytes=$(lsblk -o NAME,SIZE -b | grep "^${disk}" | awk '$1=$1' | cut -d " " -f 2)
         sizeGigaBytes=$(echo "scale=0; ${sizeBytes}/1024/1024/1024" | bc -l)
-        vedorname=$(lsblk -o NAME,VENDOR | grep "^${disk}" | awk '$1=$1' | cut -d " " -f 2)
-        mountoption="${disk} ${sizeGigaBytes} GB ${vedorname}"
+        vendorname=$(lsblk -o NAME,VENDOR | grep "^${disk}" | awk '$1=$1' | cut -d " " -f 2)
+        mountoption="${disk} ${sizeGigaBytes} GB ${vendorname}"
         echo "backupCandidate[${drivecounter}]='${mountoption}'"
         drivecounter=$(($drivecounter +1))
       fi
@@ -60,7 +61,7 @@ if [ "$1" = "status" ]; then
 fi
 
 # check if started with sudo
-if [ "$EUID" -ne 0 ]; then 
+if [ "$EUID" -ne 0 ]; then
   echo "error='missing sudo'"
   exit 1
 fi
@@ -90,7 +91,7 @@ if [ "$1" = "on" ]; then
     if [ ${backupCandidates} -eq 0 ]; then
       dialog --title ' Adding Backup Device ' --msgbox 'Please connect now the backup device\nFor example a thumb drive bigger than 120 MB.\nDont use a second HDD/SSD for that.\nBest on a USB2 port (not the blue ones).\nThen press OK.' 9 50
       clear
-      echo 
+      echo
       echo "detecting device ... (please wait)"
       sleep 3
       source <(sudo /home/admin/config.scripts/blitz.backupdevice.sh status)
@@ -179,8 +180,15 @@ THIS WILL DELETE ALL DATA ON THAT DEVICE!
     echo "error='failed to mount'"
   fi
 
-  # copy SCB over
-  cp /mnt/hdd/lnd/data/chain/${network}/${chain}net/channel.backup /mnt/backup/channel.backup 1>&2
+  if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
+    # copy SCB over
+    cp /mnt/hdd/lnd/data/chain/${network}/${chain}net/channel.backup /mnt/backup/channel.backup 1>&2
+  fi
+  if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ]; then
+    # copy ER over
+    source <(/home/admin/config.scripts/network.aliases.sh getvars cl ${chain}net)
+    cp /home/bitcoin/.lightning/${CLNETWORK}/emergency.recover /mnt/backup/${netprefix}emergency.recover 1>&2
+  fi
 
   if [ ${userinteraction} -eq 1 ]; then
     if [ ${isMounted} -eq 0 ]; then
