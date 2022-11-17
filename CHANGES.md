@@ -2,6 +2,7 @@
 
 ## What's new in Version 1.8.1 of RaspiBlitz?
 
+- New: CL Watchtower (The Eye of Satoshi) [details](https://github.com/talaia-labs/rust-teos/tree/master/watchtower-plugin)
 - New: Support of X708 UPS HAT [details](https://github.com/rootzoll/raspiblitz/pull/3087)
 - Update: LND v0.15.3 [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.15.3-beta
 - Update: Core Lightning v0.12.1 [details](https://github.com/ElementsProject/lightning/releases/tag/v0.12.1)

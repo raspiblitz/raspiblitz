@@ -168,6 +168,7 @@ There are further Services that can be switched on:
 - **CL Spark Wallet** (WalletUI with BOLT12 offers) [details](https://github.com/shesek/spark-wallet#progressive-web-app)
 - **CL plugin: Sparko** (WalletUI & HTTP-RPC bridge) [details](https://github.com/fiatjaf/sparko#the-sparko-plugin)
 - **CL plugin: CLBOSS** (Automated Node Manager) [details](https://github.com/ZmnSCPxj/clboss#clboss-the-c-lightning-node-manager)
+- **CL plugin: The Eye of Satoshi** (Watchtower) [details](https://github.com/talaia-labs/rust-teos/tree/master/watchtower-plugin)
 - **Tallycoin Connect** (Use Tallycoin with your own node) [details](https://github.com/djbooth007/tallycoin_connect)
 - **ItchySats** (Non-custodial peer-to-peer CFD trading) [details](https://github.com/itchysats/itchysats)
 
