@@ -304,7 +304,7 @@ echo -e "\n*** SOFTWARE UPDATE ***"
 # lsb-release -> needed to know which distro version we're running to add APT sources
 general_utils="policykit-1 htop git curl bash-completion vim jq dphys-swapfile bsdmainutils autossh telnet vnstat parted dosfstools btrfs-progs fbi sysbench build-essential dialog bc python3-dialog unzip whois fdisk lsb-release"
 
-python_dependencies="python3-venv python3-dev python3-wheel python3-jinja2 python3-pip"
+python_dependencies="python3-venv python3-dev python3-wheel python3-jinja2 python3-pip python3-mako"
 server_utils="rsync net-tools xxd netcat openssh-client openssh-sftp-server sshpass psmisc ufw sqlite3"
 [ "${baseimage}" = "armbian" ] && armbian_dependencies="armbian-config" # add armbian-config
 apt_install ${general_utils} ${python_dependencies} ${server_utils} ${armbian_dependencies}
