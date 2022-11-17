@@ -126,6 +126,13 @@ if [ ${#runBehindTor} -eq 0 ] || [ "${runBehindTor}" = "off" ]; then
 fi
 OPTIONS+=(p 'Parallel Testnet/Signet' ${parallelTestnets})
 
+
+# Lightning options (only LND and/or CLN)
+if [ "${lndNode}" == "on" ] || [ "${clNode}" == "on" ]; then
+  OPTIONS+=(x 'SCB/Emergency-Backup on Nextcloud' ${NextcloudBackup})
+  OPTIONS+=(e 'SCB/Emergency-Backup USB Drive' ${LocalBackup})
+fi
+
 # LND & options (only when running LND)
 OPTIONS+=(m 'LND LIGHTNING LABS NODE' ${lndNode})
 if [ "${lndNode}" == "on" ]; then
@@ -133,8 +140,6 @@ if [ "${lndNode}" == "on" ]; then
   OPTIONS+=(k '-LND Accept Keysend' ${keysend})
   OPTIONS+=(c '-LND Circuitbreaker (firewall)' ${circuitbreaker})
   OPTIONS+=(u '-LND Auto-Unlock' ${autoUnlock})
-  OPTIONS+=(x '-LND StaticChannelBackup on Nextcloud' ${NextcloudBackup})
-  OPTIONS+=(e '-LND StaticChannelBackup USB Drive' ${LocalBackup})
 fi
 
 # Core Lightning & options/PlugIns
