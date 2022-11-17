@@ -311,6 +311,9 @@ apt_install ${general_utils} ${python_dependencies} ${server_utils} ${armbian_de
 sudo apt clean -y
 sudo apt autoremove -y
 
+echo "wait 314"
+read
+
 echo -e "\n*** Python DEFAULT libs & dependencies ***"
 # make sure /usr/bin/pip exists (and calls pip3 in Debian Buster)
 sudo update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
@@ -320,10 +323,13 @@ sudo update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
 # pytesseract mechanize PySocks urwid Pillow requests
 # 3. Nyx
 # setuptools
-python_libs="grpcio==1.42.0 googleapis-common-protos==1.53.0 toml==0.10.2 j2cli==0.3.10 requests[socks]==2.21.0 protobuf==3.20.1 mako==1.2.3"
+python_libs="grpcio==1.42.0 googleapis-common-protos==1.53.0 toml==0.10.2 j2cli==0.3.10 requests[socks]==2.21.0 protobuf==3.20.1"
 torbox_libs="pytesseract mechanize PySocks urwid Pillow requests setuptools"
 sudo -H python3 -m pip install --upgrade pip
 sudo -H python3 -m pip install ${python_libs} ${torbox_libs}
+
+echo "wait 331"
+read
 
 if [ -f "/usr/bin/python3.9" ]; then
   # use python 3.9 if available
@@ -343,6 +349,9 @@ else
   echo "There is no tested version of python present"
   exit 1
 fi
+
+echo "wait 353"
+read
 
 echo -e "\n*** PREPARE ${baseimage} ***"
 
@@ -584,6 +593,9 @@ sudo -u admin chmod +x /home/admin/config.scripts/*.sh
 sudo -u admin cp -r /home/admin/raspiblitz/home.admin/setup.scripts /home/admin/
 sudo -u admin chmod +x /home/admin/setup.scripts/*.sh
 
+echo "wait 596"
+read
+
 # install newest version of BlitzPy
 blitzpy_wheel=$(ls -tR /home/admin/raspiblitz/home.admin/BlitzPy/dist | grep -E "any.whl" | tail -n 1)
 blitzpy_version=$(echo "${blitzpy_wheel}" | grep -oE "([0-9]\.[0-9]\.[0-9])")
@@ -600,6 +612,9 @@ sudo bash -c "echo 'PATH=\$PATH:/sbin' >> /etc/profile"
 
 # replace boot splash image when raspbian
 [ "${baseimage}" = "raspios_arm64" ] && { echo "* replacing boot splash"; sudo cp /home/admin/raspiblitz/pictures/splash.png /usr/share/plymouth/themes/pix/splash.png; }
+
+echo "wait 616"
+read
 
 echo -e "\n*** RASPIBLITZ EXTRAS ***"
 
