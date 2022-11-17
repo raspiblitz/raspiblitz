@@ -760,7 +760,7 @@ If there is a public IP change on your router LND restarts automatically, and wi
 
 - [When using Auto-Unlock, how much security do I lose?](FAQ.md#when-using-auto-unlock-how-much-security-do-i-lose)
 
-##### LND StaticChannelBackup on Nextcloud
+##### StaticChannel/Emergency-Backup on Nextcloud
 
 See [below on this README](README.md#backup-for-on-chain---channel-funds) for your Backup options when it comes to securing your funds against accidental loss.
 Storing the encrypted Static Channel Backup file to your Nextcloud account is an easy and secure way to do this.
@@ -769,12 +769,12 @@ Nextcloud is an open-source project to host your own files: <https://en.wikipedi
 You can run it yourself or use a hosted Nextcloud server.
 Find free Nextcloud providers here to sign up: <https://nextcloud.com/signup/>
 
-##### StaticChannelBackup on USB Drive
+##### StaticChannel/Emergency-Backup on USB Drive
 
 You can connect a small extra USB drive to your RaspiBlitz (choose a small one up to 32GB, don't use second HDD or SSD here as that would drain too much power from the RaspiBlitz).
 That USB drive will then be used to store your latest StaticChannelBackup, just in case your HDD encounters an error.
 
-##### StaticChannelBackup per SCP/SSH to other server
+##### StaticChannel/Emergency-Backup per SCP/SSH to other server
 
 An option for more advanced users -- that you only can set directly in the `raspiblitz.conf` -- is the automated backup of the StaticChannelBackup to another server by SSH/SCP.
 For this you need to set the value:
