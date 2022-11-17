@@ -185,3 +185,7 @@ To change back to the code:
 ```
 /home/admin/config.scripts/blitz.github.sh master
 ```
+
+### How can I push changes to an existing Pull Request?
+
+See article: https://tech.sycamore.garden/add-commit-push-contributor-branch-git-github .. only works if your a contributer on raspiblitz repo.
