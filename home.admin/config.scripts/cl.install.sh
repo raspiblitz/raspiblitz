@@ -55,6 +55,7 @@ function buildAndInstallCLbinaries()
 {
   echo "- Configuring EXPERIMENTAL_FEATURES enabled"
   echo
+  sudo -u bitcoin pip install mako
   sudo -u bitcoin ./configure --enable-experimental-features
   echo
   echo "- Building Core lightning from source"
