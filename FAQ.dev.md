@@ -185,3 +185,13 @@ To change back to the code:
 ```
 /home/admin/config.scripts/blitz.github.sh master
 ```
+
+### How can I push changes to an existing Pull Request?
+
+See article: https://tech.sycamore.garden/add-commit-push-contributor-branch-git-github .. only works if your a contributer on raspiblitz repo.
+
+### How to cherry-pick with branch protections & CODEOWNERS file?
+
+Chery-picking patch PRs from dev to a release-branch like 'v1.8' (for example) is now a bit more complicated. Either an admin switches temorarly the branch protection "require a pull request before merging" setting off for the `git cherry-pick` OR we create a `p1.8` branch from `v1.8`, cherry-pick the squashed patch PR into that unprotected `p1.8` and then open a PR back to `v1.8`.
+
+But what we gain is that better branch protection and we can add more contributers to the project that are allowed to manage issues - like adding lables or closing.

@@ -182,7 +182,7 @@ patch()
           whiptail --title "ERROR" --msgbox "${error}" 8 30
         fi
       fi
-      patch
+      patch all
       exit 0
       ;;
     BRANCH)
@@ -199,7 +199,7 @@ patch()
           whiptail --title "ERROR" --msgbox "${error}" 8 30
         fi
       fi
-      patch
+      patch all
       exit 0
       ;;
     PR)
@@ -453,7 +453,7 @@ Do you really want to update Bitcoin Core now?
 
 # quick call by parameter
 if [ "$1" == "github" ]; then
-  patch
+  patch all
   exit 0
 fi
 
@@ -537,7 +537,7 @@ case $CHOICE in
     ;;
   PATCH)
     patchNotice
-    patch
+    patch all
     ;;
   LND)
     lnd

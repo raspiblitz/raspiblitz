@@ -760,7 +760,7 @@ If there is a public IP change on your router LND restarts automatically, and wi
 
 - [When using Auto-Unlock, how much security do I lose?](FAQ.md#when-using-auto-unlock-how-much-security-do-i-lose)
 
-##### LND StaticChannelBackup on Nextcloud
+##### StaticChannel/Emergency-Backup on Nextcloud
 
 See [below on this README](README.md#backup-for-on-chain---channel-funds) for your Backup options when it comes to securing your funds against accidental loss.
 Storing the encrypted Static Channel Backup file to your Nextcloud account is an easy and secure way to do this.
@@ -769,12 +769,12 @@ Nextcloud is an open-source project to host your own files: <https://en.wikipedi
 You can run it yourself or use a hosted Nextcloud server.
 Find free Nextcloud providers here to sign up: <https://nextcloud.com/signup/>
 
-##### StaticChannelBackup on USB Drive
+##### StaticChannel/Emergency-Backup on USB Drive
 
 You can connect a small extra USB drive to your RaspiBlitz (choose a small one up to 32GB, don't use second HDD or SSD here as that would drain too much power from the RaspiBlitz).
 That USB drive will then be used to store your latest StaticChannelBackup, just in case your HDD encounters an error.
 
-##### StaticChannelBackup per SCP/SSH to other server
+##### StaticChannel/Emergency-Backup per SCP/SSH to other server
 
 An option for more advanced users -- that you only can set directly in the `raspiblitz.conf` -- is the automated backup of the StaticChannelBackup to another server by SSH/SCP.
 For this you need to set the value:
@@ -1472,7 +1472,7 @@ You have now built your own RaspiBlitz SD card image.
 _Note: If you plan to use your self-build SD card as a MASTER copy and distribute it: Use a smaller 8GB card for that.
 This way it's ensured that it will fit on every 16 GB card recommended for RaspiBlitz later on._
 
-- [Can I run RaspiBlitz on other computers than RaspberryPi?](FAQ.md#can-i-run-raspiblitz-on-other-computers-than-raspberrypi)
+- [Can I run RaspiBlitz on other computers than RaspberryPi?](./alternative.platforms/README.md)
 - [How can I build an SD card from another branch?](FAQ.md#how-can-i-build-an-sd-card-from-another-branch)
 - [How can I build an SD card from my forked GitHub Repo?](FAQ.md#how-can-i-build-an-sd-card-from-my-forked-github-repo)
 
@@ -1483,7 +1483,6 @@ Here is a short selection of the very frequently asked questions:
 - [How do I backup my Lightning Node?](FAQ.md#how-do-i-backup-my-lightning-node)
 - [How can I recover my coins from a failing RaspiBlitz?](FAQ.md#how-can-i-recover-my-coins-from-a-failing-raspiblitz)
 - [Are those "Under-Voltage detected" warnings a problem?](FAQ.md#are-those-under-voltage-detected-warnings-a-problem)
-- [Can I run RaspiBlitz on computer boards other than RaspberryPi?](FAQ.md#can-i-run-raspiblitz-on-other-computers-than-raspberrypi)
 
 Do you still have more questions? Check the [RaspiBlitz-FAQ-Archive](FAQ.md).
 
