@@ -38,7 +38,11 @@ if [ "$1" = "on" ];then
 
   #Cleanup existing
   if [ -d "/home/bitcoin/cl-plugins-available/plugins/${plugin}/" ]; then
-    rm -rf "/home/bitcoin/cl-plugins-available/plugins/${plugin}/"
+    sudo rm -rf "/home/bitcoin/cl-plugins-available/plugins/${plugin}/"
+  fi
+
+  if [ -d "/home/bitcoin/cl-plugins-available/rust-teos/" ]; then
+    sudo rm -rf "/home/bitcoin/cl-plugins-available/rust-teos/"
   fi
 
   #Clone source repository
