@@ -84,9 +84,11 @@ if [ "$1" = off ];then
 
   # purge
   if [ "$(echo "$@" | grep -c purge)" -gt 0 ];then
-    echo "# Delete plugin"
+    echo "# Delete plugin and source code"
     sudo rm -rf /home/bitcoin/cl-plugins-available/rust-teos*
+    sudo rm -rf /home/bitcoin/cl-plugins-available/${plugin}
   fi
+
 
   # setting value in raspi blitz config
   /home/admin/config.scripts/blitz.conf.sh set ${netprefix}clWatchtowerClient "off"
