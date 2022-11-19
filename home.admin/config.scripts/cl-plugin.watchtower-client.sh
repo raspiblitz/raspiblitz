@@ -17,6 +17,7 @@ echo "# cl-plugin.watchtower-client.sh $*"
 source <(/home/admin/config.scripts/network.aliases.sh getvars cl $2)
 source /mnt/hdd/raspiblitz.conf  #to get runBehindTor
 plugin="watchtower-client"
+pkg_dependencies="libssl-dev"
 
 if [ "$1" = info ]; then
     echo "The Eye of Satoshi is a Lightning watchtower compliant with BOLT13, written in Rust."
@@ -44,6 +45,9 @@ if [ "$1" = "on" ];then
   cd /home/bitcoin/cl-plugins-available || exit 1
   sudo -u bitcoin git clone https://github.com/talaia-labs/rust-teos.git
   
+  #Install additional dependencies
+  sudo apt-get install -y ${pkg_dependencies} > /dev/null
+
   #Compile
   cd /home/bitcoin/cl-plugins-available/rust-teos || exit 1
   sudo -u bitcoin /home/bitcoin/.cargo/bin/cargo install --path watchtower-plugin \
