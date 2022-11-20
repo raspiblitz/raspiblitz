@@ -72,7 +72,46 @@ if [ "$1" = "setpassword" ]; then
     echo "will change the password to: mynewpassword"
     exit 1
   fi
-  sudo -u lndg /home/lndg/lndg/.venv/bin/python /home/lndg/lndg/changepassword.py "$2"
+  isChangepassword=$(sudo ls /home/lndg/lndg/changepassword.py 2>/dev/null | grep -c 'changepassword.py')
+  if ! [ ${isChangepassword} -eq 0 ]; then
+    sudo -u lndg /home/lndg/lndg/.venv/bin/python /home/lndg/lndg/changepassword.py "$2"
+  else
+    # create python file for command line password change
+    echo "# create python file for command line password change"
+    echo "
+#!/usr/bin/env python
+
+import django
+import sys
+from os import environ
+from lndg import settings
+from time import sleep
+environ['DJANGO_SETTINGS_MODULE'] = 'lndg.settings'
+django.setup()
+from django.contrib.auth.models import User
+
+def newpassword():
+    users = User.objects.all()
+    user = users[0]
+    user.set_password(sys.argv[1])
+    user.save()
+
+def main():
+    try:
+        newpassword()
+    except Exception as e:
+        print('Error while attempting to change password: ' + str(e))
+        sleep(5)
+
+if __name__ == '__main__':
+    main()
+" | sudo tee "/home/lndg/lndg/changepassword.py"
+
+    sudo chmod 644 /home/lndg/lndg/changepassword.py
+    sudo chown lndg:lndg /home/lndg/lndg/changepassword.py
+	sudo -u lndg /home/lndg/lndg/.venv/bin/python /home/lndg/lndg/changepassword.py "$2"
+  fi
+  echo "ok, password changed to $2"
   exit 0
 fi
 
@@ -126,6 +165,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
         echo "Database already exists, using existing database"
         sudo rm /home/lndg/lndg/data/db.sqlite3
         sudo -u lndg ln -sf /mnt/hdd/app-data/lndg/data/db.sqlite3 /home/lndg/lndg/data/db.sqlite3
+		sudo -u lndg /home/lndg/lndg/.venv/bin/python manage.py migrate
       fi
     else
 	
