@@ -5,7 +5,7 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "config script to install, update or uninstall LNDG"
- echo "bonus.lndg.sh [on|off|menu|update|status]"
+ echo "bonus.lndg.sh [on|off|menu|update|setpassword|status]"
  exit 1
 fi
 
@@ -47,11 +47,9 @@ if [ "$1" = "menu" ]; then
 http://${localip}:${httpPort}\n
 https://${localip}:${httpsPort} with Fingerprint:
 ${fingerprint}\n
-Default username is lndg-admin. Use your Password B to login.\n
-To change username, login using default username and go to:
-http://${localip}:${httpPort}/lndg-admin\n
+Username is lndg-admin. Use your Password B to login.\n
 Hidden Service address for TOR Browser (see LCD for QR):\n${toraddress}
-" 20 67
+" 18 67
     sudo /home/admin/config.scripts/blitz.display.sh hide
   else
     # Info without TOR
@@ -59,13 +57,22 @@ Hidden Service address for TOR Browser (see LCD for QR):\n${toraddress}
 http://${localip}:${httpPort}\n
 Or https://${localip}:${httpsPort} with Fingerprint:
 ${fingerprint}\n
-Default username is lndg-admin. Use your Password B to login.\n
-To change username, login using default username and go to:
-http://${localip}:${httpPort}/lndg-admin\n
+Username is lndg-admin. Use your Password B to login.\n
 Activate TOR to access the web interface from outside your local network.
-" 19 67
+" 17 67
   fi
   echo "please wait ..."
+  exit 0
+fi
+
+if [ "$1" = "setpassword" ]; then
+  if [ "$2" = "" ]; then
+    echo "to change lndg password, enter the new password as the second variable and try again"
+    echo "example: bonus.lndg.sh setpassword mynewpassword"
+    echo "will change the password to: mynewpassword"
+    exit 1
+  fi
+  sudo -u lndg /home/lndg/lndg/.venv/bin/python /home/lndg/lndg/changepassword.py "$2"
   exit 0
 fi
 
@@ -130,6 +137,40 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       sudo chown lndg:lndg -R /mnt/hdd/app-data/lndg/
     fi
     sudo chown lndg:lndg /home/lndg/lndg/data/db.sqlite3
+
+    # create python file for command line password change
+    echo "# create python file for command line password change"
+    echo "
+#!/usr/bin/env python
+
+import django
+import sys
+from os import environ
+from lndg import settings
+from time import sleep
+environ['DJANGO_SETTINGS_MODULE'] = 'lndg.settings'
+django.setup()
+from django.contrib.auth.models import User
+
+def newpassword():
+    users = User.objects.all()
+    user = users[0]
+    user.set_password(sys.argv[1])
+    user.save()
+
+def main():
+    try:
+        newpassword()
+    except Exception as e:
+        print('Error while attempting to change password: ' + str(e))
+        sleep(5)
+
+if __name__ == '__main__':
+    main()
+" | sudo tee "/home/lndg/lndg/changepassword.py"
+
+    sudo chmod 644 /home/lndg/lndg/changepassword.py
+    sudo chown lndg:lndg /home/lndg/lndg/changepassword.py
 
     ##################
     # gunicorn install
