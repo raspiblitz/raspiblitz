@@ -18,6 +18,7 @@ fi
 DEFAULT_GITHUB_USER="fusion44"
 DEFAULT_GITHUB_REPO="blitz_api"
 DEFAULT_GITHUB_BRANCH="main"
+DEFAULT_GITHUB_COMMITORTAG="v0.5.0-beta"
 
 ###################
 # UPDATE CONFIG
@@ -155,6 +156,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     DEFAULT_GITHUB_BRANCH="$4"
   fi
 
+  if [ "$5" != "" ]; then
+    DEFAULT_GITHUB_COMMITORTAG="$5"
+  fi
+
   echo "# INSTALL Web API ..."
   # clean old source
   rm -r /root/blitz_api 2>/dev/null
@@ -196,14 +201,17 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "error='git checkout failed'"
     exit 1
   fi
-
+  if ! git reset --hard ${DEFAULT_GITHUB_COMMITORTAG}; then
+    echo "error='git reset failed'"
+    exit 1
+  fi
   # install
   sudo -u blitzapi python3 -m venv venv
   if ! sudo -u blitzapi ./venv/bin/pip install -r requirements.txt --no-deps; then
     echo "error='pip install failed'"
     exit 1
   fi
-
+  
   # build the config and set unique secret (its OK to be a new secret every install/upadte)
   /home/admin/config.scripts/blitz.web.api.sh update-config
   secret=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 64 ; echo '')
