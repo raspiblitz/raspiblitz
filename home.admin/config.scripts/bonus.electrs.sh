@@ -530,7 +530,7 @@ if [ "$1" = "update" ]; then
     
     # update config
     sed -i "/^server_banner =/d" /home/electrs/.electrs/config.toml
-    sudo bash -c "echo 'server_banner = \"Welcome to electrs $ELECTRSVERSION - the Electrum Rust Server on your RaspiBlitz\"' >> /home/electrs/.electrs/config.toml"
+    sudo bash -c "echo 'server_banner = \"Welcome to electrs $updateVersion - the Electrum Rust Server on your RaspiBlitz\"' >> /home/electrs/.electrs/config.toml"
 
     echo "# Updated Electrs to $updateVersion"
   fi
