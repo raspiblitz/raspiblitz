@@ -276,6 +276,7 @@ if [ "$1" = "update-code" ]; then
   if [ "${apiActive}" != "0" ]; then
     echo "# Update Web API CODE"
     systemctl stop blitzapi
+    sudo chown -R blitzapi:blitzapi /home/blitzapi/blitz_api
     cd /home/blitzapi/blitz_api
     currentBranch=$(sudo -u blitzapi git rev-parse --abbrev-ref HEAD)
     echo "# updating local repo ..."
