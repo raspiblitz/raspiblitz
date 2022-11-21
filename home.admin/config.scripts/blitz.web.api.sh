@@ -190,13 +190,14 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo -u blitzapi ln -s /mnt/hdd/app-data/.lightning /home/blitzapi/
 
   cd /home/blitzapi || exit 1
+  
   # git clone https://github.com/fusion44/blitz_api.git /home/blitzapi/blitz_api
-  if ! git clone https://github.com/${DEFAULT_GITHUB_USER}/${DEFAULT_GITHUB_REPO}.git /home/blitzapi/blitz_api; then
+  if ! sudo -u blitzapi git clone https://github.com/${DEFAULT_GITHUB_USER}/${DEFAULT_GITHUB_REPO}.git blitz_api; then
     echo "error='git clone failed'"
     exit 1
   fi
   cd blitz_api || exit 1
-  if ! git checkout ${DEFAULT_GITHUB_BRANCH}; then
+  if ! sudo -u blitzapi git checkout ${DEFAULT_GITHUB_BRANCH}; then
     echo "error='git checkout failed'"
     exit 1
   fi
@@ -204,11 +205,13 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "error='git reset failed'"
     exit 1
   fi
-  if ! pip install -r requirements.txt --no-deps; then
+  # install
+  sudo -u blitzapi python3 -m venv venv
+  if ! sudo -u blitzapi ./venv/bin/pip install -r requirements.txt --no-deps; then
     echo "error='pip install failed'"
     exit 1
   fi
-
+  
   # build the config and set unique secret (its OK to be a new secret every install/upadte)
   /home/admin/config.scripts/blitz.web.api.sh update-config
   secret=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 64 ; echo '')
@@ -274,14 +277,14 @@ if [ "$1" = "update-code" ]; then
     echo "# Update Web API CODE"
     systemctl stop blitzapi
     cd /home/blitzapi/blitz_api
-    currentBranch=$(git rev-parse --abbrev-ref HEAD)
+    currentBranch=$(sudo -u blitzapi git rev-parse --abbrev-ref HEAD)
     echo "# updating local repo ..."
-    oldCommit=$(git rev-parse HEAD)
-    git fetch
-    git reset --hard origin/${currentBranch}
-    newCommit=$(git rev-parse HEAD)
+    oldCommit=$(sudo -u blitzapi git rev-parse HEAD)
+    sudo -u blitzapi git fetch
+    sudo -u blitzapi git reset --hard origin/${currentBranch}
+    newCommit=$(sudo -u blitzapi git rev-parse HEAD)
     if [ "${oldCommit}" != "${newCommit}" ]; then
-      pip install -r requirements.txt
+      sudo -u blitzapi ./venv/bin/pip install -r requirements.txt
     else
       echo "# no code changes"
     fi
