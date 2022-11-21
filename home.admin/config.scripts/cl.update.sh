@@ -20,7 +20,7 @@ mode="$1"
 
 # RECOMMENDED UPDATE BY RASPIBLITZ TEAM
 # comment will be shown as "BEWARE Info" when option is choosen (can be multiple lines) 
-clUpdateVersion="0.10.2" # example: 0.10.1 .. keep empty if no newer version as sd card build is available
+clUpdateVersion="" # example: 0.12.1 .. keep empty if no newer version as sd card build is available
 clUpdateComment="Please keep in mind that downgrading afterwards is not tested. Also not all additional apps are fully tested with the this update - but it looked good on first tests."
 
 # GATHER DATA
@@ -36,7 +36,7 @@ clUpdateInstalled=$(echo "${clInstalledVersion}" | grep -c "${clUpdateVersion}")
 
 # get latest release from Core Lightning GitHub releases without release candidates
 clLatestVersion=$(curl -s https://api.github.com/repos/ElementsProject/lightning/releases | jq -r '.[].tag_name' | grep -v "rc" | head -n1)
-# example: v0.10.2
+# example: v0.12.1
 
 # INFO
 if [ "${mode}" = "info" ]; then
