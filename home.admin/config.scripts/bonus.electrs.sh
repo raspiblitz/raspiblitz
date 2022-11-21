@@ -527,6 +527,11 @@ if [ "$1" = "update" ]; then
     sudo -u electrs git reset --hard $updateVersion
     echo "# Build Electrs ..."
     sudo -u electrs /home/electrs/.cargo/bin/cargo build --locked --release || exit 1
+    
+    # update config
+    sed -i "/^server_banner =/d" /home/electrs/.electrs/config.toml
+    sudo bash -c "echo 'server_banner = \"Welcome to electrs $ELECTRSVERSION - the Electrum Rust Server on your RaspiBlitz\"' >> /home/electrs/.electrs/config.toml"
+
     echo "# Updated Electrs to $updateVersion"
   fi
   sudo systemctl start electrs
