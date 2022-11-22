@@ -405,7 +405,7 @@ do
   fi
 
   ###############################
-  # SCB Monitoring
+  # SCB Monitoring (LND)
   ###############################
 
   # check every 1min (only when lnd active)
@@ -509,6 +509,9 @@ do
     fi
   fi
 
+  ###################################
+  # Emergency Backup Monitoring (CLN)
+  ###################################
 
   # check every 1min for cln
   recheckER=0
