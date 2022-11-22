@@ -104,7 +104,7 @@ if [ "$1" = "on" ]; then
 
     # check if there is only one candidate
     if [ ${backupCandidates} -gt 1 ]; then
-      dialog --title ' FAIL ' --msgbox 'There is more then one possible backup target connected.\nMake sure that just that one device is connected and try again.' 8 40
+      dialog --title ' FAIL ' --msgbox 'There is more than one possible backup target connected.\nMake sure that just that one device is connected and try again.' 8 40
       clear
       exit 1
     fi
