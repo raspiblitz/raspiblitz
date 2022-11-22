@@ -312,7 +312,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # https://github.com/romanz/electrs/blob/master/doc/usage.md#configuration-files-and-environment-variables
     sudo -u electrs mkdir /home/electrs/.electrs 2>/dev/null
     echo "\
-log_filters = \"TRACE\"
+log_filters = \"INFO\"
 timestamp = true
 jsonrpc_import = true
 index-batch-size = 10
