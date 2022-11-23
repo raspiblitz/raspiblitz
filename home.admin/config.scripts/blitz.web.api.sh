@@ -18,6 +18,7 @@ fi
 DEFAULT_GITHUB_USER="fusion44"
 DEFAULT_GITHUB_REPO="blitz_api"
 DEFAULT_GITHUB_BRANCH="main"
+DEFAULT_GITHUB_COMMITORTAG="v0.5.0-beta"
 
 ###################
 # UPDATE CONFIG
@@ -155,6 +156,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     DEFAULT_GITHUB_BRANCH="$4"
   fi
 
+  if [ "$5" != "" ]; then
+    DEFAULT_GITHUB_COMMITORTAG="$5"
+  fi
+
   echo "# INSTALL Web API ..."
   # clean old source
   rm -r /root/blitz_api 2>/dev/null
@@ -185,21 +190,28 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo -u blitzapi ln -s /mnt/hdd/app-data/.lightning /home/blitzapi/
 
   cd /home/blitzapi || exit 1
+  
   # git clone https://github.com/fusion44/blitz_api.git /home/blitzapi/blitz_api
-  if ! git clone https://github.com/${DEFAULT_GITHUB_USER}/${DEFAULT_GITHUB_REPO}.git /home/blitzapi/blitz_api; then
+  if ! sudo -u blitzapi git clone https://github.com/${DEFAULT_GITHUB_USER}/${DEFAULT_GITHUB_REPO}.git blitz_api; then
     echo "error='git clone failed'"
     exit 1
   fi
   cd blitz_api || exit 1
-  if ! git checkout ${DEFAULT_GITHUB_BRANCH}; then
+  if ! sudo -u blitzapi git checkout ${DEFAULT_GITHUB_BRANCH}; then
     echo "error='git checkout failed'"
     exit 1
   fi
-  if ! pip install -r requirements.txt --no-deps; then
+  if ! git reset --hard ${DEFAULT_GITHUB_COMMITORTAG}; then
+    echo "error='git reset failed'"
+    exit 1
+  fi
+  # install
+  sudo -u blitzapi python3 -m venv venv
+  if ! sudo -u blitzapi ./venv/bin/pip install -r requirements.txt --no-deps; then
     echo "error='pip install failed'"
     exit 1
   fi
-
+  
   # build the config and set unique secret (its OK to be a new secret every install/upadte)
   /home/admin/config.scripts/blitz.web.api.sh update-config
   secret=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 64 ; echo '')
@@ -216,7 +228,7 @@ After=network.target mnt-hdd.mount
 WorkingDirectory=/home/blitzapi/blitz_api
 # before every start update the config with latest credentials/settings
 ExecStartPre=-/home/admin/config.scripts/blitz.web.api.sh update-config
-ExecStart=/usr/bin/python -m uvicorn app.main:app --port 11111 --host=0.0.0.0 --root-path /api
+ExecStart=/home/blitzapi/blitz_api/venv/bin/python -m uvicorn app.main:app --port 11111 --host=0.0.0.0 --root-path /api
 User=blitzapi
 Group=blitzapi
 Type=simple
@@ -264,15 +276,16 @@ if [ "$1" = "update-code" ]; then
   if [ "${apiActive}" != "0" ]; then
     echo "# Update Web API CODE"
     systemctl stop blitzapi
+    sudo chown -R blitzapi:blitzapi /home/blitzapi/blitz_api
     cd /home/blitzapi/blitz_api
-    currentBranch=$(git rev-parse --abbrev-ref HEAD)
+    currentBranch=$(sudo -u blitzapi git rev-parse --abbrev-ref HEAD)
     echo "# updating local repo ..."
-    oldCommit=$(git rev-parse HEAD)
-    git fetch
-    git reset --hard origin/${currentBranch}
-    newCommit=$(git rev-parse HEAD)
+    oldCommit=$(sudo -u blitzapi git rev-parse HEAD)
+    sudo -u blitzapi git fetch
+    sudo -u blitzapi git reset --hard origin/${currentBranch}
+    newCommit=$(sudo -u blitzapi git rev-parse HEAD)
     if [ "${oldCommit}" != "${newCommit}" ]; then
-      pip install -r requirements.txt
+      sudo -u blitzapi ./venv/bin/pip install -r requirements.txt
     else
       echo "# no code changes"
     fi
