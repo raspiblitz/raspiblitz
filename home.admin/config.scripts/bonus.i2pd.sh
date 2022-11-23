@@ -6,7 +6,8 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "I2P Daemon install script"
   echo "More info at https://i2pd.readthedocs.io"
   echo "Usage:"
-  echo "bonus.i2pd.sh on           -> Install i2pd"
+  echo "bonus.i2pd.sh install      -> Install i2pd"
+  echo "bonus.i2pd.sh on           -> Switch on i2pd"
   echo "bonus.i2pd.sh off          -> Uninstall i2pd"
   echo "bonus.i2pd.sh addseednodes -> Add all I2P seed nodes from: https://github.com/bitcoin/bitcoin/blob/master/contrib/seeds/nodes_main.txt"
   echo "bonus.i2pd.sh status       -> I2P related logs from bitcoind, bitcoin-cli -netinfo 4 and webconsole access"
@@ -111,41 +112,55 @@ function bitcoinI2Pstatus {
 echo "# Running: 'bonus.i2pd.sh $*'"
 source /mnt/hdd/raspiblitz.conf
 
+if [ "$1" = "install" ]; then
+
+  if apt list i2pd; then
+    echo "# i2pd is already installed."
+  else
+    echo "# Installing i2pd ..."
+    ARCHITECTURE=$(dpkg --print-architecture)
+    if [ ${ARCHITECTURE} = arm64 ]; then
+      # use the deb repo
+
+      add_repo
+
+      sudo apt-get update
+      sudo apt-get install -y i2pd
+    else
+      # install from github
+      # https://github.com/PurpleI2P/i2pd/releases
+      VERSION=2.43.0
+      DISTRO=$(lsb_release -cs)
+
+      mkdir -p download/i2pd
+      cd download/i2pd || exit 1
+      wget -O i2pd_${VERSION}-1${DISTRO}1_${ARCHITECTURE}.deb https://github.com/PurpleI2P/i2pd/releases/download/${VERSION}/i2pd_${VERSION}-1${DISTRO}1_${ARCHITECTURE}.deb
+
+      # verify
+      wget -O SHA512SUMS https://github.com/PurpleI2P/i2pd/releases/download/${VERSION}/SHA512SUMS
+      wget -O SHA512SUMS.asc https://github.com/PurpleI2P/i2pd/releases/download/${VERSION}/SHA512SUMS.asc
+      curl https://repo.i2pd.xyz/r4sas.gpg | gpg --import
+      gpg --verify SHA512SUMS.asc || (echo "# PGP signature error"; exit 5)
+      sha512sum -c SHA512SUMS --ignore-missing || (echo "# Checksum error"; exit 6)
+
+      # install
+      sudo dpkg -i --force-confnew i2pd_${VERSION}-1${DISTRO}1_${ARCHITECTURE}.deb
+    fi
+  fi
+  exit 0
+fi
+
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
+
+  if apt list i2pd; then
+    echo "# i2pd is installed."
+  else
+    /home/admin/config.scripts/bonus.i2pd.sh install
+  fi
 
   if systemctl is-active --quiet i2pd.service; then
     echo "# i2pd.service is already installed."
-    exit 1
-  fi
-
-  echo "# Installing i2pd ..."
-  ARCHITECTURE=$(dpkg --print-architecture)
-  if [ ${ARCHITECTURE} = arm64 ]; then
-    # use the deb repo
-
-    add_repo
-
-    sudo apt-get update
-    sudo apt-get install -y i2pd
-  else
-    # install from github
-    # https://github.com/PurpleI2P/i2pd/releases
-    VERSION=2.43.0
-    DISTRO=$(lsb_release -cs)
-
-    mkdir -p download/i2pd
-    cd download/i2pd
-    wget -O i2pd_${VERSION}-1${DISTRO}1_${ARCHITECTURE}.deb https://github.com/PurpleI2P/i2pd/releases/download/${VERSION}/i2pd_${VERSION}-1${DISTRO}1_${ARCHITECTURE}.deb
-
-    # verify
-    wget -O SHA512SUMS https://github.com/PurpleI2P/i2pd/releases/download/${VERSION}/SHA512SUMS
-    wget -O SHA512SUMS.asc https://github.com/PurpleI2P/i2pd/releases/download/${VERSION}/SHA512SUMS.asc
-    curl https://repo.i2pd.xyz/r4sas.gpg | gpg --import
-    gpg --verify SHA512SUMS.asc || (echo "# PGP signature error"; exit 5)
-    sha512sum -c SHA512SUMS --ignore-missing || (echo "# Checksum error"; exit 6)
-
-    # install
-    sudo dpkg -i --force-confnew i2pd_${VERSION}-1${DISTRO}1_${ARCHITECTURE}.deb
+    exit 0
   fi
 
   sudo systemctl enable i2pd

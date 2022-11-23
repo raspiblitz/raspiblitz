@@ -134,6 +134,10 @@ do
 done
 echo "OK ${network} startup successful " >> ${logFile}
 
+# I2P
+echo "Start i2pd" >> ${logFile}
+/home/admin/_cache.sh set message "i2pd setup"
+/home/admin/config.scripts/bonus.i2pd.sh on >> ${logFile}
 
 ###################################
 # Prepare Lightning

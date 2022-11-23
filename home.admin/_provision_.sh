@@ -211,6 +211,11 @@ else
   echo "Provisioning Bitcoin Core interims update - keep default" >> ${logFile}
 fi
 
+# I2P
+echo "Start i2pd" >> ${logFile}
+/home/admin/_cache.sh set message "i2pd setup"
+/home/admin/config.scripts/bonus.i2pd.sh on >> ${logFile}
+
 # LND INTERIMS UPDATE
 if [ ${#lndInterimsUpdate} -gt 0 ]; then
   /home/admin/_cache.sh set message "Provisioning LND update"

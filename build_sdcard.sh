@@ -756,7 +756,7 @@ echo
 # I2P #
 #######
 echo
-/home/admin/config.scripts/bonus.i2pd.sh on || exit 1
+/home/admin/config.scripts/bonus.i2pd.sh install || exit 1
 
 # *** BLITZ WEB SERVICE ***
 echo "Provisioning BLITZ WEB SERVICE"
