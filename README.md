@@ -776,7 +776,7 @@ That USB drive will then be used to store your latest StaticChannelBackup, just 
 
 ##### StaticChannel/Emergency-Backup per SCP/SSH to other server
 
-See [SCP Backup Target](https://github.com/rootzoll/raspiblitz/blob/baa2ca485d11f84cbfd90778813b8ec07f38e84d/README.md#b-scp-backup-target) for details on how to setup static channel backups using SCP.
+See [SCP Backup Target](README.md#b-scp-backup-target) for details on how to setup static channel backups using SCP.
 
 ##### CORE LIGHTNING NODE
 
