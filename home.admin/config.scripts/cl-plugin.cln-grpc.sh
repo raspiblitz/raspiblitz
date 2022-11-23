@@ -32,7 +32,7 @@ function buildGRPCplugin() {
   if [ ! -f /home/bitcoin/cl-plugins-available/cln-grpc/debug/cln-grpc ]; then
     # check if the source code is present
     if [ ! -d /home/bitcoin/lightning/plugins/grpc-plugin ];then
-      echo "* Adding Core Lightning ..."
+      echo "# - install Core Lightning ..."
       /home/admin/config.scripts/cl.install.sh install || exit 1
     fi
     # rust for cln-grpc, includes rustfmt
