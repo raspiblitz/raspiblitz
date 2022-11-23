@@ -52,9 +52,8 @@ function switchOn() {
     buildGRPCplugin
 
     # symlink to plugin directory
+    echo "# symlink cln-grpc to /home/bitcoin/${netprefix}cl-plugins-enabled/"
     sudo ln -s /home/bitcoin/cl-plugins-available/cln-grpc/debug/cln-grpc /home/bitcoin/${netprefix}cl-plugins-enabled/
-    echo "# cln-grpc moved to /home/bitcoin/${netprefix}cl-plugins-enabled/"
-
     # blitz.conf.sh set [key] [value] [?conffile] <noquotes>
     /home/admin/config.scripts/blitz.conf.sh set "grpc-port" "${PORT}" "${CLCONF}" "noquotes"
     /home/admin/config.scripts/blitz.conf.sh set "${netprefix}clnGRPCport" "${PORT}"
