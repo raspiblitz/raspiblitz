@@ -448,7 +448,7 @@ if [ "$1" = "update" ]; then
   
   # reinitialize settings.py in case update requires it
   sudo rm /home/lndg/lndg/lndg/settings.py 
-  sudo /home/lndg/lndg/.venv/bin/python initialize.py -wn
+  sudo /home/lndg/lndg/.venv/bin/python /home/lndg/lndg/initialize.py -wn
   
   # restart services
   sudo systemctl restart nginx
