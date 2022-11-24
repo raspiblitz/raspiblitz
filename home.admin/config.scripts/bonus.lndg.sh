@@ -445,6 +445,12 @@ if [ "$1" = "update" ]; then
   sudo -u lndg git pull
   sudo -u lndg .venv/bin/pip install requests
   sudo -u lndg .venv/bin/python manage.py migrate
+  
+  # reinitialize settings.py in case update requires it
+  sudo rm /home/lndg/lndg/lndg/settings.py 
+  sudo /home/lndg/lndg/.venv/bin/python initialize.py -wn
+  
+  # restart services
   sudo systemctl restart nginx
   sudo systemctl restart gunicorn.service
 
