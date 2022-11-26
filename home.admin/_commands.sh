@@ -83,6 +83,7 @@ function blitzhelp() {
   echo "  ckbunker     CKbunker"
   echo
   echo "Extras:"
+  echo "  lndmanage    use the lndmanage bonus app"
   echo "  whitepaper   download the whitepaper from the blockchain to /home/admin/bitcoin.pdf"
   echo "  notifyme     wrapper for blitz.notify.sh that will send a notification using the configured method and settings"
 }
@@ -361,6 +362,21 @@ function jm() {
   else
     echo "JoinMarket is not installed - to install run:"
     echo "sudo /home/admin/config.scripts/bonus.joinmarket.sh on"
+  fi
+}
+
+# command: lndmanage
+# switch to lndmanage env
+function lndmanage() {
+  if [ $(cat /mnt/hdd/raspiblitz.conf 2>/dev/null | grep -c "lndmanage=on") -eq 1 ]; then
+    cd /home/admin/lndmanage
+    source venv/bin/activate
+    echo "NOTICE: Needs at least one active channel to run without error."
+    echo "to exit (venv) enter ---> deactivate"
+    lndmanage
+  else
+    echo "lndmanage not installed - to install run:"
+    echo "sudo /home/admin/config.scripts/bonus.lndmanage.sh on"
   fi
 }
 
