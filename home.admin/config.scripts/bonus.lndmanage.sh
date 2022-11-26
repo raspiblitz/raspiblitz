@@ -20,7 +20,7 @@ if [ "$1" = "menu" ]; then
   dialog --title " Info lndmanage " --msgbox "\n\
 Usage: https://github.com/bitromortac/lndmanage/blob/master/README.md or
 lndmanage --help.\n
-To start type: 'lndmanage' in the command line.
+To start type: 'manage' in the command line.
 " 9 75
   exit 0
 fi

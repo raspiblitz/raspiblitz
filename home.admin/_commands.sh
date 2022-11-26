@@ -83,7 +83,7 @@ function blitzhelp() {
   echo "  ckbunker     CKbunker"
   echo
   echo "Extras:"
-  echo "  lndmanage    use the lndmanage bonus app"
+  echo "  manage       use the lndmanage bonus app"
   echo "  whitepaper   download the whitepaper from the blockchain to /home/admin/bitcoin.pdf"
   echo "  notifyme     wrapper for blitz.notify.sh that will send a notification using the configured method and settings"
 }
@@ -365,9 +365,9 @@ function jm() {
   fi
 }
 
-# command: lndmanage
+# command: manage
 # switch to lndmanage env
-function lndmanage() {
+function manage() {
   if [ $(cat /mnt/hdd/raspiblitz.conf 2>/dev/null | grep -c "lndmanage=on") -eq 1 ]; then
     cd /home/admin/lndmanage
     source venv/bin/activate
