@@ -69,7 +69,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "# installing ..."
   python3 -m venv venv
   source /home/admin/lndmanage/venv/bin/activate
-  python3 -m pip install lndmanage-0.11.0-py3-none-any.whl
+  python3 -m pip install lndmanage-${lndmanageVersion}-py3-none-any.whl
 
   # get build dependencies
   # python3 -m pip install --upgrade pip wheel setuptools
