@@ -64,5 +64,6 @@ sudo systemctl start gdm
     * `disk_size` - the size op the raw image. The .qcow2 file is compressed.
     * `template`  - image filename
     * `output_directory` - directory under builds where the image will be placed
-
-* There is a `vagrant` user set up for the build which will need to be deleted
+    * the `pi` user is given passwordless sudo access and used for the image setup
+* VNC
+    * can follow the setup locally in VNC with the port stated in the first part of the logs
