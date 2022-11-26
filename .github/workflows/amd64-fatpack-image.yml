@@ -1,0 +1,57 @@
+name: amd64-fatpack-image-build
+
+on:
+  push:
+    branches: [ "add-amd64-image-build" ]
+    paths:
+      - 'build_sdcard.sh'
+      - 'home.admin/**'
+  pull_request:
+    branches: [ "add-amd64-image-build" ]
+    paths:
+      - 'build_sdcard.sh'
+      - 'home.admin/**'
+  workflow_dispatch:
+
+jobs:
+  amd64-image-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set values
+        run: |
+          echo "BUILD_DATE=$(date +"%Y-%m-%d")" >> $GITHUB_ENV
+          echo "BUILD_VERSION=$(git describe --always --tags)" >> $GITHUB_ENV
+
+      - name: Hello RaspiBlitz
+        run: echo "Building the debian-11.5-amd64-image-${{ env.BUILD_DATE }}-${{ env.BUILD_VERSION }} at "
+
+      - name: Run the build script
+        run: |
+          cd ci
+          bash packer.build.amd64-fatpack.sh
+
+      - name: Compute checksum of the raw image
+        run: |
+          cd builds/packer-debian-11.5-amd64-fatpack-qemu//
+          sha256sum debian-11.5-amd64-fatpack.qcow2 > debian-11.5-amd64-fatpack.qcow2.sha256
+
+      - name: Compress image
+        run: |
+          cd builds/packer-debian-11.5-amd64-fatpack-qemu//
+          gzip -v9 debian-11.5-amd64-fatpack.qcow2
+
+      - name: Compute checksum of the compressed image
+        run: |
+          cd builds/packer-debian-11.5-amd64-fatpack-qemu//
+          sha256sum debian-11.5-amd64-fatpack.qcow2.gz > debian-11.5-amd64-fatpack.qcow2.gz.sha256
+
+      - name: Upload the image and checksums
+        uses: actions/upload-artifact@v3
+        with:
+          name: raspiblitz-amd64-image-${{ env.BUILD_DATE }}-${{ env.BUILD_VERSION }}
+          path: |
+            ${{ github.workspace }}/builds/packer-debian-11.5-amd64-fatpack-qemu//debian-11.5-amd64-fatpack.qcow2.sha256
+            ${{ github.workspace }}/builds/packer-debian-11.5-amd64-fatpack-qemu//debian-11.5-amd64-fatpack.qcow2.gz
+            ${{ github.workspace }}/builds/packer-debian-11.5-amd64-fatpack-qemu//debian-11.5-amd64-fatpack.qcow2.gz.sha256
