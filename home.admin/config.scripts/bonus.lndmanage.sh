@@ -9,7 +9,7 @@ fi
 
 # set version of LND manage to install
 # https://github.com/bitromortac/lndmanage/releases
-lndmanageVersion="0.11.0"
+lndmanageVersion="0.14.2"
 pgpKeyDownload="https://github.com/bitromortac.gpg"
 gpgFingerprint="0453B9F5071261A40FDB34181965063FC13BEBE2"
 
