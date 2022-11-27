@@ -57,7 +57,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo bash -c "echo 'PATH=$PATH:/home/bos/.npm-global/bin' >> /home/bos/.bashrc"
   
   # download source code
-  sudo -u bos git clone https://github.com/alexbosworth/balanceofsatoshis.git /home/bos/balanceofsatoshis
+  sudo -u bos git clone https://github.com/alexbosworth/balanceofsatoshis.git --single-branch /home/bos/balanceofsatoshis
   cd /home/bos/balanceofsatoshis
   
   # make sure symlink to central app-data directory exists ***"

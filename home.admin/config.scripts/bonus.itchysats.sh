@@ -123,7 +123,7 @@ buildFromSource() {
     # verify the author. If you app provides its source/binaries in another way, may check
     # other install scripts to see how that implement code download & verify.
     echo "# download from source code & verify"
-    sudo -u ${APPID} git clone ${GITHUB_REPO} /home/${APPID}/${APPID}
+    sudo -u ${APPID} git clone ${GITHUB_REPO} --single-branch /home/${APPID}/${APPID}
     cd /home/${APPID}/${APPID} || exit 1
 
     sudo -u ${APPID} git reset --hard "$VERSION"
@@ -138,6 +138,8 @@ buildFromSource() {
     echo "# compile/install the app. This will take a long time"
     sudo -u ${APPID} /home/${APPID}/.cargo/bin/cargo install --path taker --locked --target-dir /home/${APPID}/bin/
     exitCode=$?
+    sudo rm -R /home/${APPID}/.cargo
+    sudo rm -R /home/${APPID}/.rustup
     if ! [ ${exitCode} -eq 0 ]; then
         echo "# FAIL - cargo install did not run correctly - deleting code & exit"
         sudo rm -r /home/${APPID}/${APPID}
