@@ -339,6 +339,12 @@ elif [ "$1" = "unlock" ]; then
       echo "# Backup is out of date, reinitiliazng and saving a copy in /home/bitcoin/ (on the SDcard / OS disk)"
       /home/admin/config.scripts/cl-plugin.backup.sh on
 
+    # check if database upgrade is needed
+    elif [ $(echo "${clError}" | \
+     grep -c 'use --database-upgrade=true to override') -gt 0 ];then
+      /home/admin/config.scripts/blitz.conf.sh set database-upgrade true $CLCONF noquotes
+      sudo systemctl restart ${netprefix}lightningd
+
     # fail
     elif [ $attempt -eq 12 ];then
       echo "# Failed to unlock the ${netprefix}lightningd wallet - giving up after 1 minute"
