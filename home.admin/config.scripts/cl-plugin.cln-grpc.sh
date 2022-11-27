@@ -42,6 +42,11 @@ function buildGRPCplugin() {
     # build
     sudo -u bitcoin /home/bitcoin/.cargo/bin/cargo build \
      --target-dir /home/bitcoin/cl-plugins-available/cln-grpc
+
+  # clean up
+  sudo rm -R /home/bitcoin/.cargo
+  sudo rm -R /home/bitcoin/.rustup
+
   else
     echo "# - cln-grpc plugin was already built/installed"
   fi

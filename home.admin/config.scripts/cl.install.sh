@@ -141,7 +141,7 @@ if [ "$1" = "install" ]; then
   echo
   echo "- Cloning https://github.com/ElementsProject/lightning.git"
   echo
-  sudo -u bitcoin git clone https://github.com/ElementsProject/lightning.git
+  sudo -u bitcoin git clone https://github.com/ElementsProject/lightning.git --single-branch
   cd lightning || exit 1
   echo
   echo "- Reset to version $CLVERSION"
