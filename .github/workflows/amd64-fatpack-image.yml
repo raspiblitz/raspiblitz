@@ -6,11 +6,13 @@ on:
     paths:
       - 'build_sdcard.sh'
       - 'home.admin/**'
+      - 'ci/**'
   pull_request:
     branches: [ "add-amd64-image-build" ]
     paths:
       - 'build_sdcard.sh'
       - 'home.admin/**'
+      - 'ci/**'
   workflow_dispatch:
 
 jobs:
