@@ -127,7 +127,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     # install mempool
     cd /home/mempool
-    sudo -u mempool git clone https://github.com/mempool/mempool.git
+    sudo -u mempool git clone https://github.com/mempool/mempool.git --single-branch
     cd mempool
     sudo -u mempool git reset --hard $pinnedVersion
     sudo -u mempool /home/admin/config.scripts/blitz.git-verify.sh \

@@ -195,7 +195,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # verify the author. If you app provides its source/binaries in another way, may check
   # other install scripts to see how that implement code download & verify.
   echo "# download the source code & verify"
-  sudo -u ${APPID} git clone ${GITHUB_REPO} /home/${APPID}/${APPID}
+  sudo -u ${APPID} git clone ${GITHUB_REPO} --single-branch /home/${APPID}/${APPID}
   cd /home/${APPID}/${APPID}
   sudo -u ${APPID} git reset --hard $GITHUB_VERSION
   if [ "${GITHUB_SIGN_AUTHOR}" != "" ]; then

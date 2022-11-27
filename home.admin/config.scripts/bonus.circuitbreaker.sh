@@ -68,7 +68,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     # install from source
     cd /home/circuitbreaker
-    sudo -u circuitbreaker git clone https://github.com/lightningequipment/circuitbreaker.git
+    sudo -u circuitbreaker git clone https://github.com/lightningequipment/circuitbreaker.git --single-branch
     cd circuitbreaker
     sudo -u circuitbreaker git reset --hard $pinnedVersion
     sudo -u circuitbreaker /usr/local/go/bin/go install ./... || exit 1

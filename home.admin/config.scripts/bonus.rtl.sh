@@ -161,7 +161,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # download source code and set to tag release
     echo "# Get the RTL Source Code"
     sudo -u rtl rm -rf /home/rtl/RTL 2>/dev/null
-    sudo -u rtl git clone https://github.com/ShahanaFarooqui/RTL.git /home/rtl/RTL
+    sudo -u rtl git clone https://github.com/ShahanaFarooqui/RTL.git /home/rtl/RTL --single-branch
     cd /home/rtl/RTL
     # check https://github.com/Ride-The-Lightning/RTL/releases/
     sudo -u rtl git reset --hard $RTLVERSION
