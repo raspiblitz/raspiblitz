@@ -6,7 +6,7 @@ echo 'Build RaspiBlitz ...'
 sudo bash build_sdcard.sh -f true -u rootzoll -b dev -d headless -t false -w off -i false
 echo 'Add Gnome desktop'
 export DEBIAN_FRONTEND=noninteractive
-sudo apt install gnome -y
+sudo apt install gnome --force-yes
 echo 'Deleting SSH pub keys (will be recreated on the first boot) ...'
 sudo rm /etc/ssh/ssh_host_*
 echo 'OK'
