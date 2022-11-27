@@ -3,9 +3,9 @@
 # Based on: https://gist.github.com/normandmickey/3f10fc077d15345fb469034e3697d0d0
 
 # https://github.com/dgarage/NBXplorer/tags
-NBXplorerVersion="v2.3.28"
+NBXplorerVersion="v2.3.49"
 # https://github.com/btcpayserver/btcpayserver/releases
-BTCPayVersion="v1.6.1"
+BTCPayVersion="v1.7.0"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -20,32 +20,41 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
 fi
 
 source /mnt/hdd/raspiblitz.conf
-# get cpu architecture
+# get cpu architecture (checked with 'uname -m')
 source /home/admin/raspiblitz.info
 source <(/home/admin/_cache.sh get state)
 
 function postgresConfig() {
   # https://github.com/rootzoll/raspiblitz/issues/3218
   echo "# Install postgres"
-  sudo apt install -y postgresql
-
-  echo "# Move the postgres data to /mnt/hdd/app-data/postgresql"
+  if sudo apt install -y postgresql-13; then
+    PGVERSION=13
+  elif sudo apt install -y postgresql-12; then
+    PGVERSION=12
+  fi
   # sudo -u postgres psql -c "show data_directory"
   #  /var/lib/postgresql/13/main
-  if [ ! -d /var/lib/postgresql ]; then
-    sudo  mkdir -p /var/lib/postgresql/13/main
+  if [ ! -d /var/lib/postgresql/${PGVERSION}/main ]; then
+    sudo  mkdir -p /var/lib/postgresql/${PGVERSION}/main
     sudo chown -R postgres:postgres /var/lib/postgresql
-    # sudo pg_dropcluster 13 main
-    sudo pg_createcluster 13 main --start
+    sudo systemctl start postgresql@${PGVERSION}-main
   fi
-  sudo systemctl stop postgresql 2>/dev/null
-  sudo rsync -av /var/lib/postgresql /mnt/hdd/app-data
-  sudo mv /var/lib/postgresql /var/lib/postgresql.bak
-  sudo rm -rf /var/lib/postgresql # not a symlink.. delete it silently
-  sudo ln -s /mnt/hdd/app-data/postgresql /var/lib/
-
-  sudo systemctl enable postgresql
-  sudo systemctl start postgresql
+  if [ ! -L /var/lib/postgresql ]; then
+  echo "# Move the postgres data to /mnt/hdd/app-data/postgresql"
+    # stop the postgresql servers
+    sudo su - postgres -c "/usr/lib/postgresql/${PGVERSION}/bin/pg_ctl stop --wait --pgdata=/var/lib/postgresql/${PGVERSION}/main"
+    sudo systemctl stop postgresql@${PGVERSION}-main
+    sudo rsync -av /var/lib/postgresql /mnt/hdd/app-data
+    sudo mv /var/lib/postgresql /var/lib/postgresql.bak
+    sudo rm -rf /var/lib/postgresql # not a symlink.. delete it silently
+    sudo ln -s /mnt/hdd/app-data/postgresql /var/lib/
+    sudo chown -R postgres:postgres /mnt/hdd/app-data/postgresql
+    sudo chmod -R 0700 /mnt/hdd/app-data/postgresql
+    # start
+    sudo systemctl start postgresql@${PGVERSION}-main
+  fi
+  echo "# Check clusters with: pg_lsclusters"
+  pg_lsclusters
 
   echo "# Generate the database"
   sudo -u postgres psql -c "create database nbxplorermainnet;"
@@ -55,6 +64,14 @@ function postgresConfig() {
   # sudo -u btcpay sed -i "s/Password=*/Password='${newPassword}';/g" /home/btcpay/.nbxplorer/Main/settings.config
   # sudo -u btcpay sed -i "s/Password=*/Password='${newPassword}';/g" /home/btcpay/.btcpayserver/Main/settings.config
   sudo -u postgres psql -c "grant all privileges on database nbxplorermainnet to nbxplorer;"
+  echo "# List databases with: sudo -u postgres psql -c '\l'"
+  sudo -u postgres psql -c '\l'
+
+  ## clean postgresql:
+  # sudo su - postgres -c "/usr/lib/postgresql/${PGVERSION}/bin/pg_ctl stop --wait --pgdata=/var/lib/postgresql/${PGVERSION}/main"
+  # sudo pg_dropcluster ${PGVERSION} main
+  # sudo apt remove postgresql -y --purge
+  # sudo apt remove  postgresql-${PGVERSION} -y --purge
 }
 
 function NBXplorerConfig() {
@@ -71,9 +88,8 @@ btc.rpc.password=${PASSWORD_B}
 postgres=User ID=nbxplorer;Host=localhost;Port=5432;Application Name=nbxplorer;MaxPoolSize=20;Database=nbxplorermainnet;Password='raspiblitz';
 automigrate=1
 nomigrateevts=1
-" | sudo tee /home/btcpay/.nbxplorer/Main/settings.config
+" | sudo -u btcpay tee /home/btcpay/.nbxplorer/Main/settings.config
   sudo chmod 600 /home/btcpay/.nbxplorer/Main/settings.config
-  sudo chown btcpay:btcpay /home/btcpay/.nbxplorer/Main/settings.config
 }
 
 function BtcPayConfig() {
@@ -373,6 +389,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # dependencies
     sudo apt-get -y install libunwind8 gettext libssl1.0
 
+    cpu=$(uname -m)
     if [ "${cpu}" = "aarch64" ]; then
       binaryVersion="arm64"
       dotNetdirectLink="https://download.visualstudio.microsoft.com/download/pr/d43345e2-f0d7-4866-b56e-419071f30ebe/68debcece0276e9b25a65ec5798cf07b/dotnet-sdk-6.0.101-linux-arm64.tar.gz"
@@ -441,10 +458,12 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "# Build NBXplorer ..."
     # from the build.sh with path
     sudo -u btcpay /home/btcpay/dotnet/dotnet build -c Release NBXplorer/NBXplorer.csproj
-    # see the configuration options with:
-    # sudo -u btcpay /home/btcpay/dotnet/dotnet run --no-launch-profile --no-build -c Release -p "NBXplorer/NBXplorer.csproj" -c /home/btcpay/.nbxplorer/Main/settings.config -h
-    # run manually to debug:
-    # sudo -u btcpay /home/btcpay/dotnet/dotnet run --no-launch-profile --no-build -c Release -p "NBXplorer/NBXplorer.csproj" -c /home/btcpay/.nbxplorer/Main/settings.config --network=mainnet -- $@
+    ## see the configuration options with:
+    # sudo -u btcpay /home/btcpay/dotnet/dotnet run --no-launch-profile --no-build -c Release --project "NBXplorer/NBXplorer.csproj" -c /home/btcpay/.nbxplorer/Main/settings.config -h
+    ##sudo systenmct run manually to debug:
+    # sudo su - btcpay
+    # cd NBXplorer
+    # /home/btcpay/dotnet/dotnet run --no-launch-profile --no-build -c Release --project "NBXplorer/NBXplorer.csproj" -- $@
     echo "# create the nbxplorer.service"
     echo "
 [Unit]
@@ -521,16 +540,16 @@ WantedBy=multi-user.target
     cd btcpayserver || exit 1
     sudo -u btcpay git reset --hard $BTCPayVersion
 
-    # sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh \
-    #  "web-flow" "https://github.com/web-flow.gpg" "4AEE18F83AFDEB23" || exit 1
-    PGPsigner="nicolasdorier"
-    PGPpubkeyLink="https://keybase.io/nicolasdorier/pgp_keys.asc"
-    PGPpubkeyFingerprint="AB4CFA9895ACA0DBE27F6B346618763EF09186FE"
+    sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh \
+     "web-flow" "https://github.com/web-flow.gpg" "4AEE18F83AFDEB23" || exit 1
+    #PGPsigner="nicolasdorier"
+    #PGPpubkeyLink="https://keybase.io/nicolasdorier/pgp_keys.asc"
+    #PGPpubkeyFingerprint="AB4CFA9895ACA0DBE27F6B346618763EF09186FE"
     #PGPsigner="Kukks"
     #PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
     #PGPpubkeyFingerprint="8E5530D9D1C93097"
-    sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh \
-     "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
+    #sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh \
+    # "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
 
     echo "# Build BTCPayServer ..."
     # from the build.sh with path
@@ -539,7 +558,7 @@ WantedBy=multi-user.target
     # see the configuration options with:
     # sudo -u btcpay /home/btcpay/dotnet/dotnet run --no-launch-profile --no-build -c Release -p "/home/btcpay/btcpayserver/BTCPayServer/BTCPayServer.csproj" -- -h
     # run manually to debug:
-    # sudo -u btcpay /home/btcpay/dotnet/dotnet run --no-launch-profile --no-build -c Release -p "/home/btcpay/btcpayserver/BTCPayServer/BTCPayServer.csproj" -- --sqlitefile=sqllite.db --network=mainnet
+    # sudo -u btcpay /home/btcpay/dotnet/dotnet run --no-launch-profile --no-build -c Release --project "/home/btcpay/btcpayserver/BTCPayServer/BTCPayServer.csproj" -- --sqlitefile=sqllite.db
     echo "# create the btcpayserver.service"
     echo "
 [Unit]
@@ -586,10 +605,10 @@ WantedBy=multi-user.target
     fi
 
     sudo -u btcpay mkdir -p /home/btcpay/.btcpayserver/Main/
-    if [ ${lnd} = on ]; then
+    if [ "${lnd}" = on ]; then
       /home/admin/config.scripts/bonus.btcpayserver.sh write-tls-macaroon
     fi
-    if [ ${cl} = on ]; then
+    if [ "${cl}" = on ]; then
       /home/admin/config.scripts/bonus.btcpayserver.sh cln-lightning-rpc-access
     fi
   else
