@@ -3,6 +3,7 @@
 ## What's new in Version 1.9.0 of RaspiBlitz?
 
 - New: Support of X708 UPS HAT [details](https://github.com/rootzoll/raspiblitz/pull/3087)
+- Update: Bitcoin Core v24.0 [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-24.0.md)
 - Update: LND v0.15.4 [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.15.4-beta
 - Update: Core Lightning v0.12.1 [details](https://github.com/ElementsProject/lightning/releases/tag/v0.12.1)
 - Update: Electrum Server in Rust (electrs) v0.9.10 [details](https://github.com/romanz/electrs/blob/master/RELEASE-NOTES.md#0910-nov-3-2022)
