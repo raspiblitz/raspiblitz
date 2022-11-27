@@ -59,19 +59,16 @@ if [ "$1" = getvars ];then
   # zmqprefix is:     28 | 21 | 23
   if [ "${chain}" == "main" ];then
     netprefix=""
-    L1rpcportmod=""
     L2rpcportmod=0
     portprefix=""
     zmqprefix=28
   elif [ "${chain}" == "test" ];then
     netprefix="t"
-    L1rpcportmod=1
     L2rpcportmod=1
     portprefix=1
     zmqprefix=21
   elif [ "${chain}" == "sig" ];then
     netprefix="s"
-    L1rpcportmod=3
     L2rpcportmod=3
     portprefix=3
     zmqprefix=23
@@ -114,7 +111,7 @@ if [ "$1" = getvars ];then
   # sudo -u bitcoin /usr/local/bin/lncli --chain=${network} --network=${chain}net
   echo "lncli_alias=\"sudo -u bitcoin /usr/local/bin/lncli -n=${chain}net --rpcserver localhost:1${L2rpcportmod}009\""
   # sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network}
-  echo "bitcoincli_alias=\"/usr/local/bin/${network}-cli -datadir=/home/bitcoin/.${network} -rpcport=${L1rpcportmod}8332\""
+  echo "bitcoincli_alias=\"/usr/local/bin/${network}-cli -datadir=/home/bitcoin/.${network} -rpcport=${portprefix}8332\""
 
 fi
 
