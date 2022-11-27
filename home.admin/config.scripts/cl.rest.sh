@@ -140,7 +140,7 @@ if [ "$1" = on ]; then
 
   if [ ! -f /home/bitcoin/c-lightning-REST/cl-rest.js ];then
     cd /home/bitcoin || exit 1
-    sudo -u bitcoin git clone https://github.com/saubyk/c-lightning-REST --single-branch
+    sudo -u bitcoin git clone https://github.com/saubyk/c-lightning-REST
     cd c-lightning-REST || exit 1
     sudo -u bitcoin git reset --hard $CLRESTVERSION
 

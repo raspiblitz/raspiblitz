@@ -67,7 +67,7 @@ if [ $1 = on ];then
   sudo chown bitcoin:bitcoin -R /mnt/hdd/app-data/.spark-wallet
 
   cd /home/bitcoin || exit 1
-  sudo -u bitcoin git clone https://github.com/shesek/spark-wallet --single-branch
+  sudo -u bitcoin git clone https://github.com/shesek/spark-wallet
   cd spark-wallet || exit 1
   sudo -u bitcoin git reset --hard ${SPARKVERSION} || exit 1
   sudo -u bitcoin npm install @babel/cli
