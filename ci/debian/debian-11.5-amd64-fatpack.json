@@ -140,6 +140,7 @@
         "{{template_dir}}/scripts/networking.sh",
         "{{template_dir}}/scripts/sudoers.sh",
         "{{template_dir}}/scripts/systemd.sh",
+        "{{template_dir}}/scripts/gnomedesktop.sh",
         "{{template_dir}}/scripts/raspiblitz-fatpack.sh",
         "{{template_dir}}/scripts/cleanup.sh"
       ]
