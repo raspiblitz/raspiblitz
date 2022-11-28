@@ -42,6 +42,7 @@ function installDependencies()
   sudo apt-get install -y postgresql libpq-dev
   # upgrade pip
   sudo pip3 install --upgrade pip
+  sudo -u bitcoin pip install mako
   # poetry
   sudo -u bitcoin pip3 install --user poetry
   if ! grep -Eq '^PATH="$HOME/.local/bin:$PATH"' /mnt/hdd/raspiblitz.conf; then
@@ -64,6 +65,48 @@ function buildAndInstallCLbinaries()
   echo "- Install to /usr/local/bin/"
   sudo make install || exit 1
 }
+
+echo "# Running: 'cl.install.sh $*'"
+
+# check for version if specified
+if [ "$1" = "update" ] && [ $# -gt 1 ]; then
+  CLVERSION=$2
+  if curl --output /dev/null --silent --head --fail \
+   https://github.com/ElementsProject/lightning/releases/tag/${CLVERSION};then
+    echo "# OK version exists at https://github.com/ElementsProject/lightning/releases/tag/${CLVERSION}"
+    echo "# Press ENTER to proceed to install Core Lightning ${CLVERSION} or CTRL+C to abort."
+    read key
+  else 
+    echo "# ${CLVERSION} does not exist"
+    echo
+    echo "# Press ENTER to return to the main menu"
+    read key
+    exit 1
+  fi
+fi
+
+# check for PR if testPR
+if [ "$1" = "testPR" ]; then
+    if [ $# -gt 1 ]; then
+      PRnumber=$2
+    else
+      echo "# Need PRnumber as the second paramater"
+    fi
+    echo "# Using the PR:"
+    echo "# https://github.com/ElementsProject/lightning/pull/${PRnumber}"
+  if curl --output /dev/null --silent --head --fail \
+   https://github.com/ElementsProject/lightning/pull/${PRnumber};then
+    echo "# OK the PR exists at https://github.com/ElementsProject/lightning/pull/${PRnumber}"
+    echo "# Press ENTER to proceed to install Core Lightning with the PR ${PRnumber} or CTRL+C to abort."
+    read key
+  else 
+    echo "# ${PRnumber} does not exist"
+    echo
+    echo "# Press ENTER to return to the main menu"
+    read key
+    exit 1
+  fi
+fi
 
 if [ "$1" = "install" ]; then
 
@@ -184,7 +227,6 @@ else
   source <(/home/admin/config.scripts/network.aliases.sh getvars cl $2)
 fi
 
-echo "# Running: 'cl.install.sh $*'"
 echo "# Using the settings for: ${network} ${CHAIN}"
 
 if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = testPR ];then
@@ -236,9 +278,9 @@ if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = testPR ];then
     elif [ "$1" = "testPR" ]; then
       PRnumber=$2 || exit 1
       echo "# Using the PR:"
-      echo "# https://github.com/ElementsProject/lightning/pull/$PRnumber"
-      sudo -u bitcoin git fetch origin pull/$PRnumber/head:pr$PRnumber || exit 1
-      sudo -u bitcoin git checkout pr$PRnumber || exit 1
+      echo "# https://github.com/ElementsProject/lightning/pull/${PRnumber}"
+      sudo -u bitcoin git fetch origin pull/${PRnumber}/head:pr${PRnumber} || exit 1
+      sudo -u bitcoin git checkout pr${PRnumber} || exit 1
     fi
 
     installDependencies
