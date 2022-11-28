@@ -2,6 +2,7 @@
 
 ## What's new in Version 1.9.0 of RaspiBlitz?
 
+- New: Automated disk image build for amd64 (VM, laptop, desktop, server) [details](https://github.com/rootzoll/raspiblitz/tree/dev/ci/README.md)
 - New: CL Watchtower (The Eye of Satoshi) [details](https://github.com/talaia-labs/rust-teos/tree/master/watchtower-plugin)
 - New: Support of X708 UPS HAT [details](https://github.com/rootzoll/raspiblitz/pull/3087)
 - New: BOS Telegram Bot Support (see OPTIONS on LND Balance of Satoshis menu entry)
