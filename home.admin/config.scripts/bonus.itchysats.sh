@@ -138,7 +138,6 @@ buildFromSource() {
     echo "# compile/install the app. This will take a long time"
     sudo -u ${APPID} /home/${APPID}/.cargo/bin/cargo install --path taker --locked --target-dir /home/${APPID}/bin/
     exitCode=$?
-    sudo rm -R /home/${APPID}/.cargo
     sudo rm -R /home/${APPID}/.rustup
     if ! [ ${exitCode} -eq 0 ]; then
         echo "# FAIL - cargo install did not run correctly - deleting code & exit"
