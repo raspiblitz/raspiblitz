@@ -371,6 +371,7 @@ echo
 echo "*** MOUNTED DRIVES ***"
 df -T -h
 echo
+sudo du -ahd1 /home
 
 echo
 echo "*** DATADRIVE ***"
