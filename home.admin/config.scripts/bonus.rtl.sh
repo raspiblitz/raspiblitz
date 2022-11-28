@@ -161,7 +161,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # download source code and set to tag release
     echo "# Get the RTL Source Code"
     sudo -u rtl rm -rf /home/rtl/RTL 2>/dev/null
-    sudo -u rtl git clone https://github.com/ShahanaFarooqui/RTL.git /home/rtl/RTL --single-branch
+    sudo -u rtl git clone https://github.com/ShahanaFarooqui/RTL.git /home/rtl/RTL
     cd /home/rtl/RTL
     # check https://github.com/Ride-The-Lightning/RTL/releases/
     sudo -u rtl git reset --hard $RTLVERSION
@@ -477,12 +477,10 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   isInstalled=$(sudo ls /etc/systemd/system/${systemdService}.service 2>/dev/null | grep -c "${systemdService}.service")
   if [ ${isInstalled} -eq 1 ]; then
-
     echo "# Removing RTL for ${LNTYPE} ${CHAIN}"
     sudo systemctl disable ${systemdService}.service
     sudo rm /etc/systemd/system/${systemdService}.service
     echo "# OK ${systemdService} removed."
-
   else
     echo "# ${systemdService} is not installed."
   fi
