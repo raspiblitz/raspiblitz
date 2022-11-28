@@ -123,7 +123,7 @@ buildFromSource() {
     # verify the author. If you app provides its source/binaries in another way, may check
     # other install scripts to see how that implement code download & verify.
     echo "# download from source code & verify"
-    sudo -u ${APPID} git clone ${GITHUB_REPO} --single-branch /home/${APPID}/${APPID}
+    sudo -u ${APPID} git clone ${GITHUB_REPO} /home/${APPID}/${APPID}
     cd /home/${APPID}/${APPID} || exit 1
 
     sudo -u ${APPID} git reset --hard "$VERSION"
@@ -566,6 +566,9 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   echo "# mark app as uninstalled in raspiblitz config"
   /home/admin/config.scripts/blitz.conf.sh set ${APPID} "off"
+
+  echo "# delete user"
+  sudo userdel -rf itchysats 2>/dev/null
 
   # only if 'delete-data' is an additional parameter then also the data directory gets deleted
   if [ "$(echo "$@" | grep -c delete-data)" -gt 0 ]; then
