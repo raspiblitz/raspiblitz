@@ -32,7 +32,8 @@ function blitz() {
 function blitzhelp() {
   echo
   echo "Blitz commands are consolidated here."
-  echo
+  echolncli
+
   echo "Menu access:"
   echo "  raspiblitz   menu"
   echo "  menu         menu"
@@ -69,11 +70,6 @@ function blitzhelp() {
   echo "  gettx        retrieve transaction from mempool or blockchain and print as JSON"
   echo "  watchtx      retrieve transaction from mempool or blockchain until certain confirmation target"
   echo
-  echo "LND:"
-  echo "  balance      your satoshi balance"
-  echo "  channels     your lightning channels"
-  echo "  fwdreport    show forwarding report"
-  echo
   echo "Users:"
   echo "  bos          Balance of Satoshis"
   echo "  chantools    ChanTools"
@@ -85,6 +81,15 @@ function blitzhelp() {
   echo "Extras:"
   echo "  whitepaper   download the whitepaper from the blockchain to /home/admin/bitcoin.pdf"
   echo "  notifyme     wrapper for blitz.notify.sh that will send a notification using the configured method and settings"
+  echo
+  echo "LND:"
+  echo "  lncli        LND commandline interface (when installed)"
+  echo "  balance      your satoshi balance"
+  echo "  channels     your lightning channels"
+  echo "  fwdreport    show forwarding report"
+  echo
+  echo "CLN:"
+  echo " lightning-cli Core-Lightning commandline interface (when installed)"
 }
 
 # command: raspiblitz
