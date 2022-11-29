@@ -302,7 +302,7 @@ echo -e "\n*** SOFTWARE UPDATE ***"
 # sqlite3 -> database
 # fdisk -> create partitions
 # lsb-release -> needed to know which distro version we're running to add APT sources
-general_utils="policykit-1 htop git curl bash-completion vim jq dphys-swapfile bsdmainutils autossh telnet vnstat parted dosfstools btrfs-progs fbi sysbench build-essential dialog bc python3-dialog unzip whois fdisk lsb-release"
+general_utils="policykit-1 htop git curl bash-completion vim jq dphys-swapfile bsdmainutils autossh telnet vnstat parted dosfstools btrfs-progs fbi sysbench build-essential dialog bc python3-dialog unzip whois fdisk lsb-release smartmontools"
 
 # python3-mako --> https://github.com/rootzoll/raspiblitz/issues/3441
 python_dependencies="python3-venv python3-dev python3-wheel python3-jinja2 python3-pip python3-mako"
