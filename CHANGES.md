@@ -1,8 +1,9 @@
 # CHANGES between Releases
 
-## What's new in Version 1.8.1 of RaspiBlitz?
+## What's new in Version 1.9.0 of RaspiBlitz?
 
 - New: Support of X708 UPS HAT [details](https://github.com/rootzoll/raspiblitz/pull/3087)
+- Update: Bitcoin Core v24.0 [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-24.0.md)
 - Update: LND v0.15.4 [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.15.4-beta
 - Update: Core Lightning v0.12.1 [details](https://github.com/ElementsProject/lightning/releases/tag/v0.12.1)
 - Update: Electrum Server in Rust (electrs) v0.9.10 [details](https://github.com/romanz/electrs/blob/master/RELEASE-NOTES.md#0910-nov-3-2022)
@@ -17,6 +18,7 @@
 - Update: JoininBox v0.7.4 [details](https://github.com/openoms/joininbox/releases/tag/v0.7.3)
 - Update: Electrum Server in Rust (electrs) v0.9.9 [details](https://github.com/romanz/electrs/blob/master/RELEASE-NOTES.md#099-jul-12-2022)
 - Update: Balance of Satoshis 13.6.0 (BOS) [details](https://github.com/alexbosworth/balanceofsatoshis/blob/master/CHANGELOG.md#1360)
+- Update: Circuitbreaker v0.3.2 [details](https://github.com/lightningequipment/circuitbreaker/blob/master/README.md)
 - Info: Run RaspiBlitz on Proxmox [details](https://github.com/rootzoll/raspiblitz/tree/dev/alternative.platforms/Proxmox)
 - Fixed: SCB/Emergency-Backup to USB drive (now also with cln emergency file)
 
