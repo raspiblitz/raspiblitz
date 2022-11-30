@@ -509,8 +509,14 @@ if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${clWatchtowerClient}" != "${choice}" ] && [ "${clNode}" == "on" ]; then
   echo "CL WATCHTOWER CLIENT Setting changed .."
   anychange=1
+
   if [ ${choice} = on ]; then
-    sudo /home/admin/config.scripts/cl-plugin.watchtower-client.sh on
+    if /home/admin/config.scripts/cl-plugin.watchtower-client.sh info; then
+      sudo /home/admin/config.scripts/cl-plugin.watchtower-client.sh on
+    else
+      echo "CL WATCHTOWER CLIENT install was cancelled."
+      sleep 2
+    fi
   else
     sudo /home/admin/config.scripts/cl-plugin.watchtower-client.sh off
   fi

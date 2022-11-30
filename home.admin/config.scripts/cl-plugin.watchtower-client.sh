@@ -19,14 +19,34 @@ source /mnt/hdd/raspiblitz.conf  #to get runBehindTor
 plugin="watchtower-client"
 pkg_dependencies="libssl-dev"
 
+
 if [ "$1" = info ]; then
-    echo "The Eye of Satoshi is a Lightning watchtower compliant with BOLT13, written in Rust."
-    echo ""
-    echo "To connect to a tower, use:"
-    echo "cl registertower <tower_id>"
-    echo ""
-    echo "Links with more info:"
-    echo "https://github.com/talaia-labs/rust-teos/tree/master/watchtower-plugin"
+	whiptail --title "The Eye of Satoshi CLN Watchtower" \
+    --yes-button "Install" \
+		--no-button "Cancel" \
+		--yesno "
+This is a watchtower client plugin to interact with an Eye of Satoshi tower, and
+eventually with any BOLT13 compliant watchtower.
+
+The plugin manages all the client-side logic to send appointment to a number of
+registered towers every time a new commitment transaction is generated.
+It also keeps a summary of the messages sent to the towers and their responses.
+
+Usage:
+
+cl registertower <tower_id>: registers the user id (compressed public key) with a given tower.
+cl gettowerinfo <tower_id>: gets all the locally stored data about a given tower.
+cl retrytower <tower_id>: tries to send pending appointment to a (previously) unreachable tower.
+cl abandontower <tower_id>: deletes all data associated with a given tower.
+cl listtowers: lists all registered towers.
+cl getappointment <tower_id> <locator>: queries a given tower about an appointment.
+cl getsubscriptioninfo <tower_id>: gets the subscription information by querying the tower.
+cl getappointmentreceipt <tower_id> <locator>: pulls a given appointment receipt from the local database.
+cl getregistrationreceipt <tower_id>: pulls the latest registration receipt from the local database.
+
+Links with more info:
+https://github.com/talaia-labs/rust-teos/tree/master/watchtower-plugin
+" 0 0
 fi
 
 
