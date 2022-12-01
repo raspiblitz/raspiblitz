@@ -17,7 +17,7 @@ PGPpubkeyFingerprint="BFF0F67810C1EED1"
 if [ $# -eq 0 ]||[ "$1" = "-h" ]||[ "$1" = "--help" ];then
   echo
   echo "Core Lightning install script"
-  echo "The default version is: $CLVERSION"
+  echo "The default version is: ${CLVERSION}"
   echo "mainnet / testnet / signet instances can run parallel"
   echo
   echo "Usage:"
@@ -62,6 +62,8 @@ function buildAndInstallCLbinaries()
   echo
   sudo -u bitcoin make
   echo
+  # git reset --hard needed to not show as 'v22.11-modded'
+  sudo -u bitcoin git reset --hard
   echo "- Install to /usr/local/bin/"
   sudo make install || exit 1
 }
@@ -184,8 +186,8 @@ if [ "$1" = "install" ]; then
   sudo -u bitcoin git clone https://github.com/ElementsProject/lightning.git
   cd lightning || exit 1
   echo
-  echo "- Reset to version $CLVERSION"
-  sudo -u bitcoin git reset --hard $CLVERSION
+  echo "- Reset to version ${CLVERSION}"
+  sudo -u bitcoin git reset --hard ${CLVERSION}
 
   sudo -u bitcoin /home/admin/config.scripts/blitz.git-verify.sh \
    "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" "${CLVERSION}" || exit 1
@@ -262,8 +264,8 @@ if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = testPR ];then
     if [ "$1" = "update" ]; then
       if [ $# -gt 1 ];then
         CLVERSION=$2
-        echo "# Installing the version $CLVERSION"
-        sudo -u bitcoin git reset --hard $CLVERSION
+        echo "# Installing the version ${CLVERSION}"
+        sudo -u bitcoin git reset --hard ${CLVERSION}
       else
         echo "# Updating to the latest commit in:"
         echo "# https://github.com/ElementsProject/lightning"
@@ -350,12 +352,12 @@ always-use-proxy=true
   #################
   # Backup plugin #
   #################
-  /home/admin/config.scripts/cl-plugin.backup.sh on $CHAIN
+  /home/admin/config.scripts/cl-plugin.backup.sh on ${CHAIN}
 
   ###################
   # Systemd service #
   ###################
-  /home/admin/config.scripts/cl.install-service.sh $CHAIN
+  /home/admin/config.scripts/cl.install-service.sh ${CHAIN}
 
   #############
   # logrotate #
