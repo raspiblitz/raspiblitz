@@ -2,7 +2,7 @@
 # https://lightning.readthedocs.io/
 
 # https://github.com/ElementsProject/lightning/releases
-CLVERSION=v0.12.1
+CLVERSION=v22.11
 
 # install the latest master by using the last commit id
 # https://github.com/ElementsProject/lightning/commit/master
@@ -74,13 +74,10 @@ if [ "$1" = "update" ] && [ $# -gt 1 ]; then
   if curl --output /dev/null --silent --head --fail \
    https://github.com/ElementsProject/lightning/releases/tag/${CLVERSION};then
     echo "# OK version exists at https://github.com/ElementsProject/lightning/releases/tag/${CLVERSION}"
-    echo "# Press ENTER to proceed to install Core Lightning ${CLVERSION} or CTRL+C to abort."
-    read key
-  else 
+  else
     echo "# ${CLVERSION} does not exist"
     echo
-    echo "# Press ENTER to return to the main menu"
-    read key
+    echo "# Exiting 'cl.install.sh $*' script"
     exit 1
   fi
 fi
@@ -99,7 +96,7 @@ if [ "$1" = "testPR" ]; then
     echo "# OK the PR exists at https://github.com/ElementsProject/lightning/pull/${PRnumber}"
     echo "# Press ENTER to proceed to install Core Lightning with the PR ${PRnumber} or CTRL+C to abort."
     read key
-  else 
+  else
     echo "# ${PRnumber} does not exist"
     echo
     echo "# Press ENTER to return to the main menu"
