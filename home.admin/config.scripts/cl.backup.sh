@@ -380,8 +380,8 @@ if [ ${mode} = "cl-import-gui" ]; then
     /home/admin/config.scripts/blitz.conf.sh set ${netprefix}clEncryptedHSM "off"
   else
     cat $output
-    echo "# Starting cl.hsmtool.sh unlock"
-    /home/admin/config.scripts/cl.hsmtool.sh unlock $CHAIN
+    echo "# Starting cl.hsmtool.sh unlock ${CHAIN}"
+    /home/admin/config.scripts/cl.hsmtool.sh unlock ${CHAIN}
   fi
 
   # set the lightningd service file on each active network
