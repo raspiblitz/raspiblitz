@@ -348,8 +348,7 @@ Do you really want to update Core Lightning now?
       ;;
     RECKLESS)
       whiptail --title "RECKLESS Core Lightning UPDATE to ${clLatestVersion}" --yes-button "Cancel" --no-button "Update" \
-      --yesno "Using the 'RECKLESS' Core Lightning update will download
-the latest Core Lightning release published on the Core Lightning GitHub page.
+      --yesno "Using the 'RECKLESS' Core Lightning update will download the latest Core Lightning release published on the Core Lightning GitHub page.
 
 The update was not tested as a part of the release.
 
