@@ -7,7 +7,7 @@
 - Update: LND v0.15.5 [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.15.5-beta
 - Update: Core Lightning v0.12.1 [details](https://github.com/ElementsProject/lightning/releases/tag/v0.12.1)
 - Update: Electrum Server in Rust (electrs) v0.9.10 [details](https://github.com/romanz/electrs/blob/master/RELEASE-NOTES.md#0910-nov-3-2022)
-- Update: Lightning Terminal v0.8.3-alpha [details](https://github.com/lightninglabs/lightning-terminal/releases/tag/v0.8.3-alpha)
+- Update: Lightning Terminal v0.8.4-alpha [details](https://github.com/lightninglabs/lightning-terminal/releases/tag/v0.8.4-alpha)
 - Update: RTL v0.13.0 with update option [details](https://github.com/Ride-The-Lightning/RTL/releases/tag/v0.12.3)
 - Update: Thunderhub v0.13.16 with balance sharing disabled [details](https://github.com/apotdevin/thunderhub/releases/tag/v0.13.16)
 - Update: LNbits 0.9.4 [details](https://github.com/lnbits/lnbits-legend/releases/tag/0.9.2)
