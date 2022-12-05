@@ -130,7 +130,10 @@
         "HOME_DIR=/home/pi",
         "http_proxy={{user `http_proxy`}}",
         "https_proxy={{user `https_proxy`}}",
-        "no_proxy={{user `no_proxy`}}"
+        "no_proxy={{user `no_proxy`}}",
+        "github_user={{user `github_user`}}",
+        "branch={{user `branch`}}",
+        "fatpack=false"
       ],
       "execute_command": "echo 'raspiblitz' | {{.Vars}} sudo -S -E sh -eux '{{.Path}}'",
       "expect_disconnect": true,
@@ -140,7 +143,7 @@
         "{{template_dir}}/scripts/networking.sh",
         "{{template_dir}}/scripts/sudoers.sh",
         "{{template_dir}}/scripts/systemd.sh",
-        "{{template_dir}}/scripts/raspiblitz-lean.sh",
+        "{{template_dir}}/scripts/raspiblitz.sh",
         "{{template_dir}}/scripts/cleanup.sh"
       ]
     }

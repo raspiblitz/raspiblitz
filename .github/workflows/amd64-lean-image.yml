@@ -27,12 +27,12 @@ jobs:
           echo "BUILD_VERSION=$(git describe --always --tags)" >> $GITHUB_ENV
 
       - name: Hello RaspiBlitz
-        run: echo "Building the debian-11.5-amd64-image-${{ env.BUILD_DATE }}-${{ env.BUILD_VERSION }} at "
+        run: echo "Building the debian-11.5-amd64-image-${{env.BUILD_DATE}}-${{env.BUILD_VERSION}}"
 
       - name: Run the build script
         run: |
           cd ci
-          bash packer.build.amd64-lean.sh
+          bash packer.build.amd64-lean.sh $GITHUB_ACTOR $GITHUB_HEAD_REF
 
       - name: Compute checksum of the raw image
         run: |
@@ -52,8 +52,8 @@ jobs:
       - name: Upload the image and checksums
         uses: actions/upload-artifact@v3
         with:
-          name: raspiblitz-amd64-image-${{ env.BUILD_DATE }}-${{ env.BUILD_VERSION }}
+          name: raspiblitz-amd64-image-${{env.BUILD_DATE}}-${{env.BUILD_VERSION}}
           path: |
-            ${{ github.workspace }}/builds/packer-debian-11.5-amd64-lean-qemu/debian-11.5-amd64-lean.qcow2.sha256
-            ${{ github.workspace }}/builds/packer-debian-11.5-amd64-lean-qemu/debian-11.5-amd64-lean.qcow2.gz
-            ${{ github.workspace }}/builds/packer-debian-11.5-amd64-lean-qemu/debian-11.5-amd64-lean.qcow2.gz.sha256
+            ${{github.workspace}}/builds/packer-debian-11.5-amd64-lean-qemu/debian-11.5-amd64-lean.qcow2.sha256
+            ${{github.workspace}}/builds/packer-debian-11.5-amd64-lean-qemu/debian-11.5-amd64-lean.qcow2.gz
+            ${{github.workspace}}/builds/packer-debian-11.5-amd64-lean-qemu/debian-11.5-amd64-lean.qcow2.gz.sha256

@@ -11,7 +11,19 @@ sudo apt-get install -y packer
 echo -e "\nInstalling qemu..."
 sudo apt-get install -y qemu-system
 
+if [ $# -gt 0 ]; then
+  github_user=$1
+else
+  github_user=rootzoll
+fi
+
+if [ $# -gt 1 ]; then
+  branch=$2
+else
+  branch=dev
+fi
+
 # Build the image
 echo -e "\nBuilding image..."
 cd debian
-PACKER_LOG=1 packer build -only=qemu debian-11.5-amd64-lean.json
+PACKER_LOG=1 packer build --var github_user=${github_user} --var branch=${branch} -only=qemu debian-11.5-amd64-lean.json
