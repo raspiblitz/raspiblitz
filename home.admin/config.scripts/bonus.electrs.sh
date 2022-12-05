@@ -285,7 +285,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo
     echo "# Downloading and building electrs $ELECTRSVERSION. This will take ~40 minutes"
     echo
-    sudo -u electrs git clone https://github.com/romanz/electrs --single-branch
+    sudo -u electrs git clone https://github.com/romanz/electrs
     cd /home/electrs/electrs || exit 1
     sudo -u electrs git reset --hard $ELECTRSVERSION
     sudo -u electrs /home/admin/config.scripts/blitz.git-verify.sh \
