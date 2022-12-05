@@ -96,7 +96,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo adduser --disabled-password --gecos "" thunderhub
 
     # download and install
-    sudo -u thunderhub git clone https://github.com/apotdevin/thunderhub.git --single-branch /home/thunderhub/thunderhub
+    sudo -u thunderhub git clone https://github.com/apotdevin/thunderhub.git /home/thunderhub/thunderhub
     cd /home/thunderhub/thunderhub || exit 1
     # https://github.com/apotdevin/thunderhub/releases
     sudo -u thunderhub git reset --hard $THUBVERSION

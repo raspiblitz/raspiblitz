@@ -427,7 +427,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo
     cd /home/btcpay || exit 1
     echo "# Download the NBXplorer source code ..."
-    sudo -u btcpay git clone https://github.com/dgarage/NBXplorer.git --single-branch 2>/dev/null
+    sudo -u btcpay git clone https://github.com/dgarage/NBXplorer.git 2>/dev/null
     cd NBXplorer || exit 1
     sudo -u btcpay git reset --hard $NBXplorerVersion
     # PGP verify
@@ -517,7 +517,7 @@ WantedBy=multi-user.target
     echo
     cd /home/btcpay || exit 1
     echo "# Download the BTCPayServer source code ..."
-    sudo -u btcpay git clone https://github.com/btcpayserver/btcpayserver.git --single-branch 2>/dev/null
+    sudo -u btcpay git clone https://github.com/btcpayserver/btcpayserver.git 2>/dev/null
     cd btcpayserver || exit 1
     sudo -u btcpay git reset --hard $BTCPayVersion
 
