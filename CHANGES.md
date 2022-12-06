@@ -21,6 +21,7 @@
 - Update: Circuitbreaker v0.3.2 [details](https://github.com/lightningequipment/circuitbreaker/blob/master/README.md)
 - Info: Run RaspiBlitz on Proxmox [details](https://github.com/rootzoll/raspiblitz/tree/dev/alternative.platforms/Proxmox)
 - Fixed: SCB/Emergency-Backup to USB drive (now also with cln emergency file)
+- Info: 32GB sdcard is now enforced (after being recommended since v1.5)
 
 ## What's new in Version 1.8.0c of RaspiBlitz?
 

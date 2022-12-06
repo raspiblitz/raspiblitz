@@ -97,6 +97,10 @@ if [ "$1" = "on" ];then
     echo
     sudo -u bitcoin /home/bitcoin/.cargo/bin/cargo build --release
     sudo chmod a+x /home/bitcoin/cl-plugins-available/c-lightning-http-plugin/target/release/c-lightning-http-plugin
+
+    # clean up
+    sudo rm -R /home/bitcoin/.cargo
+    sudo rm -R /home/bitcoin/.rustup
   fi
 
   if [ ! -L /home/bitcoin/cl-plugins-enabled/c-lightning-http-plugin ];then
