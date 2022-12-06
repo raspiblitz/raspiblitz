@@ -32,8 +32,7 @@ function blitz() {
 function blitzhelp() {
   echo
   echo "Blitz commands are consolidated here."
-  echolncli
-
+  echo
   echo "Menu access:"
   echo "  raspiblitz   menu"
   echo "  menu         menu"
