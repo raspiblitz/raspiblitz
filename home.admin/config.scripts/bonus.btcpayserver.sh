@@ -540,16 +540,17 @@ WantedBy=multi-user.target
     cd btcpayserver || exit 1
     sudo -u btcpay git reset --hard $BTCPayVersion
 
-    sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh \
-     "web-flow" "https://github.com/web-flow.gpg" "4AEE18F83AFDEB23" || exit 1
-    #PGPsigner="nicolasdorier"
-    #PGPpubkeyLink="https://keybase.io/nicolasdorier/pgp_keys.asc"
-    #PGPpubkeyFingerprint="AB4CFA9895ACA0DBE27F6B346618763EF09186FE"
+    #sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh \
+    # "web-flow" "https://github.com/web-flow.gpg" "4AEE18F83AFDEB23" || exit 1
+    
+    PGPsigner="nicolasdorier"
+    PGPpubkeyLink="https://keybase.io/nicolasdorier/pgp_keys.asc"
+    PGPpubkeyFingerprint="AB4CFA9895ACA0DBE27F6B346618763EF09186FE"
     #PGPsigner="Kukks"
     #PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
     #PGPpubkeyFingerprint="8E5530D9D1C93097"
-    #sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh \
-    # "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
+    sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh \
+     "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
 
     echo "# Build BTCPayServer ..."
     # from the build.sh with path
