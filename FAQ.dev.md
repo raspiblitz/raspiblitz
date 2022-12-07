@@ -29,7 +29,7 @@ Work notes for the process of producing a new SD card image release:
 * In terminal `ssh pi@[IP-OF-RASPIBLITZ]`
 * Password is `raspberry`
 * Run the following command BUT REPLACE `[BRANCH]` with the branch-string of your latest version
-* `wget --no-cache https://raw.githubusercontent.com/rootzoll/raspiblitz/[BRANCH]/build_sdcard.sh && sudo bash build_sdcard.sh -b [BRANCH]`
+* `wget --no-cache https://raw.githubusercontent.com/rootzoll/raspiblitz/[BRANCH]/build_sdcard.sh && sudo bash build_sdcard.sh -u rootzoll -b [BRANCH]`
 * Monitor/Check outputs for warnings/errors - install LCD
 * Login new with `ssh admin@[IP-OF-RASPIBLITZ]` (pw: raspiblitz) and run `release`
 * Disconnect WiFi/LAN on build laptop (hardware switch off) and shutdown
@@ -76,8 +76,10 @@ udp://tracker.leechers-paradise.org:6969
 ### Versioning
 
 * Major Updates: 1.0.0, 2.0.0, 3.0.0, ... are epic updates signaling that the software reached a new era.
-* Main Updates: 1.1.0, 1.2.0, 1.3.0, ... are breaking updates - the reflashing of the sd ard is mandatory.
-* Minor Updates: 1.3.0, 1.3.1, 1.3.2, ... are soft updates - can be done by 'patching' the scripts & code, but new sd card reflash is still advised.
+* Main Updates: 1.1.0, 1.2.0, 1.3.0, ... are release updates - the reflashing of the sd ard is mandatory.
+* Minor Updates: 1.3.0, 1.3.1, 1.3.2, ... are patch updates - can be done by 'patching' the scripts & code, but new sd card reflash is still advised.
+
+Every release has its own branch: `v1.9`, `v1.10`, `v1.11` .. this way hot patches can be merged into the release branch and people update with the `patch code` command
 
 ### How can I customize my RaspiBlitz or add other software?
 

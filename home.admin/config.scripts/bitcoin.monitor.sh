@@ -7,7 +7,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "bitcoin.monitor.sh [mainnet|testnet|signet] info"
  echo "bitcoin.monitor.sh [mainnet|testnet|signet] mempool"
  echo "bitcoin.monitor.sh [mainnet|testnet|signet] network"
- echo "bitcoin.monitor.sh [mainnet] peer-kickstart [ipv4|ipv6|tor|auto]"
+ echo "bitcoin.monitor.sh [mainnet] peer-kickstart [ipv4|ipv6|tor|i2p|auto]"
  echo "bitcoin.monitor.sh [mainnet] peer-disconnectall"
  exit 1
 fi
@@ -101,19 +101,27 @@ if [ "$2" = "network" ]; then
   btc_running=$(systemctl status $service_alias 2>/dev/null | grep -c "active (running)")
   getnetworkinfo=$($bitcoincli_alias getnetworkinfo 2>/dev/null)
   if [ "${getnetworkinfo}" == "" ]; then
-    echo "error='no data'"
+    echo "error='no network data'"
     exit 1
   fi
-   
+  getpeerinfo=$($bitcoincli_alias getpeerinfo 2>/dev/null)
+  if [ "${getpeerinfo}" == "" ]; then
+    echo "error='no peer data'"
+    exit 1
+  fi  
 
   # parse data
   btc_peers=$(echo "${getnetworkinfo}" | grep "connections\"" | tr -cd '[[:digit:]]')
   btc_address=$(echo ${getnetworkinfo} | jq -r '.localaddresses [0] .address')
   btc_port=$(echo "${getnetworkinfo}" | jq -r '.localaddresses [0] .port')
+  btc_peers_onion=$(echo "${getpeerinfo}" | grep -c "network\": \"onion")
+  btc_peers_i2p=$(echo "${getpeerinfo}" | grep -c "network\": \"i2p")
 
   # print data
   echo "btc_running='${btc_running}'"
   echo "btc_peers='${btc_peers}'"
+  echo "btc_peers_onion='${btc_peers_onion}'"
+  echo "btc_peers_i2p='${btc_peers_i2p}'"
   echo "btc_address='${btc_address}'"
   echo "btc_port='${btc_port}'"
   exit 0
@@ -223,6 +231,12 @@ if [ "$2" = "peer-kickstart" ]; then
     exit 1
   fi
 
+  bitnodesI2PData=$(sudo -u admin cat /home/admin/fallback.i2p.nodes)
+  if [ ${#bitnodesI2PData} -lt 10 ]; then
+    echo "error='no valid data from /home/admin/fallback.i2p.nodes'"
+    exit 1
+  fi
+
   # determine which address to choose
   addressFormat="$3"
   # set default to auto
@@ -230,7 +244,7 @@ if [ "$2" = "peer-kickstart" ]; then
     addressFormat="auto"
   fi
   # check valid value
-  if [ "${addressFormat}" != "ipv4" ] && [ "${addressFormat}" != "ipv6" ] && [ "${addressFormat}" != "tor" ] && [ "${addressFormat}" != "auto" ]; then
+  if [ "${addressFormat}" != "ipv4" ] && [ "${addressFormat}" != "ipv6" ] && [ "${addressFormat}" != "tor" ] && [ "${addressFormat}" != "i2p" ] && [ "${addressFormat}" != "auto" ]; then
     echo "error='invalid address type'"
     exit 1
   fi
@@ -259,6 +273,9 @@ if [ "$2" = "peer-kickstart" ]; then
   elif [ "${addressFormat}" == "ipv6" ]; then
     # get IPv6 nodes
     nodeList=$(echo "${bitnodesRawData}" | grep -o '\[.\{5,45\}\]\:[0-9]\{3,5\}')
+  elif [ "${addressFormat}" == "i2p" ]; then
+    # get I2P nodes
+    nodeList=$(echo "${bitnodesI2PData}")
   else
     # invalid address
     echo "error='invalid address format'"
