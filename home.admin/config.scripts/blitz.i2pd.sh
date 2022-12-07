@@ -6,11 +6,11 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "I2P Daemon install script"
   echo "More info at https://i2pd.readthedocs.io"
   echo "Usage:"
-  echo "bonus.i2pd.sh install      -> Install i2pd"
-  echo "bonus.i2pd.sh on           -> Switch on i2pd"
-  echo "bonus.i2pd.sh off          -> Uninstall i2pd"
-  echo "bonus.i2pd.sh addseednodes -> Add all I2P seed nodes from: https://github.com/bitcoin/bitcoin/blob/master/contrib/seeds/nodes_main.txt"
-  echo "bonus.i2pd.sh status       -> I2P related logs from bitcoind, bitcoin-cli -netinfo 4 and webconsole access"
+  echo "blitz.i2pd.sh install      -> Install i2pd"
+  echo "blitz.i2pd.sh on           -> Switch on i2pd"
+  echo "blitz.i2pd.sh off          -> Uninstall i2pd"
+  echo "blitz.i2pd.sh addseednodes -> Add all I2P seed nodes from: https://github.com/bitcoin/bitcoin/blob/master/contrib/seeds/nodes_main.txt"
+  echo "blitz.i2pd.sh status       -> I2P related logs from bitcoind, bitcoin-cli -netinfo 4 and webconsole access"
   exit 1
 fi
 
@@ -109,7 +109,7 @@ function bitcoinI2Pstatus {
 }
 
 
-echo "# Running: 'bonus.i2pd.sh $*'"
+echo "# Running: 'blitz.i2pd.sh $*'"
 source /mnt/hdd/raspiblitz.conf
 
 if [ "$1" = "install" ]; then
@@ -157,7 +157,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   if [ "${isInstalled}" != "0" ]; then
     echo "# i2pd is installed."
   else
-    /home/admin/config.scripts/bonus.i2pd.sh install
+    /home/admin/config.scripts/blitz.i2pd.sh install
   fi
 
   if systemctl is-active --quiet i2pd.service; then
@@ -240,7 +240,7 @@ fi
 
 if [ "$1" = "addseednodes" ]; then
 
-  /home/admin/config.scripts/bonus.i2pd.sh on
+  /home/admin/config.scripts/blitz.i2pd.sh on
 
   echo "Add all I2P seed nodes from: https://github.com/bitcoin/bitcoin/blob/master/contrib/seeds/nodes_main.txt"
   i2pSeedNodeList=$(curl -sS https://raw.githubusercontent.com/bitcoin/bitcoin/master/contrib/seeds/nodes_main.txt | grep .b32.i2p:0)

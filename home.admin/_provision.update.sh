@@ -169,11 +169,6 @@ systemctl daemon-reload >> ${logFile}
 systemctl enable ${network}d.service >> ${logFile}
 systemctl start ${network}d.service >> ${logFile}
 
-# I2P
-echo "Start i2pd" >> ${logFile}
-/home/admin/_cache.sh set message "i2pd setup"
-/home/admin/config.scripts/bonus.i2pd.sh on >> ${logFile}
-
 # INSTALL LND on Update/Recovery
 if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
 
