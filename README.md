@@ -776,16 +776,7 @@ That USB drive will then be used to store your latest StaticChannelBackup, just 
 
 ##### StaticChannel/Emergency-Backup per SCP/SSH to other server
 
-An option for more advanced users -- that you only can set directly in the `raspiblitz.conf` -- is the automated backup of the StaticChannelBackup to another server by SSH/SCP.
-For this you need to set the value:
-
-`scpBackupTarget='[USER]@[SERVER]:[DIRPATH-WITHOUT-ENDING-/]'`
-
-and you can optionally set custom options for the SCP command (for example to set a non-default port) with:
-
-`scpBackupOptions='[YOUR-CUSTOM-OPTIONS]'`
-
-On the target server add the root ssh public key of your RaspiBlitz to the `authorized_keys` file for the user - how to do this see: <https://www.linode.com/docs/security/authentication/use-public-key-authentication-with-ssh/>
+See [SCP Backup Target](README.md#b-scp-backup-target) for details on how to setup static channel backups using SCP.
 
 ##### CORE LIGHTNING NODE
 
@@ -1391,12 +1382,32 @@ Find free Nextcloud providers here to sign up: <https://nextcloud.com/signup/>
 
 _You can also backup the StaticChannelBackup file to your own server, but this needs manual setup:_
 
-In the `/mnt/hdd/raspiblitz.conf` the parameter `scpBackupTarget='[USER]@[SERVER]:[DIRPATH-WITHOUT-ENDING-/]'` can be set to activate this feature.
-On the remote server, the public key of the RaspiBlitz root user needs to be added to the `authorized_keys` file so that no password is needed for the background script to make the backup.
+Run the command below to generate root SSH keys:
+`sudo /home/admin/config.scripts/blitz.ssh.sh root-get`
+The public key is found in the `sshPubKey=` section of the above output. For manual setup, use the value after the = without the single quotes.
 
-The script `/home/admin/config.scripts/blitz.ssh.sh` show (`root-get`) and transfer ssh-pubkey (`root-transfer`) to a remote server.
+Copy the generated keys from above to the remote server (note, if your remote server doesn't allow password authentication, you will have to copy it manually). 
+`sudo /home/admin/config.scripts/blitz.ssh.sh root-transfer myuser@myserver`
 
-To test it, try opening or closing a channel and then check if you can find a copy of `channel.backup` on your remote server.
+Note: If you do not copy the public key to your remote server, these backups will not work.
+
+Edit the `/mnt/hdd/raspiblitz.conf` file to include the following:
+
+`scpBackupTarget='[USER]@[SERVER]:[DIRPATH-WITHOUT-ENDING-/]'`
+
+Eg:
+`scpBackupTarget='myaccount@10.10.10.100:/home/myaccount/backups'`
+
+and you can optionally set custom options for the SCP command (for example to set a non-default port) with:
+
+`scpBackupOptions='[YOUR-CUSTOM-OPTIONS]'`
+
+If you have done the setup above and want to run this manually, you can run the below command (from the root user):
+
+`scp /home/admin/backups/scb/channel.backup myaccount@10.10.10.100:/home/myaccount/backups`
+
+Alternatively, open or close a channel. The backups get taken on every channel open or close.
+
 You can check the background-script logs to see details on errors: `sudo journalctl -f -u background`
 
 #### C) Local Backup Target (USB Thumbdrive)
@@ -1446,7 +1457,7 @@ But if you want to build that image yourself - here is a quick guide:
 - Get a latest RaspiOS 64-bit (Desktop): [DOWNLOAD](https://downloads.raspberrypi.org/raspios_arm64/images).
 - Write the image to an SD card: [TUTORIAL](https://www.raspberrypi.org/documentation/installation/installing-images/README.md).
 - Add a file called `ssh` to the root of the SD card when mounted on your laptop to enable SSH login.
-- Add a file called `userconf` next to the empty `ssh` file that contains the just the string `pi:$6$p2DNwHsYzR06mVFX$jwZnOo5Jl/6pEMFFowpUBqM7E0Rz8vEtXtupwxuXZA7eqyKxDk8barhYZ24ei/JEP4e8Jr0mOvRThASuUxIAZ0`.
+- Add a file called `userconf` next to the empty `ssh` file that contains just the string `pi:$6$p2DNwHsYzR06mVFX$jwZnOo5Jl/6pEMFFowpUBqM7E0Rz8vEtXtupwxuXZA7eqyKxDk8barhYZ24ei/JEP4e8Jr0mOvRThASuUxIAZ0`.
 - Start the card on a Raspi and login via SSH with `ssh pi@[IP-OF-YOUR-RASPI]`. Password is `raspberry`.
 
 Now you are ready to start the SD card build script (check the code to see if the installation and config are OK for you).

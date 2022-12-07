@@ -10,7 +10,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ];
   echo "Manage RaspiBlitz Web API"
   echo "blitz.web.api.sh on [?GITHUBUSER] [?REPO] [?BRANCH]"
   echo "blitz.web.api.sh update-config"
-  echo "blitz.web.api.sh update-code"
+  echo "blitz.web.api.sh update-code [?BRANCH]"
   echo "blitz.web.api.sh off"
   exit 1
 fi
@@ -272,13 +272,20 @@ fi
 ###################
 if [ "$1" = "update-code" ]; then
 
+  # the branch on which to get the latest code from
+  if [ "$2" != "" ]; then
+    currentBranch="$2"
+  fi
+
   apiActive=$(ls /etc/systemd/system/blitzapi.service | grep -c blitzapi.service)
   if [ "${apiActive}" != "0" ]; then
     echo "# Update Web API CODE"
     systemctl stop blitzapi
     sudo chown -R blitzapi:blitzapi /home/blitzapi/blitz_api
     cd /home/blitzapi/blitz_api
-    currentBranch=$(sudo -u blitzapi git rev-parse --abbrev-ref HEAD)
+    if [ "$currentBranch" == "" ]; then
+      currentBranch=$(sudo -u blitzapi git rev-parse --abbrev-ref HEAD)
+    fi
     echo "# updating local repo ..."
     oldCommit=$(sudo -u blitzapi git rev-parse HEAD)
     sudo -u blitzapi git fetch

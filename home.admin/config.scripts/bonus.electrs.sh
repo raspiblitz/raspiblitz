@@ -447,6 +447,10 @@ WantedBy=multi-user.target
     bitcoindRestart=yes
   fi
 
+  # clean up
+  sudo rm -R /home/electrs/.cargo
+  sudo rm -R /home/electrs/.rustup
+
   source <(/home/admin/_cache.sh get state)
   if [ "${state}" == "ready" ]; then
     if [ "${bitcoindRestart}" == "yes" ]; then
