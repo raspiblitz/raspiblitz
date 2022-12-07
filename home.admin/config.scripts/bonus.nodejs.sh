@@ -58,7 +58,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       rm -f node-$VERSION-$DISTRO.tar.xz*
       exit 1
     fi
-    echo "OK the checkdum of nodeJS is OK"
+    echo "OK the checksum of nodeJS is OK"
     sleep 3
     # install
     sudo mkdir -p /usr/local/lib/nodejs
