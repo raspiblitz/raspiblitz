@@ -114,7 +114,8 @@ source /mnt/hdd/raspiblitz.conf
 
 if [ "$1" = "install" ]; then
 
-  if apt list i2pd; then
+  isInstalled=$(sudo systemctl list-unit-files | grep -c i2pd)
+  if [ "${isInstalled}" != "0" ]; then
     echo "# i2pd is already installed."
   else
     echo "# Installing i2pd ..."
@@ -152,14 +153,15 @@ fi
 
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
-  if apt list i2pd; then
+  isInstalled=$(sudo systemctl list-unit-files | grep -c i2pd)
+  if [ "${isInstalled}" != "0" ]; then
     echo "# i2pd is installed."
   else
     /home/admin/config.scripts/bonus.i2pd.sh install
   fi
 
   if systemctl is-active --quiet i2pd.service; then
-    echo "# i2pd.service is already installed."
+    echo "# i2pd.service is already active."
     exit 0
   fi
 
