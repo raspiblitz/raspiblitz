@@ -216,24 +216,15 @@ if [ "$2" = "peer-kickstart" ]; then
     exit 1
   fi
 
-  # get raw node data from bitnodes.io (use Tor if available)
-  #if [ "${runBehindTor}" == "on" ]; then
-    # call over tor proxy (CAPTCHA BLOCKED)
-    #bitnodesRawData=$(curl --socks5-hostname 127.0.0.1:9050 -H "Accept: application/json; indent=4" https://bitnodes.io/api/v1/snapshots/latest/ 2>/dev/null)
-  #else
-    # call over clearnet
-    # bitnodesRawData=$(curl -H "Accept: application/json; indent=4" https://bitnodes.io/api/v1/snapshots/latest/ 2>/dev/null)
-  #fi
-
-  bitnodesRawData=$(sudo -u admin cat /home/admin/fallback.nodes)
-  if [ ${#bitnodesRawData} -lt 100 ]; then
+  bitnodesRawData1=$(sudo -u admin cat /home/admin/fallback.bitnodes.nodes)
+  if [ ${#bitnodesRawData1} -lt 100 ]; then
     echo "error='no valid data from bitnodes.io'"
     exit 1
   fi
 
-  bitnodesI2PData=$(sudo -u admin cat /home/admin/fallback.i2p.nodes)
-  if [ ${#bitnodesI2PData} -lt 10 ]; then
-    echo "error='no valid data from /home/admin/fallback.i2p.nodes'"
+  bitnodesRawData2=$(sudo -u admin cat /home/admin/fallback.bitcoin.nodes)
+  if [ ${#bitnodesRawData2} -lt 100 ]; then
+    echo "error='no valid data from bitcoin core'"
     exit 1
   fi
 
@@ -266,16 +257,16 @@ if [ "$2" = "peer-kickstart" ]; then
   # filter raw data for node addresses based on what kind of connection is running
   if [ "${addressFormat}" == "tor" ]; then
     # get Tor nodes (v2 or v3)
-    nodeList=$(echo "${bitnodesRawData}" | grep -o '[0-9a-z]\{16,56\}\.onion')
+    nodeList=$(echo "${bitnodesRawData1}" | grep -o '[0-9a-z]\{16,56\}\.onion')
   elif [ "${addressFormat}" == "ipv4" ]; then
     # get IPv4 nodes
-    nodeList=$(echo "${bitnodesRawData}" | grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\:[0-9]\{3,5\}')
+    nodeList=$(echo "${bitnodesRawData1}" | grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\:[0-9]\{3,5\}')
   elif [ "${addressFormat}" == "ipv6" ]; then
     # get IPv6 nodes
-    nodeList=$(echo "${bitnodesRawData}" | grep -o '\[.\{5,45\}\]\:[0-9]\{3,5\}')
+    nodeList=$(echo "${bitnodesRawData1}" | grep -o '\[.\{5,45\}\]\:[0-9]\{3,5\}')
   elif [ "${addressFormat}" == "i2p" ]; then
-    # get I2P nodes
-    nodeList=$(echo "${bitnodesI2PData}")
+    # get I2P nodes (only in fallbacklist from bitcoin core)
+    nodeList=$(echo "${bitnodesRawData2}" | grep -o '[0-9,a-z]\{32,64\}\.b32\.i2p\:[0-9]\{1,5\}')
   else
     # invalid address
     echo "error='invalid address format'"

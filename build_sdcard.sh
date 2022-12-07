@@ -780,16 +780,12 @@ if ${fatpack}; then
   echo "* Adding the cln-grpc plugin ..."
   /home/admin/config.scripts/cl-plugin.cln-grpc.sh install || exit 1
 
-  # *** UPDATE FALLBACK NODE LIST (only as part of fatpack) *** see https://github.com/rootzoll/raspiblitz/issues/1888
+  # *** AUTO UPDATE FALLBACK NODE LIST FROM INTERNET (only in fatpack)
   echo "*** FALLBACK NODE LIST ***"
-  sudo -u admin curl -H "Accept: application/json; indent=4" https://bitnodes.io/api/v1/snapshots/latest/ -o /home/admin/fallback.nodes
-  byteSizeList=$(sudo -u admin stat -c %s /home/admin/fallback.nodes)
-  if [ ${#byteSizeList} -eq 0 ] || [ ${byteSizeList} -lt 10240 ]; then
-    echo "WARN: Failed downloading fresh FALLBACK NODE LIST --> https://bitnodes.io/api/v1/snapshots/latest/"
-    sudo rm /home/admin/fallback.nodes 2>/dev/null
-    sudo cp /home/admin/assets/fallback.nodes /home/admin/fallback.nodes
-  fi
-  sudo chown admin:admin /home/admin/fallback.nodes
+  # see https://github.com/rootzoll/raspiblitz/issues/1888
+  sudo -u admin curl -H "Accept: application/json; indent=4" https://bitnodes.io/api/v1/snapshots/latest/ -o /home/admin/fallback.bitnodes.nodes
+  # Fallback Nodes List from Bitcoin Core
+  sudo -u admin curl https://raw.githubusercontent.com/bitcoin/bitcoin/master/contrib/seeds/nodes_main.txt -o /home/admin/fallback.bitcoin.nodes
 
   echo "* Adding Raspiblitz API ..."
   sudo /home/admin/config.scripts/blitz.web.api.sh on || exit 1
@@ -806,6 +802,24 @@ if ${fatpack}; then
 else
   echo "* skipping FATPACK"
 fi
+
+# check fallback list bitnodes
+byteSizeList=$(sudo -u admin stat -c %s /home/admin/fallback.bitnodes.nodes)
+if [ ${#byteSizeList} -eq 0 ] || [ ${byteSizeList} -lt 10240 ]; then
+  echo "Using fallback list from repo: bitnodes"
+  sudo rm /home/admin/fallback.bitnodes.nodes 2>/dev/null
+  sudo cp /home/admin/assets/fallback.bitnodes.nodes /home/admin/fallback.bitnodes.nodes
+fi
+sudo chown admin:admin /home/admin/fallback.bitnodes.nodes
+
+# check fallback list bitcoin core
+byteSizeList=$(sudo -u admin stat -c %s /home/admin/fallback.bitcoin.nodes)
+if [ ${#byteSizeList} -eq 0 ] || [ ${byteSizeList} -lt 10240 ]; then
+  echo "Using fallback list from repo: bitcoin core"
+  sudo rm /home/admin/fallback.bitcoin.nodes 2>/dev/null
+  sudo cp /home/admin/assets/fallback.bitcoin.nodes /home/admin/fallback.bitcoin.nodes
+fi
+sudo chown admin:admin /home/admin/fallback.bitcoin.nodes
 
 echo
 echo "*** raspiblitz.info ***"
