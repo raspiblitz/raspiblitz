@@ -104,6 +104,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # install helipad
     sudo -u $HELIPAD_USER $HELIPAD_CARGO_BIN install --path $HELIPAD_BUILD_DIR
 
+    # clean up
+    sudo rm -R $HELIPAD_HOME_DIR/.rustup
+
     ###############
     # CONFIG
     ###############

@@ -477,12 +477,10 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   isInstalled=$(sudo ls /etc/systemd/system/${systemdService}.service 2>/dev/null | grep -c "${systemdService}.service")
   if [ ${isInstalled} -eq 1 ]; then
-
     echo "# Removing RTL for ${LNTYPE} ${CHAIN}"
     sudo systemctl disable ${systemdService}.service
     sudo rm /etc/systemd/system/${systemdService}.service
     echo "# OK ${systemdService} removed."
-
   else
     echo "# ${systemdService} is not installed."
   fi

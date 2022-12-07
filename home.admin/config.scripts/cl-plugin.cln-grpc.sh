@@ -29,7 +29,7 @@ PORT="${portprefix}4772"
 
 function buildGRPCplugin() {
   echo "# - Build the cln-grpc plugin"
-  if [ ! -f /home/bitcoin/cl-plugins-available/cln-grpc/debug/cln-grpc ]; then
+  if [ ! -f /home/bitcoin/cl-plugins-available/cln-grpc ]; then
     # check if the source code is present
     if [ ! -d /home/bitcoin/lightning/plugins/grpc-plugin ];then
       echo "# - install Core Lightning ..."
@@ -41,19 +41,31 @@ function buildGRPCplugin() {
     cd /home/bitcoin/lightning/plugins/grpc-plugin || exit 1
     # build
     sudo -u bitcoin /home/bitcoin/.cargo/bin/cargo build \
-     --target-dir /home/bitcoin/cl-plugins-available/cln-grpc
+     --target-dir /home/bitcoin/cln-grpc-build
+    # delete old dir or binary
+    sudo rm -rf /home/bitcoin/cl-plugins-available/cln-grpc
+    # move to /home/bitcoin/cl-plugins-available/
+    sudo -u bitcoin mv /home/bitcoin/cln-grpc-build/debug/cln-grpc /home/bitcoin/cl-plugins-available/
   else
     echo "# - cln-grpc plugin was already built/installed"
   fi
+  echo "# Cleaning"
+  sudo rm -rf /home/bitcoin/.rustup
+  sudo rm -rf /home/bitcoin/.cargo/
+  sudo rm -rf /home/bitcoin/.cache
+  sudo rm -rf /home/bitcoin/cln-grpc-build
 }
 
 function switchOn() {
-  if ! "$lightningcli_alias" plugin list | grep "/home/bitcoin/${netprefix}cl-plugins-enabled/cln-grpc"; then
+  if ! $lightningcli_alias plugin list | grep "/home/bitcoin/${netprefix}cl-plugins-enabled/cln-grpc"; then
     buildGRPCplugin
 
     # symlink to plugin directory
     echo "# symlink cln-grpc to /home/bitcoin/${netprefix}cl-plugins-enabled/"
-    sudo ln -s /home/bitcoin/cl-plugins-available/cln-grpc/debug/cln-grpc /home/bitcoin/${netprefix}cl-plugins-enabled/
+    # delete old symlink
+    sudo rm /home/bitcoin/${netprefix}cl-plugins-enabled/cln-grpc
+    sudo ln -s /home/bitcoin/cl-plugins-available/cln-grpc /home/bitcoin/${netprefix}cl-plugins-enabled/
+
     # blitz.conf.sh set [key] [value] [?conffile] <noquotes>
     /home/admin/config.scripts/blitz.conf.sh set "grpc-port" "${PORT}" "${CLCONF}" "noquotes"
     /home/admin/config.scripts/blitz.conf.sh set "${netprefix}clnGRPCport" "${PORT}"
