@@ -43,7 +43,7 @@ do
   source ${infoFile} 2>/dev/null
   source ${configFile} 2>/dev/null
   source <(/home/admin/_cache.sh get state setupPhase)
-  
+
   ####################################################
   # SKIP BACKGROUND TASK LOOP ON CERTAIN SYSTEM STATES
   # https://github.com/rootzoll/raspiblitz/issues/160
@@ -266,7 +266,7 @@ do
       # first check if flags need to be reset (manually delete of blockchain)
       if [ "${flagBtcDone}" == "1" ] && [ "${flagBtcActive}" == "1" ]; then
         flagBtcDone=0
-        /home/admin/config.scripts/blitz.conf.sh set btc_${CHAIN}net_sync_initial_done ${flagBtcDone} /home/admin/raspiblitz.info      
+        /home/admin/config.scripts/blitz.conf.sh set btc_${CHAIN}net_sync_initial_done ${flagBtcDone} /home/admin/raspiblitz.info
         echo "EVENT --> btc_${CHAIN}net_sync_initial_done changed to ${flagBtcDone}"
       fi
 
@@ -280,7 +280,7 @@ do
       # when started done is set - but not not active anymore --> end of IDB event detected
       if [ "${flagBtcDone}" == "0" ] && [ "${flagBtcOnline}" == "1" ] && [ "${flagBtcSynced}" == "1" ]; then
         flagBtcDone=1
-        /home/admin/config.scripts/blitz.conf.sh set btc_${CHAIN}net_sync_initial_done ${flagBtcDone} /home/admin/raspiblitz.info      
+        /home/admin/config.scripts/blitz.conf.sh set btc_${CHAIN}net_sync_initial_done ${flagBtcDone} /home/admin/raspiblitz.info
         echo "EVENT --> btc_${CHAIN}net_sync_initial_done changed to ${flagBtcDone}"
       fi
 
@@ -335,7 +335,7 @@ do
   fi
 
   ####################################################
-  # CHECK FOR End of Intial Blockhain & Lightning Sync
+  # Check for end of Initial Blockhain & Lightning Sync
   # bitcoin mainnet only / special on dbcache size
   ####################################################
 
@@ -347,7 +347,7 @@ do
     # this flag signals that an initial blockchain sync/chatchup was happening
     flagExists=$(ls /mnt/hdd/bitcoin/blocks/selfsync.flag 2>/dev/null | grep -c "selfsync.flag")
     if [ ${flagExists} -eq 1 ]; then
-    
+
       source <(/home/admin/_cache.sh get btc_default_sync_initialblockdownload)
       if [ "${btc_default_sync_initialblockdownload}" == "0" ]; then
 
@@ -387,7 +387,7 @@ do
   # check every 30sec
   recheckBlitzTUI=$(($counter % 30))
   if [ "${touchscreen}" == "1" ] && [ ${recheckBlitzTUI} -eq 1 ]; then
-    
+
     echo "BlitzTUI Monitoring Check"
     if [ -d "/var/cache/raspiblitz" ]; then
       latestHeartBeatLine=$(tail -n 300 /var/cache/raspiblitz/pi/blitz-tui.log | grep beat | tail -n 1)
@@ -621,7 +621,7 @@ do
 
 
   ###############################
-  # SUBSCRIPTION RENWES
+  # SUBSCRIPTION RENEWS
   ###############################
 
   # check every 20min
