@@ -232,6 +232,10 @@ do
       echo "Blockchain Sync Monitoring: ZERO PEERS DETECTED .. doing out-of-band kickstart"
       /home/admin/config.scripts/bitcoin.monitor.sh mainnet peer-kickstart
     fi
+    if [ "${i2pd}" == "on" ] && [ "${btc_peers_i2p}" == "0" ] && [ "${btc_running}" == "1" ]; then
+      echo "Blockchain Sync Monitoring: IP2TOR 0 peers .. doing out-of-band kickstart"
+      /home/admin/config.scripts/bitcoin.monitor.sh mainnet peer-kickstart i2p
+    fi
   fi
 
   ####################################################
