@@ -257,7 +257,7 @@ if [ "$2" = "peer-kickstart" ]; then
   # filter raw data for node addresses based on what kind of connection is running
   if [ "${addressFormat}" == "tor" ]; then
     # get Tor nodes (v3)
-    nodeList=$(echo "${bitnodesRawData1}" | grep -o '[0-9a-z]\{31,56\}d\.onion')
+    nodeList=$(echo "${bitnodesRawData1}" | grep -o '[0-9a-z]\{32,56\}\.onion')
   elif [ "${addressFormat}" == "ipv4" ]; then
     # get IPv4 nodes
     nodeList=$(echo "${bitnodesRawData1}" | grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\:[0-9]\{3,5\}')
