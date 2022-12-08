@@ -47,7 +47,7 @@ if [ "$1" = "menu" ]; then
   if [ "${LNBitsFunding}" == "lnd" ] || [ "${LNBitsFunding}" == "tlnd" ] || [ "${LNBitsFunding}" == "slnd" ]; then
     fundinginfo="on LND "
   elif [ "${LNBitsFunding}" == "cl" ] || [ "${LNBitsFunding}" == "tcl" ] || [ "${LNBitsFunding}" == "scl" ]; then
-    fundinginfo="on c-lightning "
+    fundinginfo="on CLN "
   fi
 
   text="Local Web Browser: https://${localIP}:${httpsPort}"
@@ -112,7 +112,7 @@ Consider adding a IP2TOR Bridge under OPTIONS."
 
   # Change Funding Source options (only if available)
   if [ "${LNBitsFunding}" == "lnd" ] && [ "${cl}" == "on" ]; then
-    OPTIONS+=(SWITCH-CL "Switch: Use c-lightning as funding source")
+    OPTIONS+=(SWITCH-CL "Switch: Use CLN as funding source")
   elif [ "${LNBitsFunding}" == "cl" ] && [ "${lnd}" == "on" ]; then
     OPTIONS+=(SWITCH-LND "Switch: Use LND as funding source")
   fi
@@ -264,6 +264,7 @@ if [ "$1" = "prestart" ]; then
   echo "# --> /home/lnbits/lnbits/.env"
 
   # set values based in funding source in raspiblitz config
+  # portprefix is "" |  1 | 3
   LNBitsNetwork="bitcoin"
   LNBitsChain=""
   LNBitsLightning=""
@@ -271,12 +272,15 @@ if [ "$1" = "prestart" ]; then
     LNBitsFunding="lnd"
     LNBitsLightning="lnd"
     LNBitsChain="main"
+    portprefix=""
   elif [ "${LNBitsFunding}" == "tlnd" ]; then
     LNBitsLightning="lnd"
     LNBitsChain="test"
+    portprefix="1"
   elif [ "${LNBitsFunding}" == "slnd" ]; then
     LNBitsLightning="lnd"
     LNBitsChain="sig"
+    portprefix="3"
   elif [ "${LNBitsFunding}" == "cl" ]; then
     LNBitsLightning="cl"
     LNBitsChain="main"
@@ -318,16 +322,17 @@ if [ "$1" = "prestart" ]; then
     sed -i "s/^LND_REST_ADMIN_MACAROON=.*/LND_REST_ADMIN_MACAROON=${macaroonAdminHex}/g" /home/lnbits/lnbits/.env
     sed -i "s/^LND_REST_INVOICE_MACAROON=.*/LND_REST_INVOICE_MACAROON=${macaroonInvoiceHex}/g" /home/lnbits/lnbits/.env
     sed -i "s/^LND_REST_READ_MACAROON=.*/LND_REST_READ_MACAROON=${macaroonReadHex}/g" /home/lnbits/lnbits/.env
+    sed -i "s/^LND_REST_ENDPOINT=.*/LND_REST_ENDPOINT=https://127.0.0.1:${portprefix}8080/g" /home/lnbits/lnbits/.env
 
   elif [ "${LNBitsLightning}" == "cl" ]; then
 
     isUsingCL=$(cat /home/lnbits/lnbits/.env | grep -c "LNBITS_BACKEND_WALLET_CLASS=CLightningWallet")
     if [ "${isUsingCL}" != "1" ]; then
-      echo "# FAIL: /home/lnbits/lnbits/.env not set to c-lightning"
+      echo "# FAIL: /home/lnbits/lnbits/.env not set to CLN"
       exit 1
     fi
 
-    echo "# everything looks OK for lnbits config on c-lightning on ${LNBitsChain}net"
+    echo "# everything looks OK for lnbits config on CLN on ${LNBitsChain}net"
 
   else
     echo "# FAIL: missing or not supported LNBitsLightning=${LNBitsLightning}"
@@ -442,19 +447,19 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   elif [ "${fundingsource}" == "cl" ]; then
     if [ "${cl}" != "on" ]; then
-      echo "# FAIL: c-lightning mainnet needs to be activated"
+      echo "# FAIL: CLN mainnet needs to be activated"
       exit 1
     fi
 
   elif [ "${fundingsource}" == "tcl" ]; then
     if [ "${tcl}" != "on" ]; then
-      echo "# FAIL: c-lightning testnet needs to be activated"
+      echo "# FAIL: CLN testnet needs to be activated"
       exit 1
     fi
 
   elif [ "${fundingsource}" == "scl" ]; then
     if [ "${scl}" != "on" ]; then
-      echo "# FAIL: c-lightning signet needs to be activated"
+      echo "# FAIL: CLN signet needs to be activated"
       exit 1
     fi
 
@@ -532,8 +537,7 @@ After=bitcoind.service
 [Service]
 WorkingDirectory=/home/lnbits/lnbits
 ExecStartPre=/home/admin/config.scripts/bonus.lnbits.sh prestart
-
-ExecStart=/bin/sh -c 'cd /home/lnbits/lnbits && ./venv/bin/uvicorn lnbits.__main__:app --port 5000'
+ExecStart=/home/lnbits/lnbits/venv/bin/uvicorn lnbits.__main__:app --port 5000
 User=lnbits
 Restart=always
 TimeoutSec=120
@@ -594,7 +598,7 @@ EOF
   exit 0
 fi
 
-# config for a special funding source (e.g lnd or c-lightning as backend)
+# config for a special funding source (e.g lnd or CLN as backend)
 if [ "$1" = "switch" ]; then
 
   echo "## bonus.lnbits.sh switch $2"
@@ -622,21 +626,21 @@ if [ "$1" = "switch" ]; then
 
   elif [ "${fundingsource}" == "cl" ]; then
     if [ "${cl}" != "on" ]; then
-      echo "# FAIL: c-lightning mainnet not installed or running"
+      echo "# FAIL: CLN mainnet not installed or running"
       exit 1
     fi
 
   elif [ "${fundingsource}" == "tcl" ]; then
     clrpcsubdir="/testnet"
     if [ "${tcl}" != "on" ]; then
-      echo "# FAIL: c-lightning testnet not installed or running"
+      echo "# FAIL: CLN testnet not installed or running"
       exit 1
     fi
 
   elif [ "${fundingsource}" == "scl" ]; then
     clrpcsubdir="/signet"
     if [ "${scl}" != "on" ]; then
-      echo "# FAIL: c-lightning signet not installed or running"
+      echo "# FAIL: CLN signet not installed or running"
       exit 1
     fi
 
@@ -700,7 +704,7 @@ if [ "$1" = "switch" ]; then
       echo "rpc-file-mode=0660" | sudo tee -a ${CLCONF}
     fi
 
-    echo "# preparing lnbits config for c-lightning"
+    echo "# preparing lnbits config for CLN"
     sudo bash -c "echo 'LNBITS_BACKEND_WALLET_CLASS=CLightningWallet' >> /home/lnbits/lnbits/.env"
     sudo bash -c "echo 'CLIGHTNING_RPC=/home/bitcoin/.lightning/bitcoin${clrpcsubdir}/lightning-rpc' >> /home/lnbits/lnbits/.env"
   fi

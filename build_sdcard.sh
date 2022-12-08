@@ -2,8 +2,8 @@
 
 #########################################################################
 # Build your SD card image based on: 2022-04-04-raspios-bullseye-arm64.img.xz
-# https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2022-04-07/
-# SHA256: 5adcab7a063310734856adcdd2041c8d58f65c185a3383132bc758886528a93d
+# https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2022-09-26/
+# SHA256: c42856ffca096480180b5aff66e1dad2f727fdc33359b24e0d2d49cc7676b576
 # PGP fingerprint: 8738CD6B956F460C
 # PGP key: https://www.raspberrypi.org/raspberrypi_downloads.gpg.key
 # setup fresh SD card with image above - login per SSH and run this script:
@@ -302,9 +302,10 @@ echo -e "\n*** SOFTWARE UPDATE ***"
 # sqlite3 -> database
 # fdisk -> create partitions
 # lsb-release -> needed to know which distro version we're running to add APT sources
-general_utils="policykit-1 htop git curl bash-completion vim jq dphys-swapfile bsdmainutils autossh telnet vnstat parted dosfstools btrfs-progs fbi sysbench build-essential dialog bc python3-dialog unzip whois fdisk lsb-release"
+general_utils="policykit-1 htop git curl bash-completion vim jq dphys-swapfile bsdmainutils autossh telnet vnstat parted dosfstools btrfs-progs fbi sysbench build-essential dialog bc python3-dialog unzip whois fdisk lsb-release smartmontools"
 
-python_dependencies="python3-venv python3-dev python3-wheel python3-jinja2 python3-pip"
+# python3-mako --> https://github.com/rootzoll/raspiblitz/issues/3441
+python_dependencies="python3-venv python3-dev python3-wheel python3-jinja2 python3-pip python3-mako"
 server_utils="rsync net-tools xxd netcat openssh-client openssh-sftp-server sshpass psmisc ufw sqlite3"
 [ "${baseimage}" = "armbian" ] && armbian_dependencies="armbian-config" # add armbian-config
 apt_install ${general_utils} ${python_dependencies} ${server_utils} ${armbian_dependencies}
@@ -320,7 +321,7 @@ sudo update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
 # pytesseract mechanize PySocks urwid Pillow requests
 # 3. Nyx
 # setuptools
-python_libs="grpcio==1.42.0 googleapis-common-protos==1.53.0 toml==0.10.2 j2cli==0.3.10 requests[socks]==2.21.0 protobuf==3.20.1"
+python_libs="grpcio==1.42.0 googleapis-common-protos==1.53.0 toml==0.10.2 j2cli==0.3.10 requests[socks]==2.21.0 protobuf==3.20.1 wrapt==1.14.1"
 torbox_libs="pytesseract mechanize PySocks urwid Pillow requests setuptools"
 sudo -H python3 -m pip install --upgrade pip
 sudo -H python3 -m pip install ${python_libs} ${torbox_libs}
@@ -751,6 +752,12 @@ echo
 echo
 /home/admin/config.scripts/bitcoin.install.sh install || exit 1
 
+#######
+# I2P #
+#######
+echo
+/home/admin/config.scripts/blitz.i2pd.sh install || exit 1
+
 # *** BLITZ WEB SERVICE ***
 echo "Provisioning BLITZ WEB SERVICE"
 /home/admin/config.scripts/blitz.web.sh http-on || exit 1
@@ -773,16 +780,12 @@ if ${fatpack}; then
   echo "* Adding the cln-grpc plugin ..."
   /home/admin/config.scripts/cl-plugin.cln-grpc.sh install || exit 1
 
-  # *** UPDATE FALLBACK NODE LIST (only as part of fatpack) *** see https://github.com/rootzoll/raspiblitz/issues/1888
+  # *** AUTO UPDATE FALLBACK NODE LIST FROM INTERNET (only in fatpack)
   echo "*** FALLBACK NODE LIST ***"
-  sudo -u admin curl -H "Accept: application/json; indent=4" https://bitnodes.io/api/v1/snapshots/latest/ -o /home/admin/fallback.nodes
-  byteSizeList=$(sudo -u admin stat -c %s /home/admin/fallback.nodes)
-  if [ ${#byteSizeList} -eq 0 ] || [ ${byteSizeList} -lt 10240 ]; then
-    echo "WARN: Failed downloading fresh FALLBACK NODE LIST --> https://bitnodes.io/api/v1/snapshots/latest/"
-    sudo rm /home/admin/fallback.nodes 2>/dev/null
-    sudo cp /home/admin/assets/fallback.nodes /home/admin/fallback.nodes
-  fi
-  sudo chown admin:admin /home/admin/fallback.nodes
+  # see https://github.com/rootzoll/raspiblitz/issues/1888
+  sudo -u admin curl -H "Accept: application/json; indent=4" https://bitnodes.io/api/v1/snapshots/latest/ -o /home/admin/fallback.bitnodes.nodes
+  # Fallback Nodes List from Bitcoin Core
+  sudo -u admin curl https://raw.githubusercontent.com/bitcoin/bitcoin/master/contrib/seeds/nodes_main.txt -o /home/admin/fallback.bitcoin.nodes
 
   echo "* Adding Raspiblitz API ..."
   sudo /home/admin/config.scripts/blitz.web.api.sh on || exit 1
@@ -799,6 +802,24 @@ if ${fatpack}; then
 else
   echo "* skipping FATPACK"
 fi
+
+# check fallback list bitnodes
+byteSizeList=$(sudo -u admin stat -c %s /home/admin/fallback.bitnodes.nodes)
+if [ ${#byteSizeList} -eq 0 ] || [ ${byteSizeList} -lt 10240 ]; then
+  echo "Using fallback list from repo: bitnodes"
+  sudo rm /home/admin/fallback.bitnodes.nodes 2>/dev/null
+  sudo cp /home/admin/assets/fallback.bitnodes.nodes /home/admin/fallback.bitnodes.nodes
+fi
+sudo chown admin:admin /home/admin/fallback.bitnodes.nodes
+
+# check fallback list bitcoin core
+byteSizeList=$(sudo -u admin stat -c %s /home/admin/fallback.bitcoin.nodes)
+if [ ${#byteSizeList} -eq 0 ] || [ ${byteSizeList} -lt 10240 ]; then
+  echo "Using fallback list from repo: bitcoin core"
+  sudo rm /home/admin/fallback.bitcoin.nodes 2>/dev/null
+  sudo cp /home/admin/assets/fallback.bitcoin.nodes /home/admin/fallback.bitcoin.nodes
+fi
+sudo chown admin:admin /home/admin/fallback.bitcoin.nodes
 
 echo
 echo "*** raspiblitz.info ***"

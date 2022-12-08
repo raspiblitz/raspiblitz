@@ -33,6 +33,7 @@ if [ ${#helipad} -eq 0 ]; then helipad="off"; fi
 if [ ${#bitcoinminds} -eq 0 ]; then bitcoinminds="off"; fi
 if [ ${#squeaknode} -eq 0 ]; then squeaknode="off"; fi
 if [ ${#itchysats} -eq 0 ]; then itchysats="off"; fi
+if [ ${#lightningtipbot} -eq 0 ]; then lightningtipbot="off"; fi
 
 # show select dialog
 echo "run dialog ..."
@@ -56,6 +57,7 @@ fi
 # available for both LND & c-lightning
 if [ "${lnd}" == "on" ] || [ "${cl}" == "on" ]; then
   OPTIONS+=(i 'LNbits (Lightning Accounts)' ${LNBits})
+  OPTIONS+=(g 'LightningTipBot' ${lightningtipbot})
 fi
 
 # just available for LND
@@ -388,6 +390,21 @@ if [ "${LNBits}" != "${choice}" ]; then
   fi
 else
   echo "LNbits setting unchanged."
+fi
+
+# LightningTipBot process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "g")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${lightningtipbot}" != "${choice}" ]; then
+  echo "LightningTipBot Setting changed .."
+  anychange=1
+  sudo -u admin /home/admin/config.scripts/bonus.lightningtipbot.sh ${choice}
+  if [ "${choice}" =  "on" ]; then
+    sudo systemctl start lightningtipbot
+    sudo -u admin /home/admin/config.scripts/bonus.lightningtipbot.sh menu
+  fi
+else
+  echo "LightningTipBot setting unchanged."
 fi
 
 # LIT (Lightning Terminal)

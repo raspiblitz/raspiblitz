@@ -120,7 +120,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "# get the github code ${githubRepo}"
     sudo rm -r /home/squeaknode/squeaknode 2>/dev/null
     cd /home/squeaknode
-    sudo -u squeaknode git clone ${githubRepo}.git
+    sudo -u squeaknode git clone ${githubRepo}.git 
     cd /home/squeaknode/squeaknode
     sudo -u squeaknode git checkout ${pinnedVersion}
 

@@ -34,7 +34,7 @@ if [ "$1" = "menu" ]; then
     # TOR
     /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
     whiptail --title " Homer " --msgbox "Open in your local web browser & accept self-signed cert:
-https://${localip}:4091\n
+https://${localIP}:4091\n
 SHA1 Thumb/Fingerprint:
 ${fingerprint}\n
 Hidden Service address for TOR Browser (QR see LCD):
@@ -46,7 +46,7 @@ ${additionalInfo}
 
     # IP + Domain
     whiptail --title " Homer " --msgbox "Open in your local web browser & accept self-signed cert:
-https://${localip}:4091\n
+https://${localIP}:4091\n
 SHA1 Thumb/Fingerprint:
 ${fingerprint}\n
 Activate TOR to access the web block explorer from outside your local network.\n
