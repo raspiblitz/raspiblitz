@@ -17,6 +17,7 @@ if [ ${#circuitbreaker} -eq 0 ]; then circuitbreaker="off"; fi
 if [ ${#clboss} -eq 0 ]; then clboss="off"; fi
 if [ ${#clEncryptedHSM} -eq 0 ]; then clEncryptedHSM="off"; fi
 if [ ${#clAutoUnlock} -eq 0 ]; then clAutoUnlock="off"; fi
+if [ ${#clWatchtowerClient} -eq 0 ]; then clWatchtowerClient="off"; fi
 if [ ${#blitzapi} -eq 0 ]; then blitzapi="off"; fi
 
 echo "# map LND to on/off"
@@ -95,6 +96,12 @@ if [ "${clAutoUnlock}" == "on" ]; then
   clAutoUnlockMenu='on'
 fi
 
+echo "# map clWatchtowerClient to on/off"
+clWatchtowerClientMenu='off'
+if [ "${clWatchtowerClient}" == "on" ]; then
+  clWatchtowerClientMenu='on'
+fi
+
 echo "# map keysend to on/off (may take time)"
 keysend="on"
 source <(sudo /home/admin/config.scripts/lnd.keysend.sh status)
@@ -147,6 +154,7 @@ OPTIONS+=(n 'CL CORE LIGHTNING NODE' ${clNode})
 if [ "${clNode}" == "on" ]; then
   OPTIONS+=(o '-CL CLBOSS Automatic Node Manager' ${clbossMenu})
   OPTIONS+=(h '-CL Wallet Encryption' ${clEncryptedHSMMenu})
+  OPTIONS+=(w '-CL Watchtower Client' ${clWatchtowerClientMenu})  
   if [ "${clEncryptedHSM}" == "on" ]; then
     OPTIONS+=(q '-CL Auto-Unlock' ${clAutoUnlockMenu})
   fi
@@ -498,6 +506,28 @@ if [ "${clAutoUnlock}" != "${choice}" ] && [ "${clNode}" == "on" ]; then
   needsReboot=0
 else
   echo "clAutoUnlock Setting unchanged."
+fi
+
+# clWatchtowerClient process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "w")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${clWatchtowerClient}" != "${choice}" ] && [ "${clNode}" == "on" ]; then
+  echo "CL WATCHTOWER CLIENT Setting changed .."
+  anychange=1
+
+  if [ ${choice} = on ]; then
+    if /home/admin/config.scripts/cl-plugin.watchtower-client.sh info; then
+      sudo /home/admin/config.scripts/cl-plugin.watchtower-client.sh on
+    else
+      echo "CL WATCHTOWER CLIENT install was cancelled."
+      sleep 2
+    fi
+  else
+    sudo /home/admin/config.scripts/cl-plugin.watchtower-client.sh off
+  fi
+  needsReboot=0
+else
+  echo "CL WATCHTOWER CLIENT Setting unchanged."
 fi
 
 # parallel testnet process choice

@@ -2,6 +2,7 @@
 
 ## What's new in Version 1.9.0 of RaspiBlitz?
 
+- New: CL Watchtower (The Eye of Satoshi) [details](https://github.com/talaia-labs/rust-teos/tree/master/watchtower-plugin)
 - New: Support of X708 UPS HAT [details](https://github.com/rootzoll/raspiblitz/pull/3087)
 - Update: Bitcoin Core v24.0 [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-24.0.md)
 - Update: LND v0.15.5 [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.15.5-beta
