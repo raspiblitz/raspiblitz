@@ -13,7 +13,7 @@ systemctl mask apt-daily.service
 systemctl mask apt-daily-upgrade.service
 systemctl daemon-reload
 
-apt-get update
-
-apt-get -y upgrade linux-image-$arch
-apt-get -y install linux-headers-$(uname -r)
+## leave update and upgrade to the build_sdcard.sh
+#apt-get update
+#apt-get -y upgrade linux-image-$arch
+#apt-get -y install linux-headers-$(uname -r)

@@ -218,7 +218,7 @@ esac
 # AUTO-DETECTION: OPERATINGSYSTEM
 # ---------------------------------------
 if [ $(cat /etc/os-release 2>/dev/null | grep -c 'Debian') -gt 0 ]; then
-  if [ $(uname -n | grep -c 'raspberrypi') -gt 0 ] && [ "${cpu}" = aarch64 ]; then
+  if [ -f /etc/apt/sources.list.d/raspi.list ] && [ "${cpu}" = aarch64 ]; then
     # default image for RaspberryPi
     baseimage="raspios_arm64"
   elif [ $(uname -n | grep -c 'rpi') -gt 0 ] && [ "${cpu}" = aarch64 ]; then
@@ -274,7 +274,7 @@ if [ "${baseimage}" = "raspios_arm64" ]||[ "${baseimage}" = "debian_rpi64" ]||[ 
 fi
 
 echo "*** Remove unnecessary packages ***"
-sudo apt remove --purge -y libreoffice* oracle-java* chromium-browser nuscratch scratch sonic-pi plymouth python2 vlc cups
+sudo apt remove --purge -y libreoffice* oracle-java* chromium-browser nuscratch scratch sonic-pi plymouth python2 vlc* cups
 sudo apt clean -y
 sudo apt autoremove -y
 
@@ -770,7 +770,7 @@ if ${fatpack}; then
   sudo /home/admin/config.scripts/bonus.nodejs.sh on || exit 1
 
   echo "* Optional Packages (may be needed for extended features)"
-  apt_install qrencode secure-delete fbi ssmtp unclutter xterm python3-pyqt5 xfonts-terminus apache2-utils nginx python3-jinja2 socat libatlas-base-dev hexyl autossh
+  apt_install qrencode secure-delete fbi msmtp unclutter xterm python3-pyqt5 xfonts-terminus apache2-utils nginx python3-jinja2 socat libatlas-base-dev hexyl autossh
 
   echo "* Adding LND ..."
   /home/admin/config.scripts/lnd.install.sh install || exit 1

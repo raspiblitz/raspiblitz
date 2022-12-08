@@ -6,13 +6,13 @@ on:
     paths:
       - 'build_sdcard.sh'
       - 'home.admin/**'
-      - 'ci/**'
+      - 'ci/amd64/**'
   pull_request:
     branches: [ "dev" ]
     paths:
       - 'build_sdcard.sh'
       - 'home.admin/**'
-      - 'ci/**'
+      - 'ci/amd64/**'
   workflow_dispatch:
 
 jobs:
@@ -27,33 +27,33 @@ jobs:
           echo "BUILD_VERSION=$(git describe --always --tags)" >> $GITHUB_ENV
 
       - name: Hello RaspiBlitz
-        run: echo "Building the debian-11.5-amd64-image-${{env.BUILD_DATE}}-${{env.BUILD_VERSION}} at "
+        run: echo "Building the raspiblitz-amd64-debian-11.5-image-${{env.BUILD_DATE}}-${{env.BUILD_VERSION}} at "
 
       - name: Run the build script
         run: |
-          cd ci
-          bash packer.build.amd64-fatpack.sh $GITHUB_ACTOR $GITHUB_HEAD_REF
+          cd ci/amd64
+          bash packer.build.amd64-debian.sh fatpack $GITHUB_ACTOR $GITHUB_HEAD_REF
 
       - name: Compute checksum of the raw image
         run: |
-          cd builds/packer-debian-11.5-amd64-fatpack-qemu//
-          sha256sum debian-11.5-amd64-fatpack.qcow2 > debian-11.5-amd64-fatpack.qcow2.sha256
+          cd ci/amd64/builds/raspiblitz-amd64-debian-11.5-fatpack-qemu/
+          sha256sum raspiblitz-amd64-debian-11.5-fatpack.qcow2 > raspiblitz-amd64-debian-11.5-fatpack.qcow2.sha256
 
       - name: Compress image
         run: |
-          cd builds/packer-debian-11.5-amd64-fatpack-qemu//
-          gzip -v9 debian-11.5-amd64-fatpack.qcow2
+          cd ci/amd64/builds/raspiblitz-amd64-debian-11.5-fatpack-qemu/
+          gzip -v9 raspiblitz-amd64-debian-11.5-fatpack.qcow2
 
       - name: Compute checksum of the compressed image
         run: |
-          cd builds/packer-debian-11.5-amd64-fatpack-qemu//
-          sha256sum debian-11.5-amd64-fatpack.qcow2.gz > debian-11.5-amd64-fatpack.qcow2.gz.sha256
+          cd ci/amd64/builds/raspiblitz-amd64-debian-11.5-fatpack-qemu/
+          sha256sum raspiblitz-amd64-debian-11.5-fatpack.qcow2.gz > raspiblitz-amd64-debian-11.5-fatpack.qcow2.gz.sha256
 
       - name: Upload the image and checksums
         uses: actions/upload-artifact@v3
         with:
           name: raspiblitz-amd64-image-${{env.BUILD_DATE}}-${{env.BUILD_VERSION}}
           path: |
-            ${{github.workspace}}/builds/packer-debian-11.5-amd64-fatpack-qemu//debian-11.5-amd64-fatpack.qcow2.sha256
-            ${{github.workspace}}/builds/packer-debian-11.5-amd64-fatpack-qemu//debian-11.5-amd64-fatpack.qcow2.gz
-            ${{github.workspace}}/builds/packer-debian-11.5-amd64-fatpack-qemu//debian-11.5-amd64-fatpack.qcow2.gz.sha256
+            ${{github.workspace}}/ci/amd64/builds/raspiblitz-amd64-debian-11.5-fatpack-qemu/raspiblitz-amd64-debian-11.5-fatpack.qcow2.sha256
+            ${{github.workspace}}/ci/amd64/builds/raspiblitz-amd64-debian-11.5-fatpack-qemu/raspiblitz-amd64-debian-11.5-fatpack.qcow2.gz
+            ${{github.workspace}}/ci/amd64/builds/raspiblitz-amd64-debian-11.5-fatpack-qemu/raspiblitz-amd64-debian-11.5-fatpack.qcow2.gz.sha256

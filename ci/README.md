@@ -22,7 +22,7 @@ with the [Makefile](https://github.com/rootzoll/raspiblitz/blob/dev/Makefile)
     git checkout dev
     make amd64-fatpack-image
     ```
-* find the image and sh256 hashes in the `builds` directory
+* find the image and sh256 hashes in the `ci/amd64/builds` directory
 
 ## Images generated in github actions
 Find the images in the green runs in github actions at:
@@ -34,8 +34,8 @@ identify the connected disk with `lsblk` eg `/dev/sdd`
 ###  Convert qcow2 to raw image
 * the raw image is 33.5 GB
     ```
-    gzip -dkv debian-11.5-amd64-fatpack.qcow2.gz
-    qemu-img convert debian-11.5-amd64-fatpack.qcow2 debian-11.5-amd64-fatpack.img
+    gzip -dkv raspiblitz-amd64-debian-11.5-fatpack.qcow2.gz
+    qemu-img convert raspiblitz-amd64-debian-11.5-fatpack.qcow2 raspiblitz-amd64-debian-11.5-fatpack.img
     ```
 ### Write to a disk connected with USB with Balena Etcher or `dd`
 
@@ -86,4 +86,4 @@ identify the connected disk with `lsblk` eg `/dev/sdd`
 * VNC
     * can follow the setup locally in VNC with the port stated in the first part of the logs eg: `Found available VNC port: 5952 on IP: 127.0.0.1`
 * Flashing
-    * using `sudo qemu-img dd bs=4M if=debian-11.5-amd64-lean.qcow2 of=/dev/sdd` changed the UUID so it won't boot without editing the GRUB
+    * using `sudo qemu-img dd bs=4M if=raspiblitz-amd64-debian-11.5-lean.qcow2 of=/dev/sdd` changed the UUID so it won't boot without editing the GRUB

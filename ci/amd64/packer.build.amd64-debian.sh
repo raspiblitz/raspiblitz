@@ -12,13 +12,19 @@ echo -e "\nInstalling qemu..."
 sudo apt-get install -y qemu-system
 
 if [ $# -gt 0 ]; then
-  github_user=$1
+  pack=$1
+else
+  pack=lean
+fi
+
+if [ $# -gt 1 ]; then
+  github_user=$2
 else
   github_user=rootzoll
 fi
 
-if [ $# -gt 1 ]; then
-  branch=$2
+if [ $# -gt 2 ]; then
+  branch=$3
 else
   branch=dev
 fi
@@ -26,4 +32,6 @@ fi
 # Build the image
 echo -e "\nBuilding image..."
 cd debian
-PACKER_LOG=1 packer build --var github_user=${github_user} --var branch=${branch} -only=qemu debian-11.5-amd64-lean.json
+PACKER_LOG=1 packer build \
+ --var pack=${pack} --var github_user=${github_user} --var branch=${branch}  \
+ -only=qemu amd64-debian.json
