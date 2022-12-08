@@ -3,6 +3,7 @@
 ## What's new in Version 1.8.1 of RaspiBlitz?
 
 - New: Support of X708 UPS HAT [details](https://github.com/rootzoll/raspiblitz/pull/3087)
+- New: Bos TelegramBot Support (see OPTIONS on LND Balance of Satoshis menu entry)
 - Update: LND v0.15.4 [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.15.4-beta
 - Update: Lightning Terminal v0.8.3-alpha [details](https://github.com/lightninglabs/lightning-terminal/releases/tag/v0.8.3-alpha)
 - Update: Core Lightning v0.12.1 [details](https://github.com/ElementsProject/lightning/releases/tag/v0.12.1)
