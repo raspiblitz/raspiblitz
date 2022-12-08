@@ -22,17 +22,15 @@ pkg_dependencies="libssl-dev"
 
 if [ "$1" = info ]; then
 	whiptail --title "The Eye of Satoshi CLN Watchtower" \
-    --yes-button "Install" \
-		--no-button "Cancel" \
-		--yesno "
+    --msgbox "
 This is a watchtower client plugin to interact with an Eye of Satoshi tower, and
-eventually with any BOLT13 compliant watchtower.
+eventually with any BOLT13 compliant watchtower. 
 
 The plugin manages all the client-side logic to send appointment to a number of
 registered towers every time a new commitment transaction is generated.
 It also keeps a summary of the messages sent to the towers and their responses.
 
-Usage:
+Usage (from the command line):
 
 cl registertower <tower_id>: registers the user id (compressed public key) with a given tower.
 cl gettowerinfo <tower_id>: gets all the locally stored data about a given tower.
@@ -47,6 +45,7 @@ cl getregistrationreceipt <tower_id>: pulls the latest registration receipt from
 Links with more info:
 https://github.com/talaia-labs/rust-teos/tree/master/watchtower-plugin
 " 0 0
+  exit 0
 fi
 
 
