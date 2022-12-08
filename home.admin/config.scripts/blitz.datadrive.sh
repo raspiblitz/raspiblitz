@@ -38,6 +38,18 @@ if [ ${btrfsInstalled} -eq 0 ]; then
   exit 1
 fi
 
+# install smartmontools if needed
+smartmontoolsInstalled=$(apt-cache policy smartmontools | grep -c 'Installed: (none)' | grep -c "0")
+if [ ${smartmontoolsInstalled} -eq 0 ]; then
+  >&2 echo "# Installing smartmontools ..."
+  apt-get install -y smartmontools 1>/dev/null
+fi
+smartmontoolsInstalled=$(apt-cache policy smartmontools | grep -c 'Installed: (none)' | grep -c "0")
+if [ ${smartmontoolsInstalled} -eq 0 ]; then
+  echo "error='missing smartmontools package'"
+  exit 1
+fi
+
 ###################
 # STATUS
 ###################
@@ -51,6 +63,7 @@ isBTRFS=$(btrfs filesystem show 2>/dev/null| grep -c 'BLITZSTORAGE')
 isRaid=$(btrfs filesystem df /mnt/hdd 2>/dev/null | grep -c "Data, RAID1")
 isZFS=$(zfs list 2>/dev/null | grep -c "/mnt/hdd")
 isSSD="0"
+isSMART="0"
 
 # determine if swap is external on or not
 externalSwapPath="/mnt/hdd/swapfile"
@@ -162,8 +175,16 @@ if [ "$1" = "status" ]; then
       hddDataPartition=""
     fi
 
-    # try to detect if its an SSD 
-    isSSD=$(cat /sys/block/${hdd}/queue/rotational 2>/dev/null | grep -c 0)
+    # try to detect if its an SSD
+    isSMART=$(sudo smartctl -a /dev/${hdd} | grep -c "Rotation Rate:")
+    echo "isSMART=$(isSMART)"
+    if [ ${isSMART} -gt 0 ]; then
+    	#detect using smartmontools (preferred)
+        isSSD=$(sudo smartctl -a /dev/${hdd} | grep 'Rotation Rate:' | grep -c "Solid State")
+    else
+    	#detect using using fall back method
+	isSSD=$(cat /sys/block/${hdd}/queue/rotational 2>/dev/null | grep -c 0)
+    fi 
     echo "isSSD=${isSSD}"
 
     # display results from hdd & partition detection
@@ -384,7 +405,16 @@ if [ "$1" = "status" ]; then
     fi
     echo "hddRaspiVersion='${hddRaspiVersion}'"
 
-    isSSD=$(cat /sys/block/${hdd}/queue/rotational 2>/dev/null | grep -c 0)
+    # try to detect if its an SSD
+    isSMART=$(sudo smartctl -a /dev/${hdd} | grep -c "Rotation Rate:")
+    echo "isSMART=$(isSMART)"
+    if [ ${isSMART} -gt 0 ]; then
+    	#detect using smartmontools (preferred)
+        isSSD=$(sudo smartctl -a /dev/${hdd} | grep 'Rotation Rate:' | grep -c "Solid State")
+    else
+    	#detect using using fall back method
+	isSSD=$(cat /sys/block/${hdd}/queue/rotational 2>/dev/null | grep -c 0)
+    fi
     echo "isSSD=${isSSD}"
 
     echo "datadisk='${hdd}'"
