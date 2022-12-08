@@ -22,7 +22,7 @@ systemdService="${netprefix}spark"
 if [ "$1" = "menu" ]; then
 
   # get network info
-  localip=$(ip addr | grep 'state UP' -A2 | grep -E -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+  localip=$(hostname -I | awk '{print $1}')
   toraddress=$(sudo cat /mnt/hdd/tor/${netprefix}spark-wallet/hostname)
   toraddresstext="Hidden Service address for the Tor Browser (QRcode on LCD):\n$toraddress"
   if [ ${#toraddress} -eq 0 ];then

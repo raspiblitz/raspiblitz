@@ -5,6 +5,19 @@ if [ -f /home/admin/_aliases ];then
   source /home/admin/_aliases
 fi
 
+# confirm interrupting commands
+confirm=0
+function confirmMsg() {
+  while true; do
+    read -p "$(echo -e "Execute the blitz command '$1'? (y/n): ")" yn
+    case $yn in
+        [Yy]* ) confirm=1;break;;
+        [Nn]* ) confirm=0;break;;
+        * ) echo "Please answer yes or no.";;
+    esac
+  done
+}
+
 # SHORTCUT COMMANDS you can call as user 'admin' from terminal
 
 # command: blitz
@@ -35,7 +48,7 @@ function blitzhelp() {
   echo "  status       informational Blitz status screen"
   echo "  sourcemode   copy blockchain source modus"
   echo "  check        check if Blitz configuration files are correct"
-  echo "  patch        sync all scripts with latest from github and branch"
+  echo "  patch [all]  sync all scripts with latest from github and branch"
   echo "  patch code   sync only blitz scripts with latest from github and branch"
   echo "  patch api    sync only Blitz-API with latest from github and branch"
   echo "  patch web    sync only Blitz-WebUI with latest from github and branch"
@@ -56,11 +69,6 @@ function blitzhelp() {
   echo "  gettx        retrieve transaction from mempool or blockchain and print as JSON"
   echo "  watchtx      retrieve transaction from mempool or blockchain until certain confirmation target"
   echo
-  echo "LND:"
-  echo "  balance      your satoshi balance"
-  echo "  channels     your lightning channels"
-  echo "  fwdreport    show forwarding report"
-  echo
   echo "Users:"
   echo "  bos          Balance of Satoshis"
   echo "  chantools    ChanTools"
@@ -72,6 +80,15 @@ function blitzhelp() {
   echo "Extras:"
   echo "  whitepaper   download the whitepaper from the blockchain to /home/admin/bitcoin.pdf"
   echo "  notifyme     wrapper for blitz.notify.sh that will send a notification using the configured method and settings"
+  echo
+  echo "LND:"
+  echo "  lncli        LND commandline interface (when installed)"
+  echo "  balance      your satoshi balance"
+  echo "  channels     your lightning channels"
+  echo "  fwdreport    show forwarding report"
+  echo
+  echo "CLN:"
+  echo " lightning-cli Core-Lightning commandline interface (when installed)"
 }
 
 # command: raspiblitz
@@ -97,7 +114,11 @@ function repair() {
 
 # command: restart
 function restart() {
-  /home/admin/config.scripts/blitz.shutdown.sh reboot
+  echo "Command to restart your RaspiBlitz"
+  confirmMsg restart
+  if [ $confirm -eq 1 ]; then
+    /home/admin/config.scripts/blitz.shutdown.sh reboot
+  fi
 }
 
 # command: sourcemode
@@ -112,7 +133,18 @@ function check() {
 
 # command: release
 function release() {
-  /home/admin/config.scripts/blitz.preparerelease.sh
+  echo "Command to prepare your RaspiBlitz installation for sd card image:"
+  echo "- delete logs"
+  echo "- clean raspiblitz.info"
+  echo "- delete SSH Pub keys"
+  echo "- delete local DNS confs"
+  echo "- delete old API conf"
+  echo "- delete local WIFI conf"
+  echo "- shutdown"
+  confirmMsg release
+  if [ $confirm -eq 1 ]; then
+    /home/admin/config.scripts/blitz.preparerelease.sh
+  fi
 }
 
 # command: debug
@@ -136,23 +168,31 @@ function debug() {
 # command: patch
 # syncs script with latest set github and branch
 function patch() {
+  if [ "$1" == "" ]; then
+    echo "Command to patch your RaspiBlitz from github"
+    confirmMsg patch
+    if [ $confirm -eq 1 ]; then
+      patch all
+    fi
+  fi
+
   cd /home/admin
 
-  if [ "$1" == "" ] || [ "$1" == "code" ]; then
+  if [ "$1" == "all" ] || [ "$1" == "code" ]; then
     echo
     echo "#######################################################"
     echo "### UPDATE BLITZ --> SCRIPTS (code)"
     /home/admin/config.scripts/blitz.github.sh -run
   fi
 
-  if [ "$1" == "" ] || [ "$1" == "api" ]; then
+  if [ "$1" == "all" ] || [ "$1" == "api" ]; then
     echo
     echo "#######################################################"
     echo "### UPDATE BLITZ --> API"
     sudo /home/admin/config.scripts/blitz.web.api.sh update-code
   fi
 
-  if [ "$1" == "" ] || [ "$1" == "web" ]; then
+  if [ "$1" == "all" ] || [ "$1" == "web" ]; then
     echo
     echo "#######################################################"
     echo "### UPDATE BLITZ --> WEBUI"
@@ -164,7 +204,11 @@ function patch() {
 
 # command: off
 function off() {
-  /home/admin/config.scripts/blitz.shutdown.sh
+  echo "Command to power off your RaspiBlitz"
+  confirmMsg off
+  if [ $confirm -eq 1 ]; then
+    /home/admin/config.scripts/blitz.shutdown.sh
+  fi
 }
 
 # command: github
@@ -176,23 +220,35 @@ function github() {
 
 # command: hdmi
 function hdmi() {
-  echo "# SWITCHING VIDEO OUTPUT TO --> HDMI"
-  sudo /home/admin/config.scripts/blitz.display.sh set-display hdmi
-  restart
+  echo "Command to switch video output of your RaspiBlitz to hdmi"
+  confirmMsg hdmi
+  if [ $confirm -eq 1 ]; then
+    echo "# SWITCHING VIDEO OUTPUT TO --> HDMI"
+    sudo /home/admin/config.scripts/blitz.display.sh set-display hdmi
+    restart
+  fi
 }
 
 # command: lcd
 function lcd() {
-  echo "# SWITCHING VIDEO OUTPUT TO --> LCD"
-  sudo /home/admin/config.scripts/blitz.display.sh set-display lcd
-  restart
+  echo "Command to switch video output of your RaspiBlitz to lcd"
+  confirmMsg lcd
+  if [ $confirm -eq 1 ]; then
+    echo "# SWITCHING VIDEO OUTPUT TO --> LCD"
+    sudo /home/admin/config.scripts/blitz.display.sh set-display lcd
+    restart
+  fi
 }
 
 # command: headless
 function headless() {
-  echo "# SWITCHING VIDEO OUTPUT TO --> HEADLESS"
-  sudo /home/admin/config.scripts/blitz.display.sh set-display headless
-  restart
+  echo "Command to switch off any video output of your RaspiBlitz (ssh only)"
+  confirmMsg headless
+  if [ $confirm -eq 1 ]; then
+    echo "# SWITCHING VIDEO OUTPUT TO --> HEADLESS"
+    sudo /home/admin/config.scripts/blitz.display.sh set-display headless
+    restart
+  fi
 }
 
 # command: cache
