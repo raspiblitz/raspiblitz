@@ -424,6 +424,24 @@ else
     echo "Provisioning clHTTPplugin - keep default" >> ${logFile}
 fi
 
+# clboss
+if [ "${clboss}" = "on" ]; then
+    echo "Provisioning clboss - run config script" >> ${logFile}
+    /home/admin/_cache.sh set message "Setup clboss"
+    sudo -u admin /home/admin/config.scripts/cl-plugin.clboss.sh on >> ${logFile} 2>&1
+else
+    echo "Provisioning clboss - keep default" >> ${logFile}
+fi
+
+# clWatchtowerClient
+if [ "${clWatchtowerClient}" = "on" ]; then
+    echo "Provisioning clWatchtowerClient - run config script" >> ${logFile}
+    /home/admin/_cache.sh set message "Setup clWatchtowerClient"
+    sudo -u admin /home/admin/config.scripts/cl-plugin.watchtower-client.sh on >> ${logFile} 2>&1
+else
+    echo "Provisioning clWatchtowerClient - keep default" >> ${logFile}
+fi
+
 # SPARK
 if [ "${spark}" = "on" ]; then
     echo "Provisioning Spark Wallet - run config script" >> ${logFile}
