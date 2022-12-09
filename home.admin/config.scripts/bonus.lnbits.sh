@@ -316,7 +316,7 @@ if [ "$1" = "status" ]; then
 
     # check for LetsEnryptDomain for DynDns
     error=""
-    source <(sudo /home/admin/config.scripts/blitz.subscriptions.ip2tor.py ip-by-tor $publicIP)
+    source <(sudo /home/admin/config.scripts/blitz.subscriptions.ip2tor.py ip-by-tor $publicIP 2>/dev/null)
     if [ ${#error} -eq 0 ]; then
       echo "publicDomain='${domain}'"
     fi
