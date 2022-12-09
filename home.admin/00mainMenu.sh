@@ -1,5 +1,5 @@
 #!/bin/bash
-
+ 
 echo "Starting the main menu ..."
 
 # MAIN MENU AFTER SETUP
@@ -85,6 +85,9 @@ if [ "${BTCPayServer}" == "on" ]; then
 fi
 if [ "${lit}" == "on" ]; then
   OPTIONS+=(LIT "LIT (loop, pool, faraday)")
+fi
+if [ "${lndg}" == "on" ]; then
+  OPTIONS+=(LNDG "LNDg (auto-rebalance, auto-fees)")
 fi
 if [ "${sparko}" == "on" ]; then
   OPTIONS+=(SPARKO "Sparko Webwallet")
@@ -267,6 +270,9 @@ case $CHOICE in
             ;;
         LIT)
             /home/admin/config.scripts/bonus.lit.sh menu
+            ;;
+        LNDG)
+            /home/admin/config.scripts/bonus.lndg.sh menu
             ;;
         SPARKO)
             /home/admin/config.scripts/cl-plugin.sparko.sh menu mainnet

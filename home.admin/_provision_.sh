@@ -5,7 +5,7 @@ if [ "$EUID" -ne 0 ]; then
   echo "error='run as root'"
   exit 1
 fi
-
+ 
 # This script gets called from a fresh SD card
 # starting up that has an config file on HDD
 # from old RaspiBlitz or manufacturer to
@@ -708,6 +708,15 @@ if [ "${lit}" = "on" ]; then
   sudo -u admin /home/admin/config.scripts/bonus.lit.sh on >> ${logFile} 2>&1
 else
   echo "Provisioning LIT - keep default" >> ${logFile}
+fi
+
+# lndg
+if [ "${lndg}" = "on" ]; then
+  echo "Provisioning LNDg - run config script" >> ${logFile}
+  /home/admin/_cache.sh set message "Setup LNDg"
+  sudo -u admin /home/admin/config.scripts/bonus.lndg.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning LNDg - keep default" >> ${logFile}
 fi
 
 # sphinxrelay

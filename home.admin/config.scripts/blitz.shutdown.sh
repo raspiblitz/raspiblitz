@@ -30,6 +30,18 @@ sleep 3
 echo "stop electrs - please wait .."
 sudo systemctl stop electrs 2>/dev/null
 
+# stopping LNDg (if installed)
+isInstalled=$(sudo ls /etc/systemd/system/jobs-lndg.service 2>/dev/null | grep -c 'jobs-lndg.service')
+if ! [ ${isInstalled} -eq 0 ]; then
+  echo "stop LNDg - please wait .."
+  sudo systemctl stop gunicorn.service 2>/dev/null
+  sudo systemctl stop jobs-lndg.timer 2>/dev/null
+  sudo systemctl stop jobs-lndg.service 2>/dev/null
+  sudo systemctl stop rebalancer-lndg.timer 2>/dev/null
+  sudo systemctl stop rebalancer-lndg.service 2>/dev/null
+  sudo systemctl stop htlc-stream-lndg.service 2>/dev/null
+fi
+
 # stopping lightning
 echo "stop lightning - please wait .."
 sudo systemctl stop lnd 2>/dev/null
