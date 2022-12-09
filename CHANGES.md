@@ -3,6 +3,7 @@
 ## What's new in Version 1.9.0 of RaspiBlitz?
 
 - New: CL Watchtower (The Eye of Satoshi) [details](https://github.com/talaia-labs/rust-teos/tree/master/watchtower-plugin)
+- New: LNDg v1.4.0 [details](https://github.com/cryptosharks131/lndg)
 - New: Support of X708 UPS HAT [details](https://github.com/rootzoll/raspiblitz/pull/3087)
 - New: BOS Telegram Bot Support (see OPTIONS on LND Balance of Satoshis menu entry)
 - New: LightningTipBot v0.5 [details](https://github.com/LightningTipBot/LightningTipBot)

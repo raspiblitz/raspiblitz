@@ -121,6 +121,7 @@ case "$1" in
     [ "${LNBits}" = "on" ] && /home/admin/config.scripts/tor.onion-service.sh lnbits 80 5002 443 5003
     [ "${thunderhub}" = "on" ] && /home/admin/config.scripts/tor.onion-service.sh thunderhub 80 3012 443 3013
     [ "${specter}" = "on" ] && /home/admin/config.scripts/tor.onion-service.sh specter 443 25441
+    [ "${lndg}" = "on" ] && /home/admin/config.scripts/tor.onion-service.sh lndg 80 8886 443 8887
     if [ "${sphinxrelay}" = "on" ]; then
       /home/admin/config.scripts/tor.onion-service.sh sphinxrelay 80 3302 443 3303
       toraddress=$(sudo cat /mnt/hdd/tor/sphinxrelay/hostname 2>/dev/null)

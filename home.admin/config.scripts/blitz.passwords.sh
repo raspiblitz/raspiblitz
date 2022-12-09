@@ -388,6 +388,12 @@ elif [ "${abcd}" = "b" ]; then
     sudo sed -i "s/^pass = .*/pass = ${newPassword}/g" /etc/i2pd/i2pd.conf
   fi
 
+  # LNDg
+  if [ "${lndg}" == "on" ]; then
+    echo "# changing the password for lndg"
+    sudo -u lndg /home/lndg/lndg/.venv/bin/python initialize.py -pw ${newPassword}
+  fi
+
   echo "# OK -> RPC Password B changed"
   echo "# Reboot is needed (will be triggered if interactive menu was called)"
   echo "error=''"
