@@ -313,18 +313,6 @@ sudo apt clean -y
 sudo apt autoremove -y
 
 echo -e "\n*** Python DEFAULT libs & dependencies ***"
-# make sure /usr/bin/pip exists (and calls pip3 in Debian Buster)
-sudo update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
-# 1. libs (for global python scripts)
-# grpcio==1.42.0 googleapis-common-protos==1.53.0 toml==0.10.2 j2cli==0.3.10 requests[socks]==2.21.0
-# 2. For TorBox bridges python scripts (pip3) https://github.com/radio24/TorBox/blob/master/requirements.txt
-# pytesseract mechanize PySocks urwid Pillow requests
-# 3. Nyx
-# setuptools
-python_libs="grpcio==1.42.0 googleapis-common-protos==1.53.0 toml==0.10.2 j2cli==0.3.10 requests[socks]==2.21.0 protobuf==3.20.1 wrapt==1.14.1"
-torbox_libs="pytesseract mechanize PySocks urwid Pillow requests setuptools"
-sudo -H python3 -m pip install --upgrade pip
-sudo -H python3 -m pip install ${python_libs} ${torbox_libs}
 
 if [ -f "/usr/bin/python3.9" ]; then
   # use python 3.9 if available
@@ -344,6 +332,18 @@ else
   echo "There is no tested version of python present"
   exit 1
 fi
+
+# make sure /usr/bin/pip exists (and calls pip3 in Debian Buster)
+sudo update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
+# 1. libs (for global python scripts)
+# grpcio==1.42.0 googleapis-common-protos==1.53.0 toml==0.10.2 j2cli==0.3.10 requests[socks]==2.21.0
+# 2. For TorBox bridges python scripts (pip3) https://github.com/radio24/TorBox/blob/master/requirements.txt
+# pytesseract mechanize PySocks urwid Pillow requests
+# 3. Nyx
+# setuptools
+sudo -H python3 -m pip install --upgrade pip
+sudo -H python3 -m pip install grpcio==1.42.0 googleapis-common-protos==1.53.0 toml==0.10.2 j2cli==0.3.10 requests[socks]==2.21.0 protobuf==3.20.1 pathlib2==2.3.7.post1
+sudo -H python3 -m pip install pytesseract mechanize PySocks urwid Pillow requests setuptools
 
 echo -e "\n*** PREPARE ${baseimage} ***"
 
