@@ -1,6 +1,7 @@
 #!/bin/bash
  
 # https://github.com/cryptosharks131/lndg
+VERSION="1.4.0 "
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -139,6 +140,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # download and install
     sudo -u lndg git clone https://github.com/cryptosharks131/lndg.git /home/lndg/lndg/
     cd /home/lndg/lndg/ || exit 1
+    sudo -u lndg git reset --hard v${VERSION}
     sudo apt install -y virtualenv
     sudo -u lndg virtualenv -p python3 .venv
     sudo -u lndg .venv/bin/pip install -r requirements.txt
