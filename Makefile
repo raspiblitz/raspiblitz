@@ -4,7 +4,7 @@ CURRENT_BRANCH = $(shell git rev-parse --abbrev-ref HEAD)
 
 amd64-lean-image:
 	# Run the build script
-	cd ci && \
+	cd ci/amd64 && \
 	bash packer.build.amd64-debian.sh lean $(GITHUB_USER) $(CURRENT_BRANCH) 0
 
 	# Compute checksum of the raw image
@@ -21,7 +21,7 @@ amd64-lean-image:
 
 amd64-fatpack-image:
 	# Run the build script
-	cd ci && \
+	cd ci/amd64 && \
 	bash packer.build.amd64-debian.sh fatpack $(GITHUB_USER) $(CURRENT_BRANCH)
 
 	# Compute checksum of the raw image
