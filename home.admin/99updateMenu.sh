@@ -182,7 +182,7 @@ patch()
           whiptail --title "ERROR" --msgbox "${error}" 8 30
         fi
       fi
-      patch
+      patch all
       exit 0
       ;;
     BRANCH)
@@ -199,7 +199,7 @@ patch()
           whiptail --title "ERROR" --msgbox "${error}" 8 30
         fi
       fi
-      patch
+      patch all
       exit 0
       ;;
     PR)
@@ -347,10 +347,10 @@ Do you really want to update Core Lightning now?
       fi
       ;;
     RECKLESS)
-      whiptail --title "RECKLESS Core Lightning UPDATE to ${clLatestVersion}" --yes-button "Cancel" --no-button "Update" --yesno "Using the 'RECKLESS' Core Lightning update will simply
-grab the latest Core Lightning release published on the Core Lightning GitHub page (also release candidates).
+      whiptail --title "RECKLESS Core Lightning UPDATE to ${clLatestVersion}" --yes-button "Cancel" --no-button "Update" \
+      --yesno "Using the 'RECKLESS' Core Lightning update will download the latest Core Lightning release published on the Core Lightning GitHub page.
 
-There will be no security checks on signature, etc.
+The update was not tested as a part of the release.
 
 This update mode is only recommended for testing and
 development nodes with no serious funding.
@@ -367,6 +367,10 @@ Do you really want to update Core Lightning now?
         whiptail --title "ERROR" --msgbox "${error}" 8 30
       else
         echo "# Core Lightning was updated successfully"
+
+        # unlock or fix issues from the logs
+        /home/admin/config.scripts/cl.hsmtool.sh unlock ${chain}net
+
         exit 0
       fi
       ;;
@@ -453,7 +457,7 @@ Do you really want to update Bitcoin Core now?
 
 # quick call by parameter
 if [ "$1" == "github" ]; then
-  patch
+  patch all
   exit 0
 fi
 
@@ -474,6 +478,10 @@ fi
 
 if [ "${bos}" == "on" ]; then
   OPTIONS+=(BOS "Update Balance of Satoshis")
+fi
+
+if [ "${ElectRS}" == "on" ]; then
+  OPTIONS+=(ELECTRS "Update Electrs")
 fi
 
 if [ "${RTL}" == "on" ]||[ "${cRTL}" == "on" ]; then
@@ -533,7 +541,7 @@ case $CHOICE in
     ;;
   PATCH)
     patchNotice
-    patch
+    patch all
     ;;
   LND)
     lnd
@@ -546,6 +554,9 @@ case $CHOICE in
     ;;
   BOS)
     /home/admin/config.scripts/bonus.bos.sh update
+    ;;
+  ELECTRS)
+    /home/admin/config.scripts/bonus.electrs.sh update
     ;;
   RTL)
     /home/admin/config.scripts/bonus.rtl.sh update

@@ -79,8 +79,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   chown www-data:www-data -R /var/www/public
 
   # install info
+  localIP=$(hostname -I | awk '{print $1}')
   echo "# The WebUI is now available under:"
-  echo "# http://[LOCALIP]"
+  echo "# http://${localIP}"
 
   exit 0
 fi

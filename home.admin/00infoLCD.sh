@@ -88,7 +88,7 @@ while :
     source ${infoFile}
     source <(/home/admin/_cache.sh get state message)
 
-    configExists=$(ls ${configFile} 2>/dev/null | grep -c '.conf')
+    configExists=$(ls "${configFile}" 2>/dev/null | grep -c '.conf')
     if [ ${configExists} -eq 1 ]; then
       source ${configFile}
       source <(/home/admin/config.scripts/network.aliases.sh getvars)

@@ -211,6 +211,11 @@ else
   echo "Provisioning Bitcoin Core interims update - keep default" >> ${logFile}
 fi
 
+# I2P
+echo "Start i2pd" >> ${logFile}
+/home/admin/_cache.sh set message "i2pd setup"
+/home/admin/config.scripts/blitz.i2pd.sh on >> ${logFile}
+
 # LND INTERIMS UPDATE
 if [ ${#lndInterimsUpdate} -gt 0 ]; then
   /home/admin/_cache.sh set message "Provisioning LND update"
@@ -417,6 +422,24 @@ if [ "${clHTTPplugin}" = "on" ]; then
     sudo -u admin /home/admin/config.scripts/cl-plugin.http.sh on >> ${logFile} 2>&1
 else
     echo "Provisioning clHTTPplugin - keep default" >> ${logFile}
+fi
+
+# clboss
+if [ "${clboss}" = "on" ]; then
+    echo "Provisioning clboss - run config script" >> ${logFile}
+    /home/admin/_cache.sh set message "Setup clboss"
+    sudo -u admin /home/admin/config.scripts/cl-plugin.clboss.sh on >> ${logFile} 2>&1
+else
+    echo "Provisioning clboss - keep default" >> ${logFile}
+fi
+
+# clWatchtowerClient
+if [ "${clWatchtowerClient}" = "on" ]; then
+    echo "Provisioning clWatchtowerClient - run config script" >> ${logFile}
+    /home/admin/_cache.sh set message "Setup clWatchtowerClient"
+    sudo -u admin /home/admin/config.scripts/cl-plugin.watchtower-client.sh on >> ${logFile} 2>&1
+else
+    echo "Provisioning clWatchtowerClient - keep default" >> ${logFile}
 fi
 
 # SPARK
@@ -757,6 +780,15 @@ if [ "${itchysats}" = "on" ]; then
   sudo -u admin /home/admin/config.scripts/bonus.itchysats.sh on --download >> ${logFile} 2>&1
 else
   echo "ItchySats - keep default" >> ${logFile}
+fi
+
+# LightningTipBot
+if [ "${lightningtipbot}" = "on" ]; then
+  echo "Provisioning LightningTipBot - run config script" >> ${logFile}
+  /home/admin/_cache.sh set message "Setup LightningTipBot"
+  sudo -u admin /home/admin/config.scripts/bonus.lightningtipbot.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning LightningTipBot - keep default" >> ${logFile}
 fi
 
 # custom install script from user

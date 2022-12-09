@@ -168,6 +168,7 @@ There are further Services that can be switched on:
 - **CL Spark Wallet** (WalletUI with BOLT12 offers) [details](https://github.com/shesek/spark-wallet#progressive-web-app)
 - **CL plugin: Sparko** (WalletUI & HTTP-RPC bridge) [details](https://github.com/fiatjaf/sparko#the-sparko-plugin)
 - **CL plugin: CLBOSS** (Automated Node Manager) [details](https://github.com/ZmnSCPxj/clboss#clboss-the-c-lightning-node-manager)
+- **CL plugin: The Eye of Satoshi** (Watchtower) [details](https://github.com/talaia-labs/rust-teos/tree/master/watchtower-plugin)
 - **Tallycoin Connect** (Use Tallycoin with your own node) [details](https://github.com/djbooth007/tallycoin_connect)
 - **ItchySats** (Non-custodial peer-to-peer CFD trading) [details](https://github.com/itchysats/itchysats)
 
@@ -760,7 +761,7 @@ If there is a public IP change on your router LND restarts automatically, and wi
 
 - [When using Auto-Unlock, how much security do I lose?](FAQ.md#when-using-auto-unlock-how-much-security-do-i-lose)
 
-##### LND StaticChannelBackup on Nextcloud
+##### StaticChannel/Emergency-Backup on Nextcloud
 
 See [below on this README](README.md#backup-for-on-chain---channel-funds) for your Backup options when it comes to securing your funds against accidental loss.
 Storing the encrypted Static Channel Backup file to your Nextcloud account is an easy and secure way to do this.
@@ -769,23 +770,14 @@ Nextcloud is an open-source project to host your own files: <https://en.wikipedi
 You can run it yourself or use a hosted Nextcloud server.
 Find free Nextcloud providers here to sign up: <https://nextcloud.com/signup/>
 
-##### StaticChannelBackup on USB Drive
+##### StaticChannel/Emergency-Backup on USB Drive
 
 You can connect a small extra USB drive to your RaspiBlitz (choose a small one up to 32GB, don't use second HDD or SSD here as that would drain too much power from the RaspiBlitz).
 That USB drive will then be used to store your latest StaticChannelBackup, just in case your HDD encounters an error.
 
-##### StaticChannelBackup per SCP/SSH to other server
+##### StaticChannel/Emergency-Backup per SCP/SSH to other server
 
-An option for more advanced users -- that you only can set directly in the `raspiblitz.conf` -- is the automated backup of the StaticChannelBackup to another server by SSH/SCP.
-For this you need to set the value:
-
-`scpBackupTarget='[USER]@[SERVER]:[DIRPATH-WITHOUT-ENDING-/]'`
-
-and you can optionally set custom options for the SCP command (for example to set a non-default port) with:
-
-`scpBackupOptions='[YOUR-CUSTOM-OPTIONS]'`
-
-On the target server add the root ssh public key of your RaspiBlitz to the `authorized_keys` file for the user - how to do this see: <https://www.linode.com/docs/security/authentication/use-public-key-authentication-with-ssh/>
+See [SCP Backup Target](README.md#b-scp-backup-target) for details on how to setup static channel backups using SCP.
 
 ##### CORE LIGHTNING NODE
 
@@ -1351,7 +1343,7 @@ To develop your own scripts/apps and connect other services/apps to your RaspiBl
 - `lncli` command line interface on the terminal [DOC](https://api.lightning.community/)
 - `lnd` running on port 9735 (public)
 - `gRPC` running on port 10009 (public) [DOC](https://api.lightning.community/)
-- `REST` running on port 8080 (public) [DOC](https://api.lightning.community/rest/index.html)
+- `REST` running on port 8080 (public) [DOC](https://api.lightning.community/#lnd-rest-api-reference)
 
 If you activate Tor then your LND gRPC & REST APIs will also be reachable publicly as a Hidden Service.
 
@@ -1391,12 +1383,32 @@ Find free Nextcloud providers here to sign up: <https://nextcloud.com/signup/>
 
 _You can also backup the StaticChannelBackup file to your own server, but this needs manual setup:_
 
-In the `/mnt/hdd/raspiblitz.conf` the parameter `scpBackupTarget='[USER]@[SERVER]:[DIRPATH-WITHOUT-ENDING-/]'` can be set to activate this feature.
-On the remote server, the public key of the RaspiBlitz root user needs to be added to the `authorized_keys` file so that no password is needed for the background script to make the backup.
+Run the command below to generate root SSH keys:
+`sudo /home/admin/config.scripts/blitz.ssh.sh root-get`
+The public key is found in the `sshPubKey=` section of the above output. For manual setup, use the value after the = without the single quotes.
 
-The script `/home/admin/config.scripts/blitz.ssh.sh` show (`root-get`) and transfer ssh-pubkey (`root-transfer`) to a remote server.
+Copy the generated keys from above to the remote server (note, if your remote server doesn't allow password authentication, you will have to copy it manually). 
+`sudo /home/admin/config.scripts/blitz.ssh.sh root-transfer myuser@myserver`
 
-To test it, try opening or closing a channel and then check if you can find a copy of `channel.backup` on your remote server.
+Note: If you do not copy the public key to your remote server, these backups will not work.
+
+Edit the `/mnt/hdd/raspiblitz.conf` file to include the following:
+
+`scpBackupTarget='[USER]@[SERVER]:[DIRPATH-WITHOUT-ENDING-/]'`
+
+Eg:
+`scpBackupTarget='myaccount@10.10.10.100:/home/myaccount/backups'`
+
+and you can optionally set custom options for the SCP command (for example to set a non-default port) with:
+
+`scpBackupOptions='[YOUR-CUSTOM-OPTIONS]'`
+
+If you have done the setup above and want to run this manually, you can run the below command (from the root user):
+
+`scp /home/admin/backups/scb/channel.backup myaccount@10.10.10.100:/home/myaccount/backups`
+
+Alternatively, open or close a channel. The backups get taken on every channel open or close.
+
 You can check the background-script logs to see details on errors: `sudo journalctl -f -u background`
 
 #### C) Local Backup Target (USB Thumbdrive)
@@ -1446,7 +1458,7 @@ But if you want to build that image yourself - here is a quick guide:
 - Get a latest RaspiOS 64-bit (Desktop): [DOWNLOAD](https://downloads.raspberrypi.org/raspios_arm64/images).
 - Write the image to an SD card: [TUTORIAL](https://www.raspberrypi.org/documentation/installation/installing-images/README.md).
 - Add a file called `ssh` to the root of the SD card when mounted on your laptop to enable SSH login.
-- Add a file called `userconf` next to the empty `ssh` file that contains the just the string `pi:$6$p2DNwHsYzR06mVFX$jwZnOo5Jl/6pEMFFowpUBqM7E0Rz8vEtXtupwxuXZA7eqyKxDk8barhYZ24ei/JEP4e8Jr0mOvRThASuUxIAZ0`.
+- Add a file called `userconf` next to the empty `ssh` file that contains just the string `pi:$6$p2DNwHsYzR06mVFX$jwZnOo5Jl/6pEMFFowpUBqM7E0Rz8vEtXtupwxuXZA7eqyKxDk8barhYZ24ei/JEP4e8Jr0mOvRThASuUxIAZ0`.
 - Start the card on a Raspi and login via SSH with `ssh pi@[IP-OF-YOUR-RASPI]`. Password is `raspberry`.
 
 Now you are ready to start the SD card build script (check the code to see if the installation and config are OK for you).
@@ -1472,7 +1484,7 @@ You have now built your own RaspiBlitz SD card image.
 _Note: If you plan to use your self-build SD card as a MASTER copy and distribute it: Use a smaller 8GB card for that.
 This way it's ensured that it will fit on every 16 GB card recommended for RaspiBlitz later on._
 
-- [Can I run RaspiBlitz on other computers than RaspberryPi?](FAQ.md#can-i-run-raspiblitz-on-other-computers-than-raspberrypi)
+- [Can I run RaspiBlitz on other computers than RaspberryPi?](./alternative.platforms/README.md)
 - [How can I build an SD card from another branch?](FAQ.md#how-can-i-build-an-sd-card-from-another-branch)
 - [How can I build an SD card from my forked GitHub Repo?](FAQ.md#how-can-i-build-an-sd-card-from-my-forked-github-repo)
 
@@ -1483,7 +1495,6 @@ Here is a short selection of the very frequently asked questions:
 - [How do I backup my Lightning Node?](FAQ.md#how-do-i-backup-my-lightning-node)
 - [How can I recover my coins from a failing RaspiBlitz?](FAQ.md#how-can-i-recover-my-coins-from-a-failing-raspiblitz)
 - [Are those "Under-Voltage detected" warnings a problem?](FAQ.md#are-those-under-voltage-detected-warnings-a-problem)
-- [Can I run RaspiBlitz on computer boards other than RaspberryPi?](FAQ.md#can-i-run-raspiblitz-on-other-computers-than-raspberrypi)
 
 Do you still have more questions? Check the [RaspiBlitz-FAQ-Archive](FAQ.md).
 
