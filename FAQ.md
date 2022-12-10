@@ -501,6 +501,10 @@ Yellow is OK. The RaspiBlitz can detect that it can reach a service on the port 
 
 For details on how to set port forwarding on your router model see: https://portforward.com
 
+### How can I set a fixed IP?
+
+Add an entry called `staticIP` in `raspiblitz.conf` to prevent external IP detection and force a fixed IP for your node.
+
 ### How do I fix a displayed Error in my Config?
 
 When the LCD display is telling you to do a config check:
