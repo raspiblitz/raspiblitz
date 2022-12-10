@@ -2,13 +2,13 @@ name: amd64-fatpack-image-build
 
 on:
   push:
-    branches: [ "dev" ]
+    branches: [ "dev", "v*" ]
     paths:
       - 'build_sdcard.sh'
       - 'home.admin/**'
       - 'ci/amd64/**'
   pull_request:
-    branches: [ "dev" ]
+    branches: [ "dev", "v*" ]
     paths:
       - 'build_sdcard.sh'
       - 'home.admin/**'
@@ -17,7 +17,7 @@ on:
 
 jobs:
   amd64-image-build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
 

@@ -78,12 +78,38 @@ identify the connected disk with `lsblk` eg `/dev/sdd`
     ```
 
 ## Workflow notes
-* Packer .json settings:
-    * `disk_size` - the size op the raw image. The .qcow2 file is compressed.
-    * `template`  - image filename
-    * `output_directory` - directory under builds where the image will be placed
-    * the `pi` user is given passwordless sudo access and used for the image setup
-* VNC
-    * can follow the setup locally in VNC with the port stated in the first part of the logs eg: `Found available VNC port: 5952 on IP: 127.0.0.1`
-* Flashing
-    * using `sudo qemu-img dd bs=4M if=raspiblitz-amd64-debian-11.5-lean.qcow2 of=/dev/sdd` changed the UUID so it won't boot without editing the GRUB
+
+The github workflow files are the equivalent of the Makefile commands run locally.
+The local repo owner (`GITHUB_ACTOR`) and branch (`GITHUB_HEAD_REF`) is picked up.
+The build_sdcard.sh is downloaded from the source branch and built with the options pack=[lean|fatpack] to set fatpack=[0|1].
+
+The github workflow is running the job in an ubuntu-latest image.
+
+The amd64 image is built with running a qemu VM
+* installs the base OS (Debian 11.5)
+* connects with ssh and runs the scripts including the build_sdcard.sh
+
+The arm64-rpi image genenaration runs in Docker
+* the base image (RasberryOS) is started in the qemu VM
+* packer runs the build_sdcard.sh directly in the VM
+
+After the image is built (and there is no exit with errors) the next steps are:
+* compute checksum of the qemu/raw image
+* compress the image with gzip
+* compute checksum of the compressed image
+* (in github actions: upload the artifacts in one .zip file)
+
+
+### Packer .json settings:
+* `disk_size` - the size op the raw image. The .qcow2 file is compressed.
+* `template`  - image filename
+* `output_directory` - directory under builds where the image will be placed
+* the `pi` user is given passwordless sudo access and used for the image setup
+### VNC
+* can follow the setup locally in VNC with the port stated in the first part of the logs eg: `Found available VNC port: 5952 on IP: 127.0.0.1`
+### Flashing
+* using `sudo qemu-img dd bs=4M if=raspiblitz-amd64-debian-11.5-lean.qcow2 of=/dev/sdd` changed the UUID so it won't boot without editing the GRUB
+
+
+
+check the hash of base image instead of url

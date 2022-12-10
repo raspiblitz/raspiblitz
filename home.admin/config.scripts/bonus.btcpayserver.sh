@@ -25,36 +25,8 @@ source /home/admin/raspiblitz.info
 source <(/home/admin/_cache.sh get state)
 
 function postgresConfig() {
-  # https://github.com/rootzoll/raspiblitz/issues/3218
-  echo "# Install postgres"
-  if sudo apt install -y postgresql-13; then
-    PGVERSION=13
-  elif sudo apt install -y postgresql-12; then
-    PGVERSION=12
-  fi
-  # sudo -u postgres psql -c "show data_directory"
-  #  /var/lib/postgresql/13/main
-  if [ ! -d /var/lib/postgresql/${PGVERSION}/main ]; then
-    sudo  mkdir -p /var/lib/postgresql/${PGVERSION}/main
-    sudo chown -R postgres:postgres /var/lib/postgresql
-    sudo systemctl start postgresql@${PGVERSION}-main
-  fi
-  if [ ! -L /var/lib/postgresql ]; then
-  echo "# Move the postgres data to /mnt/hdd/app-data/postgresql"
-    # stop the postgresql servers
-    sudo su - postgres -c "/usr/lib/postgresql/${PGVERSION}/bin/pg_ctl stop --wait --pgdata=/var/lib/postgresql/${PGVERSION}/main"
-    sudo systemctl stop postgresql@${PGVERSION}-main
-    sudo rsync -av /var/lib/postgresql /mnt/hdd/app-data
-    sudo mv /var/lib/postgresql /var/lib/postgresql.bak
-    sudo rm -rf /var/lib/postgresql # not a symlink.. delete it silently
-    sudo ln -s /mnt/hdd/app-data/postgresql /var/lib/
-    sudo chown -R postgres:postgres /mnt/hdd/app-data/postgresql
-    sudo chmod -R 0700 /mnt/hdd/app-data/postgresql
-    # start
-    sudo systemctl start postgresql@${PGVERSION}-main
-  fi
-  echo "# Check clusters with: pg_lsclusters"
-  pg_lsclusters
+
+  sudo /home/admin/config.scripts/bonus.postgresql.sh on || exit 1
 
   echo "# Generate the database"
   sudo -u postgres psql -c "create database nbxplorermainnet;"
@@ -751,6 +723,7 @@ if [ "$1" = "update" ]; then
       sudo systemctl restart bitcoind
     fi
 
+    # POSTGRES
     postgresConfig
 
     NBXplorerConfig

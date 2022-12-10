@@ -4,6 +4,7 @@
 
 - New: Automated disk image build for amd64 (VM, laptop, desktop, server) and arm64-rpi (Raspberry Pi) [details](https://github.com/rootzoll/raspiblitz/tree/dev/ci/README.md)
 - New: CLN Watchtower (The Eye of Satoshi) [details](https://github.com/talaia-labs/rust-teos/tree/master/watchtower-plugin)
+- New: LNDg v1.4.0 [details](https://github.com/cryptosharks131/lndg)
 - New: Support of X708 UPS HAT [details](https://github.com/rootzoll/raspiblitz/pull/3087)
 - New: BOS Telegram Bot Support (see OPTIONS on LND Balance of Satoshis menu entry)
 - New: LightningTipBot v0.5 [details](https://github.com/LightningTipBot/LightningTipBot)
@@ -24,7 +25,7 @@
 - Update: Balance of Satoshis 13.6.0 (BOS) [details](https://github.com/alexbosworth/balanceofsatoshis/blob/master/CHANGELOG.md#1360)
 - Update: Circuitbreaker v0.3.2 [details](https://github.com/lightningequipment/circuitbreaker/blob/master/README.md)
 - Info: Run RaspiBlitz on Proxmox [details](https://github.com/rootzoll/raspiblitz/tree/dev/alternative.platforms/Proxmox)
-- Fixed: SCB/Emergency-Backup to USB drive (now also with cln emergency file)
+- Fixed: SCB/Emergency-Backup to USB drive (now also with CLN emergency file)
 - Info: 32GB sdcard is now enforced (after being recommended since v1.5)
 
 ## What's new in Version 1.8.0c of RaspiBlitz?
