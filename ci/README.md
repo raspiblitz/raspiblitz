@@ -10,7 +10,7 @@
   - [Generate an amd64 image](#generate-an-amd64-image)
 - [Images generated in github actions](#images-generated-in-github-actions)
 - [Write the image to a disk connected with USB](#write-the-image-to-a-disk-connected-with-usb)
-  - [Convert qcow2 to raw image](#convert-qcow2-to-raw-image)
+  - [Convert the qcow2 volume to a raw disk image](#convert-the-qcow2-volume-to-a-raw-disk-image)
   - [Write to a disk connected with USB with Balena Etcher or `dd`](#write-to-a-disk-connected-with-usb-with-balena-etcher-or-dd)
   - [Extend the partition on the new disk (optional)](#extend-the-partition-on-the-new-disk-optional)
 - [The first boot](#the-first-boot)
@@ -24,18 +24,28 @@
 
 ## Local build
 with the [Makefile](https://github.com/rootzoll/raspiblitz/blob/dev/Makefile)
-* needs ~10 GB free space
+* needs ~20 GB free space
 * tested on:
   * Ubuntu Live (jammy)
   * Debian Bullseye Desktop
+* Preparation:
+  ```
+  # change to a mountpoint with sufficient space (check with 'df -h')
+  cd /var/log
+  # switch to root
+  sudo su
+  # install git and make
+  apt update && apt install -y git make
+  # download the repo (or your fork)
+  git clone https://github.com/rootzoll/raspiblitz
+  cd raspiblitz
+  # checkout the desired branch
+  git checkout dev
+  ```
 
 ### Generate an arm64-rpi image
 * The workflow locally and in github actions generates a .img raw format image for the Raspberry Pi.
   ```
-  sudo apt update && sudo apt install -y git make
-  git clone https://github.com/rootzoll/raspiblitz
-  cd raspiblitz
-  git checkout dev
   make arm-rpi-fatpack-image
   ```
 * find the image and sh256 hashes in the `ci/arm64-rpi/packer-builder-arm` directory
@@ -47,10 +57,6 @@ The workflow locally and in github actions generates a .qcow2 format amd64 image
     * libvirt / virsh / virt-manager (https://virt-manager.org/)
     * written to disk and booted with legacy boot (non-UEFI)
   ```
-  sudo apt update && sudo apt install -y git make
-  git clone https://github.com/rootzoll/raspiblitz
-  cd raspiblitz
-  git checkout dev
   make amd64-fatpack-image
   ```
 * find the compressed .qcow2 image and sh256 hashes in the `ci/amd64/builds` directory
@@ -62,7 +68,7 @@ https://github.com/rootzoll/raspiblitz/actions
 ## Write the image to a disk connected with USB
 identify the connected disk with `lsblk` eg `/dev/sdd`
 
-###  Convert qcow2 to raw image
+###  Convert the qcow2 volume to a raw disk image
 * the raw image is 33.5 GB
     ```
     # unzip
@@ -81,7 +87,7 @@ identify the connected disk with `lsblk` eg `/dev/sdd`
     # download the script
     git clone https://git.scs.carleton.ca/git/extend-lvm.git
     # run with the disk as the parameter (sde for example)
-    sudo bash extend-lvm/extend-lvm.sh /dev/sde
+    bash extend-lvm/extend-lvm.sh /dev/sde
     ```
 
 ## The first boot
@@ -106,8 +112,8 @@ identify the connected disk with `lsblk` eg `/dev/sdd`
 #### Add Gnome desktop (optional)
 * Connect to the internet (easiest to plug in a LAN cable - use a USB - LAN adapter if have no port)
     ```
-    sudo apt install gnome
-    sudo systemctl start gdm
+    apt install gnome
+    systemctl start gdm
     ```
 
 ## Workflow notes
@@ -156,4 +162,4 @@ After the image is built (and there is no exit with errors) the next steps are:
 ### VNC
 * can follow the setup locally in VNC with the port stated in the first part of the logs eg: `Found available VNC port: 5952 on IP: 127.0.0.1`
 ### Flashing
-* using `sudo qemu-img dd bs=4M if=raspiblitz-amd64-debian-11.5-lean.qcow2 of=/dev/sdd` changed the UUID so it won't boot without editing the GRUB
+* using `qemu-img dd bs=4M if=raspiblitz-amd64-debian-11.5-lean.qcow2 of=/dev/sdd` changed the UUID so it won't boot without editing GRUB
