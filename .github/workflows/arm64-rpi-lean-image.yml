@@ -2,13 +2,13 @@ name: arm64-rpi-lean-image-build
 
 on:
   push:
-    branches: [ "dev", "v*" ]
+    branches: [ "dev", "v1.8", "v1.9" ]
     paths:
       - 'build_sdcard.sh'
       - 'home.admin/**'
       - 'ci/arm64-rpi/**'
   pull_request:
-    branches: [ "dev", "v*" ]
+    branches: [ "dev", "v1.8", "v1.9" ]
     paths:
       - 'build_sdcard.sh'
       - 'home.admin/**'
