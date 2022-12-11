@@ -264,7 +264,7 @@ After=${network}d.service
 [Service]
 WorkingDirectory=/home/mempool/mempool/backend
 # ExecStartPre=/usr/bin/npm run build
-ExecStart=/usr/bin/node --max-old-space-size=2048 dist/index.js
+ExecStart=/usr/bin/node --loglevel warn --max-old-space-size=2048 dist/index.js
 User=mempool
 # Restart on failure but no more than default times (DefaultStartLimitBurst=5) every 10 minutes (600 seconds). Otherwise stop
 Restart=on-failure
