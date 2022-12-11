@@ -155,6 +155,8 @@ Group=joinmarket
 Restart=always
 TimeoutSec=120
 RestartSec=60
+LogLevelMax=4
+
 # Hardening measures
 PrivateTmp=true
 ProtectSystem=full

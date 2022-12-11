@@ -308,6 +308,7 @@ WorkingDirectory=/home/btcrpcexplorer/btc-rpc-explorer
 ExecStart=/usr/bin/npm start
 Restart=on-failure
 RestartSec=20
+LogLevelMax=4
 
 # Hardening measures
 PrivateTmp=true

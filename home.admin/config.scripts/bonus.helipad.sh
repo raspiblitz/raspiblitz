@@ -170,6 +170,7 @@ RestartSec=30
 Environment="LND_TLSCERT=$HELIPAD_CERT"
 Environment="LND_ADMINMACAROON=$HELIPAD_MACAROON"
 Environment="HELIPAD_DATABASE_DIR=$HELIPAD_DB"
+LogLevelMax=4
 [Install]
 WantedBy=multi-user.target
 " | sudo tee /etc/systemd/system/helipad.service
