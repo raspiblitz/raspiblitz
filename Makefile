@@ -42,15 +42,15 @@ arm64-rpi-lean-image:
 	sudo bash packer.build.arm64-rpi.local.sh lean $(GITHUB_ACTOR) $(GITHUB_HEAD_REF)
 
 	# Compute checksum of the raw image
-	cd ci/arm64-rpi && \
+	cd ci/arm64-rpi/packer-builder-arm && \
 	sha256sum raspiblitz-arm64-rpi-lean.img > raspiblitz-arm64-rpi-lean.img.sha256
 
 	# Compress image
-	cd ci/arm64-rpi && \
+	cd ci/arm64-rpi/packer-builder-arm  && \
 	gzip -v9 raspiblitz-arm64-rpi-lean.img
 
 	# Compute checksum of the compressed image
-	cd ci/arm64-rpi && \
+	cd ci/arm64-rpi/packer-builder-arm  && \
 	sha256sum raspiblitz-arm64-rpi-lean.img.gz > raspiblitz-arm64-rpi-lean.img.gz.sha256
 
 arm64-rpi-fatpack-image:
@@ -59,13 +59,13 @@ arm64-rpi-fatpack-image:
 	sudo bash packer.build.arm64-rpi.local.sh fatpack $(GITHUB_ACTOR) $(GITHUB_HEAD_REF)
 
 	# Compute checksum of the raw image
-	cd ci/arm64-rpi && \
+	cd ci/arm64-rpi/packer-builder-arm  && \
 	sha256sum raspiblitz-arm64-rpi-fatpack.img > raspiblitz-arm64-rpi-fatpack.img.sha256
 
 	# Compress image
-	cd ci/arm64-rpi && \
+	cd ci/arm64-rpi/packer-builder-arm  && \
 	gzip -v9 raspiblitz-arm64-rpi-fatpack.img
 
 	# Compute checksum of the compressed image
-	cd ci/arm64-rpi && \
+	cd ci/arm64-rpi/packer-builder-arm  && \
 	sha256sum raspiblitz-arm64-rpi-fatpack.img.gz > raspiblitz-arm64-rpi-fatpack.img.gz.sha256
