@@ -391,7 +391,6 @@ if [ "$1" = "uninstall" ]; then
 
   # clear dotnet cache
   /home/btcpay/dotnet/dotnet nuget locals all --clear
-  sudo rm -rf /tmp/NuGetScratch
 
   # remove dotnet
   sudo rm -rf /usr/share/dotnet
