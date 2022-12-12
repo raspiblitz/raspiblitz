@@ -6,6 +6,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "bonus.postgresql.sh [on|off]"
  echo "bonus.postgresql.sh [backup] [database]"
  echo "bonus.postgresql.sh [restore] [database] [user] [password]"
+ echo "bonus.postgresql.sh [info]"
  exit 1
 fi
 
@@ -141,6 +142,18 @@ if [ "$command" = "restore" ] && [ "$db_name" != "" ] && [ "$db_user" != "" ] &&
   sudo -u postgres psql $db_name < ${backup_file} > $backup_target/logs/sql_import.log || exit 1
   echo "$backup_target/sql_import.log written"
   echo "OK database $db_name restored."
+  exit 0
+fi
+
+if [ "$command" = "info" ]; then
+  check=$(sudo -u postgres psql -c "show data_directory;" | grep data_directory)
+  if [ "$check" = "" ]; then
+    echo "show data_directory failed, PostgreSQL not installed?!"
+    exit 1
+  else
+    sudo -u postgres psql -c "show data_directory;"
+    sudo -u postgres psql -c "SELECT datname FROM pg_database;"
+  fi
   exit 0
 fi
 
