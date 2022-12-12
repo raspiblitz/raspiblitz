@@ -384,7 +384,7 @@ fi
 if [ "$1" = "uninstall" ]; then
 
   isActive=$(sudo ls /etc/systemd/system/btcpayserver.service 2>/dev/null | grep -c 'btcpayserver.service')
-  if [ "${isActive}" != "0"]; then
+  if [ "${isActive}" != "0" ]; then
     echo "# cannot uninstall if still 'on'"
     exit 1
   fi
