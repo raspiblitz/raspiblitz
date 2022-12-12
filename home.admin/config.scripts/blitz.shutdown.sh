@@ -59,9 +59,9 @@ if [ "${network}" != "" ]; then
 
   # stopping bitcoind (thru systemd)
   echo "stop ${network}d (2) - please wait .."
-  sudo systemctl stop ${network}d 2>/dev/null
-  sudo systemctl stop t${network}d 2>/dev/null
-  sudo systemctl stop s${network}d 2>/dev/null
+  sudo timeout 120 systemctl stop ${network}d 2>/dev/null
+  sudo timeout 120 systemctl stop t${network}d 2>/dev/null
+  sudo timeout 120 systemctl stop s${network}d 2>/dev/null
   sleep 3
 else
   echo "skipping stopping layer1 (network=='' in cache)"
