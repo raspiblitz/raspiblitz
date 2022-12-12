@@ -116,8 +116,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     # persist settings in app-data
     sudo mkdir -p $HELIPAD_DATA_DIR
-    sudo chown $HELIPAD_USER: $HELIPAD_DATA_DIR
+    sudo chown $HELIPAD_USER:$HELIPAD_USER $HELIPAD_DATA_DIR
     sudo -u $HELIPAD_USER touch $HELIPAD_DB
+    sudo chown $HELIPAD_USER:$HELIPAD_USER $HELIPAD_DB
 
     ##################
     # NGINX
