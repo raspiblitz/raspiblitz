@@ -220,6 +220,7 @@ TimeoutSec=120
 RestartSec=30
 StandardOutput=null
 StandardError=journal
+LogLevelMax=4
 
 # Hardening measures
 PrivateTmp=true
@@ -406,9 +407,9 @@ if [ "$1" = "prestart" ]; then
     jq ".nodes[0].Authentication.swapMacaroonPath = \"/home/rtl/.loop/${CHAIN}/\"" | \
     jq ".nodes[0].Authentication.boltzMacaroonPath = \"/home/rtl/.boltz-lnd/macaroons/\"" | \
     jq ".nodes[0].Settings.userPersona = \"OPERATOR\"" | \
-    jq ".nodes[0].Settings.lnServerUrl = \"https://localhost:${portprefix}8080\"" | \
+    jq ".nodes[0].Settings.lnServerUrl = \"https://127.0.0.1:${portprefix}8080\"" | \
     jq ".nodes[0].Settings.channelBackupPath = \"/mnt/hdd/app-data/rtl/${systemdService}-SCB-backup-$hostname\"" | \
-    jq ".nodes[0].Settings.swapServerUrl = \"https://localhost:${SWAPSERVERPORT}\"" > /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json.tmp
+    jq ".nodes[0].Settings.swapServerUrl = \"https://127.0.0.1:${SWAPSERVERPORT}\"" > /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json.tmp
     mv /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json.tmp /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json
   fi
 
@@ -427,9 +428,9 @@ if [ "$1" = "prestart" ]; then
     jq ".nodes[0].Authentication.swapMacaroonPath = \"/home/rtl/.loop/${CHAIN}/\"" | \
     jq ".nodes[0].Authentication.boltzMacaroonPath = \"/home/rtl/.boltz-lnd/macaroons/\"" | \
     jq ".nodes[0].Settings.userPersona = \"OPERATOR\"" | \
-    jq ".nodes[0].Settings.lnServerUrl = \"https://localhost:${portprefix}6100\"" | \
+    jq ".nodes[0].Settings.lnServerUrl = \"https://127.0.0.1:${portprefix}6100\"" | \
     jq ".nodes[0].Settings.channelBackupPath = \"/mnt/hdd/app-data/rtl/${systemdService}-SCB-backup-$hostname\"" | \
-    jq ".nodes[0].Settings.swapServerUrl = \"https://localhost:${SWAPSERVERPORT}\"" > /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json.tmp
+    jq ".nodes[0].Settings.swapServerUrl = \"https://127.0.0.1:${SWAPSERVERPORT}\"" > /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json.tmp
     mv /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json.tmp /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json
   fi
 

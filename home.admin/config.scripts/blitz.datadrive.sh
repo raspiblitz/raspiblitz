@@ -407,7 +407,7 @@ if [ "$1" = "status" ]; then
 
     # try to detect if its an SSD
     isSMART=$(sudo smartctl -a /dev/${hdd} | grep -c "Rotation Rate:")
-    echo "isSMART=$(isSMART)"
+    echo "isSMART=${isSMART}"
     if [ ${isSMART} -gt 0 ]; then
     	#detect using smartmontools (preferred)
         isSSD=$(sudo smartctl -a /dev/${hdd} | grep 'Rotation Rate:' | grep -c "Solid State")
