@@ -3,7 +3,7 @@
 
 _Build your own Lightning & Bitcoin Fullnode on a RaspberryPi with a nice Display._
 
-`Version 1.9.0 with bitcoin 24.0, lnd 0.15.5 & Core Lightning 22.11.1`
+`Version 1.9.0 with bitcoin 24.0.1, lnd 0.15.5 & Core Lightning 22.11.1`
 
 ![RaspiBlitz](pictures/raspiblitz.jpg)
 
