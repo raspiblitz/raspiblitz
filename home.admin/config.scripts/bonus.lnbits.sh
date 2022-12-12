@@ -952,18 +952,19 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 fi
 
 # backup
-backup_target="/mnt/backup_manual"
+backup_target="/mnt/hdd/app-data/backup"
 if [ "$1" = "backup" ]; then
   if [ ! -d $backup_target ]; then
     sudo mkdir -p $backup_target 1>&2
   fi
 
-  if [ -d /mnt/hdd/app-data/LNBits/ ]; then
-    echo "# Backup SQLite database"
-    sudo tar -cf $backup_target/LNBits_db_backup.tar -C "/mnt/hdd/app-data" LNBits/
-  else
+  source <(/home/admin/_cache.sh get LNBitsDB)
+  if [ "${LNBitsDB}" == "PostgreSQL" ]; then
     echo "# Backup PostgreSQL database"
     sudo /home/admin/config.scripts/bonus.postgresql.sh backup lnbits_db
+  else
+    echo "# Backup SQLite database"
+    sudo tar -cf $backup_target/LNBits_db_backup.tar -C "/mnt/hdd/app-data" LNBits/
   fi
   sudo systemctl start lnbits
   exit 0
@@ -974,7 +975,11 @@ if [ "$1" = "restore" ]; then
   if [ ! -d $backup_target ]; then
     echo "# No backups found"
   else
-    if [ -d /mnt/hdd/app-data/LNBits/ ]; then
+    source <(/home/admin/_cache.sh get LNBitsDB)
+    if [ "${LNBitsDB}" == "PostgreSQL" ]; then
+      echo "# Restore PostgreSQL database"
+      sudo /home/admin/config.scripts/bonus.postgresql.sh restore lnbits_db lnbits_user raspiblitz
+    else
       echo "# Restore SQLite database"
       cd $backup_target
       # unpack backup file
@@ -985,9 +990,6 @@ if [ "$1" = "restore" ]; then
       # apply backup data
       sudo rm -R ../LNBits/
       sudo mv LNBits/ ../
-    else
-      echo "# Restore PostgreSQL database"
-      sudo /home/admin/config.scripts/bonus.postgresql.sh restore lnbits_db lnbits_user raspiblitz
     fi
   fi
   sudo systemctl start lnbits
