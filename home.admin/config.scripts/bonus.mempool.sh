@@ -304,16 +304,26 @@ EOF
   echo "# needs to finish creating txindex to be functional"
   echo "# monitor with: sudo tail -n 20 -f /mnt/hdd/bitcoin/debug.log"
 
-
   # Hidden Service for Mempool if Tor is active
   if [ "${runBehindTor}" = "on" ]; then
     # make sure to keep in sync with tor.network.sh script
     /home/admin/config.scripts/tor.onion-service.sh mempool 80 4082 443 4083
   fi
 
-  # needed for API/WebUI as signal that install ran thru 
-  echo "result='OK'"
-  exit 0
+  # check install success by testing backend
+  localIP=$(hostname -I | awk '{print $1}')
+  httpResponseCode=$(curl -s -o /dev/null -w "%{http_code}" http://${localIP}:4080/api/v1/statistics/2h)
+  if [ "${httpResponseCode}" != "200"]; then
+    # signal an error to WebUI
+    echo "result='${httpResponseCode}'"
+    echo "# HTTP error code ${httpResponseCode} calling backend: http://${localIP}:4080/api/v1/statistics/2h"
+    exit 1
+  else
+    # needed for API/WebUI as signal that install ran thru 
+    echo "result='OK'"
+    exit 0
+  fi
+  
 fi
 
 # switch off
