@@ -205,6 +205,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     "ENABLED": true,
     "HOST": "localhost",
     "PORT": 3306,
+    "SOCKET": "/var/run/mysqld/mysqld.sock",
     "USERNAME": "mempool",
     "PASSWORD": "mempool",
     "DATABASE": "mempool"
