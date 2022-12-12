@@ -98,7 +98,7 @@ if [ "$command" = "0" ] || [ "$command" = "off" ]; then
 fi
 
 # backup
-backup_target="/mnt/backup_manual/$db_name"
+backup_target="/mnt/hdd/app-data/backup/$db_name"
 backup_file="${db_name}_`date +%d`-`date +%m`-`date +%Y`_`date +%H`-`date +%M`_dump"
 if [ ! -d $backup_target ]; then
     sudo mkdir -p $backup_target 1>&2
