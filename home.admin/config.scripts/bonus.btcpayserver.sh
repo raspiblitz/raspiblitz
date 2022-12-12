@@ -306,9 +306,6 @@ if [ "$1" = "install" ]; then
   sudo adduser --disabled-password --gecos "" btcpay
   cd /home/btcpay || exit 1
 
-  echo "# install postreSQL"
-  sudo /home/admin/config.scripts/bonus.postgresql.sh on || exit 1
-
   echo "# install .NET"
   # https://dotnet.microsoft.com/en-us/download/dotnet/6.0
   sudo apt-get -y install libunwind8 gettext libssl1.0
@@ -340,8 +337,6 @@ if [ "$1" = "install" ]; then
   sudo -u btcpay tar -xvf ${dotNetName} -C /home/btcpay/dotnet
   sudo rm -f *.tar.gz*
   echo "DOTNET_CLI_TELEMETRY_OPTOUT=1" | sudo tee -a /etc/environment
-
-##################################################################################################
 
   # NBXplorer
   echo "# Install NBXplorer"
@@ -428,6 +423,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   echo "# ACTIVATE BTCPAYSERVER"
 
+  echo "# install postreSQL"
+  sudo /home/admin/config.scripts/bonus.postgresql.sh on || exit 1
+
   # setup nginx symlinks
   if ! [ -f /etc/nginx/sites-available/btcpay_ssl.conf ]; then
      sudo cp /home/admin/assets/nginx/sites-available/btcpay_ssl.conf /etc/nginx/sites-available/btcpay_ssl.conf
@@ -458,6 +456,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   # check for $BTCPayDomain
   source /mnt/hdd/raspiblitz.conf
+  if [ "${BTCPayDomain}" == "off" ]; then
+    BTCPayDomain=""
+  fi
 
   # stop services
   echo "# making sure services are not running"
@@ -532,6 +533,8 @@ WantedBy=multi-user.target
   else
     echo "# Because the system is not 'ready' the service 'nbxplorer' will not be started at this point .. its enabled and will start on next reboot"
   fi
+
+  postgresConfig
 
   NBXplorerConfig
 
