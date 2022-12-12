@@ -110,7 +110,7 @@ if [ "$command" = "backup" ] && [ "$db_name" != "" ]; then
   sudo -u postgres pg_dump $db_name > $backup_target/${backup_file}.sql || exit 1
   # Delete old backups (keep last 3 backups)
   sudo ls -tp $backup_target/*.sql | grep -v '/$' | tail -n +4 | tr '\n' '\0' | xargs -0 rm --
-  echo "OK database $db_name backup done."
+  echo "OK - backup finished, file saved as $backup_target/${backup_file}.sql"
   exit 0
 fi
 
@@ -120,9 +120,10 @@ if [ "$command" = "restore" ] && [ "$db_name" != "" ] && [ "$db_user" != "" ] &&
   # find recent backup
   backup_file=$(ls -t $backup_target/*.sql | head -n1)
   if [ ! -e $backup_file ]; then
-    echo "FAIL - Database backup not found in ${backup_target}"
-    echo "ABORT - PostgreSQL restore"
+    echo "FAIL - sql file to restore not found in ${backup_target}"
     exit 1
+  else
+    echo "Start restore from backup ${backup_file}"
   fi
 
   # clean up
@@ -141,7 +142,7 @@ if [ "$command" = "restore" ] && [ "$db_name" != "" ] && [ "$db_user" != "" ] &&
   sudo mkdir -p $backup_target/logs 1>&2
   sudo -u postgres psql $db_name < ${backup_file} > $backup_target/logs/sql_import.log || exit 1
   echo "$backup_target/sql_import.log written"
-  echo "OK database $db_name restored."
+  echo "OK - database $db_name restored from ${backup_file}"
   exit 0
 fi
 

@@ -959,12 +959,12 @@ if [ "$1" = "backup" ]; then
   fi
 
   source <(/home/admin/_cache.sh get LNBitsDB)
+  echo "# Start Backup LNBits ${LNBitsDB} database"
   if [ "${LNBitsDB}" == "PostgreSQL" ]; then
-    echo "# Backup PostgreSQL database"
     sudo /home/admin/config.scripts/bonus.postgresql.sh backup lnbits_db
   else
-    echo "# Backup SQLite database"
     sudo tar -cf $backup_target/LNBits_db_backup.tar -C "/mnt/hdd/app-data" LNBits/
+    echo "Backup file: $backup_target/LNBits_db_backup.tar"
   fi
   sudo systemctl start lnbits
   exit 0
