@@ -12,8 +12,8 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "# config script for RideTheLightning $RTLVERSION WebInterface"
   echo "# able to run intances for lnd and cl parallel"
   echo "# mainnet and testnet instances can run parallel"
-  echo "# bonus.rtl.sh [on|off|menu] <lnd|cl> <mainnet|testnet|signet> <purge>"
   echo "# bonus.rtl.sh [install|uninstall]"
+  echo "# bonus.rtl.sh [on|off|menu] <lnd|cl> <mainnet|testnet|signet> <purge>"
   echo "# bonus.rtl.sh connect-services"
   echo "# bonus.rtl.sh prestart <lnd|cl> <mainnet|testnet|signet>"
   echo "# bonus.rtl.sh update <commit>"
@@ -181,8 +181,27 @@ fi
 if [ "$1" = "uninstall" ]; then
 
   echo "# Uninstalling RTL codebase"
+
+  # check LND RTL services
+  isActiveMain=$(sudo ls /etc/systemd/system/RTL.service 2>/dev/null | grep -c 'RTL.service')
+  isActiveTest=$(sudo ls /etc/systemd/system/tRTL.service 2>/dev/null | grep -c 'RTL.service')
+  isActiveSig=$(sudo ls /etc/systemd/system/sRTL.service 2>/dev/null | grep -c 'RTL.service')
+  if [ "${isActiveMain}" != "0" ] || [ "${isActiveTest}" != "0" ] || [ "${isActiveSig}" != "0" ]; then
+    echo "# cannot uninstall RTL still used by LND"
+    exit 1
+  fi
+
+  # check LND RTL services
+  isActiveMain=$(sudo ls /etc/systemd/system/cRTL.service 2>/dev/null | grep -c 'RTL.service')
+  isActiveTest=$(sudo ls /etc/systemd/system/tcRTL.service 2>/dev/null | grep -c 'RTL.service')
+  isActiveSig=$(sudo ls /etc/systemd/system/scRTL.service 2>/dev/null | grep -c 'RTL.service')
+  if [ "${isActiveMain}" != "0" ] || [ "${isActiveTest}" != "0" ] || [ "${isActiveSig}" != "0" ]; then
+    echo "# cannot uninstall RTL still used by CLN"
+    exit 1
+  fi
+
   echo "# Delete user and home directory"
-   sudo userdel -rf rtl
+  sudo userdel -rf rtl
 
   exit 0
 fi
@@ -200,9 +219,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   fi
 
   # check that is already active
-  isInstalled=$(sudo ls /etc/systemd/system/${systemdService}.service 2>/dev/null | grep -c "${systemdService}.service")
-  if [ ${isInstalled} -eq 1 ]; then
+  isActive=$(sudo ls /etc/systemd/system/${systemdService}.service 2>/dev/null | grep -c "${systemdService}.service")
+  if [ ${isActive} -eq 1 ]; then
     echo "# OK, the ${netprefix}${typeprefix}RTL.service is already active."
+    echo "result='already active'"
     exit 1
   fi
 

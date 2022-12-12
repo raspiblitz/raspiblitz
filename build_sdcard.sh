@@ -787,9 +787,13 @@ if ${fatpack}; then
   # Fallback Nodes List from Bitcoin Core
   sudo -u admin curl https://raw.githubusercontent.com/bitcoin/bitcoin/master/contrib/seeds/nodes_main.txt -o /home/admin/fallback.bitcoin.nodes
 
+  echo "* Adding Code&Compile for WEBUI-APP: RTL"
+  /home/admin/config.scripts/bonus.rtl.sh install || exit 1
+  echo "* Adding Code&Compile for WEBUI-APP: BTCPAYSERVER"
+  /home/admin/config.scripts/bonus.btcpayserver.sh install || exit 1
+
   echo "* Adding Raspiblitz API ..."
   sudo /home/admin/config.scripts/blitz.web.api.sh on || exit 1
-
   echo "* Adding Raspiblitz WebUI ..."
   sudo /home/admin/config.scripts/blitz.web.ui.sh on || exit 1
 
