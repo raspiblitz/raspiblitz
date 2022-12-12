@@ -1,5 +1,5 @@
 #!/bin/bash
-
+ 
 echo "Starting the main menu ..."
 
 # MAIN MENU AFTER SETUP
@@ -86,6 +86,9 @@ fi
 if [ "${lit}" == "on" ]; then
   OPTIONS+=(LIT "LIT (loop, pool, faraday)")
 fi
+if [ "${lndg}" == "on" ]; then
+  OPTIONS+=(LNDG "LNDg (auto-rebalance, auto-fees)")
+fi
 if [ "${sparko}" == "on" ]; then
   OPTIONS+=(SPARKO "Sparko Webwallet")
 fi
@@ -165,6 +168,9 @@ if [ "${squeaknode}" == "on" ]; then
 fi
 if [ "${itchysats}" == "on" ]; then
   OPTIONS+=(ITCHYSATS "Show ItchySats details")
+fi
+if [ "${lightningtipbot}" == "on" ]; then
+  OPTIONS+=(LIGHTNINGTIPBOT "Show LightningTipBot details")
 fi
 
 # dont offer to switch to "testnet view for now" - so no wswitch back to mainnet needed
@@ -265,6 +271,9 @@ case $CHOICE in
         LIT)
             /home/admin/config.scripts/bonus.lit.sh menu
             ;;
+        LNDG)
+            /home/admin/config.scripts/bonus.lndg.sh menu
+            ;;
         SPARKO)
             /home/admin/config.scripts/cl-plugin.sparko.sh menu mainnet
             ;;
@@ -277,6 +286,9 @@ case $CHOICE in
         LNDMANAGE)
             /home/admin/config.scripts/bonus.lndmanage.sh menu
             ;;
+        LIGHTNINGTIPBOT)
+            /home/admin/config.scripts/bonus.lightningtipbot.sh menu
+            ;;            
         LOOP)
             /home/admin/config.scripts/bonus.loop.sh menu
             ;;

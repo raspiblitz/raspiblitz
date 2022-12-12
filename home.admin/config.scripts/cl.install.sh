@@ -2,22 +2,22 @@
 # https://lightning.readthedocs.io/
 
 # https://github.com/ElementsProject/lightning/releases
-CLVERSION=v0.12.1
+CLVERSION=v22.11.1
 
 # install the latest master by using the last commit id
 # https://github.com/ElementsProject/lightning/commit/master
 # CLVERSION="063366ed7e3b7cc12a8d1681acc2b639cf07fa23"
 
 # https://github.com/ElementsProject/lightning/tree/master/contrib/keys
-PGPsigner="niftynei" # rustyrussel D9200E6CD1ADB8F1 # cdecker A26D6D9FE088ED58
+PGPsigner="cdecker" # rustyrussel D9200E6CD1ADB8F1 # cdecker A26D6D9FE088ED58 # niftynei BFF0F67810C1EED1
 PGPpubkeyLink="https://raw.githubusercontent.com/ElementsProject/lightning/master/contrib/keys/${PGPsigner}.txt"
-PGPpubkeyFingerprint="BFF0F67810C1EED1"
+PGPpubkeyFingerprint="A26D6D9FE088ED58"
 
 # help
 if [ $# -eq 0 ]||[ "$1" = "-h" ]||[ "$1" = "--help" ];then
   echo
   echo "Core Lightning install script"
-  echo "The default version is: $CLVERSION"
+  echo "The default version is: ${CLVERSION}"
   echo "mainnet / testnet / signet instances can run parallel"
   echo
   echo "Usage:"
@@ -42,6 +42,7 @@ function installDependencies()
   sudo apt-get install -y postgresql libpq-dev
   # upgrade pip
   sudo pip3 install --upgrade pip
+  sudo -u bitcoin pip install mako
   # poetry
   sudo -u bitcoin pip3 install --user poetry
   if ! grep -Eq '^PATH="$HOME/.local/bin:$PATH"' /mnt/hdd/raspiblitz.conf; then
@@ -61,9 +62,50 @@ function buildAndInstallCLbinaries()
   echo
   sudo -u bitcoin make
   echo
+  # git reset --hard needed to not show as 'v22.11-modded'
+  sudo -u bitcoin git reset --hard
   echo "- Install to /usr/local/bin/"
   sudo make install || exit 1
 }
+
+echo "# Running: 'cl.install.sh $*'"
+
+# check for version if specified
+if [ "$1" = "update" ] && [ $# -gt 1 ]; then
+  CLVERSION=$2
+  if curl --output /dev/null --silent --head --fail \
+   https://github.com/ElementsProject/lightning/releases/tag/${CLVERSION};then
+    echo "# OK version exists at https://github.com/ElementsProject/lightning/releases/tag/${CLVERSION}"
+  else
+    echo "# ${CLVERSION} does not exist"
+    echo
+    echo "# Exiting 'cl.install.sh $*' script"
+    exit 1
+  fi
+fi
+
+# check for PR if testPR
+if [ "$1" = "testPR" ]; then
+    if [ $# -gt 1 ]; then
+      PRnumber=$2
+    else
+      echo "# Need PRnumber as the second paramater"
+    fi
+    echo "# Using the PR:"
+    echo "# https://github.com/ElementsProject/lightning/pull/${PRnumber}"
+  if curl --output /dev/null --silent --head --fail \
+   https://github.com/ElementsProject/lightning/pull/${PRnumber};then
+    echo "# OK the PR exists at https://github.com/ElementsProject/lightning/pull/${PRnumber}"
+    echo "# Press ENTER to proceed to install Core Lightning with the PR ${PRnumber} or CTRL+C to abort."
+    read key
+  else
+    echo "# ${PRnumber} does not exist"
+    echo
+    echo "# Press ENTER to return to the main menu"
+    read key
+    exit 1
+  fi
+fi
 
 if [ "$1" = "install" ]; then
 
@@ -144,8 +186,8 @@ if [ "$1" = "install" ]; then
   sudo -u bitcoin git clone https://github.com/ElementsProject/lightning.git
   cd lightning || exit 1
   echo
-  echo "- Reset to version $CLVERSION"
-  sudo -u bitcoin git reset --hard $CLVERSION
+  echo "- Reset to version ${CLVERSION}"
+  sudo -u bitcoin git reset --hard ${CLVERSION}
 
   sudo -u bitcoin /home/admin/config.scripts/blitz.git-verify.sh \
    "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" "${CLVERSION}" || exit 1
@@ -184,7 +226,6 @@ else
   source <(/home/admin/config.scripts/network.aliases.sh getvars cl $2)
 fi
 
-echo "# Running: 'cl.install.sh $*'"
 echo "# Using the settings for: ${network} ${CHAIN}"
 
 if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = testPR ];then
@@ -223,8 +264,8 @@ if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = testPR ];then
     if [ "$1" = "update" ]; then
       if [ $# -gt 1 ];then
         CLVERSION=$2
-        echo "# Installing the version $CLVERSION"
-        sudo -u bitcoin git reset --hard $CLVERSION
+        echo "# Installing the version ${CLVERSION}"
+        sudo -u bitcoin git reset --hard ${CLVERSION}
       else
         echo "# Updating to the latest commit in:"
         echo "# https://github.com/ElementsProject/lightning"
@@ -236,9 +277,9 @@ if [ "$1" = on ]||[ "$1" = update ]||[ "$1" = testPR ];then
     elif [ "$1" = "testPR" ]; then
       PRnumber=$2 || exit 1
       echo "# Using the PR:"
-      echo "# https://github.com/ElementsProject/lightning/pull/$PRnumber"
-      sudo -u bitcoin git fetch origin pull/$PRnumber/head:pr$PRnumber || exit 1
-      sudo -u bitcoin git checkout pr$PRnumber || exit 1
+      echo "# https://github.com/ElementsProject/lightning/pull/${PRnumber}"
+      sudo -u bitcoin git fetch origin pull/${PRnumber}/head:pr${PRnumber} || exit 1
+      sudo -u bitcoin git checkout pr${PRnumber} || exit 1
     fi
 
     installDependencies
@@ -311,12 +352,12 @@ always-use-proxy=true
   #################
   # Backup plugin #
   #################
-  /home/admin/config.scripts/cl-plugin.backup.sh on $CHAIN
+  /home/admin/config.scripts/cl-plugin.backup.sh on ${CHAIN}
 
   ###################
   # Systemd service #
   ###################
-  /home/admin/config.scripts/cl.install-service.sh $CHAIN
+  /home/admin/config.scripts/cl.install-service.sh ${CHAIN}
 
   #############
   # logrotate #

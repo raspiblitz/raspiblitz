@@ -55,13 +55,27 @@ if [ "$command" = "1" ] || [ "$command" = "on" ]; then
     sudo mv $postgres_datadir /var/lib/postgresql.bak
     sudo rm -rf $postgres_datadir # not a symlink.. delete it silently
     sudo ln -s /mnt/hdd/app-data/postgresql /var/lib/
-    sudo systemctl enable postgresql
-    sudo systemctl start postgresql
   fi
+  sudo systemctl enable postgresql
+  sudo systemctl start postgresql
 
   # check if PostgreSQL was installed
   if psql --version; then
-    echo "# Installed PostgreSQL $(psql --version)"
+    # wait for the postgres server to start
+    count=0
+    count_max=30
+    while ! nc -zv 127.0.0.1 5432 2>/dev/null;
+    do
+      count=`expr $count + 1`
+      echo "sleep $count/$count_max"
+      sleep 1
+      if [ $count = $count_max ]; then
+        sudo systemctl status postgresql
+        echo "FAIL - Was not able to start PostgreSQL service"
+        exit 1
+      fi
+    done
+    echo "OK PostgreSQL installed"
   else
     echo "FAIL - Was not able to install PostgreSQL"
     echo "ABORT - PostgreSQL install"
@@ -77,6 +91,7 @@ if [ "$command" = "0" ] || [ "$command" = "off" ]; then
   echo "*** REMOVING POSTGRESQL ***"
   sudo apt remove -y postgresql
   sudo systemctl stop postgresql
+  sudo systemctl disable postgresql
   echo "OK PostgreSQL removed."
   exit 0
 fi

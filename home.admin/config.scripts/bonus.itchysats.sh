@@ -138,6 +138,7 @@ buildFromSource() {
     echo "# compile/install the app. This will take a long time"
     sudo -u ${APPID} /home/${APPID}/.cargo/bin/cargo install --path taker --locked --target-dir /home/${APPID}/bin/
     exitCode=$?
+    sudo rm -R /home/${APPID}/.rustup
     if ! [ ${exitCode} -eq 0 ]; then
         echo "# FAIL - cargo install did not run correctly - deleting code & exit"
         sudo rm -r /home/${APPID}/${APPID}
@@ -340,6 +341,7 @@ TimeoutSec=120
 RestartSec=30
 StandardOutput=null
 StandardError=journal
+LogLevelMax=4
 
 # Hardening measures
 PrivateTmp=true
@@ -564,6 +566,9 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   echo "# mark app as uninstalled in raspiblitz config"
   /home/admin/config.scripts/blitz.conf.sh set ${APPID} "off"
+
+  echo "# delete user"
+  sudo userdel -rf itchysats 2>/dev/null
 
   # only if 'delete-data' is an additional parameter then also the data directory gets deleted
   if [ "$(echo "$@" | grep -c delete-data)" -gt 0 ]; then

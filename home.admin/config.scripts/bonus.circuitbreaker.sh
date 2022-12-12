@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # https://github.com/lightningequipment/circuitbreaker/releases
-pinnedVersion="v0.3.0"
+pinnedVersion="v0.3.2"
 # the commits are not signed
 
 # command info

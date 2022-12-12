@@ -501,6 +501,10 @@ Yellow is OK. The RaspiBlitz can detect that it can reach a service on the port 
 
 For details on how to set port forwarding on your router model see: https://portforward.com
 
+### How can I set a fixed IP?
+
+Add an entry called `staticIP` in `raspiblitz.conf` to prevent external IP detection and force a fixed IP for your node.
+
 ### How do I fix a displayed Error in my Config?
 
 When the LCD display is telling you to do a config check:
@@ -529,7 +533,7 @@ You don't need a LAN port on your laptop as long as you can connect over WLAN to
 A LAN cable is recommended because it reduces a possible source of error on the network connection side. But how to setup WLAN when you don't have a LAN-Router/Switch available see here:
 
 Using [Raspberry Pi Imager: ](https://www.raspberrypi.com/software/)
-https://raspibolt.org/operating-system.html#configure-boot-options
+https://raspibolt.org/guide/raspberry-pi/operating-system.html#configure-boot-options
 
 Manually
 https://github.com/raspibolt/raspibolt/blob/a21788c0518618d17093e3f447f68a53e4efa6e7/raspibolt/raspibolt_20_pi.md#prepare-wifi

@@ -17,7 +17,7 @@ function help(){
 
 # https://github.com/lightningd/plugins/commits/master/backup
 # use the version beore the migration to poetry
-pinnedVersion="3da5778dcf408ff075515b4956aef405aa18f81a"
+pinnedVersion="4d3560b129b12cba0381fff0b1e30ac32ef84106"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ];then
@@ -35,8 +35,9 @@ function install() {
     sudo -u bitcoin git clone https://github.com/lightningd/plugins.git
   fi
   cd ${plugindir} || exit 1
-  sudo -u bitcoin git reset --hard ${pinnedVersion}
-  
+  sudo -u bitcoin git pull
+  sudo -u bitcoin git reset --hard ${pinnedVersion} || exit 1
+
   if [ $($lightningcli_alias plugin list 2>/dev/null | grep -c "${plugin}") -eq 0 ];then
     echo "# Checking dependencies"
     sudo -u bitcoin pip install --user -r ${plugindir}/${plugin}/requirements.txt 1>/dev/null
@@ -56,12 +57,12 @@ function install() {
 }
 
 if [ "$1" = on ];then
-  
+
   install
 
   echo "# Stop the ${netprefix}lightningd.service"
   sudo systemctl stop ${netprefix}lightningd
-  
+
   # don't overwrite old backup
   if [ -f /home/bitcoin/${netprefix}lightningd.sqlite3.backup ];then
     echo "# Backup the existing old backup on the SDcard"
@@ -96,7 +97,7 @@ if [ "$1" = on ];then
   fi
 
 
-elif [ "$1" = off ];then
+elif [ "$1" = off ]; then
   echo "# Removing the backup plugin"
   sudo rm -f /home/bitcoin/${netprefix}cl-plugins-enabled/backup.py
   echo "# Backup the existing old backup on the SDcard"
@@ -113,9 +114,9 @@ elif [ "$1" = restore ];then
 
   #look for a backup to restore
   if sudo ls /home/bitcoin/${netprefix}lightningd.sqlite3.backup; then
-    
+
     sudo systemctl stop ${netprefix}lightningd
-  
+
     # https://github.com/lightningd/plugins/tree/master/backup#restoring-a-backup
     # ./backup-cli restore file:///mnt/external/location ~/.lightning/bitcoin/lightningd.sqlite3
 
@@ -129,12 +130,12 @@ elif [ "$1" = restore ];then
         sudo rm /home/bitcoin/.lightning/${CLNETWORK}/lightningd.sqlite3
       fi
     fi
-  
+
     # restore
     sudo -u bitcoin ${plugindir}/backup/backup-cli restore \
       file:///home/bitcoin/${netprefix}lightningd.sqlite3.backup \
       /home/bitcoin/.lightning/${CLNETWORK}/lightningd.sqlite3
-    
+
     source <(/home/admin/_cache.sh get state)
     if [ "${state}" == "ready" ]; then
       sudo systemctl start ${netprefix}lightningd
@@ -157,11 +158,11 @@ elif [ "$1" = backup-compact ];then
       echo "# The backup is 200MB+ larger than the db, running '${netprefix}lightning-cli backup-compact' ..."
       $lightningcli_alias backup-compact
     else
-      echo "The backup is not significantly larger than the db, there is no need to compact." 
+      echo "The backup is not significantly larger than the db, there is no need to compact."
     fi
   else
     echo "# No ${dbPath} is present"
-    echo "# Run 'config.scripts/cl-plugin.backup.sh on ${CLNETWORK}' first"    
+    echo "# Run 'config.scripts/cl-plugin.backup.sh on ${CLNETWORK}' first"
   fi
 
 else

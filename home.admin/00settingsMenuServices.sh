@@ -1,5 +1,5 @@
 #!/bin/bash
-
+ 
 # get raspiblitz config
 echo "get raspiblitz config"
 source /home/admin/raspiblitz.info
@@ -23,6 +23,7 @@ if [ ${#pyblock} -eq 0 ]; then pyblock="off"; fi
 if [ ${#thunderhub} -eq 0 ]; then thunderhub="off"; fi
 if [ ${#sphinxrelay} -eq 0 ]; then sphinxrelay="off"; fi
 if [ ${#lit} -eq 0 ]; then lit="off"; fi
+if [ ${#lndg} -eq 0 ]; then lndg="off"; fi
 if [ ${#whitepaper} -eq 0 ]; then whitepaper="off"; fi
 if [ ${#chantools} -eq 0 ]; then chantools="off"; fi
 if [ ${#homer} -eq 0 ]; then homer="off"; fi
@@ -33,6 +34,7 @@ if [ ${#helipad} -eq 0 ]; then helipad="off"; fi
 if [ ${#bitcoinminds} -eq 0 ]; then bitcoinminds="off"; fi
 if [ ${#squeaknode} -eq 0 ]; then squeaknode="off"; fi
 if [ ${#itchysats} -eq 0 ]; then itchysats="off"; fi
+if [ ${#lightningtipbot} -eq 0 ]; then lightningtipbot="off"; fi
 
 # show select dialog
 echo "run dialog ..."
@@ -56,6 +58,7 @@ fi
 # available for both LND & c-lightning
 if [ "${lnd}" == "on" ] || [ "${cl}" == "on" ]; then
   OPTIONS+=(i 'LNbits (Lightning Accounts)' ${LNBits})
+  OPTIONS+=(g 'LightningTipBot' ${lightningtipbot})
 fi
 
 # just available for LND
@@ -63,6 +66,7 @@ if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
   OPTIONS+=(r 'LND RTL Webinterface' ${rtlWebinterface})
   OPTIONS+=(t 'LND ThunderHub' ${thunderhub})
   OPTIONS+=(l 'LND LIT (loop, pool, faraday)' ${lit})
+  OPTIONS+=(g 'LND LNDg (auto-rebalance, auto-fees)' ${lndg})
   OPTIONS+=(o 'LND Balance of Satoshis' ${bos})
   OPTIONS+=(y 'LND PyBLOCK' ${pyblock})
   OPTIONS+=(h 'LND ChannelTools (Fund Rescue)' ${chantools})
@@ -390,6 +394,21 @@ else
   echo "LNbits setting unchanged."
 fi
 
+# LightningTipBot process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "g")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${lightningtipbot}" != "${choice}" ]; then
+  echo "LightningTipBot Setting changed .."
+  anychange=1
+  sudo -u admin /home/admin/config.scripts/bonus.lightningtipbot.sh ${choice}
+  if [ "${choice}" =  "on" ]; then
+    sudo systemctl start lightningtipbot
+    sudo -u admin /home/admin/config.scripts/bonus.lightningtipbot.sh menu
+  fi
+else
+  echo "LightningTipBot setting unchanged."
+fi
+
 # LIT (Lightning Terminal)
 choice="off"; check=$(echo "${CHOICES}" | grep -c "l")
 if [ ${check} -eq 1 ]; then choice="on"; fi
@@ -403,6 +422,41 @@ if [ "${lit}" != "${choice}" ]; then
   fi
 else
   echo "LIT setting unchanged."
+fi
+
+# LNDg
+choice="off"; check=$(echo "${CHOICES}" | grep -c "g")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${lndg}" != "${choice}" ]; then
+  echo "LNDg Setting changed .."
+  anychange=1
+  databasechoice=""
+  isDatabase=$(sudo ls /mnt/hdd/app-data/lndg/data/db.sqlite3 2>/dev/null | grep -c 'db.sqlite3')
+  if ! [ ${isDatabase} -eq 0 ]; then
+    if [ "${choice}" = "off" ]; then
+      whiptail --title "Delete LNDg Database?" \
+      --yes-button "Keep Database" \
+      --no-button "Delete Database" \
+      --yesno "LNDg is getting uninstalled. If you keep the database, you will be able to reuse the data should you choose to re-install. Do you wish to keep the database?" 10 80
+      if [ $? -eq 1 ]; then
+        databasechoice="deletedatabase"
+      fi
+    else
+      whiptail --title "Use Existing LNDg Database?" \
+      --yes-button "Use existing database" \
+      --no-button "Start a new database" \
+      --yesno "LNDg is getting installed, and there is an existing database. You may use the existing database, which will include your old password and all of your old data, or you may start with a clean database. Do you wish to use the existing database?" 10 110
+      if [ $? -eq 1 ]; then
+        databasechoice="deletedatabase"
+      fi
+    fi
+  fi
+  sudo -u admin /home/admin/config.scripts/bonus.lndg.sh ${choice} ${databasechoice}
+  if [ "${choice}" =  "on" ]; then
+    sudo -u admin /home/admin/config.scripts/bonus.lndg.sh menu
+  fi
+else
+  echo "LNDg unchanged."
 fi
 
 # Sphinx Relay

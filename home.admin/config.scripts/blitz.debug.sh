@@ -39,7 +39,8 @@ if [ "$1" == "redact" ]; then
   sed -i 's/alias [A-Za-z0-9]* /alias *** /' ${redactFile}
   sed -i 's/public key [a-z0-9]*,/public key *** /' ${redactFile}
   sed -i 's/[a-z0-9][a-z0-9]*.onion/###.onion/' ${redactFile}
-
+  sed -i 's/alias=[^\r\n]*/alias=****/' ${redactFile}
+  
   exit 0
 fi
 
@@ -368,8 +369,18 @@ fi
 
 echo
 echo "*** MOUNTED DRIVES ***"
+echo "df -T -h"
 df -T -h
+
 echo
+echo "*** SD CARD HOMES ***"
+echo "sudo du -ahd1 /home"
+sudo du -ahd1 /home
+
+echo
+echo "*** LOGFILES ***"
+sudo journalctl --disk-usage
+sudo du -sh /var/log
 
 echo
 echo "*** DATADRIVE ***"
@@ -395,11 +406,6 @@ echo "*** SYSTEM CACHE STATUS ***"
 /home/admin/_cache.sh "export" system_
 /home/admin/_cache.sh "export" ln_default | grep -v "ln_default_address"
 /home/admin/_cache.sh "export" btc_default | grep -v "btc_default_address"
-
-echo
-echo "*** LOGFILES ***"
-sudo journalctl --disk-usage
-sudo du -sh /var/log
 
 echo
 echo "*** OPTION: SHARE THIS DEBUG OUTPUT ***"

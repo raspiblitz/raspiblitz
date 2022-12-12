@@ -33,6 +33,9 @@ if [ ${#openChannels} -gt 0 ] && [ ${openChannels} -gt 0 ]; then
 fi
   OPTIONS+=(CASHOUT "Withdraw all funds onchain ($CHAIN)")
   OPTIONS+=(SEED "Show Wallet Seed Words")
+if [ "${clWatchtowerClient}" == "on" ] && [ "${CHAIN}" == "mainnet" ]; then
+  OPTIONS+=(WATCHTOWER  "Watchtower Client Options")
+fi  
   OPTIONS+=(REPAIR-CL "Repair options for Core Lightning")
 if [ "${lightning}" != "cl" ] && [ "${CHAIN}" == "mainnet" ]; then
   OPTIONS+=(SWITCHLN  "Use Core Lightning as default")
@@ -80,6 +83,9 @@ case $CHOICE in
       ;;
   NAME)
       sudo /home/admin/config.scripts/cl.setname.sh $CHAIN
+      ;;
+  WATCHTOWER)
+      /home/admin/config.scripts/cl-plugin.watchtower-client.sh info
       ;;
   SUEZ)
       clear

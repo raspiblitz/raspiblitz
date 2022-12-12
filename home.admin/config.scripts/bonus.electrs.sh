@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # https://github.com/romanz/electrs/releases
-ELECTRSVERSION="v0.9.9"
+ELECTRSVERSION="v0.9.10"
 # https://github.com/romanz/electrs/commits/master
 # ELECTRSVERSION="446858ea621416916f84cbce61be92b748e8133e"
 
@@ -10,7 +10,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "config script to switch the Electrum Rust Server on or off"
  echo "bonus.electrs.sh status -> dont call in loops"
  echo "bonus.electrs.sh status-sync"
- echo "bonus.electrs.sh [on|off|menu]"
+ echo "bonus.electrs.sh [on|off|menu|update]"
  echo "installs the version $ELECTRSVERSION"
  exit 1
 fi
@@ -145,7 +145,7 @@ if [ "$1" = "menu" ]; then
 
   # get status
   echo "# collecting status info ... (please wait)"
-  source <(sudo /home/admin/config.scripts/bonus.electrs.sh status)
+  source <(sudo /home/admin/config.scripts/bonus.electrs.sh status showAddress)
 
   if [ ${serviceInstalled} -eq 0 ]; then
     echo "# FAIL not installed"
@@ -208,11 +208,11 @@ Check 'sudo nginx -t' for a detailed error message.
     echo
     echo "On Network Settings > Server menu:"
     echo "- deactivate automatic server selection"
-    echo "- as manual server set '${localip}' & '${portSSL}'"
+    echo "- as manual server set '${localIP}' & '${portSSL}'"
     echo "- laptop and RaspiBlitz need to be within same local network"
     echo
     echo "To start directly from laptop terminal use:"
-    echo "electrum --oneserver --server ${localip}:${portSSL}:s"
+    echo "electrum --oneserver --server ${localIP}:${portSSL}:s"
     if [ ${TorRunning} -eq 1 ]; then
       echo
       echo "The Tor Hidden Service address for electrs is (see LCD for QR code):"
@@ -415,6 +415,7 @@ Type=simple
 TimeoutSec=60
 Restart=always
 RestartSec=60
+LogLevelMax=5
 
 # Hardening measures
 PrivateTmp=true
@@ -446,6 +447,10 @@ WantedBy=multi-user.target
     echo "whitelist=download@127.0.0.1" | sudo tee -a /mnt/hdd/bitcoin/bitcoin.conf
     bitcoindRestart=yes
   fi
+
+  # clean up
+  sudo rm -R /home/electrs/.cargo
+  sudo rm -R /home/electrs/.rustup
 
   source <(/home/admin/_cache.sh get state)
   if [ "${state}" == "ready" ]; then
@@ -507,6 +512,34 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   else
     echo "# ElectRS is not installed."
   fi
+  exit 0
+fi
+
+if [ "$1" = "update" ]; then
+  echo "# Update Electrs"
+  cd /home/electrs/electrs || exit 1
+  sudo -u electrs git fetch
+
+  localVersion=$(git describe --tag)
+  updateVersion=$(curl -s https://api.github.com/repos/romanz/electrs/releases/latest|grep tag_name|head -1|cut -d '"' -f4)
+
+  if [ $localVersion = $updateVersion ]; then
+    echo "# Up-to-date on version $localVersion"
+  else
+    echo "# Pulling latest changes..."
+    sudo -u electrs git pull -p
+    echo "# Reset to the latest release tag: $updateVersion"
+    sudo -u electrs git reset --hard $updateVersion
+    echo "# Build Electrs ..."
+    sudo -u electrs /home/electrs/.cargo/bin/cargo build --locked --release || exit 1
+    
+    # update config
+    sed -i "/^server_banner =/d" /home/electrs/.electrs/config.toml
+    sudo bash -c "echo 'server_banner = \"Welcome to electrs $updateVersion - the Electrum Rust Server on your RaspiBlitz\"' >> /home/electrs/.electrs/config.toml"
+
+    echo "# Updated Electrs to $updateVersion"
+  fi
+  sudo systemctl start electrs
   exit 0
 fi
 

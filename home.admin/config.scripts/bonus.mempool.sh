@@ -189,7 +189,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     "HTTP_PORT": 8999,
     "API_URL_PREFIX": "/api/v1/",
     "CACHE_DIR": "/mnt/hdd/app-storage/mempool/cache",
-    "POLL_RATE_MS": 2000
+    "POLL_RATE_MS": 2000,
+    "STDOUT_LOG_MIN_PRIORITY": "info"
   },
   "CORE_RPC": {
     "USERNAME": "$RPC_USER",
@@ -204,6 +205,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     "ENABLED": true,
     "HOST": "localhost",
     "PORT": 3306,
+    "SOCKET": "/var/run/mysqld/mysqld.sock",
     "USERNAME": "mempool",
     "PASSWORD": "mempool",
     "DATABASE": "mempool"
@@ -268,6 +270,7 @@ User=mempool
 # Restart on failure but no more than default times (DefaultStartLimitBurst=5) every 10 minutes (600 seconds). Otherwise stop
 Restart=on-failure
 RestartSec=600
+LogLevelMax=4
 
 # Hardening measures
 PrivateTmp=true
@@ -302,16 +305,26 @@ EOF
   echo "# needs to finish creating txindex to be functional"
   echo "# monitor with: sudo tail -n 20 -f /mnt/hdd/bitcoin/debug.log"
 
-
   # Hidden Service for Mempool if Tor is active
   if [ "${runBehindTor}" = "on" ]; then
     # make sure to keep in sync with tor.network.sh script
     /home/admin/config.scripts/tor.onion-service.sh mempool 80 4082 443 4083
   fi
 
-  # needed for API/WebUI as signal that install ran thru 
-  echo "result='OK'"
-  exit 0
+  # check install success by testing backend
+  localIP=$(hostname -I | awk '{print $1}')
+  httpResponseCode=$(curl -s -o /dev/null -w "%{http_code}" http://${localIP}:4080/api/v1/statistics/2h)
+  if [ "${httpResponseCode}" != "200" ]; then
+    # signal an error to WebUI
+    echo "result='${httpResponseCode}'"
+    echo "# HTTP error code ${httpResponseCode} calling backend: http://${localIP}:4080/api/v1/statistics/2h"
+    exit 1
+  else
+    # needed for API/WebUI as signal that install ran thru 
+    echo "result='OK'"
+    exit 0
+  fi
+  
 fi
 
 # switch off

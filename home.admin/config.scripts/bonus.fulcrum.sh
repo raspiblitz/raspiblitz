@@ -194,8 +194,8 @@ if [ "$1" = off ]; then
   # remove Tor service
   /home/admin/config.scripts/tor.onion-service.sh off fulcrum
   # close ports on firewall
-  sudo ufw deny 50021
-  sudo ufw deny 50022
+  sudo ufw delete allow 50021
+  sudo ufw delete allow 50022
   # to remove the database directory:
   # sudo rm -rf /mnt/hdd/app-storage/fulcrum
   # setting value in raspiblitz config

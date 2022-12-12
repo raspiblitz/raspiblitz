@@ -1,17 +1,32 @@
 # CHANGES between Releases
 
-## What's new in Version 1.8.1 of RaspiBlitz?
+## What's new in Version 1.9.0 of RaspiBlitz?
 
+- New: CL Watchtower (The Eye of Satoshi) [details](https://github.com/talaia-labs/rust-teos/tree/master/watchtower-plugin)
+- New: LNDg v1.4.0 [details](https://github.com/cryptosharks131/lndg)
 - New: Support of X708 UPS HAT [details](https://github.com/rootzoll/raspiblitz/pull/3087)
-- Update: LND v0.15.3 [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.15.3-beta
-- Update: Core Lightning v0.12.1 [details](https://github.com/ElementsProject/lightning/releases/tag/v0.12.1)
+- New: BOS Telegram Bot Support (see OPTIONS on LND Balance of Satoshis menu entry)
+- New: LightningTipBot v0.5 [details](https://github.com/LightningTipBot/LightningTipBot)
+- Update: Bitcoin Core v24.0.1 [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-24.0.1.md)
+- Update: LND v0.15.5 [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.15.5-beta
+- Update: Core Lightning v22.11.1 [details](https://github.com/ElementsProject/lightning/releases/tag/v22.11.1)
+- Update: Electrum Server in Rust (electrs) v0.9.10 [details](https://github.com/romanz/electrs/blob/master/RELEASE-NOTES.md#0910-nov-3-2022)
+- Update: Lightning Terminal v0.8.4-alpha [details](https://github.com/lightninglabs/lightning-terminal/releases/tag/v0.8.4-alpha)
 - Update: RTL v0.13.0 with update option [details](https://github.com/Ride-The-Lightning/RTL/releases/tag/v0.12.3)
+- Update: Thunderhub v0.13.16 with balance sharing disabled [details](https://github.com/apotdevin/thunderhub/releases/tag/v0.13.16)
 - Update: LNbits 0.9.4 [details](https://github.com/lnbits/lnbits-legend/releases/tag/0.9.2)
+- Update: BTCPayServer 1.7.1 [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.7.1)
 - Update: ItchySats 0.7.0 [details](https://github.com/itchysats/itchysats/releases/tag/0.7.0)
+- Update: Channel Tools (chantools) v0.10.5 [details](https://github.com/guggero/chantools/releases/tag/v0.10.5)
 - Update: Jam (JoinMarket Web UI) v0.1.2 [details](https://github.com/joinmarket-webui/joinmarket-webui/releases/tag/v0.1.0)
 - Update: JoinMarket v0.9.8 [details](https://github.com/JoinMarket-Org/joinmarket-clientserver/releases/tag/v0.9.8)
 - Update: JoininBox v0.7.4 [details](https://github.com/openoms/joininbox/releases/tag/v0.7.3)
+- Update: Electrum Server in Rust (electrs) v0.9.9 [details](https://github.com/romanz/electrs/blob/master/RELEASE-NOTES.md#099-jul-12-2022)
+- Update: Balance of Satoshis 13.6.0 (BOS) [details](https://github.com/alexbosworth/balanceofsatoshis/blob/master/CHANGELOG.md#1360)
+- Update: Circuitbreaker v0.3.2 [details](https://github.com/lightningequipment/circuitbreaker/blob/master/README.md)
 - Info: Run RaspiBlitz on Proxmox [details](https://github.com/rootzoll/raspiblitz/tree/dev/alternative.platforms/Proxmox)
+- Fixed: SCB/Emergency-Backup to USB drive (now also with cln emergency file)
+- Info: 32GB sdcard is now enforced (after being recommended since v1.5)
 
 ## What's new in Version 1.8.0c of RaspiBlitz?
 

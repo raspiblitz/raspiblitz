@@ -5,7 +5,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "set a dynamic domain like freeDNS"
  echo "internet.dyndomain.sh status"
  echo "internet.dyndomain.sh on --> interactive setup"
- echo "internet.dyndomain.sh [domainName] [?updateURL]"
+ echo "internet.dyndomain.sh on [domainName] [?updateURL]"
  echo "internet.dyndomain.sh update"
  echo "internet.dyndomain.sh off"
  exit 1
@@ -47,13 +47,17 @@ fi
 # FUNCTION updating dyndomain (if update URL is set)
 updateDynDNS()
 {
-  if [ ${#dynUpdateUrl} -gt 0 ]; then
-    echo "# calling: ${dynUpdateUrl}"
-    echo "# to update domain: ${dynDomain}"
-    curl -s --connect-timeout 6 ${dynUpdateUrl} 1>&2
+  if [ "${staticIP}" == "" ]; then
+    if [ ${#dynUpdateUrl} -gt 0 ]; then
+      echo "# calling: ${dynUpdateUrl}"
+      echo "# to update domain: ${dynDomain}"
+      curl -s --connect-timeout 6 ${dynUpdateUrl} 1>&2
+    else
+      echo "# dynUpdateUrl not set - not updating"
+    fi
   else
-    echo "# dynUpdateUrl not set - not updating"
-  fi 
+    echo "# staticIP is set - not updating"
+  fi
 }
 
 # UPDATE
