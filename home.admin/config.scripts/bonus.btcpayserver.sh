@@ -419,7 +419,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   isInstalled=$(compgen -u | grep -c btcpay)
   if [ "${isInstalled}" == "0" ]; then
     echo "# Installing code base & dependencies first .."
-    /home/admin/config.scripts/bonus.btcpayserver.sh install | exit 1
+    /home/admin/config.scripts/bonus.btcpayserver.sh install || exit 1
   fi
 
   echo "# ACTIVATE BTCPAYSERVER"
