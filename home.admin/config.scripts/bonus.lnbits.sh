@@ -283,6 +283,7 @@ Consider adding a IP2TOR Bridge under OPTIONS."
             ;;
         RESTORE)
             clear
+            # check if backup exist
             source <(/home/admin/_cache.sh get LNBitsDB)
             if [ "${LNBitsDB}" == "PostgreSQL" ]; then
               backup_target="/mnt/hdd/app-data/backup/lnbits_db"
@@ -295,9 +296,9 @@ Consider adding a IP2TOR Bridge under OPTIONS."
               echo "ABORT - No Backup found to restore from"
               exit 1
             else
+              # build dialog to choose backup file from menu
               OPTIONS_RESTORE=()
-              WIDTH_RESTORE=66         
-
+                     
               counter=0
               cd $backup_target
               for f in `find *.* -maxdepth 1 -type f`; do 
@@ -306,25 +307,23 @@ Consider adding a IP2TOR Bridge under OPTIONS."
                 OPTIONS_RESTORE+=($counter "$f")
               done
 
+              WIDTH_RESTORE=66  
               CHOICE_HEIGHT_RESTORE=$(("${#OPTIONS_RESTORE[@]}/2+1"))
               HEIGHT_RESTORE=$((CHOICE_HEIGHT_RESTORE+7))     
-
               CHOICE_RESTORE=$(dialog --clear \
               --title " LNbits - Backup restore" \
               --ok-label "Select" \
               --cancel-label "Back" \
-              --menu "Choose one of the following options:" \
+              --menu "Choose one of the following backups:" \
               $HEIGHT_RESTORE $WIDTH_RESTORE $CHOICE_HEIGHT_RESTORE \
               "${OPTIONS_RESTORE[@]}" \
               2>&1 >/dev/tty)
 
-              # check back choice
-              if [ "$CHOICE_RESTORE" = "" ]; then
-                clear
-                exit 0
-              else
-                clear
-                /home/admin/config.scripts/bonus.lnbits.sh restore "${backup_target}/${OPTIONS_RESTORE[$(($CHOICE_RESTORE+1))]}"
+              # start restore with selected backup
+              clear
+              if [ "$CHOICE_RESTORE" != "" ]; then
+                backup_file=${backup_target}/${OPTIONS_RESTORE[$(($CHOICE_RESTORE*2-1))]}
+                /home/admin/config.scripts/bonus.lnbits.sh restore "${backup_file}"
                 echo
                 echo "Restore done"
                 echo "PRESS ENTER to continue"
@@ -1041,7 +1040,12 @@ if [ "$1" = "restore" ]; then
       cd $backup_target
        
       if [ "$2" != "" ]; then
-        backup_file=$2
+        if [ -e $2 ]; then
+          backup_file=$2
+        else
+          echo "ABORT - File not found (${2})"
+          exit 1
+        fi
       else
         # find recent backup
         backup_file=$(ls -t $backup_target/*.tar | head -n1)
@@ -1051,7 +1055,6 @@ if [ "$1" = "restore" ]; then
 
       # unpack backup file
       sudo tar -xf $backup_file || exit 1
-      sudo chown -R lnbits:lnbits LNBits/
       echo "Unpack backup successful, backup current db now ..."
 
       # backup current db
@@ -1059,6 +1062,7 @@ if [ "$1" = "restore" ]; then
       
       # apply backup data
       sudo rm -R /mnt/hdd/app-data/LNBits/
+      sudo chown -R lnbits:lnbits LNBits/
       sudo mv LNBits/ /mnt/hdd/app-data/
 
       echo "Remove restored backup file"
