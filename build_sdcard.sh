@@ -797,7 +797,9 @@ if ${fatpack}; then
   /home/admin/config.scripts/bonus.thunderhub.sh install || exit 1
   echo "* Adding Code&Compile for WEBUI-APP: BTC RPC EXPLORER"
   /home/admin/config.scripts/bonus.btc-rpc-explorer.sh install || exit 1
-  
+  echo "* Adding Code&Compile for WEBUI-APP: LNBITS"
+  /home/admin/config.scripts/bonus.lnbits.sh install || exit 1
+
   echo "* Adding Raspiblitz API ..."
   sudo /home/admin/config.scripts/blitz.web.api.sh on || exit 1
   echo "* Adding Raspiblitz WebUI ..."
