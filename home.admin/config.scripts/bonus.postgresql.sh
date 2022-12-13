@@ -14,6 +14,7 @@ command=$1
 db_name=$2
 db_user=$3
 db_user_pw=$4
+db_backupfile=$5
 
 # switch on
 if [ "$command" = "1" ] || [ "$command" = "on" ]; then
@@ -118,7 +119,12 @@ fi
 if [ "$command" = "restore" ] && [ "$db_name" != "" ] && [ "$db_user" != "" ] && [ "$db_user_pw" != "" ]; then
   echo "*** RESTORE POSTGRESQL $db_name ***"
   # find recent backup
-  backup_file=$(ls -t $backup_target/*.sql | head -n1)
+  if [ "$db_backupfile" != "" ]; then
+    backup_file=$db_backupfile
+  else
+    backup_file=$(ls -t $backup_target/*.sql | head -n1)
+  fi
+
   if [ ! -e $backup_file ]; then
     echo "FAIL - sql file to restore not found in ${backup_target}"
     exit 1

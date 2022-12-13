@@ -19,7 +19,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "bonus.lnbits.sh repo [githubuser] [branch]"
   echo "bonus.lnbits.sh sync"
   echo "bonus.lnbits.sh backup"
-  echo "bonus.lnbits.sh restore"    
+  echo "bonus.lnbits.sh restore [?FILE]"    
   echo "bonus.lnbits.sh migrate"
   exit 1
 fi
@@ -295,14 +295,36 @@ Consider adding a IP2TOR Bridge under OPTIONS."
               echo "ABORT - No Backup found to restore from"
               exit 1
             else
-              dialog --title "RESTORE LNBITS" --yesno "
-Backup found as ${backup_file}
+              OPTIONS_RESTORE=()
+              WIDTH_RESTORE=66         
 
-Do you want to restore this database?!
-" 12 65
-              if [ $? -eq 0 ]; then
+              counter=0
+              cd $backup_target
+              for f in `find *.* -maxdepth 1 -type f`; do 
+                [[ -f "$f" ]] || continue
+                counter=$(($counter+1))
+                OPTIONS_RESTORE+=($counter "$f")
+              done
+
+              CHOICE_HEIGHT_RESTORE=$(("${#OPTIONS_RESTORE[@]}/2+1"))
+              HEIGHT_RESTORE=$((CHOICE_HEIGHT_RESTORE+7))     
+
+              CHOICE_RESTORE=$(dialog --clear \
+              --title " LNbits - Backup restore" \
+              --ok-label "Select" \
+              --cancel-label "Back" \
+              --menu "Choose one of the following options:" \
+              $HEIGHT_RESTORE $WIDTH_RESTORE $CHOICE_HEIGHT_RESTORE \
+              "${OPTIONS_RESTORE[@]}" \
+              2>&1 >/dev/tty)
+
+              # check back choice
+              if [ "$CHOICE_RESTORE" = "" ]; then
                 clear
-                /home/admin/config.scripts/bonus.lnbits.sh restore
+                exit 0
+              else
+                clear
+                /home/admin/config.scripts/bonus.lnbits.sh restore "${backup_target}/${OPTIONS_RESTORE[$(($CHOICE_RESTORE+1))]}"
                 echo
                 echo "Restore done"
                 echo "PRESS ENTER to continue"
@@ -1003,7 +1025,12 @@ if [ "$1" = "restore" ]; then
   source <(/home/admin/_cache.sh get LNBitsDB)
   if [ "${LNBitsDB}" == "PostgreSQL" ]; then
     echo "# Restore PostgreSQL database"
-    sudo /home/admin/config.scripts/bonus.postgresql.sh restore lnbits_db lnbits_user raspiblitz
+    if [ "$2" != "" ]; then
+      backup_file=$2
+      sudo /home/admin/config.scripts/bonus.postgresql.sh restore lnbits_db lnbits_user raspiblitz "${backup_file}"
+    else
+      sudo /home/admin/config.scripts/bonus.postgresql.sh restore lnbits_db lnbits_user raspiblitz
+    fi
   else
     backup_target="/mnt/hdd/app-data/backup/lnbits_sqlite"
     if [ ! -d $backup_target ]; then
