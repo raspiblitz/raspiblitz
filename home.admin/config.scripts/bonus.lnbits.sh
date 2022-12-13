@@ -301,6 +301,7 @@ Backup found as ${backup_file}
 Do you want to restore this database?!
 " 12 65
               if [ $? -eq 0 ]; then
+                clear
                 /home/admin/config.scripts/bonus.lnbits.sh restore
                 echo
                 echo "Restore done"
@@ -986,7 +987,8 @@ if [ "$1" = "backup" ]; then
       sudo mkdir -p $backup_target 1>&2
     fi
     # Delete old backups (keep last 3 backups)
-    sudo ls -tp $backup_target/*.tar | grep -v '/$' | tail -n +4 | tr '\n' '\0' | xargs -0 rm --
+    sudo chown -R admin:admin $backup_target
+    ls -tp $backup_target/*.tar | grep -v '/$' | tail -n +4 | tr '\n' '\0' | xargs -0 rm -- 2>/dev/null
 
     cd $backup_target
     sudo tar -cf $backup_file -C "/mnt/hdd/app-data" LNBits/
@@ -1024,8 +1026,8 @@ if [ "$1" = "restore" ]; then
       /home/admin/config.scripts/bonus.lnbits.sh backup
       
       # apply backup data
-      sudo rm -R ../LNBits/
-      sudo mv LNBits/ ../
+      sudo rm -R /mnt/hdd/app-data/LNBits/
+      sudo mv LNBits/ /mnt/hdd/app-data/
 
       echo "Remove restored backup file"
       sudo rm -f $backup_file
