@@ -143,10 +143,13 @@ case $CHOICE in
       ;;
   XPUB)
     clear
-    echo "LND xPub => first result of => $lncli_alias wallet accounts list"
+    echo "LND wallet xPubs => $lncli_alias wallet accounts list --name default"
     echo
-    $lncli_alias wallet accounts list | grep -o "xpub[0-9a-zA-Z]*" | head -1
+    $lncli_alias wallet accounts list --name default | grep --color=never .*,
     echo
+    echo "EXPERIMENTAL - DONT USE FOR SERIOUS FUND RECEIVING YET"
+    echo "Report your experience to: https://github.com/rootzoll/raspiblitz/issues/2192"
+    echo 
     echo "Press ENTER to return to main menu."
     read key
 
