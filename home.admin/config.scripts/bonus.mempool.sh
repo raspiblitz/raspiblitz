@@ -8,6 +8,7 @@ pinnedVersion="v2.4.0"
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "# small config script to switch Mempool on or off"
   echo "# installs the $pinnedVersion by default"
+  echo "# bonus.mempool.sh [install|uninstall]"
   echo "# bonus.mempool.sh [status|on|off]"
   exit 1
 fi
@@ -65,6 +66,9 @@ fi
 # status
 if [ "$1" = "status" ]; then
 
+  isInstalled=$(compgen -u | grep -c mempool)
+  echo "codebase=${isInstalled}"
+
   if [ "${mempoolExplorer}" = "on" ]; then
     echo "configured=1"
 
@@ -96,7 +100,7 @@ if [ "$1" = "status" ]; then
     fi
 
   else
-    echo "installed=0"
+    echo "active=0"
     echo "configured=0"
   fi
   exit 0
@@ -106,36 +110,101 @@ fi
 echo "# making sure services are not running"
 sudo systemctl stop mempool 2>/dev/null
 
-# switch on
-if [ "$1" = "1" ] || [ "$1" = "on" ]; then
+# install (code & compile)
+if [ "$1" = "install" ]; then
+
+  # check if already installed
+  isInstalled=$(compgen -u | grep -c mempool)
+  if [ "${isInstalled}" != "0" ]; then
+    echo "result='already installed'"
+    exit 0
+  fi
+
   echo "# *** INSTALL MEMPOOL ***"
 
-  isInstalled=$(sudo ls /etc/systemd/system/mempool.service 2>/dev/null | grep -c 'mempool.service')
-  if [ ${isInstalled} -eq 0 ]; then
+  # install nodeJS
+  /home/admin/config.scripts/bonus.nodejs.sh on
 
-    # install nodeJS
-    /home/admin/config.scripts/bonus.nodejs.sh on
+  # make sure needed os dependencies are installed
+  sudo apt-get install -y mariadb-server mariadb-client
+
+  # add mempool user
+  sudo adduser --disabled-password --gecos "" mempool
+
+  # install mempool
+  cd /home/mempool
+  sudo -u mempool git clone https://github.com/mempool/mempool.git
+  cd mempool
+  sudo -u mempool git reset --hard $pinnedVersion
+  sudo -u mempool /home/admin/config.scripts/blitz.git-verify.sh "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
+
+  echo "# npm install for mempool explorer (frontend)"
+
+  cd frontend
+  sudo -u mempool NG_CLI_ANALYTICS=false npm install --no-optional
+  if ! [ $? -eq 0 ]; then
+      echo "FAIL - npm install did not run correctly, aborting"
+      exit 1
+  fi
+  sudo -u mempool NG_CLI_ANALYTICS=false npm run build
+  if ! [ $? -eq 0 ]; then
+      echo "FAIL - npm run build did not run correctly, aborting (1)"
+      exit 1
+  fi
+
+  echo "# npm install for mempool explorer (backend)"
+
+  cd ../backend/
+  sudo -u mempool NG_CLI_ANALYTICS=false npm install --no-optional
+  if ! [ $? -eq 0 ]; then
+      echo "# FAIL - npm install did not run correctly, aborting"
+      echo "result='failed npm install'"
+      exit 1
+  fi
+  sudo -u mempool NG_CLI_ANALYTICS=false npm run build
+  if ! [ $? -eq 0 ]; then
+      echo "# FAIL - npm run build did not run correctly, aborting (2)"
+      echo "result='failed npm run build'"
+      exit 1
+  fi
+
+  exit 0
+fi
+
+# remove from system
+if [ "$1" = "uninstall" ]; then
+
+  # check if still active
+  isActive=$(sudo ls /etc/systemd/system/mempool.service 2>/dev/null | grep -c 'mempool.service')
+  if [ "${isActive}" != "0" ]; then
+    echo "result='still in use'"
+    exit 1
+  fi
+
+  echo "# *** UNINSTALL MEMPOOL ***"
+
+  # always delete user and home directory
+  sudo userdel -rf mempool
+
+  exit 0
+fi
+
+# switch on
+if [ "$1" = "1" ] || [ "$1" = "on" ]; then
+
+  isInstalled=$(compgen -u | grep -c mempool)
+  if [ "${isInstalled}" == "0" ]; then
+    echo "# Install code base first ...."
+    /home/admin/config.scripts/bonus.mempool.sh install
+  fi
+
+  echo "# *** Activate MEMPOOL ***"
+
+  isActive=$(sudo ls /etc/systemd/system/mempool.service 2>/dev/null | grep -c 'mempool.service')
+  if [ ${isActive} -eq 0 ]; then
 
     # make sure that txindex of blockchain is switched on
     /home/admin/config.scripts/network.txindex.sh on
-
-    # make sure needed os dependencies are installed
-    sudo apt-get install -y mariadb-server mariadb-client
-
-    # add mempool user
-    sudo adduser --disabled-password --gecos "" mempool
-
-    # install mempool
-    cd /home/mempool
-    sudo -u mempool git clone https://github.com/mempool/mempool.git
-    cd mempool
-    sudo -u mempool git reset --hard $pinnedVersion
-    sudo -u mempool /home/admin/config.scripts/blitz.git-verify.sh \
-     "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
-
-    # modify an
-    #echo "# try to suppress question on statistics report .."
-    #sudo sed -i "s/^}/,\"cli\": {\"analytics\": false}}/g" /home/mempool/mempool/frontend/angular.json
 
     sudo mariadb -e "DROP DATABASE IF EXISTS mempool;"
     sudo mariadb -e "CREATE DATABASE mempool;"
@@ -143,34 +212,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo mariadb -e "FLUSH PRIVILEGES;"
     if [ -f "mariadb-structure.sql" ]; then
       mariadb -umempool -pmempool mempool < mariadb-structure.sql
-    fi
-
-    echo "# npm install for mempool explorer (frontend)"
-
-    cd frontend
-    sudo -u mempool NG_CLI_ANALYTICS=false npm install --no-optional
-    if ! [ $? -eq 0 ]; then
-        echo "FAIL - npm install did not run correctly, aborting"
-        exit 1
-    fi
-    sudo -u mempool NG_CLI_ANALYTICS=false npm run build
-    if ! [ $? -eq 0 ]; then
-        echo "FAIL - npm run build did not run correctly, aborting (1)"
-        exit 1
-    fi
-
-    echo "# npm install for mempool explorer (backend)"
-
-    cd ../backend/
-    sudo -u mempool NG_CLI_ANALYTICS=false npm install --no-optional
-    if ! [ $? -eq 0 ]; then
-        echo "FAIL - npm install did not run correctly, aborting"
-        exit 1
-    fi
-    sudo -u mempool NG_CLI_ANALYTICS=false npm run build
-    if ! [ $? -eq 0 ]; then
-        echo "FAIL - npm run build did not run correctly, aborting (2)"
-        exit 1
     fi
 
     # prepare .env file
@@ -232,7 +273,6 @@ EOF
     sudo ufw allow 4080 comment 'mempool HTTP'
     sudo ufw allow 4081 comment 'mempool HTTPS'
     echo ""
-
 
     ##################
     # NGINX
@@ -329,9 +369,6 @@ fi
 
 # switch off
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
-
-  # always delete user and home directory
-  sudo userdel -rf mempool
 
   # always remove nginx symlinks
   sudo rm -f /etc/nginx/snippets/mempool.conf
