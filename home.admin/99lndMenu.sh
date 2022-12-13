@@ -22,6 +22,7 @@ OPTIONS+=(PEERING "Connect to a Peer")
 OPTIONS+=(CHANNEL "Open a Channel with Peer")
 OPTIONS+=(SEND "Pay an Invoice/PaymentRequest")
 OPTIONS+=(RECEIVE "Create Invoice/PaymentRequest")
+OPTIONS+=(XPUB "Show OnChain xPub")
 
 if [ "${chain}" = "main" ]; then
   OPTIONS+=(lnbalance "Detailed Wallet Balances")
@@ -140,4 +141,13 @@ case $CHOICE in
       echo "Press ENTER to return to main menu."
       read key
       ;;
+  XPUB)
+    clear
+    echo "LND xPub => first result of => $lncli_alias wallet accounts list"
+    echo
+    $lncli_alias wallet accounts list | grep -o "xpub[0-9a-zA-Z]*" | head -1
+    echo
+    echo "Press ENTER to return to main menu."
+    read key
+
 esac
