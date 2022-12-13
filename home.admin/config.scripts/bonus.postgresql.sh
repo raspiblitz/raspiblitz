@@ -18,6 +18,7 @@ db_backupfile=$5
 
 # switch on
 if [ "$command" = "1" ] || [ "$command" = "on" ]; then
+  
   # https://github.com/rootzoll/raspiblitz/issues/3218
   echo "# Install PostgreSQL"
 
