@@ -1110,7 +1110,7 @@ if [ "$1" = "migrate" ]; then
     sudo bash -c "echo 'LNBITS_DATA_FOLDER=/mnt/hdd/app-data/LNBits' >> /home/lnbits/lnbits/.env"
 
     #sudo -u lnbits git checkout ${tag}
-    sudo -u lnbits git reset --hard f3b720b690c533b4b28793209f5a71fd01b9af6e # good tested after BIGINT fix (#1030)
+    sudo -u lnbits git reset --hard 4f05c6c12e284d4a322a9041d19f66d01afa205b # good tested after BIGINT fix (#1135)
     /home/admin/config.scripts/bonus.lnbits.sh sync || exit 1
     # stop after sync was done
     sudo systemctl stop lnbits
