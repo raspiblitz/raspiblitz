@@ -67,7 +67,7 @@ fi
 if [ "$1" = "status" ]; then
 
   isInstalled=$(compgen -u | grep -c mempool)
-  echo "installed=${isInstalled}"
+  echo "codebase=${isInstalled}"
 
   if [ "${mempoolExplorer}" = "on" ]; then
     echo "configured=1"
@@ -77,7 +77,7 @@ if [ "$1" = "status" ]; then
     toraddress=$(sudo cat /mnt/hdd/tor/mempool/hostname 2>/dev/null)
     fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
 
-    echo "active=1"
+    echo "installed=1"
     echo "localIP='${localIP}'"
     echo "httpPort='4080'"
     echo "httpsPort='4081'"

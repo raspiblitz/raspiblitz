@@ -95,9 +95,9 @@ explorer.postgres=User ID=nbxplorer;Host=localhost;Port=5432;Application Name=nb
 if [ "$1" = "status" ]; then
 
     isInstalled=$(compgen -u | grep -c btcpay)
-    echo "installed=${isInstalled}"
+    echo "prepared=${isInstalled}"
     isActive=$(sudo ls /etc/systemd/system/btcpayserver.service 2>/dev/null | grep -c 'btcpayserver.service')
-    echo "active=${isActive}"
+    echo "installed=${isActive}"
 
   if [ "${BTCPayServer}" = "on" ]; then
     echo "switchedon=1"
