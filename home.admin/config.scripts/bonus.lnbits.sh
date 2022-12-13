@@ -981,14 +981,16 @@ if [ "$1" = "backup" ]; then
   else
     # sqlite backup
     backup_target="/mnt/hdd/app-data/backup/lnbits_sqlite"
-    backup_file="${db_name}_`date +%d`-`date +%m`-`date +%Y`_`date +%H`-`date +%M`_fs"
+    backup_file="lnbits_sqlite_`date +%d`-`date +%m`-`date +%Y`_`date +%H`-`date +%M`_fs.tar"
     if [ ! -d $backup_target ]; then
       sudo mkdir -p $backup_target 1>&2
     fi
     # Delete old backups (keep last 3 backups)
     sudo ls -tp $backup_target/*.tar | grep -v '/$' | tail -n +4 | tr '\n' '\0' | xargs -0 rm --
+
+    cd $backup_target
     sudo tar -cf $backup_file -C "/mnt/hdd/app-data" LNBits/
-    echo "OK - Backup finished, file saved as ${backup_file}"
+    echo "OK - Backup finished, file saved as ${backup_target}/${backup_file}"
   fi
   sudo systemctl start lnbits
   exit 0
