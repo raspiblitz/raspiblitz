@@ -6,6 +6,7 @@ THUBVERSION="v0.13.16"
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "config script to install, update or uninstall ThunderHub"
+ echo "bonus.thunderhub.sh [install|uninstall]"
  echo "bonus.thunderhub.sh [on|off|menu|update|status]"
  echo "install $THUBVERSION by default"
  exit 1
@@ -76,17 +77,18 @@ fi
 echo "making sure services are not running"
 sudo systemctl stop thunderhub 2>/dev/null
 
-# switch on
-if [ "$1" = "1" ] || [ "$1" = "on" ]; then
-  echo "*** INSTALL THUNDERHUB ***"
 
-  isInstalled=$(sudo ls /etc/systemd/system/thunderhub.service 2>/dev/null | grep -c 'thunderhub.service')
-  if ! [ ${isInstalled} -eq 0 ]; then
-    echo "ThunderHub already installed."
-  else
-    ###############
-    # INSTALL
-    ###############
+# install (code & compile)
+if [ "$1" = "install" ]; then
+
+  # check if already installed
+  isInstalled=$(compgen -u | grep -c thunderhub)
+  if [ "${isInstalled}" != "0" ]; then
+    echo "result='already installed'"
+    exit 0
+  fi
+
+  echo "# *** INSTALL THUNDERHUB ***"
 
     # Preparations
     # check and install NodeJS
@@ -101,13 +103,13 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # https://github.com/apotdevin/thunderhub/releases
     sudo -u thunderhub git reset --hard $THUBVERSION
 
-    sudo -u thunderhub /home/admin/config.scripts/blitz.git-verify.sh \
-     "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
+    sudo -u thunderhub /home/admin/config.scripts/blitz.git-verify.sh "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
 
     echo "Running npm install ..."
     sudo rm -r /home/thunderhub/thunderhub/node_modules 2>/dev/null
     if ! sudo -u thunderhub npm install; then
       echo "FAIL - npm install did not run correctly, aborting"
+      echo "result='fail npm install '"
       exit 1
     fi
 
@@ -116,6 +118,44 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     echo "# run build ..."
     sudo -u thunderhub npm run build
+
+  exit 0
+fi
+
+# remove from system
+if [ "$1" = "uninstall" ]; then
+
+  # check if still active
+  isActive=$(sudo ls /etc/systemd/system/thunderhub.service 2>/dev/null | grep -c 'thunderhub.service')
+  if [ "${isActive}" != "0" ]; then
+    echo "result='still in use'"
+    exit 1
+  fi
+
+  echo "# *** UNINSTALL THUNDERHUB ***"
+
+  # always delete user and home directory
+  sudo userdel -rf thunderhub
+
+  exit 0
+fi
+
+# switch on
+if [ "$1" = "1" ] || [ "$1" = "on" ]; then
+
+  # check if code is already installed
+  isInstalled=$(compgen -u | grep -c thunderhub)
+  if [ "${isInstalled}" == "0" ]; then
+    echo "# Installing code base & dependencies first .."
+    /home/admin/config.scripts/bonus.thunderhub.sh install || exit 1
+  fi
+
+  echo "*** INSTALL THUNDERHUB ***"
+
+  isActive=$(sudo ls /etc/systemd/system/thunderhub.service 2>/dev/null | grep -c 'thunderhub.service')
+  if ! [ ${isActive} -eq 0 ]; then
+    echo "ThunderHub already installed."
+  else
 
     ###############
     # CONFIG
@@ -293,8 +333,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # remove systemd service
   sudo systemctl disable thunderhub
   sudo rm -f /etc/systemd/system/thunderhub.service
-  # delete user and home directory
-  sudo userdel -rf thunderhub
+
   # close ports on firewall
   sudo ufw deny 3010
   sudo ufw deny 3011
@@ -314,7 +353,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     /home/admin/config.scripts/tor.onion-service.sh off thunderhub
   fi
 
-  echo "OK ThunderHub removed."
+  echo "OK ThunderHub deactivated"
 
   # disable balance sharing server side
   /home/admin/config.scripts/blitz.conf.sh set DISABLE_BALANCE_PUSHES true /mnt/hdd/app-data/thunderhub/.env.local noquotes

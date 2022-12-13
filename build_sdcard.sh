@@ -793,6 +793,8 @@ if ${fatpack}; then
   /home/admin/config.scripts/bonus.btcpayserver.sh install || exit 1
   echo "* Adding Code&Compile for WEBUI-APP: MEMPOOL"
   /home/admin/config.scripts/bonus.mempool.sh install || exit 1
+  echo "* Adding Code&Compile for WEBUI-APP: THUNDERHUB"
+  /home/admin/config.scripts/bonus.thunderhub.sh install || exit 1
 
   echo "* Adding Raspiblitz API ..."
   sudo /home/admin/config.scripts/blitz.web.api.sh on || exit 1
