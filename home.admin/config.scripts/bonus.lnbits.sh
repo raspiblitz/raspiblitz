@@ -10,7 +10,8 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "Config script to switch LNbits on or off."
   echo "Installs the version ${tag} by default."
   echo "Usage:"
-  echo "bonus.lnbits.sh on [lnd|tlnd|slnd|cl|tcl|scl] [?GITHUBUSER] [?BRANCH|?TAG]"
+  echo "bonus.lnbits.sh [install|uninstall] [?GITHUBUSER] [?BRANCH|?TAG]"
+  echo "bonus.lnbits.sh on [lnd|tlnd|slnd|cl|tcl|scl]"
   echo "bonus.lnbits.sh switch [lnd|tlnd|slnd|cl|tcl|scl]"
   echo "bonus.lnbits.sh off"
   echo "bonus.lnbits.sh status"
@@ -594,12 +595,89 @@ fi
 # stop service
 sudo systemctl stop lnbits 2>/dev/null
 
+# install (code & compile)
+if [ "$1" = "install" ]; then
+
+  # check if already installed
+  isInstalled=$(compgen -u | grep -c lnbits)
+  if [ "${isInstalled}" != "0" ]; then
+    echo "result='already installed'"
+    exit 0
+  fi
+
+  echo "# *** INSTALL THUNDERHUB ***"
+
+  # add lnbits user
+  echo "*** Add the 'lnbits' user ***"
+  sudo adduser --disabled-password --gecos "" lnbits
+
+  # get optional github parameter
+  githubUser="lnbits"
+  if [ "$2" != "" ]; then
+    githubUser="$2"
+  fi
+  if [ "$3" != "" ]; then
+    tag="$3"
+  fi
+
+  # install from GitHub
+  echo "# get the github code user(${githubUser}) branch(${tag})"
+  sudo rm -r /home/lnbits/lnbits 2>/dev/null
+  cd /home/lnbits  || exit 1
+  sudo -u lnbits git clone https://github.com/${githubUser}/lnbits-legend lnbits
+  cd /home/lnbits/lnbits || exit 1
+  sudo -u lnbits git checkout ${tag} || exit 1
+
+  # to the install
+  echo "# installing application dependencies"
+  cd /home/lnbits/lnbits  || exit 1
+
+  # do install like this
+  sudo -u lnbits python3 -m venv venv
+  sudo -u lnbits ./venv/bin/pip install -r requirements.txt
+  sudo -u lnbits ./venv/bin/pip install pylightning
+  sudo -u lnbits ./venv/bin/pip install secp256k1
+  sudo -u lnbits ./venv/bin/pip install pyln-client
+  sudo -u lnbits ./venv/bin/pip install psycopg2 # conv.py postgres migration dependency
+
+  # build
+  sudo -u lnbits ./venv/bin/python build.py
+
+  exit 0
+fi
+
+# remove from system
+if [ "$1" = "uninstall" ]; then
+
+  # check if still active
+  isActive=$(sudo ls /etc/systemd/system/lnbits.service 2>/dev/null | grep -c 'lnbits.service')
+  if [ "${isActive}" != "0" ]; then
+    echo "result='still in use'"
+    exit 1
+  fi
+
+  echo "# *** UNINSTALL LNBITS ***"
+
+  # always delete user and home directory
+  sudo userdel -rf lnbits
+
+  exit 0
+fi
+
+
 # install
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
-  # check if already installed
-  isInstalled=$(sudo ls /etc/systemd/system/lnbits.service 2>/dev/null | grep -c 'lnbits.service')
-  if [ "${isInstalled}" == "1" ]; then
+  # check if code is already installed
+  isInstalled=$(compgen -u | grep -c lnbits)
+  if [ "${isInstalled}" == "0" ]; then
+    echo "# Installing code base & dependencies first .."
+    /home/admin/config.scripts/bonus.lnbits.sh install || exit 1
+  fi
+
+  # check if already active
+  isActive=$(sudo ls /etc/systemd/system/lnbits.service 2>/dev/null | grep -c 'lnbits.service')
+  if [ "${isActive}" == "1" ]; then
     echo "# FAIL: already installed"
     exit 1
   fi
@@ -654,27 +732,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     exit 1
   fi
 
-  # add lnbits user
-  echo "*** Add the 'lnbits' user ***"
-  sudo adduser --disabled-password --gecos "" lnbits
-
-  # get optional github parameter
-  githubUser="lnbits"
-  if [ "$3" != "" ]; then
-    githubUser="$3"
-  fi
-  if [ "$4" != "" ]; then
-    tag="$4"
-  fi
-
-  # install from GitHub
-  echo "# get the github code user(${githubUser}) branch(${tag})"
-  sudo rm -r /home/lnbits/lnbits 2>/dev/null
-  cd /home/lnbits  || exit 1
-  sudo -u lnbits git clone https://github.com/${githubUser}/lnbits-legend lnbits
-  cd /home/lnbits/lnbits || exit 1
-  sudo -u lnbits git checkout ${tag} || exit 1
-
   # prepare .env file
   echo "# preparing env file"
   sudo rm /home/lnbits/lnbits/.env 2>/dev/null
@@ -707,21 +764,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   # let switch command part do the detail config
   /home/admin/config.scripts/bonus.lnbits.sh switch ${fundingsource}
-
-  # to the install
-  echo "# installing application dependencies"
   cd /home/lnbits/lnbits  || exit 1
-
-  # do install like this
-  sudo -u lnbits python3 -m venv venv
-  sudo -u lnbits ./venv/bin/pip install -r requirements.txt
-  sudo -u lnbits ./venv/bin/pip install pylightning
-  sudo -u lnbits ./venv/bin/pip install secp256k1
-  sudo -u lnbits ./venv/bin/pip install pyln-client
-  sudo -u lnbits ./venv/bin/pip install psycopg2 # conv.py postgres migration dependency
-
-  # build
-  sudo -u lnbits ./venv/bin/python build.py
 
   # open firewall
   echo
@@ -972,9 +1015,6 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   if [ "${runBehindTor}" = "on" ]; then
     /home/admin/config.scripts/tor.onion-service.sh off lnbits
   fi
-
-  # always clean
-  sudo userdel -rf lnbits
 
   if [ ${deleteData} -eq 1 ]; then
     echo "# deleting data"

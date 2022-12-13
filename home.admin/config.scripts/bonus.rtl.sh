@@ -12,6 +12,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "# config script for RideTheLightning $RTLVERSION WebInterface"
   echo "# able to run intances for lnd and cl parallel"
   echo "# mainnet and testnet instances can run parallel"
+  echo "# bonus.rtl.sh [install|uninstall]"
   echo "# bonus.rtl.sh [on|off|menu] <lnd|cl> <mainnet|testnet|signet> <purge>"
   echo "# bonus.rtl.sh connect-services"
   echo "# bonus.rtl.sh prestart <lnd|cl> <mainnet|testnet|signet>"
@@ -114,6 +115,97 @@ Activate Tor to access the web interface from outside your local network.
   exit 0
 fi
 
+
+########################################
+# INSTALL (just user, code & compile)
+########################################
+
+if [ "$1" = "install" ]; then
+
+  # check if already installed
+  if [ -f /home/rtl/RTL/LICENSE ];then
+    echo "# RTL already installed - skipping"
+    exit 0
+  fi
+
+  echo "# Installing RTL codebase"
+
+  # check and install NodeJS
+  /home/admin/config.scripts/bonus.nodejs.sh on
+
+  # create rtl user (one for all instances)
+  if [ $(compgen -u | grep -c rtl) -eq 0 ];then
+    sudo adduser --disabled-password --gecos "" rtl || exit 1
+  fi
+
+  # download source code and set to tag release
+  echo "# Get the RTL Source Code"
+  sudo -u rtl rm -rf /home/rtl/RTL 2>/dev/null
+  sudo -u rtl git clone https://github.com/ShahanaFarooqui/RTL.git /home/rtl/RTL
+  cd /home/rtl/RTL
+  # check https://github.com/Ride-The-Lightning/RTL/releases/
+  sudo -u rtl git reset --hard $RTLVERSION
+
+  sudo -u rtl /home/admin/config.scripts/blitz.git-verify.sh "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" "${RTLVERSION}" || exit 1
+
+  # from https://github.com/Ride-The-Lightning/RTL/commits/master
+  # git checkout 917feebfa4fb583360c140e817c266649307ef72
+  if [ -f /home/rtl/RTL/LICENSE ]; then
+    echo "# OK - RTL code copy looks good"
+  else
+    echo "# FAIL - RTL code not available"
+    echo "err='code download falied'"
+    exit 1
+  fi
+
+  # install
+  echo "# Running npm install ..."
+  export NG_CLI_ANALYTICS=false
+  sudo -u rtl npm install --omit=dev
+  if ! [ $? -eq 0 ]; then
+    echo "# FAIL - npm install did not run correctly - deleting code and exit"
+    sudo rm -r /home/rtl/RTL
+    exit 1
+  else
+    echo "# OK - RTL install looks good"
+    echo
+  fi
+
+  exit 0
+fi
+
+########################################
+# UNINSTALL (remove from system)
+########################################
+
+if [ "$1" = "uninstall" ]; then
+
+  echo "# Uninstalling RTL codebase"
+
+  # check LND RTL services
+  isActiveMain=$(sudo ls /etc/systemd/system/RTL.service 2>/dev/null | grep -c 'RTL.service')
+  isActiveTest=$(sudo ls /etc/systemd/system/tRTL.service 2>/dev/null | grep -c 'RTL.service')
+  isActiveSig=$(sudo ls /etc/systemd/system/sRTL.service 2>/dev/null | grep -c 'RTL.service')
+  if [ "${isActiveMain}" != "0" ] || [ "${isActiveTest}" != "0" ] || [ "${isActiveSig}" != "0" ]; then
+    echo "# cannot uninstall RTL still used by LND"
+    exit 1
+  fi
+
+  # check LND RTL services
+  isActiveMain=$(sudo ls /etc/systemd/system/cRTL.service 2>/dev/null | grep -c 'RTL.service')
+  isActiveTest=$(sudo ls /etc/systemd/system/tcRTL.service 2>/dev/null | grep -c 'RTL.service')
+  isActiveSig=$(sudo ls /etc/systemd/system/scRTL.service 2>/dev/null | grep -c 'RTL.service')
+  if [ "${isActiveMain}" != "0" ] || [ "${isActiveTest}" != "0" ] || [ "${isActiveSig}" != "0" ]; then
+    echo "# cannot uninstall RTL still used by CLN"
+    exit 1
+  fi
+
+  echo "# Delete user and home directory"
+  sudo userdel -rf rtl
+
+  exit 0
+fi
+
 ##########################
 # ON
 #########################
@@ -126,70 +218,35 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     exit 1
   fi
 
-  # check that is installed
-  isInstalled=$(sudo ls /etc/systemd/system/${systemdService}.service 2>/dev/null | grep -c "${systemdService}.service")
-  if [ ${isInstalled} -eq 1 ]; then
-    echo "# OK, the ${netprefix}${typeprefix}RTL.service is already installed."
+  # check that is already active
+  isActive=$(sudo ls /etc/systemd/system/${systemdService}.service 2>/dev/null | grep -c "${systemdService}.service")
+  if [ ${isActive} -eq 1 ]; then
+    echo "# OK, the ${netprefix}${typeprefix}RTL.service is already active."
+    echo "result='already active'"
     exit 1
   fi
 
-  echo "# Installing RTL for ${LNTYPE} ${CHAIN}"
-
-  # check and install NodeJS
-  /home/admin/config.scripts/bonus.nodejs.sh on
-
-  # create rtl user (one for all instances)
-  if [ $(compgen -u | grep -c rtl) -eq 0 ];then
-    sudo adduser --disabled-password --gecos "" rtl || exit 1
+  # make sure softwarte is installed
+  if [ -f /home/rtl/RTL/LICENSE ];then
+    echo "# OK - the RTL code is already present"
+  else
+    echo "# install of codebase is needed first"
+    /home/admin/config.scripts/bonus.rtl.sh install || exit 1
   fi
+  cd /home/rtl/RTL
+
+  echo "# Activating RTL for ${LNTYPE} ${CHAIN}"
+
   echo "# Make sure symlink to central app-data directory exists"
   if ! [[ -L "/home/rtl/.lnd" ]]; then
     sudo rm -rf "/home/rtl/.lnd" 2>/dev/null              # not a symlink.. delete it silently
     sudo ln -s "/mnt/hdd/app-data/lnd/" "/home/rtl/.lnd"  # and create symlink
   fi
+
   if [ "${LNTYPE}" == "lnd" ]; then
     # for LND make sure user rtl is allowed to access admin macaroons
     echo "# adding user rtl to group lndadmin"
     sudo /usr/sbin/usermod --append --groups lndadmin rtl
-  fi
-
-  # source code (one place for all instances)
-  if [ -f /home/rtl/RTL/LICENSE ];then
-    echo "# OK - the RTL code is already present"
-    cd /home/rtl/RTL
-  else
-    # download source code and set to tag release
-    echo "# Get the RTL Source Code"
-    sudo -u rtl rm -rf /home/rtl/RTL 2>/dev/null
-    sudo -u rtl git clone https://github.com/ShahanaFarooqui/RTL.git /home/rtl/RTL
-    cd /home/rtl/RTL
-    # check https://github.com/Ride-The-Lightning/RTL/releases/
-    sudo -u rtl git reset --hard $RTLVERSION
-
-    sudo -u rtl /home/admin/config.scripts/blitz.git-verify.sh \
-     "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" "${RTLVERSION}" || exit 1
-
-    # from https://github.com/Ride-The-Lightning/RTL/commits/master
-    # git checkout 917feebfa4fb583360c140e817c266649307ef72
-    if [ -f /home/rtl/RTL/LICENSE ]; then
-      echo "# OK - RTL code copy looks good"
-    else
-      echo "# FAIL - RTL code not available"
-      echo "err='code download falied'"
-      exit 1
-    fi
-    # install
-    echo "# Running npm install ..."
-    export NG_CLI_ANALYTICS=false
-    sudo -u rtl npm install --omit=dev
-    if ! [ $? -eq 0 ]; then
-      echo "# FAIL - npm install did not run correctly - deleting code and exit"
-      sudo rm -r /home/rtl/RTL
-      exit 1
-    else
-      echo "# OK - RTL install looks good"
-      echo
-    fi
   fi
 
   echo "# Updating Firewall"
@@ -488,9 +545,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # only if 'purge' is an additional parameter (other instances/services might need this)
   if [ "$(echo "$@" | grep -c purge)" -gt 0 ];then
-    echo "# Removing the binaries"
-    echo "# Delete user and home directory"
-    sudo userdel -rf rtl
+    home/admin/config.scripts/bonus.rtl.sh uninstall
     if [ $LNTYPE = cl ];then
       /home/admin/config.scripts/cl.rest.sh off ${CHAIN}
     fi
