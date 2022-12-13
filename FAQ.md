@@ -216,7 +216,7 @@ But first you need to make sure that the public server you are using is supporti
 ```
 RSAAuthentication yes
 PubkeyAuthentication yes
-GatewayPorts yes
+GatewayPorts clientspecified
 AllowTcpForwarding yes
 ClientAliveInterval 60
 ClientAliveCountMax 2
@@ -249,7 +249,7 @@ Make sure the `/etc/ssh/sshd_config` has the following lines at the end:
 ```
 RSAAuthentication yes
 PubkeyAuthentication yes
-GatewayPorts yes
+GatewayPorts clientspecified
 AllowTcpForwarding yes
 AuthorizedKeysFile  /etc/ssh/authorized_keys/%u
 ```
