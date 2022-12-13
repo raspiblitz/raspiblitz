@@ -18,7 +18,7 @@ db_backupfile=$5
 
 # switch on
 if [ "$command" = "1" ] || [ "$command" = "on" ]; then
-  
+
   # https://github.com/rootzoll/raspiblitz/issues/3218
   echo "# Install PostgreSQL"
 
@@ -90,6 +90,7 @@ fi
 
 # switch off
 if [ "$command" = "0" ] || [ "$command" = "off" ]; then
+
   # setting value in raspiblitz config
   echo "*** REMOVING POSTGRESQL ***"
   sudo apt remove -y postgresql
@@ -97,6 +98,7 @@ if [ "$command" = "0" ] || [ "$command" = "off" ]; then
   sudo systemctl disable postgresql
   echo "OK PostgreSQL removed."
   exit 0
+
 fi
 
 # backup
@@ -108,16 +110,20 @@ fi
 
 # https://www.postgresql.org/docs/current/backup-dump.html
 if [ "$command" = "backup" ] && [ "$db_name" != "" ]; then
+
   echo "*** BACKUP POSTGRESQL $db_name ***"
   sudo -u postgres pg_dump $db_name > $backup_target/${backup_file}.sql || exit 1
   # Delete old backups (keep last 3 backups)
-  sudo ls -tp $backup_target/*.sql | grep -v '/$' | tail -n +4 | tr '\n' '\0' | xargs -0 rm --
+  sudo chown -R admin:admin $backup_target
+  ls -tp $backup_target/*.sql | grep -v '/$' | tail -n +4 | tr '\n' '\0' | xargs -0 rm -- 2>/dev/null
   echo "OK - backup finished, file saved as $backup_target/${backup_file}.sql"
   exit 0
+
 fi
 
 # restore
 if [ "$command" = "restore" ] && [ "$db_name" != "" ] && [ "$db_user" != "" ] && [ "$db_user_pw" != "" ]; then
+
   echo "*** RESTORE POSTGRESQL $db_name ***"
   # find recent backup
   if [ "$db_backupfile" != "" ]; then
@@ -147,13 +153,16 @@ if [ "$command" = "restore" ] && [ "$db_name" != "" ] && [ "$db_user" != "" ] &&
   # restore dump
   echo "# Import SQL Dump"
   sudo mkdir -p $backup_target/logs 1>&2
+  sudo chown -R postgres:postgres $backup_file
   sudo -u postgres psql $db_name < ${backup_file} > $backup_target/logs/sql_import.log || exit 1
   echo "$backup_target/sql_import.log written"
   echo "OK - database $db_name restored from ${backup_file}"
   exit 0
+
 fi
 
 if [ "$command" = "info" ]; then
+
   check=$(sudo -u postgres psql -c "show data_directory;" | grep data_directory)
   if [ "$check" = "" ]; then
     echo "show data_directory failed, PostgreSQL not installed?!"
@@ -163,6 +172,7 @@ if [ "$command" = "info" ]; then
     sudo -u postgres psql -c "SELECT datname FROM pg_database;"
   fi
   exit 0
+
 fi
 
 echo "FAIL - Unknown Parameter $command"
