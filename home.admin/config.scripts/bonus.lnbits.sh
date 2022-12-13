@@ -1039,9 +1039,14 @@ if [ "$1" = "restore" ]; then
     else
       echo "# Restore SQLite database"
       cd $backup_target
-      
-      # find recent backup
-      backup_file=$(ls -t $backup_target/*.tar | head -n1)
+       
+      if [ "$2" != "" ]; then
+        backup_file=$2
+      else
+        # find recent backup
+        backup_file=$(ls -t $backup_target/*.tar | head -n1)
+      fi
+
       echo "Start restore from backup ${backup_file}"
 
       # unpack backup file
