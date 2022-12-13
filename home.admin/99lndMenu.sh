@@ -22,7 +22,7 @@ OPTIONS+=(PEERING "Connect to a Peer")
 OPTIONS+=(CHANNEL "Open a Channel with Peer")
 OPTIONS+=(SEND "Pay an Invoice/PaymentRequest")
 OPTIONS+=(RECEIVE "Create Invoice/PaymentRequest")
-OPTIONS+=(XPUB "Show OnChain xPub")
+OPTIONS+=(XPUB "Show OnChain xPubs")
 
 if [ "${chain}" = "main" ]; then
   OPTIONS+=(lnbalance "Detailed Wallet Balances")
