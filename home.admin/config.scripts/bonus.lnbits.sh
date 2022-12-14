@@ -19,6 +19,8 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "bonus.lnbits.sh prestart"
   echo "bonus.lnbits.sh repo [githubuser] [branch]"
   echo "bonus.lnbits.sh sync"
+  echo "bonus.lnbits.sh backup"
+  echo "bonus.lnbits.sh restore [?FILE]"    
   echo "bonus.lnbits.sh migrate"
   exit 1
 fi
@@ -209,6 +211,12 @@ Consider adding a IP2TOR Bridge under OPTIONS."
     OPTIONS+=(SWITCH-LND "Switch: Use LND as funding source")
   fi
 
+  # Backup database
+  OPTIONS+=(BACKUP "Backup database")
+  if [ -d /mnt/hdd/app-data/backup ]; then
+    OPTIONS+=(RESTORE "Restore database")
+  fi
+
   # Migrate SQLite to PostgreSQL
   if [ -e /mnt/hdd/app-data/LNBits/database.sqlite3 ]; then
     OPTIONS+=(MIGRATE-DB "Migrate SQLite to PostgreSQL database")
@@ -265,6 +273,66 @@ Consider adding a IP2TOR Bridge under OPTIONS."
             read key
             exit 0
             ;;
+        BACKUP)
+            clear
+            /home/admin/config.scripts/bonus.lnbits.sh backup
+            echo
+            echo "Backup done"
+            echo "PRESS ENTER to continue"
+            read key
+            exit 0
+            ;;
+        RESTORE)
+            clear
+            # check if backup exist
+            source <(/home/admin/_cache.sh get LNBitsDB)
+            if [ "${LNBitsDB}" == "PostgreSQL" ]; then
+              backup_target="/mnt/hdd/app-data/backup/lnbits_db"
+              backup_file=$(ls -t $backup_target/*.sql | head -n1)
+            else
+              backup_target="/mnt/hdd/app-data/backup/lnbits_sqlite"
+              backup_file=$(ls -t $backup_target/*.tar | head -n1)
+            fi      
+            if [ "$backup_file" = "" ]; then
+              echo "ABORT - No Backup found to restore from"
+              exit 1
+            else
+              # build dialog to choose backup file from menu
+              OPTIONS_RESTORE=()
+                     
+              counter=0
+              cd $backup_target
+              for f in `find *.* -maxdepth 1 -type f`; do 
+                [[ -f "$f" ]] || continue
+                counter=$(($counter+1))
+                OPTIONS_RESTORE+=($counter "$f")
+              done
+
+              WIDTH_RESTORE=66  
+              CHOICE_HEIGHT_RESTORE=$(("${#OPTIONS_RESTORE[@]}/2+1"))
+              HEIGHT_RESTORE=$((CHOICE_HEIGHT_RESTORE+7))     
+              CHOICE_RESTORE=$(dialog --clear \
+              --title " LNbits - Backup restore" \
+              --ok-label "Select" \
+              --cancel-label "Back" \
+              --menu "Choose one of the following backups:" \
+              $HEIGHT_RESTORE $WIDTH_RESTORE $CHOICE_HEIGHT_RESTORE \
+              "${OPTIONS_RESTORE[@]}" \
+              2>&1 >/dev/tty)
+
+              # start restore with selected backup
+              clear
+              if [ "$CHOICE_RESTORE" != "" ]; then
+                backup_file=${backup_target}/${OPTIONS_RESTORE[$(($CHOICE_RESTORE*2-1))]}
+                /home/admin/config.scripts/bonus.lnbits.sh restore "${backup_file}"
+                echo
+                echo "Restore done"
+                echo "PRESS ENTER to continue"
+                read key
+              fi
+              exit 0
+            fi
+            ;;
         MIGRATE-DB)
             clear
             dialog --title "MIGRATE LNBITS" --yesno "
@@ -285,7 +353,7 @@ This can fail for unknown circumstances. Revert of this process is possible afte
               read key              
             fi
             exit 0
-            ;;            
+            ;;
         *)
             clear
             exit 0
@@ -965,12 +1033,97 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   exit 0
 fi
 
+# backup
+if [ "$1" = "backup" ]; then
+  source <(/home/admin/_cache.sh get LNBitsDB)
+  echo "# Start Backup LNBits ${LNBitsDB} database"
+  if [ "${LNBitsDB}" == "PostgreSQL" ]; then
+    # postgresql backup
+    sudo /home/admin/config.scripts/bonus.postgresql.sh backup lnbits_db
+  else
+    # sqlite backup
+    backup_target="/mnt/hdd/app-data/backup/lnbits_sqlite"
+    backup_file="lnbits_sqlite_`date +%d`-`date +%m`-`date +%Y`_`date +%H`-`date +%M`_fs.tar"
+    if [ ! -d $backup_target ]; then
+      sudo mkdir -p $backup_target 1>&2
+    fi
+    # Delete old backups (keep last 3 backups)
+    sudo chown -R admin:admin $backup_target
+    ls -tp $backup_target/*.tar | grep -v '/$' | tail -n +4 | tr '\n' '\0' | xargs -0 rm -- 2>/dev/null
+
+    cd $backup_target
+    sudo tar -cf $backup_file -C "/mnt/hdd/app-data" LNBits/
+    echo "OK - Backup finished, file saved as ${backup_target}/${backup_file}"
+  fi
+  sudo systemctl start lnbits
+  exit 0
+fi
+
+# restore
+if [ "$1" = "restore" ]; then
+  source <(/home/admin/_cache.sh get LNBitsDB)
+  if [ "${LNBitsDB}" == "PostgreSQL" ]; then
+    echo "# Restore PostgreSQL database"
+    if [ "$2" != "" ]; then
+      backup_file=$2
+      sudo /home/admin/config.scripts/bonus.postgresql.sh restore lnbits_db lnbits_user raspiblitz "${backup_file}"
+    else
+      sudo /home/admin/config.scripts/bonus.postgresql.sh restore lnbits_db lnbits_user raspiblitz
+    fi
+  else
+    backup_target="/mnt/hdd/app-data/backup/lnbits_sqlite"
+    if [ ! -d $backup_target ]; then
+      echo "# ABORT - No backups found"
+      exit 1
+    else
+      echo "# Restore SQLite database"
+      cd $backup_target
+       
+      if [ "$2" != "" ]; then
+        if [ -e $2 ]; then
+          backup_file=$2
+        else
+          echo "ABORT - File not found (${2})"
+          exit 1
+        fi
+      else
+        # find recent backup
+        backup_file=$(ls -t $backup_target/*.tar | head -n1)
+      fi
+
+      echo "Start restore from backup ${backup_file}"
+
+      # unpack backup file
+      sudo tar -xf $backup_file || exit 1
+      echo "Unpack backup successful, backup current db now ..."
+
+      # backup current db
+      /home/admin/config.scripts/bonus.lnbits.sh backup
+      
+      # apply backup data
+      sudo rm -R /mnt/hdd/app-data/LNBits/
+      sudo chown -R lnbits:lnbits LNBits/
+      sudo mv LNBits/ /mnt/hdd/app-data/
+
+      echo "Remove restored backup file"
+      sudo rm -f $backup_file
+
+      echo "OK - Apply backup data successful"
+    fi
+  fi
+
+  sudo systemctl start lnbits
+  exit 0
+fi
+
+# revert migrate to postgresql
 if [ "$1" = "migrate" ] && [ "$2" = "revert" ]; then
   /home/admin/config.scripts/blitz.conf.sh set LNBitsMigrate "on"
   revertMigration
   exit 0
 fi
 
+# migrate
 if [ "$1" = "migrate" ]; then
 
   if [ -e /mnt/hdd/app-data/LNBits/database.sqlite3 ]; then
@@ -997,7 +1150,7 @@ if [ "$1" = "migrate" ]; then
     sudo bash -c "echo 'LNBITS_DATA_FOLDER=/mnt/hdd/app-data/LNBits' >> /home/lnbits/lnbits/.env"
 
     #sudo -u lnbits git checkout ${tag}
-    sudo -u lnbits git reset --hard f3b720b690c533b4b28793209f5a71fd01b9af6e # good tested after BIGINT fix (#1030)
+    sudo -u lnbits git reset --hard 4f05c6c12e284d4a322a9041d19f66d01afa205b # good tested after BIGINT fix (#1135)
     /home/admin/config.scripts/bonus.lnbits.sh sync || exit 1
     # stop after sync was done
     sudo systemctl stop lnbits
@@ -1041,7 +1194,7 @@ if [ "$1" = "migrate" ]; then
       revertMigration
       exit 1
     else
-      echo "# Convert successful"
+      echo "# OK - Convert successful"
     fi
 
     # cleanup old sqlite data directory
@@ -1058,9 +1211,9 @@ if [ "$1" = "migrate" ]; then
     # setting value in raspi blitz config
     /home/admin/config.scripts/blitz.conf.sh set LNBitsMigrate "off"
 
-    echo "# OK migration done"
+    echo "# OK - migration done"
   else
-    echo "# No SQLite data found to migrate from"
+    echo "# ABORT - No SQLite data found to migrate from"
   fi
 
   sudo systemctl start lnbits
