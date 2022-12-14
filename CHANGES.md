@@ -18,7 +18,7 @@
 - Update: BTCPayServer 1.7.1 [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.7.1)
 - Update: ItchySats 0.7.0 [details](https://github.com/itchysats/itchysats/releases/tag/0.7.0)
 - Update: Channel Tools (chantools) v0.10.5 [details](https://github.com/guggero/chantools/releases/tag/v0.10.5)
-- Update: Jam (JoinMarket Web UI) v0.1.2 [details](https://github.com/joinmarket-webui/joinmarket-webui/releases/tag/v0.1.0)
+- Update: Jam (JoinMarket Web UI) v0.1.4 [details](https://github.com/joinmarket-webui/joinmarket-webui/releases/tag/v0.1.4)
 - Update: JoinMarket v0.9.8 [details](https://github.com/JoinMarket-Org/joinmarket-clientserver/releases/tag/v0.9.8)
 - Update: JoininBox v0.7.4 [details](https://github.com/openoms/joininbox/releases/tag/v0.7.3)
 - Update: Electrum Server in Rust (electrs) v0.9.9 [details](https://github.com/romanz/electrs/blob/master/RELEASE-NOTES.md#099-jul-12-2022)
