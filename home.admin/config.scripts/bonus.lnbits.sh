@@ -4,11 +4,12 @@
 
 # https://github.com/lnbits/lnbits-legend/releases
 tag="0.9.4"
+VERSION="${tag}"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "Config script to switch LNbits on or off."
-  echo "Installs the version ${tag} by default."
+  echo "Installs the version ${VERSION} by default."
   echo "Usage:"
   echo "bonus.lnbits.sh [install|uninstall] [?GITHUBUSER] [?BRANCH|?TAG]"
   echo "bonus.lnbits.sh on [lnd|tlnd|slnd|cl|tcl|scl]"
@@ -364,6 +365,8 @@ fi
 
 # status
 if [ "$1" = "status" ]; then
+
+  echo "version='${VERSION}'"
 
   if [ "${LNBits}" = "on" ]; then
     echo "installed=1"

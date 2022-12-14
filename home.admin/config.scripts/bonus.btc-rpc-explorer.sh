@@ -4,6 +4,8 @@
 # ~/.config/btc-rpc-explorer.env
 # https://github.com/janoside/btc-rpc-explorer/blob/master/.env-sample
 
+VERSION="v3.3.0"
+
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "# small config script to switch BTC-RPC-explorer on or off"
@@ -78,6 +80,8 @@ fi
 
 # status
 if [ "$1" = "status" ]; then
+
+  echo "version='${VERSION}'"
 
   if [ "${BTCRPCexplorer}" = "on" ]; then
     echo "configured=1"
@@ -209,7 +213,7 @@ if [ "$1" = "install" ]; then
   cd /home/btcrpcexplorer
   sudo -u btcrpcexplorer git clone https://github.com/janoside/btc-rpc-explorer.git
   cd btc-rpc-explorer
-  sudo -u btcrpcexplorer git reset --hard v3.3.0
+  sudo -u btcrpcexplorer git reset --hard ${VERSION}
   sudo -u btcrpcexplorer /home/admin/config.scripts/blitz.git-verify.sh "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
   sudo -u btcrpcexplorer npm install
   if ! [ $? -eq 0 ]; then
