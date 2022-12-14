@@ -164,10 +164,15 @@ echo "allow: local web admin HTTPS"
 ufw allow from 10.0.0.0/8 to any port 443 comment 'allow local LAN HTTPS'
 ufw allow from 172.16.0.0/12 to any port 443 comment 'allow local LAN HTTPS'
 ufw allow from 192.168.0.0/16 to any port 443 comment 'allow local LAN HTTPS'
-echo "open firewall for auto nat discover (see issue #129)"
+echo "open firewall for auto nat discover (see issue #129 & #3144)"
 ufw allow proto udp from 10.0.0.0/8 port 1900 to any comment 'allow local LAN SSDP for UPnP discovery'
 ufw allow proto udp from 172.16.0.0/12 port 1900 to any comment 'allow local LAN SSDP for UPnP discovery'
 ufw allow proto udp from 192.168.0.0/16 port 1900 to any comment 'allow local LAN SSDP for UPnP discovery'
+ufw allow proto udp from 192.168.0.0/16 port 5350 to any comment 'Bonjour NAT'
+ufw allow proto udp from 172.16.0.0/12 port 5350 to any comment 'Bonjour NAT'
+ufw allow proto udp from 192.168.0.0/16 port 5351 to any comment 'Bonjour NAT'
+ufw allow proto udp from 172.16.0.0/12 port 5351 to any comment 'Bonjour NAT'
+
 echo "enable lazy firewall"
 ufw --force enable
 echo ""

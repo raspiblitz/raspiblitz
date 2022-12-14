@@ -63,6 +63,11 @@ if [ "$1" == "prestart" ]; then
 
   ##### APPLICATION OPTIONS SECTION #####
 
+  # remove sync-freelist=1 (use =true is you want to overrule raspiblitz)
+  # https://github.com/rootzoll/raspiblitz/issues/3251
+  sed -i "/^# Avoid slow startup time/d" ${lndConfFile}
+  sed -i "/^sync-freelist=1/d" ${lndConfFile}
+
   # delete autounlock if passwordFile not present
   passwordFile="/mnt/hdd/lnd/data/chain/${network}/${CHAIN}/password.info"
   if ! ls ${passwordFile} &>/dev/null; then
