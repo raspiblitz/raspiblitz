@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # https://github.com/Ride-The-Lightning/RTL/releases
-RTLVERSION="v0.13.0"
+="v0.13.0"
 
 # check and load raspiblitz config
 # to know which network is running
@@ -66,6 +66,8 @@ if [ "$1" = "status" ] || [ "$1" = "menu" ]; then
   RTLHTTPS=$((RTLHTTP+1))
 
   if [ "$1" = "status" ]; then
+  
+    echo "version='${RTLVERSION}'"
     echo "installed='${isInstalled}'"
     echo "localIP='${localip}'"
     echo "httpPort='${RTLHTTP}'"
