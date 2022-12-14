@@ -66,6 +66,8 @@ fi
 # status
 if [ "$1" = "status" ]; then
 
+  echo "version='${pinnedVersion}'"
+
   isInstalled=$(compgen -u | grep -c mempool)
   echo "codebase=${isInstalled}"
 
