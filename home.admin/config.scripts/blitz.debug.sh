@@ -41,6 +41,11 @@ if [ "$1" == "redact" ]; then
   sed -i 's/[a-z0-9][a-z0-9]*.onion/###.onion/' ${redactFile}
   sed -i 's/alias=[^\r\n]*/alias=****/' ${redactFile}
   
+  # redact lnbits credentials #3520
+  sed -i 's/api-key=[a-zA-Z0-9]+ /api-key=*** /' ${redactFile}
+  sed -i 's/wallet=[a-zA-Z0-9]+ /wallet=*** /' ${redactFile}
+  sed -i 's/usr=[a-zA-Z0-9]+ /usr=*** /' ${redactFile}
+
   exit 0
 fi
 
