@@ -341,6 +341,7 @@ TimeoutSec=120
 RestartSec=30
 StandardOutput=null
 StandardError=journal
+LogLevelMax=4
 
 # Hardening measures
 PrivateTmp=true

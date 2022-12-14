@@ -7,6 +7,7 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "# small config script to switch BTC-RPC-explorer on or off"
+ echo "# bonus.btc-rpc-explorer.sh [install|uninstall]"
  echo "# bonus.btc-rpc-explorer.sh [status|on|off]"
  echo "# bonus.btc-rpc-explorer.sh prestart"
  exit 1
@@ -182,10 +183,61 @@ if [ "$1" = "prestart" ]; then
   exit 0 # exit with clean code
 fi
 
-
 # stop service (for all calls below)
 echo "# making sure services are not running"
 sudo systemctl stop btc-rpc-explorer 2>/dev/null
+
+# install (code & compile)
+if [ "$1" = "install" ]; then
+
+  # check if already installed
+  isInstalled=$(compgen -u | grep -c btcrpcexplorer)
+  if [ "${isInstalled}" != "0" ]; then
+    echo "result='already installed'"
+    exit 0
+  fi
+
+  echo "# *** INSTALL BTC-RPC-EXPLORER ***"
+
+  # install nodeJS
+  /home/admin/config.scripts/bonus.nodejs.sh on
+
+  # add btcrpcexplorer user
+  sudo adduser --disabled-password --gecos "" btcrpcexplorer
+
+  # install btc-rpc-explorer
+  cd /home/btcrpcexplorer
+  sudo -u btcrpcexplorer git clone https://github.com/janoside/btc-rpc-explorer.git
+  cd btc-rpc-explorer
+  sudo -u btcrpcexplorer git reset --hard v3.3.0
+  sudo -u btcrpcexplorer /home/admin/config.scripts/blitz.git-verify.sh "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
+  sudo -u btcrpcexplorer npm install
+  if ! [ $? -eq 0 ]; then
+      echo "FAIL - npm install did not run correctly, aborting"
+      echo "result='fail npm install'"
+      exit 1
+  fi
+
+  exit 0
+fi
+
+# remove from system
+if [ "$1" = "uninstall" ]; then
+
+  # check if still active
+  isActive=$(sudo ls /etc/systemd/system/btc-rpc-explorer.service 2>/dev/null | grep -c 'btc-rpc-explorer.service')
+  if [ "${isActive}" != "0" ]; then
+    echo "result='still in use'"
+    exit 1
+  fi
+
+  echo "# *** UNINSTALL BTC-RPC-EXPLORER ***"
+
+  # always delete user and home directory
+  sudo userdel -rf btcrpcexplorer
+  
+  exit 0
+fi
 
 ##########################
 # ON
@@ -193,32 +245,21 @@ sudo systemctl stop btc-rpc-explorer 2>/dev/null
 
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
-  echo "# *** INSTALL BTC-RPC-EXPLORER ***"
+
+  # check if code is already installed
+  isInstalled=$(compgen -u | grep -c btcrpcexplorer)
+  if [ "${isInstalled}" == "0" ]; then
+    echo "# Installing code base & dependencies first .."
+    /home/admin/config.scripts/bonus.btc-rpc-explorer.sh install || exit 1
+  fi
+
+  echo "# *** ACTIVATE BTC-RPC-EXPLORER ***"
 
   isInstalled=$(sudo ls /etc/systemd/system/btc-rpc-explorer.service 2>/dev/null | grep -c 'btc-rpc-explorer.service')
   if [ ${isInstalled} -eq 0 ]; then
 
-    # install nodeJS
-    /home/admin/config.scripts/bonus.nodejs.sh on
-
     # make sure that txindex of blockchain is switched on
     /home/admin/config.scripts/network.txindex.sh on
-
-    # add btcrpcexplorer user
-    sudo adduser --disabled-password --gecos "" btcrpcexplorer
-
-    # install btc-rpc-explorer
-    cd /home/btcrpcexplorer
-    sudo -u btcrpcexplorer git clone https://github.com/janoside/btc-rpc-explorer.git
-    cd btc-rpc-explorer
-    sudo -u btcrpcexplorer git reset --hard v3.3.0
-    sudo -u btcrpcexplorer /home/admin/config.scripts/blitz.git-verify.sh \
-     "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
-    sudo -u btcrpcexplorer npm install
-    if ! [ $? -eq 0 ]; then
-        echo "FAIL - npm install did not run correctly, aborting"
-        exit 1
-    fi
 
     # prepare .env file
     echo "# getting RPC credentials from the ${network}.conf"
@@ -270,7 +311,6 @@ EOF
     sudo ufw allow 3021 comment 'btc-rpc-explorer HTTPS'
     echo ""
 
-
     ##################
     # NGINX
     ##################
@@ -308,6 +348,7 @@ WorkingDirectory=/home/btcrpcexplorer/btc-rpc-explorer
 ExecStart=/usr/bin/npm start
 Restart=on-failure
 RestartSec=20
+LogLevelMax=4
 
 # Hardening measures
 PrivateTmp=true
@@ -371,8 +412,6 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     echo "# *** REMOVING BTC-RPC-explorer ***"
     sudo systemctl disable btc-rpc-explorer
     sudo rm /etc/systemd/system/btc-rpc-explorer.service
-    # delete user and home directory
-    sudo userdel -rf btcrpcexplorer
 
     # remove nginx symlinks
     sudo rm -f /etc/nginx/sites-enabled/btcrpcexplorer_ssl.conf

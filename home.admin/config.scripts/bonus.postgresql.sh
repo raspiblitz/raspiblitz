@@ -9,6 +9,7 @@ fi
 
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
+
   # https://github.com/rootzoll/raspiblitz/issues/3218
   echo "# Install PostgreSQL"
 

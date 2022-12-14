@@ -116,8 +116,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     # persist settings in app-data
     sudo mkdir -p $HELIPAD_DATA_DIR
-    sudo chown $HELIPAD_USER: $HELIPAD_DATA_DIR
+    sudo chown $HELIPAD_USER:$HELIPAD_USER $HELIPAD_DATA_DIR
     sudo -u $HELIPAD_USER touch $HELIPAD_DB
+    sudo chown $HELIPAD_USER:$HELIPAD_USER $HELIPAD_DB
 
     ##################
     # NGINX
@@ -170,6 +171,7 @@ RestartSec=30
 Environment="LND_TLSCERT=$HELIPAD_CERT"
 Environment="LND_ADMINMACAROON=$HELIPAD_MACAROON"
 Environment="HELIPAD_DATABASE_DIR=$HELIPAD_DB"
+LogLevelMax=4
 [Install]
 WantedBy=multi-user.target
 " | sudo tee /etc/systemd/system/helipad.service

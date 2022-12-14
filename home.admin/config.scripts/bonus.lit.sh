@@ -295,6 +295,7 @@ Restart=on-failure
 RestartSec=60
 StandardOutput=journal
 StandardError=journal
+LogLevelMax=4
 
 # Hardening measures
 PrivateTmp=true

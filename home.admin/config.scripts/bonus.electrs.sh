@@ -415,6 +415,7 @@ Type=simple
 TimeoutSec=60
 Restart=always
 RestartSec=60
+LogLevelMax=5
 
 # Hardening measures
 PrivateTmp=true
