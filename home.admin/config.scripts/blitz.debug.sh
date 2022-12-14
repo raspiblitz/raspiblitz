@@ -44,8 +44,9 @@ if [ "$1" == "redact" ]; then
   # redact lnbits credentials #3520
   sed -i 's/api-key=[a-zA-Z0-9]\+/api-key=***/' ${redactFile}
   sed -i 's/wallet=[a-zA-Z0-9]\+/wallet=***/' ${redactFile}
+  sed -i 's/wal=[a-zA-Z0-9]\+/wal=***/' ${redactFile}
   sed -i 's/usr=[a-zA-Z0-9]\+/usr=***/' ${redactFile}
-  sed -i 's/Create user [a-zA-Z0-9]\+/Create user ***/' ${redactFile}
+  sed -i 's/user [a-zA-Z0-9]\+/user ***/' ${redactFile}
 
   exit 0
 fi
