@@ -32,6 +32,7 @@ if [ "$1" = "status" ] || [ "$1" = "menu" ]; then
   httpsPort="3011"
 
   if [ "$1" = "status" ]; then
+    echo "version='${THUBVERSION}'"
     echo "installed='${isInstalled}'"
     echo "localIP='${localip}'"
     echo "httpPort='${httpPort}'"
