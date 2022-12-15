@@ -81,7 +81,7 @@ do
   # https://github.com/rootzoll/raspiblitz/issues/2659
   ####################################################
 
-  # once a day 5 minutes
+  # once a day
   recheckLogs=$((($counter % 86400)+2))
   if [ ${recheckLogs} -eq 1 ]; then
     echo "*** MONITOR LOG SIZES  ***"

@@ -275,7 +275,7 @@ if [ "$1" = "target" ]; then
     case $response in
       1) quickCheckOK=1 ;;
     esac
-  
+
   fi
 
   if [ ${quickCheckOK} -eq 0 ]; then
@@ -290,6 +290,16 @@ if [ "$1" = "target" ]; then
 
   echo "restarting services ... (please wait)"
   sudo systemctl enable bitcoind 
+
+  clear
+  echo "****************************************************************************"
+  echo "OK your RaspiBlitz will now go into reboot and try to sync the blockchain"
+  echo "by itself. If you run into troubles you can always cut power and restart"
+  echo "setup with a fresh flashed sd card."
+  echo "****************************************************************************"
+  echo "PRESS ENTER to trigger reboot."
+  sleep 1
+  read key
 
   echo "rebooting"
   /home/admin/config.scripts/blitz.shutdown.sh reboot
