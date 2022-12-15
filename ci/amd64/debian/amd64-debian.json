@@ -5,7 +5,7 @@
   "build_timestamp": "{{isotime \"20060102150405\"}}",
   "pack": "{{user `pack`}}",
   "cpus": "2",
-  "disk_size": "30000",
+  "disk_size": "32000",
   "git_revision": "__unknown_git_revision__",
   "guest_additions_url": "",
   "headless": "false",
