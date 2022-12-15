@@ -337,6 +337,16 @@ EOF
   if [ "${state}" == "ready" ]; then
     echo "# OK - the mempool.service is enabled, system is on ready so starting service"
     sudo systemctl start mempool
+    sleep 10
+
+    # check install success by testing backend
+  isWorking=$(sudo systemctl status mempool | grep -c "Active: active")
+  if [ ${isWorking} -lt 1 ]; then
+      # signal an error to WebUI
+      echo "result='mempool service not active'"
+      exit 1
+    fi
+
   else
     echo "# OK - the mempool.service is enabled, to start manually use: sudo systemctl start mempool"
   fi
@@ -353,16 +363,10 @@ EOF
     /home/admin/config.scripts/tor.onion-service.sh mempool 80 4082 443 4083
   fi
 
-  # check install success by testing backend
-  isWorking=$(sudo systemctl status mempool | grep -c "Active: active")
-  if [ ${isWorking} -lt 1 ]; then
-    # signal an error to WebUI
-    echo "result='service mempool not active'"
-  else
-    # needed for API/WebUI as signal that install ran thru 
-    echo "result='OK'"
-    exit 0
-  fi
+  # needed for API/WebUI as signal that install ran thru 
+  echo "result='OK'"
+  exit 0
+
   
 fi
 

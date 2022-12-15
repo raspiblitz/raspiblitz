@@ -29,6 +29,8 @@ if [ "$1" = "status" ]; then
 
   echo "##### STATUS ELECTRS SERVICE"
 
+  echo "version='${ELECTRSVERSION}'"
+
   if [ "${ElectRS}" = "on" ]; then
     echo "configured=1"
   else
