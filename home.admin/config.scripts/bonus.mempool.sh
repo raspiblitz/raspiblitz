@@ -340,12 +340,10 @@ EOF
     sleep 10
 
     # check install success by testing backend
-    localIP=$(hostname -I | awk '{print $1}')
-    httpResponseCode=$(curl -s -o /dev/null -w "%{http_code}" http://${localIP}:4080/api/mempool)
-    if [ "${httpResponseCode}" != "200" ]; then
+  isWorking=$(sudo systemctl status mempool | grep -c "Active: active")
+  if [ ${isWorking} -lt 1 ]; then
       # signal an error to WebUI
-      echo "result='${httpResponseCode}'"
-      echo "# HTTP error code ${httpResponseCode} calling backend: http://${localIP}:4080/api/mempool"
+      echo "result='mempool service not active'"
       exit 1
     fi
 
