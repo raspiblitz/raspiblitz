@@ -105,11 +105,17 @@ if [ "$1" = "status" ]; then
     fi
     lsblk -o NAME,SIZE -b | grep -P "[s|vn][dv][a-z][0-9]?" > .lsblk.tmp
     while read line; do
-
+      
       # cut line info into different informations
       testname=$(echo $line | cut -d " " -f 1 | sed 's/[^a-z0-9]*//g')
-      testdevice=$(echo $testname | sed 's/[^a-z]*//g')
-      testpartition=$(echo $testname | grep -P '[a-z]{3,5}[0-9]{1}')
+	  if [ $(echo $line | grep -c "nvme") = 0 ]; then
+        testdevice=$(echo $testname | sed 's/[^a-z]*//g')
+		testpartition=$(echo $testname | grep -P '[a-z]{3,5}[0-9]{1}')
+      else
+	    testdevice=$(echo $testname | sed 's/\([^p]*\).*/\1/')
+		testpartition=$(echo $testname | grep -P '[p]{1}')
+	  fi
+	  
       if [ ${#testpartition} -gt 0 ]; then
         testsize=$(echo $line | sed "s/  */ /g" | cut -d " " -f 2 | sed 's/[^0-9]*//g')
       else
@@ -134,9 +140,22 @@ if [ "$1" = "status" ]; then
       #echo "# hdd(${hdd})"
 
       if [ "$(uname -m)" = "x86_64" ]; then
-        testParentDisk=$(echo "$testpartition" | sed 's/[^a-z]*//g')
-        OSParentDisk=$(echo "$OSPartition" | sed 's/[^a-z]*//g')
-        bootParentDisk=$(echo "$bootPartition" | sed 's/[^a-z]*//g')
+	    if [ $(echo "$testpartition" | grep -c "nvme")  = 0 ]; then
+          testParentDisk=$(echo "$testpartition" | sed 's/[^a-z]*//g')
+		else
+		  testParentDisk=$(echo "$testpartition" | sed 's/\([^p]*\).*/\1/')
+		fi
+		if [ $(echo "$OSPartition" | grep -c "nvme")  = 0 ]; then
+          OSParentDisk=$(echo "$OSPartition" | sed 's/[^a-z]*//g')
+		else
+          OSParentDisk=$(echo "$OSPartition" | sed 's/\([^p]*\).*/\1/')
+        fi
+        if [ $(echo "$bootPartition" | grep -c "nvme")  = 0 ]; then	
+          bootParentDisk=$(echo "$bootPartition" | sed 's/[^a-z]*//g')
+		else
+		  bootParentDisk=$(echo "$bootPartition" | sed 's/\([^p]*\).*/\1/')
+		fi
+		  
         if [ "$testdevice" != "$OSParentDisk" ] && [ "$testdevice" != "$bootParentDisk" ];then
           sizeDataPartition=${testsize}
           hddDataPartition="${testpartition}"
@@ -177,7 +196,7 @@ if [ "$1" = "status" ]; then
 
     # try to detect if its an SSD
     isSMART=$(sudo smartctl -a /dev/${hdd} | grep -c "Rotation Rate:")
-    echo "isSMART=$(isSMART)"
+    echo "isSMART=${isSMART}"
     if [ ${isSMART} -gt 0 ]; then
     	#detect using smartmontools (preferred)
         isSSD=$(sudo smartctl -a /dev/${hdd} | grep 'Rotation Rate:' | grep -c "Solid State")
@@ -193,7 +212,10 @@ if [ "$1" = "status" ]; then
     hddGigaBytes=0
     if [ "${hdd}" != "" ]; then
       hddBytes=$(fdisk -l /dev/$hdd | grep GiB | cut -d " " -f 5)
-      hddGigaBytes=$(echo "scale=0; ${hddBytes}/1024/1024/1024" | bc -l)
+	  if [ "${hddBytes}" = "" ]; then
+	    hddBytes=$(fdisk -l /dev/$hdd | grep TiB | cut -d " " -f 5)
+	  fi
+      ddGigaBytes=$(echo "scale=0; ${hddBytes}/1024/1024/1024" | bc -l)
     fi
     echo "hddBytes=${hddBytes}"
     echo "hddGigaBytes=${hddGigaBytes}"
@@ -286,9 +308,14 @@ if [ "$1" = "status" ]; then
 
         # temp storage data drive
         mkdir -p /mnt/storage
+		if [ $(echo "${hdd}" | grep -c "nvme")  = 0 ]; then
+		  nvp=""
+		else
+		  nvp="p"
+		fi
         if [ "${hddFormat}" = "btrfs" ]; then
           # in btrfs setup the second partition is storage partition
-          mount /dev/${hdd}2 /mnt/storage 2>/dev/null
+          mount /dev/${hdd}${nvp}2 /mnt/storage 2>/dev/null
           isTempMounted=$(df | grep /mnt/storage | grep -c ${hdd})
         else
           # in ext4 setup the partition is also the storage partition
@@ -317,7 +344,7 @@ if [ "$1" = "status" ]; then
             hdd_data_free1Kblocks=$(df -h -k /dev/${hddDataPartitionExt4} | grep "/dev/${hddDataPartitionExt4}" | sed -e's/  */ /g' | cut -d" " -f 4 | tr -dc '0-9')
           else
             # BRTS
-            hdd_data_free1Kblocks=$(df -h -k /dev/${hdd}1 | grep "/dev/${hdd}1" | sed -e's/  */ /g' | cut -d" " -f 4 | tr -dc '0-9')
+            hdd_data_free1Kblocks=$(df -h -k /dev/${hdd}${nvp}1 | grep "/dev/${hdd}${nvp}1" | sed -e's/  */ /g' | cut -d" " -f 4 | tr -dc '0-9')
           fi
           if [ "${hdd_data_free1Kblocks}" != "" ]; then
             hddDataFreeBytes=$((${hdd_data_free1Kblocks} * 1024))
@@ -362,7 +389,7 @@ if [ "$1" = "status" ]; then
           fi
           echo "hddGotMigrationData='${hddGotMigrationData}'"
 
-          # comment this line out if case to study the contect of the storage section
+          # comment this line out if case to study the content of the storage section
           umount /mnt/storage
         fi
       else
@@ -391,7 +418,11 @@ if [ "$1" = "status" ]; then
       # on ext4 its the whole /mnt/hdd
       hddDataPartition=$(df | grep "/mnt/hdd$" | cut -d " " -f 1 | cut -d "/" -f 3)
     fi
-    hdd=$(echo $hddDataPartition | sed 's/[0-9]*//g')
+	if [ $(echo "${hddDataPartition}" | grep -c "nvme")  = 0 ]; then
+	  hdd=$(echo $hddDataPartition | sed 's/[0-9]*//g')
+	else
+	  hdd=$(echo "$hddDataPartition" | sed 's/\([^p]*\).*/\1/')
+	fi
     hddFormat=$(lsblk -o FSTYPE,NAME,TYPE | grep part | grep "${hddDataPartition}" | cut -d " " -f 1)
     if [ "${hddFormat}" = "ext4" ]; then
        hddDataPartitionExt4=$hddDataPartition
@@ -407,7 +438,7 @@ if [ "$1" = "status" ]; then
 
     # try to detect if its an SSD
     isSMART=$(sudo smartctl -a /dev/${hdd} | grep -c "Rotation Rate:")
-    echo "isSMART=$(isSMART)"
+    echo "isSMART=${isSMART}"
     if [ ${isSMART} -gt 0 ]; then
     	#detect using smartmontools (preferred)
         isSSD=$(sudo smartctl -a /dev/${hdd} | grep 'Rotation Rate:' | grep -c "Solid State")
@@ -444,12 +475,17 @@ if [ "$1" = "status" ]; then
 
     # used space - at the moment just string info to display
     if [ "${isBTRFS}" -gt 0 ]; then
+	  if [ $(echo "${hdd}" | grep -c "nvme")  = 0 ]; then
+		nvp=""
+	  else
+		nvp="p"
+	  fi
       # BTRFS calculations
       # TODO: this is the final/correct way - make better later
       # https://askubuntu.com/questions/170044/btrfs-and-missing-free-space
-      datadrive=$(df -h | grep "/dev/${hdd}1" | sed -e's/  */ /g' | cut -d" " -f 5)
-      storageDrive=$(df -h | grep "/dev/${hdd}2" | sed -e's/  */ /g' | cut -d" " -f 5)
-      hdd_data_free1Kblocks=$(df -h -k /dev/${hdd}1 | grep "/dev/${hdd}1" | sed -e's/  */ /g' | cut -d" " -f 4 | tr -dc '0-9')
+      datadrive=$(df -h | grep "/dev/${hdd}${nvp}1" | sed -e's/  */ /g' | cut -d" " -f 5)
+      storageDrive=$(df -h | grep "/dev/${hdd}${nvp}2" | sed -e's/  */ /g' | cut -d" " -f 5)
+      hdd_data_free1Kblocks=$(df -h -k /dev/${hdd}${nvp}1 | grep "/dev/${hdd}${nvp}1" | sed -e's/  */ /g' | cut -d" " -f 4 | tr -dc '0-9')
       hddUsedInfo="${datadrive} & ${storageDrive}"
     elif [ "${isZFS}" -gt 0 ]; then
       # ZFS calculations
@@ -659,13 +695,20 @@ if [ "$1" = "format" ]; then
       exit 1
     fi
   fi
-
-  if [[ $hdd =~ [0-9] ]]; then
-     ext4IsPartition=1
+  
+  if [ $(echo "${hdd}" | grep -c "nvme")  = 0 ]; then
+    if [[ $hdd =~ [0-9] ]]; then
+      ext4IsPartition=1
+    else
+      ext4IsPartition=0
+    fi
   else
-     ext4IsPartition=0
+    if [[ $hdd =~ [p] ]]; then
+      ext4IsPartition=1
+    else
+      ext4IsPartition=0
+    fi
   fi
-
   wipePartitions=0
   if [ "$2" = "btrfs" ]; then
      wipePartitions=1
@@ -762,8 +805,13 @@ if [ "$1" = "format" ]; then
 
      # setting fsk check interval to 1
      # see https://github.com/rootzoll/raspiblitz/issues/360#issuecomment-467567572
+	 if [ $(echo "${hdd}" | grep -c "nvme")  = 0 ]; then
+       nvp=""
+     else
+       nvp="p"
+     fi
      if [ $ext4IsPartition -eq 0 ]; then
-        tune2fs -c 1 /dev/${hdd}1
+        tune2fs -c 1 /dev/${hdd}${nvp}1
      else
         tune2fs -c 1 /dev/${hdd}
      fi
@@ -774,7 +822,11 @@ if [ "$1" = "format" ]; then
 
   # formatting new: BTRFS layout - this consists of 3 volumes:
   if [ "$2" = "btrfs" ]; then
-
+     if [ $(echo "${hdd}" | grep -c "nvme")  = 0 ]; then
+       nvp=""
+     else
+       nvp="p"
+     fi
      # prepare temp mount point
      mkdir -p /tmp/btrfs 1>/dev/null
 
@@ -782,12 +834,12 @@ if [ "$1" = "format" ]; then
      parted -s -- /dev/${hdd} mkpart primary btrfs 1024KiB 30GiB 1>/dev/null
      sync
      sleep 6
-     win=$(lsblk -o NAME | grep -c ${hdd}1)
+     win=$(lsblk -o NAME | grep -c ${hdd}${nvp}1)
      if [ ${win} -eq 0 ]; then 
        echo "error='partition failed'"
        exit 1
      fi
-     mkfs.btrfs -f -L BLITZDATA /dev/${hdd}1 1>/dev/null
+     mkfs.btrfs -f -L BLITZDATA /dev/${hdd}${nvp}1 1>/dev/null
      # check result
      loopdone=0
      loopcount=0
@@ -809,9 +861,9 @@ if [ "$1" = "format" ]; then
      >&2 echo "# OK BLITZDATA exists now"
   
      >&2 echo "# Creating SubVolume for Snapshots"
-     mount /dev/${hdd}1 /tmp/btrfs 1>/dev/null
+     mount /dev/${hdd}${nvp}1 /tmp/btrfs 1>/dev/null
      if [ $(df | grep -c "/tmp/btrfs") -eq 0 ]; then
-       echo "error='mount ${hdd}1 failed'"
+       echo "error='mount ${hdd}${nvp}1 failed'"
        exit 1
      fi
      cd /tmp/btrfs
@@ -823,12 +875,12 @@ if [ "$1" = "format" ]; then
      parted -s -- /dev/${hdd} mkpart primary btrfs 30GiB -34GiB 1>/dev/null
      sync
      sleep 6
-     win=$(lsblk -o NAME | grep -c ${hdd}2)
+     win=$(lsblk -o NAME | grep -c ${hdd}${nvp}2)
      if [ ${win} -eq 0 ]; then 
        echo "error='partition failed'"
        exit 1
      fi
-     mkfs.btrfs -f -L BLITZSTORAGE /dev/${hdd}2 1>/dev/null
+     mkfs.btrfs -f -L BLITZSTORAGE /dev/${hdd}${nvp}2 1>/dev/null
      # check result
      loopdone=0
      loopcount=0
@@ -849,9 +901,9 @@ if [ "$1" = "format" ]; then
      >&2 echo "# OK BLITZSTORAGE exists now"
   
      >&2 echo "# Creating SubVolume for Snapshots"
-     mount /dev/${hdd}2 /tmp/btrfs 1>/dev/null
+     mount /dev/${hdd}${nvp}2 /tmp/btrfs 1>/dev/null
      if [ $(df | grep -c "/tmp/btrfs") -eq 0 ]; then
-       echo "error='mount ${hdd}2 failed'"
+       echo "error='mount ${hdd}${nvp}2 failed'"
        exit 1
      fi
      cd /tmp/btrfs
@@ -861,14 +913,14 @@ if [ "$1" = "format" ]; then
      >&2 echo "# Creating the FAT32 partition"
      parted -s -- /dev/${hdd} mkpart primary fat32 -34GiB 100% 1>/dev/null
      sync && sleep 3
-     win=$(lsblk -o NAME | grep -c ${hdd}3)
+     win=$(lsblk -o NAME | grep -c ${hdd}${nvp}3)
      if [ ${win} -eq 0 ]; then 
        echo "error='partition failed'"
        exit 1
      fi
  
      >&2 echo "# Creating Volume BLITZTEMP (format)"
-     mkfs -t vfat -n BLITZTEMP /dev/${hdd}3 1>/dev/null
+     mkfs -t vfat -n BLITZTEMP /dev/${hdd}${nvp}3 1>/dev/null
      # check result
      loopdone=0
      loopcount=0
@@ -910,14 +962,23 @@ if [ "$1" = "fstab" ]; then
 
   # check if exist and which format
   # if hdd is a partition (ext4)
-  if [[ $hdd =~ [0-9] ]]; then
-     # ext4
-     hddFormat=$(lsblk -o FSTYPE,NAME | grep ${hdd} | cut -d ' ' -f 1)
+  if [ $(echo "${hdd}" | grep -c "nvme")  = 0 ]; then
+    if [[ $hdd =~ [0-9] ]]; then
+      # ext4
+      hddFormat=$(lsblk -o FSTYPE,NAME | grep ${hdd} | cut -d ' ' -f 1)
+    else
+      # btrfs
+      hddFormat=$(lsblk -o FSTYPE,NAME | grep ${hdd}1 | cut -d ' ' -f 1)
+    fi
   else
-     # btrfs
-     hddFormat=$(lsblk -o FSTYPE,NAME | grep ${hdd}1 | cut -d ' ' -f 1)
+    if [[ $hdd =~ [p] ]]; then
+      # ext4
+      hddFormat=$(lsblk -o FSTYPE,NAME | grep ${hdd} | cut -d ' ' -f 1)
+    else
+      # btrfs
+      hddFormat=$(lsblk -o FSTYPE,NAME | grep ${hdd}p1 | cut -d ' ' -f 1)
+    fi
   fi
-
   if [ ${#hddFormat} -eq 0 ]; then
     echo "# FAIL given device/partition not found"
     echo "error='device not found'"
@@ -993,9 +1054,14 @@ if [ "$1" = "fstab" ]; then
     # get info on: Data Drive
     uuidDATA=$(lsblk -o UUID,NAME,LABEL | grep "${hdd}" | grep "BLITZDATA" | cut -d " " -f 1 | grep "-")
     mkdir -p /tmp/btrfs
-    mount /dev/${hdd}1 /tmp/btrfs 1>/dev/null
+	if [ $(echo "${hdd}" | grep -c "nvme")  = 0 ]; then
+      nvp=""
+    else
+      nvp="p"
+    fi
+    mount /dev/${hdd}${nvp}1 /tmp/btrfs 1>/dev/null
     if [ $(df | grep -c "/tmp/btrfs") -eq 0 ]; then
-      echo "error='mount ${hdd}1 failed'"
+      echo "error='mount ${hdd}${nvp}1 failed'"
       exit 1
     fi
     cd /tmp/btrfs
@@ -1010,9 +1076,9 @@ if [ "$1" = "fstab" ]; then
   
     # get info on: Storage Drive
     uuidSTORAGE=$(lsblk -o UUID,NAME,LABEL | grep "${hdd}" | grep "BLITZSTORAGE" | cut -d " " -f 1 | grep "-")
-    mount /dev/${hdd}2 /tmp/btrfs 1>/dev/null
+    mount /dev/${hdd}${nvp}2 /tmp/btrfs 1>/dev/null
     if [ $(df | grep -c "/tmp/btrfs") -eq 0 ]; then
-      echo "error='mount ${hdd}2 failed'"
+      echo "error='mount ${hdd}${nvp}2 failed'"
       exit 1
     fi
     cd /tmp/btrfs
@@ -1357,15 +1423,25 @@ if [ "$1" = "tempmount" ]; then
   fi
 
   # if hdd is a partition
-  if [[ $hdd =~ [0-9] ]]; then
-     hddDataPartition=$hdd
-     hddDataPartitionExt4=$hddDataPartition
-     hddFormat=$(lsblk -o FSTYPE,NAME | grep ${hddDataPartitionExt4} | cut -d ' ' -f 1)
+  if [ $(echo "${hdd}" | grep -c "nvme")  = 0 ]; then
+    if [[ $hdd =~ [0-9] ]]; then
+      hddDataPartition=$hdd
+      hddDataPartitionExt4=$hddDataPartition
+      hddFormat=$(lsblk -o FSTYPE,NAME | grep ${hddDataPartitionExt4} | cut -d ' ' -f 1)
+    else
+      hddBTRFS=$hdd
+      hddFormat=$(lsblk -o FSTYPE,NAME | grep ${hddBTRFS}1 | cut -d ' ' -f 1)
+    fi
   else
-     hddBTRFS=$hdd
-     hddFormat=$(lsblk -o FSTYPE,NAME | grep ${hddBTRFS}1 | cut -d ' ' -f 1)
+    if [[ $hdd =~ [p] ]]; then
+      hddDataPartition=$hdd
+      hddDataPartitionExt4=$hddDataPartition
+      hddFormat=$(lsblk -o FSTYPE,NAME | grep ${hddDataPartitionExt4} | cut -d ' ' -f 1)
+    else
+      hddBTRFS=$hdd
+      hddFormat=$(lsblk -o FSTYPE,NAME | grep ${hddBTRFS}p1 | cut -d ' ' -f 1)
+    fi
   fi
-
   if [ ${#hddFormat} -eq 0 ]; then
     >&2 echo "# FAIL given device not found"
     echo "error='device not found'"
@@ -1401,12 +1477,17 @@ if [ "$1" = "tempmount" ]; then
     bitcoinGID=$(id -g bitcoin)
 
     # do BTRFS temp mount
+	if [ $(echo "${hddBTRFS}" | grep -c "nvme")  = 0 ]; then
+      nvp=""
+    else
+      nvp="p"
+    fi
     mkdir -p /mnt/hdd 1>/dev/null
     mkdir -p /mnt/storage 1>/dev/null
     mkdir -p /mnt/temp 1>/dev/null
-    mount -t btrfs -o degraded -o subvol=WORKINGDIR /dev/${hddBTRFS}1 /mnt/hdd
-    mount -t btrfs -o subvol=WORKINGDIR /dev/${hddBTRFS}2 /mnt/storage
-    mount -o umask=0000,uid=${bitcoinUID},gid=${bitcoinGID} /dev/${hddBTRFS}3 /mnt/temp 
+    mount -t btrfs -o degraded -o subvol=WORKINGDIR /dev/${hddBTRFS}${nvp}1 /mnt/hdd
+    mount -t btrfs -o subvol=WORKINGDIR /dev/${hddBTRFS}${nvp}2 /mnt/storage
+    mount -o umask=0000,uid=${bitcoinUID},gid=${bitcoinGID} /dev/${hddBTRFS}${nvp}3 /mnt/temp 
 
     # check result
     isMountedA=$(df | grep -c "/mnt/hdd")
