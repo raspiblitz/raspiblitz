@@ -12,6 +12,12 @@
 defaultRepo="rootzoll"
 defaultBranch="v1.8"
 
+defaultAPIuser="fusion44"
+defaultAPIrepo="blitz_api"
+
+defaultWEBUIuser="cstenglein"
+defaultWEBUIrepo="raspiblitz-web"
+
 me="${0##/*}"
 
 nocolor="\033[0m"
@@ -187,7 +193,6 @@ range_argument display "lcd" "hdmi" "headless"
 # If 'false' this will skipped.
 : "${tweak_boot_drive:=true}"
 range_argument tweak_boot_drive "0" "1" "false" "true"
-
 
 # WIFI
 # ---------------------------------------
@@ -801,9 +806,9 @@ if ${fatpack}; then
   /home/admin/config.scripts/bonus.lnbits.sh install || exit 1
 
   echo "* Adding Raspiblitz API ..."
-  sudo /home/admin/config.scripts/blitz.web.api.sh on || exit 1
+  sudo /home/admin/config.scripts/blitz.web.api.sh on "${defaultAPIuser}" "${defaultAPIrepo}" "${branch}" || exit 1
   echo "* Adding Raspiblitz WebUI ..."
-  sudo /home/admin/config.scripts/blitz.web.ui.sh on || exit 1
+  sudo /home/admin/config.scripts/blitz.web.ui.sh on "${defaultAPIuser}" "${defaultAPIrepo}" "${branch}" || exit 1
 
   # set build code as new default
   sudo rm -r /home/admin/assets/nginx/www_public
