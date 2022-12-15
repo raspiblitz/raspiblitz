@@ -354,13 +354,10 @@ EOF
   fi
 
   # check install success by testing backend
-  localIP=$(hostname -I | awk '{print $1}')
-  httpResponseCode=$(curl -s -o /dev/null -w "%{http_code}" http://${localIP}:4080/api/v1/statistics/2h)
-  if [ "${httpResponseCode}" != "200" ]; then
+  isWorking=$(sudo systemctl status mempool | grep -c "Active: active")
+  if [ ${isWorking} -lt 1 ]; then
     # signal an error to WebUI
-    echo "result='${httpResponseCode}'"
-    echo "# HTTP error code ${httpResponseCode} calling backend: http://${localIP}:4080/api/v1/statistics/2h"
-    exit 1
+    echo "result='service mempool not active'"
   else
     # needed for API/WebUI as signal that install ran thru 
     echo "result='OK'"
