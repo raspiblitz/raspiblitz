@@ -5,7 +5,7 @@
 # restart the systemd `blitzapi` when credentials of lnd or bitcoind are changed and it will
 # excute the `update-config` automatically before restarting
 
-# NORMALLY user/repo/version will be defined by valling script - see build_sdcard.sh
+# NORMALLY user/repo/version will be defined by calling script - see build_sdcard.sh
 # the following is just a fallback to try during development if script given branch does not exist
 FALLACK_BRANCH="main"
 
@@ -219,20 +219,20 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   cd /home/blitzapi || exit 1
   
   # git clone https://github.com/fusion44/blitz_api.git /home/blitzapi/blitz_api
-  echo "# clone github: ${DEFAULT_GITHUB_USER}/${DEFAULT_GITHUB_REPO}"
-  if ! sudo -u blitzapi git clone https://github.com/${DEFAULT_GITHUB_USER}/${DEFAULT_GITHUB_REPO}.git blitz_api; then
+  echo "# clone github: ${GITHUB_USER}/${GITHUB_REPO}"
+  if ! sudo -u blitzapi git clone https://github.com/${GITHUB_USER}/${GITHUB_REPO}.git blitz_api; then
     echo "error='git clone failed'"
     exit 1
   fi
   cd blitz_api || exit 1
-  echo "# checkout branch: ${DEFAULT_GITHUB_BRANCH}"
-  if ! sudo -u blitzapi git checkout ${DEFAULT_GITHUB_BRANCH}; then
+  echo "# checkout branch: ${GITHUB_BRANCH}"
+  if ! sudo -u blitzapi git checkout ${GITHUB_BRANCH}; then
     echo "error='git checkout failed'"
     exit 1
   fi
-  if [ "${DEFAULT_GITHUB_COMMITORTAG}" != "" ]; then
-    echo "# setting code to tag/commit: ${DEFAULT_GITHUB_COMMITORTAG}"
-    if ! git reset --hard ${DEFAULT_GITHUB_COMMITORTAG}; then
+  if [ "${GITHUB_COMMITORTAG}" != "" ]; then
+    echo "# setting code to tag/commit: ${GITHUB_COMMITORTAG}"
+    if ! git reset --hard ${GITHUB_COMMITORTAG}; then
       echo "error='git reset failed'"
       exit 1
     fi
@@ -247,7 +247,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     exit 1
   fi
   
-  # build the config and set unique secret (its OK to be a new secret every install/upadte)
+  # build the config and set unique secret (its OK to be a new secret every install/update)
   /home/admin/config.scripts/blitz.web.api.sh update-config
   secret=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 64 ; echo '')
   sed -i "s/^secret=.*/secret=${secret}/g" ./.env
