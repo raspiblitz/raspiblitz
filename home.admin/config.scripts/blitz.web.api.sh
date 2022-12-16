@@ -41,7 +41,6 @@ if [ "$1" = "update-config" ]; then
   sed -i "s/^platform=.*/platform=raspiblitz/g" ./.env
 
   # configure access token secret
-  secretNeedsInit=$(cat ./.env 2>/dev/null| grep -c "=please_please_update_me_please")
   if [ "${secret}" == "" ] || [ "${secret}" == "please_please_update_me_please" ]; then
     echo "# init secret ..."
     secret=$(dd if=/dev/urandom bs=256 count=1 2> /dev/null | shasum -a256 | cut -d " " -f1)
@@ -67,7 +66,6 @@ if [ "$1" = "update-config" ]; then
     sed -i "s/^bitcoind_ip_testnet=.*/bitcoind_ip_testnet=127.0.0.1/g" ./.env
     sed -i "s/^bitcoind_user=.*/bitcoind_user=${RPCUSER}/g" ./.env
     sed -i "s/^bitcoind_pw=.*/bitcoind_pw=${RPCPASS}/g" ./.env
-
 
     # configure LND
     if [ "${lightning}" == "lnd" ]; then
@@ -248,11 +246,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     exit 1
   fi
   
-  # build the config and set unique secret (its OK to be a new secret every install/update)
-  /home/admin/config.scripts/blitz.web.api.sh update-config
-  secret=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 64 ; echo '')
-  sed -i "s/^secret=.*/secret=${secret}/g" ./.env
-
   # prepare systemd service
   echo "
 [Unit]
