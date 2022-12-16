@@ -46,7 +46,7 @@ with the [Makefile](https://github.com/rootzoll/raspiblitz/blob/dev/Makefile)
 ### Generate an arm64-rpi image
 * The workflow locally and in github actions generates a .img raw format image for the Raspberry Pi.
   ```
-  make arm-rpi-fatpack-image
+  make arm-rpi-lean-image
   ```
 * find the image and sh256 hashes in the `ci/arm64-rpi/packer-builder-arm` directory
 * the .img.gz file can be written to an SDcard directly with Balena Etcher
@@ -57,7 +57,7 @@ The workflow locally and in github actions generates a .qcow2 format amd64 image
     * libvirt / virsh / virt-manager (https://virt-manager.org/)
     * written to disk and booted with legacy boot (non-UEFI)
   ```
-  make amd64-fatpack-image
+  make amd64-lean-image
   ```
 * find the compressed .qcow2 image and sh256 hashes in the `ci/amd64/builds` directory
 
@@ -65,6 +65,10 @@ The workflow locally and in github actions generates a .qcow2 format amd64 image
 * Find the images in the green runs in github actions at:
 https://github.com/rootzoll/raspiblitz/actions
 
+  ```
+  # unzip to the same directory
+  unzip raspiblitz-amd64-image-YEAR-MM-DD-COMMITHASH.zip
+  ```
 ## Write the image to a disk connected with USB
 identify the connected disk with `lsblk` eg `/dev/sdd`
 
@@ -72,9 +76,9 @@ identify the connected disk with `lsblk` eg `/dev/sdd`
 * the raw image is 33.5 GB
     ```
     # unzip
-    gzip -dkv raspiblitz-amd64-debian-11.5-fatpack.qcow2.gz
+    gzip -dkv raspiblitz-amd64-debian-11.5-lean.qcow2.gz
     # convert
-    qemu-img convert raspiblitz-amd64-debian-11.5-fatpack.qcow2 raspiblitz-amd64-debian-11.5-fatpack.img
+    qemu-img convert raspiblitz-amd64-debian-11.5-lean.qcow2 raspiblitz-amd64-debian-11.5-lean.img
     ```
 ### Write to a disk connected with USB with Balena Etcher or `dd`
 
