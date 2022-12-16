@@ -33,6 +33,7 @@ echo "deleting local DNS confs ..."
 sudo rm /etc/resolv.conf
 echo "OK"
 
+# make sure that every install runs API with own secret=
 echo
 echo "deleting old API conf ..."
 sudo rm /home/blitzapi/blitz_api/.env 2>/dev/null
