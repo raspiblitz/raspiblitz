@@ -188,8 +188,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     exit 1
   fi
 
-  curl -s "https://api.github.com/repos/fusion44/blitz_api/branches/master" | grep -c "\"name\": \"master\""
-
   echo "# INSTALL Web API ..."
   # clean old source
   rm -r /root/blitz_api 2>/dev/null
