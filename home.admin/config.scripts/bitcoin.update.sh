@@ -46,7 +46,7 @@ installedVersion=$(sudo -u bitcoin bitcoind --version | head -n1| cut -d" " -f4|
 bitcoinUpdateInstalled=$(echo "${installedVersion}" | grep -c "${bitcoinVersion}")
 
 # get latest release from GitHub releases
-gitHubLatestReleaseJSON="$(curl -s https://api.github.com/repos/bitcoin/bitcoin/releases | jq '.[0]')"
+gitHubLatestReleaseJSON="$(curl --header "X-GitHub-Api-Version:2022-11-28" -s https://api.github.com/repos/bitcoin/bitcoin/releases | jq '.[0]')"
 bitcoinLatestVersion=$(echo "${gitHubLatestReleaseJSON}"|jq -r '.tag_name'|cut -c 2-)
 
 # INFO

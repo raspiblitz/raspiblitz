@@ -2,7 +2,7 @@
 
 # https://github.com/joinmarket-webui/jam
 
-WEBUI_VERSION=0.1.2
+WEBUI_VERSION=0.1.4
 REPO=joinmarket-webui/jam
 USERNAME=jam
 HOME_DIR=/home/$USERNAME
@@ -243,7 +243,7 @@ if [ "$1" = "update" ]; then
       echo "# Downloading the latest commit in the default branch of $REPO"
       sudo -u $USERNAME git clone https://github.com/$REPO
     else
-      version=$(curl --silent "https://api.github.com/repos/$REPO/releases/latest" | grep '"tag_name":' | sed -E 's/.*"v([^"]+)".*/\1/')
+      version=$(curl --header "X-GitHub-Api-Version:2022-11-28" --silent "https://api.github.com/repos/$REPO/releases/latest" | grep '"tag_name":' | sed -E 's/.*"v([^"]+)".*/\1/')
       cd $APP_DIR || exit 1
       current=$(node -p "require('./package.json').version")
       cd ..

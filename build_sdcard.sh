@@ -12,6 +12,12 @@
 defaultRepo="rootzoll"
 defaultBranch="v1.8"
 
+defaultAPIuser="fusion44"
+defaultAPIrepo="blitz_api"
+
+defaultWEBUIuser="cstenglein"
+defaultWEBUIrepo="raspiblitz-web"
+
 me="${0##/*}"
 
 nocolor="\033[0m"
@@ -166,13 +172,13 @@ range_argument fatpack "0" "1" "false" "true"
 # could be any valid github-user that has a fork of the raspiblitz repo - 'rootzoll' is default
 # The 'raspiblitz' repo of this user is used to provisioning sd card with raspiblitz assets/scripts later on.
 : "${github_user:=$defaultRepo}"
-curl -s "https://api.github.com/repos/${github_user}/raspiblitz" | grep -q "\"message\": \"Not Found\"" && error_msg "Repository 'raspiblitz' not found for user '${github_user}"
+curl --header "X-GitHub-Api-Version:2022-11-28" -s "https://api.github.com/repos/${github_user}/raspiblitz" | grep -q "\"message\": \"Not Found\"" && error_msg "Repository 'raspiblitz' not found for user '${github_user}"
 
 # GITHUB-BRANCH
 # -------------------------------------
 # could be any valid branch or tag of the given GITHUB-USERNAME forked raspiblitz repo
 : "${branch:=$defaultBranch}"
-curl -s "https://api.github.com/repos/${github_user}/raspiblitz/branches/${branch}" | grep -q "\"message\": \"Branch not found\"" && error_msg "Repository 'raspiblitz' for user '${github_user}' does not contain branch '${branch}'"
+curl --header "X-GitHub-Api-Version:2022-11-28" -s "https://api.github.com/repos/${github_user}/raspiblitz/branches/${branch}" | grep -q "\"message\": \"Branch not found\"" && error_msg "Repository 'raspiblitz' for user '${github_user}' does not contain branch '${branch}'"
 
 # DISPLAY-CLASS
 # ----------------------------------------
@@ -187,7 +193,6 @@ range_argument display "lcd" "hdmi" "headless"
 # If 'false' this will skipped.
 : "${tweak_boot_drive:=true}"
 range_argument tweak_boot_drive "0" "1" "false" "true"
-
 
 # WIFI
 # ---------------------------------------
@@ -801,9 +806,9 @@ if ${fatpack}; then
   /home/admin/config.scripts/bonus.lnbits.sh install || exit 1
 
   echo "* Adding Raspiblitz API ..."
-  sudo /home/admin/config.scripts/blitz.web.api.sh on || exit 1
+  sudo /home/admin/config.scripts/blitz.web.api.sh on "${defaultAPIuser}" "${defaultAPIrepo}" "${branch}" || exit 1
   echo "* Adding Raspiblitz WebUI ..."
-  sudo /home/admin/config.scripts/blitz.web.ui.sh on || exit 1
+  sudo /home/admin/config.scripts/blitz.web.ui.sh on "${defaultAPIuser}" "${defaultAPIrepo}" "${branch}" || exit 1
 
   # set build code as new default
   sudo rm -r /home/admin/assets/nginx/www_public

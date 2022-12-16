@@ -77,6 +77,18 @@ do
   fi
 
   ####################################################
+  # MONITOR LOG SIZES
+  # https://github.com/rootzoll/raspiblitz/issues/2659
+  ####################################################
+
+  # once a day
+  recheckLogs=$((($counter % 86400)+2))
+  if [ ${recheckLogs} -eq 1 ]; then
+    echo "*** MONITOR LOG SIZES  ***"
+    journalctl --vacuum-size=100M
+  fi
+
+  ####################################################
   # RECHECK DHCP-SERVER
   # https://github.com/rootzoll/raspiblitz/issues/160
   ####################################################

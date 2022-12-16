@@ -66,6 +66,8 @@ if [ "$1" = "status" ] || [ "$1" = "menu" ]; then
   RTLHTTPS=$((RTLHTTP+1))
 
   if [ "$1" = "status" ]; then
+  
+    echo "version='${RTLVERSION}'"
     echo "installed='${isInstalled}'"
     echo "localIP='${localip}'"
     echo "httpPort='${RTLHTTP}'"

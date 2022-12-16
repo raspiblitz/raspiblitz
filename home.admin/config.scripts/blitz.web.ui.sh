@@ -2,10 +2,14 @@
 
 # main repo: https://github.com/cstenglein/raspiblitz-web
 
+# NORMALLY user/repo/version will be defined by calling script - see build_sdcard.sh
+# the following is just a fallback to try during development if script given branch does not exist
+FALLACK_BRANCH="master"
+
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ]; then
-  echo "Manage RaspiBlitz Web UI"
-  echo "blitz.web.ui.sh on [?GITHUBUSER] [?REPO] [?BRANCH]"
+  echo "Manage RaspiBlitz WebUI"
+  echo "blitz.web.ui.sh on [?GITHUBUSER] [?REPO] [?BRANCH] [?COMMITORTAG]"
   echo "blitz.web.ui.sh update"
   echo "blitz.web.ui.sh off"
   exit 0
@@ -17,44 +21,84 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
-DEFAULT_GITHUB_USER="cstenglein"
-DEFAULT_GITHUB_REPO="raspiblitz-web"
-DEFAULT_GITHUB_BRANCH="master"
-
 ###################
 # ON / INSTALL
 ###################
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
-  if [ "$2" != "" ]; then
-    DEFAULT_GITHUB_USER="$2"
+  # get parameters
+  GITHUB_USER=$2
+  if [ "${GITHUB_USER}" == "" ]; then
+    echo "# FAIL: No GITHUB_USER provided"
+    exit 1
+  fi
+  GITHUB_REPO=$3
+  if [ "${GITHUB_REPO}" == "" ]; then
+    echo "# FAIL: No GITHUB_REPO provided"
+    exit 1
+  fi
+  GITHUB_BRANCH=$4
+  if [ "${GITHUB_BRANCH}" == "" ]; then
+    echo "# FAIL: No GITHUB_BRANCH provided"
+    exit 1
+  fi
+  GITHUB_COMMITORTAG=$5
+  if [ "${GITHUB_COMMITORTAG}" == "" ]; then
+    echo "# INFO: No GITHUB_COMMITORTAG provided .. will use latest code on branch"
   fi
 
-  if [ "$3" != "" ]; then
-    DEFAULT_GITHUB_REPO="$3"
+  # check if given branch exits on that github user/repo
+  branchExists=$(curl --header "X-GitHub-Api-Version:2022-11-28" -s "https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/branches/${GITHUB_BRANCH}" | grep -c "\"name\": \"${GITHUB_BRANCH}\"")
+  if [ ${branchExists} -lt 1 ]; then
+    echo
+    echo "# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+    echo "# WARNING! The given WebUI repo is not available:"
+    echo "# user(${GITHUB_USER}) repo(${GITHUB_REPO}) branch(${GITHUB_BRANCH})"
+    echo "# WORKING WITH FALLBACK REPO - USE JUST FOR DEVELOPMENT - DONT USE IN PRODUCTION"
+    echo "# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+    echo
+    sleep 10
+    GITHUB_BRANCH="${FALLACK_BRANCH}"
   fi
 
-  if [ "$4" != "" ]; then
-    DEFAULT_GITHUB_BRANCH="$4"
+  # re-check (if case its fallback)
+  branchExists=$(curl --header "X-GitHub-Api-Version:2022-11-28" -s "https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/branches/${GITHUB_BRANCH}" | grep -c "\"name\": \"${GITHUB_BRANCH}\"")
+  if [ ${branchExists} -lt 1 ]; then
+    echo
+    echo "# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+    echo "# FAIL! user(${GITHUB_USER}) repo(${GITHUB_REPO}) branch(${GITHUB_BRANCH})"
+    echo "# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+    exit 1
   fi
 
   echo "# INSTALL WebUI"
   # clean all source
   rm -r /root/blitz_web 2>/dev/null
-  rm -r /root/${DEFAULT_GITHUB_REPO} 2>/dev/null
+  rm -r /root/${GITHUB_REPO} 2>/dev/null
   rm -r /home/blitzapi/blitz_web 2>/dev/null
-  rm -r /home/blitzapi/${DEFAULT_GITHUB_REPO} 2>/dev/null
+  rm -r /home/blitzapi/${GITHUB_REPO} 2>/dev/null
   
   cd /home/blitzapi || exit 1
-  if ! git clone https://github.com/${DEFAULT_GITHUB_USER}/${DEFAULT_GITHUB_REPO}.git; then
+   echo "# clone github: ${GITHUB_USER}/${GITHUB_REPO}"
+  if ! git clone https://github.com/${GITHUB_USER}/${GITHUB_REPO}.git; then
     echo "error='git clone failed'"
     exit 1
   fi
-  mv /home/blitzapi/${DEFAULT_GITHUB_REPO} /home/blitzapi/blitz_web
+  mv /home/blitzapi/${GITHUB_REPO} /home/blitzapi/blitz_web
   cd blitz_web || exit 1
-  if ! git checkout ${DEFAULT_GITHUB_BRANCH}; then
+  echo "# checkout branch: ${GITHUB_BRANCH}"
+  if ! git checkout ${GITHUB_BRANCH}; then
     echo "error='git checkout failed'"
     exit 1
+  fi
+  if [ "${GITHUB_COMMITORTAG}" != "" ]; then
+    echo "# setting code to tag/commit: ${GITHUB_COMMITORTAG}"
+    if ! git reset --hard ${GITHUB_COMMITORTAG}; then
+      echo "error='git reset failed'"
+      exit 1
+    fi
+  else
+    echo "# using lastest code in branch"
   fi
 
   echo "# Compile WebUI"

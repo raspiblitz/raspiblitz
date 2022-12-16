@@ -5,20 +5,19 @@
 # restart the systemd `blitzapi` when credentials of lnd or bitcoind are changed and it will
 # excute the `update-config` automatically before restarting
 
+# NORMALLY user/repo/version will be defined by calling script - see build_sdcard.sh
+# the following is just a fallback to try during development if script given branch does not exist
+FALLACK_BRANCH="main"
+
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ]; then
   echo "Manage RaspiBlitz Web API"
-  echo "blitz.web.api.sh on [?GITHUBUSER] [?REPO] [?BRANCH]"
+  echo "blitz.web.api.sh on [?GITHUBUSER] [?REPO] [?BRANCH] [?COMMITORTAG]"
   echo "blitz.web.api.sh update-config"
   echo "blitz.web.api.sh update-code [?BRANCH]"
   echo "blitz.web.api.sh off"
   exit 1
 fi
-
-DEFAULT_GITHUB_USER="fusion44"
-DEFAULT_GITHUB_REPO="blitz_api"
-DEFAULT_GITHUB_BRANCH="main"
-DEFAULT_GITHUB_COMMITORTAG="v0.5.0-beta"
 
 ###################
 # UPDATE CONFIG
@@ -144,20 +143,49 @@ fi
 ###################
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
-  if [ "$2" != "" ]; then
-    DEFAULT_GITHUB_USER="$2"
+  # get parameters
+  GITHUB_USER=$2
+  if [ "${GITHUB_USER}" == "" ]; then
+    echo "# FAIL: No GITHUB_USER provided"
+    exit 1
+  fi
+  GITHUB_REPO=$3
+  if [ "${GITHUB_REPO}" == "" ]; then
+    echo "# FAIL: No GITHUB_REPO provided"
+    exit 1
+  fi
+  GITHUB_BRANCH=$4
+  if [ "${GITHUB_BRANCH}" == "" ]; then
+    echo "# FAIL: No GITHUB_BRANCH provided"
+    exit 1
+  fi
+  GITHUB_COMMITORTAG=$5
+  if [ "${GITHUB_COMMITORTAG}" == "" ]; then
+    echo "# INFO: No GITHUB_COMMITORTAG provided .. will use latest code on branch"
   fi
 
-  if [ "$3" != "" ]; then
-    DEFAULT_GITHUB_REPO="$3"
+  # check if given branch exits on that github user/repo
+  branchExists=$(curl --header "X-GitHub-Api-Version:2022-11-28" -s "https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/branches/${GITHUB_BRANCH}" | grep -c "\"name\": \"${GITHUB_BRANCH}\"")
+  if [ ${branchExists} -lt 1 ]; then
+    echo
+    echo "# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+    echo "# WARNING! The given API repo is not available:"
+    echo "# user(${GITHUB_USER}) repo(${GITHUB_REPO}) branch(${GITHUB_BRANCH})"
+    echo "# WORKING WITH FALLBACK REPO - USE JUST FOR DEVELOPMENT - DONT USE IN PRODUCTION"
+    echo "# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+    echo
+    sleep 10
+    GITHUB_BRANCH="${FALLACK_BRANCH}"
   fi
 
-  if [ "$4" != "" ]; then
-    DEFAULT_GITHUB_BRANCH="$4"
-  fi
-
-  if [ "$5" != "" ]; then
-    DEFAULT_GITHUB_COMMITORTAG="$5"
+  # re-check (if case its fallback)
+  branchExists=$(curl --header "X-GitHub-Api-Version:2022-11-28" -s "https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/branches/${GITHUB_BRANCH}" | grep -c "\"name\": \"${GITHUB_BRANCH}\"")
+  if [ ${branchExists} -lt 1 ]; then
+    echo
+    echo "# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+    echo "# FAIL! user(${GITHUB_USER}) repo(${GITHUB_REPO}) branch(${GITHUB_BRANCH})"
+    echo "# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+    exit 1
   fi
 
   echo "# INSTALL Web API ..."
@@ -192,27 +220,35 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   cd /home/blitzapi || exit 1
   
   # git clone https://github.com/fusion44/blitz_api.git /home/blitzapi/blitz_api
-  if ! sudo -u blitzapi git clone https://github.com/${DEFAULT_GITHUB_USER}/${DEFAULT_GITHUB_REPO}.git blitz_api; then
+  echo "# clone github: ${GITHUB_USER}/${GITHUB_REPO}"
+  if ! sudo -u blitzapi git clone https://github.com/${GITHUB_USER}/${GITHUB_REPO}.git blitz_api; then
     echo "error='git clone failed'"
     exit 1
   fi
   cd blitz_api || exit 1
-  if ! sudo -u blitzapi git checkout ${DEFAULT_GITHUB_BRANCH}; then
+  echo "# checkout branch: ${GITHUB_BRANCH}"
+  if ! sudo -u blitzapi git checkout ${GITHUB_BRANCH}; then
     echo "error='git checkout failed'"
     exit 1
   fi
-  if ! git reset --hard ${DEFAULT_GITHUB_COMMITORTAG}; then
-    echo "error='git reset failed'"
-    exit 1
+  if [ "${GITHUB_COMMITORTAG}" != "" ]; then
+    echo "# setting code to tag/commit: ${GITHUB_COMMITORTAG}"
+    if ! git reset --hard ${GITHUB_COMMITORTAG}; then
+      echo "error='git reset failed'"
+      exit 1
+    fi
+  else
+    echo "# using lastest code in branch"
   fi
   # install
+  echo "# running install"
   sudo -u blitzapi python3 -m venv venv
   if ! sudo -u blitzapi ./venv/bin/pip install -r requirements.txt --no-deps; then
     echo "error='pip install failed'"
     exit 1
   fi
   
-  # build the config and set unique secret (its OK to be a new secret every install/upadte)
+  # build the config and set unique secret (its OK to be a new secret every install/update)
   /home/admin/config.scripts/blitz.web.api.sh update-config
   secret=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 64 ; echo '')
   sed -i "s/^secret=.*/secret=${secret}/g" ./.env
