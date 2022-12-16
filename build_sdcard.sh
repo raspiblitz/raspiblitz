@@ -794,19 +794,20 @@ if ${fatpack}; then
   # Fallback Nodes List from Bitcoin Core
   sudo -u admin curl https://raw.githubusercontent.com/bitcoin/bitcoin/master/contrib/seeds/nodes_main.txt -o /home/admin/fallback.bitcoin.nodes
 
-
-  echo "* Adding Code&Compile for WEBUI-APP: RTL"
-  /home/admin/config.scripts/bonus.rtl.sh install || exit 1
-  echo "* Adding Code&Compile for WEBUI-APP: BTCPAYSERVER"
-  /home/admin/config.scripts/bonus.btcpayserver.sh install || exit 1
-  echo "* Adding Code&Compile for WEBUI-APP: MEMPOOL"
-  /home/admin/config.scripts/bonus.mempool.sh install || exit 1
-  echo "* Adding Code&Compile for WEBUI-APP: THUNDERHUB"
-  /home/admin/config.scripts/bonus.thunderhub.sh install || exit 1
-  echo "* Adding Code&Compile for WEBUI-APP: BTC RPC EXPLORER"
-  /home/admin/config.scripts/bonus.btc-rpc-explorer.sh install || exit 1
-  echo "* Adding Code&Compile for WEBUI-APP: LNBITS"
-  /home/admin/config.scripts/bonus.lnbits.sh install || exit 1
+  if ! ischroot; then # skip Code&Compile for VM builds
+    echo "* Adding Code&Compile for WEBUI-APP: RTL"
+    /home/admin/config.scripts/bonus.rtl.sh install || exit 1
+    echo "* Adding Code&Compile for WEBUI-APP: BTCPAYSERVER"
+    /home/admin/config.scripts/bonus.btcpayserver.sh install || exit 1
+    echo "* Adding Code&Compile for WEBUI-APP: MEMPOOL"
+    /home/admin/config.scripts/bonus.mempool.sh install || exit 1
+    echo "* Adding Code&Compile for WEBUI-APP: THUNDERHUB"
+    /home/admin/config.scripts/bonus.thunderhub.sh install || exit 1
+    echo "* Adding Code&Compile for WEBUI-APP: BTC RPC EXPLORER"
+    /home/admin/config.scripts/bonus.btc-rpc-explorer.sh install || exit 1
+    echo "* Adding Code&Compile for WEBUI-APP: LNBITS"
+    /home/admin/config.scripts/bonus.lnbits.sh install || exit 1
+  fi
 
   echo "* Adding Raspiblitz API ..."
   sudo /home/admin/config.scripts/blitz.web.api.sh on "${defaultAPIuser}" "${defaultAPIrepo}" "${branch}" || exit 1
