@@ -424,7 +424,7 @@ if [ "$1" = "update" ]; then
   cd /home/mempool/mempool
 
   localVersion=$(git describe --tag)
-  updateVersion=$(curl -s https://api.github.com/repos/mempool/mempool/releases/latest|grep tag_name|head -1|cut -d '"' -f4)
+  updateVersion=$(curl --header "X-GitHub-Api-Version:2022-11-28" -s https://api.github.com/repos/mempool/mempool/releases/latest|grep tag_name|head -1|cut -d '"' -f4)
 
   if [ $localVersion = $updateVersion ]; then
       echo "***  You are up-to-date on version $localVersion ***"
