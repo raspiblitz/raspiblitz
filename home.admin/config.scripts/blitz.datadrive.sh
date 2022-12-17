@@ -215,7 +215,7 @@ if [ "$1" = "status" ]; then
 	  if [ "${hddBytes}" = "" ]; then
 	    hddBytes=$(fdisk -l /dev/$hdd | grep TiB | cut -d " " -f 5)
 	  fi
-      ddGigaBytes=$(echo "scale=0; ${hddBytes}/1024/1024/1024" | bc -l)
+      hddGigaBytes=$(echo "scale=0; ${hddBytes}/1024/1024/1024" | bc -l)
     fi
     echo "hddBytes=${hddBytes}"
     echo "hddGigaBytes=${hddGigaBytes}"
