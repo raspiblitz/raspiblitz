@@ -43,47 +43,47 @@ OPTIONS=()
 
 # just available for BTC
 if [ "${network}" == "bitcoin" ]; then
-  OPTIONS+=(e 'BTC Electrum Rust Server' ${ElectRS})
-  OPTIONS+=(p 'BTC PayServer' ${BTCPayServer})
-  OPTIONS+=(b 'BTC RPC-Explorer' ${BTCRPCexplorer})
-  OPTIONS+=(s 'BTC Specter Desktop' ${specter})
-  OPTIONS+=(a 'BTC Mempool Space' ${mempoolExplorer})
-  OPTIONS+=(j 'BTC JoinMarket+JoininBox menu' ${joinmarket})
-  OPTIONS+=(z 'BTC Jam (JoinMarket WebUI)' ${jam})
-  OPTIONS+=(w 'BTC Download Bitcoin Whitepaper' ${whitepaper})
-  OPTIONS+=(v 'BTC Install BitcoinMinds.org' ${bitcoinminds})
-  OPTIONS+=(u 'BTC Install ItchySats' ${itchysats})
+  OPTIONS+=(ea 'BTC Electrum Rust Server' ${ElectRS})
+  OPTIONS+=(pa 'BTC PayServer' ${BTCPayServer})
+  OPTIONS+=(ba 'BTC RPC-Explorer' ${BTCRPCexplorer})
+  OPTIONS+=(sa 'BTC Specter Desktop' ${specter})
+  OPTIONS+=(aa 'BTC Mempool Space' ${mempoolExplorer})
+  OPTIONS+=(ja 'BTC JoinMarket+JoininBox menu' ${joinmarket})
+  OPTIONS+=(za 'BTC Jam (JoinMarket WebUI)' ${jam})
+  OPTIONS+=(wa 'BTC Download Bitcoin Whitepaper' ${whitepaper})
+  OPTIONS+=(va 'BTC Install BitcoinMinds.org' ${bitcoinminds})
+  OPTIONS+=(ua 'BTC Install ItchySats' ${itchysats})
 fi
 
 # available for both LND & c-lightning
 if [ "${lnd}" == "on" ] || [ "${cl}" == "on" ]; then
-  OPTIONS+=(i 'LNbits (Lightning Accounts)' ${LNBits})
-  OPTIONS+=(g 'LightningTipBot' ${lightningtipbot})
+  OPTIONS+=(ia 'LNbits (Lightning Accounts)' ${LNBits})
+  OPTIONS+=(ga 'LightningTipBot' ${lightningtipbot})
 fi
 
 # just available for LND
 if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
-  OPTIONS+=(r 'LND RTL Webinterface' ${rtlWebinterface})
-  OPTIONS+=(t 'LND ThunderHub' ${thunderhub})
-  OPTIONS+=(l 'LND LIT (loop, pool, faraday)' ${lit})
-  OPTIONS+=(ü 'LND LNDg (auto-rebalance, auto-fees)' ${lndg})
-  OPTIONS+=(o 'LND Balance of Satoshis' ${bos})
-  OPTIONS+=(y 'LND PyBLOCK' ${pyblock})
-  OPTIONS+=(h 'LND ChannelTools (Fund Rescue)' ${chantools})
-  OPTIONS+=(x 'LND Sphinx-Relay' ${sphinxrelay})
-  OPTIONS+=(f 'LND Helipad Boostagram reader' ${helipad})
-  OPTIONS+=(d 'LND Tallycoin Connect' ${tallycoinConnect})
-  #OPTIONS+=(q 'LND Squeaknode' ${squeaknode})
+  OPTIONS+=(ra 'LND RTL Webinterface' ${rtlWebinterface})
+  OPTIONS+=(ta 'LND ThunderHub' ${thunderhub})
+  OPTIONS+=(la 'LND LIT (loop, pool, faraday)' ${lit})
+  OPTIONS+=(gb 'LND LNDg (auto-rebalance, auto-fees)' ${lndg})
+  OPTIONS+=(oa 'LND Balance of Satoshis' ${bos})
+  OPTIONS+=(ya 'LND PyBLOCK' ${pyblock})
+  OPTIONS+=(ha 'LND ChannelTools (Fund Rescue)' ${chantools})
+  OPTIONS+=(xa 'LND Sphinx-Relay' ${sphinxrelay})
+  OPTIONS+=(fa 'LND Helipad Boostagram reader' ${helipad})
+  OPTIONS+=(da 'LND Tallycoin Connect' ${tallycoinConnect})
+  #OPTIONS+=(qa 'LND Squeaknode' ${squeaknode})
 fi
 
 # just available for CL
 if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ]; then
-  OPTIONS+=(c 'Core Lightning RTL Webinterface' ${crtlWebinterface})
-  OPTIONS+=(k 'Core Lightning Sparko WebWallet' ${sparko})
-  OPTIONS+=(n 'Core Lightning Spark Wallet' ${spark})
+  OPTIONS+=(ca 'Core Lightning RTL Webinterface' ${crtlWebinterface})
+  OPTIONS+=(ka 'Core Lightning Sparko WebWallet' ${sparko})
+  OPTIONS+=(na 'Core Lightning Spark Wallet' ${spark})
 fi
 
-OPTIONS+=(m 'Homer Dashboard' ${homer})
+OPTIONS+=(ma 'Homer Dashboard' ${homer})
 
 CHOICES=$(dialog --title ' Additional Mainnet Services ' \
           --checklist ' use spacebar to activate/de-activate ' \
@@ -107,7 +107,7 @@ needsReboot=0
 anychange=0
 
 # RTL process choice (LND)
-choice="off"; check=$(echo "${CHOICES}" | grep -c "r")
+choice="off"; check=$(echo "${CHOICES}" | grep -c "ra")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 
 if [ "${rtlWebinterface}" != "${choice}" ]; then
@@ -133,7 +133,7 @@ else
 fi
 
 # RTL process choice (Core Lightning)
-choice="off"; check=$(echo "${CHOICES}" | grep -c "c")
+choice="off"; check=$(echo "${CHOICES}" | grep -c "ca")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${crtlWebinterface}" != "${choice}" ]; then
   echo "RTL-cl Webinterface Setting changed .."
@@ -158,7 +158,7 @@ else
 fi
 
 # BTC-RPC-Explorer process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "b")
+choice="off"; check=$(echo "${CHOICES}" | grep -c "ba")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${BTCRPCexplorer}" != "${choice}" ]; then
   echo "RTL Webinterface Setting changed .."
@@ -186,7 +186,7 @@ else
 fi
 
 # Specter Desktop process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "s")
+choice="off"; check=$(echo "${CHOICES}" | grep -c "sa")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${specter}" != "${choice}" ]; then
   echo "Specter Desktop Setting changed .."
@@ -209,7 +209,7 @@ else
 fi
 
 # ElectRS process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "e")
+choice="off"; check=$(echo "${CHOICES}" | grep -c "ea")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${ElectRS}" != "${choice}" ]; then
   echo "ElectRS Setting changed .."
@@ -259,7 +259,7 @@ else
 fi
 
 # BTCPayServer process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "p")
+choice="off"; check=$(echo "${CHOICES}" | grep -c "pa")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${BTCPayServer}" != "${choice}" ]; then
   echo "BTCPayServer setting changed .."
@@ -295,7 +295,7 @@ else
 fi
 
 # LNDMANAGE process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "ä")
+choice="off"; check=$(echo "${CHOICES}" | grep -c "ab")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${lndmanage}" != "${choice}" ]; then
   echo "lndmanage Setting changed .."
@@ -310,7 +310,7 @@ else
 fi
 
 # CHANTOOLS process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "h")
+choice="off"; check=$(echo "${CHOICES}" | grep -c "ha")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${chantools}" != "${choice}" ]; then
   echo "chantools Setting changed .."
@@ -325,7 +325,7 @@ else
 fi
 
 # Balance of Satoshis process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "o")
+choice="off"; check=$(echo "${CHOICES}" | grep -c "oa")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${bos}" != "${choice}" ]; then
   echo "Balance of Satoshis Setting changed .."
@@ -340,7 +340,7 @@ else
 fi
 
 # PyBLOCK process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "y")
+choice="off"; check=$(echo "${CHOICES}" | grep -c "ya")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${pyblock}" != "${choice}" ]; then
   echo "PyBLOCK Setting changed .."
@@ -355,7 +355,7 @@ else
 fi
 
 # thunderhub process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "t")
+choice="off"; check=$(echo "${CHOICES}" | grep -c "ta")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${thunderhub}" != "${choice}" ]; then
   echo "ThunderHub Setting changed .."
@@ -380,7 +380,7 @@ else
 fi
 
 # LNbits process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "i")
+choice="off"; check=$(echo "${CHOICES}" | grep -c "ia")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${LNBits}" != "${choice}" ]; then
   echo "LNbits Setting changed .."
@@ -395,7 +395,7 @@ else
 fi
 
 # LightningTipBot process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "g")
+choice="off"; check=$(echo "${CHOICES}" | grep -c "ga")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${lightningtipbot}" != "${choice}" ]; then
   echo "LightningTipBot Setting changed .."
@@ -410,7 +410,7 @@ else
 fi
 
 # LIT (Lightning Terminal)
-choice="off"; check=$(echo "${CHOICES}" | grep -c "l")
+choice="off"; check=$(echo "${CHOICES}" | grep -c "la")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${lit}" != "${choice}" ]; then
   echo "LIT Setting changed .."
@@ -425,7 +425,7 @@ else
 fi
 
 # LNDg
-choice="off"; check=$(echo "${CHOICES}" | grep -c "ü")
+choice="off"; check=$(echo "${CHOICES}" | grep -c "gb")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${lndg}" != "${choice}" ]; then
   echo "LNDg Setting changed .."
@@ -460,7 +460,7 @@ else
 fi
 
 # Sphinx Relay
-choice="off"; check=$(echo "${CHOICES}" | grep -c "x")
+choice="off"; check=$(echo "${CHOICES}" | grep -c "xa")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${sphinxrelay}" != "${choice}" ]; then
   echo "Sphinx-Relay Setting changed .."
@@ -479,7 +479,7 @@ else
 fi
 
 # Helipad
-choice="off"; check=$(echo "${CHOICES}" | grep -c "f")
+choice="off"; check=$(echo "${CHOICES}" | grep -c "fa")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${helipad}" != "${choice}" ]; then
   echo "Helipad setting changed .."
@@ -494,7 +494,7 @@ else
 fi
 
 # Tallycoin
-choice="off"; check=$(echo "${CHOICES}" | grep -c "d")
+choice="off"; check=$(echo "${CHOICES}" | grep -c "da")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${tallycoinConnect}" != "${choice}" ]; then
   echo "Tallycoin Setting changed .."
@@ -511,7 +511,7 @@ else
 fi
 
 # JoinMarket process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "j")
+choice="off"; check=$(echo "${CHOICES}" | grep -c "ja")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${joinmarket}" != "${choice}" ]; then
   echo "JoinMarket setting changed .."
@@ -540,7 +540,7 @@ else
 fi
 
 # Jam process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "z")
+choice="off"; check=$(echo "${CHOICES}" | grep -c "za")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${jam}" != "${choice}" ]; then
   echo "Jam setting changed .."
@@ -569,7 +569,7 @@ else
 fi
 
 # Mempool process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "a")
+choice="off"; check=$(echo "${CHOICES}" | grep -c "aa")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${mempoolExplorer}" != "${choice}" ]; then
   echo "Mempool Explorer settings changed .."
@@ -596,7 +596,7 @@ else
 fi
 
 # Whitepaper process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "w")
+choice="off"; check=$(echo "${CHOICES}" | grep -c "wa")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${whitepaper}" != "${choice}" ]; then
   echo "Whitepaper setting changed .."
@@ -611,7 +611,7 @@ else
 fi
 
 # Homer process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "m")
+choice="off"; check=$(echo "${CHOICES}" | grep -c "ma")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${homer}" != "${choice}" ]; then
   echo "Homer settings changed .."
@@ -629,7 +629,7 @@ else
 fi
 
 # BitcoinMinds process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "v")
+choice="off"; check=$(echo "${CHOICES}" | grep -c "va")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${bitcoinminds}" != "${choice}" ]; then
   echo "BitcoinMinds setting changed."
@@ -644,7 +644,7 @@ else
 fi
 
 # sparko process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "k")
+choice="off"; check=$(echo "${CHOICES}" | grep -c "ka")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${sparko}" != "${choice}" ]; then
   echo "# Sparko on mainnet Setting changed .."
@@ -666,7 +666,7 @@ else
 fi
 
 # spark wallet process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "n")
+choice="off"; check=$(echo "${CHOICES}" | grep -c "na")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${spark}" != "${choice}" ]; then
   echo "# Spark Wallet on mainnet Setting changed .."
@@ -688,7 +688,7 @@ else
 fi
 
 # squeaknode process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "q")
+choice="off"; check=$(echo "${CHOICES}" | grep -c "qa")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${squeaknode}" != "${choice}" ]; then
   echo "squeaknode Setting changed .."
@@ -703,7 +703,7 @@ else
 fi
 
 # ItchySats process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "u")
+choice="off"; check=$(echo "${CHOICES}" | grep -c "ua")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${itchysats}" != "${choice}" ]; then
   echo "ItchySats setting changed .."
