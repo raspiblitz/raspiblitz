@@ -66,7 +66,7 @@ if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
   OPTIONS+=(r 'LND RTL Webinterface' ${rtlWebinterface})
   OPTIONS+=(t 'LND ThunderHub' ${thunderhub})
   OPTIONS+=(l 'LND LIT (loop, pool, faraday)' ${lit})
-  OPTIONS+=(g 'LND LNDg (auto-rebalance, auto-fees)' ${lndg})
+  OPTIONS+=(ü 'LND LNDg (auto-rebalance, auto-fees)' ${lndg})
   OPTIONS+=(o 'LND Balance of Satoshis' ${bos})
   OPTIONS+=(y 'LND PyBLOCK' ${pyblock})
   OPTIONS+=(h 'LND ChannelTools (Fund Rescue)' ${chantools})
@@ -425,7 +425,7 @@ else
 fi
 
 # LNDg
-choice="off"; check=$(echo "${CHOICES}" | grep -c "g")
+choice="off"; check=$(echo "${CHOICES}" | grep -c "ü")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${lndg}" != "${choice}" ]; then
   echo "LNDg Setting changed .."
