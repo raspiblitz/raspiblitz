@@ -102,6 +102,7 @@ if [ "$1" = "status" ]; then
     fi
 
   else
+    echo "installed=0"
     echo "active=0"
     echo "configured=0"
   fi
