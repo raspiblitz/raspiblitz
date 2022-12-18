@@ -77,9 +77,9 @@ ${fingerprint}\n
 Activate Tor to access the web interface from outside your local network.
 " 15 57
     fi
-    echo "please wait ..."
+    echo "# please wait ..."
   else
-    echo "*** JAM NOT INSTALLED ***"
+    echo "# *** JAM NOT INSTALLED ***"
   fi
   exit 0
 fi
@@ -94,7 +94,7 @@ if [ "$1" = "install" ]; then
   fi
 
   # make sure joinmarket is installed
-  sudo /home/admin/config.scripts/bonus.joinmarket.sh install || exit 1
+  sudo /home/admin/config.scripts/bonus.joinmarket.sh install 1>&2 || exit 1
   
   echo "# *** INSTALL JAM (user & code) ***"
 
@@ -119,7 +119,8 @@ if [ "$1" = "install" ]; then
   cd $APP_DIR || exit 1
   sudo -u $USERNAME rm -rf docker
   if ! sudo -u $USERNAME npm install; then
-    echo "FAIL - npm install did not run correctly, aborting"
+    echo "# FAIL - npm install did not run correctly, aborting"
+    echo "result='fail - npm install did not run correctly'"
     exit 1
   fi
 
@@ -150,7 +151,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   # check if already ON
   if [ ${isActive} -gt 1 ]; then
-    echo "ThunderHub already installed."
+    echo "# JAM already installed."
+    echo "result='OK'"
     exit 0
   fi
 
@@ -162,8 +164,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # make sure joinmarket base is also activated
   sudo /home/admin/config.scripts/bonus.joinmarket.sh on || exit 1
 
-
-  echo "*** ACTIVATING JAM ***"
+  echo "# *** ACTIVATING JAM ***"
 
   ##################
   # NGINX
@@ -182,10 +183,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo systemctl reload nginx
 
   # open the firewall
-  echo "*** Updating Firewall ***"
+  echo "# *** Updating Firewall ***"
   sudo ufw allow from any to any port 7500 comment 'allow Jam HTTP'
   sudo ufw allow from any to any port 7501 comment 'allow Jam HTTPS'
-  echo ""
 
   #########################
   ## JOINMARKET-API SERVICE
@@ -250,13 +250,10 @@ WantedBy=multi-user.target
       echo "# OK - the joinmarket-api.service is enabled, to start manually use: 'sudo systemctl start joinmarket-api'"
   fi
 
-  echo
   echo "# Start the joinmarket ob-watcher.service"
   sudo -u joinmarket /home/joinmarket/menu.orderbook.sh startOrderBookService
-  echo
-  echo "# For the connection details run:"
-  echo "/home/admin/config.scripts/bonus.jam.sh menu"
-  echo
+  echo "# For the connection details run: /home/admin/config.scripts/bonus.jam.sh menu"
+  echo "result='OK'"
   exit 0
 fi
 
