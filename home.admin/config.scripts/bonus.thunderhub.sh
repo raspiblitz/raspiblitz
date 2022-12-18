@@ -359,6 +359,9 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # disable balance sharing server side
   /home/admin/config.scripts/blitz.conf.sh set DISABLE_BALANCE_PUSHES true /mnt/hdd/app-data/thunderhub/.env.local noquotes
 
+  # setting value in raspiblitz config
+  /home/admin/config.scripts/blitz.conf.sh set thunderhub "off"
+
   # needed for API/WebUI as signal that install ran thru
   echo "result='OK'"
   exit 0
