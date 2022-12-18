@@ -16,21 +16,6 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  exit 1
 fi
 
-# check if sudo
-if [ "$EUID" -ne 0 ]
-  then echo "Please run as root (with sudo)"
-  exit
-fi
-
-# check if user/codebase is installed
-isInstalled=$(compgen -u | grep -c joinmarket)
-
-PGPsigner="openoms"
-PGPpubkeyLink="https://github.com/openoms.gpg"
-PGPpubkeyFingerprint="13C688DB5B9C745DE4D2E4545BFB77609B081B65"
-
-source /mnt/hdd/raspiblitz.conf 2>/dev/null
-
 # show info menu
 if [ "$1" = "menu" ]; then
   whiptail --title " JoinMarket info " \
@@ -47,6 +32,21 @@ and start the JoininBox menu.
   fi
   exit 0
 fi
+
+# check if sudo
+if [ "$EUID" -ne 0 ]
+  then echo "Please run as root (with sudo)"
+  exit
+fi
+
+# check if user/codebase is installed
+isInstalled=$(compgen -u | grep -c joinmarket)
+
+PGPsigner="openoms"
+PGPpubkeyLink="https://github.com/openoms.gpg"
+PGPpubkeyFingerprint="13C688DB5B9C745DE4D2E4545BFB77609B081B65"
+
+source /mnt/hdd/raspiblitz.conf 2>/dev/null
 
 # install (code & compile)
 if [ "$1" = "install" ]; then
