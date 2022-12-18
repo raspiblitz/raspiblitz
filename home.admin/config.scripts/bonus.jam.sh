@@ -345,13 +345,6 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   echo "*** DEACTIVATE JAM ***"
 
-  if [ -d /home/$USERNAME ]; then
-    sudo userdel -rf $USERNAME 2>/dev/null
-    echo "Removed the $USERNAME user"
-  else
-    echo "There is no /home/$USERNAME present"
-  fi
-
   echo "Cleaning up Jam install ..."
   # remove systemd service
   sudo systemctl stop joinmarket-api 2>/dev/null
