@@ -149,6 +149,7 @@ function release() {
 
 # command: debug
 function debug() {
+  clear
   echo "Printing debug logs. Be patient, this should take maximum 2 minutes .."
   sudo rm /var/cache/raspiblitz/debug.log 2>/dev/null
   /home/admin/config.scripts/blitz.debug.sh > /var/cache/raspiblitz/debug.log

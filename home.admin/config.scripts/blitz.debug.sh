@@ -76,7 +76,6 @@ if [ ${#chain} -eq 0 ]; then
   fi
 fi
 
-clear
 echo
 echo "***************************************************************"
 echo "* RASPIBLITZ DEBUG LOGS "
