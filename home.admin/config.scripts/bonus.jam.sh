@@ -53,7 +53,7 @@ fi
 # show info menu
 if [ "$1" = "menu" ]; then
 
-  if [ ${isInstalled} -eq 1 ]; then
+  if [ ${isActive} -eq 1 ]; then
     # get network info
     toraddress=$(sudo cat /mnt/hdd/tor/jam/hostname 2>/dev/null)
     fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
@@ -150,6 +150,7 @@ fi
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   # check if already ON
+  echo "# isActive(${isActive})"
   if [ ${isActive} -gt 1 ]; then
     echo "# JAM already installed."
     echo "result='OK'"
@@ -157,6 +158,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   fi
 
   # check if user/codebase is already installed
+  echo "# isInstalled(${isInstalled})"
   if [ ${isInstalled} -eq 0 ]; then
     sudo /home/admin/config.scripts/bonus.jam.sh install || exit 1
   fi
