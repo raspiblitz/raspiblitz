@@ -197,10 +197,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u joinmarket rm -rf /home/joinmarket/.joinmarket/ssl 1>&2
   fi
   subj="/C=US/ST=Utah/L=Lehi/O=Your Company, Inc./OU=IT/CN=example.com"
-  sudo -u joinmarket mkdir -p /home/joinmarket/.joinmarket/ssl/ \
-    && pushd "$_" \
-    && sudo -u joinmarket openssl req -newkey rsa:4096 -x509 -sha256 -days 3650 -nodes -out cert.pem -keyout key.pem -subj "$subj" \
-    && popd || exit 1
+  sudo -u joinmarket mkdir -p /home/joinmarket/.joinmarket/ssl/ 1>&2 \
+    && pushd "$_" 1>&2 \
+    && sudo -u joinmarket openssl req -newkey rsa:4096 -x509 -sha256 -days 3650 -nodes -out cert.pem -keyout key.pem -subj "$subj" 1>&2 \
+    && popd 1>&2 || exit 1
 
   # SYSTEMD SERVICE
   echo "# Install JoinMarket API systemd" 1>&2
