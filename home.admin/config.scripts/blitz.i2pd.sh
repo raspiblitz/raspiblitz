@@ -14,7 +14,6 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   exit 1
 fi
 
-
 function confAdd {
   # get parameters
   keystr="$1"
@@ -149,16 +148,16 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     exit 0
   fi
 
+  echo "# sudo systemctl enable i2pd"
   sudo systemctl enable i2pd
 
+  echo "# i2pd config"
   /home/admin/config.scripts/blitz.conf.sh set debug tor /mnt/hdd/bitcoin/bitcoin.conf noquotes
   confAdd debug i2p /mnt/hdd/bitcoin/bitcoin.conf
   /home/admin/config.scripts/blitz.conf.sh set i2psam 127.0.0.1:7656 /mnt/hdd/bitcoin/bitcoin.conf noquotes
   /home/admin/config.scripts/blitz.conf.sh set i2pacceptincoming 1 /mnt/hdd/bitcoin/bitcoin.conf noquotes
   /home/admin/config.scripts/blitz.conf.sh set onlynet tor /mnt/hdd/bitcoin/bitcoin.conf noquotes
   confAdd onlynet i2p /mnt/hdd/bitcoin/bitcoin.conf
-
-  # config
   PASSWORD_B=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcpassword | cut -c 13-)
   cat << EOF | sudo tee /etc/i2pd/i2pd.conf
 # i2pd settings for the RaspiBlitz

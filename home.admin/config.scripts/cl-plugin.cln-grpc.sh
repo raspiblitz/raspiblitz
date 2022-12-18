@@ -35,16 +35,14 @@ function buildGRPCplugin() {
       echo "# - install Core Lightning ..."
       /home/admin/config.scripts/cl.install.sh install || exit 1
     fi
-    # rust for cln-grpc, includes rustfmt
-    sudo -u bitcoin curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | \
-     sudo -u bitcoin sh -s -- -y
+    echo "# rust for cln-grpc, includes rustfmt"
+    sudo -u bitcoin curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sudo -u bitcoin sh -s -- -y
     cd /home/bitcoin/lightning/plugins/grpc-plugin || exit 1
-    # build
-    sudo -u bitcoin /home/bitcoin/.cargo/bin/cargo build \
-     --target-dir /home/bitcoin/cln-grpc-build
-    # delete old dir or binary
+    echo "# build"
+    sudo -u bitcoin /home/bitcoin/.cargo/bin/cargo build --target-dir /home/bitcoin/cln-grpc-build
+    echo "# delete old dir or binary"
     sudo rm -rf /home/bitcoin/cl-plugins-available/cln-grpc
-    # move to /home/bitcoin/cl-plugins-available/
+    echo "# move to /home/bitcoin/cl-plugins-available/"
     sudo -u bitcoin mv /home/bitcoin/cln-grpc-build/debug/cln-grpc /home/bitcoin/cl-plugins-available/
   else
     echo "# - cln-grpc plugin was already built/installed"

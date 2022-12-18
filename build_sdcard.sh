@@ -812,7 +812,7 @@ if ${fatpack}; then
   echo "* Adding Raspiblitz API ..."
   sudo /home/admin/config.scripts/blitz.web.api.sh on "${defaultAPIuser}" "${defaultAPIrepo}" "${branch}" || exit 1
   echo "* Adding Raspiblitz WebUI ..."
-  sudo /home/admin/config.scripts/blitz.web.ui.sh on "${defaultAPIuser}" "${defaultAPIrepo}" "${branch}" || exit 1
+  sudo /home/admin/config.scripts/blitz.web.ui.sh on "${defaultWEBUIuser}" "${defaultWEBUIrepo}" "${branch}" || exit 1
 
   # set build code as new default
   sudo rm -r /home/admin/assets/nginx/www_public
