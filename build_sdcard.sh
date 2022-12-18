@@ -806,7 +806,7 @@ if ${fatpack}; then
   /home/admin/config.scripts/bonus.lnbits.sh install || exit 1
 
   echo "* Adding Raspiblitz API ..."
-  sudo /home/admin/config.scripts/blitz.web.api.sh on "${defaultAPIuser}" "${defaultAPIrepo}" "${branch}" || exit 1
+  sudo /home/admin/config.scripts/blitz.web.api.sh on "${defaultAPIuser}" "${defaultAPIrepo}" "blitz-${branch}" || exit 1
   echo "* Adding Raspiblitz WebUI ..."
   sudo /home/admin/config.scripts/blitz.web.ui.sh on "${defaultWEBUIuser}" "${defaultWEBUIrepo}" "${branch}" || exit 1
 
