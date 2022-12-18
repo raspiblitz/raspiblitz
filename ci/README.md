@@ -17,6 +17,8 @@
   - [fatpack image](#fatpack-image)
   - [lean image](#lean-image)
     - [Add Gnome desktop (optional)](#add-gnome-desktop-optional)
+- [Add wifi](#add-wifi)
+- [Add wifi driver (optional)](#add-wifi-driver-optional)
 - [Workflow notes](#workflow-notes)
   - [Packer .json settings:](#packer-json-settings)
   - [VNC](#vnc)
@@ -81,18 +83,35 @@ identify the connected disk with `lsblk` eg `/dev/sdd`
     qemu-img convert raspiblitz-amd64-debian-11.5-lean.qcow2 raspiblitz-amd64-debian-11.5-lean.img
     ```
 ### Write to a disk connected with USB with Balena Etcher or `dd`
+* [Balena Etcher](https://www.balena.io/etcher/) to write the .img to disk
+* dd to write the .img to disk
+  ```
+  # identify partitions
+  lsblk
+  # write to disk
+  sudo dd if=./raspiblitz-amd64-debian-11.5-lean.img of=/dev/sde bs=4M status=progress
+  ```
 
+* qemu-image dd to write the .qcow2 directly to disk
+  ```
+  sudo apt install -y qemu-utils
+  sudo qemu-img dd if=./raspiblitz-amd64-debian-11.5-lean.qcow2 of=/dev/sde bs=4M
+  ```
 ### Extend the partition on the new disk (optional)
 * Use Disks to resize the Extended Partition to the full size of the disk
 * To extend the LVM:
-    ```
-    # identify the USB connected disk
-    lsblk
-    # download the script
-    git clone https://git.scs.carleton.ca/git/extend-lvm.git
-    # run with the disk as the parameter (sde for example)
-    bash extend-lvm/extend-lvm.sh /dev/sde
-    ```
+  ```
+  # identify the USB connected disk
+  lsblk
+  df -h
+  # extend the lvm to the full free space and resize the filesystem
+  sudo lvextend -r -l +100%FREE /dev/mapper/raspiblitz--amd74--debian--11--vg-root
+
+  # alternatively download the script
+  git clone https://git.scs.carleton.ca/git/extend-lvm.git
+  # run with the disk as the parameter (sde for example)
+  sudo bash extend-lvm/extend-lvm.sh /dev/sde
+  ```
 
 ## The first boot
 ### fatpack image
@@ -119,6 +138,20 @@ identify the connected disk with `lsblk` eg `/dev/sdd`
     apt install gnome
     systemctl start gdm
     ```
+
+## Add wifi
+* if the wifi driver is included in the FOSS Debian distro
+* in the command line run the network manager interface to connect:
+  ```
+  sudo nmtui
+  ```
+## Add wifi driver (optional)
+* as in https://wiki.debian.org/iwlwifi
+* add the component `non-free` after `deb http://deb.debian.org/debian bullseye main` in `/etc/apt/sources.list`
+* install the wifi driver for the mentioned cards:
+  ```
+  sudo apt update && sudo apt install firmware-iwlwifi
+  ```
 
 ## Workflow notes
 
