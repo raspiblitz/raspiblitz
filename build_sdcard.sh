@@ -804,6 +804,8 @@ if ${fatpack}; then
   /home/admin/config.scripts/bonus.btc-rpc-explorer.sh install || exit 1
   echo "* Adding Code&Compile for WEBUI-APP: LNBITS"
   /home/admin/config.scripts/bonus.lnbits.sh install || exit 1
+  echo "* Adding Code&Compile for WEBUI-APP: JAM"
+  /home/admin/config.scripts/bonus.jam.sh install || exit 1
 
   echo "* Adding Raspiblitz API ..."
   sudo /home/admin/config.scripts/blitz.web.api.sh on "${defaultAPIuser}" "${defaultAPIrepo}" "blitz-${branch}" || exit 1
