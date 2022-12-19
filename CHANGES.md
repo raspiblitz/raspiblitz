@@ -7,6 +7,7 @@
 - New: Support of X708 UPS HAT [details](https://github.com/rootzoll/raspiblitz/pull/3087)
 - New: BOS Telegram Bot Support (see OPTIONS on LND Balance of Satoshis menu entry)
 - New: LightningTipBot v0.5 [details](https://github.com/LightningTipBot/LightningTipBot)
+- New on WebUI: Jam (JoinMarket Web UI) v0.1.4 [details](https://github.com/joinmarket-webui/joinmarket-webui/releases/tag/v0.1.4)
 - Update: Bitcoin Core v24.0.1 [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-24.0.1.md)
 - Update: LND v0.15.5 [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.15.5-beta
 - Update: Core Lightning v22.11.1 [details](https://github.com/ElementsProject/lightning/releases/tag/v22.11.1)
@@ -18,14 +19,14 @@
 - Update: BTCPayServer 1.7.2 [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.7.2)
 - Update: ItchySats 0.7.0 [details](https://github.com/itchysats/itchysats/releases/tag/0.7.0)
 - Update: Channel Tools (chantools) v0.10.5 [details](https://github.com/guggero/chantools/releases/tag/v0.10.5)
-- Update: Jam (JoinMarket Web UI) v0.1.4 [details](https://github.com/joinmarket-webui/joinmarket-webui/releases/tag/v0.1.4)
 - Update: JoinMarket v0.9.8 [details](https://github.com/JoinMarket-Org/joinmarket-clientserver/releases/tag/v0.9.8)
 - Update: JoininBox v0.7.4 [details](https://github.com/openoms/joininbox/releases/tag/v0.7.3)
 - Update: Electrum Server in Rust (electrs) v0.9.9 [details](https://github.com/romanz/electrs/blob/master/RELEASE-NOTES.md#099-jul-12-2022)
 - Update: Balance of Satoshis 13.6.0 (BOS) [details](https://github.com/alexbosworth/balanceofsatoshis/blob/master/CHANGELOG.md#1360)
 - Update: Circuitbreaker v0.3.2 [details](https://github.com/lightningequipment/circuitbreaker/blob/master/README.md)
-- Info: Run RaspiBlitz on Proxmox [details](https://github.com/rootzoll/raspiblitz/tree/dev/alternative.platforms/Proxmox)
 - Fixed: SCB/Emergency-Backup to USB drive (now also with cln emergency file)
+- Info: Run RaspiBlitz on Proxmox [details](https://github.com/rootzoll/raspiblitz/tree/dev/alternative.platforms/Proxmox)
+- Info: IP2Tor unavailable & deactivated in SSH menus [details](https://github.com/rootzoll/raspiblitz/issues/3417#issuecomment-1310303480)
 - Info: 32GB sdcard is now enforced (after being recommended since v1.5)
 
 ## What's new in Version 1.8.0c of RaspiBlitz?
