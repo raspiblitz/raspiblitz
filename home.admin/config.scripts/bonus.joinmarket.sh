@@ -10,10 +10,11 @@ JBTAG="v0.7.4" # installs JoinMarket v0.9.8
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
- echo "JoinMarket install script to switch JoinMarket on or off"
- echo "sudo /home/admin/config.scrips/bonus.joinmarket.sh on|off"
- echo "Installs JoininBox $JBTAG with JoinMarket v0.9.5"
- exit 1
+  echo "JoinMarket install script to install and switch JoinMarket on or off"
+  echo "sudo /home/admin/config.scrips/bonus.joinmarket.sh install"
+  echo "sudo /home/admin/config.scrips/bonus.joinmarket.sh on|off"
+  echo "Installs JoininBox $JBTAG with JoinMarket v0.9.5"
+  exit 1
 fi
 
 # show info menu
@@ -46,7 +47,7 @@ PGPpubkeyFingerprint="13C688DB5B9C745DE4D2E4545BFB77609B081B65"
 source /mnt/hdd/raspiblitz.conf
 
 # switch on
-if [ "$1" = "1" ] || [ "$1" = "on" ]; then
+if [ "$1" = "install" ]; then
   echo "# INSTALL JOINMARKET"
 
   # check if running Tor
@@ -77,8 +78,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     fi
   fi
 
-  if [ ! -f "/home/joinmarket/joinmarket-clientserver/jmvenv/bin/activate" ] ; then
-
+  if [ -f "/home/joinmarket/joinmarket-clientserver/jmvenv/bin/activate" ]; then
+    echo "JoinMarket is already installed"
+  else
     echo "# cleaning before install"
     sudo userdel -rf joinmarket 2>/dev/null
 
@@ -193,26 +195,37 @@ fi
     echo "# Install JoinMarket and configure JoininBox #"
     echo "##############################################"
     echo
-    sudo -u joinmarket /home/joinmarket/start.joininbox.sh
+    if sudo -u joinmarket /home/joinmarket/install.joinmarket.sh -i install; then
+      echo "# Installed JoinMarket"
+      echo "# Run: 'sudo /home/admin/config.scrips/bonus.joinmarket.sh on' to configure and switch on"
+    else
+      echo " Failed to install JoinMarket"
+      exit 1
+    fi
+  fi
+  exit 0
+fi
 
+# switch on
+if [ "$1" = "1" ] || [ "$1" = "on" ]; then
+
+  if [ -f /home/joinmarket/start.joininbox.sh ]; then
+    echo "# Ok, Joininbox is present"
   else
-    echo "JoinMarket is already installed"
-    echo
+    sudo /home/admin/config.scrips/bonus.joinmarket.sh install
   fi
 
-  if [ -f "/home/joinmarket/joinmarket-clientserver/jmvenv/bin/activate" ] ; then
-    # setting value in raspi blitz config
-    /home/admin/config.scripts/blitz.conf.sh set joinmarket "on"
-    # starting info
-    echo
+  # configure joinmarket (includes a check if it is installed)
+  if sudo -u joinmarket /home/joinmarket/start.joininbox.sh; then
     echo "# Start to use by logging in to the 'joinmarket' user with:"
     echo "# 'sudo su joinmarket' or use the shortcut 'jm'"
-    echo
-
   else
-    echo " Failed to install JoinMarket"
+    echo "# There was an error running 'bonus.joinmarket.sh on', see above"
     exit 1
   fi
+
+  # set the raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set joinmarket "on"
 
   exit 0
 fi
