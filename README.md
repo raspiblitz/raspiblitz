@@ -945,11 +945,6 @@ LNbits is a very simple server that sits on top of your Lightning Wallet.
 
 ![LNBITS](pictures/lnbits.png)
 
-It can be used together with IP2Tor to provide:
-
-- Lightning Paper Vouchers (Plugin: LNURLw)
-- Merchant Onboarding (Plugin: TPOS)
-
 [![Video Tutorial](pictures/video-vouchers.png)](https://www.youtube.com/watch?v=0Bt3tHULAnw)
 
 You can also develop your own extensions on it.
@@ -1104,20 +1099,7 @@ At the moment, the following subscription services are available:
 
 ##### IP2TOR (paid)
 
-IP2TOR is a tunnel service where you can run your RaspiBlitz anonymously behind TOR but you rent a port on a clearnet IP through which you can make services of your RaspiBlitz easy reachable for everybody on the internet.
-You don't need to care about your local router or firewall settings.
-You can pay for this service directly through Lightning from your RaspiBlitz as subscription.
-
-At first you select what services of your RaspiBlitz you like to tunnel through a IP2TOR bridge.
-
-You will get a list of available IP2TOR bridge offerings.
-Select `OK` on an IP2TOR bridge offering and you will see more details on it, such as how many satoshis the subscription will cost you.
-Your node should be funded and have channels open already at this point.
-
-If you choose `AGREE` on the details of a IP2TOR bridge offering the RaspiBlitz tries for you to setup the IP2TOR bridge.
-If everything worked you will find now the subscription under `MAINMENU` > `SUBSCRIBE` > `LIST My Subscriptions` where you can cancel it again.
-
-To try out the IP2TOR tunnel choose in `MAINMENU` the extra menu point of the Service you choose the bridge for and it should give you now an updated URL or try calling the API on the IP and Port that is displayed under the details of the subscription in the `LIST My Subscriptions` section.
+DEACTIVATED SINCE 1.9 --> see for background: https://github.com/rootzoll/raspiblitz/issues/3417#issuecomment-1310303480
 
 ##### HTTPS with LetsEncrypt (free)
 
@@ -1133,9 +1115,6 @@ Because you also need a domain name for that you will need to open a free accoun
 When you create a new LetsEncrypt subscription, you will be asked for your subdomain on DuckDNS and the auth-token of your DuckDNS account.
 Then RaspiBlitz tries to setup everything for you.
 If everything worked, you will find the subscription under `MAINMENU` > `SUBSCRIBE` > `LIST My Subscriptions`, where you can cancel it at any time if you wish.
-
-To try out the IP2TOR tunnel, go into `MAINMENU` and the extra menu point of the Service you want to use the bridge for.
-It should give you an updated URL to call your service.
 
 HTTPS can be a hairy topic, you can try using a SSL Checker to help you quickly diagnose problems with your SSL certificate installation: [www.sslshopper.com/ssl-checker.html](https://www.sslshopper.com/ssl-checker.html)
 

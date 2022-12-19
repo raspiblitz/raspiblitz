@@ -225,7 +225,7 @@ def main():
 
     choices = list()
     choices.append(("LIST", "My Subscriptions"))
-    choices.append(("NEW1", "+ IP2TOR Bridge (paid)"))
+    #choices.append(("NEW1", "+ IP2TOR Bridge (paid)"))
     choices.append(("NEW2", "+ LetsEncrypt HTTPS Domain (free)"))
 
     d = Dialog(dialog="dialog", autowidgetsize=True)
