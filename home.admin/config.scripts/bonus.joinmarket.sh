@@ -10,10 +10,11 @@ JBTAG="v0.7.4" # installs JoinMarket v0.9.8
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
- echo "JoinMarket install script to switch JoinMarket on or off"
- echo "sudo /home/admin/config.scrips/bonus.joinmarket.sh install|uninstall|on|off"
- echo "Installs JoininBox $JBTAG with JoinMarket v0.9.5"
- exit 1
+  echo "JoinMarket install script to install and switch JoinMarket on or off"
+  echo "sudo /home/admin/config.scrips/bonus.joinmarket.sh install"
+  echo "sudo /home/admin/config.scrips/bonus.joinmarket.sh on|off"
+  echo "Installs JoininBox $JBTAG with JoinMarket v0.9.5"
+  exit 1
 fi
 
 # show info menu
@@ -39,80 +40,15 @@ if [ "$EUID" -ne 0 ]
   exit
 fi
 
-# check if user/codebase is installed
-isInstalled=$(compgen -u | grep -c joinmarket)
-
 PGPsigner="openoms"
 PGPpubkeyLink="https://github.com/openoms.gpg"
 PGPpubkeyFingerprint="13C688DB5B9C745DE4D2E4545BFB77609B081B65"
 
-source /mnt/hdd/raspiblitz.conf 2>/dev/null
-
-# install (code & compile)
-if [ "$1" = "install" ]; then
-
-  if [ "${isInstalled}" != "0" ]; then
-    echo "result='already installed'"
-    exit 0
-  fi
-
-  echo "# *** INSTALL JOINMARLET ***"
-
-
-  echo "# Creating the joinmarket user"
-  sudo adduser --disabled-password --gecos "" joinmarket
-
-  sudo cp /home/joinmarket/.bashrc /home/joinmarket/.bashrc.backup
-
-  # make a folder for authorized keys
-  sudo -u joinmarket mkdir -p /home/joinmarket/.ssh
-  chmod -R 700 /home/joinmarket/.ssh
-
-  # install tmux
-  apt -y install tmux
-
-  # install a command-line fuzzy finder (https://github.com/junegunn/fzf)
-  apt -y install fzf
-  bash -c "echo 'source /usr/share/doc/fzf/examples/key-bindings.bash' >> /home/joinmarket/.bashrc"
-
-  echo "# adding JoininBox"
-  sudo rm -rf /home/joinmarket/joininbox
-  sudo -u joinmarket git clone https://github.com/openoms/joininbox.git /home/joinmarket/joininbox
-  # check the latest at:
-  cd /home/joinmarket/joininbox || exit 1
-  # https://github.com/openoms/joininbox/releases/
-  sudo -u joinmarket git reset --hard ${JBTAG}
-  sudo -u joinmarket /home/admin/config.scripts/blitz.git-verify.sh "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" "${JBTAG}" || exit 1
-
-  echo "#  OK joinmarket user/codebase installed"
-  exit 0
-fi
-
-# remove from system
-if [ "$1" = "uninstall" ]; then
-
-  # check if still active
-  if [ "${joinmarket}" == "on" ]; then
-    echo "result='still in use'"
-    exit 1
-  fi
-
-  echo "# *** UNINSTALL JOINMARKET ***"
-
-  # always delete user and home directory
-  sudo userdel -rf joinmarket
-
-  exit 0
-fi
+source /mnt/hdd/raspiblitz.conf
 
 # switch on
-if [ "$1" = "1" ] || [ "$1" = "on" ]; then
-
-  if [ "${isInstalled}" == "0" ]; then
-    /home/admin/config.scripts/bonus.joinmarket.sh install || exit 1
-  fi
-
-  echo "# ACTIVATE JOINMARKET"
+if [ "$1" = "install" ]; then
+  echo "# INSTALL JOINMARKET"
 
   # check if running Tor
   if [ ${runBehindTor} = on ]; then
@@ -142,32 +78,54 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     fi
   fi
 
-  echo "# setting PASSWORD_B as the password for the 'joinmarket' user"
-  PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
-  echo "joinmarket:$PASSWORD_B" | sudo chpasswd
+  if [ -f "/home/joinmarket/joinmarket-clientserver/jmvenv/bin/activate" ]; then
+    echo "JoinMarket is already installed"
+  else
+    echo "# cleaning before install"
+    sudo userdel -rf joinmarket 2>/dev/null
 
-  # add to sudo group (required for installation)
-  adduser joinmarket sudo
+    echo "# add the 'joinmarket' user"
+    adduser --disabled-password --gecos "" joinmarket
 
-  # configure sudo for usage without password entry for the joinmarket user
-  echo 'joinmarket ALL=(ALL) NOPASSWD:ALL' | EDITOR='tee -a' visudo
+    echo "# setting PASSWORD_B as the password for the 'joinmarket' user"
+    PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
+    echo "joinmarket:$PASSWORD_B" | sudo chpasswd
+    # add to sudo group (required for installation)
+    adduser joinmarket sudo
+    # configure sudo for usage without password entry for the joinmarket user
+    echo 'joinmarket ALL=(ALL) NOPASSWD:ALL' | EDITOR='tee -a' visudo
 
-  # store JoinMarket data on HDD
-  mkdir /mnt/hdd/app-data/.joinmarket 2>/dev/null
- 
-  # copy old JoinMarket data to app-data
-  cp -rf /home/admin/joinmarket-clientserver/scripts/wallets /mnt/hdd/app-data/.joinmarket/ 2>/dev/null
-  chown -R joinmarket:joinmarket /mnt/hdd/app-data/.joinmarket
-  ln -s /mnt/hdd/app-data/.joinmarket /home/joinmarket/ 2>/dev/null
-  chown -R joinmarket:joinmarket /home/joinmarket/.joinmarket
-  # specify wallet.dat in old config for multiwallet for multiwallet support
-  if [ -f "/home/joinmarket/.joinmarket/joinmarket.cfg" ] ; then
-    sudo -u joinmarket sed -i "s/^rpc_wallet_file =.*/rpc_wallet_file = wallet.dat/g" \
-    /home/joinmarket/.joinmarket/joinmarket.cfg
-    echo "# specified to use wallet.dat in the recovered joinmarket.cfg"
-  fi
+    # make a folder for authorized keys
+    sudo -u joinmarket mkdir -p /home/joinmarket/.ssh
+    chmod -R 700 /home/joinmarket/.ssh
 
-  if [ ! -f "/home/joinmarket/joinmarket-clientserver/jmvenv/bin/activate" ] ; then
+    # install the command-line fuzzy finder (https://github.com/junegunn/fzf)
+    bash -c "echo 'source /usr/share/doc/fzf/examples/key-bindings.bash' >> /home/joinmarket/.bashrc"
+
+    # store JoinMarket data on HDD
+    mkdir /mnt/hdd/app-data/.joinmarket 2>/dev/null
+
+    # copy old JoinMarket data to app-data
+    cp -rf /home/admin/joinmarket-clientserver/scripts/wallets /mnt/hdd/app-data/.joinmarket/ 2>/dev/null
+    chown -R joinmarket:joinmarket /mnt/hdd/app-data/.joinmarket
+    ln -s /mnt/hdd/app-data/.joinmarket /home/joinmarket/ 2>/dev/null
+    chown -R joinmarket:joinmarket /home/joinmarket/.joinmarket
+    # specify wallet.dat in old config for multiwallet for multiwallet support
+    if [ -f "/home/joinmarket/.joinmarket/joinmarket.cfg" ] ; then
+      sudo -u joinmarket sed -i "s/^rpc_wallet_file =.*/rpc_wallet_file = wallet.dat/g" \
+      /home/joinmarket/.joinmarket/joinmarket.cfg
+      echo "# specified to use wallet.dat in the recovered joinmarket.cfg"
+    fi
+
+    echo "# adding JoininBox"
+    sudo rm -rf /home/joinmarket/joininbox
+    sudo -u joinmarket git clone https://github.com/openoms/joininbox.git /home/joinmarket/joininbox
+    # check the latest at:
+    cd /home/joinmarket/joininbox || exit 1
+    # https://github.com/openoms/joininbox/releases/
+    sudo -u joinmarket git reset --hard ${JBTAG}
+    sudo -u joinmarket /home/admin/config.scripts/blitz.git-verify.sh \
+     "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" "${JBTAG}" || exit 1
 
     # copy the scripts in place
     sudo -u joinmarket cp /home/joinmarket/joininbox/scripts/* /home/joinmarket/
@@ -180,7 +138,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # Tor config
     # add the joinmarket user to the Tor group
     usermod -a -G debian-tor joinmarket
-
     # fix Tor config
     sudo sed -i "s:^CookieAuthFile*:#CookieAuthFile:g" /etc/tor/torrc
     if ! grep -Eq "^CookieAuthentication 1" /etc/tor/torrc; then
@@ -201,6 +158,19 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     if grep -Eq "^runBehindTor=on" /mnt/hdd/raspiblitz.conf; then
       sudo -u joinmarket sed -i "s/^runBehindTor=.*/runBehindTor=on/g" /home/joinmarket/joinin.conf
     fi
+
+    echo
+    echo "##########"
+    echo "# Extras #"
+    echo "##########"
+    echo
+    # install a command-line fuzzy finder (https://github.com/junegunn/fzf)
+    apt -y install fzf
+    bash -c "echo 'source /usr/share/doc/fzf/examples/key-bindings.bash' >> \
+    /home/joinmarket/.bashrc"
+
+    # install tmux
+    apt -y install tmux
 
     echo
     echo "#############"
@@ -225,26 +195,37 @@ fi
     echo "# Install JoinMarket and configure JoininBox #"
     echo "##############################################"
     echo
-    sudo -u joinmarket /home/joinmarket/start.joininbox.sh
+    if sudo -u joinmarket /home/joinmarket/install.joinmarket.sh -i install; then
+      echo "# Installed JoinMarket"
+      echo "# Run: 'sudo /home/admin/config.scrips/bonus.joinmarket.sh on' to configure and switch on"
+    else
+      echo " Failed to install JoinMarket"
+      exit 1
+    fi
+  fi
+  exit 0
+fi
 
+# switch on
+if [ "$1" = "1" ] || [ "$1" = "on" ]; then
+
+  if [ -f /home/joinmarket/start.joininbox.sh ]; then
+    echo "# Ok, Joininbox is present"
   else
-    echo "JoinMarket is already installed"
-    echo
+    sudo /home/admin/config.scrips/bonus.joinmarket.sh install
   fi
 
-  if [ -f "/home/joinmarket/joinmarket-clientserver/jmvenv/bin/activate" ] ; then
-    # setting value in raspi blitz config
-    /home/admin/config.scripts/blitz.conf.sh set joinmarket "on"
-    # starting info
-    echo
+  # configure joinmarket (includes a check if it is installed)
+  if sudo -u joinmarket /home/joinmarket/start.joininbox.sh; then
     echo "# Start to use by logging in to the 'joinmarket' user with:"
     echo "# 'sudo su joinmarket' or use the shortcut 'jm'"
-    echo
-
   else
-    echo " Failed to install JoinMarket"
+    echo "# There was an error running 'bonus.joinmarket.sh on', see above"
     exit 1
   fi
+
+  # set the raspiblitz.conf
+  /home/admin/config.scripts/blitz.conf.sh set joinmarket "on"
 
   exit 0
 fi
@@ -254,7 +235,15 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # setting value in raspi blitz config
   /home/admin/config.scripts/blitz.conf.sh set joinmarket "off"
-  /home/admin/config.scripts/bonus.jam.sh off 2>/dev/null
+
+  if [ -d /home/joinmarket ]; then
+    echo "Removing the joinmarket user"
+    sudo userdel -rf joinmarket 2>/dev/null
+  else
+    echo "JoinMarket is not installed."
+  fi
+
+  /home/admin/config.scripts/bonus.jam.sh off
 
   exit 0
 fi
