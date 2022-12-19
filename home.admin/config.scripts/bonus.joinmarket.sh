@@ -72,21 +72,6 @@ if [ "$1" = "install" ]; then
     # install the command-line fuzzy finder (https://github.com/junegunn/fzf)
     bash -c "echo 'source /usr/share/doc/fzf/examples/key-bindings.bash' >> /home/joinmarket/.bashrc"
 
-    # store JoinMarket data on HDD
-    mkdir /mnt/hdd/app-data/.joinmarket 2>/dev/null
-
-    # copy old JoinMarket data to app-data
-    cp -rf /home/admin/joinmarket-clientserver/scripts/wallets /mnt/hdd/app-data/.joinmarket/ 2>/dev/null
-    chown -R joinmarket:joinmarket /mnt/hdd/app-data/.joinmarket
-    ln -s /mnt/hdd/app-data/.joinmarket /home/joinmarket/ 2>/dev/null
-    chown -R joinmarket:joinmarket /home/joinmarket/.joinmarket
-    # specify wallet.dat in old config for multiwallet for multiwallet support
-    if [ -f "/home/joinmarket/.joinmarket/joinmarket.cfg" ] ; then
-      sudo -u joinmarket sed -i "s/^rpc_wallet_file =.*/rpc_wallet_file = wallet.dat/g" \
-      /home/joinmarket/.joinmarket/joinmarket.cfg
-      echo "# specified to use wallet.dat in the recovered joinmarket.cfg"
-    fi
-
     echo "# adding JoininBox"
     sudo rm -rf /home/joinmarket/joininbox
     sudo -u joinmarket git clone https://github.com/openoms/joininbox.git /home/joinmarket/joininbox
@@ -136,25 +121,6 @@ if [ "$1" = "install" ]; then
     # install tmux
     apt -y install tmux
 
-    echo
-    echo "#############"
-    echo "# Autostart #"
-    echo "#############"
-    echo "
-if [ -f \"/home/joinmarket/joinmarket-clientserver/jmvenv/bin/activate\" ]; then
-  . /home/joinmarket/joinmarket-clientserver/jmvenv/bin/activate
-  /home/joinmarket/joinmarket-clientserver/jmvenv/bin/python -c \"import PySide2\"
-  cd /home/joinmarket/joinmarket-clientserver/scripts/
-fi
-# shortcut commands
-source /home/joinmarket/_commands.sh
-# automatically start main menu for joinmarket unless
-# when running in a tmux session
-if [ -z \"\$TMUX\" ]; then
-  /home/joinmarket/menu.sh
-fi
-"   | sudo -u joinmarket tee -a /home/joinmarket/.bashrc
-
     echo "##############################################"
     echo "# Install JoinMarket and configure JoininBox #"
     echo "##############################################"
@@ -182,6 +148,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     exit 1
   fi
 
+  # set password B
+  echo "# setting PASSWORD_B as the password for the 'joinmarket' user"
+  PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
+  echo "joinmarket:$PASSWORD_B" | sudo chpasswd
+
   if [ -f /home/joinmarket/start.joininbox.sh ]; then
     echo "# Ok, Joininbox is present"
   else
@@ -207,10 +178,39 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     fi
   fi
 
-  # set password B
-  echo "# setting PASSWORD_B as the password for the 'joinmarket' user"
-  PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
-  echo "joinmarket:$PASSWORD_B" | sudo chpasswd
+  # store JoinMarket data on HDD
+  mkdir /mnt/hdd/app-data/.joinmarket 2>/dev/null
+
+  # copy old JoinMarket data to app-data
+  cp -rf /home/admin/joinmarket-clientserver/scripts/wallets /mnt/hdd/app-data/.joinmarket/ 2>/dev/null
+  chown -R joinmarket:joinmarket /mnt/hdd/app-data/.joinmarket
+  ln -s /mnt/hdd/app-data/.joinmarket /home/joinmarket/ 2>/dev/null
+  chown -R joinmarket:joinmarket /home/joinmarket/.joinmarket
+  # specify wallet.dat in old config for multiwallet for multiwallet support
+  if [ -f "/home/joinmarket/.joinmarket/joinmarket.cfg" ] ; then
+    sudo -u joinmarket sed -i "s/^rpc_wallet_file =.*/rpc_wallet_file = wallet.dat/g" \
+    /home/joinmarket/.joinmarket/joinmarket.cfg
+    echo "# specified to use wallet.dat in the recovered joinmarket.cfg"
+  fi
+
+  echo
+  echo "#############"
+  echo "# Autostart #"
+  echo "#############"
+  echo "
+if [ -f \"/home/joinmarket/joinmarket-clientserver/jmvenv/bin/activate\" ]; then
+  . /home/joinmarket/joinmarket-clientserver/jmvenv/bin/activate
+  /home/joinmarket/joinmarket-clientserver/jmvenv/bin/python -c \"import PySide2\"
+  cd /home/joinmarket/joinmarket-clientserver/scripts/
+fi
+# shortcut commands
+source /home/joinmarket/_commands.sh
+# automatically start main menu for joinmarket unless
+# when running in a tmux session
+if [ -z \"\$TMUX\" ]; then
+  /home/joinmarket/menu.sh
+fi
+"   | sudo -u joinmarket tee -a /home/joinmarket/.bashrc
 
   # configure joinmarket (includes a check if it is installed)
   if sudo -u joinmarket /home/joinmarket/start.joininbox.sh; then
