@@ -794,7 +794,7 @@ if ${fatpack}; then
   # Fallback Nodes List from Bitcoin Core
   sudo -u admin curl https://raw.githubusercontent.com/bitcoin/bitcoin/master/contrib/seeds/nodes_main.txt -o /home/admin/fallback.bitcoin.nodes
 
-  if [ "${architecture}" = "amd64" ]; then # skip Code&Compile for amd64 builds
+  if [ "${architecture}" != "amd64" ]; then # skip Code&Compile for amd64 builds
     echo "* Adding Code&Compile for WEBUI-APP: RTL"
     /home/admin/config.scripts/bonus.rtl.sh install || exit 1
     echo "* Adding Code&Compile for WEBUI-APP: BTCPAYSERVER"
@@ -807,12 +807,14 @@ if ${fatpack}; then
     /home/admin/config.scripts/bonus.btc-rpc-explorer.sh install || exit 1
     echo "* Adding Code&Compile for WEBUI-APP: LNBITS"
     /home/admin/config.scripts/bonus.lnbits.sh install || exit 1
+    echo "* Adding Code&Compile for WEBUI-APP: JAM"
+    /home/admin/config.scripts/bonus.jam.sh install || exit 1
   fi
 
   echo "* Adding Raspiblitz API ..."
-  sudo /home/admin/config.scripts/blitz.web.api.sh on "${defaultAPIuser}" "${defaultAPIrepo}" "${branch}" || exit 1
+  sudo /home/admin/config.scripts/blitz.web.api.sh on "${defaultAPIuser}" "${defaultAPIrepo}" "blitz-${branch}" || exit 1
   echo "* Adding Raspiblitz WebUI ..."
-  sudo /home/admin/config.scripts/blitz.web.ui.sh on "${defaultWEBUIuser}" "${defaultWEBUIrepo}" "${branch}" || exit 1
+  sudo /home/admin/config.scripts/blitz.web.ui.sh on "${defaultWEBUIuser}" "${defaultWEBUIrepo}" "release/${branch}" || exit 1
 
   # set build code as new default
   sudo rm -r /home/admin/assets/nginx/www_public
