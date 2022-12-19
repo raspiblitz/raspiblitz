@@ -794,7 +794,7 @@ if ${fatpack}; then
   # Fallback Nodes List from Bitcoin Core
   sudo -u admin curl https://raw.githubusercontent.com/bitcoin/bitcoin/master/contrib/seeds/nodes_main.txt -o /home/admin/fallback.bitcoin.nodes
 
-  if ! ischroot; then # skip Code&Compile for VM builds
+  if [ "${architecture}" = "amd64" ]; then # skip Code&Compile for amd64 builds
     echo "* Adding Code&Compile for WEBUI-APP: RTL"
     /home/admin/config.scripts/bonus.rtl.sh install || exit 1
     echo "* Adding Code&Compile for WEBUI-APP: BTCPAYSERVER"
