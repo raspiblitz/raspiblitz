@@ -358,6 +358,8 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # remove nginx symlinks and configs
   sudo rm -f /etc/nginx/sites-enabled/jam_* 1>&2
   sudo rm -f /etc/nginx/sites-available/jam_* 1>&2
+  sudo rm /var/log/nginx/error_jam.log 1>&2
+  sudo rm /var/log/nginx/access_jam.log 1>&2
   sudo nginx -t 1>&2
   sudo systemctl reload nginx 1>&2
 
@@ -365,9 +367,6 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   if [ "${runBehindTor}" = "on" ]; then
     /home/admin/config.scripts/tor.onion-service.sh off jam 1>&2
   fi
-
-  # remove the app
-  sudo rm -rf $HOME_DIR/$APP_DIR 2>/dev/null
 
   # remove SSL
   sudo rm -rf $HOME_DIR/.joinmarket/ssl 1>&2
