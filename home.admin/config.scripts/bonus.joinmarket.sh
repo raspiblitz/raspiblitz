@@ -44,20 +44,11 @@ PGPsigner="openoms"
 PGPpubkeyLink="https://github.com/openoms.gpg"
 PGPpubkeyFingerprint="13C688DB5B9C745DE4D2E4545BFB77609B081B65"
 
-source /mnt/hdd/raspiblitz.conf
+source /mnt/hdd/raspiblitz.conf 2>/dev/null
 
 # switch on
 if [ "$1" = "install" ]; then
   echo "# INSTALL JOINMARKET"
-
-  # check if running Tor
-  if [ ${runBehindTor} = on ]; then
-    echo "# OK, running behind Tor"
-  else
-    echo "# Not running Tor"
-    echo "# Activate Tor from the SERVICES menu before installing JoinMarket."
-    exit 1
-  fi
 
   # make sure the Bitcoin Core wallet is on
   /home/admin/config.scripts/network.wallet.sh on
@@ -87,11 +78,9 @@ if [ "$1" = "install" ]; then
     echo "# add the 'joinmarket' user"
     adduser --disabled-password --gecos "" joinmarket
 
-    echo "# setting PASSWORD_B as the password for the 'joinmarket' user"
-    PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
-    echo "joinmarket:$PASSWORD_B" | sudo chpasswd
     # add to sudo group (required for installation)
     adduser joinmarket sudo
+
     # configure sudo for usage without password entry for the joinmarket user
     echo 'joinmarket ALL=(ALL) NOPASSWD:ALL' | EDITOR='tee -a' visudo
 
@@ -148,16 +137,10 @@ if [ "$1" = "install" ]; then
       echo "AllowOutboundLocalhost 1" | sudo tee -a /etc/tor/torsocks.conf
       sudo systemctl reload tor@default
     fi
+  
     # joinin.conf settings
     sudo -u joinmarket touch /home/joinmarket/joinin.conf
-    # add default Tor value to joinin.conf if needed
-    if ! grep -Eq "^runBehindTor" /home/joinmarket/joinin.conf; then
-      echo "runBehindTor=off" | sudo -u joinmarket tee -a /home/joinmarket/joinin.conf
-    fi
-    # setting Tor value in joinin config
-    if grep -Eq "^runBehindTor=on" /mnt/hdd/raspiblitz.conf; then
-      sudo -u joinmarket sed -i "s/^runBehindTor=.*/runBehindTor=on/g" /home/joinmarket/joinin.conf
-    fi
+    sudo -u joinmarket sed -i "s/^runBehindTor=.*/runBehindTor=on/g" /home/joinmarket/joinin.conf
 
     echo
     echo "##########"
@@ -209,11 +192,25 @@ fi
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
+  # check if running Tor
+  if [ "${runBehindTor}" = "on" ]; then
+    echo "# OK, running behind Tor"
+  else
+    echo "# Not running Tor"
+    echo "# Activate Tor from the SERVICES menu before installing JoinMarket."
+    exit 1
+  fi
+
   if [ -f /home/joinmarket/start.joininbox.sh ]; then
     echo "# Ok, Joininbox is present"
   else
     sudo /home/admin/config.scrips/bonus.joinmarket.sh install
   fi
+
+  # set password B
+  echo "# setting PASSWORD_B as the password for the 'joinmarket' user"
+  PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
+  echo "joinmarket:$PASSWORD_B" | sudo chpasswd
 
   # configure joinmarket (includes a check if it is installed)
   if sudo -u joinmarket /home/joinmarket/start.joininbox.sh; then
