@@ -358,8 +358,8 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # remove nginx symlinks and configs
   sudo rm -f /etc/nginx/sites-enabled/jam_* 1>&2
   sudo rm -f /etc/nginx/sites-available/jam_* 1>&2
-  sudo rm /var/log/nginx/error_jam.log 1>&2
-  sudo rm /var/log/nginx/access_jam.log 1>&2
+  sudo rm /var/log/nginx/error_jam.log 1>/dev/null 2/dev/null
+  sudo rm /var/log/nginx/access_jam.log 1>/dev/null 2/dev/null
   sudo nginx -t 1>&2
   sudo systemctl reload nginx 1>&2
 
