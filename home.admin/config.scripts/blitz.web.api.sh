@@ -7,7 +7,7 @@
 
 # NORMALLY user/repo/version will be defined by calling script - see build_sdcard.sh
 # the following is just a fallback to try during development if script given branch does not exist
-FALLACK_BRANCH="dev"
+FALLACK_BRANCH="refactor_system"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ]; then
