@@ -60,7 +60,7 @@ if [ "$1" = "install" ]; then
     adduser --disabled-password --gecos "" joinmarket
 
     # add to sudo group (required for installation)
-    adduser joinmarket sudo
+    adduser joinmarket sudo || exit 1
 
     # configure sudo for usage without password entry for the joinmarket user
     echo 'joinmarket ALL=(ALL) NOPASSWD:ALL' | EDITOR='tee -a' visudo
