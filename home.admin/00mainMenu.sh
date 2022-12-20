@@ -186,9 +186,7 @@ OPTIONS+=(SETTINGS "Node Settings & Options")
 OPTIONS+=(SERVICES "Additional Apps & Services")
 OPTIONS+=(SYSTEM "Monitoring & Configuration")
 OPTIONS+=(CONNECT "Connect Apps & Show Credentials")
-if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
-  OPTIONS+=(SUBSCRIBE "Manage Subscriptions")
-fi
+OPTIONS+=(SUBSCRIBE "Manage Subscriptions")
 OPTIONS+=(PASSWORD "Change Passwords")
 
 if [ "${touchscreen}" == "1" ]; then
