@@ -4,11 +4,7 @@
   - [Recommended specs](#recommended-specs)
 - [amd64 image](#amd64-image)
   - [Requirements](#requirements)
-  - [Download](#download)
-  - [Verify](#verify)
-  - [Write the image to the OS disk](#write-the-image-to-the-os-disk)
-  - [Extend the partition](#extend-the-partition)
-  - [Start the Raspiblitz setup](#start-the-raspiblitz-setup)
+  - [Automated builds](#automated-builds)
 - [Virtual Machine](#virtual-machine)
   - [Create the base image](#create-the-base-image)
   - [Building the Raspiblitz scripts](#building-the-raspiblitz-scripts)
@@ -17,7 +13,7 @@
 - [Armbian](#armbian)
 - [Ubuntu](#ubuntu)
 - [Python upgrade](#python-upgrade)
-- [Create an image release for amd64](#create-an-image-release-for-amd64)
+- [Manual image release for amd64](#manual-image-release-for-amd64)
   - [Requirements:](#requirements-1)
   - [Create an NTFS formatted USB Stick / USB disk](#create-an-ntfs-formatted-usb-stick--usb-disk)
   - [Boot Ubuntu Live from USB](#boot-ubuntu-live-from-usb)
@@ -30,10 +26,9 @@
     - [Start Tails](#start-tails)
     - [Import the signing keys](#import-the-signing-keys)
       - [Prepare the disk](#prepare-the-disk)
-- [Verify the downloaded image](#verify-the-downloaded-image)
-  - [Linux instructions](#linux-instructions)
-- [Create a torrent](#create-a-torrent)
-- [Switch off sleep, suspend and hibernation](#switch-off-sleep-suspend-and-hibernation)
+  - [Verify the downloaded image](#verify-the-downloaded-image)
+    - [Linux instructions](#linux-instructions)
+  - [Create a torrent](#create-a-torrent)
 
 ## Minimum requirements
 * ARMv8 or x86 processor (64 bit)
@@ -51,7 +46,6 @@ Specifications of the tested hardware: [hw_comparison.md](hw_comparison.md)
 All testers are welcome. Open an issue for your specific board to collaborate and share your experience.
 
 ## amd64 image
-
 ### Requirements
 * amd64 Laptop, Desktop or Server connected to the internet via a LAN cable
 
@@ -61,35 +55,8 @@ All testers are welcome. Open an issue for your specific board to collaborate an
     * if the laptop has an optical drive an [Optical Drive Bay Caddy / adapter](https://www.amazon.co.uk/dp/B07SHSCVC7/) can be used to change it to a second SSD instead.
 * `Data disk`: a new, minimum 1TB SSD is recommended - stores data independent of the operating system
     * usually placed internally
-
-
-### Download
- * raspiblitz-amd64-v1.7.2-2022-04-03
-   * manually created with the [process described below](#Create-an-image-release-for-amd64) from the [`dev` branch](https://github.com/rootzoll/raspiblitz/tree/dev) at [43c7384](https://github.com/rootzoll/raspiblitz/tree/43c7384cb70523c57990e0c409d51cfd7b818a10)
-   * Torrent [file](/home.admin/assets/raspiblitz-amd64-v1.7.2-2022-04-03.torrent) and [magnet link](/home.admin/assets/raspiblitz-amd64-v1.7.2-2022-04-03.magnet)
-   * Direct downloads:
-     * https://mega.nz/folder/AlsC0A4L#mTPOke2OLJIGU4iMyAqwBw
-     * https://keybase.pub/oms/images/raspiblitz-amd64-v1.7.2-2022-04-03
-      ```
-      # download from keybase using the command line
-      mkdir raspiblitz-amd64-v1.7.2-2022-04-03
-      cd raspiblitz-amd64-v1.7.2-2022-04-03
-      wget -c https://oms.keybase.pub/images/raspiblitz-amd64-v1.7.2-2022-04-03/raspiblitz-amd64-v1.7.2-2022-04-03.img.gz
-      wget -c https://oms.keybase.pub/images/raspiblitz-amd64-v1.7.2-2022-04-03/raspiblitz-amd64-v1.7.2-2022-04-03.img.gz.sha256
-      wget -c https://oms.keybase.pub/images/raspiblitz-amd64-v1.7.2-2022-04-03/raspiblitz-amd64-v1.7.2-2022-04-03.img.gz.sha256.asc
-      ```
-
-### [Verify](#Verify-the-downloaded-image)
-### Write the image to the OS disk
-* On a separate computer: write the image to the USB connected OSdisk or SDcard with [Balena Etcher](https://www.balena.io/etcher/)
-* On the same computer: boot an Ubuntu Live from USB with which the image can be downloaded, verified and flashed on an internal or USB connected OS disk
-### Extend the partition
-* start Disks or any partition manager and extend the partition to the full size of the disk on the OS disk (just flashed)
-
-### Start the Raspiblitz setup
-* Assemble and start the computer.
-* Log in with admin and open a terminal on the local desktop or log in with ssh (username `admin` password: `raspiblitz`)
-* Continue the setup as described in the [main readme](https://github.com/rootzoll/raspiblitz#setup-process-detailed-documentation)
+### Automated builds
+* find the download links or build locally with the instructions in: [/ci/README.md](/ci/README.md)
 
 ## Virtual Machine
 
@@ -233,7 +200,7 @@ Continue with building the SDcard: https://github.com/rootzoll/raspiblitz#build-
   python3 --version
   ```
 
-## Create an image release for amd64
+## Manual image release for amd64
 
 Work notes partially based on: https://github.com/rootzoll/raspiblitz/blob/v1.7/FAQ.md#what-is-the-process-of-creating-a-new-sd-card-image-release
 
@@ -386,8 +353,8 @@ Work notes partially based on: https://github.com/rootzoll/raspiblitz/blob/v1.7/
 * Upload the new image to server - put the .sig file and .sha256 next to it
 * Copy the sha256sum to GitHub README and update the download link
 
-## Verify the downloaded image
-### Linux instructions
+### Verify the downloaded image
+#### Linux instructions
 * Open a terminal in the directory with the downloaded files
     ```
     raspiblitz-amd64-vX.X.X-YEAR-MONTH-DAY.img.gz
@@ -416,7 +383,7 @@ Work notes partially based on: https://github.com/rootzoll/raspiblitz/blob/v1.7/
   # raspiblitz-amd64-vX.X.X-YEAR-MONTH-DAY.img.gz: OK
   ```
 
-## Create a torrent
+### Create a torrent
 * Create Torrent file from image (for example with Transmission / qbBittorrent) and place in the `home.admin/assets` folder & link on README
 * Tracker list recommended to be used with the torrent:
     ```
@@ -449,8 +416,3 @@ Work notes partially based on: https://github.com/rootzoll/raspiblitz/blob/v1.7/
     # Compare the sha256 hash to the hash of the image file (Look for the output 'OK'):
     shasum -c *.sha256
     ```
-## Switch off sleep, suspend and hibernation
-* Run in the terminal:
-  ```
-  sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
-  ```

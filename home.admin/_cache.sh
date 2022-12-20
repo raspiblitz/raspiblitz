@@ -113,13 +113,13 @@ elif [ "$1" = "keyvalue" ] && [ "$2" = "on" ]; then
   sudo sed -i "/^save .*/d" /etc/redis/redis.conf
 
   # restart with new config
-  sudo systemctl restart redis-server
+  if ! ischroot; then sudo systemctl restart redis-server; fi
 
   # clean old databases if exist
   sudo rm /var/lib/redis/dump.rdb 2>/dev/null
 
   # restart again this time there is no old data dump to load
-  sudo systemctl restart redis-server
+  if ! ischroot; then sudo systemctl restart redis-server; fi
 
 # uninstall
 elif [ "$1" = "keyvalue" ] && [ "$2" = "off" ]; then

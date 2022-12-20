@@ -2,7 +2,8 @@
 
 ## What's new in Version 1.9.0 of RaspiBlitz?
 
-- New: CL Watchtower (The Eye of Satoshi) [details](https://github.com/talaia-labs/rust-teos/tree/master/watchtower-plugin)
+- New: Automated disk image build for amd64 (VM, laptop, desktop, server) and arm64-rpi (Raspberry Pi) [details](https://github.com/rootzoll/raspiblitz/tree/dev/ci/README.md)
+- New: CLN Watchtower (The Eye of Satoshi) [details](https://github.com/talaia-labs/rust-teos/tree/master/watchtower-plugin)
 - New: LNDg v1.4.0 [details](https://github.com/cryptosharks131/lndg)
 - New: Support of X708 UPS HAT [details](https://github.com/rootzoll/raspiblitz/pull/3087)
 - New: BOS Telegram Bot Support (see OPTIONS on LND Balance of Satoshis menu entry)
@@ -21,10 +22,9 @@
 - Update: Channel Tools (chantools) v0.10.5 [details](https://github.com/guggero/chantools/releases/tag/v0.10.5)
 - Update: JoinMarket v0.9.8 [details](https://github.com/JoinMarket-Org/joinmarket-clientserver/releases/tag/v0.9.8)
 - Update: JoininBox v0.7.4 [details](https://github.com/openoms/joininbox/releases/tag/v0.7.3)
-- Update: Electrum Server in Rust (electrs) v0.9.9 [details](https://github.com/romanz/electrs/blob/master/RELEASE-NOTES.md#099-jul-12-2022)
 - Update: Balance of Satoshis 13.6.0 (BOS) [details](https://github.com/alexbosworth/balanceofsatoshis/blob/master/CHANGELOG.md#1360)
 - Update: Circuitbreaker v0.3.2 [details](https://github.com/lightningequipment/circuitbreaker/blob/master/README.md)
-- Fixed: SCB/Emergency-Backup to USB drive (now also with cln emergency file)
+- Fixed: SCB/Emergency-Backup to USB drive (now also with CLN emergency.recover file)
 - Info: Run RaspiBlitz on Proxmox [details](https://github.com/rootzoll/raspiblitz/tree/dev/alternative.platforms/Proxmox)
 - Info: IP2Tor unavailable & deactivated in SSH menus [details](https://github.com/rootzoll/raspiblitz/issues/3417#issuecomment-1310303480)
 - Info: 32GB sdcard is now enforced (after being recommended since v1.5)

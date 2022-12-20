@@ -111,6 +111,12 @@ function bitcoinI2Pstatus {
 echo "# Running: 'blitz.i2pd.sh $*'"
 source /mnt/hdd/raspiblitz.conf
 
+# make sure to be present in PATH
+if ! echo "$PATH" | grep "/usr/sbin"; then
+  export PATH=$PATH:/usr/sbin
+  echo "PATH=\$PATH:/usr/sbin" | sudo tee -a /etc/profile
+fi
+
 if [ "$1" = "install" ]; then
 
   isInstalled=$(sudo systemctl list-unit-files | grep -c i2pd)
@@ -118,34 +124,12 @@ if [ "$1" = "install" ]; then
     echo "# i2pd is already installed."
   else
     echo "# Installing i2pd ..."
-    ARCHITECTURE=$(dpkg --print-architecture)
-    if [ ${ARCHITECTURE} = arm64 ]; then
-      # use the deb repo
 
-      add_repo
+    add_repo
 
-      sudo apt-get update
-      sudo apt-get install -y i2pd
-    else
-      # install from github
-      # https://github.com/PurpleI2P/i2pd/releases
-      VERSION=2.43.0
-      DISTRO=$(lsb_release -cs)
+    sudo apt-get update
+    sudo apt-get install -y i2pd
 
-      mkdir -p download/i2pd
-      cd download/i2pd || exit 1
-      wget -O i2pd_${VERSION}-1${DISTRO}1_${ARCHITECTURE}.deb https://github.com/PurpleI2P/i2pd/releases/download/${VERSION}/i2pd_${VERSION}-1${DISTRO}1_${ARCHITECTURE}.deb
-
-      # verify
-      wget -O SHA512SUMS https://github.com/PurpleI2P/i2pd/releases/download/${VERSION}/SHA512SUMS
-      wget -O SHA512SUMS.asc https://github.com/PurpleI2P/i2pd/releases/download/${VERSION}/SHA512SUMS.asc
-      curl https://repo.i2pd.xyz/r4sas.gpg | gpg --import
-      gpg --verify SHA512SUMS.asc || (echo "# PGP signature error"; exit 5)
-      sha512sum -c SHA512SUMS --ignore-missing || (echo "# Checksum error"; exit 6)
-
-      # install
-      sudo dpkg -i --force-confnew i2pd_${VERSION}-1${DISTRO}1_${ARCHITECTURE}.deb
-    fi
   fi
   exit 0
 fi
