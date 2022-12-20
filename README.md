@@ -1,9 +1,8 @@
 <!-- omit in toc -->
 # ![RaspiBlitz](pictures/raspilogo_tile_400px.png) 
 
-_Build your own Lightning & Bitcoin Fullnode on a RaspberryPi with a nice Display._ ([api](https://github.com/fusion44/blitz_api)|[web](https://github.com/cstenglein/raspiblitz-web))
-
-`Version 1.9.0RC1 with bitcoin 24.0.1, lnd 0.15.5 & Core Lightning 22.11.1`
+_Build your own Lightning & Bitcoin Fullnode on a RaspberryPi with a nice Display._ 
+`Version 1.9.0RC1 with bitcoin 24.0.1, lnd 0.15.5 & Core Lightning 22.11.1` ([api](https://github.com/fusion44/blitz_api)|[web](https://github.com/cstenglein/raspiblitz-web))
 
 ![RaspiBlitz](pictures/raspiblitz.jpg)
 
