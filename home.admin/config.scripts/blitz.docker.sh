@@ -70,17 +70,17 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   #  -o /etc/bash_completion.d/docker-compose
 
   # https://docs.docker.com/compose/cli-command/#install-on-linux
-  DockerComposeVersion=2.0.0
+  DockerComposeVersion=2.14.2
   # DOCKER_CONFIG=${DOCKER_CONFIG:-$HOME/.docker}
   # mkdir -p $DOCKER_CONFIG/cli-plugins
   sudo mkdir -p /usr/local/lib/docker/cli-plugins
-  sudo curl -SL "https://github.com/docker/compose/releases/download/v${DockerComposeVersion}/docker-compose-linux-$(dpkg --print-architecture)" \
+  sudo curl -SL "https://github.com/docker/compose/releases/download/v${DockerComposeVersion}/docker-compose-linux-$(uname -m)" \
    -o /usr/local/lib/docker/cli-plugins/docker-compose
   sudo chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
 
   # switch docker-compose to docker compose
   # curl -fL https://raw.githubusercontent.com/docker/compose-switch/master/install_on_linux.sh | sudo sh
-  COMPOSE_SWITCH_VERSION="v1.0.4"
+  COMPOSE_SWITCH_VERSION="v1.0.5"
   COMPOSE_SWITCH_URL="https://github.com/docker/compose-switch/releases/download/${COMPOSE_SWITCH_VERSION}/docker-compose-linux-$(dpkg --print-architecture)"
   if ! docker compose version 2>&1 >/dev/null; then
     echo "Docker Compose V2 is not installed"
