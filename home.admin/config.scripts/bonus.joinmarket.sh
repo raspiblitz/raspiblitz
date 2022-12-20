@@ -11,8 +11,8 @@ JBTAG="v0.7.4" # installs JoinMarket v0.9.8
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "JoinMarket install script to install and switch JoinMarket on or off"
-  echo "sudo /home/admin/config.scrips/bonus.joinmarket.sh install"
-  echo "sudo /home/admin/config.scrips/bonus.joinmarket.sh on|off"
+  echo "sudo /home/admin/config.scripts/bonus.joinmarket.sh install"
+  echo "sudo /home/admin/config.scripts/bonus.joinmarket.sh on|off"
   echo "Installs JoininBox $JBTAG with JoinMarket v0.9.5"
   exit 1
 fi
@@ -103,7 +103,7 @@ if [ "$1" = "install" ]; then
       echo "AllowOutboundLocalhost 1" | sudo tee -a /etc/tor/torsocks.conf
       sudo systemctl reload tor@default
     fi
-  
+
     # joinin.conf settings
     sudo -u joinmarket touch /home/joinmarket/joinin.conf
     sudo -u joinmarket sed -i "s/^runBehindTor=.*/runBehindTor=on/g" /home/joinmarket/joinin.conf
@@ -127,7 +127,7 @@ if [ "$1" = "install" ]; then
     echo
     if sudo -u joinmarket /home/joinmarket/install.joinmarket.sh -i install; then
       echo "# Installed JoinMarket"
-      echo "# Run: 'sudo /home/admin/config.scrips/bonus.joinmarket.sh on' to configure and switch on"
+      echo "# Run: 'sudo /home/admin/config.scripts/bonus.joinmarket.sh on' to configure and switch on"
     else
       echo " Failed to install JoinMarket"
       exit 1
@@ -156,7 +156,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   if [ -f /home/joinmarket/start.joininbox.sh ]; then
     echo "# Ok, Joininbox is present"
   else
-    sudo /home/admin/config.scrips/bonus.joinmarket.sh install
+    sudo /home/admin/config.scripts/bonus.joinmarket.sh install
   fi
 
   # make sure the Bitcoin Core wallet is on
