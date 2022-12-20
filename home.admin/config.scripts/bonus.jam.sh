@@ -25,7 +25,7 @@ fi
 
 # check and load raspiblitz config to know which network is running
 source $RASPIBLITZ_INFO
-source $RASPIBLITZ_CONF
+source $RASPIBLITZ_CONF 2>/dev/null
 
 # check if already installed & active
 isInstalled=$(compgen -u | grep -c ${USERNAME})
