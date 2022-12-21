@@ -9,7 +9,8 @@ FALLACK_BRANCH="master"
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ]; then
   echo "Manage RaspiBlitz WebUI"
-  echo "blitz.web.ui.sh on [?GITHUBUSER] [?REPO] [?BRANCH] [?COMMITORTAG]"
+  echo "blitz.web.ui.sh on [GITHUBUSER] [REPO] [BRANCH] [?COMMITORTAG]"
+  echo "blitz.web.ui.sh on DEFAULT"
   echo "blitz.web.ui.sh update"
   echo "blitz.web.ui.sh off"
   exit 0
@@ -26,23 +27,40 @@ fi
 ###################
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
-  # get parameters
-  GITHUB_USER=$2
+  if [ "$2" == "DEFAULT" ]; then
+    echo "# getting default user/repo from build_sdcard.sh"
+    sudo cp /home/admin/raspiblitz/build_sdcard.sh /home/admin/build_sdcard.sh
+    sudo chmod +x /home/admin/build_sdcard.sh 2>/dev/null
+    source <(sudo /home/admin/build_sdcard.sh -EXPORT)
+    GITHUB_USER="${defaultAPIuser}"
+    GITHUB_REPO="${defaultAPIrepo}"
+    GITHUB_BRANCH="${githubBranch}"
+    GITHUB_COMMITORTAG=""
+  else
+    # get parameters
+    GITHUB_USER=$2
+    GITHUB_REPO=$3
+    GITHUB_BRANCH=$4
+    GITHUB_COMMITORTAG=$5
+  fi
+
+  # check & output info
+  echo "# GITHUB_USER(${GITHUB_USER})"
   if [ "${GITHUB_USER}" == "" ]; then
     echo "# FAIL: No GITHUB_USER provided"
     exit 1
   fi
-  GITHUB_REPO=$3
+  echo "GITHUB_REPO(${GITHUB_REPO})"
   if [ "${GITHUB_REPO}" == "" ]; then
     echo "# FAIL: No GITHUB_REPO provided"
     exit 1
   fi
-  GITHUB_BRANCH=$4
+  echo "GITHUB_BRANCH(${GITHUB_BRANCH})"
   if [ "${GITHUB_BRANCH}" == "" ]; then
     echo "# FAIL: No GITHUB_BRANCH provided"
     exit 1
   fi
-  GITHUB_COMMITORTAG=$5
+  echo "GITHUB_COMMITORTAG(${GITHUB_COMMITORTAG})"
   if [ "${GITHUB_COMMITORTAG}" == "" ]; then
     echo "# INFO: No GITHUB_COMMITORTAG provided .. will use latest code on branch"
   fi
