@@ -13,6 +13,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "# sudo blitz.display.sh rotate [on|off]"
   echo "# sudo blitz.display.sh test-lcd-connect"
   echo "# sudo blitz.display.sh set-display [hdmi|lcd|headless]"
+  echo "# sudo blitz.display.sh prepare-install"
   exit 1
 fi
 
@@ -196,6 +197,19 @@ if [ "${command}" == "test-lcd-connect" ]; then
    exit 0
 fi
 
+function prepareinstall() {
+  repoCloned=$(sudo -u admin ls /home/admin/wavesharelcd-64bit-rpi/README.md 2>/dev/null| grep -c README.md)
+  if [ ${repoCloned} -lt 1 ]; then
+    echo "# clone/download https://github.com/tux1c/wavesharelcd-64bit-rpi.git"
+    cd /home/admin/
+    sudo -u admin git clone https://github.com/tux1c/wavesharelcd-64bit-rpi.git
+    sudo -u admin chmod -R 755 wavesharelcd-64bit-rpi
+    sudo -u admin chown -R admin:admin wavesharelcd-64bit-rpi
+  else
+    echo "# LCD repo already cloned/downloaded (${repoCloned})"
+  fi
+}
+
 #######################################
 # DISPLAY TYPED INSTALLS & UN-INSTALLS
 # HDMI is the default - every added
@@ -231,10 +245,7 @@ function install_lcd() {
     sudo apt-mark hold raspberrypi-bootloader
 
     # Downloading LCD Driver from Github
-    cd /home/admin/
-    sudo -u admin git clone https://github.com/tux1c/wavesharelcd-64bit-rpi.git
-    sudo -u admin chmod -R 755 wavesharelcd-64bit-rpi
-    sudo -u admin chown -R admin:admin wavesharelcd-64bit-rpi
+    prepareinstall
     cd /home/admin/wavesharelcd-64bit-rpi
     sudo -u admin git reset --hard 5a206a7 || exit 1
     sudo -u admin /home/admin/config.scripts/blitz.git-verify.sh \
@@ -403,6 +414,17 @@ function uninstall_headless() {
     exit 1
   fi
 }
+
+###################
+# PREPARE INSTALL
+# make sure github
+# repo is installed
+###################
+
+if [ "${command}" == "prepare-install" ]; then
+  prepareinstall
+  exit 0
+fi
 
 ###################
 # SET DISPLAY TYPE
