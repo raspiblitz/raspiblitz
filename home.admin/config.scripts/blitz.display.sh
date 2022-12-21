@@ -138,9 +138,9 @@ if [ "${command}" == "rotate" ]; then
     # change rotation config
     echo "# Turn ON: LCD ROTATE"
     sed -i "s/^dtoverlay=.*/dtoverlay=waveshare35a:rotate=90/g" /boot/config.txt
-    rm /etc/X11/xorg.conf.d/40-libinput.conf >/dev/null
+    rm /etc/X11/xorg.conf.d/40-libinput.conf 2>/dev/null
 
-    /home/admin/config.scripts/blitz.conf.sh set lcdrotate 1
+    /home/admin/config.scripts/blitz.conf.sh set lcdrotate 1 2>/dev/null
     echo "# OK - a restart is needed: sudo shutdown -r now"
 
   # TURN ROTATE OFF
@@ -165,7 +165,7 @@ EOF
     fi
 
     # update raspiblitz conf
-    /home/admin/config.scripts/blitz.conf.sh set lcdrotate 0  
+    /home/admin/config.scripts/blitz.conf.sh set lcdrotate 0 2>/dev/null
     echo "OK - a restart is needed: sudo shutdown -r now"
 
   else
@@ -202,7 +202,7 @@ function prepareinstall() {
   if [ ${repoCloned} -lt 1 ]; then
     echo "# clone/download https://github.com/tux1c/wavesharelcd-64bit-rpi.git"
     cd /home/admin/
-    sudo -u admin git clone https://github.com/tux1c/wavesharelcd-64bit-rpi.git
+    sudo -u admin git clone --no-checkout https://github.com/tux1c/wavesharelcd-64bit-rpi.git
     sudo -u admin chmod -R 755 wavesharelcd-64bit-rpi
     sudo -u admin chown -R admin:admin wavesharelcd-64bit-rpi
   else
@@ -247,6 +247,7 @@ function install_lcd() {
     # Downloading LCD Driver from Github
     prepareinstall
     cd /home/admin/wavesharelcd-64bit-rpi
+    sudo -u admin git checkout master
     sudo -u admin git reset --hard 5a206a7 || exit 1
     sudo -u admin /home/admin/config.scripts/blitz.git-verify.sh \
      'GitHub' 'https://github.com/web-flow.gpg' '4AEE18F83AFDEB23' || exit 1
@@ -480,7 +481,7 @@ if [ "${command}" == "set-display" ]; then
   fi
 
   # mark new display class in config (if exist)
-  /home/admin/config.scripts/blitz.conf.sh set displayClass ${paramDisplayClass}
+  /home/admin/config.scripts/blitz.conf.sh set displayClass ${paramDisplayClass} 2>/dev/null
   sed -i "s/^displayClass=.*/displayClass=${paramDisplayClass}/g" /home/admin/raspiblitz.info
   exit 0
 
