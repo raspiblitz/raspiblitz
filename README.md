@@ -253,36 +253,39 @@ In the end your RaspiBlitz should look like this:
 
 ## Downloading the Software
 
-| Method           | Install the image                                                                                                                                                                | Build the sd card                                                 |
-| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
-| Philosophy       | Trust                                                                                                                                                                            | Sovereignty                                                       |
-| Difficulty level | Easy                                                                                                                                                                             | Medium                                                            |
-| Pros             | Make Blitz accessible to everyone                                                                                                                                                | You don't need to trust us, build from your own forked repository |
-| Instructions     | [Download 1.9.0rc1 image]() and [Flash the sd card](README.md#write-the-sd-card-image-to-your-sd-card) | [Build your own sd card image](#build-the-sd-card-image)          |
-| Verify what?     | [Signature file]() and [verify the Sig](FAQ.md#how-to-verify-the-sd-card-image-after-download) OR SHA-256 (below)                                                               | All of the code, don't trust, verify                              |
+You now have the hardware ready for your RaspiBlitz - whats missing is the software to run. This is normally done by downloading an image file and then writing it (flashing it) to the sd card. This is a bigger file (multiple GigaBytes) so make sure to have the available storage space on your laptop.
 
-If downloading the maintainer SD card image:
-
-- GPG 64-bit (main): 1C73 060C 7C17 6461 & (sub): AA9D D1B5 CC56 47DA
-- SHA-256: 
-
-Which verification method should I used: Hash or Signature?
-
-- Signed file prove to you that the SD card image was actually built by the lead developer of the RaspiBlitz project. (Safest)
-- Hash function checks file integrity. (Secure)
-
-<!---
-The maintainer sd card image can also be downloaded via torrent:
-
-- [assets/raspiblitz-v1.8.0-2022-07-28.img.gz.torrent](https://github.com/rootzoll/raspiblitz/raw/dev/home.admin/assets/raspiblitz-v1.8.0-2022-07-28.img.gz.torrent)
---->
+If you are a very advanded user who is able to read/verify code or you like to run a self-modified/forked version of RaspiBlitz you can also build the sd card image yourself - see the [Build your own sd card image](#build-the-sd-card-image) section for this. Everybody else can choose from two ready-made sd card images below.
 
 Useful info:
 
 - [What's new in Version 1.9.0 of RaspiBlitz?](CHANGES.md#whats-new-in-version-190-of-raspiblitz)
 - [How to update my RaspiBlitz?](README.md#updating-raspiblitz-to-new-version)
 - [How to migrate to RaspiBlitz from Umbrel/myNode/Citadel](#make-a-raspiblitz-out-of-your-umbrel-citadel-or-mynode)
-- [How to verify the SD card image after download?](FAQ.md#how-to-verify-the-sd-card-image-after-download)
+
+### Download FATPACK Image (Beginners - WebUI)
+
+This is the sd card image you should choose if your at the beginning of your RaspiBlitz journey or you are a casual node runner wanna download the next update - with WebUI & fast installing bonus apps. Its totally fine :)
+
+- FATPACK SD CARD IMAGE: n/a <!--[raspiblitz-fat-v1.9.0rc1-2022-12-21.img.gz](https://raspiblitz.fulmo.org/images/raspiblitz-fat-v1.9.0rc1-2022-12-21.img.gz)-->
+- SHA-256: n/a
+- Signature-File: n/a <!--[raspiblitz-fat-v1.9.0rc1-2022-12-21.img.gz.sig](https://raspiblitz.fulmo.org/images/raspiblitz-fat-v1.9.0rc1-2022-12-21.img.gz.sig)-->
+- Torrent: n/a <!--[raspiblitz-fat-v1.9.0-2022-12-21.img.gz.torrent](https://github.com/rootzoll/raspiblitz/raw/dev/home.admin/assets/raspiblitz-fat-v1.9.0-2022-12-21.img.gz.torrent)-->
+- GPG 64-bit (main): 1C73 060C 7C17 6461 & (sub): AA9D D1B5 CC56 47DA
+
+[How to verify the SD card image after download?](FAQ.md#how-to-verify-the-sd-card-image-after-download)
+
+### Download MINIMAL Image (Experienced Users - SSH)
+
+This is the sd card image for RaspiBlitz users that are already more experienced and want to use just a limited set of features of the RaspiBlitz. This image has just the bare minimum of features pre-installed - LCD & HDMI output is off by default. Setup, Update or Recovery needs to be done thru SSH login - API & WebUI are later available but are not preinstalled/activated by default. The RaspiBlitz will download & compile just the tools that are in your ´raspiblitz.conf´ - this will take longer but as a tradeoff this RaspiBlitz then just runs with a reduced set of dependencies and so a minimalized attack vector and better performance. Its for the serious & experineced node runners.
+
+- MINIMAL SD CARD IMAGE: n/a <!--[raspiblitz-min-v1.9.0rc1-2022-12-21.img.gz](https://raspiblitz.fulmo.org/images/raspiblitz-minimal-v1.9.0rc1-2022-12-21.img.gz)-->
+- SHA-256: n/a
+- Signature-File: n/a <!--[raspiblitz-min-v1.9.0rc1-2022-12-21.img.gz.sig](https://raspiblitz.fulmo.org/images/raspiblitz-min-v1.9.0rc1-2022-12-21.img.gz.sig)-->
+- Torrent: n/a <!--[raspiblitz-min-v1.9.0-2022-12-21.img.gz.torrent](https://github.com/rootzoll/raspiblitz/raw/dev/home.admin/assets/raspiblitz-min-v1.9.0-2022-12-21.img.gz.torrent)-->
+- GPG 64-bit (main): 1C73 060C 7C17 6461 & (sub): AA9D D1B5 CC56 47DA
+
+[How to verify the SD card image after download?](FAQ.md#how-to-verify-the-sd-card-image-after-download)
 
 ## Write the SD-Card image to your SD Card
 
@@ -676,7 +679,7 @@ It will enable 4 touch buttons on the left hand side of the screen.
 - Invoice - creates an Invoice-QR code that can be used for payments
 - Off - Shutdown or Restart the RaspiBlitz
 
-Please mind that the touchscreen is still experimental and with recent changes is missing certain UI fixes. This might take still until v1.8.1 release where the touchscreen is planned for a refactor/rewrite.
+Please mind that the touchscreen is still experimental and with recent changes is missing certain UI fixes. This might take still until a later version where the touchscreen is planned for a refactor/rewrite.
 
 ##### LCD Rotate
 
@@ -1280,10 +1283,6 @@ Another kind of migration is when you already run a full node with the Umbrel, C
 You basically have all the hardware needed and just need to change software.
 You don't need the [LCD from the shopping list](#amazon-shopping-list-buy-parts--build-it-yourself) - RaspiBlitz can also run without an LCD.
 
-_NOTE: This migration is still experimental.
-You will still use the terminal to setup & manage your RaspiBlitz.
-If that is too technical for you please wait for the RaspiBlitz v1.8, which will introduce a WebUI for your browser that will make the migration to RaspiBlitz more familiar to your old node user experience._
-
 Before you start migration:
 
 - if you have on-chain funds on your old node - make sure to have the backup seed words
@@ -1449,7 +1448,7 @@ But if you want to build that image yourself - here is a quick guide:
 Now you are ready to start the SD card build script (check the code to see if the installation and config are OK for you).
 Copy the following command into your terminal and execute:
 
-`wget https://raw.githubusercontent.com/rootzoll/raspiblitz/v1.8/build_sdcard.sh && sudo bash build_sdcard.sh`
+`wget https://raw.githubusercontent.com/rootzoll/raspiblitz/v1.9/build_sdcard.sh && sudo bash build_sdcard.sh`
 
 As you can see from the URL, you can find the build script in this Git repo under `build_sdcard.sh`.
 

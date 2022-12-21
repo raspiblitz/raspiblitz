@@ -10,7 +10,7 @@
 ##########################################################################
 
 defaultRepo="rootzoll"
-defaultBranch="v1.8"
+defaultBranch="v1.9"
 
 defaultAPIuser="fusion44"
 defaultAPIrepo="blitz_api"
@@ -28,6 +28,7 @@ usage(){
   printf %s"${me} [--option <argument>]
 
 Options:
+  -EXPORT                                  just print build parameters & exit'
   -h, --help                               this help info
   -i, --interaction [0|1]                  interaction before proceeding with exection (default: 1)
   -f, --fatpack [0|1]                      fatpack mode (default: 1)
@@ -45,6 +46,21 @@ Notes:
 }
 if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
   usage
+fi
+
+if [ "$1" = "-EXPORT" ] || [ "$1" = "EXPORT" ]; then
+  cd /home/admin/raspiblitz 2>/dev/null
+  activeBranch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+  if [ "${activeBranch}" == "" ]; then
+    activeBranch="${defaultBranch}"
+  fi
+  echo "githubUser='${defaultRepo}'"
+  echo "githubBranch='${activeBranch}'"
+  echo "defaultAPIuser='${defaultAPIuser}'"
+  echo "defaultAPIrepo='${defaultAPIrepo}'"
+  echo "defaultWEBUIuser='${defaultWEBUIuser}'"
+  echo "defaultWEBUIrepo='${defaultWEBUIrepo}'"
+  exit 0
 fi
 
 ## default user message
