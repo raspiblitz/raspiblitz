@@ -13,7 +13,7 @@ FALLACK_BRANCH="dev"
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ]; then
   echo "Manage RaspiBlitz Web API"
   echo "blitz.web.api.sh on [GITHUBUSER] [REPO] [BRANCH] [?COMMITORTAG]"
-  echo "blitz.web.api.sh on DEFAULTS"
+  echo "blitz.web.api.sh on DEFAULT"
   echo "blitz.web.api.sh update-config"
   echo "blitz.web.api.sh update-code [?BRANCH]"
   echo "blitz.web.api.sh off"
@@ -145,8 +145,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   if [ "$2" == "DEFAULT" ]; then
 
     echo "# getting default user/repo from build_sdcard.sh"
-    sudo chmod +x /home/admin/raspiblitz/build_sdcard.sh 2>/dev/null
-    source <(sudo /home/admin/raspiblitz/build_sdcard.sh -EXPORT)
+    sudo cp /home/admin/raspiblitz/build_sdcard.sh /home/admin/build_sdcard.sh
+    sudo chmod +x /home/admin/build_sdcard.sh 2>/dev/null
+    source <(sudo /home/admin/build_sdcard.sh -EXPORT)
     GITHUB_USER="${defaultAPIuser}"
     GITHUB_REPO="${defaultAPIrepo}"
     GITHUB_BRANCH="${githubBranch}"
