@@ -32,8 +32,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo cp /home/admin/raspiblitz/build_sdcard.sh /home/admin/build_sdcard.sh
     sudo chmod +x /home/admin/build_sdcard.sh 2>/dev/null
     source <(sudo /home/admin/build_sdcard.sh -EXPORT)
-    GITHUB_USER="${defaultAPIuser}"
-    GITHUB_REPO="${defaultAPIrepo}"
+    GITHUB_USER="${defaultWEBUIuser}"
+    GITHUB_REPO="${defaultWEBUIrepo}"
     GITHUB_BRANCH="${githubBranch}"
     GITHUB_COMMITORTAG=""
   else
