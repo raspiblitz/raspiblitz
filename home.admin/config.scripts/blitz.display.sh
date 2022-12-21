@@ -13,6 +13,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "# sudo blitz.display.sh rotate [on|off]"
   echo "# sudo blitz.display.sh test-lcd-connect"
   echo "# sudo blitz.display.sh set-display [hdmi|lcd|headless]"
+  echo "# sudo blitz.display.sh prepare-install"
   exit 1
 fi
 
@@ -137,9 +138,9 @@ if [ "${command}" == "rotate" ]; then
     # change rotation config
     echo "# Turn ON: LCD ROTATE"
     sed -i "s/^dtoverlay=.*/dtoverlay=waveshare35a:rotate=90/g" /boot/config.txt
-    rm /etc/X11/xorg.conf.d/40-libinput.conf >/dev/null
+    rm /etc/X11/xorg.conf.d/40-libinput.conf 2>/dev/null
 
-    /home/admin/config.scripts/blitz.conf.sh set lcdrotate 1
+    /home/admin/config.scripts/blitz.conf.sh set lcdrotate 1 2>/dev/null
     echo "# OK - a restart is needed: sudo shutdown -r now"
 
   # TURN ROTATE OFF
@@ -164,7 +165,7 @@ EOF
     fi
 
     # update raspiblitz conf
-    /home/admin/config.scripts/blitz.conf.sh set lcdrotate 0  
+    /home/admin/config.scripts/blitz.conf.sh set lcdrotate 0 2>/dev/null
     echo "OK - a restart is needed: sudo shutdown -r now"
 
   else
@@ -195,6 +196,19 @@ if [ "${command}" == "test-lcd-connect" ]; then
   fi
    exit 0
 fi
+
+function prepareinstall() {
+  repoCloned=$(sudo -u admin ls /home/admin/wavesharelcd-64bit-rpi/README.md 2>/dev/null| grep -c README.md)
+  if [ ${repoCloned} -lt 1 ]; then
+    echo "# clone/download https://github.com/tux1c/wavesharelcd-64bit-rpi.git"
+    cd /home/admin/
+    sudo -u admin git clone --no-checkout https://github.com/tux1c/wavesharelcd-64bit-rpi.git
+    sudo -u admin chmod -R 755 wavesharelcd-64bit-rpi
+    sudo -u admin chown -R admin:admin wavesharelcd-64bit-rpi
+  else
+    echo "# LCD repo already cloned/downloaded (${repoCloned})"
+  fi
+}
 
 #######################################
 # DISPLAY TYPED INSTALLS & UN-INSTALLS
@@ -231,11 +245,9 @@ function install_lcd() {
     sudo apt-mark hold raspberrypi-bootloader
 
     # Downloading LCD Driver from Github
-    cd /home/admin/
-    sudo -u admin git clone https://github.com/tux1c/wavesharelcd-64bit-rpi.git
-    sudo -u admin chmod -R 755 wavesharelcd-64bit-rpi
-    sudo -u admin chown -R admin:admin wavesharelcd-64bit-rpi
+    prepareinstall
     cd /home/admin/wavesharelcd-64bit-rpi
+    sudo -u admin git checkout master
     sudo -u admin git reset --hard 5a206a7 || exit 1
     sudo -u admin /home/admin/config.scripts/blitz.git-verify.sh \
      'GitHub' 'https://github.com/web-flow.gpg' '4AEE18F83AFDEB23' || exit 1
@@ -405,6 +417,17 @@ function uninstall_headless() {
 }
 
 ###################
+# PREPARE INSTALL
+# make sure github
+# repo is installed
+###################
+
+if [ "${command}" == "prepare-install" ]; then
+  prepareinstall
+  exit 0
+fi
+
+###################
 # SET DISPLAY TYPE
 ###################
 
@@ -458,7 +481,7 @@ if [ "${command}" == "set-display" ]; then
   fi
 
   # mark new display class in config (if exist)
-  /home/admin/config.scripts/blitz.conf.sh set displayClass ${paramDisplayClass}
+  /home/admin/config.scripts/blitz.conf.sh set displayClass ${paramDisplayClass} 2>/dev/null
   sed -i "s/^displayClass=.*/displayClass=${paramDisplayClass}/g" /home/admin/raspiblitz.info
   exit 0
 

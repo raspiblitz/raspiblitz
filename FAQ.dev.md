@@ -12,8 +12,7 @@ Work notes for the process of producing a new SD card image release:
 * From the browser `Show All Downloads` and from the context menu select `Open Containing Folder`
 * On that file manager open context (right click) on the white-space and select `Open in Terminal`
 * Compare the checksum with the one you just made note of, using `shasum -a 256 *.zip`
-* Install curl if needed `sudo apt-get install -f curl net-tools`
-* Check signature: `curl https://www.raspberrypi.org/raspberrypi_downloads.gpg.key | gpg --import && gpg --verify *.sig`
+* Check signature: `wget https://www.raspberrypi.org/raspberrypi_downloads.gpg.key && gpg --import ./raspberrypi_downloads.gpg.key && gpg --verify *.sig`
 * The result should say "correct signature" and the fingerprint should end with `8738 CD6B 956F 460C`
 * Insert an NTFS formatted USB stick and use the file manager to move all files to the USB
 * If image is an ZIP file use in file manager context on NTFS USB stick `extract here` to unzip
@@ -197,3 +196,15 @@ See article: https://tech.sycamore.garden/add-commit-push-contributor-branch-git
 Chery-picking patch PRs from dev to a release-branch like 'v1.8' (for example) is now a bit more complicated. Either an admin switches temorarly the branch protection "require a pull request before merging" setting off for the `git cherry-pick` OR we create a `p1.8` branch from `v1.8`, cherry-pick the squashed patch PR into that unprotected `p1.8` and then open a PR back to `v1.8`.
 
 But what we gain is that better branch protection and we can add more contributers to the project that are allowed to manage issues - like adding lables or closing.
+
+### How to run the automatic amd64 build on a VM on OSX?
+
+just notes so far:
+
+https://brew.sh
+brew install qemu
+https://github.com/rootzoll/raspiblitz/actions --> download amd64-lean image
+double unzip until `qcow2` file 
+convert `qcow2` to `vdi:
+qemu-img convert -f qcow2 raspiblitz-amd64-debian-lean.qcow2 -O vdi raspiblitz-amd64-debian-lean.vdi
+https://www.virtualbox.org/wiki/Downloads

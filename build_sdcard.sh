@@ -856,6 +856,8 @@ echo -e "\nIMPORTANT IF WANT TO MAKE A RELEASE IMAGE FROM THIS BUILD:"
 echo "1. login fresh --> user:admin password:raspiblitz"
 echo -e "2. run --> release\n"
 
+# make sure that at least the code is available (also if no internet)
+sudo /home/admin/config.scripts/blitz.display.sh prepare-install
 # (do last - because might trigger reboot)
 if [ "${display}" != "headless" ] || [ "${baseimage}" = "raspios_arm64" ]; then
   echo "*** ADDITIONAL DISPLAY OPTIONS ***"
