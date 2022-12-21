@@ -360,8 +360,8 @@ blitzApiInstalled=$(systemctl status blitzapi | grep -c "loaded")
 if [ "${blitzapi}" == "on" ] && [ $blitzApiInstalled -eq 0 ]; then
     echo "Provisioning BlitzAPI - run config script" >> ${logFile}
     /home/admin/_cache.sh set message "Setup BlitzAPI (takes time)"
-    /home/admin/config.scripts/blitz.web.api.sh on >> ${logFile} 2>&1    
-    /home/admin/config.scripts/blitz.web.ui.sh on >> ${logFile} 2>&1   
+    /home/admin/config.scripts/blitz.web.api.sh on DEFAULT >> ${logFile} 2>&1    
+    /home/admin/config.scripts/blitz.web.ui.sh on DEFAULT >> ${logFile} 2>&1   
 else
     echo "Provisioning BlitzAPI - keep default" >> ${logFile}
 fi
