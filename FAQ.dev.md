@@ -28,7 +28,8 @@ Work notes for the process of producing a new SD card image release:
 * In terminal `ssh pi@[IP-OF-RASPIBLITZ]`
 * Password is `raspberry`
 * Run the following command BUT REPLACE `[BRANCH]` with the branch-string of your latest version
-* `wget --no-cache https://raw.githubusercontent.com/rootzoll/raspiblitz/[BRANCH]/build_sdcard.sh && sudo bash build_sdcard.sh -u rootzoll -b [BRANCH]`
+* For FATPACK: `wget --no-cache https://raw.githubusercontent.com/rootzoll/raspiblitz/[BRANCH]/build_sdcard.sh && sudo bash build_sdcard.sh -u rootzoll -b [BRANCH]`
+* For MINIMAL: `wget --no-cache https://raw.githubusercontent.com/rootzoll/raspiblitz/[BRANCH]/build_sdcard.sh && sudo bash build_sdcard.sh -u rootzoll -b [BRANCH] -f 0 -d headless`
 * Monitor/Check outputs for warnings/errors - install LCD
 * Login new with `ssh admin@[IP-OF-RASPIBLITZ]` (pw: raspiblitz) and run `release`
 * Disconnect WiFi/LAN on build laptop (hardware switch off) and shutdown
@@ -43,11 +44,17 @@ Work notes for the process of producing a new SD card image release:
 * Take the SD card from the RaspberryPi and connect with an external SD card reader to the laptop
 * Click on `boot` volume once in the file manger
 * Connect the NTFS USB stick, open in file manager and delete old files
+
+* if not: review changes in latest pishrink script
+* To make a raw image from sd card - first way (terminal): 
+  * Open Terminal and cd into directory of NTFS USB stick under `/media/amnesia`
+  * Run `df` to check on the SD card device name (`boot` - ignore last partition number)
+  * `dd if=/dev/[sdcarddevice] of=./raspiblitz.img`
+* To make a raw image from sd card - second way (UI with progress): 
+  * Search "Laufwerke" or "Drives" on Tails Apps
+  * Create image named `raspiblitz.img` to USB storage
 * Open Terminal and cd into directory of NTFS USB stick under `/media/amnesia`
 * `shasum -a 256 ./pishrink.sh` should be `e46e1e1e3c6e3555f9fff5435e2305e99b98aaa8dc28db1814cf861fbb472a69`
-* if not: review changes in latest pishrink script
-* Run `df` to check on the SD card device name (`boot` - ignore last partition number)
-* `dd if=/dev/[sdcarddevice] of=./raspiblitz.img`
 * `chmod +x ./pishrink.sh | sudo ./pishrink.sh ./raspiblitz.img`
 * `gzip -c ./raspiblitz.img > ./raspiblitz-vX.X-YEAR-MONTH-DAY.img.gz`
 * Then run `shasum -a 256 *.gz > sha256.txt`
