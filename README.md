@@ -267,8 +267,10 @@ Useful info:
 
 This is the sd card image you should choose if your at the beginning of your RaspiBlitz journey or you are a casual node runner wanna download the next update - with WebUI & fast installing bonus apps. Its totally fine :)
 
-- FATPACK SD CARD IMAGE: n/a <!--[raspiblitz-fat-v1.9.0rc1-2022-12-21.img.gz](https://raspiblitz.fulmo.org/images/raspiblitz-fat-v1.9.0rc1-2022-12-21.img.gz)-->
-- SHA-256: n/a
+__WARNING: THIS IS STILL A RELEASE CANDIDATE VERSION - JUST USE FOR TESTING, HIGHER RISK OF LOSING FUNDS!__
+
+- FATPACK SD CARD IMAGE: n/a [raspiblitz-fat-v1.9.0rc1-2022-12-21.img.gz](https://raspiblitz.fulmo.org/images/raspiblitz-fat-v1.9.0rc1-2022-12-21.img.gz)
+- SHA-256: 76bd41a8c69fe44ea642a171ba36c63bc217cfad28eaa501c0ff2823b59bb628
 - Signature-File: n/a <!--[raspiblitz-fat-v1.9.0rc1-2022-12-21.img.gz.sig](https://raspiblitz.fulmo.org/images/raspiblitz-fat-v1.9.0rc1-2022-12-21.img.gz.sig)-->
 - Torrent: n/a <!--[raspiblitz-fat-v1.9.0-2022-12-21.img.gz.torrent](https://github.com/rootzoll/raspiblitz/raw/dev/home.admin/assets/raspiblitz-fat-v1.9.0-2022-12-21.img.gz.torrent)-->
 - GPG 64-bit (main): 1C73 060C 7C17 6461 & (sub): AA9D D1B5 CC56 47DA
@@ -279,8 +281,10 @@ This is the sd card image you should choose if your at the beginning of your Ras
 
 This is the sd card image for RaspiBlitz users that are already more experienced and want to use just a limited set of features of the RaspiBlitz. This image has just the bare minimum of features pre-installed - LCD & HDMI output is off by default. Setup, Update or Recovery needs to be done thru SSH login - API & WebUI are later available but are not preinstalled/activated by default. The RaspiBlitz will download & compile just the tools that are in your ´raspiblitz.conf´ - this will take longer but as a tradeoff this RaspiBlitz then just runs with a reduced set of dependencies and so a minimalized attack vector and better performance. Its for the serious & experineced node runners.
 
-- MINIMAL SD CARD IMAGE: n/a <!--[raspiblitz-min-v1.9.0rc1-2022-12-21.img.gz](https://raspiblitz.fulmo.org/images/raspiblitz-minimal-v1.9.0rc1-2022-12-21.img.gz)-->
-- SHA-256: n/a
+__WARNING: THIS IS STILL A RELEASE CANDIDATE VERSION - JUST USE FOR TESTING, HIGHER RISK OF LOSING FUNDS!__
+
+- MINIMAL SD CARD IMAGE: n/a [raspiblitz-min-v1.9.0rc1-2022-12-21.img.gz](https://raspiblitz.fulmo.org/images/raspiblitz-min-v1.9.0rc1-2022-12-21.img.gz)
+- SHA-256: a5e14858a8a5976009bdc198f868f898185cbd9cebde72d077d5ffbf64bb817f
 - Signature-File: n/a <!--[raspiblitz-min-v1.9.0rc1-2022-12-21.img.gz.sig](https://raspiblitz.fulmo.org/images/raspiblitz-min-v1.9.0rc1-2022-12-21.img.gz.sig)-->
 - Torrent: n/a <!--[raspiblitz-min-v1.9.0-2022-12-21.img.gz.torrent](https://github.com/rootzoll/raspiblitz/raw/dev/home.admin/assets/raspiblitz-min-v1.9.0-2022-12-21.img.gz.torrent)-->
 - GPG 64-bit (main): 1C73 060C 7C17 6461 & (sub): AA9D D1B5 CC56 47DA
