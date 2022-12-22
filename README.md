@@ -269,7 +269,7 @@ This is the sd card image you should choose if your at the beginning of your Ras
 
 __WARNING: THIS IS STILL A RELEASE CANDIDATE VERSION - JUST USE FOR TESTING, HIGHER RISK OF LOSING FUNDS!__
 
-- FATPACK SD CARD IMAGE: n/a [raspiblitz-fat-v1.9.0rc1-2022-12-21.img.gz](https://raspiblitz.fulmo.org/images/raspiblitz-fat-v1.9.0rc1-2022-12-21.img.gz)
+- FATPACK SD CARD IMAGE: [raspiblitz-fat-v1.9.0rc1-2022-12-21.img.gz](https://raspiblitz.fulmo.org/images/raspiblitz-fat-v1.9.0rc1-2022-12-21.img.gz)
 - SHA-256: 76bd41a8c69fe44ea642a171ba36c63bc217cfad28eaa501c0ff2823b59bb628
 - Signature-File: n/a <!--[raspiblitz-fat-v1.9.0rc1-2022-12-21.img.gz.sig](https://raspiblitz.fulmo.org/images/raspiblitz-fat-v1.9.0rc1-2022-12-21.img.gz.sig)-->
 - Torrent: n/a <!--[raspiblitz-fat-v1.9.0-2022-12-21.img.gz.torrent](https://github.com/rootzoll/raspiblitz/raw/dev/home.admin/assets/raspiblitz-fat-v1.9.0-2022-12-21.img.gz.torrent)-->
@@ -283,7 +283,7 @@ This is the sd card image for RaspiBlitz users that are already more experienced
 
 __WARNING: THIS IS STILL A RELEASE CANDIDATE VERSION - JUST USE FOR TESTING, HIGHER RISK OF LOSING FUNDS!__
 
-- MINIMAL SD CARD IMAGE: n/a [raspiblitz-min-v1.9.0rc1-2022-12-21.img.gz](https://raspiblitz.fulmo.org/images/raspiblitz-min-v1.9.0rc1-2022-12-21.img.gz)
+- MINIMAL SD CARD IMAGE: [raspiblitz-min-v1.9.0rc1-2022-12-21.img.gz](https://raspiblitz.fulmo.org/images/raspiblitz-min-v1.9.0rc1-2022-12-21.img.gz)
 - SHA-256: a5e14858a8a5976009bdc198f868f898185cbd9cebde72d077d5ffbf64bb817f
 - Signature-File: n/a <!--[raspiblitz-min-v1.9.0rc1-2022-12-21.img.gz.sig](https://raspiblitz.fulmo.org/images/raspiblitz-min-v1.9.0rc1-2022-12-21.img.gz.sig)-->
 - Torrent: n/a <!--[raspiblitz-min-v1.9.0-2022-12-21.img.gz.torrent](https://github.com/rootzoll/raspiblitz/raw/dev/home.admin/assets/raspiblitz-min-v1.9.0-2022-12-21.img.gz.torrent)-->
