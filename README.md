@@ -150,17 +150,11 @@ In the end your RaspiBlitz should look like this:
 
 ![HardwareSetup](pictures/hardwaresetup.webp)
 
-## Downloading the Software
-
 You now have the hardware ready for your RaspiBlitz - whats missing is the software to run. This is normally done by downloading an image file and then writing it (flashing it) to the sd card. This is a bigger file (multiple GigaBytes) so make sure to have the available storage space on your laptop.
 
-If you are a very advanded user who is able to read/verify code or you like to run a self-modified/forked version of RaspiBlitz you can also build the sd card image yourself - see the [Build your own sd card image](#build-the-sd-card-image) section for this. Everybody else can choose from two ready-made sd card images below.
+## Downloading the Software
 
-Useful info:
-
-- [What's new in Version 1.9.0 of RaspiBlitz?](CHANGES.md#whats-new-in-version-190-of-raspiblitz)
-- [How to update my RaspiBlitz?](README.md#updating-raspiblitz-to-new-version)
-- [How to migrate to RaspiBlitz from Umbrel/myNode/Citadel](#make-a-raspiblitz-out-of-your-umbrel-citadel-or-mynode)
+If you are a very advanded user who is able to read/verify code or you like to run a self-modified/forked version of RaspiBlitz you can also build the sd card image yourself - see the [Build your own sd card image](#build-the-sd-card-image) section for this. Everybody else can choose from two ready-made sd card images below for first install or update.
 
 ### Download FATPACK Image (Beginners - WebUI)
 
@@ -173,8 +167,7 @@ __WARNING: THIS IS STILL A RELEASE CANDIDATE VERSION - JUST USE FOR TESTING, HIG
 - Signature-File: n/a <!--[raspiblitz-fat-v1.9.0rc1-2022-12-21.img.gz.sig](https://raspiblitz.fulmo.org/images/raspiblitz-fat-v1.9.0rc1-2022-12-21.img.gz.sig)-->
 - Torrent: n/a <!--[raspiblitz-fat-v1.9.0-2022-12-21.img.gz.torrent](https://github.com/rootzoll/raspiblitz/raw/dev/home.admin/assets/raspiblitz-fat-v1.9.0-2022-12-21.img.gz.torrent)-->
 - GPG 64-bit (main): 1C73 060C 7C17 6461 & (sub): AA9D D1B5 CC56 47DA
-
-[How to verify the SD card image after download?](FAQ.md#how-to-verify-the-sd-card-image-after-download)
+- [How to verify the SD card image after download?](FAQ.md#how-to-verify-the-sd-card-image-after-download)
 
 ### Download MINIMAL Image (Experienced Users - SSH)
 
@@ -187,8 +180,13 @@ __WARNING: THIS IS STILL A RELEASE CANDIDATE VERSION - JUST USE FOR TESTING, HIG
 - Signature-File: n/a <!--[raspiblitz-min-v1.9.0rc1-2022-12-21.img.gz.sig](https://raspiblitz.fulmo.org/images/raspiblitz-min-v1.9.0rc1-2022-12-21.img.gz.sig)-->
 - Torrent: n/a <!--[raspiblitz-min-v1.9.0-2022-12-21.img.gz.torrent](https://github.com/rootzoll/raspiblitz/raw/dev/home.admin/assets/raspiblitz-min-v1.9.0-2022-12-21.img.gz.torrent)-->
 - GPG 64-bit (main): 1C73 060C 7C17 6461 & (sub): AA9D D1B5 CC56 47DA
+- [How to verify the SD card image after download?](FAQ.md#how-to-verify-the-sd-card-image-after-download)
 
-[How to verify the SD card image after download?](FAQ.md#how-to-verify-the-sd-card-image-after-download)
+Further Info:
+
+- [What's new in Version 1.9.0 of RaspiBlitz?](CHANGES.md#whats-new-in-version-190-of-raspiblitz)
+- [How to update my RaspiBlitz?](README.md#updating-raspiblitz-to-new-version)
+- [How to migrate to RaspiBlitz from Umbrel/myNode/Citadel](#make-a-raspiblitz-out-of-your-umbrel-citadel-or-mynode)
 
 ## Write the SD-Card image to your SD Card
 
