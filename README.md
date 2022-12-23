@@ -160,7 +160,7 @@ In this section you find the lastest ready-to-use RaspiBlitz sd card images. Bas
 
 ### FATPACK SD Card Image (Beginners - WebUI)
 
-This is the sd card image you should choose if your at the beginning of your RaspiBlitz journey or you are a casual node runner wanna download the next update - with WebUI & fast installing bonus apps. Its totally fine :)
+This is the sd card image you should choose if your at the beginning of your RaspiBlitz journey or you are a casual node runner wanna download the next update - with WebUI & fast installing bonus apps.
 
 *WARNING: THIS IS STILL A RELEASE CANDIDATE VERSION</br>
 JUST USE FOR TESTING, HIGHER RISK OF LOSING FUNDS!*
