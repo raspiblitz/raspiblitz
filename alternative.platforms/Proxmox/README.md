@@ -125,10 +125,10 @@ apt upgrade -y
 apt install sudo
 ```
 
-Now we need to download the Build SDCard Script from Rootzoll. The version can be customized as you like. The latest version (as of block time 755125) is the 1.8.
+Now we need to download the Build SDCard Script from Rootzoll. The version can be customized as you like. The latest version (as of block time 768745) is the 1.9.
 
 ```
-wget https://raw.githubusercontent.com/rootzoll/raspiblitz/v1.8/build_sdcard.sh
+wget https://raw.githubusercontent.com/rootzoll/raspiblitz/v1.9/build_sdcard.sh
 ```
 
 And run:
