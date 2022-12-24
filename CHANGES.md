@@ -11,7 +11,7 @@
 - New: LightningTipBot v0.5 [details](https://github.com/LightningTipBot/LightningTipBot)
 - New on WebUI: Jam (JoinMarket Web UI) v0.1.4 [details](https://github.com/joinmarket-webui/joinmarket-webui/releases/tag/v0.1.4)
 - Update: Bitcoin Core v24.0.1 [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-24.0.1.md)
-- Update: LND v0.15.5 [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.15.5-beta
+- Update: LND v0.15.5 [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.15.5-beta)
 - Update: Core Lightning v22.11.1 [details](https://github.com/ElementsProject/lightning/releases/tag/v22.11.1)
 - Update: Electrum Server in Rust (electrs) v0.9.10 [details](https://github.com/romanz/electrs/blob/master/RELEASE-NOTES.md#0910-nov-3-2022)
 - Update: Lightning Terminal v0.8.4-alpha [details](https://github.com/lightninglabs/lightning-terminal/releases/tag/v0.8.4-alpha)
