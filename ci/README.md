@@ -17,8 +17,8 @@
   - [fatpack image](#fatpack-image)
   - [lean image](#lean-image)
     - [Add Gnome desktop (optional)](#add-gnome-desktop-optional)
-- [Add wifi](#add-wifi)
-- [Add wifi driver (optional)](#add-wifi-driver-optional)
+  - [Add wifi (optional)](#add-wifi-optional)
+  - [Add wifi driver (optional)](#add-wifi-driver-optional)
 - [Workflow notes](#workflow-notes)
   - [Packer .json settings:](#packer-json-settings)
   - [VNC](#vnc)
@@ -56,32 +56,33 @@ with the [Makefile](https://github.com/rootzoll/raspiblitz/blob/dev/Makefile)
 ### Generate an amd64 image
 The workflow locally and in github actions generates a .qcow2 format amd64 image.
 * Tested with
-    * libvirt / virsh / virt-manager (https://virt-manager.org/)
-    * written to disk and booted with legacy boot (non-UEFI)
+  * libvirt / virsh / virt-manager (https://virt-manager.org/)
+  * written to disk and booted with legacy boot (non-UEFI)
   ```
   make amd64-lean-image
   ```
 * find the compressed .qcow2 image and sh256 hashes in the `ci/amd64/builds` directory
 
 ## Images generated in github actions
+* To see the downloadable artifacts will need to log in with your github profile
 * Find the images in the green runs in github actions at:
 https://github.com/rootzoll/raspiblitz/actions
-
   ```
   # unzip to the same directory
   unzip raspiblitz-amd64-image-YEAR-MM-DD-COMMITHASH.zip
   ```
 ## Write the image to a disk connected with USB
-identify the connected disk with `lsblk` eg `/dev/sdd`
+* identify the connected disk with `lsblk` eg `/dev/sdd`
 
-###  Convert the qcow2 volume to a raw disk image
+### Convert the qcow2 volume to a raw disk image
 * the raw image is 33.5 GB
-    ```
-    # unzip
-    gzip -dkv raspiblitz-amd64-debian-11.5-lean.qcow2.gz
-    # convert
-    qemu-img convert raspiblitz-amd64-debian-11.5-lean.qcow2 raspiblitz-amd64-debian-11.5-lean.img
-    ```
+  ```
+  # unzip
+  gzip -dkv raspiblitz-amd64-debian-11.5-lean.qcow2.gz
+  # convert
+  qemu-img convert raspiblitz-amd64-debian-11.5-lean.qcow2 raspiblitz-amd64-debian-11.5-lean.img
+  ```
+
 ### Write to a disk connected with USB with Balena Etcher or `dd`
 * [Balena Etcher](https://www.balena.io/etcher/) to write the .img to disk
 * dd to write the .img to disk
@@ -134,18 +135,18 @@ identify the connected disk with `lsblk` eg `/dev/sdd`
 
 #### Add Gnome desktop (optional)
 * Connect to the internet (easiest to plug in a LAN cable - use a USB - LAN adapter if have no port)
-    ```
-    apt install gnome
-    systemctl start gdm
-    ```
+  ```
+  apt install gnome
+  systemctl start gdm
+  ```
 
-## Add wifi
+### Add wifi (optional)
 * if the wifi driver is included in the FOSS Debian distro
 * in the command line run the network manager interface to connect:
   ```
   sudo nmtui
   ```
-## Add wifi driver (optional)
+### Add wifi driver (optional)
 * as in https://wiki.debian.org/iwlwifi
 * add the component `non-free` after `deb http://deb.debian.org/debian bullseye main` in `/etc/apt/sources.list`
 * install the wifi driver for the mentioned cards:
