@@ -321,23 +321,23 @@ if [ "${lndg}" == "on" ]; then
   echo
   echo "*** LNDg JOBS SYSTEMD STATUS ***"
   sudo systemctl status jobs-lndg.service -n2 --no-pager
-  echo "sudo tail -n 5 lnd_jobs_error.log"
-  sudo tail -n 5 lnd_jobs_error.log
+  echo "sudo tail -n 5 /var/log/lnd_jobs_error.log"
+  sudo tail -n 5 /var/log/lnd_jobs_error.log
   echo
   echo "*** LNDg REBALANCER SYSTEMD STATUS ***"
   sudo systemctl status rebalancer-lndg.service -n2 --no-pager
-  echo "sudo tail -n 5 lnd_rebalancer_error.log"
-  sudo tail -n 5 lnd_rebalancer_error.log
+  echo "sudo tail -n 5 /var/log/lnd_rebalancer_error.log"
+  sudo tail -n 5 /var/log/lnd_rebalancer_error.log
   echo
   echo "*** LNDg HTLC-STREAM SYSTEMD STATUS ***"
   sudo systemctl status htlc-stream-lndg.service -n2 --no-pager
-  echo "sudo tail -n 5 lnd_htlc_stream_error.log"
-  sudo tail -n 5 lnd_htlc_stream_error.log
+  echo "sudo tail -n 5 /var/log/lnd_htlc_stream_error.log"
+  sudo tail -n 5 /var/log/lnd_htlc_stream_error.log
   echo
   echo "*** LNDg GUNICORN SERVER SYSTEMD STATUS ***"
   sudo systemctl status gunicorn.service -n2 --no-pager
-  echo "sudo tail -n 5 gunicorn_error.log"
-  sudo tail -n 5 gunicorn_error.log
+  echo "sudo tail -n 5 /var/log/gunicorn_error.log"
+  sudo tail -n 5 /var/log/gunicorn_error.log
   echo
   echo "*** LAST 10 LNDg LOGS ***"
   echo "sudo journalctl -u lndg -b --no-pager -n10"

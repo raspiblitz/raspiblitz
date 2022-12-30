@@ -243,7 +243,7 @@ ExecStart=/home/lndg/lndg/.venv/bin/gunicorn lndg.wsgi -w 4 -b 0.0.0.0:8889
 Restart=always
 KillSignal=SIGQUIT
 Type=notify
-StandardError=syslog
+StandardError=append:/var/log/gunicorn_error.log
 NotifyAccess=all
 RestartSec=60s
 
