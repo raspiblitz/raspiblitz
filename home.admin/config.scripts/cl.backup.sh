@@ -189,7 +189,7 @@ if [ ${mode} = "cl-export-gui" ]; then
   echo 
   echo "ON YOUR MAC & LINUX LAPTOP - RUN IN NEW TERMINAL:"
   echo "sftp '${fileowner}@${localip}:${filename}' ./"
-  echo "ON WINDOWS USE:"
+  echo "ON WINDOWS - RUN IN CMD:"
   echo "sftp ${fileowner}@${localip}:${filename} ."
   echo
   echo "Use password A to authenticate file transfer."
