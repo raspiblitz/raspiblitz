@@ -514,7 +514,7 @@ echo "
   sharedscripts
   postrotate
     invoke-rc.d rsyslog rotate > /dev/null
-  enscript
+  endscript
 }
 
 /var/log/kern.log
