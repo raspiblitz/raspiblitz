@@ -24,7 +24,7 @@
 - Update: JoinMarket v0.9.8 [details](https://github.com/JoinMarket-Org/joinmarket-clientserver/releases/tag/v0.9.8)
 - Update: JoininBox v0.7.4 [details](https://github.com/openoms/joininbox/releases/tag/v0.7.3)
 - Update: Balance of Satoshis 13.6.0 (BOS) [details](https://github.com/alexbosworth/balanceofsatoshis/blob/master/CHANGELOG.md#1360)
-- Update: Circuitbreaker v0.3.2 [details](https://github.com/lightningequipment/circuitbreaker/blob/master/README.md)
+- Update: Circuitbreaker with webUI [details](https://github.com/lightningequipment/circuitbreaker/blob/master/README.md)
 - Fixed: SCB/Emergency-Backup to USB drive (now also with CLN emergency.recover file)
 - Info: Run RaspiBlitz on Proxmox [details](https://github.com/rootzoll/raspiblitz/tree/dev/alternative.platforms/Proxmox)
 - Info: IP2Tor unavailable & deactivated in SSH menus [details](https://github.com/rootzoll/raspiblitz/issues/3417#issuecomment-1310303480)

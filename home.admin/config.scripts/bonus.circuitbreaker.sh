@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # https://github.com/lightningequipment/circuitbreaker/releases
-pinnedVersion="v0.3.2"
-# the commits are not signed
+# https://github.com/lightningequipment/circuitbreaker/commits/master
+pinnedVersion="c6c2c3cf8a64673d0885941d1e16bd42619bae69"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -73,18 +73,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u circuitbreaker git reset --hard $pinnedVersion
     sudo -u circuitbreaker /usr/local/go/bin/go install ./... || exit 1
 
-    ##################
-    # config
-    ##################
-    echo
-    echo "# Setting the example configuration from:"
-    echo "# https://github.com/lightningequipment/circuitbreaker/blob/$pinnedVersion/circuitbreaker-example.yaml"
-    echo "# Find it at: /home/circuitbreaker/.circutbreaker/circuitbreaker.yaml"
-    echo
-    sudo -u circuitbreaker mkdir /home/circuitbreaker/.circuitbreaker 2>/dev/null
-    sudo -u circuitbreaker cp circuitbreaker-example.yaml \
-    /home/circuitbreaker/.circuitbreaker/circuitbreaker.yaml
-
     # make systemd service
     # sudo nano /etc/systemd/system/circuitbreaker.service
     echo "
@@ -114,9 +102,20 @@ WantedBy=multi-user.target
     sudo systemctl enable circuitbreaker
     echo "# OK - the circuitbreaker.service is now enabled"
 
-  else 
+  else
     echo "# The circuitbreaker.service is already installed."
   fi
+
+  ##################
+  # NGINX
+  ##################
+  # setup nginx symlinks
+  if ! [ -f /etc/nginx/sites-available/circuitbeaker_ssl.conf ]; then
+    sudo cp /home/admin/assets/nginx/sites-available/circuitbeaker_ssl.conf /etc/nginx/sites-available/circuitbeaker_ssl.conf
+  fi
+  sudo ln -sf /etc/nginx/sites-available/circuitbeaker_ssl.conf /etc/nginx/sites-enabled/
+  sudo nginx -t
+  sudo systemctl reload nginx
 
   # setting value in raspi blitz config
   /home/admin/config.scripts/blitz.conf.sh set circuitbreaker "on"
@@ -138,27 +137,32 @@ WantedBy=multi-user.target
     echo "# Failed to install circuitbreaker "
     exit 1
   fi
-  
+
+  sudo ufw allow 9236 comment circuitbreaker_https
+
   exit 0
 fi
 
 # switch off
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
+  echo "# Removing the user and it's home directory"
+  sudo userdel -rf circuitbreaker 2>/dev/null
+
   if [ ${isInstalled} -eq 1 ]; then
     echo "# Removing the circuitbreaker.service"
     sudo systemctl stop circuitbreaker
     sudo systemctl disable circuitbreaker
     sudo rm /etc/systemd/system/circuitbreaker.service
-    echo "# Removing the user and it's home directory"
-    sudo userdel -rf circuitbreaker 2>/dev/null
-    echo "# OK, Circuit Breaker is removed."
+    echo "# OK, circuitbreaker.service is removed."
   else
-    echo "# Circuit Breaker is not installed."
+    echo "# circuitbreaker.service is not installed."
   fi
 
   # setting value in raspiblitz.conf
   /home/admin/config.scripts/blitz.conf.sh set circuitbreaker "off"
+
+  sudo ufw delete allow 9236
 
   exit 0
 fi
@@ -166,7 +170,7 @@ fi
 # update
 if [ "$1" = "update" ]; then
   echo "# Updating Circuit Breaker"
-  cd /home/circuitbreaker/circuitbreaker
+  cd /home/circuitbreaker/circuitbreaker || exit 1
   # from https://github.com/apotdevin/thunderhub/blob/master/scripts/updateToLatest.sh
   # fetch latest master
   sudo -u circuitbreaker git fetch
@@ -192,13 +196,6 @@ if [ "$1" = "update" ]; then
   sudo -u circuitbreaker git reset --hard $TAG
   echo "# Installing the version: $TAG"
   sudo -u circuitbreaker /usr/local/go/bin/go install ./... || exit 1
-  echo
-  echo "# Setting the example configuration from:"
-  echo "# https://github.com/lightningequipment/circuitbreaker/blob/$TAG/circuitbreaker-example.yaml"
-  echo "# Find it at: /home/circuitbreaker/.circutbreaker/circuitbreaker.yaml"
-  sudo -u circuitbreaker mkdir /home/circuitbreaker/.circuitbreaker 2>/dev/null
-  sudo -u circuitbreaker cp circuitbreaker-example.yaml \
-  /home/circuitbreaker/.circuitbreaker/circuitbreaker.yaml
   echo
   echo "# Updated to version" $TAG
   echo
