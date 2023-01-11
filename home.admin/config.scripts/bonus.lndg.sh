@@ -166,6 +166,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
         # using existing database, so remove newly created database and link to existing one
         echo "Database already exists, using existing database"
         sudo rm /home/lndg/lndg/data/db.sqlite3
+		sudo chown -R lndg:lndg /mnt/hdd/app-data/lndg
+		sudo chmod -R 755 /mnt/hdd/app-data/lndg
+		sudo chmod 644 /mnt/hdd/app-data/lndg/data/db.sqlite3
         sudo -u lndg ln -sf /mnt/hdd/app-data/lndg/data/db.sqlite3 /home/lndg/lndg/data/db.sqlite3
 		sudo -u lndg /home/lndg/lndg/.venv/bin/python manage.py migrate
       fi
