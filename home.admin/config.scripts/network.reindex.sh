@@ -35,7 +35,7 @@ if [ "$1" = "reindex" ]; then
 
   # stop bitcoin service
   echo "# stopping ${network} service (please wait) .."
-  sudo systemctl stop ${prefix}${network}d 2>/dev/null
+  sudo systemctl stop ${prefix}${network}d
 
   # starting reindex
   echo "# starting ${network} service with -reindex flag"
