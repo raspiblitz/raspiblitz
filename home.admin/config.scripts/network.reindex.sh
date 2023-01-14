@@ -40,8 +40,8 @@ if [ "$1" = "start" ]; then
   # starting reindex
   echo "# starting re-index ..."
   sudo -u bitcoin /usr/local/bin/${network}d ${netparam}-daemon -reindex -conf=/mnt/hdd/${network}/${network}.conf -datadir=/mnt/hdd/${network}
-  echo "# wait re-index ..."
-  sleep 100
+  echo "# wait re-index (10 secs) ..."
+  sleep 10
   echo "# going into reboot - reindex process can be monitored like normal blockchain sync status"
   sudo /home/admin/config.scripts/blitz.shutdown.sh reboot
 
