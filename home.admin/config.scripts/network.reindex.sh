@@ -39,7 +39,7 @@ if [ "$1" = "reindex" ]; then
 
   # starting reindex
   echo "# starting ${network} service with -reindex flag"
-  sudo -u bitcoin /usr/local/bin/${network}d ${netparam}-daemon -reindex -conf=/mnt/hdd/${network}/${network}.conf -datadir=/mnt/hdd/${network}
+  sudo -u bitcoin /usr/local/bin/${network}d ${netparam}-daemon -reindex -conf=/mnt/hdd/${network}/${network}.conf -datadir=/mnt/hdd/${network} 1>&2
   echo "# waiting 10 secs"
   sleep 10
   echo "# going into reboot - reindex process can be monitored like normal blockchain sync status"
