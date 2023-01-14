@@ -13,7 +13,7 @@ source /mnt/hdd/raspiblitz.conf
 ###################
 # START
 ###################
-if [ "$1" = "start" ]; then
+if [ "$1" = "reindex" ]; then
 
   # network prefixes
   if [ "$2" = "main" ]; then
