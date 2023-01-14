@@ -90,7 +90,15 @@ case $CHOICE in
 #  HARDWARE)
 #    ;;
   SOFTWARE)
-    sudo /home/admin/config.scripts/blitz.debug.sh
+    echo "Generating debug logs. Be patient, this should take maximum 2 minutes .."
+    sudo rm /var/cache/raspiblitz/debug.log 2>/dev/null
+    /home/admin/config.scripts/blitz.debug.sh > /var/cache/raspiblitz/debug.log
+    echo "Redacting .."
+    /home/admin/config.scripts/blitz.debug.sh redact /var/cache/raspiblitz/debug.log
+    sudo chmod 640 /var/cache/raspiblitz/debug.log
+    sudo chown root:sudo /var/cache/raspiblitz/debug.log
+    cat /var/cache/raspiblitz/debug.log
+    echo
     echo "Press ENTER to return to main menu."
     read key
     ;;
