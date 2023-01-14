@@ -29,7 +29,7 @@ if [ "$1" = "start" ]; then
     prefix="s"
     netparam="-signet "
   else
-    echo "faile='need parameter main, test or sig'"
+    echo "error='unknown/missing secondary parameter'"
     exit 1
   fi
 
@@ -45,4 +45,9 @@ if [ "$1" = "start" ]; then
   echo "# going into reboot - reindex process can be monitored like normal blockchain sync status"
   sudo /home/admin/config.scripts/blitz.shutdown.sh reboot
 
+  exit 0
 fi
+
+echo "error='unknown main parameter'"
+exit 1
+
