@@ -34,13 +34,13 @@ if [ "$1" = "reindex" ]; then
   fi
 
   # stop bitcoin service
-  echo "making sure services are not running .."
+  echo "# stopping ${network} service (please wait) .."
   sudo systemctl stop ${prefix}${network}d 2>/dev/null
 
   # starting reindex
-  echo "# starting re-index ..."
+  echo "# starting ${network} service with -reindex flag"
   sudo -u bitcoin /usr/local/bin/${network}d ${netparam}-daemon -reindex -conf=/mnt/hdd/${network}/${network}.conf -datadir=/mnt/hdd/${network}
-  echo "# wait re-index (10 secs) ..."
+  echo "# waiting 10 secs"
   sleep 10
   echo "# going into reboot - reindex process can be monitored like normal blockchain sync status"
   sudo /home/admin/config.scripts/blitz.shutdown.sh reboot
