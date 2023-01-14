@@ -76,11 +76,12 @@ if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ]; then
 fi
 OPTIONS+=(MIGRATION "Migrate Blitz Data to new Hardware")
 OPTIONS+=(COPY-SOURCE "Copy Blockchain Source Modus")
+OPTIONS+=(REINDEX "Redindex Bitcoin Blockchain")
+OPTIONS+=(DELETE-INDEX "Delete Bitcoin Transaction-Index")
 OPTIONS+=(RESET-CHAIN "Delete Blockchain & Re-Download")
 OPTIONS+=(RESET-HDD "Delete HDD Data but keep Blockchain")
 OPTIONS+=(RESET-ALL "Delete HDD completely to start fresh")
 OPTIONS+=(DELETE-ELEC "Delete Electrum Index")
-OPTIONS+=(DELETE-INDEX "Delete Bitcoin Transaction-Index")
 
 CHOICE=$(whiptail --clear --title "Repair Options" --menu "" 19 62 12 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
@@ -146,6 +147,10 @@ case $CHOICE in
     ;;
   DELETE-INDEX)
     /home/admin/config.scripts/network.txindex.sh delete
+    exit 0;
+    ;;
+  REINDEX)
+    /home/admin/config.scripts/network.reindex.sh reindex main
     exit 0;
     ;;
   COPY-SOURCE)
