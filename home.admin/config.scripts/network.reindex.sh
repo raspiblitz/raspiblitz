@@ -4,7 +4,7 @@
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "script to run re-index if the blockchain - blocks will not be deleted but re-indexed"
  echo "will trigger reboot after started and progress can be monitored thru normal sync status"
- echo "network.reindex.sh reindex [main|test|sig] --> use to start re-index chain"
+ echo "network.reindex.sh reindex [mainnet|testnet|signet] --> use to start re-index chain"
  exit 1
 fi
 
@@ -16,15 +16,15 @@ source /mnt/hdd/raspiblitz.conf
 if [ "$1" = "reindex" ]; then
 
   # network prefixes
-  if [ "$2" = "main" ]; then
+  if [ "$2" = "mainnet" ]; then
     echo "# network.reindex.sh reindex --> mainnet"
     prefix=""
     netparam=""
-  elif [ "$2" = "test" ]; then
+  elif [ "$2" = "testnet" ]; then
     echo "# network.reindex.sh reindex --> testnet"
     prefix="t"
     netparam="-testnet "
-  elif [ "$2" = "sig" ]; then
+  elif [ "$2" = "signet" ]; then
     echo "# network.reindex.sh reindex --> signet"
     prefix="s"
     netparam="-signet "
