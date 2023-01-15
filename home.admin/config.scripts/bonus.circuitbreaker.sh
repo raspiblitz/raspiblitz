@@ -2,7 +2,7 @@
 
 # https://github.com/lightningequipment/circuitbreaker/releases
 # https://github.com/lightningequipment/circuitbreaker/commits/master
-pinnedVersion="c6c2c3cf8a64673d0885941d1e16bd42619bae69"
+pinnedVersion="e223938d983b756b3893880f3b3bf77e624a9f00"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -16,9 +16,36 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   exit 1
 fi
 
+PGPsigner="web-flow"
+PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
+PGPpubkeyFingerprint="4AEE18F83AFDEB23"
+
+# PGPsigner="joostjager"
+# PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
+# PGPpubkeyFingerprint="B9A26449A5528325"
+
 source /mnt/hdd/raspiblitz.conf
 
 isInstalled=$(sudo ls /etc/systemd/system/circuitbreaker.service 2>/dev/null | grep -c 'circuitbreaker.service')
+
+# show info menu
+if [ "$1" = "menu" ]; then
+  # get network info
+  localip=$(hostname -I | awk '{print $1}')
+  fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
+
+  # info without Tor
+  whiptail --title " Circuit Breaker" --msgbox "Open in your local web browser & accept self-signed cert:
+https://${localip}:9236\n
+SHA1 Thumb/Fingerprint:
+${fingerprint}\n
+To follow the logs use the command:
+sudo journalctl -fu circuitbreaker
+" 14 63
+
+  echo "please wait ..."
+  exit 0
+fi
 
 # switch on
 if [ "$1" = "menu" ]; then
@@ -67,10 +94,14 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo /usr/sbin/usermod --append --groups lndadmin circuitbreaker
 
     # install from source
-    cd /home/circuitbreaker
+    cd /home/circuitbreaker || exit 1
     sudo -u circuitbreaker git clone https://github.com/lightningequipment/circuitbreaker.git
-    cd circuitbreaker
+    cd circuitbreaker || exit 1
     sudo -u circuitbreaker git reset --hard $pinnedVersion
+
+    sudo -u circuitbreaker /home/admin/config.scripts/blitz.git-verify.sh \
+     "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
+
     sudo -u circuitbreaker /usr/local/go/bin/go install ./... || exit 1
 
     # make systemd service
@@ -110,17 +141,14 @@ WantedBy=multi-user.target
   # NGINX
   ##################
   # setup nginx symlinks
-  if ! [ -f /etc/nginx/sites-available/circuitbeaker_ssl.conf ]; then
-    sudo cp /home/admin/assets/nginx/sites-available/circuitbeaker_ssl.conf /etc/nginx/sites-available/circuitbeaker_ssl.conf
+  if ! [ -f /etc/nginx/sites-available/circuitbreaker_ssl.conf ]; then
+    sudo cp /home/admin/assets/nginx/sites-available/circuitbreaker_ssl.conf /etc/nginx/sites-available/circuitbreaker_ssl.conf
   fi
-  sudo ln -sf /etc/nginx/sites-available/circuitbeaker_ssl.conf /etc/nginx/sites-enabled/
+  sudo ln -sf /etc/nginx/sites-available/circuitbreaker_ssl.conf /etc/nginx/sites-enabled/
   sudo nginx -t
   sudo systemctl reload nginx
 
-  # setting value in raspi blitz config
-  /home/admin/config.scripts/blitz.conf.sh set circuitbreaker "on"
-
-  isInstalled=$(sudo -u circuitbreaker /home/circuitbreaker/go/bin/circuitbreaker --version | grep -c "circuitbreaker version")
+  isInstalled=$(sudo -u circuitbreaker /home/circuitbreaker/go/bin/circuitbreaker --version | grep -c "circuitbreakerd version")
   if [ ${isInstalled} -eq 1 ]; then
     echo
 
@@ -137,6 +165,9 @@ WantedBy=multi-user.target
     echo "# Failed to install circuitbreaker "
     exit 1
   fi
+
+  # setting value in raspi blitz config
+  /home/admin/config.scripts/blitz.conf.sh set circuitbreaker "on"
 
   sudo ufw allow 9236 comment circuitbreaker_https
 
@@ -194,6 +225,9 @@ if [ "$1" = "update" ]; then
   echo "# Pulling latest changes..."
   sudo -u circuitbreaker git pull -p
   sudo -u circuitbreaker git reset --hard $TAG
+
+  #TODO PGP verification on update
+
   echo "# Installing the version: $TAG"
   sudo -u circuitbreaker /usr/local/go/bin/go install ./... || exit 1
   echo
