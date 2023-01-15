@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # https://github.com/romanz/electrs/releases
-ELECTRSVERSION="v0.9.10"
+ELECTRSVERSION="v0.9.11"
 # https://github.com/romanz/electrs/commits/master
 # ELECTRSVERSION="446858ea621416916f84cbce61be92b748e8133e"
 
