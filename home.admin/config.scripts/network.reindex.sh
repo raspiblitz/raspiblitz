@@ -1,93 +1,53 @@
 #!/bin/bash
 
 # command info
-if [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
- echo "script to run re-index if the blockchain (in case of repair)"
- echo "run to start or monitor re-index progress"
+if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
+ echo "script to run re-index if the blockchain - blocks will not be deleted but re-indexed"
+ echo "will trigger reboot after started and progress can be monitored thru normal sync status"
+ echo "network.reindex.sh reindex [mainnet|testnet|signet] --> use to start re-index chain"
  exit 1
 fi
 
-# check and load raspiblitz config
-# to know which network is running
-source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
 
-# if re-index is not running, start ...
-source <(/home/admin/_cache.sh get state)
-if [ "${state}" != "reindex" ]; then
+###################
+# START
+###################
+if [ "$1" = "reindex" ]; then
 
-  # stop services
-  echo "making sure services are not running .."
-  sudo systemctl stop lnd 2>/dev/null
-  sudo systemctl stop ${network}d 2>/dev/null
+  # network prefixes
+  if [ "$2" = "mainnet" ]; then
+    echo "# network.reindex.sh reindex --> mainnet"
+    prefix=""
+    netparam=""
+  elif [ "$2" = "testnet" ]; then
+    echo "# network.reindex.sh reindex --> testnet"
+    prefix="t"
+    netparam="-testnet "
+  elif [ "$2" = "signet" ]; then
+    echo "# network.reindex.sh reindex --> signet"
+    prefix="s"
+    netparam="-signet "
+  else
+    echo "error='unknown/missing secondary parameter'"
+    exit 1
+  fi
+
+  # stop bitcoin service
+  echo "# stopping ${network} service (please wait - can take time) .."
+  sudo systemctl stop ${prefix}${network}d
 
   # starting reindex
-  echo "starting re-index ..."
-  sudo -u bitcoin /usr/local/bin/${network}d -daemon -reindex -conf=/home/bitcoin/.${network}/${network}.conf -datadir=/home/bitcoin/.${network}
+  echo "# starting ${network} service with -reindex flag"
+  sudo -u bitcoin /usr/local/bin/${network}d ${netparam}-daemon -reindex -conf=/mnt/hdd/${network}/${network}.conf -datadir=/mnt/hdd/${network} 1>&2
+  echo "# waiting 10 secs"
+  sleep 10
+  echo "# going into reboot - reindex process can be monitored like normal blockchain sync status"
+  sudo /home/admin/config.scripts/blitz.shutdown.sh reboot
 
-  # set reindex flag in raspiblitz.info (gets deleted after (final) reboot)
-  sudo sed -i "s/^state=.*/state=reindex/g" /home/admin/raspiblitz.info
-
+  exit 0
 fi
 
-# while loop to wait to finish
-finished=0
-progress=0
-while [ ${finished} -eq 0 ]
-  do
-  clear
-  echo "*************************"
-  echo "REINDEXING BLOCKCHAIN"
-  echo "*************************"
-  date
-  echo "THIS CAN TAKE SOME VERY LONG TIME"
-  echo "See Raspiblitz FAQ: https://github.com/rootzoll/raspiblitz"
-  echo "On question: My blockchain data is corrupted - what can I do?"
-  echo "If you dont see any progress after 24h keep X pressed to stop."
+echo "error='unknown main parameter'"
+exit 1
 
-  # get blockchain sync progress
-  blockchaininfo=$(sudo -u bitcoin ${network}-cli -datadir=/home/bitcoin/.${network} getblockchaininfo)
-  progress=$(echo "${blockchaininfo}" | jq -r '.verificationprogress')
-  #progress=$(echo "${progress}*100" | bc)
-  progress=$(echo $progress | awk '{printf( "%.2f%%", 100 * $1)}')
-  inprogress="$(echo "${blockchaininfo}" | jq -r '.initialblockdownload')"
-  if [ "${inprogress}" = "false" ]; then
-    finished=1
-  fi
-
-  echo ""
-  echo "RUNNING: ${inprogress}"
-  echo "PROGRESS: ${progress}"
-  echo ""
-
-  echo "You can close terminal while reindex is running.."
-  echo "But you have to login again to check if ready."
-
-  # wait 2 seconds for key input
-  read -n 1 -t 2 keyPressed
-
-  # check if user wants to abort monitor
-  if [ "${keyPressed}" = "x" ]; then
-    echo "stopped by user ..."
-    break
-  fi
-
-done
-
-
-# trigger reboot when finished
-echo "*************************"
-if [ ${finished} -eq 0 ]; then
-  echo "Re-Index CANCELED"
-else 
-  echo "Re-Index finished"
-fi
-echo "Starting reboot ..."
-echo "*************************"
-# stop bitcoind
-sudo -u bitcoin ${network}-cli stop
-sleep 4
-# clean logs (to prevent a false reindex detection)
-sudo rm /mnt/hdd/${network}/debug.log 2>/dev/null
-# reboot
-sudo /home/admin/config.scripts/blitz.shutdown.sh reboot
