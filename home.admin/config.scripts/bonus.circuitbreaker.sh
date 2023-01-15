@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # https://github.com/lightningequipment/circuitbreaker/releases
-pinnedVersion="v0.3.2"
-# the commits are not signed
+# https://github.com/lightningequipment/circuitbreaker/commits/master
+pinnedVersion="e223938d983b756b3893880f3b3bf77e624a9f00"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -16,9 +16,36 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   exit 1
 fi
 
+PGPsigner="web-flow"
+PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
+PGPpubkeyFingerprint="4AEE18F83AFDEB23"
+
+# PGPsigner="joostjager"
+# PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
+# PGPpubkeyFingerprint="B9A26449A5528325"
+
 source /mnt/hdd/raspiblitz.conf
 
 isInstalled=$(sudo ls /etc/systemd/system/circuitbreaker.service 2>/dev/null | grep -c 'circuitbreaker.service')
+
+# show info menu
+if [ "$1" = "menu" ]; then
+  # get network info
+  localip=$(hostname -I | awk '{print $1}')
+  fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
+
+  # info without Tor
+  whiptail --title " Circuit Breaker" --msgbox "Open in your local web browser & accept self-signed cert:
+https://${localip}:9236\n
+SHA1 Thumb/Fingerprint:
+${fingerprint}\n
+To follow the logs use the command:
+sudo journalctl -fu circuitbreaker
+" 14 63
+
+  echo "please wait ..."
+  exit 0
+fi
 
 # switch on
 if [ "$1" = "menu" ]; then
@@ -67,23 +94,15 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo /usr/sbin/usermod --append --groups lndadmin circuitbreaker
 
     # install from source
-    cd /home/circuitbreaker
+    cd /home/circuitbreaker || exit 1
     sudo -u circuitbreaker git clone https://github.com/lightningequipment/circuitbreaker.git
-    cd circuitbreaker
+    cd circuitbreaker || exit 1
     sudo -u circuitbreaker git reset --hard $pinnedVersion
-    sudo -u circuitbreaker /usr/local/go/bin/go install ./... || exit 1
 
-    ##################
-    # config
-    ##################
-    echo
-    echo "# Setting the example configuration from:"
-    echo "# https://github.com/lightningequipment/circuitbreaker/blob/$pinnedVersion/circuitbreaker-example.yaml"
-    echo "# Find it at: /home/circuitbreaker/.circutbreaker/circuitbreaker.yaml"
-    echo
-    sudo -u circuitbreaker mkdir /home/circuitbreaker/.circuitbreaker 2>/dev/null
-    sudo -u circuitbreaker cp circuitbreaker-example.yaml \
-    /home/circuitbreaker/.circuitbreaker/circuitbreaker.yaml
+    sudo -u circuitbreaker /home/admin/config.scripts/blitz.git-verify.sh \
+     "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
+
+    sudo -u circuitbreaker /usr/local/go/bin/go install ./... || exit 1
 
     # make systemd service
     # sudo nano /etc/systemd/system/circuitbreaker.service
@@ -114,14 +133,22 @@ WantedBy=multi-user.target
     sudo systemctl enable circuitbreaker
     echo "# OK - the circuitbreaker.service is now enabled"
 
-  else 
+  else
     echo "# The circuitbreaker.service is already installed."
   fi
 
-  # setting value in raspi blitz config
-  /home/admin/config.scripts/blitz.conf.sh set circuitbreaker "on"
+  ##################
+  # NGINX
+  ##################
+  # setup nginx symlinks
+  if ! [ -f /etc/nginx/sites-available/circuitbreaker_ssl.conf ]; then
+    sudo cp /home/admin/assets/nginx/sites-available/circuitbreaker_ssl.conf /etc/nginx/sites-available/circuitbreaker_ssl.conf
+  fi
+  sudo ln -sf /etc/nginx/sites-available/circuitbreaker_ssl.conf /etc/nginx/sites-enabled/
+  sudo nginx -t
+  sudo systemctl reload nginx
 
-  isInstalled=$(sudo -u circuitbreaker /home/circuitbreaker/go/bin/circuitbreaker --version | grep -c "circuitbreaker version")
+  isInstalled=$(sudo -u circuitbreaker /home/circuitbreaker/go/bin/circuitbreaker --version | grep -c "circuitbreakerd version")
   if [ ${isInstalled} -eq 1 ]; then
     echo
 
@@ -138,27 +165,35 @@ WantedBy=multi-user.target
     echo "# Failed to install circuitbreaker "
     exit 1
   fi
-  
+
+  # setting value in raspi blitz config
+  /home/admin/config.scripts/blitz.conf.sh set circuitbreaker "on"
+
+  sudo ufw allow 9236 comment circuitbreaker_https
+
   exit 0
 fi
 
 # switch off
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
+  echo "# Removing the user and it's home directory"
+  sudo userdel -rf circuitbreaker 2>/dev/null
+
   if [ ${isInstalled} -eq 1 ]; then
     echo "# Removing the circuitbreaker.service"
     sudo systemctl stop circuitbreaker
     sudo systemctl disable circuitbreaker
     sudo rm /etc/systemd/system/circuitbreaker.service
-    echo "# Removing the user and it's home directory"
-    sudo userdel -rf circuitbreaker 2>/dev/null
-    echo "# OK, Circuit Breaker is removed."
+    echo "# OK, circuitbreaker.service is removed."
   else
-    echo "# Circuit Breaker is not installed."
+    echo "# circuitbreaker.service is not installed."
   fi
 
   # setting value in raspiblitz.conf
   /home/admin/config.scripts/blitz.conf.sh set circuitbreaker "off"
+
+  sudo ufw delete allow 9236
 
   exit 0
 fi
@@ -166,7 +201,7 @@ fi
 # update
 if [ "$1" = "update" ]; then
   echo "# Updating Circuit Breaker"
-  cd /home/circuitbreaker/circuitbreaker
+  cd /home/circuitbreaker/circuitbreaker || exit 1
   # from https://github.com/apotdevin/thunderhub/blob/master/scripts/updateToLatest.sh
   # fetch latest master
   sudo -u circuitbreaker git fetch
@@ -190,15 +225,11 @@ if [ "$1" = "update" ]; then
   echo "# Pulling latest changes..."
   sudo -u circuitbreaker git pull -p
   sudo -u circuitbreaker git reset --hard $TAG
+
+  #TODO PGP verification on update
+
   echo "# Installing the version: $TAG"
   sudo -u circuitbreaker /usr/local/go/bin/go install ./... || exit 1
-  echo
-  echo "# Setting the example configuration from:"
-  echo "# https://github.com/lightningequipment/circuitbreaker/blob/$TAG/circuitbreaker-example.yaml"
-  echo "# Find it at: /home/circuitbreaker/.circutbreaker/circuitbreaker.yaml"
-  sudo -u circuitbreaker mkdir /home/circuitbreaker/.circuitbreaker 2>/dev/null
-  sudo -u circuitbreaker cp circuitbreaker-example.yaml \
-  /home/circuitbreaker/.circuitbreaker/circuitbreaker.yaml
   echo
   echo "# Updated to version" $TAG
   echo
