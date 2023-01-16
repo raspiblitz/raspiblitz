@@ -80,6 +80,7 @@ function blitzhelp() {
   echo "Extras:"
   echo "  whitepaper   download the whitepaper from the blockchain to /home/admin/bitcoin.pdf"
   echo "  notifyme     wrapper for blitz.notify.sh that will send a notification using the configured method and settings"
+  echo "  suez         visualize channels (for the default ln implementation and chain when installed)"
   echo
   echo "LND:"
   echo "  lncli        LND commandline interface (when installed)"
@@ -88,7 +89,7 @@ function blitzhelp() {
   echo "  fwdreport    show forwarding report"
   echo
   echo "CLN:"
-  echo " lightning-cli Core-Lightning commandline interface (when installed)"
+  echo " lightning-cli Core Lightning commandline interface (when installed)"
 }
 
 # command: raspiblitz
@@ -522,5 +523,30 @@ function lnproxy() {
     echo "Requesting a wrapped invoice from https://lnproxy.org ..."
     echo
     curl https://lnproxy.org/api/${1}
+  fi
+}
+
+# command: suez
+function suez() {
+  source /mnt/hdd/raspiblitz.conf
+  if [ ${lightning} = 'cl' ] || [ ${lightning} = 'lnd' ]; then
+    if [ ! -f /home/bitcoin/suez/suez ];then
+      /home/admin/config.scripts/bonus.suez.sh on
+    fi
+    source <(/home/admin/config.scripts/network.aliases.sh getvars ${lightning} ${chain}net)
+    cd /home/bitcoin/suez || exit 1
+    clear
+    echo "# Showing the channels of ${lightning} ${chain}net - consider reducing the font size (press CTRL- or CMD-)"
+    if [ ${lightning} = cl ]; then
+      sudo -u bitcoin /home/bitcoin/.local/bin/poetry run ./suez \
+      --client=c-lightning --client-args=--conf=${CLCONF}
+    elif [ ${lightning} = lnd ]; then
+      sudo -u bitcoin /home/bitcoin/.local/bin/poetry run ./suez \
+      --client-args=-n=${CHAIN} \
+      --client-args=--rpcserver=localhost:1${L2rpcportmod}009
+    fi
+    cd
+  else
+    echo "# Lightning is ${lightning}"
   fi
 }
