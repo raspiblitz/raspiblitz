@@ -64,9 +64,9 @@ The workflow locally and in github actions generates a .qcow2 format amd64 image
 * find the compressed .qcow2 image and sh256 hashes in the `ci/amd64/builds` directory
 
 ## Images generated in github actions
-* To see the downloadable artifacts will need to log in with your github profile
-* Find the images in the green runs in github actions at:
-https://github.com/rootzoll/raspiblitz/actions
+* To see the downloadable artifacts will need to log in to GitHub
+* Find the latest successful builds for amd64 using the dev branch at:  
+https://github.com/rootzoll/raspiblitz/actions/workflows/amd64-lean-image.yml?query=workflow%3Aamd64-lean-image-build+branch%3Adev+is%3Asuccess++
   ```
   # unzip to the same directory
   unzip raspiblitz-amd64-image-YEAR-MM-DD-COMMITHASH.zip
