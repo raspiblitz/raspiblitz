@@ -530,7 +530,7 @@ if [ "$1" = "update" ]; then
   cd /home/electrs/electrs || exit 1
   sudo -u electrs git fetch
 
-  localVersion=$(git describe --tag)
+  localVersion=$(/home/electrs/electrs/target/release/electrs --version)
   updateVersion=$(curl --header "X-GitHub-Api-Version:2022-11-28" -s https://api.github.com/repos/romanz/electrs/releases/latest|grep tag_name|head -1|cut -d '"' -f4)
 
   if [ $localVersion = $updateVersion ]; then
@@ -543,6 +543,11 @@ if [ "$1" = "update" ]; then
 
     sudo -u electrs /home/admin/config.scripts/blitz.git-verify.sh \
      "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
+
+    echo "# Installing build dependencies"
+    sudo -u electrs curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sudo -u electrs sh -s -- --default-toolchain none -y
+    sudo apt install -y clang cmake build-essential  # for building 'rust-rocksdb'
+    echo
 
     echo "# Build Electrs ..."
     sudo -u electrs /home/electrs/.cargo/bin/cargo build --locked --release || exit 1
