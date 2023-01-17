@@ -1449,7 +1449,7 @@ But if you want to build that image yourself - here is a quick guide:
 - Get a latest RaspiOS 64-bit (Desktop): [DOWNLOAD](https://downloads.raspberrypi.org/raspios_arm64/images).
 - Write the image to an SD card: [TUTORIAL](https://www.raspberrypi.org/documentation/installation/installing-images/README.md).
 - Add a file called `ssh` to the root of the SD card when mounted on your laptop to enable SSH login.
-- Newest Raspi-OS release did remove the default username therefore you need to cread an own user. Add a file called `userconf` next to the empty `ssh` file and add your specified userstring as followed:
+- Newest RasperryOS release did remove the default username therefore you need to create an own user. Add a file called `userconf` next to the empty `ssh` file and add your specified userstring as followed:
   Create a hashed password using command on linux `echo 'raspberry' | openssl passwd -6 -stdin` and copy the output allongside the username for example `pi:$6$6c.o/U6OkN3ST65b$7F3TIamnnQCwQT4h00Vp1mcVMdSg3/ams7yeVGfZbclcScEnRnw9tkgI9btalTCHFI84o3Pr3cDbdpbCXYTmF1` into the userconf file. See also https://www.raspberrypi.com/news/raspberry-pi-bullseye-update-april-2022/
 
 - Start the card on a Raspi and login via SSH with `ssh pi@[IP-OF-YOUR-RASPI]`. Password is `raspberry`.
