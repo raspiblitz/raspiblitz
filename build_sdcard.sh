@@ -10,7 +10,13 @@
 ##########################################################################
 
 defaultRepo="rootzoll"
-defaultBranch="v1.8"
+defaultBranch="v1.9"
+
+defaultAPIuser="fusion44"
+defaultAPIrepo="blitz_api"
+
+defaultWEBUIuser="cstenglein"
+defaultWEBUIrepo="raspiblitz-web"
 
 me="${0##/*}"
 
@@ -22,6 +28,7 @@ usage(){
   printf %s"${me} [--option <argument>]
 
 Options:
+  -EXPORT                                  just print build parameters & exit'
   -h, --help                               this help info
   -i, --interaction [0|1]                  interaction before proceeding with exection (default: 1)
   -f, --fatpack [0|1]                      fatpack mode (default: 1)
@@ -39,6 +46,21 @@ Notes:
 }
 if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
   usage
+fi
+
+if [ "$1" = "-EXPORT" ] || [ "$1" = "EXPORT" ]; then
+  cd /home/admin/raspiblitz 2>/dev/null
+  activeBranch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+  if [ "${activeBranch}" == "" ]; then
+    activeBranch="${defaultBranch}"
+  fi
+  echo "githubUser='${defaultRepo}'"
+  echo "githubBranch='${activeBranch}'"
+  echo "defaultAPIuser='${defaultAPIuser}'"
+  echo "defaultAPIrepo='${defaultAPIrepo}'"
+  echo "defaultWEBUIuser='${defaultWEBUIuser}'"
+  echo "defaultWEBUIrepo='${defaultWEBUIrepo}'"
+  exit 0
 fi
 
 ## default user message
@@ -166,13 +188,13 @@ range_argument fatpack "0" "1" "false" "true"
 # could be any valid github-user that has a fork of the raspiblitz repo - 'rootzoll' is default
 # The 'raspiblitz' repo of this user is used to provisioning sd card with raspiblitz assets/scripts later on.
 : "${github_user:=$defaultRepo}"
-curl -s "https://api.github.com/repos/${github_user}/raspiblitz" | grep -q "\"message\": \"Not Found\"" && error_msg "Repository 'raspiblitz' not found for user '${github_user}"
+curl --header "X-GitHub-Api-Version:2022-11-28" -s "https://api.github.com/repos/${github_user}/raspiblitz" | grep -q "\"message\": \"Not Found\"" && error_msg "Repository 'raspiblitz' not found for user '${github_user}"
 
 # GITHUB-BRANCH
 # -------------------------------------
 # could be any valid branch or tag of the given GITHUB-USERNAME forked raspiblitz repo
 : "${branch:=$defaultBranch}"
-curl -s "https://api.github.com/repos/${github_user}/raspiblitz/branches/${branch}" | grep -q "\"message\": \"Branch not found\"" && error_msg "Repository 'raspiblitz' for user '${github_user}' does not contain branch '${branch}'"
+curl --header "X-GitHub-Api-Version:2022-11-28" -s "https://api.github.com/repos/${github_user}/raspiblitz/branches/${branch}" | grep -q "\"message\": \"Branch not found\"" && error_msg "Repository 'raspiblitz' for user '${github_user}' does not contain branch '${branch}'"
 
 # DISPLAY-CLASS
 # ----------------------------------------
@@ -187,7 +209,6 @@ range_argument display "lcd" "hdmi" "headless"
 # If 'false' this will skipped.
 : "${tweak_boot_drive:=true}"
 range_argument tweak_boot_drive "0" "1" "false" "true"
-
 
 # WIFI
 # ---------------------------------------
@@ -218,7 +239,7 @@ esac
 # AUTO-DETECTION: OPERATINGSYSTEM
 # ---------------------------------------
 if [ $(cat /etc/os-release 2>/dev/null | grep -c 'Debian') -gt 0 ]; then
-  if [ $(uname -n | grep -c 'raspberrypi') -gt 0 ] && [ "${cpu}" = aarch64 ]; then
+  if [ -f /etc/apt/sources.list.d/raspi.list ] && [ "${cpu}" = aarch64 ]; then
     # default image for RaspberryPi
     baseimage="raspios_arm64"
   elif [ $(uname -n | grep -c 'rpi') -gt 0 ] && [ "${cpu}" = aarch64 ]; then
@@ -274,7 +295,7 @@ if [ "${baseimage}" = "raspios_arm64" ]||[ "${baseimage}" = "debian_rpi64" ]||[ 
 fi
 
 echo "*** Remove unnecessary packages ***"
-sudo apt remove --purge -y libreoffice* oracle-java* chromium-browser nuscratch scratch sonic-pi plymouth python2 vlc cups
+sudo apt remove --purge -y libreoffice* oracle-java* chromium-browser nuscratch scratch sonic-pi plymouth python2 vlc* cups
 sudo apt clean -y
 sudo apt autoremove -y
 
@@ -302,29 +323,19 @@ echo -e "\n*** SOFTWARE UPDATE ***"
 # sqlite3 -> database
 # fdisk -> create partitions
 # lsb-release -> needed to know which distro version we're running to add APT sources
-general_utils="policykit-1 htop git curl bash-completion vim jq dphys-swapfile bsdmainutils autossh telnet vnstat parted dosfstools btrfs-progs fbi sysbench build-essential dialog bc python3-dialog unzip whois fdisk lsb-release"
+general_utils="policykit-1 htop git curl bash-completion vim jq dphys-swapfile bsdmainutils autossh telnet vnstat parted dosfstools btrfs-progs fbi sysbench build-essential dialog bc python3-dialog unzip whois fdisk lsb-release smartmontools"
 
 # python3-mako --> https://github.com/rootzoll/raspiblitz/issues/3441
 python_dependencies="python3-venv python3-dev python3-wheel python3-jinja2 python3-pip python3-mako"
 server_utils="rsync net-tools xxd netcat openssh-client openssh-sftp-server sshpass psmisc ufw sqlite3"
 [ "${baseimage}" = "armbian" ] && armbian_dependencies="armbian-config" # add armbian-config
-apt_install ${general_utils} ${python_dependencies} ${server_utils} ${armbian_dependencies}
+[ "${architecture}" = "amd64" ] && amd64_dependencies="network-manager" # add amd64 dependency
+
+apt_install ${general_utils} ${python_dependencies} ${server_utils} ${armbian_dependencies} ${amd64_dependencies}
 sudo apt clean -y
 sudo apt autoremove -y
 
 echo -e "\n*** Python DEFAULT libs & dependencies ***"
-# make sure /usr/bin/pip exists (and calls pip3 in Debian Buster)
-sudo update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
-# 1. libs (for global python scripts)
-# grpcio==1.42.0 googleapis-common-protos==1.53.0 toml==0.10.2 j2cli==0.3.10 requests[socks]==2.21.0
-# 2. For TorBox bridges python scripts (pip3) https://github.com/radio24/TorBox/blob/master/requirements.txt
-# pytesseract mechanize PySocks urwid Pillow requests
-# 3. Nyx
-# setuptools
-python_libs="grpcio==1.42.0 googleapis-common-protos==1.53.0 toml==0.10.2 j2cli==0.3.10 requests[socks]==2.21.0 protobuf==3.20.1 wrapt==1.14.1"
-torbox_libs="pytesseract mechanize PySocks urwid Pillow requests setuptools"
-sudo -H python3 -m pip install --upgrade pip
-sudo -H python3 -m pip install ${python_libs} ${torbox_libs}
 
 if [ -f "/usr/bin/python3.9" ]; then
   # use python 3.9 if available
@@ -344,6 +355,18 @@ else
   echo "There is no tested version of python present"
   exit 1
 fi
+
+# make sure /usr/bin/pip exists (and calls pip3 in Debian Buster)
+sudo update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
+# 1. libs (for global python scripts)
+# grpcio==1.42.0 googleapis-common-protos==1.53.0 toml==0.10.2 j2cli==0.3.10 requests[socks]==2.21.0
+# 2. For TorBox bridges python scripts (pip3) https://github.com/radio24/TorBox/blob/master/requirements.txt
+# pytesseract mechanize PySocks urwid Pillow requests
+# 3. Nyx
+# setuptools
+sudo -H python3 -m pip install --upgrade pip
+sudo -H python3 -m pip install grpcio==1.42.0 googleapis-common-protos==1.53.0 toml==0.10.2 j2cli==0.3.10 requests[socks]==2.21.0 protobuf==3.20.1 pathlib2==2.3.7.post1
+sudo -H python3 -m pip install pytesseract mechanize PySocks urwid Pillow requests setuptools
 
 echo -e "\n*** PREPARE ${baseimage} ***"
 
@@ -752,6 +775,12 @@ echo
 echo
 /home/admin/config.scripts/bitcoin.install.sh install || exit 1
 
+#######
+# I2P #
+#######
+echo
+/home/admin/config.scripts/blitz.i2pd.sh install || exit 1
+
 # *** BLITZ WEB SERVICE ***
 echo "Provisioning BLITZ WEB SERVICE"
 /home/admin/config.scripts/blitz.web.sh http-on || exit 1
@@ -764,7 +793,7 @@ if ${fatpack}; then
   sudo /home/admin/config.scripts/bonus.nodejs.sh on || exit 1
 
   echo "* Optional Packages (may be needed for extended features)"
-  apt_install qrencode secure-delete fbi ssmtp unclutter xterm python3-pyqt5 xfonts-terminus apache2-utils nginx python3-jinja2 socat libatlas-base-dev hexyl autossh
+  apt_install qrencode secure-delete fbi msmtp unclutter xterm python3-pyqt5 xfonts-terminus apache2-utils nginx python3-jinja2 socat libatlas-base-dev hexyl autossh
 
   echo "* Adding LND ..."
   /home/admin/config.scripts/lnd.install.sh install || exit 1
@@ -774,22 +803,32 @@ if ${fatpack}; then
   echo "* Adding the cln-grpc plugin ..."
   /home/admin/config.scripts/cl-plugin.cln-grpc.sh install || exit 1
 
-  # *** UPDATE FALLBACK NODE LIST (only as part of fatpack) *** see https://github.com/rootzoll/raspiblitz/issues/1888
+  # *** AUTO UPDATE FALLBACK NODE LIST FROM INTERNET (only in fatpack)
   echo "*** FALLBACK NODE LIST ***"
-  sudo -u admin curl -H "Accept: application/json; indent=4" https://bitnodes.io/api/v1/snapshots/latest/ -o /home/admin/fallback.nodes
-  byteSizeList=$(sudo -u admin stat -c %s /home/admin/fallback.nodes)
-  if [ ${#byteSizeList} -eq 0 ] || [ ${byteSizeList} -lt 10240 ]; then
-    echo "WARN: Failed downloading fresh FALLBACK NODE LIST --> https://bitnodes.io/api/v1/snapshots/latest/"
-    sudo rm /home/admin/fallback.nodes 2>/dev/null
-    sudo cp /home/admin/assets/fallback.nodes /home/admin/fallback.nodes
-  fi
-  sudo chown admin:admin /home/admin/fallback.nodes
+  # see https://github.com/rootzoll/raspiblitz/issues/1888
+  sudo -u admin curl -H "Accept: application/json; indent=4" https://bitnodes.io/api/v1/snapshots/latest/ -o /home/admin/fallback.bitnodes.nodes
+  # Fallback Nodes List from Bitcoin Core
+  sudo -u admin curl https://raw.githubusercontent.com/bitcoin/bitcoin/master/contrib/seeds/nodes_main.txt -o /home/admin/fallback.bitcoin.nodes
+
+  echo "* Adding Code&Compile for WEBUI-APP: LNBITS"
+  /home/admin/config.scripts/bonus.lnbits.sh install || exit 1
+  echo "* Adding Code&Compile for WEBUI-APP: JAM"
+  /home/admin/config.scripts/bonus.jam.sh install || exit 1
+  echo "* Adding Code&Compile for WEBUI-APP: BTCPAYSERVER"
+  /home/admin/config.scripts/bonus.btcpayserver.sh install || exit 1
+  echo "* Adding Code&Compile for WEBUI-APP: RTL"
+  /home/admin/config.scripts/bonus.rtl.sh install || exit 1
+  echo "* Adding Code&Compile for WEBUI-APP: THUNDERHUB"
+  /home/admin/config.scripts/bonus.thunderhub.sh install || exit 1
+  echo "* Adding Code&Compile for WEBUI-APP: BTC RPC EXPLORER"
+  /home/admin/config.scripts/bonus.btc-rpc-explorer.sh install || exit 1
+  echo "* Adding Code&Compile for WEBUI-APP: MEMPOOL"
+  /home/admin/config.scripts/bonus.mempool.sh install || exit 1
 
   echo "* Adding Raspiblitz API ..."
-  sudo /home/admin/config.scripts/blitz.web.api.sh on || exit 1
-
+  sudo /home/admin/config.scripts/blitz.web.api.sh on "${defaultAPIuser}" "${defaultAPIrepo}" "blitz-${branch}" || exit 1
   echo "* Adding Raspiblitz WebUI ..."
-  sudo /home/admin/config.scripts/blitz.web.ui.sh on || exit 1
+  sudo /home/admin/config.scripts/blitz.web.ui.sh on "${defaultWEBUIuser}" "${defaultWEBUIrepo}" "release/${branch}" || exit 1
 
   # set build code as new default
   sudo rm -r /home/admin/assets/nginx/www_public
@@ -800,6 +839,24 @@ if ${fatpack}; then
 else
   echo "* skipping FATPACK"
 fi
+
+# check fallback list bitnodes
+byteSizeList=$(sudo -u admin stat -c %s /home/admin/fallback.bitnodes.nodes)
+if [ ${#byteSizeList} -eq 0 ] || [ ${byteSizeList} -lt 10240 ]; then
+  echo "Using fallback list from repo: bitnodes"
+  sudo rm /home/admin/fallback.bitnodes.nodes 2>/dev/null
+  sudo cp /home/admin/assets/fallback.bitnodes.nodes /home/admin/fallback.bitnodes.nodes
+fi
+sudo chown admin:admin /home/admin/fallback.bitnodes.nodes
+
+# check fallback list bitcoin core
+byteSizeList=$(sudo -u admin stat -c %s /home/admin/fallback.bitcoin.nodes)
+if [ ${#byteSizeList} -eq 0 ] || [ ${byteSizeList} -lt 10240 ]; then
+  echo "Using fallback list from repo: bitcoin core"
+  sudo rm /home/admin/fallback.bitcoin.nodes 2>/dev/null
+  sudo cp /home/admin/assets/fallback.bitcoin.nodes /home/admin/fallback.bitcoin.nodes
+fi
+sudo chown admin:admin /home/admin/fallback.bitcoin.nodes
 
 echo
 echo "*** raspiblitz.info ***"
@@ -815,6 +872,8 @@ echo -e "\nIMPORTANT IF WANT TO MAKE A RELEASE IMAGE FROM THIS BUILD:"
 echo "1. login fresh --> user:admin password:raspiblitz"
 echo -e "2. run --> release\n"
 
+# make sure that at least the code is available (also if no internet)
+sudo /home/admin/config.scripts/blitz.display.sh prepare-install
 # (do last - because might trigger reboot)
 if [ "${display}" != "headless" ] || [ "${baseimage}" = "raspios_arm64" ]; then
   echo "*** ADDITIONAL DISPLAY OPTIONS ***"

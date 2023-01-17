@@ -35,7 +35,7 @@ clInstalledVersionMinor=$(echo "${clInstalledVersion}" | cut -d "-" -f1 | cut -d
 clUpdateInstalled=$(echo "${clInstalledVersion}" | grep -c "${clUpdateVersion}")
 
 # get latest release from Core Lightning GitHub releases without release candidates
-clLatestVersion=$(curl -s https://api.github.com/repos/ElementsProject/lightning/releases | jq -r '.[].tag_name' | grep -v "rc" | head -n1)
+clLatestVersion=$(curl --header "X-GitHub-Api-Version:2022-11-28" -s https://api.github.com/repos/ElementsProject/lightning/releases | jq -r '.[].tag_name' | grep -v "rc" | head -n1)
 # example: v0.12.1
 
 # INFO

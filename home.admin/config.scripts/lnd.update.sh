@@ -68,7 +68,7 @@ lndInstalledVersionMinor=$(echo "${lndInstalledVersion}" | cut -d "-" -f1 | cut 
 lndUpdateInstalled=$(echo "${lndInstalledVersion}" | grep -c "${lndUpdateVersion}")
 
 # get latest release from LND GitHub releases (without release candidates)
-lndLatestVersion=$(curl -s https://api.github.com/repos/lightningnetwork/lnd/releases | jq -r '.[].tag_name' | grep -v "rc" | head -n1)
+lndLatestVersion=$(curl --header "X-GitHub-Api-Version:2022-11-28" -s https://api.github.com/repos/lightningnetwork/lnd/releases | jq -r '.[].tag_name' | grep -v "rc" | head -n1)
 # example: v0.13.3-beta
 binaryName="lnd-linux-${cpuArchitecture}-${lndLatestVersion}.tar.gz"
 # example: lnd-linux-arm64-v0.13.3-beta.tar.gz

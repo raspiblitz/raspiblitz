@@ -29,6 +29,8 @@ if [ "$1" = "status" ]; then
 
   echo "##### STATUS ELECTRS SERVICE"
 
+  echo "version='${ELECTRSVERSION}'"
+
   if [ "${ElectRS}" = "on" ]; then
     echo "configured=1"
   else
@@ -415,6 +417,7 @@ Type=simple
 TimeoutSec=60
 Restart=always
 RestartSec=60
+LogLevelMax=5
 
 # Hardening measures
 PrivateTmp=true
@@ -446,6 +449,10 @@ WantedBy=multi-user.target
     echo "whitelist=download@127.0.0.1" | sudo tee -a /mnt/hdd/bitcoin/bitcoin.conf
     bitcoindRestart=yes
   fi
+
+  # clean up
+  sudo rm -R /home/electrs/.cargo
+  sudo rm -R /home/electrs/.rustup
 
   source <(/home/admin/_cache.sh get state)
   if [ "${state}" == "ready" ]; then
@@ -516,7 +523,7 @@ if [ "$1" = "update" ]; then
   sudo -u electrs git fetch
 
   localVersion=$(git describe --tag)
-  updateVersion=$(curl -s https://api.github.com/repos/romanz/electrs/releases/latest|grep tag_name|head -1|cut -d '"' -f4)
+  updateVersion=$(curl --header "X-GitHub-Api-Version:2022-11-28" -s https://api.github.com/repos/romanz/electrs/releases/latest|grep tag_name|head -1|cut -d '"' -f4)
 
   if [ $localVersion = $updateVersion ]; then
     echo "# Up-to-date on version $localVersion"

@@ -73,7 +73,7 @@ if [ ${#wantedGitHubUser} -gt 0 ] && [ ${vagrant} -eq 0 ]; then
   else
 
     echo "# checking repo exists .."
-    repoExists=$(curl -s https://api.github.com/repos/${wantedGitHubUser}/raspiblitz | jq -r '.name' | grep -c 'raspiblitz')
+    repoExists=$(curl --header "X-GitHub-Api-Version:2022-11-28" -s https://api.github.com/repos/${wantedGitHubUser}/raspiblitz | jq -r '.name' | grep -c 'raspiblitz')
     if [ ${repoExists} -eq 0 ]; then
       echo "error='repo not found'"
       exit 1
@@ -100,7 +100,7 @@ if [ ${#wantedBranch} -gt 0 ] && [ ${vagrant} -eq 0 ]; then
     localBranch=$(git branch | grep -c "${wantedBranch}")
     if [ ${localBranch} -eq 0 ]; then
       echo "# checking branch exists .."
-      branchExists=$(curl -s https://api.github.com/repos/${activeGitHubUser}/raspiblitz/branches/${wantedBranch} | jq -r '.name' | grep -c ${wantedBranch})
+      branchExists=$(curl --header "X-GitHub-Api-Version:2022-11-28" -s https://api.github.com/repos/${activeGitHubUser}/raspiblitz/branches/${wantedBranch} | jq -r '.name' | grep -c ${wantedBranch})
       if [ ${branchExists} -eq 0 ]; then
         echo "error='branch not found'"
         exit 1

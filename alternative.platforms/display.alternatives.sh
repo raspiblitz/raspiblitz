@@ -55,7 +55,7 @@ if [ "${CHOICE}" = "GPIO" ]; then
     sudo apt-mark hold raspberrypi-bootloader
     sudo ./LCD35-show
   else
-    sudo rm -rf /etc/X11/xorg.conf.d/40-libinput.conf
+    sudo rm -rf /etc/X11/xorg.conf.d/40-libinput.conf 2>/dev/null
     sudo mkdir /etc/X11/xorg.conf.d
     sudo cp ./usr/tft35a-overlay.dtb /boot/overlays/
     sudo cp ./usr/tft35a-overlay.dtb /boot/overlays/tft35a.dtbo
@@ -79,7 +79,7 @@ elif [ "${CHOICE}" = "HDMI" ]; then
   sudo chmod -R 755 LCD-show
   cd LCD-show/
   #sudo ./MPI3508-show  
-  sudo rm -rf /etc/X11/xorg.conf.d/40-libinput.conf
+  sudo rm -rf /etc/X11/xorg.conf.d/40-libinput.conf 2>/dev/null
   
   if [ "${baseimage}" != "dietpi" ]; then
     sudo cp -rf ./boot/config-35-480X320.txt /boot/config.txt  

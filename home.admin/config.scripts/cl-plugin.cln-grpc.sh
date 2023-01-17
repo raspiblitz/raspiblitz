@@ -29,31 +29,40 @@ PORT="${portprefix}4772"
 
 function buildGRPCplugin() {
   echo "# - Build the cln-grpc plugin"
-  if [ ! -f /home/bitcoin/cl-plugins-available/cln-grpc/debug/cln-grpc ]; then
+  if [ ! -f /home/bitcoin/cl-plugins-available/cln-grpc ]; then
     # check if the source code is present
     if [ ! -d /home/bitcoin/lightning/plugins/grpc-plugin ];then
-      echo "* Adding Core Lightning ..."
+      echo "# - install Core Lightning ..."
       /home/admin/config.scripts/cl.install.sh install || exit 1
     fi
-    # rust for cln-grpc, includes rustfmt
-    sudo -u bitcoin curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | \
-     sudo -u bitcoin sh -s -- -y
+    echo "# rust for cln-grpc, includes rustfmt"
+    sudo -u bitcoin curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sudo -u bitcoin sh -s -- -y
     cd /home/bitcoin/lightning/plugins/grpc-plugin || exit 1
-    # build
-    sudo -u bitcoin /home/bitcoin/.cargo/bin/cargo build \
-     --target-dir /home/bitcoin/cl-plugins-available/cln-grpc
+    echo "# build"
+    sudo -u bitcoin /home/bitcoin/.cargo/bin/cargo build --target-dir /home/bitcoin/cln-grpc-build
+    echo "# delete old dir or binary"
+    sudo rm -rf /home/bitcoin/cl-plugins-available/cln-grpc
+    echo "# move to /home/bitcoin/cl-plugins-available/"
+    sudo -u bitcoin mv /home/bitcoin/cln-grpc-build/debug/cln-grpc /home/bitcoin/cl-plugins-available/
   else
     echo "# - cln-grpc plugin was already built/installed"
   fi
+  echo "# Cleaning"
+  sudo rm -rf /home/bitcoin/.rustup
+  sudo rm -rf /home/bitcoin/.cargo/
+  sudo rm -rf /home/bitcoin/.cache
+  sudo rm -rf /home/bitcoin/cln-grpc-build
 }
 
 function switchOn() {
-  if ! "$lightningcli_alias" plugin list | grep "/home/bitcoin/${netprefix}cl-plugins-enabled/cln-grpc"; then
+  if ! $lightningcli_alias plugin list | grep "/home/bitcoin/${netprefix}cl-plugins-enabled/cln-grpc"; then
     buildGRPCplugin
 
     # symlink to plugin directory
-    sudo ln -s /home/bitcoin/cl-plugins-available/cln-grpc/debug/cln-grpc /home/bitcoin/${netprefix}cl-plugins-enabled/
-    echo "# cln-grpc moved to /home/bitcoin/${netprefix}cl-plugins-enabled/"
+    echo "# symlink cln-grpc to /home/bitcoin/${netprefix}cl-plugins-enabled/"
+    # delete old symlink
+    sudo rm /home/bitcoin/${netprefix}cl-plugins-enabled/cln-grpc
+    sudo ln -s /home/bitcoin/cl-plugins-available/cln-grpc /home/bitcoin/${netprefix}cl-plugins-enabled/
 
     # blitz.conf.sh set [key] [value] [?conffile] <noquotes>
     /home/admin/config.scripts/blitz.conf.sh set "grpc-port" "${PORT}" "${CLCONF}" "noquotes"

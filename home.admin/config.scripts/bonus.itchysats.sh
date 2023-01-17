@@ -10,7 +10,7 @@ GITHUB_REPO="https://github.com/itchysats/itchysats"
 # the github tag of the version of the source code to install
 # can also be a commit hash 
 # if empty it will use the latest source version
-# GITHUB_VERSION=$( curl -s https://api.github.com/repos/itchysats/itchysats/releases | jq -r '.[].tag_name' | grep -v "rc" | head -n1)
+# GITHUB_VERSION=$( curl --header "X-GitHub-Api-Version:2022-11-28" -s https://api.github.com/repos/itchysats/itchysats/releases | jq -r '.[].tag_name' | grep -v "rc" | head -n1)
 GITHUB_VERSION="0.7.0"
 
 # the github signature to verify the author
@@ -138,6 +138,7 @@ buildFromSource() {
     echo "# compile/install the app. This will take a long time"
     sudo -u ${APPID} /home/${APPID}/.cargo/bin/cargo install --path taker --locked --target-dir /home/${APPID}/bin/
     exitCode=$?
+    sudo rm -R /home/${APPID}/.rustup
     if ! [ ${exitCode} -eq 0 ]; then
         echo "# FAIL - cargo install did not run correctly - deleting code & exit"
         sudo rm -r /home/${APPID}/${APPID}
@@ -340,6 +341,7 @@ TimeoutSec=120
 RestartSec=30
 StandardOutput=null
 StandardError=journal
+LogLevelMax=4
 
 # Hardening measures
 PrivateTmp=true
@@ -479,7 +481,7 @@ fi
 #  UPDATE
 ###############
 if [ "$1" = "update" ]; then
-    LATEST_VERSION=$( curl -s https://api.github.com/repos/itchysats/itchysats/releases | jq -r '.[].tag_name' | grep -v "rc" | head -n1)
+    LATEST_VERSION=$( curl --header "X-GitHub-Api-Version:2022-11-28" -s https://api.github.com/repos/itchysats/itchysats/releases | jq -r '.[].tag_name' | grep -v "rc" | head -n1)
     echo "# Updating ItchySats to $LATEST_VERSION"
 
     echo "# Making sure service is not running"
@@ -564,6 +566,9 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   echo "# mark app as uninstalled in raspiblitz config"
   /home/admin/config.scripts/blitz.conf.sh set ${APPID} "off"
+
+  echo "# delete user"
+  sudo userdel -rf itchysats 2>/dev/null
 
   # only if 'delete-data' is an additional parameter then also the data directory gets deleted
   if [ "$(echo "$@" | grep -c delete-data)" -gt 0 ]; then

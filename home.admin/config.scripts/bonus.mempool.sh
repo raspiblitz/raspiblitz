@@ -8,6 +8,7 @@ pinnedVersion="v2.4.0"
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "# small config script to switch Mempool on or off"
   echo "# installs the $pinnedVersion by default"
+  echo "# bonus.mempool.sh [install|uninstall]"
   echo "# bonus.mempool.sh [status|on|off]"
   exit 1
 fi
@@ -65,6 +66,11 @@ fi
 # status
 if [ "$1" = "status" ]; then
 
+  echo "version='${pinnedVersion}'"
+
+  isInstalled=$(compgen -u | grep -c mempool)
+  echo "codebase=${isInstalled}"
+
   if [ "${mempoolExplorer}" = "on" ]; then
     echo "configured=1"
 
@@ -97,6 +103,7 @@ if [ "$1" = "status" ]; then
 
   else
     echo "installed=0"
+    echo "active=0"
     echo "configured=0"
   fi
   exit 0
@@ -106,36 +113,101 @@ fi
 echo "# making sure services are not running"
 sudo systemctl stop mempool 2>/dev/null
 
-# switch on
-if [ "$1" = "1" ] || [ "$1" = "on" ]; then
+# install (code & compile)
+if [ "$1" = "install" ]; then
+
+  # check if already installed
+  isInstalled=$(compgen -u | grep -c mempool)
+  if [ "${isInstalled}" != "0" ]; then
+    echo "result='already installed'"
+    exit 0
+  fi
+
   echo "# *** INSTALL MEMPOOL ***"
 
-  isInstalled=$(sudo ls /etc/systemd/system/mempool.service 2>/dev/null | grep -c 'mempool.service')
-  if [ ${isInstalled} -eq 0 ]; then
+  # install nodeJS
+  /home/admin/config.scripts/bonus.nodejs.sh on
 
-    # install nodeJS
-    /home/admin/config.scripts/bonus.nodejs.sh on
+  # make sure needed os dependencies are installed
+  sudo apt-get install -y mariadb-server mariadb-client
+
+  # add mempool user
+  sudo adduser --disabled-password --gecos "" mempool
+
+  # install mempool
+  cd /home/mempool
+  sudo -u mempool git clone https://github.com/mempool/mempool.git
+  cd mempool
+  sudo -u mempool git reset --hard $pinnedVersion
+  sudo -u mempool /home/admin/config.scripts/blitz.git-verify.sh "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
+
+  echo "# npm install for mempool explorer (frontend)"
+
+  cd frontend
+  sudo -u mempool NG_CLI_ANALYTICS=false npm install --no-optional
+  if ! [ $? -eq 0 ]; then
+      echo "FAIL - npm install did not run correctly, aborting"
+      exit 1
+  fi
+  sudo -u mempool NG_CLI_ANALYTICS=false npm run build
+  if ! [ $? -eq 0 ]; then
+      echo "FAIL - npm run build did not run correctly, aborting (1)"
+      exit 1
+  fi
+
+  echo "# npm install for mempool explorer (backend)"
+
+  cd ../backend/
+  sudo -u mempool NG_CLI_ANALYTICS=false npm install --no-optional
+  if ! [ $? -eq 0 ]; then
+      echo "# FAIL - npm install did not run correctly, aborting"
+      echo "result='failed npm install'"
+      exit 1
+  fi
+  sudo -u mempool NG_CLI_ANALYTICS=false npm run build
+  if ! [ $? -eq 0 ]; then
+      echo "# FAIL - npm run build did not run correctly, aborting (2)"
+      echo "result='failed npm run build'"
+      exit 1
+  fi
+
+  exit 0
+fi
+
+# remove from system
+if [ "$1" = "uninstall" ]; then
+
+  # check if still active
+  isActive=$(sudo ls /etc/systemd/system/mempool.service 2>/dev/null | grep -c 'mempool.service')
+  if [ "${isActive}" != "0" ]; then
+    echo "result='still in use'"
+    exit 1
+  fi
+
+  echo "# *** UNINSTALL MEMPOOL ***"
+
+  # always delete user and home directory
+  sudo userdel -rf mempool
+
+  exit 0
+fi
+
+# switch on
+if [ "$1" = "1" ] || [ "$1" = "on" ]; then
+
+  isInstalled=$(compgen -u | grep -c mempool)
+  if [ "${isInstalled}" == "0" ]; then
+    echo "# Install code base first ...."
+    /home/admin/config.scripts/bonus.mempool.sh install
+  fi
+
+  echo "# *** Activate MEMPOOL ***"
+
+  isActive=$(sudo ls /etc/systemd/system/mempool.service 2>/dev/null | grep -c 'mempool.service')
+  if [ ${isActive} -eq 0 ]; then
 
     # make sure that txindex of blockchain is switched on
     /home/admin/config.scripts/network.txindex.sh on
-
-    # make sure needed os dependencies are installed
-    sudo apt-get install -y mariadb-server mariadb-client
-
-    # add mempool user
-    sudo adduser --disabled-password --gecos "" mempool
-
-    # install mempool
-    cd /home/mempool
-    sudo -u mempool git clone https://github.com/mempool/mempool.git
-    cd mempool
-    sudo -u mempool git reset --hard $pinnedVersion
-    sudo -u mempool /home/admin/config.scripts/blitz.git-verify.sh \
-     "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
-
-    # modify an
-    #echo "# try to suppress question on statistics report .."
-    #sudo sed -i "s/^}/,\"cli\": {\"analytics\": false}}/g" /home/mempool/mempool/frontend/angular.json
 
     sudo mariadb -e "DROP DATABASE IF EXISTS mempool;"
     sudo mariadb -e "CREATE DATABASE mempool;"
@@ -143,34 +215,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo mariadb -e "FLUSH PRIVILEGES;"
     if [ -f "mariadb-structure.sql" ]; then
       mariadb -umempool -pmempool mempool < mariadb-structure.sql
-    fi
-
-    echo "# npm install for mempool explorer (frontend)"
-
-    cd frontend
-    sudo -u mempool NG_CLI_ANALYTICS=false npm install --no-optional
-    if ! [ $? -eq 0 ]; then
-        echo "FAIL - npm install did not run correctly, aborting"
-        exit 1
-    fi
-    sudo -u mempool NG_CLI_ANALYTICS=false npm run build
-    if ! [ $? -eq 0 ]; then
-        echo "FAIL - npm run build did not run correctly, aborting (1)"
-        exit 1
-    fi
-
-    echo "# npm install for mempool explorer (backend)"
-
-    cd ../backend/
-    sudo -u mempool NG_CLI_ANALYTICS=false npm install --no-optional
-    if ! [ $? -eq 0 ]; then
-        echo "FAIL - npm install did not run correctly, aborting"
-        exit 1
-    fi
-    sudo -u mempool NG_CLI_ANALYTICS=false npm run build
-    if ! [ $? -eq 0 ]; then
-        echo "FAIL - npm run build did not run correctly, aborting (2)"
-        exit 1
     fi
 
     # prepare .env file
@@ -205,6 +249,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     "ENABLED": true,
     "HOST": "localhost",
     "PORT": 3306,
+    "SOCKET": "/var/run/mysqld/mysqld.sock",
     "USERNAME": "mempool",
     "PASSWORD": "mempool",
     "DATABASE": "mempool"
@@ -231,7 +276,6 @@ EOF
     sudo ufw allow 4080 comment 'mempool HTTP'
     sudo ufw allow 4081 comment 'mempool HTTPS'
     echo ""
-
 
     ##################
     # NGINX
@@ -269,6 +313,7 @@ User=mempool
 # Restart on failure but no more than default times (DefaultStartLimitBurst=5) every 10 minutes (600 seconds). Otherwise stop
 Restart=on-failure
 RestartSec=600
+LogLevelMax=4
 
 # Hardening measures
 PrivateTmp=true
@@ -293,6 +338,16 @@ EOF
   if [ "${state}" == "ready" ]; then
     echo "# OK - the mempool.service is enabled, system is on ready so starting service"
     sudo systemctl start mempool
+    sleep 10
+
+    # check install success by testing backend
+  isWorking=$(sudo systemctl status mempool | grep -c "Active: active")
+  if [ ${isWorking} -lt 1 ]; then
+      # signal an error to WebUI
+      echo "result='mempool service not active'"
+      exit 1
+    fi
+
   else
     echo "# OK - the mempool.service is enabled, to start manually use: sudo systemctl start mempool"
   fi
@@ -303,7 +358,6 @@ EOF
   echo "# needs to finish creating txindex to be functional"
   echo "# monitor with: sudo tail -n 20 -f /mnt/hdd/bitcoin/debug.log"
 
-
   # Hidden Service for Mempool if Tor is active
   if [ "${runBehindTor}" = "on" ]; then
     # make sure to keep in sync with tor.network.sh script
@@ -313,13 +367,12 @@ EOF
   # needed for API/WebUI as signal that install ran thru 
   echo "result='OK'"
   exit 0
+
+  
 fi
 
 # switch off
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
-
-  # always delete user and home directory
-  sudo userdel -rf mempool
 
   # always remove nginx symlinks
   sudo rm -f /etc/nginx/snippets/mempool.conf
@@ -372,7 +425,7 @@ if [ "$1" = "update" ]; then
   cd /home/mempool/mempool
 
   localVersion=$(git describe --tag)
-  updateVersion=$(curl -s https://api.github.com/repos/mempool/mempool/releases/latest|grep tag_name|head -1|cut -d '"' -f4)
+  updateVersion=$(curl --header "X-GitHub-Api-Version:2022-11-28" -s https://api.github.com/repos/mempool/mempool/releases/latest|grep tag_name|head -1|cut -d '"' -f4)
 
   if [ $localVersion = $updateVersion ]; then
       echo "***  You are up-to-date on version $localVersion ***"

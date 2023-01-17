@@ -5,20 +5,20 @@
 # restart the systemd `blitzapi` when credentials of lnd or bitcoind are changed and it will
 # excute the `update-config` automatically before restarting
 
+# NORMALLY user/repo/version will be defined by calling script - see build_sdcard.sh
+# the following is just a fallback to try during development if script given branch does not exist
+FALLACK_BRANCH="dev"
+
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ]; then
   echo "Manage RaspiBlitz Web API"
-  echo "blitz.web.api.sh on [?GITHUBUSER] [?REPO] [?BRANCH]"
+  echo "blitz.web.api.sh on [GITHUBUSER] [REPO] [BRANCH] [?COMMITORTAG]"
+  echo "blitz.web.api.sh on DEFAULT"
   echo "blitz.web.api.sh update-config"
-  echo "blitz.web.api.sh update-code"
+  echo "blitz.web.api.sh update-code [?BRANCH]"
   echo "blitz.web.api.sh off"
   exit 1
 fi
-
-DEFAULT_GITHUB_USER="fusion44"
-DEFAULT_GITHUB_REPO="blitz_api"
-DEFAULT_GITHUB_BRANCH="main"
-DEFAULT_GITHUB_COMMITORTAG="v0.5.0-beta"
 
 ###################
 # UPDATE CONFIG
@@ -42,7 +42,6 @@ if [ "$1" = "update-config" ]; then
   sed -i "s/^platform=.*/platform=raspiblitz/g" ./.env
 
   # configure access token secret
-  secretNeedsInit=$(cat ./.env 2>/dev/null| grep -c "=please_please_update_me_please")
   if [ "${secret}" == "" ] || [ "${secret}" == "please_please_update_me_please" ]; then
     echo "# init secret ..."
     secret=$(dd if=/dev/urandom bs=256 count=1 2> /dev/null | shasum -a256 | cut -d " " -f1)
@@ -68,7 +67,6 @@ if [ "$1" = "update-config" ]; then
     sed -i "s/^bitcoind_ip_testnet=.*/bitcoind_ip_testnet=127.0.0.1/g" ./.env
     sed -i "s/^bitcoind_user=.*/bitcoind_user=${RPCUSER}/g" ./.env
     sed -i "s/^bitcoind_pw=.*/bitcoind_pw=${RPCPASS}/g" ./.env
-
 
     # configure LND
     if [ "${lightning}" == "lnd" ]; then
@@ -144,20 +142,66 @@ fi
 ###################
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
-  if [ "$2" != "" ]; then
-    DEFAULT_GITHUB_USER="$2"
+  if [ "$2" == "DEFAULT" ]; then
+    echo "# getting default user/repo from build_sdcard.sh"
+    sudo cp /home/admin/raspiblitz/build_sdcard.sh /home/admin/build_sdcard.sh
+    sudo chmod +x /home/admin/build_sdcard.sh 2>/dev/null
+    source <(sudo /home/admin/build_sdcard.sh -EXPORT)
+    GITHUB_USER="${defaultAPIuser}"
+    GITHUB_REPO="${defaultAPIrepo}"
+    GITHUB_BRANCH="${githubBranch}"
+    GITHUB_COMMITORTAG=""
+  else
+    # get parameters
+    GITHUB_USER=$2
+    GITHUB_REPO=$3
+    GITHUB_BRANCH=$4
+    GITHUB_COMMITORTAG=$5
   fi
 
-  if [ "$3" != "" ]; then
-    DEFAULT_GITHUB_REPO="$3"
+  # check & output info
+  echo "# GITHUB_USER(${GITHUB_USER})"
+  if [ "${GITHUB_USER}" == "" ]; then
+    echo "# FAIL: No GITHUB_USER provided"
+    exit 1
+  fi
+  echo "GITHUB_REPO(${GITHUB_REPO})"
+  if [ "${GITHUB_REPO}" == "" ]; then
+    echo "# FAIL: No GITHUB_REPO provided"
+    exit 1
+  fi
+  echo "GITHUB_BRANCH(${GITHUB_BRANCH})"
+  if [ "${GITHUB_BRANCH}" == "" ]; then
+    echo "# FAIL: No GITHUB_BRANCH provided"
+    exit 1
+  fi
+  echo "GITHUB_COMMITORTAG(${GITHUB_COMMITORTAG})"
+  if [ "${GITHUB_COMMITORTAG}" == "" ]; then
+    echo "# INFO: No GITHUB_COMMITORTAG provided .. will use latest code on branch"
   fi
 
-  if [ "$4" != "" ]; then
-    DEFAULT_GITHUB_BRANCH="$4"
+  # check if given branch exits on that github user/repo
+  branchExists=$(curl --header "X-GitHub-Api-Version:2022-11-28" -s "https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/branches/${GITHUB_BRANCH}" | grep -c "\"name\": \"${GITHUB_BRANCH}\"")
+  if [ ${branchExists} -lt 1 ]; then
+    echo
+    echo "# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+    echo "# WARNING! The given API repo is not available:"
+    echo "# user(${GITHUB_USER}) repo(${GITHUB_REPO}) branch(${GITHUB_BRANCH})"
+    echo "# WORKING WITH FALLBACK REPO - USE JUST FOR DEVELOPMENT - DONT USE IN PRODUCTION"
+    echo "# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+    echo
+    sleep 10
+    GITHUB_BRANCH="${FALLACK_BRANCH}"
   fi
 
-  if [ "$5" != "" ]; then
-    DEFAULT_GITHUB_COMMITORTAG="$5"
+  # re-check (if case its fallback)
+  branchExists=$(curl --header "X-GitHub-Api-Version:2022-11-28" -s "https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/branches/${GITHUB_BRANCH}" | grep -c "\"name\": \"${GITHUB_BRANCH}\"")
+  if [ ${branchExists} -lt 1 ]; then
+    echo
+    echo "# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+    echo "# FAIL! user(${GITHUB_USER}) repo(${GITHUB_REPO}) branch(${GITHUB_BRANCH})"
+    echo "# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+    exit 1
   fi
 
   echo "# INSTALL Web API ..."
@@ -192,31 +236,34 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   cd /home/blitzapi || exit 1
   
   # git clone https://github.com/fusion44/blitz_api.git /home/blitzapi/blitz_api
-  if ! sudo -u blitzapi git clone https://github.com/${DEFAULT_GITHUB_USER}/${DEFAULT_GITHUB_REPO}.git blitz_api; then
+  echo "# clone github: ${GITHUB_USER}/${GITHUB_REPO}"
+  if ! sudo -u blitzapi git clone https://github.com/${GITHUB_USER}/${GITHUB_REPO}.git blitz_api; then
     echo "error='git clone failed'"
     exit 1
   fi
   cd blitz_api || exit 1
-  if ! sudo -u blitzapi git checkout ${DEFAULT_GITHUB_BRANCH}; then
+  echo "# checkout branch: ${GITHUB_BRANCH}"
+  if ! sudo -u blitzapi git checkout ${GITHUB_BRANCH}; then
     echo "error='git checkout failed'"
     exit 1
   fi
-  if ! git reset --hard ${DEFAULT_GITHUB_COMMITORTAG}; then
-    echo "error='git reset failed'"
-    exit 1
+  if [ "${GITHUB_COMMITORTAG}" != "" ]; then
+    echo "# setting code to tag/commit: ${GITHUB_COMMITORTAG}"
+    if ! git reset --hard ${GITHUB_COMMITORTAG}; then
+      echo "error='git reset failed'"
+      exit 1
+    fi
+  else
+    echo "# using lastest code in branch"
   fi
   # install
+  echo "# running install"
   sudo -u blitzapi python3 -m venv venv
   if ! sudo -u blitzapi ./venv/bin/pip install -r requirements.txt --no-deps; then
     echo "error='pip install failed'"
     exit 1
   fi
   
-  # build the config and set unique secret (its OK to be a new secret every install/upadte)
-  /home/admin/config.scripts/blitz.web.api.sh update-config
-  secret=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 64 ; echo '')
-  sed -i "s/^secret=.*/secret=${secret}/g" ./.env
-
   # prepare systemd service
   echo "
 [Unit]
@@ -272,13 +319,20 @@ fi
 ###################
 if [ "$1" = "update-code" ]; then
 
+  # the branch on which to get the latest code from
+  if [ "$2" != "" ]; then
+    currentBranch="$2"
+  fi
+
   apiActive=$(ls /etc/systemd/system/blitzapi.service | grep -c blitzapi.service)
   if [ "${apiActive}" != "0" ]; then
     echo "# Update Web API CODE"
     systemctl stop blitzapi
     sudo chown -R blitzapi:blitzapi /home/blitzapi/blitz_api
     cd /home/blitzapi/blitz_api
-    currentBranch=$(sudo -u blitzapi git rev-parse --abbrev-ref HEAD)
+    if [ "$currentBranch" == "" ]; then
+      currentBranch=$(sudo -u blitzapi git rev-parse --abbrev-ref HEAD)
+    fi
     echo "# updating local repo ..."
     oldCommit=$(sudo -u blitzapi git rev-parse HEAD)
     sudo -u blitzapi git fetch

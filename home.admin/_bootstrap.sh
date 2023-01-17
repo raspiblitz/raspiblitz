@@ -898,6 +898,20 @@ if [ ${configWifiExists} -eq 1 ]; then
   cp /etc/wpa_supplicant/wpa_supplicant.conf /mnt/hdd/app-data/wpa_supplicant.conf
 fi
 
+# always copy the latest display setting (maybe just in raspiblitz.info) to raspiblitz.conf
+if [ "${displayClass}" != "" ]; then
+  /home/admin/config.scripts/blitz.conf.sh set displayClass ${displayClass}
+fi
+if [ "${displayType}" != "" ]; then
+  /home/admin/config.scripts/blitz.conf.sh set displayType ${displayType}
+fi
+
+# correct blitzapi config value
+blitzApiRunning=$(ls /etc/systemd/system/blitzapi.service 2>/dev/null | grep -c "blitzapi.service")
+if [ "${blitzapi}" == "" ] && [ ${blitzApiRunning} -eq 1 ]; then
+  /home/admin/config.scripts/blitz.conf.sh set blitzapi "on"
+fi
+
 # make sure users have latest credentials (if lnd is on)
 if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
   echo "running LND users credentials update" >> $logFile

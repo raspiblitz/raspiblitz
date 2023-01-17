@@ -10,12 +10,12 @@ source /home/admin/raspiblitz.info </dev/null
 # command info
 if [ "$1" == "" ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "# tools for the boot drive / sd card"
- echo "# blitz.sdcard.sh status"
- echo "# blitz.sdcard.sh expand"
+ echo "# blitz.bootdrive.sh status"
+ echo "# blitz.bootdrive.sh fsexpand"
  exit 1
 fi
 
-# check if sudo
+# check if su
 if [ "$EUID" -ne 0 ]
   then echo "Please run as root (with sudo)"
   exit 1
@@ -28,7 +28,7 @@ action=$1
 # STATUS
 
 # gather data on sd card
-minimumSizeByte=8192000000
+minimumSizeByte=16384000000
 rootPartition=$(sudo mount | grep " / " | cut -d " " -f 1 | cut -d "/" -f 3)
 rootPartitionBytes=$(lsblk -b -o NAME,SIZE | grep "${rootPartition}" | tr -s ' ' | cut -d " " -f 2)
 

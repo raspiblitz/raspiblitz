@@ -134,7 +134,6 @@ do
 done
 echo "OK ${network} startup successful " >> ${logFile}
 
-
 ###################################
 # Prepare Lightning
 source /mnt/hdd/raspiblitz.conf

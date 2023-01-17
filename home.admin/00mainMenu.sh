@@ -86,6 +86,9 @@ fi
 if [ "${lit}" == "on" ]; then
   OPTIONS+=(LIT "LIT (loop, pool, faraday)")
 fi
+if [ "${lndg}" == "on" ]; then
+  OPTIONS+=(LNDG "LNDg (auto-rebalance, auto-fees)")
+fi
 if [ "${sparko}" == "on" ]; then
   OPTIONS+=(SPARKO "Sparko Webwallet")
 fi
@@ -155,7 +158,7 @@ if [ "${homer}" == "on" ]; then
   CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
 fi
 if [ "${circuitbreaker}" == "on" ]; then
-  OPTIONS+=(CIRCUIT "Circuitbreaker (LND firewall)")
+  OPTIONS+=(CIRCUITBREAKER "Circuitbreaker (LND firewall)")
 fi
 if [ "${tallycoinConnect}" == "on" ]; then
   OPTIONS+=(TALLY "Tallycoin Connect")
@@ -165,6 +168,9 @@ if [ "${squeaknode}" == "on" ]; then
 fi
 if [ "${itchysats}" == "on" ]; then
   OPTIONS+=(ITCHYSATS "Show ItchySats details")
+fi
+if [ "${lightningtipbot}" == "on" ]; then
+  OPTIONS+=(LIGHTNINGTIPBOT "Show LightningTipBot details")
 fi
 
 # dont offer to switch to "testnet view for now" - so no wswitch back to mainnet needed
@@ -180,9 +186,7 @@ OPTIONS+=(SETTINGS "Node Settings & Options")
 OPTIONS+=(SERVICES "Additional Apps & Services")
 OPTIONS+=(SYSTEM "Monitoring & Configuration")
 OPTIONS+=(CONNECT "Connect Apps & Show Credentials")
-if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
-  OPTIONS+=(SUBSCRIBE "Manage Subscriptions")
-fi
+OPTIONS+=(SUBSCRIBE "Manage Subscriptions")
 OPTIONS+=(PASSWORD "Change Passwords")
 
 if [ "${touchscreen}" == "1" ]; then
@@ -265,6 +269,9 @@ case $CHOICE in
         LIT)
             /home/admin/config.scripts/bonus.lit.sh menu
             ;;
+        LNDG)
+            /home/admin/config.scripts/bonus.lndg.sh menu
+            ;;
         SPARKO)
             /home/admin/config.scripts/cl-plugin.sparko.sh menu mainnet
             ;;
@@ -276,6 +283,9 @@ case $CHOICE in
             ;;
         LNDMANAGE)
             /home/admin/config.scripts/bonus.lndmanage.sh menu
+            ;;
+        LIGHTNINGTIPBOT)
+            /home/admin/config.scripts/bonus.lightningtipbot.sh menu
             ;;
         LOOP)
             /home/admin/config.scripts/bonus.loop.sh menu
@@ -319,7 +329,6 @@ case $CHOICE in
         HELIPAD)
             sudo /home/admin/config.scripts/bonus.helipad.sh menu
             ;;
-
         SQUEAKNODE)
             /home/admin/config.scripts/bonus.squeaknode.sh menu
             ;;
@@ -329,7 +338,7 @@ case $CHOICE in
         CHANTOOLS)
             sudo /home/admin/config.scripts/bonus.chantools.sh menu
             ;;
-        CIRCUIT)
+        CIRCUITBREAKER)
             sudo /home/admin/config.scripts/bonus.circuitbreaker.sh menu
             ;;
         TESTNETS)

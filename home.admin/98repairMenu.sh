@@ -76,11 +76,12 @@ if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ]; then
 fi
 OPTIONS+=(MIGRATION "Migrate Blitz Data to new Hardware")
 OPTIONS+=(COPY-SOURCE "Copy Blockchain Source Modus")
+OPTIONS+=(REINDEX "Redindex Bitcoin Blockchain")
+OPTIONS+=(DELETE-INDEX "Delete Bitcoin Transaction-Index")
 OPTIONS+=(RESET-CHAIN "Delete Blockchain & Re-Download")
 OPTIONS+=(RESET-HDD "Delete HDD Data but keep Blockchain")
 OPTIONS+=(RESET-ALL "Delete HDD completely to start fresh")
 OPTIONS+=(DELETE-ELEC "Delete Electrum Index")
-OPTIONS+=(DELETE-INDEX "Delete Bitcoin Transaction-Index")
 
 CHOICE=$(whiptail --clear --title "Repair Options" --menu "" 19 62 12 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
@@ -89,7 +90,15 @@ case $CHOICE in
 #  HARDWARE)
 #    ;;
   SOFTWARE)
-    sudo /home/admin/config.scripts/blitz.debug.sh
+    echo "Generating debug logs. Be patient, this should take maximum 2 minutes .."
+    sudo rm /var/cache/raspiblitz/debug.log 2>/dev/null
+    /home/admin/config.scripts/blitz.debug.sh > /var/cache/raspiblitz/debug.log
+    echo "Redacting .."
+    /home/admin/config.scripts/blitz.debug.sh redact /var/cache/raspiblitz/debug.log
+    sudo chmod 640 /var/cache/raspiblitz/debug.log
+    sudo chown root:sudo /var/cache/raspiblitz/debug.log
+    cat /var/cache/raspiblitz/debug.log
+    echo
     echo "Press ENTER to return to main menu."
     read key
     ;;
@@ -146,6 +155,10 @@ case $CHOICE in
     ;;
   DELETE-INDEX)
     /home/admin/config.scripts/network.txindex.sh delete
+    exit 0;
+    ;;
+  REINDEX)
+    /home/admin/config.scripts/network.reindex.sh reindex main
     exit 0;
     ;;
   COPY-SOURCE)

@@ -6,9 +6,12 @@ Only use this software with funds you could afford to lose. Especially a lightni
 
 Just because the software is OpenSource does not mean its free of errors. Especially if you run additional apps, the RaspiBlitz team cannot review all the code of those external projects.
 
-The software is provided "AS IS", without warranty of any kind. In no event shall the
-authors or copyright holders be liable for any claim, damages or other
+The software is provided "AS IS", without warranty of any kind. In no event shall the authors or copyright holders be liable for any claim, damages or other
 liability. [details on legal license](LICENSE.md)
+
+## Minimal SD Card Build
+
+To improve the UX for beginners & casual users we decided to preinstall & activate lots of features like LCD, API & WebUI of RaspiBlitz from the beginning and even preinstall/compile a selection of additional apps in the default `fatpack` sd card image. This creates a bigger attack surface and more trusted dependencies on the security side. For more advanced users we also provide a `minimal` sd card image in the download section - which aims to install just the basics and every else will be just installed/compiled on-demand - this is recommended for users (especially on updates) that already know what features they want/need from their RaspiBlitz to run it with the reduced attack surface. To create a minimal sd card yourself run the `build_sdcard.sh` script with the options `-f 0` (fatpack off) & `-d headless` (to not preinstall external LCD drivers).
 
 ## Supported Versions
 

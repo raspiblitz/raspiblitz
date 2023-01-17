@@ -169,7 +169,7 @@ systemctl daemon-reload >> ${logFile}
 systemctl enable ${network}d.service >> ${logFile}
 systemctl start ${network}d.service >> ${logFile}
 
-# INSTALL LND on Upadte/Recovery
+# INSTALL LND on Update/Recovery
 if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
 
   # prepare lnd service

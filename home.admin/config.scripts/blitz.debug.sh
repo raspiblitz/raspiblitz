@@ -41,6 +41,13 @@ if [ "$1" == "redact" ]; then
   sed -i 's/[a-z0-9][a-z0-9]*.onion/###.onion/' ${redactFile}
   sed -i 's/alias=[^\r\n]*/alias=****/' ${redactFile}
   
+  # redact lnbits credentials #3520
+  sed -i 's/api-key=[a-zA-Z0-9]\+/api-key=***/' ${redactFile}
+  sed -i 's/wallet=[a-zA-Z0-9]\+/wallet=***/' ${redactFile}
+  sed -i 's/wal=[a-zA-Z0-9]\+/wal=***/' ${redactFile}
+  sed -i 's/usr=[a-zA-Z0-9]\+/usr=***/' ${redactFile}
+  sed -i 's/user [a-zA-Z0-9]\+/user ***/' ${redactFile}
+
   exit 0
 fi
 
@@ -69,7 +76,6 @@ if [ ${#chain} -eq 0 ]; then
   fi
 fi
 
-clear
 echo
 echo "***************************************************************"
 echo "* RASPIBLITZ DEBUG LOGS "
@@ -369,8 +375,18 @@ fi
 
 echo
 echo "*** MOUNTED DRIVES ***"
+echo "df -T -h"
 df -T -h
+
 echo
+echo "*** SD CARD HOMES ***"
+echo "sudo du -ahd1 /home"
+sudo du -ahd1 /home
+
+echo
+echo "*** LOGFILES ***"
+sudo journalctl --disk-usage
+sudo du -sh /var/log
 
 echo
 echo "*** DATADRIVE ***"
@@ -396,11 +412,6 @@ echo "*** SYSTEM CACHE STATUS ***"
 /home/admin/_cache.sh "export" system_
 /home/admin/_cache.sh "export" ln_default | grep -v "ln_default_address"
 /home/admin/_cache.sh "export" btc_default | grep -v "btc_default_address"
-
-echo
-echo "*** LOGFILES ***"
-sudo journalctl --disk-usage
-sudo du -sh /var/log
 
 echo
 echo "*** OPTION: SHARE THIS DEBUG OUTPUT ***"

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # https://github.com/lightninglabs/lightning-terminal/releases
-LITVERSION="0.8.3-alpha"
+LITVERSION="0.8.4-alpha"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -235,12 +235,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       echo "# Connect to the Pool, Loop and Terminal server through Tor"
       LOOPPROXY="loop.server.proxy=127.0.0.1:9050"
       POOLPROXY="pool.proxy=127.0.0.1:9050"
-      runLitd="torsocks /usr/local/bin/litd"
     else
       echo "# Connect to Pool, Loop and Terminal server through clearnet"
       LOOPPROXY=""
       POOLPROXY=""
-      runLitd="/usr/local/bin/litd"
     fi
     PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
     echo "
@@ -288,7 +286,7 @@ Description=litd Service
 After=lnd.service
 
 [Service]
-ExecStart=${runLitd}
+ExecStart=/usr/local/bin/litd
 User=lit
 Group=lit
 Type=simple
@@ -297,6 +295,7 @@ Restart=on-failure
 RestartSec=60
 StandardOutput=journal
 StandardError=journal
+LogLevelMax=4
 
 # Hardening measures
 PrivateTmp=true

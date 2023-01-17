@@ -12,8 +12,7 @@ Work notes for the process of producing a new SD card image release:
 * From the browser `Show All Downloads` and from the context menu select `Open Containing Folder`
 * On that file manager open context (right click) on the white-space and select `Open in Terminal`
 * Compare the checksum with the one you just made note of, using `shasum -a 256 *.zip`
-* Install curl if needed `sudo apt-get install -f curl net-tools`
-* Check signature: `curl https://www.raspberrypi.org/raspberrypi_downloads.gpg.key | gpg --import && gpg --verify *.sig`
+* Check signature: `wget https://www.raspberrypi.org/raspberrypi_downloads.gpg.key && gpg --import ./raspberrypi_downloads.gpg.key && gpg --verify *.sig`
 * The result should say "correct signature" and the fingerprint should end with `8738 CD6B 956F 460C`
 * Insert an NTFS formatted USB stick and use the file manager to move all files to the USB
 * If image is an ZIP file use in file manager context on NTFS USB stick `extract here` to unzip
@@ -29,7 +28,8 @@ Work notes for the process of producing a new SD card image release:
 * In terminal `ssh pi@[IP-OF-RASPIBLITZ]`
 * Password is `raspberry`
 * Run the following command BUT REPLACE `[BRANCH]` with the branch-string of your latest version
-* `wget --no-cache https://raw.githubusercontent.com/rootzoll/raspiblitz/[BRANCH]/build_sdcard.sh && sudo bash build_sdcard.sh -b [BRANCH]`
+* For FATPACK: `wget --no-cache https://raw.githubusercontent.com/rootzoll/raspiblitz/[BRANCH]/build_sdcard.sh && sudo bash build_sdcard.sh -u rootzoll -b [BRANCH]`
+* For MINIMAL: `wget --no-cache https://raw.githubusercontent.com/rootzoll/raspiblitz/[BRANCH]/build_sdcard.sh && sudo bash build_sdcard.sh -u rootzoll -b [BRANCH] -f 0 -d headless`
 * Monitor/Check outputs for warnings/errors - install LCD
 * Login new with `ssh admin@[IP-OF-RASPIBLITZ]` (pw: raspiblitz) and run `release`
 * Disconnect WiFi/LAN on build laptop (hardware switch off) and shutdown
@@ -44,11 +44,17 @@ Work notes for the process of producing a new SD card image release:
 * Take the SD card from the RaspberryPi and connect with an external SD card reader to the laptop
 * Click on `boot` volume once in the file manger
 * Connect the NTFS USB stick, open in file manager and delete old files
+
+* if not: review changes in latest pishrink script
+* To make a raw image from sd card - first way (terminal): 
+  * Open Terminal and cd into directory of NTFS USB stick under `/media/amnesia`
+  * Run `df` to check on the SD card device name (`boot` - ignore last partition number)
+  * `dd if=/dev/[sdcarddevice] of=./raspiblitz.img`
+* To make a raw image from sd card - second way (UI with progress): 
+  * Search "Laufwerke" or "Drives" on Tails Apps
+  * Create image named `raspiblitz.img` to USB storage
 * Open Terminal and cd into directory of NTFS USB stick under `/media/amnesia`
 * `shasum -a 256 ./pishrink.sh` should be `e46e1e1e3c6e3555f9fff5435e2305e99b98aaa8dc28db1814cf861fbb472a69`
-* if not: review changes in latest pishrink script
-* Run `df` to check on the SD card device name (`boot` - ignore last partition number)
-* `dd if=/dev/[sdcarddevice] of=./raspiblitz.img`
 * `chmod +x ./pishrink.sh | sudo ./pishrink.sh ./raspiblitz.img`
 * `gzip -c ./raspiblitz.img > ./raspiblitz-vX.X-YEAR-MONTH-DAY.img.gz`
 * Then run `shasum -a 256 *.gz > sha256.txt`
@@ -76,8 +82,10 @@ udp://tracker.leechers-paradise.org:6969
 ### Versioning
 
 * Major Updates: 1.0.0, 2.0.0, 3.0.0, ... are epic updates signaling that the software reached a new era.
-* Main Updates: 1.1.0, 1.2.0, 1.3.0, ... are breaking updates - the reflashing of the sd ard is mandatory.
-* Minor Updates: 1.3.0, 1.3.1, 1.3.2, ... are soft updates - can be done by 'patching' the scripts & code, but new sd card reflash is still advised.
+* Main Updates: 1.1.0, 1.2.0, 1.3.0, ... are release updates - the reflashing of the sd ard is mandatory.
+* Minor Updates: 1.3.0, 1.3.1, 1.3.2, ... are patch updates - can be done by 'patching' the scripts & code, but new sd card reflash is still advised.
+
+Every release has its own branch: `v1.9`, `v1.10`, `v1.11` .. this way hot patches can be merged into the release branch and people update with the `patch code` command
 
 ### How can I customize my RaspiBlitz or add other software?
 
@@ -195,3 +203,15 @@ See article: https://tech.sycamore.garden/add-commit-push-contributor-branch-git
 Chery-picking patch PRs from dev to a release-branch like 'v1.8' (for example) is now a bit more complicated. Either an admin switches temorarly the branch protection "require a pull request before merging" setting off for the `git cherry-pick` OR we create a `p1.8` branch from `v1.8`, cherry-pick the squashed patch PR into that unprotected `p1.8` and then open a PR back to `v1.8`.
 
 But what we gain is that better branch protection and we can add more contributers to the project that are allowed to manage issues - like adding lables or closing.
+
+### How to run the automatic amd64 build on a VM on OSX?
+
+just notes so far:
+
+https://brew.sh
+brew install qemu
+https://github.com/rootzoll/raspiblitz/actions --> download amd64-lean image
+double unzip until `qcow2` file 
+convert `qcow2` to `vdi:
+qemu-img convert -f qcow2 raspiblitz-amd64-debian-lean.qcow2 -O vdi raspiblitz-amd64-debian-lean.vdi
+https://www.virtualbox.org/wiki/Downloads
