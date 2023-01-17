@@ -4,11 +4,13 @@
 
 - New: Automated disk image build for amd64 (VM, laptop, desktop, server) and arm64-rpi (Raspberry Pi) [details](https://github.com/rootzoll/raspiblitz/tree/dev/ci/README.md)
 - New: Fatpack & Minimal sd card builds [details](SECURITY.md#minimal-sd-card-build)
+- New: I2P support for Bitcoin Core (i2pacceptincoming=1) [details](https://github.com/rootzoll/raspiblitz/issues/2413)
 - New: CLN Watchtower (The Eye of Satoshi) [details](https://github.com/talaia-labs/rust-teos/tree/master/watchtower-plugin)
 - New: LNDg v1.4.0 [details](https://github.com/cryptosharks131/lndg)
 - New: Support of X708 UPS HAT [details](https://github.com/rootzoll/raspiblitz/pull/3087)
 - New: BOS Telegram Bot Support (see OPTIONS on LND Balance of Satoshis menu entry)
 - New: LightningTipBot v0.5 [details](https://github.com/LightningTipBot/LightningTipBot)
+- New: CLI shortcut for ↬lnproxy [details](https://github.com/rootzoll/raspiblitz/pull/3333)
 - New on WebUI: Jam (JoinMarket Web UI) v0.1.4 [details](https://github.com/joinmarket-webui/joinmarket-webui/releases/tag/v0.1.4)
 - Update: Bitcoin Core v24.0.1 [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-24.0.1.md)
 - Update: LND v0.15.5 [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.15.5-beta)
