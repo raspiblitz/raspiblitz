@@ -159,9 +159,11 @@ if [ "$2" = "info" ]; then
   btc_sync_percentage=$(echo ${btc_sync_progress} | awk '{printf( "%.2f%%", 100 * $1)}')
   if [ "${btc_blocks_headers}" != "" ]  && [ "${btc_blocks_headers}" == "${btc_blocks_verified}" ]; then
     btc_sync_percentage="100.00"
+  elif [ "${btc_blocks_headers}" != "" ] && [ "${btc_blocks_behind}" != "" ] && [ ${btc_blocks_behind} -lt 50 ]; then
+    # #3620 prevent that on catching the last 50 blocks its already 100.00% 
+    btc_sync_percentage="99.99"
   fi
 
-  
   # determine if synced (tolerate falling 1 block behind)
   # and be sure that initial blockdownload is done
   btc_synced=0
