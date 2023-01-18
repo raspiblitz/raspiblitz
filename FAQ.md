@@ -540,7 +540,7 @@ https://github.com/raspibolt/raspibolt/blob/a21788c0518618d17093e3f447f68a53e4ef
 
 ### Can I directly connect the RaspiBlitz to my laptop?
 
-If you have a LAN port on your laptop - or you have a USB-LAN adapter, you can connect the RaspiBlitz directly (without a router/switch) to your laptop and share the WIFI internet connection. You can follow this [guide for OSX](https://medium.com/@tzhenghao/how-to-ssh-into-your-raspberry-pi-with-a-mac-and-ethernet-cable-636a197d055).
+If you have a LAN port on your laptop - or you have a USB-LAN adapter, you can connect the RaspiBlitz directly (without a router/switch) to your laptop and share the WIFI internet connection. You can follow this [guide for OSX](https://medium.com/@tzhenghao/how-to-ssh-into-your-raspberry-pi-with-a-mac-and-ethernet-cable-636a197d055) and this [guide for Windows](https://www.tomshardware.com/how-to/share-internet-connection-windows-ethernet-wi-fi).
 
 In short for OSX:
 
@@ -552,7 +552,19 @@ In short for OSX:
 * in terminal > `arp -a` and check for an IP of a client to the bridge
 * in terminal > ssh admin@[clientIP]
 
-If anyone has experience on doing this in Linux/Win, please share.
+In short for Windows:
+
+* make sure all VPNs are off (can interfere with local LAN)
+* connect Raspiblitz with laptop LAN/ethernet directly
+* Control Panel > Network and Internet > Network and Sharing Centre 
+* Click on your active internet connection highlighted in blue
+* Properties > Sharing
+* Check the box titled "Allow other network users to connect through this computer's Internet connection
+* Select LAN/Ethernet from the "Home networking connection:" dropdown menu
+* Click OK
+* Restart the Raspiblitz
+
+If anyone has experience on doing this in Linux please share.
 
 ### How to attach the RaspberryPi to the HDD?
 

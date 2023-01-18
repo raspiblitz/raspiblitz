@@ -1,7 +1,7 @@
 #!/bin/bash
  
 # https://github.com/cryptosharks131/lndg
-VERSION="1.4.0 "
+VERSION="1.5.0 "
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -155,7 +155,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 	  if [ "$2" == "deletedatabase" ]; then
 	  
 	    # deleting old database and moving new database
-		echo "Deleting existing database and creating new one"
+	echo "Deleting existing database and creating new one"
         sudo rm -rf /mnt/hdd/app-data/lndg/data
         sudo cp -p -r /home/lndg/lndg/data /mnt/hdd/app-data/lndg/data
         sudo rm /home/lndg/lndg/data/db.sqlite3
@@ -166,8 +166,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
         # using existing database, so remove newly created database and link to existing one
         echo "Database already exists, using existing database"
         sudo rm /home/lndg/lndg/data/db.sqlite3
+	sudo chown -R lndg:lndg /mnt/hdd/app-data/lndg
+	sudo chmod -R 755 /mnt/hdd/app-data/lndg
+	sudo chmod 644 /mnt/hdd/app-data/lndg/data/db.sqlite3
         sudo -u lndg ln -sf /mnt/hdd/app-data/lndg/data/db.sqlite3 /home/lndg/lndg/data/db.sqlite3
-		sudo -u lndg /home/lndg/lndg/.venv/bin/python manage.py migrate
+	sudo -u lndg /home/lndg/lndg/.venv/bin/python manage.py migrate
       fi
     else
 	
@@ -243,7 +246,7 @@ ExecStart=/home/lndg/lndg/.venv/bin/gunicorn lndg.wsgi -w 4 -b 0.0.0.0:8889
 Restart=always
 KillSignal=SIGQUIT
 Type=notify
-StandardError=syslog
+StandardError=append:/var/log/gunicorn_error.log
 NotifyAccess=all
 RestartSec=60s
 
