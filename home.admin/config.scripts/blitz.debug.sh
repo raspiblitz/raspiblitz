@@ -336,7 +336,7 @@ if [ "${lndg}" == "on" ]; then
   echo "*** LNDg GUNICORN SERVER SYSTEMD STATUS ***"
   sudo systemctl status gunicorn.service -n2 --no-pager
   echo "sudo tail -n 5 /var/log/gunicorn_error.log"
-  sudo tail -n 5 /var/log/gunicorn_error.log
+  sudo tail -n 5 /var/log/gunicorn_error.log 2>/dev/null
   echo
   echo "*** LAST 10 LNDg LOGS ***"
   echo "sudo journalctl -u lndg -b --no-pager -n10"
