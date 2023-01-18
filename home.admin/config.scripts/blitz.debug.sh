@@ -148,8 +148,8 @@ if [ "${testnet}" == "on" ] || [ "${testnet}" == "1" ]; then
   sudo journalctl -u t${network}d -b --no-pager -n8
   echo
   echo "*** LAST BLOCKCHAIN (TESTNET) 20 INFO LOGS ***"
-  echo "sudo tail -n 20 /mnt/hdd/${network}/tdebug.log"
-  sudo tail -n 20 /mnt/hdd/${network}/tdebug.log
+  echo "sudo tail -n 20 /mnt/hdd/${network}/testnet3/debug.log"
+  sudo tail -n 20 /mnt/hdd/${network}/testnet3/debug.log
   echo
 else
   echo "- OFF by config -"
@@ -192,8 +192,8 @@ if [ "${signet}" == "on" ] || [ "${signet}" == "1" ]; then
   sudo journalctl -u s${network}d -b --no-pager -n8
   echo
   echo "*** LAST BLOCKCHAIN (SIGNET) 20 INFO LOGS ***"
-  echo "sudo tail -n 20 /mnt/hdd/${network}/sdebug.log"
-  sudo tail -n 20 /mnt/hdd/${network}/sdebug.log
+  echo "sudo tail -n 20 /mnt/hdd/${network}/signet/debug.log"
+  sudo tail -n 20 /mnt/hdd/${network}/signet/debug.log
   echo
 else
   echo "- OFF by config -"
@@ -336,7 +336,7 @@ if [ "${lndg}" == "on" ]; then
   echo "*** LNDg GUNICORN SERVER SYSTEMD STATUS ***"
   sudo systemctl status gunicorn.service -n2 --no-pager
   echo "sudo tail -n 5 /var/log/gunicorn_error.log"
-  sudo tail -n 5 /var/log/gunicorn_error.log
+  sudo tail -n 5 /var/log/gunicorn_error.log 2>/dev/null
   echo
   echo "*** LAST 10 LNDg LOGS ***"
   echo "sudo journalctl -u lndg -b --no-pager -n10"
