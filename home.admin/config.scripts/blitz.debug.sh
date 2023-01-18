@@ -193,7 +193,7 @@ if [ "${signet}" == "on" ] || [ "${signet}" == "1" ]; then
   echo
   echo "*** LAST BLOCKCHAIN (SIGNET) 20 INFO LOGS ***"
   echo "sudo tail -n 20 /mnt/hdd/${network}/signet/debug.log"
-  sudo tail -n 20 /mnt/hdd/${network}/signet/debug.log 2>/dev/null
+  sudo tail -n 20 /mnt/hdd/${network}/signet/debug.log
   echo
 else
   echo "- OFF by config -"
