@@ -28,6 +28,7 @@
 - Update: Balance of Satoshis 13.15.0 (bos) [details](https://github.com/alexbosworth/balanceofsatoshis/blob/master/CHANGELOG.md#13150)
 - Update: lndmanage 0.14.2 [details](https://github.com/bitromortac/lndmanage)
 - Update: Circuitbreaker with webUI [details](https://github.com/lightningequipment/circuitbreaker/blob/master/README.md)
+- Update: Suez - Channel Visualization for LND & CL [details](https://github.com/prusnak/suez)
 - Fixed: SCB/Emergency-Backup to USB drive (now also with CLN emergency.recover file)
 - Info: Run RaspiBlitz on Proxmox [details](https://github.com/rootzoll/raspiblitz/tree/dev/alternative.platforms/Proxmox)
 - Info: IP2Tor unavailable & deactivated in SSH menus [details](https://github.com/rootzoll/raspiblitz/issues/3417#issuecomment-1310303480)
