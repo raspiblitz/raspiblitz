@@ -99,7 +99,11 @@ fi
 # switch off
 ###################
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
+  echo "# changing config ..."
   sudo sed -i "s/^txindex=.*/txindex=0/g" /mnt/hdd/${network}/${network}.conf
+  echo "# deinstalling apps needing txindex ..."
+  sudo -u admin /home/admin/config.scripts/bonus.btc-rpc-explorer.sh off
+  echo "# restarting bitcoind ..."
   sudo systemctl restart ${network}d
   exit 0
 fi
@@ -109,8 +113,6 @@ fi
 # on version update check all bonus scripts that this network.txindex.sh on
 ###################
 if [ "$1" = "delete" ]; then
-  echo "# deinstalling apps needing txindex ..."
-  sudo -u admin /home/admin/config.scripts/bonus.btc-rpc-explorer.sh off
   echo "# changing config ..."
   sudo systemctl stop ${network}d
   echo "# deleting tx index ..."

@@ -65,6 +65,9 @@ RaspiBlitz image to your SD card.
 " 12 40
 }
 
+# get status of txindex
+source <(/home/admin/config.scripts/network.txindex.sh status)
+
 OPTIONS=()
 #OPTIONS+=(HARDWARE "Run Hardwaretest")
 OPTIONS+=(SOFTWARE "Run Softwaretest (DebugReport)")
@@ -76,8 +79,13 @@ if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ]; then
 fi
 OPTIONS+=(MIGRATION "Migrate Blitz Data to new Hardware")
 OPTIONS+=(COPY-SOURCE "Copy Blockchain Source Modus")
-OPTIONS+=(REINDEX "Redindex Bitcoin Blockchain")
-OPTIONS+=(DELETE-INDEX "Delete Bitcoin Transaction-Index")
+if [ "${txindex}" == "1" ]; then
+  OPTIONS+=(DELETE-INDEX "Reindex Bitcoin Transaction-Index")
+elif [ "${indexByteSize}" != "0" ]; then
+  OPTIONS+=(DELETE-INDEX "Delete Bitcoin Transaction-Index")
+fi
+OPTIONS+=(REINDEX-UTXO "Redindex Just Bitcoin Chainstate (Fast)")
+OPTIONS+=(REINDEX-FULL "Redindex Full Bitcoin Blockchain (Slow)")
 OPTIONS+=(RESET-CHAIN "Delete Blockchain & Re-Download")
 OPTIONS+=(RESET-HDD "Delete HDD Data but keep Blockchain")
 OPTIONS+=(RESET-ALL "Delete HDD completely to start fresh")
@@ -157,8 +165,12 @@ case $CHOICE in
     /home/admin/config.scripts/network.txindex.sh delete
     exit 0;
     ;;
-  REINDEX)
-    /home/admin/config.scripts/network.reindex.sh reindex main
+  REINDEX-UTXO)
+    /home/admin/config.scripts/network.reindex.sh reindex-chainstate mainnet
+    exit 0;
+    ;;
+  REINDEX-FULL)
+    /home/admin/config.scripts/network.reindex.sh reindex mainnet
     exit 0;
     ;;
   COPY-SOURCE)
