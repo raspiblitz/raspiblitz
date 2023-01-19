@@ -42,8 +42,9 @@ if [ "$1" = "status" ]; then
   fi
 
   # try to gather if still indexing
+  source <(/home/admin/_cache.sh get btc_mainnet_blocks_headers)
+  blockchainHeight="${btc_mainnet_blocks_headers}"
   indexedToBlock=$(sudo tail -n 200 /mnt/hdd/${network}${pathAdd}/debug.log | grep "Syncing txindex with block chain from height" | tail -n 1 | cut -d " " -f 9 | sed 's/[^0-9]*//g')
-  blockchainHeight=$(sudo -u bitcoin ${network}-cli getblockchaininfo 2>/dev/null | jq -r '.blocks' | sed 's/[^0-9]*//g')
   indexFinished=$(sudo tail -n 200 /mnt/hdd/${network}${pathAdd}/debug.log | grep -c "txindex is enabled at height")
 
   if [ ${#indexedToBlock} -eq 0 ] || [ ${indexFinished} -gt 0 ] || [ "${indexedToBlock}" = "${blockchainHeight}" ]; then
@@ -65,7 +66,6 @@ if [ "$1" = "status" ]; then
   echo "indexFinished=${indexFinished}"
   echo "indexedToBlock=${indexedToBlock}"
   echo "blockchainHeight=${blockchainHeight}"
-
 
   exit 0
 
@@ -113,7 +113,7 @@ fi
 # on version update check all bonus scripts that this network.txindex.sh on
 ###################
 if [ "$1" = "delete" ]; then
-  echo "# changing config ..."
+  echo "# stopping bitcoind ..."
   sudo systemctl stop ${network}d
   echo "# deleting tx index ..."
   sudo rm -r /mnt/hdd/${network}/indexes/txindex
