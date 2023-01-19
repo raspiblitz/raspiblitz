@@ -98,20 +98,21 @@ if [ "$1" = "status-sync" ] || [ "$1" = "status" ]; then
   echo "serviceRunning=${serviceRunning}"
   if [ ${serviceRunning} -eq 1 ]; then
 
-    # Experimental try to get sync Info
-    syncedToBlock=$(sudo journalctl -u electrs --no-pager -n2000 | grep "height=" | tail -n1| cut -d= -f3)
-    blockchainHeight=$(sudo -u bitcoin ${network}-cli getblockchaininfo 2>/dev/null | jq -r '.headers' | sed 's/[^0-9]*//g')
-    lastBlockchainHeight=$(($blockchainHeight -1))
-    syncProgress=0
-    if [ "${syncedToBlock}" != "" ] && [ "${blockchainHeight}" != "" ] && [ "${blockchainHeight}" != "0" ]; then
-      syncProgress="$(echo "$syncedToBlock" "$blockchainHeight" | awk '{printf "%.2f", $1 / $2 * 100}')"
-    fi
-    echo "syncProgress=${syncProgress}%"
-    if [ "${syncedToBlock}" = "${blockchainHeight}" ] || [ "${syncedToBlock}" = "${lastBlockchainHeight}" ]; then
-      echo "tipSynced=1"
-    else
-      echo "tipSynced=0"
-    fi
+    # Experimental try to get sync Info (electrs debug info would need more details)
+    #source <(/home/admin/_cache.sh get btc_mainnet_blocks_headers)
+    #blockchainHeight="${btc_mainnet_blocks_headers}"
+    #lastBlockchainHeight=$(($blockchainHeight -1))
+    #syncedToBlock=$(sudo journalctl -u electrs --no-pager -n2000 | grep "height=" | tail -n1| cut -d= -f3)
+    #syncProgress=0
+    #if [ "${syncedToBlock}" != "" ] && [ "${blockchainHeight}" != "" ] && [ "${blockchainHeight}" != "0" ]; then
+    #  syncProgress="$(echo "$syncedToBlock" "$blockchainHeight" | awk '{printf "%.2f", $1 / $2 * 100}')"
+    #fi
+    #echo "syncProgress=${syncProgress}%"
+    #if [ "${syncedToBlock}" = "${blockchainHeight}" ] || [ "${syncedToBlock}" = "${lastBlockchainHeight}" ]; then
+    #  echo "tipSynced=1"
+    #else
+    #  echo "tipSynced=0"
+    #fi
 
     # check if initial sync was done, by setting a file as once electrs is the first time responding on port 50001
     electrumResponding=$(echo '{"jsonrpc":"2.0","method":"server.ping","params":[],"id":"electrs-check"}' | netcat -w 2 127.0.0.1 50001 | grep -c "result")
@@ -135,7 +136,7 @@ if [ "$1" = "status-sync" ] || [ "$1" = "status" ]; then
     fi
 
   else
-    echo "tipSynced=0"
+    # echo "tipSynced=0"
     echo "initialSynced=0"
     echo "electrumResponding=0"
     echo "infoSync='Not running - check: sudo journalctl -u electrs'"
