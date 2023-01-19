@@ -23,9 +23,6 @@ if [ "${chain}" = "test" ]; then
 	  pathAdd="/testnet3"
 fi
 
-
-grep -c "^txindex=1" /mnt/hdd/bitcoin/bitcoin.conf
-
 ###################
 # STATUS
 ###################
