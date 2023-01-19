@@ -353,7 +353,7 @@ else
   appInfoLine=""
 
   # Electrum Server - electrs
-  if [ "${ElectRS}" = "on" ]; then
+  if [ "${ElectRS}" == "on" ]; then
     error=""
     source <(sudo /home/admin/config.scripts/bonus.electrs.sh status-sync 2>/dev/null)
     if [ ${#infoSync} -gt 0 ]; then
@@ -361,15 +361,10 @@ else
     fi
   fi
 
-  # BTC RPC EXPLORER
-  if [ "${BTCRPCexplorer}" = "on" ]; then
-    error=""
-    source <(sudo /home/admin/config.scripts/bonus.btc-rpc-explorer.sh status 2>/dev/null)
-    if [ ${#error} -gt 0 ]; then
-      appInfoLine="ERROR BTC-RPC-Explorer: ${error} (try restart)"
-    elif [ "${isIndexed}" = "0" ]; then
-      appInfoLine="BTC-RPC-Explorer: ${indexInfo}"
-    fi
+  # Transaction Index
+  source <(/home/admin/config.scripts/network.txindex.sh status)
+  if [ "${txindex}" == "1" ] && [ "${isIndexed}" != "1" ]; then
+      appInfoLine="Bitcoin Transaction Index: ${indexInfo}"
   fi
 
   if [ ${#appInfoLine} -gt 0 ]; then
