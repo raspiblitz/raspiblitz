@@ -47,12 +47,10 @@ if [ "$1" = "status" ]; then
     indexByteSize=0
   fi
 
-  echo "indexedToBlock=${indexedToBlock}"
-  echo "blockchainHeight=${blockchainHeight}"
-  echo "indexFinished=${indexFinished}"
-  echo "indexByteSize=${indexByteSize}"
   if [ ${#indexedToBlock} -eq 0 ] || [ ${indexFinished} -gt 0 ] || [ "${indexedToBlock}" = "${blockchainHeight}" ]; then
     echo "isIndexed=1"
+    indexedToBlock=$blockchainHeight
+    indexFinished=1
     indexInfo="OK"
   else
     echo "isIndexed=0"
@@ -63,11 +61,16 @@ if [ "$1" = "status" ]; then
       indexInfo="Indexing is running (please wait)"
     fi
     echo "indexInfo='${indexInfo}'"
-  fi
+  fi  
+
+  echo "indexFinished=${indexFinished}"
+  echo "indexedToBlock=${indexedToBlock}"
+  echo "blockchainHeight=${blockchainHeight}"
+  echo "indexByteSize=${indexByteSize}"
+
   exit 0
 
 fi
-
 
 ###################
 # switch on
@@ -93,7 +96,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   fi
 fi
 
-
 ###################
 # switch off
 ###################
@@ -102,7 +104,6 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   sudo systemctl restart ${network}d
   exit 0
 fi
-
 
 ###################
 # delete (and make sure all using apps are deinstalled)
@@ -113,7 +114,6 @@ if [ "$1" = "delete" ]; then
   sudo -u admin /home/admin/config.scripts/bonus.btc-rpc-explorer.sh off
   echo "# changing config ..."
   sudo systemctl stop ${network}d
-  sudo sed -i "s/^txindex=.*/txindex=0/g" /mnt/hdd/${network}/${network}.conf
   echo "# deleting tx index ..."
   sudo rm -r /mnt/hdd/${network}/indexes/txindex
   echo "# restarting bitcoind ..."
