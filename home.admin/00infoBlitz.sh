@@ -364,7 +364,7 @@ else
   # Transaction Index
   source <(/home/admin/config.scripts/network.txindex.sh status)
   if [ "${txindex}" == "1" ] && [ "${isIndexed}" != "1" ]; then
-      appInfoLine="Bitcoin Transaction Index: ${indexInfo}"
+      appInfoLine="Transaction Index: ${indexInfo}"
   fi
 
   if [ ${#appInfoLine} -gt 0 ]; then
