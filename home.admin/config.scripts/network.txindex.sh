@@ -30,7 +30,13 @@ if [ "$1" = "status" ]; then
 
   echo "##### STATUS TXINDEX"
 
+  indexByteSize=$(sudo du -s /mnt/hdd/bitcoin/indexes/txindex 2>/dev/null | cut -f1)
+  if [ "${indexByteSize}" == "" ]; then
+    indexByteSize=0
+  fi
+
   echo "txindex=${txindex}"
+  echo "indexByteSize=${indexByteSize}"
   if [ ${txindex} -eq 0 ]; then
     exit 0
   fi
@@ -39,10 +45,6 @@ if [ "$1" = "status" ]; then
   indexedToBlock=$(sudo tail -n 200 /mnt/hdd/${network}${pathAdd}/debug.log | grep "Syncing txindex with block chain from height" | tail -n 1 | cut -d " " -f 9 | sed 's/[^0-9]*//g')
   blockchainHeight=$(sudo -u bitcoin ${network}-cli getblockchaininfo 2>/dev/null | jq -r '.blocks' | sed 's/[^0-9]*//g')
   indexFinished=$(sudo tail -n 200 /mnt/hdd/${network}${pathAdd}/debug.log | grep -c "txindex is enabled at height")
-  indexByteSize=$(sudo du -s /mnt/hdd/bitcoin/indexes/txindex 2>/dev/null | cut -f1)
-  if [ "${indexByteSize}" == "" ]; then
-    indexByteSize=0
-  fi
 
   if [ ${#indexedToBlock} -eq 0 ] || [ ${indexFinished} -gt 0 ] || [ "${indexedToBlock}" = "${blockchainHeight}" ]; then
     echo "isIndexed=1"
@@ -63,7 +65,7 @@ if [ "$1" = "status" ]; then
   echo "indexFinished=${indexFinished}"
   echo "indexedToBlock=${indexedToBlock}"
   echo "blockchainHeight=${blockchainHeight}"
-  echo "indexByteSize=${indexByteSize}"
+
 
   exit 0
 
