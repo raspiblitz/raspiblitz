@@ -156,11 +156,12 @@ if [ "$2" = "info" ]; then
   btc_blocks_behind=$((${btc_blocks_headers} - ${btc_blocks_verified}))
   btc_sync_initialblockdownload=$(echo "${blockchaininfo}" | jq -r '.initialblockdownload' | grep -c 'true')
   btc_sync_progress=$(echo "${blockchaininfo}" | jq -r '.verificationprogress')
-  btc_sync_percentage=$(echo ${btc_sync_progress} | awk '{printf( "%.2f%%", 100 * $1)}')
-  if [ "${btc_blocks_headers}" != "" ]  && [ "${btc_blocks_headers}" == "${btc_blocks_verified}" ]; then
+  if (( $(awk 'BEGIN { print( '${btc_sync_progress}'<0.99995 ) }') )); then
+    # #3620 prevent displaying 100.00%, although incorrect because of rounding
+    btc_sync_percentage=$(awk 'BEGIN { printf( "%.2f%%", 100 * '${btc_sync_progress}') }')
+  elif [ "${btc_blocks_headers}" != "" ] && [ "${btc_blocks_headers}" == "${btc_blocks_verified}" ]; then
     btc_sync_percentage="100.00"
-  elif [ "${btc_blocks_headers}" != "" ] && [ "${btc_blocks_behind}" != "" ] && [ ${btc_blocks_behind} -lt 50 ]; then
-    # #3620 prevent that on catching the last 50 blocks its already 100.00% 
+  else
     btc_sync_percentage="99.99"
   fi
 
