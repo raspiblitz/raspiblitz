@@ -23,6 +23,9 @@ if [ "${chain}" = "test" ]; then
 	  pathAdd="/testnet3"
 fi
 
+
+grep -c "^txindex=1" /mnt/hdd/bitcoin/bitcoin.conf
+
 ###################
 # STATUS
 ###################
@@ -39,9 +42,15 @@ if [ "$1" = "status" ]; then
   indexedToBlock=$(sudo tail -n 200 /mnt/hdd/${network}${pathAdd}/debug.log | grep "Syncing txindex with block chain from height" | tail -n 1 | cut -d " " -f 9 | sed 's/[^0-9]*//g')
   blockchainHeight=$(sudo -u bitcoin ${network}-cli getblockchaininfo 2>/dev/null | jq -r '.blocks' | sed 's/[^0-9]*//g')
   indexFinished=$(sudo tail -n 200 /mnt/hdd/${network}${pathAdd}/debug.log | grep -c "txindex is enabled at height")
+  indexByteSize=$(sudo du -s /mnt/hdd/bitcoin/indexes/txindex 2>/dev/null | cut -f1)
+  if [ "${indexByteSize}" == "" ]; then
+    indexByteSize=0
+  fi
+
   echo "indexedToBlock=${indexedToBlock}"
   echo "blockchainHeight=${blockchainHeight}"
   echo "indexFinished=${indexFinished}"
+  echo "indexByteSize=${indexByteSize}"
   if [ ${#indexedToBlock} -eq 0 ] || [ ${indexFinished} -gt 0 ] || [ "${indexedToBlock}" = "${blockchainHeight}" ]; then
     echo "isIndexed=1"
     indexInfo="OK"
