@@ -27,6 +27,10 @@ source <(/home/admin/_cache.sh get state)
 
 function postgresConfig() {
 
+  if ! sudo -u postgres psql --list 2>/dev/null; then
+    /home/admin/config.scripts/bonus.postgresql.sh on
+  fi
+
   echo "# Generate the database"
   sudo -u postgres psql -c "create database nbxplorermainnet;"
   sudo -u postgres psql -c "create user nbxplorer with encrypted password 'raspiblitz';"
@@ -90,6 +94,42 @@ explorer.postgres=User ID=nbxplorer;Host=localhost;Port=5432;Application Name=nb
   #echo "# setting new LND TLS thumbprint for BTCPay"
   #s="BTC.lightning=type=lnd-rest\;server=https\://127.0.0.1:8080/\;macaroonfilepath=/home/btcpay/admin.macaroon\;"
   #sudo -u btcpay sed -i "s|^${s}certthumbprint=.*|${s}certthumbprint=$FINGERPRINT|g" /home/btcpay/.btcpayserver/Main/settings.config
+}
+
+function BtcPayInstallService() {
+  # see the configuration options with:
+  # sudo -u btcpay /home/btcpay/dotnet/dotnet run --no-launch-profile --no-build -c Release -p "/home/btcpay/btcpayserver/BTCPayServer/BTCPayServer.csproj" -- -h
+  # run manually to debug:
+  # sudo -u btcpay /home/btcpay/dotnet/dotnet run --no-launch-profile --no-build -c Release --project "/home/btcpay/btcpayserver/BTCPayServer/BTCPayServer.csproj" -- --sqlitefile=sqllite.db
+  echo "# create the btcpayserver.service"
+  echo "\
+[Unit]
+Description=BtcPayServer daemon
+Requires=nbxplorer.service
+After=nbxplorer.service
+
+[Service]
+ExecStart=/home/btcpay/dotnet/dotnet run --no-launch-profile --no-build \
+ -c Release --project \"/home/btcpay/btcpayserver/BTCPayServer/BTCPayServer.csproj\" \
+ -- --sqlitefile=sqllite.db
+User=btcpay
+Group=btcpay
+Type=simple
+PIDFile=/run/btcpayserver/btcpayserver.pid
+Restart=always
+RestartSec=10s
+
+# Hardening measures
+PrivateTmp=true
+ProtectSystem=full
+NoNewPrivileges=true
+PrivateDevices=true
+
+[Install]
+WantedBy=multi-user.target
+" | sudo tee /etc/systemd/system/btcpayserver.service
+  sudo systemctl daemon-reload
+  sudo systemctl enable btcpayserver
 }
 
 if [ "$1" = "status" ]; then
@@ -341,9 +381,9 @@ if [ "$1" = "install" ]; then
   echo "DOTNET_CLI_TELEMETRY_OPTOUT=1" | sudo tee -a /etc/environment
 
   # NBXplorer
-  echo "# Install NBXplorer"
+  echo "# Install NBXplorer $NBXplorerVersion"
   cd /home/btcpay || exit 1
-  echo "# Download the NBXplorer source code ..."
+  echo "# Download the NBXplorer source code $NBXplorerVersion"
   sudo -u btcpay git clone https://github.com/dgarage/NBXplorer.git 2>/dev/null
   cd NBXplorer || exit 1
   sudo -u btcpay git reset --hard $NBXplorerVersion
@@ -352,14 +392,14 @@ if [ "$1" = "install" ]; then
   PGPpubkeyLink="https://keybase.io/nicolasdorier/pgp_keys.asc"
   PGPpubkeyFingerprint="AB4CFA9895ACA0DBE27F6B346618763EF09186FE"
   sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
-  echo "# Build NBXplorer ..."
+  echo "# Build NBXplorer $NBXplorerVersion"
   # from the build.sh with path
   sudo -u btcpay /home/btcpay/dotnet/dotnet build -c Release NBXplorer/NBXplorer.csproj
 
   # BTCPayServer
   echo "# Install BTCPayServer"
   cd /home/btcpay || exit 1
-  echo "# Download the BTCPayServer source code ..."
+  echo "# Download the BTCPayServer source code $BTCPayVersion"
   sudo -u btcpay git clone https://github.com/btcpayserver/btcpayserver.git 2>/dev/null
   cd btcpayserver || exit 1
   sudo -u btcpay git reset --hard $BTCPayVersion
@@ -372,7 +412,7 @@ if [ "$1" = "install" ]; then
   #PGPpubkeyFingerprint="8E5530D9D1C93097"
   sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
 
-  echo "# Build BTCPayServer ..."
+  echo "# Build BTCPayServer $BTCPayVersion"
   # from the build.sh with path
   sudo -u btcpay /home/btcpay/dotnet/dotnet build -c Release /home/btcpay/btcpayserver/BTCPayServer/BTCPayServer.csproj
 
@@ -554,37 +594,7 @@ WantedBy=multi-user.target
     sudo systemctl restart nbxplorer
   fi
 
-  # see the configuration options with:
-  # sudo -u btcpay /home/btcpay/dotnet/dotnet run --no-launch-profile --no-build -c Release -p "/home/btcpay/btcpayserver/BTCPayServer/BTCPayServer.csproj" -- -h
-  # run manually to debug:
-  # sudo -u btcpay /home/btcpay/dotnet/dotnet run --no-launch-profile --no-build -c Release --project "/home/btcpay/btcpayserver/BTCPayServer/BTCPayServer.csproj" -- --sqlitefile=sqllite.db
-  echo "# create the btcpayserver.service"
-  echo "
-[Unit]
-Description=BtcPayServer daemon
-Requires=nbxplorer.service
-After=nbxplorer.service
-
-[Service]
-ExecStart=/home/btcpay/dotnet/dotnet run --no-launch-profile --no-build \
- -c Release --project \"/home/btcpay/btcpayserver/BTCPayServer/BTCPayServer.csproj\" \
- -- --sqlitefile=sqllite.db
-User=btcpay
-Group=btcpay
-Type=simple
-PIDFile=/run/btcpayserver/btcpayserver.pid
-Restart=on-failure
-
-# Hardening measures
-PrivateTmp=true
-ProtectSystem=full
-NoNewPrivileges=true
-PrivateDevices=true
-
-[Install]
-WantedBy=multi-user.target
-" | sudo tee /etc/systemd/system/btcpayserver.service
-  sudo systemctl enable btcpayserver
+  BtcPayInstallService
 
   if [ "${state}" == "ready" ]; then
     echo "# Starting btcpayserver"
@@ -600,7 +610,7 @@ WantedBy=multi-user.target
       fi
     done
   else
-    echo "# Because the system is not 'ready' the service 'btcpayserver' will not be started at this point .. its enabled and will start on next reboot"
+    echo "# Because the system is not 'ready' the service 'btcpayserver' will not be started at this point .. it is enabled and will start on next reboot"
   fi
 
   sudo -u btcpay mkdir -p /home/btcpay/.btcpayserver/Main/
@@ -712,7 +722,7 @@ if [ "$1" = "update" ]; then
     TAG=$(git tag | sort -V | tail -1)
     echo "# Up-to-date on version $TAG"
   else
-    echo "# Pulling latest changes..."
+    echo "# Pulling the latest changes..."
     sudo -u btcpay git pull -p
     TAG=$(git tag | sort -V | tail -1)
     echo "# Reset to the latest release tag: $TAG"
@@ -722,7 +732,7 @@ if [ "$1" = "update" ]; then
     PGPpubkeyFingerprint="AB4CFA9895ACA0DBE27F6B346618763EF09186FE"
     sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh \
      "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
-    echo "# Build NBXplorer ..."
+    echo "# Build NBXplorer $TAG"
     # from the build.sh with path
     sudo systemctl stop nbxplorer
     sudo -u btcpay /home/btcpay/dotnet/dotnet build -c Release NBXplorer/NBXplorer.csproj
@@ -746,6 +756,9 @@ if [ "$1" = "update" ]; then
   sudo systemctl stop btcpayserver
 
   BtcPayConfig
+
+  # always update the btcpayserver.service
+  BtcPayInstallService
 
   echo "# Update BTCPayServer"
   cd /home/btcpay || exit 1
@@ -775,7 +788,7 @@ if [ "$1" = "update" ]; then
     # https://github.com/rootzoll/raspiblitz/issues/3025
     # sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh \
     #  "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
-    echo "# Build BTCPayServer ..."
+    echo "# Build BTCPayServer $TAG"
     # from the build.sh with path
     sudo systemctl stop btcpayserver
     sudo -u btcpay /home/btcpay/dotnet/dotnet build -c Release /home/btcpay/btcpayserver/BTCPayServer/BTCPayServer.csproj
