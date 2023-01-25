@@ -3,7 +3,7 @@
 # https://github.com/lnbits/lnbits-legend
 
 # https://github.com/lnbits/lnbits-legend/releases
-tag="0.9.4"
+tag="0.9.6"
 VERSION="${tag}"
 
 # command info
@@ -608,7 +608,7 @@ if [ "$1" = "install" ]; then
     exit 0
   fi
 
-  echo "# *** INSTALL THUNDERHUB ***"
+  echo "# *** INSTALL LNBIS ${VERSION} ***"
 
   # add lnbits user
   echo "*** Add the 'lnbits' user ***"
