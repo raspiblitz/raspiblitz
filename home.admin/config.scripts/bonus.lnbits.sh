@@ -608,7 +608,7 @@ if [ "$1" = "install" ]; then
     exit 0
   fi
 
-  echo "# *** INSTALL THUNDERHUB ***"
+  echo "# *** INSTALL LNBIS ${VERSION} ***"
 
   # add lnbits user
   echo "*** Add the 'lnbits' user ***"
