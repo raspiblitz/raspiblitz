@@ -626,7 +626,7 @@ def menuMakeSubscription(blitzServiceName, torAddress, torPort):
         if lastusedShop == choice_url_fulmo: lastusedShop="" 
 
         # add before option if different from static options
-        if len(lastusedShop) > 0: choices.append(("Y", lastusedShop))
+        if len(lastusedShop) > 0: choices.append(("Y", "http://i6p7ktus6nviclkd6omgqphlqj4ikfljvzxhr5budffinjj5xmv2hmqd.onion"))
 
         # enter own shop address option
         choices.append(("X", "Enter a new Shop URL"))
@@ -654,6 +654,7 @@ def menuMakeSubscription(blitzServiceName, torAddress, torPort):
                 "Enter Address of the IP2TOR Shop (OR JUST PRESS OK):",
                 height=10, width=72, init=shopurl,
                 title="Shop Address")
+            if shopurl.find("://") > 0: shopurl = shopurl[shopurl.find("://") + 3:]
 
         # try & get host list from shop
         os.system('clear')
