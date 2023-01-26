@@ -626,11 +626,8 @@ def menuMakeSubscription(blitzServiceName, torAddress, torPort):
         if lastusedShop == choice_url_fulmo: lastusedShop="" 
 
         # add before option if different from static options
-        if len(lastusedShop) > 0: choices.append(("Y", "lastusedShop"))
-        
-        # TEST
-        choices.append(("T", "http://i6p7ktus6nviclkd6omgqphlqj4ikfljvzxhr5budffinjj5xmv2hmqd.onion"))
-
+        if len(lastusedShop) > 0: choices.append(("Y", lastusedShop))
+    
         # enter own shop address option
         choices.append(("X", "Enter a new Shop URL"))
 
