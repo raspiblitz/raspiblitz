@@ -595,10 +595,10 @@ def menuMakeSubscription(blitzServiceName, torAddress, torPort):
     torTarget = "{0}:{1}".format(torAddress, torPort)
 
     ############################
-    # PHASE 1: Enter Shop URL
+    # PHASE 1: Choose Shop URL
 
     # see if user had before entered another shop of preference
-    shopurl = DEFAULT_SHOPURL
+    shopurl = ""
     try:
         subscriptions = toml.load(SUBSCRIPTIONS_FILE)
         shopurl = subscriptions['shop_ip2tor']
@@ -606,26 +606,53 @@ def menuMakeSubscription(blitzServiceName, torAddress, torPort):
     except Exception as e:
         print("# using default shop url")
 
-    # remove https:// from shop url (to keep it short)
-    if shopurl.find("://") > 0:
-        shopurl = shopurl[shopurl.find("://") + 3:]
-
     while True:
 
-        # input shop url
+        # set choices of shops
+        choices = []
+
+        # IP2TOR.COM Shop
+        choice_url_ip2torcom="ip2tor.com"
+        choices.append(("A", "ip2tor.com Shop"))
+        if shopurl == choice_url_ip2torcom: shopurl="" 
+
+        # FULMO Shop
+        choice_url_fulmo="fulmo7x6yvgz6zs2b2ptduvzwevxmizhq23klkenslt5drxx2physlqd.onion"
+        choices.append(("B", "Fulmo Shop"))
+        if shopurl == choice_url_fulmo: shopurl="" 
+
+        # add third option if different from others
+        if len(shopurl) > 0:
+            choices.append((shopurl, shopurl))
+
+        # enter own shop address option
+        choices.append(("X", "Enter a new Shop URL"))
+
+        # remove https:// from shop url (to keep it short)
+        if shopurl.find("://") > 0:
+            shopurl = shopurl[shopurl.find("://") + 3:]
+
+        # select dialog
         d = Dialog(dialog="dialog", autowidgetsize=True)
-        d.set_background_title("Select IP2TOR Bridge Shop (communication secured thru TOR)")
-        code, text = d.inputbox(
-            "Enter Address of the IP2TOR Shop (OR JUST PRESS OK):",
-            height=10, width=72, init=shopurl,
-            title="Shop Address")
+        d.set_background_title("LetsEncrypt Subscription")
+        code, selected = d.menu(
+            "\nChoose your IP2Tor provider/shop:",
+            choices=choices, width=60, height=10, title="Select IP2Tor Shop")
 
         # if user canceled
         if code != d.OK:
             sys.exit(0)
 
+        # input shop url
+        if selected == "X":
+            d = Dialog(dialog="dialog", autowidgetsize=True)
+            d.set_background_title("Add IP2TOR Bridge Shop")
+            code, shopurl = d.inputbox(
+                "Enter Address of the IP2TOR Shop (OR JUST PRESS OK):",
+                height=10, width=72, init=shopurl,
+                title="Shop Address")
+
         # get host list from shop
-        shopurl = text
         os.system('clear')
         try:
             hosts = shopList(shopurl)
