@@ -597,44 +597,43 @@ def menuMakeSubscription(blitzServiceName, torAddress, torPort):
     ############################
     # PHASE 1: Choose Shop URL
 
-    # see if user had before entered another shop of preference
     shopurl = ""
-    try:
-        subscriptions = toml.load(SUBSCRIPTIONS_FILE)
-        shopurl = subscriptions['shop_ip2tor']
-        print("# using last shop url set in subscriptions.toml")
-    except Exception as e:
-        print("# using default shop url")
-
     while True:
+
+        # see if user had before entered another shop of preference
+        lastusedShop = ""
+        try:
+            subscriptions = toml.load(SUBSCRIPTIONS_FILE)
+            lastusedShop = subscriptions['shop_ip2tor']
+            print("# using last shop url set in subscriptions.toml")
+        except Exception as e:
+            print("# using default shop url")
 
         # set choices of shops
         choices = []
 
+        # remove https:// from shop url (to keep it short)
+        if lastusedShop.find("://") > 0: lastusedShop = lastusedShop[lastusedShop.find("://") + 3:]
+
         # IP2TOR.COM Shop
         choice_url_ip2torcom="ip2tor.com"
         choices.append(("A", "ip2tor.com Shop"))
-        if shopurl == choice_url_ip2torcom: shopurl="" 
+        if lastusedShop == choice_url_ip2torcom: lastusedShop="" 
 
         # FULMO Shop
         choice_url_fulmo="fulmo7x6yvgz6zs2b2ptduvzwevxmizhq23klkenslt5drxx2physlqd.onion"
         choices.append(("B", "Fulmo Shop"))
-        if shopurl == choice_url_fulmo: shopurl="" 
+        if lastusedShop == choice_url_fulmo: lastusedShop="" 
 
-        # add third option if different from others
-        if len(shopurl) > 0:
-            choices.append((shopurl, shopurl))
+        # add before option if different from static options
+        if len(lastusedShop) > 0: choices.append(("Y", lastusedShop))
 
         # enter own shop address option
         choices.append(("X", "Enter a new Shop URL"))
 
-        # remove https:// from shop url (to keep it short)
-        if shopurl.find("://") > 0:
-            shopurl = shopurl[shopurl.find("://") + 3:]
-
         # select dialog
         d = Dialog(dialog="dialog", autowidgetsize=True)
-        d.set_background_title("LetsEncrypt Subscription")
+        d.set_background_title("IP2TOR - Select Shop")
         code, selected = d.menu(
             "\nChoose your IP2Tor provider/shop:",
             choices=choices, width=60, height=10, title="Select IP2Tor Shop")
@@ -643,16 +642,20 @@ def menuMakeSubscription(blitzServiceName, torAddress, torPort):
         if code != d.OK:
             sys.exit(0)
 
+        if selected == "A" : shopurl=choice_url_ip2torcom
+        if selected == "B" : shopurl=choice_url_fulmo
+        if selected == "Y" : shopurl=lastusedShop
+
         # input shop url
         if selected == "X":
             d = Dialog(dialog="dialog", autowidgetsize=True)
-            d.set_background_title("Add IP2TOR Bridge Shop")
+            d.set_background_title("IP2TOR - Add new Shop")
             code, shopurl = d.inputbox(
                 "Enter Address of the IP2TOR Shop (OR JUST PRESS OK):",
                 height=10, width=72, init=shopurl,
                 title="Shop Address")
 
-        # get host list from shop
+        # try & get host list from shop
         os.system('clear')
         try:
             hosts = shopList(shopurl)
