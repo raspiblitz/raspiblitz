@@ -639,7 +639,7 @@ def menuMakeSubscription(blitzServiceName, torAddress, torPort):
         d.set_background_title("IP2TOR - Select Shop")
         code, selected = d.menu(
             "\nChoose your IP2Tor provider/shop:",
-            choices=choices, width=60, height=10, title="Select IP2Tor Shop")
+            choices=choices, width=75, height=10, title="Select IP2Tor Shop")
 
         # if user canceled
         if code != d.OK:
