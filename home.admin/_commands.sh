@@ -78,16 +78,17 @@ function blitzhelp() {
   echo "  ckbunker     CKbunker"
   echo
   echo "Extras:"
-  echo "  manage       use the lndmanage bonus app"
   echo "  whitepaper   download the whitepaper from the blockchain to /home/admin/bitcoin.pdf"
   echo "  notifyme     wrapper for blitz.notify.sh that will send a notification using the configured method and settings"
   echo "  suez         visualize channels (for the default ln implementation and chain when installed)"
+  exho "  lnproxy      wrap invoices with lnproxy"
   echo
   echo "LND:"
   echo "  lncli        LND commandline interface (when installed)"
   echo "  balance      your satoshi balance"
   echo "  channels     your lightning channels"
   echo "  fwdreport    show forwarding report"
+  echo "  manage       use the lndmanage bonus app"
   echo
   echo "CLN:"
   echo " lightning-cli Core Lightning commandline interface (when installed)"
@@ -529,17 +530,31 @@ function bm() {
 
 # command: lnproxy
 function lnproxy() {
-  if [ $(cat /mnt/hdd/raspiblitz.conf 2>/dev/null | grep -c "runBehindTor=on") -eq 1 ]; then
-    echo
-    echo "Requesting a wrapped invoice from rdq6tvulanl7aqtupmoboyk2z3suzkdwurejwyjyjf4itr3zhxrm2lad.onion ..."
-    echo
-    torify curl http://rdq6tvulanl7aqtupmoboyk2z3suzkdwurejwyjyjf4itr3zhxrm2lad.onion/api/${1}
+  if [ $# -gt 0 ]; then
+    invoice=$1
   else
-    echo
-    echo "Requesting a wrapped invoice from https://lnproxy.org ..."
-    echo
-    curl https://lnproxy.org/api/${1}
+    echo "Paste the invoice to be wrapped and press enter:"
+    read -r invoice
   fi
+  if systemctl is-active --quiet tor@default; then
+    if [ -z "${lnproxy_override_tor}" ]; then
+      lnproxy_override_tor="rdq6tvulanl7aqtupmoboyk2z3suzkdwurejwyjyjf4itr3zhxrm2lad.onion"
+    fi
+    wrapped=$(torsocks curl -sS http://${lnproxy_override_tor}/api/${invoice})
+    echo
+    echo "Requesting a wrapped invoice from ${lnproxy_override_tor}"
+  else
+    if [ -z "${lnproxy_override_clearnet}" ]; then
+      lnproxy_override_clearnet="lnproxy.org"
+    fi
+    wrapped=$(curl -sS https://${lnproxy_override_clearnet}/api/${invoice})
+    echo
+    echo "Requesting a wrapped invoice from ${lnproxy_override_clearnet}"
+  fi
+  echo
+  /home/admin/config.scripts/blitz.check-invoice-wrap.py "$1" "$wrapped"
+  echo
+  echo $wrapped
 }
 
 # command: suez
