@@ -530,6 +530,7 @@ function bm() {
 
 # command: lnproxy
 function lnproxy() {
+  source /mnt/hdd/raspiblitz.conf
   if [ $# -gt 0 ]; then
     invoice=$1
   else

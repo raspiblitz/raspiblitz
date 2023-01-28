@@ -1,7 +1,12 @@
 #!/usr/bin/env sh
 
 # set version, check: https://golang.org/dl/
-goVersion="1.18.7"
+goVersion="1.19.5"
+# checksums:
+amd64="36519702ae2fd573c9869461990ae550c8c0d955cd28d2827a6b159fda81ff95"
+armv6l="ec14f04bdaf4a62bdcf8b55b9b6434cc27c2df7d214d0bb7076a7597283b026a"
+arm64="fc0aa29c933cec8d76f5435d859aaf42249aa08c74eb2d154689ae44c08d23b3"
+
 downloadFolder="/home/admin/download"
 
 usage(){
@@ -14,19 +19,24 @@ case "$1" in
 
   1|on) # switch on
     . /etc/profile # get Go vars - needed if there was no log-out since Go installed
-    printf "Check Framework: Go\n"
+    printf "# Check Framework: Go\n"
     if go version 2>/dev/null | grep -q "${goVersion}" ; then
       printf "\nThe requested version of Go is already installed.\n"
       go version
       printf "\n"
     else
-      architecture="$(uname -m)"
-      case "${architecture}" in
-        arm*) goOSversion="armv6l";;
-        aarch64) goOSversion="arm64";;
-        x86_64) goOSversion="amd64";;
-        *) printf %s"Not available for architecture=${architecture}\n"; exit 1
-      esac
+      goOSversion=$(dpkg --print-architecture)
+      if [ $goOSversion = "armv6l" ]; then
+        checksum=$armv6l
+      elif [ $goOSversion = "arm64" ]; then
+        checksum=$arm64
+      elif [ $goOSversion = "amd64" ]; then
+        checksum=$amd64
+      else
+        echo "# architecture $goOSversion not supported"
+        exit 1
+      fi
+
       printf %s"\n*** Installing Go v${goVersion} for ${goOSversion} \n***"
       wget https://dl.google.com/go/go${goVersion}.linux-${goOSversion}.tar.gz -P ${downloadFolder}
       if [ ! -f "${downloadFolder}/go${goVersion}.linux-${goOSversion}.tar.gz" ]; then
@@ -34,7 +44,13 @@ case "$1" in
         rm -fv go${goVersion}.linux-${goOSversion}.tar.gz*
         exit 1
       fi
-      printf "Clean old Go version\n"
+      if ! echo ${checksum} ${downloadFolder}/go${goVersion}.linux-${goOSversion}.tar.gz | sha256sum -c   ; then
+        printf "# FAIL: Download corrupted\n"
+        rm -fv ${downloadFolder}/go${goVersion}.linux-${goOSversion}.tar.gz*
+        exit 1
+      fi
+
+      printf "# Clean old Go version\n"
       sudo rm -rf /usr/local/go /usr/local/gocode
       sudo tar -C /usr/local -xzf ${downloadFolder}/go${goVersion}.linux-${goOSversion}.tar.gz
       rm -fv ${downloadFolder}/go${goVersion}.linux-${goOSversion}.tar.gz*
@@ -54,7 +70,7 @@ case "$1" in
   0|off) # switch off
     printf "*** REMOVING GO ***\n"
     sudo rm -rf /usr/local/go /usr/local/gocode
-    printf "OK Go removed.\n"
+    printf "# OK Go removed.\n"
   ;;
 
   *) usage
