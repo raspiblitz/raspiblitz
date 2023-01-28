@@ -2,13 +2,15 @@
 
 # https://github.com/lnproxy/lnproxy/commits/main
 LNPROXYVERSION="423723b58cc45daa2fdf6c8b22537d560aca4d7a"
+# https://github.com/lnproxy/lnproxy-webui/commits/main
+WEBUIVERSION=24d291c884a0b60126c1915301f29c893900a155
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
- echo "config script to install or uninstall lnproxy"
- echo "bonus.lnproxy.sh [on|off]"
- echo "installs the version $LNPROXYVERSION by default"
- exit 1
+  echo "config script to install or uninstall the lnproxy server"
+  echo "bonus.lnproxy.sh [on|off|menu]"
+  echo "installs the version $LNPROXYVERSION by default"
+  exit 1
 fi
 
 source /mnt/hdd/raspiblitz.conf
@@ -25,15 +27,16 @@ if [ "$1" = "menu" ]; then
     if [ "${runBehindTor}" = "on" ] && [ -n "${toraddressApi}" ]; then
       # Info with Tor
       sudo /home/admin/config.scripts/blitz.display.sh qr "${toraddressWebui}"
-      whiptail --title " lnproxy-webui " --msgbox "Open in your local web browser:
+      whiptail --title " lnproxy-webui and API" --msgbox "\
+Open in your local web browser:
 http://${localip}:4748\n
-Hidden Service address for Tor Browser (see LCD for QR):\n${toraddressWebui}
-
+Hidden Service address for Tor Browser (see LCD for QR):
+${toraddressWebui}\n
 To use the API:
-curl http://${localip}:4747/{your_invoice}?routing_msat={routing_budget}
-The Tor Hidden service to share:
+curl http://${localip}:4747/{invoice}?routing_msat={budget}\n
+The Tor Hidden Service address to share for using the API:
 ${toraddressApi}
-" 16 67
+" 17 67
       sudo /home/admin/config.scripts/blitz.display.sh hide
     else
       # Info without Tor
@@ -80,7 +83,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo chmod 600 /home/lnproxy/lnproxy.macaroon
 
   # make sure symlink to central app-data directory exists
-  sudo rm -rf /home/lnproxy/.lnd  # not a symlink.. delete it silently
+  sudo rm -rf /home/lnproxy/.lnd # not a symlink.. delete it silently
   # create symlink
   sudo ln -s "/mnt/hdd/app-data/lnd/" "/home/lnproxy/.lnd"
 
@@ -88,6 +91,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   cd /home/lnproxy/ || exit 1
   sudo -u lnproxy git clone https://github.com/lnproxy/lnproxy.git /home/lnproxy/lnproxy
   cd /home/lnproxy/lnproxy || exit 1
+  sudo -u lnproxy git reset --hard ${LNPROXYVERSION} || exit 1
 
   # build
   sudo -u lnproxy /usr/local/go/bin/go get lnproxy
@@ -117,7 +121,6 @@ ProtectSystem=full
 NoNewPrivileges=true
 PrivateDevices=true
 
-
 [Install]
 WantedBy=multi-user.target
 EOF
@@ -137,6 +140,7 @@ EOF
   cd /home/lnproxy/ || exit 1
   sudo -u lnproxy git clone https://github.com/lnproxy/lnproxy-webui
   cd /home/lnproxy/lnproxy-webui || exit 1
+  sudo -u lnproxy git reset --hard ${WEBUIVERSION} || exit 1
 
   # build
   sudo -u lnproxy /usr/local/go/bin/go get lnproxy-webui
@@ -163,7 +167,6 @@ PrivateTmp=true
 ProtectSystem=full
 NoNewPrivileges=true
 PrivateDevices=true
-
 
 [Install]
 WantedBy=multi-user.target
