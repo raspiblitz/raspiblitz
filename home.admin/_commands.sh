@@ -539,16 +539,16 @@ function lnproxy() {
   fi
   if systemctl is-active --quiet tor@default; then
     if [ -z "${lnproxy_override_tor}" ]; then
-      lnproxy_override_tor="rdq6tvulanl7aqtupmoboyk2z3suzkdwurejwyjyjf4itr3zhxrm2lad.onion"
+      lnproxy_override_tor="rdq6tvulanl7aqtupmoboyk2z3suzkdwurejwyjyjf4itr3zhxrm2lad.onion/api"
     fi
-    wrapped=$(torsocks curl -sS http://${lnproxy_override_tor}/api/${invoice})
+    wrapped=$(torsocks curl -sS http://${lnproxy_override_tor}/${invoice})
     echo
     echo "Requesting a wrapped invoice from ${lnproxy_override_tor}"
   else
     if [ -z "${lnproxy_override_clearnet}" ]; then
-      lnproxy_override_clearnet="lnproxy.org"
+      lnproxy_override_clearnet="lnproxy.org/api"
     fi
-    wrapped=$(curl -sS https://${lnproxy_override_clearnet}/api/${invoice})
+    wrapped=$(curl -sS https://${lnproxy_override_clearnet}/${invoice})
     echo
     echo "Requesting a wrapped invoice from ${lnproxy_override_clearnet}"
   fi
