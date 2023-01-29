@@ -717,6 +717,9 @@ Try again later, enter another address or cancel.
         if len(host['terms_of_service']) == 0: host['terms_of_service'] = "-"
         if len(host['terms_of_service_url']) == 0: host['terms_of_service_url'] = "-"
 
+        description=host['terms_of_service']
+        if "description" in host: description = "{0} / {1}".format(host['description'], host['terms_of_service'])
+
         # show details of selected
         d = Dialog(dialog="dialog", autowidgetsize=True)
         d.set_background_title("IP2TOR Bridge Offer Details: {0}".format(shopurl))
@@ -736,18 +739,17 @@ There will be no refunds for not used hours.
 There is no guarantee for quality of service.
 
 The service has the following additional description & terms:
-{5} / {6}
+{5}
 
 More information on the service you can find under:
-{7}
+{6}
 '''.format(
             host['tor_bridge_duration_hours'],
             host['tor_bridge_price_initial_sats'],
             host['tor_bridge_price_extension_sats'],
             host['ip'],
             torTarget,
-            host['description'],
-            host['terms_of_service'],
+            description,
             host['terms_of_service_url'],
             blitzServiceName
         )
