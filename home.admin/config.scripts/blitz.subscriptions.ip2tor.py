@@ -735,17 +735,18 @@ the "SUBSCRIPTONS" menu on your RaspiBlitz.
 There will be no refunds for not used hours.
 There is no guarantee for quality of service.
 
-The service has the following additional terms:
-{5}
+The service has the following additional description & terms:
+{5} / {6}
 
 More information on the service you can find under:
-{6}
+{7}
 '''.format(
             host['tor_bridge_duration_hours'],
             host['tor_bridge_price_initial_sats'],
             host['tor_bridge_price_extension_sats'],
             host['ip'],
             torTarget,
+            host['description'],
             host['terms_of_service'],
             host['terms_of_service_url'],
             blitzServiceName
