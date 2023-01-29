@@ -63,6 +63,7 @@ function BtcPayConfig() {
     databaseOption="# keep using sqlite as /mnt/hdd/app-data/.btcpayserver/Main/sqllite.db exists (configured in the btcpayserver.service)"
   else
     echo "# sqlite database does not exist, using postgresql"
+    databaseOption="postgres=User ID=btcpay;Host=localhost;Port=5432;Application Name=btcpay;MaxPoolSize=20;Database=btcpaymainnet;Password='raspiblitz';"
     if sudo -u postgres psql -c '\l' | grep btcpaymainnet; then
       echo "# btcpaymainnet database already exists"
     else
@@ -104,7 +105,7 @@ function BtcPayService() {
     databaseOption=""
   fi
   # see the configuration options with:
-  # sudo -u btcpay /home/btcpay/dotnet/dotnet run --no-launch-profile --no-build -c Release -p "/home/btcpay/btcpayserver/BTCPayServer/BTCPayServer.csproj" -- -h
+  # sudo -u btcpay /home/btcpay/dotnet/dotnet run --no-launch-profile --no-build -c Release --project "/home/btcpay/btcpayserver/BTCPayServer/BTCPayServer.csproj" -- -h
   # run manually to debug:
   # sudo -u btcpay /home/btcpay/dotnet/dotnet run --no-launch-profile --no-build -c Release --project "/home/btcpay/btcpayserver/BTCPayServer/BTCPayServer.csproj" -- --sqlitefile=sqllite.db
   echo "# create the btcpayserver.service"
