@@ -122,8 +122,8 @@ User=btcpay
 Group=btcpay
 Type=simple
 PIDFile=/run/btcpayserver/btcpayserver.pid
-Restart=on-failure
-RestartSec=30
+Restart=always
+RestartSec=10
 
 # Hardening measures
 PrivateTmp=true
