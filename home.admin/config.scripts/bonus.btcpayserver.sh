@@ -793,11 +793,12 @@ if [ "$1" = "update" ]; then
     #  "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
     echo "# Build BTCPayServer $TAG"
     # from the build.sh with path
+    sudo systemctl stop btcpayserver
     sudo -u btcpay /home/btcpay/dotnet/dotnet build -c Release /home/btcpay/btcpayserver/BTCPayServer/BTCPayServer.csproj
+    sudo systemctl start btcpayserver
     echo "# Updated BTCPayServer to $TAG"
   fi
-
-  # always start after BtcPayConfig
+# always start after BtcPayConfig
   sudo systemctl start btcpayserver
   exit 0
 fi
