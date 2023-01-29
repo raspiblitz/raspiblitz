@@ -70,9 +70,9 @@ function BtcPayConfig() {
       sudo -u postgres psql -c "create database btcpaymainnet;"
       sudo -u postgres psql -c "create user btcpay with encrypted password 'raspiblitz';"
       sudo -u postgres psql -c "grant all privileges on database btcpaymainnet to btcpay;"
-      echo "# List databases with: sudo -u postgres psql -c '\l'"
-      sudo -u postgres psql -c '\l'
     fi
+    echo "# List databases with: sudo -u postgres psql -c '\l'"
+    sudo -u postgres psql -c '\l'
   fi
   echo "# Regenerate the btcpayserver settings (includes the LND TLS thumbprint)"
   # https://docs.btcpayserver.org/Deployment/ManualDeploymentExtended/#3-create-a-configuration-file
@@ -122,6 +122,7 @@ Group=btcpay
 Type=simple
 PIDFile=/run/btcpayserver/btcpayserver.pid
 Restart=on-failure
+RestartSec=30
 
 # Hardening measures
 PrivateTmp=true
@@ -593,6 +594,8 @@ WantedBy=multi-user.target
     fi
     sudo systemctl restart nbxplorer
   fi
+
+  BtcPayConfig
 
   BtcPayService
 
