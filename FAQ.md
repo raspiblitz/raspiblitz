@@ -302,6 +302,17 @@ You can also put an empty file just called `hdmi` (without any ending) onto the 
 
 ## Debug
 
+### How do I generate a Debug Report?
+
+If your RaspiBlitz is not working correctly and you like to get help from the community, it's good to provide more debug information, so others can better diagnose your problem - please follow the following steps to generate a debug report:
+
+- SSH into your raspiblitz as admin user with your password A
+- If you see the menu - use CTRL+C to get to the terminal
+- To generate debug report run: `debug`, optionally create a link with `debug -l`
+- Then copy all output beginning with `*** RASPIBLITZ LOGS ***` and share this
+
+*PLEASE NOTICE: It's possible that these logs can contain private information (like IPs, node IDs, ...) - just share publicly what you feel OK with.*
+
 ### I have the full blockchain on another storage. How do I copy it to the RaspiBlitz?
 
 Copying a already synced blockchain from another storage (e.g. your Laptop or external hard drive) can be a quick way to get the RaspiBlitz started or replacing a corrupted blockchain with a fresh one. Also that way you have synced and verified the blockchain yourself, and are not trusting the RaspiBlitz Torrent downloads (Don't trust, verify).
@@ -318,16 +329,13 @@ If everything described above is in order, start the setup of the new RaspiBlitz
 
 Once you finished all the transfers, the Raspiblitz will make a quick-check on the data - but that will not guarantee that everything in detail was OK with the transfer. Check further FAQ answers if you get stuck or see a final sync with a value below 90%.
 
-### How do I generate a Debug Report?
+### Bitcoind tells me to reindex - how can I do this?
 
-If your RaspiBlitz is not working correctly and you like to get help from the community, it's good to provide more debug information, so others can better diagnose your problem - please follow the following steps to generate a debug report:
+ To find/access information fast in large data sets like the Bitcoin blockhain indexes are needed. Those indexes can get corrupted on your HDD/SSD and to repair them they need to be rebuild - re-indexed. Bitcoind has two different options to do this - a fast way called "reindex-chainstate" (which just rebuilds the UTXO set from the blocks as you have them) and the slow but complete way called just "reindex" that would even recheck all your block data - see for details here: https://bitcoin.stackexchange.com/questions/60709/when-should-i-use-reindex-chainstate-and-when-reindex 
+ 
+ So if you read in your debug logs of bitcoind that you should "reindex" you can try first just to do a fast "reindex-chainstate" and if that didnt worked a slow and full "reindex".
 
-- SSH into your raspiblitz as admin user with your password A
-- If you see the menu - use CTRL+C to get to the terminal
-- To generate debug report run: `debug`, optionally create a link with `debug -l`
-- Then copy all output beginning with `*** RASPIBLITZ LOGS ***` and share this
-
-*PLEASE NOTICE: It's possible that these logs can contain private information (like IPs, node IDs, ...) - just share publicly what you feel OK with.*
+See the raspiblitz script `./config.scripts/network.reindex.sh` or the REAPIR menu to start these processes.
 
 ### Why is my "final sync" taking so long?
 

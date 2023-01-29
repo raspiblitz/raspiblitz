@@ -30,35 +30,46 @@ if [ "$1" = "status" ]; then
 
   echo "##### STATUS TXINDEX"
 
+  indexByteSize=$(sudo du -s /mnt/hdd/bitcoin/indexes/txindex 2>/dev/null | cut -f1)
+  if [ "${indexByteSize}" == "" ]; then
+    indexByteSize=0
+  fi
+
   echo "txindex=${txindex}"
+  echo "indexByteSize=${indexByteSize}"
   if [ ${txindex} -eq 0 ]; then
     exit 0
   fi
 
   # try to gather if still indexing
+  source <(/home/admin/_cache.sh get btc_mainnet_blocks_headers)
+  blockchainHeight="${btc_mainnet_blocks_headers}"
   indexedToBlock=$(sudo tail -n 200 /mnt/hdd/${network}${pathAdd}/debug.log | grep "Syncing txindex with block chain from height" | tail -n 1 | cut -d " " -f 9 | sed 's/[^0-9]*//g')
-  blockchainHeight=$(sudo -u bitcoin ${network}-cli getblockchaininfo 2>/dev/null | jq -r '.blocks' | sed 's/[^0-9]*//g')
   indexFinished=$(sudo tail -n 200 /mnt/hdd/${network}${pathAdd}/debug.log | grep -c "txindex is enabled at height")
-  echo "indexedToBlock=${indexedToBlock}"
-  echo "blockchainHeight=${blockchainHeight}"
-  echo "indexFinished=${indexFinished}"
+
   if [ ${#indexedToBlock} -eq 0 ] || [ ${indexFinished} -gt 0 ] || [ "${indexedToBlock}" = "${blockchainHeight}" ]; then
     echo "isIndexed=1"
+    indexedToBlock=$blockchainHeight
+    indexFinished=1
     indexInfo="OK"
   else
     echo "isIndexed=0"
     if [ ${#indexedToBlock} -gt 0 ] && [ ${#blockchainHeight} -gt 0 ]; then
       progressPercent=$(printf %.2f $(echo "${indexedToBlock}/${blockchainHeight}*100" | bc -l))
-      indexInfo="Indexing is at ${progressPercent}% (please wait)"
+      indexInfo="Building ${progressPercent}% (please wait)"
     else
-      indexInfo="Indexing is running (please wait)"
+      indexInfo="Building (please wait)"
     fi
     echo "indexInfo='${indexInfo}'"
-  fi
+  fi  
+
+  echo "indexFinished=${indexFinished}"
+  echo "indexedToBlock=${indexedToBlock}"
+  echo "blockchainHeight=${blockchainHeight}"
+
   exit 0
 
 fi
-
 
 ###################
 # switch on
@@ -84,27 +95,26 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   fi
 fi
 
-
 ###################
 # switch off
 ###################
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
+  echo "# changing config ..."
   sudo sed -i "s/^txindex=.*/txindex=0/g" /mnt/hdd/${network}/${network}.conf
+  echo "# deinstalling apps needing txindex ..."
+  sudo -u admin /home/admin/config.scripts/bonus.btc-rpc-explorer.sh off
+  echo "# restarting bitcoind ..."
   sudo systemctl restart ${network}d
   exit 0
 fi
-
 
 ###################
 # delete (and make sure all using apps are deinstalled)
 # on version update check all bonus scripts that this network.txindex.sh on
 ###################
 if [ "$1" = "delete" ]; then
-  echo "# deinstalling apps needing txindex ..."
-  sudo -u admin /home/admin/config.scripts/bonus.btc-rpc-explorer.sh off
-  echo "# changing config ..."
+  echo "# stopping bitcoind ..."
   sudo systemctl stop ${network}d
-  sudo sed -i "s/^txindex=.*/txindex=0/g" /mnt/hdd/${network}/${network}.conf
   echo "# deleting tx index ..."
   sudo rm -r /mnt/hdd/${network}/indexes/txindex
   echo "# restarting bitcoind ..."
