@@ -132,6 +132,7 @@ PrivateDevices=true
 [Install]
 WantedBy=multi-user.target
 " | sudo tee /etc/systemd/system/btcpayserver.service
+  sudo systemctl daemon-reload
 }
 
 if [ "$1" = "status" ]; then
@@ -735,8 +736,8 @@ if [ "$1" = "update" ]; then
     PGPpubkeyFingerprint="AB4CFA9895ACA0DBE27F6B346618763EF09186FE"
 
     sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh \
-     "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
-    
+      "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
+
     echo "# Build NBXplorer $TAG"
     # from the build.sh with path
     sudo systemctl stop nbxplorer
@@ -760,7 +761,7 @@ if [ "$1" = "update" ]; then
   BtcPayConfig
 
   # always update the btcpayserver.service
-  BtcPayInstallService
+  BtcPayService
 
   echo "# Update BTCPayServer"
   cd /home/btcpay || exit 1
@@ -795,8 +796,6 @@ if [ "$1" = "update" ]; then
     sudo -u btcpay /home/btcpay/dotnet/dotnet build -c Release /home/btcpay/btcpayserver/BTCPayServer/BTCPayServer.csproj
     echo "# Updated BTCPayServer to $TAG"
   fi
-
-  BtcPayService
 
   # always start after BtcPayConfig
   sudo systemctl start btcpayserver
