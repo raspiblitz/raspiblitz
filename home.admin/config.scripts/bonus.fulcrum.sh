@@ -192,7 +192,7 @@ if [ "$1" = off ]; then
   sudo systemctl stop fulcrum
   sudo userdel -rf fulcrum
   # remove Tor service
-  /home/admin/config.scripts/tor.onion-service.sh off electrs
+  /home/admin/config.scripts/tor.onion-service.sh off fulcrum
   # close ports on firewall
   sudo ufw deny 50021
   sudo ufw deny 50022
