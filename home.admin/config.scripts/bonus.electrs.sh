@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # https://github.com/romanz/electrs/releases
-ELECTRSVERSION="v0.9.10"
+ELECTRSVERSION="v0.9.11"
 # https://github.com/romanz/electrs/commits/master
 # ELECTRSVERSION="446858ea621416916f84cbce61be92b748e8133e"
 
@@ -73,7 +73,7 @@ if [ "$1" = "status" ]; then
       # no answer on that port
       echo "publicHTTPPortAnswering=0"
     fi
-    # add TOR info
+    # add Tor info
     if [ "${runBehindTor}" == "on" ]; then
       echo "TorRunning=1"
       if [ "$2" = "showAddress" ]; then
@@ -269,7 +269,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   isInstalled=$(sudo ls /etc/systemd/system/electrs.service 2>/dev/null | grep -c 'electrs.service')
   if [ ${isInstalled} -eq 0 ]; then
 
-    #cleanup
+    # cleanup
     sudo rm -f /home/electrs/.electrs/config.toml
 
     echo
@@ -290,9 +290,14 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo
     sudo -u electrs git clone https://github.com/romanz/electrs
     cd /home/electrs/electrs || exit 1
+
     sudo -u electrs git reset --hard $ELECTRSVERSION
+
+    # verify
     sudo -u electrs /home/admin/config.scripts/blitz.git-verify.sh \
      "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
+
+    # build
     sudo -u electrs /home/electrs/.cargo/bin/cargo build --locked --release || exit 1
 
     echo
@@ -303,7 +308,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     echo
     echo "# Getting RPC credentials from the bitcoin.conf"
-    #read PASSWORD_B
+    # read PASSWORD_B
     RPC_USER=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcuser | cut -c 9-)
     PASSWORD_B=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcpassword | cut -c 13-)
     echo "# Done"
@@ -479,8 +484,7 @@ fi
 # switch off
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
-  # setting value in raspiblitz config
-  /home/admin/config.scripts/blitz.conf.sh set ElectRS "off"
+  echo "# REMOVING ELECTRS"
 
   # if second parameter is "deleteindex"
   if [ "$2" == "deleteindex" ]; then
@@ -488,23 +492,10 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo rm -rf /mnt/hdd/app-storage/electrs/
   fi
 
-  # Hidden Service if Tor is active
-  if [ "${runBehindTor}" = "on" ]; then
-    /home/admin/config.scripts/tor.onion-service.sh off electrs
-  fi
-
   isInstalled=$(sudo ls /etc/systemd/system/electrs.service 2>/dev/null | grep -c 'electrs.service')
   if [ ${isInstalled} -eq 1 ]; then
-
-    echo "# REMOVING ELECTRS"
     sudo systemctl disable electrs
     sudo rm /etc/systemd/system/electrs.service
-    # delete user and home directory
-    sudo userdel -rf electrs
-    # close ports on firewall
-    sudo ufw deny 50001
-    sudo ufw deny 50002
-    echo "# OK ElectRS removed."
 
     # restart BTC-RPC-Explorer to reconfigure itself to use electrs for address API
     if [ "${BTCRPCexplorer}" == "on" ]; then
@@ -513,8 +504,25 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     fi
 
   else
-    echo "# ElectRS is not installed."
+    echo "# electrs.service is not installed."
   fi
+
+  # Hidden Service if Tor is active
+  if [ "${runBehindTor}" = "on" ]; then
+    /home/admin/config.scripts/tor.onion-service.sh off electrs
+  fi
+
+  # close ports on firewall
+  sudo ufw delete allow 50001
+  sudo ufw delete allow 50002
+
+  # delete user and home directory
+  sudo userdel -rf electrs
+
+  # setting value in raspiblitz config
+  /home/admin/config.scripts/blitz.conf.sh set ElectRS "off"
+
+  echo "# OK ElectRS removed."
   exit 0
 fi
 
@@ -523,7 +531,7 @@ if [ "$1" = "update" ]; then
   cd /home/electrs/electrs || exit 1
   sudo -u electrs git fetch
 
-  localVersion=$(git describe --tag)
+  localVersion=$(/home/electrs/electrs/target/release/electrs --version)
   updateVersion=$(curl --header "X-GitHub-Api-Version:2022-11-28" -s https://api.github.com/repos/romanz/electrs/releases/latest|grep tag_name|head -1|cut -d '"' -f4)
 
   if [ $localVersion = $updateVersion ]; then
@@ -533,12 +541,21 @@ if [ "$1" = "update" ]; then
     sudo -u electrs git pull -p
     echo "# Reset to the latest release tag: $updateVersion"
     sudo -u electrs git reset --hard $updateVersion
+
+    sudo -u electrs /home/admin/config.scripts/blitz.git-verify.sh \
+     "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
+
+    echo "# Installing build dependencies"
+    sudo -u electrs curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sudo -u electrs sh -s -- --default-toolchain none -y
+    sudo apt install -y clang cmake build-essential  # for building 'rust-rocksdb'
+    echo
+
     echo "# Build Electrs ..."
     sudo -u electrs /home/electrs/.cargo/bin/cargo build --locked --release || exit 1
-    
+
     # update config
-    sed -i "/^server_banner =/d" /home/electrs/.electrs/config.toml
-    sudo bash -c "echo 'server_banner = \"Welcome to electrs $updateVersion - the Electrum Rust Server on your RaspiBlitz\"' >> /home/electrs/.electrs/config.toml"
+    sudo -u electrs sed -i "/^server_banner = /d" /home/electrs/.electrs/config.toml
+    sudo -u electrs bash -c "echo 'server_banner = \"Welcome to electrs $updateVersion - the Electrum Rust Server on your RaspiBlitz\"' >> /home/electrs/.electrs/config.toml"
 
     echo "# Updated Electrs to $updateVersion"
   fi
