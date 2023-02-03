@@ -273,8 +273,18 @@ sleep 3 ## give time to cancel
 
 export DEBIAN_FRONTEND=noninteractive
 
-echo "*** Prevent sleep ***" # on all platforms
+echo "*** Prevent sleep ***" # on all platforms https://wiki.debian.org/Suspend
 sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
+sudo mkdir /etc/systemd/sleep.conf.d
+echo "[Sleep]
+AllowSuspend=no
+AllowHibernation=no
+AllowSuspendThenHibernate=no
+AllowHybridSleep=no" | sudo tee /etc/systemd/sleep.conf.d/nosuspend.conf
+sudo mkdir /etc/systemd/logind.conf.d
+echo "[Login]
+HandleLidSwitch=ignore
+HandleLidSwitchDocked=ignore" | sudo tee /etc/systemd/logind.conf.d/nosuspend.conf
 
 # FIXING LOCALES
 # https://github.com/rootzoll/raspiblitz/issues/138
@@ -478,11 +488,11 @@ sudo sed -i "s/^#SystemMaxFileSize=.*/SystemMaxFileSize=50M/g" /etc/systemd/jour
 echo "
 /var/log/syslog
 {
-	rotate 7
-	daily
-	missingok
-	notifempty
-	delaycompress
+  rotate 7
+  daily
+  missingok
+  notifempty
+  delaycompress
   compress
   postrotate
     invoke-rc.d rsyslog rotate > /dev/null
@@ -504,23 +514,22 @@ echo "
   sharedscripts
   postrotate
     invoke-rc.d rsyslog rotate > /dev/null
-  enscript
+  endscript
 }
-
 
 /var/log/kern.log
 /var/log/auth.log
 {
-        rotate 4
-        size=100M
-        missingok
-        notifempty
-        compress
-        delaycompress
-        sharedscripts
-        postrotate
-                invoke-rc.d rsyslog rotate > /dev/null
-        endscript
+  rotate 4
+  size=100M
+  missingok
+  notifempty
+  compress
+  delaycompress
+  sharedscripts
+  postrotate
+    invoke-rc.d rsyslog rotate > /dev/null
+  endscript
 }
 
 /var/log/user.log
@@ -529,16 +538,16 @@ echo "
 /var/log/debug
 /var/log/messages
 {
-	rotate 4
-	weekly
-	missingok
-	notifempty
-	compress
-	delaycompress
-	sharedscripts
-	postrotate
-		invoke-rc.d rsyslog rotate > /dev/null
-	endscript
+  rotate 4
+  weekly
+  missingok
+  notifempty
+  compress
+  delaycompress
+  sharedscripts
+  postrotate
+    invoke-rc.d rsyslog rotate > /dev/null
+  endscript
 }
 " | sudo tee ./rsyslog
 sudo mv ./rsyslog /etc/logrotate.d/rsyslog
