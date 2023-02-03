@@ -71,7 +71,7 @@ deactivateBitcoinOverTor()
 [ -f "/home/admin/raspiblitz.info" ] && . /home/admin/raspiblitz.info
 [ -f "/mnt/hdd/raspiblitz.conf" ] && . /mnt/hdd/raspiblitz.conf
 
-torActive=$(sudo systemctl is-active tor@default | grep -c "active")
+torActive=$(systemctl is-active tor@default | grep -c "^active")
 curl --socks5 127.0.0.1:9050 --socks5-hostname 127.0.0.1:9050 -m 5 -s https://check.torproject.org/api/ip | grep -q "\"IsTor\":true" && torFunctional=1
 
 case "$1" in
@@ -156,7 +156,7 @@ EOF
     sudo chmod -R 700 /mnt/hdd/tor
     sudo chown -R debian-tor:debian-tor /mnt/hdd/tor
     sudo systemctl restart tor@default
-    echo "OK - Tor is now $(sudo systemctl is-active tor@default)"
+    echo "OK - Tor is now $(systemctl is-active tor@default)"
     echo "needs reboot to activate new setting"
   ;;
 
