@@ -772,7 +772,7 @@ Using pre-signed bitcoin transactions (PSBT) and [Hardware Wallet Interface](htt
 At the moment it is very Linux-focused.
 The same applies to multi-signature setups.
 
-The goal of the Specter Desktop wallet is to make a convenient and user-friendly GUI around Bitcoin Core, focusing on multi-signature setups with air-gapped hardware wallets like Trezor, Ledger, COLDCARD or the Specter-DIY.
+The goal of the Specter Desktop wallet is to make a sub and user-friendly GUI around Bitcoin Core, focusing on multi-signature setups with air-gapped hardware wallets like Trezor, Ledger, COLDCARD or the Specter-DIY.
 
 ![SPECTER](pictures/specter.jpg)
 
@@ -854,6 +854,11 @@ After install, you will see a new `LIT` option in the SSH main menu - it will gi
 LNbits is a very simple server that sits on top of your Lightning Wallet.
 
 ![LNBITS](pictures/lnbits.png)
+
+It can be used together with IP2Tor to provide:
+
+- Lightning Paper Vouchers (Plugin: LNURLw)
+- Merchant Onboarding (Plugin: TPOS)
 
 [![Video Tutorial](pictures/video-vouchers.png)](https://www.youtube.com/watch?v=0Bt3tHULAnw)
 
@@ -1009,7 +1014,20 @@ At the moment, the following subscription services are available:
 
 ##### IP2TOR (paid)
 
-DEACTIVATED SINCE 1.9 --> see for background: https://github.com/rootzoll/raspiblitz/issues/3417#issuecomment-1310303480
+IP2TOR is a tunnel service where you can run your RaspiBlitz anonymously behind TOR but you rent a port on a clearnet IP through which you can make services of your RaspiBlitz easy reachable for everybody on the internet.
+You don't need to care about your local router or firewall settings.
+You can pay for this service directly through Lightning from your RaspiBlitz as subscription.
+
+At first you select what services of your RaspiBlitz you like to tunnel through a IP2TOR bridge.
+
+You will get a list of available IP2TOR shops & bridge offerings.
+Select `OK` on an IP2TOR bridge offering and you will see more details on it, such as how many satoshis the subscription will cost you.
+Your node should be funded and have channels open already at this point.
+
+If you choose `AGREE` on the details of a IP2TOR bridge offering the RaspiBlitz tries for you to setup the IP2TOR bridge.
+If everything worked you will find now the subscription under `MAINMENU` > `SUBSCRIBE` > `LIST My Subscriptions` where you can cancel it again.
+
+To try out the IP2TOR tunnel choose in `MAINMENU` the extra menu point of the Service you choose the bridge for and it should give you now an updated URL or try calling the API on the IP and Port that is displayed under the details of the subscription in the `LIST My Subscriptions` section.
 
 ##### HTTPS with LetsEncrypt (free)
 
