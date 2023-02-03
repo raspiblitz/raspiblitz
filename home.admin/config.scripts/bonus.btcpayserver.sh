@@ -718,6 +718,11 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 fi
 
 if [ "$1" = "update" ]; then
+
+  # prevent the git error 'detected dubious ownership in repository'
+  git config --global --add safe.directory /home/btcpay/NBXplorer
+  git config --global --add safe.directory /home/btcpay/btcpayserver
+
   echo "# Update NBXplorer"
   cd /home/btcpay || exit 1
   cd NBXplorer || exit 1
