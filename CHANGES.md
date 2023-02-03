@@ -31,7 +31,7 @@
 - Update: Suez - Channel Visualization for LND & CL [details](https://github.com/prusnak/suez)
 - Fixed: SCB/Emergency-Backup to USB drive (now also with CLN emergency.recover file)
 - Info: Run RaspiBlitz on Proxmox [details](https://github.com/rootzoll/raspiblitz/tree/dev/alternative.platforms/Proxmox)
-- Info: IP2Tor unavailable & deactivated in SSH menus [details](https://github.com/rootzoll/raspiblitz/issues/3417#issuecomment-1310303480)
+- Info: IP2Tor fix fulmo shop & added new ip2tor.com shop
 - Info: 32GB sdcard is now enforced (after being recommended since v1.5)
 - Info: 'Reindex Blockchain' is not part of 'repair' menu
 
