@@ -20,7 +20,7 @@
 - Update: RTL v0.13.0 with update option [details](https://github.com/Ride-The-Lightning/RTL/releases/tag/v0.12.3)
 - Update: Thunderhub v0.13.16 with balance sharing disabled [details](https://github.com/apotdevin/thunderhub/releases/tag/v0.13.16)
 - Update: LNbits 0.9.6 [details](https://github.com/lnbits/lnbits-legend/releases/tag/0.9.6)
-- Update: BTCPayServer 1.7.2 [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.7.2)
+- Update: BTCPayServer 1.7.5 (using postgres for new installs) [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.7.5)
 - Update: ItchySats 0.7.0 [details](https://github.com/itchysats/itchysats/releases/tag/0.7.0)
 - Update: Channel Tools (chantools) v0.10.5 [details](https://github.com/guggero/chantools/releases/tag/v0.10.5)
 - Update: JoinMarket v0.9.8 [details](https://github.com/JoinMarket-Org/joinmarket-clientserver/releases/tag/v0.9.8)
