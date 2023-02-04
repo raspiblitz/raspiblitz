@@ -595,37 +595,68 @@ def menuMakeSubscription(blitzServiceName, torAddress, torPort):
     torTarget = "{0}:{1}".format(torAddress, torPort)
 
     ############################
-    # PHASE 1: Enter Shop URL
+    # PHASE 1: Choose Shop URL
 
-    # see if user had before entered another shop of preference
-    shopurl = DEFAULT_SHOPURL
-    try:
-        subscriptions = toml.load(SUBSCRIPTIONS_FILE)
-        shopurl = subscriptions['shop_ip2tor']
-        print("# using last shop url set in subscriptions.toml")
-    except Exception as e:
-        print("# using default shop url")
-
-    # remove https:// from shop url (to keep it short)
-    if shopurl.find("://") > 0:
-        shopurl = shopurl[shopurl.find("://") + 3:]
-
+    shopurl = ""
     while True:
 
-        # input shop url
+        # see if user had before entered another shop of preference
+        lastusedShop = ""
+        try:
+            subscriptions = toml.load(SUBSCRIPTIONS_FILE)
+            lastusedShop = subscriptions['shop_ip2tor']
+            print("# using last shop url set in subscriptions.toml")
+        except Exception as e:
+            print("# using default shop url")
+
+        # set choices of shops
+        choices = []
+
+        # remove https:// from shop url (to keep it short)
+        if lastusedShop.find("://") > 0: lastusedShop = lastusedShop[lastusedShop.find("://") + 3:]
+
+        # IP2TOR.COM Shop
+        choice_url_ip2torcom="ip2tor.com"
+        choices.append(("A", "ip2tor.com Shop"))
+        if lastusedShop == choice_url_ip2torcom: lastusedShop="" 
+
+        # FULMO Shop
+        choice_url_fulmo="fulmo7x6yvgz6zs2b2ptduvzwevxmizhq23klkenslt5drxx2physlqd.onion"
+        choices.append(("B", "Fulmo Shop"))
+        if lastusedShop == choice_url_fulmo: lastusedShop="" 
+
+        # add before option if different from static options
+        if len(lastusedShop) > 0: choices.append(("Y", lastusedShop))
+    
+        # enter own shop address option
+        choices.append(("X", "Enter a new Shop URL"))
+
+        # select dialog
         d = Dialog(dialog="dialog", autowidgetsize=True)
-        d.set_background_title("Select IP2TOR Bridge Shop (communication secured thru TOR)")
-        code, text = d.inputbox(
-            "Enter Address of the IP2TOR Shop (OR JUST PRESS OK):",
-            height=10, width=72, init=shopurl,
-            title="Shop Address")
+        d.set_background_title("IP2TOR - Select Shop")
+        code, selected = d.menu(
+            "\nChoose your IP2Tor provider/shop:",
+            choices=choices, width=75, height=10, title="Select IP2Tor Shop")
 
         # if user canceled
         if code != d.OK:
             sys.exit(0)
 
-        # get host list from shop
-        shopurl = text
+        if selected == "A" : shopurl=choice_url_ip2torcom
+        if selected == "B" : shopurl=choice_url_fulmo
+        if selected == "Y" : shopurl=lastusedShop
+
+        # input shop url
+        if selected == "X":
+            d = Dialog(dialog="dialog", autowidgetsize=True)
+            d.set_background_title("IP2TOR - Add new Shop")
+            code, shopurl = d.inputbox(
+                "Enter Address of the IP2TOR Shop (OR JUST PRESS OK):",
+                height=10, width=72, init=shopurl,
+                title="Shop Address")
+            if shopurl.find("://") > 0: shopurl = shopurl[shopurl.find("://") + 3:]
+
+        # try & get host list from shop
         os.system('clear')
         try:
             hosts = shopList(shopurl)
@@ -686,6 +717,9 @@ Try again later, enter another address or cancel.
         if len(host['terms_of_service']) == 0: host['terms_of_service'] = "-"
         if len(host['terms_of_service_url']) == 0: host['terms_of_service_url'] = "-"
 
+        description=host['terms_of_service']
+        if "description" in host: description = "{0} / {1}".format(host['description'], host['terms_of_service'])
+
         # show details of selected
         d = Dialog(dialog="dialog", autowidgetsize=True)
         d.set_background_title("IP2TOR Bridge Offer Details: {0}".format(shopurl))
@@ -704,7 +738,7 @@ the "SUBSCRIPTONS" menu on your RaspiBlitz.
 There will be no refunds for not used hours.
 There is no guarantee for quality of service.
 
-The service has the following additional terms:
+The service has the following additional description & terms:
 {5}
 
 More information on the service you can find under:
@@ -715,7 +749,7 @@ More information on the service you can find under:
             host['tor_bridge_price_extension_sats'],
             host['ip'],
             torTarget,
-            host['terms_of_service'],
+            description,
             host['terms_of_service_url'],
             blitzServiceName
         )

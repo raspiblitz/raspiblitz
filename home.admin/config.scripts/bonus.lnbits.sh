@@ -174,10 +174,10 @@ https://${ip2torDomain}:${ip2torPort} ready for public use"
 IP2TOR: https://${ip2torIP}:${ip2torPort}
 SHA1 ${sslFingerprintTOR}\n
 Consider adding a LetsEncrypt HTTPS Domain under OPTIONS."
-#  elif [ ${#publicDomain} -eq 0 ]; then
-#    text="${text}\n
-#To enable easy reachability with normal browser from the outside
-#Consider adding a IP2TOR Bridge under OPTIONS."
+  elif [ ${#publicDomain} -eq 0 ]; then
+    text="${text}\n
+To enable easy reachability with normal browser from the outside
+Consider adding a IP2TOR Bridge under OPTIONS."
   fi
 
   whiptail --title " LNbits ${fundinginfo}" --yes-button "OK" --no-button "OPTIONS" --yesno "${text}" 18 69
@@ -194,16 +194,16 @@ Consider adding a LetsEncrypt HTTPS Domain under OPTIONS."
   OPTIONS=()
 
   # IP2TOR options
-  #if [ "${ip2torDomain}" != "" ]; then
-  #  # IP2TOR+LetsEncrypt active - offer cancel
-  #  OPTIONS+=(IP2TOR-OFF "Cancel IP2Tor Subscription for LNbits")
-  #elif [ "${ip2torIP}" != "" ]; then
-  #  # just IP2TOR active - offer cancel or Lets Encrypt
-  #  OPTIONS+=(HTTPS-ON "Add free HTTPS-Certificate for LNbits")
-  #  OPTIONS+=(IP2TOR-OFF "Cancel IP2Tor Subscription for LNbits")
-  #else
-  #  OPTIONS+=(IP2TOR-ON "Make Public with IP2Tor Subscription")
-  #fi
+  if [ "${ip2torDomain}" != "" ]; then
+    # IP2TOR+LetsEncrypt active - offer cancel
+    OPTIONS+=(IP2TOR-OFF "Cancel IP2Tor Subscription for LNbits")
+  elif [ "${ip2torIP}" != "" ]; then
+    # just IP2TOR active - offer cancel or Lets Encrypt
+    OPTIONS+=(HTTPS-ON "Add free HTTPS-Certificate for LNbits")
+    OPTIONS+=(IP2TOR-OFF "Cancel IP2Tor Subscription for LNbits")
+  else
+    OPTIONS+=(IP2TOR-ON "Make Public with IP2Tor Subscription")
+  fi
 
   # Change Funding Source options (only if available)
   if [ "${LNBitsFunding}" == "lnd" ] && [ "${cl}" == "on" ]; then

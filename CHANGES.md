@@ -15,7 +15,7 @@
 - Update: Bitcoin Core v24.0.1 [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-24.0.1.md)
 - Update: LND v0.15.5 [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.15.5-beta)
 - Update: Core Lightning v22.11.1 [details](https://github.com/ElementsProject/lightning/releases/tag/v22.11.1)
-- Update: Electrum Server in Rust (electrs) v0.9.10 [details](https://github.com/romanz/electrs/blob/master/RELEASE-NOTES.md#0910-nov-3-2022)
+- Update: Electrum Server in Rust (electrs) v0.9.11 [details](https://github.com/romanz/electrs/blob/master/RELEASE-NOTES.md#0911-jan-5-2023)
 - Update: Lightning Terminal v0.8.4-alpha [details](https://github.com/lightninglabs/lightning-terminal/releases/tag/v0.8.4-alpha)
 - Update: RTL v0.13.0 with update option [details](https://github.com/Ride-The-Lightning/RTL/releases/tag/v0.12.3)
 - Update: Thunderhub v0.13.16 with balance sharing disabled [details](https://github.com/apotdevin/thunderhub/releases/tag/v0.13.16)
@@ -29,9 +29,10 @@
 - Update: lndmanage 0.14.2 [details](https://github.com/bitromortac/lndmanage)
 - Update: Circuitbreaker with webUI [details](https://github.com/lightningequipment/circuitbreaker/blob/master/README.md)
 - Update: Suez - Channel Visualization for LND & CL [details](https://github.com/prusnak/suez)
+- Update: Tallycoin Connect v1.7.5 [details](https://github.com/djbooth007/tallycoin_connect/releases/tag/v1.7.5)
 - Fixed: SCB/Emergency-Backup to USB drive (now also with CLN emergency.recover file)
 - Info: Run RaspiBlitz on Proxmox [details](https://github.com/rootzoll/raspiblitz/tree/dev/alternative.platforms/Proxmox)
-- Info: IP2Tor unavailable & deactivated in SSH menus [details](https://github.com/rootzoll/raspiblitz/issues/3417#issuecomment-1310303480)
+- Info: IP2Tor fix fulmo shop & added new ip2tor.com shop
 - Info: 32GB sdcard is now enforced (after being recommended since v1.5)
 - Info: 'Reindex Blockchain' is not part of 'repair' menu
 
