@@ -391,7 +391,15 @@ elif [ "${abcd}" = "b" ]; then
   # LNDg
   if [ "${lndg}" == "on" ]; then
     echo "# changing the password for lndg"
-    sudo -u lndg /home/lndg/lndg/.venv/bin/python initialize.py -pw ${newPassword}
+    sudo -u lndg /home/lndg/lndg/.venv/bin/python /home/lndg/lndg/initialize.py -pw ${newPassword}
+  fi
+
+  # mempool Explorer
+  if [ "${mempoolExplorer}" == "on" ]; then
+    echo "# changing the password for mempool Explorer"
+    sudo jq ".CORE_RPC.PASSWORD=\"${newPassword}\"" /home/mempool/mempool/backend/mempool-config.json > /var/cache/raspiblitz/mempool-config.json
+    sudo mv /var/cache/raspiblitz/mempool-config.json /home/mempool/mempool/backend/mempool-config.json
+    sudo chown mempool:mempool /home/mempool/mempool/backend/mempool-config.json
   fi
 
   echo "# OK -> RPC Password B changed"

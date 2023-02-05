@@ -59,7 +59,7 @@
 * Yes, all [BOLT specification](https://github.com/lightningnetwork/lightning-rfc) compliant implementations can open channels to each other and route payments.
 
 ### Can I run LND and CLN connected to the same node?
-* Yes, both can run parallel on a RaspiBlitz and even have channels witch each other.
+* Yes, both can run parallel on a RaspiBlitz and even have channels with each other.
 
 ### Can I convert an LND node to CLN (or the opposite)?
 * No, currently there are no tools available to convert between the databases storing the channel states.

@@ -80,15 +80,18 @@ function blitzhelp() {
   echo "Extras:"
   echo "  whitepaper   download the whitepaper from the blockchain to /home/admin/bitcoin.pdf"
   echo "  notifyme     wrapper for blitz.notify.sh that will send a notification using the configured method and settings"
+  echo "  suez         visualize channels (for the default ln implementation and chain when installed)"
+  exho "  lnproxy      wrap invoices with lnproxy"
   echo
   echo "LND:"
   echo "  lncli        LND commandline interface (when installed)"
   echo "  balance      your satoshi balance"
   echo "  channels     your lightning channels"
   echo "  fwdreport    show forwarding report"
+  echo "  manage       use the lndmanage bonus app"
   echo
   echo "CLN:"
-  echo " lightning-cli Core-Lightning commandline interface (when installed)"
+  echo " lightning-cli Core Lightning commandline interface (when installed)"
 }
 
 # command: raspiblitz
@@ -369,6 +372,21 @@ function jm() {
   fi
 }
 
+# command: manage
+# switch to lndmanage env
+function manage() {
+  if [ $(cat /mnt/hdd/raspiblitz.conf 2>/dev/null | grep -c "lndmanage=on") -eq 1 ]; then
+    cd /home/admin/lndmanage
+    source venv/bin/activate
+    echo "NOTICE: Needs at least one active channel to run without error."
+    echo "to exit (venv) enter ---> deactivate"
+    lndmanage
+  else
+    echo "lndmanage not installed - to install run:"
+    echo "sudo /home/admin/config.scripts/bonus.lndmanage.sh on"
+  fi
+}
+
 # command: ckbunker
 # switch to the ckbunker user
 function ckbunker() {
@@ -512,15 +530,55 @@ function bm() {
 
 # command: lnproxy
 function lnproxy() {
-  if [ $(cat /mnt/hdd/raspiblitz.conf 2>/dev/null | grep -c "runBehindTor=on") -eq 1 ]; then
-    echo
-    echo "Requesting a wrapped invoice from rdq6tvulanl7aqtupmoboyk2z3suzkdwurejwyjyjf4itr3zhxrm2lad.onion ..."
-    echo
-    torify curl http://rdq6tvulanl7aqtupmoboyk2z3suzkdwurejwyjyjf4itr3zhxrm2lad.onion/api/${1}
+  source /mnt/hdd/raspiblitz.conf
+  if [ $# -gt 0 ]; then
+    invoice=$1
   else
+    echo "Paste the invoice to be wrapped and press enter:"
+    read -r invoice
+  fi
+  if systemctl is-active --quiet tor@default; then
+    if [ -z "${lnproxy_override_tor}" ]; then
+      lnproxy_override_tor="rdq6tvulanl7aqtupmoboyk2z3suzkdwurejwyjyjf4itr3zhxrm2lad.onion/api"
+    fi
+    wrapped=$(torsocks curl -sS http://${lnproxy_override_tor}/${invoice})
     echo
-    echo "Requesting a wrapped invoice from https://lnproxy.org ..."
+    echo "Requesting a wrapped invoice from ${lnproxy_override_tor}"
+  else
+    if [ -z "${lnproxy_override_clearnet}" ]; then
+      lnproxy_override_clearnet="lnproxy.org/api"
+    fi
+    wrapped=$(curl -sS https://${lnproxy_override_clearnet}/${invoice})
     echo
-    curl https://lnproxy.org/api/${1}
+    echo "Requesting a wrapped invoice from ${lnproxy_override_clearnet}"
+  fi
+  echo
+  /home/admin/config.scripts/blitz.check-invoice-wrap.py "$1" "$wrapped"
+  echo
+  echo $wrapped
+}
+
+# command: suez
+function suez() {
+  source /mnt/hdd/raspiblitz.conf
+  if [ ${lightning} = 'cl' ] || [ ${lightning} = 'lnd' ]; then
+    if [ ! -f /home/bitcoin/suez/suez ];then
+      /home/admin/config.scripts/bonus.suez.sh on
+    fi
+    source <(/home/admin/config.scripts/network.aliases.sh getvars ${lightning} ${chain}net)
+    cd /home/bitcoin/suez || exit 1
+    clear
+    echo "# Showing the channels of ${lightning} ${chain}net - consider reducing the font size (press CTRL- or CMD-)"
+    if [ ${lightning} = cl ]; then
+      sudo -u bitcoin /home/bitcoin/.local/bin/poetry run ./suez \
+      --client=c-lightning --client-args=--conf=${CLCONF}
+    elif [ ${lightning} = lnd ]; then
+      sudo -u bitcoin /home/bitcoin/.local/bin/poetry run ./suez \
+      --client-args=-n=${CHAIN} \
+      --client-args=--rpcserver=localhost:1${L2rpcportmod}009
+    fi
+    cd
+  else
+    echo "# Lightning is ${lightning}"
   fi
 }

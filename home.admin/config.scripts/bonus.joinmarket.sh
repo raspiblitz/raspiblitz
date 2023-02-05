@@ -6,7 +6,7 @@
 # https://github.com/openoms/joininbox
 
 # https://github.com/openoms/joininbox/tags
-JBTAG="v0.7.4" # installs JoinMarket v0.9.8
+JBTAG="v0.7.6" # installs JoinMarket v0.9.9
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -20,9 +20,9 @@ fi
 # show info menu
 if [ "$1" = "menu" ]; then
   whiptail --title " JoinMarket info " \
-  --yes-button "Start Joininbox" \
-  --no-button "Cancel" \
-  --yesno "Usage notes:
+    --yes-button "Start Joininbox" \
+    --no-button "Cancel" \
+    --yesno "Usage notes:
 https://github.com/openoms/bitcoin-tutorials/blob/master/joinmarket/README.md
 
 Can also type: 'jm' in the command line to switch to the dedicated user,
@@ -35,8 +35,8 @@ and start the JoininBox menu.
 fi
 
 # check if sudo
-if [ "$EUID" -ne 0 ]
-  then echo "Please run as root (with sudo)"
+if [ "$EUID" -ne 0 ]; then
+  echo "Please run as root (with sudo)"
   exit
 fi
 
@@ -80,7 +80,7 @@ if [ "$1" = "install" ]; then
     # https://github.com/openoms/joininbox/releases/
     sudo -u joinmarket git reset --hard ${JBTAG}
     sudo -u joinmarket /home/admin/config.scripts/blitz.git-verify.sh \
-     "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" "${JBTAG}" || exit 1
+      "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" "${JBTAG}" || exit 1
 
     # copy the scripts in place
     sudo -u joinmarket cp /home/joinmarket/joininbox/scripts/* /home/joinmarket/
@@ -161,7 +161,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   # make sure the Bitcoin Core wallet is on
   /home/admin/config.scripts/network.wallet.sh on
-  if [ $(/usr/local/bin/bitcoin-cli -conf=/mnt/hdd/bitcoin/bitcoin.conf listwallets | grep -c wallet.dat) -eq 0 ];then
+  if [ $(/usr/local/bin/bitcoin-cli -conf=/mnt/hdd/bitcoin/bitcoin.conf listwallets | grep -c wallet.dat) -eq 0 ]; then
     echo "# Create a non-descriptor wallet.dat"
     /usr/local/bin/bitcoin-cli -conf=/mnt/hdd/bitcoin/bitcoin.conf -named createwallet wallet_name=wallet.dat descriptors=false
   else
@@ -187,9 +187,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   ln -s /mnt/hdd/app-data/.joinmarket /home/joinmarket/ 2>/dev/null
   chown -R joinmarket:joinmarket /home/joinmarket/.joinmarket
   # specify wallet.dat in old config for multiwallet for multiwallet support
-  if [ -f "/home/joinmarket/.joinmarket/joinmarket.cfg" ] ; then
+  if [ -f "/home/joinmarket/.joinmarket/joinmarket.cfg" ]; then
     sudo -u joinmarket sed -i "s/^rpc_wallet_file =.*/rpc_wallet_file = wallet.dat/g" \
-    /home/joinmarket/.joinmarket/joinmarket.cfg
+      /home/joinmarket/.joinmarket/joinmarket.cfg
     echo "# specified to use wallet.dat in the recovered joinmarket.cfg"
   fi
 
@@ -210,7 +210,7 @@ source /home/joinmarket/_commands.sh
 if [ -z \"\$TMUX\" ]; then
   /home/joinmarket/menu.sh
 fi
-"   | sudo -u joinmarket tee -a /home/joinmarket/.bashrc
+" | sudo -u joinmarket tee -a /home/joinmarket/.bashrc
 
   # configure joinmarket (includes a check if it is installed)
   if sudo -u joinmarket /home/joinmarket/start.joininbox.sh; then

@@ -1,5 +1,5 @@
 #!/bin/bash
- 
+
 echo "Starting the main menu ..."
 
 # MAIN MENU AFTER SETUP
@@ -158,7 +158,7 @@ if [ "${homer}" == "on" ]; then
   CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
 fi
 if [ "${circuitbreaker}" == "on" ]; then
-  OPTIONS+=(CIRCUIT "Circuitbreaker (LND firewall)")
+  OPTIONS+=(CIRCUITBREAKER "Circuitbreaker (LND firewall)")
 fi
 if [ "${tallycoinConnect}" == "on" ]; then
   OPTIONS+=(TALLY "Tallycoin Connect")
@@ -286,7 +286,7 @@ case $CHOICE in
             ;;
         LIGHTNINGTIPBOT)
             /home/admin/config.scripts/bonus.lightningtipbot.sh menu
-            ;;            
+            ;;
         LOOP)
             /home/admin/config.scripts/bonus.loop.sh menu
             ;;
@@ -329,7 +329,6 @@ case $CHOICE in
         HELIPAD)
             sudo /home/admin/config.scripts/bonus.helipad.sh menu
             ;;
-
         SQUEAKNODE)
             /home/admin/config.scripts/bonus.squeaknode.sh menu
             ;;
@@ -339,7 +338,7 @@ case $CHOICE in
         CHANTOOLS)
             sudo /home/admin/config.scripts/bonus.chantools.sh menu
             ;;
-        CIRCUIT)
+        CIRCUITBREAKER)
             sudo /home/admin/config.scripts/bonus.circuitbreaker.sh menu
             ;;
         TESTNETS)

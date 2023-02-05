@@ -35,11 +35,11 @@ fi
   OPTIONS+=(SEED "Show Wallet Seed Words")
 if [ "${clWatchtowerClient}" == "on" ] && [ "${CHAIN}" == "mainnet" ]; then
   OPTIONS+=(WATCHTOWER  "Watchtower Client Options")
-fi  
+fi
   OPTIONS+=(REPAIR-CL "Repair options for Core Lightning")
 if [ "${lightning}" != "cl" ] && [ "${CHAIN}" == "mainnet" ]; then
   OPTIONS+=(SWITCHLN  "Use Core Lightning as default")
-fi  
+fi
 
 CHOICE_HEIGHT=$(("${#OPTIONS[@]}/2+1"))
 HEIGHT=$((CHOICE_HEIGHT+6))
@@ -92,12 +92,9 @@ case $CHOICE in
       if [ ! -f /home/bitcoin/suez/suez ];then
         /home/admin/config.scripts/bonus.suez.sh on
       fi
-      cd /home/bitcoin/suez || exit 0
-      command="sudo -u bitcoin /home/bitcoin/.local/bin/poetry run ./suez --client=c-lightning --client-args=--conf=${CLCONF}"
-      echo "# Running the command:"
-      echo "${command}"
+      cd /home/bitcoin/suez || exit 1
       echo
-      $command
+      sudo -u bitcoin /home/bitcoin/.local/bin/poetry run ./suez --client=c-lightning --client-args=--conf=${CLCONF}
       echo
       echo "Press ENTER to return to main menu."
       read key
@@ -111,7 +108,7 @@ case $CHOICE in
       /home/admin/99clRepairMenu.sh $CHAIN
       ;;
   SWITCHLN)
-      clear 
+      clear
       echo
       # setting value in the raspiblitz.conf
       /home/admin/config.scripts/blitz.conf.sh set lightning "cl"

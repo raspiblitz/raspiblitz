@@ -148,8 +148,8 @@ if [ "${testnet}" == "on" ] || [ "${testnet}" == "1" ]; then
   sudo journalctl -u t${network}d -b --no-pager -n8
   echo
   echo "*** LAST BLOCKCHAIN (TESTNET) 20 INFO LOGS ***"
-  echo "sudo tail -n 20 /mnt/hdd/${network}/tdebug.log"
-  sudo tail -n 20 /mnt/hdd/${network}/tdebug.log
+  echo "sudo tail -n 20 /mnt/hdd/${network}/testnet3/debug.log"
+  sudo tail -n 20 /mnt/hdd/${network}/testnet3/debug.log
   echo
 else
   echo "- OFF by config -"
@@ -192,8 +192,8 @@ if [ "${signet}" == "on" ] || [ "${signet}" == "1" ]; then
   sudo journalctl -u s${network}d -b --no-pager -n8
   echo
   echo "*** LAST BLOCKCHAIN (SIGNET) 20 INFO LOGS ***"
-  echo "sudo tail -n 20 /mnt/hdd/${network}/sdebug.log"
-  sudo tail -n 20 /mnt/hdd/${network}/sdebug.log
+  echo "sudo tail -n 20 /mnt/hdd/${network}/signet/debug.log"
+  sudo tail -n 20 /mnt/hdd/${network}/signet/debug.log
   echo
 else
   echo "- OFF by config -"
@@ -311,6 +311,39 @@ if [ "${lit}" == "on" ]; then
   echo
 else
   echo "- LIT is OFF by config"
+fi
+
+if [ "${lndg}" == "on" ]; then
+  echo
+  echo "*** LNDg Status ***"
+  sudo /home/admin/config.scripts/bonus.lndg.sh status
+  echo
+  echo "*** LNDg JOBS SYSTEMD STATUS ***"
+  sudo systemctl status jobs-lndg.service -n2 --no-pager
+  echo "sudo tail -n 5 /var/log/lnd_jobs_error.log"
+  sudo tail -n 5 /var/log/lnd_jobs_error.log
+  echo
+  echo "*** LNDg REBALANCER SYSTEMD STATUS ***"
+  sudo systemctl status rebalancer-lndg.service -n2 --no-pager
+  echo "sudo tail -n 5 /var/log/lnd_rebalancer_error.log"
+  sudo tail -n 5 /var/log/lnd_rebalancer_error.log
+  echo
+  echo "*** LNDg HTLC-STREAM SYSTEMD STATUS ***"
+  sudo systemctl status htlc-stream-lndg.service -n2 --no-pager
+  echo "sudo tail -n 5 /var/log/lnd_htlc_stream_error.log"
+  sudo tail -n 5 /var/log/lnd_htlc_stream_error.log
+  echo
+  echo "*** LNDg GUNICORN SERVER SYSTEMD STATUS ***"
+  sudo systemctl status gunicorn.service -n2 --no-pager
+  echo "sudo tail -n 5 /var/log/gunicorn_error.log"
+  sudo tail -n 5 /var/log/gunicorn_error.log 2>/dev/null
+  echo
+  echo "*** LAST 10 LNDg LOGS ***"
+  echo "sudo journalctl -u lndg -b --no-pager -n10"
+  sudo journalctl -u lndg -b --no-pager -n20
+  echo
+else
+  echo "- LNDg is OFF by config"
 fi
 
 if [ "${BTCPayServer}" == "on" ]; then

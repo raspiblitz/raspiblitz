@@ -108,9 +108,9 @@ iOS support is native, Android needs Orbot"
 At the moment your Sphinx Relay Server is just available
 within the local network - without transport encryption.
 Local server for test & debug: ${publicURL}/app"#\n
-#To enable easy reachability from the outside consider
-#adding a IP2TOR Bridge and reconnect:
-#MAINMENU > SUBSCRIBE > IP2TOR > SPHINX"
+To enable easy reachability from the outside consider
+adding a IP2TOR Bridge and reconnect:
+MAINMENU > SUBSCRIBE > IP2TOR > SPHINX"
    extraPairInfo="You need to be on the same local network to make this work."
 
   else

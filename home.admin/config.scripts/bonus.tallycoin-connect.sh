@@ -8,7 +8,7 @@ HOME_DIR=/home/$USERNAME
 CONFIG_FILE=$APP_DATA_DIR/tallycoin_api.key
 RASPIBLITZ_INFO=/home/admin/raspiblitz.info
 SERVICE_FILE=/etc/systemd/system/tallycoin-connect.service
-TC_VERSION=1.7.1
+TC_VERSION=1.7.5
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then

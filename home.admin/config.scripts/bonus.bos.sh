@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # https://github.com/alexbosworth/balanceofsatoshis/blob/master/package.json#L81
-BOSVERSION="13.6.0"
+BOSVERSION="13.15.0"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -75,14 +75,14 @@ https://github.com/alexbosworth/balanceofsatoshis/blob/master/README.md
 Start BoS telegram setup now?" 14 72
             if [ "$?" != "1" ]; then
               exit 0
-            fi            
+            fi
             sudo bash /home/admin/config.scripts/bonus.bos.sh telegram setup
             echo
             echo "OK Balance of Satoshis telegram setup done."
             echo "PRESS ENTER to continue"
             read key
             exit 0
-            ;;            
+            ;;
         TELEGRAM-SERVICE)
             clear
             connectMsg="
@@ -95,7 +95,7 @@ Please enter the CONNECT CODE from your telegram bot
               connectCode=$(echo "${connectCode}" | cut -d " " -f1)
             else
               exit 0
-            fi        
+            fi
             /home/admin/config.scripts/bonus.bos.sh telegram on ${connectCode}
             echo
             echo "OK BoS telegram service active."
@@ -185,14 +185,14 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sleep 3
     exit 1
   fi
-  
+
   echo "*** INSTALL BALANCE OF SATOSHIS ***"
   # check and install NodeJS
   /home/admin/config.scripts/bonus.nodejs.sh on
-  
+
   # create bos user
   sudo adduser --disabled-password --gecos "" bos
-  
+
   echo "# Create data folder on the disk"
   # move old data if present
   sudo mv /home/bos/.bos /mnt/hdd/app-data/ 2>/dev/null
@@ -207,19 +207,19 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo -u bos mkdir /home/bos/.npm-global
   sudo -u bos npm config set prefix '/home/bos/.npm-global'
   sudo bash -c "echo 'PATH=$PATH:/home/bos/.npm-global/bin' >> /home/bos/.bashrc"
-  
+
   # download source code
   sudo -u bos git clone https://github.com/alexbosworth/balanceofsatoshis.git /home/bos/balanceofsatoshis
   cd /home/bos/balanceofsatoshis
-  
+
   # make sure symlink to central app-data directory exists ***"
   sudo rm -rf /home/bos/.lnd  # not a symlink.. delete it silently
   # create symlink
   sudo ln -s "/mnt/hdd/app-data/lnd/" "/home/bos/.lnd"
-  
+
   # add user to group with admin access to lnd
   sudo /usr/sbin/usermod --append --groups lndadmin bos
-  
+
   # install bos
   # check latest version:
   # https://github.com/alexbosworth/balanceofsatoshis/blob/master/package.json#L70

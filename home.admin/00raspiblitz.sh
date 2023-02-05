@@ -48,13 +48,6 @@ if [ "${copyInProgress}" = "1" ]; then
   exit
 fi
 
-# special state: reindex was triggered
-if [ "${state}" = "reindex" ]; then
-  echo "Re-Index in progress ... start monitoring:"
-  /home/admin/config.scripts/network.reindex.sh
-  exit
-fi
-
 # special state: copystation
 if [ "${state}" = "copystation" ]; then
   echo "Copy Station is Running ..."

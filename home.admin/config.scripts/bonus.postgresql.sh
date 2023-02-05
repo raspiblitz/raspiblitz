@@ -2,12 +2,12 @@
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
- echo "config script to install PostgreSQL"
- echo "bonus.postgresql.sh [on|off]"
- echo "bonus.postgresql.sh [backup] [database]"
- echo "bonus.postgresql.sh [restore] [database] [user] [password]"
- echo "bonus.postgresql.sh [info]"
- exit 1
+  echo "config script to install PostgreSQL"
+  echo "bonus.postgresql.sh [on|off]"
+  echo "bonus.postgresql.sh [backup] [database]"
+  echo "bonus.postgresql.sh [restore] [database] [user] [password]"
+  echo "bonus.postgresql.sh [info]"
+  exit 1
 fi
 
 command=$1
@@ -36,22 +36,22 @@ if [ "$command" = "1" ] || [ "$command" = "on" ]; then
   fi
 
   fix_postgres=0
-  if [ -L $postgres_datadir ] ; then
-     if [ -e $postgres_datadir ] ; then
-        echo "# Good link in $postgres_datadir"
-     else
-        echo "# Broken link in $postgres_datadir"
-        fix_postgres=1
-     fi
-  elif [ -e $postgres_datadir ] ; then
-     echo "# Not a link in $postgres_datadir"
-     fix_postgres=1
+  if [ -L $postgres_datadir ]; then
+    if [ -e $postgres_datadir ]; then
+      echo "# Good link in $postgres_datadir"
+    else
+      echo "# Broken link in $postgres_datadir"
+      fix_postgres=1
+    fi
+  elif [ -e $postgres_datadir ]; then
+    echo "# Not a link in $postgres_datadir"
+    fix_postgres=1
   else
-     echo "# Missing Link in $postgres_datadir"
-     fix_postgres=1
+    echo "# Missing Link in $postgres_datadir"
+    fix_postgres=1
   fi
 
-  if [ fix_postgres = 1 ] || [ ! -d /mnt/hdd/app-data/postgresql ]; then
+  if [ ${fix_postgres} = 1 ] || [ ! -d /mnt/hdd/app-data/postgresql ]; then
     echo "# Move the PostgreSQL data to /mnt/hdd/app-data/postgresql"
     sudo systemctl stop postgresql 2>/dev/null
     sudo rsync -av $postgres_datadir /mnt/hdd/app-data
@@ -67,9 +67,8 @@ if [ "$command" = "1" ] || [ "$command" = "on" ]; then
     # wait for the postgres server to start
     count=0
     count_max=30
-    while ! nc -zv 127.0.0.1 5432 2>/dev/null;
-    do
-      count=`expr $count + 1`
+    while ! nc -zv 127.0.0.1 5432 2>/dev/null; do
+      count=$((count + 1))
       echo "sleep $count/$count_max"
       sleep 1
       if [ $count = $count_max ]; then
@@ -103,16 +102,16 @@ fi
 
 # backup
 backup_target="/mnt/hdd/app-data/backup/$db_name"
-backup_file="${db_name}_`date +%d`-`date +%m`-`date +%Y`_`date +%H`-`date +%M`_dump"
+backup_file="${db_name}_$(date +%d)-$(date +%m)-$(date +%Y)_$(date +%H)-$(date +%M)_dump"
 if [ ! -d $backup_target ]; then
-    sudo mkdir -p $backup_target 1>&2
+  sudo mkdir -p $backup_target 1>&2
 fi
 
 # https://www.postgresql.org/docs/current/backup-dump.html
 if [ "$command" = "backup" ] && [ "$db_name" != "" ]; then
 
   echo "*** BACKUP POSTGRESQL $db_name ***"
-  sudo -u postgres pg_dump $db_name > $backup_target/${backup_file}.sql || exit 1
+  sudo -u postgres pg_dump $db_name >$backup_target/${backup_file}.sql || exit 1
   # Delete old backups (keep last 3 backups)
   sudo chown -R admin:admin $backup_target
   ls -tp $backup_target/*.sql | grep -v '/$' | tail -n +4 | tr '\n' '\0' | xargs -0 rm -- 2>/dev/null
@@ -154,7 +153,7 @@ if [ "$command" = "restore" ] && [ "$db_name" != "" ] && [ "$db_user" != "" ] &&
   echo "# Import SQL Dump"
   sudo mkdir -p $backup_target/logs 1>&2
   sudo chown -R postgres:postgres $backup_file
-  sudo -u postgres psql $db_name < ${backup_file} > $backup_target/logs/sql_import.log || exit 1
+  sudo -u postgres psql $db_name <${backup_file} >$backup_target/logs/sql_import.log || exit 1
   echo "$backup_target/sql_import.log written"
   echo "OK - database $db_name restored from ${backup_file}"
   exit 0
