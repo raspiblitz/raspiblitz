@@ -21,22 +21,24 @@ if [ "$1" = "menu" ]; then
 
   if systemctl is-active --quiet lnproxy; then
     # get network info
-    toraddressApi=$(sudo cat /mnt/hdd/tor/lnproxy/hostname 2>/dev/null)
-    toraddressWebui=$(sudo cat /mnt/hdd/tor/lnproxy-webui/hostname 2>/dev/null)
+    torAddress=$(sudo cat /mnt/hdd/tor/lnproxy/hostname 2>/dev/null)
+    fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
 
-    if [ "${runBehindTor}" = "on" ] && [ -n "${toraddressApi}" ]; then
+    if [ "${runBehindTor}" = "on" ] && [ -n "${torAddress}" ]; then
       # Info with Tor
-      sudo /home/admin/config.scripts/blitz.display.sh qr "${toraddressWebui}"
+      sudo /home/admin/config.scripts/blitz.display.sh qr "${torAddress}"
       whiptail --title " lnproxy-webui and API" --msgbox "\
 Open in your local web browser:
-http://${localip}:4748\n
+http://${localip}:4748
+https://${localip}:4749 with Fingerprint:
+${fingerprint}\n
 Hidden Service address for Tor Browser (see LCD for QR):
-${toraddressWebui}\n
+${torAddress}\n
 To use the API:
-curl http://${localip}:4747/{invoice}?routing_msat={budget}\n
+curl -k https://${localip}:4749/api/{invoice}?routing_msat={budget}\n
 The Tor Hidden Service address to share for using the API:
-${toraddressApi}
-" 17 67
+${torAddress}/api
+" 19 67
       sudo /home/admin/config.scripts/blitz.display.sh hide
     else
       # Info without Tor
@@ -183,11 +185,30 @@ EOF
     echo "# OK - the lnproxy-webui.service is enabled, to start manually use: sudo systemctl start lnproxy-webui"
   fi
 
+  ##################
+  # NGINX
+  ##################
+  # setup nginx symlinks
+  if ! [ -f /etc/nginx/sites-available/lnproxy_ssl.conf ]; then
+    sudo cp -f /home/admin/assets/nginx/sites-available/lnproxy_ssl.conf /etc/nginx/sites-available/lnproxy_ssl.conf
+  fi
+  if ! [ -f /etc/nginx/sites-available/lnproxy_tor.conf ]; then
+    sudo cp /home/admin/assets/nginx/sites-available/lnproxy_tor.conf /etc/nginx/sites-available/lnproxy_tor.conf
+  fi
+  if ! [ -f /etc/nginx/sites-available/lnproxy_tor_ssl.conf ]; then
+    sudo cp /home/admin/assets/nginx/sites-available/lnproxy_tor_ssl.conf /etc/nginx/sites-available/lnproxy_tor_ssl.conf
+  fi
+  sudo ln -sf /etc/nginx/sites-available/lnproxy_ssl.conf /etc/nginx/sites-enabled/
+  sudo ln -sf /etc/nginx/sites-available/lnproxy_tor.conf /etc/nginx/sites-enabled/
+  sudo ln -sf /etc/nginx/sites-available/lnproxy_tor_ssl.conf /etc/nginx/sites-enabled/
+  sudo nginx -t
+  sudo systemctl reload nginx
+
   sudo ufw allow 4747 comment lnproxy-HTTP
   sudo ufw allow 4748 comment lnproxy-webui-HTTP
+  sudo ufw allow 4749 comment lnproxy-HTTPS
 
-  /home/admin/config.scripts/tor.onion-service.sh lnproxy 80 4747
-  /home/admin/config.scripts/tor.onion-service.sh lnproxy-webui 80 4748
+  /home/admin/config.scripts/tor.onion-service.sh lnproxy 80 4750 443 4751
 
   # setting value in raspi blitz config
   /home/admin/config.scripts/blitz.conf.sh set lnproxy "on"
@@ -216,11 +237,11 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # remove Tor service
   /home/admin/config.scripts/tor.onion-service.sh off lnproxy
-  /home/admin/config.scripts/tor.onion-service.sh off lnproxy-webui
 
   # close ports on firewall
   sudo ufw delete allow 4747
   sudo ufw delete allow 4748
+  sudo ufw delete allow 4749
 
   # setting value in raspi blitz config
   /home/admin/config.scripts/blitz.conf.sh set lnproxy "off"
