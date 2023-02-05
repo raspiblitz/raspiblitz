@@ -399,10 +399,7 @@ if [ "$1" = "install" ]; then
   sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
   echo "# Build NBXplorer $NBXplorerVersion"
   # from the build.sh with path
-  sudo -u btcpay /home/btcpay/dotnet/dotnet build -c Release NBXplorer/NBXplorer.csproj || (
-    echo "# Build failed"
-    exit 1
-  )
+  sudo -u btcpay /home/btcpay/dotnet/dotnet build -c Release NBXplorer/NBXplorer.csproj || exit 1
 
   # BTCPayServer
   echo "# Install BTCPayServer"
@@ -423,10 +420,7 @@ if [ "$1" = "install" ]; then
   echo "# Build BTCPayServer $BTCPayVersion"
   # from the build.sh with path
   sudo -u btcpay /home/btcpay/dotnet/dotnet build -c Release \
-    /home/btcpay/btcpayserver/BTCPayServer/BTCPayServer.csproj || (
-    echo "# Build failed"
-    exit 1
-  )
+    /home/btcpay/btcpayserver/BTCPayServer/BTCPayServer.csproj || exit 1
 
   exit 0
 fi
@@ -757,10 +751,8 @@ if [ "$1" = "update" ]; then
     echo "# Build NBXplorer $TAG"
     # from the build.sh with path
     sudo systemctl stop nbxplorer
-    sudo -u btcpay /home/btcpay/dotnet/dotnet build -c Release NBXplorer/NBXplorer.csproj || (
-      echo "# Build failed"
-      exit 1
-    )
+    sudo -u btcpay /home/btcpay/dotnet/dotnet build -c Release NBXplorer/NBXplorer.csproj || exit 1
+
     # whitelist localhost in bitcoind
     if ! sudo grep -Eq "^whitelist=127.0.0.1" /mnt/hdd/bitcoin/bitcoin.conf; then
       echo "whitelist=127.0.0.1" | sudo tee -a /mnt/hdd/bitcoin/bitcoin.conf
@@ -813,10 +805,7 @@ if [ "$1" = "update" ]; then
     echo "# Build BTCPayServer $TAG"
     # from the build.sh with path
     sudo systemctl stop btcpayserver
-    sudo -u btcpay /home/btcpay/dotnet/dotnet build -c Release /home/btcpay/btcpayserver/BTCPayServer/BTCPayServer.csproj || (
-      echo "# Build failed"
-      exit 1
-    )
+    sudo -u btcpay /home/btcpay/dotnet/dotnet build -c Release /home/btcpay/btcpayserver/BTCPayServer/BTCPayServer.csproj || exit 1
     sudo systemctl start btcpayserver
     echo "# Updated BTCPayServer to $TAG"
   fi
