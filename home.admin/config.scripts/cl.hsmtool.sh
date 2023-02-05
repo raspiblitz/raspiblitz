@@ -156,7 +156,7 @@ function decryptHSMsecret() {
       /home/admin/config.scripts/cl.hsmtool.sh unlock ${CHAIN}
       # attempt to decrypt again
       sudo cat $passwordFile | sudo -u bitcoin lightning-hsmtool decrypt \
-       "$hsmSecretPath" || echo "# Couldn't decrypt"; exit 1
+       "$hsmSecretPath" || (echo "# Couldn't decrypt"; exit 1)
     fi
   fi
   shredPasswordFile
