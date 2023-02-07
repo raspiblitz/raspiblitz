@@ -52,10 +52,10 @@ if [ "$1" = on ]; then
   curl https://raw.githubusercontent.com/Electron-Cash/keys-n-hashes/master/pubkeys/calinkey.txt | sudo -u fulcrum gpg --import
 
   # look for 'Good signature'
-  sudo -u fulcrum gpg --verify Fulcrum-${fulcrumVersion}-${build}.tar.gz.asc || (echo "Failed to verify the GPG signature of Fulcrum-${fulcrumVersion}-${build}.tar.gz"; exit 1)
+  sudo -u fulcrum gpg --verify Fulcrum-${fulcrumVersion}-${build}.tar.gz.asc || exit 1
 
   # look for 'OK'
-  sudo -u fulcrum sha256sum -c Fulcrum-${fulcrumVersion}-${build}.tar.gz.sha256sum --ignore-missing || (echo "Failed to verify the sha256 hash of Fulcrum-${fulcrumVersion}-${build}.tar.gz"; exit 1)
+  sudo -u fulcrum sha256sum -c Fulcrum-${fulcrumVersion}-${build}.tar.gz.sha256sum --ignore-missing || exit 1
 
   # decompress
   sudo -u fulcrum tar -xvf Fulcrum-${fulcrumVersion}-${build}.tar.gz
