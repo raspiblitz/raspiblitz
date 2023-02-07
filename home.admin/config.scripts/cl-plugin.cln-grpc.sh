@@ -114,7 +114,7 @@ elif [ "$1" = off ]; then
 
 elif [ "$1" = update ]; then
   if [ "$(echo "$@" | grep -c source)" -gt 0 ];then
-    cd /home/bitcoin/lightning/ || (echo " The source is not present"; exit 1)
+    cd /home/bitcoin/lightning/ || exit 1
     sudo -u bitcoin git pull
   fi
   sudo rm -rf /home/bitcoin/cl-plugins-available/cln-grpc
