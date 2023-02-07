@@ -185,8 +185,8 @@ if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${blitzapi}" != "${choice}" ]; then
   echo "Blitz API + webUI settings changed .."
   anychange=1
-  sudo /home/admin/config.scripts/blitz.web.api.sh ${choice}
-  sudo /home/admin/config.scripts/blitz.web.ui.sh ${choice}
+  sudo /home/admin/config.scripts/blitz.web.api.sh ${choice} DEFAULT
+  sudo /home/admin/config.scripts/blitz.web.ui.sh ${choice} DEFAULT
   errorOnInstall=$?
   if [ "${choice}" =  "on" ]; then
     whiptail --title " Installed Blitz API + webUI" --msgbox "\
