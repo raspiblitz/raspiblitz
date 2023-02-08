@@ -565,7 +565,7 @@ do
     fi
     if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${CYCLE_QUICK} ]; then
       echo "updating: /home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net status"
-      source <(/home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net status)
+      source <(timeout 30s /home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net status)
       /home/admin/_cache.sh set ln_lnd_${CHAIN}net_activated "1"
       /home/admin/_cache.sh set ln_lnd_${CHAIN}net_locked "${ln_lnd_locked}"
       /home/admin/_cache.sh set ln_lnd_${CHAIN}net_version "${ln_lnd_version}"
@@ -595,7 +595,7 @@ do
       if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${CYCLE_LONG} ]; then
         error=""
         echo "updating: /home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net config"
-        source <(/home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net config)
+        source <(timeout 30s /home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net config)
         if [ "${error}" == "" ]; then
           /home/admin/_cache.sh set ln_lnd_${CHAIN}net_alias "${ln_lnd_alias}"
           if [ "${isDefaultLightning}" == "1" ] && [ "${isDefaultChain}" == "1" ]; then
@@ -638,7 +638,7 @@ do
       if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${CYCLE_MID} ]; then
         error=""
         echo "updating: /home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net info"
-        source <(/home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net info)
+        source <(timeout 30s /home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net info)
         if [ "${error}" == "" ]; then
           /home/admin/_cache.sh set ln_lnd_${CHAIN}net_address "${ln_lnd_address}"
           /home/admin/_cache.sh set ln_lnd_${CHAIN}net_tor "${ln_lnd_tor}"
@@ -688,7 +688,7 @@ do
       if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${CYCLE_QUICK} ]; then
         error=""
         echo "updating: /home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net wallet"
-        source <(/home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net wallet)
+        source <(timeout 30s /home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net wallet)
         if [ "${error}" == "" ]; then
           /home/admin/_cache.sh set ln_lnd_${CHAIN}net_wallet_onchain_balance "${ln_lnd_wallet_onchain_balance}"
           /home/admin/_cache.sh set ln_lnd_${CHAIN}net_wallet_onchain_pending "${ln_lnd_wallet_onchain_pending}"
@@ -720,7 +720,7 @@ do
       if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${CYCLE_LONG} ]; then
         error=""
         echo "updating: /home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net fees"
-        source <(/home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net fees)
+        source <(timeout 30s /home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net fees)
         if [ "${error}" == "" ]; then
           /home/admin/_cache.sh set ln_lnd_${CHAIN}net_fees_daily "${ln_lnd_fees_daily}"
           /home/admin/_cache.sh set ln_lnd_${CHAIN}net_fees_weekly "${ln_lnd_fees_weekly}"
@@ -795,7 +795,7 @@ do
     fi
     if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${CYCLE_QUICK} ]; then
       echo "updating: /home/admin/config.scripts/cl.monitor.sh ${CHAIN}net status"
-      source <(/home/admin/config.scripts/cl.monitor.sh ${CHAIN}net status)
+      source <(timeout 30s /home/admin/config.scripts/cl.monitor.sh ${CHAIN}net status)
       /home/admin/_cache.sh set ln_cl_${CHAIN}net_activated "1"
       /home/admin/_cache.sh set ln_cl_${CHAIN}net_version "${ln_cl_version}"
       /home/admin/_cache.sh set ln_cl_${CHAIN}net_running "${ln_cl_running}"
@@ -850,7 +850,7 @@ do
       if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${CYCLE_MID} ]; then
         error=""
         echo "updating: /home/admin/config.scripts/cl.monitor.sh ${CHAIN}net info"
-        source <(/home/admin/config.scripts/cl.monitor.sh ${CHAIN}net info)
+        source <(timeout 30s /home/admin/config.scripts/cl.monitor.sh ${CHAIN}net info)
         if [ "${error}" == "" ]; then
           /home/admin/_cache.sh set ln_cl_${CHAIN}net_alias "${ln_cl_alias}"
           /home/admin/_cache.sh set ln_cl_${CHAIN}net_address "${ln_cl_address}"
@@ -904,7 +904,7 @@ do
       if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${CYCLE_MID} ]; then
         error=""
         echo "updating: /home/admin/config.scripts/cl.monitor.sh ${CHAIN}net wallet"
-        source <(/home/admin/config.scripts/cl.monitor.sh ${CHAIN}net wallet)
+        source <(timeout 30s /home/admin/config.scripts/cl.monitor.sh ${CHAIN}net wallet)
         if [ "${error}" == "" ]; then
           /home/admin/_cache.sh set ln_cl_${CHAIN}net_wallet_onchain_balance "${ln_cl_wallet_onchain_balance}"
           /home/admin/_cache.sh set ln_cl_${CHAIN}net_wallet_onchain_pending "${ln_cl_wallet_onchain_pending}"
