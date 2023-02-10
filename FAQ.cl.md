@@ -582,7 +582,7 @@ Will need to pay through a peer which supports the onion messages which means yo
   sudo cp /home/admin/emergency.recover /home/bitcoin/.lightning/bitcoin/
   sudo chown bitcoin:bitcoin /home/bitcoin/.lightning/bitcoin/emergency.recover
   ```
-1. Recover
+4. emergencyrecover
 
 * run (as admin or bitcoin user):
   ```
