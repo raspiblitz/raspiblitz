@@ -34,18 +34,19 @@
 - [Backups](#backups)
   - [Backup strategy](#backup-strategy)
   - [Seed](#seed)
-  - [How to display the hsm_secret in a human-readable format?](#how-to-display-the-hsm_secret-in-a-human-readable-format)
+  - [How to display the hsm\_secret in a human-readable format?](#how-to-display-the-hsm_secret-in-a-human-readable-format)
   - [How to test the seedwords?](#how-to-test-the-seedwords)
-  - [How to restore the hsm_secret from text?](#how-to-restore-the-hsm_secret-from-text)
+  - [How to restore the hsm\_secret from text?](#how-to-restore-the-hsm_secret-from-text)
   - [Channel database](#channel-database)
-  - [Recovery](#recovery)
-    - [Recover from a cl-rescue file](#recover-from-a-cl-rescue-file)
-    - [Recover from a seed](#recover-from-a-seed)
-    - [Restore a CLN node from the database backup on the SDcard](#restore-a-cln-node-from-the-database-backup-on-the-sdcard)
-    - [Rescan the chain after restoring a used CLN wallet](#rescan-the-chain-after-restoring-a-used-cln-wallet)
-    - [Guesstoremote to recover funds from force-closed channels](#guesstoremote-to-recover-funds-from-force-closed-channels)
+- [Recovery](#recovery)
+  - [Recover from a cl-rescue file](#recover-from-a-cl-rescue-file)
+  - [Recover from a seed](#recover-from-a-seed)
+  - [Emergency recovery in case of lost channel states](#emergency-recovery-in-case-of-lost-channel-states)
+  - [Restore a CLN node from the database backup on the SDcard](#restore-a-cln-node-from-the-database-backup-on-the-sdcard)
+  - [Rescan the chain after restoring a used CLN wallet](#rescan-the-chain-after-restoring-a-used-cln-wallet)
+  - [Guesstoremote to recover funds from force-closed channels](#guesstoremote-to-recover-funds-from-force-closed-channels)
 - [sqlite3 queries](#sqlite3-queries)
-- [Extract the private and public key from the hsm_secret file](#extract-the-private-and-public-key-from-the-hsm_secret-file)
+- [Extract the private and public key from the hsm\_secret file](#extract-the-private-and-public-key-from-the-hsm_secret-file)
 - [Update](#update)
   - [Update to a new CLN release](#update-to-a-new-cln-release)
   - [Experimental update to the latest master](#experimental-update-to-the-latest-master)
@@ -457,7 +458,7 @@ Will need to pay through a peer which supports the onion messages which means yo
     ```
 
 ## Backups
-*<> https://lightning.readthedocs.io/FAQ.html#how-to-backup-my-wallet>
+* <https://lightning.readthedocs.io/FAQ.html#how-to-backup-my-wallet>>
 * General details: <https://lightning.readthedocs.io/BACKUP.html>
 
 ### Backup strategy
@@ -519,19 +520,99 @@ Will need to pay through a peer which supports the onion messages which means yo
 ### Channel database
 * Stored on the disk and synchronised to the SDcard with the help of the `backup` plugin.
 
-### Recovery
+## Recovery
 * https://lightning.readthedocs.io/FAQ.html#database-corruption-channel-state-lost
 * https://lightning.readthedocs.io/FAQ.html#loss
-#### Recover from a cl-rescue file
+### Recover from a cl-rescue file
 * use the `REPAIR-CL` - `FILERESTORE` option in the menu for instructions to upload
 
-#### Recover from a seed
+### Recover from a seed
 * use the `REPAIR-CL` - `SEEDRESTORE` option in the menu for instructions to paste the seedwords to restore
+* or use the manual commands
+  ```
+  # stop CLN
+  sudo systemctl stop lightningd
 
-#### Restore a CLN node from the database backup on the SDcard
+  # change to the bitcoin user
+  sudo su - bitcoin
+
+  # generate the hsm_secret in temporary directory from your CLN seed words (follow the instructions)
+   lightning-hsmtool generatehsm /dev/shm/hsm_secret
+
+  # backup your old hsm_secret and channel database
+  mkdir /home/bitcoin/.lightning/bitcoin/old_node
+  mv /home/bitcoin/.lightning/bitcoin/** /home/bitcoin/.lightning/bitcoin/old_node/
+
+  # move the new hsm_secret in place
+  mv /dev/shm/hsm_secret /home/bitcoin/.lightning/bitcoin/
+
+  # back to admin
+  exit
+
+  # start lightningd
+  sudo systemctl start lightningd
+
+  # show the logs
+  cllog
+  ```
+
+### Emergency recovery in case of lost channel states
+
+* manpage: <https://lightning.readthedocs.io/lightning-emergencyrecover.7.html>
+* blogpost: <https://blog.blockstream.com/core-lightning-v0-12-0/>
+* demo video: https://youtu.be/zBmEieZuS8Q
+   ```
+   lightning-cli help emergencyrecover
+   ```
+
+1. Restore the hsm_secret (onchain wallet keys) from seed (or HEX)
+	* can use the raspiblitz menu CLN - REPAIR-CL - SEEDRESTORE
+    * or the [manual commands to restore the hsm_secret from seed](#manual-commands-to-restore-the-hsm_secret-from-the-seed)
+
+2. Best to wait for the rescan to finish. Can follow with:
+   ```
+   cllog
+   ```
+3. Upload and copy the emergency.recover file in place
+
+* upload the file with scp
+    ```
+    scp hsm_secret emergency.recover admin@RASPIBLITZ_IP:~/
+    ```
+* for example to copy it from `/home/admin/` as the admin user
+   ```
+   sudo cp /home/admin/emergency.recover /home/bitcoin/.lightning/bitcoin/
+   sudo chown bitcoin:bitcoin /home/bitcoin/.lightning/bitcoin/emergency.recover
+   ```
+4. Recover
+
+* run (as admin or bitcoin user):
+  ```
+  lightning-cli emergencyrecover
+  ```
+  a list of channelID-s should be returned if it worked:
+  ```
+  {
+     "stubs": [
+        "................",
+     ]
+  }
+  ```
+5. See more data about the recovered channels with:
+   ```
+   lightning-cli listfunds
+   ```
+   List the funding txids:
+   ```
+   lightning-cli listfunds | jq -r '.channels[] | .funding_txid'
+   ```
+   Can check the txid-s in a mempool explorer. If one is spent that channel is already closed
+
+
+### Restore a CLN node from the database backup on the SDcard
 * https://gist.github.com/openoms/3516cd8f393d69d52f858c3d47c9e469
 
-#### Rescan the chain after restoring a used CLN wallet
+### Rescan the chain after restoring a used CLN wallet
 
 * can use the `menu` -> `REPAIR` -> `REPAIR-CL` -> `RESCAN` option
 * or follow the manual process:
@@ -554,7 +635,7 @@ Will need to pay through a peer which supports the onion messages which means yo
     cllog
     ```
 
-#### Guesstoremote to recover funds from force-closed channels
+### Guesstoremote to recover funds from force-closed channels
 * <https://lightning.readthedocs.io/lightning-hsmtool.8.html>
     ```
     $ man lightning-hsmtool
