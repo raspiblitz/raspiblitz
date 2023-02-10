@@ -743,305 +743,304 @@ Will need to pay through a peer which supports the onion messages which means yo
     rm clScriptList.txt
     ```
 
-  ```
-  + ./cl.backup.sh -h
+    ```
+    + ./cl.backup.sh -h
 
-  ---------------------------------------------------
-  CL RESCUE FILE (tar.gz of complete cl directory)
-  ---------------------------------------------------
-  cl.backup.sh cl-export
-  cl.backup.sh cl-export-gui
-  cl.backup.sh cl-import [file]
-  cl.backup.sh cl-import-gui [setup|production] [?resultfile]
-  ---------------------------------------------------
-  SEED WORDS
-  ---------------------------------------------------
-  cl.backup.sh seed-export-gui [clseeddata]
-  cl.backup.sh seed-import-gui [resultfile]
-  ---------------------------------------------------
-  RECOVERY
-  ---------------------------------------------------
-  cl.backup.sh [mainnet|signet|testnet] recoverymode [on|off|status] <-rescanbockheight|rescandepth>
+    ---------------------------------------------------
+    CL RESCUE FILE (tar.gz of complete cl directory)
+    ---------------------------------------------------
+    cl.backup.sh cl-export
+    cl.backup.sh cl-export-gui
+    cl.backup.sh cl-import [file]
+    cl.backup.sh cl-import-gui [setup|production] [?resultfile]
+    ---------------------------------------------------
+    SEED WORDS
+    ---------------------------------------------------
+    cl.backup.sh seed-export-gui [clseeddata]
+    cl.backup.sh seed-import-gui [resultfile]
+    ---------------------------------------------------
+    RECOVERY
+    ---------------------------------------------------
+    cl.backup.sh [mainnet|signet|testnet] recoverymode [on|off|status] <-rescanbockheight|rescandepth>
 
-  + ./cl.check.sh -h
+    + ./cl.check.sh -h
 
-  # script to check CL states
-  # cl.check.sh basic-setup
-  # cl.check.sh prestart [mainnet|testnet|signet]
+    # script to check CL states
+    # cl.check.sh basic-setup
+    # cl.check.sh prestart [mainnet|testnet|signet]
 
-  + ./cl.hsmtool.sh -h
+    + ./cl.hsmtool.sh -h
 
-  Create new wallet or import seed
-  Unlock/lock, encrypt, decrypt, set autounlock or change password for the hsm_secret
+    Create new wallet or import seed
+    Unlock/lock, encrypt, decrypt, set autounlock or change password for the hsm_secret
 
-  Usage:
-  Create new wallet:
-  cl.hsmtool.sh [new] [mainnet|testnet|signet] [?seedpassword]
-  cl.hsmtool.sh [new-force] [mainnet|testnet|signet] [?seedpassword]
-  There will be no seedpassword(passphrase) used by default
-  new-force will backup the old wallet and will work without interaction
+    Usage:
+    Create new wallet:
+    cl.hsmtool.sh [new] [mainnet|testnet|signet] [?seedpassword]
+    cl.hsmtool.sh [new-force] [mainnet|testnet|signet] [?seedpassword]
+    There will be no seedpassword(passphrase) used by default
+    new-force will backup the old wallet and will work without interaction
 
-  cl.hsmtool.sh [seed] [mainnet|testnet|signet] ["space-separated-seed-words"] [?seedpassword]
-  cl.hsmtool.sh [seed-force] [mainnet|testnet|signet] ["space-separated-seed-words"] [?seedpassword]
-  The new hsm_secret will be not encrypted if no NewPassword is given
-  seed-force will delete any old wallet and will work without dialog
+    cl.hsmtool.sh [seed] [mainnet|testnet|signet] ["space-separated-seed-words"] [?seedpassword]
+    cl.hsmtool.sh [seed-force] [mainnet|testnet|signet] ["space-separated-seed-words"] [?seedpassword]
+    The new hsm_secret will be not encrypted if no NewPassword is given
+    seed-force will delete any old wallet and will work without dialog
 
-  cl.hsmtool.sh [unlock] <mainnet|testnet|signet> <password>
-    success: exit 0
-    wrong password: exit 2
-    fail to unlock after 1 minute + show logs: exit 3
-  cl.hsmtool.sh [lock] <mainnet|testnet|signet>
-  cl.hsmtool.sh [encrypt|decrypt] <mainnet|testnet|signet>
-  cl.hsmtool.sh [autounlock-on|autounlock-off] <mainnet|testnet|signet>
+    cl.hsmtool.sh [unlock] <mainnet|testnet|signet> <password>
+        success: exit 0
+        wrong password: exit 2
+        fail to unlock after 1 minute + show logs: exit 3
+    cl.hsmtool.sh [lock] <mainnet|testnet|signet>
+    cl.hsmtool.sh [encrypt|decrypt] <mainnet|testnet|signet>
+    cl.hsmtool.sh [autounlock-on|autounlock-off] <mainnet|testnet|signet>
 
-  cl.hsmtool.sh [change-password] <mainnet|testnet|signet> <NewPassword>
+    cl.hsmtool.sh [change-password] <mainnet|testnet|signet> <NewPassword>
 
-  + ./cl.install-service.sh -h
+    + ./cl.install-service.sh -h
 
-  Script to set up or update the Core Lightning systemd service
-  Usage:
-  /home/admin/config.scripts/cl.install-service.sh <mainnet|testnet|signet>
+    Script to set up or update the Core Lightning systemd service
+    Usage:
+    /home/admin/config.scripts/cl.install-service.sh <mainnet|testnet|signet>
 
-  + ./cl.install.sh -h
+    + ./cl.install.sh -h
 
-  Core Lightning install script
-  The default version is: v22.11.1
-  mainnet / testnet / signet instances can run parallel
+    Core Lightning install script
+    The default version is: v22.11.1
+    mainnet / testnet / signet instances can run parallel
 
-  Usage:
-  cl.install.sh install - called by build_sdcard.sh
-  cl.install.sh on <mainnet|testnet|signet>
-  cl.install.sh off <mainnet|testnet|signet> <purge>
-  cl.install.sh [update <version>|testPR <PRnumber>]
-  cl.install.sh display-seed <mainnet|testnet|signet>
+    Usage:
+    cl.install.sh install - called by build_sdcard.sh
+    cl.install.sh on <mainnet|testnet|signet>
+    cl.install.sh off <mainnet|testnet|signet> <purge>
+    cl.install.sh [update <version>|testPR <PRnumber>]
+    cl.install.sh display-seed <mainnet|testnet|signet>
 
-  + ./cl.monitor.sh -h
-  monitor and troubleshot the c-lightning network
-  cl.monitor.sh [mainnet|testnet|signet] status
-  cl.monitor.sh [mainnet|testnet|signet] config
-  cl.monitor.sh [mainnet|testnet|signet] info
-  cl.monitor.sh [mainnet|testnet|signet] wallet
-  + ./cl-plugin.backup.sh -h
+    + ./cl.monitor.sh -h
+    monitor and troubleshot the c-lightning network
+    cl.monitor.sh [mainnet|testnet|signet] status
+    cl.monitor.sh [mainnet|testnet|signet] config
+    cl.monitor.sh [mainnet|testnet|signet] info
+    cl.monitor.sh [mainnet|testnet|signet] wallet
+    + ./cl-plugin.backup.sh -h
 
-  Install the backup plugin for Core Lightning
-  Replicates the lightningd.sqlite3 database on the SDcard
+    Install the backup plugin for Core Lightning
+    Replicates the lightningd.sqlite3 database on the SDcard
 
-  Usage:
-  cl-plugin.backup.sh [on|off] [testnet|mainnet|signet]
-  cl-plugin.backup.sh [restore] [testnet|mainnet|signet] [force]
-  cl-plugin.backup.sh [backup-compact] [testnet|mainnet|signet]
+    Usage:
+    cl-plugin.backup.sh [on|off] [testnet|mainnet|signet]
+    cl-plugin.backup.sh [restore] [testnet|mainnet|signet] [force]
+    cl-plugin.backup.sh [backup-compact] [testnet|mainnet|signet]
 
-  https://github.com/lightningd/plugins/tree/master/backup
+    https://github.com/lightningd/plugins/tree/master/backup
 
-  + ./cl-plugin.clboss.sh -h
+    + ./cl-plugin.clboss.sh -h
 
-  Install or remove the CLBOSS Core Lightning plugin
-  version: v0.13A
-  Usage:
-  cl-plugin.clboss.sh [on|off] [testnet|mainnet|signet]
-  cl-plugin.clboss.sh [info]
+    Install or remove the CLBOSS Core Lightning plugin
+    version: v0.13A
+    Usage:
+    cl-plugin.clboss.sh [on|off] [testnet|mainnet|signet]
+    cl-plugin.clboss.sh [info]
 
-  + ./cl-plugin.cln-grpc.sh -h
+    + ./cl-plugin.cln-grpc.sh -h
 
-  Install the cln-grpc plugin for CLN
-  Usage:
-  cl-plugin.cln-grpc.sh install - called by build_sdcard.sh
-  cl-plugin.cln-grpc.sh on <testnet|mainnet|signet>
-  cl-plugin.cln-grpc.sh off <testnet|mainnet|signet> <purge>
-  cl-plugin.cln-grpc.sh status <testnet|mainnet|signet>
-  cl-plugin.cln-grpc.sh update <source>
+    Install the cln-grpc plugin for CLN
+    Usage:
+    cl-plugin.cln-grpc.sh install - called by build_sdcard.sh
+    cl-plugin.cln-grpc.sh on <testnet|mainnet|signet>
+    cl-plugin.cln-grpc.sh off <testnet|mainnet|signet> <purge>
+    cl-plugin.cln-grpc.sh status <testnet|mainnet|signet>
+    cl-plugin.cln-grpc.sh update <source>
 
-  + ./cl-plugin.feeadjuster.sh -h
+    + ./cl-plugin.feeadjuster.sh -h
 
-  Install the feeadjuster plugin for Core Lightning
-  Usage:
-  cl-plugin.feeadjuster.sh [on|off] <testnet|mainnet|signet>
+    Install the feeadjuster plugin for Core Lightning
+    Usage:
+    cl-plugin.feeadjuster.sh [on|off] <testnet|mainnet|signet>
 
-  + ./cl-plugin.http.sh -h
+    + ./cl-plugin.http.sh -h
 
-  Install, remove, connect the c-lightning-http-plugin
-  version: 1dbb6537e0ec5fb9b8edde10db6b4cc613ccdb19
-  Implemented for mainnet only.
-  Usage:
-  cl-plugin.http.sh [on|off|connect] <norestart>
+    Install, remove, connect the c-lightning-http-plugin
+    version: 1dbb6537e0ec5fb9b8edde10db6b4cc613ccdb19
+    Implemented for mainnet only.
+    Usage:
+    cl-plugin.http.sh [on|off|connect] <norestart>
 
-  + ./cl-plugin.sparko.sh -h
+    + ./cl-plugin.sparko.sh -h
 
-  Install, remove, connect or get info about the Sparko plugin for Core Lightning
-  version: v2.8
-  Usage:
-  cl-plugin.sparko.sh [on|off|menu|connect] [testnet|mainnet|signet] [norestart]
+    Install, remove, connect or get info about the Sparko plugin for Core Lightning
+    version: v2.8
+    Usage:
+    cl-plugin.sparko.sh [on|off|menu|connect] [testnet|mainnet|signet] [norestart]
 
-  + ./cl-plugin.standard-python.sh -h
+    + ./cl-plugin.standard-python.sh -h
 
-  Install and show the output of the chosen plugin for Core Lightning
-  Usage:
-  cl-plugin.standard-python.sh on [plugin-name] <testnet|mainnet|signet> <persist|runonce>
+    Install and show the output of the chosen plugin for Core Lightning
+    Usage:
+    cl-plugin.standard-python.sh on [plugin-name] <testnet|mainnet|signet> <persist|runonce>
 
-  tested plugins:
-  summary | helpme | feeadjuster | paytest
+    tested plugins:
+    summary | helpme | feeadjuster | paytest
 
-  find more at:
-  https://github.com/lightningd/plugins
+    find more at:
+    https://github.com/lightningd/plugins
 
-  + ./cl-plugin.summary.sh -h
+    + ./cl-plugin.summary.sh -h
 
-  Install and show the output if the summary plugin forCore Lightning
-  Usage:
-  cl-plugin.summary.sh [testnet|mainnet|signet] [runonce]
+    Install and show the output if the summary plugin forCore Lightning
+    Usage:
+    cl-plugin.summary.sh [testnet|mainnet|signet] [runonce]
 
-  + ./cl-plugin.watchtower-client.sh -h
+    + ./cl-plugin.watchtower-client.sh -h
 
-  Install the rust-teos watchtower-client plugin for CLN
-  Usage:
-  cl-plugin.watchtower-client.sh on <testnet|mainnet|signet>
-  cl-plugin.watchtower-client.sh off <testnet|mainnet|signet> <purge>
-  cl-plugin.watchtower-client.sh info
+    Install the rust-teos watchtower-client plugin for CLN
+    Usage:
+    cl-plugin.watchtower-client.sh on <testnet|mainnet|signet>
+    cl-plugin.watchtower-client.sh off <testnet|mainnet|signet> <purge>
+    cl-plugin.watchtower-client.sh info
 
-  + ./cl.rest.sh -h
+    + ./cl.rest.sh -h
 
-  Core-Lightning-REST install script
-  The default version is: v0.9.0
-  mainnet | testnet | signet instances can run parallel
+    Core-Lightning-REST install script
+    The default version is: v0.9.0
+    mainnet | testnet | signet instances can run parallel
 
-  Usage:
-  cl.rest.sh [on|off|connect] <mainnet|testnet|signet> [?key-value]
+    Usage:
+    cl.rest.sh [on|off|connect] <mainnet|testnet|signet> [?key-value]
 
-  + ./cl.setname.sh -h
+    + ./cl.setname.sh -h
 
-  Config script to set the alias of the Core Lightning node
-  cl.setname.sh [mainnet|testnet|signet] [?newName]
+    Config script to set the alias of the Core Lightning node
+    cl.setname.sh [mainnet|testnet|signet] [?newName]
 
-  + ./cl.spark.sh -h
+    + ./cl.spark.sh -h
 
-  Install, remove or get info about the Spark Wallet for Core Lightning
-  version: v0.3.1
-  Usage:
-  cl.spark.sh [on|off|menu] <testnet|mainnet|signet>
+    Install, remove or get info about the Spark Wallet for Core Lightning
+    version: v0.3.1
+    Usage:
+    cl.spark.sh [on|off|menu] <testnet|mainnet|signet>
 
-  + ./cl.update.sh -h
+    + ./cl.update.sh -h
 
-  Interim optional Core Lightning updates between RaspiBlitz releases.
-  cl.update.sh [info|verified|reckless]
-  info -> get actual state and possible actions
-  verified -> only do recommended updates by RaspiBlitz team
-    binary will be checked by signature and checksum
-  reckless -> if you just want to update to the latest release
-    published on Core Lightning GitHub releases (RC or final) without any
-    testing or security checks.
-
-  ```
+    Interim optional Core Lightning updates between RaspiBlitz releases.
+    cl.update.sh [info|verified|reckless]
+    info -> get actual state and possible actions
+    verified -> only do recommended updates by RaspiBlitz team
+        binary will be checked by signature and checksum
+    reckless -> if you just want to update to the latest release
+        published on Core Lightning GitHub releases (RC or final) without any
+        testing or security checks.
+    ```
 
 ## All possible config options
   *  can be shown by running:
   `lightningd --help`
   * To persist the setings place the options in the config file without the `--` and restart lightningd
-  ```
-  Usage: lightningd
-  A bitcoin lightning daemon (default values shown for network: bitcoin).
-  --conf=<file>                                     Specify configuration file
-  --lightning-dir=<dir>                             Set base directory: network-specific subdirectory is under here (default: "/home/admin/.lightning")
-  --network <arg>                                   Select the network parameters (bitcoin, testnet, signet, regtest, litecoin or litecoin-testnet) (default: bitcoin)
-  --mainnet                                         Alias for --network=bitcoin
-  --testnet                                         Alias for --network=testnet
-  --signet                                          Alias for --network=signet
-  --allow-deprecated-apis <arg>                     Enable deprecated options, JSONRPC commands, fields, etc. (default: true)
-  --rpc-file <arg>                                  Set JSON-RPC socket (or /dev/tty) (default: "lightning-rpc")
-  --plugin <arg>                                    Add a plugin to be run (can be used multiple times)
-  --plugin-dir <arg>                                Add a directory to load plugins from (can be used multiple times)
-  --clear-plugins                                   Remove all plugins added before this option
-  --disable-plugin <arg>                            Disable a particular plugin by filename/name
-  --important-plugin <arg>                          Add an important plugin to be run (can be used multiple times). Die if the plugin dies.
-  --always-use-proxy <arg>                          Use the proxy always (default: false)
-  --daemon                                          Run in the background, suppress stdout/stderr
-  --wallet <arg>                                    Location of the wallet database.
-  --large-channels|--wumbo                          Allow channels larger than 0.16777215 BTC
-  --experimental-dual-fund                          experimental: Advertise dual-funding and allow peers to establish channels via v2 channel open protocol.
-  --experimental-onion-messages                     EXPERIMENTAL: enable send, receive and relay of onion messages and blinded payments
-  --experimental-offers                             EXPERIMENTAL: enable send and receive of offers (also sets experimental-onion-messages)
-  --experimental-shutdown-wrong-funding             EXPERIMENTAL: allow shutdown with alternate txids
-  --announce-addr-dns <arg>                         Use DNS entries in --announce-addr and --addr (not widely supported!) (default: false)
-  --help|-h                                         Print this message.
-  --rgb <arg>                                       RRGGBB hex color for node
-  --alias <arg>                                     Up to 32-byte alias for node
-  --pid-file=<file>                                 Specify pid file (default: "/home/admin/.lightning/lightningd-bitcoin.pid")
-  --ignore-fee-limits <arg>                         (DANGEROUS) allow peer to set any feerate (default: false)
-  --watchtime-blocks <arg>                          Blocks before peer can unilaterally spend funds (default: 144)
-  --max-locktime-blocks <arg>                       Maximum blocks funds may be locked for (default: 2016)
-  --funding-confirms <arg>                          Confirmations required for funding transaction (default: 3)
-  --cltv-delta <arg>                                Number of blocks for cltv_expiry_delta (default: 34)
-  --cltv-final <arg>                                Number of blocks for final cltv_expiry (default: 18)
-  --commit-time=<millseconds>                       Time after changes before sending out COMMIT (default: 10)
-  --fee-base <arg>                                  Millisatoshi minimum to charge for HTLC (default: 1000)
-  --rescan <arg>                                    Number of blocks to rescan from the current head, or absolute blockheight if negative (default: 15)
-  --fee-per-satoshi <arg>                           Microsatoshi fee for every satoshi in HTLC (default: 10)
-  --htlc-minimum-msat <arg>                         The default minimal value an HTLC must carry in order to be forwardable for new channels
-  --htlc-maximum-msat <arg>                         The default maximal value an HTLC must carry in order to be forwardable for new channel
-  --max-concurrent-htlcs <arg>                      Number of HTLCs one channel can handle concurrently. Should be between 1 and 483 (default: 30)
-  --max-dust-htlc-exposure-msat <arg>               Max HTLC amount that can be trimmed
-  --min-capacity-sat <arg>                          Minimum capacity in satoshis for accepting channels (default: 10000)
-  --addr <arg>                                      Set an IP address (v4 or v6) to listen on and announce to the network for incoming connections
-  --bind-addr <arg>                                 Set an IP address (v4 or v6) to listen on, but not announce
-  --announce-addr <arg>                             Set an IP address (v4 or v6) or .onion v3 to announce, but not listen on
-  --disable-ip-discovery                            Turn off announcement of discovered public IPs
-  --offline                                         Start in offline-mode (do not automatically reconnect and do not accept incoming connections)
-  --autolisten <arg>                                If true, listen on default port and announce if it seems to be a public interface (default: true)
-  --dev-allowdustreserve <arg>                      If true, we allow the `fundchannel` RPC command and the `openchannel` plugin hook to set a reserve that is below the dust limit.
-                                                     (default: false)
-  --proxy <arg>                                     Set a socks v5 proxy IP address and port
-  --tor-service-password <arg>                      Set a Tor hidden service password
-  --accept-htlc-tlv-types <arg>                     Comma separated list of extra HTLC TLV types to accept.
-  --disable-dns                                     Disable DNS lookups of peers
-  --encrypted-hsm                                   Set the password to encrypt hsm_secret with. If no password is passed through command line, you will be prompted to enter it.
-  --rpc-file-mode <arg>                             Set the file mode (permissions) for the JSON-RPC socket (default: "0600")
-  --force-feerates <arg>                            Set testnet/regtest feerates in sats perkw, opening/mutual_close/unlateral_close/delayed_to_us/htlc_resolution/penalty: if fewer
-                                                    specified, last number applies to remainder
-  --subdaemon <arg>                                 Arg specified as SUBDAEMON:PATH. Specifies an alternate subdaemon binary. If the supplied path is relative the subdaemon binary is
-                                                    found in the working directory. This option may be specified multiple times. For example, --subdaemon=hsmd:remote_signer would use
-                                                    a hypothetical remote signing subdaemon.
-  --experimental-websocket-port <arg>               experimental: alternate port for peers to connect using WebSockets (RFC6455)
-  --database-upgrade <arg>                          Set to true to allow database upgrades even on non-final releases (WARNING: you won't be able to downgrade!)
-  --log-level <arg>                                 log level (io, debug, info, unusual, broken) [:prefix] (default: info)
-  --log-timestamps <arg>                            prefix log messages with timestamp (default: true)
-  --log-prefix <arg>                                log prefix (default: )
-  --log-file=<file>                                 Also log to file (- for stdout)
-  --version|-V                                      Print version and exit
-  --fetchinvoice-noconnect                          Don't try to connect directly to fetch an invoice.
-  --autocleaninvoice-cycle <arg>                    Perform cleanup of expired invoices every given seconds, or do not autoclean if 0
-  --autocleaninvoice-expired-by <arg>               If expired invoice autoclean enabled, invoices that have expired for at least this given seconds are cleaned
-  --autoclean-cycle <arg>                           Perform cleanup every given seconds
-  --autoclean-succeededforwards-age <arg>           How old do successful forwards have to be before deletion (0 = never)
-  --autoclean-failedforwards-age <arg>              How old do failed forwards have to be before deletion (0 = never)
-  --autoclean-succeededpays-age <arg>               How old do successful pays have to be before deletion (0 = never)
-  --autoclean-failedpays-age <arg>                  How old do failed pays have to be before deletion (0 = never)
-  --autoclean-paidinvoices-age <arg>                How old do paid invoices have to be before deletion (0 = never)
-  --autoclean-expiredinvoices-age <arg>             How old do expired invoices have to be before deletion (0 = never)
-  --bitcoin-datadir <arg>                           -datadir arg for bitcoin-cli
-  --bitcoin-cli <arg>                               bitcoin-cli pathname
-  --bitcoin-rpcuser <arg>                           bitcoind RPC username
-  --bitcoin-rpcpassword <arg>                       bitcoind RPC password
-  --bitcoin-rpcconnect <arg>                        bitcoind RPC host to connect to
-  --bitcoin-rpcport <arg>                           bitcoind RPC host's port
-  --bitcoin-retry-timeout <arg>                     how long to keep retrying to contact bitcoind before fatally exiting
-  --commit-fee <arg>                                Percentage of fee to request for their commitment
-  --disable-mpp                                     Disable multi-part payments.
-  --funder-policy <arg>                             Policy to use for dual-funding requests. [match, available, fixed]
-  --funder-policy-mod <arg>                         Percent to apply policy at (match/available); or amount to fund (fixed)
-  --funder-min-their-funding <arg>                  Minimum funding peer must open with to activate our policy
-  --funder-max-their-funding <arg>                  Maximum funding peer may open with to activate our policy
-  --funder-per-channel-min <arg>                    Minimum funding we'll add to a channel. If we can't meet this, we don't fund
-  --funder-per-channel-max <arg>                    Maximum funding we'll add to a channel. We cap all contributions to this
-  --funder-reserve-tank <arg>                       Amount of funds we'll always leave available.
-  --funder-fuzz-percent <arg>                       Percent to fuzz the policy contribution by. Defaults to 0%. Max is 100%
-  --funder-fund-probability <arg>                   Percent of requests to consider. Defaults to 100%. Setting to 0% will disable dual-funding
-  --funder-lease-requests-only <arg>                Only fund lease requests. Defaults to true if channel lease rates are being advertised
-  --lease-fee-base-sat <arg>                        Channel lease rates, base fee for leased funds, in satoshi.
-  --lease-fee-base-msat <arg>                       Channel lease rates, base fee for leased funds, in satoshi.
-  --lease-fee-basis <arg>                           Channel lease rates, basis charged for leased funds (per 10,000 satoshi.)
-  --lease-funding-weight <arg>                      Channel lease rates, weight we'll ask opening peer to pay for in funding transaction
-  --channel-fee-max-base-msat <arg>                 Channel lease rates, maximum channel fee base we'll charge for funds routed through a leased channel.
-  --channel-fee-max-proportional-thousandths <arg>  Channel lease rates, maximum proportional fee (in thousandths, or ppt) we'll charge for funds routed through a leased channel.
-                                                    Note: 1ppt = 1,000ppm
-  --bookkeeper-dir <arg>                            Location for bookkeeper records.
-  --bookkeeper-db <arg>                             Location of the bookkeeper database
-  ```
+    ```
+    Usage: lightningd
+    A bitcoin lightning daemon (default values shown for network: bitcoin).
+    --conf=<file>                                     Specify configuration file
+    --lightning-dir=<dir>                             Set base directory: network-specific subdirectory is under here (default: "/home/admin/.lightning")
+    --network <arg>                                   Select the network parameters (bitcoin, testnet, signet, regtest, litecoin or litecoin-testnet) (default: bitcoin)
+    --mainnet                                         Alias for --network=bitcoin
+    --testnet                                         Alias for --network=testnet
+    --signet                                          Alias for --network=signet
+    --allow-deprecated-apis <arg>                     Enable deprecated options, JSONRPC commands, fields, etc. (default: true)
+    --rpc-file <arg>                                  Set JSON-RPC socket (or /dev/tty) (default: "lightning-rpc")
+    --plugin <arg>                                    Add a plugin to be run (can be used multiple times)
+    --plugin-dir <arg>                                Add a directory to load plugins from (can be used multiple times)
+    --clear-plugins                                   Remove all plugins added before this option
+    --disable-plugin <arg>                            Disable a particular plugin by filename/name
+    --important-plugin <arg>                          Add an important plugin to be run (can be used multiple times). Die if the plugin dies.
+    --always-use-proxy <arg>                          Use the proxy always (default: false)
+    --daemon                                          Run in the background, suppress stdout/stderr
+    --wallet <arg>                                    Location of the wallet database.
+    --large-channels|--wumbo                          Allow channels larger than 0.16777215 BTC
+    --experimental-dual-fund                          experimental: Advertise dual-funding and allow peers to establish channels via v2 channel open protocol.
+    --experimental-onion-messages                     EXPERIMENTAL: enable send, receive and relay of onion messages and blinded payments
+    --experimental-offers                             EXPERIMENTAL: enable send and receive of offers (also sets experimental-onion-messages)
+    --experimental-shutdown-wrong-funding             EXPERIMENTAL: allow shutdown with alternate txids
+    --announce-addr-dns <arg>                         Use DNS entries in --announce-addr and --addr (not widely supported!) (default: false)
+    --help|-h                                         Print this message.
+    --rgb <arg>                                       RRGGBB hex color for node
+    --alias <arg>                                     Up to 32-byte alias for node
+    --pid-file=<file>                                 Specify pid file (default: "/home/admin/.lightning/lightningd-bitcoin.pid")
+    --ignore-fee-limits <arg>                         (DANGEROUS) allow peer to set any feerate (default: false)
+    --watchtime-blocks <arg>                          Blocks before peer can unilaterally spend funds (default: 144)
+    --max-locktime-blocks <arg>                       Maximum blocks funds may be locked for (default: 2016)
+    --funding-confirms <arg>                          Confirmations required for funding transaction (default: 3)
+    --cltv-delta <arg>                                Number of blocks for cltv_expiry_delta (default: 34)
+    --cltv-final <arg>                                Number of blocks for final cltv_expiry (default: 18)
+    --commit-time=<millseconds>                       Time after changes before sending out COMMIT (default: 10)
+    --fee-base <arg>                                  Millisatoshi minimum to charge for HTLC (default: 1000)
+    --rescan <arg>                                    Number of blocks to rescan from the current head, or absolute blockheight if negative (default: 15)
+    --fee-per-satoshi <arg>                           Microsatoshi fee for every satoshi in HTLC (default: 10)
+    --htlc-minimum-msat <arg>                         The default minimal value an HTLC must carry in order to be forwardable for new channels
+    --htlc-maximum-msat <arg>                         The default maximal value an HTLC must carry in order to be forwardable for new channel
+    --max-concurrent-htlcs <arg>                      Number of HTLCs one channel can handle concurrently. Should be between 1 and 483 (default: 30)
+    --max-dust-htlc-exposure-msat <arg>               Max HTLC amount that can be trimmed
+    --min-capacity-sat <arg>                          Minimum capacity in satoshis for accepting channels (default: 10000)
+    --addr <arg>                                      Set an IP address (v4 or v6) to listen on and announce to the network for incoming connections
+    --bind-addr <arg>                                 Set an IP address (v4 or v6) to listen on, but not announce
+    --announce-addr <arg>                             Set an IP address (v4 or v6) or .onion v3 to announce, but not listen on
+    --disable-ip-discovery                            Turn off announcement of discovered public IPs
+    --offline                                         Start in offline-mode (do not automatically reconnect and do not accept incoming connections)
+    --autolisten <arg>                                If true, listen on default port and announce if it seems to be a public interface (default: true)
+    --dev-allowdustreserve <arg>                      If true, we allow the `fundchannel` RPC command and the `openchannel` plugin hook to set a reserve that is below the dust limit.
+                                                        (default: false)
+    --proxy <arg>                                     Set a socks v5 proxy IP address and port
+    --tor-service-password <arg>                      Set a Tor hidden service password
+    --accept-htlc-tlv-types <arg>                     Comma separated list of extra HTLC TLV types to accept.
+    --disable-dns                                     Disable DNS lookups of peers
+    --encrypted-hsm                                   Set the password to encrypt hsm_secret with. If no password is passed through command line, you will be prompted to enter it.
+    --rpc-file-mode <arg>                             Set the file mode (permissions) for the JSON-RPC socket (default: "0600")
+    --force-feerates <arg>                            Set testnet/regtest feerates in sats perkw, opening/mutual_close/unlateral_close/delayed_to_us/htlc_resolution/penalty: if fewer
+                                                        specified, last number applies to remainder
+    --subdaemon <arg>                                 Arg specified as SUBDAEMON:PATH. Specifies an alternate subdaemon binary. If the supplied path is relative the subdaemon binary is
+                                                        found in the working directory. This option may be specified multiple times. For example, --subdaemon=hsmd:remote_signer would use
+                                                        a hypothetical remote signing subdaemon.
+    --experimental-websocket-port <arg>               experimental: alternate port for peers to connect using WebSockets (RFC6455)
+    --database-upgrade <arg>                          Set to true to allow database upgrades even on non-final releases (WARNING: you won't be able to downgrade!)
+    --log-level <arg>                                 log level (io, debug, info, unusual, broken) [:prefix] (default: info)
+    --log-timestamps <arg>                            prefix log messages with timestamp (default: true)
+    --log-prefix <arg>                                log prefix (default: )
+    --log-file=<file>                                 Also log to file (- for stdout)
+    --version|-V                                      Print version and exit
+    --fetchinvoice-noconnect                          Don't try to connect directly to fetch an invoice.
+    --autocleaninvoice-cycle <arg>                    Perform cleanup of expired invoices every given seconds, or do not autoclean if 0
+    --autocleaninvoice-expired-by <arg>               If expired invoice autoclean enabled, invoices that have expired for at least this given seconds are cleaned
+    --autoclean-cycle <arg>                           Perform cleanup every given seconds
+    --autoclean-succeededforwards-age <arg>           How old do successful forwards have to be before deletion (0 = never)
+    --autoclean-failedforwards-age <arg>              How old do failed forwards have to be before deletion (0 = never)
+    --autoclean-succeededpays-age <arg>               How old do successful pays have to be before deletion (0 = never)
+    --autoclean-failedpays-age <arg>                  How old do failed pays have to be before deletion (0 = never)
+    --autoclean-paidinvoices-age <arg>                How old do paid invoices have to be before deletion (0 = never)
+    --autoclean-expiredinvoices-age <arg>             How old do expired invoices have to be before deletion (0 = never)
+    --bitcoin-datadir <arg>                           -datadir arg for bitcoin-cli
+    --bitcoin-cli <arg>                               bitcoin-cli pathname
+    --bitcoin-rpcuser <arg>                           bitcoind RPC username
+    --bitcoin-rpcpassword <arg>                       bitcoind RPC password
+    --bitcoin-rpcconnect <arg>                        bitcoind RPC host to connect to
+    --bitcoin-rpcport <arg>                           bitcoind RPC host's port
+    --bitcoin-retry-timeout <arg>                     how long to keep retrying to contact bitcoind before fatally exiting
+    --commit-fee <arg>                                Percentage of fee to request for their commitment
+    --disable-mpp                                     Disable multi-part payments.
+    --funder-policy <arg>                             Policy to use for dual-funding requests. [match, available, fixed]
+    --funder-policy-mod <arg>                         Percent to apply policy at (match/available); or amount to fund (fixed)
+    --funder-min-their-funding <arg>                  Minimum funding peer must open with to activate our policy
+    --funder-max-their-funding <arg>                  Maximum funding peer may open with to activate our policy
+    --funder-per-channel-min <arg>                    Minimum funding we'll add to a channel. If we can't meet this, we don't fund
+    --funder-per-channel-max <arg>                    Maximum funding we'll add to a channel. We cap all contributions to this
+    --funder-reserve-tank <arg>                       Amount of funds we'll always leave available.
+    --funder-fuzz-percent <arg>                       Percent to fuzz the policy contribution by. Defaults to 0%. Max is 100%
+    --funder-fund-probability <arg>                   Percent of requests to consider. Defaults to 100%. Setting to 0% will disable dual-funding
+    --funder-lease-requests-only <arg>                Only fund lease requests. Defaults to true if channel lease rates are being advertised
+    --lease-fee-base-sat <arg>                        Channel lease rates, base fee for leased funds, in satoshi.
+    --lease-fee-base-msat <arg>                       Channel lease rates, base fee for leased funds, in satoshi.
+    --lease-fee-basis <arg>                           Channel lease rates, basis charged for leased funds (per 10,000 satoshi.)
+    --lease-funding-weight <arg>                      Channel lease rates, weight we'll ask opening peer to pay for in funding transaction
+    --channel-fee-max-base-msat <arg>                 Channel lease rates, maximum channel fee base we'll charge for funds routed through a leased channel.
+    --channel-fee-max-proportional-thousandths <arg>  Channel lease rates, maximum proportional fee (in thousandths, or ppt) we'll charge for funds routed through a leased channel.
+                                                        Note: 1ppt = 1,000ppm
+    --bookkeeper-dir <arg>                            Location for bookkeeper records.
+    --bookkeeper-db <arg>                             Location of the bookkeeper database
+    ```
