@@ -558,60 +558,60 @@ Will need to pay through a peer which supports the onion messages which means yo
 
 ### Emergency recovery in case of lost channel states
 
-* manpage: <https://lightning.readthedocs.io/lightning-emergencyrecover.7.html>
 * blogpost: <https://blog.blockstream.com/core-lightning-v0-12-0/>
 * demo video: https://youtu.be/zBmEieZuS8Q
+* manpage: <https://lightning.readthedocs.io/lightning-emergencyrecover.7.html>
    ```
    lightning-cli help emergencyrecover
    ```
 
-1. [Restore the hsm_secret (onchain wallet keys) from seed](#recover-from-a-seed) (or HEX)
+1. [Restore the hsm_secret (onchain wallet keys) from seed](#recover-from-a-seed) (or hex).
+   * There is no need to wait for the (few hours) rescan to finish, but can follow it any time with:
+    ```
+    cllog
+    ```
+1. Upload and copy the emergency.recover file in place
 
-2. Best to wait for the rescan to finish. Can follow with:
-   ```
-   cllog
-   ```
-3. Upload and copy the emergency.recover file in place
+    * upload the file with scp:
+    ```
+    scp hsm_secret emergency.recover admin@RASPIBLITZ_IP:~/
+    ```
+    * copy it from `/home/admin/`:
+    ```
+    sudo cp /home/admin/emergency.recover /home/bitcoin/.lightning/bitcoin/
+    sudo chown bitcoin:bitcoin /home/bitcoin/.lightning/bitcoin/emergency.recover
+    ```
+1. Recover
 
-* upload the file with scp
-  ```
-  scp hsm_secret emergency.recover admin@RASPIBLITZ_IP:~/
-  ```
-* copy it from `/home/admin/`
-  ```
-  sudo cp /home/admin/emergency.recover /home/bitcoin/.lightning/bitcoin/
-  sudo chown bitcoin:bitcoin /home/bitcoin/.lightning/bitcoin/emergency.recover
-  ```
-4. emergencyrecover
-
-* run (as admin or bitcoin user):
-  ```
-  lightning-cli emergencyrecover
-  ```
-  a list of channelID-s should be returned if it worked:
-  ```
-  {
-     "stubs": [
-        "................",
-     ]
-  }
-  ```
-5. See more data about the recovered channels with:
+    * run (as admin or bitcoin user):
+    ```
+    lightning-cli emergencyrecover
+    ```
+    * a list of channelID-s should be returned if it worked:
+    ```
+    {
+       "stubs": [
+          "................",
+       ]
+    }
+    ```
+1. See more data about the recovered funds and channels
    ```
    lightning-cli listfunds
+   lightning-cli listpeers
    ```
-   List the funding txids:
+   * List the funding txid-s:
    ```
    lightning-cli listfunds | jq -r '.channels[] | .funding_txid'
    ```
-   Can check the txid-s in a mempool explorer. If one is spent that channel is already closed
-
+   Can check the txid-s in a mempool explorer. If one is spent that channel is already closed.
 
 ### Restore a CLN node from the database backup on the SDcard
 * https://gist.github.com/openoms/3516cd8f393d69d52f858c3d47c9e469
 
 ### Rescan the chain after restoring a used CLN wallet
-
+* automatically done when using `SEEDRESTORE`
+* controlled by the entry in the cln config file
 * can use the `menu` -> `REPAIR` -> `REPAIR-CL` -> `RESCAN` option
 * or follow the manual process:
   <https://lightning.readthedocs.io/FAQ.html#rescanning-the-block-chain-for-lost-utxos>
