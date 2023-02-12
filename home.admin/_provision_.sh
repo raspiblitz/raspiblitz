@@ -643,6 +643,15 @@ else
   echo "Provisioning Balance of Satoshis - keep default" >> ${logFile}
 fi
 
+# LNPROXY
+if [ "${lnproxy}" = "on" ]; then
+  echo "Provisioning lnproxy - run config script" >> ${logFile}
+  /home/admin/_cache.sh set message "Setup lnproxy"
+  sudo -u admin /home/admin/config.scripts/bonus.lnproxy.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning lnproxy - keep default" >> ${logFile}
+fi
+
 # thunderhub
 if [ "${thunderhub}" = "on" ]; then
   echo "Provisioning ThunderHub - run config script" >> ${logFile}
