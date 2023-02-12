@@ -204,7 +204,6 @@ EOF
   sudo nginx -t
   sudo systemctl reload nginx
 
-  sudo ufw allow 4747 comment lnproxy-HTTP
   sudo ufw allow 4748 comment lnproxy-webui-HTTP
   sudo ufw allow 4749 comment lnproxy-HTTPS
 
@@ -214,9 +213,11 @@ EOF
   /home/admin/config.scripts/blitz.conf.sh set lnproxy "on"
 
   echo "# API:"
-  echo "curl http://${localip}:4747/{your_invoice}?routing_msat={routing_budget}"
+  echo "curl http://127.0.0.1:4747/{your_invoice}?routing_msat={routing_budget}"
+  echo "curl -k https://${localip}:4749/api/{your_invoice}?routing_msat={routing_budget}"
   echo "# WebUI:"
   echo "http://${localip}:4748"
+  echo "https://${localip}:4749"
   echo "# More info at:"
   echo "https://github.com/lnproxy/lnproxy"
 
@@ -231,15 +232,14 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # remove systemd services
   sudo systemctl disable --now lnproxy
-  /etc/systemd/system/lnproxy.service
+  sudo rm -f /etc/systemd/system/lnproxy.service
   sudo systemctl disable --now lnproxy-webui
-  /etc/systemd/system/lnproxy-webui.service
+  sudo rm -f /etc/systemd/system/lnproxy-webui.service
 
   # remove Tor service
   /home/admin/config.scripts/tor.onion-service.sh off lnproxy
 
   # close ports on firewall
-  sudo ufw delete allow 4747
   sudo ufw delete allow 4748
   sudo ufw delete allow 4749
 
