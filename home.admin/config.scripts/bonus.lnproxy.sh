@@ -38,7 +38,7 @@ To use the API:
 curl -k https://${localip}:4749/api/{invoice}?routing_msat={budget}\n
 The Tor Hidden Service address to share for using the API:
 ${torAddress}/api
-" 19 67
+" 20 70
       sudo /home/admin/config.scripts/blitz.display.sh hide
     else
       # Info without Tor
