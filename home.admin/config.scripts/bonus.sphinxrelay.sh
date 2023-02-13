@@ -132,8 +132,7 @@ MAINMENU > SUBSCRIBE > IP2TOR > SPHINX"
 BUT TO MAKE THIS WORK:\n
 It needs an additional Domain with LetsEncrypt certificate for HTTPS: Go MAINMENU > SUBSCRIBE and add LetsEncrypt HTTPS Domain\n
 (or cancel the IP2Tor & just use sphinx within local network)"
-    whiptail --title " Warning " \
-    --msgbox "${text}" 15 72
+    whiptail --title " Warning " --msgbox "${text}" 15 72
     exit 0
   fi
 
