@@ -132,6 +132,9 @@ fi
 if [ "${bos}" == "on" ]; then
   OPTIONS+=(BOS "Balance of Satoshis")
 fi
+if [ "${lnproxy}" == "on" ]; then
+  OPTIONS+=(LNPROXY "lnproxy server")
+fi
 if [ "${pyblock}" == "on" ]; then
   OPTIONS+=(PYBLOCK "PyBlock")
 fi
@@ -307,6 +310,9 @@ case $CHOICE in
             ;;
         BOS)
             sudo /home/admin/config.scripts/bonus.bos.sh menu
+            ;;
+        LNPROXY)
+            sudo /home/admin/config.scripts/bonus.lnproxy.sh menu
             ;;
 		    PYBLOCK)
             sudo /home/admin/config.scripts/bonus.pyblock.sh menu

@@ -19,6 +19,7 @@ if [ ${#jam} -eq 0 ]; then jam="off"; fi
 if [ ${#LNBits} -eq 0 ]; then LNBits="off"; fi
 if [ ${#mempoolExplorer} -eq 0 ]; then mempoolExplorer="off"; fi
 if [ ${#bos} -eq 0 ]; then bos="off"; fi
+if [ ${#lnproxy} -eq 0 ]; then lnproxy="off"; fi
 if [ ${#pyblock} -eq 0 ]; then pyblock="off"; fi
 if [ ${#thunderhub} -eq 0 ]; then thunderhub="off"; fi
 if [ ${#sphinxrelay} -eq 0 ]; then sphinxrelay="off"; fi
@@ -68,6 +69,7 @@ if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
   OPTIONS+=(la 'LND LIT (loop, pool, faraday)' ${lit})
   OPTIONS+=(gb 'LND LNDg (auto-rebalance, auto-fees)' ${lndg})
   OPTIONS+=(oa 'LND Balance of Satoshis' ${bos})
+  OPTIONS+=(lp 'LND lnproxy server' ${lnproxy})
   OPTIONS+=(ya 'LND PyBLOCK' ${pyblock})
   OPTIONS+=(ha 'LND ChannelTools (Fund Rescue)' ${chantools})
   OPTIONS+=(xa 'LND Sphinx-Relay' ${sphinxrelay})
@@ -337,6 +339,21 @@ if [ "${bos}" != "${choice}" ]; then
   fi
 else
   echo "Balance of Satoshis setting unchanged."
+fi
+
+# lnproxy process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "lp")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${lnproxy}" != "${choice}" ]; then
+  echo "lnproxy setting changed .."
+  anychange=1
+  sudo -u admin /home/admin/config.scripts/bonus.lnproxy.sh ${choice}
+  source /mnt/hdd/raspiblitz.conf
+  if [ "${lnproxy}" =  "on" ]; then
+    sudo -u admin /home/admin/config.scripts/bonus.lnproxy.sh menu
+  fi
+else
+  echo "lnproxy setting unchanged."
 fi
 
 # PyBLOCK process choice
