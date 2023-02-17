@@ -441,6 +441,7 @@ if [ "${clNode}" != "${choice}" ]; then
     fi
 
     # make sure that cln-grpc is on for the WebAPI
+    echo "# install the cln-grpc plugin"
     /home/admin/config.scripts/cl-plugin.cln-grpc.sh install
     /home/admin/config.scripts/cl-plugin.cln-grpc.sh on
 
