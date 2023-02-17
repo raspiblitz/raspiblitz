@@ -39,17 +39,14 @@ function install() {
 
   if [ $($lightningcli_alias plugin list 2>/dev/null | grep -c "${plugin}") -eq 0 ]; then
     echo "# Checking dependencies"
+    # upgrade pip
+    sudo pip3 install --upgrade pip
     # poetry
-    sudo -u bitcoin pip3 install --user poetry
-    if ! grep -Eq '^PATH="$HOME/.local/bin:$PATH"' /mnt/hdd/raspiblitz.conf; then
-      echo 'PATH="$HOME/.local/bin:$PATH"' | sudo tee -a /home/bitcoin/.profile
-    fi
-    export PATH="home/bitcoin/.local/bin:$PATH"
+    sudo -u bitcoin pip3 install --user poetry 1>/dev/null || exit 1
+
+    cd ${plugindir}/backup/ || exit 1
     sudo -u bitcoin /home/bitcoin/.local/bin/poetry install
-    if [ $(echo $PATH | grep -c "/home/bitcoin/.local/bin") -eq 0 ]; then
-      export PATH=$PATH:/home/bitcoin/.local/bin
-      echo "PATH=\$PATH:/home/bitcoin/.local/bin" | sudo tee -a /etc/profile
-    fi
+
     sudo chmod +x ${plugindir}/${plugin}/${plugin}.py
 
     # symlink to the default plugin dir
@@ -78,12 +75,13 @@ if [ "$1" = on ]; then
   fi
 
   # always re-init plugin
-  if sudo ls /home/bitcoin/.lightning/${CLNETWORK}/backup.lock; then
+  if sudo ls /home/bitcoin/.lightning/${CLNETWORK}/backup.lock 2>/dev/null; then
     sudo rm /home/bitcoin/.lightning/${CLNETWORK}/backup.lock
   fi
   # https://github.com/lightningd/plugins/tree/master/backup#setup
   echo "# Initialize the backup plugin"
-  sudo -u bitcoin /home/bitcoin/.local/bin/poetry run ${plugindir}/backup/backup-cli init --lightning-dir /home/bitcoin/.lightning/${CLNETWORK} \
+  cd ${plugindir}/backup/ || exit 1
+  sudo -u bitcoin /home/bitcoin/.local/bin/poetry run ./backup-cli init --lightning-dir /home/bitcoin/.lightning/${CLNETWORK} \
     file:///home/bitcoin/${netprefix}lightningd.sqlite3.backup
 
   if [ $(crontab -u admin -l | grep -c "backup-compact $CHAIN") -eq 0 ]; then
@@ -142,7 +140,8 @@ then
     fi
 
     # restore
-    sudo -u bitcoin /home/bitcoin/.local/bin/poetry run ${plugindir}/backup/backup-cli restore \
+    cd ${plugindir}/backup/ || exit 1
+    sudo -u bitcoin /home/bitcoin/.local/bin/poetry run ./backup-cli restore \
       file:///home/bitcoin/${netprefix}lightningd.sqlite3.backup \
       /home/bitcoin/.lightning/${CLNETWORK}/lightningd.sqlite3
 
