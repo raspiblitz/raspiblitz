@@ -43,7 +43,7 @@ function installDependencies() {
   sudo pip3 install --upgrade pip
   sudo -u bitcoin pip install mako
   # poetry
-  sudo -u bitcoin pip3 install --user poetry
+  sudo pip3 install poetry
   if ! grep -Eq '^PATH="$HOME/.local/bin:$PATH"' /home/bitcoin/.profile; then
     echo 'PATH="$HOME/.local/bin:$PATH"' | sudo tee -a /home/bitcoin/.profile
   fi

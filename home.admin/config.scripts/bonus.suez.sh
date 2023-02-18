@@ -35,7 +35,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   # poetry
   sudo pip3 install --upgrade pip
-  sudo -u bitcoin pip3 install --user poetry
+  sudo pip3 install poetry
 
   # download source code
   sudo -u bitcoin git clone https://github.com/prusnak/suez.git
@@ -75,7 +75,7 @@ if [ "$1" = "update" ]; then
   cd /home/bitcoin || exit 1
   # dependency
   sudo pip3 install --upgrade pip
-  sudo -u bitcoin pip3 install --user poetry
+  sudo pip3 install poetry
   # download source code
   if [ -d suez ]; then
     sudo -u bitcoin git clone https://github.com/prusnak/suez.git
