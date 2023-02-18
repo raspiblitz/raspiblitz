@@ -118,7 +118,7 @@ case $CHOICE in
         /home/admin/config.scripts/bonus.suez.sh on
       fi
       cd /home/bitcoin/suez || exit 1 
-      sudo -u bitcoin /home/bitcoin/.local/bin/poetry run ./suez \
+      sudo -u bitcoin poetry run ./suez \
         --client-args=-n=${CHAIN} \
         --client-args=--rpcserver=localhost:1${L2rpcportmod}009
       echo

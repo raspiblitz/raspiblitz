@@ -48,7 +48,7 @@ function installDependencies() {
     echo 'PATH="$HOME/.local/bin:$PATH"' | sudo tee -a /home/bitcoin/.profile
   fi
   export PATH="home/bitcoin/.local/bin:$PATH"
-  sudo -u bitcoin /home/bitcoin/.local/bin/poetry install
+  sudo -u bitcoin poetry install
 }
 
 function buildAndInstallCLbinaries() {
