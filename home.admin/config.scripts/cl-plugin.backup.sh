@@ -41,9 +41,9 @@ function install() {
     echo "# Checking dependencies"
     # upgrade pip
     sudo pip3 install --upgrade pip
+
     # poetry
     sudo -u bitcoin pip3 install --user poetry 1>/dev/null || exit 1
-
     cd ${plugindir}/backup/ || exit 1
     sudo -u bitcoin /home/bitcoin/.local/bin/poetry install
 
