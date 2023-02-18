@@ -37,7 +37,7 @@ function install() {
   sudo -u bitcoin git pull
   sudo -u bitcoin git reset --hard ${pinnedVersion} || exit 1
 
-  if [ $($lightningcli_alias plugin list 2>/dev/null | grep -c "${plugin}") -eq 0 ]; then
+  if [ $($lightningcli_alias plugin list 2>/dev/null | grep -c "/${plugin}") -eq 0 ]; then
     echo "# Checking dependencies"
     # upgrade pip
     sudo pip3 install --upgrade pip
