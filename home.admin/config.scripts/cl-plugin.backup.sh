@@ -16,7 +16,7 @@ function help() {
 }
 
 # https://github.com/lightningd/plugins/commits/master/backup
-pinnedVersion="f3d741e7afeb244f6807181332dfae94bc58c2b5"
+pinnedVersion="30003279e35e5931fc85d7e6211ea4de6f9554d7"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -42,8 +42,11 @@ function install() {
     # upgrade pip
     sudo pip3 install --upgrade pip
 
+    # pip dependencies
+    sudo -u bitcoin pip3 install pyln-client tqdm
+
     # poetry
-    sudo pip3 install poetry 1>/dev/null || exit 1
+    sudo pip3 install poetry || exit 1
     cd ${plugindir}/backup/ || exit 1
     sudo -u bitcoin poetry install
 
