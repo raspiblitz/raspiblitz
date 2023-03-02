@@ -3,9 +3,9 @@
 # Based on: https://gist.github.com/normandmickey/3f10fc077d15345fb469034e3697d0d0
 
 # https://github.com/dgarage/NBXplorer/tags
-NBXplorerVersion="v2.3.59"
+NBXplorerVersion="v2.3.62"
 # https://github.com/btcpayserver/btcpayserver/releases
-BTCPayVersion="v1.7.5"
+BTCPayVersion="v1.8.0"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -31,7 +31,7 @@ function NBXplorerConfig() {
     echo "# nbxplorermainnet database already exists"
   else
     echo "# Generate the database for nbxplorer"
-    sudo -u postgres psql -c "create database nbxplorermainnet;"
+    sudo -u postgres psql -c "CREATE DATABASE nbxplorermainnet TEMPLATE template0 LC_CTYPE 'C' LC_COLLATE 'C' ENCODING 'UTF8';"
     sudo -u postgres psql -c "create user nbxplorer with encrypted password 'raspiblitz';"
     sudo -u postgres psql -c "grant all privileges on database nbxplorermainnet to nbxplorer;"
   fi
@@ -68,7 +68,7 @@ function BtcPayConfig() {
       echo "# btcpaymainnet database already exists"
     else
       echo "# Generate the database for btcpay"
-      sudo -u postgres psql -c "create database btcpaymainnet;"
+      sudo -u postgres psql -c "CREATE DATABASE btcpaymainnet TEMPLATE template0 LC_CTYPE 'C' LC_COLLATE 'C' ENCODING 'UTF8';"
       sudo -u postgres psql -c "create user btcpay with encrypted password 'raspiblitz';"
       sudo -u postgres psql -c "grant all privileges on database btcpaymainnet to btcpay;"
     fi
@@ -696,6 +696,8 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     echo "# deleting data"
     sudo -u postgres psql -c "drop database nbxplorermainnet;"
     sudo -u postgres psql -c "drop user nbxplorer;"
+    sudo -u postgres psql -c "drop database btcpaymainnet;"
+    sudo -u postgres psql -c "drop user btcpay;"
     sudo rm -R /mnt/hdd/app-data/.btcpayserver/
   else
     echo "# keeping data"
