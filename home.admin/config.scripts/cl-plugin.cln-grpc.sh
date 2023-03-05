@@ -35,6 +35,8 @@ function buildGRPCplugin() {
       echo "# - install Core Lightning ..."
       /home/admin/config.scripts/cl.install.sh install || exit 1
     fi
+    echo "# install dependencies"
+    sudo apt-get install protobuf-compiler -y
     echo "# rust for cln-grpc, includes rustfmt"
     sudo -u bitcoin curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sudo -u bitcoin sh -s -- -y
     cd /home/bitcoin/lightning/plugins/grpc-plugin || exit 1
