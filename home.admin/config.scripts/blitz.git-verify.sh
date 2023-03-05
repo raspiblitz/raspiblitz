@@ -30,10 +30,9 @@ PGPsigner="$1"
 PGPpubkeyLink="$2"
 PGPpubkeyFingerprint="$3"
 
-
 wget -O /var/cache/raspiblitz/pgp_keys_${PGPsigner}.asc "${PGPpubkeyLink}"
 gpg --import --import-options show-only /var/cache/raspiblitz/pgp_keys_${PGPsigner}.asc
-fingerprint=$(gpg --show-keys /var/cache/raspiblitz/pgp_keys_${PGPsigner}.asc 2>/dev/null | grep "${PGPpubkeyFingerprint}" -c)
+fingerprint=$(gpg --show-keys --keyid-format LONG /var/cache/raspiblitz/pgp_keys_${PGPsigner}.asc 2>/dev/null | grep "${PGPpubkeyFingerprint}" -c)
 if [ "${fingerprint}" -lt 1 ]; then
   echo
   echo "# WARNING --> the PGP fingerprint is not as expected for ${PGPsigner}" >&2
@@ -65,7 +64,7 @@ echo
 cat "$_temp"
 echo "# goodSignature(${goodSignature})"
 
-correctKey=$(tr -d " \t\n\r" < "$_temp" | grep "${PGPpubkeyFingerprint}" -c)
+correctKey=$(tr -d " \t\n\r" <"$_temp" | grep "${PGPpubkeyFingerprint}" -c)
 echo "# correctKey(${correctKey})"
 
 if [ "${correctKey}" -lt 1 ] || [ "${goodSignature}" -lt 1 ]; then
