@@ -2,16 +2,20 @@
 # https://lightning.readthedocs.io/
 
 # https://github.com/ElementsProject/lightning/releases
-CLVERSION=v22.11.1
+CLVERSION=v23.02
 
 # install the latest master by using the last commit id
 # https://github.com/ElementsProject/lightning/commit/master
 # CLVERSION="063366ed7e3b7cc12a8d1681acc2b639cf07fa23"
 
+PGPsigner="endothermicdev"
+PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
+PGPpubkeyFingerprint="8F55EE750D950E3E"
+
 # https://github.com/ElementsProject/lightning/tree/master/contrib/keys
-PGPsigner="cdecker" # rustyrussel D9200E6CD1ADB8F1 # cdecker A26D6D9FE088ED58 # niftynei BFF0F67810C1EED1
-PGPpubkeyLink="https://raw.githubusercontent.com/ElementsProject/lightning/master/contrib/keys/${PGPsigner}.txt"
-PGPpubkeyFingerprint="A26D6D9FE088ED58"
+# PGPsigner="cdecker" # rustyrussel D9200E6CD1ADB8F1 # cdecker A26D6D9FE088ED58 # niftynei BFF0F67810C1EED1
+# PGPpubkeyLink="https://raw.githubusercontent.com/ElementsProject/lightning/master/contrib/keys/${PGPsigner}.txt"
+# PGPpubkeyFingerprint="A26D6D9FE088ED58"
 
 # help
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
@@ -237,7 +241,7 @@ if [ "$1" = on ] || [ "$1" = update ] || [ "$1" = testPR ]; then
   ##########
 
   # make sure binary is installed (will skip if already done)
-  /home/admin/config.scripts/cl.install.sh install
+  /home/admin/config.scripts/cl.install.sh install || exit 1
 
   echo "# Make sure bitcoin is in the ${TORGROUP} group"
   sudo usermod -a -G ${TORGROUP} bitcoin
