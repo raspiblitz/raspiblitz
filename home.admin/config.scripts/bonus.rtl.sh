@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # https://github.com/Ride-The-Lightning/RTL/releases
-RTLVERSION="v0.13.0"
+RTLVERSION="v0.13.6"
 
 # check and load raspiblitz config
 # to know which network is running
@@ -63,10 +63,10 @@ if [ "$1" = "status" ] || [ "$1" = "menu" ]; then
   localip=$(hostname -I | awk '{print $1}')
   toraddress=$(sudo cat /mnt/hdd/tor/${netprefix}${typeprefix}RTL/hostname 2>/dev/null)
   fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
-  RTLHTTPS=$((RTLHTTP+1))
+  RTLHTTPS=$((RTLHTTP + 1))
 
   if [ "$1" = "status" ]; then
-  
+
     echo "version='${RTLVERSION}'"
     echo "installed='${isInstalled}'"
     echo "localIP='${localip}'"
@@ -96,7 +96,7 @@ if [ "$1" = "menu" ]; then
     sudo /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
     whiptail --title "Ride The Lightning (RTL - $LNTYPE - $CHAIN)" --msgbox "Open in your local web browser:
 http://${localip}:${RTLHTTP}\n
-https://${localip}:$((RTLHTTP+1)) with Fingerprint:
+https://${localip}:$((RTLHTTP + 1)) with Fingerprint:
 ${fingerprint}\n
 Use your Password B to login.\n
 Hidden Service address for Tor Browser (QRcode on LCD):\n${toraddress}
@@ -107,7 +107,7 @@ Hidden Service address for Tor Browser (QRcode on LCD):\n${toraddress}
   else
     whiptail --title "Ride The Lightning (RTL - $LNTYPE - $CHAIN)" --msgbox "Open in your local web browser & accept self-signed cert:
 http://${localip}:${RTLHTTP}\n
-https://${localip}:$((RTLHTTP+1)) with Fingerprint:
+https://${localip}:$((RTLHTTP + 1)) with Fingerprint:
 ${fingerprint}\n
 Use your Password B to login.\n
 Activate Tor to access the web interface from outside your local network.
@@ -117,7 +117,6 @@ Activate Tor to access the web interface from outside your local network.
   exit 0
 fi
 
-
 ########################################
 # INSTALL (just user, code & compile)
 ########################################
@@ -125,7 +124,7 @@ fi
 if [ "$1" = "install" ]; then
 
   # check if already installed
-  if [ -f /home/rtl/RTL/LICENSE ];then
+  if [ -f /home/rtl/RTL/LICENSE ]; then
     echo "# RTL already installed - skipping"
     exit 0
   fi
@@ -136,7 +135,7 @@ if [ "$1" = "install" ]; then
   /home/admin/config.scripts/bonus.nodejs.sh on
 
   # create rtl user (one for all instances)
-  if [ $(compgen -u | grep -c rtl) -eq 0 ];then
+  if [ $(compgen -u | grep -c rtl) -eq 0 ]; then
     sudo adduser --disabled-password --gecos "" rtl || exit 1
   fi
 
@@ -229,7 +228,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   fi
 
   # make sure softwarte is installed
-  if [ -f /home/rtl/RTL/LICENSE ];then
+  if [ -f /home/rtl/RTL/LICENSE ]; then
     echo "# OK - the RTL code is already present"
   else
     echo "# install of codebase is needed first"
@@ -241,8 +240,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   echo "# Make sure symlink to central app-data directory exists"
   if ! [[ -L "/home/rtl/.lnd" ]]; then
-    sudo rm -rf "/home/rtl/.lnd" 2>/dev/null              # not a symlink.. delete it silently
-    sudo ln -s "/mnt/hdd/app-data/lnd/" "/home/rtl/.lnd"  # and create symlink
+    sudo rm -rf "/home/rtl/.lnd" 2>/dev/null             # not a symlink.. delete it silently
+    sudo ln -s "/mnt/hdd/app-data/lnd/" "/home/rtl/.lnd" # and create symlink
   fi
 
   if [ "${LNTYPE}" == "lnd" ]; then
@@ -253,7 +252,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   echo "# Updating Firewall"
   sudo ufw allow ${RTLHTTP} comment "${systemdService} HTTP"
-  sudo ufw allow $((RTLHTTP+1)) comment "${systemdService} HTTPS"
+  sudo ufw allow $((RTLHTTP + 1)) comment "${systemdService} HTTPS"
   echo
 
   # make sure config directory exists
@@ -314,7 +313,7 @@ WantedBy=multi-user.target
   # Hidden Service for RTL if Tor is active
   if [ "${runBehindTor}" = "on" ]; then
     # make sure to keep in sync with tor.network.sh script
-    /home/admin/config.scripts/tor.onion-service.sh ${netprefix}${typeprefix}RTL 80 $((RTLHTTP+2)) 443 $((RTLHTTP+3))
+    /home/admin/config.scripts/tor.onion-service.sh ${netprefix}${typeprefix}RTL 80 $((RTLHTTP + 2)) 443 $((RTLHTTP + 3))
   fi
 
   # nginx configuration
@@ -323,11 +322,11 @@ WantedBy=multi-user.target
   sudo cp /home/admin/assets/nginx/sites-available/rtl_tor.conf /etc/nginx/sites-available/${netprefix}${typeprefix}rtl_tor.conf
   sudo cp /home/admin/assets/nginx/sites-available/rtl_tor_ssl.conf /etc/nginx/sites-available/${netprefix}${typeprefix}rtl_tor_ssl.conf
   sudo sed -i "s/3000/$RTLHTTP/g" /etc/nginx/sites-available/${netprefix}${typeprefix}rtl_ssl.conf
-  sudo sed -i "s/3001/$((RTLHTTP+1))/g" /etc/nginx/sites-available/${netprefix}${typeprefix}rtl_ssl.conf
+  sudo sed -i "s/3001/$((RTLHTTP + 1))/g" /etc/nginx/sites-available/${netprefix}${typeprefix}rtl_ssl.conf
   sudo sed -i "s/3000/$RTLHTTP/g" /etc/nginx/sites-available/${netprefix}${typeprefix}rtl_tor.conf
-  sudo sed -i "s/3002/$((RTLHTTP+2))/g" /etc/nginx/sites-available/${netprefix}${typeprefix}rtl_tor.conf
+  sudo sed -i "s/3002/$((RTLHTTP + 2))/g" /etc/nginx/sites-available/${netprefix}${typeprefix}rtl_tor.conf
   sudo sed -i "s/3000/$RTLHTTP/g" /etc/nginx/sites-available/${netprefix}${typeprefix}rtl_tor_ssl.conf
-  sudo sed -i "s/3003/$((RTLHTTP+3))/g" /etc/nginx/sites-available/${netprefix}${typeprefix}rtl_tor_ssl.conf
+  sudo sed -i "s/3003/$((RTLHTTP + 3))/g" /etc/nginx/sites-available/${netprefix}${typeprefix}rtl_tor_ssl.conf
   sudo ln -sf /etc/nginx/sites-available/${netprefix}${typeprefix}rtl_ssl.conf /etc/nginx/sites-enabled/
   sudo ln -sf /etc/nginx/sites-available/${netprefix}${typeprefix}rtl_tor.conf /etc/nginx/sites-enabled/
   sudo ln -sf /etc/nginx/sites-available/${netprefix}${typeprefix}rtl_tor_ssl.conf /etc/nginx/sites-enabled/
@@ -345,7 +344,7 @@ WantedBy=multi-user.target
   echo "# OK - the ${systemdService}.service is now enabled & started"
   echo "# Monitor with: sudo journalctl -f -u ${systemdService}"
 
-  # needed for API/WebUI as signal that install ran thru 
+  # needed for API/WebUI as signal that install ran thru
   echo "result='OK'"
   exit 0
 fi
@@ -379,8 +378,8 @@ if [ "$1" = "connect-services" ]; then
     echo "# Add the rtl user to the lit group"
     sudo /usr/sbin/usermod --append --groups lit rtl
     echo "# Symlink the lit-loop.macaroon"
-    sudo rm -rf "/home/rtl/.loop"                    #  delete symlink
-    sudo ln -s "/home/lit/.loop/" "/home/rtl/.loop"  # create symlink
+    sudo rm -rf "/home/rtl/.loop"                   #  delete symlink
+    sudo ln -s "/home/lit/.loop/" "/home/rtl/.loop" # create symlink
     echo "# Make the loop macaroon group readable"
     sudo chmod 640 /home/rtl/.loop/mainnet/macaroons.db
   elif [ "${loop}" = "on" ]; then
@@ -388,8 +387,8 @@ if [ "$1" = "connect-services" ]; then
     echo "# Add the rtl user to the loop group"
     sudo /usr/sbin/usermod --append --groups loop rtl
     echo "# Symlink the loop.macaroon"
-    sudo rm -rf "/home/rtl/.loop"                     # delete symlink
-    sudo ln -s "/home/loop/.loop/" "/home/rtl/.loop"  # create symlink
+    sudo rm -rf "/home/rtl/.loop"                    # delete symlink
+    sudo ln -s "/home/loop/.loop/" "/home/rtl/.loop" # create symlink
     echo "# Make the loop macaroon group readable"
     sudo chmod 640 /home/rtl/.loop/mainnet/macaroons.db
   else
@@ -428,14 +427,14 @@ if [ "$1" = "prestart" ]; then
 
   # determine correct loop swap server port (lit over loop single)
   if [ "${lit}" = "on" ]; then
-      echo "# use lit loop port"
-      SWAPSERVERPORT=8443
+    echo "# use lit loop port"
+    SWAPSERVERPORT=8443
   elif [ "${loop}" = "on" ]; then
-      echo "# use loop single instance port"
-      SWAPSERVERPORT=8081
+    echo "# use loop single instance port"
+    SWAPSERVERPORT=8081
   else
-      echo "# No lit or loop single detected"
-      SWAPSERVERPORT=""
+    echo "# No lit or loop single detected"
+    SWAPSERVERPORT=""
   fi
 
   # prepare RTL-Config.json file
@@ -455,20 +454,20 @@ if [ "$1" = "prestart" ]; then
   # LND changes of config
   if [ "${LNTYPE}" == "lnd" ]; then
     echo "# LND Config"
-    cat /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json | \
-    jq ".port = \"${RTLHTTP}\"" | \
-    jq ".multiPass = \"${RPCPASSWORD}\"" | \
-    jq ".multiPassHashed = \"\"" | \
-    jq ".nodes[0].lnNode = \"${hostname}\"" | \
-    jq ".nodes[0].lnImplementation = \"LND\"" | \
-    jq ".nodes[0].Authentication.macaroonPath = \"/home/rtl/.lnd/data/chain/${network}/${CHAIN}/\"" | \
-    jq ".nodes[0].Authentication.configPath = \"/home/rtl/.lnd/${netprefix}lnd.conf\"" | \
-    jq ".nodes[0].Authentication.swapMacaroonPath = \"/home/rtl/.loop/${CHAIN}/\"" | \
-    jq ".nodes[0].Authentication.boltzMacaroonPath = \"/home/rtl/.boltz-lnd/macaroons/\"" | \
-    jq ".nodes[0].Settings.userPersona = \"OPERATOR\"" | \
-    jq ".nodes[0].Settings.lnServerUrl = \"https://127.0.0.1:${portprefix}8080\"" | \
-    jq ".nodes[0].Settings.channelBackupPath = \"/mnt/hdd/app-data/rtl/${systemdService}-SCB-backup-$hostname\"" | \
-    jq ".nodes[0].Settings.swapServerUrl = \"https://127.0.0.1:${SWAPSERVERPORT}\"" > /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json.tmp
+    cat /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json |
+      jq ".port = \"${RTLHTTP}\"" |
+      jq ".multiPass = \"${RPCPASSWORD}\"" |
+      jq ".multiPassHashed = \"\"" |
+      jq ".nodes[0].lnNode = \"${hostname}\"" |
+      jq ".nodes[0].lnImplementation = \"LND\"" |
+      jq ".nodes[0].Authentication.macaroonPath = \"/home/rtl/.lnd/data/chain/${network}/${CHAIN}/\"" |
+      jq ".nodes[0].Authentication.configPath = \"/home/rtl/.lnd/${netprefix}lnd.conf\"" |
+      jq ".nodes[0].Authentication.swapMacaroonPath = \"/home/rtl/.loop/${CHAIN}/\"" |
+      jq ".nodes[0].Authentication.boltzMacaroonPath = \"/home/rtl/.boltz-lnd/macaroons/\"" |
+      jq ".nodes[0].Settings.userPersona = \"OPERATOR\"" |
+      jq ".nodes[0].Settings.lnServerUrl = \"https://127.0.0.1:${portprefix}8080\"" |
+      jq ".nodes[0].Settings.channelBackupPath = \"/mnt/hdd/app-data/rtl/${systemdService}-SCB-backup-$hostname\"" |
+      jq ".nodes[0].Settings.swapServerUrl = \"https://127.0.0.1:${SWAPSERVERPORT}\"" >/mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json.tmp
     mv /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json.tmp /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json
   fi
 
@@ -476,20 +475,20 @@ if [ "$1" = "prestart" ]; then
   # https://github.com/Ride-The-Lightning/RTL/blob/master/docs/C-Lightning-setup.md
   if [ "${LNTYPE}" == "cl" ]; then
     echo "# CL Config"
-    cat /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json | \
-    jq ".port = \"${RTLHTTP}\"" | \
-    jq ".multiPass = \"${RPCPASSWORD}\"" | \
-    jq ".multiPassHashed = \"\"" | \
-    jq ".nodes[0].lnNode = \"${hostname}\"" | \
-    jq ".nodes[0].lnImplementation = \"CLT\"" | \
-    jq ".nodes[0].Authentication.macaroonPath = \"/home/bitcoin/c-lightning-REST/${CLNETWORK}/certs\"" | \
-    jq ".nodes[0].Authentication.configPath = \"${CLCONF}\"" | \
-    jq ".nodes[0].Authentication.swapMacaroonPath = \"/home/rtl/.loop/${CHAIN}/\"" | \
-    jq ".nodes[0].Authentication.boltzMacaroonPath = \"/home/rtl/.boltz-lnd/macaroons/\"" | \
-    jq ".nodes[0].Settings.userPersona = \"OPERATOR\"" | \
-    jq ".nodes[0].Settings.lnServerUrl = \"https://127.0.0.1:${portprefix}6100\"" | \
-    jq ".nodes[0].Settings.channelBackupPath = \"/mnt/hdd/app-data/rtl/${systemdService}-SCB-backup-$hostname\"" | \
-    jq ".nodes[0].Settings.swapServerUrl = \"https://127.0.0.1:${SWAPSERVERPORT}\"" > /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json.tmp
+    cat /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json |
+      jq ".port = \"${RTLHTTP}\"" |
+      jq ".multiPass = \"${RPCPASSWORD}\"" |
+      jq ".multiPassHashed = \"\"" |
+      jq ".nodes[0].lnNode = \"${hostname}\"" |
+      jq ".nodes[0].lnImplementation = \"CLT\"" |
+      jq ".nodes[0].Authentication.macaroonPath = \"/home/bitcoin/c-lightning-REST/${CLNETWORK}/certs\"" |
+      jq ".nodes[0].Authentication.configPath = \"${CLCONF}\"" |
+      jq ".nodes[0].Authentication.swapMacaroonPath = \"/home/rtl/.loop/${CHAIN}/\"" |
+      jq ".nodes[0].Authentication.boltzMacaroonPath = \"/home/rtl/.boltz-lnd/macaroons/\"" |
+      jq ".nodes[0].Settings.userPersona = \"OPERATOR\"" |
+      jq ".nodes[0].Settings.lnServerUrl = \"https://127.0.0.1:${portprefix}6100\"" |
+      jq ".nodes[0].Settings.channelBackupPath = \"/mnt/hdd/app-data/rtl/${systemdService}-SCB-backup-$hostname\"" |
+      jq ".nodes[0].Settings.swapServerUrl = \"https://127.0.0.1:${SWAPSERVERPORT}\"" >/mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json.tmp
     mv /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json.tmp /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json
   fi
 
@@ -546,9 +545,9 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   fi
 
   # only if 'purge' is an additional parameter (other instances/services might need this)
-  if [ "$(echo "$@" | grep -c purge)" -gt 0 ];then
+  if [ "$(echo "$@" | grep -c purge)" -gt 0 ]; then
     home/admin/config.scripts/bonus.rtl.sh uninstall
-    if [ $LNTYPE = cl ];then
+    if [ $LNTYPE = cl ]; then
       /home/admin/config.scripts/cl.rest.sh off ${CHAIN}
     fi
     echo "# Delete all configs"
@@ -557,13 +556,12 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # close ports on firewall
   sudo ufw deny "${RTLHTTP}"
-  sudo ufw deny $((RTLHTTP+1))
+  sudo ufw deny $((RTLHTTP + 1))
 
-  # needed for API/WebUI as signal that install ran thru 
+  # needed for API/WebUI as signal that install ran thru
   echo "result='OK'"
   exit 0
 fi
-
 
 if [ "$1" = "update" ]; then
   echo "# UPDATING RTL"
@@ -616,7 +614,10 @@ if [ "$1" = "update" ]; then
       echo "# OK - RTL install looks good"
       echo
     fi
-    currentRTLcommit=$(cd /home/rtl/RTL; git describe --tags)
+    currentRTLcommit=$(
+      cd /home/rtl/RTL
+      git describe --tags
+    )
     echo "# Updated RTL to $currentRTLcommit"
   else
     echo "# Unknown option: $updateOption"
