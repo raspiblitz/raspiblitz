@@ -570,10 +570,10 @@ function suez() {
     clear
     echo "# Showing the channels of ${lightning} ${chain}net - consider reducing the font size (press CTRL- or CMD-)"
     if [ ${lightning} = cl ]; then
-      sudo -u bitcoin /home/bitcoin/.local/bin/poetry run ./suez \
+      sudo -u bitcoin poetry run ./suez \
       --client=c-lightning --client-args=--conf=${CLCONF}
     elif [ ${lightning} = lnd ]; then
-      sudo -u bitcoin /home/bitcoin/.local/bin/poetry run ./suez \
+      sudo -u bitcoin poetry run ./suez \
       --client-args=-n=${CHAIN} \
       --client-args=--rpcserver=localhost:1${L2rpcportmod}009
     fi

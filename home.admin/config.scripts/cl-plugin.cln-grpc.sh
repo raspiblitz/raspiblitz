@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # command info
-if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ];then
+if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo
   echo "Install the cln-grpc plugin for CLN"
   echo "Usage:"
@@ -31,10 +31,12 @@ function buildGRPCplugin() {
   echo "# - Build the cln-grpc plugin"
   if [ ! -f /home/bitcoin/cl-plugins-available/cln-grpc ]; then
     # check if the source code is present
-    if [ ! -d /home/bitcoin/lightning/plugins/grpc-plugin ];then
+    if [ ! -d /home/bitcoin/lightning/plugins/grpc-plugin ]; then
       echo "# - install Core Lightning ..."
       /home/admin/config.scripts/cl.install.sh install || exit 1
     fi
+    echo "# install dependencies"
+    sudo apt-get install protobuf-compiler -y
     echo "# rust for cln-grpc, includes rustfmt"
     sudo -u bitcoin curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sudo -u bitcoin sh -s -- -y
     cd /home/bitcoin/lightning/plugins/grpc-plugin || exit 1
@@ -61,7 +63,7 @@ function switchOn() {
     # symlink to plugin directory
     echo "# symlink cln-grpc to /home/bitcoin/${netprefix}cl-plugins-enabled/"
     # delete old symlink
-    sudo rm /home/bitcoin/${netprefix}cl-plugins-enabled/cln-grpc
+    sudo rm -f /home/bitcoin/${netprefix}cl-plugins-enabled/cln-grpc
     sudo ln -s /home/bitcoin/cl-plugins-available/cln-grpc /home/bitcoin/${netprefix}cl-plugins-enabled/
 
     # blitz.conf.sh set [key] [value] [?conffile] <noquotes>
@@ -102,7 +104,7 @@ elif [ "$1" = on ]; then
 elif [ "$1" = off ]; then
   sed -i "/^grpc-port/d" "${CLCONF}"
   sudo rm -rf /home/bitcoin/${netprefix}cl-plugins-enabled/cln-grpc
-  if [ "$(echo "$@" | grep -c purge)" -gt 0 ];then
+  if [ "$(echo "$@" | grep -c purge)" -gt 0 ]; then
     sudo rm -rf /home/bitcoin/cl-plugins-available/cln-grpc
   fi
   /home/admin/config.scripts/blitz.conf.sh set "${netprefix}clnGRPCport" "off"
@@ -113,7 +115,7 @@ elif [ "$1" = off ]; then
   exit 0
 
 elif [ "$1" = update ]; then
-  if [ "$(echo "$@" | grep -c source)" -gt 0 ];then
+  if [ "$(echo "$@" | grep -c source)" -gt 0 ]; then
     cd /home/bitcoin/lightning/ || exit 1
     sudo -u bitcoin git pull
   fi

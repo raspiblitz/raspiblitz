@@ -33,17 +33,17 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   cd /home/bitcoin || exit 1
 
-  # dependency
-  sudo -u bitcoin curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py\
-    | sudo -u bitcoin python -
+  # poetry
+  sudo pip3 install --upgrade pip
+  sudo pip3 install poetry
 
   # download source code
   sudo -u bitcoin git clone https://github.com/prusnak/suez.git
   cd suez || exit 1
   sudo -u bitcoin git reset --hard $SUEZVERSION
   sudo -u bitcoin /home/admin/config.scripts/blitz.git-verify.sh \
-   "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
-  sudo -u bitcoin /home/bitcoin/.local/bin/poetry install
+    "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
+  sudo -u bitcoin poetry install
 
   # setting value in raspi blitz config
   /home/admin/config.scripts/blitz.conf.sh set suez "on"
@@ -74,8 +74,8 @@ if [ "$1" = "update" ]; then
   echo "# UPDATE SUEZ"
   cd /home/bitcoin || exit 1
   # dependency
-  sudo -u bitcoin curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py\
-    | sudo -u bitcoin python -
+  sudo pip3 install --upgrade pip
+  sudo pip3 install poetry
   # download source code
   if [ -d suez ]; then
     sudo -u bitcoin git clone https://github.com/prusnak/suez.git
@@ -83,8 +83,8 @@ if [ "$1" = "update" ]; then
   cd suez || exit 1
   sudo -u bitcoin git pull
   sudo -u bitcoin /home/admin/config.scripts/blitz.git-verify.sh \
-   "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
-  sudo -u bitcoin /home/bitcoin/.local/bin/poetry install
+    "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
+  sudo -u bitcoin poetry install
   echo "# Updated to the latest in https://github.com/prusnak/suez/commits/master"
   exit 0
 fi
