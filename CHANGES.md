@@ -15,6 +15,7 @@
 - Update: Bitcoin Core v24.0.1 [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-24.0.1.md)
 - Update: LND v0.15.5 [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.15.5-beta)
 - Update: Core Lightning v23.02 [details](https://github.com/ElementsProject/lightning/releases/tag/v23.02)
+- Update: C-lightningREST v0.10.1 [details](https://github.com/Ride-The-Lightning/c-lightning-REST/releases/tag/v0.10.1)
 - Update: Electrum Server in Rust (electrs) v0.9.11 [details](https://github.com/romanz/electrs/blob/master/RELEASE-NOTES.md#0911-jan-5-2023)
 - Update: Lightning Terminal v0.8.4-alpha [details](https://github.com/lightninglabs/lightning-terminal/releases/tag/v0.8.4-alpha)
 - Update: RTL v0.13.6 with update option [details](https://github.com/Ride-The-Lightning/RTL/releases/tag/v0.13.6)
