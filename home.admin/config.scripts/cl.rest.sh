@@ -5,14 +5,14 @@ CLRESTVERSION="v0.10.1"
 
 # help
 if [ $# -eq 0 ]||[ "$1" = "-h" ]||[ "$1" = "--help" ];then
-  echo
   echo "Core-Lightning-REST install script"
   echo "The default version is: $CLRESTVERSION"
   echo "mainnet | testnet | signet instances can run parallel"
   echo
   echo "Usage:"
-  echo "cl.rest.sh [on|off|connect] <mainnet|testnet|signet> [?key-value]"
-  echo
+  echo "cl.rest.sh on <mainnet|testnet|signet>"
+  echo "cl.rest.sh connect <mainnet|testnet|signet> [?key-value]"
+  echo "cl.rest.sh off <mainnet|testnet|signet> <purge>"
   exit 1
 fi
 
