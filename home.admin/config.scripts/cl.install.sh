@@ -330,7 +330,7 @@ always-use-proxy=true
 
   echo
   sudo -u admin touch /home/admin/_aliases
-  if ! grep -Eq "${netprefix}lightning-cli" /home/admin/_aliases; then
+  if ! grep -Eq "^alias ${netprefix}lightning-cli" /home/admin/_aliases; then
     echo "# Adding aliases"
     echo "\
 alias ${netprefix}lightning-cli=\"sudo -u bitcoin /usr/local/bin/lightning-cli\
