@@ -502,7 +502,6 @@ if [ "$1" = "prestart" ]; then
 
     # set tls.cert path (use | as separator to avoid escaping file path slashes)
     sed -i "s|^LND_REST_CERT=.*|LND_REST_CERT=/mnt/hdd/app-data/lnd/tls.cert|g" /home/lnbits/lnbits/.env
-
     # set macaroon  path info in .env - USING HEX IMPORT
     chmod 600 /home/lnbits/lnbits/.env
     macaroonAdminHex=$(xxd -ps -u -c 1000 /mnt/hdd/app-data/lnd/data/chain/${LNBitsNetwork}/${LNBitsChain}net/admin.macaroon)
@@ -511,7 +510,8 @@ if [ "$1" = "prestart" ]; then
     sed -i "s/^LND_REST_ADMIN_MACAROON=.*/LND_REST_ADMIN_MACAROON=${macaroonAdminHex}/g" /home/lnbits/lnbits/.env
     sed -i "s/^LND_REST_INVOICE_MACAROON=.*/LND_REST_INVOICE_MACAROON=${macaroonInvoiceHex}/g" /home/lnbits/lnbits/.env
     sed -i "s/^LND_REST_READ_MACAROON=.*/LND_REST_READ_MACAROON=${macaroonReadHex}/g" /home/lnbits/lnbits/.env
-    sed -i "s/^LND_REST_ENDPOINT=.*/LND_REST_ENDPOINT=https://127.0.0.1:${portprefix}8080/g" /home/lnbits/lnbits/.env
+    # set the REST endpoint (use | as separator to avoid escaping slashes)
+    sed -i "s|^LND_REST_ENDPOINT=.*|LND_REST_ENDPOINT=https://127.0.0.1:${portprefix}8080|g" /home/lnbits/lnbits/.env
 
   elif [ "${LNBitsLightning}" == "cl" ]; then
 
