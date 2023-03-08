@@ -724,33 +724,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     exit 1
   fi
 
-<<<<<<< Updated upstream
-=======
-  # add lnbits user
-  echo "*** Add the 'lnbits' user ***"
-  sudo adduser --disabled-password --gecos "" lnbits
-
-  # get optional github parameter
-  githubUser="lnbits"
-  if [ "$3" != "" ]; then
-    githubUser="$3"
-  fi
-
-  # https://github.com/lnbits/lnbits/releases
-  tag="0.10.2"
-  if [ "$4" != "" ]; then
-    tag="$4"
-  fi
-
-  # install from GitHub
-  echo "# get the github code user(${githubUser}) branch(${tag})"
-  sudo rm -r /home/lnbits/lnbits 2>/dev/null
-  cd /home/lnbits
-  sudo -u lnbits git clone ${githubRepo} lnbits
-  cd /home/lnbits/lnbits
-  sudo -u lnbits git checkout ${tag} || exit 1
-
->>>>>>> Stashed changes
   # prepare .env file
   echo "# preparing env file"
   sudo rm /home/lnbits/lnbits/.env 2>/dev/null
