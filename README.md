@@ -132,8 +132,10 @@ _If the above mentioned LCD screen is sold out you can also use these different 
 
 - Quimat 3,5'' Zoll Inch Touch
 - ELEGOO Display 3.5" Zoll TFT LCD
-- kuman 3.5 Inch Touch Screen TFT Monitor
+- kuman 3.5 Inch Touch Screen TFT Monitor 
 - Waveshare 3.5inch Display for Raspberry Pi
+
+With all LCD screen models dont use the ones that have an HDMI port/connector - what you need is a 3.5 inch LCD screen model (resolution of 480×320) that connects only thru the GPIO ports (SPI) and has an XPT2046 touch controller.
 
 _You can even pay for your RaspiBlitz Amazon Shopping with Bitcoin & Lightning through [Bitrefill](https://blog.bitrefill.com/its-here-buy-amazon-vouchers-with-bitcoin-on-bitrefill-bb2a4449724a)._
 
