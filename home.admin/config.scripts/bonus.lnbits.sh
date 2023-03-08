@@ -10,7 +10,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "bonus.lnbits.sh off"
   echo "bonus.lnbits.sh status"
   echo "bonus.lnbits.sh menu"
-  echo "bonus.lnbits.sh prestart" 
+  echo "bonus.lnbits.sh prestart"
   echo "bonus.lnbits.sh githubsync"
   exit 1
 fi
@@ -157,7 +157,7 @@ Consider adding a IP2TOR Bridge under OPTIONS."
             echo "Restarting LNbits ..."
             sudo systemctl restart lnbits
             echo
-            echo "OK new funding source for LNbits active." 
+            echo "OK new funding source for LNbits active."
             echo "PRESS ENTER to continue"
             read key
             exit 0
@@ -346,9 +346,8 @@ if [ "$1" = "repo" ]; then
   fi
 
   # check if repo exists
-  #githubRepo="https://github.com/${githubUser}/lnbits"
-  githubRepo="https://github.com/${githubUser}/lnbits-legend"
-  
+  githubRepo="https://github.com/${githubUser}/lnbits"
+
   httpcode=$(curl -s -o /dev/null -w "%{http_code}" ${githubRepo})
   if [ "${httpcode}" != "200" ]; then
     echo "# tested github repo: ${githubRepo}"
@@ -453,8 +452,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   if [ "$3" != "" ]; then
     githubUser="$3"
   fi
-  # https://github.com/lnbits/lnbits-legend/releases
-  tag="0.9.1"
+
+  # https://github.com/lnbits/lnbits/releases
+  tag="0.10.2"
   if [ "$4" != "" ]; then
     tag="$4"
   fi
@@ -463,7 +463,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "# get the github code user(${githubUser}) branch(${tag})"
   sudo rm -r /home/lnbits/lnbits 2>/dev/null
   cd /home/lnbits
-  sudo -u lnbits git clone https://github.com/${githubUser}/lnbits-legend lnbits
+  sudo -u lnbits git clone ${githubRepo} lnbits
   cd /home/lnbits/lnbits
   sudo -u lnbits git checkout ${tag} || exit 1
 
@@ -471,28 +471,24 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "# preparing env file"
   sudo rm /home/lnbits/lnbits/.env 2>/dev/null
   sudo -u lnbits touch /home/lnbits/lnbits/.env
-  sudo bash -c "echo 'LNBITS_FORCE_HTTPS=0' >> /home/lnbits/lnbits/.env"
 
   # set database path to HDD data so that its survives updates and migrations
   sudo mkdir /mnt/hdd/app-data/LNBits 2>/dev/null
   sudo chown lnbits:lnbits -R /mnt/hdd/app-data/LNBits
   sudo bash -c "echo 'LNBITS_DATA_FOLDER=/mnt/hdd/app-data/LNBits' >> /home/lnbits/lnbits/.env"
 
-  # let switch command part do the detail config 
+  # let switch command part do the detail config
   /home/admin/config.scripts/bonus.lnbits.sh switch ${fundingsource}
 
   # to the install
   echo "# installing application dependencies"
   cd /home/lnbits/lnbits
 
-  # do install like this
-  sudo -u lnbits python3 -m venv venv
-  sudo -u lnbits ./venv/bin/pip install -r requirements.txt
-  sudo -u lnbits ./venv/bin/pip install pylightning
-  sudo -u lnbits ./venv/bin/pip install secp256k1
+  # check if poetry in installed, if not install it
+  sudo -u lnbits which poetry || sudo -u lnbits curl -sSL https://install.python-poetry.org | sudo -u lnbits python3 -
 
-  # build
-  sudo -u lnbits ./venv/bin/python build.py
+  # do install like this
+  sudo -u lnbits poetry install
 
   # open firewall
   echo
@@ -515,7 +511,7 @@ After=bitcoind.service
 WorkingDirectory=/home/lnbits/lnbits
 ExecStartPre=/home/admin/config.scripts/bonus.lnbits.sh prestart
 
-ExecStart=/bin/sh -c 'cd /home/lnbits/lnbits && ./venv/bin/uvicorn lnbits.__main__:app --port 5000'
+ExecStart=/bin/sh -c 'cd /home/lnbits/lnbits && poetry run lnbits --port 5000'
 User=lnbits
 Restart=always
 TimeoutSec=120
@@ -570,8 +566,8 @@ EOF
   fi
 
   echo "# OK install done ... might need to restart or call: sudo systemctl start lnbits"
-  
-  # needed for API/WebUI as signal that install ran thru 
+
+  # needed for API/WebUI as signal that install ran thru
   echo "result='OK'"
   exit 0
 fi
@@ -660,10 +656,10 @@ if [ "$1" = "switch" ]; then
     sudo bash -c "echo 'LND_REST_INVOICE_MACAROON=' >> /home/lnbits/lnbits/.env"
     sudo bash -c "echo 'LND_REST_READ_MACAROON=' >> /home/lnbits/lnbits/.env"
 
-  fi  
+  fi
 
   if [ "${fundingsource}" == "cl" ] || [ "${fundingsource}" == "tcl" ] || [ "${fundingsource}" == "scl" ]; then
-  
+
     echo "# add the 'lnbits' user to the 'bitcoin' group"
     sudo /usr/sbin/usermod --append --groups bitcoin lnbits
     echo "# check user"
@@ -754,7 +750,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # setting value in raspi blitz config
   /home/admin/config.scripts/blitz.conf.sh set LNBits "off"
 
-  # needed for API/WebUI as signal that install ran thru 
+  # needed for API/WebUI as signal that install ran thru
   echo "result='OK'"
   exit 0
 fi
