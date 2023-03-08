@@ -1,4 +1,5 @@
 # CHANGES between Releases
+- Update: LNbits 0.10.2 [details](https://github.com/lnbits/lnbits/releases/tag/0.10.2)
 
 ## What's new in Version 1.9.0 of RaspiBlitz?
 
