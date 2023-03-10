@@ -107,7 +107,7 @@ if [ "$1" = "menu" ]; then
   dialogTitle=" ${APPID} "
 
   # basic info text - for an web app how to call with http & self-signed https
-  dialogText="Follow information on ${GITHUB_REPO} on how use the FinTS API or say hello on the Telegram Community Chat: https://t.me/LN_FinTS\n"
+  dialogText="This is an very early experimental feature.\n\nSee GitHub Repo for more Details:\n${GITHUB_REPO}\n\nTelegram Community Chat & Support (say hi):\nhttps://t.me/LN_FinTS\n\nUse OPTIONS to config with LNbits & Debug."
 
   # add tor info (if available)
   if [ "${toraddress}" != "" ]; then
@@ -138,6 +138,7 @@ if [ "$1" = "menu" ]; then
                 2>&1 >/dev/tty)
   case $CHOICE in
     DEBUG)
+      clear
       echo "# sudo tail -n 100 /home/fints/log/fuelifints.log"
       sudo tail -n 100 /home/fints/log/fuelifints.log
       echo "# PRESS ENTER to continue"
@@ -145,7 +146,7 @@ if [ "$1" = "menu" ]; then
       ;;
     LNBITS)
       edittemp=$(mktemp -p /dev/shm/)
-      sudo -u fints dialog --title "Editing /home/fints/lnbits.properties" --editbox "/home/fints/lnbits.properties" 200 200 2> "${edittemp}"
+      sudo -u fints dialog --title "Editing /home/fints/config/lnbits.properties" --editbox "/home/fints/config/lnbits.properties" 200 200 2> "${edittemp}"
       result=$?
       echo "result=${result}"
       echo "edittemp=${edittemp}"
