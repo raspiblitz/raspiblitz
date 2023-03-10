@@ -148,11 +148,16 @@ if [ "$1" = "menu" ]; then
       edittemp=$(mktemp -p /dev/shm/)
       sudo -u fints dialog --title "Editing /home/fints/config/lnbits.properties" --editbox "/home/fints/config/lnbits.properties" 200 200 2> "${edittemp}"
       result=$?
-      echo "result=${result}"
-      sudo rm /home/fints/config/lnbits.properties
-      sudo mv ${edittemp} /home/fints/config/lnbits.properties
+      if [ "${result}" == "0" ]; then
+        echo "# saving changes to /home/fints/config/lnbits.properties"
+        sudo rm /home/fints/config/lnbits.properties
+        sudo mv ${edittemp} /home/fints/config/lnbits.properties
+      else
+        echo "# no changes saved"
+      fi
+      echo "# restarting fints service"
       sudo systemctl restart fints
-      read key
+      sleep 2
       ;;
   esac
 
