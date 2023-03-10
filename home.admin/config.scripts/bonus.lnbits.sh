@@ -631,7 +631,11 @@ if [ "$1" = "install" ]; then
   cd /home/lnbits/lnbits  || exit 1
 
   # check if poetry in installed, if not install it
-  sudo -u lnbits which poetry || sudo -u lnbits curl -sSL https://install.python-poetry.org | sudo -u lnbits python3 -
+  if ! sudo -u lnbits which poetry; then
+    echo "# install poetry"
+    sudo pip3 install --upgrade pip
+    sudo pip3 install poetry
+  fi
   # do install like this
   sudo -u lnbits poetry install
 
