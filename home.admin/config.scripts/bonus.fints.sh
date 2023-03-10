@@ -155,7 +155,7 @@ if [ "$1" = "menu" ]; then
         sudo mv ${edittemp} /home/fints/config/lnbits.properties
         sudo chown fints:fints /home/fints/config/lnbits.properties
       else
-        echo "# ({$result}) no changes - dont save"
+        echo "# (${result}) no changes - dont save"
       fi
       echo "# restarting fints service"
       sudo systemctl restart fints
