@@ -320,11 +320,17 @@ WantedBy=multi-user.target
   # mark app as installed in raspiblitz config
   /home/admin/config.scripts/blitz.conf.sh set ${APPID} "on"
 
-  # start app up thru systemd
+  # enable app up thru systemd
   sudo systemctl enable ${APPID}
   echo "# OK - the ${APPID}.service is now enabled"
 
-  sudo systemctl start ${APPID}
+  # start app (only when blitz is ready)
+  source <(/home/admin/_cache.sh get state)
+  if [ "${state}" == "ready" ]; then
+    sudo systemctl start ${APPID}
+    echo "# OK - the ${APPID}.service is now started"
+  fi
+
   echo "# Monitor with: sudo journalctl -f -u ${APPID}"
   exit 0
 
