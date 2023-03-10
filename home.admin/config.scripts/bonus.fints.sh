@@ -111,11 +111,11 @@ if [ "$1" = "menu" ]; then
 
   # add tor info (if available)
   if [ "${toraddress}" != "" ]; then
-    dialogText="${dialogText}Hidden Service address for Tor Browser (QRcode on LCD):\n${toraddress}"
+    dialogText="${dialogText}Hidden Service address for Tor Connection:\n${toraddress}"
   fi
 
   # use whiptail to show SSH dialog & exit
-  whiptail --title "${dialogTitle}" --yes-button "OK" --no-button "OPTIONS" --yesno "${dialogText}" 18 67
+  whiptail --title "${dialogTitle}" --yes-button "OK" --no-button "OPTIONS" --yesno "${dialogText}" 19 67
   result=$?
   if [ ${result} -eq 0 ]; then
     exit 0
@@ -149,7 +149,8 @@ if [ "$1" = "menu" ]; then
       sudo -u fints dialog --title "Editing /home/fints/config/lnbits.properties" --editbox "/home/fints/config/lnbits.properties" 200 200 2> "${edittemp}"
       result=$?
       echo "result=${result}"
-      echo "edittemp=${edittemp}"
+      sudo rm /home/fints/config/lnbits.properties
+      sudo mv ${edittemp} /home/fints/config/lnbits.properties
       sudo systemctl restart fints
       read key
       ;;
