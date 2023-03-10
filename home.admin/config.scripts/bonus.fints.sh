@@ -104,10 +104,10 @@ if [ "$1" = "menu" ]; then
 
 
   # set the title for the dialog
-  dialogTitle=" ${APPID} "
+  dialogTitle=" FinTS / HBCI Interface "
 
   # basic info text - for an web app how to call with http & self-signed https
-  dialogText="This is an very early experimental feature.\n\nSee GitHub Repo for more Details:\n${GITHUB_REPO}\n\nTelegram Community Chat & Support (say hi):\nhttps://t.me/LN_FinTS\n\nUse OPTIONS to config with LNbits & Debug."
+  dialogText="This is an very early experimental feature.\n\nSee GitHub Repo for more Details:\n${GITHUB_REPO}\n\nTelegram Community Chat & Support (say hi):\nhttps://t.me/LN_FinTS\n\nUse OPTIONS to config with LNbits & Debug.\n\n"
 
   # add tor info (if available)
   if [ "${toraddress}" != "" ]; then
@@ -150,6 +150,8 @@ if [ "$1" = "menu" ]; then
       result=$?
       echo "result=${result}"
       echo "edittemp=${edittemp}"
+      sudo systemctl restart fints
+      read key
       ;;
   esac
 
