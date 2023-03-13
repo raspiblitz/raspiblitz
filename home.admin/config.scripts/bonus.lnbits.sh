@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# https://github.com/lnbits/lnbits-legend
+# https://github.com/lnbits/lnbits
 
-# https://github.com/lnbits/lnbits-legend/releases
-tag="0.9.6"
+# https://github.com/lnbits/lnbits/releases
+tag="0.10.2"
 VERSION="${tag}"
 
 # command info
@@ -21,7 +21,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "bonus.lnbits.sh repo [githubuser] [branch]"
   echo "bonus.lnbits.sh sync"
   echo "bonus.lnbits.sh backup"
-  echo "bonus.lnbits.sh restore [?FILE]"    
+  echo "bonus.lnbits.sh restore [?FILE]"
   echo "bonus.lnbits.sh migrate"
   exit 1
 fi
@@ -53,7 +53,7 @@ function postgresConfig() {
     echo "# Setup PostgreSQL successful, new database found: $check"
   fi
 
-  /home/admin/config.scripts/blitz.conf.sh set LNBitsDB "PostgreSQL"  
+  /home/admin/config.scripts/blitz.conf.sh set LNBitsDB "PostgreSQL"
 }
 
 function migrateMsg() {
@@ -97,9 +97,9 @@ function revertMigration() {
       echo "# No backup file found!"
     fi
 
-    # update config 
+    # update config
     echo "# Configure config .env"
-    
+
     # clean up
     sudo sed -i "/^LNBITS_DATABASE_URL=/d" /home/lnbits/lnbits/.env
     sudo sed -i "/^LNBITS_DATA_FOLDER=/d" /home/lnbits/lnbits/.env
@@ -293,25 +293,25 @@ Consider adding a IP2TOR Bridge under OPTIONS."
             else
               backup_target="/mnt/hdd/app-data/backup/lnbits_sqlite"
               backup_file=$(ls -t $backup_target/*.tar | head -n1)
-            fi      
+            fi
             if [ "$backup_file" = "" ]; then
               echo "ABORT - No Backup found to restore from"
               exit 1
             else
               # build dialog to choose backup file from menu
               OPTIONS_RESTORE=()
-                     
+
               counter=0
               cd $backup_target
-              for f in `find *.* -maxdepth 1 -type f`; do 
+              for f in `find *.* -maxdepth 1 -type f`; do
                 [[ -f "$f" ]] || continue
                 counter=$(($counter+1))
                 OPTIONS_RESTORE+=($counter "$f")
               done
 
-              WIDTH_RESTORE=66  
+              WIDTH_RESTORE=66
               CHOICE_HEIGHT_RESTORE=$(("${#OPTIONS_RESTORE[@]}/2+1"))
-              HEIGHT_RESTORE=$((CHOICE_HEIGHT_RESTORE+7))     
+              HEIGHT_RESTORE=$((CHOICE_HEIGHT_RESTORE+7))
               CHOICE_RESTORE=$(dialog --clear \
               --title " LNbits - Backup restore" \
               --ok-label "Select" \
@@ -339,19 +339,19 @@ Consider adding a IP2TOR Bridge under OPTIONS."
             dialog --title "MIGRATE LNBITS" --yesno "
 Do you want to proceed the migration?
 
-Try to migrate your LNBits SQLite database to PostgreSQL. 
+Try to migrate your LNBits SQLite database to PostgreSQL.
 
 This can fail for unknown circumstances. Revert of this process is possible afterwards, a backup will be saved.
             " 12 65
             if [ $? -eq 0 ]; then
-              clear     
+              clear
               /home/admin/config.scripts/bonus.lnbits.sh migrate
               echo
               migrateMsg
               echo
               echo "OK please test your LNBits installation."
               echo "PRESS ENTER to continue"
-              read key              
+              read key
             fi
             exit 0
             ;;
@@ -579,16 +579,11 @@ if [ "$1" = "sync" ] || [ "$1" = "repo" ]; then
   # pull latest code
   sudo -u lnbits git pull
 
-  # install
-  sudo -u lnbits python3 -m venv venv
-  sudo -u lnbits ./venv/bin/pip install -r requirements.txt
-  sudo -u lnbits ./venv/bin/pip install pylightning
-  sudo -u lnbits ./venv/bin/pip install secp256k1
-  sudo -u lnbits ./venv/bin/pip install pyln-client
-  sudo -u lnbits ./venv/bin/pip install psycopg2 # conv.py postgres migration dependency
+  # check if poetry in installed, if not install it
+  sudo -u lnbits which poetry || sudo -u lnbits curl -sSL https://install.python-poetry.org | sudo -u lnbits python3 -
+  # do install like this
+  sudo -u lnbits poetry install
 
-  # build
-  sudo -u lnbits ./venv/bin/python build.py
   # restart lnbits service
   sudo systemctl restart lnbits
   echo "# server is restarting ... maybe takes some seconds until available"
@@ -627,7 +622,7 @@ if [ "$1" = "install" ]; then
   echo "# get the github code user(${githubUser}) branch(${tag})"
   sudo rm -r /home/lnbits/lnbits 2>/dev/null
   cd /home/lnbits  || exit 1
-  sudo -u lnbits git clone https://github.com/${githubUser}/lnbits-legend lnbits
+  sudo -u lnbits git clone https://github.com/${githubUser}/lnbits lnbits
   cd /home/lnbits/lnbits || exit 1
   sudo -u lnbits git checkout ${tag} || exit 1
 
@@ -635,16 +630,14 @@ if [ "$1" = "install" ]; then
   echo "# installing application dependencies"
   cd /home/lnbits/lnbits  || exit 1
 
+  # check if poetry in installed, if not install it
+  if ! sudo -u lnbits which poetry; then
+    echo "# install poetry"
+    sudo pip3 install --upgrade pip
+    sudo pip3 install poetry
+  fi
   # do install like this
-  sudo -u lnbits python3 -m venv venv
-  sudo -u lnbits ./venv/bin/pip install -r requirements.txt
-  sudo -u lnbits ./venv/bin/pip install pylightning
-  sudo -u lnbits ./venv/bin/pip install secp256k1
-  sudo -u lnbits ./venv/bin/pip install pyln-client
-  sudo -u lnbits ./venv/bin/pip install psycopg2 # conv.py postgres migration dependency
-
-  # build
-  sudo -u lnbits ./venv/bin/python build.py
+  sudo -u lnbits poetry install
 
   exit 0
 fi
@@ -739,7 +732,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "# preparing env file"
   sudo rm /home/lnbits/lnbits/.env 2>/dev/null
   sudo -u lnbits touch /home/lnbits/lnbits/.env
-  sudo bash -c "echo 'LNBITS_FORCE_HTTPS=0' >> /home/lnbits/lnbits/.env"
 
   if [ ! -e /mnt/hdd/app-data/LNBits/database.sqlite3 ]; then
     echo "# install database: PostgreSQL"
@@ -752,11 +744,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # config update
     # example: postgres://<user>:<password>@<host>/<database>
     sudo bash -c "echo 'LNBITS_DATABASE_URL=postgres://lnbits_user:raspiblitz@localhost:5432/lnbits_db' >> /home/lnbits/lnbits/.env"
-    sudo bash -c "echo 'LNBITS_DATA_FOLDER=/mnt/hdd/app-data/LNBits/data' >> /home/lnbits/lnbits/.env"  
+    sudo bash -c "echo 'LNBITS_DATA_FOLDER=/mnt/hdd/app-data/LNBits/data' >> /home/lnbits/lnbits/.env"
   else
     echo "# install database: SQLite"
     /home/admin/config.scripts/blitz.conf.sh set LNBitsDB "SQLite"
-    
+
     # new data directory
     sudo mkdir -p /mnt/hdd/app-data/LNBits
 
@@ -789,7 +781,7 @@ After=bitcoind.service
 [Service]
 WorkingDirectory=/home/lnbits/lnbits
 ExecStartPre=/home/admin/config.scripts/bonus.lnbits.sh prestart
-ExecStart=/home/lnbits/lnbits/venv/bin/uvicorn lnbits.__main__:app --port 5000
+ExecStart=/bin/sh -c 'cd /home/lnbits/lnbits && poetry run lnbits --port 5000'
 User=lnbits
 Restart=always
 TimeoutSec=120
@@ -1081,7 +1073,7 @@ if [ "$1" = "restore" ]; then
     else
       echo "# Restore SQLite database"
       cd $backup_target
-       
+
       if [ "$2" != "" ]; then
         if [ -e $2 ]; then
           backup_file=$2
@@ -1102,7 +1094,7 @@ if [ "$1" = "restore" ]; then
 
       # backup current db
       /home/admin/config.scripts/bonus.lnbits.sh backup
-      
+
       # apply backup data
       sudo rm -R /mnt/hdd/app-data/LNBits/
       sudo chown -R lnbits:lnbits LNBits/
@@ -1166,7 +1158,7 @@ if [ "$1" = "migrate" ]; then
     # example: postgres://<user>:<password>@<host>/<database>
     # add new postgres config
     sudo bash -c "echo 'LNBITS_DATABASE_URL=postgres://lnbits_user:raspiblitz@localhost:5432/lnbits_db' >> /home/lnbits/lnbits/.env"
-    
+
     # clean start on new postgres db prior migration
     echo "# LNBits first start with clean PostgreSQL"
     sudo systemctl start lnbits
@@ -1192,7 +1184,7 @@ if [ "$1" = "migrate" ]; then
     sudo systemctl stop lnbits
 
     echo "# Start convert old SQLite to new PostgreSQL"
-    if ! sudo -u lnbits ./venv/bin/python tools/conv.py; then
+    if ! sudo -u lnbits poetry run python tools/conv.py; then
       echo "FAIL - Convert failed, revert migration process"
       revertMigration
       exit 1
