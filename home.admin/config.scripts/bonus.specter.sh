@@ -2,6 +2,7 @@
 # https://github.com/cryptoadvance/specter-desktop
 
 pinnedVersion="1.13.1"
+pinnedVersion="2.0.0"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -10,15 +11,40 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "bonus.specter.sh off <--delete-data|--keep-data>"
   echo "installing the version $pinnedVersion by default"
   exit 1
+  echo "config script to switch Specter Desktop on, off, configure or update"
+  echo "bonus.specter.sh [status|on|off|config|update] <mainnet|testnet|signet>"
+  echo "installing the version $pinnedVersion by default"
+  exit 1
 fi
 
 echo "# bonus.specter.sh $1 $2"
 
 source /mnt/hdd/raspiblitz.conf
 if [ $# -gt 1 ]; then
+if [ $# -gt 1 ]; then
   CHAIN=$2
   chain=${CHAIN::-3}
 fi
+
+function check_and_install_python310() {
+  if ! /home/specter/.env/bin/python3 --version | grep -q "3.10"; then
+    echo "#    --> Python 3.10 is not installed. Installing it now."
+    # Install the required packages to add a PPA
+    sudo apt install software-properties-common gnupg2 -y
+    # Add the deadsnakes PPA
+    sudo sh -c 'echo "deb http://ppa.launchpad.net/deadsnakes/ppa/ubuntu focal main" > /etc/apt/sources.list.d/deadsnakes.list'
+    # Add the repository's GPG key
+    sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys F23C5A6CF475977595C89F51BA6932366A755776
+    # Update the package index
+    sudo apt update
+    # Install Python 3.10 and the associated packages
+    sudo apt install -y python3.10 python3.10-venv python3.10-dev || exit 1
+    # Remove the existing virtual environment directory
+    sudo -u specter rm -rf /home/specter/.env/
+    # Create a new virtual environment with the new version of Python
+    sudo -u specter python3.10 -m venv /home/specter/.env/
+  fi
+}
 
 # get status key/values
 if [ "$1" = "status" ]; then
@@ -111,6 +137,7 @@ source <(grep -E "^blockfilterindex=.*" /mnt/hdd/${network}/${network}.conf)
 function configure_specter {
   echo "#    --> creating App-config"
   if [ "${runBehindTor}" = "on" ]; then
+  if [ "${runBehindTor}" = "on" ]; then
     proxy="socks5h://localhost:9050"
     torOnly="true"
     tor_control_port="9051"
@@ -119,6 +146,7 @@ function configure_specter {
     torOnly="false"
     tor_control_port=""
   fi
+  cat >/home/admin/config.json <<EOF
   cat >/home/admin/config.json <<EOF
 {
     "auth": {
@@ -145,6 +173,7 @@ EOF
 
   echo "# Connect Specter to the default mainnet node"
   cat >/home/admin/default.json <<EOF
+  cat >/home/admin/default.json <<EOF
 {
     "name": "raspiblitz_mainnet",
     "alias": "default",
@@ -161,6 +190,8 @@ EOF
 EOF
   sudo mv /home/admin/default.json /home/specter/.specter/nodes/default.json
   sudo chown -RL specter:specter /home/specter/
+  sudo mv /home/admin/default.json /home/specter/.specter/nodes/default.json
+  sudo chown -RL specter:specter /home/specter/
 
   if [ "${chain}" != "main" ]; then
     if [ "${chain}" = "test" ]; then
@@ -169,7 +200,16 @@ EOF
       portprefix=3
     fi
     PORT="${portprefix}8332"
+  if [ "${chain}" != "main" ]; then
+    if [ "${chain}" = "test" ]; then
+      portprefix=1
+    elif [ "${chain}" = "sig" ]; then
+      portprefix=3
+    fi
+    PORT="${portprefix}8332"
 
+    echo "# Connect Specter to the raspiblitz_${chain}net node"
+    cat >/home/admin/raspiblitz_${chain}net.json <<EOF
     echo "# Connect Specter to the raspiblitz_${chain}net node"
     cat >/home/admin/raspiblitz_${chain}net.json <<EOF
 {
@@ -186,6 +226,9 @@ EOF
     "fullpath": "/home/specter/.specter/nodes/raspiblitz_${chain}net.json"
 }
 EOF
+    sudo mv /home/admin/raspiblitz_${chain}net.json /home/specter/.specter/nodes/raspiblitz_${chain}net.json
+    sudo chown -RL specter:specter /home/specter/
+  fi
     sudo mv /home/admin/raspiblitz_${chain}net.json /home/specter/.specter/nodes/raspiblitz_${chain}net.json
     sudo chown -RL specter:specter /home/specter/
   fi
@@ -238,7 +281,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "#    --> creating a virtualenv"
     sudo -u specter virtualenv --python=python3 /home/specter/.env
 
-    echo "#    --> pip-installing specter"
+    check_and_install_python310
+    sudo -u specter /home/specter/.env/bin/python3 -m pip install --upgrade pip
+
+   echo "#    --> pip-installing specter"
     sudo -u specter /home/specter/.env/bin/python3 -m pip install --upgrade cryptoadvance.specter==$pinnedVersion || exit 1
 
     # activating Authentication here ...
@@ -262,6 +308,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     # Ledger
     cat >/home/admin/20-hw1.rules <<EOF
+    cat >/home/admin/20-hw1.rules <<EOF
  HW.1 / Nano
 SUBSYSTEMS=="usb", ATTRS{idVendor}=="2581", ATTRS{idProduct}=="1b7c|2b7c|3b7c|4b7c", TAG+="uaccess", TAG+="udev-acl", OWNER="specter"
 # Blue
@@ -277,6 +324,7 @@ SUBSYSTEMS=="usb", ATTRS{idVendor}=="2c97", ATTRS{idProduct}=="0004|4000|4001|40
 EOF
 
     # ColdCard
+    cat >/home/admin/51-coinkite.rules <<EOF
     cat >/home/admin/51-coinkite.rules <<EOF
 # Linux udev support file.
 #
@@ -296,6 +344,7 @@ KERNEL=="hidraw*", ATTRS{idVendor}=="d13e", ATTRS{idProduct}=="cc10", GROUP="plu
 EOF
 
     # Trezor
+    cat >/home/admin/51-trezor.rules <<EOF
     cat >/home/admin/51-trezor.rules <<EOF
 # Trezor: The Original Hardware Wallet
 # https://trezor.io/
@@ -317,6 +366,7 @@ KERNEL=="hidraw*", ATTRS{idVendor}=="1209", ATTRS{idProduct}=="53c1", MODE="0660
 EOF
 
     # KeepKey
+    cat >/home/admin/51-usb-keepkey.rules <<EOF
     cat >/home/admin/51-usb-keepkey.rules <<EOF
 # KeepKey: Your Private Bitcoin Vault
 # http://www.keepkey.com/
@@ -341,6 +391,7 @@ EOF
 
     # install service
     echo "#    --> Install specter systemd service"
+    cat >/home/admin/specter.service <<EOF
     cat >/home/admin/specter.service <<EOF
 # systemd unit for Specter Desktop
 
@@ -388,6 +439,7 @@ EOF
   # setting value in raspi blitz config
   /home/admin/config.scripts/blitz.conf.sh set specter "on"
 
+
   # Hidden Service for SERVICE if Tor is active
   if [ "${runBehindTor}" = "on" ]; then
     # make sure to keep in sync with tor.network.sh script
@@ -413,6 +465,7 @@ EOF
     echo "# blockfilterindex is already active"
   fi
 
+  # needed for API/WebUI as signal that install ran thru
   # needed for API/WebUI as signal that install ran thru
   echo "result='OK'"
   exit 0
@@ -466,6 +519,8 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     bitcoin-cli listwallets | jq -r .[] | tail -n +2
     for i in $(bitcoin-cli listwallets | jq -r .[] | tail -n +2); do
       name=$(echo $i | cut -d"/" -f2)
+    for i in $(bitcoin-cli listwallets | jq -r .[] | tail -n +2); do
+      name=$(echo $i | cut -d"/" -f2)
       bitcoin-cli unloadwallet specter/$name
     done
     echo "#    --> Removing the /mnt/hdd/app-data/.specter"
@@ -480,6 +535,8 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   echo "#    --> OK Specter Desktop removed."
 
   # needed for API/WebUI as signal that install ran thru
+
+  # needed for API/WebUI as signal that install ran thru
   echo "result='OK'"
   exit 0
 fi
@@ -487,6 +544,9 @@ fi
 # update
 if [ "$1" = "update" ]; then
   echo "#    --> UPDATING Specter Desktop "
+
+  check_and_install_python310
+
   sudo -u specter /home/specter/.env/bin/python3 -m pip install --upgrade pip
   sudo -u specter /home/specter/.env/bin/python3 -m pip install --upgrade cryptoadvance.specter
   echo "#    --> Updated to the latest in https://pypi.org/project/cryptoadvance.specter/#history ***"
