@@ -134,7 +134,7 @@ if [ ${runOnline} -eq 1 ]; then
   fi
   if [ ${online} -eq 0 ]; then
     # test with netcat to avoid firewall issues with ICMP packets
-    online=$(nc -v -z -w 8.8.8.8 53 &> /dev/null && echo "1" || echo "0")
+    online=$(nc -v -z -w 3 8.8.8.8 53 &> /dev/null && echo "1" || echo "0")
   fi
   if [ ${online} -eq 0 ]; then
     # re-test with other server
