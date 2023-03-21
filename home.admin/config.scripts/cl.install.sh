@@ -374,6 +374,7 @@ alias ${netprefix}clconf=\"sudo nano ${CLCONF}\"
   fi
 
   # if this is the first lightning mainnet turned on - make default
+  [ "${lightning}" == "none" ] && lightning=""
   if [ "${CHAIN}" == "mainnet" ] && [ "${lightning}" == "" ]; then
     echo "# CL is now the default lightning implementation"
     /home/admin/config.scripts/blitz.conf.sh set lightning cl
