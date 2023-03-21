@@ -13,7 +13,7 @@ CLVERSION=v23.02.2
 # PGPpubkeyFingerprint="8F55EE750D950E3E"
 
 # https://github.com/ElementsProject/lightning/tree/master/contrib/keys
-PGPsigner="rustyrussel" # rustyrussel D9200E6CD1ADB8F1 # cdecker A26D6D9FE088ED58 # niftynei BFF0F67810C1EED1 # endothermicdev 8F55EE750D950E3E
+PGPsigner="rustyrussell" # rustyrussell D9200E6CD1ADB8F1 # cdecker A26D6D9FE088ED58 # niftynei BFF0F67810C1EED1 # endothermicdev 8F55EE750D950E3E
 PGPpubkeyLink="https://raw.githubusercontent.com/ElementsProject/lightning/master/contrib/keys/${PGPsigner}.txt"
 PGPpubkeyFingerprint="D9200E6CD1ADB8F1"
 
