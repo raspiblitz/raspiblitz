@@ -107,7 +107,7 @@ if [ "$1" = "menu" ]; then
   dialogTitle=" FinTS / HBCI Interface "
 
   # basic info text - for an web app how to call with http & self-signed https
-  dialogText="This is an very early experimental feature.\n\nSee GitHub Repo for more Details:\n${GITHUB_REPO}\n\nTelegram Community Chat & Support (say hi):\nhttps://t.me/LN_FinTS\n\nUse OPTIONS to config with LNbits & Debug.\n\n"
+  dialogText="This is an very early experimental feature.\nServer-URL: 127.0.0.1:${PORT_CLEAR}\n\nSee GitHub Repo for more Details:\n${GITHUB_REPO}\n\nTelegram Community Chat & Support (say hi):\nhttps://t.me/LN_FinTS\n\nUse OPTIONS to config with LNbits & Debug.\n\n"
 
   # add tor info (if available)
   if [ "${toraddress}" != "" ]; then
