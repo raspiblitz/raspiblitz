@@ -21,7 +21,7 @@ cp ./*.proto ./protobuffs
 
 Now copy the generated RPC libs per SFTP over to your Laptop and add them to the `/home/admin/config.scripts/lndlibs`.
 
-sftp -r admin@192.168.X.X:/home/admin/protobuffs ./protobuffs
+scp -r admin@192.168.X.X:/home/admin/protobuffs ./protobuffs
 
 Make sure the first lines (ignore comments) of the `lightning_pb2_grpc.py` look like the following for python3 compatibility:
 ```
