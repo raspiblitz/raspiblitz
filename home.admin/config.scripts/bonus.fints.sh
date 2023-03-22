@@ -218,9 +218,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo -u ${APPID} git clone ${GITHUB_REPO} /home/${APPID}/${APPID}
   cd /home/${APPID}/${APPID}
 
-  # TODO remove later and use master branch
-  sudo -u fints git checkout lnbits-via-mt940
-
   if [ "${GITHUB_TAG}" != "" ]; then
     sudo -u ${APPID} git reset --hard $GITHUB_TAG
   fi
