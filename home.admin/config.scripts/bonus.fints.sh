@@ -317,7 +317,7 @@ WantedBy=multi-user.target
   sudo sed -i "s/^rdh_port =.*/rdh_port = ${PORT_CLEAR}/g" /home/fints/config/fuelifints.properties
   sudo sed -i "s/^ssl_port =.*/ssl_port = ${PORT_SSL}/g" /home/fints/config/fuelifints.properties
   sudo sed -i "s/^keystore_location =.*/keystore_location = \/mnt\/hdd\/app-data\/fints\/keystore.jks/g" /home/fints/config/fuelifints.properties
-  sudo sed -i "s/^keysotre_password =.*/keysotre_password = raspiblitz/g" /home/fints/config/fuelifints.properties
+  sudo sed -i "s/^keystore_password =.*/keystore_password = raspiblitz/g" /home/fints/config/fuelifints.properties
 
   # config app basics: blz.banking2.properties.example
   sudo -u fints cp /home/fints/fints/config/blz.banking2.properties.example /home/fints/config/blz.banking2.properties
