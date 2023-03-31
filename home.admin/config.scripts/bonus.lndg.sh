@@ -5,9 +5,9 @@ VERSION="1.6.0 "
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
- echo "config script to install, update or uninstall LNDG"
- echo "bonus.lndg.sh [on|off|menu|update|setpassword|status]"
- exit 1
+  echo "config script to install, update or uninstall LNDG"
+  echo "bonus.lndg.sh [on|off|menu|update|setpassword|status]"
+  exit 1
 fi
 
 # check and load raspiblitz config
@@ -110,7 +110,7 @@ if __name__ == '__main__':
 
     sudo chmod 644 /home/lndg/lndg/changepassword.py
     sudo chown lndg:lndg /home/lndg/lndg/changepassword.py
-  sudo -u lndg /home/lndg/lndg/.venv/bin/python /home/lndg/lndg/changepassword.py "$2"
+    sudo -u lndg /home/lndg/lndg/.venv/bin/python /home/lndg/lndg/changepassword.py "$2"
   fi
   echo "ok, password changed to $2"
   exit 0
@@ -152,10 +152,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # first check and see if a database exists
     isDatabase=$(sudo ls /mnt/hdd/app-data/lndg/data/db.sqlite3 2>/dev/null | grep -c 'db.sqlite3')
     if ! [ ${isDatabase} -eq 0 ]; then
-    if [ "$2" == "deletedatabase" ]; then
+      if [ "$2" == "deletedatabase" ]; then
     
       # deleting old database and moving new database
-  echo "Deleting existing database and creating new one"
+        echo "Deleting existing database and creating new one"
         sudo rm -rf /mnt/hdd/app-data/lndg/data
         sudo cp -p -r /home/lndg/lndg/data /mnt/hdd/app-data/lndg/data
         sudo rm /home/lndg/lndg/data/db.sqlite3
@@ -166,11 +166,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
         # using existing database, so remove newly created database and link to existing one
         echo "Database already exists, using existing database"
         sudo rm /home/lndg/lndg/data/db.sqlite3
-  sudo chown -R lndg:lndg /mnt/hdd/app-data/lndg
-  sudo chmod -R 755 /mnt/hdd/app-data/lndg
-  sudo chmod 644 /mnt/hdd/app-data/lndg/data/db.sqlite3
+        sudo chown -R lndg:lndg /mnt/hdd/app-data/lndg
+        sudo chmod -R 755 /mnt/hdd/app-data/lndg
+        sudo chmod 644 /mnt/hdd/app-data/lndg/data/db.sqlite3
         sudo -u lndg ln -sf /mnt/hdd/app-data/lndg/data/db.sqlite3 /home/lndg/lndg/data/db.sqlite3
-  sudo -u lndg /home/lndg/lndg/.venv/bin/python manage.py migrate
+        sudo -u lndg /home/lndg/lndg/.venv/bin/python manage.py migrate
       fi
     else
   
@@ -226,11 +226,11 @@ if __name__ == '__main__':
     sudo rm /home/lndg/lndg/lndg/settings.py
     sudo /home/lndg/lndg/.venv/bin/python initialize.py -wn
 
-  # install gunicorn application server
+    # install gunicorn application server
     sudo /home/lndg/lndg/.venv/bin/python -m pip install 'gunicorn==20.1.*'
 
-  # switch back to home directory
-  cd /home/admin/
+    # switch back to home directory
+    cd /home/admin/
 
     echo "# Install gunicorn.service file for gunicorn lndg.wsgi application server"
     echo "
@@ -258,13 +258,13 @@ WantedBy=multi-user.target
 
     # setup nginx .conf files
     if ! [ -f /etc/nginx/sites-available/lndg_ssl.conf ]; then
-       sudo cp -f /home/admin/assets/nginx/sites-available/lndg_ssl.conf /etc/nginx/sites-available/lndg_ssl.conf
+      sudo cp -f /home/admin/assets/nginx/sites-available/lndg_ssl.conf /etc/nginx/sites-available/lndg_ssl.conf
     fi
     if ! [ -f /etc/nginx/sites-available/lndg_tor.conf ]; then
-       sudo cp -f /home/admin/assets/nginx/sites-available/lndg_tor.conf /etc/nginx/sites-available/lndg_tor.conf
+      sudo cp -f /home/admin/assets/nginx/sites-available/lndg_tor.conf /etc/nginx/sites-available/lndg_tor.conf
     fi
     if ! [ -f /etc/nginx/sites-available/lndg_tor_ssl.conf ]; then
-       sudo cp -f /home/admin/assets/nginx/sites-available/lndg_tor_ssl.conf /etc/nginx/sites-available/lndg_tor_ssl.conf
+      sudo cp -f /home/admin/assets/nginx/sites-available/lndg_tor_ssl.conf /etc/nginx/sites-available/lndg_tor_ssl.conf
     fi
 
     # setup nginx symlinks
@@ -449,6 +449,7 @@ if [ "$1" = "update" ]; then
   cd /home/lndg/lndg || exit 1
   sudo -u lndg git pull
   sudo -u lndg .venv/bin/pip install requests
+  sudo -u lndg .venv/bin/pip install -r requirements.txt
   sudo -u lndg .venv/bin/python manage.py migrate
   
   # reinitialize settings.py in case update requires it
