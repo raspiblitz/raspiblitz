@@ -33,8 +33,11 @@ function check_and_install_python310() {
     sudo apt install software-properties-common gnupg2 -y
     # Add the deadsnakes PPA
     sudo sh -c 'echo "deb http://ppa.launchpad.net/deadsnakes/ppa/ubuntu focal main" > /etc/apt/sources.list.d/deadsnakes.list'
-    # Add the repository's GPG key
-    sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys F23C5A6CF475977595C89F51BA6932366A755776
+    # Add the repository's GPG key without using apt-key
+    curl -sSL "http://keyserver.ubuntu.com/pks/lookup?op=get&search=0xBA6932366A755776" -o BA6932366A755776.gpg
+    sudo gpg --no-default-keyring --keyring gnupg-ring:/etc/apt/trusted.gpg.d/BA6932366A755776.gpg --import BA6932366A755776.gpg
+    sudo chmod 644 /etc/apt/trusted.gpg.d/BA6932366A755776.gpg
+    rm BA6932366A755776.gpg
     # Update the package index
     sudo apt update
     # Install Python 3.10 and the associated packages
