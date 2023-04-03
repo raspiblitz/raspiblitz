@@ -1,8 +1,7 @@
 #!/bin/bash
 # https://github.com/cryptoadvance/specter-desktop
 
-pinnedVersion="1.13.1"
-pinnedVersion="2.0.0"
+pinnedVersion="2.0.1"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -158,7 +157,6 @@ function configure_specter {
         "rate_limit": 10,
         "registration_link_timeout": 1
     },
-    "active_node_alias": "raspiblitz_${chain}net",
     "proxy_url": "${proxy}",
     "only_tor": "${torOnly}",
     "tor_control_port": "${tor_control_port}",
@@ -169,74 +167,6 @@ EOF
   sudo mkdir -p /home/specter/.specter/nodes
   sudo mv /home/admin/config.json /home/specter/.specter/config.json
   sudo chown -RL specter:specter /home/specter/
-
-  echo "# Adding the raspiblitz_${chain}net node to Specter"
-  RPCUSER=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcuser | cut -c 9-)
-  PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
-
-  echo "# Connect Specter to the default mainnet node"
-  cat >/home/admin/default.json <<EOF
-  cat >/home/admin/default.json <<EOF
-{
-    "python_class": "cryptoadvance.specter.node.Node",
-    "fullpath": "/home/specter/.specter/nodes/default.json",
-    "name": "default",
-    "alias": "default",
-    "autodetect": false,
-    "datadir": "/home/specter/.bitcoin",
-    "user": "${RPCUSER}",
-    "password": "${PASSWORD_B}",
-    "port": "8332",
-    "host": "localhost",
-    "protocol": "http",
-    "node_type": "BTC"
-}
-EOF
-  sudo mv /home/admin/default.json /home/specter/.specter/nodes/default.json
-  sudo chown -RL specter:specter /home/specter/
-  sudo mv /home/admin/default.json /home/specter/.specter/nodes/default.json
-  sudo chown -RL specter:specter /home/specter/
-
-  if [ "${chain}" != "main" ]; then
-    if [ "${chain}" = "test" ]; then
-      portprefix=1
-    elif [ "${chain}" = "sig" ]; then
-      portprefix=3
-    fi
-    PORT="${portprefix}8332"
-  if [ "${chain}" != "main" ]; then
-    if [ "${chain}" = "test" ]; then
-      portprefix=1
-    elif [ "${chain}" = "sig" ]; then
-      portprefix=3
-    fi
-    PORT="${portprefix}8332"
-
-    echo "# Connect Specter to the raspiblitz_${chain}net node"
-    cat >/home/admin/raspiblitz_${chain}net.json <<EOF
-    echo "# Connect Specter to the raspiblitz_${chain}net node"
-    cat >/home/admin/raspiblitz_${chain}net.json <<EOF
-{
-    "python_class": "cryptoadvance.specter.node.Node",
-    "fullpath": "/home/specter/.specter/nodes/raspiblitz_${chain}net.json"
-    "name": "raspiblitz_${chain}net",
-    "alias": "raspiblitz_${chain}net",
-    "autodetect": false,
-    "datadir": "",
-    "user": "${RPCUSER}",
-    "password": "${PASSWORD_B}",
-    "port": "${PORT}",
-    "host": "localhost",
-    "protocol": "http",
-    "node_type": "BTC"
-}
-EOF
-    sudo mv /home/admin/raspiblitz_${chain}net.json /home/specter/.specter/nodes/raspiblitz_${chain}net.json
-    sudo chown -RL specter:specter /home/specter/
-  fi
-    sudo mv /home/admin/raspiblitz_${chain}net.json /home/specter/.specter/nodes/raspiblitz_${chain}net.json
-    sudo chown -RL specter:specter /home/specter/
-  fi
 }
 
 # config
@@ -270,11 +200,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "# add the user to the debian-tor group"
     sudo usermod -a -G debian-tor specter
 
-    # add the user to the bitcoin group
+    echo "# add the user to the bitcoin group"
     sudo usermod -a -G bitcoin specter
-    # symlink the bitcoind data to the home dir
-    sudo rm -rf /home/specter/.bitcoind # not a symlink.. delete it silently
-    sudo ln -s /mnt/hdd/bitcoin/ /home/specter/.bitcoin
 
     # store data on the disk
     sudo mkdir -p /mnt/hdd/app-data/.specter 2>/dev/null
@@ -539,6 +466,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   fi
 
   echo "#    --> Removing the specter user and home directory"
+  sudo userdel -rf specter 2>/dev/null
   sudo userdel -rf specter 2>/dev/null
   echo "#    --> OK Specter Desktop removed."
 
