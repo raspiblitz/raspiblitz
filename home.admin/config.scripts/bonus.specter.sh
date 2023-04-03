@@ -178,17 +178,18 @@ EOF
   cat >/home/admin/default.json <<EOF
   cat >/home/admin/default.json <<EOF
 {
-    "name": "raspiblitz_mainnet",
+    "python_class": "cryptoadvance.specter.node.Node",
+    "fullpath": "/home/specter/.specter/nodes/default.json",
+    "name": "default",
     "alias": "default",
     "autodetect": false,
-    "datadir": "",
+    "datadir": "/home/specter/.bitcoin",
     "user": "${RPCUSER}",
     "password": "${PASSWORD_B}",
     "port": "8332",
     "host": "localhost",
     "protocol": "http",
-    "external_node": true,
-    "fullpath": "/home/specter/.specter/nodes/default.json"
+    "node_type": "BTC"
 }
 EOF
   sudo mv /home/admin/default.json /home/specter/.specter/nodes/default.json
@@ -216,6 +217,8 @@ EOF
     echo "# Connect Specter to the raspiblitz_${chain}net node"
     cat >/home/admin/raspiblitz_${chain}net.json <<EOF
 {
+    "python_class": "cryptoadvance.specter.node.Node",
+    "fullpath": "/home/specter/.specter/nodes/raspiblitz_${chain}net.json"
     "name": "raspiblitz_${chain}net",
     "alias": "raspiblitz_${chain}net",
     "autodetect": false,
@@ -225,8 +228,7 @@ EOF
     "port": "${PORT}",
     "host": "localhost",
     "protocol": "http",
-    "external_node": true,
-    "fullpath": "/home/specter/.specter/nodes/raspiblitz_${chain}net.json"
+    "node_type": "BTC"
 }
 EOF
     sudo mv /home/admin/raspiblitz_${chain}net.json /home/specter/.specter/nodes/raspiblitz_${chain}net.json
@@ -268,8 +270,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "# add the user to the debian-tor group"
     sudo usermod -a -G debian-tor specter
 
-    echo "# add the user to the bitcoin group"
+    # add the user to the bitcoin group
     sudo usermod -a -G bitcoin specter
+    # symlink the bitcoind data to the home dir
+    sudo rm -rf /home/specter/.bitcoind # not a symlink.. delete it silently
+    sudo ln -s /mnt/hdd/bitcoin/ /home/specter/.bitcoin
 
     # store data on the disk
     sudo mkdir -p /mnt/hdd/app-data/.specter 2>/dev/null
@@ -509,7 +514,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     deleteData="0"
   fi
   if [ "${deleteData}" == "" ]; then
-    if (whiptail --title "Delete Data?" --yes-button "Keep Data" --no-button "Delete Data" --yesno "Do you want to delete all Data related to specter? This includes also Bitcoin-Core-Wallets managed by specter?" 8 78) then
+    if (whiptail --title "Delete Data?" --yes-button "Keep Data" --no-button "Delete Data" --yesno "Do you want to delete all data related to Specter? This includes the Bitcoin Core wallets managed by Specter." 0 0); then
       deleteData="0"
     else
       deleteData="1"
