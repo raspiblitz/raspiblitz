@@ -36,6 +36,7 @@ if [ ${#bitcoinminds} -eq 0 ]; then bitcoinminds="off"; fi
 if [ ${#squeaknode} -eq 0 ]; then squeaknode="off"; fi
 if [ ${#itchysats} -eq 0 ]; then itchysats="off"; fi
 if [ ${#lightningtipbot} -eq 0 ]; then lightningtipbot="off"; fi
+if [ ${#fints} -eq 0 ]; then fints="off"; fi
 
 # show select dialog
 echo "run dialog ..."
@@ -86,6 +87,7 @@ if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ]; then
 fi
 
 OPTIONS+=(ma 'Homer Dashboard' ${homer})
+OPTIONS+=(fn 'FinTS/HBCI Interface (experimental)' ${fints})
 
 CHOICES=$(dialog --title ' Additional Mainnet Services ' \
           --checklist ' use spacebar to activate/de-activate ' \
@@ -732,6 +734,17 @@ if [ "${itchysats}" != "${choice}" ]; then
   fi
 else
   echo "ItchySats setting unchanged."
+fi
+
+# fints process choice  
+choice="off"; check=$(echo "${CHOICES}" | grep -c "fn")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${fints}" != "${choice}" ]; then
+  echo "fints setting changed .."
+  anychange=1
+  sudo -u admin /home/admin/config.scripts/bonus.fints.sh ${choice}
+else
+  echo "fints setting unchanged."
 fi
 
 if [ ${anychange} -eq 0 ]; then

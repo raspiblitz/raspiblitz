@@ -406,6 +406,17 @@ else
   echo "- SPHINX is OFF by config"
 fi
 
+if [ "${fints}" == "on" ]; then  
+  echo
+  echo "*** LAST 20 FINTS LOGS ***"
+  echo "sudo journalctl -u fints -b --no-pager -n20"
+  sudo journalctl -u fints -b --no-pager -n20
+  echo "sudo tail -n 30 /home/fints/log/fuelifints.log"
+  sudo tail -n 30 /home/fints/log/fuelifints.log
+else
+  echo "- FINTS is OFF by config"
+fi
+
 echo
 echo "*** MOUNTED DRIVES ***"
 echo "df -T -h"
