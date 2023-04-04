@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # https://github.com/lightninglabs/lightning-terminal/releases
-LITVERSION="0.8.4-alpha"
+LITVERSION="0.9.0-alpha"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -23,6 +23,9 @@ elif [ $PGPsigner = guggero ];then
 elif [ $PGPsigner = roasbeef ];then
   PGPpkeys="https://keybase.io/${PGPsigner}/pgp_keys.asc "
   PGPcheck="3BBD59E99B280306"
+elif [ $PGPsigner = ellemouton ];then
+  PGPpkeys="https://keybase.io/ellemo/pgp_keys.asc "
+  PGPcheck="D7D916376026F17"
 fi
 
 source /mnt/hdd/raspiblitz.conf
