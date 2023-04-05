@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # https://github.com/Ride-The-Lightning/c-lightning-REST/releases/
-CLRESTVERSION="v0.10.1"
+CLRESTVERSION="v0.10.2"
 
 # help
-if [ $# -eq 0 ]||[ "$1" = "-h" ]||[ "$1" = "--help" ];then
+if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
   echo "Core-Lightning-REST install script"
   echo "The default version is: $CLRESTVERSION"
   echo "mainnet | testnet | signet instances can run parallel"
@@ -29,7 +29,7 @@ source <(/home/admin/config.scripts/network.aliases.sh getvars cl $2)
 
 echo "# Running 'cl.rest.sh $*'"
 
-if [ "$1" = connect ];then
+if [ "$1" = connect ]; then
   if ! systemctl is-active --quiet ${netprefix}clrest; then
     /home/admin/config.scripts/cl.rest.sh on ${CHAIN}
   fi
@@ -58,74 +58,74 @@ if [ "$1" = connect ];then
 
   # deactivated
   function showStepByStepQR() {
-  clear
-  echo
-  sudo /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
-  echo "The Tor address is shown as a QRcode below and on the LCD"
-  echo "Scan it to your phone with a QR scanner app and paste it to: 'Host'"
-  echo
-  echo "Host: ${toraddress}"
-  echo "REST Port: 443"
-  echo
-  qrencode -t ANSIUTF8 "${toraddress}"
-  echo
-  echo
-  echo "Alternatively to connect through the LAN the address is:"
-  echo "https://${localip}"
-  echo "REST Port: ${portprefix}6100"
-  echo
-  echo "# Press enter to continue to show the Macaroon"
-  read key
-  sudo /home/admin/config.scripts/blitz.display.sh hide
-  sudo /home/admin/config.scripts/blitz.display.sh qr "${hex_macaroon}"
-  clear
-  echo
-  echo "The Macaroon is shown as a QRcode below and on the LCD"
-  echo "Scan it to your phone with a QR scanner app and paste it to: 'Macaroon (Hex format)'"
-  echo
-  echo "Macaroon: ${hex_macaroon}"
-  echo
-  qrencode -t ANSIUTF8 "${hex_macaroon}"
-  echo
-  echo "# Press enter to hide the QRcode from the LCD"
-  read key
-  sudo /home/admin/config.scripts/blitz.display.sh hide
-  exit 0
+    clear
+    echo
+    sudo /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
+    echo "The Tor address is shown as a QRcode below and on the LCD"
+    echo "Scan it to your phone with a QR scanner app and paste it to: 'Host'"
+    echo
+    echo "Host: ${toraddress}"
+    echo "REST Port: 443"
+    echo
+    qrencode -t ANSIUTF8 "${toraddress}"
+    echo
+    echo
+    echo "Alternatively to connect through the LAN the address is:"
+    echo "https://${localip}"
+    echo "REST Port: ${portprefix}6100"
+    echo
+    echo "# Press enter to continue to show the Macaroon"
+    read key
+    sudo /home/admin/config.scripts/blitz.display.sh hide
+    sudo /home/admin/config.scripts/blitz.display.sh qr "${hex_macaroon}"
+    clear
+    echo
+    echo "The Macaroon is shown as a QRcode below and on the LCD"
+    echo "Scan it to your phone with a QR scanner app and paste it to: 'Macaroon (Hex format)'"
+    echo
+    echo "Macaroon: ${hex_macaroon}"
+    echo
+    qrencode -t ANSIUTF8 "${hex_macaroon}"
+    echo
+    echo "# Press enter to hide the QRcode from the LCD"
+    read key
+    sudo /home/admin/config.scripts/blitz.display.sh hide
+    exit 0
   }
 
   function showClRestQr() {
-  # c-lightning-rest://http://your_hidden_service.onion:your_port?&macaroon=your_macaroon_file_in_HEX&protocol=http
-  clear
-  echo
-  sudo /home/admin/config.scripts/blitz.display.sh qr "${clresttor}"
-  echo "The string to connect over Tor is shown as a QRcode below and on the LCD"
-  echo "Scan it to Zeus using the c-lightning-REST option"
-  echo
-  echo "c-lightning-REST connection string:"
-  echo "${clresttor}"
-  echo
-  qrencode -t ANSIUTF8 "${clresttor}"
-  echo
-  echo "# Press enter to show the string to connect over LAN"
-  read key
-  sudo /home/admin/config.scripts/blitz.display.sh hide
-  sudo /home/admin/config.scripts/blitz.display.sh qr "${clrestlan}"
-  clear
-  echo
-  echo "The string to connect over the local the network is shown as a QRcode below and on the LCD"
-  echo "Scan it to Zeus using the c-lightning-REST option"
-  echo "This will only work if your node si connected to the same network"
-  echo "To connect reemotely consider using a VPN like ZeroTier or Tailscale"
-  echo
-  echo "c-lightning-REST connection string:"
-  echo "${clrestlan}"
-  echo
-  qrencode -t ANSIUTF8 "${clrestlan}"
-  echo
-  echo "# Press enter to hide the QRcode from the LCD"
-  read key
-  sudo /home/admin/config.scripts/blitz.display.sh hide
-  exit 0
+    # c-lightning-rest://http://your_hidden_service.onion:your_port?&macaroon=your_macaroon_file_in_HEX&protocol=http
+    clear
+    echo
+    sudo /home/admin/config.scripts/blitz.display.sh qr "${clresttor}"
+    echo "The string to connect over Tor is shown as a QRcode below and on the LCD"
+    echo "Scan it to Zeus using the c-lightning-REST option"
+    echo
+    echo "c-lightning-REST connection string:"
+    echo "${clresttor}"
+    echo
+    qrencode -t ANSIUTF8 "${clresttor}"
+    echo
+    echo "# Press enter to show the string to connect over LAN"
+    read key
+    sudo /home/admin/config.scripts/blitz.display.sh hide
+    sudo /home/admin/config.scripts/blitz.display.sh qr "${clrestlan}"
+    clear
+    echo
+    echo "The string to connect over the local the network is shown as a QRcode below and on the LCD"
+    echo "Scan it to Zeus using the c-lightning-REST option"
+    echo "This will only work if your node si connected to the same network"
+    echo "To connect reemotely consider using a VPN like ZeroTier or Tailscale"
+    echo
+    echo "c-lightning-REST connection string:"
+    echo "${clrestlan}"
+    echo
+    qrencode -t ANSIUTF8 "${clrestlan}"
+    echo
+    echo "# Press enter to hide the QRcode from the LCD"
+    read key
+    sudo /home/admin/config.scripts/blitz.display.sh hide
+    exit 0
   }
 
   showClRestQr
@@ -138,14 +138,14 @@ if [ "$1" = on ]; then
   sudo systemctl stop ${netprefix}clrest
   sudo systemctl disable ${netprefix}clrest
 
-  if [ ! -f /home/bitcoin/c-lightning-REST/cl-rest.js ];then
+  if [ ! -f /home/bitcoin/c-lightning-REST/cl-rest.js ]; then
     cd /home/bitcoin || exit 1
     sudo -u bitcoin git clone https://github.com/saubyk/c-lightning-REST
     cd c-lightning-REST || exit 1
     sudo -u bitcoin git reset --hard $CLRESTVERSION
 
     sudo -u bitcoin /home/admin/config.scripts/blitz.git-verify.sh \
-     "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" "${CLRESTVERSION}" || exit 1
+      "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" "${CLRESTVERSION}" || exit 1
 
     sudo -u bitcoin npm install
   fi
@@ -163,10 +163,10 @@ if [ "$1" = on ]; then
     \"RPCCOMMANDS\": [\"*\"]
 }" | sudo -u bitcoin tee ./${CLNETWORK}/cl-rest-config.json
 
-  # copy clrest to a CLNETWORK subdor to make parallel networks possible
+  # copy clrest to a CLNETWORK subdir to make parallel networks possible
   sudo -u bitcoin mkdir /home/bitcoin/c-lightning-REST/${CLNETWORK}
   sudo -u bitcoin cp -r /home/bitcoin/c-lightning-REST/* \
-   /home/bitcoin/c-lightning-REST/${CLNETWORK}
+    /home/bitcoin/c-lightning-REST/${CLNETWORK}
 
   echo "
 # systemd unit for c-lightning-REST for ${CHAIN}
@@ -209,7 +209,7 @@ WantedBy=multi-user.target
   echo
 fi
 
-if [ "$1" = off ];then
+if [ "$1" = off ]; then
   echo "# Removing c-lightning-REST for ${CHAIN}"
   sudo systemctl stop ${netprefix}clrest
   sudo systemctl disable ${netprefix}clrest
@@ -217,7 +217,7 @@ if [ "$1" = off ];then
   echo "# Deny port ${portprefix}6100 through the firewall"
   sudo ufw deny "${portprefix}6100"
   /home/admin/config.scripts/tor.onion-service.sh off ${netprefix}clrest
-  if [ "$(echo "$@" | grep -c purge)" -gt 0 ];then
+  if [ "$(echo "$@" | grep -c purge)" -gt 0 ]; then
     echo "# Removing the source code and binaries"
     sudo rm -rf /home/bitcoin/c-lightning-REST
   fi
