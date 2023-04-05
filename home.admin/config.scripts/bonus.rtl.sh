@@ -548,7 +548,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   if [ "$(echo "$@" | grep -c purge)" -gt 0 ]; then
     /home/admin/config.scripts/bonus.rtl.sh uninstall
     if [ $LNTYPE = cl ]; then
-      /home/admin/config.scripts/cl.rest.sh off ${CHAIN}
+      /home/admin/config.scripts/cl.rest.sh off ${CHAIN} purge
     fi
     echo "# Delete all configs"
     sudo rm -rf /mnt/hdd/app-data/rtl
@@ -615,7 +615,7 @@ if [ "$1" = "update" ]; then
       echo
     fi
     currentRTLcommit=$(
-      cd /home/rtl/RTL
+      cd /home/rtl/RTL || exit 1
       git describe --tags
     )
     echo "# Updated RTL to $currentRTLcommit"
