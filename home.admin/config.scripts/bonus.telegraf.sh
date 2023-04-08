@@ -68,6 +68,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # 
   # changed according suggestion from @frennkie in #1501
   echo "deb https://repos.influxdata.com/debian ${DISTRIB_ID} stable" | sudo tee -a /etc/apt/sources.list.d/influxdb.list >/dev/null
+  #
+  # as the key is untrusted, this is a dirty fix
+  sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys D8FF8E1F7DF8B07E
   sudo apt-get update
   sudo apt-get install -y telegraf
 
@@ -77,6 +80,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   #
   # enable telegraf as admin for lnd
   sudo usermod telegraf -a -G lndadmin
+  #
+  # add telegraf to sudoers (for later application with smartmontools)
+  sudo usermod telegraf -a -G sudo
 
   # stop telegraf service
   sudo systemctl stop telegraf.service
@@ -84,7 +90,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "*** telegraf installation: copying telegraf config templates"
   # copy custom "telegraf.conf" template to the telegraf target dir
   # the telegraf inputs part goes into telegraf.d subdir
-  # this split into "telegraf.conf" and "telegraf.d/teöegraf_inputs.conf" is necessary
+  # this split into "telegraf.conf" and "telegraf.d/telegraf_inputs.conf" is necessary
   # as the the [[inputs.***]] part contains lines with the keywords
   # "urls", "database", "username" "password"
   # so the sed-replacement-part would get confused

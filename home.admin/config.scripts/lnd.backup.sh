@@ -198,9 +198,9 @@ if [ ${mode} = "lnd-export-gui" ]; then
   echo "********************************"
   echo 
   echo "ON YOUR MAC & LINUX LAPTOP - RUN IN NEW TERMINAL:"
-  echo "sftp '${fileowner}@${localip}:${filename}' ./"
+  echo "scp '${fileowner}@${localip}:${filename}' ./"
   echo "ON WINDOWS - RUN IN CMD:"
-  echo "sftp ${fileowner}@${localip}:${filename} ."
+  echo "scp ${fileowner}@${localip}:${filename} ."
   echo "Use password A to authenticate file transfer."
   echo
   echo "Check for correct file size after transfer: ${size} byte"
@@ -299,7 +299,7 @@ if [ ${mode} = "lnd-import-gui" ]; then
       echo "To make upload open a new terminal on your laptop,"
       echo "change into the directory where your lnd-rescue file is and"
       echo "COPY, PASTE AND EXECUTE THE FOLLOWING COMMAND:"
-      echo "sftp -r ./lnd-rescue-*.tar.gz ${defaultUploadUser}@${localip}:${defaultUploadPath}/"
+      echo "scp -r ./lnd-rescue-*.tar.gz ${defaultUploadUser}@${localip}:${defaultUploadPath}/"
       echo
       echo "Use ${passwordInfo} to authenticate file transfer."
       echo "PRESS ENTER when upload is done"
@@ -413,7 +413,7 @@ if [ ${mode} = "scb-export-gui" ]; then
   echo "**************************************"
   echo 
   echo "RUN THE FOLLOWING COMMAND ON YOUR LAPTOP IN NEW TERMINAL:"
-  echo "sftp -r ${fileuser}@${localip}:${filename} ./"
+  echo "scp -r ${fileuser}@${localip}:${filename} ./"
   echo ""
   echo "Use password A to authenticate file transfer."
   echo
@@ -492,7 +492,7 @@ if [ ${mode} = "scb-import-gui" ]; then
       echo "To make upload open a new terminal and change,"
       echo "into the directory where your lnd-rescue file is and"
       echo "COPY, PASTE AND EXECUTE THE FOLLOWING COMMAND:"
-      echo "sftp ./channel.backup ${defaultUploadUser}@${localip}:${defaultUploadPath}/"
+      echo "scp ./channel.backup ${defaultUploadUser}@${localip}:${defaultUploadPath}/"
       echo ""
       echo "Use ${passwordInfo} to authenticate file transfer."
       echo "PRESS ENTER when upload is done."

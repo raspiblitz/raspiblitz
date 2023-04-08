@@ -188,9 +188,9 @@ if [ ${mode} = "cl-export-gui" ]; then
   echo "*******************************************"
   echo 
   echo "ON YOUR MAC & LINUX LAPTOP - RUN IN NEW TERMINAL:"
-  echo "sftp '${fileowner}@${localip}:${filename}' ./"
+  echo "scp '${fileowner}@${localip}:${filename}' ./"
   echo "ON WINDOWS - RUN IN CMD:"
-  echo "sftp ${fileowner}@${localip}:${filename} ."
+  echo "scp ${fileowner}@${localip}:${filename} ."
   echo
   echo "Use password A to authenticate file transfer."
   echo "Check for correct file size after transfer: ${size} byte"
@@ -291,7 +291,7 @@ if [ ${mode} = "cl-import-gui" ]; then
       echo "To make upload open a new terminal on your laptop,"
       echo "change into the directory where your cl-rescue file is and"
       echo "COPY, PASTE AND EXECUTE THE FOLLOWING COMMAND:"
-      echo "sftp -r ./cl-rescue-*.tar.gz ${defaultUploadUser}@${localip}:${defaultUploadPath}/"
+      echo "scp -r ./cl-rescue-*.tar.gz ${defaultUploadUser}@${localip}:${defaultUploadPath}/"
       echo
       echo "Use ${passwordInfo} to authenticate file transfer."
       echo "PRESS ENTER when upload is done"

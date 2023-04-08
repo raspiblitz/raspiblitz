@@ -28,7 +28,7 @@ case "$1" in
     goOSversion=$(dpkg --print-architecture)
     if [ ${goOSversion} = "armv6l" ]; then
       checksum=${armv6lChecksum}
-    elif [ ${goOSversion{} = "arm64" ]; then
+    elif [ ${goOSversion} = "arm64" ]; then
       checksum=${arm64Checksum}
     elif [ ${goOSversion} = "amd64" ]; then
       checksum=${amd64Checksum}

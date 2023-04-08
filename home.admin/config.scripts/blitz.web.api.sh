@@ -95,25 +95,26 @@ if [ "$1" = "update-config" ]; then
     elif [ "${lightning}" == "cl" ]; then
 
       echo "# CONFIG Web API Lightning --> CL"
-      sed -i "s/^ln_node=.*/ln_node=cln_grpc/g" ./.env
+      sed -i "s/^ln_node=.*/ln_node=cln_jrpc/g" ./.env
+      sed -i "s/^cln_jrpc_path=.*/cln_jrpc_path="/mnt/hdd/app-data/.lightning/bitcoin/lightning-rpc"/g" ./.env
 
       # make sure cln-grpc is on
-      sudo /home/admin/config.scripts/cl-plugin.cln-grpc.sh on mainnet
+      # sudo /home/admin/config.scripts/cl-plugin.cln-grpc.sh on mainnet
 
       # get hex values of pem files
-      hexClient=$(sudo xxd -p -c2000 /home/bitcoin/.lightning/bitcoin/client.pem)
-      hexClientKey=$(sudo xxd -p -c2000 /home/bitcoin/.lightning/bitcoin/client-key.pem)
-      hexCa=$(sudo xxd -p -c2000 /home/bitcoin/.lightning/bitcoin/ca.pem)
-      if [ "${hexClient}" == "" ]; then
-        echo "# FAIL /home/bitcoin/.lightning/bitcoin/*.pem files maybe missing"
-      fi
+      # hexClient=$(sudo xxd -p -c2000 /home/bitcoin/.lightning/bitcoin/client.pem)
+      # hexClientKey=$(sudo xxd -p -c2000 /home/bitcoin/.lightning/bitcoin/client-key.pem)
+      # hexCa=$(sudo xxd -p -c2000 /home/bitcoin/.lightning/bitcoin/ca.pem)
+      # if [ "${hexClient}" == "" ]; then
+      #   echo "# FAIL /home/bitcoin/.lightning/bitcoin/*.pem files maybe missing"
+      # fi
 
       # update config with hex values
-      sed -i "s/^cln_grpc_cert=.*/cln_grpc_cert=${hexClient}/g" ./.env
-      sed -i "s/^cln_grpc_key=.*/cln_grpc_key=${hexClientKey}/g" ./.env
-      sed -i "s/^cln_grpc_ca=.*/cln_grpc_ca=${hexCa}/g" ./.env
-      sed -i "s/^cln_grpc_ip=.*/cln_grpc_ip=127.0.0.1/g" ./.env
-      sed -i "s/^cln_grpc_port=.*/cln_grpc_port=4772/g" ./.env
+      # sed -i "s/^cln_grpc_cert=.*/cln_grpc_cert=${hexClient}/g" ./.env
+      # sed -i "s/^cln_grpc_key=.*/cln_grpc_key=${hexClientKey}/g" ./.env
+      # sed -i "s/^cln_grpc_ca=.*/cln_grpc_ca=${hexCa}/g" ./.env
+      # sed -i "s/^cln_grpc_ip=.*/cln_grpc_ip=127.0.0.1/g" ./.env
+      # sed -i "s/^cln_grpc_port=.*/cln_grpc_port=4772/g" ./.env
 
     else
       echo "# CONFIG Web API Lightning --> OFF"

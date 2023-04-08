@@ -97,7 +97,7 @@ echo "******************************"
 # execute command
 if [ ${LNTYPE} = "cl" ];then
   # withdraw destination satoshi [feerate] [minconf] [utxos]
-  command="$lightningcli_alias withdraw ${address} all slow"
+  command="$lightningcli_alias withdraw ${address} all"
 elif [ ${LNTYPE} = "lnd" ];then
   command="$lncli_alias sendcoins --sweepall --addr=${address} --conf_target=36"
 fi
