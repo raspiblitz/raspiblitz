@@ -95,7 +95,7 @@ if [ "$1" = "update-config" ]; then
     elif [ "${lightning}" == "cl" ]; then
 
       echo "# CONFIG Web API Lightning --> CL"
-      sed -i "s/^ln_node=.*/ln_node=cln_grpc/g" ./.env
+      sed -i "s/^ln_node=.*/ln_node=cln_jrpc/g" ./.env
 
       # make sure cln-grpc is on
       sudo /home/admin/config.scripts/cl-plugin.cln-grpc.sh on mainnet
