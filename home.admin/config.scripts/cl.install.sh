@@ -118,7 +118,7 @@ if [ "$1" = "install" ]; then
   # check if the binary is already installed
   if [ -f /usr/local/bin/lightningd ]; then
     echo "Core Lightning binary already installed - done"
-    exit 1
+    exit 0
   fi
 
   # download and verify the source from github
