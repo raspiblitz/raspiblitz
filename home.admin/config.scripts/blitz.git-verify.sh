@@ -31,6 +31,18 @@ PGPpubkeyLink="$2"
 PGPpubkeyFingerprint="$3"
 
 wget -O /var/cache/raspiblitz/pgp_keys_${PGPsigner}.asc "${PGPpubkeyLink}"
+
+# in the case the wget above fails, try to use curl instead
+if [ $? -ne 0 ]; then
+  echo "# WARNING --> wget failed to download the PGP key, trying curl instead" >&2
+  curl -o /var/cache/raspiblitz/pgp_keys_${PGPsigner}.asc "${PGPpubkeyLink}"
+  if [ $? -ne 0 ]; then
+    echo "# ERROR --> curl failed to download the PGP key" >&2
+    echo "# Exiting" >&2
+    exit 6
+  fi
+fi
+
 gpg --import --import-options show-only /var/cache/raspiblitz/pgp_keys_${PGPsigner}.asc
 fingerprint=$(gpg --show-keys --keyid-format LONG /var/cache/raspiblitz/pgp_keys_${PGPsigner}.asc 2>/dev/null | grep "${PGPpubkeyFingerprint}" -c)
 if [ "${fingerprint}" -lt 1 ]; then

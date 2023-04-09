@@ -150,6 +150,15 @@ function release() {
   fi
 }
 
+# command: fatpack
+function fatpack() {
+  echo "Command to be called only on a fresh stopped minimal build to re-pack installs."
+  confirmMsg fatpack
+  if [ $confirm -eq 1 ]; then
+    sudo /home/admin/config.scripts/blitz.fatpack.sh
+  fi
+}
+
 # command: debug
 function debug() {
   clear
