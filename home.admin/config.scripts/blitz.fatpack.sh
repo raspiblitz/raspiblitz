@@ -3,6 +3,12 @@
 
 echo -e "\n*** FATPACK ***"
 
+# check if su
+if [ "$EUID" -ne 0 ]
+  then echo "Please run as root (with sudo)"
+  exit 1
+fi
+
 echo "# getting default user/repo from build_sdcard.sh"
 sudo cp /home/admin/raspiblitz/build_sdcard.sh /home/admin/build_sdcard.sh
 sudo chmod +x /home/admin/build_sdcard.sh 2>/dev/null
@@ -13,17 +19,6 @@ echo "# defaultAPIuser(${defaultAPIuser})"
 echo "# defaultAPIrepo(${defaultAPIrepo})"
 echo "# defaultWEBUIuser(${defaultWEBUIuser})"
 echo "# defaultWEBUIrepo(${defaultWEBUIrepo})"
-
-# from cloned github repo
-cd /home/admin/raspiblitz 2>/dev/null
-repo=$(git config --get remote.origin.url | sed -n 's/.*\:\/\/github.com\/\([^\/]*\)\/.*/\1/p')
-branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
-
-# check if su
-if [ "$EUID" -ne 0 ]
-  then echo "Please run as root (with sudo)"
-  exit 1
-fi
 
 echo "* Adding nodeJS Framework ..."
 /home/admin/config.scripts/bonus.nodejs.sh on || exit 1
