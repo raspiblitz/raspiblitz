@@ -9,6 +9,17 @@ if [ "$EUID" -ne 0 ]
   exit 1
 fi
 
+echo "# getting default user/repo from build_sdcard.sh"
+sudo cp /home/admin/raspiblitz/build_sdcard.sh /home/admin/build_sdcard.sh
+sudo chmod +x /home/admin/build_sdcard.sh 2>/dev/null
+source <(sudo /home/admin/build_sdcard.sh -EXPORT)
+branch="${githubBranch}"
+echo "# branch(${branch})"
+echo "# defaultAPIuser(${defaultAPIuser})"
+echo "# defaultAPIrepo(${defaultAPIrepo})"
+echo "# defaultWEBUIuser(${defaultWEBUIuser})"
+echo "# defaultWEBUIrepo(${defaultWEBUIrepo})"
+
 echo "* Adding nodeJS Framework ..."
 /home/admin/config.scripts/bonus.nodejs.sh on || exit 1
 
@@ -30,6 +41,17 @@ sudo -u admin curl -H "Accept: application/json; indent=4" https://bitnodes.io/a
 # Fallback Nodes List from Bitcoin Core
 sudo -u admin curl https://raw.githubusercontent.com/bitcoin/bitcoin/master/contrib/seeds/nodes_main.txt -o /home/admin/fallback.bitcoin.nodes
 
+echo "* Adding Raspiblitz API ..."
+sudo /home/admin/config.scripts/blitz.web.api.sh on "${defaultAPIuser}" "${defaultAPIrepo}" "blitz-${branch}" || exit 1
+echo "* Adding Raspiblitz WebUI ..."
+sudo /home/admin/config.scripts/blitz.web.ui.sh on "${defaultWEBUIuser}" "${defaultWEBUIrepo}" "release/${branch}" || exit 1
+
+# set build code as new www default
+sudo rm -r /home/admin/assets/nginx/www_public
+sudo cp -a /home/blitzapi/blitz_web/build/* /home/admin/assets/nginx/www_public
+sudo chown admin:admin /home/admin/assets/nginx/www_public
+sudo rm -r /home/blitzapi/blitz_web/build/*
+
 echo "* Adding Code&Compile for WEBUI-APP: LNBITS"
 /home/admin/config.scripts/bonus.lnbits.sh install || exit 1
 echo "* Adding Code&Compile for WEBUI-APP: JAM"
@@ -45,13 +67,5 @@ echo "* Adding Code&Compile for WEBUI-APP: BTC RPC EXPLORER"
 echo "* Adding Code&Compile for WEBUI-APP: MEMPOOL"
 /home/admin/config.scripts/bonus.mempool.sh install || exit 1
 
-echo "* Adding Raspiblitz API ..."
-sudo /home/admin/config.scripts/blitz.web.api.sh on "${defaultAPIuser}" "${defaultAPIrepo}" "blitz-${branch}" || exit 1
-echo "* Adding Raspiblitz WebUI ..."
-sudo /home/admin/config.scripts/blitz.web.ui.sh on "${defaultWEBUIuser}" "${defaultWEBUIrepo}" "release/${branch}" || exit 1
-
-# set build code as new www default
-sudo rm -r /home/admin/assets/nginx/www_public
-sudo cp -a /home/blitzapi/blitz_web/build/* /home/admin/assets/nginx/www_public
-sudo chown admin:admin /home/admin/assets/nginx/www_public
-sudo rm -r /home/blitzapi/blitz_web/build/*
+# set default display to LCD
+sudo /home/admin/config.scripts/blitz.display.sh set-display lcd
