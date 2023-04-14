@@ -5,7 +5,7 @@
 # https://github.com/dgarage/NBXplorer/tags
 NBXplorerVersion="v2.3.62"
 # https://github.com/btcpayserver/btcpayserver/releases
-BTCPayVersion="v1.8.2"
+BTCPayVersion="v1.9.0"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -58,23 +58,16 @@ nomigrateevts=1
 function BtcPayConfig() {
   # set thumbprint
   FINGERPRINT=$(openssl x509 -noout -fingerprint -sha256 -inform pem -in /home/btcpay/.lnd/tls.cert | cut -d"=" -f2)
-  if sudo ls /mnt/hdd/app-data/.btcpayserver/Main/sqllite.db 1>/dev/null 2>&1; then
-    echo "# sqlite database exists"
-    databaseOption="# keep using sqlite as /mnt/hdd/app-data/.btcpayserver/Main/sqllite.db exists (configured in the btcpayserver.service)"
+  if sudo -u postgres psql -c '\l' | grep btcpaymainnet; then
+    echo "# btcpaymainnet database already exists"
   else
-    echo "# sqlite database does not exist, using postgresql"
-    databaseOption="postgres=User ID=btcpay;Host=localhost;Port=5432;Application Name=btcpay;MaxPoolSize=20;Database=btcpaymainnet;Password='raspiblitz';"
-    if sudo -u postgres psql -c '\l' | grep btcpaymainnet; then
-      echo "# btcpaymainnet database already exists"
-    else
-      echo "# Generate the database for btcpay"
-      sudo -u postgres psql -c "CREATE DATABASE btcpaymainnet TEMPLATE template0 LC_CTYPE 'C' LC_COLLATE 'C' ENCODING 'UTF8';"
-      sudo -u postgres psql -c "create user btcpay with encrypted password 'raspiblitz';"
-      sudo -u postgres psql -c "grant all privileges on database btcpaymainnet to btcpay;"
-    fi
-    echo "# List databases with: sudo -u postgres psql -c '\l'"
-    sudo -u postgres psql -c '\l'
+    echo "# Generate the database for btcpay"
+    sudo -u postgres psql -c "CREATE DATABASE btcpaymainnet TEMPLATE template0 LC_CTYPE 'C' LC_COLLATE 'C' ENCODING 'UTF8';"
+    sudo -u postgres psql -c "create user btcpay with encrypted password 'raspiblitz';"
+    sudo -u postgres psql -c "grant all privileges on database btcpaymainnet to btcpay;"
   fi
+  echo "# List databases with: sudo -u postgres psql -c '\l'"
+  sudo -u postgres psql -c '\l'
   echo "# Regenerate the btcpayserver settings (includes the LND TLS thumbprint)"
   # https://docs.btcpayserver.org/Deployment/ManualDeploymentExtended/#3-create-a-configuration-file
   echo "
@@ -91,14 +84,14 @@ BTC.explorer.url=http://127.0.0.1:24444/
 BTC.lightning=type=lnd-rest;server=https://127.0.0.1:8080/;macaroonfilepath=/home/btcpay/admin.macaroon;certthumbprint=$FINGERPRINT
 
 ### Database ###
-${databaseOption}
+postgres=User ID=btcpay;Host=localhost;Port=5432;Application Name=btcpay;MaxPoolSize=20;Database=btcpaymainnet;Password='raspiblitz';
 explorer.postgres=User ID=nbxplorer;Host=localhost;Port=5432;Application Name=nbxplorer;MaxPoolSize=20;Database=nbxplorermainnet;Password='raspiblitz';
 " | sudo -u btcpay tee /home/btcpay/.btcpayserver/Main/settings.config
 }
 
 function BtcPayService() {
   if sudo ls /mnt/hdd/app-data/.btcpayserver/Main/sqllite.db 1>/dev/null 2>&1; then
-    echo "# sqlite database exists"
+    echo "# sqlite database exists - will be ignored after the migration to postgresql"
     databaseOption=" -- --sqlitefile=sqllite.db"
   else
     echo "# sqlite database does not exist, using postgresql"
