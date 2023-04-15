@@ -58,6 +58,7 @@ nomigrateevts=1
 function BtcPayConfig() {
   # set thumbprint
   FINGERPRINT=$(openssl x509 -noout -fingerprint -sha256 -inform pem -in /home/btcpay/.lnd/tls.cert | cut -d"=" -f2)
+  # set up postgres
   if sudo -u postgres psql -c '\l' | grep btcpaymainnet; then
     echo "# btcpaymainnet database already exists"
   else
@@ -78,6 +79,7 @@ network=mainnet
 port=23000
 bind=127.0.0.1
 externalurl=https://$BTCPayDomain
+socksendpoint=127.0.0.1:9050
 
 ### NBXplorer settings ###
 BTC.explorer.url=http://127.0.0.1:24444/
