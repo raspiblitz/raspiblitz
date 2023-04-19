@@ -41,6 +41,7 @@ from . import walletunlocker_pb2 as walletunlocker__pb2
 
 Make sure the first lines (ignore comments) of the `walletunlocker_pb2.py` look like the following for python3 compatibility:
 ```
+from google.protobuf.internal import builder as _builder
 from google.protobuf import descriptor as _descriptor
 from google.protobuf import descriptor_pool as _descriptor_pool
 from google.protobuf import message as _message
