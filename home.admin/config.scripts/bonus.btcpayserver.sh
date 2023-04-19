@@ -71,6 +71,7 @@ function BtcPayConfig() {
   sudo -u postgres psql -c '\l'
   echo "# Regenerate the btcpayserver settings (includes the LND TLS thumbprint)"
   # https://docs.btcpayserver.org/Deployment/ManualDeploymentExtended/#3-create-a-configuration-file
+  sudo -u btcpay mkdir -p /home/btcpay/.btcpayserver/Main
   echo "
 ### Global settings ###
 network=mainnet
@@ -614,7 +615,6 @@ WantedBy=multi-user.target
     echo "# Because the system is not 'ready' the service 'btcpayserver' will not be started at this point .. it is enabled and will start on next reboot"
   fi
 
-  sudo -u btcpay mkdir -p /home/btcpay/.btcpayserver/Main/
   if [ "${lnd}" = on ]; then
     /home/admin/config.scripts/bonus.btcpayserver.sh write-tls-macaroon
   fi
