@@ -159,25 +159,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo /home/admin/config.scripts/bonus.joinmarket.sh install
   fi
 
-  # make sure the Bitcoin Core wallet is on
-  /home/admin/config.scripts/network.wallet.sh on
-  if [ $(/usr/local/bin/bitcoin-cli -conf=/mnt/hdd/bitcoin/bitcoin.conf listwallets | grep -c wallet.dat) -eq 0 ]; then
-    echo "# Create a non-descriptor wallet.dat"
-    /usr/local/bin/bitcoin-cli -conf=/mnt/hdd/bitcoin/bitcoin.conf -named createwallet wallet_name=wallet.dat descriptors=false
-  else
-    isDescriptor=$(/usr/local/bin/bitcoin-cli -conf=/mnt/hdd/bitcoin/bitcoin.conf -rpcwallet=wallet.dat getwalletinfo | grep -c '"descriptors": true,')
-    if [ "$isDescriptor" -gt 0 ]; then
-      # unload
-      bitcoin-cli unloadwallet wallet.dat
-      echo "# Move the wallet.dat with descriptors to /mnt/hdd/bitcoin/descriptors"
-      sudo mv /mnt/hdd/bitcoin/wallet.dat /mnt/hdd/bitcoin/descriptors
-      echo "# Create a non-descriptor wallet.dat"
-      bitcoin-cli -conf=/mnt/hdd/bitcoin/bitcoin.conf -named createwallet wallet_name=wallet.dat descriptors=false
-    else
-      echo "# The non-descriptor wallet.dat is loaded in bitcoind."
-    fi
-  fi
-
   # store JoinMarket data on HDD
   mkdir /mnt/hdd/app-data/.joinmarket 2>/dev/null
 
@@ -211,6 +192,25 @@ if [ -z \"\$TMUX\" ]; then
   /home/joinmarket/menu.sh
 fi
 " | sudo -u joinmarket tee -a /home/joinmarket/.bashrc
+
+  # make sure the Bitcoin Core wallet is on
+  /home/admin/config.scripts/network.wallet.sh on
+  if [ $(/usr/local/bin/bitcoin-cli -conf=/mnt/hdd/bitcoin/bitcoin.conf listwallets | grep -c wallet.dat) -eq 0 ]; then
+    echo "# Create a non-descriptor wallet.dat"
+    /usr/local/bin/bitcoin-cli -conf=/mnt/hdd/bitcoin/bitcoin.conf -named createwallet wallet_name=wallet.dat descriptors=false
+  else
+    isDescriptor=$(/usr/local/bin/bitcoin-cli -conf=/mnt/hdd/bitcoin/bitcoin.conf -rpcwallet=wallet.dat getwalletinfo | grep -c '"descriptors": true,')
+    if [ "$isDescriptor" -gt 0 ]; then
+      # unload
+      bitcoin-cli unloadwallet wallet.dat
+      echo "# Move the wallet.dat with descriptors to /mnt/hdd/bitcoin/descriptors"
+      sudo mv /mnt/hdd/bitcoin/wallet.dat /mnt/hdd/bitcoin/descriptors
+      echo "# Create a non-descriptor wallet.dat"
+      bitcoin-cli -conf=/mnt/hdd/bitcoin/bitcoin.conf -named createwallet wallet_name=wallet.dat descriptors=false
+    else
+      echo "# The non-descriptor wallet.dat is loaded in bitcoind."
+    fi
+  fi
 
   # configure joinmarket (includes a check if it is installed)
   if sudo -u joinmarket /home/joinmarket/start.joininbox.sh; then
