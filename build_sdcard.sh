@@ -625,14 +625,14 @@ sudo -H /usr/bin/python -m pip install "/home/admin/raspiblitz/home.admin/BlitzP
 
 # make sure lndlibs are patched for compatibility for both Python2 and Python3
 file="/home/admin/config.scripts/lndlibs/lightning_pb2_grpc.py"
-! grep -Fxq "from __future__ import absolute_import" "${file}" && sed -i -E '1 a from __future__ import absolute_import' "${file}"
-! grep -Eq "^from . import.*" "${file}" && sed -i -E 's/^(import.*_pb2)/from . \1/' "${file}"
+! grep -Fxq "from __future__ import absolute_import" "${file}" && sudo sed -i -E '1 a from __future__ import absolute_import' "${file}"
+! grep -Eq "^from . import.*" "${file}" && sudo sed -i -E 's/^(import.*_pb2)/from . \1/' "${file}"
 
 # add /sbin to path for all
 sudo bash -c "echo 'PATH=\$PATH:/sbin' >> /etc/profile"
 
 # replace boot splash image when raspbian
-[ "${baseimage}" = "raspios_arm64" ] && { echo "* replacing boot splash"; sudo cp /home/admin/raspiblitz/pictures/splash.png /usr/share/plymouth/themes/pix/splash.png; }
+[ -d /usr/share/plymouth ] && [ "${baseimage}" = "raspios_arm64" ] && { echo "* replacing boot splash"; sudo cp /home/admin/raspiblitz/pictures/splash.png /usr/share/plymouth/themes/pix/splash.png; }
 
 echo -e "\n*** RASPIBLITZ EXTRAS ***"
 
@@ -770,7 +770,7 @@ sudo cp /home/admin/assets/background.service /etc/systemd/system/background.ser
 sudo systemctl enable background
 
 # *** BACKGROUND SCAN ***
-/home/admin/_background.scan.sh install
+sudo /home/admin/_background.scan.sh install
 
 #######
 # TOR #
