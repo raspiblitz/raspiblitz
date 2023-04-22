@@ -24,7 +24,7 @@
 - Update: ItchySats 0.7.0 [details](https://github.com/itchysats/itchysats/releases/tag/0.7.0)
 - Update: Channel Tools (chantools) v0.10.5 [details](https://github.com/guggero/chantools/releases/tag/v0.10.5)
 - Update: JoinMarket v0.9.9 [details](https://github.com/JoinMarket-Org/joinmarket-clientserver/releases/tag/v0.9.9)
-- Update: JoininBox v0.7.6 [details](https://github.com/openoms/joininbox/releases/tag/v0.7.6)
+- Update: JoininBox v0.7.7 [details](https://github.com/openoms/joininbox/releases/tag/v0.7.7)
 - Update: Balance of Satoshis 13.15.0 (bos) [details](https://github.com/alexbosworth/balanceofsatoshis/blob/master/CHANGELOG.md#13150)
 - Update: lndmanage 0.14.2 [details](https://github.com/bitromortac/lndmanage)
 - Update: Circuitbreaker with webUI [details](https://github.com/lightningequipment/circuitbreaker/blob/master/README.md)
