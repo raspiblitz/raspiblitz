@@ -67,7 +67,11 @@ function buildAndInstallCLbinaries()
   sudo -u bitcoin make
   echo
   echo "- Install to /usr/local/bin/"
-  sudo make install || exit 1
+  sudo chown -R root:root $(pwd)
+  sudo make install
+  err=$?
+  sudo chown -R bitcoin:bitcoin $(pwd)
+  [ $err -eq 0 ] || exit 1
 }
 
 if [ "$1" = "install" ]; then
