@@ -8,7 +8,7 @@
 - New: Support of X708 UPS HAT [details](https://github.com/rootzoll/raspiblitz/pull/3087)
 - New: BOS Telegram Bot Support (see OPTIONS on LND Balance of Satoshis menu entry)
 - New: LightningTipBot v0.5 [details](https://github.com/LightningTipBot/LightningTipBot)
-- New: CLI shortcut for ↬lnproxy [details](https://github.com/rootzoll/raspiblitz/pull/3333)
+- New: ↬lnproxy cli shortcut and server [details](https://github.com/lnproxy)
 - New: Homebanking Interface FinTS/HBCI (experimental) [details](https://github.com/rootzoll/raspiblitz/issues/1186)
 - New on WebUI: Jam (JoinMarket Web UI) v0.1.5 [details](https://github.com/joinmarket-webui/joinmarket-webui/releases/tag/v0.1.5)
 - Update: Bitcoin Core v24.0.1 [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-24.0.1.md)
