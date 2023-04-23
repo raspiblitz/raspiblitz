@@ -59,6 +59,10 @@ if [ "$command" = "1" ] || [ "$command" = "on" ]; then
     sudo rm -rf $postgres_datadir # not a symlink.. delete it silently
     sudo ln -s /mnt/hdd/app-data/postgresql /var/lib/
   fi
+
+  # always fix ownership
+  sudo chown -R postgres:postgres  /mnt/hdd/app-data/postgresql
+
   sudo systemctl enable postgresql
   sudo systemctl start postgresql
 
