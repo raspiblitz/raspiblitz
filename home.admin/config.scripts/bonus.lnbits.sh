@@ -781,7 +781,7 @@ After=bitcoind.service
 [Service]
 WorkingDirectory=/home/lnbits/lnbits
 ExecStartPre=/home/admin/config.scripts/bonus.lnbits.sh prestart
-ExecStart=/bin/sh -c 'cd /home/lnbits/lnbits && poetry run lnbits --port 5000'
+ExecStart=/bin/sh -c 'cd /home/lnbits/lnbits && poetry run lnbits --port 5000 --host 0.0.0.0'
 User=lnbits
 Restart=always
 TimeoutSec=120
