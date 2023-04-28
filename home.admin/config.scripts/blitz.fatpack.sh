@@ -24,7 +24,7 @@ echo "* Adding nodeJS Framework ..."
 /home/admin/config.scripts/bonus.nodejs.sh on || exit 1
 
 echo "* Optional Packages (may be needed for extended features)"
-apt_install qrencode secure-delete fbi msmtp unclutter xterm python3-pyqt5 xfonts-terminus apache2-utils nginx python3-jinja2 socat libatlas-base-dev hexyl autossh
+sudo apt install -y qrencode secure-delete fbi msmtp unclutter xterm python3-pyqt5 xfonts-terminus apache2-utils nginx python3-jinja2 socat libatlas-base-dev hexyl autossh
 
 echo "* Adding LND ..."
 /home/admin/config.scripts/lnd.install.sh install || exit 1
@@ -48,6 +48,7 @@ sudo /home/admin/config.scripts/blitz.web.ui.sh on "${defaultWEBUIuser}" "${defa
 
 # set build code as new www default
 sudo rm -r /home/admin/assets/nginx/www_public
+mkdir -p /home/admin/assets/nginx/www_public
 sudo cp -a /home/blitzapi/blitz_web/build/* /home/admin/assets/nginx/www_public
 sudo chown admin:admin /home/admin/assets/nginx/www_public
 sudo rm -r /home/blitzapi/blitz_web/build/*
