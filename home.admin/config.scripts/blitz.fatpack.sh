@@ -9,6 +9,15 @@ if [ "$EUID" -ne 0 ]
   exit 1
 fi
 
+apt_install() {
+  apt install -y ${@}
+  if [ $? -eq 100 ]; then
+    echo "FAIL! apt failed to install needed packages!"
+    echo ${@}
+    exit 1
+  fi
+}
+
 echo "# getting default user/repo from build_sdcard.sh"
 sudo cp /home/admin/raspiblitz/build_sdcard.sh /home/admin/build_sdcard.sh
 sudo chmod +x /home/admin/build_sdcard.sh 2>/dev/null
@@ -24,7 +33,7 @@ echo "* Adding nodeJS Framework ..."
 /home/admin/config.scripts/bonus.nodejs.sh on || exit 1
 
 echo "* Optional Packages (may be needed for extended features)"
-sudo apt install -y qrencode secure-delete fbi msmtp unclutter xterm python3-pyqt5 xfonts-terminus apache2-utils nginx python3-jinja2 socat libatlas-base-dev hexyl autossh
+apt_install qrencode secure-delete fbi msmtp unclutter xterm python3-pyqt5 xfonts-terminus apache2-utils nginx python3-jinja2 socat libatlas-base-dev hexyl autossh
 
 echo "* Adding LND ..."
 /home/admin/config.scripts/lnd.install.sh install || exit 1
