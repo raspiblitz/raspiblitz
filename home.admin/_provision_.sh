@@ -643,6 +643,15 @@ else
   echo "Provisioning Balance of Satoshis - keep default" >> ${logFile}
 fi
 
+# LNPROXY
+if [ "${lnproxy}" = "on" ]; then
+  echo "Provisioning lnproxy - run config script" >> ${logFile}
+  /home/admin/_cache.sh set message "Setup lnproxy"
+  sudo -u admin /home/admin/config.scripts/bonus.lnproxy.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning lnproxy - keep default" >> ${logFile}
+fi
+
 # thunderhub
 if [ "${thunderhub}" = "on" ]; then
   echo "Provisioning ThunderHub - run config script" >> ${logFile}
@@ -803,6 +812,15 @@ if [ "${lightningtipbot}" = "on" ]; then
   sudo -u admin /home/admin/config.scripts/bonus.lightningtipbot.sh on >> ${logFile} 2>&1
 else
   echo "Provisioning LightningTipBot - keep default" >> ${logFile}
+fi
+
+# FinTS
+if [ "${fints}" = "on" ]; then
+  echo "Provisioning FinTS - run config script" >> ${logFile}
+  /home/admin/_cache.sh set message "Setup FinTS"
+  sudo -u admin /home/admin/config.scripts/bonus.fints.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning FinTS - keep default" >> ${logFile}
 fi
 
 # custom install script from user

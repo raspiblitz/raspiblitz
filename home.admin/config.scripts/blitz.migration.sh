@@ -26,21 +26,21 @@ defaultUploadPath="/mnt/hdd/temp/migration"
 # get local ip
 source <(/home/admin/config.scripts/internet.sh status local)
 
-# SFTP download and upload links
-sftpDownloadUnix="sftp -r 'bitcoin@${localip}:${defaultUploadPath}/raspiblitz-*.tar.gz' ./"
-sftpDownloadWin="sftp -r bitcoin@${localip}:${defaultUploadPath}/raspiblitz-*.tar.gz ."
-sftpUploadUnix="sftp -r ./raspiblitz-*.tar.gz bitcoin@${localip}:${defaultUploadPath}"
-sftpUploadWin="sftp -r ./raspiblitz-*.tar.gz bitcoin@${localip}:${defaultUploadPath}"
+# SCP download and upload links
+downloadUnix="scp -r 'bitcoin@${localip}:${defaultUploadPath}/raspiblitz-*.tar.gz' ./"
+downloadWin="scp -r bitcoin@${localip}:${defaultUploadPath}/raspiblitz-*.tar.gz ."
+uploadUnix="scp -r ./raspiblitz-*.tar.gz bitcoin@${localip}:${defaultUploadPath}"
+uploadWin="scp -r ./raspiblitz-*.tar.gz bitcoin@${localip}:${defaultUploadPath}"
 
 # output status data & exit
 if [ "$1" = "status" ]; then
   echo "# RASPIBLITZ Data Import & Export"
   echo "localip=\"${localip}\""
   echo "defaultUploadPath=\"${defaultUploadPath}\""
-  echo "sftpDownloadUnix=\"${sftpDownloadUnix}\""
-  echo "sftpUploadUnix=\"${sftpUploadUnix}\""
-  echo "sftpDownloadWin=\"${sftpDownloadWin}\""
-  echo "sftpUploadWin=\"${sftpUploadWin}\""
+  echo "downloadUnix=\"${downloadUnix}\""
+  echo "uploadUnix=\"${uploadUnix}\""
+  echo "downloadWin=\"${downloadWin}\""
+  echo "uploadWin=\"${uploadWin}\""
   exit 1
 fi
 

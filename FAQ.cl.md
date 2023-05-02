@@ -34,18 +34,19 @@
 - [Backups](#backups)
   - [Backup strategy](#backup-strategy)
   - [Seed](#seed)
-  - [How to display the hsm_secret in a human-readable format?](#how-to-display-the-hsm_secret-in-a-human-readable-format)
+  - [How to display the hsm\_secret in a human-readable format?](#how-to-display-the-hsm_secret-in-a-human-readable-format)
   - [How to test the seedwords?](#how-to-test-the-seedwords)
-  - [How to restore the hsm_secret from text?](#how-to-restore-the-hsm_secret-from-text)
+  - [How to restore the hsm\_secret from text?](#how-to-restore-the-hsm_secret-from-text)
   - [Channel database](#channel-database)
-  - [Recovery](#recovery)
-    - [Recover from a cl-rescue file](#recover-from-a-cl-rescue-file)
-    - [Recover from a seed](#recover-from-a-seed)
-    - [Restore a CLN node from the database backup on the SDcard](#restore-a-cln-node-from-the-database-backup-on-the-sdcard)
-    - [Rescan the chain after restoring a used CLN wallet](#rescan-the-chain-after-restoring-a-used-cln-wallet)
-    - [Guesstoremote to recover funds from force-closed channels](#guesstoremote-to-recover-funds-from-force-closed-channels)
+- [Recovery](#recovery)
+  - [Recover from a cl-rescue file](#recover-from-a-cl-rescue-file)
+  - [Recover from a seed](#recover-from-a-seed)
+  - [Emergency recovery in case of lost channel states](#emergency-recovery-in-case-of-lost-channel-states)
+  - [Restore a CLN node from the database backup on the SDcard](#restore-a-cln-node-from-the-database-backup-on-the-sdcard)
+  - [Rescan the chain after restoring a used CLN wallet](#rescan-the-chain-after-restoring-a-used-cln-wallet)
+  - [Guesstoremote to recover funds from force-closed channels](#guesstoremote-to-recover-funds-from-force-closed-channels)
 - [sqlite3 queries](#sqlite3-queries)
-- [Extract the private and public key from the hsm_secret file](#extract-the-private-and-public-key-from-the-hsm_secret-file)
+- [Extract the private and public key from the hsm\_secret file](#extract-the-private-and-public-key-from-the-hsm_secret-file)
 - [Update](#update)
   - [Update to a new CLN release](#update-to-a-new-cln-release)
   - [Experimental update to the latest master](#experimental-update-to-the-latest-master)
@@ -457,7 +458,7 @@ Will need to pay through a peer which supports the onion messages which means yo
     ```
 
 ## Backups
-*<> https://lightning.readthedocs.io/FAQ.html#how-to-backup-my-wallet>
+* <https://lightning.readthedocs.io/FAQ.html#how-to-backup-my-wallet>>
 * General details: <https://lightning.readthedocs.io/BACKUP.html>
 
 ### Backup strategy
@@ -479,7 +480,7 @@ Will need to pay through a peer which supports the onion messages which means yo
 * If there is no such file and you have not funded the CLN wallet yet can reset the wallet and the next wallet will be created with a seed.
 
 ### How to display the hsm_secret in a human-readable format?
-* If there is no seed available it is best to save the hsm_secret as a file with `sftp` or note down the alphanumeric characters in the two line displayed with:
+* If there is no seed available it is best to save the hsm_secret as a file with `scp` or note down the alphanumeric characters in the two line displayed with:
     ```
     sudo xxd /home/bitcoin/.lightning/bitcoin/hsm_secret
     ```
@@ -519,20 +520,98 @@ Will need to pay through a peer which supports the onion messages which means yo
 ### Channel database
 * Stored on the disk and synchronised to the SDcard with the help of the `backup` plugin.
 
-### Recovery
+## Recovery
 * https://lightning.readthedocs.io/FAQ.html#database-corruption-channel-state-lost
 * https://lightning.readthedocs.io/FAQ.html#loss
-#### Recover from a cl-rescue file
+### Recover from a cl-rescue file
 * use the `REPAIR-CL` - `FILERESTORE` option in the menu for instructions to upload
 
-#### Recover from a seed
+### Recover from a seed
 * use the `REPAIR-CL` - `SEEDRESTORE` option in the menu for instructions to paste the seedwords to restore
+* or use the manual commands
+  ```
+  # stop CLN
+  sudo systemctl stop lightningd
 
-#### Restore a CLN node from the database backup on the SDcard
+  # change to the bitcoin user
+  sudo su - bitcoin
+
+  # generate the hsm_secret in temporary directory from your CLN seed words (follow the instructions)
+   lightning-hsmtool generatehsm /dev/shm/hsm_secret
+
+  # backup your old hsm_secret and channel database
+  mkdir /home/bitcoin/.lightning/bitcoin/old_node
+  mv /home/bitcoin/.lightning/bitcoin/** /home/bitcoin/.lightning/bitcoin/old_node/
+
+  # move the new hsm_secret in place
+  mv /dev/shm/hsm_secret /home/bitcoin/.lightning/bitcoin/
+
+  # back to admin
+  exit
+
+  # start lightningd
+  sudo systemctl start lightningd
+
+  # show the logs
+  cllog
+  ```
+
+### Emergency recovery in case of lost channel states
+
+* blogpost: <https://blog.blockstream.com/core-lightning-v0-12-0/>
+* demo video: https://youtu.be/zBmEieZuS8Q
+* manpage: <https://lightning.readthedocs.io/lightning-emergencyrecover.7.html>
+   ```
+   lightning-cli help emergencyrecover
+   ```
+
+1. [Restore the hsm_secret (onchain wallet keys) from seed](#recover-from-a-seed) (or hex).
+   * There is no need to wait for the (few hours) rescan to finish, but can follow it any time with:
+    ```
+    cllog
+    ```
+1. Upload and copy the emergency.recover file in place
+
+    * upload the file with scp:
+    ```
+    scp hsm_secret emergency.recover admin@RASPIBLITZ_IP:~/
+    ```
+    * copy it from `/home/admin/`:
+    ```
+    sudo cp /home/admin/emergency.recover /home/bitcoin/.lightning/bitcoin/
+    sudo chown bitcoin:bitcoin /home/bitcoin/.lightning/bitcoin/emergency.recover
+    ```
+1. Recover
+
+    * run (as admin or bitcoin user):
+    ```
+    lightning-cli emergencyrecover
+    ```
+    * a list of channelID-s should be returned if it worked:
+    ```
+    {
+       "stubs": [
+          "................",
+       ]
+    }
+    ```
+1. See more data about the recovered funds and channels
+   ```
+   lightning-cli listfunds
+   lightning-cli listpeers
+   ```
+   * List the funding txid-s:
+   ```
+   lightning-cli listfunds | jq -r '.channels[] | .funding_txid'
+   ```
+   Can check the txid-s in a mempool explorer. If one is spent that channel is already closed.
+
+### Restore a CLN node from the database backup on the SDcard
 * https://gist.github.com/openoms/3516cd8f393d69d52f858c3d47c9e469
 
-#### Rescan the chain after restoring a used CLN wallet
-
+### Rescan the chain after restoring a used CLN wallet
+* automatically done when using `SEEDRESTORE`
+* controlled by the entry in the cln config file
 * can use the `menu` -> `REPAIR` -> `REPAIR-CL` -> `RESCAN` option
 * or follow the manual process:
   <https://lightning.readthedocs.io/FAQ.html#rescanning-the-block-chain-for-lost-utxos>
@@ -554,7 +633,7 @@ Will need to pay through a peer which supports the onion messages which means yo
     cllog
     ```
 
-#### Guesstoremote to recover funds from force-closed channels
+### Guesstoremote to recover funds from force-closed channels
 * <https://lightning.readthedocs.io/lightning-hsmtool.8.html>
     ```
     $ man lightning-hsmtool
@@ -708,9 +787,9 @@ Will need to pay through a peer which supports the onion messages which means yo
     seed-force will delete any old wallet and will work without dialog
 
     cl.hsmtool.sh [unlock] <mainnet|testnet|signet> <password>
-    success: exit 0
-    wrong password: exit 2
-    fail to unlock after 1 minute + show logs: exit 3
+        success: exit 0
+        wrong password: exit 2
+        fail to unlock after 1 minute + show logs: exit 3
     cl.hsmtool.sh [lock] <mainnet|testnet|signet>
     cl.hsmtool.sh [encrypt|decrypt] <mainnet|testnet|signet>
     cl.hsmtool.sh [autounlock-on|autounlock-off] <mainnet|testnet|signet>
@@ -726,7 +805,7 @@ Will need to pay through a peer which supports the onion messages which means yo
     + ./cl.install.sh -h
 
     Core Lightning install script
-    The default version is: v0.11.2
+    The default version is: v22.11.1
     mainnet / testnet / signet instances can run parallel
 
     Usage:
@@ -807,14 +886,22 @@ Will need to pay through a peer which supports the onion messages which means yo
 
     + ./cl-plugin.summary.sh -h
 
-    Install and show the output if the summary plugin for Core Lightning
+    Install and show the output if the summary plugin forCore Lightning
     Usage:
     cl-plugin.summary.sh [testnet|mainnet|signet] [runonce]
 
+    + ./cl-plugin.watchtower-client.sh -h
+
+    Install the rust-teos watchtower-client plugin for CLN
+    Usage:
+    cl-plugin.watchtower-client.sh on <testnet|mainnet|signet>
+    cl-plugin.watchtower-client.sh off <testnet|mainnet|signet> <purge>
+    cl-plugin.watchtower-client.sh info
+
     + ./cl.rest.sh -h
 
-    Core Lightning-REST install script
-    The default version is: v0.7.2
+    Core-Lightning-REST install script
+    The default version is: v0.9.0
     mainnet | testnet | signet instances can run parallel
 
     Usage:
@@ -830,7 +917,7 @@ Will need to pay through a peer which supports the onion messages which means yo
     Install, remove or get info about the Spark Wallet for Core Lightning
     version: v0.3.1
     Usage:
-    cl.spark.sh [on|off|menu] <testnet|mainnet|signet> 
+    cl.spark.sh [on|off|menu] <testnet|mainnet|signet>
 
     + ./cl.update.sh -h
 
@@ -838,10 +925,10 @@ Will need to pay through a peer which supports the onion messages which means yo
     cl.update.sh [info|verified|reckless]
     info -> get actual state and possible actions
     verified -> only do recommended updates by RaspiBlitz team
-    binary will be checked by signature and checksum
+        binary will be checked by signature and checksum
     reckless -> if you just want to update to the latest release
-    published on Core Lightning GitHub releases (RC or final) without any
-    testing or security checks.
+        published on Core Lightning GitHub releases (RC or final) without any
+        testing or security checks.
     ```
 
 ## All possible config options
@@ -869,9 +956,10 @@ Will need to pay through a peer which supports the onion messages which means yo
     --wallet <arg>                                    Location of the wallet database.
     --large-channels|--wumbo                          Allow channels larger than 0.16777215 BTC
     --experimental-dual-fund                          experimental: Advertise dual-funding and allow peers to establish channels via v2 channel open protocol.
-    --experimental-onion-messages                     EXPERIMENTAL: enable send, receive and relay of onion messages
+    --experimental-onion-messages                     EXPERIMENTAL: enable send, receive and relay of onion messages and blinded payments
     --experimental-offers                             EXPERIMENTAL: enable send and receive of offers (also sets experimental-onion-messages)
     --experimental-shutdown-wrong-funding             EXPERIMENTAL: allow shutdown with alternate txids
+    --announce-addr-dns <arg>                         Use DNS entries in --announce-addr and --addr (not widely supported!) (default: false)
     --help|-h                                         Print this message.
     --rgb <arg>                                       RRGGBB hex color for node
     --alias <arg>                                     Up to 32-byte alias for node
@@ -897,25 +985,36 @@ Will need to pay through a peer which supports the onion messages which means yo
     --disable-ip-discovery                            Turn off announcement of discovered public IPs
     --offline                                         Start in offline-mode (do not automatically reconnect and do not accept incoming connections)
     --autolisten <arg>                                If true, listen on default port and announce if it seems to be a public interface (default: true)
+    --dev-allowdustreserve <arg>                      If true, we allow the `fundchannel` RPC command and the `openchannel` plugin hook to set a reserve that is below the dust limit.
+                                                        (default: false)
     --proxy <arg>                                     Set a socks v5 proxy IP address and port
     --tor-service-password <arg>                      Set a Tor hidden service password
-    --experimental-accept-extra-tlv-types <arg>       Comma separated list of extra TLV types to accept.
+    --accept-htlc-tlv-types <arg>                     Comma separated list of extra HTLC TLV types to accept.
     --disable-dns                                     Disable DNS lookups of peers
     --encrypted-hsm                                   Set the password to encrypt hsm_secret with. If no password is passed through command line, you will be prompted to enter it.
     --rpc-file-mode <arg>                             Set the file mode (permissions) for the JSON-RPC socket (default: "0600")
-    --force-feerates <arg>                            Set testnet/regtest feerates in sats perkw, opening/mutual_close/unlateral_close/delayed_to_us/htlc_resolution/penalty: if fewer specified, last number applies to remainder
-    --subdaemon <arg>                                 Arg specified as SUBDAEMON:PATH. Specifies an alternate subdaemon binary. If the supplied path is relative the subdaemon binary is found in the working directory. This option may be
-                                                    specified multiple times. For example, --subdaemon=hsmd:remote_signer would use a hypothetical remote signing subdaemon.
+    --force-feerates <arg>                            Set testnet/regtest feerates in sats perkw, opening/mutual_close/unlateral_close/delayed_to_us/htlc_resolution/penalty: if fewer
+                                                        specified, last number applies to remainder
+    --subdaemon <arg>                                 Arg specified as SUBDAEMON:PATH. Specifies an alternate subdaemon binary. If the supplied path is relative the subdaemon binary is
+                                                        found in the working directory. This option may be specified multiple times. For example, --subdaemon=hsmd:remote_signer would use
+                                                        a hypothetical remote signing subdaemon.
     --experimental-websocket-port <arg>               experimental: alternate port for peers to connect using WebSockets (RFC6455)
+    --database-upgrade <arg>                          Set to true to allow database upgrades even on non-final releases (WARNING: you won't be able to downgrade!)
     --log-level <arg>                                 log level (io, debug, info, unusual, broken) [:prefix] (default: info)
     --log-timestamps <arg>                            prefix log messages with timestamp (default: true)
-    --log-prefix <arg>                                log prefix (default: lightningd)
-    --log-file=<file>                                 log to file instead of stdout
+    --log-prefix <arg>                                log prefix (default: )
+    --log-file=<file>                                 Also log to file (- for stdout)
     --version|-V                                      Print version and exit
+    --fetchinvoice-noconnect                          Don't try to connect directly to fetch an invoice.
     --autocleaninvoice-cycle <arg>                    Perform cleanup of expired invoices every given seconds, or do not autoclean if 0
     --autocleaninvoice-expired-by <arg>               If expired invoice autoclean enabled, invoices that have expired for at least this given seconds are cleaned
-    --fetchinvoice-noconnect                          Don't try to connect directly to fetch an invoice.
-    --disable-mpp                                     Disable multi-part payments.
+    --autoclean-cycle <arg>                           Perform cleanup every given seconds
+    --autoclean-succeededforwards-age <arg>           How old do successful forwards have to be before deletion (0 = never)
+    --autoclean-failedforwards-age <arg>              How old do failed forwards have to be before deletion (0 = never)
+    --autoclean-succeededpays-age <arg>               How old do successful pays have to be before deletion (0 = never)
+    --autoclean-failedpays-age <arg>                  How old do failed pays have to be before deletion (0 = never)
+    --autoclean-paidinvoices-age <arg>                How old do paid invoices have to be before deletion (0 = never)
+    --autoclean-expiredinvoices-age <arg>             How old do expired invoices have to be before deletion (0 = never)
     --bitcoin-datadir <arg>                           -datadir arg for bitcoin-cli
     --bitcoin-cli <arg>                               bitcoin-cli pathname
     --bitcoin-rpcuser <arg>                           bitcoind RPC username
@@ -924,6 +1023,7 @@ Will need to pay through a peer which supports the onion messages which means yo
     --bitcoin-rpcport <arg>                           bitcoind RPC host's port
     --bitcoin-retry-timeout <arg>                     how long to keep retrying to contact bitcoind before fatally exiting
     --commit-fee <arg>                                Percentage of fee to request for their commitment
+    --disable-mpp                                     Disable multi-part payments.
     --funder-policy <arg>                             Policy to use for dual-funding requests. [match, available, fixed]
     --funder-policy-mod <arg>                         Percent to apply policy at (match/available); or amount to fund (fixed)
     --funder-min-their-funding <arg>                  Minimum funding peer must open with to activate our policy
@@ -939,5 +1039,8 @@ Will need to pay through a peer which supports the onion messages which means yo
     --lease-fee-basis <arg>                           Channel lease rates, basis charged for leased funds (per 10,000 satoshi.)
     --lease-funding-weight <arg>                      Channel lease rates, weight we'll ask opening peer to pay for in funding transaction
     --channel-fee-max-base-msat <arg>                 Channel lease rates, maximum channel fee base we'll charge for funds routed through a leased channel.
-    --channel-fee-max-proportional-thousandths <arg>  Channel lease rates, maximum proportional fee (in thousandths, or ppt) we'll charge for funds routed through a leased channel. Note: 1ppt = 1,000ppm
+    --channel-fee-max-proportional-thousandths <arg>  Channel lease rates, maximum proportional fee (in thousandths, or ppt) we'll charge for funds routed through a leased channel.
+                                                        Note: 1ppt = 1,000ppm
+    --bookkeeper-dir <arg>                            Location for bookkeeper records.
+    --bookkeeper-db <arg>                             Location of the bookkeeper database
     ```

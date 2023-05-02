@@ -3,7 +3,7 @@
 
 _Build your own Lightning & Bitcoin Fullnode on a RaspberryPi with an optional Display._
 
-`Version 1.9.0RC2 with bitcoin 24.0.1, lnd 0.15.5 & Core Lightning 22.11.1` ([api](https://github.com/fusion44/blitz_api)|[web](https://github.com/cstenglein/raspiblitz-web))
+`Version 1.9.0RC2 with bitcoin 24.0.1, lnd 0.16.1 & Core Lightning 23.02` ([api](https://github.com/fusion44/blitz_api)|[web](https://github.com/cstenglein/raspiblitz-web))
 
 ![RaspiBlitz](pictures/raspiblitz.jpg)
 
@@ -132,8 +132,10 @@ _If the above mentioned LCD screen is sold out you can also use these different 
 
 - Quimat 3,5'' Zoll Inch Touch
 - ELEGOO Display 3.5" Zoll TFT LCD
-- kuman 3.5 Inch Touch Screen TFT Monitor
+- kuman 3.5 Inch Touch Screen TFT Monitor 
 - Waveshare 3.5inch Display for Raspberry Pi
+
+With all LCD screen models dont use the ones that have an HDMI port/connector - what you need is a 3.5 inch LCD screen model (resolution of 480×320) that connects only thru the GPIO ports (SPI) and has an XPT2046 touch controller.
 
 _You can even pay for your RaspiBlitz Amazon Shopping with Bitcoin & Lightning through [Bitrefill](https://blog.bitrefill.com/its-here-buy-amazon-vouchers-with-bitcoin-on-bitrefill-bb2a4449724a)._
 
@@ -1034,7 +1036,7 @@ To try out the IP2TOR tunnel choose in `MAINMENU` the extra menu point of the Se
 If you want a web service, like BTCPay Server or LNbits, to be available to the outside internet (like with IP2TOR) people expect you to offer an HTTPS address so that the communication between the client and your RaspiBlitz is encrypted.
 You could use the self-signed HTTPS certificate that RaspiBlitz is offering you, but this will give users Security Warnings in their browser and is not very user friendly.
 
-That's where you can use a LetsEncrypt Subscription to get a free valid HTTPS certificate that is excepted without warning from almost all common browsers
+That's where you can use a LetsEncrypt Subscription to get a free valid HTTPS certificate that is accepted without warning from almost all common browsers
 
 Because you also need a domain name for that you will need to open a free account, the following are presently supported, would be good to add more with the help of the community:
 [DuckDNS.org](https://www.duckdns.org)

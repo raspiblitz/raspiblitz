@@ -33,7 +33,7 @@ if [ "$1" = "update-config" ]; then
   fi
 
   # prepare config update
-  cd /home/blitzapi/blitz_api
+  cd /home/blitzapi/blitz_api || exit 1
   secret=$(cat ./.env 2>/dev/null | grep "secret=" | cut -d "=" -f2)
   cp ./.env_sample ./.env
   dateStr=$(date)
@@ -44,7 +44,7 @@ if [ "$1" = "update-config" ]; then
   # configure access token secret
   if [ "${secret}" == "" ] || [ "${secret}" == "please_please_update_me_please" ]; then
     echo "# init secret ..."
-    secret=$(dd if=/dev/urandom bs=256 count=1 2> /dev/null | shasum -a256 | cut -d " " -f1)
+    secret=$(dd if=/dev/urandom bs=256 count=1 2>/dev/null | shasum -a256 | cut -d " " -f1)
   else
     echo "# use existing secret"
   fi
@@ -78,13 +78,13 @@ if [ "$1" = "update-config" ]; then
       sed -i "s/^lnd_grpc_ip=.*/lnd_grpc_ip=127.0.0.1/g" ./.env
       sed -i "s/^lnd_macaroon=.*/lnd_macaroon=${adminMacaroon}/g" ./.env
       sed -i "s/^lnd_cert=.*/lnd_cert=${tlsCert}/g" ./.env
-      if [ "${chain}" == "main" ];then
+      if [ "${chain}" == "main" ]; then
         L2rpcportmod=0
         portprefix=""
-      elif [ "${chain}" == "test" ];then
+      elif [ "${chain}" == "test" ]; then
         L2rpcportmod=1
         portprefix=1
-      elif [ "${chain}" == "sig" ];then
+      elif [ "${chain}" == "sig" ]; then
         L2rpcportmod=3
         portprefix=3
       fi
@@ -95,25 +95,26 @@ if [ "$1" = "update-config" ]; then
     elif [ "${lightning}" == "cl" ]; then
 
       echo "# CONFIG Web API Lightning --> CL"
-      sed -i "s/^ln_node=.*/ln_node=cln_grpc/g" ./.env
+      sed -i "s/^ln_node=.*/ln_node=cln_jrpc/g" ./.env
+      sed -i "s#^cln_jrpc_path=.*#cln_jrpc_path=\"/mnt/hdd/app-data/.lightning/bitcoin/lightning-rpc\"#g" ./.env
 
       # make sure cln-grpc is on
-      sudo /home/admin/config.scripts/cl-plugin.cln-grpc.sh on mainnet
+      # sudo /home/admin/config.scripts/cl-plugin.cln-grpc.sh on mainnet
 
       # get hex values of pem files
-      hexClient=$(sudo xxd -p -c2000 /home/bitcoin/.lightning/bitcoin/client.pem)
-      hexClientKey=$(sudo xxd -p -c2000 /home/bitcoin/.lightning/bitcoin/client-key.pem)
-      hexCa=$(sudo xxd -p -c2000 /home/bitcoin/.lightning/bitcoin/ca.pem)
-      if [ "${hexClient}" == "" ]; then
-        echo "# FAIL /home/bitcoin/.lightning/bitcoin/*.pem files maybe missing"
-      fi
+      # hexClient=$(sudo xxd -p -c2000 /home/bitcoin/.lightning/bitcoin/client.pem)
+      # hexClientKey=$(sudo xxd -p -c2000 /home/bitcoin/.lightning/bitcoin/client-key.pem)
+      # hexCa=$(sudo xxd -p -c2000 /home/bitcoin/.lightning/bitcoin/ca.pem)
+      # if [ "${hexClient}" == "" ]; then
+      #   echo "# FAIL /home/bitcoin/.lightning/bitcoin/*.pem files maybe missing"
+      # fi
 
       # update config with hex values
-      sed -i "s/^cln_grpc_cert=.*/cln_grpc_cert=${hexClient}/g" ./.env
-      sed -i "s/^cln_grpc_key=.*/cln_grpc_key=${hexClientKey}/g" ./.env
-      sed -i "s/^cln_grpc_ca=.*/cln_grpc_ca=${hexCa}/g" ./.env
-      sed -i "s/^cln_grpc_ip=.*/cln_grpc_ip=127.0.0.1/g" ./.env
-      sed -i "s/^cln_grpc_port=.*/cln_grpc_port=4772/g" ./.env
+      # sed -i "s/^cln_grpc_cert=.*/cln_grpc_cert=${hexClient}/g" ./.env
+      # sed -i "s/^cln_grpc_key=.*/cln_grpc_key=${hexClientKey}/g" ./.env
+      # sed -i "s/^cln_grpc_ca=.*/cln_grpc_ca=${hexCa}/g" ./.env
+      # sed -i "s/^cln_grpc_ip=.*/cln_grpc_ip=127.0.0.1/g" ./.env
+      # sed -i "s/^cln_grpc_port=.*/cln_grpc_port=4772/g" ./.env
 
     else
       echo "# CONFIG Web API Lightning --> OFF"
@@ -121,9 +122,9 @@ if [ "$1" = "update-config" ]; then
     fi
 
   else
-      echo "# CONFIG Web API ... still in setup, skip bitcoin & lightning"
-      sed -i "s/^network=.*/network=/g" ./.env
-      sed -i "s/^ln_node=.*/ln_node=/g" ./.env
+    echo "# CONFIG Web API ... still in setup, skip bitcoin & lightning"
+    sed -i "s/^network=.*/network=/g" ./.env
+    sed -i "s/^ln_node=.*/ln_node=/g" ./.env
   fi
 
   echo "# '.env' config updates - blitzapi maybe needs to be restarted"
@@ -229,12 +230,12 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   fi
   /usr/sbin/usermod --append --groups bitcoin blitzapi
   # symlink the CLN data dir for blitzapi
-  sudo rm -rf /home/blitzapi/.lightning  # not a symlink.. delete it silently
+  sudo rm -rf /home/blitzapi/.lightning # not a symlink.. delete it silently
   # create symlink
   sudo -u blitzapi ln -s /mnt/hdd/app-data/.lightning /home/blitzapi/
 
   cd /home/blitzapi || exit 1
-  
+
   # git clone https://github.com/fusion44/blitz_api.git /home/blitzapi/blitz_api
   echo "# clone github: ${GITHUB_USER}/${GITHUB_REPO}"
   if ! sudo -u blitzapi git clone https://github.com/${GITHUB_USER}/${GITHUB_REPO}.git blitz_api; then
@@ -263,7 +264,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "error='pip install failed'"
     exit 1
   fi
-  
+
   # prepare systemd service
   echo "
 [Unit]
@@ -329,7 +330,7 @@ if [ "$1" = "update-code" ]; then
     echo "# Update Web API CODE"
     systemctl stop blitzapi
     sudo chown -R blitzapi:blitzapi /home/blitzapi/blitz_api
-    cd /home/blitzapi/blitz_api
+    cd /home/blitzapi/blitz_api || exit 1
     if [ "$currentBranch" == "" ]; then
       currentBranch=$(sudo -u blitzapi git rev-parse --abbrev-ref HEAD)
     fi

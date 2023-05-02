@@ -132,6 +132,9 @@ fi
 if [ "${bos}" == "on" ]; then
   OPTIONS+=(BOS "Balance of Satoshis")
 fi
+if [ "${lnproxy}" == "on" ]; then
+  OPTIONS+=(LNPROXY "lnproxy server")
+fi
 if [ "${pyblock}" == "on" ]; then
   OPTIONS+=(PYBLOCK "PyBlock")
 fi
@@ -171,6 +174,9 @@ if [ "${itchysats}" == "on" ]; then
 fi
 if [ "${lightningtipbot}" == "on" ]; then
   OPTIONS+=(LIGHTNINGTIPBOT "Show LightningTipBot details")
+fi
+if [ "${fints}" == "on" ]; then
+  OPTIONS+=(FINTS "Show FinTS/HBCI details")
 fi
 
 # dont offer to switch to "testnet view for now" - so no wswitch back to mainnet needed
@@ -308,6 +314,9 @@ case $CHOICE in
         BOS)
             sudo /home/admin/config.scripts/bonus.bos.sh menu
             ;;
+        LNPROXY)
+            sudo /home/admin/config.scripts/bonus.lnproxy.sh menu
+            ;;
 		    PYBLOCK)
             sudo /home/admin/config.scripts/bonus.pyblock.sh menu
             ;;
@@ -340,6 +349,9 @@ case $CHOICE in
             ;;
         CIRCUITBREAKER)
             sudo /home/admin/config.scripts/bonus.circuitbreaker.sh menu
+            ;;
+        FINTS)
+            sudo /home/admin/config.scripts/bonus.fints.sh menu
             ;;
         TESTNETS)
             /home/admin/00parallelChainsMenu.sh

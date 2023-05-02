@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # https://github.com/lightninglabs/lightning-terminal/releases
-LITVERSION="0.9.0-alpha"
+LITVERSION="0.9.2-alpha"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -14,16 +14,16 @@ fi
 # check who signed the release in https://github.com/lightninglabs/lightning-terminal/releases
 PGPsigner="ellemouton"
 
-if [ $PGPsigner = ellemouton ];then
+if [ $PGPsigner = ellemouton ]; then
   PGPpkeys="https://github.com/${PGPsigner}.gpg"
   PGPcheck="D7D916376026F177"
-elif [ $PGPsigner = guggero ];then
+elif [ $PGPsigner = guggero ]; then
   PGPpkeys="https://keybase.io/${PGPsigner}/pgp_keys.asc"
   PGPcheck="03DB6322267C373B"
-elif [ $PGPsigner = roasbeef ];then
+elif [ $PGPsigner = roasbeef ]; then
   PGPpkeys="https://keybase.io/${PGPsigner}/pgp_keys.asc "
   PGPcheck="3BBD59E99B280306"
-elif [ $PGPsigner = ellemouton ];then
+elif [ $PGPsigner = ellemouton ]; then
   PGPpkeys="https://keybase.io/ellemo/pgp_keys.asc "
   PGPcheck="D7D916376026F17"
 fi
@@ -219,6 +219,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       echo "# BUILD FAILED --> LND PGP Verify not OK / signature(${goodSignature}) verify(${correctKey})"
       exit 1
     fi
+
     ###########
     # install #
     ###########
@@ -234,6 +235,17 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     ###########
     # config  #
     ###########
+
+    # check if lnd.conf has rpcmiddleware.enable entry under section Application Options
+    entryExists=$(sudo cat /mnt/hdd/lnd/lnd.conf | grep -c "rpcmiddleware.enable=")
+    if [ "${entryExists}" == "0" ]; then
+      echo "# add rpcmiddleware.enable=true to lnd.conf"
+      sudo sed -i "/^\[Application Options\]$/arpcmiddleware.enable=true" /mnt/hdd/lnd/lnd.conf
+    fi
+
+    # make sure lnd.conf has rpcmiddleware.enable=true
+    sudo sed -i "s/^rpcmiddleware.enable=.*/rpcmiddleware.enable=true/g" /mnt/hdd/lnd/lnd.conf
+
     if [ "${runBehindTor}" = "on" ]; then
       echo "# Connect to the Pool, Loop and Terminal server through Tor"
       LOOPPROXY="loop.server.proxy=127.0.0.1:9050"
@@ -243,7 +255,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       LOOPPROXY=""
       POOLPROXY=""
     fi
-    PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
+    PASSWORD_B=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcpassword | cut -c 13-)
     echo "
 # Application Options
 httpslisten=0.0.0.0:8443
@@ -254,7 +266,7 @@ remote.lit-debuglevel=debug
 
 # Remote lnd options
 remote.lnd.rpcserver=127.0.0.1:10009
-remote.lnd.macaroonpath=/home/lit/.lnd/data/chain/${network}/${chain}net/admin.macaroon
+remote.lnd.macaroonpath=/home/lit/.lnd/data/chain/bitcoin/${chain}net/admin.macaroon
 remote.lnd.tlscertpath=/home/lit/.lnd/tls.cert
 
 # Loop
@@ -350,6 +362,7 @@ alias lit-frcli=\"frcli --rpcserver=localhost:8443 \
   source <(/home/admin/_cache.sh get state)
   if [ "${state}" == "ready" ]; then
     echo "# OK - the litd.service is enabled, system is ready so starting service"
+    sudo systemctl restart lnd
     sudo systemctl start litd
   else
     echo "# OK - the litd.service is enabled, to start manually use: 'sudo systemctl start litd'"

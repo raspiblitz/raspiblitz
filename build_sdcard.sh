@@ -2,8 +2,8 @@
 
 #########################################################################
 # Build your SD card image based on: 2022-04-04-raspios-bullseye-arm64.img.xz
-# https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2022-09-26/
-# SHA256: c42856ffca096480180b5aff66e1dad2f727fdc33359b24e0d2d49cc7676b576
+# https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2023-02-21/
+# SHA256: 4c963bcd53b9a77fa8235e2dc16785cc7d56372ec83c3090eac9073bd262833f
 # PGP fingerprint: 8738CD6B956F460C
 # PGP key: https://www.raspberrypi.org/raspberrypi_downloads.gpg.key
 # setup fresh SD card with image above - login per SSH and run this script:
@@ -796,55 +796,8 @@ echo "Provisioning BLITZ WEB SERVICE"
 
 # *** FATPACK *** (can be activated by parameter - see details at start of script)
 if ${fatpack}; then
-  echo -e "\n*** FATPACK ***"
-
-  echo "* Adding nodeJS Framework ..."
-  sudo /home/admin/config.scripts/bonus.nodejs.sh on || exit 1
-
-  echo "* Optional Packages (may be needed for extended features)"
-  apt_install qrencode secure-delete fbi msmtp unclutter xterm python3-pyqt5 xfonts-terminus apache2-utils nginx python3-jinja2 socat libatlas-base-dev hexyl autossh
-
-  echo "* Adding LND ..."
-  /home/admin/config.scripts/lnd.install.sh install || exit 1
-
-  echo "* Adding Core Lightning ..."
-  /home/admin/config.scripts/cl.install.sh install || exit 1
-  echo "* Adding the cln-grpc plugin ..."
-  /home/admin/config.scripts/cl-plugin.cln-grpc.sh install || exit 1
-
-  # *** AUTO UPDATE FALLBACK NODE LIST FROM INTERNET (only in fatpack)
-  echo "*** FALLBACK NODE LIST ***"
-  # see https://github.com/rootzoll/raspiblitz/issues/1888
-  sudo -u admin curl -H "Accept: application/json; indent=4" https://bitnodes.io/api/v1/snapshots/latest/ -o /home/admin/fallback.bitnodes.nodes
-  # Fallback Nodes List from Bitcoin Core
-  sudo -u admin curl https://raw.githubusercontent.com/bitcoin/bitcoin/master/contrib/seeds/nodes_main.txt -o /home/admin/fallback.bitcoin.nodes
-
-  echo "* Adding Code&Compile for WEBUI-APP: LNBITS"
-  /home/admin/config.scripts/bonus.lnbits.sh install || exit 1
-  echo "* Adding Code&Compile for WEBUI-APP: JAM"
-  /home/admin/config.scripts/bonus.jam.sh install || exit 1
-  echo "* Adding Code&Compile for WEBUI-APP: BTCPAYSERVER"
-  /home/admin/config.scripts/bonus.btcpayserver.sh install || exit 1
-  echo "* Adding Code&Compile for WEBUI-APP: RTL"
-  /home/admin/config.scripts/bonus.rtl.sh install || exit 1
-  echo "* Adding Code&Compile for WEBUI-APP: THUNDERHUB"
-  /home/admin/config.scripts/bonus.thunderhub.sh install || exit 1
-  echo "* Adding Code&Compile for WEBUI-APP: BTC RPC EXPLORER"
-  /home/admin/config.scripts/bonus.btc-rpc-explorer.sh install || exit 1
-  echo "* Adding Code&Compile for WEBUI-APP: MEMPOOL"
-  /home/admin/config.scripts/bonus.mempool.sh install || exit 1
-
-  echo "* Adding Raspiblitz API ..."
-  sudo /home/admin/config.scripts/blitz.web.api.sh on "${defaultAPIuser}" "${defaultAPIrepo}" "blitz-${branch}" || exit 1
-  echo "* Adding Raspiblitz WebUI ..."
-  sudo /home/admin/config.scripts/blitz.web.ui.sh on "${defaultWEBUIuser}" "${defaultWEBUIrepo}" "release/${branch}" || exit 1
-
-  # set build code as new default
-  sudo rm -r /home/admin/assets/nginx/www_public
-  sudo cp -a /home/blitzapi/blitz_web/build/* /home/admin/assets/nginx/www_public
-  sudo chown admin:admin /home/admin/assets/nginx/www_public
-  sudo rm -r /home/blitzapi/blitz_web/build/*
-
+  echo "* FATPACK activated"
+  /home/admin/config.scripts/blitz.fatpack.sh || exit 1
 else
   echo "* skipping FATPACK"
 fi

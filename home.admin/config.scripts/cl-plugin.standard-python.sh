@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # command info
-if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ];then
+if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo
   echo "Install and show the output of the chosen plugin for Core Lightning"
   echo "Usage:"
@@ -16,7 +16,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ];then
   exit 1
 fi
 
-if [ "$1" = "on" ];then
+if [ "$1" = "on" ]; then
 
   source <(/home/admin/config.scripts/network.aliases.sh getvars cl $3)
 
@@ -29,27 +29,27 @@ if [ "$1" = "on" ];then
   fi
 
   # enable
-  if [ "$(echo "$@" | grep -c "persist")" -gt 0 ];then
-    if [ ! -L /home/bitcoin/${netprefix}cl-plugins-enabled/${plugin}.py ];then
+  if [ "$(echo "$@" | grep -c "persist")" -gt 0 ]; then
+    if [ ! -L /home/bitcoin/${netprefix}cl-plugins-enabled/${plugin}.py ]; then
       echo "# Symlink to /home/bitcoin/${netprefix}cl-plugins-enabled"
       sudo ln -s /home/bitcoin/cl-plugins-available/plugins/${plugin}/${plugin}.py \
-                 /home/bitcoin/${netprefix}cl-plugins-enabled
-      
+        /home/bitcoin/${netprefix}cl-plugins-enabled
+
       source <(/home/admin/_cache.sh get state)
       if [ "${state}" == "ready" ]; then
         echo "# Restart the ${netprefix}lightningd.service to activate the ${plugin} plugin"
         sudo systemctl restart ${netprefix}lightningd
       fi
     fi
-  
+
   else
-    if [ $($lightningcli_alias | grep -c "${plugin}") -eq 0 ];then
+    if [ $($lightningcli_alias | grep -c "/${plugin}") -eq 0 ]; then
       echo "# Just start the ${plugin} plugin"
       sudo -u bitcoin pip install -r /home/bitcoin/cl-plugins-available/plugins/${plugin}/requirements.txt
       $lightningcli_alias plugin start /home/bitcoin/cl-plugins-available/plugins/${plugin}/${plugin}.py
     fi
   fi
-  
+
   echo
   echo "Node URI:"
   ln_getinfo=$($lightningcli_alias -H getinfo 2>/dev/null)
@@ -60,11 +60,11 @@ if [ "$1" = "on" ];then
   echo
   echo "# Running:"
   echo "${netprefix}lightning-cli ${plugin}"
-  echo 
+  echo
   $lightningcli_alias ${plugin}
   echo
 
-  if [ "$(echo "$@" | grep -c "runonce")" -gt 0 ];then
+  if [ "$(echo "$@" | grep -c "runonce")" -gt 0 ]; then
     $lightningcli_alias plugin stop /home/bitcoin/cl-plugins-available/plugins/${plugin}/${plugin}.py
   fi
 
