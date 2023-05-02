@@ -10,6 +10,7 @@ Wants=network-online.target
 #OnFailure=systemd-sendmail@%n
 
 [Service]
+Environment='MALLOC_ARENA_MAX=1'
 ExecStartPre=-/home/admin/config.scripts/blitz.systemd.sh log blockchain STARTED
 ExecStart=/usr/local/bin/bitcoind -daemonwait \
                                   -conf=/mnt/hdd/bitcoin/bitcoin.conf \
