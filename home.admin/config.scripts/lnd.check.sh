@@ -305,6 +305,39 @@ fi
 
   fi
 
+  ##### RPCMIDDLEWARE SECTION #####
+
+  # [rpcmiddleware]
+  sectionName="[Rr]pcmiddleware"
+  echo "# [${sectionName}] config ..."
+
+  # make sure lnd config has a [rpcmiddleware] section
+  sectionExists=$(cat ${lndConfFile} | grep -c "^\[${sectionName}\]")
+  echo "# sectionExists(${sectionExists})"
+  if [ "${sectionExists}" == "0" ]; then
+    echo "# adding section [${sectionName}]"
+    echo "
+  [${sectionName}]
+  " | tee -a ${lndConfFile}
+  fi
+
+  # get line number of [rpcmiddleware] section
+  sectionLine=$(cat ${lndConfFile} | grep -n "^\[${sectionName}\]" | cut -d ":" -f1)
+  echo "# sectionLine(${sectionLine})"
+  insertLine=$(expr $sectionLine + 1)
+  echo "# insertLine(${insertLine})"
+  fileLines=$(wc -l ${lndConfFile} | cut -d " " -f1)
+  echo "# fileLines(${fileLines})"
+  if [ ${fileLines} -lt ${insertLine} ]; then
+    echo "# adding new line for inserts"
+    echo "
+  " | tee -a ${lndConfFile}
+  fi
+
+  # SET/UPDATE rpcmiddleware.enable
+  setting ${lndConfFile} ${insertLine} "rpcmiddleware.enable" "true"
+
+
   echo "# OK PRESTART DONE"
 
 ######################################################################
