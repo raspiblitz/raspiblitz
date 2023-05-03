@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # https://github.com/lightninglabs/lightning-terminal/releases
-LITVERSION="0.8.6-alpha"
+LITVERSION="0.9.2-alpha"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -14,15 +14,18 @@ fi
 # check who signed the release in https://github.com/lightninglabs/lightning-terminal/releases
 PGPsigner="ellemouton"
 
-if [ $PGPsigner = ellemouton ];then
+if [ $PGPsigner = ellemouton ]; then
   PGPpkeys="https://github.com/${PGPsigner}.gpg"
   PGPcheck="D7D916376026F177"
-elif [ $PGPsigner = guggero ];then
+elif [ $PGPsigner = guggero ]; then
   PGPpkeys="https://keybase.io/${PGPsigner}/pgp_keys.asc"
   PGPcheck="03DB6322267C373B"
-elif [ $PGPsigner = roasbeef ];then
+elif [ $PGPsigner = roasbeef ]; then
   PGPpkeys="https://keybase.io/${PGPsigner}/pgp_keys.asc "
   PGPcheck="3BBD59E99B280306"
+elif [ $PGPsigner = ellemouton ]; then
+  PGPpkeys="https://keybase.io/ellemo/pgp_keys.asc "
+  PGPcheck="D7D916376026F17"
 fi
 
 source /mnt/hdd/raspiblitz.conf
