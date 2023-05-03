@@ -9,6 +9,15 @@ if [ "$EUID" -ne 0 ]
   exit 1
 fi
 
+apt_install() {
+  apt install -y ${@}
+  if [ $? -eq 100 ]; then
+    echo "FAIL! apt failed to install needed packages!"
+    echo ${@}
+    exit 1
+  fi
+}
+
 echo "# getting default user/repo from build_sdcard.sh"
 sudo cp /home/admin/raspiblitz/build_sdcard.sh /home/admin/build_sdcard.sh
 sudo chmod +x /home/admin/build_sdcard.sh 2>/dev/null
@@ -48,6 +57,7 @@ sudo /home/admin/config.scripts/blitz.web.ui.sh on "${defaultWEBUIuser}" "${defa
 
 # set build code as new www default
 sudo rm -r /home/admin/assets/nginx/www_public
+mkdir -p /home/admin/assets/nginx/www_public
 sudo cp -a /home/blitzapi/blitz_web/build/* /home/admin/assets/nginx/www_public
 sudo chown admin:admin /home/admin/assets/nginx/www_public
 sudo rm -r /home/blitzapi/blitz_web/build/*
