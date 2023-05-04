@@ -19,7 +19,7 @@
 - Update: Lightning Terminal v0.8.6-alpha [details](https://github.com/lightninglabs/lightning-terminal/releases/tag/v0.8.6-alpha)
 - Update: RTL v0.13.6 with update option [details](https://github.com/Ride-The-Lightning/RTL/releases/tag/v0.13.6)
 - Update: Thunderhub v0.13.16 with balance sharing disabled [details](https://github.com/apotdevin/thunderhub/releases/tag/v0.13.16)
-- Update: LNbits 0.10.2 [details](https://github.com/lnbits/lnbits/releases/tag/0.10.2)
+- Update: LNbits 0.10.5 [details](https://github.com/lnbits/lnbits/releases/tag/0.10.5)
 - Update: BTCPayServer 1.9.1 (postgres by default with sqlite migration) [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.9.1)
 - Update: ItchySats 0.7.0 [details](https://github.com/itchysats/itchysats/releases/tag/0.7.0)
 - Update: Channel Tools (chantools) v0.10.5 [details](https://github.com/guggero/chantools/releases/tag/v0.10.5)
