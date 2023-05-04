@@ -11,7 +11,7 @@ fi
 
 # check if sd card needs expansion before fatpack
 source <(sudo /home/admin/config.scripts/blitz.bootdrive.sh status)
-if [ "${fsexpanded}" != "1" ]; then
+if [ "${needsExpansion}" == "1" ]; then
 
     echo "################################################"
     echo "# SD CARD NEEDS EXPANSION BEFORE FATPACK"
@@ -28,6 +28,12 @@ if [ "${fsexpanded}" != "1" ]; then
 
     # make sure this expand is not marked (because its not done after release)
     sed -i "s/^fsexpanded=.*/fsexpanded=0/g" /home/admin/raspiblitz.info
+
+    echo "################################################"
+    echo "# SD CARD GOT EXPANSION BEFORE FATPACK"
+    echo "# triggering a reboot"
+    echo "# after reboot run this script again"
+    echo "################################################"
 
     # trigger reboot
     shutdown -h -r now
