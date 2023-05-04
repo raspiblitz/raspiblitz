@@ -9,6 +9,31 @@ if [ "$EUID" -ne 0 ]
   exit 1
 fi
 
+# check if sd card needs expansion before fatpack
+source <(sudo /home/admin/config.scripts/blitz.bootdrive.sh status)
+if [ "${fsexpanded}" != "1" ]; then
+
+    echo "################################################"
+    echo "# SD CARD NEEDS EXPANSION BEFORE FATPACK"
+    echo "# this will be done now ... and trigger a reboot"
+    echo "# after reboot run this script again"
+    echo "################################################"
+
+    # write a stop file to prevent full bootstrap
+    # after fsexpand reboot
+    touch /boot/stop
+
+    # trigger fsexpand
+    /home/admin/config.scripts/blitz.bootdrive.sh fsexpand
+
+    # make sure this expand is not marked (because its not done after release)
+    sed -i "s/^fsexpanded=.*/fsexpanded=0/g" /home/admin/raspiblitz.info
+
+    # trigger reboot
+    shutdown -h -r now
+    exit 0
+fi
+
 apt_install() {
   apt install -y ${@}
   if [ $? -eq 100 ]; then
