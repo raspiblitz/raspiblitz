@@ -32,7 +32,7 @@ minimumSizeByte=16384000000
 rootPartition=$(sudo mount | grep " / " | cut -d " " -f 1 | cut -d "/" -f 3)
 rootPartitionBytes=$(lsblk -b -o NAME,SIZE | grep "${rootPartition}" | tr -s ' ' | cut -d " " -f 2)
 
-# make conculsions
+# make conclusions
 needsExpansion=0
 tooSmall=0
 if [ $rootPartitionBytes -lt $minimumSizeByte ]; then
