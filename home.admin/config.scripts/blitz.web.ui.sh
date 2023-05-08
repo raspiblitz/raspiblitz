@@ -17,12 +17,6 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ];
   exit 0
 fi
 
-# check if started with sudo
-if [ "$EUID" -ne 0 ]; then 
-  echo "error='run as root'"
-  exit 1
-fi
-
 ###################
 # INFO
 ###################
@@ -49,6 +43,12 @@ if [ "$1" = "info" ]; then
   echo "commit='${commit}'"
 
   exit 0
+fi
+
+# check if started with sudo
+if [ "$EUID" -ne 0 ]; then 
+  echo "error='run as root'"
+  exit 1
 fi
 
 ###################
