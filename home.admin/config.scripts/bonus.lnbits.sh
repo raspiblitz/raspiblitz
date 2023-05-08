@@ -14,7 +14,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "bonus.lnbits.sh [install|uninstall] [?GITHUBUSER] [?BRANCH|?TAG]"
   echo "bonus.lnbits.sh on [lnd|tlnd|slnd|cl|tcl|scl]"
   echo "bonus.lnbits.sh switch [lnd|tlnd|slnd|cl|tcl|scl]"
-  echo "bonus.lnbits.sh off"
+  echo "bonus.lnbits.sh off <--keep-data|--delete-data>"
   echo "bonus.lnbits.sh status"
   echo "bonus.lnbits.sh menu"
   echo "bonus.lnbits.sh prestart"
@@ -580,7 +580,11 @@ if [ "$1" = "sync" ] || [ "$1" = "repo" ]; then
   sudo -u lnbits git pull
 
   # check if poetry in installed, if not install it
-  sudo -u lnbits which poetry || sudo -u lnbits curl -sSL https://install.python-poetry.org | sudo -u lnbits python3 -
+  if ! sudo -u lnbits which poetry; then
+    echo "# install poetry"
+    sudo pip3 install --upgrade pip
+    sudo pip3 install poetry
+  fi
   # do install like this
   sudo -u lnbits poetry install
 
@@ -597,13 +601,12 @@ sudo systemctl stop lnbits 2>/dev/null
 if [ "$1" = "install" ]; then
 
   # check if already installed
-  isInstalled=$(compgen -u | grep -c lnbits)
-  if [ "${isInstalled}" != "0" ]; then
+  if compgen -u | grep -w lnbits; then
     echo "result='already installed'"
     exit 0
   fi
 
-  echo "# *** INSTALL LNBIS ${VERSION} ***"
+  echo "# *** INSTALL LNBITS ${VERSION} ***"
 
   # add lnbits user
   echo "*** Add the 'lnbits' user ***"
@@ -661,12 +664,18 @@ if [ "$1" = "uninstall" ]; then
 fi
 
 
-# install
+# on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
-  # check if code is already installed
-  isInstalled=$(compgen -u | grep -c lnbits)
-  if [ "${isInstalled}" == "0" ]; then
+  # check if already installed
+  if compgen -u | grep -w lnbits; then
+    # check poetry if the user exists
+    if ! sudo -u lnbits which poetry; then
+      echo "# Fix faulty installation"
+      /home/admin/config.scripts/bonus.lnbits.sh off --keep-data
+      /home/admin/config.scripts/bonus.lnbits.sh install || exit 1
+    fi
+  else
     echo "# Installing code base & dependencies first .."
     /home/admin/config.scripts/bonus.lnbits.sh install || exit 1
   fi
@@ -987,12 +996,12 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo systemctl stop lnbits
     sudo systemctl disable lnbits
     sudo rm /etc/systemd/system/lnbits.service
-    echo "OK lnbits.service removed."
+    echo "# OK lnbits.service removed."
   else
-    echo "lnbits.service is not installed."
+    echo "# lnbits.service is not installed."
   fi
 
-  echo "Cleaning up LNbits install ..."
+  echo "# Cleaning up LNbits install ..."
   sudo ufw delete allow 5000
   sudo ufw delete allow 5001
 
@@ -1019,6 +1028,9 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   else
     echo "# keeping data"
   fi
+
+  echo "# Remove the lnbits user"
+  sudo userdel -rf lnbits 2>/dev/null
 
   # setting value in raspi blitz config
   /home/admin/config.scripts/blitz.conf.sh set LNBits "off"
