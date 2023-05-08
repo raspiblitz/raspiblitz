@@ -31,15 +31,15 @@ if [ "$1" = "info" ]; then
   echo "installed=1"
 
   # get github origin repo from repo directory with git command
-  origin=$(sudo -u blitzapi git config --get remote.origin.url)
+  origin=$(sudo git config --get remote.origin.url)
   echo "repo='${origin}'"
 
   # get github branch from repo directory with git command 
-  branch=$(sudo -u blitzapi git rev-parse --abbrev-ref HEAD)
+  branch=$(sudo git rev-parse --abbrev-ref HEAD)
   echo "branch='${branch}'"
 
   # get github commit from repo directory with git command
-  commit=$(sudo -u blitzapi git rev-parse HEAD)
+  commit=$(sudo git rev-parse HEAD)
   echo "commit='${commit}'"
 
   exit 0
