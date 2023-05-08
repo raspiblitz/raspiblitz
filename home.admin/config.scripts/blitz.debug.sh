@@ -254,6 +254,7 @@ fi
 
 echo "*** BLITZ WebUI STATUS ***"
 /home/admin/config.scripts/blitz.web.ui.sh info
+echo
 
 if [ "${touchscreen}" == "" ] || [ "${touchscreen}" == "0" ] || [ "${touchscreen}" == "off" ]; then
   echo "- TOUCHSCREEN is OFF by config"
