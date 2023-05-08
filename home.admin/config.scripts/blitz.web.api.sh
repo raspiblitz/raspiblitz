@@ -12,6 +12,7 @@ FALLACK_BRANCH="dev"
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ]; then
   echo "Manage RaspiBlitz Web API"
+  echo "blitz.web.api.sh info"
   echo "blitz.web.api.sh on [GITHUBUSER] [REPO] [BRANCH] [?COMMITORTAG]"
   echo "blitz.web.api.sh on DEFAULT"
   echo "blitz.web.api.sh update-config"
@@ -25,7 +26,13 @@ fi
 ###################
 if [ "$1" = "info" ]; then
 
-  cd /home/blitzapi/blitz_api || exit 1
+  # check if installed
+  cd /home/blitzapi/blitz_api
+  if [ "$?" != "0" ]; then
+    echo "installed=0"
+    exit 1
+  fi
+  echo "installed=1"
 
   # get github origin repo from repo directory with git command
   origin=$(sudo -u blitzapi git config --get remote.origin.url)
