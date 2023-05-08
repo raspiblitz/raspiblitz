@@ -25,12 +25,13 @@ fi
 ###################
 if [ "$1" = "info" ]; then
 
+  cd /home/blitzapi/blitz_api || exit 1
+
   # get github origin repo from repo directory with git command
   origin=$(sudo -u blitzapi git config --get remote.origin.url)
   echo "repo='${origin}'"
 
   # get github branch from repo directory with git command 
-  cd /home/blitzapi/blitz_api || exit 1
   branch=$(sudo -u blitzapi git rev-parse --abbrev-ref HEAD)
   echo "branch='${branch}'"
 
