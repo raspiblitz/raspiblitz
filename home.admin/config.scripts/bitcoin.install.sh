@@ -254,6 +254,7 @@ After=network-online.target
 Wants=network-online.target
 
 [Service]
+Environment='MALLOC_ARENA_MAX=1'
 ExecStart=/usr/local/bin/bitcoind -${CHAIN} \\
                                   -daemonwait \\
                                   -conf=/mnt/hdd/bitcoin/bitcoin.conf \\
