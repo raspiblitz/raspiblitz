@@ -11,6 +11,7 @@
 - New: ↬lnproxy cli shortcut and server [details](https://github.com/lnproxy)
 - New: Homebanking Interface FinTS/HBCI (experimental) [details](https://github.com/rootzoll/raspiblitz/issues/1186)
 - New on WebUI: Jam (JoinMarket Web UI) v0.1.5 [details](https://github.com/joinmarket-webui/joinmarket-webui/releases/tag/v0.1.5)
+- New on WQebUI: Generate/Download Debug Report from Settings
 - Update: Bitcoin Core v24.0.1 [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-24.0.1.md)
 - Update: LND v0.16.2-beta [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.16.2-beta)
 - Update: Core Lightning v23.02.2 [details](https://github.com/ElementsProject/lightning/releases/tag/v23.02.2)
