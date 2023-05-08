@@ -9,10 +9,39 @@ FALLACK_BRANCH="master"
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ]; then
   echo "Manage RaspiBlitz WebUI"
+  echo "blitz.web.ui.sh info"
   echo "blitz.web.ui.sh on [GITHUBUSER] [REPO] [BRANCH] [?COMMITORTAG]"
   echo "blitz.web.ui.sh on DEFAULT"
   echo "blitz.web.ui.sh update"
   echo "blitz.web.ui.sh off"
+  exit 0
+fi
+
+###################
+# INFO
+###################
+if [ "$1" = "info" ]; then
+
+  # check if installed
+  cd /home/blitzapi/blitz_web
+  if [ "$?" != "0" ]; then
+    echo "installed=0"
+    exit 1
+  fi
+  echo "installed=1"
+
+  # get github origin repo from repo directory with git command
+  origin=$(sudo git config --get remote.origin.url)
+  echo "repo='${origin}'"
+
+  # get github branch from repo directory with git command 
+  branch=$(sudo git rev-parse --abbrev-ref HEAD)
+  echo "branch='${branch}'"
+
+  # get github commit from repo directory with git command
+  commit=$(sudo git rev-parse HEAD)
+  echo "commit='${commit}'"
+
   exit 0
 fi
 
