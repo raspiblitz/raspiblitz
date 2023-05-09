@@ -10,7 +10,7 @@ BTCPayVersion="v1.9.3"
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "Config script to switch BTCPay Server on or off"
-  echo "Usage:"
+  echo "bonus.btcpayserver.sh menu"
   echo "bonus.btcpayserver.sh [install|uninstall]"
   echo "bonus.btcpayserver.sh [on|off|menu|write-tls-macaroon|cln-lightning-rpc-access]"
   echo "installs BTCPayServer $BTCPayVersion with NBXplorer $NBXplorerVersion"
@@ -437,10 +437,12 @@ if [ "$1" = "uninstall" ]; then
   /home/btcpay/dotnet/dotnet nuget locals all --clear
 
   # remove dotnet
-  sudo rm -rf /usr/share/dotnet
+  sudo rm -rf /usr/share/dotnet 2>/dev/null
 
   # nuke user
   sudo userdel -rf btcpay 2>/dev/null
+
+  echo "# uninstall done"
 
   exit 0
 fi
