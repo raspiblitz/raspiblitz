@@ -434,7 +434,7 @@ if [ "$1" = "uninstall" ]; then
   fi
 
   # clear dotnet cache
-  /home/btcpay/dotnet/dotnet nuget locals all --clear
+  /home/btcpay/dotnet/dotnet nuget locals all --clear 2>/dev/null
 
   # remove dotnet
   sudo rm -rf /usr/share/dotnet 2>/dev/null
