@@ -64,6 +64,7 @@ ExecStartPre=-/home/admin/config.scripts/cl.check.sh prestart $CHAIN
 ExecStart=/bin/sh -c '${passwordInput}/usr/local/bin/lightningd \\
                        --conf=${CLCONF} ${encryptedHSMoption} \\
                        --pid-file=/run/lightningd/${netprefix}lightningd.pid'
+ExecStartPost=-/home/admin/config.scripts/cl.check.sh poststart $CHAIN
 
 # Creates /run/lightningd owned by bitcoin
 RuntimeDirectory=lightningd
