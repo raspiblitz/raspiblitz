@@ -102,8 +102,12 @@ fi
 if [ "$1" == "poststart" ]; then
 
     # make sure socket can be accessed by blitzapi
-    logger "# Set access CL SOCKET: /mnt/hdd/app-data/.lightning/bitcoin/lightning-rpc as user(${USER})"
+    info=$(ls -la /mnt/hdd/app-data/.lightning/bitcoin/lightning-rpc)
+    logger "${info}"
+    logger "# Set access CL SOCKET: /mnt/hdd/app-data/.lightning/bitcoin/lightning-rpc"
     chmod 770 /mnt/hdd/app-data/.lightning/bitcoin/lightning-rpc
+    info=$(ls -la /mnt/hdd/app-data/.lightning/bitcoin/lightning-rpc)
+    logger "${info}"
 
   exit 0
 fi
