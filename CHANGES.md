@@ -26,7 +26,7 @@
 - Update: JoinMarket v0.9.9 [details](https://github.com/JoinMarket-Org/joinmarket-clientserver/releases/tag/v0.9.9)
 - Update: JoininBox v0.7.7 [details](https://github.com/openoms/joininbox/releases/tag/v0.7.7)
 - Update: Balance of Satoshis 13.15.0 (bos) [details](https://github.com/alexbosworth/balanceofsatoshis/blob/master/CHANGELOG.md#13150)
-- Update: lndmanage 0.14.2 [details](https://github.com/bitromortac/lndmanage)
+- Update: lndmanage 0.15.0 [details](https://github.com/bitromortac/lndmanage)
 - Update: Circuitbreaker with webUI [details](https://github.com/lightningequipment/circuitbreaker/blob/master/README.md)
 - Update: Suez - Channel Visualization for LND & CL [details](https://github.com/prusnak/suez)
 - Update: Tallycoin Connect v1.8.0 [details](https://github.com/djbooth007/tallycoin_connect/releases/tag/v1.8.0)
