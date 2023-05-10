@@ -103,7 +103,7 @@ if [ "$1" == "poststart" ]; then
 
     # make sure socket can be accessed by blitzapi
     echo "# Set access CL SOCKET: /mnt/hdd/app-data/.lightning/bitcoin/lightning-rpc"
-    sudo chmod 770 /mnt/hdd/app-data/.lightning/bitcoin/lightning-rpc
+    sudo -u bitcoin chmod 770 /mnt/hdd/app-data/.lightning/bitcoin/lightning-rpc
 
   exit 0
 fi
