@@ -74,8 +74,6 @@ echo "* Adding LND ..."
 
 echo "* Adding Core Lightning ..."
 /home/admin/config.scripts/cl.install.sh install || exit 1
-echo "* Adding the cln-grpc plugin ..."
-/home/admin/config.scripts/cl-plugin.cln-grpc.sh install || exit 1
 
 # *** AUTO UPDATE FALLBACK NODE LIST FROM INTERNET (only in fatpack)
 echo "*** FALLBACK NODE LIST ***"

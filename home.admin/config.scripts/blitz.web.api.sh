@@ -131,9 +131,6 @@ if [ "$1" = "update-config" ]; then
       sed -i "s/^ln_node=.*/ln_node=cln_jrpc/g" ./.env
       sed -i "s#^cln_jrpc_path=.*#cln_jrpc_path=\"/mnt/hdd/app-data/.lightning/bitcoin/lightning-rpc\"#g" ./.env
 
-      # make sure cln-grpc is on
-      # sudo /home/admin/config.scripts/cl-plugin.cln-grpc.sh on mainnet
-
       # get hex values of pem files
       # hexClient=$(sudo xxd -p -c2000 /home/bitcoin/.lightning/bitcoin/client.pem)
       # hexClientKey=$(sudo xxd -p -c2000 /home/bitcoin/.lightning/bitcoin/client-key.pem)
