@@ -9,6 +9,9 @@ if [ "$EUID" -ne 0 ]
   exit 1
 fi
 
+# make sure LCD is on (default for fatpack)
+/home/admin/config.scripts/blitz.display.sh set-display lcd
+
 # check if sd card needs expansion before fatpack
 source <(sudo /home/admin/config.scripts/blitz.bootdrive.sh status)
 if [ "${needsExpansion}" == "1" ]; then
