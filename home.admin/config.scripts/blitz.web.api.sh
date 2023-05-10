@@ -123,10 +123,6 @@ if [ "$1" = "update-config" ]; then
     # configure CL
     elif [ "${lightning}" == "cl" ]; then
 
-      # make sure socket can be accessed by blitzapi
-      echo "# Access Rights Web API Lightning --> CL SOCKET: /mnt/hdd/app-data/.lightning/bitcoin/lightning-rpc"
-      sudo chmod 770 /mnt/hdd/app-data/.lightning/bitcoin/lightning-rpc
-
       echo "# CONFIG Web API Lightning --> CL"
       sed -i "s/^ln_node=.*/ln_node=cln_jrpc/g" ./.env
       sed -i "s#^cln_jrpc_path=.*#cln_jrpc_path=\"/mnt/hdd/app-data/.lightning/bitcoin/lightning-rpc\"#g" ./.env
