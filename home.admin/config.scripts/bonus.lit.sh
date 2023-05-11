@@ -5,10 +5,10 @@ LITVERSION="0.9.2-alpha"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
- echo "config script to switch the Lightning Terminal Service on or off"
- echo "installs the version $LITVERSION"
- echo "bonus.lit.sh [on|off|menu]"
- exit 1
+  echo "config script to switch the Lightning Terminal Service on or off"
+  echo "installs the version $LITVERSION"
+  echo "bonus.lit.sh [on|off|menu]"
+  exit 1
 fi
 
 # check who signed the release in https://github.com/lightninglabs/lightning-terminal/releases
@@ -78,16 +78,16 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   # switching off single installs of pool, loop or faraday if installed
   if [ "${loop}" = "on" ]; then
-      echo "# Replacing single install of: LOOP"
-      /home/admin/config.scripts/bonus.loop.sh off
+    echo "# Replacing single install of: LOOP"
+    /home/admin/config.scripts/bonus.loop.sh off
   fi
   if [ "${pool}" = "on" ]; then
-      echo "# Replacing single install of: POOL"
-      /home/admin/config.scripts/bonus.pool.sh off
+    echo "# Replacing single install of: POOL"
+    /home/admin/config.scripts/bonus.pool.sh off
   fi
   if [ "${faraday}" = "on" ]; then
-      echo "# Replacing single install of: FARADAY"
-      /home/admin/config.scripts/bonus.faraday.sh off
+    echo "# Replacing single install of: FARADAY"
+    /home/admin/config.scripts/bonus.faraday.sh off
   fi
 
   isInstalled=$(sudo ls /etc/systemd/system/litd.service 2>/dev/null | grep -c 'litd.service')
@@ -96,7 +96,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # create dedicated user
     sudo adduser --disabled-password --gecos "" lit
     # make sure symlink to central app-data directory exists
-    sudo rm -rf /home/lit/.lnd  # not a symlink.. delete it silently
+    sudo rm -rf /home/lit/.lnd # not a symlink.. delete it silently
     # create symlink
     sudo ln -s "/mnt/hdd/app-data/lnd/" "/home/lit/.lnd"
 
@@ -160,21 +160,21 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       uname -m
       exit 1
     else
-    echo "OK running on $(uname -m) architecture."
+      echo "OK running on $(uname -m) architecture."
     fi
 
-    downloadDir="/home/admin/download/lit"  # edit your download directory
+    downloadDir="/home/admin/download/lit" # edit your download directory
     rm -rf "${downloadDir}"
     mkdir -p "${downloadDir}"
     cd "${downloadDir}" || exit 1
 
     # extract the SHA256 hash from the manifest file for the corresponding platform
     wget -N https://github.com/lightninglabs/lightning-terminal/releases/download/v${LITVERSION}/manifest-v${LITVERSION}.txt
-    if [ ${isARM} -eq 1 ] ; then
+    if [ ${isARM} -eq 1 ]; then
       OSversion="armv7"
-    elif [ ${isAARCH64} -eq 1 ] ; then
+    elif [ ${isAARCH64} -eq 1 ]; then
       OSversion="arm64"
-    elif [ ${isX86_64} -eq 1 ] ; then
+    elif [ ${isX86_64} -eq 1 ]; then
       OSversion="amd64"
     fi
     SHA256=$(grep -i "linux-$OSversion" manifest-v$LITVERSION.txt | cut -d " " -f1)
@@ -198,8 +198,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     echo "# check gpg finger print"
     gpg --show-keys --keyid-format LONG ./pgp_keys.asc
-    fingerprint=$(gpg --show-keys --keyid-format LONG "./pgp_keys.asc" 2>/dev/null \
-    | grep "${PGPcheck}" -c)
+    fingerprint=$(gpg --show-keys --keyid-format LONG "./pgp_keys.asc" 2>/dev/null |
+      grep "${PGPcheck}" -c)
     if [ ${fingerprint} -lt 1 ]; then
       echo ""
       echo "# BUILD WARNING --> LiT PGP author not as expected"
@@ -209,7 +209,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     fi
     gpg --import ./pgp_keys.asc
     sleep 3
-    verifyResult=$(LANG=en_US.utf8; gpg --verify manifest-v${LITVERSION}.sig manifest-v${LITVERSION}.txt 2>&1)
+    verifyResult=$(
+      LANG=en_US.utf8
+      gpg --verify manifest-v${LITVERSION}.sig manifest-v${LITVERSION}.txt 2>&1
+    )
     goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
     echo "goodSignature(${goodSignature})"
     correctKey=$(echo ${verifyResult} | tr -d " \t\n\r" | grep "${GPGcheck}" -c)
@@ -235,16 +238,13 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     ###########
     # config  #
     ###########
-
-    # check if lnd.conf has rpcmiddleware.enable entry under section Application Options
-    entryExists=$(sudo cat /mnt/hdd/lnd/lnd.conf | grep -c "rpcmiddleware.enable=")
-    if [ "${entryExists}" == "0" ]; then
-      echo "# add rpcmiddleware.enable=true to lnd.conf"
-      sudo sed -i "/^\[Application Options\]$/arpcmiddleware.enable=true" /mnt/hdd/lnd/lnd.conf
+    # check if lnd.conf has rpcmiddleware.enable entry under [rpcmiddleware]
+    if sudo grep rpcmiddleware /mnt/hdd/lnd/lnd.conf; then
+      sudo sed -i "s/^rpcmiddleware.enable=.*/rpcmiddleware.enable=true/g" /mnt/hdd/lnd/lnd.conf
+    else
+      sudo bash -c "echo '[rpcmiddleware]' >> /mnt/hdd/lnd/lnd.conf"
+      sudo bash -c "echo 'rpcmiddleware.enable=true' >> /mnt/hdd/lnd/lnd.conf"
     fi
-
-    # make sure lnd.conf has rpcmiddleware.enable=true
-    sudo sed -i "s/^rpcmiddleware.enable=.*/rpcmiddleware.enable=true/g" /mnt/hdd/lnd/lnd.conf
 
     if [ "${runBehindTor}" = "on" ]; then
       echo "# Connect to the Pool, Loop and Terminal server through Tor"
@@ -408,4 +408,3 @@ fi
 echo "FAIL - Unknown Parameter $1"
 echo "may need reboot to run normal again"
 exit 1
-

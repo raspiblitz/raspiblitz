@@ -9,6 +9,9 @@ if [ "$EUID" -ne 0 ]
   exit 1
 fi
 
+# make sure LCD is on (default for fatpack)
+/home/admin/config.scripts/blitz.display.sh set-display lcd
+
 # check if sd card needs expansion before fatpack
 source <(sudo /home/admin/config.scripts/blitz.bootdrive.sh status)
 if [ "${needsExpansion}" == "1" ]; then
@@ -71,8 +74,6 @@ echo "* Adding LND ..."
 
 echo "* Adding Core Lightning ..."
 /home/admin/config.scripts/cl.install.sh install || exit 1
-echo "* Adding the cln-grpc plugin ..."
-/home/admin/config.scripts/cl-plugin.cln-grpc.sh install || exit 1
 
 # *** AUTO UPDATE FALLBACK NODE LIST FROM INTERNET (only in fatpack)
 echo "*** FALLBACK NODE LIST ***"

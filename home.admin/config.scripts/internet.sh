@@ -181,9 +181,9 @@ if [ ${runGlobal} -eq 1 ]; then
     globalIP=""
     echo "# getting public IP from third party service"
     if [ "${ipv6}" == "on" ]; then
-      globalIP=$(curl -s -f -S -m 5 http://v6.ipv6-test.com/api/myip.php 2>/dev/null)
+      globalIP=$(curl -s -f -S -m 10 http://v6.ipv6-test.com/api/myip.php 2>/dev/null)
     else
-      globalIP=$(curl -s -f -S -m 5 http://v4.ipv6-test.com/api/myip.php 2>/dev/null)
+      globalIP=$(curl -s -f -S -m 10 http://v4.ipv6-test.com/api/myip.php 2>/dev/null)
     fi
     echo "##  curl returned:  ${globalIP}"
     echo "##  curl exit code: ${?}"
