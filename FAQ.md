@@ -307,14 +307,23 @@ You can also put an empty file just called `hdmi` (without any ending) onto the 
 
 ### How do I generate a Debug Report?
 
-If your RaspiBlitz is not working correctly and you like to get help from the community, it's good to provide more debug information, so others can better diagnose your problem - please follow the following steps to generate a debug report:
+If your RaspiBlitz is not working correctly and you like to get help from the community, it's good to provide more debug information, so others can better diagnose your problem.
+
+When you use the WebUI in the browser than you can follow the steps:
+
+- Login  into the WebUI and enter the Dashboard (needs to be fully snyced)
+- In the left navigation bar - choose "Settings"
+- Under "Generate Debug Report" click "Generate"
+- This might take some minutes, but then a Text-File will be offered for download
+
+ You can also get a debug report thru the SSH menus:
 
 - SSH into your raspiblitz as admin user with your password A
 - If you see the menu - use CTRL+C to get to the terminal
 - To generate debug report run: `debug`, optionally create a link with `debug -l`
 - Then copy all output beginning with `*** RASPIBLITZ LOGS ***` and share this
 
-*PLEASE NOTICE: It's possible that these logs can contain private information (like IPs, node IDs, ...) - just share publicly what you feel OK with.*
+*PLEASE NOTICE: Most private information (like IPs, node IDs, ...) will filtered from debug logs, but this might not catch all sensitive information - so recheck content yourself before you share publicly.*
 
 ### I have the full blockchain on another storage. How do I copy it to the RaspiBlitz?
 
