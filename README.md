@@ -167,8 +167,8 @@ This is the sd card image you should choose if your at the beginning of your Ras
 *WARNING: THIS IS STILL A RELEASE CANDIDATE VERSION</br>
 JUST USE FOR TESTING, HIGHER RISK OF LOSING FUNDS!*
 
-- __FATPACK SD CARD IMAGE ⮕ [raspiblitz-fat-v1.9.0rc2-2023-02-07.img.gz](https://raspiblitz.fulmo.org/images/raspiblitz-fat-v1.9.0rc2-2023-02-07.img.gz)__
-- SHA-256: f49582e362046893c5dfbabdf73d7f85d919145bf339c72980f61ba79668a476
+- __FATPACK SD CARD IMAGE ⮕ [raspiblitz-fat-v1.9.0rc5-2023-05-11.img.gz](https://raspiblitz.fulmo.org/images/raspiblitz-fat-v1.9.0rc5-2023-05-11.img.gz)__
+- SHA-256: 
 - GPG 64-bit (main): 1C73 060C 7C17 6461 & (sub): AA9D D1B5 CC56 47DA
 - Signature-File: n/a <!--[raspiblitz-fat-v1.9.0rc1-2022-12-21.img.gz.sig](https://raspiblitz.fulmo.org/images/raspiblitz-fat-v1.9.0rc1-2022-12-21.img.gz.sig)-->
 - Torrent: n/a <!--[raspiblitz-fat-v1.9.0-2022-12-21.img.gz.torrent](https://github.com/rootzoll/raspiblitz/raw/dev/home.admin/assets/raspiblitz-fat-v1.9.0-2022-12-21.img.gz.torrent)-->
@@ -181,8 +181,8 @@ This is the sd card image for RaspiBlitz users that are already more experienced
 *WARNING: THIS IS STILL A RELEASE CANDIDATE VERSION</br>
 JUST USE FOR TESTING, HIGHER RISK OF LOSING FUNDS!*
 
-- __MINIMAL SD CARD IMAGE ⮕ [raspiblitz-min-v1.9.0rc2-2023-02-07.img.gz](https://raspiblitz.fulmo.org/images/raspiblitz-min-v1.9.0rc2-2023-02-07.img.gz)__
-- SHA-256: 2a037ee3bce7d2092d6faa67f5bd74a135abe257a5af52c380b4ae68d4ad13f3
+- __MINIMAL SD CARD IMAGE ⮕ [raspiblitz-min-v1.9.0rc5-2023-05-11.img.gz](https://raspiblitz.fulmo.org/images/raspiblitz-min-v1.9.0rc5-2023-05-11.img.gz)__
+- SHA-256: 
 - GPG 64-bit (main): 1C73 060C 7C17 6461 & (sub): AA9D D1B5 CC56 47DA
 - Signature-File: n/a <!--[raspiblitz-min-v1.9.0rc1-2022-12-21.img.gz.sig](https://raspiblitz.fulmo.org/images/raspiblitz-min-v1.9.0rc1-2022-12-21.img.gz.sig)-->
 - Torrent: n/a <!--[raspiblitz-min-v1.9.0-2022-12-21.img.gz.torrent](https://github.com/rootzoll/raspiblitz/raw/dev/home.admin/assets/raspiblitz-min-v1.9.0-2022-12-21.img.gz.torrent)-->

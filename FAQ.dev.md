@@ -2,9 +2,13 @@
 
 ### What is the process of creating a new SD card image release?
 
-Work notes for the process of producing a new SD card image release:
+Checklist before making a SD card image release:
 
-* Make sure you have the "Versioning" final in your RaspiBlitz Source Code
+* "Versioning" number is upfates in your RaspiBlitz Source Code (_version.info)
+* Latest code is merged in release branch
+
+Creating the base minimal sd card:
+
 * Start [`Ubuntu LIVE`](http://releases.ubuntu.com/18.04.3/ubuntu-18.04.3-desktop-amd64.iso) from USB stick
 * Under Settings: best to set correct keyboard language & power settings to prevent monitor turn off
 * Connect to a secure WiFi (hardware switch on) or LAN
@@ -33,6 +37,9 @@ Work notes for the process of producing a new SD card image release:
 * Login new with `ssh admin@[IP-OF-RASPIBLITZ]` (pw: raspiblitz) and run `release`
 * Disconnect WiFi/LAN on build laptop (hardware switch off) and shutdown
 * Remove `Ubuntu LIVE` USB stick and cut power from the RaspberryPi
+
+Creating the image of sd card:
+
 * Connect USB stick with latest `TAILS` (make it stay offline)
 * Boot Tails with extra setting of Admin-Passwort and remember (use later for sudo)
 * Menu > Systemtools > Settings > Energy -> best to set monitor to never turn off
@@ -43,18 +50,45 @@ Work notes for the process of producing a new SD card image release:
 * Take the SD card from the RaspberryPi and connect with an external SD card reader to the laptop
 * Click on `boot` volume once in the file manger
 * Connect the NTFS USB stick, open in file manager and delete old files
-
-
 * To make a raw image from sd card - second way (UI with progress): 
   * Search "Laufwerke" or "Drives" on Tails Apps
   * Create image named `raspiblitz.img` to USB storage
 * Open Terminal and cd into directory of NTFS USB stick under `/media/amnesia`
 * `shasum -a 256 ./pishrink.sh` should be `e46e1e1e3c6e3555f9fff5435e2305e99b98aaa8dc28db1814cf861fbb472a69`
 * `chmod +x ./pishrink.sh | sudo ./pishrink.sh ./raspiblitz.img`
-* `gzip -c ./raspiblitz.img > ./raspiblitz-vX.X-YEAR-MONTH-DAY.img.gz`
-* Then run `shasum -a 256 *.gz > sha256.txt`
-* Sign with `gpg --output raspiblitz-vX.X-YEAR-MONTH-DAY.img.gz.sig --detach-sign *.gz`
-* Shutdown build computer
+* `gzip -c ./raspiblitz.img > ./raspiblitz-min/fat-vX.X.X-YEAR-MONTH-DAY.img.gz`
+* `shasum -a 256 ./raspiblitz-min/fat-vX.X.X-YEAR-MONTH-DAY.img.gz > ./raspiblitz-min/fat-vX.X.X-YEAR-MONTH-DAY.img.gz.sha`
+* make analog copy/note of checksum 
+* Sign with `gpg --output raspiblitz-min/fat-vX.X.X-YEAR-MONTH-DAY.img.gz.sig --detach-sign raspiblitz-min/fat-vX.X.X-YEAR-MONTH-DAY.img.gz`
+
+Prepare template for subversion update later:
+
+* `mv ./raspiblitz.img ./raspiblitz-min-vX.X.X.img`
+* `shasum -a 256 ./raspiblitz-min-vX.X.img > ./raspiblitz-min-vX.X.X.img.sha`
+* make analog copy/note of checksum
+
+Creating a fatpack sd card from the minimal image:
+
+* Start TAILS live image
+* On NTFS USB Stick (Open in Terminal) check hash of raspiblitz-min-vX.X.X.img wit analog note:
+* `shasum -a 256 ./raspiblitz-min-vX.X.X.img`
+* Right-Click the file and write to a min 32GB sd card
+* On `bootfs` in FileManger (Open in Terminal):
+* `touch stop` & `exit` terminal
+* Shutdown TAILS & eject sd card
+* Bootup UBUNTU LIVE
+* Connect a RaspiBlitz (without HDD) to network, insert sd card and power up
+* Find the IP of the RaspiBlitz (arp -a or check router)
+* In terminal `ssh admin@[IP-OF-RASPIBLITZ]`
+* Update to latest code with `patch code`
+* the following only if its a `fatpack`:
+  * run command `fatpack`
+  * if it reboot, ssh in again & again run command `fatpack`
+  * check that script ended without errors
+* do the creation & signing of the image file like in chapter above
+
+Publishing the images:
+
 * Connect the NTFS USB stick to MacOS (it is just read-only)
 * Run tests on the new image
 * Upload the new image to the Download Server - put sig-file next to it
