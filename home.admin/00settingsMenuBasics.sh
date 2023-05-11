@@ -440,14 +440,8 @@ if [ "${clNode}" != "${choice}" ]; then
       /home/admin/config.scripts/cl.install.sh on signet
     fi
 
-    # make sure that cln-grpc is on for the WebAPI
-    echo "# install the cln-grpc plugin"
-    /home/admin/config.scripts/cl-plugin.cln-grpc.sh install
-    /home/admin/config.scripts/cl-plugin.cln-grpc.sh on
-
   else
     echo "# turning OFF"
-    /home/admin/config.scripts/cl-plugin.cln-grpc.sh off
     /home/admin/config.scripts/cl.install.sh off mainnet
     /home/admin/config.scripts/cl.install.sh off testnet
     /home/admin/config.scripts/cl.install.sh off signet

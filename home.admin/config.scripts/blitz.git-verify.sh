@@ -43,6 +43,7 @@ if [ $? -ne 0 ]; then
   fi
 fi
 
+echo "# importing key of ${PGPsigner}"
 gpg --import --import-options show-only /var/cache/raspiblitz/pgp_keys_${PGPsigner}.asc
 fingerprint=$(gpg --show-keys --keyid-format LONG /var/cache/raspiblitz/pgp_keys_${PGPsigner}.asc 2>/dev/null | grep "${PGPpubkeyFingerprint}" -c)
 if [ "${fingerprint}" -lt 1 ]; then
