@@ -3,7 +3,7 @@
 
 _Build your own Lightning & Bitcoin Fullnode on a RaspberryPi with an optional Display._
 
-`Version 1.9.0RC2 with bitcoin 24.0.1, lnd 0.16.2 & Core Lightning 23.02` ([api](https://github.com/fusion44/blitz_api)|[web](https://github.com/cstenglein/raspiblitz-web))
+`Version 1.9.0RC5 with bitcoin 24.0.1, lnd 0.16.2 & Core Lightning 23.02` ([api](https://github.com/fusion44/blitz_api)|[web](https://github.com/cstenglein/raspiblitz-web))
 
 ![RaspiBlitz](pictures/raspiblitz.jpg)
 
@@ -168,7 +168,7 @@ This is the sd card image you should choose if your at the beginning of your Ras
 JUST USE FOR TESTING, HIGHER RISK OF LOSING FUNDS!*
 
 - __FATPACK SD CARD IMAGE ⮕ [raspiblitz-fat-v1.9.0rc5-2023-05-11.img.gz](https://raspiblitz.fulmo.org/images/raspiblitz-fat-v1.9.0rc5-2023-05-11.img.gz)__
-- SHA-256: 
+- SHA-256: e97ea0bef3a0d9d0c3bebd4cf5716ff4f3062f54804648cdfd12b467fadbae88
 - GPG 64-bit (main): 1C73 060C 7C17 6461 & (sub): AA9D D1B5 CC56 47DA
 - Signature-File: n/a <!--[raspiblitz-fat-v1.9.0rc1-2022-12-21.img.gz.sig](https://raspiblitz.fulmo.org/images/raspiblitz-fat-v1.9.0rc1-2022-12-21.img.gz.sig)-->
 - Torrent: n/a <!--[raspiblitz-fat-v1.9.0-2022-12-21.img.gz.torrent](https://github.com/rootzoll/raspiblitz/raw/dev/home.admin/assets/raspiblitz-fat-v1.9.0-2022-12-21.img.gz.torrent)-->
@@ -182,7 +182,7 @@ This is the sd card image for RaspiBlitz users that are already more experienced
 JUST USE FOR TESTING, HIGHER RISK OF LOSING FUNDS!*
 
 - __MINIMAL SD CARD IMAGE ⮕ [raspiblitz-min-v1.9.0rc5-2023-05-11.img.gz](https://raspiblitz.fulmo.org/images/raspiblitz-min-v1.9.0rc5-2023-05-11.img.gz)__
-- SHA-256: 
+- SHA-256: 4f85182b52ac8e984da1c907ee583ce428c4ef2afec39e41673e31f20cd57f76
 - GPG 64-bit (main): 1C73 060C 7C17 6461 & (sub): AA9D D1B5 CC56 47DA
 - Signature-File: n/a <!--[raspiblitz-min-v1.9.0rc1-2022-12-21.img.gz.sig](https://raspiblitz.fulmo.org/images/raspiblitz-min-v1.9.0rc1-2022-12-21.img.gz.sig)-->
 - Torrent: n/a <!--[raspiblitz-min-v1.9.0-2022-12-21.img.gz.torrent](https://github.com/rootzoll/raspiblitz/raw/dev/home.admin/assets/raspiblitz-min-v1.9.0-2022-12-21.img.gz.torrent)-->
