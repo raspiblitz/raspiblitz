@@ -92,7 +92,7 @@ if [ "${setPasswordB}" == "1" ]; then
   fi
   sudo sed -i '/^passwordB=/d' $SETUPFILE
   echo "passwordB='${password}'" >> $SETUPFILE
-  dialog --backtitle "RaspiBlitz - Setup" --msgbox "\nThanks - Password B accepted.\n\nUse this password as login for\nadditial Apps & API access." 10 34
+  dialog --backtitle "RaspiBlitz - Setup" --msgbox "\nThanks - Password B accepted.\n\nUse this password as login for\nadditional Apps & API access." 10 34
 fi
 
 # PASSWORD C
