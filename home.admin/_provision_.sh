@@ -243,9 +243,14 @@ fi
 if [ ${#clInterimsUpdate} -gt 0 ]; then
   /home/admin/_cache.sh set message "Provisioning CL update"
   if [ "${clInterimsUpdate}" == "reckless" ]; then
-    # determine the database version
-    clDbVersion=$(sudo -u bitcoin sqlite3 /home/bitcoin/.lightning/bitcoin/lightningd.sqlite3 "SELECT version FROM version;")
-    # Examples: 216 is CLN v23.02.2 # 219 is CLN v23.05
+    # determine the database version # Examples: 216 is CLN v23.02.2 # 219 is CLN v23.05
+    clDbVersion=$(sqlite3 /mnt/hdd/app-data/.lightning/bitcoin/lightningd.sqlite3 "SELECT version FROM version;")
+    if [ ${#clDbVersion} -eq 0 ]; then
+      echo "Could not determine the CLN database version - using 0" >> ${logFile}
+      clDbVersion=0
+    else
+      echo "The CLN database version is ${clDbVersion}" >> ${logFile}
+    fi
     if [ ${clDbVersion} -lt 217 ]; then
       # even if reckless is set - update to the recommended release
       echo "Provisioning CL verified interims update" >> ${logFile}
