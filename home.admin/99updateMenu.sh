@@ -496,9 +496,10 @@ if [ "${lndg}" == "on" ]; then
   OPTIONS+=(LNDG "Update LNDg")
 fi
 
-if [ "${specter}" == "on" ]; then
-  OPTIONS+=(SPECTER "Update Specter Desktop")
-fi
+## Disabled for now until the base image has Python 3.10
+#if [ "${specter}" == "on" ]; then
+#  OPTIONS+=(SPECTER "Update Specter Desktop")
+#fi
 
 if [ "${BTCPayServer}" == "on" ]; then
   OPTIONS+=(BTCPAY "Update BTCPayServer")
