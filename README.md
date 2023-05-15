@@ -44,7 +44,7 @@ Additional Services that can be installed thru WebUI (beginners):
 - **Ride the Lightning (RTL)** (LND & CoreLightning Node Manager WebUI) [details](https://github.com/Ride-The-Lightning/RTL)
 - **ThunderHub** (LND Node Manager WebUI) [details](https://www.thunderhub.io/)
 - **BTC-RPC-Explorer** (Bitcoin Blockchain Explorer) [details](https://github.com/janoside/btc-rpc-explorer)
-- **BTCPayServer** (Cryptocurrency Payment Processor) [details](https://btcpayserver.org)
+- **BTCPay Server** (Bitcoin Payment Processor) [details](https://btcpayserver.org)
 - **LNbits** (Lightning wallet/accounts System) [details](https://twitter.com/lnbits/status/1253700293440741377?s=20)
 - **Mempool Explorer** [details](https://github.com/mempool/mempool)
 
