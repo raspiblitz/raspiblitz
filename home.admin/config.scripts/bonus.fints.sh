@@ -322,8 +322,8 @@ WantedBy=multi-user.target
   sudo sed -i "s/^keystore_location =.*/keystore_location = \/mnt\/hdd\/app-data\/fints\/keystore.jks/g" /home/fints/config/fuelifints.properties
   sudo sed -i "s/^keystore_password =.*/keystore_password = raspiblitz/g" /home/fints/config/fuelifints.properties
 
-  # config app basics: blz.banking2.properties.example
-  sudo -u fints cp /home/fints/fints/config/blz.banking2.properties.example /home/fints/config/blz.banking2.properties
+  # config app basics: blz.banking2.properties.example: blz needs to be replaced with bankcode of fuelifints.properties
+  sudo -u fints cp /home/fints/fints/config/blz.banking2.properties.example /home/fints/config/12345678.banking2.properties
 
   # config app basics: lnbits.properties
   sudo -u fints cp /home/fints/fints/config/lnbits.properties.example /home/fints/config/lnbits.properties
