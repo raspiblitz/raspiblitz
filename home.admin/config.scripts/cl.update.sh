@@ -80,7 +80,13 @@ if [ "${mode}" = "verified" ]; then
   fi
 
   if [ ${#clUpdateVersion} -gt 0 ]; then
-    /home/admin/config.scripts/cl.install.sh update ${clUpdateVersion}
+    # only update if the clUpdateVersion is different from the installed
+    if [ "${clInstalledVersion}" = "${clUpdateVersion}" ]; then
+      echo "# clInstalledVersion = clUpdateVersion (${clUpdateVersion})"
+      echo "# There is no need to update again."
+    else
+      /home/admin/config.scripts/cl.install.sh update ${clUpdateVersion}
+    fi
   else
     /home/admin/config.scripts/cl.install.sh on
   fi
