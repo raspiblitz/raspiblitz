@@ -9,7 +9,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "verified -> only do recommended updates by RaspiBlitz team"
   echo "  binary will be checked by signature and checksum"
   echo "reckless -> if you just want to update to the latest release"
-  echo "  published on Core Lightning GitHub releases (RC or final) without any"
+  echo "  published on Core Lightning GitHub releases without any"
   echo "  testing or security checks."
   echo
   exit 1
@@ -20,13 +20,13 @@ mode="$1"
 
 # RECOMMENDED UPDATE BY RASPIBLITZ TEAM
 # comment will be shown as "BEWARE Info" when option is choosen (can be multiple lines)
-clUpdateVersion="" # example: 0.12.1 .. keep empty if no newer version as sd card build is available
+clUpdateVersion="v23.02.2" # example: v23.02.2 # keep empty if no newer version as sd card build is available
 clUpdateComment="Please keep in mind that downgrading afterwards is not tested. Also not all additional apps are fully tested with the this update - but it looked good on first tests."
 
 # GATHER DATA
 
 # installed Core Lightning version
-clInstalledVersion=$(sudo -u bitcoin lightning-cli --version)
+clInstalledVersion=$(sudo -u bitcoin lightningd --version) # example output: v23.02.2
 clInstalledVersionMajor=$(echo "${clInstalledVersion}" | cut -d "-" -f1 | cut -d "." -f1)
 clInstalledVersionMain=$(echo "${clInstalledVersion}" | cut -d "-" -f1 | cut -d "." -f2)
 clInstalledVersionMinor=$(echo "${clInstalledVersion}" | cut -d "-" -f1 | cut -d "." -f3)
@@ -36,7 +36,7 @@ clUpdateInstalled=$(echo "${clInstalledVersion}" | grep -c "${clUpdateVersion}")
 
 # get latest release from Core Lightning GitHub releases without release candidates
 clLatestVersion=$(curl --header "X-GitHub-Api-Version:2022-11-28" -s https://api.github.com/repos/ElementsProject/lightning/releases | jq -r '.[].tag_name' | grep -v "rc" | head -n1)
-# example: v0.12.1
+# example output: v23.05
 
 # INFO
 if [ "${mode}" = "info" ]; then
@@ -80,7 +80,13 @@ if [ "${mode}" = "verified" ]; then
   fi
 
   if [ ${#clUpdateVersion} -gt 0 ]; then
-    /home/admin/config.scripts/cl.install.sh update v${clUpdateVersion}
+    # only update if the clUpdateVersion is different from the installed
+    if [ "${clInstalledVersion}" = "${clUpdateVersion}" ]; then
+      echo "# clInstalledVersion = clUpdateVersion (${clUpdateVersion})"
+      echo "# There is no need to update again."
+    else
+      /home/admin/config.scripts/cl.install.sh update ${clUpdateVersion}
+    fi
   else
     /home/admin/config.scripts/cl.install.sh on
   fi
@@ -100,10 +106,9 @@ if [ "${mode}" = "reckless" ]; then
 
   # only update if the latest release is different from the installed
   if [ "${clInstalledVersion}" = "${clLatestVersion}" ]; then
-    # attention to leading 'v'
-    echo "# clInstalledVersion = clLatestVersion (${clLatestVersion:1})"
+    echo "# clInstalledVersion = clLatestVersion (${clLatestVersion})"
     echo "# There is no need to update again."
-    clInterimsUpdateNew="${clLatestVersion:1}"
+    clInterimsUpdateNew="${clLatestVersion}"
   else
     /home/admin/config.scripts/cl.install.sh update ${clLatestVersion}
     clInterimsUpdateNew="reckless"

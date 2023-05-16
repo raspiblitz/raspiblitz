@@ -243,13 +243,27 @@ fi
 if [ ${#clInterimsUpdate} -gt 0 ]; then
   /home/admin/_cache.sh set message "Provisioning CL update"
   if [ "${clInterimsUpdate}" == "reckless" ]; then
-    # recklessly update CL to latest release on GitHub (just for test & dev nodes)
-    echo "Provisioning CL reckless interims update" >> ${logFile}
-    /home/admin/config.scripts/cl.update.sh reckless >> ${logFile}
+    # determine the database version # Examples: 216 is CLN v23.02.2 # 219 is CLN v23.05
+    clDbVersion=$(sqlite3 /mnt/hdd/app-data/.lightning/bitcoin/lightningd.sqlite3 "SELECT version FROM version;")
+    if [ ${#clDbVersion} -eq 0 ]; then
+      echo "Could not determine the CLN database version - using 0" >> ${logFile}
+      clDbVersion=0
+    else
+      echo "The CLN database version is ${clDbVersion}" >> ${logFile}
+    fi
+    if [ ${clDbVersion} -lt 217 ]; then
+      # even if reckless is set - update to the recommended release
+      echo "Provisioning CL verified interims update" >> ${logFile}
+      /home/admin/config.scripts/cl.update.sh verified >> ${logFile}
+    else # 217 or higher
+      # recklessly update CL to latest release on GitHub (just for test & dev nodes)
+      echo "Provisioning CL reckless interims update" >> ${logFile}
+      /home/admin/config.scripts/cl.update.sh reckless >> ${logFile}
+    fi
   else
     # when installing the same sd image - this will re-trigger the secure interims update
-    # if this a update with a newer RaspiBlitz version .. interims update will be ignored
-    # because standard CL version is most more up to date
+    # if this is an update with a newer RaspiBlitz version .. interims update will be ignored
+    # because the standard CL version is up to date
     echo "Provisioning CL verified interims update" >> ${logFile}
     /home/admin/config.scripts/cl.update.sh verified ${clInterimsUpdate} >> ${logFile}
   fi
