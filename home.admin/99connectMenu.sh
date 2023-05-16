@@ -65,7 +65,6 @@ case $CHOICE in
     exit 0;;
   RESET)
     sudo /home/admin/config.scripts/lnd.credentials.sh reset "${chain:-main}net"
-    sudo /home/admin/config.scripts/lnd.credentials.sh sync "${chain:-main}net"
     sudo /home/admin/config.scripts/blitz.shutdown.sh reboot
     exit 0;;
   SYNC)

@@ -105,11 +105,11 @@ if [ "$1" = "reset" ]; then
   echo "# restarting LND ... wait 10 secs"
   # shellcheck disable=SC2154
   sudo systemctl start "${netprefix}lnd"
-  sleep 10
+  sleep 20
 
   # unlock wallet after restart
   sudo /home/admin/config.scripts/lnd.unlock.sh "${CHAIN}"
-  sleep 10
+  sleep 15
 
   if [ ${resetMacaroons} -eq 1 ]; then
     echo "# copy new macaroons to central app-data directory and ensure unix ownerships and permissions"
