@@ -251,6 +251,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo mariadb -e "GRANT ALL PRIVILEGES ON fints.* TO 'fintsuser' IDENTIFIED BY 'fints';"
   sudo mariadb -e "FLUSH PRIVILEGES;"
   if [ -f "dbsetup.sql" ]; then
+    # set default encrypted PIN 123456789 within dbsetup.sql if not yet set
+    sudo sed -i -e "s/REPLACE_ENCRYPTED_PIN/$(mvn compile exec:java -Dexec.mainClass="net.petafuel.fuelifints.cryptography.aesencryption.AESUtil" -Dexec.args=123456789 -q)/g" dbsetup.sql
+    
     mariadb -ufintsuser -pfints fints < dbsetup.sql
   else
     echo "# FAIL - dbsetup.sql not found - deleting code & exit"
