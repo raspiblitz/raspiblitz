@@ -60,6 +60,11 @@ function install() {
   else
     echo "# The ${plugin} plugin is already loaded"
   fi
+
+  # make sure default virtaulenv is used
+  sudo apt-get remove -y python3-virtualenv 2>/dev/null
+  sudo pip uninstall -y virtualenv 2>/dev/null
+  sudo apt-get install -y python3-virtualenv
 }
 
 if [ "$1" = on ]; then
@@ -153,6 +158,7 @@ then
       sudo systemctl start ${netprefix}lightningd
       echo "# Started the ${netprefix}lightningd.service"
     fi
+
   fi
 
 elif
