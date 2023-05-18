@@ -588,6 +588,11 @@ if [ "$1" = "sync" ] || [ "$1" = "repo" ]; then
   # do install like this
   sudo -u lnbits poetry install
 
+  # make sure default virtaulenv is used
+  sudo apt-get remove -y python3-virtualenv 2>/dev/null
+  sudo pip uninstall -y virtualenv 2>/dev/null
+  sudo apt-get install -y python3-virtualenv
+
   # restart lnbits service
   sudo systemctl restart lnbits
   echo "# server is restarting ... maybe takes some seconds until available"
@@ -641,6 +646,11 @@ if [ "$1" = "install" ]; then
   fi
   # do install like this
   sudo -u lnbits poetry install
+
+  # make sure default virtaulenv is used
+  sudo apt-get remove -y python3-virtualenv 2>/dev/null
+  sudo pip uninstall -y virtualenv 2>/dev/null
+  sudo apt-get install -y python3-virtualenv
 
   exit 0
 fi

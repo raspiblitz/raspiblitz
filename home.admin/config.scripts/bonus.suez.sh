@@ -45,6 +45,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
   sudo -u bitcoin poetry install
 
+  # make sure default virtaulenv is used
+  sudo apt-get remove -y python3-virtualenv 2>/dev/null
+  sudo pip uninstall -y virtualenv 2>/dev/null
+  sudo apt-get install -y python3-virtualenv
+
   # setting value in raspi blitz config
   /home/admin/config.scripts/blitz.conf.sh set suez "on"
 
@@ -86,6 +91,12 @@ if [ "$1" = "update" ]; then
     "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
   sudo -u bitcoin poetry install
   echo "# Updated to the latest in https://github.com/prusnak/suez/commits/master"
+
+  # make sure default virtaulenv is used
+  sudo apt-get remove -y python3-virtualenv 2>/dev/null
+  sudo pip uninstall -y virtualenv 2>/dev/null
+  sudo apt-get install -y python3-virtualenv
+
   exit 0
 fi
 
