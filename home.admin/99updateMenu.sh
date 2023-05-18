@@ -421,10 +421,7 @@ Do you really want to update Bitcoin Core now?
 
       error=""
       warn=""
-      source <(sudo -u admin /home/admin/config.scripts/bitcoin.update.sh tested)
-      if [ ${#error} -gt 0 ]; then
-        whiptail --title "ERROR" --msgbox "${error}" 8 30
-      fi
+      sudo -u admin /home/admin/config.scripts/bitcoin.update.sh tested
       /home/admin/config.scripts/blitz.shutdown.sh reboot
       ;;
     RECKLESS)
