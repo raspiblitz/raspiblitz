@@ -16,13 +16,13 @@ fi
 # 1. parameter [info|tested|reckless]
 mode="$1"
 
-# RECOMMENDED UPDATE BY RASPIBLITZ TEAM
+# RECOMMENDED UPDATE BY RASPIBLITZ TEAM (just possible once per sd card update)
 # comment will be shown as "BEWARE Info" when option is choosen (can be multiple lines)
-bitcoinVersion="" # example: 22.0 .. keep empty if no newer version as sd card build is available
+bitcoinVersion="24.1" # example: 22.0 .. keep empty if no newer version as sd card build is available
 
 # needed to check code signing
-# https://github.com/sipa.gpg
-fallbackSigner=sipa
+# https://github.com/emzy.gpg
+fallbackSigner=Emzy
 
 # GATHER DATA
 # setting download directory to the current user
@@ -148,17 +148,18 @@ if [ "${mode}" = "tested" ] || [ "${mode}" = "reckless" ] || [ "${mode}" = "cust
   mkdir -p "${downloadDir}"
   cd "${downloadDir}" || exit 1
 
-  echo "# Enter the github username of a signer. Find the list of signers at: "
-  echo "https://github.com/bitcoin-core/guix.sigs/tree/main/${pathVersion}"
-  echo "# Example for Peter Wuille (https://github.com/sipa):"
-  echo "sipa"
-  echo "# example for Emzy (https://github.com/Emzy):"
-  echo "Emzy"
-  read customSigner
-
-  if [ ${#customSigner} -eq 0 ]; then
-    customSigner=$fallbackSigner
-  fi
+  # NOTE: this script is run by provision and cannot have user input at this point or it will lock up the provision process
+  # echo "# Enter the github username of a signer. Find the list of signers at: "
+  # echo "https://github.com/bitcoin-core/guix.sigs/tree/main/${pathVersion}"
+  # echo "# Example for Peter Wuille (https://github.com/sipa):"
+  # echo "sipa"
+  # echo "# example for Emzy (https://github.com/Emzy):"
+  # echo "Emzy"
+  # read customSigner
+  # if [ ${#customSigner} -eq 0 ]; then
+  #   customSigner=$fallbackSigner
+  # fi
+  customSigner=$fallbackSigner
 
   echo "# Download the binary sha256 hash sum file"
   wget -O all.SHA256SUMS https://raw.githubusercontent.com/bitcoin-core/guix.sigs/main/${pathVersion}/${customSigner}/all.SHA256SUMS
