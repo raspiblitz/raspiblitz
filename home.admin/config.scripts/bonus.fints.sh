@@ -313,7 +313,7 @@ WantedBy=multi-user.target
     echo "# keystore already exists"
   fi
   
-  # config app basics: lnbits.properties
+  # config app basics: fuelifints.properties
   sudo -u fints mkdir /home/fints/config
   sudo -u fints cp /home/fints/fints/config/fuelifints.properties /home/fints/config/fuelifints.properties
   sudo sed -i "s/^productinfo.csv.check=.*/productinfo.csv.check=false/g" /home/fints/config/fuelifints.properties
@@ -324,7 +324,14 @@ WantedBy=multi-user.target
 
   # config app basics: blz.banking2.properties.example: blz needs to be replaced with bankcode of fuelifints.properties
   sudo -u fints cp /home/fints/fints/config/blz.banking2.properties.example /home/fints/config/12345678.banking2.properties
-
+  
+  # config app basics: connectionpool.properties
+  sudo -u fints cp /home/fints/fints/connectionpool.properties.example /home/fints/connectionpool.properties
+  sudo sed -i "s/yourdbserver/127.0.0.1/g" /home/fints/connectionpool.properties
+  sudo sed -i "s/=dbserver/=127.0.0.1/g" /home/fints/connectionpool.properties
+  sudo sed -i "s/=dbuser/=fintsuser/g" /home/fints/connectionpool.properties
+  sudo sed -i "s/=dbpassword/=fints/g" /home/fints/connectionpool.properties
+  
   # config app basics: lnbits.properties
   sudo -u fints cp /home/fints/fints/config/lnbits.properties.example /home/fints/config/lnbits.properties
   # in file lnbits.properties replace the line starting with lnbitsUrl with the following line 'lnbitsUrl = http://127.0.0.1:5000'
