@@ -251,6 +251,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo mariadb -e "GRANT ALL PRIVILEGES ON fints.* TO 'fintsuser' IDENTIFIED BY 'fints';"
   sudo mariadb -e "FLUSH PRIVILEGES;"
   if [ -f "dbsetup.sql" ]; then
+    # set default encrypted PIN 123456789 within dbsetup.sql if not yet set
+    sudo sed -i -e "s/REPLACE_ENCRYPTED_PIN/$(mvn compile exec:java -Dexec.mainClass="net.petafuel.fuelifints.cryptography.aesencryption.AESUtil" -Dexec.args=123456789 -q)/g" dbsetup.sql
+    
     mariadb -ufintsuser -pfints fints < dbsetup.sql
   else
     echo "# FAIL - dbsetup.sql not found - deleting code & exit"
@@ -310,7 +313,7 @@ WantedBy=multi-user.target
     echo "# keystore already exists"
   fi
   
-  # config app basics: lnbits.properties
+  # config app basics: fuelifints.properties
   sudo -u fints mkdir /home/fints/config
   sudo -u fints cp /home/fints/fints/config/fuelifints.properties /home/fints/config/fuelifints.properties
   sudo sed -i "s/^productinfo.csv.check=.*/productinfo.csv.check=false/g" /home/fints/config/fuelifints.properties
@@ -319,9 +322,16 @@ WantedBy=multi-user.target
   sudo sed -i "s/^keystore_location =.*/keystore_location = \/mnt\/hdd\/app-data\/fints\/keystore.jks/g" /home/fints/config/fuelifints.properties
   sudo sed -i "s/^keystore_password =.*/keystore_password = raspiblitz/g" /home/fints/config/fuelifints.properties
 
-  # config app basics: blz.banking2.properties.example
-  sudo -u fints cp /home/fints/fints/config/blz.banking2.properties.example /home/fints/config/blz.banking2.properties
-
+  # config app basics: blz.banking2.properties.example: blz needs to be replaced with bankcode of fuelifints.properties
+  sudo -u fints cp /home/fints/fints/config/blz.banking2.properties.example /home/fints/config/12345678.banking2.properties
+  
+  # config app basics: connectionpool.properties
+  sudo -u fints cp /home/fints/fints/connectionpool.properties.example /home/fints/connectionpool.properties
+  sudo sed -i "s/yourdbserver/127.0.0.1/g" /home/fints/connectionpool.properties
+  sudo sed -i "s/=dbserver/=127.0.0.1/g" /home/fints/connectionpool.properties
+  sudo sed -i "s/=dbuser/=fintsuser/g" /home/fints/connectionpool.properties
+  sudo sed -i "s/=dbpassword/=fints/g" /home/fints/connectionpool.properties
+  
   # config app basics: lnbits.properties
   sudo -u fints cp /home/fints/fints/config/lnbits.properties.example /home/fints/config/lnbits.properties
   # in file lnbits.properties replace the line starting with lnbitsUrl with the following line 'lnbitsUrl = http://127.0.0.1:5000'

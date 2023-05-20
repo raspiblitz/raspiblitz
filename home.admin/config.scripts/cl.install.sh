@@ -68,6 +68,12 @@ function buildAndInstallCLbinaries() {
   sudo -u bitcoin git reset --hard
   echo "- Install to /usr/local/bin/"
   sudo make install || exit 1
+
+  # make sure default virtaulenv is used
+  sudo apt-get remove -y python3-virtualenv 2>/dev/null
+  sudo pip uninstall -y virtualenv 2>/dev/null
+  sudo apt-get install -y python3-virtualenv
+
 }
 
 echo "# Running: 'cl.install.sh $*'"
@@ -234,6 +240,7 @@ if [ "$1" = on ] || [ "$1" = update ] || [ "$1" = testPR ]; then
     echo "# Building from source Core Lightning $currentCLversion"
 
     buildAndInstallCLbinaries
+
   fi
 
   ##########

@@ -337,6 +337,12 @@ do
               /home/admin/config.scripts/lnd.backup.sh mainnet recoverymode off
             fi
 
+            # CLN if recovery mode was on - deactivate now
+            if [ "${LN}" == "cl" ] && [ "${flagLNRecoveryMode}" == "1" ]; then
+              /home/admin/_cache.sh set ln_cl_mainnet_recovery_mode 0
+              /home/admin/config.scripts/cl.backup.sh mainnet recoverymode off
+            fi
+
           fi
 
         fi

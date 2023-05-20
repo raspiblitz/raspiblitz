@@ -432,9 +432,8 @@ if [ "$1" = "export" ]; then
   # delete temp files
   rm ~/.exclude.temp
   rm ~/.include.temp
-  
-  echo "sftpDownloadUnix=\"${sftpDownloadUnix}\""
-  echo "sftpDownloadWin=\"${sftpDownloadWin}\""  
+
+  echo "name=\"${defaultUploadPath}/${name}\""
   echo "# OK - Export done"
   exit 0
 fi
@@ -492,9 +491,9 @@ if [ "$1" = "export-gui" ]; then
   echo "*******************************"
   echo 
   echo "On your Linux or MacOS Laptop - RUN IN NEW TERMINAL:"
-  echo "${sftpDownloadUnix}"
+  echo "${downloadUnix}"
   echo "On Windows use command:"
-  echo "${sftpDownloadWin}"
+  echo "${downloadWin}"
   echo ""
   echo "Use password A to authenticate file transfer."
   echo 

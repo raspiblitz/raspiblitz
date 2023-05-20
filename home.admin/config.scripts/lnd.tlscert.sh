@@ -176,8 +176,8 @@ if [ "$1" = "refresh" ]; then
   while [ ${newCertExists} -eq 0 ]
   do
     count=$(($count + 1))
-    echo "# (${count}/60) check for cert"
-    if [ ${count} -gt 60 ]; then
+    echo "# (${count}/120) check for cert"
+    if [ ${count} -gt 120 ]; then
       sudo systemctl stop lnd
       echo "error='failed to generate new LND cert'"
       exit 1
