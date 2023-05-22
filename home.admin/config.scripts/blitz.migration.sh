@@ -108,11 +108,12 @@ migrate_raspiblitz_conf () {
 
 if [ "$1" = "migration-umbrel" ]; then
 
+  # make sure data drive is not (regular) mounted
   source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
   if [ "${isMounted}" == "1" ]; then
     source <(sudo /home/admin/config.scripts/blitz.datadrive.sh unmount)
   fi
-  # make sure data drive is mounted
+  # make sure data drive is temp-mounted
   source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
   if [ "${isMounted}" != "1" ]; then
     source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount)
@@ -209,6 +210,8 @@ if [ "$1" = "migration-umbrel" ]; then
   # LND since 0.5.0 umbrel uses a different data structure
   echo "### LND ###"
   if [ ${versionMajor} -eq 0 ] && [ ${versionMiner} -gt 4 ]; then
+    # rename lnd.conf (seems to be a think since umbrel 0.5.3)
+    sudo mv /mnt/hdd/umbrel/app-data/lightning/data/lnd/umbrel-lnd.conf /mnt/hdd/umbrel/app-data/lightning/data/lnd/lnd.conf 2>/dev/null
     # new way - lnd might even not exist because its optional 
     lndExists=$(sudo ls /mnt/hdd/umbrel/app-data/lightning/data/lnd/lnd.conf | grep -c "lnd.conf")
     if [ "${lndExists}" == "1" ]; then

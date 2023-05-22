@@ -371,8 +371,8 @@ if [ "$1" = "status" ]; then
                 lndVersion=$(grep "lightninglabs/lnd" /mnt/storage/umbrel/docker-compose.yml 2>/dev/null | sed 's/.*lnd://' | sed 's/@.*//')
               fi
               echo "hddVersionBTC='${btcVersion}'"
-              echo "hddVersionLND='${clnVersion}'"
-              echo "hddVersionCLN='${lndVersion}'"
+              echo "hddVersionCLN='${clnVersion}'"
+              echo "hddVersionLND='${lndVersion}'"
             elif [ ${isMyNodeHDD} -gt 0 ]; then
               hddGotMigrationData="mynode"
             elif [ ${isCitadelHDD} -gt 0 ]; then
