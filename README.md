@@ -46,6 +46,7 @@ Additional Services that can be installed thru WebUI (beginners):
 - **BTCPay Server** (Bitcoin Payment Processor) [details](https://btcpayserver.org)
 - **LNbits** (Lightning wallet/accounts System) [details](https://twitter.com/lnbits/status/1253700293440741377?s=20)
 - **Mempool Explorer** [details](https://github.com/mempool/mempool)
+- **JAM** (JoinMarket Web UI) v0.1.5 [details](https://github.com/joinmarket-webui/joinmarket-webui)
 
 Further Services that are just available thru SSH menu (advanced users):
 
