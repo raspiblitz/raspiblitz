@@ -3,7 +3,7 @@
 
 _Build your own Lightning & Bitcoin Fullnode on a RaspberryPi with an optional Display._
 
-`Version 1.9.0RC5 with bitcoin 24.0.1, lnd 0.16.2 & Core Lightning 23.02` ([api](https://github.com/fusion44/blitz_api)|[web](https://github.com/cstenglein/raspiblitz-web))
+`Version 1.9.0 with bitcoin 24.0.1, lnd 0.16.2 & Core Lightning 23.02.2` ([api](https://github.com/fusion44/blitz_api)|[web](https://github.com/cstenglein/raspiblitz-web))
 
 ![RaspiBlitz](pictures/raspiblitz.jpg)
 
@@ -18,7 +18,6 @@ Build it as part of a [workshop](WORKSHOP.md) or as a weekend project yourself.
 ## Table of Contents
 
   - [Feature Overview](#feature-overview)
-  - [DeepDive Video (July 2020)](#deepdive-video-july-2020)
   - [Time Estimate to Set Up a RaspiBlitz](#time-estimate-to-set-up-a-raspiblitz)
   - [Hardware Needed](#hardware-needed)
   - [Assemble your RaspiBlitz](#assemble-your-raspiblitz)
@@ -103,7 +102,7 @@ If you already run a Umbrel, Citadel or myNode you have basically all the hardwa
 
 ## Hardware Needed
 
-All parts together cost around 180-250 USD - based on shops and location.
+All parts together cost around 200-300 USD - based on shops and location.
 
 ### Buy a ready-2-go RaspiBlitz (Germany, EU and International)
 
@@ -164,28 +163,28 @@ In this section you find the lastest ready-to-use RaspiBlitz sd card images. Bas
 
 This is the sd card image you should choose if your at the beginning of your RaspiBlitz journey or you are a casual node runner wanna download the next update - with WebUI & fast installing bonus apps.
 
-*WARNING: THIS IS STILL A RELEASE CANDIDATE VERSION</br>
-JUST USE FOR TESTING, HIGHER RISK OF LOSING FUNDS!*
+<!-- *WARNING: THIS IS STILL A RELEASE CANDIDATE VERSION</br>
+JUST USE FOR TESTING, HIGHER RISK OF LOSING FUNDS!* -->
 
-- __FATPACK SD CARD IMAGE ⮕ [raspiblitz-fat-v1.9.0rc5-2023-05-11.img.gz](https://raspiblitz.fulmo.org/images/raspiblitz-fat-v1.9.0rc5-2023-05-11.img.gz)__
-- SHA-256: e97ea0bef3a0d9d0c3bebd4cf5716ff4f3062f54804648cdfd12b467fadbae88
+- __FATPACK SD CARD IMAGE ⮕ [raspiblitz-fat-v1.9.0-2023-05-22.img.gz](https://raspiblitz.fulmo.org/images/raspiblitz-fat-v1.9.0-2023-05-22.img.gz)__
+- SHA-256: 0972d2bc4bf18d895c2cd8d860779e8c0a1f9c8e5c3675707967077001efe6d6
 - GPG 64-bit (main): 1C73 060C 7C17 6461 & (sub): AA9D D1B5 CC56 47DA
-- Signature-File: n/a <!--[raspiblitz-fat-v1.9.0rc1-2022-12-21.img.gz.sig](https://raspiblitz.fulmo.org/images/raspiblitz-fat-v1.9.0rc1-2022-12-21.img.gz.sig)-->
-- Torrent: n/a <!--[raspiblitz-fat-v1.9.0-2022-12-21.img.gz.torrent](https://github.com/rootzoll/raspiblitz/raw/dev/home.admin/assets/raspiblitz-fat-v1.9.0-2022-12-21.img.gz.torrent)-->
+- Signature-File: [raspiblitz-fat-v1.9.0-2023-05-22.img.gz.sig](https://raspiblitz.fulmo.org/images/raspiblitz-fat-v1.9.0-2023-05-22.img.gz.sig)
+- Torrent: n/a [raspiblitz-fat-v1.9.0-2022-12-21.img.gz.torrent](https://github.com/rootzoll/raspiblitz/raw/dev/home.admin/assets/raspiblitz-fat-v1.9.0-2023-05-22.img.gz.torrent)
 - [How to verify the SD card image after download?](FAQ.md#how-to-verify-the-sd-card-image-after-download)
 
 ### MINIMAL SD Card Image (Experienced Users - SSH)
 
 This is the sd card image for RaspiBlitz users that are already more experienced and want to use just a limited set of features of the RaspiBlitz. This image has just the bare minimum of features pre-installed - LCD & HDMI output is off by default. Setup, Update or Recovery needs to be done thru SSH login - API & WebUI are later available but are not preinstalled/activated by default. The RaspiBlitz will download & compile just the tools that are in your ´raspiblitz.conf´ - this will take longer but as a tradeoff this RaspiBlitz then just runs with a reduced set of dependencies and so a minimalized attack vector and better performance. Its for the serious & experineced node runners.
 
-*WARNING: THIS IS STILL A RELEASE CANDIDATE VERSION</br>
-JUST USE FOR TESTING, HIGHER RISK OF LOSING FUNDS!*
+<!-- *WARNING: THIS IS STILL A RELEASE CANDIDATE VERSION</br>
+JUST USE FOR TESTING, HIGHER RISK OF LOSING FUNDS!* -->
 
-- __MINIMAL SD CARD IMAGE ⮕ [raspiblitz-min-v1.9.0rc5-2023-05-11.img.gz](https://raspiblitz.fulmo.org/images/raspiblitz-min-v1.9.0rc5-2023-05-11.img.gz)__
-- SHA-256: 4f85182b52ac8e984da1c907ee583ce428c4ef2afec39e41673e31f20cd57f76
+- __MINIMAL SD CARD IMAGE ⮕ [raspiblitz-min-v1.9.0-2023-05-22.img.gz](https://raspiblitz.fulmo.org/images/raspiblitz-min-v1.9.0-2023-05-22.img.gz)__
+- SHA-256: c740d18efd097bd55bb7c6ccf7f08a7972c06180075fa948c1d316f1e62b21f3
 - GPG 64-bit (main): 1C73 060C 7C17 6461 & (sub): AA9D D1B5 CC56 47DA
-- Signature-File: n/a <!--[raspiblitz-min-v1.9.0rc1-2022-12-21.img.gz.sig](https://raspiblitz.fulmo.org/images/raspiblitz-min-v1.9.0rc1-2022-12-21.img.gz.sig)-->
-- Torrent: n/a <!--[raspiblitz-min-v1.9.0-2022-12-21.img.gz.torrent](https://github.com/rootzoll/raspiblitz/raw/dev/home.admin/assets/raspiblitz-min-v1.9.0-2022-12-21.img.gz.torrent)-->
+- Signature-File: [raspiblitz-min-v1.9.0-2023-05-22.img.gz.sig](https://raspiblitz.fulmo.org/images/raspiblitz-min-v1.9.0-2023-05-22.img.gz.sig)
+- Torrent: n/a [raspiblitz-min-v1.9.0-2022-12-21.img.gz.torrent](https://github.com/rootzoll/raspiblitz/raw/dev/home.admin/assets/raspiblitz-min-v1.9.0-2023-05-22.img.gz.torrent)
 - [How to verify the SD card image after download?](FAQ.md#how-to-verify-the-sd-card-image-after-download)
 
 Further Info:

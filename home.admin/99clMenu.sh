@@ -94,7 +94,7 @@ case $CHOICE in
       fi
       cd /home/bitcoin/suez || exit 1
       echo
-      sudo -u bitcoin poetry run ./suez --client=c-lightning --client-args=--conf=${CLCONF}
+      sudo -u bitcoin poetry run /home/bitcoin/suez/suez --client=c-lightning --client-args=--conf=${CLCONF}
       echo
       echo "Press ENTER to return to main menu."
       read key
