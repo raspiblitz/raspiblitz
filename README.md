@@ -46,7 +46,7 @@ Additional Services that can be installed thru WebUI (beginners):
 - **BTCPay Server** (Bitcoin Payment Processor) [details](https://btcpayserver.org)
 - **LNbits** (Lightning wallet/accounts System) [details](https://twitter.com/lnbits/status/1253700293440741377?s=20)
 - **Mempool Explorer** [details](https://github.com/mempool/mempool)
-- **JAM** (JoinMarket Web UI) v0.1.5 [details](https://github.com/joinmarket-webui/joinmarket-webui)
+- **JAM** (JoinMarket Web UI) [details](https://github.com/joinmarket-webui/joinmarket-webui)
 
 Further Services that are just available thru SSH menu (advanced users):
 
@@ -176,7 +176,7 @@ JUST USE FOR TESTING, HIGHER RISK OF LOSING FUNDS!* -->
 
 ### MINIMAL SD Card Image (Experienced Users - SSH)
 
-This is the sd card image for RaspiBlitz users that are already more experienced and want to use just a limited set of features of the RaspiBlitz. This image has just the bare minimum of features pre-installed - LCD & HDMI output is off by default. Setup, Update or Recovery needs to be done thru SSH login - API & WebUI are later available but are not preinstalled/activated by default. The RaspiBlitz will download & compile just the tools that are in your ´raspiblitz.conf´ - this will take longer but as a tradeoff this RaspiBlitz then just runs with a reduced set of dependencies and so a minimalized attack vector and better performance. Its for the serious & experineced node runners.
+This is the sd card image for RaspiBlitz users that are already more experienced and want to use just a limited set of features of the RaspiBlitz. This image has just the bare minimum of features pre-installed - LCD & HDMI output is off by default. Setup, Update or Recovery needs to be done thru SSH login - API & WebUI are later available but are not preinstalled/activated by default. The RaspiBlitz will download & compile just the tools that are in your ´raspiblitz.conf´ - this will take longer but as a trade-off this RaspiBlitz then just runs with a reduced set of dependencies and so a minimalized attack vector and better performance. Its for the serious & experienced node runners.
 
 <!-- *WARNING: THIS IS STILL A RELEASE CANDIDATE VERSION</br>
 JUST USE FOR TESTING, HIGHER RISK OF LOSING FUNDS!* -->
