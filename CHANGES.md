@@ -36,7 +36,7 @@
 - Info: Run RaspiBlitz on Proxmox [details](https://github.com/rootzoll/raspiblitz/tree/dev/alternative.platforms/Proxmox)
 - Info: IP2Tor fix fulmo shop & added new ip2tor.com shop
 - Info: 32GB sdcard is now enforced (after being recommended since v1.5)
-- Info: 'Reindex Blockchain' is not part of 'repair' menu
+- Info: 'Reindex Blockchain' is now part of 'repair' menu
 
 ## What's new in Version 1.8.0c of RaspiBlitz?
 
