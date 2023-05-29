@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # https://github.com/Ride-The-Lightning/c-lightning-REST/releases/
-CLRESTVERSION="v0.10.2"
+CLRESTVERSION="v0.10.3"
 
 # help
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
@@ -13,6 +13,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
   echo "cl.rest.sh on <mainnet|testnet|signet>"
   echo "cl.rest.sh connect <mainnet|testnet|signet> [?key-value]"
   echo "cl.rest.sh off <mainnet|testnet|signet> <purge>"
+  echo "cl.rest.sh update <mainnet|testnet|signet>"
   exit 1
 fi
 
@@ -41,7 +42,7 @@ if [ "$1" = connect ]; then
   /home/admin/config.scripts/tor.onion-service.sh ${netprefix}clrest 443 ${portprefix}6100 1>/dev/null
 
   toraddress=$(sudo cat /mnt/hdd/tor/${netprefix}clrest/hostname)
-  hex_macaroon=$(xxd -plain /home/bitcoin/c-lightning-REST/${CLNETWORK}/certs//access.macaroon | tr -d '\n')
+  hex_macaroon=$(xxd -plain /home/bitcoin/c-lightning-REST/${CLNETWORK}/certs/access.macaroon | tr -d '\n')
   url="https://${localip}:${portprefix}6100/"
   lndconnect="lndconnect://${toraddress}:443?macaroon=${hex_macaroon}"
   # c-lightning-rest://http://your_hidden_service.onion:your_port?&macaroon=your_macaroon_file_in_HEX&protocol=http
@@ -147,10 +148,10 @@ if [ "$1" = on ]; then
     sudo -u bitcoin /home/admin/config.scripts/blitz.git-verify.sh \
       "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" "${CLRESTVERSION}" || exit 1
 
+    export NG_CLI_ANALYTICS=false
     sudo -u bitcoin npm install
   fi
 
-  # config
   cd /home/bitcoin/c-lightning-REST || exit 1
   sudo -u bitcoin mkdir ${CLNETWORK}
   echo "
@@ -205,8 +206,9 @@ WantedBy=multi-user.target
   fi
   echo
   echo "# Monitor with:"
-  echo "sudo journalctl -f -u clrest"
+  echo "sudo journalctl -fu clrest"
   echo
+  exit 0
 fi
 
 if [ "$1" = off ]; then
@@ -214,11 +216,57 @@ if [ "$1" = off ]; then
   sudo systemctl stop ${netprefix}clrest
   sudo systemctl disable ${netprefix}clrest
   sudo rm -rf /home/bitcoin/c-lightning-REST/${CLNETWORK}
-  echo "# Deny port ${portprefix}6100 through the firewall"
-  sudo ufw deny "${portprefix}6100"
+  echo "# Remove the firewall rule"
+  sudo ufw delete allow "${portprefix}6100"
   /home/admin/config.scripts/tor.onion-service.sh off ${netprefix}clrest
   if [ "$(echo "$@" | grep -c purge)" -gt 0 ]; then
     echo "# Removing the source code and binaries"
     sudo rm -rf /home/bitcoin/c-lightning-REST
   fi
+  exit 0
 fi
+
+if [ "$1" = "update" ]; then
+  echo "# UPDATING c-lightning-REST for ${CHAIN}"
+  cd /home/bitcoin/c-lightning-REST/${CLNETWORK} || exit 1
+  # fetch latest master
+  sudo -u bitcoin git fetch
+  # unset $1
+  set --
+  UPSTREAM=${1:-'@{u}'}
+  LOCAL=$(sudo -u bitcoin git rev-parse @)
+  REMOTE=$(sudo -u bitcoin git rev-parse "$UPSTREAM")
+  if [ "$LOCAL" = "$REMOTE" ]; then
+    TAG=$(sudo -u bitcoin git tag | sort -V | grep -v rc | tail -1)
+    echo "# You are up-to-date on version" "$TAG"
+  else
+    sudo systemctl stop ${netprefix}clrest
+    echo "# Pulling latest changes..."
+    sudo -u bitcoin git pull -p
+    echo "# Reset to the latest release tag"
+    TAG=$(sudo -u bitcoin git tag | sort -V | grep -v rc | tail -1)
+    sudo -u bitcoin git reset --hard "$TAG"
+    sudo -u bitcoin /home/admin/config.scripts/blitz.git-verify.sh \
+      "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" "${TAG}" || exit 1
+    echo "# Updating to the latest"
+    echo "# Running npm install ..."
+    export NG_CLI_ANALYTICS=false
+    if sudo -u bitcoin npm install; then
+      echo "# OK - c-lightning-REST install looks good"
+      echo
+    else
+      echo "# FAIL - npm install did not run correctly - deleting code and exit"
+      /home/admin/config.scripts/cl.rest.sh off "" purge
+      exit 1
+    fi
+    echo "# Updated to version" "$TAG"
+    echo
+    echo "# Starting the ${netprefix}clrest service ..."
+    sudo systemctl start ${netprefix}clrest
+    echo
+  fi
+  exit 0
+fi
+
+echo "# FAIL - Unknown Parameter $1"
+exit 1
