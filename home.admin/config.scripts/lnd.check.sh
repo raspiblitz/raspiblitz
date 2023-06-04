@@ -315,8 +315,8 @@ if [ "$1" == "prestart" ]; then
   if [ "${sectionExists}" == "0" ]; then
     echo "# adding section [${sectionName}]"
     echo "
-  [${sectionName}]
-  " | tee -a ${lndConfFile}
+[${sectionName}]
+" | tee -a ${lndConfFile}
   fi
 
   # get line number of [rpcmiddleware] section
@@ -329,7 +329,7 @@ if [ "$1" == "prestart" ]; then
   if [ ${fileLines} -lt ${insertLine} ]; then
     echo "# adding new line for inserts"
     echo "
-  " | tee -a ${lndConfFile}
+" | tee -a ${lndConfFile}
   fi
 
   # SET/UPDATE rpcmiddleware.enable
