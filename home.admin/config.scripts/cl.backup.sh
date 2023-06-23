@@ -180,7 +180,7 @@ if [ ${mode} = "cl-export-gui" ]; then
   # get local ip info
   source <(/home/admin/config.scripts/internet.sh status local)
 
-  # offer SCP for download
+  # offer SFTP for download
   clear
   echo
   echo "*******************************************"
@@ -189,7 +189,7 @@ if [ ${mode} = "cl-export-gui" ]; then
   echo 
   echo "ON YOUR MAC & LINUX LAPTOP - RUN IN NEW TERMINAL:"
   echo "scp '${fileowner}@${localip}:${filename}' ./"
-  echo "ON WINDOWS USE:"
+  echo "ON WINDOWS - RUN IN CMD:"
   echo "scp ${fileowner}@${localip}:${filename} ."
   echo
   echo "Use password A to authenticate file transfer."
@@ -380,8 +380,8 @@ if [ ${mode} = "cl-import-gui" ]; then
     /home/admin/config.scripts/blitz.conf.sh set ${netprefix}clEncryptedHSM "off"
   else
     cat $output
-    echo "# Starting cl.hsmtool.sh unlock"
-    /home/admin/config.scripts/cl.hsmtool.sh unlock $CHAIN
+    echo "# Starting cl.hsmtool.sh unlock ${CHAIN}"
+    /home/admin/config.scripts/cl.hsmtool.sh unlock ${CHAIN}
   fi
 
   # set the lightningd service file on each active network

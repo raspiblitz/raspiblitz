@@ -86,6 +86,9 @@ fi
 if [ "${lit}" == "on" ]; then
   OPTIONS+=(LIT "LIT (loop, pool, faraday)")
 fi
+if [ "${lndg}" == "on" ]; then
+  OPTIONS+=(LNDG "LNDg (auto-rebalance, auto-fees)")
+fi
 if [ "${sparko}" == "on" ]; then
   OPTIONS+=(SPARKO "Sparko Webwallet")
 fi
@@ -120,11 +123,17 @@ fi
 if [ "${joinmarket}" == "on" ]; then
   OPTIONS+=(JM "JoinMarket with JoininBox")
 fi
+if [ "${jam}" == "on" ]; then
+  OPTIONS+=(JAM "Jam (JoinMarket WebUI)")
+fi
 if [ "${faraday}" == "on" ]; then
   OPTIONS+=(FARADAY "Faraday Channel Management")
 fi
 if [ "${bos}" == "on" ]; then
   OPTIONS+=(BOS "Balance of Satoshis")
+fi
+if [ "${lnproxy}" == "on" ]; then
+  OPTIONS+=(LNPROXY "lnproxy server")
 fi
 if [ "${pyblock}" == "on" ]; then
   OPTIONS+=(PYBLOCK "PyBlock")
@@ -152,7 +161,7 @@ if [ "${homer}" == "on" ]; then
   CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
 fi
 if [ "${circuitbreaker}" == "on" ]; then
-  OPTIONS+=(CIRCUIT "Circuitbreaker (LND firewall)")
+  OPTIONS+=(CIRCUITBREAKER "Circuitbreaker (LND firewall)")
 fi
 if [ "${tallycoinConnect}" == "on" ]; then
   OPTIONS+=(TALLY "Tallycoin Connect")
@@ -162,6 +171,12 @@ if [ "${squeaknode}" == "on" ]; then
 fi
 if [ "${itchysats}" == "on" ]; then
   OPTIONS+=(ITCHYSATS "Show ItchySats details")
+fi
+if [ "${lightningtipbot}" == "on" ]; then
+  OPTIONS+=(LIGHTNINGTIPBOT "Show LightningTipBot details")
+fi
+if [ "${fints}" == "on" ]; then
+  OPTIONS+=(FINTS "Show FinTS/HBCI details")
 fi
 
 # dont offer to switch to "testnet view for now" - so no wswitch back to mainnet needed
@@ -177,9 +192,7 @@ OPTIONS+=(SETTINGS "Node Settings & Options")
 OPTIONS+=(SERVICES "Additional Apps & Services")
 OPTIONS+=(SYSTEM "Monitoring & Configuration")
 OPTIONS+=(CONNECT "Connect Apps & Show Credentials")
-if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
-  OPTIONS+=(SUBSCRIBE "Manage Subscriptions")
-fi
+OPTIONS+=(SUBSCRIBE "Manage Subscriptions")
 OPTIONS+=(PASSWORD "Change Passwords")
 
 if [ "${touchscreen}" == "1" ]; then
@@ -217,7 +230,7 @@ case $CHOICE in
               echo ""
               echo -en "Screen is updating in a loop .... press 'x' now to get back to menu."
               read -n 1 -t 6 keyPressed
-              echo -en "\rGathering information to update info ... please wait.                \n"  
+              echo -en "\rGathering information to update info ... please wait.                \n"
 
               # check if user wants to abort session
               if [ "${keyPressed}" = "x" ]; then
@@ -262,6 +275,9 @@ case $CHOICE in
         LIT)
             /home/admin/config.scripts/bonus.lit.sh menu
             ;;
+        LNDG)
+            /home/admin/config.scripts/bonus.lndg.sh menu
+            ;;
         SPARKO)
             /home/admin/config.scripts/cl-plugin.sparko.sh menu mainnet
             ;;
@@ -273,6 +289,9 @@ case $CHOICE in
             ;;
         LNDMANAGE)
             /home/admin/config.scripts/bonus.lndmanage.sh menu
+            ;;
+        LIGHTNINGTIPBOT)
+            /home/admin/config.scripts/bonus.lightningtipbot.sh menu
             ;;
         LOOP)
             /home/admin/config.scripts/bonus.loop.sh menu
@@ -286,11 +305,17 @@ case $CHOICE in
         JM)
             /home/admin/config.scripts/bonus.joinmarket.sh menu
             ;;
+        JAM)
+            /home/admin/config.scripts/bonus.jam.sh menu
+            ;;
         FARADAY)
             sudo /home/admin/config.scripts/bonus.faraday.sh menu
             ;;
         BOS)
             sudo /home/admin/config.scripts/bonus.bos.sh menu
+            ;;
+        LNPROXY)
+            sudo /home/admin/config.scripts/bonus.lnproxy.sh menu
             ;;
 		    PYBLOCK)
             sudo /home/admin/config.scripts/bonus.pyblock.sh menu
@@ -313,7 +338,6 @@ case $CHOICE in
         HELIPAD)
             sudo /home/admin/config.scripts/bonus.helipad.sh menu
             ;;
-
         SQUEAKNODE)
             /home/admin/config.scripts/bonus.squeaknode.sh menu
             ;;
@@ -323,12 +347,15 @@ case $CHOICE in
         CHANTOOLS)
             sudo /home/admin/config.scripts/bonus.chantools.sh menu
             ;;
-        CIRCUIT)
+        CIRCUITBREAKER)
             sudo /home/admin/config.scripts/bonus.circuitbreaker.sh menu
+            ;;
+        FINTS)
+            sudo /home/admin/config.scripts/bonus.fints.sh menu
             ;;
         TESTNETS)
             /home/admin/00parallelChainsMenu.sh
-            ;;  
+            ;;
         SUBSCRIBE)
             /home/admin/config.scripts/blitz.subscriptions.py
             ;;

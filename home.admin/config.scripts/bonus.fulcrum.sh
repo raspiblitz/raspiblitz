@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # https://github.com/cculianu/Fulcrum/releases
-fulcrumVersion="1.7.0"
+fulcrumVersion="1.9.1"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -11,7 +11,6 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "installs the version $fulcrumVersion"
   exit 1
 fi
-
 
 if [ "$1" = on ]; then
   # ?wait until txindex finishes?
@@ -26,6 +25,7 @@ if [ "$1" = on ]; then
 
   source <(/home/admin/_cache.sh get state)
   if [ "${state}" == "ready" ]; then
+    echo "# Restarting bitcoind"
     sudo systemctl restart bitcoind
   fi
 
@@ -51,26 +51,25 @@ if [ "$1" = on ]; then
   # get the PGP key
   curl https://raw.githubusercontent.com/Electron-Cash/keys-n-hashes/master/pubkeys/calinkey.txt | sudo -u fulcrum gpg --import
 
-  # look for 'Good signature'
-  sudo -u fulcrum gpg --verify Fulcrum-${fulcrumVersion}-${build}.tar.gz.asc || (echo "Failed to verify the GPG signature of Fulcrum-${fulcrumVersion}-${build}.tar.gz"; exit 1)
+  echo "# Look for 'Good signature'"
+  sudo -u fulcrum gpg --verify Fulcrum-${fulcrumVersion}-${build}.tar.gz.asc || exit 1
 
-  # look for 'OK'
-  sudo -u fulcrum sha256sum -c Fulcrum-${fulcrumVersion}-${build}.tar.gz.sha256sum --ignore-missing || (echo "Failed to verify the sha256 hash of Fulcrum-${fulcrumVersion}-${build}.tar.gz"; exit 1)
+  echo "# Look for 'OK'"
+  sudo -u fulcrum sha256sum -c Fulcrum-${fulcrumVersion}-${build}.tar.gz.sha256sum --ignore-missing || exit 1
 
-  # decompress
+  echo "# Unpack"
   sudo -u fulcrum tar -xvf Fulcrum-${fulcrumVersion}-${build}.tar.gz
 
-  # create the database directory in /mnt/hdd/app-storage (on the disk)
+  echo "# Create the database directory in /mnt/hdd/app-storage (on the disk)"
   sudo mkdir -p /mnt/hdd/app-storage/fulcrum/db
   sudo chown -R fulcrum:fulcrum /mnt/hdd/app-storage/fulcrum
 
-  # create a symlink to /home/fulcrum/.fulcrum
+  echo "# Create a symlink to /home/fulcrum/.fulcrum"
   sudo ln -s /mnt/hdd/app-storage/fulcrum /home/fulcrum/.fulcrum
   sudo chown -R fulcrum:fulcrum /home/fulcrum/.fulcrum
 
-  # Create a config file
-  echo "# Getting RPC credentials from the bitcoin.conf"
-  #read PASSWORD_B
+  echo "# Create a config file"
+  echo "# Get the RPC credentials from the bitcoin.conf"
   RPC_USER=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcuser | cut -c 9-)
   PASSWORD_B=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcpassword | cut -c 13-)
   echo "\
@@ -96,7 +95,7 @@ tcp = 0.0.0.0:50021
 # ssl via nginx
 " | sudo -u fulcrum tee /home/fulcrum/.fulcrum/fulcrum.conf
 
-  # Create a systemd service
+  echo "# Create a systemd service"
   echo "\
 [Unit]
 Description=Fulcrum
@@ -119,11 +118,9 @@ WantedBy=multi-user.target
 
   sudo systemctl enable fulcrum
   if [ "${state}" == "ready" ]; then
+    echo "# Starting the fulcrum.service"
     sudo systemctl start fulcrum
   fi
-
-  # sudo journalctl -fu fulcrum
-  # sudo systemctl status fulcrum
 
   sudo ufw allow 50021 comment 'Fulcrum TCP'
   sudo ufw allow 50022 comment 'Fulcrum SSL'
@@ -135,7 +132,7 @@ WantedBy=multi-user.target
   elif [ ${isConfigured} -eq 0 ]; then
     isStream=$(sudo cat /etc/nginx/nginx.conf 2>/dev/null | grep -c 'stream {')
     if [ ${isStream} -eq 0 ]; then
-    echo "
+      echo "
 stream {
         upstream fulcrum {
                 server 127.0.0.1:50021;
@@ -152,9 +149,9 @@ stream {
         }
 }" | sudo tee -a /etc/nginx/nginx.conf
 
-      elif [ ${isStream} -eq 1 ]; then
-            sudo truncate -s-2 /etc/nginx/nginx.conf
-            echo "
+    elif [ ${isStream} -eq 1 ]; then
+      sudo truncate -s-2 /etc/nginx/nginx.conf
+      echo "
         upstream fulcrum {
                 server 127.0.0.1:50021;
         }
@@ -184,18 +181,20 @@ stream {
 
   # setting value in raspiblitz config
   /home/admin/config.scripts/blitz.conf.sh set fulcrum "on"
-fi
 
+  echo "# Follow the logs with the command:"
+  echo "sudo journalctl -fu fulcrum"
+fi
 
 if [ "$1" = off ]; then
   sudo systemctl disable fulcrum
   sudo systemctl stop fulcrum
   sudo userdel -rf fulcrum
   # remove Tor service
-  /home/admin/config.scripts/tor.onion-service.sh off electrs
+  /home/admin/config.scripts/tor.onion-service.sh off fulcrum
   # close ports on firewall
-  sudo ufw deny 50021
-  sudo ufw deny 50022
+  sudo ufw delete allow 50021
+  sudo ufw delete allow 50022
   # to remove the database directory:
   # sudo rm -rf /mnt/hdd/app-storage/fulcrum
   # setting value in raspiblitz config

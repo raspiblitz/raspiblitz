@@ -1,25 +1,31 @@
 #!/bin/bash
 
 # https://github.com/lightninglabs/lightning-terminal/releases
-LITVERSION="0.7.0-alpha"
+LITVERSION="0.9.2-alpha"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
- echo "config script to switch the Lightning Terminal Service on or off"
- echo "installs the version $LITVERSION"
- echo "bonus.lit.sh [on|off|menu]"
- exit 1
+  echo "config script to switch the Lightning Terminal Service on or off"
+  echo "installs the version $LITVERSION"
+  echo "bonus.lit.sh [on|off|menu]"
+  exit 1
 fi
 
 # check who signed the release in https://github.com/lightninglabs/lightning-terminal/releases
-PGPsigner="guggero"
+PGPsigner="ellemouton"
 
-if [ $PGPsigner = guggero ];then
-  PGPpkeys="https://keybase.io/guggero/pgp_keys.asc"
+if [ $PGPsigner = ellemouton ]; then
+  PGPpkeys="https://github.com/${PGPsigner}.gpg"
+  PGPcheck="D7D916376026F177"
+elif [ $PGPsigner = guggero ]; then
+  PGPpkeys="https://keybase.io/${PGPsigner}/pgp_keys.asc"
   PGPcheck="03DB6322267C373B"
-elif [ $PGPsigner = roasbeef ];then
-  PGPpkeys="https://keybase.io/roasbeef/pgp_keys.asc "
+elif [ $PGPsigner = roasbeef ]; then
+  PGPpkeys="https://keybase.io/${PGPsigner}/pgp_keys.asc "
   PGPcheck="3BBD59E99B280306"
+elif [ $PGPsigner = ellemouton ]; then
+  PGPpkeys="https://keybase.io/ellemo/pgp_keys.asc "
+  PGPcheck="D7D916376026F17"
 fi
 
 source /mnt/hdd/raspiblitz.conf
@@ -72,16 +78,16 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   # switching off single installs of pool, loop or faraday if installed
   if [ "${loop}" = "on" ]; then
-      echo "# Replacing single install of: LOOP"
-      /home/admin/config.scripts/bonus.loop.sh off
+    echo "# Replacing single install of: LOOP"
+    /home/admin/config.scripts/bonus.loop.sh off
   fi
   if [ "${pool}" = "on" ]; then
-      echo "# Replacing single install of: POOL"
-      /home/admin/config.scripts/bonus.pool.sh off
+    echo "# Replacing single install of: POOL"
+    /home/admin/config.scripts/bonus.pool.sh off
   fi
   if [ "${faraday}" = "on" ]; then
-      echo "# Replacing single install of: FARADAY"
-      /home/admin/config.scripts/bonus.faraday.sh off
+    echo "# Replacing single install of: FARADAY"
+    /home/admin/config.scripts/bonus.faraday.sh off
   fi
 
   isInstalled=$(sudo ls /etc/systemd/system/litd.service 2>/dev/null | grep -c 'litd.service')
@@ -90,7 +96,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # create dedicated user
     sudo adduser --disabled-password --gecos "" lit
     # make sure symlink to central app-data directory exists
-    sudo rm -rf /home/lit/.lnd  # not a symlink.. delete it silently
+    sudo rm -rf /home/lit/.lnd # not a symlink.. delete it silently
     # create symlink
     sudo ln -s "/mnt/hdd/app-data/lnd/" "/home/lit/.lnd"
 
@@ -154,21 +160,21 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       uname -m
       exit 1
     else
-    echo "OK running on $(uname -m) architecture."
+      echo "OK running on $(uname -m) architecture."
     fi
 
-    downloadDir="/home/admin/download/lit"  # edit your download directory
+    downloadDir="/home/admin/download/lit" # edit your download directory
     rm -rf "${downloadDir}"
     mkdir -p "${downloadDir}"
     cd "${downloadDir}" || exit 1
 
     # extract the SHA256 hash from the manifest file for the corresponding platform
     wget -N https://github.com/lightninglabs/lightning-terminal/releases/download/v${LITVERSION}/manifest-v${LITVERSION}.txt
-    if [ ${isARM} -eq 1 ] ; then
+    if [ ${isARM} -eq 1 ]; then
       OSversion="armv7"
-    elif [ ${isAARCH64} -eq 1 ] ; then
+    elif [ ${isAARCH64} -eq 1 ]; then
       OSversion="arm64"
-    elif [ ${isX86_64} -eq 1 ] ; then
+    elif [ ${isX86_64} -eq 1 ]; then
       OSversion="amd64"
     fi
     SHA256=$(grep -i "linux-$OSversion" manifest-v$LITVERSION.txt | cut -d " " -f1)
@@ -183,7 +189,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     echo "# check binary was not manipulated (checksum test)"
     wget -N https://github.com/lightninglabs/lightning-terminal/releases/download/v${LITVERSION}/manifest-v${LITVERSION}.sig
-    wget --no-check-certificate ${PGPpkeys}
+    wget --no-check-certificate -O ./pgp_keys.asc ${PGPpkeys}
     binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
     if [ "${binaryChecksum}" != "${SHA256}" ]; then
       echo "# FAIL # Downloaded LiT BINARY not matching SHA256 checksum: ${SHA256}"
@@ -192,8 +198,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     echo "# check gpg finger print"
     gpg --show-keys --keyid-format LONG ./pgp_keys.asc
-    fingerprint=$(gpg --show-keys --keyid-format LONG "./pgp_keys.asc" 2>/dev/null \
-    | grep "${PGPcheck}" -c)
+    fingerprint=$(gpg --show-keys --keyid-format LONG "./pgp_keys.asc" 2>/dev/null |
+      grep "${PGPcheck}" -c)
     if [ ${fingerprint} -lt 1 ]; then
       echo ""
       echo "# BUILD WARNING --> LiT PGP author not as expected"
@@ -203,7 +209,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     fi
     gpg --import ./pgp_keys.asc
     sleep 3
-    verifyResult=$(LANG=en_US.utf8; gpg --verify manifest-v${LITVERSION}.sig manifest-v${LITVERSION}.txt 2>&1)
+    verifyResult=$(
+      LANG=en_US.utf8
+      gpg --verify manifest-v${LITVERSION}.sig manifest-v${LITVERSION}.txt 2>&1
+    )
     goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
     echo "goodSignature(${goodSignature})"
     correctKey=$(echo ${verifyResult} | tr -d " \t\n\r" | grep "${GPGcheck}" -c)
@@ -213,6 +222,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       echo "# BUILD FAILED --> LND PGP Verify not OK / signature(${goodSignature}) verify(${correctKey})"
       exit 1
     fi
+
     ###########
     # install #
     ###########
@@ -228,18 +238,24 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     ###########
     # config  #
     ###########
+    # check if lnd.conf has rpcmiddleware.enable entry under [rpcmiddleware]
+    if sudo grep rpcmiddleware /mnt/hdd/lnd/lnd.conf; then
+      sudo sed -i "s/^rpcmiddleware.enable=.*/rpcmiddleware.enable=true/g" /mnt/hdd/lnd/lnd.conf
+    else
+      sudo bash -c "echo '[rpcmiddleware]' >> /mnt/hdd/lnd/lnd.conf"
+      sudo bash -c "echo 'rpcmiddleware.enable=true' >> /mnt/hdd/lnd/lnd.conf"
+    fi
+
     if [ "${runBehindTor}" = "on" ]; then
       echo "# Connect to the Pool, Loop and Terminal server through Tor"
       LOOPPROXY="loop.server.proxy=127.0.0.1:9050"
       POOLPROXY="pool.proxy=127.0.0.1:9050"
-      runLitd="torsocks /usr/local/bin/litd"
     else
       echo "# Connect to Pool, Loop and Terminal server through clearnet"
       LOOPPROXY=""
       POOLPROXY=""
-      runLitd="/usr/local/bin/litd"
     fi
-    PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
+    PASSWORD_B=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcpassword | cut -c 13-)
     echo "
 # Application Options
 httpslisten=0.0.0.0:8443
@@ -250,7 +266,7 @@ remote.lit-debuglevel=debug
 
 # Remote lnd options
 remote.lnd.rpcserver=127.0.0.1:10009
-remote.lnd.macaroonpath=/home/lit/.lnd/data/chain/${network}/${chain}net/admin.macaroon
+remote.lnd.macaroonpath=/home/lit/.lnd/data/chain/bitcoin/${chain}net/admin.macaroon
 remote.lnd.tlscertpath=/home/lit/.lnd/tls.cert
 
 # Loop
@@ -285,7 +301,7 @@ Description=litd Service
 After=lnd.service
 
 [Service]
-ExecStart=${runLitd}
+ExecStart=/usr/local/bin/litd
 User=lit
 Group=lit
 Type=simple
@@ -294,6 +310,7 @@ Restart=on-failure
 RestartSec=60
 StandardOutput=journal
 StandardError=journal
+LogLevelMax=4
 
 # Hardening measures
 PrivateTmp=true
@@ -345,6 +362,7 @@ alias lit-frcli=\"frcli --rpcserver=localhost:8443 \
   source <(/home/admin/_cache.sh get state)
   if [ "${state}" == "ready" ]; then
     echo "# OK - the litd.service is enabled, system is ready so starting service"
+    sudo systemctl restart lnd
     sudo systemctl start litd
   else
     echo "# OK - the litd.service is enabled, to start manually use: 'sudo systemctl start litd'"
@@ -390,4 +408,3 @@ fi
 echo "FAIL - Unknown Parameter $1"
 echo "may need reboot to run normal again"
 exit 1
-

@@ -134,7 +134,7 @@ if [ ${runOnline} -eq 1 ]; then
   fi
   if [ ${online} -eq 0 ]; then
     # test with netcat to avoid firewall issues with ICMP packets
-    online=$(nc -v -z -w 8.8.8.8 53 &> /dev/null && echo "1" || echo "0")
+    online=$(nc -v -z -w 3 8.8.8.8 53 &> /dev/null && echo "1" || echo "0")
   fi
   if [ ${online} -eq 0 ]; then
     # re-test with other server
@@ -168,18 +168,29 @@ fi
 if [ ${runGlobal} -eq 1 ]; then
 
   ###########################################
+  # Static IP
+  # the static IP to override globalIP and publicIP detection
+  if [ "${staticIP}" != "" ]; then
+    echo "## static IP found: ${staticIP}"
+  fi
+
+  ###########################################
   # Global IP
   # the public IP that can be detected from outside
-  globalIP=""
-  echo "# getting public IP from third party service"
-  if [ "${ipv6}" == "on" ]; then
-    globalIP=$(curl -s -f -S -m 5 http://v6.ipv6-test.com/api/myip.php 2>/dev/null)
+  if [ "${staticIP}" == "" ]; then
+    globalIP=""
+    echo "# getting public IP from third party service"
+    if [ "${ipv6}" == "on" ]; then
+      globalIP=$(curl -s -f -S -m 10 http://v6.ipv6-test.com/api/myip.php 2>/dev/null)
+    else
+      globalIP=$(curl -s -f -S -m 10 http://v4.ipv6-test.com/api/myip.php 2>/dev/null)
+    fi
+    echo "##  curl returned:  ${globalIP}"
+    echo "##  curl exit code: ${?}"
   else
-    globalIP=$(curl -s -f -S -m 5 http://v4.ipv6-test.com/api/myip.php 2>/dev/null)
+    globalIP=${staticIP}
+    echo "##  staticIP as globalIP: ${staticIP}"
   fi
-  echo "##  curl returned:  ${globalIP}"
-  echo "##  curl exit code: ${?}"
-
 
   # sanity check on IP data
   # see https://github.com/rootzoll/raspiblitz/issues/371#issuecomment-472416349
@@ -199,20 +210,34 @@ if [ ${runGlobal} -eq 1 ]; then
     if [ "${ipv6}" == "on" ]; then
       globalIP="::1"
     else
-      globalIP="127.0.0.1"
+      if [ "${staticIP}" == "" ]; then
+        # only if publicIP is empty, dont prefer 127.0.0.1
+        if [ "${publicIP}" != "" ]; then
+          globalIP="${publicIP}"
+        else
+          globalIP="127.0.0.1"
+        fi
+      else
+        globalIP="${staticIP}"
+      fi
     fi
   fi
 
   ##########################################
   # Public IP
-  # the public that is maybe set by raspiblitz config file (overriding aut-detection)
+  # the public that is maybe set by raspiblitz config file (overriding auto-detection)
   if [ "${publicIP}" == "" ]; then
-    # if publicIP is not set by config ... use detected global IP
-    if [ "${ipv6}" == "on" ]; then
-      # use ipv6 with square brackets so that it can be used in http addresses like a IPv4
-      publicIP="[${globalIP}]"
+    if [ "${staticIP}" == "" ]; then
+      # if publicIP is not set by config ... use detected global IP
+      if [ "${ipv6}" == "on" ]; then
+        # use ipv6 with square brackets so that it can be used in http addresses like a IPv4
+        publicIP="[${globalIP}]"
+      else
+        publicIP="${globalIP}"
+      fi
     else
-      publicIP="${globalIP}"
+      # if a static IP was set, use it as public IP
+      publicIP="${staticIP}"
     fi
   fi
 

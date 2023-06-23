@@ -190,7 +190,7 @@ if [ ${mode} = "lnd-export-gui" ]; then
   # get local ip info
   source <(/home/admin/config.scripts/internet.sh status local)
 
-  # offer SCP for download
+  # offer SFTP for download
   clear
   echo
   echo "********************************"
@@ -199,7 +199,7 @@ if [ ${mode} = "lnd-export-gui" ]; then
   echo 
   echo "ON YOUR MAC & LINUX LAPTOP - RUN IN NEW TERMINAL:"
   echo "scp '${fileowner}@${localip}:${filename}' ./"
-  echo "ON WINDOWS USE:"
+  echo "ON WINDOWS - RUN IN CMD:"
   echo "scp ${fileowner}@${localip}:${filename} ."
   echo "Use password A to authenticate file transfer."
   echo

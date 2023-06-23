@@ -153,10 +153,10 @@ function decryptHSMsecret() {
       echo "# Decrypted successfully"
     else
       # unlock manually
-      /home/admin/config.scripts/cl.hsmtool.sh unlock
+      /home/admin/config.scripts/cl.hsmtool.sh unlock ${CHAIN}
       # attempt to decrypt again
       sudo cat $passwordFile | sudo -u bitcoin lightning-hsmtool decrypt \
-       "$hsmSecretPath" || echo "# Couldn't decrypt"; exit 1
+       "$hsmSecretPath" || exit 1
     fi
   fi
   shredPasswordFile
@@ -338,6 +338,12 @@ elif [ "$1" = "unlock" ]; then
       grep -c 'Backup is out of date, we cannot continue safely. Emergency shutdown.') -gt 0 ];then
       echo "# Backup is out of date, reinitiliazng and saving a copy in /home/bitcoin/ (on the SDcard / OS disk)"
       /home/admin/config.scripts/cl-plugin.backup.sh on
+
+    # check if database upgrade is needed
+    elif [ $(echo "${clError}" | \
+     grep -c 'use --database-upgrade=true to override') -gt 0 ];then
+      /home/admin/config.scripts/blitz.conf.sh set database-upgrade true $CLCONF noquotes
+      sudo systemctl restart ${netprefix}lightningd
 
     # fail
     elif [ $attempt -eq 12 ];then

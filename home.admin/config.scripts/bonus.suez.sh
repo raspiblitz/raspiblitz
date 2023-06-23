@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # https://github.com/prusnak/suez/commits/master
-SUEZVERSION="e402edbddb45d8a53af346b8582243f4068ece6c"
+SUEZVERSION="bcfd3502ac1f7d95b90c62c1daeae50aa7052be7"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -12,7 +12,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
 fi
 
 PGPsigner="prusnak"
-PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
+PGPpubkeyLink="https://rusnak.io/public/pgp.txt"
 PGPpubkeyFingerprint="91F3B339B9A02A3D"
 
 source /mnt/hdd/raspiblitz.conf
@@ -21,8 +21,7 @@ source /mnt/hdd/raspiblitz.conf
 if [ "$1" = "menu" ]; then
   dialog --title " Info Suez" --msgbox "
 Suez is a command line tool.
-Type: 'suez' for the default channel visualization for LND
-Type: 'suez --help' in the command line to see the usage options.
+Type: 'suez' to visualize the channels of the default ln instance
 Readme: https://github.com/prusnak/suez#readme
 " 10 75
   exit 0
@@ -34,22 +33,22 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   cd /home/bitcoin || exit 1
 
-  # dependency
-  sudo -u bitcoin curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py\
-    | sudo -u bitcoin python -
+  # poetry
+  sudo pip3 install --upgrade pip
+  sudo pip3 install poetry
 
   # download source code
   sudo -u bitcoin git clone https://github.com/prusnak/suez.git
   cd suez || exit 1
   sudo -u bitcoin git reset --hard $SUEZVERSION
   sudo -u bitcoin /home/admin/config.scripts/blitz.git-verify.sh \
-   "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
-  sudo -u bitcoin /home/bitcoin/.local/bin/poetry install
+    "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
+  sudo -u bitcoin poetry install
 
-  echo "# Adding alias"
-  sudo -u admin touch /home/admin/_aliases
-  echo "alias suez='cd /home/bitcoin/suez && sudo -u bitcoin /home/bitcoin/.local/bin/poetry run ./suez'"\
-   | sudo tee -a /home/admin/_aliases
+  # make sure default virtaulenv is used
+  sudo apt-get remove -y python3-virtualenv 2>/dev/null
+  sudo pip uninstall -y virtualenv 2>/dev/null
+  sudo apt-get install -y python3-virtualenv
 
   # setting value in raspi blitz config
   /home/admin/config.scripts/blitz.conf.sh set suez "on"
@@ -65,16 +64,14 @@ fi
 
 # switch off
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
-
   echo "# REMOVING SUEZ"
   sudo rm -rf /home/bitcoin/suez
-  echo "# OK, suez is removed."
+  echo "# OK, Suez is removed."
 
   # setting value in raspi blitz config
   /home/admin/config.scripts/blitz.conf.sh set suez "off"
 
   exit 0
-
 fi
 
 # update
@@ -82,8 +79,8 @@ if [ "$1" = "update" ]; then
   echo "# UPDATE SUEZ"
   cd /home/bitcoin || exit 1
   # dependency
-  sudo -u bitcoin curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py\
-    | sudo -u bitcoin python -
+  sudo pip3 install --upgrade pip
+  sudo pip3 install poetry
   # download source code
   if [ -d suez ]; then
     sudo -u bitcoin git clone https://github.com/prusnak/suez.git
@@ -91,9 +88,15 @@ if [ "$1" = "update" ]; then
   cd suez || exit 1
   sudo -u bitcoin git pull
   sudo -u bitcoin /home/admin/config.scripts/blitz.git-verify.sh \
-   "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
-  sudo -u bitcoin /home/bitcoin/.local/bin/poetry install
+    "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
+  sudo -u bitcoin poetry install
   echo "# Updated to the latest in https://github.com/prusnak/suez/commits/master"
+
+  # make sure default virtaulenv is used
+  sudo apt-get remove -y python3-virtualenv 2>/dev/null
+  sudo pip uninstall -y virtualenv 2>/dev/null
+  sudo apt-get install -y python3-virtualenv
+
   exit 0
 fi
 

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # command info
-if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ];then
+if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo
   echo "Install the cln-grpc plugin for CLN"
   echo "Usage:"
@@ -29,31 +29,43 @@ PORT="${portprefix}4772"
 
 function buildGRPCplugin() {
   echo "# - Build the cln-grpc plugin"
-  if [ ! -f /home/bitcoin/cl-plugins-available/cln-grpc/debug/cln-grpc ]; then
+  if [ ! -f /home/bitcoin/cl-plugins-available/cln-grpc ]; then
     # check if the source code is present
-    if [ ! -d /home/bitcoin/lightning/plugins/grpc-plugin ];then
-      echo "* Adding Core Lightning ..."
+    if [ ! -d /home/bitcoin/lightning/plugins/grpc-plugin ]; then
+      echo "# - install Core Lightning ..."
       /home/admin/config.scripts/cl.install.sh install || exit 1
     fi
-    # rust for cln-grpc, includes rustfmt
-    sudo -u bitcoin curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | \
-     sudo -u bitcoin sh -s -- -y
+    echo "# install dependencies"
+    sudo apt-get install protobuf-compiler -y
+    echo "# rust for cln-grpc, includes rustfmt"
+    sudo -u bitcoin curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sudo -u bitcoin sh -s -- -y
     cd /home/bitcoin/lightning/plugins/grpc-plugin || exit 1
-    # build
-    sudo -u bitcoin /home/bitcoin/.cargo/bin/cargo build \
-     --target-dir /home/bitcoin/cl-plugins-available/cln-grpc
+    echo "# build"
+    sudo -u bitcoin /home/bitcoin/.cargo/bin/cargo build --target-dir /home/bitcoin/cln-grpc-build
+    echo "# delete old dir or binary"
+    sudo rm -rf /home/bitcoin/cl-plugins-available/cln-grpc
+    echo "# move to /home/bitcoin/cl-plugins-available/"
+    sudo mkdir -p /home/bitcoin/cl-plugins-available
+    sudo -u bitcoin mv /home/bitcoin/cln-grpc-build/debug/cln-grpc /home/bitcoin/cl-plugins-available/
   else
     echo "# - cln-grpc plugin was already built/installed"
   fi
+  echo "# Cleaning"
+  sudo rm -rf /home/bitcoin/.rustup
+  sudo rm -rf /home/bitcoin/.cargo/
+  sudo rm -rf /home/bitcoin/.cache
+  sudo rm -rf /home/bitcoin/cln-grpc-build
 }
 
 function switchOn() {
-  if ! "$lightningcli_alias" plugin list | grep "/home/bitcoin/${netprefix}cl-plugins-enabled/cln-grpc"; then
+  if ! $lightningcli_alias plugin list | grep "/home/bitcoin/${netprefix}cl-plugins-enabled/cln-grpc"; then
     buildGRPCplugin
 
     # symlink to plugin directory
-    sudo ln -s /home/bitcoin/cl-plugins-available/cln-grpc/debug/cln-grpc /home/bitcoin/${netprefix}cl-plugins-enabled/
-    echo "# cln-grpc moved to /home/bitcoin/${netprefix}cl-plugins-enabled/"
+    echo "# symlink cln-grpc to /home/bitcoin/${netprefix}cl-plugins-enabled/"
+    # delete old symlink
+    sudo rm -f /home/bitcoin/${netprefix}cl-plugins-enabled/cln-grpc
+    sudo ln -s /home/bitcoin/cl-plugins-available/cln-grpc /home/bitcoin/${netprefix}cl-plugins-enabled/
 
     # blitz.conf.sh set [key] [value] [?conffile] <noquotes>
     /home/admin/config.scripts/blitz.conf.sh set "grpc-port" "${PORT}" "${CLCONF}" "noquotes"
@@ -93,7 +105,7 @@ elif [ "$1" = on ]; then
 elif [ "$1" = off ]; then
   sed -i "/^grpc-port/d" "${CLCONF}"
   sudo rm -rf /home/bitcoin/${netprefix}cl-plugins-enabled/cln-grpc
-  if [ "$(echo "$@" | grep -c purge)" -gt 0 ];then
+  if [ "$(echo "$@" | grep -c purge)" -gt 0 ]; then
     sudo rm -rf /home/bitcoin/cl-plugins-available/cln-grpc
   fi
   /home/admin/config.scripts/blitz.conf.sh set "${netprefix}clnGRPCport" "off"
@@ -104,8 +116,8 @@ elif [ "$1" = off ]; then
   exit 0
 
 elif [ "$1" = update ]; then
-  if [ "$(echo "$@" | grep -c source)" -gt 0 ];then
-    cd /home/bitcoin/lightning/ || (echo " The source is not present"; exit 1)
+  if [ "$(echo "$@" | grep -c source)" -gt 0 ]; then
+    cd /home/bitcoin/lightning/ || exit 1
     sudo -u bitcoin git pull
   fi
   sudo rm -rf /home/bitcoin/cl-plugins-available/cln-grpc

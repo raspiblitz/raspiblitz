@@ -3,7 +3,7 @@
 # https://github.com/bastienwirtz/homer
 
 installVersion="v22.06.1"
-remoteVersion=$(curl -s https://api.github.com/repos/bastienwirtz/homer/releases/latest|grep tag_name|head -1|cut -d '"' -f4)
+remoteVersion=$(curl --header "X-GitHub-Api-Version:2022-11-28" -s https://api.github.com/repos/bastienwirtz/homer/releases/latest|grep tag_name|head -1|cut -d '"' -f4)
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -23,7 +23,7 @@ if [ "$1" = "menu" ]; then
   source <(sudo /home/admin/config.scripts/bonus.homer.sh status)
 
   # get network info
-  localip=$(ip addr | grep 'state UP' -A2 | egrep -v 'docker0' | grep 'eth0\|wlan0' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
+  localIP=$(hostname -I | awk '{print $1}')
   toraddress=$(sudo cat /mnt/hdd/tor/homer/hostname 2>/dev/null)
   fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
 
@@ -34,7 +34,7 @@ if [ "$1" = "menu" ]; then
     # TOR
     /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
     whiptail --title " Homer " --msgbox "Open in your local web browser & accept self-signed cert:
-https://${localip}:4091\n
+https://${localIP}:4091\n
 SHA1 Thumb/Fingerprint:
 ${fingerprint}\n
 Hidden Service address for TOR Browser (QR see LCD):
@@ -46,7 +46,7 @@ ${additionalInfo}
 
     # IP + Domain
     whiptail --title " Homer " --msgbox "Open in your local web browser & accept self-signed cert:
-https://${localip}:4091\n
+https://${localIP}:4091\n
 SHA1 Thumb/Fingerprint:
 ${fingerprint}\n
 Activate TOR to access the web block explorer from outside your local network.\n

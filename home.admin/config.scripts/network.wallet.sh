@@ -39,23 +39,23 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # specify wallet.dat for mainnet to avoid error on testnet
   sudo sed -i "s/^wallet=wallet.dat/main.wallet=wallet.dat/g" /mnt/hdd/${network}/${network}.conf
   if ! grep -Eq "^${chain}.wallet=wallet.dat" /mnt/hdd/${network}/${network}.conf; then
-    echo "Enable the multiwallet feature in ${network} core ${chain}net and specify wallet.dat" 
+    echo "# Enable the multiwallet feature in ${network} core ${chain}net and specify wallet.dat" 
     echo "${chain}.wallet=wallet.dat" | sudo tee -a /mnt/hdd/${network}/${network}.conf >/dev/null
     restartService=1
   else
-    echo "Multiwallet is active and wallet.dat is used." 
+    echo "# Multiwallet is active and wallet.dat is used." 
     restartService=0
   fi
   if [ ${disablewallet} == 1 ]; then
     sudo sed -i "s/^disablewallet=.*/disablewallet=0/g" /mnt/hdd/${network}/${network}.conf
-    echo "Switching the ${network} core wallet on"
+    echo "# Switching the ${network} core wallet on"
     restartService=1
   else
-    echo "The ${network} core wallet is already on"    
+    echo "# The ${network} core wallet is already on"    
   fi
   source <(/home/admin/_cache.sh get state)
   if [ ${restartService} == 1 ] && [ ${state} != "recovering" ]; then
-    echo "Restarting ${network}d"
+    echo "# Restarting ${network}d"
     sudo systemctl restart ${network}d
   fi
   exit 0

@@ -1,16 +1,16 @@
 #!/bin/bash
 
 # https://github.com/romanz/electrs/releases
-ELECTRSVERSION="v0.9.7"
+ELECTRSVERSION="v0.9.11"
 # https://github.com/romanz/electrs/commits/master
-# ELECTRSVERSION="3041e89cd2fb377541b929d852ef6298c2d4e60a"
+# ELECTRSVERSION="446858ea621416916f84cbce61be92b748e8133e"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "config script to switch the Electrum Rust Server on or off"
  echo "bonus.electrs.sh status -> dont call in loops"
  echo "bonus.electrs.sh status-sync"
- echo "bonus.electrs.sh [on|off|menu]"
+ echo "bonus.electrs.sh [on|off|menu|update]"
  echo "installs the version $ELECTRSVERSION"
  exit 1
 fi
@@ -28,6 +28,8 @@ if [ "$1" = "status" ]; then
   source <(/home/admin/config.scripts/internet.sh status global)
 
   echo "##### STATUS ELECTRS SERVICE"
+
+  echo "version='${ELECTRSVERSION}'"
 
   if [ "${ElectRS}" = "on" ]; then
     echo "configured=1"
@@ -71,7 +73,7 @@ if [ "$1" = "status" ]; then
       # no answer on that port
       echo "publicHTTPPortAnswering=0"
     fi
-    # add TOR info
+    # add Tor info
     if [ "${runBehindTor}" == "on" ]; then
       echo "TorRunning=1"
       if [ "$2" = "showAddress" ]; then
@@ -96,20 +98,21 @@ if [ "$1" = "status-sync" ] || [ "$1" = "status" ]; then
   echo "serviceRunning=${serviceRunning}"
   if [ ${serviceRunning} -eq 1 ]; then
 
-    # Experimental try to get sync Info
-    syncedToBlock=$(sudo journalctl -u electrs --no-pager -n2000 | grep "height=" | tail -n1| cut -d= -f3)
-    blockchainHeight=$(sudo -u bitcoin ${network}-cli getblockchaininfo 2>/dev/null | jq -r '.headers' | sed 's/[^0-9]*//g')
-    lastBlockchainHeight=$(($blockchainHeight -1))
-    syncProgress=0
-    if [ "${syncedToBlock}" != "" ] && [ "${blockchainHeight}" != "" ] && [ "${blockchainHeight}" != "0" ]; then
-      syncProgress="$(echo "$syncedToBlock" "$blockchainHeight" | awk '{printf "%.2f", $1 / $2 * 100}')"
-    fi
-    echo "syncProgress=${syncProgress}%"
-    if [ "${syncedToBlock}" = "${blockchainHeight}" ] || [ "${syncedToBlock}" = "${lastBlockchainHeight}" ]; then
-      echo "tipSynced=1"
-    else
-      echo "tipSynced=0"
-    fi
+    # Experimental try to get sync Info (electrs debug info would need more details)
+    #source <(/home/admin/_cache.sh get btc_mainnet_blocks_headers)
+    #blockchainHeight="${btc_mainnet_blocks_headers}"
+    #lastBlockchainHeight=$(($blockchainHeight -1))
+    #syncedToBlock=$(sudo journalctl -u electrs --no-pager -n2000 | grep "height=" | tail -n1| cut -d= -f3)
+    #syncProgress=0
+    #if [ "${syncedToBlock}" != "" ] && [ "${blockchainHeight}" != "" ] && [ "${blockchainHeight}" != "0" ]; then
+    #  syncProgress="$(echo "$syncedToBlock" "$blockchainHeight" | awk '{printf "%.2f", $1 / $2 * 100}')"
+    #fi
+    #echo "syncProgress=${syncProgress}%"
+    #if [ "${syncedToBlock}" = "${blockchainHeight}" ] || [ "${syncedToBlock}" = "${lastBlockchainHeight}" ]; then
+    #  echo "tipSynced=1"
+    #else
+    #  echo "tipSynced=0"
+    #fi
 
     # check if initial sync was done, by setting a file as once electrs is the first time responding on port 50001
     electrumResponding=$(echo '{"jsonrpc":"2.0","method":"server.ping","params":[],"id":"electrs-check"}' | netcat -w 2 127.0.0.1 50001 | grep -c "result")
@@ -133,7 +136,7 @@ if [ "$1" = "status-sync" ] || [ "$1" = "status" ]; then
     fi
 
   else
-    echo "tipSynced=0"
+    # echo "tipSynced=0"
     echo "initialSynced=0"
     echo "electrumResponding=0"
     echo "infoSync='Not running - check: sudo journalctl -u electrs'"
@@ -145,7 +148,7 @@ if [ "$1" = "menu" ]; then
 
   # get status
   echo "# collecting status info ... (please wait)"
-  source <(sudo /home/admin/config.scripts/bonus.electrs.sh status)
+  source <(sudo /home/admin/config.scripts/bonus.electrs.sh status showAddress)
 
   if [ ${serviceInstalled} -eq 0 ]; then
     echo "# FAIL not installed"
@@ -208,11 +211,11 @@ Check 'sudo nginx -t' for a detailed error message.
     echo
     echo "On Network Settings > Server menu:"
     echo "- deactivate automatic server selection"
-    echo "- as manual server set '${localip}' & '${portSSL}'"
+    echo "- as manual server set '${localIP}' & '${portSSL}'"
     echo "- laptop and RaspiBlitz need to be within same local network"
     echo
     echo "To start directly from laptop terminal use:"
-    echo "electrum --oneserver --server ${localip}:${portSSL}:s"
+    echo "electrum --oneserver --server ${localIP}:${portSSL}:s"
     if [ ${TorRunning} -eq 1 ]; then
       echo
       echo "The Tor Hidden Service address for electrs is (see LCD for QR code):"
@@ -266,7 +269,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   isInstalled=$(sudo ls /etc/systemd/system/electrs.service 2>/dev/null | grep -c 'electrs.service')
   if [ ${isInstalled} -eq 0 ]; then
 
-    #cleanup
+    # cleanup
     sudo rm -f /home/electrs/.electrs/config.toml
 
     echo
@@ -287,9 +290,14 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo
     sudo -u electrs git clone https://github.com/romanz/electrs
     cd /home/electrs/electrs || exit 1
+
     sudo -u electrs git reset --hard $ELECTRSVERSION
+
+    # verify
     sudo -u electrs /home/admin/config.scripts/blitz.git-verify.sh \
      "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
+
+    # build
     sudo -u electrs /home/electrs/.cargo/bin/cargo build --locked --release || exit 1
 
     echo
@@ -300,7 +308,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     echo
     echo "# Getting RPC credentials from the bitcoin.conf"
-    #read PASSWORD_B
+    # read PASSWORD_B
     RPC_USER=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcuser | cut -c 9-)
     PASSWORD_B=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcpassword | cut -c 13-)
     echo "# Done"
@@ -415,6 +423,7 @@ Type=simple
 TimeoutSec=60
 Restart=always
 RestartSec=60
+LogLevelMax=5
 
 # Hardening measures
 PrivateTmp=true
@@ -447,6 +456,10 @@ WantedBy=multi-user.target
     bitcoindRestart=yes
   fi
 
+  # clean up
+  sudo rm -R /home/electrs/.cargo
+  sudo rm -R /home/electrs/.rustup
+
   source <(/home/admin/_cache.sh get state)
   if [ "${state}" == "ready" ]; then
     if [ "${bitcoindRestart}" == "yes" ]; then
@@ -471,8 +484,7 @@ fi
 # switch off
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
-  # setting value in raspiblitz config
-  /home/admin/config.scripts/blitz.conf.sh set ElectRS "off"
+  echo "# REMOVING ELECTRS"
 
   # if second parameter is "deleteindex"
   if [ "$2" == "deleteindex" ]; then
@@ -480,23 +492,10 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo rm -rf /mnt/hdd/app-storage/electrs/
   fi
 
-  # Hidden Service if Tor is active
-  if [ "${runBehindTor}" = "on" ]; then
-    /home/admin/config.scripts/tor.onion-service.sh off electrs
-  fi
-
   isInstalled=$(sudo ls /etc/systemd/system/electrs.service 2>/dev/null | grep -c 'electrs.service')
   if [ ${isInstalled} -eq 1 ]; then
-
-    echo "# REMOVING ELECTRS"
     sudo systemctl disable electrs
     sudo rm /etc/systemd/system/electrs.service
-    # delete user and home directory
-    sudo userdel -rf electrs
-    # close ports on firewall
-    sudo ufw deny 50001
-    sudo ufw deny 50002
-    echo "# OK ElectRS removed."
 
     # restart BTC-RPC-Explorer to reconfigure itself to use electrs for address API
     if [ "${BTCRPCexplorer}" == "on" ]; then
@@ -505,8 +504,62 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     fi
 
   else
-    echo "# ElectRS is not installed."
+    echo "# electrs.service is not installed."
   fi
+
+  # Hidden Service if Tor is active
+  if [ "${runBehindTor}" = "on" ]; then
+    /home/admin/config.scripts/tor.onion-service.sh off electrs
+  fi
+
+  # close ports on firewall
+  sudo ufw delete allow 50001
+  sudo ufw delete allow 50002
+
+  # delete user and home directory
+  sudo userdel -rf electrs
+
+  # setting value in raspiblitz config
+  /home/admin/config.scripts/blitz.conf.sh set ElectRS "off"
+
+  echo "# OK ElectRS removed."
+  exit 0
+fi
+
+if [ "$1" = "update" ]; then
+  echo "# Update Electrs"
+  cd /home/electrs/electrs || exit 1
+  sudo -u electrs git fetch
+
+  localVersion=$(/home/electrs/electrs/target/release/electrs --version)
+  updateVersion=$(curl --header "X-GitHub-Api-Version:2022-11-28" -s https://api.github.com/repos/romanz/electrs/releases/latest|grep tag_name|head -1|cut -d '"' -f4)
+
+  if [ $localVersion = $updateVersion ]; then
+    echo "# Up-to-date on version $localVersion"
+  else
+    echo "# Pulling latest changes..."
+    sudo -u electrs git pull -p
+    echo "# Reset to the latest release tag: $updateVersion"
+    sudo -u electrs git reset --hard $updateVersion
+
+    sudo -u electrs /home/admin/config.scripts/blitz.git-verify.sh \
+     "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
+
+    echo "# Installing build dependencies"
+    sudo -u electrs curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sudo -u electrs sh -s -- --default-toolchain none -y
+    sudo apt install -y clang cmake build-essential  # for building 'rust-rocksdb'
+    echo
+
+    echo "# Build Electrs ..."
+    sudo -u electrs /home/electrs/.cargo/bin/cargo build --locked --release || exit 1
+
+    # update config
+    sudo -u electrs sed -i "/^server_banner = /d" /home/electrs/.electrs/config.toml
+    sudo -u electrs bash -c "echo 'server_banner = \"Welcome to electrs $updateVersion - the Electrum Rust Server on your RaspiBlitz\"' >> /home/electrs/.electrs/config.toml"
+
+    echo "# Updated Electrs to $updateVersion"
+  fi
+  sudo systemctl start electrs
   exit 0
 fi
 

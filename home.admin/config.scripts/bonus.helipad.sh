@@ -90,7 +90,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     # install system dependencies:
     sudo apt --assume-yes update
-    sudo apt --assume-yes --show-upgraded install libssl-dev libsqlite3-dev
+    sudo apt --assume-yes --show-upgraded install libssl-dev libsqlite3-dev pkg-config
 
     # install Rust dependencies:
     echo "*** Installing rustup for the Helipad user ***"
@@ -104,6 +104,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # install helipad
     sudo -u $HELIPAD_USER $HELIPAD_CARGO_BIN install --path $HELIPAD_BUILD_DIR
 
+    # clean up
+    sudo rm -R $HELIPAD_HOME_DIR/.rustup
+
     ###############
     # CONFIG
     ###############
@@ -113,8 +116,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     # persist settings in app-data
     sudo mkdir -p $HELIPAD_DATA_DIR
-    sudo chown $HELIPAD_USER: $HELIPAD_DATA_DIR
+    sudo chown $HELIPAD_USER:$HELIPAD_USER $HELIPAD_DATA_DIR
     sudo -u $HELIPAD_USER touch $HELIPAD_DB
+    sudo chown $HELIPAD_USER:$HELIPAD_USER $HELIPAD_DB
 
     ##################
     # NGINX
@@ -167,6 +171,7 @@ RestartSec=30
 Environment="LND_TLSCERT=$HELIPAD_CERT"
 Environment="LND_ADMINMACAROON=$HELIPAD_MACAROON"
 Environment="HELIPAD_DATABASE_DIR=$HELIPAD_DB"
+LogLevelMax=4
 [Install]
 WantedBy=multi-user.target
 " | sudo tee /etc/systemd/system/helipad.service

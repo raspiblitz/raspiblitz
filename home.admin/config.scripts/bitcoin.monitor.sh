@@ -7,7 +7,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "bitcoin.monitor.sh [mainnet|testnet|signet] info"
  echo "bitcoin.monitor.sh [mainnet|testnet|signet] mempool"
  echo "bitcoin.monitor.sh [mainnet|testnet|signet] network"
- echo "bitcoin.monitor.sh [mainnet] peer-kickstart [ipv4|ipv6|tor|auto]"
+ echo "bitcoin.monitor.sh [mainnet] peer-kickstart [ipv4|ipv6|tor|i2p|auto]"
  echo "bitcoin.monitor.sh [mainnet] peer-disconnectall"
  exit 1
 fi
@@ -101,19 +101,27 @@ if [ "$2" = "network" ]; then
   btc_running=$(systemctl status $service_alias 2>/dev/null | grep -c "active (running)")
   getnetworkinfo=$($bitcoincli_alias getnetworkinfo 2>/dev/null)
   if [ "${getnetworkinfo}" == "" ]; then
-    echo "error='no data'"
+    echo "error='no network data'"
     exit 1
   fi
-   
+  getpeerinfo=$($bitcoincli_alias getpeerinfo 2>/dev/null)
+  if [ "${getpeerinfo}" == "" ]; then
+    echo "error='no peer data'"
+    exit 1
+  fi  
 
   # parse data
   btc_peers=$(echo "${getnetworkinfo}" | grep "connections\"" | tr -cd '[[:digit:]]')
   btc_address=$(echo ${getnetworkinfo} | jq -r '.localaddresses [0] .address')
   btc_port=$(echo "${getnetworkinfo}" | jq -r '.localaddresses [0] .port')
+  btc_peers_onion=$(echo "${getpeerinfo}" | grep -c "network\": \"onion")
+  btc_peers_i2p=$(echo "${getpeerinfo}" | grep -c "network\": \"i2p")
 
   # print data
   echo "btc_running='${btc_running}'"
   echo "btc_peers='${btc_peers}'"
+  echo "btc_peers_onion='${btc_peers_onion}'"
+  echo "btc_peers_i2p='${btc_peers_i2p}'"
   echo "btc_address='${btc_address}'"
   echo "btc_port='${btc_port}'"
   exit 0
@@ -148,12 +156,15 @@ if [ "$2" = "info" ]; then
   btc_blocks_behind=$((${btc_blocks_headers} - ${btc_blocks_verified}))
   btc_sync_initialblockdownload=$(echo "${blockchaininfo}" | jq -r '.initialblockdownload' | grep -c 'true')
   btc_sync_progress=$(echo "${blockchaininfo}" | jq -r '.verificationprogress')
-  btc_sync_percentage=$(echo ${btc_sync_progress} | awk '{printf( "%.2f%%", 100 * $1)}')
-  if [ "${btc_blocks_headers}" != "" ]  && [ "${btc_blocks_headers}" == "${btc_blocks_verified}" ]; then
+  if (( $(awk 'BEGIN { print( '${btc_sync_progress}'<0.99995 ) }') )); then
+    # #3620 prevent displaying 100.00%, although incorrect because of rounding
+    btc_sync_percentage=$(awk 'BEGIN { printf( "%.2f%%", 100 * '${btc_sync_progress}') }')
+  elif [ "${btc_blocks_headers}" != "" ] && [ "${btc_blocks_headers}" == "${btc_blocks_verified}" ]; then
     btc_sync_percentage="100.00"
+  else
+    btc_sync_percentage="99.99"
   fi
 
-  
   # determine if synced (tolerate falling 1 block behind)
   # and be sure that initial blockdownload is done
   btc_synced=0
@@ -208,18 +219,15 @@ if [ "$2" = "peer-kickstart" ]; then
     exit 1
   fi
 
-  # get raw node data from bitnodes.io (use Tor if available)
-  #if [ "${runBehindTor}" == "on" ]; then
-    # call over tor proxy (CAPTCHA BLOCKED)
-    #bitnodesRawData=$(curl --socks5-hostname 127.0.0.1:9050 -H "Accept: application/json; indent=4" https://bitnodes.io/api/v1/snapshots/latest/ 2>/dev/null)
-  #else
-    # call over clearnet
-    # bitnodesRawData=$(curl -H "Accept: application/json; indent=4" https://bitnodes.io/api/v1/snapshots/latest/ 2>/dev/null)
-  #fi
-
-  bitnodesRawData=$(sudo -u admin cat /home/admin/fallback.nodes)
-  if [ ${#bitnodesRawData} -lt 100 ]; then
+  bitnodesRawData1=$(sudo -u admin cat /home/admin/fallback.bitnodes.nodes)
+  if [ ${#bitnodesRawData1} -lt 100 ]; then
     echo "error='no valid data from bitnodes.io'"
+    exit 1
+  fi
+
+  bitnodesRawData2=$(sudo -u admin cat /home/admin/fallback.bitcoin.nodes)
+  if [ ${#bitnodesRawData2} -lt 100 ]; then
+    echo "error='no valid data from bitcoin core'"
     exit 1
   fi
 
@@ -230,7 +238,7 @@ if [ "$2" = "peer-kickstart" ]; then
     addressFormat="auto"
   fi
   # check valid value
-  if [ "${addressFormat}" != "ipv4" ] && [ "${addressFormat}" != "ipv6" ] && [ "${addressFormat}" != "tor" ] && [ "${addressFormat}" != "auto" ]; then
+  if [ "${addressFormat}" != "ipv4" ] && [ "${addressFormat}" != "ipv6" ] && [ "${addressFormat}" != "tor" ] && [ "${addressFormat}" != "i2p" ] && [ "${addressFormat}" != "auto" ]; then
     echo "error='invalid address type'"
     exit 1
   fi
@@ -251,14 +259,17 @@ if [ "$2" = "peer-kickstart" ]; then
 
   # filter raw data for node addresses based on what kind of connection is running
   if [ "${addressFormat}" == "tor" ]; then
-    # get Tor nodes (v2 or v3)
-    nodeList=$(echo "${bitnodesRawData}" | grep -o '[0-9a-z]\{16,56\}\.onion')
+    # get Tor nodes (v3)
+    nodeList=$(echo "${bitnodesRawData1}" | grep -o '[0-9a-z]\{32,56\}\.onion')
   elif [ "${addressFormat}" == "ipv4" ]; then
     # get IPv4 nodes
-    nodeList=$(echo "${bitnodesRawData}" | grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\:[0-9]\{3,5\}')
+    nodeList=$(echo "${bitnodesRawData1}" | grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\:[0-9]\{3,5\}')
   elif [ "${addressFormat}" == "ipv6" ]; then
     # get IPv6 nodes
-    nodeList=$(echo "${bitnodesRawData}" | grep -o '\[.\{5,45\}\]\:[0-9]\{3,5\}')
+    nodeList=$(echo "${bitnodesRawData1}" | grep -o '\[.\{5,45\}\]\:[0-9]\{3,5\}')
+  elif [ "${addressFormat}" == "i2p" ]; then
+    # get I2P nodes (only in fallbacklist from bitcoin core)
+    nodeList=$(echo "${bitnodesRawData2}" | grep -o '[0-9,a-z]\{32,64\}\.b32\.i2p\:[0-9]\{1,5\}')
   else
     # invalid address
     echo "error='invalid address format'"

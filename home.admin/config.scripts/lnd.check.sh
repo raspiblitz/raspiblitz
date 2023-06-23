@@ -22,8 +22,7 @@ echo "# lndConfFile(${lndConfFile})"
 # so it tries to make sure the config is in valid shape
 ######################################################################
 
-function setting() # FILE LINENUMBER NAME VALUE
-{
+function setting() { # FILE LINENUMBER NAME VALUE
   FILE=$1
   LINENUMBER=$2
   NAME=$3
@@ -62,6 +61,11 @@ if [ "$1" == "prestart" ]; then
   fi
 
   ##### APPLICATION OPTIONS SECTION #####
+
+  # remove sync-freelist=1 (use =true is you want to overrule raspiblitz)
+  # https://github.com/rootzoll/raspiblitz/issues/3251
+  sed -i "/^# Avoid slow startup time/d" ${lndConfFile}
+  sed -i "/^sync-freelist=1/d" ${lndConfFile}
 
   # delete autounlock if passwordFile not present
   passwordFile="/mnt/hdd/lnd/data/chain/${network}/${CHAIN}/password.info"
@@ -113,7 +117,6 @@ if [ "$1" == "prestart" ]; then
   echo "# ${network}.node insert/update"
   setting ${lndConfFile} ${insertLine} "${network}\.node" "${network}d"
 
-
   ##### BITCOIND OPTIONS SECTION #####
 
   # [bitcoind]
@@ -154,11 +157,25 @@ if [ "$1" == "prestart" ]; then
   setting ${lndConfFile} ${insertLine} "${network}d\.zmqpubrawblock" "tcp\:\/\/127\.0\.0\.1\:${zmqprefix}332"
 
   # SET/UPDATE rpcpass
-  RPCPSW=$(cat /mnt/hdd/${network}/${network}.conf | grep "rpcpassword=" | cut -d "=" -f2)
+  RPCPSW=$(cat /mnt/hdd/${network}/${network}.conf | grep "^rpcpassword=" | tail -1 | cut -d "=" -f2 | tail -n 1)
+  if [ "${RPCPSW}" == "" ]; then
+    RPCPSW=$(cat /mnt/hdd/${network}/${network}.conf | grep "^${network}d.rpcpassword=" | cut -d "=" -f2 | tail -n 1)
+  fi
+  if [ "${RPCPSW}" == "" ]; then
+    echo 1>&2 "FAIL: 'rpcpassword' not found in /mnt/hdd/${network}/${network}.conf"
+    exit 11
+  fi
   setting ${lndConfFile} ${insertLine} "${network}d\.rpcpass" "${RPCPSW}"
 
   # SET/UPDATE rpcuser
-  RPCUSER=$(cat /mnt/hdd/${network}/${network}.conf | grep "rpcuser=" | cut -d "=" -f2)
+  RPCUSER=$(cat /mnt/hdd/${network}/${network}.conf | grep "^rpcuser=" | cut -d "=" -f2 | tail -n 1)
+  if [ "${RPCUSER}" == "" ]; then
+    RPCUSER=$(cat /mnt/hdd/${network}/${network}.conf | grep "^${network}d.rpcuser=" | cut -d "=" -f2 | tail -n 1)
+  fi
+  if [ "${RPCUSER}" == "" ]; then
+    echo 1>&2 "FAIL: 'rpcuser' not found in /mnt/hdd/${network}/${network}.conf"
+    exit 12
+  fi
   setting ${lndConfFile} ${insertLine} "${network}d\.rpcuser" "${RPCUSER}"
 
   # SET/UPDATE rpchost
@@ -239,7 +256,7 @@ if [ "$1" == "prestart" ]; then
     # limit workers to the number of cores
     setting ${lndConfFile} ${insertLine} "workers.write" "${cores}"
     setting ${lndConfFile} ${insertLine} "workers.sig" "${cores}"
-fi
+  fi
 
   ##### TOR SECTION #####
 
@@ -277,7 +294,7 @@ fi
 
     # take care of incompatible settings https://github.com/rootzoll/raspiblitz/issues/2787#issuecomment-991245694
     if [ $(cat ${lndConfFile} | grep -c "^tor.skip-proxy-for-clearnet-targets=true") -gt 0 ] ||
-       [ $(cat ${lndConfFile} | grep -c "^tor.skip-proxy-for-clearnet-targets=1") -gt 0 ]; then
+      [ $(cat ${lndConfFile} | grep -c "^tor.skip-proxy-for-clearnet-targets=1") -gt 0 ]; then
       setting ${lndConfFile} ${insertLine} "tor.streamisolation" "false"
     fi
 
@@ -285,6 +302,38 @@ fi
     sed -i '/^tor.password=*/d' ${lndConfFile}
 
   fi
+
+  ##### RPCMIDDLEWARE SECTION #####
+
+  # [rpcmiddleware]
+  sectionName="rpcmiddleware"
+  echo "# [${sectionName}] config ..."
+
+  # make sure lnd config has a [rpcmiddleware] section
+  sectionExists=$(cat ${lndConfFile} | grep -c "^\[${sectionName}\]")
+  echo "# sectionExists(${sectionExists})"
+  if [ "${sectionExists}" == "0" ]; then
+    echo "# adding section [${sectionName}]"
+    echo "
+[${sectionName}]
+" | tee -a ${lndConfFile}
+  fi
+
+  # get line number of [rpcmiddleware] section
+  sectionLine=$(cat ${lndConfFile} | grep -n "^\[${sectionName}\]" | cut -d ":" -f1)
+  echo "# sectionLine(${sectionLine})"
+  insertLine=$(expr $sectionLine + 1)
+  echo "# insertLine(${insertLine})"
+  fileLines=$(wc -l ${lndConfFile} | cut -d " " -f1)
+  echo "# fileLines(${fileLines})"
+  if [ ${fileLines} -lt ${insertLine} ]; then
+    echo "# adding new line for inserts"
+    echo "
+" | tee -a ${lndConfFile}
+  fi
+
+  # SET/UPDATE rpcmiddleware.enable
+  setting ${lndConfFile} ${insertLine} "rpcmiddleware.enable" "true"
 
   echo "# OK PRESTART DONE"
 
@@ -359,25 +408,25 @@ elif [ "$1" == "basic-setup" ]; then
     echo "err='$(netprefix)lnd.conf: blockchain network in $(netprefix)lnd.conf (${lndNetwork}) is different from raspiblitz.conf (${network})'"
   fi
 
-#  # get chain from config (TESTNET / MAINNET)
-#  lndChain=""
-#  source <(sudo cat /mnt/hdd/lnd/lnd.conf 2>/dev/null | grep "${lndNetwork}.mainnet" | sed 's/^[a-z]*\.//g')
-#  source <(sudo cat /mnt/hdd/lnd/lnd.conf 2>/dev/null | grep "${lndNetwork}.testnet" | sed 's/^[a-z]*\.//g')
-#  if [ "${mainnet}" == "1" ] && [ "${testnet}" == "1" ]; then
-#    echo "err='lnd.conf: mainnet and testnet are set active at the same time'"
-#  elif [ "${mainnet}" == "1" ]; then
-#    lndChain="main"
-#  elif [ "${testnet}" == "1" ]; then
-#    lndChain="test"
-#  else
-#    echo "err='lnd.conf: neither testnet or mainnet is set active (raspiblitz needs one of them active in lnd.conf)'"
-#  fi
-#  echo "chain='${lndChain}'"
-#
-#  # check if chain is same the raspiblitz config
-#  if [ "${chain}" != "${lndChain}" ]; then
-#    echo "err='lnd.conf: testnet/mainnet in lnd.conf (${lndChain}) is different from raspiblitz.conf (${chain})'"
-#  fi
+  #  # get chain from config (TESTNET / MAINNET)
+  #  lndChain=""
+  #  source <(sudo cat /mnt/hdd/lnd/lnd.conf 2>/dev/null | grep "${lndNetwork}.mainnet" | sed 's/^[a-z]*\.//g')
+  #  source <(sudo cat /mnt/hdd/lnd/lnd.conf 2>/dev/null | grep "${lndNetwork}.testnet" | sed 's/^[a-z]*\.//g')
+  #  if [ "${mainnet}" == "1" ] && [ "${testnet}" == "1" ]; then
+  #    echo "err='lnd.conf: mainnet and testnet are set active at the same time'"
+  #  elif [ "${mainnet}" == "1" ]; then
+  #    lndChain="main"
+  #  elif [ "${testnet}" == "1" ]; then
+  #    lndChain="test"
+  #  else
+  #    echo "err='lnd.conf: neither testnet or mainnet is set active (raspiblitz needs one of them active in lnd.conf)'"
+  #  fi
+  #  echo "chain='${lndChain}'"
+  #
+  #  # check if chain is same the raspiblitz config
+  #  if [ "${chain}" != "${lndChain}" ]; then
+  #    echo "err='lnd.conf: testnet/mainnet in lnd.conf (${lndChain}) is different from raspiblitz.conf (${chain})'"
+  #  fi
 
   # check for admin macaroon exist (on HDD)
   adminMacaroonExists=$(sudo ls /mnt/hdd/lnd/data/chain/${network}/${chain}net/admin.macaroon 2>/dev/null | grep -c 'admin.macaroon')

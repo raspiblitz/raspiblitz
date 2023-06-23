@@ -382,6 +382,26 @@ elif [ "${abcd}" = "b" ]; then
     sudo sed -i "s/^faraday.bitcoin.password=.*/faraday.bitcoin.password=${newPassword}/g" /mnt/hdd/app-data/.lit/lit.conf
   fi
 
+  # i2pd
+  if [ "${i2pd}" == "on" ]; then
+    echo "# changing the password for i2pd"
+    sudo sed -i "s/^pass = .*/pass = ${newPassword}/g" /etc/i2pd/i2pd.conf
+  fi
+
+  # LNDg
+  if [ "${lndg}" == "on" ]; then
+    echo "# changing the password for lndg"
+    sudo -u lndg /home/lndg/lndg/.venv/bin/python /home/lndg/lndg/initialize.py -pw ${newPassword}
+  fi
+
+  # mempool Explorer
+  if [ "${mempoolExplorer}" == "on" ]; then
+    echo "# changing the password for mempool Explorer"
+    sudo jq ".CORE_RPC.PASSWORD=\"${newPassword}\"" /home/mempool/mempool/backend/mempool-config.json > /var/cache/raspiblitz/mempool-config.json
+    sudo mv /var/cache/raspiblitz/mempool-config.json /home/mempool/mempool/backend/mempool-config.json
+    sudo chown mempool:mempool /home/mempool/mempool/backend/mempool-config.json
+  fi
+
   echo "# OK -> RPC Password B changed"
   echo "# Reboot is needed (will be triggered if interactive menu was called)"
   echo "error=''"

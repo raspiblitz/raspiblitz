@@ -19,7 +19,7 @@ cp ./*.proto ./protobuffs
 
 *NOTE: If LND master branch is already a version ahead .. use the rpc.proto from the version tagged branch.*
 
-Now copy the generated RPC libs per SCP over to your Laptop and add them to the `/home/admin/config.scripts/lndlibs`.
+Now copy the generated RPC libs per SFTP over to your Laptop and add them to the `/home/admin/config.scripts/lndlibs`.
 
 scp -r admin@192.168.X.X:/home/admin/protobuffs ./protobuffs
 
@@ -41,6 +41,7 @@ from . import walletunlocker_pb2 as walletunlocker__pb2
 
 Make sure the first lines (ignore comments) of the `walletunlocker_pb2.py` look like the following for python3 compatibility:
 ```
+from google.protobuf.internal import builder as _builder
 from google.protobuf import descriptor as _descriptor
 from google.protobuf import descriptor_pool as _descriptor_pool
 from google.protobuf import message as _message

@@ -5,6 +5,19 @@ if [ -f /home/admin/_aliases ];then
   source /home/admin/_aliases
 fi
 
+# confirm interrupting commands
+confirm=0
+function confirmMsg() {
+  while true; do
+    read -p "$(echo -e "Execute the blitz command '$1'? (y/n): ")" yn
+    case $yn in
+        [Yy]* ) confirm=1;break;;
+        [Nn]* ) confirm=0;break;;
+        * ) echo "Please answer yes or no.";;
+    esac
+  done
+}
+
 # SHORTCUT COMMANDS you can call as user 'admin' from terminal
 
 # command: blitz
@@ -35,7 +48,7 @@ function blitzhelp() {
   echo "  status       informational Blitz status screen"
   echo "  sourcemode   copy blockchain source modus"
   echo "  check        check if Blitz configuration files are correct"
-  echo "  patch        sync all scripts with latest from github and branch"
+  echo "  patch [all]  sync all scripts with latest from github and branch"
   echo "  patch code   sync only blitz scripts with latest from github and branch"
   echo "  patch api    sync only Blitz-API with latest from github and branch"
   echo "  patch web    sync only Blitz-WebUI with latest from github and branch"
@@ -56,11 +69,6 @@ function blitzhelp() {
   echo "  gettx        retrieve transaction from mempool or blockchain and print as JSON"
   echo "  watchtx      retrieve transaction from mempool or blockchain until certain confirmation target"
   echo
-  echo "LND:"
-  echo "  balance      your satoshi balance"
-  echo "  channels     your lightning channels"
-  echo "  fwdreport    show forwarding report"
-  echo
   echo "Users:"
   echo "  bos          Balance of Satoshis"
   echo "  chantools    ChanTools"
@@ -72,6 +80,18 @@ function blitzhelp() {
   echo "Extras:"
   echo "  whitepaper   download the whitepaper from the blockchain to /home/admin/bitcoin.pdf"
   echo "  notifyme     wrapper for blitz.notify.sh that will send a notification using the configured method and settings"
+  echo "  suez         visualize channels (for the default ln implementation and chain when installed)"
+  exho "  lnproxy      wrap invoices with lnproxy"
+  echo
+  echo "LND:"
+  echo "  lncli        LND commandline interface (when installed)"
+  echo "  balance      your satoshi balance"
+  echo "  channels     your lightning channels"
+  echo "  fwdreport    show forwarding report"
+  echo "  manage       use the lndmanage bonus app"
+  echo
+  echo "CLN:"
+  echo " lightning-cli Core Lightning commandline interface (when installed)"
 }
 
 # command: raspiblitz
@@ -97,7 +117,11 @@ function repair() {
 
 # command: restart
 function restart() {
-  /home/admin/config.scripts/blitz.shutdown.sh reboot
+  echo "Command to restart your RaspiBlitz"
+  confirmMsg restart
+  if [ $confirm -eq 1 ]; then
+    /home/admin/config.scripts/blitz.shutdown.sh reboot
+  fi
 }
 
 # command: sourcemode
@@ -112,11 +136,32 @@ function check() {
 
 # command: release
 function release() {
-  /home/admin/config.scripts/blitz.preparerelease.sh
+  echo "Command to prepare your RaspiBlitz installation for sd card image:"
+  echo "- delete logs"
+  echo "- clean raspiblitz.info"
+  echo "- delete SSH Pub keys"
+  echo "- delete local DNS confs"
+  echo "- delete old API conf"
+  echo "- delete local WIFI conf"
+  echo "- shutdown"
+  confirmMsg release
+  if [ $confirm -eq 1 ]; then
+    /home/admin/config.scripts/blitz.preparerelease.sh
+  fi
+}
+
+# command: fatpack
+function fatpack() {
+  echo "Command to be called only on a fresh stopped minimal build to re-pack installs."
+  confirmMsg fatpack
+  if [ $confirm -eq 1 ]; then
+    sudo /home/admin/config.scripts/blitz.fatpack.sh
+  fi
 }
 
 # command: debug
 function debug() {
+  clear
   echo "Printing debug logs. Be patient, this should take maximum 2 minutes .."
   sudo rm /var/cache/raspiblitz/debug.log 2>/dev/null
   /home/admin/config.scripts/blitz.debug.sh > /var/cache/raspiblitz/debug.log
@@ -136,23 +181,31 @@ function debug() {
 # command: patch
 # syncs script with latest set github and branch
 function patch() {
+  if [ "$1" == "" ]; then
+    echo "Command to patch your RaspiBlitz from github"
+    confirmMsg patch
+    if [ $confirm -eq 1 ]; then
+      patch all
+    fi
+  fi
+
   cd /home/admin
 
-  if [ "$1" == "" ] || [ "$1" == "code" ]; then
+  if [ "$1" == "all" ] || [ "$1" == "code" ]; then
     echo
     echo "#######################################################"
     echo "### UPDATE BLITZ --> SCRIPTS (code)"
     /home/admin/config.scripts/blitz.github.sh -run
   fi
 
-  if [ "$1" == "" ] || [ "$1" == "api" ]; then
+  if [ "$1" == "all" ] || [ "$1" == "api" ]; then
     echo
     echo "#######################################################"
     echo "### UPDATE BLITZ --> API"
     sudo /home/admin/config.scripts/blitz.web.api.sh update-code
   fi
 
-  if [ "$1" == "" ] || [ "$1" == "web" ]; then
+  if [ "$1" == "all" ] || [ "$1" == "web" ]; then
     echo
     echo "#######################################################"
     echo "### UPDATE BLITZ --> WEBUI"
@@ -164,7 +217,11 @@ function patch() {
 
 # command: off
 function off() {
-  /home/admin/config.scripts/blitz.shutdown.sh
+  echo "Command to power off your RaspiBlitz"
+  confirmMsg off
+  if [ $confirm -eq 1 ]; then
+    /home/admin/config.scripts/blitz.shutdown.sh
+  fi
 }
 
 # command: github
@@ -176,23 +233,35 @@ function github() {
 
 # command: hdmi
 function hdmi() {
-  echo "# SWITCHING VIDEO OUTPUT TO --> HDMI"
-  sudo /home/admin/config.scripts/blitz.display.sh set-display hdmi
-  restart
+  echo "Command to switch video output of your RaspiBlitz to hdmi"
+  confirmMsg hdmi
+  if [ $confirm -eq 1 ]; then
+    echo "# SWITCHING VIDEO OUTPUT TO --> HDMI"
+    sudo /home/admin/config.scripts/blitz.display.sh set-display hdmi
+    restart
+  fi
 }
 
 # command: lcd
 function lcd() {
-  echo "# SWITCHING VIDEO OUTPUT TO --> LCD"
-  sudo /home/admin/config.scripts/blitz.display.sh set-display lcd
-  restart
+  echo "Command to switch video output of your RaspiBlitz to lcd"
+  confirmMsg lcd
+  if [ $confirm -eq 1 ]; then
+    echo "# SWITCHING VIDEO OUTPUT TO --> LCD"
+    sudo /home/admin/config.scripts/blitz.display.sh set-display lcd
+    restart
+  fi
 }
 
 # command: headless
 function headless() {
-  echo "# SWITCHING VIDEO OUTPUT TO --> HEADLESS"
-  sudo /home/admin/config.scripts/blitz.display.sh set-display headless
-  restart
+  echo "Command to switch off any video output of your RaspiBlitz (ssh only)"
+  confirmMsg headless
+  if [ $confirm -eq 1 ]; then
+    echo "# SWITCHING VIDEO OUTPUT TO --> HEADLESS"
+    sudo /home/admin/config.scripts/blitz.display.sh set-display headless
+    restart
+  fi
 }
 
 # command: cache
@@ -309,6 +378,21 @@ function jm() {
   else
     echo "JoinMarket is not installed - to install run:"
     echo "sudo /home/admin/config.scripts/bonus.joinmarket.sh on"
+  fi
+}
+
+# command: manage
+# switch to lndmanage env
+function manage() {
+  if [ $(cat /mnt/hdd/raspiblitz.conf 2>/dev/null | grep -c "lndmanage=on") -eq 1 ]; then
+    cd /home/admin/lndmanage
+    source venv/bin/activate
+    echo "NOTICE: Needs at least one active channel to run without error."
+    echo "to exit (venv) enter ---> deactivate"
+    lndmanage
+  else
+    echo "lndmanage not installed - to install run:"
+    echo "sudo /home/admin/config.scripts/bonus.lndmanage.sh on"
   fi
 }
 
@@ -450,5 +534,60 @@ function bm() {
   else
     echo "BitcoinMinds script is not installed - to install run:"
     echo "sudo /home/admin/config.scripts/bonus.bitcoinminds.sh on"
+  fi
+}
+
+# command: lnproxy
+function lnproxy() {
+  source /mnt/hdd/raspiblitz.conf
+  if [ $# -gt 0 ]; then
+    invoice=$1
+  else
+    echo "Paste the invoice to be wrapped and press enter:"
+    read -r invoice
+  fi
+  if systemctl is-active --quiet tor@default; then
+    if [ -z "${lnproxy_override_tor}" ]; then
+      lnproxy_override_tor="rdq6tvulanl7aqtupmoboyk2z3suzkdwurejwyjyjf4itr3zhxrm2lad.onion/api"
+    fi
+    wrapped=$(torsocks curl -sS http://${lnproxy_override_tor}/${invoice})
+    echo
+    echo "Requesting a wrapped invoice from ${lnproxy_override_tor}"
+  else
+    if [ -z "${lnproxy_override_clearnet}" ]; then
+      lnproxy_override_clearnet="lnproxy.org/api"
+    fi
+    wrapped=$(curl -sS https://${lnproxy_override_clearnet}/${invoice})
+    echo
+    echo "Requesting a wrapped invoice from ${lnproxy_override_clearnet}"
+  fi
+  echo
+  /home/admin/config.scripts/blitz.check-invoice-wrap.py "$1" "$wrapped"
+  echo
+  echo $wrapped
+}
+
+# command: suez
+function suez() {
+  source /mnt/hdd/raspiblitz.conf
+  if [ ${lightning} = 'cl' ] || [ ${lightning} = 'lnd' ]; then
+    if [ ! -f /home/bitcoin/suez/suez ];then
+      /home/admin/config.scripts/bonus.suez.sh on
+    fi
+    source <(/home/admin/config.scripts/network.aliases.sh getvars ${lightning} ${chain}net)
+    cd /home/bitcoin/suez || exit 1
+    clear
+    echo "# Showing the channels of ${lightning} ${chain}net - consider reducing the font size (press CTRL- or CMD-)"
+    if [ ${lightning} = cl ]; then
+      sudo -u bitcoin poetry run /home/bitcoin/suez/suez \
+      --client=c-lightning --client-args=--conf=${CLCONF}
+    elif [ ${lightning} = lnd ]; then
+      sudo -u bitcoin poetry run /home/bitcoin/suez/suez \
+      --client-args=-n=${CHAIN} \
+      --client-args=--rpcserver=localhost:1${L2rpcportmod}009
+    fi
+    cd
+  else
+    echo "# Lightning is ${lightning}"
   fi
 }

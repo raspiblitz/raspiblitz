@@ -1,4 +1,51 @@
-# CHANGES between Releases
+## What's new in Version 1.9.0 of RaspiBlitz?
+
+- New: Automated disk image build for amd64 (VM, laptop, desktop, server) and arm64-rpi (Raspberry Pi) [details](https://github.com/rootzoll/raspiblitz/tree/dev/ci/README.md)
+- New: Fatpack & Minimal sd card builds [details](SECURITY.md#minimal-sd-card-build)
+- New: I2P support for Bitcoin Core (i2pacceptincoming=1) [details](https://github.com/rootzoll/raspiblitz/issues/2413)
+- New: CLN Watchtower (The Eye of Satoshi) [details](https://github.com/talaia-labs/rust-teos/tree/master/watchtower-plugin)
+- New: LNDg v1.6.0 [details](https://github.com/cryptosharks131/lndg)
+- New: Support of X708 UPS HAT [details](https://github.com/rootzoll/raspiblitz/pull/3087)
+- New: BOS Telegram Bot Support (see OPTIONS on LND Balance of Satoshis menu entry)
+- New: LightningTipBot v0.5 [details](https://github.com/LightningTipBot/LightningTipBot)
+- New: ↬lnproxy cli shortcut and server [details](https://github.com/lnproxy)
+- New: Homebanking Interface FinTS/HBCI (experimental) [details](https://github.com/rootzoll/raspiblitz/issues/1186)
+- New on WebUI: Jam (JoinMarket Web UI) v0.1.5 [details](https://github.com/joinmarket-webui/joinmarket-webui/releases/tag/v0.1.5)
+- New on WebUI: Generate/Download Debug Report from Settings
+- Update: Bitcoin Core v24.0.1 [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-24.0.1.md)
+- Update: LND v0.16.2-beta [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.16.2-beta)
+- Update: Core Lightning v23.02.2 [details](https://github.com/ElementsProject/lightning/releases/tag/v23.02.2)
+- Update: C-lightningREST v0.10.2 [details](https://github.com/Ride-The-Lightning/c-lightning-REST/releases/tag/v0.10.2)
+- Update: Electrum Server in Rust (electrs) v0.9.11 [details](https://github.com/romanz/electrs/blob/master/RELEASE-NOTES.md#0911-jan-5-2023)
+- Update: Lightning Terminal v0.9.2-alpha [details](https://github.com/lightninglabs/lightning-terminal/releases/tag/v0.9.2-alpha)
+- Update: RTL v0.13.6 with update option [details](https://github.com/Ride-The-Lightning/RTL/releases/tag/v0.13.6)
+- Update: Thunderhub v0.13.16 with balance sharing disabled [details](https://github.com/apotdevin/thunderhub/releases/tag/v0.13.16)
+- Update: LNbits 0.10.6 [details](https://github.com/lnbits/lnbits/releases/tag/0.10.6)
+- Update: BTCPayServer 1.9.3 (postgres by default with sqlite migration) [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.9.3)
+- Update: ItchySats 0.7.0 [details](https://github.com/itchysats/itchysats/releases/tag/0.7.0)
+- Update: Channel Tools (chantools) v0.10.5 [details](https://github.com/guggero/chantools/releases/tag/v0.10.5)
+- Update: JoinMarket v0.9.9 [details](https://github.com/JoinMarket-Org/joinmarket-clientserver/releases/tag/v0.9.9)
+- Update: JoininBox v0.7.7 [details](https://github.com/openoms/joininbox/releases/tag/v0.7.7)
+- Update: Balance of Satoshis 13.15.0 (bos) [details](https://github.com/alexbosworth/balanceofsatoshis/blob/master/CHANGELOG.md#13150)
+- Update: lndmanage 0.15.0 [details](https://github.com/bitromortac/lndmanage)
+- Update: Circuitbreaker with webUI [details](https://github.com/lightningequipment/circuitbreaker/blob/master/README.md)
+- Update: Suez - Channel Visualization for LND & CL [details](https://github.com/prusnak/suez)
+- Update: Tallycoin Connect v1.8.0 [details](https://github.com/djbooth007/tallycoin_connect/releases/tag/v1.8.0)
+- Update: Fulcrum install script (CLI only) v1.9.1 [details](https://github.com/cculianu/Fulcrum/releases/tag/v1.9.1)
+- Fixed: SCB/Emergency-Backup to USB drive (now also with CLN emergency.recover file)
+- Info: Run RaspiBlitz on Proxmox [details](https://github.com/rootzoll/raspiblitz/tree/dev/alternative.platforms/Proxmox)
+- Info: IP2Tor fix fulmo shop & added new ip2tor.com shop
+- Info: 32GB sdcard is now enforced (after being recommended since v1.5)
+- Info: 'Reindex Blockchain' is now part of 'repair' menu
+
+## What's new in Version 1.8.0c of RaspiBlitz?
+
+- Update: LND v0.15.4 (emergency hotfix release) [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.15.4-beta)
+- Update: Electrum Server in Rust (electrs) v0.9.9 [details](https://github.com/romanz/electrs/blob/master/RELEASE-NOTES.md#099-jul-12-2022)
+
+## What's new in Version 1.8.0b of RaspiBlitz?
+
+- Update: LND v0.15.2 (emergency hotfix release) [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.15.2-beta)
 
 ## What's new in Version 1.8.0 of RaspiBlitz?
 
@@ -19,7 +66,7 @@
 - Update: C-lightningREST v0.7.2 [details](https://github.com/Ride-The-Lightning/c-lightning-REST/releases/tag/v0.7.2)
 - Update: CLBOSS 0.13A [details](https://github.com/ZmnSCPxj/clboss/releases/tag/0.13A)
 - Update: Channel Tools (chantools) v0.10.4 [details](https://github.com/guggero/chantools/blob/master/README.md)
-- Update: Lightning Terminal v0.7.0-alpha with Lightning Node Connect over Tor [details](https://github.com/lightninglabs/lightning-terminal/releases/tag/v0.7.0-alpha)
+- Update: Lightning Terminal v0.9.2-alpha with Lightning Node Connect over Tor [details](https://github.com/lightninglabs/lightning-terminal/releases/tag/v0.9.2-alpha)
 - Update: JoinMarket v0.9.6 [details](https://github.com/JoinMarket-Org/joinmarket-clientserver/releases/tag/v0.9.6)
 - Update: JoininBox v0.6.8 [details](https://github.com/openoms/joininbox/releases/tag/v0.6.8)
 - Update: JoinMarket Web UI (Jam) v0.0.9 (CLI install script) [details](https://github.com/joinmarket-webui/joinmarket-webui/releases/tag/v0.0.9)

@@ -457,11 +457,11 @@ if [ ${isMounted} -eq 0 ]; then
   /home/admin/config.scripts/blitz.datadrive.sh status >> ${logFile}
 
   # determine correct setup phase
-  infoMessage="Please Login for Setup"
+  infoMessage="Please start Setup"
   setupPhase="setup"
   
   if [ "${hddGotMigrationData}" != "" ]; then
-    infoMessage="Please Login for Migration"
+    infoMessage="Please start Migration"
     setupPhase="migration"
     # check if lightning is outdated
     migrationMode="normal"
@@ -480,10 +480,10 @@ if [ ${isMounted} -eq 0 ]; then
     # TODO: improve version/update detection later
     isRecovery=$(echo "${hddRaspiVersion}" | grep -c "${codeVersion}")
     if [ "${isRecovery}" == "1" ]; then
-      infoMessage="Please Login for Recovery"
+      infoMessage="Please start Recovery"
       setupPhase="recovery"
     else
-      infoMessage="Please Login for Update"
+      infoMessage="Please start Update"
       setupPhase="update"
     fi
 
@@ -896,6 +896,20 @@ source <(/home/admin/config.scripts/internet.sh status)
 if [ ${configWifiExists} -eq 1 ]; then
   echo "Making Backup Copy of WIFI config to HDD" >> $logFile
   cp /etc/wpa_supplicant/wpa_supplicant.conf /mnt/hdd/app-data/wpa_supplicant.conf
+fi
+
+# always copy the latest display setting (maybe just in raspiblitz.info) to raspiblitz.conf
+if [ "${displayClass}" != "" ]; then
+  /home/admin/config.scripts/blitz.conf.sh set displayClass ${displayClass}
+fi
+if [ "${displayType}" != "" ]; then
+  /home/admin/config.scripts/blitz.conf.sh set displayType ${displayType}
+fi
+
+# correct blitzapi config value
+blitzApiRunning=$(ls /etc/systemd/system/blitzapi.service 2>/dev/null | grep -c "blitzapi.service")
+if [ "${blitzapi}" == "" ] && [ ${blitzApiRunning} -eq 1 ]; then
+  /home/admin/config.scripts/blitz.conf.sh set blitzapi "on"
 fi
 
 # make sure users have latest credentials (if lnd is on)

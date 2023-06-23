@@ -134,7 +134,6 @@ do
 done
 echo "OK ${network} startup successful " >> ${logFile}
 
-
 ###################################
 # Prepare Lightning
 source /mnt/hdd/raspiblitz.conf
@@ -342,10 +341,6 @@ if [ "${lightning}" == "cl" ]; then
   echo "# switch mainnet config on" >> ${logFile}
   /home/admin/_cache.sh set message "Core Lightning Setup"
   /home/admin/config.scripts/cl.install.sh on mainnet >> ${logFile}
-
-  echo "# switch cln-grpc on" >> ${logFile}
-  /home/admin/config.scripts/cl-plugin.cln-grpc.sh install >> ${logFile}
-  /home/admin/config.scripts/cl-plugin.cln-grpc.sh on >> ${logFile}
 
   # OLD WALLET FROM CLIGHTNING RESCUE
   if [ "${clrescue}" != "" ]; then

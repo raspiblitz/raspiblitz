@@ -1,12 +1,12 @@
 #!/bin/bash
 
 # https://github.com/alexbosworth/balanceofsatoshis/blob/master/package.json#L81
-BOSVERSION="11.50.0"
+BOSVERSION="13.15.0"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "config script to install, update or uninstall Balance of Satoshis"
- echo "bonus.bos.sh [on|off|menu|update]"
+ echo "bonus.bos.sh [on|off|menu|update|telegram]"
  echo "installs the version $BOSVERSION by default"
  exit 1
 fi
@@ -15,15 +15,167 @@ source /mnt/hdd/raspiblitz.conf
 
 # show info menu
 if [ "$1" = "menu" ]; then
-  dialog --title " Info Balance of Satoshis " --msgbox "
+
+  text="
 Balance of Satoshis is a command line tool.
 Type: 'bos' in the command line to switch to the dedicated user.
 Then see 'bos help' for the options. Usage:
 https://github.com/alexbosworth/balanceofsatoshis/blob/master/README.md
-" 10 75
+"
+
+  whiptail --title " Info Balance of Satoshis" --yes-button "OK" --no-button "OPTIONS" --yesno "${text}" 10 75
+  result=$?
+  sudo /home/admin/config.scripts/blitz.display.sh hide
+  echo "option (${result}) - please wait ..."
+
+  # exit when user presses OK to close menu
+  if [ ${result} -eq 0 ]; then
+    exit 0
+  fi
+
+  # Balance of Satoshis OPTIONS menu
+  OPTIONS=()
+  OPTIONS+=(TELEGRAM-SETUP "Setup or renew BoS telegram bot")
+  if [ -e /etc/systemd/system/bos-telegram.service ]; then
+    OPTIONS+=(TELEGRAM-DISABLE "Remove BoS telegram bot service")
+  else
+    OPTIONS+=(TELEGRAM-SERVICE "Install BoS telegram bot as a service")
+  fi
+
+  WIDTH=66
+  CHOICE_HEIGHT=$(("${#OPTIONS[@]}/2+1"))
+  HEIGHT=$((CHOICE_HEIGHT+7))
+  CHOICE=$(dialog --clear \
+                --title " BoS - Options" \
+                --ok-label "Select" \
+                --cancel-label "Back" \
+                --menu "Choose one of the following options:" \
+                $HEIGHT $WIDTH $CHOICE_HEIGHT \
+                "${OPTIONS[@]}" \
+                2>&1 >/dev/tty)
+
+  case $CHOICE in
+        TELEGRAM-DISABLE)
+            clear
+            /home/admin/config.scripts/bonus.bos.sh telegram off
+            echo
+            echo "OK telegram disabled."
+            echo "PRESS ENTER to continue"
+            read key
+            exit 0
+            ;;
+        TELEGRAM-SETUP)
+            clear
+            whiptail --title " First time setup instructions " \
+            --yes-button "Back" \
+            --no-button "Setup" \
+            --yesno "1. Create your telegram bot: https://t.me/botfather\n
+2. BoS asks for HTTP API Token given from telegram.\n
+3. BoS asks for your connection code (Bot command: /connect)\n
+Start BoS telegram setup now?" 14 72
+            if [ "$?" != "1" ]; then
+              exit 0
+            fi
+            sudo bash /home/admin/config.scripts/bonus.bos.sh telegram setup
+            echo
+            echo "OK Balance of Satoshis telegram setup done."
+            echo "PRESS ENTER to continue"
+            read key
+            exit 0
+            ;;
+        TELEGRAM-SERVICE)
+            clear
+            connectMsg="
+Start chatting with the bot for connect code (/connect)\n
+Please enter the CONNECT CODE from your telegram bot
+"
+            connectCode=$(whiptail --inputbox "$connectMsg" 14 62 --title "Connect Telegram Bot" 3>&1 1>&2 2>&3)
+            exitstatus=$?
+            if [ $exitstatus = 0 ]; then
+              connectCode=$(echo "${connectCode}" | cut -d " " -f1)
+            else
+              exit 0
+            fi
+            /home/admin/config.scripts/bonus.bos.sh telegram on ${connectCode}
+            echo
+            echo "OK BoS telegram service active."
+            echo "PRESS ENTER to continue"
+            read key
+            exit 0
+            ;;
+        *)
+            clear
+            exit 0
+  esac
+
   exit 0
 fi
 
+# telegram on
+if [ "$1" = "telegram" ] && [ "$2" = "on" ] && [ "$3" != "" ] ; then
+  sudo rm /etc/systemd/system/bos-telegram.service 2>/dev/null
+
+  # install service
+  echo "*** INSTALL BoS Telegram ***"
+  cat <<EOF | sudo tee /etc/systemd/system/bos-telegram.service >/dev/null
+# systemd unit for bos telegram
+
+[Unit]
+Description=Balance of Satoshis Telegram Bot
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/bos/balanceofsatoshis
+ExecStart=/home/bos/.npm-global/bin/bos telegram --connect $3 -v
+User=bos
+Group=bos
+Restart=always
+TimeoutSec=120
+RestartSec=15
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+  sudo systemctl enable bos-telegram
+  sudo systemctl start bos-telegram
+
+  # check for error
+  isDead=$(sudo systemctl status bos-telegram | grep -c 'inactive (dead)')
+  if [ ${isDead} -eq 1 ]; then
+    echo "error='Service Failed'"
+    exit 0
+  fi
+
+  exit 0
+fi
+
+# telegram off
+if [ "$1" = "telegram" ] && [ "$2" = "off" ]; then
+  echo "*** DISABLE BoS Telegram ***"
+  isInstalled=$(sudo ls /etc/systemd/system/bos-telegram.service 2>/dev/null | grep -c 'bos-telegram.service')
+  if [ ${isInstalled} -eq 1 ]; then
+    sudo systemctl stop bos-telegram
+    sudo systemctl disable bos-telegram
+    sudo rm /etc/systemd/system/bos-telegram.service
+    echo "OK bos-telegram.service removed."
+  else
+    echo "bos-telegram.service is not installed."
+  fi
+
+  echo "result='OK'"
+  exit 0
+fi
+
+# telegram bot setup
+if [ "$1" = "telegram" ] && [ "$2" = "setup" ]; then
+  /home/admin/config.scripts/bonus.bos.sh telegram off
+  echo "*** SETUP BoS Telegram ***"
+  echo "Wait to start 'bos telegram --reset-api-key' (CTRL + C when done) ..."
+  sudo -u bos /home/bos/.npm-global/bin/bos telegram --reset-api-key
+fi
 
 # install
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
@@ -33,14 +185,14 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sleep 3
     exit 1
   fi
-  
+
   echo "*** INSTALL BALANCE OF SATOSHIS ***"
   # check and install NodeJS
   /home/admin/config.scripts/bonus.nodejs.sh on
-  
+
   # create bos user
   sudo adduser --disabled-password --gecos "" bos
-  
+
   echo "# Create data folder on the disk"
   # move old data if present
   sudo mv /home/bos/.bos /mnt/hdd/app-data/ 2>/dev/null
@@ -55,19 +207,19 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo -u bos mkdir /home/bos/.npm-global
   sudo -u bos npm config set prefix '/home/bos/.npm-global'
   sudo bash -c "echo 'PATH=$PATH:/home/bos/.npm-global/bin' >> /home/bos/.bashrc"
-  
+
   # download source code
   sudo -u bos git clone https://github.com/alexbosworth/balanceofsatoshis.git /home/bos/balanceofsatoshis
   cd /home/bos/balanceofsatoshis
-  
+
   # make sure symlink to central app-data directory exists ***"
   sudo rm -rf /home/bos/.lnd  # not a symlink.. delete it silently
   # create symlink
   sudo ln -s "/mnt/hdd/app-data/lnd/" "/home/bos/.lnd"
-  
+
   # add user to group with admin access to lnd
   sudo /usr/sbin/usermod --append --groups lndadmin bos
-  
+
   # install bos
   # check latest version:
   # https://github.com/alexbosworth/balanceofsatoshis/blob/master/package.json#L70

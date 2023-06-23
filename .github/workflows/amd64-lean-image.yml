@@ -1,0 +1,67 @@
+name: amd64-lean-image-build
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "dev", "v1.8", "v1.9" ]
+    paths:
+      - 'build_sdcard.sh'
+      - 'home.admin/bitcoin.install.sh'
+      - 'home.admin/tor.install.sh'
+      - 'home.admin/blitz.i2pd.sh'
+      - 'home.admin/blitz.web.sh'
+      - 'home.admin/blitz.display.sh'
+      - 'ci/amd64/**'
+  pull_request:
+    branches: [ "dev", "v1.8", "v1.9" ]
+    paths:
+      - 'build_sdcard.sh'
+      - 'home.admin/bitcoin.install.sh'
+      - 'home.admin/tor.install.sh'
+      - 'home.admin/blitz.i2pd.sh'
+      - 'home.admin/blitz.web.sh'
+      - 'home.admin/blitz.display.sh'
+      - 'ci/amd64/**'
+
+jobs:
+  amd64-image-build:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set values
+        run: |
+          echo "BUILD_DATE=$(date +"%Y-%m-%d")" >> $GITHUB_ENV
+          echo "BUILD_VERSION=$(git describe --always --tags)" >> $GITHUB_ENV
+
+      - name: Hello RaspiBlitz
+        run: echo "Building the raspiblitz-amd64-debian-image-${{env.BUILD_DATE}}-${{env.BUILD_VERSION}}"
+
+      - name: Run the build script
+        run: |
+          cd ci/amd64
+          bash packer.build.amd64-debian.sh lean $GITHUB_ACTOR $GITHUB_HEAD_REF
+
+      - name: Compute checksum of the raw image
+        run: |
+          cd ci/amd64/builds/raspiblitz-amd64-debian-lean-qemu
+          sha256sum raspiblitz-amd64-debian-lean.qcow2 > raspiblitz-amd64-debian-lean.qcow2.sha256
+
+      - name: Compress image
+        run: |
+          cd ci/amd64/builds/raspiblitz-amd64-debian-lean-qemu
+          gzip -v9 raspiblitz-amd64-debian-lean.qcow2
+
+      - name: Compute checksum of the compressed image
+        run: |
+          cd ci/amd64/builds/raspiblitz-amd64-debian-lean-qemu
+          sha256sum raspiblitz-amd64-debian-lean.qcow2.gz > raspiblitz-amd64-debian-lean.qcow2.gz.sha256
+
+      - name: Upload the image and checksums
+        uses: actions/upload-artifact@v3
+        with:
+          name: raspiblitz-amd64-image-${{env.BUILD_DATE}}-${{env.BUILD_VERSION}}
+          path: |
+            ${{github.workspace}}/ci/amd64/builds/raspiblitz-amd64-debian-lean-qemu/raspiblitz-amd64-debian-lean.qcow2.sha256
+            ${{github.workspace}}/ci/amd64/builds/raspiblitz-amd64-debian-lean-qemu/raspiblitz-amd64-debian-lean.qcow2.gz
+            ${{github.workspace}}/ci/amd64/builds/raspiblitz-amd64-debian-lean-qemu/raspiblitz-amd64-debian-lean.qcow2.gz.sha256

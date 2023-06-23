@@ -146,6 +146,9 @@ else
   echo "WARN: /mnt/hdd/bitcoin/bitcoin.conf not found" >> ${logFile}
 fi
 
+# delete old Tor v1 addresses from config -  see: https://github.com/rootzoll/raspiblitz/issues/3659
+sed -i -E "/^addnode=[a-z0-9]{8,18}\.onion/d" /mnt/hdd/${network}/${network}.conf 2>/dev/null
+
 echo "Version Code: ${codeVersion}" >> ${logFile}
 echo "Version Data: ${raspiBlitzVersion}" >> ${logFile}
 
@@ -169,7 +172,7 @@ systemctl daemon-reload >> ${logFile}
 systemctl enable ${network}d.service >> ${logFile}
 systemctl start ${network}d.service >> ${logFile}
 
-# INSTALL LND on Upadte/Recovery
+# INSTALL LND on Update/Recovery
 if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
 
   # prepare lnd service

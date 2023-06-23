@@ -32,11 +32,23 @@ fi
 ###################
 if [ "$1" = "renew" ]; then
   echo "# *** $0 $1"
-  sudo systemctl stop sshd
-  sudo rm /etc/ssh/ssh_host_*
-  sudo ssh-keygen -A
-  sudo dpkg-reconfigure openssh-server
-  sudo systemctl start sshd
+
+  # stop sshd
+  systemctl stop sshd
+
+  # remove old keys
+  rm /etc/ssh/ssh_host_*
+
+  # generate new keys
+  ssh-keygen -A
+  dpkg-reconfigure openssh-server
+
+  # clear journalctl logs
+  journalctl --rotate
+  journalctl --vacuum-time=1s
+
+  # restart sshd
+  systemctl start sshd
   exit 0
 fi
 
@@ -70,23 +82,15 @@ if [ "$1" = "checkrepair" ]; then
   countKeyFiles=$(ls -la /etc/ssh/ssh_host_* 2>/dev/null | grep -c "/etc/ssh/ssh_host")
   echo "# countKeyFiles(${countKeyFiles})"
   if [ ${countKeyFiles} -lt 8 ]; then
-  
     echo "# DETECTED: MISSING SSHD KEYFILES --> Generating new ones"
-    systemctl stop ssh
-    echo "# ssh-keygen1"
-    cd /etc/ssh
-    ssh-keygen -A
-    systemctl start sshd
-    sleep 3
+    /home/admin/config.scripts/blitz.ssh.sh renew
+  fi
 
-    countKeyFiles=$(ls -la /etc/ssh/ssh_host_* 2>/dev/null | grep -c "/etc/ssh/ssh_host")
-    echo "# countKeyFiles(${countKeyFiles})"
-    if [ ${countKeyFiles} -lt 8 ]; then
-      echo "# FAIL: Was not able to generate new sshd host keys"
-    else
-      echo "# OK: New sshd host keys generated"
-    fi
-    
+  # check logs for "no hostkeys available"
+  noHostKeys=$(journalctl -u sshd | grep -c "no hostkeys available")
+  if [ ${noHostKeys} -gt 0 ]; then
+    echo "# DETECTED: SSHD LOGS 'no hostkeys available' --> Generating new ones"
+    /home/admin/config.scripts/blitz.ssh.sh renew
   fi
 
   # check if SSHD service is NOT running & active

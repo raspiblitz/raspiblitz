@@ -5,7 +5,7 @@ if [ "$EUID" -ne 0 ]; then
   echo "error='run as root'"
   exit 1
 fi
-
+ 
 # This script gets called from a fresh SD card
 # starting up that has an config file on HDD
 # from old RaspiBlitz or manufacturer to
@@ -164,10 +164,15 @@ echo "allow: local web admin HTTPS"
 ufw allow from 10.0.0.0/8 to any port 443 comment 'allow local LAN HTTPS'
 ufw allow from 172.16.0.0/12 to any port 443 comment 'allow local LAN HTTPS'
 ufw allow from 192.168.0.0/16 to any port 443 comment 'allow local LAN HTTPS'
-echo "open firewall for auto nat discover (see issue #129)"
+echo "open firewall for auto nat discover (see issue #129 & #3144)"
 ufw allow proto udp from 10.0.0.0/8 port 1900 to any comment 'allow local LAN SSDP for UPnP discovery'
 ufw allow proto udp from 172.16.0.0/12 port 1900 to any comment 'allow local LAN SSDP for UPnP discovery'
 ufw allow proto udp from 192.168.0.0/16 port 1900 to any comment 'allow local LAN SSDP for UPnP discovery'
+ufw allow proto udp from 192.168.0.0/16 port 5350 to any comment 'Bonjour NAT'
+ufw allow proto udp from 172.16.0.0/12 port 5350 to any comment 'Bonjour NAT'
+ufw allow proto udp from 192.168.0.0/16 port 5351 to any comment 'Bonjour NAT'
+ufw allow proto udp from 172.16.0.0/12 port 5351 to any comment 'Bonjour NAT'
+
 echo "enable lazy firewall"
 ufw --force enable
 echo ""
@@ -211,6 +216,11 @@ else
   echo "Provisioning Bitcoin Core interims update - keep default" >> ${logFile}
 fi
 
+# I2P
+echo "Start i2pd" >> ${logFile}
+/home/admin/_cache.sh set message "i2pd setup"
+/home/admin/config.scripts/blitz.i2pd.sh on >> ${logFile}
+
 # LND INTERIMS UPDATE
 if [ ${#lndInterimsUpdate} -gt 0 ]; then
   /home/admin/_cache.sh set message "Provisioning LND update"
@@ -233,13 +243,27 @@ fi
 if [ ${#clInterimsUpdate} -gt 0 ]; then
   /home/admin/_cache.sh set message "Provisioning CL update"
   if [ "${clInterimsUpdate}" == "reckless" ]; then
-    # recklessly update CL to latest release on GitHub (just for test & dev nodes)
-    echo "Provisioning CL reckless interims update" >> ${logFile}
-    /home/admin/config.scripts/cl.update.sh reckless >> ${logFile}
+    # determine the database version # Examples: 216 is CLN v23.02.2 # 219 is CLN v23.05
+    clDbVersion=$(sqlite3 /mnt/hdd/app-data/.lightning/bitcoin/lightningd.sqlite3 "SELECT version FROM version;")
+    if [ ${#clDbVersion} -eq 0 ]; then
+      echo "Could not determine the CLN database version - using 0" >> ${logFile}
+      clDbVersion=0
+    else
+      echo "The CLN database version is ${clDbVersion}" >> ${logFile}
+    fi
+    if [ ${clDbVersion} -lt 217 ]; then
+      # even if reckless is set - update to the recommended release
+      echo "Provisioning CL verified interims update" >> ${logFile}
+      /home/admin/config.scripts/cl.update.sh verified >> ${logFile}
+    else # 217 or higher
+      # recklessly update CL to latest release on GitHub (just for test & dev nodes)
+      echo "Provisioning CL reckless interims update" >> ${logFile}
+      /home/admin/config.scripts/cl.update.sh reckless >> ${logFile}
+    fi
   else
     # when installing the same sd image - this will re-trigger the secure interims update
-    # if this a update with a newer RaspiBlitz version .. interims update will be ignored
-    # because standard CL version is most more up to date
+    # if this is an update with a newer RaspiBlitz version .. interims update will be ignored
+    # because the standard CL version is up to date
     echo "Provisioning CL verified interims update" >> ${logFile}
     /home/admin/config.scripts/cl.update.sh verified ${clInterimsUpdate} >> ${logFile}
   fi
@@ -305,9 +329,6 @@ if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ] || [ "${tcl}" == "on" ] || 
   # if already installed by fatpack will skip 
   echo "Provisioning Core Lightning Binary - run config script" >> ${logFile}
   /home/admin/config.scripts/cl.install.sh install >> ${logFile} 2>&1
-  echo "Provisioning cl-plugin.cln-grpc.sh - run config script" >> ${logFile}
-  /home/admin/config.scripts/cl-plugin.cln-grpc.sh install >> ${logFile}
-  /home/admin/config.scripts/cl-plugin.cln-grpc.sh on >> ${logFile}
 else
     echo "Provisioning Core Lightning Binary - not active" >> ${logFile}
 fi
@@ -336,6 +357,7 @@ else
     echo "Provisioning CL Signet - not active" >> ${logFile}
 fi
 
+
 # TOR
 if [ "${runBehindTor}" == "on" ]; then
     echo "Provisioning TOR - run config script" >> ${logFile}
@@ -350,8 +372,8 @@ blitzApiInstalled=$(systemctl status blitzapi | grep -c "loaded")
 if [ "${blitzapi}" == "on" ] && [ $blitzApiInstalled -eq 0 ]; then
     echo "Provisioning BlitzAPI - run config script" >> ${logFile}
     /home/admin/_cache.sh set message "Setup BlitzAPI (takes time)"
-    /home/admin/config.scripts/blitz.web.api.sh on >> ${logFile} 2>&1    
-    /home/admin/config.scripts/blitz.web.ui.sh on >> ${logFile} 2>&1   
+    /home/admin/config.scripts/blitz.web.api.sh on DEFAULT >> ${logFile} 2>&1    
+    /home/admin/config.scripts/blitz.web.ui.sh on DEFAULT >> ${logFile} 2>&1   
 else
     echo "Provisioning BlitzAPI - keep default" >> ${logFile}
 fi
@@ -417,6 +439,24 @@ if [ "${clHTTPplugin}" = "on" ]; then
     sudo -u admin /home/admin/config.scripts/cl-plugin.http.sh on >> ${logFile} 2>&1
 else
     echo "Provisioning clHTTPplugin - keep default" >> ${logFile}
+fi
+
+# clboss
+if [ "${clboss}" = "on" ]; then
+    echo "Provisioning clboss - run config script" >> ${logFile}
+    /home/admin/_cache.sh set message "Setup clboss"
+    sudo -u admin /home/admin/config.scripts/cl-plugin.clboss.sh on >> ${logFile} 2>&1
+else
+    echo "Provisioning clboss - keep default" >> ${logFile}
+fi
+
+# clWatchtowerClient
+if [ "${clWatchtowerClient}" = "on" ]; then
+    echo "Provisioning clWatchtowerClient - run config script" >> ${logFile}
+    /home/admin/_cache.sh set message "Setup clWatchtowerClient"
+    sudo -u admin /home/admin/config.scripts/cl-plugin.watchtower-client.sh on >> ${logFile} 2>&1
+else
+    echo "Provisioning clWatchtowerClient - keep default" >> ${logFile}
 fi
 
 # SPARK
@@ -579,13 +619,13 @@ else
   echo "Provisioning JoinMarket - keep default" >> ${logFile}
 fi
 
-# JoinMarket Web UI
-if [ "${joinmarketWebUI}" = "on" ]; then
-  echo "Provisioning JoinMarket Web UI - run config script" >> ${logFile}
-  /home/admin/_cache.sh set message "Setup JoinMarket Web UI"
-  sudo /home/admin/config.scripts/bonus.joinmarket-webui.sh on >> ${logFile} 2>&1
+# Jam
+if [ "${jam}" = "on" ]; then
+  echo "Provisioning Jam - run config script" >> ${logFile}
+  /home/admin/_cache.sh set message "Setup Jam"
+  sudo /home/admin/config.scripts/bonus.jam.sh on >> ${logFile} 2>&1
 else
-  echo "Provisioning JoinMarket Web UI - keep default" >> ${logFile}
+  echo "Provisioning Jam - keep default" >> ${logFile}
 fi
 
 # Specter
@@ -613,6 +653,15 @@ if [ "${bos}" = "on" ]; then
   sudo -u admin /home/admin/config.scripts/bonus.bos.sh on >> ${logFile} 2>&1
 else
   echo "Provisioning Balance of Satoshis - keep default" >> ${logFile}
+fi
+
+# LNPROXY
+if [ "${lnproxy}" = "on" ]; then
+  echo "Provisioning lnproxy - run config script" >> ${logFile}
+  /home/admin/_cache.sh set message "Setup lnproxy"
+  sudo -u admin /home/admin/config.scripts/bonus.lnproxy.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning lnproxy - keep default" >> ${logFile}
 fi
 
 # thunderhub
@@ -687,6 +736,15 @@ else
   echo "Provisioning LIT - keep default" >> ${logFile}
 fi
 
+# lndg
+if [ "${lndg}" = "on" ]; then
+  echo "Provisioning LNDg - run config script" >> ${logFile}
+  /home/admin/_cache.sh set message "Setup LNDg"
+  sudo -u admin /home/admin/config.scripts/bonus.lndg.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning LNDg - keep default" >> ${logFile}
+fi
+
 # sphinxrelay
 if [ "${sphinxrelay}" = "on" ]; then
   echo "Sphinx-Relay - run config script" >> ${logFile}
@@ -757,6 +815,24 @@ if [ "${itchysats}" = "on" ]; then
   sudo -u admin /home/admin/config.scripts/bonus.itchysats.sh on --download >> ${logFile} 2>&1
 else
   echo "ItchySats - keep default" >> ${logFile}
+fi
+
+# LightningTipBot
+if [ "${lightningtipbot}" = "on" ]; then
+  echo "Provisioning LightningTipBot - run config script" >> ${logFile}
+  /home/admin/_cache.sh set message "Setup LightningTipBot"
+  sudo -u admin /home/admin/config.scripts/bonus.lightningtipbot.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning LightningTipBot - keep default" >> ${logFile}
+fi
+
+# FinTS
+if [ "${fints}" = "on" ]; then
+  echo "Provisioning FinTS - run config script" >> ${logFile}
+  /home/admin/_cache.sh set message "Setup FinTS"
+  sudo -u admin /home/admin/config.scripts/bonus.fints.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning FinTS - keep default" >> ${logFile}
 fi
 
 # custom install script from user

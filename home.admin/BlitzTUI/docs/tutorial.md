@@ -25,7 +25,7 @@ Your screen should look similar to this:
 * (3) this should be reflected in the preview Window
 * (4) save your changes
 
-The next step is to transfer (use scp or WinSCP) the updated `home.ui` to the RaspiBlitz.
+The next step is to transfer (use sftp or WinSCP) the updated `home.ui` to the RaspiBlitz.
 
 Login to your RaspiBlitz as **admin** (Password A) and change the directory to `~/raspiblitz/home.admin/BlitzTUI`.
 

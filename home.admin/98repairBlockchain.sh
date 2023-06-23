@@ -29,10 +29,6 @@ elif [ "${CHOICE}" = "RESYNC" ]; then
     echo "rebooting .. (please wait)"
     sudo /home/admin/config.scripts/blitz.shutdown.sh reboot
 
-elif [ "${CHOICE}" = "REINDEX" ]; then
-    echo "Starting REINDEX ..."
-    sudo /home/admin/config.scripts/network.reindex.sh
-
 elif [ "${CHOICE}" = "BACKUP" ]; then
     /home/admin/config.scripts/lnd.compact.sh interactive
     sudo /home/admin/config.scripts/lnd.backup.sh lnd-export-gui

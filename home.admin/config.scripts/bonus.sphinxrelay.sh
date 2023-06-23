@@ -107,7 +107,7 @@ iOS support is native, Android needs Orbot"
     text="${text}\n
 At the moment your Sphinx Relay Server is just available
 within the local network - without transport encryption.
-Local server for test & debug: ${publicURL}/app\n
+Local server for test & debug: ${publicURL}/app#\n
 To enable easy reachability from the outside consider
 adding a IP2TOR Bridge and reconnect:
 MAINMENU > SUBSCRIBE > IP2TOR > SPHINX"
@@ -132,8 +132,7 @@ MAINMENU > SUBSCRIBE > IP2TOR > SPHINX"
 BUT TO MAKE THIS WORK:\n
 It needs an additional Domain with LetsEncrypt certificate for HTTPS: Go MAINMENU > SUBSCRIBE and add LetsEncrypt HTTPS Domain\n
 (or cancel the IP2Tor & just use sphinx within local network)"
-    whiptail --title " Warning " \
-    --msgbox "${text}" 15 72
+    whiptail --title " Warning " --msgbox "${text}" 15 72
     exit 0
   fi
 

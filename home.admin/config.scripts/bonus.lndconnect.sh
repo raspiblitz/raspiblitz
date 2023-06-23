@@ -81,7 +81,7 @@ if [ "${targetWallet}" = "zap-ios" ]; then
   fi
 
 elif [ "${targetWallet}" = "zap-android" ]; then
-  connectInfo="- start the Zap Wallet --> SETUP WALLET\n  or choose new Wallet in app menu\n- scan the QR code \n- confirm host address"
+  connectInfo="- start the Zap/Bitbanana Wallet --> SETUP WALLET\n  or choose new Wallet in app menu\n- scan the QR code \n- confirm host address"
   # ZAP uses gRPC ports
   port="10009"
   if [ ${#ip2torGRPC_IP} -gt 0 ]; then
@@ -98,7 +98,7 @@ elif [ "${targetWallet}" = "zeus-ios" ]; then
     usingIP2TOR="LND-REST-API"
     forceTOR=1
     host=$(sudo cat /mnt/hdd/tor/lndrest8080/hostname)
-    connectInfo="- start the Zeus Wallet --> lndconnect\n- scan the QR code \n- activate 'Tor' option \n- activate 'Certification Verification' option\n- save Node Config"
+    connectInfo="- start the Zeus Wallet --> Scan Node Config\n- scan the QR code \n- save Node Config"
 
 elif [ "${targetWallet}" = "zeus-android" ]; then
 
@@ -106,7 +106,7 @@ elif [ "${targetWallet}" = "zeus-android" ]; then
     usingIP2TOR="LND-REST-API"
     forceTOR=1
     host=$(sudo cat /mnt/hdd/tor/lndrest8080/hostname)
-    connectInfo="- start the Zeus Wallet --> lndconnect\n- scan the QR code \n- activate 'Tor' option \n- activate 'Certification Verification' option\n- save Node Config"
+    connectInfo="- start the Zeus Wallet --> Scan Node Config\n- scan the QR code \n- save Node Config"
 
 elif [ "${targetWallet}" = "sendmany-android" ]; then
 

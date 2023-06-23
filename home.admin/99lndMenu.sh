@@ -22,6 +22,7 @@ OPTIONS+=(PEERING "Connect to a Peer")
 OPTIONS+=(CHANNEL "Open a Channel with Peer")
 OPTIONS+=(SEND "Pay an Invoice/PaymentRequest")
 OPTIONS+=(RECEIVE "Create Invoice/PaymentRequest")
+OPTIONS+=(XPUB "Show OnChain xPubs")
 
 if [ "${chain}" = "main" ]; then
   OPTIONS+=(lnbalance "Detailed Wallet Balances")
@@ -117,7 +118,7 @@ case $CHOICE in
         /home/admin/config.scripts/bonus.suez.sh on
       fi
       cd /home/bitcoin/suez || exit 1 
-      sudo -u bitcoin /home/bitcoin/.local/bin/poetry run ./suez \
+      sudo -u bitcoin poetry run /home/bitcoin/suez/suez \
         --client-args=-n=${CHAIN} \
         --client-args=--rpcserver=localhost:1${L2rpcportmod}009
       echo
@@ -140,4 +141,16 @@ case $CHOICE in
       echo "Press ENTER to return to main menu."
       read key
       ;;
+  XPUB)
+    clear
+    echo "LND wallet xPubs => $lncli_alias wallet accounts list --name default"
+    echo
+    $lncli_alias wallet accounts list --name default | grep --color=never .*,
+    echo
+    echo "EXPERIMENTAL - DONT USE FOR SERIOUS FUND RECEIVING YET"
+    echo "Report your experience to: https://github.com/rootzoll/raspiblitz/issues/2192"
+    echo 
+    echo "Press ENTER to return to main menu."
+    read key
+
 esac

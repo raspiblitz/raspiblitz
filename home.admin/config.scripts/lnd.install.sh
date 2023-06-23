@@ -4,17 +4,17 @@
 ## based on https://raspibolt.github.io/raspibolt/raspibolt_40_lnd.html#lightning-lnd
 ## see LND releases: https://github.com/lightningnetwork/lnd/releases
 ### If you change here - make sure to also change interims version in lnd.update.sh #!
-lndVersion="0.15.0-beta"
+lndVersion="0.16.2-beta"
 
 # olaoluwa
-PGPauthor="roasbeef"
-PGPpkeys="https://keybase.io/roasbeef/pgp_keys.asc"
-PGPcheck="E4D85299674B2D31FAA1892E372CBD7633C61696"
+#PGPauthor="roasbeef"
+#PGPpkeys="https://keybase.io/roasbeef/pgp_keys.asc"
+#PGPcheck="E4D85299674B2D31FAA1892E372CBD7633C61696"
 
 # guggero
-# PGPauthor="guggero"
-# PGPpkeys="https://keybase.io/guggero/pgp_keys.asc"
-# PGPcheck="F4FC70F07310028424EFC20A8E4256593F177720"
+PGPauthor="guggero"
+PGPpkeys="https://keybase.io/guggero/pgp_keys.asc"
+PGPcheck="F4FC70F07310028424EFC20A8E4256593F177720"
 
 # bitconner
 #PGPauthor="bitconner"
@@ -28,7 +28,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ];then
   echo "lnd.install.sh install - called by the build_sdcard.sh"
   echo "lnd.install.sh info [?compareVersion]"
   echo "lnd.install.sh on [mainnet|testnet|signet] [?initwallet]"
-  echo "lnd.install.sh off [mainnet|testnet|signet]"
+  echo "lnd.install.sh off [mainnet|testnet|signet] <purge>"
   echo "lnd.install.sh display-seed [mainnet|testnet|signet] [?delete]"
   echo
   exit 1
@@ -202,7 +202,11 @@ fi
 
 # CHAIN is signet | testnet | mainnet
 CHAIN=$2
-if [ ${CHAIN} = testnet ]||[ ${CHAIN} = mainnet ]||[ ${CHAIN} = signet ];then
+if [ -z "${CHAIN}" ] || [ "$2" = purge ]; then
+  source /mnt/hdd/raspiblitz.conf
+  CHAIN=${chain}net
+fi
+if [ "${CHAIN}" = testnet ]||[ "${CHAIN}" = mainnet ]||[ "${CHAIN}" = signet ];then
   echo "# Configuring the LND instance on ${CHAIN}"
 else
   echo "# ${CHAIN} is not supported"
@@ -478,6 +482,9 @@ alias ${netprefix}lndconf=\"sudo nano /home/bitcoin/.lnd/${netprefix}lnd.conf\"\
     fi
   fi
 
+  # needed to make lnd.newwallet.py work
+  pip install --upgrade google-api-python-client
+
   exit 0
 fi
 
@@ -548,11 +555,22 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # if lnd mainnet was default - remove
   if [ "${CHAIN}" == "mainnet" ] && [ "${lightning}" == "lnd" ]; then
     echo "# LND is REMOVED as default lightning implementation"
-    /home/admin/config.scripts/blitz.conf.sh set lightning ""
+    /home/admin/config.scripts/blitz.conf.sh set lightning "none"
     if [ "${cl}" == "on" ]; then
       echo "# CL is now the new default lightning implementation"
       /home/admin/config.scripts/blitz.conf.sh set lightning "cl"
     fi
+  fi
+
+  # purge
+  if echo "$@" | grep purge; then
+    echo "# Stop on LND all networks and delete lnd binaries"
+    /home/admin/config.scripts/lnd.install.sh off mainnet
+    /home/admin/config.scripts/lnd.install.sh off testnet
+    /home/admin/config.scripts/lnd.install.sh off signet
+    sudo rm /usr/local/bin/lncli
+    sudo rm /usr/local/bin/lnd
+    echo "# Deleted the binaries"
   fi
 
   exit 0

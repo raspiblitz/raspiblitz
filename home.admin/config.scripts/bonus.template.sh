@@ -10,13 +10,17 @@
 # should be same as used in name if script
 APPID="template" # one-word lower-case no-specials
 
+# clean human readable version - will be displayed in UI
+# just numbers only seperated by dots (2 or 0.1 or 1.3.4 or 3.4.5.2)
+VERSION="0.1"
+
 # the git repo to get the source code from for install
 GITHUB_REPO="https://github.com/rootzoll/webapp-template"
 
 # the github tag of the version of the source code to install
 # can also be a commit hash
 # if empty it will use the latest source version
-GITHUB_VERSION="v0.1"
+GITHUB_TAG="v0.1"
 
 # the github signature to verify the author
 # leave GITHUB_SIGN_AUTHOR empty to skip verifying
@@ -36,11 +40,11 @@ PORT_TOR_SSL="12348"
 # to see how you can deal with an app that installs multiple instances depending on
 # lightning implementation or testnets - but this should be OK for a start:
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
-  echo "# bonus.${APPID}.sh status   -> status information (key=value)"
-  echo "# bonus.${APPID}.sh on       -> install the app"
-  echo "# bonus.${APPID}.sh off      -> uninstall the app"
-  echo "# bonus.${APPID}.sh menu     -> SSH menu dialog"
-  echo "# bonus.${APPID}.sh prestart -> will be called by systemd before start"
+  echo "# bonus.${APPID}.sh status    -> status information (key=value)"
+  echo "# bonus.${APPID}.sh on        -> install the app"
+  echo "# bonus.${APPID}.sh off       -> uninstall the app"
+  echo "# bonus.${APPID}.sh menu      -> SSH menu dialog"
+  echo "# bonus.${APPID}.sh prestart  -> will be called by systemd before start"
   exit 1
 fi
 
@@ -76,8 +80,9 @@ fi
 # status information as a key=value list
 if [ "$1" = "status" ]; then
   echo "appID='${APPID}'"
+  echo "version='${VERSION}'"
   echo "githubRepo='${GITHUB_REPO}'"
-  echo "githubVersion='${GITHUB_VERSION}'"
+  echo "githubVersion='${GITHUB_TAG}'"
   echo "githubSignature='${GITHUB_SIGNATURE}'"
   echo "isInstalled=${isInstalled}"
   echo "isRunning=${isRunning}"
@@ -197,10 +202,12 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "# download the source code & verify"
   sudo -u ${APPID} git clone ${GITHUB_REPO} /home/${APPID}/${APPID}
   cd /home/${APPID}/${APPID}
-  sudo -u ${APPID} git reset --hard $GITHUB_VERSION
+  if [ "${GITHUB_TAG}" != "" ]; then
+    sudo -u ${APPID} git reset --hard $GITHUB_TAG
+  fi
   if [ "${GITHUB_SIGN_AUTHOR}" != "" ]; then
     sudo -u ${APPID} /home/admin/config.scripts/blitz.git-verify.sh \
-     "${GITHUB_SIGN_AUTHOR}" "${GITHUB_SIGN_PUBKEYLINK}" "${GITHUB_SIGN_FINGERPRINT}" "${GITHUB_VERSION}" || exit 1
+     "${GITHUB_SIGN_AUTHOR}" "${GITHUB_SIGN_PUBKEYLINK}" "${GITHUB_SIGN_FINGERPRINT}" "${GITHUB_TAG}" || exit 1
   fi
 
   # compile/install the app
@@ -232,6 +239,7 @@ Wants=bitcoind
 After=bitcoind
 
 [Service]
+WorkingDirectory=/home/${APPID}
 Environment=\"HOME_PATH=/mnt/hdd/app-data/${APPID}\"
 ExecStartPre=-/home/admin/config.scripts/bonus.${APPID}.sh prestart
 ExecStart=/usr/bin/node /home/${APPID}/${APPID}/${APPID}
@@ -322,10 +330,17 @@ server {
   # mark app as installed in raspiblitz config
   /home/admin/config.scripts/blitz.conf.sh set ${APPID} "on"
 
-  # start app up thru systemd
+  # enable app up thru systemd
   sudo systemctl enable ${APPID}
-  sudo systemctl start ${APPID}
-  echo "# OK - the ${APPID}.service is now enabled & started"
+  echo "# OK - the ${APPID}.service is now enabled"
+
+  # start app (only when blitz is ready)
+  source <(/home/admin/_cache.sh get state)
+  if [ "${state}" == "ready" ]; then
+    sudo systemctl start ${APPID}
+    echo "# OK - the ${APPID}.service is now started"
+  fi
+
   echo "# Monitor with: sudo journalctl -f -u ${APPID}"
   exit 0
 
@@ -416,6 +431,9 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   echo "# close ports on firewall"
   sudo ufw deny "${PORT_CLEAR}"
   sudo ufw deny "${PORT_SSL}"
+
+  echo "# delete user"
+  sudo userdel -rf ${APPID}
 
   echo "# removing Tor hidden service (if active)"
   /home/admin/config.scripts/tor.onion-service.sh off ${APPID}

@@ -39,6 +39,14 @@ if [ "$1" == "redact" ]; then
   sed -i 's/alias [A-Za-z0-9]* /alias *** /' ${redactFile}
   sed -i 's/public key [a-z0-9]*,/public key *** /' ${redactFile}
   sed -i 's/[a-z0-9][a-z0-9]*.onion/###.onion/' ${redactFile}
+  sed -i 's/alias=[^\r\n]*/alias=****/' ${redactFile}
+  
+  # redact lnbits credentials #3520
+  sed -i 's/api-key=[a-zA-Z0-9]\+/api-key=***/' ${redactFile}
+  sed -i 's/wallet=[a-zA-Z0-9]\+/wallet=***/' ${redactFile}
+  sed -i 's/wal=[a-zA-Z0-9]\+/wal=***/' ${redactFile}
+  sed -i 's/usr=[a-zA-Z0-9]\+/usr=***/' ${redactFile}
+  sed -i 's/user [a-zA-Z0-9]\+/user ***/' ${redactFile}
 
   exit 0
 fi
@@ -68,7 +76,6 @@ if [ ${#chain} -eq 0 ]; then
   fi
 fi
 
-clear
 echo
 echo "***************************************************************"
 echo "* RASPIBLITZ DEBUG LOGS "
@@ -95,12 +102,12 @@ echo "*** BLOCKCHAIN (MAINNET) SYSTEMD STATUS ***"
 sudo systemctl status ${network}d -n2 --no-pager
 echo
 echo "*** LAST BLOCKCHAIN (MAINNET) ERROR LOGS ***"
-echo "sudo journalctl -u ${network}d -b --no-pager -n8"
-sudo journalctl -u ${network}d -b --no-pager -n8
+echo "sudo journalctl -u ${network}d -b --no-pager -n20"
+sudo journalctl -u ${network}d -b --no-pager -n20
 echo
-echo "*** LAST BLOCKCHAIN (MAINNET) 20 INFO LOGS ***"
-echo "sudo tail -n 20 /mnt/hdd/${network}/debug.log"
-sudo tail -n 20 /mnt/hdd/${network}${pathAdd}/debug.log
+echo "*** LAST BLOCKCHAIN (MAINNET) INFO LOGS ***"
+echo "sudo tail -n 50 /mnt/hdd/${network}/debug.log"
+sudo tail -n 50 /mnt/hdd/${network}${pathAdd}/debug.log
 echo
 
 echo "*** LND (MAINNET) SYSTEMD STATUS ***"
@@ -111,9 +118,9 @@ if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ] || [ "${lnd}" == "1" ]; t
   echo "sudo journalctl -u lnd -b --no-pager -n12"
   sudo journalctl -u lnd -b --no-pager -n12
   echo
-  echo "*** LAST 30 LND (MAINNET) INFO LOGS ***"
-  echo "sudo tail -n 30 /mnt/hdd/lnd/logs/${network}/mainnet/lnd.log"
-  sudo tail -n 30 /mnt/hdd/lnd/logs/${network}/mainnet/lnd.log
+  echo "*** LAST LND (MAINNET) INFO LOGS ***"
+  echo "sudo tail -n 50 /mnt/hdd/lnd/logs/${network}/mainnet/lnd.log"
+  sudo tail -n 50 /mnt/hdd/lnd/logs/${network}/mainnet/lnd.log
 else
   echo "- OFF by config -"
 fi
@@ -123,10 +130,10 @@ echo "*** CORE LIGHTNING (MAINNET) SYSTEMD STATUS ***"
 if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ] || [ "${cl}" == "1" ]; then
   sudo systemctl status lightningd -n2 --no-pager
   echo
-  echo "*** LAST 30 CORE LIGHTNING (MAINNET) INFO LOGS ***"
+  echo "*** LAST CORE LIGHTNING (MAINNET) INFO LOGS ***"
   echo "For details also use command --> cllog"
-  echo "sudo tail -n 30 /home/bitcoin/.lightning/${network}/cl.log"
-  sudo tail -n 30 /home/bitcoin/.lightning/${network}/cl.log
+  echo "sudo tail -n 50 /home/bitcoin/.lightning/${network}/cl.log"
+  sudo tail -n 50 /home/bitcoin/.lightning/${network}/cl.log
 else
   echo "- not activated -"
 fi
@@ -141,8 +148,8 @@ if [ "${testnet}" == "on" ] || [ "${testnet}" == "1" ]; then
   sudo journalctl -u t${network}d -b --no-pager -n8
   echo
   echo "*** LAST BLOCKCHAIN (TESTNET) 20 INFO LOGS ***"
-  echo "sudo tail -n 20 /mnt/hdd/${network}/tdebug.log"
-  sudo tail -n 20 /mnt/hdd/${network}/tdebug.log
+  echo "sudo tail -n 20 /mnt/hdd/${network}/testnet3/debug.log"
+  sudo tail -n 20 /mnt/hdd/${network}/testnet3/debug.log
   echo
 else
   echo "- OFF by config -"
@@ -185,8 +192,8 @@ if [ "${signet}" == "on" ] || [ "${signet}" == "1" ]; then
   sudo journalctl -u s${network}d -b --no-pager -n8
   echo
   echo "*** LAST BLOCKCHAIN (SIGNET) 20 INFO LOGS ***"
-  echo "sudo tail -n 20 /mnt/hdd/${network}/sdebug.log"
-  sudo tail -n 20 /mnt/hdd/${network}/sdebug.log
+  echo "sudo tail -n 20 /mnt/hdd/${network}/signet/debug.log"
+  sudo tail -n 20 /mnt/hdd/${network}/signet/debug.log
   echo
 else
   echo "- OFF by config -"
@@ -231,10 +238,11 @@ echo "--> CHECK CONFIG: sudo nginx -t"
 sudo nginx -t 2>&1
 echo
 
+echo "*** BLITZAPI STATUS ***"
+/home/admin/config.scripts/blitz.web.api.sh info
 if [ $(sudo systemctl status blitzapi 2>/dev/null | grep -c "blitzapi.service") -lt 1 ]; then
   echo "- BLITZAPI is not running"
 else
-  echo "*** BLITZAPI SYSTEMD STATUS ***"
   sudo systemctl status blitzapi -n2 --no-pager
   echo
 
@@ -243,6 +251,10 @@ else
   sudo journalctl -u blitzapi -b --no-pager -n20
   echo
 fi
+
+echo "*** BLITZ WebUI STATUS ***"
+/home/admin/config.scripts/blitz.web.ui.sh info
+echo
 
 if [ "${touchscreen}" == "" ] || [ "${touchscreen}" == "0" ] || [ "${touchscreen}" == "off" ]; then
   echo "- TOUCHSCREEN is OFF by config"
@@ -306,6 +318,39 @@ else
   echo "- LIT is OFF by config"
 fi
 
+if [ "${lndg}" == "on" ]; then
+  echo
+  echo "*** LNDg Status ***"
+  sudo /home/admin/config.scripts/bonus.lndg.sh status
+  echo
+  echo "*** LNDg JOBS SYSTEMD STATUS ***"
+  sudo systemctl status jobs-lndg.service -n2 --no-pager
+  echo "sudo tail -n 5 /var/log/lnd_jobs_error.log"
+  sudo tail -n 5 /var/log/lnd_jobs_error.log
+  echo
+  echo "*** LNDg REBALANCER SYSTEMD STATUS ***"
+  sudo systemctl status rebalancer-lndg.service -n2 --no-pager
+  echo "sudo tail -n 5 /var/log/lnd_rebalancer_error.log"
+  sudo tail -n 5 /var/log/lnd_rebalancer_error.log
+  echo
+  echo "*** LNDg HTLC-STREAM SYSTEMD STATUS ***"
+  sudo systemctl status htlc-stream-lndg.service -n2 --no-pager
+  echo "sudo tail -n 5 /var/log/lnd_htlc_stream_error.log"
+  sudo tail -n 5 /var/log/lnd_htlc_stream_error.log
+  echo
+  echo "*** LNDg GUNICORN SERVER SYSTEMD STATUS ***"
+  sudo systemctl status gunicorn.service -n2 --no-pager
+  echo "sudo tail -n 5 /var/log/gunicorn_error.log"
+  sudo tail -n 5 /var/log/gunicorn_error.log 2>/dev/null
+  echo
+  echo "*** LAST 10 LNDg LOGS ***"
+  echo "sudo journalctl -u lndg -b --no-pager -n10"
+  sudo journalctl -u lndg -b --no-pager -n20
+  echo
+else
+  echo "- LNDg is OFF by config"
+fi
+
 if [ "${BTCPayServer}" == "on" ]; then
   echo
   echo "*** LAST 20 BTCPayServer LOGS ***"
@@ -366,10 +411,31 @@ else
   echo "- SPHINX is OFF by config"
 fi
 
+if [ "${fints}" == "on" ]; then  
+  echo
+  echo "*** LAST 20 FINTS LOGS ***"
+  echo "sudo journalctl -u fints -b --no-pager -n20"
+  sudo journalctl -u fints -b --no-pager -n20
+  echo "sudo tail -n 30 /home/fints/log/fuelifints.log"
+  sudo tail -n 30 /home/fints/log/fuelifints.log
+else
+  echo "- FINTS is OFF by config"
+fi
+
 echo
 echo "*** MOUNTED DRIVES ***"
+echo "df -T -h"
 df -T -h
+
 echo
+echo "*** SD CARD HOMES ***"
+echo "sudo du -ahd1 /home"
+sudo du -ahd1 /home
+
+echo
+echo "*** LOGFILES ***"
+sudo journalctl --disk-usage
+sudo du -sh /var/log
 
 echo
 echo "*** DATADRIVE ***"
@@ -395,11 +461,6 @@ echo "*** SYSTEM CACHE STATUS ***"
 /home/admin/_cache.sh "export" system_
 /home/admin/_cache.sh "export" ln_default | grep -v "ln_default_address"
 /home/admin/_cache.sh "export" btc_default | grep -v "btc_default_address"
-
-echo
-echo "*** LOGFILES ***"
-sudo journalctl --disk-usage
-sudo du -sh /var/log
 
 echo
 echo "*** OPTION: SHARE THIS DEBUG OUTPUT ***"
