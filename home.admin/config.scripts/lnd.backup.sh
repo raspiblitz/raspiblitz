@@ -151,22 +151,33 @@ if [ ${mode} = "lnd-export" ]; then
   echo "# OK"
   echo 
 
-  # zip it
-  sudo tar -zcvf ${downloadPath}/lnd-rescue.tar.gz /mnt/hdd/lnd 1>&2
-  sudo chown ${fileowner}:${fileowner} ${downloadPath}/lnd-rescue.tar.gz 1>&2
+  # tar it
+  timestamp=$(date +%Y%m%d%H%M)
+  filename="${downloadPath}/lnd-rescue-${timestamp}"
+  fileext=".tar.gz"
+  sudo tar -zcvf ${filename}${fileext} /mnt/hdd/lnd 1>&2
+  sudo chown ${fileowner}:${fileowner} ${filename}${fileext} 1>&2
 
   # delete old backups
   # rm ${downloadPath}/lnd-rescue-*.tar.gz 2>/dev/null 1>/dev/null
 
-  # name with md5 checksum
-  md5checksum=$(md5sum ${downloadPath}/lnd-rescue.tar.gz | head -n1 | cut -d " " -f1)
-  mv ${downloadPath}/lnd-rescue.tar.gz ${downloadPath}/lnd-rescue-${md5checksum}.tar.gz 1>&2
-  byteSize=$(ls -l ${downloadPath}/lnd-rescue-${md5checksum}.tar.gz | awk '{print $5}')
+  # name with md5 checksum and timestamp
+  md5checksum=$(md5sum ${filename}${fileext} | head -n1 | cut -d " " -f1)
+  mv ${filename}${fileext} ${filename}-${md5checksum}${fileext} 1>&2
+  filename=${filename}-${md5checksum}${fileext} 1>&2
+  byteSize=$(ls -l ${filename} | awk '{print $5}')
 
   # check file size
   if [ ${byteSize} -lt 100 ]; then
     echo "error='backup is empty'"
     exit 1
+  fi
+
+  # copy backup over
+  source <(/home/admin/config.scripts/blitz.backupdevice.sh status)
+  if [ $isMounted == 1 ]; then
+     sudo cp ${filename} /mnt/backup
+     echo "copied to backup device"
   fi
 
   # output result data
