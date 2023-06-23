@@ -183,6 +183,8 @@ THIS WILL DELETE ALL DATA ON THAT DEVICE!
   if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
     # copy SCB over
     cp /mnt/hdd/lnd/data/chain/${network}/${chain}net/channel.backup /mnt/backup/channel.backup 1>&2
+    # copy lnd rescue over
+    cp /home/admin/lnd-rescue*.tar.gz /mnt/backup 1>&2
   fi
   if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ]; then
     # copy ER over
