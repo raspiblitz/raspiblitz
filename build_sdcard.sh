@@ -248,14 +248,8 @@ if [ $(cat /etc/os-release 2>/dev/null | grep -c 'Debian') -gt 0 ]; then
   if [ -f /etc/apt/sources.list.d/raspi.list ] && [ "${cpu}" = aarch64 ]; then
     # default image for RaspberryPi
     baseimage="raspios_arm64"
-  elif [ $(uname -n | grep -c 'rpi') -gt 0 ] && [ "${cpu}" = aarch64 ]; then
-    # experimental: a clean alternative image of debian for RaspberryPi
-    baseimage="debian_rpi64"
-  elif [ "${cpu}" = "arm" ] || [ "${cpu}" = "aarch64" ]; then
-    # experimental: fallback for all debian on arm
-    baseimage="armbian"
   else
-    # experimental: fallback for all debian on other CPUs
+    # experimental: fallback for all to debian
     baseimage="debian"
   fi
 elif [ $(cat /etc/os-release 2>/dev/null | grep -c 'Ubuntu') -gt 0 ]; then
@@ -353,15 +347,23 @@ apt autoremove -y
 
 echo -e "\n*** Python DEFAULT libs & dependencies ***"
 
-if [ -f "/usr/bin/python3.9" ]; then
-  # use python 3.9 if available
-  update-alternatives --install /usr/bin/python python /usr/bin/python3.9 1
-  echo "python calls python3.9"
+if [ -f "/usr/bin/python3.11" ]; then
+  # use python 3.11 if available
+  update-alternatives --install /usr/bin/python python /usr/bin/python3.11 1
+  # keep python backwards compatible
+  ln -s /usr/bin/python3.11 /usr/bin/python3.9
+  ln -s /usr/bin/python3.11 /usr/bin/python3.10
+  echo "python calls python3.11"
 elif [ -f "/usr/bin/python3.10" ]; then
   # use python 3.10 if available
   update-alternatives --install /usr/bin/python python /usr/bin/python3.10 1
+  # keep python backwards compatible
   ln -s /usr/bin/python3.10 /usr/bin/python3.9
   echo "python calls python3.10"
+elif [ -f "/usr/bin/python3.9" ]; then
+  # use python 3.9 if available
+  update-alternatives --install /usr/bin/python python /usr/bin/python3.9 1
+  echo "python calls python3.9"
 elif [ -f "/usr/bin/python3.8" ]; then
   # use python 3.8 if available
   update-alternatives --install /usr/bin/python python /usr/bin/python3.8 1
