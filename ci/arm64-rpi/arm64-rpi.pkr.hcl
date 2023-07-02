@@ -1,13 +1,15 @@
-variable "pack" {}
-variable "github_user" {}
-variable "branch" {}
+variable "pack" { default = "lean" }
+variable "github_user" { default = "raspiblitz" }
+variable "branch" { default = "dev" }
+variable "image_link" { default = "https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2023-05-03/2023-05-03-raspios-bullseye-arm64.img.xz" }
+variable "image_checksum" { default = "e7c0c89db32d457298fbe93195e9d11e3e6b4eb9e0683a7beb1598ea39a0a7aa" }
 
 source "arm" "raspiblitz-arm64-rpi" {
   file_checksum_type    = "sha256"
-  file_checksum         = "c42856ffca096480180b5aff66e1dad2f727fdc33359b24e0d2d49cc7676b576"
+  file_checksum         = var.image_checksum
   file_target_extension = "xz"
   file_unarchive_cmd    = ["xz", "--decompress", "$ARCHIVE_PATH"]
-  file_urls             = ["https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2022-09-26/2022-09-22-raspios-bullseye-arm64.img.xz"]
+  file_urls             = [var.image_link]
   image_build_method    = "resize"
   image_chroot_env      = ["PATH=/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin"]
   image_partitions {
@@ -48,7 +50,7 @@ build {
   }
 
   provisioner "shell" {
-    environment_vars =  [
+    environment_vars = [
       "github_user=${var.github_user}",
       "branch=${var.branch}",
       "pack=${var.pack}"
