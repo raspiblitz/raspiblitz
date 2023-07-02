@@ -49,7 +49,7 @@ if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
 fi
 
 # check if started with sudo
-if [ "$EUID" -ne 0 ]; then 
+if [ "$EUID" -ne 0 ]; then
   echo "error='run as root / may use sudo'"
   exit 1
 fi
@@ -148,13 +148,14 @@ range_argument(){
   fi
 }
 
-apt_install(){
-    apt install -y ${@}
+apt_install() {
+  for package in "$@"; do
+    apt install -y "$package"
     if [ $? -eq 100 ]; then
-        echo "FAIL! apt failed to install needed packages!"
-        echo ${@}
-        exit 1
+      echo "FAIL! apt failed to install package: $package"
+      exit 1
     fi
+  done
 }
 
 general_utils="curl"
@@ -317,7 +318,7 @@ echo -e "\n*** SOFTWARE UPDATE ***"
 # based on https://raspibolt.org/system-configuration.html#system-update
 # htop git curl bash-completion vim jq dphys-swapfile bsdmainutils -> helpers
 # autossh telnet vnstat -> network tools bandwidth monitoring for future statistics
-# parted dosfstolls -> prepare for format data drive
+# parted dosfstools -> prepare for format data drive
 # btrfs-progs -> prepare for BTRFS data drive raid
 # fbi -> prepare for display graphics mode. https://github.com/rootzoll/raspiblitz/pull/334
 # sysbench -> prepare for powertest
