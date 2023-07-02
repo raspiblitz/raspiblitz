@@ -150,7 +150,7 @@ range_argument(){
 
 apt_install() {
   for package in "$@"; do
-    apt install -y "$package"
+    apt install -y -q "$package"
     if [ $? -eq 100 ]; then
       echo "FAIL! apt failed to install package: $package"
       exit 1
@@ -291,7 +291,7 @@ HandleLidSwitchDocked=ignore" | tee /etc/systemd/logind.conf.d/nosuspend.conf
 # https://github.com/rootzoll/raspiblitz/issues/138
 # https://daker.me/2014/10/how-to-fix-perl-warning-setting-locale-failed-in-raspbian.html
 # https://stackoverflow.com/questions/38188762/generate-all-locales-in-a-docker-image
-if [ "${baseimage}" = "raspios_arm64" ]||[ "${baseimage}" = "debian_rpi64" ]||[ "${baseimage}" = "armbian" ]; then
+if [ "${baseimage}" = "raspios_arm64" ] || [ "${baseimage}" = "debian" ]; then
   echo -e "\n*** FIXING LOCALES FOR BUILD ***"
 
   sed -i "s/^# en_US.UTF-8 UTF-8.*/en_US.UTF-8 UTF-8/g" /etc/locale.gen
@@ -340,10 +340,9 @@ general_utils="policykit-1 htop git curl bash-completion vim jq dphys-swapfile b
 # python3-mako --> https://github.com/rootzoll/raspiblitz/issues/3441
 python_dependencies="python3-venv python3-dev python3-wheel python3-jinja2 python3-pip python3-mako"
 server_utils="rsync net-tools xxd netcat-openbsd openssh-client openssh-sftp-server sshpass psmisc ufw sqlite3"
-[ "${baseimage}" = "armbian" ] && armbian_dependencies="armbian-config" # add armbian-config
 [ "${architecture}" = "amd64" ] && amd64_dependencies="network-manager" # add amd64 dependency
 
-apt_install ${general_utils} ${python_dependencies} ${server_utils} ${armbian_dependencies} ${amd64_dependencies}
+apt_install ${general_utils} ${python_dependencies} ${server_utils} ${amd64_dependencies}
 apt clean -y
 apt autoremove -y
 
@@ -398,7 +397,7 @@ if [ "$(compgen -u | grep -c pi)" -eq 0 ];then
 fi
 
 # special prepare when Raspbian
-if [ "${baseimage}" = "raspios_arm64" ] || [ "${baseimage}" = "debian_rpi64" ]; then
+if [ "${baseimage}" = "raspios_arm64" ] || [ "${architecture}" = "aarch64" ] && [ "${baseimage}" = "debian" ]; then
 
   echo -e "\n*** PREPARE RASPBERRY OS VARIANTS ***"
   apt_install raspi-config
@@ -469,8 +468,7 @@ echo "root:raspiblitz" | chpasswd
 echo "pi:raspiblitz" | chpasswd
 
 # prepare auto-start of 00infoLCD.sh script on pi user login (just kicks in if auto-login of pi is activated in HDMI or LCD mode)
-if [ "${baseimage}" = "raspios_arm64" ] || [ "${baseimage}" = "debian_rpi64" ] || \
-   [ "${baseimage}" = "armbian" ] || [ "${baseimage}" = "ubuntu" ]; then
+if [ "${baseimage}" = "raspios_arm64" ] || [ "${baseimage}" = "debian" ] || [ "${baseimage}" = "ubuntu" ]; then
   homeFile=/home/pi/.bashrc
   autostartDone=$(grep -c "automatic start the LCD" $homeFile)
   if [ ${autostartDone} -eq 0 ]; then
@@ -723,7 +721,7 @@ echo "Activating CACHE RAM DISK ... "
 /home/admin/_cache.sh keyvalue on
 
 # *** Wifi, Bluetooth & other RaspberryPi configs ***
-if [ "${baseimage}" = "raspios_arm64"  ] || [ "${baseimage}" = "debian_rpi64" ]; then
+if [ "${baseimage}" = "raspios_arm64"  ] || [ "${architecture}" = "aarch64" ] && [ "${baseimage}" = "debian" ]; then
 
   if [ "${wifi_region}" == "off" ]; then
     echo -e "\n*** DISABLE WIFI ***"
