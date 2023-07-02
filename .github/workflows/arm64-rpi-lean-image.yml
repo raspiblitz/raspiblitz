@@ -1,27 +1,31 @@
 name: arm64-rpi-lean-image-build
 
+concurrency:
+  group: arm64-rpi-lean-image-build-${{ github.head_ref }}
+  cancel-in-progress: true
+
 on:
   workflow_dispatch:
   push:
-    branches: [ "dev", "v1.8", "v1.9" ]
+    branches: ["dev", "v1.8", "v1.9"]
     paths:
-      - 'build_sdcard.sh'
-      - 'home.admin/bitcoin.install.sh'
-      - 'home.admin/tor.install.sh'
-      - 'home.admin/blitz.i2pd.sh'
-      - 'home.admin/blitz.web.sh'
-      - 'home.admin/blitz.display.sh'
-      - 'ci/arm64-rpi/**'
+      - "build_sdcard.sh"
+      - "home.admin/bitcoin.install.sh"
+      - "home.admin/tor.install.sh"
+      - "home.admin/blitz.i2pd.sh"
+      - "home.admin/blitz.web.sh"
+      - "home.admin/blitz.display.sh"
+      - "ci/arm64-rpi/**"
   pull_request:
-    branches: [ "dev", "v1.8", "v1.9" ]
+    branches: ["dev", "v1.8", "v1.9"]
     paths:
-      - 'build_sdcard.sh'
-      - 'home.admin/bitcoin.install.sh'
-      - 'home.admin/tor.install.sh'
-      - 'home.admin/blitz.i2pd.sh'
-      - 'home.admin/blitz.web.sh'
-      - 'home.admin/blitz.display.sh'
-      - 'ci/arm64-rpi/**'
+      - "build_sdcard.sh"
+      - "home.admin/bitcoin.install.sh"
+      - "home.admin/tor.install.sh"
+      - "home.admin/blitz.i2pd.sh"
+      - "home.admin/blitz.web.sh"
+      - "home.admin/blitz.display.sh"
+      - "ci/arm64-rpi/**"
 
 jobs:
   arm64-rpi-image-build:

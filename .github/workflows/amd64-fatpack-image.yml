@@ -1,5 +1,9 @@
 name: amd64-fatpack-image-build
 
+concurrency:
+  group: amd64-fatpack-image-build-${{ github.head_ref }}
+  cancel-in-progress: true
+
 on:
   workflow_dispatch:
   #push:
