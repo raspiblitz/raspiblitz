@@ -4,7 +4,7 @@
 ## based on https://raspibolt.github.io/raspibolt/raspibolt_40_lnd.html#lightning-lnd
 ## see LND releases: https://github.com/lightningnetwork/lnd/releases
 ### If you change here - make sure to also change interims version in lnd.update.sh #!
-lndVersion="0.16.3-beta"
+lndVersion="0.16.4-beta"
 
 # olaoluwa
 #PGPauthor="roasbeef"
