@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # https://github.com/Ride-The-Lightning/c-lightning-REST/releases/
-CLRESTVERSION="v0.10.3"
+CLRESTVERSION="v0.10.5"
 
 # help
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
