@@ -6,6 +6,7 @@
 - Update: Core Lightning v23.05.2 [details](https://github.com/ElementsProject/lightning/releases/tag/v23.05.2)
 - Update: Electrum Server in Rust (electrs) v0.9.14 [details](https://github.com/romanz/electrs/blob/master/RELEASE-NOTES.md#0914-jun-10-2023)
 - Update: Lightning Terminal v0.10.1-alpha [details](https://github.com/lightninglabs/lightning-terminal/releases/tag/v0.10.1-alpha)
+- Update: LNDg v1.7.0 [details](https://github.com/cryptosharks131/lndg)
 - Fix: Homebanking Interface FinTS/HBCI (experimental) [details](https://github.com/rootzoll/raspiblitz/issues/1186)
 
 ## What's new in Version 1.9.0 of RaspiBlitz?
