@@ -1,9 +1,7 @@
 #!/bin/bash
 
 # https://github.com/romanz/electrs/releases
-ELECTRSVERSION="v0.9.11"
-# https://github.com/romanz/electrs/commits/master
-# ELECTRSVERSION="446858ea621416916f84cbce61be92b748e8133e"
+ELECTRSVERSION="v0.9.14"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
