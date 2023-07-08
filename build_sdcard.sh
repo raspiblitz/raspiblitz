@@ -9,8 +9,8 @@
 # setup fresh SD card with image above - login per SSH and run this script:
 ##########################################################################
 
-defaultRepo="rootzoll"
-defaultBranch="v1.9"
+defaultRepo="raspiblitz" #user that hosts a `raspiblitz` repo
+defaultBranch="v1.10"
 
 defaultAPIuser="fusion44"
 defaultAPIrepo="blitz_api"

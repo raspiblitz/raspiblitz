@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # https://github.com/apotdevin/thunderhub
-THUBVERSION="v0.13.16"
+THUBVERSION="v0.13.19"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then

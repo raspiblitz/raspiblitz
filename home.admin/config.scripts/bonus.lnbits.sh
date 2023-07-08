@@ -3,7 +3,7 @@
 # https://github.com/lnbits/lnbits
 
 # https://github.com/lnbits/lnbits/releases
-tag="0.10.6"
+tag="0.10.9"
 VERSION="${tag}"
 
 # command info
@@ -1038,9 +1038,6 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   else
     echo "# keeping data"
   fi
-
-  echo "# Remove the lnbits user"
-  sudo userdel -rf lnbits 2>/dev/null
 
   # setting value in raspi blitz config
   /home/admin/config.scripts/blitz.conf.sh set LNBits "off"
