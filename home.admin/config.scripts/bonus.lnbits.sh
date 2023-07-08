@@ -1039,9 +1039,6 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     echo "# keeping data"
   fi
 
-  echo "# Remove the lnbits user"
-  sudo userdel -rf lnbits 2>/dev/null
-
   # setting value in raspi blitz config
   /home/admin/config.scripts/blitz.conf.sh set LNBits "off"
 
