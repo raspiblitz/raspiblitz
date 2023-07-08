@@ -15,7 +15,7 @@ if [ "$1" = "install" ]; then
 
   # set version (change if update is available)
   # https://bitcoincore.org/en/download/
-  bitcoinVersion="24.0.1"
+  bitcoinVersion="25.0"
 
   # needed to check code signing
   # https://github.com/laanwj
@@ -254,6 +254,7 @@ After=network-online.target
 Wants=network-online.target
 
 [Service]
+Environment='MALLOC_ARENA_MAX=1'
 ExecStart=/usr/local/bin/bitcoind -${CHAIN} \\
                                   -daemonwait \\
                                   -conf=/mnt/hdd/bitcoin/bitcoin.conf \\

@@ -1,5 +1,9 @@
 name: arm64-rpi-fatpack-image-build
 
+concurrency:
+  group: arm64-rpi-fatpack-image-build-${{ github.head_ref }}
+  cancel-in-progress: true
+
 on:
   workflow_dispatch:
   #push:

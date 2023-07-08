@@ -457,11 +457,11 @@ if [ ${isMounted} -eq 0 ]; then
   /home/admin/config.scripts/blitz.datadrive.sh status >> ${logFile}
 
   # determine correct setup phase
-  infoMessage="Please Login for Setup"
+  infoMessage="Please start Setup"
   setupPhase="setup"
   
   if [ "${hddGotMigrationData}" != "" ]; then
-    infoMessage="Please Login for Migration"
+    infoMessage="Please start Migration"
     setupPhase="migration"
     # check if lightning is outdated
     migrationMode="normal"
@@ -480,10 +480,10 @@ if [ ${isMounted} -eq 0 ]; then
     # TODO: improve version/update detection later
     isRecovery=$(echo "${hddRaspiVersion}" | grep -c "${codeVersion}")
     if [ "${isRecovery}" == "1" ]; then
-      infoMessage="Please Login for Recovery"
+      infoMessage="Please start Recovery"
       setupPhase="recovery"
     else
-      infoMessage="Please Login for Update"
+      infoMessage="Please start Update"
       setupPhase="update"
     fi
 

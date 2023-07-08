@@ -202,7 +202,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "# download the source code & verify"
   sudo -u ${APPID} git clone ${GITHUB_REPO} /home/${APPID}/${APPID}
   cd /home/${APPID}/${APPID}
-  sudo -u ${APPID} git reset --hard $GITHUB_TAG
+  if [ "${GITHUB_TAG}" != "" ]; then
+    sudo -u ${APPID} git reset --hard $GITHUB_TAG
+  fi
   if [ "${GITHUB_SIGN_AUTHOR}" != "" ]; then
     sudo -u ${APPID} /home/admin/config.scripts/blitz.git-verify.sh \
      "${GITHUB_SIGN_AUTHOR}" "${GITHUB_SIGN_PUBKEYLINK}" "${GITHUB_SIGN_FINGERPRINT}" "${GITHUB_TAG}" || exit 1
@@ -237,6 +239,7 @@ Wants=bitcoind
 After=bitcoind
 
 [Service]
+WorkingDirectory=/home/${APPID}
 Environment=\"HOME_PATH=/mnt/hdd/app-data/${APPID}\"
 ExecStartPre=-/home/admin/config.scripts/bonus.${APPID}.sh prestart
 ExecStart=/usr/bin/node /home/${APPID}/${APPID}/${APPID}
@@ -327,10 +330,17 @@ server {
   # mark app as installed in raspiblitz config
   /home/admin/config.scripts/blitz.conf.sh set ${APPID} "on"
 
-  # start app up thru systemd
+  # enable app up thru systemd
   sudo systemctl enable ${APPID}
-  sudo systemctl start ${APPID}
-  echo "# OK - the ${APPID}.service is now enabled & started"
+  echo "# OK - the ${APPID}.service is now enabled"
+
+  # start app (only when blitz is ready)
+  source <(/home/admin/_cache.sh get state)
+  if [ "${state}" == "ready" ]; then
+    sudo systemctl start ${APPID}
+    echo "# OK - the ${APPID}.service is now started"
+  fi
+
   echo "# Monitor with: sudo journalctl -f -u ${APPID}"
   exit 0
 
@@ -421,6 +431,9 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   echo "# close ports on firewall"
   sudo ufw deny "${PORT_CLEAR}"
   sudo ufw deny "${PORT_SSL}"
+
+  echo "# delete user"
+  sudo userdel -rf ${APPID}
 
   echo "# removing Tor hidden service (if active)"
   /home/admin/config.scripts/tor.onion-service.sh off ${APPID}

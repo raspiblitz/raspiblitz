@@ -140,7 +140,7 @@ if [ "${command}" == "rotate" ]; then
     sed -i "s/^dtoverlay=.*/dtoverlay=waveshare35a:rotate=90/g" /boot/config.txt
     rm /etc/X11/xorg.conf.d/40-libinput.conf 2>/dev/null
 
-    /home/admin/config.scripts/blitz.conf.sh set lcdrotate 1 2>/dev/null
+    /home/admin/config.scripts/blitz.conf.sh set lcdrotate 1 1>/dev/null 2>/dev/null
     echo "# OK - a restart is needed: sudo shutdown -r now"
 
   # TURN ROTATE OFF
@@ -165,7 +165,7 @@ EOF
     fi
 
     # update raspiblitz conf
-    /home/admin/config.scripts/blitz.conf.sh set lcdrotate 0 2>/dev/null
+    /home/admin/config.scripts/blitz.conf.sh set lcdrotate 0 1>/dev/null 2>/dev/null
     echo "OK - a restart is needed: sudo shutdown -r now"
 
   else

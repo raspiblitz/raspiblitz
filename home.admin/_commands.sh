@@ -150,6 +150,15 @@ function release() {
   fi
 }
 
+# command: fatpack
+function fatpack() {
+  echo "Command to be called only on a fresh stopped minimal build to re-pack installs."
+  confirmMsg fatpack
+  if [ $confirm -eq 1 ]; then
+    sudo /home/admin/config.scripts/blitz.fatpack.sh
+  fi
+}
+
 # command: debug
 function debug() {
   clear
@@ -570,10 +579,10 @@ function suez() {
     clear
     echo "# Showing the channels of ${lightning} ${chain}net - consider reducing the font size (press CTRL- or CMD-)"
     if [ ${lightning} = cl ]; then
-      sudo -u bitcoin poetry run ./suez \
+      sudo -u bitcoin poetry run /home/bitcoin/suez/suez \
       --client=c-lightning --client-args=--conf=${CLCONF}
     elif [ ${lightning} = lnd ]; then
-      sudo -u bitcoin poetry run ./suez \
+      sudo -u bitcoin poetry run /home/bitcoin/suez/suez \
       --client-args=-n=${CHAIN} \
       --client-args=--rpcserver=localhost:1${L2rpcportmod}009
     fi

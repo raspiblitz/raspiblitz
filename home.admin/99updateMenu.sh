@@ -421,10 +421,7 @@ Do you really want to update Bitcoin Core now?
 
       error=""
       warn=""
-      source <(sudo -u admin /home/admin/config.scripts/bitcoin.update.sh tested)
-      if [ ${#error} -gt 0 ]; then
-        whiptail --title "ERROR" --msgbox "${error}" 8 30
-      fi
+      sudo -u admin /home/admin/config.scripts/bitcoin.update.sh tested
       /home/admin/config.scripts/blitz.shutdown.sh reboot
       ;;
     RECKLESS)
@@ -496,9 +493,10 @@ if [ "${lndg}" == "on" ]; then
   OPTIONS+=(LNDG "Update LNDg")
 fi
 
-if [ "${specter}" == "on" ]; then
-  OPTIONS+=(SPECTER "Update Specter Desktop")
-fi
+## Disabled for now until the base image has Python 3.10
+#if [ "${specter}" == "on" ]; then
+#  OPTIONS+=(SPECTER "Update Specter Desktop")
+#fi
 
 if [ "${BTCPayServer}" == "on" ]; then
   OPTIONS+=(BTCPAY "Update BTCPayServer")

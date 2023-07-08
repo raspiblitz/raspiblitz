@@ -175,6 +175,9 @@ fi
 if [ "${lightningtipbot}" == "on" ]; then
   OPTIONS+=(LIGHTNINGTIPBOT "Show LightningTipBot details")
 fi
+if [ "${fints}" == "on" ]; then
+  OPTIONS+=(FINTS "Show FinTS/HBCI details")
+fi
 
 # dont offer to switch to "testnet view for now" - so no wswitch back to mainnet needed
 #if [ ${chain} != "main" ]; then
@@ -346,6 +349,9 @@ case $CHOICE in
             ;;
         CIRCUITBREAKER)
             sudo /home/admin/config.scripts/bonus.circuitbreaker.sh menu
+            ;;
+        FINTS)
+            sudo /home/admin/config.scripts/bonus.fints.sh menu
             ;;
         TESTNETS)
             /home/admin/00parallelChainsMenu.sh

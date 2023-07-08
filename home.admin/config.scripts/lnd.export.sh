@@ -154,10 +154,10 @@ elif [ "${exportType}" = "sftp" ]; then
   echo "The password needed during download is your Password A."
   echo ""
   echo "Macaroons:"
-  echo "sftp bitcoin@${local_ip}:/home/bitcoin/.lnd/data/chain/${network}/${chain}net/\*.macaroon ./"
+  echo "scp bitcoin@${local_ip}:/home/bitcoin/.lnd/data/chain/${network}/${chain}net/\*.macaroon ./"
   echo ""
   echo "TLS Certificate:"
-  echo "sftp bitcoin@${local_ip}:/home/bitcoin/.lnd/tls.cert ./"
+  echo "scp bitcoin@${local_ip}:/home/bitcoin/.lnd/tls.cert ./"
   echo ""
 
 ###########################

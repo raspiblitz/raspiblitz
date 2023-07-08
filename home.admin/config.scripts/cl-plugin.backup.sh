@@ -60,6 +60,11 @@ function install() {
   else
     echo "# The ${plugin} plugin is already loaded"
   fi
+
+  # make sure default virtaulenv is used
+  sudo apt-get remove -y python3-virtualenv 2>/dev/null
+  sudo pip uninstall -y virtualenv 2>/dev/null
+  sudo apt-get install -y python3-virtualenv
 }
 
 if [ "$1" = on ]; then
@@ -84,7 +89,7 @@ if [ "$1" = on ]; then
   # https://github.com/lightningd/plugins/tree/master/backup#setup
   echo "# Initialize the backup plugin"
   cd ${plugindir}/backup/ || exit 1
-  sudo -u bitcoin poetry run ./backup-cli init --lightning-dir /home/bitcoin/.lightning/${CLNETWORK} \
+  sudo -u bitcoin poetry run /home/bitcoin/cl-plugins-available/plugins/backup/backup-cli init --lightning-dir /home/bitcoin/.lightning/${CLNETWORK} \
     file:///home/bitcoin/${netprefix}lightningd.sqlite3.backup
 
   if [ $(crontab -u admin -l | grep -c "backup-compact $CHAIN") -eq 0 ]; then
@@ -129,7 +134,7 @@ then
     sudo systemctl stop ${netprefix}lightningd
 
     # https://github.com/lightningd/plugins/tree/master/backup#restoring-a-backup
-    # poetry run ./backup-cli restore file:///mnt/external/location ~/.lightning/bitcoin/lightningd.sqlite3
+    # poetry run /home/bitcoin/cl-plugins-available/plugins/backup/backup-cli restore file:///mnt/external/location ~/.lightning/bitcoin/lightningd.sqlite3
 
     # make sure to not overwrite old database
     if sudo ls /home/bitcoin/.lightning/${CLNETWORK}/lightningd.sqlite3; then
@@ -144,7 +149,7 @@ then
 
     # restore
     cd ${plugindir}/backup/ || exit 1
-    sudo -u bitcoin poetry run ./backup-cli restore \
+    sudo -u bitcoin poetry run /home/bitcoin/cl-plugins-available/plugins/backup/backup-cli restore \
       file:///home/bitcoin/${netprefix}lightningd.sqlite3.backup \
       /home/bitcoin/.lightning/${CLNETWORK}/lightningd.sqlite3
 
@@ -153,6 +158,7 @@ then
       sudo systemctl start ${netprefix}lightningd
       echo "# Started the ${netprefix}lightningd.service"
     fi
+
   fi
 
 elif

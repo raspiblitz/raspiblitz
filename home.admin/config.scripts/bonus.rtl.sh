@@ -162,7 +162,7 @@ if [ "$1" = "install" ]; then
   # install
   echo "# Running npm install ..."
   export NG_CLI_ANALYTICS=false
-  sudo -u rtl npm install --omit=dev
+  sudo -u rtl npm install --omit=dev --legacy-peer-deps
   if ! [ $? -eq 0 ]; then
     echo "# FAIL - npm install did not run correctly - deleting code and exit"
     sudo rm -r /home/rtl/RTL
@@ -251,7 +251,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   fi
 
   echo "# Updating Firewall"
-  sudo ufw allow ${RTLHTTP} comment "${systemdService} HTTP"
+  sudo ufw allow "${RTLHTTP}" comment "${systemdService} HTTP"
   sudo ufw allow $((RTLHTTP + 1)) comment "${systemdService} HTTPS"
   echo
 
@@ -546,17 +546,17 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # only if 'purge' is an additional parameter (other instances/services might need this)
   if [ "$(echo "$@" | grep -c purge)" -gt 0 ]; then
-    home/admin/config.scripts/bonus.rtl.sh uninstall
+    /home/admin/config.scripts/bonus.rtl.sh uninstall
     if [ $LNTYPE = cl ]; then
-      /home/admin/config.scripts/cl.rest.sh off ${CHAIN}
+      /home/admin/config.scripts/cl.rest.sh off ${CHAIN} purge
     fi
     echo "# Delete all configs"
     sudo rm -rf /mnt/hdd/app-data/rtl
   fi
 
   # close ports on firewall
-  sudo ufw deny "${RTLHTTP}"
-  sudo ufw deny $((RTLHTTP + 1))
+  sudo ufw delete allow "${RTLHTTP}"
+  sudo ufw delete allow $((RTLHTTP + 1))
 
   # needed for API/WebUI as signal that install ran thru
   echo "result='OK'"
@@ -589,7 +589,7 @@ if [ "$1" = "update" ]; then
       # https://github.com/Ride-The-Lightning/RTL#or-update-existing-dependencies
       echo "# Running npm install ..."
       export NG_CLI_ANALYTICS=false
-      sudo -u rtl npm install --omit=dev
+      sudo -u rtl npm install --omit=dev --legacy-peer-deps
       if ! [ $? -eq 0 ]; then
         echo "# FAIL - npm install did not run correctly - deleting code and exit"
         sudo rm -r /home/rtl/RTL
@@ -605,7 +605,7 @@ if [ "$1" = "update" ]; then
     sudo -u rtl git pull -p
     echo "# Running npm install ..."
     export NG_CLI_ANALYTICS=false
-    sudo -u rtl npm install --only=prod --logLevel warn
+    sudo -u rtl npm install --omit=dev --legacy-peer-deps
     if ! [ $? -eq 0 ]; then
       echo "# FAIL - npm install did not run correctly - deleting code and exit"
       sudo rm -r /home/rtl/RTL
@@ -615,7 +615,7 @@ if [ "$1" = "update" ]; then
       echo
     fi
     currentRTLcommit=$(
-      cd /home/rtl/RTL
+      cd /home/rtl/RTL || exit 1
       git describe --tags
     )
     echo "# Updated RTL to $currentRTLcommit"

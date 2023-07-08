@@ -2,7 +2,7 @@
 
 # https://github.com/joinmarket-webui/jam
 
-WEBUI_VERSION=0.1.4
+WEBUI_VERSION=0.1.5
 REPO=joinmarket-webui/jam
 USERNAME=jam
 HOME_DIR=/home/$USERNAME
@@ -358,8 +358,8 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # remove nginx symlinks and configs
   sudo rm -f /etc/nginx/sites-enabled/jam_* 1>&2
   sudo rm -f /etc/nginx/sites-available/jam_* 1>&2
-  sudo rm /var/log/nginx/error_jam.log 1>/dev/null 2/dev/null
-  sudo rm /var/log/nginx/access_jam.log 1>/dev/null 2/dev/null
+  sudo rm /var/log/nginx/error_jam.log 1>/dev/null 2>/dev/null
+  sudo rm /var/log/nginx/access_jam.log 1>/dev/null 2>/dev/null
   sudo nginx -t 1>&2
   sudo systemctl reload nginx 1>&2
 
@@ -375,6 +375,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   /home/admin/config.scripts/blitz.conf.sh delete jam $RASPIBLITZ_CONF
 
   echo "# OK, Jam is removed"
+  echo "result='OK'"
   exit 0
 fi
 

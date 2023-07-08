@@ -21,7 +21,7 @@ cp ./*.proto ./protobuffs
 
 Now copy the generated RPC libs per SFTP over to your Laptop and add them to the `/home/admin/config.scripts/lndlibs`.
 
-sftp -r admin@192.168.X.X:/home/admin/protobuffs ./protobuffs
+scp -r admin@192.168.X.X:/home/admin/protobuffs ./protobuffs
 
 Make sure the first lines (ignore comments) of the `lightning_pb2_grpc.py` look like the following for python3 compatibility:
 ```
@@ -41,6 +41,7 @@ from . import walletunlocker_pb2 as walletunlocker__pb2
 
 Make sure the first lines (ignore comments) of the `walletunlocker_pb2.py` look like the following for python3 compatibility:
 ```
+from google.protobuf.internal import builder as _builder
 from google.protobuf import descriptor as _descriptor
 from google.protobuf import descriptor_pool as _descriptor_pool
 from google.protobuf import message as _message

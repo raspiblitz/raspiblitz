@@ -2,7 +2,7 @@
 # https://lightning.readthedocs.io/
 
 # https://github.com/ElementsProject/lightning/releases
-CLVERSION=v23.02.2
+CLVERSION="v23.05.2"
 
 # install the latest master by using the last commit id
 # https://github.com/ElementsProject/lightning/commit/master
@@ -68,6 +68,12 @@ function buildAndInstallCLbinaries() {
   sudo -u bitcoin git reset --hard
   echo "- Install to /usr/local/bin/"
   sudo make install || exit 1
+
+  # make sure default virtaulenv is used
+  sudo apt-get remove -y python3-virtualenv 2>/dev/null
+  sudo pip uninstall -y virtualenv 2>/dev/null
+  sudo apt-get install -y python3-virtualenv
+
 }
 
 echo "# Running: 'cl.install.sh $*'"
@@ -118,7 +124,7 @@ if [ "$1" = "install" ]; then
   # check if the binary is already installed
   if [ -f /usr/local/bin/lightningd ]; then
     echo "Core Lightning binary already installed - done"
-    exit 1
+    exit 0
   fi
 
   # download and verify the source from github
@@ -234,6 +240,7 @@ if [ "$1" = on ] || [ "$1" = update ] || [ "$1" = testPR ]; then
     echo "# Building from source Core Lightning $currentCLversion"
 
     buildAndInstallCLbinaries
+
   fi
 
   ##########

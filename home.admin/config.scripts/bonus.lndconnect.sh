@@ -81,7 +81,7 @@ if [ "${targetWallet}" = "zap-ios" ]; then
   fi
 
 elif [ "${targetWallet}" = "zap-android" ]; then
-  connectInfo="- start the Zap Wallet --> SETUP WALLET\n  or choose new Wallet in app menu\n- scan the QR code \n- confirm host address"
+  connectInfo="- start the Zap/Bitbanana Wallet --> SETUP WALLET\n  or choose new Wallet in app menu\n- scan the QR code \n- confirm host address"
   # ZAP uses gRPC ports
   port="10009"
   if [ ${#ip2torGRPC_IP} -gt 0 ]; then
