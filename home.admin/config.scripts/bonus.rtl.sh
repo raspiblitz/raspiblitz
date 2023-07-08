@@ -574,16 +574,16 @@ if [ "$1" = "update" ]; then
     # unset $1
     set --
     UPSTREAM=${1:-'@{u}'}
-    LOCAL=$(git rev-parse @)
-    REMOTE=$(git rev-parse "$UPSTREAM")
+    LOCAL=$(sudo -u rtl git rev-parse @)
+    REMOTE=$(sudo -u rtl git rev-parse "$UPSTREAM")
     if [ $LOCAL = $REMOTE ]; then
-      TAG=$(git tag | sort -V | grep -v rc | tail -1)
+      TAG=$(sudo -u rtl git tag | sort -V | grep -v rc | tail -1)
       echo "# You are up-to-date on version" $TAG
     else
       echo "# Pulling latest changes..."
       sudo -u rtl git pull -p
       echo "# Reset to the latest release tag"
-      TAG=$(git tag | sort -V | grep -v rc | tail -1)
+      TAG=$(sudo -u rtl git tag | sort -V | grep -v rc | tail -1)
       sudo -u rtl git reset --hard $TAG
       echo "# updating to the latest"
       # https://github.com/Ride-The-Lightning/RTL#or-update-existing-dependencies
