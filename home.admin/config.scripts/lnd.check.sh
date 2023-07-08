@@ -333,8 +333,8 @@ if [ "$1" == "prestart" ]; then
   fi
 
   # remove erroneous entries
-  sudo sed -i '/^  \[rpcmiddleware\]/d' ${lndConfFile}
-  sudo sed -i '/^  \[\[Rr\]pcmiddleware\]/d' ${lndConfFile}
+  sed -i '/^  \[rpcmiddleware\]/d' ${lndConfFile}
+  sed -i '/^  \[\[Rr\]pcmiddleware\]/d' ${lndConfFile}
 
   # SET/UPDATE rpcmiddleware.enable
   setting ${lndConfFile} ${insertLine} "rpcmiddleware.enable" "true"
