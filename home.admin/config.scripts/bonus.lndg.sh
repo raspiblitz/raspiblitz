@@ -1,7 +1,7 @@
 #!/bin/bash
  
 # https://github.com/cryptosharks131/lndg
-VERSION="1.6.0 "
+VERSION="1.7.0"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
