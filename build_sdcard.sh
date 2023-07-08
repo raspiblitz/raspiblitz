@@ -2,8 +2,8 @@
 
 #########################################################################
 # Build your SD card image based on: 2022-04-04-raspios-bullseye-arm64.img.xz
-# https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2023-02-21/
-# SHA256: 4c963bcd53b9a77fa8235e2dc16785cc7d56372ec83c3090eac9073bd262833f
+# https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2023-05-03/
+# SHA256: e7c0c89db32d457298fbe93195e9d11e3e6b4eb9e0683a7beb1598ea39a0a7aa
 # PGP fingerprint: 8738CD6B956F460C
 # PGP key: https://www.raspberrypi.org/raspberrypi_downloads.gpg.key
 # setup fresh SD card with image above - login per SSH and run this script:
