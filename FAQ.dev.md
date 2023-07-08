@@ -32,7 +32,7 @@ Creating the base minimal sd card:
 * In terminal `ssh pi@[IP-OF-RASPIBLITZ]`
 * Password is `raspberry`
 * Run the following command BUT REPLACE `[BRANCH]` with the branch-string of your latest version
-* To run the minimal pack: `wget --no-cache https://raw.githubusercontent.com/rootzoll/raspiblitz/[BRANCH]/build_sdcard.sh && sudo bash build_sdcard.sh -u rootzoll -b [BRANCH] -f 0 -d headless`
+* To run the minimal pack: `wget --no-cache https://raw.githubusercontent.com/raspiblitz/raspiblitz/[BRANCH]/build_sdcard.sh && sudo bash build_sdcard.sh -u raspiblitz -b [BRANCH] -f 0 -d headless`
 * Monitor/Check outputs for warnings/errors
 * Login new with `ssh admin@[IP-OF-RASPIBLITZ]` (pw: raspiblitz) and run `release`
 * Disconnect WiFi/LAN on build laptop (hardware switch off) and shutdown
@@ -143,7 +143,7 @@ To build a SD card image from another branch than master, you follow the [Build 
 
 For example if you want to make a build from the 'dev' branch you execute the following command:
 
-`wget --no-cache https://raw.githubusercontent.com/rootzoll/raspiblitz/dev/build_sdcard.sh && sudo bash build_sdcard.sh -b dev`
+`wget --no-cache https://raw.githubusercontent.com/raspiblitz/raspiblitz/dev/build_sdcard.sh && sudo bash build_sdcard.sh -b dev`
 
 If you want to see all the optional parameters for building your sd card, just answere `no` on first question and call `sudo bash build_sdcard.sh --help`.
 
@@ -161,7 +161,7 @@ If you are then working in your forked repo and want to update the scripts on yo
 
 ### How can I checkout a new branch from the RaspiBlitz repo to my forked repo?
 
-You need to have your forked repo checked-out on your laptop. There your should see your forked repo as `origin` when you run `git remote -v`. If you don't see an additional `upstream` remote yet, then create it with the following command: `git remote add upstream https://github.com/rootzoll/raspiblitz.git`.
+You need to have your forked repo checked-out on your laptop. There your should see your forked repo as `origin` when you run `git remote -v`. If you don't see an additional `upstream` remote yet, then create it with the following command: `git remote add upstream https://github.com/raspiblitz/raspiblitz.git`.
 
 So, first checkout the new branch named `BRANCH` from the original RaspBlitz repo to your local computer with: `git fetch upstream` and then `git checkout -b BRANCH upstream/BRANCH`.
 
@@ -173,7 +173,7 @@ Once the branch is available and synced between the RaspiBlitz GitHub repo, your
 
 Since v1.5 of RaspiBlitz there has been an easy way thru the SSH menus: Under `MAIN MENU > UPDATE > PATCH` you have the option to change the GitHub repository and and branch to sync with. You change the GitHub Reposity by setting the GitHub username where you forked the Repo.
 
-So for example: If you forked the RaspiBlitz project (rootzoll/raspiblitz) on GitHub and your GitHub project page is now called: https://github.com/raumi75/raspiblitz ... then just change the repo to sync/patch with to your username `raumi75`.
+So for example: If you forked the RaspiBlitz project (raspiblitz/raspiblitz) on GitHub and your GitHub project page is now called: https://github.com/raumi75/raspiblitz ... then just change the repo to sync/patch with to your username `raumi75`.
 
 Now you can use the `Patch/Sync RaspiBlitz with GitHub Repo` to easily keep your RaspiBlitz in sync with your forked repository and develop your own customizations and features.
 
@@ -195,7 +195,7 @@ So your workflow can go like this: You write code on your local computer. Commit
 
 ### How to add an app to the RaspiBlitz?
 
-To add your app you can fork the raspiblitz repo, follow the `/home.admin/config.scripts/bonus.template.sh` script [see code](https://github.com/rootzoll/raspiblitz/blob/dev/home.admin/config.scripts/bonus.template.sh), copy/adapt it, test it on your RaspiBlitz and make a PR back to the main repo.
+To add your app you can fork the raspiblitz repo, follow the `/home.admin/config.scripts/bonus.template.sh` script [see code](https://github.com/raspiblitz/raspiblitz/blob/dev/home.admin/config.scripts/bonus.template.sh), copy/adapt it, test it on your RaspiBlitz and make a PR back to the main repo.
 
 ### How contribute a feature/change from my forked branch back to the RaspiBlitz repo?
 
@@ -239,7 +239,7 @@ just notes so far:
 
 https://brew.sh
 brew install qemu
-https://github.com/rootzoll/raspiblitz/actions --> download amd64-lean image
+https://github.com/raspiblitz/raspiblitz/actions --> download amd64-lean image
 double unzip until `qcow2` file 
 convert `qcow2` to `vdi:
 qemu-img convert -f qcow2 raspiblitz-amd64-debian-lean.qcow2 -O vdi raspiblitz-amd64-debian-lean.vdi
