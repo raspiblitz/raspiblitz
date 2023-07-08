@@ -313,6 +313,19 @@ WantedBy=multi-user.target
     echo "# keystore already exists"
   fi
   
+  # create aeskey.properties if needed
+  aeskeyExists=$(sudo ls /home/fints/aeskey.properties 2>/dev/null | grep -c 'aeskey.properties')
+  if [ ${aeskeyExists} -eq 0 ]; then
+    echo "# creating aeskey.properties"
+    sudo -u fints openssl rand -hex 12 > /home/fints/aeskey.secret
+    sudo -u fints openssl enc -aes-128-cbc -kfile /home/fints/aeskey.secret -P -md sha1 | grep "key=" > /home/fints/aeskey.tmp
+    sudo sed -i "s/key/aes_key/g" /home/fints/aeskey.tmp
+    sudo -u fints tr -d '\n' < /home/fints/aeskey.tmp > /home/fints/aeskey.properties
+    sudo -u fints rm /home/fints/aeskey.tmp
+  else
+    echo "# aeskey.properties already exists"
+  fi
+  
   # config app basics: fuelifints.properties
   sudo -u fints mkdir /home/fints/config
   sudo -u fints cp /home/fints/fints/config/fuelifints.properties /home/fints/config/fuelifints.properties
