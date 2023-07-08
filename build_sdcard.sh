@@ -340,6 +340,7 @@ general_utils="policykit-1 htop git curl bash-completion vim jq dphys-swapfile b
 # python3-mako --> https://github.com/rootzoll/raspiblitz/issues/3441
 python_dependencies="python3-venv python3-dev python3-wheel python3-jinja2 python3-pip python3-mako"
 server_utils="rsync net-tools xxd netcat-openbsd openssh-client openssh-sftp-server sshpass psmisc ufw sqlite3"
+[ "${baseimage}" = "armbian" ] && armbian_dependencies="armbian-config" # add armbian-config
 [ "${architecture}" = "amd64" ] && amd64_dependencies="network-manager" # add amd64 dependency
 
 apt_install ${general_utils} ${python_dependencies} ${server_utils} ${amd64_dependencies}

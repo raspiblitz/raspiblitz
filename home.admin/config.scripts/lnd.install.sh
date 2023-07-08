@@ -350,8 +350,8 @@ PIDFile=/home/bitcoin/.lnd/${netprefix}lnd.pid
 User=bitcoin
 Group=bitcoin
 
-# Try restarting lnd if it stops due to a failure
-Restart=on-failure
+# Try to restart lnd always
+Restart=always
 RestartSec=60
 
 # Type=notify is required for lnd to notify systemd when it is ready
