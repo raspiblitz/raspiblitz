@@ -82,5 +82,5 @@ Reviewers that have demonstrated a deeper commitment and understanding of the pr
 The project leader is the release manager for each RaspiBlitz release.
 
 ## Copyright
-By contributing to this repository, you agree to license your work under the [MIT license](https://github.com/rootzoll/raspiblitz/blob/master/LICENSE).
+By contributing to this repository, you agree to license your work under the [MIT license](https://github.com/raspiblitz/raspiblitz/blob/master/LICENSE).
 Any work contributed where you are not the original author must contain its license header with the original author(s) and source.

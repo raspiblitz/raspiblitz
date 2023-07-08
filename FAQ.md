@@ -121,7 +121,7 @@ The upgrade should be quite simple - you don't need to close any channels:
 
 - It would be best to get a second 16GB or 32GB SD card - but you can also reuse your old one
 - In the SSH main menu of you RaspiBlitz choose `UPDATE` & follow the dialogs until shutdown
-- Download the new RaspiBlitz image file from the [GitHub README](https://github.com/rootzoll/raspiblitz/blob/dev/README.md#installing-the-software)
+- Download the new RaspiBlitz image file from the [GitHub README](https://github.com/raspiblitz/raspiblitz/blob/dev/README.md#installing-the-software)
 - Write the new image to the (new) SD card with a tool like [balena etcher](https://www.balena.io/etcher/)
 - RaspiBlitz with new SD card image - it now goes through a recover/update phase - this may take some time.
 - Once that's done, login once via SSH and use the password raspiblitz and set a new password A (can be your old one or a new one).
@@ -180,7 +180,7 @@ If that doesn't work, try to ping the IP of the RaspiBlitz with `ping [IP-of-Ras
 - Check if you have a VPN running on your laptop - some VPNs block local network
 - Some Routers have `IP Isolation` switched on - not allowing two devices to connect
 
-If you've checked those and SSH is still not working: Join the conversation on [GitHub Issue #420](https://github.com/rootzoll/raspiblitz/issues/420).
+If you've checked those and SSH is still not working: Join the conversation on [GitHub Issue #420](https://github.com/raspiblitz/raspiblitz/issues/420).
 
 ### How to SSH over Tor?
 
@@ -363,7 +363,7 @@ There are two ways of performing a Backup:
 #### 1) Securing your On-Chain- and Channel-Funds during Operation
 
 This is best done by auto backing-up the 'channel.backup' file to a remote location. But it just secures the funds you have in your on-chain wallet or in your channels. On recovery the channels will get closed. For details on how to setup see the README:
-https://github.com/rootzoll/raspiblitz/blob/v1.2/README.md#backup-for-on-chain---channel-funds
+https://github.com/raspiblitz/raspiblitz/blob/v1.2/README.md#backup-for-on-chain---channel-funds
 
 #### 2) Making a complete LND data backup
 
@@ -418,7 +418,7 @@ Then give LND some time to re-scan the blockchain. In the end you will have rest
 If you don't have the `channel.backup` file but only the seed words there is a last hope - read this article:
 https://medium.com/@guggero/did-you-lose-funds-on-the-lightning-network-because-of-a-disk-crash-8971b6a92494
 
-*Important: If you see a zero balance for on-chain funds after restoring from seed ... see details discussed [here](https://github.com/rootzoll/raspiblitz/issues/278) - you might try setup fresh this time with bigger look-ahead number.*
+*Important: If you see a zero balance for on-chain funds after restoring from seed ... see details discussed [here](https://github.com/raspiblitz/raspiblitz/issues/278) - you might try setup fresh this time with bigger look-ahead number.*
 
 
 ### How do I move funds & channels from RaspiBlitz to LND Lightning Desktop App?
@@ -450,7 +450,7 @@ Use the "Change Name/Alias of Node" option in the Lightning - LND Wallet Options
 
 ### How do I change the public port LND/Lightning node is running on?
 
-There is a experimental script you can call from the terminal that will make all changes for you ... see details here: https://github.com/rootzoll/raspiblitz/issues/100#issuecomment-466722712
+There is a experimental script you can call from the terminal that will make all changes for you ... see details here: https://github.com/raspiblitz/raspiblitz/issues/100#issuecomment-466722712
 
 ### How do I solve a "signature mismatch after caveat verification" error?
 
@@ -642,7 +642,7 @@ Yes but you need to change the port number (for example to 9736) on at least one
 
 ### How can I enforce UASP mode for my SSD controller?
 
-By default just tested & selected SSD encasings/controller are running enabled with UASP in RaspiBlitz. UASP brings a speed up for the SSD but also if not well supported by the SSD encasing/controller can lead to system halts. If you know for sure that your SSD encasing/controller is supporting UASP fully you can place a file called `uasp.force` on the sd card boot section after flashing the image with your laptop. See details or report errors on issue [#2488](https://github.com/rootzoll/raspiblitz/issues/2488)
+By default just tested & selected SSD encasings/controller are running enabled with UASP in RaspiBlitz. UASP brings a speed up for the SSD but also if not well supported by the SSD encasing/controller can lead to system halts. If you know for sure that your SSD encasing/controller is supporting UASP fully you can place a file called `uasp.force` on the sd card boot section after flashing the image with your laptop. See details or report errors on issue [#2488](https://github.com/raspiblitz/raspiblitz/issues/2488)
 
 ### I am facing maintenance/emergency mode on boot. How do I fix it?
 
