@@ -1,13 +1,13 @@
-name: arm64-rpi-lean-image-build
+name: arm64-rpi-debian12-lean-image-build
 
 concurrency:
-  group: arm64-rpi-lean-image-build-${{ github.head_ref }}
+  group: arm64-rpi-debian12-lean-image-build-${{ github.head_ref }}
   cancel-in-progress: true
 
 on:
   workflow_dispatch:
   push:
-    branches: ["dev", "v1.8", "v1.9"]
+    branches: ["dev"]
     paths:
       - "build_sdcard.sh"
       - "home.admin/bitcoin.install.sh"
@@ -17,7 +17,7 @@ on:
       - "home.admin/blitz.display.sh"
       - "ci/arm64-rpi/**"
   pull_request:
-    branches: ["dev", "v1.8", "v1.9"]
+    branches: ["dev"]
     paths:
       - "build_sdcard.sh"
       - "home.admin/bitcoin.install.sh"
@@ -44,7 +44,7 @@ jobs:
       - name: Run the build script
         run: |
           cd ci/arm64-rpi
-          bash packer.build.arm64-rpi.sh lean $GITHUB_ACTOR $GITHUB_HEAD_REF
+          bash packer.build.arm64-rpi.sh lean $GITHUB_ACTOR $GITHUB_HEAD_REF "https://raspi.debian.net/tested/20230612_raspi_4_bookworm.img.xz" "a68cd2bfe7831c438d8a5d832803ae0db17afec9f3cd370d9e8748c7b5456283"
 
       - name: Compute checksum of the raw image
         run: |
@@ -64,7 +64,7 @@ jobs:
       - name: Upload the image and checksums
         uses: actions/upload-artifact@v3
         with:
-          name: raspiblitz-arm64-rpi-image-${{ env.BUILD_DATE }}-${{ env.BUILD_VERSION }}
+          name: raspiblitz-arm64-rpi--debian12-image-${{ env.BUILD_DATE }}-${{ env.BUILD_VERSION }}
           path: |
             ${{ github.workspace }}/ci/arm64-rpi/raspiblitz-arm64-rpi-lean.img.sha256
             ${{ github.workspace }}/ci/arm64-rpi/raspiblitz-arm64-rpi-lean.img.gz
