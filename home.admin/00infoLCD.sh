@@ -20,38 +20,6 @@ function usage() {
 verbose=0
 pause=3
 
-# this is used by touchscreen and command 'status'
-# TODO: remove on v1.8
-while [[ "$1" == -* ]]; do
-  case "$1" in
-    -h|--help)
-      usage
-      exit 0
-      ;;
-    -v*)
-      (( verbose += ${#1} - 1 ))
-      ;;
-    --verbose)
-      (( verbose++ ))
-      ;;
-   -p|--pause)
-      shift
-      pause="$1"
-      ;;
-    --)
-      shift
-      break
-      ;;
-    *)
-    echo "Unrecognized option $1."
-    echo ""
-    usage
-    exit 1
-    ;;
-  esac
-  shift
-done
-
 if ! [[ "$pause" =~ ^[[:digit:]]+$ ]]; then
   echo "pause must be a positive integer or 0." >&2
   exit 1
