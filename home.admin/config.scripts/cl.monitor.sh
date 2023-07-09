@@ -241,7 +241,6 @@ if [ "$2" = "wallet" ]; then
   # /usr/local/bin/lightning-cli --lightning-dir=/home/bitcoin/.lightning --conf=/home/bitcoin/.lightning/config listfunds
 
   # get data
-  sudo -u bitcoin
   command="sudo -u bitcoin $lightningcli_alias listfunds"
   cl_listfunds=$(${command} 2>/dev/null)
   if [ "${cl_listfunds}" == "" ]; then
