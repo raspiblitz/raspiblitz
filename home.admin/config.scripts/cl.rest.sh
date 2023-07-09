@@ -142,7 +142,7 @@ if [ "$1" = on ]; then
   if [ ! -f /home/bitcoin/c-lightning-REST/cl-rest.js ]; then
     cd /home/bitcoin || exit 1
     sudo -u bitcoin git clone https://github.com/saubyk/c-lightning-REST
-    cd c-lightning-REST || exit 1
+    cd /home/bitcoin/c-lightning-REST || exit 1
     sudo -u bitcoin git reset --hard $CLRESTVERSION
 
     sudo -u bitcoin /home/admin/config.scripts/blitz.git-verify.sh \
@@ -152,8 +152,11 @@ if [ "$1" = on ]; then
     sudo -u bitcoin npm install
   fi
 
-  cd /home/bitcoin/c-lightning-REST || exit 1
-  sudo -u bitcoin mkdir ${CLNETWORK}
+  # copy clrest to a CLNETWORK subdir to make parallel networks possible
+  sudo -u bitcoin mkdir /home/bitcoin/c-lightning-REST/${CLNETWORK}
+  sudo -u bitcoin cp -r /home/bitcoin/c-lightning-REST/* \
+    /home/bitcoin/c-lightning-REST/${CLNETWORK}
+
   echo "
 {
     \"PORT\": ${portprefix}6100,
@@ -162,12 +165,7 @@ if [ "$1" = on ]; then
     \"EXECMODE\": \"production\",
     \"LNRPCPATH\": \"/home/bitcoin/.lightning/${CLNETWORK}/lightning-rpc\",
     \"RPCCOMMANDS\": [\"*\"]
-}" | sudo -u bitcoin tee ./${CLNETWORK}/cl-rest-config.json
-
-  # copy clrest to a CLNETWORK subdir to make parallel networks possible
-  sudo -u bitcoin mkdir /home/bitcoin/c-lightning-REST/${CLNETWORK}
-  sudo -u bitcoin cp -r /home/bitcoin/c-lightning-REST/* \
-    /home/bitcoin/c-lightning-REST/${CLNETWORK}
+}" | sudo -u bitcoin tee /home/bitcoin/c-lightning-REST/${CLNETWORK}/cl-rest-config.json || exit 1
 
   echo "
 # systemd unit for c-lightning-REST for ${CHAIN}
