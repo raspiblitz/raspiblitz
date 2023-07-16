@@ -163,12 +163,12 @@ The build_sdcard.sh is downloaded from the source branch and built with the opti
 The github workflow is running the job in an ubuntu-22.04 image.
 
 The amd64 image is built with running a qemu VM
-* installs the base OS (Debian 11.5)
+* installs the base OS (Debian)
 * connects with ssh and runs the scripts including the build_sdcard.sh
 
-The arm64-rpi image genenaration runs in Docker in github actions and without Docker locally.
-* the base image (RasberryOS) is started in the qemu VM
-* packer runs the build_sdcard.sh directly in the VM
+The arm64-rpi image generation runs in Docker in github actions and without Docker locally.
+* the base image (RaspberryOS) is started in the qemu VM
+* Packer runs the build_sdcard.sh directly in the VM
 
 After the image is built (and there is no exit with errors) the next steps are:
 * compute checksum of the qemu/raw image
