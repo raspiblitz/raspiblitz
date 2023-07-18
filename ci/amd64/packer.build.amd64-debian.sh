@@ -11,27 +11,11 @@ sudo apt-get install -y packer
 echo -e "\nInstalling qemu..."
 sudo apt-get install -y qemu-system
 
-if [ $# -gt 0 ]; then
-  pack=$1
-else
-  pack=lean
-fi
-
-if [ $# -gt 1 ]; then
-  github_user=$2
-else
-  github_user=rootzoll
-fi
-
-if [ $# -gt 2 ]; then
-  branch=$3
-else
-  branch=dev
-fi
+# set vars
+source ../set_variables.sh
+set_variables "$@"
 
 # Build the image
 echo -e "\nBuilding image..."
 cd debian
-PACKER_LOG=1 packer build \
- --var pack=${pack} --var github_user=${github_user} --var branch=${branch}  \
- -only=qemu amd64-debian.json
+PACKER_LOG=1 packer build ${vars} -only=qemu amd64-debian.json
