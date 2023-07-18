@@ -18,7 +18,7 @@ mode="$1"
 
 # RECOMMENDED UPDATE BY RASPIBLITZ TEAM (just possible once per sd card update)
 # comment will be shown as "BEWARE Info" when option is choosen (can be multiple lines)
-bitcoinVersion="24.1" # example: 22.0 .. keep empty if no newer version as sd card build is available
+bitcoinVersion="" # example: 22.0 .. keep empty if no newer version as sd card build is available
 
 # needed to check code signing
 # https://github.com/emzy.gpg
