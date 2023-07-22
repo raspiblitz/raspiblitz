@@ -44,7 +44,7 @@ Ensure that you put quotes around fingerprints containing spaces if importing wi
 
 # Privacy Protection
 
-When you call `debug` on the command line you get basic system & services logs that can be used if you need to report details for support by other users. There is already a basic redaction of private data (nodeids, IPv4s, .onion-adresses, balances) for that debug report BUT always check the data you post in DMs or public before sending. If you find further private data that needs redaction, please report as an issue on the github repo.  
+When you call `debug` on the command line you get basic system & services logs that can be used if you need to report details for support by other users. There is already a basic redaction of private data (nodeids, IPv4s, .onion-addresses, balances) for that debug report BUT always check the data you post in DMs or public before sending. If you find further private data that needs redaction, please report as an issue on the github repo.  
 
 # Network Security
 
@@ -58,7 +58,7 @@ When you call `debug` on the command line you get basic system & services logs t
 
 * Downloaded binaries and source code is verified with the authors' PGP keys by either:
     * signed shasum files and checking the hash of each downloaded binary
-    * verfying the signature on the source code changes utilising the `git verify-commit` or `git verify-tag` commands
+    * verifying the signature on the source code changes utilising the `git verify-commit` or `git verify-tag` commands
 
 # Physical Security
 
@@ -85,7 +85,7 @@ Some apps (like Fully Noded or JoinMarket) activate the Bitcoin core wallet and 
 
 Please note that there is no perfect backup concept for the funds in your lightning channels yet. We strongly recommend using the `Static Channel Backup` provided by LND and consider off-line location backup of that file to have the best chances to recover Lightning funds in a case of recovering from a disaster.
 
-The C-ligthning lightning.sqlite3 is replicated on the SDcard from the disk in real time. See more details in the [Core Lightning FAQ](FAQ.cl.md#backups)
+The C-lightning lightning.sqlite3 is replicated on the SDcard from the disk in real time. See more details in the [Core Lightning FAQ](FAQ.cl.md#backups)
 
 
 For more practical information on this topic see: [Backup Channel Funds](README.md#backup-for-on-chain---channel-funds)

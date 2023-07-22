@@ -860,7 +860,7 @@ LNbits is a very simple server that sits on top of your Lightning Wallet.
 It can be used together with IP2Tor to provide:
 
 - Lightning Paper Vouchers (Plugin: LNURLw)
-- Merchant Onboarding (Plugin: TPOS)
+- Merchant Onboarding (Plugin: TYPOS)
 
 [![Video Tutorial](pictures/video-vouchers.png)](https://www.youtube.com/watch?v=0Bt3tHULAnw)
 

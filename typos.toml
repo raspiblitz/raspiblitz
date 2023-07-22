@@ -1,0 +1,8 @@
+# curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+# source "$HOME/.cargo/env"
+# cargo install typos-cli
+# typos -c typos.toml
+# typos -c typos.toml -w
+
+[files]
+extend-exclude = ["*.nodes","*.torrent","*.sh","*.py","*.proto","*.conf","*.json","*.service"]
