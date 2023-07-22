@@ -5,4 +5,11 @@
 # typos -c typos.toml -w
 
 [files]
+# skip these files
 extend-exclude = ["*.nodes","*.torrent","*.sh","*.py","*.proto","*.conf","*.json","*.service"]
+
+[default.extend-words]
+# don't correct these false positives
+tpos = "tpos"
+ba = "ba"
+tne = "tne"

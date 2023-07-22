@@ -650,7 +650,7 @@ Will need to pay through a peer which supports the onion messages which means yo
 
 * Output if unsuccessful (the private key is not known):
     ```
-    Could not find any basepoint matching the provided witness programm.
+    Could not find any basepoint matching the provided witness programme.
     Are you sure that the channel used `option_static_remotekey` ?
     *** stack smashing detected ***: terminated
     Aborted
@@ -679,7 +679,7 @@ Will need to pay through a peer which supports the onion messages which means yo
     ```
 * Example output:
     ```
-    KwFvThe98E1t3mTNAr8pKx67eUzFJWdSNPqPSfxMEtrueW7PcQzL
+    KwFvTne98E1t3mTNAr8pKx67eUzFJWdSNPqPSfxMEtrueW7PcQzL
     ```
 * To import to the Electrum Wallet use the `p2wpkh:` prefix:
   <https://bitcoinelectrum.com/importing-your-private-keys-into-electrum/>
@@ -708,7 +708,7 @@ Will need to pay through a peer which supports the onion messages which means yo
 
 ### Experimental update to the latest master
 * this won't persist in case the SDcard is reflashed so will need to manually update again.
-* the command to use the built-in script to update to the lates commit in the default branch is:
+* the command to use the built-in script to update to the last commit in the default branch is:
     ```
     config.scripts/cl.install.sh update
     ```

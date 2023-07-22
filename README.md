@@ -158,7 +158,7 @@ You now have the hardware ready for your RaspiBlitz - whats missing is the softw
 
 ## Downloading the Software
 
-In this section you find the lastest ready-to-use RaspiBlitz sd card images. Basically you just download, write/flash the image file to an sd card and start your RaspberryPi with it - its the same for first install or updating to a newer version. You can choose from two ready-made sd card images below:
+In this section you find the latest ready-to-use RaspiBlitz SDcard images. Basically you just download, write/flash the image file to an sd card and start your RaspberryPi with it - its the same for first install or updating to a newer version. You can choose from two ready-made sd card images below:
 
 ### FATPACK SD Card Image (Beginners - WebUI)
 
@@ -860,7 +860,7 @@ LNbits is a very simple server that sits on top of your Lightning Wallet.
 It can be used together with IP2Tor to provide:
 
 - Lightning Paper Vouchers (Plugin: LNURLw)
-- Merchant Onboarding (Plugin: TYPOS)
+- Merchant Onboarding (Plugin: TPOS)
 
 [![Video Tutorial](pictures/video-vouchers.png)](https://www.youtube.com/watch?v=0Bt3tHULAnw)
 
