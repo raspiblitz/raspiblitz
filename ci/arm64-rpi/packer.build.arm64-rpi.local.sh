@@ -58,11 +58,12 @@ go mod download
 go build || exit 1
 
 # set vars
-source ../set_variables.sh
-set_variables "$@"
+source <(../set_variables.sh "$@")
 
-cp ../arm64-rpi.pkr.hcl ./
-cp ../raspiblitz.sh ./
+cp ../build.arm64-rpi.pkr.hcl ./
+cp ../build.raspiblitz.sh ./
 
 echo -e "\n# Build the image"
-packer build ${vars} arm64-rpi.pkr.hcl
+command="packer build ${vars} build.arm64-rpi.pkr.hcl"
+echo "# Running: $command"
+$command || exit 1

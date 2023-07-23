@@ -44,7 +44,7 @@ jobs:
       - name: Run the build script
         run: |
           cd ci/amd64
-          bash packer.build.amd64-debian.sh lean $GITHUB_ACTOR $GITHUB_HEAD_REF
+          bash packer.build.amd64-debian.sh	--pack lean --github_user $GITHUB_ACTOR --branch $GITHUB_HEAD_REF --preseed_file preseed.cfg --qemu_bios OVMF.fd --desktop gnome
 
       - name: Compute checksum of the raw image
         run: |

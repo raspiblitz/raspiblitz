@@ -1,46 +1,71 @@
+#!/bin/bash
+
 function set_variables() {
-  if [ $# -gt 0 ]; then
-    pack=$1
-  fi
 
-  if [ $# -gt 1 ]; then
-    github_user=$2
-  fi
+  declare -A params
+  while (("$#")); do
+    case "$1" in
+    --pack)
+      params[pack]="$2"
+      shift 2
+      ;;
+    --github_user)
+      params[github_user]="$2"
+      shift 2
+      ;;
+    --branch)
+      params[branch]="$2"
+      shift 2
+      ;;
+    # arm64-rpi
+    --image_link)
+      params[image_link]="$2"
+      shift 2
+      ;;
+    # arm64-rpi
+    --image_checksum)
+      params[image_checksum]="$2"
+      shift 2
+      ;;
+    # amd64
+    # preseed.cfg
+    --preseed_file)
+      params[preseed_file]="$2"
+      shift 2
+      ;;
+    # amd64
+    # OVMF.fd | bios-256k.bin
+    --qemu_bios)
+      params[qemu_bios]="$2"
+      shift 2
+      ;;
+    # amd64
+    # none | gnome
+    --desktop)
+      params[desktop]="$2"
+      shift 2
+      ;;
+    --)
+      shift
+      break
+      ;;
+    *)
+      echo "Error: Invalid argument"
+      exit 1
+      ;;
+    esac
+  done
 
-  if [ $# -gt 2 ]; then
-    branch=$3
-  fi
-
-  if [ $# -gt 4 ]; then
-    image_link="$4"
-    image_checksum="$5"
-  fi
-
-  # Initialize the variables string
+  # Reset the global vars string
   vars=""
+  # Iterate over all keys in the params array
+  for key in "${!params[@]}"; do
+    # If the value for this key is not empty, add it to vars
+    if [ -n "${params[$key]}" ]; then
+      vars="$vars -var $key=${params[$key]}"
+    fi
+  done
 
-  # Add the pack variable if it is defined
-  if [ -n "${pack}" ]; then
-    vars="$vars -var pack=${pack}"
-  fi
+  export vars
 
-  # Add the github_user variable if it is defined
-  if [ -n "${github_user}" ]; then
-    vars="$vars -var github_user=${github_user}"
-  fi
-
-  # Add the branch variable if it is defined
-  if [ -n "${branch}" ]; then
-    vars="$vars -var branch=${branch}"
-  fi
-
-  # Add the image_link variable if it is defined
-  if [ -n "${image_link}" ]; then
-    vars="$vars -var image_link=${image_link}"
-  fi
-
-  # Add the image_checksum variable if it is defined
-  if [ -n "${image_checksum}" ]; then
-    vars="$vars -var image_checksum=${image_checksum}"
-  fi
 }
