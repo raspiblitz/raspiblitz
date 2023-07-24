@@ -10,7 +10,7 @@ amd64-lean-desktop-image:
 	  --github_user $(GITHUB_ACTOR) \
 	  --branch $(GITHUB_HEAD_REF) \
 	  --preseed_file preseed.cfg \
-	  --qemu_bios OVMF.fd \
+	  --boot uefi\
 	  --desktop gnome
 
 	# Compute the checksum of the qemu image
@@ -36,7 +36,7 @@ amd64-lean-server-image:
 	  --github_user $(GITHUB_ACTOR) \
 	  --branch $(GITHUB_HEAD_REF) \
 	  --preseed_file preseed.cfg \
-	  --qemu_bios OVMF.fd \
+	  --boot bios-256k.bin \
 	  --desktop none
 
 	# Compute the checksum of the qemu image
@@ -62,7 +62,7 @@ amd64-fatpack-image:
 	--github_user $(GITHUB_ACTOR) \
 	--branch $(GITHUB_HEAD_REF) \
 	--preseed_file preseed.cfg \
-	--qemu_bios OVMF.fd \
+	--boot uefi\
 	--desktop gnome
 
 	# Compute the checksum of the qemu image

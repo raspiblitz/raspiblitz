@@ -86,12 +86,14 @@ https://github.com/rootzoll/raspiblitz/actions/workflows/amd64-lean-image.yml?qu
 * [Balena Etcher](https://www.balena.io/etcher/) to write the .img to disk
 * dd to write the .img to disk
   ```
-  sudo dd if=./raspiblitz-amd64-debian-lean.img of=/dev/sdk bs=4M status=progress
+  disk="/dev/sdk"
+  sudo dd if=./raspiblitz-amd64-debian-lean.img of=${disk} bs=4M status=progress
   ```
 * qemu-image dd to write the .qcow2 directly to disk
   ```
   sudo apt install -y qemu-utils
-  sudo qemu-img dd if=./raspiblitz-amd64-debian-lean.qcow2 of=/dev/sde bs=4M
+  disk="/dev/sdk"
+  sudo qemu-img dd if=./raspiblitz-amd64-debian-lean.qcow2 of=${disk} bs=4M
   ```
 ### Extend the partition on the new disk (optional)
 * GUI: use GParted to resize the Extended Partition to the full size of the disk
@@ -111,8 +113,9 @@ https://github.com/rootzoll/raspiblitz/actions/workflows/amd64-lean-image.yml?qu
 
   # alternatively download the script
   git clone https://git.scs.carleton.ca/git/extend-lvm.git
-  # run with the disk as the parameter (sdk for example)
-  sudo bash extend-lvm/extend-lvm.sh /dev/sdk
+  # run with the disk as the parameter (/dev/sdk for example)
+  disk="/dev/sdk"
+  sudo bash extend-lvm/extend-lvm.sh ${disk}
   ```
 
 ## The first boot

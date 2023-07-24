@@ -34,9 +34,9 @@ function set_variables() {
       shift 2
       ;;
     # amd64
-    # OVMF.fd | bios-256k.bin
-    --qemu_bios)
-      params[qemu_bios]="$2"
+    # uefi | bios
+    --boot)
+      params[boot]="$2"
       shift 2
       ;;
     # amd64
