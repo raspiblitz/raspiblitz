@@ -7,16 +7,16 @@
 
 - [Local build](#local-build)
   - [Generate an arm64-rpi image](#generate-an-arm64-rpi-image)
-  - [Generate an amd64 image](#generate-an-amd64-image)
+  - [Generate an amd64 image with gnome desktop](#generate-an-amd64-image-with-gnome-desktop)
 - [Images generated in github actions](#images-generated-in-github-actions)
 - [Write the image to a disk connected with USB](#write-the-image-to-a-disk-connected-with-usb)
   - [Convert the qcow2 volume to a raw disk image](#convert-the-qcow2-volume-to-a-raw-disk-image)
   - [Write to a disk connected with USB with Balena Etcher or `dd`](#write-to-a-disk-connected-with-usb-with-balena-etcher-or-dd)
   - [Extend the partition on the new disk (optional)](#extend-the-partition-on-the-new-disk-optional)
 - [The first boot](#the-first-boot)
-  - [fatpack image](#fatpack-image)
+  - [the default image with desktop](#the-default-image-with-desktop)
   - [lean image](#lean-image)
-    - [Add Gnome desktop (optional)](#add-gnome-desktop-optional)
+    - [Add Gnome desktop to the server image (optional)](#add-gnome-desktop-to-the-server-image-optional)
   - [Add wifi (optional)](#add-wifi-optional)
   - [Add wifi driver (optional)](#add-wifi-driver-optional)
 - [Workflow notes](#workflow-notes)
@@ -59,7 +59,7 @@ The workflow locally and in github actions generates a .qcow2 format amd64 image
   * libvirt / virsh / virt-manager (https://virt-manager.org/)
   * written to disk and booted with legacy boot (non-UEFI)
   ```
-  make amd64-lean-desktop-image
+  make amd64-lean-desktop-uefi-image
   ```
 * find the compressed .qcow2 image and sha256 hashes in the `ci/amd64/builds` directory
 
@@ -69,7 +69,7 @@ The workflow locally and in github actions generates a .qcow2 format amd64 image
 https://github.com/rootzoll/raspiblitz/actions/workflows/amd64-lean-image.yml?query=workflow%3Aamd64-lean-image-build+branch%3Adev+is%3Asuccess++
   ```
   # unzip to the same directory
-  unzip raspiblitz-amd64-image-YEAR-MM-DD-COMMITHASH.zip
+  unzip ./raspiblitz-amd64-image-YEAR-MM-DD-COMMITHASH.zip
   ```
 ## Write the image to a disk connected with USB
 ### Convert the qcow2 volume to a raw disk image
@@ -78,7 +78,7 @@ https://github.com/rootzoll/raspiblitz/actions/workflows/amd64-lean-image.yml?qu
   # unzip
   gzip -dkv raspiblitz-amd64-debian-lean.qcow2.gz
   # convert
-  qemu-img convert raspiblitz-amd64-debian-lean.qcow2 raspiblitz-amd64-debian-lean.img
+  qemu-img convert ./raspiblitz-amd64-debian-lean.qcow2 ./raspiblitz-amd64-debian-lean.img
   ```
 
 ### Write to a disk connected with USB with Balena Etcher or `dd`

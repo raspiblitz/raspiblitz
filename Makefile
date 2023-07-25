@@ -2,7 +2,7 @@ SHELL = /bin/bash
 GITHUB_ACTOR = $(shell git remote -v | grep origin | head -1 | cut -d/ -f4)
 GITHUB_HEAD_REF = $(shell git rev-parse --abbrev-ref HEAD)
 
-amd64-lean-desktop-image:
+amd64-lean-desktop-uefi-image:
 	# Run the build script
 	cd ci/amd64 && \
 	bash packer.build.amd64-debian.sh \
@@ -28,7 +28,7 @@ amd64-lean-desktop-image:
 	# List the generated files
 	ls -lah ci/amd64/builds/raspiblitz-amd64-debian-lean-qemu/raspiblitz-amd64-debian-lean.qcow2.*
 
-amd64-lean-server-image:
+amd64-lean-server-legacyboot-image:
 	# Run the build script
 	cd ci/amd64 && \
 	bash packer.build.amd64-debian.sh \
@@ -54,7 +54,7 @@ amd64-lean-server-image:
 	# List the generated files
 	ls -lah ci/amd64/builds/raspiblitz-amd64-debian-lean-qemu/raspiblitz-amd64-debian-lean.qcow2.*
 
-amd64-fatpack-image:
+amd64-fatpack-desktop-uefi-image:
 	# Run the build script
 	cd ci/amd64 && \
 	bash packer.build.amd64-debian.sh \
