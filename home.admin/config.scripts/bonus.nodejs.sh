@@ -7,7 +7,7 @@ VERSION="20"
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "config script to install NodeJs $VERSION"
-  echo "bonus.nodejs.sh [on|off|info]"
+  echo "bonus.nodejs.sh [on|off]"
   exit 1
 fi
 
