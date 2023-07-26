@@ -150,17 +150,16 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   echo "# Compile WebUI"
   /home/admin/config.scripts/bonus.nodejs.sh on
-  source <(/home/admin/config.scripts/bonus.nodejs.sh info)
   if ! npm install --global yarn; then
     echo "error='install yarn failed'"
     exit 1
   fi
-  ${NODEPATH}/yarn config set --home enableTelemetry 0
-  if ! ${NODEPATH}/yarn install; then
+  yarn config set --home enableTelemetry 0
+  if ! yarn install; then
     echo "error='yarn install failed'"
     exit 1
   fi
-  if ! ${NODEPATH}/yarn build; then
+  if ! yarn build; then
     echo "error='yarn build failed'"
     exit 1
   fi
@@ -192,9 +191,8 @@ if [ "$1" = "update" ]; then
     git reset --hard origin/${currentBranch}
     newCommit=$(git rev-parse HEAD)
     if [ "${oldCommit}" != "${newCommit}" ]; then
-      source <(/home/admin/config.scripts/bonus.nodejs.sh info)
-      ${NODEPATH}/yarn install
-      ${NODEPATH}/yarn build
+      yarn install
+      yarn build
       sudo rm -r /var/www/public/* 2>/dev/null
       sudo cp -r /home/blitzapi/blitz_web/build/* /var/www/public
       sudo chown www-data:www-data -R /var/www/public
