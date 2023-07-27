@@ -6,7 +6,8 @@ pinnedVersion="1.13.1"
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "config script to switch Specter Desktop on, off, configure or update"
-  echo "bonus.specter.sh [status|on|off|config|update] <mainnet|testnet|signet>"
+  echo "bonus.specter.sh [status|on|config|update] <mainnet|testnet|signet>"
+  echo "bonus.specter.sh off <--delete-data|--keep-data>"
   echo "installing the version $pinnedVersion by default"
   exit 1
 fi
