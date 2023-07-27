@@ -1,22 +1,21 @@
 <!-- omit in toc -->
 # Automated builds
-* The images are built using the dev branch.
-* The lean image has no Gnome desktop or WebUI installed.
-* Issue: https://github.com/rootzoll/raspiblitz/issues/3053
-* The templates are made using: https://github.com/chef/bento
 
 - [Local build](#local-build)
   - [Generate an arm64-rpi image](#generate-an-arm64-rpi-image)
-  - [Generate an amd64 image with gnome desktop](#generate-an-amd64-image-with-gnome-desktop)
+  - [Generate an amd64 image](#generate-an-amd64-image)
+    - [amd64-lean-desktop-uefi-image](#amd64-lean-desktop-uefi-image)
+    - [amd64-lean-server-legacyboot-image](#amd64-lean-server-legacyboot-image)
 - [Images generated in github actions](#images-generated-in-github-actions)
 - [Write the image to a disk connected with USB](#write-the-image-to-a-disk-connected-with-usb)
   - [Convert the qcow2 volume to a raw disk image](#convert-the-qcow2-volume-to-a-raw-disk-image)
   - [Write to a disk connected with USB with Balena Etcher or `dd`](#write-to-a-disk-connected-with-usb-with-balena-etcher-or-dd)
-  - [Extend the partition on the new disk (optional)](#extend-the-partition-on-the-new-disk-optional)
+  - [Extend the partition on the new disk](#extend-the-partition-on-the-new-disk)
 - [The first boot](#the-first-boot)
-  - [the default image with desktop](#the-default-image-with-desktop)
-  - [lean image](#lean-image)
+  - [Lean image with Gnome desktop (default image)](#lean-image-with-gnome-desktop-default-image)
+  - [Lean server image without Gnome desktop](#lean-server-image-without-gnome-desktop)
     - [Add Gnome desktop to the server image (optional)](#add-gnome-desktop-to-the-server-image-optional)
+  - [Fatpack images](#fatpack-images)
   - [Add wifi (optional)](#add-wifi-optional)
   - [Add wifi driver (optional)](#add-wifi-driver-optional)
 - [Workflow notes](#workflow-notes)
@@ -53,19 +52,30 @@ with the [Makefile](https://github.com/rootzoll/raspiblitz/blob/dev/Makefile)
 * find the image and sha256 hashes in the `ci/arm64-rpi/packer-builder-arm` directory
 * the .img.gz file can be written to an SDcard directly with Balena Etcher
 
-### Generate an amd64 image with gnome desktop
-The workflow locally and in github actions generates a .qcow2 format amd64 image.
+### Generate an amd64 image
+* The workflow locally and in github actions generates a .qcow2 format amd64 image.
+* When finished find the compressed .qcow2 image and sha256 hashes in the `ci/amd64/builds` directory
+
+#### amd64-lean-desktop-uefi-image
+* lean image, Gnome desktop, UEFI boot
 * Tested with
-  * libvirt / virsh / virt-manager (https://virt-manager.org/)
-  * written to disk and booted with legacy boot (non-UEFI)
+  * written to disk and booted with UEFI
   ```
   make amd64-lean-desktop-uefi-image
   ```
-* find the compressed .qcow2 image and sha256 hashes in the `ci/amd64/builds` directory
+
+#### amd64-lean-server-legacyboot-image
+* lean image, no desktop (cli only), legacy boot for old computers
+* Tested with
+  * libvirt / virsh / virt-manager (https://virt-manager.org/)
+  * written to disk and booted with legacy boot (non-UEFI / CSM mode)
+  ```
+  amd64-lean-server-legacyboot-image
+  ```
 
 ## Images generated in github actions
 * To see the downloadable artifacts will need to log in to GitHub
-* Find the latest successful builds for amd64 using the dev branch at:  
+* Find the latest successful build of the default amd64 image:
 https://github.com/rootzoll/raspiblitz/actions/workflows/amd64-lean-image.yml?query=workflow%3Aamd64-lean-image-build+branch%3Adev+is%3Asuccess++
   ```
   # unzip to the same directory
@@ -95,7 +105,11 @@ https://github.com/rootzoll/raspiblitz/actions/workflows/amd64-lean-image.yml?qu
   disk="/dev/sdk"
   sudo qemu-img dd if=./raspiblitz-amd64-debian-lean.qcow2 of=${disk} bs=4M
   ```
-### Extend the partition on the new disk (optional)
+
+### Extend the partition on the new disk
+<details>
+<summary>(optional)</summary>
+
 * GUI: use GParted to resize the Extended Partition to the full size of the disk
   ```
   # install
@@ -118,21 +132,20 @@ https://github.com/rootzoll/raspiblitz/actions/workflows/amd64-lean-image.yml?qu
   sudo bash extend-lvm/extend-lvm.sh ${disk}
   ```
 
+</details>
+
 ## The first boot
-### the default image with desktop
+### Lean image with Gnome desktop (default image)
 * log in on screen:
   * username: `admin`
   * password: `raspiblitz`
-
 * start a terminal for guidance
 
-* alternatively open a browser and go to:
-  * http://localhost
-* can also open the WebUI on another computer
-  * Find the the RaspiBlitz_IP in your router dashboard, in the terminal prompt or with `hostname -I`
-  * open: http://RaspiBlitz_IP
+* connect with ssh over the LAN
+  * username: `admin`
+  * password: `raspiblitz` 
 
-### lean image
+### Lean server image without Gnome desktop
 * press any key to get to a login prompt after the splash screen
   * username: `admin`
   * password: `raspiblitz`
@@ -143,6 +156,13 @@ https://github.com/rootzoll/raspiblitz/actions/workflows/amd64-lean-image.yml?qu
   apt install gnome
   systemctl start gdm
   ```
+
+### Fatpack images
+* can open a browser and go to:
+  * http://localhost
+* can also open the WebUI on another computer
+  * Find the the RaspiBlitz_IP in your router dashboard, in the terminal prompt or with `hostname -I`
+  * open: http://RaspiBlitz_IP
 
 ### Add wifi (optional)
 * if the wifi driver is included in the FOSS Debian distro
