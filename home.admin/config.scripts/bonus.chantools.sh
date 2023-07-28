@@ -5,10 +5,10 @@
 # see https://github.com/guggero/chantools/releases
 
 lndVersion=$(lncli -v | cut -d " " -f 3 | cut -d"." -f2)
-if [ $lndVersion -eq 15 ]; then
-  pinnedVersion="0.10.5"
+if [ $lndVersion -gt 15 ]; then
+  pinnedVersion="0.11.3"
 else
-  echo "# LND not installed or a version not tested with chantools"
+  echo "# LND is not installed or is an outdated version (v0.15.x or lower)"
   lncli -v
   exit 1
 fi
