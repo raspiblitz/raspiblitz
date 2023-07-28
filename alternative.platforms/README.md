@@ -87,7 +87,7 @@ These not need installation, password: `osboxes.org`
     sudo bash build_sdcard.sh -f true -b dev -d headless -t false -w off
     # Options:
     #   -h, --help                               this help info
-    #   -i, --interaction [0|1]                  interaction before proceeding with exection (default: 1)
+    #   -i, --interaction [0|1]                  interaction before proceeding with execution (default: 1)
     #   -f, --fatpack [0|1]                      fatpack mode (default: 1)
     #   -u, --github-user [rootzoll|other]       github user to be checked from the repo (default: rootzoll)
     #   -b, --branch [v1.7|v1.8]                 branch to be built on (default: v1.7)
@@ -274,7 +274,7 @@ Work notes partially based on: https://github.com/rootzoll/raspiblitz/blob/v1.7/
       * All files in one partition
       * Can remove the `Swap` partition - a swap file will be created on the Data disk later
 * At the `Software selection` choose:
-    * Debian dekstop environment
+    * Debian desktop environment
     * GNOME (could be other as preferred)
     * SSH server
     * standard system utilities
@@ -310,7 +310,7 @@ Work notes partially based on: https://github.com/rootzoll/raspiblitz/blob/v1.7/
 * Remove the `Installation medium` and the `Ubuntu Live` USB stick and the LAN cable
 #### Start Tails
 * Connect the `Tails USB Stick` (make it stay offline)
-* Boot Tails and set and Admin password in Additioanl Settings (will need it to work with the disk)
+* Boot Tails and set and Admin password in Additional Settings (will need it to work with the disk)
 * Set the screen to not switch off: Settings > Power -> Blank screen - Never
 #### Import the signing keys
 * Connect USB stick with GPG signing keys - decrypt drive if needed

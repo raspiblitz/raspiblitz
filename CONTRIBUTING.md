@@ -29,7 +29,7 @@ Not all enhancements needs to go through all levels, these are levels of difficu
 1. **Executable** --> Turn your experiment into a basic shell script.
 
 #### Advanced
-1. **Config script** --> Integrate your executable into the RaspiBlitz enviroment.
+1. **Config script** --> Integrate your executable into the RaspiBlitz environment.
 1. **SSH-GUI** --> Make it easier for others to use your config script.
 1. **WEB-GUI** --> Turn your feature into customer ready
 
@@ -70,7 +70,7 @@ NACKs without accompanying reasoning may be disregarded.
 After conceptual agreement on the change, code review can be provided. A review begins with the urgent necessity of the changes.
 Start from urgent to less important:
 1. Security risk.
-1. Code that breaks the enviroment.
+1. Code that breaks the environment.
 1. Enhancing current services functionality.
 1. Solving a common issue.
 1. Adding new applications.

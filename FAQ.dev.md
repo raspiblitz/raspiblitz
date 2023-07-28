@@ -129,7 +129,7 @@ The RaspiBlitz is your computer to experiment with. Feel free to add your own sc
 - When a release of a new main-update (see above) comes closer, a new release branch gets created from 'dev' with the first release candidate - the RCs and the final release sd card will be build from this branch.
 - All minor-releases will basically all work with the same 'build_sdcard.sh' script so that the code could be updated by just calling 'patch'. Emergency updates on lnd & bitcoin may break this guideline, but basic structure & packaging should stay mostly consistent over a main-update version.
 - Once a release is ready, that release branch will be set as the "default" branch on GitHub (so its shown as main page)
-- Hot fixes & new features for minor verisons will be created as single branches from the release branch, and once ready will be merged back into that release branch as a Pull Request using 'Squash-Merge' AND then, this 'Squash-Merge' (one single commit) will get cherry-picked into the  'dev' branch ('git cherry-pick COMMITHASH' - may call 'git fetch' & 'git pull' before to make a clean cherry-pick into dev).
+- Hot fixes & new features for minor versions will be created as single branches from the release branch, and once ready will be merged back into that release branch as a Pull Request using 'Squash-Merge' AND then, this 'Squash-Merge' (one single commit) will get cherry-picked into the  'dev' branch ('git cherry-pick COMMITHASH' - may call 'git fetch' & 'git pull' before to make a clean cherry-pick into dev).
 
 ### Can I run RaspiBlitz on other computers than RaspberryPi?
 
@@ -171,7 +171,7 @@ Once the branch is available and synced between the RaspiBlitz GitHub repo, your
 
 ### How can I sync a branch of my forked GitHub with my local RaspiBlitz?
 
-Since v1.5 of RaspiBlitz there has been an easy way thru the SSH menus: Under `MAIN MENU > UPDATE > PATCH` you have the option to change the GitHub repository and and branch to sync with. You change the GitHub Reposity by setting the GitHub username where you forked the Repo.
+Since v1.5 of RaspiBlitz there has been an easy way thru the SSH menus: Under `MAIN MENU > UPDATE > PATCH` you have the option to change the GitHub repository and and branch to sync with. You change the GitHub Repository by setting the GitHub username where you forked the Repo.
 
 So for example: If you forked the RaspiBlitz project (raspiblitz/raspiblitz) on GitHub and your GitHub project page is now called: https://github.com/raumi75/raspiblitz ... then just change the repo to sync/patch with to your username `raumi75`.
 
@@ -225,13 +225,13 @@ To change back to the code:
 
 ### How can I push changes to an existing Pull Request?
 
-See article: https://tech.sycamore.garden/add-commit-push-contributor-branch-git-github .. only works if your a contributer on raspiblitz repo.
+See article: https://tech.sycamore.garden/add-commit-push-contributor-branch-git-github .. only works if your a contributor on raspiblitz repo.
 
 ### How to cherry-pick with branch protections & CODEOWNERS file?
 
 Chery-picking patch PRs from dev to a release-branch like 'v1.8' (for example) is now a bit more complicated. Either an admin switches temorarly the branch protection "require a pull request before merging" setting off for the `git cherry-pick` OR we create a `p1.8` branch from `v1.8`, cherry-pick the squashed patch PR into that unprotected `p1.8` and then open a PR back to `v1.8`.
 
-But what we gain is that better branch protection and we can add more contributers to the project that are allowed to manage issues - like adding lables or closing.
+But what we gain is that better branch protection and we can add more contributors to the project that are allowed to manage issues - like adding labels or closing.
 
 ### How to run the automatic amd64 build on a VM on OSX?
 
