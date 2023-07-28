@@ -158,7 +158,7 @@ You now have the hardware ready for your RaspiBlitz - whats missing is the softw
 
 ## Downloading the Software
 
-In this section you find the lastest ready-to-use RaspiBlitz sd card images. Basically you just download, write/flash the image file to an sd card and start your RaspberryPi with it - its the same for first install or updating to a newer version. You can choose from two ready-made sd card images below:
+In this section you find the latest ready-to-use RaspiBlitz SDcard images. Basically you just download, write/flash the image file to an sd card and start your RaspberryPi with it - its the same for first install or updating to a newer version. You can choose from two ready-made sd card images below:
 
 ### FATPACK SD Card Image (Beginners - WebUI)
 
