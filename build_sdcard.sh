@@ -495,61 +495,22 @@ sed -i "s/^#SystemMaxFileSize=.*/SystemMaxFileSize=50M/g" /etc/systemd/journald.
 # see https://github.com/rootzoll/raspiblitz/issues/394#issuecomment-471535483
 echo "
 /var/log/syslog
-{
-  rotate 7
-  daily
-  missingok
-  notifempty
-  delaycompress
-  compress
-  postrotate
-    invoke-rc.d rsyslog rotate > /dev/null
-  endscript
-}
-
 /var/log/mail.info
 /var/log/mail.warn
 /var/log/mail.err
 /var/log/mail.log
 /var/log/daemon.log
-{
-  rotate 4
-  size=100M
-  missingok
-  notifempty
-  compress
-  delaycompress
-  sharedscripts
-  postrotate
-    invoke-rc.d rsyslog rotate > /dev/null
-  endscript
-}
-
 /var/log/kern.log
 /var/log/auth.log
-{
-  rotate 4
-  size=100M
-  missingok
-  notifempty
-  compress
-  delaycompress
-  sharedscripts
-  postrotate
-    invoke-rc.d rsyslog rotate > /dev/null
-  endscript
-}
-
 /var/log/user.log
 /var/log/lpr.log
 /var/log/cron.log
 /var/log/debug
 /var/log/messages
 {
-  rotate 4
-  weekly
+  rotate 3
+  size 100M
   missingok
-  notifempty
   compress
   delaycompress
   sharedscripts
