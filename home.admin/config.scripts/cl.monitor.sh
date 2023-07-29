@@ -2,16 +2,16 @@
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
- echo "monitor and troubleshot the c-lightning network"
- echo "cl.monitor.sh [mainnet|testnet|signet] status"
- echo "cl.monitor.sh [mainnet|testnet|signet] config"
- echo "cl.monitor.sh [mainnet|testnet|signet] info"
- echo "cl.monitor.sh [mainnet|testnet|signet] wallet"
- exit 1
+  echo "monitor and troubleshot the c-lightning network"
+  echo "cl.monitor.sh [mainnet|testnet|signet] status"
+  echo "cl.monitor.sh [mainnet|testnet|signet] config"
+  echo "cl.monitor.sh [mainnet|testnet|signet] info"
+  echo "cl.monitor.sh [mainnet|testnet|signet] wallet"
+  exit 1
 fi
 
 # check if started with sudo
-if [ "$EUID" -ne 0 ]; then 
+if [ "$EUID" -ne 0 ]; then
   echo "error='run as root'"
   exit 1
 fi
@@ -51,7 +51,7 @@ if [ "$2" = "status" ]; then
   cl_locked="0"
   cl_error_short=""
   cl_error_full=""
-  
+
   if [ "${cl_running}" = "0" ]; then
     # check if error because wallet is locked
     # the next release will have soecific error code for decryption  error
@@ -59,23 +59,24 @@ if [ "$2" = "status" ]; then
     source /mnt/hdd/raspiblitz.conf
     # password file is on the disk if encrypted and auto-unlock is enabled
     passwordFile="/dev/shm/.${netprefix}cl.pw"
-    if grep -Eq "${netprefix}clEncryptedHSM=on" /mnt/hdd/raspiblitz.conf;then
-      if grep -Eq "${netprefix}clAutoUnlock=on" /mnt/hdd/raspiblitz.conf;then
+    if grep -Eq "${netprefix}clEncryptedHSM=on" /mnt/hdd/raspiblitz.conf; then
+      if grep -Eq "${netprefix}clAutoUnlock=on" /mnt/hdd/raspiblitz.conf; then
         passwordFile=/home/bitcoin/.${netprefix}cl.pw
       fi
     fi
     clError=$(sudo journalctl -n5 -u ${netprefix}lightningd)
- 
+
     # cases from 'cl.hsmtool.sh unlock'
-    if \
-    [ "$(eval echo \$${netprefix}clEncryptedHSM)" = "on" ] && [ ! -f $passwordFile ] || \
-    [ $(echo "${clError}" | \
-     grep -c 'encrypted-hsm: Could not read pass from stdin.') -gt 0 ] || \
-    [ $(echo "${clError}" | \
-     grep -c 'hsm_secret is encrypted, you need to pass the --encrypted-hsm startup option.') -gt 0 ] || \
-    [ $(echo "${clError}" | \
-      grep -c 'Wrong password for encrypted hsm_secret.') -gt 0 ]; then
-    
+    if
+      [ "$(eval echo \$${netprefix}clEncryptedHSM)" = "on" ] && [ ! -f $passwordFile ] ||
+        [ $(echo "${clError}" |
+          grep -c 'encrypted-hsm: Could not read pass from stdin.') -gt 0 ] ||
+        [ $(echo "${clError}" |
+          grep -c 'hsm_secret is encrypted, you need to pass the --encrypted-hsm startup option.') -gt 0 ] ||
+        [ $(echo "${clError}" |
+          grep -c 'Wrong password for encrypted hsm_secret.') -gt 0 ]
+    then
+
       # signal wallet locked
       cl_locked="1"
       # dont report it as error
@@ -108,13 +109,13 @@ if [ "$2" = "status" ]; then
     # check results if proof for online
     else
       cl_ready="1"
-      connections=$( echo "${winData}" | grep "num_peers\"" | tr -cd '[[:digit:]]')
+      connections=$(echo "${winData}" | grep "num_peers\"" | tr -cd '[[:digit:]]')
       if [ "${connections}" != "" ] && [ "${connections}" != "0" ]; then
         cl_online="1"
       fi
     fi
 
-  fi 
+  fi
 
   # print results
   echo "ln_cl_version='${cl_version}'"
@@ -126,7 +127,7 @@ if [ "$2" = "status" ]; then
   echo "ln_cl_error_full='${cl_error_full}'"
 
   exit 0
-fi   
+fi
 
 ######################################################
 # CONFIG
@@ -145,7 +146,6 @@ if [ "$2" = "config" ]; then
 
   exit 1
 fi
-
 
 ######################################################
 # INFO
@@ -178,9 +178,9 @@ if [ "$2" = "info" ]; then
   cl_channels_pending=$(echo "${ln_getInfo}" | jq -r '.num_pending_channels')
   cl_channels_active=$(echo "${ln_getInfo}" | jq -r '.num_active_channels')
   cl_channels_inactive=$(echo "${ln_getInfo}" | jq -r '.num_inactive_channels')
-  cl_channels_total=$(( cl_channels_pending + cl_channels_active + cl_channels_inactive ))
+  cl_channels_total=$((cl_channels_pending + cl_channels_active + cl_channels_inactive))
   cl_peers=$(echo "${ln_getInfo}" | jq -r '.num_peers')
-  cl_fees_collected_msat=$(echo "${ln_getInfo}" |  jq -r '.fees_collected_msat')
+  cl_fees_collected_msat=$(echo "${ln_getInfo}" | jq -r '.fees_collected_msat')
 
   # calculate with cached value if c-lightning is fully synced
   source <(/home/admin/_cache.sh get ${blockchainHeightKey})
@@ -195,7 +195,7 @@ if [ "$2" = "info" ]; then
     cl_sync_progress=$(echo "scale=2; $cl_sync_height*100/$blockheight" | bc)
     # needs to be at least "two blocks behind" to be considered not synced
     blockheight=$(($blockheight - 1))
-    if [ ${blockheight} -gt ${cl_sync_height} ];then
+    if [ ${blockheight} -gt ${cl_sync_height} ]; then
       cl_sync_chain=0
     else
       cl_sync_chain=1
@@ -228,7 +228,7 @@ if [ "$2" = "info" ]; then
   echo "ln_cl_recovery_mode='${cl_recovery_mode}'"
   echo "ln_cl_recovery_done='${cl_recovery_done}'"
   exit 0
-  
+
 fi
 
 ######################################################
@@ -241,7 +241,6 @@ if [ "$2" = "wallet" ]; then
   # /usr/local/bin/lightning-cli --lightning-dir=/home/bitcoin/.lightning --conf=/home/bitcoin/.lightning/config listfunds
 
   # get data
-  sudo -u bitcoin
   command="sudo -u bitcoin $lightningcli_alias listfunds"
   cl_listfunds=$(${command} 2>/dev/null)
   if [ "${cl_listfunds}" == "" ]; then
@@ -251,33 +250,38 @@ if [ "$2" = "wallet" ]; then
   fi
 
   ln_walletbalance=0
-  for i in $(echo "$cl_listfunds" | jq .outputs[] | jq 'select(.status=="confirmed")' | grep value | awk '{print $2}' | cut -d, -f1);do
-    ln_walletbalance=$((ln_walletbalance+i))
+  for i in $(echo "$cl_listfunds" | jq '.outputs[] | select(.status == "confirmed").amount_msat'); do
+    sat=$((i / 1000))
+    ln_walletbalance=$((ln_walletbalance + sat))
   done
   ln_walletbalance_wait=0
-  for i in $(echo "$cl_listfunds" | jq .outputs[] | jq 'select(.status=="unconfirmed")' | grep value | awk '{print $2}' | cut -d, -f1);do
-    ln_walletbalance_wait=$((ln_walletbalance_wait+i))
+  for i in $(echo "$cl_listfunds" | jq '.outputs[] | select(.status == "unconfirmed").amount_msat'); do
+    sat=$((i / 1000))
+    ln_walletbalance_wait=$((ln_walletbalance_wait + sat))
   done
   ln_closedchannelbalance=0
-  for i in $(echo "$cl_listfunds" | jq .channels[] | jq 'select(.state=="ONCHAIN")' | grep channel_sat | awk '{print $2}' | cut -d, -f1);do
-    ln_closedchannelbalance=$((ln_closedchannelbalance+i))
+  for i in $(echo "$cl_listfunds" | jq -r '.channels[] | select(.state=="ONCHAIN") | .our_amount_msat'); do
+    sat=$((i / 1000))
+    ln_closedchannelbalance=$((ln_closedchannelbalance + sat))
   done
-  ln_pendingonchain=$((ln_walletbalance_wait+ln_closedchannelbalance))
+  ln_pendingonchain=$((ln_walletbalance_wait + ln_closedchannelbalance))
   if [ ${#ln_pendingonchain} -gt 0 ]; then ln_pendingonchain="(+${ln_pendingonchain})"; fi
   ln_channelbalance=0
-  for i in $(echo "$cl_listfunds" |jq .channels[]|jq 'select(.state=="CHANNELD_NORMAL")'|grep channel_sat|awk '{print $2}'|cut -d, -f1);do
-    ln_channelbalance=$((ln_channelbalance+i))
+  for i in $(echo "$cl_listfunds" | jq -r '.channels[] | select(.state=="CHANNELD_NORMAL") | .our_amount_msat'); do
+    sat=$((i / 1000))
+    ln_channelbalance=$((ln_channelbalance + sat))
   done
-  if [ ${#ln_channelbalance} -eq 0 ];then
+  if [ ${#ln_channelbalance} -eq 0 ]; then
     ln_channelbalance=0
   fi
   ln_channelbalance_all=0
-  for i in $(echo "$cl_listfunds" |jq .channels[]|grep channel_sat|awk '{print $2}'|cut -d, -f1);do
-    ln_channelbalance_all=$((ln_channelbalance_all+i))
+  for i in $(echo "$cl_listfunds" | jq -r '.channels[] | .our_amount_msat'); do
+    sat=$((i / 1000))
+    ln_channelbalance_all=$((ln_channelbalance_all + sat))
   done
-  ln_channelbalance_pending=$((ln_channelbalance_all-ln_channelbalance-ln_closedchannelbalance))
+  ln_channelbalance_pending=$((ln_channelbalance_all - ln_channelbalance - ln_closedchannelbalance))
   if [ ${#ln_channelbalance_pending} -gt 0 ]; then ln_channelbalance_pending=" (+${ln_channelbalance_pending})"; fi
-  
+
   # print data
   echo "ln_cl_wallet_onchain_balance='${ln_walletbalance//[^0-9.]/}'"
   echo "ln_cl_wallet_onchain_pending='${ln_pendingonchain//[^0-9.]/}'"
