@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# main repo: https://github.com/cstenglein/raspiblitz-web
+# main repo: https://github.com/raspiblitz/raspiblitz-web
 
 # NORMALLY user/repo/version will be defined by calling script - see build_sdcard.sh
 # the following is just a fallback to try during development if script given branch does not exist

@@ -15,7 +15,7 @@ defaultBranch="v1.10"
 defaultAPIuser="fusion44"
 defaultAPIrepo="blitz_api"
 
-defaultWEBUIuser="cstenglein"
+defaultWEBUIuser="raspiblitz"
 defaultWEBUIrepo="raspiblitz-web"
 
 me="${0##/*}"
