@@ -1,7 +1,10 @@
 #!/bin/bash
 
-# https://github.com/alexbosworth/balanceofsatoshis/blob/master/package.json#L81
-BOSVERSION="13.15.0"
+# versioning:
+# https://github.com/alexbosworth/balanceofsatoshis/blob/master/package.json#L85
+# https://www.npmjs.com/package/balanceofsatoshis
+
+BOSVERSION="15.8.14"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
