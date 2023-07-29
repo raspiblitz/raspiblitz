@@ -707,8 +707,14 @@ bash -c "echo '# End of file' >> /etc/security/limits.conf"
 sed --in-place -i "23s/.*/session required pam_limits.so/" /etc/pam.d/common-session
 sed --in-place -i "25s/.*/session required pam_limits.so/" /etc/pam.d/common-session-noninteractive
 bash -c "echo '# end of pam-auth-update config' >> /etc/pam.d/common-session-noninteractive"
-# increase the possible number of running processes from 128
-bash -c "echo 'fs.inotify.max_user_instances=4096' >> /etc/sysctl.conf"
+
+# Increase maximum number of inotify instances
+bash -c "echo '# RaspiBlitz Edit: Set maximum number of inotify instances (8192 recommended for min 2GB RAM)' >> /etc/sysctl.conf"
+bash -c "echo 'fs.inotify.max_user_instances=8192' >> /etc/sysctl.conf"
+
+# Activate overcommit_memory
+bash -c "echo '# RaspiBlitz Edit: Use overcommit to prevent system crashes' >> /etc/sysctl.conf"
+bash -c "echo 'vm.overcommit_memory=1' >> /etc/sysctl.conf"
 
 # *** fail2ban ***
 # based on https://raspibolt.org/security.html#fail2ban
