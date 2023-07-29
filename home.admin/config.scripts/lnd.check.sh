@@ -48,6 +48,13 @@ if [ "$1" == "prestart" ]; then
     exit 1
   fi
 
+  ##### CLEAN UP #####
+
+  # all lines with just spaces to empty lines
+  sed -i 's/^[[:space:]]*$//g' /mnt/hdd/lnd/lnd.conf
+  # all double empty lines to single empty lines
+  sed -i '/^$/N;/^\n$/D' /mnt/hdd/lnd/lnd.conf
+
   # set default chain parameter
   targetchain=$2
   if [ "${targetchain}" == "" ]; then
