@@ -291,9 +291,8 @@ HandleLidSwitchDocked=ignore" | tee /etc/systemd/logind.conf.d/nosuspend.conf
 # https://github.com/rootzoll/raspiblitz/issues/138
 # https://daker.me/2014/10/how-to-fix-perl-warning-setting-locale-failed-in-raspbian.html
 # https://stackoverflow.com/questions/38188762/generate-all-locales-in-a-docker-image
-if [ "${baseimage}" = "raspios_arm64" ] || [ "${baseimage}" = "debian" ]; then
+if [ "${baseimage}" = "raspios_arm64" ] || [ "${cpu}" = aarch64 ] && [ "${baseimage}" = "debian" ]; then
   echo -e "\n*** FIXING LOCALES FOR BUILD ***"
-
   sed -i "s/^# en_US.UTF-8 UTF-8.*/en_US.UTF-8 UTF-8/g" /etc/locale.gen
   sed -i "s/^# en_US ISO-8859-1.*/en_US ISO-8859-1/g" /etc/locale.gen
   locale-gen

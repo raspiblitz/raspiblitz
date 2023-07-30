@@ -2,10 +2,16 @@ SHELL = /bin/bash
 GITHUB_ACTOR = $(shell git remote -v | grep origin | head -1 | cut -d/ -f4)
 GITHUB_HEAD_REF = $(shell git rev-parse --abbrev-ref HEAD)
 
-amd64-lean-image:
+amd64-lean-desktop-uefi-image:
 	# Run the build script
 	cd ci/amd64 && \
-	bash packer.build.amd64-debian.sh lean $(GITHUB_ACTOR) $(GITHUB_HEAD_REF) 0
+	bash packer.build.amd64-debian.sh \
+	  --pack lean \
+	  --github_user $(GITHUB_ACTOR) \
+	  --branch $(GITHUB_HEAD_REF) \
+	  --preseed_file preseed.cfg \
+	  --boot uefi\
+	  --desktop gnome
 
 	# Compute the checksum of the qemu image
 	cd ci/amd64/builds/raspiblitz-amd64-debian-lean-qemu && \
@@ -22,10 +28,42 @@ amd64-lean-image:
 	# List the generated files
 	ls -lah ci/amd64/builds/raspiblitz-amd64-debian-lean-qemu/raspiblitz-amd64-debian-lean.qcow2.*
 
-amd64-fatpack-image:
+amd64-lean-server-legacyboot-image:
 	# Run the build script
 	cd ci/amd64 && \
-	bash packer.build.amd64-debian.sh fatpack $(GITHUB_ACTOR) $(GITHUB_HEAD_REF)
+	bash packer.build.amd64-debian.sh \
+	  --pack lean \
+	  --github_user $(GITHUB_ACTOR) \
+	  --branch $(GITHUB_HEAD_REF) \
+	  --preseed_file preseed.cfg \
+	  --boot bios-256k.bin \
+	  --desktop none
+
+	# Compute the checksum of the qemu image
+	cd ci/amd64/builds/raspiblitz-amd64-debian-lean-qemu && \
+	sha256sum raspiblitz-amd64-debian-lean.qcow2 > raspiblitz-amd64-debian-lean.qcow2.sha256
+
+	# Compress the image
+	cd ci/amd64/builds/raspiblitz-amd64-debian-lean-qemu && \
+	gzip -v9 raspiblitz-amd64-debian-lean.qcow2
+
+	# Compute the checksum of the compressed image
+	cd ci/amd64/builds/raspiblitz-amd64-debian-lean-qemu && \
+	sha256sum raspiblitz-amd64-debian-lean.qcow2.gz > raspiblitz-amd64-debian-lean.qcow2.gz.sha256
+
+	# List the generated files
+	ls -lah ci/amd64/builds/raspiblitz-amd64-debian-lean-qemu/raspiblitz-amd64-debian-lean.qcow2.*
+
+amd64-fatpack-desktop-uefi-image:
+	# Run the build script
+	cd ci/amd64 && \
+	bash packer.build.amd64-debian.sh \
+	--pack fatpack \
+	--github_user $(GITHUB_ACTOR) \
+	--branch $(GITHUB_HEAD_REF) \
+	--preseed_file preseed.cfg \
+	--boot uefi\
+	--desktop gnome
 
 	# Compute the checksum of the qemu image
 	cd ci/amd64/builds/raspiblitz-amd64-debian-fatpack-qemu && \
@@ -45,7 +83,10 @@ amd64-fatpack-image:
 arm64-rpi-lean-image:
 	# Run the build script
 	cd ci/arm64-rpi && \
-	bash packer.build.arm64-rpi.local.sh lean $(GITHUB_ACTOR) $(GITHUB_HEAD_REF)
+	bash packer.build.arm64-rpi.local.sh \
+	--pack lean \
+	--github_user $(GITHUB_ACTOR) \
+	--branch $(GITHUB_HEAD_REF)
 
 	# Compute the checksum of the raw image
 	cd ci/arm64-rpi/packer-builder-arm && \
@@ -65,7 +106,10 @@ arm64-rpi-lean-image:
 arm64-rpi-fatpack-image:
 	# Run the build script
 	cd ci/arm64-rpi && \
-	bash packer.build.arm64-rpi.local.sh fatpack $(GITHUB_ACTOR) $(GITHUB_HEAD_REF)
+	bash packer.build.arm64-rpi.local.sh \
+	--pack fatpack \
+	--github_user $(GITHUB_ACTOR) \
+	--branch $(GITHUB_HEAD_REF)
 
 	# Compute the checksum of the raw image
 	cd ci/arm64-rpi/packer-builder-arm  && \
