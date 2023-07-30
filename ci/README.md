@@ -1,6 +1,9 @@
 <!-- omit in toc -->
 # Automated builds
 
+<details>
+<summary>Table of Contents</summary>
+
 - [Local build](#local-build)
   - [Generate an arm64-rpi image](#generate-an-arm64-rpi-image)
   - [Generate an amd64 image](#generate-an-amd64-image)
@@ -10,18 +13,20 @@
 - [Write the image to a disk connected with USB](#write-the-image-to-a-disk-connected-with-usb)
   - [Convert the qcow2 volume to a raw disk image](#convert-the-qcow2-volume-to-a-raw-disk-image)
   - [Write to a disk connected with USB with Balena Etcher or `dd`](#write-to-a-disk-connected-with-usb-with-balena-etcher-or-dd)
-  - [Extend the partition on the new disk](#extend-the-partition-on-the-new-disk)
 - [The first boot](#the-first-boot)
   - [Lean image with Gnome desktop (default image)](#lean-image-with-gnome-desktop-default-image)
   - [Lean server image without Gnome desktop](#lean-server-image-without-gnome-desktop)
     - [Add Gnome desktop to the server image (optional)](#add-gnome-desktop-to-the-server-image-optional)
   - [Fatpack images](#fatpack-images)
+  - [Extend the root partition (optional - recommended)](#extend-the-root-partition-optional---recommended)
   - [Add wifi (optional)](#add-wifi-optional)
   - [Add wifi driver (optional)](#add-wifi-driver-optional)
 - [Workflow notes](#workflow-notes)
-  - [Packer .json settings:](#packer-json-settings)
   - [VNC](#vnc)
+  - [Packer settings](#packer-settings)
   - [Flashing](#flashing)
+
+</details>
 
 ## Local build
 with the [Makefile](https://github.com/rootzoll/raspiblitz/blob/dev/Makefile)
@@ -106,44 +111,15 @@ https://github.com/rootzoll/raspiblitz/actions/workflows/amd64-lean-image.yml?qu
   sudo qemu-img dd if=./raspiblitz-amd64-debian-lean.qcow2 of=${disk} bs=4M
   ```
 
-### Extend the partition on the new disk
-<details>
-<summary>(optional)</summary>
-
-* GUI: use GParted to resize the Extended Partition to the full size of the disk
-  ```
-  # install
-  sudo apt install gparted
-  # run
-  sudo gparted
-  ```
-* CLI:
-  ```
-  # identify the USB connected disk
-  lsblk
-  df -h
-  # extend the lvm to the full free space and resize the filesystem
-  sudo lvextend -r -l +100%FREE /dev/mapper/raspiblitz--amd64--debian--11--vg-root
-
-  # alternatively download the script
-  git clone https://git.scs.carleton.ca/git/extend-lvm.git
-  # run with the disk as the parameter (/dev/sdk for example)
-  disk="/dev/sdk"
-  sudo bash extend-lvm/extend-lvm.sh ${disk}
-  ```
-
-</details>
-
 ## The first boot
 ### Lean image with Gnome desktop (default image)
 * log in on screen:
   * username: `admin`
   * password: `raspiblitz`
 * start a terminal for guidance
-
 * connect with ssh over the LAN
   * username: `admin`
-  * password: `raspiblitz` 
+  * password: `raspiblitz`
 
 ### Lean server image without Gnome desktop
 * press any key to get to a login prompt after the splash screen
@@ -163,6 +139,37 @@ https://github.com/rootzoll/raspiblitz/actions/workflows/amd64-lean-image.yml?qu
 * can also open the WebUI on another computer
   * Find the the RaspiBlitz_IP in your router dashboard, in the terminal prompt or with `hostname -I`
   * open: http://RaspiBlitz_IP
+
+### Extend the root partition (optional - recommended)
+* The default image is 30GB. The partition can be extended to the full size of the disk.
+* The lvm partition can be extended while mounted so this step can be done later as well while the system is running.
+* CLI (recommended)
+  ```
+  # identify the USB connected disk
+  lsblk
+  df -h
+  # select the disk carefully
+  disk="/dev/sde"
+  # resize the extended partition to the full size of the disk
+  sudo parted ${disk} -- resizepart 2 100%
+  # resize the lvm partition to the full size of the disk
+  sudo parted ${disk} -- resizepart 5 100%
+  # extend the physical volume to size of the lvm partition
+  sudo pvresize ${disk}5
+  # extend the root lvm to the full free space and resize the filesystem
+  sudo lvextend -r -l +100%FREE /dev/mapper/raspiblitz--amd64--vg-root
+  ```
+* GUI with GParted
+  ```
+  # install
+  sudo apt install gparted
+  # start the gparted GUI
+  sudo gparted
+  # resize the extended partition to the full size of the disk
+  # extend the lvm to the full free space and resize the filesystem (extends the swap space by default)
+  # in CLI: extend the root lvm
+  sudo lvextend -r -l +100%FREE /dev/mapper/raspiblitz--amd64--vg-root
+  ```
 
 ### Add wifi (optional)
 * if the wifi driver is included in the FOSS Debian distro
@@ -204,8 +211,11 @@ After the image is built (and there is no exit with errors) the next steps are:
 * compute checksum of the compressed image
 * (in github actions: upload the artifacts in one .zip file)
 
-### Packer .json settings:
-* `disk_size` - the size op the raw image. The .qcow2 file is compressed.
+### VNC
+* can follow the setup locally in VNC with the port stated in the first part of the logs eg: `Found available VNC port: 5900 on IP: 127.0.0.1`
+
+### Packer settings
+* `disk_size` / `image_size` - the size op the raw image. The .qcow2 file is compressed.
 * `template`  - image filename
 * `output_directory` - directory under builds where the image will be placed
 * the `pi` user is given passwordless sudo access and used for the image setup
@@ -225,7 +235,5 @@ After the image is built (and there is no exit with errors) the next steps are:
 
   cat 2022-09-22-raspios-bullseye-arm64.img.xz.sha256
   ```
-### VNC
-* can follow the setup locally in VNC with the port stated in the first part of the logs eg: `Found available VNC port: 5952 on IP: 127.0.0.1`
 ### Flashing
 * using `qemu-img dd bs=4M if=raspiblitz-amd64-debian-lean.qcow2 of=/dev/sdd` changed the UUID so it won't boot without editing GRUB
