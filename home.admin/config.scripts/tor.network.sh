@@ -136,8 +136,8 @@ case "$1" in
     # add logrotate config for modified Tor dir on ext. disk
     sudo tee /etc/logrotate.d/raspiblitz-tor >/dev/null <<EOF
 /mnt/hdd/tor/*log {
-        daily
-        rotate 5
+        size 100M
+        rotate 4
         compress
         delaycompress
         missingok

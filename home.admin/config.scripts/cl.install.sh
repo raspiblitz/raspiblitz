@@ -322,8 +322,8 @@ always-use-proxy=true
   echo "\
 /home/bitcoin/.lightning/${CLNETWORK}/cl.log
 {
-        rotate 5
-        daily
+        rotate 4
+        size 100M
         copytruncate
         missingok
         olddir /home/bitcoin/.lightning/${CLNETWORK}/cl.log_old
