@@ -523,7 +523,7 @@ echo "
   delaycompress
   sharedscripts
   postrotate
-    systemctl reload rsyslog
+    service logrotate restart
   endscript
 }
 " | tee ./rsyslog
