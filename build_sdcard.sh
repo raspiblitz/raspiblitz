@@ -494,9 +494,9 @@ sed -i "s/^#SystemMaxFileSize=.*/SystemMaxFileSize=50M/g" /etc/systemd/journald.
 ## LOG ROTATION
 
 # GLOBAL for all logs: /etc/logrotate.conf
-echo "# Optimizing log files: rotate daily max 100M, keep 4 days & compress old" >> ${logFile}
-sed -i "s/^weekly/daily size 100M/g" /etc/logrotate.conf >> ${logFile} 2>&1
-sed -i "s/^#compress/compress/g" /etc/logrotate.conf >> ${logFile} 2>&1
+echo "# Optimizing log files: rotate daily max 100M, keep 4 days & compress old"
+sed -i "s/^weekly/daily size 100M/g" /etc/logrotate.conf
+sed -i "s/^#compress/compress/g" /etc/logrotate.conf
 
 # SPECIAL FOR SYSLOG: /etc/logrotate.d/rsyslog
 # to test config run: sudo logrotate -v /etc/logrotate.d/rsyslog
