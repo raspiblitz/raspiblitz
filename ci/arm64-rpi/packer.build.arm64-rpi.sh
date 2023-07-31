@@ -1,7 +1,8 @@
 #!/bin/bash -e
 
 # set vars
-source <(../set_variables.sh "$@")
+source ../set_variables.sh
+set_variables "$@"
 
 # build the image in docker
 echo -e "\nBuild the image..."
