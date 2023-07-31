@@ -243,9 +243,9 @@ signet.addnode=nsgyo7begau4yecc46ljfecaykyzszcseapxmtu6adrfagfrrzrlngyd.onion:38
 
   # /etc/systemd/system/${prefix}bitcoind.service
   # based on https://github.com/bitcoin/bitcoin/blob/master/contrib/init/bitcoind.service
-  chainparamter=""
+  chainparameter=""
   if [ "${CHAIN}" != "mainnet" ]; then
-    chainparamter="-${CHAIN}"
+    chainparameter="-${CHAIN}"
   fi
   echo "
 [Unit]
