@@ -57,12 +57,14 @@ if [ "$1" == "prestart" ]; then
   fi
 
   # make sure entry exists
+  echo "make sure entry(${bitcoinlog_entry}) exists"
   extryExists=$(grep -c "^${bitcoinlog_entry}=" /mnt/hdd/bitcoin/bitcoin.conf)
   if [ "${extryExists}" == "0" ]; then
     echo "${bitcoinlog_entry}=${bitcoinlog_path}" >> /mnt/hdd/bitcoin/bitcoin.conf
   fi
 
   # make sure entry has the correct value
+  echo "make sure entry(${bitcoinlog_entry}) has the correct value(${bitcoinlog_path})"
   sed -i "s/^${bitcoinlog_entry}=.*/${bitcoinlog_entry}=${bitcoinlog_path}/g" /mnt/hdd/bitcoin/bitcoin.conf
 
   ##### STATISTICS #####
