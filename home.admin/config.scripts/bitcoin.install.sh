@@ -257,7 +257,7 @@ Wants=network-online.target
 [Service]
 Environment='MALLOC_ARENA_MAX=1'
 ExecStartPre=-/home/admin/config.scripts/bitcoin.check.sh prestart ${CHAIN}
-ExecStart=/usr/local/bin/bitcoind ${chainparamter} \\
+ExecStart=/usr/local/bin/bitcoind ${chainparameter} \\
                                   -daemonwait \\
                                   -conf=/mnt/hdd/bitcoin/bitcoin.conf \\
                                   -datadir=/mnt/hdd/bitcoin
