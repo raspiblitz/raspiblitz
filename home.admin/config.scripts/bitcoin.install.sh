@@ -243,7 +243,11 @@ signet.addnode=nsgyo7begau4yecc46ljfecaykyzszcseapxmtu6adrfagfrrzrlngyd.onion:38
 
   # /etc/systemd/system/${prefix}bitcoind.service
   # based on https://github.com/bitcoin/bitcoin/blob/master/contrib/init/bitcoind.service
-    echo "
+  chainparamter=""
+  if [ "${CHAIN}" != "mainnet" ]; then
+    chainparamter="-${CHAIN}"
+  fi
+  echo "
 [Unit]
 Description=Bitcoin daemon on ${CHAIN}
 
@@ -253,7 +257,7 @@ Wants=network-online.target
 [Service]
 Environment='MALLOC_ARENA_MAX=1'
 ExecStartPre=-/home/admin/config.scripts/bitcoin.check.sh prestart ${CHAIN}
-ExecStart=/usr/local/bin/bitcoind -${CHAIN} \\
+ExecStart=/usr/local/bin/bitcoind ${chainparamter} \\
                                   -daemonwait \\
                                   -conf=/mnt/hdd/bitcoin/bitcoin.conf \\
                                   -datadir=/mnt/hdd/bitcoin
