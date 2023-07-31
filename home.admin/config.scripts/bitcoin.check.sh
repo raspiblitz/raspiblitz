@@ -35,6 +35,13 @@ if [ "$1" == "prestart" ]; then
 
   /bin/chgrp bitcoin /mnt/hdd/bitcoin
 
+  ##### CLEAN UP #####
+
+  # all lines with just spaces to empty lines
+  sed -i 's/^[[:space:]]*$//g' /mnt/hdd/bitcoin/bitcoin.conf
+  # all double empty lines to single empty lines
+  sed -i '/^$/N;/^\n$/D' /mnt/hdd/bitcoin/bitcoin.conf
+
   ##### CHECK/SET CONFIG VALUES #####
 
   # correct debug log path
@@ -43,27 +50,20 @@ if [ "$1" == "prestart" ]; then
     bitcoinlog_path="/mnt/hdd/bitcoin/debug.log"
   elif [ "${CHAIN}" == "testnet" ]; then
     bitcoinlog_entry="test.debuglogfile"
-    bitcoinlogpath="/mnt/hdd/bitcoin/testnet3/debug.log"
+    bitcoinlog_path="/mnt/hdd/bitcoin/testnet3/debug.log"
   elif [ "${CHAIN}" == "signet" ]; then
     bitcoinlog_entry="signet.debuglogfile"
-    bitcoinlogpath="/mnt/hdd/bitcoin/signet/debug.log"
+    bitcoinlog_path="/mnt/hdd/bitcoin/signet/debug.log"
   fi
 
   # make sure entry exists
   extryExists=$(grep -c "^${bitcoinlog_entry}=" /mnt/hdd/bitcoin/bitcoin.conf)
   if [ "${extryExists}" == "0" ]; then
-    echo "${bitcoinlog_entry}=${bitcoinlogpath}" >> /mnt/hdd/bitcoin/bitcoin.conf
+    echo "${bitcoinlog_entry}=${bitcoinlog_path}" >> /mnt/hdd/bitcoin/bitcoin.conf
   fi
 
   # make sure entry has the correct value
-  sed -i "s/^${bitcoinlog_entry}=.*/${bitcoinlog_entry}=${bitcoinlogpath}/g" /mnt/hdd/bitcoin/bitcoin.conf
-
-  ##### CLEAN UP #####
-
-  # all lines with just spaces to empty lines
-  sed -i 's/^[[:space:]]*$//g' /mnt/hdd/bitcoin/bitcoin.conf
-  # all double empty lines to single empty lines
-  sed -i '/^$/N;/^\n$/D' /mnt/hdd/bitcoin/bitcoin.conf
+  sed -i "s/^${bitcoinlog_entry}=.*/${bitcoinlog_entry}=${bitcoinlog_path}/g" /mnt/hdd/bitcoin/bitcoin.conf
 
   ##### STATISTICS #####
 
