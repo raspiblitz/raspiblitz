@@ -29,7 +29,7 @@ if [ "$1" == "prestart" ]; then
     exit 1
   fi
 
-  CHAIN = "$2"
+  CHAIN="$2"
 
   ##### DIRECTORY PERMISSIONS #####
 
@@ -39,14 +39,14 @@ if [ "$1" == "prestart" ]; then
 
   # correct debug log path
   if [ "${CHAIN}" == "mainnet" ]; then
-    bitcoinlog_entry = "main.debuglogfile"
-    bitcoinlog_path  = "/mnt/hdd/bitcoin/debug.log"
+    bitcoinlog_entry="main.debuglogfile"
+    bitcoinlog_path="/mnt/hdd/bitcoin/debug.log"
   elif [ "${CHAIN}" == "testnet" ]; then
-    bitcoinlog_entry = "test.debuglogfile"
-    bitcoinlogpath   = "/mnt/hdd/bitcoin/testnet3/debug.log"
+    bitcoinlog_entry="test.debuglogfile"
+    bitcoinlogpath="/mnt/hdd/bitcoin/testnet3/debug.log"
   elif [ "${CHAIN}" == "signet" ]; then
-    bitcoinlog_entry = "signet.debuglogfile"
-    bitcoinlogpath   = "/mnt/hdd/bitcoin/signet/debug.log"
+    bitcoinlog_entry="signet.debuglogfile"
+    bitcoinlogpath="/mnt/hdd/bitcoin/signet/debug.log"
   fi
 
   # make sure entry exists
