@@ -491,55 +491,25 @@ fi
 sed -i "s/^#SystemMaxUse=.*/SystemMaxUse=250M/g" /etc/systemd/journald.conf
 sed -i "s/^#SystemMaxFileSize=.*/SystemMaxFileSize=50M/g" /etc/systemd/journald.conf
 
-# change log rotates
-# see https://github.com/rootzoll/raspiblitz/issues/394#issuecomment-471535483
+## LOG ROTATION
+
+# GLOBAL for all logs: /etc/logrotate.conf
+echo "# Optimizing log files: rotate daily max 100M, keep 4 days & compress old"
+sed -i "s/^weekly/daily size 100M/g" /etc/logrotate.conf
+sed -i "s/^#compress/compress/g" /etc/logrotate.conf
+
+# SPECIAL FOR SYSLOG: /etc/logrotate.d/rsyslog
+# to test config run: sudo logrotate -v /etc/logrotate.d/rsyslog
+rm /etc/logrotate.d/rsyslog 2>/dev/null
 echo "
 /var/log/syslog
-{
-  rotate 7
-  daily
-  missingok
-  notifempty
-  delaycompress
-  compress
-  postrotate
-    invoke-rc.d rsyslog rotate > /dev/null
-  endscript
-}
-
 /var/log/mail.info
 /var/log/mail.warn
 /var/log/mail.err
 /var/log/mail.log
 /var/log/daemon.log
-{
-  rotate 4
-  size=100M
-  missingok
-  notifempty
-  compress
-  delaycompress
-  sharedscripts
-  postrotate
-    invoke-rc.d rsyslog rotate > /dev/null
-  endscript
-}
-
 /var/log/kern.log
 /var/log/auth.log
-{
-  rotate 4
-  size=100M
-  missingok
-  notifempty
-  compress
-  delaycompress
-  sharedscripts
-  postrotate
-    invoke-rc.d rsyslog rotate > /dev/null
-  endscript
-}
-
 /var/log/user.log
 /var/log/lpr.log
 /var/log/cron.log
@@ -547,19 +517,19 @@ echo "
 /var/log/messages
 {
   rotate 4
-  weekly
+  size 100M
   missingok
-  notifempty
   compress
   delaycompress
   sharedscripts
   postrotate
-    invoke-rc.d rsyslog rotate > /dev/null
+    service logrotate restart
   endscript
 }
 " | tee ./rsyslog
 mv ./rsyslog /etc/logrotate.d/rsyslog
 chown root:root /etc/logrotate.d/rsyslog
+service logrotate restart
 service rsyslog restart
 
 echo -e "\n*** ADDING MAIN USER admin ***"
