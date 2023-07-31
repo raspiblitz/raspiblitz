@@ -65,7 +65,7 @@ if [ "$1" == "prestart" ]; then
 
   # make sure entry has the correct value
   echo "make sure entry(${bitcoinlog_entry}) has the correct value(${bitcoinlog_path})"
-  sed -i "s/^${bitcoinlog_entry}=.*/${bitcoinlog_entry}=${bitcoinlog_path}/g" /mnt/hdd/bitcoin/bitcoin.conf
+  sed -i "s|^${bitcoinlog_entry}=.*|${bitcoinlog_entry}=${bitcoinlog_path}|g" /mnt/hdd/bitcoin/bitcoin.conf
 
   ##### STATISTICS #####
 
