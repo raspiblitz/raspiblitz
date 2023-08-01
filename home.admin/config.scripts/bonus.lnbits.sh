@@ -149,7 +149,7 @@ if [ "$1" = "menu" ]; then
     fundinginfo="on CLN "
   fi
 
-  text="Local Web Browser: https://${localIP}:${httpsPort}"
+  text="https://${localIP}:${httpsPort}${authMethod}"
 
   if [ ${#publicDomain} -gt 0 ]; then
      text="${text}
