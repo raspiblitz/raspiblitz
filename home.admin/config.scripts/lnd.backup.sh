@@ -176,8 +176,8 @@ if [ ${mode} = "lnd-export" ]; then
     # get free space in bytes from backup device
     freeSpace=$(df | grep -m1 "/mnt/backup" | awk '{print $4}')
 
-    # subtract 500MB for safety
-    freeSpace=$(expr ${freeSpace} - 500000000)
+    # subtract 50MB for safety
+    freeSpace=$(expr ${freeSpace} - 50000000)
 
     # check if enough space on backup device
     if [ ${freeSpace} -gt ${byteSize} ]; then
