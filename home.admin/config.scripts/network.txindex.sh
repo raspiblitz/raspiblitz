@@ -54,6 +54,7 @@ if [ "$1" = "status" ]; then
     indexInfo="OK"
   else
     echo "isIndexed=0"
+    progressPercent="0.00%"
     if [ ${#indexedToBlock} -gt 0 ] && [ ${#blockchainHeight} -gt 0 ]; then
       progressPercentRaw=$(echo "${indexedToBlock}/${blockchainHeight}*100" | bc -l 2>/dev/null)
       progressPercent=$(printf "%.2f" "${progressPercentRaw}" 2>/dev/null)
@@ -62,6 +63,7 @@ if [ "$1" = "status" ]; then
       indexInfo="Building (please wait)"
     fi
     echo "indexInfo='${indexInfo}'"
+    echo "indexPrecent='${progressPercent}'"
   fi  
 
   echo "indexFinished=${indexFinished}"
