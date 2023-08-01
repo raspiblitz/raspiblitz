@@ -182,7 +182,7 @@ if [ ${mode} = "lnd-export" ]; then
     # check if enough space on backup device
     if [ ${freeSpace} -gt ${byteSize} ]; then
       echo "# making copy to backup device ..."
-      sudo cp ./${filename} /mnt/backup/${filename}
+      sudo cp ${downloadPath}/lnd-rescue-${md5checksum}.tar.gz /mnt/backup/lnd-rescue-${md5checksum}.tar.gz
     else
       echo "# not enough space on backup device for extra copy'"
     fi
