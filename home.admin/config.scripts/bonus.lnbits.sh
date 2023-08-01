@@ -105,6 +105,10 @@ function revertMigration() {
     sudo sed -i "/^LNBITS_DATA_FOLDER=/d" /home/lnbits/lnbits/.env
     sudo bash -c "echo 'LNBITS_DATA_FOLDER=/mnt/hdd/app-data/LNBits' >> /home/lnbits/lnbits/.env"
 
+    # activate admin user
+    sudo sed -i "/^LNBITS_ADMIN_UI=/d" /home/lnbits/lnbits/.env
+    sudo bash -c "echo 'LNBITS_ADMIN_UI=true' >> /home/lnbits/lnbits/.env"
+
     # start service
     echo "# Start LNBits"
     sudo systemctl start lnbits
@@ -377,8 +381,11 @@ if [ "$1" = "status" ]; then
     echo "httpsPort='5001'"
     echo "httpsForced='1'"
     echo "httpsSelfsigned='1'" # TODO: change later if IP2Tor+LetsEncrypt is active
-    echo "authMethod='none'"
     echo "publicIP='${publicIP}'"
+
+    # auth method is to call with a certain useer id
+    admin_userid=$(sudo cat /home/lnbits/lnbits/.super_user)
+    echo "authMethod='/wallet?usr=${admin_userid}'"
 
     # check funding source
     if [ "${LNBitsFunding}" == "" ]; then
@@ -527,6 +534,9 @@ if [ "$1" = "prestart" ]; then
     echo "# FAIL: missing or not supported LNBitsLightning=${LNBitsLightning}"
     exit 1
   fi
+
+  # protect the admin user id if exists
+  chmod 640 /home/lnbits/lnbits/.super_user 2>/dev/null
 
   echo "# OK: prestart finished"
   exit 0 # exit with clean code
