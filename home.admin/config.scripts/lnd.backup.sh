@@ -169,6 +169,13 @@ if [ ${mode} = "lnd-export" ]; then
     exit 1
   fi
 
+  # copy backup over
+  source <(/home/admin/config.scripts/blitz.backupdevice.sh status)
+  if [ $isMounted == 1 ]; then
+     sudo cp ${filename} /mnt/backup
+     echo "copied to backup device"
+  fi
+
   # output result data
   echo "# lnd service is stopped for security"
   echo "filename='${downloadPath}/lnd-rescue-${md5checksum}.tar.gz'"
