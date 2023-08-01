@@ -149,7 +149,7 @@ or with the alias: `cllog`
     ```
 * start with
     ```
-    lightnign-cli plugin start /home/bitcoin/cl-plugins-enabled/PLUGIN_NAME
+    lightning-cli plugin start /home/bitcoin/cl-plugins-enabled/PLUGIN_NAME
     ```
 * or to load it automatically on restart:
     ```
@@ -175,7 +175,7 @@ It does automatically:
 Overall it is a tool which makes users able to send and receive lightning payments with minimal interaction, basically setting up a routing node by itself.
 
 The transactions made by CLBOSS does cost money and running it requires a fair amount of trust in the (fully open-source - MIT) code.
-Neither the CLBOSS nor the RaspiBlitz developers can take resposibility for lost sats, use at your own discretion!
+Neither the CLBOSS nor the RaspiBlitz developers can take responsibility for lost sats, use at your own discretion!
 
 * Activate it in the menu - `SETTINGS` - `-CL CLBOSS`
 * Discussion: https://github.com/rootzoll/raspiblitz/issues/2490
@@ -317,7 +317,7 @@ the amounts can be specified in `sat` or `btc`
 list the utxo-s with `lightning-cli listfunds`, can list multiple
 the feerate is in `perkb` by default, e.g. use 1000 for 1 sat/byte
     ```
-    lightning-cli fundchannel feerate=PERKB_FEERATE utxos='["TRANSACTION_ID:INDDEX_NUMBER"]' -k id=NODE_ID amount=OWN_AMOUNTsat request_amt=PEER_CONTRIBUTION_AMOUNTsat compact_lease=COMPACT_LEASE
+    lightning-cli fundchannel feerate=PERKB_FEERATE utxos='["TRANSACTION_ID:INDEX_NUMBER"]' -k id=NODE_ID amount=OWN_AMOUNTsat request_amt=PEER_CONTRIBUTION_AMOUNTsat compact_lease=COMPACT_LEASE
     ```
 
 #### Multifundchannel syntax
@@ -650,7 +650,7 @@ Will need to pay through a peer which supports the onion messages which means yo
 
 * Output if unsuccessful (the private key is not known):
     ```
-    Could not find any basepoint matching the provided witness programm.
+    Could not find any basepoint matching the provided witness programme.
     Are you sure that the channel used `option_static_remotekey` ?
     *** stack smashing detected ***: terminated
     Aborted
@@ -681,7 +681,7 @@ Will need to pay through a peer which supports the onion messages which means yo
     ```
     KwFvTne98E1t3mTNAr8pKx67eUzFJWdSNPqPSfxMEtrueW7PcQzL
     ```
-* To import to teh Electrum Wallet use the `p2wpkh:` prefix:
+* To import to the Electrum Wallet use the `p2wpkh:` prefix:
   <https://bitcoinelectrum.com/importing-your-private-keys-into-electrum/>
   ```
   p2wpkh:KxacygL6usxP8T9cFSM2SRW5QsEg66bUQUEn997UWwCZANEe7NLT
@@ -708,7 +708,7 @@ Will need to pay through a peer which supports the onion messages which means yo
 
 ### Experimental update to the latest master
 * this won't persist in case the SDcard is reflashed so will need to manually update again.
-* the commadn to use the built-in script to update to the lates commit in the default branch is:
+* the command to use the built-in script to update to the last commit in the default branch is:
     ```
     config.scripts/cl.install.sh update
     ```
@@ -934,7 +934,7 @@ Will need to pay through a peer which supports the onion messages which means yo
 ## All possible config options
   *  can be shown by running:
   `lightningd --help`
-  * To persist the setings place the options in the config file without the `--` and restart lightningd
+  * To persist the settings place the options in the config file without the `--` and restart lightningd
     ```
     Usage: lightningd
     A bitcoin lightning daemon (default values shown for network: bitcoin).
@@ -970,7 +970,7 @@ Will need to pay through a peer which supports the onion messages which means yo
     --funding-confirms <arg>                          Confirmations required for funding transaction (default: 3)
     --cltv-delta <arg>                                Number of blocks for cltv_expiry_delta (default: 34)
     --cltv-final <arg>                                Number of blocks for final cltv_expiry (default: 18)
-    --commit-time=<millseconds>                       Time after changes before sending out COMMIT (default: 10)
+    --commit-time=<milliseconds>                       Time after changes before sending out COMMIT (default: 10)
     --fee-base <arg>                                  Millisatoshi minimum to charge for HTLC (default: 1000)
     --rescan <arg>                                    Number of blocks to rescan from the current head, or absolute blockheight if negative (default: 15)
     --fee-per-satoshi <arg>                           Microsatoshi fee for every satoshi in HTLC (default: 10)

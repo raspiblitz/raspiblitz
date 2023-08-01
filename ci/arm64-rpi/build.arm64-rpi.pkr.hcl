@@ -56,7 +56,7 @@ build {
       "branch=${var.branch}",
       "pack=${var.pack}"
     ]
-    script = "./raspiblitz.sh"
+    script = "./build.raspiblitz.sh"
   }
 
   provisioner "shell" {

@@ -9,7 +9,7 @@ else
   fatpack="0"
 fi
 
-if [ "${fatpack}" = "1" ]; then
+if [ "${desktop}" = "gnome" ]; then
   echo 'Add Gnome desktop'
   export DEBIAN_FRONTEND=none
   sudo apt install gnome -y

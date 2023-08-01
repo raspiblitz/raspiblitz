@@ -3,7 +3,7 @@
 
 _Build your own Lightning & Bitcoin Fullnode on a RaspberryPi with an optional Display._
 
-`Version 1.9.0 with bitcoin 24.0.1, lnd 0.16.2 & Core Lightning 23.02.2` ([api](https://github.com/fusion44/blitz_api)|[web](https://github.com/cstenglein/raspiblitz-web))
+`Version 1.10.0rc1 with bitcoin 25.0.0, lnd 0.16.4 & Core Lightning 23.05.2` ([api](https://github.com/fusion44/blitz_api)|[web](https://github.com/cstenglein/raspiblitz-web))
 
 ![RaspiBlitz](pictures/raspiblitz.jpg)
 
@@ -158,11 +158,11 @@ You now have the hardware ready for your RaspiBlitz - whats missing is the softw
 
 ## Downloading the Software
 
-In this section you find the lastest ready-to-use RaspiBlitz sd card images. Basically you just download, write/flash the image file to an sd card and start your RaspberryPi with it - its the same for first install or updating to a newer version. You can choose from two ready-made sd card images below:
+In this section you find the latest ready-to-use RaspiBlitz SDcard images. Basically you just download, write/flash the image file to an sd card and start your RaspberryPi with it - its the same for first install or updating to a newer version. You can choose from two ready-made sd card images below:
 
 ### FATPACK SD Card Image (Beginners - WebUI)
 
-This is the sd card image you should choose if your at the beginning of your RaspiBlitz journey or you are a casual node runner wanna download the next update - with WebUI & fast installing bonus apps.
+This is the sd card image you should choose if your at the beginning of your RaspiBlitz journey or you are a casual node runner wanna download the next update/upgrade - with WebUI & fast installing bonus apps.
 
 <!-- *WARNING: THIS IS STILL A RELEASE CANDIDATE VERSION</br>
 JUST USE FOR TESTING, HIGHER RISK OF LOSING FUNDS!* -->

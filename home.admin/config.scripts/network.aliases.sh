@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # command info
-if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ];then
+if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "# Usage:"
   echo "# source <(/home/admin/config.scripts/network.aliases.sh getvars <lnd|cl> <mainnet|testnet|signet>)"
   echo "# if no values given uses the default values from the raspiblitz.conf"
@@ -18,20 +18,20 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ];then
   exit 1
 fi
 
-if [ "$1" = getvars ];then
+if [ "$1" = getvars ]; then
 
   source /home/admin/raspiblitz.info
   source /mnt/hdd/raspiblitz.conf 2>/dev/null
 
-  if [ ${#network} -eq 0 ];then
+  if [ ${#network} -eq 0 ]; then
     network=bitcoin
   fi
 
   # LNTYPE is: lnd | cl
-  if [ $# -gt 1 ];then
+  if [ $# -gt 1 ]; then
     LNTYPE=$2
   else
-    if [ ${#lightning} -gt 0 ];then
+    if [ ${#lightning} -gt 0 ]; then
       LNTYPE=${lightning}
     else
       LNTYPE=lnd
@@ -44,30 +44,30 @@ if [ "$1" = getvars ];then
     chain=main
   fi
   # CHAIN is: signet | testnet | mainnet
-  if [ $# -gt 2 ]&&[ "$3" != net ]&&[ "$3" != "" ];then
+  if [ $# -gt 2 ] && { [ "$3" = "signet" ] || [ "$3" = "testnet" ] || [ "$3" = "mainnet" ]; }; then
     CHAIN=$3
     chain=${CHAIN::-3}
   else
     CHAIN=${chain}net
   fi
-  echo "CHAIN=${chain}net"
+  echo "CHAIN=${CHAIN}"
   echo "chain=${chain}"
 
   # netprefix is:     "" |  t | s
   # portprefix is:    "" |  1 | 3
   # L2rpcportmod is:   0 |  1 | 3
   # zmqprefix is:     28 | 21 | 23
-  if [ "${chain}" == "main" ];then
+  if [ "${chain}" == "main" ]; then
     netprefix=""
     L2rpcportmod=0
     portprefix=""
     zmqprefix=28
-  elif [ "${chain}" == "test" ];then
+  elif [ "${chain}" == "test" ]; then
     netprefix="t"
     L2rpcportmod=1
     portprefix=1
     zmqprefix=21
-  elif [ "${chain}" == "sig" ];then
+  elif [ "${chain}" == "sig" ]; then
     netprefix="s"
     L2rpcportmod=3
     portprefix=3
@@ -78,9 +78,9 @@ if [ "$1" = getvars ];then
   echo "L2rpcportmod=${L2rpcportmod}"
   echo "zmqprefix=${zmqprefix}"
 
-  if [ "${LNTYPE}" == "cl" ];then
+  if [ "${LNTYPE}" == "cl" ]; then
     # CLNETWORK is: bitcoin / signet / testnet
-    if [ "${chain}" == "main" ];then
+    if [ "${chain}" == "main" ]; then
       CLNETWORK=${network}
     else
       CLNETWORK=${chain}net
@@ -100,7 +100,7 @@ if [ "$1" = getvars ];then
   fi
 
   # typeprefix is: "" | c
-  if [ "${LNTYPE}" == "lnd" ];then
+  if [ "${LNTYPE}" == "lnd" ]; then
     typeprefix=''
     lndConfFile="/mnt/hdd/lnd/${netprefix}lnd.conf"
   fi

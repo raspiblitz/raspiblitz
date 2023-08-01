@@ -48,6 +48,13 @@ if [ "$1" == "prestart" ]; then
     exit 1
   fi
 
+  ##### CLEAN UP #####
+
+  # all lines with just spaces to empty lines
+  sed -i 's/^[[:space:]]*$//g' /mnt/hdd/lnd/lnd.conf
+  # all double empty lines to single empty lines
+  sed -i '/^$/N;/^\n$/D' /mnt/hdd/lnd/lnd.conf
+
   # set default chain parameter
   targetchain=$2
   if [ "${targetchain}" == "" ]; then
@@ -304,8 +311,6 @@ if [ "$1" == "prestart" ]; then
   fi
 
   ##### RPCMIDDLEWARE SECTION #####
-
-  # [rpcmiddleware]
   sectionName="rpcmiddleware"
   echo "# [${sectionName}] config ..."
 
@@ -338,6 +343,38 @@ if [ "$1" == "prestart" ]; then
 
   # SET/UPDATE rpcmiddleware.enable
   setting ${lndConfFile} ${insertLine} "rpcmiddleware.enable" "true"
+
+  ##### HEALTHCHECK SECTION #####
+  sectionName="healthcheck"
+  echo "# [${sectionName}] config ..."
+
+  # make sure lnd config has a [healthcheck] section
+  sectionExists=$(cat ${lndConfFile} | grep -c "^\[${sectionName}\]")
+  echo "# sectionExists(${sectionExists})"
+  if [ "${sectionExists}" == "0" ]; then
+    echo "# adding section [${sectionName}]"
+    echo "
+[${sectionName}]
+" | tee -a ${lndConfFile}
+  fi
+
+  # get line number of [healthcheck] section
+  sectionLine=$(cat ${lndConfFile} | grep -n "^\[${sectionName}\]" | cut -d ":" -f1)
+  echo "# sectionLine(${sectionLine})"
+  insertLine=$(expr $sectionLine + 1)
+  echo "# insertLine(${insertLine})"
+  fileLines=$(wc -l ${lndConfFile} | cut -d " " -f1)
+  echo "# fileLines(${fileLines})"
+  if [ ${fileLines} -lt ${insertLine} ]; then
+    echo "# adding new line for inserts"
+    echo "
+" | tee -a ${lndConfFile}
+  fi
+
+  # SET/UPDATE healthcheck values
+  setting ${lndConfFile} ${insertLine} "healthcheck.chainbackend.attempts" "3"
+  setting ${lndConfFile} ${insertLine} "healthcheck.chainbackend.timeout" "2m0s"
+  setting ${lndConfFile} ${insertLine} "healthcheck.chainbackend.interval" "1m30s"
 
   echo "# OK PRESTART DONE"
 
@@ -411,26 +448,6 @@ elif [ "$1" == "basic-setup" ]; then
   if [ "${network}" != "${lndNetwork}" ]; then
     echo "err='$(netprefix)lnd.conf: blockchain network in $(netprefix)lnd.conf (${lndNetwork}) is different from raspiblitz.conf (${network})'"
   fi
-
-  #  # get chain from config (TESTNET / MAINNET)
-  #  lndChain=""
-  #  source <(sudo cat /mnt/hdd/lnd/lnd.conf 2>/dev/null | grep "${lndNetwork}.mainnet" | sed 's/^[a-z]*\.//g')
-  #  source <(sudo cat /mnt/hdd/lnd/lnd.conf 2>/dev/null | grep "${lndNetwork}.testnet" | sed 's/^[a-z]*\.//g')
-  #  if [ "${mainnet}" == "1" ] && [ "${testnet}" == "1" ]; then
-  #    echo "err='lnd.conf: mainnet and testnet are set active at the same time'"
-  #  elif [ "${mainnet}" == "1" ]; then
-  #    lndChain="main"
-  #  elif [ "${testnet}" == "1" ]; then
-  #    lndChain="test"
-  #  else
-  #    echo "err='lnd.conf: neither testnet or mainnet is set active (raspiblitz needs one of them active in lnd.conf)'"
-  #  fi
-  #  echo "chain='${lndChain}'"
-  #
-  #  # check if chain is same the raspiblitz config
-  #  if [ "${chain}" != "${lndChain}" ]; then
-  #    echo "err='lnd.conf: testnet/mainnet in lnd.conf (${lndChain}) is different from raspiblitz.conf (${chain})'"
-  #  fi
 
   # check for admin macaroon exist (on HDD)
   adminMacaroonExists=$(sudo ls /mnt/hdd/lnd/data/chain/${network}/${chain}net/admin.macaroon 2>/dev/null | grep -c 'admin.macaroon')

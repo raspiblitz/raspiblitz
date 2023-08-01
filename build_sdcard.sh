@@ -15,7 +15,7 @@ defaultBranch="v1.10"
 defaultAPIuser="fusion44"
 defaultAPIrepo="blitz_api"
 
-defaultWEBUIuser="cstenglein"
+defaultWEBUIuser="raspiblitz"
 defaultWEBUIrepo="raspiblitz-web"
 
 me="${0##/*}"
@@ -291,9 +291,8 @@ HandleLidSwitchDocked=ignore" | tee /etc/systemd/logind.conf.d/nosuspend.conf
 # https://github.com/rootzoll/raspiblitz/issues/138
 # https://daker.me/2014/10/how-to-fix-perl-warning-setting-locale-failed-in-raspbian.html
 # https://stackoverflow.com/questions/38188762/generate-all-locales-in-a-docker-image
-if [ "${baseimage}" = "raspios_arm64" ] || [ "${baseimage}" = "debian" ]; then
+if [ "${baseimage}" = "raspios_arm64" ] || [ "${cpu}" = aarch64 ] && [ "${baseimage}" = "debian" ]; then
   echo -e "\n*** FIXING LOCALES FOR BUILD ***"
-
   sed -i "s/^# en_US.UTF-8 UTF-8.*/en_US.UTF-8 UTF-8/g" /etc/locale.gen
   sed -i "s/^# en_US ISO-8859-1.*/en_US ISO-8859-1/g" /etc/locale.gen
   locale-gen
@@ -492,55 +491,25 @@ fi
 sed -i "s/^#SystemMaxUse=.*/SystemMaxUse=250M/g" /etc/systemd/journald.conf
 sed -i "s/^#SystemMaxFileSize=.*/SystemMaxFileSize=50M/g" /etc/systemd/journald.conf
 
-# change log rotates
-# see https://github.com/rootzoll/raspiblitz/issues/394#issuecomment-471535483
+## LOG ROTATION
+
+# GLOBAL for all logs: /etc/logrotate.conf
+echo "# Optimizing log files: rotate daily max 100M, keep 4 days & compress old"
+sed -i "s/^weekly/daily size 100M/g" /etc/logrotate.conf
+sed -i "s/^#compress/compress/g" /etc/logrotate.conf
+
+# SPECIAL FOR SYSLOG: /etc/logrotate.d/rsyslog
+# to test config run: sudo logrotate -v /etc/logrotate.d/rsyslog
+rm /etc/logrotate.d/rsyslog 2>/dev/null
 echo "
 /var/log/syslog
-{
-  rotate 7
-  daily
-  missingok
-  notifempty
-  delaycompress
-  compress
-  postrotate
-    invoke-rc.d rsyslog rotate > /dev/null
-  endscript
-}
-
 /var/log/mail.info
 /var/log/mail.warn
 /var/log/mail.err
 /var/log/mail.log
 /var/log/daemon.log
-{
-  rotate 4
-  size=100M
-  missingok
-  notifempty
-  compress
-  delaycompress
-  sharedscripts
-  postrotate
-    invoke-rc.d rsyslog rotate > /dev/null
-  endscript
-}
-
 /var/log/kern.log
 /var/log/auth.log
-{
-  rotate 4
-  size=100M
-  missingok
-  notifempty
-  compress
-  delaycompress
-  sharedscripts
-  postrotate
-    invoke-rc.d rsyslog rotate > /dev/null
-  endscript
-}
-
 /var/log/user.log
 /var/log/lpr.log
 /var/log/cron.log
@@ -548,19 +517,19 @@ echo "
 /var/log/messages
 {
   rotate 4
-  weekly
+  size 100M
   missingok
-  notifempty
   compress
   delaycompress
   sharedscripts
   postrotate
-    invoke-rc.d rsyslog rotate > /dev/null
+    service logrotate restart
   endscript
 }
 " | tee ./rsyslog
 mv ./rsyslog /etc/logrotate.d/rsyslog
 chown root:root /etc/logrotate.d/rsyslog
+service logrotate restart
 service rsyslog restart
 
 echo -e "\n*** ADDING MAIN USER admin ***"
@@ -708,8 +677,14 @@ bash -c "echo '# End of file' >> /etc/security/limits.conf"
 sed --in-place -i "23s/.*/session required pam_limits.so/" /etc/pam.d/common-session
 sed --in-place -i "25s/.*/session required pam_limits.so/" /etc/pam.d/common-session-noninteractive
 bash -c "echo '# end of pam-auth-update config' >> /etc/pam.d/common-session-noninteractive"
-# increase the possible number of running processes from 128
-bash -c "echo 'fs.inotify.max_user_instances=4096' >> /etc/sysctl.conf"
+
+# Increase maximum number of inotify instances
+bash -c "echo '# RaspiBlitz Edit: Set maximum number of inotify instances (8192 recommended for min 2GB RAM)' >> /etc/sysctl.conf"
+bash -c "echo 'fs.inotify.max_user_instances=8192' >> /etc/sysctl.conf"
+
+# Activate overcommit_memory
+bash -c "echo '# RaspiBlitz Edit: Use overcommit to prevent system crashes' >> /etc/sysctl.conf"
+bash -c "echo 'vm.overcommit_memory=1' >> /etc/sysctl.conf"
 
 # *** fail2ban ***
 # based on https://raspibolt.org/security.html#fail2ban

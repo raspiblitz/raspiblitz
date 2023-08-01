@@ -4,14 +4,16 @@
 - Update: Bitcoin Core v25.0.0 [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-25.0.md)
 - Update: LND v0.16.4-beta [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.16.4-beta)
 - Update: Core Lightning v23.05.2 [details](https://github.com/ElementsProject/lightning/releases/tag/v23.05.2)
-- Update: Electrum Server in Rust (electrs) v0.9.14 [details](https://github.com/romanz/electrs/blob/master/RELEASE-NOTES.md#0914-jun-10-2023)
+- Update: Electrum Server in Rust (electrs) v0.10.0 [details](https://github.com/romanz/electrs/blob/master/RELEASE-NOTES.md#0100-jul-22-2023)
 - Update: C-lightningREST v0.10.5 [details](https://github.com/Ride-The-Lightning/c-lightning-REST/releases/tag/v0.10.5)
 - Update: RTL v0.14.0 [details](https://github.com/Ride-The-Lightning/RTL/releases/tag/v0.14.0)
 - Update: Lightning Terminal v0.10.1-alpha [details](https://github.com/lightninglabs/lightning-terminal/releases/tag/v0.10.1-alpha)
+- Update: Channel Tools (chantools) v0.11.3 [details](https://github.com/guggero/chantools/releases/tag/v0.11.3)
 - Update: LNDg v1.7.0 [details](https://github.com/cryptosharks131/lndg)
 - Update: Thunderhub v0.13.19 [details](https://github.com/apotdevin/thunderhub/releases/tag/v0.13.19)
 - Update: LNbits 0.10.9 [details](https://github.com/lnbits/lnbits/releases/tag/0.10.9)
 - Update: BTCPayServer 1.10.3 (postgres by default with sqlite migration) [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.10.3)
+- Update: Specter Desktop 1.13.1 [details](https://github.com/cryptoadvance/specter-desktop/releases/tag/v1.13.1)
 - Fix: Homebanking Interface FinTS/HBCI (experimental) [details](https://github.com/rootzoll/raspiblitz/issues/1186)
 
 ## What's new in Version 1.9.0 of RaspiBlitz?
@@ -245,7 +247,7 @@ There was a small patch-update with raspiblitz-v1.7.1-2021-10-28.img.gz to fix a
 - New: Circuit Breaker (config-script) [details](https://github.com/rootzoll/raspiblitz/issues/1581)
 - New: PyBlock (Python Util & Fun Scripts) [details](https://github.com/curly60e/pyblock/blob/master/README.md)
 - New: Mempool Explorer [details](https://github.com/mempool/mempool)
-- New: dynu.com as alternative option for LetsEncrpyt FreeDNS provider
+- New: dynu.com as alternative option for LetsEncrypt FreeDNS provider
 - New: Experimental running RaspiBlitz as VM (vagrant & docker)
 
 For ALL small bug fixes & improvements see: https://github.com/rootzoll/raspiblitz/milestone/11
