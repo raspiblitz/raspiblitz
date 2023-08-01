@@ -184,7 +184,7 @@ To enable easy reachability with normal browser from the outside
 Consider adding a IP2TOR Bridge under OPTIONS."
   fi
 
-  whiptail --title " LNbits ${fundinginfo}" --yes-button "OK" --no-button "OPTIONS" --yesno "${text}" 18 69
+  whiptail --title " LNbits ${fundinginfo}" --yes-button "OK" --no-button "OPTIONS" --yesno "${text}" 18 78
   result=$?
   sudo /home/admin/config.scripts/blitz.display.sh hide
   echo "option (${result}) - please wait ..."
