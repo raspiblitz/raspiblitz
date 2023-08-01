@@ -169,11 +169,23 @@ if [ ${mode} = "lnd-export" ]; then
     exit 1
   fi
 
-  # copy backup over
+  # if a backup device is connected (and has enogh free space) copy it there
   source <(/home/admin/config.scripts/blitz.backupdevice.sh status)
   if [ $isMounted == 1 ]; then
-     sudo cp ${filename} /mnt/backup
-     echo "copied to backup device"
+
+    # get free space in bytes from backup device
+    freeSpace=$(df | grep -m1 "/mnt/backup" | awk '{print $4}')
+
+    # subtract 500MB for safety
+    freeSpace=$(expr ${freeSpace} - 500000000)
+
+    # check if enough space on backup device
+    if [ ${freeSpace} -gt ${byteSize} ]; then
+      echo "# making copy to backup device ..."
+      sudo cp ${filename} /mnt/backup
+    else
+      echo "# not enough space on backup device for extra copy'"
+    fi
   fi
 
   # output result data
