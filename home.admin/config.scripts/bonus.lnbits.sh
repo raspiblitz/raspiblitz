@@ -105,10 +105,6 @@ function revertMigration() {
     sudo sed -i "/^LNBITS_DATA_FOLDER=/d" /home/lnbits/lnbits/.env
     sudo bash -c "echo 'LNBITS_DATA_FOLDER=/mnt/hdd/app-data/LNBits' >> /home/lnbits/lnbits/.env"
 
-    # activate admin user
-    sudo sed -i "/^LNBITS_ADMIN_UI=/d" /home/lnbits/lnbits/.env
-    sudo bash -c "echo 'LNBITS_ADMIN_UI=true' >> /home/lnbits/lnbits/.env"
-
     # start service
     echo "# Start LNBits"
     sudo systemctl start lnbits
@@ -761,6 +757,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "# preparing env file"
   sudo rm /home/lnbits/lnbits/.env 2>/dev/null
   sudo -u lnbits touch /home/lnbits/lnbits/.env
+
+  # activate admin user
+  sudo sed -i "/^LNBITS_ADMIN_UI=/d" /home/lnbits/lnbits/.env
+  sudo bash -c "echo 'LNBITS_ADMIN_UI=true' >> /home/lnbits/lnbits/.env"
 
   if [ ! -e /mnt/hdd/app-data/LNBits/database.sqlite3 ]; then
     echo "# install database: PostgreSQL"
