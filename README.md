@@ -167,8 +167,8 @@ This is the sd card image you should choose if your at the beginning of your Ras
 *WARNING: THIS IS STILL A RELEASE CANDIDATE VERSION</br>
 JUST USE FOR TESTING, HIGHER RISK OF LOSING FUNDS!*
 
-- __FATPACK SD CARD IMAGE ⮕ [raspiblitz-fat-v1.10.0rc2-2023-08-01.img.gz](https://raspiblitz.fulmo.org/images/raspiblitz-fat-v1.10.0rc2-2023-08-01.img.gz)__
-- SHA-256: 61b1052399ab98c9794674f6127cb3c1114d788f26c62de88278d69805613dbd
+- __FATPACK SD CARD IMAGE ⮕ [raspiblitz-fat-v1.10.0rc2-2023-08-02.img.gz](https://raspiblitz.fulmo.org/images/raspiblitz-fat-v1.10.0rc2-2023-08-02.img.gz)__
+- SHA-256: a1a187a655a7b9b9ba6b3b1609d555a801f6be754d6fd209dfede9ff9e7379b8
 <!--- GPG 64-bit (main): 1C73 060C 7C17 6461 & (sub): AA9D D1B5 CC56 47DA
 - Signature-File: [raspiblitz-fat-v1.9.0-2023-05-22.img.gz.sig](https://raspiblitz.fulmo.org/images/raspiblitz-fat-v1.9.0-2023-05-22.img.gz.sig)
 - Torrent: [raspiblitz-fat-v1.9.0-2022-12-21.img.gz.torrent](https://github.com/rootzoll/raspiblitz/raw/dev/home.admin/assets/raspiblitz-fat-v1.9.0-2023-05-22.img.gz.torrent) -->
@@ -181,8 +181,8 @@ This is the sd card image for RaspiBlitz users that are already more experienced
 *WARNING: THIS IS STILL A RELEASE CANDIDATE VERSION</br>
 JUST USE FOR TESTING, HIGHER RISK OF LOSING FUNDS!*
 
-- __MINIMAL SD CARD IMAGE ⮕ [raspiblitz-min-v1.10.0rc2-2023-08-01.img.gz](https://raspiblitz.fulmo.org/images/raspiblitz-min-v1.10.0rc2-2023-08-01.img.gz)__
-- SHA-256: 2488dc9c8d948e9048d41016a718842d65adc25978fe22bc96ab9ce6cbead4b8
+- __MINIMAL SD CARD IMAGE ⮕ [raspiblitz-min-v1.10.0rc2-2023-08-02.img.gz](https://raspiblitz.fulmo.org/images/raspiblitz-min-v1.10.0rc2-2023-08-02.img.gz)__
+- SHA-256: d2775524f5e51770294d873a9418b445041d98b97606c4510c3e322a180f9806
 <!-- - GPG 64-bit (main): 1C73 060C 7C17 6461 & (sub): AA9D D1B5 CC56 47DA
 - Signature-File: [raspiblitz-min-v1.9.0-2023-05-22.img.gz.sig](https://raspiblitz.fulmo.org/images/raspiblitz-min-v1.9.0-2023-05-22.img.gz.sig)
 - Torrent: [raspiblitz-min-v1.9.0-2022-12-21.img.gz.torrent](https://github.com/rootzoll/raspiblitz/raw/dev/home.admin/assets/raspiblitz-min-v1.9.0-2023-05-22.img.gz.torrent) -->
