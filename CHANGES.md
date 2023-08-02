@@ -13,7 +13,7 @@
 - Update: LNDg v1.7.0 [details](https://github.com/cryptosharks131/lndg)
 - Update: Thunderhub v0.13.19 [details](https://github.com/apotdevin/thunderhub/releases/tag/v0.13.19)
 - Update: LNbits 0.10.9 [details](https://github.com/lnbits/lnbits/releases/tag/0.10.9)
-- Update: BTCPayServer 1.10.3 (postgres by default with sqlite migration) [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.10.3)
+- Update: BTCPayServer 1.11.1 [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.10.3)
 - Update: Specter Desktop 1.13.1 [details](https://github.com/cryptoadvance/specter-desktop/releases/tag/v1.13.1)
 - Update: Kindle-Display 0.5.1 [details](https://github.com/dennisreimann/kindle-display/)
 - Update: JoinMarket v0.9.10 [details](https://github.com/JoinMarket-Org/joinmarket-clientserver/releases/tag/v0.9.10)
