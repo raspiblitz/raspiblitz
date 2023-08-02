@@ -265,6 +265,16 @@ else
   echo "Provisioning CL interims update - keep default" >> ${logFile}
 fi
 
+# Bitcoin Mainnet
+if [ "${mainnet}" == "on" ] || [ "${chain}" == "main" ]; then
+    echo "Provisioning ${network} Mainnet - run config script" >> ${logFile}
+    /home/admin/config.scripts/bitcoin.install.sh on mainnet >> ${logFile} 2>&1
+    systemctl start bitcoind >> ${logFile} 2>&1
+else
+    echo "Provisioning ${network} Mainnet - not active" >> ${logFile}
+fi
+
+
 # Bitcoin Testnet
 if [ "${testnet}" == "on" ]; then
     echo "Provisioning ${network} Testnet - run config script" >> ${logFile}
