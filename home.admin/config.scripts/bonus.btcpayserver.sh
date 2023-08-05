@@ -403,10 +403,10 @@ if [ "$1" = "install" ]; then
   cd NBXplorer || exit 1
   sudo -u btcpay git reset --hard $NBXplorerVersion
   # PGP verify
-  PGPsigner="nicolasdorier"
-  PGPpubkeyLink="https://keybase.io/nicolasdorier/pgp_keys.asc"
-  PGPpubkeyFingerprint="AB4CFA9895ACA0DBE27F6B346618763EF09186FE"
-  sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
+  NBXPGPsigner="nicolasdorier"
+  NBXPGPpubkeyLink="https://keybase.io/nicolasdorier/pgp_keys.asc"
+  NBXPGPpubkeyFingerprint="AB4CFA9895ACA0DBE27F6B346618763EF09186FE"
+  sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh "${NBXPGPsigner}" "${NBXPGPpubkeyLink}" "${NBXPGPpubkeyFingerprint}" || exit 1
   echo "# Build NBXplorer $NBXplorerVersion"
   # from the build.sh with path
   sudo -u btcpay /home/btcpay/dotnet/dotnet build -c Release NBXplorer/NBXplorer.csproj || exit 1
