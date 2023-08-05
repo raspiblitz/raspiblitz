@@ -4,8 +4,22 @@
 
 # https://github.com/dgarage/NBXplorer/tags
 NBXplorerVersion="v2.3.65"
+
 # https://github.com/btcpayserver/btcpayserver/releases
 BTCPayVersion="v1.11.1"
+
+# check who signed the release (person that published release)
+#PGPsigner="nicolasdorier"
+#PGPpubkeyLink="https://keybase.io/nicolasdorier/pgp_keys.asc"
+#PGPpubkeyFingerprint="AB4CFA9895ACA0DBE27F6B346618763EF09186FE"
+# ---
+PGPsigner="Kukks"
+PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
+PGPpubkeyFingerprint="8E5530D9D1C93097"
+# ---
+#PGPsigner="web-flow"
+#PGPpubkeyLink="https://github.com/web-flow.gpg"
+#PGPpubkeyFingerprint="4AEE18F83AFDEB23"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -405,17 +419,6 @@ if [ "$1" = "install" ]; then
   cd btcpayserver || exit 1
   sudo -u btcpay git reset --hard $BTCPayVersion
   #sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh "web-flow" "https://github.com/web-flow.gpg" "4AEE18F83AFDEB23" || exit 1
-  PGPsigner="nicolasdorier"
-  PGPpubkeyLink="https://keybase.io/nicolasdorier/pgp_keys.asc"
-  PGPpubkeyFingerprint="AB4CFA9895ACA0DBE27F6B346618763EF09186FE"
-  # ---
-  #PGPsigner="Kukks"
-  #PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
-  #PGPpubkeyFingerprint="8E5530D9D1C93097"
-  # ---
-  #PGPsigner="web-flow"
-  #PGPpubkeyLink="https://github.com/web-flow.gpg"
-  #PGPpubkeyFingerprint="4AEE18F83AFDEB23"
 
   echo "# verify signature of ${PGPsigner}"
   sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
