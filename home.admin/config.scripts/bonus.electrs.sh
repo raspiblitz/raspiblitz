@@ -212,8 +212,9 @@ Check 'sudo nginx -t' for a detailed error message.
     echo "- as manual server set '${localIP}' & '${portSSL}'"
     echo "- laptop and RaspiBlitz need to be within same local network"
     echo
-    echo "To start directly from laptop terminal use:"
-    echo "electrum --oneserver --server ${localIP}:${portSSL}:s"
+    echo "To start directly from laptop terminal use"
+    echo "PC: electrum --oneserver --server ${localIP}:${portSSL}:s"
+    echo "MAC: open -a /Applications/Electrum.app --args --oneserver --server ${localIP}:${portSSL}:s"
     if [ ${TorRunning} -eq 1 ]; then
       echo
       echo "The Tor Hidden Service address for electrs is (see LCD for QR code):"
