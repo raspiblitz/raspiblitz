@@ -786,7 +786,9 @@ else
   echo "* skipping FATPACK"
 fi
 
-# check fallback list bitnodes
+# check fallback list bitnodes 
+# update on releases manually in asset folder with:
+# curl -H "Accept: application/json; indent=4" https://bitnodes.io/api/v1/snapshots/latest/ -o ./fallback.bitnodes.nodes
 byteSizeList=$(sudo -u admin stat -c %s /home/admin/fallback.bitnodes.nodes)
 if [ ${#byteSizeList} -eq 0 ] || [ ${byteSizeList} -lt 10240 ]; then
   echo "Using fallback list from repo: bitnodes"
@@ -796,6 +798,8 @@ fi
 chown admin:admin /home/admin/fallback.bitnodes.nodes
 
 # check fallback list bitcoin core
+# update on releases manually in asset folder with:
+# curl https://raw.githubusercontent.com/bitcoin/bitcoin/master/contrib/seeds/nodes_main.txt -o ./fallback.bitcoin.nodes
 byteSizeList=$(sudo -u admin stat -c %s /home/admin/fallback.bitcoin.nodes)
 if [ ${#byteSizeList} -eq 0 ] || [ ${byteSizeList} -lt 10240 ]; then
   echo "Using fallback list from repo: bitcoin core"
