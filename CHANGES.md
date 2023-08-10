@@ -14,6 +14,7 @@
 - Update: LNbits 0.10.9 [details](https://github.com/lnbits/lnbits/releases/tag/0.10.9)
 - Update: BTCPayServer 1.10.3 (postgres by default with sqlite migration) [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.10.3)
 - Update: Specter Desktop 1.13.1 [details](https://github.com/cryptoadvance/specter-desktop/releases/tag/v1.13.1)
+- Update: Kindle-Display 0.5.1 [details](https://github.com/dennisreimann/kindle-display/)
 - Fix: Homebanking Interface FinTS/HBCI (experimental) [details](https://github.com/rootzoll/raspiblitz/issues/1186)
 
 ## What's new in Version 1.9.0 of RaspiBlitz?
