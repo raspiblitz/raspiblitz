@@ -32,7 +32,7 @@ Options:
   -h, --help                               this help info
   -i, --interaction [0|1]                  interaction before proceeding with exection (default: 1)
   -f, --fatpack [0|1]                      fatpack mode (default: 1)
-  -u, --github-user [rootzoll|other]       github user to be checked from the repo (default: ${defaultRepo})
+  -u, --github-user [raspiblitz|other]       github user to be checked from the repo (default: ${defaultRepo})
   -b, --branch [v1.7|v1.8]                 branch to be built on (default: ${defaultBranch})
   -d, --display [lcd|hdmi|headless]        display class (default: lcd)
   -t, --tweak-boot-drive [0|1]             tweak boot drives (default: 1)
@@ -291,7 +291,7 @@ HandleLidSwitchDocked=ignore" | tee /etc/systemd/logind.conf.d/nosuspend.conf
 # https://github.com/rootzoll/raspiblitz/issues/138
 # https://daker.me/2014/10/how-to-fix-perl-warning-setting-locale-failed-in-raspbian.html
 # https://stackoverflow.com/questions/38188762/generate-all-locales-in-a-docker-image
-if [ "${baseimage}" = "raspios_arm64" ] || [ "${cpu}" = aarch64 ] && [ "${baseimage}" = "debian" ]; then
+if [ "${baseimage}" = "raspios_arm64" ] || [ "${baseimage}" = "debian" ]; then
   echo -e "\n*** FIXING LOCALES FOR BUILD ***"
   sed -i "s/^# en_US.UTF-8 UTF-8.*/en_US.UTF-8 UTF-8/g" /etc/locale.gen
   sed -i "s/^# en_US ISO-8859-1.*/en_US ISO-8859-1/g" /etc/locale.gen
@@ -397,7 +397,7 @@ if [ "$(compgen -u | grep -c pi)" -eq 0 ];then
 fi
 
 # special prepare when Raspbian
-if [ "${baseimage}" = "raspios_arm64" ] || [ "${architecture}" = "aarch64" ] && [ "${baseimage}" = "debian" ]; then
+if [ "${baseimage}" = "raspios_arm64" ] || [ "${baseimage}" = "debian" ]; then
 
   echo -e "\n*** PREPARE RASPBERRY OS VARIANTS ***"
   apt_install raspi-config
@@ -697,7 +697,7 @@ echo "Activating CACHE RAM DISK ... "
 /home/admin/_cache.sh keyvalue on
 
 # *** Wifi, Bluetooth & other RaspberryPi configs ***
-if [ "${baseimage}" = "raspios_arm64"  ] || [ "${architecture}" = "aarch64" ] && [ "${baseimage}" = "debian" ]; then
+if [ "${baseimage}" = "raspios_arm64"  ] || [ "${baseimage}" = "debian" ]; then
 
   if [ "${wifi_region}" == "off" ]; then
     echo -e "\n*** DISABLE WIFI ***"
