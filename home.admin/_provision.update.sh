@@ -167,7 +167,6 @@ echo "*** Start ${network} (UPDATE) ***" >> ${logFile}
 /home/admin/_cache.sh set message "Blockchain Testrun"
 echo "- This can take a while .." >> ${logFile}
 chown -R bitcoin:bitcoin /mnt/hdd/${network} >>${logFile} 2>&1
-cp /home/admin/assets/${network}d.service /etc/systemd/system/${network}d.service
 systemctl daemon-reload >> ${logFile}
 systemctl enable ${network}d.service >> ${logFile}
 systemctl start ${network}d.service >> ${logFile}
