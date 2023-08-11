@@ -265,34 +265,6 @@ else
   echo "Provisioning CL interims update - keep default" >> ${logFile}
 fi
 
-# Bitcoin Mainnet
-if [ "${mainnet}" == "on" ] || [ "${chain}" == "main" ]; then
-    echo "Provisioning ${network} Mainnet - run config script" >> ${logFile}
-    /home/admin/config.scripts/bitcoin.install.sh on mainnet >> ${logFile} 2>&1
-    systemctl start bitcoind >> ${logFile} 2>&1
-else
-    echo "Provisioning ${network} Mainnet - not active" >> ${logFile}
-fi
-
-
-# Bitcoin Testnet
-if [ "${testnet}" == "on" ]; then
-    echo "Provisioning ${network} Testnet - run config script" >> ${logFile}
-    /home/admin/config.scripts/bitcoin.install.sh on testnet >> ${logFile} 2>&1
-    systemctl start tbitcoind >> ${logFile} 2>&1
-else
-    echo "Provisioning ${network} Testnet - not active" >> ${logFile}
-fi
-
-# Bitcoin Signet
-if [ "${signet}" == "on" ]; then
-    echo "Provisioning ${network} Signet - run config script" >> ${logFile}
-    /home/admin/config.scripts/bitcoin.install.sh on signet >> ${logFile} 2>&1
-    systemctl start sbitcoind >> ${logFile} 2>&1
-else
-    echo "Provisioning ${network} Signet - not active" >> ${logFile}
-fi
-
 # LND binary install
 if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ] || [ "${tlnd}" == "on" ] || [ "${slnd}" == "on" ]; then
   # if already installed by fatpack will skip 
