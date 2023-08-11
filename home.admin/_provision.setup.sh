@@ -117,7 +117,7 @@ echo ""
 echo "*** Start ${network} (SETUP) ***" >> ${logFile}
 /home/admin/_cache.sh set message "Blockchain Testrun"
 echo "- This can take a while .." >> ${logFile}
-cp /home/admin/assets/${network}d.service /etc/systemd/system/${network}d.service
+systemctl daemon-reload >> ${logFile}
 systemctl enable ${network}d.service
 systemctl start ${network}d.service
 

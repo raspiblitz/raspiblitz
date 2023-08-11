@@ -744,6 +744,30 @@ if [ ${isMounted} -eq 0 ]; then
   echo "# setting PASSWORD A" >> ${logFile}
   sudo /home/admin/config.scripts/blitz.passwords.sh set a "${passwordA}" >> ${logFile}
 
+  # Bitcoin Mainnet
+  if [ "${mainnet}" == "on" ] || [ "${chain}" == "main" ]; then
+    echo "Provisioning ${network} Mainnet - run config script" >> ${logFile}
+    /home/admin/config.scripts/bitcoin.install.sh on mainnet >> ${logFile} 2>&1
+  else
+    echo "Provisioning ${network} Mainnet - not active" >> ${logFile}
+  fi
+
+  # Bitcoin Testnet
+  if [ "${testnet}" == "on" ]; then
+    echo "Provisioning ${network} Testnet - run config script" >> ${logFile}
+    /home/admin/config.scripts/bitcoin.install.sh on testnet >> ${logFile} 2>&1
+  else
+    echo "Provisioning ${network} Testnet - not active" >> ${logFile}
+  fi
+
+  # Bitcoin Signet
+  if [ "${signet}" == "on" ]; then
+    echo "Provisioning ${network} Signet - run config script" >> ${logFile}
+    /home/admin/config.scripts/bitcoin.install.sh on signet >> ${logFile} 2>&1
+  else
+    echo "Provisioning ${network} Signet - not active" >> ${logFile}
+  fi
+
   # if setup - run provision setup first
   if [ "${setupPhase}" == "setup" ]; then
     echo "Calling _provision.setup.sh for basic setup tasks .." >> $logFile
