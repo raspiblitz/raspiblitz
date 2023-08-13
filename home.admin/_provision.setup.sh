@@ -93,8 +93,12 @@ if [ "${network}" == "bitcoin" ]; then
   kbSizeRAM=$(cat /proc/meminfo | grep "MemTotal" | sed 's/[^0-9]*//g')
   echo "kbSizeRAM(${kbSizeRAM})" >> ${logFile}
   echo "dont forget to reduce dbcache once IBD is done" > "/mnt/hdd/${network}/blocks/selfsync.flag"
+  # RP4 8GB
+  if [ ${kbSizeRAM} -gt 7500000 ]; then
+    echo "Detected RAM >=8GB --> optimizing ${network}.conf" >> ${logFile}
+    sed -i "s/^dbcache=.*/dbcache=4096/g" /mnt/hdd/${network}/${network}.conf
   # RP4 4GB
-  if [ ${kbSizeRAM} -gt 3500000 ]; then
+  elif [ ${kbSizeRAM} -gt 3500000 ]; then
     echo "Detected RAM >=4GB --> optimizing ${network}.conf" >> ${logFile}
     sed -i "s/^dbcache=.*/dbcache=2560/g" /mnt/hdd/${network}/${network}.conf
   # RP4 2GB
@@ -113,7 +117,7 @@ echo ""
 echo "*** Start ${network} (SETUP) ***" >> ${logFile}
 /home/admin/_cache.sh set message "Blockchain Testrun"
 echo "- This can take a while .." >> ${logFile}
-cp /home/admin/assets/${network}d.service /etc/systemd/system/${network}d.service
+systemctl daemon-reload >> ${logFile}
 systemctl enable ${network}d.service
 systemctl start ${network}d.service
 
