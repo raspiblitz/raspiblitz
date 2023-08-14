@@ -4,7 +4,7 @@
 
 _Build your own Lightning & Bitcoin Fullnode on a RaspberryPi with an optional Display._
 
-`Version 1.10.0rc2 with bitcoin 25.0.0, lnd 0.16.4 & Core Lightning 23.05.2` ([api](https://github.com/fusion44/blitz_api)|[web](https://github.com/raspiblitz/raspiblitz-web))
+`Version 1.10.0rc3 with bitcoin 25.0.0, lnd 0.16.4 & Core Lightning 23.05.2` ([api](https://github.com/fusion44/blitz_api)|[web](https://github.com/raspiblitz/raspiblitz-web))
 
 ![RaspiBlitz](pictures/raspiblitz.jpg)
 
@@ -170,8 +170,8 @@ This is the sd card image you should choose if your at the beginning of your Ras
 _WARNING: THIS IS STILL A RELEASE CANDIDATE VERSION</br>
 JUST USE FOR TESTING, HIGHER RISK OF LOSING FUNDS!_
 
-- **FATPACK SD CARD IMAGE ⮕ [raspiblitz-fat-v1.10.0rc2-2023-08-02.img.gz](https://raspiblitz.fulmo.org/images/raspiblitz-fat-v1.10.0rc2-2023-08-02.img.gz)**
-- SHA-256: a1a187a655a7b9b9ba6b3b1609d555a801f6be754d6fd209dfede9ff9e7379b8
+- **FATPACK SD CARD IMAGE ⮕ [raspiblitz-fat-v1.10.0rc3-2023-08-13.img.gz](https://raspiblitz.fulmo.org/images/raspiblitz-fat-v1.10.0rc3-2023-08-13.img.gz)**
+- SHA-256: 8ba43f92ebe62535c419b83b08e86362599d029def5a81920c14f68a96ce7adf
 <!--- GPG 64-bit (main): 1C73 060C 7C17 6461 & (sub): AA9D D1B5 CC56 47DA
 - Signature-File: [raspiblitz-fat-v1.9.0-2023-05-22.img.gz.sig](https://raspiblitz.fulmo.org/images/raspiblitz-fat-v1.9.0-2023-05-22.img.gz.sig)
 - Torrent: [raspiblitz-fat-v1.9.0-2022-12-21.img.gz.torrent](https://github.com/rootzoll/raspiblitz/raw/dev/home.admin/assets/raspiblitz-fat-v1.9.0-2023-05-22.img.gz.torrent) -->
@@ -184,8 +184,8 @@ This is the sd card image for RaspiBlitz users that are already more experienced
 _WARNING: THIS IS STILL A RELEASE CANDIDATE VERSION</br>
 JUST USE FOR TESTING, HIGHER RISK OF LOSING FUNDS!_
 
-- **MINIMAL SD CARD IMAGE ⮕ [raspiblitz-min-v1.10.0rc2-2023-08-02.img.gz](https://raspiblitz.fulmo.org/images/raspiblitz-min-v1.10.0rc2-2023-08-02.img.gz)**
-- SHA-256: d2775524f5e51770294d873a9418b445041d98b97606c4510c3e322a180f9806
+- **MINIMAL SD CARD IMAGE ⮕ [raspiblitz-min-v1.10.0rc3-2023-08-13.img.gz](https://raspiblitz.fulmo.org/images/raspiblitz-min-v1.10.0rc3-2023-08-13.img.gz)**
+- SHA-256: 1303c5c3b5657658b683df0caeb50989cdad5437037ae678a6ec5a4d1c04a5f9
 <!-- - GPG 64-bit (main): 1C73 060C 7C17 6461 & (sub): AA9D D1B5 CC56 47DA
 - Signature-File: [raspiblitz-min-v1.9.0-2023-05-22.img.gz.sig](https://raspiblitz.fulmo.org/images/raspiblitz-min-v1.9.0-2023-05-22.img.gz.sig)
 - Torrent: [raspiblitz-min-v1.9.0-2022-12-21.img.gz.torrent](https://github.com/rootzoll/raspiblitz/raw/dev/home.admin/assets/raspiblitz-min-v1.9.0-2023-05-22.img.gz.torrent) -->
