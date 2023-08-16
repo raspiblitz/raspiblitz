@@ -13,7 +13,7 @@ if [ "$1" == "only-one-loop" ]; then
 fi
 # start with parameter "install" (to setup service as systemd background running)
 if [ "$1" == "install" ]; then
-  
+
   # write systemd service
   cat > /etc/systemd/system/background.scan.service <<EOF
 # Monitor the RaspiBlitz State
@@ -56,7 +56,7 @@ configFile="/mnt/hdd/raspiblitz.conf"
 # INFOFILE - persited state data
 infoFile="/home/admin/raspiblitz.info"
 
-# better readbale seconds (slightly off to reduce same time window trigger)
+# better readable seconds (slightly off to reduce same time window trigger)
 MINUTE=60
 MINUTE2=115
 MINUTE5=290
@@ -74,21 +74,21 @@ YEAR=31536000
 usermod -G bitcoin root
 
 ####################################################################
-# INIT 
+# INIT
 ####################################################################
 
 # init values
-/home/admin/_cache.sh set system_temp_celsius "0"
-/home/admin/_cache.sh set system_temp_fahrenheit "0"
-/home/admin/_cache.sh set system_count_longscan "0"
-/home/admin/_cache.sh set system_count_undervoltage "0"
-/home/admin/_cache.sh set system_count_start_blockchain "0"
-/home/admin/_cache.sh set system_count_start_lightning "0"
-/home/admin/_cache.sh set system_count_start_tui "0"
-/home/admin/_cache.sh set btc_default_peers "0"
-/home/admin/_cache.sh set btc_default_sync_percentage "0"
-/home/admin/_cache.sh set btc_default_address ""
-/home/admin/_cache.sh set btc_default_port ""
+/home/admin/_cache.sh set system_temp_celsius "0" NX
+/home/admin/_cache.sh set system_temp_fahrenheit "0" NX
+/home/admin/_cache.sh set system_count_longscan "0" NX
+/home/admin/_cache.sh set system_count_undervoltage "0" NX
+/home/admin/_cache.sh set system_count_start_blockchain "0" NX
+/home/admin/_cache.sh set system_count_start_lightning "0" NX
+/home/admin/_cache.sh set system_count_start_tui "0" NX
+/home/admin/_cache.sh set btc_default_peers "0" NX
+/home/admin/_cache.sh set btc_default_sync_percentage "0" NX
+/home/admin/_cache.sh set btc_default_address "" NX
+/home/admin/_cache.sh set btc_default_port "" NX
 
 # import all base values from raspiblitz.info
 echo "importing: ${infoFile}"
@@ -132,8 +132,8 @@ while [ 1 ]
 do
 
   ####################################################################
-  # LOOP DATA (BASIC SYSTEM) 
-  # data that is always available 
+  # LOOP DATA (BASIC SYSTEM)
+  # data that is always available
   ####################################################################
 
   # check that redis contains init data (detect possible restart of redis)
@@ -147,7 +147,7 @@ do
   startTime=$(date +%s)
 
   #################
-  # BASIC SYSTEM 
+  # BASIC SYSTEM
 
   # uptime just do on every run
   system_up=$(cat /proc/uptime | grep -o '^[0-9]\+')
@@ -396,7 +396,7 @@ do
 
       # update detail infos only when ready (get as value from cache)
       source <(/home/admin/_cache.sh meta btc_${CHAIN}net_ready)
-      if [ "${value}" == "1" ]; then 
+      if [ "${value}" == "1" ]; then
 
         # check if network needs update
         source <(/home/admin/_cache.sh valid \
@@ -432,7 +432,7 @@ do
             /home/admin/_cache.sh set btc_${CHAIN}net_sync_progress "${btc_sync_progress}"
             /home/admin/_cache.sh set btc_${CHAIN}net_sync_percentage "${btc_sync_percentage}"
             /home/admin/_cache.sh set btc_${CHAIN}net_sync_initialblockdownload "${btc_sync_initialblockdownload}"
-            
+
             if [ "${isDefaultChain}" == "1" ]; then
               /home/admin/_cache.sh set btc_default_synced "${btc_synced}"
               /home/admin/_cache.sh set btc_default_blocks_headers "${btc_blocks_headers}"
@@ -1044,7 +1044,7 @@ do
   # if was started with special parameter
   if [ "${ONLY_ONE_LOOP}" == "1" ]; then
     echo "Exiting because ONLY_ONE_LOOP==1"
-    exit 0 
+    exit 0
   fi
 
 done
