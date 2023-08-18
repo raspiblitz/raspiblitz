@@ -1,14 +1,14 @@
 #!/bin/bash
 
 # check if run by root user
-if [ "$EUID" -ne 0 ]; then 
+if [ "$EUID" -ne 0 ]; then
   echo "error='run as root'"
   exit 1
 fi
- 
+
 # This script gets called from a fresh SD card
-# starting up that has an config file on HDD
-# from old RaspiBlitz or manufacturer to
+# starting up that has a config file on HDD
+# from old RaspiBlitz or manufacturer
 # to install and config services
 
 # LOGFILE - store debug logs of bootstrap
@@ -72,7 +72,7 @@ if [ ${kbSizeRAM} -gt 3500000 ]; then
 fi
 
 # zram on for all devices
-/home/admin/config.scripts/blitz.zram.sh on
+/home/admin/config.scripts/blitz.zram.sh on >> ${logFile}
 
 # link and copy HDD content into new OS on sd card
 echo "Copy HDD content for user admin" >> ${logFile}
@@ -267,7 +267,7 @@ fi
 
 # LND binary install
 if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ] || [ "${tlnd}" == "on" ] || [ "${slnd}" == "on" ]; then
-  # if already installed by fatpack will skip 
+  # if already installed by fatpack will skip
   echo "Provisioning LND Binary - run config script" >> ${logFile}
   /home/admin/config.scripts/lnd.install.sh install >> ${logFile} 2>&1
 else
@@ -302,7 +302,7 @@ fi
 
 # CORE LIGHTNING binary install
 if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ] || [ "${tcl}" == "on" ] || [ "${scl}" == "on" ]; then
-  # if already installed by fatpack will skip 
+  # if already installed by fatpack will skip
   echo "Provisioning Core Lightning Binary - run config script" >> ${logFile}
   /home/admin/config.scripts/cl.install.sh install >> ${logFile} 2>&1
 else
@@ -348,8 +348,8 @@ blitzApiInstalled=$(systemctl status blitzapi | grep -c "loaded")
 if [ "${blitzapi}" == "on" ] && [ $blitzApiInstalled -eq 0 ]; then
     echo "Provisioning BlitzAPI - run config script" >> ${logFile}
     /home/admin/_cache.sh set message "Setup BlitzAPI (takes time)"
-    /home/admin/config.scripts/blitz.web.api.sh on DEFAULT >> ${logFile} 2>&1    
-    /home/admin/config.scripts/blitz.web.ui.sh on DEFAULT >> ${logFile} 2>&1   
+    /home/admin/config.scripts/blitz.web.api.sh on DEFAULT >> ${logFile} 2>&1
+    /home/admin/config.scripts/blitz.web.ui.sh on DEFAULT >> ${logFile} 2>&1
 else
     echo "Provisioning BlitzAPI - keep default" >> ${logFile}
 fi
@@ -839,7 +839,7 @@ if [ -d "/var/cache/raspiblitz/tls_backup" ]; then
   cp /var/cache/raspiblitz/tls_backup/tls.cert /mnt/hdd/lnd/tls.cert >> ${logFile} 2>&1
   cp /var/cache/raspiblitz/tls_backup/tls.key /mnt/hdd/lnd/tls.key >> ${logFile} 2>&1
   chown -R bitcoin:bitcoin /mnt/hdd/lnd >> ${logFile} 2>&1
-  echo "On next final restart admin creds will be updated by _boostrap.sh" >> ${logFile}
+  echo "On next final restart admin creds will be updated by _bootstrap.sh" >> ${logFile}
 
   echo "DONE" >> ${logFile}
 else
