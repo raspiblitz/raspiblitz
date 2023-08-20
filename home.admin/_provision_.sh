@@ -426,15 +426,6 @@ else
     echo "Provisioning clWatchtowerClient - keep default" >> ${logFile}
 fi
 
-# SPARK
-if [ "${spark}" = "on" ]; then
-    echo "Provisioning Spark Wallet - run config script" >> ${logFile}
-    /home/admin/_cache.sh set message "Setup SPARK WALLET"
-    sudo -u admin /home/admin/config.scripts/cl.spark.sh on mainnet >> ${logFile} 2>&1
-else
-    echo "Provisioning Spark Wallet - keep default" >> ${logFile}
-fi
-
 #LOOP - install only if LiT won't be installed
 if [ "${loop}" = "on" ] && [ "${lit}" != "on" ]; then
   echo "Provisioning Lightning Loop - run config script" >> ${logFile}

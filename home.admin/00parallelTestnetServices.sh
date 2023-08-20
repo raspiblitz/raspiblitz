@@ -13,7 +13,6 @@ if [ ${#trtlWebinterface} -eq 0 ]; then trtlWebinterface="off"; fi
 if [ ${#tlnd} -eq 0 ]; then tlnd="off"; fi
 if [ ${#tcrtlWebinterface} -eq 0 ]; then tcrtlWebinterface="off"; fi
 if [ ${#tcl} -eq 0 ]; then tcl="off"; fi
-if [ ${#tspark} -eq 0 ]; then tspark="off"; fi
 
 # show select dialog
 echo "run dialog ..."
@@ -23,7 +22,6 @@ OPTIONS+=(l "LND on $CHAIN" ${tlnd})
 OPTIONS+=(r "RTL for LND $CHAIN" ${trtlWebinterface})
 OPTIONS+=(c "Core Lightning on $CHAIN" ${tcl})
 OPTIONS+=(t "RTL for CL on $CHAIN" ${tcrtlWebinterface})
-OPTIONS+=(m "Spark Wallet fro CL on $CHAIN" ${tspark})
 
 CHOICES=$(dialog --title ' Additional Services ' \
           --checklist ' use spacebar to activate/de-activate ' \
@@ -138,28 +136,6 @@ if [ "${tcrtlWebinterface}" != "${choice}" ]; then
   fi
 else
   echo "RTL for CL $CHAIN Setting unchanged."
-fi
-
-# tspark process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "m")
-if [ ${check} -eq 1 ]; then choice="on"; fi
-if [ "${tspark}" != "${choice}" ]; then
-  echo "# Spark Wallet on $CHAIN Setting changed .."
-  anychange=1
-  /home/admin/config.scripts/cl.spark.sh ${choice} $CHAIN
-  errorOnInstall=$?
-  if [ "${choice}" =  "on" ]; then
-    if [ ${errorOnInstall} -eq 0 ]; then
-      /home/admin/config.scripts/cl.spark.sh menu $CHAIN
-    else
-      l1="# FAIL on Spark Wallet on $CHAIN install #"
-      l2="# Try manual install on terminal after reboot with:"
-      l3="/home/admin/config.scripts/cl.spark.sh on $CHAIN"
-      dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
-    fi
-  fi
-else
-  echo "# Spark Wallet on $CHAIN Setting unchanged."
 fi
 
 if [ ${anychange} -eq 0 ]; then

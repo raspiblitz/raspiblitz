@@ -28,7 +28,6 @@ if [ ${#lndg} -eq 0 ]; then lndg="off"; fi
 if [ ${#whitepaper} -eq 0 ]; then whitepaper="off"; fi
 if [ ${#chantools} -eq 0 ]; then chantools="off"; fi
 if [ ${#homer} -eq 0 ]; then homer="off"; fi
-if [ ${#spark} -eq 0 ]; then spark="off"; fi
 if [ ${#tallycoinConnect} -eq 0 ]; then tallycoinConnect="off"; fi
 if [ ${#helipad} -eq 0 ]; then helipad="off"; fi
 if [ ${#bitcoinminds} -eq 0 ]; then bitcoinminds="off"; fi
@@ -81,7 +80,6 @@ fi
 # just available for CL
 if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ]; then
   OPTIONS+=(ca 'Core Lightning RTL Webinterface' ${crtlWebinterface})
-  OPTIONS+=(na 'Core Lightning Spark Wallet' ${spark})
 fi
 
 OPTIONS+=(ma 'Homer Dashboard' ${homer})
@@ -658,28 +656,6 @@ if [ "${bitcoinminds}" != "${choice}" ]; then
   fi
 else
   echo "BitcoinMinds setting unchanged."
-fi
-
-# spark wallet process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "na")
-if [ ${check} -eq 1 ]; then choice="on"; fi
-if [ "${spark}" != "${choice}" ]; then
-  echo "# Spark Wallet on mainnet Setting changed .."
-  anychange=1
-  /home/admin/config.scripts/cl.spark.sh ${choice} mainnet
-  errorOnInstall=$?
-  if [ "${choice}" =  "on" ]; then
-    if [ ${errorOnInstall} -eq 0 ]; then
-      /home/admin/config.scripts/cl.spark.sh menu mainnet
-    else
-      l1="# FAIL on Spark Wallet on mainnet install #"
-      l2="# Try manual install on terminal after reboot with:"
-      l3="/home/admin/config.scripts/cl.spark.sh on mainnet"
-      dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
-    fi
-  fi
-else
-  echo "# Spark Wallet on mainnet Setting unchanged."
 fi
 
 # squeaknode process choice
