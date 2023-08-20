@@ -11,10 +11,15 @@ if [ $# -lt 1 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "Install or remove the CLBOSS Core Lightning plugin"
   echo "version: v${CLBOSSVERSION}"
   echo "Usage:"
-  echo "cl-plugin.clboss.sh [on|off] [testnet|mainnet|signet]"
-  echo "cl-plugin.clboss.sh [info]"
+  echo "cl-plugin.clboss.sh [on|off] [mainnet|testnet] <latest>"
+  echo "cl-plugin.clboss.sh info"
+  echo "cl-plugin.clboss.sh update"
   echo
   exit 1
+fi
+
+if [ $# -gt 2 ] && [ $3 = latest ]; then
+  CLBOSSVERSION=""
 fi
 
 # source <(/home/admin/config.scripts/network.aliases.sh getvars cl <mainnet|testnet|signet>)
@@ -42,23 +47,24 @@ https://github.com/ZmnSCPxj/clboss#operating
 fi
 
 function buildFromSource() {
-    CLBOSSVERSION=$1
-    # dependencies
-    sudo apt install -y build-essential pkg-config libev-dev \
-      libcurl4-gnutls-dev libsqlite3-dev dnsutils
-    sudo apt install -y git automake autoconf-archive libtool
+  version=$1
+  # dependencies
+  sudo apt install -y build-essential pkg-config libev-dev \
+    libcurl4-gnutls-dev libsqlite3-dev dnsutils
+  sudo apt install -y git automake autoconf-archive libtool
 
-    # download
-    cd /home/bitcoin/cl-plugins-available/ || exit 1
-    sudo -u bitcoin git clone https://github.com/ZmnSCPxj/clboss
-    cd clboss || exit 1
-    if [ "${CLBOSSVERSION}" != "" ]; then
-      sudo -u bitcoin git reset --hard ${CLBOSSVERSION}
-    fi
-     # build
-    sudo -u bitcoin autoreconf -i
-    sudo -u bitcoin ./configure && sudo -u bitcoin make
-    # sudo make install # installs to /usr/local/bin/clboss
+  # download
+  cd /home/bitcoin/cl-plugins-available/ || exit 1
+  sudo -u bitcoin git clone https://github.com/ZmnSCPxj/clboss
+  cd clboss || exit 1
+  if [[ -v version && -n "$version" ]]; then
+    sudo -u bitcoin git reset --hard ${version}
+  fi
+
+  # build
+  sudo -u bitcoin autoreconf -i
+  sudo -u bitcoin ./configure && sudo -u bitcoin make
+  # sudo make install # optional - installs to /usr/local/bin/clboss
 }
 
 if [ "$1" = on ]; then
@@ -69,11 +75,10 @@ if [ "$1" = on ]; then
 
   fi
 
-  # symlink to enable
-  if [ ! -L /home/bitcoin/${netprefix}cl-plugins-enabled/clboss ]; then
-    sudo ln -s /home/bitcoin/cl-plugins-available/clboss/clboss \
-      /home/bitcoin/${netprefix}cl-plugins-enabled
-  fi
+  # refresh symlink to enable
+  sudo rm /home/bitcoin/${netprefix}cl-plugins-enabled/clboss 2>/dev/null
+  sudo ln -s /home/bitcoin/cl-plugins-available/clboss/clboss \
+    /home/bitcoin/${netprefix}cl-plugins-enabled/
 
   # setting value in raspiblitz.conf
   /home/admin/config.scripts/blitz.conf.sh set ${netprefix}clboss "on"
@@ -97,7 +102,7 @@ if [ "$1" = off ]; then
   # delete symlink
   sudo rm -rf /home/bitcoin/${netprefix}cl-plugins-enabled/clboss
 
-  echo "# Restart the ${netprefix}lightningd.service to deactivate clboss"
+  echo "# Restarting the ${netprefix}lightningd.service to deactivate clboss"
   sudo systemctl restart ${netprefix}lightningd
 
   # purge
@@ -116,7 +121,7 @@ fi
 
 if [ "$1" = update ]; then
   if [ ! -f /home/bitcoin/cl-plugins-available/clboss/clboss ]; then
-    /home/admin/config.scrips/cl-plugin/clboss.sh on
+    /home/admin/config.scrips/cl-plugin/clboss.sh on "${CHAIN}"
     exit 0
   else
     sudo rm -rf /home/bitcoin/cl-plugins-available/clboss
@@ -124,6 +129,12 @@ if [ "$1" = update ]; then
     buildFromSource
 
     echo "# clboss was updated to the latest master commit"
-    echo "# restart lightningd to activate"
+    echo "# Restarting ${netprefix}lightningd to activate"
+    sudo systemctl restart ${netprefix}lightningd
+
+    exit 0
   fi
 fi
+
+echo "# FAIL - Unknown Parameter $1"
+exit 1
