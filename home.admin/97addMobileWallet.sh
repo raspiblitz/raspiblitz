@@ -81,8 +81,6 @@ fi
 
 if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ]; then
 	OPTIONS+=(ZEUS_CLREST "Zeus to Core LightningREST (Android or iOS)")
-	OPTIONS+=(ZEUS_SPARK "Zeus to Sparko (Android or iOS)")
-	OPTIONS+=(SPARK "Spark Wallet to Sparko (Android - EXPERIMENTAL)" )
 	OPTIONS+=(FULLYNODED_CL "Fully Noded to CL REST (iOS+Tor)")
 fi
 
@@ -283,37 +281,4 @@ ZEUS_CLREST)
   	  /home/admin/config.scripts/cl.rest.sh connect
   	  exit 0;
 	;;
-ZEUS_SPARK)
-      sudo /home/admin/config.scripts/blitz.display.sh image /home/admin/raspiblitz/pictures/app_zeus.png
-	  whiptail --title "Install Zeus on your Android or iOS Phone" \
-		--yes-button "Continue" \
-		--no-button "Cancel" \
-		--yesno "Open the https://zeusln.app/ on your mobile phone to find the App Store link or binary for your phone.\n\nWhen the app is installed and started --> Continue." 12 65
-	  if [ $? -eq 1 ]; then
-		exit 0
-	  fi
-	  sudo /home/admin/config.scripts/blitz.display.sh hide
-  	  /home/admin/config.scripts/cl-plugin.sparko.sh connect
-  	  exit 0;
-	;;
-SPARK)
-      appstoreLink="https://github.com/shesek/spark-wallet#mobile-app"
-      sudo /home/admin/config.scripts/blitz.display.sh image /home/admin/raspiblitz/pictures/app_zeus.png
-	  whiptail --title "Install Zeus on your Android Phone" \
-		--yes-button "Continue" \
-		--no-button "GitHub link" \
-		--yesno "Open the ${appstoreLink} on Android to find the App Store link or binary for your phone.\n\nWhen the app is installed and started --> Continue." 12 65
-	  if [ $? -eq 1 ]; then
-		sudo /home/admin/config.scripts/blitz.display.sh qr ${appstoreLink}
-		whiptail --title " GitHub link " --msgbox "\
-To install app open the following link:\n
-${appstoreLink}\n
-Or scan the QR code on the LCD with your mobile phone.
-" 11 70
-	  fi
-	  sudo /home/admin/config.scripts/blitz.display.sh hide
-  	  /home/admin/config.scripts/cl-plugin.sparko.sh connect
-  	  exit 0;
-;;
-
 esac

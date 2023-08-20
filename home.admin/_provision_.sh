@@ -399,15 +399,6 @@ else
     echo "Provisioning RTL CL - keep default" >> ${logFile}
 fi
 
-# SPARKO
-if [ "${sparko}" = "on" ]; then
-    echo "Provisioning Sparko - run config script" >> ${logFile}
-    /home/admin/_cache.sh set message "Setup SPARKO"
-    sudo -u admin /home/admin/config.scripts/cl-plugin.sparko.sh on mainnet >> ${logFile} 2>&1
-else
-    echo "Provisioning Sparko - keep default" >> ${logFile}
-fi
-
 # clHTTPplugin
 if [ "${clHTTPplugin}" = "on" ]; then
     echo "Provisioning clHTTPplugin - run config script" >> ${logFile}

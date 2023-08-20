@@ -28,7 +28,6 @@ if [ ${#lndg} -eq 0 ]; then lndg="off"; fi
 if [ ${#whitepaper} -eq 0 ]; then whitepaper="off"; fi
 if [ ${#chantools} -eq 0 ]; then chantools="off"; fi
 if [ ${#homer} -eq 0 ]; then homer="off"; fi
-if [ ${#sparko} -eq 0 ]; then sparko="off"; fi
 if [ ${#spark} -eq 0 ]; then spark="off"; fi
 if [ ${#tallycoinConnect} -eq 0 ]; then tallycoinConnect="off"; fi
 if [ ${#helipad} -eq 0 ]; then helipad="off"; fi
@@ -82,7 +81,6 @@ fi
 # just available for CL
 if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ]; then
   OPTIONS+=(ca 'Core Lightning RTL Webinterface' ${crtlWebinterface})
-  OPTIONS+=(ka 'Core Lightning Sparko WebWallet' ${sparko})
   OPTIONS+=(na 'Core Lightning Spark Wallet' ${spark})
 fi
 
@@ -660,28 +658,6 @@ if [ "${bitcoinminds}" != "${choice}" ]; then
   fi
 else
   echo "BitcoinMinds setting unchanged."
-fi
-
-# sparko process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "ka")
-if [ ${check} -eq 1 ]; then choice="on"; fi
-if [ "${sparko}" != "${choice}" ]; then
-  echo "# Sparko on mainnet Setting changed .."
-  anychange=1
-  /home/admin/config.scripts/cl-plugin.sparko.sh ${choice} mainnet
-  errorOnInstall=$?
-  if [ "${choice}" =  "on" ]; then
-    if [ ${errorOnInstall} -eq 0 ]; then
-      /home/admin/config.scripts/cl-plugin.sparko.sh menu mainnet
-    else
-      l1="# FAIL on Sparko on mainnet install #"
-      l2="# Try manual install on terminal after reboot with:"
-      l3="/home/admin/config.scripts/cl-plugin.sparko.sh on mainnet"
-      dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
-    fi
-  fi
-else
-  echo "# Sparko on mainnet Setting unchanged."
 fi
 
 # spark wallet process choice

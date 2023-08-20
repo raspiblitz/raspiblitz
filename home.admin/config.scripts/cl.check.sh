@@ -34,15 +34,6 @@ if [ "$1" == "prestart" ]; then
     sed -i "/^announce-addr=127.0.0.1/d" ${CLCONF}
   fi
 
-  if [ $(grep -c "^sparko" < ${CLCONF}) -gt 0 ];then
-    if [ ! -f /home/bitcoin/${netprefix}cl-plugins-enabled/sparko ]\
-      || [ "$(eval echo \$${netprefix}sparko)" != "on" ]; then
-      echo "# The Sparko plugin is not present but in config"
-      sed -i "/^sparko/d" ${CLCONF}
-      rm -rf /home/bitcoin/${netprefix}cl-plugins-enabled/sparko
-    fi
-  fi
-
   if [ $(grep -c "^clboss" < ${CLCONF}) -gt 0 ];then
     if [ ! -f /home/bitcoin/${netprefix}cl-plugins-enabled/clboss ]\
       || [ "$(eval echo \$${netprefix}clboss)" != "on" ]; then
