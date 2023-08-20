@@ -2,10 +2,11 @@
 # https://github.com/ZmnSCPxj/clboss#operating
 
 # https://github.com/ZmnSCPxj/clboss/releases
-CLBOSSVERSION="0.13A"
+# https://github.com/ZmnSCPxj/clboss/commits/master
+CLBOSSVERSION="ef5c41612da0d544b0ed1f3e986b4b07126723a1"
 
 # command info
-if [ $# -lt 1 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ];then
+if [ $# -lt 1 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo
   echo "Install or remove the CLBOSS Core Lightning plugin"
   echo "version: v${CLBOSSVERSION}"
@@ -20,10 +21,10 @@ fi
 source <(/home/admin/config.scripts/network.aliases.sh getvars cl $2)
 
 if [ "$1" = info ]; then
-	whiptail --title " CLBOSS WARNING " \
+  whiptail --title " CLBOSS WARNING " \
     --yes-button "Install" \
-		--no-button "Cancel" \
-		--yesno "
+    --no-button "Cancel" \
+    --yesno "
 The goal of CLBOSS is to make the node able to pay and receive payments
 on the lightning network reliably without needing active management.
 It is not a tool to run a profitable lightning node and it can lose some sats on fees.
@@ -40,34 +41,38 @@ https://github.com/ZmnSCPxj/clboss#operating
 " 0 0
 fi
 
-
-if [ "$1" = on ];then
-
-  if [ ! -f /home/bitcoin/cl-plugins-available/clboss-${CLBOSSVERSION}.tar.gz ];then
-
-    # download tarball
-    sudo -u bitcoin wget \
-     https://github.com/ZmnSCPxj/clboss/releases/download/${CLBOSSVERSION}/clboss-${CLBOSSVERSION}.tar.gz \
-     -O /home/bitcoin/cl-plugins-available/clboss-${CLBOSSVERSION}.tar.gz || exit 1
-  fi
-
-  if [ ! -f /home/bitcoin/cl-plugins-available/clboss-${CLBOSSVERSION}/clboss ];then
+function buildFromSource() {
+    CLBOSSVERSION=$1
     # dependencies
     sudo apt install -y build-essential pkg-config libev-dev \
-     libcurl4-gnutls-dev libsqlite3-dev dnsutils
+      libcurl4-gnutls-dev libsqlite3-dev dnsutils
+    sudo apt install -y git automake autoconf-archive libtool
 
-    # install
+    # download
     cd /home/bitcoin/cl-plugins-available/ || exit 1
-    sudo -u bitcoin tar -xvf clboss-${CLBOSSVERSION}.tar.gz
-    cd clboss-${CLBOSSVERSION} || exit 1
+    sudo -u bitcoin git clone https://github.com/ZmnSCPxj/clboss
+    cd clboss || exit 1
+    if [ "${CLBOSSVERSION}" != "" ]; then
+      sudo -u bitcoin git reset --hard ${CLBOSSVERSION}
+    fi
+     # build
+    sudo -u bitcoin autoreconf -i
     sudo -u bitcoin ./configure && sudo -u bitcoin make
     # sudo make install # installs to /usr/local/bin/clboss
+}
+
+if [ "$1" = on ]; then
+
+  if [ ! -f /home/bitcoin/cl-plugins-available/clboss/clboss ]; then
+
+    buildFromSource ${CLBOSSVERSION}
+
   fi
 
   # symlink to enable
-  if [ ! -L /home/bitcoin/${netprefix}cl-plugins-enabled/clboss ];then
-    sudo ln -s /home/bitcoin/cl-plugins-available/clboss-${CLBOSSVERSION}/clboss \
-               /home/bitcoin/${netprefix}cl-plugins-enabled
+  if [ ! -L /home/bitcoin/${netprefix}cl-plugins-enabled/clboss ]; then
+    sudo ln -s /home/bitcoin/cl-plugins-available/clboss/clboss \
+      /home/bitcoin/${netprefix}cl-plugins-enabled
   fi
 
   # setting value in raspiblitz.conf
@@ -85,9 +90,10 @@ if [ "$1" = on ];then
   echo "${netprefix}cl clboss-status"
   echo "https://github.com/ZmnSCPxj/clboss#operating"
 
+  exit 0
 fi
 
-if [ "$1" = off ];then
+if [ "$1" = off ]; then
   # delete symlink
   sudo rm -rf /home/bitcoin/${netprefix}cl-plugins-enabled/clboss
 
@@ -95,7 +101,7 @@ if [ "$1" = off ];then
   sudo systemctl restart ${netprefix}lightningd
 
   # purge
-  if [ "$(echo "$@" | grep -c purge)" -gt 0 ];then
+  if [ "$(echo "$@" | grep -c purge)" -gt 0 ]; then
     echo "# Delete plugin"
     sudo rm -rf /home/bitcoin/cl-plugins-available/clboss*
     sudo rm -f /usr/local/bin/clboss
@@ -105,4 +111,19 @@ if [ "$1" = off ];then
   /home/admin/config.scripts/blitz.conf.sh set ${netprefix}clboss "off"
   echo "# clboss was uninstalled for $CHAIN"
 
+  exit 0
+fi
+
+if [ "$1" = update ]; then
+  if [ ! -f /home/bitcoin/cl-plugins-available/clboss/clboss ]; then
+    /home/admin/config.scrips/cl-plugin/clboss.sh on
+    exit 0
+  else
+    sudo rm -rf /home/bitcoin/cl-plugins-available/clboss
+
+    buildFromSource
+
+    echo "# clboss was updated to the latest master commit"
+    echo "# restart lightningd to activate"
+  fi
 fi
