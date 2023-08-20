@@ -17,7 +17,7 @@
 - Update: Specter Desktop 1.13.1 [details](https://github.com/cryptoadvance/specter-desktop/releases/tag/v1.13.1)
 - Update: Kindle-Display 0.5.1 [details](https://github.com/dennisreimann/kindle-display/)
 - Fix: Homebanking Interface FinTS/HBCI (experimental) [details](https://github.com/rootzoll/raspiblitz/issues/1186)
-- Remove: Sparko CLN plugin (not maintained anymore)
+- Remove: Spark Wallet and Sparko CLN plugin (not maintained anymore)
 
 ## What's new in Version 1.9.0 of RaspiBlitz?
 
