@@ -106,7 +106,7 @@ get_arg(){
 }
 
 ## hacky getopts
-## 1. if the option requires argument, and the option is preceeded by single or double dash and it
+## 1. if the option requires an argument, and the option is preceeded by single or double dash and it
 ##    can be it can be specified with '-s=ssh' or '-s ssh' or '--service=ssh' or '--service ssh'
 ##    use: get_arg variable_name "${opt}" "${arg}"
 ## 2. if a bunch of options that does different things are to be assigned to the same variable
@@ -159,7 +159,7 @@ apt_install() {
 }
 
 general_utils="curl"
-## loop all general_utils to see if program is installed (placed on PATH) and if not, add to the list of commands to be installed
+## loop through all general_utils to see if program is installed (placed on PATH) and if not, add to the list of commands to be installed
 for prog in ${general_utils}; do
   ! command -v ${prog} >/dev/null && general_utils_install="${general_utils_install} ${prog}"
 done
@@ -298,6 +298,7 @@ if [ "${baseimage}" = "raspios_arm64" ] || [ "${baseimage}" = "debian" ]; then
   sed -i "s/^# en_US.UTF-8 UTF-8.*/en_US.UTF-8 UTF-8/g" /etc/locale.gen
   sed -i "s/^# en_US ISO-8859-1.*/en_US ISO-8859-1/g" /etc/locale.gen
   locale-gen
+  export LC_ALL=C
   export LANGUAGE=en_US.UTF-8
   export LANG=en_US.UTF-8
   if [ ! -f /etc/apt/sources.list.d/raspi.list ]; then
@@ -803,7 +804,7 @@ else
   echo "* skipping FATPACK"
 fi
 
-# check fallback list bitnodes 
+# check fallback list bitnodes
 # update on releases manually in asset folder with:
 # curl -H "Accept: application/json; indent=4" https://bitnodes.io/api/v1/snapshots/latest/ -o ./fallback.bitnodes.nodes
 byteSizeList=$(sudo -u admin stat -c %s /home/admin/fallback.bitnodes.nodes)
@@ -834,14 +835,14 @@ echo -e "\n**********************************************"
 echo "BASIC SD CARD BUILD DONE"
 echo -e "**********************************************\n"
 echo "Your SD Card Image for RaspiBlitz is ready (might still do display config)."
-echo "Take the chance & look thru the output above if you can spot any errors or warnings."
-echo -e "\nIMPORTANT IF WANT TO MAKE A RELEASE IMAGE FROM THIS BUILD:"
+echo "Take the chance & look through the output above if you can spot any errors or warnings."
+echo -e "\nIMPORTANT IF YOU WANT TO MAKE A RELEASE IMAGE FROM THIS BUILD:"
 echo "1. login fresh --> user:admin password:raspiblitz"
 echo -e "2. run --> release\n"
 
 # make sure that at least the code is available (also if no internet)
 /home/admin/config.scripts/blitz.display.sh prepare-install
-# (do last - because might trigger reboot)
+# (do last - because it might trigger reboot)
 if [ "${display}" != "headless" ] || [ "${baseimage}" = "raspios_arm64" ]; then
   echo "*** ADDITIONAL DISPLAY OPTIONS ***"
   echo "- calling: blitz.display.sh set-display ${display}"
