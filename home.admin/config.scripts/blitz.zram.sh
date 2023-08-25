@@ -62,12 +62,11 @@ if [ "$1" = on ]; then
     sudo /home/admin/download/zram-swap/install.sh
 
     # make better use of zram
-    echo "\
-vm.vfs_cache_pressure=500
-vm.swappiness=100
-vm.dirty_background_ratio=1
-vm.dirty_ratio=50
-" | sudo tee -a  /etc/sysctl.conf
+    echo "# RaspiBlitz Edit: blitz.zram.sh" | sudo tee -a /etc/sysctl.conf
+    echo "vm.vfs_cache_pressure=500" | sudo tee -a /etc/sysctl.conf
+    echo "vm.swappiness=100" | sudo tee -a /etc/sysctl.conf
+    echo "vm.dirty_background_ratio=1" | sudo tee -a /etc/sysctl.conf
+    echo "vm.dirty_ratio=50" | sudo tee -a /etc/sysctl.conf
 
     # apply
     sudo sysctl --system
