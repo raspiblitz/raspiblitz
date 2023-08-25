@@ -6,6 +6,7 @@ VERSION="205ea1ec5b169f566e5e98ead794e9daf90cf245"
 if [ "$1" = status ]; then
 
   # check if file /home/admin/download/zram-swap/install.sh exists
+  echo "# https://github.com/foundObjects/zram-swap"
   if [ -f /home/admin/download/zram-swap/install.sh ]; then
     echo "downloaded=1"
   else
@@ -13,6 +14,7 @@ if [ "$1" = status ]; then
   fi
 
   # check if service zram-swap is loaded/active
+  echo "# sudo systemctl status zram-swap"
   serviceLoaded=$(sudo systemctl status zram-swap | grep -c loaded)
   if [ ${serviceLoaded} -gt 0 ]; then
     echo "serviceLoaded=1"
