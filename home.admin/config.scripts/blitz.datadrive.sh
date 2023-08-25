@@ -1577,9 +1577,9 @@ if [ "$1" = "swap" ]; then
       sed -i "s/^CONF_SWAPFILE=.*/CONF_SWAPFILE=\/mnt\/hdd\/swapfile/g" /etc/dphys-swapfile  
     fi
     sed -i "s/^CONF_SWAPSIZE=/#CONF_SWAPSIZE=/g" /etc/dphys-swapfile 
-    sed -i "s/^#CONF_MAXSWAP=.*/CONF_MAXSWAP=3072/g" /etc/dphys-swapfile
+    sed -i "s/^#CONF_MAXSWAP=.*/CONF_MAXSWAP=10240/g" /etc/dphys-swapfile
     >&2 echo "# Creating SWAP file .."
-    dd if=/dev/zero of=$externalSwapPath count=3072 bs=1MiB 1>/dev/null
+    dd if=/dev/zero of=$externalSwapPath count=10240 bs=1MiB 1>/dev/null
     chmod 0600 $externalSwapPath 1>/dev/null
     >&2 echo "# Activating new SWAP"
     mkswap $externalSwapPath
