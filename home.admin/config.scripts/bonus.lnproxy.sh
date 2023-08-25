@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # https://github.com/lnproxy/lnproxy/commits/main
-LNPROXYVERSION="7c8a14106b42cfd89471c1dc02d7baab1122dfa2"
+LNPROXYVERSION="c1031bbe507623f8f196ff83aa5ea504cca05143"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
