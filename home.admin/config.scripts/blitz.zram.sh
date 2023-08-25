@@ -39,17 +39,22 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   exit 1
 fi
 
+
+echo "# mkdir /home/admin/download"
 mkdir /home/admin/download 2>/dev/null
 cd /home/admin/download || exit 1
 if [ ! -d zram-swap ]; then
+  echo "# download script"
   sudo -u admin git clone https://github.com/foundObjects/zram-swap.git
   cd zram-swap || exit 1
   git reset --hard $VERSION || exit 1
 else
+  echo "# script available"
   cd zram-swap || exit 1
 fi
 
 if [ "$1" = on ]; then
+  echo "# install zram-swap"
   if [ $(sudo cat /proc/swaps | grep -c zram) -eq 0 ]; then
     # install zram to 1/2 of RAM, activate and prioritize
     sudo /home/admin/download/zram-swap/install.sh
@@ -75,6 +80,7 @@ vm.dirty_ratio=50
 fi
 
 if [ "$1" = off ]; then
+  echo "# deinstall zram-swap"
   sudo /home/admin/download/zram-swap/install.sh --uninstall
   sudo rm /etc/default/zram-swap
   sudo rm -rf /home/admin/download/zram-swap
