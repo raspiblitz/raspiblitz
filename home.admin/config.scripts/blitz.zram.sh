@@ -46,7 +46,9 @@ cd /home/admin/download || exit 1
 if [ ! -d zram-swap ]; then
   echo "# download script"
   sudo -u admin git clone https://github.com/foundObjects/zram-swap.git
+  echo "# cd zram-swap"
   cd zram-swap || exit 1
+  echo "# check version"
   git reset --hard $VERSION || exit 1
 else
   echo "# script available"
