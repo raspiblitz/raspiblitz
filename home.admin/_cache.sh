@@ -14,6 +14,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ];
   echo "_cache.sh ramdisk [on|off]"
   echo "_cache.sh keyvalue [on|off]"
   echo
+  echo "_cache.sh init [key] [value] (only sets value if not exists)"
   echo "_cache.sh set [key] [value] [?expire-seconds]"
   echo "_cache.sh get [key1] [?key2] [?key3] ..."
   echo
@@ -133,7 +134,7 @@ elif [ "$1" = "keyvalue" ] && [ "$2" = "off" ]; then
 ###################
 
 # set
-elif [ "$1" = "set" ]; then
+elif [ "$1" = "set" ] || [ "$1" = "init" ]; then
 
   # get parameters
   keystr=$2
@@ -148,8 +149,8 @@ elif [ "$1" = "set" ]; then
 
 
   NX=""
-  if [ "${expireOrNx}" == "NX" ]; then
-    NX="NX"
+  if [ "$1" = "init" ]; then
+    NX="NX "
   else
   # filter from expire just numbers
   expireOrNx="${expire//[^0-9.]/}"
@@ -167,7 +168,7 @@ elif [ "$1" = "set" ]; then
 
   # set in redis the timestamp
   timestamp=$(date +%s)
-  redis-cli set ${NX} ${keystr}${META_LASTTOUCH_TS} "${timestamp}" ${additionalParams} 1>/dev/null
+  redis-cli set ${NX}${keystr}${META_LASTTOUCH_TS} "${timestamp}" ${additionalParams} 1>/dev/null
   #echo "# lasttouch(${timestamp})"
 
   # check if the value has a outdate policy

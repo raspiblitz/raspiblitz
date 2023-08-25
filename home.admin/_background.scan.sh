@@ -78,17 +78,17 @@ usermod -G bitcoin root
 ####################################################################
 
 # init values
-/home/admin/_cache.sh set system_temp_celsius "0" NX
-/home/admin/_cache.sh set system_temp_fahrenheit "0" NX
-/home/admin/_cache.sh set system_count_longscan "0" NX
-/home/admin/_cache.sh set system_count_undervoltage "0" NX
-/home/admin/_cache.sh set system_count_start_blockchain "0" NX
-/home/admin/_cache.sh set system_count_start_lightning "0" NX
-/home/admin/_cache.sh set system_count_start_tui "0" NX
-/home/admin/_cache.sh set btc_default_peers "0" NX
-/home/admin/_cache.sh set btc_default_sync_percentage "0" NX
-/home/admin/_cache.sh set btc_default_address "" NX
-/home/admin/_cache.sh set btc_default_port "" NX
+/home/admin/_cache.sh init system_temp_celsius "0"
+/home/admin/_cache.sh init system_temp_fahrenheit "0"
+/home/admin/_cache.sh init system_count_longscan "0"
+/home/admin/_cache.sh init system_count_undervoltage "0"
+/home/admin/_cache.sh init system_count_start_blockchain "0"
+/home/admin/_cache.sh init system_count_start_lightning "0"
+/home/admin/_cache.sh init system_count_start_tui "0"
+/home/admin/_cache.sh init btc_default_peers "0"
+/home/admin/_cache.sh init btc_default_sync_percentage "0"
+/home/admin/_cache.sh init btc_default_address ""
+/home/admin/_cache.sh init btc_default_port ""
 
 # import all base values from raspiblitz.info
 echo "importing: ${infoFile}"
