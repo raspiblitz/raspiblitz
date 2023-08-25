@@ -399,15 +399,6 @@ else
     echo "Provisioning RTL CL - keep default" >> ${logFile}
 fi
 
-# SPARKO
-if [ "${sparko}" = "on" ]; then
-    echo "Provisioning Sparko - run config script" >> ${logFile}
-    /home/admin/_cache.sh set message "Setup SPARKO"
-    sudo -u admin /home/admin/config.scripts/cl-plugin.sparko.sh on mainnet >> ${logFile} 2>&1
-else
-    echo "Provisioning Sparko - keep default" >> ${logFile}
-fi
-
 # clHTTPplugin
 if [ "${clHTTPplugin}" = "on" ]; then
     echo "Provisioning clHTTPplugin - run config script" >> ${logFile}
@@ -433,15 +424,6 @@ if [ "${clWatchtowerClient}" = "on" ]; then
     sudo -u admin /home/admin/config.scripts/cl-plugin.watchtower-client.sh on >> ${logFile} 2>&1
 else
     echo "Provisioning clWatchtowerClient - keep default" >> ${logFile}
-fi
-
-# SPARK
-if [ "${spark}" = "on" ]; then
-    echo "Provisioning Spark Wallet - run config script" >> ${logFile}
-    /home/admin/_cache.sh set message "Setup SPARK WALLET"
-    sudo -u admin /home/admin/config.scripts/cl.spark.sh on mainnet >> ${logFile} 2>&1
-else
-    echo "Provisioning Spark Wallet - keep default" >> ${logFile}
 fi
 
 #LOOP - install only if LiT won't be installed
