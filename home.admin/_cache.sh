@@ -139,7 +139,7 @@ elif [ "$1" = "set" ] || [ "$1" = "init" ]; then
   # get parameters
   keystr=$2
   valuestr=$3
-  expireOrNx=$4
+  expire=$4
 
   # check that key & value are provided
   if [ "${keystr}" == "" ]; then
@@ -151,17 +151,16 @@ elif [ "$1" = "set" ] || [ "$1" = "init" ]; then
   NX=""
   if [ "$1" = "init" ]; then
     NX="NX "
-  else
+  fi
+
   # filter from expire just numbers
-  expireOrNx="${expire//[^0-9.]/}"
+  expire="${expire//[^0-9.]/}"
 
   additionalParams=""
   # add an expire flag if given
-  if [ "${expireOrNx}" != "" ]; then
+  if [ "${expire}" != "" ]; then
     additionalParams="EX ${expire}"
   fi
-  fi
-
 
   # set in redis key value cache
   redis-cli set ${NX} ${keystr} "${valuestr}" ${additionalParams} 1>/dev/null

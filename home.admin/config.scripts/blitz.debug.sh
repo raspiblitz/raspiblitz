@@ -446,6 +446,11 @@ echo "*** NETWORK ***"
 sudo /home/admin/config.scripts/internet.sh status | grep 'network_device\|localip\|dhcp'
 echo
 
+echo
+echo "*** ZRAM ***"
+sudo /home/admin/config.scripts/blitz.zram.sh status
+echo
+
 echo "*** HARDWARE TEST RESULTS ***"
 source <(/home/admin/_cache.sh get system_count_undervoltage)
 showImproveInfo=0
