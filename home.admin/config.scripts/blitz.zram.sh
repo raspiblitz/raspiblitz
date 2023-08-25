@@ -49,10 +49,12 @@ if [ ! -d zram-swap ]; then
   echo "# cd zram-swap"
   cd zram-swap || exit 1
   echo "# check version"
-  git reset --hard $VERSION || exit 1
+  sudo -u admin git reset --hard $VERSION || exit 1
+  echo "# version OK" 
 else
   echo "# script available"
   cd zram-swap || exit 1
+  echo "# directory OK"
 fi
 
 if [ "$1" = on ]; then
