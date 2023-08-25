@@ -319,7 +319,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # https://github.com/romanz/electrs/blob/master/doc/usage.md#configuration-files-and-environment-variables
     sudo -u electrs mkdir /home/electrs/.electrs 2>/dev/null
     echo "\
-log_filters = \"INFO\"
+log_filters = \"WARN\"
 timestamp = true
 jsonrpc_import = true
 index-batch-size = 10
@@ -422,7 +422,6 @@ Type=simple
 TimeoutSec=60
 Restart=always
 RestartSec=60
-LogLevelMax=5
 
 # Hardening measures
 PrivateTmp=true
