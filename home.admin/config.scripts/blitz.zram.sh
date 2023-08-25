@@ -15,13 +15,13 @@ if [ "$1" = status ]; then
 
   # check if service zram-swap is loaded/active
   echo "# sudo systemctl status zram-swap"
-  serviceLoaded=$(sudo systemctl status zram-swap | grep -c loaded)
+  serviceLoaded=$(sudo systemctl status zram-swap 2>/dev/null | grep -c loaded)
   if [ ${serviceLoaded} -gt 0 ]; then
     echo "serviceLoaded=1"
   else
     echo "serviceLoaded=0"
   fi  
-  serviceActive=$(sudo systemctl status zram-swap | grep -c active)
+  serviceActive=$(sudo systemctl status zram-swap 2>/dev/null | grep -c active)
   if [ ${serviceActive} -gt 0 ]; then
     echo "serviceActive=1"
   else
