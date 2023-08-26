@@ -885,6 +885,7 @@ echo "Make sure main services are running .." >> ${logFile}
 systemctl start ${network}d
 if [ "${lightning}" == "lnd" ];then
   systemctl start lnd
+  sleep 10
   # set password c if given in flag from migration prep
   passwordFlagExists=$(ls /mnt/hdd/passwordc.flag | grep -c "passwordc.flag")
   if [ "${passwordFlagExists}" == "1" ]; then
