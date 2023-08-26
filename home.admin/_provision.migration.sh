@@ -55,6 +55,8 @@ fi
 # make sure for the rest of the setup info is set correctly
 /home/admin/config.scripts/blitz.conf.sh set network "bitcoin"
 /home/admin/config.scripts/blitz.conf.sh set chain "main"
+echo "Provisioning ${network} Mainnet - run config script" >> ${logFile}
+/home/admin/config.scripts/bitcoin.install.sh on mainnet >> ${logFile} 2>&1
 
 # set Password B
 echo "## SETTING PASSWORD B" >> ${logFile}
