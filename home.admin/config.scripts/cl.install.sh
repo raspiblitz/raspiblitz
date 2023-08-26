@@ -58,7 +58,7 @@ function installDependencies() {
 function buildAndInstallCLbinaries() {
   echo "- Configuring EXPERIMENTAL_FEATURES enabled"
   echo
-  sudo -u bitcoin ./configure --enable-experimental-features
+  sudo -u bitcoin ./configure
   echo
   echo "- Building Core lightning from source"
   echo
