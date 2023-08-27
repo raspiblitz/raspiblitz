@@ -2,7 +2,7 @@
 # https://lightning.readthedocs.io/
 
 # https://github.com/ElementsProject/lightning/releases
-CLVERSION="v23.05.2"
+CLVERSION="v23.08"
 
 # install the latest master by using the last commit id
 # https://github.com/ElementsProject/lightning/commit/master
@@ -58,7 +58,7 @@ function installDependencies() {
 function buildAndInstallCLbinaries() {
   echo "- Configuring EXPERIMENTAL_FEATURES enabled"
   echo
-  sudo -u bitcoin ./configure --enable-experimental-features
+  sudo -u bitcoin ./configure
   echo
   echo "- Building Core lightning from source"
   echo
