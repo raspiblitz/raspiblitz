@@ -37,7 +37,7 @@ elif [ "$1" = "http-on" ]; then
 
   # install
   sudo apt-get update
-  sudo apt-get install -y nginx apache2-utils
+  sudo apt-get install -y nginx-full apache2-utils
   if [ $? -ne 0 ]; then
     echo "error='nginx install failed'"
     exit 1

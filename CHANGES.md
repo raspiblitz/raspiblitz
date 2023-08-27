@@ -3,7 +3,7 @@
 - Update: RaspiOS base image from 2023-05-03
 - Update: Bitcoin Core v25.0.0 [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-25.0.md)
 - Update: LND v0.16.4-beta [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.16.4-beta)
-- Update: Core Lightning v23.05.2 [details](https://github.com/ElementsProject/lightning/releases/tag/v23.05.2)
+- Update: Core Lightning v23.08 [details](https://github.com/ElementsProject/lightning/releases/tag/v23.08)
 - Update: Suez - Channel Visualization for LND & CLN [details](https://github.com/prusnak/suez)
 - Update: Electrum Server in Rust (electrs) v0.10.0 [details](https://github.com/romanz/electrs/blob/master/RELEASE-NOTES.md#0100-jul-22-2023)
 - Update: C-lightningREST v0.10.5 [details](https://github.com/Ride-The-Lightning/c-lightning-REST/releases/tag/v0.10.5)
@@ -17,6 +17,7 @@
 - Update: Specter Desktop 1.13.1 [details](https://github.com/cryptoadvance/specter-desktop/releases/tag/v1.13.1)
 - Update: Kindle-Display 0.5.1 [details](https://github.com/dennisreimann/kindle-display/)
 - Fix: Homebanking Interface FinTS/HBCI (experimental) [details](https://github.com/rootzoll/raspiblitz/issues/1186)
+- Remove: Spark Wallet and Sparko CLN plugin (not maintained anymore)
 
 ## What's new in Version 1.9.0 of RaspiBlitz?
 

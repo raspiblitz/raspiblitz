@@ -89,12 +89,6 @@ fi
 if [ "${lndg}" == "on" ]; then
   OPTIONS+=(LNDG "LNDg (auto-rebalance, auto-fees)")
 fi
-if [ "${sparko}" == "on" ]; then
-  OPTIONS+=(SPARKO "Sparko Webwallet")
-fi
-if [ "${spark}" == "on" ]; then
-  OPTIONS+=(SPARK "Spark Wallet")
-fi
 if [ "${ElectRS}" == "on" ]; then
   OPTIONS+=(ELECTRS "Electrum Rust Server")
 fi
@@ -277,12 +271,6 @@ case $CHOICE in
             ;;
         LNDG)
             /home/admin/config.scripts/bonus.lndg.sh menu
-            ;;
-        SPARKO)
-            /home/admin/config.scripts/cl-plugin.sparko.sh menu mainnet
-            ;;
-        SPARK)
-            /home/admin/config.scripts/cl.spark.sh menu mainnet
             ;;
         LNBITS)
             /home/admin/config.scripts/bonus.lnbits.sh menu
