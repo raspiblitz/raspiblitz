@@ -5,7 +5,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ];then
   echo
   echo "bitcoin.install.sh install - called by build.sdcard.sh"
   echo "Install or remove parallel chains for Bitcoin Core:"
-  echo "bitcoin.install.sh [on|off] [signet|testnet|mainnet]"
+  echo "bitcoin.install.sh [install|on|off] [signet|testnet|mainnet]"
   echo
   exit 1
 fi
@@ -251,8 +251,8 @@ signet.addnode=nsgyo7begau4yecc46ljfecaykyzszcseapxmtu6adrfagfrrzrlngyd.onion:38
 [Unit]
 Description=Bitcoin daemon on ${CHAIN}
 
-After=network-online.target
-Wants=network-online.target
+Wants=redis.service
+After=redis.service
 
 [Service]
 Environment='MALLOC_ARENA_MAX=1'
