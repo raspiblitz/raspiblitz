@@ -397,7 +397,7 @@ if [ "$(compgen -u | grep -c pi)" -eq 0 ];then
 fi
 
 # special prepare when Raspbian
-if [ "${baseimage}" = "raspios_arm64" ] || [ "${baseimage}" = "debian" ]; then
+if [ "${baseimage}" = "raspios_arm64" ]; then
 
   echo -e "\n*** PREPARE RASPBERRY OS VARIANTS ***"
   apt_install raspi-config
