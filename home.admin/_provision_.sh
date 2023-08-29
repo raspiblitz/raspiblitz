@@ -85,7 +85,6 @@ mkdir /home/admin/.lnd/data >> ${logFile} 2>&1
 cp -r /mnt/hdd/lnd/data/chain /home/admin/.lnd/data/chain >> ${logFile} 2>&1
 chown -R admin:admin /home/admin/.${network} >> ${logFile} 2>&1
 chown -R admin:admin /home/admin/.lnd >> ${logFile} 2>&1
-cp /home/admin/assets/${network}d.service /etc/systemd/system/${network}d.service >> ${logFile} 2>&1
 cp /home/admin/assets/tmux.conf.local /mnt/hdd/.tmux.conf.local >> ${logFile} 2>&1
 chown admin:admin /mnt/hdd/.tmux.conf.local >> ${logFile} 2>&1
 ln -s -f /mnt/hdd/.tmux.conf.local /home/admin/.tmux.conf.local >> ${logFile} 2>&1
