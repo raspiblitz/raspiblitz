@@ -6,8 +6,11 @@
 
 - [Ready made images](#ready-made-images)
 - [Write the image to a disk connected with USB](#write-the-image-to-a-disk-connected-with-usb)
-  - [Convert the qcow2 volume to a raw disk image](#convert-the-qcow2-volume-to-a-raw-disk-image)
-  - [Write to a disk connected with USB with Balena Etcher or `dd`](#write-to-a-disk-connected-with-usb-with-balena-etcher-or-dd)
+  - [Option 1 - requires less disk space](#option-1---requires-less-disk-space)
+    - [Write the .qcow2 file directly to disk with `qemu-image dd`](#write-the-qcow2-file-directly-to-disk-with-qemu-image-dd)
+  - [Option 2 - convert to  a raq disk image first](#option-2---convert-to--a-raq-disk-image-first)
+    - [Convert the .qcow2 volume to a raw disk image](#convert-the-qcow2-volume-to-a-raw-disk-image)
+    - [Write the .img to the disk](#write-the-img-to-the-disk)
 - [The first boot](#the-first-boot)
   - [Lean image with Gnome desktop (default image)](#lean-image-with-gnome-desktop-default-image)
   - [Extend the root partition (optional - recommended)](#extend-the-root-partition-optional---recommended)
@@ -39,8 +42,18 @@ https://github.com/rootzoll/raspiblitz/actions/workflows/amd64-lean-image.yml?qu
   unzip ./raspiblitz-amd64-image-*.zip
   ```
 ## Write the image to a disk connected with USB
-### Convert the qcow2 volume to a raw disk image
-* the raw image is 30GB
+### Option 1 - requires less disk space
+####  Write the .qcow2 file directly to disk with `qemu-image dd`
+* the .qcow2 volume is 8.1 GB
+* identify the connected disk with `lsblk` e.g., `/dev/sdk`
+  ```
+  sudo apt install -y qemu-utils
+  disk="/dev/sdk"
+  sudo qemu-img dd if=./raspiblitz-amd64-debian-lean.qcow2 of=${disk} bs=4M
+  ```
+### Option 2 - convert to  a raq disk image first
+#### Convert the .qcow2 volume to a raw disk image
+* the raw .img is 30GB
   ```
   # unzip
   gzip -dkv raspiblitz-amd64-debian-lean.qcow2.gz
@@ -49,20 +62,13 @@ https://github.com/rootzoll/raspiblitz/actions/workflows/amd64-lean-image.yml?qu
   # convert
   qemu-img convert ./raspiblitz-amd64-debian-lean.qcow2 ./raspiblitz-amd64-debian-lean.img
   ```
-
-### Write to a disk connected with USB with Balena Etcher or `dd`
-* identify the connected disk with `lsblk` eg,: `/dev/sdk`
-* [Balena Etcher](https://www.balena.io/etcher/) to write the .img to disk
-* dd to write the .img to disk
+#### Write the .img to the disk
+* identify the connected disk with `lsblk` e.g., `/dev/sdk`
+* use [Balena Etcher](https://www.balena.io/etcher/)
+* or `dd` to write the .img to disk
   ```
   disk="/dev/sdk"
   sudo dd if=./raspiblitz-amd64-debian-lean.img of=${disk} bs=4M status=progress
-  ```
-* qemu-image dd to write the .qcow2 directly to disk
-  ```
-  sudo apt install -y qemu-utils
-  disk="/dev/sdk"
-  sudo qemu-img dd if=./raspiblitz-amd64-debian-lean.qcow2 of=${disk} bs=4M
   ```
 
 ## The first boot
