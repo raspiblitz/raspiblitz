@@ -375,6 +375,11 @@ else
   exit 1
 fi
 
+# remove any debian python protection from pip installing modules
+if [ "${baseimage}" = "debian" ]; then
+  rm /usr/lib/python3.*/EXTERNALLY-MANAGED
+fi
+
 # make sure /usr/bin/pip exists (and calls pip3 in Debian Buster)
 update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
 # 1. libs (for global python scripts)
@@ -549,6 +554,9 @@ if [ $(sudo cat /etc/group | grep -c "^admin") -lt 1 ]; then
 else
   echo -e "\nOK group admin exists"
 fi
+# make admin home directly readable by others, the bitcoin user needs access to it
+chmod 755 /home/admin
+
 
 echo -e "\n*** ADDING SERVICE USER bitcoin"
 # based on https://raspibolt.org/guide/raspberry-pi/system-configuration.html
