@@ -245,7 +245,13 @@ esac
 
 # AUTO-DETECTION: OPERATINGSYSTEM
 # ---------------------------------------
-if [ $(cat /etc/os-release 2>/dev/null | grep -c 'Debian') -gt 0 ]; then
+# 
+# OrangePi5 was not recognized
+# so recognize it by same 'Debian' method,
+# replacing by 'Armbian'
+if [ $(cat /etc/os-release 2>/dev/null | grep -c 'Armbian') -gt 0 ]; then
+  baseimage="armbian"
+elif [ $(cat /etc/os-release 2>/dev/null | grep -c 'Debian') -gt 0 ]; then
   if [ -f /etc/apt/sources.list.d/raspi.list ] && [ "${cpu}" = aarch64 ]; then
     # default image for RaspberryPi
     baseimage="raspios_arm64"
