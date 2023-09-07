@@ -27,11 +27,14 @@ if [ "$1" = "install" ]; then
   cd /home/admin/download || exit 1
 
   # receive signer key
-  if ! gpg --keyserver hkp://keyserver.ubuntu.com --recv-key "71A3 B167 3540 5025 D447 E8F2 7481 0B01 2346 C9A6"
-  then
-    echo "# FAIL # Couldn't download Wladimir J. van der Laan's PGP pubkey"
-    exit 1
-  fi
+  # Bitcoin Install Fails during build_sdcard.sh due to PGP key download
+  # see https://github.com/raspiblitz/raspiblitz/issues/3753
+  # comment it by now
+  #if ! gpg --keyserver hkp://keyserver.ubuntu.com --recv-key "71A3 B167 3540 5025 D447 E8F2 7481 0B01 2346 C9A6"
+  #then
+  #  echo "# FAIL # Couldn't download Wladimir J. van der Laan's PGP pubkey"
+  #  exit 1
+  #fi
 
   # download signed binary sha256 hash sum file
   sudo -u admin wget https://bitcoincore.org/bin/bitcoin-core-${bitcoinVersion}/SHA256SUMS
