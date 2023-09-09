@@ -110,7 +110,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   if [ ${isInstalled} -eq 0 ]; then
 
     echo "*** Add the 'squeaknode' user ***"
-    sudo adduser --disabled-password --gecos "" squeaknode
+    sudo adduser --system --group --home /home/squeaknode squeaknode
 
     # make sure needed debian packages are installed
     echo "# installing needed packages"

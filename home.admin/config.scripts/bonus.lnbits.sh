@@ -621,7 +621,7 @@ if [ "$1" = "install" ]; then
 
   # add lnbits user
   echo "*** Add the 'lnbits' user ***"
-  sudo adduser --disabled-password --gecos "" lnbits
+  sudo adduser --system --group --home /home/lnbits lnbits
 
   # get optional github parameter
   githubUser="lnbits"

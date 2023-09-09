@@ -132,7 +132,7 @@ if [ "$1" = "install" ]; then
   sudo apt-get install -y mariadb-server mariadb-client
 
   # add mempool user
-  sudo adduser --disabled-password --gecos "" mempool
+  sudo adduser --system --group --home /home/mempool mempool
 
   # install mempool
   cd /home/mempool

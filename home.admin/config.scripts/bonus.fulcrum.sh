@@ -30,7 +30,7 @@ if [ "$1" = on ]; then
   fi
 
   # create a dedicated user
-  sudo adduser --disabled-password --gecos "" fulcrum
+  sudo adduser --system --group --home /home/fulcrum fulcrum
   cd /home/fulcrum || exit 1
 
   sudo apt install -y libssl-dev # was needed on Debian Bullseye

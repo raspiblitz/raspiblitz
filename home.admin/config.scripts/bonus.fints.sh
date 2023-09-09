@@ -196,7 +196,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   # create a dedicated user for the app
   echo "# create user"
-  sudo adduser --disabled-password --gecos "" ${APPID} || exit 1
+  sudo adduser --system --group --home /home/${APPID} ${APPID} || exit 1
 
   # add user to special groups with special access rights
   # echo "# add use to special groups"
