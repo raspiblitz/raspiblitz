@@ -29,7 +29,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "*** INSTALL pyblocks***"
   
   # create pyblock user
-  sudo adduser --disabled-password --gecos "" pyblock
+  sudo adduser --system --group --home /home/pyblock pyblock
   cd /home/pyblock
   sudo -u pyblock mkdir /home/pyblock/config
 

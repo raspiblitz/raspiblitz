@@ -37,7 +37,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     /home/admin/config.scripts/bonus.nodejs.sh on
 
     # add user
-    sudo adduser --disabled-password --gecos "" $USERNAME
+    sudo adduser --system --group --home /home/$USERNAME $USERNAME
 
     # install kindle-display
     echo "# install .."

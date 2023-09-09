@@ -99,7 +99,7 @@ if [ "$1" = "install" ]; then
   echo "# *** INSTALL JAM (user & code) ***"
 
   echo "# Creating the ${USERNAME} user"
-  sudo adduser --disabled-password --gecos "" ${USERNAME}
+  sudo adduser --system --group --home /home/${USERNAME} ${USERNAME}
 
   # install nodeJS
   /home/admin/config.scripts/bonus.nodejs.sh on

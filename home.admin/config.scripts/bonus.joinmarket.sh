@@ -57,7 +57,7 @@ if [ "$1" = "install" ]; then
     sudo userdel -rf joinmarket 2>/dev/null
 
     echo "# add the 'joinmarket' user"
-    adduser --disabled-password --gecos "" joinmarket
+    adduser --system --group --home /home/joinmarket joinmarket
 
     # add to sudo group (required for installation)
     adduser joinmarket sudo || exit 1
