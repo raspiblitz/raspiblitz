@@ -7,7 +7,7 @@ concurrency:
 on:
   workflow_dispatch:
   #push:
-  #  branches: [ "dev", "v1.8", "v1.9" ]
+  #  branches: [ "dev", "v1.9" ]
   #  paths:
   #    - 'build_sdcard.sh'
   #    - 'home.admin/bitcoin.install.sh'
@@ -27,8 +27,8 @@ on:
   #    - 'home.admin/blitz.web.ui.sh'
   #    - 'home.admin/blitz.display.sh'
   #    - 'ci/amd64/**'
-  #pull_request:
-  #  branches: [ "dev", "v1.8", "v1.9" ]
+  pull_request:
+    branches: [ "dev", "v1.9" ]
   #  paths:
   #    - 'build_sdcard.sh'
   #    - 'home.admin/bitcoin.install.sh'
@@ -70,9 +70,9 @@ jobs:
 
       - name: Run the build script
         run: |
-          echo "Using the variables: --pack fatpack --github_user $GITHUB_ACTOR --branch ${{env.BRANCH_NAME}} --preseed_file preseed.cfg --boot uefi --desktop gnome"
+          echo "Using the variables: --pack fatpack --github_user $GITHUB_ACTOR --branch ${{env.BRANCH_NAME}} --preseed_file preseed.cfg --boot uefi --desktop none"
           cd ci/amd64
-          bash packer.build.amd64-debian.sh	--pack fatpack --github_user $GITHUB_ACTOR --branch ${{env.BRANCH_NAME}} --preseed_file preseed.cfg --boot uefi --desktop gnome
+          bash packer.build.amd64-debian.sh	--pack fatpack --github_user $GITHUB_ACTOR --branch ${{env.BRANCH_NAME}} --preseed_file preseed.cfg --boot uefi --desktop none
 
       - name: Compute checksum of the raw image
         run: |
