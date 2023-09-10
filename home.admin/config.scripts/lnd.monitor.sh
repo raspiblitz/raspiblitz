@@ -84,6 +84,14 @@ if [ "$2" = "status" ]; then
         lnd_error_full=""
       fi
 
+      # check if wallet is locked by systemd status (backup)
+      if [ "${lnd_locked}" == "0" ]; then
+        walletLockedCount=$(systemctl status ${netprefix}lnd 2>/dev/null | grep -c "Wallet locked")
+        if [ ${walletLockedCount} -gt 0 ]; then
+          lnd_locked="1"
+        fi
+      fi
+
     # check results if proof for online
     else
       lnd_ready="1"
