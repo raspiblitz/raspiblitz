@@ -4,29 +4,126 @@
 <details>
 <summary>Table of Contents</summary>
 
+- [Ready made images](#ready-made-images)
+- [Write the image to a disk connected with USB](#write-the-image-to-a-disk-connected-with-usb)
+  - [Option 1 - requires less disk space](#option-1---requires-less-disk-space)
+    - [Write the .qcow2 file directly to disk with `qemu-image dd`](#write-the-qcow2-file-directly-to-disk-with-qemu-image-dd)
+  - [Option 2 - convert to  a raq disk image first](#option-2---convert-to--a-raq-disk-image-first)
+    - [Convert the .qcow2 volume to a raw disk image](#convert-the-qcow2-volume-to-a-raw-disk-image)
+    - [Write the .img to the disk](#write-the-img-to-the-disk)
+- [The first boot](#the-first-boot)
+  - [Lean image with Gnome desktop (default image)](#lean-image-with-gnome-desktop-default-image)
+  - [Extend the root partition (optional - recommended)](#extend-the-root-partition-optional---recommended)
+  - [Add wifi driver (optional)](#add-wifi-driver-optional)
 - [Local build](#local-build)
   - [Generate an arm64-rpi image](#generate-an-arm64-rpi-image)
   - [Generate an amd64 image](#generate-an-amd64-image)
     - [amd64-lean-desktop-uefi-image](#amd64-lean-desktop-uefi-image)
     - [amd64-lean-server-legacyboot-image](#amd64-lean-server-legacyboot-image)
-- [Images generated in github actions](#images-generated-in-github-actions)
-- [Write the image to a disk connected with USB](#write-the-image-to-a-disk-connected-with-usb)
-  - [Convert the qcow2 volume to a raw disk image](#convert-the-qcow2-volume-to-a-raw-disk-image)
-  - [Write to a disk connected with USB with Balena Etcher or `dd`](#write-to-a-disk-connected-with-usb-with-balena-etcher-or-dd)
-- [The first boot](#the-first-boot)
-  - [Lean image with Gnome desktop (default image)](#lean-image-with-gnome-desktop-default-image)
-  - [Lean server image without Gnome desktop](#lean-server-image-without-gnome-desktop)
+- [Notes for the lean server image without Gnome desktop](#notes-for-the-lean-server-image-without-gnome-desktop)
+  - [After the boot](#after-the-boot)
+  - [Connect to wifi from the command line (optional)](#connect-to-wifi-from-the-command-line-optional)
     - [Add Gnome desktop to the server image (optional)](#add-gnome-desktop-to-the-server-image-optional)
-  - [Fatpack images](#fatpack-images)
-  - [Extend the root partition (optional - recommended)](#extend-the-root-partition-optional---recommended)
-  - [Add wifi (optional)](#add-wifi-optional)
-  - [Add wifi driver (optional)](#add-wifi-driver-optional)
+- [Fatpack images](#fatpack-images)
 - [Workflow notes](#workflow-notes)
   - [VNC](#vnc)
   - [Packer settings](#packer-settings)
   - [Flashing](#flashing)
 
 </details>
+
+## Ready made images
+* The images are built in GitHub actions
+* To see the downloadable artifacts will need to log in to GitHub
+* Find the latest successful build of the default amd64 image:
+https://github.com/rootzoll/raspiblitz/actions/workflows/amd64-lean-image.yml?query=workflow%3Aamd64-lean-image-build+branch%3Adev+is%3Asuccess++
+  ```
+  # unzip to the same directory
+  unzip ./raspiblitz-amd64-image-*.zip
+  ```
+## Write the image to a disk connected with USB
+### Option 1 - requires less disk space
+####  Write the .qcow2 file directly to disk with `qemu-image dd`
+* the .qcow2 volume is 8.1 GB
+* identify the connected disk with `lsblk` e.g., `/dev/sdk`
+  ```
+  sudo apt install -y qemu-utils
+  disk="/dev/sdk"
+  sudo qemu-img dd if=./raspiblitz-amd64-debian-lean.qcow2 of=${disk} bs=4M
+  ```
+### Option 2 - convert to  a raq disk image first
+#### Convert the .qcow2 volume to a raw disk image
+* the raw .img is 30GB
+  ```
+  # unzip
+  gzip -dkv raspiblitz-amd64-debian-lean.qcow2.gz
+  # install qemu-utils
+  sudo apt install -y qemu-utils
+  # convert
+  qemu-img convert ./raspiblitz-amd64-debian-lean.qcow2 ./raspiblitz-amd64-debian-lean.img
+  ```
+#### Write the .img to the disk
+* identify the connected disk with `lsblk` e.g., `/dev/sdk`
+* use [Balena Etcher](https://www.balena.io/etcher/)
+* or `dd` to write the .img to disk
+  ```
+  disk="/dev/sdk"
+  sudo dd if=./raspiblitz-amd64-debian-lean.img of=${disk} bs=4M status=progress
+  ```
+
+## The first boot
+### Lean image with Gnome desktop (default image)
+* log in on screen:
+  * username: `admin`
+  * password: `raspiblitz`
+* start a terminal for guidance
+* alternatively connect with ssh over the LAN
+  * username: `admin`
+  * password: `raspiblitz`
+
+### Extend the root partition (optional - recommended)
+* The default image is 30GB. The partition can be extended to the full size of the disk.
+* The lvm partition can be extended while mounted so this step can be done later as well while the system is running.
+* CLI (recommended)
+  ```
+  # identify the USB connected disk
+  lsblk
+  df -h
+  # select the disk carefully
+  disk="/dev/sde"
+  # resize the extended partition to the full size of the disk
+  sudo parted ${disk} -- resizepart 2 100%
+  # resize the lvm partition to the full size of the disk
+  sudo parted ${disk} -- resizepart 5 100%
+  # extend the physical volume to size of the lvm partition
+  sudo pvresize ${disk}5
+  # extend the root lvm to the full free space and resize the filesystem
+  sudo lvextend -r -l +100%FREE /dev/mapper/raspiblitz--amd64--vg-root
+  ```
+* GUI with GParted
+  ```
+  # install
+  sudo apt install gparted
+  # start the gparted GUI
+  sudo gparted
+  # resize the extended partition to the full size of the disk
+  # extend the lvm to the full free space and resize the filesystem (extends the swap space by default)
+  # in CLI: extend the root lvm
+  sudo lvextend -r -l +100%FREE /dev/mapper/raspiblitz--amd64--vg-root
+  ```
+
+### Add wifi driver (optional)
+* as in https://wiki.debian.org/iwlwifi
+* add the component `non-free` after `deb http://deb.debian.org/debian bullseye main` in `/etc/apt/sources.list`
+* install the wifi driver for the mentioned cards:
+  ```
+  sudo apt update && sudo apt install firmware-iwlwifi
+  ```
+* alternatively download the deb package from: http://ftp.debian.org/debian/pool/non-free-firmware/f/firmware-nonfree/firmware-iwlwifi_20230210-5_all.deb
+* install with:
+  ```
+  sudo dpkg -i firmware-iwlwifi_20230210-5_all.deb
+  ```
 
 ## Local build
 with the [Makefile](https://github.com/rootzoll/raspiblitz/blob/dev/Makefile)
@@ -78,53 +175,18 @@ with the [Makefile](https://github.com/rootzoll/raspiblitz/blob/dev/Makefile)
   amd64-lean-server-legacyboot-image
   ```
 
-## Images generated in github actions
-* To see the downloadable artifacts will need to log in to GitHub
-* Find the latest successful build of the default amd64 image:
-https://github.com/rootzoll/raspiblitz/actions/workflows/amd64-lean-image.yml?query=workflow%3Aamd64-lean-image-build+branch%3Adev+is%3Asuccess++
-  ```
-  # unzip to the same directory
-  unzip ./raspiblitz-amd64-image-YEAR-MM-DD-COMMITHASH.zip
-  ```
-## Write the image to a disk connected with USB
-### Convert the qcow2 volume to a raw disk image
-* the raw image is 30GB
-  ```
-  # unzip
-  gzip -dkv raspiblitz-amd64-debian-lean.qcow2.gz
-  # convert
-  qemu-img convert ./raspiblitz-amd64-debian-lean.qcow2 ./raspiblitz-amd64-debian-lean.img
-  ```
-
-### Write to a disk connected with USB with Balena Etcher or `dd`
-* identify the connected disk with `lsblk` eg,: `/dev/sdk`
-* [Balena Etcher](https://www.balena.io/etcher/) to write the .img to disk
-* dd to write the .img to disk
-  ```
-  disk="/dev/sdk"
-  sudo dd if=./raspiblitz-amd64-debian-lean.img of=${disk} bs=4M status=progress
-  ```
-* qemu-image dd to write the .qcow2 directly to disk
-  ```
-  sudo apt install -y qemu-utils
-  disk="/dev/sdk"
-  sudo qemu-img dd if=./raspiblitz-amd64-debian-lean.qcow2 of=${disk} bs=4M
-  ```
-
-## The first boot
-### Lean image with Gnome desktop (default image)
-* log in on screen:
-  * username: `admin`
-  * password: `raspiblitz`
-* start a terminal for guidance
-* connect with ssh over the LAN
-  * username: `admin`
-  * password: `raspiblitz`
-
-### Lean server image without Gnome desktop
+## Notes for the lean server image without Gnome desktop
+### After the boot
 * press any key to get to a login prompt after the splash screen
   * username: `admin`
   * password: `raspiblitz`
+
+### Connect to wifi from the command line (optional)
+* if the wifi driver is included in the FOSS Debian distro
+* in the command line run the network manager interface to connect:
+  ```
+  sudo nmtui
+  ```
 
 #### Add Gnome desktop to the server image (optional)
 * Connect to the internet (easiest to plug in a LAN cable - use a USB - LAN adapter if have no port)
@@ -133,62 +195,12 @@ https://github.com/rootzoll/raspiblitz/actions/workflows/amd64-lean-image.yml?qu
   systemctl start gdm
   ```
 
-### Fatpack images
+## Fatpack images
 * can open a browser and go to:
   * http://localhost
 * can also open the WebUI on another computer
   * Find the the RaspiBlitz_IP in your router dashboard, in the terminal prompt or with `hostname -I`
   * open: http://RaspiBlitz_IP
-
-### Extend the root partition (optional - recommended)
-* The default image is 30GB. The partition can be extended to the full size of the disk.
-* The lvm partition can be extended while mounted so this step can be done later as well while the system is running.
-* CLI (recommended)
-  ```
-  # identify the USB connected disk
-  lsblk
-  df -h
-  # select the disk carefully
-  disk="/dev/sde"
-  # resize the extended partition to the full size of the disk
-  sudo parted ${disk} -- resizepart 2 100%
-  # resize the lvm partition to the full size of the disk
-  sudo parted ${disk} -- resizepart 5 100%
-  # extend the physical volume to size of the lvm partition
-  sudo pvresize ${disk}5
-  # extend the root lvm to the full free space and resize the filesystem
-  sudo lvextend -r -l +100%FREE /dev/mapper/raspiblitz--amd64--vg-root
-  ```
-* GUI with GParted
-  ```
-  # install
-  sudo apt install gparted
-  # start the gparted GUI
-  sudo gparted
-  # resize the extended partition to the full size of the disk
-  # extend the lvm to the full free space and resize the filesystem (extends the swap space by default)
-  # in CLI: extend the root lvm
-  sudo lvextend -r -l +100%FREE /dev/mapper/raspiblitz--amd64--vg-root
-  ```
-
-### Add wifi (optional)
-* if the wifi driver is included in the FOSS Debian distro
-* in the command line run the network manager interface to connect:
-  ```
-  sudo nmtui
-  ```
-### Add wifi driver (optional)
-* as in https://wiki.debian.org/iwlwifi
-* add the component `non-free` after `deb http://deb.debian.org/debian bullseye main` in `/etc/apt/sources.list`
-* install the wifi driver for the mentioned cards:
-  ```
-  sudo apt update && sudo apt install firmware-iwlwifi
-  ```
-* alternatively download the deb package from: http://ftp.debian.org/debian/pool/non-free-firmware/f/firmware-nonfree/firmware-iwlwifi_20230210-5_all.deb
-* install with:
-  ```
-  sudo dpkg -i firmware-iwlwifi_20230210-5_all.deb
-  ```
 
 ## Workflow notes
 The github workflow files are the equivalent of the Makefile commands run locally.

@@ -181,6 +181,7 @@ if [ ${logsMegaByte} -gt 1000 ]; then
   sudo service rsyslog restart
   /home/admin/_cache.sh set message "WARNING: /var/log/ >1GB"
   echo "WARN # Logs in /var/log in were bigger then 1GB and got emergency delete to prevent fillup." >> $logFile
+  sudo ls -la /var/log >> $logFile
   echo "If you see this in the logs please report to the GitHub issues, so LOG config needs to be optimized." >> $logFile
   sleep 10
 else

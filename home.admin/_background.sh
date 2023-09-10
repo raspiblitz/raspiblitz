@@ -250,6 +250,30 @@ do
     fi
   fi
 
+  ###############################
+  # SYSTEM LOG FILE SIZES
+  ###############################
+
+  # check every 15min
+  recheckSync=$(($counter % 900))
+  if [ ${recheckSync} -eq 1 ]; then
+    echo "*** CHECK LOG FILE SIZES ***"
+    # check if log file is getting too big
+    logsMegaByte=$(sudo du -c -m /var/log | grep "total" | awk '{print $1;}')
+    if [ ${logsMegaByte} -gt 5000 ]; then
+      echo "WARN # Logs /var/log in are bigger then 5GB .. starting repair"
+      debuginfo=$(ls -la /var/log/ 2>/dev/null)
+      # dont delete directories - can make services crash
+      sudo rm /var/log/*
+      sudo service rsyslog restart
+      /home/admin/config.scripts/blitz.error.sh _background.sh "log-delete" "REPAIR: /var/log/ >5GB" "Logs in /var/log in were bigger then 5GB and got emergency delete to prevent fillup." "${debuginfo}"
+      sleep 10
+    else
+      echo "OK - logs are at ${logsMegaByte} MB - within safety limit"
+    fi
+    echo ""
+  fi
+
   ####################################################
   # MONITOR Initial Syncing of Bitcoin & Lightning
   # - turn off recovery mode
