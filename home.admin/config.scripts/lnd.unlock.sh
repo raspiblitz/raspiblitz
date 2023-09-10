@@ -2,7 +2,7 @@
 
 if [ "$1" == "-h" ] || [ "$1" == "help" ]; then
  echo "script to unlock LND wallet"
- echo "lnd.unlock.sh status"
+ echo "lnd.unlock.sh status" # DEPRECATED - use lnd.monitor.sh 
  echo "lnd.unlock.sh unlock [?passwordC]"
  echo "lnd.unlock.sh chain-unlock [mainnet|testnet|signet]"
  exit 1
@@ -48,18 +48,40 @@ fi
 
 source <(/home/admin/config.scripts/network.aliases.sh getvars lnd ${chain}net)
 
-# check if wallet is already unlocked
-# echo "# checking LND wallet ... (can take some time)"
-lndError=$(${lncli_alias} getinfo 2>&1)
-walletLocked=$(echo "${lndError}" | grep -c "Wallet is encrypted")
+# check if wallet is locked (try multiple ways)
+
+walletLocked="0" 
+
+#1 check by systemd status
 if [ "${walletLocked}" == "0" ]; then
-    # test for new error message
+    walletLockedCount=$(sudo systemctl status lnd | grep -c "Wallet locked")    
+    if [ ${walletLockedCount} -gt 0 ]; then
+        walletLocked=1
+    fi
+fi
+
+
+#2 check by ln error ("Wallet is encrypted")
+if [ "${walletLocked}" == "0" ]; then
+    lndError=$(${lncli_alias} getinfo 2>&1)
+    walletLocked=$(echo "${lndError}" | grep -c "Wallet is encrypted")
+    if [ "${walletLocked}" == "0" ]; then
+        # test for new error message
+        walletLocked=$(echo "${lndError}" | grep -c "wallet locked")
+    fi
+fi
+
+#3 check by ln error ("wallet locked")
+if [ "${walletLocked}" == "0" ]; then
     walletLocked=$(echo "${lndError}" | grep -c "wallet locked")
 fi
+
+# check if macaroons are missing
 macaroonsMissing=$(echo "${lndError}" | grep -c "unable to read macaroon")
 
 # if action is just status
 if [ "${action}" == "status" ]; then
+    echi "# DEPRECATED - use lnd.monitor.sh"
     echo "locked=${walletLocked}"
     echo "missingMacaroons=${macaroonsMissing}"
     exit 0
