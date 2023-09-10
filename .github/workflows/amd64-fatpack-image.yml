@@ -70,9 +70,9 @@ jobs:
 
       - name: Run the build script
         run: |
-          echo "Using the variables: --pack fatpack --github_user $GITHUB_ACTOR --branch ${{env.BRANCH_NAME}} --preseed_file preseed.cfg --boot uefi--desktop gnome"
+          echo "Using the variables: --pack fatpack --github_user $GITHUB_ACTOR --branch ${{env.BRANCH_NAME}} --preseed_file preseed.cfg --boot uefi --desktop gnome"
           cd ci/amd64
-          bash packer.build.amd64-debian.sh	--pack fatpack --github_user $GITHUB_ACTOR --branch ${{env.BRANCH_NAME}} --preseed_file preseed.cfg --boot uefi--desktop gnome
+          bash packer.build.amd64-debian.sh	--pack fatpack --github_user $GITHUB_ACTOR --branch ${{env.BRANCH_NAME}} --preseed_file preseed.cfg --boot uefi --desktop gnome
 
       - name: Compute checksum of the raw image
         run: |
