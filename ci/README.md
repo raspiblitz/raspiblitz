@@ -169,7 +169,7 @@ with the [Makefile](https://github.com/rootzoll/raspiblitz/blob/dev/Makefile)
   * libvirt / virsh / virt-manager (https://virt-manager.org/)
   * written to disk and booted with legacy boot (non-UEFI / CSM mode)
   ```
-  amd64-lean-server-legacyboot-image
+  make amd64-lean-server-legacyboot-image
   ```
 
 ## Notes for the lean server image without Gnome desktop
