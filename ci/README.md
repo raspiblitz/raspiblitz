@@ -38,8 +38,12 @@
 * Find the latest successful build of the default amd64 image:
 https://github.com/rootzoll/raspiblitz/actions/workflows/amd64-lean-image.yml?query=workflow%3Aamd64-lean-image-build+branch%3Adev+is%3Asuccess++
   ```
-  # unzip to the same directory
+  # unpack the artifact to the same directory
   unzip ./raspiblitz-amd64-image-*.zip
+  # unpack the image
+  gzip -dkv raspiblitz-amd64-debian-lean.qcow2.gz
+  # install qemu-utils
+  sudo apt install -y qemu-utils
   ```
 ## Write the image to a disk connected with USB
 ### Option 1 - requires less disk space
@@ -47,7 +51,6 @@ https://github.com/rootzoll/raspiblitz/actions/workflows/amd64-lean-image.yml?qu
 * the .qcow2 volume is 8.1 GB
 * identify the connected disk with `lsblk` e.g., `/dev/sdk`
   ```
-  sudo apt install -y qemu-utils
   disk="/dev/sdk"
   sudo qemu-img dd if=./raspiblitz-amd64-debian-lean.qcow2 of=${disk} bs=4M
   ```
@@ -55,10 +58,6 @@ https://github.com/rootzoll/raspiblitz/actions/workflows/amd64-lean-image.yml?qu
 #### Convert the .qcow2 volume to a raw disk image
 * the raw .img is 30GB
   ```
-  # unzip
-  gzip -dkv raspiblitz-amd64-debian-lean.qcow2.gz
-  # install qemu-utils
-  sudo apt install -y qemu-utils
   # convert
   qemu-img convert ./raspiblitz-amd64-debian-lean.qcow2 ./raspiblitz-amd64-debian-lean.img
   ```
@@ -77,9 +76,7 @@ https://github.com/rootzoll/raspiblitz/actions/workflows/amd64-lean-image.yml?qu
   * username: `admin`
   * password: `raspiblitz`
 * start a terminal for guidance
-* alternatively connect with ssh over the LAN
-  * username: `admin`
-  * password: `raspiblitz`
+* alternatively connect with ssh over the LAN with the same username and password
 
 ### Extend the root partition (optional - recommended)
 * The default image is 30GB. The partition can be extended to the full size of the disk.
@@ -172,7 +169,7 @@ with the [Makefile](https://github.com/rootzoll/raspiblitz/blob/dev/Makefile)
   * libvirt / virsh / virt-manager (https://virt-manager.org/)
   * written to disk and booted with legacy boot (non-UEFI / CSM mode)
   ```
-  amd64-lean-server-legacyboot-image
+  make amd64-lean-server-legacyboot-image
   ```
 
 ## Notes for the lean server image without Gnome desktop
