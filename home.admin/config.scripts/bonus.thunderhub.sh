@@ -96,7 +96,7 @@ if [ "$1" = "install" ]; then
     /home/admin/config.scripts/bonus.nodejs.sh on
 
     # create thunderhub user
-    sudo adduser --system --group --home /home/thunderhub thunderhub
+    sudo adduser --system --group --shell /bin/bash --home /home/thunderhub thunderhub
 
     # download and install
     sudo -u thunderhub git clone https://github.com/apotdevin/thunderhub.git /home/thunderhub/thunderhub

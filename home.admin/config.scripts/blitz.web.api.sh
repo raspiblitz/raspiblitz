@@ -237,7 +237,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   rm -r /home/blitzapi/blitz_api 2>/dev/null
 
   # create user
-  adduser --system --group --home /home/blitzapi blitzapi
+  adduser --system --group --shell /bin/bash --home /home/blitzapi blitzapi
 
   # sudo capability for manipulating passwords
   /usr/sbin/usermod --append --groups sudo blitzapi

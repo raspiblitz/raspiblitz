@@ -90,7 +90,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   if [ ${isInstalled} -eq 0 ]; then
 
     # create dedicated user
-    sudo adduser --system --group --home /home/lit lit
+    sudo adduser --system --group --shell /bin/bash --home /home/lit lit
     # make sure symlink to central app-data directory exists
     sudo rm -rf /home/lit/.lnd # not a symlink.. delete it silently
     # create symlink

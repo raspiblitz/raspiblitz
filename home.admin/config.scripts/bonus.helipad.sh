@@ -86,7 +86,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     ###############
     
     # create helipad user:
-    sudo adduser --system --group --home /home/$HELIPAD_USER $HELIPAD_USER
+    sudo adduser --system --group --shell /bin/bash --home /home/$HELIPAD_USER $HELIPAD_USER
 
     # install system dependencies:
     sudo apt --assume-yes update

@@ -128,7 +128,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   if [ ${isInstalled} -eq 0 ]; then
 
     # add homer user
-    sudo adduser --system --group --home /home/homer homer
+    sudo adduser --system --group --shell /bin/bash --home /home/homer homer
 
     # install homer
     cd /home/homer

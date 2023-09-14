@@ -346,7 +346,7 @@ if [ "$1" = "install" ]; then
   fi
 
   echo "# create btcpay user"
-  sudo adduser --system --group --home /home/btcpay btcpay
+  sudo adduser --system --group --shell /bin/bash --home /home/btcpay btcpay
   cd /home/btcpay || exit 1
 
   echo "# install .NET"

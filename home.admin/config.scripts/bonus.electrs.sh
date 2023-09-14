@@ -274,7 +274,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo
     echo "# Creating the electrs user"
     echo
-    sudo adduser --system --group --home /home/electrs electrs
+    sudo adduser --system --group --shell /bin/bash --home /home/electrs electrs
     cd /home/electrs
 
     echo

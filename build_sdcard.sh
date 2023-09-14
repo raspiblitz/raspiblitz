@@ -394,7 +394,7 @@ echo -e "\n*** PREPARE ${baseimage} ***"
 # make sure the pi user is present
 if [ "$(compgen -u | grep -c pi)" -eq 0 ];then
   echo "# Adding the user pi"
-  adduser --system --group --home /home/pi pi
+  adduser --system --group --shell /bin/bash --home /home/pi pi
   adduser pi sudo
 fi
 
@@ -537,7 +537,7 @@ service rsyslog restart
 echo -e "\n*** ADDING MAIN USER admin ***"
 # based on https://raspibolt.org/system-configuration.html#add-users
 # using the default password 'raspiblitz'
-adduser --system --group --home /home/admin admin
+adduser --system --group --shell /bin/bash --home /home/admin admin
 echo "admin:raspiblitz" | chpasswd
 adduser admin sudo
 chsh admin -s /bin/bash
@@ -555,7 +555,7 @@ fi
 echo -e "\n*** ADDING SERVICE USER bitcoin"
 # based on https://raspibolt.org/guide/raspberry-pi/system-configuration.html
 # create user and set default password for user
-adduser --system --group --home /home/bitcoin bitcoin
+adduser --system --group --shell /bin/bash --home /home/bitcoin bitcoin
 echo "bitcoin:raspiblitz" | chpasswd
 # make home directory readable
 chmod 755 /home/bitcoin

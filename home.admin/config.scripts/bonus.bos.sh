@@ -194,7 +194,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   /home/admin/config.scripts/bonus.nodejs.sh on
 
   # create bos user
-  sudo adduser --system --group --home /home/bos bos
+  sudo adduser --system --group --shell /bin/bash --home /home/bos bos
 
   echo "# Create data folder on the disk"
   # move old data if present

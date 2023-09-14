@@ -110,7 +110,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   if [ ${isInstalled} -eq 0 ]; then
 
     echo "*** Add the 'squeaknode' user ***"
-    sudo adduser --system --group --home /home/squeaknode squeaknode
+    sudo adduser --system --group --shell /bin/bash --home /home/squeaknode squeaknode
 
     # make sure needed debian packages are installed
     echo "# installing needed packages"

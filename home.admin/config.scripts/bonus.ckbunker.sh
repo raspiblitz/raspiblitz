@@ -99,7 +99,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo apt install -y virtualenv python-dev libusb-1.0-0-dev libudev-dev
 
   # create dedicated user
-  sudo adduser --system --group --home /home/ckbunker ckbunker
+  sudo adduser --system --group --shell /bin/bash --home /home/ckbunker ckbunker
 
   # add the user to the Tor group
   sudo usermod -a -G debian-tor ckbunker

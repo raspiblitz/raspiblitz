@@ -129,7 +129,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     ###############
 
     # create lndg user
-    sudo adduser --system --group --home /home/lndg lndg
+    sudo adduser --system --group --shell /bin/bash --home /home/lndg lndg
     # add user to group with admin access to lnd
     sudo /usr/sbin/usermod --append --groups lndadmin lndg
     # make sure symlink to central app-data directory exists

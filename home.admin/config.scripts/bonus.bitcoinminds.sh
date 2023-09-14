@@ -36,7 +36,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo ""
 
     # create user
-    sudo adduser --system --group --home /home/bitcoinminds bitcoinminds
+    sudo adduser --system --group --shell /bin/bash --home /home/bitcoinminds bitcoinminds
 
     # add local directory to path and set PATH for the user
     sudo bash -c "echo 'PATH=\$PATH:/home/bitcoinminds/.local/bin' >> /home/bitcoinminds/.profile"
