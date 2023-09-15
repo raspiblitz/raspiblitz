@@ -376,7 +376,7 @@ else
 fi
 
 # remove any debian python protection from pip installing modules
-if [ "${baseimage}" = "debian" ]; then
+if [ -f rm /usr/lib/python3.*/EXTERNALLY-MANAGED ]; then
   rm /usr/lib/python3.*/EXTERNALLY-MANAGED
 fi
 
@@ -554,9 +554,6 @@ if [ $(sudo cat /etc/group | grep -c "^admin") -lt 1 ]; then
 else
   echo -e "\nOK group admin exists"
 fi
-# make admin home directly readable by others, the bitcoin user needs access to it
-chmod 755 /home/admin
-
 
 echo -e "\n*** ADDING SERVICE USER bitcoin"
 # based on https://raspibolt.org/guide/raspberry-pi/system-configuration.html
