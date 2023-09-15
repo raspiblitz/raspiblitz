@@ -21,6 +21,9 @@
 - Update: Balance of Satoshis 15.11.0 (bos) [details](https://github.com/alexbosworth/balanceofsatoshis/blob/master/CHANGELOG.md#15110)
 - Fix: Homebanking Interface FinTS/HBCI (experimental) [details](https://github.com/rootzoll/raspiblitz/issues/1186)
 - Remove: Spark Wallet and Sparko CLN plugin (not maintained anymore)
+- Remove: Faraday, Loop, Pool single installs - used in the LiT package instead
+- Remove: deactivate LNproxy in the menu and in provision
+- Info: the users not intended to be logged in will not be available to change into (manage them from admin with sudo)
 
 ## What's new in Version 1.9.0 of RaspiBlitz?
 
