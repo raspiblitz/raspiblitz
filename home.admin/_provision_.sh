@@ -425,15 +425,6 @@ else
     echo "Provisioning clWatchtowerClient - keep default" >> ${logFile}
 fi
 
-#LOOP - install only if LiT won't be installed
-if [ "${loop}" = "on" ] && [ "${lit}" != "on" ]; then
-  echo "Provisioning Lightning Loop - run config script" >> ${logFile}
-  /home/admin/_cache.sh set message "Setup Lightning Loop"
-  sudo -u admin /home/admin/config.scripts/bonus.loop.sh on >> ${logFile} 2>&1
-else
-  echo "Provisioning Lightning Loop - keep default" >> ${logFile}
-fi
-
 #BTC RPC EXPLORER
 if [ "${BTCRPCexplorer}" = "on" ]; then
   echo "Provisioning BTCRPCexplorer - run config script" >> ${logFile}

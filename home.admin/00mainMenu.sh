@@ -281,9 +281,6 @@ case $CHOICE in
         LIGHTNINGTIPBOT)
             /home/admin/config.scripts/bonus.lightningtipbot.sh menu
             ;;
-        LOOP)
-            /home/admin/config.scripts/bonus.loop.sh menu
-            ;;
         MEMPOOL)
             /home/admin/config.scripts/bonus.mempool.sh menu
             ;;
