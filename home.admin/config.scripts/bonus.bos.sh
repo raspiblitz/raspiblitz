@@ -8,10 +8,10 @@ BOSVERSION="15.11.0"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
-  echo "config script to install, update or uninstall Balance of Satoshis"
-  echo "bonus.bos.sh [on|off|menu|update|telegram]"
-  echo "installs the version $BOSVERSION by default"
-  exit 1
+ echo "config script to install, update or uninstall Balance of Satoshis"
+ echo "bonus.bos.sh [on|off|menu|update|telegram]"
+ echo "installs the version $BOSVERSION by default"
+ exit 1
 fi
 
 source /mnt/hdd/raspiblitz.conf
@@ -21,23 +21,19 @@ if [ "$1" = "menu" ]; then
 
   text="
 Balance of Satoshis is a command line tool.
-Can also type: 'bos' in the command line to switch to the dedicated user.
-Then see 'bos help' for the options, 'exit' to return. Usage:
+Type: 'bos' in the command line to switch to the dedicated user.
+Then see 'bos help' for the options. Usage:
 https://github.com/alexbosworth/balanceofsatoshis/blob/master/README.md
 "
 
-  whiptail \
-    --title "Info Balance of Satoshis" \
-    --yes-button "Switch to bos user" \
-    --no-button "OPTIONS" \
-    --yesno "${text}" 10 77
+  whiptail --title " Info Balance of Satoshis" --yes-button "OK" --no-button "OPTIONS" --yesno "${text}" 10 75
   result=$?
   sudo /home/admin/config.scripts/blitz.display.sh hide
   echo "option (${result}) - please wait ..."
 
   # exit when user presses OK to close menu
   if [ ${result} -eq 0 ]; then
-    sudo su - bos
+    exit 0
   fi
 
   # Balance of Satoshis OPTIONS menu
@@ -51,76 +47,75 @@ https://github.com/alexbosworth/balanceofsatoshis/blob/master/README.md
 
   WIDTH=66
   CHOICE_HEIGHT=$(("${#OPTIONS[@]}/2+1"))
-  HEIGHT=$((CHOICE_HEIGHT + 7))
+  HEIGHT=$((CHOICE_HEIGHT+7))
   CHOICE=$(dialog --clear \
-    --title " BoS - Options" \
-    --ok-label "Select" \
-    --cancel-label "Back" \
-    --menu "Choose one of the following options:" \
-    $HEIGHT $WIDTH $CHOICE_HEIGHT \
-    "${OPTIONS[@]}" \
-    2>&1 >/dev/tty)
+                --title " BoS - Options" \
+                --ok-label "Select" \
+                --cancel-label "Back" \
+                --menu "Choose one of the following options:" \
+                $HEIGHT $WIDTH $CHOICE_HEIGHT \
+                "${OPTIONS[@]}" \
+                2>&1 >/dev/tty)
 
   case $CHOICE in
-  TELEGRAM-DISABLE)
-    clear
-    /home/admin/config.scripts/bonus.bos.sh telegram off
-    echo
-    echo "OK telegram disabled."
-    echo "PRESS ENTER to continue"
-    read key
-    exit 0
-    ;;
-  TELEGRAM-SETUP)
-    clear
-    whiptail --title " First time setup instructions " \
-      --yes-button "Back" \
-      --no-button "Setup" \
-      --yesno "1. Create your telegram bot: https://t.me/botfather\n
+        TELEGRAM-DISABLE)
+            clear
+            /home/admin/config.scripts/bonus.bos.sh telegram off
+            echo
+            echo "OK telegram disabled."
+            echo "PRESS ENTER to continue"
+            read key
+            exit 0
+            ;;
+        TELEGRAM-SETUP)
+            clear
+            whiptail --title " First time setup instructions " \
+            --yes-button "Back" \
+            --no-button "Setup" \
+            --yesno "1. Create your telegram bot: https://t.me/botfather\n
 2. BoS asks for HTTP API Token given from telegram.\n
 3. BoS asks for your connection code (Bot command: /connect)\n
 Start BoS telegram setup now?" 14 72
-    if [ "$?" != "1" ]; then
-      exit 0
-    fi
-    sudo bash /home/admin/config.scripts/bonus.bos.sh telegram setup
-    echo
-    echo "OK Balance of Satoshis telegram setup done."
-    echo "PRESS ENTER to continue"
-    read key
-    exit 0
-    ;;
-  TELEGRAM-SERVICE)
-    clear
-    connectMsg="
+            if [ "$?" != "1" ]; then
+              exit 0
+            fi
+            sudo bash /home/admin/config.scripts/bonus.bos.sh telegram setup
+            echo
+            echo "OK Balance of Satoshis telegram setup done."
+            echo "PRESS ENTER to continue"
+            read key
+            exit 0
+            ;;
+        TELEGRAM-SERVICE)
+            clear
+            connectMsg="
 Start chatting with the bot for connect code (/connect)\n
 Please enter the CONNECT CODE from your telegram bot
 "
-    connectCode=$(whiptail --inputbox "$connectMsg" 14 62 --title "Connect Telegram Bot" 3>&1 1>&2 2>&3)
-    exitstatus=$?
-    if [ $exitstatus = 0 ]; then
-      connectCode=$(echo "${connectCode}" | cut -d " " -f1)
-    else
-      exit 0
-    fi
-    /home/admin/config.scripts/bonus.bos.sh telegram on ${connectCode}
-    echo
-    echo "OK BoS telegram service active."
-    echo "PRESS ENTER to continue"
-    read key
-    exit 0
-    ;;
-  *)
-    clear
-    exit 0
-    ;;
+            connectCode=$(whiptail --inputbox "$connectMsg" 14 62 --title "Connect Telegram Bot" 3>&1 1>&2 2>&3)
+            exitstatus=$?
+            if [ $exitstatus = 0 ]; then
+              connectCode=$(echo "${connectCode}" | cut -d " " -f1)
+            else
+              exit 0
+            fi
+            /home/admin/config.scripts/bonus.bos.sh telegram on ${connectCode}
+            echo
+            echo "OK BoS telegram service active."
+            echo "PRESS ENTER to continue"
+            read key
+            exit 0
+            ;;
+        *)
+            clear
+            exit 0
   esac
 
   exit 0
 fi
 
 # telegram on
-if [ "$1" = "telegram" ] && [ "$2" = "on" ] && [ "$3" != "" ]; then
+if [ "$1" = "telegram" ] && [ "$2" = "on" ] && [ "$3" != "" ] ; then
   sudo rm /etc/systemd/system/bos-telegram.service 2>/dev/null
 
   # install service
@@ -198,6 +193,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # check and install NodeJS
   /home/admin/config.scripts/bonus.nodejs.sh on
 
+  # create bos user
   user=bos
   echo "# add the user: ${user}"
   adduser --system --group --shell /bin/bash --home /home/${user} ${user}
@@ -219,8 +215,12 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo -u bos npm config set prefix '/home/bos/.npm-global'
   sudo bash -c "echo 'PATH=$PATH:/home/bos/.npm-global/bin' >> /home/bos/.bashrc"
 
+  # download source code
+  sudo -u bos git clone https://github.com/alexbosworth/balanceofsatoshis.git /home/bos/balanceofsatoshis
+  cd /home/bos/balanceofsatoshis
+
   # make sure symlink to central app-data directory exists ***"
-  sudo rm -rf /home/bos/.lnd # not a symlink.. delete it silently
+  sudo rm -rf /home/bos/.lnd  # not a symlink.. delete it silently
   # create symlink
   sudo ln -s "/mnt/hdd/app-data/lnd/" "/home/bos/.lnd"
 
@@ -250,6 +250,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   exit 0
 fi
 
+
 # switch off
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
@@ -262,6 +263,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   exit 0
 
 fi
+
 
 # update
 if [ "$1" = "update" ]; then
