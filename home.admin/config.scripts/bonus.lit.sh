@@ -92,7 +92,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # create dedicated user
     USERNAME=lit
     echo "# add the user: ${USERNAME}"
-    adduser --system --group --shell /bin/bash --home /home/${USERNAME} ${USERNAME}
+    sudo adduser --system --group --shell /bin/bash --home /home/${USERNAME} ${USERNAME}
     echo "Copy the skeleton files for login"
     sudo -u ${USERNAME} cp -r /etc/skel/. /home/${USERNAME}/
     # make sure symlink to central app-data directory exists
