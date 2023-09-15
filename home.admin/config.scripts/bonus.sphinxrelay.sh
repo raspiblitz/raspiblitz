@@ -387,7 +387,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     /home/admin/config.scripts/lnd.keysend.sh on
 
     echo "*** Add the 'sphinxrelay' user ***"
-    sudo adduser --system --group --shell /bin/bash --home /home/sphinxrelay sphinxrelay
+    sudo adduser --system --group --home /home/sphinxrelay sphinxrelay
     sudo /usr/sbin/usermod --append --groups lndadmin sphinxrelay
     sudo /usr/sbin/usermod --append --groups lndsigner sphinxrelay
     sudo /usr/sbin/usermod --append --groups lndrouter sphinxrelay

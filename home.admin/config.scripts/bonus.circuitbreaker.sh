@@ -77,7 +77,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # get Go vars
     source /etc/profile
     # create dedicated user
-    sudo adduser --system --group --shell /bin/bash --home /home/circuitbreaker circuitbreaker
+    sudo adduser --system --group --home /home/circuitbreaker circuitbreaker
     # set PATH for the user
     sudo bash -c "echo 'PATH=\$PATH:/home/circuitbreaker/go/bin/' >> /home/circuitbreaker/.profile"
 

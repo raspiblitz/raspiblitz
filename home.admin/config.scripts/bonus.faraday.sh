@@ -157,7 +157,7 @@ if [ "${mode}" = "on" ] || [ "${mode}" = "1" ]; then
 
   # create dedicated user
   echo "# Add the 'faraday' user"
-  sudo adduser --system --group --shell /bin/bash --home /home/faraday faraday
+  sudo adduser --system --group --home /home/faraday faraday
 
   # set PATH for the user
   sudo bash -c "echo 'PATH=\$PATH:/home/faraday/bin/' >> /home/faraday/.profile"

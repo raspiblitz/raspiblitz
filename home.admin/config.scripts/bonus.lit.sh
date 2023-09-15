@@ -90,11 +90,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   if [ ${isInstalled} -eq 0 ]; then
 
     # create dedicated user
-    user=lit
-    echo "# add the user: ${user}"
-    adduser --system --group --shell /bin/bash --home /home/${user} ${user}
+    USERNAME=lit
+    echo "# add the user: ${USERNAME}"
+    adduser --system --group --shell /bin/bash --home /home/${USERNAME} ${USERNAME}
     echo "Copy the skeleton files for login"
-    sudo -u ${user} cp -r /etc/skel/. /home/${user}/
+    sudo -u ${USERNAME} cp -r /etc/skel/. /home/${USERNAME}/
     # make sure symlink to central app-data directory exists
     sudo rm -rf /home/lit/.lnd # not a symlink.. delete it silently
     # create symlink

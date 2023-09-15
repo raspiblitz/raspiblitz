@@ -136,7 +136,7 @@ if [ "$1" = "install" ]; then
 
   # create rtl user (one for all instances)
   if [ $(compgen -u | grep -c rtl) -eq 0 ]; then
-    sudo adduser --system --group --shell /bin/bash --home /home/rtl rtl || exit 1
+    sudo adduser --system --group --home /home/rtl rtl || exit 1
   fi
 
   # download source code and set to tag release

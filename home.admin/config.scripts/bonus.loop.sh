@@ -53,7 +53,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     source /etc/profile
 
     # create dedicated user
-    sudo adduser --system --group --shell /bin/bash --home /home/loop loop
+    sudo adduser --system --group --home /home/loop loop
 
     # set PATH for the user
     sudo bash -c "echo 'PATH=\$PATH:/home/loop/go/bin/' >> /home/loop/.profile"

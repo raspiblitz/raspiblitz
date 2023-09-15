@@ -261,7 +261,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # BACKGROUND is here to seperate running apps by unix users
   # and only give file write access to the rest of the system where needed.
   echo "# Create user"
-  sudo adduser --system --group --shell /bin/bash --home /home/${APPID} ${APPID}
+  sudo adduser --system --group --home /home/${APPID} ${APPID}
 
   # create a data directory on /mnt/hdd/app-data/ for the app
   # BACKGROUND is that any critical data that needs to survive an update should

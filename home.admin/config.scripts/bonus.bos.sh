@@ -194,11 +194,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   /home/admin/config.scripts/bonus.nodejs.sh on
 
   # create bos user
-  user=bos
-  echo "# add the user: ${user}"
-  adduser --system --group --shell /bin/bash --home /home/${user} ${user}
+  USERNAME=bos
+  echo "# add the user: ${USERNAME}"
+  adduser --system --group --shell /bin/bash --home /home/${USERNAME} ${USERNAME}
   echo "Copy the skeleton files for login"
-  sudo -u ${user} cp -r /etc/skel/. /home/${user}/
+  sudo -u ${USERNAME} cp -r /etc/skel/. /home/${USERNAME}/
 
   echo "# Create data folder on the disk"
   # move old data if present

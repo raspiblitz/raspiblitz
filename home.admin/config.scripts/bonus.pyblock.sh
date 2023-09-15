@@ -29,12 +29,12 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "*** INSTALL pyblocks***"
   
   # create pyblock user
-  user=pyblock
-  echo "# add the user: ${user}"
-  adduser --system --group --shell /bin/bash --home /home/${user} ${user}
+  USERNAME=pyblock
+  echo "# add the user: ${USERNAME}"
+  adduser --system --group --shell /bin/bash --home /home/${USERNAME} ${USERNAME}
   echo "Copy the skeleton files for login"
-  sudo -u ${user} cp -r /etc/skel/. /home/${user}/
-  
+  sudo -u ${USERNAME} cp -r /etc/skel/. /home/${USERNAME}/
+
   cd /home/pyblock
   sudo -u pyblock mkdir /home/pyblock/config
 

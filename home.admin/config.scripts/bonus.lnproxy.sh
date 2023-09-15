@@ -54,7 +54,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   /home/admin/config.scripts/bonus.go.sh on
 
   # create lnproxy user
-  sudo adduser --system --group --shell /bin/bash --home /home/lnproxy lnproxy
+  sudo adduser --system --group --home /home/lnproxy lnproxy
 
   # create macaroon
   cd /home/bitcoin || exit 1
