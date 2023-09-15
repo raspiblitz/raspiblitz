@@ -293,9 +293,6 @@ case $CHOICE in
         JAM)
             /home/admin/config.scripts/bonus.jam.sh menu
             ;;
-        FARADAY)
-            sudo /home/admin/config.scripts/bonus.faraday.sh menu
-            ;;
         BOS)
             sudo /home/admin/config.scripts/bonus.bos.sh menu
             ;;

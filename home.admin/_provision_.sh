@@ -585,15 +585,6 @@ else
   echo "Provisioning Specter - keep default" >> ${logFile}
 fi
 
-# Faraday
-if [ "${faraday}" = "on" ]; then
-  echo "Provisioning Faraday - run config script" >> ${logFile}
-  /home/admin/_cache.sh set message "Setup Faraday"
-  sudo -u admin /home/admin/config.scripts/bonus.faraday.sh on >> ${logFile} 2>&1
-else
-  echo "Provisioning Faraday - keep default" >> ${logFile}
-fi
-
 # BOS
 if [ "${bos}" = "on" ]; then
   echo "Provisioning Balance of Satoshis - run config script" >> ${logFile}
