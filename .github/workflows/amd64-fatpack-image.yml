@@ -66,9 +66,9 @@ jobs:
             echo "BRANCH_NAME=${GITHUB_HEAD_REF}" >> $GITHUB_ENV
           fi
           if [[ "${{github.event_name}}" == "pull_request" ]]; then
-            echo "name=github_user=${{github.event.pull_request.head.repo.owner.login}}" >> $GITHUB_OUTPUT
+            echo "::set-output name=github_user::${{github.event.pull_request.head.repo.owner.login}}"
           else
-            echo "name=github_user=$(echo ${{github.repository}} | cut -d'/' -f1)" >> $GITHUB_OUTPUT
+            echo "::set-output name=github_user::$(echo ${{github.repository}} | cut -d'/' -f1)"
           fi
 
       - name: Display the build name
