@@ -68,7 +68,7 @@ if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
   OPTIONS+=(la 'LND LIT (loop, pool, faraday)' ${lit})
   OPTIONS+=(gb 'LND LNDg (auto-rebalance, auto-fees)' ${lndg})
   OPTIONS+=(oa 'LND Balance of Satoshis' ${bos})
-  OPTIONS+=(lp 'LND lnproxy server' ${lnproxy})
+  #OPTIONS+=(lp 'LND lnproxy server' ${lnproxy})
   OPTIONS+=(ya 'LND PyBLOCK' ${pyblock})
   OPTIONS+=(ha 'LND ChannelTools (Fund Rescue)' ${chantools})
   OPTIONS+=(xa 'LND Sphinx-Relay' ${sphinxrelay})
