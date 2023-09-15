@@ -215,10 +215,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo -u bos npm config set prefix '/home/bos/.npm-global'
   sudo bash -c "echo 'PATH=$PATH:/home/bos/.npm-global/bin' >> /home/bos/.bashrc"
 
-  # download source code
-  sudo -u bos git clone https://github.com/alexbosworth/balanceofsatoshis.git /home/bos/balanceofsatoshis
-  cd /home/bos/balanceofsatoshis
-
   # make sure symlink to central app-data directory exists ***"
   sudo rm -rf /home/bos/.lnd  # not a symlink.. delete it silently
   # create symlink
