@@ -28,7 +28,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     /home/admin/config.scripts/bonus.nodejs.sh on
 
     # add user
-    sudo adduser --system --group --shell /bin/bash --home /home/$USERNAME $USERNAME
+    user=${USERNAME}
+    echo "# add the user: ${user}"
+    adduser --system --group --shell /bin/bash --home /home/${user} ${user}
+    echo "Copy the skeleton files for login"
+    sudo -u ${user} cp -r /etc/skel/. /home/${user}/
 
     # install stacking-sats-kraken
     cd $HOME_DIR

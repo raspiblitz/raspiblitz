@@ -198,8 +198,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # check and install NodeJS
   /home/admin/config.scripts/bonus.nodejs.sh on
 
-  # create bos user
-  sudo adduser --system --group --shell /bin/bash --home /home/bos bos
+  user=bos
+  echo "# add the user: ${user}"
+  adduser --system --group --shell /bin/bash --home /home/${user} ${user}
+  echo "Copy the skeleton files for login"
+  sudo -u ${user} cp -r /etc/skel/. /home/${user}/
 
   echo "# Create data folder on the disk"
   # move old data if present
@@ -215,10 +218,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo -u bos mkdir /home/bos/.npm-global
   sudo -u bos npm config set prefix '/home/bos/.npm-global'
   sudo bash -c "echo 'PATH=$PATH:/home/bos/.npm-global/bin' >> /home/bos/.bashrc"
-
-  # download source code
-  sudo -u bos git clone https://github.com/alexbosworth/balanceofsatoshis.git /home/bos/balanceofsatoshis
-  cd /home/bos/balanceofsatoshis
 
   # make sure symlink to central app-data directory exists ***"
   sudo rm -rf /home/bos/.lnd # not a symlink.. delete it silently

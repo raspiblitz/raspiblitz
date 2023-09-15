@@ -56,8 +56,11 @@ if [ "$1" = "install" ]; then
     echo "# cleaning before install"
     sudo userdel -rf joinmarket 2>/dev/null
 
-    echo "# add the 'joinmarket' user"
-    adduser --system --group --shell /bin/bash --home /home/joinmarket joinmarket
+    user=joinmarket
+    echo "# add the user: ${user}"
+    adduser --system --group --shell /bin/bash --home /home/${user} ${user}
+    echo "Copy the skeleton files for login"
+    sudo -u ${user} cp -r /etc/skel/. /home/${user}/
 
     # add to sudo group (required for installation)
     adduser joinmarket sudo || exit 1
