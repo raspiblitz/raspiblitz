@@ -1,5 +1,7 @@
 #!/bin/bash -e
 
+sudo apt-get update
+
 # install packer
 if ! packer version 2>/dev/null; then
   curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
@@ -11,8 +13,11 @@ else
   echo "# Packer is installed"
 fi
 
+
+
 # install qemu
-echo -e "\nInstalling qemu..."
+echo "# Install qemu ..."
+sudo apt-get update
 sudo apt-get install -y qemu-system
 
 # set vars
@@ -20,7 +25,7 @@ source ../set_variables.sh
 set_variables "$@"
 
 # Build the image
-echo -e "\nBuilding the image..."
+echo "# Build the image ..."
 cd debian
 packer init -upgrade .
 command="PACKER_LOG=1 packer build ${vars} -only=qemu packer.build.amd64-debian.hcl"
