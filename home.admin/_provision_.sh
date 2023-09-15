@@ -657,15 +657,6 @@ else
   echo "Provisioning Stacking Sats Kraken - keep default" >> ${logFile}
 fi
 
-# Pool - install only if LiT won't be installed
-if [ "${pool}" = "on" ] && [ "${lit}" != "on" ]; then
-  echo "Provisioning Pool - run config script" >> ${logFile}
-  /home/admin/_cache.sh set message "Setup Pool"
-  sudo -u admin /home/admin/config.scripts/bonus.pool.sh on >> ${logFile} 2>&1
-else
-  echo "Provisioning Pool - keep default" >> ${logFile}
-fi
-
 # lit (make sure to be installed after RTL)
 if [ "${lit}" = "on" ]; then
   echo "Provisioning LIT - run config script" >> ${logFile}

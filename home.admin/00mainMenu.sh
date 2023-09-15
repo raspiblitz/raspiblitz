@@ -311,9 +311,6 @@ case $CHOICE in
         ZEROTIER)
             sudo /home/admin/config.scripts/bonus.zerotier.sh menu
             ;;
-        POOL)
-            sudo /home/admin/config.scripts/bonus.pool.sh menu
-            ;;
         SPHINX)
             sudo /home/admin/config.scripts/bonus.sphinxrelay.sh menu
             ;;
