@@ -281,11 +281,16 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       exit 1
     fi
   else
-    echo "# using lastest code in branch"
+    echo "# using the latest code in branch"
   fi
   # install
   echo "# running install"
   sudo -u blitzapi python3 -m venv venv
+  # see https://github.com/raspiblitz/raspiblitz/issues/4169
+  if ! sudo -u blitzapi ./venv/bin/pip install install cchardet --use-pep517; then
+    echo "error='pip install cchardet failed'"
+    exit 1
+  fi
   if ! sudo -u blitzapi ./venv/bin/pip install -r requirements.txt --no-deps; then
     echo "error='pip install failed'"
     exit 1
