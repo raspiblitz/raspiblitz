@@ -3,7 +3,7 @@
 # https://github.com/lnbits/lnbits
 
 # https://github.com/lnbits/lnbits/releases
-tag="0.10.9"
+tag="0.10.10"
 VERSION="${tag}"
 
 # command info
