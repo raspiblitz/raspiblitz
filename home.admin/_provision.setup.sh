@@ -41,7 +41,7 @@ fi
 
 # make sure raspiblitz.conf has an blitzapi entry when setup thru fatpack image (blitzapi=on in raspiblitz.info)
 if [ "${blitzapi}" == "on" ]; then
-  /home/admin/config.scripts/blitz.config.sh blitzapi on >> ${logFile}
+  /home/admin/config.scripts/blitz.conf.sh set blitzapi on >> ${logFile}
 fi
 
 ###################################
