@@ -40,6 +40,7 @@ if [ ${configExists} -eq 0 ]; then
 fi
 
 # import config values
+source ${infoFile}
 source ${configFile}
 
 ##########################
@@ -705,7 +706,7 @@ fi
 # homer
 if [ "${homer}" = "on" ]; then
   echo "Provisioning Homer - run config script" >> ${logFile}
-  sudo sed -i "s/^message=.*/message='Setup Homer'/g" ${infoFile}
+  /home/admin/_cache.sh set message "Setup Homer"
   sudo -u admin /home/admin/config.scripts/bonus.homer.sh on >> ${logFile} 2>&1
 else
   echo "Provisioning Homer - keep default" >> ${logFile}
@@ -732,7 +733,7 @@ fi
 # squeaknode
 if [ "${squeaknode}" = "on" ]; then
   echo "Provisioning Squeaknode - run config script" >> ${logFile}
-  sudo sed -i "s/^message=.*/message='Setup Squeaknode '/g" ${infoFile}
+  /home/admin/_cache.sh set message "Setup Squeaknode"
   sudo -u admin /home/admin/config.scripts/bonus.squeaknode.sh on >> ${logFile} 2>&1
 else
   echo "Provisioning Squeaknode - keep default" >> ${logFile}
@@ -741,7 +742,7 @@ fi
 # itchysats
 if [ "${itchysats}" = "on" ]; then
   echo "Provisioning ItchySats - run config script" >> ${logFile}
-  sudo sed -i "s/^message=.*/message='Setup ItchySats'/g" ${infoFile}
+  /home/admin/_cache.sh set message "Setup ItchySats"
   sudo -u admin /home/admin/config.scripts/bonus.itchysats.sh on --download >> ${logFile} 2>&1
 else
   echo "ItchySats - keep default" >> ${logFile}
