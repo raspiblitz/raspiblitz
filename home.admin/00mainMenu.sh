@@ -126,9 +126,9 @@ fi
 if [ "${bos}" == "on" ]; then
   OPTIONS+=(BOS "Balance of Satoshis")
 fi
-if [ "${lnproxy}" == "on" ]; then
-  OPTIONS+=(LNPROXY "lnproxy server")
-fi
+#if [ "${lnproxy}" == "on" ]; then
+#  OPTIONS+=(LNPROXY "lnproxy server")
+#fi
 if [ "${pyblock}" == "on" ]; then
   OPTIONS+=(PYBLOCK "PyBlock")
 fi
@@ -281,9 +281,6 @@ case $CHOICE in
         LIGHTNINGTIPBOT)
             /home/admin/config.scripts/bonus.lightningtipbot.sh menu
             ;;
-        LOOP)
-            /home/admin/config.scripts/bonus.loop.sh menu
-            ;;
         MEMPOOL)
             /home/admin/config.scripts/bonus.mempool.sh menu
             ;;
@@ -295,9 +292,6 @@ case $CHOICE in
             ;;
         JAM)
             /home/admin/config.scripts/bonus.jam.sh menu
-            ;;
-        FARADAY)
-            sudo /home/admin/config.scripts/bonus.faraday.sh menu
             ;;
         BOS)
             sudo /home/admin/config.scripts/bonus.bos.sh menu
@@ -316,9 +310,6 @@ case $CHOICE in
             ;;
         ZEROTIER)
             sudo /home/admin/config.scripts/bonus.zerotier.sh menu
-            ;;
-        POOL)
-            sudo /home/admin/config.scripts/bonus.pool.sh menu
             ;;
         SPHINX)
             sudo /home/admin/config.scripts/bonus.sphinxrelay.sh menu

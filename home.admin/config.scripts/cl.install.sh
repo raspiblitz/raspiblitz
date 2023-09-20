@@ -2,7 +2,7 @@
 # https://lightning.readthedocs.io/
 
 # https://github.com/ElementsProject/lightning/releases
-CLVERSION="v23.08"
+CLVERSION="v23.08.1"
 
 # install the latest master by using the last commit id
 # https://github.com/ElementsProject/lightning/commit/master

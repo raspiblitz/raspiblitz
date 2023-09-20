@@ -425,15 +425,6 @@ else
     echo "Provisioning clWatchtowerClient - keep default" >> ${logFile}
 fi
 
-#LOOP - install only if LiT won't be installed
-if [ "${loop}" = "on" ] && [ "${lit}" != "on" ]; then
-  echo "Provisioning Lightning Loop - run config script" >> ${logFile}
-  /home/admin/_cache.sh set message "Setup Lightning Loop"
-  sudo -u admin /home/admin/config.scripts/bonus.loop.sh on >> ${logFile} 2>&1
-else
-  echo "Provisioning Lightning Loop - keep default" >> ${logFile}
-fi
-
 #BTC RPC EXPLORER
 if [ "${BTCRPCexplorer}" = "on" ]; then
   echo "Provisioning BTCRPCexplorer - run config script" >> ${logFile}
@@ -594,15 +585,6 @@ else
   echo "Provisioning Specter - keep default" >> ${logFile}
 fi
 
-# Faraday
-if [ "${faraday}" = "on" ]; then
-  echo "Provisioning Faraday - run config script" >> ${logFile}
-  /home/admin/_cache.sh set message "Setup Faraday"
-  sudo -u admin /home/admin/config.scripts/bonus.faraday.sh on >> ${logFile} 2>&1
-else
-  echo "Provisioning Faraday - keep default" >> ${logFile}
-fi
-
 # BOS
 if [ "${bos}" = "on" ]; then
   echo "Provisioning Balance of Satoshis - run config script" >> ${logFile}
@@ -612,14 +594,14 @@ else
   echo "Provisioning Balance of Satoshis - keep default" >> ${logFile}
 fi
 
-# LNPROXY
-if [ "${lnproxy}" = "on" ]; then
-  echo "Provisioning lnproxy - run config script" >> ${logFile}
-  /home/admin/_cache.sh set message "Setup lnproxy"
-  sudo -u admin /home/admin/config.scripts/bonus.lnproxy.sh on >> ${logFile} 2>&1
-else
-  echo "Provisioning lnproxy - keep default" >> ${logFile}
-fi
+## LNPROXY
+#if [ "${lnproxy}" = "on" ]; then
+#  echo "Provisioning lnproxy - run config script" >> ${logFile}
+#  /home/admin/_cache.sh set message "Setup lnproxy"
+#  sudo -u admin /home/admin/config.scripts/bonus.lnproxy.sh on >> ${logFile} 2>&1
+#else
+#  echo "Provisioning lnproxy - keep default" >> ${logFile}
+#fi
 
 # thunderhub
 if [ "${thunderhub}" = "on" ]; then
@@ -673,15 +655,6 @@ if [ "${stackingSatsKraken}" = "on" ]; then
   sudo -u admin /home/admin/config.scripts/bonus.stacking-sats-kraken.sh on >> ${logFile} 2>&1
 else
   echo "Provisioning Stacking Sats Kraken - keep default" >> ${logFile}
-fi
-
-# Pool - install only if LiT won't be installed
-if [ "${pool}" = "on" ] && [ "${lit}" != "on" ]; then
-  echo "Provisioning Pool - run config script" >> ${logFile}
-  /home/admin/_cache.sh set message "Setup Pool"
-  sudo -u admin /home/admin/config.scripts/bonus.pool.sh on >> ${logFile} 2>&1
-else
-  echo "Provisioning Pool - keep default" >> ${logFile}
 fi
 
 # lit (make sure to be installed after RTL)

@@ -4,7 +4,7 @@
 # https://github.com/alexbosworth/balanceofsatoshis/blob/master/package.json#L85
 # https://www.npmjs.com/package/balanceofsatoshis
 
-BOSVERSION="15.8.14"
+BOSVERSION="15.11.0"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -194,7 +194,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   /home/admin/config.scripts/bonus.nodejs.sh on
 
   # create bos user
-  sudo adduser --system --group --home /home/bos bos
+  USERNAME=bos
+  echo "# add the user: ${USERNAME}"
+  sudo adduser --system --group --shell /bin/bash --home /home/${USERNAME} ${USERNAME}
+  echo "Copy the skeleton files for login"
+  sudo -u ${USERNAME} cp -r /etc/skel/. /home/${USERNAME}/
 
   echo "# Create data folder on the disk"
   # move old data if present
@@ -210,10 +214,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo -u bos mkdir /home/bos/.npm-global
   sudo -u bos npm config set prefix '/home/bos/.npm-global'
   sudo bash -c "echo 'PATH=$PATH:/home/bos/.npm-global/bin' >> /home/bos/.bashrc"
-
-  # download source code
-  sudo -u bos git clone https://github.com/alexbosworth/balanceofsatoshis.git /home/bos/balanceofsatoshis
-  cd /home/bos/balanceofsatoshis
 
   # make sure symlink to central app-data directory exists ***"
   sudo rm -rf /home/bos/.lnd  # not a symlink.. delete it silently
