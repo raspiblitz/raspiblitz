@@ -377,6 +377,11 @@ else
   exit 1
 fi
 
+# remove any debian python protection from pip installing modules
+if [ -f rm /usr/lib/python3.*/EXTERNALLY-MANAGED ]; then
+  rm /usr/lib/python3.*/EXTERNALLY-MANAGED
+fi
+
 # make sure /usr/bin/pip exists (and calls pip3 in Debian Buster)
 update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
 # 1. libs (for global python scripts)
