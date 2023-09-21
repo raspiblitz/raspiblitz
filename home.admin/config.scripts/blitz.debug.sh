@@ -85,6 +85,11 @@ echo "chainnetwork: ${network} / ${chain}"
 uptime
 echo
 
+echo "*** FAILED SERVICES ***"
+echo "list any servcies with problems: sudo systemctl list-units --failed"
+sudo systemctl list-units --failed
+echo
+
 echo "*** SETUPPHASE / BOOTSTRAP ***"
 echo "see logs: cat /home/admin/raspiblitz.log"
 echo "setupPhase--> ${setupPhase}"
