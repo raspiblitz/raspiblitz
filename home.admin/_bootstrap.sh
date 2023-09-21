@@ -167,9 +167,6 @@ sleep 5
 # CLEANING BOOT SYSTEM
 ################################
 
-# force a rotation of every log on boot
-logrotate -f /etc/logrotate.d/rsyslog
-
 # Emergency cleaning logs when over 1GB (to prevent SD card filling up)
 # see https://github.com/rootzoll/raspiblitz/issues/418#issuecomment-472180944
 echo "*** Checking Log Size ***"
