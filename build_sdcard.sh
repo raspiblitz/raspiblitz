@@ -507,6 +507,9 @@ echo "# Optimizing log files: rotate daily max 100M, keep 4 days & compress old"
 sed -i "s/^weekly/daily size 100M/g" /etc/logrotate.conf
 sed -i "s/^#compress/compress/g" /etc/logrotate.conf
 
+# add the option "copytruncate" to /etc/logrotate.conf below the line staring with "# global options do"
+sed -i '/# global options do/a \copytruncate' /etc/logrotate.conf
+
 # SPECIAL FOR SYSLOG: /etc/logrotate.d/rsyslog
 # to test config run: sudo logrotate -v /etc/logrotate.d/rsyslog
 rm /etc/logrotate.d/rsyslog 2>/dev/null
@@ -530,6 +533,7 @@ echo "
   missingok
   compress
   delaycompress
+  copytruncate
   sharedscripts
   postrotate
     service logrotate restart
