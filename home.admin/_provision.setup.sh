@@ -39,6 +39,11 @@ if [ "${confExists}" != "1" ]; then
     exit 6
 fi
 
+# make sure raspiblitz.conf has an blitzapi entry when setup thru fatpack image (blitzapi=on in raspiblitz.info)
+if [ "${blitzapi}" == "on" ]; then
+  /home/admin/config.scripts/blitz.conf.sh set blitzapi on >> ${logFile}
+fi
+
 ###################################
 # Preserve SSH keys
 # just copy dont link anymore

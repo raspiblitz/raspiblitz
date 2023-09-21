@@ -161,7 +161,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # BACKGROUND is here to seperate running apps by unix users
   # and only give file write access to the rest of the system where needed.
   echo "# create user"
-  sudo adduser --system --group --home /home/${APPID} ${APPID} || exit 1
+  # If the user is intended to be loeed in to add '--shell /bin/bash'
+  # and copy the skeleton files
+  sudo adduser --system --group --shell /bin/bash --home /home/${APPID} ${APPID} || exit 1
+  # copy the skeleton files for login
+  sudo -u ${APPID} cp -r /etc/skel/. /home/${APPID}/
 
   # add user to special groups with special access rights
   # BACKGROUND there are some unix groups available that will give the access to

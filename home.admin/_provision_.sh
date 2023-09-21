@@ -40,6 +40,7 @@ if [ ${configExists} -eq 0 ]; then
 fi
 
 # import config values
+source ${infoFile}
 source ${configFile}
 
 ##########################
@@ -425,15 +426,6 @@ else
     echo "Provisioning clWatchtowerClient - keep default" >> ${logFile}
 fi
 
-#LOOP - install only if LiT won't be installed
-if [ "${loop}" = "on" ] && [ "${lit}" != "on" ]; then
-  echo "Provisioning Lightning Loop - run config script" >> ${logFile}
-  /home/admin/_cache.sh set message "Setup Lightning Loop"
-  sudo -u admin /home/admin/config.scripts/bonus.loop.sh on >> ${logFile} 2>&1
-else
-  echo "Provisioning Lightning Loop - keep default" >> ${logFile}
-fi
-
 #BTC RPC EXPLORER
 if [ "${BTCRPCexplorer}" = "on" ]; then
   echo "Provisioning BTCRPCexplorer - run config script" >> ${logFile}
@@ -594,15 +586,6 @@ else
   echo "Provisioning Specter - keep default" >> ${logFile}
 fi
 
-# Faraday
-if [ "${faraday}" = "on" ]; then
-  echo "Provisioning Faraday - run config script" >> ${logFile}
-  /home/admin/_cache.sh set message "Setup Faraday"
-  sudo -u admin /home/admin/config.scripts/bonus.faraday.sh on >> ${logFile} 2>&1
-else
-  echo "Provisioning Faraday - keep default" >> ${logFile}
-fi
-
 # BOS
 if [ "${bos}" = "on" ]; then
   echo "Provisioning Balance of Satoshis - run config script" >> ${logFile}
@@ -612,14 +595,14 @@ else
   echo "Provisioning Balance of Satoshis - keep default" >> ${logFile}
 fi
 
-# LNPROXY
-if [ "${lnproxy}" = "on" ]; then
-  echo "Provisioning lnproxy - run config script" >> ${logFile}
-  /home/admin/_cache.sh set message "Setup lnproxy"
-  sudo -u admin /home/admin/config.scripts/bonus.lnproxy.sh on >> ${logFile} 2>&1
-else
-  echo "Provisioning lnproxy - keep default" >> ${logFile}
-fi
+## LNPROXY
+#if [ "${lnproxy}" = "on" ]; then
+#  echo "Provisioning lnproxy - run config script" >> ${logFile}
+#  /home/admin/_cache.sh set message "Setup lnproxy"
+#  sudo -u admin /home/admin/config.scripts/bonus.lnproxy.sh on >> ${logFile} 2>&1
+#else
+#  echo "Provisioning lnproxy - keep default" >> ${logFile}
+#fi
 
 # thunderhub
 if [ "${thunderhub}" = "on" ]; then
@@ -675,15 +658,6 @@ else
   echo "Provisioning Stacking Sats Kraken - keep default" >> ${logFile}
 fi
 
-# Pool - install only if LiT won't be installed
-if [ "${pool}" = "on" ] && [ "${lit}" != "on" ]; then
-  echo "Provisioning Pool - run config script" >> ${logFile}
-  /home/admin/_cache.sh set message "Setup Pool"
-  sudo -u admin /home/admin/config.scripts/bonus.pool.sh on >> ${logFile} 2>&1
-else
-  echo "Provisioning Pool - keep default" >> ${logFile}
-fi
-
 # lit (make sure to be installed after RTL)
 if [ "${lit}" = "on" ]; then
   echo "Provisioning LIT - run config script" >> ${logFile}
@@ -732,7 +706,7 @@ fi
 # homer
 if [ "${homer}" = "on" ]; then
   echo "Provisioning Homer - run config script" >> ${logFile}
-  sudo sed -i "s/^message=.*/message='Setup Homer'/g" ${infoFile}
+  /home/admin/_cache.sh set message "Setup Homer"
   sudo -u admin /home/admin/config.scripts/bonus.homer.sh on >> ${logFile} 2>&1
 else
   echo "Provisioning Homer - keep default" >> ${logFile}
@@ -759,7 +733,7 @@ fi
 # squeaknode
 if [ "${squeaknode}" = "on" ]; then
   echo "Provisioning Squeaknode - run config script" >> ${logFile}
-  sudo sed -i "s/^message=.*/message='Setup Squeaknode '/g" ${infoFile}
+  /home/admin/_cache.sh set message "Setup Squeaknode"
   sudo -u admin /home/admin/config.scripts/bonus.squeaknode.sh on >> ${logFile} 2>&1
 else
   echo "Provisioning Squeaknode - keep default" >> ${logFile}
@@ -768,7 +742,7 @@ fi
 # itchysats
 if [ "${itchysats}" = "on" ]; then
   echo "Provisioning ItchySats - run config script" >> ${logFile}
-  sudo sed -i "s/^message=.*/message='Setup ItchySats'/g" ${infoFile}
+  /home/admin/_cache.sh set message "Setup ItchySats"
   sudo -u admin /home/admin/config.scripts/bonus.itchysats.sh on --download >> ${logFile} 2>&1
 else
   echo "ItchySats - keep default" >> ${logFile}

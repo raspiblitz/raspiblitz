@@ -3,7 +3,7 @@
 - Update: RaspiOS base image from 2023-05-03
 - Update: Bitcoin Core v25.0.0 [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-25.0.md)
 - Update: LND v0.16.4-beta [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.16.4-beta)
-- Update: Core Lightning v23.08 [details](https://github.com/ElementsProject/lightning/releases/tag/v23.08)
+- Update: Core Lightning v23.08.1 [details](https://github.com/ElementsProject/lightning/releases/tag/v23.08.1)
 - Update: Suez - Channel Visualization for LND & CLN [details](https://github.com/prusnak/suez)
 - Update: Electrum Server in Rust (electrs) v0.10.0 [details](https://github.com/romanz/electrs/blob/master/RELEASE-NOTES.md#0100-jul-22-2023)
 - Update: C-lightningREST v0.10.5 [details](https://github.com/Ride-The-Lightning/c-lightning-REST/releases/tag/v0.10.5)
@@ -16,8 +16,14 @@
 - Update: BTCPayServer 1.10.3 (postgres by default with sqlite migration) [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.10.3)
 - Update: Specter Desktop 1.13.1 [details](https://github.com/cryptoadvance/specter-desktop/releases/tag/v1.13.1)
 - Update: Kindle-Display 0.5.1 [details](https://github.com/dennisreimann/kindle-display/)
+- Update: JoinMarket v0.9.10 [details](https://github.com/JoinMarket-Org/joinmarket-clientserver/releases/tag/v0.9.10)
+- Update: JoininBox v0.8.1 [details](https://github.com/openoms/joininbox/releases/tag/v0.8.1)
+- Update: Balance of Satoshis 15.11.0 (bos) [details](https://github.com/alexbosworth/balanceofsatoshis/blob/master/CHANGELOG.md#15110)
 - Fix: Homebanking Interface FinTS/HBCI (experimental) [details](https://github.com/rootzoll/raspiblitz/issues/1186)
 - Remove: Spark Wallet and Sparko CLN plugin (not maintained anymore)
+- Remove: Faraday, Loop, Pool single installs - used in the LiT package instead
+- Remove: deactivate LNproxy in the menu and in provision
+- Info: the users not intended to be logged in will not be available to change into (manage them from admin with sudo)
 
 ## What's new in Version 1.9.0 of RaspiBlitz?
 

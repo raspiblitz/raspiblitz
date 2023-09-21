@@ -377,6 +377,11 @@ else
   exit 1
 fi
 
+# remove any debian python protection from pip installing modules
+if [ -f rm /usr/lib/python3.*/EXTERNALLY-MANAGED ]; then
+  rm /usr/lib/python3.*/EXTERNALLY-MANAGED
+fi
+
 # make sure /usr/bin/pip exists (and calls pip3 in Debian Buster)
 update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
 # 1. libs (for global python scripts)
@@ -394,7 +399,9 @@ echo -e "\n*** PREPARE ${baseimage} ***"
 # make sure the pi user is present
 if [ "$(compgen -u | grep -c pi)" -eq 0 ];then
   echo "# Adding the user pi"
-  adduser --system --group --home /home/pi pi
+  adduser --system --group --shell /bin/bash --home /home/pi pi
+  # copy the skeleton files for login
+  sudo -u pi cp -r /etc/skel/. /home/pi/
   adduser pi sudo
 fi
 
@@ -500,6 +507,9 @@ echo "# Optimizing log files: rotate daily max 100M, keep 4 days & compress old"
 sed -i "s/^weekly/daily size 100M/g" /etc/logrotate.conf
 sed -i "s/^#compress/compress/g" /etc/logrotate.conf
 
+# add the option "copytruncate" to /etc/logrotate.conf below the line staring with "# global options do"
+sed -i '/# global options do/a \copytruncate' /etc/logrotate.conf
+
 # SPECIAL FOR SYSLOG: /etc/logrotate.d/rsyslog
 # to test config run: sudo logrotate -v /etc/logrotate.d/rsyslog
 rm /etc/logrotate.d/rsyslog 2>/dev/null
@@ -523,6 +533,7 @@ echo "
   missingok
   compress
   delaycompress
+  copytruncate
   sharedscripts
   postrotate
     service logrotate restart
@@ -537,7 +548,9 @@ service rsyslog restart
 echo -e "\n*** ADDING MAIN USER admin ***"
 # based on https://raspibolt.org/system-configuration.html#add-users
 # using the default password 'raspiblitz'
-adduser --system --group --home /home/admin admin
+adduser --system --group --shell /bin/bash --home /home/admin admin
+# copy the skeleton files for login
+sudo -u admin cp -r /etc/skel/. /home/admin/
 echo "admin:raspiblitz" | chpasswd
 adduser admin sudo
 chsh admin -s /bin/bash
@@ -555,7 +568,9 @@ fi
 echo -e "\n*** ADDING SERVICE USER bitcoin"
 # based on https://raspibolt.org/guide/raspberry-pi/system-configuration.html
 # create user and set default password for user
-adduser --system --group --home /home/bitcoin bitcoin
+adduser --system --group --shell /bin/bash --home /home/bitcoin bitcoin
+# copy the skeleton files for login
+sudo -u bitcoin cp -r /etc/skel/. /home/bitcoin/
 echo "bitcoin:raspiblitz" | chpasswd
 # make home directory readable
 chmod 755 /home/bitcoin

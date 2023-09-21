@@ -2,12 +2,12 @@
 Everybody is welcome to join, improve, and extend the RaspiBlitz - it's a work in progress. Check the issues if you wanna help out or add new ideas. You can find the scripts used for RaspiBlitz interactions on the device at /home/admin or in this Git repo's subfolder home.admin.
 
 ## Understanding Blitz project
-RaspiBlitz is insipired by the [RaspiBolt guide](https://raspibolt.github.io/raspibolt/). Tutorial on how to build a lightning node on the RaspberryPi. So much thx to Stadicus :)
+RaspiBlitz is inspired by the [RaspiBolt guide](https://raspibolt.github.io/raspibolt/). Tutorial on how to build a lightning node on the RaspberryPi. So much thx to Stadicus :)
 To start your Deep Dive into the RaspiBlitz project, watch [this video](https://www.youtube.com/watch?v=QXUGg45CWLo).
 
 ### Blitz philosophy
 
-* DIY community development, if you are unhappy with the code, fork and pull request, this will make you you DYOR instead of depending on the developers.
+* DIY community development, if you are unhappy with the code, fork and pull request, this will make you DYOR instead of depending on the developers.
 * If you ask when the next release will be available, we don't know, but if you contribute, it might be faster.
 * Be sure to contribute back, every little help is wanted.
 
@@ -49,7 +49,7 @@ and is also an effective way to request assistance if and when you need it.
 1. Make sure it is compatible with Blitz philosophy.
 1. Fork the repo
 1. Commit changes on the new branch
-1. Open a pull request (PR are made to the `dev` branch unless indicated otherwise by a collaborator.
+1. Open a pull request (PRs are made to the `dev` branch unless indicated otherwise by a collaborator.
 
 #### Review
 
