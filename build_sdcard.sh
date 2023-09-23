@@ -377,10 +377,13 @@ else
   exit 1
 fi
 
-# remove any debian python protection from pip installing modules
-if [ -f rm /usr/lib/python3.*/EXTERNALLY-MANAGED ]; then
-  rm /usr/lib/python3.*/EXTERNALLY-MANAGED
-fi
+# don't protect system packages from pip install
+# tracking issue: https://github.com/raspiblitz/raspiblitz/issues/4170
+for PYTHONDIR in /usr/lib/python3.*; do
+  if [ -f "$PYTHONDIR/EXTERNALLY-MANAGED" ]; then
+    rm "$PYTHONDIR/EXTERNALLY-MANAGED"
+  fi
+done
 
 # make sure /usr/bin/pip exists (and calls pip3 in Debian Buster)
 update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
