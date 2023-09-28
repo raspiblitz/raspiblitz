@@ -4,7 +4,7 @@
 
 _Build your own Lightning & Bitcoin Fullnode on a RaspberryPi with an optional Display._
 
-`Version 1.10.0rc6 with bitcoin 25.0.0, lnd 0.16.4 & Core Lightning 23.08.1` ([api](https://github.com/fusion44/blitz_api)|[web](https://github.com/raspiblitz/raspiblitz-web))
+`Version 1.10.0 with bitcoin 25.0.0, lnd 0.16.4 & Core Lightning 23.08.1` ([api](https://github.com/fusion44/blitz_api)|[web](https://github.com/raspiblitz/raspiblitz-web))
 
 ![RaspiBlitz](pictures/raspiblitz.jpg)
 
@@ -167,33 +167,33 @@ In this section you find the latest ready-to-use RaspiBlitz SDcard images. Basic
 
 This is the sd card image you should choose if your at the beginning of your RaspiBlitz journey or you are a casual node runner wanna download the next update/upgrade - with WebUI & fast installing bonus apps.
 
-_WARNING: THIS IS STILL A RELEASE CANDIDATE VERSION</br>
-JUST USE FOR TESTING, HIGHER RISK OF LOSING FUNDS!_
+<!--- _WARNING: THIS IS STILL A RELEASE CANDIDATE VERSION</br>
+JUST USE FOR TESTING, HIGHER RISK OF LOSING FUNDS!_ -->
 
-- **FATPACK SD CARD IMAGE ⮕ [raspiblitz-fat-v1.10.0rc6-2023-09-22.img.gz](https://raspiblitz.fulmo.org/images/raspiblitz-fat-v1.10.0rc6-2023-09-22.img.gz)**
+- **FATPACK SD CARD IMAGE ⮕ [raspiblitz-fat-v1.10.0-2023-09-22.img.gz](https://raspiblitz.fulmo.org/images/raspiblitz-fat-v1.10.0-2023-09-22.img.gz)**
 - SHA-256: 50b48e078d162dfafc2b80025cf493141b0d8ab5774519bff4c3239d5d246f8f
-<!--- GPG 64-bit (main): 1C73 060C 7C17 6461 & (sub): AA9D D1B5 CC56 47DA
-- Signature-File: [raspiblitz-fat-v1.9.0-2023-05-22.img.gz.sig](https://raspiblitz.fulmo.org/images/raspiblitz-fat-v1.9.0-2023-05-22.img.gz.sig)
-- Torrent: [raspiblitz-fat-v1.9.0-2022-12-21.img.gz.torrent](https://github.com/rootzoll/raspiblitz/raw/dev/home.admin/assets/raspiblitz-fat-v1.9.0-2023-05-22.img.gz.torrent) -->
+GPG 64-bit (main): 1C73 060C 7C17 6461 & (sub): AA9D D1B5 CC56 47DA
+- Signature-File: [raspiblitz-fat-v1.10.0-2023-09-22.img.gz.sig](https://raspiblitz.fulmo.org/images/raspiblitz-fat-v1.10.0-2023-09-22.img.gz.sig)
+- Torrent: [raspiblitz-fat-v1.10.0-2023-09-22.img.gz.torrent](https://github.com/rootzoll/raspiblitz/raw/dev/home.admin/assets/raspiblitz-fat-v1.10.0-2023-09-22.img.gz.torrent)
 - [How to verify the SD card image after download?](FAQ.md#how-to-verify-the-sd-card-image-after-download)
 
 ### MINIMAL SD Card Image (Experienced Users - SSH)
 
 This is the sd card image for RaspiBlitz users that are already more experienced and want to use just a limited set of features of the RaspiBlitz. This image has just the bare minimum of features pre-installed - LCD & HDMI output is off by default. Setup, Update or Recovery needs to be done thru SSH login - API & WebUI are later available but are not preinstalled/activated by default. The RaspiBlitz will download & compile just the tools that are in your ´raspiblitz.conf´ - this will take longer but as a trade-off this RaspiBlitz then just runs with a reduced set of dependencies and so a minimalized attack vector and better performance. Its for the serious & experienced node runners.
 
-_WARNING: THIS IS STILL A RELEASE CANDIDATE VERSION</br>
-JUST USE FOR TESTING, HIGHER RISK OF LOSING FUNDS!_
+<!-- _WARNING: THIS IS STILL A RELEASE CANDIDATE VERSION</br>
+JUST USE FOR TESTING, HIGHER RISK OF LOSING FUNDS!_ -->
 
-- **MINIMAL SD CARD IMAGE ⮕ [raspiblitz-min-v1.10.0rc6-2023-09-22.img.gz](https://raspiblitz.fulmo.org/images/raspiblitz-min-v1.10.0rc6-2023-09-22.img.gz)**
+- **MINIMAL SD CARD IMAGE ⮕ [raspiblitz-min-v1.10.0-2023-09-22.img.gz](https://raspiblitz.fulmo.org/images/raspiblitz-min-v1.10.0-2023-09-22.img.gz)**
 - SHA-256: 77674947b6682cfcc507179038ad532d4b7e60eb5274edca1a62ee78882108ad
-<!-- - GPG 64-bit (main): 1C73 060C 7C17 6461 & (sub): AA9D D1B5 CC56 47DA
-- Signature-File: [raspiblitz-min-v1.9.0-2023-05-22.img.gz.sig](https://raspiblitz.fulmo.org/images/raspiblitz-min-v1.9.0-2023-05-22.img.gz.sig)
-- Torrent: [raspiblitz-min-v1.9.0-2022-12-21.img.gz.torrent](https://github.com/rootzoll/raspiblitz/raw/dev/home.admin/assets/raspiblitz-min-v1.9.0-2023-05-22.img.gz.torrent) -->
+- GPG 64-bit (main): 1C73 060C 7C17 6461 & (sub): AA9D D1B5 CC56 47DA
+- Signature-File: [raspiblitz-min-v1.10.0-2023-09-22.img.gz.sig](https://raspiblitz.fulmo.org/images/raspiblitz-min-v1.10.0-2023-09-22.img.gz.sig)
+- Torrent: [raspiblitz-min-v1.10.0-2023-09-22.img.gz.torrent](https://github.com/rootzoll/raspiblitz/raw/dev/home.admin/assets/raspiblitz-min-v1.10.0-2023-09-22.img.gz.torrent)
 - [How to verify the SD card image after download?](FAQ.md#how-to-verify-the-sd-card-image-after-download)
 
 Further Info:
 
-- [What's new in Version 1.9.0 of RaspiBlitz?](CHANGES.md#whats-new-in-version-190-of-raspiblitz)
+- [What's new in Version 1.10.0 of RaspiBlitz?](CHANGES.md#whats-new-in-version-1100-of-raspiblitz)
 - [How to update my RaspiBlitz?](README.md#updating-raspiblitz-to-new-version)
 - [How to migrate to RaspiBlitz from Umbrel/myNode/Citadel](#make-a-raspiblitz-out-of-your-umbrel-citadel-or-mynode)
 
@@ -1377,7 +1377,7 @@ But if you want to build that image yourself - here is a quick guide:
 Now you are ready to start the SD card build script (check the code to see if the installation and config are OK for you).
 Copy the following command into your terminal and execute:
 
-`wget https://raw.githubusercontent.com/rootzoll/raspiblitz/v1.9/build_sdcard.sh && sudo bash build_sdcard.sh`
+`wget https://raw.githubusercontent.com/rootzoll/raspiblitz/v1.10/build_sdcard.sh && sudo bash build_sdcard.sh`
 
 As you can see from the URL, you can find the build script in this Git repo under `build_sdcard.sh`.
 
