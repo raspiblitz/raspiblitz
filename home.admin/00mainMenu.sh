@@ -95,6 +95,9 @@ fi
 if [ "${ElectRS}" == "on" ]; then
   OPTIONS+=(ELECTRS "Electrum Rust Server")
 fi
+if [ "${boltcard}" == "on" ]; then
+  OPTIONS+=(BOLTCARD "Boltcard")
+fi
 if [ "${BTCRPCexplorer}" == "on" ]; then
   OPTIONS+=(EXPLORE "BTC RPC Explorer")
 fi
@@ -258,6 +261,9 @@ case $CHOICE in
             ;;
         ELECTRS)
             /home/admin/config.scripts/bonus.electrs.sh menu
+            ;;
+        BOLTCARD)
+            /home/admin/config.scripts/bonus.boltcard.sh menu
             ;;
         LIT)
             /home/admin/config.scripts/bonus.lit.sh menu

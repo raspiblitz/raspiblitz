@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 
 # set version, check: https://golang.org/dl/
-goVersion="1.17.3"
+goVersion="1.18.5"
 downloadFolder="/home/admin/download"
 
 usage(){
