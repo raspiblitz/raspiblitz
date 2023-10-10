@@ -18,8 +18,8 @@ variable "boot" { default = "uefi" }
 variable "preseed_file" { default = "preseed.cfg" }
 variable "hostname" { default = "raspiblitz-amd64" }
 
-variable "iso_name" { default = "debian-12.1.0-amd64-netinst.iso" }
-variable "iso_checksum" { default = "9f181ae12b25840a508786b1756c6352a0e58484998669288c4eec2ab16b8559" }
+variable "iso_name" { default = "debian-12.2.0-amd64-netinst.iso" }
+variable "iso_checksum" { default = "23ab444503069d9ef681e3028016250289a33cc7bab079259b73100daee0af66" }
 
 variable "disk_size" { default = "30000" }
 variable "memory" { default = "4096" }
@@ -65,7 +65,7 @@ source "qemu" "debian" {
   disk_size        = var.disk_size
   http_directory   = "./http"
   iso_checksum     = var.iso_checksum
-  iso_url          = "http://cdimage.debian.org/cdimage/release/current/amd64/iso-cd/${var.iso_name}"
+  iso_url          = "https://cdimage.debian.org/cdimage/release/current/amd64/iso-cd/${var.iso_name}"
   memory           = var.memory
   output_directory = "../builds/${local.name_template}-qemu"
   shutdown_command = "echo 'raspiblitz' | sudo /sbin/shutdown -hP now"
