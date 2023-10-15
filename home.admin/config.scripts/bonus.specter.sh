@@ -1,7 +1,7 @@
 #!/bin/bash
 # https://github.com/cryptoadvance/specter-desktop
 
-pinnedVersion="2.0.1"
+pinnedVersion="2.0.2"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -146,17 +146,17 @@ EOF
   echo "# Connect Specter to the default mainnet node"
   cat >/home/admin/default.json <<EOF
 {
+    "python_class": "cryptoadvance.specter.node.Node",
+    "fullpath": "/home/specter/.specter/nodes/default.json"
     "name": "raspiblitz_mainnet",
     "alias": "default",
     "autodetect": false,
-    "datadir": "/mnt/hdd/bitcoin",
+    "datadir": "",
     "user": "${RPCUSER}",
     "password": "${PASSWORD_B}",
     "port": "8332",
     "host": "localhost",
     "protocol": "http",
-    "external_node": true,
-    "fullpath": "/home/specter/.specter/nodes/default.json"
 }
 EOF
   sudo mv /home/admin/default.json /home/specter/.specter/nodes/default.json
