@@ -714,6 +714,10 @@ bash -c "echo 'vm.overcommit_memory=1' >> /etc/sysctl.conf"
 # based on https://raspibolt.org/security.html#fail2ban
 echo "*** HARDENING ***"
 apt_install --no-install-recommends python3-systemd fail2ban
+# https://github.com/raspiblitz/raspiblitz/issues/4044
+if [ ! -f /var/log/auth.log ]; then
+  touch /var/log/auth.log
+fi
 
 # *** CACHE DISK IN RAM & KEYVALUE-STORE***
 echo "Activating CACHE RAM DISK ... "
