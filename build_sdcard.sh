@@ -237,10 +237,14 @@ done
 # AUTO-DETECTION: CPU-ARCHITECTURE
 # ---------------------------------------
 cpu="$(uname -m)" && echo "cpu=${cpu}"
-architecture="$(dpkg --print-architecture 2>/dev/null)" && echo "architecture=${architecture}"
 case "${cpu}" in
-  arm*|aarch64|x86_64|amd64);;
-  *) echo -e "# FAIL #\nCan only build on ARM, aarch64, x86_64 not on: cpu=${cpu}"; exit 1;;
+  aarch64|x86_64);;
+  *) echo -e "# FAIL #\nCan only build on aarch64 or x86_64 not on: cpu=${cpu}"; exit 1;;
+esac
+architecture="$(dpkg --print-architecture 2>/dev/null)" && echo "architecture=${architecture}"
+case "${architecture}" in
+  arm*|amd64);;
+  *) echo -e "# FAIL #\nCan only build on arm* or amd64 not on: architecture=${cpu}"; exit 1;;
 esac
 
 # AUTO-DETECTION: OPERATINGSYSTEM
@@ -293,7 +297,7 @@ HandleLidSwitchDocked=ignore" | tee /etc/systemd/logind.conf.d/nosuspend.conf
 # https://github.com/rootzoll/raspiblitz/issues/138
 # https://daker.me/2014/10/how-to-fix-perl-warning-setting-locale-failed-in-raspbian.html
 # https://stackoverflow.com/questions/38188762/generate-all-locales-in-a-docker-image
-if [ "${baseimage}" = "raspios_arm64" ] || [ "${baseimage}" = "debian" ]; then
+if [ "${cpu}" = "aarch64" ] && { [ "${baseimage}" = "raspios_arm64" ] || [ "${baseimage}" = "debian" ]; }; then
   echo -e "\n*** FIXING LOCALES FOR BUILD ***"
   sed -i "s/^# en_US.UTF-8 UTF-8.*/en_US.UTF-8 UTF-8/g" /etc/locale.gen
   sed -i "s/^# en_US ISO-8859-1.*/en_US ISO-8859-1/g" /etc/locale.gen
