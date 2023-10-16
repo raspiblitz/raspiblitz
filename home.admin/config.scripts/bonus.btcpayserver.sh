@@ -3,19 +3,18 @@
 # Based on: https://gist.github.com/normandmickey/3f10fc077d15345fb469034e3697d0d0
 
 # https://github.com/dgarage/NBXplorer/tags
-NBXplorerVersion="v2.3.65"
-
+NBXplorerVersion="v2.3.66"
 # https://github.com/btcpayserver/btcpayserver/releases
-BTCPayVersion="v1.11.1"
+BTCPayVersion="v1.11.6"
 
 # check who signed the release (person that published release)
-#PGPsigner="nicolasdorier"
-#PGPpubkeyLink="https://keybase.io/nicolasdorier/pgp_keys.asc"
-#PGPpubkeyFingerprint="AB4CFA9895ACA0DBE27F6B346618763EF09186FE"
+PGPsigner="nicolasdorier"
+PGPpubkeyLink="https://keybase.io/nicolasdorier/pgp_keys.asc"
+PGPpubkeyFingerprint="AB4CFA9895ACA0DBE27F6B346618763EF09186FE"
 # ---
-PGPsigner="Kukks"
-PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
-PGPpubkeyFingerprint="8E5530D9D1C93097"
+#PGPsigner="Kukks"
+#PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
+#PGPpubkeyFingerprint="8E5530D9D1C93097"
 # ---
 #PGPsigner="web-flow"
 #PGPpubkeyLink="https://github.com/web-flow.gpg"
