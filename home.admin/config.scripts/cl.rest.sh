@@ -115,7 +115,7 @@ if [ "$1" = connect ]; then
     echo
     echo "The string to connect over the local the network is shown as a QRcode below and on the LCD"
     echo "Scan it to Zeus using the c-lightning-REST option"
-    echo "This will only work if your node si connected to the same network"
+    echo "This will only work if your node is connected to the same network"
     echo "To connect reemotely consider using a VPN like ZeroTier or Tailscale"
     echo
     echo "c-lightning-REST connection string:"
