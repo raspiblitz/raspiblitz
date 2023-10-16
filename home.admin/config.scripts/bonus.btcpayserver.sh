@@ -48,8 +48,6 @@ function NBXplorerConfig() {
     sudo -u postgres psql -c "create user nbxplorer with encrypted password 'raspiblitz';"
     sudo -u postgres psql -c "grant all privileges on database nbxplorermainnet to nbxplorer;"
   fi
-  echo "# List databases with: sudo -u postgres psql -c '\l'"
-  sudo -u postgres psql -c '\l'
 
   # https://docs.btcpayserver.org/Deployment/ManualDeploymentExtended/#4-create-a-configuration-file
   echo
@@ -80,8 +78,7 @@ function BtcPayConfig() {
     sudo -u postgres psql -c "create user btcpay with encrypted password 'raspiblitz';"
     sudo -u postgres psql -c "grant all privileges on database btcpaymainnet to btcpay;"
   fi
-  echo "# List databases with: sudo -u postgres psql -c '\l'"
-  sudo -u postgres psql -c '\l'
+
   echo "# Regenerate the btcpayserver settings (includes the LND TLS thumbprint)"
   # https://docs.btcpayserver.org/Deployment/ManualDeploymentExtended/#3-create-a-configuration-file
   sudo -u btcpay mkdir -p /home/btcpay/.btcpayserver/Main
