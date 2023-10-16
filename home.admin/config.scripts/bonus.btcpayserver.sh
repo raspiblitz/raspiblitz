@@ -45,8 +45,10 @@ function NBXplorerConfig() {
   else
     echo "# Generate the database for nbxplorer"
     sudo -u postgres psql -c "CREATE DATABASE nbxplorermainnet TEMPLATE template0 LC_CTYPE 'C' LC_COLLATE 'C' ENCODING 'UTF8';"
-    sudo -u postgres psql -c "create user nbxplorer with encrypted password 'raspiblitz';"
-    sudo -u postgres psql -c "grant all privileges on database nbxplorermainnet to nbxplorer;"
+    sudo -u postgres psql -c "CREATE USER nbxplorer WITH ENCRYPTED PASSWORD 'raspiblitz';"
+    sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE nbxplorermainnet TO nbxplorer;"
+    # for migrations
+    sudo -u postgres psql -d nbxplorermainnet -c "GRANT ALL PRIVILEGES ON SCHEMA public TO nbxplorer;"
   fi
 
   # https://docs.btcpayserver.org/Deployment/ManualDeploymentExtended/#4-create-a-configuration-file
@@ -75,8 +77,10 @@ function BtcPayConfig() {
   else
     echo "# Generate the database for btcpay"
     sudo -u postgres psql -c "CREATE DATABASE btcpaymainnet TEMPLATE template0 LC_CTYPE 'C' LC_COLLATE 'C' ENCODING 'UTF8';"
-    sudo -u postgres psql -c "create user btcpay with encrypted password 'raspiblitz';"
-    sudo -u postgres psql -c "grant all privileges on database btcpaymainnet to btcpay;"
+    sudo -u postgres psql -c "CREATE USER btcpay WITH ENCRYPTED PASSWORD 'raspiblitz';"
+    sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE btcpaymainnet TO btcpay;"
+    # for migrations
+    sudo -u postgres psql -d btcpaymainnet -c "GRANT ALL PRIVILEGES ON SCHEMA public TO btcpay;"
   fi
 
   echo "# Regenerate the btcpayserver settings (includes the LND TLS thumbprint)"
