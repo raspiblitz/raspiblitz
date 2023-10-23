@@ -130,7 +130,7 @@ After=network-online.target
 
 [Service]
 Type=simple
-WorkingDirectory=/home/bos/balanceofsatoshis
+WorkingDirectory=/home/bos
 ExecStart=/home/bos/.npm-global/bin/bos telegram --connect $3 -v
 User=bos
 Group=bos
