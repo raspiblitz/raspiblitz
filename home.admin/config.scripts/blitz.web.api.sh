@@ -17,7 +17,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ];
   echo "blitz.web.api.sh on DEFAULT"
   echo "blitz.web.api.sh update-config"
   echo "blitz.web.api.sh update-code [?BRANCH]"
-  echo "blitz.web.api.sh off"
+  echo "blitz.web.api.sh off"f
   exit 1
 fi
 
@@ -286,13 +286,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # install
   echo "# running install"
   sudo -u blitzapi python3 -m venv venv
-  # see https://github.com/raspiblitz/raspiblitz/issues/4169 - requires both Cython upgrade and use-pep517 for now
+  # see https://github.com/raspiblitz/raspiblitz/issues/4169 - requires a Cython upgrade.
   if ! sudo -u blitzapi ./venv/bin/pip install --upgrade Cython; then
     echo "error='pip install upgrade Cython'"
-    exit 1
-  fi
-  if ! sudo -u blitzapi ./venv/bin/pip install install cchardet --use-pep517; then
-    echo "error='pip install cchardet failed'"
     exit 1
   fi
   if ! sudo -u blitzapi ./venv/bin/pip install -r requirements.txt --no-deps; then
