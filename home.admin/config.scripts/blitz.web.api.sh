@@ -287,7 +287,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "# running install"
   sudo -u blitzapi python3 -m venv venv
   # see https://github.com/raspiblitz/raspiblitz/issues/4169 - requires both Cython upgrade and use-pep517 for now
-  if ! sudo -u blitzapi ./venv/bin/pip install --upgrade Cython then
+  if ! sudo -u blitzapi ./venv/bin/pip install --upgrade Cython; then
     echo "error='pip install upgrade Cython'"
     exit 1
   fi
