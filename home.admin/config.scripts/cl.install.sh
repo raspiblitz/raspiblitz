@@ -42,7 +42,7 @@ function installDependencies() {
     libsqlite3-dev python3 net-tools zlib1g-dev libsodium-dev \
     gettext
   # additional requirements
-  sudo apt-get install -y postgresql libpq-dev
+  sudo apt-get install -y postgresql libpq-dev psutil
   # upgrade pip
   sudo pip3 install --upgrade pip
   sudo -u bitcoin pip install mako
