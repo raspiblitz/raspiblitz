@@ -248,7 +248,7 @@ function lcd() {
   confirmMsg lcd
   if [ $confirm -eq 1 ]; then
     echo "# SWITCHING VIDEO OUTPUT TO --> LCD"
-    sudo /home/admin/config.scripts/blitz.display.sh set-display lcd
+    sudo /home/admin/config.scripts/blitz.display.sh set-display lcd20
     restart
   fi
 }

@@ -10,7 +10,8 @@ if [ "$EUID" -ne 0 ]
 fi
 
 # make sure LCD is on (default for fatpack)
-/home/admin/config.scripts/blitz.display.sh set-display lcd
+echo "# Calling blitz.display.sh set-display "$1" from blitz.fatpack.sh (1)"
+/home/admin/config.scripts/blitz.display.sh set-display "$1"
 
 # check if sd card needs expansion before fatpack
 source <(sudo /home/admin/config.scripts/blitz.bootdrive.sh status)
@@ -108,6 +109,3 @@ echo "* Adding Code&Compile for WEBUI-APP: BTC RPC EXPLORER"
 /home/admin/config.scripts/bonus.btc-rpc-explorer.sh install || exit 1
 echo "* Adding Code&Compile for WEBUI-APP: MEMPOOL"
 /home/admin/config.scripts/bonus.mempool.sh install || exit 1
-
-# set default display to LCD
-sudo /home/admin/config.scripts/blitz.display.sh set-display lcd

@@ -168,25 +168,8 @@ This is the sd card image you should choose if your at the beginning of your Ras
 <!--- _WARNING: THIS IS STILL A RELEASE CANDIDATE VERSION</br>
 JUST USE FOR TESTING, HIGHER RISK OF LOSING FUNDS!_ -->
 
-- **FATPACK SD CARD IMAGE ⮕ [raspiblitz-fat-v1.10.0-2023-09-22.img.gz](https://raspiblitz.fulmo.org/images/raspiblitz-fat-v1.10.0-2023-09-22.img.gz)**
-- SHA-256: 50b48e078d162dfafc2b80025cf493141b0d8ab5774519bff4c3239d5d246f8f
-GPG 64-bit (main): 1C73 060C 7C17 6461 & (sub): AA9D D1B5 CC56 47DA
-- Signature-File: [raspiblitz-fat-v1.10.0-2023-09-22.img.gz.sig](https://raspiblitz.fulmo.org/images/raspiblitz-fat-v1.10.0-2023-09-22.img.gz.sig)
-- Torrent: [raspiblitz-fat-v1.10.0-2023-09-22.img.gz.torrent](https://github.com/rootzoll/raspiblitz/raw/dev/home.admin/assets/raspiblitz-fat-v1.10.0-2023-09-22.img.gz.torrent)
-- [How to verify the SD card image after download?](FAQ.md#how-to-verify-the-sd-card-image-after-download)
-
-### MINIMAL SD Card Image (Experienced Users - SSH)
-
-This is the sd card image for RaspiBlitz users that are already more experienced and want to use just a limited set of features of the RaspiBlitz. This image has just the bare minimum of features pre-installed - LCD & HDMI output is off by default. Setup, Update or Recovery needs to be done thru SSH login - API & WebUI are later available but are not preinstalled/activated by default. The RaspiBlitz will download & compile just the tools that are in your ´raspiblitz.conf´ - this will take longer but as a trade-off this RaspiBlitz then just runs with a reduced set of dependencies and so a minimalized attack vector and better performance. Its for the serious & experienced node runners.
-
-<!-- _WARNING: THIS IS STILL A RELEASE CANDIDATE VERSION</br>
-JUST USE FOR TESTING, HIGHER RISK OF LOSING FUNDS!_ -->
-
-- **MINIMAL SD CARD IMAGE ⮕ [raspiblitz-min-v1.10.0-2023-09-22.img.gz](https://raspiblitz.fulmo.org/images/raspiblitz-min-v1.10.0-2023-09-22.img.gz)**
-- SHA-256: 77674947b6682cfcc507179038ad532d4b7e60eb5274edca1a62ee78882108ad
-- GPG 64-bit (main): 1C73 060C 7C17 6461 & (sub): AA9D D1B5 CC56 47DA
-- Signature-File: [raspiblitz-min-v1.10.0-2023-09-22.img.gz.sig](https://raspiblitz.fulmo.org/images/raspiblitz-min-v1.10.0-2023-09-22.img.gz.sig)
-- Torrent: [raspiblitz-min-v1.10.0-2023-09-22.img.gz.torrent](https://github.com/rootzoll/raspiblitz/raw/dev/home.admin/assets/raspiblitz-min-v1.10.0-2023-09-22.img.gz.torrent)
+- **FATPACK SD CARD IMAGE (with 2.0 inch LCD) ⮕ [raspiblitz-fat-v1.10.0-2.0_inch_LCD-2023-11-18.img.gz](https://1drv.ms/u/s!AoYeoNb29-3HjWVDq-K7eb2vv6uU)**
+- SHA-256: 7A962397527850BEAEFE7C65E2B4E633784E77AFFAA10BA9A130F150CB140ECF
 - [How to verify the SD card image after download?](FAQ.md#how-to-verify-the-sd-card-image-after-download)
 
 Further Info:
