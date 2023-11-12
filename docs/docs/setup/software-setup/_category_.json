@@ -1,0 +1,8 @@
+{
+    "label": "Software",
+    "position": 4,
+    "link": {
+        "type": "generated-index",
+        "description": "Setting up the Software parts of your Raspiblitz"
+    }
+}
