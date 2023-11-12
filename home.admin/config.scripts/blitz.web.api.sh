@@ -286,9 +286,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # install
   echo "# running install"
   sudo -u blitzapi python3 -m venv venv
-  # see https://github.com/raspiblitz/raspiblitz/issues/4169
-  if ! sudo -u blitzapi ./venv/bin/pip install install cchardet --use-pep517; then
-    echo "error='pip install cchardet failed'"
+  # see https://github.com/raspiblitz/raspiblitz/issues/4169 - requires a Cython upgrade.
+  if ! sudo -u blitzapi ./venv/bin/pip install --upgrade Cython; then
+    echo "error='pip install upgrade Cython'"
     exit 1
   fi
   if ! sudo -u blitzapi ./venv/bin/pip install -r requirements.txt --no-deps; then
