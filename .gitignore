@@ -10,3 +10,9 @@ ci/amd64/builds
 ci/arm64-rpi/raspiblitz-arm64-rpi*
 ci/arm64-rpi/.packer*
 ci/arm64-rpi/packer-builder-arm
+docs/.yarn/*
+docs/!.yarn/releases
+docs/!.yarn/plugins
+docs/!.yarn/sdks
+docs/!.yarn/versions
+docs/.pnp.*
