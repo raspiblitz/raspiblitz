@@ -17,7 +17,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ];
   echo "blitz.web.api.sh on DEFAULT"
   echo "blitz.web.api.sh update-config"
   echo "blitz.web.api.sh update-code [?BRANCH]"
-  echo "blitz.web.api.sh off"f
+  echo "blitz.web.api.sh off"
   exit 1
 fi
 
