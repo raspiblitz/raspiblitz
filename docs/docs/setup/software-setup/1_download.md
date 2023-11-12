@@ -1,9 +1,8 @@
 ---
-sidebar_position: 3
+sidebar_position: 1
 ---
 
-# Software
-
+# Download / Flash
 ## Downloading the Software
 
 In this section you find the latest ready-to-use RaspiBlitz SDcard images. Basically you just download, write/flash the image file to an sd card and start your RaspberryPi with it - its the same for first install or updating to a newer version. You can choose from two ready-made sd card images below:

@@ -1,5 +1,5 @@
 ---
-sidebar_position: 4
+sidebar_position: 2
 ---
 
 # Basic Setup
@@ -49,3 +49,36 @@ If you chose to use one of the lightning implementations you will now be asked i
 Normally you just chose `NEW` here, but to recover an old wallet you have the following options if you choose `OLD`:
 
 ![SSH1](../../../static/img/ssh2-layer2old.png)
+
+You have the following options to recover an old node.
+
+#### LNDRESCUE 
+
+:::info
+This is the preffered choice
+:::
+
+Choose this option if you have made a complete backup of the LND or Core Lightning data and have a tar.gz file starting with the word 'lnd-rescue' or 'cl-rescue' available.
+It will recover all your on-chain funds and open channels you had.
+But you have to make sure that the rescue backup you have is really the latest version - otherwise you might lose channel funds.
+
+_If you have tar.gz file that starts with 'raspiblitz', that's a migration file.
+That also includes your old LND/Core Lightning wallet, but you import that file at the beginning of the setup process with 'FROMBACKUP - Upload Migration Backup' instead choosing FRESHSETUP_
+
+#### SEED+SCB Words Seed & channel.backup file (OK)
+:::info
+This is the second best option if LNDRESCUE is not available
+:::
+The next best option is if you have the channel.backup file and the word list seed.
+This allows you to recover all on-chain funds (i.e. "bitcoin balance") in the lightning wallet, and gives you a good chance of recovering the off-chain funds (i.e. "lightning balance") you had in open channels, as long as the remote peer supports `option_data_loss_protect` which is very common since 2020.
+All channels you had open before will be closed during this procedure.
+See [Bitcoin Optech - Static Channel Backups](https://bitcoinops.org/en/topics/static-channel-backups/) for more background information on this process.
+
+#### ONLY SEED Only Seed Word List (Fallback)
+:::info
+This option should only be used if all off the above options fail.
+:::
+If you only have the seed word list (RaspiBlitz 1.1 and older) you can at least try to recover your on-chain funds.
+Recovery of channel funds is not very likely in this scenario.
+
+But normally you are setting up a new node - so simply choose `NEW` in the menu.
