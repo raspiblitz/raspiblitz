@@ -343,7 +343,7 @@ Once you finished all the transfers, the Raspiblitz will make a quick-check on t
 
 ### Bitcoind tells me to reindex - how can I do this?
 
- To find/access information fast in large data sets like the Bitcoin blockchain indexes are needed. Those indexes can get corrupted on your HDD/SSD and to repair them they need to be rebuild - re-indexed. Bitcoind has two different options to do this - a fast way called "reindex-chainstate" (which just rebuilds the UTXO set from the blocks as you have them) and the slow but complete way called just "reindex" that would even recheck all your block data - see for details here: https://bitcoin.stackexchange.com/questions/60709/when-should-i-use-reindex-chainstate-and-when-reindex 
+ To find/access information fast in large data sets like the Bitcoin blockchain indexes are needed. Those indexes can get corrupted on your HDD/SSD and to repair them they need to be rebuilt - re-indexed. Bitcoind has two different options to do this - a fast way called "reindex-chainstate" (which just rebuilds the UTXO set from the blocks as you have them) and the slow but complete way called just "reindex" that would even recheck all your block data - see for details here: https://bitcoin.stackexchange.com/questions/60709/when-should-i-use-reindex-chainstate-and-when-reindex 
  
  So if you read in your debug logs of bitcoind that you should "reindex" you can try first just to do a fast "reindex-chainstate" and if that didnt worked a slow and full "reindex".
 
