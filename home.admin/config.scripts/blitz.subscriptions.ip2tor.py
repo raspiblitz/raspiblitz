@@ -344,7 +344,7 @@ def lndPayInvoice(lnInvoiceString):
         stub = rpcstub.LightningStub(channel)
         request = lnrpc.SendRequest(
             payment_request=lnInvoiceString,
-            fee_limit=lnrpc.FeeLimit(percent=0.25),
+            fee_limit=lnrpc.FeeLimit(fixed=1000),
         )
         response = stub.SendPaymentSync(request, metadata=[('macaroon', macaroon)])
 
