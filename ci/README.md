@@ -6,9 +6,10 @@
 
 - [Ready made images](#ready-made-images)
 - [Write the image to a disk connected with USB](#write-the-image-to-a-disk-connected-with-usb)
+  - [Prepare the disk](#prepare-the-disk)
   - [Option 1 - requires less disk space](#option-1---requires-less-disk-space)
     - [Write the .qcow2 file directly to disk with `qemu-image dd`](#write-the-qcow2-file-directly-to-disk-with-qemu-image-dd)
-  - [Option 2 - convert to  a raq disk image first](#option-2---convert-to--a-raq-disk-image-first)
+  - [Option 2 - convert to a raw disk image first](#option-2---convert-to-a-raw-disk-image-first)
     - [Convert the .qcow2 volume to a raw disk image](#convert-the-qcow2-volume-to-a-raw-disk-image)
     - [Write the .img to the disk](#write-the-img-to-the-disk)
 - [The first boot](#the-first-boot)
@@ -46,15 +47,31 @@ https://github.com/rootzoll/raspiblitz/actions/workflows/amd64-lean-image.yml?qu
   sudo apt install -y qemu-utils
   ```
 ## Write the image to a disk connected with USB
+
+### Prepare the disk
+* identify the connected disk with `lsblk` e.g., `/dev/sdk`
+* set the disk variable
+  ```
+  # identify the USB connected disk
+  lsblk
+  # set the disk variable
+  disk=/dev/sdk
+  ```
+* clean the existing partitions:
+  ```
+  # unmount all partitions
+  sudo umount ${disk}*
+  # wipe the partition table
+  sudo wipefs --all ${disk}
+  ```
+
 ### Option 1 - requires less disk space
 ####  Write the .qcow2 file directly to disk with `qemu-image dd`
 * the .qcow2 volume is 8.1 GB
-* identify the connected disk with `lsblk` e.g., `/dev/sdk`
   ```
-  disk="/dev/sdk"
   sudo qemu-img dd if=./raspiblitz-amd64-debian-lean.qcow2 of=${disk} bs=4M
   ```
-### Option 2 - convert to  a raq disk image first
+### Option 2 - convert to a raw disk image first
 #### Convert the .qcow2 volume to a raw disk image
 * the raw .img is 30GB
   ```
@@ -66,7 +83,6 @@ https://github.com/rootzoll/raspiblitz/actions/workflows/amd64-lean-image.yml?qu
 * use [Balena Etcher](https://www.balena.io/etcher/)
 * or `dd` to write the .img to disk
   ```
-  disk="/dev/sdk"
   sudo dd if=./raspiblitz-amd64-debian-lean.img of=${disk} bs=4M status=progress
   ```
 
