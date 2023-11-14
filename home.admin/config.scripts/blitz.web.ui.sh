@@ -34,7 +34,7 @@ if [ "$1" = "info" ]; then
   origin=$(sudo git config --get remote.origin.url)
   echo "repo='${origin}'"
 
-  # get github branch from repo directory with git command 
+  # get github branch from repo directory with git command
   branch=$(sudo git rev-parse --abbrev-ref HEAD)
   echo "branch='${branch}'"
 
@@ -46,7 +46,7 @@ if [ "$1" = "info" ]; then
 fi
 
 # check if started with sudo
-if [ "$EUID" -ne 0 ]; then 
+if [ "$EUID" -ne 0 ]; then
   echo "error='run as root'"
   exit 1
 fi
@@ -124,7 +124,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   rm -r /root/${GITHUB_REPO} 2>/dev/null
   rm -r /home/blitzapi/blitz_web 2>/dev/null
   rm -r /home/blitzapi/${GITHUB_REPO} 2>/dev/null
-  
+
   cd /home/blitzapi || exit 1
    echo "# clone github: ${GITHUB_USER}/${GITHUB_REPO}"
   if ! git clone https://github.com/${GITHUB_USER}/${GITHUB_REPO}.git; then
@@ -150,17 +150,12 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   echo "# Compile WebUI"
   /home/admin/config.scripts/bonus.nodejs.sh on
-  if ! npm install --global yarn; then
-    echo "error='install yarn failed'"
+  if ! npm install; then
+    echo "error='npm install failed'"
     exit 1
   fi
-  yarn config set --home enableTelemetry 0
-  if ! yarn install; then
-    echo "error='yarn install failed'"
-    exit 1
-  fi
-  if ! yarn build; then
-    echo "error='yarn build failed'"
+  if ! npm run build; then
+    echo "error='npm run build failed'"
     exit 1
   fi
 
@@ -191,8 +186,8 @@ if [ "$1" = "update" ]; then
     git reset --hard origin/${currentBranch}
     newCommit=$(git rev-parse HEAD)
     if [ "${oldCommit}" != "${newCommit}" ]; then
-      yarn install
-      yarn build
+      npm install
+      npm run build
       sudo rm -r /var/www/public/* 2>/dev/null
       sudo cp -r /home/blitzapi/blitz_web/build/* /var/www/public
       sudo chown www-data:www-data -R /var/www/public
