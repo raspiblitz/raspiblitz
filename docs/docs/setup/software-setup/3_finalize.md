@@ -59,3 +59,57 @@ There are two basic options :
 
 ![SSH4](../../../static/img/ssh4-blockchain.png)
 
+#### 1. SYNC - Self validate all Blocks
+
+For the new RaspberryPi 4 (with SSD & min 2GB RAM) this is the best way to go.
+It will take around 3-6 days to sync & validate directly with the bitcoin network.
+With this option, you have done it the original `don't trust, verify` way.
+
+:::info
+For the old RaspberryPi 3 this is not recommended.
+A RaspberryPi 3 has a very low power CPU and syncing+validating the blockchain directly with the peer2peer network can take multiple weeks - that's why for a RP3 you should choose the COPY option ._
+:::
+
+#### 2. COPY - Copy from Laptop or another RaspiBlitz over Local Network
+
+If you have a friend that is already running a synced RaspiBlitz or you have a laptop with enough free space on the hard drive that can download & validate the Blockchain much faster you can also choose the `COPY` option.
+You can then delete existing blockchain your RaspiBlitz already started syncing for you
+
+![SSH4](../../../static/img/ssh4-copy.png)
+
+To copy from another RaspiBlitz choose `BLITZ` and follow the instructions.
+Know that the other Blitz will be offline to the lightning network during the copy that will take multiple hours.
+
+To copy from your laptop/computer (`WINDOWS`, `MACOS` & `LINUX` options) you first need to download & validate the blockchain on your own computer/laptop.
+To do so, install latest bitcoin-core (0.18.1 or higher) from [bitcoin.org](https://bitcoin.org/en/download) and keep it running until the blockchain is synced (will need around 400 GB).
+Then under the `COPY` option choose the Operating System.
+The copy will be done over the local network by SCP (SSH file transfer) - follow the instructions given in the dialogues.
+It's advised to keep a backup of Bitcoin Core & the blockchain data directory on your laptop/computer in case you need to re-setup the RaspiBlitz.
+
+More details: [I have the full blockchain on another computer. How do I copy it to the RaspiBlitz?](../../faq/faq.md#i-have-the-full-blockchain-on-another-storage-how-do-i-copy-it-to-the-raspiblitz)
+
+If you don't have the Bitcoin blockchain already on another laptop or RaspiBlitz simply choose `SELFSYNC`.
+
+And hooray :D Your RaspiBlitz is ready to go! Welcome new node operator.
+
+![SSH4](../../../static/img/ssh4-done.png)
+
+If you hit OK, the RaspiBlitz will go into a final reboot.
+
+![SSH5](../../../static/img/ssh5-reboot.png)
+
+Just wait a bit and then the SSH command to login again.
+Logging in via SSH requires password A that you setup earlier.
+
+![SSH5](../../../static/img/ssh5-unlock.png)
+
+If you run LND you will be asked to unlock your wallet - this requires password C.
+There is an option to activate auto-unlock of LND if you prefer, this can be found under `SETTINGS` in the main menu.
+
+![SSH5](../../../static/img/ssh5-blocksync.png)
+
+Your RaspiBlitz might need quite some time to sync and validate the blockchain -- this can be multiple days.
+In the beginning you might see fast progress but this gets slower later on as historical blocks start to get fuller.
+Your RaspberryPi CPU will likely get quite hot during initial sync.
+However this is OK as the RaspberryPi has its own protection against overheating and will ensure the CPU doesn't critically overheat.
+
