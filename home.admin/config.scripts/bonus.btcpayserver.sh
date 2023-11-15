@@ -3,9 +3,22 @@
 # Based on: https://gist.github.com/normandmickey/3f10fc077d15345fb469034e3697d0d0
 
 # https://github.com/dgarage/NBXplorer/tags
-NBXplorerVersion="v2.3.65"
+NBXplorerVersion="v2.3.67"
 # https://github.com/btcpayserver/btcpayserver/releases
-BTCPayVersion="v1.10.3"
+BTCPayVersion="v1.11.7"
+
+# check who signed the release (person that published release)
+PGPsigner="nicolasdorier"
+PGPpubkeyLink="https://keybase.io/nicolasdorier/pgp_keys.asc"
+PGPpubkeyFingerprint="AB4CFA9895ACA0DBE27F6B346618763EF09186FE"
+# ---
+#PGPsigner="Kukks"
+#PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
+#PGPpubkeyFingerprint="8E5530D9D1C93097"
+# ---
+#PGPsigner="web-flow"
+#PGPpubkeyLink="https://github.com/web-flow.gpg"
+#PGPpubkeyFingerprint="4AEE18F83AFDEB23"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -32,11 +45,11 @@ function NBXplorerConfig() {
   else
     echo "# Generate the database for nbxplorer"
     sudo -u postgres psql -c "CREATE DATABASE nbxplorermainnet TEMPLATE template0 LC_CTYPE 'C' LC_COLLATE 'C' ENCODING 'UTF8';"
-    sudo -u postgres psql -c "create user nbxplorer with encrypted password 'raspiblitz';"
-    sudo -u postgres psql -c "grant all privileges on database nbxplorermainnet to nbxplorer;"
+    sudo -u postgres psql -c "CREATE USER nbxplorer WITH ENCRYPTED PASSWORD 'raspiblitz';"
+    sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE nbxplorermainnet TO nbxplorer;"
+    # for migrations
+    sudo -u postgres psql -d nbxplorermainnet -c "GRANT ALL PRIVILEGES ON SCHEMA public TO nbxplorer;"
   fi
-  echo "# List databases with: sudo -u postgres psql -c '\l'"
-  sudo -u postgres psql -c '\l'
 
   # https://docs.btcpayserver.org/Deployment/ManualDeploymentExtended/#4-create-a-configuration-file
   echo
@@ -64,11 +77,12 @@ function BtcPayConfig() {
   else
     echo "# Generate the database for btcpay"
     sudo -u postgres psql -c "CREATE DATABASE btcpaymainnet TEMPLATE template0 LC_CTYPE 'C' LC_COLLATE 'C' ENCODING 'UTF8';"
-    sudo -u postgres psql -c "create user btcpay with encrypted password 'raspiblitz';"
-    sudo -u postgres psql -c "grant all privileges on database btcpaymainnet to btcpay;"
+    sudo -u postgres psql -c "CREATE USER btcpay WITH ENCRYPTED PASSWORD 'raspiblitz';"
+    sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE btcpaymainnet TO btcpay;"
+    # for migrations
+    sudo -u postgres psql -d btcpaymainnet -c "GRANT ALL PRIVILEGES ON SCHEMA public TO btcpay;"
   fi
-  echo "# List databases with: sudo -u postgres psql -c '\l'"
-  sudo -u postgres psql -c '\l'
+
   echo "# Regenerate the btcpayserver settings (includes the LND TLS thumbprint)"
   # https://docs.btcpayserver.org/Deployment/ManualDeploymentExtended/#3-create-a-configuration-file
   sudo -u btcpay mkdir -p /home/btcpay/.btcpayserver/Main
@@ -244,7 +258,7 @@ SHA1 ${sslFingerprintIP}"
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
     sudo /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
     text="${text}\n
-TOR Browser Hidden Service address (see the QR onLCD):
+Tor Browser Hidden Service address (see the QR onLCD):
 ${toraddress}"
   fi
 
@@ -389,10 +403,10 @@ if [ "$1" = "install" ]; then
   cd NBXplorer || exit 1
   sudo -u btcpay git reset --hard $NBXplorerVersion
   # PGP verify
-  PGPsigner="nicolasdorier"
-  PGPpubkeyLink="https://keybase.io/nicolasdorier/pgp_keys.asc"
-  PGPpubkeyFingerprint="AB4CFA9895ACA0DBE27F6B346618763EF09186FE"
-  sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
+  NBXPGPsigner="nicolasdorier"
+  NBXPGPpubkeyLink="https://keybase.io/nicolasdorier/pgp_keys.asc"
+  NBXPGPpubkeyFingerprint="AB4CFA9895ACA0DBE27F6B346618763EF09186FE"
+  sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh "${NBXPGPsigner}" "${NBXPGPpubkeyLink}" "${NBXPGPpubkeyFingerprint}" || exit 1
   echo "# Build NBXplorer $NBXplorerVersion"
   # from the build.sh with path
   sudo -u btcpay /home/btcpay/dotnet/dotnet build -c Release NBXplorer/NBXplorer.csproj || exit 1
@@ -405,17 +419,6 @@ if [ "$1" = "install" ]; then
   cd btcpayserver || exit 1
   sudo -u btcpay git reset --hard $BTCPayVersion
   #sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh "web-flow" "https://github.com/web-flow.gpg" "4AEE18F83AFDEB23" || exit 1
-  PGPsigner="nicolasdorier"
-  PGPpubkeyLink="https://keybase.io/nicolasdorier/pgp_keys.asc"
-  PGPpubkeyFingerprint="AB4CFA9895ACA0DBE27F6B346618763EF09186FE"
-  # ---
-  #PGPsigner="Kukks"
-  #PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
-  #PGPpubkeyFingerprint="8E5530D9D1C93097"
-  # ---
-  #PGPsigner="web-flow"
-  #PGPpubkeyLink="https://github.com/web-flow.gpg"
-  #PGPpubkeyFingerprint="4AEE18F83AFDEB23"
 
   echo "# verify signature of ${PGPsigner}"
   sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1

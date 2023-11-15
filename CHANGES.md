@@ -1,3 +1,7 @@
+## What's new in Version 1.11.0 of RaspiBlitz?
+
+- Update: BTCPayServer v1.11.7 [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.11.7)
+
 ## What's new in Version 1.10.0 of RaspiBlitz?
 
 - Update: RaspiOS base image from 2023-05-03
