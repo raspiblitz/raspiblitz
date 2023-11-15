@@ -258,7 +258,7 @@ SHA1 ${sslFingerprintIP}"
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
     sudo /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
     text="${text}\n
-TOR Browser Hidden Service address (see the QR onLCD):
+Tor Browser Hidden Service address (see the QR onLCD):
 ${toraddress}"
   fi
 
