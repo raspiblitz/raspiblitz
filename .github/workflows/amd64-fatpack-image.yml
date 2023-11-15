@@ -7,7 +7,7 @@ concurrency:
 on:
   workflow_dispatch:
   #push:
-  #  branches: [ "dev", "v1.8", "v1.9" ]
+  #  branches: ["dev", "v1.10"]
   #  paths:
   #    - 'build_sdcard.sh'
   #    - 'home.admin/bitcoin.install.sh'
@@ -28,7 +28,7 @@ on:
   #    - 'home.admin/blitz.display.sh'
   #    - 'ci/amd64/**'
   #pull_request:
-  #  branches: [ "dev", "v1.8", "v1.9" ]
+  #  branches: ["dev", "v1.10"]
   #  paths:
   #    - 'build_sdcard.sh'
   #    - 'home.admin/bitcoin.install.sh'
@@ -56,6 +56,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Set values
+        id: set_values
         run: |
           echo "BUILD_DATE=$(date +"%Y-%m-%d")" >> $GITHUB_ENV
           echo "BUILD_VERSION=$(git describe --always --tags)" >> $GITHUB_ENV
@@ -64,15 +65,20 @@ jobs:
           else
             echo "BRANCH_NAME=${GITHUB_HEAD_REF}" >> $GITHUB_ENV
           fi
+          if [[ "${{github.event_name}}" == "pull_request" ]]; then
+            echo "::set-output name=github_user::${{github.event.pull_request.head.repo.owner.login}}"
+          else
+            echo "::set-output name=github_user::$(echo ${{github.repository}} | cut -d'/' -f1)"
+          fi
 
-      - name: Hello RaspiBlitz
+      - name: Display the build name
         run: echo "Building the raspiblitz-amd64-debian-image-${{env.BUILD_DATE}}-${{env.BUILD_VERSION}}"
 
       - name: Run the build script
         run: |
-          echo "Using the variables: --pack fatpack --github_user $GITHUB_ACTOR --branch ${{env.BRANCH_NAME}} --preseed_file preseed.cfg --boot uefi--desktop gnome"
+          echo "Using the variables: --pack fatpack --github_user ${{steps.set_values.outputs.github_user}} --branch ${{env.BRANCH_NAME}} --preseed_file preseed.cfg --boot uefi --desktop none"
           cd ci/amd64
-          bash packer.build.amd64-debian.sh	--pack fatpack --github_user $GITHUB_ACTOR --branch ${{env.BRANCH_NAME}} --preseed_file preseed.cfg --boot uefi--desktop gnome
+          bash packer.build.amd64-debian.sh --pack fatpack --github_user ${{steps.set_values.outputs.github_user}} --branch ${{env.BRANCH_NAME}} --preseed_file preseed.cfg --boot uefi --desktop none
 
       - name: Compute checksum of the raw image
         run: |

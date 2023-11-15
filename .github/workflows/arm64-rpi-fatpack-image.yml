@@ -7,7 +7,7 @@ concurrency:
 on:
   workflow_dispatch:
   #push:
-  #  branches: [ "dev", "v1.8", "v1.9" ]
+  #  branches: [ "dev", "v1.10" ]
   #  paths:
   #    - 'build_sdcard.sh'
   #    - 'home.admin/bitcoin.install.sh'
@@ -28,7 +28,7 @@ on:
   #    - 'home.admin/blitz.display.sh'
   #    - 'ci/arm64-rpi/**'
   #pull_request:
-  #  branches: [ "dev", "v1.8", "v1.9" ]
+  #  branches: [ "dev", "v1.10" ]
   #  paths:
   #    - 'build_sdcard.sh'
   #    - 'home.admin/bitcoin.install.sh'
@@ -47,7 +47,7 @@ on:
   #    - 'home.admin/blitz.web.api.sh'
   #    - 'home.admin/blitz.web.ui.sh'
   #    - 'home.admin/blitz.display.sh'
-  #    - 'ci/arm64-rpi/**'
+  #    - 'ci/amd64/**'
 
 jobs:
   arm64-rpi-image-build:
@@ -56,6 +56,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Set values
+        id: set_values
         run: |
           echo "BUILD_DATE=$(date +"%Y-%m-%d")" >> $GITHUB_ENV
           echo "BUILD_VERSION=$(git describe --always --tags)" >> $GITHUB_ENV
@@ -64,15 +65,20 @@ jobs:
           else
             echo "BRANCH_NAME=${GITHUB_HEAD_REF}" >> $GITHUB_ENV
           fi
+          if [[ "${{github.event_name}}" == "pull_request" ]]; then
+            echo "::set-output name=github_user::${{github.event.pull_request.head.repo.owner.login}}"
+          else
+            echo "::set-output name=github_user::$(echo ${{github.repository}} | cut -d'/' -f1)"
+          fi
 
-      - name: Hello Raspiblitz
-        run: echo "Building the raspiblitz-arm64-rpi-fatpack-image-${{ env.BUILD_DATE }}-${{ env.BUILD_VERSION }}"
+      - name: Display the build name
+        run: echo "Building the raspiblitz-arm64-rpi-fatpack-image-${{env.BUILD_DATE}}-${{env.BUILD_VERSION}}"
 
       - name: Run the build script
         run: |
-          echo "Using the variables: --pack fatpack --github_user $GITHUB_ACTOR --branch ${{env.BRANCH_NAME}}"
+          echo "Using the variables: --pack fatpack --github_user ${{steps.set_values.outputs.github_user}} --branch ${{env.BRANCH_NAME}}"
           cd ci/arm64-rpi
-          bash packer.build.arm64-rpi.sh --pack fatpack --github_user $GITHUB_ACTOR --branch ${{env.BRANCH_NAME}}
+          bash packer.build.arm64-rpi.sh --pack fatpack --github_user ${{steps.set_values.outputs.github_user}} --branch ${{env.BRANCH_NAME}}
 
       - name: Compute checksum of the raw image
         run: |

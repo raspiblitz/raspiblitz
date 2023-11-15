@@ -13,8 +13,6 @@ else
   echo "# Packer is installed"
 fi
 
-
-
 # install qemu
 echo "# Install qemu ..."
 sudo apt-get update

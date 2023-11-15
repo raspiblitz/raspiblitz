@@ -237,10 +237,14 @@ done
 # AUTO-DETECTION: CPU-ARCHITECTURE
 # ---------------------------------------
 cpu="$(uname -m)" && echo "cpu=${cpu}"
-architecture="$(dpkg --print-architecture 2>/dev/null)" && echo "architecture=${architecture}"
 case "${cpu}" in
-  arm*|aarch64|x86_64|amd64);;
-  *) echo -e "# FAIL #\nCan only build on ARM, aarch64, x86_64 not on: cpu=${cpu}"; exit 1;;
+  aarch64|x86_64);;
+  *) echo -e "# FAIL #\nCan only build on aarch64 or x86_64 not on: cpu=${cpu}"; exit 1;;
+esac
+architecture="$(dpkg --print-architecture 2>/dev/null)" && echo "architecture=${architecture}"
+case "${architecture}" in
+  arm*|amd64);;
+  *) echo -e "# FAIL #\nCan only build on arm* or amd64 not on: architecture=${cpu}"; exit 1;;
 esac
 
 # AUTO-DETECTION: OPERATINGSYSTEM
@@ -293,7 +297,7 @@ HandleLidSwitchDocked=ignore" | tee /etc/systemd/logind.conf.d/nosuspend.conf
 # https://github.com/rootzoll/raspiblitz/issues/138
 # https://daker.me/2014/10/how-to-fix-perl-warning-setting-locale-failed-in-raspbian.html
 # https://stackoverflow.com/questions/38188762/generate-all-locales-in-a-docker-image
-if [ "${baseimage}" = "raspios_arm64" ] || [ "${baseimage}" = "debian" ]; then
+if [ "${cpu}" = "aarch64" ] && { [ "${baseimage}" = "raspios_arm64" ] || [ "${baseimage}" = "debian" ]; }; then
   echo -e "\n*** FIXING LOCALES FOR BUILD ***"
   sed -i "s/^# en_US.UTF-8 UTF-8.*/en_US.UTF-8 UTF-8/g" /etc/locale.gen
   sed -i "s/^# en_US ISO-8859-1.*/en_US ISO-8859-1/g" /etc/locale.gen
@@ -378,10 +382,13 @@ else
   exit 1
 fi
 
-# remove any debian python protection from pip installing modules
-if [ -f rm /usr/lib/python3.*/EXTERNALLY-MANAGED ]; then
-  rm /usr/lib/python3.*/EXTERNALLY-MANAGED
-fi
+# don't protect system packages from pip install
+# tracking issue: https://github.com/raspiblitz/raspiblitz/issues/4170
+for PYTHONDIR in /usr/lib/python3.*; do
+  if [ -f "$PYTHONDIR/EXTERNALLY-MANAGED" ]; then
+    rm "$PYTHONDIR/EXTERNALLY-MANAGED"
+  fi
+done
 
 # make sure /usr/bin/pip exists (and calls pip3 in Debian Buster)
 update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
@@ -708,6 +715,10 @@ bash -c "echo 'vm.overcommit_memory=1' >> /etc/sysctl.conf"
 # based on https://raspibolt.org/security.html#fail2ban
 echo "*** HARDENING ***"
 apt_install --no-install-recommends python3-systemd fail2ban
+# https://github.com/raspiblitz/raspiblitz/issues/4044
+if [ ! -f /var/log/auth.log ]; then
+  touch /var/log/auth.log
+fi
 
 # *** CACHE DISK IN RAM & KEYVALUE-STORE***
 echo "Activating CACHE RAM DISK ... "
