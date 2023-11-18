@@ -193,7 +193,7 @@ Check 'sudo nginx -t' for a detailed error message.
   # Options (available without TOR)
   OPTIONS=( \
         CONNECT "How to Connect" \
-        INDEX "Delete&Rebuild Index" \
+        REINDEX "Delete&Rebuild Index" \
         STATUS "ElectRS Status Info"
 	)
 
@@ -238,7 +238,7 @@ Check 'sudo nginx -t' for a detailed error message.
     echo "Press ENTER to get back to main menu."
     read key
     ;;
-    INDEX)
+    REINDEX)
     echo "######## Delete/Rebuild Index ########"
     echo "# stopping service"
     sudo systemctl stop electrs
