@@ -58,6 +58,7 @@ go mod download
 go build || exit 1
 
 # set vars
+echo "# Setting the variables: $*"
 source ../set_variables.sh
 set_variables "$@"
 

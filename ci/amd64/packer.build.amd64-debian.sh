@@ -19,6 +19,7 @@ sudo apt-get update
 sudo apt-get install -y qemu-system
 
 # set vars
+echo "# Setting the variables: $*"
 source ../set_variables.sh
 set_variables "$@"
 
