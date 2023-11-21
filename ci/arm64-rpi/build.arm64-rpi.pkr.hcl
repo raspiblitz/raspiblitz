@@ -47,6 +47,8 @@ build {
       "apt-get install -y sudo wget",
       "apt-get -y autoremove",
       "apt-get -y clean",
+      "touch /boot/ssh",
+      "echo 'pi:$6$TE7HmruYY9EaNiKP$Vz0inJ6gaoJgJvQrC5z/HMDRMTN2jKhiEnG83tc1Jsw7lli5MYdeA83g3NOVCsBaTVW4mUBiT/1ZRWYdofVQX0' > /boot/userconf"
     ]
   }
 
