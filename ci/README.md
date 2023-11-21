@@ -4,18 +4,16 @@
 <details>
 <summary>Table of Contents</summary>
 
-- [Ready made images](#ready-made-images)
-- [Write the image to a disk connected with USB](#write-the-image-to-a-disk-connected-with-usb)
-  - [Prepare the disk](#prepare-the-disk)
-  - [Option 1 - requires less disk space](#option-1---requires-less-disk-space)
-    - [Write the .qcow2 file directly to disk with `qemu-image dd`](#write-the-qcow2-file-directly-to-disk-with-qemu-image-dd)
-  - [Option 2 - convert to a raw disk image first](#option-2---convert-to-a-raw-disk-image-first)
-    - [Convert the .qcow2 volume to a raw disk image](#convert-the-qcow2-volume-to-a-raw-disk-image)
-    - [Write the .img to the disk](#write-the-img-to-the-disk)
-- [The first boot](#the-first-boot)
-  - [Lean image with Gnome desktop (default image)](#lean-image-with-gnome-desktop-default-image)
-  - [Extend the root partition (optional - recommended)](#extend-the-root-partition-optional---recommended)
-  - [Add wifi driver (optional)](#add-wifi-driver-optional)
+- [Ready made images for arm64-rpi](#ready-made-images-for-arm64-rpi)
+- [Ready made images for amd64 (x86)](#ready-made-images-for-amd64-x86)
+  - [Write the image to a disk connected with USB](#write-the-image-to-a-disk-connected-with-usb)
+    - [Prepare the disk](#prepare-the-disk)
+    - [Option 1 - rite the .qcow2 file directly to disk with `qemu-image dd`](#option-1---rite-the-qcow2-file-directly-to-disk-with-qemu-image-dd)
+    - [Option 2 - convert the .qcow2 volume to a raw disk image](#option-2---convert-the-qcow2-volume-to-a-raw-disk-image)
+  - [The first boot](#the-first-boot)
+    - [Lean image with Gnome desktop (default image)](#lean-image-with-gnome-desktop-default-image)
+    - [Extend the root partition (optional - recommended)](#extend-the-root-partition-optional---recommended)
+    - [Add wifi driver (optional)](#add-wifi-driver-optional)
 - [Local build](#local-build)
   - [Generate an arm64-rpi image](#generate-an-arm64-rpi-image)
   - [Generate an amd64 image](#generate-an-amd64-image)
@@ -33,7 +31,19 @@
 
 </details>
 
-## Ready made images
+## Ready made images for arm64-rpi
+* The images are built in GitHub actions
+* To see the downloadable artifacts will need to log in to GitHub
+* Find the latest successful build of the default amd64 image:
+https://github.com/raspiblitz/raspiblitz/actions/workflows/arm64-rpi-lean-image.yml?query=workflow%3Aarm64-rpi-lean-image-build+is%3Asuccess
+* unpack the artifact to the same directory
+  ```
+  unzip ./raspiblitz-arm64-rpi-image-*.zip
+  ```
+* The resulting `raspiblitz-arm64-rpi-lean.img.gz` can be written to an SDcard directly with Balena Etcher
+
+
+## Ready made images for amd64 (x86)
 * The images are built in GitHub actions
 * To see the downloadable artifacts will need to log in to GitHub
 * Find the latest successful build of the default amd64 image:
@@ -46,9 +56,9 @@ https://github.com/rootzoll/raspiblitz/actions/workflows/amd64-lean-image.yml?qu
   # install qemu-utils
   sudo apt install -y qemu-utils
   ```
-## Write the image to a disk connected with USB
+###  Write the image to a disk connected with USB
 
-### Prepare the disk
+#### Prepare the disk
 * identify the connected disk with `lsblk` e.g., `/dev/sdk`
 * set the disk variable
   ```
@@ -65,20 +75,18 @@ https://github.com/rootzoll/raspiblitz/actions/workflows/amd64-lean-image.yml?qu
   sudo wipefs --all ${disk}
   ```
 
-### Option 1 - requires less disk space
-####  Write the .qcow2 file directly to disk with `qemu-image dd`
-* the .qcow2 volume is 8.1 GB
+#### Option 1 - rite the .qcow2 file directly to disk with `qemu-image dd`
+* requires less disk space - the .qcow2 volume is 8.1 GB
   ```
   sudo qemu-img dd if=./raspiblitz-amd64-debian-lean.qcow2 of=${disk} bs=4M
   ```
-### Option 2 - convert to a raw disk image first
-#### Convert the .qcow2 volume to a raw disk image
+
+#### Option 2 - convert the .qcow2 volume to a raw disk image
 * the raw .img is 30GB
   ```
   # convert
   qemu-img convert ./raspiblitz-amd64-debian-lean.qcow2 ./raspiblitz-amd64-debian-lean.img
   ```
-#### Write the .img to the disk
 * identify the connected disk with `lsblk` e.g., `/dev/sdk`
 * use [Balena Etcher](https://www.balena.io/etcher/)
 * or `dd` to write the .img to disk
@@ -86,15 +94,15 @@ https://github.com/rootzoll/raspiblitz/actions/workflows/amd64-lean-image.yml?qu
   sudo dd if=./raspiblitz-amd64-debian-lean.img of=${disk} bs=4M status=progress
   ```
 
-## The first boot
-### Lean image with Gnome desktop (default image)
+### The first boot
+#### Lean image with Gnome desktop (default image)
 * log in on screen:
   * username: `admin`
   * password: `raspiblitz`
 * start a terminal for guidance
 * alternatively connect with ssh over the LAN with the same username and password
 
-### Extend the root partition (optional - recommended)
+#### Extend the root partition (optional - recommended)
 * The default image is 30GB. The partition can be extended to the full size of the disk.
 * The lvm partition can be extended while mounted so this step can be done later as well while the system is running.
 * CLI (recommended)
@@ -125,7 +133,7 @@ https://github.com/rootzoll/raspiblitz/actions/workflows/amd64-lean-image.yml?qu
   sudo lvextend -r -l +100%FREE /dev/mapper/raspiblitz--amd64--vg-root
   ```
 
-### Add wifi driver (optional)
+#### Add wifi driver (optional)
 * as in https://wiki.debian.org/iwlwifi
 * add the component `non-free` after `deb http://deb.debian.org/debian bullseye main` in `/etc/apt/sources.list`
 * install the wifi driver for the mentioned cards:
