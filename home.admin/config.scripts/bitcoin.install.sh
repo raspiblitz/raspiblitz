@@ -70,7 +70,7 @@ if [ "$1" = "install" ]; then
   # download resources
   binaryName="bitcoin-${bitcoinVersion}-${bitcoinOSversion}.tar.gz"
   if [ ! -f "./${binaryName}" ]; then
-     sudo -u admin wget https://bitcoincore.org/bin/bitcoin-core-${bitcoinVersion}/${binaryName}
+     sudo -u admin wget --show-progress https://bitcoincore.org/bin/bitcoin-core-${bitcoinVersion}/${binaryName} > /dev/null
   fi
   if [ ! -f "./${binaryName}" ]; then
      echo "# FAIL # Could not download the BITCOIN BINARY"
