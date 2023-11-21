@@ -150,7 +150,7 @@ range_argument(){
 
 apt_install() {
   for package in "$@"; do
-    apt install -y -q "$package"
+    apt-get install -y -q "$package"
     if [ $? -eq 100 ]; then
       echo "FAIL! apt failed to install package: $package"
       exit 1
