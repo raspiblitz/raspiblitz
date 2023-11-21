@@ -5,7 +5,6 @@ import grpc
 
 from . import lightning_pb2 as lightning__pb2
 
-
 class LightningStub(object):
     """
     Comments in this file will be directly parsed into the API

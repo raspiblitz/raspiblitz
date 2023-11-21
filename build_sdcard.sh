@@ -399,7 +399,7 @@ update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
 # 3. Nyx
 # setuptools
 sudo -H python3 -m pip install --upgrade pip
-sudo -H python3 -m pip install grpcio==1.42.0 googleapis-common-protos==1.53.0 toml==0.10.2 j2cli==0.3.10 requests[socks]==2.21.0 protobuf==3.20.1 pathlib2==2.3.7.post1
+sudo -H python3 -m pip install grpcio==1.59.3 googleapis-common-protos==1.61.0 toml==0.10.2 j2cli==0.3.10 requests[socks]==2.21.0 protobuf==4.25.1 pathlib2==2.3.7.post1
 sudo -H python3 -m pip install pytesseract mechanize PySocks urwid Pillow requests setuptools
 
 echo -e "\n*** PREPARE ${baseimage} ***"

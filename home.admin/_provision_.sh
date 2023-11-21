@@ -864,7 +864,6 @@ if [ "${lightning}" == "lnd" ];then
   if [ "${passwordFlagExists}" == "1" ]; then
     echo "Found /mnt/hdd/passwordc.flag .. changing password" >> ${logFile}
     oldPasswordC=$(cat /mnt/hdd/passwordc.flag)
-    if ! pip list | grep grpc; then sudo -H python3 -m pip install grpcio==1.38.1; fi
     /home/admin/config.scripts/lnd.initwallet.py change-password mainnet "${oldPasswordC}" "${passwordC}" >> ${logFile}
     shred -u /mnt/hdd/passwordc.flag
   else

@@ -267,7 +267,6 @@ if [ "${lightning}" == "lnd" ]; then
 
     echo "WALLET --> SEED" >> ${logFile}
     /home/admin/_cache.sh set message "LND Wallet (SEED)"
-    if ! pip list | grep grpc; then sudo -H python3 -m pip install grpcio==1.38.1; fi
     source <(/home/admin/config.scripts/lnd.initwallet.py seed mainnet "${passwordC}" "${seedWords}" "${seedPassword}")
     if [ "${err}" != "" ]; then
       /home/admin/config.scripts/blitz.error.sh _provision.setup.sh "lnd-wallet-seed" "lnd.initwallet.py seed returned error" "/home/admin/config.scripts/lnd.initwallet.py seed mainnet ... --> ${err} + ${errMore}" ${logFile}
@@ -284,7 +283,6 @@ if [ "${lightning}" == "lnd" ]; then
 
     echo "# WALLET --> NEW" >> ${logFile}
     /home/admin/_cache.sh set message "LND Wallet (NEW)"
-    if ! pip list | grep grpc; then sudo -H python3 -m pip install grpcio==1.38.1; fi
     source <(/home/admin/config.scripts/lnd.initwallet.py new mainnet "${passwordC}")
     if [ "${err}" != "" ]; then
       /home/admin/config.scripts/blitz.error.sh _provision.setup.sh "lnd-wallet-new" "lnd.initwallet.py new returned error" "/home/admin/config.scripts/lnd.initwallet.py new mainnet ... --> ${err} + ${errMore}" ${logFile}
