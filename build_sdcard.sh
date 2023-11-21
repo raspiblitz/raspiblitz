@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 
 #########################################################################
-# Build your SD card image based on: 2022-04-04-raspios-bullseye-arm64.img.xz
-# https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2023-05-03/
-# SHA256: e7c0c89db32d457298fbe93195e9d11e3e6b4eb9e0683a7beb1598ea39a0a7aa
+# Build your SD card image based on: 2023-10-10-raspios-bookworm-arm64.img.xz
+# https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2023-10-10/
+# SHA256: 1702d6494e8fc1036c39d73d99a5b7e0bfb5352fd2cf35fd940c66ceb37d2c0a
 # PGP fingerprint: 8738CD6B956F460C
 # PGP key: https://www.raspberrypi.org/raspberrypi_downloads.gpg.key
-# setup fresh SD card with image above - login per SSH and run this script:
+# setup fresh SD card with image above - login via SSH and run this script:
 ##########################################################################
 
 defaultRepo="raspiblitz" #user that hosts a `raspiblitz` repo
@@ -152,7 +152,7 @@ apt_install() {
   for package in "$@"; do
     apt-get install -y -q "$package"
     if [ $? -eq 100 ]; then
-      echo "FAIL! apt failed to install package: $package"
+      echo "FAIL! apt-get failed to install package: $package"
       exit 1
     fi
   done
@@ -166,7 +166,7 @@ done
 ## if any of the required programs are not installed, update and if successfull, install packages
 if [ -n "${general_utils_install}" ]; then
   echo -e "\n*** SOFTWARE UPDATE ***"
-  apt update -y || exit 1
+  apt-get update -y || exit 1
   apt_install ${general_utils_install}
 fi
 
@@ -312,13 +312,21 @@ if [ "${cpu}" = "aarch64" ] && { [ "${baseimage}" = "raspios_arm64" ] || [ "${ba
 fi
 
 echo "*** Remove unnecessary packages ***"
-apt remove --purge -y libreoffice* oracle-java* chromium-browser nuscratch scratch sonic-pi plymouth python2 vlc* cups
-apt clean -y
-apt autoremove -y
+unnecessary_packages=(libreoffice* oracle-java* chromium-browser nuscratch scratch sonic-pi plymouth python2 vlc* cups)
+for pkg in "${unnecessary_packages[@]}"; do
+  if dpkg-query -W -f='${Status}' $pkg 2>/dev/null | grep -q "ok installed"; then
+    echo "Removing $pkg..."
+    apt-get remove --purge -y $pkg
+  else
+    echo "$pkg is not installed."
+  fi
+done
+apt-get clean -y
+apt-get autoremove -y
 
 echo -e "\n*** UPDATE Debian***"
-apt update -y
-apt upgrade -f -y
+apt-get update -y
+apt-get upgrade -f -y
 
 echo -e "\n*** SOFTWARE UPDATE ***"
 # based on https://raspibolt.org/system-configuration.html#system-update
@@ -350,8 +358,8 @@ server_utils="rsync net-tools xxd netcat-openbsd openssh-client openssh-sftp-ser
 [ "${architecture}" = "amd64" ] && amd64_dependencies="network-manager" # add amd64 dependency
 
 apt_install ${general_utils} ${python_dependencies} ${server_utils} ${amd64_dependencies} ${armbian_dependencies}
-apt clean -y
-apt autoremove -y
+apt-get clean -y
+apt-get autoremove -y
 
 echo -e "\n*** Python DEFAULT libs & dependencies ***"
 
@@ -754,7 +762,7 @@ if [ "${baseimage}" = "raspios_arm64"  ] || [ "${baseimage}" = "debian" ]; then
   systemctl disable hciuart.service
 
   # remove bluetooth packages
-  apt remove -y --purge pi-bluetooth bluez bluez-firmware
+  apt-get remove -y --purge pi-bluetooth bluez bluez-firmware
 
   # disable audio
   echo -e "\n*** DISABLE AUDIO (snd_bcm2835) ***"
