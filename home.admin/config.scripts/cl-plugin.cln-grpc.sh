@@ -45,6 +45,7 @@ function buildGRPCplugin() {
     echo "# delete old dir or binary"
     sudo rm -rf /home/bitcoin/cl-plugins-available/cln-grpc
     echo "# move to /home/bitcoin/cl-plugins-available/"
+    sudo mkdir -p /home/bitcoin/cl-plugins-available
     sudo -u bitcoin mv /home/bitcoin/cln-grpc-build/debug/cln-grpc /home/bitcoin/cl-plugins-available/
   else
     echo "# - cln-grpc plugin was already built/installed"

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # https://github.com/apotdevin/thunderhub
-THUBVERSION="v0.13.16"
+THUBVERSION="v0.13.19"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -96,7 +96,7 @@ if [ "$1" = "install" ]; then
     /home/admin/config.scripts/bonus.nodejs.sh on
 
     # create thunderhub user
-    sudo adduser --disabled-password --gecos "" thunderhub
+    sudo adduser --system --group --home /home/thunderhub thunderhub
 
     # download and install
     sudo -u thunderhub git clone https://github.com/apotdevin/thunderhub.git /home/thunderhub/thunderhub

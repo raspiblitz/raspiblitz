@@ -85,6 +85,11 @@ echo "chainnetwork: ${network} / ${chain}"
 uptime
 echo
 
+echo "*** FAILED SERVICES ***"
+echo "list any servcies with problems: sudo systemctl list-units --failed"
+sudo systemctl list-units --failed
+echo
+
 echo "*** SETUPPHASE / BOOTSTRAP ***"
 echo "see logs: cat /home/admin/raspiblitz.log"
 echo "setupPhase--> ${setupPhase}"
@@ -102,12 +107,12 @@ echo "*** BLOCKCHAIN (MAINNET) SYSTEMD STATUS ***"
 sudo systemctl status ${network}d -n2 --no-pager
 echo
 echo "*** LAST BLOCKCHAIN (MAINNET) ERROR LOGS ***"
-echo "sudo journalctl -u ${network}d -b --no-pager -n8"
-sudo journalctl -u ${network}d -b --no-pager -n8
+echo "sudo journalctl -u ${network}d -b --no-pager -n20"
+sudo journalctl -u ${network}d -b --no-pager -n20
 echo
-echo "*** LAST BLOCKCHAIN (MAINNET) 20 INFO LOGS ***"
-echo "sudo tail -n 20 /mnt/hdd/${network}/debug.log"
-sudo tail -n 20 /mnt/hdd/${network}${pathAdd}/debug.log
+echo "*** LAST BLOCKCHAIN (MAINNET) INFO LOGS ***"
+echo "sudo tail -n 50 /mnt/hdd/${network}/debug.log"
+sudo tail -n 50 /mnt/hdd/${network}${pathAdd}/debug.log
 echo
 
 echo "*** LND (MAINNET) SYSTEMD STATUS ***"
@@ -118,9 +123,9 @@ if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ] || [ "${lnd}" == "1" ]; t
   echo "sudo journalctl -u lnd -b --no-pager -n12"
   sudo journalctl -u lnd -b --no-pager -n12
   echo
-  echo "*** LAST 30 LND (MAINNET) INFO LOGS ***"
-  echo "sudo tail -n 30 /mnt/hdd/lnd/logs/${network}/mainnet/lnd.log"
-  sudo tail -n 30 /mnt/hdd/lnd/logs/${network}/mainnet/lnd.log
+  echo "*** LAST LND (MAINNET) INFO LOGS ***"
+  echo "sudo tail -n 50 /mnt/hdd/lnd/logs/${network}/mainnet/lnd.log"
+  sudo tail -n 50 /mnt/hdd/lnd/logs/${network}/mainnet/lnd.log
 else
   echo "- OFF by config -"
 fi
@@ -130,10 +135,10 @@ echo "*** CORE LIGHTNING (MAINNET) SYSTEMD STATUS ***"
 if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ] || [ "${cl}" == "1" ]; then
   sudo systemctl status lightningd -n2 --no-pager
   echo
-  echo "*** LAST 30 CORE LIGHTNING (MAINNET) INFO LOGS ***"
+  echo "*** LAST CORE LIGHTNING (MAINNET) INFO LOGS ***"
   echo "For details also use command --> cllog"
-  echo "sudo tail -n 30 /home/bitcoin/.lightning/${network}/cl.log"
-  sudo tail -n 30 /home/bitcoin/.lightning/${network}/cl.log
+  echo "sudo tail -n 50 /home/bitcoin/.lightning/${network}/cl.log"
+  sudo tail -n 50 /home/bitcoin/.lightning/${network}/cl.log
 else
   echo "- not activated -"
 fi
@@ -238,10 +243,11 @@ echo "--> CHECK CONFIG: sudo nginx -t"
 sudo nginx -t 2>&1
 echo
 
+echo "*** BLITZAPI STATUS ***"
+/home/admin/config.scripts/blitz.web.api.sh info
 if [ $(sudo systemctl status blitzapi 2>/dev/null | grep -c "blitzapi.service") -lt 1 ]; then
   echo "- BLITZAPI is not running"
 else
-  echo "*** BLITZAPI SYSTEMD STATUS ***"
   sudo systemctl status blitzapi -n2 --no-pager
   echo
 
@@ -250,6 +256,10 @@ else
   sudo journalctl -u blitzapi -b --no-pager -n20
   echo
 fi
+
+echo "*** BLITZ WebUI STATUS ***"
+/home/admin/config.scripts/blitz.web.ui.sh info
+echo
 
 if [ "${touchscreen}" == "" ] || [ "${touchscreen}" == "0" ] || [ "${touchscreen}" == "off" ]; then
   echo "- TOUCHSCREEN is OFF by config"
@@ -441,6 +451,11 @@ echo "*** NETWORK ***"
 sudo /home/admin/config.scripts/internet.sh status | grep 'network_device\|localip\|dhcp'
 echo
 
+echo
+echo "*** ZRAM ***"
+sudo /home/admin/config.scripts/blitz.zram.sh status
+echo
+
 echo "*** HARDWARE TEST RESULTS ***"
 source <(/home/admin/_cache.sh get system_count_undervoltage)
 showImproveInfo=0
@@ -456,6 +471,10 @@ echo "*** SYSTEM CACHE STATUS ***"
 /home/admin/_cache.sh "export" system_
 /home/admin/_cache.sh "export" ln_default | grep -v "ln_default_address"
 /home/admin/_cache.sh "export" btc_default | grep -v "btc_default_address"
+
+echo "*** POSSIBLE ERROR REPORTS ***"
+ls -1  /home/admin/error* 2>/dev/null
+echo
 
 echo
 echo "*** OPTION: SHARE THIS DEBUG OUTPUT ***"

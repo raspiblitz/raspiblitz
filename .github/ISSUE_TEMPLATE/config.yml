@@ -1,0 +1,7 @@
+contact_links:
+  - name: Need help? Ask a question in the Q&A section
+    url: https://github.com/raspiblitz/raspiblitz/discussions/categories/q-a
+    about: Community support for questions
+  - name: Have an idea for a new app in the RaspiBlitz? Make a suggestion in the app ideas section
+    url: https://github.com/raspiblitz/raspiblitz/discussions/categories/feature-app-ideas
+    about: Feature and app ideas

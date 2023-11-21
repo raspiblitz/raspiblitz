@@ -92,6 +92,9 @@ if [ "$1" = "reset" ]; then
     if [ "${keepOldMacaroons}" != "1" ]; then
       sudo rm /home/bitcoin/.lnd/data/chain/"${network}"/"${chain}"net/macaroons.db
     fi
+
+    echo "# delete also lit macaroons if present"
+    sudo rm /mnt/hdd/app-data/.lit/mainnet/lit.macaroon 2>/dev/null
   fi
 
   if [ ${resetTLS} -eq 1 ]; then
@@ -105,11 +108,11 @@ if [ "$1" = "reset" ]; then
   echo "# restarting LND ... wait 10 secs"
   # shellcheck disable=SC2154
   sudo systemctl start "${netprefix}lnd"
-  sleep 10
+  sleep 20
 
   # unlock wallet after restart
   sudo /home/admin/config.scripts/lnd.unlock.sh "${CHAIN}"
-  sleep 10
+  sleep 15
 
   if [ ${resetMacaroons} -eq 1 ]; then
     echo "# copy new macaroons to central app-data directory and ensure unix ownerships and permissions"
@@ -120,6 +123,9 @@ if [ "$1" = "reset" ]; then
   fi
 
   /home/admin/config.scripts/lnd.credentials.sh sync "${CHAIN}"
+
+  echo "# restart also litd if present (reboot advised)"
+  sudo systemctl restart litd 2>/dev/null
 
 ###########################
 # SYNC

@@ -57,7 +57,7 @@ Variation: If you don't have a big bugdet to prefinance the parts or people have
 
 _Estimated Duration: 4–6 Hours_
 
-This scenario is advised only for small groups, or you'll need to bring multiple blockchain copy stations - see details on "Prepare HDDs with Blockchain Data". Otherwise it needs the least prepartion time and prefinance and can be announced to participants about 5 days beforehand, so that they have time to order all the parts online.
+This scenario is advised only for small groups, or you'll need to bring multiple blockchain copy stations - see details on "Prepare HDDs with Blockchain Data". Otherwise it needs the least preparation time and prefinance and can be announced to participants about 5 days beforehand, so that they have time to order all the parts online.
 
 
 - [Instruct Participants to bring Hardware](WORKSHOP.md#instruct-participants-to-bring-hardware)
@@ -82,7 +82,7 @@ Make sure you have the following hardware and infrastructure ready for the works
 - Extra WLAN Router (if you are not sure if LAN & WLAN is not on the same network at location)
 - One or two USB SD card adapters
 - One or two USB-C to USB-A adapters
-- Some Tape, Markers & Pens always come in handy (also for participants to wirte down seeds & passwords)
+- Some Tape, Markers & Pens always come in handy (also for participants to write down seeds & passwords)
 - Potentially some bitcoin funds (if people dont have their own to start funding channels)
 
 Participants need to bring at least their laptops.
@@ -191,7 +191,7 @@ Once you have that "template" you can make an image from that and write that ima
 In the RaspiBlitz GitHub repo and also on every RaspiBlitz (since v1.3) you can find the script:
 `/home/admin/XXcopyStation.sh`
 
-This can be used to prepare and keep multiple HDDs in snyc with blockchain data in preparation of a workshop. You can start it directly on a RaspiBlitz and turn it into "Copy Station Mode" by executing on the command line:
+This can be used to prepare and keep multiple HDDs in sync with blockchain data in preparation of a workshop. You can start it directly on a RaspiBlitz and turn it into "Copy Station Mode" by executing on the command line:
 
 `sudo /home/admin/XXcopyStation.sh`
 

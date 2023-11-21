@@ -1,9 +1,7 @@
 #!/bin/bash
 
 # https://github.com/lnproxy/lnproxy/commits/main
-LNPROXYVERSION="423723b58cc45daa2fdf6c8b22537d560aca4d7a"
-# https://github.com/lnproxy/lnproxy-webui/commits/main
-WEBUIVERSION=24d291c884a0b60126c1915301f29c893900a155
+LNPROXYVERSION="c1031bbe507623f8f196ff83aa5ea504cca05143"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -20,33 +18,21 @@ localip=$(hostname -I | awk '{print $1}')
 if [ "$1" = "menu" ]; then
 
   if systemctl is-active --quiet lnproxy; then
-    # get network info
     torAddress=$(sudo cat /mnt/hdd/tor/lnproxy/hostname 2>/dev/null)
-    fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
+    sudo /home/admin/config.scripts/blitz.display.sh qr "${torAddress}"
+    whiptail --title " lnproxy server API" --msgbox "\
+Use your hidden service as a relay on the lnproxy Tor website:
+dx7pn6ehykq6cadce4bjbxn5tf64z7e3fufpxgxce7n4f5eja476cpyd.onion
+Your address to be used as the relay:
+http://${torAddress}/spec
 
-    if [ "${runBehindTor}" = "on" ] && [ -n "${torAddress}" ]; then
-      # Info with Tor
-      sudo /home/admin/config.scripts/blitz.display.sh qr "${torAddress}"
-      whiptail --title " lnproxy-webui and API" --msgbox "\
-Open in your local web browser:
-http://${localip}:4748
-https://${localip}:4749 with Fingerprint:
-${fingerprint}\n
-Hidden Service address for Tor Browser (see LCD for QR):
-${torAddress}\n
-To use the API:
-curl -k https://${localip}:4749/api/{invoice}?routing_msat={budget}\n
+To use the API from another computer on your LAN:
+curl -k https://${localip}:4748/api/{invoice}?routing_msat={budget}
+
 The Tor Hidden Service address to share for using the API:
 ${torAddress}/api
-" 20 70
-      sudo /home/admin/config.scripts/blitz.display.sh hide
-    else
-      # Info without Tor
-      whiptail --title " lnproxy-webui " --msgbox "Open in your local web browser:
-http://${localip}:4748\n
-Activate Tor to access the web interface from outside your local network.
-" 15 57
-    fi
+" 16 78
+    sudo /home/admin/config.scripts/blitz.display.sh hide
     echo "# please wait ..."
   else
     echo "# *** LNPROXY IS NOT INSTALLED ***"
@@ -68,7 +54,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   /home/admin/config.scripts/bonus.go.sh on
 
   # create lnproxy user
-  sudo adduser --disabled-password --gecos "" lnproxy
+  sudo adduser --system --group --home /home/lnproxy lnproxy
 
   # create macaroon
   cd /home/bitcoin || exit 1
@@ -138,53 +124,6 @@ EOF
     echo "# OK - the lnproxy.service is enabled, to start manually use: sudo systemctl start lnproxy"
   fi
 
-  # lnproxy-webui
-  cd /home/lnproxy/ || exit 1
-  sudo -u lnproxy git clone https://github.com/lnproxy/lnproxy-webui
-  cd /home/lnproxy/lnproxy-webui || exit 1
-  sudo -u lnproxy git reset --hard ${WEBUIVERSION} || exit 1
-
-  # build
-  sudo -u lnproxy /usr/local/go/bin/go get lnproxy-webui
-  sudo -u lnproxy /usr/local/go/bin/go build
-
-  # create systemd service
-  cat <<EOF | sudo tee /etc/systemd/system/lnproxy-webui.service
-[Unit]
-Description=lnproxy-webui
-After=lnproxy.service
-
-[Service]
-WorkingDirectory=/home/lnproxy/lnproxy-webui
-User=lnproxy
-Group=lnproxy
-Type=simple
-ExecStart=/home/lnproxy/lnproxy-webui/lnproxy-webui
-Restart=on-failure
-RestartSec=30
-TimeoutSec=120
-
-# Hardening measures
-PrivateTmp=true
-ProtectSystem=full
-NoNewPrivileges=true
-PrivateDevices=true
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-  # enable and start service
-  sudo systemctl enable lnproxy-webui
-
-  source <(/home/admin/_cache.sh get state)
-  if [ "${state}" == "ready" ]; then
-    echo "# OK - the lnproxy-webui.service is enabled, system is on ready so starting service"
-    sudo systemctl start lnproxy-webui
-  else
-    echo "# OK - the lnproxy-webui.service is enabled, to start manually use: sudo systemctl start lnproxy-webui"
-  fi
-
   ##################
   # NGINX
   ##################
@@ -201,25 +140,28 @@ EOF
   sudo ln -sf /etc/nginx/sites-available/lnproxy_ssl.conf /etc/nginx/sites-enabled/
   sudo ln -sf /etc/nginx/sites-available/lnproxy_tor.conf /etc/nginx/sites-enabled/
   sudo ln -sf /etc/nginx/sites-available/lnproxy_tor_ssl.conf /etc/nginx/sites-enabled/
-  sudo nginx -t
+  sudo nginx -t || exit 1
   sudo systemctl reload nginx
 
-  sudo ufw allow 4748 comment lnproxy-webui-HTTP
-  sudo ufw allow 4749 comment lnproxy-HTTPS
+  sudo ufw allow 4748 comment lnproxy-HTTPS
 
-  /home/admin/config.scripts/tor.onion-service.sh lnproxy 80 4750 443 4751
+  /home/admin/config.scripts/tor.onion-service.sh lnproxy 80 4749 443 4750
 
   # setting value in raspi blitz config
   /home/admin/config.scripts/blitz.conf.sh set lnproxy "on"
 
-  echo "# API:"
-  echo "curl http://127.0.0.1:4747/{your_invoice}?routing_msat={routing_budget}"
-  echo "curl -k https://${localip}:4749/api/{your_invoice}?routing_msat={routing_budget}"
-  echo "# WebUI:"
-  echo "http://${localip}:4748"
-  echo "https://${localip}:4749"
+  torAddress=$(sudo cat /mnt/hdd/tor/lnproxy/hostname 2>/dev/null)
+  echo
+  echo "# Use your hidden service as a relay on the lnproxy Tor website:"
+  echo "dx7pn6ehykq6cadce4bjbxn5tf64z7e3fufpxgxce7n4f5eja476cpyd.onion"
+  echo "# Your address to be used as the relay:"
+  echo "http://${torAddress}/spec"
+  echo "# To use the API from another computer on your LAN:"
+  echo "curl -k https://${localip}:4748/api/{invoice}?routing_msat={budget}\n"
+  echo "# The Tor Hidden Service address to share for using the API:"
+  echo "${torAddress}/api"
   echo "# More info at:"
-  echo "https://github.com/lnproxy/lnproxy"
+  echo "https://github.com/lnproxy"
 
   exit 0
 fi
@@ -233,15 +175,22 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # remove systemd services
   sudo systemctl disable --now lnproxy
   sudo rm -f /etc/systemd/system/lnproxy.service
-  sudo systemctl disable --now lnproxy-webui
-  sudo rm -f /etc/systemd/system/lnproxy-webui.service
 
   # remove Tor service
   /home/admin/config.scripts/tor.onion-service.sh off lnproxy
 
+  sudo rm /etc/nginx/sites-available/lnproxy_ssl.conf
+  sudo rm /etc/nginx/sites-available/lnproxy_tor.conf
+  sudo rm /etc/nginx/sites-available/lnproxy_tor_ssl.conf
+  sudo rm /etc/nginx/sites-enabled/lnproxy_ssl.conf
+  sudo rm /etc/nginx/sites-enabled/lnproxy_tor.conf
+  sudo rm /etc/nginx/sites-enabled/lnproxy_tor_ssl.conf
+
+  sudo nginx -t || exit 1
+  sudo systemctl reload nginx
+
   # close ports on firewall
   sudo ufw delete allow 4748
-  sudo ufw delete allow 4749
 
   # setting value in raspi blitz config
   /home/admin/config.scripts/blitz.conf.sh set lnproxy "off"

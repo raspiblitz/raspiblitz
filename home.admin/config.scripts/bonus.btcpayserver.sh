@@ -3,14 +3,27 @@
 # Based on: https://gist.github.com/normandmickey/3f10fc077d15345fb469034e3697d0d0
 
 # https://github.com/dgarage/NBXplorer/tags
-NBXplorerVersion="v2.3.62"
+NBXplorerVersion="v2.3.67"
 # https://github.com/btcpayserver/btcpayserver/releases
-BTCPayVersion="v1.8.2"
+BTCPayVersion="v1.11.7"
+
+# check who signed the release (person that published release)
+PGPsigner="nicolasdorier"
+PGPpubkeyLink="https://keybase.io/nicolasdorier/pgp_keys.asc"
+PGPpubkeyFingerprint="AB4CFA9895ACA0DBE27F6B346618763EF09186FE"
+# ---
+#PGPsigner="Kukks"
+#PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
+#PGPpubkeyFingerprint="8E5530D9D1C93097"
+# ---
+#PGPsigner="web-flow"
+#PGPpubkeyLink="https://github.com/web-flow.gpg"
+#PGPpubkeyFingerprint="4AEE18F83AFDEB23"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "Config script to switch BTCPay Server on or off"
-  echo "Usage:"
+  echo "bonus.btcpayserver.sh menu"
   echo "bonus.btcpayserver.sh [install|uninstall]"
   echo "bonus.btcpayserver.sh [on|off|menu|write-tls-macaroon|cln-lightning-rpc-access]"
   echo "installs BTCPayServer $BTCPayVersion with NBXplorer $NBXplorerVersion"
@@ -32,11 +45,11 @@ function NBXplorerConfig() {
   else
     echo "# Generate the database for nbxplorer"
     sudo -u postgres psql -c "CREATE DATABASE nbxplorermainnet TEMPLATE template0 LC_CTYPE 'C' LC_COLLATE 'C' ENCODING 'UTF8';"
-    sudo -u postgres psql -c "create user nbxplorer with encrypted password 'raspiblitz';"
-    sudo -u postgres psql -c "grant all privileges on database nbxplorermainnet to nbxplorer;"
+    sudo -u postgres psql -c "CREATE USER nbxplorer WITH ENCRYPTED PASSWORD 'raspiblitz';"
+    sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE nbxplorermainnet TO nbxplorer;"
+    # for migrations
+    sudo -u postgres psql -d nbxplorermainnet -c "GRANT ALL PRIVILEGES ON SCHEMA public TO nbxplorer;"
   fi
-  echo "# List databases with: sudo -u postgres psql -c '\l'"
-  sudo -u postgres psql -c '\l'
 
   # https://docs.btcpayserver.org/Deployment/ManualDeploymentExtended/#4-create-a-configuration-file
   echo
@@ -58,25 +71,21 @@ nomigrateevts=1
 function BtcPayConfig() {
   # set thumbprint
   FINGERPRINT=$(openssl x509 -noout -fingerprint -sha256 -inform pem -in /home/btcpay/.lnd/tls.cert | cut -d"=" -f2)
-  if sudo ls /mnt/hdd/app-data/.btcpayserver/Main/sqllite.db 1>/dev/null 2>&1; then
-    echo "# sqlite database exists"
-    databaseOption="# keep using sqlite as /mnt/hdd/app-data/.btcpayserver/Main/sqllite.db exists (configured in the btcpayserver.service)"
+  # set up postgres
+  if sudo -u postgres psql -c '\l' | grep btcpaymainnet; then
+    echo "# btcpaymainnet database already exists"
   else
-    echo "# sqlite database does not exist, using postgresql"
-    databaseOption="postgres=User ID=btcpay;Host=localhost;Port=5432;Application Name=btcpay;MaxPoolSize=20;Database=btcpaymainnet;Password='raspiblitz';"
-    if sudo -u postgres psql -c '\l' | grep btcpaymainnet; then
-      echo "# btcpaymainnet database already exists"
-    else
-      echo "# Generate the database for btcpay"
-      sudo -u postgres psql -c "CREATE DATABASE btcpaymainnet TEMPLATE template0 LC_CTYPE 'C' LC_COLLATE 'C' ENCODING 'UTF8';"
-      sudo -u postgres psql -c "create user btcpay with encrypted password 'raspiblitz';"
-      sudo -u postgres psql -c "grant all privileges on database btcpaymainnet to btcpay;"
-    fi
-    echo "# List databases with: sudo -u postgres psql -c '\l'"
-    sudo -u postgres psql -c '\l'
+    echo "# Generate the database for btcpay"
+    sudo -u postgres psql -c "CREATE DATABASE btcpaymainnet TEMPLATE template0 LC_CTYPE 'C' LC_COLLATE 'C' ENCODING 'UTF8';"
+    sudo -u postgres psql -c "CREATE USER btcpay WITH ENCRYPTED PASSWORD 'raspiblitz';"
+    sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE btcpaymainnet TO btcpay;"
+    # for migrations
+    sudo -u postgres psql -d btcpaymainnet -c "GRANT ALL PRIVILEGES ON SCHEMA public TO btcpay;"
   fi
+
   echo "# Regenerate the btcpayserver settings (includes the LND TLS thumbprint)"
   # https://docs.btcpayserver.org/Deployment/ManualDeploymentExtended/#3-create-a-configuration-file
+  sudo -u btcpay mkdir -p /home/btcpay/.btcpayserver/Main
   echo "
 ### Global settings ###
 network=mainnet
@@ -85,20 +94,21 @@ network=mainnet
 port=23000
 bind=127.0.0.1
 externalurl=https://$BTCPayDomain
+socksendpoint=127.0.0.1:9050
 
 ### NBXplorer settings ###
 BTC.explorer.url=http://127.0.0.1:24444/
 BTC.lightning=type=lnd-rest;server=https://127.0.0.1:8080/;macaroonfilepath=/home/btcpay/admin.macaroon;certthumbprint=$FINGERPRINT
 
 ### Database ###
-${databaseOption}
+postgres=User ID=btcpay;Host=localhost;Port=5432;Application Name=btcpay;MaxPoolSize=20;Database=btcpaymainnet;Password='raspiblitz';
 explorer.postgres=User ID=nbxplorer;Host=localhost;Port=5432;Application Name=nbxplorer;MaxPoolSize=20;Database=nbxplorermainnet;Password='raspiblitz';
 " | sudo -u btcpay tee /home/btcpay/.btcpayserver/Main/settings.config
 }
 
 function BtcPayService() {
   if sudo ls /mnt/hdd/app-data/.btcpayserver/Main/sqllite.db 1>/dev/null 2>&1; then
-    echo "# sqlite database exists"
+    echo "# sqlite database exists - will be ignored after the migration to postgresql"
     databaseOption=" -- --sqlitefile=sqllite.db"
   else
     echo "# sqlite database does not exist, using postgresql"
@@ -248,7 +258,7 @@ SHA1 ${sslFingerprintIP}"
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
     sudo /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
     text="${text}\n
-TOR Browser Hidden Service address (see the QR onLCD):
+Tor Browser Hidden Service address (see the QR onLCD):
 ${toraddress}"
   fi
 
@@ -350,7 +360,7 @@ if [ "$1" = "install" ]; then
   fi
 
   echo "# create btcpay user"
-  sudo adduser --disabled-password --gecos "" btcpay
+  sudo adduser --system --group --home /home/btcpay btcpay
   cd /home/btcpay || exit 1
 
   echo "# install .NET"
@@ -393,10 +403,10 @@ if [ "$1" = "install" ]; then
   cd NBXplorer || exit 1
   sudo -u btcpay git reset --hard $NBXplorerVersion
   # PGP verify
-  PGPsigner="nicolasdorier"
-  PGPpubkeyLink="https://keybase.io/nicolasdorier/pgp_keys.asc"
-  PGPpubkeyFingerprint="AB4CFA9895ACA0DBE27F6B346618763EF09186FE"
-  sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
+  NBXPGPsigner="nicolasdorier"
+  NBXPGPpubkeyLink="https://keybase.io/nicolasdorier/pgp_keys.asc"
+  NBXPGPpubkeyFingerprint="AB4CFA9895ACA0DBE27F6B346618763EF09186FE"
+  sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh "${NBXPGPsigner}" "${NBXPGPpubkeyLink}" "${NBXPGPpubkeyFingerprint}" || exit 1
   echo "# Build NBXplorer $NBXplorerVersion"
   # from the build.sh with path
   sudo -u btcpay /home/btcpay/dotnet/dotnet build -c Release NBXplorer/NBXplorer.csproj || exit 1
@@ -409,12 +419,8 @@ if [ "$1" = "install" ]; then
   cd btcpayserver || exit 1
   sudo -u btcpay git reset --hard $BTCPayVersion
   #sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh "web-flow" "https://github.com/web-flow.gpg" "4AEE18F83AFDEB23" || exit 1
-  PGPsigner="nicolasdorier"
-  PGPpubkeyLink="https://keybase.io/nicolasdorier/pgp_keys.asc"
-  PGPpubkeyFingerprint="AB4CFA9895ACA0DBE27F6B346618763EF09186FE"
-  #PGPsigner="Kukks"
-  #PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
-  #PGPpubkeyFingerprint="8E5530D9D1C93097"
+
+  echo "# verify signature of ${PGPsigner}"
   sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
 
   echo "# Build BTCPayServer $BTCPayVersion"
@@ -438,13 +444,15 @@ if [ "$1" = "uninstall" ]; then
   fi
 
   # clear dotnet cache
-  /home/btcpay/dotnet/dotnet nuget locals all --clear
+  /home/btcpay/dotnet/dotnet nuget locals all --clear 2>/dev/null
 
   # remove dotnet
-  sudo rm -rf /usr/share/dotnet
+  sudo rm -rf /usr/share/dotnet 2>/dev/null
 
   # nuke user
   sudo userdel -rf btcpay 2>/dev/null
+
+  echo "# uninstall done"
 
   exit 0
 fi
@@ -619,7 +627,6 @@ WantedBy=multi-user.target
     echo "# Because the system is not 'ready' the service 'btcpayserver' will not be started at this point .. it is enabled and will start on next reboot"
   fi
 
-  sudo -u btcpay mkdir -p /home/btcpay/.btcpayserver/Main/
   if [ "${lnd}" = on ]; then
     /home/admin/config.scripts/bonus.btcpayserver.sh write-tls-macaroon
   fi

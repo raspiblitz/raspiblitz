@@ -371,8 +371,8 @@ if [ "$1" = "status" ]; then
                 lndVersion=$(grep "lightninglabs/lnd" /mnt/storage/umbrel/docker-compose.yml 2>/dev/null | sed 's/.*lnd://' | sed 's/@.*//')
               fi
               echo "hddVersionBTC='${btcVersion}'"
-              echo "hddVersionLND='${clnVersion}'"
-              echo "hddVersionCLN='${lndVersion}'"
+              echo "hddVersionCLN='${clnVersion}'"
+              echo "hddVersionLND='${lndVersion}'"
             elif [ ${isMyNodeHDD} -gt 0 ]; then
               hddGotMigrationData="mynode"
             elif [ ${isCitadelHDD} -gt 0 ]; then
@@ -717,6 +717,11 @@ if [ "$1" = "format" ]; then
 
   # formatting old: EXT4
   if [ "$2" = "ext4" ]; then
+     if [ $(echo "${hdd}" | grep -c "nvme")  = 0 ]; then
+       nvp=""
+     else
+       nvp="p"
+     fi
      # prepare temp mount point
      mkdir -p /tmp/ext4 1>/dev/null
      if [ $ext4IsPartition -eq 0 ]; then
@@ -733,7 +738,7 @@ if [ "$1" = "format" ]; then
           >&2 echo "# waiting until the partition gets available"
           sleep 2
           sync
-          loopdone=$(lsblk -o NAME | grep -c ${hdd}1)
+          loopdone=$(lsblk -o NAME | grep -c ${hdd}${nvp}1)
           loopcount=$(($loopcount +1))
           if [ ${loopcount} -gt 10 ]; then
             >&2 echo "# partition failed"
@@ -754,7 +759,7 @@ if [ "$1" = "format" ]; then
      fi
      >&2 echo "# Formatting"
      if [ $ext4IsPartition -eq 0 ]; then
-        mkfs.ext4 -F -L BLOCKCHAIN /dev/${hdd}1 1>/dev/null
+        mkfs.ext4 -F -L BLOCKCHAIN /dev/${hdd}${nvp}1 1>/dev/null
      else
         mkfs.ext4 -F -L BLOCKCHAIN /dev/${hdd} 1>/dev/null
      fi
@@ -1577,9 +1582,9 @@ if [ "$1" = "swap" ]; then
       sed -i "s/^CONF_SWAPFILE=.*/CONF_SWAPFILE=\/mnt\/hdd\/swapfile/g" /etc/dphys-swapfile  
     fi
     sed -i "s/^CONF_SWAPSIZE=/#CONF_SWAPSIZE=/g" /etc/dphys-swapfile 
-    sed -i "s/^#CONF_MAXSWAP=.*/CONF_MAXSWAP=3072/g" /etc/dphys-swapfile
+    sed -i "s/^#CONF_MAXSWAP=.*/CONF_MAXSWAP=10240/g" /etc/dphys-swapfile
     >&2 echo "# Creating SWAP file .."
-    dd if=/dev/zero of=$externalSwapPath count=3072 bs=1MiB 1>/dev/null
+    dd if=/dev/zero of=$externalSwapPath count=10240 bs=1MiB 1>/dev/null
     chmod 0600 $externalSwapPath 1>/dev/null
     >&2 echo "# Activating new SWAP"
     mkswap $externalSwapPath

@@ -39,7 +39,7 @@ Have a look at the [Mini-Tutorial](tutorial.md)
 ## Release workflow
 
 * `make build-ui` - in case there were any changes to the *.ui or *.qrc files
-* make sure you have all changes added and commited (consider re-basing)
+* make sure you have all changes added and committed (consider re-basing)
 * update the version in `blitztui/version.py`
 * update the `CHANGELOG.md` file (reflect the new version!)
 * `git add CHANGELOG.md blitztui/version.py`

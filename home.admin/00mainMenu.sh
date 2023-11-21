@@ -89,12 +89,6 @@ fi
 if [ "${lndg}" == "on" ]; then
   OPTIONS+=(LNDG "LNDg (auto-rebalance, auto-fees)")
 fi
-if [ "${sparko}" == "on" ]; then
-  OPTIONS+=(SPARKO "Sparko Webwallet")
-fi
-if [ "${spark}" == "on" ]; then
-  OPTIONS+=(SPARK "Spark Wallet")
-fi
 if [ "${ElectRS}" == "on" ]; then
   OPTIONS+=(ELECTRS "Electrum Rust Server")
 fi
@@ -132,9 +126,9 @@ fi
 if [ "${bos}" == "on" ]; then
   OPTIONS+=(BOS "Balance of Satoshis")
 fi
-if [ "${lnproxy}" == "on" ]; then
-  OPTIONS+=(LNPROXY "lnproxy server")
-fi
+#if [ "${lnproxy}" == "on" ]; then
+#  OPTIONS+=(LNPROXY "lnproxy server")
+#fi
 if [ "${pyblock}" == "on" ]; then
   OPTIONS+=(PYBLOCK "PyBlock")
 fi
@@ -278,12 +272,6 @@ case $CHOICE in
         LNDG)
             /home/admin/config.scripts/bonus.lndg.sh menu
             ;;
-        SPARKO)
-            /home/admin/config.scripts/cl-plugin.sparko.sh menu mainnet
-            ;;
-        SPARK)
-            /home/admin/config.scripts/cl.spark.sh menu mainnet
-            ;;
         LNBITS)
             /home/admin/config.scripts/bonus.lnbits.sh menu
             ;;
@@ -292,9 +280,6 @@ case $CHOICE in
             ;;
         LIGHTNINGTIPBOT)
             /home/admin/config.scripts/bonus.lightningtipbot.sh menu
-            ;;
-        LOOP)
-            /home/admin/config.scripts/bonus.loop.sh menu
             ;;
         MEMPOOL)
             /home/admin/config.scripts/bonus.mempool.sh menu
@@ -307,9 +292,6 @@ case $CHOICE in
             ;;
         JAM)
             /home/admin/config.scripts/bonus.jam.sh menu
-            ;;
-        FARADAY)
-            sudo /home/admin/config.scripts/bonus.faraday.sh menu
             ;;
         BOS)
             sudo /home/admin/config.scripts/bonus.bos.sh menu
@@ -328,9 +310,6 @@ case $CHOICE in
             ;;
         ZEROTIER)
             sudo /home/admin/config.scripts/bonus.zerotier.sh menu
-            ;;
-        POOL)
-            sudo /home/admin/config.scripts/bonus.pool.sh menu
             ;;
         SPHINX)
             sudo /home/admin/config.scripts/bonus.sphinxrelay.sh menu

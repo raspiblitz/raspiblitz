@@ -2,7 +2,7 @@
 # https://lightning.readthedocs.io/
 
 # https://github.com/ElementsProject/lightning/releases
-CLVERSION=v23.02.2
+CLVERSION="v23.08.1"
 
 # install the latest master by using the last commit id
 # https://github.com/ElementsProject/lightning/commit/master
@@ -58,7 +58,7 @@ function installDependencies() {
 function buildAndInstallCLbinaries() {
   echo "- Configuring EXPERIMENTAL_FEATURES enabled"
   echo
-  sudo -u bitcoin ./configure --enable-experimental-features
+  sudo -u bitcoin ./configure
   echo
   echo "- Building Core lightning from source"
   echo
@@ -68,6 +68,12 @@ function buildAndInstallCLbinaries() {
   sudo -u bitcoin git reset --hard
   echo "- Install to /usr/local/bin/"
   sudo make install || exit 1
+
+  # make sure default virtaulenv is used
+  sudo apt-get remove -y python3-virtualenv 2>/dev/null
+  sudo pip uninstall -y virtualenv 2>/dev/null
+  sudo apt-get install -y python3-virtualenv
+
 }
 
 echo "# Running: 'cl.install.sh $*'"
@@ -234,6 +240,7 @@ if [ "$1" = on ] || [ "$1" = update ] || [ "$1" = testPR ]; then
     echo "# Building from source Core Lightning $currentCLversion"
 
     buildAndInstallCLbinaries
+
   fi
 
   ##########
@@ -315,8 +322,8 @@ always-use-proxy=true
   echo "\
 /home/bitcoin/.lightning/${CLNETWORK}/cl.log
 {
-        rotate 5
-        daily
+        rotate 4
+        size 100M
         copytruncate
         missingok
         olddir /home/bitcoin/.lightning/${CLNETWORK}/cl.log_old
@@ -360,9 +367,6 @@ alias ${netprefix}clconf=\"sudo nano ${CLCONF}\"
   # setting values in the raspiblitz.conf
   /home/admin/config.scripts/blitz.conf.sh set ${netprefix}cl on
   # blitz.conf.sh needs sudo access - cannot be run in cl.check.sh
-  if [ ! -f /home/bitcoin/${netprefix}cl-plugins-enabled/sparko ]; then
-    /home/admin/config.scripts/blitz.conf.sh set ${netprefix}sparko "off"
-  fi
   if [ ! -f /home/bitcoin/cl-plugins-enabled/c-lightning-http-plugin ]; then
     /home/admin/config.scripts/blitz.conf.sh set clHTTPplugin "off"
   fi

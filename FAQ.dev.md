@@ -2,9 +2,13 @@
 
 ### What is the process of creating a new SD card image release?
 
-Work notes for the process of producing a new SD card image release:
+Checklist before making a SD card image release:
 
-* Make sure you have the "Versioning" final in your RaspiBlitz Source Code
+* "Versioning" number is upfates in your RaspiBlitz Source Code (_version.info)
+* Latest code is merged in release branch
+
+Creating the base minimal sd card:
+
 * Start [`Ubuntu LIVE`](http://releases.ubuntu.com/18.04.3/ubuntu-18.04.3-desktop-amd64.iso) from USB stick
 * Under Settings: best to set correct keyboard language & power settings to prevent monitor turn off
 * Connect to a secure WiFi (hardware switch on) or LAN
@@ -28,12 +32,14 @@ Work notes for the process of producing a new SD card image release:
 * In terminal `ssh pi@[IP-OF-RASPIBLITZ]`
 * Password is `raspberry`
 * Run the following command BUT REPLACE `[BRANCH]` with the branch-string of your latest version
-* For FATPACK: `wget --no-cache https://raw.githubusercontent.com/rootzoll/raspiblitz/[BRANCH]/build_sdcard.sh && sudo bash build_sdcard.sh -u rootzoll -b [BRANCH]`
-* For MINIMAL: `wget --no-cache https://raw.githubusercontent.com/rootzoll/raspiblitz/[BRANCH]/build_sdcard.sh && sudo bash build_sdcard.sh -u rootzoll -b [BRANCH] -f 0 -d headless`
-* Monitor/Check outputs for warnings/errors - install LCD
+* To run the minimal pack: `wget --no-cache https://raw.githubusercontent.com/raspiblitz/raspiblitz/[BRANCH]/build_sdcard.sh && sudo bash build_sdcard.sh -u raspiblitz -b [BRANCH] -f 0 -d headless`
+* Monitor/Check outputs for warnings/errors
 * Login new with `ssh admin@[IP-OF-RASPIBLITZ]` (pw: raspiblitz) and run `release`
 * Disconnect WiFi/LAN on build laptop (hardware switch off) and shutdown
 * Remove `Ubuntu LIVE` USB stick and cut power from the RaspberryPi
+
+Creating the image of sd card:
+
 * Connect USB stick with latest `TAILS` (make it stay offline)
 * Boot Tails with extra setting of Admin-Passwort and remember (use later for sudo)
 * Menu > Systemtools > Settings > Energy -> best to set monitor to never turn off
@@ -44,22 +50,45 @@ Work notes for the process of producing a new SD card image release:
 * Take the SD card from the RaspberryPi and connect with an external SD card reader to the laptop
 * Click on `boot` volume once in the file manger
 * Connect the NTFS USB stick, open in file manager and delete old files
-
-* if not: review changes in latest pishrink script
-* To make a raw image from sd card - first way (terminal): 
-  * Open Terminal and cd into directory of NTFS USB stick under `/media/amnesia`
-  * Run `df` to check on the SD card device name (`boot` - ignore last partition number)
-  * `dd if=/dev/[sdcarddevice] of=./raspiblitz.img`
 * To make a raw image from sd card - second way (UI with progress): 
   * Search "Laufwerke" or "Drives" on Tails Apps
   * Create image named `raspiblitz.img` to USB storage
 * Open Terminal and cd into directory of NTFS USB stick under `/media/amnesia`
 * `shasum -a 256 ./pishrink.sh` should be `e46e1e1e3c6e3555f9fff5435e2305e99b98aaa8dc28db1814cf861fbb472a69`
 * `chmod +x ./pishrink.sh | sudo ./pishrink.sh ./raspiblitz.img`
-* `gzip -c ./raspiblitz.img > ./raspiblitz-vX.X-YEAR-MONTH-DAY.img.gz`
-* Then run `shasum -a 256 *.gz > sha256.txt`
-* Sign with `gpg --output raspiblitz-vX.X-YEAR-MONTH-DAY.img.gz.sig --detach-sign *.gz`
-* Shutdown build computer
+* `gzip -c ./raspiblitz.img > ./raspiblitz-min/fat-vX.X.X-YEAR-MONTH-DAY.img.gz`
+* `shasum -a 256 ./raspiblitz-min/fat-vX.X.X-YEAR-MONTH-DAY.img.gz > ./raspiblitz-min/fat-vX.X.X-YEAR-MONTH-DAY.img.gz.sha`
+* make analog copy/note of checksum 
+* Sign with `gpg --output raspiblitz-min/fat-vX.X.X-YEAR-MONTH-DAY.img.gz.sig --detach-sign raspiblitz-min/fat-vX.X.X-YEAR-MONTH-DAY.img.gz`
+
+Prepare template for subversion update later:
+
+* `mv ./raspiblitz.img ./raspiblitz-min-vX.X.X.img`
+* `shasum -a 256 ./raspiblitz-min-vX.X.img > ./raspiblitz-min-vX.X.X.img.sha`
+* make analog copy/note of checksum
+
+Creating a fatpack sd card from the minimal image:
+
+* Start TAILS live image
+* On NTFS USB Stick (Open in Terminal) check hash of raspiblitz-min-vX.X.X.img wit analog note:
+* `shasum -a 256 ./raspiblitz-min-vX.X.X.img`
+* Right-Click the file and write to a min 32GB sd card
+* On `bootfs` in FileManger (Open in Terminal):
+* `touch stop` & `exit` terminal
+* Shutdown TAILS & eject sd card
+* Bootup UBUNTU LIVE
+* Connect a RaspiBlitz (without HDD) to network, insert sd card and power up
+* Find the IP of the RaspiBlitz (arp -a or check router)
+* In terminal `ssh admin@[IP-OF-RASPIBLITZ]`
+* Update to latest code with `patch code`
+* the following only if its a `fatpack`:
+  * run command `fatpack`
+  * if it reboot, ssh in again & again run command `fatpack`
+  * check that script ended without errors
+* do the creation & signing of the image file like in chapter above
+
+Publishing the images:
+
 * Connect the NTFS USB stick to MacOS (it is just read-only)
 * Run tests on the new image
 * Upload the new image to the Download Server - put sig-file next to it
@@ -100,7 +129,7 @@ The RaspiBlitz is your computer to experiment with. Feel free to add your own sc
 - When a release of a new main-update (see above) comes closer, a new release branch gets created from 'dev' with the first release candidate - the RCs and the final release sd card will be build from this branch.
 - All minor-releases will basically all work with the same 'build_sdcard.sh' script so that the code could be updated by just calling 'patch'. Emergency updates on lnd & bitcoin may break this guideline, but basic structure & packaging should stay mostly consistent over a main-update version.
 - Once a release is ready, that release branch will be set as the "default" branch on GitHub (so its shown as main page)
-- Hot fixes & new features for minor verisons will be created as single branches from the release branch, and once ready will be merged back into that release branch as a Pull Request using 'Squash-Merge' AND then, this 'Squash-Merge' (one single commit) will get cherry-picked into the  'dev' branch ('git cherry-pick COMMITHASH' - may call 'git fetch' & 'git pull' before to make a clean cherry-pick into dev).
+- Hot fixes & new features for minor versions will be created as single branches from the release branch, and once ready will be merged back into that release branch as a Pull Request using 'Squash-Merge' AND then, this 'Squash-Merge' (one single commit) will get cherry-picked into the  'dev' branch ('git cherry-pick COMMITHASH' - may call 'git fetch' & 'git pull' before to make a clean cherry-pick into dev).
 
 ### Can I run RaspiBlitz on other computers than RaspberryPi?
 
@@ -114,7 +143,7 @@ To build a SD card image from another branch than master, you follow the [Build 
 
 For example if you want to make a build from the 'dev' branch you execute the following command:
 
-`wget --no-cache https://raw.githubusercontent.com/rootzoll/raspiblitz/dev/build_sdcard.sh && sudo bash build_sdcard.sh -b dev`
+`wget --no-cache https://raw.githubusercontent.com/raspiblitz/raspiblitz/dev/build_sdcard.sh && sudo bash build_sdcard.sh -b dev`
 
 If you want to see all the optional parameters for building your sd card, just answere `no` on first question and call `sudo bash build_sdcard.sh --help`.
 
@@ -132,7 +161,7 @@ If you are then working in your forked repo and want to update the scripts on yo
 
 ### How can I checkout a new branch from the RaspiBlitz repo to my forked repo?
 
-You need to have your forked repo checked-out on your laptop. There your should see your forked repo as `origin` when you run `git remote -v`. If you don't see an additional `upstream` remote yet, then create it with the following command: `git remote add upstream https://github.com/rootzoll/raspiblitz.git`.
+You need to have your forked repo checked-out on your laptop. There your should see your forked repo as `origin` when you run `git remote -v`. If you don't see an additional `upstream` remote yet, then create it with the following command: `git remote add upstream https://github.com/raspiblitz/raspiblitz.git`.
 
 So, first checkout the new branch named `BRANCH` from the original RaspBlitz repo to your local computer with: `git fetch upstream` and then `git checkout -b BRANCH upstream/BRANCH`.
 
@@ -142,9 +171,9 @@ Once the branch is available and synced between the RaspiBlitz GitHub repo, your
 
 ### How can I sync a branch of my forked GitHub with my local RaspiBlitz?
 
-Since v1.5 of RaspiBlitz there has been an easy way thru the SSH menus: Under `MAIN MENU > UPDATE > PATCH` you have the option to change the GitHub repository and and branch to sync with. You change the GitHub Reposity by setting the GitHub username where you forked the Repo.
+Since v1.5 of RaspiBlitz there has been an easy way thru the SSH menus: Under `MAIN MENU > UPDATE > PATCH` you have the option to change the GitHub repository and and branch to sync with. You change the GitHub Repository by setting the GitHub username where you forked the Repo.
 
-So for example: If you forked the RaspiBlitz project (rootzoll/raspiblitz) on GitHub and your GitHub project page is now called: https://github.com/raumi75/raspiblitz ... then just change the repo to sync/patch with to your username `raumi75`.
+So for example: If you forked the RaspiBlitz project (raspiblitz/raspiblitz) on GitHub and your GitHub project page is now called: https://github.com/raumi75/raspiblitz ... then just change the repo to sync/patch with to your username `raumi75`.
 
 Now you can use the `Patch/Sync RaspiBlitz with GitHub Repo` to easily keep your RaspiBlitz in sync with your forked repository and develop your own customizations and features.
 
@@ -166,7 +195,7 @@ So your workflow can go like this: You write code on your local computer. Commit
 
 ### How to add an app to the RaspiBlitz?
 
-To add your app you can fork the raspiblitz repo, follow the `/home.admin/config.scripts/bonus.template.sh` script [see code](https://github.com/rootzoll/raspiblitz/blob/dev/home.admin/config.scripts/bonus.template.sh), copy/adapt it, test it on your RaspiBlitz and make a PR back to the main repo.
+To add your app you can fork the raspiblitz repo, follow the `/home.admin/config.scripts/bonus.template.sh` script [see code](https://github.com/raspiblitz/raspiblitz/blob/dev/home.admin/config.scripts/bonus.template.sh), copy/adapt it, test it on your RaspiBlitz and make a PR back to the main repo.
 
 ### How contribute a feature/change from my forked branch back to the RaspiBlitz repo?
 
@@ -196,13 +225,13 @@ To change back to the code:
 
 ### How can I push changes to an existing Pull Request?
 
-See article: https://tech.sycamore.garden/add-commit-push-contributor-branch-git-github .. only works if your a contributer on raspiblitz repo.
+See article: https://tech.sycamore.garden/add-commit-push-contributor-branch-git-github .. only works if your a contributor on raspiblitz repo.
 
 ### How to cherry-pick with branch protections & CODEOWNERS file?
 
 Chery-picking patch PRs from dev to a release-branch like 'v1.8' (for example) is now a bit more complicated. Either an admin switches temorarly the branch protection "require a pull request before merging" setting off for the `git cherry-pick` OR we create a `p1.8` branch from `v1.8`, cherry-pick the squashed patch PR into that unprotected `p1.8` and then open a PR back to `v1.8`.
 
-But what we gain is that better branch protection and we can add more contributers to the project that are allowed to manage issues - like adding lables or closing.
+But what we gain is that better branch protection and we can add more contributors to the project that are allowed to manage issues - like adding labels or closing.
 
 ### How to run the automatic amd64 build on a VM on OSX?
 
@@ -210,7 +239,7 @@ just notes so far:
 
 https://brew.sh
 brew install qemu
-https://github.com/rootzoll/raspiblitz/actions --> download amd64-lean image
+https://github.com/raspiblitz/raspiblitz/actions --> download amd64-lean image
 double unzip until `qcow2` file 
 convert `qcow2` to `vdi:
 qemu-img convert -f qcow2 raspiblitz-amd64-debian-lean.qcow2 -O vdi raspiblitz-amd64-debian-lean.vdi

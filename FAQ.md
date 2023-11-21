@@ -121,7 +121,7 @@ The upgrade should be quite simple - you don't need to close any channels:
 
 - It would be best to get a second 16GB or 32GB SD card - but you can also reuse your old one
 - In the SSH main menu of you RaspiBlitz choose `UPDATE` & follow the dialogs until shutdown
-- Download the new RaspiBlitz image file from the [GitHub README](https://github.com/rootzoll/raspiblitz/blob/dev/README.md#installing-the-software)
+- Download the new RaspiBlitz image file from the [GitHub README](https://github.com/raspiblitz/raspiblitz/blob/dev/README.md#installing-the-software)
 - Write the new image to the (new) SD card with a tool like [balena etcher](https://www.balena.io/etcher/)
 - RaspiBlitz with new SD card image - it now goes through a recover/update phase - this may take some time.
 - Once that's done, login once via SSH and use the password raspiblitz and set a new password A (can be your old one or a new one).
@@ -180,7 +180,7 @@ If that doesn't work, try to ping the IP of the RaspiBlitz with `ping [IP-of-Ras
 - Check if you have a VPN running on your laptop - some VPNs block local network
 - Some Routers have `IP Isolation` switched on - not allowing two devices to connect
 
-If you've checked those and SSH is still not working: Join the conversation on [GitHub Issue #420](https://github.com/rootzoll/raspiblitz/issues/420).
+If you've checked those and SSH is still not working: Join the conversation on [GitHub Issue #420](https://github.com/raspiblitz/raspiblitz/issues/420).
 
 ### How to SSH over Tor?
 
@@ -307,14 +307,23 @@ You can also put an empty file just called `hdmi` (without any ending) onto the 
 
 ### How do I generate a Debug Report?
 
-If your RaspiBlitz is not working correctly and you like to get help from the community, it's good to provide more debug information, so others can better diagnose your problem - please follow the following steps to generate a debug report:
+If your RaspiBlitz is not working correctly and you like to get help from the community, it's good to provide more debug information, so others can better diagnose your problem.
+
+When you use the WebUI in the browser than you can follow the steps:
+
+- Login  into the WebUI and enter the Dashboard (needs to be fully snyced)
+- In the left navigation bar - choose "Settings"
+- Under "Generate Debug Report" click "Generate"
+- This might take some minutes, but then a Text-File will be offered for download
+
+ You can also get a debug report thru the SSH menus:
 
 - SSH into your raspiblitz as admin user with your password A
 - If you see the menu - use CTRL+C to get to the terminal
 - To generate debug report run: `debug`, optionally create a link with `debug -l`
 - Then copy all output beginning with `*** RASPIBLITZ LOGS ***` and share this
 
-*PLEASE NOTICE: It's possible that these logs can contain private information (like IPs, node IDs, ...) - just share publicly what you feel OK with.*
+*PLEASE NOTICE: Most private information (like IPs, node IDs, ...) will filtered from debug logs, but this might not catch all sensitive information - so recheck content yourself before you share publicly.*
 
 ### I have the full blockchain on another storage. How do I copy it to the RaspiBlitz?
 
@@ -334,7 +343,7 @@ Once you finished all the transfers, the Raspiblitz will make a quick-check on t
 
 ### Bitcoind tells me to reindex - how can I do this?
 
- To find/access information fast in large data sets like the Bitcoin blockhain indexes are needed. Those indexes can get corrupted on your HDD/SSD and to repair them they need to be rebuild - re-indexed. Bitcoind has two different options to do this - a fast way called "reindex-chainstate" (which just rebuilds the UTXO set from the blocks as you have them) and the slow but complete way called just "reindex" that would even recheck all your block data - see for details here: https://bitcoin.stackexchange.com/questions/60709/when-should-i-use-reindex-chainstate-and-when-reindex 
+ To find/access information fast in large data sets like the Bitcoin blockchain indexes are needed. Those indexes can get corrupted on your HDD/SSD and to repair them they need to be rebuilt - re-indexed. Bitcoind has two different options to do this - a fast way called "reindex-chainstate" (which just rebuilds the UTXO set from the blocks as you have them) and the slow but complete way called just "reindex" that would even recheck all your block data - see for details here: https://bitcoin.stackexchange.com/questions/60709/when-should-i-use-reindex-chainstate-and-when-reindex 
  
  So if you read in your debug logs of bitcoind that you should "reindex" you can try first just to do a fast "reindex-chainstate" and if that didnt worked a slow and full "reindex".
 
@@ -354,7 +363,7 @@ There are two ways of performing a Backup:
 #### 1) Securing your On-Chain- and Channel-Funds during Operation
 
 This is best done by auto backing-up the 'channel.backup' file to a remote location. But it just secures the funds you have in your on-chain wallet or in your channels. On recovery the channels will get closed. For details on how to setup see the README:
-https://github.com/rootzoll/raspiblitz/blob/v1.2/README.md#backup-for-on-chain---channel-funds
+https://github.com/raspiblitz/raspiblitz/blob/v1.2/README.md#backup-for-on-chain---channel-funds
 
 #### 2) Making a complete LND data backup
 
@@ -394,7 +403,7 @@ This script will offer you a way to transfer the lnd-rescue file from your lapto
 
 Remember those 24 words you were writing down during the setup? That's your "cipher seed" - These words are very important for recovering your wallet. If you don't have them anymore: go back to option "Recover LND data" (see above) and check all possible ways to recover data from the HDD. If you still have the word seed: good, but read the following carefully:
 
-With the word seed you can recover the on-chain funds that LND was managing for you - but it does not contain all the details about the channels you have open - it's mostly the key to your funding wallet. If you were able to close all channels or never opened any, then you should be safe: The best results to recover on-chain funds from wallet seeds have been reported from people installing the Lightning Labs App on laptop and then using the wallet seed (and same wallet passwords): https://github.com/lightninglabs/lightning-app/releases. Other people were succesful in this process using the Zap Desktop wallet (OSX, Win, Linux): https://zap.jackmallers.com/download
+With the word seed you can recover the on-chain funds that LND was managing for you - but it does not contain all the details about the channels you have open - it's mostly the key to your funding wallet. If you were able to close all channels or never opened any, then you should be safe: The best results to recover on-chain funds from wallet seeds have been reported from people installing the Lightning Labs App on laptop and then using the wallet seed (and same wallet passwords): https://github.com/lightninglabs/lightning-app/releases. Other people were successful in this process using the Zap Desktop wallet (OSX, Win, Linux): https://zap.jackmallers.com/download
 
 If you had open channels it would be best to check if you have also the `channel.backup` file (Static-Channel-Backup feature) that is available since LND 0.6 (RaspiBlitz v1.2) and use it in the process below ... for more details on the `channel.backup` file see [README.md on backups](README.md#backup-for-on-chain---channel-funds).
 
@@ -409,7 +418,7 @@ Then give LND some time to re-scan the blockchain. In the end you will have rest
 If you don't have the `channel.backup` file but only the seed words there is a last hope - read this article:
 https://medium.com/@guggero/did-you-lose-funds-on-the-lightning-network-because-of-a-disk-crash-8971b6a92494
 
-*Important: If you see a zero balance for on-chain funds after restoring from seed ... see details discussed [here](https://github.com/rootzoll/raspiblitz/issues/278) - you might try setup fresh this time with bigger look-ahead number.*
+*Important: If you see a zero balance for on-chain funds after restoring from seed ... see details discussed [here](https://github.com/raspiblitz/raspiblitz/issues/278) - you might try setup fresh this time with bigger look-ahead number.*
 
 
 ### How do I move funds & channels from RaspiBlitz to LND Lightning Desktop App?
@@ -441,7 +450,7 @@ Use the "Change Name/Alias of Node" option in the Lightning - LND Wallet Options
 
 ### How do I change the public port LND/Lightning node is running on?
 
-There is a experimental script you can call from the terminal that will make all changes for you ... see details here: https://github.com/rootzoll/raspiblitz/issues/100#issuecomment-466722712
+There is a experimental script you can call from the terminal that will make all changes for you ... see details here: https://github.com/raspiblitz/raspiblitz/issues/100#issuecomment-466722712
 
 ### How do I solve a "signature mismatch after caveat verification" error?
 
@@ -633,7 +642,7 @@ Yes but you need to change the port number (for example to 9736) on at least one
 
 ### How can I enforce UASP mode for my SSD controller?
 
-By default just tested & selected SSD encasings/controller are running enabled with UASP in RaspiBlitz. UASP brings a speed up for the SSD but also if not well supported by the SSD encasing/controller can lead to system halts. If you know for sure that your SSD encasing/controller is supporting UASP fully you can place a file called `uasp.force` on the sd card boot section after flashing the image with your laptop. See details or report errors on issue [#2488](https://github.com/rootzoll/raspiblitz/issues/2488)
+By default just tested & selected SSD encasings/controller are running enabled with UASP in RaspiBlitz. UASP brings a speed up for the SSD but also if not well supported by the SSD encasing/controller can lead to system halts. If you know for sure that your SSD encasing/controller is supporting UASP fully you can place a file called `uasp.force` on the sd card boot section after flashing the image with your laptop. See details or report errors on issue [#2488](https://github.com/raspiblitz/raspiblitz/issues/2488)
 
 ### I am facing maintenance/emergency mode on boot. How do I fix it?
 
@@ -799,7 +808,7 @@ For the Raspiblitz this means that you can connect an additional 32GB USB3 Thumb
 
 #### Snapshotting the Blockchain
 
-BTRFS comes with a build in snapshot feature - that means that your RaspiBlitz can make every day a backup of the blockchain data and if a blockchain corruption occurs (exmaple thru a power outage) there is no need to sync the complete chain again. Just switch back to the last backup state and quickly sync up from there. On BTRFS such backups can be done as snapshots that dont need much more space on the drive and are quickly done - no need to buy a bigger SSD or wait for copying over 200GB.
+BTRFS comes with a build in snapshot feature - that means that your RaspiBlitz can make every day a backup of the blockchain data and if a blockchain corruption occurs (example thru a power outage) there is no need to sync the complete chain again. Just switch back to the last backup state and quickly sync up from there. On BTRFS such backups can be done as snapshots that dont need much more space on the drive and are quickly done - no need to buy a bigger SSD or wait for copying over 200GB.
 
 #### How do I use BTRFS on RaspiBlitz?
 

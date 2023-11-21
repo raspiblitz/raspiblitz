@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# main repo: https://github.com/cstenglein/raspiblitz-web
+# main repo: https://github.com/raspiblitz/raspiblitz-web
 
 # NORMALLY user/repo/version will be defined by calling script - see build_sdcard.sh
 # the following is just a fallback to try during development if script given branch does not exist
@@ -9,10 +9,39 @@ FALLACK_BRANCH="master"
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ]; then
   echo "Manage RaspiBlitz WebUI"
+  echo "blitz.web.ui.sh info"
   echo "blitz.web.ui.sh on [GITHUBUSER] [REPO] [BRANCH] [?COMMITORTAG]"
   echo "blitz.web.ui.sh on DEFAULT"
   echo "blitz.web.ui.sh update"
   echo "blitz.web.ui.sh off"
+  exit 0
+fi
+
+###################
+# INFO
+###################
+if [ "$1" = "info" ]; then
+
+  # check if installed
+  cd /home/blitzapi/blitz_web
+  if [ "$?" != "0" ]; then
+    echo "installed=0"
+    exit 1
+  fi
+  echo "installed=1"
+
+  # get github origin repo from repo directory with git command
+  origin=$(sudo git config --get remote.origin.url)
+  echo "repo='${origin}'"
+
+  # get github branch from repo directory with git command 
+  branch=$(sudo git rev-parse --abbrev-ref HEAD)
+  echo "branch='${branch}'"
+
+  # get github commit from repo directory with git command
+  commit=$(sudo git rev-parse HEAD)
+  echo "commit='${commit}'"
+
   exit 0
 fi
 
@@ -121,17 +150,16 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   echo "# Compile WebUI"
   /home/admin/config.scripts/bonus.nodejs.sh on
-  source <(/home/admin/config.scripts/bonus.nodejs.sh info)
   if ! npm install --global yarn; then
     echo "error='install yarn failed'"
     exit 1
   fi
-  ${NODEPATH}/yarn config set --home enableTelemetry 0
-  if ! ${NODEPATH}/yarn install; then
+  yarn config set --home enableTelemetry 0
+  if ! yarn install; then
     echo "error='yarn install failed'"
     exit 1
   fi
-  if ! ${NODEPATH}/yarn build; then
+  if ! yarn build; then
     echo "error='yarn build failed'"
     exit 1
   fi
@@ -163,9 +191,8 @@ if [ "$1" = "update" ]; then
     git reset --hard origin/${currentBranch}
     newCommit=$(git rev-parse HEAD)
     if [ "${oldCommit}" != "${newCommit}" ]; then
-      source <(/home/admin/config.scripts/bonus.nodejs.sh info)
-      ${NODEPATH}/yarn install
-      ${NODEPATH}/yarn build
+      yarn install
+      yarn build
       sudo rm -r /var/www/public/* 2>/dev/null
       sudo cp -r /home/blitzapi/blitz_web/build/* /var/www/public
       sudo chown www-data:www-data -R /var/www/public

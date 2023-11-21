@@ -12,12 +12,41 @@ FALLACK_BRANCH="dev"
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ]; then
   echo "Manage RaspiBlitz Web API"
+  echo "blitz.web.api.sh info"
   echo "blitz.web.api.sh on [GITHUBUSER] [REPO] [BRANCH] [?COMMITORTAG]"
   echo "blitz.web.api.sh on DEFAULT"
   echo "blitz.web.api.sh update-config"
   echo "blitz.web.api.sh update-code [?BRANCH]"
   echo "blitz.web.api.sh off"
   exit 1
+fi
+
+###################
+# INFO
+###################
+if [ "$1" = "info" ]; then
+
+  # check if installed
+  cd /home/blitzapi/blitz_api
+  if [ "$?" != "0" ]; then
+    echo "installed=0"
+    exit 1
+  fi
+  echo "installed=1"
+
+  # get github origin repo from repo directory with git command
+  origin=$(sudo -u blitzapi git config --get remote.origin.url)
+  echo "repo='${origin}'"
+
+  # get github branch from repo directory with git command 
+  branch=$(sudo -u blitzapi git rev-parse --abbrev-ref HEAD)
+  echo "branch='${branch}'"
+
+  # get github commit from repo directory with git command
+  commit=$(sudo -u blitzapi git rev-parse HEAD)
+  echo "commit='${commit}'"
+
+  exit 0
 fi
 
 ###################
@@ -97,9 +126,6 @@ if [ "$1" = "update-config" ]; then
       echo "# CONFIG Web API Lightning --> CL"
       sed -i "s/^ln_node=.*/ln_node=cln_jrpc/g" ./.env
       sed -i "s#^cln_jrpc_path=.*#cln_jrpc_path=\"/mnt/hdd/app-data/.lightning/bitcoin/lightning-rpc\"#g" ./.env
-
-      # make sure cln-grpc is on
-      # sudo /home/admin/config.scripts/cl-plugin.cln-grpc.sh on mainnet
 
       # get hex values of pem files
       # hexClient=$(sudo xxd -p -c2000 /home/bitcoin/.lightning/bitcoin/client.pem)
@@ -211,7 +237,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   rm -r /home/blitzapi/blitz_api 2>/dev/null
 
   # create user
-  adduser --disabled-password --gecos "" blitzapi
+  adduser --system --group --home /home/blitzapi blitzapi
 
   # sudo capability for manipulating passwords
   /usr/sbin/usermod --append --groups sudo blitzapi
@@ -255,11 +281,16 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       exit 1
     fi
   else
-    echo "# using lastest code in branch"
+    echo "# using the latest code in branch"
   fi
   # install
   echo "# running install"
   sudo -u blitzapi python3 -m venv venv
+  # see https://github.com/raspiblitz/raspiblitz/issues/4169 - requires a Cython upgrade.
+  if ! sudo -u blitzapi ./venv/bin/pip install --upgrade Cython; then
+    echo "error='pip install upgrade Cython'"
+    exit 1
+  fi
   if ! sudo -u blitzapi ./venv/bin/pip install -r requirements.txt --no-deps; then
     echo "error='pip install failed'"
     exit 1

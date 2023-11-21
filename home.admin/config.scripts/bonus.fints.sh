@@ -196,7 +196,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   # create a dedicated user for the app
   echo "# create user"
-  sudo adduser --disabled-password --gecos "" ${APPID} || exit 1
+  sudo adduser --system --group --home /home/${APPID} ${APPID} || exit 1
 
   # add user to special groups with special access rights
   # echo "# add use to special groups"
@@ -251,6 +251,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo mariadb -e "GRANT ALL PRIVILEGES ON fints.* TO 'fintsuser' IDENTIFIED BY 'fints';"
   sudo mariadb -e "FLUSH PRIVILEGES;"
   if [ -f "dbsetup.sql" ]; then
+    # set default encrypted PIN 123456789 within dbsetup.sql if not yet set
+    sudo sed -i -e "s/REPLACE_ENCRYPTED_PIN/$(mvn compile exec:java -Dexec.mainClass="net.petafuel.fuelifints.cryptography.aesencryption.AESUtil" -Dexec.args=123456789 -q)/g" dbsetup.sql
+    
     mariadb -ufintsuser -pfints fints < dbsetup.sql
   else
     echo "# FAIL - dbsetup.sql not found - deleting code & exit"
@@ -310,7 +313,20 @@ WantedBy=multi-user.target
     echo "# keystore already exists"
   fi
   
-  # config app basics: lnbits.properties
+  # create aeskey.properties if needed
+  aeskeyExists=$(sudo ls /home/fints/aeskey.properties 2>/dev/null | grep -c 'aeskey.properties')
+  if [ ${aeskeyExists} -eq 0 ]; then
+    echo "# creating aeskey.properties"
+    sudo -u fints openssl rand -hex 12 > /home/fints/aeskey.secret
+    sudo -u fints openssl enc -aes-128-cbc -kfile /home/fints/aeskey.secret -P -md sha1 | grep "key=" > /home/fints/aeskey.tmp
+    sudo sed -i "s/key/aes_key/g" /home/fints/aeskey.tmp
+    sudo -u fints tr -d '\n' < /home/fints/aeskey.tmp > /home/fints/aeskey.properties
+    sudo -u fints rm /home/fints/aeskey.tmp
+  else
+    echo "# aeskey.properties already exists"
+  fi
+  
+  # config app basics: fuelifints.properties
   sudo -u fints mkdir /home/fints/config
   sudo -u fints cp /home/fints/fints/config/fuelifints.properties /home/fints/config/fuelifints.properties
   sudo sed -i "s/^productinfo.csv.check=.*/productinfo.csv.check=false/g" /home/fints/config/fuelifints.properties
@@ -319,9 +335,16 @@ WantedBy=multi-user.target
   sudo sed -i "s/^keystore_location =.*/keystore_location = \/mnt\/hdd\/app-data\/fints\/keystore.jks/g" /home/fints/config/fuelifints.properties
   sudo sed -i "s/^keystore_password =.*/keystore_password = raspiblitz/g" /home/fints/config/fuelifints.properties
 
-  # config app basics: blz.banking2.properties.example
-  sudo -u fints cp /home/fints/fints/config/blz.banking2.properties.example /home/fints/config/blz.banking2.properties
-
+  # config app basics: blz.banking2.properties.example: blz needs to be replaced with bankcode of fuelifints.properties
+  sudo -u fints cp /home/fints/fints/config/blz.banking2.properties.example /home/fints/config/12345678.banking2.properties
+  
+  # config app basics: connectionpool.properties
+  sudo -u fints cp /home/fints/fints/connectionpool.properties.example /home/fints/connectionpool.properties
+  sudo sed -i "s/yourdbserver/127.0.0.1/g" /home/fints/connectionpool.properties
+  sudo sed -i "s/=dbserver/=127.0.0.1/g" /home/fints/connectionpool.properties
+  sudo sed -i "s/=dbuser/=fintsuser/g" /home/fints/connectionpool.properties
+  sudo sed -i "s/=dbpassword/=fints/g" /home/fints/connectionpool.properties
+  
   # config app basics: lnbits.properties
   sudo -u fints cp /home/fints/fints/config/lnbits.properties.example /home/fints/config/lnbits.properties
   # in file lnbits.properties replace the line starting with lnbitsUrl with the following line 'lnbitsUrl = http://127.0.0.1:5000'

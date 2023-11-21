@@ -3,7 +3,7 @@
 # https://github.com/lnbits/lnbits
 
 # https://github.com/lnbits/lnbits/releases
-tag="0.10.2"
+tag="0.10.9"
 VERSION="${tag}"
 
 # command info
@@ -14,7 +14,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "bonus.lnbits.sh [install|uninstall] [?GITHUBUSER] [?BRANCH|?TAG]"
   echo "bonus.lnbits.sh on [lnd|tlnd|slnd|cl|tcl|scl]"
   echo "bonus.lnbits.sh switch [lnd|tlnd|slnd|cl|tcl|scl]"
-  echo "bonus.lnbits.sh off"
+  echo "bonus.lnbits.sh off <--keep-data|--delete-data>"
   echo "bonus.lnbits.sh status"
   echo "bonus.lnbits.sh menu"
   echo "bonus.lnbits.sh prestart"
@@ -145,7 +145,7 @@ if [ "$1" = "menu" ]; then
     fundinginfo="on CLN "
   fi
 
-  text="Local Web Browser: https://${localIP}:${httpsPort}"
+  text="https://${localIP}:${httpsPort}${authMethod}"
 
   if [ ${#publicDomain} -gt 0 ]; then
      text="${text}
@@ -180,7 +180,7 @@ To enable easy reachability with normal browser from the outside
 Consider adding a IP2TOR Bridge under OPTIONS."
   fi
 
-  whiptail --title " LNbits ${fundinginfo}" --yes-button "OK" --no-button "OPTIONS" --yesno "${text}" 18 69
+  whiptail --title " LNbits ${fundinginfo}" --yes-button "OK" --no-button "OPTIONS" --yesno "${text}" 18 78
   result=$?
   sudo /home/admin/config.scripts/blitz.display.sh hide
   echo "option (${result}) - please wait ..."
@@ -377,8 +377,11 @@ if [ "$1" = "status" ]; then
     echo "httpsPort='5001'"
     echo "httpsForced='1'"
     echo "httpsSelfsigned='1'" # TODO: change later if IP2Tor+LetsEncrypt is active
-    echo "authMethod='none'"
     echo "publicIP='${publicIP}'"
+
+    # auth method is to call with a certain useer id
+    admin_userid=$(sudo cat /home/lnbits/lnbits/.super_user)
+    echo "authMethod='/wallet?usr=${admin_userid}'"
 
     # check funding source
     if [ "${LNBitsFunding}" == "" ]; then
@@ -528,6 +531,9 @@ if [ "$1" = "prestart" ]; then
     exit 1
   fi
 
+  # protect the admin user id if exists
+  chmod 640 /home/lnbits/lnbits/.super_user 2>/dev/null
+
   echo "# OK: prestart finished"
   exit 0 # exit with clean code
 fi
@@ -580,9 +586,18 @@ if [ "$1" = "sync" ] || [ "$1" = "repo" ]; then
   sudo -u lnbits git pull
 
   # check if poetry in installed, if not install it
-  sudo -u lnbits which poetry || sudo -u lnbits curl -sSL https://install.python-poetry.org | sudo -u lnbits python3 -
+  if ! sudo -u lnbits which poetry; then
+    echo "# install poetry"
+    sudo pip3 install --upgrade pip
+    sudo pip3 install poetry
+  fi
   # do install like this
   sudo -u lnbits poetry install
+
+  # make sure default virtaulenv is used
+  sudo apt-get remove -y python3-virtualenv 2>/dev/null
+  sudo pip uninstall -y virtualenv 2>/dev/null
+  sudo apt-get install -y python3-virtualenv
 
   # restart lnbits service
   sudo systemctl restart lnbits
@@ -597,17 +612,16 @@ sudo systemctl stop lnbits 2>/dev/null
 if [ "$1" = "install" ]; then
 
   # check if already installed
-  isInstalled=$(compgen -u | grep -c lnbits)
-  if [ "${isInstalled}" != "0" ]; then
+  if compgen -u | grep -w lnbits; then
     echo "result='already installed'"
     exit 0
   fi
 
-  echo "# *** INSTALL LNBIS ${VERSION} ***"
+  echo "# *** INSTALL LNBITS ${VERSION} ***"
 
   # add lnbits user
   echo "*** Add the 'lnbits' user ***"
-  sudo adduser --disabled-password --gecos "" lnbits
+  sudo adduser --system --group --home /home/lnbits lnbits
 
   # get optional github parameter
   githubUser="lnbits"
@@ -639,6 +653,11 @@ if [ "$1" = "install" ]; then
   # do install like this
   sudo -u lnbits poetry install
 
+  # make sure default virtaulenv is used
+  sudo apt-get remove -y python3-virtualenv 2>/dev/null
+  sudo pip uninstall -y virtualenv 2>/dev/null
+  sudo apt-get install -y python3-virtualenv
+
   exit 0
 fi
 
@@ -661,12 +680,18 @@ if [ "$1" = "uninstall" ]; then
 fi
 
 
-# install
+# on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
-  # check if code is already installed
-  isInstalled=$(compgen -u | grep -c lnbits)
-  if [ "${isInstalled}" == "0" ]; then
+  # check if already installed
+  if compgen -u | grep -w lnbits; then
+    # check poetry if the user exists
+    if ! sudo -u lnbits which poetry; then
+      echo "# Fix faulty installation"
+      /home/admin/config.scripts/bonus.lnbits.sh off --keep-data
+      /home/admin/config.scripts/bonus.lnbits.sh install || exit 1
+    fi
+  else
     echo "# Installing code base & dependencies first .."
     /home/admin/config.scripts/bonus.lnbits.sh install || exit 1
   fi
@@ -733,6 +758,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo rm /home/lnbits/lnbits/.env 2>/dev/null
   sudo -u lnbits touch /home/lnbits/lnbits/.env
 
+  # activate admin user
+  sudo sed -i "/^LNBITS_ADMIN_UI=/d" /home/lnbits/lnbits/.env
+  sudo bash -c "echo 'LNBITS_ADMIN_UI=true' >> /home/lnbits/lnbits/.env"
+
   if [ ! -e /mnt/hdd/app-data/LNBits/database.sqlite3 ]; then
     echo "# install database: PostgreSQL"
     # POSTGRES
@@ -781,7 +810,7 @@ After=bitcoind.service
 [Service]
 WorkingDirectory=/home/lnbits/lnbits
 ExecStartPre=/home/admin/config.scripts/bonus.lnbits.sh prestart
-ExecStart=/bin/sh -c 'cd /home/lnbits/lnbits && poetry run lnbits --port 5000'
+ExecStart=/bin/sh -c 'cd /home/lnbits/lnbits && poetry run lnbits --port 5000 --host 0.0.0.0'
 User=lnbits
 Restart=always
 TimeoutSec=120
@@ -987,12 +1016,12 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo systemctl stop lnbits
     sudo systemctl disable lnbits
     sudo rm /etc/systemd/system/lnbits.service
-    echo "OK lnbits.service removed."
+    echo "# OK lnbits.service removed."
   else
-    echo "lnbits.service is not installed."
+    echo "# lnbits.service is not installed."
   fi
 
-  echo "Cleaning up LNbits install ..."
+  echo "# Cleaning up LNbits install ..."
   sudo ufw delete allow 5000
   sudo ufw delete allow 5001
 

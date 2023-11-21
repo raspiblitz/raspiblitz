@@ -276,7 +276,7 @@ ${color_yellow}${ln_publicColor}${ln_external}${color_gray}"
 if [ "${joinmarket}" = "on" ];then
   # show JoinMarket stats in place of the LND URI only if the Yield Generator is running
   if [ "$(sudo -u joinmarket pgrep -f "yg-privacyenhanced.py" 2>/dev/null | wc -l)" -gt 2 ] || \
-     [ "$(curl -ksX GET https://127.0.0.1:28183/api/v1/session | jq  .maker_running)" = true ]; then
+     [ "$(curl -ksX GET https://127.0.0.1:28183/api/v1/session | jq  .maker_running 2>/dev/null)" = true ]; then
 
     trap 'rm -f "$JMstats"' EXIT
     JMstats=$(mktemp -p /dev/shm)

@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # https://github.com/prusnak/suez/commits/master
-SUEZVERSION="bcfd3502ac1f7d95b90c62c1daeae50aa7052be7"
+# reactivate PGP verification if the pinned / last commit is signed
+SUEZVERSION="d055a1f8b4a81488c72f60da9b51b0f0932c5146"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -41,9 +42,14 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo -u bitcoin git clone https://github.com/prusnak/suez.git
   cd suez || exit 1
   sudo -u bitcoin git reset --hard $SUEZVERSION
-  sudo -u bitcoin /home/admin/config.scripts/blitz.git-verify.sh \
-    "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
+#  sudo -u bitcoin /home/admin/config.scripts/blitz.git-verify.sh \
+#    "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
   sudo -u bitcoin poetry install
+
+  # make sure default virtaulenv is used
+  sudo apt-get remove -y python3-virtualenv 2>/dev/null
+  sudo pip uninstall -y virtualenv 2>/dev/null
+  sudo apt-get install -y python3-virtualenv
 
   # setting value in raspi blitz config
   /home/admin/config.scripts/blitz.conf.sh set suez "on"
@@ -82,10 +88,16 @@ if [ "$1" = "update" ]; then
   fi
   cd suez || exit 1
   sudo -u bitcoin git pull
-  sudo -u bitcoin /home/admin/config.scripts/blitz.git-verify.sh \
-    "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
+#  sudo -u bitcoin /home/admin/config.scripts/blitz.git-verify.sh \
+#    "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
   sudo -u bitcoin poetry install
   echo "# Updated to the latest in https://github.com/prusnak/suez/commits/master"
+
+  # make sure default virtaulenv is used
+  sudo apt-get remove -y python3-virtualenv 2>/dev/null
+  sudo pip uninstall -y virtualenv 2>/dev/null
+  sudo apt-get install -y python3-virtualenv
+
   exit 0
 fi
 

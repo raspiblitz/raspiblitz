@@ -567,9 +567,42 @@ service Lightning {
     /* lncli: `subscribecustom`
     SubscribeCustomMessages subscribes to a stream of incoming custom peer
     messages.
+
+    To include messages with type outside of the custom range (>= 32768) lnd
+    needs to be compiled with  the `dev` build tag, and the message type to
+    override should be specified in lnd's experimental protocol configuration.
     */
     rpc SubscribeCustomMessages (SubscribeCustomMessagesRequest)
         returns (stream CustomMessage);
+
+    /* lncli: `listaliases`
+    ListAliases returns the set of all aliases that have ever existed with
+    their confirmed SCID (if it exists) and/or the base SCID (in the case of
+    zero conf).
+    */
+    rpc ListAliases (ListAliasesRequest) returns (ListAliasesResponse);
+
+    /*
+    LookupHtlcResolution retrieves a final htlc resolution from the database.
+    If the htlc has no final resolution yet, a NotFound grpc status code is
+    returned.
+    */
+    rpc LookupHtlcResolution (LookupHtlcResolutionRequest)
+        returns (LookupHtlcResolutionResponse);
+}
+
+message LookupHtlcResolutionRequest {
+    uint64 chan_id = 1;
+
+    uint64 htlc_index = 2;
+}
+
+message LookupHtlcResolutionResponse {
+    // Settled is true is the htlc was settled. If false, the htlc was failed.
+    bool settled = 1;
+
+    // Offchain indicates whether the htlc was resolved off-chain or on-chain.
+    bool offchain = 2;
 }
 
 message SubscribeCustomMessagesRequest {
@@ -591,6 +624,9 @@ message SendCustomMessageRequest {
     bytes peer = 1;
 
     // Message type. This value needs to be in the custom range (>= 32768).
+    // To send a type < custom range, lnd needs to be compiled with the `dev`
+    // build tag, and the message type to override should be specified in lnd's
+    // experimental protocol configuration.
     uint32 type = 2;
 
     // Raw message data.
@@ -630,6 +666,7 @@ enum OutputScriptType {
     SCRIPT_TYPE_NULLDATA = 6;
     SCRIPT_TYPE_NON_STANDARD = 7;
     SCRIPT_TYPE_WITNESS_UNKNOWN = 8;
+    SCRIPT_TYPE_WITNESS_V1_TAPROOT = 9;
 }
 
 message OutputDetail {
@@ -919,6 +956,14 @@ message ChannelAcceptRequest {
 
     // The commitment type the initiator wishes to use for the proposed channel.
     CommitmentType commitment_type = 14;
+
+    // Whether the initiator wants to open a zero-conf channel via the channel
+    // type.
+    bool wants_zero_conf = 15;
+
+    // Whether the initiator wants to use the scid-alias channel type. This is
+    // separate from the feature bit.
+    bool wants_scid_alias = 16;
 }
 
 message ChannelAcceptResponse {
@@ -979,6 +1024,13 @@ message ChannelAcceptResponse {
     The number of confirmations we require before we consider the channel open.
     */
     uint32 min_accept_depth = 10;
+
+    /*
+    Whether the responder wants this to be a zero-conf channel. This will fail
+    if either side does not have the scid-alias feature bit set. The minimum
+    depth field must be zero if this is true.
+    */
+    bool zero_conf = 11;
 }
 
 message ChannelPoint {
@@ -1475,6 +1527,24 @@ message Channel {
 
     // List constraints for the remote node.
     ChannelConstraints remote_constraints = 30;
+
+    /*
+    This lists out the set of alias short channel ids that exist for a channel.
+    This may be empty.
+    */
+    repeated uint64 alias_scids = 31;
+
+    // Whether or not this is a zero-conf channel.
+    bool zero_conf = 32;
+
+    // This is the confirmed / on-chain zero-conf SCID.
+    uint64 zero_conf_confirmed_scid = 33;
+
+    // The configured alias name of our peer.
+    string peer_alias = 34;
+
+    // This is the peer SCID alias.
+    uint64 peer_scid_alias = 35 [jstype = JS_STRING];
 }
 
 message ListChannelsRequest {
@@ -1488,10 +1558,31 @@ message ListChannelsRequest {
     empty, all channels will be returned.
     */
     bytes peer = 5;
+
+    // Informs the server if the peer alias lookup per channel should be
+    // enabled. It is turned off by default in order to avoid degradation of
+    // performance for existing clients.
+    bool peer_alias_lookup = 6;
 }
 message ListChannelsResponse {
     // The list of active channels
     repeated Channel channels = 11;
+}
+
+message AliasMap {
+    /*
+    For non-zero-conf channels, this is the confirmed SCID. Otherwise, this is
+    the first assigned "base" alias.
+    */
+    uint64 base_scid = 1;
+
+    // The set of all aliases stored for the base SCID.
+    repeated uint64 aliases = 2;
+}
+message ListAliasesRequest {
+}
+message ListAliasesResponse {
+    repeated AliasMap alias_maps = 1;
 }
 
 enum Initiator {
@@ -1558,6 +1649,15 @@ message ChannelCloseSummary {
     Initiator close_initiator = 12;
 
     repeated Resolution resolutions = 13;
+
+    /*
+    This lists out the set of alias short channel ids that existed for the
+    closed channel. This may be empty.
+    */
+    repeated uint64 alias_scids = 14;
+
+    //  The confirmed SCID for a zero-conf channel.
+    uint64 zero_conf_confirmed_scid = 15 [jstype = JS_STRING];
 }
 
 enum ResolutionType {
@@ -1831,6 +1931,9 @@ message GetInfoResponse {
     Indicates whether the HTLC interceptor API is in always-on mode.
     */
     bool require_htlc_interceptor = 21;
+
+    // Indicates whether final htlc resolutions are stored on disk.
+    bool store_final_htlc_resolutions = 22;
 }
 
 message GetRecoveryInfoRequest {
@@ -1903,6 +2006,11 @@ message CloseChannelRequest {
     // A manual fee rate set in sat/vbyte that should be used when crafting the
     // closure transaction.
     uint64 sat_per_vbyte = 6;
+
+    // The maximum fee rate the closer is willing to pay.
+    //
+    // NOTE: This field is only respected if we're the initiator of the channel.
+    uint64 max_fee_per_vbyte = 7;
 }
 
 message CloseStatusUpdate {
@@ -2114,6 +2222,58 @@ message OpenChannelRequest {
     the remote peer supports explicit channel negotiation.
     */
     CommitmentType commitment_type = 18;
+
+    /*
+    If this is true, then a zero-conf channel open will be attempted.
+    */
+    bool zero_conf = 19;
+
+    /*
+    If this is true, then an option-scid-alias channel-type open will be
+    attempted.
+    */
+    bool scid_alias = 20;
+
+    /*
+    The base fee charged regardless of the number of milli-satoshis sent.
+    */
+    uint64 base_fee = 21;
+
+    /*
+    The fee rate in ppm (parts per million) that will be charged in
+    proportion of the value of each forwarded HTLC.
+    */
+    uint64 fee_rate = 22;
+
+    /*
+    If use_base_fee is true the open channel announcement will update the
+    channel base fee with the value specified in base_fee. In the case of
+    a base_fee of 0 use_base_fee is needed downstream to distinguish whether
+    to use the default base fee value specified in the config or 0.
+    */
+    bool use_base_fee = 23;
+
+    /*
+    If use_fee_rate is true the open channel announcement will update the
+    channel fee rate with the value specified in fee_rate. In the case of
+    a fee_rate of 0 use_fee_rate is needed downstream to distinguish whether
+    to use the default fee rate value specified in the config or 0.
+    */
+    bool use_fee_rate = 24;
+
+    /*
+    The number of satoshis we require the remote peer to reserve. This value,
+    if specified, must be above the dust limit and below 20% of the channel
+    capacity.
+    */
+    uint64 remote_chan_reserve_sat = 25;
+
+    /*
+    If set, then lnd will attempt to commit all the coins under control of the
+    internal wallet to open the channel, and the LocalFundingAmount field must
+    be zero and is ignored.
+    */
+    bool fund_max = 26;
 }
 message OpenStatusUpdate {
     oneof update {
@@ -2488,9 +2648,17 @@ message PendingChannelsResponse {
 
         repeated PendingHTLC pending_htlcs = 8;
 
+        /*
+          There are three resolution states for the anchor:
+          limbo, lost and recovered. Derive the current state
+          from the limbo and recovered balances.
+        */
         enum AnchorState {
+            // The recovered_balance is zero and limbo_balance is non-zero.
             LIMBO = 0;
+            // The recovered_balance is non-zero.
             RECOVERED = 1;
+            // A state that is neither LIMBO nor RECOVERED.
             LOST = 2;
         }
 
@@ -2936,6 +3104,9 @@ message LightningNode {
     repeated NodeAddress addresses = 4;
     string color = 5;
     map<uint32, Feature> features = 6;
+
+    // Custom node announcement tlv records.
+    map<uint64, bytes> custom_records = 7;
 }
 
 message NodeAddress {
@@ -2951,6 +3122,9 @@ message RoutingPolicy {
     bool disabled = 5;
     uint64 max_htlc_msat = 6;
     uint32 last_update = 7;
+
+    // Custom channel update tlv records.
+    map<uint64, bytes> custom_records = 8;
 }
 
 /*
@@ -2978,6 +3152,9 @@ message ChannelEdge {
 
     RoutingPolicy node1_policy = 7;
     RoutingPolicy node2_policy = 8;
+
+    // Custom channel announcement tlv records.
+    map<uint64, bytes> custom_records = 9;
 }
 
 message ChannelGraphRequest {
@@ -3209,17 +3386,23 @@ message Invoice {
     */
     int64 value_msat = 23;
 
-    // Whether this invoice has been fulfilled
+    /*
+    Whether this invoice has been fulfilled.
+
+    The field is deprecated. Use the state field instead (compare to SETTLED).
+    */
     bool settled = 6 [deprecated = true];
 
     /*
     When this invoice was created.
+    Measured in seconds since the unix epoch.
     Note: Output only, don't specify for creating an invoice.
     */
     int64 creation_date = 7;
 
     /*
     When this invoice was settled.
+    Measured in seconds since the unix epoch.
     Note: Output only, don't specify for creating an invoice.
     */
     int64 settle_date = 8;
@@ -3240,7 +3423,7 @@ message Invoice {
     */
     bytes description_hash = 10;
 
-    // Payment request expiry time in seconds. Default is 3600 (1 hour).
+    // Payment request expiry time in seconds. Default is 86400 (24 hours).
     int64 expiry = 11;
 
     // Fallback on-chain address.
@@ -3256,6 +3439,8 @@ message Invoice {
     repeated RouteHint route_hints = 14;
 
     // Whether this invoice should include routing hints for private channels.
+    // Note: When enabled, if value and value_msat are zero, a large number of
+    // hints with these channels can be included, which might not be desirable.
     bool private = 15;
 
     /*
@@ -3484,7 +3669,16 @@ message ListInvoiceRequest {
     specified index offset. This can be used to paginate backwards.
     */
     bool reversed = 6;
+
+    // If set, returns all invoices with a creation date greater than or equal
+    // to it. Measured in seconds since the unix epoch.
+    uint64 creation_date_start = 7;
+
+    // If set, returns all invoices with a creation date less than or equal to
+    // it. Measured in seconds since the unix epoch.
+    uint64 creation_date_end = 8;
 }
+
 message ListInvoiceResponse {
     /*
     A list of invoices from the time slice of the time series specified in the
@@ -3683,6 +3877,14 @@ message ListPaymentsRequest {
     of payments, as all of them have to be iterated through to be counted.
     */
     bool count_total_payments = 5;
+
+    // If set, returns all invoices with a creation date greater than or equal
+    // to it. Measured in seconds since the unix epoch.
+    uint64 creation_date_start = 6;
+
+    // If set, returns all invoices with a creation date less than or equal to
+    // it. Measured in seconds since the unix epoch.
+    uint64 creation_date_end = 7;
 }
 
 message ListPaymentsResponse {
@@ -3927,6 +4129,10 @@ message ForwardingHistoryRequest {
 
     // The max number of events to return in the response to this query.
     uint32 num_max_events = 4;
+
+    // Informs the server if the peer alias should be looked up for each
+    // forwarding event.
+    bool peer_alias_lookup = 5;
 }
 message ForwardingEvent {
     // Timestamp is the time (unix epoch offset) that this circuit was
@@ -3965,6 +4171,12 @@ message ForwardingEvent {
     // The number of nanoseconds elapsed since January 1, 1970 UTC when this
     // circuit was completed.
     uint64 timestamp_ns = 11;
+
+    // The peer alias of the incoming channel.
+    string peer_alias_in = 12;
+
+    // The peer alias of the outgoing channel.
+    string peer_alias_out = 13;
 
     // TODO(roasbeef): add settlement latency?
     //  * use FPE on the chan id?
@@ -4361,6 +4573,14 @@ message RPCMiddlewareRequest {
         the same type, or replaced by an error message.
         */
         RPCMessage response = 6;
+
+        /*
+        This is used to indicate to the client that the server has successfully
+        registered the interceptor. This is only used in the very first message
+        that the server sends to the client after the client sends the server
+        the middleware registration message.
+        */
+        bool reg_complete = 8;
     }
 
     /*
@@ -4398,7 +4618,8 @@ message RPCMessage {
 
     /*
     The full canonical gRPC name of the message type (in the format
-    <rpcpackage>.TypeName, for example lnrpc.GetInfoRequest).
+    <rpcpackage>.TypeName, for example lnrpc.GetInfoRequest). In case of an
+    error being returned from lnd, this simply contains the string "error".
     */
     string type_name = 3;
 
@@ -4407,6 +4628,13 @@ message RPCMessage {
     format.
     */
     bytes serialized = 4;
+
+    /*
+    Indicates that the response from lnd was an error, not a gRPC response. If
+    this is set to true then the type_name contains the string "error" and
+    serialized contains the error string.
+    */
+    bool is_error = 5;
 }
 
 message RPCMiddlewareResponse {
@@ -4483,18 +4711,16 @@ message InterceptFeedback {
     string error = 1;
 
     /*
-    A boolean indicating that the gRPC response should be replaced/overwritten.
-    As its name suggests, this can only be used as a feedback to an intercepted
-    response RPC message and is ignored for feedback on any other message. This
-    boolean is needed because in protobuf an empty message is serialized as a
-    0-length or nil byte slice and we wouldn't be able to distinguish between
+    A boolean indicating that the gRPC message should be replaced/overwritten.
+    This boolean is needed because in protobuf an empty message is serialized as
+    a 0-length or nil byte slice and we wouldn't be able to distinguish between
     an empty replacement message and the "don't replace anything" case.
     */
     bool replace_response = 2;
 
     /*
     If the replace_response field is set to true, this field must contain the
-    binary serialized gRPC response message in the protobuf format.
+    binary serialized gRPC message in the protobuf format.
     */
     bytes replacement_serialized = 3;
 }

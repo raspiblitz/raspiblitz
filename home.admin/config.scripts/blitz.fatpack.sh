@@ -9,6 +9,49 @@ if [ "$EUID" -ne 0 ]
   exit 1
 fi
 
+# make sure LCD is on (default for fatpack)
+/home/admin/config.scripts/blitz.display.sh set-display lcd
+
+# check if sd card needs expansion before fatpack
+source <(sudo /home/admin/config.scripts/blitz.bootdrive.sh status)
+if [ "${needsExpansion}" == "1" ]; then
+
+    echo "################################################"
+    echo "# SD CARD NEEDS EXPANSION BEFORE FATPACK"
+    echo "# this will be done now ... and trigger a reboot"
+    echo "# after reboot run this script again"
+    echo "################################################"
+
+    # write a stop file to prevent full bootstrap
+    # after fsexpand reboot
+    touch /boot/stop
+
+    # trigger fsexpand
+    /home/admin/config.scripts/blitz.bootdrive.sh fsexpand
+
+    # make sure this expand is not marked (because its not done after release)
+    sed -i "s/^fsexpanded=.*/fsexpanded=0/g" /home/admin/raspiblitz.info
+
+    echo "################################################"
+    echo "# SD CARD GOT EXPANSION BEFORE FATPACK"
+    echo "# triggering a reboot"
+    echo "# after reboot run this script again"
+    echo "################################################"
+
+    # trigger reboot
+    shutdown -h -r now
+    exit 0
+fi
+
+apt_install() {
+  apt install -y ${@}
+  if [ $? -eq 100 ]; then
+    echo "FAIL! apt failed to install needed packages!"
+    echo ${@}
+    exit 1
+  fi
+}
+
 echo "# getting default user/repo from build_sdcard.sh"
 sudo cp /home/admin/raspiblitz/build_sdcard.sh /home/admin/build_sdcard.sh
 sudo chmod +x /home/admin/build_sdcard.sh 2>/dev/null
@@ -31,8 +74,6 @@ echo "* Adding LND ..."
 
 echo "* Adding Core Lightning ..."
 /home/admin/config.scripts/cl.install.sh install || exit 1
-echo "* Adding the cln-grpc plugin ..."
-/home/admin/config.scripts/cl-plugin.cln-grpc.sh install || exit 1
 
 # *** AUTO UPDATE FALLBACK NODE LIST FROM INTERNET (only in fatpack)
 echo "*** FALLBACK NODE LIST ***"
@@ -48,6 +89,7 @@ sudo /home/admin/config.scripts/blitz.web.ui.sh on "${defaultWEBUIuser}" "${defa
 
 # set build code as new www default
 sudo rm -r /home/admin/assets/nginx/www_public
+mkdir -p /home/admin/assets/nginx/www_public
 sudo cp -a /home/blitzapi/blitz_web/build/* /home/admin/assets/nginx/www_public
 sudo chown admin:admin /home/admin/assets/nginx/www_public
 sudo rm -r /home/blitzapi/blitz_web/build/*

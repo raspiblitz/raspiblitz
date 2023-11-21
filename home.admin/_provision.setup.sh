@@ -39,6 +39,11 @@ if [ "${confExists}" != "1" ]; then
     exit 6
 fi
 
+# make sure raspiblitz.conf has an blitzapi entry when setup thru fatpack image (blitzapi=on in raspiblitz.info)
+if [ "${blitzapi}" == "on" ]; then
+  /home/admin/config.scripts/blitz.conf.sh set blitzapi on >> ${logFile}
+fi
+
 ###################################
 # Preserve SSH keys
 # just copy dont link anymore
@@ -93,8 +98,12 @@ if [ "${network}" == "bitcoin" ]; then
   kbSizeRAM=$(cat /proc/meminfo | grep "MemTotal" | sed 's/[^0-9]*//g')
   echo "kbSizeRAM(${kbSizeRAM})" >> ${logFile}
   echo "dont forget to reduce dbcache once IBD is done" > "/mnt/hdd/${network}/blocks/selfsync.flag"
+  # RP4 8GB
+  if [ ${kbSizeRAM} -gt 7500000 ]; then
+    echo "Detected RAM >=8GB --> optimizing ${network}.conf" >> ${logFile}
+    sed -i "s/^dbcache=.*/dbcache=4096/g" /mnt/hdd/${network}/${network}.conf
   # RP4 4GB
-  if [ ${kbSizeRAM} -gt 3500000 ]; then
+  elif [ ${kbSizeRAM} -gt 3500000 ]; then
     echo "Detected RAM >=4GB --> optimizing ${network}.conf" >> ${logFile}
     sed -i "s/^dbcache=.*/dbcache=2560/g" /mnt/hdd/${network}/${network}.conf
   # RP4 2GB
@@ -113,7 +122,7 @@ echo ""
 echo "*** Start ${network} (SETUP) ***" >> ${logFile}
 /home/admin/_cache.sh set message "Blockchain Testrun"
 echo "- This can take a while .." >> ${logFile}
-cp /home/admin/assets/${network}d.service /etc/systemd/system/${network}d.service
+systemctl daemon-reload >> ${logFile}
 systemctl enable ${network}d.service
 systemctl start ${network}d.service
 
@@ -341,10 +350,6 @@ if [ "${lightning}" == "cl" ]; then
   echo "# switch mainnet config on" >> ${logFile}
   /home/admin/_cache.sh set message "Core Lightning Setup"
   /home/admin/config.scripts/cl.install.sh on mainnet >> ${logFile}
-
-  echo "# switch cln-grpc on" >> ${logFile}
-  /home/admin/config.scripts/cl-plugin.cln-grpc.sh install >> ${logFile}
-  /home/admin/config.scripts/cl-plugin.cln-grpc.sh on >> ${logFile}
 
   # OLD WALLET FROM CLIGHTNING RESCUE
   if [ "${clrescue}" != "" ]; then

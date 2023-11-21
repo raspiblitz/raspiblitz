@@ -37,7 +37,7 @@ PASSWORD C) Lightning Wallet Password for Unlock
 
 You will need to set now Password: ${passwordinfo}
 
-Follow Password Rule: Minimal of 8 chars,,
+Follow Password Rule: Minimum of 8 characters,
 no spaces and only special characters - or .
 Write them down & store them in a safe place.
 " 16 54
@@ -55,7 +55,7 @@ PASSWORD C) Lightning Wallet Password for Unlock
 You will need to set now Password: ${passwordinfo}
 (other passwords might stay like on your old node)
 
-Follow Password Rules: Minimal of 8 chars,
+Follow Password Rules: Minimum of 8 characters,
 no spaces and only special characters - or .
 Write them down & store them in a safe place.
 " 17 64
@@ -92,7 +92,7 @@ if [ "${setPasswordB}" == "1" ]; then
   fi
   sudo sed -i '/^passwordB=/d' $SETUPFILE
   echo "passwordB='${password}'" >> $SETUPFILE
-  dialog --backtitle "RaspiBlitz - Setup" --msgbox "\nThanks - Password B accepted.\n\nUse this password as login for\nadditial Apps & API access." 10 34
+  dialog --backtitle "RaspiBlitz - Setup" --msgbox "\nThanks - Password B accepted.\n\nUse this password as login for\nadditional Apps & API access." 10 34
 fi
 
 # PASSWORD C

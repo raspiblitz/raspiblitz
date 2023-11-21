@@ -1,9 +1,7 @@
 #!/bin/bash
 
 # https://github.com/romanz/electrs/releases
-ELECTRSVERSION="v0.9.11"
-# https://github.com/romanz/electrs/commits/master
-# ELECTRSVERSION="446858ea621416916f84cbce61be92b748e8133e"
+ELECTRSVERSION="v0.10.1"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -195,7 +193,7 @@ Check 'sudo nginx -t' for a detailed error message.
   # Options (available without TOR)
   OPTIONS=( \
         CONNECT "How to Connect" \
-        INDEX "Delete&Rebuild Index" \
+        REINDEX "Delete&Rebuild Index" \
         STATUS "ElectRS Status Info"
 	)
 
@@ -214,8 +212,9 @@ Check 'sudo nginx -t' for a detailed error message.
     echo "- as manual server set '${localIP}' & '${portSSL}'"
     echo "- laptop and RaspiBlitz need to be within same local network"
     echo
-    echo "To start directly from laptop terminal use:"
-    echo "electrum --oneserver --server ${localIP}:${portSSL}:s"
+    echo "To start directly from laptop terminal use"
+    echo "PC: electrum --oneserver --server ${localIP}:${portSSL}:s"
+    echo "MAC: open -a /Applications/Electrum.app --args --oneserver --server ${localIP}:${portSSL}:s"
     if [ ${TorRunning} -eq 1 ]; then
       echo
       echo "The Tor Hidden Service address for electrs is (see LCD for QR code):"
@@ -239,7 +238,7 @@ Check 'sudo nginx -t' for a detailed error message.
     echo "Press ENTER to get back to main menu."
     read key
     ;;
-    INDEX)
+    REINDEX)
     echo "######## Delete/Rebuild Index ########"
     echo "# stopping service"
     sudo systemctl stop electrs
@@ -275,7 +274,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo
     echo "# Creating the electrs user"
     echo
-    sudo adduser --disabled-password --gecos "" electrs
+    sudo adduser --system --group --home /home/electrs electrs
     cd /home/electrs
 
     echo
@@ -320,7 +319,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # https://github.com/romanz/electrs/blob/master/doc/usage.md#configuration-files-and-environment-variables
     sudo -u electrs mkdir /home/electrs/.electrs 2>/dev/null
     echo "\
-log_filters = \"INFO\"
+log_filters = \"WARN\"
 timestamp = true
 jsonrpc_import = true
 index-batch-size = 10
@@ -423,7 +422,6 @@ Type=simple
 TimeoutSec=60
 Restart=always
 RestartSec=60
-LogLevelMax=5
 
 # Hardening measures
 PrivateTmp=true

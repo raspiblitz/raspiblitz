@@ -13,13 +13,6 @@ fi
 # source <(/home/admin/config.scripts/network.aliases.sh getvars cl <mainnet|testnet|signet>)
 source <(/home/admin/config.scripts/network.aliases.sh getvars cl $1)
 
-if [ $(sudo -u bitcoin cat ${CLCONF} | grep -c "^sparko") -gt 0 ];then
-  if [ ! -f /home/bitcoin/${netprefix}cl-plugins-enabled/sparko ];then
-    echo "# The Sparko plugin is not present but in config"
-    /home/admin/config.scripts/cl-plugin.sparko.sh on $CHAIN norestart
-  fi
-fi
-
 if [ $(sudo -u bitcoin cat ${CLCONF} | grep -c "^http-pass") -gt 0 ];then
   if [ ! -f /home/bitcoin/cl-plugins-enabled/c-lightning-http-plugin ]; then
     echo "# The clHTTPplugin is not present but in config"
@@ -61,9 +54,8 @@ After=network-online.target
 
 [Service]
 ExecStartPre=-/home/admin/config.scripts/cl.check.sh prestart $CHAIN
-ExecStart=/bin/sh -c '${passwordInput}/usr/local/bin/lightningd \\
-                       --conf=${CLCONF} ${encryptedHSMoption} \\
-                       --pid-file=/run/lightningd/${netprefix}lightningd.pid'
+ExecStart=/bin/sh -c '${passwordInput}/usr/local/bin/lightningd --conf=${CLCONF} ${encryptedHSMoption} --pid-file=/run/lightningd/${netprefix}lightningd.pid --rpc-file-mode 0660'
+ExecStartPost=-/home/admin/config.scripts/cl.check.sh poststart $CHAIN
 
 # Creates /run/lightningd owned by bitcoin
 RuntimeDirectory=lightningd

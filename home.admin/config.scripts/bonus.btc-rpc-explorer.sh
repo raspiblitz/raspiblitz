@@ -207,7 +207,7 @@ if [ "$1" = "install" ]; then
   /home/admin/config.scripts/bonus.nodejs.sh on
 
   # add btcrpcexplorer user
-  sudo adduser --disabled-password --gecos "" btcrpcexplorer
+  sudo adduser --system --group --home /home/btcrpcexplorer btcrpcexplorer
 
   # install btc-rpc-explorer
   cd /home/btcrpcexplorer

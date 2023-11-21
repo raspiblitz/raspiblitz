@@ -344,6 +344,7 @@ def lndPayInvoice(lnInvoiceString):
         stub = rpcstub.LightningStub(channel)
         request = lnrpc.SendRequest(
             payment_request=lnInvoiceString,
+            fee_limit=lnrpc.FeeLimit(fixed=1000),
         )
         response = stub.SendPaymentSync(request, metadata=[('macaroon', macaroon)])
 
@@ -402,7 +403,7 @@ def shopOrder(shopUrl, hostid, servicename, torTarget, duration, msatsFirst, msa
         raise BlitzError("invoice bigger amount than advertised",
                          "advertised({0}) invoice({1})".format(msatsFirst, paymentRequestDecoded.num_msat))
 
-    print("#### Paying invoice ...")
+    print("#### Paying invoice (initial subscription) ...")
     payedInvoice = lndPayInvoice(paymentRequestStr)
     print('# OK PAYMENT SENT')
 
@@ -523,7 +524,7 @@ def subscriptionExtend(shopUrl, bridgeid, durationAdvertised, msatsNext, bridge_
         raise BlitzError("invoice bigger amount than advertised",
                          "advertised({0}) invoice({1})".format(msatsNext, paymentRequestDecoded.num_msat))
 
-    print("#### Paying invoice ...")
+    print("#### Paying invoice (extend subscription) ...")
     payedInvoice = lndPayInvoice(paymentRequestStr)
 
     print("#### Check if bridge was extended ...")
@@ -802,6 +803,7 @@ Message: {1}
 You DID NOT PAY the initial fee.
 The service was not able to provide service.
 Subscription will be ignored.
+Maybe see service description & open a direct channel.         
 
 Error: {0}
 Message: {1}

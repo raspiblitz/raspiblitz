@@ -178,6 +178,7 @@ if [ ${logsMegaByte} -gt 1000 ]; then
   sudo service rsyslog restart
   /home/admin/_cache.sh set message "WARNING: /var/log/ >1GB"
   echo "WARN # Logs in /var/log in were bigger then 1GB and got emergency delete to prevent fillup." >> $logFile
+  sudo ls -la /var/log >> $logFile
   echo "If you see this in the logs please report to the GitHub issues, so LOG config needs to be optimized." >> $logFile
   sleep 10
 else
@@ -457,11 +458,11 @@ if [ ${isMounted} -eq 0 ]; then
   /home/admin/config.scripts/blitz.datadrive.sh status >> ${logFile}
 
   # determine correct setup phase
-  infoMessage="Please Login for Setup"
+  infoMessage="Please start Setup"
   setupPhase="setup"
   
   if [ "${hddGotMigrationData}" != "" ]; then
-    infoMessage="Please Login for Migration"
+    infoMessage="Please start Migration"
     setupPhase="migration"
     # check if lightning is outdated
     migrationMode="normal"
@@ -480,10 +481,10 @@ if [ ${isMounted} -eq 0 ]; then
     # TODO: improve version/update detection later
     isRecovery=$(echo "${hddRaspiVersion}" | grep -c "${codeVersion}")
     if [ "${isRecovery}" == "1" ]; then
-      infoMessage="Please Login for Recovery"
+      infoMessage="Please start Recovery"
       setupPhase="recovery"
     else
-      infoMessage="Please Login for Update"
+      infoMessage="Please start Update"
       setupPhase="update"
     fi
 
@@ -740,6 +741,30 @@ if [ ${isMounted} -eq 0 ]; then
 
   echo "# setting PASSWORD A" >> ${logFile}
   sudo /home/admin/config.scripts/blitz.passwords.sh set a "${passwordA}" >> ${logFile}
+
+  # Bitcoin Mainnet
+  if [ "${mainnet}" == "on" ] || [ "${chain}" == "main" ]; then
+    echo "Provisioning ${network} Mainnet - run config script" >> ${logFile}
+    /home/admin/config.scripts/bitcoin.install.sh on mainnet >> ${logFile} 2>&1
+  else
+    echo "Provisioning ${network} Mainnet - not active" >> ${logFile}
+  fi
+
+  # Bitcoin Testnet
+  if [ "${testnet}" == "on" ]; then
+    echo "Provisioning ${network} Testnet - run config script" >> ${logFile}
+    /home/admin/config.scripts/bitcoin.install.sh on testnet >> ${logFile} 2>&1
+  else
+    echo "Provisioning ${network} Testnet - not active" >> ${logFile}
+  fi
+
+  # Bitcoin Signet
+  if [ "${signet}" == "on" ]; then
+    echo "Provisioning ${network} Signet - run config script" >> ${logFile}
+    /home/admin/config.scripts/bitcoin.install.sh on signet >> ${logFile} 2>&1
+  else
+    echo "Provisioning ${network} Signet - not active" >> ${logFile}
+  fi
 
   # if setup - run provision setup first
   if [ "${setupPhase}" == "setup" ]; then

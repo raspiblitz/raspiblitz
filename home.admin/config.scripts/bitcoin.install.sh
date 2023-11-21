@@ -5,7 +5,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ];then
   echo
   echo "bitcoin.install.sh install - called by build.sdcard.sh"
   echo "Install or remove parallel chains for Bitcoin Core:"
-  echo "bitcoin.install.sh [on|off] [signet|testnet|mainnet]"
+  echo "bitcoin.install.sh [install|on|off] [signet|testnet|mainnet]"
   echo
   exit 1
 fi
@@ -15,7 +15,7 @@ if [ "$1" = "install" ]; then
 
   # set version (change if update is available)
   # https://bitcoincore.org/en/download/
-  bitcoinVersion="24.0.1"
+  bitcoinVersion="25.0"
 
   # needed to check code signing
   # https://github.com/laanwj
@@ -241,28 +241,27 @@ signet.addnode=nsgyo7begau4yecc46ljfecaykyzszcseapxmtu6adrfagfrrzrlngyd.onion:38
 
   removeParallelService
 
-  if [ ${CHAIN} = mainnet ];then
-    sudo cp /home/admin/assets/bitcoind.service /etc/systemd/system/bitcoind.service
-  else
-    # /etc/systemd/system/${prefix}bitcoind.service
-    # based on https://github.com/bitcoin/bitcoin/blob/master/contrib/init/bitcoind.service
-    echo "
+  # /etc/systemd/system/${prefix}bitcoind.service
+  # based on https://github.com/bitcoin/bitcoin/blob/master/contrib/init/bitcoind.service
+  chainparameter=""
+  if [ "${CHAIN}" != "mainnet" ]; then
+    chainparameter="-${CHAIN}"
+  fi
+  echo "
 [Unit]
 Description=Bitcoin daemon on ${CHAIN}
 
-After=network-online.target
-Wants=network-online.target
+Wants=redis.service
+After=redis.service
 
 [Service]
-ExecStart=/usr/local/bin/bitcoind -${CHAIN} \\
+Environment='MALLOC_ARENA_MAX=1'
+ExecStartPre=-/home/admin/config.scripts/bitcoin.check.sh prestart ${CHAIN}
+ExecStart=/usr/local/bin/bitcoind ${chainparameter} \\
                                   -daemonwait \\
                                   -conf=/mnt/hdd/bitcoin/bitcoin.conf \\
-                                  -datadir=/mnt/hdd/bitcoin \\
-                                  -debuglogfile=${bitcoinlogpath}
-
-# Make sure the config directory is readable by the service user
+                                  -datadir=/mnt/hdd/bitcoin
 PermissionsStartOnly=true
-ExecStartPre=/bin/chgrp bitcoin /mnt/hdd/bitcoin
 
 # Process management
 ####################
@@ -300,7 +299,6 @@ MemoryDenyWriteExecute=true
 [Install]
 WantedBy=multi-user.target
 " | sudo tee /etc/systemd/system/${prefix}bitcoind.service
-    fi
   sudo systemctl daemon-reload
   sudo systemctl enable ${prefix}bitcoind
   echo "# OK - the bitcoin daemon on ${CHAIN} service is now enabled"
