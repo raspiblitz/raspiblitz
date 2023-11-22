@@ -4,7 +4,7 @@
 ## based on https://raspibolt.github.io/raspibolt/raspibolt_40_lnd.html#lightning-lnd
 ## see LND releases: https://github.com/lightningnetwork/lnd/releases
 ### If you change here - make sure to also change interims version in lnd.update.sh #!
-lndVersion="0.16.4-beta"
+lndVersion="0.17.2-beta"
 
 # olaoluwa
 PGPauthor="roasbeef"
@@ -422,7 +422,6 @@ alias ${netprefix}lndconf=\"sudo nano /home/bitcoin/.lnd/${netprefix}lnd.conf\"\
       else
         passwordC="raspiblitz"
       fi
-      if ! pip list | grep grpc; then sudo -H python3 -m pip install grpcio==1.38.1; fi
       source <(sudo /home/admin/config.scripts/lnd.initwallet.py new ${CHAIN} ${passwordC})
       if [ "${err}" != "" ]; then
         clear

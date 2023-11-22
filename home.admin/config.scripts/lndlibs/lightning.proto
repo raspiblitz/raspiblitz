@@ -101,8 +101,10 @@ service Lightning {
     rpc SignMessage (SignMessageRequest) returns (SignMessageResponse);
 
     /* lncli: `verifymessage`
-    VerifyMessage verifies a signature over a msg. The signature must be
-    zbase32 encoded and signed by an active node in the resident node's
+    VerifyMessage verifies a signature over a message and recovers the signer's
+    public key. The signature is only deemed valid if the recovered public key
+    corresponds to a node key in the public Lightning network. The signature
+    must be zbase32 encoded and signed by an active node in the resident node's
     channel database. In addition to returning the validity of the signature,
     VerifyMessage also returns the recovered pubkey from the signature.
     */
@@ -1350,6 +1352,13 @@ enum CommitmentType {
     channel before its maturity date.
     */
     SCRIPT_ENFORCED_LEASE = 4;
+
+    /*
+    A channel that uses musig2 for the funding output, and the new tapscript
+    features where relevant.
+    */
+    // TODO(roasbeef): need script enforce mirror type for the above as well?
+    SIMPLE_TAPROOT = 5;
 }
 
 message ChannelConstraints {
@@ -1545,6 +1554,13 @@ message Channel {
 
     // This is the peer SCID alias.
     uint64 peer_scid_alias = 35 [jstype = JS_STRING];
+
+    /*
+    An optional note-to-self to go along with the channel containing some
+    useful information. This is only ever stored locally and in no way impacts
+    the channel's operation.
+    */
+    string memo = 36;
 }
 
 message ListChannelsRequest {
@@ -1910,13 +1926,16 @@ message GetInfoResponse {
     /*
     Whether the current node is connected to testnet. This field is
     deprecated and the network field should be used instead
-    **/
+    */
     bool testnet = 10 [deprecated = true];
 
     reserved 11;
 
-    // A list of active chains the node is connected to
-    repeated Chain chains = 16;
+    /*
+    Deprecated. The only active chain is bitcoin.
+    A list of active chains the node is connected to
+    */
+    repeated Chain chains = 16 [deprecated = true];
 
     // The URIs of the current node.
     repeated string uris = 12;
@@ -1950,8 +1969,9 @@ message GetRecoveryInfoResponse {
 }
 
 message Chain {
-    // The blockchain the node is on (eg bitcoin, litecoin)
-    string chain = 1;
+    // Deprecated. The chain is now always assumed to be bitcoin.
+    // The blockchain the node is on (must be bitcoin)
+    string chain = 1 [deprecated = true];
 
     // The network the node is on (eg regtest, testnet, mainnet)
     string network = 2;
@@ -2119,6 +2139,76 @@ message BatchOpenChannel {
     the remote peer supports explicit channel negotiation.
     */
     CommitmentType commitment_type = 9;
+
+    /*
+    The maximum amount of coins in millisatoshi that can be pending within
+    the channel. It only applies to the remote party.
+    */
+    uint64 remote_max_value_in_flight_msat = 10;
+
+    /*
+    The maximum number of concurrent HTLCs we will allow the remote party to add
+    to the commitment transaction.
+    */
+    uint32 remote_max_htlcs = 11;
+
+    /*
+    Max local csv is the maximum csv delay we will allow for our own commitment
+    transaction.
+    */
+    uint32 max_local_csv = 12;
+
+    /*
+    If this is true, then a zero-conf channel open will be attempted.
+    */
+    bool zero_conf = 13;
+
+    /*
+    If this is true, then an option-scid-alias channel-type open will be
+    attempted.
+    */
+    bool scid_alias = 14;
+
+    /*
+    The base fee charged regardless of the number of milli-satoshis sent.
+    */
+    uint64 base_fee = 15;
+
+    /*
+    The fee rate in ppm (parts per million) that will be charged in
+    proportion of the value of each forwarded HTLC.
+    */
+    uint64 fee_rate = 16;
+
+    /*
+    If use_base_fee is true the open channel announcement will update the
+    channel base fee with the value specified in base_fee. In the case of
+    a base_fee of 0 use_base_fee is needed downstream to distinguish whether
+    to use the default base fee value specified in the config or 0.
+    */
+    bool use_base_fee = 17;
+
+    /*
+    If use_fee_rate is true the open channel announcement will update the
+    channel fee rate with the value specified in fee_rate. In the case of
+    a fee_rate of 0 use_fee_rate is needed downstream to distinguish whether
+    to use the default fee rate value specified in the config or 0.
+    */
+    bool use_fee_rate = 18;
+
+    /*
+    The number of satoshis we require the remote peer to reserve. This value,
+    if specified, must be above the dust limit and below 20% of the channel
+    capacity.
+    */
+    uint64 remote_chan_reserve_sat = 19;
+
+    /*
+    An optional note-to-self to go along with the channel containing some
+    useful information. This is only ever stored locally and in no way impacts
+    the channel's operation.
+    */
+    string memo = 20;
 }
 
 message BatchOpenChannelResponse {
@@ -2274,6 +2364,18 @@ message OpenChannelRequest {
     be zero and is ignored.
     */
     bool fund_max = 26;
+
+    /*
+    An optional note-to-self to go along with the channel containing some
+    useful information. This is only ever stored locally and in no way impacts
+    the channel's operation.
+    */
+    string memo = 27;
+
+    /*
+    A list of selected outpoints that are allocated for channel funding.
+    */
+    repeated OutPoint outpoints = 28;
 }
 message OpenStatusUpdate {
     oneof update {
@@ -2355,6 +2457,11 @@ message ChanPointShim {
     the value is less than 500,000, or as an absolute height otherwise.
     */
     uint32 thaw_height = 6;
+
+    /*
+    Indicates that the funding output is using a MuSig2 multi-sig output.
+    */
+    bool musig2 = 7;
 }
 
 message PsbtShim {
@@ -2540,6 +2647,13 @@ message PendingChannelsResponse {
 
         // Whether this channel is advertised to the network or not.
         bool private = 12;
+
+        /*
+        An optional note-to-self to go along with the channel containing some
+        useful information. This is only ever stored locally and in no way
+        impacts the channel's operation.
+        */
+        string memo = 13;
     }
 
     message PendingOpenChannel {
@@ -2567,6 +2681,17 @@ message PendingChannelsResponse {
 
         // Previously used for confirmation_height. Do not reuse.
         reserved 2;
+
+        // The number of blocks until the funding transaction is considered
+        // expired. If this value gets close to zero, there is a risk that the
+        // channel funding will be canceled by the channel responder. The
+        // channel should be fee bumped using CPFP (see walletrpc.BumpFee) to
+        // ensure that the channel confirms in time. Otherwise a force-close
+        // will be necessary if the channel confirms after the funding
+        // transaction expires. A negative value means the channel responder has
+        // very likely canceled the funding and the channel will never become
+        // fully operational.
+        int32 funding_expiry_blocks = 3;
     }
 
     message WaitingCloseChannel {
@@ -2719,6 +2844,9 @@ message WalletAccountBalance {
 }
 
 message WalletBalanceRequest {
+    // The wallet account the balance is shown for.
+    // If this is not specified, the balance of the "default" account is shown.
+    string account = 1;
 }
 
 message WalletBalanceResponse {
@@ -2804,6 +2932,9 @@ message QueryRoutesRequest {
     not add any additional block padding on top of final_ctlv_delta. This
     padding of a few blocks needs to be added manually or otherwise failures may
     happen when a block comes in while the payment is in flight.
+
+    Note: must not be set if making a payment to a blinded path (delta is
+    set by the aggregate parameters provided by blinded_payment_paths)
     */
     int32 final_cltv_delta = 4;
 
@@ -2878,11 +3009,20 @@ message QueryRoutesRequest {
     repeated lnrpc.RouteHint route_hints = 16;
 
     /*
+    An optional blinded path(s) to reach the destination. Note that the
+    introduction node must be provided as the first hop in the route.
+    */
+    repeated BlindedPaymentPath blinded_payment_paths = 19;
+
+    /*
     Features assumed to be supported by the final node. All transitive feature
     dependencies must also be set properly. For a given feature bit pair, either
     optional or remote may be set, but not both. If this field is nil or empty,
     the router will try to load destination features from the graph as a
     fallback.
+
+    Note: must not be set if making a payment to a blinded route (features
+    are provided in blinded_payment_paths).
     */
     repeated lnrpc.FeatureBit dest_features = 17;
 
@@ -2988,6 +3128,32 @@ message Hop {
 
     // The payment metadata to send along with the payment to the payee.
     bytes metadata = 13;
+
+    /*
+    Blinding point is an optional blinding point included for introduction
+    nodes in blinded paths. This field is mandatory for hops that represents
+    the introduction point in a blinded path.
+    */
+    bytes blinding_point = 14;
+
+    /*
+    Encrypted data is a receiver-produced blob of data that provides hops
+    in a blinded route with forwarding data. As this data is encrypted by
+    the recipient, we will not be able to parse it - it is essentially an
+    arbitrary blob of data from our node's perspective. This field is
+    mandatory for all hops in a blinded path, including the introduction
+    node.
+    */
+    bytes encrypted_data = 15;
+
+    /*
+    The total amount that is sent to the recipient (possibly across multiple
+    HTLCs), as specified by the sender when making a payment to a blinded path.
+    This value is only set in the final hop payload of a blinded payment. This
+    value is analogous to the MPPRecord that is used for regular (non-blinded)
+    MPP payments.
+    */
+    uint64 total_amt_msat = 16;
 }
 
 message MPPRecord {
@@ -3333,6 +3499,61 @@ message RouteHint {
     repeated HopHint hop_hints = 1;
 }
 
+message BlindedPaymentPath {
+    // The blinded path to send the payment to.
+    BlindedPath blinded_path = 1;
+
+    // The base fee for the blinded path provided, expressed in msat.
+    uint64 base_fee_msat = 2;
+
+    // The proportional fee for the blinded path provided, expressed in msat.
+    uint64 proportional_fee_msat = 3;
+
+    /*
+    The total CLTV delta for the blinded path provided, including the
+    final CLTV delta for the receiving node.
+    */
+    uint32 total_cltv_delta = 4;
+
+    /*
+    The minimum hltc size that may be sent over the blinded path, expressed
+    in msat.
+    */
+    uint64 htlc_min_msat = 5;
+
+    /*
+    The maximum htlc size that may be sent over the blinded path, expressed
+    in msat.
+    */
+    uint64 htlc_max_msat = 6;
+
+    // The feature bits for the route.
+    repeated FeatureBit features = 7;
+}
+
+message BlindedPath {
+    // The unblinded pubkey of the introduction node for the route.
+    bytes introduction_node = 1;
+
+    // The ephemeral pubkey used by nodes in the blinded route.
+    bytes blinding_point = 2;
+
+    /*
+    A set of blinded node keys and data blobs for the blinded portion of the
+    route. Note that the first hop is expected to be the introduction node,
+    so the route is always expected to have at least one hop.
+    */
+    repeated BlindedHop blinded_hops = 3;
+}
+
+message BlindedHop {
+    // The blinded public key of the node.
+    bytes blinded_node = 1;
+
+    // An encrypted blob of data provided to the blinded node.
+    bytes encrypted_data = 2;
+}
+
 message AMPInvoiceState {
     // The state the HTLCs associated with this setID are in.
     InvoiceHTLCState state = 1;
@@ -3466,22 +3687,22 @@ message Invoice {
 
     /*
     The amount that was accepted for this invoice, in satoshis. This will ONLY
-    be set if this invoice has been settled. We provide this field as if the
-    invoice was created with a zero value, then we need to record what amount
-    was ultimately accepted. Additionally, it's possible that the sender paid
-    MORE that was specified in the original invoice. So we'll record that here
-    as well.
+    be set if this invoice has been settled or accepted. We provide this field
+    as if the invoice was created with a zero value, then we need to record what
+    amount was ultimately accepted. Additionally, it's possible that the sender
+    paid MORE that was specified in the original invoice. So we'll record that
+    here as well.
     Note: Output only, don't specify for creating an invoice.
     */
     int64 amt_paid_sat = 19;
 
     /*
     The amount that was accepted for this invoice, in millisatoshis. This will
-    ONLY be set if this invoice has been settled. We provide this field as if
-    the invoice was created with a zero value, then we need to record what
-    amount was ultimately accepted. Additionally, it's possible that the sender
-    paid MORE that was specified in the original invoice. So we'll record that
-    here as well.
+    ONLY be set if this invoice has been settled or accepted. We provide this
+    field as if the invoice was created with a zero value, then we need to
+    record what amount was ultimately accepted. Additionally, it's possible that
+    the sender paid MORE that was specified in the original invoice. So we'll
+    record that here as well.
     Note: Output only, don't specify for creating an invoice.
     */
     int64 amt_paid_msat = 20;
@@ -3779,10 +4000,20 @@ message Payment {
     string payment_request = 9;
 
     enum PaymentStatus {
-        UNKNOWN = 0;
+        // Deprecated. This status will never be returned.
+        UNKNOWN = 0 [deprecated = true];
+
+        // Payment has inflight HTLCs.
         IN_FLIGHT = 1;
+
+        // Payment is settled.
         SUCCEEDED = 2;
+
+        // Payment is failed.
         FAILED = 3;
+
+        // Payment is created and has not attempted any HTLCs.
+        INITIATED = 4;
     }
 
     // The status of the payment.

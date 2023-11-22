@@ -9,8 +9,6 @@ source <(/home/admin/config.scripts/network.aliases.sh getvars lnd $1)
 
 sudo mkdir /var/cache/raspiblitz/temp 2>/dev/null
 
-if ! pip list | grep grpc; then sudo -H python3 -m pip install grpcio==1.38.1; fi
-
 askLNDbackupCopy()
 {
   whiptail --title "LND Data Backup" --yes-button "Backup" --no-button "Skip" --yesno "

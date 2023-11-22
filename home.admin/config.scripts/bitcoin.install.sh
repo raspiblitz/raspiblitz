@@ -15,7 +15,7 @@ if [ "$1" = "install" ]; then
 
   # set version (change if update is available)
   # https://bitcoincore.org/en/download/
-  bitcoinVersion="25.0"
+  bitcoinVersion="25.1"
 
   # needed to check code signing
   # https://github.com/laanwj
