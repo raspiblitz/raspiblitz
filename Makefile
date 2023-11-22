@@ -10,7 +10,7 @@ amd64-lean-desktop-uefi-image:
 	  --github_user $(GITHUB_ACTOR) \
 	  --branch $(GITHUB_HEAD_REF) \
 	  --preseed_file preseed.cfg \
-	  --boot uefi\
+	  --boot uefi \
 	  --desktop gnome
 
 	# Compute the checksum of the qemu image
@@ -62,7 +62,7 @@ amd64-fatpack-desktop-uefi-image:
 	--github_user $(GITHUB_ACTOR) \
 	--branch $(GITHUB_HEAD_REF) \
 	--preseed_file preseed.cfg \
-	--boot uefi\
+	--boot uefi \
 	--desktop gnome
 
 	# Compute the checksum of the qemu image
