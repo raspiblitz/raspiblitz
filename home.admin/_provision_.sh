@@ -210,11 +210,6 @@ else
   echo "Provisioning Bitcoin Core interims update - keep default" >> ${logFile}
 fi
 
-# I2P
-echo "Start i2pd" >> ${logFile}
-/home/admin/_cache.sh set message "i2pd setup"
-/home/admin/config.scripts/blitz.i2pd.sh on >> ${logFile}
-
 # LND INTERIMS UPDATE
 if [ ${#lndInterimsUpdate} -gt 0 ]; then
   /home/admin/_cache.sh set message "Provisioning LND update"
@@ -810,6 +805,11 @@ if [ ${confExists} -eq 0 ]; then
   cp /home/admin/assets/bitcoin.conf /mnt/hdd/bitcoin/bitcoin.conf
   chown bitcoin:bitcoin /mnt/hdd/bitcoin/bitcoin.conf
 fi
+
+# I2P
+echo "Start i2pd" >> ${logFile}
+/home/admin/_cache.sh set message "i2pd setup"
+/home/admin/config.scripts/blitz.i2pd.sh on >> ${logFile}
 
 # signal setup done
 /home/admin/_cache.sh set message "Setup Done"
