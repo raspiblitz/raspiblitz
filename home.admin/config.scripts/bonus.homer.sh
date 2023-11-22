@@ -2,6 +2,11 @@
 
 # https://github.com/bastienwirtz/homer
 
+###########################################################################
+# DEPRECATED see #4146 https://github.com/raspiblitz/raspiblitz/issues/4146
+# configscript might get removed in the future
+###########################################################################
+
 installVersion="v22.06.1"
 remoteVersion=$(curl --header "X-GitHub-Api-Version:2022-11-28" -s https://api.github.com/repos/bastienwirtz/homer/releases/latest|grep tag_name|head -1|cut -d '"' -f4)
 
