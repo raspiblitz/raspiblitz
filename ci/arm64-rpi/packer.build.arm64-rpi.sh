@@ -1,6 +1,7 @@
 #!/bin/bash -e
 
 # set vars
+echo "# Setting the variables: $*"
 source ../set_variables.sh
 set_variables "$@"
 
