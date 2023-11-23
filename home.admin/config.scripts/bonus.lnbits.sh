@@ -3,7 +3,7 @@
 # https://github.com/lnbits/lnbits
 
 # https://github.com/lnbits/lnbits/releases
-tag="0.10.10"
+tag="0.11.1"
 VERSION="${tag}"
 
 # command info
@@ -380,7 +380,8 @@ if [ "$1" = "status" ]; then
     echo "publicIP='${publicIP}'"
 
     # auth method is to call with a certain useer id
-    admin_userid=$(sudo cat /home/lnbits/lnbits/.super_user)
+    #admin_userid=$(sudo cat /home/lnbits/lnbits/.super_user)
+    admin_userid=$(sudo cat /mnt/hdd/app-data/LNBits/data/.super_user);
     echo "authMethod='/wallet?usr=${admin_userid}'"
 
     # check funding source
@@ -532,7 +533,8 @@ if [ "$1" = "prestart" ]; then
   fi
 
   # protect the admin user id if exists
-  chmod 640 /home/lnbits/lnbits/.super_user 2>/dev/null
+  # chmod 640 /home/lnbits/lnbits/.super_user 2>/dev/null
+  chmod 640 /mnt/hdd/app-data/LNBits/data/.super_user 2>/dev/null 
 
   echo "# OK: prestart finished"
   exit 0 # exit with clean code
