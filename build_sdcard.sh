@@ -412,16 +412,13 @@ sudo -H python3 -m pip install pytesseract mechanize PySocks urwid Pillow reques
 
 echo -e "\n*** PREPARE ${baseimage} ***"
 
-# make sure the pi user is present and has a shell
+# make sure the pi user is present
 if ! compgen -u pi; then
   echo "# Adding the user pi"
   adduser --system --group --shell /bin/bash --home /home/pi pi
   # copy the skeleton files for login
   sudo -u pi cp -r /etc/skel/. /home/pi/
   adduser pi sudo
-else
-  echo "# Set bash shell for the user pi"
-  usermod pi --shell /bin/bash
 fi
 
 # special prepare when Raspbian
