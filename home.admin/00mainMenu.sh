@@ -150,10 +150,6 @@ fi
 if [ "${chantools}" == "on" ]; then
   OPTIONS+=(CHANTOOLS "ChannelTools (Fund Rescue)")
 fi
-if [ "${homer}" == "on" ]; then
-  OPTIONS+=(HOMER "Homer Dashboard")
-  CHOICE_HEIGHT=$((CHOICE_HEIGHT+1))
-fi
 if [ "${circuitbreaker}" == "on" ]; then
   OPTIONS+=(CIRCUITBREAKER "Circuitbreaker (LND firewall)")
 fi
@@ -162,9 +158,6 @@ if [ "${tallycoinConnect}" == "on" ]; then
 fi
 if [ "${squeaknode}" == "on" ]; then
   OPTIONS+=(SQUEAKNODE "Squeaknode")
-fi
-if [ "${itchysats}" == "on" ]; then
-  OPTIONS+=(ITCHYSATS "Show ItchySats details")
 fi
 if [ "${lightningtipbot}" == "on" ]; then
   OPTIONS+=(LIGHTNINGTIPBOT "Show LightningTipBot details")
@@ -337,9 +330,6 @@ case $CHOICE in
             ;;
         SUBSCRIBE)
             /home/admin/config.scripts/blitz.subscriptions.py
-            ;;
-        HOMER)
-            sudo /home/admin/config.scripts/bonus.homer.sh menu
             ;;
         SERVICES)
             /home/admin/00settingsMenuServices.sh

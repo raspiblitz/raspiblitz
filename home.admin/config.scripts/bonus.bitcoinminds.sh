@@ -1,5 +1,10 @@
 #!/bin/bash
 
+###########################################################################
+# DEPRECATED see #4146 https://github.com/raspiblitz/raspiblitz/issues/4146
+# configscript might get removed in the future
+###########################################################################
+
 BitcoinMindsVersion="v0.1"
 
 # command info

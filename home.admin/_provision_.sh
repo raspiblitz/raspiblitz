@@ -698,15 +698,6 @@ else
   echo "Provisioning CircuitBreaker - keep default" >> ${logFile}
 fi
 
-# homer
-if [ "${homer}" = "on" ]; then
-  echo "Provisioning Homer - run config script" >> ${logFile}
-  /home/admin/_cache.sh set message "Setup Homer"
-  sudo -u admin /home/admin/config.scripts/bonus.homer.sh on >> ${logFile} 2>&1
-else
-  echo "Provisioning Homer - keep default" >> ${logFile}
-fi
-
 # tallycoin_connect
 if [ "${tallycoinConnect}" = "on" ]; then
   echo "Provisioning Tallycoin Connect - run config script" >> ${logFile}
@@ -716,15 +707,6 @@ else
   echo "Provisioning Tallycoin Connect - keep default" >> ${logFile}
 fi
 
-# bitcoinminds.org
-if [ "${bitcoinminds}" = "on" ]; then
-  echo "Provisioning bitcoinminds.org - run config script" >> ${logFile}
-  /home/admin/_cache.sh set message "Setup Bitcoinminds.org"
-  sudo -u admin /home/admin/config.scripts/bonus.bitcoinminds.sh on >> ${logFile} 2>&1
-else
-  echo "Provisioning bitcoinminds.org - keep default" >> ${logFile}
-fi
-
 # squeaknode
 if [ "${squeaknode}" = "on" ]; then
   echo "Provisioning Squeaknode - run config script" >> ${logFile}
@@ -732,15 +714,6 @@ if [ "${squeaknode}" = "on" ]; then
   sudo -u admin /home/admin/config.scripts/bonus.squeaknode.sh on >> ${logFile} 2>&1
 else
   echo "Provisioning Squeaknode - keep default" >> ${logFile}
-fi
-
-# itchysats
-if [ "${itchysats}" = "on" ]; then
-  echo "Provisioning ItchySats - run config script" >> ${logFile}
-  /home/admin/_cache.sh set message "Setup ItchySats"
-  sudo -u admin /home/admin/config.scripts/bonus.itchysats.sh on --download >> ${logFile} 2>&1
-else
-  echo "ItchySats - keep default" >> ${logFile}
 fi
 
 # LightningTipBot
