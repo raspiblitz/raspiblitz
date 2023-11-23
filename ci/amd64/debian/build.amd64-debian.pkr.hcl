@@ -72,7 +72,7 @@ source "qemu" "debian" {
   ssh_password     = "raspiblitz"
   ssh_port         = 22
   ssh_timeout      = "10000s"
-  ssh_username     = "admin"
+  ssh_username     = "pi"
   format           = "qcow2"
   vm_name          = "${local.name_template}.qcow2"
   headless         = false
@@ -92,7 +92,7 @@ build {
 
   provisioner "shell" {
     environment_vars = [
-      "HOME_DIR=/home/admin",
+      "HOME_DIR=/home/pi",
       "github_user=${var.github_user}",
       "branch=${var.branch}",
       "pack=${var.pack}",
