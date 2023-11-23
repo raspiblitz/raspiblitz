@@ -413,7 +413,7 @@ sudo -H python3 -m pip install pytesseract mechanize PySocks urwid Pillow reques
 echo -e "\n*** PREPARE ${baseimage} ***"
 
 # make sure the pi user is present
-if [ "$(compgen -u | grep -c pi)" -eq 0 ];then
+if ! compgen -u pi; then
   echo "# Adding the user pi"
   adduser --system --group --shell /bin/bash --home /home/pi pi
   # copy the skeleton files for login
@@ -564,9 +564,9 @@ service rsyslog restart
 echo -e "\n*** ADDING MAIN USER admin ***"
 # based on https://raspibolt.org/system-configuration.html#add-users
 # using the default password 'raspiblitz'
-adduser --system --group --shell /bin/bash --home /home/admin admin
-# copy the skeleton files for login
-sudo -u admin cp -r /etc/skel/. /home/admin/
+adduser --disabled-password --gecos "" admin
+# make the home folder world readable
+chmod 0755 /home/admin
 echo "admin:raspiblitz" | chpasswd
 adduser admin sudo
 chsh admin -s /bin/bash
