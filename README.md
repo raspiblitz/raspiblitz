@@ -68,14 +68,12 @@ Further Services that are just available thru SSH menu (advanced users):
 - **Chantools** (Fund Rescue) [details](https://github.com/guggero/chantools/blob/master/README.md)
 - **Suez** (Channel Visualization for LND & CL) [details](https://github.com/prusnak/suez#suez)
 - **Helipad** (Podcasting 2.0 Boostagram reader) [details](https://github.com/Podcastindex-org/helipad)
-- **Homer** (Web Dashboard) [details](https://github.com/bastienwirtz/homer#readme)
 - **Squeaknode** [details](https://github.com/yzernik/squeaknode)
 - **CL Spark Wallet** (WalletUI with BOLT12 offers) [details](https://github.com/shesek/spark-wallet#progressive-web-app)
 - **CL plugin: Sparko** (WalletUI & HTTP-RPC bridge) [details](https://github.com/fiatjaf/sparko#the-sparko-plugin)
 - **CL plugin: CLBOSS** (Automated Node Manager) [details](https://github.com/ZmnSCPxj/clboss#clboss-the-c-lightning-node-manager)
 - **CL plugin: The Eye of Satoshi** (Watchtower) [details](https://github.com/talaia-labs/rust-teos/tree/master/watchtower-plugin)
 - **Tallycoin Connect** (Use Tallycoin with your own node) [details](https://github.com/djbooth007/tallycoin_connect)
-- **ItchySats** (Non-custodial peer-to-peer CFD trading) [details](https://github.com/itchysats/itchysats)
 - **LNDg** (WebUI analyze/manage lnd with automation) [details](https://github.com/cryptosharks131/lndg)
 
 You can connect the following Wallet-Apps to your RaspiBlitz (thru SSH menu):
@@ -812,10 +810,6 @@ After install, you will see a new `JMARKET` option in the SSH main menu - it wil
 ##### Download Bitcoin Whitepaper
 
 Extract the original Bitcoin Whitepaper as PDF directly from the blockchain of your node.
-
-##### Bitcoinminds.org local on RaspiBlitz
-
-make the BitcoinMinds.org educational link collection locally available on your RaspiBlitz.
 
 ##### RTL Webinterface
 

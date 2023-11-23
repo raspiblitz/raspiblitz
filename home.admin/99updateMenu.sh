@@ -502,10 +502,6 @@ if [ "${sphinxrelay}" == "on" ]; then
   OPTIONS+=(SPHINX "Update Sphinx Server Relay")
 fi
 
-if [ "${homer}" == "on" ]; then
-  OPTIONS+=(HOMER "Update Homer")
-fi
-
 if [ "${mempoolExplorer}" == "on" ]; then
   OPTIONS+=(MEMPOOL "Update Mempool Explorer")
 fi
@@ -516,10 +512,6 @@ fi
 
 if [ "${runBehindTor}" == "on" ]; then
   OPTIONS+=(TOR "Update Tor from the Torproject repo")
-fi
-
-if [ "${itchysats}" == "on" ]; then
-  OPTIONS+=(ITCHYSATS "Update ItchySats")
 fi
 
 CHOICE_HEIGHT=$(("${#OPTIONS[@]}/2+1"))
@@ -577,16 +569,10 @@ case $CHOICE in
   TOR)
     sudo /home/admin/config.scripts/tor.network.sh update
     ;;
-  HOMER)
-    /home/admin/config.scripts/bonus.homer.sh update
-    ;;
   MEMPOOL)
     /home/admin/config.scripts/bonus.mempool.sh update
     ;;
   JAM)
     /home/admin/config.scripts/bonus.jam.sh update
-    ;;
-  ITCHYSATS)
-    /home/admin/config.scripts/bonus.itchysats.sh update
     ;;
 esac

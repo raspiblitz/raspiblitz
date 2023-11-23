@@ -4,6 +4,9 @@
 - Update: LND v0.17.2-beta [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.17.2-beta)
 - Update: BTCPayServer v1.11.7 [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.11.7)
 - Update: LNbits 0.11.1 [details](https://github.com/lnbits/lnbits/releases/tag/0.11.1)
+- Deprecated: Homer Dashboard (remove from SSH menus, config script will stay with possible future removal)
+- Deprecated: Bitcoinminds (remove from SSH menus, config script will stay with possible future removal)
+- Remove: ItchySats (unmaintained project / in consent with dev)
 
 ## What's new in Version 1.10.0 of RaspiBlitz?
 
@@ -433,4 +436,3 @@ Version 1.1 packs some first fixes and enhancements to make the RaspiBlitz more 
 - Removed: FTP download option for blockchain
 
 For full details see issue list of [Release 1.1 Milestone](https://github.com/rootzoll/raspiblitz/milestone/3?closed=1).
-
