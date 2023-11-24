@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # https://github.com/cculianu/Fulcrum/releases
-fulcrumVersion="1.9.6"
+fulcrumVersion="1.9.7"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -17,18 +17,18 @@ function downloadAndVerifyBinary() {
 
   # download the prebuilt binary
   sudo -u fulcrum wget https://github.com/cculianu/Fulcrum/releases/download/v${fulcrumVersion}/Fulcrum-${fulcrumVersion}-${build}.tar.gz || exit 1
-  sudo -u fulcrum wget https://github.com/cculianu/Fulcrum/releases/download/v${fulcrumVersion}/Fulcrum-${fulcrumVersion}-sha256sums.txt || exit 1
-  sudo -u fulcrum wget https://github.com/cculianu/Fulcrum/releases/download/v${fulcrumVersion}/Fulcrum-${fulcrumVersion}-sha256sums.txt.asc || exit 1
+  sudo -u fulcrum wget https://github.com/cculianu/Fulcrum/releases/download/v${fulcrumVersion}/Fulcrum-${fulcrumVersion}-shasums.txt || exit 1
+  sudo -u fulcrum wget https://github.com/cculianu/Fulcrum/releases/download/v${fulcrumVersion}/Fulcrum-${fulcrumVersion}-shasums.txt.asc || exit 1
 
   # Verify
   # get the PGP key
   curl https://raw.githubusercontent.com/Electron-Cash/keys-n-hashes/master/pubkeys/calinkey.txt | sudo -u fulcrum gpg --import
 
   echo "# Look for 'Good signature'"
-  sudo -u fulcrum gpg --verify Fulcrum-${fulcrumVersion}-sha256sums.txt.asc || exit 1
+  sudo -u fulcrum gpg --verify Fulcrum-${fulcrumVersion}-shasums.txt.asc || exit 1
 
   echo "# Look for 'OK'"
-  sudo -u fulcrum sha256sum -c Fulcrum-${fulcrumVersion}-sha256sums.txt --ignore-missing || exit 1
+  sudo -u fulcrum sha256sum -c Fulcrum-${fulcrumVersion}-shasums.txt --ignore-missing || exit 1
 
   echo "# Unpack"
   sudo -u fulcrum tar -xvf Fulcrum-${fulcrumVersion}-${build}.tar.gz
@@ -61,7 +61,7 @@ WantedBy=multi-user.target
 if [ $(uname -m) = "aarch64" ]; then
   build="arm64-linux"
 elif [ $(uname -m) = "x86_64" ]; then
-  build="x86_64-linux-ub16"
+  build="x86_64-linux"
 fi
 
 if [ "$1" = on ]; then
