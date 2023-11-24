@@ -1,8 +1,11 @@
 ## What's new in Version 1.11.0 of RaspiBlitz?
 
+- Update: RasperryOS base image 2023-10-10-raspios-bookworm-arm64.img.xz [details](https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2023-10-10/)
 - Update: Bitcoin Core v25.1 [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-25.1.md)
 - Update: LND v0.17.2-beta [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.17.2-beta)
 - Update: BTCPayServer v1.11.7 [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.11.7)
+- Update: Electrs (Electrum Server in Rust) v0.10.1 [details](https://github.com/romanz/electrs/blob/master/RELEASE-NOTES.md#0101-nov-01-2023)
+- Update: Fulcrum electrum server (CLI only) v1.9.7 [details](https://github.com/cculianu/Fulcrum/releases/tag/v1.9.7)
 - Deprecated: Homer Dashboard (remove from SSH menus, config script will stay with possible future removal)
 - Deprecated: Bitcoinminds (remove from SSH menus, config script will stay with possible future removal)
 - Remove: ItchySats (unmaintained project / in consent with dev)
@@ -28,6 +31,7 @@
 - Update: JoinMarket v0.9.10 [details](https://github.com/JoinMarket-Org/joinmarket-clientserver/releases/tag/v0.9.10)
 - Update: JoininBox v0.8.1 [details](https://github.com/openoms/joininbox/releases/tag/v0.8.1)
 - Update: Balance of Satoshis 15.11.0 (bos) [details](https://github.com/alexbosworth/balanceofsatoshis/blob/master/CHANGELOG.md#15110)
+- Update: Fulcrum electrum server (CLI only) v1.9.7 [details](https://github.com/cculianu/Fulcrum/releases/tag/v1.9.7)
 - Fix: Homebanking Interface FinTS/HBCI (experimental) [details](https://github.com/rootzoll/raspiblitz/issues/1186)
 - Remove: Spark Wallet and Sparko CLN plugin (not maintained anymore)
 - Remove: Faraday, Loop, Pool single installs - used in the LiT package instead
