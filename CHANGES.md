@@ -31,7 +31,6 @@
 - Update: JoinMarket v0.9.10 [details](https://github.com/JoinMarket-Org/joinmarket-clientserver/releases/tag/v0.9.10)
 - Update: JoininBox v0.8.1 [details](https://github.com/openoms/joininbox/releases/tag/v0.8.1)
 - Update: Balance of Satoshis 15.11.0 (bos) [details](https://github.com/alexbosworth/balanceofsatoshis/blob/master/CHANGELOG.md#15110)
-- Update: Fulcrum electrum server (CLI only) v1.9.7 [details](https://github.com/cculianu/Fulcrum/releases/tag/v1.9.7)
 - Fix: Homebanking Interface FinTS/HBCI (experimental) [details](https://github.com/rootzoll/raspiblitz/issues/1186)
 - Remove: Spark Wallet and Sparko CLN plugin (not maintained anymore)
 - Remove: Faraday, Loop, Pool single installs - used in the LiT package instead
