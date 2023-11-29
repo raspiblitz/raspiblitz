@@ -2,7 +2,7 @@
 # https://lightning.readthedocs.io/
 
 # https://github.com/ElementsProject/lightning/releases
-CLVERSION="v23.08.1"
+CLVERSION="v23.11"
 
 # install the latest master by using the last commit id
 # https://github.com/ElementsProject/lightning/commit/master
@@ -38,14 +38,18 @@ function installDependencies() {
   echo "- installDependencies()"
   # from https://lightning.readthedocs.io/INSTALL.html#to-build-on-ubuntu
   sudo apt-get install -y \
-    autoconf automake build-essential git libtool libgmp-dev \
-    libsqlite3-dev python3 net-tools zlib1g-dev libsodium-dev \
-    gettext
+    autoconf automake build-essential git libtool libsqlite3-dev \
+    net-tools zlib1g-dev libsodium-dev gettext
   # additional requirements
   sudo apt-get install -y postgresql libpq-dev
+  # for clnrest (since v23.11)
+  sudo apt-get install python3-json5 python3-flask python3-gunicorn
   # upgrade pip
   sudo pip3 install --upgrade pip
-  sudo -u bitcoin pip install mako
+  # for clnrest
+  pip3 install mako
+  cd /home/bitcoin/lightning || exit 1
+  sudo -u bitcoin pip3 install --user -r plugins/clnrest/requirements.txt
   # poetry
   sudo pip3 install poetry
   if ! grep -Eq '^PATH="$HOME/.local/bin:$PATH"' /home/bitcoin/.profile; then
@@ -56,24 +60,16 @@ function installDependencies() {
 }
 
 function buildAndInstallCLbinaries() {
-  echo "- Configuring EXPERIMENTAL_FEATURES enabled"
+  echo "- configure"
   echo
   sudo -u bitcoin ./configure
   echo
-  echo "- Building Core lightning from source"
+  echo "- make"
   echo
   sudo -u bitcoin make
   echo
-  # git reset --hard needed to not show as 'v22.11-modded'
-  sudo -u bitcoin git reset --hard
-  echo "- Install to /usr/local/bin/"
+  echo "- install to /usr/local/bin/"
   sudo make install || exit 1
-
-  # make sure default virtaulenv is used
-  sudo apt-get remove -y python3-virtualenv 2>/dev/null
-  sudo pip uninstall -y virtualenv 2>/dev/null
-  sudo apt-get install -y python3-virtualenv
-
 }
 
 echo "# Running: 'cl.install.sh $*'"
