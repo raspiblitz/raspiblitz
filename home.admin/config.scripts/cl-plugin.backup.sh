@@ -43,7 +43,7 @@ function install() {
     sudo pip3 install --upgrade pip
 
     # pip dependencies
-    sudo -u bitcoin pip3 install pyln-client tqdm
+    sudo -u bitcoin pip3 install pyln-client tqdm psutil
 
     # poetry
     sudo pip3 install poetry || exit 1
