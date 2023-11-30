@@ -443,6 +443,8 @@ if [ "$1" = "off" ]; then
     echo "# Removing the binaries"
     sudo rm -f /usr/local/bin/lightningd
     sudo rm -f /usr/local/bin/lightning-cli
+    echo "# Removing the source code"
+    sudo rm -rf /home/bitcoin/lightning
   fi
   # setting value in the raspiblitz.conf
   /home/admin/config.scripts/blitz.conf.sh set ${netprefix}cl "off"
