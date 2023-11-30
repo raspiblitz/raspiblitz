@@ -8,14 +8,15 @@ CLVERSION="v23.11"
 # https://github.com/ElementsProject/lightning/commit/master
 # CLVERSION="063366ed7e3b7cc12a8d1681acc2b639cf07fa23"
 
+# https://github.com/ElementsProject/lightning/tree/master/contrib/keys
+# rustyrussell D9200E6CD1ADB8F1 # cdecker A26D6D9FE088ED58 # niftynei BFF0F67810C1EED1 # pneuroth (nepet) C3F21EE387FF4CD2
+PGPsigner="pneuroth"
+PGPpubkeyLink="https://raw.githubusercontent.com/ElementsProject/lightning/master/contrib/keys/${PGPsigner}.txt"
+PGPpubkeyFingerprint="C3F21EE387FF4CD2"
+
 # PGPsigner="endothermicdev"
 # PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
 # PGPpubkeyFingerprint="8F55EE750D950E3E"
-
-# https://github.com/ElementsProject/lightning/tree/master/contrib/keys
-PGPsigner="rustyrussell" # rustyrussell D9200E6CD1ADB8F1 # cdecker A26D6D9FE088ED58 # niftynei BFF0F67810C1EED1 # endothermicdev 8F55EE750D950E3E
-PGPpubkeyLink="https://raw.githubusercontent.com/ElementsProject/lightning/master/contrib/keys/${PGPsigner}.txt"
-PGPpubkeyFingerprint="D9200E6CD1ADB8F1"
 
 # help
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
@@ -43,7 +44,7 @@ function installDependencies() {
   # additional requirements
   sudo apt-get install -y postgresql libpq-dev
   # for clnrest (since v23.11)
-  sudo apt-get install python3-json5 python3-flask python3-gunicorn
+  sudo apt-get install -y python3-json5 python3-flask python3-gunicorn
   # upgrade pip
   sudo pip3 install --upgrade pip
   # for clnrest
