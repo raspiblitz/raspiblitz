@@ -256,7 +256,7 @@ There are plenty off rooms you can find Raspiblitz users that can help you:
 
 3. [Telegram Spanish](https://t.me/raspiblitz_ES)
 
-4. [Telegram Italian](https://t.me/raspiblitz_IT)
+4. [Telegram Italian](https://t.me/raspiblitz_italia)
 
 5. [Telegram Russian](https://t.me/raspiblitz_RU)
 
