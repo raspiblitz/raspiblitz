@@ -265,6 +265,8 @@ do
       debuginfo=$(ls -la /var/log/ 2>/dev/null)
       # dont delete directories - can make services crash
       sudo rm /var/log/*
+      sudo touch /var/log/auth.log
+      sudo chown root:adm /var/log/auth.log
       sudo service rsyslog restart
       /home/admin/config.scripts/blitz.error.sh _background.sh "log-delete" "REPAIR: /var/log/ >5GB" "Logs in /var/log in were bigger then 5GB and got emergency delete to prevent fillup." "${debuginfo}"
       sleep 10
