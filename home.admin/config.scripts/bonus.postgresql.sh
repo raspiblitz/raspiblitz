@@ -81,6 +81,8 @@ if [ "$command" = "1" ] || [ "$command" = "on" ]; then
         exit 1
       fi
     done
+    echo "Setting default password for postgres user"
+    sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD 'postgres';"
     echo "OK PostgreSQL installed"
   else
     echo "FAIL - Was not able to install PostgreSQL"
