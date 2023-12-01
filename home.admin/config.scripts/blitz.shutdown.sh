@@ -82,7 +82,7 @@ for pid in $(sudo lsof -t "/mnt/hdd"); do
     sleep 5                    # Wait for the process to terminate
 done
 echo "# unmount /mnt/hdd"
-sudo umount -l "/mnt/hdd"
+sudo umount "/mnt/hdd"
 
 echo "starting shutdown ..."
 sudo shutdown ${shutdownParams}
