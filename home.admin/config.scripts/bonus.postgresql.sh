@@ -98,9 +98,9 @@ if [ "$command" = "0" ] || [ "$command" = "off" ]; then
 
   # setting value in raspiblitz config
   echo "*** REMOVING POSTGRESQL ***"
-  sudo apt remove -y postgresql
   sudo systemctl stop postgresql
   sudo systemctl disable postgresql
+  sudo apt remove -y postgresql
   echo "OK PostgreSQL removed."
   exit 0
 
