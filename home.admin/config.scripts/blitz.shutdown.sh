@@ -16,7 +16,7 @@ if [ "$1" = "reboot" ]; then
   /home/admin/_cache.sh set state "reboot"
   /home/admin/_cache.sh set message "$2"
 else
-  shutdownParams="-h now"
+  shutdownParams="-P -h now"
   echo "Then wait 5 seconds and disconnect power."
   /home/admin/_cache.sh set state "shutdown"
   /home/admin/_cache.sh set message ""
@@ -74,6 +74,15 @@ if [ "${isBTRFS}" == "1" ] && [ "${isMounted}" == "1" ]; then
   sudo btrfs scrub start /mnt/hdd/
 fi
 sync
+
+# unmount HDD - try to kill all processes first #3114
+for pid in $(sudo lsof -t "/mnt/hdd"); do
+    echo "# kill -SIGTERM $pid"
+    sudo kill -SIGTERM $pid    # Send SIGTERM signal
+    sleep 5                    # Wait for the process to terminate
+done
+echo "# unmount /mnt/hdd"
+sudo umount -l "/mnt/hdd"
 
 echo "starting shutdown ..."
 sudo shutdown ${shutdownParams}
