@@ -266,7 +266,7 @@ if [ "$1" = on ] || [ "$1" = update ] || [ "$1" = testPR ]; then
     sudo -u bitcoin mkdir /home/bitcoin/.lightning/${CLNETWORK}
   fi
 
-  if ! sudo ls ${CLCONF}; then
+  if ! sudo ls ${CLCONF} 2>/dev/null; then
     echo "# Create ${CLCONF}"
     echo "# lightningd configuration for ${network} ${CHAIN}
 
@@ -313,7 +313,7 @@ always-use-proxy=true
   #############
   echo
   echo "# Set logrotate for ${netprefix}lightningd"
-  if ! sudo ls /home/bitcoin/.lightning/${CLNETWORK}/cl.log_old; then
+  if ! sudo ls /home/bitcoin/.lightning/${CLNETWORK}/cl.log_old 2>/dev/null; then
     sudo -u bitcoin mkdir /home/bitcoin/.lightning/${CLNETWORK}/cl.log_old
   fi
   echo "\
