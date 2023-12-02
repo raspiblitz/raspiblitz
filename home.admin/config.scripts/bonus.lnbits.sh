@@ -1166,18 +1166,12 @@ if [ "$1" = "migrate" ]; then
     # create new backup
     sudo tar -cf /mnt/hdd/app-data/LNBits_sqlitedb_backup.tar -C /mnt/hdd/app-data LNBits/
 
-    # update to expected tag
-    cd /home/lnbits/lnbits || exit 1
-
     # remove existent config for database
     sudo sed -i "/^LNBITS_DATABASE_URL=/d" /home/lnbits/lnbits/.env 2>/dev/null
     sudo sed -i "/^LNBITS_DATA_FOLDER=/d" /home/lnbits/lnbits/.env 2>/dev/null
     # restore sqlite database config
     sudo bash -c "echo 'LNBITS_DATA_FOLDER=/mnt/hdd/app-data/LNBits' >> /home/lnbits/lnbits/.env"
 
-    #sudo -u lnbits git checkout ${tag}
-    sudo -u lnbits git reset --hard 4f05c6c12e284d4a322a9041d19f66d01afa205b # good tested after BIGINT fix (#1135)
-    /home/admin/config.scripts/bonus.lnbits.sh sync || exit 1
     # stop after sync was done
     sudo systemctl stop lnbits
 
