@@ -77,9 +77,10 @@ sync
 
 # unmount HDD - try to kill all processes first #3114
 for pid in $(sudo lsof -t "/mnt/hdd"); do
-    echo "# kill -SIGTERM $pid"
-    sudo kill -SIGTERM $pid    # Send SIGTERM signal
-    sleep 5                    # Wait for the process to terminate
+  process_name=$(ps -p $pid -o comm=)
+  echo "# kill -SIGTERM $pid ($process_name)"
+  sudo kill -SIGTERM $pid # Send SIGTERM signal
+  sleep 5                 # Wait for the process to terminate
 done
 echo "# unmount /mnt/hdd"
 sudo umount "/mnt/hdd"
@@ -87,7 +88,7 @@ sudo umount "/mnt/hdd"
 echo "starting shutdown ..."
 sudo shutdown ${shutdownParams}
 
-# detect missing DBUS 
+# detect missing DBUS
 if [ "${DBUS_SESSION_BUS_ADDRESS}" == "" ]; then
   echo "WARN: Missing \$DBUS_SESSION_BUS_ADDRESS .. "
   if [ "$1" = "reboot" ]; then
