@@ -16,7 +16,7 @@ if [ "$1" = "reboot" ]; then
   /home/admin/_cache.sh set state "reboot"
   /home/admin/_cache.sh set message "$2"
 else
-  shutdownParams="-h now"
+  shutdownParams="-P -h now"
   echo "Then wait 5 seconds and disconnect power."
   /home/admin/_cache.sh set state "shutdown"
   /home/admin/_cache.sh set message ""
@@ -75,10 +75,24 @@ if [ "${isBTRFS}" == "1" ] && [ "${isMounted}" == "1" ]; then
 fi
 sync
 
+# unmount HDD - try to kill all processes first #3114
+echo "# Killing the processes using /mnt/hdd"
+processesUsingDisk=$(sudo lsof -t "/mnt/hdd")
+while [ -n "$processesUsingDisk" ]; do
+  pid=$(echo "$processesUsingDisk" | head -n 1)
+  processName=$(ps -p $pid -o comm=)
+  echo "# Stop $processName with: 'kill -SIGTERM $pid'"
+  sudo kill -SIGTERM $pid # Send SIGTERM signal
+  sleep 5                 # Wait for the process to terminate
+  processesUsingDisk=$(sudo lsof -t "/mnt/hdd") # Refresh the list
+done
+echo "# Attempt to unmount /mnt/hdd"
+sudo umount "/mnt/hdd"
+
 echo "starting shutdown ..."
 sudo shutdown ${shutdownParams}
 
-# detect missing DBUS 
+# detect missing DBUS
 if [ "${DBUS_SESSION_BUS_ADDRESS}" == "" ]; then
   echo "WARN: Missing \$DBUS_SESSION_BUS_ADDRESS .. "
   if [ "$1" = "reboot" ]; then
