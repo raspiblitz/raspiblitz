@@ -30,7 +30,7 @@ if [ ${#newName} -eq 0 ]; then
 fi
 
 # check if cl config file exists
-if ! sudo ls ${CLCONF}; then
+if ! sudo ls ${CLCONF} 2>/dev/null; then
   echo "FAIL - missing ${CLCONF}"
   exit 1
 fi
