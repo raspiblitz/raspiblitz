@@ -204,7 +204,7 @@ Save this password as it will be needed to restore the backup (same as the Passw
     source $_temp
     /home/admin/config.scripts/cl.hsmtool.sh seed-force "$CHAIN" "${seedWords}"
     sudo rm $_temp 2>/dev/null
-    if ! sudo ls /home/bitcoin/.lightning/${CLNETWORK}/hsm_secret; then
+    if ! sudo ls /home/bitcoin/.lightning/${CLNETWORK}/hsm_secret 2>/dev/null; then
       echo "# There was no hsm_secret created - exiting"
       exit 15
     fi

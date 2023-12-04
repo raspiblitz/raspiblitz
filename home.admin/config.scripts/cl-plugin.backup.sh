@@ -43,7 +43,7 @@ function install() {
     sudo pip3 install --upgrade pip
 
     # pip dependencies
-    sudo -u bitcoin pip3 install pyln-client tqdm
+    sudo -u bitcoin pip3 install pyln-client tqdm psutil
 
     # poetry
     sudo pip3 install poetry || exit 1
@@ -61,7 +61,7 @@ function install() {
     echo "# The ${plugin} plugin is already loaded"
   fi
 
-  # make sure default virtaulenv is used
+  # make sure the default virtualenv is used
   sudo apt-get remove -y python3-virtualenv 2>/dev/null
   sudo pip uninstall -y virtualenv 2>/dev/null
   sudo apt-get install -y python3-virtualenv

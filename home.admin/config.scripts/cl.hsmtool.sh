@@ -171,7 +171,7 @@ function decryptHSMsecret() {
 if [ "$1" = "new" ] || [ "$1" = "new-force" ] || [ "$1" = "seed" ] || [ "$1" = "seed-force" ]; then
 
   # make sure /home/bitcoin/.lightning/bitcoin exists (when lightningd was not run yet)
-  if ! sudo ls /home/bitcoin/.lightning/bitcoin 1>/dev/null; then
+  if ! sudo ls /home/bitcoin/.lightning/bitcoin 2>/dev/null; then
     echo "# Create /home/bitcoin/.lightning/bitcoin/"
     sudo -u bitcoin mkdir -p /home/bitcoin/.lightning/bitcoin/
   fi
