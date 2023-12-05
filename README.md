@@ -54,7 +54,7 @@ Additional Services that can be installed thru WebUI (beginners):
 Further Services that are just available thru SSH menu (advanced users):
 
 - **ElectRS** (Electrum Server in Rust) [details](https://github.com/romanz/electrs)
-- **SpecterDesktop** (Multisig Trezor, Ledger, COLDCARDwallet & Specter-DIY) [details](https://github.com/cryptoadvance/specter-desktop) [app connection guide](https://d11n.net/connect-specter-desktor-with-raspiblitz.html)
+- **SpecterDesktop** (Multisig Trezor, Ledger, COLDCARDwallet & Specter-DIY) [details](https://github.com/cryptoadvance/specter-desktop) [app connection guide](https://web.archive.org/web/20220815214301/https://www.d11n.net/connect-specter-desktor-with-raspiblitz.html)
 - **Lightning Terminal (Loop, Pool & Faraday)** (Manage Channel Liquidity) [details](https://github.com/lightninglabs/lightning-terminal#lightning-terminal-lit)
 - **JoinMarket** (CoinJoin Service) [details](https://github.com/JoinMarket-Org/joinmarket-clientserver)
 - **JoinMarket Web UI** (Browser-based interface for JoinMarket) [details](https://github.com/joinmarket-webui/joinmarket-webui)
