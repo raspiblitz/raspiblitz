@@ -67,7 +67,7 @@ if [ "${lightning}" != ""  ] && [ "${ln_default_sync_progress}" == "" ]; then
 elif [ "${ln_default_sync_progress}" == "100.00" ] && [ "${ln_default_recovery_mode}" == "1" ]; then
     scanProgress="recoverscan"
 elif [ "${ln_default_sync_progress}" == "100.00" ] && [ "${ln_default_sync_chain}" == "0" ]; then
-    scanProgress="sync graph ${ln_default_peers} peers"
+    scanProgress="graphsync ${ln_default_peers} peers"
 elif [ ${#ln_default_sync_progress} -lt 6 ]; then
     scanProgress=" ${ln_default_sync_progress} %"
 else
