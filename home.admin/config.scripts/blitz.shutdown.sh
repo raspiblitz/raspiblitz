@@ -78,14 +78,15 @@ sync
 # unmount HDD - try to kill all processes first #3114
 echo "# Killing the processes using /mnt/hdd"
 processesUsingDisk=$(sudo lsof -t "/mnt/hdd")
-while [ -n "$processesUsingDisk" ]; do
-  pid=$(echo "$processesUsingDisk" | head -n 1)
-  processName=$(ps -p $pid -o comm=)
-  echo "# Stop $processName with: 'kill -SIGTERM $pid'"
-  sudo kill -SIGTERM $pid # Send SIGTERM signal
-  sleep 5                 # Wait for the process to terminate
-  processesUsingDisk=$(sudo lsof -t "/mnt/hdd") # Refresh the list
-done
+if [ -n "$processesUsingDisk" ]; then
+  while read -r pid; do
+    processName=$(ps -p $pid -o comm=)
+    echo "# Stop $processName with: 'kill -SIGTERM $pid'"
+    sudo kill -SIGTERM $pid # Send SIGTERM signal
+    sleep 5                 # Wait for the process to terminate
+  done <<< "$processesUsingDisk"
+fi
+
 echo "# Attempt to unmount /mnt/hdd"
 sudo umount "/mnt/hdd"
 
