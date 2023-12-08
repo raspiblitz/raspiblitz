@@ -159,7 +159,7 @@ if [ "${mode}" = "tested" ] || [ "${mode}" = "reckless" ] || [ "${mode}" = "cust
     echo
   else
     echo
-    echo "# BUILD FAILED --> the PGP verification failed) "
+    echo "# BUILD FAILED --> the PGP verification failed"
     exit 1
   fi
 

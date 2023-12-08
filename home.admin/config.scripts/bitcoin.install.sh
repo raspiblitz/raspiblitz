@@ -39,7 +39,7 @@ if [ "$1" = "install" ]; then
     echo
   else
     echo
-    echo "# BUILD FAILED --> the PGP verification failed) "
+    echo "# BUILD FAILED --> the PGP verification failed"
     exit 1
   fi
 
@@ -97,8 +97,10 @@ if [ "$1" = "install" ]; then
     echo "# BUILD FAILED --> Was not able to install bitcoind version(${bitcoinVersion})"
     exit 1
   fi
-  if [ "$(alias | grep -c "alias bitcoinlog")" -eq 0 ];then
-    echo "alias bitcoinlog=\"sudo tail -n 30 -f /mnt/hdd/bitcoin/debug.log\""  | sudo tee -a /home/admin/_aliases
+
+  if ! grep "alias bitcoinlog" /home/admin/_aliases; then
+    echo "alias bitcoinlog=\"sudo tail -n 30 -f /mnt/hdd/bitcoin/debug.log\"" |
+      sudo tee -a /home/admin/_aliases
   fi
   sudo chown admin:admin /home/admin/_aliases
 
@@ -291,18 +293,15 @@ WantedBy=multi-user.target
   sudo systemctl enable ${prefix}bitcoind
   echo "# OK - the bitcoin daemon on ${CHAIN} service is now enabled"
 
-  echo "# Add aliases ${prefix}bitcoin-cli, ${prefix}bitcoind, ${prefix}bitcoinlog"
+  echo "# Add aliases ${prefix}bitcoin-cli and ${prefix}bitcoinlog"
   sudo -u admin touch /home/admin/_aliases
-  if [ "$(alias | grep -c "alias ${prefix}bitcoin-cli")" -eq 0 ];then
-    echo "\
-alias ${prefix}bitcoin-cli=\"sudo -u bitcoin /usr/local/bin/bitcoin-cli\
- -rpcport=${rpcprefix}8332\"
-"  | sudo tee -a /home/admin/_aliases
+  if ! grep "alias ${prefix}bitcoin-cli" /home/admin/_aliases; then
+    echo "alias ${prefix}bitcoin-cli=\"sudo -u bitcoin /usr/local/bin/bitcoin-cli -rpcport=${rpcprefix}8332\"" |
+      sudo tee -a /home/admin/_aliases
   fi
-  if [ "$(alias | grep -c "alias ${prefix}bitcoinlog")" -eq 0 ];then
-    echo "\
-alias ${prefix}bitcoinlog=\"sudo -u bitcoin tail -n 30 -f ${bitcoinlogpath}\"\
-"  | sudo tee -a /home/admin/_aliases
+  if ! grep "alias ${prefix}bitcoinlog" /home/admin/_aliases; then
+    echo "alias ${prefix}bitcoinlog=\"sudo -u bitcoin tail -n 30 -f ${bitcoinlogpath}\"" |
+      sudo tee -a /home/admin/_aliases
   fi
   sudo chown admin:admin /home/admin/_aliases
 
