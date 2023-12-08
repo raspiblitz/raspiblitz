@@ -17,42 +17,30 @@ if [ "$1" = "install" ]; then
   # https://bitcoincore.org/en/download/
   bitcoinVersion="26.0"
 
-  # needed to check code signing
-  # https://github.com/laanwj
-  laanwjPGP="71A3 B167 3540 5025 D447 E8F2 7481 0B01 2346 C9A6"
-
   # prepare directories
   sudo rm -rf /home/admin/download
   sudo -u admin mkdir /home/admin/download
   cd /home/admin/download || exit 1
 
-  # receive signer key
-  if ! gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-key "71A3 B167 3540 5025 D447 E8F2 7481 0B01 2346 C9A6"
-  then
-    echo "# FAIL # Couldn't download Wladimir J. van der Laan's PGP pubkey"
-    exit 1
-  fi
+  echo "# Receive signer keys"
+  curl -s "https://api.github.com/repos/bitcoin-core/guix.sigs/contents/builder-keys" |
+    jq -r '.[].download_url' | while read url; do curl -s "$url" | gpg --import; done
 
   # download signed binary sha256 hash sum file
-  sudo -u admin wget https://bitcoincore.org/bin/bitcoin-core-${bitcoinVersion}/SHA256SUMS
+  sudo -u admin wget --prefer-family=ipv4 --progress=bar:force -O SHA256SUMS https://bitcoincore.org/bin/bitcoin-core-${bitcoinVersion}/SHA256SUMS
+  # download the signed binary sha256 hash sum file and check
+  sudo -u admin wget --prefer-family=ipv4 --progress=bar:force -O SHA256SUMS.asc https://bitcoincore.org/bin/bitcoin-core-${bitcoinVersion}/SHA256SUMS.asc
 
-  # download signed binary sha256 hash sum file and check
-  sudo -u admin wget https://bitcoincore.org/bin/bitcoin-core-${bitcoinVersion}/SHA256SUMS.asc
-  verifyResult=$(LANG=en_US.utf8; gpg --verify SHA256SUMS.asc 2>&1)
-  goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
-  echo "goodSignature(${goodSignature})"
-  correctKey=$(echo ${verifyResult} | grep "${laanwjPGP}" -c)
-  echo "correctKey(${correctKey})"
-  if [ ${correctKey} -lt 1 ] || [ ${goodSignature} -lt 1 ]; then
-    echo
-    echo "# BUILD FAILED --> PGP Verify not OK / signature(${goodSignature}) verify(${correctKey})"
-    exit 1
-  else
+  if gpg --verify SHA256SUMS.asc; then
     echo
     echo "****************************************"
     echo "OK --> BITCOIN MANIFEST IS CORRECT"
     echo "****************************************"
     echo
+  else
+    echo
+    echo "# BUILD FAILED --> the PGP verification failed) "
+    exit 1
   fi
 
   # bitcoinOSversion
@@ -104,8 +92,7 @@ if [ "$1" = "install" ]; then
   sudo -u admin tar -xvf ${binaryName}
   sudo install -m 0755 -o root -g root -t /usr/local/bin/ bitcoin-${bitcoinVersion}/bin/*
   sleep 3
-  installed=$(sudo -u admin bitcoind --version | grep "${bitcoinVersion}" -c)
-  if [ ${installed} -lt 1 ]; then
+  if ! sudo /usr/local/bin/bitcoind --version | grep "${bitcoinVersion}"; then
     echo
     echo "# BUILD FAILED --> Was not able to install bitcoind version(${bitcoinVersion})"
     exit 1
@@ -310,7 +297,6 @@ WantedBy=multi-user.target
     echo "\
 alias ${prefix}bitcoin-cli=\"sudo -u bitcoin /usr/local/bin/bitcoin-cli\
  -rpcport=${rpcprefix}8332\"
-alias ${prefix}bitcoind=\"sudo -u bitcoin /usr/local/bin/bitcoind -${CHAIN}\"\
 "  | sudo tee -a /home/admin/_aliases
   fi
   if [ "$(alias | grep -c "alias ${prefix}bitcoinlog")" -eq 0 ];then

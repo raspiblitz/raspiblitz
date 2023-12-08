@@ -24,14 +24,12 @@ bitcoinVersion="" # example: 22.0 .. keep empty if no newer version as sd card b
 # setting download directory to the current user
 downloadDir="/home/$(whoami)/download/bitcoin.update"
 
-# detect CPU architecture & fitting download link
-if [ $(uname -m | grep -c 'arm') -eq 1 ]; then
+# bitcoinOSversion
+if [ "$(uname -m | grep -c 'arm')" -gt 0 ]; then
   bitcoinOSversion="arm-linux-gnueabihf"
-fi
-if [ $(uname -m | grep -c 'aarch64') -eq 1 ]; then
+elif [ "$(uname -m | grep -c 'aarch64')" -gt 0 ]; then
   bitcoinOSversion="aarch64-linux-gnu"
-fi
-if [ $(uname -m | grep -c 'x86_64') -eq 1 ]; then
+elif [ "$(uname -m | grep -c 'x86_64')" -gt 0 ]; then
   bitcoinOSversion="x86_64-linux-gnu"
 fi
 
@@ -161,7 +159,7 @@ if [ "${mode}" = "tested" ] || [ "${mode}" = "reckless" ] || [ "${mode}" = "cust
     echo
   else
     echo
-    echo "# BUILD FAILED --> the PGP verification failed / signature(${goodSignature}) "
+    echo "# BUILD FAILED --> the PGP verification failed) "
     exit 1
   fi
 
@@ -208,7 +206,7 @@ if [ "${mode}" = "tested" ] || [ "${mode}" = "reckless" ] || [ "${mode}" = "cust
   tar -xvf ${binaryName}
   sudo install -m 0755 -o root -g root -t /usr/local/bin/ bitcoin-${bitcoinVersion}/bin/*
   sleep 3
-  if ! sudo -u bitcoin /usr/local/bin/bitcoind --version | grep "${bitcoinVersion}"; then
+  if ! sudo /usr/local/bin/bitcoind --version | grep "${bitcoinVersion}"; then
     echo
     echo "# BUILD FAILED --> Was not able to install bitcoind version(${bitcoinVersion})"
     exit 1
