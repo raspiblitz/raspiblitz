@@ -104,8 +104,8 @@ elif [ "${mode}" = "custom" ]; then
   echo
   echo "# Input the version you would like to install and press ENTER."
   echo "# Examples (versions below 22 are not supported):"
-  echo "22.0rc3"
-  echo "24.0.1"
+  echo "25.1.0"
+  echo "26.0"
   echo
   read bitcoinVersion
   if [ $(echo ${bitcoinVersion} | grep -c "rc") -gt 0 ]; then
@@ -148,48 +148,25 @@ if [ "${mode}" = "tested" ] || [ "${mode}" = "reckless" ] || [ "${mode}" = "cust
   mkdir -p "${downloadDir}"
   cd "${downloadDir}" || exit 1
 
-  # NOTE: this script is run by provision and cannot have user input at this point or it will lock up the provision process
-  # echo "# Enter the github username of a signer. Find the list of signers at: "
-  # echo "https://github.com/bitcoin-core/guix.sigs/tree/main/${pathVersion}"
-  # echo "# Example for Peter Wuille (https://github.com/sipa):"
-  # echo "sipa"
-  # echo "# example for Emzy (https://github.com/Emzy):"
-  # echo "Emzy"
-  # read customSigner
-  # if [ ${#customSigner} -eq 0 ]; then
-  #   customSigner=$fallbackSigner
-  # fi
-  customSigner=$fallbackSigner
+  echo "# Receive signer keys"
+  curl -s "https://api.github.com/repos/bitcoin-core/guix.sigs/contents/builder-keys" |
+    jq -r '.[].download_url' | while read url; do curl -s "$url" | gpg --import; done
 
-  echo "# Download the binary sha256 hash sum file"
-  wget -O all.SHA256SUMS https://raw.githubusercontent.com/bitcoin-core/guix.sigs/main/${pathVersion}/${customSigner}/all.SHA256SUMS
-  echo "# Download signature of the binary sha256 hash sum file"
-  wget -O all.SHA256SUMS.asc https://raw.githubusercontent.com/bitcoin-core/guix.sigs/main/${pathVersion}/${customSigner}/all.SHA256SUMS.asc
+  # download signed binary sha256 hash sum file
+  wget --prefer-family=ipv4 --progress=bar:force -O SHA256SUMS https://bitcoincore.org/bin/bitcoin-core-${bitcoinVersion}/SHA256SUMS
+  # download the signed binary sha256 hash sum file and check
+  wget --prefer-family=ipv4 --progress=bar:force -O SHA256SUMS.asc https://bitcoincore.org/bin/bitcoin-core-${bitcoinVersion}/SHA256SUMS.asc
 
-  echo "# Download PGP pubkey of ${customSigner}"
-  if ! wget -O pubkey.asc https://github.com/${customSigner}.gpg; then
-    echo "# FAIL # Could not down
-    load the PGP pubkey of ${customSigner}"
-    rm pubkey.asc
-    exit 1
-  fi
-  echo "# Import PGP pubkey of ${customSigner}"
-  if ! gpg --import pubkey.asc; then
-    echo "# FAIL # Couldn't import the PGP pubkey of ${customSigner}"
-    rm pubkey.asc
-    exit 1
-  fi
-  rm pubkey.asc
-
-  echo "# Checking PGP signature of the binary sha256 hash sum file"
-  if ! gpg --verify all.SHA256SUMS.asc; then
+  if gpg --verify SHA256SUMS.asc; then
     echo
-    echo "# BUILD FAILED --> the signature does not match"
-    exit 1
+    echo "****************************************"
+    echo "OK --> BITCOIN MANIFEST IS CORRECT"
+    echo "****************************************"
+    echo
   else
     echo
-    echo "# OK --> BITCOIN MANIFEST IS CORRECT"
-    echo
+    echo "# BUILD FAILED --> the PGP verification failed / signature(${goodSignature}) "
+    exit 1
   fi
 
   echo "# Downloading Bitcoin Core v${bitcoinVersion} for ${bitcoinOSversion} ..."
@@ -201,9 +178,9 @@ if [ "${mode}" = "tested" ] || [ "${mode}" = "reckless" ] || [ "${mode}" = "cust
   fi
 
   echo "# Checking the binary checksum ..."
-  if ! sha256sum -c --ignore-missing all.SHA256SUMS; then
+  if ! sha256sum -c --ignore-missing SHA256SUMS; then
     # get the sha256 value for the corresponding platform from signed hash sum file
-    bitcoinSHA256=$(grep -i "${binaryName}}" all.SHA256SUMS | cut -d " " -f1)
+    bitcoinSHA256=$(grep -i "${binaryName}}" SHA256SUMS | cut -d " " -f1)
     echo "# FAIL # Downloaded BITCOIN BINARY CHECKSUM:"
     echo "$(sha256sum ${binaryName})"
     echo "NOT matching SHA256 checksum:"
@@ -235,7 +212,7 @@ if [ "${mode}" = "tested" ] || [ "${mode}" = "reckless" ] || [ "${mode}" = "cust
   tar -xvf ${binaryName}
   sudo install -m 0755 -o root -g root -t /usr/local/bin/ bitcoin-${bitcoinVersion}/bin/*
   sleep 3
-  if ! bitcoind --version | grep "${bitcoinVersion}"; then
+  if ! sudo -u bitcoin /usr/local/bin/bitcoind --version | grep "${bitcoinVersion}"; then
     echo
     echo "# BUILD FAILED --> Was not able to install bitcoind version(${bitcoinVersion})"
     exit 1
