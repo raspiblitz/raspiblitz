@@ -5,7 +5,8 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ];then
   echo
   echo "bitcoin.install.sh install - called by build.sdcard.sh"
   echo "Install or remove parallel chains for Bitcoin Core:"
-  echo "bitcoin.install.sh [install|on|off] [signet|testnet|mainnet]"
+  echo "bitcoin.install.sh install"
+  echo "bitcoin.install.sh [on|off] [signet|testnet|mainnet]"
   echo
   exit 1
 fi
@@ -317,7 +318,7 @@ WantedBy=multi-user.target
 
   isInstalled=$(systemctl status ${prefix}bitcoind | grep -c active)
   if [ $isInstalled -gt 0 ]; then
-    echo "# Installed $(bitcoind --version | grep version)"
+    echo "# Installed $(sudo -u bitcoin bitcoind --version | grep version)"
     echo
     echo "# Monitor the ${prefix}bitcoind with:"
     echo "# sudo tail -f /mnt/hdd/bitcoin/${prefix}debug.log"
