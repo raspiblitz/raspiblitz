@@ -192,29 +192,27 @@ datadir=/mnt/hdd/bitcoin
 
   # make sure rpcbind is correctly configured
   sudo sed -i s/^rpcbind=/main.rpcbind=/g /mnt/hdd/bitcoin/bitcoin.conf
-  if [ $(grep -c "rpcallowip" < /mnt/hdd/bitcoin/bitcoin.conf) -gt 0 ];then
-    if [ $(grep -c "${bitcoinprefix}.rpcbind=" < /mnt/hdd/bitcoin/bitcoin.conf) -eq 0 ];then
-      echo "\
-${bitcoinprefix}.rpcbind=127.0.0.1"|\
-      sudo tee -a /mnt/hdd/bitcoin/bitcoin.conf
+  if grep "rpcallowip" /mnt/hdd/bitcoin/bitcoin.conf; then
+    if ! grep "${bitcoinprefix}.rpcbind=" /mnt/hdd/bitcoin/bitcoin.conf; then
+      echo "${bitcoinprefix}.rpcbind=127.0.0.1" |
+        sudo tee -a /mnt/hdd/bitcoin/bitcoin.conf
     fi
   fi
 
   # correct rpcport entry
   sudo sed -i s/^rpcport=/main.rpcport=/g /mnt/hdd/bitcoin/bitcoin.conf
-  if [ $(grep -c "${bitcoinprefix}.rpcport" < /mnt/hdd/bitcoin/bitcoin.conf) -eq 0 ];then
-    echo "\
-${bitcoinprefix}.rpcport=${rpcprefix}8332"|\
-    sudo tee -a /mnt/hdd/bitcoin/bitcoin.conf
+  if ! grep "${bitcoinprefix}.rpcport" /mnt/hdd/bitcoin/bitcoin.conf; then
+    echo "${bitcoinprefix}.rpcport=${rpcprefix}8332" |
+      sudo tee -a /mnt/hdd/bitcoin/bitcoin.conf
   fi
 
   # correct zmq entry
   sudo sed -i s/^zmqpubraw/main.zmqpubraw/g /mnt/hdd/bitcoin/bitcoin.conf
-  if [ $(grep -c "${bitcoinprefix}.zmqpubrawblock" < /mnt/hdd/bitcoin/bitcoin.conf) -eq 0 ];then
+  if ! grep "${bitcoinprefix}.zmqpubrawblock" /mnt/hdd/bitcoin/bitcoin.conf; then
     echo "\
 ${bitcoinprefix}.zmqpubrawblock=tcp://127.0.0.1:${zmqprefix}332
-${bitcoinprefix}.zmqpubrawtx=tcp://127.0.0.1:${zmqprefix}333"|\
-    sudo tee -a /mnt/hdd/bitcoin/bitcoin.conf
+${bitcoinprefix}.zmqpubrawtx=tcp://127.0.0.1:${zmqprefix}333" |
+      sudo tee -a /mnt/hdd/bitcoin/bitcoin.conf
   fi
 
   # addnode
