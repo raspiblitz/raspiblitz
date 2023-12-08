@@ -81,7 +81,7 @@ if [ "$1" = "checkrepair" ]; then
   # check if sshd host keys are missing / need generation
   countKeyFiles=$(ls -la /etc/ssh/ssh_host_* 2>/dev/null | grep -c "/etc/ssh/ssh_host")
   echo "# countKeyFiles(${countKeyFiles})"
-  if [ ${countKeyFiles} -lt 8 ]; then
+  if [ ${countKeyFiles} -lt 6 ]; then
     echo "# DETECTED: MISSING SSHD KEYFILES --> Generating new ones"
     /home/admin/config.scripts/blitz.ssh.sh renew
   fi
