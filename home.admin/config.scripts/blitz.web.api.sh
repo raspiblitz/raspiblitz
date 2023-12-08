@@ -27,7 +27,7 @@ fi
 if [ "$1" = "info" ]; then
 
   # check if installed
-  cd /home/blitzapi/blitz_api
+  cd /home/blitzapi/blitz_api 2>/dev/null
   if [ "$?" != "0" ]; then
     echo "installed=0"
     exit 1
