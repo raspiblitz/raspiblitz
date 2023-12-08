@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # https://github.com/Ride-The-Lightning/RTL/releases
-RTLVERSION="v0.14.0"
+RTLVERSION="v0.14.1"
 
 # check and load raspiblitz config
 # to know which network is running

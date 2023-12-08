@@ -4,7 +4,7 @@
 
 _Build your own Lightning & Bitcoin Fullnode on a RaspberryPi with an optional Display._
 
-`Version 1.10.0 with bitcoin 25.0.0, lnd 0.16.4 & Core Lightning 23.08.1` ([api](https://github.com/fusion44/blitz_api)|[web](https://github.com/raspiblitz/raspiblitz-web))
+`Version 1.11.0rc0 with bitcoin 26.0, lnd 0.17.2 & Core Lightning 23.11` ([api](https://github.com/fusion44/blitz_api)|[web](https://github.com/raspiblitz/raspiblitz-web))
 
 ![RaspiBlitz](pictures/raspiblitz.jpg)
 
@@ -54,7 +54,7 @@ Additional Services that can be installed thru WebUI (beginners):
 Further Services that are just available thru SSH menu (advanced users):
 
 - **ElectRS** (Electrum Server in Rust) [details](https://github.com/romanz/electrs)
-- **SpecterDesktop** (Multisig Trezor, Ledger, COLDCARDwallet & Specter-DIY) [details](https://github.com/cryptoadvance/specter-desktop) [app connection guide](https://d11n.net/connect-specter-desktor-with-raspiblitz.html)
+- **SpecterDesktop** (Multisig Trezor, Ledger, COLDCARDwallet & Specter-DIY) [details](https://github.com/cryptoadvance/specter-desktop) [app connection guide](https://web.archive.org/web/20220815214301/https://www.d11n.net/connect-specter-desktor-with-raspiblitz.html)
 - **Lightning Terminal (Loop, Pool & Faraday)** (Manage Channel Liquidity) [details](https://github.com/lightninglabs/lightning-terminal#lightning-terminal-lit)
 - **JoinMarket** (CoinJoin Service) [details](https://github.com/JoinMarket-Org/joinmarket-clientserver)
 - **JoinMarket Web UI** (Browser-based interface for JoinMarket) [details](https://github.com/joinmarket-webui/joinmarket-webui)

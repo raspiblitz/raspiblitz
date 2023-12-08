@@ -1,10 +1,11 @@
 ## What's new in Version 1.11.0 of RaspiBlitz?
 
-- Update: Bitcoin Core v25.1 [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-25.1.md)
+- Update: Bitcoin Core v26.0 [details](https://bitcoincore.org/en/releases/26.0/)
 - Update: LND v0.17.2-beta [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.17.2-beta)
 - Update: Core Lightning v23.11 [details](https://github.com/ElementsProject/lightning/releases/tag/v23.11)
 - Update: BTCPayServer v1.11.7 [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.11.7)
 - Update: Channel Tools (chantools) v0.12.0 [details](https://github.com/lightninglabs/chantools/releases/tag/v0.12.0)
+- Update: LNbits 0.11.2 [details](https://github.com/lnbits/lnbits/releases/tag/0.11.2)
 - Deprecated: Homer Dashboard (remove from SSH menus, config script will stay with possible future removal)
 - Deprecated: Bitcoinminds (remove from SSH menus, config script will stay with possible future removal)
 - Remove: ItchySats (unmaintained project / in consent with dev)
@@ -437,4 +438,3 @@ Version 1.1 packs some first fixes and enhancements to make the RaspiBlitz more 
 - Removed: FTP download option for blockchain
 
 For full details see issue list of [Release 1.1 Milestone](https://github.com/rootzoll/raspiblitz/milestone/3?closed=1).
-
