@@ -8,7 +8,8 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "tested -> only do a tested update by the RaspiBlitz team"
   echo "reckless -> the update was not tested by the RaspiBlitz team"
   echo "custom <version> <skipverify> -> update to a chosen version"
-  echo " the binary will be checked by signature and checksum in all cases"
+  echo " the binary checksum and signatures will be checked in all cases"
+  echo " except when 'skipverify' is used"
   echo
   exit 1
 fi
