@@ -20,7 +20,7 @@ echo "# Running: bitcoin.update.sh $*"
 mode="$1"
 
 # RECOMMENDED UPDATE BY RASPIBLITZ TEAM (just possible once per sd card update)
-# comment will be shown as "BEWARE Info" when option is choosen (can be multiple lines)
+# comment will be shown as "BEWARE Info" when option is chosen (can be multiple lines)
 bitcoinVersion="" # example: 22.0 .. keep empty if no newer version as sd card build is available
 
 # GATHER DATA
