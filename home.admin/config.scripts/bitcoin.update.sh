@@ -7,11 +7,13 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "info -> get actual state and possible actions"
   echo "tested -> only do a tested update by the RaspiBlitz team"
   echo "reckless -> the update was not tested by the RaspiBlitz team"
-  echo "custom -> update to a chosen version"
+  echo "custom <version> <skipverify> -> update to a chosen version"
   echo " the binary will be checked by signature and checksum in all cases"
   echo
   exit 1
 fi
+
+echo "# Running: bitcoin.update.sh $*"
 
 # 1. parameter [info|tested|reckless]
 mode="$1"
@@ -92,16 +94,21 @@ elif [ "${mode}" = "reckless" ]; then
   pathVersion=${bitcoinVersion}
 
 elif [ "${mode}" = "custom" ]; then
-  clear
-  echo
-  echo "# Update Bitcoin Core to a chosen version."
-  echo
-  echo "# Input the version you would like to install and press ENTER."
-  echo "# Examples (versions below 22 are not supported):"
-  echo "25.1.0"
-  echo "26.0"
-  echo
-  read bitcoinVersion
+  if [ $# -gt 1 ]; then
+    bitcoinVersion="$2"
+  else
+    clear
+    echo
+    echo "# Update Bitcoin Core to a chosen version."
+    echo
+    echo "# Input the version you would like to install and press ENTER."
+    echo "# Examples (versions below 22.1 are not supported):"
+    echo "24.0.1"
+    echo "26.0"
+    echo
+    read bitcoinVersion
+  fi
+
   if [ $(echo ${bitcoinVersion} | grep -c "rc") -gt 0 ]; then
     cutVersion=$(echo ${bitcoinVersion} | awk -F"r" '{print $1}')
     rcVersion=$(echo ${bitcoinVersion} | awk -F"r" '{print $2}')
@@ -114,6 +121,9 @@ elif [ "${mode}" = "custom" ]; then
   if curl --output /dev/null --silent --head --fail \
     https://bitcoincore.org/bin/bitcoin-core-${pathVersion}/SHA256SUMS.asc; then
     echo "# OK version exists at https://bitcoincore.org/bin/bitcoin-core-${pathVersion}"
+    if [ "${mode}" = "custom" ] && [ "$3" = "skipverify" ]; then
+      echo "# skipping signature verification"
+    fi
     echo "# Press ENTER to proceed to install Bitcoin Core $bitcoinVersion or CTRL+C to abort."
     read key
   else
@@ -151,16 +161,25 @@ if [ "${mode}" = "tested" ] || [ "${mode}" = "reckless" ] || [ "${mode}" = "cust
   # download the signed binary sha256 hash sum file and check
   wget --prefer-family=ipv4 --progress=bar:force -O SHA256SUMS.asc https://bitcoincore.org/bin/bitcoin-core-${bitcoinVersion}/SHA256SUMS.asc
 
-  if gpg --verify SHA256SUMS.asc; then
-    echo
-    echo "****************************************"
-    echo "OK --> BITCOIN MANIFEST IS CORRECT"
-    echo "****************************************"
-    echo
+  if [ "${mode}" = "custom" ] && [ "$3" = "skipverify" ]; then
+    echo "# skipping signature verification"
+    echo "# display the output of 'gpg --verify SHA256SUMS.asc'"
+    gpg --verify SHA256SUMS.asc
   else
-    echo
-    echo "# BUILD FAILED --> the PGP verification failed"
-    exit 1
+    if gpg --verify SHA256SUMS.asc; then
+      echo
+      echo "****************************************"
+      echo "OK --> BITCOIN MANIFEST IS CORRECT"
+      echo "****************************************"
+      echo
+    else
+      echo
+      echo "# BUILD FAILED --> the PGP verification failed"
+      echo "# try again or with a different version"
+      echo "# if you want to skip verifying all signatures (and just show them) use the command:"
+      echo "# /home/admin/config.scripts/bonus.bitcoin.sh custom ${bitcoinVersion:-<version>} skipverify"
+      exit 1
+    fi
   fi
 
   echo "# Downloading Bitcoin Core v${bitcoinVersion} for ${bitcoinOSversion} ..."
