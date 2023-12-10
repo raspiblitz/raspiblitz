@@ -1,4 +1,4 @@
-# Boostrap the RaspiBlitz
+# Bootstrap the RaspiBlitz
 # /etc/systemd/system/bootstrap.service
 
 [Unit]
