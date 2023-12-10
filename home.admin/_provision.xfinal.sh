@@ -35,6 +35,6 @@ sudo rm /var/cache/raspiblitz/temp/raspiblitz.setup
 sudo cp /home/admin/raspiblitz.log /home/admin/raspiblitz.setup.log
 sudo chmod 640 /home/admin/raspiblitz.setup.log
 sudo chown root:sudo /home/admin/raspiblitz.setup.log
-timeout 120 /home/admin/config.scripts/blitz.shutdown.sh reboot finalsetup
+timeout 120 sudo /home/admin/config.scripts/blitz.shutdown.sh reboot finalsetup
 # if system has not rebooted yet - force reboot directly
 sudo shutdown -r now
