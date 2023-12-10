@@ -477,6 +477,17 @@ if [ "${baseimage}" = "raspios_arm64" ]; then
   else
     echo "$fsOption2 already in $kernelOptionsFile"
   fi
+
+  # *** SAFE SHUTDOWN ***
+  # logind
+  echo "[Login]" | tee /etc/systemd/logind.conf.d/safeshutdown.conf
+  echo "HandlePowerKey=ignore" | tee -a /etc/systemd/logind.conf.d/safeshutdown.conf
+  # sudoers
+  echo 'nobody ALL=(ALL) NOPASSWD: /home/admin/config.scripts/blitz.shutdown.sh' |
+    tee -a /etc/sudoers
+  # triggerhappy
+  echo 'KEY_POWER    1    sudo /home/admin/config.scripts/blitz.shutdown.sh' |
+    tee /etc/triggerhappy/triggers.d/powerbutton.conf
 fi
 
 # special prepare when Nvidia Jetson Nano
