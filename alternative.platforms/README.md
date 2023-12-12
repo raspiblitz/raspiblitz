@@ -90,7 +90,7 @@ These not need installation, password: `osboxes.org`
   Options:
     -EXPORT                                  just print build parameters & exit'
     -h, --help                               this help info
-    -i, --interaction [0|1]                  interaction before proceeding with exection (default: 1)
+    -i, --interaction [0|1]                  interaction before proceeding with execution (default: 1)
     -f, --fatpack [0|1]                      fatpack mode (default: 1)
     -u, --github-user [raspiblitz|other]       github user to be checked from the repo (default: raspiblitz)
     -b, --branch [v1.7|v1.8]                 branch to be built on (default: v1.10)
