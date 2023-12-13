@@ -120,7 +120,7 @@ function restart() {
   echo "Command to restart your RaspiBlitz"
   confirmMsg restart
   if [ $confirm -eq 1 ]; then
-    /home/admin/config.scripts/blitz.shutdown.sh reboot
+    sudo /home/admin/config.scripts/blitz.shutdown.sh reboot
   fi
 }
 
@@ -220,7 +220,7 @@ function off() {
   echo "Command to power off your RaspiBlitz"
   confirmMsg off
   if [ $confirm -eq 1 ]; then
-    /home/admin/config.scripts/blitz.shutdown.sh
+    sudo /home/admin/config.scripts/blitz.shutdown.sh
   fi
 }
 
