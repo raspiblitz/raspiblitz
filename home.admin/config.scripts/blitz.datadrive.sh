@@ -520,7 +520,7 @@ if [ "$1" = "status" ]; then
     hddAdapterUSAP=0
     
     # check if force UASP flag is set on sd card
-    if [ -f "/boot/uasp.force" ]; then
+    if [ -f "/boot/firmware/uasp.force" ]; then
       hddAdapterUSAP=1
     fi
     # or UASP is set by config file
