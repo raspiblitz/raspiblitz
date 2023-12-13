@@ -173,18 +173,23 @@ if [ "$1" = "status" ]; then
       else
         # default hdd set, when there is no OSpartition and there might be no partitions at all
         echo "# else"
+        echo "# testsize(${testsize})"
+        echo "# sizeDataPartition(${sizeDataPartition})"
+
         if [ "${OSPartition}" = "root" ] && [ "${hdd}" = "" ] && [ "${testdevice}" != "" ]; then
           echo "# OSPartition = root"
           hdd="${testdevice}"
         fi
+
 	      # make sure to use the biggest
         if [ ${testsize} -gt ${sizeDataPartition} ]; then
 	        # Partition to be created is smaller than disk so this is not correct (but close)
-          echo "# testsize(${testsize}) > sizeDataPartition(${sizeDataPartition})"
+          echo "# testsize > sizeDataPartition"
           sizeDataPartition=$(fdisk -l /dev/$testdevice | grep GiB | cut -d " " -f 5)
           hddDataPartition="${testdevice}1"
           hdd="${testdevice}"
 	      fi
+
       fi
 
       echo "# testpartitioncount($testpartitioncount)"
