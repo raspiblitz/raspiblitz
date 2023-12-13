@@ -695,10 +695,13 @@ if [ "$1" = "format" ]; then
   if [ $wipePartitions -eq 1 ]; then
      # wipe all partitions and write fresh GPT
      >&2 echo "# Wiping all partitions (sfdisk/wipefs)"
+     >&2 echo "# sfdisk"
      sfdisk --delete /dev/${hdd}
      sleep 4
+     >&2 echo "# wipefs"
      wipefs -a /dev/${hdd}
      sleep 4
+     >&2 echo "# lsblk"
      partitions=$(lsblk | grep -c "─${hdd}")
      if [ ${partitions} -gt 0 ]; then
        >&2 echo "# WARNING: partitions are still not clean - try Quick & Dirty"
@@ -710,6 +713,7 @@ if [ "$1" = "format" ]; then
        echo "error='partition cleaning failed'"
        exit 1
      fi
+     >&2 echo "# parted"
      parted -s /dev/${hdd} mklabel gpt 1>/dev/null 1>&2
      sleep 2
      sync
