@@ -160,7 +160,7 @@ patch()
       if [ $? -eq 0 ]; then
         clear
         echo "REBOOT .."
-        /home/admin/config.scripts/blitz.shutdown.sh reboot
+        sudo /home/admin/config.scripts/blitz.shutdown.sh reboot
         sleep 8
         exit 1
       else
@@ -269,7 +269,7 @@ Do you really want to update LND now?
       if [ ${#error} -gt 0 ]; then
         whiptail --title "ERROR" --msgbox "${error}" 8 30
       else
-        /home/admin/config.scripts/blitz.shutdown.sh reboot
+        sudo /home/admin/config.scripts/blitz.shutdown.sh reboot
         sleep 8
       fi
       ;;
@@ -293,7 +293,7 @@ Do you really want to update LND now?
       if [ ${#error} -gt 0 ]; then
         whiptail --title "ERROR" --msgbox "${error}" 8 30
       else
-        /home/admin/config.scripts/blitz.shutdown.sh reboot
+        sudo /home/admin/config.scripts/blitz.shutdown.sh reboot
         sleep 8
       fi
       ;;
@@ -418,7 +418,7 @@ Do you really want to update Bitcoin Core now?
       error=""
       warn=""
       sudo -u admin /home/admin/config.scripts/bitcoin.update.sh tested
-      /home/admin/config.scripts/blitz.shutdown.sh reboot
+      sudo /home/admin/config.scripts/blitz.shutdown.sh reboot
       ;;
     RECKLESS)
       whiptail --title "UNTESTED Bitcoin Core update to ${bitcoinLatestVersion}" --yes-button "Cancel" \
@@ -439,11 +439,11 @@ Do you really want to update Bitcoin Core now?
       if [ ${#error} -gt 0 ]; then
         whiptail --title "ERROR" --msgbox "${error}" 8 30
       fi
-      /home/admin/config.scripts/blitz.shutdown.sh reboot
+      sudo /home/admin/config.scripts/blitz.shutdown.sh reboot
       ;;
     CUSTOM)
       sudo -u admin /home/admin/config.scripts/bitcoin.update.sh custom
-      /home/admin/config.scripts/blitz.shutdown.sh reboot
+      sudo /home/admin/config.scripts/blitz.shutdown.sh reboot
       ;;
   esac
 }
