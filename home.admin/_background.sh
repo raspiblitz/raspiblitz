@@ -485,8 +485,8 @@ do
         mkdir -p /home/admin/backups/scb/ 2>/dev/null
         cp $scbPath $localBackupPath
         cp $scbPath $localTimestampedPath
-        cp $scbPath /boot/channel.backup
-        echo "OK channel.backup copied to '${localBackupPath}' and '${localTimestampedPath}' and '/boot/channel.backup'"
+        cp $scbPath /boot/firmware/channel.backup
+        echo "OK channel.backup copied to '${localBackupPath}' and '${localTimestampedPath}' and '/boot/firmware/channel.backup'"
 
         # check if a additional local backup target is set
         # see ./config.scripts/blitz.backupdevice.sh
@@ -591,8 +591,8 @@ do
         mkdir -p /home/admin/backups/er/ 2>/dev/null
         cp $erPath $localBackupPath
         cp $erPath $localTimestampedPath
-        cp $erPath /boot/${netprefix}emergency.recover
-        echo "OK emergency.recover copied to '${localBackupPath}' and '${localTimestampedPath}' and '/boot/${netprefix}emergency.recover'"
+        cp $erPath /boot/firmware/${netprefix}emergency.recover
+        echo "OK emergency.recover copied to '${localBackupPath}' and '${localTimestampedPath}' and '/boot/firmware/${netprefix}emergency.recover'"
 
         # check if a additional local backup target is set
         # see ./config.scripts/blitz.backupdevice.sh
