@@ -19,8 +19,8 @@ fi
 
 echo "# Running: bitcoin.install.sh $*"
 
-# CHAIN is mainnet | testnet | signet
-CHAIN=$2
+# mainnet | testnet | signet
+CHAIN=${2:-mainnet}
 if [ "${CHAIN}" != signet ] && [ "${CHAIN}" != testnet ] && [ "${CHAIN}" != mainnet ]; then
   echo "# ${CHAIN} is not supported"
   exit 1
