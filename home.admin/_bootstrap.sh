@@ -127,11 +127,11 @@ source ${configFile} 2>/dev/null
 ######################################
 # CHECK SD CARD STATE
 
-# when a file 'stop' is on the sd card boot partition - stop for manual provision
-flagExists=$(sudo ls /boot/stop | grep -c 'stop')
+# when a file 'stop' is on the sd card bootfs partition root - stop for manual provision
+flagExists=$(sudo ls /boot/firmware/stop | grep -c 'stop')
 if [ "${flagExists}" == "1" ]; then
   # remove flag
-  sudo rm /boot/stop
+  sudo rm /boot/firmware/stop
   # set state info
   /home/admin/_cache.sh set state "stop"
   /home/admin/_cache.sh set message "stopped for manual provision"
@@ -230,11 +230,11 @@ systemInitReboot=0
 ################################
 # FORCED SWITCH TO HDMI
 # if a file called 'hdmi' gets
-# placed onto the boot part of
+# placed onto the bootfs part of
 # the sd card - switch to hdmi
 ################################
 
-forceHDMIoutput=$(sudo ls /boot/hdmi* 2>/dev/null | grep -c hdmi)
+forceHDMIoutput=$(sudo ls /boot/firmware/hdmi* 2>/dev/null | grep -c hdmi)
 if [ ${forceHDMIoutput} -eq 1 ]; then
   # delete that file (to prevent loop)
   sudo rm /boot/hdmi*
@@ -310,10 +310,10 @@ fi
 # the sd card - delete old ssh data
 ################################
 
-sshReset=$(sudo ls /boot/ssh.reset* 2>/dev/null | grep -c reset)
+sshReset=$(sudo ls /boot/firmware/ssh.reset* 2>/dev/null | grep -c reset)
 if [ ${sshReset} -eq 1 ]; then
   # delete that file (to prevent loop)
-  rm /boot/ssh.reset* >> $logFile
+  rm /boot/firmware/ssh.reset* >> $logFile
   # delete ssh certs
   echo "SSHRESET switch found ... stopping SSH and deleting old certs" >> $logFile
   /home/admin/config.scripts/blitz.ssh.sh renew >> $logFile
@@ -557,7 +557,7 @@ if [ ${isMounted} -eq 0 ]; then
       
     # check if there is a flag set on sd card boot section to format as btrfs (experimental)
     filesystem="ext4"
-    flagBTRFS=$(sudo ls /boot/btrfs* 2>/dev/null | grep -c btrfs)
+    flagBTRFS=$(sudo ls /boot/firmware/btrfs* 2>/dev/null | grep -c btrfs)
     if [ "${flagBTRFS}" != "0" ]; then
       echo "Found BTRFS flag ---> formatting with experimental BTRFS filesystem" >> ${logFile}
       filesystem="btrfs"
@@ -987,7 +987,7 @@ fi
 # FORCE UASP FLAG
 ####################
 # if uasp.force flag was set on sd card - now move into raspiblitz.conf
-if [ -f "/boot/uasp.force" ]; then
+if [ -f "/boot/firmware/uasp.force" ]; then
   /home/admin/config.scripts/blitz.conf.sh set forceUasp "on"
   echo "DONE forceUasp=on recorded in raspiblitz.conf" >> $logFile
 fi

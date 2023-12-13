@@ -24,7 +24,7 @@ if [ "${needsExpansion}" == "1" ]; then
 
     # write a stop file to prevent full bootstrap
     # after fsexpand reboot
-    touch /boot/stop
+    touch /boot/firmware/stop
 
     # trigger fsexpand
     /home/admin/config.scripts/blitz.bootdrive.sh fsexpand
