@@ -746,9 +746,10 @@ if [ "$1" = "format" ]; then
      mkdir -p /tmp/ext4 1>/dev/null
      if [ $ext4IsPartition -eq 0 ]; then
         # write new EXT4 partition
-        >&2 echo "# Creating the one big partition"
+        >&2 echo "# Creating the one big partition hdd(${hdd})"
         parted -s /dev/${hdd} mkpart primary ext4 1024KiB 100% 1>&2
         sleep 6
+        >&2 echo "# sync"
         sync
         # loop until the partition gets available
         loopdone=0
