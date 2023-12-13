@@ -121,8 +121,8 @@ if [ "$1" = "status" ]; then
         testsize=0
       fi
 
-      echo "# line($line)"
-      echo "# testname(${testname}) testdevice(${testdevice}) testpartition(${testpartition}) testsize(${testsize})"
+      # echo "# line($line)"
+      # echo "# testname(${testname}) testdevice(${testdevice}) testpartition(${testpartition}) testsize(${testsize})"
 
       # count partitions
       testpartitioncount=0
@@ -162,7 +162,7 @@ if [ "$1" = "status" ]; then
 
       elif [ $testpartitioncount -gt 0 ]; then
         # if a partition was found - make sure to skip the OS and boot partitions
-        echo "# testpartitioncount > 0"
+        # echo "# testpartitioncount > 0"
         if [ "${testpartition}" != "${OSPartition}" ] && [ "${testpartition}" != "${bootPartition}" ]; then
           # make sure to use the biggest
           if [ ${testsize} -gt ${sizeDataPartition} ]; then
@@ -174,19 +174,19 @@ if [ "$1" = "status" ]; then
 
       else
         # default hdd set, when there is no OSpartition and there might be no partitions at all
-        echo "# else"
-        echo "# testsize(${testsize})"
-        echo "# sizeDataPartition(${sizeDataPartition})"
+        # echo "# else"
+        # echo "# testsize(${testsize})"
+        # echo "# sizeDataPartition(${sizeDataPartition})"
 
         if [ "${OSPartition}" = "mmcblk0p2" ] && [ "${hdd}" = "" ] && [ "${testdevice}" != "" ]; then
-          echo "# OSPartition = mmcblk0p2"
+          # echo "# OSPartition = mmcblk0p2"
           hdd="${testdevice}"
         fi
 
 	      # make sure to use the biggest
         if [ ${testsize} -gt ${sizeDataPartition} ]; then
 	        # Partition to be created is smaller than disk so this is not correct (but close)
-          echo "# testsize > sizeDataPartition"
+          # echo "# testsize > sizeDataPartition"
           sizeDataPartition=$(fdisk -l /dev/$testdevice | grep GiB | cut -d " " -f 5)
           hddDataPartition="${testdevice}1"
           hdd="${testdevice}"
@@ -194,10 +194,10 @@ if [ "$1" = "status" ]; then
 
       fi
 
-      echo "# testpartitioncount($testpartitioncount)"
-      echo "# OSPartition(${OSPartition})"
-      echo "# bootPartition(${bootPartition})"
-      echo "# hdd(${hdd})"
+      # echo "# testpartitioncount($testpartitioncount)"
+      # echo "# OSPartition(${OSPartition})"
+      # echo "# bootPartition(${bootPartition})"
+      # echo "# hdd(${hdd})"
 
     done < .lsblk.tmp
     rm -f .lsblk.tmp 1>/dev/null 2>/dev/null
