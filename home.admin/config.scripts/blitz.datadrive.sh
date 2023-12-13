@@ -109,10 +109,10 @@ if [ "$1" = "status" ]; then
       testname=$(echo $line | cut -d " " -f 1 | sed 's/[^a-z0-9]*//g')
       if [ $(echo $line | grep -c "nvme") = 0 ]; then
         testdevice=$(echo $testname | sed 's/[^a-z]*//g')
-	  testpartition=$(echo $testname | grep -P '[a-z]{3,5}[0-9]{1}')
+	      testpartition=$(echo $testname | grep -P '[a-z]{3,5}[0-9]{1}')
       else
-	testdevice=$(echo $testname | sed 's/\([^p]*\).*/\1/')
-	testpartition=$(echo $testname | grep -P '[p]{1}')
+	      testdevice=$(echo $testname | sed 's/\([^p]*\).*/\1/')
+	      testpartition=$(echo $testname | grep -P '[p]{1}')
       fi
 	  
       if [ ${#testpartition} -gt 0 ]; then
@@ -121,8 +121,8 @@ if [ "$1" = "status" ]; then
         testsize=0
       fi
 
-      #echo "# line($line)"
-      #echo "# testname(${testname}) testdevice(${testdevice}) testpartition(${testpartition}) testsize(${testsize})"
+      echo "# line($line)"
+      echo "# testname(${testname}) testdevice(${testdevice}) testpartition(${testpartition}) testsize(${testsize})"
 
       # count partitions
       testpartitioncount=0
@@ -132,34 +132,32 @@ if [ "$1" = "status" ]; then
         testpartitioncount=$((testpartitioncount-1))
       fi
 
-      #echo "# testpartitioncount($testpartitioncount)"
-      #echo "# testpartitioncount(${testpartitioncount})"
-      #echo "# OSPartition(${OSPartition})"
-      #echo "# bootPartition(${bootPartition})"
-      #echo "# hdd(${hdd})"
-
       if [ "$(uname -m)" = "x86_64" ]; then
-	if [ $(echo "$testpartition" | grep -c "nvme")  = 0 ]; then
+	      
+        if [ $(echo "$testpartition" | grep -c "nvme")  = 0 ]; then
           testParentDisk=$(echo "$testpartition" | sed 's/[^a-z]*//g')
-	else
+	      else
           testParentDisk=$(echo "$testpartition" | sed 's/\([^p]*\).*/\1/')
-   	fi
-	if [ $(echo "$OSPartition" | grep -c "nvme")  = 0 ]; then
+   	    fi
+	      
+        if [ $(echo "$OSPartition" | grep -c "nvme")  = 0 ]; then
           OSParentDisk=$(echo "$OSPartition" | sed 's/[^a-z]*//g')
-	else
+	      else
           OSParentDisk=$(echo "$OSPartition" | sed 's/\([^p]*\).*/\1/')
         fi
+        
         if [ $(echo "$bootPartition" | grep -c "nvme")  = 0 ]; then	
           bootParentDisk=$(echo "$bootPartition" | sed 's/[^a-z]*//g')
-	else
-	  bootParentDisk=$(echo "$bootPartition" | sed 's/\([^p]*\).*/\1/')
-	fi
+	      else
+	        bootParentDisk=$(echo "$bootPartition" | sed 's/\([^p]*\).*/\1/')
+	      fi
 		  
         if [ "$testdevice" != "$OSParentDisk" ] && [ "$testdevice" != "$bootParentDisk" ];then
           sizeDataPartition=${testsize}
           hddDataPartition="${testpartition}"
           hdd="${testdevice}"
         fi
+
       elif [ $testpartitioncount -gt 0 ]; then
         # if a partition was found - make sure to skip the OS and boot partitions
         if [ "${testpartition}" != "${OSPartition}" ] && [ "${testpartition}" != "${bootPartition}" ]; then
@@ -170,19 +168,27 @@ if [ "$1" = "status" ]; then
             hdd="${testdevice}"
           fi
         fi
+
       else
         # default hdd set, when there is no OSpartition and there might be no partitions at all
         if [ "${OSPartition}" = "root" ] && [ "${hdd}" = "" ] && [ "${testdevice}" != "" ]; then
           hdd="${testdevice}"
         fi
-	# make sure to use the biggest
+	      # make sure to use the biggest
         if [ ${testsize} -gt ${sizeDataPartition} ]; then
-	  # Partition to be created is smaller than disk so this is not correct (but close)
+	        # Partition to be created is smaller than disk so this is not correct (but close)
           sizeDataPartition=$(fdisk -l /dev/$testdevice | grep GiB | cut -d " " -f 5)
           hddDataPartition="${testdevice}1"
           hdd="${testdevice}"
-	fi
+	      fi
       fi
+
+      echo "# testpartitioncount($testpartitioncount)"
+      echo "# testpartitioncount(${testpartitioncount})"
+      echo "# OSPartition(${OSPartition})"
+      echo "# bootPartition(${bootPartition})"
+      echo "# hdd(${hdd})"
+
     done < .lsblk.tmp
     rm -f .lsblk.tmp 1>/dev/null 2>/dev/null
 
