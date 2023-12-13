@@ -346,7 +346,7 @@ case $CHOICE in
     echo
     echo "Press ENTER when your backup download is done to shutdown."
     read key
-    /home/admin/config.scripts/blitz.shutdown.sh
+    sudo /home/admin/config.scripts/blitz.shutdown.sh
     ;;
   RESET-LND)
     askLNDbackupCopy
