@@ -2,8 +2,8 @@
 
 #########################################################################
 # Build your SD card image based on: 2023-10-10-raspios-bookworm-arm64.img.xz
-# https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2023-10-10/
-# SHA256: 1702d6494e8fc1036c39d73d99a5b7e0bfb5352fd2cf35fd940c66ceb37d2c0a
+# https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2023-12-06/
+# SHA256: 5c54f0572d61e443a32dfa80aa8d918049814bfc70ab977f2d545eef45f1658e
 # PGP fingerprint: 8738CD6B956F460C
 # PGP key: https://www.raspberrypi.org/raspberrypi_downloads.gpg.key
 # setup fresh SD card with image above - login via SSH and run this script:
