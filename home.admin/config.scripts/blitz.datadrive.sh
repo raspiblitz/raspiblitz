@@ -134,6 +134,8 @@ if [ "$1" = "status" ]; then
 
       if [ "$(uname -m)" = "x86_64" ]; then
 	      
+        # For PC systems
+
         if [ $(echo "$testpartition" | grep -c "nvme")  = 0 ]; then
           testParentDisk=$(echo "$testpartition" | sed 's/[^a-z]*//g')
 	      else
@@ -176,8 +178,8 @@ if [ "$1" = "status" ]; then
         echo "# testsize(${testsize})"
         echo "# sizeDataPartition(${sizeDataPartition})"
 
-        if [ "${OSPartition}" = "root" ] && [ "${hdd}" = "" ] && [ "${testdevice}" != "" ]; then
-          echo "# OSPartition = root"
+        if [ "${OSPartition}" = "mmcblk0p2" ] && [ "${hdd}" = "" ] && [ "${testdevice}" != "" ]; then
+          echo "# OSPartition = mmcblk0p2"
           hdd="${testdevice}"
         fi
 
