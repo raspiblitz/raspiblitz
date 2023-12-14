@@ -437,15 +437,16 @@ if [ "${baseimage}" = "raspios_arm64" ]; then
   # see https://github.com/rootzoll/raspiblitz/issues/428#issuecomment-472822840
 
   configFile="/boot/config.txt"
-  max_usb_current="max_usb_current=1"
-  max_usb_currentDone=$(grep -c "$max_usb_current" $configFile)
+  raspiblitzEdits=$(grep -c "Raspiblitz" $configFile)
 
-  if [ ${max_usb_currentDone} -eq 0 ]; then
+  if [ ${raspiblitzEdits} -eq 0 ]; then
+    echo "# Raspiblitz Edits adding to $configFile"
     echo | tee -a $configFile
     echo "# Raspiblitz" | tee -a $configFile
-    echo "$max_usb_current" | tee -a $configFile
+    echo "max_usb_current=1" | tee -a $configFile
+    echo "dtparam=nvme" | tee -a $configFile
   else
-    echo "$max_usb_current already in $configFile"
+    echo "# Raspiblitz Edits already in $configFile"
   fi
 
   # run fsck on sd root partition on every startup to prevent "maintenance login" screen
