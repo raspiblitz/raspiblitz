@@ -445,6 +445,8 @@ if [ "${baseimage}" = "raspios_arm64" ]; then
     echo "# Raspiblitz" | tee -a $configFile
     echo "max_usb_current=1" | tee -a $configFile
     echo "dtparam=nvme" | tee -a $configFile
+    echo 'dtoverlay=pi3-disable-bt' | tee -a $configFile
+    echo 'dtoverlay=disable-bt' | tee -a $configFile
   else
     echo "# Raspiblitz Edits already in $configFile"
   fi
@@ -753,21 +755,6 @@ if [ "${baseimage}" = "raspios_arm64"  ] || [ "${baseimage}" = "debian" ]; then
     echo -e "\n*** DISABLE WIFI ***"
     systemctl disable wpa_supplicant.service
     ifconfig wlan0 down
-  fi
-
-  echo -e "\n*** DISABLE BLUETOOTH ***"
-  configFile="/boot/config.txt"
-  disableBT="dtoverlay=disable-bt"
-  disableBTDone=$(grep -c "$disableBT" $configFile)
-
-  if [ "${disableBTDone}" -eq 0 ]; then
-    # disable bluetooth module
-    echo "" | tee -a $configFile
-    echo "# Raspiblitz" | tee -a $configFile
-    echo 'dtoverlay=pi3-disable-bt' | tee -a $configFile
-    echo 'dtoverlay=disable-bt' | tee -a $configFile
-  else
-    echo "disable BT already in $configFile"
   fi
 
   # remove bluetooth services
