@@ -2,10 +2,11 @@
 
 #########################################################################
 # Build your SD card image based on: 2023-10-10-raspios-bookworm-arm64.img.xz
-# https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2023-10-10/
-# SHA256: 1702d6494e8fc1036c39d73d99a5b7e0bfb5352fd2cf35fd940c66ceb37d2c0a
-# PGP fingerprint: 8738CD6B956F460C
-# PGP key: https://www.raspberrypi.org/raspberrypi_downloads.gpg.key
+# https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2023-12-06/
+# SHA256: 5c54f0572d61e443a32dfa80aa8d918049814bfc70ab977f2d545eef45f1658e
+# also change in: raspiblitz/ci/arm64-rpi/build.arm64-rpi.pkr.hcl
+# PGP fingerprint: 8738CD6B956F460C - to check signature:
+# curl -O https://www.raspberrypi.org/raspberrypi_downloads.gpg.key && gpg --import ./raspberrypi_downloads.gpg.key && gpg --verify *.sig 
 # setup fresh SD card with image above - login via SSH and run this script:
 ##########################################################################
 
@@ -32,7 +33,7 @@ Options:
   -h, --help                               this help info
   -i, --interaction [0|1]                  interaction before proceeding with execution (default: 1)
   -f, --fatpack [0|1]                      fatpack mode (default: 1)
-  -u, --github-user [raspiblitz|other]       github user to be checked from the repo (default: ${defaultRepo})
+  -u, --github-user [raspiblitz|other]     github user to be checked from the repo (default: ${defaultRepo})
   -b, --branch [v1.7|v1.8]                 branch to be built on (default: ${defaultBranch})
   -d, --display [lcd|hdmi|headless]        display class (default: lcd)
   -t, --tweak-boot-drive [0|1]             tweak boot drives (default: 1)
