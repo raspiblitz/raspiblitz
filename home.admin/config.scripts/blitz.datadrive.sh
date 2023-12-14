@@ -747,7 +747,7 @@ if [ "$1" = "format" ]; then
      if [ $ext4IsPartition -eq 0 ]; then
         # write new EXT4 partition
         >&2 echo "# Creating the one big partition - hdd(${hdd})"
-        parted -s /dev/${hdd} mkpart primary ext4 1024KiB 100% 1>&2
+        parted -s /dev/${hdd} mkpart primary ext4 0% 100% 1>&2
         sleep 6
         >&2 echo "# sync"
         sync
