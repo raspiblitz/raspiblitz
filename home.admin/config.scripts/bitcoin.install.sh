@@ -1,58 +1,101 @@
 #!/bin/bash
 
+# set version (change if update is available)
+# https://bitcoincore.org/en/download/
+bitcoinVersion="26.0"
+
+
 # command info
-if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ];then
+if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo
   echo "bitcoin.install.sh install - called by build.sdcard.sh"
   echo "Install or remove parallel chains for Bitcoin Core:"
-  echo "bitcoin.install.sh [install|on|off] [signet|testnet|mainnet]"
+  echo "bitcoin.install.sh install"
+  echo "bitcoin.install.sh [on|off] [signet|testnet|mainnet]"
+  echo "Installs Bitcoin Core $bitcoinVersion by default"
   echo
   exit 1
 fi
 
+echo "# Running: bitcoin.install.sh $*"
+
+# mainnet | testnet | signet
+CHAIN=${2:-mainnet}
+if [ "${CHAIN}" != signet ] && [ "${CHAIN}" != testnet ] && [ "${CHAIN}" != mainnet ]; then
+  echo "# ${CHAIN} is not supported"
+  exit 1
+fi
+# prefixes for parallel services
+if [ "${CHAIN}" = testnet ]; then
+  prefix="t"
+  bitcoinprefix="test"
+  zmqprefix=21 # zmqpubrawblock=21332 zmqpubrawtx=21333 zmqpubhashblock=21334
+  rpcprefix=1  # rpcport=18332
+elif [ ${CHAIN} = signet ]; then
+  prefix="s"
+  bitcoinprefix="signet"
+  zmqprefix=23
+  rpcprefix=3
+elif [ ${CHAIN} = mainnet ]; then
+  prefix=""
+  bitcoinprefix="main"
+  zmqprefix=28
+  rpcprefix=""
+fi
+# bitcoinlogpath
+if [ ${CHAIN} = signet ]; then
+  bitcoinlogpath="/mnt/hdd/bitcoin/signet/debug.log"
+elif [ ${CHAIN} = testnet ]; then
+  bitcoinlogpath="/mnt/hdd/bitcoin/testnet3/debug.log"
+elif [ ${CHAIN} = mainnet ]; then
+  bitcoinlogpath="/mnt/hdd/bitcoin/debug.log"
+fi
+
+function addBitcoinAliases {
+  echo "# Add aliases ${prefix}bitcoin-cli, ${prefix}bitcoinlog"
+  sudo -u admin touch /home/admin/_aliases
+  if ! grep "alias ${prefix}bitcoin-cli" /home/admin/_aliases; then
+    echo "alias ${prefix}bitcoin-cli=\"sudo -u bitcoin /usr/local/bin/bitcoin-cli -rpcport=${rpcprefix}8332\"" |
+      sudo tee -a /home/admin/_aliases
+  fi
+  if ! grep "alias ${prefix}bitcoinlog" /home/admin/_aliases; then
+    echo "alias ${prefix}bitcoinlog=\"sudo -u bitcoin tail -n 30 -f ${bitcoinlogpath}\"" |
+      sudo tee -a /home/admin/_aliases
+  fi
+  if ! grep "alias bitcoinconf" /home/admin/_aliases; then
+    echo "alias bitcoinconf=\"sudo nano /mnt/hdd/bitcoin/bitcoin.conf\"" |
+      sudo tee -a /home/admin/_aliases
+  fi
+  sudo chown admin:admin /home/admin/_aliases
+}
+
 if [ "$1" = "install" ]; then
   echo "*** PREPARING BITCOIN ***"
-
-  # set version (change if update is available)
-  # https://bitcoincore.org/en/download/
-  bitcoinVersion="26.0"
-
-  # needed to check code signing
-  # https://github.com/laanwj
-  laanwjPGP="71A3 B167 3540 5025 D447 E8F2 7481 0B01 2346 C9A6"
 
   # prepare directories
   sudo rm -rf /home/admin/download
   sudo -u admin mkdir /home/admin/download
   cd /home/admin/download || exit 1
 
-  # receive signer key
-  if ! gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-key "71A3 B167 3540 5025 D447 E8F2 7481 0B01 2346 C9A6"
-  then
-    echo "# FAIL # Couldn't download Wladimir J. van der Laan's PGP pubkey"
-    exit 1
-  fi
+  echo "# Receive signer keys"
+  curl -s "https://api.github.com/repos/bitcoin-core/guix.sigs/contents/builder-keys" |
+    jq -r '.[].download_url' | while read url; do curl -s "$url" | gpg --import; done
 
   # download signed binary sha256 hash sum file
-  sudo -u admin wget https://bitcoincore.org/bin/bitcoin-core-${bitcoinVersion}/SHA256SUMS
+  sudo -u admin wget --prefer-family=ipv4 --progress=bar:force -O SHA256SUMS https://bitcoincore.org/bin/bitcoin-core-${bitcoinVersion}/SHA256SUMS
+  # download the signed binary sha256 hash sum file and check
+  sudo -u admin wget --prefer-family=ipv4 --progress=bar:force -O SHA256SUMS.asc https://bitcoincore.org/bin/bitcoin-core-${bitcoinVersion}/SHA256SUMS.asc
 
-  # download signed binary sha256 hash sum file and check
-  sudo -u admin wget https://bitcoincore.org/bin/bitcoin-core-${bitcoinVersion}/SHA256SUMS.asc
-  verifyResult=$(LANG=en_US.utf8; gpg --verify SHA256SUMS.asc 2>&1)
-  goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
-  echo "goodSignature(${goodSignature})"
-  correctKey=$(echo ${verifyResult} | grep "${laanwjPGP}" -c)
-  echo "correctKey(${correctKey})"
-  if [ ${correctKey} -lt 1 ] || [ ${goodSignature} -lt 1 ]; then
-    echo
-    echo "# BUILD FAILED --> PGP Verify not OK / signature(${goodSignature}) verify(${correctKey})"
-    exit 1
-  else
+  if gpg --verify SHA256SUMS.asc; then
     echo
     echo "****************************************"
     echo "OK --> BITCOIN MANIFEST IS CORRECT"
     echo "****************************************"
     echo
+  else
+    echo
+    echo "# BUILD FAILED --> the PGP verification failed"
+    exit 1
   fi
 
   # bitcoinOSversion
@@ -74,8 +117,8 @@ if [ "$1" = "install" ]; then
     sudo -u admin wget --quiet https://bitcoincore.org/bin/bitcoin-core-${bitcoinVersion}/${binaryName}
   fi
   if [ ! -f "./${binaryName}" ]; then
-     echo "# FAIL # Could not download the BITCOIN BINARY"
-     exit 1
+    echo "# FAIL # Could not download the BITCOIN BINARY"
+    exit 1
   else
 
     # check binary checksum test
@@ -104,58 +147,21 @@ if [ "$1" = "install" ]; then
   sudo -u admin tar -xvf ${binaryName}
   sudo install -m 0755 -o root -g root -t /usr/local/bin/ bitcoin-${bitcoinVersion}/bin/*
   sleep 3
-  installed=$(sudo -u admin bitcoind --version | grep "${bitcoinVersion}" -c)
-  if [ ${installed} -lt 1 ]; then
+  if ! sudo /usr/local/bin/bitcoind --version | grep "${bitcoinVersion}"; then
     echo
     echo "# BUILD FAILED --> Was not able to install bitcoind version(${bitcoinVersion})"
     exit 1
   fi
-  if [ "$(alias | grep -c "alias bitcoinlog")" -eq 0 ];then
-    echo "alias bitcoinlog=\"sudo tail -n 30 -f /mnt/hdd/bitcoin/debug.log\""  | sudo tee -a /home/admin/_aliases
-  fi
-  sudo chown admin:admin /home/admin/_aliases
+
+  addBitcoinAliases
 
   echo "- Bitcoin install OK"
   exit 0
 fi
 
-
-# CHAIN is mainnet | testnet | signet
-CHAIN=$2
-if [ "${CHAIN}" != signet ]&&[ "${CHAIN}" != testnet ]&&[ "${CHAIN}" != mainnet ];then
-  echo "# ${CHAIN} is not supported"
-  exit 1
-fi
-# prefixes for parallel services
-if [ "${CHAIN}" = testnet ];then
-  prefix="t"
-  bitcoinprefix="test"
-  zmqprefix=21  # zmqpubrawblock=21332 zmqpubrawtx=21333 zmqpubhashblock=21334
-  rpcprefix=1   # rpcport=18332
-elif [ ${CHAIN} = signet ];then
-  prefix="s"
-  bitcoinprefix="signet"
-  zmqprefix=23
-  rpcprefix=3
-elif [ ${CHAIN} = mainnet ];then
-  prefix=""
-  bitcoinprefix="main"
-  zmqprefix=28
-  rpcprefix=""
-fi
-# bitcoinlogpath
-if [ ${CHAIN} = signet ]; then
-  bitcoinlogpath="/mnt/hdd/bitcoin/signet/debug.log"
-elif [ ${CHAIN} = testnet ]; then
-  bitcoinlogpath="/mnt/hdd/bitcoin/testnet3/debug.log"
-elif [ ${CHAIN} = mainnet ]; then
-  bitcoinlogpath="/mnt/hdd/bitcoin/debug.log"
-fi
-
-
 function removeParallelService() {
-  if [ -f "/etc/systemd/system/${prefix}bitcoind.service" ];then
-    if [ ${CHAIN} != mainnet ];then
+  if [ -f "/etc/systemd/system/${prefix}bitcoind.service" ]; then
+    if [ ${CHAIN} != mainnet ]; then
       /usr/local/bin/bitcoin-cli -${CHAIN} stop
     else
       /usr/local/bin/bitcoin-cli stop
@@ -163,9 +169,9 @@ function removeParallelService() {
     sudo systemctl stop ${prefix}bitcoind
     sudo systemctl disable ${prefix}bitcoind
     sudo rm /etc/systemd/system/${prefix}bitcoind.service 2>/dev/null
-    if [ ${bitcoinprefix} = signet ];then
+    if [ ${bitcoinprefix} = signet ]; then
       # check for signet service set up by joininbox
-      if [ -f "/etc/systemd/system/signetd.service" ];then
+      if [ -f "/etc/systemd/system/signetd.service" ]; then
         sudo systemctl stop signetd
         sudo systemctl disable signetd
         echo "# The signetd.service is stopped and disabled"
@@ -178,9 +184,9 @@ function removeParallelService() {
 function installParallelService() {
   echo "# Installing Bitcoin Core instance on ${CHAIN}"
   # bitcoin.conf
-  if [ ! -f /home/bitcoin/.bitcoin/bitcoin.conf ];then
+  if [ ! -f /home/bitcoin/.bitcoin/bitcoin.conf ]; then
     # add minimal config
-    randomRPCpass=$(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c8)
+    randomRPCpass=$(tr </dev/urandom -dc _A-Z-a-z-0-9 | head -c8)
     echo "
 # bitcoind configuration for ${CHAIN}
 
@@ -202,41 +208,39 @@ datadir=/mnt/hdd/bitcoin
 
   # make sure rpcbind is correctly configured
   sudo sed -i s/^rpcbind=/main.rpcbind=/g /mnt/hdd/bitcoin/bitcoin.conf
-  if [ $(grep -c "rpcallowip" < /mnt/hdd/bitcoin/bitcoin.conf) -gt 0 ];then
-    if [ $(grep -c "${bitcoinprefix}.rpcbind=" < /mnt/hdd/bitcoin/bitcoin.conf) -eq 0 ];then
-      echo "\
-${bitcoinprefix}.rpcbind=127.0.0.1"|\
-      sudo tee -a /mnt/hdd/bitcoin/bitcoin.conf
+  if grep "rpcallowip" /mnt/hdd/bitcoin/bitcoin.conf; then
+    if ! grep "${bitcoinprefix}.rpcbind=" /mnt/hdd/bitcoin/bitcoin.conf; then
+      echo "${bitcoinprefix}.rpcbind=127.0.0.1" |
+        sudo tee -a /mnt/hdd/bitcoin/bitcoin.conf
     fi
   fi
 
   # correct rpcport entry
   sudo sed -i s/^rpcport=/main.rpcport=/g /mnt/hdd/bitcoin/bitcoin.conf
-  if [ $(grep -c "${bitcoinprefix}.rpcport" < /mnt/hdd/bitcoin/bitcoin.conf) -eq 0 ];then
-    echo "\
-${bitcoinprefix}.rpcport=${rpcprefix}8332"|\
-    sudo tee -a /mnt/hdd/bitcoin/bitcoin.conf
+  if ! grep "${bitcoinprefix}.rpcport" /mnt/hdd/bitcoin/bitcoin.conf; then
+    echo "${bitcoinprefix}.rpcport=${rpcprefix}8332" |
+      sudo tee -a /mnt/hdd/bitcoin/bitcoin.conf
   fi
 
   # correct zmq entry
   sudo sed -i s/^zmqpubraw/main.zmqpubraw/g /mnt/hdd/bitcoin/bitcoin.conf
-  if [ $(grep -c "${bitcoinprefix}.zmqpubrawblock" < /mnt/hdd/bitcoin/bitcoin.conf) -eq 0 ];then
+  if ! grep "${bitcoinprefix}.zmqpubrawblock" /mnt/hdd/bitcoin/bitcoin.conf; then
     echo "\
 ${bitcoinprefix}.zmqpubrawblock=tcp://127.0.0.1:${zmqprefix}332
-${bitcoinprefix}.zmqpubrawtx=tcp://127.0.0.1:${zmqprefix}333"|\
-    sudo tee -a /mnt/hdd/bitcoin/bitcoin.conf
+${bitcoinprefix}.zmqpubrawtx=tcp://127.0.0.1:${zmqprefix}333" |
+      sudo tee -a /mnt/hdd/bitcoin/bitcoin.conf
   fi
 
   # addnode
-  if [ ${bitcoinprefix} = signet ];then
-    if [ $(grep -c "${bitcoinprefix}.addnode" < /mnt/hdd/bitcoin/bitcoin.conf) -eq 0 ];then
+  if [ ${bitcoinprefix} = signet ]; then
+    if [ $(grep -c "${bitcoinprefix}.addnode" </mnt/hdd/bitcoin/bitcoin.conf) -eq 0 ]; then
       echo "\
 signet.addnode=s7fcvn5rblem7tiquhhr7acjdhu7wsawcph7ck44uxyd6sismumemcyd.onion:38333
 signet.addnode=6megrst422lxzsqvshkqkg6z2zhunywhyrhy3ltezaeyfspfyjdzr3qd.onion:38333
 signet.addnode=jahtu4veqnvjldtbyxjiibdrltqiiighauai7hmvknwxhptsb4xat4qd.onion:38333
 signet.addnode=f4kwoin7kk5a5kqpni7yqe25z66ckqu6bv37sqeluon24yne5rodzkqd.onion:38333
-signet.addnode=nsgyo7begau4yecc46ljfecaykyzszcseapxmtu6adrfagfrrzrlngyd.onion:38333"|\
-      sudo tee -a /mnt/hdd/bitcoin/bitcoin.conf
+signet.addnode=nsgyo7begau4yecc46ljfecaykyzszcseapxmtu6adrfagfrrzrlngyd.onion:38333" |
+        sudo tee -a /mnt/hdd/bitcoin/bitcoin.conf
     fi
   fi
 
@@ -304,21 +308,7 @@ WantedBy=multi-user.target
   sudo systemctl enable ${prefix}bitcoind
   echo "# OK - the bitcoin daemon on ${CHAIN} service is now enabled"
 
-  echo "# Add aliases ${prefix}bitcoin-cli, ${prefix}bitcoind, ${prefix}bitcoinlog"
-  sudo -u admin touch /home/admin/_aliases
-  if [ "$(alias | grep -c "alias ${prefix}bitcoin-cli")" -eq 0 ];then
-    echo "\
-alias ${prefix}bitcoin-cli=\"sudo -u bitcoin /usr/local/bin/bitcoin-cli\
- -rpcport=${rpcprefix}8332\"
-alias ${prefix}bitcoind=\"sudo -u bitcoin /usr/local/bin/bitcoind -${CHAIN}\"\
-"  | sudo tee -a /home/admin/_aliases
-  fi
-  if [ "$(alias | grep -c "alias ${prefix}bitcoinlog")" -eq 0 ];then
-    echo "\
-alias ${prefix}bitcoinlog=\"sudo -u bitcoin tail -n 30 -f ${bitcoinlogpath}\"\
-"  | sudo tee -a /home/admin/_aliases
-  fi
-  sudo chown admin:admin /home/admin/_aliases
+  addBitcoinAliases
 
   source <(/home/admin/_cache.sh get state)
 
@@ -332,7 +322,7 @@ alias ${prefix}bitcoinlog=\"sudo -u bitcoin tail -n 30 -f ${bitcoinlogpath}\"\
 
   isInstalled=$(systemctl status ${prefix}bitcoind | grep -c active)
   if [ $isInstalled -gt 0 ]; then
-    echo "# Installed $(bitcoind --version | grep version)"
+    echo "# Installed $(sudo -u bitcoin bitcoind --version | grep version)"
     echo
     echo "# Monitor the ${prefix}bitcoind with:"
     echo "# sudo tail -f /mnt/hdd/bitcoin/${prefix}debug.log"
