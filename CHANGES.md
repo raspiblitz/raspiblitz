@@ -1,5 +1,6 @@
 ## What's new in Version 1.11.0 of RaspiBlitz?
 
+- New: Enabling NVMe PCIe Hats
 - Update: RaspiOS base image from 2023-12-05 (Bookworm)
 - Update: Bitcoin Core v26.0 [details](https://bitcoincore.org/en/releases/26.0/)
 - Update: LND v0.17.3-beta [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.17.3-beta)
