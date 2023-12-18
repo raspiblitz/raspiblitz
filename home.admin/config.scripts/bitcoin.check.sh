@@ -67,6 +67,12 @@ if [ "$1" == "prestart" ]; then
   echo "# make sure entry(${bitcoinlog_entry}) has the correct value(${bitcoinlog_path})"
   sed -i "s|^${bitcoinlog_entry}=.*|${bitcoinlog_entry}=${bitcoinlog_path}|g" /mnt/hdd/bitcoin/bitcoin.conf
 
+  # make sure bitcoin debug file exists
+  echo "# make sure bitcoin debug file exists"
+  touch ${bitcoinlog_path}
+  chown bitcoin:bitcoin ${bitcoinlog_path}
+  chmod 600 ${bitcoinlog_path} 
+
   ##### STATISTICS #####
 
   # count startings
