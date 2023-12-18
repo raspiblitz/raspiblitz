@@ -566,7 +566,7 @@ if [ ${isMounted} -eq 0 ]; then
     # run formatting
     error=""
     /home/admin/_cache.sh set state "formathdd"
-    echo "Running Format: (${filesystem}) (${hddCandidate})" >> ${logFile}
+    echo "Running Format: filesystem(${filesystem}) hddCandidate(${hddCandidate})" >> ${logFile}
     source <(sudo /home/admin/config.scripts/blitz.datadrive.sh format ${filesystem} ${hddCandidate})
     if [ "${error}" != "" ]; then
       echo "FAIL ON FORMATTING THE DRIVE:" >> ${logFile}
