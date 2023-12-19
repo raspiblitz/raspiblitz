@@ -42,9 +42,9 @@ if [ "$1" = connect ]; then
   /home/admin/config.scripts/tor.onion-service.sh ${netprefix}clrest 443 ${portprefix}6100 1>/dev/null
 
   toraddress=$(sudo cat /mnt/hdd/tor/${netprefix}clrest/hostname)
-  hex_macaroon=$(xxd -plain /home/bitcoin/c-lightning-REST/${CLNETWORK}/certs/access.macaroon | tr -d '\n')
+  hex_macaroon=$(sudo -u bitcoin xxd -plain /home/bitcoin/c-lightning-REST/${CLNETWORK}/certs/access.macaroon | tr -d '\n')
   url="https://${localip}:${portprefix}6100/"
-  lndconnect="lndconnect://${toraddress}:443?macaroon=${hex_macaroon}"
+  # lndconnect="lndconnect://${toraddress}:443?macaroon=${hex_macaroon}"
   # c-lightning-rest://http://your_hidden_service.onion:your_port?&macaroon=your_macaroon_file_in_HEX&protocol=http
   clrestlan="c-lightning-rest://${localip}:${portprefix}6100?&macaroon=${hex_macaroon}&protocol=http"
   clresttor="c-lightning-rest://${toraddress}:443?&macaroon=${hex_macaroon}&protocol=http"
@@ -156,6 +156,21 @@ if [ "$1" = on ]; then
   sudo -u bitcoin mkdir /home/bitcoin/c-lightning-REST/${CLNETWORK}
   sudo -u bitcoin cp -r /home/bitcoin/c-lightning-REST/* \
     /home/bitcoin/c-lightning-REST/${CLNETWORK}
+
+  # symlink the certs directory to the c-lightning-REST directory
+  if sudo ls /mnt/hdd/app-data/c-lightning-REST/${CLNETWORK}/certs 2>/dev/null; then
+    # remove the symlink and recreate it if app-data exists
+    sudo rm -rf /home/bitcoin/c-lightning-REST/${CLNETWORK}/certs
+  else
+    # create the app-data directory and move the certs directory there
+    sudo mkdir -p /mnt/hdd/app-data/c-lightning-REST/${CLNETWORK}/certs 2>/dev/null
+    sudo mv /home/bitcoin/c-lightning-REST/${CLNETWORK}/certs \
+      /mnt/hdd/app-data/c-lightning-REST/${CLNETWORK}/certs
+  fi
+  sudo ln -s /mnt/hdd/app-data/c-lightning-REST/${CLNETWORK}/certs \
+    /home/bitcoin/c-lightning-REST/${CLNETWORK}/
+  sudo chmod -R 700 /mnt/hdd/app-data/c-lightning-REST
+  sudo chown -R bitcoin:bitcoin /mnt/hdd/app-data/c-lightning-REST
 
   echo "
 {
