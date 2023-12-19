@@ -35,8 +35,6 @@ localip=$(hostname -I | awk '{print $1}')
 if [ "$1" = "status" ]; then
 
   toraddress=$(sudo cat /mnt/hdd/tor/${USERNAME}/hostname 2>/dev/null)
-  httpPort="3010"
-  httpsPort="3011"
 
   echo "version='${WEBUI_VERSION}'"
   echo "installed='${isActive}'"
@@ -95,7 +93,7 @@ if [ "$1" = "install" ]; then
 
   # make sure joinmarket is installed
   sudo /home/admin/config.scripts/bonus.joinmarket.sh install || exit 1
-  
+
   echo "# *** INSTALL JAM (user & code) ***"
 
   echo "# Creating the ${USERNAME} user"
