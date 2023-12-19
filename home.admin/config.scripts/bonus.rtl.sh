@@ -319,9 +319,9 @@ WantedBy=multi-user.target
     # Copy the rune and save it in a file which must be accessible to RTL. The content of the file must be LIGHTNING_RUNE="<your-rune>"
 
     # blitz.conf.sh set [key] [value] [?conffile] <noquotes>
-    if ! grep "^clnrest-port=${portprefix}3010" "${CLCONF}" >/dev/null; then
-      echo "# setting clnrest-port=${portprefix}3010"
-      sudo /home/admin/config.scripts/blitz.conf.sh set "clnrest-port" "${portprefix}3010" "${CLCONF}" "noquotes"
+    if ! grep "^clnrest-port=${portprefix}3100" "${CLCONF}" >/dev/null; then
+      echo "# setting clnrest-port=${portprefix}3100"
+      sudo /home/admin/config.scripts/blitz.conf.sh set "clnrest-port" "${portprefix}3100" "${CLCONF}" "noquotes"
       source /home/admin/raspiblitz.info
       if [ "${state}" == "ready" ]; then
         echo "# OK the system is ready so restarting ${netprefix}lightningd to activate the clnrest plugin"
