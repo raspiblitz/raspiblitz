@@ -2,7 +2,8 @@
 
 # https://github.com/lightningequipment/circuitbreaker/releases
 # https://github.com/lightningequipment/circuitbreaker/commits/master
-pinnedVersion="e223938d983b756b3893880f3b3bf77e624a9f00"
+pinnedVersion="60b70d91710efe7227b253e74f0d39ccfc9702c1"
+
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
