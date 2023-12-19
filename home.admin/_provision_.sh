@@ -190,6 +190,28 @@ sed -i "s/^setupStep=.*/setupStep=100/g" /home/admin/raspiblitz.info
 echo "Provisioning BLITZ WEB SERVICE - run config script" >> ${logFile}
 /home/admin/config.scripts/blitz.web.sh https-on >> ${logFile} 2>&1
 
+echo "### CHECKING BLITZ-API/FRONT STATUS ###" >> ${logFile}
+blitzApiInstalled=$(systemctl status blitzapi | grep -c "loaded")
+echo "# blitzapi(${blitzapi}) blitzApiInstalled(${blitzApiInstalled})"
+
+# deinstall when not explizit 'on' when blitzapi is installed by fatpack
+# https://github.com/raspiblitz/raspiblitz/issues/4171#issuecomment-1728302628
+if [ "${blitzapi}" != "on" ] && [ ${blitzApiInstalled} -gt 0 ]; then
+  echo "blitz_api directory exists & blitzapi is not 'on' - deactivating blitz-api" >> ${logFile}
+  /home/admin/_cache.sh set message "Deactivate API/WebUI"
+  /home/admin/config.scripts/blitz.web.api.sh off >> ${logFile} 2>&1
+  /home/admin/config.scripts/blitz.web.ui.sh off >> ${logFile} 2>&1
+fi
+# WebAPI & UI (in case image was not fatpack - but webapi was switchen on)
+if [ "${blitzapi}" == "on" ] && [ $blitzApiInstalled -eq 0 ]; then
+    echo "Provisioning BlitzAPI - run config script" >> ${logFile}
+    /home/admin/_cache.sh set message "Setup BlitzAPI (takes time)"
+    /home/admin/config.scripts/blitz.web.api.sh on DEFAULT >> ${logFile} 2>&1
+    /home/admin/config.scripts/blitz.web.ui.sh on DEFAULT >> ${logFile} 2>&1
+else
+    echo "Provisioning BlitzAPI - keep default" >> ${logFile}
+fi
+
 echo "### RUNNING PROVISIONING SERVICES ###" >> ${logFile}
 
 # BITCOIN INTERIMS UPDATE
@@ -336,17 +358,6 @@ if [ "${runBehindTor}" == "on" ]; then
     /home/admin/config.scripts/tor.network.sh on >> ${logFile} 2>&1
 else
     echo "Provisioning Tor - keep default" >> ${logFile}
-fi
-
-# WebAPI & UI (in case image was not fatpack - but webapi was switchen on)
-blitzApiInstalled=$(systemctl status blitzapi | grep -c "loaded")
-if [ "${blitzapi}" == "on" ] && [ $blitzApiInstalled -eq 0 ]; then
-    echo "Provisioning BlitzAPI - run config script" >> ${logFile}
-    /home/admin/_cache.sh set message "Setup BlitzAPI (takes time)"
-    /home/admin/config.scripts/blitz.web.api.sh on DEFAULT >> ${logFile} 2>&1
-    /home/admin/config.scripts/blitz.web.ui.sh on DEFAULT >> ${logFile} 2>&1
-else
-    echo "Provisioning BlitzAPI - keep default" >> ${logFile}
 fi
 
 # AUTO PILOT
