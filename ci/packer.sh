@@ -85,14 +85,26 @@ fi
 
 echo "# BUILDING SUCESS ###########################################"
 
-echo "# moving build to timestamped folder"
 TIMESTAMP=$(date +%s)
+echo "# moving build to timestamped folder ./${TIMESTAMP}"
 mkdir "${TIMESTAMP}"
+if [ $? -gt 0 ]; then
+  echo "# FAILED CREATING FOLDER: ${TIMESTAMP}"
+  exit 1
+fi
 mv "${PACKERBUILDPATH}${PACKERBUILDFILE}.img.gz" "./${TIMESTAMP}/${PACKERBUILDFILE}.img.gz"
+if [ $? -gt 0 ]; then
+  echo "# FAILED MOVING .img.gz"
+  exit 1
+fi
 mv "${PACKERBUILDPATH}${PACKERBUILDFILE}.img.gz.sha256" "./${TIMESTAMP}/${PACKERBUILDFILE}.img.gz.sha256"
+if [ $? -gt 0 ]; then
+  echo "# FAILED MOVING .img.gz.sha256"
+  exit 1
+fi
 mv "${PACKERBUILDPATH}${PACKERBUILDFILE}.img.sha256" "./${TIMESTAMP}/${PACKERBUILDFILE}.img.sha256"
 if [ $? -gt 0 ]; then
-  echo "# FAILED MOVING FILES"
+  echo "# FAILED MOVING .img.sha256"
   exit 1
 fi
 
@@ -120,7 +132,8 @@ echo
 # Note down the SHA256 checksum of the image
 echo "# MANUAL ACTION NEEDED:"
 echo "# Note down the SHA256 checksum of the image:"
-echo "TODO: cat checksum file" #TODO
+echo
+cat ./${TIMESTAMP}/${PACKERBUILDFILE}.img.gz.sha256
 echo 
 echo "# Press RETURN to continue..."
 read -r -p "" key
