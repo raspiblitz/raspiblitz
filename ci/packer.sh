@@ -36,13 +36,16 @@ fi
 
 if [ "${OUTPUT}" == "lean" ]; then
   PACKERTARGET="arm64-rpi-lean-image"
-  PACKERBUILDPATH="./raspiblitz/ci/arm64-rpi/packer-builder-arm/raspiblitz-arm64-rpi-lean"
+  PACKERBUILDPATH="./raspiblitz/ci/arm64-rpi/packer-builder-arm/"
+  PACKERBUILDFILE="raspiblitz-arm64-rpi-lean"
 elif [ "${OUTPUT}" == "fat" ]; then
   PACKERTARGET="arm64-rpi-fatpack-image" 
   PACKERBUILDPATH="./raspiblitz/ci/arm64-rpi/packer-builder-arm/TODO" #TODO
+  PACKERBUILDFILE="TODO" #TODO
 elif [ "${OUTPUT}" == "x86" ]; then
   PACKERTARGET="amd64-lean-server-legacyboot-image" 
   PACKERBUILDPATH="./raspiblitz/ci/amd64/TODO" #TODO
+  PACKERBUILDFILE="TODO" #TODO
 else
   echo "error='output $OUTPUT not supported'"
   exit 1
@@ -84,10 +87,70 @@ echo "# BUILDING SUCESS ###########################################"
 
 echo "# moving build to timestamped folder"
 TIMESTAMP=$(date +%s)
-mkdir $TIMESTAMP
-mv $PACKERBUILDPATH.img.gz ./$TIMESTAMP
-mv $PACKERBUILDPATH.img.gz.sha256 ./$TIMESTAMP
-mv $PACKERBUILDPATH.img.sha256 ./$TIMESTAMP
+mkdir "${TIMESTAMP}"
+mv "${PACKERBUILDPATH}${PACKERBUILDFILE}.img.gz" "./${TIMESTAMP}/${PACKERBUILDFILE}.img.gz"
+mv "${PACKERBUILDPATH}${PACKERBUILDFILE}.img.gz.sha256" "./${TIMESTAMP}/${PACKERBUILDFILE}.img.gz.sha256"
+mv "${PACKERBUILDPATH}${PACKERBUILDFILE}.img.sha256" "./${TIMESTAMP}/${PACKERBUILDFILE}.img.sha256"
+if [ $? -gt 0 ]; then
+  echo "# FAILED MOVING FILES"
+  exit 1
+fi
 
-echo "# TODO: CLEAN UP OLD BUILDS"
-echo "# TODO: CUT INTERNET & SIGN IMAGE"
+
+echo "# clean up"
+rm -rf raspiblitz 2>/dev/null
+
+echo "# SIGN & SECURE IMAGE ###########################################"
+echo
+
+# security check that internet is cut
+echo "# MANUAL ACTION NEEDED:"
+echo "# Cut the connection to the internet before signing the image."
+echo
+echo "# Press RETURN to continue..."
+read -r -p "" key
+if ping -c 1 "1.1.1.1" &> /dev/null; then
+    echo "# FAIL - Internet connection is up - EXITING SCRIPT"
+    exit 1
+else
+    echo "# OK - Internet connection is cut"
+fi
+echo
+
+# Note down the SHA256 checksum of the image
+echo "# MANUAL ACTION NEEDED:"
+echo "# Note down the SHA256 checksum of the image:"
+echo "TODO: cat checksum file" #TODO
+echo 
+echo "# Press RETURN to continue..."
+read -r -p "" key
+
+# import the signer keys
+echo "# MANUAL ACTION NEEDED:"
+echo "# Keep this terminal open and the 128GB stick connected."
+echo "# Additionalley connect and unlock the USB device with the signer keys."
+echo "# Open in Filemanager and use right-click 'Open in Termonal' and run:"
+echo "# gpg --import ./sub.key"
+echi "# Close that second terminal and remove USB device with signer keys."
+echo 
+echo "# Press RETURN to continue..."
+read -r -p "" key
+
+# signing instructions
+echo "# MANUAL ACTION NEEDED:"
+echo "# Please wait infront of the screen until the signing process is asks you for the password."
+echo
+cd "${TIMESTAMP}"
+gpg --output ${PACKERBUILDFILE}.img.gz.sig --detach-sign ${PACKERBUILDFILE}.img.gz
+if [ $? -gt 0 ]; then
+  echo "# !!!!!!! SIGNING FAILED - redo manual before closing this terminbal !!!!!!!"
+  echo "gpg --output ${PACKERBUILDFILE}.img.gz.sig --detach-sign ${PACKERBUILDFILE}.img.gz"
+else
+  echo "# OK Signing successful."
+fi
+
+# last notes
+echo
+echo "Close this terminal and eject your 128GB usb device."
+echo "Have fun with your build image on it under:"
+echo "${TIMESTAMP}/${PACKERBUILDFILE}.img.gz"
