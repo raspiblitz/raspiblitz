@@ -7,7 +7,7 @@
   * Connect a additional 128GB USB with NFTS formatted 
 * Using Filemanager open the 128GB-USBDrive and right-click "Open in Terminal"
 * Make sure the packer script is in root of the 128GB-USBDrive
-  * If it is not there download: `curl -O -L --no-cache https://raw.githubusercontent.com/raspiblitz/raspiblitz/dev/ci/packer.sh`
+  * If it is not there download: `curl -O -L https://raw.githubusercontent.com/raspiblitz/raspiblitz/dev/ci/packer.sh`
 * Security read/check script and then start build with (replace parameters):
 * `sudo bash ./packer.sh [BRANCH] [lean|fat|x86]`
 
