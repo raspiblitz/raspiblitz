@@ -1,6 +1,17 @@
 ## FAQ Development
 
-### What is the process of creating a new SD card image release?
+### Steps to create RaspberryPi images with Packer?
+
+* Start [`Debian LIVE`](https://cdimage.debian.org/debian-cd/current-live/amd64/iso-hybrid/debian-live-12.4.0-amd64-cinnamon.iso) from USB stick
+  * On USB boot be sure to start the "LIVE_SYSTEM" image
+  * Connect a additional 128GB USB with NFTS formatted 
+* Using Filemanager open the 128GB-USBDrive and right-click "Open in Terminal"
+* Make sure the packer script is in root of the 128GB-USBDrive
+  * If it is not there download: `wget --no-cache https://raw.githubusercontent.com/raspiblitz/raspiblitz/dev/ci/packer.sh`
+* Security read/check script and then start build with (replace parameters):
+* `sudo bash ./packer.sh [BRANCH] [lean|fat|x86]`
+
+### What is the process of creating a new RaspberryPi SD card image release manually?
 
 Checklist before making a SD card image release:
 
