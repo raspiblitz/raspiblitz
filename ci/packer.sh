@@ -72,6 +72,7 @@ git checkout $BRANCH
 
 # prevet monitor to go to sleep during long non-inetractive build
 xset s off
+gsettings set org.gnome.desktop.screensaver idle-activation-enabled false
 
 echo "# BUILDING '${PACKERTARGET}' ###########################################"
 make $PACKERTARGET
@@ -87,6 +88,7 @@ echo "# BUILDING SUCESS ###########################################"
 
 TIMESTAMP=$(date +%s)
 echo "# moving build to timestamped folder ./${TIMESTAMP}"
+cd ..
 mkdir "${TIMESTAMP}"
 if [ $? -gt 0 ]; then
   echo "# FAILED CREATING FOLDER: ${TIMESTAMP}"
