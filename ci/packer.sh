@@ -146,7 +146,7 @@ echo "# Keep this terminal open and the 128GB stick connected."
 echo "# Additionalley connect and unlock the USB device with the signer keys."
 echo "# Open in Filemanager and use right-click 'Open in Termonal' and run:"
 echo "# gpg --import ./sub.key"
-echi "# Close that second terminal and remove USB device with signer keys."
+echo "# Close that second terminal and remove USB device with signer keys."
 echo 
 echo "# Press RETURN to continue..."
 read -r -p "" key
