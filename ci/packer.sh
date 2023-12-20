@@ -48,21 +48,11 @@ else
   exit 1
 fi
 
-# check if build was successful
-if [ $? -gt 0 ]; then
-  echo "# BUILDING FAILED ###########################################"
-  echo "# Check the output above for errors."
-  exit 1
-fi
-
 # check if started with sudo
 if [ "$EUID" -ne 0 ]; then
   echo "error='run as root / may use sudo'"
   exit 1
 fi
-
-# switch to root
-sudo su
 
 # install git and make
 apt update && apt install -y git make
@@ -76,6 +66,9 @@ cd raspiblitz
 
 # checkout the desired branch
 git checkout $BRANCH
+
+# prevet monitor to go to sleep during long non-inetractive build
+xset s off
 
 echo "# BUILDING '${PACKERTARGET}' ###########################################"
 make $PACKERTARGET
