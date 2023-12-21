@@ -60,6 +60,7 @@ git checkout $BRANCH
 
 # get code version
 source <(./home.admin/_version.info)
+codeVersion=$(cat ./home_admin/_version.info | grep 'codeVersion="' | cut -d'"' -f2)
 echo "# RaspiBlitz Version: ${codeVersion}"
 
 # get date as string fromatted like YEAR-MONTH-DAY
