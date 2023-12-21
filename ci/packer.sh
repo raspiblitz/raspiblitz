@@ -259,4 +259,4 @@ fi
 echo
 echo "Close this terminal and eject your 128GB usb device."
 echo "Have fun with your build image on it under:"
-echo "${BUILDFOLDER}/${PACKERBUILDFILE}.gz"
+echo "${BUILDFOLDER}/${PACKERFINALFILE}.gz"
