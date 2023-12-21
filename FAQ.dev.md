@@ -9,7 +9,7 @@
 * Make sure the packer script is in root of the 128GB-USBDrive
   * If it is not there download: `curl -O -L https://raw.githubusercontent.com/raspiblitz/raspiblitz/dev/ci/packer.sh`
 * Security read/check script and then start build with (replace parameters):
-* `sudo bash ./packer.sh [BRANCH] [lean|fat|x86]`
+* `sudo bash ./packer.sh [BRANCH] [arm|x86] [min|fat]`
 
 ### What is the process of creating a new RaspberryPi SD card image release manually?
 
