@@ -65,7 +65,7 @@ cd raspiblitz
 git checkout $BRANCH
 
 # get code version
-codeVersion=$(cat ./home_admin/_version.info | grep 'codeVersion="' | cut -d'"' -f2)
+codeVersion=$(cat ./home.admin/_version.info | grep 'codeVersion="' | cut -d'"' -f2)
 if [ ${#codeVersion} -eq 0 ]; then
   echo "error='codeVersion not found'"
   exit 1
