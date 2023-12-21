@@ -3,24 +3,9 @@
 # Based on: https://gist.github.com/normandmickey/3f10fc077d15345fb469034e3697d0d0
 
 # https://github.com/dgarage/NBXplorer/tags
-NBXplorerVersion="v2.3.67"
+NBXplorerVersion="v2.4.3"
 # https://github.com/btcpayserver/btcpayserver/releases
-BTCPayVersion="v1.11.7"
-
-# check who signed the release (person that published release)
-PGPsigner="nicolasdorier"
-PGPpubkeyLink="https://keybase.io/nicolasdorier/pgp_keys.asc"
-PGPpubkeyFingerprint="AB4CFA9895ACA0DBE27F6B346618763EF09186FE"
-# ---
-#PGPsigner="Kukks"
-#PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
-#PGPpubkeyFingerprint="8E5530D9D1C93097"
-# ---
-#PGPsigner="web-flow"
-#PGPpubkeyLink="https://github.com/web-flow.gpg"
-#PGPpubkeyFingerprint="4AEE18F83AFDEB23"
-
-# command info
+BTCPayVersion="v1.12.0"
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "Config script to switch BTCPay Server on or off"
   echo "bonus.btcpayserver.sh menu"
@@ -45,11 +30,11 @@ function NBXplorerConfig() {
   else
     echo "# Generate the database for nbxplorer"
     sudo -u postgres psql -c "CREATE DATABASE nbxplorermainnet TEMPLATE template0 LC_CTYPE 'C' LC_COLLATE 'C' ENCODING 'UTF8';"
-    sudo -u postgres psql -c "CREATE USER nbxplorer WITH ENCRYPTED PASSWORD 'raspiblitz';"
-    sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE nbxplorermainnet TO nbxplorer;"
-    # for migrations
-    sudo -u postgres psql -d nbxplorermainnet -c "GRANT ALL PRIVILEGES ON SCHEMA public TO nbxplorer;"
+    sudo -u postgres psql -c "create user nbxplorer with encrypted password 'raspiblitz';"
+    sudo -u postgres psql -c "grant all privileges on database nbxplorermainnet to nbxplorer;"
   fi
+  echo "# List databases with: sudo -u postgres psql -c '\l'"
+  sudo -u postgres psql -c '\l'
 
   # https://docs.btcpayserver.org/Deployment/ManualDeploymentExtended/#4-create-a-configuration-file
   echo
@@ -77,12 +62,11 @@ function BtcPayConfig() {
   else
     echo "# Generate the database for btcpay"
     sudo -u postgres psql -c "CREATE DATABASE btcpaymainnet TEMPLATE template0 LC_CTYPE 'C' LC_COLLATE 'C' ENCODING 'UTF8';"
-    sudo -u postgres psql -c "CREATE USER btcpay WITH ENCRYPTED PASSWORD 'raspiblitz';"
-    sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE btcpaymainnet TO btcpay;"
-    # for migrations
-    sudo -u postgres psql -d btcpaymainnet -c "GRANT ALL PRIVILEGES ON SCHEMA public TO btcpay;"
+    sudo -u postgres psql -c "create user btcpay with encrypted password 'raspiblitz';"
+    sudo -u postgres psql -c "grant all privileges on database btcpaymainnet to btcpay;"
   fi
-
+  echo "# List databases with: sudo -u postgres psql -c '\l'"
+  sudo -u postgres psql -c '\l'
   echo "# Regenerate the btcpayserver settings (includes the LND TLS thumbprint)"
   # https://docs.btcpayserver.org/Deployment/ManualDeploymentExtended/#3-create-a-configuration-file
   sudo -u btcpay mkdir -p /home/btcpay/.btcpayserver/Main
@@ -258,7 +242,7 @@ SHA1 ${sslFingerprintIP}"
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
     sudo /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
     text="${text}\n
-Tor Browser Hidden Service address (see the QR onLCD):
+TOR Browser Hidden Service address (see the QR onLCD):
 ${toraddress}"
   fi
 
@@ -369,18 +353,18 @@ if [ "$1" = "install" ]; then
   cpu=$(uname -m)
   if [ "${cpu}" = "aarch64" ]; then
     binaryVersion="arm64"
-    dotNetdirectLink="https://download.visualstudio.microsoft.com/download/pr/d43345e2-f0d7-4866-b56e-419071f30ebe/68debcece0276e9b25a65ec5798cf07b/dotnet-sdk-6.0.101-linux-arm64.tar.gz"
-    dotNetChecksum="04cd89279f412ae6b11170d1724c6ac42bb5d4fae8352020a1f28511086dd6d6af2106dd48ebe3b39d312a21ee8925115de51979687a9161819a3a29e270a954"
+    dotNetdirectLink="https://download.visualstudio.microsoft.com/download/pr/43e09d57-d0f5-4c92-a75a-b16cfd1983a4/cba02bd4f7c92fb59e22a25573d5a550/dotnet-sdk-8.0.100-linux-arm64.tar.gz"
+    dotNetChecksum="3296d2bc15cc433a0ca13c3da83b93a4e1ba00d4f9f626f5addc60e7e398a7acefa7d3df65273f3d0825df9786e029c89457aea1485507b98a4df2a1193cd765"
   elif [ "${cpu}" = "x86_64" ]; then
     binaryVersion="x64"
-    dotNetdirectLink="https://download.visualstudio.microsoft.com/download/pr/ede8a287-3d61-4988-a356-32ff9129079e/bdb47b6b510ed0c4f0b132f7f4ad9d5a/dotnet-sdk-6.0.101-linux-x64.tar.gz"
-    dotNetChecksum="ca21345400bcaceadad6327345f5364e858059cfcbc1759f05d7df7701fec26f1ead297b6928afa01e46db6f84e50770c673146a10b9ff71e4c7f7bc76fbf709"
+    dotNetdirectLink="https://download.visualstudio.microsoft.com/download/pr/5226a5fa-8c0b-474f-b79a-8984ad7c5beb/3113ccbf789c9fd29972835f0f334b7a/dotnet-sdk-8.0.100-linux-x64.tar.gz"
+    dotNetChecksum="13905ea20191e70baeba50b0e9bbe5f752a7c34587878ee104744f9fb453bfe439994d38969722bdae7f60ee047d75dda8636f3ab62659450e9cd4024f38b2a5"
   else
     echo "# FAIL! CPU (${cpu}) not supported."
     echo "result='dotnet cpu not supported'"
     exit 1
   fi
-  dotNetName="dotnet-sdk-6.0.101-linux-${binaryVersion}.tar.gz"
+  dotNetName="dotnet-sdk-8.0.100-linux-${binaryVersion}.tar.gz"
   sudo rm /home/btcpay/${dotnetName} 2>/dev/null
   sudo -u btcpay wget "${dotNetdirectLink}" -O "${dotNetName}"
   # check binary is was not manipulated (checksum test)
@@ -403,10 +387,10 @@ if [ "$1" = "install" ]; then
   cd NBXplorer || exit 1
   sudo -u btcpay git reset --hard $NBXplorerVersion
   # PGP verify
-  NBXPGPsigner="nicolasdorier"
-  NBXPGPpubkeyLink="https://keybase.io/nicolasdorier/pgp_keys.asc"
-  NBXPGPpubkeyFingerprint="AB4CFA9895ACA0DBE27F6B346618763EF09186FE"
-  sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh "${NBXPGPsigner}" "${NBXPGPpubkeyLink}" "${NBXPGPpubkeyFingerprint}" || exit 1
+  PGPsigner="nicolasdorier"
+  PGPpubkeyLink="https://keybase.io/nicolasdorier/pgp_keys.asc"
+  PGPpubkeyFingerprint="AB4CFA9895ACA0DBE27F6B346618763EF09186FE"
+  sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
   echo "# Build NBXplorer $NBXplorerVersion"
   # from the build.sh with path
   sudo -u btcpay /home/btcpay/dotnet/dotnet build -c Release NBXplorer/NBXplorer.csproj || exit 1
@@ -419,6 +403,17 @@ if [ "$1" = "install" ]; then
   cd btcpayserver || exit 1
   sudo -u btcpay git reset --hard $BTCPayVersion
   #sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh "web-flow" "https://github.com/web-flow.gpg" "4AEE18F83AFDEB23" || exit 1
+  PGPsigner="nicolasdorier"
+  PGPpubkeyLink="https://keybase.io/nicolasdorier/pgp_keys.asc"
+  PGPpubkeyFingerprint="AB4CFA9895ACA0DBE27F6B346618763EF09186FE"
+  # ---
+  #PGPsigner="Kukks"
+  #PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
+  #PGPpubkeyFingerprint="8E5530D9D1C93097"
+  # ---
+  #PGPsigner="web-flow"
+  #PGPpubkeyLink="https://github.com/web-flow.gpg"
+  #PGPpubkeyFingerprint="4AEE18F83AFDEB23"
 
   echo "# verify signature of ${PGPsigner}"
   sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
