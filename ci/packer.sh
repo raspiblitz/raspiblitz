@@ -164,7 +164,7 @@ if [ $? -gt 0 ]; then
 fi
 
 # move gz.sha256 file to build folder
-mv "${PACKERBUILDPATH}.gz.sha256" "./${BUILDFOLDER}/${PACKERFINALFILE}gz.sha256"
+mv "${PACKERBUILDPATH}.gz.sha256" "./${BUILDFOLDER}/${PACKERFINALFILE}.gz.sha256"
 if [ $? -gt 0 ]; then
   echo "# FAILED MOVING .gz.sha256"
   exit 1
