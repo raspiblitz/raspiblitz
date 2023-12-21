@@ -97,6 +97,13 @@ echo "# PACKER TARGET: ${PACKERTARGET}"
 echo "# PACKER BUILD PATH: ${PACKERBUILDPATH}"
 echo "# PACKER FINAL FILE: ${PACKERFINALFILE}"
 
+# check if file already exists
+if [ -f "./${BUILDFOLDER}/${PACKERFINALFILE}.img.gz" ]; then
+  echo "error='image already exists'"
+  echo "# delete ./${BUILDFOLDER}/${PACKERFINALFILE}.img.gz (and all .sha256 & .sig) before trying again"
+  exit 1
+fi
+
 # prevet monitor to go to sleep during long non-inetractive build
 xset s off
 gsettings set org.gnome.desktop.screensaver idle-activation-enabled false
