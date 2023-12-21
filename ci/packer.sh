@@ -8,9 +8,14 @@
 # YOUR REPO (REPLACE WITH YOUR OWN FORK IF NEEDED)
 REPO="https://github.com/raspiblitz/raspiblitz"
 
+# folders to store the build results
+BUILDFOLDER="images"
+
 echo "Build RaspiBlitz install images on a Debian LIVE system"
 echo "From repo (change in script is needed):"
 echo $REPO
+echo "Results will be stored in:"
+echo $BUILDFOLDER
 
 # give info if not started with parameters
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -34,23 +39,6 @@ if [ -z "$OUTPUT" ]; then
   exit 1
 fi
 
-if [ "${OUTPUT}" == "lean" ]; then
-  PACKERTARGET="arm64-rpi-lean-image"
-  PACKERBUILDPATH="./raspiblitz/ci/arm64-rpi/packer-builder-arm/"
-  PACKERBUILDFILE="raspiblitz-arm64-rpi-lean"
-elif [ "${OUTPUT}" == "fat" ]; then
-  PACKERTARGET="arm64-rpi-fatpack-image" 
-  PACKERBUILDPATH="./raspiblitz/ci/arm64-rpi/packer-builder-arm/TODO" #TODO
-  PACKERBUILDFILE="TODO" #TODO
-elif [ "${OUTPUT}" == "x86" ]; then
-  PACKERTARGET="amd64-lean-server-legacyboot-image" 
-  PACKERBUILDPATH="./raspiblitz/ci/amd64/TODO" #TODO
-  PACKERBUILDFILE="TODO" #TODO
-else
-  echo "error='output $OUTPUT not supported'"
-  exit 1
-fi
-
 # check if started with sudo
 if [ "$EUID" -ne 0 ]; then
   echo "error='run as root / may use sudo'"
@@ -70,6 +58,35 @@ cd raspiblitz
 # checkout the desired branch
 git checkout $BRANCH
 
+# get code version
+source <(./home.admin/_version.info)
+echo "# RaspiBlitz Version: ${codeVersion}"
+
+# get date as string fromatted like YEAR-MONTH-DAY
+dateString=$(date +%Y-%m-%d)
+echo "# Date: ${dateString}"
+
+if [ "${OUTPUT}" == "lean" ]; then
+  PACKERTARGET="arm64-rpi-lean-image"
+  PACKERBUILDPATH="./raspiblitz/ci/arm64-rpi/packer-builder-arm/raspiblitz-arm64-rpi-lean"
+  PACKERFINALFILE="raspiblitz-min-${codeVersion}-${dateString}"
+elif [ "${OUTPUT}" == "fat" ]; then
+  PACKERTARGET="arm64-rpi-fatpack-image" 
+  PACKERBUILDPATH="./raspiblitz/ci/arm64-rpi/packer-builder-arm/TODO" #TODO
+  PACKERFINALFILE="raspiblitz-fat-${codeVersion}-${dateString}"
+elif [ "${OUTPUT}" == "x86" ]; then
+  PACKERTARGET="amd64-lean-server-legacyboot-image" 
+  PACKERBUILDPATH="./raspiblitz/ci/amd64/TODO" #TODO
+  PACKERFINALFILE="raspiblitz-amd64-${codeVersion}-${dateString}"
+else
+  echo "error='output $OUTPUT not supported'"
+  exit 1
+fi
+
+echo "# PACKER TARGET: ${PACKERTARGET}"
+echo "# PACKER BUILD PATH: ${PACKERBUILDPATH}"
+echo "# PACKER FINAL FILE: ${PACKERFINALFILE}"
+
 # prevet monitor to go to sleep during long non-inetractive build
 xset s off
 gsettings set org.gnome.desktop.screensaver idle-activation-enabled false
@@ -86,25 +103,24 @@ fi
 
 echo "# BUILDING SUCESS ###########################################"
 
-TIMESTAMP=$(date +%s)
-echo "# moving build to timestamped folder ./${TIMESTAMP}"
+echo "# moving build to timestamped folder ./${BUILDFOLDER}"
 cd ..
-mkdir "${TIMESTAMP}"
+mkdir "${BUILDFOLDER}"
 if [ $? -gt 0 ]; then
-  echo "# FAILED CREATING FOLDER: ${TIMESTAMP}"
+  echo "# FAILED CREATING FOLDER: ${BUILDFOLDER}"
   exit 1
 fi
-mv "${PACKERBUILDPATH}${PACKERBUILDFILE}.img.gz" "./${TIMESTAMP}/${PACKERBUILDFILE}.img.gz"
+mv "${PACKERBUILDPATH}.img.gz" "./${BUILDFOLDER}/${PACKERFINALFILE}.img.gz"
 if [ $? -gt 0 ]; then
   echo "# FAILED MOVING .img.gz"
   exit 1
 fi
-mv "${PACKERBUILDPATH}${PACKERBUILDFILE}.img.gz.sha256" "./${TIMESTAMP}/${PACKERBUILDFILE}.img.gz.sha256"
+mv "${PACKERBUILDPATH}.img.gz.sha256" "./${BUILDFOLDER}/${PACKERFINALFILE}.img.gz.sha256"
 if [ $? -gt 0 ]; then
   echo "# FAILED MOVING .img.gz.sha256"
   exit 1
 fi
-mv "${PACKERBUILDPATH}${PACKERBUILDFILE}.img.sha256" "./${TIMESTAMP}/${PACKERBUILDFILE}.img.sha256"
+mv "${PACKERBUILDPATH}.img.sha256" "./${BUILDFOLDER}/${PACKERFINALFILE}.img.sha256"
 if [ $? -gt 0 ]; then
   echo "# FAILED MOVING .img.sha256"
   exit 1
@@ -135,7 +151,7 @@ echo
 echo "# MANUAL ACTION NEEDED:"
 echo "# Note down the SHA256 checksum of the image:"
 echo
-cat ./${TIMESTAMP}/${PACKERBUILDFILE}.img.gz.sha256
+cat ./${BUILDFOLDER}/${PACKERFINALFILE}.img.gz.sha256
 echo 
 echo "# Press RETURN to continue..."
 read -r -p "" key
@@ -145,7 +161,7 @@ echo "# MANUAL ACTION NEEDED:"
 echo "# Keep this terminal open and the 128GB stick connected."
 echo "# Additionalley connect and unlock the USB device with the signer keys."
 echo "# Open in Filemanager and use right-click 'Open in Termonal' and run:"
-echo "# gpg --import ./sub.key"
+echo "# sudo gpg --import ./sub.key"
 echo "# Close that second terminal and remove USB device with signer keys."
 echo 
 echo "# Press RETURN to continue..."
@@ -155,11 +171,11 @@ read -r -p "" key
 echo "# MANUAL ACTION NEEDED:"
 echo "# Please wait infront of the screen until the signing process is asks you for the password."
 echo
-cd "${TIMESTAMP}"
-gpg --output ${PACKERBUILDFILE}.img.gz.sig --detach-sign ${PACKERBUILDFILE}.img.gz
+cd "${BUILDFOLDER}"
+gpg --output ${PACKERFINALFILE}.img.gz.sig --detach-sign ${PACKERFINALFILE}.img.gz
 if [ $? -gt 0 ]; then
   echo "# !!!!!!! SIGNING FAILED - redo manual before closing this terminbal !!!!!!!"
-  echo "gpg --output ${PACKERBUILDFILE}.img.gz.sig --detach-sign ${PACKERBUILDFILE}.img.gz"
+  echo "gpg --output ${PACKERFINALFILE}.img.gz.sig --detach-sign ${PACKERFINALFILE}.img.gz"
 else
   echo "# OK Signing successful."
 fi
@@ -168,4 +184,4 @@ fi
 echo
 echo "Close this terminal and eject your 128GB usb device."
 echo "Have fun with your build image on it under:"
-echo "${TIMESTAMP}/${PACKERBUILDFILE}.img.gz"
+echo "${BUILDFOLDER}/${PACKERBUILDFILE}.img.gz"
