@@ -9,8 +9,12 @@
 * Make sure the packer script is in root of the 128GB-USBDrive
   * If it is not there download: `curl -O -L https://raw.githubusercontent.com/raspiblitz/raspiblitz/dev/ci/packer.sh`
 * Security read/check script and then start build with (replace parameters):
-* `sudo bash ./packer.sh [BRANCH] [arm|x86] [min|fat]`
-
+* `sudo bash ./packer.sh [BRANCH] [arm|x86] [min|fat] [?LASTCOMMITHASH]`
+  * BRANCH = the branch of which the image should be build
+  * `[arm|x86]` = The architecture the image is targeting
+  * `[min|fat]` = lean or fatpack
+  * LASTCOMMITHASH (optional) = security check & copy the latest commit hash of the branch you want to build
+ 
 ### What is the process of creating a new RaspberryPi SD card image release manually?
 
 Checklist before making a SD card image release:
