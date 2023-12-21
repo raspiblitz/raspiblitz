@@ -20,13 +20,14 @@ echo $BUILDFOLDER
 # give info if not started with parameters
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "Start this script in the root of an writable 128GB NTFS formatted USB drive:"
-  echo "packer.sh [BRANCH] [arm|x86] [min|fat]"
+  echo "packer.sh [BRANCH] [arm|x86] [min|fat] [?lastcommithash]"
   exit 1
 fi
 
 BRANCH=$1
 ARCH=$2
 TYPE=$3
+COMMITHASH=$4
 
 # check if branch is set
 if [ "$BRANCH" == "[BRANCH]" ]; then
@@ -52,6 +53,8 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
+git log -1 --format=%H | grep -c
+
 # install git and make
 apt update && apt install -y git make
 
@@ -70,6 +73,22 @@ cd raspiblitz
 
 # checkout the desired branch
 git checkout $BRANCH
+
+
+# check commit hash if set
+if [ ${#COMMITHASH} -gt 0 ]; then
+  echo "# CHECKING COMMITHASH"
+  actualCOMMITHASH=$(git log -1 --format=%H)
+  echo "# actual(${actualCOMMITHASH}) ?= wanted(${COMMITHASH})"
+  matches=$(echo "${actualCOMMITHASH}" | grep -c "${COMMITHASH}")
+  if [ ${matches} -eq 0 ]; then
+    echo "error='COMMITHASH of branch does not match'"
+    exit 1
+  fi
+  echo "# COMMITHASH CHECK OK"
+else
+  echo "# NO COMMITHASH CHECK"
+fi
 
 # get code version
 codeVersion=$(cat ./home.admin/_version.info | grep 'codeVersion="' | cut -d'"' -f2)
