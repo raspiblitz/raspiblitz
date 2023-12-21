@@ -53,14 +53,23 @@ rm -rf raspiblitz 2>/dev/null
 
 # download the repo
 git clone $REPO
+if [ $? -gt 0 ]; then
+  echo "# REPO: ${REPO}"
+  echo "error='git clone failed'"
+  exit 1
+fi
+
 cd raspiblitz
 
 # checkout the desired branch
 git checkout $BRANCH
 
 # get code version
-source <(./home.admin/_version.info)
 codeVersion=$(cat ./home_admin/_version.info | grep 'codeVersion="' | cut -d'"' -f2)
+if [ ${#codeVersion} -eq 0 ]; then
+  echo "error='codeVersion not found'"
+  exit 1
+fi
 echo "# RaspiBlitz Version: ${codeVersion}"
 
 # get date as string fromatted like YEAR-MONTH-DAY
