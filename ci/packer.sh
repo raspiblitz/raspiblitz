@@ -20,12 +20,13 @@ echo $BUILDFOLDER
 # give info if not started with parameters
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "Start this script in the root of an writable 128GB NTFS formatted USB drive:"
-  echo "packer.sh [BRANCH] [lean|fat|x86]"
+  echo "packer.sh [BRANCH] [arm|x86] [min|fat]"
   exit 1
 fi
 
 BRANCH=$1
-OUTPUT=$2
+ARCH=$2
+TYPE=$3
 
 # check if branch is set
 if [ "$BRANCH" == "[BRANCH]" ]; then
@@ -34,8 +35,14 @@ if [ "$BRANCH" == "[BRANCH]" ]; then
 fi
 
 # check if output is set
-if [ -z "$OUTPUT" ]; then
-  echo "error='output not set'"
+if [ -z "$ARCH" ]; then
+  echo "error='ARCH not set'"
+  exit 1
+fi
+
+# check if output is set
+if [ -z "TYPE" ]; then
+  echo "error='TYPE not set'"
   exit 1
 fi
 
@@ -76,20 +83,20 @@ echo "# RaspiBlitz Version: ${codeVersion}"
 dateString=$(date +%Y-%m-%d)
 echo "# Date: ${dateString}"
 
-if [ "${OUTPUT}" == "lean" ]; then
+if [ "${ARCH}" == "arm" ] && [ "${TYPE}" == "min" ]; then
   PACKERTARGET="arm64-rpi-lean-image"
-  PACKERBUILDPATH="./raspiblitz/ci/arm64-rpi/packer-builder-arm/raspiblitz-arm64-rpi-lean"
-  PACKERFINALFILE="raspiblitz-min-${codeVersion}-${dateString}"
-elif [ "${OUTPUT}" == "fat" ]; then
+  PACKERBUILDPATH="./raspiblitz/ci/arm64-rpi/packer-builder-arm/raspiblitz-arm64-rpi-lean.img"
+  PACKERFINALFILE="raspiblitz-min-${codeVersion}-${dateString}.img"
+elif [ "${ARCH}" == "arm" ] && [ "${TYPE}" == "fat" ]; then
   PACKERTARGET="arm64-rpi-fatpack-image" 
   PACKERBUILDPATH="./raspiblitz/ci/arm64-rpi/packer-builder-arm/TODO" #TODO
-  PACKERFINALFILE="raspiblitz-fat-${codeVersion}-${dateString}"
-elif [ "${OUTPUT}" == "x86" ]; then
-  PACKERTARGET="amd64-lean-server-legacyboot-image" 
-  PACKERBUILDPATH="./raspiblitz/ci/amd64/TODO" #TODO
-  PACKERFINALFILE="raspiblitz-amd64-${codeVersion}-${dateString}"
+  PACKERFINALFILE="raspiblitz-fat-${codeVersion}-${dateString}.img"
+elif [ "${ARCH}" == "x86" ] && [ "${TYPE}" == "min" ]; then
+  PACKERTARGET="amd64-lean-server-legacyboot-image"
+  PACKERBUILDPATH="./raspiblitz/ci/amd64/builds/raspiblitz-amd64-debian-lean-qemu/raspiblitz-amd64-debian-lean.qcow2"
+  PACKERFINALFILE="raspiblitz-amd64-min-${codeVersion}-${dateString}.qcow2"
 else
-  echo "error='output $OUTPUT not supported'"
+  echo "error='$ARCH-$TYPE not supported'"
   exit 1
 fi
 
@@ -130,26 +137,51 @@ if [ ! -d "./${BUILDFOLDER}" ]; then
   exit 1
 fi
 
-# move img.gz file to build folder
-mv "${PACKERBUILDPATH}.img.gz" "./${BUILDFOLDER}/${PACKERFINALFILE}.img.gz"
+# move .gz file to build folder
+mv "${PACKERBUILDPATH}.gz" "./${BUILDFOLDER}/${PACKERFINALFILE}.gz"
 if [ $? -gt 0 ]; then
-  echo "# FAILED MOVING .img.gz"
+  echo "# FAILED MOVING .gz"
   exit 1
 fi
 
-# move img.gz.sha256 file to build folder
-mv "${PACKERBUILDPATH}.img.gz.sha256" "./${BUILDFOLDER}/${PACKERFINALFILE}.img.gz.sha256"
+# move gz.sha256 file to build folder
+mv "${PACKERBUILDPATH}.gz.sha256" "./${BUILDFOLDER}/${PACKERFINALFILE}gz.sha256"
 if [ $? -gt 0 ]; then
-  echo "# FAILED MOVING .img.gz.sha256"
+  echo "# FAILED MOVING .gz.sha256"
   exit 1
 fi
 
-# move img.sha256 file to build folder
-mv "${PACKERBUILDPATH}.img.sha256" "./${BUILDFOLDER}/${PACKERFINALFILE}.img.sha256"
+# move sha256 file to build folder
+mv "${PACKERBUILDPATH}.sha256" "./${BUILDFOLDER}/${PACKERFINALFILE}.sha256"
 if [ $? -gt 0 ]; then
-  echo "# FAILED MOVING .img.sha256"
+  echo "# FAILED MOVING .sha256"
   exit 1
 fi
+
+# special handling for qcow2
+if [ "${ARCH}" == "x86" ]; then
+  echo "# decompressing qcow2"
+  gunzip "./${BUILDFOLDER}/${PACKERFINALFILE}.gz"
+  echo "# converting qcow2 to raw"
+  qemu-img convert -f qcow2 -O raw "./${BUILDFOLDER}/${PACKERFINALFILE}.qcow2" "./${BUILDFOLDER}/${PACKERFINALFILE}.img"
+  if [ $? -gt 0 ]; then
+    echo "# FAILED CONVERTING qcow2 to raw"
+    exit 1
+  fi
+  echo "# compressing raw"
+  gzip -9 "./${BUILDFOLDER}/${PACKERFINALFILE}.img"
+  if [ $? -gt 0 ]; then
+    echo "# FAILED COMPRESSING raw"
+    exit 1
+  fi
+  echo "# removing raw"
+  rm "./${BUILDFOLDER}/${PACKERFINALFILE}.img"
+  if [ $? -gt 0 ]; then
+    echo "# FAILED REMOVING raw"
+    exit 1
+  fi
+fi
+
 
 echo "# clean up"
 rm -rf raspiblitz 2>/dev/null
@@ -175,7 +207,7 @@ echo
 echo "# MANUAL ACTION NEEDED:"
 echo "# Note down the SHA256 checksum of the image:"
 echo
-cat ./${BUILDFOLDER}/${PACKERFINALFILE}.img.gz.sha256
+cat ./${BUILDFOLDER}/${PACKERFINALFILE}.gz.sha256
 echo 
 echo "# Press RETURN to continue..."
 read -r -p "" key
@@ -196,10 +228,10 @@ echo "# MANUAL ACTION NEEDED:"
 echo "# Please wait infront of the screen until the signing process is asks you for the password."
 echo
 cd "${BUILDFOLDER}"
-gpg --output ${PACKERFINALFILE}.img.gz.sig --detach-sign ${PACKERFINALFILE}.img.gz
+gpg --output ${PACKERFINALFILE}.gz.sig --detach-sign ${PACKERFINALFILE}.gz
 if [ $? -gt 0 ]; then
   echo "# !!!!!!! SIGNING FAILED - redo manual before closing this terminbal !!!!!!!"
-  echo "gpg --output ${PACKERFINALFILE}.img.gz.sig --detach-sign ${PACKERFINALFILE}.img.gz"
+  echo "gpg --output ${PACKERFINALFILE}.gz.sig --detach-sign ${PACKERFINALFILE}.gz"
 else
   echo "# OK Signing successful."
 fi
@@ -208,4 +240,4 @@ fi
 echo
 echo "Close this terminal and eject your 128GB usb device."
 echo "Have fun with your build image on it under:"
-echo "${BUILDFOLDER}/${PACKERBUILDFILE}.img.gz"
+echo "${BUILDFOLDER}/${PACKERBUILDFILE}.gz"
