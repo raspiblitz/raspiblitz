@@ -122,27 +122,34 @@ echo "# BUILDING SUCESS ###########################################"
 
 echo "# moving build to timestamped folder ./${BUILDFOLDER}"
 cd ..
-mkdir "${BUILDFOLDER}"
-if [ $? -gt 0 ]; then
-  echo "# FAILED CREATING FOLDER: ${BUILDFOLDER}"
+mkdir "${BUILDFOLDER}" 2>/dev/null
+
+#check that Build folder exists
+if [ ! -d "./${BUILDFOLDER}" ]; then
+  echo "# FAILED CREATING BUILD FOLDER: ./${BUILDFOLDER}"
   exit 1
 fi
+
+# move img.gz file to build folder
 mv "${PACKERBUILDPATH}.img.gz" "./${BUILDFOLDER}/${PACKERFINALFILE}.img.gz"
 if [ $? -gt 0 ]; then
   echo "# FAILED MOVING .img.gz"
   exit 1
 fi
+
+# move img.gz.sha256 file to build folder
 mv "${PACKERBUILDPATH}.img.gz.sha256" "./${BUILDFOLDER}/${PACKERFINALFILE}.img.gz.sha256"
 if [ $? -gt 0 ]; then
   echo "# FAILED MOVING .img.gz.sha256"
   exit 1
 fi
+
+# move img.sha256 file to build folder
 mv "${PACKERBUILDPATH}.img.sha256" "./${BUILDFOLDER}/${PACKERFINALFILE}.img.sha256"
 if [ $? -gt 0 ]; then
   echo "# FAILED MOVING .img.sha256"
   exit 1
 fi
-
 
 echo "# clean up"
 rm -rf raspiblitz 2>/dev/null
