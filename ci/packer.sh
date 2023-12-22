@@ -53,8 +53,6 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
-git log -1 --format=%H | grep -c
-
 # install git and make
 apt update && apt install -y git make
 
@@ -73,7 +71,6 @@ cd raspiblitz
 
 # checkout the desired branch
 git checkout $BRANCH
-
 
 # check commit hash if set
 if [ ${#COMMITHASH} -gt 0 ]; then
