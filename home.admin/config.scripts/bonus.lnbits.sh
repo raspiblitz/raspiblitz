@@ -3,7 +3,7 @@
 # https://github.com/lnbits/lnbits
 
 # https://github.com/lnbits/lnbits/releases
-tag="0.10.10"
+tag="0.11.3"
 VERSION="${tag}"
 
 # command info
@@ -380,7 +380,8 @@ if [ "$1" = "status" ]; then
     echo "publicIP='${publicIP}'"
 
     # auth method is to call with a certain useer id
-    admin_userid=$(sudo cat /home/lnbits/lnbits/.super_user)
+    #admin_userid=$(sudo cat /home/lnbits/lnbits/.super_user)
+    admin_userid=$(sudo cat /mnt/hdd/app-data/LNBits/data/.super_user);
     echo "authMethod='/wallet?usr=${admin_userid}'"
 
     # check funding source
@@ -532,7 +533,8 @@ if [ "$1" = "prestart" ]; then
   fi
 
   # protect the admin user id if exists
-  chmod 640 /home/lnbits/lnbits/.super_user 2>/dev/null
+  # chmod 640 /home/lnbits/lnbits/.super_user 2>/dev/null
+  chmod 640 /mnt/hdd/app-data/LNBits/data/.super_user 2>/dev/null 
 
   echo "# OK: prestart finished"
   exit 0 # exit with clean code
@@ -772,7 +774,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     # config update
     # example: postgres://<user>:<password>@<host>/<database>
-    sudo bash -c "echo 'LNBITS_DATABASE_URL=postgres://lnbits_user:raspiblitz@localhost:5432/lnbits_db' >> /home/lnbits/lnbits/.env"
+    sudo bash -c "echo 'LNBITS_DATABASE_URL=postgres://postgres:postgres@localhost:5432/lnbits_db' >> /home/lnbits/lnbits/.env"
     sudo bash -c "echo 'LNBITS_DATA_FOLDER=/mnt/hdd/app-data/LNBits/data' >> /home/lnbits/lnbits/.env"
   else
     echo "# install database: SQLite"
@@ -1164,18 +1166,12 @@ if [ "$1" = "migrate" ]; then
     # create new backup
     sudo tar -cf /mnt/hdd/app-data/LNBits_sqlitedb_backup.tar -C /mnt/hdd/app-data LNBits/
 
-    # update to expected tag
-    cd /home/lnbits/lnbits || exit 1
-
     # remove existent config for database
     sudo sed -i "/^LNBITS_DATABASE_URL=/d" /home/lnbits/lnbits/.env 2>/dev/null
     sudo sed -i "/^LNBITS_DATA_FOLDER=/d" /home/lnbits/lnbits/.env 2>/dev/null
     # restore sqlite database config
     sudo bash -c "echo 'LNBITS_DATA_FOLDER=/mnt/hdd/app-data/LNBits' >> /home/lnbits/lnbits/.env"
 
-    #sudo -u lnbits git checkout ${tag}
-    sudo -u lnbits git reset --hard 4f05c6c12e284d4a322a9041d19f66d01afa205b # good tested after BIGINT fix (#1135)
-    /home/admin/config.scripts/bonus.lnbits.sh sync || exit 1
     # stop after sync was done
     sudo systemctl stop lnbits
 

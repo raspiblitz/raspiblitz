@@ -192,6 +192,17 @@ if [ -z \"\$TMUX\" ]; then
 fi
 " | sudo -u joinmarket tee -a /home/joinmarket/.bashrc
 
+  echo "# Check 'deprecatedrpc=create_bdb' in bitcoin.conf"
+  if ! sudo grep "deprecatedrpc=create_bdb" "/mnt/hdd/bitcoin/bitcoin.conf"; then
+    echo "# Place 'deprecatedrpc=create_bdb' in bitcoin.conf"
+    echo "deprecatedrpc=create_bdb" | sudo tee -a "/mnt/hdd/bitcoin/bitcoin.conf"
+    source <(/home/admin/_cache.sh get state)
+    if [ ${state} != "recovering" ]; then
+      echo "# Restarting bitcoind"
+      sudo systemctl restart bitcoind
+    fi
+  fi
+
   # make sure the Bitcoin Core wallet is on
   /home/admin/config.scripts/network.wallet.sh on
   if [ $(/usr/local/bin/bitcoin-cli -conf=/mnt/hdd/bitcoin/bitcoin.conf listwallets | grep -c wallet.dat) -eq 0 ]; then

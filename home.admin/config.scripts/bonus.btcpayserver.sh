@@ -3,22 +3,22 @@
 # Based on: https://gist.github.com/normandmickey/3f10fc077d15345fb469034e3697d0d0
 
 # https://github.com/dgarage/NBXplorer/tags
-NBXplorerVersion="v2.3.67"
+NBXplorerVersion="v2.4.3"
 # https://github.com/btcpayserver/btcpayserver/releases
-BTCPayVersion="v1.11.7"
+BTCPayVersion="v1.12.3"
 
 # check who signed the release (person that published release)
-PGPsigner="nicolasdorier"
-PGPpubkeyLink="https://keybase.io/nicolasdorier/pgp_keys.asc"
-PGPpubkeyFingerprint="AB4CFA9895ACA0DBE27F6B346618763EF09186FE"
+#PGPsigner="nicolasdorier"
+#PGPpubkeyLink="https://keybase.io/nicolasdorier/pgp_keys.asc"
+#PGPpubkeyFingerprint="AB4CFA9895ACA0DBE27F6B346618763EF09186FE"
 # ---
 #PGPsigner="Kukks"
 #PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
 #PGPpubkeyFingerprint="8E5530D9D1C93097"
 # ---
-#PGPsigner="web-flow"
-#PGPpubkeyLink="https://github.com/web-flow.gpg"
-#PGPpubkeyFingerprint="4AEE18F83AFDEB23"
+PGPsigner="web-flow"
+PGPpubkeyLink="https://github.com/web-flow.gpg"
+PGPpubkeyFingerprint="4AEE18F83AFDEB23"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -69,8 +69,8 @@ nomigrateevts=1
 }
 
 function BtcPayConfig() {
-  # set thumbprint
-  FINGERPRINT=$(openssl x509 -noout -fingerprint -sha256 -inform pem -in /home/btcpay/.lnd/tls.cert | cut -d"=" -f2)
+  # set thumbprint (remove colons and make lowercase)
+  FINGERPRINT=$(openssl x509 -noout -fingerprint -sha256 -inform pem -in /home/btcpay/.lnd/tls.cert | cut -d"=" -f2 | tr -d ':' | awk '{print tolower($0)}')
   # set up postgres
   if sudo -u postgres psql -c '\l' | grep btcpaymainnet; then
     echo "# btcpaymainnet database already exists"
@@ -191,7 +191,7 @@ if [ "$1" = "status" ]; then
       echo "ip2torID='${id}'"
       echo "ip2torIP='${ip}'"
       echo "ip2torPort='${port}'"
-      # check for LetsEnryptDomain on IP2TOR
+      # check for LetsEncryptDomain on IP2TOR
       error=""
       source <(sudo /home/admin/config.scripts/blitz.subscriptions.letsencrypt.py domain-by-ip $ip)
       if [ ${#error} -eq 0 ]; then
@@ -364,23 +364,23 @@ if [ "$1" = "install" ]; then
   cd /home/btcpay || exit 1
 
   echo "# install .NET"
-  # https://dotnet.microsoft.com/en-us/download/dotnet/6.0
+  # https://dotnet.microsoft.com/en-us/download/dotnet/8.0
   sudo apt-get -y install libunwind8 gettext libssl1.0
   cpu=$(uname -m)
   if [ "${cpu}" = "aarch64" ]; then
     binaryVersion="arm64"
-    dotNetdirectLink="https://download.visualstudio.microsoft.com/download/pr/d43345e2-f0d7-4866-b56e-419071f30ebe/68debcece0276e9b25a65ec5798cf07b/dotnet-sdk-6.0.101-linux-arm64.tar.gz"
-    dotNetChecksum="04cd89279f412ae6b11170d1724c6ac42bb5d4fae8352020a1f28511086dd6d6af2106dd48ebe3b39d312a21ee8925115de51979687a9161819a3a29e270a954"
+    dotNetdirectLink="https://download.visualstudio.microsoft.com/download/pr/43e09d57-d0f5-4c92-a75a-b16cfd1983a4/cba02bd4f7c92fb59e22a25573d5a550/dotnet-sdk-8.0.100-linux-arm64.tar.gz"
+    dotNetChecksum="3296d2bc15cc433a0ca13c3da83b93a4e1ba00d4f9f626f5addc60e7e398a7acefa7d3df65273f3d0825df9786e029c89457aea1485507b98a4df2a1193cd765"
   elif [ "${cpu}" = "x86_64" ]; then
     binaryVersion="x64"
-    dotNetdirectLink="https://download.visualstudio.microsoft.com/download/pr/ede8a287-3d61-4988-a356-32ff9129079e/bdb47b6b510ed0c4f0b132f7f4ad9d5a/dotnet-sdk-6.0.101-linux-x64.tar.gz"
-    dotNetChecksum="ca21345400bcaceadad6327345f5364e858059cfcbc1759f05d7df7701fec26f1ead297b6928afa01e46db6f84e50770c673146a10b9ff71e4c7f7bc76fbf709"
+    dotNetdirectLink="https://download.visualstudio.microsoft.com/download/pr/5226a5fa-8c0b-474f-b79a-8984ad7c5beb/3113ccbf789c9fd29972835f0f334b7a/dotnet-sdk-8.0.100-linux-x64.tar.gz"
+    dotNetChecksum="13905ea20191e70baeba50b0e9bbe5f752a7c34587878ee104744f9fb453bfe439994d38969722bdae7f60ee047d75dda8636f3ab62659450e9cd4024f38b2a5"
   else
     echo "# FAIL! CPU (${cpu}) not supported."
     echo "result='dotnet cpu not supported'"
     exit 1
   fi
-  dotNetName="dotnet-sdk-6.0.101-linux-${binaryVersion}.tar.gz"
+  dotNetName="dotnet-sdk-8.0.100-linux-${binaryVersion}.tar.gz"
   sudo rm /home/btcpay/${dotnetName} 2>/dev/null
   sudo -u btcpay wget "${dotNetdirectLink}" -O "${dotNetName}"
   # check binary is was not manipulated (checksum test)

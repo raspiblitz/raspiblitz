@@ -109,10 +109,10 @@ if [ "$1" = "status" ]; then
       testname=$(echo $line | cut -d " " -f 1 | sed 's/[^a-z0-9]*//g')
       if [ $(echo $line | grep -c "nvme") = 0 ]; then
         testdevice=$(echo $testname | sed 's/[^a-z]*//g')
-	  testpartition=$(echo $testname | grep -P '[a-z]{3,5}[0-9]{1}')
+	      testpartition=$(echo $testname | grep -P '[a-z]{3,5}[0-9]{1}')
       else
-	testdevice=$(echo $testname | sed 's/\([^p]*\).*/\1/')
-	testpartition=$(echo $testname | grep -P '[p]{1}')
+	      testdevice=$(echo $testname | sed 's/\([^p]*\).*/\1/')
+	      testpartition=$(echo $testname | grep -P '[p]{1}')
       fi
 	  
       if [ ${#testpartition} -gt 0 ]; then
@@ -121,8 +121,8 @@ if [ "$1" = "status" ]; then
         testsize=0
       fi
 
-      #echo "# line($line)"
-      #echo "# testname(${testname}) testdevice(${testdevice}) testpartition(${testpartition}) testsize(${testsize})"
+      # echo "# line($line)"
+      # echo "# testname(${testname}) testdevice(${testdevice}) testpartition(${testpartition}) testsize(${testsize})"
 
       # count partitions
       testpartitioncount=0
@@ -132,36 +132,37 @@ if [ "$1" = "status" ]; then
         testpartitioncount=$((testpartitioncount-1))
       fi
 
-      #echo "# testpartitioncount($testpartitioncount)"
-      #echo "# testpartitioncount(${testpartitioncount})"
-      #echo "# OSPartition(${OSPartition})"
-      #echo "# bootPartition(${bootPartition})"
-      #echo "# hdd(${hdd})"
-
       if [ "$(uname -m)" = "x86_64" ]; then
-	if [ $(echo "$testpartition" | grep -c "nvme")  = 0 ]; then
+	      
+        # For PC systems
+
+        if [ $(echo "$testpartition" | grep -c "nvme")  = 0 ]; then
           testParentDisk=$(echo "$testpartition" | sed 's/[^a-z]*//g')
-	else
+	      else
           testParentDisk=$(echo "$testpartition" | sed 's/\([^p]*\).*/\1/')
-   	fi
-	if [ $(echo "$OSPartition" | grep -c "nvme")  = 0 ]; then
+   	    fi
+	      
+        if [ $(echo "$OSPartition" | grep -c "nvme")  = 0 ]; then
           OSParentDisk=$(echo "$OSPartition" | sed 's/[^a-z]*//g')
-	else
+	      else
           OSParentDisk=$(echo "$OSPartition" | sed 's/\([^p]*\).*/\1/')
         fi
+        
         if [ $(echo "$bootPartition" | grep -c "nvme")  = 0 ]; then	
           bootParentDisk=$(echo "$bootPartition" | sed 's/[^a-z]*//g')
-	else
-	  bootParentDisk=$(echo "$bootPartition" | sed 's/\([^p]*\).*/\1/')
-	fi
+	      else
+	        bootParentDisk=$(echo "$bootPartition" | sed 's/\([^p]*\).*/\1/')
+	      fi
 		  
         if [ "$testdevice" != "$OSParentDisk" ] && [ "$testdevice" != "$bootParentDisk" ];then
           sizeDataPartition=${testsize}
           hddDataPartition="${testpartition}"
           hdd="${testdevice}"
         fi
+
       elif [ $testpartitioncount -gt 0 ]; then
         # if a partition was found - make sure to skip the OS and boot partitions
+        # echo "# testpartitioncount > 0"
         if [ "${testpartition}" != "${OSPartition}" ] && [ "${testpartition}" != "${bootPartition}" ]; then
           # make sure to use the biggest
           if [ ${testsize} -gt ${sizeDataPartition} ]; then
@@ -170,19 +171,34 @@ if [ "$1" = "status" ]; then
             hdd="${testdevice}"
           fi
         fi
+
       else
         # default hdd set, when there is no OSpartition and there might be no partitions at all
-        if [ "${OSPartition}" = "root" ] && [ "${hdd}" = "" ] && [ "${testdevice}" != "" ]; then
+        # echo "# else"
+        # echo "# testsize(${testsize})"
+        # echo "# sizeDataPartition(${sizeDataPartition})"
+
+        if [ "${OSPartition}" = "mmcblk0p2" ] && [ "${hdd}" = "" ] && [ "${testdevice}" != "" ]; then
+          # echo "# OSPartition = mmcblk0p2"
           hdd="${testdevice}"
         fi
-	# make sure to use the biggest
+
+	      # make sure to use the biggest
         if [ ${testsize} -gt ${sizeDataPartition} ]; then
-	  # Partition to be created is smaller than disk so this is not correct (but close)
+	        # Partition to be created is smaller than disk so this is not correct (but close)
+          # echo "# testsize > sizeDataPartition"
           sizeDataPartition=$(fdisk -l /dev/$testdevice | grep GiB | cut -d " " -f 5)
           hddDataPartition="${testdevice}1"
           hdd="${testdevice}"
-	fi
+	      fi
+
       fi
+
+      # echo "# testpartitioncount($testpartitioncount)"
+      # echo "# OSPartition(${OSPartition})"
+      # echo "# bootPartition(${bootPartition})"
+      # echo "# hdd(${hdd})"
+
     done < .lsblk.tmp
     rm -f .lsblk.tmp 1>/dev/null 2>/dev/null
 
@@ -520,7 +536,7 @@ if [ "$1" = "status" ]; then
     hddAdapterUSAP=0
     
     # check if force UASP flag is set on sd card
-    if [ -f "/boot/uasp.force" ]; then
+    if [ -f "/boot/firmware/uasp.force" ]; then
       hddAdapterUSAP=1
     fi
     # or UASP is set by config file
@@ -695,10 +711,13 @@ if [ "$1" = "format" ]; then
   if [ $wipePartitions -eq 1 ]; then
      # wipe all partitions and write fresh GPT
      >&2 echo "# Wiping all partitions (sfdisk/wipefs)"
+     >&2 echo "# sfdisk"
      sfdisk --delete /dev/${hdd}
      sleep 4
+     >&2 echo "# wipefs"
      wipefs -a /dev/${hdd}
      sleep 4
+     >&2 echo "# lsblk"
      partitions=$(lsblk | grep -c "─${hdd}")
      if [ ${partitions} -gt 0 ]; then
        >&2 echo "# WARNING: partitions are still not clean - try Quick & Dirty"
@@ -710,6 +729,7 @@ if [ "$1" = "format" ]; then
        echo "error='partition cleaning failed'"
        exit 1
      fi
+     >&2 echo "# parted"
      parted -s /dev/${hdd} mklabel gpt 1>/dev/null 1>&2
      sleep 2
      sync
@@ -726,9 +746,10 @@ if [ "$1" = "format" ]; then
      mkdir -p /tmp/ext4 1>/dev/null
      if [ $ext4IsPartition -eq 0 ]; then
         # write new EXT4 partition
-        >&2 echo "# Creating the one big partition"
-        parted -s /dev/${hdd} mkpart primary ext4 1024KiB 100% 1>&2
+        >&2 echo "# Creating the one big partition - hdd(${hdd})"
+        parted -s /dev/${hdd} mkpart primary ext4 0% 100% 1>&2
         sleep 6
+        >&2 echo "# sync"
         sync
         # loop until the partition gets available
         loopdone=0

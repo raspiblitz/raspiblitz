@@ -2,10 +2,11 @@
 
 #########################################################################
 # Build your SD card image based on: 2023-10-10-raspios-bookworm-arm64.img.xz
-# https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2023-10-10/
-# SHA256: 1702d6494e8fc1036c39d73d99a5b7e0bfb5352fd2cf35fd940c66ceb37d2c0a
-# PGP fingerprint: 8738CD6B956F460C
-# PGP key: https://www.raspberrypi.org/raspberrypi_downloads.gpg.key
+# https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2023-12-06/
+# SHA256: 5c54f0572d61e443a32dfa80aa8d918049814bfc70ab977f2d545eef45f1658e
+# also change in: raspiblitz/ci/arm64-rpi/build.arm64-rpi.pkr.hcl
+# PGP fingerprint: 8738CD6B956F460C - to check signature:
+# curl -O https://www.raspberrypi.org/raspberrypi_downloads.gpg.key && gpg --import ./raspberrypi_downloads.gpg.key && gpg --verify *.sig 
 # setup fresh SD card with image above - login via SSH and run this script:
 ##########################################################################
 
@@ -30,9 +31,9 @@ usage(){
 Options:
   -EXPORT                                  just print build parameters & exit'
   -h, --help                               this help info
-  -i, --interaction [0|1]                  interaction before proceeding with exection (default: 1)
+  -i, --interaction [0|1]                  interaction before proceeding with execution (default: 1)
   -f, --fatpack [0|1]                      fatpack mode (default: 1)
-  -u, --github-user [raspiblitz|other]       github user to be checked from the repo (default: ${defaultRepo})
+  -u, --github-user [raspiblitz|other]     github user to be checked from the repo (default: ${defaultRepo})
   -b, --branch [v1.7|v1.8]                 branch to be built on (default: ${defaultBranch})
   -d, --display [lcd|hdmi|headless]        display class (default: lcd)
   -t, --tweak-boot-drive [0|1]             tweak boot drives (default: 1)
@@ -436,15 +437,18 @@ if [ "${baseimage}" = "raspios_arm64" ]; then
   # see https://github.com/rootzoll/raspiblitz/issues/428#issuecomment-472822840
 
   configFile="/boot/config.txt"
-  max_usb_current="max_usb_current=1"
-  max_usb_currentDone=$(grep -c "$max_usb_current" $configFile)
+  raspiblitzEdits=$(grep -c "Raspiblitz" $configFile)
 
-  if [ ${max_usb_currentDone} -eq 0 ]; then
+  if [ ${raspiblitzEdits} -eq 0 ]; then
+    echo "# Raspiblitz Edits adding to $configFile"
     echo | tee -a $configFile
     echo "# Raspiblitz" | tee -a $configFile
-    echo "$max_usb_current" | tee -a $configFile
+    echo "max_usb_current=1" | tee -a $configFile
+    echo "dtparam=nvme" | tee -a $configFile
+    echo 'dtoverlay=pi3-disable-bt' | tee -a $configFile
+    echo 'dtoverlay=disable-bt' | tee -a $configFile
   else
-    echo "$max_usb_current already in $configFile"
+    echo "# Raspiblitz Edits already in $configFile"
   fi
 
   # run fsck on sd root partition on every startup to prevent "maintenance login" screen
@@ -477,6 +481,17 @@ if [ "${baseimage}" = "raspios_arm64" ]; then
   else
     echo "$fsOption2 already in $kernelOptionsFile"
   fi
+
+  # *** SAFE SHUTDOWN ***
+  # logind
+  echo "[Login]" | tee /etc/systemd/logind.conf.d/safeshutdown.conf
+  echo "HandlePowerKey=ignore" | tee -a /etc/systemd/logind.conf.d/safeshutdown.conf
+  # sudoers
+  echo 'nobody ALL=(ALL) NOPASSWD: /home/admin/config.scripts/blitz.shutdown.sh' |
+    tee -a /etc/sudoers
+  # triggerhappy
+  echo 'KEY_POWER    1    sudo /home/admin/config.scripts/blitz.shutdown.sh' |
+    tee /etc/triggerhappy/triggers.d/powerbutton.conf
 fi
 
 # special prepare when Nvidia Jetson Nano
@@ -740,21 +755,6 @@ if [ "${baseimage}" = "raspios_arm64"  ] || [ "${baseimage}" = "debian" ]; then
     echo -e "\n*** DISABLE WIFI ***"
     systemctl disable wpa_supplicant.service
     ifconfig wlan0 down
-  fi
-
-  echo -e "\n*** DISABLE BLUETOOTH ***"
-  configFile="/boot/config.txt"
-  disableBT="dtoverlay=disable-bt"
-  disableBTDone=$(grep -c "$disableBT" $configFile)
-
-  if [ "${disableBTDone}" -eq 0 ]; then
-    # disable bluetooth module
-    echo "" | tee -a $configFile
-    echo "# Raspiblitz" | tee -a $configFile
-    echo 'dtoverlay=pi3-disable-bt' | tee -a $configFile
-    echo 'dtoverlay=disable-bt' | tee -a $configFile
-  else
-    echo "disable BT already in $configFile"
   fi
 
   # remove bluetooth services

@@ -1,13 +1,16 @@
 ## What's new in Version 1.11.0 of RaspiBlitz?
 
-- Update: RasperryOS base image 2023-10-10-raspios-bookworm-arm64.img.xz [details](https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2023-10-10/)
-- Update: Bitcoin Core v25.1 [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-25.1.md)
-- Update: LND v0.17.2-beta [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.17.2-beta)
+- New: Enabling NVMe PCIe Hats
+- Update: RaspiOS base image from 2023-12-05 (Bookworm)
+- Update: Bitcoin Core v26.0 [details](https://bitcoincore.org/en/releases/26.0/)
+- Update: LND v0.17.3-beta [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.17.3-beta)
+- Update: Core Lightning v23.11 [details](https://github.com/ElementsProject/lightning/releases/tag/v23.11)
 - Update: C-lightningREST v0.10.7 [details](https://github.com/Ride-The-Lightning/c-lightning-REST/releases/tag/v0.10.7)
 - Update: CLBOSS 0.13+ (latest master 0673c50) [details](https://github.com/ZmnSCPxj/clboss/releases/tag/v0.13)
 - Update: BTCPayServer v1.12.3 [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.12.3)
-- Update: Electrs (Electrum Server in Rust) v0.10.1 [details](https://github.com/romanz/electrs/blob/master/RELEASE-NOTES.md#0101-nov-01-2023)
-- Update: Fulcrum electrum server (CLI only) v1.9.7 [details](https://github.com/cculianu/Fulcrum/releases/tag/v1.9.7)
+- Update: Channel Tools (chantools) v0.12.0 [details](https://github.com/lightninglabs/chantools/releases/tag/v0.12.0)
+- Update: LNbits 0.11.3 [details](https://github.com/lnbits/lnbits/releases/tag/0.11.3)
+- Update: Circuitbreaker v0.5.1 [details](https://github.com/lightningequipment/circuitbreaker/blob/master/README.md)
 - Deprecated: Homer Dashboard (remove from SSH menus, config script will stay with possible future removal)
 - Deprecated: Bitcoinminds (remove from SSH menus, config script will stay with possible future removal)
 - Remove: ItchySats (unmaintained project / in consent with dev)
@@ -440,4 +443,3 @@ Version 1.1 packs some first fixes and enhancements to make the RaspiBlitz more 
 - Removed: FTP download option for blockchain
 
 For full details see issue list of [Release 1.1 Milestone](https://github.com/rootzoll/raspiblitz/milestone/3?closed=1).
-

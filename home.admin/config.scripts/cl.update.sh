@@ -20,7 +20,7 @@ mode="$1"
 
 # RECOMMENDED UPDATE BY RASPIBLITZ TEAM
 # comment will be shown as "BEWARE Info" when option is choosen (can be multiple lines)
-clUpdateVersion="v23.02.2" # example: v23.02.2 # keep empty if no newer version as sd card build is available
+clUpdateVersion="" # example: v23.02.2 # keep empty if no newer version as sd card build is available
 clUpdateComment="Please keep in mind that downgrading afterwards is not tested. Also not all additional apps are fully tested with the this update - but it looked good on first tests."
 
 # GATHER DATA

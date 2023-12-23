@@ -78,23 +78,26 @@ Tested with:
 These not need installation, password: `osboxes.org`
 
 ### Building the Raspiblitz scripts
-* Run the build script in the terminal of the guest OS (with sudo access):
+* Run the build script in the terminal of the base OS (with sudo access):
 
-    ```bash
-    # download the build script
-    wget https://raw.githubusercontent.com/rootzoll/raspiblitz/dev/build_sdcard.sh
-    # run
-    sudo bash build_sdcard.sh -f true -b dev -d headless -t false -w off
-    # Options:
-    #   -h, --help                               this help info
-    #   -i, --interaction [0|1]                  interaction before proceeding with execution (default: 1)
-    #   -f, --fatpack [0|1]                      fatpack mode (default: 1)
-    #   -u, --github-user [rootzoll|other]       github user to be checked from the repo (default: rootzoll)
-    #   -b, --branch [v1.7|v1.8]                 branch to be built on (default: v1.7)
-    #   -d, --display [lcd|hdmi|headless]        display class (default: lcd)
-    #   -t, --tweak-boot-drive [0|1]             tweak boot drives (default: 1)
-    #   -w, --wifi-region [off|US|GB|other]      wifi iso code (default: US) or 'off'
-    ```
+  ```bash
+  # download the build script
+  wget https://raw.githubusercontent.com/rootzoll/raspiblitz/dev/build_sdcard.sh
+  # run
+  sudo bash build_sdcard.sh -f false -b dev -d headless -t false -w off
+  ```
+  ```
+  Options:
+    -EXPORT                                  just print build parameters & exit'
+    -h, --help                               this help info
+    -i, --interaction [0|1]                  interaction before proceeding with execution (default: 1)
+    -f, --fatpack [0|1]                      fatpack mode (default: 1)
+    -u, --github-user [raspiblitz|other]       github user to be checked from the repo (default: raspiblitz)
+    -b, --branch [v1.7|v1.8]                 branch to be built on (default: v1.10)
+    -d, --display [lcd|hdmi|headless]        display class (default: lcd)
+    -t, --tweak-boot-drive [0|1]             tweak boot drives (default: 1)
+    -w, --wifi-region [off|US|GB|other]      wifi iso code (default: US) or 'off'
+  ```
 
 * Switch off when ready
 * Attach an other disk (can be even small if you prune or [stop bitcoind](https://github.com/rootzoll/raspiblitz/issues/1500#issuecomment-982779830) manually.

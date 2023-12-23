@@ -1,13 +1,5 @@
-packer {
-  required_version = ">= 1.7.0, < 2.0.0"
-
-  required_plugins {
-    qemu = {
-      source  = "github.com/hashicorp/qemu"
-      version = ">= 1.0.0, < 2.0.0"
-    }
-  }
-}
+variable "iso_name" { default = "debian-12.4.0-amd64-netinst.iso" }
+variable "iso_checksum" { default = "64d727dd5785ae5fcfd3ae8ffbede5f40cca96f1580aaa2820e8b99dae989d94" }
 
 variable "pack" { default = "lean" }
 variable "github_user" { default = "raspiblitz" }
@@ -17,9 +9,6 @@ variable "desktop" { default = "none" }
 variable "boot" { default = "uefi" }
 variable "preseed_file" { default = "preseed.cfg" }
 variable "hostname" { default = "raspiblitz-amd64" }
-
-variable "iso_name" { default = "debian-12.2.0-amd64-netinst.iso" }
-variable "iso_checksum" { default = "23ab444503069d9ef681e3028016250289a33cc7bab079259b73100daee0af66" }
 
 variable "disk_size" { default = "30000" }
 variable "memory" { default = "4096" }
@@ -111,5 +100,16 @@ build {
       "./scripts/build.raspiblitz.sh",
       "./scripts/cleanup.sh"
     ]
+  }
+}
+
+packer {
+  required_version = ">= 1.7.0, < 2.0.0"
+
+  required_plugins {
+    qemu = {
+      source  = "github.com/hashicorp/qemu"
+      version = ">= 1.0.0, < 2.0.0"
+    }
   }
 }
