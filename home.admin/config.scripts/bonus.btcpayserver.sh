@@ -5,20 +5,20 @@
 # https://github.com/dgarage/NBXplorer/tags
 NBXplorerVersion="v2.4.3"
 # https://github.com/btcpayserver/btcpayserver/releases
-BTCPayVersion="v1.12.0"
+BTCPayVersion="v1.12.3"
 
 # check who signed the release (person that published release)
-PGPsigner="nicolasdorier"
-PGPpubkeyLink="https://keybase.io/nicolasdorier/pgp_keys.asc"
-PGPpubkeyFingerprint="AB4CFA9895ACA0DBE27F6B346618763EF09186FE"
+#PGPsigner="nicolasdorier"
+#PGPpubkeyLink="https://keybase.io/nicolasdorier/pgp_keys.asc"
+#PGPpubkeyFingerprint="AB4CFA9895ACA0DBE27F6B346618763EF09186FE"
 # ---
 #PGPsigner="Kukks"
 #PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
 #PGPpubkeyFingerprint="8E5530D9D1C93097"
 # ---
-#PGPsigner="web-flow"
-#PGPpubkeyLink="https://github.com/web-flow.gpg"
-#PGPpubkeyFingerprint="4AEE18F83AFDEB23"
+PGPsigner="web-flow"
+PGPpubkeyLink="https://github.com/web-flow.gpg"
+PGPpubkeyFingerprint="4AEE18F83AFDEB23"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -69,8 +69,8 @@ nomigrateevts=1
 }
 
 function BtcPayConfig() {
-  # set thumbprint
-  FINGERPRINT=$(openssl x509 -noout -fingerprint -sha256 -inform pem -in /home/btcpay/.lnd/tls.cert | cut -d"=" -f2)
+  # set thumbprint (remove colons and make lowercase)
+  FINGERPRINT=$(openssl x509 -noout -fingerprint -sha256 -inform pem -in /home/btcpay/.lnd/tls.cert | cut -d"=" -f2 | tr -d ':' | awk '{print tolower($0)}')
   # set up postgres
   if sudo -u postgres psql -c '\l' | grep btcpaymainnet; then
     echo "# btcpaymainnet database already exists"
@@ -191,7 +191,7 @@ if [ "$1" = "status" ]; then
       echo "ip2torID='${id}'"
       echo "ip2torIP='${ip}'"
       echo "ip2torPort='${port}'"
-      # check for LetsEnryptDomain on IP2TOR
+      # check for LetsEncryptDomain on IP2TOR
       error=""
       source <(sudo /home/admin/config.scripts/blitz.subscriptions.letsencrypt.py domain-by-ip $ip)
       if [ ${#error} -eq 0 ]; then
