@@ -59,7 +59,8 @@ go build || exit 1
 
 # set vars
 echo "# Setting the variables: $*"
-source ../set_variables.sh
+# running from the ci/arm64-rpi/packer-builder-arm directory
+source ../../set_variables.sh
 set_variables "$@"
 
 cp ../build.arm64-rpi.pkr.hcl ./
