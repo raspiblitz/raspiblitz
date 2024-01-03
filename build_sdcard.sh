@@ -437,14 +437,13 @@ if [ "${baseimage}" = "raspios_arm64" ]; then
   # see https://github.com/rootzoll/raspiblitz/issues/428#issuecomment-472822840
 
   configFile="/boot/config.txt"
-  pageSize="$(getconf PAGE_SIZE)"
-  echo "PAGE_SIZE=$pageSize"
   if ! grep "Raspiblitz" $configFile; then
     echo "# Adding Raspiblitz Edits to $configFile"
     echo | tee -a $configFile
     echo "# Raspiblitz" | tee -a $configFile
-    # ensure that PAGE_SIZE is set to 4K # https://github.com/raspiblitz/raspiblitz/issues/4346
-    if [ "$pageSize" != 4096 ] && [ -f /boot/firmware/kernel8.img ]; then
+    # ensure that kernel8.img is used to set PAGE_SIZE to 4K
+    # https://github.com/raspiblitz/raspiblitz/issues/4346
+    if [ -f /boot/firmware/kernel8.img ]; then
       echo 'kernel=kernel8.img' | tee -a $configFile
     fi
     echo "max_usb_current=1" | tee -a $configFile
@@ -452,7 +451,7 @@ if [ "${baseimage}" = "raspios_arm64" ]; then
     echo 'dtoverlay=pi3-disable-bt' | tee -a $configFile
     echo 'dtoverlay=disable-bt' | tee -a $configFile
   else
-    echo "# Raspiblitz Edits already in $configFile"
+    echo "# Raspiblitz Edits are already in $configFile"
   fi
 
   # run fsck on sd root partition on every startup to prevent "maintenance login" screen
