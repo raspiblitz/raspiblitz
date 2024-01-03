@@ -437,12 +437,14 @@ if [ "${baseimage}" = "raspios_arm64" ]; then
   # see https://github.com/rootzoll/raspiblitz/issues/428#issuecomment-472822840
 
   configFile="/boot/config.txt"
-  raspiblitzEdits=$(grep -c "Raspiblitz" $configFile)
-
-  if [ ${raspiblitzEdits} -eq 0 ]; then
-    echo "# Raspiblitz Edits adding to $configFile"
+  if ! grep "Raspiblitz" $configFile; then
+    echo "# Adding Raspiblitz Edits to $configFile"
     echo | tee -a $configFile
     echo "# Raspiblitz" | tee -a $configFile
+    # ensure that PAGE_SIZE is set to 4K # https://github.com/raspiblitz/raspiblitz/issues/4346
+    if [ "$(getconf PAGE_SIZE)" != 4096 ] && [ -f /boot/firmware/kernel8.img ]; then
+      echo 'kernel=kernel8.img' | tee -a $configFile
+    fi
     echo "max_usb_current=1" | tee -a $configFile
     echo "dtparam=nvme" | tee -a $configFile
     echo 'dtoverlay=pi3-disable-bt' | tee -a $configFile
