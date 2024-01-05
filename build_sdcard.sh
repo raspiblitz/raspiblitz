@@ -427,28 +427,27 @@ if [ "${baseimage}" = "raspios_arm64" ]; then
 
   echo -e "\n*** PREPARE RASPBERRY OS VARIANTS ***"
   apt_install raspi-config
-  # do memory split (16MB)
-  raspi-config nonint do_memory_split 16
-  # set to wait until network is available on boot (0 seems to yes)
-  raspi-config nonint do_boot_wait 0
   # set WIFI country so boot does not block
   # this will undo the softblock of rfkill on RaspiOS
   [ "${wifi_region}" != "off" ] && raspi-config nonint do_wifi_country $wifi_region
   # see https://github.com/rootzoll/raspiblitz/issues/428#issuecomment-472822840
 
   configFile="/boot/config.txt"
-  raspiblitzEdits=$(grep -c "Raspiblitz" $configFile)
-
-  if [ ${raspiblitzEdits} -eq 0 ]; then
-    echo "# Raspiblitz Edits adding to $configFile"
+  if ! grep "Raspiblitz" $configFile; then
+    echo "# Adding Raspiblitz Edits to $configFile"
     echo | tee -a $configFile
     echo "# Raspiblitz" | tee -a $configFile
+    # ensure that kernel8.img is used to set PAGE_SIZE to 4K
+    # https://github.com/raspiblitz/raspiblitz/issues/4346
+    if [ -f /boot/kernel8.img ]; then
+      echo 'kernel=kernel8.img' | tee -a $configFile
+    fi
     echo "max_usb_current=1" | tee -a $configFile
     echo "dtparam=nvme" | tee -a $configFile
     echo 'dtoverlay=pi3-disable-bt' | tee -a $configFile
     echo 'dtoverlay=disable-bt' | tee -a $configFile
   else
-    echo "# Raspiblitz Edits already in $configFile"
+    echo "# Raspiblitz Edits are already in $configFile"
   fi
 
   # run fsck on sd root partition on every startup to prevent "maintenance login" screen
