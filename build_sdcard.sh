@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 
 #########################################################################
-# Build your SD card image based on: 2023-10-10-raspios-bookworm-arm64.img.xz
+# Build your SD card image based on: 2023-12-05-raspios-bookworm-arm64.img.xz
 # https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2023-12-06/
 # SHA256: 5c54f0572d61e443a32dfa80aa8d918049814bfc70ab977f2d545eef45f1658e
 # also change in: raspiblitz/ci/arm64-rpi/build.arm64-rpi.pkr.hcl
 # PGP fingerprint: 8738CD6B956F460C - to check signature:
-# curl -O https://www.raspberrypi.org/raspberrypi_downloads.gpg.key && gpg --import ./raspberrypi_downloads.gpg.key && gpg --verify *.sig 
+# curl -O https://www.raspberrypi.org/raspberrypi_downloads.gpg.key && gpg --import ./raspberrypi_downloads.gpg.key && gpg --verify *.sig
 # setup fresh SD card with image above - login via SSH and run this script:
 ##########################################################################
 
