@@ -2,7 +2,7 @@
 # https://lightning.readthedocs.io/
 
 # https://github.com/ElementsProject/lightning/releases
-CLVERSION="v23.11"
+CLVERSION="v23.11.2"
 
 # install the latest master by using the last commit id
 # https://github.com/ElementsProject/lightning/commit/master
@@ -10,9 +10,9 @@ CLVERSION="v23.11"
 
 # https://github.com/ElementsProject/lightning/tree/master/contrib/keys
 # rustyrussell D9200E6CD1ADB8F1 # cdecker A26D6D9FE088ED58 # niftynei BFF0F67810C1EED1 # pneuroth (nepet) C3F21EE387FF4CD2
-PGPsigner="pneuroth"
+PGPsigner="cdecker"
 PGPpubkeyLink="https://raw.githubusercontent.com/ElementsProject/lightning/master/contrib/keys/${PGPsigner}.txt"
-PGPpubkeyFingerprint="C3F21EE387FF4CD2"
+PGPpubkeyFingerprint="A26D6D9FE088ED58"
 
 # PGPsigner="endothermicdev"
 # PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
