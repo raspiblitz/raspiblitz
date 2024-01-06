@@ -135,15 +135,15 @@ if [ "$1" = "install" ]; then
   sudo adduser --system --group --home /home/mempool mempool
 
   # install mempool
-  cd /home/mempool
+  cd /home/mempool || exit 1
   sudo -u mempool git clone https://github.com/mempool/mempool.git
-  cd mempool
+  cd mempool || exit 1
   sudo -u mempool git reset --hard $pinnedVersion
   sudo -u mempool /home/admin/config.scripts/blitz.git-verify.sh "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
 
   echo "# npm install for mempool explorer (frontend)"
 
-  cd frontend
+  cd frontend || exit 1
   sudo -u mempool NG_CLI_ANALYTICS=false npm install --no-optional
   if ! [ $? -eq 0 ]; then
     echo "FAIL - npm install did not run correctly, aborting"
@@ -157,7 +157,7 @@ if [ "$1" = "install" ]; then
 
   echo "# npm install for mempool explorer (backend)"
 
-  cd ../backend/
+  cd ../backend/ || exit 1
   sudo -u mempool NG_CLI_ANALYTICS=false npm install --no-optional
   if ! [ $? -eq 0 ]; then
     echo "# FAIL - npm install did not run correctly, aborting"
@@ -262,7 +262,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 EOF
     sudo mv /var/cache/raspiblitz/mempool-config.json /home/mempool/mempool/backend/mempool-config.json
     sudo chown mempool:mempool /home/mempool/mempool/backend/mempool-config.json
-    cd /home/mempool/mempool/frontend
+    cd /home/mempool/mempool/frontend || exit 1
 
     sudo mkdir -p /mnt/hdd/app-storage/mempool/cache
     sudo chown mempool:mempool /mnt/hdd/app-storage/mempool/cache
@@ -421,7 +421,7 @@ fi
 if [ "$1" = "update" ]; then
   echo "*** Checking Mempool Explorer Version ***"
 
-  cd /home/mempool/mempool
+  cd /home/mempool/mempool || exit 1
 
   localVersion=$(git describe --tag)
   updateVersion=$(curl --header "X-GitHub-Api-Version:2022-11-28" -s https://api.github.com/repos/mempool/mempool/releases/latest | grep tag_name | head -1 | cut -d '"' -f4)
@@ -439,8 +439,7 @@ if [ "$1" = "update" ]; then
 
     echo "# npm install for mempool explorer (backend)"
 
-    cd /home/mempool/mempool/backend/
-
+    cd /home/mempool/mempool/backend/ || exit 1
     sudo -u mempool NG_CLI_ANALYTICS=false npm install
     if ! [ $? -eq 0 ]; then
       echo "FAIL - npm install did not run correctly, aborting"
@@ -470,11 +469,11 @@ if [ "$1" = "update" ]; then
     sudo chown mempool:mempool /home/mempool/mempool/backend/mempool-config.json
 
     # Restore frontend files
-    cd /home/mempool/mempool/frontend
+    cd /home/mempool/mempool/frontend || exit 1
     sudo rsync -I -av --delete dist/mempool/ /var/www/mempool/
     sudo chown -R www-data:www-data /var/www/mempool
 
-    cd /home/mempool/mempool
+    cd /home/mempool/mempool || exit 1
 
     # Reinstall the mempool configuration for nginx
     cp nginx.conf nginx-mempool.conf /etc/nginx/nginx.conf
