@@ -146,13 +146,13 @@ if [ "$1" = "install" ]; then
   cd frontend
   sudo -u mempool NG_CLI_ANALYTICS=false npm install --no-optional
   if ! [ $? -eq 0 ]; then
-      echo "FAIL - npm install did not run correctly, aborting"
-      exit 1
+    echo "FAIL - npm install did not run correctly, aborting"
+    exit 1
   fi
   sudo -u mempool NG_CLI_ANALYTICS=false npm run build
   if ! [ $? -eq 0 ]; then
-      echo "FAIL - npm run build did not run correctly, aborting (1)"
-      exit 1
+    echo "FAIL - npm run build did not run correctly, aborting (1)"
+    exit 1
   fi
 
   echo "# npm install for mempool explorer (backend)"
@@ -160,15 +160,15 @@ if [ "$1" = "install" ]; then
   cd ../backend/
   sudo -u mempool NG_CLI_ANALYTICS=false npm install --no-optional
   if ! [ $? -eq 0 ]; then
-      echo "# FAIL - npm install did not run correctly, aborting"
-      echo "result='failed npm install'"
-      exit 1
+    echo "# FAIL - npm install did not run correctly, aborting"
+    echo "result='failed npm install'"
+    exit 1
   fi
   sudo -u mempool NG_CLI_ANALYTICS=false npm run build
   if ! [ $? -eq 0 ]; then
-      echo "# FAIL - npm run build did not run correctly, aborting (2)"
-      echo "result='failed npm run build'"
-      exit 1
+    echo "# FAIL - npm run build did not run correctly, aborting (2)"
+    echo "result='failed npm run build'"
+    exit 1
   fi
 
   exit 0
@@ -214,7 +214,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo mariadb -e "GRANT ALL PRIVILEGES ON mempool.* TO 'mempool' IDENTIFIED BY 'mempool';"
     sudo mariadb -e "FLUSH PRIVILEGES;"
     if [ -f "mariadb-structure.sql" ]; then
-      mariadb -umempool -pmempool mempool < mariadb-structure.sql
+      mariadb -umempool -pmempool mempool <mariadb-structure.sql
     fi
 
     # prepare .env file
@@ -225,7 +225,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     touch /var/cache/raspiblitz/mempool-config.json
     chmod 600 /var/cache/raspiblitz/mempool-config.json || exit 1
-    cat > /var/cache/raspiblitz/mempool-config.json <<EOF
+    cat >/var/cache/raspiblitz/mempool-config.json <<EOF
 {
   "MEMPOOL": {
     "NETWORK": "mainnet",
@@ -297,7 +297,7 @@ EOF
 
     # install service
     echo "*** Install mempool systemd ***"
-    cat > /var/cache/raspiblitz/mempool.service <<EOF
+    cat >/var/cache/raspiblitz/mempool.service <<EOF
 # systemd unit for Mempool
 
 [Unit]
@@ -341,8 +341,8 @@ EOF
     sleep 10
 
     # check install success by testing backend
-  isWorking=$(sudo systemctl status mempool | grep -c "Active: active")
-  if [ ${isWorking} -lt 1 ]; then
+    isWorking=$(sudo systemctl status mempool | grep -c "Active: active")
+    if [ ${isWorking} -lt 1 ]; then
       # signal an error to WebUI
       echo "result='mempool service not active'"
       exit 1
@@ -364,11 +364,10 @@ EOF
     /home/admin/config.scripts/tor.onion-service.sh mempool 80 4082 443 4083
   fi
 
-  # needed for API/WebUI as signal that install ran thru 
+  # needed for API/WebUI as signal that install ran thru
   echo "result='OK'"
   exit 0
 
-  
 fi
 
 # switch off
@@ -413,7 +412,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # setting value in raspi blitz config
   /home/admin/config.scripts/blitz.conf.sh set mempoolExplorer "off"
 
-  # needed for API/WebUI as signal that install ran thru 
+  # needed for API/WebUI as signal that install ran thru
   echo "result='OK'"
   exit 0
 fi
@@ -425,70 +424,68 @@ if [ "$1" = "update" ]; then
   cd /home/mempool/mempool
 
   localVersion=$(git describe --tag)
-  updateVersion=$(curl --header "X-GitHub-Api-Version:2022-11-28" -s https://api.github.com/repos/mempool/mempool/releases/latest|grep tag_name|head -1|cut -d '"' -f4)
+  updateVersion=$(curl --header "X-GitHub-Api-Version:2022-11-28" -s https://api.github.com/repos/mempool/mempool/releases/latest | grep tag_name | head -1 | cut -d '"' -f4)
 
   if [ $localVersion = $updateVersion ]; then
-      echo "***  You are up-to-date on version $localVersion ***"
-      sudo systemctl restart mempool 2>/dev/null
-      echo "***  Restarting Mempool  ***"
+    echo "***  You are up-to-date on version $localVersion ***"
+    sudo systemctl restart mempool 2>/dev/null
+    echo "***  Restarting Mempool  ***"
   else
-      # Preserve Config
-      sudo cp backend/mempool-config.json /home/admin
+    # Preserve Config
+    sudo cp backend/mempool-config.json /home/admin
 
-      sudo -u mempool git fetch
-      sudo -u mempool git checkout $updateVersion
+    sudo -u mempool git fetch
+    sudo -u mempool git checkout $updateVersion
 
-      echo "# npm install for mempool explorer (backend)"
+    echo "# npm install for mempool explorer (backend)"
 
-      cd /home/mempool/mempool/backend/
+    cd /home/mempool/mempool/backend/
 
-      sudo -u mempool NG_CLI_ANALYTICS=false npm install
-      if ! [ $? -eq 0 ]; then
-          echo "FAIL - npm install did not run correctly, aborting"
-          exit 1
-      fi
-      sudo -u mempool NG_CLI_ANALYTICS=false npm run build
-      if ! [ $? -eq 0 ]; then
-          echo "FAIL - npm run build did not run correctly, aborting (3)"
-          exit 1
-      fi
+    sudo -u mempool NG_CLI_ANALYTICS=false npm install
+    if ! [ $? -eq 0 ]; then
+      echo "FAIL - npm install did not run correctly, aborting"
+      exit 1
+    fi
+    sudo -u mempool NG_CLI_ANALYTICS=false npm run build
+    if ! [ $? -eq 0 ]; then
+      echo "FAIL - npm run build did not run correctly, aborting (3)"
+      exit 1
+    fi
 
-      echo "# npm install for mempool explorer (frontend)"
+    echo "# npm install for mempool explorer (frontend)"
 
-      cd ../frontend
-      sudo -u mempool NG_CLI_ANALYTICS=false npm install
-      if ! [ $? -eq 0 ]; then
-          echo "FAIL - npm install did not run correctly, aborting"
-          exit 1
-      fi
-      sudo -u mempool NG_CLI_ANALYTICS=false npm run build
-      if ! [ $? -eq 0 ]; then
-          echo "FAIL - npm run build did not run correctly, aborting (4)"
-          exit 1
-      fi
+    cd ../frontend
+    sudo -u mempool NG_CLI_ANALYTICS=false npm install
+    if ! [ $? -eq 0 ]; then
+      echo "FAIL - npm install did not run correctly, aborting"
+      exit 1
+    fi
+    sudo -u mempool NG_CLI_ANALYTICS=false npm run build
+    if ! [ $? -eq 0 ]; then
+      echo "FAIL - npm run build did not run correctly, aborting (4)"
+      exit 1
+    fi
 
-      sudo mv /home/admin/mempool-config.json /home/mempool/mempool/backend/mempool-config.json
-      sudo chown mempool:mempool /home/mempool/mempool/backend/mempool-config.json
+    sudo mv /home/admin/mempool-config.json /home/mempool/mempool/backend/mempool-config.json
+    sudo chown mempool:mempool /home/mempool/mempool/backend/mempool-config.json
 
+    # Restore frontend files
+    cd /home/mempool/mempool/frontend
+    sudo rsync -I -av --delete dist/mempool/ /var/www/mempool/
+    sudo chown -R www-data:www-data /var/www/mempool
 
-      # Restore frontend files
-      cd /home/mempool/mempool/frontend
-      sudo rsync -I -av --delete dist/mempool/ /var/www/mempool/
-      sudo chown -R www-data:www-data /var/www/mempool
+    cd /home/mempool/mempool
 
-      cd /home/mempool/mempool
+    # Reinstall the mempool configuration for nginx
+    cp nginx.conf nginx-mempool.conf /etc/nginx/nginx.conf
+    sudo systemctl restart nginx
 
-      # Reinstall the mempool configuration for nginx
-      cp nginx.conf nginx-mempool.conf /etc/nginx/nginx.conf
-      sudo systemctl restart nginx
+    # Remove useless deps
+    echo "Removing unnecessary modules..."
+    npm prune --production
 
-      # Remove useless deps
-      echo "Removing unnecessary modules..."
-      npm prune --production
-
-
-      echo "***  Restarting Mempool  ***"
-      sudo systemctl start mempool
+    echo "***  Restarting Mempool  ***"
+    sudo systemctl start mempool
 
   fi
 
