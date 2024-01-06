@@ -144,13 +144,11 @@ if [ "$1" = "install" ]; then
   echo "# npm install for mempool explorer (frontend)"
 
   cd frontend || exit 1
-  sudo -u mempool NG_CLI_ANALYTICS=false npm install --no-optional
-  if ! [ $? -eq 0 ]; then
+  if ! sudo -u mempool NG_CLI_ANALYTICS=false npm install --no-optional; then
     echo "FAIL - npm install did not run correctly, aborting"
     exit 1
   fi
-  sudo -u mempool NG_CLI_ANALYTICS=false npm run build
-  if ! [ $? -eq 0 ]; then
+  if ! sudo -u mempool NG_CLI_ANALYTICS=false npm run build; then
     echo "FAIL - npm run build did not run correctly, aborting (1)"
     exit 1
   fi
@@ -158,14 +156,12 @@ if [ "$1" = "install" ]; then
   echo "# npm install for mempool explorer (backend)"
 
   cd ../backend/ || exit 1
-  sudo -u mempool NG_CLI_ANALYTICS=false npm install --no-optional
-  if ! [ $? -eq 0 ]; then
+  if ! sudo -u mempool NG_CLI_ANALYTICS=false npm install --no-optional; then
     echo "# FAIL - npm install did not run correctly, aborting"
     echo "result='failed npm install'"
     exit 1
   fi
-  sudo -u mempool NG_CLI_ANALYTICS=false npm run build
-  if ! [ $? -eq 0 ]; then
+  if ! sudo -u mempool NG_CLI_ANALYTICS=false npm run build; then
     echo "# FAIL - npm run build did not run correctly, aborting (2)"
     echo "result='failed npm run build'"
     exit 1
@@ -440,27 +436,23 @@ if [ "$1" = "update" ]; then
     echo "# npm install for mempool explorer (backend)"
 
     cd /home/mempool/mempool/backend/ || exit 1
-    sudo -u mempool NG_CLI_ANALYTICS=false npm install
-    if ! [ $? -eq 0 ]; then
+    if ! sudo -u mempool NG_CLI_ANALYTICS=false npm install; then
       echo "FAIL - npm install did not run correctly, aborting"
       exit 1
     fi
-    sudo -u mempool NG_CLI_ANALYTICS=false npm run build
-    if ! [ $? -eq 0 ]; then
+    if ! sudo -u mempool NG_CLI_ANALYTICS=false npm run build; then
       echo "FAIL - npm run build did not run correctly, aborting (3)"
       exit 1
     fi
 
     echo "# npm install for mempool explorer (frontend)"
 
-    cd ../frontend
-    sudo -u mempool NG_CLI_ANALYTICS=false npm install
-    if ! [ $? -eq 0 ]; then
+    cd ../frontend || exit 1
+    if ! sudo -u mempool NG_CLI_ANALYTICS=false npm install; then
       echo "FAIL - npm install did not run correctly, aborting"
       exit 1
     fi
-    sudo -u mempool NG_CLI_ANALYTICS=false npm run build
-    if ! [ $? -eq 0 ]; then
+    if ! sudo -u mempool NG_CLI_ANALYTICS=false npm run build; then
       echo "FAIL - npm run build did not run correctly, aborting (4)"
       exit 1
     fi
