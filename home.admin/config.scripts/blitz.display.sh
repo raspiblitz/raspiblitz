@@ -12,8 +12,8 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo
   echo "# sudo blitz.display.sh rotate [on|off]"
   echo "# sudo blitz.display.sh test-lcd-connect"
-  echo "# sudo blitz.display.sh set-display [hdmi|lcd|headless]"
-  echo "# sudo blitz.display.sh prepare-install"
+  echo "# sudo blitz.display.sh set-display [hdmi|lcd35|lcd20|headless]"
+  echo "# sudo blitz.display.sh prepare-install [lcd35|lcd20]"
   exit 1
 fi
 
@@ -198,13 +198,22 @@ if [ "${command}" == "test-lcd-connect" ]; then
 fi
 
 function prepareinstall() {
-  repoCloned=$(sudo -u admin ls /home/admin/wavesharelcd-64bit-rpi/README.md 2>/dev/null| grep -c README.md)
+  lcd_type=${1}
+  lcd_driver_repo="https://github.com/tux1c/wavesharelcd-64bit-rpi.git"
+  lcd_driver_dir="wavesharelcd-64bit-rpi"
+
+  if [ "$lcd_type" == "lcd20" ]; then
+    lcd_driver_repo="https://github.com/semafelectronics/raspiblitz20lcd.git"
+    lcd_driver_dir="raspiblitz20lcd"
+  fi
+
+  repoCloned=$(sudo -u admin ls /home/admin/$lcd_driver_dir/README.md 2>/dev/null| grep -c README.md)
   if [ ${repoCloned} -lt 1 ]; then
-    echo "# clone/download https://github.com/tux1c/wavesharelcd-64bit-rpi.git"
+    echo "# clone/download $lcd_driver_repo"
     cd /home/admin/
-    sudo -u admin git clone --no-checkout https://github.com/tux1c/wavesharelcd-64bit-rpi.git
-    sudo -u admin chmod -R 755 wavesharelcd-64bit-rpi
-    sudo -u admin chown -R admin:admin wavesharelcd-64bit-rpi
+    sudo -u admin git clone --no-checkout $lcd_driver_repo
+    sudo -u admin  chmod -R 755 $lcd_driver_dir
+    sudo -u admin chown -R admin:admin $lcd_driver_dir
   else
     echo "# LCD repo already cloned/downloaded (${repoCloned})"
   fi
@@ -231,6 +240,7 @@ function uninstall_hdmi() {
 
 function install_lcd() {
 
+  lcd_type=${1:-lcd35}
   if [ "${baseimage}" = "raspios_arm64"  ] || [ "${baseimage}" = "debian_rpi64" ]; then
 
     echo "# INSTALL 64bit LCD DRIVER"
@@ -245,22 +255,34 @@ function install_lcd() {
     sudo apt-mark hold raspberrypi-bootloader
 
     # Downloading LCD Driver from Github
-    prepareinstall
-    cd /home/admin/wavesharelcd-64bit-rpi
+    prepareinstall "$lcd_type"
+
+    lcd_driver_dir="wavesharelcd-64bit-rpi"
+
+    [ "$lcd_type" == "lcd20" ] && lcd_driver_dir="raspiblitz20lcd"
+
+    cd /home/admin/$lcd_driver_dir
+
     sudo -u admin git checkout master
-    sudo -u admin git reset --hard 5a206a7 || exit 1
+
+    if [ "$lcd_type" != "lcd20" ]; then
+	      sudo -u admin git reset --hard 5a206a7 || exit 1
+    fi
     sudo -u admin /home/admin/config.scripts/blitz.git-verify.sh \
      'GitHub' 'https://github.com/web-flow.gpg' '4AEE18F83AFDEB23' || exit 1
 
-    # customized from https://github.com/tux1c/wavesharelcd-64bit-rpi/blob/master/install.sh
-    # prepare X11
-    mkdir -p /etc/X11/xorg.conf.d
-    mv /etc/X11/xorg.conf.d/40-libinput.conf /home/admin/wavesharelcd-64bit-rpi/40-libinput.conf 2>/dev/null
-    cp -rf ./99-calibration.conf /etc/X11/xorg.conf.d/99-calibration.conf
-    # sudo cp -rf ./99-fbturbo.conf  /etc/X11/xorg.conf.d/99-fbturbo.conf # there is no such file
-
-    # add waveshare mod
-    cp ./waveshare35a.dtbo /boot/overlays/
+    if [ "$lcd_type" == "lcd20" ]; then
+       cp ./waveshare20lcd.dtbo /boot/overlays/
+    else
+      # customized from https://github.com/tux1c/wavesharelcd-64bit-rpi/blob/master/install.sh
+      # prepare X11
+      mkdir -p /etc/X11/xorg.conf.d
+      mv /etc/X11/xorg.conf.d/40-libinput.conf /home/admin/wavesharelcd-64bit-rpi/40-libinput.conf 2>/dev/null
+      cp -rf ./99-calibration.conf /etc/X11/xorg.conf.d/99-calibration.conf
+      # sudo cp -rf ./99-fbturbo.conf  /etc/X11/xorg.conf.d/99-fbturbo.conf # there is no such file
+      # add waveshare mod
+      cp ./waveshare35a.dtbo /boot/overlays/
+    fi
 
     # modify /boot/config.txt 
     sed -i "s/^hdmi_force_hotplug=.*//g" /boot/config.txt 
@@ -276,8 +298,12 @@ function install_lcd() {
     # echo "dtparam=spi=on" >> /boot/config.txt
     # echo "enable_uart=1" >> /boot/config.txt
     sed -i "s/^dtoverlay=.*//g" /boot/config.txt 
-    echo "dtoverlay=waveshare35a:rotate=90" >> /boot/config.txt
 
+    if [ "$lcd_type" == "lcd20" ]; then
+      echo "dtoverlay=waveshare20lcd" >> /boot/config.txt
+    else
+      echo "dtoverlay=waveshare35a:rotate=90" >> /boot/config.txt
+    fi
     # modify cmdline.txt 
     modification="dwc_otg.lpm_enable=0 quiet fbcon=map:10 fbcon=font:ProFont6x11 logo.nologo"
     containsModification=$(grep -c "${modification}" /boot/cmdline.txt)
@@ -295,9 +321,12 @@ function install_lcd() {
       exit 1
     fi
 
-    # touch screen calibration
-    apt-get install -y xserver-xorg-input-evdev
-    cp -rf /usr/share/X11/xorg.conf.d/10-evdev.conf /usr/share/X11/xorg.conf.d/45-evdev.conf
+    if [ "$lcd_type" != "lcd20" ]; then
+      # touch screen calibration
+      apt-get install -y xserver-xorg-input-evdev
+      cp -rf /usr/share/X11/xorg.conf.d/10-evdev.conf /usr/share/X11/xorg.conf.d/45-evdev.conf
+    fi
+    
     # TODO manual touchscreen calibration option
     # https://github.com/tux1c/wavesharelcd-64bit-rpi#adapting-guide-to-other-lcds
 
@@ -316,7 +345,8 @@ function install_lcd() {
 }
 
 function uninstall_lcd() {
-
+  lcd_type=${1:-lcd35}
+ 
   if [ "${baseimage}" = "raspios_arm64"  ] || [ "${baseimage}" = "debian_rpi64" ]; then
 
     echo "# UNINSTALL 64bit LCD DRIVER"
@@ -343,12 +373,16 @@ function uninstall_lcd() {
     sed -i "s/ dwc_otg.lpm_enable=0 quiet fbcon=map:10 fbcon=font:ProFont6x11 logo.nologo//g" /boot/cmdline.txt
 
     # un-prepare X11
-    mv /home/admin/wavesharelcd-64bit-rpi/40-libinput.conf /etc/X11/xorg.conf.d/40-libinput.conf 2>/dev/null
-    rm -rf /etc/X11/xorg.conf.d/99-calibration.conf
+    if [ "$lcd_type" == "lcd20" ]; then
+      rm -r /home/admin/raspiblitz20lcd 2>/dev/null
+    # 'lcd35' or 'lcd' (old naming)
+    else 
+      mv /home/admin/wavesharelcd-64bit-rpi/40-libinput.conf /etc/X11/xorg.conf.d/40-libinput.conf 2>/dev/null
+      rm -rf /etc/X11/xorg.conf.d/99-calibration.conf 2>/dev/null
 
-    # remove github code of LCD drivers
-    rm -r /home/admin/wavesharelcd-64bit-rpi
-
+      # remove github code of LCD drivers
+      rm -r /home/admin/wavesharelcd-64bit-rpi 2>/dev/null
+    fi
     echo "# OK uninstall LCD done ... reboot needed"
 
   else
@@ -423,7 +457,8 @@ function uninstall_headless() {
 ###################
 
 if [ "${command}" == "prepare-install" ]; then
-  prepareinstall
+  lcd_type=${2:-lcd35}
+  prepareinstall $lcd_type
   exit 0
 fi
 
@@ -467,14 +502,20 @@ if [ "${command}" == "set-display" ]; then
   echo "# old(${displayClass})"
   echo "# new(${paramDisplayClass})"
 
-  if [ "${paramDisplayClass}" == "hdmi" ] || [ "${paramDisplayClass}" == "lcd" ] || [ "${paramDisplayClass}" == "headless" ]; then
+  if [ "${paramDisplayClass}" == "hdmi" ] || [ "${paramDisplayClass}" == "headless" ]; then
 
     # uninstall old state
     uninstall_$displayClass
 
     # install new state
     install_$paramDisplayClass
+  elif [[ "${paramDisplayClass}" =~ ^lcd.* ]]; then
+ 
+    # uninstall old state
+    uninstall_lcd "${paramDisplayClass}"
 
+    # install new state
+    install_lcd "${paramDisplayClass}"
   else
     echo "err='unknown parameter'"
     exit 1
