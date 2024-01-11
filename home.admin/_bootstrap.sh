@@ -415,6 +415,30 @@ do
   sleep 1
 done
 
+################################
+# RaspberryPi 5 - Firmware Update (needs internet)
+# https://github.com/raspiblitz/raspiblitz/issues/4359
+################################
+
+/home/admin/_cache.sh set message "checking Firmware"
+if [ "${baseimage}" == "raspios_arm64" ]; then
+  isRaspberryPi5=$(cat /proc/device-tree/model 2>/dev/null | grep -c "Raspberry Pi 5")
+  firmwareBuildNumber=$(rpi-eeprom-update | grep "CURRENT" | cut -d "(" -f2 | sed 's/[^0-9]*//g'
+  echo "checking Firmware: isRaspberryPi5(${isRaspberryPi5}) firmwareBuildNumber(${firmwareBuildNumber})" >> $logFile
+  if [ ${isRaspberryPi5} -gt 0 ] && [ ${firmwareBuildNumber} -lt 1701887365 ]; then
+    echo "RaspberryPi 5 detected with old firmware ... do update." >> $logFile
+    # apt-get update -y
+    # apt-get upgrade -y
+    # apt-get install -y rpi-eeprom
+    # rpi-eeprom-update -a
+    # reboot
+  else
+    echo "Not a RaspberryPi5 .. no firmware update needed." >> $logFile
+  fi
+else
+  echo "Not a RaspberryPi .. no firmware update needed." >> $logFile
+fi
+
 # write info for LCD
 /home/admin/_cache.sh set state "inspect-hdd"
 /home/admin/_cache.sh set message "please wait"
@@ -533,29 +557,6 @@ if [ ${isMounted} -eq 0 ]; then
     source <(/home/admin/_cache.sh get state)
 
   done
-
-  ################################
-  # RaspberryPi 5 - Firmware Update (needs internet)
-  # https://github.com/raspiblitz/raspiblitz/issues/4359
-  ################################
-  /home/admin/_cache.sh set message "checking Firmware"
-  if [ "${baseimage}" == "raspios_arm64" ]; then
-    isRaspberryPi5=$(cat /proc/device-tree/model 2>/dev/null | grep -c "Raspberry Pi 5")
-    firmwareBuildNumber=$(rpi-eeprom-update | grep "CURRENT" | cut -d "(" -f2 | sed 's/[^0-9]*//g'
-    echo "checking Firmware: isRaspberryPi5(${isRaspberryPi5}) firmwareBuildNumber(${firmwareBuildNumber})" >> $logFile
-    if [ ${isRaspberryPi5} -gt 0 ] && [ ${firmwareBuildNumber} -lt 1701887365 ]; then
-      echo "RaspberryPi 5 detected with old firmware ... do update." >> $logFile
-      # apt-get update -y
-      # apt-get upgrade -y
-      # apt-get install -y rpi-eeprom
-      # rpi-eeprom-update -a
-      # reboot
-    else
-      echo "Not a RaspberryPi5 .. no firmware update needed." >> $logFile
-    fi
-  else
-    echo "Not a RaspberryPi .. no firmware update needed." >> $logFile
-  fi
 
   #############################################
   # PROVISION PROCESS
