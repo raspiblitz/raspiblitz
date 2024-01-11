@@ -95,7 +95,7 @@ if [ ${#codeVersion} -eq 0 ]; then
 fi
 echo "# RaspiBlitz Version: ${codeVersion}"
 
-# get date as string fromatted like YEAR-MONTH-DAY
+# get date as string formatted like YEAR-MONTH-DAY
 dateString=$(date +%Y-%m-%d)
 echo "# Date: ${dateString}"
 
@@ -127,7 +127,7 @@ if [ -f "./${BUILDFOLDER}/${PACKERFINALFILE}.img.gz" ]; then
   exit 1
 fi
 
-# prevet monitor to go to sleep during long non-inetractive build
+# prevent monitor to go to sleep during long non-interactive build
 xset s off
 gsettings set org.gnome.desktop.screensaver idle-activation-enabled false
 
@@ -141,7 +141,7 @@ if [ $? -gt 0 ]; then
   exit 1
 fi
 
-echo "# BUILDING SUCESS ###########################################"
+echo "# BUILDING SUCCESS ###########################################"
 
 echo "# moving build to timestamped folder ./${BUILDFOLDER}"
 cd ..
