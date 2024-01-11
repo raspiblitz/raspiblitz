@@ -371,6 +371,7 @@ fi
 # from actions above
 
 if [ "${systemInitReboot}" == "1" ]; then
+  echo "Reboot" >> $logFile
   sudo cp ${logFile} /home/admin/raspiblitz.systeminit.log
   /home/admin/_cache.sh set state "reboot"
   sleep 8
@@ -386,6 +387,8 @@ fi
 gotLocalIP=0
 until [ ${gotLocalIP} -eq 1 ]
 do
+
+  echo "gotLocalIP(${gotLocalIP})" >> $logFile
 
   # get latest network info directly
   source <(/home/admin/config.scripts/internet.sh status online)
@@ -420,6 +423,7 @@ done
 # https://github.com/raspiblitz/raspiblitz/issues/4359
 ################################
 
+echo "checking Firmware" >> $logFile
 /home/admin/_cache.sh set message "checking Firmware"
 if [ "${baseimage}" == "raspios_arm64" ]; then
   isRaspberryPi5=$(cat /proc/device-tree/model 2>/dev/null | grep -c "Raspberry Pi 5")
