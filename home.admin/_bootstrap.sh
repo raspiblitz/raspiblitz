@@ -426,8 +426,9 @@ done
 echo "checking Firmware" >> $logFile
 /home/admin/_cache.sh set message "checking Firmware"
 if [ "${baseimage}" == "raspios_arm64" ]; then
+  echo "getting data" >> $logFile
   isRaspberryPi5=$(cat /proc/device-tree/model 2>/dev/null | grep -c "Raspberry Pi 5")
-  firmwareBuildNumber=$(rpi-eeprom-update | grep "CURRENT" | cut -d "(" -f2 | sed 's/[^0-9]*//g'
+  firmwareBuildNumber=$(rpi-eeprom-update | grep "CURRENT" | cut -d "(" -f2 | sed 's/[^0-9]*//g')
   echo "checking Firmware: isRaspberryPi5(${isRaspberryPi5}) firmwareBuildNumber(${firmwareBuildNumber})" >> $logFile
   if [ ${isRaspberryPi5} -gt 0 ] && [ ${firmwareBuildNumber} -lt 1701887365 ]; then
     echo "RaspberryPi 5 detected with old firmware ... do update." >> $logFile
