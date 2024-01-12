@@ -27,6 +27,9 @@ infoFile="/home/admin/raspiblitz.info"
 # this key/value file contains the state during the setup process
 setupFile="/var/cache/raspiblitz/temp/raspiblitz.setup"
 
+# Backup last log file if available
+sudo cp ${logFile} /home/admin/raspiblitz.last.log 2>/dev/null
+
 # Init boostrap log file
 echo "Writing logs to: ${logFile}"
 echo "" > $logFile
