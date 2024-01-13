@@ -439,6 +439,7 @@ if [ "${baseimage}" == "raspios_arm64" ]; then
     apt-get upgrade -y
     apt-get install -y rpi-eeprom
     rpi-eeprom-update -a
+    echo "Restarting ..." >> $logFile
     reboot
   else
     echo "RaspberryPi Firmware not in th need of update." >> $logFile
