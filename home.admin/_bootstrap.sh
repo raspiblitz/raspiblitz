@@ -27,6 +27,9 @@ infoFile="/home/admin/raspiblitz.info"
 # this key/value file contains the state during the setup process
 setupFile="/var/cache/raspiblitz/temp/raspiblitz.setup"
 
+# Backup last log file if available
+sudo cp ${logFile} /home/admin/raspiblitz.last.log 2>/dev/null
+
 # Init boostrap log file
 echo "Writing logs to: ${logFile}"
 echo "" > $logFile
@@ -371,6 +374,7 @@ fi
 # from actions above
 
 if [ "${systemInitReboot}" == "1" ]; then
+  echo "Reboot" >> $logFile
   sudo cp ${logFile} /home/admin/raspiblitz.systeminit.log
   /home/admin/_cache.sh set state "reboot"
   sleep 8
@@ -386,6 +390,8 @@ fi
 gotLocalIP=0
 until [ ${gotLocalIP} -eq 1 ]
 do
+
+  echo "gotLocalIP(${gotLocalIP})" >> $logFile
 
   # get latest network info directly
   source <(/home/admin/config.scripts/internet.sh status online)
@@ -414,6 +420,33 @@ do
   fi
   sleep 1
 done
+
+################################
+# RaspberryPi 5 - Firmware Update (needs internet)
+# https://github.com/raspiblitz/raspiblitz/issues/4359
+################################
+
+echo "checking Firmware" >> $logFile
+/home/admin/_cache.sh set message "checking Firmware"
+if [ "${baseimage}" == "raspios_arm64" ]; then
+  echo "getting data" >> $logFile
+  isRaspberryPi5=$(cat /proc/device-tree/model 2>/dev/null | grep -c "Raspberry Pi 5")
+  firmwareBuildNumber=$(rpi-eeprom-update | grep "CURRENT" | cut -d "(" -f2 | sed 's/[^0-9]*//g')
+  echo "checking Firmware: isRaspberryPi5(${isRaspberryPi5}) firmwareBuildNumber(${firmwareBuildNumber})" >> $logFile
+  if [ ${isRaspberryPi5} -gt 0 ] && [ ${firmwareBuildNumber} -lt 1701887365 ]; then
+    echo "RaspberryPi 5 detected with old firmware ... do update." >> $logFile
+    apt-get update -y
+    apt-get upgrade -y
+    apt-get install -y rpi-eeprom
+    rpi-eeprom-update -a
+    echo "Restarting ..." >> $logFile
+    reboot
+  else
+    echo "RaspberryPi Firmware not in th need of update." >> $logFile
+  fi
+else
+  echo "Not a RaspberryPi .. no firmware update needed." >> $logFile
+fi
 
 # write info for LCD
 /home/admin/_cache.sh set state "inspect-hdd"
