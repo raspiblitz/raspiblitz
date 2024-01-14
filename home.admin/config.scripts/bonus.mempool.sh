@@ -144,7 +144,7 @@ if [ "$1" = "install" ]; then
   echo "# npm install for mempool explorer (frontend)"
 
   cd frontend || exit 1
-  if ! sudo -u mempool NG_CLI_ANALYTICS=false npm install --no-optional; then
+  if ! sudo -u mempool NG_CLI_ANALYTICS=false npm ci; then
     echo "FAIL - npm install did not run correctly, aborting"
     exit 1
   fi
@@ -156,7 +156,7 @@ if [ "$1" = "install" ]; then
   echo "# npm install for mempool explorer (backend)"
 
   cd ../backend/ || exit 1
-  if ! sudo -u mempool NG_CLI_ANALYTICS=false npm install --no-optional; then
+  if ! sudo -u mempool NG_CLI_ANALYTICS=false npm ci; then
     echo "# FAIL - npm install did not run correctly, aborting"
     echo "result='failed npm install'"
     exit 1
@@ -194,7 +194,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   isInstalled=$(compgen -u | grep -c mempool)
   if [ "${isInstalled}" == "0" ]; then
     echo "# Install code base first ...."
-    /home/admin/config.scripts/bonus.mempool.sh install
+    if ! /home/admin/config.scripts/bonus.mempool.sh install; then
+      echo "FAIL - install did not run correctly, aborting"
+      exit 1
+    fi
   fi
 
   echo "# *** Activate MEMPOOL ***"
