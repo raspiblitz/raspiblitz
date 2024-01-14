@@ -439,7 +439,7 @@ if [ "$1" = "update" ]; then
     echo "# npm install for mempool explorer (backend)"
 
     cd /home/mempool/mempool/backend/ || exit 1
-    if ! sudo -u mempool NG_CLI_ANALYTICS=false npm install; then
+    if ! sudo -u mempool NG_CLI_ANALYTICS=false npm ci; then
       echo "FAIL - npm install did not run correctly, aborting"
       exit 1
     fi
