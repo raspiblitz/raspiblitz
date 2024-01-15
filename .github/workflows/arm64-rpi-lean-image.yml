@@ -7,25 +7,25 @@ concurrency:
 on:
   workflow_dispatch:
   push:
-    branches: ["dev", "v1.10"]
+    branches: ['dev', 'v1.10']
     paths:
-      - "build_sdcard.sh"
-      - "home.admin/bitcoin.install.sh"
-      - "home.admin/tor.install.sh"
-      - "home.admin/blitz.i2pd.sh"
-      - "home.admin/blitz.web.sh"
-      - "home.admin/blitz.display.sh"
-      - "ci/arm64-rpi/**"
+      - 'build_sdcard.sh'
+      - 'home.admin/bitcoin.install.sh'
+      - 'home.admin/tor.install.sh'
+      - 'home.admin/blitz.i2pd.sh'
+      - 'home.admin/blitz.web.sh'
+      - 'home.admin/blitz.display.sh'
+      - 'ci/arm64-rpi/**'
   pull_request:
-    branches: ["dev", "v1.10"]
+    branches: ['dev', 'v1.10']
     paths:
-      - "build_sdcard.sh"
-      - "home.admin/bitcoin.install.sh"
-      - "home.admin/tor.install.sh"
-      - "home.admin/blitz.i2pd.sh"
-      - "home.admin/blitz.web.sh"
-      - "home.admin/blitz.display.sh"
-      - "ci/arm64-rpi/**"
+      - 'build_sdcard.sh'
+      - 'home.admin/bitcoin.install.sh'
+      - 'home.admin/tor.install.sh'
+      - 'home.admin/blitz.i2pd.sh'
+      - 'home.admin/blitz.web.sh'
+      - 'home.admin/blitz.display.sh'
+      - 'ci/arm64-rpi/**'
 
 jobs:
   arm64-rpi-image-build:
@@ -44,9 +44,9 @@ jobs:
             echo "BRANCH_NAME=${GITHUB_HEAD_REF}" >> $GITHUB_ENV
           fi
           if [[ "${{github.event_name}}" == "pull_request" ]]; then
-            echo "::set-output name=github_user::${{github.event.pull_request.head.repo.owner.login}}"
+            echo "GITHUB_USER=${{github.event.pull_request.head.repo.owner.login}}" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=github_user::$(echo ${{github.repository}} | cut -d'/' -f1)"
+            echo "GITHUB_USER=$(echo ${{github.repository}} | cut -d'/' -f1)" >> $GITHUB_OUTPUT
           fi
 
       - name: Display the build name
@@ -54,9 +54,9 @@ jobs:
 
       - name: Run the build script
         run: |
-          echo "Using the variables: --pack lean --github_user ${{steps.set_values.outputs.github_user}} --branch ${{env.BRANCH_NAME}}"
+          echo "Using the variables: --pack lean --github_user ${{steps.set_values.outputs.GITHUB_USER}} --branch ${{env.BRANCH_NAME}}"
           cd ci/arm64-rpi
-          bash packer.build.arm64-rpi.sh --pack lean --github_user ${{steps.set_values.outputs.github_user}} --branch ${{env.BRANCH_NAME}}
+          bash packer.build.arm64-rpi.sh --pack lean --github_user ${{steps.set_values.outputs.GITHUB_USER}} --branch ${{env.BRANCH_NAME}}
 
       - name: Compute checksum of the raw image
         run: |
