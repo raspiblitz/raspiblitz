@@ -14,6 +14,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
   echo "cl.rest.sh connect <mainnet|testnet|signet> [?key-value]"
   echo "cl.rest.sh off <mainnet|testnet|signet> <purge>"
   echo "cl.rest.sh update <mainnet|testnet|signet>"
+  echo "cl.rest.sh symlink-to-appdata <mainnet|testnet|signet>"
   exit 1
 fi
 
@@ -30,6 +31,24 @@ source <(/home/admin/config.scripts/network.aliases.sh getvars cl $2)
 
 echo "# Running 'cl.rest.sh $*'"
 
+function symlinkToAppData() {
+  # symlink the certs directory to the c-lightning-REST directory
+  echo "# Symlinking the certs directory from app-data"
+  if sudo ls /mnt/hdd/app-data/c-lightning-REST/${CLNETWORK}/certs 2>/dev/null; then
+    # remove the symlink and recreate it if app-data exists
+    sudo rm -rf /home/bitcoin/c-lightning-REST/${CLNETWORK}/certs
+  else
+    # create the app-data directory and move the certs directory there
+    sudo mkdir -p /mnt/hdd/app-data/c-lightning-REST/${CLNETWORK}/certs 2>/dev/null
+    sudo mv /home/bitcoin/c-lightning-REST/${CLNETWORK}/certs \
+      /mnt/hdd/app-data/c-lightning-REST/${CLNETWORK}/certs
+  fi
+  sudo ln -s /mnt/hdd/app-data/c-lightning-REST/${CLNETWORK}/certs \
+    /home/bitcoin/c-lightning-REST/${CLNETWORK}/
+  sudo chmod -R 700 /mnt/hdd/app-data/c-lightning-REST
+  sudo chown -R bitcoin:bitcoin /mnt/hdd/app-data/c-lightning-REST
+}
+
 if [ "$1" = connect ]; then
   if ! systemctl is-active --quiet ${netprefix}clrest; then
     /home/admin/config.scripts/cl.rest.sh on ${CHAIN}
@@ -42,9 +61,9 @@ if [ "$1" = connect ]; then
   /home/admin/config.scripts/tor.onion-service.sh ${netprefix}clrest 443 ${portprefix}6100 1>/dev/null
 
   toraddress=$(sudo cat /mnt/hdd/tor/${netprefix}clrest/hostname)
-  hex_macaroon=$(xxd -plain /home/bitcoin/c-lightning-REST/${CLNETWORK}/certs/access.macaroon | tr -d '\n')
+  hex_macaroon=$(sudo -u bitcoin xxd -plain /home/bitcoin/c-lightning-REST/${CLNETWORK}/certs/access.macaroon | tr -d '\n')
   url="https://${localip}:${portprefix}6100/"
-  lndconnect="lndconnect://${toraddress}:443?macaroon=${hex_macaroon}"
+  # lndconnect="lndconnect://${toraddress}:443?macaroon=${hex_macaroon}"
   # c-lightning-rest://http://your_hidden_service.onion:your_port?&macaroon=your_macaroon_file_in_HEX&protocol=http
   clrestlan="c-lightning-rest://${localip}:${portprefix}6100?&macaroon=${hex_macaroon}&protocol=http"
   clresttor="c-lightning-rest://${toraddress}:443?&macaroon=${hex_macaroon}&protocol=http"
@@ -58,6 +77,7 @@ if [ "$1" = connect ]; then
   fi
 
   # deactivated
+  # shellcheck disable=SC2317
   function showStepByStepQR() {
     clear
     echo
@@ -76,7 +96,7 @@ if [ "$1" = connect ]; then
     echo "REST Port: ${portprefix}6100"
     echo
     echo "# Press enter to continue to show the Macaroon"
-    read key
+    read -r
     sudo /home/admin/config.scripts/blitz.display.sh hide
     sudo /home/admin/config.scripts/blitz.display.sh qr "${hex_macaroon}"
     clear
@@ -89,7 +109,7 @@ if [ "$1" = connect ]; then
     qrencode -t ANSIUTF8 "${hex_macaroon}"
     echo
     echo "# Press enter to hide the QRcode from the LCD"
-    read key
+    read -r
     sudo /home/admin/config.scripts/blitz.display.sh hide
     exit 0
   }
@@ -108,7 +128,7 @@ if [ "$1" = connect ]; then
     qrencode -t ANSIUTF8 "${clresttor}"
     echo
     echo "# Press enter to show the string to connect over LAN"
-    read key
+    read -r
     sudo /home/admin/config.scripts/blitz.display.sh hide
     sudo /home/admin/config.scripts/blitz.display.sh qr "${clrestlan}"
     clear
@@ -124,7 +144,7 @@ if [ "$1" = connect ]; then
     qrencode -t ANSIUTF8 "${clrestlan}"
     echo
     echo "# Press enter to hide the QRcode from the LCD"
-    read key
+    read -r
     sudo /home/admin/config.scripts/blitz.display.sh hide
     exit 0
   }
@@ -156,6 +176,8 @@ if [ "$1" = on ]; then
   sudo -u bitcoin mkdir /home/bitcoin/c-lightning-REST/${CLNETWORK}
   sudo -u bitcoin cp -r /home/bitcoin/c-lightning-REST/* \
     /home/bitcoin/c-lightning-REST/${CLNETWORK}
+
+  symlinkToAppData
 
   echo "
 {
@@ -202,6 +224,9 @@ WantedBy=multi-user.target
   else
     echo "# OK - the clrest.service is enabled, to start manually use: 'sudo systemctl start clrest'"
   fi
+
+  /home/admin/config.scripts/blitz.conf.sh set ${netprefix}clrest "on"
+
   echo
   echo "# Monitor with:"
   echo "sudo journalctl -fu clrest"
@@ -221,6 +246,7 @@ if [ "$1" = off ]; then
     echo "# Removing the source code and binaries"
     sudo rm -rf /home/bitcoin/c-lightning-REST
   fi
+  /home/admin/config.scripts/blitz.conf.sh set ${netprefix}clrest "off"
   exit 0
 fi
 
@@ -239,6 +265,9 @@ if [ "$1" = "update" ]; then
     echo "# You are up-to-date on version" "$TAG"
   else
     sudo systemctl stop ${netprefix}clrest
+
+    symlinkToAppData
+
     echo "# Pulling latest changes..."
     sudo -u bitcoin git pull -p
     echo "# Reset to the latest release tag"
@@ -258,11 +287,19 @@ if [ "$1" = "update" ]; then
       exit 1
     fi
     echo "# Updated to version" "$TAG"
+
+    /home/admin/config.scripts/blitz.conf.sh set ${netprefix}clrest "on"
+
     echo
     echo "# Starting the ${netprefix}clrest service ..."
     sudo systemctl start ${netprefix}clrest
     echo
   fi
+  exit 0
+fi
+
+if [ "$1" = "symlink-to-appdata" ]; then
+  symlinkToAppData
   exit 0
 fi
 
