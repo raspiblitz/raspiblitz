@@ -45,7 +45,7 @@ function symlinkToAppData() {
   fi
   sudo ln -s /mnt/hdd/app-data/c-lightning-REST/${CLNETWORK}/certs \
     /home/bitcoin/c-lightning-REST/${CLNETWORK}/
-  sudo chmod -R 700 /mnt/hdd/app-data/c-lightning-REST
+  sudo chmod -R 750 /mnt/hdd/app-data/c-lightning-REST
   sudo chown -R bitcoin:bitcoin /mnt/hdd/app-data/c-lightning-REST
 }
 

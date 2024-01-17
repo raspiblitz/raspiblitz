@@ -139,6 +139,8 @@ if [ "$1" = "install" ]; then
     sudo adduser --system --group --home /home/rtl rtl || exit 1
   fi
 
+  sudo usermod -a -G bitcoin rtl
+
   # download source code and set to tag release
   echo "# Get the RTL Source Code"
   sudo -u rtl rm -rf /home/rtl/RTL 2>/dev/null
