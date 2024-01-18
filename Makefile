@@ -5,7 +5,7 @@ GITHUB_HEAD_REF = $(shell git rev-parse --abbrev-ref HEAD)
 amd64-lean-desktop-uefi-image:
 	# Run the build script
 	cd ci/amd64 && \
-	bash packer.build.amd64-debian.sh \
+	sudo bash packer.build.amd64-debian.sh \
 	  --pack lean \
 	  --github_user $(GITHUB_ACTOR) \
 	  --branch $(GITHUB_HEAD_REF) \
@@ -31,7 +31,7 @@ amd64-lean-desktop-uefi-image:
 amd64-lean-server-legacyboot-image:
 	# Run the build script
 	cd ci/amd64 && \
-	bash packer.build.amd64-debian.sh \
+	sudo bash packer.build.amd64-debian.sh \
 	  --pack lean \
 	  --github_user $(GITHUB_ACTOR) \
 	  --branch $(GITHUB_HEAD_REF) \
@@ -57,7 +57,7 @@ amd64-lean-server-legacyboot-image:
 amd64-fatpack-desktop-uefi-image:
 	# Run the build script
 	cd ci/amd64 && \
-	bash packer.build.amd64-debian.sh \
+	sudo bash packer.build.amd64-debian.sh \
 	--pack fatpack \
 	--github_user $(GITHUB_ACTOR) \
 	--branch $(GITHUB_HEAD_REF) \
@@ -83,7 +83,7 @@ amd64-fatpack-desktop-uefi-image:
 arm64-rpi-lean-image:
 	# Run the build script
 	cd ci/arm64-rpi && \
-	bash packer.build.arm64-rpi.local.sh \
+	sudo bash packer.build.arm64-rpi.local.sh \
 	--pack lean \
 	--github_user $(GITHUB_ACTOR) \
 	--branch $(GITHUB_HEAD_REF)
