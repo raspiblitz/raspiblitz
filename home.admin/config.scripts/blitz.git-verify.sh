@@ -68,15 +68,13 @@ elif [ $# -eq 4 ]; then
   commitOrTag="$4 tag"
 fi
 echo "# running: ${gitCommand}"
-if ${gitCommand} 2>&1 >&"$_temp"; then
-  goodSignature=1
-else
-  goodSignature=0
-fi
+${gitCommand} 2>&1 >&"$_temp"
 echo
 cat "$_temp"
 echo "# goodSignature(${goodSignature})"
 
+goodSignature=$(tr -d " \t\n\r" <"$_temp" | grep "Good signature from" -c)
+echo "# goodSignature(${goodSignature})"
 correctKey=$(tr -d " \t\n\r" <"$_temp" | grep "${PGPpubkeyFingerprint}" -c)
 echo "# correctKey(${correctKey})"
 
