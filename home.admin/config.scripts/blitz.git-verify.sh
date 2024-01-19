@@ -30,6 +30,10 @@ PGPsigner="$1"
 PGPpubkeyLink="$2"
 PGPpubkeyFingerprint="$3"
 
+# force outputs to English
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+
 wget -O /var/cache/raspiblitz/pgp_keys_${PGPsigner}.asc "${PGPpubkeyLink}"
 
 # in the case the wget above fails, try to use curl instead
@@ -68,15 +72,13 @@ elif [ $# -eq 4 ]; then
   commitOrTag="$4 tag"
 fi
 echo "# running: ${gitCommand}"
-if ${gitCommand} 2>&1 >&"$_temp"; then
-  goodSignature=1
-else
-  goodSignature=0
-fi
+${gitCommand} 2>&1 >&"$_temp"
 echo
 cat "$_temp"
-echo "# goodSignature(${goodSignature})"
+echo
 
+goodSignature=$(grep "Good signature from" -c <"$_temp")
+echo "# goodSignature(${goodSignature})"
 correctKey=$(tr -d " \t\n\r" <"$_temp" | grep "${PGPpubkeyFingerprint}" -c)
 echo "# correctKey(${correctKey})"
 
