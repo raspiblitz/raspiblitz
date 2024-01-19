@@ -73,10 +73,11 @@ elif [ $# -eq 4 ]; then
 fi
 echo "# running: ${gitCommand}"
 ${gitCommand} 2>&1 >&"$_temp"
-echo temp
+echo
 cat "$_temp"
+echo
 
-goodSignature=$(cat "$_temp" | grep "Good signature from" -c)
+goodSignature=$(grep "Good signature from" -c <"$_temp")
 echo "# goodSignature(${goodSignature})"
 correctKey=$(tr -d " \t\n\r" <"$_temp" | grep "${PGPpubkeyFingerprint}" -c)
 echo "# correctKey(${correctKey})"
