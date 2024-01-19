@@ -71,9 +71,8 @@ echo "# running: ${gitCommand}"
 ${gitCommand} 2>&1 >&"$_temp"
 echo
 cat "$_temp"
-echo "# goodSignature(${goodSignature})"
 
-goodSignature=$(tr -d " \t\n\r" <"$_temp" | grep "Good signature from" -c)
+goodSignature=$(cat "$_temp" | grep "Good signature from" -c)
 echo "# goodSignature(${goodSignature})"
 correctKey=$(tr -d " \t\n\r" <"$_temp" | grep "${PGPpubkeyFingerprint}" -c)
 echo "# correctKey(${correctKey})"
