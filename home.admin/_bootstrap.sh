@@ -1079,6 +1079,9 @@ if [ "${btc_default_sync_initialblockdownload}" == "1" ]; then
   /home/admin/_cache.sh focus btc_default_sync_progress 0
 fi
 
+# backup wifi settings
+/home/admin/config.scripts/internet.wifi.sh backup-restore
+
 # notify about (re)start if activated
 source <(/home/admin/_cache.sh get hostname)
 /home/admin/config.scripts/blitz.notify.sh send "RaspiBlitz '${hostname}' (re)started" >> $logFile
