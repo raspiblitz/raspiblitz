@@ -143,6 +143,29 @@ if [ "${flagExists}" == "1" ]; then
   exit 0
 fi
 
+# wifi config by file on sd card
+flagExists=$(sudo ls /boot/firmware/wifi | grep -c 'wfi')
+if [ "${flagExists}" == "1" ]; then
+
+  # set info
+  echo "Setting Wifi by file on sd card ..." >> ${logFile}
+  /home/admin/_cache.sh set message "setting wifi"
+
+  # get first line as string from wifi file (NAME OF WIFI)
+  ssid=$(sudo sed -n '1p' /boot/firmware/wifi | tr -d '[:space:]')
+
+  # get second line as string from wifi file (PASSWORD OF WIFI)
+  password=$(sudo sed -n '2p' /boot/firmware/wifi | tr -d '[:space:]')
+
+  # set wifi
+  echo "Setting Wifi SSID(${ssid}) Password(${password})" >> ${logFile}
+  /home/admin/config.scripts/internet.wifi.sh on ${ssid} ${password} >> ${logFile}
+
+  # remove flag
+  sudo rm /boot/firmware/wifi
+fi
+
+
 # when the provision did not ran thru without error (ask user for fresh sd card)
 provisionFlagExists=$(sudo ls /home/admin/provision.flag | grep -c 'provision.flag')
 if [ "${provisionFlagExists}" == "1" ]; then
