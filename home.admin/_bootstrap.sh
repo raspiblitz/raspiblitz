@@ -144,7 +144,7 @@ if [ "${flagExists}" == "1" ]; then
 fi
 
 # wifi config by file on sd card
-flagExists=$(sudo ls /boot/firmware/wifi | grep -c 'wfi')
+flagExists=$(sudo ls /boot/firmware/wifi | grep -c 'wifi')
 if [ "${flagExists}" == "1" ]; then
 
   # set info
@@ -163,8 +163,9 @@ if [ "${flagExists}" == "1" ]; then
 
   # remove flag
   sudo rm /boot/firmware/wifi
+else
+  echo "No Wifi config by file on sd card." >> ${logFile}
 fi
-
 
 # when the provision did not ran thru without error (ask user for fresh sd card)
 provisionFlagExists=$(sudo ls /home/admin/provision.flag | grep -c 'provision.flag')
