@@ -696,7 +696,7 @@ That USB drive will then be used to store your latest StaticChannelBackup, just 
 
 ##### StaticChannel/Emergency-Backup per SCP/SSH to other server
 
-See [SCP Backup Target](README.md#b-scp-backup-target) for details on how to setup static channel backups using SCP.
+See [SFTP Backup Target](README.md#b-sftp-backup-target) for details on how to setup static channel backups using SCP.
 
 ##### CORE LIGHTNING NODE
 
@@ -1291,7 +1291,7 @@ Nextcloud is an open-source project to host your own files: <https://en.wikipedi
 
 Find free Nextcloud providers here to sign up: <https://nextcloud.com/signup/>
 
-#### B) SCP Backup Target
+#### B) SFTP Backup Target
 
 _You can also backup the StaticChannelBackup file to your own server, but this needs manual setup:_
 
@@ -1306,18 +1306,18 @@ Note: If you do not copy the public key to your remote server, these backups wil
 
 Edit the `/mnt/hdd/raspiblitz.conf` file to include the following:
 
-`scpBackupTarget='[USER]@[SERVER]:[DIRPATH-WITHOUT-ENDING-/]'`
+`sftpBackupTarget='[USER]@[SERVER]:[DIRPATH-WITHOUT-ENDING-/]'`
 
 Eg:
-`scpBackupTarget='myaccount@10.10.10.100:/home/myaccount/backups'`
+`sftpBackupTarget='myaccount@10.10.10.100:/home/myaccount/backups'`
 
-and you can optionally set custom options for the SCP command (for example to set a non-default port) with:
+and you can optionally set custom options for the SFTP command (for example to set a non-default port) with:
 
-`scpBackupOptions='[YOUR-CUSTOM-OPTIONS]'`
+`sftpBackupOptions='[YOUR-CUSTOM-OPTIONS]'`
 
 If you have done the setup above and want to run this manually, you can run the below command (from the root user):
 
-`scp /home/admin/backups/scb/channel.backup myaccount@10.10.10.100:/home/myaccount/backups`
+`sftp myaccount@10.10.10.100:/home/myaccount/backups <<< $'put /home/admin/backups/scb/channel.backup'`
 
 Alternatively, open or close a channel. The backups get taken on every channel open or close.
 

@@ -525,8 +525,8 @@ do
           fi
           # its ok to ignore known host, because data is encrypted (worst case of MiM would be: no offsite channel backup)
           # but its more likely that without ignoring known host, script might not run thru and that way: no offsite channel backup
-          sftp ${sftpBackupOptions} ${localBackupPath} ${sftpBackupTarget}/
-          sftp ${sftpBackupOptions} ${localTimestampedPath} ${sftpBackupTarget}/
+          sftp ${sftpBackupOptions} ${sftpBackupTarget}/ <<< $'put ${localBackupPath}'
+          sftp ${sftpBackupOptions} ${sftpBackupTarget}/ <<< $'put ${localTimestampedPath}'
           result=$?
           if [ ${result} -eq 0 ]; then
             echo "OK - SFTP Backup exited with 0"
@@ -631,8 +631,8 @@ do
           fi
           # its ok to ignore known host, because data is encrypted (worst case of MiM would be: no offsite channel backup)
           # but its more likely that without ignoring known host, script might not run thru and that way: no offsite channel backup
-          sftp ${sftpBackupOptions} ${localBackupPath} ${sftpBackupTarget}/
-          sftp ${sftpBackupOptions} ${localTimestampedPath} ${sftpBackupTarget}/
+          sftp ${sftpBackupOptions} ${sftpBackupTarget}/ <<< $'put ${localBackupPath}'
+          sftp ${sftpBackupOptions} ${sftpBackupTarget}/ <<< $'put ${localTimestampedPath}'
           result=$?
           if [ ${result} -eq 0 ]; then
             echo "OK - SFTP Backup exited with 0"
