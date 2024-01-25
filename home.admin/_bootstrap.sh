@@ -158,12 +158,12 @@ if [ "${flagExists}" == "1" ]; then
   password=$(sudo sed -n '2p' /boot/firmware/wifi | tr -d '[:space:]')
 
   # set wifi
-  error=""
+  err=""
   echo "Setting Wifi SSID(${ssid}) Password(${password})" >> ${logFile}
   source <(/home/admin/config.scripts/internet.wifi.sh on ${ssid} ${password})
-  if [ "${error}" != "" ]; then
+  if [ "${err}" != "" ]; then
     echo "Setting Wifi failed - edit or remove file /boot/firmware/wifi" >> ${logFile}
-    echo "error(${error})" >> ${logFile}
+    echo "error(${err})" >> ${logFile}
     echo "Will shutdown in 1min ..." >> ${logFile}
     /home/admin/_cache.sh set state "errorWIFI"
     /home/admin/_cache.sh set message "shutting down - edit or remove file"
