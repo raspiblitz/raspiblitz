@@ -322,7 +322,7 @@ fi
 ####################################
 
 # check if there is a WIFI configuration to backup or restore
-if [ -f "/var/cache/raspiblitz/hdd-inspect/wpa_supplicant.conf" ]; then
+if [ -d "/var/cache/raspiblitz/hdd-inspect/wifi" ]; then
   echo "WIFI RESTORE from /var/cache/raspiblitz/hdd-inspect/wpa_supplicant.conf" >> $logFile
   /home/admin/config.scripts/internet.wifi.sh backup-restore >> $logFile
 else
