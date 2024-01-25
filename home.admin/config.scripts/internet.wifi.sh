@@ -102,7 +102,7 @@ if [ "$1" == "backup-restore" ]; then
   # check if mem copy of wifi config is available (for restore only)
   # this should be available if a backup on HDD exists and HDD is not mounted yet but was inspected by datadrive script
   memRestoreConfigAvailable=0
-  if [ -d /var/cache/raspiblitz/hdd-inspect/wifi ]; then
+  if [ -d /var/cache/raspiblitz/hdd-inspect/wifi ] && [ "$(ls -A /var/cache/raspiblitz/hdd-inspect/wifi)" ]; then
     memRestoreConfigAvailable=1
   fi
   echo "memRestoreConfigAvailable=${memRestoreConfigAvailable}"
@@ -110,7 +110,7 @@ if [ "$1" == "backup-restore" ]; then
   if [ ${wifiIsSet} -eq 1 ]; then
     # BACKUP latest wifi settings to HDD if available
     if [ ${hddBackupLocationAvailable} -eq 1 ]; then
-      sudo cp /etc/NetworkManager/system-connections/* /mnt/hdd/app-data/wifi/
+      sudo cp -a /etc/NetworkManager/system-connections/* /mnt/hdd/app-data/wifi/
       echo "wifiRestore=0"
       echo "wifiBackup=1"
     else
@@ -120,22 +120,20 @@ if [ "$1" == "backup-restore" ]; then
     exit 0
   elif [ ${hddRestoreConfigAvailable} -eq 1 ]; then
     # RESTORE backuped wifi settings from HDD to RaspiBlitz
-    # TODO REFACTOR
-    exit 1
-    sudo cp /mnt/hdd/app-data/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.conf
     echo "# restoring old wifi settings from HDD ... wait 4 secounds to connect"
-    sudo wpa_cli -i wlan0 reconfigure 1>/dev/null
+    sudo cp -a /mnt/hdd/app-data/wifi/* /etc/NetworkManager/system-connections/
+    sudo chmod 600 /etc/NetworkManager/system-connections/*
+    sudo systemctl restart NetworkManager
     sleep 4
     echo "wifiRestore=1"
     echo "wifiBackup=0"
     exit 0
   elif [ ${memRestoreConfigAvailable} -eq 1 ]; then
     # RESTORE backuped wifi settings from MEMCOPY to RaspiBlitz
-    # TODO REFACTOR
-    exit 1
-    sudo cp /var/cache/raspiblitz/hdd-inspect/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.conf
     echo "# restoring old wifi settings from MEMCOPY ... wait 4 secounds to connect"
-    sudo wpa_cli -i wlan0 reconfigure 1>/dev/null
+    sudo cp -a /var/cache/raspiblitz/hdd-inspect/wifi/* /etc/NetworkManager/system-connections/
+    sudo chmod 600 /etc/NetworkManager/system-connections/*
+    sudo systemctl restart NetworkManager
     sleep 4
     echo "wifiRestore=1"
     echo "wifiBackup=0"

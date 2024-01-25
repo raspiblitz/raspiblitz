@@ -293,7 +293,7 @@ if [ "$1" = "status" ]; then
             cp -a /mnt/hdd${subVolumeDir}/raspiblitz.conf /var/cache/raspiblitz/hdd-inspect/raspiblitz.conf
 
             # make copy of WIFI config to RAMDISK (if available)
-            cp -a /mnt/hdd${subVolumeDir}/app-data/wpa_supplicant.conf /var/cache/raspiblitz/hdd-inspect/wpa_supplicant.conf 2>/dev/null
+            cp -a /mnt/hdd${subVolumeDir}/app-data/wifi /var/cache/raspiblitz/hdd-inspect/wifi 2>/dev/null
 
             # Convert old ssh backup data structure (if needed)
             oldDataExists=$(sudo ls /mnt/hdd${subVolumeDir}/ssh/ssh_host_rsa_key 2>/dev/null | grep -c "ssh_host_rsa_key")
