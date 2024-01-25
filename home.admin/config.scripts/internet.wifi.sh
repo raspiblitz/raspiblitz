@@ -86,8 +86,9 @@ if [ "$1" == "backup-restore" ]; then
 
   # check if HDD backup location is available (for backup or restore)
   hddBackupLocationAvailable=0
-  if [ -d /mnt/hdd/app-data/wifi ]; then
+  if [ -d /mnt/hdd/app-data ]; then
     hddBackupLocationAvailable=1
+    sudo mkdir /mnt/hdd/app-data/wifi 2>/dev/null
   fi
   echo "hddBackupLocationAvailable=${hddBackupLocationAvailable}"
 
@@ -106,12 +107,10 @@ if [ "$1" == "backup-restore" ]; then
   fi
   echo "memRestoreConfigAvailable=${memRestoreConfigAvailable}"
 
-  exit 1
-
   if [ ${wifiIsSet} -eq 1 ]; then
     # BACKUP latest wifi settings to HDD if available
     if [ ${hddBackupLocationAvailable} -eq 1 ]; then
-      sudo cp /etc/wpa_supplicant/wpa_supplicant.conf /mnt/hdd/app-data/wpa_supplicant.conf 
+      sudo cp /etc/NetworkManager/system-connections/* /mnt/hdd/app-data/wifi/
       echo "wifiRestore=0"
       echo "wifiBackup=1"
     else
@@ -121,6 +120,8 @@ if [ "$1" == "backup-restore" ]; then
     exit 0
   elif [ ${hddRestoreConfigAvailable} -eq 1 ]; then
     # RESTORE backuped wifi settings from HDD to RaspiBlitz
+    # TODO REFACTOR
+    exit 1
     sudo cp /mnt/hdd/app-data/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.conf
     echo "# restoring old wifi settings from HDD ... wait 4 secounds to connect"
     sudo wpa_cli -i wlan0 reconfigure 1>/dev/null
@@ -130,6 +131,8 @@ if [ "$1" == "backup-restore" ]; then
     exit 0
   elif [ ${memRestoreConfigAvailable} -eq 1 ]; then
     # RESTORE backuped wifi settings from MEMCOPY to RaspiBlitz
+    # TODO REFACTOR
+    exit 1
     sudo cp /var/cache/raspiblitz/hdd-inspect/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.conf
     echo "# restoring old wifi settings from MEMCOPY ... wait 4 secounds to connect"
     sudo wpa_cli -i wlan0 reconfigure 1>/dev/null
