@@ -30,6 +30,7 @@ if [ ${#tallycoinConnect} -eq 0 ]; then tallycoinConnect="off"; fi
 if [ ${#helipad} -eq 0 ]; then helipad="off"; fi
 if [ ${#lightningtipbot} -eq 0 ]; then lightningtipbot="off"; fi
 if [ ${#fints} -eq 0 ]; then fints="off"; fi
+if [ ${#lndk} -eq 0 ]; then lndk="off"; fi
 
 # show select dialog
 echo "run dialog ..."
@@ -66,6 +67,7 @@ if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
   OPTIONS+=(xa 'LND Sphinx-Relay' ${sphinxrelay})
   OPTIONS+=(fa 'LND Helipad Boostagram reader' ${helipad})
   OPTIONS+=(da 'LND Tallycoin Connect' ${tallycoinConnect})
+  OPTIONS+=(lb 'LND LNDK (BOLT 12 LND)' ${lndk})
 fi
 
 # just available for CL
@@ -498,6 +500,22 @@ Use the new 'TALLY' entry in Main Menu for more info.\n
   fi
 else
   echo "Tallycoin Setting unchanged."
+fi
+
+# LNDK
+choice="off"; check=$(echo "${CHOICES}" | grep -c "lb")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${lndk}" != "${choice}" ]; then
+  echo "LNDK Setting changed .."
+  anychange=1
+  sudo -u admin /home/admin/config.scripts/bonus.lndk.sh ${choice}
+  if [ "${choice}" =  "on" ]; then
+    whiptail --title " Installed LNDK" --msgbox "\
+LNDK was installed.\n
+" 10 45
+  fi
+else
+  echo "LNDK Setting unchanged."
 fi
 
 # JoinMarket process choice
