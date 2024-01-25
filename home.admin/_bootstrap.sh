@@ -161,7 +161,8 @@ if [ "${flagExists}" == "1" ]; then
   echo "Setting Wifi SSID(${ssid}) Password(${password})" >> ${logFile}
   /home/admin/config.scripts/internet.wifi.sh on ${ssid} ${password} >> ${logFile}
   if [ $? -gt 0 ]; then
-    echo "Display failure for 1min on on LCD display" >> ${logFile}
+    echo "Setting Wifi failed -  edit or remove file /boot/firmware/wifi" >> ${logFile}
+    echo "Will shutdown in 1min ..." >> ${logFile}
     /home/admin/_cache.sh set state "errorWIFI"
     /home/admin/_cache.sh set message "shutting down - edit or remove file"
     sleep 60
