@@ -323,8 +323,8 @@ ${contentString}
 elif [ "${eventID}" == "errorWIFI" ]; then
 
     # contentString --> detail error message
-    dialog --backtitle "${backtitle}" --cr-wrap --infobox "
-PROBLEM: Not working WIFI config by file
+    dialog --backtitle "${backtitle}" --cr-wrap --infobox "PROBLEM: Failed WIFI config
+    by file 'wifi' on sd card
 Detailed Error Message:
 ${contentString}
 " 7 35
