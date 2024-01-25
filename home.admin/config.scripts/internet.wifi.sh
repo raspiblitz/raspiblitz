@@ -86,18 +86,28 @@ if [ "$1" == "backup-restore" ]; then
 
   # check if HDD backup location is available (for backup or restore)
   hddBackupLocationAvailable=0
-  if [ -d /mnt/hdd/app-data ]; then
+  if [ -d /mnt/hdd/app-data/wifi ]; then
     hddBackupLocationAvailable=1
   fi
   echo "hddBackupLocationAvailable=${hddBackupLocationAvailable}"
 
-  hddRestoreConfigAvailable=$(sudo ls /mnt/hdd/app-data/wpa_supplicant.conf 2>/dev/null | grep -c "wpa_supplicant.conf")
+  hddRestoreConfigAvailable=0
+  if [ ${hddBackupLocationAvailable} -eq 1 ] && [ "$(ls -A /mnt/hdd/app-data/wifi)" ]; then
+         # the directory /mnt/hdd/app-data/wifi contains files.
+        hddRestoreConfigAvailable=1
+  fi
   echo "hddRestoreConfigAvailable=${hddRestoreConfigAvailable}"
 
   # check if mem copy of wifi config is available (for restore only)
   # this should be available if a backup on HDD exists and HDD is not mounted yet but was inspected by datadrive script
-  memRestoreConfigAvailable=$(sudo ls /var/cache/raspiblitz/hdd-inspect/wpa_supplicant.conf 2>/dev/null | grep -c "wpa_supplicant.conf")
+  memRestoreConfigAvailable=0
+  if [ -d /var/cache/raspiblitz/hdd-inspect/wifi ]; then
+  if [ "$(ls -A )" ]; then
+    memRestoreConfigAvailable=1
+  fi
   echo "memRestoreConfigAvailable=${memRestoreConfigAvailable}"
+
+  exit
 
   if [ ${wifiIsSet} -eq 1 ]; then
     # BACKUP latest wifi settings to HDD if available
