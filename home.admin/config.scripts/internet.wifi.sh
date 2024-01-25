@@ -102,12 +102,11 @@ if [ "$1" == "backup-restore" ]; then
   # this should be available if a backup on HDD exists and HDD is not mounted yet but was inspected by datadrive script
   memRestoreConfigAvailable=0
   if [ -d /var/cache/raspiblitz/hdd-inspect/wifi ]; then
-  if [ "$(ls -A )" ]; then
     memRestoreConfigAvailable=1
   fi
   echo "memRestoreConfigAvailable=${memRestoreConfigAvailable}"
 
-  exit
+  exit 1
 
   if [ ${wifiIsSet} -eq 1 ]; then
     # BACKUP latest wifi settings to HDD if available
