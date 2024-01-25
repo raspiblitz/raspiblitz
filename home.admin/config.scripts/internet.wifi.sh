@@ -42,6 +42,7 @@ if [ "$1" == "on" ]; then
 
   # activate wifi
   sudo nmcli radio wifi on
+  sleep 10
   sudo nmcli device wifi connect "${ssid}" password "${password}"
   errorCode=$?
   if [ ${errorCode} -gt 0 ]; then
