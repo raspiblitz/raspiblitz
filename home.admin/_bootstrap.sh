@@ -160,7 +160,7 @@ if [ "${flagExists}" == "1" ]; then
   # set wifi
   error=""
   echo "Setting Wifi SSID(${ssid}) Password(${password})" >> ${logFile}
-  source <(/home/admin/config.scripts/internet.wifi.sh on ${ssid} ${password} >> ${logFile})
+  source <(/home/admin/config.scripts/internet.wifi.sh on ${ssid} ${password})
   if [ "${error}" != "" ]; then
     echo "Setting Wifi failed - edit or remove file /boot/firmware/wifi" >> ${logFile}
     echo "error(${error})" >> ${logFile}
@@ -171,7 +171,7 @@ if [ "${flagExists}" == "1" ]; then
     sudo shutdown now
     exit 1
   fi
-  
+
   # remove flag
   echo "Setting Wifi worked - removing file" >> ${logFile}
   sudo rm /boot/firmware/wifi
