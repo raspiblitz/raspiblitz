@@ -166,7 +166,7 @@ if [ "${flagExists}" == "1" ]; then
     echo "error(${err})" >> ${logFile}
     echo "Will shutdown in 1min ..." >> ${logFile}
     /home/admin/_cache.sh set state "errorWIFI"
-    /home/admin/_cache.sh set message "shutting down - edit or remove file"
+    /home/admin/_cache.sh set message "${err}"
     sleep 60
     sudo shutdown now
     exit 1
