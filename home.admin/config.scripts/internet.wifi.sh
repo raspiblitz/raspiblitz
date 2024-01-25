@@ -10,7 +10,9 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  exit 1
 fi
 
-wifiIsSet=$(sudo cat /etc/wpa_supplicant/wpa_supplicant.conf 2>/dev/null| grep -c "network=")
+# gather status information
+wifiIsSet=$(nmcli connection show | grep -c "wifi")
+[ ${wifiIsSet} -gt 1 ] && wifiIsSet=1
 wifiLocalIP=$(ip addr | grep 'state UP' -A2 | grep -E -v 'docker0|veth' | grep -E -i '([wlan][0-9]$)' | tail -n1 | awk '{print $2}' | cut -f1 -d'/')
 connected=0
 if [ ${#wifiLocalIP} -gt 0 ]; then
@@ -18,68 +20,62 @@ if [ ${#wifiLocalIP} -gt 0 ]; then
 fi
 
 if [ "$1" == "status" ]; then
-
   echo "activated=${wifiIsSet}"
   echo "connected=${connected}"
   echo "localip='${wifiLocalIP}'"
   exit 0
+fi
 
-elif [ "$1" == "on" ]; then
+if [ "$1" == "on" ]; then
 
+  # get and check parameters
   ssid="$2"
   password="$3"
-
   if [ ${#ssid} -eq 0 ]; then
     echo "err='no ssid given'"
     exit 1
   fi
-
   if [ ${#password} -eq 0 ]; then
     echo "err='no password given'"
     exit 1
   fi
 
-  wifiConfig="country=US
-ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
-update_config=1
-network={
-  ssid=\"${ssid}\"
-  scan_ssid=1
-  psk=\"${password}\"
-  key_mgmt=WPA-PSK
-}"
-  echo "${wifiConfig}" > "/home/admin/wpa_supplicant.conf"
-  sudo chown root:root /home/admin/wpa_supplicant.conf
-  sudo mv /home/admin/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.conf
-  sudo chmod 755 /etc/wpa_supplicant/wpa_supplicant.conf
+  # activate wifi
+  sudo nmcli radio wifi on
+  sudo nmcli device wifi connect "${ssid}" password "${password}"
+  errorCode=$?
+  if [ ${errorCode} -gt 0 ]; then
+    echo "err='error code ${errorCode}'"
+    exit 1
+  fi
 
-  # activate new wifi settings
-  sudo wpa_cli -i wlan0 reconfigure 1>/dev/null
-  echo "# OK - changes should be active now - maybe reboot needed"
+  echo "# OK - changes should be active now"
   exit 0
+fi
 
-elif [ "$1" == "off" ]; then
+if [ "$1" == "off" ]; then
 
-  wifiConfig="country=US
-ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
-update_config=1"
-  echo "${wifiConfig}" > "/home/admin/wpa_supplicant.conf"
-  sudo chown root:root /home/admin/wpa_supplicant.conf
-  sudo mv /home/admin/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.conf
-  sudo chmod 600 /etc/wpa_supplicant/wpa_supplicant.conf
-  sudo rm /boot/wpa_supplicant.conf 2>/dev/null
+  # remove all wifi connection coinfigs
+  nmcli connection show | grep wifi | cut -d " " -f 1 | while read -r line ; do
+    echo "# deactivating wifi connection: ${line}"
+    sudo nmcli connection delete "${line}"
+  done
+
+  # turn wifi off
+  sudo nmcli radio wifi off
+
+  # delete any backups on HDD/SSD (new and legacy)
+  sudo rm /mnt/hdd/app-data/wifi/* 2>/dev/null
   sudo rm /mnt/hdd/app-data/wpa_supplicant.conf 2>/dev/null
 
-
-  # activate new wifi settings
-  sudo wpa_cli -i wlan0 reconfigure 1>/dev/null
-  echo "# OK - changes should be active now - maybe reboot needed"
+  echo "# OK - WIFI is now off"
   exit 0
+fi
 
 # https://github.com/rootzoll/raspiblitz/issues/560
-# when calling this it will backup wpa_supplicant.conf to HDD (if WIFI is active)
-# or when WIFI is inactive but a wpa_supplicant.conf exists restore this
-elif [ "$1" == "backup-restore" ]; then
+# when calling this it will backup the wifi config to HDD/SSD (if WIFI is active)
+# or when WIFI is inactive but a backup on HDD/SSD exists restore this
+if [ "$1" == "backup-restore" ]; then
 
   # print wifi state 
   echo "wifiIsSet=${wifiIsSet}"
@@ -134,7 +130,8 @@ elif [ "$1" == "backup-restore" ]; then
     echo "wifiBackup=0"
     exit 0
   fi
-
-else
-  echo "err='parameter not known - run with -help'"
 fi
+
+# error case
+echo "err='parameter not known - run with -help'"
+exit 1
