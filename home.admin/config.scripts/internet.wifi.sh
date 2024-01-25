@@ -110,7 +110,7 @@ if [ "$1" == "backup-restore" ]; then
   if [ ${wifiIsSet} -eq 1 ]; then
     # BACKUP latest wifi settings to HDD if available
     if [ ${hddBackupLocationAvailable} -eq 1 ]; then
-      sudo cp -a /etc/NetworkManager/system-connections/* /mnt/hdd/app-data/wifi/
+      sudo cp -a /etc/NetworkManager/system-connections /mnt/hdd/app-data/wifi
       echo "wifiRestore=0"
       echo "wifiBackup=1"
     else
@@ -123,6 +123,8 @@ if [ "$1" == "backup-restore" ]; then
     echo "# restoring old wifi settings from HDD ... wait 4 secounds to connect"
     sudo cp -a /mnt/hdd/app-data/wifi/* /etc/NetworkManager/system-connections/
     sudo chmod 600 /etc/NetworkManager/system-connections/*
+    sudo nmcli radio wifi on
+    sleep 10
     sudo systemctl restart NetworkManager
     sleep 4
     echo "wifiRestore=1"
@@ -133,6 +135,8 @@ if [ "$1" == "backup-restore" ]; then
     echo "# restoring old wifi settings from MEMCOPY ... wait 4 secounds to connect"
     sudo cp -a /var/cache/raspiblitz/hdd-inspect/wifi/* /etc/NetworkManager/system-connections/
     sudo chmod 600 /etc/NetworkManager/system-connections/*
+    sudo nmcli radio wifi on
+    sleep 10
     sudo systemctl restart NetworkManager
     sleep 4
     echo "wifiRestore=1"
