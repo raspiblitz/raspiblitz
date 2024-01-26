@@ -143,19 +143,33 @@ if [ "${flagExists}" == "1" ]; then
   exit 0
 fi
 
+
+
 # wifi config by file on sd card
-flagExists=$(sudo ls /boot/firmware/wifi | grep -c 'wifi')
-if [ "${flagExists}" == "1" ]; then
+wifiFileExists=$(sudo ls /boot/firmware/wifi | grep -c 'wifi')
+wpaFileExists=$(sudo ls /boot/firmware/wpa_supplicant.conf | grep -c 'wpa_supplicant.conf')
+if [ "${wifiFileExists}" == "1" ] || [ "${wifiFileExists}" == "1" ]; then
 
   # set info
   echo "Setting Wifi by file on sd card ..." >> ${logFile}
   /home/admin/_cache.sh set message "setting wifi"
 
+  # File: wifi
   # get first line as string from wifi file (NAME OF WIFI)
-  ssid=$(sudo sed -n '1p' /boot/firmware/wifi | tr -d '[:space:]')
-
   # get second line as string from wifi file (PASSWORD OF WIFI)
-  password=$(sudo sed -n '2p' /boot/firmware/wifi | tr -d '[:space:]')
+  if [ "${wifiFileExists}" == "1" ]; then
+    echo "Getting data from file: /boot/firmware/wifi" >> ${logFile}
+    ssid=$(sudo sed -n '1p' /boot/firmware/wifi | tr -d '[:space:]')
+    password=$(sudo sed -n '2p' /boot/firmware/wifi | tr -d '[:space:]')
+  fi
+
+  # File: wpa_supplicant.conf (legacy way to set wifi)
+  # see: https://github.com/raspibolt/raspibolt/blob/a21788c0518618d17093e3f447f68a53e4efa6e7/raspibolt/raspibolt_20_pi.md#prepare-wifi
+  if [ "${wpaFileExists}" == "1" ]; then  
+    echo "Getting data from file: /boot/firmware/wpa_supplicant.conf" >> ${logFile}
+    ssid=$(grep ssid "/boot/firmware/wpa_supplicant.conf" | awk -F'=' '{print $2}' | tr -d '"')
+    password=$(grep psk "/boot/firmware/wpa_supplicant.conf" | awk -F'=' '{print $2}' | tr -d '"')
+  fi
 
   # set wifi
   err=""
@@ -172,9 +186,10 @@ if [ "${flagExists}" == "1" ]; then
     exit 1
   fi
 
-  # remove flag
+  # remove file
   echo "Setting Wifi worked - removing file" >> ${logFile}
-  sudo rm /boot/firmware/wifi
+  sudo rm /boot/firmware/wifi 2>/dev/null
+  sudo rm /boot/firmware/wpa_supplicant.conf 2>/dev/null
 else
   echo "No Wifi config by file on sd card." >> ${logFile}
 fi
