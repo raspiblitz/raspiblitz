@@ -148,7 +148,7 @@ fi
 # wifi config by file on sd card
 wifiFileExists=$(sudo ls /boot/firmware/wifi | grep -c 'wifi')
 wpaFileExists=$(sudo ls /boot/firmware/wpa_supplicant.conf | grep -c 'wpa_supplicant.conf')
-if [ "${wifiFileExists}" == "1" ] || [ "${wifiFileExists}" == "1" ]; then
+if [ "${wifiFileExists}" == "1" ] || [ "${wpaFileExists}" == "1" ]; then
 
   # set info
   echo "Setting Wifi by file on sd card ..." >> ${logFile}
