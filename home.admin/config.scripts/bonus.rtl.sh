@@ -10,7 +10,7 @@ source /mnt/hdd/raspiblitz.conf
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "# config script for RideTheLightning $RTLVERSION WebInterface"
-  echo "# able to run intances for lnd and cl parallel"
+  echo "# able to run separate instances for lnd and cl parallel"
   echo "# mainnet and testnet instances can run parallel"
   echo "# bonus.rtl.sh [install|uninstall]"
   echo "# bonus.rtl.sh [on|off|menu] <lnd|cl> <mainnet|testnet|signet> <purge>"
@@ -45,7 +45,7 @@ elif [ "${LNTYPE}" == "lnd" ]; then
 fi
 echo "# RTLHTTP(${RTLHTTP})"
 
-# construct needed varibale elements
+# construct needed variable elements
 configEntry="${netprefix}${typeprefix}rtlWebinterface"
 systemdService="${netprefix}${typeprefix}RTL"
 echo "# configEntry(${configEntry})"
@@ -144,8 +144,8 @@ if [ "$1" = "install" ]; then
   # download source code and set to tag release
   echo "# Get the RTL Source Code"
   sudo -u rtl rm -rf /home/rtl/RTL 2>/dev/null
-  sudo -u rtl git clone https://github.com/ShahanaFarooqui/RTL.git /home/rtl/RTL
-  cd /home/rtl/RTL
+  sudo -u rtl git clone https://github.com/Ride-The-Lightning/RTL.git /home/rtl/RTL
+  cd /home/rtl/RTL || exit 1
   # check https://github.com/Ride-The-Lightning/RTL/releases/
   sudo -u rtl git reset --hard $RTLVERSION
 
@@ -157,7 +157,7 @@ if [ "$1" = "install" ]; then
     echo "# OK - RTL code copy looks good"
   else
     echo "# FAIL - RTL code not available"
-    echo "err='code download falied'"
+    echo "err='code download failed'"
     exit 1
   fi
 
@@ -229,14 +229,18 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     exit 1
   fi
 
-  # make sure softwarte is installed
+  # make sure software is installed
   if [ -f /home/rtl/RTL/LICENSE ]; then
     echo "# OK - the RTL code is already present"
   else
     echo "# install of codebase is needed first"
-    /home/admin/config.scripts/bonus.rtl.sh install || exit 1
+    if ! /home/admin/config.scripts/bonus.rtl.sh install; then
+      echo "# FAIL - install of RTL code failed, setting ${configEntry} off in the raspiblitz.conf"
+      /home/admin/config.scripts/blitz.conf.sh set ${configEntry} "off"
+      exit 1
+    fi
   fi
-  cd /home/rtl/RTL
+  cd /home/rtl/RTL || exit 1
 
   echo "# Activating RTL for ${LNTYPE} ${CHAIN}"
 
@@ -338,7 +342,7 @@ WantedBy=multi-user.target
   # run config as root to connect prepare services (lit, pool, ...)
   sudo /home/admin/config.scripts/bonus.rtl.sh connect-services
 
-  # ig
+  # setting value in raspi blitz config
   /home/admin/config.scripts/blitz.conf.sh set ${configEntry} "on"
 
   sudo systemctl enable ${systemdService}
