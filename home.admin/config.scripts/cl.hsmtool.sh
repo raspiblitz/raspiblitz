@@ -14,7 +14,7 @@ if [ $# -lt 1 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]||\
   echo
   echo "Usage:"
   echo "Create new wallet:"
-  echo "cl.hsmtool.sh [new] [mainnet|testnet|signet] [?seedpassword]"
+  echo "cl.hsmtool.sh [new] [mainnet|testnet|signet] [?seedpassword|non-interactive]"
   echo "cl.hsmtool.sh [new-force] [mainnet|testnet|signet] [?seedpassword]"
   echo "There will be no seedpassword(passphrase) used by default"
   echo "new-force will backup the old wallet and will work without interaction"
@@ -222,7 +222,11 @@ if [ "$1" = "new" ] || [ "$1" = "new-force" ] || [ "$1" = "seed" ] || [ "$1" = "
     # get 24 words
     source <(python /home/admin/config.scripts/blitz.mnemonic.py generate)
     #TODO seedwords to cl.backup.sh seed-export-gui
-    /home/admin/config.scripts/cl.backup.sh seed-export-gui "${seedwords6x4}"
+    if [ "${seedpassword}" != "non-interactive" ]; then
+      /home/admin/config.scripts/cl.backup.sh seed-export-gui "${seedwords6x4}"
+    else
+      seedpassword=""
+    fi
   elif [ "$1" = "new-force" ]; then
     # get 24 words
     source <(python /home/admin/config.scripts/blitz.mnemonic.py generate)

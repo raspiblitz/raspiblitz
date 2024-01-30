@@ -430,7 +430,7 @@ if [ "${clNode}" != "${choice}" ]; then
     /home/admin/config.scripts/cl.install.sh on mainnet
     # generate wallet from seedwords or just display (write to dev/null to not write seed words to logs)
     echo "Generating CL wallet seedwords .."
-    /home/admin/config.scripts/cl.hsmtool.sh new mainnet 1>/dev/null
+    /home/admin/config.scripts/cl.hsmtool.sh new mainnet non-interactive
     if [ "${testnet}" == "on" ]; then
       # no seed for testnet
       echo "Turn on CL testnet .."
