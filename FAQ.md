@@ -552,7 +552,7 @@ You don't need a LAN port on your laptop as long as you can connect over WLAN to
 
 A LAN cable is recommended because it reduces a possible source of error on the network connection side. But how to setup WLAN when you don't have a LAN-Router/Switch available see here:
 
-After flashing the sd card image to the sd card, reconnect the sd card with the laptop. It should appear as a drive on your computer. Open a text editor (a real text editor like vs code not word) and write the name of the wifi (the SSID) into the first line and the wifi password into the second line. Then store the file as with the name just "wifi" (no ending) to the sd card drive. Close the text editor and eject the sd card to boot them up in your RaspiBlitz. Watch the LCD on boot up for possible error messages.
+After flashing the SDcard image to the SDcard, reconnect the SDcard with the laptop or PC. It should appear as a drive on your computer. Open a text editor (a simple text editor like Notepad or VSCode, not Word) and write the name of the WiFi (the SSID) into the first line and the WiFi password into the second line. Then store the file as with the name just "wifi" (no extension) to the SDcard drive. Close the text editor and eject the SDcard to boot it up in your RaspiBlitz. Watch the LCD on boot up for possible error messages.
 
 The old legacy way:
 https://github.com/raspibolt/raspibolt/blob/a21788c0518618d17093e3f447f68a53e4efa6e7/raspibolt/raspibolt_20_pi.md#prepare-wifi
