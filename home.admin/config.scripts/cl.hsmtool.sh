@@ -190,7 +190,10 @@ if [ "$1" = "new" ] || [ "$1" = "new-force" ] || [ "$1" = "seed" ] || [ "$1" = "
         if sudo ls /home/bitcoin/.lightning/${CLNETWORK}/seedwords.info 2>1 1>/dev/null; then
           echo "# There is a /home/bitcoin/.lightning/${CLNETWORK}/seedwords.info so don't create new"
           # show seed
-          sudo /home/admin/config.scripts/cl.install.sh display-seed mainnet
+          if [ "$3" != "noninteractive" ]; then
+            sudo /home/admin/config.scripts/cl.backup.sh seed-export-gui
+            sudo /home/admin/config.scripts/cl.install.sh display-seed mainnet
+          fi
           exit 0
         else
           # there should be no hsm_secret without seedwords.info, but protect this edge-case
