@@ -219,6 +219,7 @@ if [ "$1" = "new" ] || [ "$1" = "new-force" ] || [ "$1" = "seed" ] || [ "$1" = "
 
   if [ "$1" = "new" ]; then
     seedpassword="$3"
+    echo "new seedpassword='${seedpassword}'"
     # get 24 words
     source <(python /home/admin/config.scripts/blitz.mnemonic.py generate)
     if [ "${seedpassword}" != "noninteractive" ]; then
