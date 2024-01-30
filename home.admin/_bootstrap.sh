@@ -143,6 +143,57 @@ if [ "${flagExists}" == "1" ]; then
   exit 0
 fi
 
+
+
+# wifi config by file on sd card
+wifiFileExists=$(sudo ls /boot/firmware/wifi | grep -c 'wifi')
+wpaFileExists=$(sudo ls /boot/firmware/wpa_supplicant.conf | grep -c 'wpa_supplicant.conf')
+if [ "${wifiFileExists}" == "1" ] || [ "${wpaFileExists}" == "1" ]; then
+
+  # set info
+  echo "Setting Wifi by file on sd card ..." >> ${logFile}
+  /home/admin/_cache.sh set message "setting wifi"
+
+  # File: wifi
+  # get first line as string from wifi file (NAME OF WIFI)
+  # get second line as string from wifi file (PASSWORD OF WIFI)
+  if [ "${wifiFileExists}" == "1" ]; then
+    echo "Getting data from file: /boot/firmware/wifi" >> ${logFile}
+    ssid=$(sudo sed -n '1p' /boot/firmware/wifi | tr -d '[:space:]')
+    password=$(sudo sed -n '2p' /boot/firmware/wifi | tr -d '[:space:]')
+  fi
+
+  # File: wpa_supplicant.conf (legacy way to set wifi)
+  # see: https://github.com/raspibolt/raspibolt/blob/a21788c0518618d17093e3f447f68a53e4efa6e7/raspibolt/raspibolt_20_pi.md#prepare-wifi
+  if [ "${wpaFileExists}" == "1" ]; then  
+    echo "Getting data from file: /boot/firmware/wpa_supplicant.conf" >> ${logFile}
+    ssid=$(grep ssid "/boot/firmware/wpa_supplicant.conf" | awk -F'=' '{print $2}' | tr -d '"')
+    password=$(grep psk "/boot/firmware/wpa_supplicant.conf" | awk -F'=' '{print $2}' | tr -d '"')
+  fi
+
+  # set wifi
+  err=""
+  echo "Setting Wifi SSID(${ssid}) Password(${password})" >> ${logFile}
+  source <(/home/admin/config.scripts/internet.wifi.sh on ${ssid} ${password})
+  if [ "${err}" != "" ]; then
+    echo "Setting Wifi failed - edit or remove file /boot/firmware/wifi" >> ${logFile}
+    echo "error(${err})" >> ${logFile}
+    echo "Will shutdown in 1min ..." >> ${logFile}
+    /home/admin/_cache.sh set state "errorWIFI"
+    /home/admin/_cache.sh set message "${err}"
+    sleep 60
+    sudo shutdown now
+    exit 1
+  fi
+
+  # remove file
+  echo "Setting Wifi worked - removing file" >> ${logFile}
+  sudo rm /boot/firmware/wifi 2>/dev/null
+  sudo rm /boot/firmware/wpa_supplicant.conf 2>/dev/null
+else
+  echo "No Wifi config by file on sd card." >> ${logFile}
+fi
+
 # when the provision did not ran thru without error (ask user for fresh sd card)
 provisionFlagExists=$(sudo ls /home/admin/provision.flag | grep -c 'provision.flag')
 if [ "${provisionFlagExists}" == "1" ]; then
@@ -286,7 +337,7 @@ fi
 ####################################
 
 # check if there is a WIFI configuration to backup or restore
-if [ -f "/var/cache/raspiblitz/hdd-inspect/wpa_supplicant.conf" ]; then
+if [ -d "/var/cache/raspiblitz/hdd-inspect/wifi" ]; then
   echo "WIFI RESTORE from /var/cache/raspiblitz/hdd-inspect/wpa_supplicant.conf" >> $logFile
   /home/admin/config.scripts/internet.wifi.sh backup-restore >> $logFile
 else
@@ -1055,6 +1106,9 @@ if [ "${btc_default_sync_initialblockdownload}" == "1" ]; then
   echo "Node is still in IBD .. refresh btc_default_sync_progress faster" >> $logFile
   /home/admin/_cache.sh focus btc_default_sync_progress 0
 fi
+
+# backup wifi settings
+/home/admin/config.scripts/internet.wifi.sh backup-restore
 
 # notify about (re)start if activated
 source <(/home/admin/_cache.sh get hostname)

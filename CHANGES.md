@@ -16,6 +16,7 @@
 - Update: Channel Tools (chantools) v0.12.0 [details](https://github.com/lightninglabs/chantools/releases/tag/v0.12.0)
 - Update: LNbits 0.11.3 [details](https://github.com/lnbits/lnbits/releases/tag/0.11.3)
 - Update: Circuitbreaker v0.5.1 [details](https://github.com/lightningequipment/circuitbreaker/blob/master/README.md)
+- Refactor: Wifi config with file on sd card
 - Deprecated: Homer Dashboard (remove from SSH menus, config script will stay with possible future removal)
 - Deprecated: Bitcoinminds (remove from SSH menus, config script will stay with possible future removal)
 - Remove: ItchySats (unmaintained project / in consent with dev)

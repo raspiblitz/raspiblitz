@@ -320,6 +320,15 @@ Detailed Error Message:
 ${contentString}
 " 7 35
 
+elif [ "${eventID}" == "errorWIFI" ]; then
+
+    # contentString --> detail error message
+    dialog --backtitle "${backtitle}" --cr-wrap --infobox "PROBLEM: Failed WIFI config
+${contentString}
+edit or remove file 'wifi'
+Shutting down ...
+" 7 35
+
 elif [ "${eventID}" == "errorNetwork" ]; then
 
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "
