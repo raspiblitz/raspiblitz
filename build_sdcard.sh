@@ -422,7 +422,7 @@ if ! compgen -u pi; then
   adduser pi sudo
 fi
 
-# special prepare when Raspbian
+# special prepare when RaspberryPi OS
 if [ "${baseimage}" = "raspios_arm64" ]; then
 
   echo -e "\n*** PREPARE RASPBERRY OS VARIANTS ***"
@@ -498,6 +498,10 @@ if [ $(uname -a | grep -c 'tegra') -gt 0 ] ; then
   echo "Nvidia --> disable GUI on boot"
   systemctl set-default multi-user.target
 fi
+
+# remove rpi-first-boot-wizard
+apt purge piwiz -y
+userdel -r rpi-first-boot-wizard
 
 echo -e "\n*** CONFIG ***"
 # based on https://raspibolt.github.io/raspibolt/raspibolt_20_pi.html#raspi-config
