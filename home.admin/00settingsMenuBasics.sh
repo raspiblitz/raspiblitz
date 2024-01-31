@@ -427,16 +427,18 @@ if [ "${clNode}" != "${choice}" ]; then
   echo "# Core Lightning NODE Setting changed .."
   if [ "${choice}" = "on" ]; then
     echo "# turning ON"
-
     /home/admin/config.scripts/cl.install.sh on mainnet
     # generate wallet from seedwords or just display (write to dev/null to not write seed words to logs)
-    /home/admin/config.scripts/cl.hsmtool.sh new mainnet 1>/dev/null
+    echo "Generating CL wallet seedwords .."
+    /home/admin/config.scripts/cl.hsmtool.sh new mainnet noninteractive
     if [ "${testnet}" == "on" ]; then
       # no seed for testnet
+      echo "Turn on CL testnet .."
       /home/admin/config.scripts/cl.install.sh on testnet
     fi
     if [ "${signet}" == "on" ]; then
       # no seed for signet
+      echo "Turn on CL signet .."
       /home/admin/config.scripts/cl.install.sh on signet
     fi
 
