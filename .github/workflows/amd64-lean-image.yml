@@ -31,7 +31,7 @@ jobs:
   amd64-image-build:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set values
         id: set_values
@@ -74,7 +74,7 @@ jobs:
           sha256sum raspiblitz-amd64-debian-lean.qcow2.gz > raspiblitz-amd64-debian-lean.qcow2.gz.sha256
 
       - name: Upload the image and checksums
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: raspiblitz-amd64-image-${{env.BUILD_DATE}}-${{env.BUILD_VERSION}}
           path: |

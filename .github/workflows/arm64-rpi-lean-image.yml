@@ -31,7 +31,7 @@ jobs:
   arm64-rpi-image-build:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set values
         id: set_values
@@ -74,7 +74,7 @@ jobs:
           sha256sum raspiblitz-arm64-rpi-lean.img.gz > raspiblitz-arm64-rpi-lean.img.gz.sha256
 
       - name: Upload the image and checksums
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: raspiblitz-arm64-rpi-image-${{ env.BUILD_DATE }}-${{ env.BUILD_VERSION }}
           path: |
