@@ -347,7 +347,7 @@ Once you finished all the transfers, the Raspiblitz will make a quick-check on t
  
  So if you read in your debug logs of bitcoind that you should "reindex" you can try first just to do a fast "reindex-chainstate" and if that didnt worked a slow and full "reindex".
 
-See the raspiblitz script `./config.scripts/network.reindex.sh` or the REAPIR menu to start these processes.
+See the raspiblitz script `./config.scripts/network.reindex.sh` or the REPAIR menu to start these processes.
 
 ### Why is my "final sync" taking so long?
 
