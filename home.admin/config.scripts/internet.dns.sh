@@ -44,7 +44,7 @@ Do you want to set the fixed DNS 1.1.1.1 by Cloudflare (they claim they provide 
   if [ $? -eq 0 ]; then
     echo "# SETTING 1.1.1.1"
     DNSSERVER="1.1.1.1"
-    # IPv6 is: DNSSERVER="2606:4700:4700::1111"
+    # for IPv6: DNSSERVER="2606:4700:4700::1111"
     autoreboot=1
   else
     echo "# Ignoring DNS-Test fail"
@@ -82,7 +82,7 @@ if sudo test -f /etc/dhcpcd.conf || sudo test -f /etc/dhcp/dhcpd.conf; then
   echo "# OK"
   echo
 else
-  # Get a list of all Ethernet and Wi-Fi connections
+  # Get a list of all active Ethernet and Wi-Fi connections
   ACTIVE_CONNECTIONS=$(nmcli -t -f TYPE,NAME con show --active | grep -E 'ethernet|wireless' | cut -d: -f2)
 
   for CON in $ACTIVE_CONNECTIONS; do
@@ -92,7 +92,7 @@ else
       if sudo nmcli con mod "$CON" $DNSTYPE.dns "$DNSSERVER" &&
         sudo nmcli con mod "$CON" $DNSTYPE.ignore-auto-dns yes &&
         sudo nmcli con mod "$CON" $DNSTYPE.method auto; then
-        # Restart the connection to apply changes
+        # if set successfully restart the connection to apply changes
         sudo nmcli con down "$CON"
         sudo nmcli con up "$CON"
         echo "${DNSTYPE} DNS set for $CON."
