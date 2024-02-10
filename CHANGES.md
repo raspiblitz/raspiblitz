@@ -1,7 +1,7 @@
 ## What's new in Version 1.11.0 of RaspiBlitz?
 
 - New: Enabling NVMe PCIe Hats
-- Update: RaspiOS base image from 2023-12-05 (Bookworm)
+- Update: RaspberryOS base image 2023-12-05 (Debian 12 Bookworm)
 - Update: Bitcoin Core v26.0 [details](https://bitcoincore.org/en/releases/26.0/)
 - Update: Electrum Server in Rust (electrs) v0.10.2 [details](https://github.com/romanz/electrs/blob/master/RELEASE-NOTES.md#0102-dec-31-2023)
 - Update: Fulcrum Electrum server v1.9.7 (CLI install script) [details](https://github.com/cculianu/Fulcrum/releases/tag/v1.9.7)
@@ -12,7 +12,7 @@
 - Update: Core Lightning v23.11.2 [details](https://github.com/ElementsProject/lightning/releases/tag/v23.11.2)
 - Update: C-lightningREST v0.10.7 [details](https://github.com/Ride-The-Lightning/c-lightning-REST/releases/tag/v0.10.7)
 - Update: CLBOSS 0.13+ (latest master 0673c50) [details](https://github.com/ZmnSCPxj/clboss/releases/tag/v0.13)
-- Update: BTCPayServer v1.12.3 [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.12.3)
+- Update: BTCPayServer v1.12.5 [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.12.5)
 - Update: Channel Tools (chantools) v0.12.0 [details](https://github.com/lightninglabs/chantools/releases/tag/v0.12.0)
 - Update: LNbits 0.11.3 [details](https://github.com/lnbits/lnbits/releases/tag/0.11.3)
 - Update: Circuitbreaker v0.5.1 [details](https://github.com/lightningequipment/circuitbreaker/blob/master/README.md)
