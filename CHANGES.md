@@ -1,6 +1,7 @@
 ## What's new in Version 1.11.0 of RaspiBlitz?
 
 - New: Enabling NVMe PCIe Hats
+- New: BTCPay Server PostgreSQL database backup and restore options [details](https://github.com/raspiblitz/raspiblitz/pull/4409)
 - Update: RaspberryOS base image 2023-12-05 (Debian 12 Bookworm)
 - Update: Bitcoin Core v26.0 [details](https://bitcoincore.org/en/releases/26.0/)
 - Update: Electrum Server in Rust (electrs) v0.10.2 [details](https://github.com/romanz/electrs/blob/master/RELEASE-NOTES.md#0102-dec-31-2023)
