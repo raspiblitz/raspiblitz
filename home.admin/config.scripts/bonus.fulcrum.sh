@@ -1,15 +1,73 @@
 #!/bin/bash
 
 # https://github.com/cculianu/Fulcrum/releases
-fulcrumVersion="1.9.7"
+fulcrumVersion="1.9.8"
+
+portTCP="50021"
+portSSL="50022"
+portAdmin="8021"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "config script to switch the Fulcrum electrum server on, off or update to the latest release"
-  # echo "bonus.fulcrum.sh status [?showAddress]"
-  echo "bonus.fulcrum.sh [on|off|update]"
+  echo "bonus.fulcrum.sh [on|off|update|status|getinfo]"
   echo "installs the version $fulcrumVersion"
   exit 1
+fi
+
+if [ "$1" = "getinfo" ]; then
+  /home/fulcrum/FulcrumAdmin -p $portAdmin getinfo
+  exit 0
+fi
+
+if [ "$1" = "status" ]; then
+  # Attempt to get info from FulcrumAdmin, redirecting stderr to stdout to capture any error messages
+  getInfoOutput=$(/home/fulcrum/FulcrumAdmin -p $portAdmin getinfo 2>&1)
+
+  # Check if the command was successful or if it failed with "Connection refused"
+  if ! echo "$getInfoOutput" | jq -r '.version'; then
+    # Command failed, make getInfo empty
+    getInfo=""
+  else
+    # Command succeeded, store the output in getInfo
+    getInfo="$getInfoOutput"
+  fi
+  localIP=$(hostname -I | cut -d' ' -f1)
+  publicIP=$(curl -s ifconfig.me)
+  fulcrumVersion=$(echo "${getInfo}" | jq -r '.version' | awk '{print $2}')
+
+  # Get TOR address if exists.
+  if [ -f /mnt/hdd/tor/fulcrum/hostname ]; then
+    TORaddress=$(sudo cat /mnt/hdd/tor/fulcrum/hostname)
+  else
+    TORaddress="N/A"
+  fi
+
+  # Check if the initial sync is done.
+  # Get Bitcoin node block height
+  bitcoin_blockheight=$(bitcoin-cli getblockchaininfo | jq -r '.blocks')
+  # Get Fulcrum block height
+  fulcrum_blockheight=$(echo "${getInfo}" | jq -r '.height')
+  # Compare the block heights
+  if [ "$bitcoin_blockheight" -eq "$fulcrum_blockheight" ]; then
+    # Sync complete. Bitcoin node and Fulcrum block heights match: $bitcoin_blockheight
+    initialSyncDone=true
+  else
+    # Sync in progress. Bitcoin node block height: $bitcoin_blockheight, Fulcrum block height: $fulcrum_blockheight
+    initialSyncDone=false
+  fi
+
+  # Return the information as a JSON object.
+  echo "{"
+  echo "  \"version\": \"$fulcrumVersion\","
+  echo "  \"localIP\": \"$localIP\","
+  echo "  \"publicIP\": \"$publicIP\","
+  echo "  \"portTCP\": \"$portTCP\","
+  echo "  \"portSSL\": \"$portSSL\","
+  echo "  \"TORaddress\": \"$TORaddress\","
+  echo "  \"initialSyncDone\": $initialSyncDone"
+  echo "}"
+  exit 0
 fi
 
 function downloadAndVerifyBinary() {
@@ -32,6 +90,14 @@ function downloadAndVerifyBinary() {
 
   echo "# Unpack"
   sudo -u fulcrum tar -xvf Fulcrum-${fulcrumVersion}-${build}.tar.gz
+
+  # symlink to fulcrum home
+  # remove first to start clean
+  sudo rm -f /home/fulcrum/Fulcrum
+  sudo rm -f /home/fulcrum/FulcrumAdmin
+  # symlink
+  sudo ln -s /home/fulcrum/Fulcrum-${fulcrumVersion}-${build}/Fulcrum /home/fulcrum/ |
+    sudo ln -s /home/fulcrum/Fulcrum-${fulcrumVersion}-${build}/FulcrumAdmin /home/fulcrum/
 }
 
 function createSystemdService() {
@@ -44,7 +110,7 @@ StartLimitBurst=2
 StartLimitIntervalSec=20
 
 [Service]
-ExecStart=/home/fulcrum/Fulcrum-${fulcrumVersion}-${build}/Fulcrum /home/fulcrum/.fulcrum/fulcrum.conf
+ExecStart=/home/fulcrum/Fulcrum /home/fulcrum/.fulcrum/fulcrum.conf
 KillSignal=SIGINT
 User=fulcrum
 LimitNOFILE=8192
@@ -58,9 +124,9 @@ WantedBy=multi-user.target
 }
 
 # set the platform
-if [ $(uname -m) = "aarch64" ]; then
+if [ "$(uname -m)" = "aarch64" ]; then
   build="arm64-linux"
-elif [ $(uname -m) = "x86_64" ]; then
+elif [ "$(uname -m)" = "x86_64" ]; then
   build="x86_64-linux"
 fi
 
@@ -119,7 +185,8 @@ fast-sync = 1024
 # disable peer discovery and public server options
 peering = false
 announce = false
-tcp = 0.0.0.0:50021
+tcp = 0.0.0.0:${portTCP}
+admin = ${portAdmin}
 # ssl via nginx
 " | sudo -u fulcrum tee /home/fulcrum/.fulcrum/fulcrum.conf
 
@@ -131,8 +198,8 @@ tcp = 0.0.0.0:50021
     sudo systemctl start fulcrum
   fi
 
-  sudo ufw allow 50021 comment 'Fulcrum TCP'
-  sudo ufw allow 50022 comment 'Fulcrum SSL'
+  sudo ufw allow ${portTCP} comment 'Fulcrum TCP'
+  sudo ufw allow ${portSSL} comment 'Fulcrum SSL'
 
   # Setting up the nginx.conf with the existing SSL cert
   isConfigured=$(sudo cat /etc/nginx/nginx.conf 2>/dev/null | grep -c 'upstream fulcrum')
@@ -144,10 +211,10 @@ tcp = 0.0.0.0:50021
       echo "
 stream {
         upstream fulcrum {
-                server 127.0.0.1:50021;
+                server 127.0.0.1:${portTCP};
         }
         server {
-                listen 50022 ssl;
+                listen ${portSSL} ssl;
                 proxy_pass fulcrum;
                 ssl_certificate /mnt/hdd/app-data/nginx/tls.cert;
                 ssl_certificate_key /mnt/hdd/app-data/nginx/tls.key;
@@ -162,10 +229,10 @@ stream {
       sudo truncate -s-2 /etc/nginx/nginx.conf
       echo "
         upstream fulcrum {
-                server 127.0.0.1:50021;
+                server 127.0.0.1:${portTCP};
         }
         server {
-                listen 50022 ssl;
+                listen ${portSSL} ssl;
                 proxy_pass fulcrum;
                 ssl_certificate /mnt/hdd/app-data/nginx/tls.cert;
                 ssl_certificate_key /mnt/hdd/app-data/nginx/tls.key;
@@ -186,13 +253,15 @@ stream {
   sudo nginx -t && sudo systemctl reload nginx
 
   # Tor
-  /home/admin/config.scripts/tor.onion-service.sh fulcrum 50021 50021 50022 50022
+  /home/admin/config.scripts/tor.onion-service.sh fulcrum ${portTCP} ${portTCP} ${portSSL} ${portSSL}
 
   # setting value in raspiblitz config
   /home/admin/config.scripts/blitz.conf.sh set fulcrum "on"
 
   echo "# Follow the logs with the command:"
   echo "sudo journalctl -fu fulcrum"
+
+  exit 0
 fi
 
 if [ "$1" = update ]; then
@@ -215,6 +284,8 @@ if [ "$1" = update ]; then
   createSystemdService
 
   sudo systemctl enable --now fulcrum
+
+  exit 0
 fi
 
 if [ "$1" = off ]; then
@@ -223,10 +294,14 @@ if [ "$1" = off ]; then
   # remove Tor service
   /home/admin/config.scripts/tor.onion-service.sh off fulcrum
   # close ports on firewall
-  sudo ufw delete allow 50021
-  sudo ufw delete allow 50022
+  sudo ufw delete allow ${portTCP}
+  sudo ufw delete allow ${portSSL}
   # to remove the database directory:
   # sudo rm -rf /mnt/hdd/app-storage/fulcrum
   # setting value in raspiblitz config
   /home/admin/config.scripts/blitz.conf.sh set fulcrum "off"
+  exit 0
 fi
+
+echo "# FAIL - Unknown Parameter $1"
+exit 1
