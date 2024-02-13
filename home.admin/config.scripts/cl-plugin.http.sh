@@ -17,7 +17,7 @@ fi
 
 PGPsigner="web-flow"
 PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
-PGPpubkeyFingerprint="4AEE18F83AFDEB23"
+PGPpubkeyFingerprint="B5690EEEBB952194"
 
 # source <(/home/admin/config.scripts/network.aliases.sh getvars cl <mainnet|testnet|signet>)
 source <(/home/admin/config.scripts/network.aliases.sh getvars cl mainnet)

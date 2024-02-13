@@ -15,7 +15,7 @@ GITHUB_TAG=""
 # leave GITHUB_SIGN_AUTHOR empty to skip verifying
 GITHUB_SIGN_AUTHOR="" #web-flow
 GITHUB_SIGN_PUBKEYLINK="https://github.com/web-flow.gpg"
-GITHUB_SIGN_FINGERPRINT="4AEE18F83AFDEB23"
+GITHUB_SIGN_FINGERPRINT="B5690EEEBB952194"
 
 # port numbers the app should run on
 # delete if not an web app
