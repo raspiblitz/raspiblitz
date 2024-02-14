@@ -15,7 +15,7 @@ fi
 # Example for commits created on GitHub:
 # PGPsigner="web-flow"
 # PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
-# PGPpubkeyFingerprint="B5690EEEBB952194"
+# PGPpubkeyFingerprint="(4AEE18F83AFDEB23|B5690EEEBB952194)"
 
 # Example for commits signed with a personal PGP key:
 # PGPsigner="janoside"
@@ -49,7 +49,7 @@ fi
 
 echo "# importing key of ${PGPsigner}"
 gpg --import --import-options show-only /var/cache/raspiblitz/pgp_keys_${PGPsigner}.asc
-fingerprint=$(gpg --show-keys --keyid-format LONG /var/cache/raspiblitz/pgp_keys_${PGPsigner}.asc 2>/dev/null | grep "${PGPpubkeyFingerprint}" -c)
+fingerprint=$(gpg --show-keys --keyid-format LONG /var/cache/raspiblitz/pgp_keys_${PGPsigner}.asc 2>/dev/null | grep -Ec "${PGPpubkeyFingerprint}")
 if [ "${fingerprint}" -lt 1 ]; then
   echo
   echo "# WARNING --> the PGP fingerprint is not as expected for ${PGPsigner}" >&2
