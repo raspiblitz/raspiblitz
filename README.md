@@ -75,6 +75,7 @@ Further Services that are just available thru SSH menu (advanced users):
 - **CL plugin: The Eye of Satoshi** (Watchtower) [details](https://github.com/talaia-labs/rust-teos/tree/master/watchtower-plugin)
 - **Tallycoin Connect** (Use Tallycoin with your own node) [details](https://github.com/djbooth007/tallycoin_connect)
 - **LNDg** (WebUI analyze/manage lnd with automation) [details](https://github.com/cryptosharks131/lndg)
+- **LNDK** (runs on top of LND to help forward onion messages (BOLT 12)) [details](https://github.com/lndk-org/lndk)
 
 You can connect the following Wallet-Apps to your RaspiBlitz (thru SSH menu):
 

@@ -1,8 +1,9 @@
 ## What's new in Version 1.11.0 of RaspiBlitz?
 
-- New: Enabling NVMe PCIe Hats
+- New: RaspberryPi5 tested & enabling NVMe PCIe Hats
 - New: BTCPay Server PostgreSQL database backup and restore options [details](https://github.com/raspiblitz/raspiblitz/pull/4409)
 - Update: RaspberryOS base image 2023-12-05 (Debian 12 Bookworm)
+- Update: amd64 base image: debian-12.5.0-amd64-netinst.iso
 - Update: Bitcoin Core v26.0 [details](https://bitcoincore.org/en/releases/26.0/)
 - Update: Electrum Server in Rust (electrs) v0.10.2 [details](https://github.com/romanz/electrs/blob/master/RELEASE-NOTES.md#0102-dec-31-2023)
 - Update: Fulcrum Electrum server v1.9.7 (CLI install script) [details](https://github.com/cculianu/Fulcrum/releases/tag/v1.9.7)
@@ -10,6 +11,7 @@
 - Update: JoininBox v0.8.2 [details](https://github.com/openoms/joininbox/releases/tag/v0.8.2)
 - Update: LND v0.17.3-beta [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.17.3-beta)
 - Update: RTL v0.14.1 [details](https://github.com/Ride-The-Lightning/RTL/releases/tag/v0.14.1)
+- Update: Thunderhub v0.13.30 [details](https://github.com/apotdevin/thunderhub/releases/tag/v0.13.30)
 - Update: Core Lightning v23.11.2 [details](https://github.com/ElementsProject/lightning/releases/tag/v23.11.2)
 - Update: C-lightningREST v0.10.7 [details](https://github.com/Ride-The-Lightning/c-lightning-REST/releases/tag/v0.10.7)
 - Update: CLBOSS 0.13+ (latest master 0673c50) [details](https://github.com/ZmnSCPxj/clboss/releases/tag/v0.13)
@@ -17,6 +19,7 @@
 - Update: Channel Tools (chantools) v0.12.0 [details](https://github.com/lightninglabs/chantools/releases/tag/v0.12.0)
 - Update: LNbits 0.11.3 [details](https://github.com/lnbits/lnbits/releases/tag/0.11.3)
 - Update: Circuitbreaker v0.5.1 [details](https://github.com/lightningequipment/circuitbreaker/blob/master/README.md)
+- Experimental: LNDK (runs on top of LND to help forward onion messages (BOLT 12)) [details](https://github.com/lndk-org/lndk)
 - Refactor: Wifi config with file on sd card
 - Deprecated: Homer Dashboard (remove from SSH menus, config script will stay with possible future removal)
 - Deprecated: Bitcoinminds (remove from SSH menus, config script will stay with possible future removal)
