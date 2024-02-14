@@ -79,7 +79,7 @@ echo
 
 goodSignature=$(grep "Good signature from" -c <"$_temp")
 echo "# goodSignature(${goodSignature})"
-correctKey=$(tr -d " \t\n\r" <"$_temp" | grep "${PGPpubkeyFingerprint}" -c)
+correctKey=$(tr -d " \t\n\r" <"$_temp" | grep -Ec "${PGPpubkeyFingerprint}")
 echo "# correctKey(${correctKey})"
 
 if [ "${correctKey}" -lt 1 ] || [ "${goodSignature}" -lt 1 ]; then
