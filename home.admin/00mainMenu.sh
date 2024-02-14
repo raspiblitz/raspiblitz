@@ -108,6 +108,9 @@ fi
 if [ "${loop}" == "on" ]; then
   OPTIONS+=(LOOP "Loop In/Out Service")
 fi
+if [ "${lndk}" == "on" ]; then
+  OPTIONS+=(LNDK "LND BOLT 12 privacy")
+fi
 if [ "${mempoolExplorer}" == "on" ]; then
   OPTIONS+=(MEMPOOL "Mempool Space")
 fi
@@ -270,6 +273,9 @@ case $CHOICE in
             ;;
         LNDMANAGE)
             /home/admin/config.scripts/bonus.lndmanage.sh menu
+            ;;
+        LNDK)
+            /home/admin/config.scripts/bonus.lndk.sh menu
             ;;
         LIGHTNINGTIPBOT)
             /home/admin/config.scripts/bonus.lightningtipbot.sh menu
