@@ -10,6 +10,7 @@
 - Update: JoininBox v0.8.2 [details](https://github.com/openoms/joininbox/releases/tag/v0.8.2)
 - Update: LND v0.17.3-beta [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.17.3-beta)
 - Update: RTL v0.14.1 [details](https://github.com/Ride-The-Lightning/RTL/releases/tag/v0.14.1)
+- Update: Thunderhub v0.13.30 [details](https://github.com/apotdevin/thunderhub/releases/tag/v0.13.30)
 - Update: Core Lightning v23.11.2 [details](https://github.com/ElementsProject/lightning/releases/tag/v23.11.2)
 - Update: C-lightningREST v0.10.7 [details](https://github.com/Ride-The-Lightning/c-lightning-REST/releases/tag/v0.10.7)
 - Update: CLBOSS 0.13+ (latest master 0673c50) [details](https://github.com/ZmnSCPxj/clboss/releases/tag/v0.13)
