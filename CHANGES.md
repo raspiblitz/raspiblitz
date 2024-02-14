@@ -1,6 +1,6 @@
 ## What's new in Version 1.11.0 of RaspiBlitz?
 
-- New: Enabling NVMe PCIe Hats
+- New: RaspberryPi5 tested & enabling NVMe PCIe Hats
 - Update: RaspberryOS base image 2023-12-05 (Debian 12 Bookworm)
 - Update: amd64 base image: debian-12.5.0-amd64-netinst.iso
 - Update: Bitcoin Core v26.0 [details](https://bitcoincore.org/en/releases/26.0/)
@@ -17,6 +17,7 @@
 - Update: Channel Tools (chantools) v0.12.0 [details](https://github.com/lightninglabs/chantools/releases/tag/v0.12.0)
 - Update: LNbits 0.11.3 [details](https://github.com/lnbits/lnbits/releases/tag/0.11.3)
 - Update: Circuitbreaker v0.5.1 [details](https://github.com/lightningequipment/circuitbreaker/blob/master/README.md)
+- Experimental: LNDK (runs on top of LND to help forward onion messages (BOLT 12)) [details](https://github.com/lndk-org/lndk)
 - Refactor: Wifi config with file on sd card
 - Deprecated: Homer Dashboard (remove from SSH menus, config script will stay with possible future removal)
 - Deprecated: Bitcoinminds (remove from SSH menus, config script will stay with possible future removal)
