@@ -517,13 +517,13 @@ if [ "$1" = "status" ]; then
       hdd_used_space=$(($(zpool list -pH | awk '{print $3}')/1024/1024/1024))
       hdd_used_ratio=$((100 * hdd_used_space / hddGigaBytes))
       hdd_data_free1Kblocks=$(($(zpool list -pH | awk '{print $4}') / 1024))
-      hddUsedInfo="${hdd_used_ratio}% ${hddTemp}°C"
+      hddUsedInfo="${hdd_used_ratio}%"
     else
       # EXT4 calculations
       hdd_used_space=$(df -h | grep "/dev/${hddDataPartitionExt4}" | sed -e's/  */ /g' | cut -d" " -f 3  2>/dev/null)
       hdd_used_ratio=$(df -h | grep "/dev/${hddDataPartitionExt4}" | sed -e's/  */ /g' | cut -d" " -f 5 | tr -dc '0-9' 2>/dev/null)
       hdd_data_free1Kblocks=$(df -h -k /dev/${hddDataPartitionExt4} | grep "/dev/${hddDataPartitionExt4}" | sed -e's/  */ /g' | cut -d" " -f 4 | tr -dc '0-9')
-      hddUsedInfo="${hdd_used_ratio}% ${hddTemp}°C"
+      hddUsedInfo="${hdd_used_ratio}%"
     fi
 
     hddTBSize="<1TB"
@@ -536,7 +536,9 @@ if [ "$1" = "status" ]; then
     if [ ${hddBytes} -gt 2300000000000 ]; then
       hddTBSize=">2TB"
     fi
-
+    if [ "${hddTemp}" != "" ]; then
+      hddUsedInfo="${hdd_used_ratio}% ${hddTemp}°C"
+    fi
     echo "hddTBSize='${hddTBSize}'"
     echo "hddUsedInfo='${hddTBSize} ${hddUsedInfo}'"
     hddDataFreeBytes=$((${hdd_data_free1Kblocks} * 1024))
