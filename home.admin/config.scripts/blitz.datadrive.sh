@@ -528,6 +528,7 @@ if [ "$1" = "status" ]; then
     hddTBSize="<1TB"
     if [ ${hddBytes} -gt 800000000000 ]; then
       hddTBSize="1TB"
+    fi
     if [ ${hddBytes} -gt 1800000000000 ]; then
       hddTBSize="2TB"
     fi
