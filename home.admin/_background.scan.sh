@@ -313,6 +313,8 @@ do
     /home/admin/_cache.sh set hdd_free_gb "${hddDataFreeGB}"
     /home/admin/_cache.sh set hdd_used_info "${hddUsedInfo}"
     /home/admin/_cache.sh set hddTemperature "${hddTemperature}"
+    /home/admin/_cache.sh set hddTBSize "${hddTBSize}"
+    
   fi
 
   ###################
