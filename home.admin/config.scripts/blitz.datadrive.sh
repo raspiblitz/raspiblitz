@@ -494,6 +494,7 @@ if [ "$1" = "status" ]; then
       sizeDataPartition=$(lsblk -o NAME,SIZE -b | grep "${hddDataPartition}" | awk '$1=$1' | cut -d " " -f 2)
       hddGigaBytes=$(echo "scale=0; ${sizeDataPartition}/1024/1024/1024" | bc -l)
     fi
+    hddBytes=${sizeDataPartition}
     echo "hddBytes=${sizeDataPartition}"
     echo "hddGigaBytes=${hddGigaBytes}"
 
