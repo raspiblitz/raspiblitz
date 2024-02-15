@@ -34,7 +34,7 @@ if [ "${mode}" != "lcd" ] && [ "${mode}" != "ssh" ]; then
 fi
 
 # default backtitle for dialog
-backtitle="RaspiBlitz ${codeVersion} / ${eventID} / ${internet_localip} / ${hdd_used_info}"
+backtitle="${codeVersion} / ${eventID} / ${internet_localip} / ${hdd_used_info}"
 
 ################################################
 # 1) WELL DEFINED EVENTS
