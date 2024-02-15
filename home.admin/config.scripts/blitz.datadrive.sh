@@ -220,6 +220,7 @@ if [ "$1" = "status" ]; then
     fi 
     echo "isSSD=${isSSD}"
     echo "hddTemperature="
+    echo "hddTemperatureStr='?°C'"
 
     # display results from hdd & partition detection
     echo "hddCandidate='${hdd}'"
@@ -449,12 +450,14 @@ if [ "$1" = "status" ]; then
     fi
     echo "hddRaspiVersion='${hddRaspiVersion}'"
 
+    smartCtlA=$(smartctl -A /dev/${hdd} | tr -d '"')
+
     # try to detect if its an SSD
-    isSMART=$(sudo smartctl -a /dev/${hdd} | grep -c "Rotation Rate:")
+    isSMART=$(echo "${smartCtlA}" | grep -c "Rotation Rate:")
     echo "isSMART=${isSMART}"
     if [ ${isSMART} -gt 0 ]; then
       #detect using smartmontools (preferred)
-      isSSD=$(sudo smartctl -a /dev/${hdd} | grep 'Rotation Rate:' | grep -c "Solid State")
+      isSSD=$(echo "${smartCtlA}" | grep 'Rotation Rate:' | grep -c "Solid State")
     else
       #detect using using fall back method
       isSSD=$(cat /sys/block/${hdd}/queue/rotational 2>/dev/null | grep -c 0)
@@ -466,9 +469,13 @@ if [ "$1" = "status" ]; then
     echo "hddCandidate='${hdd}'"
     echo "hddPartitionCandidate='${hddDataPartition}'"
 
-    # check temp if available
-    hddTemp=$(smartctl -A /dev/nvme0n1 | grep "^Temperature" | head -n 1 | grep -o '[0-9]\+')
+    # check temp if possible
+    hddTemp=$(echo "${smartCtlA}" | grep "^Temperature" | head -n 1 | grep -o '[0-9]\+')
+    if [ hddTemp = "" ]; then
+      hddTemp=$(echo "${smartCtlA}" | grep "^194" | tr -s ' ' | cut -d" " -f 10 | grep -o '[0-9]\+')
+    fi
     echo "hddTemperature=${hddTemp}"
+    echo "hddTemperatureStr='${hddTemp}°C'"
 
     # check if blockchain data is available
     hddBlocksBitcoin=$(ls /mnt/hdd/bitcoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
