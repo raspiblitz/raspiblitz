@@ -209,15 +209,13 @@ if [ "$1" = "status" ]; then
     fi
 
     # try to detect if its an SSD
-    isSMART=$(sudo smartctl -a /dev/${hdd} | grep -c "Rotation Rate:")
+    isSMART=$(sudo smartctl -a /dev/${hdd} | grep -c "Serial Number:")
     echo "isSMART=${isSMART}"
-    if [ ${isSMART} -gt 0 ]; then
-      #detect using smartmontools (preferred)
-      isSSD=$(sudo smartctl -a /dev/${hdd} | grep 'Rotation Rate:' | grep -c "Solid State")
-    else
-      #detect using using fall back method
-      isSSD=$(cat /sys/block/${hdd}/queue/rotational 2>/dev/null | grep -c 0)
-    fi 
+    isSSD=1
+    isRotational=$(echo "${smartCtlA}" | grep -c "Rotation Rate:")
+    if [ ${isRotational} -gt 0 ]; then
+      isSSD=$(echo "${smartCtlA}" | grep "Rotation Rate:" | grep -c "Solid State Device")
+    fi
     echo "isSSD=${isSSD}"
     hddTemp=""
     echo "hddTemperature="
@@ -451,17 +449,16 @@ if [ "$1" = "status" ]; then
     fi
     echo "hddRaspiVersion='${hddRaspiVersion}'"
 
-    smartCtlA=$(smartctl -A /dev/${hdd} | tr -d '"')
+    smartCtlA=$(sudo smartctl -a /dev/${hdd} | tr -d '"')
 
     # try to detect if its an SSD
-    isSMART=$(echo "${smartCtlA}" | grep -c "Rotation Rate:")
+    isSMART=$(echo "${smartCtlA}" | grep -c "Serial Number:")
     echo "isSMART=${isSMART}"
-    if [ ${isSMART} -gt 0 ]; then
-      #detect using smartmontools (preferred)
-      isSSD=$(echo "${smartCtlA}" | grep 'Rotation Rate:' | grep -c "Solid State")
-    else
-      #detect using using fall back method
-      isSSD=$(cat /sys/block/${hdd}/queue/rotational 2>/dev/null | grep -c 0)
+
+    isSSD=1
+    isRotational=$(echo "${smartCtlA}" | grep -c "Rotation Rate:")
+    if [ ${isRotational} -gt 0 ]; then
+      isSSD=$(echo "${smartCtlA}" | grep "Rotation Rate:" | grep -c "Solid State Device")
     fi
     echo "isSSD=${isSSD}"
 

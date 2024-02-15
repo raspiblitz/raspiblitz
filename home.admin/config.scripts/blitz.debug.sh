@@ -446,7 +446,7 @@ echo
 echo "*** DATADRIVE ***"
 source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
 sudo /home/admin/config.scripts/blitz.datadrive.sh status
-sudo smartctl -A /dev/${datadisk}
+sudo smartctl -a /dev/${datadisk}
 echo
 
 echo "*** NETWORK ***"
