@@ -219,6 +219,7 @@ if [ "$1" = "status" ]; then
       isSSD=$(cat /sys/block/${hdd}/queue/rotational 2>/dev/null | grep -c 0)
     fi 
     echo "isSSD=${isSSD}"
+    hddTemp=""
     echo "hddTemperature="
     echo "hddTemperatureStr='?°C'"
 
@@ -475,7 +476,6 @@ if [ "$1" = "status" ]; then
       hddTemp=$(echo "${smartCtlA}" | grep "^194" | tr -s ' ' | cut -d" " -f 10 | grep -o '[0-9]\+')
     fi
     echo "hddTemperature=${hddTemp}"
-    echo "hddTemperatureStr='${hddTemp}°C'"
 
     # check if blockchain data is available
     hddBlocksBitcoin=$(ls /mnt/hdd/bitcoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
@@ -516,13 +516,13 @@ if [ "$1" = "status" ]; then
       hdd_used_space=$(($(zpool list -pH | awk '{print $3}')/1024/1024/1024))
       hdd_used_ratio=$((100 * hdd_used_space / hddGigaBytes))
       hdd_data_free1Kblocks=$(($(zpool list -pH | awk '{print $4}') / 1024))
-      hddUsedInfo="${hdd_used_space} (${hdd_used_ratio}%)"
+      hddUsedInfo="${hdd_used_ratio}%/${hddTemp}°C"
     else
       # EXT4 calculations
       hdd_used_space=$(df -h | grep "/dev/${hddDataPartitionExt4}" | sed -e's/  */ /g' | cut -d" " -f 3  2>/dev/null)
       hdd_used_ratio=$(df -h | grep "/dev/${hddDataPartitionExt4}" | sed -e's/  */ /g' | cut -d" " -f 5 | tr -dc '0-9' 2>/dev/null)
       hdd_data_free1Kblocks=$(df -h -k /dev/${hddDataPartitionExt4} | grep "/dev/${hddDataPartitionExt4}" | sed -e's/  */ /g' | cut -d" " -f 4 | tr -dc '0-9')
-      hddUsedInfo="${hdd_used_space} (${hdd_used_ratio}%)"
+      hddUsedInfo="${hdd_used_ratio}%/${hddTemp}°C"
     fi
     echo "hddUsedInfo='${hddUsedInfo}'"
     hddDataFreeBytes=$((${hdd_data_free1Kblocks} * 1024))
