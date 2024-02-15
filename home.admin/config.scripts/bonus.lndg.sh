@@ -1,5 +1,8 @@
 #!/bin/bash
  
+# github users to ping on issues:
+# allyourbankarebelongtous 
+
 # https://github.com/cryptosharks131/lndg
 VERSION="1.8.0"
 
