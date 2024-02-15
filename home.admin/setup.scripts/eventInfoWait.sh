@@ -34,7 +34,7 @@ if [ "${mode}" != "lcd" ] && [ "${mode}" != "ssh" ]; then
 fi
 
 # default backtitle for dialog
-backtitle="${codeVersion} / ${eventID} / ${internet_localip} ${system_temp_celsius}°C ${hdd_used_info}"
+backtitle="${codeVersion} ${eventID} / ${internet_localip} ${system_temp_celsius}°C ${hdd_used_info}"
 
 ################################################
 # 1) WELL DEFINED EVENTS
