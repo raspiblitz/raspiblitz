@@ -219,6 +219,7 @@ if [ "$1" = "status" ]; then
       isSSD=$(cat /sys/block/${hdd}/queue/rotational 2>/dev/null | grep -c 0)
     fi 
     echo "isSSD=${isSSD}"
+    echo "hddTemperature="
 
     # display results from hdd & partition detection
     echo "hddCandidate='${hdd}'"
@@ -464,6 +465,10 @@ if [ "$1" = "status" ]; then
     echo "datapartition='${hddDataPartition}'"
     echo "hddCandidate='${hdd}'"
     echo "hddPartitionCandidate='${hddDataPartition}'"
+
+    # check temp if available
+    hddTemp=$(smartctl -A /dev/nvme0n1 | grep "^Temperature" | head -n 1 | grep -o '[0-9]\+')
+    echo "hddTemperature=${hddTemp}"
 
     # check if blockchain data is available
     hddBlocksBitcoin=$(ls /mnt/hdd/bitcoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
