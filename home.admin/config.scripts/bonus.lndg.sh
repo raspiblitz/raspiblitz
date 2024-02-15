@@ -128,6 +128,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # INSTALL
     ###############
 
+    echo "# LNDg user ..."
+
     # create lndg user
     sudo adduser --system --group --home /home/lndg lndg
     # add user to group with admin access to lnd
@@ -137,6 +139,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # create symlink
     sudo ln -s /mnt/hdd/app-data/lnd/ /home/lndg/.lnd
 
+    echo "# LNDg download and install ..."
+
     # download and install
     sudo -u lndg git clone https://github.com/cryptosharks131/lndg.git /home/lndg/lndg/
     cd /home/lndg/lndg/ || exit 1
@@ -145,8 +149,12 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u lndg virtualenv -p python3 .venv
     sudo -u lndg .venv/bin/pip install -r requirements.txt
     PASSWORD_B=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcpassword | cut -c 13-)
+    echo "# LNDg initialize.py ..."
     sudo -u lndg .venv/bin/python initialize.py -pw $PASSWORD_B
+    echo "# LNDg jobs.py ..."
     sudo -u lndg .venv/bin/python jobs.py
+
+    echo "# LNDg database ..."
 
     # set database path to HDD data so that its survives updates and migrations
     # first check and see if a database exists
@@ -220,6 +228,8 @@ if __name__ == '__main__':
     ##################
     # gunicorn install
     ##################
+
+    echo "# LNDg gunicorn ..."
 
     # first install and configure whitenoise
     sudo /home/lndg/lndg/.venv/bin/pip install whitenoise
