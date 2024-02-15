@@ -15,6 +15,7 @@ TITLE=" ${CHAIN} System Options "
 MENU=""    # adds lines to HEIGHT
 OPTIONS=() # adds lines to HEIGHt + CHOICE_HEIGHT
 
+OPTIONS+=(BTOP "Monitor system resources with btop")
 OPTIONS+=(${network}LOG "Monitor the debug.log for ${CHAIN}")
 OPTIONS+=(${network}CONF "Edit the bitcoin.conf")
 
@@ -49,6 +50,13 @@ CHOICE=$(dialog --clear \
                 2>&1 >/dev/tty)
 
 case $CHOICE in
+  BTOP)
+    if ! btop -v; then
+      sudo apt install -y btop
+    fi
+    # run as root to allow signal sending to any process
+    sudo btop
+    ;;
   ${network}LOG)
     if [ ${CHAIN} = signet ]; then
       bitcoinlogpath="/mnt/hdd/bitcoin/signet/debug.log"

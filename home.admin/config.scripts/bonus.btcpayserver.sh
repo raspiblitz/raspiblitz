@@ -281,10 +281,98 @@ consider adding a IP2TOR Bridge: MAINMENU > SUBSCRIBE > IP2TOR"
 To get the 'Connection String' to activate Lightning Payments:
 MAINMENU > CONNECT > BTCPay Server"
 
-  whiptail --title " BTCPay Server " --msgbox "${text}" 17 69
-
+  whiptail --title " BTCPay Server " --yes-button "OK" --no-button "OPTIONS" --yesno "${text}" 17 69
+  result=$?
   sudo /home/admin/config.scripts/blitz.display.sh hide
   echo "# please wait ..."
+
+  # exit when user presses OK to close menu
+  if [ ${result} -eq 0 ]; then
+    exit 0
+  fi
+
+  OPTIONS=()
+  # Backup database
+  OPTIONS+=(BACKUP "Backup database")
+  if [ -d /mnt/hdd/app-data/backup ]; then
+    OPTIONS+=(RESTORE "Restore database")
+  fi
+
+  WIDTH=66
+  CHOICE_HEIGHT=$(("${#OPTIONS[@]}/2+1"))
+  HEIGHT=$((CHOICE_HEIGHT + 7))
+  CHOICE=$(dialog --clear \
+    --title " BTCPayServer - Options" \
+    --ok-label "Select" \
+    --cancel-label "Back" \
+    --menu "Choose one of the following options:" \
+    $HEIGHT $WIDTH $CHOICE_HEIGHT \
+    "${OPTIONS[@]}" \
+    2>&1 >/dev/tty)
+
+  case $CHOICE in
+  BACKUP)
+    clear
+    /home/admin/config.scripts/bonus.btcpayserver.sh backup
+    echo
+    echo "Backup done"
+    echo "PRESS ENTER to continue"
+    read -r
+    exit 0
+    ;;
+  RESTORE)
+    clear
+    # check if backup exist
+
+    backup_target="/mnt/hdd/app-data/backup/btcpaymainnet"
+    backup_file=$(ls -t $backup_target/*.sql | head -n1)
+
+    if [ "$backup_file" = "" ]; then
+      echo "ABORT - No Backup found to restore from"
+      exit 1
+    else
+      # build dialog to choose backup file from menu
+      OPTIONS_RESTORE=()
+
+      counter=0
+      cd $backup_target || exit 1
+      for f in $(find *.* -maxdepth 1 -type f); do
+        [[ -f "$f" ]] || continue
+        counter=$(($counter + 1))
+        OPTIONS_RESTORE+=($counter "$f")
+      done
+
+      WIDTH_RESTORE=66
+      CHOICE_HEIGHT_RESTORE=$(("${#OPTIONS_RESTORE[@]}/2+1"))
+      HEIGHT_RESTORE=$((CHOICE_HEIGHT_RESTORE + 7))
+      CHOICE_RESTORE=$(dialog --clear \
+        --title "BTCPayServer - Backup restore" \
+        --ok-label "Select" \
+        --cancel-label "Back" \
+        --menu "Choose one of the following backups:" \
+        $HEIGHT_RESTORE $WIDTH_RESTORE $CHOICE_HEIGHT_RESTORE \
+        "${OPTIONS_RESTORE[@]}" \
+        2>&1 >/dev/tty)
+
+      # start restore with selected backup
+      clear
+      if [ "$CHOICE_RESTORE" != "" ]; then
+        backup_file=${backup_target}/${OPTIONS_RESTORE[$(($CHOICE_RESTORE * 2 - 1))]}
+        /home/admin/config.scripts/bonus.btcpayserver.sh restore "${backup_file}"
+        echo
+        echo "Restore done"
+        echo "PRESS ENTER to continue"
+        read -r
+      fi
+      exit 0
+    fi
+    ;;
+  *)
+    clear
+    exit 0
+    ;;
+  esac
+
   exit 0
 fi
 
@@ -717,6 +805,29 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # needed for API/WebUI as signal that install ran thru
   echo "result='OK'"
 
+  exit 0
+fi
+
+# backup
+if [ "$1" = "backup" ]; then
+  sudo systemctl stop btcpayserver
+  echo "# Start the backup of btcpaymainnet database"
+  sudo /home/admin/config.scripts/bonus.postgresql.sh backup btcpaymainnet
+  sudo systemctl start btcpayserver
+  exit 0
+fi
+
+# restore
+if [ "$1" = "restore" ]; then
+  sudo systemctl stop btcpayserver
+  echo "# Restore btcpaymainnet PostgreSQL database"
+  if [ "$2" != "" ]; then
+    backup_file=$2
+    sudo /home/admin/config.scripts/bonus.postgresql.sh restore btcpaymainnet btcpay raspiblitz "${backup_file}"
+  else
+    sudo /home/admin/config.scripts/bonus.postgresql.sh restore btcpaymainnet btcpay raspiblitz
+  fi
+  sudo systemctl start btcpayserver
   exit 0
 fi
 
