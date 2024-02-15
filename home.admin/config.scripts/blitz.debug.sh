@@ -444,9 +444,9 @@ sudo du -sh /var/log
 
 echo
 echo "*** DATADRIVE ***"
-source <(/home/admin/config.scripts/blitz.datadrive.sh status)
+source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
 sudo /home/admin/config.scripts/blitz.datadrive.sh status
-sudo smartctl -a /dev/${datadisk}
+sudo smartctl -A /dev/${datadisk}
 echo
 
 echo "*** NETWORK ***"
