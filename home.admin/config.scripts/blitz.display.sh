@@ -250,7 +250,7 @@ function install_lcd() {
     sudo -u admin git checkout master
     sudo -u admin git reset --hard 5a206a7 || exit 1
     
-    sudo -u admin /home/admin/config.scripts/blitz.git-verify.sh 'GitHub' 'https://github.com/web-flow.gpg' '4AEE18F83AFDEB23' || exit 1
+    sudo -u admin /home/admin/config.scripts/blitz.git-verify.sh 'GitHub' 'https://github.com/web-flow.gpg' '(4AEE18F83AFDEB23|B5690EEEBB952194)' || exit 1
 
     # customized from https://github.com/tux1c/wavesharelcd-64bit-rpi/blob/master/install.sh
     # prepare X11

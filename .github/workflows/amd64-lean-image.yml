@@ -31,6 +31,12 @@ jobs:
   amd64-image-build:
     runs-on: ubuntu-22.04
     steps:
+      - name: Maximize build space
+        uses: easimon/maximize-build-space@master
+        with:
+          root-reserve-mb: 12288
+          temp-reserve-mb: 12288
+
       - uses: actions/checkout@v4
 
       - name: Set values
