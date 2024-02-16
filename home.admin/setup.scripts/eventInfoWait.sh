@@ -6,7 +6,7 @@
 source /home/admin/raspiblitz.info 2>/dev/null
 
 # get values from cache
-source <(/home/admin/_cache.sh get codeVersion internet_localip blitzapi)
+source <(/home/admin/_cache.sh get codeVersion internet_localip blitzapi hdd_used_info system_temp_celsius)
 
 # 1st PARAMETER: eventID
 # fixed ID string for a certain event
@@ -34,7 +34,7 @@ if [ "${mode}" != "lcd" ] && [ "${mode}" != "ssh" ]; then
 fi
 
 # default backtitle for dialog
-backtitle="RaspiBlitz ${codeVersion} / ${eventID} / ${internet_localip}"
+backtitle="${codeVersion} ${eventID} / ${internet_localip} ${system_temp_celsius}°C ${hdd_used_info}"
 
 ################################################
 # 1) WELL DEFINED EVENTS

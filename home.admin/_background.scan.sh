@@ -268,6 +268,27 @@ do
     /home/admin/_cache.sh set internet_online "${online}"
   fi
 
+  ###################
+  # HARDDRIVE
+
+  if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE2} ]; then
+    echo "updating: /home/admin/config.scripts/blitz.datadrive.sh status"
+    source <(/home/admin/config.scripts/blitz.datadrive.sh status)
+    /home/admin/_cache.sh set hdd_mounted "${isMounted}"
+    /home/admin/_cache.sh set hdd_ssd "${isSSD}"
+    /home/admin/_cache.sh set hdd_btrfs "${isBTRFS}"
+    /home/admin/_cache.sh set hdd_raid "${isRaid}"
+    /home/admin/_cache.sh set hdd_uasp "${hddAdapterUSAP}"
+    /home/admin/_cache.sh set hdd_capacity_bytes "${hddBytes}"
+    /home/admin/_cache.sh set hdd_capacity_gb "${hddGigaBytes}"
+    /home/admin/_cache.sh set hdd_free_bytes "${hddDataFreeBytes}"
+    /home/admin/_cache.sh set hdd_free_gb "${hddDataFreeGB}"
+    /home/admin/_cache.sh set hdd_used_info "${hddUsedInfo}"
+    /home/admin/_cache.sh set hddTemperature "${hddTemperature}"
+    /home/admin/_cache.sh set hddTBSize "${hddTBSize}"
+    
+  fi
+
   # exit if still setup or higher system stopped
   source <(/home/admin/_cache.sh get setupPhase state)
   if [ "${setupPhase}" != "done" ] ||
@@ -295,25 +316,6 @@ do
 
   # read/update config values
   source /mnt/hdd/raspiblitz.conf
-
-  ###################
-  # HARDDRIVE
-
-  if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE2} ]; then
-    echo "updating: /home/admin/config.scripts/blitz.datadrive.sh status"
-    source <(/home/admin/config.scripts/blitz.datadrive.sh status)
-    /home/admin/_cache.sh set hdd_mounted "${isMounted}"
-    /home/admin/_cache.sh set hdd_ssd "${isSSD}"
-    /home/admin/_cache.sh set hdd_btrfs "${isBTRFS}"
-    /home/admin/_cache.sh set hdd_raid "${isRaid}"
-    /home/admin/_cache.sh set hdd_uasp "${hddAdapterUSAP}"
-    /home/admin/_cache.sh set hdd_capacity_bytes "${hddBytes}"
-    /home/admin/_cache.sh set hdd_capacity_gb "${hddGigaBytes}"
-    /home/admin/_cache.sh set hdd_free_bytes "${hddDataFreeBytes}"
-    /home/admin/_cache.sh set hdd_free_gb "${hddDataFreeGB}"
-    /home/admin/_cache.sh set hdd_used_info "${hddUsedInfo}"
-    /home/admin/_cache.sh set hdd_blockchain_data "${hddBlocksBitcoin}"
-  fi
 
   ###################
   # BITCOIN

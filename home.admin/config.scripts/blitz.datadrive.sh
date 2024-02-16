@@ -209,16 +209,17 @@ if [ "$1" = "status" ]; then
     fi
 
     # try to detect if its an SSD
-    isSMART=$(sudo smartctl -a /dev/${hdd} | grep -c "Rotation Rate:")
+    isSMART=$(sudo smartctl -a /dev/${hdd} | grep -c "Serial Number:")
     echo "isSMART=${isSMART}"
-    if [ ${isSMART} -gt 0 ]; then
-      #detect using smartmontools (preferred)
-      isSSD=$(sudo smartctl -a /dev/${hdd} | grep 'Rotation Rate:' | grep -c "Solid State")
-    else
-      #detect using using fall back method
-      isSSD=$(cat /sys/block/${hdd}/queue/rotational 2>/dev/null | grep -c 0)
-    fi 
+    isSSD=1
+    isRotational=$(echo "${smartCtlA}" | grep -c "Rotation Rate:")
+    if [ ${isRotational} -gt 0 ]; then
+      isSSD=$(echo "${smartCtlA}" | grep "Rotation Rate:" | grep -c "Solid State Device")
+    fi
     echo "isSSD=${isSSD}"
+    hddTemp=""
+    echo "hddTemperature="
+    echo "hddTemperatureStr='?°C'"
 
     # display results from hdd & partition detection
     echo "hddCandidate='${hdd}'"
@@ -448,15 +449,16 @@ if [ "$1" = "status" ]; then
     fi
     echo "hddRaspiVersion='${hddRaspiVersion}'"
 
+    smartCtlA=$(sudo smartctl -a /dev/${hdd} | tr -d '"')
+
     # try to detect if its an SSD
-    isSMART=$(sudo smartctl -a /dev/${hdd} | grep -c "Rotation Rate:")
+    isSMART=$(echo "${smartCtlA}" | grep -c "Serial Number:")
     echo "isSMART=${isSMART}"
-    if [ ${isSMART} -gt 0 ]; then
-      #detect using smartmontools (preferred)
-      isSSD=$(sudo smartctl -a /dev/${hdd} | grep 'Rotation Rate:' | grep -c "Solid State")
-    else
-      #detect using using fall back method
-      isSSD=$(cat /sys/block/${hdd}/queue/rotational 2>/dev/null | grep -c 0)
+
+    isSSD=1
+    isRotational=$(echo "${smartCtlA}" | grep -c "Rotation Rate:")
+    if [ ${isRotational} -gt 0 ]; then
+      isSSD=$(echo "${smartCtlA}" | grep "Rotation Rate:" | grep -c "Solid State Device")
     fi
     echo "isSSD=${isSSD}"
 
@@ -464,6 +466,13 @@ if [ "$1" = "status" ]; then
     echo "datapartition='${hddDataPartition}'"
     echo "hddCandidate='${hdd}'"
     echo "hddPartitionCandidate='${hddDataPartition}'"
+
+    # check temp if possible
+    hddTemp=$(echo "${smartCtlA}" | grep "^Temperature" | head -n 1 | grep -o '[0-9]\+')
+    if [ hddTemp = "" ]; then
+      hddTemp=$(echo "${smartCtlA}" | grep "^194" | tr -s ' ' | cut -d" " -f 10 | grep -o '[0-9]\+')
+    fi
+    echo "hddTemperature=${hddTemp}"
 
     # check if blockchain data is available
     hddBlocksBitcoin=$(ls /mnt/hdd/bitcoin/blocks/blk00000.dat 2>/dev/null | grep -c '.dat')
@@ -482,6 +491,7 @@ if [ "$1" = "status" ]; then
       sizeDataPartition=$(lsblk -o NAME,SIZE -b | grep "${hddDataPartition}" | awk '$1=$1' | cut -d " " -f 2)
       hddGigaBytes=$(echo "scale=0; ${sizeDataPartition}/1024/1024/1024" | bc -l)
     fi
+    hddBytes=${sizeDataPartition}
     echo "hddBytes=${sizeDataPartition}"
     echo "hddGigaBytes=${hddGigaBytes}"
 
@@ -498,21 +508,36 @@ if [ "$1" = "status" ]; then
       datadrive=$(df -h | grep "/dev/${hdd}${nvp}1" | sed -e's/  */ /g' | cut -d" " -f 5)
       storageDrive=$(df -h | grep "/dev/${hdd}${nvp}2" | sed -e's/  */ /g' | cut -d" " -f 5)
       hdd_data_free1Kblocks=$(df -h -k /dev/${hdd}${nvp}1 | grep "/dev/${hdd}${nvp}1" | sed -e's/  */ /g' | cut -d" " -f 4 | tr -dc '0-9')
-      hddUsedInfo="${datadrive} & ${storageDrive}"
+      hddUsedInfo="${datadrive} ${storageDrive}"
     elif [ "${isZFS}" -gt 0 ]; then
       # ZFS calculations
       hdd_used_space=$(($(zpool list -pH | awk '{print $3}')/1024/1024/1024))
       hdd_used_ratio=$((100 * hdd_used_space / hddGigaBytes))
       hdd_data_free1Kblocks=$(($(zpool list -pH | awk '{print $4}') / 1024))
-      hddUsedInfo="${hdd_used_space} (${hdd_used_ratio}%)"
+      hddUsedInfo="${hdd_used_ratio}%"
     else
       # EXT4 calculations
       hdd_used_space=$(df -h | grep "/dev/${hddDataPartitionExt4}" | sed -e's/  */ /g' | cut -d" " -f 3  2>/dev/null)
       hdd_used_ratio=$(df -h | grep "/dev/${hddDataPartitionExt4}" | sed -e's/  */ /g' | cut -d" " -f 5 | tr -dc '0-9' 2>/dev/null)
       hdd_data_free1Kblocks=$(df -h -k /dev/${hddDataPartitionExt4} | grep "/dev/${hddDataPartitionExt4}" | sed -e's/  */ /g' | cut -d" " -f 4 | tr -dc '0-9')
-      hddUsedInfo="${hdd_used_space} (${hdd_used_ratio}%)"
+      hddUsedInfo="${hdd_used_ratio}%"
     fi
-    echo "hddUsedInfo='${hddUsedInfo}'"
+
+    hddTBSize="<1TB"
+    if [ ${hddBytes} -gt 800000000000 ]; then
+      hddTBSize="1TB"
+    fi
+    if [ ${hddBytes} -gt 1800000000000 ]; then
+      hddTBSize="2TB"
+    fi
+    if [ ${hddBytes} -gt 2300000000000 ]; then
+      hddTBSize=">2TB"
+    fi
+    if [ "${hddTemp}" != "" ]; then
+      hddUsedInfo="${hdd_used_ratio}% ${hddTemp}°C"
+    fi
+    echo "hddTBSize='${hddTBSize}'"
+    echo "hddUsedInfo='${hddTBSize} ${hddUsedInfo}'"
     hddDataFreeBytes=$((${hdd_data_free1Kblocks} * 1024))
     hddDataFreeGB=$((${hdd_data_free1Kblocks} / (1024 * 1024)))
     echo "hddDataFreeBytes=${hddDataFreeBytes}"
