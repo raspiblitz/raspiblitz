@@ -19,7 +19,7 @@ fi
 
 PGPsigner="web-flow"
 PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
-PGPpubkeyFingerprint="4AEE18F83AFDEB23"
+PGPpubkeyFingerprint="(4AEE18F83AFDEB23|B5690EEEBB952194)"
 
 # PGPsigner="joostjager"
 # PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"

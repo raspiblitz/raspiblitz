@@ -748,8 +748,8 @@ fi
 
 # *** CACHE DISK IN RAM & KEYVALUE-STORE***
 echo "Activating CACHE RAM DISK ... "
-/home/admin/_cache.sh ramdisk on
-/home/admin/_cache.sh keyvalue on
+/home/admin/_cache.sh ramdisk on || exit 1
+/home/admin/_cache.sh keyvalue on || exit 1
 
 # *** Wifi, Bluetooth & other RaspberryPi configs ***
 if [ "${baseimage}" = "raspios_arm64"  ] || [ "${baseimage}" = "debian" ]; then
@@ -794,7 +794,7 @@ cp /home/admin/assets/background.service /etc/systemd/system/background.service
 systemctl enable background
 
 # *** BACKGROUND SCAN ***
-/home/admin/_background.scan.sh install
+/home/admin/_background.scan.sh install || exit 1
 
 #######
 # TOR #
@@ -863,13 +863,13 @@ echo "1. login fresh --> user:admin password:raspiblitz"
 echo -e "2. run --> release\n"
 
 # make sure that at least the code is available (also if no internet)
-/home/admin/config.scripts/blitz.display.sh prepare-install
+/home/admin/config.scripts/blitz.display.sh prepare-install || exit 1
 # (do last - because it might trigger reboot)
 if [ "${display}" != "headless" ] || [ "${baseimage}" = "raspios_arm64" ]; then
   echo "*** ADDITIONAL DISPLAY OPTIONS ***"
   echo "- calling: blitz.display.sh set-display ${display}"
-  /home/admin/config.scripts/blitz.display.sh set-display ${display}
-  /home/admin/config.scripts/blitz.display.sh rotate 1
+  /home/admin/config.scripts/blitz.display.sh set-display ${display} || exit 1
+  /home/admin/config.scripts/blitz.display.sh rotate 1 || exit 1
 fi
 
 echo "# BUILD DONE - see above"
