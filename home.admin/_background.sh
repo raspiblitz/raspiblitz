@@ -511,27 +511,27 @@ do
           fi
         fi
 
-        # check if a SFTP backup target is set
+        # check if a SCP backup target is set
         # parameter in raspiblitz.conf:
-        # sftpBackupTarget='[USER]@[SERVER]:[DIRPATH-WITHOUT-ENDING-/]'
-        # optionally a custom option string for the sftp command can be set with
-        # sftpBackupOptions='[YOUR-CUSTOM-OPTIONS]'
+        # scpBackupTarget='[USER]@[SERVER]:[DIRPATH-WITHOUT-ENDING-/]'
+        # optionally a custom option string for the scp command can be set with
+        # scpBackupOptions='[YOUR-CUSTOM-OPTIONS]'
         # On target server add the public key of your RaspiBlitz to the authorized_keys for the user
         # https://www.linode.com/docs/security/authentication/use-public-key-authentication-with-ssh/
-        if [ ${#sftpBackupTarget} -gt 0 ]; then
+        if [ ${#scpBackupTarget} -gt 0 ]; then
           echo "--> Offsite-Backup SFTP Server"
-          if [ "${sftpBackupOptions}" == "" ]; then
-            sftpBackupOptions="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+          if [ "${scpBackupOptions}" == "" ]; then
+            scpBackupOptions="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
           fi
           # its ok to ignore known host, because data is encrypted (worst case of MiM would be: no offsite channel backup)
           # but its more likely that without ignoring known host, script might not run thru and that way: no offsite channel backup
-          sftp ${sftpBackupOptions} ${sftpBackupTarget}/ <<< "put ${localBackupPath}"
-          sftp ${sftpBackupOptions} ${sftpBackupTarget}/ <<< "put ${localTimestampedPath}"
+          scp ${scpBackupOptions} ${localBackupPath} ${scpBackupTarget}/
+          scp ${scpBackupOptions} ${localTimestampedPath} ${scpBackupTarget}/
           result=$?
           if [ ${result} -eq 0 ]; then
-            echo "OK - SFTP Backup exited with 0"
+            echo "OK - SCP Backup exited with 0"
           else
-            echo "FAIL - SFTP Backup exited with ${result}"
+            echo "FAIL - SCP Backup exited with ${result}"
           fi
         fi
 
@@ -617,27 +617,27 @@ do
           fi
         fi
 
-        # check if a SFTP backup target is set
+        # check if a SCP backup target is set
         # parameter in raspiblitz.conf:
-        # sftpBackupTarget='[USER]@[SERVER]:[DIRPATH-WITHOUT-ENDING-/]'
-        # optionally a custom option string for the sftp command can be set with
-        # sftpBackupOptions='[YOUR-CUSTOM-OPTIONS]'
+        # scpBackupTarget='[USER]@[SERVER]:[DIRPATH-WITHOUT-ENDING-/]'
+        # optionally a custom option string for the scp command can be set with
+        # scpBackupOptions='[YOUR-CUSTOM-OPTIONS]'
         # On target server add the public key of your RaspiBlitz to the authorized_keys for the user
         # https://www.linode.com/docs/security/authentication/use-public-key-authentication-with-ssh/
-        if [ ${#sftpBackupTarget} -gt 0 ]; then
+        if [ ${#scpBackupTarget} -gt 0 ]; then
           echo "--> Offsite-Backup SFTP Server"
-          if [ "${sftpBackupOptions}" == "" ]; then
-            sftpBackupOptions="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+          if [ "${scpBackupOptions}" == "" ]; then
+            scpBackupOptions="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
           fi
           # its ok to ignore known host, because data is encrypted (worst case of MiM would be: no offsite channel backup)
           # but its more likely that without ignoring known host, script might not run thru and that way: no offsite channel backup
-          sftp ${sftpBackupOptions} ${sftpBackupTarget}/ <<< "put ${localBackupPath}"
-          sftp ${sftpBackupOptions} ${sftpBackupTarget}/ <<< "put ${localTimestampedPath}"
+          scp ${scpBackupOptions} ${localBackupPath} ${scpBackupTarget}/
+          scp ${scpBackupOptions} ${localTimestampedPath} ${scpBackupTarget}/
           result=$?
           if [ ${result} -eq 0 ]; then
-            echo "OK - SFTP Backup exited with 0"
+            echo "OK - SCP Backup exited with 0"
           else
-            echo "FAIL - SFTP Backup exited with ${result}"
+            echo "FAIL - SCP Backup exited with ${result}"
           fi
         fi
 
