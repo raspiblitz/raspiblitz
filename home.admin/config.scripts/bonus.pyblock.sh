@@ -41,8 +41,15 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # install hexyl
   sudo apt-get install -y hexyl html2text
 
+  ## WORKAROUND: see https://github.com/raspiblitz/raspiblitz/issues/4383
   # install via pip
-  sudo -u pyblock pip3 install pybitblock 
+  # sudo -u pyblock pip3 install pybitblock 
+  # install from github
+  sudo -u pyblock git clone https://github.com/curly60e/pyblock.git
+  cd pyblock
+  sudo -u pyblock git checkout v2.2.3
+  sudo -u pyblock sed -i 's/jq = "1.2.2"/jq = "1.2.3"/' pyproject.toml
+  sudo -u pyblock pip install .
 
   # set PATH for the user
   sudo bash -c "echo 'PATH=\$PATH:/home/pyblock/.local/bin/' >> /home/pyblock/.profile"
