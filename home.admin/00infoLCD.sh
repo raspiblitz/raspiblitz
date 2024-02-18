@@ -97,6 +97,9 @@ while :
     if [ "${setupPhase}" != "done" ] || [ "${state}" == "reboot" ] || [ "${state}" == "shutdown" ] || [ "${state}" == "copytarget" ] || [ "${state}" == "copysource" ] || [ "${state}" == "copystation" ]; then
 
       # show status info during boot & setup & repair on LCD
+      if [ "${state}" == "" ]; then
+        state="nostate"
+      fi
       /home/admin/setup.scripts/eventInfoWait.sh "${state}" "${message}" lcd
       sleep 1
       continue
