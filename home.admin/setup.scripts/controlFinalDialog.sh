@@ -88,10 +88,10 @@ fi
 sleep 2
 clear
 echo "***********************************************************"
-echo "RaspiBlitz going to reboot"
+echo "RaspiBlitz is about to reboot"
 echo "***********************************************************"
 echo "This is the final setup reboot - you will get disconnected."
-echo "SSH again into system after restart."
+echo "Connect via SSH again after the restart."
 echo "Use your password A"
 echo "***********************************************************"
 sleep 5
