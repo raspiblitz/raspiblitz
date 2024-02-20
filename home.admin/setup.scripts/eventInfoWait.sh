@@ -47,7 +47,7 @@ Starting RaspiBlitz
 Please wait ...
 " 6 24
 
-elif [ "${eventID}" == "ready" ]; then
+elif [ "${eventID}" == "ready" ] || [ "${eventID}" == "nostate" ]; then
 
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "
 Please wait ...
