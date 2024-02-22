@@ -49,7 +49,7 @@ source <(/home/admin/_cache.sh get \
     ln_default_recovery_mode \
     ln_default_peers \
     ln_default_sync_chain \
-    system_count_start_lightning \
+    system_count_start_lightning
 )
 
 # formatting LIGHTNING SCAN PROGRESS  
@@ -92,6 +92,7 @@ source <(/home/admin/_cache.sh get \
     system_temp_fahrenheit \
     hostname \
     network \
+    hdd_used_info \
 )
 
 # set admin string
@@ -103,4 +104,4 @@ fi
 
 # display info to user
 time=$(date '+%H:%M:%S')
-dialog --title " Node is Syncing (${time}) " --backtitle "RaspiBlitz ${codeVersion} / ${system_temp_celsius}°C / ${system_temp_fahrenheit}°F / ${hostname}" --infobox "${infoStr}\n ${adminStr}" ${height} ${width}
+dialog --title " Node is Syncing (${time}) " --backtitle "${codeVersion} / ${internet_localip} ${system_temp_celsius}°C ${system_temp_fahrenheit}°F / ${hdd_used_info}" --infobox "${infoStr}\n ${adminStr}" ${height} ${width}
