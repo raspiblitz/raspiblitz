@@ -10,7 +10,10 @@ portAdmin="8021"
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "config script to switch the Fulcrum electrum server on, off or update to the latest release"
-  echo "bonus.fulcrum.sh [on|off|update|status|getinfo]"
+  echo "bonus.fulcrum.sh [on|off|update|getinfo]"
+  echo "bonus.fulcrum.sh getinfo -> FulcrumAdmin getinfo output"
+  echo "bonus.fulcrum.sh status -> don't call in loops"
+  echo "bonus.fulcrum.sh status-sync"
   echo "installs the version $fulcrumVersion"
   exit 1
 fi
@@ -21,52 +24,165 @@ if [ "$1" = "getinfo" ]; then
 fi
 
 if [ "$1" = "status" ]; then
+  # get local and global internet info
+  source <(/home/admin/config.scripts/internet.sh status global)
+
+  echo "##### STATUS FULCRUM SERVICE"
+
   # Attempt to get info from FulcrumAdmin, redirecting stderr to stdout to capture any error messages
   getInfoOutput=$(/home/fulcrum/FulcrumAdmin -p $portAdmin getinfo 2>&1)
 
   # Check if the command was successful or if it failed with "Connection refused"
-  if ! echo "$getInfoOutput" | jq -r '.version'; then
+  if ! echo "$getInfoOutput" | jq -r '.version' >/dev/null; then
     # Command failed, make getInfo empty
     getInfo=""
   else
     # Command succeeded, store the output in getInfo
     getInfo="$getInfoOutput"
   fi
-  localIP=$(hostname -I | cut -d' ' -f1)
-  publicIP=$(curl -s ifconfig.me)
   fulcrumVersion=$(echo "${getInfo}" | jq -r '.version' | awk '{print $2}')
 
-  # Get TOR address if exists.
-  if [ -f /mnt/hdd/tor/fulcrum/hostname ]; then
-    TORaddress=$(sudo cat /mnt/hdd/tor/fulcrum/hostname)
+  echo "version='${fulcrumVersion}'"
+
+  source /mnt/hdd/raspiblitz.conf
+  if [ "${fulcrum}" = "on" ]; then
+    echo "configured=1"
   else
-    TORaddress="N/A"
+    echo "configured=0"
   fi
 
-  # Check if the initial sync is done.
-  # Get Bitcoin node block height
-  bitcoin_blockheight=$(bitcoin-cli getblockchaininfo | jq -r '.blocks')
-  # Get Fulcrum block height
-  fulcrum_blockheight=$(echo "${getInfo}" | jq -r '.height')
-  # Compare the block heights
-  if [ "$bitcoin_blockheight" -eq "$fulcrum_blockheight" ]; then
-    # Sync complete. Bitcoin node and Fulcrum block heights match: $bitcoin_blockheight
-    initialSyncDone=true
-  else
-    # Sync in progress. Bitcoin node block height: $bitcoin_blockheight, Fulcrum block height: $fulcrum_blockheight
-    initialSyncDone=false
+  serviceInstalled=$(sudo systemctl status fulcrum --no-page 2>/dev/null | grep -c "fulcrum.service - Fulcrum")
+  echo "serviceInstalled=${serviceInstalled}"
+  if [ ${serviceInstalled} -eq 0 ]; then
+    echo "infoSync='Service not installed'"
+  fi
+  if [ ${serviceInstalled} -eq 0 ]; then
+    echo "infoSync='Service not installed'"
   fi
 
-  # Return the information as a JSON object.
-  echo "{"
-  echo "  \"version\": \"$fulcrumVersion\","
-  echo "  \"localIP\": \"$localIP\","
-  echo "  \"publicIP\": \"$publicIP\","
-  echo "  \"portTCP\": \"$portTCP\","
-  echo "  \"portSSL\": \"$portSSL\","
-  echo "  \"TORaddress\": \"$TORaddress\","
-  echo "  \"initialSyncDone\": $initialSyncDone"
-  echo "}"
+  if systemctl is-active fulcrum >/dev/null; then
+    serviceRunning=1
+  else
+    serviceRunning=0
+  fi
+  echo "serviceRunning=${serviceRunning}"
+  if [ ${serviceRunning} -eq 1 ]; then
+
+    # check local IPv4 port
+    echo "localIP='${localip}'"
+    echo "publicIP='${cleanip}'"
+    echo "portTCP='50021'"
+    localPortRunning=$(sudo netstat -an | grep -c '0.0.0.0:50021')
+    echo "localTCPPortActive=${localPortRunning}"
+
+    publicPortRunning=$(
+      nc -z -w6 ${publicip} 50021 2>/dev/null
+      echo $?
+    )
+    if [ "${publicPortRunning}" == "0" ]; then
+      # OK looks good - but just means that something is answering on that port
+      echo "publicTCPPortAnswering=1"
+    else
+      # no answer on that port
+      echo "publicTCPPortAnswering=0"
+    fi
+    echo "portSSL='50022'"
+    localPortRunning=$(sudo netstat -an | grep -c '0.0.0.0:50022')
+    echo "localHTTPPortActive=${localPortRunning}"
+    publicPortRunning=$(
+      nc -z -w6 ${publicip} 50022 2>/dev/null
+      echo $?
+    )
+    if [ "${publicPortRunning}" == "0" ]; then
+      # OK looks good - but just means that something is answering on that port
+      echo "publicHTTPPortAnswering=1"
+    else
+      # no answer on that port
+      echo "publicHTTPPortAnswering=0"
+    fi
+
+    # add Tor info
+    if [ "${runBehindTor}" == "on" ]; then
+      echo "TorRunning=1"
+      if [ "$2" = "showAddress" ]; then
+        TORaddress=$(sudo cat /mnt/hdd/tor/fulcrum/hostname)
+        echo "TORaddress='${TORaddress}'"
+      fi
+    else
+      echo "TorRunning=0"
+    fi
+    # check Nginx
+    nginxTest=$(sudo nginx -t 2>&1 | grep -c "test is successful")
+    echo "nginxTest=$nginxTest"
+  fi
+fi
+
+# give sync-status (can be called regularly)
+if [ "$1" = "status-sync" ] || [ "$1" = "status" ]; then
+  if systemctl is-active fulcrum >/dev/null; then
+    serviceRunning=1
+  else
+    serviceRunning=0
+  fi
+  echo "serviceRunning=${serviceRunning}"
+  if [ ${serviceRunning} -eq 1 ]; then
+
+    # Attempt to get info from FulcrumAdmin, redirecting stderr to stdout to capture any error messages
+    getInfoOutput=$(/home/fulcrum/FulcrumAdmin -p $portAdmin getinfo 2>&1)
+
+    # Check if the command was successful or if it failed with "Connection refused"
+    # Check if the command was successful or if it failed with "Connection refused"
+    if ! echo "$getInfoOutput" | jq -r '.version' >/dev/null; then
+      # Command failed, make getInfo empty
+      getInfo=""
+    else
+      # Command succeeded, store the output in getInfo
+      getInfo="$getInfoOutput"
+    fi
+
+    if [ "$getInfo" = "" ]; then
+      electrumResponding=
+    else
+      electrumResponding=1
+    fi
+    echo "electrumResponding=${electrumResponding}"
+
+    fileFlagExists=$(sudo ls /mnt/hdd/app-storage/fulcrum/initial-sync.done 2>/dev/null | grep -c 'initial-sync.done')
+    if [ ${fileFlagExists} -eq 0 ] && [ ${electrumResponding} -gt 0 ]; then
+      # set file flag for the future
+      sudo touch /mnt/hdd/app-storage/fulcrum/initial-sync.done
+      sudo chmod 544 /mnt/hdd/app-storage/fulcrum/initial-sync.done
+      fileFlagExists=1
+    fi
+    if [ ${fileFlagExists} -eq 0 ]; then
+      echo "initialSynced=0"
+      echo "infoSync='Building Index (please wait)'"
+    else
+      echo "initialSynced=1"
+    fi
+
+    # sync info
+    source <(/home/admin/_cache.sh get btc_mainnet_blocks_headers)
+    blockchainHeight="${btc_mainnet_blocks_headers}"
+    lastBlockchainHeight=$(($blockchainHeight - 1))
+    syncedToBlock=$(echo "${getInfo}" | jq -r '.height')
+    syncProgress=0
+    if [ "${syncedToBlock}" != "" ] && [ "${blockchainHeight}" != "" ] && [ "${blockchainHeight}" != "0" ]; then
+      syncProgress="$(echo "$syncedToBlock" "$blockchainHeight" | awk '{printf "%.2f", $1 / $2 * 100}')"
+    fi
+    echo "syncProgress=${syncProgress}%"
+    if [ "${syncedToBlock}" = "${blockchainHeight}" ] || [ "${syncedToBlock}" = "${lastBlockchainHeight}" ]; then
+      echo "tipSynced=1"
+    else
+      echo "tipSynced=0"
+    fi
+
+  else
+    echo "tipSynced=0"
+    echo "initialSynced=0"
+    echo "electrumResponding=0"
+    echo "infoSync='Not running - check: sudo journalctl -u fulcrum'"
+  fi
   exit 0
 fi
 
