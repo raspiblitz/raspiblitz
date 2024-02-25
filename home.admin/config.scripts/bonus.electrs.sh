@@ -93,7 +93,7 @@ if [ "$1" = "status" ]; then
 fi
 
 # give sync-status (can be called regularly)
-if [ "$1" = "status-sync" ] || [ "$1" = "status" ]; then
+if [ "$1" = "status-sync" ]; then
 
   serviceRunning=$(sudo systemctl status electrs --no-page 2>/dev/null | grep -c "active (running)")
   echo "serviceRunning=${serviceRunning}"
