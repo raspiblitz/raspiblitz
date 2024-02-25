@@ -92,6 +92,9 @@ fi
 if [ "${ElectRS}" == "on" ]; then
   OPTIONS+=(ELECTRS "Electrum Rust Server")
 fi
+if [ "${fulcrum}" == "on" ]; then
+  OPTIONS+=(FULCRUM "Fulcrum Electrum Server")
+fi
 if [ "${BTCRPCexplorer}" == "on" ]; then
   OPTIONS+=(EXPLORE "BTC RPC Explorer")
 fi
@@ -258,6 +261,9 @@ case $CHOICE in
             ;;
         ELECTRS)
             /home/admin/config.scripts/bonus.electrs.sh menu
+            ;;
+        FULCRUM)
+            /home/admin/config.scripts/bonus.fulcrum.sh menu
             ;;
         LIT)
             /home/admin/config.scripts/bonus.lit.sh menu
