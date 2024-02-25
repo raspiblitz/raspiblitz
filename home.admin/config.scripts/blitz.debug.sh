@@ -308,6 +308,8 @@ if [ "${ElectRS}" == "on" ]; then
   echo
   echo "*** ElectRS Status ***"
   sudo /home/admin/config.scripts/bonus.electrs.sh status
+  echo "*** ElectRS Status-Sync ***"
+  sudo /home/admin/config.scripts/bonus.electrs.sh status-sync
   echo
 else
   echo "- Electrum Rust Server is OFF by config"

@@ -214,7 +214,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
     echo "# WARNING! The given API repo is not available:"
     echo "# user(${GITHUB_USER}) repo(${GITHUB_REPO}) branch(${GITHUB_BRANCH})"
-    echo "# WORKING WITH FALLBACK REPO - USE JUST FOR DEVELOPMENT - DONT USE IN PRODUCTION"
+    GITHUB_BRANCH="${FALLACK_BRANCH}"
+    echo "# SO WORKING WITH FALLBACK REPO:"
+    echo "# user(${GITHUB_USER}) repo(${GITHUB_REPO}) branch(${GITHUB_BRANCH})"
+    echo "# USE JUST FOR DEVELOPMENT - DONT USE IN PRODUCTION"
     echo "# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
     echo
     sleep 10
