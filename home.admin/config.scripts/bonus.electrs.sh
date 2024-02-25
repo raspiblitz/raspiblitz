@@ -34,16 +34,16 @@ if [ "$1" = "status" ]; then
     echo "configured=1"
   else
     echo "configured=0"
+    echo "infoSync='Service not installed'"
+  fi
+
+  if id "electrs" &>/dev/null; then
+    echo "installed=1"
+  else
+    echo "installed=0"
   fi
 
   serviceInstalled=$(sudo systemctl status electrs --no-page 2>/dev/null | grep -c "electrs.service - Electrs")
-  if [ ${serviceInstalled} -eq 0 ]; then
-    echo "installed=0"
-    echo "infoSync='Service not installed'"
-  else
-    echo "installed=1"
-  fi
-
   serviceRunning=$(sudo systemctl status electrs --no-page 2>/dev/null | grep -c "active (running)")
   echo "serviceRunning=${serviceRunning}"
   if [ ${serviceRunning} -eq 1 ]; then
@@ -151,7 +151,7 @@ if [ "$1" = "menu" ]; then
   echo "# collecting status info ... (please wait)"
   source <(sudo /home/admin/config.scripts/bonus.electrs.sh status showAddress)
 
-  if [ ${serviceInstalled} -eq 0 ]; then
+  if [ ${configured} -eq 0 ]; then
     echo "# FAIL not installed"
     exit 1
   fi
