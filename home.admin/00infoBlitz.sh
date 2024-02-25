@@ -361,6 +361,15 @@ else
     fi
   fi
 
+  # Electrum Server - fulcrum
+  if [ "${fulcrum}" == "on" ]; then
+    error=""
+    source <(sudo /home/admin/config.scripts/bonus.fulcrum.sh status-sync 2>/dev/null)
+    if [ ${#infoSync} -gt 0 ]; then
+      appInfoLine="Fulcrum: ${infoSync}"
+    fi
+  fi
+
   # Transaction Index
   source <(/home/admin/config.scripts/network.txindex.sh status)
   if [ "${txindex}" == "1" ] && [ "${isIndexed}" != "1" ]; then
