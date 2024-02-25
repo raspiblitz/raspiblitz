@@ -9,6 +9,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "bonus.electrs.sh status -> dont call in loops"
  echo "bonus.electrs.sh status-sync"
  echo "bonus.electrs.sh [on|off|menu|update]"
+ echo "bonus.electrs.sh [install|uninstall]"
  echo "installs the version $ELECTRSVERSION"
  exit 1
 fi
@@ -261,16 +262,15 @@ fi
 echo "# Making sure services are not running"
 sudo systemctl stop electrs 2>/dev/null
 
-# switch on
-if [ "$1" = "1" ] || [ "$1" = "on" ]; then
+# uninstall
+if [ "$1" = "install" ]; then
   echo "# INSTALL ELECTRS"
 
-  isInstalled=$(sudo ls /etc/systemd/system/electrs.service 2>/dev/null | grep -c 'electrs.service')
-  if [ ${isInstalled} -eq 0 ]; then
-
-    # cleanup
-    sudo rm -f /home/electrs/.electrs/config.toml
-
+  if id "electrs" &>/dev/null; then
+      echo "# user electrs exists already (codebase is installed)"
+  else
+    echo "# Installing codebase"
+    
     echo
     echo "# Creating the electrs user"
     echo
@@ -304,6 +304,27 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo
     sudo mkdir /mnt/hdd/app-storage/electrs 2>/dev/null
     sudo chown -R electrs:electrs /mnt/hdd/app-storage/electrs
+  fi
+
+  exit 0
+fi
+
+# switch on
+if [ "$1" = "1" ] || [ "$1" = "on" ]; then
+  echo "# INSTALL ELECTRS"
+
+  isInstalled=$(sudo ls /etc/systemd/system/electrs.service 2>/dev/null | grep -c 'electrs.service')
+  if [ ${isInstalled} -eq 0 ]; then
+
+    # cleanup
+    sudo rm -f /home/electrs/.electrs/config.toml
+
+    if id "electrs" &>/dev/null; then
+      echo "# user electrs exists already (codebase is installed)"
+    else
+      echo "# Installing codebase"
+      /home/admin/config.scripts/bonus.electrs.sh install
+    fi
 
     echo
     echo "# Getting RPC credentials from the bitcoin.conf"
@@ -479,6 +500,14 @@ WantedBy=multi-user.target
   exit 0
 fi
 
+# uninstall
+if [ "$1" = "uninstall" ]; then
+  echo "# UNINSTALL ELECTRS"
+  echo "# remove user and home directory"
+  sudo userdel -rf electrs
+  exit 0
+fi
+
 # switch off
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
@@ -514,13 +543,10 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   sudo ufw delete allow 50001
   sudo ufw delete allow 50002
 
-  # delete user and home directory
-  sudo userdel -rf electrs
-
   # setting value in raspiblitz config
   /home/admin/config.scripts/blitz.conf.sh set ElectRS "off"
 
-  echo "# OK ElectRS removed."
+  echo "# OK ElectRS off."
   exit 0
 fi
 
