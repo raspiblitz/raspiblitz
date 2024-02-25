@@ -505,6 +505,12 @@ fi
 # uninstall
 if [ "$1" = "uninstall" ]; then
   echo "# UNINSTALL ELECTRS"
+
+  if [ "${ElectRS}" = "on" ]; then
+    echo "# FAIL: First switch ElectRS off before uninstalling."
+    exit 1
+  fi
+
   echo "# remove user and home directory"
   sudo userdel -rf electrs
   exit 0
