@@ -36,7 +36,7 @@ if [ "$1" = "status" ]; then
   fi
 
   serviceInstalled=$(sudo systemctl status electrs --no-page 2>/dev/null | grep -c "electrs.service - Electrs")
-  echo "serviceInstalled=${serviceInstalled}"
+  echo "installed=${serviceInstalled}"
   if [ ${serviceInstalled} -eq 0 ]; then
     echo "infoSync='Service not installed'"
   fi
