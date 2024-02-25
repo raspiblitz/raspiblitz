@@ -30,7 +30,7 @@ fi
 
 if [ "$1" = "status-sync" ] || [ "$1" = "status" ]; then
   # Check if the command was successful or if it failed with "Connection refused"
-  if ! echo "$getInfoOutput" | jq -r '.version' >/dev/null; then
+  if ! echo "$getInfoOutput" | jq -r '.version' 2>/dev/null; then
     # Command failed, make getInfo empty
     getInfo=""
   else
@@ -46,7 +46,7 @@ fi
 
 if [ "$1" = "status" ]; then
   echo "##### STATUS FULCRUM SERVICE"
-  fulcrumVersion=$(echo "${getInfo}" | jq -r '.version' | awk '{print $2}')
+  fulcrumVersion=$(/home/fulcrum/Fulcrum -v 2>/dev/null | grep -oP 'Fulcrum \K\d+\.\d+\.\d+')
   echo "version='${fulcrumVersion}'"
 
   source /mnt/hdd/raspiblitz.conf
@@ -119,18 +119,22 @@ if [ "$1" = "status-sync" ] || [ "$1" = "status" ]; then
   echo "serviceRunning=${serviceRunning}"
   if [ ${serviceRunning} -eq 1 ]; then
 
-    # sync info
-    source <(/home/admin/_cache.sh get btc_mainnet_blocks_headers)
-    blockchainHeight="${btc_mainnet_blocks_headers}"
-    lastBlockchainHeight=$(($blockchainHeight - 1))
-    syncedToBlock=$(echo "${getInfo}" | jq -r '.height')
-
-    if [ "$syncedToBlock" = "" ]; then
+    if [ "$getInfo" = "" ]; then
       electrumResponding=0
     else
       electrumResponding=1
     fi
     echo "electrumResponding=${electrumResponding}"
+
+    # sync info
+    source <(/home/admin/_cache.sh get btc_mainnet_blocks_headers)
+    blockchainHeight="${btc_mainnet_blocks_headers}"
+    lastBlockchainHeight=$(($blockchainHeight - 1))
+    if [ $electrumResponding -eq 0 ]; then
+      syncedToBlock=$(sudo journalctl -u fulcrum -n 100 | grep Processed | tail -n1 | grep -oP '(?<=Processed height: )\d+')
+    else
+      syncedToBlock=$(echo "${getInfo}" | jq -r '.height')
+    fi
 
     syncProgress=0
     if [ "${syncedToBlock}" != "" ] && [ "${blockchainHeight}" != "" ] && [ "${blockchainHeight}" != "0" ]; then
@@ -138,10 +142,11 @@ if [ "$1" = "status-sync" ] || [ "$1" = "status" ]; then
     fi
     echo "syncProgress=${syncProgress}%"
     if [ "${syncedToBlock}" = "${blockchainHeight}" ] || [ "${syncedToBlock}" = "${lastBlockchainHeight}" ]; then
-      echo "tipSynced=1"
+      tipSynced=1
     else
-      echo "tipSynced=0"
+      tipSynced=0
     fi
+    echo "tipSynced=$tipSynced"
 
     fileFlagExists=$(sudo ls /mnt/hdd/app-storage/fulcrum/initial-sync.done 2>/dev/null | grep -c 'initial-sync.done')
     if [ ${fileFlagExists} -eq 0 ] && [ ${tipSynced} -gt 0 ]; then
@@ -152,7 +157,7 @@ if [ "$1" = "status-sync" ] || [ "$1" = "status" ]; then
     fi
     if [ ${fileFlagExists} -eq 0 ]; then
       echo "initialSynced=0"
-      echo "infoSync='Building Index (please wait)'"
+      echo "infoSync='Building Fulcrum database ($syncProgress)'"
     else
       echo "initialSynced=1"
     fi
@@ -163,6 +168,124 @@ if [ "$1" = "status-sync" ] || [ "$1" = "status" ]; then
     echo "electrumResponding=0"
     echo "infoSync='Not running - check: sudo journalctl -u fulcrum'"
   fi
+  exit 0
+fi
+
+if [ "$1" = "menu" ]; then
+  # get status
+  echo "# collecting status info ... (please wait)"
+  source <(sudo /home/admin/config.scripts/bonus.fulcrum.sh status showAddress)
+
+  if [ ${serviceInstalled} -eq 0 ]; then
+    echo "# FAIL not installed"
+    exit 1
+  fi
+
+  if [ ${serviceRunning} -eq 0 ]; then
+    dialog --title " Fulcrum Service Not Running" --msgbox "
+The fulcrum.service is not running.
+Please check the following debug info.
+      " 8 48
+    sudo journalctl -u fulcrum -n 100
+    echo "Press ENTER to get back to main menu."
+    read -r
+    exit 0
+  fi
+
+  if [ ${initialSynced} -eq 0 ]; then
+    dialog --title "Fulcrum Index Not Ready" --msgbox "
+Fulcrum is still building its index.
+Currently is at $syncProgress
+This can take multiple days.
+Monitor the progress with the command:
+'sudo journalctl -fu fulcrum'
+" 11 48
+    exit 0
+  fi
+
+  if [ ${nginxTest} -eq 0 ]; then
+    dialog --title "Testing nginx.conf has failed" --msgbox "
+Nginx is in a failed state. Will attempt to fix.
+Try connecting via port 50022 or Tor again once finished.
+Check 'sudo nginx -t' for a detailed error message.
+      " 9 61
+    logFileMissing=$(sudo nginx -t 2>&1 | grep -c "/var/log/nginx/access.log")
+    if [ ${logFileMissing} -eq 1 ]; then
+      sudo mkdir /var/log/nginx
+      sudo systemctl restart nginx
+    fi
+    /home/admin/config.scripts/blitz.web.sh
+    echo "Press ENTER to get back to main menu."
+    read -r
+    exit 0
+  fi
+
+  OPTIONS=(
+    CONNECT "How to connect"
+    REINDEX "Delete and rebuild the Fulcrum database"
+    STATUS "Fulcrum status info"
+  )
+
+  CHOICE=$(whiptail --clear --title "Fulcrum Electrum Server" --menu "menu" 10 50 3 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+  clear
+
+  case $CHOICE in
+  CONNECT)
+    echo "######## How to Connect to the Fulcrum Electrum Server #######"
+    echo
+    echo "Install the Electrum Wallet App on your laptop from:"
+    echo "https://electrum.org"
+    echo
+    echo "On Network Settings > Server menu:"
+    echo "- deactivate automatic server selection"
+    echo "- as manual server set '${localIP}' & '${portSSL}'"
+    echo "- laptop and RaspiBlitz need to be within same local network"
+    echo
+    echo "To start directly from laptop terminal use"
+    echo "PC: electrum --oneserver --server ${localIP}:${portSSL}:s"
+    echo "MAC: open -a /Applications/Electrum.app --args --oneserver --server ${localIP}:${portSSL}:s"
+    if [ ${TorRunning} -eq 1 ]; then
+      echo
+      echo "The Tor Hidden Service address for Fulcrum is (see LCD for QR code):"
+      echo "${TORaddress}"
+      echo
+      echo "To connect through Tor open the Tor Browser and start with the options:"
+      echo "electrum --oneserver --server ${TORaddress}:50022:s --proxy socks5:127.0.0.1:9150"
+      sudo /home/admin/config.scripts/blitz.display.sh qr "${TORaddress}"
+    fi
+    echo
+    echo "For more details check the RaspiBlitz README on Fulcrum:"
+    echo "https://github.com/raspiblitz/raspiblitz"
+    echo
+    echo "Press ENTER to get back to main menu."
+    read key
+    sudo /home/admin/config.scripts/blitz.display.sh hide
+    ;;
+  STATUS)
+    sudo /home/admin/config.scripts/bonus.fulcrum.sh status
+    echo
+    echo "Press ENTER to get back to main menu."
+    read key
+    ;;
+  REINDEX)
+    echo "######## Delete and rebuild the Fulcrum database ########"
+    echo "# Last chance to cancel here: press CTRL+C to exit and keep the database"
+    echo "# Press any key to proceed with the deletion"
+    read -r
+    echo "# stopping service"
+    sudo systemctl stop fulcrum
+    echo "# deleting index"
+    sudo rm -r /mnt/hdd/app-storage/fulcrum/db
+    sudo rm /mnt/hdd/app-storage/fulcrum/initial-sync.done 2>/dev/null
+    echo "# starting service"
+    sudo systemctl start fulcrum
+    echo "# ok"
+    echo
+    echo "Press ENTER to get back to main menu."
+    read -r
+    ;;
+  esac
+
   exit 0
 fi
 
