@@ -325,7 +325,12 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       echo "# user electrs exists already (codebase is installed)"
     else
       echo "# Installing codebase"
-      /home/admin/config.scripts/bonus.electrs.sh install || exit 1
+      /home/admin/config.scripts/bonus.electrs.sh install
+      if [ $? -ne 0 ]; then
+        echo "Install failed .. removing again."
+        /home/admin/config.scripts/bonus.electrs.sh uninstall
+        exit 1
+      fi
     fi
 
     echo
