@@ -87,9 +87,9 @@ if [ "$1" = "status" ]; then
     # check Nginx
     nginxTest=$(sudo nginx -t 2>&1 | grep -c "test is successful")
     echo "nginxTest=$nginxTest"
-
   fi
 
+  exit 0
 fi
 
 # give sync-status (can be called regularly)
