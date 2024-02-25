@@ -519,7 +519,7 @@ fi
 # switch off
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
-  echo "# REMOVING ELECTRS"
+  echo "# DEACTIVATING ELECTRS"
 
   # if second parameter is "deleteindex"
   if [ "$2" == "deleteindex" ]; then
