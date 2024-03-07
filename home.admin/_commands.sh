@@ -172,7 +172,7 @@ function debug() {
   if [ "$1" = "-l" ]||[ "$1" = "--link" ]; then
     proxy="-X 5 -x localhost:9050"
     if [ "$2" = "-n" ]||[ "$2" = "--no-tor" ]; then proxy=""; fi
-    cat /var/cache/raspiblitz/debug.log | nc ${proxy} termbin.com 9999 | sed "s/termbin.com/l.termbin.com/"
+    cat /var/cache/raspiblitz/debug.log | nc ${proxy} termbin.com 9999
   else
     cat /var/cache/raspiblitz/debug.log
   fi
