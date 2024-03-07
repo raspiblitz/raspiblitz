@@ -391,7 +391,7 @@ elif [ "${abcd}" = "b" ]; then
   # LNDg
   if [ "${lndg}" == "on" ]; then
     echo "# changing the password for lndg"
-    sudo -u lndg /home/lndg/lndg/.venv/bin/python /home/lndg/lndg/initialize.py -pw ${newPassword}
+    /home/admin/config.scripts/bonus.lndg.sh set-password "${newPassword}"
   fi
 
   # mempool Explorer
