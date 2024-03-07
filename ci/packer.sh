@@ -11,45 +11,64 @@ REPO="https://github.com/raspiblitz/raspiblitz"
 # folders to store the build results
 BUILDFOLDER="images"
 
+# check if started with sudo
+if [ "$EUID" -ne 0 ]; then
+  echo "error='run as root / may use sudo'"
+  exit 1
+fi
+
+# usage info
+echo "packer.sh [BRANCH] [arm|x86] [min|fat] [?lastcommithash]"
 echo "Build RaspiBlitz install images on a Debian LIVE system"
 echo "From repo (change in script is needed):"
 echo $REPO
 echo "Results will be stored in:"
 echo $BUILDFOLDER
+echo "Start this script in the root of an writable 128GB NTFS formatted USB drive."
 
-# give info if not started with parameters
+# get parameters
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
-  echo "Start this script in the root of an writable 128GB NTFS formatted USB drive:"
-  echo "packer.sh [BRANCH] [arm|x86] [min|fat] [?lastcommithash]"
-  exit 1
+
+  # by input
+  read -p "Press ENTER to continue or CTRL+C to exit"
+  read -p "Enter the branch to build (default: dev): " BRANCH
+  read -p "Enter the architecture to build (arm|x86): " ARCH
+  read -p "Enter the type to build (min|fat): " TYPE
+  read -p "Enter the last commit hash to check (optional): " COMMITHASH
+
+else
+
+  # by command line
+  BRANCH=$1
+  ARCH=$2
+  TYPE=$3
+  COMMITHASH=$4
+  
 fi
 
-BRANCH=$1
-ARCH=$2
-TYPE=$3
-COMMITHASH=$4
-
 # check if branch is set
-if [ "$BRANCH" == "[BRANCH]" ]; then
+if [ ${#BRANCH} -eq 0 ]; then
   echo "error='branch not set'"
   exit 1
 fi
 
-# check if output is set
-if [ -z "$ARCH" ]; then
+# check if arch is set
+if [ ${#ARCH} -eq 0 ]; then
   echo "error='ARCH not set'"
   exit 1
 fi
-
-# check if output is set
-if [ -z "TYPE" ]; then
-  echo "error='TYPE not set'"
+if [ "$ARCH" != "arm" ] && [ "$ARCH" != "x86" ]; then
+  echo "error='ARCH not supported'"
   exit 1
 fi
 
-# check if started with sudo
-if [ "$EUID" -ne 0 ]; then
-  echo "error='run as root / may use sudo'"
+# check if type is set
+if [ ${#TYPE} -eq 0 ]; then
+  echo "error='TYPE not set'"
+  exit 1
+fi
+if [ "$TYPE" != "min" ] && [ "$TYPE" != "fat" ]; then
+  echo "error='TYPE not supported'"
   exit 1
 fi
 
