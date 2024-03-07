@@ -170,7 +170,7 @@ with the [Makefile](https://github.com/rootzoll/raspiblitz/blob/dev/Makefile)
 ### Generate an arm64-rpi image
 * The workflow locally and in github actions generates a .img raw format image for the Raspberry Pi.
   ```
-  make arm-rpi-lean-image
+  make arm64-rpi-lean-image
   ```
 * find the image and sha256 hashes in the `ci/arm64-rpi/packer-builder-arm` directory
 * the .img.gz file can be written to an SDcard directly with Balena Etcher
