@@ -2,7 +2,7 @@
 
 # https://github.com/joinmarket-webui/jam
 
-WEBUI_VERSION=0.1.6
+WEBUI_VERSION=0.2.0
 REPO=joinmarket-webui/jam
 USERNAME=jam
 HOME_DIR=/home/$USERNAME
@@ -280,6 +280,8 @@ if [ "$1" = "precheck" ]; then
   sed -i "s/#max_cj_fee_abs = x/max_cj_fee_abs = $(shuf -i 5000-10000 -n1)/g" /home/joinmarket/.joinmarket/joinmarket.cfg
   # max_cj_fee_rel between 0.01 - 0.03%
   sed -i "s/#max_cj_fee_rel = x/max_cj_fee_rel = 0.000$((RANDOM%3+1))/g" /home/joinmarket/.joinmarket/joinmarket.cfg
+  # change the onion_serving_port toavoid collusion with LND REST port
+  sed -i "s#^onion_serving_port = 8080#onion_serving_port = 8090#g" /home/joinmarket/.joinmarket/joinmarket.cfg
   exit 0
 fi
 
