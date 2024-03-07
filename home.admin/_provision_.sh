@@ -449,6 +449,15 @@ else
   echo "Provisioning ElectRS - keep default" >> ${logFile}
 fi
 
+#FULCRUM
+if [ "${fulcrum}" = "on" ]; then
+  echo "Provisioning Fulcrum - run config script" >> ${logFile}
+  /home/admin/_cache.sh set message "Setup Fulcrum"
+  sudo -u admin /home/admin/config.scripts/bonus.fulcrum.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning Fulcrum - keep default" >> ${logFile}
+fi
+
 # BTCPAYSERVER
 if [ "${BTCPayServer}" = "on" ]; then
 

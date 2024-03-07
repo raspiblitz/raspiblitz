@@ -8,7 +8,7 @@
 - Update: amd64 base image: debian-12.5.0-amd64-netinst.iso
 - Update: Bitcoin Core v26.0 [details](https://bitcoincore.org/en/releases/26.0/)
 - Update: Electrum Server in Rust (electrs) v0.10.2 [details](https://github.com/romanz/electrs/blob/master/RELEASE-NOTES.md#0102-dec-31-2023)
-- Update: Fulcrum Electrum server v1.9.7 (CLI install script) [details](https://github.com/cculianu/Fulcrum/releases/tag/v1.9.7)
+- Update: Fulcrum Electrum server v1.9.8 (CLI install script) [details](https://github.com/cculianu/Fulcrum/releases/tag/v1.9.8)
 - Update: BTC-RPC-Explorer v3.4.0 [details](https://github.com/janoside/btc-rpc-explorer/blob/master/CHANGELOG.md#v340)
 - Update: JoinMarket v0.9.11 [details](https://github.com/JoinMarket-Org/joinmarket-clientserver/releases/tag/v0.9.11)
 - Update: Jam (JoinMarket Web UI) v0.2.0 [details](https://github.com/joinmarket-webui/jam/releases/tag/v0.2.0)
