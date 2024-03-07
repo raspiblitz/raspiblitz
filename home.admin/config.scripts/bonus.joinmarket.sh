@@ -6,7 +6,7 @@
 # https://github.com/openoms/joininbox
 
 # https://github.com/openoms/joininbox/tags
-JBTAG="v0.8.2" # installs JoinMarket v0.9.10
+JBTAG="v0.8.3" # installs JoinMarket v0.9.11
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -120,11 +120,19 @@ if [ "$1" = "install" ]; then
     # install tmux
     apt -y install tmux
 
+    echo
     echo "##############################################"
     echo "# Install JoinMarket and configure JoininBox #"
     echo "##############################################"
     echo
-    if sudo -u joinmarket /home/joinmarket/install.joinmarket.sh -i install; then
+    # install joinmarket using the joininbox install script
+    if [ "${uname-m}" = x86_64 ]; then
+      qtgui=true
+    else
+      # no qtgui on arm
+      qtgui=false
+    fi
+    if sudo -u joinmarket /home/joinmarket/install.joinmarket.sh -i install -q $qtgui; then
       echo "# Installed JoinMarket"
       echo "# Run: 'sudo /home/admin/config.scripts/bonus.joinmarket.sh on' to configure and switch on"
     else
@@ -155,7 +163,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   if [ -f /home/joinmarket/start.joininbox.sh ]; then
     echo "# Ok, Joininbox is present"
   else
-    sudo /home/admin/config.scripts/bonus.joinmarket.sh install
+    sudo /home/admin/config.scripts/bonus.joinmarket.sh install || exit 1
   fi
 
   # store JoinMarket data on HDD
@@ -180,7 +188,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "
 if [ -f \"/home/joinmarket/joinmarket-clientserver/jmvenv/bin/activate\" ]; then
   . /home/joinmarket/joinmarket-clientserver/jmvenv/bin/activate
-  /home/joinmarket/joinmarket-clientserver/jmvenv/bin/python -c \"import PySide2\"
   cd /home/joinmarket/joinmarket-clientserver/scripts/
 fi
 # shortcut commands
