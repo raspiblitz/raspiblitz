@@ -31,7 +31,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
 
   # by input
   read -p "Press ENTER to continue or CTRL+C to exit"
-  read -p "Enter the branch to build (default: dev): " BRANCH
+  read -p "Enter the branch to build: " BRANCH
   read -p "Enter the architecture to build (arm|x86): " ARCH
   read -p "Enter the type to build (min|fat): " TYPE
   read -p "Enter the last commit hash to check (optional): " COMMITHASH
