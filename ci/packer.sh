@@ -107,7 +107,9 @@ else
 fi
 
 # make sure make build runs thru
-git config --global --add safe.directory ./ci/arm64-rpi/packer-builder-arm
+safedir=$(realpath ./ci/arm64-rpi/packer-builder-arm)
+echo "# Setting safe.directory to: ${safedir}"
+git config --global --add safe.directory "${safedir}"
 
 # get code version
 codeVersion=$(cat ./home.admin/_version.info | grep 'codeVersion="' | cut -d'"' -f2)
