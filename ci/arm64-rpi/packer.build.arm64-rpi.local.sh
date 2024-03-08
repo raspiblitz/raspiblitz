@@ -55,7 +55,7 @@ cd packer-builder-arm
 git reset --hard "v1.0.7"
 echo -e "\n# Build the packer-builder-arm plugin"
 go mod download
-go build -buildvcs=false|| exit 1
+go build || exit 1
 
 # set vars
 echo "# Setting the variables: $*"

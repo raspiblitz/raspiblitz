@@ -106,6 +106,9 @@ else
   echo "# NO COMMITHASH CHECK"
 fi
 
+# make sure make build runs thru
+git config --global --add safe.directory ./ci/arm64-rpi/packer-builder-arm
+
 # get code version
 codeVersion=$(cat ./home.admin/_version.info | grep 'codeVersion="' | cut -d'"' -f2)
 if [ ${#codeVersion} -eq 0 ]; then
