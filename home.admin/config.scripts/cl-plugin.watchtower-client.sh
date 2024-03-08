@@ -71,7 +71,7 @@ if [ "$1" = "on" ]; then
 
   #Compile
   cd /home/bitcoin/cl-plugins-available/rust-teos || exit 1
-  sudo -u bitcoin /home/bitcoin/.cargo/bin/cargo install --path watchtower-plugin \
+  sudo -u bitcoin /home/bitcoin/.cargo/bin/cargo install --locked --path watchtower-plugin \
     --target-dir /home/bitcoin/cl-plugins-available/${plugin} || exit 1
 
   #Symlink to enable
@@ -80,9 +80,16 @@ if [ "$1" = "on" ]; then
     sudo -u bitcoin ln -s /home/bitcoin/cl-plugins-available/${plugin}/release/${plugin} /home/bitcoin/${netprefix}cl-plugins-enabled/${plugin}
   fi
 
-  #check if toronly node, then add watchtower-proxy config to CL
-  if [ "$runBehindTor" = on ]; then
-    echo "watchtower-proxy=127.0.0.1:9050" | sudo tee -a ${CLCONF}
+  #check if toronly node, then add watchtower proxy config to CL
+  if [ "$runBehindTor" = "on" ]; then
+    # Check if the line is already in the file
+    if ! grep -q "^proxy=127.0.0.1:9050$" "${CLCONF}"; then
+      # If not, append the line to the file
+      echo "Adding proxy configuration to ${CLCONF}"
+      echo "proxy=127.0.0.1:9050" | sudo tee -a "${CLCONF}" >/dev/null
+    else
+      echo "Proxy configuration already exists in ${CLCONF}"
+    fi
   fi
 
   # setting value in raspiblitz.conf
@@ -99,9 +106,6 @@ fi
 if [ "$1" = off ]; then
   # delete symlink
   sudo rm -rf /home/bitcoin/${netprefix}cl-plugins-enabled/${plugin}
-
-  # delete watchtower-proxy config line from ${CLCONF}
-  sudo sed -i '/watchtower-proxy=/d' ${CLCONF}
 
   echo "# Restart the ${netprefix}lightningd.service to deactivate ${plugin}"
   sudo systemctl restart ${netprefix}lightningd
