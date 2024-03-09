@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # command info
-if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ];then
+if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo
   echo "Install the rust-teos watchtower-client plugin for CLN"
   echo "Usage:"
@@ -15,16 +15,15 @@ fi
 echo "# cl-plugin.watchtower-client.sh $*"
 
 source <(/home/admin/config.scripts/network.aliases.sh getvars cl $2)
-source /mnt/hdd/raspiblitz.conf  #to get runBehindTor
+source /mnt/hdd/raspiblitz.conf #to get runBehindTor
 plugin="watchtower-client"
 pkg_dependencies="libssl-dev"
 
-
 if [ "$1" = info ]; then
-	whiptail --title "The Eye of Satoshi CLN Watchtower" \
+  whiptail --title "The Eye of Satoshi CLN Watchtower" \
     --msgbox "
 This is a watchtower client plugin to interact with an Eye of Satoshi tower, and
-eventually with any BOLT13 compliant watchtower. 
+eventually with any BOLT13 compliant watchtower.
 
 The plugin manages all the client-side logic to send appointment to a number of
 registered towers every time a new commitment transaction is generated.
@@ -48,12 +47,11 @@ https://github.com/talaia-labs/rust-teos/tree/master/watchtower-plugin
   exit 0
 fi
 
-
-if [ "$1" = "on" ];then
+if [ "$1" = "on" ]; then
 
   # rust for rust-teos, includes rustfmt
-  sudo -u bitcoin curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | \
-  sudo -u bitcoin sh -s -- -y
+  sudo -u bitcoin curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs |
+    sudo -u bitcoin sh -s -- -y
 
   #Cleanup existing
   if [ -d "/home/bitcoin/cl-plugins-available/plugins/${plugin}/" ]; then
@@ -67,24 +65,31 @@ if [ "$1" = "on" ];then
   #Clone source repository
   cd /home/bitcoin/cl-plugins-available || exit 1
   sudo -u bitcoin git clone https://github.com/talaia-labs/rust-teos.git
-  
+
   #Install additional dependencies
-  sudo apt-get install -y ${pkg_dependencies} > /dev/null
+  sudo apt-get install -y ${pkg_dependencies} >/dev/null
 
   #Compile
   cd /home/bitcoin/cl-plugins-available/rust-teos || exit 1
-  sudo -u bitcoin /home/bitcoin/.cargo/bin/cargo install --path watchtower-plugin \
-      --target-dir /home/bitcoin/cl-plugins-available/${plugin}
+  sudo -u bitcoin /home/bitcoin/.cargo/bin/cargo install --locked --path watchtower-plugin \
+    --target-dir /home/bitcoin/cl-plugins-available/${plugin} || exit 1
 
   #Symlink to enable
-  if [ ! -L  /home/bitcoin/${netprefix}cl-plugins-enabled/${plugin} ]; then
+  if [ ! -L /home/bitcoin/${netprefix}cl-plugins-enabled/${plugin} ]; then
     echo "Running: sudo -u bitcoin ln -s /home/bitcoin/cl-plugins-available/${plugin}/release/${plugin} /home/bitcoin/${netprefix}cl-plugins-enabled/${plugin}"
     sudo -u bitcoin ln -s /home/bitcoin/cl-plugins-available/${plugin}/release/${plugin} /home/bitcoin/${netprefix}cl-plugins-enabled/${plugin}
   fi
 
-  #check if toronly node, then add watchtower-proxy config to CL 
-  if [ "$runBehindTor" = on ]; then
-    echo "watchtower-proxy=127.0.0.1:9050" | sudo tee -a ${CLCONF}
+  #check if toronly node, then add watchtower proxy config to CL
+  if [ "$runBehindTor" = "on" ]; then
+    # Check if the line is already in the file
+    if ! grep -q "^proxy=127.0.0.1:9050$" "${CLCONF}"; then
+      # If not, append the line to the file
+      echo "Adding proxy configuration to ${CLCONF}"
+      echo "proxy=127.0.0.1:9050" | sudo tee -a "${CLCONF}" >/dev/null
+    else
+      echo "Proxy configuration already exists in ${CLCONF}"
+    fi
   fi
 
   # setting value in raspiblitz.conf
@@ -98,28 +103,22 @@ if [ "$1" = "on" ];then
 
 fi
 
-
-if [ "$1" = off ];then
+if [ "$1" = off ]; then
   # delete symlink
   sudo rm -rf /home/bitcoin/${netprefix}cl-plugins-enabled/${plugin}
-
-  # delete watchtower-proxy config line from ${CLCONF}
-  sudo sed -i '/watchtower-proxy=/d' ${CLCONF}
 
   echo "# Restart the ${netprefix}lightningd.service to deactivate ${plugin}"
   sudo systemctl restart ${netprefix}lightningd
 
   # purge
-  if [ "$(echo "$@" | grep -c purge)" -gt 0 ];then
+  if [ "$(echo "$@" | grep -c purge)" -gt 0 ]; then
     echo "# Delete plugin and source code"
     sudo rm -rf /home/bitcoin/cl-plugins-available/rust-teos*
     sudo rm -rf /home/bitcoin/cl-plugins-available/${plugin}
   fi
-
 
   # setting value in raspi blitz config
   /home/admin/config.scripts/blitz.conf.sh set ${netprefix}clWatchtowerClient "off"
   echo "# watchtower-client was uninstalled for ${CHAIN}"
 
 fi
-
