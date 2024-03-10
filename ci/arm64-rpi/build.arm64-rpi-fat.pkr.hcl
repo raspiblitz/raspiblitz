@@ -28,7 +28,7 @@ source "arm" "raspiblitz-arm64-rpi-lean" {
     type         = "83"
   }
   image_path                   = "raspiblitz-arm64-rpi-fat.img"
-  image_size                   = "28G"
+  image_size                   = "20G"
   image_type                   = "dos"
   qemu_binary_destination_path = "/usr/bin/qemu-arm-static"
   qemu_binary_source_path      = "/usr/bin/qemu-arm-static"
