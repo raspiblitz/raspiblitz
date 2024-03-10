@@ -2,21 +2,21 @@
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
- echo "config script to install, uninstall ZeroTier"
- echo "bonus.zerotier.sh on [?networkid]"
- echo "bonus.zerotier.sh off"
- echo "bonus.zerotier.sh menu"
- exit 1
-fi 
+  echo "config script to install, uninstall ZeroTier"
+  echo "bonus.zerotier.sh on [?networkid]"
+  echo "bonus.zerotier.sh off"
+  echo "bonus.zerotier.sh menu"
+  exit 1
+fi
 
 source /mnt/hdd/raspiblitz.conf
 
 # show info menu
 if [ "$1" = "menu" ]; then
 
-networkDetails=$(sudo zerotier-cli listnetworks | grep OK)
+  networkDetails=$(sudo zerotier-cli listnetworks | grep OK)
 
-whiptail --title " Info ZeroTier " --msgbox "\n\
+  whiptail --title " Info ZeroTier " --msgbox "\n\
 Manage your ZeroTier account at https://my.zerotier.com. Add additional devices
 (desktop/laptop/mobile) to your network so they can communicate.\n\n\
 
@@ -40,9 +40,19 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   networkID=$2
   if [ ${#networkID} -eq 0 ]; then
-    networkID=$(whiptail --inputbox "\nPlease enter the ZeroTier networkID to connect to:" 10 38 "" --title " Join ZeroTier Network " --backtitle "RaspiBlitz - Settings" 3>&1 1>&2 2>&3)
-    networkID=$(echo "${networkID[0]}")
-    if [ ${#networkID} -eq 0 ]; then
+    trap 'rm -f "$_temp"' EXIT
+    _temp=$(mktemp -p /dev/shm/)
+
+    dialog --backtitle "RaspiBlitz - Settings" \
+      --title "Join ZeroTier Network" \
+      --inputbox "\nPlease enter the ZeroTier networkID to connect to:" 10 60 2>"$_temp"
+
+    networkID=$(cat "$_temp")
+
+    # Remove temporary file explicitly, though it's also handled by the EXIT trap
+    rm -f "$_temp"
+
+    if [ -z "$networkID" ]; then
       echo "error='cancel'"
       exit 0
     fi
@@ -67,7 +77,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     # adding zero tier IP to LND TLS cert
     # sudo /home/admin/config.scripts/lnd.tlscert.sh ip-add 172.X
-    # sudo /home/admin/config.scripts/lnd.credentials.sh reset "${chain:-main}net" tls 
+    # sudo /home/admin/config.scripts/lnd.credentials.sh reset "${chain:-main}net" tls
     # sudo /home/admin/config.scripts/lnd.credentials.sh sync "${chain:-main}net"
 
   else
