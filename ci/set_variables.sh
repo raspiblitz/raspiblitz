@@ -45,6 +45,10 @@ function set_variables() {
       params[desktop]="$2"
       shift 2
       ;;
+    --image_size)
+      params[image_size]="$2"
+      shift 2
+      ;;
     --)
       shift
       break
