@@ -29,7 +29,7 @@ source "arm" "raspiblitz-arm64-rpi" {
     type         = "83"
   }
   image_path                   = "raspiblitz-arm64-rpi-${var.pack}.img"
-  image_size                   = "28G"
+  image_size                   = var.image_size
   image_type                   = "dos"
   qemu_binary_destination_path = "/usr/bin/qemu-arm-static"
   qemu_binary_source_path      = "/usr/bin/qemu-arm-static"
@@ -66,6 +66,12 @@ build {
       "echo '# delete the SSH keys (will be recreated on the first boot)'",
       "rm -f /etc/ssh/ssh_host_*",
       "echo 'OK'",
+    ]
+  }
+
+  provisioner "shell" {
+    inline = [
+      "if [ \"${var.pack}\" = \"base\" ]; then echo 'Adding stop file to /boot/firmware/'; touch /boot/firmware/stop; fi"
     ]
   }
 }
