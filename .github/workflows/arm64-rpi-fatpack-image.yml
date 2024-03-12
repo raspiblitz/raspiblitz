@@ -6,51 +6,29 @@ concurrency:
 
 on:
   workflow_dispatch:
-  #push:
-  #  branches: [ "dev", "v1.10" ]
-  #  paths:
-  #    - 'build_sdcard.sh'
-  #    - 'home.admin/bitcoin.install.sh'
-  #    - 'home.admin/lnd.install.sh'
-  #    - 'home.admin/cl.install.sh'
-  #    - 'home.admin/cl-plugin.cln-grpc.sh'
-  #    - 'home.admin/tor.install.sh'
-  #    - 'home.admin/blitz.i2pd.sh'
-  #    - 'home.admin/blitz.web.sh'
-  #    - 'home.admin/bonus.nodejs.sh'
-  #    - 'home.admin/bonus.rtl.sh'
-  #    - 'home.admin/bonus.btcpayserver.sh'
-  #    - 'home.admin/bonus.thunderhub.sh'
-  #    - 'home.admin/bonus.jam.sh install'
-  #    - 'home.admin/bonus.mempool.sh'
-  #    - 'home.admin/blitz.web.api.sh'
-  #    - 'home.admin/blitz.web.ui.sh'
-  #    - 'home.admin/blitz.display.sh'
-  #    - 'ci/arm64-rpi/**'
-  #pull_request:
-  #  branches: [ "dev", "v1.10" ]
-  #  paths:
-  #    - 'build_sdcard.sh'
-  #    - 'home.admin/bitcoin.install.sh'
-  #    - 'home.admin/lnd.install.sh'
-  #    - 'home.admin/cl.install.sh'
-  #    - 'home.admin/cl-plugin.cln-grpc.sh'
-  #    - 'home.admin/tor.install.sh'
-  #    - 'home.admin/blitz.i2pd.sh'
-  #    - 'home.admin/blitz.web.sh'
-  #    - 'home.admin/bonus.nodejs.sh'
-  #    - 'home.admin/bonus.rtl.sh'
-  #    - 'home.admin/bonus.btcpayserver.sh'
-  #    - 'home.admin/bonus.thunderhub.sh'
-  #    - 'home.admin/bonus.jam.sh install'
-  #    - 'home.admin/bonus.mempool.sh'
-  #    - 'home.admin/blitz.web.api.sh'
-  #    - 'home.admin/blitz.web.ui.sh'
-  #    - 'home.admin/blitz.display.sh'
-  #    - 'ci/amd64/**'
+  push:
+    branches: ['dev', 'v1.10', 'v1.11']
+    paths:
+      - 'build_sdcard.sh'
+      - 'home.admin/bitcoin.install.sh'
+      - 'home.admin/tor.install.sh'
+      - 'home.admin/blitz.i2pd.sh'
+      - 'home.admin/blitz.web.sh'
+      - 'home.admin/blitz.display.sh'
+      - 'ci/arm64-rpi/**'
+  pull_request:
+    branches: ['dev', 'v1.10', 'v1.11']
+    paths:
+      - 'build_sdcard.sh'
+      - 'home.admin/bitcoin.install.sh'
+      - 'home.admin/tor.install.sh'
+      - 'home.admin/blitz.i2pd.sh'
+      - 'home.admin/blitz.web.sh'
+      - 'home.admin/blitz.display.sh'
+      - 'ci/arm64-rpi/**'
 
 jobs:
-  arm64-rpi-image-build:
+  arm64-rpi-base-image-build:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
@@ -72,13 +50,89 @@ jobs:
           fi
 
       - name: Display the build name
-        run: echo "Building the raspiblitz-arm64-rpi-fatpack-image-${{env.BUILD_DATE}}-${{env.BUILD_VERSION}}"
+        run: echo "Building the raspiblitz-arm64-rpi-base-image-${{ env.BUILD_DATE }}-${{ env.BUILD_VERSION }}"
 
       - name: Run the build script
         run: |
-          echo "Using the variables: --pack fatpack --github_user ${{steps.set_values.outputs.GITHUB_USER}} --branch ${{env.BRANCH_NAME}}"
+          echo "Using the variables: --pack base --github_user ${{steps.set_values.outputs.GITHUB_USER}} --branch ${{env.BRANCH_NAME}} --image_size 20G"
           cd ci/arm64-rpi
-          bash packer.build.arm64-rpi.sh --pack fatpack --github_user ${{steps.set_values.outputs.GITHUB_USER}} --branch ${{env.BRANCH_NAME}}
+          bash packer.build.arm64-rpi.sh --pack base --github_user ${{steps.set_values.outputs.GITHUB_USER}} --branch ${{env.BRANCH_NAME}} --image_size 20G
+
+      - name: Calculate the checksum of the raw image
+        run: |
+          cd ci/arm64-rpi
+          sha256sum raspiblitz-arm64-rpi-base.img > raspiblitz-arm64-rpi-base.img.sha256
+
+      - name: Upload the image and checksum
+        uses: actions/upload-artifact@v4
+        with:
+          name: raspiblitz-arm64-rpi-image-${{ env.BUILD_DATE }}-${{ env.BUILD_VERSION }}
+          path: |
+            ${{ github.workspace }}/ci/arm64-rpi/raspiblitz-arm64-rpi-base.img.sha256
+            ${{ github.workspace }}/ci/arm64-rpi/raspiblitz-arm64-rpi-base.img
+
+  arm64-rpi-fatpack-image-build:
+    needs: arm64-rpi-base-image-build
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Maximize build space
+        uses: easimon/maximize-build-space@master
+        with:
+          root-reserve-mb: 31000
+          temp-reserve-mb: 31000
+          remove-dotnet: 'true'
+          remove-android: 'true'
+          remove-haskell: 'true'
+          remove-codeql: 'true'
+          remove-docker-images: 'true'
+
+      - name: Display free space
+        run: |
+          df -h
+          du -hd1
+
+      - name: Set values
+        id: set_values
+        run: |
+          echo "BUILD_DATE=$(date +"%Y-%m-%d")" >> $GITHUB_ENV
+          echo "BUILD_VERSION=$(git describe --always --tags)" >> $GITHUB_ENV
+          if [ -z "$GITHUB_HEAD_REF" ]; then
+            echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_ENV
+          else
+            echo "BRANCH_NAME=${GITHUB_HEAD_REF}" >> $GITHUB_ENV
+          fi
+          if [[ "${{github.event_name}}" == "pull_request" ]]; then
+            echo "GITHUB_USER=${{github.event.pull_request.head.repo.owner.login}}" >> $GITHUB_OUTPUT
+          else
+            echo "GITHUB_USER=$(echo ${{github.repository}} | cut -d'/' -f1)" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download base image
+        uses: actions/download-artifact@v4
+        with:
+          name: raspiblitz-arm64-rpi-base
+          path: ci/arm64-rpi
+
+      - name: Set the "image_checksum" variable
+        run: |
+          echo "IMAGE_CHECKSUM=$(cat ci/arm64-rpi/raspiblitz-arm64-rpi-base.img.sha256 | cut -d' ' -f1)" >> $GITHUB_ENV
+
+      - name: Run the fatpack build
+        run: |
+          echo "Using the variables: --github_user ${{steps.set_values.outputs.GITHUB_USER}} --branch ${{env.BRANCH_NAME}}"
+          cd ci/arm64-rpi
+          docker run --rm --privileged \
+            -v /dev:/dev \
+            -v .:/build \
+            mkaczanowski/packer-builder-arm:1.0.9 build \
+            -var "github_user=${{steps.set_values.outputs.GITHUB_USER}}" \
+            -var "branch=${{env.BRANCH_NAME}}" \
+            -var "artifact=file:/build/raspiblitz-arm64-rpi-base.img" \
+            -var "image_checksum=${{env.IMAGE_CHECKSUM}}" \
+            build.arm64-rpi-fatpack.pkr.hcl
 
       - name: Compute checksum of the raw image
         run: |
