@@ -49,6 +49,10 @@ update_config=1
 country=US" | sudo tee /etc/wpa_supplicant/wpa_supplicant.conf  2>/dev/null
 echo "OK"
 
+echo "shutdown redis ..."
+sudo systemctl stop redis
+sleep 3
+
 echo
 echo "Will shutdown now."
 echo "Wait until Raspberry LEDs show no activity anymore."
