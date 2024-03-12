@@ -4,6 +4,7 @@
 
 * Start [`Debian LIVE`](https://cdimage.debian.org/debian-cd/current-live/amd64/iso-hybrid/debian-live-12.4.0-amd64-cinnamon.iso) from USB stick
   * On USB boot be sure to start the "LIVE_SYSTEM" image
+  * Set KeyboardLang, "Screensaver" & "Power Management"
   * Connect a additional 128GB USB with NFTS formatted 
 * Using Filemanager open the 128GB-USBDrive and right-click "Open in Terminal"
 * Make sure the packer script is in root of the 128GB-USBDrive
@@ -19,6 +20,8 @@
   * `[min|fat]` = lean or fatpack (fatpack prepackages lots of apps already with the image)
   * `LASTCOMMITHASH` (optional) = security check & copy the latest commit hash of the branch you want to build (substring is ok)
  
+To directly write an image from the final `img.gz` file from the build laptop you need tu unzip the file first with `gunzip [imagefile.img.gz]` and then use the debian Image Writer.
+
 ### What is the process of creating a new RaspberryPi SD card image release manually?
 
 Checklist before making a SD card image release:
@@ -73,7 +76,7 @@ Creating the image of sd card:
   * Search "Laufwerke" or "Drives" on Tails Apps
   * Create image named `raspiblitz.img` to USB storage
 * Open Terminal and cd into directory of NTFS USB stick under `/media/amnesia`
-* `shasum -a 256 ./pishrink.sh` should be `e46e1e1e3c6e3555f9fff5435e2305e99b98aaa8dc28db1814cf861fbb472a69`
+* `shasum -a 256 ./pishrink.sh` should be `760a7996fe8496e1d463e7a174d87ee92e41a8a1b195c02e98a27fcad2051dc6`
 * `chmod +x ./pishrink.sh | sudo ./pishrink.sh ./raspiblitz.img`
 * `gzip -c ./raspiblitz.img > ./raspiblitz-min/fat-vX.X.X-YEAR-MONTH-DAY.img.gz`
 * `shasum -a 256 ./raspiblitz-min/fat-vX.X.X-YEAR-MONTH-DAY.img.gz > ./raspiblitz-min/fat-vX.X.X-YEAR-MONTH-DAY.img.gz.sha`
