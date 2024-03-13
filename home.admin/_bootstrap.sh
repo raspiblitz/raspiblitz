@@ -143,8 +143,6 @@ if [ "${flagExists}" == "1" ]; then
   exit 0
 fi
 
-
-
 # wifi config by file on sd card
 wifiFileExists=$(sudo ls /boot/firmware/wifi | grep -c 'wifi')
 wpaFileExists=$(sudo ls /boot/firmware/wpa_supplicant.conf | grep -c 'wpa_supplicant.conf')
@@ -425,6 +423,8 @@ fi
 # from actions above
 
 if [ "${systemInitReboot}" == "1" ]; then
+  echo "Stopping Redis server" >> $logFile
+  sudo systemctl stop redis
   echo "Reboot" >> $logFile
   sudo cp ${logFile} /home/admin/raspiblitz.systeminit.log
   /home/admin/_cache.sh set state "reboot"
