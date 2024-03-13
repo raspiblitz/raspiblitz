@@ -6,5 +6,8 @@ wget https://raw.githubusercontent.com/${github_user}/raspiblitz/${branch}/home.
 # make /dev/shm world writable for qemu
 sudo chmod 777 /dev/shm
 
+# make /var/cache/raspiblitz world writable for qemu
+sudo chmod 777 /var/cache/raspiblitz
+
 echo 'Build Fatpack ...'
 bash blitz.fatpack.sh
