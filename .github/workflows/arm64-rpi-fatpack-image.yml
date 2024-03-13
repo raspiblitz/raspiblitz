@@ -10,22 +10,44 @@ on:
     branches: ['dev', 'v1.10', 'v1.11']
     paths:
       - 'build_sdcard.sh'
-      - 'home.admin/bitcoin.install.sh'
-      - 'home.admin/tor.install.sh'
-      - 'home.admin/blitz.i2pd.sh'
-      - 'home.admin/blitz.web.sh'
-      - 'home.admin/blitz.display.sh'
+      - 'home.admin/config.scripts/bitcoin.install.sh'
+      - 'home.admin/config.scripts/tor.install.sh'
+      - 'home.admin/config.scripts/blitz.i2pd.sh'
+      - 'home.admin/config.scripts/blitz.web.sh'
+      - 'home.admin/config.scripts/blitz.display.sh'
       - 'ci/arm64-rpi/**'
+      - 'home.admin/config.scripts/bonus.btc-rpc-explorer.sh'
+      - 'home.admin/config.scripts/bonus.btcpayserver.sh'
+      - 'home.admin/config.scripts/bonus.jam.sh'
+      - 'home.admin/config.scripts/bonus.joinmarket.sh'
+      - 'home.admin/config.scripts/bonus.lnbits.sh'
+      - 'home.admin/config.scripts/bonus.mempool.sh'
+      - 'home.admin/config.scripts/bonus.nodejs.sh'
+      - 'home.admin/config.scripts/bonus.rtl.sh'
+      - 'home.admin/config.scripts/bonus.thunderhub.sh'
+      - 'home.admin/config.scripts/blitz.web.api.sh'
+      - 'home.admin/config.scripts/blitz.web.ui'
   pull_request:
     branches: ['dev', 'v1.10', 'v1.11']
     paths:
       - 'build_sdcard.sh'
-      - 'home.admin/bitcoin.install.sh'
-      - 'home.admin/tor.install.sh'
-      - 'home.admin/blitz.i2pd.sh'
-      - 'home.admin/blitz.web.sh'
-      - 'home.admin/blitz.display.sh'
+      - 'home.admin/config.scripts/bitcoin.install.sh'
+      - 'home.admin/config.scripts/tor.install.sh'
+      - 'home.admin/config.scripts/blitz.i2pd.sh'
+      - 'home.admin/config.scripts/blitz.web.sh'
+      - 'home.admin/config.scripts/blitz.display.sh'
       - 'ci/arm64-rpi/**'
+      - 'home.admin/config.scripts/bonus.btc-rpc-explorer.sh'
+      - 'home.admin/config.scripts/bonus.btcpayserver.sh'
+      - 'home.admin/config.scripts/bonus.jam.sh'
+      - 'home.admin/config.scripts/bonus.joinmarket.sh'
+      - 'home.admin/config.scripts/bonus.lnbits.sh'
+      - 'home.admin/config.scripts/bonus.mempool.sh'
+      - 'home.admin/config.scripts/bonus.nodejs.sh'
+      - 'home.admin/config.scripts/bonus.rtl.sh'
+      - 'home.admin/config.scripts/bonus.thunderhub.sh'
+      - 'home.admin/config.scripts/blitz.web.api.sh'
+      - 'home.admin/config.scripts/blitz.web.ui'
 
 jobs:
   arm64-rpi-base-image-build:
@@ -36,6 +58,7 @@ jobs:
       - name: Set values
         id: set_values
         run: |
+          echo "BUILD_VERSION=$(git describe --always --tags)" >> $GITHUB_ENV
           if [ -z "$GITHUB_HEAD_REF" ]; then
             echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_ENV
           else
@@ -64,7 +87,7 @@ jobs:
       - name: Upload the base image and checksum
         uses: actions/upload-artifact@v4
         with:
-          name: raspiblitz-arm64-rpi-base-image
+          name: raspiblitz-arm64-rpi-base-image-${{ env.BUILD_VERSION }}
           path: |
             ${{ github.workspace }}/ci/arm64-rpi/raspiblitz-arm64-rpi-base.img.sha256
             ${{ github.workspace }}/ci/arm64-rpi/raspiblitz-arm64-rpi-base.img
@@ -111,7 +134,7 @@ jobs:
       - name: Download base image
         uses: actions/download-artifact@v4
         with:
-          name: raspiblitz-arm64-rpi-base-image
+          name: raspiblitz-arm64-rpi-base-image-${{ env.BUILD_VERSION }}
           path: ci/arm64-rpi
 
       - name: Set the "image_checksum" variable
