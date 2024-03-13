@@ -49,7 +49,7 @@ else
   sudo /home/admin/config.scripts/blitz.ssh.sh checkrepair >> ${logFile}
 fi
 
-echo "## INIT raspiblitz.info" >> $logFile
+echo "## prepare raspiblitz temp" >> $logFile
 
 # make sure /var/cache/raspiblitz/temp exists
 sudo mkdir -p /var/cache/raspiblitz/temp
