@@ -63,10 +63,10 @@ jobs:
           cd ci/arm64-rpi
           sha256sum raspiblitz-arm64-rpi-base.img > raspiblitz-arm64-rpi-base.img.sha256
 
-      - name: Upload the image and checksum
+      - name: Upload the base image and checksum
         uses: actions/upload-artifact@v4
         with:
-          name: raspiblitz-arm64-rpi-image-${{ env.BUILD_DATE }}-${{ env.BUILD_VERSION }}
+          name: raspiblitz-arm64-rpi-base-image-${{ env.BUILD_DATE }}-${{ env.BUILD_VERSION }}
           path: |
             ${{ github.workspace }}/ci/arm64-rpi/raspiblitz-arm64-rpi-base.img.sha256
             ${{ github.workspace }}/ci/arm64-rpi/raspiblitz-arm64-rpi-base.img
@@ -91,29 +91,13 @@ jobs:
           df -h
           du -hd1
 
-      - name: Set values
-        id: set_values
-        run: |
-          echo "BUILD_DATE=$(date +"%Y-%m-%d")" >> $GITHUB_ENV
-          echo "BUILD_VERSION=$(git describe --always --tags)" >> $GITHUB_ENV
-          if [ -z "$GITHUB_HEAD_REF" ]; then
-            echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_ENV
-          else
-            echo "BRANCH_NAME=${GITHUB_HEAD_REF}" >> $GITHUB_ENV
-          fi
-          if [[ "${{github.event_name}}" == "pull_request" ]]; then
-            echo "GITHUB_USER=${{github.event.pull_request.head.repo.owner.login}}" >> $GITHUB_OUTPUT
-          else
-            echo "GITHUB_USER=$(echo ${{github.repository}} | cut -d'/' -f1)" >> $GITHUB_OUTPUT
-          fi
-
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Download base image
         uses: actions/download-artifact@v4
         with:
-          name: raspiblitz-arm64-rpi-base
+          name: raspiblitz-arm64-rpi-base-image-${{ env.BUILD_DATE }}-${{ env.BUILD_VERSION }}
           path: ci/arm64-rpi
 
       - name: Set the "image_checksum" variable
