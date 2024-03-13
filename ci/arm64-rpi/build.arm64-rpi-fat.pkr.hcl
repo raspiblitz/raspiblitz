@@ -3,7 +3,7 @@ variable "branch" { default = "dev" }
 variable "artifact" { default = "file:/build/raspiblitz-arm64-rpi-lean.img" }
 variable "image_checksum" { default = "not_available" }
 
-source "arm" "raspiblitz-arm64-rpi-fatpack" {
+source "arm" "raspiblitz-arm64-rpi-fat" {
   file_urls = [var.artifact]
   file_checksum_type = "sha256"
   file_checksum         = var.image_checksum
@@ -27,7 +27,7 @@ source "arm" "raspiblitz-arm64-rpi-fatpack" {
     start_sector = "532480"
     type         = "83"
   }
-  image_path                   = "raspiblitz-arm64-rpi-fatpack.img"
+  image_path                   = "raspiblitz-arm64-rpi-fat.img"
   image_size                   = "20G"
   image_type                   = "dos"
   qemu_binary_destination_path = "/usr/bin/qemu-arm-static"
@@ -35,7 +35,7 @@ source "arm" "raspiblitz-arm64-rpi-fatpack" {
 }
 
 build {
-  sources = ["source.arm.raspiblitz-arm64-rpi-fatpack"]
+  sources = ["source.arm.raspiblitz-arm64-rpi-fat"]
 
   provisioner "shell" {
     environment_vars = [

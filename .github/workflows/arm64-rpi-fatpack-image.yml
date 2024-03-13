@@ -130,28 +130,28 @@ jobs:
             -var "branch=${{env.BRANCH_NAME}}" \
             -var "artifact=file:/build/raspiblitz-arm64-rpi-base.img" \
             -var "image_checksum=${{env.IMAGE_CHECKSUM}}" \
-            build.arm64-rpi-fatpack.pkr.hcl
+            build.arm64-rpi-fat.pkr.hcl
 
       - name: Compute checksum of the raw image
         run: |
           cd ci/arm64-rpi
-          sha256sum raspiblitz-arm64-rpi-fatpack.img > raspiblitz-arm64-rpi-fatpack.img.sha256
+          sha256sum raspiblitz-arm64-rpi-fat.img > raspiblitz-arm64-rpi-fat.img.sha256
 
       - name: Compress image
         run: |
           cd ci/arm64-rpi
-          gzip -v9 raspiblitz-arm64-rpi-fatpack.img
+          gzip -v9 raspiblitz-arm64-rpi-fat.img
 
       - name: Compute checksum of the compressed image
         run: |
           cd ci/arm64-rpi
-          sha256sum raspiblitz-arm64-rpi-fatpack.img.gz > raspiblitz-arm64-rpi-fatpack.img.gz.sha256
+          sha256sum raspiblitz-arm64-rpi-fat.img.gz > raspiblitz-arm64-rpi-fat.img.gz.sha256
 
       - name: Upload the image and checksums
         uses: actions/upload-artifact@v4
         with:
-          name: raspiblitz-arm64-rpi-fatpack-image-${{ env.BUILD_DATE }}-${{ env.BUILD_VERSION }}
+          name: raspiblitz-arm64-rpi-fat-image-${{ env.BUILD_DATE }}-${{ env.BUILD_VERSION }}
           path: |
-            ${{ github.workspace }}/ci/arm64-rpi/raspiblitz-arm64-rpi-fatpack.img.sha256
-            ${{ github.workspace }}/ci/arm64-rpi/raspiblitz-arm64-rpi-fatpack.img.gz
-            ${{ github.workspace }}/ci/arm64-rpi/raspiblitz-arm64-rpi-fatpack.img.gz.sha256
+            ${{ github.workspace }}/ci/arm64-rpi/raspiblitz-arm64-rpi-fat.img.sha256
+            ${{ github.workspace }}/ci/arm64-rpi/raspiblitz-arm64-rpi-fat.img.gz
+            ${{ github.workspace }}/ci/arm64-rpi/raspiblitz-arm64-rpi-fat.img.gz.sha256
