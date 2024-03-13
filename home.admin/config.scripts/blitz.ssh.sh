@@ -33,21 +33,22 @@ fi
 if [ "$1" = "renew" ]; then
   echo "# *** $0 $1"
 
-  # stop sshd
+  echo "# stop sshd"
   systemctl stop sshd
 
-  # remove old keys
+  echo "# remove old keys"
   rm /etc/ssh/ssh_host_*
 
-  # generate new keys
+  echo "# generate new keys"
   ssh-keygen -A
+  echo "# reconfigure"
   dpkg-reconfigure openssh-server
 
-  # clear journalctl logs
+  echo "# clear journalctl logs"
   journalctl --rotate
   journalctl --vacuum-time=1s
 
-  # restart sshd
+  echo "# restart sshd"
   systemctl start sshd
   exit 0
 fi
