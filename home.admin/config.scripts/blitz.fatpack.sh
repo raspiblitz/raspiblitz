@@ -117,10 +117,10 @@ echo "* Adding Code&Compile for WEBUI-APP: LNBITS"
 #echo "* Adding Code&Compile for WEBUI-APP: JAM"
 #/home/admin/config.scripts/bonus.jam.sh install || exit 1
 
-echo
-echo "*******************************"
-echo "* Adding Code&Compile for WEBUI-APP: BTCPAYSERVER"
-/home/admin/config.scripts/bonus.btcpayserver.sh install || exit 1
+#echo
+#echo "*******************************"
+#echo "* Adding Code&Compile for WEBUI-APP: BTCPAYSERVER"
+#/home/admin/config.scripts/bonus.btcpayserver.sh install || exit 1
 
 echo
 echo "*******************************"
