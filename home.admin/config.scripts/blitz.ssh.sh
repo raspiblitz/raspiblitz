@@ -5,7 +5,8 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ];
   echo "RaspiBlitz SSH tools"
   echo
   echo "## SSHD SERVICE #######"
-  echo "blitz.ssh.sh renew       --> renew the sshd host certs"
+  echo "blitz.ssh.sh renew       --> renew the sshd host certs & restarts sshd"
+  echo "blitz.ssh.sh init        --> just creates sshd host certs"
   echo "blitz.ssh.sh clear       --> make sure old sshd host certs are cleared"
   echo "blitz.ssh.sh checkrepair --> check sshd & repair just in case"
   echo "blitz.ssh.sh backup      --> copy ssh keys to backup (if exist)"
@@ -25,6 +26,39 @@ fi
 if [ "$EUID" -ne 0 ]; then 
   echo "error='missing sudo'"
   exit 1
+fi
+
+###################
+# INIT
+###################
+if [ "$1" = "init" ]; then
+  echo "# *** $0 $1"
+
+  echo "# generate new keys"
+  ssh-keygen -A
+  if [ $? -gt 0 ]; then
+    echo "error='ssh-keygen failed'"
+    exit 1
+  fi
+
+  echo "# reconfigure"
+  dpkg-reconfigure openssh-server
+  if [ $? -gt 0 ]; then
+    echo "error='dpkg-reconfigure failed'"
+    exit 1
+  fi
+
+  echo "# remove flag"
+  rm /etc/ssh/sshd_init_keys
+
+  echo "# restart sshd"
+  systemctl restart sshd
+  if [ $? -gt 0 ]; then
+    echo "error='sshd restart failed'"
+    exit 1
+  fi
+
+  exit 0
 fi
 
 ###################
@@ -48,8 +82,13 @@ if [ "$1" = "renew" ]; then
   journalctl --rotate
   journalctl --vacuum-time=1s
 
-  echo "# restart sshd"
-  systemctl start sshd
+  if [ "$1" = "init" ]; then
+    echo "# init mode - not starting sshd"
+    rm /etc/ssh/sshd_init_keys
+  else
+    echo "# start sshd"
+    systemctl start sshd
+  fi
   exit 0
 fi
 

@@ -40,8 +40,16 @@ echo "Running RaspiBlitz Bootstrap ${codeVersion}" >> $logFile
 date >> $logFile
 echo "***********************************************" >> $logFile
 
-# make sure SSH server is configured & running
-sudo /home/admin/config.scripts/blitz.ssh.sh checkrepair >> ${logFile}
+# check if the file /etc/ssh/sshd_init_keys exists
+if [ -f "/etc/ssh/sshd_init_keys" ]; then
+  echo "# init SSH KEYS fresh for new user" >> $logFile
+  sudo /home/admin/config.scripts/blitz.ssh.sh init >> ${logFile}
+else
+  echo "# make sure SSH server is configured & running" >> $logFile
+  sudo /home/admin/config.scripts/blitz.ssh.sh checkrepair >> ${logFile}
+fi
+
+echo "## INIT raspiblitz.info" >> $logFile
 
 # make sure /var/cache/raspiblitz/temp exists
 sudo mkdir -p /var/cache/raspiblitz/temp
