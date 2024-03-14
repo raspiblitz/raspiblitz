@@ -50,6 +50,14 @@ update_config=1
 country=US" | sudo tee /etc/wpa_supplicant/wpa_supplicant.conf  2>/dev/null
 echo "OK"
 
+# make sure that every install runs API with own secret
+# https://github.com/raspiblitz/raspiblitz/issues/4469
+echo
+echo "disable redis for initial start ..."
+sudo systemctl stop redis 2>/dev/null
+sudo systemctl disable redis 2>/dev/null
+echo "OK"
+
 echo
 echo "Will shutdown now."
 echo "Wait until Raspberry LEDs show no activity anymore."

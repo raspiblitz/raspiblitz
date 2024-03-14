@@ -40,14 +40,19 @@ echo "Running RaspiBlitz Bootstrap ${codeVersion}" >> $logFile
 date >> $logFile
 echo "***********************************************" >> $logFile
 
-# check if the file /etc/ssh/sshd_init_keys exists
+# check if the file /etc/ssh/sshd_init_keys exists --> initial boot of fresh sd card image
 if [ -f "/etc/ssh/sshd_init_keys" ]; then
   echo "# init SSH KEYS fresh for new user" >> $logFile
-  sudo /home/admin/config.scripts/blitz.ssh.sh init >> ${logFile}
+  sudo /home/admin/config.scripts/blitz.ssh.sh init >> $logFile
 else
   echo "# make sure SSH server is configured & running" >> $logFile
-  sudo /home/admin/config.scripts/blitz.ssh.sh checkrepair >> ${logFile}
+  sudo /home/admin/config.scripts/blitz.ssh.sh checkrepair >> $logFile
 fi
+
+# make sure that redis service is enabled (disabled on fresh sd card image)
+echo "# make sure redis is running" >> $logFile
+sudo systemctl enable redis-server >> $logFile
+sudo systemctl start redis-server >> $logFile
 
 echo "## prepare raspiblitz temp" >> $logFile
 
