@@ -105,9 +105,7 @@ do
 
     # detect a missing DHCP config
     if [ "${localip:0:4}" = "169." ]; then
-      echo "Missing DHCP detected ... trying emergency reboot"
-      echo "_background.sh> DHCP-ERROR > trigger reboot" >> /home/admin/raspiblitz.log
-      #/home/admin/config.scripts/blitz.shutdown.sh reboot
+      echo "Missing DHCP detected ..."
     else
       echo "DHCP OK"
     fi

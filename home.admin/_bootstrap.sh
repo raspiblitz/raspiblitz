@@ -115,20 +115,6 @@ chmod 664 ${infoFile}
 cat $infoFile >> $logFile
 
 #########################
-# Manual Provision Stop
-#########################
-
-# when a file 'stop' is on the sd card bootfs partition root - stop for manual provision
-flagExists=$(ls /boot/firmware/stop | grep -c 'stop')
-if [ "${flagExists}" == "1" ]; then
-  # remove flag
-  rm /boot/firmware/stop
-  # log info
-  echo "INFO: 'bootstrap stopped - run release after manual provison'" >> ${logFile}
-  exit 0
-fi
-
-#########################
 # INIT RaspiBlitz Cache
 #########################
 
@@ -168,6 +154,16 @@ source ${configFile} 2>/dev/null
 
 ######################################
 # CHECK SD CARD STATE
+
+# when a file 'stop' is on the sd card bootfs partition root - stop for manual provision
+flagExists=$(ls /boot/firmware/stop | grep -c 'stop')
+if [ "${flagExists}" == "1" ]; then
+  # remove flag
+  rm /boot/firmware/stop
+  # log info
+  echo "INFO: 'bootstrap stopped - run release after manual provison'" >> ${logFile}
+  exit 0
+fi
 
 # wifi config by file on sd card
 wifiFileExists=$(ls /boot/firmware/wifi | grep -c 'wifi')
