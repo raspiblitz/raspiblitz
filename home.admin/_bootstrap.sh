@@ -56,8 +56,10 @@ fi
 
 # make sure that redis service is enabled (disabled on fresh sd card image)
 echo "# make sure redis is running" >> $logFile
+systemctl status redis-server >> $logFile
 systemctl enable redis-server >> $logFile
 systemctl start redis-server >> $logFile
+systemctl status redis-server >> $logFile
 
 echo "## prepare raspiblitz temp" >> $logFile
 

@@ -13,6 +13,7 @@ configFile="/mnt/hdd/raspiblitz.conf"
 # LOGS see: sudo journalctl -f -u background
 
 echo "_background.sh STARTED"
+echo "_background.sh > started loop - sudo journalctl -f -u background" > /home/admin/raspiblitz.log
 
 # global vars
 blitzTUIHeartBeatLine=""
@@ -105,6 +106,7 @@ do
     # detect a missing DHCP config
     if [ "${localip:0:4}" = "169." ]; then
       echo "Missing DHCP detected ... trying emergency reboot"
+      echo "_background.sh> DHCP-ERROR > trigger reboot" > /home/admin/raspiblitz.log
       /home/admin/config.scripts/blitz.shutdown.sh reboot
     else
       echo "DHCP OK"
