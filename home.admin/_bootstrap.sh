@@ -46,20 +46,15 @@ echo "***********************************************" >> $logFile
 systemctl list-units --type=service --state=running >> $logFile
 
 # check if the file /etc/ssh/sshd_init_keys exists --> initial boot of fresh sd card image
+systemInitReboot=0
 if [ -f "/etc/ssh/sshd_init_keys" ]; then
   echo "# init SSH KEYS fresh for new user" >> $logFile
   /home/admin/config.scripts/blitz.ssh.sh init >> $logFile
+  systemInitReboot=1
 else
   echo "# make sure SSH server is configured & running" >> $logFile
   /home/admin/config.scripts/blitz.ssh.sh checkrepair >> $logFile
 fi
-
-# make sure that redis service is enabled (disabled on fresh sd card image)
-echo "# make sure redis is running" >> $logFile
-systemctl status redis-server >> $logFile
-systemctl enable redis-server >> $logFile
-systemctl start redis-server >> $logFile
-systemctl status redis-server >> $logFile
 
 echo "## prepare raspiblitz temp" >> $logFile
 
@@ -122,8 +117,32 @@ chmod 664 ${infoFile}
 cat $infoFile >> $logFile
 
 #########################
+# Manual Provision Stop
+#########################
+
+# when a file 'stop' is on the sd card bootfs partition root - stop for manual provision
+flagExists=$(ls /boot/firmware/stop | grep -c 'stop')
+if [ "${flagExists}" == "1" ]; then
+  # remove flag
+  rm /boot/firmware/stop
+  # log info
+  echo "INFO: 'bootstrap stopped - run release after manual provison'" >> ${logFile}
+  exit 0
+fi
+
+#########################
 # INIT RaspiBlitz Cache
 #########################
+
+# make sure that redis service is enabled (disabled on fresh sd card image)
+if [ ${systemInitReboot} -eq 1 ]; then
+  echo "# make sure redis is running" >> $logFile
+  sleep 6
+  systemctl status redis-server >> $logFile
+  systemctl enable redis-server >> $logFile
+  systemctl start redis-server >> $logFile
+  systemctl status redis-server >> $logFile
+fi
 
 echo "## INIT RaspiBlitz Cache ... wait background.scan.service to finish first scan loop" >> $logFile
 systemscan_runtime=""
@@ -149,19 +168,6 @@ source ${configFile} 2>/dev/null
 
 ######################################
 # CHECK SD CARD STATE
-
-# when a file 'stop' is on the sd card bootfs partition root - stop for manual provision
-flagExists=$(ls /boot/firmware/stop | grep -c 'stop')
-if [ "${flagExists}" == "1" ]; then
-  # remove flag
-  rm /boot/firmware/stop
-  # set state info
-  /home/admin/_cache.sh set state "stop"
-  /home/admin/_cache.sh set message "stopped for manual provision"
-  # log info
-  echo "INFO: 'bootstrap stopped - run release after manual provison'" >> ${logFile}
-  exit 0
-fi
 
 # wifi config by file on sd card
 wifiFileExists=$(ls /boot/firmware/wifi | grep -c 'wifi')
