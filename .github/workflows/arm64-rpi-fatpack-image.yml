@@ -75,9 +75,9 @@ jobs:
 
       - name: Run the build script
         run: |
-          echo "Using the variables: --pack base --github_user ${{steps.set_values.outputs.GITHUB_USER}} --branch ${{env.BRANCH_NAME}} --image_size 16G"
+          echo "Using the variables: --pack base --github_user ${{steps.set_values.outputs.GITHUB_USER}} --branch ${{env.BRANCH_NAME}} --image_size 18G"
           cd ci/arm64-rpi
-          bash packer.build.arm64-rpi.sh --pack base --github_user ${{steps.set_values.outputs.GITHUB_USER}} --branch ${{env.BRANCH_NAME}} --image_size 16G
+          bash packer.build.arm64-rpi.sh --pack base --github_user ${{steps.set_values.outputs.GITHUB_USER}} --branch ${{env.BRANCH_NAME}} --image_size 18G
 
       - name: Calculate the checksum of the raw image
         run: |
@@ -99,8 +99,8 @@ jobs:
       - name: Maximize build space
         uses: easimon/maximize-build-space@master
         with:
-          root-reserve-mb: 32000
-          temp-reserve-mb: 32000
+          root-reserve-mb: 34000
+          temp-reserve-mb: 34000
           remove-dotnet: 'true'
           remove-android: 'true'
           remove-haskell: 'true'
