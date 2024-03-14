@@ -13,7 +13,7 @@ configFile="/mnt/hdd/raspiblitz.conf"
 # LOGS see: sudo journalctl -f -u background
 
 echo "_background.sh STARTED"
-echo "_background.sh > started loop - sudo journalctl -f -u background" > /home/admin/raspiblitz.log
+echo "INFO: _background.sh loop started - sudo journalctl -f -u background" >> /home/admin/raspiblitz.log
 
 # global vars
 blitzTUIHeartBeatLine=""
