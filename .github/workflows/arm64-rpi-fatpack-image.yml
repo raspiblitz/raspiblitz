@@ -99,8 +99,8 @@ jobs:
       - name: Maximize build space
         uses: easimon/maximize-build-space@master
         with:
-          root-reserve-mb: 34000
-          temp-reserve-mb: 34000
+          root-reserve-mb: 36000
+          temp-reserve-mb: 36000
           remove-dotnet: 'true'
           remove-android: 'true'
           remove-haskell: 'true'
@@ -110,7 +110,7 @@ jobs:
       - name: Display free space
         run: |
           df -h
-          du -hd1
+          du -hd1 /
 
       - name: Checkout code
         uses: actions/checkout@v4
@@ -159,6 +159,11 @@ jobs:
         run: |
           cd ci/arm64-rpi
           sha256sum raspiblitz-arm64-rpi-fat.img > raspiblitz-arm64-rpi-fat.img.sha256
+
+      - name: Display free space
+        run: |
+          df -h
+          du -hd1 /
 
       - name: Compress image
         run: |
