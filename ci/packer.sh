@@ -126,15 +126,15 @@ echo "# Date: ${dateString}"
 if [ "${ARCH}" == "arm" ] && [ "${TYPE}" == "min" ]; then
   PACKERTARGET="arm64-rpi-lean-image"
   PACKERBUILDPATH="./raspiblitz/ci/arm64-rpi/packer-builder-arm/raspiblitz-arm64-rpi-lean.img"
-  PACKERFINALFILE="raspiblitz-min-${codeVersion}-${dateString}.img"
+  PACKERFINALFILE="raspiblitz-min-v${codeVersion}-${dateString}.img"
 elif [ "${ARCH}" == "arm" ] && [ "${TYPE}" == "fat" ]; then
   PACKERTARGET="arm64-rpi-fatpack-image" 
   PACKERBUILDPATH="./raspiblitz/ci/arm64-rpi/packer-builder-arm/TODO" #TODO
-  PACKERFINALFILE="raspiblitz-fat-${codeVersion}-${dateString}.img"
+  PACKERFINALFILE="raspiblitz-fat-v${codeVersion}-${dateString}.img"
 elif [ "${ARCH}" == "x86" ] && [ "${TYPE}" == "min" ]; then
   PACKERTARGET="amd64-lean-server-legacyboot-image"
   PACKERBUILDPATH="./raspiblitz/ci/amd64/builds/raspiblitz-amd64-debian-lean-qemu/raspiblitz-amd64-debian-lean.qcow2"
-  PACKERFINALFILE="raspiblitz-amd64-min-${codeVersion}-${dateString}.qcow2"
+  PACKERFINALFILE="raspiblitz-amd64-min-v${codeVersion}-${dateString}.qcow2"
 else
   echo "error='$ARCH-$TYPE not supported'"
   exit 1
