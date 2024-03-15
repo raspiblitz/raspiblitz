@@ -58,8 +58,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   if [ "$2" == "DEFAULT" ]; then
     echo "# WEBUI: getting default user/repo from build_sdcard.sh"
-    sudo chmod +x /home/admin/raspiblitz/build_sdcard.sh 2>/dev/null
-    source <(sudo /home/admin//raspiblitz/build_sdcard.sh -EXPORT)
+    # copy build_sdcard.sh out of raspiblitz diretcory to not create "changes" in git
+    sudo cp /home/admin/raspiblitz/build_sdcard.sh /home/admin/build_sdcard.sh
+    sudo chmod +x /home/admin/build_sdcard.sh 2>/dev/null
+    source <(sudo /home/admin/build_sdcard.sh -EXPORT)
     GITHUB_USER="${defaultWEBUIuser}"
     GITHUB_REPO="${defaultWEBUIrepo}"
     GITHUB_BRANCH="release/${githubBranch}"
