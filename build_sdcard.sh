@@ -56,12 +56,11 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 if [ "$1" = "-EXPORT" ] || [ "$1" = "EXPORT" ]; then
-  cd /home/admin/raspiblitz 2>/dev/null
-  activeBranch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+  activeBranch=$(git -C /home/admin/raspiblitz rev-parse --abbrev-ref HEAD 2>/dev/null)
+  echo "activeBranch='${activeBranch}'"
   if [ "${activeBranch}" == "" ]; then
     activeBranch="${defaultBranch}"
   fi
-  echo "activeBranch='${activeBranch}'"
   echo "githubUser='${defaultRepo}'"
   echo "githubBranch='${activeBranch}'"
   echo "defaultAPIuser='${defaultAPIuser}'"
