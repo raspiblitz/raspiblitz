@@ -2,6 +2,9 @@
 
 ### Steps to create RaspberryPi images with Packer?
 
+* Make sure you have:
+  * Correct version-string in: `_version.info`
+  * Correct version-branch as fallback in `build_sdcard.sh`
 * Start [`Debian LIVE`](https://cdimage.debian.org/debian-cd/current-live/amd64/iso-hybrid/debian-live-12.4.0-amd64-cinnamon.iso) from USB stick
   * On USB boot be sure to start the "LIVE_SYSTEM" image
   * Set KeyboardLang, "Screensaver" & "Power Management"

@@ -170,7 +170,7 @@ fi
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   if [ "$2" == "DEFAULT" ]; then
-    echo "# getting default user/repo from build_sdcard.sh"
+    echo "# API: getting default user/repo from build_sdcard.sh"
     sudo cp /home/admin/raspiblitz/build_sdcard.sh /home/admin/build_sdcard.sh
     sudo chmod +x /home/admin/build_sdcard.sh 2>/dev/null
     source <(sudo /home/admin/build_sdcard.sh -EXPORT)

@@ -11,7 +11,7 @@
 ##########################################################################
 
 defaultRepo="raspiblitz" #user that hosts a `raspiblitz` repo
-defaultBranch="v1.10"
+defaultBranch="v1.11"
 
 defaultAPIuser="fusion44"
 defaultAPIrepo="blitz_api"
