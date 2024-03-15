@@ -10,8 +10,8 @@
 # setup fresh SD card with image above - login via SSH and run this script:
 ##########################################################################
 
-defaultRepo="raspiblitz" #user that hosts a `raspiblitz` repo
-defaultBranch="v1.10"
+defaultRepo="raspiblitz" # user that hosts a `raspiblitz` repo
+defaultBranch="v1.11" # latest version branch
 
 defaultAPIuser="fusion44"
 defaultAPIrepo="blitz_api"
@@ -56,8 +56,8 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 if [ "$1" = "-EXPORT" ] || [ "$1" = "EXPORT" ]; then
-  cd /home/admin/raspiblitz 2>/dev/null
-  activeBranch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+  activeBranch=$(git -C /home/admin/raspiblitz branch --show-current 2>/dev/null)
+  echo "activeBranch='${activeBranch}'"
   if [ "${activeBranch}" == "" ]; then
     activeBranch="${defaultBranch}"
   fi
