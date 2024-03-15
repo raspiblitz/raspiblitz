@@ -80,17 +80,17 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "# FAIL: No GITHUB_USER provided"
     exit 1
   fi
-  echo "GITHUB_REPO(${GITHUB_REPO})"
+  echo "# GITHUB_REPO(${GITHUB_REPO})"
   if [ "${GITHUB_REPO}" == "" ]; then
     echo "# FAIL: No GITHUB_REPO provided"
     exit 1
   fi
-  echo "GITHUB_BRANCH(${GITHUB_BRANCH})"
+  echo "# GITHUB_BRANCH(${GITHUB_BRANCH})"
   if [ "${GITHUB_BRANCH}" == "" ]; then
     echo "# FAIL: No GITHUB_BRANCH provided"
     exit 1
   fi
-  echo "GITHUB_COMMITORTAG(${GITHUB_COMMITORTAG})"
+  echo "# GITHUB_COMMITORTAG(${GITHUB_COMMITORTAG})"
   if [ "${GITHUB_COMMITORTAG}" == "" ]; then
     echo "# INFO: No GITHUB_COMMITORTAG provided .. will use latest code on branch"
   fi
