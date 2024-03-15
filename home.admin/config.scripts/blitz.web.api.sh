@@ -176,7 +176,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     source <(sudo /home/admin/build_sdcard.sh -EXPORT)
     GITHUB_USER="${defaultAPIuser}"
     GITHUB_REPO="${defaultAPIrepo}"
-    GITHUB_BRANCH="${githubBranch}"
+    GITHUB_BRANCH="blitz-${githubBranch}"
     GITHUB_COMMITORTAG=""
   else
     # get parameters
