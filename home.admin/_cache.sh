@@ -112,6 +112,7 @@ elif [ "$1" = "keyvalue" ] && [ "$2" = "on" ]; then
 
   # edit config: dont save to disk
   sudo sed -i "/^save .*/d" /etc/redis/redis.conf
+  sudo sed -i 's/^stop-writes-on-bgsave-error yes/stop-writes-on-bgsave-error no/' /etc/redis/redis.conf
 
   # restart with new config
   if ! ischroot; then sudo systemctl restart redis-server; fi

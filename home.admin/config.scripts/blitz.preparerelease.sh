@@ -25,6 +25,7 @@ echo
 echo "deleting SSH Pub keys ..."
 echo "they will get recreated on fresh bootup, by _bootstrap.sh service"
 sudo rm /etc/ssh/ssh_host_*
+sudo touch /etc/ssh/sshd_init_keys
 echo "OK"
 
 # https://github.com/rootzoll/raspiblitz/issues/1068#issuecomment-599267503
@@ -47,6 +48,14 @@ sudo rm /boot/wpa_supplicant.conf 2>/dev/null
 echo "ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
 update_config=1
 country=US" | sudo tee /etc/wpa_supplicant/wpa_supplicant.conf  2>/dev/null
+echo "OK"
+
+# make sure that every install runs API with own secret
+# https://github.com/raspiblitz/raspiblitz/issues/4469
+echo
+echo "disable redis for initial start ..."
+sudo systemctl stop redis 2>/dev/null
+sudo systemctl disable redis 2>/dev/null
 echo "OK"
 
 echo
