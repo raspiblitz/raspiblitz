@@ -3,6 +3,8 @@
 # This script runs on every start called by boostrap.service
 # see logs with --> tail -n 100 /home/admin/raspiblitz.log
 
+# NOTE: this boostrap script runs as root user (bootstrap.service) - so no sudo needed
+
 ################################
 # BASIC SETTINGS
 ################################
@@ -28,24 +30,35 @@ infoFile="/home/admin/raspiblitz.info"
 setupFile="/var/cache/raspiblitz/temp/raspiblitz.setup"
 
 # Backup last log file if available
-sudo cp ${logFile} /home/admin/raspiblitz.last.log 2>/dev/null
+cp ${logFile} /home/admin/raspiblitz.last.log 2>/dev/null
 
 # Init boostrap log file
 echo "Writing logs to: ${logFile}"
 echo "" > $logFile
-sudo chmod 640 ${logFile}
-sudo chown root:sudo ${logFile}
+chmod 640 ${logFile}
+chown root:sudo ${logFile}
 echo "***********************************************" >> $logFile
 echo "Running RaspiBlitz Bootstrap ${codeVersion}" >> $logFile
 date >> $logFile
 echo "***********************************************" >> $logFile
 
-# make sure SSH server is configured & running
-sudo /home/admin/config.scripts/blitz.ssh.sh checkrepair >> ${logFile}
+# list all running systemd services for future debug
+systemctl list-units --type=service --state=running >> $logFile
+
+# check if the file /etc/ssh/sshd_init_keys exists --> initial boot of fresh sd card image
+if [ -f "/etc/ssh/sshd_init_keys" ]; then
+  echo "# init SSH KEYS fresh for new user" >> $logFile
+  /home/admin/config.scripts/blitz.ssh.sh init >> $logFile
+else
+  echo "# make sure SSH server is configured & running" >> $logFile
+  /home/admin/config.scripts/blitz.ssh.sh checkrepair >> $logFile
+fi
+
+echo "## prepare raspiblitz temp" >> $logFile
 
 # make sure /var/cache/raspiblitz/temp exists
-sudo mkdir -p /var/cache/raspiblitz/temp
-sudo chmod 777 /var/cache/raspiblitz/temp
+mkdir -p /var/cache/raspiblitz/temp
+chmod 777 /var/cache/raspiblitz/temp
 
 ################################
 # INIT raspiblitz.info
@@ -96,7 +109,7 @@ echo "ln_cl_mainnet_sync_initial_done=${ln_cl_mainnet_sync_initial_done}" >> $in
 echo "ln_cl_testnet_sync_initial_done=${ln_cl_testnet_sync_initial_done}" >> $infoFile
 echo "ln_cl_signet_sync_initial_done=${ln_cl_signet_sync_initial_done}" >> $infoFile
 
-sudo chmod 664 ${infoFile}
+chmod 664 ${infoFile}
 
 # write content of raspiblitz.info to logs
 cat $infoFile >> $logFile
@@ -104,6 +117,18 @@ cat $infoFile >> $logFile
 #########################
 # INIT RaspiBlitz Cache
 #########################
+
+# make sure that redis service is enabled (disabled on fresh sd card image)
+redisEnabled=$(systemctl is-enabled redis-server | grep -c "enabled")
+echo "## redisEnabled(${redisEnabled})" >> $logFile
+if [ ${redisEnabled} -eq 0 ]; then
+  echo "# make sure redis is running" >> $logFile
+  sleep 6
+  systemctl status redis-server >> $logFile
+  systemctl enable redis-server >> $logFile
+  systemctl start redis-server >> $logFile
+  systemctl status redis-server >> $logFile
+fi
 
 echo "## INIT RaspiBlitz Cache ... wait background.scan.service to finish first scan loop" >> $logFile
 systemscan_runtime=""
@@ -131,23 +156,18 @@ source ${configFile} 2>/dev/null
 # CHECK SD CARD STATE
 
 # when a file 'stop' is on the sd card bootfs partition root - stop for manual provision
-flagExists=$(sudo ls /boot/firmware/stop | grep -c 'stop')
+flagExists=$(ls /boot/firmware/stop | grep -c 'stop')
 if [ "${flagExists}" == "1" ]; then
   # remove flag
-  sudo rm /boot/firmware/stop
-  # set state info
-  /home/admin/_cache.sh set state "stop"
-  /home/admin/_cache.sh set message "stopped for manual provision"
+  rm /boot/firmware/stop
   # log info
   echo "INFO: 'bootstrap stopped - run release after manual provison'" >> ${logFile}
   exit 0
 fi
 
-
-
 # wifi config by file on sd card
-wifiFileExists=$(sudo ls /boot/firmware/wifi | grep -c 'wifi')
-wpaFileExists=$(sudo ls /boot/firmware/wpa_supplicant.conf | grep -c 'wpa_supplicant.conf')
+wifiFileExists=$(ls /boot/firmware/wifi | grep -c 'wifi')
+wpaFileExists=$(ls /boot/firmware/wpa_supplicant.conf | grep -c 'wpa_supplicant.conf')
 if [ "${wifiFileExists}" == "1" ] || [ "${wpaFileExists}" == "1" ]; then
 
   # set info
@@ -159,8 +179,8 @@ if [ "${wifiFileExists}" == "1" ] || [ "${wpaFileExists}" == "1" ]; then
   # get second line as string from wifi file (PASSWORD OF WIFI)
   if [ "${wifiFileExists}" == "1" ]; then
     echo "Getting data from file: /boot/firmware/wifi" >> ${logFile}
-    ssid=$(sudo sed -n '1p' /boot/firmware/wifi | tr -d '[:space:]')
-    password=$(sudo sed -n '2p' /boot/firmware/wifi | tr -d '[:space:]')
+    ssid=$(sed -n '1p' /boot/firmware/wifi | tr -d '[:space:]')
+    password=$(sed -n '2p' /boot/firmware/wifi | tr -d '[:space:]')
   fi
 
   # File: wpa_supplicant.conf (legacy way to set wifi)
@@ -182,22 +202,22 @@ if [ "${wifiFileExists}" == "1" ] || [ "${wpaFileExists}" == "1" ]; then
     /home/admin/_cache.sh set state "errorWIFI"
     /home/admin/_cache.sh set message "${err}"
     sleep 60
-    sudo shutdown now
+    shutdown now
     exit 1
   fi
 
   # remove file
   echo "Setting Wifi worked - removing file" >> ${logFile}
-  sudo rm /boot/firmware/wifi 2>/dev/null
-  sudo rm /boot/firmware/wpa_supplicant.conf 2>/dev/null
+  rm /boot/firmware/wifi 2>/dev/null
+  rm /boot/firmware/wpa_supplicant.conf 2>/dev/null
 else
   echo "No Wifi config by file on sd card." >> ${logFile}
 fi
 
 # when the provision did not ran thru without error (ask user for fresh sd card)
-provisionFlagExists=$(sudo ls /home/admin/provision.flag | grep -c 'provision.flag')
+provisionFlagExists=$(ls /home/admin/provision.flag | grep -c 'provision.flag')
 if [ "${provisionFlagExists}" == "1" ]; then
-  sudo systemctl stop ${network}d 2>/dev/null
+  systemctl stop ${network}d 2>/dev/null
   /home/admin/_cache.sh set state "inconsistentsystem"
   /home/admin/_cache.sh set message "provision did not ran thru"
   echo "FAIL: 'provision did not ran thru' - need fresh sd card!" >> ${logFile}
@@ -224,15 +244,15 @@ sleep 5
 # Emergency cleaning logs when over 1GB (to prevent SD card filling up)
 # see https://github.com/rootzoll/raspiblitz/issues/418#issuecomment-472180944
 echo "*** Checking Log Size ***"
-logsMegaByte=$(sudo du -c -m /var/log | grep "total" | awk '{print $1;}')
+logsMegaByte=$(du -c -m /var/log | grep "total" | awk '{print $1;}')
 if [ ${logsMegaByte} -gt 1000 ]; then
   echo "WARN # Logs /var/log in are bigger then 1GB" >> $logFile
   # dont delete directories - can make services crash
-  sudo rm /var/log/*
-  sudo service rsyslog restart
+  rm /var/log/*
+  service rsyslog restart
   /home/admin/_cache.sh set message "WARNING: /var/log/ >1GB"
   echo "WARN # Logs in /var/log in were bigger then 1GB and got emergency delete to prevent fillup." >> $logFile
-  sudo ls -la /var/log >> $logFile
+  ls -la /var/log >> $logFile
   echo "If you see this in the logs please report to the GitHub issues, so LOG config needs to be optimized." >> $logFile
   sleep 10
 else
@@ -241,19 +261,19 @@ fi
 echo ""
 
 # get the state of data drive
-source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
+source <(/home/admin/config.scripts/blitz.datadrive.sh status)
 
 ################################
 # WAIT LOOP: HDD CONNECTED
 ################################
 
 echo "Waiting for HDD/SSD ..." >> $logFile
-sudo ls -la /etc/ssh >> $logFile 
+ls -la /etc/ssh >> $logFile 
 until [ ${isMounted} -eq 1 ] || [ ${#hddCandidate} -gt 0 ]
 do
 
   # recheck HDD/SSD
-  source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
+  source <(/home/admin/config.scripts/blitz.datadrive.sh status)
   echo "isMounted: $isMounted" >> $logFile
   echo "hddCandidate: $hddCandidate" >> $logFile
 
@@ -288,13 +308,13 @@ systemInitReboot=0
 # the sd card - switch to hdmi
 ################################
 
-forceHDMIoutput=$(sudo ls /boot/firmware/hdmi* 2>/dev/null | grep -c hdmi)
+forceHDMIoutput=$(ls /boot/firmware/hdmi* 2>/dev/null | grep -c hdmi)
 if [ ${forceHDMIoutput} -eq 1 ]; then
   # delete that file (to prevent loop)
-  sudo rm /boot/hdmi*
+  rm /boot/hdmi*
   # switch to HDMI what will trigger reboot
   echo "HDMI switch found ... activating HDMI display output & reboot" >> $logFile
-  sudo /home/admin/config.scripts/blitz.display.sh set-display hdmi >> $logFile
+  /home/admin/config.scripts/blitz.display.sh set-display hdmi >> $logFile
   systemInitReboot=1
   /home/admin/_cache.sh set message "HDMI"
 else
@@ -306,11 +326,11 @@ fi
 # extend sd card to maximum capacity
 ################################
 
-source <(sudo /home/admin/config.scripts/blitz.bootdrive.sh status)
+source <(/home/admin/config.scripts/blitz.bootdrive.sh status)
 if [ "${needsExpansion}" == "1" ] && [ "${fsexpanded}" == "0" ]; then
   echo "FSEXPAND needed ... starting process" >> $logFile
-  sudo /home/admin/config.scripts/blitz.bootdrive.sh status >> $logFile
-  sudo /home/admin/config.scripts/blitz.bootdrive.sh fsexpand >> $logFile
+  /home/admin/config.scripts/blitz.bootdrive.sh status >> $logFile
+  /home/admin/config.scripts/blitz.bootdrive.sh fsexpand >> $logFile
   systemInitReboot=1
   /home/admin/_cache.sh set message "FSEXPAND"
 elif [ "${tooSmall}" == "1" ]; then
@@ -320,7 +340,7 @@ elif [ "${tooSmall}" == "1" ]; then
   /home/admin/_cache.sh set state "sdtoosmall"
   echo "System stopped. Please cut power." >> $logFile
   sleep 6000
-  sudo shutdown -r now
+  shutdown -r now
   slepp 100
   exit 1
 else
@@ -364,7 +384,7 @@ fi
 # the sd card - delete old ssh data
 ################################
 
-sshReset=$(sudo ls /boot/firmware/ssh.reset* 2>/dev/null | grep -c reset)
+sshReset=$(ls /boot/firmware/ssh.reset* 2>/dev/null | grep -c reset)
 if [ ${sshReset} -eq 1 ]; then
   # delete that file (to prevent loop)
   rm /boot/firmware/ssh.reset* >> $logFile
@@ -412,7 +432,7 @@ fi
 # UASP FIX
 ################################
 /home/admin/_cache.sh set message "checking HDD"
-source <(sudo /home/admin/config.scripts/blitz.datadrive.sh uasp-fix)
+source <(/home/admin/config.scripts/blitz.datadrive.sh uasp-fix)
 if [ "${neededReboot}" == "1" ]; then
   echo "UASP FIX applied ... reboot needed." >> $logFile
   systemInitReboot=1
@@ -425,11 +445,13 @@ fi
 # from actions above
 
 if [ "${systemInitReboot}" == "1" ]; then
+  echo "Stopping Redis server" >> $logFile
+  systemctl stop redis
   echo "Reboot" >> $logFile
-  sudo cp ${logFile} /home/admin/raspiblitz.systeminit.log
+  cp ${logFile} /home/admin/raspiblitz.systeminit.log
   /home/admin/_cache.sh set state "reboot"
   sleep 8
-  sudo shutdown -r now
+  shutdown -r now
   sleep 100
   exit 0
 fi
@@ -504,7 +526,7 @@ fi
 /home/admin/_cache.sh set message "please wait"
 
 # get fresh info about data drive to continue
-source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
+source <(/home/admin/config.scripts/blitz.datadrive.sh status)
 
 echo "isMounted: $isMounted" >> $logFile
 
@@ -590,11 +612,11 @@ if [ ${isMounted} -eq 0 ]; then
   do
 
     # get fresh info about data drive (in case the hdd gets disconnected)
-    source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
+    source <(/home/admin/config.scripts/blitz.datadrive.sh status)
     if [ "${hddCandidate}" == "" ]; then
       /home/admin/config.scripts/blitz.error.sh _bootstrap.sh "lost-hdd" "Lost HDD connection .. triggering reboot." "happened during WAIT LOOP: USER SETUP/UPDATE/MIGRATION" ${logFile}
       sleep 8
-      sudo shutdown -r now
+      shutdown -r now
       sleep 100
       exit 0
     fi
@@ -605,7 +627,7 @@ if [ ${isMounted} -eq 0 ]; then
     if [ "${localip}" == "" ]; then
       sed -i "s/^state=.*/state=errorNetwork/g" ${infoFile}
       sleep 8
-      sudo shutdown now
+      shutdown now
       sleep 100
       exit 0
     fi
@@ -630,7 +652,7 @@ if [ ${isMounted} -eq 0 ]; then
   echo "the provision process was started but did not finish yet" > /home/admin/provision.flag
 
   # get fresh data from setup file & data drive
-  source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
+  source <(/home/admin/config.scripts/blitz.datadrive.sh status)
   source ${setupFile}
 
   # special setup tasks (triggered by api/webui thru setupfile)
@@ -641,7 +663,7 @@ if [ ${isMounted} -eq 0 ]; then
       
     # check if there is a flag set on sd card boot section to format as btrfs (experimental)
     filesystem="ext4"
-    flagBTRFS=$(sudo ls /boot/firmware/btrfs* 2>/dev/null | grep -c btrfs)
+    flagBTRFS=$(ls /boot/firmware/btrfs* 2>/dev/null | grep -c btrfs)
     if [ "${flagBTRFS}" != "0" ]; then
       echo "Found BTRFS flag ---> formatting with experimental BTRFS filesystem" >> ${logFile}
       filesystem="btrfs"
@@ -651,7 +673,7 @@ if [ ${isMounted} -eq 0 ]; then
     error=""
     /home/admin/_cache.sh set state "formathdd"
     echo "Running Format: filesystem(${filesystem}) hddCandidate(${hddCandidate})" >> ${logFile}
-    source <(sudo /home/admin/config.scripts/blitz.datadrive.sh format ${filesystem} ${hddCandidate})
+    source <(/home/admin/config.scripts/blitz.datadrive.sh format ${filesystem} ${hddCandidate})
     if [ "${error}" != "" ]; then
       echo "FAIL ON FORMATTING THE DRIVE:" >> ${logFile}
       echo "${error}" >> ${logFile}
@@ -671,7 +693,7 @@ if [ ${isMounted} -eq 0 ]; then
     if [ "${hddGotMigrationData}" != "" ]; then
         clear
         echo "Migrating Blockchain of ${hddGotMigrationData}'" >> ${logFile}
-        source <(sudo /home/admin/config.scripts/blitz.migration.sh migration-${hddGotMigrationData})
+        source <(/home/admin/config.scripts/blitz.migration.sh migration-${hddGotMigrationData})
         if [ "${error}" != "0" ]; then
           echo "MIGRATION OF BLOCKHAIN FAILED: ${err}" >> ${logFile}
           echo "Format data disk on laptop & recover funds with fresh sd card using seed words + static channel backup." >> ${logFile}
@@ -683,8 +705,8 @@ if [ ${isMounted} -eq 0 ]; then
 
     # delete everything but blockchain
     echo "Deleting everything on HDD/SSD while keeping blockchain ..." >> ${logFile}
-    sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount 1>/dev/null 2>/dev/null
-    sudo /home/admin/config.scripts/blitz.datadrive.sh clean all -keepblockchain >> ${logFile}
+    /home/admin/config.scripts/blitz.datadrive.sh tempmount 1>/dev/null 2>/dev/null
+    /home/admin/config.scripts/blitz.datadrive.sh clean all -keepblockchain >> ${logFile}
     if [ "${error}" != "" ]; then
        echo "CLEANING HDD FAILED:" >> ${logFile}
       echo "${error}" >> ${logFile}
@@ -693,7 +715,7 @@ if [ ${isMounted} -eq 0 ]; then
       /home/admin/_cache.sh set message "Fail Cleaning HDD"
       exit 1
     fi
-    sudo /home/admin/config.scripts/blitz.datadrive.sh unmount >> ${logFile}
+    /home/admin/config.scripts/blitz.datadrive.sh unmount >> ${logFile}
     /home/admin/_cache.sh set setupPhase "setup"
 
     sleep 2
@@ -718,10 +740,10 @@ if [ ${isMounted} -eq 0 ]; then
     # will first be created and in cache drive
     # and some lines below copied to hdd when mounted
     TEMPCONFIGFILE="/var/cache/raspiblitz/temp/raspiblitz.conf"
-    sudo rm $TEMPCONFIGFILE 2>/dev/null
-    sudo touch $TEMPCONFIGFILE
-    sudo chown admin:admin $TEMPCONFIGFILE
-    sudo chmod 777 $TEMPCONFIGFILE
+    rm $TEMPCONFIGFILE 2>/dev/null
+    touch $TEMPCONFIGFILE
+    chown admin:admin $TEMPCONFIGFILE
+    chmod 777 $TEMPCONFIGFILE
     echo "# RASPIBLITZ CONFIG FILE" > $TEMPCONFIGFILE
     echo "raspiBlitzVersion='${codeVersion}'" >> $TEMPCONFIGFILE
     echo "lcdrotate='1'" >> $TEMPCONFIGFILE
@@ -735,7 +757,7 @@ if [ ${isMounted} -eq 0 ]; then
   # make sure HDD is mounted (could be freshly formatted by user on last loop)
   source <(/home/admin/config.scripts/blitz.datadrive.sh status)
   echo "Temp mounting (2) data drive (hddFormat='${hddFormat}')" >> ${logFile}
-  source <(sudo /home/admin/config.scripts/blitz.datadrive.sh tempmount)
+  source <(/home/admin/config.scripts/blitz.datadrive.sh tempmount)
   echo "Temp mounting (2) result: ${isMounted}" >> ${logFile}
 
   # check that HDD was temp mounted
@@ -747,16 +769,16 @@ if [ ${isMounted} -eq 0 ]; then
 
   # make sure all links between directories/drives are correct
   echo "Refreshing links between directories/drives .." >> ${logFile}
-  sudo /home/admin/config.scripts/blitz.datadrive.sh link
+  /home/admin/config.scripts/blitz.datadrive.sh link
 
   # copy over the raspiblitz.conf created from setup to HDD
   configExists=$(ls /mnt/hdd/raspiblitz.conf 2>/dev/null | grep -c "raspiblitz.conf")
   if [ "${configExists}" != "1" ]; then
-    sudo cp /var/cache/raspiblitz/temp/raspiblitz.conf ${configFile}
+    cp /var/cache/raspiblitz/temp/raspiblitz.conf ${configFile}
   fi
 
   # enable tor service
-  sudo /home/admin/config.scripts/tor.install.sh enable >> ${logFile}
+  /home/admin/config.scripts/tor.install.sh enable >> ${logFile}
 
   # kick-off provision process
   /home/admin/_cache.sh set state "provision"
@@ -824,7 +846,7 @@ if [ ${isMounted} -eq 0 ]; then
   fi
 
   echo "# setting PASSWORD A" >> ${logFile}
-  sudo /home/admin/config.scripts/blitz.passwords.sh set a "${passwordA}" >> ${logFile}
+  /home/admin/config.scripts/blitz.passwords.sh set a "${passwordA}" >> ${logFile}
 
   # Bitcoin Mainnet
   if [ "${mainnet}" == "on" ] || [ "${chain}" == "main" ]; then
@@ -857,7 +879,7 @@ if [ ${isMounted} -eq 0 ]; then
     /home/admin/_cache.sh set message "Provision Setup"
     /home/admin/_provision.setup.sh
     errorState=$?
-    sudo cat /home/admin/raspiblitz.provision-setup.log
+    cat /home/admin/raspiblitz.provision-setup.log
     if [ "$errorState" != "0" ]; then
       # only trigger an error message if the script hasnt itself triggered an error message already
       source <(/home/admin/_cache.sh get state)
@@ -983,7 +1005,7 @@ else
 
   # limit debug.log to 10MB on start - see #3872
   if [ $(grep -c "shrinkdebugfile=" < /mnt/hdd/bitcoin/bitcoin.conf) -eq 0 ];then
-    echo "shrinkdebugfile=1" | sudo tee -a /mnt/hdd/bitcoin/bitcoin.conf
+    echo "shrinkdebugfile=1" | tee -a /mnt/hdd/bitcoin/bitcoin.conf
   fi
   # /mnt/hdd/lnd/logs/bitcoin/mainnet/lnd.log
   rm /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2>/dev/null
@@ -1048,7 +1070,7 @@ fi
 # CLEAN HDD TEMP
 #####################################
 echo "CLEANING TEMP DRIVE/FOLDER" >> $logFile
-source <(sudo /home/admin/config.scripts/blitz.datadrive.sh clean temp)
+source <(/home/admin/config.scripts/blitz.datadrive.sh clean temp)
 if [ ${#error} -gt 0 ]; then
   echo "FAIL: ${error}" >> $logFile
 else
@@ -1082,7 +1104,7 @@ fi
 
 if [ -d "/mnt/hdd/app-data/subscriptions" ]; then
   echo "OK: subscription data directory exists"
-  sudo chown admin:admin /mnt/hdd/app-data/subscriptions
+  chown admin:admin /mnt/hdd/app-data/subscriptions
 else
   echo "CREATE: subscription data directory"
   mkdir /mnt/hdd/app-data/subscriptions
@@ -1090,7 +1112,7 @@ else
 fi
 
 # make sure that bitcoin service is active
-sudo systemctl enable ${network}d
+systemctl enable ${network}d
 
 # make sure setup/provision is marked as done
 /home/admin/_cache.sh set setupPhase "done"

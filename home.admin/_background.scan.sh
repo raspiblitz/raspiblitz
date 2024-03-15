@@ -128,6 +128,9 @@ fi
 # flag that init was done (will be checked on each loop)
 /home/admin/_cache.sh set system_init_time "$(date +%s)"
 
+# add info about start to raspiblitz.log
+echo "INFO: _bootstrap.scan.sh loop started > sudo journalctl -f -u background.scan" >> /home/admin/raspiblitz.log
+
 while [ 1 ]
 do
 
@@ -140,6 +143,7 @@ do
   source <(/home/admin/_cache.sh get system_init_time)
   if [ "${system_init_time}" == "" ]; then
     echo "FAIL: CACHE IS MISSING INIT DATA ... exiting to let systemd restart"
+    echo "INFO: _bootstrap.scan.sh -> cache not running - exiting" >> /home/admin/raspiblitz.log
     exit 1
   fi
 
