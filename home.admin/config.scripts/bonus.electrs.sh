@@ -264,14 +264,12 @@ fi
 echo "# Making sure services are not running"
 sudo systemctl stop electrs 2>/dev/null
 
-# uninstall
+# install
 if [ "$1" = "install" ]; then
   echo "# INSTALL ELECTRS"
 
   if id "electrs" &>/dev/null; then
       echo "# user electrs exists already (codebase is installed)"
-      # app-storage dir could have wrong userid fix just in case 
-      sudo chown -R electrs:electrs /mnt/hdd/app-storage/electrs
   else
     echo "# Installing codebase"
     
@@ -302,14 +300,7 @@ if [ "$1" = "install" ]; then
 
     # build
     sudo -u electrs /home/electrs/.cargo/bin/cargo build --locked --release || exit 1
-
-    echo
-    echo "# The electrs database will be built in /mnt/hdd/app-storage/electrs/db. Takes ~18 hours and ~50Gb diskspace"
-    echo
-    sudo mkdir /mnt/hdd/app-storage/electrs 2>/dev/null
-    sudo chown -R electrs:electrs /mnt/hdd/app-storage/electrs
   fi
-
   exit 0
 fi
 
@@ -335,6 +326,16 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       fi
     fi
 
+    # check and create storage dir
+    if ! sudo ls /mnt/hdd/app-storage/electrs 2>/dev/null; then
+      sudo mkdir /mnt/hdd/app-storage/electrs
+      echo
+      echo "# The electrs database will be built in /mnt/hdd/app-storage/electrs/db. Takes ~18 hours and ~50Gb diskspace"
+      echo
+    fi
+    # always fix user id 
+    sudo chown -R electrs:electrs /mnt/hdd/app-storage/electrs 
+    
     echo
     echo "# Getting RPC credentials from the bitcoin.conf"
     # read PASSWORD_B
