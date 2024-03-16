@@ -270,6 +270,8 @@ if [ "$1" = "install" ]; then
 
   if id "electrs" &>/dev/null; then
       echo "# user electrs exists already (codebase is installed)"
+      # app-storage dir could have wrong userid fix just in case 
+      sudo chown -R electrs:electrs /mnt/hdd/app-storage/electrs
   else
     echo "# Installing codebase"
     
