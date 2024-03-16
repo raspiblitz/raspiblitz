@@ -314,6 +314,16 @@ fi
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "# ACTIVATING ELECTRS"
 
+  # check and create storage dir
+  if ! sudo ls /mnt/hdd/app-storage/electrs 2>/dev/null; then
+    sudo mkdir /mnt/hdd/app-storage/electrs
+    echo
+    echo "# The electrs database will be built in /mnt/hdd/app-storage/electrs/db. Takes ~18 hours and ~50Gb diskspace"
+    echo
+  fi
+  # always fix user id
+  sudo chown -R electrs:electrs /mnt/hdd/app-storage/electrs
+
   isInstalled=$(sudo ls /etc/systemd/system/electrs.service 2>/dev/null | grep -c 'electrs.service')
   if [ ${isInstalled} -eq 0 ]; then
 
@@ -331,16 +341,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
         exit 1
       fi
     fi
-
-    # check and create storage dir
-    if ! sudo ls /mnt/hdd/app-storage/electrs 2>/dev/null; then
-      sudo mkdir /mnt/hdd/app-storage/electrs
-      echo
-      echo "# The electrs database will be built in /mnt/hdd/app-storage/electrs/db. Takes ~18 hours and ~50Gb diskspace"
-      echo
-    fi
-    # always fix user id
-    sudo chown -R electrs:electrs /mnt/hdd/app-storage/electrs
 
     echo
     echo "# Getting RPC credentials from the bitcoin.conf"
