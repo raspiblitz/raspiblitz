@@ -99,8 +99,8 @@ jobs:
       - name: Maximize build space
         uses: easimon/maximize-build-space@master
         with:
-          root-reserve-mb: 36000
-          temp-reserve-mb: 36000
+          root-reserve-mb: 38000
+          temp-reserve-mb: 38000
           remove-dotnet: 'true'
           remove-android: 'true'
           remove-haskell: 'true'
@@ -110,6 +110,7 @@ jobs:
       - name: Display free space
         run: |
           df -h
+          echo "# disk usage:"
           sudo du -hd1 /mnt/
 
       - name: Checkout code
@@ -141,6 +142,12 @@ jobs:
         run: |
           echo "IMAGE_CHECKSUM=$(cat ci/arm64-rpi/raspiblitz-arm64-rpi-base.img.sha256 | cut -d' ' -f1)" >> $GITHUB_ENV
 
+      - name: Display free space
+        run: |
+          df -h
+          echo "# disk usage:"
+          sudo du -hd1 /mnt/
+
       - name: Run the fatpack build
         run: |
           echo "Using the variables: --github_user ${{steps.set_values.outputs.GITHUB_USER}} --branch ${{env.BRANCH_NAME}}"
@@ -163,6 +170,7 @@ jobs:
       - name: Display free space
         run: |
           df -h
+          echo "# disk usage:"
           sudo du -hd1 /mnt/
 
       - name: Compress image
