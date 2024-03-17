@@ -2,6 +2,7 @@ variable "github_user" { default = "raspiblitz" }
 variable "branch" { default = "dev" }
 variable "artifact" { default = "file:/build/raspiblitz-arm64-rpi-lean.img" }
 variable "image_checksum" { default = "not_available" }
+variable "image_size" { default = "20G" }
 
 source "arm" "raspiblitz-arm64-rpi-fat" {
   file_urls = [var.artifact]
@@ -28,7 +29,7 @@ source "arm" "raspiblitz-arm64-rpi-fat" {
     type         = "83"
   }
   image_path                   = "raspiblitz-arm64-rpi-fat.img"
-  image_size                   = "20G"
+  image_size                   = var.image_size
   image_type                   = "dos"
   qemu_binary_destination_path = "/usr/bin/qemu-arm-static"
   qemu_binary_source_path      = "/usr/bin/qemu-arm-static"
