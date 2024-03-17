@@ -8,7 +8,7 @@
 - Update: amd64 base image: debian-12.5.0-amd64-netinst.iso
 - Update: Bitcoin Core v26.0 [details](https://bitcoincore.org/en/releases/26.0/)
 - Update: LND v0.17.3-beta [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.17.3-beta)
-- Update: Core Lightning v23.11.2 [details](https://github.com/ElementsProject/lightning/releases/tag/v23.11.2)
+- Update: Core Lightning v24.02.1 [details](https://github.com/ElementsProject/lightning/releases/tag/v24.02.1)
 - Update: C-lightningREST v0.10.7 [details](https://github.com/Ride-The-Lightning/c-lightning-REST/releases/tag/v0.10.7)
 - Update: Electrum Server in Rust (electrs) v0.10.2 [details](https://github.com/romanz/electrs/blob/master/RELEASE-NOTES.md#0102-dec-31-2023)
 - Update: Fulcrum Electrum server v1.9.8 (CLI install script) [details](https://github.com/cculianu/Fulcrum/releases/tag/v1.9.8)
@@ -24,7 +24,7 @@
 - Update: LNbits 0.11.3 [details](https://github.com/lnbits/lnbits/releases/tag/0.11.3)
 - Update: Circuitbreaker v0.5.1 [details](https://github.com/lightningequipment/circuitbreaker/blob/master/README.md)
 - Experimental: LNDK (runs on top of LND to help forward onion messages (BOLT 12)) [details](https://github.com/lndk-org/lndk)
-- Fix: PyBlock 2.2.3 [details](https://github.com/curly60e/pyblock/blob/master/README.md) 
+- Fix: PyBlock 2.2.3 [details](https://github.com/curly60e/pyblock/blob/master/README.md)
 - Refactor: Wifi config with file on sd card
 - Deactivated for Repair: LNDg [details](https://github.com/raspiblitz/raspiblitz/issues/4418)
 - Deprecated: Homer Dashboard (remove from SSH menus, config script will stay with possible future removal)
