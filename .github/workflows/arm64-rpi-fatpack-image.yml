@@ -99,8 +99,8 @@ jobs:
       - name: Maximize build space
         uses: easimon/maximize-build-space@master
         with:
-          root-reserve-mb: 38000
-          temp-reserve-mb: 38000
+          root-reserve-mb: 40000
+          temp-reserve-mb: 40000
           remove-dotnet: 'true'
           remove-android: 'true'
           remove-haskell: 'true'
@@ -146,7 +146,7 @@ jobs:
         run: |
           df -h
           echo "# disk usage:"
-          sudo du -hd1 /mnt/
+          sudo du -hd2 /mnt/
 
       - name: Run the fatpack build
         run: |
@@ -171,7 +171,7 @@ jobs:
         run: |
           df -h
           echo "# disk usage:"
-          sudo du -hd1 /mnt/
+          sudo du -hd2 /mnt/
 
       - name: Compress image
         run: |
