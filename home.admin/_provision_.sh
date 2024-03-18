@@ -183,21 +183,25 @@ sed -i "s/^setupStep=.*/setupStep=100/g" /home/admin/raspiblitz.info
 ##########################
 # PROVISIONING SERVICES
 ##########################
-/home/admin/_cache.sh set message "Installing Services"
+
+echo "### CHECKING BLITZ-API/FRONT STATUS ###" >> ${logFile}
+blitzApiInstalled=$(systemctl status blitzapi | grep -c "loaded")
+echo "# blitzapi(${blitzapi}) blitzApiInstalled(${blitzApiInstalled})"
+if [ "${blitzapi}" != "on" ] && [ ${blitzApiInstalled} -gt 0 ]; then
+  /home/admin/_cache.sh set message "DeactivateAPI/WebUI - please use SSH for further setup"
+  sleep 10
+else
+  /home/admin/_cache.sh set message "Installing Services"
+fi
 
 # BLITZ WEB SERVICE
 echo "Provisioning BLITZ WEB SERVICE - run config script" >> ${logFile}
 /home/admin/config.scripts/blitz.web.sh https-on >> ${logFile} 2>&1
 
-echo "### CHECKING BLITZ-API/FRONT STATUS ###" >> ${logFile}
-blitzApiInstalled=$(systemctl status blitzapi | grep -c "loaded")
-echo "# blitzapi(${blitzapi}) blitzApiInstalled(${blitzApiInstalled})"
-
 # deinstall when not explizit 'on' when blitzapi is installed by fatpack
 # https://github.com/raspiblitz/raspiblitz/issues/4171#issuecomment-1728302628
 if [ "${blitzapi}" != "on" ] && [ ${blitzApiInstalled} -gt 0 ]; then
   echo "blitz_api directory exists & blitzapi is not 'on' - deactivating blitz-api" >> ${logFile}
-  /home/admin/_cache.sh set message "Deactivate API/WebUI"
   /home/admin/config.scripts/blitz.web.api.sh off >> ${logFile} 2>&1
   /home/admin/config.scripts/blitz.web.ui.sh off >> ${logFile} 2>&1
 fi
