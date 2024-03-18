@@ -17,7 +17,7 @@ echo "# RASPIBLITZ SETUP STATE" > $SETUPFILE
 sudo chown admin:admin $SETUPFILE
 sudo chmod 777 $SETUPFILE
 
-source <(/home/admin/_cache.sh get setupPhase dnsworking)
+source <(/home/admin/_cache.sh get dnsworking)
 
 # remember original setupphase
 orgSetupPhase="${setupPhase}"
@@ -90,7 +90,8 @@ if [ "${setupPhase}" == "migration" ]; then
 
 fi
 
-source <(/home/admin/_cache.sh get setupPhase)
+# fresh import setup values
+source /home/admin/raspiblitz.info
 
 ############################################
 # DEFAULT: Basic Setup menu
