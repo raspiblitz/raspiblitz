@@ -188,7 +188,7 @@ echo "### CHECKING BLITZ-API/FRONT STATUS ###" >> ${logFile}
 blitzApiInstalled=$(systemctl status blitzapi | grep -c "loaded")
 echo "# blitzapi(${blitzapi}) blitzApiInstalled(${blitzApiInstalled})"
 if [ "${blitzapi}" != "on" ] && [ ${blitzApiInstalled} -gt 0 ]; then
-  /home/admin/_cache.sh set message "DeactivateAPI/WebUI - please use SSH for further setup"
+  /home/admin/_cache.sh set message "Deactivate API/WebUI (as in your config) - please use SSH for further setup"
   sleep 10
 else
   /home/admin/_cache.sh set message "Installing Services"
