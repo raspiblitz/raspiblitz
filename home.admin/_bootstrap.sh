@@ -54,22 +54,6 @@ else
   /home/admin/config.scripts/blitz.ssh.sh checkrepair >> $logFile
 fi
 
-######################################
-# STOP file flag - for manual provision
-
-# when a file 'stop' is on the sd card bootfs partition root - stop for manual provision
-flagExists=$(ls /boot/firmware/stop | grep -c 'stop')
-if [ "${flagExists}" == "1" ]; then
-  # remove flag
-  rm /boot/firmware/stop
-  # set state info
-  /home/admin/_cache.sh set state "stop"
-  /home/admin/_cache.sh set message "stopped for manual provision"
-  # log info
-  echo "INFO: 'bootstrap stopped - run release after manual provison'" >> ${logFile}
-  exit 0
-fi
-
 echo "## prepare raspiblitz temp" >> $logFile
 
 # make sure /var/cache/raspiblitz/temp exists
@@ -129,6 +113,22 @@ chmod 664 ${infoFile}
 
 # write content of raspiblitz.info to logs
 cat $infoFile >> $logFile
+
+######################################
+# STOP file flag - for manual provision
+
+# when a file 'stop' is on the sd card bootfs partition root - stop for manual provision
+flagExists=$(ls /boot/firmware/stop | grep -c 'stop')
+if [ "${flagExists}" == "1" ]; then
+  # remove flag
+  rm /boot/firmware/stop
+  # set state info
+  /home/admin/_cache.sh set state "stop"
+  /home/admin/_cache.sh set message "stopped for manual provision"
+  # log info
+  echo "INFO: 'bootstrap stopped - run release after manual provison'" >> ${logFile}
+  exit 0
+fi
 
 #########################
 # INIT RaspiBlitz Cache
