@@ -90,11 +90,11 @@ ln_cl_signet_sync_initial_done=0
 source ${infoFile} 2>/dev/null
 
 # write fresh raspiblitz.info file
-echo "state=starting" >> $infoFile
+echo "state=starting" > $infoFile
 echo "message=starting" >> $infoFile
 echo "setupPhase=${setupPhase}" >> $infoFile
 echo "setupStep=${setupStep}" >> $infoFile
-echo "baseimage=${baseimage}" > $infoFile
+echo "baseimage=${baseimage}" >> $infoFile
 echo "cpu=${cpu}" >> $infoFile
 echo "blitzapi=${blitzapi}" >> $infoFile
 echo "displayClass=${displayClass}" >> $infoFile
