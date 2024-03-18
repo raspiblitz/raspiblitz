@@ -43,7 +43,7 @@ do
   # source info & config file fresh on every loop
   source ${infoFile} 2>/dev/null
   source ${configFile} 2>/dev/null
-  source <(/home/admin/_cache.sh get state setupPhase)
+  source <(/home/admin/_cache.sh get setupPhase)
 
   ####################################################
   # SKIP BACKGROUND TASK LOOP ON CERTAIN SYSTEM STATES
