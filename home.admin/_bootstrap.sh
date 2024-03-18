@@ -90,15 +90,16 @@ ln_cl_signet_sync_initial_done=0
 source ${infoFile} 2>/dev/null
 
 # write fresh raspiblitz.info file
+echo "state=starting" >> $infoFile
+echo "message=starting" >> $infoFile
+echo "setupPhase=${setupPhase}" >> $infoFile
+echo "setupStep=${setupStep}" >> $infoFile
 echo "baseimage=${baseimage}" > $infoFile
 echo "cpu=${cpu}" >> $infoFile
 echo "blitzapi=${blitzapi}" >> $infoFile
 echo "displayClass=${displayClass}" >> $infoFile
 echo "displayType=${displayType}" >> $infoFile
-echo "setupPhase=${setupPhase}" >> $infoFile
-echo "setupStep=${setupStep}" >> $infoFile
 echo "fsexpanded=${fsexpanded}" >> $infoFile
-echo "state=starting" >> $infoFile
 echo "btc_mainnet_sync_initial_done=${btc_mainnet_sync_initial_done}" >> $infoFile
 echo "btc_testnet_sync_initial_done=${btc_testnet_sync_initial_done}" >> $infoFile
 echo "btc_signet_sync_initial_done=${btc_signet_sync_initial_done}" >> $infoFile
