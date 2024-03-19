@@ -27,6 +27,7 @@
 - Fix: PyBlock 2.2.3 [details](https://github.com/curly60e/pyblock/blob/master/README.md)
 - Refactor: Wifi config with file on sd card
 - Deactivated for Repair: LNDg [details](https://github.com/raspiblitz/raspiblitz/issues/4418)
+- Deactivated for Repair: lnproxy [details](https://github.com/raspiblitz/raspiblitz/issues/4122)
 - Deprecated: Homer Dashboard (remove from SSH menus, config script will stay with possible future removal)
 - Deprecated: Bitcoinminds (remove from SSH menus, config script will stay with possible future removal)
 - Remove: ItchySats (unmaintained project / in consent with dev)
