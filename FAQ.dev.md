@@ -218,6 +218,10 @@ Now to sync your branch namend BRANCH on your forked repo with your RaspiBlitz, 
 
 So your workflow can go like this: You write code on your local computer. Commit to your local repo, push it to your forked repo and use the sync-script above to get the code to your RaspiBlitz.
 
+### How can I manual provision an image with updated code?
+
+To boot an already build sd card image with your updated raspiblitz code base you can use the `stop` file flag. This will make the `_bootstrap.sh` script stop basically before making any setup or recovery changes to the system. You can SSH in an use the `github` command to update the raspiblitz code and then use `release` command. To set the `stop` file flag. Insert a fresh written sd card into your PC and on the root of `bootfs` drive with a file manager place a empty file simply called `stop` (with no file extension).
+
 ### How to add an app to the RaspiBlitz?
 
 To add your app you can fork the raspiblitz repo, follow the `/home.admin/config.scripts/bonus.template.sh` script [see code](https://github.com/raspiblitz/raspiblitz/blob/dev/home.admin/config.scripts/bonus.template.sh), copy/adapt it, test it on your RaspiBlitz and make a PR back to the main repo.

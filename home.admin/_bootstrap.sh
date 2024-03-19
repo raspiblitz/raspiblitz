@@ -90,15 +90,16 @@ ln_cl_signet_sync_initial_done=0
 source ${infoFile} 2>/dev/null
 
 # write fresh raspiblitz.info file
-echo "baseimage=${baseimage}" > $infoFile
+echo "state=starting" > $infoFile
+echo "message=starting" >> $infoFile
+echo "setupPhase=${setupPhase}" >> $infoFile
+echo "setupStep=${setupStep}" >> $infoFile
+echo "baseimage=${baseimage}" >> $infoFile
 echo "cpu=${cpu}" >> $infoFile
 echo "blitzapi=${blitzapi}" >> $infoFile
 echo "displayClass=${displayClass}" >> $infoFile
 echo "displayType=${displayType}" >> $infoFile
-echo "setupPhase=${setupPhase}" >> $infoFile
-echo "setupStep=${setupStep}" >> $infoFile
 echo "fsexpanded=${fsexpanded}" >> $infoFile
-echo "state=starting" >> $infoFile
 echo "btc_mainnet_sync_initial_done=${btc_mainnet_sync_initial_done}" >> $infoFile
 echo "btc_testnet_sync_initial_done=${btc_testnet_sync_initial_done}" >> $infoFile
 echo "btc_signet_sync_initial_done=${btc_signet_sync_initial_done}" >> $infoFile
@@ -113,6 +114,22 @@ chmod 664 ${infoFile}
 
 # write content of raspiblitz.info to logs
 cat $infoFile >> $logFile
+
+######################################
+# STOP file flag - for manual provision
+
+# when a file 'stop' is on the sd card bootfs partition root - stop for manual provision
+flagExists=$(ls /boot/firmware/stop | grep -c 'stop')
+if [ "${flagExists}" == "1" ]; then
+  # remove flag
+  rm /boot/firmware/stop
+  # set state info
+  /home/admin/_cache.sh set state "stop"
+  /home/admin/_cache.sh set message "stopped for manual provision"
+  # log info
+  echo "INFO: 'bootstrap stopped - run release after manual provison'" >> ${logFile}
+  exit 0
+fi
 
 #########################
 # INIT RaspiBlitz Cache
@@ -154,16 +171,6 @@ source ${configFile} 2>/dev/null
 
 ######################################
 # CHECK SD CARD STATE
-
-# when a file 'stop' is on the sd card bootfs partition root - stop for manual provision
-flagExists=$(ls /boot/firmware/stop | grep -c 'stop')
-if [ "${flagExists}" == "1" ]; then
-  # remove flag
-  rm /boot/firmware/stop
-  # log info
-  echo "INFO: 'bootstrap stopped - run release after manual provison'" >> ${logFile}
-  exit 0
-fi
 
 # wifi config by file on sd card
 wifiFileExists=$(ls /boot/firmware/wifi | grep -c 'wifi')

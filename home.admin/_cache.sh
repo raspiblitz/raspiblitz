@@ -148,6 +148,23 @@ elif [ "$1" = "set" ] || [ "$1" = "init" ]; then
     exit 1
   fi
 
+  # update certain values also in raspiblitz.info
+  if [ "${keystr}" = "state" ]; then
+    # change value in raspiblitz.info
+    sudo sed -i "s/^state=.*/state='${valuestr}'/g" ${infoFile}
+  fi
+  if [ "${keystr}" = "message" ]; then
+    # change value in raspiblitz.info
+    sudo sed -i "s/^message=.*/message='${valuestr}'/g" ${infoFile}
+  fi
+  if [ "${keystr}" = "setupPhase" ]; then
+    # change value in raspiblitz.info
+    sudo sed -i "s/^setupPhase=.*/setupPhase='${valuestr}'/g" ${infoFile}
+  fi
+  if [ "${keystr}" = "setupStep" ]; then
+    # change value in raspiblitz.info
+    sudo sed -i "s/^setupStep=.*/setupStep='${valuestr}'/g" ${infoFile}
+  fi 
 
   NX=""
   if [ "$1" = "init" ]; then

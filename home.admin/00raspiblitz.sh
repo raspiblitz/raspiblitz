@@ -13,7 +13,6 @@ source /mnt/hdd/raspiblitz.conf 2>/dev/null
 # INFOFILE - state data from bootstrap
 infoFile="/home/admin/raspiblitz.info"
 source ${infoFile}
-source <(/home/admin/_cache.sh get state message)
 
 # check that basic system phase/state information is available
 if [ "${setupPhase}" == "" ] || [ "${state}" == "" ]; then
