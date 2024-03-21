@@ -38,8 +38,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     exit 1
   fi
 
+  sshUI=0
   networkID=$2
   if [ ${#networkID} -eq 0 ]; then
+
+    sshUI=1
     trap 'rm -f "$_temp"' EXIT
     _temp=$(mktemp -p /dev/shm/)
 
@@ -53,7 +56,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     rm -f "$_temp"
 
     if [ -z "$networkID" ]; then
-      echo "error='cancel'"
+      dialog --msgbox "ZeroTier Connection canceled." 8 46
       exit 0
     fi
   fi
@@ -80,9 +83,19 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # sudo /home/admin/config.scripts/lnd.credentials.sh reset "${chain:-main}net" tls
     # sudo /home/admin/config.scripts/lnd.credentials.sh sync "${chain:-main}net"
 
+    if [ $sshUI -eq 1 ]; then
+      dialog --msgbox "Your RaspiBlitz joined the ZeroTier network." 6 46
+    else
+      echo "# OK, ZeroTier is joined."
+    fi
+
   else
     sudo -u admin sudo apt -y purge zerotier-one 1>&2
-    echo "error='ZeroTier join failed'"
+    if [ $sshUI -eq 1 ]; then
+      dialog --msgbox "FAILED: Joining the ZeroTier networkID(${networkID})" 6 46
+    else
+      echo "error='ZeroTier join failed'"
+    fi
   fi
   exit 0
 fi
