@@ -376,16 +376,8 @@ if [ "${zerotierSwitch}" != "${choice}" ]; then
   echo "zerotier setting changed .."
   anychange=1
   error=""
-  source <(sudo -u admin /home/admin/config.scripts/bonus.zerotier.sh ${choice})
-  if [ "${choice}" == "on" ]; then
-    if [ ${#error} -eq 0 ]; then
-      dialog --msgbox "Your RaspiBlitz joined the ZeroTier network." 6 46
-    else
-      if [ "${error}" != "cancel" ]; then
-        dialog --msgbox "ZeroTier Error:\n${error}" 8 46
-      fi
-    fi
-  else
+  sudo -u admin /home/admin/config.scripts/bonus.zerotier.sh ${choice}
+  if [ "${choice}" != "on" ]; then
     dialog --msgbox "ZeroTier is now OFF." 5 46
   fi
 
