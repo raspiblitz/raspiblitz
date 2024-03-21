@@ -3,6 +3,10 @@
 # Just run this script once after a fresh sd card build
 # to prepare the image for release as a downloadable sd card image
 
+# remove stop flag (if exists)
+echo "deleting stop flag .."
+sudo rm /boot/firmware/stop 2>/dev/null
+
 # cleaning logs
 echo "deleting raspiblitz & system logs .."
 sudo rm /var/log/* 2>/dev/null
