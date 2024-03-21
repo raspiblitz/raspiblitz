@@ -59,6 +59,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       dialog --msgbox "ZeroTier Connection canceled." 8 46
       exit 0
     fi
+    clear
   fi
 
   echo "# *** INSTALL ZeroTier ***"
