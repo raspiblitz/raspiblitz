@@ -4,7 +4,7 @@
 
 _Build your own Lightning & Bitcoin Fullnode on a RaspberryPi with an optional Display._
 
-`Version 1.11.0rc4 with bitcoin 26.0, lnd 0.17.3 & Core Lightning 23.11.2` ([api](https://github.com/fusion44/blitz_api)|[web](https://github.com/raspiblitz/raspiblitz-web))
+`Version 1.11.0rc5 with bitcoin 26.0, lnd 0.17.3 & Core Lightning 24.02.1` ([api](https://github.com/fusion44/blitz_api)|[web](https://github.com/raspiblitz/raspiblitz-web))
 
 ![RaspiBlitz](pictures/raspiblitz.jpg)
 
@@ -169,8 +169,8 @@ This is the sd card image you should choose if your at the beginning of your Ras
 _WARNING: THIS IS STILL A RELEASE CANDIDATE VERSION</br>
 JUST USE FOR TESTING, HIGHER RISK OF LOSING FUNDS!_
 
-- **FATPACK SD CARD IMAGE ⮕ [raspiblitz-fat-v1.11.0rc4-2024-03-15.img.gz](https://raspiblitz.fulmo.org/images/raspiblitz-fat-v1.11.0rc4-2024-03-15.img.gz)**
-- SHA-256: 2081ad3d93e56672b6c75043a825a634a165ff1b4d7ca00d106ba74ab257a6af
+- **FATPACK SD CARD IMAGE ⮕ [raspiblitz-fat-v1.11.0rc5-2024-03-20.img.gz](https://raspiblitz.fulmo.org/images/raspiblitz-fat-v1.11.0rc5-2024-03-20.img.gz)**
+- SHA-256: ed9c986e2d3a64244aae50344237c695c32e9966939ef0e637a1a4440d9dd235
 <!--
 - GPG 64-bit (main): 1C73 060C 7C17 6461 & (sub): AA9D D1B5 CC56 47DA
 - Signature-File: [raspiblitz-fat-v1.10.0-2023-09-22.img.gz.sig](https://raspiblitz.fulmo.org/images/raspiblitz-fat-v1.10.0-2023-09-22.img.gz.sig)
@@ -185,8 +185,8 @@ This is the sd card image for RaspiBlitz users that are already more experienced
 _WARNING: THIS IS STILL A RELEASE CANDIDATE VERSION</br>
 JUST USE FOR TESTING, HIGHER RISK OF LOSING FUNDS!_
 
-- **MINIMAL SD CARD IMAGE ⮕ [raspiblitz-min-v1.11.0rc4-2024-03-15.img.gz](https://raspiblitz.fulmo.org/images/raspiblitz-min-v1.11.0rc4-2024-03-15.img.gz)**
-- SHA-256: 401c44c056bdaf94bf6b136ab5f5fdb2eab954914f486e31dd1dbbd677907a4c
+- **MINIMAL SD CARD IMAGE ⮕ [raspiblitz-min-v1.11.0rc5-2024-03-20.img.gz](https://raspiblitz.fulmo.org/images/raspiblitz-min-v1.11.0rc5-2024-03-20.img.gz)**
+- SHA-256: 010f212871cb2315e944726857a74594fab0fc405abe1b70e6ccff847f84fbc4
 <!--
 - GPG 64-bit (main): 1C73 060C 7C17 6461 & (sub): AA9D D1B5 CC56 47DA
 - Signature-File: [raspiblitz-min-v1.10.0-2023-09-22.img.gz.sig](https://raspiblitz.fulmo.org/images/raspiblitz-min-v1.10.0-2023-09-22.img.gz.sig)

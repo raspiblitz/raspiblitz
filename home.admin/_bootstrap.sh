@@ -121,13 +121,11 @@ cat $infoFile >> $logFile
 # when a file 'stop' is on the sd card bootfs partition root - stop for manual provision
 flagExists=$(ls /boot/firmware/stop | grep -c 'stop')
 if [ "${flagExists}" == "1" ]; then
-  # remove flag
-  rm /boot/firmware/stop
   # set state info
   /home/admin/_cache.sh set state "stop"
   /home/admin/_cache.sh set message "stopped for manual provision"
   # log info
-  echo "INFO: 'bootstrap stopped - run release after manual provison'" >> ${logFile}
+  echo "INFO: 'bootstrap stopped - run command release after manual provison to remove stop flag'" >> ${logFile}"
   exit 0
 fi
 
