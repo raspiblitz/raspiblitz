@@ -125,7 +125,7 @@ if [ "${flagExists}" == "1" ]; then
   /home/admin/_cache.sh set state "stop"
   /home/admin/_cache.sh set message "stopped for manual provision"
   # log info
-  echo "INFO: 'bootstrap stopped - run command release after manual provison to remove stop flag'" >> ${logFile}"
+  echo "INFO: 'bootstrap stopped - run command release after manual provison to remove stop flag" >> ${logFile}
   exit 0
 fi
 
