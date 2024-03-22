@@ -72,7 +72,7 @@ build {
 
   provisioner "shell" {
     inline = [
-      "if [ \"${var.pack}\" = \"base\" ]; then lsblk; ls -la /boot/; echo 'Adding stop file to /boot/firmware/'; touch /boot/firmware/stop; fi"
+      "if [ \"${var.pack}\" = \"base\" ]; then echo 'Adding stop file to /boot/'; touch /boot/stop; fi"
     ]
   }
 }
