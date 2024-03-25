@@ -348,9 +348,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   echo "*** REMOVING LNDG ***"
   # remove systemd services
-  sudo systemctl disable jobs-lndg.timer
-  sudo systemctl disable rebalancer-lndg.timer
-  sudo systemctl disable htlc-stream-lndg.service
+  sudo systemctl disable lndg-controller
   sudo systemctl disable gunicorn.service
   sudo rm -f /etc/systemd/system/jobs-lndg.timer
   sudo rm -f /etc/systemd/system/rebalancer-lndg.timer
