@@ -154,7 +154,7 @@ When you have all parts you need to:
 
 In the end your RaspiBlitz should look like this:
 
-![HardwareSetup](pictures/hardwaresetup.webp)
+![HardwareSetup](pictures/hardwaresetup.jpeg)
 
 You now have the hardware ready for your RaspiBlitz - whats missing is the software to run. This is normally done by downloading an image file and then writing it (flashing it) to the sd card. This is a bigger file (multiple GigaBytes) so make sure to have the available storage space on your laptop. If you are a very advanded user who is able to read/verify code or you like to run a self-modified/forked version of RaspiBlitz you can also build the sd card image yourself - see the [Build your own sd card image](#build-the-sd-card-image) section for this.
 
