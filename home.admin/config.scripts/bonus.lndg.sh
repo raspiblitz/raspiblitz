@@ -154,8 +154,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     PASSWORD_B=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcpassword | cut -c 13-)
     echo "# LNDg initialize.py ..."
     sudo -u lndg .venv/bin/python initialize.py -pw $PASSWORD_B
-    echo "# LNDg jobs.py ..."
-    sudo -u lndg .venv/bin/python jobs.py
 
     echo "# LNDg database ..."
 
