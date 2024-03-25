@@ -60,7 +60,7 @@ if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
   OPTIONS+=(ra 'LND RTL Webinterface' ${rtlWebinterface})
   OPTIONS+=(ta 'LND ThunderHub' ${thunderhub})
   OPTIONS+=(la 'LND LIT (loop, pool, faraday)' ${lit})
-  #OPTIONS+=(gb 'LND LNDg (auto-rebalance, auto-fees)' ${lndg})
+  OPTIONS+=(gb 'LND LNDg (auto-rebalance, auto-fees)' ${lndg})
   OPTIONS+=(oa 'LND Balance of Satoshis' ${bos})
   OPTIONS+=(ya 'LND PyBLOCK' ${pyblock})
   OPTIONS+=(ha 'LND ChannelTools (Fund Rescue)' ${chantools})
