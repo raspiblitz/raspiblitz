@@ -303,87 +303,29 @@ WantedBy=multi-user.target
     sudo ufw allow from any to any port 8888 comment 'allow LNDg HTTPS'
     echo ""
 
-    ##################
-    # SYSTEMD SERVICE
-    ##################
+    ############################
+    # SYSTEMD CONTROLLER SERVICE
+    ############################
 
     echo "# Install LNDg systemd for ${network} on ${chain}"
     echo "
-#!/bin/bash
-
-/home/lndg/lndg/.venv/bin/python /home/lndg/lndg/jobs.py
-" | sudo tee /home/lndg/lndg/jobs.sh
-    echo "
-#!/bin/bash
-
-/home/lndg/lndg/.venv/bin/python /home/lndg/lndg/rebalancer.py
-" | sudo tee /home/lndg/lndg/rebalancer.sh
-    echo "
-#!/bin/bash
-
-/home/lndg/lndg/.venv/bin/python /home/lndg/lndg/htlc_stream.py
-" | sudo tee /home/lndg/lndg/htlc_stream.sh
-    echo "
 [Unit]
-Description=Run Jobs For Lndg
+Description=Backend Controller For Lndg
 [Service]
+Environment=PYTHONUNBUFFERED=1
 User=lndg
 Group=lndg
-ExecStart=/bin/bash /home/lndg/lndg/jobs.sh
-StandardError=append:/var/log/lnd_jobs_error.log
-" | sudo tee /etc/systemd/system/jobs-lndg.service
-    echo "
-[Unit]
-Description=Run Rebalancer For Lndg
-[Service]
-User=lndg
-Group=lndg
-ExecStart=/bin/bash /home/lndg/lndg/rebalancer.sh
-StandardError=append:/var/log/lnd_rebalancer_error.log
-RuntimeMaxSec=3600
-" | sudo tee /etc/systemd/system/rebalancer-lndg.service
-    echo "
-[Unit]
-Description=Run HTLC Stream For Lndg
-Requires=lnd.service
-After=lnd.service
-[Service]
-User=lndg
-Group=lndg
-ExecStart=/bin/bash /home/lndg/lndg/htlc_stream.sh
-StandardError=append:/var/log/lnd_htlc_stream_error.log
+ExecStart=/home/lndg/lndg/.venv/bin/python /home/lndg/lndg/controller.py
+StandardOutput=append:/var/log/lndg-controller.log
+StandardError=append:/var/log/lndg-controller.log
 Restart=always
 RestartSec=60s
 [Install]
 WantedBy=multi-user.target
-" | sudo tee /etc/systemd/system/htlc-stream-lndg.service
-    echo "
-[Unit]
-Description=Run Lndg Jobs Every 20 Seconds
-[Timer]
-OnBootSec=300
-OnUnitActiveSec=20
-AccuracySec=1
-[Install]
-WantedBy=timers.target
-" | sudo tee /etc/systemd/system/jobs-lndg.timer
-    echo "
-[Unit]
-Description=Run Lndg Rebalancer Every 20 Seconds
-[Timer]
-OnBootSec=315
-OnUnitActiveSec=20
-AccuracySec=1
-[Install]
-WantedBy=timers.target
-" | sudo tee /etc/systemd/system/rebalancer-lndg.timer
-    sudo systemctl enable jobs-lndg.timer
-    sudo systemctl enable rebalancer-lndg.timer
-    sudo systemctl enable htlc-stream-lndg.service
-    sudo systemctl start jobs-lndg.timer
-    sudo systemctl start rebalancer-lndg.timer
-    sudo systemctl start htlc-stream-lndg.service
+" | sudo tee /etc/systemd/system/lndg-controller.service
 
+    sudo systemctl enable lndg-controller
+    sudo systemctl start lndg-controller
 
     # setting value in raspiblitz config
     /home/admin/config.scripts/blitz.conf.sh set lndg "on"
