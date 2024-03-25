@@ -585,27 +585,6 @@ In short for Windows:
 
 If anyone has experience on doing this in Linux please share.
 
-### How to attach the RaspberryPi to the HDD?
-
-Try a rubber band.
-
-### What other case options do I have?
-
-You can put the heatsink-case (top-part mentioned in the shopping lists) into a customized 3D printed case for the RaspiBlitz called "Lightning Shell" - great work by @CryptoCloaks
-
-https://www.cryptocloaks.com/product/lightningshell/ (Delivery from USA)
-
-![LightningShell](pictures/lightningshell.jpeg)
-
-![LightningShell](pictures/lightningshell2.jpeg)
-
-Also there is the ZKDS metal case available that also needs some extra hardware (SATA-USB expansion board and USB bridge).
-
-https://diynodes.com (delivery from UK)
-
-![ZKDSMetalCase](pictures/metalcase.png)
-
-
 ### Are those "Under-Voltage detected" warnings a problem?
 
 When your USB power adapter for the RaspiBlitz delivers too low of a power level, those messages with "Under-Voltage detected" (under-voltage) are shown on the display. This can lead to data loss/corruption on the HDD. If you see this just one or two times it's not OK, but can be in a tolerant window. Nevertheless it is important to make sure that your USB power adapter can deliver at least 3A (big and stable is good). If you still see those warnings maybe get a second USB Power adapter just for the HDD, and power the HDD through a Y-Cable - see https://en.wikipedia.org/wiki/Y-cable#USB or put a USB Hub with extra power between the Raspberry and the HDD.
