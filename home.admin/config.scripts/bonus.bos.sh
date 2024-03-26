@@ -4,7 +4,7 @@
 # https://github.com/alexbosworth/balanceofsatoshis/blob/master/package.json#L85
 # https://www.npmjs.com/package/balanceofsatoshis
 
-BOSVERSION="15.11.0"
+BOSVERSION="17.9.1"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
