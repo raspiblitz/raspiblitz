@@ -24,6 +24,7 @@
 - Update: LNbits 0.11.3 [details](https://github.com/lnbits/lnbits/releases/tag/0.11.3)
 - Update: Circuitbreaker v0.5.1 [details](https://github.com/lightningequipment/circuitbreaker/blob/master/README.md)
 - Update: LNDg v1.8.0 [details](https://github.com/cryptosharks131/lndg/releases/tag/v1.8.0)
+- Update: Balance of Satoshis v17.9.1 [details](https://www.npmjs.com/package/balanceofsatoshis/v/17.9.1)
 - Experimental: LNDK (runs on top of LND to help forward onion messages (BOLT 12)) [details](https://github.com/lndk-org/lndk)
 - Fix: PyBlock 2.2.3 [details](https://github.com/curly60e/pyblock/blob/master/README.md)
 - Refactor: Wifi config with file on sd card
