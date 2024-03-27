@@ -26,13 +26,17 @@ if [ "$command" = "1" ] || [ "$command" = "on" ]; then
   postgres_datadir="/var/lib/postgresql" # default data dir
 
   # sudo -u postgres psql -c "show data_directory"
-  #  /var/lib/postgresql/13/main
   if [ ! -d $postgres_datadir ]; then
+    # Get the default or highest version of PostgreSQL installed
+    PG_VERSION=$(psql -V | awk '{print $3}' | cut -d'.' -f1)
+    echo "Detected PostgreSQL version: $PG_VERSION"
+
     echo "# Create PostgreSQL data"
-    sudo mkdir -p $postgres_datadir/13/main
+    sudo mkdir -p $postgres_datadir/$PG_VERSION/main
     sudo chown -R postgres:postgres $postgres_datadir
-    # sudo pg_dropcluster 13 main
-    sudo pg_createcluster 13 main --start
+
+    # create cluster
+    sudo pg_createcluster $PG_VERSION main --start
   fi
 
   fix_postgres=0
@@ -61,7 +65,7 @@ if [ "$command" = "1" ] || [ "$command" = "on" ]; then
   fi
 
   # always fix ownership
-  sudo chown -R postgres:postgres  /mnt/hdd/app-data/postgresql
+  sudo chown -R postgres:postgres /mnt/hdd/app-data/postgresql
 
   sudo systemctl enable postgresql
   sudo systemctl start postgresql
@@ -95,8 +99,7 @@ fi
 
 # switch off
 if [ "$command" = "0" ] || [ "$command" = "off" ]; then
-
-  # setting value in raspiblitz config
+  # would delete all pg data: 'sudo pg_dropcluster $PG_VERSION main'
   echo "*** REMOVING POSTGRESQL ***"
   sudo systemctl stop postgresql
   sudo systemctl disable postgresql
