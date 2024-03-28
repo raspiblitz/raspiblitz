@@ -42,7 +42,7 @@ function installDependencies() {
     autoconf automake build-essential git libtool libsqlite3-dev \
     net-tools zlib1g-dev libsodium-dev gettext
   # additional requirements
-  sudo apt-get install -y postgresql libpq-dev
+  sudo apt-get install -y libpq-dev
   # for clnrest (since v23.11)
   sudo apt-get install -y python3-json5 python3-flask python3-gunicorn
   # upgrade pip
