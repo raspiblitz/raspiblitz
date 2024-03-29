@@ -118,7 +118,13 @@ Publishing the images:
 * Run tests on the new image
 * Upload the new image to the Download Server - put sig-file next to it
 * Copy SHA256-String into GitHub README and update the download link
-* Create Torrent file from image (for example with Transmission) and place in in the `home.admin/assets` folder & link on README
+* Create Torrent file from image and place in in the `home.admin/assets` folder
+  * upload images per FTP (Filezilla) to `yourseedbox.com` server under `torrent/rtorrent`
+  * open QuickBox > ruTorrent and choose `create Torrent`
+  * select image file, add trackers (see below) and start seeding
+  * download the torrent-file into `home.admin/assets` folder & commit
+  * get raw-link to torrent file from gitub
+  * edit in `raspiblitz-docs` the `docs/software-setup/_download.md`
 
 This is a recommended tracker list to be used with the torrent:
 ```
