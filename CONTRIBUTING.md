@@ -1,7 +1,9 @@
 # Community development
+
 Everybody is welcome to join, improve, and extend the RaspiBlitz - it's a work in progress. Check the issues if you wanna help out or add new ideas. You can find the scripts used for RaspiBlitz interactions on the device at /home/admin or in this Git repo's subfolder home.admin.
 
 ## Understanding Blitz project
+
 RaspiBlitz is inspired by the [RaspiBolt guide](https://raspibolt.github.io/raspibolt/). Tutorial on how to build a lightning node on the RaspberryPi. So much thx to Stadicus :)
 To start your Deep Dive into the RaspiBlitz project, watch [this video](https://www.youtube.com/watch?v=QXUGg45CWLo).
 
@@ -12,23 +14,28 @@ To start your Deep Dive into the RaspiBlitz project, watch [this video](https://
 * Be sure to contribute back, every little help is wanted.
 
 ## Getting started
+
 Get all details on "How to contribute to RaspiBlitz Development" on [this video](https://www.youtube.com/watch?v=ZVtZepV3OfM).
 
 ### Levels
+
 All levels are important. Even advanced users help on basic levels for other Blitzers. Every help is welcome.
 Not all enhancements needs to go through all levels, these are levels of difficulty, scalability depends on your skills.
 
 #### Basic
+
 1. **Reporting user side** --> Open an issue to indicate a problem or make a feature request.
 1. **Community support** --> Solve other people issues.
 1. **Good first issue** --> The purpose of the good first issue label is to highlight which issues are suitable for a new contributor without a deep understanding of the codebase.
 
 #### Medium
+
 1. **Sovereignty** --> Fork the repo to have the changes controlled by you.
 1. **Experiment** --> Try things out on your RaspiBlitz.
 1. **Executable** --> Turn your experiment into a basic shell script.
 
 #### Advanced
+
 1. **Config script** --> Integrate your executable into the RaspiBlitz environment.
 1. **SSH-GUI** --> Make it easier for others to use your config script.
 1. **WEB-GUI** --> Turn your feature into customer ready
