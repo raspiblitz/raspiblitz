@@ -90,18 +90,6 @@ usermod -G bitcoin root
 /home/admin/_cache.sh init btc_default_address ""
 /home/admin/_cache.sh init btc_default_port ""
 
-/home/admin/_cache.sh set ln_default_address "" 1
-/home/admin/_cache.sh set ln_default_tor "" 1
-/home/admin/_cache.sh set ln_default_sync_chain "" 1
-/home/admin/_cache.sh set ln_default_sync_progress "" 1
-/home/admin/_cache.sh set ln_default_channels_pending "0" 1
-/home/admin/_cache.sh set ln_default_channels_active "0" 1
-/home/admin/_cache.sh set ln_default_channels_inactive "0" 1
-/home/admin/_cache.sh set ln_default_channels_total "0" 1
-/home/admin/_cache.sh set ln_default_peers "" 1
-/home/admin/_cache.sh set ln_default_recovery_mode "" 1
-/home/admin/_cache.sh set ln_default_recovery_done "" 1
-
 # import all base values from raspiblitz.info
 echo "importing: ${infoFile}"
 /home/admin/_cache.sh import $infoFile
@@ -142,6 +130,9 @@ fi
 
 # add info about start to raspiblitz.log
 echo "INFO: _bootstrap.scan.sh loop started > sudo journalctl -f -u background.scan" >> /home/admin/raspiblitz.log
+
+# debug print out all cache values on start
+/home/admin/_cache.sh export
 
 while [ 1 ]
 do
