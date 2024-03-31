@@ -179,7 +179,6 @@
   sudo -u postgres psql -l | grep testdb
   sudo -u postgres psql -l | grep testuser
 }
-
 @test "Final cleanup" {
   # run the script
   run ../home.admin/config.scripts/bonus.postgresql.sh off

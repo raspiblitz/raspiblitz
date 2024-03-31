@@ -98,6 +98,7 @@ if [ "$command" = "1" ] || [ "$command" = "on" ]; then
       sudo apt update
     fi
     sudo apt install -y postgresql-13 || exit 1
+    sudo systemctl stop postgresql
     if [ -d /mnt/hdd/app-data/postgresql-conf ]; then
       # symlink conf dir
       sudo mkdir -p /mnt/hdd/app-data/postgresql-conf/postgresql
