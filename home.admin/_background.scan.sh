@@ -659,7 +659,7 @@ do
           /home/admin/_cache.sh set ln_lnd_${CHAIN}net_recovery_mode "${ln_lnd_recovery_mode}"
           /home/admin/_cache.sh set ln_lnd_${CHAIN}net_recovery_done "${ln_lnd_recovery_done}"
           if [ "${isDefaultLightning}" == "1" ] && [ "${isDefaultChain}" == "1" ]; then
-            /home/admin/_cache.sh set ln_default_address "${ln_lnd_address}"
+            # /home/admin/_cache.sh set ln_default_address "${ln_lnd_address}"
             /home/admin/_cache.sh set ln_default_tor "${ln_lnd_tor}"
             /home/admin/_cache.sh set ln_default_sync_chain "${ln_lnd_sync_chain}"
             /home/admin/_cache.sh set ln_default_sync_progress "${ln_lnd_sync_progress}"
