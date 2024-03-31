@@ -132,7 +132,7 @@ fi
 echo "INFO: _bootstrap.scan.sh loop started > sudo journalctl -f -u background.scan" >> /home/admin/raspiblitz.log
 
 # debug print out all cache values on start
-/home/admin/_cache.sh export
+/home/admin/_cache.sh export >> /home/admin/raspiblitz.log
 
 while [ 1 ]
 do
