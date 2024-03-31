@@ -112,9 +112,10 @@ elif [ "$1" = "keyvalue" ] && [ "$2" = "on" ]; then
 
   # edit config: dont save to disk
   # echo "# edit config"
-  # sudo sed -i "s/^# save \"\"/save \"\"/g" /etc/redis/redis.conf
-  # sudo sed -i "s/^appendonly/appendonly no/g" /etc/redis/redis.conf
-  # sudo sed -i "s/^stop-writes-on-bgsave-error/stop-writes-on-bgsave-error no/g" /etc/redis/redis.conf
+  sudo cp /etc/redis/redis.conf /etc/redis/redis.conf.backup
+  sudo sed -i "s/^# save \"\"/save \"\"/g" /etc/redis/redis.conf
+  sudo sed -i "s/^appendonly/appendonly no/g" /etc/redis/redis.conf
+  sudo sed -i "s/^stop-writes-on-bgsave-error/stop-writes-on-bgsave-error no/g" /etc/redis/redis.conf
 
   echo "# restart and remove db dump file"
   # restart with new config
