@@ -645,7 +645,7 @@ do
         error=""
         echo "updating: /home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net info"
         source <(timeout 30s /home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net info)
-        if [ "${error}" == "" ]; then
+        if [ $? -eq 0 ] && [ "${error}" == "" ]; then
           /home/admin/_cache.sh set ln_lnd_${CHAIN}net_address "${ln_lnd_address}"
           /home/admin/_cache.sh set ln_lnd_${CHAIN}net_tor "${ln_lnd_tor}"
           /home/admin/_cache.sh set ln_lnd_${CHAIN}net_sync_chain "${ln_lnd_sync_chain}"
