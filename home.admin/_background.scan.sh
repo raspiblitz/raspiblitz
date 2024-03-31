@@ -90,6 +90,9 @@ usermod -G bitcoin root
 /home/admin/_cache.sh init btc_default_address ""
 /home/admin/_cache.sh init btc_default_port ""
 
+echo "INFO: _bootstrap.scan.sh XXXXXXXXX" >> /home/admin/raspiblitz.log
+/home/admin/_cache.sh export >> /home/admin/raspiblitz.log
+
 # import all base values from raspiblitz.info
 echo "importing: ${infoFile}"
 /home/admin/_cache.sh import $infoFile
