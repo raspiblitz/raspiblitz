@@ -42,6 +42,8 @@ echo "Running RaspiBlitz Bootstrap ${codeVersion}" >> $logFile
 date >> $logFile
 echo "***********************************************" >> $logFile
 
+/home/admin/_cache.sh export ln_default_address >> /home/admin/raspiblitz.log
+
 # list all running systemd services for future debug
 systemctl list-units --type=service --state=running >> $logFile
 
@@ -1028,6 +1030,8 @@ fi
 # load data from config file fresh
 echo "load configfile data" >> $logFile
 source ${configFile}
+
+/home/admin/_cache.sh export ln_default_address >> /home/admin/raspiblitz.log
 
 # if a WIFI config exists backup to HDD
 source <(/home/admin/config.scripts/internet.sh status)

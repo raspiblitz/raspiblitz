@@ -77,8 +77,6 @@ usermod -G bitcoin root
 # INIT
 ####################################################################
 
-/home/admin/_cache.sh export ln_default_address >> /home/admin/raspiblitz.log
-
 # init values
 /home/admin/_cache.sh init system_temp_celsius "0"
 /home/admin/_cache.sh init system_temp_fahrenheit "0"
