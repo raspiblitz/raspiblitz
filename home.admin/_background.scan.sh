@@ -90,6 +90,18 @@ usermod -G bitcoin root
 /home/admin/_cache.sh init btc_default_address ""
 /home/admin/_cache.sh init btc_default_port ""
 
+/home/admin/_cache.sh init ln_default_address ""
+/home/admin/_cache.sh init ln_default_tor ""
+/home/admin/_cache.sh init ln_default_sync_chain ""
+/home/admin/_cache.sh init ln_default_sync_progress ""
+/home/admin/_cache.sh init ln_default_channels_pending "0"
+/home/admin/_cache.sh init ln_default_channels_active "0"
+/home/admin/_cache.sh init ln_default_channels_inactive "0"
+/home/admin/_cache.sh init ln_default_channels_total "0"
+/home/admin/_cache.sh init ln_default_peers ""
+/home/admin/_cache.sh init ln_default_recovery_mode ""
+/home/admin/_cache.sh init ln_default_recovery_done ""
+
 # import all base values from raspiblitz.info
 echo "importing: ${infoFile}"
 /home/admin/_cache.sh import $infoFile
