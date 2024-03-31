@@ -2,7 +2,7 @@
 
 @test "Start PostgreSQL cluster" {
   # run the script
-  run ../bonus.postgresql.sh on
+  run ../home.admin/config.scripts/bonus.postgresql.sh on
   # check if the script ran successfully
   [ "$status" -eq 0 ]
   # check if PostgreSQL cluster is running
@@ -25,7 +25,7 @@
 
 @test "Switch cluster off and move" {
   # run the script
-  run ../bonus.postgresql.sh off
+  run ../home.admin/config.scripts/bonus.postgresql.sh off
   # check if the script ran successfully
   [ "$status" -eq 0 ]
   # check if PostgreSQL cluster is running
@@ -42,7 +42,7 @@
   sudo mv /mnt/hdd/app-data/postgresql.bak /mnt/hdd/app-data/postgresql
   sudo mv /mnt/hdd/app-data/postgresql-conf.bak /mnt/hdd/app-data/postgresql-conf
   # run the script
-  run ../bonus.postgresql.sh on
+  run ../home.admin/config.scripts/bonus.postgresql.sh on
   # check if the script ran successfully
   [ "$status" -eq 0 ]
   # check if PostgreSQL cluster is running
@@ -55,7 +55,7 @@
 
 @test "Switch cluster off and move (2)" {
   # run the script
-  run ../bonus.postgresql.sh off
+  run ../home.admin/config.scripts/bonus.postgresql.sh off
   # check if the script ran successfully
   [ "$status" -eq 0 ]
   # check if PostgreSQL cluster is running
@@ -74,7 +74,7 @@
   sudo rm -rf /etc/postgresql
   sudo rm -rf /mnt/hdd/app-data/postgresql-conf.bak
   # run the script
-  run ../bonus.postgresql.sh on
+  run ../home.admin/config.scripts/bonus.postgresql.sh on
 
   # check if the script ran successfully
   [ "$status" -eq 0 ]
@@ -88,7 +88,7 @@
 
 @test "Cleanup" {
   # run the script
-  run ../bonus.postgresql.sh off
+  run ../home.admin/config.scripts/bonus.postgresql.sh off
   # check if the script ran successfully
   [ "$status" -eq 0 ]
   # check if PostgreSQL cluster is running
@@ -105,13 +105,21 @@
 @test "Create PostgreSQL 13 cluster" {
   postgres_datadir="/var/lib/postgresql" # default data dir
   postgres_confdir="/etc/postgresql"     # default conf dir
+
+
   # /usr/bin/pg_upgradecluster [OPTIONS] <old version> <cluster name> [<new data directory>]
   if [ ! -f /etc/apt/trusted.gpg.d/postgresql.gpg ]; then
     curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/postgresql.gpg
     echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
     sudo apt update
   fi
-  sudo apt install -y postgresql-13 || exit 1
+  sudo apt install -y postgresql-13
+
+  # Cleanup existing clusters to avoid "cluster configuration already exists" error
+  if sudo pg_lsclusters | grep -q '13 main'; then
+    echo "Existing PostgreSQL 13 'main' cluster found, dropping..."
+    sudo pg_dropcluster 13 main --stop || true
+  fi
 
   # symlink data dir
   sudo mkdir -p /mnt/hdd/app-data/postgresql
@@ -119,7 +127,7 @@
   sudo rm -rf $postgres_datadir                                # not a symlink.. delete it silently
   sudo ln -s /mnt/hdd/app-data/postgresql /var/lib/            # create symlink
 
-  sudo mkdir -p $postgres_datadir/13main
+  sudo mkdir -p $postgres_datadir/13/main
   sudo chown -R postgres:postgres $postgres_datadir
 
   sudo pg_createcluster 13 main --start
@@ -142,7 +150,7 @@
 
 @test "Switch cluster 13 off and move" {
   sudo apt remove -y postgresql-13
-  ../bonus.postgresql.sh off
+  ../home.admin/config.scripts/bonus.postgresql.sh off
   echo "# pg_dropcluster"
   PG_VERSION=$(psql -V | awk '{print $3}' | cut -d'.' -f1)
   echo "Detected PostgreSQL version: $PG_VERSION"
@@ -156,7 +164,7 @@
   sudo rm -rf /etc/postgresql
   sudo rm -rf /mnt/hdd/app-data/postgresql-conf.bak
   # run the script
-  run ../bonus.postgresql.sh on
+  run ../home.admin/config.scripts/bonus.postgresql.sh on
   # check if the script ran successfully
   [ "$status" -eq 0 ]
   # check if PostgreSQL cluster is running
@@ -181,7 +189,7 @@
 
 @test "Final cleanup" {
   # run the script
-  run ../bonus.postgresql.sh off
+  run ../home.admin/config.scripts/bonus.postgresql.sh off
   # check if the script ran successfully
   [ "$status" -eq 0 ]
   # check if PostgreSQL cluster is running

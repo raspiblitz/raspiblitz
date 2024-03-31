@@ -1,0 +1,32 @@
+name: Test bats
+
+concurrency:
+  group: test-bats-${{ github.head_ref }}
+  cancel-in-progress: true
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["dev"]
+    paths:
+      - "home.admin/config.scripts/bonus.postgresql.sh"
+  pull_request:
+    branches: ["dev"]
+    paths:
+      - "home.admin/config.scripts/bonus.postgresql.sh"
+
+jobs:
+  run-bats-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install bats
+        run: |
+          sudo apt install bats
+
+      - name: Run the bats tests
+        run: |
+          cd test
+          sudo bats ./bonus.postgresql.bats
