@@ -90,9 +90,6 @@ usermod -G bitcoin root
 /home/admin/_cache.sh init btc_default_address ""
 /home/admin/_cache.sh init btc_default_port ""
 
-echo "INFO: _bootstrap.scan.sh XXXXXXXXX" >> /home/admin/raspiblitz.log
-/home/admin/_cache.sh export >> /home/admin/raspiblitz.log
-
 # import all base values from raspiblitz.info
 echo "importing: ${infoFile}"
 /home/admin/_cache.sh import $infoFile
@@ -133,10 +130,6 @@ fi
 
 # add info about start to raspiblitz.log
 echo "INFO: _bootstrap.scan.sh loop started > sudo journalctl -f -u background.scan" >> /home/admin/raspiblitz.log
-
-# debug print out all cache values on start
-/home/admin/_cache.sh export >> /home/admin/raspiblitz.log
-/home/admin/_cache.sh set "ln_lnd_mainnet_address" ""
 
 while [ 1 ]
 do
