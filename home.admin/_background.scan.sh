@@ -130,7 +130,7 @@ fi
 
 # add info about start to raspiblitz.log
 echo "INFO: _bootstrap.scan.sh loop started > sudo journalctl -f -u background.scan" >> /home/admin/raspiblitz.log
-cache export ln_ >> /home/admin/raspiblitz.log
+/home/admin/_cache.sh export ln_ >> /home/admin/raspiblitz.log
 
 while [ 1 ]
 do
