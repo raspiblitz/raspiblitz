@@ -106,6 +106,14 @@
   postgres_datadir="/var/lib/postgresql" # default data dir
   postgres_confdir="/etc/postgresql"     # default conf dir
 
+  # symlink data dir
+  sudo mkdir -p /mnt/hdd/app-data/postgresql
+  sudo chown -R postgres:postgres /mnt/hdd/app-data/postgresql # fix ownership
+  sudo rm -rf $postgres_datadir                                # not a symlink.. delete it silently
+  sudo ln -s /mnt/hdd/app-data/postgresql /var/lib/            # create symlink
+
+  sudo mkdir -p $postgres_datadir/13/main
+  sudo chown -R postgres:postgres /mnt/hdd/app-data/postgresql # fix ownership            # create symlink
 
   # /usr/bin/pg_upgradecluster [OPTIONS] <old version> <cluster name> [<new data directory>]
   if [ ! -f /etc/apt/trusted.gpg.d/postgresql.gpg ]; then
@@ -114,23 +122,8 @@
     sudo apt update
   fi
   sudo apt install -y postgresql-13
+  sudo pg_createcluster 13 main --start || true
 
-  # Cleanup existing clusters to avoid "cluster configuration already exists" error
-  if sudo pg_lsclusters | grep -q '13 main'; then
-    echo "Existing PostgreSQL 13 'main' cluster found, dropping..."
-    sudo pg_dropcluster 13 main --stop || true
-  fi
-
-  # symlink data dir
-  sudo mkdir -p /mnt/hdd/app-data/postgresql
-  sudo chown -R postgres:postgres /mnt/hdd/app-data/postgresql # fix ownership
-  sudo rm -rf $postgres_datadir                                # not a symlink.. delete it silently
-  sudo ln -s /mnt/hdd/app-data/postgresql /var/lib/            # create symlink
-
-  sudo mkdir -p $postgres_datadir/13/main
-  sudo chown -R postgres:postgres $postgres_datadir
-
-  sudo pg_createcluster 13 main --start
   # start cluster
   sudo systemctl enable --now postgresql
   sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD 'postgres';"
