@@ -90,17 +90,17 @@ usermod -G bitcoin root
 /home/admin/_cache.sh init btc_default_address ""
 /home/admin/_cache.sh init btc_default_port ""
 
-/home/admin/_cache.sh init ln_default_address ""
-/home/admin/_cache.sh init ln_default_tor ""
-/home/admin/_cache.sh init ln_default_sync_chain ""
-/home/admin/_cache.sh init ln_default_sync_progress ""
-/home/admin/_cache.sh init ln_default_channels_pending "0"
-/home/admin/_cache.sh init ln_default_channels_active "0"
-/home/admin/_cache.sh init ln_default_channels_inactive "0"
-/home/admin/_cache.sh init ln_default_channels_total "0"
-/home/admin/_cache.sh init ln_default_peers ""
-/home/admin/_cache.sh init ln_default_recovery_mode ""
-/home/admin/_cache.sh init ln_default_recovery_done ""
+/home/admin/_cache.sh set ln_default_address "" 1
+/home/admin/_cache.sh set ln_default_tor "" 1
+/home/admin/_cache.sh set ln_default_sync_chain "" 1
+/home/admin/_cache.sh set ln_default_sync_progress "" 1
+/home/admin/_cache.sh set ln_default_channels_pending "0" 1
+/home/admin/_cache.sh set ln_default_channels_active "0" 1
+/home/admin/_cache.sh set ln_default_channels_inactive "0" 1
+/home/admin/_cache.sh set ln_default_channels_total "0" 1
+/home/admin/_cache.sh set ln_default_peers "" 1
+/home/admin/_cache.sh set ln_default_recovery_mode "" 1
+/home/admin/_cache.sh set ln_default_recovery_done "" 1
 
 # import all base values from raspiblitz.info
 echo "importing: ${infoFile}"
@@ -657,7 +657,7 @@ do
         error=""
         echo "updating: /home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net info"
         source <(timeout 30s /home/admin/config.scripts/lnd.monitor.sh ${CHAIN}net info)
-        if [ $? -eq 0 ] && [ "${error}" == "" ]; then
+        if [ "${error}" == "" ]; then
           /home/admin/_cache.sh set ln_lnd_${CHAIN}net_address "${ln_lnd_address}"
           /home/admin/_cache.sh set ln_lnd_${CHAIN}net_tor "${ln_lnd_tor}"
           /home/admin/_cache.sh set ln_lnd_${CHAIN}net_sync_chain "${ln_lnd_sync_chain}"
