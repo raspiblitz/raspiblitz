@@ -874,7 +874,7 @@ do
 
           if [ "${isDefaultLightning}" == "1" ] && [ "${isDefaultChain}" == "1" ]; then
             /home/admin/_cache.sh set ln_default_alias "${ln_cl_alias}"
-            /home/admin/_cache.sh set ln_default_address "${ln_cl_address}"
+            # /home/admin/_cache.sh set ln_default_address "${ln_cl_address}"
             /home/admin/_cache.sh set ln_default_tor "${ln_cl_tor}"
             /home/admin/_cache.sh set ln_default_peers "${ln_cl_fees_total}"
             /home/admin/_cache.sh set ln_default_sync_chain "${ln_cl_sync_chain}"
