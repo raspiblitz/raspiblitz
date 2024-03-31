@@ -58,7 +58,7 @@ echo "OK"
 # https://github.com/raspiblitz/raspiblitz/issues/4469
 echo
 # check if redis is enabled
-REDIS_ENABLED=$(sudo systemctl is-enabled redis | grep -c enabled)
+REDIS_ENABLED=$(sudo systemctl is-enabled redis 2>/dev/null | grep -c enabled)
 if [ ${REDIS_ENABLED} -gt 0 ]; then
     echo "disable redis for initial start ..."
     sudo systemctl stop redis 2>/dev/null
