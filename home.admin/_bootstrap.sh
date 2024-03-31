@@ -42,6 +42,9 @@ echo "Running RaspiBlitz Bootstrap ${codeVersion}" >> $logFile
 date >> $logFile
 echo "***********************************************" >> $logFile
 
+echo "ZERO" >> /home/admin/raspiblitz.log
+redis-cli KEYS "*" >> /home/admin/raspiblitz.log
+
 # list all running systemd services for future debug
 systemctl list-units --type=service --state=running >> $logFile
 
@@ -116,7 +119,7 @@ chmod 664 ${infoFile}
 cat $infoFile >> $logFile
 
 echo "ONE" >> /home/admin/raspiblitz.log
-/home/admin/_cache.sh export ln_default_address >> /home/admin/raspiblitz.log
+redis-cli KEYS "*" >> /home/admin/raspiblitz.log
 
 ######################################
 # STOP file flag - for manual provision
@@ -148,9 +151,6 @@ if [ ${redisEnabled} -eq 0 ]; then
   systemctl status redis-server >> $logFile
 fi
 
-echo "TWO" >> /home/admin/raspiblitz.log
-/home/admin/_cache.sh export ln_default_address >> /home/admin/raspiblitz.log
-
 echo "## INIT RaspiBlitz Cache ... wait background.scan.service to finish first scan loop" >> $logFile
 systemscan_runtime=""
 while [ "${systemscan_runtime}" == "" ]
@@ -159,9 +159,6 @@ do
   source <(/home/admin/_cache.sh get systemscan_runtime)
   echo "- waiting for background.scan.service --> systemscan_runtime(${systemscan_runtime})" >> $logFile
 done
-
-echo "THREE" >> /home/admin/raspiblitz.log
-/home/admin/_cache.sh export ln_default_address >> /home/admin/raspiblitz.log
 
 # make sure latest info file is imported
 /home/admin/_cache.sh import $infoFile
@@ -250,9 +247,6 @@ randnum=$(shuf -i 0-7 -n 1)
 /home/admin/config.scripts/blitz.display.sh image /home/admin/raspiblitz/pictures/startlogo${randnum}.png
 sleep 5
 /home/admin/config.scripts/blitz.display.sh hide
-
-echo "FOUR" >> /home/admin/raspiblitz.log
-/home/admin/_cache.sh export ln_default_address >> /home/admin/raspiblitz.log
 
 ################################
 # CLEANING BOOT SYSTEM
@@ -472,9 +466,6 @@ if [ "${systemInitReboot}" == "1" ]; then
   sleep 100
   exit 0
 fi
-
-echo "FIVE" >> /home/admin/raspiblitz.log
-/home/admin/_cache.sh export ln_default_address >> /home/admin/raspiblitz.log
 
 ###################################
 # WAIT LOOP: LOCALNET / INTERNET
