@@ -133,6 +133,7 @@ echo "INFO: _bootstrap.scan.sh loop started > sudo journalctl -f -u background.s
 
 # debug print out all cache values on start
 /home/admin/_cache.sh export >> /home/admin/raspiblitz.log
+/home/admin/_cache.sh set "ln_lnd_mainnet_address" ""
 
 while [ 1 ]
 do
