@@ -57,9 +57,15 @@ echo "OK"
 # make sure that every install runs API with own secret
 # https://github.com/raspiblitz/raspiblitz/issues/4469
 echo
-echo "disable redis for initial start ..."
-sudo systemctl stop redis 2>/dev/null
-sudo systemctl disable redis 2>/dev/null
+# check if redis is enabled
+REDIS_ENABLED=$(sudo systemctl is-enabled redis | grep -c enabled)
+if [ ${REDIS_ENABLED} -gt 0 ]; then
+    echo "disable redis for initial start ..."
+    sudo systemctl stop redis 2>/dev/null
+    sudo systemctl disable redis 2>/dev/null
+fi
+echo "deleting redis data (if still there) ..."
+sudo rm /var/lib/redis/dump.rdb 2>/dev/null
 echo "OK"
 
 echo

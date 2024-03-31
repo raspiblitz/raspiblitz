@@ -111,19 +111,16 @@ elif [ "$1" = "keyvalue" ] && [ "$2" = "on" ]; then
   sudo apt install -y redis-server
 
   # edit config: dont save to disk
-  sudo sed -i "/^save .*/d" /etc/redis/redis.conf
-  sudo sed -i 's/^dbfilename dump.rdb/#dbfilename dump.rdb/' /etc/redis/redis.conf
-  sudo sed -i 's/^dir/#dir/' /etc/redis/redis.conf
-  sudo sed -i 's/^stop-writes-on-bgsave-error yes/stop-writes-on-bgsave-error no/' /etc/redis/redis.conf
-  sudo sed -i 's/^rdb-save-incremental-fsync yes/# rdb-save-incremental-fsync no/' /etc/redis/redis.conf
+  echo "# edit config"
+  redis-cli config set save ""
+  redis-cli config set appendonly no
+  redis-cli config set stop-writes-on-bgsave-error no
+  redis-cli config set rdb-save-incremental-fsync no
 
+  echo "# restart and remove db dump file"
   # restart with new config
   if ! ischroot; then sudo systemctl restart redis-server; fi
-
-  # clean old databases if exist
   sudo rm /var/lib/redis/dump.rdb 2>/dev/null
-
-  # restart again this time there is no old data dump to load
   if ! ischroot; then sudo systemctl restart redis-server; fi
 
 # uninstall
