@@ -48,6 +48,9 @@ if [ "$1" == "redact" ]; then
   sed -i 's/usr=[a-zA-Z0-9]\+/usr=***/' ${redactFile}
   sed -i 's/user [a-zA-Z0-9]\+/user ***/' ${redactFile}
 
+  # redact i2p #4507
+  sed -i 's/[[:alnum:]]*.b32.i2p/***.b32.i2p/' ${redactFile}
+
   exit 0
 fi
 
