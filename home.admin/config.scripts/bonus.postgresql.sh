@@ -187,6 +187,9 @@ if [ "$command" = "0" ] || [ "$command" = "off" ]; then
   sudo systemctl disable --now postgresql@$PG_VERSION-main
   sudo systemctl disable --now postgresql@13-main
   sudo apt remove -y postgresql
+  if dpkg -l | grep -q "postgresql-13"; then
+    sudo apt remove -y postgresql-13
+  fi
   echo "# remove symlink /var/lib/postgresql"
   sudo rm /var/lib/postgresql
   sudo rm /etc/postgresql
