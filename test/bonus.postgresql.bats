@@ -124,8 +124,9 @@
   fi
   sudo apt install -y postgresql-13
   sudo systemctl start postgresql
-  sudo pg_createcluster 13 main --start
-  pg_lsclusters
+  if ! pg_lsclusters | grep "13 main"; then
+    sudo pg_createcluster 13 main --start
+  fi
   sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD 'postgres';"
 }
 
@@ -156,6 +157,9 @@
   sudo mv /mnt/hdd/app-data/postgresql.bak /mnt/hdd/app-data/postgresql
   sudo rm -rf /etc/postgresql
   sudo rm -rf /mnt/hdd/app-data/postgresql-conf.bak
+  PG_VERSION=$(psql -V | awk '{print $3}' | cut -d'.' -f1)
+  echo "Detected PostgreSQL version: $PG_VERSION"
+  sudo pg_dropcluster $PG_VERSION main || true
   # run the script
   run ../home.admin/config.scripts/bonus.postgresql.sh on
   # check if the script ran successfully

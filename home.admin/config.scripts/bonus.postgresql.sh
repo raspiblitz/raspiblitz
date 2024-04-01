@@ -117,7 +117,9 @@ if [ "$command" = "1" ] || [ "$command" = "on" ]; then
       sudo chown -R postgres:postgres $postgres_datadir
       # start cluster temporarily
       sudo systemctl start postgresql
-      sudo pg_createcluster 13 main --start
+      if ! pg_lsclusters | grep "13 main"; then
+        sudo pg_createcluster 13 main --start
+      fi
       echo "Setting default password for postgres user"
       sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD 'postgres';"
       sudo systemctl stop postgresql
