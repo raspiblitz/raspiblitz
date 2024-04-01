@@ -144,9 +144,6 @@ if [ ${redisEnabled} -eq 0 ]; then
   systemctl start redis-server >> $logFile
   systemctl status redis-server >> $logFile
 fi
-echo "**** REDIS STATE on START (should be empty) ***" >> /home/admin/raspiblitz.log
-redis-cli KEYS "*" >> /home/admin/raspiblitz.log
-echo "*******" >> /home/admin/raspiblitz.log
 
 echo "## INIT RaspiBlitz Cache ... wait background.scan.service to finish first scan loop" >> $logFile
 systemscan_runtime=""
