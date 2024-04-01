@@ -450,8 +450,6 @@ fi
 # from actions above
 
 if [ "${systemInitReboot}" == "1" ]; then
-  echo "Stopping Redis server" >> $logFile
-  systemctl stop redis
   echo "Reboot" >> $logFile
   cp ${logFile} /home/admin/raspiblitz.systeminit.log
   /home/admin/_cache.sh set state "reboot"

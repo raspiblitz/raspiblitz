@@ -140,7 +140,7 @@ if [ "$2" = "info" ]; then
 
   # get data
   ln_getInfo=$($lndcli_alias getinfo 2>/dev/null)
-  if [ "${ln_getInfo}" == "" ]; then
+  if [ $? != 0 ] || [ "${ln_getInfo}" == "" ]; then
     echo "command='$lndcli_alias getinfo'"
     echo "error='no data'"
     exit 1
