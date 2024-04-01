@@ -16,13 +16,18 @@ db_user=$3
 db_user_pw=$4
 db_backupfile=$5
 
+PG_VERSION=15
+echo "# Using the default PostgreSQL version: $PG_VERSION"
+
 # switch on
 if [ "$command" = "1" ] || [ "$command" = "on" ]; then
   echo "# Install PostgreSQL"
-  sudo apt install -y postgresql
-
-  PG_VERSION=$(psql -V | awk '{print $3}' | cut -d'.' -f1)
-  echo "Detected PostgreSQL version: $PG_VERSION"
+  if [ ! -f /etc/apt/trusted.gpg.d/postgresql.gpg ]; then
+    curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/postgresql.gpg
+    echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
+    sudo apt update
+  fi
+  sudo apt install -y postgresql-$PG_VERSION
 
   postgres_datadir="/var/lib/postgresql" # default data dir
   postgres_confdir="/etc/postgresql"     # default conf dir
@@ -52,7 +57,8 @@ if [ "$command" = "1" ] || [ "$command" = "on" ]; then
     sudo chown -R postgres:postgres $postgres_datadir
 
     echo "# Create cluster"
-    sudo pg_createcluster $PG_VERSION main --start
+    sudo pg_createcluster $PG_VERSION main
+    sudo pg_ctlcluster $PG_VERSION main start
 
   elif [ -d /mnt/hdd/app-data/postgresql/$PG_VERSION/main ]; then
     if [ -d /mnt/hdd/app-data/postgresql-conf ]; then
@@ -67,11 +73,14 @@ if [ "$command" = "1" ] || [ "$command" = "on" ]; then
       echo "# Create PostgreSQL data"
       sudo mkdir -p $postgres_datadir/$PG_VERSION/main
       sudo chown -R postgres:postgres $postgres_datadir
-      sudo pg_createcluster $PG_VERSION main --start
+      sudo pg_createcluster $PG_VERSION main
+      sudo pg_ctlcluster $PG_VERSION main start
       echo "Setting default password for postgres user"
       # start cluster temporarily
       sudo systemctl start postgresql
-      sudo systemctl start@$PG_VERSION-main
+      sudo pg_createcluster $PG_VERSION main
+      sudo pg_ctlcluster $PG_VERSION main start
+      echo "Setting default password for postgres user"
       sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD 'postgres';"
       sudo systemctl stop postgresql
       sudo systemctl stop postgresql@$PG_VERSION-main
@@ -80,6 +89,7 @@ if [ "$command" = "1" ] || [ "$command" = "on" ]; then
       sudo mv /etc/postgresql /mnt/hdd/app-data/postgresql-conf/
       sudo chown -R postgres:postgres /mnt/hdd/app-data/postgresql-conf
       sudo ln -s /mnt/hdd/app-data/postgresql-conf/postgresql /etc/ # create symlink
+      sudo chown -R postgres:postgres $postgres_confdir
     fi
 
     # symlink data dir
@@ -90,16 +100,13 @@ if [ "$command" = "1" ] || [ "$command" = "on" ]; then
     sudo ln -s /mnt/hdd/app-data/postgresql /var/lib/            # create symlink
 
     sudo chown -R postgres:postgres $postgres_datadir
-    sudo pg_createcluster $PG_VERSION main --start
+    sudo systemctl start postgresql
+    sudo systemctl start postgresql@13-main
+    sudo pg_createcluster $PG_VERSION main
+    sudo pg_ctlcluster $PG_VERSION main start
 
   elif [ -d /mnt/hdd/app-data/postgresql/13/main ]; then
     # if there is old data for pg 13 start and upgrade cluster
-    # /usr/bin/pg_upgradecluster [OPTIONS] <old version> <cluster name> [<new data directory>]
-    if [ ! -f /etc/apt/trusted.gpg.d/postgresql.gpg ]; then
-      curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/postgresql.gpg
-      echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
-      sudo apt update
-    fi
     sudo apt install -y postgresql-13 || exit 1
     sudo systemctl stop postgresql
     sudo systemctl stop postgresql@13-main
@@ -117,9 +124,8 @@ if [ "$command" = "1" ] || [ "$command" = "on" ]; then
       sudo chown -R postgres:postgres $postgres_datadir
       # start cluster temporarily
       sudo systemctl start postgresql
-      if ! pg_lsclusters | grep "13 main"; then
-        sudo pg_createcluster 13 main --start
-      fi
+      sudo pg_createcluster 13 main
+      sudo pg_ctlcluster 13 main start
       echo "Setting default password for postgres user"
       sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD 'postgres';"
       sudo systemctl stop postgresql
@@ -142,8 +148,9 @@ if [ "$command" = "1" ] || [ "$command" = "on" ]; then
     sudo chown -R postgres:postgres $postgres_datadir
     sudo systemctl start postgresql
     sudo systemctl start postgresql@13-main
-    sudo pg_createcluster 13 main --start
-
+    sudo pg_createcluster 13 main
+    sudo pg_ctlcluster 13 main start
+    # /usr/bin/pg_upgradecluster [OPTIONS] <old version> <cluster name> [<new data directory>]
     sudo pg_upgradecluster 13 main $postgres_datadir/$PG_VERSION/main || exit 1
     sudo systemctl disable --now postgresql@13-main
     sudo apt remove -y postgresql-13
@@ -157,7 +164,7 @@ if [ "$command" = "1" ] || [ "$command" = "on" ]; then
     echo "# wait for the postgresql server to start"
     count=0
     count_max=30
-    while ! nc -zv 127.0.0.1 5432 2>/dev/null; do
+    while ! nc -zv '127.0.0.1' 5432 2>/dev/null; do
       count=$((count + 1))
       echo "sleep $count/$count_max"
       sleep 1

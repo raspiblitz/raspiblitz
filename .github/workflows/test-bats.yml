@@ -24,16 +24,15 @@ jobs:
 
       - name: Install bats
         run: |
-          sudo apt install bats
+          sudo apt update &>/dev/null
+          sudo apt install -y bats
 
-      - name: Install postgreql 15
-        run: |
-          curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/postgresql.gpg
-          echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
-          sudo apt update
-          sudo apt install -y postgresql-15
-
-      - name: Run the bats tests
+      - name: Run the bats tests with postgresql 15
         run: |
           cd test
-          sudo bats ./bonus.postgresql.bats
+          sudo bats ./bonus.postgresql-15.bats
+
+      - name: Run the bats tests with postgresql 13
+        run: |
+          cd test
+          sudo bats ./bonus.postgresql-13.bats
