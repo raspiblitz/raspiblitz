@@ -113,6 +113,7 @@
   sudo ln -s /mnt/hdd/app-data/postgresql /var/lib/            # create symlink
 
   sudo mkdir -p $postgres_datadir/13/main
+  sudo chown -R postgres:postgres $postgres_datadir
   sudo chown -R postgres:postgres /mnt/hdd/app-data/postgresql # fix ownership            # create symlink
 
   # /usr/bin/pg_upgradecluster [OPTIONS] <old version> <cluster name> [<new data directory>]
@@ -122,10 +123,9 @@
     sudo apt update
   fi
   sudo apt install -y postgresql-13
-  sudo pg_createcluster 13 main --start || true
-
-  # start cluster
-  sudo systemctl enable --now postgresql
+  sudo systemctl start postgresql
+  sudo pg_createcluster 13 main --start
+  pg_lsclusters
   sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD 'postgres';"
 }
 
@@ -179,6 +179,7 @@
   sudo -u postgres psql -l | grep testdb
   sudo -u postgres psql -l | grep testuser
 }
+
 @test "Final cleanup" {
   # run the script
   run ../home.admin/config.scripts/bonus.postgresql.sh off
