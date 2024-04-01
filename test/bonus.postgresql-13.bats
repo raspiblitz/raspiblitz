@@ -1,3 +1,5 @@
+#!/usr/bin/env bats
+
 @test "Create PostgreSQL 13 cluster" {
   postgres_datadir="/var/lib/postgresql" # default data dir
   postgres_confdir="/etc/postgresql"     # default conf dir
@@ -8,7 +10,8 @@
   fi
   sudo apt-get install -y postgresql-13
 
-  sudo pg_createcluster 13 main
+  # avoid failure in github action
+  sudo pg_createcluster 13 main || true
   sudo pg_ctlcluster 13 main start
 
   sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD 'postgres';"
