@@ -114,9 +114,8 @@
 
   sudo mkdir -p $postgres_datadir/13/main
   sudo chown -R postgres:postgres $postgres_datadir
-  sudo chown -R postgres:postgres /mnt/hdd/app-data/postgresql # fix ownership            # create symlink
+  sudo chown -R postgres:postgres /mnt/hdd/app-data/postgresql # fix ownership
 
-  # /usr/bin/pg_upgradecluster [OPTIONS] <old version> <cluster name> [<new data directory>]
   if [ ! -f /etc/apt/trusted.gpg.d/postgresql.gpg ]; then
     curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/postgresql.gpg
     echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
