@@ -6,10 +6,11 @@
 
 [files]
 # skip these files
-extend-exclude = ["*.nodes","*.torrent","*.sh","*.py","*.proto","*.json"]
+extend-exclude = ["*.nodes","*.torrent","*.sh","*.py","*.proto","*.json","*.conf","*.toml"]
 
 [default.extend-words]
 # don't correct these false positives
 tpos = "tpos"
 ba = "ba"
 tne = "tne"
+HD = "HD"
