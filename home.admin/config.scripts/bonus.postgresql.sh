@@ -158,6 +158,7 @@ if [ "$command" = "1" ] || [ "$command" = "on" ]; then
 
   # start cluster
   sudo systemctl enable --now postgresql
+  sudo systemctl enable --now postgresql@$PG_VERSION-main
 
   # check if PostgreSQL was installed
   if psql --version; then
