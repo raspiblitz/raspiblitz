@@ -24,12 +24,6 @@ echo "cpu=${cpu}" >> /home/admin/raspiblitz.info
 echo "blitzapi=${blitzapi}" >> /home/admin/raspiblitz.info
 echo "displayClass=${displayClass}" >> /home/admin/raspiblitz.info
 
-# https://github.com/rootzoll/raspiblitz/issues/1068#issuecomment-599267503
-echo
-echo "deleting local DNS confs ..."
-sudo rm /etc/resolv.conf
-echo "OK"
-
 # make sure that every install runs API with own secret=
 echo
 echo "deleting old API conf ..."
@@ -38,7 +32,7 @@ echo "OK"
 
 # https://github.com/rootzoll/raspiblitz/issues/1371
 echo
-echo "deleting local WIFI conf ..."
+echo "deactivate local WIFI ..."
 sudo nmcli radio wifi off
 echo "OK"
 
@@ -54,6 +48,12 @@ if [ ${REDIS_ENABLED} -gt 0 ]; then
 fi
 echo "deleting redis data (if still there) ..."
 sudo rm /var/lib/redis/dump.rdb 2>/dev/null
+echo "OK"
+
+# https://github.com/rootzoll/raspiblitz/issues/1068#issuecomment-599267503
+echo
+echo "reset DNS confs ..."
+echo -e "nameserver 1.1.1.1\nnameserver 84.200.69.80" | sudo tee /etc/resolv.conf > /dev/null
 echo "OK"
 
 # SSH Pubkeys (make unique for every sd card image install)
