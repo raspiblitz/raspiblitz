@@ -24,14 +24,6 @@ echo "cpu=${cpu}" >> /home/admin/raspiblitz.info
 echo "blitzapi=${blitzapi}" >> /home/admin/raspiblitz.info
 echo "displayClass=${displayClass}" >> /home/admin/raspiblitz.info
 
-# SSH Pubkeys (make unique for every sd card image install)
-echo
-echo "deleting SSH Pub keys ..."
-echo "they will get recreated on fresh bootup, by _bootstrap.sh service"
-sudo rm /etc/ssh/ssh_host_*
-sudo touch /etc/ssh/sshd_init_keys
-echo "OK"
-
 # https://github.com/rootzoll/raspiblitz/issues/1068#issuecomment-599267503
 echo
 echo "deleting local DNS confs ..."
@@ -66,6 +58,17 @@ if [ ${REDIS_ENABLED} -gt 0 ]; then
 fi
 echo "deleting redis data (if still there) ..."
 sudo rm /var/lib/redis/dump.rdb 2>/dev/null
+echo "OK"
+
+# SSH Pubkeys (make unique for every sd card image install)
+echo
+echo "deleting SSH Pub keys ..."
+echo "keys will get recreated and sshd reactivated on fresh bootup, by _bootstrap.sh service"
+sudo systemctl stop sshd
+sudo systemctl disable sshd
+sudo rm /etc/ssh/ssh_host_*
+touch /boot/firmware/ssh
+#sudo touch /etc/ssh/sshd_init_keys
 echo "OK"
 
 echo
