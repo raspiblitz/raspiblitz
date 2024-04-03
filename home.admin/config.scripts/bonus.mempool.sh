@@ -131,6 +131,10 @@ if [ "$1" = "install" ]; then
   # make sure needed os dependencies are installed
   sudo apt-get install -y mariadb-server mariadb-client
 
+  # stop mariadb - will be activated when switched "on"
+  sudo systemctl stop mariadb
+  sudo systemctl disable mariadb
+
   # add mempool user
   sudo adduser --system --group --home /home/mempool mempool
 
@@ -201,6 +205,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   fi
 
   echo "# *** Activate MEMPOOL ***"
+
+  # make sure mariadb is running
+  sudo systemctl enable mariadb 2>/dev/null
+  sudo systemctl start mariadb 2>/dev/null
 
   isActive=$(sudo ls /etc/systemd/system/mempool.service 2>/dev/null | grep -c 'mempool.service')
   if [ ${isActive} -eq 0 ]; then

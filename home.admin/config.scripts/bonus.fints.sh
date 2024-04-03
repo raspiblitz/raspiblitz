@@ -191,8 +191,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo apt install -y default-jdk
   sudo apt install -y maven
 
-  # make sure mysql/myria db is available
+  # make sure mysql/myria db is available & running
   sudo apt-get install -y mariadb-server mariadb-client
+  sudo systemctl enable mariadb 2>/dev/null
+  sudo systemctl start mariadb 2>/dev/null
 
   # create a dedicated user for the app
   echo "# create user"

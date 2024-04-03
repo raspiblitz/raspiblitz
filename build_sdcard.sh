@@ -520,7 +520,7 @@ if [ "${baseimage}" = "raspios_arm64" ] || [ "${baseimage}" = "debian" ] || [ "$
     # run as exec to dont allow easy physical access by keyboard
     # see https://github.com/rootzoll/raspiblitz/issues/54
     bash -c 'echo "# automatic start the LCD info loop" >> /home/pi/.bashrc'
-    bash -c 'echo "SCRIPT=/home/admin/00infoLCD.sh" >> /home/pi/.bashrc'
+    bash -c 'echo "SCRIPT=\"sudo /home/admin/00infoLCD.sh\"" >> /home/pi/.bashrc'
     bash -c 'echo "# replace shell with script => logout when exiting script" >> /home/pi/.bashrc'
     bash -c 'echo "exec \$SCRIPT" >> /home/pi/.bashrc'
     echo "autostart LCD added to $homeFile"
