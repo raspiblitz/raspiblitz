@@ -516,6 +516,9 @@ if [ "${baseimage}" = "raspios_arm64" ] || [ "${baseimage}" = "debian" ] || [ "$
   homeFile=/home/pi/.bashrc
   autostartDone=$(grep -c "automatic start the LCD" $homeFile)
   if [ ${autostartDone} -eq 0 ]; then
+    # allow pi to write to /dev/tty1
+    sudo chown root:sudo /dev/tty1
+    sudo chmod 660 /dev/tty1
     # bash autostart for pi
     # run as exec to dont allow easy physical access by keyboard
     # see https://github.com/rootzoll/raspiblitz/issues/54

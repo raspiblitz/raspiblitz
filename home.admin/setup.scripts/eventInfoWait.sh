@@ -217,7 +217,7 @@ elif [ "${eventID}" == "waitsetup" ] && [ "${mode}" == "lcd" ]; then
 
         # show default login help info
         logger -p info "eventInfoWait.sh: waitsetup dialog"
-        sudo dialog --backtitle "${backtitle}" --cr-wrap --infobox "
+        dialog --backtitle "${backtitle}" --cr-wrap --infobox "
 ${welcomeline}
 ------------------------------------
 ${browserline}
