@@ -3,17 +3,22 @@
 # Just run this script once after a fresh sd card build
 # to prepare the image for release as a downloadable sd card image
 
+# stop background services
+sudo systemctl stop background.service
+sudo systemctl stop background.scan.service
+
 # remove stop flag (if exists)
 echo "deleting stop flag .."
 sudo rm /boot/firmware/stop 2>/dev/null
 
 # cleaning logs
 echo "deleting raspiblitz & system logs .."
-sudo rm /var/log/* 2>/dev/null
+sudo rm -rf /var/log/journal/* 2>/dev/null
 sudo rm /var/log/redis/* 2>/dev/null
 sudo rm /var/log/private/* 2>/dev/null
 sudo rm /var/log/nginx/* 2>/dev/null
 sudo rm /home/admin/*.log 2>/dev/null
+logger -p info "****** RASPIBLITZ RELEASE ******"
 echo "OK"
 
 # clean raspiblitz.info toward the values set by sd card build script
@@ -24,20 +29,6 @@ echo "cpu=${cpu}" >> /home/admin/raspiblitz.info
 echo "blitzapi=${blitzapi}" >> /home/admin/raspiblitz.info
 echo "displayClass=${displayClass}" >> /home/admin/raspiblitz.info
 
-# SSH Pubkeys (make unique for every sd card image install)
-echo
-echo "deleting SSH Pub keys ..."
-echo "they will get recreated on fresh bootup, by _bootstrap.sh service"
-sudo rm /etc/ssh/ssh_host_*
-sudo touch /etc/ssh/sshd_init_keys
-echo "OK"
-
-# https://github.com/rootzoll/raspiblitz/issues/1068#issuecomment-599267503
-echo
-echo "deleting local DNS confs ..."
-sudo rm /etc/resolv.conf
-echo "OK"
-
 # make sure that every install runs API with own secret=
 echo
 echo "deleting old API conf ..."
@@ -46,12 +37,8 @@ echo "OK"
 
 # https://github.com/rootzoll/raspiblitz/issues/1371
 echo
-echo "deleting local WIFI conf ..."
-sudo rm /boot/wpa_supplicant.conf 2>/dev/null
-# reset entries
-echo "ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
-update_config=1
-country=US" | sudo tee /etc/wpa_supplicant/wpa_supplicant.conf  2>/dev/null
+echo "deactivate local WIFI ..."
+sudo nmcli radio wifi off
 echo "OK"
 
 # make sure that every install runs API with own secret
@@ -66,6 +53,22 @@ if [ ${REDIS_ENABLED} -gt 0 ]; then
 fi
 echo "deleting redis data (if still there) ..."
 sudo rm /var/lib/redis/dump.rdb 2>/dev/null
+echo "OK"
+
+# https://github.com/rootzoll/raspiblitz/issues/1068#issuecomment-599267503
+echo
+echo "reset DNS confs ..."
+echo -e "nameserver 1.1.1.1\nnameserver 84.200.69.80" | sudo tee /etc/resolv.conf > /dev/null
+echo "OK"
+
+# SSH Pubkeys (make unique for every sd card image install)
+echo
+echo "deleting SSH Pub keys ..."
+echo "keys will get recreated and sshd reactivated on fresh bootup, by _bootstrap.sh service"
+sudo systemctl stop sshd
+sudo systemctl disable sshd
+sudo rm /etc/ssh/ssh_host_*
+sudo touch /boot/firmware/ssh
 echo "OK"
 
 echo

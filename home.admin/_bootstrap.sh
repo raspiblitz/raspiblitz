@@ -124,6 +124,8 @@ if [ "${flagExists}" == "1" ]; then
   # set state info
   /home/admin/_cache.sh set state "stop"
   /home/admin/_cache.sh set message "stopped for manual provision"
+  systemctl stop background.service
+  systemctl stop background.scan.service
   # log info
   echo "INFO: 'bootstrap stopped - run command release after manual provison to remove stop flag" >> ${logFile}
   exit 0
