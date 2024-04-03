@@ -64,8 +64,8 @@ configFile="/mnt/hdd/raspiblitz.conf"
 infoFile="/home/admin/raspiblitz.info"
 
 # check that user is pi
-if [ "$USER" != "pi" ]; then
-  echo "plz run as user pi --> su pi"
+if [ "$USER" != "pi" ] && [ "$USER" != "root" ]; then
+  echo "plz run as user pi or with sudo"
   exit 1
 fi
 

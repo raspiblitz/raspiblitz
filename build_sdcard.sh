@@ -516,14 +516,11 @@ if [ "${baseimage}" = "raspios_arm64" ] || [ "${baseimage}" = "debian" ] || [ "$
   homeFile=/home/pi/.bashrc
   autostartDone=$(grep -c "automatic start the LCD" $homeFile)
   if [ ${autostartDone} -eq 0 ]; then
-    # allow pi to write to /dev/tty1
-    sudo chown root:sudo /dev/tty1
-    sudo chmod 660 /dev/tty1
     # bash autostart for pi
     # run as exec to dont allow easy physical access by keyboard
     # see https://github.com/rootzoll/raspiblitz/issues/54
     bash -c 'echo "# automatic start the LCD info loop" >> /home/pi/.bashrc'
-    bash -c 'echo "SCRIPT=/home/admin/00infoLCD.sh" >> /home/pi/.bashrc'
+    bash -c 'echo "SCRIPT=\"sudo /home/admin/00infoLCD.sh\"" >> /home/pi/.bashrc'
     bash -c 'echo "# replace shell with script => logout when exiting script" >> /home/pi/.bashrc'
     bash -c 'echo "exec \$SCRIPT" >> /home/pi/.bashrc'
     echo "autostart LCD added to $homeFile"
