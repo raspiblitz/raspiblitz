@@ -253,30 +253,29 @@ function install_lcd() {
     sudo -u admin /home/admin/config.scripts/blitz.git-verify.sh 'GitHub' 'https://github.com/web-flow.gpg' '(4AEE18F83AFDEB23|B5690EEEBB952194)' || exit 1
 
     # customized from https://github.com/tux1c/wavesharelcd-64bit-rpi/blob/master/install.sh
-    # prepare X11
+    rm -rf /etc/X11/xorg.conf.d/40-libinput.conf
     mkdir -p /etc/X11/xorg.conf.d
-    mv /etc/X11/xorg.conf.d/40-libinput.conf /home/admin/wavesharelcd-64bit-rpi/40-libinput.conf 2>/dev/null
-    cp -rf ./99-calibration.conf /etc/X11/xorg.conf.d/99-calibration.conf
-    # sudo cp -rf ./99-fbturbo.conf  /etc/X11/xorg.conf.d/99-fbturbo.conf # there is no such file
+    cp -rf ./99-calibration.conf  /etc/X11/xorg.conf.d/99-calibration.conf
+    cp -rf ./99-fbturbo.conf  /etc/X11/xorg.conf.d/99-fbturbo.conf
 
     # add waveshare mod
     cp ./waveshare35a.dtbo /boot/overlays/
 
     # modify /boot/config.txt 
-    sed -i "s/^hdmi_force_hotplug=.*//g" /boot/config.txt 
-    sed -i '/^hdmi_group=/d' /boot/config.txt 2>/dev/null
-    sed -i "/^hdmi_mode=/d" /boot/config.txt 2>/dev/null
+    sed -i "s/^hdmi_force_hotplug=.*//g" /boot/firmware/config.txt 
+    sed -i '/^hdmi_group=/d' /boot/firmware/config.txt 2>/dev/null
+    sed -i "/^hdmi_mode=/d" /boot/firmware/config.txt 2>/dev/null
 
     #sed -i "s/^#framebuffer_width=.*/framebuffer_width=480/g" /boot/config.txt
     #sed -i "s/^#framebuffer_height=.*/framebuffer_height=320/g" /boot/config.txt
-    #echo "hdmi_force_hotplug=1" >> /boot/config.txt
-    sed -i "s/^dtparam=i2c_arm=.*//g" /boot/config.txt 
+    #echo "hdmi_force_hotplug=1" >> /boot/firmware/config.txt
+    sed -i "s/^dtparam=i2c_arm=.*//g" /boot/firmware/config.txt
     # echo "dtparam=i2c_arm=on" >> /boot/config.txt --> this is to be called I2C errors - see: https://github.com/rootzoll/raspiblitz/issues/1058#issuecomment-739517713
     # don't enable SPI and UART ports by default
-    # echo "dtparam=spi=on" >> /boot/config.txt
-    # echo "enable_uart=1" >> /boot/config.txt
-    sed -i "s/^dtoverlay=.*//g" /boot/config.txt 
-    echo "dtoverlay=waveshare35a:rotate=90" >> /boot/config.txt
+    # echo "dtparam=spi=on" >> /boot/firmware/config.txt
+    # echo "enable_uart=1" >> /boot/firmware/config.txt
+    sed -i "s/^dtoverlay=.*//g" /boot/firmware/config.txt
+    echo "dtoverlay=waveshare35a:rotate=90" >> /boot/firmware/config.txt
 
     # modify cmdline.txt 
     modification="dwc_otg.lpm_enable=0 quiet fbcon=map:10 fbcon=font:ProFont6x11 logo.nologo"
