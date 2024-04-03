@@ -67,7 +67,7 @@ echo "keys will get recreated and sshd reactivated on fresh bootup, by _bootstra
 sudo systemctl stop sshd
 sudo systemctl disable sshd
 sudo rm /etc/ssh/ssh_host_*
-touch /boot/firmware/ssh
+sudo touch /boot/firmware/ssh
 #sudo touch /etc/ssh/sshd_init_keys
 echo "OK"
 
