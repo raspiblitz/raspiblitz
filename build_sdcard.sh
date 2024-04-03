@@ -432,7 +432,7 @@ if [ "${baseimage}" = "raspios_arm64" ]; then
   [ "${wifi_region}" != "off" ] && raspi-config nonint do_wifi_country $wifi_region
   # see https://github.com/rootzoll/raspiblitz/issues/428#issuecomment-472822840
 
-  configFile="/boot/config.txt"
+  configFile="/boot/firmware/config.txt"
   if ! grep "Raspiblitz" $configFile; then
     echo "# Adding Raspiblitz Edits to $configFile"
     echo | tee -a $configFile
