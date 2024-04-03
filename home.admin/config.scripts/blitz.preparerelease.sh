@@ -9,7 +9,7 @@ sudo rm /boot/firmware/stop 2>/dev/null
 
 # cleaning logs
 echo "deleting raspiblitz & system logs .."
-sudo rm /var/log/* 2>/dev/null
+sudo rm -rf /var/log/journal/* 2>/dev/null
 sudo rm /var/log/redis/* 2>/dev/null
 sudo rm /var/log/private/* 2>/dev/null
 sudo rm /var/log/nginx/* 2>/dev/null
