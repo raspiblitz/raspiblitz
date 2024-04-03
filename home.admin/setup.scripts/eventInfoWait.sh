@@ -223,7 +223,7 @@ ${welcomeline}
 ${browserline}
 terminal: ssh admin@${internet_localip}
 password: raspiblitz
-" 9 41
+" 9 41 2>&1 >/dev/tty
 
     else
 
