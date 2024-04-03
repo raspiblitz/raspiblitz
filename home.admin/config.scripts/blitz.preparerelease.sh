@@ -18,6 +18,7 @@ sudo rm /var/log/redis/* 2>/dev/null
 sudo rm /var/log/private/* 2>/dev/null
 sudo rm /var/log/nginx/* 2>/dev/null
 sudo rm /home/admin/*.log 2>/dev/null
+logger -p info "****** RASPIBLITZ RELEASE ******"
 echo "OK"
 
 # clean raspiblitz.info toward the values set by sd card build script
