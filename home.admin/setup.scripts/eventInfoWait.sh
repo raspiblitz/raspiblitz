@@ -217,13 +217,13 @@ elif [ "${eventID}" == "waitsetup" ] && [ "${mode}" == "lcd" ]; then
 
         # show default login help info
         logger -p info "eventInfoWait.sh: waitsetup dialog"
-        dialog --backtitle "${backtitle}" --cr-wrap --infobox "
+        sudo dialog --backtitle "${backtitle}" --cr-wrap --infobox "
 ${welcomeline}
 ------------------------------------
 ${browserline}
 terminal: ssh admin@${internet_localip}
 password: raspiblitz
-" 9 41 2>&1 >/dev/tty
+" 9 41
 
     else
 
