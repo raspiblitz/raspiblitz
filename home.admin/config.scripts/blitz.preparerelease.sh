@@ -39,11 +39,7 @@ echo "OK"
 # https://github.com/rootzoll/raspiblitz/issues/1371
 echo
 echo "deleting local WIFI conf ..."
-sudo rm /boot/wpa_supplicant.conf 2>/dev/null
-# reset entries
-echo "ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
-update_config=1
-country=US" | sudo tee /etc/wpa_supplicant/wpa_supplicant.conf  2>/dev/null
+sudo nmcli radio wifi off
 echo "OK"
 
 # make sure that every install runs API with own secret
