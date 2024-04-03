@@ -3,6 +3,10 @@
 # Just run this script once after a fresh sd card build
 # to prepare the image for release as a downloadable sd card image
 
+# stop background services
+sudo systemctl stop background.service
+sudo systemctl stop background.scan.service
+
 # remove stop flag (if exists)
 echo "deleting stop flag .."
 sudo rm /boot/firmware/stop 2>/dev/null
