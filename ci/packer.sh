@@ -104,6 +104,8 @@ if [ ${#COMMITHASH} -gt 0 ]; then
   echo "# actual(${actualCOMMITHASH}) ?= wanted(${COMMITHASH})"
   matches=$(echo "${actualCOMMITHASH}" | grep -c "${COMMITHASH}")
   if [ ${matches} -eq 0 ]; then
+    cd ..
+    rm -rf raspiblitz 2>/dev/null
     echo "error='COMMITHASH of branch does not match'"
     exit 1
   fi
