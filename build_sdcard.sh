@@ -294,6 +294,15 @@ echo "[Login]
 HandleLidSwitch=ignore
 HandleLidSwitchDocked=ignore" | tee /etc/systemd/logind.conf.d/nosuspend.conf
 
+# check if /etc/hosts already has debian entry
+# prevent "unable to resolve host debian" error
+isDebianInHosts=$(grep -c "debian" /etc/hosts)
+if [ ${isDebianInHosts} -eq 0 ]; then
+  echo "# Adding debian to /etc/hosts"
+  echo "127.0.1.1       debian" | tee -a /etc/hosts > /dev/null
+  systemctl restart networking
+fi
+
 # FIXING LOCALES
 # https://github.com/rootzoll/raspiblitz/issues/138
 # https://daker.me/2014/10/how-to-fix-perl-warning-setting-locale-failed-in-raspbian.html
