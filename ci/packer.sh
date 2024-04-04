@@ -17,12 +17,6 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
-# check if internet is available
-if ping -c 1 "1.1.1.1" &> /dev/null; then
-  echo "error='script needs internet connection to run'"
-  exit 1
-fi
-
 # usage info
 echo "packer.sh [BRANCH] [arm|x86] [min|fat] [?lastcommithash]"
 echo "Build RaspiBlitz install images on a Debian LIVE system"
@@ -31,6 +25,14 @@ echo $REPO
 echo "Results will be stored in:"
 echo $BUILDFOLDER
 echo "Start this script in the root of an writable 128GB NTFS formatted USB drive."
+
+# check if internet is available
+if ping -c 1 "1.1.1.1" &> /dev/null; then
+  echo "# checking internet"
+else
+  echo "error='script needs internet connection to run'"
+  exit 1
+fi
 
 # get parameters
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
