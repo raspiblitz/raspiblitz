@@ -36,8 +36,7 @@ if [ "$command" = "1" ] || [ "$command" = "on" ]; then
   sudo systemctl stop postgresql@$PG_VERSION-main
 
   if [ ! -d /mnt/hdd/app-data/postgresql ]; then
-    # there is no old data
-
+    echo "# There is no old pg data"
     # symlink conf dir
     sudo mkdir -p /mnt/hdd/app-data/postgresql-conf/postgresql
     sudo chown -R postgres:postgres /mnt/hdd/app-data/postgresql-conf # fix ownership
@@ -52,7 +51,7 @@ if [ "$command" = "1" ] || [ "$command" = "on" ]; then
     sudo rm -rf $postgres_datadir                                # not a symlink.. delete it silently
     sudo ln -s /mnt/hdd/app-data/postgresql /var/lib/            # create symlink
 
-    echo "# Create PostgreSQL data"
+    echo "# Create PostgreSQL $PG_VERSION data"
     sudo mkdir -p $postgres_datadir/$PG_VERSION/main
     sudo chown -R postgres:postgres $postgres_datadir
 
@@ -61,6 +60,7 @@ if [ "$command" = "1" ] || [ "$command" = "on" ]; then
     sudo pg_ctlcluster $PG_VERSION main start
 
   elif [ -d /mnt/hdd/app-data/postgresql/$PG_VERSION/main ]; then
+    echo "# There is old data for $PG_VERSION, restoring ..."
     if [ -d /mnt/hdd/app-data/postgresql-conf ]; then
       # symlink conf dir
       sudo mkdir -p /mnt/hdd/app-data/postgresql-conf/postgresql
@@ -70,7 +70,7 @@ if [ "$command" = "1" ] || [ "$command" = "on" ]; then
       sudo ln -s /mnt/hdd/app-data/postgresql-conf/postgresql /etc/     # create symlink
     else
       # generate new cluster and use default config
-      echo "# Create PostgreSQL data"
+      echo "# Create $PG_VERSION config"
       sudo mkdir -p $postgres_datadir/$PG_VERSION/main
       sudo chown -R postgres:postgres $postgres_datadir
       sudo pg_createcluster $PG_VERSION main
@@ -106,7 +106,7 @@ if [ "$command" = "1" ] || [ "$command" = "on" ]; then
     sudo pg_ctlcluster $PG_VERSION main start
 
   elif [ -d /mnt/hdd/app-data/postgresql/13/main ]; then
-    # if there is old data for pg 13 start and upgrade cluster
+    echo "# There is old data for pg 13, start and upgrade cluster ..."
     sudo apt install -y postgresql-13 || exit 1
     sudo systemctl stop postgresql
     sudo systemctl stop postgresql@13-main
@@ -119,7 +119,7 @@ if [ "$command" = "1" ] || [ "$command" = "on" ]; then
       sudo ln -s /mnt/hdd/app-data/postgresql-conf/postgresql /etc/     # create symlink
     else
       # generate new cluster and use default config
-      echo "# Create PostgreSQL data"
+      echo "# Create pg 13 config"
       sudo mkdir -p $postgres_datadir/13/main
       sudo chown -R postgres:postgres $postgres_datadir
       # start cluster temporarily
@@ -150,8 +150,21 @@ if [ "$command" = "1" ] || [ "$command" = "on" ]; then
     sudo systemctl start postgresql@13-main
     sudo pg_createcluster 13 main
     sudo pg_ctlcluster 13 main start
+
+    if [ -d /mnt/hdd/app-data/postgresql/$PG_VERSION ]; then
+      echo "# backup /mnt/hdd/app-data/postgresql/$PG_VERSION"
+      now=$(date +"%Y_%m_%d_%H%M%S")
+      sudo mv /mnt/hdd/app-data/postgresql/$PG_VERSION /mnt/hdd/app-data/postgresql/$PG_VERSION-backup-$now
+      sudo pg_dropcluster 15 main
+    fi
+
     # /usr/bin/pg_upgradecluster [OPTIONS] <old version> <cluster name> [<new data directory>]
     sudo pg_upgradecluster 13 main $postgres_datadir/$PG_VERSION/main || exit 1
+    sudo chown -R postgres:postgres /mnt/hdd/app-data/postgresql/$PG_VERSION
+    echo "# backup /mnt/hdd/app-data/postgresql/13"
+    now=$(date +"%Y_%m_%d_%H%M%S")
+    sudo mv /mnt/hdd/app-data/postgresql/13 /mnt/hdd/app-data/postgresql/13-backup-$now
+    sudo pg_dropcluster 13 main
     sudo systemctl disable --now postgresql@13-main
     sudo apt remove -y postgresql-13
   fi
