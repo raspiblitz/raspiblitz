@@ -444,7 +444,7 @@ if [ "${baseimage}" = "raspios_arm64" ]; then
     fi
     echo "max_usb_current=1" | tee -a $configFile
     echo "dtparam=nvme" | tee -a $configFile
-    echo "dtparam=watchdog=off" | tee -a $configFile
+    echo "dtparam=watchdog=on" | tee -a $configFile
     echo 'dtoverlay=pi3-disable-bt' | tee -a $configFile
     echo 'dtoverlay=disable-bt' | tee -a $configFile
   else
