@@ -98,6 +98,13 @@ cd raspiblitz
 
 # checkout the desired branch
 git checkout $BRANCH
+if [ $? -gt 0 ]; then
+  cd ..
+  rm -rf raspiblitz 2>/dev/null
+  echo "# BRANCH: ${BRANCH}"
+  echo "error='git checkout BRANCH failed'"
+  exit 1
+fi
 
 # check commit hash if set
 if [ ${#COMMITHASH} -gt 0 ]; then
