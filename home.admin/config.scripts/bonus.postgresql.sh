@@ -151,11 +151,12 @@ if [ "$command" = "1" ] || [ "$command" = "on" ]; then
     sudo pg_createcluster 13 main
     sudo pg_ctlcluster 13 main start
 
-    if [ -d /mnt/hdd/app-data/postgresql/$PG_VERSION ]; then
+    if [ -d /mnt/hdd/app-data/postgresql/$PG_VERSION ] || pg_lsclusters | grep -q "$PG_VERSION main" ; then
       echo "# backup /mnt/hdd/app-data/postgresql/$PG_VERSION"
       now=$(date +"%Y_%m_%d_%H%M%S")
       sudo mv /mnt/hdd/app-data/postgresql/$PG_VERSION /mnt/hdd/app-data/postgresql/$PG_VERSION-backup-$now
-      sudo pg_dropcluster 15 main
+      echo "# Drop empty pg 15 cluster"
+      sudo pg_dropcluster $PG_VERSION main
     fi
 
     # /usr/bin/pg_upgradecluster [OPTIONS] <old version> <cluster name> [<new data directory>]
