@@ -172,10 +172,8 @@ if [ "$command" = "1" ] || [ "$command" = "on" ]; then
     if sudo cat /etc/postgresql/$PG_VERSION/main/postgresql.conf | grep 5433; then
       echo "# Switch port back to 5432"
       sudo sed -i 's/port = 5433/port = 5432/' /etc/postgresql/$PG_VERSION/main/postgresql.conf
-      if pg_lscluters | grep 5433; then
-        echo "# Restart posgresql.service"
-        sudo systemctl restart postgresql
-      fi
+      echo "# Restart posgresql.service"
+      sudo systemctl restart postgresql
     fi
   fi
 
