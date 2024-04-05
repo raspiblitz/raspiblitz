@@ -980,6 +980,7 @@ if [ ${isMounted} -eq 0 ]; then
 
   # system has to wait before reboot to present like seed words and other info/options to user
   echo "BOOTSTRAP EXIT ... waiting for final setup controller to initiate final reboot." >> $logFile
+  echo "------------> You may login thru web browser to continue setup." >> $logFile
   exit 1
 
 else
