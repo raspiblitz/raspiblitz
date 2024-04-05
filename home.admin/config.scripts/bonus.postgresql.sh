@@ -151,7 +151,7 @@ if [ "$command" = "1" ] || [ "$command" = "on" ]; then
     sudo pg_createcluster 13 main
     sudo pg_ctlcluster 13 main start
 
-    if [ -d /mnt/hdd/app-data/postgresql/$PG_VERSION ] || pg_lsclusters | grep -q "$PG_VERSION main" ; then
+    if [ -d /mnt/hdd/app-data/postgresql/$PG_VERSION ] || pg_lsclusters | grep -q "$PG_VERSION  main"; then
       echo "# backup /mnt/hdd/app-data/postgresql/$PG_VERSION"
       now=$(date +"%Y_%m_%d_%H%M%S")
       sudo mv /mnt/hdd/app-data/postgresql/$PG_VERSION /mnt/hdd/app-data/postgresql/$PG_VERSION-backup-$now
@@ -168,6 +168,15 @@ if [ "$command" = "1" ] || [ "$command" = "on" ]; then
     sudo pg_dropcluster 13 main
     sudo systemctl disable --now postgresql@13-main
     sudo apt remove -y postgresql-13
+
+    if sudo cat /etc/postgresql/$PG_VERSION/main/postgresql.conf | grep 5433; then
+      echo "# Switch port back to 5432"
+      sudo sed -i 's/port = 5433/port = 5432/' /etc/postgresql/$PG_VERSION/main/postgresql.conf
+      if pg_lscluters | grep 5433; then
+        echo "# Restart posgresql.service"
+        sudo systemctl restart postgresql
+      fi
+    fi
   fi
 
   # start cluster

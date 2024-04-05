@@ -52,6 +52,12 @@
   # run the script
   run ../home.admin/config.scripts/bonus.postgresql.sh on
   [ "$status" -eq 0 ]
+  run pg_lsclusters
+  # check that no 13 cluster is present
+  [ $(echo "$output" | grep -c "13  main") -eq 0 ]
+  # check that no 13 cluster is present
+  echo "$output" | grep -q "15  main"
+  [ "$?" -eq 0 ]
   run sudo -u postgres psql -l
   echo "$output" | grep -q "testdb13"
   [ "$?" -eq 0 ]
@@ -77,8 +83,8 @@
   [ "$status" -eq 0 ]
   run pg_lsclusters
   [ "$status" -eq 0 ]
-  sudo pg_dropcluster 15 main  --stop || true
-  sudo pg_dropcluster 13 main  --stop || true
+  sudo pg_dropcluster 15 main --stop || true
+  sudo pg_dropcluster 13 main --stop || true
   sudo rm -rf /mnt/hdd/app-data/postgresql*
   sudo apt-get remove -y postgresql-13
   sudo apt-get remove -y postgresql-15
