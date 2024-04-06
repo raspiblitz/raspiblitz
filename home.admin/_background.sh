@@ -23,7 +23,7 @@ blitzTUIHeartBeatLine=""
 raspi_bootdir=""
 if [ -d /boot/firmware ]; then
   raspi_bootdir="/boot/firmware"
-elif if [ -d /boot ]; then
+elif [ -d /boot ]; then
   raspi_bootdir="/boot"
 fi
 echo "# raspi_bootdir(${raspi_bootdir})"
