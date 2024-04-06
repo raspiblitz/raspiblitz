@@ -19,8 +19,7 @@ echo "INFO: _background.sh loop started - sudo journalctl -f -u background" >> /
 blitzTUIHeartBeatLine=""
 /home/admin/_cache.sh set blitzTUIRestarts "0"
 
-
-# determine correct raspberrypi config files
+# determine correct raspberrypi boot drive path (that easy to access when sd card is insert into laptop)
 raspi_bootdir=""
 if [ -d /boot/firmware ];then
   raspi_bootdir="/boot/firmware"
