@@ -19,6 +19,16 @@ echo "INFO: _background.sh loop started - sudo journalctl -f -u background" >> /
 blitzTUIHeartBeatLine=""
 /home/admin/_cache.sh set blitzTUIRestarts "0"
 
+
+# determine correct raspberrypi config files
+raspi_bootdir=""
+if [ -d /boot/firmware ];then
+  raspi_bootdir="/boot/firmware"
+elif if [ -d /boot ];then
+  raspi_bootdir="/boot"
+fi
+echo "# raspi_bootdir(${raspi_bootdir})"
+
 counter=0
 while [ 1 ]
 do
@@ -481,11 +491,35 @@ do
         echo "--> Channel Backup File changed"
 
         # make copy to sd card (as local basic backup)
-        mkdir -p /home/admin/backups/scb/ 2>/dev/null
+        mkdir -p ${localBackupDir} 2>/dev/null
         cp $scbPath $localBackupPath
+        if [ $? -eq 0 ]; then
+          echo "OK channel.backup copied to '${localBackupPath}'"
+        else
+          logger -p daemon.err "_background.sh FAIL channel.backup copy to '${localBackupPath}'"
+          echo "FAIL channel.backup copy to '${localBackupPath}'"
+        fi
+
         cp $scbPath $localTimestampedPath
-        cp $scbPath /boot/firmware/channel.backup
-        echo "OK channel.backup copied to '${localBackupPath}' and '${localTimestampedPath}' and '/boot/firmware/channel.backup'"
+        if [ $? -eq 0 ]; then
+          echo "OK channel.backup copied to '${localTimestampedPath}'"
+        else
+          logger -p daemon.err "_background.sh FAIL channel.backup copy to '${localTimestampedPath}'"
+          echo "FAIL channel.backup copy to '${localTimestampedPath}'"
+        fi
+
+        # copy to boot drive (for easy recovery)
+        if [ "${raspi_bootdir}" != "" ]; then
+          cp $scbPath ${raspi_bootdir}/channel.backup
+          if [ $? -eq 0 ]; then
+            echo "OK channel.backup copied to '${raspi_bootdir}/channel.backup'"
+          else
+            logger -p daemon.err "_background.sh FAIL channel.backup copy to '${raspi_bootdir}/channel.backup'"
+            echo "FAIL channel.backup copy to '${raspi_bootdir}/channel.backup'"
+          fi
+        else
+          echo "No boot drive found - skip copy to boot"
+        fi
 
         # check if a additional local backup target is set
         # see ./config.scripts/blitz.backupdevice.sh
@@ -590,8 +624,8 @@ do
         mkdir -p /home/admin/backups/er/ 2>/dev/null
         cp $erPath $localBackupPath
         cp $erPath $localTimestampedPath
-        cp $erPath /boot/firmware/${netprefix}emergency.recover
-        echo "OK emergency.recover copied to '${localBackupPath}' and '${localTimestampedPath}' and '/boot/firmware/${netprefix}emergency.recover'"
+        cp $erPath ${raspi_bootdir}/${netprefix}emergency.recover
+        echo "OK emergency.recover copied to '${localBackupPath}' and '${localTimestampedPath}' and '${raspi_bootdir}/${netprefix}emergency.recover'"
 
         # check if a additional local backup target is set
         # see ./config.scripts/blitz.backupdevice.sh
