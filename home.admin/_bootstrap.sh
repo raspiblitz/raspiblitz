@@ -117,9 +117,9 @@ cat $infoFile >> $logFile
 
 # determine correct raspberrypi boot drive path (that easy to access when sd card is insert into laptop)
 raspi_bootdir=""
-if [ -d /boot/firmware ];then
+if [ -d /boot/firmware ]; then
   raspi_bootdir="/boot/firmware"
-elif if [ -d /boot ];then
+elif if [ -d /boot ]; then
   raspi_bootdir="/boot"
 fi
 echo "# raspi_bootdir(${raspi_bootdir})" >> $logFile
