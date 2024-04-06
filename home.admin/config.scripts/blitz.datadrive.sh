@@ -26,6 +26,15 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
+# determine correct raspberrypi boot drive path (that easy to access when sd card is insert into laptop)
+raspi_bootdir=""
+if [ -d /boot/firmware ]; then
+  raspi_bootdir="/boot/firmware"
+elif if [ -d /boot ]; then
+  raspi_bootdir="/boot"
+fi
+echo "# raspi_bootdir(${raspi_bootdir})"
+
 # install BTRFS if needed
 btrfsInstalled=$(btrfs --version 2>/dev/null | grep -c "btrfs-progs")
 if [ ${btrfsInstalled} -eq 0 ]; then
@@ -561,7 +570,7 @@ if [ "$1" = "status" ]; then
     hddAdapterUSAP=0
     
     # check if force UASP flag is set on sd card
-    if [ -f "/boot/firmware/uasp.force" ]; then
+    if [ -f "${raspi_bootdir}/uasp.force" ]; then
       hddAdapterUSAP=1
     fi
     # or UASP is set by config file
@@ -1881,18 +1890,18 @@ if [ "$1" = "uasp-fix" ]; then
 
   # check if UASP is already deactivated (on RaspiOS)
   # https://www.pragmaticlinux.com/2021/03/fix-for-getting-your-ssd-working-via-usb-3-on-your-raspberry-pi/
-  cmdlineExists=$(ls /boot/cmdline.txt 2>/dev/null | grep -c "cmdline.txt")
+  cmdlineExists=$(ls ${raspi_bootdir}/cmdline.txt 2>/dev/null | grep -c "cmdline.txt")
   if [ ${cmdlineExists} -eq 1 ] && [ ${#hddAdapterUSB} -gt 0 ] && [ ${hddAdapterUSAP} -eq 0 ]; then
     echo "# Checking for UASP deactivation ..."
-    usbQuirkActive=$(cat /boot/cmdline.txt | grep -c "usb-storage.quirks=")
-    usbQuirkDone=$(cat /boot/cmdline.txt | grep -c "usb-storage.quirks=${hddAdapterUSB}:u")
+    usbQuirkActive=$(cat ${raspi_bootdir}/cmdline.txt | grep -c "usb-storage.quirks=")
+    usbQuirkDone=$(cat ${raspi_bootdir}/cmdline.txt | grep -c "usb-storage.quirks=${hddAdapterUSB}:u")
     if [ ${usbQuirkActive} -gt 0 ] && [ ${usbQuirkDone} -eq 0 ]; then
       # remove old usb-storage.quirks
-      sed -i "s/usb-storage.quirks=[^ ]* //g" /boot/cmdline.txt
+      sed -i "s/usb-storage.quirks=[^ ]* //g" ${raspi_bootdir}/cmdline.txt
     fi 
     if [ ${usbQuirkDone} -eq 0 ]; then
       # add new usb-storage.quirks
-      sed -i "s/^/usb-storage.quirks=${hddAdapterUSB}:u /" /boot/cmdline.txt
+      sed -i "s/^/usb-storage.quirks=${hddAdapterUSB}:u /" ${raspi_bootdir}/cmdline.txt
       # go into reboot to activate new setting
       echo "# DONE deactivating UASP for ${hddAdapterUSB} ... reboot needed"
       echo "neededReboot=1"
