@@ -30,7 +30,7 @@ source /mnt/hdd/raspiblitz.conf 2>/dev/null
 # but basically this just says if the driver for GPIO LCD is installed - not if connected
 fb1Exists=$(ls /dev/fb1 2>/dev/null | grep -c "/dev/fb1")
 
-# determine correct raspiblitz config files
+# determine correct raspberrypi config files
 raspi_configfile="/boot/config.txt"
 raspi_commandfile="/boot/cmdline.txt"
 if [ -d /boot/firmware ];then
