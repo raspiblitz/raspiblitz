@@ -441,14 +441,18 @@ if [ "${baseimage}" = "raspios_arm64" ]; then
   [ "${wifi_region}" != "off" ] && raspi-config nonint do_wifi_country $wifi_region
   # see https://github.com/rootzoll/raspiblitz/issues/428#issuecomment-472822840
 
-  configFile="/boot/firmware/config.txt"
+  if [ -d /boot/firmware ];then
+    configFile="/boot/firmware/config.txt"
+  else
+    configFile="/boot/config.txt"
+  fi
   if ! grep "Raspiblitz" $configFile; then
     echo "# Adding Raspiblitz Edits to $configFile"
     echo | tee -a $configFile
     echo "# Raspiblitz" | tee -a $configFile
     # ensure that kernel8.img is used to set PAGE_SIZE to 4K
     # https://github.com/raspiblitz/raspiblitz/issues/4346
-    if [ -f /boot/firmware/kernel8.img ]; then
+    if [ -f /boot/kernel8.img ] || [ -f /boot/firmware/kernel8.img ]; then
       echo 'kernel=kernel8.img' | tee -a $configFile
     fi
     echo "max_usb_current=1" | tee -a $configFile
