@@ -276,7 +276,7 @@ else
 fi
 
 # LND binary install
-if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ] || [ "${tlnd}" == "on" ] || [ "${slnd}" == "on" ]; then
+if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ] || [ "${tlnd}" == "on" ] || [ "${slnd}" == "on" ]; then
   # if already installed by fatpack will skip
   echo "Provisioning LND Binary - run config script" >> ${logFile}
   /home/admin/config.scripts/lnd.install.sh install >> ${logFile} 2>&1
