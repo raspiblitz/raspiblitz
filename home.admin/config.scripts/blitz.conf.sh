@@ -23,7 +23,8 @@ if [ "$1" = "set" ]; then
 
   # check that key & value are given
   if [ "${keystr}" == "" ] || [ "${valuestr}" == "" ]; then
-    echo "# blitz.conf.sh $*"
+    # shellcheck disable=SC2145
+    echo "# blitz.conf.sh $@"
     echo "# FAIL: missing parameter"
     exit 1
   fi
@@ -39,7 +40,8 @@ if [ "$1" = "set" ]; then
   # check that config file exists
   raspiblitzConfExists=$(ls ${configFile} 2>/dev/null | grep -c "${configFile}")
   if [ ${raspiblitzConfExists} -eq 0 ]; then
-    echo "# blitz.conf.sh $*"
+    # shellcheck disable=SC2145
+    echo "# blitz.conf.sh $@"
     exit 3
   fi
 
@@ -87,7 +89,8 @@ elif [ "$1" = "list-add" ]; then
 
   # check that key & value are given
   if [ "${keystr}" == "" ] || [ "${valuestr}" == "" ]; then
-    echo "# blitz.conf.sh $*"
+    # shellcheck disable=SC2145
+    echo "# blitz.conf.sh $@"
     echo "# FAIL: missing parameter"
     exit 1
   fi
@@ -141,7 +144,8 @@ elif [ "$1" = "list-remove" ]; then
 
   # check that key & value are given
   if [ "${keystr}" == "" ] || [ "${valuestr}" == "" ]; then
-    echo "# blitz.conf.sh $*"
+    # shellcheck disable=SC2145
+    echo "# blitz.conf.sh $@"
     echo "# FAIL: missing parameter"
     exit 1
   fi
