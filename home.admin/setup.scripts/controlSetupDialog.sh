@@ -66,7 +66,7 @@ if [ "${setupPhase}" == "migration" ]; then
 
   source <(/home/admin/_cache.sh get hddGotMigrationData migrationMode)
   if [ "${migrationMode}" == "" ]; then
-    migrationMode = "normal"
+    migrationMode="normal"
   fi
   
   # show recovery dialog
