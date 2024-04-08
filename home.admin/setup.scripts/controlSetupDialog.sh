@@ -157,7 +157,7 @@ if [ "${setupPhase}" == "setup" ]; then
       filesystem="ext4"
 
       # check if there is a flag set on sd card boot section to format as btrfs (experimental)
-      flagBTRFS=$(sudo ls /boot/btrfs* 2>/dev/null | grep -c btrfs)
+      flagBTRFS=$(sudo ls /boot/firmware/btrfs* 2>/dev/null | grep -c btrfs)
       if [ "${flagBTRFS}" != "0" ]; then
         echo "Found BTRFS flag ---> formatting with experimental BTRFS filesystem"
         filesystem="btrfs"

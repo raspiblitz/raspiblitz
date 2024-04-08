@@ -9,6 +9,15 @@ if [ "$EUID" -ne 0 ]
   exit 1
 fi
 
+# determine correct raspberrypi boot drive path (that easy to access when sd card is insert into laptop)
+raspi_bootdir=""
+if [ -d /boot/firmware ]; then
+  raspi_bootdir="/boot/firmware"
+elif [ -d /boot ]; then
+  raspi_bootdir="/boot"
+fi
+echo "# raspi_bootdir(${raspi_bootdir})"
+
 # make sure LCD is on (default for fatpack)
 /home/admin/config.scripts/blitz.display.sh set-display lcd
 
@@ -24,7 +33,7 @@ if [ "${needsExpansion}" == "1" ]; then
 
     # write a stop file to prevent full bootstrap
     # after fsexpand reboot
-    touch /boot/firmware/stop
+    touch ${raspi_bootdir}/stop
 
     # trigger fsexpand
     /home/admin/config.scripts/blitz.bootdrive.sh fsexpand

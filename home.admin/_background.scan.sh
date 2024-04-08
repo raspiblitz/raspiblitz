@@ -275,6 +275,8 @@ do
   ###################
   # HARDDRIVE
 
+  # info on storage medium
+  source <(/home/admin/_cache.sh valid hdd_mounted)
   if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE2} ]; then
     echo "updating: /home/admin/config.scripts/blitz.datadrive.sh status"
     source <(/home/admin/config.scripts/blitz.datadrive.sh status)

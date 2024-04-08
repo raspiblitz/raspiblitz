@@ -241,8 +241,7 @@ fi
 
 
 echo "# clean up"
-cd ..
-rm -rf raspiblitz 2>/dev/null
+rm -rf ./../raspiblitz 2>/dev/null
 
 echo "# SIGN & SECURE IMAGE ###########################################"
 echo
