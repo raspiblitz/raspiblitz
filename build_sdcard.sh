@@ -442,6 +442,19 @@ if ! compgen -u pi; then
   adduser pi sudo
 fi
 
+# activate watchdog if ls /dev/watchdog exists - see #4534
+if [ -e /dev/watchdog ]; then
+  echo "Activating watchdog ..."
+  if [ "${baseimage}" = "raspios_arm64" ]; then
+    echo "dtparam=watchdog=on" | tee -a $raspi_configfile
+  fi
+  sed -i "s/^#RuntimeWatchdogSec=.*/RuntimeWatchdogSec=600s/g" /etc/systemd/system.conf
+  sed -i "s/^#RebootWatchdogSec=.*/RebootWatchdogSec=3min/g" /etc/systemd/system.conf
+  sed -i "s/^#WatchdogDevice=.*/WatchdogDevice=\/dev\/watchdog/g" /etc/systemd/system.conf
+else
+  echo "No watchdog device /dev/watchdog found - keep watchdog like default"
+fi
+
 # special prepare when RaspberryPi OS
 if [ "${baseimage}" = "raspios_arm64" ]; then
 
@@ -463,7 +476,6 @@ if [ "${baseimage}" = "raspios_arm64" ]; then
     fi
     echo "max_usb_current=1" | tee -a $raspi_configfile
     echo "dtparam=nvme" | tee -a $raspi_configfile
-    echo "dtparam=watchdog=on" | tee -a $raspi_configfile
     echo 'dtoverlay=pi3-disable-bt' | tee -a $raspi_configfile
     echo 'dtoverlay=disable-bt' | tee -a $raspi_configfile
   else
