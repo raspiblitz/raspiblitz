@@ -115,11 +115,20 @@ chmod 664 ${infoFile}
 # write content of raspiblitz.info to logs
 cat $infoFile >> $logFile
 
+# determine correct raspberrypi boot drive path (that easy to access when sd card is insert into laptop)
+raspi_bootdir=""
+if [ -d /boot/firmware ]; then
+  raspi_bootdir="/boot/firmware"
+elif [ -d /boot ]; then
+  raspi_bootdir="/boot"
+fi
+echo "# raspi_bootdir(${raspi_bootdir})" >> $logFile
+
 ######################################
 # STOP file flag - for manual provision
 
 # when a file 'stop' is on the sd card bootfs partition root - stop for manual provision
-flagExists=$(ls /boot/firmware/stop | grep -c 'stop')
+flagExists=$(ls ${raspi_bootdir}/stop 2>/dev/null | grep -c 'stop')
 if [ "${flagExists}" == "1" ]; then
   # set state info
   /home/admin/_cache.sh set state "stop"
@@ -173,8 +182,8 @@ source ${configFile} 2>/dev/null
 # CHECK SD CARD STATE
 
 # wifi config by file on sd card
-wifiFileExists=$(ls /boot/firmware/wifi | grep -c 'wifi')
-wpaFileExists=$(ls /boot/firmware/wpa_supplicant.conf | grep -c 'wpa_supplicant.conf')
+wifiFileExists=$(ls ${raspi_bootdir}/wifi 2>/dev/null | grep -c 'wifi')
+wpaFileExists=$(ls ${raspi_bootdir}/wpa_supplicant.conf 2>/dev/null | grep -c 'wpa_supplicant.conf')
 if [ "${wifiFileExists}" == "1" ] || [ "${wpaFileExists}" == "1" ]; then
 
   # set info
@@ -185,17 +194,17 @@ if [ "${wifiFileExists}" == "1" ] || [ "${wpaFileExists}" == "1" ]; then
   # get first line as string from wifi file (NAME OF WIFI)
   # get second line as string from wifi file (PASSWORD OF WIFI)
   if [ "${wifiFileExists}" == "1" ]; then
-    echo "Getting data from file: /boot/firmware/wifi" >> ${logFile}
-    ssid=$(sed -n '1p' /boot/firmware/wifi | tr -d '[:space:]')
-    password=$(sed -n '2p' /boot/firmware/wifi | tr -d '[:space:]')
+    echo "Getting data from file: ${raspi_bootdir}/wifi" >> ${logFile}
+    ssid=$(sed -n '1p' ${raspi_bootdir}/wifi | tr -d '[:space:]')
+    password=$(sed -n '2p' ${raspi_bootdir}/wifi | tr -d '[:space:]')
   fi
 
   # File: wpa_supplicant.conf (legacy way to set wifi)
   # see: https://github.com/raspibolt/raspibolt/blob/a21788c0518618d17093e3f447f68a53e4efa6e7/raspibolt/raspibolt_20_pi.md#prepare-wifi
   if [ "${wpaFileExists}" == "1" ]; then  
-    echo "Getting data from file: /boot/firmware/wpa_supplicant.conf" >> ${logFile}
-    ssid=$(grep ssid "/boot/firmware/wpa_supplicant.conf" | awk -F'=' '{print $2}' | tr -d '"')
-    password=$(grep psk "/boot/firmware/wpa_supplicant.conf" | awk -F'=' '{print $2}' | tr -d '"')
+    echo "Getting data from file: ${raspi_bootdir}/wpa_supplicant.conf" >> ${logFile}
+    ssid=$(grep ssid "${raspi_bootdir}/wpa_supplicant.conf" | awk -F'=' '{print $2}' | tr -d '"')
+    password=$(grep psk "${raspi_bootdir}/wpa_supplicant.conf" | awk -F'=' '{print $2}' | tr -d '"')
   fi
 
   # set wifi
@@ -203,7 +212,7 @@ if [ "${wifiFileExists}" == "1" ] || [ "${wpaFileExists}" == "1" ]; then
   echo "Setting Wifi SSID(${ssid}) Password(${password})" >> ${logFile}
   source <(/home/admin/config.scripts/internet.wifi.sh on ${ssid} ${password})
   if [ "${err}" != "" ]; then
-    echo "Setting Wifi failed - edit or remove file /boot/firmware/wifi" >> ${logFile}
+    echo "Setting Wifi failed - edit or remove file ${raspi_bootdir}/wifi" >> ${logFile}
     echo "error(${err})" >> ${logFile}
     echo "Will shutdown in 1min ..." >> ${logFile}
     /home/admin/_cache.sh set state "errorWIFI"
@@ -215,8 +224,8 @@ if [ "${wifiFileExists}" == "1" ] || [ "${wpaFileExists}" == "1" ]; then
 
   # remove file
   echo "Setting Wifi worked - removing file" >> ${logFile}
-  rm /boot/firmware/wifi 2>/dev/null
-  rm /boot/firmware/wpa_supplicant.conf 2>/dev/null
+  rm ${raspi_bootdir}/wifi 2>/dev/null
+  rm ${raspi_bootdir}/wpa_supplicant.conf 2>/dev/null
 else
   echo "No Wifi config by file on sd card." >> ${logFile}
 fi
@@ -315,10 +324,10 @@ systemInitReboot=0
 # the sd card - switch to hdmi
 ################################
 
-forceHDMIoutput=$(ls /boot/firmware/hdmi* 2>/dev/null | grep -c hdmi)
+forceHDMIoutput=$(ls ${raspi_bootdir}/hdmi* 2>/dev/null | grep -c hdmi)
 if [ ${forceHDMIoutput} -eq 1 ]; then
   # delete that file (to prevent loop)
-  rm /boot/hdmi*
+  rm ${raspi_bootdir}/hdmi*
   # switch to HDMI what will trigger reboot
   echo "HDMI switch found ... activating HDMI display output & reboot" >> $logFile
   /home/admin/config.scripts/blitz.display.sh set-display hdmi >> $logFile
@@ -391,10 +400,10 @@ fi
 # the sd card - delete old ssh data
 ################################
 
-sshReset=$(ls /boot/firmware/ssh.reset* 2>/dev/null | grep -c reset)
+sshReset=$(ls ${raspi_bootdir}/ssh.reset* 2>/dev/null | grep -c reset)
 if [ ${sshReset} -eq 1 ]; then
   # delete that file (to prevent loop)
-  rm /boot/firmware/ssh.reset* >> $logFile
+  rm ${raspi_bootdir}/ssh.reset* >> $logFile
   # delete ssh certs
   echo "SSHRESET switch found ... stopping SSH and deleting old certs" >> $logFile
   /home/admin/config.scripts/blitz.ssh.sh renew >> $logFile
@@ -668,7 +677,7 @@ if [ ${isMounted} -eq 0 ]; then
       
     # check if there is a flag set on sd card boot section to format as btrfs (experimental)
     filesystem="ext4"
-    flagBTRFS=$(ls /boot/firmware/btrfs* 2>/dev/null | grep -c btrfs)
+    flagBTRFS=$(ls ${raspi_bootdir}/btrfs* 2>/dev/null | grep -c btrfs)
     if [ "${flagBTRFS}" != "0" ]; then
       echo "Found BTRFS flag ---> formatting with experimental BTRFS filesystem" >> ${logFile}
       filesystem="btrfs"
@@ -1099,8 +1108,9 @@ fi
 # FORCE UASP FLAG
 ####################
 # if uasp.force flag was set on sd card - now move into raspiblitz.conf
-if [ -f "/boot/firmware/uasp.force" ]; then
+if [ -f "${raspi_bootdir}/uasp.force" ]; then
   /home/admin/config.scripts/blitz.conf.sh set forceUasp "on"
+  rm ${raspi_bootdir}/uasp.force* >> $logFile
   echo "DONE forceUasp=on recorded in raspiblitz.conf" >> $logFile
 fi
 

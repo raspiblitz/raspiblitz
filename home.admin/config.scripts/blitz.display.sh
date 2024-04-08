@@ -19,6 +19,7 @@ fi
 
 # 1. Parameter: lcd command
 command=$1
+echo "### blitz.display.sh $command"
 
 # its OK if its not exist yet
 source /home/admin/raspiblitz.info
@@ -28,6 +29,16 @@ source /mnt/hdd/raspiblitz.conf 2>/dev/null
 # see https://github.com/rootzoll/raspiblitz/pull/1580
 # but basically this just says if the driver for GPIO LCD is installed - not if connected
 fb1Exists=$(ls /dev/fb1 2>/dev/null | grep -c "/dev/fb1")
+
+# determine correct raspberrypi config files
+raspi_configfile="/boot/config.txt"
+raspi_commandfile="/boot/cmdline.txt"
+if [ -d /boot/firmware ];then
+  raspi_configfile="/boot/firmware/config.txt" 
+  raspi_commandfile="/boot/firmware/cmdline.txt"
+fi
+echo "# raspi_configfile(${raspi_configfile})"
+echo "# raspi_commandfile(${raspi_commandfile})"
 
 ###################
 # QR CODE KONSOLE
@@ -137,7 +148,7 @@ if [ "${command}" == "rotate" ]; then
 
     # change rotation config
     echo "# Turn ON: LCD ROTATE"
-    sed -i "s/^dtoverlay=.*/dtoverlay=waveshare35a:rotate=90/g" /boot/config.txt
+    sed -i "s/^dtoverlay=.*/dtoverlay=waveshare35a:rotate=90/g" ${raspi_configfile}
     rm /etc/X11/xorg.conf.d/40-libinput.conf 2>/dev/null
 
     /home/admin/config.scripts/blitz.conf.sh set lcdrotate 1 1>/dev/null 2>/dev/null
@@ -148,7 +159,7 @@ if [ "${command}" == "rotate" ]; then
 
     # change rotation config
     echo "#Turn OFF: LCD ROTATE"
-    sed -i "s/^dtoverlay=.*/dtoverlay=waveshare35a:rotate=270/g" /boot/config.txt
+    sed -i "s/^dtoverlay=.*/dtoverlay=waveshare35a:rotate=270/g" ${raspi_configfile}
 
     # if touchscreen is on
     if [ "${touchscreen}" = "1" ]; then
@@ -219,14 +230,14 @@ function prepareinstall() {
 
 function install_hdmi() {
   echo "# hdmi install ... set framebuffer width/height"
-  #sed -i "s/^#framebuffer_width=.*/framebuffer_width=480/g" /boot/config.txt
-  #sed -i "s/^#framebuffer_height=.*/framebuffer_height=320/g" /boot/config.txt
+  #sed -i "s/^#framebuffer_width=.*/framebuffer_width=480/g" ${raspi_configfile}
+  #sed -i "s/^#framebuffer_height=.*/framebuffer_height=320/g" ${raspi_configfile}
 }
 
 function uninstall_hdmi() {
   echo "# hdmi uninstall ... reset framebuffer width/height"
-  #sed -i "s/^framebuffer_width=.*/#framebuffer_width=480/g" /boot/config.txt
-  #sed -i "s/^framebuffer_height=.*/#framebuffer_height=320/g" /boot/config.txt
+  #sed -i "s/^framebuffer_width=.*/#framebuffer_width=480/g" ${raspi_configfile}
+  #sed -i "s/^framebuffer_height=.*/#framebuffer_height=320/g" ${raspi_configfile}
 }
 
 function install_lcd() {
@@ -261,35 +272,35 @@ function install_lcd() {
     # add waveshare mod
     cp ./waveshare35a.dtbo /boot/overlays/
 
-    # modify /boot/config.txt 
-    sed -i "s/^hdmi_force_hotplug=.*//g" /boot/firmware/config.txt 
-    sed -i '/^hdmi_group=/d' /boot/firmware/config.txt 2>/dev/null
-    sed -i "/^hdmi_mode=/d" /boot/firmware/config.txt 2>/dev/null
+    # modify config file
+    sed -i "s/^hdmi_force_hotplug=.*//g" ${raspi_configfile}
+    sed -i '/^hdmi_group=/d' ${raspi_configfile} 2>/dev/null
+    sed -i "/^hdmi_mode=/d" ${raspi_configfile} 2>/dev/null
 
-    #sed -i "s/^#framebuffer_width=.*/framebuffer_width=480/g" /boot/config.txt
-    #sed -i "s/^#framebuffer_height=.*/framebuffer_height=320/g" /boot/config.txt
-    #echo "hdmi_force_hotplug=1" >> /boot/firmware/config.txt
-    sed -i "s/^dtparam=i2c_arm=.*//g" /boot/firmware/config.txt
-    # echo "dtparam=i2c_arm=on" >> /boot/config.txt --> this is to be called I2C errors - see: https://github.com/rootzoll/raspiblitz/issues/1058#issuecomment-739517713
+    #sed -i "s/^#framebuffer_width=.*/framebuffer_width=480/g" ${raspi_configfile}
+    #sed -i "s/^#framebuffer_height=.*/framebuffer_height=320/g" ${raspi_configfile}
+    #echo "hdmi_force_hotplug=1" >> ${raspi_configfile}
+    sed -i "s/^dtparam=i2c_arm=.*//g" ${raspi_configfile}
+    # echo "dtparam=i2c_arm=on" >> ${raspi_configfile} --> this is to be called I2C errors - see: https://github.com/rootzoll/raspiblitz/issues/1058#issuecomment-739517713
     # don't enable SPI and UART ports by default
-    # echo "dtparam=spi=on" >> /boot/firmware/config.txt
-    # echo "enable_uart=1" >> /boot/firmware/config.txt
-    sed -i "s/^dtoverlay=.*//g" /boot/firmware/config.txt
-    echo "dtoverlay=waveshare35a:rotate=90" >> /boot/firmware/config.txt
+    # echo "dtparam=spi=on" >> ${raspi_configfile}
+    # echo "enable_uart=1" >> ${raspi_configfile}
+    sed -i "s/^dtoverlay=.*//g" ${raspi_configfile}
+    echo "dtoverlay=waveshare35a:rotate=90" >> ${raspi_configfile}
 
     # modify cmdline.txt 
     modification="dwc_otg.lpm_enable=0 quiet fbcon=map:10 fbcon=font:ProFont6x11 logo.nologo"
-    containsModification=$(grep -c "${modification}" /boot/cmdline.txt)
+    containsModification=$(grep -c "${modification}" ${raspi_commandfile})
     if [ ${containsModification} -eq 0 ]; then
-      echo "# adding modification to /boot/cmdline.txt"
-      cmdlineContent=$(cat /boot/cmdline.txt)
-      echo "${cmdlineContent} ${modification}" > /boot/cmdline.txt
+      echo "# adding modification to ${raspi_commandfile}"
+      cmdlineContent=$(cat ${raspi_commandfile})
+      echo "${cmdlineContent} ${modification}" > ${raspi_commandfile}
     else
-      echo "# /boot/cmdline.txt already contains modification"
+      echo "# ${raspi_commandfile} already contains modification"
     fi
-    containsModification=$(grep -c "${modification}" /boot/cmdline.txt)
+    containsModification=$(grep -c "${modification}" ${raspi_commandfile})
     if [ ${containsModification} -eq 0 ]; then
-      echo "# FAIL: was not able to modify /boot/cmdline.txt"
+      echo "# FAIL: was not able to modify ${raspi_commandfile}"
       echo "err='ended unclear state'"
       exit 1
     fi
@@ -327,19 +338,19 @@ function uninstall_lcd() {
     apt-get install -y xinput-calibrator
 
     # remove modifications of config.txt
-    sed -i '/^hdmi_force_hotplug=/d' /boot/config.txt 2>/dev/null
-    sed -i '/^hdmi_group=/d' /boot/config.txt 2>/dev/null
-    sed -i "/^hdmi_mode=/d" /boot/config.txt 2>/dev/null
-    sed -i "s/^dtoverlay=.*//g" /boot/config.txt 2>/dev/null
-    #sed -i "s/^framebuffer_width=.*/#framebuffer_width=480/g" /boot/config.txt
-    #sed -i "s/^framebuffer_height=.*/#framebuffer_height=320/g" /boot/config.txt
-    echo "hdmi_group=1" >> /boot/config.txt
-    echo "hdmi_mode=3" >> /boot/config.txt
-    echo "dtoverlay=pi3-disable-bt" >> /boot/config.txt
-    echo "dtoverlay=disable-bt" >> /boot/config.txt
+    sed -i '/^hdmi_force_hotplug=/d' ${raspi_configfile} 2>/dev/null
+    sed -i '/^hdmi_group=/d' ${raspi_configfile} 2>/dev/null
+    sed -i "/^hdmi_mode=/d" ${raspi_configfile} 2>/dev/null
+    sed -i "s/^dtoverlay=.*//g" ${raspi_configfile} 2>/dev/null
+    #sed -i "s/^framebuffer_width=.*/#framebuffer_width=480/g" ${raspi_configfile}
+    #sed -i "s/^framebuffer_height=.*/#framebuffer_height=320/g" ${raspi_configfile}
+    echo "hdmi_group=1" >> ${raspi_configfile}
+    echo "hdmi_mode=3" >> ${raspi_configfile}
+    echo "dtoverlay=pi3-disable-bt" >> ${raspi_configfile}
+    echo "dtoverlay=disable-bt" >> ${raspi_configfile}
 
     # remove modification of cmdline.txt
-    sed -i "s/ dwc_otg.lpm_enable=0 quiet fbcon=map:10 fbcon=font:ProFont6x11 logo.nologo//g" /boot/cmdline.txt
+    sed -i "s/ dwc_otg.lpm_enable=0 quiet fbcon=map:10 fbcon=font:ProFont6x11 logo.nologo//g" ${raspi_commandfile}
 
     # un-prepare X11
     mv /home/admin/wavesharelcd-64bit-rpi/40-libinput.conf /etc/X11/xorg.conf.d/40-libinput.conf 2>/dev/null
