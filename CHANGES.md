@@ -1,3 +1,7 @@
+## What's new in Version 1.11.1 of RaspiBlitz?
+
+- Update: acme.sh 3.0.7 (repair duckdns.org dyndns)
+
 ## What's new in Version 1.11.0 of RaspiBlitz?
 
 - New: RaspberryPi5 tested & enabling NVMe PCIe Hats

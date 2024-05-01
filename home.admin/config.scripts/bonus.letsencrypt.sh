@@ -12,8 +12,9 @@ fi
 
 source /mnt/hdd/raspiblitz.conf
 
-ACME_LOAD_BASE_URL="https://codeload.github.com/acmesh-official/acme.sh/tar.gz"
-ACME_VERSION="2.8.6"
+# https://github.com/acmesh-official/acme.sh/releases
+ACME_LOAD_BASE_URL="https://github.com/acmesh-official/acme.sh/archive/refs/tags/3.0.7.tar.gz"
+ACME_VERSION="3.0.7"
 
 ACME_INSTALL_HOME="/home/admin/.acme.sh"
 ACME_CONFIG_HOME="/mnt/hdd/app-data/letsencrypt"
@@ -79,19 +80,21 @@ function acme_install() {
     sudo apt-get install -y socat >/dev/null 2>&1
   fi
 
+  # make sure config directory exists
   if ! [ -d $ACME_CONFIG_HOME ]; then
     sudo mkdir -p $ACME_CONFIG_HOME
   fi
   sudo chown admin:admin $ACME_CONFIG_HOME
 
-  rm -f "/tmp/acme.sh_${ACME_VERSION}.tar.gz"
-  if ! curl --silent --fail -o "/tmp/acme.sh_${ACME_VERSION}.tar.gz" "${ACME_LOAD_BASE_URL}/${ACME_VERSION}" 2>&1; then
-    echo "Error ($?): Download failed from: ${ACME_LOAD_BASE_URL}/${ACME_VERSION}"
-    rm -f "/tmp/acme.sh_${ACME_VERSION}.tar.gz"
+  # download and install acme.sh
+  rm -r /tmp/acme.sh*
+  if ! curl -L --silent --fail -o "/tmp/acme.sh.tar.gz" "${ACME_LOAD_BASE_URL}" 2>&1; then
+    echo "Error ($?): Download failed from: ${ACME_LOAD_BASE_URL}"
+    rm -r /tmp/acme.sh*
     exit 1
   fi
 
-  if tar xzf "/tmp/acme.sh_${ACME_VERSION}.tar.gz" -C /tmp/; then
+  if tar xzf "/tmp/acme.sh.tar.gz" -C /tmp/; then
     cd "/tmp/acme.sh-${ACME_VERSION}" || exit
 
     if [ -n "${email}" ]; then
@@ -111,9 +114,7 @@ function acme_install() {
 
   fi
 
-  rm -f "/tmp/acme.sh_${ACME_VERSION}.tar.gz"
-  rm -Rf "/tmp/acme.sh_${ACME_VERSION}"
-
+  rm -r /tmp/acme.sh*
 }
 
 function refresh_certs_with_nginx() {
