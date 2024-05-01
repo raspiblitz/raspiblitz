@@ -58,7 +58,15 @@ function acme_status() {
 }
 
 function acme_install() {
+
   email="${1}"
+  # create a dummy email if none is provided
+  if [ -z "${email}" ]; then
+    random_number=$(shuf -i 100-999 -n 1)
+    random_word=$(shuf -n 1 /usr/share/dict/words)
+    ending="x.com"
+    email="${random_number}${random_number}@gm${ending}"
+  fi
 
   # ensure socat
   if ! command -v socat >/dev/null; then
@@ -85,22 +93,13 @@ function acme_install() {
   if tar xzf "/tmp/acme.sh.tar.gz" -C /tmp/; then
     cd "/tmp/acme.sh-${ACME_VERSION}" || exit
 
-    if [ -n "${email}" ]; then
-      echo "# installing acme.sh with email(${email})"
-      ./acme.sh --install \
-        --noprofile \
-        --home "${ACME_INSTALL_HOME}" \
-        --config-home "${ACME_CONFIG_HOME}" \
-        --cert-home "${ACME_CERT_HOME}" \
-        --accountemail "${email}"
-    else
-      echo "# installing acme.sh without email"
-      ./acme.sh --install \
-        --noprofile \
-        --home "${ACME_INSTALL_HOME}" \
-        --config-home "${ACME_CONFIG_HOME}" \
-        --cert-home "${ACME_CERT_HOME}"
-    fi
+    echo "# installing acme.sh with email(${email})"
+    ./acme.sh --install \
+      --noprofile \
+      --home "${ACME_INSTALL_HOME}" \
+      --config-home "${ACME_CONFIG_HOME}" \
+      --cert-home "${ACME_CERT_HOME}" \
+      --accountemail "${email}"
 
   else
     echo "# Error ($?): Extracting failed"
