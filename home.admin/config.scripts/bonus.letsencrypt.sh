@@ -65,7 +65,7 @@ function acme_install() {
     random_number=$(shuf -i 100-999 -n 1)
     random_word=$(shuf -n 1 /usr/share/dict/words)
     ending="x.com"
-    email="${random_number}${random_number}@gm${ending}"
+    email="${random_word}${random_number}@gm${ending}"
   fi
 
   # ensure socat
