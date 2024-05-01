@@ -75,7 +75,7 @@ function acme_install() {
 
   # download and install acme.sh
   echo "# download acme.sh release ${ACME_VERSION} from ${ACME_LOAD_BASE_URL}"
-  rm -r /tmp/acme.sh*
+  rm -r /tmp/acme.sh* 2>/dev/null
   if ! curl -L --silent --fail -o "/tmp/acme.sh.tar.gz" "${ACME_LOAD_BASE_URL}" 2>&1; then
     echo "Error ($?): Download failed from: ${ACME_LOAD_BASE_URL}"
     rm -r /tmp/acme.sh*
