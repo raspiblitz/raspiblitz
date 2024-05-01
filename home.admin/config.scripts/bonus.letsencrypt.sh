@@ -22,19 +22,6 @@ ACME_CERT_HOME="${ACME_CONFIG_HOME}/certs"
 
 ACME_IS_INSTALLED=0
 
-# if Tor is on test that CURL is by default running over Tor
-# TODO: issue https://github.com/rootzoll/raspiblitz/issues/1341
-#if [ "${runBehindTor}" == "on" ]; then
-#  echo "# checking if Tor proxy for CURL is working ..."
-#  checkTor=$(curl -s https://check.torproject.org | grep -c "Congratulations")
-#  if [ ${checkTor} -eq 0 ]; then
-#    echo "err='curl tor proxy not working'"
-#    exit 1
-#  else
-#    echo "# OK Tor proxy for CURL"
-#  fi
-#fi
-
 ###################
 # FUNCTIONS
 ###################
@@ -87,6 +74,7 @@ function acme_install() {
   sudo chown admin:admin $ACME_CONFIG_HOME
 
   # download and install acme.sh
+  echo "# download acme.sh release ${ACME_VERSION} from ${ACME_LOAD_BASE_URL}"
   rm -r /tmp/acme.sh*
   if ! curl -L --silent --fail -o "/tmp/acme.sh.tar.gz" "${ACME_LOAD_BASE_URL}" 2>&1; then
     echo "Error ($?): Download failed from: ${ACME_LOAD_BASE_URL}"
@@ -112,6 +100,9 @@ function acme_install() {
         --cert-home "${ACME_CERT_HOME}"
     fi
 
+  else
+    echo "# Error ($?): Extracting failed"
+    exit 1
   fi
 
   rm -r /tmp/acme.sh*
@@ -220,6 +211,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo chmod -R 733 $ACME_CONFIG_HOME
 
     # install the acme script
+    echo "# acme_install"
     acme_install "${address}"
     echo ""
 
