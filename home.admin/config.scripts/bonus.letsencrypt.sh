@@ -86,6 +86,7 @@ function acme_install() {
     cd "/tmp/acme.sh-${ACME_VERSION}" || exit
 
     if [ -n "${email}" ]; then
+      echo "# installing acme.sh with email(${email})"
       ./acme.sh --install \
         --noprofile \
         --home "${ACME_INSTALL_HOME}" \
@@ -93,6 +94,7 @@ function acme_install() {
         --cert-home "${ACME_CERT_HOME}" \
         --accountemail "${email}"
     else
+      echo "# installing acme.sh without email"
       ./acme.sh --install \
         --noprofile \
         --home "${ACME_INSTALL_HOME}" \
