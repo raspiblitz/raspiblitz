@@ -306,12 +306,19 @@ debuglevel=info
 gc-canceled-invoices-on-startup=true
 gc-canceled-invoices-on-the-fly=true
 ignore-historical-gossip-filters=1
-sync-freelist=true
 stagger-initial-reconnect=true
 tlsautorefresh=1
 tlsdisableautofill=1
 tlscertpath=/home/bitcoin/.lnd/tls.cert
 tlskeypath=/home/bitcoin/.lnd/tls.key
+
+# Set to false for nodes with larger amount of channels. This modification leads to increased 
+# latency during initialization, yet significantly boosts runtime performance of the daemon.
+sync-freelist=true
+
+# Specify the maximum number of logfiles retained in rotation and the threshold size for rotation initiation.
+maxlogfiles=5
+maxlogfilesize=400
 
 [Bitcoin]
 bitcoin.active=1
