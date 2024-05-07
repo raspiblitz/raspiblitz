@@ -13,7 +13,6 @@ source /mnt/hdd/raspiblitz.conf 2>/dev/null
 # INFOFILE - state data from bootstrap
 infoFile="/home/admin/raspiblitz.info"
 source ${infoFile}
-source <(/home/admin/_cache.sh get state message)
 
 # check that basic system phase/state information is available
 if [ "${setupPhase}" == "" ] || [ "${state}" == "" ]; then
@@ -324,6 +323,8 @@ MAINMENU > REPAIR > REPAIR-LND > RETRYSCB
       echo "https://github.com/rootzoll/raspiblitz#support"
       echo "command to shutdown --> off"
       exit 1
+    elif [ "${state}" == "" ]; then
+      echo "state(${state}) message(${message})"
     else
         # every other state just push as event to SSH frontend
         /home/admin/setup.scripts/eventInfoWait.sh "${state}" "${message}"

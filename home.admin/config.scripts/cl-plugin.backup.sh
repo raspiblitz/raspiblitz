@@ -16,7 +16,7 @@ function help() {
 }
 
 # https://github.com/lightningd/plugins/commits/master/backup
-pinnedVersion="30003279e35e5931fc85d7e6211ea4de6f9554d7"
+pinnedVersion="46f28a88a2aa15c7c1b3c95a21dd99ea2195995e"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -43,7 +43,7 @@ function install() {
     sudo pip3 install --upgrade pip
 
     # pip dependencies
-    sudo -u bitcoin pip3 install pyln-client tqdm
+    sudo -u bitcoin pip3 install pyln-client tqdm psutil
 
     # poetry
     sudo pip3 install poetry || exit 1
@@ -61,7 +61,7 @@ function install() {
     echo "# The ${plugin} plugin is already loaded"
   fi
 
-  # make sure default virtaulenv is used
+  # make sure the default virtualenv is used
   sudo apt-get remove -y python3-virtualenv 2>/dev/null
   sudo pip uninstall -y virtualenv 2>/dev/null
   sudo apt-get install -y python3-virtualenv

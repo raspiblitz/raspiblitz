@@ -160,7 +160,7 @@ patch()
       if [ $? -eq 0 ]; then
         clear
         echo "REBOOT .."
-        /home/admin/config.scripts/blitz.shutdown.sh reboot
+        sudo /home/admin/config.scripts/blitz.shutdown.sh reboot
         sleep 8
         exit 1
       else
@@ -269,11 +269,7 @@ Do you really want to update LND now?
       if [ ${#error} -gt 0 ]; then
         whiptail --title "ERROR" --msgbox "${error}" 8 30
       else
-        # if loop was installed before reinstall
-        if [ "${loop}" == "on" ]; then
-          sudo -u admin /home/admin/config.scripts/bonus.loop.sh on
-        fi
-        /home/admin/config.scripts/blitz.shutdown.sh reboot
+        sudo /home/admin/config.scripts/blitz.shutdown.sh reboot
         sleep 8
       fi
       ;;
@@ -297,7 +293,7 @@ Do you really want to update LND now?
       if [ ${#error} -gt 0 ]; then
         whiptail --title "ERROR" --msgbox "${error}" 8 30
       else
-        /home/admin/config.scripts/blitz.shutdown.sh reboot
+        sudo /home/admin/config.scripts/blitz.shutdown.sh reboot
         sleep 8
       fi
       ;;
@@ -422,7 +418,7 @@ Do you really want to update Bitcoin Core now?
       error=""
       warn=""
       sudo -u admin /home/admin/config.scripts/bitcoin.update.sh tested
-      /home/admin/config.scripts/blitz.shutdown.sh reboot
+      sudo /home/admin/config.scripts/blitz.shutdown.sh reboot
       ;;
     RECKLESS)
       whiptail --title "UNTESTED Bitcoin Core update to ${bitcoinLatestVersion}" --yes-button "Cancel" \
@@ -443,11 +439,11 @@ Do you really want to update Bitcoin Core now?
       if [ ${#error} -gt 0 ]; then
         whiptail --title "ERROR" --msgbox "${error}" 8 30
       fi
-      /home/admin/config.scripts/blitz.shutdown.sh reboot
+      sudo /home/admin/config.scripts/blitz.shutdown.sh reboot
       ;;
     CUSTOM)
       sudo -u admin /home/admin/config.scripts/bitcoin.update.sh custom
-      /home/admin/config.scripts/blitz.shutdown.sh reboot
+      sudo /home/admin/config.scripts/blitz.shutdown.sh reboot
       ;;
   esac
 }
@@ -506,10 +502,6 @@ if [ "${sphinxrelay}" == "on" ]; then
   OPTIONS+=(SPHINX "Update Sphinx Server Relay")
 fi
 
-if [ "${homer}" == "on" ]; then
-  OPTIONS+=(HOMER "Update Homer")
-fi
-
 if [ "${mempoolExplorer}" == "on" ]; then
   OPTIONS+=(MEMPOOL "Update Mempool Explorer")
 fi
@@ -520,10 +512,6 @@ fi
 
 if [ "${runBehindTor}" == "on" ]; then
   OPTIONS+=(TOR "Update Tor from the Torproject repo")
-fi
-
-if [ "${itchysats}" == "on" ]; then
-  OPTIONS+=(ITCHYSATS "Update ItchySats")
 fi
 
 CHOICE_HEIGHT=$(("${#OPTIONS[@]}/2+1"))
@@ -581,16 +569,10 @@ case $CHOICE in
   TOR)
     sudo /home/admin/config.scripts/tor.network.sh update
     ;;
-  HOMER)
-    /home/admin/config.scripts/bonus.homer.sh update
-    ;;
   MEMPOOL)
     /home/admin/config.scripts/bonus.mempool.sh update
     ;;
   JAM)
     /home/admin/config.scripts/bonus.jam.sh update
-    ;;
-  ITCHYSATS)
-    /home/admin/config.scripts/bonus.itchysats.sh update
     ;;
 esac

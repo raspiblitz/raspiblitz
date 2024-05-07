@@ -376,16 +376,8 @@ if [ "${zerotierSwitch}" != "${choice}" ]; then
   echo "zerotier setting changed .."
   anychange=1
   error=""
-  source <(sudo -u admin /home/admin/config.scripts/bonus.zerotier.sh ${choice})
-  if [ "${choice}" == "on" ]; then
-    if [ ${#error} -eq 0 ]; then
-      dialog --msgbox "Your RaspiBlitz joined the ZeroTier network." 6 46
-    else
-      if [ "${error}" != "cancel" ]; then
-        dialog --msgbox "ZeroTier Error:\n${error}" 8 46
-      fi
-    fi
-  else
+  sudo -u admin /home/admin/config.scripts/bonus.zerotier.sh ${choice}
+  if [ "${choice}" != "on" ]; then
     dialog --msgbox "ZeroTier is now OFF." 5 46
   fi
 
@@ -427,16 +419,18 @@ if [ "${clNode}" != "${choice}" ]; then
   echo "# Core Lightning NODE Setting changed .."
   if [ "${choice}" = "on" ]; then
     echo "# turning ON"
-
     /home/admin/config.scripts/cl.install.sh on mainnet
     # generate wallet from seedwords or just display (write to dev/null to not write seed words to logs)
-    /home/admin/config.scripts/cl.hsmtool.sh new mainnet 1>/dev/null
+    echo "Generating CL wallet seedwords .."
+    /home/admin/config.scripts/cl.hsmtool.sh new mainnet noninteractive
     if [ "${testnet}" == "on" ]; then
       # no seed for testnet
+      echo "Turn on CL testnet .."
       /home/admin/config.scripts/cl.install.sh on testnet
     fi
     if [ "${signet}" == "on" ]; then
       # no seed for signet
+      echo "Turn on CL signet .."
       /home/admin/config.scripts/cl.install.sh on signet
     fi
 

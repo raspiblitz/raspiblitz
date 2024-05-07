@@ -60,6 +60,10 @@ if [ "${logfile}" !=  "" ]; then
   echo "##################" >> ${logFile}
   echo "${errorReport}" >> ${logFile}
   echo "##################" >> ${logFile}
+else 
+  # if no logfile given - write to default log
+    echo "##################" >> /home/admin/raspiblitz.log
+  echo "${errorReport}" >> /home/admin/raspiblitz.log
 fi
 
 # on serial calls make sure that at least a second is between error reports

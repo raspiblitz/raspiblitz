@@ -6,7 +6,7 @@
 source /home/admin/raspiblitz.info 2>/dev/null
 
 # get values from cache
-source <(/home/admin/_cache.sh get codeVersion internet_localip blitzapi)
+source <(/home/admin/_cache.sh get codeVersion internet_localip blitzapi hdd_used_info system_temp_celsius)
 
 # 1st PARAMETER: eventID
 # fixed ID string for a certain event
@@ -34,7 +34,7 @@ if [ "${mode}" != "lcd" ] && [ "${mode}" != "ssh" ]; then
 fi
 
 # default backtitle for dialog
-backtitle="RaspiBlitz ${codeVersion} / ${eventID} / ${internet_localip}"
+backtitle="${codeVersion} ${eventID} / ${internet_localip} ${system_temp_celsius}°C ${hdd_used_info}"
 
 ################################################
 # 1) WELL DEFINED EVENTS
@@ -47,7 +47,7 @@ Starting RaspiBlitz
 Please wait ...
 " 6 24
 
-elif [ "${eventID}" == "ready" ]; then
+elif [ "${eventID}" == "ready" ] || [ "${eventID}" == "nostate" ]; then
 
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "
 Please wait ...
@@ -216,6 +216,7 @@ elif [ "${eventID}" == "waitsetup" ] && [ "${mode}" == "lcd" ]; then
         fi
 
         # show default login help info
+        logger -p info "eventInfoWait.sh: waitsetup dialog"
         dialog --backtitle "${backtitle}" --cr-wrap --infobox "
 ${welcomeline}
 ------------------------------------
@@ -318,6 +319,15 @@ elif [ "${eventID}" == "errorHDD" ]; then
 PROBLEM: FAILED HDD/SSD
 Detailed Error Message:
 ${contentString}
+" 7 35
+
+elif [ "${eventID}" == "errorWIFI" ]; then
+
+    # contentString --> detail error message
+    dialog --backtitle "${backtitle}" --cr-wrap --infobox "PROBLEM: Failed WIFI config
+${contentString}
+edit or remove file 'wifi'
+Shutting down ...
 " 7 35
 
 elif [ "${eventID}" == "errorNetwork" ]; then

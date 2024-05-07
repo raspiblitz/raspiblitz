@@ -13,10 +13,20 @@ configFile="/mnt/hdd/raspiblitz.conf"
 # LOGS see: sudo journalctl -f -u background
 
 echo "_background.sh STARTED"
+echo "INFO: _background.sh loop started - sudo journalctl -f -u background" >> /home/admin/raspiblitz.log
 
 # global vars
 blitzTUIHeartBeatLine=""
 /home/admin/_cache.sh set blitzTUIRestarts "0"
+
+# determine correct raspberrypi boot drive path (that easy to access when sd card is insert into laptop)
+raspi_bootdir=""
+if [ -d /boot/firmware ]; then
+  raspi_bootdir="/boot/firmware"
+elif [ -d /boot ]; then
+  raspi_bootdir="/boot"
+fi
+echo "# raspi_bootdir(${raspi_bootdir})"
 
 counter=0
 while [ 1 ]
@@ -42,7 +52,6 @@ do
   # source info & config file fresh on every loop
   source ${infoFile} 2>/dev/null
   source ${configFile} 2>/dev/null
-  source <(/home/admin/_cache.sh get state setupPhase)
 
   ####################################################
   # SKIP BACKGROUND TASK LOOP ON CERTAIN SYSTEM STATES
@@ -104,8 +113,7 @@ do
 
     # detect a missing DHCP config
     if [ "${localip:0:4}" = "169." ]; then
-      echo "Missing DHCP detected ... trying emergency reboot"
-      /home/admin/config.scripts/blitz.shutdown.sh reboot
+      echo "Missing DHCP detected ..."
     else
       echo "DHCP OK"
     fi
@@ -248,6 +256,32 @@ do
       echo "Blockchain Sync Monitoring: IP2TOR 0 peers .. doing out-of-band kickstart"
       /home/admin/config.scripts/bitcoin.monitor.sh mainnet peer-kickstart i2p
     fi
+  fi
+
+  ###############################
+  # SYSTEM LOG FILE SIZES
+  ###############################
+
+  # check every 15min
+  recheckSync=$(($counter % 900))
+  if [ ${recheckSync} -eq 1 ]; then
+    echo "*** CHECK LOG FILE SIZES ***"
+    # check if log file is getting too big
+    logsMegaByte=$(sudo du -c -m /var/log | grep "total" | awk '{print $1;}')
+    if [ ${logsMegaByte} -gt 5000 ]; then
+      echo "WARN # Logs /var/log in are bigger then 5GB .. starting repair"
+      debuginfo=$(ls -la /var/log/ 2>/dev/null)
+      # dont delete directories - can make services crash
+      sudo rm /var/log/*
+      sudo touch /var/log/auth.log
+      sudo chown root:adm /var/log/auth.log
+      sudo service rsyslog restart
+      /home/admin/config.scripts/blitz.error.sh _background.sh "log-delete" "REPAIR: /var/log/ >5GB" "Logs in /var/log in were bigger then 5GB and got emergency delete to prevent fillup." "${debuginfo}"
+      sleep 10
+    else
+      echo "OK - logs are at ${logsMegaByte} MB - within safety limit"
+    fi
+    echo ""
   fi
 
   ####################################################
@@ -456,11 +490,35 @@ do
         echo "--> Channel Backup File changed"
 
         # make copy to sd card (as local basic backup)
-        mkdir -p /home/admin/backups/scb/ 2>/dev/null
+        mkdir -p ${localBackupDir} 2>/dev/null
         cp $scbPath $localBackupPath
+        if [ $? -eq 0 ]; then
+          echo "OK channel.backup copied to '${localBackupPath}'"
+        else
+          logger -p daemon.err "_background.sh FAIL channel.backup copy to '${localBackupPath}'"
+          echo "FAIL channel.backup copy to '${localBackupPath}'"
+        fi
+
         cp $scbPath $localTimestampedPath
-        cp $scbPath /boot/channel.backup
-        echo "OK channel.backup copied to '${localBackupPath}' and '${localTimestampedPath}' and '/boot/channel.backup'"
+        if [ $? -eq 0 ]; then
+          echo "OK channel.backup copied to '${localTimestampedPath}'"
+        else
+          logger -p daemon.err "_background.sh FAIL channel.backup copy to '${localTimestampedPath}'"
+          echo "FAIL channel.backup copy to '${localTimestampedPath}'"
+        fi
+
+        # copy to boot drive (for easy recovery)
+        if [ "${raspi_bootdir}" != "" ]; then
+          cp $scbPath ${raspi_bootdir}/channel.backup
+          if [ $? -eq 0 ]; then
+            echo "OK channel.backup copied to '${raspi_bootdir}/channel.backup'"
+          else
+            logger -p daemon.err "_background.sh FAIL channel.backup copy to '${raspi_bootdir}/channel.backup'"
+            echo "FAIL channel.backup copy to '${raspi_bootdir}/channel.backup'"
+          fi
+        else
+          echo "No boot drive found - skip copy to boot"
+        fi
 
         # check if a additional local backup target is set
         # see ./config.scripts/blitz.backupdevice.sh
@@ -487,27 +545,27 @@ do
           fi
         fi
 
-        # check if a SFTP backup target is set
+        # check if a SCP backup target is set
         # parameter in raspiblitz.conf:
-        # sftpBackupTarget='[USER]@[SERVER]:[DIRPATH-WITHOUT-ENDING-/]'
-        # optionally a custom option string for the sftp command can be set with
-        # sftpBackupOptions='[YOUR-CUSTOM-OPTIONS]'
+        # scpBackupTarget='[USER]@[SERVER]:[DIRPATH-WITHOUT-ENDING-/]'
+        # optionally a custom option string for the scp command can be set with
+        # scpBackupOptions='[YOUR-CUSTOM-OPTIONS]'
         # On target server add the public key of your RaspiBlitz to the authorized_keys for the user
         # https://www.linode.com/docs/security/authentication/use-public-key-authentication-with-ssh/
-        if [ ${#sftpBackupTarget} -gt 0 ]; then
+        if [ ${#scpBackupTarget} -gt 0 ]; then
           echo "--> Offsite-Backup SFTP Server"
-          if [ "${sftpBackupOptions}" == "" ]; then
-            sftpBackupOptions="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+          if [ "${scpBackupOptions}" == "" ]; then
+            scpBackupOptions="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
           fi
           # its ok to ignore known host, because data is encrypted (worst case of MiM would be: no offsite channel backup)
           # but its more likely that without ignoring known host, script might not run thru and that way: no offsite channel backup
-          sftp ${sftpBackupOptions} ${localBackupPath} ${sftpBackupTarget}/
-          sftp ${sftpBackupOptions} ${localTimestampedPath} ${sftpBackupTarget}/
+          scp ${scpBackupOptions} ${localBackupPath} ${scpBackupTarget}/
+          scp ${scpBackupOptions} ${localTimestampedPath} ${scpBackupTarget}/
           result=$?
           if [ ${result} -eq 0 ]; then
-            echo "OK - SFTP Backup exited with 0"
+            echo "OK - SCP Backup exited with 0"
           else
-            echo "FAIL - SFTP Backup exited with ${result}"
+            echo "FAIL - SCP Backup exited with ${result}"
           fi
         fi
 
@@ -565,8 +623,8 @@ do
         mkdir -p /home/admin/backups/er/ 2>/dev/null
         cp $erPath $localBackupPath
         cp $erPath $localTimestampedPath
-        cp $erPath /boot/${netprefix}emergency.recover
-        echo "OK emergency.recover copied to '${localBackupPath}' and '${localTimestampedPath}' and '/boot/${netprefix}emergency.recover'"
+        cp $erPath ${raspi_bootdir}/${netprefix}emergency.recover
+        echo "OK emergency.recover copied to '${localBackupPath}' and '${localTimestampedPath}' and '${raspi_bootdir}/${netprefix}emergency.recover'"
 
         # check if a additional local backup target is set
         # see ./config.scripts/blitz.backupdevice.sh
@@ -593,27 +651,27 @@ do
           fi
         fi
 
-        # check if a SFTP backup target is set
+        # check if a SCP backup target is set
         # parameter in raspiblitz.conf:
-        # sftpBackupTarget='[USER]@[SERVER]:[DIRPATH-WITHOUT-ENDING-/]'
-        # optionally a custom option string for the sftp command can be set with
-        # sftpBackupOptions='[YOUR-CUSTOM-OPTIONS]'
+        # scpBackupTarget='[USER]@[SERVER]:[DIRPATH-WITHOUT-ENDING-/]'
+        # optionally a custom option string for the scp command can be set with
+        # scpBackupOptions='[YOUR-CUSTOM-OPTIONS]'
         # On target server add the public key of your RaspiBlitz to the authorized_keys for the user
         # https://www.linode.com/docs/security/authentication/use-public-key-authentication-with-ssh/
-        if [ ${#sftpBackupTarget} -gt 0 ]; then
+        if [ ${#scpBackupTarget} -gt 0 ]; then
           echo "--> Offsite-Backup SFTP Server"
-          if [ "${sftpBackupOptions}" == "" ]; then
-            sftpBackupOptions="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+          if [ "${scpBackupOptions}" == "" ]; then
+            scpBackupOptions="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
           fi
           # its ok to ignore known host, because data is encrypted (worst case of MiM would be: no offsite channel backup)
           # but its more likely that without ignoring known host, script might not run thru and that way: no offsite channel backup
-          sftp ${sftpBackupOptions} ${localBackupPath} ${sftpBackupTarget}/
-          sftp ${sftpBackupOptions} ${localTimestampedPath} ${sftpBackupTarget}/
+          scp ${scpBackupOptions} ${localBackupPath} ${scpBackupTarget}/
+          scp ${scpBackupOptions} ${localTimestampedPath} ${scpBackupTarget}/
           result=$?
           if [ ${result} -eq 0 ]; then
-            echo "OK - SFTP Backup exited with 0"
+            echo "OK - SCP Backup exited with 0"
           else
-            echo "FAIL - SFTP Backup exited with ${result}"
+            echo "FAIL - SCP Backup exited with ${result}"
           fi
         fi
 

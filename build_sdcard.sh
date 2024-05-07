@@ -1,21 +1,22 @@
 #!/usr/bin/env bash
 
 #########################################################################
-# Build your SD card image based on: 2022-04-04-raspios-bullseye-arm64.img.xz
-# https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2023-02-21/
-# SHA256: 4c963bcd53b9a77fa8235e2dc16785cc7d56372ec83c3090eac9073bd262833f
-# PGP fingerprint: 8738CD6B956F460C
-# PGP key: https://www.raspberrypi.org/raspberrypi_downloads.gpg.key
-# setup fresh SD card with image above - login per SSH and run this script:
+# Build your SD card image based on: 2023-12-05-raspios-bookworm-arm64.img.xz
+# https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2024-03-15/
+# SHA256: 7e53a46aab92051d523d7283c080532bebb52ce86758629bf1951be9b4b0560f
+# also change in: raspiblitz/ci/arm64-rpi/build.arm64-rpi.pkr.hcl
+# PGP fingerprint: 8738CD6B956F460C - to check signature:
+# curl -O https://www.raspberrypi.org/raspberrypi_downloads.gpg.key && gpg --import ./raspberrypi_downloads.gpg.key && gpg --verify *.sig
+# setup fresh SD card with image above - login via SSH and run this script:
 ##########################################################################
 
-defaultRepo="rootzoll"
-defaultBranch="v1.9"
+defaultRepo="raspiblitz" # user that hosts a `raspiblitz` repo
+defaultBranch="v1.11" # latest version branch
 
 defaultAPIuser="fusion44"
 defaultAPIrepo="blitz_api"
 
-defaultWEBUIuser="cstenglein"
+defaultWEBUIuser="raspiblitz"
 defaultWEBUIrepo="raspiblitz-web"
 
 me="${0##/*}"
@@ -30,9 +31,9 @@ usage(){
 Options:
   -EXPORT                                  just print build parameters & exit'
   -h, --help                               this help info
-  -i, --interaction [0|1]                  interaction before proceeding with exection (default: 1)
+  -i, --interaction [0|1]                  interaction before proceeding with execution (default: 1)
   -f, --fatpack [0|1]                      fatpack mode (default: 1)
-  -u, --github-user [rootzoll|other]       github user to be checked from the repo (default: ${defaultRepo})
+  -u, --github-user [raspiblitz|other]     github user to be checked from the repo (default: ${defaultRepo})
   -b, --branch [v1.7|v1.8]                 branch to be built on (default: ${defaultBranch})
   -d, --display [lcd|hdmi|headless]        display class (default: lcd)
   -t, --tweak-boot-drive [0|1]             tweak boot drives (default: 1)
@@ -49,14 +50,14 @@ if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
 fi
 
 # check if started with sudo
-if [ "$EUID" -ne 0 ]; then 
+if [ "$EUID" -ne 0 ]; then
   echo "error='run as root / may use sudo'"
   exit 1
 fi
 
 if [ "$1" = "-EXPORT" ] || [ "$1" = "EXPORT" ]; then
-  cd /home/admin/raspiblitz 2>/dev/null
-  activeBranch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+  activeBranch=$(git -C /home/admin/raspiblitz branch --show-current 2>/dev/null)
+  echo "activeBranch='${activeBranch}'"
   if [ "${activeBranch}" == "" ]; then
     activeBranch="${defaultBranch}"
   fi
@@ -106,7 +107,7 @@ get_arg(){
 }
 
 ## hacky getopts
-## 1. if the option requires argument, and the option is preceeded by single or double dash and it
+## 1. if the option requires an argument, and the option is preceeded by single or double dash and it
 ##    can be it can be specified with '-s=ssh' or '-s ssh' or '--service=ssh' or '--service ssh'
 ##    use: get_arg variable_name "${opt}" "${arg}"
 ## 2. if a bunch of options that does different things are to be assigned to the same variable
@@ -148,24 +149,25 @@ range_argument(){
   fi
 }
 
-apt_install(){
-    apt install -y ${@}
+apt_install() {
+  for package in "$@"; do
+    apt-get install -y -q "$package"
     if [ $? -eq 100 ]; then
-        echo "FAIL! apt failed to install needed packages!"
-        echo ${@}
-        exit 1
+      echo "FAIL! apt-get failed to install package: $package"
+      exit 1
     fi
+  done
 }
 
 general_utils="curl"
-## loop all general_utils to see if program is installed (placed on PATH) and if not, add to the list of commands to be installed
+## loop through all general_utils to see if program is installed (placed on PATH) and if not, add to the list of commands to be installed
 for prog in ${general_utils}; do
   ! command -v ${prog} >/dev/null && general_utils_install="${general_utils_install} ${prog}"
 done
 ## if any of the required programs are not installed, update and if successfull, install packages
 if [ -n "${general_utils_install}" ]; then
   echo -e "\n*** SOFTWARE UPDATE ***"
-  apt update -y || exit 1
+  apt-get update -y || exit 1
   apt_install ${general_utils_install}
 fi
 
@@ -236,10 +238,14 @@ done
 # AUTO-DETECTION: CPU-ARCHITECTURE
 # ---------------------------------------
 cpu="$(uname -m)" && echo "cpu=${cpu}"
-architecture="$(dpkg --print-architecture 2>/dev/null)" && echo "architecture=${architecture}"
 case "${cpu}" in
-  arm*|aarch64|x86_64|amd64);;
-  *) echo -e "# FAIL #\nCan only build on ARM, aarch64, x86_64 not on: cpu=${cpu}"; exit 1;;
+  aarch64|x86_64);;
+  *) echo -e "# FAIL #\nCan only build on aarch64 or x86_64 not on: cpu=${cpu}"; exit 1;;
+esac
+architecture="$(dpkg --print-architecture 2>/dev/null)" && echo "architecture=${architecture}"
+case "${architecture}" in
+  arm*|amd64);;
+  *) echo -e "# FAIL #\nCan only build on arm* or amd64 not on: architecture=${cpu}"; exit 1;;
 esac
 
 # AUTO-DETECTION: OPERATINGSYSTEM
@@ -248,18 +254,14 @@ if [ $(cat /etc/os-release 2>/dev/null | grep -c 'Debian') -gt 0 ]; then
   if [ -f /etc/apt/sources.list.d/raspi.list ] && [ "${cpu}" = aarch64 ]; then
     # default image for RaspberryPi
     baseimage="raspios_arm64"
-  elif [ $(uname -n | grep -c 'rpi') -gt 0 ] && [ "${cpu}" = aarch64 ]; then
-    # experimental: a clean alternative image of debian for RaspberryPi
-    baseimage="debian_rpi64"
-  elif [ "${cpu}" = "arm" ] || [ "${cpu}" = "aarch64" ]; then
-    # experimental: fallback for all debian on arm
-    baseimage="armbian"
   else
-    # experimental: fallback for all debian on other CPUs
+    # experimental: fallback for all to debian
     baseimage="debian"
   fi
 elif [ $(cat /etc/os-release 2>/dev/null | grep -c 'Ubuntu') -gt 0 ]; then
   baseimage="ubuntu"
+elif [ $(cat /etc/os-release 2>/dev/null | grep -c 'Armbian') -gt 0 ]; then
+  baseimage="armbian"
 else
   echo "\n# FAIL: Base Image cannot be detected or is not supported."
   cat /etc/os-release 2>/dev/null
@@ -267,6 +269,17 @@ else
   exit 1
 fi
 echo "baseimage=${baseimage}"
+
+# AUTO-DETECTION: CONFIGFILES
+# ---------------------------------------
+raspi_configfile="/boot/config.txt"
+raspi_commandfile="/boot/cmdline.txt"
+if [ -d /boot/firmware ];then
+  raspi_configfile="/boot/firmware/config.txt" 
+  raspi_commandfile="/boot/firmware/cmdline.txt"
+fi
+echo "raspi_configfile=${raspi_configfile}"
+echo "raspi_commandfile=${raspi_commandfile}"
 
 # USER-CONFIRMATION
 if [ "${interaction}" = "true" ]; then
@@ -292,16 +305,25 @@ echo "[Login]
 HandleLidSwitch=ignore
 HandleLidSwitchDocked=ignore" | tee /etc/systemd/logind.conf.d/nosuspend.conf
 
+# check if /etc/hosts already has debian entry
+# prevent "unable to resolve host debian" error
+isDebianInHosts=$(grep -c "debian" /etc/hosts)
+if [ ${isDebianInHosts} -eq 0 ]; then
+  echo "# Adding debian to /etc/hosts"
+  echo "127.0.1.1       debian" | tee -a /etc/hosts > /dev/null
+  systemctl restart networking
+fi
+
 # FIXING LOCALES
 # https://github.com/rootzoll/raspiblitz/issues/138
 # https://daker.me/2014/10/how-to-fix-perl-warning-setting-locale-failed-in-raspbian.html
 # https://stackoverflow.com/questions/38188762/generate-all-locales-in-a-docker-image
-if [ "${baseimage}" = "raspios_arm64" ]||[ "${baseimage}" = "debian_rpi64" ]||[ "${baseimage}" = "armbian" ]; then
+if [ "${cpu}" = "aarch64" ] && { [ "${baseimage}" = "raspios_arm64" ] || [ "${baseimage}" = "debian" ]; }; then
   echo -e "\n*** FIXING LOCALES FOR BUILD ***"
-
   sed -i "s/^# en_US.UTF-8 UTF-8.*/en_US.UTF-8 UTF-8/g" /etc/locale.gen
   sed -i "s/^# en_US ISO-8859-1.*/en_US ISO-8859-1/g" /etc/locale.gen
   locale-gen
+  export LC_ALL=C
   export LANGUAGE=en_US.UTF-8
   export LANG=en_US.UTF-8
   if [ ! -f /etc/apt/sources.list.d/raspi.list ]; then
@@ -311,19 +333,27 @@ if [ "${baseimage}" = "raspios_arm64" ]||[ "${baseimage}" = "debian_rpi64" ]||[ 
 fi
 
 echo "*** Remove unnecessary packages ***"
-apt remove --purge -y libreoffice* oracle-java* chromium-browser nuscratch scratch sonic-pi plymouth python2 vlc* cups
-apt clean -y
-apt autoremove -y
+unnecessary_packages=(libreoffice* oracle-java* chromium-browser nuscratch scratch sonic-pi plymouth python2 vlc* cups)
+for pkg in "${unnecessary_packages[@]}"; do
+  if dpkg-query -W -f='${Status}' $pkg 2>/dev/null | grep -q "ok installed"; then
+    echo "Removing $pkg..."
+    apt-get remove --purge -y $pkg
+  else
+    echo "$pkg is not installed."
+  fi
+done
+apt-get clean -y
+apt-get autoremove -y
 
 echo -e "\n*** UPDATE Debian***"
-apt update -y
-apt upgrade -f -y
+apt-get update -y
+apt-get upgrade -f -y
 
 echo -e "\n*** SOFTWARE UPDATE ***"
 # based on https://raspibolt.org/system-configuration.html#system-update
 # htop git curl bash-completion vim jq dphys-swapfile bsdmainutils -> helpers
 # autossh telnet vnstat -> network tools bandwidth monitoring for future statistics
-# parted dosfstolls -> prepare for format data drive
+# parted dosfstools -> prepare for format data drive
 # btrfs-progs -> prepare for BTRFS data drive raid
 # fbi -> prepare for display graphics mode. https://github.com/rootzoll/raspiblitz/pull/334
 # sysbench -> prepare for powertest
@@ -332,36 +362,45 @@ echo -e "\n*** SOFTWARE UPDATE ***"
 # rsync -> is needed to copy from HDD
 # net-tools -> ifconfig
 # xxd -> display hex codes
-# netcat -> for proxy
+# netcat-openbsd -> for proxy
 # openssh-client openssh-sftp-server sshpass -> install OpenSSH client + server
 # psmisc -> install killall, fuser
 # ufw -> firewall
 # sqlite3 -> database
 # fdisk -> create partitions
 # lsb-release -> needed to know which distro version we're running to add APT sources
-general_utils="policykit-1 htop git curl bash-completion vim jq dphys-swapfile bsdmainutils autossh telnet vnstat parted dosfstools btrfs-progs fbi sysbench build-essential dialog bc python3-dialog unzip whois fdisk lsb-release smartmontools"
-
+general_utils="policykit-1 htop git curl bash-completion vim jq dphys-swapfile bsdmainutils autossh telnet vnstat parted dosfstools fbi sysbench build-essential dialog bc python3-dialog unzip whois fdisk lsb-release smartmontools rsyslog"
+# add btrfs-progs if not bookworm on aarch64
+[ "${architecture}" = "aarch64" ] && ! grep "12 (bookworm)" < /etc/os-release && general_utils="${general_utils} btrfs-progs"
 # python3-mako --> https://github.com/rootzoll/raspiblitz/issues/3441
 python_dependencies="python3-venv python3-dev python3-wheel python3-jinja2 python3-pip python3-mako"
-server_utils="rsync net-tools xxd netcat openssh-client openssh-sftp-server sshpass psmisc ufw sqlite3"
+server_utils="rsync net-tools xxd netcat-openbsd openssh-client openssh-sftp-server sshpass psmisc ufw sqlite3"
 [ "${baseimage}" = "armbian" ] && armbian_dependencies="armbian-config" # add armbian-config
 [ "${architecture}" = "amd64" ] && amd64_dependencies="network-manager" # add amd64 dependency
 
-apt_install ${general_utils} ${python_dependencies} ${server_utils} ${armbian_dependencies} ${amd64_dependencies}
-apt clean -y
-apt autoremove -y
+apt_install ${general_utils} ${python_dependencies} ${server_utils} ${amd64_dependencies} ${armbian_dependencies}
+apt-get clean -y
+apt-get autoremove -y
 
 echo -e "\n*** Python DEFAULT libs & dependencies ***"
 
-if [ -f "/usr/bin/python3.9" ]; then
-  # use python 3.9 if available
-  update-alternatives --install /usr/bin/python python /usr/bin/python3.9 1
-  echo "python calls python3.9"
+if [ -f "/usr/bin/python3.11" ]; then
+  # use python 3.11 if available
+  update-alternatives --install /usr/bin/python python /usr/bin/python3.11 1
+  # keep python backwards compatible
+  ln -s /usr/bin/python3.11 /usr/bin/python3.9
+  ln -s /usr/bin/python3.11 /usr/bin/python3.10
+  echo "python calls python3.11"
 elif [ -f "/usr/bin/python3.10" ]; then
   # use python 3.10 if available
   update-alternatives --install /usr/bin/python python /usr/bin/python3.10 1
+  # keep python backwards compatible
   ln -s /usr/bin/python3.10 /usr/bin/python3.9
   echo "python calls python3.10"
+elif [ -f "/usr/bin/python3.9" ]; then
+  # use python 3.9 if available
+  update-alternatives --install /usr/bin/python python /usr/bin/python3.9 1
+  echo "python calls python3.9"
 elif [ -f "/usr/bin/python3.8" ]; then
   # use python 3.8 if available
   update-alternatives --install /usr/bin/python python /usr/bin/python3.8 1
@@ -372,51 +411,75 @@ else
   exit 1
 fi
 
+# don't protect system packages from pip install
+# tracking issue: https://github.com/raspiblitz/raspiblitz/issues/4170
+for PYTHONDIR in /usr/lib/python3.*; do
+  if [ -f "$PYTHONDIR/EXTERNALLY-MANAGED" ]; then
+    rm "$PYTHONDIR/EXTERNALLY-MANAGED"
+  fi
+done
+
 # make sure /usr/bin/pip exists (and calls pip3 in Debian Buster)
 update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
 # 1. libs (for global python scripts)
-# grpcio==1.42.0 googleapis-common-protos==1.53.0 toml==0.10.2 j2cli==0.3.10 requests[socks]==2.21.0
+# grpcio==1.59.3 googleapis-common-protos==1.61.0 toml==0.10.2 j2cli==0.3.10 requests[socks]==2.21.0 protobuf==4.25.1 pathlib2==2.3.7.post1
 # 2. For TorBox bridges python scripts (pip3) https://github.com/radio24/TorBox/blob/master/requirements.txt
 # pytesseract mechanize PySocks urwid Pillow requests
 # 3. Nyx
 # setuptools
 sudo -H python3 -m pip install --upgrade pip
-sudo -H python3 -m pip install grpcio==1.42.0 googleapis-common-protos==1.53.0 toml==0.10.2 j2cli==0.3.10 requests[socks]==2.21.0 protobuf==3.20.1 pathlib2==2.3.7.post1
+sudo -H python3 -m pip install grpcio==1.59.3 googleapis-common-protos==1.61.0 toml==0.10.2 j2cli==0.3.10 requests[socks]==2.21.0 protobuf==4.25.1 pathlib2==2.3.7.post1
 sudo -H python3 -m pip install pytesseract mechanize PySocks urwid Pillow requests setuptools
 
 echo -e "\n*** PREPARE ${baseimage} ***"
 
 # make sure the pi user is present
-if [ "$(compgen -u | grep -c pi)" -eq 0 ];then
+if ! compgen -u pi; then
   echo "# Adding the user pi"
-  adduser --disabled-password --gecos "" pi
+  adduser --system --group --shell /bin/bash --home /home/pi pi
+  # copy the skeleton files for login
+  sudo -u pi cp -r /etc/skel/. /home/pi/
   adduser pi sudo
 fi
 
-# special prepare when Raspbian
-if [ "${baseimage}" = "raspios_arm64" ] || [ "${baseimage}" = "debian_rpi64" ]; then
+# activate watchdog if ls /dev/watchdog exists - see #4534
+if [ -e /dev/watchdog ]; then
+  echo "Activating watchdog ..."
+  if [ "${baseimage}" = "raspios_arm64" ]; then
+    echo "dtparam=watchdog=on" | tee -a $raspi_configfile
+  fi
+  sed -i "s/^#RuntimeWatchdogSec=.*/RuntimeWatchdogSec=600s/g" /etc/systemd/system.conf
+  sed -i "s/^#RebootWatchdogSec=.*/RebootWatchdogSec=3min/g" /etc/systemd/system.conf
+  sed -i "s/^#WatchdogDevice=.*/WatchdogDevice=\/dev\/watchdog/g" /etc/systemd/system.conf
+else
+  echo "No watchdog device /dev/watchdog found - keep watchdog like default"
+fi
+
+# special prepare when RaspberryPi OS
+if [ "${baseimage}" = "raspios_arm64" ]; then
 
   echo -e "\n*** PREPARE RASPBERRY OS VARIANTS ***"
   apt_install raspi-config
-  # do memory split (16MB)
-  raspi-config nonint do_memory_split 16
-  # set to wait until network is available on boot (0 seems to yes)
-  raspi-config nonint do_boot_wait 0
   # set WIFI country so boot does not block
   # this will undo the softblock of rfkill on RaspiOS
   [ "${wifi_region}" != "off" ] && raspi-config nonint do_wifi_country $wifi_region
   # see https://github.com/rootzoll/raspiblitz/issues/428#issuecomment-472822840
 
-  configFile="/boot/config.txt"
-  max_usb_current="max_usb_current=1"
-  max_usb_currentDone=$(grep -c "$max_usb_current" $configFile)
-
-  if [ ${max_usb_currentDone} -eq 0 ]; then
-    echo | tee -a $configFile
-    echo "# Raspiblitz" | tee -a $configFile
-    echo "$max_usb_current" | tee -a $configFile
+  if ! grep "Raspiblitz" $raspi_configfile; then
+    echo "# Adding Raspiblitz Edits to $raspi_configfile"
+    echo | tee -a $raspi_configfile
+    echo "# Raspiblitz" | tee -a $raspi_configfile
+    # ensure that kernel8.img is used to set PAGE_SIZE to 4K
+    # https://github.com/raspiblitz/raspiblitz/issues/4346
+    if [ -f /boot/kernel8.img ] || [ -f /boot/firmware/kernel8.img ]; then
+      echo 'kernel=kernel8.img' | tee -a $raspi_configfile
+    fi
+    echo "max_usb_current=1" | tee -a $raspi_configfile
+    echo "dtparam=nvme" | tee -a $raspi_configfile
+    echo 'dtoverlay=pi3-disable-bt' | tee -a $raspi_configfile
+    echo 'dtoverlay=disable-bt' | tee -a $raspi_configfile
   else
-    echo "$max_usb_current already in $configFile"
+    echo "# Raspiblitz Edits are already in $raspi_configfile"
   fi
 
   # run fsck on sd root partition on every startup to prevent "maintenance login" screen
@@ -431,24 +494,34 @@ if [ "${baseimage}" = "raspios_arm64" ] || [ "${baseimage}" = "debian_rpi64" ]; 
   fi
 
   # edit kernel parameters
-  kernelOptionsFile=/boot/cmdline.txt
   fsOption1="fsck.mode=force"
   fsOption2="fsck.repair=yes"
-  fsOption1InFile=$(grep -c ${fsOption1} ${kernelOptionsFile})
-  fsOption2InFile=$(grep -c ${fsOption2} ${kernelOptionsFile})
+  fsOption1InFile=$(grep -c ${fsOption1} ${raspi_commandfile})
+  fsOption2InFile=$(grep -c ${fsOption2} ${raspi_commandfile})
 
   if [ ${fsOption1InFile} -eq 0 ]; then
-    sed -i "s/^/$fsOption1 /g" "$kernelOptionsFile"
-    echo "$fsOption1 added to $kernelOptionsFile"
+    sed -i "s/^/$fsOption1 /g" "${raspi_commandfile}"
+    echo "$fsOption1 added to ${raspi_commandfile}"
   else
-    echo "$fsOption1 already in $kernelOptionsFile"
+    echo "$fsOption1 already in ${raspi_commandfile}"
   fi
   if [ ${fsOption2InFile} -eq 0 ]; then
-    sed -i "s/^/$fsOption2 /g" "$kernelOptionsFile"
-    echo "$fsOption2 added to $kernelOptionsFile"
+    sed -i "s/^/$fsOption2 /g" "${raspi_commandfile}"
+    echo "$fsOption2 added to ${raspi_commandfile}"
   else
-    echo "$fsOption2 already in $kernelOptionsFile"
+    echo "$fsOption2 already in ${raspi_commandfile}"
   fi
+
+  # *** SAFE SHUTDOWN ***
+  # logind
+  echo "[Login]" | tee /etc/systemd/logind.conf.d/safeshutdown.conf
+  echo "HandlePowerKey=ignore" | tee -a /etc/systemd/logind.conf.d/safeshutdown.conf
+  # sudoers
+  echo 'nobody ALL=(ALL) NOPASSWD: /home/admin/config.scripts/blitz.shutdown.sh' |
+    tee -a /etc/sudoers
+  # triggerhappy
+  echo 'KEY_POWER    1    sudo /home/admin/config.scripts/blitz.shutdown.sh' |
+    tee /etc/triggerhappy/triggers.d/powerbutton.conf
 fi
 
 # special prepare when Nvidia Jetson Nano
@@ -456,6 +529,10 @@ if [ $(uname -a | grep -c 'tegra') -gt 0 ] ; then
   echo "Nvidia --> disable GUI on boot"
   systemctl set-default multi-user.target
 fi
+
+# remove rpi-first-boot-wizard
+apt purge piwiz -y
+userdel -r rpi-first-boot-wizard
 
 echo -e "\n*** CONFIG ***"
 # based on https://raspibolt.github.io/raspibolt/raspibolt_20_pi.html#raspi-config
@@ -465,8 +542,7 @@ echo "root:raspiblitz" | chpasswd
 echo "pi:raspiblitz" | chpasswd
 
 # prepare auto-start of 00infoLCD.sh script on pi user login (just kicks in if auto-login of pi is activated in HDMI or LCD mode)
-if [ "${baseimage}" = "raspios_arm64" ] || [ "${baseimage}" = "debian_rpi64" ] || \
-   [ "${baseimage}" = "armbian" ] || [ "${baseimage}" = "ubuntu" ]; then
+if [ "${baseimage}" = "raspios_arm64" ] || [ "${baseimage}" = "debian" ] || [ "${baseimage}" = "ubuntu" ]; then
   homeFile=/home/pi/.bashrc
   autostartDone=$(grep -c "automatic start the LCD" $homeFile)
   if [ ${autostartDone} -eq 0 ]; then
@@ -474,7 +550,7 @@ if [ "${baseimage}" = "raspios_arm64" ] || [ "${baseimage}" = "debian_rpi64" ] |
     # run as exec to dont allow easy physical access by keyboard
     # see https://github.com/rootzoll/raspiblitz/issues/54
     bash -c 'echo "# automatic start the LCD info loop" >> /home/pi/.bashrc'
-    bash -c 'echo "SCRIPT=/home/admin/00infoLCD.sh" >> /home/pi/.bashrc'
+    bash -c 'echo "SCRIPT=\"sudo /home/admin/00infoLCD.sh\"" >> /home/pi/.bashrc'
     bash -c 'echo "# replace shell with script => logout when exiting script" >> /home/pi/.bashrc'
     bash -c 'echo "exec \$SCRIPT" >> /home/pi/.bashrc'
     echo "autostart LCD added to $homeFile"
@@ -489,55 +565,28 @@ fi
 sed -i "s/^#SystemMaxUse=.*/SystemMaxUse=250M/g" /etc/systemd/journald.conf
 sed -i "s/^#SystemMaxFileSize=.*/SystemMaxFileSize=50M/g" /etc/systemd/journald.conf
 
-# change log rotates
-# see https://github.com/rootzoll/raspiblitz/issues/394#issuecomment-471535483
+## LOG ROTATION
+
+# GLOBAL for all logs: /etc/logrotate.conf
+echo "# Optimizing log files: rotate daily max 100M, keep 4 days & compress old"
+sed -i "s/^weekly/daily size 100M/g" /etc/logrotate.conf
+sed -i "s/^#compress/compress/g" /etc/logrotate.conf
+
+# add the option "copytruncate" to /etc/logrotate.conf below the line staring with "# global options do"
+sed -i '/# global options do/a \copytruncate' /etc/logrotate.conf
+
+# SPECIAL FOR SYSLOG: /etc/logrotate.d/rsyslog
+# to test config run: sudo logrotate -v /etc/logrotate.d/rsyslog
+rm /etc/logrotate.d/rsyslog 2>/dev/null
 echo "
 /var/log/syslog
-{
-  rotate 7
-  daily
-  missingok
-  notifempty
-  delaycompress
-  compress
-  postrotate
-    invoke-rc.d rsyslog rotate > /dev/null
-  endscript
-}
-
 /var/log/mail.info
 /var/log/mail.warn
 /var/log/mail.err
 /var/log/mail.log
 /var/log/daemon.log
-{
-  rotate 4
-  size=100M
-  missingok
-  notifempty
-  compress
-  delaycompress
-  sharedscripts
-  postrotate
-    invoke-rc.d rsyslog rotate > /dev/null
-  endscript
-}
-
 /var/log/kern.log
 /var/log/auth.log
-{
-  rotate 4
-  size=100M
-  missingok
-  notifempty
-  compress
-  delaycompress
-  sharedscripts
-  postrotate
-    invoke-rc.d rsyslog rotate > /dev/null
-  endscript
-}
-
 /var/log/user.log
 /var/log/lpr.log
 /var/log/cron.log
@@ -545,25 +594,28 @@ echo "
 /var/log/messages
 {
   rotate 4
-  weekly
+  size 100M
   missingok
-  notifempty
   compress
   delaycompress
+  copytruncate
   sharedscripts
   postrotate
-    invoke-rc.d rsyslog rotate > /dev/null
+    service logrotate restart
   endscript
 }
 " | tee ./rsyslog
 mv ./rsyslog /etc/logrotate.d/rsyslog
 chown root:root /etc/logrotate.d/rsyslog
+service logrotate restart
 service rsyslog restart
 
 echo -e "\n*** ADDING MAIN USER admin ***"
 # based on https://raspibolt.org/system-configuration.html#add-users
 # using the default password 'raspiblitz'
 adduser --disabled-password --gecos "" admin
+# make the home folder world readable
+chmod 0755 /home/admin
 echo "admin:raspiblitz" | chpasswd
 adduser admin sudo
 chsh admin -s /bin/bash
@@ -581,7 +633,9 @@ fi
 echo -e "\n*** ADDING SERVICE USER bitcoin"
 # based on https://raspibolt.org/guide/raspberry-pi/system-configuration.html
 # create user and set default password for user
-adduser --disabled-password --gecos "" bitcoin
+adduser --system --group --shell /bin/bash --home /home/bitcoin bitcoin
+# copy the skeleton files for login
+sudo -u bitcoin cp -r /etc/skel/. /home/bitcoin/
 echo "bitcoin:raspiblitz" | chpasswd
 # make home directory readable
 chmod 755 /home/bitcoin
@@ -705,21 +759,31 @@ bash -c "echo '# End of file' >> /etc/security/limits.conf"
 sed --in-place -i "23s/.*/session required pam_limits.so/" /etc/pam.d/common-session
 sed --in-place -i "25s/.*/session required pam_limits.so/" /etc/pam.d/common-session-noninteractive
 bash -c "echo '# end of pam-auth-update config' >> /etc/pam.d/common-session-noninteractive"
-# increase the possible number of running processes from 128
-bash -c "echo 'fs.inotify.max_user_instances=4096' >> /etc/sysctl.conf"
+
+# Increase maximum number of inotify instances
+bash -c "echo '# RaspiBlitz Edit: Set maximum number of inotify instances (8192 recommended for min 2GB RAM)' >> /etc/sysctl.conf"
+bash -c "echo 'fs.inotify.max_user_instances=8192' >> /etc/sysctl.conf"
+
+# Activate overcommit_memory
+bash -c "echo '# RaspiBlitz Edit: Use overcommit to prevent system crashes' >> /etc/sysctl.conf"
+bash -c "echo 'vm.overcommit_memory=1' >> /etc/sysctl.conf"
 
 # *** fail2ban ***
 # based on https://raspibolt.org/security.html#fail2ban
 echo "*** HARDENING ***"
 apt_install --no-install-recommends python3-systemd fail2ban
+# https://github.com/raspiblitz/raspiblitz/issues/4044
+if [ ! -f /var/log/auth.log ]; then
+  touch /var/log/auth.log
+fi
 
 # *** CACHE DISK IN RAM & KEYVALUE-STORE***
 echo "Activating CACHE RAM DISK ... "
-/home/admin/_cache.sh ramdisk on
-/home/admin/_cache.sh keyvalue on
+/home/admin/_cache.sh ramdisk on || exit 1
+/home/admin/_cache.sh keyvalue on || exit 1
 
 # *** Wifi, Bluetooth & other RaspberryPi configs ***
-if [ "${baseimage}" = "raspios_arm64"  ] || [ "${baseimage}" = "debian_rpi64" ]; then
+if [ "${baseimage}" = "raspios_arm64"  ] || [ "${baseimage}" = "debian" ]; then
 
   if [ "${wifi_region}" == "off" ]; then
     echo -e "\n*** DISABLE WIFI ***"
@@ -727,40 +791,25 @@ if [ "${baseimage}" = "raspios_arm64"  ] || [ "${baseimage}" = "debian_rpi64" ];
     ifconfig wlan0 down
   fi
 
-  echo -e "\n*** DISABLE BLUETOOTH ***"
-  configFile="/boot/config.txt"
-  disableBT="dtoverlay=disable-bt"
-  disableBTDone=$(grep -c "$disableBT" $configFile)
-
-  if [ "${disableBTDone}" -eq 0 ]; then
-    # disable bluetooth module
-    echo "" | tee -a $configFile
-    echo "# Raspiblitz" | tee -a $configFile
-    echo 'dtoverlay=pi3-disable-bt' | tee -a $configFile
-    echo 'dtoverlay=disable-bt' | tee -a $configFile
-  else
-    echo "disable BT already in $configFile"
-  fi
-
   # remove bluetooth services
   systemctl disable bluetooth.service
   systemctl disable hciuart.service
 
   # remove bluetooth packages
-  apt remove -y --purge pi-bluetooth bluez bluez-firmware
+  apt-get remove -y --purge pi-bluetooth bluez bluez-firmware
 
   # disable audio
   echo -e "\n*** DISABLE AUDIO (snd_bcm2835) ***"
-  sed -i "s/^dtparam=audio=on/# dtparam=audio=on/g" /boot/config.txt
+  sed -i "s/^dtparam=audio=on/# dtparam=audio=on/g" ${raspi_configfile}
 
   # disable DRM VC4 V3D
   echo -e "\n*** DISABLE DRM VC4 V3D driver ***"
   dtoverlay=vc4-fkms-v3d
-  sed -i "s/^dtoverlay=${dtoverlay}/# dtoverlay=${dtoverlay}/g" /boot/config.txt
+  sed -i "s/^dtoverlay=${dtoverlay}/# dtoverlay=${dtoverlay}/g" ${raspi_configfile}
 
   # I2C fix (make sure dtparam=i2c_arm is not on)
   # see: https://github.com/rootzoll/raspiblitz/issues/1058#issuecomment-739517713
-  sed -i "s/^dtparam=i2c_arm=.*//g" /boot/config.txt
+  sed -i "s/^dtparam=i2c_arm=.*//g" ${raspi_configfile}
 fi
 
 # *** BOOTSTRAP ***
@@ -776,7 +825,7 @@ cp /home/admin/assets/background.service /etc/systemd/system/background.service
 systemctl enable background
 
 # *** BACKGROUND SCAN ***
-/home/admin/_background.scan.sh install
+/home/admin/_background.scan.sh install || exit 1
 
 #######
 # TOR #
@@ -809,6 +858,8 @@ else
 fi
 
 # check fallback list bitnodes
+# update on releases manually in asset folder with:
+# curl -H "Accept: application/json; indent=4" https://bitnodes.io/api/v1/snapshots/latest/ -o ./fallback.bitnodes.nodes
 byteSizeList=$(sudo -u admin stat -c %s /home/admin/fallback.bitnodes.nodes)
 if [ ${#byteSizeList} -eq 0 ] || [ ${byteSizeList} -lt 10240 ]; then
   echo "Using fallback list from repo: bitnodes"
@@ -818,6 +869,8 @@ fi
 chown admin:admin /home/admin/fallback.bitnodes.nodes
 
 # check fallback list bitcoin core
+# update on releases manually in asset folder with:
+# curl https://raw.githubusercontent.com/bitcoin/bitcoin/master/contrib/seeds/nodes_main.txt -o ./fallback.bitcoin.nodes
 byteSizeList=$(sudo -u admin stat -c %s /home/admin/fallback.bitcoin.nodes)
 if [ ${#byteSizeList} -eq 0 ] || [ ${byteSizeList} -lt 10240 ]; then
   echo "Using fallback list from repo: bitcoin core"
@@ -835,19 +888,19 @@ echo -e "\n**********************************************"
 echo "BASIC SD CARD BUILD DONE"
 echo -e "**********************************************\n"
 echo "Your SD Card Image for RaspiBlitz is ready (might still do display config)."
-echo "Take the chance & look thru the output above if you can spot any errors or warnings."
-echo -e "\nIMPORTANT IF WANT TO MAKE A RELEASE IMAGE FROM THIS BUILD:"
+echo "Take the chance & look through the output above if you can spot any errors or warnings."
+echo -e "\nIMPORTANT IF YOU WANT TO MAKE A RELEASE IMAGE FROM THIS BUILD:"
 echo "1. login fresh --> user:admin password:raspiblitz"
 echo -e "2. run --> release\n"
 
 # make sure that at least the code is available (also if no internet)
-/home/admin/config.scripts/blitz.display.sh prepare-install
-# (do last - because might trigger reboot)
+/home/admin/config.scripts/blitz.display.sh prepare-install || exit 1
+# (do last - because it might trigger reboot)
 if [ "${display}" != "headless" ] || [ "${baseimage}" = "raspios_arm64" ]; then
   echo "*** ADDITIONAL DISPLAY OPTIONS ***"
   echo "- calling: blitz.display.sh set-display ${display}"
-  /home/admin/config.scripts/blitz.display.sh set-display ${display}
-  /home/admin/config.scripts/blitz.display.sh rotate 1
+  /home/admin/config.scripts/blitz.display.sh set-display ${display} || exit 1
+  /home/admin/config.scripts/blitz.display.sh rotate 1 || exit 1
 fi
 
 echo "# BUILD DONE - see above"

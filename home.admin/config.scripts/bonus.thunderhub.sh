@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # https://github.com/apotdevin/thunderhub
-THUBVERSION="v0.13.16"
+THUBVERSION="v0.13.30"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -96,7 +96,7 @@ if [ "$1" = "install" ]; then
     /home/admin/config.scripts/bonus.nodejs.sh on
 
     # create thunderhub user
-    sudo adduser --disabled-password --gecos "" thunderhub
+    sudo adduser --system --group --home /home/thunderhub thunderhub
 
     # download and install
     sudo -u thunderhub git clone https://github.com/apotdevin/thunderhub.git /home/thunderhub/thunderhub
@@ -377,11 +377,11 @@ if [ "$1" = "update" ]; then
   # unset $1
   set --
   UPSTREAM=${1:-'@{u}'}
-  LOCAL=$(git rev-parse @)
-  REMOTE=$(git rev-parse "$UPSTREAM")
+  LOCAL=$(sudo -u thunderhub git rev-parse @)
+  REMOTE=$(sudo -u thunderhub git rev-parse "$UPSTREAM")
 
   if [ $LOCAL = $REMOTE ]; then
-    TAG=$(git tag | sort -V | tail -1)
+    TAG=$(sudo -u thunderhub git tag | sort -V | tail -1)
     echo "# Up-to-date on version" $TAG
   else
     echo "# Pulling latest changes..."

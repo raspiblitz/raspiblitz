@@ -1,9 +1,13 @@
 name: amd64-fatpack-image-build
 
+concurrency:
+  group: amd64-fatpack-image-build-${{ github.head_ref }}
+  cancel-in-progress: true
+
 on:
   workflow_dispatch:
   #push:
-  #  branches: [ "dev", "v1.8", "v1.9" ]
+  #  branches: ["dev", "v1.10"]
   #  paths:
   #    - 'build_sdcard.sh'
   #    - 'home.admin/bitcoin.install.sh'
@@ -24,7 +28,7 @@ on:
   #    - 'home.admin/blitz.display.sh'
   #    - 'ci/amd64/**'
   #pull_request:
-  #  branches: [ "dev", "v1.8", "v1.9" ]
+  #  branches: ["dev", "v1.10"]
   #  paths:
   #    - 'build_sdcard.sh'
   #    - 'home.admin/bitcoin.install.sh'
@@ -49,20 +53,32 @@ jobs:
   amd64-image-build:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set values
+        id: set_values
         run: |
           echo "BUILD_DATE=$(date +"%Y-%m-%d")" >> $GITHUB_ENV
           echo "BUILD_VERSION=$(git describe --always --tags)" >> $GITHUB_ENV
+          if [ -z "$GITHUB_HEAD_REF" ]; then
+            echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_ENV
+          else
+            echo "BRANCH_NAME=${GITHUB_HEAD_REF}" >> $GITHUB_ENV
+          fi
+          if [[ "${{github.event_name}}" == "pull_request" ]]; then
+            echo "GITHUB_USER=${{github.event.pull_request.head.repo.owner.login}}" >> $GITHUB_OUTPUT
+          else
+            echo "GITHUB_USER=$(echo ${{github.repository}} | cut -d'/' -f1)" >> $GITHUB_OUTPUT
+          fi
 
-      - name: Hello RaspiBlitz
-        run: echo "Building the raspiblitz-amd64-debian-image-${{env.BUILD_DATE}}-${{env.BUILD_VERSION}} at "
+      - name: Display the build name
+        run: echo "Building the raspiblitz-amd64-debian-image-${{env.BUILD_DATE}}-${{env.BUILD_VERSION}}"
 
       - name: Run the build script
         run: |
+          echo "Using the variables: --pack fatpack --github_user ${{steps.set_values.outputs.GITHUB_USER}} --branch ${{env.BRANCH_NAME}} --preseed_file preseed.cfg --boot uefi --desktop none"
           cd ci/amd64
-          bash packer.build.amd64-debian.sh fatpack $GITHUB_ACTOR $GITHUB_HEAD_REF
+          bash packer.build.amd64-debian.sh --pack fatpack --github_user ${{steps.set_values.outputs.GITHUB_USER}} --branch ${{env.BRANCH_NAME}} --preseed_file preseed.cfg --boot uefi --desktop none
 
       - name: Compute checksum of the raw image
         run: |
@@ -80,7 +96,7 @@ jobs:
           sha256sum raspiblitz-amd64-debian-fatpack.qcow2.gz > raspiblitz-amd64-debian-fatpack.qcow2.gz.sha256
 
       - name: Upload the image and checksums
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: raspiblitz-amd64-image-${{env.BUILD_DATE}}-${{env.BUILD_VERSION}}
           path: |

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# main repo: https://github.com/cstenglein/raspiblitz-web
+# main repo: https://github.com/raspiblitz/raspiblitz-web
 
 # NORMALLY user/repo/version will be defined by calling script - see build_sdcard.sh
 # the following is just a fallback to try during development if script given branch does not exist
@@ -23,7 +23,7 @@ fi
 if [ "$1" = "info" ]; then
 
   # check if installed
-  cd /home/blitzapi/blitz_web
+  cd /home/blitzapi/blitz_web 2>/dev/null
   if [ "$?" != "0" ]; then
     echo "installed=0"
     exit 1
@@ -34,7 +34,7 @@ if [ "$1" = "info" ]; then
   origin=$(sudo git config --get remote.origin.url)
   echo "repo='${origin}'"
 
-  # get github branch from repo directory with git command 
+  # get github branch from repo directory with git command
   branch=$(sudo git rev-parse --abbrev-ref HEAD)
   echo "branch='${branch}'"
 
@@ -46,7 +46,7 @@ if [ "$1" = "info" ]; then
 fi
 
 # check if started with sudo
-if [ "$EUID" -ne 0 ]; then 
+if [ "$EUID" -ne 0 ]; then
   echo "error='run as root'"
   exit 1
 fi
@@ -57,13 +57,14 @@ fi
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   if [ "$2" == "DEFAULT" ]; then
-    echo "# getting default user/repo from build_sdcard.sh"
+    echo "# WEBUI: getting default user/repo from build_sdcard.sh"
+    # copy build_sdcard.sh out of raspiblitz diretcory to not create "changes" in git
     sudo cp /home/admin/raspiblitz/build_sdcard.sh /home/admin/build_sdcard.sh
     sudo chmod +x /home/admin/build_sdcard.sh 2>/dev/null
     source <(sudo /home/admin/build_sdcard.sh -EXPORT)
     GITHUB_USER="${defaultWEBUIuser}"
     GITHUB_REPO="${defaultWEBUIrepo}"
-    GITHUB_BRANCH="${githubBranch}"
+    GITHUB_BRANCH="release/${githubBranch}"
     GITHUB_COMMITORTAG=""
   else
     # get parameters
@@ -79,17 +80,17 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "# FAIL: No GITHUB_USER provided"
     exit 1
   fi
-  echo "GITHUB_REPO(${GITHUB_REPO})"
+  echo "# GITHUB_REPO(${GITHUB_REPO})"
   if [ "${GITHUB_REPO}" == "" ]; then
     echo "# FAIL: No GITHUB_REPO provided"
     exit 1
   fi
-  echo "GITHUB_BRANCH(${GITHUB_BRANCH})"
+  echo "# GITHUB_BRANCH(${GITHUB_BRANCH})"
   if [ "${GITHUB_BRANCH}" == "" ]; then
     echo "# FAIL: No GITHUB_BRANCH provided"
     exit 1
   fi
-  echo "GITHUB_COMMITORTAG(${GITHUB_COMMITORTAG})"
+  echo "# GITHUB_COMMITORTAG(${GITHUB_COMMITORTAG})"
   if [ "${GITHUB_COMMITORTAG}" == "" ]; then
     echo "# INFO: No GITHUB_COMMITORTAG provided .. will use latest code on branch"
   fi
@@ -101,11 +102,13 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
     echo "# WARNING! The given WebUI repo is not available:"
     echo "# user(${GITHUB_USER}) repo(${GITHUB_REPO}) branch(${GITHUB_BRANCH})"
-    echo "# WORKING WITH FALLBACK REPO - USE JUST FOR DEVELOPMENT - DONT USE IN PRODUCTION"
+    GITHUB_BRANCH="${FALLACK_BRANCH}"
+    echo "# SO WORKING WITH FALLBACK REPO:"
+    echo "# user(${GITHUB_USER}) repo(${GITHUB_REPO}) branch(${GITHUB_BRANCH})"
+    echo "# USE JUST FOR DEVELOPMENT - DONT USE IN PRODUCTION"
     echo "# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
     echo
     sleep 10
-    GITHUB_BRANCH="${FALLACK_BRANCH}"
   fi
 
   # re-check (if case its fallback)
@@ -124,7 +127,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   rm -r /root/${GITHUB_REPO} 2>/dev/null
   rm -r /home/blitzapi/blitz_web 2>/dev/null
   rm -r /home/blitzapi/${GITHUB_REPO} 2>/dev/null
-  
+
   cd /home/blitzapi || exit 1
    echo "# clone github: ${GITHUB_USER}/${GITHUB_REPO}"
   if ! git clone https://github.com/${GITHUB_USER}/${GITHUB_REPO}.git; then
@@ -150,18 +153,12 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   echo "# Compile WebUI"
   /home/admin/config.scripts/bonus.nodejs.sh on
-  source <(/home/admin/config.scripts/bonus.nodejs.sh info)
-  if ! npm install --global yarn; then
-    echo "error='install yarn failed'"
+  if ! npm install; then
+    echo "error='npm install failed'"
     exit 1
   fi
-  ${NODEPATH}/yarn config set --home enableTelemetry 0
-  if ! ${NODEPATH}/yarn install; then
-    echo "error='yarn install failed'"
-    exit 1
-  fi
-  if ! ${NODEPATH}/yarn build; then
-    echo "error='yarn build failed'"
+  if ! npm run build; then
+    echo "error='npm run build failed'"
     exit 1
   fi
 
@@ -192,9 +189,8 @@ if [ "$1" = "update" ]; then
     git reset --hard origin/${currentBranch}
     newCommit=$(git rev-parse HEAD)
     if [ "${oldCommit}" != "${newCommit}" ]; then
-      source <(/home/admin/config.scripts/bonus.nodejs.sh info)
-      ${NODEPATH}/yarn install
-      ${NODEPATH}/yarn build
+      npm install
+      npm run build
       sudo rm -r /var/www/public/* 2>/dev/null
       sudo cp -r /home/blitzapi/blitz_web/build/* /var/www/public
       sudo chown www-data:www-data -R /var/www/public

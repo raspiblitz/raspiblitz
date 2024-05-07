@@ -3,7 +3,7 @@
 # https://github.com/lnbits/lnbits
 
 # https://github.com/lnbits/lnbits/releases
-tag="0.10.6"
+tag="0.11.3"
 VERSION="${tag}"
 
 # command info
@@ -145,7 +145,7 @@ if [ "$1" = "menu" ]; then
     fundinginfo="on CLN "
   fi
 
-  text="Local Web Browser: https://${localIP}:${httpsPort}"
+  text="https://${localIP}:${httpsPort}${authMethod}"
 
   if [ ${#publicDomain} -gt 0 ]; then
      text="${text}
@@ -180,7 +180,7 @@ To enable easy reachability with normal browser from the outside
 Consider adding a IP2TOR Bridge under OPTIONS."
   fi
 
-  whiptail --title " LNbits ${fundinginfo}" --yes-button "OK" --no-button "OPTIONS" --yesno "${text}" 18 69
+  whiptail --title " LNbits ${fundinginfo}" --yes-button "OK" --no-button "OPTIONS" --yesno "${text}" 18 78
   result=$?
   sudo /home/admin/config.scripts/blitz.display.sh hide
   echo "option (${result}) - please wait ..."
@@ -377,8 +377,12 @@ if [ "$1" = "status" ]; then
     echo "httpsPort='5001'"
     echo "httpsForced='1'"
     echo "httpsSelfsigned='1'" # TODO: change later if IP2Tor+LetsEncrypt is active
-    echo "authMethod='none'"
     echo "publicIP='${publicIP}'"
+
+    # auth method is to call with a certain useer id
+    #admin_userid=$(sudo cat /home/lnbits/lnbits/.super_user)
+    admin_userid=$(sudo cat /mnt/hdd/app-data/LNBits/data/.super_user);
+    echo "authMethod='/wallet?usr=${admin_userid}'"
 
     # check funding source
     if [ "${LNBitsFunding}" == "" ]; then
@@ -528,6 +532,10 @@ if [ "$1" = "prestart" ]; then
     exit 1
   fi
 
+  # protect the admin user id if exists
+  # chmod 640 /home/lnbits/lnbits/.super_user 2>/dev/null
+  chmod 640 /mnt/hdd/app-data/LNBits/data/.super_user 2>/dev/null 
+
   echo "# OK: prestart finished"
   exit 0 # exit with clean code
 fi
@@ -615,7 +623,7 @@ if [ "$1" = "install" ]; then
 
   # add lnbits user
   echo "*** Add the 'lnbits' user ***"
-  sudo adduser --disabled-password --gecos "" lnbits
+  sudo adduser --system --group --home /home/lnbits lnbits
 
   # get optional github parameter
   githubUser="lnbits"
@@ -752,6 +760,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo rm /home/lnbits/lnbits/.env 2>/dev/null
   sudo -u lnbits touch /home/lnbits/lnbits/.env
 
+  # activate admin user
+  sudo sed -i "/^LNBITS_ADMIN_UI=/d" /home/lnbits/lnbits/.env
+  sudo bash -c "echo 'LNBITS_ADMIN_UI=true' >> /home/lnbits/lnbits/.env"
+
   if [ ! -e /mnt/hdd/app-data/LNBits/database.sqlite3 ]; then
     echo "# install database: PostgreSQL"
     # POSTGRES
@@ -762,7 +774,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     # config update
     # example: postgres://<user>:<password>@<host>/<database>
-    sudo bash -c "echo 'LNBITS_DATABASE_URL=postgres://lnbits_user:raspiblitz@localhost:5432/lnbits_db' >> /home/lnbits/lnbits/.env"
+    sudo bash -c "echo 'LNBITS_DATABASE_URL=postgres://postgres:postgres@localhost:5432/lnbits_db' >> /home/lnbits/lnbits/.env"
     sudo bash -c "echo 'LNBITS_DATA_FOLDER=/mnt/hdd/app-data/LNBits/data' >> /home/lnbits/lnbits/.env"
   else
     echo "# install database: SQLite"
@@ -1039,9 +1051,6 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     echo "# keeping data"
   fi
 
-  echo "# Remove the lnbits user"
-  sudo userdel -rf lnbits 2>/dev/null
-
   # setting value in raspi blitz config
   /home/admin/config.scripts/blitz.conf.sh set LNBits "off"
 
@@ -1157,18 +1166,12 @@ if [ "$1" = "migrate" ]; then
     # create new backup
     sudo tar -cf /mnt/hdd/app-data/LNBits_sqlitedb_backup.tar -C /mnt/hdd/app-data LNBits/
 
-    # update to expected tag
-    cd /home/lnbits/lnbits || exit 1
-
     # remove existent config for database
     sudo sed -i "/^LNBITS_DATABASE_URL=/d" /home/lnbits/lnbits/.env 2>/dev/null
     sudo sed -i "/^LNBITS_DATA_FOLDER=/d" /home/lnbits/lnbits/.env 2>/dev/null
     # restore sqlite database config
     sudo bash -c "echo 'LNBITS_DATA_FOLDER=/mnt/hdd/app-data/LNBits' >> /home/lnbits/lnbits/.env"
 
-    #sudo -u lnbits git checkout ${tag}
-    sudo -u lnbits git reset --hard 4f05c6c12e284d4a322a9041d19f66d01afa205b # good tested after BIGINT fix (#1135)
-    /home/admin/config.scripts/bonus.lnbits.sh sync || exit 1
     # stop after sync was done
     sudo systemctl stop lnbits
 

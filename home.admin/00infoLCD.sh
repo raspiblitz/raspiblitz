@@ -64,8 +64,8 @@ configFile="/mnt/hdd/raspiblitz.conf"
 infoFile="/home/admin/raspiblitz.info"
 
 # check that user is pi
-if [ "$USER" != "pi" ]; then
-  echo "plz run as user pi --> su pi"
+if [ "$USER" != "pi" ] && [ "$USER" != "root" ]; then
+  echo "plz run as user pi or with sudo"
   exit 1
 fi
 
@@ -86,7 +86,6 @@ while :
 
     # get config info if already available (with state value)
     source ${infoFile}
-    source <(/home/admin/_cache.sh get state message)
 
     configExists=$(ls "${configFile}" 2>/dev/null | grep -c '.conf')
     if [ ${configExists} -eq 1 ]; then
@@ -97,6 +96,9 @@ while :
     if [ "${setupPhase}" != "done" ] || [ "${state}" == "reboot" ] || [ "${state}" == "shutdown" ] || [ "${state}" == "copytarget" ] || [ "${state}" == "copysource" ] || [ "${state}" == "copystation" ]; then
 
       # show status info during boot & setup & repair on LCD
+      if [ "${state}" == "" ]; then
+        state="nostate"
+      fi
       /home/admin/setup.scripts/eventInfoWait.sh "${state}" "${message}" lcd
       sleep 1
       continue

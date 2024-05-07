@@ -26,7 +26,7 @@ GITHUB_TAG="v0.1"
 # leave GITHUB_SIGN_AUTHOR empty to skip verifying
 GITHUB_SIGN_AUTHOR="web-flow"
 GITHUB_SIGN_PUBKEYLINK="https://github.com/web-flow.gpg"
-GITHUB_SIGN_FINGERPRINT="4AEE18F83AFDEB23"
+GITHUB_SIGN_FINGERPRINT="(4AEE18F83AFDEB23|B5690EEEBB952194)"
 
 # port numbers the app should run on
 # delete if not an web app
@@ -161,7 +161,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # BACKGROUND is here to seperate running apps by unix users
   # and only give file write access to the rest of the system where needed.
   echo "# create user"
-  sudo adduser --disabled-password --gecos "" ${APPID} || exit 1
+  # If the user is intended to be loeed in to add '--shell /bin/bash'
+  # and copy the skeleton files
+  sudo adduser --system --group --shell /bin/bash --home /home/${APPID} ${APPID} || exit 1
+  # copy the skeleton files for login
+  sudo -u ${APPID} cp -r /etc/skel/. /home/${APPID}/
 
   # add user to special groups with special access rights
   # BACKGROUND there are some unix groups available that will give the access to

@@ -5,7 +5,7 @@
 # 2) KEY-VALUE STORE for system state infos (REDIS)
 
 # SECURITY NOTE: The files on the RAMDISK can be set with unix file permissions and so restrict certain users access.
-# But all data stored in the KEY-VALUE STORE has to be asumed as system-wide public information.
+# But all data stored in the KEY-VALUE STORE has to be assumed as system-wide public information.
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ]; then
@@ -14,28 +14,29 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ];
   echo "_cache.sh ramdisk [on|off]"
   echo "_cache.sh keyvalue [on|off]"
   echo
+  echo "_cache.sh init [key] [value] (only sets value if not exists)"
   echo "_cache.sh set [key] [value] [?expire-seconds]"
   echo "_cache.sh get [key1] [?key2] [?key3] ..."
-  echo 
+  echo
   echo "_cache.sh increment [key1]"
   echo
   echo "_cache.sh focus [key] [update-seconds] [?duration-seconds]"
   echo "# set in how many seconds value is marked to be rescanned"
-  echo "# -1 = slowest default update cycle"  
+  echo "# -1 = slowest default update cycle"
   echo "# 0  = update on every cycle"
   echo "# set a 'duration-seconds' after defaults to -1 (optional)"
-  echo 
+  echo
   echo "_cache.sh meta [key] [?default]"
   echo "# get single key with additional metadata:"
   echo "# updateseconds= see above"
   echo "# stillvalid=0/1 if value is still valid or outdated"
   echo "# lasttouch= last update timestamp in unix seconds"
-  echo 
+  echo
   echo "_cache.sh valid [key1] [?key2] [?key3] ..."
   echo "# check multiple keys if all are still not outdated"
   echo "# use for example to check if a complex call needs"
   echo "# to be made that covers multiple single data points"
-  echo 
+  echo
   echo "_cache.sh import [bash-keyvalue-file]"
   echo "# import a bash style key-value file into store"
   echo
@@ -46,7 +47,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ];
   exit 1
 fi
 
-# BACKGROUND: we need to build outdated meta info manually, 
+# BACKGROUND: we need to build outdated meta info manually,
 # because there is nothing as "AGE" in redis: https://github.com/redis/redis/issues/1147
 # only feature that can be used uis the EXPIRE feature to determine if a value is still valid
 
@@ -55,7 +56,7 @@ META_OUTDATED_SECONDS=":out"
 META_LASTTOUCH_TS=":ts"
 META_VALID_FLAG=":val"
 
-# path of the raspiblitz.info file (persiting cache values)
+# path of the raspiblitz.info file (persisting cache values)
 infoFile="/home/admin/raspiblitz.info"
 
 ###################
@@ -110,15 +111,16 @@ elif [ "$1" = "keyvalue" ] && [ "$2" = "on" ]; then
   sudo apt install -y redis-server
 
   # edit config: dont save to disk
-  sudo sed -i "/^save .*/d" /etc/redis/redis.conf
+  # echo "# edit config"
+  sudo cp /etc/redis/redis.conf /etc/redis/redis.conf.backup
+  sudo sed -i "s/^# save \"\"/save \"\"/g" /etc/redis/redis.conf
+  sudo sed -i "s/^appendonly yes/appendonly no/g" /etc/redis/redis.conf
+  sudo sed -i "s/^stop-writes-on-bgsave-error yes/stop-writes-on-bgsave-error no/g" /etc/redis/redis.conf
 
+  echo "# restart and remove db dump file"
   # restart with new config
   if ! ischroot; then sudo systemctl restart redis-server; fi
-
-  # clean old databases if exist
   sudo rm /var/lib/redis/dump.rdb 2>/dev/null
-
-  # restart again this time there is no old data dump to load
   if ! ischroot; then sudo systemctl restart redis-server; fi
 
 # uninstall
@@ -133,44 +135,67 @@ elif [ "$1" = "keyvalue" ] && [ "$2" = "off" ]; then
 ###################
 
 # set
-elif [ "$1" = "set" ]; then
+elif [ "$1" = "set" ] || [ "$1" = "init" ]; then
 
   # get parameters
   keystr=$2
   valuestr=$3
   expire=$4
 
-  # check that key & value are given
+  # check that key & value are provided
   if [ "${keystr}" == "" ]; then
     echo "# Fail: missing parameter"
     exit 1
   fi
 
+  # update certain values also in raspiblitz.info
+  if [ "${keystr}" = "state" ]; then
+    # change value in raspiblitz.info
+    sudo sed -i "s/^state=.*/state='${valuestr}'/g" ${infoFile}
+  fi
+  if [ "${keystr}" = "message" ]; then
+    # change value in raspiblitz.info
+    sudo sed -i "s/^message=.*/message='${valuestr}'/g" ${infoFile}
+  fi
+  if [ "${keystr}" = "setupPhase" ]; then
+    # change value in raspiblitz.info
+    sudo sed -i "s/^setupPhase=.*/setupPhase='${valuestr}'/g" ${infoFile}
+  fi
+  if [ "${keystr}" = "setupStep" ]; then
+    # change value in raspiblitz.info
+    sudo sed -i "s/^setupStep=.*/setupStep='${valuestr}'/g" ${infoFile}
+  fi 
+
+  NX=""
+  if [ "$1" = "init" ]; then
+    NX="NX "
+  fi
+
   # filter from expire just numbers
   expire="${expire//[^0-9.]/}"
 
-  # add an expire flag if given
   additionalParams=""
+  # add an expire flag if given
   if [ "${expire}" != "" ]; then
     additionalParams="EX ${expire}"
   fi
 
   # set in redis key value cache
-  redis-cli set ${keystr} "${valuestr}" ${additionalParams} 1>/dev/null
+  redis-cli set ${NX} ${keystr} "${valuestr}" ${additionalParams} 1>/dev/null
 
   # set in redis the timestamp
   timestamp=$(date +%s)
-  redis-cli set ${keystr}${META_LASTTOUCH_TS} "${timestamp}" ${additionalParams} 1>/dev/null
+  redis-cli set ${NX}${keystr}${META_LASTTOUCH_TS} "${timestamp}" ${additionalParams} 1>/dev/null
   #echo "# lasttouch(${timestamp})"
 
   # check if the value has a outdate policy
   outdatesecs=$(redis-cli get ${keystr}${META_OUTDATED_SECONDS})
   if [ "${outdatesecs}" == "" ]; then
     outdatesecs="-1"
-  fi 
+  fi
   #echo "# outdatesecs(${outdatesecs})"
   if [ "${outdatesecs}" != "-1" ]; then
-    # set exipire valid flag (if its gone - value is considered as outdated)
+    # set expire valid flag (if its gone - value is considered as outdated)
     redis-cli set ${keystr}${META_VALID_FLAG} "1" EX ${outdatesecs} 1>/dev/null
   fi
 
@@ -186,7 +211,7 @@ elif [ "$1" = "get" ]; then
   position=0
   for keystr in $@
   do
-    
+
     # skip first parameter
     ((position++))
     if [ $position -eq 1 ]; then
@@ -243,7 +268,7 @@ elif [ "$1" = "export" ]; then
   # get parameter
   keyfilter="${2}*"
 
-  # go thru all keys by keyfilter
+  # go through all keys by keyfilter
   keylist=$(redis-cli KEYS "${keyfilter}")
   readarray -t arr <<< "${keylist}"
   for key in "${arr[@]}";do
@@ -266,7 +291,7 @@ elif [ "$1" = "export" ]; then
 
 ##################################
 # COUNT
-# count value up
+# increment value
 ##################################
 
 # set
@@ -309,7 +334,7 @@ elif [ "$1" = "focus" ]; then
     for key in "${arr[@]}";do
       if [ "${key}" == "" ]; then
         continue
-      fi 
+      fi
       keyClean=$(echo $key | cut -d ":" -f1)
       value=$(redis-cli get "${key}")
       echo "${keyClean}=${value}"
@@ -324,7 +349,7 @@ elif [ "$1" = "focus" ]; then
     exit
   fi
 
-  # sanatize parameters (if not -1)
+  # sanitize parameters (if not -1)
   outdatesecs="${outdatesecs//[^0-9.]/}"
 
   # check that key & value are given
@@ -333,7 +358,7 @@ elif [ "$1" = "focus" ]; then
     exit 1
   fi
 
-    # add an expire flag if given
+  # add an expire flag if given
   additionalParams=""
   if [ "${durationsecs//[^0-9.]/}" != "" ]; then
     additionalParams="EX ${durationsecs//[^0-9.]/}"
@@ -358,13 +383,13 @@ elif [ "$1" = "meta" ]; then
   keystr=$2
   default=$3
 
-  # check that key & value are given
+  # check that key & value are provided
   if [ "${keystr}" == "" ]; then
     echo "# Fail: missing parameter"
     exit 1
   fi
-  
-  # get redis basic value 
+
+  # get redis basic value
   valuestr=$(redis-cli get ${keystr})
   echo "value=\"${valuestr}\""
 
@@ -380,7 +405,7 @@ elif [ "$1" = "meta" ]; then
   # get META_OUTDATED_SECONDS
   outdatesecs=$(redis-cli get ${keystr}${META_OUTDATED_SECONDS})
   if [ "${outdatesecs}" == "" ]; then
-    # default is -1 --> never outdate 
+    # default is -1 --> never outdate
     outdatesecs="-1"
   fi
   echo "outdatesecs=\"${outdatesecs}\""
@@ -406,7 +431,7 @@ elif [ "$1" = "valid" ]; then
   lasttouch_overall=""
   for keystr in $@
   do
-    
+
     # skip first parameter from script - thats the action string
     ((position++))
     if [ $position -eq 1 ]; then
@@ -436,7 +461,7 @@ elif [ "$1" = "valid" ]; then
     # get outdate police of value (outdated = not valid anymore)
     outdatesecs=$(redis-cli get ${keystr}${META_OUTDATED_SECONDS})
     #echo "# ${keystr}${META_OUTDATED_SECONDS}=\"${outdatesecs}\""
-    
+
     # if outdate policy is default or -1 ==> never outdated
     if [ "${outdatesecs}" == "" ] || [ "${outdatesecs}" == "-1" ]; then
       continue
@@ -453,7 +478,7 @@ elif [ "$1" = "valid" ]; then
 
     # so valid flag does not exists anymore
     # ==> this means value is outdated
-    # break loop and 
+    # break loop and
     echo "stillvalid=\"0\""
     exit 0
 

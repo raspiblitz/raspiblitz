@@ -6,7 +6,7 @@
 # https://github.com/openoms/joininbox
 
 # https://github.com/openoms/joininbox/tags
-JBTAG="v0.7.8" # installs JoinMarket v0.9.9
+JBTAG="v0.8.3" # installs JoinMarket v0.9.11
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -56,8 +56,11 @@ if [ "$1" = "install" ]; then
     echo "# cleaning before install"
     sudo userdel -rf joinmarket 2>/dev/null
 
-    echo "# add the 'joinmarket' user"
-    adduser --disabled-password --gecos "" joinmarket
+    USERNAME=joinmarket
+    echo "# add the user: ${USERNAME}"
+    sudo adduser --system --group --shell /bin/bash --home /home/${USERNAME} ${USERNAME}
+    echo "Copy the skeleton files for login"
+    sudo -u ${USERNAME} cp -r /etc/skel/. /home/${USERNAME}/
 
     # add to sudo group (required for installation)
     adduser joinmarket sudo || exit 1
@@ -68,9 +71,6 @@ if [ "$1" = "install" ]; then
     # make a folder for authorized keys
     sudo -u joinmarket mkdir -p /home/joinmarket/.ssh
     chmod -R 700 /home/joinmarket/.ssh
-
-    # install the command-line fuzzy finder (https://github.com/junegunn/fzf)
-    bash -c "echo 'source /usr/share/doc/fzf/examples/key-bindings.bash' >> /home/joinmarket/.bashrc"
 
     echo "# adding JoininBox"
     sudo rm -rf /home/joinmarket/joininbox
@@ -115,17 +115,24 @@ if [ "$1" = "install" ]; then
     echo
     # install a command-line fuzzy finder (https://github.com/junegunn/fzf)
     apt -y install fzf
-    bash -c "echo 'source /usr/share/doc/fzf/examples/key-bindings.bash' >> \
-    /home/joinmarket/.bashrc"
+    echo 'source /usr/share/doc/fzf/examples/key-bindings.bash' | sudo -u joinmarket tee -a /home/joinmarket/.bashrc
 
     # install tmux
     apt -y install tmux
 
+    echo
     echo "##############################################"
     echo "# Install JoinMarket and configure JoininBox #"
     echo "##############################################"
     echo
-    if sudo -u joinmarket /home/joinmarket/install.joinmarket.sh -i install; then
+    # install joinmarket using the joininbox install script
+    if [ "${uname-m}" = x86_64 ]; then
+      qtgui=true
+    else
+      # no qtgui on arm
+      qtgui=false
+    fi
+    if sudo -u joinmarket /home/joinmarket/install.joinmarket.sh -i install -q $qtgui; then
       echo "# Installed JoinMarket"
       echo "# Run: 'sudo /home/admin/config.scripts/bonus.joinmarket.sh on' to configure and switch on"
     else
@@ -156,7 +163,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   if [ -f /home/joinmarket/start.joininbox.sh ]; then
     echo "# Ok, Joininbox is present"
   else
-    sudo /home/admin/config.scripts/bonus.joinmarket.sh install
+    sudo /home/admin/config.scripts/bonus.joinmarket.sh install || exit 1
   fi
 
   # store JoinMarket data on HDD
@@ -181,7 +188,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "
 if [ -f \"/home/joinmarket/joinmarket-clientserver/jmvenv/bin/activate\" ]; then
   . /home/joinmarket/joinmarket-clientserver/jmvenv/bin/activate
-  /home/joinmarket/joinmarket-clientserver/jmvenv/bin/python -c \"import PySide2\"
   cd /home/joinmarket/joinmarket-clientserver/scripts/
 fi
 # shortcut commands
@@ -192,6 +198,17 @@ if [ -z \"\$TMUX\" ]; then
   /home/joinmarket/menu.sh
 fi
 " | sudo -u joinmarket tee -a /home/joinmarket/.bashrc
+
+  echo "# Check 'deprecatedrpc=create_bdb' in bitcoin.conf"
+  if ! sudo grep "deprecatedrpc=create_bdb" "/mnt/hdd/bitcoin/bitcoin.conf"; then
+    echo "# Place 'deprecatedrpc=create_bdb' in bitcoin.conf"
+    echo "deprecatedrpc=create_bdb" | sudo tee -a "/mnt/hdd/bitcoin/bitcoin.conf"
+    source <(/home/admin/_cache.sh get state)
+    if [ ${state} != "recovering" ]; then
+      echo "# Restarting bitcoind"
+      sudo systemctl restart bitcoind
+    fi
+  fi
 
   # make sure the Bitcoin Core wallet is on
   /home/admin/config.scripts/network.wallet.sh on

@@ -2,7 +2,8 @@
 
 # https://github.com/lightningequipment/circuitbreaker/releases
 # https://github.com/lightningequipment/circuitbreaker/commits/master
-pinnedVersion="e223938d983b756b3893880f3b3bf77e624a9f00"
+pinnedVersion="60b70d91710efe7227b253e74f0d39ccfc9702c1"
+
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -18,7 +19,7 @@ fi
 
 PGPsigner="web-flow"
 PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
-PGPpubkeyFingerprint="4AEE18F83AFDEB23"
+PGPpubkeyFingerprint="(4AEE18F83AFDEB23|B5690EEEBB952194)"
 
 # PGPsigner="joostjager"
 # PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
@@ -77,7 +78,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # get Go vars
     source /etc/profile
     # create dedicated user
-    sudo adduser --disabled-password --gecos "" circuitbreaker
+    sudo adduser --system --group --home /home/circuitbreaker circuitbreaker
     # set PATH for the user
     sudo bash -c "echo 'PATH=\$PATH:/home/circuitbreaker/go/bin/' >> /home/circuitbreaker/.profile"
 

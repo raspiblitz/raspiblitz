@@ -17,7 +17,7 @@ echo "# RASPIBLITZ SETUP STATE" > $SETUPFILE
 sudo chown admin:admin $SETUPFILE
 sudo chmod 777 $SETUPFILE
 
-source <(/home/admin/_cache.sh get setupPhase dnsworking)
+source <(/home/admin/_cache.sh get dnsworking)
 
 # remember original setupphase
 orgSetupPhase="${setupPhase}"
@@ -66,7 +66,7 @@ if [ "${setupPhase}" == "migration" ]; then
 
   source <(/home/admin/_cache.sh get hddGotMigrationData migrationMode)
   if [ "${migrationMode}" == "" ]; then
-    migrationMode = "normal"
+    migrationMode="normal"
   fi
   
   # show recovery dialog
@@ -90,7 +90,8 @@ if [ "${setupPhase}" == "migration" ]; then
 
 fi
 
-source <(/home/admin/_cache.sh get setupPhase)
+# fresh import setup values
+source /home/admin/raspiblitz.info
 
 ############################################
 # DEFAULT: Basic Setup menu
@@ -156,7 +157,7 @@ if [ "${setupPhase}" == "setup" ]; then
       filesystem="ext4"
 
       # check if there is a flag set on sd card boot section to format as btrfs (experimental)
-      flagBTRFS=$(sudo ls /boot/btrfs* 2>/dev/null | grep -c btrfs)
+      flagBTRFS=$(sudo ls /boot/firmware/btrfs* 2>/dev/null | grep -c btrfs)
       if [ "${flagBTRFS}" != "0" ]; then
         echo "Found BTRFS flag ---> formatting with experimental BTRFS filesystem"
         filesystem="btrfs"

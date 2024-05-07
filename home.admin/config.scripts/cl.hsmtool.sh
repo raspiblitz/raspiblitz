@@ -14,7 +14,7 @@ if [ $# -lt 1 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]||\
   echo
   echo "Usage:"
   echo "Create new wallet:"
-  echo "cl.hsmtool.sh [new] [mainnet|testnet|signet] [?seedpassword]"
+  echo "cl.hsmtool.sh [new] [mainnet|testnet|signet] [?seedpassword|noninteractive]"
   echo "cl.hsmtool.sh [new-force] [mainnet|testnet|signet] [?seedpassword]"
   echo "There will be no seedpassword(passphrase) used by default"
   echo "new-force will backup the old wallet and will work without interaction"
@@ -171,7 +171,7 @@ function decryptHSMsecret() {
 if [ "$1" = "new" ] || [ "$1" = "new-force" ] || [ "$1" = "seed" ] || [ "$1" = "seed-force" ]; then
 
   # make sure /home/bitcoin/.lightning/bitcoin exists (when lightningd was not run yet)
-  if ! sudo ls /home/bitcoin/.lightning/bitcoin 1>/dev/null; then
+  if ! sudo ls /home/bitcoin/.lightning/bitcoin 2>/dev/null; then
     echo "# Create /home/bitcoin/.lightning/bitcoin/"
     sudo -u bitcoin mkdir -p /home/bitcoin/.lightning/bitcoin/
   fi
@@ -190,7 +190,10 @@ if [ "$1" = "new" ] || [ "$1" = "new-force" ] || [ "$1" = "seed" ] || [ "$1" = "
         if sudo ls /home/bitcoin/.lightning/${CLNETWORK}/seedwords.info 2>1 1>/dev/null; then
           echo "# There is a /home/bitcoin/.lightning/${CLNETWORK}/seedwords.info so don't create new"
           # show seed
-          sudo /home/admin/config.scripts/cl.install.sh display-seed mainnet
+          if [ "$3" != "noninteractive" ]; then
+            sudo /home/admin/config.scripts/cl.backup.sh seed-export-gui
+            sudo /home/admin/config.scripts/cl.install.sh display-seed mainnet
+          fi
           exit 0
         else
           # there should be no hsm_secret without seedwords.info, but protect this edge-case
@@ -219,10 +222,14 @@ if [ "$1" = "new" ] || [ "$1" = "new-force" ] || [ "$1" = "seed" ] || [ "$1" = "
 
   if [ "$1" = "new" ]; then
     seedpassword="$3"
+    echo "new seedpassword='${seedpassword}'"
     # get 24 words
     source <(python /home/admin/config.scripts/blitz.mnemonic.py generate)
-    #TODO seedwords to cl.backup.sh seed-export-gui
-    /home/admin/config.scripts/cl.backup.sh seed-export-gui "${seedwords6x4}"
+    if [ "${seedpassword}" != "noninteractive" ]; then
+      /home/admin/config.scripts/cl.backup.sh seed-export-gui "${seedwords6x4}"
+    else
+      seedpassword=""
+    fi
   elif [ "$1" = "new-force" ]; then
     # get 24 words
     source <(python /home/admin/config.scripts/blitz.mnemonic.py generate)

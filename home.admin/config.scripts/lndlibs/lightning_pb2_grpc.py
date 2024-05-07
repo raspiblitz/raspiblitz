@@ -497,8 +497,10 @@ class LightningServicer(object):
 
     def VerifyMessage(self, request, context):
         """lncli: `verifymessage`
-        VerifyMessage verifies a signature over a msg. The signature must be
-        zbase32 encoded and signed by an active node in the resident node's
+        VerifyMessage verifies a signature over a message and recovers the signer's
+        public key. The signature is only deemed valid if the recovered public key
+        corresponds to a node key in the public Lightning network. The signature
+        must be zbase32 encoded and signed by an active node in the resident node's
         channel database. In addition to returning the validity of the signature,
         VerifyMessage also returns the recovered pubkey from the signature.
         """

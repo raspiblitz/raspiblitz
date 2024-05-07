@@ -1,20 +1,21 @@
 #!/bin/bash
 # https://github.com/cryptoadvance/specter-desktop
 
-pinnedVersion="1.8.1"
+pinnedVersion="1.13.1"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
- echo "config script to switch Specter Desktop on, off, configure or update"
- echo "bonus.specter.sh [status|on|off|config|update] <mainnet|testnet|signet>"
- echo "installing the version $pinnedVersion by default"
- exit 1
+  echo "config script to switch Specter Desktop on, off, configure or update"
+  echo "bonus.specter.sh [status|on|config|update] <mainnet|testnet|signet>"
+  echo "bonus.specter.sh off <--delete-data|--keep-data>"
+  echo "installing the version $pinnedVersion by default"
+  exit 1
 fi
 
 echo "# bonus.specter.sh $1 $2"
 
 source /mnt/hdd/raspiblitz.conf
-if [ $# -gt 1 ];then
+if [ $# -gt 1 ]; then
   CHAIN=$2
   chain=${CHAIN::-3}
 fi
@@ -109,7 +110,7 @@ source <(grep -E "^blockfilterindex=.*" /mnt/hdd/${network}/${network}.conf)
 
 function configure_specter {
   echo "#    --> creating App-config"
-  if [ "${runBehindTor}" = "on" ];then
+  if [ "${runBehindTor}" = "on" ]; then
     proxy="socks5h://localhost:9050"
     torOnly="true"
     tor_control_port="9051"
@@ -118,7 +119,7 @@ function configure_specter {
     torOnly="false"
     tor_control_port=""
   fi
-  cat > /home/admin/config.json <<EOF
+  cat >/home/admin/config.json <<EOF
 {
     "auth": {
         "method": "rpcpasswordaspin",
@@ -143,7 +144,7 @@ EOF
   PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
 
   echo "# Connect Specter to the default mainnet node"
-  cat > /home/admin/default.json <<EOF
+  cat >/home/admin/default.json <<EOF
 {
     "name": "raspiblitz_mainnet",
     "alias": "default",
@@ -158,19 +159,19 @@ EOF
     "fullpath": "/home/specter/.specter/nodes/default.json"
 }
 EOF
-    sudo mv /home/admin/default.json /home/specter/.specter/nodes/default.json
-    sudo chown -RL specter:specter /home/specter/
+  sudo mv /home/admin/default.json /home/specter/.specter/nodes/default.json
+  sudo chown -RL specter:specter /home/specter/
 
-    if [ "${chain}" != "main" ]; then
-      if [ "${chain}" = "test" ];then
-        portprefix=1
-      elif [ "${chain}" = "sig" ];then
-        portprefix=3
-      fi
-      PORT="${portprefix}8332"
+  if [ "${chain}" != "main" ]; then
+    if [ "${chain}" = "test" ]; then
+      portprefix=1
+    elif [ "${chain}" = "sig" ]; then
+      portprefix=3
+    fi
+    PORT="${portprefix}8332"
 
-      echo "# Connect Specter to the raspiblitz_${chain}net node"
-      cat > /home/admin/raspiblitz_${chain}net.json <<EOF
+    echo "# Connect Specter to the raspiblitz_${chain}net node"
+    cat >/home/admin/raspiblitz_${chain}net.json <<EOF
 {
     "name": "raspiblitz_${chain}net",
     "alias": "raspiblitz_${chain}net",
@@ -185,11 +186,10 @@ EOF
     "fullpath": "/home/specter/.specter/nodes/raspiblitz_${chain}net.json"
 }
 EOF
-      sudo mv /home/admin/raspiblitz_${chain}net.json /home/specter/.specter/nodes/raspiblitz_${chain}net.json
-      sudo chown -RL specter:specter /home/specter/
-    fi
+    sudo mv /home/admin/raspiblitz_${chain}net.json /home/specter/.specter/nodes/raspiblitz_${chain}net.json
+    sudo chown -RL specter:specter /home/specter/
+  fi
 }
-
 
 # config
 if [ "$1" = "config" ]; then
@@ -213,7 +213,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo apt update
     sudo apt-get install -y virtualenv libffi-dev libusb-1.0.0-dev libudev-dev
 
-    sudo adduser --disabled-password --gecos "" specter
+    sudo adduser --system --group --home /home/specter specter
     if [ "$(ls /home | grep -c "specter")" == "0" ]; then
       echo "error='was not able to create user specter'"
       exit 1
@@ -221,6 +221,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     echo "# add the user to the debian-tor group"
     sudo usermod -a -G debian-tor specter
+
+    echo "# add the user to the bitcoin group"
+    sudo usermod -a -G bitcoin specter
 
     # store data on the disk
     sudo mkdir -p /mnt/hdd/app-data/.specter 2>/dev/null
@@ -258,7 +261,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "#    --> Installing udev-rules for hardware-wallets"
 
     # Ledger
-    cat > /home/admin/20-hw1.rules <<EOF
+    cat >/home/admin/20-hw1.rules <<EOF
  HW.1 / Nano
 SUBSYSTEMS=="usb", ATTRS{idVendor}=="2581", ATTRS{idProduct}=="1b7c|2b7c|3b7c|4b7c", TAG+="uaccess", TAG+="udev-acl", OWNER="specter"
 # Blue
@@ -274,7 +277,7 @@ SUBSYSTEMS=="usb", ATTRS{idVendor}=="2c97", ATTRS{idProduct}=="0004|4000|4001|40
 EOF
 
     # ColdCard
-    cat > /home/admin/51-coinkite.rules <<EOF
+    cat >/home/admin/51-coinkite.rules <<EOF
 # Linux udev support file.
 #
 # This is a example udev file for HIDAPI devices which changes the permissions
@@ -293,7 +296,7 @@ KERNEL=="hidraw*", ATTRS{idVendor}=="d13e", ATTRS{idProduct}=="cc10", GROUP="plu
 EOF
 
     # Trezor
-    cat > /home/admin/51-trezor.rules <<EOF
+    cat >/home/admin/51-trezor.rules <<EOF
 # Trezor: The Original Hardware Wallet
 # https://trezor.io/
 #
@@ -314,7 +317,7 @@ KERNEL=="hidraw*", ATTRS{idVendor}=="1209", ATTRS{idProduct}=="53c1", MODE="0660
 EOF
 
     # KeepKey
-    cat > /home/admin/51-usb-keepkey.rules <<EOF
+    cat >/home/admin/51-usb-keepkey.rules <<EOF
 # KeepKey: Your Private Bitcoin Vault
 # http://www.keepkey.com/
 # Put this file into /usr/lib/udev/rules.d or /etc/udev/rules.d
@@ -338,7 +341,7 @@ EOF
 
     # install service
     echo "#    --> Install specter systemd service"
-    cat > /home/admin/specter.service <<EOF
+    cat >/home/admin/specter.service <<EOF
 # systemd unit for Specter Desktop
 
 [Unit]
@@ -368,15 +371,23 @@ EOF
 
     sudo mv /home/admin/specter.service /etc/systemd/system/specter.service
     sudo systemctl enable specter
+    echo "#    --> OK - the specter service is now enabled"
 
-    echo "#    --> OK - the specter service is now enabled and started"
+    source <(/home/admin/_cache.sh get state)
+    if [ "${state}" == "ready" ]; then
+      # start service
+      echo "#    --> starting service ..."
+      sudo systemctl start specter
+      echo "#    --> OK - the specter service is now started"
+    fi
+
   else
     echo "#    --> specter already installed."
   fi
 
   # setting value in raspi blitz config
   /home/admin/config.scripts/blitz.conf.sh set specter "on"
-  
+
   # Hidden Service for SERVICE if Tor is active
   if [ "${runBehindTor}" = "on" ]; then
     # make sure to keep in sync with tor.network.sh script
@@ -402,7 +413,7 @@ EOF
     echo "# blockfilterindex is already active"
   fi
 
-  # needed for API/WebUI as signal that install ran thru 
+  # needed for API/WebUI as signal that install ran thru
   echo "result='OK'"
   exit 0
 fi
@@ -420,16 +431,17 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   fi
 
   isInstalled=$(sudo ls /etc/systemd/system/specter.service 2>/dev/null | grep -c 'specter.service')
-  if [ ${isInstalled} -eq 0 ]; then
-    echo "error='was not installed'"
-    exit 1
+  if [ ${isInstalled} -gt 0 ]; then
+    # removing base systemd service & code
+    echo "#    --> REMOVING the specter.service"
+    sudo systemctl stop specter
+    sudo systemctl disable specter
+    sudo rm /etc/systemd/system/specter.service
+  else
+    echo "#    --> The specter.service is not installed."
   fi
 
-  # removing base systemd service & code
-  echo "#    --> REMOVING Specter Desktop"
-  sudo systemctl stop specter
-  sudo systemctl disable specter
-  sudo rm /etc/systemd/system/specter.service
+  # pip uninstall
   sudo -u specter /home/specter/.env/bin/python3 -m pip uninstall --yes cryptoadvance.specter 1>&2
 
   # get delete data status - either by parameter or if not set by user dialog
@@ -441,16 +453,19 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     deleteData="0"
   fi
   if [ "${deleteData}" == "" ]; then
-    deleteData=whiptail --defaultno --yesno "Do you want to delete all Data related to specter? This includes also Bitcoin-Core-Wallets managed by specter?" 0 0
+    if (whiptail --title "Delete Data?" --yes-button "Keep Data" --no-button "Delete Data" --yesno "Do you want to delete all data related to Specter? This includes the Bitcoin Core wallets managed by Specter." 0 0); then
+      deleteData="0"
+    else
+      deleteData="1"
+    fi
   fi
 
   # execute on delete data
   if [ "${deleteData}" == "1" ]; then
     echo "#    --> Removing wallets in core"
     bitcoin-cli listwallets | jq -r .[] | tail -n +2
-    for i in $(bitcoin-cli listwallets | jq -r .[] | tail -n +2)
-    do
-	    name=$(echo $i | cut -d"/" -f2)
+    for i in $(bitcoin-cli listwallets | jq -r .[] | tail -n +2); do
+      name=$(echo $i | cut -d"/" -f2)
       bitcoin-cli unloadwallet specter/$name
     done
     echo "#    --> Removing the /mnt/hdd/app-data/.specter"
@@ -461,10 +476,10 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   fi
 
   echo "#    --> Removing the specter user and home directory"
-  sudo userdel -rf specter
+  sudo userdel -rf specter 2>/dev/null
   echo "#    --> OK Specter Desktop removed."
-    
-  # needed for API/WebUI as signal that install ran thru 
+
+  # needed for API/WebUI as signal that install ran thru
   echo "result='OK'"
   exit 0
 fi
@@ -472,6 +487,7 @@ fi
 # update
 if [ "$1" = "update" ]; then
   echo "#    --> UPDATING Specter Desktop "
+  sudo -u specter /home/specter/.env/bin/python3 -m pip install --upgrade pip
   sudo -u specter /home/specter/.env/bin/python3 -m pip install --upgrade cryptoadvance.specter
   echo "#    --> Updated to the latest in https://pypi.org/project/cryptoadvance.specter/#history ***"
   echo "#    --> Restarting the specter.service"

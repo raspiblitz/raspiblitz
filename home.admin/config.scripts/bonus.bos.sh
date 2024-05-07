@@ -1,7 +1,10 @@
 #!/bin/bash
 
-# https://github.com/alexbosworth/balanceofsatoshis/blob/master/package.json#L81
-BOSVERSION="13.15.0"
+# versioning:
+# https://github.com/alexbosworth/balanceofsatoshis/blob/master/package.json#L85
+# https://www.npmjs.com/package/balanceofsatoshis
+
+BOSVERSION="17.9.1"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -127,7 +130,6 @@ After=network-online.target
 
 [Service]
 Type=simple
-WorkingDirectory=/home/bos/balanceofsatoshis
 ExecStart=/home/bos/.npm-global/bin/bos telegram --connect $3 -v
 User=bos
 Group=bos
@@ -191,7 +193,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   /home/admin/config.scripts/bonus.nodejs.sh on
 
   # create bos user
-  sudo adduser --disabled-password --gecos "" bos
+  USERNAME=bos
+  echo "# add the user: ${USERNAME}"
+  sudo adduser --system --group --shell /bin/bash --home /home/${USERNAME} ${USERNAME}
+  echo "Copy the skeleton files for login"
+  sudo -u ${USERNAME} cp -r /etc/skel/. /home/${USERNAME}/
 
   echo "# Create data folder on the disk"
   # move old data if present
@@ -207,10 +213,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo -u bos mkdir /home/bos/.npm-global
   sudo -u bos npm config set prefix '/home/bos/.npm-global'
   sudo bash -c "echo 'PATH=$PATH:/home/bos/.npm-global/bin' >> /home/bos/.bashrc"
-
-  # download source code
-  sudo -u bos git clone https://github.com/alexbosworth/balanceofsatoshis.git /home/bos/balanceofsatoshis
-  cd /home/bos/balanceofsatoshis
 
   # make sure symlink to central app-data directory exists ***"
   sudo rm -rf /home/bos/.lnd  # not a symlink.. delete it silently

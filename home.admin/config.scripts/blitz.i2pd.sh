@@ -92,7 +92,7 @@ function bitcoinI2Pstatus {
   echo "# Follow live with the command:"
   echo "sudo tail -n 1000 -f /mnt/hdd/bitcoin/debug.log | grep i2p"
   echo
-  sudo cat  /mnt/hdd/bitcoin/debug.log | grep i2p
+  sudo cat /mnt/hdd/bitcoin/debug.log | grep i2p
   echo
   echo "# Running the command:"
   echo "bitcoin-cli -netinfo 4"
@@ -106,7 +106,6 @@ function bitcoinI2Pstatus {
   echo "# Password: your passwordB"
   echo
 }
-
 
 echo "# Running: 'blitz.i2pd.sh $*'"
 source /mnt/hdd/raspiblitz.conf
@@ -145,21 +144,20 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   if systemctl is-active --quiet i2pd.service; then
     echo "# i2pd.service is already active."
-    exit 0
+  else
+    echo "# sudo systemctl enable i2pd"
+    sudo systemctl enable i2pd
   fi
-
-  echo "# sudo systemctl enable i2pd"
-  sudo systemctl enable i2pd
 
   echo "# i2pd config"
   /home/admin/config.scripts/blitz.conf.sh set debug tor /mnt/hdd/bitcoin/bitcoin.conf noquotes
   confAdd debug i2p /mnt/hdd/bitcoin/bitcoin.conf
   /home/admin/config.scripts/blitz.conf.sh set i2psam 127.0.0.1:7656 /mnt/hdd/bitcoin/bitcoin.conf noquotes
   /home/admin/config.scripts/blitz.conf.sh set i2pacceptincoming 1 /mnt/hdd/bitcoin/bitcoin.conf noquotes
-  /home/admin/config.scripts/blitz.conf.sh set onlynet tor /mnt/hdd/bitcoin/bitcoin.conf noquotes
+  /home/admin/config.scripts/blitz.conf.sh set onlynet onion /mnt/hdd/bitcoin/bitcoin.conf noquotes
   confAdd onlynet i2p /mnt/hdd/bitcoin/bitcoin.conf
   PASSWORD_B=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcpassword | cut -c 13-)
-  cat << EOF | sudo tee /etc/i2pd/i2pd.conf
+  cat <<EOF | sudo tee /etc/i2pd/i2pd.conf
 # i2pd settings for the RaspiBlitz
 # for the defaults see:
 # https://github.com/PurpleI2P/i2pd/blob/openssl/contrib/i2pd.conf
@@ -212,6 +210,7 @@ EOF
   # setting value in raspiblitz.conf
   /home/admin/config.scripts/blitz.conf.sh set i2pd "on"
 
+  localip=$(hostname -I | awk '{print $1}')
   echo "# Config: /etc/i2pd/i2pd.conf"
   echo "# i2pd web console: ${localip}:7070"
   echo "# Monitor i2p in bitcoind:"
@@ -257,7 +256,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   /home/admin/config.scripts/blitz.conf.sh delete i2psam /mnt/hdd/bitcoin/bitcoin.conf noquotes
   /home/admin/config.scripts/blitz.conf.sh delete i2pacceptincoming /mnt/hdd/bitcoin/bitcoin.conf noquotes
   /home/admin/config.scripts/blitz.conf.sh delete onlynet /mnt/hdd/bitcoin/bitcoin.conf noquotes
-  /home/admin/config.scripts/blitz.conf.sh set onlynet tor /mnt/hdd/bitcoin/bitcoin.conf noquotes
+  /home/admin/config.scripts/blitz.conf.sh set onlynet onion /mnt/hdd/bitcoin/bitcoin.conf noquotes
 
   sudo rm /etc/systemd/system/i2pd.service
 

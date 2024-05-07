@@ -15,7 +15,7 @@ fi
 # Example for commits created on GitHub:
 # PGPsigner="web-flow"
 # PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
-# PGPpubkeyFingerprint="4AEE18F83AFDEB23"
+# PGPpubkeyFingerprint="(4AEE18F83AFDEB23|B5690EEEBB952194)"
 
 # Example for commits signed with a personal PGP key:
 # PGPsigner="janoside"
@@ -29,6 +29,10 @@ fi
 PGPsigner="$1"
 PGPpubkeyLink="$2"
 PGPpubkeyFingerprint="$3"
+
+# force outputs to English
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
 
 wget -O /var/cache/raspiblitz/pgp_keys_${PGPsigner}.asc "${PGPpubkeyLink}"
 
@@ -45,7 +49,7 @@ fi
 
 echo "# importing key of ${PGPsigner}"
 gpg --import --import-options show-only /var/cache/raspiblitz/pgp_keys_${PGPsigner}.asc
-fingerprint=$(gpg --show-keys --keyid-format LONG /var/cache/raspiblitz/pgp_keys_${PGPsigner}.asc 2>/dev/null | grep "${PGPpubkeyFingerprint}" -c)
+fingerprint=$(gpg --show-keys --keyid-format LONG /var/cache/raspiblitz/pgp_keys_${PGPsigner}.asc 2>/dev/null | grep -Ec "${PGPpubkeyFingerprint}")
 if [ "${fingerprint}" -lt 1 ]; then
   echo
   echo "# WARNING --> the PGP fingerprint is not as expected for ${PGPsigner}" >&2
@@ -68,16 +72,14 @@ elif [ $# -eq 4 ]; then
   commitOrTag="$4 tag"
 fi
 echo "# running: ${gitCommand}"
-if ${gitCommand} 2>&1 >&"$_temp"; then
-  goodSignature=1
-else
-  goodSignature=0
-fi
+${gitCommand} 2>&1 >&"$_temp"
 echo
 cat "$_temp"
-echo "# goodSignature(${goodSignature})"
+echo
 
-correctKey=$(tr -d " \t\n\r" <"$_temp" | grep "${PGPpubkeyFingerprint}" -c)
+goodSignature=$(grep "Good signature from" -c <"$_temp")
+echo "# goodSignature(${goodSignature})"
+correctKey=$(tr -d " \t\n\r" <"$_temp" | grep -Ec "${PGPpubkeyFingerprint}")
 echo "# correctKey(${correctKey})"
 
 if [ "${correctKey}" -lt 1 ] || [ "${goodSignature}" -lt 1 ]; then

@@ -40,7 +40,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   if [ ${isInstalled} -eq 0 ]; then
 
     # create dedicated user
-    sudo adduser --disabled-password --gecos "" pool
+    sudo adduser --system --group --home /home/pool pool
 
     echo "# persist settings in app-data"
     echo "# make sure the data directory exists"

@@ -19,7 +19,7 @@ source /mnt/hdd/raspiblitz.conf
 
 GITHUB_SIGN_AUTHOR="web-flow"
 GITHUB_SIGN_PUBKEYLINK="https://github.com/web-flow.gpg"
-GITHUB_SIGN_FINGERPRINT="4AEE18F83AFDEB23"
+GITHUB_SIGN_FINGERPRINT="(4AEE18F83AFDEB23|B5690EEEBB952194)"
 
 PORT_CLEAR="9823"
 PORT_SSL="9824"
@@ -99,7 +99,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo apt install -y virtualenv python-dev libusb-1.0-0-dev libudev-dev
 
   # create dedicated user
-  sudo adduser --disabled-password --gecos "" ckbunker
+  sudo adduser --system --group --home /home/ckbunker ckbunker
 
   # add the user to the Tor group
   sudo usermod -a -G debian-tor ckbunker

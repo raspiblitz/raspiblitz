@@ -120,7 +120,7 @@ function restart() {
   echo "Command to restart your RaspiBlitz"
   confirmMsg restart
   if [ $confirm -eq 1 ]; then
-    /home/admin/config.scripts/blitz.shutdown.sh reboot
+    sudo /home/admin/config.scripts/blitz.shutdown.sh reboot
   fi
 }
 
@@ -172,7 +172,7 @@ function debug() {
   if [ "$1" = "-l" ]||[ "$1" = "--link" ]; then
     proxy="-X 5 -x localhost:9050"
     if [ "$2" = "-n" ]||[ "$2" = "--no-tor" ]; then proxy=""; fi
-    cat /var/cache/raspiblitz/debug.log | nc ${proxy} termbin.com 9999 | sed "s/termbin.com/l.termbin.com/"
+    cat /var/cache/raspiblitz/debug.log | nc ${proxy} termbin.com 9999
   else
     cat /var/cache/raspiblitz/debug.log
   fi
@@ -220,7 +220,7 @@ function off() {
   echo "Command to power off your RaspiBlitz"
   confirmMsg off
   if [ $confirm -eq 1 ]; then
-    /home/admin/config.scripts/blitz.shutdown.sh
+    sudo /home/admin/config.scripts/blitz.shutdown.sh
   fi
 }
 

@@ -15,7 +15,7 @@ GITHUB_TAG=""
 # leave GITHUB_SIGN_AUTHOR empty to skip verifying
 GITHUB_SIGN_AUTHOR="" #web-flow
 GITHUB_SIGN_PUBKEYLINK="https://github.com/web-flow.gpg"
-GITHUB_SIGN_FINGERPRINT="4AEE18F83AFDEB23"
+GITHUB_SIGN_FINGERPRINT="(4AEE18F83AFDEB23|B5690EEEBB952194)"
 
 # port numbers the app should run on
 # delete if not an web app
@@ -191,12 +191,14 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo apt install -y default-jdk
   sudo apt install -y maven
 
-  # make sure mysql/myria db is available
+  # make sure mysql/myria db is available & running
   sudo apt-get install -y mariadb-server mariadb-client
+  sudo systemctl enable mariadb 2>/dev/null
+  sudo systemctl start mariadb 2>/dev/null
 
   # create a dedicated user for the app
   echo "# create user"
-  sudo adduser --disabled-password --gecos "" ${APPID} || exit 1
+  sudo adduser --system --group --home /home/${APPID} ${APPID} || exit 1
 
   # add user to special groups with special access rights
   # echo "# add use to special groups"
@@ -311,6 +313,19 @@ WantedBy=multi-user.target
     sudo -u fints keytool -genkey -keyalg RSA -alias fints -keystore /mnt/hdd/app-data/fints/keystore.jks -storepass raspiblitz -noprompt -dname "CN=raspiblitz, OU=IT, O=raspiblitz, L=world, S=world, C=BZ"
   else
     echo "# keystore already exists"
+  fi
+  
+  # create aeskey.properties if needed
+  aeskeyExists=$(sudo ls /home/fints/aeskey.properties 2>/dev/null | grep -c 'aeskey.properties')
+  if [ ${aeskeyExists} -eq 0 ]; then
+    echo "# creating aeskey.properties"
+    sudo -u fints openssl rand -hex 12 > /home/fints/aeskey.secret
+    sudo -u fints openssl enc -aes-128-cbc -kfile /home/fints/aeskey.secret -P -md sha1 | grep "key=" > /home/fints/aeskey.tmp
+    sudo sed -i "s/key/aes_key/g" /home/fints/aeskey.tmp
+    sudo -u fints tr -d '\n' < /home/fints/aeskey.tmp > /home/fints/aeskey.properties
+    sudo -u fints rm /home/fints/aeskey.tmp
+  else
+    echo "# aeskey.properties already exists"
   fi
   
   # config app basics: fuelifints.properties

@@ -28,7 +28,7 @@ fi
 # releases are creatd on GitHub
 PGPsigner="web-flow"
 PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
-PGPpubkeyFingerprint="4AEE18F83AFDEB23"
+PGPpubkeyFingerprint="(4AEE18F83AFDEB23|B5690EEEBB952194)"
 
 # TODO download with .tar.gz
 #PGPsigner="alexbosworth"
@@ -53,7 +53,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     source /etc/profile
 
     # create dedicated user
-    sudo adduser --disabled-password --gecos "" loop
+    sudo adduser --system --group --home /home/loop loop
 
     # set PATH for the user
     sudo bash -c "echo 'PATH=\$PATH:/home/loop/go/bin/' >> /home/loop/.profile"

@@ -46,7 +46,13 @@ fi
 # load old or init raspiblitz config
 source ${configFile}
 
-# check if config files contains basic: hostname
+# if hostname missing - set default
+if [ ${#hostname} -eq 0 ]; then
+  /home/admin/config.scripts/blitz.conf.sh set hostname "raspiblitz"
+  source ${configFile}
+fi
+
+# re-check if config files contains hostname value
 if [ ${#hostname} -eq 0 ]; then
   /home/admin/config.scripts/blitz.error.sh _provision.update.sh "missing-hostname" "${setupFile} or ${configFile} contains no hostname" "" ${logFile}
   exit 1
@@ -167,7 +173,6 @@ echo "*** Start ${network} (UPDATE) ***" >> ${logFile}
 /home/admin/_cache.sh set message "Blockchain Testrun"
 echo "- This can take a while .." >> ${logFile}
 chown -R bitcoin:bitcoin /mnt/hdd/${network} >>${logFile} 2>&1
-cp /home/admin/assets/${network}d.service /etc/systemd/system/${network}d.service
 systemctl daemon-reload >> ${logFile}
 systemctl enable ${network}d.service >> ${logFile}
 systemctl start ${network}d.service >> ${logFile}

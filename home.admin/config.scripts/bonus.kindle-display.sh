@@ -10,12 +10,13 @@ CONFIG_FILE=$APP_DATA_DIR/.env
 APP_ROOT_DIR=$HOME_DIR/kindle-display
 APP_SERVER_DIR=$APP_ROOT_DIR/server
 CRON_FILE=$APP_SERVER_DIR/cron.sh
-APP_VERSION=0.4.0
+APP_VERSION=0.5.3
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "small config script to switch kindle-display on or off"
  echo "bonus.kindle-display.sh [on|off]"
+ echo "bonus.kindle-display.sh [update]"
  exit 1
 fi
 
@@ -36,7 +37,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     /home/admin/config.scripts/bonus.nodejs.sh on
 
     # add user
-    sudo adduser --disabled-password --gecos "" $USERNAME
+    sudo adduser --system --group --home /home/$USERNAME $USERNAME
 
     # install kindle-display
     echo "# install .."
@@ -167,6 +168,48 @@ PATH=/bin:/usr/bin:/usr/local/bin
     /home/admin/config.scripts/blitz.conf.sh set kindleDisplay "on"
   else
     echo "KINDLE-DISPLAY already installed."
+  fi
+
+  exit 0
+fi
+
+# update
+if [ "$1" = "update" ]; then
+  isInstalled=$(sudo ls $HOME_DIR 2>/dev/null | grep -c kindle-display)
+  if [ ${isInstalled} -gt 0 ]; then
+    echo "*** UPDATE KINDLE-DISPLAY ***"
+    cd $HOME_DIR || exit 1
+
+    current=$(node -p "require('./kindle-display/server/package.json').version")
+    if [ "$current" = "$APP_VERSION" ]; then
+      echo "*** KINDLE-DISPLAY IS ALREADY UPDATED TO $APP_VERSION ***"
+      exit 0
+    fi
+
+    sudo systemctl stop kindle-display
+    sudo -u $USERNAME wget https://github.com/dennisreimann/kindle-display/archive/v$APP_VERSION.tar.gz
+    sudo -u $USERNAME tar -xzf v$APP_VERSION.tar.gz kindle-display-$APP_VERSION/server
+    sudo -u $USERNAME mv kindle-display{,-backup}
+    sudo -u $USERNAME mv kindle-display{-$APP_VERSION,}
+    sudo -u $USERNAME rm v$APP_VERSION.tar.gz
+    cd kindle-display/server
+    sudo -u $USERNAME npm install
+    if ! [ $? -eq 0 ]; then
+        echo "FAIL - npm install did not run correctly, aborting"
+        exit 1
+    fi
+    # link config to app
+    sudo -u $USERNAME ln -s $CONFIG_FILE $APP_SERVER_DIR/.env
+    # generate initial data
+    echo "# run data.sh"
+    sudo -u $USERNAME $APP_SERVER_DIR/data.sh
+    cd -
+    sudo systemctl start kindle-display
+    sudo -u $USERNAME rm -rf kindle-display-backup
+
+    echo "*** KINDLE-DISPLAY UPDATED to $APP_VERSION ***"
+  else
+    echo "*** KINDLE-DISPLAY IS NOT INSTALLED ***"
   fi
 
   exit 0

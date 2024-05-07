@@ -391,7 +391,7 @@ elif [ "${abcd}" = "b" ]; then
   # LNDg
   if [ "${lndg}" == "on" ]; then
     echo "# changing the password for lndg"
-    sudo -u lndg /home/lndg/lndg/.venv/bin/python /home/lndg/lndg/initialize.py -pw ${newPassword}
+    /home/admin/config.scripts/bonus.lndg.sh set-password "${newPassword}"
   fi
 
   # mempool Explorer
@@ -489,10 +489,6 @@ elif [ "${abcd}" = "c" ]; then
     sleep 2
 
     err=""
-    if ! pip list | grep grpc; then
-      echo "# pip install grpc"
-      sudo -H python3 -m pip install grpcio==1.38.1 1>/dev/null 2>/dev/null
-    fi
     source <(sudo /home/admin/config.scripts/lnd.initwallet.py change-password mainnet $oldPassword $newPassword)
     if [ "${err}" != "" ]; then
       echo "error='Was not able to change password'"

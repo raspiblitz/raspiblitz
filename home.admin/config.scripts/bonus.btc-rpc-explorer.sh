@@ -4,7 +4,7 @@
 # ~/.config/btc-rpc-explorer.env
 # https://github.com/janoside/btc-rpc-explorer/blob/master/.env-sample
 
-VERSION="v3.3.0"
+VERSION="v3.4.0"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -148,7 +148,7 @@ if [ "$1" = "prestart" ]; then
   if [ "${ElectRS}" == "on" ]; then
 
     # CHECK THAT ELECTRS INDEX IS BUILD (WAITLOOP)
-    # electrs listening in port 50001 means index is build 
+    # electrs listening in port 50001 means index is build
     # Use flags: t = tcp protocol only  /  a = list all connection states (includes LISTEN)  /  n = don't resolve names => no dns spam
     isElectrumReady=$(netstat -tan | grep -c "50001")
     if [ "${isElectrumReady}" == "0" ]; then
@@ -207,7 +207,7 @@ if [ "$1" = "install" ]; then
   /home/admin/config.scripts/bonus.nodejs.sh on
 
   # add btcrpcexplorer user
-  sudo adduser --disabled-password --gecos "" btcrpcexplorer
+  sudo adduser --system --group --home /home/btcrpcexplorer btcrpcexplorer
 
   # install btc-rpc-explorer
   cd /home/btcrpcexplorer
@@ -215,10 +215,10 @@ if [ "$1" = "install" ]; then
   cd btc-rpc-explorer
   sudo -u btcrpcexplorer git reset --hard ${VERSION}
   sudo -u btcrpcexplorer /home/admin/config.scripts/blitz.git-verify.sh "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
-  sudo -u btcrpcexplorer npm install
+  sudo -u btcrpcexplorer npm ci
   if ! [ $? -eq 0 ]; then
-      echo "FAIL - npm install did not run correctly, aborting"
-      echo "result='fail npm install'"
+      echo "FAIL - npm ci did not run correctly, aborting"
+      echo "result='fail npm ci'"
       exit 1
   fi
 
@@ -239,7 +239,7 @@ if [ "$1" = "uninstall" ]; then
 
   # always delete user and home directory
   sudo userdel -rf btcrpcexplorer
-  
+
   exit 0
 fi
 
@@ -374,10 +374,10 @@ EOF
 
   # setting value in raspi blitz config
   sudo /home/admin/config.scripts/blitz.conf.sh set BTCRPCexplorer "on"
-  
+
   echo "# needs to finish creating txindex to be functional"
   echo "# monitor with: sudo tail -n 20 -f /mnt/hdd/bitcoin/debug.log"
-  echo "# npm audi fix"
+  echo "# npm audit fix"
   cd /home/btcrpcexplorer/btc-rpc-explorer/
   sudo npm audit fix
 
@@ -396,7 +396,7 @@ EOF
     sleep 10
   fi
 
-  # needed for API/WebUI as signal that install ran thru 
+  # needed for API/WebUI to signal successfull install
   echo "result='OK'"
   exit 0
 fi
@@ -443,7 +443,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   sudo ufw deny 3020
   sudo ufw deny 3021
 
-  # needed for API/WebUI as signal that install ran thru 
+  # needed for API/WebUI to signal successfull install
   echo "result='OK'"
   exit 0
 fi

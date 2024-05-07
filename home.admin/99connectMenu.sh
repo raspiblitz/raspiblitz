@@ -34,6 +34,9 @@ if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
   OPTIONS+=(RESET "Recreate LND Macaroons & tls.cert")
   OPTIONS+=(SYNC "Sync Macaroons & tls.cert with Apps/Users")
 fi
+if [ -f /mnt/hdd/app-data/selfsignedcert/selfsigned.cert ]; then
+  OPTIONS+=(RESET-TLS "Reset the self-signed TLS certificate")
+fi
 
 CHOICE_HEIGHT=$(("${#OPTIONS[@]}/2+1"))
 HEIGHT=$((CHOICE_HEIGHT+6))
@@ -75,7 +78,9 @@ case $CHOICE in
   EXPORT)
     sudo /home/admin/config.scripts/lnd.export.sh
     exit 0;;
-
+  RESET-TLS)
+    sudo /home/admin/config.scripts/internetselfsignedcert.sh reset
+    exit 0;;
   ALBY)
     /home/admin/config.scripts/bonus.alby.sh
     exit 0;

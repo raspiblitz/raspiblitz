@@ -5,7 +5,8 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ];
   echo "RaspiBlitz SSH tools"
   echo
   echo "## SSHD SERVICE #######"
-  echo "blitz.ssh.sh renew       --> renew the sshd host certs"
+  echo "blitz.ssh.sh renew       --> renew the sshd host certs & restarts sshd"
+  echo "blitz.ssh.sh init        --> just creates sshd host certs"
   echo "blitz.ssh.sh clear       --> make sure old sshd host certs are cleared"
   echo "blitz.ssh.sh checkrepair --> check sshd & repair just in case"
   echo "blitz.ssh.sh backup      --> copy ssh keys to backup (if exist)"
@@ -28,27 +29,66 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 ###################
+# INIT
+###################
+if [ "$1" = "init" ]; then
+  echo "# *** $0 $1"
+
+  echo "# generate new keys"
+  ssh-keygen -A
+  if [ $? -gt 0 ]; then
+    echo "error='ssh-keygen failed'"
+    exit 1
+  fi
+
+  echo "# reconfigure"
+  dpkg-reconfigure openssh-server
+  if [ $? -gt 0 ]; then
+    echo "error='dpkg-reconfigure failed'"
+    exit 1
+  fi
+
+  echo "# remove flag"
+  rm /etc/ssh/sshd_init_keys
+
+  echo "# restart sshd"
+  systemctl restart sshd
+  if [ $? -gt 0 ]; then
+    echo "error='sshd restart failed'"
+    exit 1
+  fi
+
+  exit 0
+fi
+
+###################
 # RENEW
 ###################
 if [ "$1" = "renew" ]; then
   echo "# *** $0 $1"
 
-  # stop sshd
+  echo "# stop sshd"
   systemctl stop sshd
 
-  # remove old keys
+  echo "# remove old keys"
   rm /etc/ssh/ssh_host_*
 
-  # generate new keys
+  echo "# generate new keys"
   ssh-keygen -A
+  echo "# reconfigure"
   dpkg-reconfigure openssh-server
 
-  # clear journalctl logs
+  echo "# clear journalctl logs"
   journalctl --rotate
   journalctl --vacuum-time=1s
 
-  # restart sshd
-  systemctl start sshd
+  if [ "$1" = "init" ]; then
+    echo "# init mode - not starting sshd"
+    rm /etc/ssh/sshd_init_keys
+  else
+    echo "# start sshd"
+    systemctl start sshd
+  fi
   exit 0
 fi
 
@@ -81,7 +121,7 @@ if [ "$1" = "checkrepair" ]; then
   # check if sshd host keys are missing / need generation
   countKeyFiles=$(ls -la /etc/ssh/ssh_host_* 2>/dev/null | grep -c "/etc/ssh/ssh_host")
   echo "# countKeyFiles(${countKeyFiles})"
-  if [ ${countKeyFiles} -lt 8 ]; then
+  if [ ${countKeyFiles} -lt 6 ]; then
     echo "# DETECTED: MISSING SSHD KEYFILES --> Generating new ones"
     /home/admin/config.scripts/blitz.ssh.sh renew
   fi

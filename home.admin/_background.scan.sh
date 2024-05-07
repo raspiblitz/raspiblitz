@@ -13,7 +13,7 @@ if [ "$1" == "only-one-loop" ]; then
 fi
 # start with parameter "install" (to setup service as systemd background running)
 if [ "$1" == "install" ]; then
-  
+
   # write systemd service
   cat > /etc/systemd/system/background.scan.service <<EOF
 # Monitor the RaspiBlitz State
@@ -56,7 +56,7 @@ configFile="/mnt/hdd/raspiblitz.conf"
 # INFOFILE - persited state data
 infoFile="/home/admin/raspiblitz.info"
 
-# better readbale seconds (slightly off to reduce same time window trigger)
+# better readable seconds (slightly off to reduce same time window trigger)
 MINUTE=60
 MINUTE2=115
 MINUTE5=290
@@ -74,21 +74,21 @@ YEAR=31536000
 usermod -G bitcoin root
 
 ####################################################################
-# INIT 
+# INIT
 ####################################################################
 
 # init values
-/home/admin/_cache.sh set system_temp_celsius "0"
-/home/admin/_cache.sh set system_temp_fahrenheit "0"
-/home/admin/_cache.sh set system_count_longscan "0"
-/home/admin/_cache.sh set system_count_undervoltage "0"
-/home/admin/_cache.sh set system_count_start_blockchain "0"
-/home/admin/_cache.sh set system_count_start_lightning "0"
-/home/admin/_cache.sh set system_count_start_tui "0"
-/home/admin/_cache.sh set btc_default_peers "0"
-/home/admin/_cache.sh set btc_default_sync_percentage "0"
-/home/admin/_cache.sh set btc_default_address ""
-/home/admin/_cache.sh set btc_default_port ""
+/home/admin/_cache.sh init system_temp_celsius "0"
+/home/admin/_cache.sh init system_temp_fahrenheit "0"
+/home/admin/_cache.sh init system_count_longscan "0"
+/home/admin/_cache.sh init system_count_undervoltage "0"
+/home/admin/_cache.sh init system_count_start_blockchain "0"
+/home/admin/_cache.sh init system_count_start_lightning "0"
+/home/admin/_cache.sh init system_count_start_tui "0"
+/home/admin/_cache.sh init btc_default_peers "0"
+/home/admin/_cache.sh init btc_default_sync_percentage "0"
+/home/admin/_cache.sh init btc_default_address ""
+/home/admin/_cache.sh init btc_default_port ""
 
 # import all base values from raspiblitz.info
 echo "importing: ${infoFile}"
@@ -128,18 +128,22 @@ fi
 # flag that init was done (will be checked on each loop)
 /home/admin/_cache.sh set system_init_time "$(date +%s)"
 
+# add info about start to raspiblitz.log
+echo "INFO: _bootstrap.scan.sh loop started > sudo journalctl -f -u background.scan" >> /home/admin/raspiblitz.log
+
 while [ 1 ]
 do
 
   ####################################################################
-  # LOOP DATA (BASIC SYSTEM) 
-  # data that is always available 
+  # LOOP DATA (BASIC SYSTEM)
+  # data that is always available
   ####################################################################
 
   # check that redis contains init data (detect possible restart of redis)
   source <(/home/admin/_cache.sh get system_init_time)
   if [ "${system_init_time}" == "" ]; then
     echo "FAIL: CACHE IS MISSING INIT DATA ... exiting to let systemd restart"
+    echo "INFO: _bootstrap.scan.sh -> cache not running - exiting" >> /home/admin/raspiblitz.log
     exit 1
   fi
 
@@ -147,7 +151,7 @@ do
   startTime=$(date +%s)
 
   #################
-  # BASIC SYSTEM 
+  # BASIC SYSTEM
 
   # uptime just do on every run
   system_up=$(cat /proc/uptime | grep -o '^[0-9]\+')
@@ -268,6 +272,29 @@ do
     /home/admin/_cache.sh set internet_online "${online}"
   fi
 
+  ###################
+  # HARDDRIVE
+
+  # info on storage medium
+  source <(/home/admin/_cache.sh valid hdd_mounted)
+  if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE2} ]; then
+    echo "updating: /home/admin/config.scripts/blitz.datadrive.sh status"
+    source <(/home/admin/config.scripts/blitz.datadrive.sh status)
+    /home/admin/_cache.sh set hdd_mounted "${isMounted}"
+    /home/admin/_cache.sh set hdd_ssd "${isSSD}"
+    /home/admin/_cache.sh set hdd_btrfs "${isBTRFS}"
+    /home/admin/_cache.sh set hdd_raid "${isRaid}"
+    /home/admin/_cache.sh set hdd_uasp "${hddAdapterUSAP}"
+    /home/admin/_cache.sh set hdd_capacity_bytes "${hddBytes}"
+    /home/admin/_cache.sh set hdd_capacity_gb "${hddGigaBytes}"
+    /home/admin/_cache.sh set hdd_free_bytes "${hddDataFreeBytes}"
+    /home/admin/_cache.sh set hdd_free_gb "${hddDataFreeGB}"
+    /home/admin/_cache.sh set hdd_used_info "${hddUsedInfo}"
+    /home/admin/_cache.sh set hddTemperature "${hddTemperature}"
+    /home/admin/_cache.sh set hddTBSize "${hddTBSize}"
+    
+  fi
+
   # exit if still setup or higher system stopped
   source <(/home/admin/_cache.sh get setupPhase state)
   if [ "${setupPhase}" != "done" ] ||
@@ -295,25 +322,6 @@ do
 
   # read/update config values
   source /mnt/hdd/raspiblitz.conf
-
-  ###################
-  # HARDDRIVE
-
-  if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE2} ]; then
-    echo "updating: /home/admin/config.scripts/blitz.datadrive.sh status"
-    source <(/home/admin/config.scripts/blitz.datadrive.sh status)
-    /home/admin/_cache.sh set hdd_mounted "${isMounted}"
-    /home/admin/_cache.sh set hdd_ssd "${isSSD}"
-    /home/admin/_cache.sh set hdd_btrfs "${isBTRFS}"
-    /home/admin/_cache.sh set hdd_raid "${isRaid}"
-    /home/admin/_cache.sh set hdd_uasp "${hddAdapterUSAP}"
-    /home/admin/_cache.sh set hdd_capacity_bytes "${hddBytes}"
-    /home/admin/_cache.sh set hdd_capacity_gb "${hddGigaBytes}"
-    /home/admin/_cache.sh set hdd_free_bytes "${hddDataFreeBytes}"
-    /home/admin/_cache.sh set hdd_free_gb "${hddDataFreeGB}"
-    /home/admin/_cache.sh set hdd_used_info "${hddUsedInfo}"
-    /home/admin/_cache.sh set hdd_blockchain_data "${hddBlocksBitcoin}"
-  fi
 
   ###################
   # BITCOIN
@@ -396,7 +404,7 @@ do
 
       # update detail infos only when ready (get as value from cache)
       source <(/home/admin/_cache.sh meta btc_${CHAIN}net_ready)
-      if [ "${value}" == "1" ]; then 
+      if [ "${value}" == "1" ]; then
 
         # check if network needs update
         source <(/home/admin/_cache.sh valid \
@@ -432,7 +440,7 @@ do
             /home/admin/_cache.sh set btc_${CHAIN}net_sync_progress "${btc_sync_progress}"
             /home/admin/_cache.sh set btc_${CHAIN}net_sync_percentage "${btc_sync_percentage}"
             /home/admin/_cache.sh set btc_${CHAIN}net_sync_initialblockdownload "${btc_sync_initialblockdownload}"
-            
+
             if [ "${isDefaultChain}" == "1" ]; then
               /home/admin/_cache.sh set btc_default_synced "${btc_synced}"
               /home/admin/_cache.sh set btc_default_blocks_headers "${btc_blocks_headers}"
@@ -1044,7 +1052,7 @@ do
   # if was started with special parameter
   if [ "${ONLY_ONE_LOOP}" == "1" ]; then
     echo "Exiting because ONLY_ONE_LOOP==1"
-    exit 0 
+    exit 0
   fi
 
 done

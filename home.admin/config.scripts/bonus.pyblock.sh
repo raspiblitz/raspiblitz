@@ -29,15 +29,27 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "*** INSTALL pyblocks***"
   
   # create pyblock user
-  sudo adduser --disabled-password --gecos "" pyblock
+  USERNAME=pyblock
+  echo "# add the user: ${USERNAME}"
+  sudo adduser --system --group --shell /bin/bash --home /home/${USERNAME} ${USERNAME}
+  echo "Copy the skeleton files for login"
+  sudo -u ${USERNAME} cp -r /etc/skel/. /home/${USERNAME}/
+
   cd /home/pyblock
   sudo -u pyblock mkdir /home/pyblock/config
 
   # install hexyl
   sudo apt-get install -y hexyl html2text
 
+  ## WORKAROUND: see https://github.com/raspiblitz/raspiblitz/issues/4383
   # install via pip
-  sudo -u pyblock pip3 install pybitblock 
+  # sudo -u pyblock pip3 install pybitblock 
+  # install from github
+  sudo -u pyblock git clone https://github.com/curly60e/pyblock.git
+  cd pyblock
+  sudo -u pyblock git checkout v2.2.3
+  sudo -u pyblock sed -i 's/jq = "1.2.2"/jq = "1.2.3"/' pyproject.toml
+  sudo -u pyblock pip install .
 
   # set PATH for the user
   sudo bash -c "echo 'PATH=\$PATH:/home/pyblock/.local/bin/' >> /home/pyblock/.profile"
