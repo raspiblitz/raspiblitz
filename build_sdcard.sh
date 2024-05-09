@@ -666,6 +666,7 @@ echo -e "\n*** SHELL SCRIPTS & ASSETS ***"
 cd /home/admin/ || exit 1
 sudo -u admin git config --global user.name "${github_user}" || exit 1
 sudo -u admin git config --global user.email "johndoe@example.com" || exit 1
+sudo -u admin git config --global http.postBuffer 524288000 || exit 1
 sudo -u admin rm -rf /home/admin/raspiblitz
 sudo -u admin git clone -b "${branch}" https://github.com/${github_user}/raspiblitz.git || exit 1
 sudo -u admin cp -r /home/admin/raspiblitz/home.admin/*.* /home/admin || exit 1
