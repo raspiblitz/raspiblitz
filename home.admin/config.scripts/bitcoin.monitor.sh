@@ -158,7 +158,7 @@ if [ "$2" = "info" ]; then
   btc_sync_progress=$(echo "${blockchaininfo}" | jq -r '.verificationprogress')
   if (( $(awk 'BEGIN { print( '${btc_sync_progress}'<0.99995 ) }') )); then
     # #3620 prevent displaying 100.00%, although incorrect because of rounding
-    btc_sync_percentage=$(awk -v progress=$btc_sync_progress 'BEGIN { printf("%.2f%%", 100 * progress) }')
+    btc_sync_percentage=$(awk -v progress=$btc_sync_progress 'BEGIN { printf("%.2f%%", progress) }')
   elif [ "${btc_blocks_headers}" != "" ] && [ "${btc_blocks_headers}" == "${btc_blocks_verified}" ]; then
     btc_sync_percentage="100.00"
   else
