@@ -159,6 +159,8 @@ if [ "$2" = "info" ]; then
   if (( $(awk 'BEGIN { print( '${btc_sync_progress}'<0.99995 ) }') )); then
     # #3620 prevent displaying 100.00%, although incorrect because of rounding
     btc_sync_percentage="${btc_sync_progress:2:2}.${btc_sync_progress:4:2}"
+    # remove trailing zero if present (just one)
+    btc_sync_percentage="${btc_sync_percentage%0}"
   elif [ "${btc_blocks_headers}" != "" ] && [ "${btc_blocks_headers}" == "${btc_blocks_verified}" ]; then
     btc_sync_percentage="100.00"
   else
