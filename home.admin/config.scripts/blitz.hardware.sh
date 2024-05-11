@@ -28,8 +28,8 @@ fi
 
 # detect RaspberryPi 5
 isRaspberryPi5=$(cat /proc/device-tree/model 2>/dev/null | grep -c "Raspberry Pi 5")
-if [ "${isRaspberryPi4}" == "1" ]; then
-    board="rp4"
+if [ "${isRaspberryPi5}" == "1" ]; then
+    board="rp5"
 fi
 
 # detect VM
