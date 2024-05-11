@@ -157,9 +157,7 @@ do
   fi
 
   # ram
-  ram=$(free -m | grep Mem | awk '{ print $2 }')
   ram_avail=$(free -m | grep -E 'Mem|Speicher' | awk '{ print $7 }')
-  /home/admin/_cache.sh set system_ram_mb "${ram}"
   /home/admin/_cache.sh set system_ram_available_mb "${ram_avail}"
 
   # undervoltage
