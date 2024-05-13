@@ -58,10 +58,41 @@ if [ "$1" == "sync" ]; then
     exit 1
   fi
 
-  # get a shasum of the shared folder
-  echo  "# checking for cahnges of /mnt/vm_shared_folder/raspiblitz"
-  shasumSharedFolder=$(shasum -a 256 /mnt/vm_shared_folder/raspiblitz | awk '{print $1}')
-  echo "# shasumSharedFolder(${shasumSharedFolder})"
+  # raspiblitz main
+  echo
+  echo  "# ##### RASPIBLITZ REPO"
+  echo  "# checking for changes of /mnt/vm_shared_folder/raspiblitz"
+  source <(/home/admin/_cache.sh get lastStateRaspiBlitzRepo)
+  nowStateRaspiBlitzRepo=$(stat -c %Y "/mnt/vm_shared_folder/raspiblitz")
+  echo "# lastStateRaspiBlitzRepo(${lastStateRaspiBlitzRepo})"
+  echo "# nowStateRaspiBlitzRepo(${nowStateRaspiBlitzRepo})"
+  /home/admin/_cache.sh set lastStateRaspiBlitzRepo "${lastStateRaspiBlitzRepo}"
+  if [ "${lastStateRaspiBlitzRepo}" != "${nowStateRaspiBlitzRepo}" ]; then
+    echo "# changes detected - syncing"
+    echo "TODO: sync /mnt/vm_shared_folder/raspiblitz to /home/admin/raspiblitz"
+  else
+    echo "# no changes detected - no need for sync"
+  fi
+
+  # raspiblitz api
+  echo
+  echo  "# ##### RASPIBLITZ API REPO"
+  if [ ! -d "/mnt/vm_shared_folder/blitz_api" ]; then
+    echo "# no repo called 'blitz_api' found in shared folder - skipping sync for RaspiBlitz API"
+    exit 0
+  fi
+  echo  "# checking for changes of /mnt/vm_shared_folder/blitz_api"
+  source <(/home/admin/_cache.sh get lastStateRaspiBlitzApiRepo)
+  nowStateRaspiBlitzApiRepo=$(stat -c %Y "/mnt/vm_shared_folder/blitz_api")
+  echo "# lastStateRaspiBlitzApiRepo(${lastStateRaspiBlitzApiRepo})"
+  echo "# nowStateRaspiBlitzApiRepo(${nowStateRaspiBlitzApiRepo})"
+  /home/admin/_cache.sh set lastStateRaspiBlitzApiRepo "${lastStateRaspiBlitzApiRepo}"
+  if [ "${lastStateRaspiBlitzApiRepo}" != "${nowStateRaspiBlitzApiRepo}" ]; then
+    echo "# changes detected - syncing"
+    echo "TODO: sync /mnt/vm_shared_folder/blitz_api to /home/admin/blitz_api"
+  else
+    echo "# no changes detected - no need for sync"
+  fi
 
   exit 0
 fi
