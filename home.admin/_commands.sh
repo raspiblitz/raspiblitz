@@ -52,6 +52,7 @@ function blitzhelp() {
   echo "  patch code   sync only blitz scripts with latest from github and branch"
   echo "  patch api    sync only Blitz-API with latest from github and branch"
   echo "  patch web    sync only Blitz-WebUI with latest from github and branch"
+  echo "  sync         dont use github but sync raspiblitz VM with github projects in shared host folder"
   echo "  cache        check on chache system state"
   echo "  github       jumping directly into the options to change branch/repo/pr"
   echo
@@ -214,6 +215,26 @@ function patch() {
 
   echo
 }
+
+# command: sync
+# sync code from shared host folder - for local VM development
+function sync() {
+
+    # check if shared folder exists
+    if [ ! -d "/host_shared_directory" ]; then
+      echo "FAIL: /host_shared_directory not found"
+      echo "If you are running a VM and you want to sync code from the host, you need to set up a shared folder."
+      echo "See docs.raspiblitz.org for more information how to setup."
+      exit 1
+    fi
+
+    # check if shared folder has content
+    echo
+    echo "#######################################################"
+    echo "### UPDATE BLITZ --> from shared host folder"
+    sudo /home/admin/config.scripts/blitz.vm.sh sync
+}
+
 
 # command: off
 function off() {
