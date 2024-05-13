@@ -66,7 +66,7 @@ if [ "$1" == "sync" ]; then
   nowStateRaspiBlitzRepo=$(stat -c %Y "/mnt/vm_shared_folder/raspiblitz")
   echo "# lastStateRaspiBlitzRepo(${lastStateRaspiBlitzRepo})"
   echo "# nowStateRaspiBlitzRepo(${nowStateRaspiBlitzRepo})"
-  /home/admin/_cache.sh set lastStateRaspiBlitzRepo "${lastStateRaspiBlitzRepo}"
+  /home/admin/_cache.sh set lastStateRaspiBlitzRepo "${nowStateRaspiBlitzRepo}"
   if [ "${lastStateRaspiBlitzRepo}" != "${nowStateRaspiBlitzRepo}" ]; then
     echo "# changes detected - syncing"
     echo "TODO: sync /mnt/vm_shared_folder/raspiblitz to /home/admin/raspiblitz"
@@ -86,7 +86,7 @@ if [ "$1" == "sync" ]; then
   nowStateRaspiBlitzApiRepo=$(stat -c %Y "/mnt/vm_shared_folder/blitz_api")
   echo "# lastStateRaspiBlitzApiRepo(${lastStateRaspiBlitzApiRepo})"
   echo "# nowStateRaspiBlitzApiRepo(${nowStateRaspiBlitzApiRepo})"
-  /home/admin/_cache.sh set lastStateRaspiBlitzApiRepo "${lastStateRaspiBlitzApiRepo}"
+  /home/admin/_cache.sh set lastStateRaspiBlitzApiRepo "${nowStateRaspiBlitzApiRepo}"
   if [ "${lastStateRaspiBlitzApiRepo}" != "${nowStateRaspiBlitzApiRepo}" ]; then
     echo "# changes detected - syncing"
     echo "TODO: sync /mnt/vm_shared_folder/blitz_api to /home/admin/blitz_api"
