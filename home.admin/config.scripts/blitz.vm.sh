@@ -5,8 +5,11 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ]; then
   echo "FOR DEVELOPMENT USE ONLY!"
-  echo "RaspiBlitzVM Sync Scripts"
-  echo "blitz.vm.sh sync [-force]  -> syncs the code from /mnt/vm_shared_folder"
+  echo "RaspiBlitzVM Sync with repos in /mnt/vm_shared_folder"
+  echo "blitz.vm.sh sync      -> syncs all available repos in shared folder"
+  echo "blitz.vm.sh sync code -> syncs only the raspiblitz repo"
+  echo "blitz.vm.sh sync api  -> syncs only the raspiblitz API repo"
+  echo ""
   exit 1
 fi
 
@@ -24,51 +27,48 @@ if [ ${isVM} -eq 0 ]; then
   exit 1
 fi
 
-# sync code from shared folder projects
-if [ "$1" == "sync" ]; then
+# check if shared folder exists
+if [ ! -d "/mnt/vm_shared_folder" ]; then
+  echo "# Creating shared folder /mnt/vm_shared_folder"
+  mkdir /mnt/vm_shared_folder
+  chmod 777 /mnt/vm_shared_folder
+fi
 
-  # check if shared folder exists
-  if [ ! -d "/mnt/vm_shared_folder" ]; then
-    echo "# Creating shared folder /mnt/vm_shared_folder"
-    mkdir /mnt/vm_shared_folder
-    chmod 777 /mnt/vm_shared_folder
+# check if shared folder is mounted
+isMounted=$(mount | grep '/mnt/vm_shared_folder')
+if [ ${#isMounted} -eq 0 ]; then
+  echo "# Mounting shared folder /mnt/vm_shared_folder"
+  mount -t 9p -o trans=virtio share /mnt/vm_shared_folder
+  if [ $? -eq 0 ]; then
+    echo "# OK - shared folder mounted"
+  else
+    echo "# make sure to activate shared folder in VM settings (VirtFS)"
+    echo "error='mount failed'"
+    exit 1
   fi
+fi
 
-  # check if shared folder is mounted
-  isMounted=$(mount | grep '/mnt/vm_shared_folder')
-  if [ ${#isMounted} -eq 0 ]; then
-    echo "# Mounting shared folder /mnt/vm_shared_folder"
-    mount -t 9p -o trans=virtio share /mnt/vm_shared_folder
-    if [ $? -eq 0 ]; then
-      echo "# OK - shared folder mounted"
-    else
-      echo "# make sure to activate shared folder in VM settings (VirtFS)"
-      echo "error='mount failed'"
-      exit 1
-    fi
-  fi
+# RASPIBLITZ MAIN REPO
+if [ "$2" == "code" ] || [ "$2" == "" ]; then
 
-  #check if contains a raspiblitz repo
+  echo
+  echo  "# ##### RASPIBLITZ REPO"
+
+  #check if contains a raspiblitz MAIN repo
   containsRaspiBlitzRepo=$(ls /mnt/vm_shared_folder | grep -wc 'raspiblitz')
   if [ ${containsRaspiBlitzRepo} -eq 0 ]; then
+ 
     echo "# /mnt/vm_shared_folder does not contain a raspiblitz repo"
     echo "# make sure to share the directory that contains the raspiblitz repo - not the repo itself"
     echo "# make sure its named 'raspiblitz' and not 'raspiblitz-main' or 'raspiblitz-v1.7'"
-    echo "error='no raspiblitz repo'"
-    exit 1
-  fi
+ 
+    if [ "$2" != "" ]; then
+      echo "error='no raspiblitz main repo'"
+      exit 1
+    fi
+ 
+  else
 
-  # raspiblitz main
-  echo
-  echo  "# ##### RASPIBLITZ REPO"
-  echo  "# checking for changes of /mnt/vm_shared_folder/raspiblitz"
-  source <(/home/admin/_cache.sh get lastStateRaspiBlitzRepo)
-  nowStateRaspiBlitzRepo=$(stat -c %Y "/mnt/vm_shared_folder/raspiblitz")
-  echo "# lastStateRaspiBlitzRepo(${lastStateRaspiBlitzRepo})"
-  echo "# nowStateRaspiBlitzRepo(${nowStateRaspiBlitzRepo})"
-  /home/admin/_cache.sh set lastStateRaspiBlitzRepo "${nowStateRaspiBlitzRepo}"
-  if [ "${lastStateRaspiBlitzRepo}" != "${nowStateRaspiBlitzRepo}" ] || [ "$2" == "-force" ]; then
-    echo "# changes detected ..."
     cd /home/admin
     echo "# COPYING from VM SHARED FOLDER to /home/admin/"
     echo "# - basic admin files"
@@ -90,30 +90,46 @@ if [ "$1" == "sync" ]; then
     su - admin -c 'chmod 755 /home/admin/setup.scripts/*.sh'
     su - admin -c 'chmod 755 /home/admin/config.scripts/*.py'
     echo "# ******************************************"
-  else
-    echo "# no changes detected - no need for sync"
-  fi
 
-  # raspiblitz api
+    if [ "$2" != "" ]; then
+      exit 0
+    fi
+
+  fi
+fi  
+
+# RASPIBLITZ API REPO
+if [ "$2" == "api" ] || [ "$2" == "" ]; then
+
   echo
   echo  "# ##### RASPIBLITZ API REPO"
-  if [ ! -d "/mnt/vm_shared_folder/blitz_api" ]; then
-    echo "# no repo called 'blitz_api' found in shared folder - skipping sync for RaspiBlitz API"
-    exit 0
-  fi
-  echo  "# checking for changes of /mnt/vm_shared_folder/blitz_api"
-  source <(/home/admin/_cache.sh get lastStateRaspiBlitzApiRepo)
-  nowStateRaspiBlitzApiRepo=$(stat -c %Y "/mnt/vm_shared_folder/blitz_api")
-  echo "# lastStateRaspiBlitzApiRepo(${lastStateRaspiBlitzApiRepo})"
-  echo "# nowStateRaspiBlitzApiRepo(${nowStateRaspiBlitzApiRepo})"
-  /home/admin/_cache.sh set lastStateRaspiBlitzApiRepo "${nowStateRaspiBlitzApiRepo}"
-  if [ "${lastStateRaspiBlitzApiRepo}" != "${nowStateRaspiBlitzApiRepo}" ]; then
-    echo "# changes detected - syncing"
-    echo "TODO: sync /mnt/vm_shared_folder/blitz_api to /home/admin/blitz_api"
+
+  #check if contains a raspiblitz API repo
+  containsApiRepo=$(ls /mnt/vm_shared_folder | grep -wc 'blitz_api')
+  if [ ${containsApiRepo} -eq 0 ]; then
+ 
+    echo "# /mnt/vm_shared_folder does not contain a api repo"
+    echo "# make sure to share the directory that contains the api repo - not the repo itself"
+    echo "# make sure its named 'blitz_api'"
+ 
+    if [ "$2" != "" ]; then
+      echo "error='no raspiblitz api repo'"
+      exit 1
+    fi
+ 
   else
-    echo "# no changes detected - no need for sync"
+
+    echo "TODO: sync /mnt/vm_shared_folder/blitz_api to /home/admin/blitz_api"
+
+    if [ "$2" != "" ]; then
+      exit 0
+    fi
+
   fi
 
+fi
+
+if [ "$1" == "sync" ]; then
   exit 0
 fi
 

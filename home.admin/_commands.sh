@@ -52,10 +52,14 @@ function blitzhelp() {
   echo "  patch code   sync only blitz scripts with latest from github and branch"
   echo "  patch api    sync only Blitz-API with latest from github and branch"
   echo "  patch web    sync only Blitz-WebUI with latest from github and branch"
-  echo "  patch vm     dont use github but sync raspiblitz VM with github projects in shared host folder"
   echo "  cache        check on chache system state"
   echo "  github       jumping directly into the options to change branch/repo/pr"
   echo
+  echo "Development with VM:"
+  echo "  sync         sync all repos from shared folder"
+  echo "  sync code    sync only main raspiblitz repo from shared folder"
+  echo "  sync api     sync only blitz api repo from shared folder"
+  echo  
   echo "Power:"
   echo "  restart      restart the node"
   echo "  off          shutdown the node"
@@ -213,13 +217,13 @@ function patch() {
     sudo /home/admin/config.scripts/blitz.web.ui.sh update
   fi
 
-  if [ "$1" == "snyc" ]; then
-    echo
-    echo "#######################################################"
-    echo "### UPDATE BLITZ --> from shared host folder"
-    sudo /home/admin/config.scripts/blitz.vm.sh sync
-  fi
+  echo
+}
 
+# command: sync
+# sync VM with shared folder
+function sync() {
+  sudo /home/admin/config.scripts/blitz.vm.sh sync ${1}
   echo
 }
 
