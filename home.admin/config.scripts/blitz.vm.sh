@@ -105,7 +105,7 @@ if [ "$2" == "api" ] || [ "$2" == "" ]; then
   echo  "# ##### RASPIBLITZ API REPO"
 
   # check if blitzapi service is enabled
-  systemctl is-enabled blitzapi
+  systemctl is-enabled blitzapi 2>/dev/null
   notInstalled=$?
 
   #check if contains a raspiblitz API repo
@@ -131,30 +131,19 @@ if [ "$2" == "api" ] || [ "$2" == "" ]; then
  
   else
 
-    echo "# Stopping blitzapi service"
-    systemctl stop blitzapi
+  
+    echo "# TODO: Not implemented yet - use /script/updateBlitzAPI.sh instead to sync from host to VM"
 
-    # copy everything including subdirectories from /mnt/vm_shared_folder/blitz_api to /home/blitzapi/blitz_api
-    echo "# COPYING from VM SHARED FOLDER to /home/blitzapi/"
-    rm -rf /home/blitzapi/blitz_api
-    cp -R /mnt/vm_shared_folder/blitz_api /home/blitzapi
-
-    chown -R blitzapi:blitzapi /home/blitzapi/blitz_api
-    cd /home/blitzapi/blitz_api || exit 1
-    su - blitzapi -c './venv/bin/pip install -r requirements.txt'
-
-    echo "# Starting blitzapi service"
-    systemctl start blitzapi
-    sleep 1
-
-    # check if blitzapi service is running
-    systemctl is-active blitzapi
-    if [ $? -gt 0 ]; then
-      echo "# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-      echo "# WARNING: blitzapi service is not running"
-      echo "# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-      systemctl status blitzapi
-    fi
+    #echo "# Stopping blitzapi service"
+    #systemctl stop blitzapi
+    #echo "# COPYING from VM SHARED FOLDER to /home/blitzapi/"
+    #rm -rf /home/blitzapi/blitz_api
+    #cp -R /mnt/vm_shared_folder/blitz_api /home/blitzapi
+    #chown -R blitzapi:blitzapi /home/blitzapi/blitz_api
+    #cd /home/blitzapi/blitz_api || exit 1
+    #su - blitzapi -c './venv/bin/pip install -r requirements.txt'
+    #echo "# Starting blitzapi service"
+    #systemctl start blitzapi
 
     if [ "$2" != "" ]; then
       exit 0
