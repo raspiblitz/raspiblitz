@@ -6,7 +6,7 @@
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ]; then
   echo "FOR DEVELOPMENT USE ONLY!"
   echo "RaspiBlitzVM Sync Scripts"
-  echo "blitz.vm.sh sync  -> syncs the code from /mnt/vm_shared_folder"
+  echo "blitz.vm.sh sync [-force]  -> syncs the code from /mnt/vm_shared_folder"
   exit 1
 fi
 
@@ -67,9 +67,29 @@ if [ "$1" == "sync" ]; then
   echo "# lastStateRaspiBlitzRepo(${lastStateRaspiBlitzRepo})"
   echo "# nowStateRaspiBlitzRepo(${nowStateRaspiBlitzRepo})"
   /home/admin/_cache.sh set lastStateRaspiBlitzRepo "${nowStateRaspiBlitzRepo}"
-  if [ "${lastStateRaspiBlitzRepo}" != "${nowStateRaspiBlitzRepo}" ]; then
-    echo "# changes detected - syncing"
-    echo "TODO: sync /mnt/vm_shared_folder/raspiblitz to /home/admin/raspiblitz"
+  if [ "${lastStateRaspiBlitzRepo}" != "${nowStateRaspiBlitzRepo}" ] || [ "$2" == "-force" ]; then
+    echo "# changes detected ..."
+    cd /home/admin
+    echo "# COPYING from VM SHARED FOLDER to /home/admin/"
+    echo "# - basic admin files"
+    rm -f *.sh
+    su - admin -c 'cp /mnt/vm_shared_folder/raspiblitz/home.admin/.tmux.conf /home/admin'
+    su - admin -c 'cp /mnt/vm_shared_folder/raspiblitz/home.admin/*.* /home/admin 2>/dev/null'
+    su - admin -c 'chmod 755 *.sh'
+    echo "# - asset directory"
+    rm -rf assets
+    su - admin -c 'cp -R /mnt/vm_shared_folder/raspiblitz/home.admin/assets /home/admin/assets'
+    echo "# - config.scripts directory"
+    rm -rf /home/admin/config.scripts
+    su - admin -c 'cp -R /mnt/vm_shared_folder/raspiblitz/home.admin/config.scripts /home/admin/config.scripts'
+    su - admin -c 'chmod 755 /home/admin/config.scripts/*.sh'
+    su - admin -c 'chmod 755 /home/admin/config.scripts/*.py'
+    echo "# - setup.scripts directory"
+    rm -rf /home/admin/setup.scripts
+    su - admin -c 'cp -R /mnt/vm_shared_folder/raspiblitz/home.admin/setup.scripts /home/admin/setup.scripts'
+    su - admin -c 'chmod 755 /home/admin/setup.scripts/*.sh'
+    su - admin -c 'chmod 755 /home/admin/config.scripts/*.py'
+    echo "# ******************************************"
   else
     echo "# no changes detected - no need for sync"
   fi
