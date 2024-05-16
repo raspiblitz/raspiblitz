@@ -315,8 +315,8 @@ function downloadAndVerifyBinary() {
   sudo rm -f /home/fulcrum/Fulcrum
   sudo rm -f /home/fulcrum/FulcrumAdmin
   # symlink
-  sudo ln -s /home/fulcrum/Fulcrum-${fulcrumVersion}-${build}/Fulcrum /home/fulcrum/ |
-    sudo ln -s /home/fulcrum/Fulcrum-${fulcrumVersion}-${build}/FulcrumAdmin /home/fulcrum/
+  sudo ln -s /home/fulcrum/Fulcrum-${fulcrumVersion}-${build}/Fulcrum /home/fulcrum/
+  sudo ln -s /home/fulcrum/Fulcrum-${fulcrumVersion}-${build}/FulcrumAdmin /home/fulcrum/
 }
 
 function createSystemdService() {
