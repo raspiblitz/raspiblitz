@@ -338,6 +338,34 @@ else
 fi
 
 ################################
+# GPT integrity check
+################################
+
+check_and_fix_gpt() {
+  local device=$1
+  output=$(sudo gdisk -l $device 2>&1)
+  if echo "$output" | grep -q "PMBR size mismatch"; then
+    echo "GPT PMBR size mismatch detected on $device. Fixing..." >> $logFile
+    sgdisk -e $device
+    echo "Fixed GPT PMBR size mismatch on $device." >> $logFile
+  elif echo "$output" | grep -q "The backup GPT table is not on the end of the device"; then
+    echo "Backup GPT table is not at the end of $device. Fixing..." >> $logFile
+    sgdisk -e $device
+    echo "Fixed backup GPT table location on $device." >> $logFile
+  else
+    echo "No GPT issues detected on $device." >> $logFile
+  fi
+}
+
+# List all block devices
+devices=$(lsblk -dno NAME | grep -E '^sd|^nvme|^vd|^mmcblk')
+
+# Check and fix each device
+for dev in $devices; do
+  check_and_fix_gpt /dev/$dev
+done
+
+################################
 # FS EXPAND
 # extend sd card to maximum capacity
 ################################
