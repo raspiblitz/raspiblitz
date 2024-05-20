@@ -131,7 +131,7 @@ echo "# raspi_bootdir(${raspi_bootdir})" >> $logFile
 flagExists=$(ls ${raspi_bootdir}/stop 2>/dev/null | grep -c 'stop')
 if [ "${flagExists}" == "1" ]; then
   # get local ip from system
-  localip=$(hostname -I | awk '{print $1}')
+  localip=$(ip addr show scope global | grep inet | awk '{print $2}' | cut -d/ -f1 | head -n 1)
   echo "localip(${localip})" >> $logFile
   /home/admin/_cache.sh set internet_localip "${localip}"
   # set state info
