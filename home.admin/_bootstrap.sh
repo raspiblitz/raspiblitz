@@ -132,7 +132,7 @@ flagExists=$(ls ${raspi_bootdir}/stop 2>/dev/null | grep -c 'stop')
 if [ "${flagExists}" == "1" ]; then
   # get local ip from system
   localip=$(hostname -I | awk '{print $1}')
-  echo "# localip(${localip})" >> $logFile
+  echo "localip(${localip})" >> $logFile
   /home/admin/_cache.sh set internet_localip "${localip}"
   # set state info
   /home/admin/_cache.sh set state "stop"
