@@ -132,6 +132,7 @@ flagExists=$(ls ${raspi_bootdir}/stop 2>/dev/null | grep -c 'stop')
 if [ "${flagExists}" == "1" ]; then
   # set state info
   source <(/home/admin/config.scripts/internet.sh status local)
+  echo "# localip(${localip})" >> $logFile
   /home/admin/_cache.sh set internet_localip "${localip}"
   /home/admin/_cache.sh set state "stop"
   /home/admin/_cache.sh set message "stopped for manual provision"
