@@ -130,10 +130,6 @@ echo "# raspi_bootdir(${raspi_bootdir})" >> $logFile
 # when a file 'stop' is on the sd card bootfs partition root - stop for manual provision
 flagExists=$(ls ${raspi_bootdir}/stop 2>/dev/null | grep -c 'stop')
 if [ "${flagExists}" == "1" ]; then
-  # get local ip from system
-  localip=$(ip addr show scope global | grep inet | awk '{print $2}' | cut -d/ -f1 | head -n 1)
-  echo "localip(${localip})" >> $logFile
-  /home/admin/_cache.sh set internet_localip "${localip}"
   # set state info
   /home/admin/_cache.sh set state "stop"
   /home/admin/_cache.sh set message "stopped for manual provision"
