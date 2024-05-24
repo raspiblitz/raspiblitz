@@ -33,13 +33,12 @@ if [ "$generate_new" == "y" ]; then
 else
     # 1.b. Check if the manually entered address is valid
     read -p "Enter the existing address: " address
-    if ! lncli validateaddress "$address" | grep -q "isvalid: true"; then
+    if ! bitcoin-cli validateaddress "$address" | grep -q "isvalid\": true"; then
         echo "Error: The entered address is not valid."
         exit 1
     fi
     address_variable=$address
 fi
-
 # 2. Ask for the message to sign and save it to a variable
 read -p "Enter the message to sign: " message_to_sign
 
