@@ -1,3 +1,7 @@
+## What's new in Version 1.11.1 of RaspiBlitz?
+
+- New: config.scripts/lnd.signaddress.sh to easy sign messages on addresses on LND [details](https://github.com/raspiblitz/raspiblitz/issues/4540)
+
 ## What's new in Version 1.11.0 of RaspiBlitz?
 
 - New: RaspberryPi5 tested & enabling NVMe PCIe Hats
