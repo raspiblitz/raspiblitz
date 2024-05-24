@@ -548,13 +548,15 @@ if [ "${baseimage}" == "raspios_arm64" ]; then
   isRaspberryPi5=$(cat /proc/device-tree/model 2>/dev/null | grep -c "Raspberry Pi 5")
   firmwareBuildNumber=$(rpi-eeprom-update | grep "CURRENT" | cut -d "(" -f2 | sed 's/[^0-9]*//g')
   echo "checking Firmware: isRaspberryPi5(${isRaspberryPi5}) firmwareBuildNumber(${firmwareBuildNumber})" >> $logFile
-  if [ ${isRaspberryPi5} -gt 0 ] && [ ${firmwareBuildNumber} -lt 1701887365 ]; then
-    echo "RaspberryPi 5 detected with old firmware ... do update." >> $logFile
+  if [ ${isRaspberryPi5} -gt 0 ] && [ ${firmwareBuildNumber} -lt 1708097321 ]; then
+    echo "updating Firmware" >> $logFile
+    echo "RaspberryPi 5 detected with old firmware (${firmwareBuildNumber}) ... do update." >> $logFile
     apt-get update -y
     apt-get upgrade -y
     apt-get install -y rpi-eeprom
     rpi-eeprom-update -a
     echo "Restarting ..." >> $logFile
+    sleep 3
     reboot
   else
     echo "RaspberryPi Firmware not in th need of update." >> $logFile
