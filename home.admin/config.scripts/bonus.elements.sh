@@ -18,6 +18,7 @@ fi
 
 echo "# Running: bonus.elements.sh $*"
 
+source /mnt/hdd/raspiblitz.conf
 # elementslogpath
 elementslogpath="/home/elements/.elements/liquidv1/debug.log"
 
@@ -53,12 +54,7 @@ function installBinary {
   sudo -u admin mkdir -p /home/admin/download/elements
   cd /home/admin/download/elements || exit 1
 
-  #echo "# Receive signer keys"
-  #wget https://raw.githubusercontent.com/ElementsProject/elements/master/contrib/builder-keys/keys.txt
-  #gpg --refresh-keys
-  #while read fingerprint keyholder_name; do
-  #  gpg --keyserver hkps://keys.openpgp.org --recv-keys ${fingerprint}
-  #done <./keys.txt
+  echo "# Receive signer key"
   gpg --recv-key ${SIG_PUBKEY} || exit 1
 
   # download signed binary sha256 hash sum file
@@ -95,7 +91,6 @@ function installBinary {
   if [ ! -f "./${binaryName}" ]; then
     echo "# Downloading https://github.com/ElementsProject/elements/releases/download/${VERSION}/${binaryName} ..."
     sudo -u admin wget --quiet https://github.com/ElementsProject/elements/releases/download/${VERSION}/${binaryName}
-                               https://github.com/ElementsProject/elements/releases/download/elements-23.2.1/elements-23.2.1-aarch64-linux-gnu.tar.gz
   fi
   if [ ! -f "./${binaryName}" ]; then
     echo "# FAIL # Could not download the ELEMENTS BINARY"
@@ -162,14 +157,12 @@ function installService() {
   echo "# Installing Elements"
   # elements.conf
   if [ ! -f /home/elements/.elements/elements.conf ]; then
-    # add minimal config
-    randomRPCpass=$(tr </dev/urandom -dc _A-Z-a-z-0-9 | head -c20)
     PASSWORD_B=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcpassword | cut -c 13-)
     echo "
 # Elementsd configuration
 datadir=/mnt/hdd/app-data/.elements
 rpcuser=raspiblitz
-rpcpassword=$randomRPCpass
+rpcpassword=$PASSWORD_B
 rpcbind=127.0.0.1
 
 # Bitcoin Core credentials
@@ -276,31 +269,6 @@ WantedBy=multi-user.target
   fi
 }
 
-
-if [ "$1" = "addI2pSeedNodes" ]; then
-
-  /home/admin/config.scripts/blitz.i2pd.sh on
-
-  echo "Add all I2P seed nodes from: https://github.com/ElementsProject/elements/blob/master/contrib/seeds/nodes_main.txt"
-  i2pSeedNodeList=$(curl -sS https://raw.githubusercontent.com/ElementsProject/elements/master/contrib/seeds/nodes_main.txt| grep .b32.i2p:0)
-  for i2pSeedNode in ${i2pSeedNodeList}; do
-    echo "# Add node: ${i2pSeedNode}"
-    sudo -u elements /usr/local/bin/elements-cli -conf=/home/elements/.elements/elements.conf addnode "$i2pSeedNode" "onetry"
-  done
-
-  echo
-  echo "# Display sudo tail -n 100 elementslogpath | grep i2p"
-  sudo tail -n 100 $elementslogpath | grep i2p
-  echo
-  echo "# Display bitcoin-cli -netinfo 4"
-  sudo -u elements /usr/local/bin/elements-cli -conf=/home/elements/.elements/elements.conf -netinfo 4
-
-  exit 0
-fi
-
-
-source /mnt/hdd/raspiblitz.conf
-
 # install
 if [ "$1" = "install" ]; then
 
@@ -318,7 +286,7 @@ elif [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   installService
 
-  # setting value in raspi blitz config
+  # setting value in raspiblitz.conf
   /home/admin/config.scripts/blitz.conf.sh set elements "on"
   exit 0
 
@@ -329,7 +297,7 @@ elif [ "$1" = "0" ] || [ "$1" = "off" ]; then
   removeService
 
   sudo userdel -rf elements
-  # setting value in raspi blitz config
+  # setting value in raspiblitz.conf
   /home/admin/config.scripts/blitz.conf.sh set elements "off"
   exit 0
 fi
