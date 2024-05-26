@@ -169,7 +169,6 @@ rpcbind=127.0.0.1
 mainchainrpcuser=raspibolt
 mainchainrpcpassword=$PASSWORD_B
 
-
 # Peer connection settings
 onlynet=onion
 proxy=127.0.0.1:9050
