@@ -1,3 +1,7 @@
+## What's new in Version 1.11.1 of RaspiBlitz?
+
+- Update: Specter Desktop 2.0.4 with reactivated UPDATE option [details](https://github.com/cryptoadvance/specter-desktop/releases/tag/v2.0.4)
+
 ## What's new in Version 1.11.0 of RaspiBlitz?
 
 - New: RaspberryPi5 tested & enabling NVMe PCIe Hats
@@ -49,6 +53,11 @@
 - Update: Thunderhub v0.13.19 [details](https://github.com/apotdevin/thunderhub/releases/tag/v0.13.19)
 - Update: LNbits 0.10.10 [details](https://github.com/lnbits/lnbits/releases/tag/0.10.10)
 - Update: BTCPayServer 1.10.3 (postgres by default with sqlite migration) [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.10.3)
+- Update: Specter Desktop 1.13.1 [details](https://github.com/cryptoadvance/specter-desktop/releases/tag/v1.13.1)
+- Update: Kindle-Display 0.5.1 [details](https://github.com/dennisreimann/kindle-display/)
+- Update: JoinMarket v0.9.10 [details](https://github.com/JoinMarket-Org/joinmarket-clientserver/releases/tag/v0.9.10)
+- Update: JoininBox v0.8.1 [details](https://github.com/openoms/joininbox/releases/tag/v0.8.1)
+- Update: Balance of Satoshis 15.11.0 (bos) [details](https://github.com/alexbosworth/balanceofsatoshis/blob/master/CHANGELOG.md#15110)
 - Fix: Homebanking Interface FinTS/HBCI (experimental) [details](https://github.com/rootzoll/raspiblitz/issues/1186)
 - Remove: Spark Wallet and Sparko CLN plugin (not maintained anymore)
 - Remove: Faraday, Loop, Pool single installs - used in the LiT package instead
