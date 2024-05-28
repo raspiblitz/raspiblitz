@@ -1,3 +1,7 @@
+## What's new in Version 1.11.1 of RaspiBlitz?
+
+- Remove: Tallycoin-Connect [see service shutdown](https://x.com/djbooth007/status/1784409117563720082)
+
 ## What's new in Version 1.11.0 of RaspiBlitz?
 
 - New: RaspberryPi5 tested & enabling NVMe PCIe Hats
