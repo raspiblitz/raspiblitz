@@ -201,8 +201,6 @@ Consider adding a IP2TOR Bridge under OPTIONS."
     # just IP2TOR active - offer cancel or Lets Encrypt
     OPTIONS+=(HTTPS-ON "Add free HTTPS-Certificate for LNbits")
     OPTIONS+=(IP2TOR-OFF "Cancel IP2Tor Subscription for LNbits")
-  else
-    OPTIONS+=(IP2TOR-ON "Make Public with IP2Tor Subscription")
   fi
 
   # Change Funding Source options (only if available)
