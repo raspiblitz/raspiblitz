@@ -665,6 +665,10 @@ https://github.com/raulcano/docker-ip2tor-shop''', width=72)
             title="Shop Address")
         if shopurl.find("://") > 0: shopurl = shopurl[shopurl.find("://") + 3:]
 
+        # if user choose cancel
+        if code != d.OK:
+            sys.exit(0)
+
         # try & get host list from shop
         os.system('clear')
         try:
