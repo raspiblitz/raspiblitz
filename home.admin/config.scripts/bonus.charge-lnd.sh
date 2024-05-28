@@ -1,44 +1,46 @@
 #!/bin/bash
 
-# This script installs and configures charge-lnd according to the specified plan.
+# This script installs and configures charge-lnd
+# see https://github.com/raspiblitz/raspiblitz/issues/4590
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
-  echo "Config script to switch charge-lnd on or off"
-  echo "bonus.charge-lnd.sh [on|off]"
+  echo "# Switch charge-lnd on or off (experimental feature)"
+  echo "# needs to be switched on manually after every RaspiBlitz update/recovery for now"
+  echo "# bonus.charge-lnd.sh [on|off]"
   exit 1
-fi
-
-# add default value to raspi config if needed
-source /mnt/hdd/raspiblitz.conf
-if ! grep -Eq "^charge-lnd=" /mnt/hdd/raspiblitz.conf; then
-  echo "charge-lnd=off" >> /mnt/hdd/raspiblitz.conf
 fi
 
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   # check if charge-lnd is already installed
-  if [ $(grep -c 'charge-lnd=on' /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
-    echo "charge-lnd is already installed."
+  isInstalled=$(sudo ls /etc/systemd/system/charge-lnd.service 2>/dev/null | grep -c 'charge-lnd.service')
+  if [ $isInstalled -gt 1 ]; then
+    echo "err='charge-lnd is already installed.'"
     exit 1
   fi
 
-  # mark charge-lnd in raspiblitz.conf as installed
-  sudo sed -i "s/^charge-lnd=.*/charge-lnd=on/g" /mnt/hdd/raspiblitz.conf
-
   # install charge-lnd
-  echo "Installing charge-lnd..."
-  cd /home/bitcoin || exit 1
-  sudo -u bitcoin git clone https://github.com/accumulator/charge-lnd.git
+  echo "# Installing charge-lnd ..."
+  cd /home/bitcoin
+  sudo su - bitcoin
+  git clone https://github.com/accumulator/charge-lnd.git
   cd charge-lnd || exit 1
-  sudo -u bitcoin /home/bitcoin/charge-lnd/bin/charge-lnd
+  export CHARGE_LND_ENV=/home/bitcoin/charge-lnd
+  python3 -m venv ${CHARGE_LND_ENV}
+  ${CHARGE_LND_ENV}/bin/pip3 install -r requirements.txt .
+  exit # from sudo su - bitcoin
 
-  # setting up charge-lnd config
-  echo "Setting up charge-lnd config..."
-  mkdir -p /mnt/hdd/app-data/charge-lnd
-  config="/mnt/hdd/app-data/charge-lnd/charge.config"
-  echo "
+  # check if already a charge-lnd config exists
+  if [ -f /mnt/hdd/app-data/charge-lnd/charge.config ]; then
+      echo "# skipping charge-lnd config creation because it already exists."
+  else
+
+    # setting up charge-lnd config
+    echo "Setting up charge-lnd config ..."
+    sudo mkdir -p /mnt/hdd/app-data/charge-lnd
+    echo "
 [discourage-routing-out-of-balance]
 chan.max_ratio = 0.1
 chan.min_capacity = 250000
@@ -61,36 +63,52 @@ strategy = proportional
 min_fee_ppm = 21
 max_fee_ppm = 210
 base_fee_msat = 2000
-" > ${config}
+" | sudo tee /mnt/hdd/app-data/charge-lnd/charge.config
+  fi
 
-  # add charge-lnd to crontab
-  echo "Adding charge-lnd to crontab..."
-  (crontab -l 2>/dev/null; echo "0 */6 * * * /home/bitcoin/charge-lnd/bin/charge-lnd -c ${config}") | crontab -
+  sudo chmod 770 -R /mnt/hdd/app-data/charge-lnd
+  sudo chown bitcoin:bitcoin -R /mnt/hdd/app-data/charge-lnd
 
   # setting up systemd service
-  echo "Setting up charge-lnd systemd service..."
+  echo "# Setting up charge-lnd systemd service ..."
   echo "
 [Unit]
 Description=charge-lnd
 After=lnd.service
 
 [Service]
-ExecStart=/home/bitcoin/charge-lnd/bin/charge-lnd -c ${config}
+ExecStart=/home/bitcoin/charge-lnd/bin/charge-lnd -c /mnt/hdd/app-data/charge-lnd/charge.config
 User=bitcoin
 Group=bitcoin
 Type=simple
 KillMode=process
 TimeoutSec=60
-Restart=always
-RestartSec=60
 
 [Install]
 WantedBy=multi-user.target
 " | sudo tee /etc/systemd/system/charge-lnd.service
-  sudo systemctl enable charge-lnd
-  sudo systemctl start charge-lnd
 
-  echo "charge-lnd installation done."
+  # setting up systemd timer for hourly charge-lnd service
+  echo "# Setting up charge-lnd systemd timer ..."
+  echo "
+[Unit]
+Description=Runs charge-lnd every hour
+
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec=1h
+
+[Install]
+WantedBy=timers.target
+" | sudo tee /etc/systemd/system/charge-lnd.timer
+
+  # enable timer because the service is only needed every hour once
+  sudo systemctl enable charge-lnd.timer
+  sudo systemctl start charge-lnd.timer
+  echo "# To check if timers are running use: sudo systemctl list-timers"
+  echo "# To check logs use: sudo journalctl -u charge-lnd"
+
+  echo "# charge-lnd installation done."
   exit 0
 fi
 
@@ -98,22 +116,23 @@ fi
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # check if charge-lnd is installed
-  if [ $(grep -c 'charge-lnd=off' /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
-    echo "charge-lnd is not installed."
+  isInstalled=$(sudo ls /etc/systemd/system/charge-lnd.service 2>/dev/null | grep -c 'charge-lnd.service')
+  if [ $isInstalled -eq 0 ]; then
+    echo "err='charge-lnd is not installed.'"
     exit 1
   fi
 
-  echo "Removing charge-lnd..."
-  sudo systemctl stop charge-lnd
-  sudo systemctl disable charge-lnd
+  echo "# Removing charge-lnd..."
+  sudo systemctl stop charge-lnd.timer
+  sudo systemctl disable charge-lnd.timer
   sudo rm /etc/systemd/system/charge-lnd.service
+  sudo rm /etc/systemd/system/charge-lnd.timer
   sudo rm -rf /home/bitcoin/charge-lnd
-  (crontab -l | grep -v '/home/bitcoin/charge-lnd/bin/charge-lnd') | crontab -
-  sudo sed -i "s/^charge-lnd=.*/charge-lnd=off/g" /mnt/hdd/raspiblitz.conf
+  sudo rm -rf /mnt/hdd/app-data/charge-lnd
 
-  echo "charge-lnd removal done."
+  echo "# charge-lnd removal done."
   exit 0
 fi
 
-echo "FAIL - Unknown Parameter $1"
+echo "err='invalid parameter.'"
 exit 1
