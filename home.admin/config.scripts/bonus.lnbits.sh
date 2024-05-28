@@ -145,7 +145,7 @@ if [ "$1" = "menu" ]; then
     fundinginfo="on CLN "
   fi
 
-  text="https://${localIP}:${httpsPort}${authMethod}"
+  text="https://${localIP}:${httpsPort}"
 
   if [ ${#publicDomain} -gt 0 ]; then
     text="${text}
@@ -383,7 +383,7 @@ if [ "$1" = "status" ]; then
     # auth method is to call with a certain useer id
     #admin_userid=$(sudo cat /home/lnbits/lnbits/.super_user)
     admin_userid=$(sudo cat /mnt/hdd/app-data/LNBits/data/.super_user)
-    echo "authMethod='/wallet?usr=${admin_userid}'"
+    echo "authMethod='userdefined'"
 
     # check funding source
     if [ "${LNBitsFunding}" == "" ]; then
