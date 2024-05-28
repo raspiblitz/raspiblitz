@@ -637,7 +637,7 @@ def menuMakeSubscription(blitzServiceName, torAddress, torPort):
         d.set_background_title("IP2TOR - Select Shop")
         d.msgbox('''
 At the moment there are no public IP2TOR services to link to.
-With could run yourself one - please check the GitHub repo:
+You could run one yourself - please check the GitHub repo:
 https://github.com/raulcano/docker-ip2tor-shop''', height=10, width=72)
 
         # select dialog
