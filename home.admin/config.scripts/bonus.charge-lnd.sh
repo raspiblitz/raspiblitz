@@ -106,6 +106,7 @@ WantedBy=timers.target
   echo "# To check logs use: sudo journalctl -u charge-lnd"
   echo "# To edit config: sudo nano /mnt/hdd/app-data/charge-lnd/charge.config"
   echo "# Check options: https://github.com/accumulator/charge-lnd/blob/master/README.md"
+  echo "# feedback: https://github.com/raspiblitz/raspiblitz/discussions/3955"
 
   echo "# charge-lnd installation done."
   exit 0
