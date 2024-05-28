@@ -23,13 +23,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # install charge-lnd
   echo "# Installing charge-lnd ..."
   cd /home/bitcoin
-  sudo su - bitcoin
-  git clone https://github.com/accumulator/charge-lnd.git
+  sudo -u bitcoin git clone https://github.com/accumulator/charge-lnd.git
   cd charge-lnd || exit 1
   export CHARGE_LND_ENV=/home/bitcoin/charge-lnd
-  python3 -m venv ${CHARGE_LND_ENV}
-  ${CHARGE_LND_ENV}/bin/pip3 install -r requirements.txt .
-  exit # from sudo su - bitcoin
+  sudo -u bitcoin python3 -m venv ${CHARGE_LND_ENV}
+  sudo -u bitcoin ${CHARGE_LND_ENV}/bin/pip3 install -r requirements.txt .
 
   # check if already a charge-lnd config exists
   if [ -f /mnt/hdd/app-data/charge-lnd/charge.config ]; then
