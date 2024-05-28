@@ -26,7 +26,6 @@ if [ ${#lit} -eq 0 ]; then lit="off"; fi
 if [ ${#lndg} -eq 0 ]; then lndg="off"; fi
 if [ ${#whitepaper} -eq 0 ]; then whitepaper="off"; fi
 if [ ${#chantools} -eq 0 ]; then chantools="off"; fi
-if [ ${#tallycoinConnect} -eq 0 ]; then tallycoinConnect="off"; fi
 if [ ${#helipad} -eq 0 ]; then helipad="off"; fi
 if [ ${#lightningtipbot} -eq 0 ]; then lightningtipbot="off"; fi
 if [ ${#fints} -eq 0 ]; then fints="off"; fi
@@ -66,7 +65,6 @@ if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
   OPTIONS+=(ha 'LND ChannelTools (Fund Rescue)' ${chantools})
   OPTIONS+=(xa 'LND Sphinx-Relay' ${sphinxrelay})
   OPTIONS+=(fa 'LND Helipad Boostagram reader' ${helipad})
-  OPTIONS+=(da 'LND Tallycoin Connect' ${tallycoinConnect})
   OPTIONS+=(lb 'LND LNDK (experimental BOLT 12)' ${lndk})
 fi
 
@@ -483,23 +481,6 @@ if [ "${helipad}" != "${choice}" ]; then
   fi
 else
   echo "Helipad setting unchanged."
-fi
-
-# Tallycoin
-choice="off"; check=$(echo "${CHOICES}" | grep -c "da")
-if [ ${check} -eq 1 ]; then choice="on"; fi
-if [ "${tallycoinConnect}" != "${choice}" ]; then
-  echo "Tallycoin Setting changed .."
-  anychange=1
-  sudo -u admin /home/admin/config.scripts/bonus.tallycoin-connect.sh ${choice}
-  if [ "${choice}" =  "on" ]; then
-    whiptail --title " Installed Tallycoin-Connect" --msgbox "\
-Tallycoin-Connect was installed.\n
-Use the new 'TALLY' entry in Main Menu for more info.\n
-" 10 45
-  fi
-else
-  echo "Tallycoin Setting unchanged."
 fi
 
 # LNDK
