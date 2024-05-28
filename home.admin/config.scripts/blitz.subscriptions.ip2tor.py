@@ -638,7 +638,7 @@ def menuMakeSubscription(blitzServiceName, torAddress, torPort):
         d.msgbox('''
 At the moment there are no public IP2TOR services to link to.
 With could run yourself one - please check the GitHub repo:
-https://github.com/raulcano/docker-ip2tor-shop''')
+https://github.com/raulcano/docker-ip2tor-shop''', width=72)
 
         # select dialog
         #d = Dialog(dialog="dialog", autowidgetsize=True)
