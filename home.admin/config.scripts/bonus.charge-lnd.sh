@@ -1,12 +1,11 @@
 #!/bin/bash
 
-# This script installs and configures charge-lnd
-# see https://github.com/raspiblitz/raspiblitz/issues/4590
-
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "# Switch charge-lnd on or off (experimental feature)"
   echo "# needs to be switched on manually after every RaspiBlitz update/recovery for now"
+  echo "# config is stored in /mnt/hdd/app-data/charge-lnd/charge.config"
+  echo "# feedback: https://github.com/raspiblitz/raspiblitz/discussions/3955"
   echo "# bonus.charge-lnd.sh [on|off]"
   exit 1
 fi
@@ -107,6 +106,8 @@ WantedBy=timers.target
   sudo systemctl start charge-lnd.timer
   echo "# To check if timers are running use: sudo systemctl list-timers"
   echo "# To check logs use: sudo journalctl -u charge-lnd"
+  echo "# To edit config: sudo nano /mnt/hdd/app-data/charge-lnd/charge.config"
+  echo "# Check options: https://github.com/accumulator/charge-lnd/blob/master/README.md"
 
   echo "# charge-lnd installation done."
   exit 0

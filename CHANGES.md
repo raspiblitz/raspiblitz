@@ -1,3 +1,7 @@
+## What's new in Version 1.11.1 of RaspiBlitz?
+
+- Experimental: charge-lnd install script [details](https://github.com/raspiblitz/raspiblitz/discussions/3955)
+
 ## What's new in Version 1.11.0 of RaspiBlitz?
 
 - New: RaspberryPi5 tested & enabling NVMe PCIe Hats
