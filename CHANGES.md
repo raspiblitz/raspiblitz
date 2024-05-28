@@ -1,6 +1,7 @@
 ## What's new in Version 1.11.1 of RaspiBlitz?
 
 - New: config.scripts/lnd.signaddress.sh to easy sign messages on addresses on LND [details](https://github.com/raspiblitz/raspiblitz/issues/4540)
+- Update: LNbits 0.12.8 [details](https://github.com/lnbits/lnbits/releases/tag/0.12.8)
 - Update: Specter Desktop 2.0.4 with reactivated UPDATE option [details](https://github.com/cryptoadvance/specter-desktop/releases/tag/v2.0.4)
 - Remove: Tallycoin-Connect [see service shutdown](https://x.com/djbooth007/status/1784409117563720082)
 - Remove: IP2Tor Shoplist [details](https://github.com/raspiblitz/raspiblitz/issues/4589)
