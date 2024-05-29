@@ -62,9 +62,15 @@ if [ "$1" = "status" ]; then
     if [ "${publicPortRunning}" == "0" ]; then
       # OK looks good - but just means that something is answering on that port
       echo "publicTCPPortAnswering=1"
+
+      # get the synced blockheight
+      syncedBlock=$(echo '{"id": 1, "method": "blockchain.headers.subscribe", "params": []}' | nc -w 2 localhost 50001 | jq '.result.height')
+      echo "blockheight=${syncedBlock}"
+
     else
       # no answer on that port
       echo "publicTCPPortAnswering=0"
+      echo "blockheight=0"
     fi
     echo "portSSL='50002'"
     localPortRunning=$(sudo netstat -an | grep -c '0.0.0.0:50002')
