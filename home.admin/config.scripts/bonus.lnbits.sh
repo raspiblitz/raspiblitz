@@ -933,6 +933,10 @@ if [ "$1" = "switch" ]; then
     exit 1
   fi
 
+  # make lnd.service fallback
+  sudo sed -i 's/Wants=lnd.service/Wants=bitcoind.service/' /etc/systemd/system/lnbits.service
+  sudo sed -i 's/After=lnd.service/After=bitcoind.service/' /etc/systemd/system/lnbits.service
+
   echo "##############"
   echo "# NOTE: If you switch the funding source of a running LNbits instance all sub account will keep balance."
   echo "# Make sure that the new funding source has enough sats to cover the LNbits bookeeping of sub accounts."
