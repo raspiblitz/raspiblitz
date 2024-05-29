@@ -622,9 +622,9 @@ def menuMakeSubscription(blitzServiceName, torAddress, torPort):
         if lastusedShop == choice_url_ip2torcom: lastusedShop="" 
 
         # FULMO Shop
-        choice_url_fulmo="fulmo7x6yvgz6zs2b2ptduvzwevxmizhq23klkenslt5drxx2physlqd.onion"
-        choices.append(("B", "Fulmo Shop"))
-        if lastusedShop == choice_url_fulmo: lastusedShop="" 
+        #choice_url_fulmo="fulmo7x6yvgz6zs2b2ptduvzwevxmizhq23klkenslt5drxx2physlqd.onion"
+        #choices.append(("B", "Fulmo Shop"))
+        #if lastusedShop == choice_url_fulmo: lastusedShop="" 
 
         # add before option if different from static options
         if len(lastusedShop) > 0: choices.append(("Y", lastusedShop))
