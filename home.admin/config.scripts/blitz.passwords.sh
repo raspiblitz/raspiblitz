@@ -402,6 +402,13 @@ elif [ "${abcd}" = "b" ]; then
     sudo chown mempool:mempool /home/mempool/mempool/backend/mempool-config.json
   fi
 
+  # elements
+  if [ "${elements}" == "on" ]; then
+    echo "# changing the password for elements"
+    sudo sed -i "s/^rpcpassword=.*/rpcpassword=${newPassword}/g" /home/elements/.elements/elements.conf
+    sudo sed -i "s/^mainchainrpcpassword=.*/mainchainrpcpassword=${newPassword}/g" /home/elements/.elements/elements.conf
+  fi
+
   echo "# OK -> RPC Password B changed"
   echo "# Reboot is needed (will be triggered if interactive menu was called)"
   echo "error=''"
