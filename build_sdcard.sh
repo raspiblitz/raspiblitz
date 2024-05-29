@@ -369,7 +369,7 @@ echo -e "\n*** SOFTWARE UPDATE ***"
 # sqlite3 -> database
 # fdisk -> create partitions
 # lsb-release -> needed to know which distro version we're running to add APT sources
-general_utils="policykit-1 htop git curl bash-completion vim jq dphys-swapfile bsdmainutils autossh telnet vnstat parted dosfstools fbi sysbench build-essential dialog bc python3-dialog unzip whois fdisk lsb-release smartmontools rsyslog resolvconf"
+general_utils="sudo policykit-1 htop git curl bash-completion vim jq dphys-swapfile bsdmainutils autossh telnet vnstat parted dosfstools fbi sysbench build-essential dialog bc python3-dialog unzip whois fdisk lsb-release smartmontools rsyslog resolvconf"
 # add btrfs-progs if not bookworm on aarch64
 [ "${architecture}" = "aarch64" ] && ! grep "12 (bookworm)" < /etc/os-release && general_utils="${general_utils} btrfs-progs"
 # python3-mako --> https://github.com/rootzoll/raspiblitz/issues/3441
@@ -664,18 +664,19 @@ echo -e "\n*** ADDING GROUPS FOR CREDENTIALS STORE ***"
 echo -e "\n*** SHELL SCRIPTS & ASSETS ***"
 # copy raspiblitz repo from github
 cd /home/admin/ || exit 1
-sudo -u admin git config --global user.name "${github_user}"
-sudo -u admin git config --global user.email "johndoe@example.com"
+sudo -u admin git config --global user.name "${github_user}" || exit 1
+sudo -u admin git config --global user.email "johndoe@example.com" || exit 1
+sudo -u admin git config --global http.postBuffer 524288000 || exit 1
 sudo -u admin rm -rf /home/admin/raspiblitz
-sudo -u admin git clone -b "${branch}" https://github.com/${github_user}/raspiblitz.git
-sudo -u admin cp -r /home/admin/raspiblitz/home.admin/*.* /home/admin
-sudo -u admin cp /home/admin/raspiblitz/home.admin/.tmux.conf /home/admin
-sudo -u admin cp -r /home/admin/raspiblitz/home.admin/assets /home/admin/
-sudo -u admin chmod +x *.sh
-sudo -u admin cp -r /home/admin/raspiblitz/home.admin/config.scripts /home/admin/
-sudo -u admin chmod +x /home/admin/config.scripts/*.sh
-sudo -u admin cp -r /home/admin/raspiblitz/home.admin/setup.scripts /home/admin/
-sudo -u admin chmod +x /home/admin/setup.scripts/*.sh
+sudo -u admin git clone -b "${branch}" https://github.com/${github_user}/raspiblitz.git || exit 1
+sudo -u admin cp -r /home/admin/raspiblitz/home.admin/*.* /home/admin || exit 1
+sudo -u admin cp /home/admin/raspiblitz/home.admin/.tmux.conf /home/admin || exit 1
+sudo -u admin cp -r /home/admin/raspiblitz/home.admin/assets /home/admin/ || exit 1
+sudo -u admin chmod +x *.sh || exit 1
+sudo -u admin cp -r /home/admin/raspiblitz/home.admin/config.scripts /home/admin/ || exit 1
+sudo -u admin chmod +x /home/admin/config.scripts/*.sh || exit 1
+sudo -u admin cp -r /home/admin/raspiblitz/home.admin/setup.scripts /home/admin/ || exit 1
+sudo -u admin chmod +x /home/admin/setup.scripts/*.sh || exit 1
 
 # install newest version of BlitzPy
 blitzpy_wheel=$(ls -tR /home/admin/raspiblitz/home.admin/BlitzPy/dist | grep -E "any.whl" | tail -n 1)

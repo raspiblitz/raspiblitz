@@ -13,9 +13,29 @@ fi
 
 # detect known SBCs
 board=""
-isRaspberryPi4=$(cat /proc/device-tree/model | grep -c "Raspberry Pi 4")
+
+# detect RaspberryPi 3
+isRaspberryPi3=$(cat /proc/device-tree/model 2>/dev/null | grep -c "Raspberry Pi 3")
+if [ "${isRaspberryPi3}" == "1" ]; then
+    board="rp3"
+fi
+
+# detect RaspberryPi 4
+isRaspberryPi4=$(cat /proc/device-tree/model 2>/dev/null | grep -c "Raspberry Pi 4")
 if [ "${isRaspberryPi4}" == "1" ]; then
     board="rp4"
+fi
+
+# detect RaspberryPi 5
+isRaspberryPi5=$(cat /proc/device-tree/model 2>/dev/null | grep -c "Raspberry Pi 5")
+if [ "${isRaspberryPi5}" == "1" ]; then
+    board="rp5"
+fi
+
+# detect VM
+isVM=$(grep -c 'hypervisor' /proc/cpuinfo)
+if [ ${isVM} -gt 0 ]; then
+    board="vm"
 fi
 
 # get how many RAM (in MB)
