@@ -141,7 +141,9 @@ do
 
   # uptime just do on every run
   system_up=$(cat /proc/uptime | grep -o '^[0-9]\+')
+  system_up_text=$(uptime -p | cut -d ' ' -f 2- | cut -d ',' -f 1 | awk '{print $1 substr($2, 1, 1)}')
   /home/admin/_cache.sh set system_up "${system_up}"
+  /home/admin/_cache.sh set system_up_text "${system_up_text}"
 
   # cpu load
   cpu_load=$(w | head -n 1 | cut -d 'v' -f2 | cut -d ':' -f2)
