@@ -58,10 +58,10 @@ if [ "$1" = "status" ]; then
 
       # get the synced blockheight
       syncedBlock=$(echo '{"id": 1, "method": "blockchain.headers.subscribe", "params": []}' | nc -w 2 localhost 50001 | jq '.result.height')
-      echo "blockheight=${syncedBlock}"
+      echo "blockheight='${syncedBlock}'"
     
     else
-      echo "blockheight=0"
+      echo "blockheight='0'"
     fi
 
     publicPortRunning=$(
