@@ -721,15 +721,6 @@ else
   echo "Provisioning CircuitBreaker - keep default" >> ${logFile}
 fi
 
-# tallycoin_connect
-if [ "${tallycoinConnect}" = "on" ]; then
-  echo "Provisioning Tallycoin Connect - run config script" >> ${logFile}
-  /home/admin/_cache.sh set message "Setup Tallycoin Connect"
-  sudo -u admin /home/admin/config.scripts/bonus.tallycoin-connect.sh on >> ${logFile} 2>&1
-else
-  echo "Provisioning Tallycoin Connect - keep default" >> ${logFile}
-fi
-
 # squeaknode
 if [ "${squeaknode}" = "on" ]; then
   echo "Provisioning Squeaknode - run config script" >> ${logFile}

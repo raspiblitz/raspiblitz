@@ -268,8 +268,8 @@ def main():
         cfg.reload()
         if not cfg.run_behind_tor.value:
             Dialog(dialog="dialog", autowidgetsize=True).msgbox('''
-    The IP2TOR service just makes sense if you run
-    your RaspiBlitz behind TOR.
+    The IP2TOR service just makes sense if you
+    run your RaspiBlitz behind TOR.
             ''', title="Info")
             sys.exit(0)
 
