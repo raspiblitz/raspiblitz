@@ -1,7 +1,7 @@
 #!/bin/bash
 # https://github.com/cryptoadvance/specter-desktop
 
-pinnedVersion="1.13.1"
+pinnedVersion="2.0.4"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -131,7 +131,7 @@ function configure_specter {
     "proxy_url": "${proxy}",
     "only_tor": "${torOnly}",
     "tor_control_port": "${tor_control_port}",
-    "tor_status": true,
+    "tor_status": false,
     "hwi_bridge_url": "/hwi/api/"
 }
 EOF
@@ -146,6 +146,8 @@ EOF
   echo "# Connect Specter to the default mainnet node"
   cat >/home/admin/default.json <<EOF
 {
+    "python_class": "cryptoadvance.specter.node.Node",
+    "fullpath": "/home/specter/.specter/nodes/default.json"
     "name": "raspiblitz_mainnet",
     "alias": "default",
     "autodetect": false,
@@ -155,8 +157,6 @@ EOF
     "port": "8332",
     "host": "localhost",
     "protocol": "http",
-    "external_node": true,
-    "fullpath": "/home/specter/.specter/nodes/default.json"
 }
 EOF
   sudo mv /home/admin/default.json /home/specter/.specter/nodes/default.json
@@ -176,7 +176,7 @@ EOF
     "name": "raspiblitz_${chain}net",
     "alias": "raspiblitz_${chain}net",
     "autodetect": false,
-    "datadir": "",
+    "datadir": "/mnt/hdd/bitcoin",
     "user": "${RPCUSER}",
     "password": "${PASSWORD_B}",
     "port": "${PORT}",
@@ -237,6 +237,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     echo "#    --> creating a virtualenv"
     sudo -u specter virtualenv --python=python3 /home/specter/.env
+
+    sudo -u specter /home/specter/.env/bin/python3 -m pip install --upgrade pip
 
     echo "#    --> pip-installing specter"
     sudo -u specter /home/specter/.env/bin/python3 -m pip install --upgrade cryptoadvance.specter==$pinnedVersion || exit 1

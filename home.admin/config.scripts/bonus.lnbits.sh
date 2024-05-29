@@ -3,7 +3,7 @@
 # https://github.com/lnbits/lnbits
 
 # https://github.com/lnbits/lnbits/releases
-tag="0.11.3"
+tag="0.12.4"
 VERSION="${tag}"
 
 # command info
@@ -129,12 +129,12 @@ if [ "$1" = "menu" ]; then
   # display possible problems with IP2TOR setup
   if [ ${#ip2torWarn} -gt 0 ]; then
     whiptail --title " Warning " \
-    --yes-button "Back" \
-    --no-button "Continue Anyway" \
-    --yesno "Your IP2TOR+LetsEncrypt may have problems:\n${ip2torWarn}\n\nCheck if locally responding: https://${localIP}:${httpsPort}\n\nCheck if service is reachable over Tor:\n${toraddress}" 14 72
+      --yes-button "Back" \
+      --no-button "Continue Anyway" \
+      --yesno "Your IP2TOR+LetsEncrypt may have problems:\n${ip2torWarn}\n\nCheck if locally responding: https://${localIP}:${httpsPort}\n\nCheck if service is reachable over Tor:\n${toraddress}" 14 72
     if [ "$?" != "1" ]; then
       exit 0
-	  fi
+    fi
   fi
 
   # add info on funding source
@@ -148,7 +148,7 @@ if [ "$1" = "menu" ]; then
   text="https://${localIP}:${httpsPort}${authMethod}"
 
   if [ ${#publicDomain} -gt 0 ]; then
-     text="${text}
+    text="${text}
 Public Domain: https://${publicDomain}:${httpsPort}
 port forwarding on router needs to be active & may change port"
   fi
@@ -225,139 +225,140 @@ Consider adding a IP2TOR Bridge under OPTIONS."
 
   WIDTH=66
   CHOICE_HEIGHT=$(("${#OPTIONS[@]}/2+1"))
-  HEIGHT=$((CHOICE_HEIGHT+7))
+  HEIGHT=$((CHOICE_HEIGHT + 7))
   CHOICE=$(dialog --clear \
-                --title " LNbits - Options" \
-                --ok-label "Select" \
-                --cancel-label "Back" \
-                --menu "Choose one of the following options:" \
-                $HEIGHT $WIDTH $CHOICE_HEIGHT \
-                "${OPTIONS[@]}" \
-                2>&1 >/dev/tty)
+    --title " LNbits - Options" \
+    --ok-label "Select" \
+    --cancel-label "Back" \
+    --menu "Choose one of the following options:" \
+    $HEIGHT $WIDTH $CHOICE_HEIGHT \
+    "${OPTIONS[@]}" \
+    2>&1 >/dev/tty)
 
   case $CHOICE in
-        IP2TOR-ON)
-            python /home/admin/config.scripts/blitz.subscriptions.ip2tor.py create-ssh-dialog LNBITS ${toraddress} 443
-            exit 0
-            ;;
-        IP2TOR-OFF)
-            clear
-            python /home/admin/config.scripts/blitz.subscriptions.ip2tor.py subscription-cancel ${ip2torID}
-            echo
-            echo "OK - PRESS ENTER to continue"
-            read key
-            exit 0
-            ;;
-        HTTPS-ON)
-            python /home/admin/config.scripts/blitz.subscriptions.letsencrypt.py create-ssh-dialog
-            exit 0
-            ;;
-        SWITCH-CL)
-            clear
-            /home/admin/config.scripts/bonus.lnbits.sh switch cl
-            echo "Restarting LNbits ..."
-            sudo systemctl restart lnbits
-            echo
-            echo "OK new funding source for LNbits active."
-            echo "PRESS ENTER to continue"
-            read key
-            exit 0
-            ;;
-        SWITCH-LND)
-            clear
-            /home/admin/config.scripts/bonus.lnbits.sh switch lnd
-            echo "Restarting LNbits ..."
-            sudo systemctl restart lnbits
-            echo
-            echo "OK new funding source for LNbits active."
-            echo "PRESS ENTER to continue"
-            read key
-            exit 0
-            ;;
-        BACKUP)
-            clear
-            /home/admin/config.scripts/bonus.lnbits.sh backup
-            echo
-            echo "Backup done"
-            echo "PRESS ENTER to continue"
-            read key
-            exit 0
-            ;;
-        RESTORE)
-            clear
-            # check if backup exist
-            source <(/home/admin/_cache.sh get LNBitsDB)
-            if [ "${LNBitsDB}" == "PostgreSQL" ]; then
-              backup_target="/mnt/hdd/app-data/backup/lnbits_db"
-              backup_file=$(ls -t $backup_target/*.sql | head -n1)
-            else
-              backup_target="/mnt/hdd/app-data/backup/lnbits_sqlite"
-              backup_file=$(ls -t $backup_target/*.tar | head -n1)
-            fi
-            if [ "$backup_file" = "" ]; then
-              echo "ABORT - No Backup found to restore from"
-              exit 1
-            else
-              # build dialog to choose backup file from menu
-              OPTIONS_RESTORE=()
+  IP2TOR-ON)
+    python /home/admin/config.scripts/blitz.subscriptions.ip2tor.py create-ssh-dialog LNBITS ${toraddress} 443
+    exit 0
+    ;;
+  IP2TOR-OFF)
+    clear
+    python /home/admin/config.scripts/blitz.subscriptions.ip2tor.py subscription-cancel ${ip2torID}
+    echo
+    echo "OK - PRESS ENTER to continue"
+    read key
+    exit 0
+    ;;
+  HTTPS-ON)
+    python /home/admin/config.scripts/blitz.subscriptions.letsencrypt.py create-ssh-dialog
+    exit 0
+    ;;
+  SWITCH-CL)
+    clear
+    /home/admin/config.scripts/bonus.lnbits.sh switch cl
+    echo "Restarting LNbits ..."
+    sudo systemctl restart lnbits
+    echo
+    echo "OK new funding source for LNbits active."
+    echo "PRESS ENTER to continue"
+    read key
+    exit 0
+    ;;
+  SWITCH-LND)
+    clear
+    /home/admin/config.scripts/bonus.lnbits.sh switch lnd
+    echo "Restarting LNbits ..."
+    sudo systemctl restart lnbits
+    echo
+    echo "OK new funding source for LNbits active."
+    echo "PRESS ENTER to continue"
+    read key
+    exit 0
+    ;;
+  BACKUP)
+    clear
+    /home/admin/config.scripts/bonus.lnbits.sh backup
+    echo
+    echo "Backup done"
+    echo "PRESS ENTER to continue"
+    read key
+    exit 0
+    ;;
+  RESTORE)
+    clear
+    # check if backup exist
+    source <(/home/admin/_cache.sh get LNBitsDB)
+    if [ "${LNBitsDB}" == "PostgreSQL" ]; then
+      backup_target="/mnt/hdd/app-data/backup/lnbits_db"
+      backup_file=$(ls -t $backup_target/*.sql | head -n1)
+    else
+      backup_target="/mnt/hdd/app-data/backup/lnbits_sqlite"
+      backup_file=$(ls -t $backup_target/*.tar | head -n1)
+    fi
+    if [ "$backup_file" = "" ]; then
+      echo "ABORT - No Backup found to restore from"
+      exit 1
+    else
+      # build dialog to choose backup file from menu
+      OPTIONS_RESTORE=()
 
-              counter=0
-              cd $backup_target
-              for f in `find *.* -maxdepth 1 -type f`; do
-                [[ -f "$f" ]] || continue
-                counter=$(($counter+1))
-                OPTIONS_RESTORE+=($counter "$f")
-              done
+      counter=0
+      cd $backup_target
+      for f in $(find *.* -maxdepth 1 -type f); do
+        [[ -f "$f" ]] || continue
+        counter=$(($counter + 1))
+        OPTIONS_RESTORE+=($counter "$f")
+      done
 
-              WIDTH_RESTORE=66
-              CHOICE_HEIGHT_RESTORE=$(("${#OPTIONS_RESTORE[@]}/2+1"))
-              HEIGHT_RESTORE=$((CHOICE_HEIGHT_RESTORE+7))
-              CHOICE_RESTORE=$(dialog --clear \
-              --title " LNbits - Backup restore" \
-              --ok-label "Select" \
-              --cancel-label "Back" \
-              --menu "Choose one of the following backups:" \
-              $HEIGHT_RESTORE $WIDTH_RESTORE $CHOICE_HEIGHT_RESTORE \
-              "${OPTIONS_RESTORE[@]}" \
-              2>&1 >/dev/tty)
+      WIDTH_RESTORE=66
+      CHOICE_HEIGHT_RESTORE=$(("${#OPTIONS_RESTORE[@]}/2+1"))
+      HEIGHT_RESTORE=$((CHOICE_HEIGHT_RESTORE + 7))
+      CHOICE_RESTORE=$(dialog --clear \
+        --title " LNbits - Backup restore" \
+        --ok-label "Select" \
+        --cancel-label "Back" \
+        --menu "Choose one of the following backups:" \
+        $HEIGHT_RESTORE $WIDTH_RESTORE $CHOICE_HEIGHT_RESTORE \
+        "${OPTIONS_RESTORE[@]}" \
+        2>&1 >/dev/tty)
 
-              # start restore with selected backup
-              clear
-              if [ "$CHOICE_RESTORE" != "" ]; then
-                backup_file=${backup_target}/${OPTIONS_RESTORE[$(($CHOICE_RESTORE*2-1))]}
-                /home/admin/config.scripts/bonus.lnbits.sh restore "${backup_file}"
-                echo
-                echo "Restore done"
-                echo "PRESS ENTER to continue"
-                read key
-              fi
-              exit 0
-            fi
-            ;;
-        MIGRATE-DB)
-            clear
-            dialog --title "MIGRATE LNBITS" --yesno "
+      # start restore with selected backup
+      clear
+      if [ "$CHOICE_RESTORE" != "" ]; then
+        backup_file=${backup_target}/${OPTIONS_RESTORE[$(($CHOICE_RESTORE * 2 - 1))]}
+        /home/admin/config.scripts/bonus.lnbits.sh restore "${backup_file}"
+        echo
+        echo "Restore done"
+        echo "PRESS ENTER to continue"
+        read key
+      fi
+      exit 0
+    fi
+    ;;
+  MIGRATE-DB)
+    clear
+    dialog --title "MIGRATE LNBITS" --yesno "
 Do you want to proceed the migration?
 
 Try to migrate your LNBits SQLite database to PostgreSQL.
 
 This can fail for unknown circumstances. Revert of this process is possible afterwards, a backup will be saved.
             " 12 65
-            if [ $? -eq 0 ]; then
-              clear
-              /home/admin/config.scripts/bonus.lnbits.sh migrate
-              echo
-              migrateMsg
-              echo
-              echo "OK please test your LNBits installation."
-              echo "PRESS ENTER to continue"
-              read key
-            fi
-            exit 0
-            ;;
-        *)
-            clear
-            exit 0
+    if [ $? -eq 0 ]; then
+      clear
+      /home/admin/config.scripts/bonus.lnbits.sh migrate
+      echo
+      migrateMsg
+      echo
+      echo "OK please test your LNBits installation."
+      echo "PRESS ENTER to continue"
+      read key
+    fi
+    exit 0
+    ;;
+  *)
+    clear
+    exit 0
+    ;;
   esac
 
   exit 0
@@ -381,7 +382,7 @@ if [ "$1" = "status" ]; then
 
     # auth method is to call with a certain useer id
     #admin_userid=$(sudo cat /home/lnbits/lnbits/.super_user)
-    admin_userid=$(sudo cat /mnt/hdd/app-data/LNBits/data/.super_user);
+    admin_userid=$(sudo cat /mnt/hdd/app-data/LNBits/data/.super_user)
     echo "authMethod='/wallet?usr=${admin_userid}'"
 
     # check funding source
@@ -534,7 +535,7 @@ if [ "$1" = "prestart" ]; then
 
   # protect the admin user id if exists
   # chmod 640 /home/lnbits/lnbits/.super_user 2>/dev/null
-  chmod 640 /mnt/hdd/app-data/LNBits/data/.super_user 2>/dev/null 
+  chmod 640 /mnt/hdd/app-data/LNBits/data/.super_user 2>/dev/null
 
   echo "# OK: prestart finished"
   exit 0 # exit with clean code
@@ -587,21 +588,22 @@ if [ "$1" = "sync" ] || [ "$1" = "repo" ]; then
   # pull latest code
   sudo -u lnbits git pull
 
-  # check if poetry in installed, if not install it
+  echo "# check if poetry in installed, if not install it"
   if ! sudo -u lnbits which poetry; then
     echo "# install poetry"
     sudo pip3 install --upgrade pip
     sudo pip3 install poetry
   fi
-  # do install like this
+
+  echo "# install"
   sudo -u lnbits poetry install
 
-  # make sure default virtaulenv is used
+  echo "# make sure the default virtualenv is used"
   sudo apt-get remove -y python3-virtualenv 2>/dev/null
   sudo pip uninstall -y virtualenv 2>/dev/null
   sudo apt-get install -y python3-virtualenv
 
-  # restart lnbits service
+  echo "# restart lnbits service"
   sudo systemctl restart lnbits
   echo "# server is restarting ... maybe takes some seconds until available"
   exit 0
@@ -619,12 +621,6 @@ if [ "$1" = "install" ]; then
     exit 0
   fi
 
-  echo "# *** INSTALL LNBITS ${VERSION} ***"
-
-  # add lnbits user
-  echo "*** Add the 'lnbits' user ***"
-  sudo adduser --system --group --home /home/lnbits lnbits
-
   # get optional github parameter
   githubUser="lnbits"
   if [ "$2" != "" ]; then
@@ -634,17 +630,24 @@ if [ "$1" = "install" ]; then
     tag="$3"
   fi
 
+  echo "# *** INSTALL LNBITS ***"
+  echo "# githubUser=$githubUser tag=$tag"
+
+  # add lnbits user
+  echo "*** Add the 'lnbits' user ***"
+  sudo adduser --system --group --home /home/lnbits lnbits
+
   # install from GitHub
   echo "# get the github code user(${githubUser}) branch(${tag})"
   sudo rm -r /home/lnbits/lnbits 2>/dev/null
-  cd /home/lnbits  || exit 1
+  cd /home/lnbits || exit 1
   sudo -u lnbits git clone https://github.com/${githubUser}/lnbits lnbits
   cd /home/lnbits/lnbits || exit 1
   sudo -u lnbits git checkout ${tag} || exit 1
 
   # to the install
   echo "# installing application dependencies"
-  cd /home/lnbits/lnbits  || exit 1
+  cd /home/lnbits/lnbits || exit 1
 
   # check if poetry in installed, if not install it
   if ! sudo -u lnbits which poetry; then
@@ -652,7 +655,8 @@ if [ "$1" = "install" ]; then
     sudo pip3 install --upgrade pip
     sudo pip3 install poetry
   fi
-  # do install like this
+
+  echo "# install"
   sudo -u lnbits poetry install
 
   # make sure default virtaulenv is used
@@ -680,7 +684,6 @@ if [ "$1" = "uninstall" ]; then
 
   exit 0
 fi
-
 
 # on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
@@ -790,7 +793,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   # let switch command part do the detail config
   /home/admin/config.scripts/bonus.lnbits.sh switch ${fundingsource}
-  cd /home/lnbits/lnbits  || exit 1
+  cd /home/lnbits/lnbits || exit 1
 
   # open firewall
   echo
@@ -842,13 +845,13 @@ EOF
 
   # setup nginx symlinks
   if ! [ -f /etc/nginx/sites-available/lnbits_ssl.conf ]; then
-     sudo cp /home/admin/assets/nginx/sites-available/lnbits_ssl.conf /etc/nginx/sites-available/lnbits_ssl.conf
+    sudo cp /home/admin/assets/nginx/sites-available/lnbits_ssl.conf /etc/nginx/sites-available/lnbits_ssl.conf
   fi
   if ! [ -f /etc/nginx/sites-available/lnbits_tor.conf ]; then
-     sudo cp /home/admin/assets/nginx/sites-available/lnbits_tor.conf /etc/nginx/sites-available/lnbits_tor.conf
+    sudo cp /home/admin/assets/nginx/sites-available/lnbits_tor.conf /etc/nginx/sites-available/lnbits_tor.conf
   fi
   if ! [ -f /etc/nginx/sites-available/lnbits_tor_ssl.conf ]; then
-     sudo cp /home/admin/assets/nginx/sites-available/lnbits_tor_ssl.conf /etc/nginx/sites-available/lnbits_tor_ssl.conf
+    sudo cp /home/admin/assets/nginx/sites-available/lnbits_tor_ssl.conf /etc/nginx/sites-available/lnbits_tor_ssl.conf
   fi
   sudo ln -sf /etc/nginx/sites-available/lnbits_ssl.conf /etc/nginx/sites-enabled/
   sudo ln -sf /etc/nginx/sites-available/lnbits_tor.conf /etc/nginx/sites-enabled/
@@ -1006,7 +1009,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   else
     if (whiptail --title " DELETE DATA? " --yesno "Do you want to delete\nthe LNbits Server Data?" 8 30); then
       deleteData=1
-   else
+    else
       deleteData=0
     fi
   fi
@@ -1069,7 +1072,7 @@ if [ "$1" = "backup" ]; then
   else
     # sqlite backup
     backup_target="/mnt/hdd/app-data/backup/lnbits_sqlite"
-    backup_file="lnbits_sqlite_`date +%d`-`date +%m`-`date +%Y`_`date +%H`-`date +%M`_fs.tar"
+    backup_file="lnbits_sqlite_$(date +%d)-$(date +%m)-$(date +%Y)_$(date +%H)-$(date +%M)_fs.tar"
     if [ ! -d $backup_target ]; then
       sudo mkdir -p $backup_target 1>&2
     fi
@@ -1191,9 +1194,8 @@ if [ "$1" = "migrate" ]; then
     # execStartPre is not enough, wait for lnbits is finally running
     count=0
     count_max=30
-    while ! nc -zv 127.0.0.1 5000 2>/dev/null;
-    do
-      count=`expr $count + 1`
+    while ! nc -zv 127.0.0.1 5000 2>/dev/null; do
+      count=$(expr $count + 1)
       echo "wait for LNBIts to start (${count}s/${count_max}s)"
       sleep 1
       if [ $count = $count_max ]; then

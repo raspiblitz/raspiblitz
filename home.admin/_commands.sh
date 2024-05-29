@@ -86,7 +86,7 @@ function blitzhelp() {
   echo "  whitepaper   download the whitepaper from the blockchain to /home/admin/bitcoin.pdf"
   echo "  notifyme     wrapper for blitz.notify.sh that will send a notification using the configured method and settings"
   echo "  suez         visualize channels (for the default ln implementation and chain when installed)"
-  exho "  lnproxy      wrap invoices with lnproxy"
+  echo "  lnproxy      wrap invoices with lnproxy"
   echo
   echo "LND:"
   echo "  lncli        LND commandline interface (when installed)"
