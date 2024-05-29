@@ -682,7 +682,7 @@ adjectives = [
     "picky",
     "pied",
     "piggy",
-    "pilar",
+    "pillar",
     "pink",
     "plain",
     "plane",

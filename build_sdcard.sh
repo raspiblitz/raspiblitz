@@ -270,6 +270,17 @@ else
 fi
 echo "baseimage=${baseimage}"
 
+# AUTO-DETECTION: CONFIGFILES
+# ---------------------------------------
+raspi_configfile="/boot/config.txt"
+raspi_commandfile="/boot/cmdline.txt"
+if [ -d /boot/firmware ];then
+  raspi_configfile="/boot/firmware/config.txt" 
+  raspi_commandfile="/boot/firmware/cmdline.txt"
+fi
+echo "raspi_configfile=${raspi_configfile}"
+echo "raspi_commandfile=${raspi_commandfile}"
+
 # USER-CONFIRMATION
 if [ "${interaction}" = "true" ]; then
   echo -n "# Do you agree with all parameters above? (yes/no) "
@@ -358,7 +369,7 @@ echo -e "\n*** SOFTWARE UPDATE ***"
 # sqlite3 -> database
 # fdisk -> create partitions
 # lsb-release -> needed to know which distro version we're running to add APT sources
-general_utils="policykit-1 htop git curl bash-completion vim jq dphys-swapfile bsdmainutils autossh telnet vnstat parted dosfstools fbi sysbench build-essential dialog bc python3-dialog unzip whois fdisk lsb-release smartmontools rsyslog"
+general_utils="sudo policykit-1 htop git curl bash-completion vim jq dphys-swapfile bsdmainutils autossh telnet vnstat parted dosfstools fbi sysbench build-essential dialog bc python3-dialog unzip whois fdisk lsb-release smartmontools rsyslog resolvconf"
 # add btrfs-progs if not bookworm on aarch64
 [ "${architecture}" = "aarch64" ] && ! grep "12 (bookworm)" < /etc/os-release && general_utils="${general_utils} btrfs-progs"
 # python3-mako --> https://github.com/rootzoll/raspiblitz/issues/3441
@@ -431,6 +442,19 @@ if ! compgen -u pi; then
   adduser pi sudo
 fi
 
+# activate watchdog if ls /dev/watchdog exists - see #4534
+if [ -e /dev/watchdog ]; then
+  echo "Activating watchdog ..."
+  if [ "${baseimage}" = "raspios_arm64" ]; then
+    echo "dtparam=watchdog=on" | tee -a $raspi_configfile
+  fi
+  sed -i "s/^#RuntimeWatchdogSec=.*/RuntimeWatchdogSec=600s/g" /etc/systemd/system.conf
+  sed -i "s/^#RebootWatchdogSec=.*/RebootWatchdogSec=3min/g" /etc/systemd/system.conf
+  sed -i "s/^#WatchdogDevice=.*/WatchdogDevice=\/dev\/watchdog/g" /etc/systemd/system.conf
+else
+  echo "No watchdog device /dev/watchdog found - keep watchdog like default"
+fi
+
 # special prepare when RaspberryPi OS
 if [ "${baseimage}" = "raspios_arm64" ]; then
 
@@ -441,23 +465,21 @@ if [ "${baseimage}" = "raspios_arm64" ]; then
   [ "${wifi_region}" != "off" ] && raspi-config nonint do_wifi_country $wifi_region
   # see https://github.com/rootzoll/raspiblitz/issues/428#issuecomment-472822840
 
-  configFile="/boot/firmware/config.txt"
-  if ! grep "Raspiblitz" $configFile; then
-    echo "# Adding Raspiblitz Edits to $configFile"
-    echo | tee -a $configFile
-    echo "# Raspiblitz" | tee -a $configFile
+  if ! grep "Raspiblitz" $raspi_configfile; then
+    echo "# Adding Raspiblitz Edits to $raspi_configfile"
+    echo | tee -a $raspi_configfile
+    echo "# Raspiblitz" | tee -a $raspi_configfile
     # ensure that kernel8.img is used to set PAGE_SIZE to 4K
     # https://github.com/raspiblitz/raspiblitz/issues/4346
-    if [ -f /boot/kernel8.img ]; then
-      echo 'kernel=kernel8.img' | tee -a $configFile
+    if [ -f /boot/kernel8.img ] || [ -f /boot/firmware/kernel8.img ]; then
+      echo 'kernel=kernel8.img' | tee -a $raspi_configfile
     fi
-    echo "max_usb_current=1" | tee -a $configFile
-    echo "dtparam=nvme" | tee -a $configFile
-    echo "dtparam=watchdog=on" | tee -a $configFile
-    echo 'dtoverlay=pi3-disable-bt' | tee -a $configFile
-    echo 'dtoverlay=disable-bt' | tee -a $configFile
+    echo "max_usb_current=1" | tee -a $raspi_configfile
+    echo "dtparam=nvme" | tee -a $raspi_configfile
+    echo 'dtoverlay=pi3-disable-bt' | tee -a $raspi_configfile
+    echo 'dtoverlay=disable-bt' | tee -a $raspi_configfile
   else
-    echo "# Raspiblitz Edits are already in $configFile"
+    echo "# Raspiblitz Edits are already in $raspi_configfile"
   fi
 
   # run fsck on sd root partition on every startup to prevent "maintenance login" screen
@@ -472,23 +494,22 @@ if [ "${baseimage}" = "raspios_arm64" ]; then
   fi
 
   # edit kernel parameters
-  kernelOptionsFile=/boot/cmdline.txt
   fsOption1="fsck.mode=force"
   fsOption2="fsck.repair=yes"
-  fsOption1InFile=$(grep -c ${fsOption1} ${kernelOptionsFile})
-  fsOption2InFile=$(grep -c ${fsOption2} ${kernelOptionsFile})
+  fsOption1InFile=$(grep -c ${fsOption1} ${raspi_commandfile})
+  fsOption2InFile=$(grep -c ${fsOption2} ${raspi_commandfile})
 
   if [ ${fsOption1InFile} -eq 0 ]; then
-    sed -i "s/^/$fsOption1 /g" "$kernelOptionsFile"
-    echo "$fsOption1 added to $kernelOptionsFile"
+    sed -i "s/^/$fsOption1 /g" "${raspi_commandfile}"
+    echo "$fsOption1 added to ${raspi_commandfile}"
   else
-    echo "$fsOption1 already in $kernelOptionsFile"
+    echo "$fsOption1 already in ${raspi_commandfile}"
   fi
   if [ ${fsOption2InFile} -eq 0 ]; then
-    sed -i "s/^/$fsOption2 /g" "$kernelOptionsFile"
-    echo "$fsOption2 added to $kernelOptionsFile"
+    sed -i "s/^/$fsOption2 /g" "${raspi_commandfile}"
+    echo "$fsOption2 added to ${raspi_commandfile}"
   else
-    echo "$fsOption2 already in $kernelOptionsFile"
+    echo "$fsOption2 already in ${raspi_commandfile}"
   fi
 
   # *** SAFE SHUTDOWN ***
@@ -643,18 +664,19 @@ echo -e "\n*** ADDING GROUPS FOR CREDENTIALS STORE ***"
 echo -e "\n*** SHELL SCRIPTS & ASSETS ***"
 # copy raspiblitz repo from github
 cd /home/admin/ || exit 1
-sudo -u admin git config --global user.name "${github_user}"
-sudo -u admin git config --global user.email "johndoe@example.com"
+sudo -u admin git config --global user.name "${github_user}" || exit 1
+sudo -u admin git config --global user.email "johndoe@example.com" || exit 1
+sudo -u admin git config --global http.postBuffer 524288000 || exit 1
 sudo -u admin rm -rf /home/admin/raspiblitz
-sudo -u admin git clone -b "${branch}" https://github.com/${github_user}/raspiblitz.git
-sudo -u admin cp -r /home/admin/raspiblitz/home.admin/*.* /home/admin
-sudo -u admin cp /home/admin/raspiblitz/home.admin/.tmux.conf /home/admin
-sudo -u admin cp -r /home/admin/raspiblitz/home.admin/assets /home/admin/
-sudo -u admin chmod +x *.sh
-sudo -u admin cp -r /home/admin/raspiblitz/home.admin/config.scripts /home/admin/
-sudo -u admin chmod +x /home/admin/config.scripts/*.sh
-sudo -u admin cp -r /home/admin/raspiblitz/home.admin/setup.scripts /home/admin/
-sudo -u admin chmod +x /home/admin/setup.scripts/*.sh
+sudo -u admin git clone -b "${branch}" https://github.com/${github_user}/raspiblitz.git || exit 1
+sudo -u admin cp -r /home/admin/raspiblitz/home.admin/*.* /home/admin || exit 1
+sudo -u admin cp /home/admin/raspiblitz/home.admin/.tmux.conf /home/admin || exit 1
+sudo -u admin cp -r /home/admin/raspiblitz/home.admin/assets /home/admin/ || exit 1
+sudo -u admin chmod +x *.sh || exit 1
+sudo -u admin cp -r /home/admin/raspiblitz/home.admin/config.scripts /home/admin/ || exit 1
+sudo -u admin chmod +x /home/admin/config.scripts/*.sh || exit 1
+sudo -u admin cp -r /home/admin/raspiblitz/home.admin/setup.scripts /home/admin/ || exit 1
+sudo -u admin chmod +x /home/admin/setup.scripts/*.sh || exit 1
 
 # install newest version of BlitzPy
 blitzpy_wheel=$(ls -tR /home/admin/raspiblitz/home.admin/BlitzPy/dist | grep -E "any.whl" | tail -n 1)
@@ -779,16 +801,16 @@ if [ "${baseimage}" = "raspios_arm64"  ] || [ "${baseimage}" = "debian" ]; then
 
   # disable audio
   echo -e "\n*** DISABLE AUDIO (snd_bcm2835) ***"
-  sed -i "s/^dtparam=audio=on/# dtparam=audio=on/g" /boot/config.txt
+  sed -i "s/^dtparam=audio=on/# dtparam=audio=on/g" ${raspi_configfile}
 
   # disable DRM VC4 V3D
   echo -e "\n*** DISABLE DRM VC4 V3D driver ***"
   dtoverlay=vc4-fkms-v3d
-  sed -i "s/^dtoverlay=${dtoverlay}/# dtoverlay=${dtoverlay}/g" /boot/config.txt
+  sed -i "s/^dtoverlay=${dtoverlay}/# dtoverlay=${dtoverlay}/g" ${raspi_configfile}
 
   # I2C fix (make sure dtparam=i2c_arm is not on)
   # see: https://github.com/rootzoll/raspiblitz/issues/1058#issuecomment-739517713
-  sed -i "s/^dtparam=i2c_arm=.*//g" /boot/config.txt
+  sed -i "s/^dtparam=i2c_arm=.*//g" ${raspi_configfile}
 fi
 
 # *** BOOTSTRAP ***

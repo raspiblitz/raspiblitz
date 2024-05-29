@@ -334,8 +334,10 @@ def subscriptions_cancel(s_id):
 
     print(json.dumps(subs, indent=2))
 
-    # todo: deinstall letsencrypt if this was last subscription
-
+    # deinstall letsencrypt/dyndns if this was last subscription
+    if len(subs['subscriptions_letsencrypt']) == 0:
+        os.system("/home/admin/config.scripts/bonus.letsencrypt.sh off")
+        os.system("/home/admin/config.scripts/internet.dyndomain.sh off")
 
 def get_subscription(subscription_id):
     try:

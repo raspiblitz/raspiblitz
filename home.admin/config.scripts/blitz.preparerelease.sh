@@ -3,13 +3,22 @@
 # Just run this script once after a fresh sd card build
 # to prepare the image for release as a downloadable sd card image
 
+# determine correct raspberrypi boot drive path (that easy to access when sd card is insert into laptop)
+raspi_bootdir=""
+if [ -d /boot/firmware ]; then
+  raspi_bootdir="/boot/firmware"
+elif [ -d /boot ]; then
+  raspi_bootdir="/boot"
+fi
+echo "# raspi_bootdir(${raspi_bootdir})"
+
 # stop background services
 sudo systemctl stop background.service
 sudo systemctl stop background.scan.service
 
 # remove stop flag (if exists)
 echo "deleting stop flag .."
-sudo rm /boot/firmware/stop 2>/dev/null
+sudo rm ${raspi_bootdir}/stop 2>/dev/null
 
 # cleaning logs
 echo "deleting raspiblitz & system logs .."
@@ -68,7 +77,7 @@ echo "keys will get recreated and sshd reactivated on fresh bootup, by _bootstra
 sudo systemctl stop sshd
 sudo systemctl disable sshd
 sudo rm /etc/ssh/ssh_host_*
-sudo touch /boot/firmware/ssh
+sudo touch ${raspi_bootdir}/ssh
 echo "OK"
 
 echo
