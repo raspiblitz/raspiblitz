@@ -3,7 +3,7 @@
 # https://github.com/lnbits/lnbits
 
 # https://github.com/lnbits/lnbits/releases
-tag="0.12.4"
+tag="0.12.8"
 VERSION="${tag}"
 
 # command info
@@ -201,8 +201,6 @@ Consider adding a IP2TOR Bridge under OPTIONS."
     # just IP2TOR active - offer cancel or Lets Encrypt
     OPTIONS+=(HTTPS-ON "Add free HTTPS-Certificate for LNbits")
     OPTIONS+=(IP2TOR-OFF "Cancel IP2Tor Subscription for LNbits")
-  else
-    OPTIONS+=(IP2TOR-ON "Make Public with IP2Tor Subscription")
   fi
 
   # Change Funding Source options (only if available)
@@ -802,6 +800,14 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo ufw allow 5001 comment 'lnbits HTTPS'
   echo
 
+  # make sure that systemd starts funding source first
+  systemdDependency="bitcoind.service"
+  if [ "${fundingsource}" == "lnd" ]; then
+    systemdDependency="lnd.service"
+  elif [ "${fundingsource}" == "cl" ]; then
+    systemdDependency="lightningd.service"
+  fi
+
   # install service
   echo "*** Install systemd ***"
   cat <<EOF | sudo tee /etc/systemd/system/lnbits.service >/dev/null
@@ -809,8 +815,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
 [Unit]
 Description=lnbits
-Wants=bitcoind.service
-After=bitcoind.service
+Wants=${systemdDependency}
+After=${systemdDependency}
 
 [Service]
 WorkingDirectory=/home/lnbits/lnbits
@@ -926,6 +932,10 @@ if [ "$1" = "switch" ]; then
     echo "# FAIL: unvalid fundig source parameter"
     exit 1
   fi
+
+  # make lnd.service fallback
+  sudo sed -i 's/Wants=lnd.service/Wants=bitcoind.service/' /etc/systemd/system/lnbits.service
+  sudo sed -i 's/After=lnd.service/After=bitcoind.service/' /etc/systemd/system/lnbits.service
 
   echo "##############"
   echo "# NOTE: If you switch the funding source of a running LNbits instance all sub account will keep balance."
