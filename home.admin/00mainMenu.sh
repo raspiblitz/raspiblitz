@@ -159,9 +159,6 @@ fi
 if [ "${circuitbreaker}" == "on" ]; then
   OPTIONS+=(CIRCUITBREAKER "Circuitbreaker (LND firewall)")
 fi
-if [ "${tallycoinConnect}" == "on" ]; then
-  OPTIONS+=(TALLY "Tallycoin Connect")
-fi
 if [ "${squeaknode}" == "on" ]; then
   OPTIONS+=(SQUEAKNODE "Squeaknode")
 fi
@@ -309,9 +306,6 @@ case $CHOICE in
             ;;
         THUB)
             sudo /home/admin/config.scripts/bonus.thunderhub.sh menu
-            ;;
-        TALLY)
-            sudo /home/admin/config.scripts/bonus.tallycoin-connect.sh menu
             ;;
         ZEROTIER)
             sudo /home/admin/config.scripts/bonus.zerotier.sh menu

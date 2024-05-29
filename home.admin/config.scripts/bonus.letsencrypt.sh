@@ -12,27 +12,15 @@ fi
 
 source /mnt/hdd/raspiblitz.conf
 
-ACME_LOAD_BASE_URL="https://codeload.github.com/acmesh-official/acme.sh/tar.gz"
-ACME_VERSION="2.8.6"
+# https://github.com/acmesh-official/acme.sh/releases
+ACME_LOAD_BASE_URL="https://github.com/acmesh-official/acme.sh/archive/refs/tags/3.0.7.tar.gz"
+ACME_VERSION="3.0.7"
 
 ACME_INSTALL_HOME="/home/admin/.acme.sh"
 ACME_CONFIG_HOME="/mnt/hdd/app-data/letsencrypt"
 ACME_CERT_HOME="${ACME_CONFIG_HOME}/certs"
 
 ACME_IS_INSTALLED=0
-
-# if Tor is on test that CURL is by default running over Tor
-# TODO: issue https://github.com/rootzoll/raspiblitz/issues/1341
-#if [ "${runBehindTor}" == "on" ]; then
-#  echo "# checking if Tor proxy for CURL is working ..."
-#  checkTor=$(curl -s https://check.torproject.org | grep -c "Congratulations")
-#  if [ ${checkTor} -eq 0 ]; then
-#    echo "err='curl tor proxy not working'"
-#    exit 1
-#  else
-#    echo "# OK Tor proxy for CURL"
-#  fi
-#fi
 
 ###################
 # FUNCTIONS
@@ -70,7 +58,15 @@ function acme_status() {
 }
 
 function acme_install() {
+
   email="${1}"
+  # create a dummy email if none is provided
+  if [ -z "${email}" ]; then
+    random_number=$(shuf -i 100-999 -n 1)
+    random_word=$(shuf -n 1 /usr/share/dict/words)
+    ending="x.com"
+    email="${random_word}${random_number}@gm${ending}"
+  fi
 
   # ensure socat
   if ! command -v socat >/dev/null; then
@@ -79,41 +75,38 @@ function acme_install() {
     sudo apt-get install -y socat >/dev/null 2>&1
   fi
 
+  # make sure config directory exists
   if ! [ -d $ACME_CONFIG_HOME ]; then
     sudo mkdir -p $ACME_CONFIG_HOME
   fi
   sudo chown admin:admin $ACME_CONFIG_HOME
 
-  rm -f "/tmp/acme.sh_${ACME_VERSION}.tar.gz"
-  if ! curl --silent --fail -o "/tmp/acme.sh_${ACME_VERSION}.tar.gz" "${ACME_LOAD_BASE_URL}/${ACME_VERSION}" 2>&1; then
-    echo "Error ($?): Download failed from: ${ACME_LOAD_BASE_URL}/${ACME_VERSION}"
-    rm -f "/tmp/acme.sh_${ACME_VERSION}.tar.gz"
+  # download and install acme.sh
+  echo "# download acme.sh release ${ACME_VERSION} from ${ACME_LOAD_BASE_URL}"
+  rm -r /tmp/acme.sh* 2>/dev/null
+  if ! curl -L --silent --fail -o "/tmp/acme.sh.tar.gz" "${ACME_LOAD_BASE_URL}" 2>&1; then
+    echo "Error ($?): Download failed from: ${ACME_LOAD_BASE_URL}"
+    rm -r /tmp/acme.sh*
     exit 1
   fi
 
-  if tar xzf "/tmp/acme.sh_${ACME_VERSION}.tar.gz" -C /tmp/; then
+  if tar xzf "/tmp/acme.sh.tar.gz" -C /tmp/; then
     cd "/tmp/acme.sh-${ACME_VERSION}" || exit
 
-    if [ -n "${email}" ]; then
-      ./acme.sh --install \
-        --noprofile \
-        --home "${ACME_INSTALL_HOME}" \
-        --config-home "${ACME_CONFIG_HOME}" \
-        --cert-home "${ACME_CERT_HOME}" \
-        --accountemail "${email}"
-    else
-      ./acme.sh --install \
-        --noprofile \
-        --home "${ACME_INSTALL_HOME}" \
-        --config-home "${ACME_CONFIG_HOME}" \
-        --cert-home "${ACME_CERT_HOME}"
-    fi
+    echo "# installing acme.sh with email(${email})"
+    ./acme.sh --install \
+      --noprofile \
+      --home "${ACME_INSTALL_HOME}" \
+      --config-home "${ACME_CONFIG_HOME}" \
+      --cert-home "${ACME_CERT_HOME}" \
+      --accountemail "${email}"
 
+  else
+    echo "# Error ($?): Extracting failed"
+    exit 1
   fi
 
-  rm -f "/tmp/acme.sh_${ACME_VERSION}.tar.gz"
-  rm -Rf "/tmp/acme.sh_${ACME_VERSION}"
-
+  rm -r /tmp/acme.sh*
 }
 
 function refresh_certs_with_nginx() {
@@ -219,6 +212,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo chmod -R 733 $ACME_CONFIG_HOME
 
     # install the acme script
+    echo "# acme_install"
     acme_install "${address}"
     echo ""
 
