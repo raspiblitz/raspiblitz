@@ -58,12 +58,29 @@ if [ "$1" = "status" ]; then
 
       # get the synced blockheight
       syncedBlock=$(echo '{"id": 1, "method": "blockchain.headers.subscribe", "params": []}' | nc -w 2 localhost 50001 | jq '.result.height')
-      echo "blockheight='${syncedBlock}'"
-    
-    else
-      echo "blockheight='0'"
-    fi
 
+      # check that blockheight is a number
+      if ! [ "$syncedBlock" -eq "$syncedBlock" ] 2>/dev/null; then
+        echo "blockheight='0'"
+        echo "progress='0'"
+      else
+        echo "blockheight='${syncedBlock}'"
+
+        # calculate the progress
+        source <(/home/admin/_cache.sh get btc_mainnet_blocks_verified)
+        echo "# ${btc_mainnet_blocks_verified}"
+        
+        #chech that btc_mainnet_blocks_verified is a number
+        if ! [ "$btc_mainnet_blocks_verified" -eq "$btc_mainnet_blocks_verified" ] 2>/dev/null; then
+          echo "progress='0'"
+        else
+          progress=$(echo "scale=2; $syncedBlock / $btc_mainnet_blocks_verified * 100" | bc)
+          echo "progress='${progress}'"
+        fi
+
+      fi
+    fi
+    
     publicPortRunning=$(
       nc -z -w6 ${publicip} 50001 2>/dev/null
       echo $?
