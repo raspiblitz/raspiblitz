@@ -60,7 +60,7 @@ if [ "$1" = "status" ]; then
     if [ ${localPortRunning} -eq 1 ]; then
 
       # get the synced blockheight
-      syncedBlock=$(echo '{"id": 1, "method": "blockchain.headers.subscribe", "params": []}' | nc -w 2 localhost 50001 | jq '.result.height')
+      syncedBlock=$(echo '{"id": 1, "method": "blockchain.headers.subscribe", "params": []}' | nc -w 5 localhost 50001 | jq '.result.height')
       echo "# syncedBlock='${syncedBlock}'"
       if [ "$syncedBlock" -eq "$syncedBlock" ] 2>/dev/null; then
         blockheight=${syncedBlock}
