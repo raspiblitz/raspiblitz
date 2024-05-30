@@ -4,9 +4,9 @@
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ]; then
   echo "RaspiBlitz Time Tools"
   echo
-  echo "## SSHD SERVICE #######"
-  echo "blitz.ssh.sh choose-timezone  --> user can choose timezone from list and it gets stored to raspiblitz config"
-  echo "blitz.ssh.sh set-by-config    --> resets the time on the RaspiBlitz based on the config"
+  echo "## Parameters #######"
+  echo "choose-timezone  --> user can choose timezone from list and it gets stored to raspiblitz config"
+  echo "set-by-config    --> resets the time on the RaspiBlitz based on the config"
   exit 1
 fi
 
