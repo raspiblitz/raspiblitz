@@ -67,6 +67,7 @@ if [ "$1" = "status" ]; then
 
         # calculate the progress
         source <(/home/admin/_cache.sh get btc_mainnet_blocks_verified)
+        echo "# btc_mainnet_blocks_verified='${btc_mainnet_blocks_verified}'"
         if [ "$btc_mainnet_blocks_verified" -eq "$btc_mainnet_blocks_verified" ] 2>/dev/null; then
           blockheightPercent=$(echo "scale=0; $syncedBlock / $btc_mainnet_blocks_verified * 100" | bc)
         fi
