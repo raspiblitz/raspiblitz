@@ -19,7 +19,7 @@ fi
 ###################
 # choose-timezone
 ###################
-f [ "$1" = "choose-timezone" ]; then
+if [ "$1" = "choose-timezone" ]; then
 
   # Get the list of timezones
   timezones=$(timedatectl list-timezones)
