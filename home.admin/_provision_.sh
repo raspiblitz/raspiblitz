@@ -61,6 +61,9 @@ echo "deprecatedrpc=addresses" >> /mnt/hdd/bitcoin/bitcoin.conf 2>/dev/null
 # backup SSH PubKeys
 /home/admin/config.scripts/blitz.ssh.sh backup
 
+# set timezone
+/home/admin/config.scripts/blitz.time.sh set-time-by-config >> ${logFile}
+
 # optimize mempool if RAM >1GB
 kbSizeRAM=$(cat /proc/meminfo | grep "MemTotal" | sed 's/[^0-9]*//g')
 if [ ${kbSizeRAM} -gt 1500000 ]; then

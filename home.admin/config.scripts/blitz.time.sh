@@ -47,7 +47,7 @@ if [ "$1" = "choose-timezone" ]; then
     index=$(echo "$choice" | sed 's/^[A-Z]//')
     selected_timezone=${timezone_list[((index * 2) - 1)]}
     echo "# Setting timezone to $selected_timezone ..."
-    sudo timedatectl set-timezone "$selected_timezone"
+    timedatectl set-timezone "$selected_timezone"
     echo "# Saving timezone to raspiblitz config ..."
     /home/admin/config.scripts/blitz.conf.sh set "timezone" "$selected_timezone"
   else
@@ -62,7 +62,13 @@ fi
 # set-time-by-config
 ###################
 if [ "$1" = "set-time-by-config" ]; then
-
+  source /mnt/hdd/raspiblitz.conf
+  if [ ${#timezone} -eq 0 ]; then
+    echo "# no timezone set in raspiblitz.conf ... keeping default timezone"
+    exit 1
+  fi
+  echo "# Setting timezone to $timezone ..."
+  timedatectl set-timezone "$timezone"
   exit 0
 fi
 
