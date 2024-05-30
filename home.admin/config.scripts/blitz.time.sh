@@ -19,22 +19,24 @@ fi
 ###################
 # choose-timezone
 ###################
-if [ "$1" = "choose-timezone" ]; then
+f [ "$1" = "choose-timezone" ]; then
 
   # Get the list of timezones
   timezones=$(timedatectl list-timezones)
 
   # Prepare the list for dialog
   timezone_list=()
+  i=1
   for tz in $timezones; do
-    timezone_list+=("$tz" "" off)
+    timezone_list+=($i "$tz")
+    i=$((i+1))
   done
 
   # Use dialog to display the list and get the user selection
   choice=$(dialog --clear \
                 --backtitle "Timezone Selector" \
                 --title "Select a Timezone" \
-                --radiolist "Move using [UP] [DOWN],[Space] to Select and [Enter] to Confirm" 20 60 15 \
+                --menu "Choose a timezone:" 20 60 15 \
                 "${timezone_list[@]}" 2>&1 >/dev/tty)
 
   # Clear the screen
@@ -42,10 +44,11 @@ if [ "$1" = "choose-timezone" ]; then
 
   # Set the chosen timezone
   if [ -n "$choice" ]; then
-    echo "# Setting timezone to $choice ..."
-    sudo timedatectl set-timezone "$choice"
+    selected_timezone=${timezone_list[((choice * 2) - 1)]}
+    echo "# Setting timezone to $selected_timezone ..."
+    sudo timedatectl set-timezone "$selected_timezone"
     echo "# Saving timezone to raspiblitz config ..."
-    /home/admin/config.scripts/blitz.config.sh set "timezone" "$choice"
+    /home/admin/config.scripts/blitz.config.sh set "timezone" "$selected_timezone"
   else
     echo "# No timezone selected"
   fi
