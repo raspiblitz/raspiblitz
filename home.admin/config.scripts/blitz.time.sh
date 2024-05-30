@@ -24,13 +24,14 @@ if [ "$1" = "choose-timezone" ]; then
   # Get the list of timezones
   timezones=$(timedatectl list-timezones)
 
-  # Prepare the list for dialog
-  timezone_list=()
-  i=1
-  for tz in $timezones; do
-    timezone_list+=($i "$tz")
+# Prepare the list for dialog
+timezone_list=()
+i=1
+for tz in $timezones; do
+    prefix=$(echo $tz | cut -c1)
+    timezone_list+=("${prefix}${i}" "$tz")
     i=$((i+1))
-  done
+done
 
   # Use dialog to display the list and get the user selection
   choice=$(dialog --clear \
@@ -44,7 +45,8 @@ if [ "$1" = "choose-timezone" ]; then
 
   # Set the chosen timezone
   if [ -n "$choice" ]; then
-    selected_timezone=${timezone_list[((choice * 2) - 1)]}
+    index=$(echo "$choice" | sed 's/^[A-Z]//')
+    selected_timezone=${timezone_list[((index * 2) - 1)]}
     echo "# Setting timezone to $selected_timezone ..."
     sudo timedatectl set-timezone "$selected_timezone"
     echo "# Saving timezone to raspiblitz config ..."
