@@ -62,7 +62,7 @@ if [ "$1" = "status" ]; then
       # check that blockheight is a number
       if ! [ "$syncedBlock" -eq "$syncedBlock" ] 2>/dev/null; then
         echo "blockheight='0'"
-        echo "progress='0'"
+        echo "blockheight_percent='0'"
       else
         echo "blockheight='${syncedBlock}'"
 
@@ -72,15 +72,18 @@ if [ "$1" = "status" ]; then
         
         #chech that btc_mainnet_blocks_verified is a number
         if ! [ "$btc_mainnet_blocks_verified" -eq "$btc_mainnet_blocks_verified" ] 2>/dev/null; then
-          echo "progress='0'"
+          echo "blockheight_percent='0'"
         else
-          progress=$(echo "scale=2; $syncedBlock / $btc_mainnet_blocks_verified * 100" | bc)
-          echo "progress='${progress}'"
+          progress=$(echo "scale=0; $syncedBlock / $btc_mainnet_blocks_verified * 100" | bc)
+          echo "blockheight_percent='${progress}'"
         fi
 
       fi
+    else
+      echo "blockheight='0'"
+      echo "blockheight_percent='0'"
     fi
-    
+
     publicPortRunning=$(
       nc -z -w6 ${publicip} 50001 2>/dev/null
       echo $?
