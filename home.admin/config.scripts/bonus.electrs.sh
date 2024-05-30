@@ -54,35 +54,26 @@ if [ "$1" = "status" ]; then
     echo "portTCP='50001'"
     localPortRunning=$(sudo netstat -an | grep -c '0.0.0.0:50001')
     echo "localTCPPortActive=${localPortRunning}"
+
+    blockheight=0
+    blockheightPercent=0
     if [ ${localPortRunning} -eq 1 ]; then
 
       # get the synced blockheight
       syncedBlock=$(echo '{"id": 1, "method": "blockchain.headers.subscribe", "params": []}' | nc -w 2 localhost 50001 | jq '.result.height')
-
-      # check that blockheight is a number
-      if ! [ "$syncedBlock" -eq "$syncedBlock" ] 2>/dev/null; then
-        echo "blockheight='0'"
-        echo "blockheight_percent='0'"
-      else
-        echo "blockheight='${syncedBlock}'"
+      if [ "$syncedBlock" -eq "$syncedBlock" ] 2>/dev/null; then
+        blockheight=${syncedBlock}
 
         # calculate the progress
         source <(/home/admin/_cache.sh get btc_mainnet_blocks_verified)
-        echo "# ${btc_mainnet_blocks_verified}"
-        
-        #chech that btc_mainnet_blocks_verified is a number
-        if ! [ "$btc_mainnet_blocks_verified" -eq "$btc_mainnet_blocks_verified" ] 2>/dev/null; then
-          echo "blockheight_percent='0'"
-        else
-          progress=$(echo "scale=0; $syncedBlock / $btc_mainnet_blocks_verified * 100" | bc)
-          echo "blockheight_percent='${progress}'"
+        if [ "$btc_mainnet_blocks_verified" -eq "$btc_mainnet_blocks_verified" ] 2>/dev/null; then
+          blockheightPercent=$(echo "scale=0; $syncedBlock / $btc_mainnet_blocks_verified * 100" | bc)
         fi
 
       fi
-    else
-      echo "blockheight='0'"
-      echo "blockheight_percent='0'"
     fi
+    echo "blockheight='${blockheight}'"
+    echo "blockheightPercent='${blockheightPercent}'"
 
     publicPortRunning=$(
       nc -z -w6 ${publicip} 50001 2>/dev/null
