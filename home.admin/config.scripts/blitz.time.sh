@@ -21,17 +21,16 @@ fi
 ###################
 if [ "$1" = "choose-timezone" ]; then
 
-  # Get the list of timezones
+  # Prepare the list of timezones for dialog
+  echo "# preparing timezone list ..."
   timezones=$(timedatectl list-timezones)
-
-# Prepare the list for dialog
-timezone_list=()
-i=1
-for tz in $timezones; do
+  timezone_list=()
+  i=1
+  for tz in $timezones; do
     prefix=$(echo $tz | cut -c1)
     timezone_list+=("${prefix}${i}" "$tz")
     i=$((i+1))
-done
+  done
 
   # Use dialog to display the list and get the user selection
   choice=$(dialog --clear \
