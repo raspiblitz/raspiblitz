@@ -48,7 +48,7 @@ f [ "$1" = "choose-timezone" ]; then
     echo "# Setting timezone to $selected_timezone ..."
     sudo timedatectl set-timezone "$selected_timezone"
     echo "# Saving timezone to raspiblitz config ..."
-    /home/admin/config.scripts/blitz.config.sh set "timezone" "$selected_timezone"
+    /home/admin/config.scripts/blitz.conf.sh set "timezone" "$selected_timezone"
   else
     echo "# No timezone selected"
   fi
