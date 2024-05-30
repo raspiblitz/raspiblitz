@@ -185,8 +185,14 @@ do
         sleep 3
         continue
       fi
-    else
+    elif [ "${lightning}" = "lnd" ]; then
       if [ "${btc_default_synced}" != "1" ] || [ "${ln_default_ready}" == "0" ] || [ "${ln_default_sync_chain}" == "0" ] || [ "${ln_default_sync_initial_done}" == "0" ]; then
+        /home/admin/setup.scripts/eventBlockchainSync.sh ssh
+        sleep 3
+        continue
+      fi  
+    else
+      if [ "${btc_default_synced}" != "1" ]; then
         /home/admin/setup.scripts/eventBlockchainSync.sh ssh
         sleep 3
         continue
