@@ -55,27 +55,6 @@ if [ "$1" = "status" ]; then
     localPortRunning=$(sudo netstat -an | grep -c '0.0.0.0:50001')
     echo "localTCPPortActive=${localPortRunning}"
 
-    blockheight=0
-    blockheightPercent=0
-    if [ ${localPortRunning} -eq 1 ]; then
-
-      # get the synced blockheight
-      syncedBlock=$(echo '{"id": 1, "method": "blockchain.headers.subscribe", "params": []}' | nc -w 20 -q 1 localhost 50001 | jq '.result.height')
-      if [ "$syncedBlock" -eq "$syncedBlock" ] 2>/dev/null; then
-        blockheight=${syncedBlock}
-
-        # calculate the progress
-        source <(/home/admin/_cache.sh get btc_mainnet_blocks_verified)
-        if [ "$btc_mainnet_blocks_verified" -eq "$btc_mainnet_blocks_verified" ] 2>/dev/null; then
-          blockheightPercent=$(echo "scale=2; $syncedBlock / $btc_mainnet_blocks_verified * 100" | bc)
-          blockheightPercent=$(printf "%.0f\n" $blockheightPercent)
-        fi
-
-      fi
-    fi
-    echo "blockheight='${blockheight}'"
-    echo "blockheightPercent='${blockheightPercent}'"
-
     publicPortRunning=$(
       nc -z -w6 ${publicip} 50001 2>/dev/null
       echo $?
@@ -126,28 +105,33 @@ if [ "$1" = "status-sync" ]; then
   echo "serviceRunning=${serviceRunning}"
   if [ ${serviceRunning} -eq 1 ]; then
 
-    # Experimental try to get sync Info (electrs debug info would need more details)
-    #source <(/home/admin/_cache.sh get btc_mainnet_blocks_headers)
-    #blockchainHeight="${btc_mainnet_blocks_headers}"
-    #lastBlockchainHeight=$(($blockchainHeight -1))
-    #syncedToBlock=$(sudo journalctl -u electrs --no-pager -n2000 | grep "height=" | tail -n1| cut -d= -f3)
-    #syncProgress=0
-    #if [ "${syncedToBlock}" != "" ] && [ "${blockchainHeight}" != "" ] && [ "${blockchainHeight}" != "0" ]; then
-    #  syncProgress="$(echo "$syncedToBlock" "$blockchainHeight" | awk '{printf "%.2f", $1 / $2 * 100}')"
-    #fi
-    #echo "syncProgress=${syncProgress}%"
-    #if [ "${syncedToBlock}" = "${blockchainHeight}" ] || [ "${syncedToBlock}" = "${lastBlockchainHeight}" ]; then
-    #  echo "tipSynced=1"
-    #else
-    #  echo "tipSynced=0"
-    #fi
-
     # check if initial sync was done, by setting a file as once electrs is the first time responding on port 50001
     electrumResponding=$(echo '{"jsonrpc":"2.0","method":"server.ping","params":[],"id":"electrs-check"}' | netcat -w 2 127.0.0.1 50001 | grep -c "result")
     if [ ${electrumResponding} -gt 1 ]; then
       electrumResponding=1
     fi
     echo "electrumResponding=${electrumResponding}"
+
+    blockheight=0
+    blockheightPercent=0
+    if [ ${electrumResponding} -eq 0 ]; then
+
+      # get the synced blockheight
+      syncedBlock=$(echo '{"id": 1, "method": "blockchain.headers.subscribe", "params": []}' | nc -w 20 -q 1 localhost 50001 | jq '.result.height')
+      if [ "$syncedBlock" -eq "$syncedBlock" ] 2>/dev/null; then
+        blockheight=${syncedBlock}
+
+        # calculate the progress
+        source <(/home/admin/_cache.sh get btc_mainnet_blocks_verified)
+        if [ "$btc_mainnet_blocks_verified" -eq "$btc_mainnet_blocks_verified" ] 2>/dev/null; then
+          blockheightPercent=$(echo "scale=2; $syncedBlock / $btc_mainnet_blocks_verified * 100" | bc)
+          blockheightPercent=$(printf "%.0f\n" $blockheightPercent)
+        fi
+
+      fi
+    fi
+    echo "blockheight='${blockheight}'"
+    echo "blockheightPercent='${blockheightPercent}'"
 
     fileFlagExists=$(sudo ls /mnt/hdd/app-storage/electrs/initial-sync.done 2>/dev/null | grep -c 'initial-sync.done')
     if [ ${fileFlagExists} -eq 0 ] && [ ${electrumResponding} -gt 0 ]; then
@@ -158,7 +142,11 @@ if [ "$1" = "status-sync" ]; then
     fi
     if [ ${fileFlagExists} -eq 0 ]; then
       echo "initialSynced=0"
-      echo "infoSync='Building Index (please wait)'"
+      if [ "${blockheightPercent}" != "0" ]; then
+        echo "infoSync='Building Index ${blockheightPercent}% (please wait)'"
+      else
+        echo "infoSync='Building Index (please wait)'"
+      fi
     else
       echo "initialSynced=1"
     fi
