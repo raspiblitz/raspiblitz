@@ -183,13 +183,6 @@ if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
   # prepare lnd service
   cp /home/admin/assets/lnd.service /etc/systemd/system/lnd.service >> ${logFile} 2>&1
 
-  # convert old keysend by lndExtraParameter to raspiblitz.conf setting (will be enforced by lnd.check.sh prestart) since 1.7.1
-  if [ "${lndExtraParameter}" == "--accept-keysend" ]; then
-    echo "# MIGRATION KEYSEND from lndExtraParameter --> raspiblitz.conf" >> ${logFile}
-    /home/admin/config.scripts/blitz.conf.sh set lndKeysend "on"
-    /home/admin/config.scripts/blitz.conf.sh delete lndExtraParameter
-  fi
-
   # if old lnd.conf exists ...
   configExists=$(sudo ls /mnt/hdd/lnd/lnd.conf | grep -c '.conf')
   if [ ${configExists} -eq 1 ]; then

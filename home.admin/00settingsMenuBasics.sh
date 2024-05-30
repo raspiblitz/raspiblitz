@@ -6,7 +6,6 @@ source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
 
 echo "services default values"
-if [ ${#autoPilot} -eq 0 ]; then autoPilot="off"; fi
 if [ ${#autoUnlock} -eq 0 ]; then autoUnlock="off"; fi
 if [ ${#runBehindTor} -eq 0 ]; then runBehindTor="off"; fi
 if [ ${#networkUPnP} -eq 0 ]; then networkUPnP="off"; fi
@@ -70,14 +69,6 @@ if [ ${touchscreen} -gt 0 ]; then
   touchscreenMenu='on'
 fi
 
-echo "# map autopilot to on/off"
-lndAutoPilotOn=$(sudo cat /mnt/hdd/lnd/lnd.conf 2>/dev/null | grep -c 'autopilot.active=1')
-if [ ${lndAutoPilotOn} -eq 1 ]; then
-  autoPilot="on"
-else
-  autoPilot="off"
-fi
-
 echo "# map clboss to on/off"
 clbossMenu='off'
 if [ "${clboss}" == "on" ]; then
@@ -100,13 +91,6 @@ echo "# map clWatchtowerClient to on/off"
 clWatchtowerClientMenu='off'
 if [ "${clWatchtowerClient}" == "on" ]; then
   clWatchtowerClientMenu='on'
-fi
-
-echo "# map keysend to on/off (may take time)"
-keysend="on"
-source <(sudo /home/admin/config.scripts/lnd.keysend.sh status)
-if [ ${keysendOn} -eq 0 ]; then
-  keysend="off"
 fi
 
 # show select dialog
@@ -143,8 +127,6 @@ fi
 # LND & options (only when running LND)
 OPTIONS+=(m 'LND LIGHTNING LABS NODE' ${lndNode})
 if [ "${lndNode}" == "on" ]; then
-  OPTIONS+=(a '-LND Channel Autopilot' ${autoPilot})
-  OPTIONS+=(k '-LND Accept Keysend' ${keysend})
   OPTIONS+=(c '-LND Circuitbreaker (firewall)' ${circuitbreaker})
   OPTIONS+=(u '-LND Auto-Unlock' ${autoUnlock})
 fi
@@ -196,18 +178,6 @@ See the status screen for more info.\n
   fi
 else
   echo "Blitz API + webUI Setting unchanged."
-fi
-
-# LND AUTOPILOT process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "a")
-if [ ${check} -eq 1 ]; then choice="on"; fi
-if [ "${autoPilot}" != "${choice}" ] && [ "${lndNode}" == "on" ]; then
-  echo "Autopilot Setting changed .."
-  anychange=1
-  sudo /home/admin/config.scripts/lnd.autopilot.sh ${choice}
-  needsReboot=1
-else
-  echo "Autopilot Setting unchanged."
 fi
 
 # Dynamic Domain
@@ -353,20 +323,6 @@ if [ "${LocalBackup}" != "${choice}" ]; then
   sudo /home/admin/config.scripts/blitz.backupdevice.sh ${choice}
 else
   echo "BackupdDevice setting unchanged."
-fi
-
-# LND Keysend process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "k")
-if [ ${check} -eq 1 ]; then choice="on"; fi
-if [ "${keysend}" != "${choice}" ] && [ "${lndNode}" == "on" ]; then
-  echo "keysend setting changed .."
-  anychange=1
-  sudo -u admin /home/admin/config.scripts/lnd.keysend.sh ${choice}
-  sudo systemctl restart lnd
-  dialog --msgbox "Accept Keysend on LND mainnet is now ${choice}.\n\nLND restarted - you might need to unlock wallet." 7 52
-  sudo -u admin /home/admin/config.scripts/lnd.unlock.sh
-else
-  echo "keysend setting unchanged."
 fi
 
 # ZeroTier process choice
