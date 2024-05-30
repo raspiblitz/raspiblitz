@@ -5,8 +5,8 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ];
   echo "RaspiBlitz Time Tools"
   echo
   echo "## SSHD SERVICE #######"
-  echo "blitz.ssh.sh choose-timezone    --> user can choose timezone from list and it gets stored to raspiblitz config"
-  echo "blitz.ssh.sh set-time-by-config --> resets the time on the RaspiBlitz based on the config"
+  echo "blitz.ssh.sh choose-timezone  --> user can choose timezone from list and it gets stored to raspiblitz config"
+  echo "blitz.ssh.sh set-by-config    --> resets the time on the RaspiBlitz based on the config"
   exit 1
 fi
 
@@ -59,9 +59,9 @@ if [ "$1" = "choose-timezone" ]; then
 fi
 
 ###################
-# set-time-by-config
+# set-by-config
 ###################
-if [ "$1" = "set-time-by-config" ]; then
+if [ "$1" = "set-by-config" ]; then
   source /mnt/hdd/raspiblitz.conf
   if [ ${#timezone} -eq 0 ]; then
     echo "# no timezone set in raspiblitz.conf ... keeping default timezone"
