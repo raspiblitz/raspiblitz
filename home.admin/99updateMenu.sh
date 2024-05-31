@@ -287,7 +287,7 @@ Consider rebooting later manually if encountering any problems.
           exit 1
         else
           echo "# SKIP REBOOT"
-          echo "# starting the bitcoind.service .."
+          echo "# starting the lnd.service .."
           sudo systemctl start lnd
           exit 0
         fi
@@ -332,7 +332,7 @@ Consider rebooting later manually if encountering any problems.
           exit 1
         else
           echo "# SKIP REBOOT"
-          echo "# starting the bitcoind.service .."
+          echo "# starting the lnd.service .."
           sudo systemctl start lnd
           exit 0
         fi
