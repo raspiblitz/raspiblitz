@@ -119,7 +119,7 @@ OPTIONS+=(A 'Blitz API + WebUI' ${blitzapi})
 
 # LCD options (only when running with LCD screen)
 if [ "${displayClass}" == "lcd" ]; then
-  OPTIONS+=(s 'Touchscreen (experimental)' ${touchscreenMenu})
+  # OPTIONS+=(s 'Touchscreen (experimental)' ${touchscreenMenu})
   OPTIONS+=(r 'LCD Rotate' ${lcdrotateMenu})
 fi
 
