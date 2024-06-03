@@ -105,25 +105,11 @@ fi
 echo "importing: _version.info"
 /home/admin/_cache.sh import /home/admin/_version.info
 
-# basic hardware info (will not change)
-source <(/home/admin/_cache.sh valid \
-  system_board \
-  system_ram_mb \
-  system_ram_gb \
-)
-if [ "${stillvalid}" == "0" ]; then
-  source <(/home/admin/config.scripts/blitz.hardware.sh status)
-  /home/admin/_cache.sh set system_board "${board}"
-  /home/admin/_cache.sh set system_ram_mb "${ramMB}"
-  /home/admin/_cache.sh set system_ram_gb "${ramGB}"
-fi
-
-# VM detect vagrant
-source <(/home/admin/_cache.sh valid system_vm_vagrant)
-if [ "${stillvalid}" == "0" ]; then
-  vagrant=$(df | grep -c "/vagrant")
-  /home/admin/_cache.sh set system_vm_vagrant "${vagrant}"
-fi
+# get hardware info
+source <(/home/admin/config.scripts/blitz.hardware.sh status)
+/home/admin/_cache.sh set system_board "${board}"
+/home/admin/_cache.sh set system_ram_mb "${ramMB}"
+/home/admin/_cache.sh set system_ram_gb "${ramGB}"
 
 # flag that init was done (will be checked on each loop)
 /home/admin/_cache.sh set system_init_time "$(date +%s)"
@@ -155,7 +141,9 @@ do
 
   # uptime just do on every run
   system_up=$(cat /proc/uptime | grep -o '^[0-9]\+')
+  system_up_text=$(uptime -p | cut -d ' ' -f 2- | cut -d ',' -f 1 | awk '{print $1 substr($2, 1, 1)}')
   /home/admin/_cache.sh set system_up "${system_up}"
+  /home/admin/_cache.sh set system_up_text "${system_up_text}"
 
   # cpu load
   cpu_load=$(w | head -n 1 | cut -d 'v' -f2 | cut -d ':' -f2)
@@ -171,9 +159,7 @@ do
   fi
 
   # ram
-  ram=$(free -m | grep Mem | awk '{ print $2 }')
-  ram_avail=$(free -m | grep Mem | awk '{ print $7 }')
-  /home/admin/_cache.sh set system_ram_mb "${ram}"
+  ram_avail=$(free -m | grep -E 'Mem|Speicher' | awk '{ print $7 }')
   /home/admin/_cache.sh set system_ram_available_mb "${ram_avail}"
 
   # undervoltage

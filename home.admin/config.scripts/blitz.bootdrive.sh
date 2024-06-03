@@ -27,10 +27,11 @@ action=$1
 #########################
 # STATUS
 
-# gather data on sd card
+# gather data on SDcard / OS drive
 minimumSizeByte=16384000000
-rootPartition=$(sudo mount | grep " / " | cut -d " " -f 1 | cut -d "/" -f 3)
-rootPartitionBytes=$(lsblk -b -o NAME,SIZE | grep "${rootPartition}" | tr -s ' ' | cut -d " " -f 2)
+rootPartitionLine=$(sudo mount | grep " / " | cut -d " " -f 1)
+rootPartition=$(basename ${rootPartitionLine})
+rootPartitionBytes=$(lsblk -b -o NAME,SIZE | grep "${rootPartition}" | awk '{print $2}')
 
 # make conclusions
 needsExpansion=0
