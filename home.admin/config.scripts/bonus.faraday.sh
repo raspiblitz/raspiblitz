@@ -206,6 +206,7 @@ if [ "${mode}" = "on" ] || [ "${mode}" = "1" ]; then
 Description=faraday
 Wants=lnd.service
 After=lnd.service
+PartOf=lnd.service
 
 [Service]
 User=faraday

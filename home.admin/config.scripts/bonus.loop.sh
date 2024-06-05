@@ -114,6 +114,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 [Unit]
 Description=Loopd Service
 After=lnd.service
+PartOf=lnd.service
 
 [Service]
 WorkingDirectory=/home/loop/loop

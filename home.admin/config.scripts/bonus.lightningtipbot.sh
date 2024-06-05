@@ -90,6 +90,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 [Unit]
 Description=LightningTipBot Service
 After=lnd.service
+PartOf=lnd.service
 
 [Service]
 WorkingDirectory=/home/lightningtipbot/LightningTipBot

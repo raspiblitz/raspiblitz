@@ -344,6 +344,7 @@ Description=Lightning Network Daemon on $CHAIN
 # Make sure lnd starts after bitcoind is ready
 Requires=${netprefix}bitcoind.service
 After=${netprefix}bitcoind.service
+PartOf=${netprefix}bitcoind.service
 
 [Service]
 EnvironmentFile=/mnt/hdd/raspiblitz.conf
