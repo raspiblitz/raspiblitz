@@ -338,27 +338,26 @@ elif [ "${abcd}" = "b" ]; then
   sed -i "s/^rpcpassword=.*/rpcpassword=${newPassword}/g" /mnt/hdd/${network}/${network}.conf 2>/dev/null
   sed -i "s/^rpcpassword=.*/rpcpassword=${newPassword}/g" /home/admin/.${network}/${network}.conf 2>/dev/null
 
+  echo "# restart bitcoind"
+  sudo systemctl restart ${network}d
+
   # NOTE: now other bonus apps configs that need passwordB need to be adapted manually
   # bonus apps that use a "prestart" will adapt themselves on service restart after reboot
-
-  # blitzweb
-  if ! [ -f /etc/nginx/.htpasswd ]; then
-    echo "${newPassword}" | sudo htpasswd -ci /etc/nginx/.htpasswd admin
-  else
-    echo "${newPassword}" | sudo htpasswd -i /etc/nginx/.htpasswd admin
-  fi
 
   # electrs
   if [ "${ElectRS}" == "on" ]; then
     echo "# changing the RPC password for ELECTRS"
     RPC_USER=$(cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcuser | cut -c 9-)
     sudo sed -i "s/^auth = \"$RPC_USER.*\"/auth = \"$RPC_USER:${newPassword}\"/g" /home/electrs/.electrs/config.toml
+    echo "# restarting electrs"
+    sudo systemctl restart electrs.service
   fi
 
   # BTCPayServer
   if [ "${BTCPayServer}" == "on" ]; then
     echo "# changing the RPC password for BTCPAYSERVER"
     sudo sed -i "s/^btc.rpc.password=.*/btc.rpc.password=${newPassword}/g" /home/btcpay/.nbxplorer/Main/settings.config
+    sudo systemctl restart btcpayserver.service
   fi
 
   # JoinMarket
@@ -367,12 +366,14 @@ elif [ "${abcd}" = "b" ]; then
     sudo sed -i "s/^rpc_password =.*/rpc_password = ${newPassword}/g" /home/joinmarket/.joinmarket/joinmarket.cfg
     echo "# changing the password for the 'joinmarket' user"
     echo "joinmarket:${newPassword}" | sudo chpasswd
+    sudo systemctl restart joinmarket-api.service
   fi
 
   # ThunderHub
   if [ "${thunderhub}" == "on" ]; then
     echo "# changing the password for ThunderHub"
     sudo sed -i "s/^masterPassword:.*/masterPassword: '${newPassword}'/g" /mnt/hdd/app-data/thunderhub/thubConfig.yaml
+    sudo systemctl restart thunderhub.service
   fi
 
   # LIT
@@ -380,18 +381,23 @@ elif [ "${abcd}" = "b" ]; then
     echo "# changing the password for LIT"
     sudo sed -i "s/^uipassword=.*/uipassword=${newPassword}/g" /mnt/hdd/app-data/.lit/lit.conf
     sudo sed -i "s/^faraday.bitcoin.password=.*/faraday.bitcoin.password=${newPassword}/g" /mnt/hdd/app-data/.lit/lit.conf
+    sudo systemctl restart litd.service
   fi
 
   # i2pd
   if [ "${i2pd}" == "on" ]; then
     echo "# changing the password for i2pd"
     sudo sed -i "s/^pass = .*/pass = ${newPassword}/g" /etc/i2pd/i2pd.conf
+    sudo systemctl restart i2pd.service
   fi
 
   # LNDg
   if [ "${lndg}" == "on" ]; then
     echo "# changing the password for lndg"
     /home/admin/config.scripts/bonus.lndg.sh set-password "${newPassword}"
+    sudo systemctl restart jobs-lndg.service
+    sudo systemctl restart rebalancer-lndg.service
+    sudo systemctl restart htlc-stream-lndg.service
   fi
 
   # mempool Explorer
@@ -400,6 +406,7 @@ elif [ "${abcd}" = "b" ]; then
     sudo jq ".CORE_RPC.PASSWORD=\"${newPassword}\"" /home/mempool/mempool/backend/mempool-config.json > /var/cache/raspiblitz/mempool-config.json
     sudo mv /var/cache/raspiblitz/mempool-config.json /home/mempool/mempool/backend/mempool-config.json
     sudo chown mempool:mempool /home/mempool/mempool/backend/mempool-config.json
+    sudo systemctl restart mempool.service
   fi
 
   # elements
@@ -407,10 +414,10 @@ elif [ "${abcd}" = "b" ]; then
     echo "# changing the password for elements"
     sudo sed -i "s/^rpcpassword=.*/rpcpassword=${newPassword}/g" /home/elements/.elements/elements.conf
     sudo sed -i "s/^mainchainrpcpassword=.*/mainchainrpcpassword=${newPassword}/g" /home/elements/.elements/elements.conf
+    sudo systemctl restart elementsd.service
   fi
 
   echo "# OK -> RPC Password B changed"
-  echo "# Reboot is needed (will be triggered if interactive menu was called)"
   echo "error=''"
   sleep 3
 
