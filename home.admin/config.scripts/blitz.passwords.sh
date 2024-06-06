@@ -430,7 +430,6 @@ elif [ "${abcd}" = "b" ]; then
   fi
 
   echo "# OK -> RPC Password B changed"
-  echo "error=''"
   sleep 3
 
 ############################
