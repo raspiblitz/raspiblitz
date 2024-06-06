@@ -338,15 +338,15 @@ elif [ "${abcd}" = "b" ]; then
   sed -i "s/^rpcpassword=.*/rpcpassword=${newPassword}/g" /mnt/hdd/${network}/${network}.conf 2>/dev/null
   sed -i "s/^rpcpassword=.*/rpcpassword=${newPassword}/g" /home/admin/.${network}/${network}.conf 2>/dev/null
 
+  # dont reboot - starting either services manually below or they get restarted thru
+  # systemd dependencies like on bitcoind (Partof=...) after all configs changed
+  reboot=0;
+
   echo "# restart bitcoind"
   sudo systemctl restart ${network}d
 
   # NOTE: now other bonus apps configs that need passwordB need to be adapted manually
   # bonus apps that use a "prestart" will adapt themselves on service
-
-  # dont reboot - starting either services manually below or they get restarted thru
-  # systemd dependencies like on bitcoind (Partof=...)
-  reboot=0;
 
   # electrs
   if [ "${ElectRS}" == "on" ]; then
