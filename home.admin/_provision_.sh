@@ -547,14 +547,14 @@ else
   echo "Provisioning LCD rotate - not needed, keep default rotate on" >> ${logFile}
 fi
 
-# TOUCHSCREEN
-if [ "${#touchscreen}" -gt 0 ]; then
-    echo "Provisioning Touchscreen - run config script" >> ${logFile}
-    /home/admin/_cache.sh set message "Setup Touchscreen"
-    /home/admin/config.scripts/blitz.touchscreen.sh ${touchscreen} >> ${logFile} 2>&1
-else
-    echo "Provisioning Touchscreen - not active" >> ${logFile}
-fi
+# TOUCHSCREEN - deactivated see https://github.com/raspiblitz/raspiblitz/pull/4609#issuecomment-2144406124
+# if [ "${#touchscreen}" -gt 0 ]; then
+#     echo "Provisioning Touchscreen - run config script" >> ${logFile}
+#     /home/admin/_cache.sh set message "Setup Touchscreen"
+#     /home/admin/config.scripts/blitz.touchscreen.sh ${touchscreen} >> ${logFile} 2>&1
+# else
+#     echo "Provisioning Touchscreen - not active" >> ${logFile}
+# fi
 
 # UPS
 if [ "${#ups}" -gt 0 ]; then
