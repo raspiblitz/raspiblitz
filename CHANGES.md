@@ -4,6 +4,7 @@
 - Update: Specter Desktop 2.0.4 with reactivated UPDATE option [details](https://github.com/cryptoadvance/specter-desktop/releases/tag/v2.0.4)
 - Update: BTCPayServer 1.13.0 [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.13.0)
 - Update: acme.sh 3.0.7 (repair duckdns.org dyndns)
+- Update: lndmanage 0.16.0 [details](https://github.com/bitromortac/lndmanage)
 - Experimental: charge-lnd install script [details](https://github.com/raspiblitz/raspiblitz/discussions/3955)
 - Experimental: config.scripts/lnd.signaddress.sh to easy sign messages on addresses on LND [details](https://github.com/raspiblitz/raspiblitz/issues/4540)
 - Experimental: config.scripts/bonus.elements.sh install elements blockchain platform [details](https://github.com/ElementsProject/elements)
