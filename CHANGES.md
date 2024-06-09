@@ -8,6 +8,7 @@
 - Experimental: charge-lnd install script [details](https://github.com/raspiblitz/raspiblitz/discussions/3955)
 - Experimental: config.scripts/lnd.signaddress.sh to easy sign messages on addresses on LND [details](https://github.com/raspiblitz/raspiblitz/issues/4540)
 - Experimental: config.scripts/bonus.elements.sh install elements blockchain platform [details](https://github.com/ElementsProject/elements)
+- Remove: AutoPilot & Keysend from SSH menus [details](https://github.com/raspiblitz/raspiblitz/issues/1953#issuecomment-1811553602)
 - Remove: Tallycoin-Connect [see service shutdown](https://x.com/djbooth007/status/1784409117563720082)
 - Remove: IP2Tor Shoplist [details](https://github.com/raspiblitz/raspiblitz/issues/4589)
 - Remove: CopyStation Script [details](https://github.com/raspiblitz/raspiblitz/issues/4538)

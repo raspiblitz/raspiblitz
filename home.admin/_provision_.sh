@@ -363,15 +363,6 @@ else
     echo "Provisioning Tor - keep default" >> ${logFile}
 fi
 
-# AUTO PILOT
-if [ "${autoPilot}" = "on" ]; then
-    echo "Provisioning AUTO PILOT - run config script" >> ${logFile}
-    /home/admin/_cache.sh set message "Setup AutoPilot"
-    /home/admin/config.scripts/lnd.autopilot.sh on >> ${logFile} 2>&1
-else
-    echo "Provisioning AUTO PILOT - keep default" >> ${logFile}
-fi
-
 # NETWORK UPNP
 if [ "${networkUPnP}" = "on" ]; then
     echo "Provisioning NETWORK UPnP - run config script" >> ${logFile}
@@ -797,6 +788,10 @@ fi
 echo "Start i2pd" >> ${logFile}
 /home/admin/_cache.sh set message "i2pd setup"
 /home/admin/config.scripts/blitz.i2pd.sh on >> ${logFile}
+
+# clean up raspiblitz config from old settings
+sed -i '/^autoPilot=/d' /mnt/hdd/raspiblitz.conf
+sed -i '/^lndKeysend=/d' /mnt/hdd/raspiblitz.conf
 
 # signal setup done
 /home/admin/_cache.sh set message "Setup Done"

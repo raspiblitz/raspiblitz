@@ -384,7 +384,12 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     /home/admin/config.scripts/bonus.nodejs.sh on
 
     # make sure keysend is on
-    /home/admin/config.scripts/lnd.keysend.sh on
+    keysendOn=$(cat /mnt/hdd/lnd/lnd.conf | grep -c '^accept-keysend=1')
+	  if [ "${keysendOn}" == "0" ]; then
+      echo "ERR: keysend is not activated in LND"
+      echo "Activate it in the LND config and restart LND"
+      exit 1
+    fi
 
     echo "*** Add the 'sphinxrelay' user ***"
     sudo adduser --system --group --home /home/sphinxrelay sphinxrelay
