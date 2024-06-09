@@ -9,6 +9,7 @@
 - Experimental: config.scripts/bonus.elements.sh install elements blockchain platform [details](https://github.com/ElementsProject/elements)
 - Remove: Tallycoin-Connect [see service shutdown](https://x.com/djbooth007/status/1784409117563720082)
 - Remove: IP2Tor Shoplist [details](https://github.com/raspiblitz/raspiblitz/issues/4589)
+- Remove: CopyStation Script [details](https://github.com/raspiblitz/raspiblitz/issues/4538)
 
 ## What's new in Version 1.11.0 of RaspiBlitz?
 
