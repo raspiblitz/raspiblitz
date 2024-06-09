@@ -467,16 +467,6 @@ else
   echo "Provisioning BTCPayServer - keep default" >> ${logFile}
 fi
 
-# deprecated - see: #2031
-# LNDMANAGE
-#if [ "${lndmanage}" = "on" ]; then
-#  echo "Provisioning lndmanage - run config script" >> ${logFile}
-#  /home/admin/_cache.sh set message "Setup lndmanage"
-#  sudo -u admin /home/admin/config.scripts/bonus.lndmanage.sh on >> ${logFile} 2>&1
-#else
-#  echo "Provisioning lndmanage - not active" >> ${logFile}
-#fi
-
 # CUSTOM PORT
 echo "Provisioning LND Port" >> ${logFile}
 if [ ${#lndPort} -eq 0 ]; then
@@ -607,15 +597,6 @@ else
   echo "Provisioning Balance of Satoshis - keep default" >> ${logFile}
 fi
 
-## LNPROXY
-#if [ "${lnproxy}" = "on" ]; then
-#  echo "Provisioning lnproxy - run config script" >> ${logFile}
-#  /home/admin/_cache.sh set message "Setup lnproxy"
-#  sudo -u admin /home/admin/config.scripts/bonus.lnproxy.sh on >> ${logFile} 2>&1
-#else
-#  echo "Provisioning lnproxy - keep default" >> ${logFile}
-#fi
-
 # thunderhub
 if [ "${thunderhub}" = "on" ]; then
   echo "Provisioning ThunderHub - run config script" >> ${logFile}
@@ -686,15 +667,6 @@ if [ "${lndg}" = "on" ]; then
   sudo -u admin /home/admin/config.scripts/bonus.lndg.sh on >> ${logFile} 2>&1
 else
   echo "Provisioning LNDg - keep default" >> ${logFile}
-fi
-
-# sphinxrelay
-if [ "${sphinxrelay}" = "on" ]; then
-  echo "Sphinx-Relay - run config script" >> ${logFile}
-  /home/admin/_cache.sh set message "Setup Sphinx-Relay"
-  sudo -u admin /home/admin/config.scripts/bonus.sphinxrelay.sh on >> ${logFile} 2>&1
-else
-  echo "Sphinx-Relay - keep default" >> ${logFile}
 fi
 
 # helipad

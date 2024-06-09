@@ -63,7 +63,6 @@ if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
   OPTIONS+=(oa 'LND Balance of Satoshis' ${bos})
   OPTIONS+=(ya 'LND PyBLOCK' ${pyblock})
   OPTIONS+=(ha 'LND ChannelTools (Fund Rescue)' ${chantools})
-  OPTIONS+=(xa 'LND Sphinx-Relay' ${sphinxrelay})
   OPTIONS+=(fa 'LND Helipad Boostagram reader' ${helipad})
   OPTIONS+=(lb 'LND LNDK (experimental BOLT 12)' ${lndk})
 fi
@@ -447,25 +446,6 @@ if [ "${lndg}" != "${choice}" ]; then
   fi
 else
   echo "LNDg unchanged."
-fi
-
-# Sphinx Relay
-choice="off"; check=$(echo "${CHOICES}" | grep -c "xa")
-if [ ${check} -eq 1 ]; then choice="on"; fi
-if [ "${sphinxrelay}" != "${choice}" ]; then
-  echo "Sphinx-Relay Setting changed .."
-  anychange=1
-  sudo -u admin /home/admin/config.scripts/bonus.sphinxrelay.sh ${choice}
-  if [ "${choice}" =  "on" ]; then
-    echo "Giving service 1 minute to start up ... (please wait) ..."
-    sleep 60
-    whiptail --title " Installed Sphinx Server" --msgbox "\
-Sphinx Server was installed.\n
-Use the new 'SPHINX' entry in Main Menu for more info.\n
-" 10 35
-  fi
-else
-  echo "Sphinx Relay unchanged."
 fi
 
 # Helipad
