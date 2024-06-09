@@ -47,14 +47,6 @@ if [ "${copyInProgress}" = "1" ]; then
   exit
 fi
 
-# special state: copystation
-if [ "${state}" = "copystation" ]; then
-  echo "Copy Station is Running ..."
-  echo "reboot to return to normal"
-  sudo /home/admin/XXcopyStation.sh
-  exit
-fi
-
 #####################################
 # SSH MENU LOOP
 # this loop runs until user exits or

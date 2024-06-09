@@ -19,6 +19,7 @@ source <(/home/admin/_cache.sh get \
   system_ups_status \
   system_ups_battery \
   system_cpu_load \
+  system_up_text \
   system_temp_celsius \
   system_temp_fahrenheit \
   runBehindTor \
@@ -311,7 +312,8 @@ if [ "${blitzapi}" == "on" ]; then
  webuiinfo="Web Admin --> http://${internet_localip}"
 fi
 
-datetime=$(date -R)
+datetime=$(date +"%d %b %T %z")
+datetime="${datetime} up ${system_up_text}"
 
 stty sane
 sleep 1

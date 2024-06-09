@@ -61,6 +61,9 @@ echo "deprecatedrpc=addresses" >> /mnt/hdd/bitcoin/bitcoin.conf 2>/dev/null
 # backup SSH PubKeys
 /home/admin/config.scripts/blitz.ssh.sh backup
 
+# set timezone
+/home/admin/config.scripts/blitz.time.sh set-by-config >> ${logFile}
+
 # optimize mempool if RAM >1GB
 kbSizeRAM=$(cat /proc/meminfo | grep "MemTotal" | sed 's/[^0-9]*//g')
 if [ ${kbSizeRAM} -gt 1500000 ]; then
@@ -363,15 +366,6 @@ else
     echo "Provisioning Tor - keep default" >> ${logFile}
 fi
 
-# AUTO PILOT
-if [ "${autoPilot}" = "on" ]; then
-    echo "Provisioning AUTO PILOT - run config script" >> ${logFile}
-    /home/admin/_cache.sh set message "Setup AutoPilot"
-    /home/admin/config.scripts/lnd.autopilot.sh on >> ${logFile} 2>&1
-else
-    echo "Provisioning AUTO PILOT - keep default" >> ${logFile}
-fi
-
 # NETWORK UPNP
 if [ "${networkUPnP}" = "on" ]; then
     echo "Provisioning NETWORK UPnP - run config script" >> ${logFile}
@@ -537,14 +531,14 @@ else
   echo "Provisioning LCD rotate - not needed, keep default rotate on" >> ${logFile}
 fi
 
-# TOUCHSCREEN
-if [ "${#touchscreen}" -gt 0 ]; then
-    echo "Provisioning Touchscreen - run config script" >> ${logFile}
-    /home/admin/_cache.sh set message "Setup Touchscreen"
-    /home/admin/config.scripts/blitz.touchscreen.sh ${touchscreen} >> ${logFile} 2>&1
-else
-    echo "Provisioning Touchscreen - not active" >> ${logFile}
-fi
+# TOUCHSCREEN - deactivated see https://github.com/raspiblitz/raspiblitz/pull/4609#issuecomment-2144406124
+# if [ "${#touchscreen}" -gt 0 ]; then
+#     echo "Provisioning Touchscreen - run config script" >> ${logFile}
+#     /home/admin/_cache.sh set message "Setup Touchscreen"
+#     /home/admin/config.scripts/blitz.touchscreen.sh ${touchscreen} >> ${logFile} 2>&1
+# else
+#     echo "Provisioning Touchscreen - not active" >> ${logFile}
+# fi
 
 # UPS
 if [ "${#ups}" -gt 0 ]; then
@@ -769,6 +763,10 @@ fi
 echo "Start i2pd" >> ${logFile}
 /home/admin/_cache.sh set message "i2pd setup"
 /home/admin/config.scripts/blitz.i2pd.sh on >> ${logFile}
+
+# clean up raspiblitz config from old settings
+sed -i '/^autoPilot=/d' /mnt/hdd/raspiblitz.conf
+sed -i '/^lndKeysend=/d' /mnt/hdd/raspiblitz.conf
 
 # signal setup done
 /home/admin/_cache.sh set message "Setup Done"
