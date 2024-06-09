@@ -213,11 +213,6 @@ if [ "$1" == "prestart" ]; then
     sed -i '/^externalip=*/d' ${lndConfFile}
   fi
 
-  # enforce LND keysend (if set in raspiblitz.conf)
-  if [ "${lndKeysend}" == "on" ]; then
-    setting ${lndConfFile} ${insertLine} "accept-keysend" "true"
-  fi
-
   ##### BOLT SECTION #####
   # https://github.com/lightningnetwork/lnd/blob/0aa0831619cb320dbb74883c37a80ccbdde7f320/sample-lnd.conf#L1205
   sectionName="bolt"

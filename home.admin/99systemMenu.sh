@@ -16,6 +16,8 @@ MENU=""    # adds lines to HEIGHT
 OPTIONS=() # adds lines to HEIGHt + CHOICE_HEIGHT
 
 OPTIONS+=(BTOP "Monitor system resources with btop")
+OPTIONS+=(TIME "Set Timezone")
+
 OPTIONS+=(${network}LOG "Monitor the debug.log for ${CHAIN}")
 OPTIONS+=(${network}CONF "Edit the bitcoin.conf")
 
@@ -56,6 +58,9 @@ case $CHOICE in
     fi
     # run as root to allow signal sending to any process
     sudo btop
+    ;;
+  TIME)
+    sudo /home/admin/config.scripts/blitz.time.sh choose-timezone
     ;;
   ${network}LOG)
     if [ ${CHAIN} = signet ]; then
