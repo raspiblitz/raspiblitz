@@ -80,7 +80,7 @@ Once the LCD is white and no LEDs are blinking anymore:
 - Remove the Power from RaspiBlitz
 - Exchange the old with the new SD card
 - Connect Power back to the RaspiBlitz
-- Follow the instructions on the LCD
+- Login again per SSH or WebUI
 
 Do you have the SD card with the new version image ready
 and do you WANT TO START UPDATE NOW?
