@@ -660,6 +660,15 @@ else
   echo "Provisioning LIT - keep default" >> ${logFile}
 fi
 
+# labelbase
+if [ "${labelbase}" = "on" ]; then
+  echo "Provisioning Labelbase - run config script" >> ${logFile}
+  /home/admin/_cache.sh set message "Setup Labelbase"
+  sudo -u admin /home/admin/config.scripts/bonus.labelbase.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning Labelbase - keep default" >> ${logFile}
+fi
+
 # lndg
 if [ "${lndg}" = "on" ]; then
   echo "Provisioning LNDg - run config script" >> ${logFile}
