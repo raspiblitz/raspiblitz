@@ -168,6 +168,9 @@ fi
 if [ "${fints}" == "on" ]; then
   OPTIONS+=(FINTS "Show FinTS/HBCI details")
 fi
+if [ "${labelbase}" == "on" ]; then
+  OPTIONS+=(LABELBASE "Labelbase (UTXO labeling)")
+fi
 
 # dont offer to switch to "testnet view for now" - so no wswitch back to mainnet needed
 #if [ ${chain} != "main" ]; then
@@ -327,6 +330,9 @@ case $CHOICE in
             ;;
         CIRCUITBREAKER)
             sudo /home/admin/config.scripts/bonus.circuitbreaker.sh menu
+            ;;
+        LABELBASE)
+            sudo /home/admin/config.scripts/bonus.labelbase.sh menu
             ;;
         FINTS)
             sudo /home/admin/config.scripts/bonus.fints.sh menu
