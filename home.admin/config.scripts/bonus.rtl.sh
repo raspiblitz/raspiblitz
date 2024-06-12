@@ -48,8 +48,16 @@ echo "# RTLHTTP(${RTLHTTP})"
 # construct needed variable elements
 configEntry="${netprefix}${typeprefix}rtlWebinterface"
 systemdService="${netprefix}${typeprefix}RTL"
+dependsOn="bitcoind"
+if [ "${LNTYPE}" == "cl" ]; then
+  dependsOn="${netprefix}lightningd"
+elif [ "${LNTYPE}" == "lnd" ]; then
+  dependsOn="${netprefix}lnd"
+fi
+
 echo "# configEntry(${configEntry})"
 echo "# systemdService(${systemdService})"
+echo "# dependsOn(${dependsOn})"
 
 ##########################
 # MENU
@@ -271,8 +279,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
 [Unit]
 Description=${systemdService} Webinterface
-Wants=
-After=
+Wants=${dependsOn}
+After=${dependsOn}
+PartOf=${dependsOn}
 
 [Service]
 Environment=\"RTL_CONFIG_PATH=/mnt/hdd/app-data/rtl/${systemdService}/\"
@@ -297,19 +306,8 @@ WantedBy=multi-user.target
 " | sudo tee /etc/systemd/system/${systemdService}.service
   sudo chown root:root /etc/systemd/system/${systemdService}.service
 
-  # adapt systemd service template for LND
-  if [ "${LNTYPE}" == "lnd" ]; then
-    echo "# modifying ${systemdService}.service for LND"
-    sudo sed -i "s/^Wants=.*/Wants=${netprefix}lnd.service/g" /etc/systemd/system/${systemdService}.service
-    sudo sed -i "s/^After=.*/After=${netprefix}lnd.service/g" /etc/systemd/system/${systemdService}.service
-  fi
-  # adapt systemd service template for
+  # set up Core LightningREST (if needed)
   if [ "${LNTYPE}" == "cl" ]; then
-    echo "# modifying ${systemdService}.service for CL"
-    sudo sed -i "s/^Wants=.*/Wants=${netprefix}lightningd.service/g" /etc/systemd/system/${systemdService}.service
-    sudo sed -i "s/^After=.*/After=${netprefix}lightningd.service/g" /etc/systemd/system/${systemdService}.service
-
-    # set up Core LightningREST
     /home/admin/config.scripts/cl.rest.sh on ${CHAIN}
   fi
 
