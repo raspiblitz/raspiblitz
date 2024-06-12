@@ -279,9 +279,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
 [Unit]
 Description=${systemdService} Webinterface
-Wants=${dependsOn}
-After=${dependsOn}
-PartOf=${dependsOn}
+Wants=${dependsOn}.service
+After=${dependsOn}.service
+PartOf=${dependsOn}.service
 
 [Service]
 Environment=\"RTL_CONFIG_PATH=/mnt/hdd/app-data/rtl/${systemdService}/\"
