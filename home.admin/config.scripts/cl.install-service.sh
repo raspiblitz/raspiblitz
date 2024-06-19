@@ -49,6 +49,7 @@ echo "
 Description=c-lightning daemon on $CHAIN
 Requires=${netprefix}bitcoind.service
 After=${netprefix}bitcoind.service
+PartOf=${netprefix}bitcoind.service
 Wants=network-online.target
 After=network-online.target
 

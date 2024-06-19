@@ -1,3 +1,23 @@
+## What's new in Version 1.11.1 of RaspiBlitz?
+
+- New: Set Timezone SSHMENU > SYSTEM > TIME [details](https://github.com/raspiblitz/raspiblitz/issues/1712)
+- New: Labelbase 2.2.1 [details](https://x.com/labelbase_space)
+- Update: LNbits 0.12.8 [details](https://github.com/lnbits/lnbits/releases/tag/0.12.8)
+- Update: Specter Desktop 2.0.4 with reactivated UPDATE option [details](https://github.com/cryptoadvance/specter-desktop/releases/tag/v2.0.4)
+- Update: BTCPayServer 1.13.0 [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.13.0)
+- Update: acme.sh 3.0.7 (repair duckdns.org dyndns)
+- Update: show progress of electrs building index on LCD
+- Update: lndmanage 0.16.0 [details](https://github.com/bitromortac/lndmanage)
+- Update: Lightning Terminal v0.12.5-alpha [details](https://github.com/lightninglabs/lightning-terminal/releases/tag/v0.12.5-alpha)
+- Experimental: charge-lnd install script [details](https://github.com/raspiblitz/raspiblitz/discussions/3955)
+- Experimental: config.scripts/lnd.signaddress.sh to easy sign messages on addresses on LND [details](https://github.com/raspiblitz/raspiblitz/issues/4540)
+- Experimental: config.scripts/bonus.elements.sh install elements blockchain platform [details](https://github.com/ElementsProject/elements)
+- Deprecated: Sphinx-Relay [details](https://github.com/raspiblitz/raspiblitz/issues/2558)
+- Remove: AutoPilot & Keysend from SSH menus [details](https://github.com/raspiblitz/raspiblitz/issues/1953#issuecomment-1811553602)
+- Remove: Tallycoin-Connect [see service shutdown](https://x.com/djbooth007/status/1784409117563720082)
+- Remove: IP2Tor Shoplist [details](https://github.com/raspiblitz/raspiblitz/issues/4589)
+- Remove: CopyStation Script [details](https://github.com/raspiblitz/raspiblitz/issues/4538)
+
 ## What's new in Version 1.11.0 of RaspiBlitz?
 
 - New: RaspberryPi5 tested & enabling NVMe PCIe Hats
@@ -79,7 +99,7 @@
 - Update: Core Lightning v23.02.2 [details](https://github.com/ElementsProject/lightning/releases/tag/v23.02.2)
 - Update: C-lightningREST v0.10.2 [details](https://github.com/Ride-The-Lightning/c-lightning-REST/releases/tag/v0.10.2)
 - Update: Electrum Server in Rust (electrs) v0.9.11 [details](https://github.com/romanz/electrs/blob/master/RELEASE-NOTES.md#0911-jan-5-2023)
-- Update: Lightning Terminal v0.9.2-alpha [details](https://github.com/lightninglabs/lightning-terminal/releases/tag/v0.9.2-alpha)
+- Update: Lightning Terminal v0.8.6-alpha [details](https://github.com/lightninglabs/lightning-terminal/releases/tag/v0.8.6-alpha)
 - Update: RTL v0.13.6 with update option [details](https://github.com/Ride-The-Lightning/RTL/releases/tag/v0.13.6)
 - Update: Thunderhub v0.13.16 with balance sharing disabled [details](https://github.com/apotdevin/thunderhub/releases/tag/v0.13.16)
 - Update: LNbits 0.10.6 [details](https://github.com/lnbits/lnbits/releases/tag/0.10.6)

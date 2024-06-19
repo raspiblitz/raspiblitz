@@ -19,6 +19,7 @@ source <(/home/admin/_cache.sh get \
   system_ups_status \
   system_ups_battery \
   system_cpu_load \
+  system_up_text \
   system_temp_celsius \
   system_temp_fahrenheit \
   runBehindTor \
@@ -311,7 +312,8 @@ if [ "${blitzapi}" == "on" ]; then
  webuiinfo="Web Admin --> http://${internet_localip}"
 fi
 
-datetime=$(date -R)
+datetime=$(date +"%d %b %T %z")
+datetime="${datetime} up ${system_up_text}"
 
 stty sane
 sleep 1
@@ -353,7 +355,8 @@ else
   appInfoLine=""
 
   # Electrum Server - electrs
-  if [ "${ElectRS}" == "on" ]; then
+  fileFlagExists=$(sudo ls /mnt/hdd/app-storage/electrs/initial-sync.done 2>/dev/null | grep -c 'initial-sync.done')
+  if [ "${ElectRS}" == "on" ] && [ $fileFlagExists -eq 0 ]; then
     error=""
     source <(/home/admin/config.scripts/bonus.electrs.sh status-sync 2>/dev/null)
     if [ ${#infoSync} -gt 0 ]; then
@@ -362,7 +365,8 @@ else
   fi
 
   # Electrum Server - fulcrum
-  if [ "${fulcrum}" == "on" ]; then
+  fileFlagExists=$(sudo ls /mnt/hdd/app-storage/fulcrum/initial-sync.done 2>/dev/null | grep -c 'initial-sync.done')
+  if [ "${fulcrum}" == "on" ] && [ $fileFlagExists -eq 0 ]; then
     error=""
     source <(/home/admin/config.scripts/bonus.fulcrum.sh status-sync 2>/dev/null)
     if [ ${#infoSync} -gt 0 ]; then

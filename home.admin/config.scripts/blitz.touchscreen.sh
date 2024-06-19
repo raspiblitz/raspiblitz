@@ -30,7 +30,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   fi
 
   echo "# make sure hdmi_force_hotplug is deactivated"
-  sudo sed -i '/^hdmi_force_hotplug=/d' /boot/config.txt 2>/dev/null
+  sudo sed -i '/^hdmi_force_hotplug=/d' /boot/firmware/config.txt 2>/dev/null
 
   # update install sources
   echo "making sure system dependencies are installed"
@@ -207,8 +207,8 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   sudo raspi-config nonint do_boot_behaviour B2 >/dev/null 2>&1
 
   # make sure hdmi_force_hotplug=1 is added again to config.txt
-  sudo sed -i '/^hdmi_force_hotplug=/d' /boot/config.txt 2>/dev/null
-  #echo "hdmi_force_hotplug=1" >> /boot/config.txt
+  sudo sed -i '/^hdmi_force_hotplug=/d' /boot/firmware/config.txt 2>/dev/null
+  #echo "hdmi_force_hotplug=1" >> /boot/firmware/config.txt
 
   # set user pi user for autostart
   # TODO(frennkie/rootzoll) what should happen here? This does the same as "on".

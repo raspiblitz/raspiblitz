@@ -69,7 +69,7 @@ if [ "$1" == "prestart" ]; then
 
   ##### APPLICATION OPTIONS SECTION #####
 
-  # remove sync-freelist=1 (use =true is you want to overrule raspiblitz)
+  # remove sync-freelist=1 (use =true if you want to overrule raspiblitz)
   # https://github.com/rootzoll/raspiblitz/issues/3251
   sed -i "/^# Avoid slow startup time/d" ${lndConfFile}
   sed -i "/^sync-freelist=1/d" ${lndConfFile}
@@ -211,11 +211,6 @@ if [ "$1" == "prestart" ]; then
   else
     # when running Tor a public ip can make startup problems - so remove
     sed -i '/^externalip=*/d' ${lndConfFile}
-  fi
-
-  # enforce LND keysend (if set in raspiblitz.conf)
-  if [ "${lndKeysend}" == "on" ]; then
-    setting ${lndConfFile} ${insertLine} "accept-keysend" "true"
   fi
 
   ##### BOLT SECTION #####
