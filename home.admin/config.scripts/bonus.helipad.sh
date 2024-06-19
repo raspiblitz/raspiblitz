@@ -161,6 +161,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 Description=Helipad daemon
 Wants=lnd.service
 After=lnd.service
+PartOf=lnd.service
 [Service]
 WorkingDirectory=$HELIPAD_BUILD_DIR/
 ExecStart=$HELIPAD_BIN $HELIPAD_HTTP_PORT
