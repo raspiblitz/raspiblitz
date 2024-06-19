@@ -148,12 +148,11 @@ if [ "$2" = "info" ]; then
   if [ "$1" == "signet" ]; then
     subfolder="signet/"
   fi
-  btc_blocks_data_kb=$(sudo du -s /mnt/hdd/bitcoin/${subfolder}blocks 2>/dev/null | cut -f1)
+
+  btc_blocks_data_kb=$(du -s /mnt/hdd/bitcoin/${subfolder}blocks | cut -f1)
   if [ "${btc_blocks_data_kb}" == "" ]; then
    btc_blocks_data_kb="0"
   fi
-
-  # print data
 
   # parse data
   btc_blocks_headers=$(echo "${blockchaininfo}" | jq -r '.headers')
@@ -257,7 +256,7 @@ if [ "$2" = "peer-kickstart" ]; then
     if [ "$(cat /mnt/hdd/raspiblitz.conf | grep -c "^runBehindTor=on")" != "0" ]; then
       addressFormat="tor"
     else
-      source <(sudo /home/admin/config.scripts/internet.sh status global)
+      source <(/home/admin/config.scripts/internet.sh status global)
       if [ "${ipv6}" == "off" ]; then
         addressFormat="ipv4"
       else

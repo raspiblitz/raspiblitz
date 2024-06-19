@@ -358,7 +358,7 @@ else
   fileFlagExists=$(sudo ls /mnt/hdd/app-storage/electrs/initial-sync.done 2>/dev/null | grep -c 'initial-sync.done')
   if [ "${ElectRS}" == "on" ] && [ $fileFlagExists -eq 0 ]; then
     error=""
-    source <(sudo /home/admin/config.scripts/bonus.electrs.sh status-sync 2>/dev/null)
+    source <(/home/admin/config.scripts/bonus.electrs.sh status-sync 2>/dev/null)
     if [ ${#infoSync} -gt 0 ]; then
       appInfoLine="Electrum: ${infoSync}"
     fi
@@ -368,7 +368,7 @@ else
   fileFlagExists=$(sudo ls /mnt/hdd/app-storage/fulcrum/initial-sync.done 2>/dev/null | grep -c 'initial-sync.done')
   if [ "${fulcrum}" == "on" ] && [ $fileFlagExists -eq 0 ]; then
     error=""
-    source <(sudo /home/admin/config.scripts/bonus.fulcrum.sh status-sync 2>/dev/null)
+    source <(/home/admin/config.scripts/bonus.fulcrum.sh status-sync 2>/dev/null)
     if [ ${#infoSync} -gt 0 ]; then
       appInfoLine="Fulcrum: ${infoSync}"
     fi
