@@ -56,7 +56,7 @@ CHOICE=$(dialog --clear \
 case $CHOICE in
   SUMMARY)
       clear
-      /home/admin/config.scripts/cl-plugin.summary.sh $CHAIN
+      /home/admin/config.scripts/cl-plugin.summars.sh $CHAIN
       echo "Press ENTER to return to main menu."
       read key
       ;;
