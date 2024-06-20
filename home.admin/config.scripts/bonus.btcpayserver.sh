@@ -861,12 +861,19 @@ if [ "$1" = "update" ]; then
     TAG=$(git tag | sort -V | tail -1)
     echo "# Reset to the latest release tag: $TAG"
     sudo -u btcpay git reset --hard $TAG
+
     PGPsigner="nicolasdorier"
     PGPpubkeyLink="https://keybase.io/nicolasdorier/pgp_keys.asc"
     PGPpubkeyFingerprint="AB4CFA9895ACA0DBE27F6B346618763EF09186FE"
-
-    sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh \
-      "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
+    if ! sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh \
+      "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}"; then
+      # try with webflow
+      PGPsigner="web-flow"
+      PGPpubkeyLink="https://github.com/web-flow.gpg"
+      PGPpubkeyFingerprint="B5690EEEBB952194"
+      sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh \
+        "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
+    fi
 
     echo "# Build NBXplorer $TAG"
     # from the build.sh with path
