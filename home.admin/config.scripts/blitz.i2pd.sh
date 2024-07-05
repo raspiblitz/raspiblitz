@@ -9,7 +9,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "blitz.i2pd.sh install      -> Install i2pd"
   echo "blitz.i2pd.sh on           -> Switch on i2pd"
   echo "blitz.i2pd.sh off          -> Uninstall i2pd"
-  echo "blitz.i2pd.sh addseednodes -> Add all I2P seed nodes from: https://github.com/bitcoin/bitcoin/blob/master/contrib/seeds/nodes_main.txt"
+  echo "blitz.i2pd.sh addseednodes -> Add 21 randonly selected I2P seed nodes from: https://github.com/bitcoin/bitcoin/blob/master/contrib/seeds/nodes_main.txt"
   echo "blitz.i2pd.sh status       -> I2P related logs from bitcoind, bitcoin-cli -netinfo 4 and webconsole access"
   exit 1
 fi
