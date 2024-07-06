@@ -242,10 +242,7 @@ if [ "$1" = "addseednodes" ]; then
     echo "bitcoin-cli addnode $i2pSeedNode onetry"
     sudo -u bitcoin bitcoin-cli addnode "$i2pSeedNode" "onetry"
   done
-
-  echo
-  echo "# Display sudo tail -n 100 ${bitcoinLogPath} | grep i2p"
-  sudo tail -n 100 ${bitcoinLogPath} | grep i2p
+  
   echo
   echo "# Display bitcoin-cli -netinfo 4"
   sudo -u bitcoin bitcoin-cli -netinfo 4
