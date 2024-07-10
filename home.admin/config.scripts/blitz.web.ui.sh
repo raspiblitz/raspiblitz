@@ -64,7 +64,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     source <(sudo /home/admin/build_sdcard.sh -EXPORT)
     GITHUB_USER="${defaultWEBUIuser}"
     GITHUB_REPO="${defaultWEBUIrepo}"
-    GITHUB_BRANCH="release/${githubBranch}"
+    
+    # change back when final release to: GITHUB_BRANCH="release/${githubBranch}"
+    GITHUB_BRANCH="master"
+
     GITHUB_COMMITORTAG=""
   else
     # get parameters
