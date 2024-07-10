@@ -1,4 +1,4 @@
-## What's new in Version 1.11.1rc1 of RaspiBlitz? (ONLY FOR ERALY )
+## What's new in Version 1.11.1rc1 of RaspiBlitz?
 
 - New: Set Timezone SSHMENU > SYSTEM > TIME [details](https://github.com/raspiblitz/raspiblitz/issues/1712)
 - New: Labelbase 2.2.1 [details](https://x.com/labelbase_space)
