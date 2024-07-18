@@ -79,7 +79,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   /home/admin/config.scripts/bonus.nodejs.sh on
 
   echo "# create user"
-  sudo adduser --system --group --shell /bin/bash ${APPID} || exit 1
+  sudo adduser --system --group --shell /usr/sbin/nologin --home /home/${APPID} ${APPID} || exit 1
+
   sudo -u ${APPID} mkdir -p /home/${APPID}/.npm
 
   # I dont think this needs lnd admin privs
