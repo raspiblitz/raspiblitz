@@ -8,7 +8,7 @@ GITHUB_TAG=""
 
 PORT_API="3334"
 PORT_STRATUM="3333"
-PORT_UI="3335"
+PORT_UI="4200"
 
 # Use /mnt/hdd for app data
 APP_DATA_DIR="/mnt/hdd/app-data/${APPID}"
