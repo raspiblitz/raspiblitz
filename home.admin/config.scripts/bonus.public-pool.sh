@@ -20,10 +20,10 @@ echo "First parameter: $1"
 echo "Parameter count: $#"
 
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
-  echo "# bonus.${APPID}.sh status    -> status information (key=value)"
-  echo "# bonus.${APPID}.sh on        -> install the app"
-  echo "# bonus.${APPID}.sh off       -> uninstall the app"
-  echo "# bonus.${APPID}.sh menu      -> SSH menu dialog"
+  echo "# bonus.${APPID}.sh status            -> status information (key=value)"
+  echo "# bonus.${APPID}.sh on                -> install the app"
+  echo "# bonus.${APPID}.sh off [delete-data] -> uninstall the app"
+  echo "# bonus.${APPID}.sh menu              -> SSH menu dialog"
   exit 1
 fi
 
@@ -79,13 +79,15 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   /home/admin/config.scripts/bonus.nodejs.sh on
 
   echo "# create user"
-  sudo adduser --system --group --shell /bin/bash --home ${APP_DATA_DIR} ${APPID} || exit 1
-  sudo -u ${APPID} mkdir -p ${APP_DATA_DIR}/.npm
+  sudo adduser --system --group --shell /bin/bash ${APPID} || exit 1
+  sudo -u ${APPID} mkdir -p /home/${APPID}/.npm
 
-  echo "# add user to special groups"
-  sudo /usr/sbin/usermod --append --groups lndadmin ${APPID}
+  # I dont think this needs lnd admin privs
+  # echo "# add user to special groups"
+  # sudo /usr/sbin/usermod --append --groups lndadmin ${APPID}
 
   echo "# Install global dependencies"
+  cd /home/${APPID}
   sudo npm install -g @nestjs/cli @angular/cli node-gyp node-pre-gyp
 
   echo "# Create app directory and set permissions"
@@ -93,21 +95,21 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo chown -R ${APPID}:${APPID} ${APP_DATA_DIR}
 
   echo "# Clone repositories"
-  sudo -u ${APPID} git clone ${GITHUB_REPO} ${APP_DATA_DIR}/${APPID}
-  sudo -u ${APPID} git clone ${GITHUB_REPO_UI} ${APP_DATA_DIR}/${APPID}-ui
+  sudo -u ${APPID} git clone ${GITHUB_REPO} /home/${APPID}/${APPID}
+  sudo -u ${APPID} git clone ${GITHUB_REPO_UI} /home/${APPID}/${APPID}-ui
 
   echo "# Install and build backend"
-  cd ${APP_DATA_DIR}/${APPID}
+  cd /home/${APPID}/${APPID}
   sudo -u ${APPID} npm install
   sudo -u ${APPID} npm run build
 
   echo "# Install and build frontend"
-  cd ${APP_DATA_DIR}/${APPID}-ui
+  cd /home/${APPID}/${APPID}-ui
   sudo -u ${APPID} npm install
   sudo -u ${APPID} npm run build
 
   echo "# Set correct permissions for npm cache"
-  sudo chown -R ${APPID}:${APPID} ${APP_DATA_DIR}/.npm
+  sudo chown -R ${APPID}:${APPID} /home/${APPID}/.npm
 
   echo "# updating Firewall"
   sudo ufw allow ${PORT_API} comment "${APPID} API"
@@ -129,7 +131,7 @@ API_PORT=${PORT_API}
 STRATUM_PORT=${PORT_STRATUM}
 NETWORK=mainnet
 API_SECURE=false
-" | sudo tee ${APP_DATA_DIR}/${APPID}/.env >/dev/null
+" | sudo tee /home/${APPID}/${APPID}/.env >/dev/null
 
   echo "# create systemd service: ${APPID}.service"
   echo "
