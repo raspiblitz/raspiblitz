@@ -8,7 +8,7 @@ GITHUB_TAG=""
 
 PORT_API="3334"
 PORT_STRATUM="3333"
-PORT_UI="4200"
+PORT_UI="3335"
 
 # Use /mnt/hdd for app data
 APP_DATA_DIR="/mnt/hdd/app-data/${APPID}"
@@ -164,7 +164,7 @@ After=${APPID}.service
 
 [Service]
 WorkingDirectory=/home/${APPID}/${APPID}-ui
-ExecStart=/usr/bin/npm run start
+ExecStart=/usr/bin/ng serve --host 0.0.0.0 --port ${PORT_UI} --no-watch --poll 2000
 User=${APPID}
 Restart=always
 StandardOutput=null
