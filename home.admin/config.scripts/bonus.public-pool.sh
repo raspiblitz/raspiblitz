@@ -142,7 +142,7 @@ Wants=bitcoind
 After=bitcoind
 
 [Service]
-WorkingDirectory=${APP_DATA_DIR}/${APPID}
+WorkingDirectory=/home/${APPID}/${APPID}
 ExecStart=/usr/bin/npm start
 User=${APPID}
 Restart=always
@@ -163,7 +163,7 @@ Description=${APPID} UI
 After=${APPID}.service
 
 [Service]
-WorkingDirectory=${APP_DATA_DIR}/${APPID}-ui
+WorkingDirectory=/home/${APPID}/${APPID}-ui
 ExecStart=/usr/bin/npm run start
 User=${APPID}
 Restart=always
