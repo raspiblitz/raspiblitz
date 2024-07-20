@@ -32,16 +32,18 @@ if [ "$1" = "status" ]; then
 
   if [ "${ElectRS}" = "on" ]; then
     echo "configured=1"
+    echo "installed=1"
   else
     echo "configured=0"
+    echo "installed=0"
     echo "infoSync='Service not installed'"
   fi
 
-  if id "electrs" &>/dev/null; then
-    echo "installed=1"
-  else
-    echo "installed=0"
-  fi
+  #if id "electrs" &>/dev/null; then
+  #  echo "installed=1"
+  #else
+  #  echo "installed=0"
+  #fi
 
   serviceInstalled=$(sudo systemctl status electrs --no-page 2>/dev/null | grep -c "electrs.service - Electrs")
   serviceRunning=$(sudo systemctl status electrs --no-page 2>/dev/null | grep -c "active (running)")
