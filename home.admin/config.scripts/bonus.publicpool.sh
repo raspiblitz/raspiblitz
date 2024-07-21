@@ -101,7 +101,13 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   # Modify the environment.prod.ts file of WebUI
   echo "# Updating environment.prod.ts with correct API and STRATUM URLs" 
-  sudo -u ${APPID} tee /home/${APPID}/${APPID}-ui/src/environments/environment.prod.ts > /dev/null << EOL export const environment = { production: true, API_URL: 'http://${localIP}:${PORT_API}', STRATUM_URL: '${localIP}:${PORT_STRATUM}' }; EOL
+  sudo -u ${APPID} tee /home/${APPID}/${APPID}-ui/src/environments/environment.prod.ts > /dev/null << EOL
+export const environment = {
+  production: true,
+  API_URL: 'http://${localIP}:${PORT_API}',
+  STRATUM_URL: '${localIP}:${PORT_STRATUM}'
+};
+EOL
 
   echo "# Install and build backend"
   cd /home/${APPID}/${APPID}
