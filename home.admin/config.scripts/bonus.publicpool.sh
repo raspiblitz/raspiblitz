@@ -99,6 +99,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo -u ${APPID} git clone ${GITHUB_REPO} /home/${APPID}/${APPID}
   sudo -u ${APPID} git clone ${GITHUB_REPO_UI} /home/${APPID}/${APPID}-ui
 
+  # Modify the environment.prod.ts file of WebUI
+  echo "# Updating environment.prod.ts with correct API and STRATUM URLs" 
+  sudo -u ${APPID} tee /home/${APPID}/${APPID}-ui/src/environments/environment.prod.ts > /dev/null << EOL export const environment = { production: true, API_URL: 'http://${localIP}:${PORT_API}', STRATUM_URL: '${localIP}:${PORT_STRATUM}' }; EOL
+
   echo "# Install and build backend"
   cd /home/${APPID}/${APPID}
   sudo -u ${APPID} npm install
