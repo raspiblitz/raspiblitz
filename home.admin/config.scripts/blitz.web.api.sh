@@ -178,7 +178,15 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "# activeBranch detected by build_sdcard.sh: ${activeBranch}"
     GITHUB_USER="${defaultAPIuser}"
     GITHUB_REPO="${defaultAPIrepo}"
-    GITHUB_BRANCH="blitz-${githubBranch}"
+    # use dev branch when its an Release Candidate
+    source <(/home/admin/_cache.sh get codeVersion)
+    if [[ "$codeVersion" == *"rc"* ]]; then
+      echo "# RELEASE CANDIDATE: using dev branch"
+      GITHUB_BRANCH="dev"
+    else
+      GITHUB_BRANCH="blitz-${githubBranch}"
+    fi
+
     GITHUB_COMMITORTAG=""
   else
     # get parameters
