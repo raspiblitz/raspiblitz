@@ -65,10 +65,11 @@ echo "reset DNS confs ..."
 echo -e "nameserver 1.1.1.1\nnameserver 84.200.69.80" | sudo tee /etc/resolv.conf > /dev/null
 echo "OK"
 
-# update system
+# update system (only security updates with minimal risk of breaking changes)
 echo "update OS ..."
 sudo apt-get update -y
-sudo apt-get upgrade -y
+sudo apt-get upgrade -o Dir::Etc::SourceList=/etc/apt/sources.list.d/security.list -y
+sudo apt-get upgrade openssh-server -y
 
 # SSH Pubkeys (make unique for every sd card image install)
 echo
