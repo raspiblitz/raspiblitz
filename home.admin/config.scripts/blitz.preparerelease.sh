@@ -68,7 +68,7 @@ echo "OK"
 # update system
 echo "update OS ..."
 sudo apt-get update -y
-sudo apt-get upgrade -f -y
+sudo apt-get upgrade -y
 
 # SSH Pubkeys (make unique for every sd card image install)
 echo
