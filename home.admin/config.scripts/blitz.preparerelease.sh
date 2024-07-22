@@ -38,12 +38,6 @@ echo "cpu=${cpu}" >> /home/admin/raspiblitz.info
 echo "blitzapi=${blitzapi}" >> /home/admin/raspiblitz.info
 echo "displayClass=${displayClass}" >> /home/admin/raspiblitz.info
 
-# make sure that every install runs API with own secret=
-echo
-echo "deleting old API conf ..."
-sudo rm /home/blitzapi/blitz_api/.env 2>/dev/null
-echo "OK"
-
 # https://github.com/rootzoll/raspiblitz/issues/1371
 echo
 echo "deactivate local WIFI ..."
@@ -53,7 +47,8 @@ echo "OK"
 # make sure that every install runs API with own secret
 # https://github.com/raspiblitz/raspiblitz/issues/4469
 echo
-# check if redis is enabled
+echo "deleting old API conf ..."
+sudo rm /home/blitzapi/blitz_api/.env 2>/dev/null
 REDIS_ENABLED=$(sudo systemctl is-enabled redis 2>/dev/null | grep -c enabled)
 if [ ${REDIS_ENABLED} -gt 0 ]; then
     echo "disable redis for initial start ..."
@@ -69,6 +64,11 @@ echo
 echo "reset DNS confs ..."
 echo -e "nameserver 1.1.1.1\nnameserver 84.200.69.80" | sudo tee /etc/resolv.conf > /dev/null
 echo "OK"
+
+# update system
+echo "update OS ..."
+sudo apt-get update -y
+sudo apt-get upgrade -f -y
 
 # SSH Pubkeys (make unique for every sd card image install)
 echo
