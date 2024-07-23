@@ -54,7 +54,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo -u pyblock poetry install
   envPath=$(sudo -u pyblock poetry env info --path)
   # sudo -u pyblock ${envPath}/bin/pip uninstall -y typer click
-  #sudo -u pyblock ${envPath}/bin/pip install typer==0.4.0 click==8.0.0
+  # sudo -u pyblock ${envPath}/bin/pip install typer==0.4.0 click==8.0.0
 
   # set PATH for the user
   sudo bash -c "echo 'PATH=\$PATH:${envPath}/bin' >> /home/pyblock/.profile"
