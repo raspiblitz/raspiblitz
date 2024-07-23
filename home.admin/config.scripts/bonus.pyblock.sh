@@ -48,7 +48,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # install from github
   sudo -u pyblock git clone https://github.com/curly60e/pyblock.git
   cd pyblock
-  sudo -u pyblock git checkout v2.7.1
+  sudo -u pyblock git checkout v2.7.2
   sudo -u pyblock sed -i 's/^python =.*$/python = ">=3.11,<4.0"/' pyproject.toml
   sudo -u pyblock poetry lock
   sudo -u pyblock poetry install
