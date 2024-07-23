@@ -50,6 +50,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   cd pyblock
   sudo -u pyblock git checkout v2.3.1
   sudo -u pyblock sed -i 's/^python =.*$/python = ">=3.11,<4.0"/' pyproject.toml
+  sudo -u pyblock poetry lock
   sudo -u pyblock poetry install
   envPath=$(sudo -u pyblock poetry env info --path)
   sudo -u pyblock ${envPath}/bin/pip uninstall -y typer click
