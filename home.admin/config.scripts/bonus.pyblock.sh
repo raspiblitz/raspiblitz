@@ -50,10 +50,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   cd pyblock
   sudo -u pyblock git checkout v2.3.1
   sudo -u pyblock sed -i 's/^python =.*$/python = ">=3.11,<4.0"/' pyproject.toml
-  sudo -u poetry install
+  sudo -u pyblock poetry install
   envPath=$(sudo -u pyblock poetry env info --path)
-  sudo -u poetry ${envPath}/bin/pip uninstall -y typer click
-  sudo -u poetry ${envPath}/bin/pip install typer==0.4.0 click==8.0.0
+  sudo -u pyblock ${envPath}/bin/pip uninstall -y typer click
+  sudo -u pyblock ${envPath}/bin/pip install typer==0.4.0 click==8.0.0
 
   # set PATH for the user
   sudo bash -c "echo 'PATH=\$PATH:${envPath}/bin' >> /home/pyblock/.profile"
