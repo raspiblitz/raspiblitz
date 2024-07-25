@@ -113,13 +113,13 @@ if [ "${mode}" = "tested" ]; then
   fixedBitcoinVersion="$2"
   if [ ${#fixedBitcoinVersion} -gt 0 ]; then
     echo "# checking for fixed version update: installed(${installedVersion}) requested(${fixedBitcoinVersion}) available(${bitcoinVersion})"
-    version_compare "${bitcoinVersion}" "${fixedBitcoinVersion}"
+    version_compare "${fixedBitcoinVersion}" "${bitcoinVersion}"
     result=$?
-    if [ "${result}" -lt 2 ]; then
-      echo "# requested version is older or equal --> OK install available tested version"
-    else
-      echo "# WARNING: requested version is older then available tested --> ABORT (already up2date)"
+    if [ "${result}" -eq 2 ]; then
+      echo "# WARNING: requested version is newer then available tested --> ABORT (already up2date)"
       exit 1
+    else
+      echo "# requested version is older or equal --> OK install available tested version"
     fi
   fi
 
@@ -129,6 +129,11 @@ if [ "${mode}" = "tested" ]; then
   result=$?
   if [ "${result}" -eq 2 ]; then
     echo "# installed version is newer then to be updated version --> ABORT"
+    echo 
+    exit 1
+  fi
+  if [ "${result}" -eq 0 ]; then
+    echo "# version is already installed --> ABORT"
     echo 
     exit 1
   fi
