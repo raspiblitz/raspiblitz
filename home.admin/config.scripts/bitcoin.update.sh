@@ -116,9 +116,9 @@ if [ "${mode}" = "tested" ]; then
     version_compare "${bitcoinVersion}" "${fixedBitcoinVersion}"
     result=$?
     if [ "${result}" -lt 2 ]; then
-      echo "# requested version is older or equal --> OK install available version"
+      echo "# requested version is older or equal --> OK install available tested version"
     else
-      echo "# WARNING: requested version is newer then available --> ABORT"
+      echo "# WARNING: requested version is older then available tested --> ABORT (already up2date)"
       exit 1
     fi
   fi
