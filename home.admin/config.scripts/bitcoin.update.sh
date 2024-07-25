@@ -21,7 +21,7 @@ mode="$1"
 
 # RECOMMENDED UPDATE BY RASPIBLITZ TEAM (just possible once per sd card update)
 # comment will be shown as "BEWARE Info" when option is chosen (can be multiple lines)
-bitcoinVersion="27.0" # example: 22.0 .. keep empty if no newer version as sd card build is available
+bitcoinVersion="27.1" # example: 22.0 .. keep empty if no newer version as sd card build is available
 
 # GATHER DATA
 # setting download directory to the current user
