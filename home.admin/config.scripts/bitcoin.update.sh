@@ -123,11 +123,11 @@ if [ "${mode}" = "tested" ]; then
     fi
   fi
 
-  # check if installed version is already newer then the to be installed version
-  # this can happen if bitcoin install script already has a higher version then the tested version set by this script (see above)
+  # check against installed version
   version_compare "${installedVersion}" "${bitcoinVersion}"
   result=$?
   if [ "${result}" -eq 2 ]; then
+    # this can happen if bitcoin install script already has a higher version then the tested version set by this script (see above)
     echo "# installed version is newer then to be updated version --> ABORT"
     echo 
     exit 1
