@@ -1,4 +1,4 @@
-## What's new in Version 1.11.1rc2 of RaspiBlitz?
+## What's new in Version 1.11.1rc3 of RaspiBlitz?
 
 - New: Set Timezone SSHMENU > SYSTEM > TIME [details](https://github.com/raspiblitz/raspiblitz/issues/1712)
 - New: Labelbase 2.2.1 [details](https://x.com/labelbase_space)
@@ -21,13 +21,13 @@
 - Remove: IP2Tor Shoplist [details](https://github.com/raspiblitz/raspiblitz/issues/4589)
 - Remove: CopyStation Script [details](https://github.com/raspiblitz/raspiblitz/issues/4538)
 
-### 1.11.1rc2 Release Candidate (JUST USE FOR TESTING, HIGHER RISK OF LOSING FUNDS!)
+### 1.11.1rc3 Release Candidate (JUST USE FOR TESTING, HIGHER RISK OF LOSING FUNDS!)
 
 - **MINIMAL SD CARD IMAGE ⮕ [raspiblitz-min-v1.11.1rc2-2024-07-24.img.gz](https://github.com/raspiblitz/raspiblitz/actions/runs/10067746544/artifacts/1732856482)**
-- SHA-256: fad674e874ed262fff2fdc3588babd7217e1d900ca44b906ce80d35bbfacc6df (zip-file)
+- SHA-256: b1bfd979c263526264105132752c1adf7d3e31a303b2e6c25b79501db47b968e (zip-file)
 
-- **FATPACK SD CARD IMAGE ⮕ [raspiblitz-fat-v1.11.1rc2-2024-07-24.img.gz](https://raspiblitz.fulmo.org/images/raspiblitz-fat-v1.11.1rc2-2024-07-24.img.gz)**
-- SHA-256: faf75fcad96899ee34ef2ad1046c7690576d3626f51f79deb98f928a07cf769b
+- **FATPACK SD CARD IMAGE ⮕ [raspiblitz-fat-v1.11.1rc3-2024-07-25.img.gz](https://raspiblitz.fulmo.org/images/raspiblitz-fat-v1.11.1rc3-2024-07-25.img.gz)**
+- SHA-256: d280c99fc1ed55a7eb8540c3c0f361e55482af9c989715d15c9e834444d074ce
 
 ## What's new in Version 1.11.0 of RaspiBlitz?
 
