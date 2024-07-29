@@ -19,9 +19,8 @@ echo "# Running: bitcoin.update.sh $*"
 # 1. parameter [info|tested|reckless]
 mode="$1"
 
-# RECOMMENDED UPDATE BY RASPIBLITZ TEAM (just possible once per sd card update)
-# comment will be shown as "BEWARE Info" when option is chosen (can be multiple lines)
-bitcoinVersion="27.0" # example: 22.0 .. keep empty if no newer version as sd card build is available
+# RECOMMENDED UPDATE BY RASPIBLITZ TEAM (latest tested version available)
+bitcoinVersion="27.1" # example: 22.0 .. keep empty if no newer version as sd card build is available
 
 # GATHER DATA
 # setting download directory to the current user
@@ -59,6 +58,39 @@ function displayInfo() {
   echo "bitcoinLatestVersion='${bitcoinLatestVersion}'"
 }
 
+# COMAPRE TWO VERSION STRINGS
+# 0 = first version string is equal
+# 1 = first version string is older
+# 2 = first version string is newer
+function version_compare() {
+    if [[ $1 == $2 ]]
+    then
+        echo "equal"
+        return 0
+    fi
+    IFS='.' read -r -a ver1 <<< "$1"
+    IFS='.' read -r -a ver2 <<< "$2"
+    len1=${#ver1[@]}
+    len2=${#ver2[@]}
+    max_len=$((len1>len2?len1:len2))
+    for ((i=0; i<max_len; i++))
+    do
+        part1=${ver1[i]:-0}
+        part2=${ver2[i]:-0}
+        if ((part1 < part2))
+        then
+            # older
+            return 1
+        elif ((part1 > part2))
+        then
+            # newer
+            return 2
+        fi
+    done
+    # equal
+    return 0
+}
+
 if [ "${mode}" = "info" ]; then
   displayInfo
   exit 1
@@ -69,20 +101,43 @@ if [ "${mode}" = "tested" ]; then
 
   echo "# bitcoin.update.sh tested"
 
+  # check if a tested update is available
+  if [ ${#bitcoinVersion} -eq 0 ]; then
+    echo "# warn='no tested update available'"
+    echo "# thats OK on update from older versions"
+    /home/admin/config.scripts/blitz.conf.sh delete bitcoinInterimsUpdate 2>/dev/null
+    exit 1
+  fi
+
   # check for optional second parameter: forced update version
-  # --> only does the tested update if its the given version
-  # this is needed for recovery/update.
   fixedBitcoinVersion="$2"
   if [ ${#fixedBitcoinVersion} -gt 0 ]; then
-    echo "# checking for fixed version update: askedFor(${bitcoinVersion}) available(${bitcoinVersion})"
-    if [ "${fixedBitcoinVersion}" != "${bitcoinVersion}" ]; then
-      echo "# warn='required update version does not match'"
-      echo "# this is normal when the recovery script of a new RaspiBlitz version checks for an old update - just ignore"
+    echo "# checking for fixed version update: installed(${installedVersion}) requested(${fixedBitcoinVersion}) available(${bitcoinVersion})"
+    version_compare "${fixedBitcoinVersion}" "${bitcoinVersion}"
+    result=$?
+    if [ "${result}" -eq 2 ]; then
+      echo "# WARNING: requested version is newer then available tested --> ABORT (already up2date)"
       exit 1
     else
-      echo "# OK - update version is matching"
+      echo "# requested version is older or equal --> OK install available tested version"
     fi
   fi
+
+  # check against installed version
+  version_compare "${installedVersion}" "${bitcoinVersion}"
+  result=$?
+  if [ "${result}" -eq 2 ]; then
+    # this can happen if bitcoin install script already has a higher version then the tested version set by this script (see above)
+    echo "# installed version is newer then to be updated version --> ABORT"
+    echo 
+    exit 1
+  fi
+  if [ "${result}" -eq 0 ]; then
+    echo "# version is already installed --> ABORT"
+    echo 
+    exit 1
+  fi
+
   pathVersion=${bitcoinVersion}
 
 elif [ "${mode}" = "reckless" ]; then
