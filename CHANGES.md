@@ -1,4 +1,4 @@
-## What's new in Version 1.11.1rc3 of RaspiBlitz?
+## What's new in Version 1.11.1 of RaspiBlitz?
 
 - New: Set Timezone SSHMENU > SYSTEM > TIME [details](https://github.com/raspiblitz/raspiblitz/issues/1712)
 - New: Labelbase 2.2.1 [details](https://x.com/labelbase_space)
@@ -12,6 +12,7 @@
 - Update: lndmanage 0.16.0 [details](https://github.com/bitromortac/lndmanage)
 - Update: Lightning Terminal v0.12.5-alpha [details](https://github.com/lightninglabs/lightning-terminal/releases/tag/v0.12.5-alpha)
 - Update: PyBlock 2.7.2 [details](https://github.com/curly60e/pyblock/blob/master/README.md)
+- Update: Bitcoin Core 27.1 (as tested update) [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-27.1.md)
 - Experimental: charge-lnd install script [details](https://github.com/raspiblitz/raspiblitz/discussions/3955)
 - Experimental: config.scripts/lnd.signaddress.sh to easy sign messages on addresses on LND [details](https://github.com/raspiblitz/raspiblitz/issues/4540)
 - Experimental: config.scripts/bonus.elements.sh install elements blockchain platform [details](https://github.com/ElementsProject/elements)
@@ -20,14 +21,6 @@
 - Remove: Tallycoin-Connect [see service shutdown](https://x.com/djbooth007/status/1784409117563720082)
 - Remove: IP2Tor Shoplist [details](https://github.com/raspiblitz/raspiblitz/issues/4589)
 - Remove: CopyStation Script [details](https://github.com/raspiblitz/raspiblitz/issues/4538)
-
-### 1.11.1rc3 Release Candidate (JUST USE FOR TESTING, HIGHER RISK OF LOSING FUNDS!)
-
-- **MINIMAL SD CARD IMAGE ⮕ [raspiblitz-min-v1.11.1rc2-2024-07-24.img.gz](https://github.com/raspiblitz/raspiblitz/actions/runs/10067746544/artifacts/1732856482)**
-- SHA-256: b1bfd979c263526264105132752c1adf7d3e31a303b2e6c25b79501db47b968e (zip-file)
-
-- **FATPACK SD CARD IMAGE ⮕ [raspiblitz-fat-v1.11.1rc3-2024-07-25.img.gz](https://raspiblitz.fulmo.org/images/raspiblitz-fat-v1.11.1rc3-2024-07-25.img.gz)**
-- SHA-256: d280c99fc1ed55a7eb8540c3c0f361e55482af9c989715d15c9e834444d074ce
 
 ## What's new in Version 1.11.0 of RaspiBlitz?
 
