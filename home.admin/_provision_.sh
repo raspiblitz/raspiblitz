@@ -222,7 +222,7 @@ echo "### RUNNING PROVISIONING SERVICES ###" >> ${logFile}
 
 # BITCOIN INTERIMS UPDATE
 if [ ${#bitcoinInterimsUpdate} -gt 0 ]; then
-  /home/admin/_cache.sh set message "Provisioning Bitcoin Core update"
+  /home/admin/_cache.sh set message "Bitcoin Core update"
   if [ "${bitcoinInterimsUpdate}" == "reckless" ]; then
     # recklessly update Bitcoin Core to latest release on GitHub
     echo "Provisioning Bitcoin Core reckless interims update" >> ${logFile}
