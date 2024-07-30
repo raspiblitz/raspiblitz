@@ -47,14 +47,6 @@ if [ "${copyInProgress}" = "1" ]; then
   exit
 fi
 
-# special state: copystation
-if [ "${state}" = "copystation" ]; then
-  echo "Copy Station is Running ..."
-  echo "reboot to return to normal"
-  sudo /home/admin/XXcopyStation.sh
-  exit
-fi
-
 #####################################
 # SSH MENU LOOP
 # this loop runs until user exits or
@@ -98,8 +90,7 @@ do
     network \
     chain \
     lightning \
-    internet_localip \
-    system_vm_vagrant \
+    internet_localip
   )
 
   # background.scan is not ready yet
@@ -186,8 +177,14 @@ do
         sleep 3
         continue
       fi
-    else
+    elif [ "${lightning}" = "lnd" ]; then
       if [ "${btc_default_synced}" != "1" ] || [ "${ln_default_ready}" == "0" ] || [ "${ln_default_sync_chain}" == "0" ] || [ "${ln_default_sync_initial_done}" == "0" ]; then
+        /home/admin/setup.scripts/eventBlockchainSync.sh ssh
+        sleep 3
+        continue
+      fi  
+    else
+      if [ "${btc_default_synced}" != "1" ]; then
         /home/admin/setup.scripts/eventBlockchainSync.sh ssh
         sleep 3
         continue
@@ -280,25 +277,6 @@ MAINMENU > REPAIR > REPAIR-LND > RETRYSCB
   if [ "${setupPhase}" != "done" ]; then
 
     #echo "# DURING SETUP: Handle System State (${state})"
-
-    # when no HDD on Vagrant - just print info & exit (admin info & exit)
-    if [ "${state}" == "noHDD" ] && [ ${system_vm_vagrant} != "0" ]; then
-      echo "***********************************************************"
-      echo "VAGRANT INFO"
-      echo "***********************************************************"
-      echo "To connect a HDD data disk to your VagrantVM:"
-      echo "- shutdown VM with command: off"
-      echo "- open your VirtualBox GUI and select RaspiBlitzVM"
-      echo "- change the 'mass storage' settings"
-      echo "- add a second 'Primary Slave' drive to the already existing controller"
-      echo "- close VirtualBox GUI and run: vagrant up & vagrant ssh"
-      echo "***********************************************************"
-      echo "You can either create a new dynamic VDI with around 900GB or download"
-      echo "a VDI with a presynced blockchain to speed up setup. If you dont have 900GB"
-      echo "space on your laptop you can store the VDI file on an external drive."
-      echo "***********************************************************"
-      exit 1
-    fi
 
     # for all critical errors (admin info & exit)
     if [ "${state}" == "error" ] || [ "${state}" == "errorHDD" ]; then

@@ -1,17 +1,21 @@
 #!/bin/bash
 
+# deprecated May 2024
+# see or comment on: https://github.com/raspiblitz/raspiblitz/issues/2558
+
 # https://github.com/stakwork/sphinx-relay
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "config script to switch Sphinx-Relay on,off or update"
+  echo "The Sphinx-Relay is deprecated and may be removed in future versions."
+  echo "Needs to be manual installed manually after every update/recover"
   echo "bonus.sphinxrelay.sh on [?GITHUBUSER] [?BRANCH]"
   echo "bonus.sphinxrelay.sh [off|status|menu|write-environment|update]"
   echo "# DEVELOPMENT: TO SYNC WITH YOUR FORKED GITHUB-REPO"
   echo "bonus.sphinxrelay.sh github sync"
   exit 1
 fi
-
 source /mnt/hdd/raspiblitz.conf
 
 # show info menu
@@ -384,7 +388,12 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     /home/admin/config.scripts/bonus.nodejs.sh on
 
     # make sure keysend is on
-    /home/admin/config.scripts/lnd.keysend.sh on
+    keysendOn=$(cat /mnt/hdd/lnd/lnd.conf | grep -c '^accept-keysend=1')
+	  if [ "${keysendOn}" == "0" ]; then
+      echo "ERR: keysend is not activated in LND"
+      echo "Activate it in the LND config and restart LND"
+      exit 1
+    fi
 
     echo "*** Add the 'sphinxrelay' user ***"
     sudo adduser --system --group --home /home/sphinxrelay sphinxrelay

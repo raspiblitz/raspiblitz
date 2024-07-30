@@ -64,7 +64,15 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     source <(sudo /home/admin/build_sdcard.sh -EXPORT)
     GITHUB_USER="${defaultWEBUIuser}"
     GITHUB_REPO="${defaultWEBUIrepo}"
-    GITHUB_BRANCH="release/${githubBranch}"
+    
+    # use master branch when its an Release Candidate
+    source <(/home/admin/_cache.sh get codeVersion)
+    if [[ "$codeVersion" == *"rc"* ]]; then
+      echo "# RELEASE CANDIDATE: using master branch"
+      GITHUB_BRANCH="master"
+    else
+      GITHUB_BRANCH="release/${githubBranch}"
+    fi
     GITHUB_COMMITORTAG=""
   else
     # get parameters

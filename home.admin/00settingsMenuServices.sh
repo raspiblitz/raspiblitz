@@ -26,11 +26,11 @@ if [ ${#lit} -eq 0 ]; then lit="off"; fi
 if [ ${#lndg} -eq 0 ]; then lndg="off"; fi
 if [ ${#whitepaper} -eq 0 ]; then whitepaper="off"; fi
 if [ ${#chantools} -eq 0 ]; then chantools="off"; fi
-if [ ${#tallycoinConnect} -eq 0 ]; then tallycoinConnect="off"; fi
 if [ ${#helipad} -eq 0 ]; then helipad="off"; fi
 if [ ${#lightningtipbot} -eq 0 ]; then lightningtipbot="off"; fi
 if [ ${#fints} -eq 0 ]; then fints="off"; fi
 if [ ${#lndk} -eq 0 ]; then lndk="off"; fi
+if [ ${#labelbase} -eq 0 ]; then labelbase="off"; fi
 
 # show select dialog
 echo "run dialog ..."
@@ -47,6 +47,7 @@ if [ "${network}" == "bitcoin" ]; then
   OPTIONS+=(ja 'BTC JoinMarket+JoininBox menu' ${joinmarket})
   OPTIONS+=(za 'BTC Jam (JoinMarket WebUI)' ${jam})
   OPTIONS+=(wa 'BTC Download Bitcoin Whitepaper' ${whitepaper})
+  OPTIONS+=(ls 'BTC Labelbase' ${labelbase})
 fi
 
 # available for both LND & c-lightning
@@ -64,9 +65,7 @@ if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
   OPTIONS+=(oa 'LND Balance of Satoshis' ${bos})
   OPTIONS+=(ya 'LND PyBLOCK' ${pyblock})
   OPTIONS+=(ha 'LND ChannelTools (Fund Rescue)' ${chantools})
-  OPTIONS+=(xa 'LND Sphinx-Relay' ${sphinxrelay})
   OPTIONS+=(fa 'LND Helipad Boostagram reader' ${helipad})
-  OPTIONS+=(da 'LND Tallycoin Connect' ${tallycoinConnect})
   OPTIONS+=(lb 'LND LNDK (experimental BOLT 12)' ${lndk})
 fi
 
@@ -451,25 +450,6 @@ else
   echo "LNDg unchanged."
 fi
 
-# Sphinx Relay
-choice="off"; check=$(echo "${CHOICES}" | grep -c "xa")
-if [ ${check} -eq 1 ]; then choice="on"; fi
-if [ "${sphinxrelay}" != "${choice}" ]; then
-  echo "Sphinx-Relay Setting changed .."
-  anychange=1
-  sudo -u admin /home/admin/config.scripts/bonus.sphinxrelay.sh ${choice}
-  if [ "${choice}" =  "on" ]; then
-    echo "Giving service 1 minute to start up ... (please wait) ..."
-    sleep 60
-    whiptail --title " Installed Sphinx Server" --msgbox "\
-Sphinx Server was installed.\n
-Use the new 'SPHINX' entry in Main Menu for more info.\n
-" 10 35
-  fi
-else
-  echo "Sphinx Relay unchanged."
-fi
-
 # Helipad
 choice="off"; check=$(echo "${CHOICES}" | grep -c "fa")
 if [ ${check} -eq 1 ]; then choice="on"; fi
@@ -483,23 +463,6 @@ if [ "${helipad}" != "${choice}" ]; then
   fi
 else
   echo "Helipad setting unchanged."
-fi
-
-# Tallycoin
-choice="off"; check=$(echo "${CHOICES}" | grep -c "da")
-if [ ${check} -eq 1 ]; then choice="on"; fi
-if [ "${tallycoinConnect}" != "${choice}" ]; then
-  echo "Tallycoin Setting changed .."
-  anychange=1
-  sudo -u admin /home/admin/config.scripts/bonus.tallycoin-connect.sh ${choice}
-  if [ "${choice}" =  "on" ]; then
-    whiptail --title " Installed Tallycoin-Connect" --msgbox "\
-Tallycoin-Connect was installed.\n
-Use the new 'TALLY' entry in Main Menu for more info.\n
-" 10 45
-  fi
-else
-  echo "Tallycoin Setting unchanged."
 fi
 
 # LNDK
@@ -616,6 +579,21 @@ if [ "${whitepaper}" != "${choice}" ]; then
   fi
 else
   echo "Whitepaper setting unchanged."
+fi
+
+# labelbase process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "ls")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${labelbase}" != "${choice}" ]; then
+  echo "Labelbase setting changed .."
+  anychange=1
+  sudo -u admin /home/admin/config.scripts/bonus.labelbase.sh ${choice}
+  source /mnt/hdd/raspiblitz.conf
+  if [ "${labelbase}" =  "on" ]; then
+    sudo -u admin /home/admin/config.scripts/bonus.labelbase.sh menu
+  fi
+else
+  echo "Labelbase setting unchanged."
 fi
 
 # fints process choice  

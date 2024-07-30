@@ -148,7 +148,11 @@ if [ "$2" = "info" ]; then
   if [ "$1" == "signet" ]; then
     subfolder="signet/"
   fi
-  btc_blocks_data_kb=$(sudo du -s /mnt/hdd/bitcoin/${subfolder}blocks | cut -f1)
+
+  btc_blocks_data_kb=$(du -s /mnt/hdd/bitcoin/${subfolder}blocks | cut -f1)
+  if [ "${btc_blocks_data_kb}" == "" ]; then
+   btc_blocks_data_kb="0"
+  fi
 
   # parse data
   btc_blocks_headers=$(echo "${blockchaininfo}" | jq -r '.headers')
@@ -156,9 +160,14 @@ if [ "$2" = "info" ]; then
   btc_blocks_behind=$((${btc_blocks_headers} - ${btc_blocks_verified}))
   btc_sync_initialblockdownload=$(echo "${blockchaininfo}" | jq -r '.initialblockdownload' | grep -c 'true')
   btc_sync_progress=$(echo "${blockchaininfo}" | jq -r '.verificationprogress')
-  if (( $(awk 'BEGIN { print( '${btc_sync_progress}'<0.99995 ) }') )); then
+  if [[ "${btc_sync_progress}" == *"e-"* ]]; then
+    # is still very small - round up to 0.01%
+    btc_sync_percentage="0.01"
+  elif (( $(awk 'BEGIN { print( '${btc_sync_progress}'<0.99995 ) }') )); then
     # #3620 prevent displaying 100.00%, although incorrect because of rounding
-    btc_sync_percentage=$(awk 'BEGIN { printf( "%.2f%%", 100 * '${btc_sync_progress}') }')
+    btc_sync_percentage="${btc_sync_progress:2:2}.${btc_sync_progress:4:2}"
+    # remove trailing zero if present (just first one)
+    btc_sync_percentage="${btc_sync_percentage#0}"
   elif [ "${btc_blocks_headers}" != "" ] && [ "${btc_blocks_headers}" == "${btc_blocks_verified}" ]; then
     btc_sync_percentage="100.00"
   else
@@ -247,7 +256,7 @@ if [ "$2" = "peer-kickstart" ]; then
     if [ "$(cat /mnt/hdd/raspiblitz.conf | grep -c "^runBehindTor=on")" != "0" ]; then
       addressFormat="tor"
     else
-      source <(sudo /home/admin/config.scripts/internet.sh status global)
+      source <(/home/admin/config.scripts/internet.sh status global)
       if [ "${ipv6}" == "off" ]; then
         addressFormat="ipv4"
       else

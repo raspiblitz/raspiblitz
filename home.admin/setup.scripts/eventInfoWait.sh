@@ -147,12 +147,6 @@ ssh admin@${internet_localip}
 Use your Password A
 " 7 41
 
-elif [ "${eventID}" == "copystation" ] && [ "${mode}" == "lcd" ]; then
-
-    dialog --backtitle "${backtitle}" --title " Copy-Station Mode " --cr-wrap --infobox "
-${contentString}" 7 41
-
-
 elif [ "${eventID}" == "walletlocked" ] && [ "${mode}" == "lcd" ]; then
 
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "

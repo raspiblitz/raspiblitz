@@ -44,10 +44,15 @@ if [ "${btc_default_blocks_data_kb}" != "" ] && [ ${btc_default_blocks_data_kb} 
   OPTIONS=()
   OPTIONS+=(SELFSYNC "Run full self sync/validation (takes long)")
   OPTIONS+=(COPY "Copy from Computer/RaspiBlitz over LAN (3-10h)")
+  OPTIONS+=(TESTNET "Sync smaller Testnet (ONLY DEVELOPER)")
   CHOICESUB=$(dialog --backtitle "RaspiBlitz" --clear --title " Blockchain Sync/Validation " --menu "\nYour Blockchain is not fully synced yet.\nThe full validation might take multiple days to finish.\n\nHow do you want to proceed:" 13 66 7 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
   if [ "${CHOICESUB}" == "COPY" ]; then
     /home/admin/config.scripts/blitz.copychain.sh target
+  fi
+
+  if [ "${CHOICESUB}" == "TESTNET" ]; then
+    sudo /home/admin/config.scripts/bitcoin.testnet.sh activate
   fi
 
 fi

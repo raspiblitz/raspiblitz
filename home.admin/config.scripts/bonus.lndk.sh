@@ -46,6 +46,7 @@ protocol.custom-init=39
     echo "[Unit]
 Description=lndk Service
 After=lnd.service
+PartOf=lnd.service
 
 [Service]
 ExecStart=/home/bitcoin/lndk/target/debug/lndk --address=https://localhost:10009 --cert=/mnt/hdd/lnd/tls.cert --macaroon=/mnt/hdd/lnd/data/chain/bitcoin/mainnet/admin.macaroon

@@ -717,6 +717,7 @@ do
   if [ ${recheckRAID} -eq 1 ]; then
 
     # check if BTRTFS raid is active & scrub
+    logger -p info "background.sh - RAID data check"
     source <(/home/admin/config.scripts/blitz.datadrive.sh status)
     if [ "${isBTRFS}" == "1" ] && [ "${isRaid}" == "1" ]; then
       echo "STARTING BTRFS RAID DATA CHECK ..."

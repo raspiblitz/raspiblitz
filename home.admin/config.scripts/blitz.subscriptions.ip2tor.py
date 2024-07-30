@@ -622,9 +622,9 @@ def menuMakeSubscription(blitzServiceName, torAddress, torPort):
         if lastusedShop == choice_url_ip2torcom: lastusedShop="" 
 
         # FULMO Shop
-        choice_url_fulmo="fulmo7x6yvgz6zs2b2ptduvzwevxmizhq23klkenslt5drxx2physlqd.onion"
-        choices.append(("B", "Fulmo Shop"))
-        if lastusedShop == choice_url_fulmo: lastusedShop="" 
+        #choice_url_fulmo="fulmo7x6yvgz6zs2b2ptduvzwevxmizhq23klkenslt5drxx2physlqd.onion"
+        #choices.append(("B", "Fulmo Shop"))
+        #if lastusedShop == choice_url_fulmo: lastusedShop="" 
 
         # add before option if different from static options
         if len(lastusedShop) > 0: choices.append(("Y", lastusedShop))
@@ -632,30 +632,42 @@ def menuMakeSubscription(blitzServiceName, torAddress, torPort):
         # enter own shop address option
         choices.append(("X", "Enter a new Shop URL"))
 
-        # select dialog
+        # show a dialog info box
         d = Dialog(dialog="dialog", autowidgetsize=True)
         d.set_background_title("IP2TOR - Select Shop")
-        code, selected = d.menu(
-            "\nChoose your IP2Tor provider/shop:",
-            choices=choices, width=75, height=10, title="Select IP2Tor Shop")
+        d.msgbox('''
+At the moment there are no public IP2TOR services to link to.
+You could run one yourself - please check the GitHub repo:
+https://github.com/raulcano/docker-ip2tor-shop''', height=10, width=72)
+
+        # select dialog
+        #d = Dialog(dialog="dialog", autowidgetsize=True)
+        #d.set_background_title("IP2TOR - Select Shop")
+        #code, selected = d.menu(
+        #    "\nChoose your IP2Tor provider/shop:",
+        #    choices=choices, width=75, height=10, title="Select IP2Tor Shop")
 
         # if user canceled
-        if code != d.OK:
-            sys.exit(0)
+        #if code != d.OK:
+        #    sys.exit(0)
 
-        if selected == "A" : shopurl=choice_url_ip2torcom
-        if selected == "B" : shopurl=choice_url_fulmo
-        if selected == "Y" : shopurl=lastusedShop
+        #if selected == "A" : shopurl=choice_url_ip2torcom
+        #if selected == "B" : shopurl=choice_url_fulmo
+        #if selected == "Y" : shopurl=lastusedShop
 
         # input shop url
-        if selected == "X":
-            d = Dialog(dialog="dialog", autowidgetsize=True)
-            d.set_background_title("IP2TOR - Add new Shop")
-            code, shopurl = d.inputbox(
-                "Enter Address of the IP2TOR Shop (OR JUST PRESS OK):",
-                height=10, width=72, init=shopurl,
-                title="Shop Address")
-            if shopurl.find("://") > 0: shopurl = shopurl[shopurl.find("://") + 3:]
+        #if selected == "X":
+        d = Dialog(dialog="dialog", autowidgetsize=True)
+        d.set_background_title("IP2TOR - Add new Shop")
+        code, shopurl = d.inputbox(
+            "Enter Address of the IP2TOR Shop (OR JUST PRESS OK):",
+            height=10, width=72, init=shopurl,
+            title="Shop Address")
+        if shopurl.find("://") > 0: shopurl = shopurl[shopurl.find("://") + 3:]
+
+        # if user choose cancel
+        if code != d.OK:
+            sys.exit(0)
 
         # try & get host list from shop
         os.system('clear')

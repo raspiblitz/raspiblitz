@@ -55,6 +55,11 @@ function blitzhelp() {
   echo "  cache        check on chache system state"
   echo "  github       jumping directly into the options to change branch/repo/pr"
   echo
+  echo "Development with VM:"
+  echo "  sync         sync all repos from shared folder"
+  echo "  sync code    sync only main raspiblitz repo from shared folder"
+  echo "  sync api     sync only blitz api repo from shared folder"
+  echo  
   echo "Power:"
   echo "  restart      restart the node"
   echo "  off          shutdown the node"
@@ -81,7 +86,7 @@ function blitzhelp() {
   echo "  whitepaper   download the whitepaper from the blockchain to /home/admin/bitcoin.pdf"
   echo "  notifyme     wrapper for blitz.notify.sh that will send a notification using the configured method and settings"
   echo "  suez         visualize channels (for the default ln implementation and chain when installed)"
-  exho "  lnproxy      wrap invoices with lnproxy"
+  echo "  lnproxy      wrap invoices with lnproxy"
   echo
   echo "LND:"
   echo "  lncli        LND commandline interface (when installed)"
@@ -215,6 +220,13 @@ function patch() {
   echo
 }
 
+# command: sync
+# sync VM with shared folder
+function sync() {
+  sudo /home/admin/config.scripts/blitz.vm.sh sync ${1}
+  echo
+}
+
 # command: off
 function off() {
   echo "Command to power off your RaspiBlitz"
@@ -345,8 +357,8 @@ function bos() {
 # switch to the pyblock user for PyBLOCK
 function pyblock() {
   if [ $(grep -c "pyblock=on" < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
-    cd /home/pyblock
-    sudo -u pyblock /home/pyblock/.local/bin/pyblock
+    cd /home/pyblock/pyblock
+    sudo -u pyblock poetry run python -m pybitblock.console
   else
     echo "PyBlock is not installed - to install run:"
     echo "/home/admin/config.scripts/bonus.pyblock.sh on"

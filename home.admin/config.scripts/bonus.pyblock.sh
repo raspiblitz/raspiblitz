@@ -41,18 +41,23 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # install hexyl
   sudo apt-get install -y hexyl html2text
 
+
   ## WORKAROUND: see https://github.com/raspiblitz/raspiblitz/issues/4383
   # install via pip
   # sudo -u pyblock pip3 install pybitblock 
   # install from github
   sudo -u pyblock git clone https://github.com/curly60e/pyblock.git
   cd pyblock
-  sudo -u pyblock git checkout v2.2.3
-  sudo -u pyblock sed -i 's/jq = "1.2.2"/jq = "1.2.3"/' pyproject.toml
-  sudo -u pyblock pip install .
+  sudo -u pyblock git checkout v2.7.2
+  sudo -u pyblock sed -i 's/^python =.*$/python = ">=3.11,<4.0"/' pyproject.toml
+  sudo -u pyblock poetry lock
+  sudo -u pyblock poetry install
+  envPath=$(sudo -u pyblock poetry env info --path)
+  # sudo -u pyblock ${envPath}/bin/pip uninstall -y typer click
+  # sudo -u pyblock ${envPath}/bin/pip install typer==0.4.0 click==8.0.0
 
   # set PATH for the user
-  sudo bash -c "echo 'PATH=\$PATH:/home/pyblock/.local/bin/' >> /home/pyblock/.profile"
+  sudo bash -c "echo 'PATH=\$PATH:${envPath}/bin' >> /home/pyblock/.profile"
   
   # add user to group with admin access to lnd
   sudo /usr/sbin/usermod --append --groups lndadmin pyblock

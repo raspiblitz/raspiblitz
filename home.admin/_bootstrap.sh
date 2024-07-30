@@ -338,6 +338,34 @@ else
 fi
 
 ################################
+# GPT integrity check
+################################
+
+check_and_fix_gpt() {
+  local device=$1
+  output=$(sudo gdisk -l $device 2>&1)
+  if echo "$output" | grep -q "PMBR size mismatch"; then
+    echo "GPT PMBR size mismatch detected on $device. Fixing..." >> $logFile
+    sgdisk -e $device
+    echo "Fixed GPT PMBR size mismatch on $device." >> $logFile
+  elif echo "$output" | grep -q "The backup GPT table is not on the end of the device"; then
+    echo "Backup GPT table is not at the end of $device. Fixing..." >> $logFile
+    sgdisk -e $device
+    echo "Fixed backup GPT table location on $device." >> $logFile
+  else
+    echo "No GPT issues detected on $device." >> $logFile
+  fi
+}
+
+# List all block devices
+devices=$(lsblk -dno NAME | grep -E '^sd|^nvme|^vd|^mmcblk')
+
+# Check and fix each device
+for dev in $devices; do
+  check_and_fix_gpt /dev/$dev
+done
+
+################################
 # FS EXPAND
 # extend sd card to maximum capacity
 ################################
@@ -520,13 +548,15 @@ if [ "${baseimage}" == "raspios_arm64" ]; then
   isRaspberryPi5=$(cat /proc/device-tree/model 2>/dev/null | grep -c "Raspberry Pi 5")
   firmwareBuildNumber=$(rpi-eeprom-update | grep "CURRENT" | cut -d "(" -f2 | sed 's/[^0-9]*//g')
   echo "checking Firmware: isRaspberryPi5(${isRaspberryPi5}) firmwareBuildNumber(${firmwareBuildNumber})" >> $logFile
-  if [ ${isRaspberryPi5} -gt 0 ] && [ ${firmwareBuildNumber} -lt 1701887365 ]; then
-    echo "RaspberryPi 5 detected with old firmware ... do update." >> $logFile
+  if [ ${isRaspberryPi5} -gt 0 ] && [ ${firmwareBuildNumber} -lt 1708097321 ]; then # Fri 16 Feb 15:28:41 UTC 2024 (1708097321)
+    echo "updating Firmware" >> $logFile
+    echo "RaspberryPi 5 detected with old firmware (${firmwareBuildNumber}) ... do update." >> $logFile
     apt-get update -y
     apt-get upgrade -y
     apt-get install -y rpi-eeprom
     rpi-eeprom-update -a
     echo "Restarting ..." >> $logFile
+    sleep 3
     reboot
   else
     echo "RaspberryPi Firmware not in th need of update." >> $logFile
@@ -989,7 +1019,6 @@ if [ ${isMounted} -eq 0 ]; then
 
   # system has to wait before reboot to present like seed words and other info/options to user
   echo "BOOTSTRAP EXIT ... waiting for final setup controller to initiate final reboot." >> $logFile
-  echo "------------> You may login thru web browser to continue setup." >> $logFile
   exit 1
 
 else
