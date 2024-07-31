@@ -96,12 +96,14 @@ sudo -u admin curl https://raw.githubusercontent.com/bitcoin/bitcoin/master/cont
 source <(/home/admin/_cache.sh get codeVersion)
 if [[ "$codeVersion" == *"rc"* ]]; then
   echo "# RELEASE CANDIDATE: using development branches for WebUI & API"
+  exit 1
   echo "* Adding Raspiblitz API ..."
   sudo /home/admin/config.scripts/blitz.web.api.sh on "${defaultAPIuser}" "${defaultAPIrepo}" "dev" || exit 1
   echo "* Adding Raspiblitz WebUI ..."
   sudo /home/admin/config.scripts/blitz.web.ui.sh on "${defaultWEBUIuser}" "${defaultWEBUIrepo}" "master" || exit 1
 else
   echo "* Adding Raspiblitz API ..."
+  exit 1
   sudo /home/admin/config.scripts/blitz.web.api.sh on "${defaultAPIuser}" "${defaultAPIrepo}" "blitz-${branch}" || exit 1
   echo "* Adding Raspiblitz WebUI ..."
   sudo /home/admin/config.scripts/blitz.web.ui.sh on "${defaultWEBUIuser}" "${defaultWEBUIrepo}" "release/${branch}" || exit 1
