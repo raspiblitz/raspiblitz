@@ -25,7 +25,6 @@ if [[ "$codeVersion" == *"rc"* ]]; then
   isReleaseCandidate=1
 fi
 echo "# isReleaseCandidate(${isReleaseCandidate})"
-exit 1
 
 # make sure LCD is on (default for fatpack)
 /home/admin/config.scripts/blitz.display.sh set-display lcd
