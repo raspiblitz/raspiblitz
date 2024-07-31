@@ -18,6 +18,14 @@ elif [ -d /boot ]; then
 fi
 echo "# raspi_bootdir(${raspi_bootdir})"
 
+# determine if this is a release candidate
+source <(/home/admin/_cache.sh get codeVersion)
+isReleaseCandidate=0
+if [[ "$codeVersion" == *"rc"* ]]; then
+  isReleaseCandidate=1
+fi
+echo "# isReleaseCandidate(${isReleaseCandidate})"
+
 # make sure LCD is on (default for fatpack)
 /home/admin/config.scripts/blitz.display.sh set-display lcd
 
@@ -93,8 +101,7 @@ sudo -u admin curl -H "Accept: application/json; indent=4" https://bitnodes.io/a
 sudo -u admin curl https://raw.githubusercontent.com/bitcoin/bitcoin/master/contrib/seeds/nodes_main.txt -o /home/admin/fallback.bitcoin.nodes
 
 # use dev branch when its an Release Candidate
-source <(/home/admin/_cache.sh get codeVersion)
-if [[ "$codeVersion" == *"rc"* ]]; then
+if [ "${isReleaseCandidate}" == "1" ]; then
   echo "# RELEASE CANDIDATE: using development branches for WebUI & API"
   echo "* Adding Raspiblitz API ..."
   sudo /home/admin/config.scripts/blitz.web.api.sh on "${defaultAPIuser}" "${defaultAPIrepo}" "dev" || exit 1
