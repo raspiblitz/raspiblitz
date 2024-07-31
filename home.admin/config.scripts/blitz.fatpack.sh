@@ -18,8 +18,8 @@ elif [ -d /boot ]; then
 fi
 echo "# raspi_bootdir(${raspi_bootdir})"
 
-# determine if this is a release candidate
-source <(/home/admin/_cache.sh get codeVersion)
+# determine if this is a release candidate (use file not cache)
+codeVersion=$(cat /home/admin/_version.info | grep 'codeVersion="' | cut -d'"' -f2)
 isReleaseCandidate=0
 if [[ "$codeVersion" == *"rc"* ]]; then
   isReleaseCandidate=1
