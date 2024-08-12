@@ -34,7 +34,7 @@ variable "iso_url" {
 source "virtualbox-iso" "raspiblitz" {
   boot_command     = ["<esc><wait>auto preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed.cfg<wait><enter>"]
   boot_wait        = "5s"
-  disk_size        = "16384"
+  disk_size        = 16384
   guest_os_type    = "Debian_64"
   headless         = false
   http_directory   = "http"
@@ -58,7 +58,7 @@ build {
   }
 
   provisioner "shell" {
-    execute_command = "echo 'vagrant' | {{ .Vars }} sudo -S -E bash '{{ .Path }}' -i 0 -b ${var.branch} -u ${var.github_user} -d headless -w off"
+    execute_command = "echo 'vagrant' | {{ .Vars }} sudo -S -E bash '{{ .Path }}' -i 0 -b ${var.branch} -u ${var.github_user} -d headless -w off -f 0"
     script          = "../../../build_sdcard.sh"
   }
 

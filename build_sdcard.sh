@@ -275,7 +275,7 @@ echo "baseimage=${baseimage}"
 raspi_configfile="/boot/config.txt"
 raspi_commandfile="/boot/cmdline.txt"
 if [ -d /boot/firmware ];then
-  raspi_configfile="/boot/firmware/config.txt" 
+  raspi_configfile="/boot/firmware/config.txt"
   raspi_commandfile="/boot/firmware/cmdline.txt"
 fi
 echo "raspi_configfile=${raspi_configfile}"
@@ -369,7 +369,7 @@ echo -e "\n*** SOFTWARE UPDATE ***"
 # sqlite3 -> database
 # fdisk -> create partitions
 # lsb-release -> needed to know which distro version we're running to add APT sources
-general_utils="sudo policykit-1 htop git curl bash-completion vim jq dphys-swapfile bsdmainutils autossh telnet vnstat parted dosfstools fbi sysbench build-essential dialog bc python3-dialog unzip whois fdisk lsb-release smartmontools rsyslog resolvconf"
+general_utils="sudo policykit-1 htop git curl bash-completion vim jq dphys-swapfile bsdmainutils autossh telnet vnstat parted dosfstools fbi sysbench build-essential dialog bc python3-dialog unzip whois fdisk lsb-release smartmontools rsyslog"
 # add btrfs-progs if not bookworm on aarch64
 [ "${architecture}" = "aarch64" ] && ! grep "12 (bookworm)" < /etc/os-release && general_utils="${general_utils} btrfs-progs"
 # python3-mako --> https://github.com/rootzoll/raspiblitz/issues/3441
