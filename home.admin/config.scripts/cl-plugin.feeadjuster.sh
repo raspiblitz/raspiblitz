@@ -18,6 +18,7 @@ if [ "$1" = "on" ];then
   if [ ! -f "/home/bitcoin/cl-plugins-available/plugins/${plugin}/${plugin}.py" ]; then
     cd /home/bitcoin/cl-plugins-available || exit 1
     sudo -u bitcoin git clone https://github.com/lightningd/plugins.git
+    sudo -u bitcoin pip config set global.break-system-packages true
     sudo -u bitcoin pip install -r /home/bitcoin/cl-plugins-available/plugins/${plugin}/requirements.txt
   fi
   if [ ! -L /home/bitcoin/${netprefix}cl-plugins-enabled/${plugin}.py ];then
