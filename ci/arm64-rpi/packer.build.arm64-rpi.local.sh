@@ -29,7 +29,7 @@ echo -e "\n# Install Packer..."
 if ! packer version 2>/dev/null; then
   curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
   sudo apt-add-repository -y "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
-  sudo apt-get update -y && sudo apt-get install packer -y || exit 1
+  sudo apt-get update -y && sudo apt-get install packer=1.10.0-1 -y || exit 1
 else
   echo "# Packer is installed"
 fi
@@ -52,7 +52,7 @@ echo -e "\n# Download the packer-builder-arm plugin"
 git clone https://github.com/mkaczanowski/packer-builder-arm
 cd packer-builder-arm
 # https://github.com/mkaczanowski/packer-builder-arm/releases
-git reset --hard "v1.0.7"
+git reset --hard "v1.0.9"
 echo -e "\n# Build the packer-builder-arm plugin"
 go mod download
 go build || exit 1
