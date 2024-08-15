@@ -46,10 +46,12 @@ function installDependencies() {
   # for clnrest (since v23.11)
   sudo apt-get install -y python3-json5 python3-flask python3-gunicorn
   # upgrade pip
+  sudo pip3 config set global.break-system-packages true
   sudo pip3 install --upgrade pip
   # for clnrest
-  pip3 install mako
+  sudo pip3 install mako
   cd /home/bitcoin/lightning || exit 1
+  sudo -u bitcoin pip3 config set global.break-system-packages true
   sudo -u bitcoin pip3 install --user -r plugins/clnrest/requirements.txt
   # poetry
   sudo pip3 install poetry

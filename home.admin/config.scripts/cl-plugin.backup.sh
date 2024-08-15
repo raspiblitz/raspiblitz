@@ -40,9 +40,11 @@ function install() {
   if [ $($lightningcli_alias plugin list 2>/dev/null | grep -c "/${plugin}") -eq 0 ]; then
     echo "# Checking dependencies"
     # upgrade pip
+    sudo pip3 config set global.break-system-packages true
     sudo pip3 install --upgrade pip
 
     # pip dependencies
+    sudo -u bitcoin pip3 config set global.break-system-packages true
     sudo -u bitcoin pip3 install pyln-client tqdm psutil
 
     # poetry

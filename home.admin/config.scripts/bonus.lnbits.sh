@@ -589,6 +589,7 @@ if [ "$1" = "sync" ] || [ "$1" = "repo" ]; then
   echo "# check if poetry in installed, if not install it"
   if ! sudo -u lnbits which poetry; then
     echo "# install poetry"
+    sudo pip3 config set global.break-system-packages true
     sudo pip3 install --upgrade pip
     sudo pip3 install poetry
   fi
@@ -650,6 +651,7 @@ if [ "$1" = "install" ]; then
   # check if poetry in installed, if not install it
   if ! sudo -u lnbits which poetry; then
     echo "# install poetry"
+    sudo pip3 config set global.break-system-packages true
     sudo pip3 install --upgrade pip
     sudo pip3 install poetry
   fi
