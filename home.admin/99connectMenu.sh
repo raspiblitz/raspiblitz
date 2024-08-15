@@ -79,7 +79,7 @@ case $CHOICE in
     sudo /home/admin/config.scripts/lnd.export.sh
     exit 0;;
   RESET-TLS)
-    sudo /home/admin/config.scripts/internetselfsignedcert.sh reset
+    sudo /home/admin/config.scripts/internet.selfsignedcert.sh reset
     exit 0;;
   ALBY)
     /home/admin/config.scripts/bonus.alby.sh
