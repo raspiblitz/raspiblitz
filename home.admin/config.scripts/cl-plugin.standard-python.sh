@@ -45,6 +45,7 @@ if [ "$1" = "on" ]; then
   else
     if [ $($lightningcli_alias | grep -c "/${plugin}") -eq 0 ]; then
       echo "# Just start the ${plugin} plugin"
+      sudo -u bitcoin pip config set global.break-system-packages true
       sudo -u bitcoin pip install -r /home/bitcoin/cl-plugins-available/plugins/${plugin}/requirements.txt
       $lightningcli_alias plugin start /home/bitcoin/cl-plugins-available/plugins/${plugin}/${plugin}.py
     fi
