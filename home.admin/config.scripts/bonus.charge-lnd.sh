@@ -74,7 +74,7 @@ Description=charge-lnd
 After=lnd.service
 
 [Service]
-ExecStart=/home/bitcoin/charge-lnd/bin/charge-lnd -c /mnt/hdd/app-data/charge-lnd/charge.config
+ExecStart=bash -c '. /home/bitcoin/charge-lnd/bin/activate; /home/bitcoin/charge-lnd/bin/charge-lnd -c /mnt/hdd/app-data/charge-lnd/charge.config'
 User=bitcoin
 Group=bitcoin
 Type=simple
