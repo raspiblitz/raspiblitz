@@ -217,6 +217,7 @@ if [ "$1" = "new" ] || [ "$1" = "new-force" ] || [ "$1" = "seed" ] || [ "$1" = "
 
   # check for https://github.com/trezor/python-mnemonic
   if [ $(pip list | grep -c mnemonic) -eq 0 ];then
+    pip config set global.break-system-packages true
     pip install mnemonic==0.19 1>/dev/null
   fi
 

@@ -490,6 +490,7 @@ alias ${netprefix}lndconf=\"sudo nano /home/bitcoin/.lnd/${netprefix}lnd.conf\"\
   fi
 
   # needed to make lnd.newwallet.py work
+  pip config set global.break-system-packages true
   pip install --upgrade google-api-python-client
 
   exit 0
