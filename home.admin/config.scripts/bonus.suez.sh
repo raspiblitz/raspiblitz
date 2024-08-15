@@ -35,6 +35,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   cd /home/bitcoin || exit 1
 
   # poetry
+  sudo pip3 config set global.break-system-packages true
   sudo pip3 install --upgrade pip
   sudo pip3 install poetry
 
@@ -80,6 +81,7 @@ if [ "$1" = "update" ]; then
   echo "# UPDATE SUEZ"
   cd /home/bitcoin || exit 1
   # dependency
+  sudo pip3 config set global.break-system-packages true
   sudo pip3 install --upgrade pip
   sudo pip3 install poetry
   # download source code
