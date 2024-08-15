@@ -2,8 +2,8 @@
 
 This is just a quick patch release for v1.11.1
 
+- Fix: Core Lightning fresh wallet setup #4170
 - Fix: Update Tor repo siging keys
-
 
 ## What's new in Version 1.11.1 of RaspiBlitz?
 
