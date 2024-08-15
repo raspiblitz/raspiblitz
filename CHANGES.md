@@ -1,3 +1,10 @@
+## What's new in Version 1.11.2 of RaspiBlitz?
+
+This is just a quick patch release for v1.11.1
+
+- Fix: Update Tor repo siging keys
+
+
 ## What's new in Version 1.11.1 of RaspiBlitz?
 
 - New: Set Timezone SSHMENU > SYSTEM > TIME [details](https://github.com/raspiblitz/raspiblitz/issues/1712)
