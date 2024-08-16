@@ -146,7 +146,7 @@ if [ "${ARCH}" == "arm" ] && [ "${TYPE}" == "min" ]; then
   PACKERFINALFILE="raspiblitz-min-v${codeVersion}-${dateString}.img"
 elif [ "${ARCH}" == "arm" ] && [ "${TYPE}" == "fat" ]; then
   PACKERTARGET="arm64-rpi-fatpack-image" 
-  PACKERBUILDPATH="./raspiblitz/ci/arm64-rpi/packer-builder-arm/TODO" #TODO
+  PACKERBUILDPATH="./raspiblitz/ci/arm64-rpi/packer-builder-arm/raspiblitz-arm64-rpi-fat.img"
   PACKERFINALFILE="raspiblitz-fat-v${codeVersion}-${dateString}.img"
 elif [ "${ARCH}" == "x86" ] && [ "${TYPE}" == "min" ]; then
   PACKERTARGET="amd64-lean-server-legacyboot-image"
@@ -188,7 +188,7 @@ echo "# moving build to timestamped folder ./${BUILDFOLDER}"
 cd ..
 mkdir "${BUILDFOLDER}" 2>/dev/null
 
-#check that Build folder exists
+# check that Build folder exists
 if [ ! -d "./${BUILDFOLDER}" ]; then
   echo "# FAILED CREATING BUILD FOLDER: ./${BUILDFOLDER}"
   exit 1
