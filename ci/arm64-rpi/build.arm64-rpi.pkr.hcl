@@ -11,14 +11,14 @@ source "arm" "raspiblitz-arm64-rpi" {
   file_target_extension = "xz"
   file_unarchive_cmd    = ["xz", "--decompress", "$ARCHIVE_PATH"]
   file_urls             = [var.image_link]
-  image_build_method    = "resize"
+  image_build_method    = "qemu"
   image_chroot_env      = ["PATH=/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin"]
   image_partitions {
     filesystem   = "vfat"
     mountpoint   = "/boot"
     name         = "boot"
     size         = "256M"
-    start_sector = "8192"
+    start_sector = "2048"
     type         = "c"
   }
   image_partitions {
@@ -31,9 +31,10 @@ source "arm" "raspiblitz-arm64-rpi" {
   }
   image_path                   = "raspiblitz-arm64-rpi-${var.pack}.img"
   image_size                   = var.image_size
-  image_type                   = "dos"
-  qemu_binary_destination_path = "/usr/bin/qemu-arm-static"
-  qemu_binary_source_path      = "/usr/bin/qemu-arm-static"
+  image_type                   = "gpt"
+  qemu_binary_destination_path = "/usr/bin/qemu-system-arm"
+  qemu_binary_source_path      = "/usr/bin/qemu-system-arm"
+  qemu_args                    = ["-M", "raspi4b"]
 }
 
 build {
