@@ -77,17 +77,17 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   dynDomain=''
   dynUpdateUrl=''
 
-  # when additional parameters are given
-  if [ $# > 1 ]; then
+# when additional parameters are given
+if [ $# -gt 1 ]; then
 
-    # 2. parameter is dyndomain (required)
-    dynDomain=$2
+  # 2. parameter is dyndomain (required)
+  dynDomain=$2
 
-    # 3. parameter is the update url (optional - could be that router is doing the update)
-    if [ $# > 2 ]; then
-      dynUpdateUrl=$3
-    fi
+  # 3. parameter is the update url (optional - could be that router is doing the update)
+  if [ $# -gt 2 ]; then
+    dynUpdateUrl=$3
   fi
+fi
 
   # if no parameters --> ask for it interactive
   if [ ${#dynDomain} -eq 0 ]; then

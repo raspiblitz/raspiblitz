@@ -61,10 +61,10 @@ if [ "${needsExpansion}" == "1" ]; then
 fi
 
 apt_install() {
-  sudo DEBIAN_FRONTEND=noninteractive apt install -y ${@}
+  sudo DEBIAN_FRONTEND=noninteractive apt install -y "${@}"
   if [ $? -eq 100 ]; then
     echo "FAIL! apt failed to install needed packages!"
-    echo ${@}
+    echo "${@}"
     exit 1
   fi
 }

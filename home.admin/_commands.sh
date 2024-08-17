@@ -278,7 +278,7 @@ function headless() {
 
 # command: cache
 function cache() {
-  sudo /home/admin/_cache.sh $@
+  sudo /home/admin/_cache.sh "$@"
 }
 
 # command: torthistx
