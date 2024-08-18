@@ -121,21 +121,21 @@ sudo cp -a /home/blitzapi/blitz_web/build/* /home/admin/assets/nginx/www_public
 sudo chown admin:admin /home/admin/assets/nginx/www_public
 sudo rm -r /home/blitzapi/blitz_web/build/*
 
-echo "* Adding Code&Compile for WEBUI-APP: LNBITS"
+echo "* Adding Code&Compile for WEBUI-APP: LNBITS ###############################"
 /home/admin/config.scripts/bonus.lnbits.sh install || exit 1
-echo "* Adding Code&Compile for WEBUI-APP: JAM"
+echo "* Adding Code&Compile for WEBUI-APP: JAM ###############################"
 /home/admin/config.scripts/bonus.jam.sh install || exit 1
-echo "* Adding Code&Compile for WEBUI-APP: BTCPAYSERVER"
-/home/admin/config.scripts/bonus.btcpayserver.sh install || exit 1
-echo "* Adding Code&Compile for WEBUI-APP: RTL"
+#echo "* Adding Code&Compile for WEBUI-APP: BTCPAYSERVER"
+#/home/admin/config.scripts/bonus.btcpayserver.sh install || exit 1
+echo "* Adding Code&Compile for WEBUI-APP: RTL ###############################"
 /home/admin/config.scripts/bonus.rtl.sh install || exit 1
-echo "* Adding Code&Compile for WEBUI-APP: THUNDERHUB"
+echo "* Adding Code&Compile for WEBUI-APP: THUNDERHUB ###############################"
 /home/admin/config.scripts/bonus.thunderhub.sh install || exit 1
-echo "* Adding Code&Compile for WEBUI-APP: BTC RPC EXPLORER"
+echo "* Adding Code&Compile for WEBUI-APP: BTC RPC EXPLORER ###############################"
 /home/admin/config.scripts/bonus.btc-rpc-explorer.sh install || exit 1
-echo "* Adding Code&Compile for WEBUI-APP: MEMPOOL"
+echo "* Adding Code&Compile for WEBUI-APP: MEMPOOL ###############################"
 /home/admin/config.scripts/bonus.mempool.sh install || exit 1
-echo "* Adding Code&Compile for WEBUI-APP: ELECTRS"
+echo "* Adding Code&Compile for WEBUI-APP: ELECTRS ###############################"
 /home/admin/config.scripts/bonus.electrs.sh install || exit 1
 
 # set default display to LCD
