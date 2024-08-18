@@ -115,9 +115,9 @@ function BtcPayService() {
     databaseOption=""
   fi
   # see the configuration options with:
-  # sudo -u btcpay /home/btcpay/dotnet/dotnet run --no-launch-profile --no-build -c Release --project "/home/btcpay/btcpayserver/BTCPayServer/BTCPayServer.csproj" -- -h
+  # sudo -u btcpay /home/btcpay/.dotnet/dotnet run --no-launch-profile --no-build -c Release --project "/home/btcpay/btcpayserver/BTCPayServer/BTCPayServer.csproj" -- -h
   # run manually to debug:
-  # sudo -u btcpay /home/btcpay/dotnet/dotnet run --no-launch-profile --no-build -c Release --project "/home/btcpay/btcpayserver/BTCPayServer/BTCPayServer.csproj" -- --sqlitefile=sqllite.db
+  # sudo -u btcpay /home/btcpay/.dotnet/dotnet run --no-launch-profile --no-build -c Release --project "/home/btcpay/btcpayserver/BTCPayServer/BTCPayServer.csproj" -- --sqlitefile=sqllite.db
   echo "# create the btcpayserver.service"
   echo "
 [Unit]
@@ -126,7 +126,7 @@ Requires=nbxplorer.service
 After=nbxplorer.service
 
 [Service]
-ExecStart=/home/btcpay/dotnet/dotnet run --no-launch-profile --no-build \
+ExecStart=/home/btcpay/.dotnet/dotnet run --no-launch-profile --no-build \
  -c Release --project \"/home/btcpay/btcpayserver/BTCPayServer/BTCPayServer.csproj\" ${databaseOption}
 User=btcpay
 Group=btcpay
@@ -451,40 +451,15 @@ if [ "$1" = "install" ]; then
   sudo adduser --system --group --home /home/btcpay btcpay
   cd /home/btcpay || exit 1
 
-  echo "# install .NET"
-  # https://dotnet.microsoft.com/en-us/download/dotnet/8.0
-  sudo apt-get -y install libunwind8 gettext libssl1.0
-  cpu=$(uname -m)
-  if [ "${cpu}" = "aarch64" ]; then
-    binaryVersion="arm64"
-    dotNetdirectLink="https://download.visualstudio.microsoft.com/download/pr/43e09d57-d0f5-4c92-a75a-b16cfd1983a4/cba02bd4f7c92fb59e22a25573d5a550/dotnet-sdk-8.0.100-linux-arm64.tar.gz"
-    dotNetChecksum="3296d2bc15cc433a0ca13c3da83b93a4e1ba00d4f9f626f5addc60e7e398a7acefa7d3df65273f3d0825df9786e029c89457aea1485507b98a4df2a1193cd765"
-  elif [ "${cpu}" = "x86_64" ]; then
-    binaryVersion="x64"
-    dotNetdirectLink="https://download.visualstudio.microsoft.com/download/pr/5226a5fa-8c0b-474f-b79a-8984ad7c5beb/3113ccbf789c9fd29972835f0f334b7a/dotnet-sdk-8.0.100-linux-x64.tar.gz"
-    dotNetChecksum="13905ea20191e70baeba50b0e9bbe5f752a7c34587878ee104744f9fb453bfe439994d38969722bdae7f60ee047d75dda8636f3ab62659450e9cd4024f38b2a5"
-  else
-    echo "# FAIL! CPU (${cpu}) not supported."
-    echo "result='dotnet cpu not supported'"
-    exit 1
-  fi
-  dotNetName="dotnet-sdk-8.0.100-linux-${binaryVersion}.tar.gz"
-  sudo rm /home/btcpay/${dotnetName} 2>/dev/null
-  sudo -u btcpay wget "${dotNetdirectLink}" -O "${dotNetName}"
-  # check binary is was not manipulated (checksum test)
-  actualChecksum=$(sha512sum /home/btcpay/${dotNetName} | cut -d " " -f1)
-  if [ "${actualChecksum}" != "${dotNetChecksum}" ]; then
-    echo "# FAIL # Downloaded ${dotNetName} not matching SHA512 checksum: ${dotNetChecksum}"
-    echo "result='dotnet wrong checksum'"
-    exit 1
-  fi
-  sudo -u btcpay mkdir /home/btcpay/dotnet
-  sudo -u btcpay tar -xvf ${dotNetName} -C /home/btcpay/dotnet
-  sudo rm -f *.tar.gz*
+  sudo -u btcpay wget https://dot.net/v1/dotnet-install.sh -O dotnet-install.sh
+  sudo -u btcpay chmod +x dotnet-install.sh
+  sudo -u btcpay ./dotnet-install.sh --channel 8.0
+  sudo -u btcpay export DOTNET_ROOT=$HOME/.dotnet
+  sudo -u btcpay export PATH=$PATH:$DOTNET_ROOT:$DOTNET_ROOT/tools
   echo "DOTNET_CLI_TELEMETRY_OPTOUT=1" | sudo tee -a /etc/environment
 
   # NBXplorer
-  echo "# Install NBXplorer $NBXplorerVersion"
+  echo "# Install NBXplorer $NBXplorerVersion (NEW)"
   cd /home/btcpay || exit 1
   echo "# Download the NBXplorer source code $NBXplorerVersion"
   sudo -u btcpay git clone https://github.com/dgarage/NBXplorer.git 2>/dev/null
@@ -497,7 +472,7 @@ if [ "$1" = "install" ]; then
   sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh "${NBXPGPsigner}" "${NBXPGPpubkeyLink}" "${NBXPGPpubkeyFingerprint}" || exit 1
   echo "# Build NBXplorer $NBXplorerVersion"
   # from the build.sh with path
-  sudo -u btcpay /home/btcpay/dotnet/dotnet build -c Release NBXplorer/NBXplorer.csproj || exit 1
+  sudo -u btcpay /home/btcpay/.dotnet/dotnet build -c Release NBXplorer/NBXplorer.csproj || exit 1
 
   # BTCPayServer
   echo "# Install BTCPayServer"
@@ -513,7 +488,7 @@ if [ "$1" = "install" ]; then
 
   echo "# Build BTCPayServer $BTCPayVersion"
   # from the build.sh with path
-  sudo -u btcpay /home/btcpay/dotnet/dotnet build -c Release \
+  sudo -u btcpay /home/btcpay/.dotnet/dotnet build -c Release \
     /home/btcpay/btcpayserver/BTCPayServer/BTCPayServer.csproj || exit 1
 
   exit 0
@@ -532,7 +507,7 @@ if [ "$1" = "uninstall" ]; then
   fi
 
   # clear dotnet cache
-  /home/btcpay/dotnet/dotnet nuget locals all --clear 2>/dev/null
+  /home/btcpay/.dotnet/dotnet nuget locals all --clear 2>/dev/null
 
   # remove dotnet
   sudo rm -rf /usr/share/dotnet 2>/dev/null
@@ -623,11 +598,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo chown -R btcpay:btcpay /home/btcpay/.btcpayserver
 
   ## see the configuration options with:
-  # sudo -u btcpay /home/btcpay/dotnet/dotnet run --no-launch-profile --no-build -c Release --project "NBXplorer/NBXplorer.csproj" -c /home/btcpay/.nbxplorer/Main/settings.config -h
+  # sudo -u btcpay /home/btcpay/.dotnet/dotnet run --no-launch-profile --no-build -c Release --project "NBXplorer/NBXplorer.csproj" -c /home/btcpay/.nbxplorer/Main/settings.config -h
   ##sudo systenmct run manually to debug:
   # sudo su - btcpay
   # cd NBXplorer
-  # /home/btcpay/dotnet/dotnet run --no-launch-profile --no-build -c Release --project "NBXplorer/NBXplorer.csproj" -- $@
+  # /home/btcpay/.dotnet./dotnet run --no-launch-profile --no-build -c Release --project "NBXplorer/NBXplorer.csproj" -- $@
   echo "# create the nbxplorer.service"
   echo "
 [Unit]
@@ -637,7 +612,7 @@ After=bitcoind.service
 
 [Service]
 WorkingDirectory=/home/btcpay/NBXplorer
-ExecStart=/home/btcpay/dotnet/dotnet run --no-launch-profile --no-build \
+ExecStart=/home/btcpay/.dotnet/dotnet run --no-launch-profile --no-build \
  -c Release --project \"NBXplorer/NBXplorer.csproj\" -- \$@
 User=btcpay
 Group=btcpay
@@ -878,7 +853,7 @@ if [ "$1" = "update" ]; then
     echo "# Build NBXplorer $TAG"
     # from the build.sh with path
     sudo systemctl stop nbxplorer
-    sudo -u btcpay /home/btcpay/dotnet/dotnet build -c Release NBXplorer/NBXplorer.csproj || exit 1
+    sudo -u btcpay /home/btcpay/.dotnet/dotnet build -c Release NBXplorer/NBXplorer.csproj || exit 1
 
     # whitelist localhost in bitcoind
     if ! sudo grep -Eq "^whitelist=127.0.0.1" /mnt/hdd/bitcoin/bitcoin.conf; then
@@ -932,7 +907,7 @@ if [ "$1" = "update" ]; then
     echo "# Build BTCPayServer $TAG"
     # from the build.sh with path
     sudo systemctl stop btcpayserver
-    sudo -u btcpay /home/btcpay/dotnet/dotnet build -c Release /home/btcpay/btcpayserver/BTCPayServer/BTCPayServer.csproj || exit 1
+    sudo -u btcpay /home/btcpay/.dotnet/dotnet build -c Release /home/btcpay/btcpayserver/BTCPayServer/BTCPayServer.csproj || exit 1
     sudo systemctl start btcpayserver
     echo "# Updated BTCPayServer to $TAG"
   fi
