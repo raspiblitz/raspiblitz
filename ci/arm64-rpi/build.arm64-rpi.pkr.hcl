@@ -5,7 +5,7 @@ variable "image_link" { default = "https://downloads.raspberrypi.org/raspios_arm
 variable "image_checksum" { default = "7e53a46aab92051d523d7283c080532bebb52ce86758629bf1951be9b4b0560f" }
 variable "image_size" { default = "24G" }
 
-source "arm" "raspiblitz-arm64-rpi" {
+source "qemu" "raspiblitz-arm64-rpi" {
   file_checksum_type    = "sha256"
   file_checksum         = var.image_checksum
   file_target_extension = "xz"
@@ -34,6 +34,15 @@ source "arm" "raspiblitz-arm64-rpi" {
   image_type                   = "dos"
   qemu_binary_destination_path = "/usr/bin/qemu-arm-static"
   qemu_binary_source_path      = "/usr/bin/qemu-arm-static"
+    # If required, you can specify CPU and memory settings
+  qemuargs = [
+    ["-m", "1024M"],   # Set memory to 1GB
+    ["-smp", "4"]      # Set the number of CPU cores
+  ]
+
+  # Use the same architecture as the host (ARM)
+  accelerator = "none"
+  headless = true
 }
 
 build {
