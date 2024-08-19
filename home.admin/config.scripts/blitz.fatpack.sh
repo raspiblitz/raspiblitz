@@ -87,6 +87,12 @@ echo "* Adding nodeJS Framework ..."
 echo "* Optional Packages (may be needed for extended features)"
 apt_install qrencode secure-delete fbi msmtp unclutter xterm python3-pyqt5 xfonts-terminus python3-jinja2 socat libatlas-base-dev hexyl
 
+# moving further up to quicker test for errors on build with these
+echo "* Adding Code&Compile for WEBUI-APP: ELECTRS ###############################"
+/home/admin/config.scripts/bonus.electrs.sh install || exit 1
+echo "* Adding Code&Compile for WEBUI-APP: BTCPAYSERVER"
+/home/admin/config.scripts/bonus.btcpayserver.sh install || exit 1
+
 echo "* Adding LND ..."
 /home/admin/config.scripts/lnd.install.sh install || exit 1
 
@@ -125,8 +131,6 @@ echo "* Adding Code&Compile for WEBUI-APP: LNBITS ##############################
 /home/admin/config.scripts/bonus.lnbits.sh install || exit 1
 echo "* Adding Code&Compile for WEBUI-APP: JAM ###############################"
 /home/admin/config.scripts/bonus.jam.sh install || exit 1
-#echo "* Adding Code&Compile for WEBUI-APP: BTCPAYSERVER"
-#/home/admin/config.scripts/bonus.btcpayserver.sh install || exit 1
 echo "* Adding Code&Compile for WEBUI-APP: RTL ###############################"
 /home/admin/config.scripts/bonus.rtl.sh install || exit 1
 echo "* Adding Code&Compile for WEBUI-APP: THUNDERHUB ###############################"
@@ -135,8 +139,6 @@ echo "* Adding Code&Compile for WEBUI-APP: BTC RPC EXPLORER ####################
 /home/admin/config.scripts/bonus.btc-rpc-explorer.sh install || exit 1
 echo "* Adding Code&Compile for WEBUI-APP: MEMPOOL ###############################"
 /home/admin/config.scripts/bonus.mempool.sh install || exit 1
-echo "* Adding Code&Compile for WEBUI-APP: ELECTRS ###############################"
-/home/admin/config.scripts/bonus.electrs.sh install || exit 1
 
 # set default display to LCD
 sudo /home/admin/config.scripts/blitz.display.sh set-display lcd
