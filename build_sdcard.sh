@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #########################################################################
-# Build your SD card image based on: 2023-12-05-raspios-bookworm-arm64.img.xz
+# Build your SD card image based on: 2024-03-15-raspios-bookworm-arm64.img.xz
 # https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2024-03-15/
 # SHA256: 7e53a46aab92051d523d7283c080532bebb52ce86758629bf1951be9b4b0560f
 # also change in: raspiblitz/ci/arm64-rpi/build.arm64-rpi.pkr.hcl
