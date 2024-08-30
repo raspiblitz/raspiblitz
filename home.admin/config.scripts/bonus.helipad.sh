@@ -1,13 +1,14 @@
 #!/bin/bash
 
 #https://github.com/Podcastindex-org/helipad
-HELIPAD_VERSION="v0.1.10"
+HELIPAD_VERSION="v0.2.0"
 HELIPAD_USER=helipad
 HELIPAD_HOME_DIR=/home/$HELIPAD_USER
 HELIPAD_DATA_DIR=/mnt/hdd/app-data/helipad
 HELIPAD_BUILD_DIR=$HELIPAD_HOME_DIR/helipad
 HELIPAD_RELEASE_URL="https://github.com/Podcastindex-org/helipad/archive/refs/tags/$HELIPAD_VERSION.tar.gz"
 HELIPAD_DB=$HELIPAD_DATA_DIR/database.db
+HELIPAD_SOUND_DIR=$HELIPAD_DATA_DIR/sounds
 HELIPAD_HTTP_PORT=2112
 HELIPAD_HTTPS_PORT=2113
 HELIPAD_MACAROON=/mnt/hdd/app-data/lnd/data/chain/bitcoin/mainnet/admin.macaroon
@@ -119,6 +120,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo chown $HELIPAD_USER:$HELIPAD_USER $HELIPAD_DATA_DIR
     sudo -u $HELIPAD_USER touch $HELIPAD_DB
     sudo chown $HELIPAD_USER:$HELIPAD_USER $HELIPAD_DB
+    sudo mkdir -p $HELIPAD_SOUND_DIR
+    sudo chown $HELIPAD_USER:$HELIPAD_USER $HELIPAD_SOUND_DIR
 
     ##################
     # NGINX
@@ -172,6 +175,7 @@ RestartSec=30
 Environment="LND_TLSCERT=$HELIPAD_CERT"
 Environment="LND_ADMINMACAROON=$HELIPAD_MACAROON"
 Environment="HELIPAD_DATABASE_DIR=$HELIPAD_DB"
+Environment="HELIPAD_SOUND_DIR=$HELIPAD_SOUND_DIR"
 LogLevelMax=4
 [Install]
 WantedBy=multi-user.target
