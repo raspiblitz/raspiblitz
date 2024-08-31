@@ -579,8 +579,11 @@ if [ "$1" = "on" ]; then
     installTailscale
 
     sudo systemctl stop tailscaled
-    sudo rm -rf /var/lib/tailscale
-    sudo cp -r /mnt/hdd/app-data/tailscale /var/lib || echo "# There is no previous Tailscale data"
+    echo "# make sure the data directory exists"
+    sudo mkdir -p /mnt/hdd/app-data/tailscale
+    echo "# symlink"
+    sudo rm -rf /var/lib/tailscale # not a symlink.. delete it silently
+    sudo ln -s /mnt/hdd/app-data/tailscale /var/lib/tailscale
     sudo systemctl start tailscaled
 
     # setting value in raspiblitz config
