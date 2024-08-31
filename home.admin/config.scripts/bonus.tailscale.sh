@@ -625,13 +625,13 @@ elif [ "$1" = "off" ]; then
 
   # get delete data status - either by parameter or if not set by user dialog
   deleteData=""
-  if [ "$2" == "--delete-data" ]; then
+  if [ "$2" = "--delete-data" ]; then
     deleteData="1"
   fi
-  if [ "$2" == "--keep-data" ]; then
+  if [ "$2" = "--keep-data" ]; then
     deleteData="0"
   fi
-  if [ "${deleteData}" == "" ]; then
+  if [ "${deleteData}" = "" ]; then
     if (whiptail --title "Delete Data?" --yes-button "Keep Data" --no-button "Delete Data" --yesno "Do you want to delete all data related to Tailscale?" 0 0); then
       deleteData="0"
     else
@@ -640,7 +640,7 @@ elif [ "$1" = "off" ]; then
   fi
 
   # execute on delete data
-  if [ "${deleteData}" == "1" ]; then
+  if [ "${deleteData}" = "1" ]; then
     echo "# Removing Tailscale data"
     sudo rm -rf /mnt/hdd/app-data/tailscale
   else
