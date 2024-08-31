@@ -580,14 +580,13 @@ if [ "$1" = "on" ]; then
 
     installTailscale
 
-    # move tailscale state to HDD
+    # link tailscale state to HDD
     sudo systemctl stop tailscaled
-    sudo systemctl disable tailscaled
-    sudo rm -rf /var/lib/tailscale
+    echo "# make sure the data directory exists"
     sudo mkdir -p /mnt/hdd/app-data/tailscale
-    sudo cp /lib/systemd/system/tailscaled.service /etc/systemd/system/
-    sudo sed -i 's|--state=/var/lib/tailscale/tailscaled.state|--state=/mnt/hdd/app-data/tailscale/tailscaled.state|' /etc/systemd/system/tailscaled.service
-    sudo systemctl enable tailscaled
+    echo "# symlink"
+    sudo rm -rf /var/lib/tailscale # not a symlink.. delete it silently
+    sudo ln -s /mnt/hdd/app-data/tailscale /var/lib/tailscale
     sudo systemctl start tailscaled
 
     # setting value in raspiblitz config
