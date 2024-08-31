@@ -584,7 +584,7 @@ if [ "$1" = "on" ]; then
     sudo systemctl start tailscaled
 
     # setting value in raspiblitz config
-    /home/admin/config.scripts/blitz.conf.sh set tailscale off
+    /home/admin/config.scripts/blitz.conf.sh set tailscale on
 
     echo "Installation complete! Log in to start using Tailscale by running:"
     echo
