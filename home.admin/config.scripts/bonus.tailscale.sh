@@ -569,7 +569,9 @@ installTailscale() {
 
 if [ "$1" = "on" ]; then
   if ! systemctl is-active tailscaled; then
+
     echo "# Installing Tailscale"
+
     # backup tailscale library if exists
     if [ -d /var/lib/tailscale ]; then
       echo "# backing up /var/lib/tailscale to /var/lib/tailscale.backup"
@@ -578,12 +580,14 @@ if [ "$1" = "on" ]; then
 
     installTailscale
 
+    # move tailscale state to HDD
     sudo systemctl stop tailscaled
-    echo "# make sure the data directory exists"
+    sudo systemctl disable tailscaled
+    sudo rm -rf /var/lib/tailscale
     sudo mkdir -p /mnt/hdd/app-data/tailscale
-    echo "# symlink"
-    sudo rm -rf /var/lib/tailscale # not a symlink.. delete it silently
-    sudo ln -s /mnt/hdd/app-data/tailscale /var/lib/tailscale
+    sudo cp /lib/systemd/system/tailscaled.service /etc/systemd/system/
+    sudo sed -i 's|--state=/var/lib/tailscale/tailscaled.state|--state=/mnt/hdd/app-data/tailscale/tailscaled.state|' /etc/systemd/system/tailscaled.service
+    sudo systemctl enable tailscaled
     sudo systemctl start tailscaled
 
     # setting value in raspiblitz config
@@ -605,6 +609,9 @@ elif [ "$1" = "off" ]; then
   sudo systemctl disable --now tailscaled
   sudo apt purge -y tailscale
 
+  # delete state
+  sudo rm -rf /mnt/hdd/app-data/tailscale
+  
   # setting value in raspiblitz config
   /home/admin/config.scripts/blitz.conf.sh set tailscale off
 
