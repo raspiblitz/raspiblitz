@@ -575,8 +575,13 @@ if [ "$1" = "on" ]; then
 
     # backup tailscale library if exists
     if [ -d /var/lib/tailscale ]; then
-      echo "# backing up /var/lib/tailscale to /var/lib/tailscale.backup"
-      sudo mv /var/lib/tailscale /var/lib/tailscale.backup
+      if [ ! -d /mnt/hdd/app-data/tailscale ]; then
+        echo "# Moving the Tailscale data to disk"
+        sudo mv /var/lib/tailscale /mnt/hdd/app-data/tailscale
+      else
+        echo "# Backing up /var/lib/tailscale to /var/lib/tailscale.backup"
+        sudo mv /var/lib/tailscale /var/lib/tailscale.backup
+      fi
     fi
 
     installTailscale
