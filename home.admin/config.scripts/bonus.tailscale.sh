@@ -2,7 +2,8 @@
 
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "config script to install Tailscale"
-  echo "bonus.tailscale.sh [on|off]"
+  echo "bonus.tailscale.sh on"
+  echo "bonus.tailscale.sh off <--delete-data|--keep-data>"
   exit 1
 fi
 
@@ -13,7 +14,7 @@ fi
 # This script detects the current operating system, and installs
 # Tailscale according to that OS's conventions.
 
-set -eu
+set -e
 
 # All the code is wrapped in a main function that gets called at the
 # bottom of the file, so that a truncated partial download doesn't end
@@ -580,24 +581,33 @@ if [ "$1" = "on" ]; then
 
     installTailscale
 
-    # link tailscale state to HDD
+    # move tailscale state to HDD
     sudo systemctl stop tailscaled
-    echo "# make sure the data directory exists"
+    sudo systemctl disable tailscaled
+    sudo rm -rf /var/lib/tailscale
     sudo mkdir -p /mnt/hdd/app-data/tailscale
-    echo "# symlink"
-    sudo rm -rf /var/lib/tailscale # not a symlink.. delete it silently
-    sudo ln -s /mnt/hdd/app-data/tailscale /var/lib/tailscale
+    sudo cp /lib/systemd/system/tailscaled.service /etc/systemd/system/
+    sudo sed -i 's|--state=/var/lib/tailscale/tailscaled.state|--state=/mnt/hdd/app-data/tailscale/tailscaled.state|' /etc/systemd/system/tailscaled.service
+    sudo systemctl enable tailscaled
     sudo systemctl start tailscaled
 
     # setting value in raspiblitz config
     /home/admin/config.scripts/blitz.conf.sh set tailscale on
 
-    echo "Installation complete! Log in to start using Tailscale by running:"
-    echo
-    if [ -z "$SUDO" ]; then
-      echo "tailscale up"
+    echo "# Installation complete!"
+    if ! tailscale ip -4; then
+      echo "# Log in to start using Tailscale by running:"
+      echo
+      if [ -z "$SUDO" ]; then
+        echo "tailscale up"
+      else
+        echo "$SUDO tailscale up"
+      fi
     else
-      echo "$SUDO tailscale up"
+      echo "# Check your Tailscale IP with the command:"
+      echo "tailscale ip -4"
+      echo "# Your Tailscale IP is:"
+      tailscale ip -4
     fi
   else
     echo "# Tailscale is already running"
@@ -608,9 +618,30 @@ elif [ "$1" = "off" ]; then
   sudo systemctl disable --now tailscaled
   sudo apt purge -y tailscale
 
-  # delete state
-  sudo rm -rf /mnt/hdd/app-data/tailscale
-  
+  # get delete data status - either by parameter or if not set by user dialog
+  deleteData=""
+  if [ "$2" == "--delete-data" ]; then
+    deleteData="1"
+  fi
+  if [ "$2" == "--keep-data" ]; then
+    deleteData="0"
+  fi
+  if [ "${deleteData}" == "" ]; then
+    if (whiptail --title "Delete Data?" --yes-button "Keep Data" --no-button "Delete Data" --yesno "Do you want to delete all data related to Tailscale?" 0 0); then
+      deleteData="0"
+    else
+      deleteData="1"
+    fi
+  fi
+
+  # execute on delete data
+  if [ "${deleteData}" == "1" ]; then
+    echo "# Removing Tailscale data"
+    sudo rm -rf /mnt/hdd/app-data/tailscale
+  else
+    echo "# Tailscale data is preserved on the disk (if exist)"
+  fi
+
   # setting value in raspiblitz config
   /home/admin/config.scripts/blitz.conf.sh set tailscale off
 
