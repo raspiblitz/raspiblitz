@@ -20,9 +20,8 @@ fi
 # INFO
 ###################
 if [ "$1" = "info" ]; then
-
   # check if installed
-  if [ ! "$(cd /home/blitzapi/blitz_web)" ]; then
+  if ! cd /home/blitzapi/blitz_web 2>/dev/null; then
     echo "installed=0"
     exit 1
   fi
