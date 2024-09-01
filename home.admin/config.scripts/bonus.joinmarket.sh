@@ -28,17 +28,12 @@ https://github.com/openoms/bitcoin-tutorials/blob/master/joinmarket/README.md
 Can also type: 'jm' in the command line to switch to the dedicated user,
 and start the JoininBox menu.
 " 11 81
-  if [ $? -eq 0 ]; then
-    sudo su - joinmarket
-  fi
+  [ $? -eq 0 ] && sudo su - joinmarket
   exit 0
 fi
 
 # check if sudo
-if [ "$EUID" -ne 0 ]; then
-  echo "Please run as root (with sudo)"
-  exit
-fi
+[ "$EUID" -ne 0 ] && { echo "Please run as root (with sudo)"; exit; }
 
 PGPsigner="openoms"
 PGPpubkeyLink="https://github.com/openoms.gpg"
@@ -157,7 +152,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   # set password B
   echo "# setting PASSWORD_B as the password for the 'joinmarket' user"
-  PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
+  PASSWORD_B=$(sudo grep rpcpassword /mnt/hdd/${network}/${network}.conf | cut -c 13-)
   echo "joinmarket:$PASSWORD_B" | sudo chpasswd
 
   if [ -f /home/joinmarket/start.joininbox.sh ]; then
