@@ -379,6 +379,7 @@ server_utils="rsync net-tools xxd netcat-openbsd openssh-client openssh-sftp-ser
 [ "${architecture}" = "amd64" ] && amd64_dependencies="network-manager" # add amd64 dependency
 
 apt_install resolvconf
+grep -q "^nameserver 8.8.8.8$" /etc/resolv.conf || echo "nameserver 8.8.8.8" >> /etc/resolv.conf
 resolvconf -u
 apt_install ${general_utils} ${python_dependencies} ${server_utils} ${amd64_dependencies} ${armbian_dependencies}
 apt-get clean -y
