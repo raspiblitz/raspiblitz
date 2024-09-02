@@ -440,10 +440,10 @@ echo -e "\n*** PREPARE ${baseimage} ***"
 # make sure the pi user is present
 if ! compgen -u pi; then
   echo "# Adding the user pi"
-  adduser --system --group --shell /bin/bash --home /home/pi pi
+  /usr/sbin/adduser --system --group --shell /bin/bash --home /home/pi pi
   # copy the skeleton files for login
   sudo -u pi cp -r /etc/skel/. /home/pi/
-  adduser pi sudo
+  /usr/sbin/adduser pi sudo
 fi
 
 # activate watchdog if ls /dev/watchdog exists - see #4534
@@ -536,14 +536,14 @@ fi
 
 # remove rpi-first-boot-wizard
 apt purge piwiz -y
-userdel -r rpi-first-boot-wizard
+/usr/sbin/userdel -r rpi-first-boot-wizard
 
 echo -e "\n*** CONFIG ***"
 # based on https://raspibolt.github.io/raspibolt/raspibolt_20_pi.html#raspi-config
 
 # set new default password for root user
-echo "root:raspiblitz" | chpasswd
-echo "pi:raspiblitz" | chpasswd
+echo "root:raspiblitz" | /usr/sbin/chpasswd
+echo "pi:raspiblitz" | /usr/sbin/chpasswd
 
 # prepare auto-start of 00infoLCD.sh script on pi user login (just kicks in if auto-login of pi is activated in HDMI or LCD mode)
 if [ "${baseimage}" = "raspios_arm64" ] || [ "${baseimage}" = "debian" ] || [ "${baseimage}" = "ubuntu" ]; then
@@ -611,17 +611,17 @@ echo "
 " | tee ./rsyslog
 mv ./rsyslog /etc/logrotate.d/rsyslog
 chown root:root /etc/logrotate.d/rsyslog
-service logrotate restart
-service rsyslog restart
+/usr/sbin/service logrotate restart
+/usr/sbin/service rsyslog restart
 
 echo -e "\n*** ADDING MAIN USER admin ***"
 # based on https://raspibolt.org/system-configuration.html#add-users
 # using the default password 'raspiblitz'
-adduser --disabled-password --gecos "" admin
+/usr/sbin/adduser --disabled-password --gecos "" admin
 # make the home folder world readable
 chmod 0755 /home/admin
-echo "admin:raspiblitz" | chpasswd
-adduser admin sudo
+echo "admin:raspiblitz" | /usr/sbin/chpasswd
+/usr/sbin/adduser admin sudo
 chsh admin -s /bin/bash
 # configure sudo for usage without password entry
 echo '%sudo ALL=(ALL) NOPASSWD:ALL' | sudo EDITOR='tee -a' visudo
@@ -637,10 +637,10 @@ fi
 echo -e "\n*** ADDING SERVICE USER bitcoin"
 # based on https://raspibolt.org/guide/raspberry-pi/system-configuration.html
 # create user and set default password for user
-adduser --system --group --shell /bin/bash --home /home/bitcoin bitcoin
+/usr/sbin/adduser --system --group --shell /bin/bash --home /home/bitcoin bitcoin
 # copy the skeleton files for login
 sudo -u bitcoin cp -r /etc/skel/. /home/bitcoin/
-echo "bitcoin:raspiblitz" | chpasswd
+echo "bitcoin:raspiblitz" | /usr/sbin/chpasswd
 # make home directory readable
 chmod 755 /home/bitcoin
 
