@@ -55,6 +55,16 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
+# Check if /usr/sbin is not in the PATH and add it if necessary
+if [[ ":$PATH:" != *":/usr/sbin:"* ]]; then
+    export PATH="$PATH:/usr/sbin"
+fi
+
+# Check if /usr/bin is not in the PATH and add it if necessary
+if [[ ":$PATH:" != *":/usr/bin:"* ]]; then
+    export PATH="$PATH:/usr/bin"
+fi
+
 if [ "$1" = "-EXPORT" ] || [ "$1" = "EXPORT" ]; then
   activeBranch=$(git -C /home/admin/raspiblitz branch --show-current 2>/dev/null)
   echo "activeBranch='${activeBranch}'"
@@ -440,10 +450,10 @@ echo -e "\n*** PREPARE ${baseimage} ***"
 # make sure the pi user is present
 if ! compgen -u pi; then
   echo "# Adding the user pi"
-  /usr/sbin/adduser --system --group --shell /bin/bash --home /home/pi pi
+  adduser --system --group --shell /bin/bash --home /home/pi pi
   # copy the skeleton files for login
   sudo -u pi cp -r /etc/skel/. /home/pi/
-  /usr/sbin/adduser pi sudo
+  adduser pi sudo
 fi
 
 # activate watchdog if ls /dev/watchdog exists - see #4534
@@ -536,14 +546,14 @@ fi
 
 # remove rpi-first-boot-wizard
 apt purge piwiz -y
-/usr/sbin/userdel -r rpi-first-boot-wizard
+userdel -r rpi-first-boot-wizard
 
 echo -e "\n*** CONFIG ***"
 # based on https://raspibolt.github.io/raspibolt/raspibolt_20_pi.html#raspi-config
 
 # set new default password for root user
-echo "root:raspiblitz" | /usr/sbin/chpasswd
-echo "pi:raspiblitz" | /usr/sbin/chpasswd
+echo "root:raspiblitz" | chpasswd
+echo "pi:raspiblitz" | chpasswd
 
 # prepare auto-start of 00infoLCD.sh script on pi user login (just kicks in if auto-login of pi is activated in HDMI or LCD mode)
 if [ "${baseimage}" = "raspios_arm64" ] || [ "${baseimage}" = "debian" ] || [ "${baseimage}" = "ubuntu" ]; then
@@ -611,24 +621,24 @@ echo "
 " | tee ./rsyslog
 mv ./rsyslog /etc/logrotate.d/rsyslog
 chown root:root /etc/logrotate.d/rsyslog
-/usr/sbin/service logrotate restart
-/usr/sbin/service rsyslog restart
+service logrotate restart
+service rsyslog restart
 
 echo -e "\n*** ADDING MAIN USER admin ***"
 # based on https://raspibolt.org/system-configuration.html#add-users
 # using the default password 'raspiblitz'
-/usr/sbin/adduser --disabled-password --gecos "" admin
+adduser --disabled-password --gecos "" admin
 # make the home folder world readable
 chmod 0755 /home/admin
-echo "admin:raspiblitz" | /usr/sbin/chpasswd
-/usr/sbin/adduser admin sudo
+echo "admin:raspiblitz" | chpasswd
+adduser admin sudo
 chsh admin -s /bin/bash
 # configure sudo for usage without password entry
 echo '%sudo ALL=(ALL) NOPASSWD:ALL' | sudo EDITOR='tee -a' visudo
 # check if group "admin" was created
 if [ $(sudo cat /etc/group | grep -c "^admin") -lt 1 ]; then
   echo -e "\nMissing group admin - creating it ..."
-  /usr/sbin/groupadd --force --gid 1002 admin
+  groupadd --force --gid 1002 admin
   usermod -a -G admin admin
 else
   echo -e "\nOK group admin exists"
@@ -637,10 +647,10 @@ fi
 echo -e "\n*** ADDING SERVICE USER bitcoin"
 # based on https://raspibolt.org/guide/raspberry-pi/system-configuration.html
 # create user and set default password for user
-/usr/sbin/adduser --system --group --shell /bin/bash --home /home/bitcoin bitcoin
+adduser --system --group --shell /bin/bash --home /home/bitcoin bitcoin
 # copy the skeleton files for login
 sudo -u bitcoin cp -r /etc/skel/. /home/bitcoin/
-echo "bitcoin:raspiblitz" | /usr/sbin/chpasswd
+echo "bitcoin:raspiblitz" | chpasswd
 # make home directory readable
 chmod 755 /home/bitcoin
 
@@ -656,14 +666,14 @@ chown admin:admin /home/admin/raspiblitz.info
 
 echo -e "\n*** ADDING GROUPS FOR CREDENTIALS STORE ***"
 # access to credentials (e.g. macaroon files) in a central location is managed with unix groups and permissions
-/usr/sbin/groupadd --force --gid 9700 lndadmin
-/usr/sbin/groupadd --force --gid 9701 lndinvoice
-/usr/sbin/groupadd --force --gid 9702 lndreadonly
-/usr/sbin/groupadd --force --gid 9703 lndinvoices
-/usr/sbin/groupadd --force --gid 9704 lndchainnotifier
-/usr/sbin/groupadd --force --gid 9705 lndsigner
-/usr/sbin/groupadd --force --gid 9706 lndwalletkit
-/usr/sbin/groupadd --force --gid 9707 lndrouter
+groupadd --force --gid 9700 lndadmin
+groupadd --force --gid 9701 lndinvoice
+groupadd --force --gid 9702 lndreadonly
+groupadd --force --gid 9703 lndinvoices
+groupadd --force --gid 9704 lndchainnotifier
+groupadd --force --gid 9705 lndsigner
+groupadd --force --gid 9706 lndwalletkit
+groupadd --force --gid 9707 lndrouter
 
 echo -e "\n*** SHELL SCRIPTS & ASSETS ***"
 # copy raspiblitz repo from github
