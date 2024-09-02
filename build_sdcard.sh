@@ -55,6 +55,16 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
+# Check if /usr/sbin is not in the PATH and add it if necessary
+if [[ ":$PATH:" != *":/usr/sbin:"* ]]; then
+    export PATH="$PATH:/usr/sbin"
+fi
+
+# Check if /usr/bin is not in the PATH and add it if necessary
+if [[ ":$PATH:" != *":/usr/bin:"* ]]; then
+    export PATH="$PATH:/usr/bin"
+fi
+
 if [ "$1" = "-EXPORT" ] || [ "$1" = "EXPORT" ]; then
   activeBranch=$(git -C /home/admin/raspiblitz branch --show-current 2>/dev/null)
   echo "activeBranch='${activeBranch}'"
@@ -381,7 +391,7 @@ server_utils="rsync net-tools xxd netcat-openbsd openssh-client openssh-sftp-ser
 [ "${architecture}" = "amd64" ] && amd64_dependencies="network-manager" # add amd64 dependency
 
 apt_install resolvconf
-resolvconf -u
+/sbin/resolvconf -u
 apt_install ${general_utils} ${python_dependencies} ${server_utils} ${amd64_dependencies} ${armbian_dependencies}
 apt-get clean -y
 apt-get autoremove -y
@@ -628,7 +638,7 @@ echo '%sudo ALL=(ALL) NOPASSWD:ALL' | sudo EDITOR='tee -a' visudo
 # check if group "admin" was created
 if [ $(sudo cat /etc/group | grep -c "^admin") -lt 1 ]; then
   echo -e "\nMissing group admin - creating it ..."
-  /usr/sbin/groupadd --force --gid 1002 admin
+  groupadd --force --gid 1002 admin
   usermod -a -G admin admin
 else
   echo -e "\nOK group admin exists"
@@ -656,14 +666,14 @@ chown admin:admin /home/admin/raspiblitz.info
 
 echo -e "\n*** ADDING GROUPS FOR CREDENTIALS STORE ***"
 # access to credentials (e.g. macaroon files) in a central location is managed with unix groups and permissions
-/usr/sbin/groupadd --force --gid 9700 lndadmin
-/usr/sbin/groupadd --force --gid 9701 lndinvoice
-/usr/sbin/groupadd --force --gid 9702 lndreadonly
-/usr/sbin/groupadd --force --gid 9703 lndinvoices
-/usr/sbin/groupadd --force --gid 9704 lndchainnotifier
-/usr/sbin/groupadd --force --gid 9705 lndsigner
-/usr/sbin/groupadd --force --gid 9706 lndwalletkit
-/usr/sbin/groupadd --force --gid 9707 lndrouter
+groupadd --force --gid 9700 lndadmin
+groupadd --force --gid 9701 lndinvoice
+groupadd --force --gid 9702 lndreadonly
+groupadd --force --gid 9703 lndinvoices
+groupadd --force --gid 9704 lndchainnotifier
+groupadd --force --gid 9705 lndsigner
+groupadd --force --gid 9706 lndwalletkit
+groupadd --force --gid 9707 lndrouter
 
 echo -e "\n*** SHELL SCRIPTS & ASSETS ***"
 # copy raspiblitz repo from github
