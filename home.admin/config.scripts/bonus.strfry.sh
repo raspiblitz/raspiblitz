@@ -14,6 +14,58 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   exit 1
 fi
 
+source /mnt/hdd/raspiblitz.conf
+
+isInstalled=$(compgen -u | grep -c strfry)
+isActive=$(sudo ls /etc/systemd/system/strfry.service 2>/dev/null | grep -c 'strfry.service')
+localip=$(hostname -I | awk '{print $1}')
+toraddress=$(sudo cat /mnt/hdd/tor/strfry/hostname 2>/dev/null)
+
+if [ "$1" = "status" ]; then
+  echo "version='${VERSION}'"
+  echo "installed='${isInstalled}'"
+  echo "active='${isActive}'"
+  echo "localIP='${localip}'"
+  echo "httpPort='${portTCP}'"
+  echo "httpsPort='${portSSL}'"
+  echo "toraddress='${toraddress}'"
+  exit 0
+fi
+
+# show info menu
+if [ "$1" = "menu" ]; then
+
+  if [ ${isActive} -eq 1 ]; then
+    # get network info
+    fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
+
+    if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
+      # Info with Tor
+      sudo /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
+      whiptail --title " strfry " --msgbox "Connect to:
+wss://${localip}:${portSSL}\n
+with Fingerprint:
+${fingerprint}\n
+Hidden Service address is (see LCD for QR):
+${toraddress}
+" 16 67
+      sudo /home/admin/config.scripts/blitz.display.sh hide
+    else
+      # Info without Tor
+      whiptail --title " strfry " --msgbox "Connect to:
+wss://${localip}:${portSSL}\n
+with Fingerprint:
+${fingerprint}\n
+Activate Tor to serve an .onion address.
+" 15 57
+    fi
+    echo "# please wait ..."
+  else
+    echo "# *** strfry is not installed ***"
+  fi
+  exit 0
+fi
+
 if [ "$1" = "on" ]; then
 
   LIMITS=("strfry soft nofile 1000000" "strfry hard nofile 1000000")
@@ -81,16 +133,43 @@ if [ "$1" = "on" ]; then
     sudo systemctl start strfry
   fi
 
-  sudo ufw allow ${portTCP} comment 'strfry TCP'
   sudo ufw allow ${portSSL} comment 'strfry SSL'
 
   # nginx
+  cat <<EOF | sudo tee /etc/nginx/sites-available/strfry
+server {
+    listen ${portSSL} ssl http2;
+    listen [::]:${portSSL} ssl http2;
+    server_name _;
+
+    include /etc/nginx/snippets/ssl-params.conf;
+    include /etc/nginx/snippets/ssl-certificate-app-data.conf;
+
+    include /etc/nginx/snippets/gzip-params.conf;
+
+    access_log /var/log/nginx/access_strfry.log;
+    error_log /var/log/nginx/error_strfry.log;
+
+    location / {
+        proxy_pass http://127.0.0.1:${portTCP};
+
+        # needed for websocket connections
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection "upgrade";
+
+        include /etc/nginx/snippets/ssl-proxy-params.conf;
+    }
+}
+EOF
+
+  sudo ln -sf /etc/nginx/sites-available/strfry /etc/nginx/sites-enabled/strfry
 
   # test and reload nginx
   sudo nginx -t && sudo systemctl reload nginx
 
   # Tor
-  /home/admin/config.scripts/tor.onion-service.sh strfry ${portTCP} ${portTCP} ${portSSL} ${portSSL}
+  /home/admin/config.scripts/tor.onion-service.sh strfry 80 ${portTCP}
 
   # setting value in raspiblitz config
   /home/admin/config.scripts/blitz.conf.sh set strfry "on"
@@ -103,11 +182,10 @@ if [ "$1" = "off" ]; then
   sudo rm -f /etc/strfry.conf
   sudo rm -f /etc/systemd/system/strfry.service
 
-  sudo ufw delete allow ${portTCP}
   sudo ufw delete allow ${portSSL}
 
   # Tor
-  /home/admin/config.scripts/tor.onion-service.sh strfry off
+  /home/admin/config.scripts/tor.onion-service.sh off strfry
 
   sudo userdel -rf strfry
 
