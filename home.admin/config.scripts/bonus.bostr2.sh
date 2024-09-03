@@ -66,8 +66,6 @@ Activate Tor to serve an .onion address.
   exit 0
 fi
 
-
-
 if [ "$1" = "on" ]; then
 
   /home/admin/config.scripts/bonus.go.sh on
@@ -164,8 +162,7 @@ EOF
   sudo ufw allow ${portSSL} comment 'bostr2 SSL'
 
   # nginx
-
-cat <<EOF | sudo tee /etc/nginx/sites-available/bostr2
+  cat <<EOF | sudo tee /etc/nginx/sites-available/bostr2
 server {
     listen ${portSSL} ssl http2;
     listen [::]:${portSSL} ssl http2;
