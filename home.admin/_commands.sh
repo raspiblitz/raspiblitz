@@ -161,6 +161,8 @@ function fatpack() {
   confirmMsg fatpack
   if [ $confirm -eq 1 ]; then
     sudo /home/admin/config.scripts/blitz.fatpack.sh
+    # raspberry pi fatpack has lcd display be default
+    sudo /home/admin/config.scripts/blitz.display.sh set-display lcd
   fi
 }
 
