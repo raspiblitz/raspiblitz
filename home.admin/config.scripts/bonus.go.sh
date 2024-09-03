@@ -1,11 +1,11 @@
 #!/usr/bin/env sh
 
-# set version, check: https://golang.org/dl/
-goVersion="1.19.5"
+# set version, check: https://go.dev/dl/
+goVersion="1.23.0"
 # checksums:
-amd64Checksum="36519702ae2fd573c9869461990ae550c8c0d955cd28d2827a6b159fda81ff95"
-armv6lChecksum="ec14f04bdaf4a62bdcf8b55b9b6434cc27c2df7d214d0bb7076a7597283b026a"
-arm64Checksum="fc0aa29c933cec8d76f5435d859aaf42249aa08c74eb2d154689ae44c08d23b3"
+amd64Checksum="905a297f19ead44780548933e0ff1a1b86e8327bb459e92f9c0012569f76f5e3"
+armv6lChecksum="0efa1338e644d7f74064fa7f1016b5da7872b2df0070ea3b56e4fef63192e35b"
+arm64Checksum="62788056693009bcf7020eedc778cdd1781941c6145eab7688bd087bce0f8659"
 
 downloadFolder="/home/admin/download"
 
