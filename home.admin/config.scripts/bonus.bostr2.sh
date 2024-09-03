@@ -3,8 +3,8 @@
 # https://codeberg.org/Yonle/bostr2/tags
 VERSION="v1.0.6"
 
-portTCP=8888
-portSSL=8889
+portTCP=8800
+portSSL=8801
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -13,6 +13,60 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "installs the version $VERSION"
   exit 1
 fi
+
+source /mnt/hdd/raspiblitz.conf
+
+isInstalled=$(compgen -u | grep -c bostr2)
+isActive=$(sudo ls /etc/systemd/system/bostr2.service 2>/dev/null | grep -c 'bostr2.service')
+localip=$(hostname -I | awk '{print $1}')
+toraddress=$(sudo cat /mnt/hdd/tor/bostr2/hostname 2>/dev/null)
+
+if [ "$1" = "status" ]; then
+  echo "version='${VERSION}'"
+  echo "installed='${isInstalled}'"
+  echo "active='${isActive}'"
+  echo "localIP='${localip}'"
+  echo "httpPort='${portTCP}'"
+  echo "httpsPort='${portSSL}'"
+  echo "toraddress='${toraddress}'"
+  exit 0
+fi
+
+# show info menu
+if [ "$1" = "menu" ]; then
+
+  if [ ${isActive} -eq 1 ]; then
+    # get network info
+    fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
+
+    if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
+      # Info with Tor
+      sudo /home/admin/config.scripts/blitz.display.sh qr "${toraddress}"
+      whiptail --title " bostr2 " --msgbox "Connect to:
+wss://${localip}:${portSSL}\n
+with Fingerprint:
+${fingerprint}\n
+Hidden Service address is (see LCD for QR):
+${toraddress}
+" 16 67
+      sudo /home/admin/config.scripts/blitz.display.sh hide
+    else
+      # Info without Tor
+      whiptail --title " bostr2 " --msgbox "Connect to:
+wss://${localip}:${portSSL}\n
+with Fingerprint:
+${fingerprint}\n
+Activate Tor to serve an .onion address.
+" 15 57
+    fi
+    echo "# please wait ..."
+  else
+    echo "# *** bostr2 is not installed ***"
+  fi
+  exit 0
+fi
+
+
 
 if [ "$1" = "on" ]; then
 
@@ -34,7 +88,7 @@ if [ "$1" = "on" ]; then
 
   cat <<EOF | sudo -u bostr2 tee /mnt/hdd/app-data/bostr2/config.yaml
 ---
-listen: 0.0.0.0:8888
+listen: 0.0.0.0:${portTCP}
 
 favicon:
 
@@ -107,16 +161,44 @@ EOF
     sudo systemctl start bostr2
   fi
 
-  sudo ufw allow ${portTCP} comment 'bostr2 TCP'
   sudo ufw allow ${portSSL} comment 'bostr2 SSL'
 
   # nginx
+
+cat <<EOF | sudo tee /etc/nginx/sites-available/bostr2
+server {
+    listen ${portSSL} ssl http2;
+    listen [::]:${portSSL} ssl http2;
+    server_name _;
+
+    include /etc/nginx/snippets/ssl-params.conf;
+    include /etc/nginx/snippets/ssl-certificate-app-data.conf;
+
+    include /etc/nginx/snippets/gzip-params.conf;
+
+    access_log /var/log/nginx/access_bostr2.log;
+    error_log /var/log/nginx/error_bostr2.log;
+
+    location / {
+        proxy_pass http://127.0.0.1:${portTCP};
+
+        # needed for websocket connections
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection "upgrade";
+
+        include /etc/nginx/snippets/ssl-proxy-params.conf;
+    }
+}
+EOF
+
+  sudo ln -sf /etc/nginx/sites-available/bostr2 /etc/nginx/sites-enabled/bostr2
 
   # test and reload nginx
   sudo nginx -t && sudo systemctl reload nginx
 
   # Tor
-  /home/admin/config.scripts/tor.onion-service.sh bostr2 ${portTCP} ${portTCP} ${portSSL} ${portSSL}
+  /home/admin/config.scripts/tor.onion-service.sh bostr2 ${portTCP} ${portTCP}
 
   # setting value in raspiblitz config
   /home/admin/config.scripts/blitz.conf.sh set bostr2 "on"
@@ -128,11 +210,10 @@ if [ "$1" = "off" ]; then
   sudo systemctl disable --now bostr2
   sudo rm -f /etc/systemd/system/bostr2.service
 
-  sudo ufw delete allow ${portTCP}
   sudo ufw delete allow ${portSSL}
 
   # Tor
-  /home/admin/config.scripts/tor.onion-service.sh bostr2 off
+  /home/admin/config.scripts/tor.onion-service.sh off bostr2
 
   sudo userdel -rf bostr2
 
