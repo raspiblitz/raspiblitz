@@ -135,21 +135,28 @@ EOF
 
   # systemd
   echo "# Create a systemd service"
+  if [ "${runBehindTor}" = "on" ]; then
+    echo "# Run all connections through Tor."
+    tor="torsocks"
+  else
+    echo "# Run connections without Tor."
+    tor=""
+  fi
   echo "\
-    [Unit]
-    Description=bostr2 relay service
+[Unit]
+Description=bostr2 relay service
 
-    [Service]
-    User=bostr2
-    WorkingDirectory=/home/bostr2
-    ExecStart=/home/bostr2/go/bin/bostr2
-    Restart=on-failure
-    RestartSec=5
-    NoNewPrivileges=yes
-    ProtectSystem=full
+[Service]
+User=bostr2
+WorkingDirectory=/home/bostr2
+ExecStart=$tor /home/bostr2/go/bin/bostr2
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=yes
+ProtectSystem=full
 
-    [Install]
-    WantedBy=multi-user.target
+[Install]
+WantedBy=multi-user.target
 " | sudo tee /etc/systemd/system/bostr2.service
 
   sudo systemctl enable bostr2
