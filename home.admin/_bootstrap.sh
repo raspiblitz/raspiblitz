@@ -45,14 +45,9 @@ echo "***********************************************" >> $logFile
 # list all running systemd services for future debug
 systemctl list-units --type=service --state=running >> $logFile
 
-# check if the file /etc/ssh/sshd_init_keys exists --> initial boot of fresh sd card image
-if [ -f "/etc/ssh/sshd_init_keys" ]; then
-  echo "# init SSH KEYS fresh for new user" >> $logFile
-  /home/admin/config.scripts/blitz.ssh.sh init >> $logFile
-else
-  echo "# make sure SSH server is configured & running" >> $logFile
-  /home/admin/config.scripts/blitz.ssh.sh checkrepair >> $logFile
-fi
+# make sure ssh is configured and running
+echo "# make sure SSH server is configured & running" >> $logFile
+/home/admin/config.scripts/blitz.ssh.sh checkrepair >> $logFile
 
 echo "## prepare raspiblitz temp" >> $logFile
 
