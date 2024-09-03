@@ -2,6 +2,7 @@
 
 # Just run this script once after a fresh sd card build
 # to prepare the image for release as a downloadable sd card image
+# call with parameter `-quick` to skip skip os update
 
 # determine correct raspberrypi boot drive path (that easy to access when sd card is insert into laptop)
 raspi_bootdir=""
@@ -69,12 +70,17 @@ echo "OK"
 wget -qO- https://deb.torproject.org/torproject.org/A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89.asc | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/torproject.gpg >/dev/null
 
 # update system (only security updates with minimal risk of breaking changes)
-echo
-echo "update OS ..."
-sudo apt-get update -y
-sudo apt-get upgrade -o Dir::Etc::SourceList=/etc/apt/sources.list.d/security.list -y
-sudo apt-get upgrade openssh-server -y
-sudo dpkg --configure -a
+if [ "$1" != "-quick" ]; then
+  echo
+  echo "update OS ..."
+  sudo apt-get update -y
+  sudo apt-get upgrade -o Dir::Etc::SourceList=/etc/apt/sources.list.d/security.list -y
+  sudo apt-get upgrade openssh-server -y
+  sudo dpkg --configure -a
+else
+  echo
+  echo "skipping OS update ..."
+fi
 
 # SSH Pubkeys (make unique for every sd card image install)
 echo
