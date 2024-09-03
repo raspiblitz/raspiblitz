@@ -126,8 +126,9 @@ echo "# raspi_bootdir(${raspi_bootdir})" >> $logFile
 flagExists=$(ls ${raspi_bootdir}/stop 2>/dev/null | grep -c 'stop')
 if [ "${flagExists}" == "1" ]; then
   # set state info
+  localip=$(hostname -I | awk '{print $1}')
   /home/admin/_cache.sh set state "stop"
-  /home/admin/_cache.sh set message "stopped for manual provision"
+  /home/admin/_cache.sh set message "stopped for manual provision ${localip}"
   systemctl stop background.service
   systemctl stop background.scan.service
   # log info
