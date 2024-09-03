@@ -3,8 +3,8 @@
 # https://github.com/hoytech/strfry/commits/master/
 VERSION="32a367738c6db7430780058c4a6c98b271af73b2"
 
-portTCP=7777
-portSSL=7778
+portTCP=7700
+portSSL=7701
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -68,7 +68,10 @@ fi
 
 if [ "$1" = "on" ]; then
 
-  LIMITS=("strfry soft nofile 1000000" "strfry hard nofile 1000000")
+  LIMITS=(
+    "strfry soft nofile 1000000"
+    "strfry hard nofile 1000000"
+  )
   # Loop through each limit
   for LIMIT in "${LIMITS[@]}"; do
     # Check if the limit already exists
@@ -105,9 +108,9 @@ if [ "$1" = "on" ]; then
   sudo -u strfry cp ./strfry.conf /mnt/hdd/app-data/strfry/strfry.conf
 
   # edit the defaults https://github.com/hoytech/strfry/blob/master/strfry.conf
-  sed -i 's|db = "./strfry-db/"|db = "/mnt/hdd/app-storage/strfry-db"|' /mnt/hdd/app-data/strfry/strfry.conf
-  sed -i 's|mapsize = 10995116277760|mapsize = 100000000000|' /mnt/hdd/app-data/strfry/strfry.conf
-  sed -i 's|bind = "127.0.0.1"|bind = "0.0.0.0"|' /mnt/hdd/app-data/strfry/strfry.conf
+  sudo -u strfry sed -i 's|db = "./strfry-db/"|db = "/mnt/hdd/app-storage/strfry-db"|' /mnt/hdd/app-data/strfry/strfry.conf
+  sudo -u strfry sed -i 's|mapsize = 10995116277760|mapsize = 100000000000|' /mnt/hdd/app-data/strfry/strfry.conf
+  sudo -u strfry sed -i 's|bind = "127.0.0.1"|bind = "0.0.0.0"|' /mnt/hdd/app-data/strfry/strfry.conf
 
   # symlink
   sudo ln -s /mnt/hdd/app-data/strfry/strfry.conf /etc/strfry.conf
@@ -115,20 +118,20 @@ if [ "$1" = "on" ]; then
   # systemd
   echo "# Create a systemd service"
   echo "\
-    [Unit]
-    Description=strfry relay service
+[Unit]
+Description=strfry relay service
 
-    [Service]
-    User=strfry
-    ExecStart=/home/strfry/strfry/strfry relay
-    Restart=on-failure
-    RestartSec=5
-    NoNewPrivileges=yes
-    ProtectSystem=full
-    LimitCORE=1000000000
+[Service]
+User=strfry
+ExecStart=/home/strfry/strfry/strfry relay
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=yes
+ProtectSystem=full
+LimitCORE=1000000000
 
-    [Install]
-    WantedBy=multi-user.target
+[Install]
+WantedBy=multi-user.target
 " | sudo tee /etc/systemd/system/strfry.service
 
   sudo systemctl enable strfry
