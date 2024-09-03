@@ -151,7 +151,7 @@ function release() {
   echo "- shutdown"
   confirmMsg release
   if [ $confirm -eq 1 ]; then
-    /home/admin/config.scripts/blitz.preparerelease.sh
+    /home/admin/config.scripts/blitz.preparerelease.sh $1
   fi
 }
 
