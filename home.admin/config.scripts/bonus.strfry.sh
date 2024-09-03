@@ -104,6 +104,11 @@ if [ "$1" = "on" ]; then
   sudo chmod 755 /mnt/hdd/app-data/strfry
   sudo -u strfry cp ./strfry.conf /mnt/hdd/app-data/strfry/strfry.conf
 
+  # edit the defaults https://github.com/hoytech/strfry/blob/master/strfry.conf
+  sed -i 's|db = "./strfry-db/"|db = "/mnt/hdd/app-storage/strfry-db"|' /mnt/hdd/app-data/strfry/strfry.conf
+  sed -i 's|mapsize = 10995116277760|mapsize = 100000000000|' /mnt/hdd/app-data/strfry/strfry.conf
+  sed -i 's|bind = "127.0.0.1"|bind = "0.0.0.0"|' /mnt/hdd/app-data/strfry/strfry.conf
+
   # symlink
   sudo ln -s /mnt/hdd/app-data/strfry/strfry.conf /etc/strfry.conf
 
