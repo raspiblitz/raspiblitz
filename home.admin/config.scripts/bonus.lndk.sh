@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# https://github.com/lndk-org/lndk/releases/tag/v0.0.1
-LNDKVERSION="v0.1.1"
+# https://github.com/lndk-org/lndk/releases
+LNDKVERSION="v0.2.0"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -20,9 +20,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   if [ ${isInstalled} -eq 0 ]; then
 
     # Install Rust for lndk, includes rustfmt
-    sudo -u bitcoin curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | \
-    sudo -u bitcoin sh -s -- -y
-    
+    sudo -u bitcoin curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs |
+      sudo -u bitcoin sh -s -- -y
+
     # Clone and compile lndk onto Raspiblitz.
     if [ ! -d "/home/bitcoin/lndk" ]; then
       cd /home/bitcoin || exit 1
@@ -36,7 +36,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     protocol=protocol
     lnd_conf_file=/home/bitcoin/.lnd/lnd.conf
     if grep $protocol $lnd_conf_file; then
-       echo "[protocol]
+      echo "[protocol]
 protocol.custom-message=513
 protocol.custom-nodeann=39
 protocol.custom-init=39
@@ -71,7 +71,7 @@ WantedBy=multi-user.target
 " | sudo tee -a $lndkServicePath
     sudo systemctl enable lndk
     sudo systemctl start lndk
-    echo "OK - we've now started the LNDK service" 
+    echo "OK - we've now started the LNDK service"
 
     # Set value in raspiblitz config
     /home/admin/config.scripts/blitz.conf.sh set lndk "on"
@@ -108,7 +108,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # Set value in raspi blitz config
   /home/admin/config.scripts/blitz.conf.sh set lndk "off"
 
-  exit 0 
+  exit 0
 fi
 
 echo "FAIL - Unknown Parameter $1"
