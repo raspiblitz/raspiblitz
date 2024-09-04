@@ -11,37 +11,82 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   exit 1
 fi
 
+source /home/admin/raspiblitz.info
+source <(/home/admin/_cache.sh get state)
+
 # Switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
-  echo "# INSTALL LNDK"
-
   lndkServicePath="/etc/systemd/system/lndk.service"
   isInstalled=$(sudo ls $lndkServicePath 2>/dev/null | grep -c 'lndk.service')
   if [ ${isInstalled} -eq 0 ]; then
+    echo "# INSTALL LNDK"
+
+    sudo apt-get install -y protobuf-compiler
 
     # Install Rust for lndk, includes rustfmt
     sudo -u bitcoin curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs |
       sudo -u bitcoin sh -s -- -y
 
     # Clone and compile lndk onto Raspiblitz.
-    if [ ! -d "/home/bitcoin/lndk" ]; then
+    if [ ! -f "/home/bitcoin/lndk/target/debug/lndk" ]; then
       cd /home/bitcoin || exit 1
       sudo -u bitcoin git clone https://github.com/lndk-org/lndk
       cd /home/bitcoin/lndk || exit 1
-      sudo -u bitcoin git checkout tags/$LNDKVERSION -b $LNDKVERSION
+      sudo -u bitcoin git rest --hard $LNDKVERSION
       sudo -u bitcoin /home/bitcoin/.cargo/bin/cargo build # Lndk bin will be built to /home/bitcoin/lndk/target/debug/lndk
     fi
 
     # LND needs the following configuration settings so lndk can run.
-    protocol=protocol
-    lnd_conf_file=/home/bitcoin/.lnd/lnd.conf
-    if grep $protocol $lnd_conf_file; then
-      echo "[protocol]
-protocol.custom-message=513
-protocol.custom-nodeann=39
-protocol.custom-init=39
-" | sudo tee -a $lnd_conf_file
+    lnd_conf_file="/home/bitcoin/.lnd/lnd.conf"
+    lines=(
+      "protocol.custom-message=513"
+      "protocol.custom-nodeann=39"
+      "protocol.custom-init=39"
+    )
+
+    # Check if the [protocol] section exists
+    needsLNDrestart=0
+    if grep -q "\[protocol\]" "$lnd_conf_file"; then
+      # Loop through each line to append after the [protocol] section
+      for line in "${lines[@]}"; do
+        # Check if the line already exists in the configuration file
+        if ! grep -q "$line" "$lnd_conf_file"; then
+          # Append the line after the [protocol] section
+          echo $line
+          sudo sed -i "/^\[protocol\]$/a $line" "$lnd_conf_file"
+          needsLNDrestart=1
+        fi
+      done
+    else
+      # If the [protocol] section does not exist, create it and append the lines
+      {
+        echo "[protocol]"
+        for line in "${lines[@]}"; do
+          echo "$line"
+        done
+      } | sudo tee -a "$lnd_conf_file" >/dev/null
+      needsLNDrestart=1
     fi
+
+    if [ ${needsLNDrestart} -eq 1 ]; then
+      if [ "${state}" == "ready" ]; then
+        sudo systemctl restart lnd
+      fi
+    fi
+
+    #config
+    sudo mkdir -p /mnt/hdd/app-data/.lndk
+    sudo chown -R bitcoin:bitcoin /mnt/hdd/app-data/.lndk
+    sudo chmod 755 /mnt/hdd/app-data/.lndk
+
+    cat <<EOF | sudo tee /mnt/hdd/app-data/.lndk/lndk.conf
+address="https://localhost:10009"
+cert_path="/mnt/hdd/lnd/tls.cert"
+macaroon_path="/mnt/hdd/lnd/data/chain/bitcoin/mainnet/admin.macaroon"
+grpc_port=5635
+log_level="debug"
+response_invoice_timeout=15
+EOF
 
     echo "[Unit]
 Description=lndk Service
@@ -49,7 +94,7 @@ After=lnd.service
 PartOf=lnd.service
 
 [Service]
-ExecStart=/home/bitcoin/lndk/target/debug/lndk --address=https://localhost:10009 --cert=/mnt/hdd/lnd/tls.cert --macaroon=/mnt/hdd/lnd/data/chain/bitcoin/mainnet/admin.macaroon
+ExecStart=/home/bitcoin/lndk/target/debug/lndk --conf=/mnt/hdd/app-data/.lndk/lndk.conf
 User=bitcoin
 Group=bitcoin
 Type=simple
@@ -58,7 +103,6 @@ Restart=on-failure
 RestartSec=60
 StandardOutput=journal
 StandardError=journal
-LogLevelMax=4
 
 # Hardening measures
 PrivateTmp=true
@@ -68,13 +112,18 @@ PrivateDevices=true
 
 [Install]
 WantedBy=multi-user.target
-" | sudo tee -a $lndkServicePath
+" | sudo tee $lndkServicePath
     sudo systemctl enable lndk
-    sudo systemctl start lndk
-    echo "OK - we've now started the LNDK service"
-
+    echo "# Enabled the lndk.service"
+    if [ "${state}" == "ready" ]; then
+      sudo systemctl start lndk
+      echo "# Started the lndk.service"
+    fi
     # Set value in raspiblitz config
     /home/admin/config.scripts/blitz.conf.sh set lndk "on"
+  else
+    echo "# LNDK is already installed."
+    sudo sysetctl status lndk
   fi
 
   exit 0
@@ -84,7 +133,7 @@ fi
 if [ "$1" = "menu" ]; then
   whiptail --title " LNDK " --msgbox "Your node is now forwarding onion messages!\n
 Check 'sudo systemctl status lndk' to see if it's running properly.\n
-See more information about LNDK v0.0.1 here: https://github.com/lndk-org/lndk" 14 63
+See more information about LNDK here: https://github.com/lndk-org/lndk" 14 63
 
   echo "please wait ..."
   exit 0
