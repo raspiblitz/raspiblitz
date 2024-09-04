@@ -237,14 +237,24 @@ if [ "$1" = "status" ]; then
     if [ "${hdd}" != "" ]; then
       hddBytes=$(fdisk -l /dev/$hdd | grep GiB | cut -d " " -f 5)
       if [ "${hddBytes}" = "" ]; then
-	hddBytes=$(fdisk -l /dev/$hdd | grep TiB | cut -d " " -f 5)
+	      hddBytes=$(fdisk -l /dev/$hdd | grep TiB | cut -d " " -f 5)
       fi
       hddGigaBytes=$(echo "scale=0; ${hddBytes}/1024/1024/1024" | bc -l)
     fi
     echo "hddBytes=${hddBytes}"
     echo "hddGigaBytes=${hddGigaBytes}"
+
+    # check if big enough
+    if [ ${#hddDataPartition} -gt 0 ]; then
+      if [ ${hddGigaBytes} -lt 130 ]; then
+        echo "hddError='hdd too small'"
+        hddDataPartition=""
+      fi
+    fi
+
     echo "hddPartitionCandidate='${hddDataPartition}'"
-    
+
+
     # if positive deliver more data
     if [ ${#hddDataPartition} -gt 0 ]; then
       # check partition size in bytes and GBs
