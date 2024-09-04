@@ -230,8 +230,6 @@ if [ "$1" = "status" ]; then
     echo "hddTemperature="
     echo "hddTemperatureStr='?°C'"
 
-    # display results from hdd & partition detection
-    echo "hddCandidate='${hdd}'"
     hddBytes=0
     hddGigaBytes=0
     if [ "${hdd}" != "" ]; then
@@ -241,19 +239,19 @@ if [ "$1" = "status" ]; then
       fi
       hddGigaBytes=$(echo "scale=0; ${hddBytes}/1024/1024/1024" | bc -l)
     fi
-    echo "hddBytes=${hddBytes}"
-    echo "hddGigaBytes=${hddGigaBytes}"
 
     # check if big enough
-    if [ ${#hddDataPartition} -gt 0 ]; then
-      if [ ${hddGigaBytes} -lt 130 ]; then
-        echo "hddError='hdd too small'"
-        hddDataPartition=""
-      fi
+    if [ ${hddGigaBytes} -lt 130 ]; then
+      echo "hddError='hdd too small'"
+      hdd=""
+      hddDataPartition=""
     fi
 
+    # display results from hdd & partition detection
+    echo "hddCandidate='${hdd}'"
+    echo "hddBytes=${hddBytes}"
+    echo "hddGigaBytes=${hddGigaBytes}"
     echo "hddPartitionCandidate='${hddDataPartition}'"
-
 
     # if positive deliver more data
     if [ ${#hddDataPartition} -gt 0 ]; then
