@@ -28,12 +28,14 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       sudo -u bitcoin sh -s -- -y
 
     # Clone and compile lndk onto Raspiblitz.
-    if [ ! -f "/home/bitcoin/lndk/target/debug/lndk" ]; then
+    if [ ! -f "/usr/local/bin/lndk" ] || [ ! -f "/usr/local/bin/lndk-cli" ]; then
       cd /home/bitcoin || exit 1
       sudo -u bitcoin git clone https://github.com/lndk-org/lndk
       cd /home/bitcoin/lndk || exit 1
       sudo -u bitcoin git rest --hard $LNDKVERSION
       sudo -u bitcoin /home/bitcoin/.cargo/bin/cargo build # Lndk bin will be built to /home/bitcoin/lndk/target/debug/lndk
+      sudo install -m 0755 -o root -g root -t /usr/local/bin /home/bitcoin/lndk/target/debug/lndk
+      sudo install -m 0755 -o root -g root -t /usr/local/bin /home/bitcoin/lndk/target/debug/lndk-cli
     fi
 
     # LND needs the following configuration settings so lndk can run.
@@ -94,7 +96,7 @@ After=lnd.service
 PartOf=lnd.service
 
 [Service]
-ExecStart=/home/bitcoin/lndk/target/debug/lndk --conf=/mnt/hdd/app-data/.lndk/lndk.conf
+ExecStart=/usr/local/bin/lndk --conf=/mnt/hdd/app-data/.lndk/lndk.conf
 User=bitcoin
 Group=bitcoin
 Type=simple
