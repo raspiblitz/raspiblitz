@@ -21,21 +21,27 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   if [ ${isInstalled} -eq 0 ]; then
     echo "# INSTALL LNDK"
 
+    USERNAME=lndk
+    echo "# add the user: ${USERNAME}"
+    sudo adduser --system --group --shell /bin/bash --home /home/${USERNAME} ${USERNAME}
+    echo "Copy the skeleton files for login"
+    sudo -u ${USERNAME} cp -r /etc/skel/. /home/${USERNAME}/
+
     sudo apt-get install -y protobuf-compiler
 
     # Install Rust for lndk, includes rustfmt
-    sudo -u bitcoin curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs |
-      sudo -u bitcoin sh -s -- -y
+    sudo -u lndk curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs |
+      sudo -u lndk sh -s -- -y
 
     # Clone and compile lndk onto Raspiblitz.
     if [ ! -f "/usr/local/bin/lndk" ] || [ ! -f "/usr/local/bin/lndk-cli" ]; then
-      cd /home/bitcoin || exit 1
-      sudo -u bitcoin git clone https://github.com/lndk-org/lndk
-      cd /home/bitcoin/lndk || exit 1
-      sudo -u bitcoin git rest --hard $LNDKVERSION
-      sudo -u bitcoin /home/bitcoin/.cargo/bin/cargo build # Lndk bin will be built to /home/bitcoin/lndk/target/debug/lndk
-      sudo install -m 0755 -o root -g root -t /usr/local/bin /home/bitcoin/lndk/target/debug/lndk
-      sudo install -m 0755 -o root -g root -t /usr/local/bin /home/bitcoin/lndk/target/debug/lndk-cli
+      cd /home/lndk || exit 1
+      sudo -u lndk git clone https://github.com/lndk-org/lndk
+      cd /home/lndk/lndk || exit 1
+      sudo -u lndk git reset --hard $LNDKVERSION
+      sudo -u lndk /home/lndk/.cargo/bin/cargo build # Lndk bin will be built to /home/lndk/lndk/target/debug/lndk
+      sudo install -m 0755 -o root -g root -t /usr/local/bin /home/lndk/lndk/target/debug/lndk
+      sudo install -m 0755 -o root -g root -t /usr/local/bin /home/lndk/lndk/target/debug/lndk-cli
     fi
 
     # LND needs the following configuration settings so lndk can run.
@@ -78,23 +84,29 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     #config
     sudo mkdir -p /mnt/hdd/app-data/.lndk
-    sudo chown -R bitcoin:bitcoin /mnt/hdd/app-data/.lndk
+    sudo chown -R lndk:lndk /mnt/hdd/app-data/.lndk
     sudo chmod 755 /mnt/hdd/app-data/.lndk
 
     cat <<EOF | sudo tee /mnt/hdd/app-data/.lndk/lndk.conf
 address="https://localhost:10009"
 cert_path="/mnt/hdd/lnd/tls.cert"
-macaroon_path="/mnt/hdd/lnd/data/chain/bitcoin/mainnet/admin.macaroon"
+macaroon_path="/home/lndk/.lnd/data/chain/bitcoin/mainnet/admin.macaroon"
 grpc_port=5635
 log_level="debug"
 response_invoice_timeout=15
 EOF
 
-    # symlink data dir for bitcoin and admin users
-    sudo rm -rf /home/bitcoin/.lndk
-    sudo ln -s /mnt/hdd/app-data/.lndk /home/bitcoin/
+    # symlink data dir for lndk and admin users
+    sudo rm -rf /home/lndk/.lndk
+    sudo ln -s /mnt/hdd/app-data/.lndk /home/lndk/
     sudo rm -rf /home/admin/.lndk
     sudo ln -s /mnt/hdd/app-data/.lndk /home/admin/
+
+    # create symlink
+    sudo ln -s "/mnt/hdd/app-data/lnd/" "/home/lndk/.lnd"
+
+    # add user to group with admin access to lnd
+    sudo /usr/sbin/usermod --append --groups lndadmin lndk
 
     echo "[Unit]
 Description=lndk Service
@@ -103,8 +115,8 @@ PartOf=lnd.service
 
 [Service]
 ExecStart=/usr/local/bin/lndk --conf=/mnt/hdd/app-data/.lndk/lndk.conf
-User=bitcoin
-Group=bitcoin
+User=lndk
+Group=lndk
 Type=simple
 TimeoutSec=60
 Restart=on-failure
@@ -131,7 +143,7 @@ WantedBy=multi-user.target
     /home/admin/config.scripts/blitz.conf.sh set lndk "on"
   else
     echo "# LNDK is already installed."
-    sudo sysetctl status lndk
+    sudo systemctl status lndk
   fi
 
   exit 0
@@ -157,10 +169,12 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo systemctl disable lndk
     sudo rm /etc/systemd/system/lndk.service
 
-    sudo rm /home/bitcoin/lndk/target/debug/lndk
+    sudo rm /home/lndk/lndk/target/debug/lndk
   else
     echo "# LNDK is not installed."
   fi
+
+  sudo userdel -rf lndk
 
   # Set value in raspi blitz config
   /home/admin/config.scripts/blitz.conf.sh set lndk "off"
