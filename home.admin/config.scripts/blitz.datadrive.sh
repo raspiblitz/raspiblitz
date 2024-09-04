@@ -242,7 +242,7 @@ if [ "$1" = "status" ]; then
 
     # check if big enough
     if [ ${hddGigaBytes} -lt 130 ]; then
-      echo "hddError='hdd too small'"
+      echo "# Found HDD '${hdd}' is smaller than 130GB"
       hdd=""
       hddDataPartition=""
     fi
