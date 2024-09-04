@@ -90,6 +90,12 @@ log_level="debug"
 response_invoice_timeout=15
 EOF
 
+    # symlink data dir for bitcoin and admin users
+    sudo rm -rf /home/bitcoin/.lndk
+    sudo ln -s /mnt/hdd/app-data/.lndk /home/bitcoin/
+    sudo rm -rf /home/admin/.lndk
+    sudo ln -s /mnt/hdd/app-data/.lndk /home/admin/
+
     echo "[Unit]
 Description=lndk Service
 After=lnd.service
