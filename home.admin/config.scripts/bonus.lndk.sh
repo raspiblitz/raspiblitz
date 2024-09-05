@@ -7,7 +7,8 @@ LNDKVERSION="v0.2.0"
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "config script to switch the LNDK Service on or off"
   echo "installs the version $LNDKVERSION"
-  echo "bonus.lndk.sh [on|off|menu]"
+  echo "bonus.lndk.sh [on|menu]"
+  echo "bonus.lndk.sh off <--delete-data|--keep-data>"
   exit 1
 fi
 
@@ -176,12 +177,41 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo systemctl disable lndk
     sudo rm /etc/systemd/system/lndk.service
 
-    sudo rm /home/lndk/lndk/target/debug/lndk
   else
     echo "# LNDK is not installed."
   fi
 
+  # remove the binaries
+  sudo rm -f /usr/local/bin/lndk
+  sudo rm -f /usr/local/bin/lndk-cli
+  sudo rm -f /home/lndk/lndk/target/debug/lndk
+
+  # remove the user and home dirlndl
   sudo userdel -rf lndk
+  sudo rm -rf /home/admin/.lndk
+
+  # get delete data status - either by parameter or if not set by user dialog
+  deleteData=""
+  if [ "$2" == "--delete-data" ]; then
+    deleteData="1"
+  fi
+  if [ "$2" == "--keep-data" ]; then
+    deleteData="0"
+  fi
+  if [ "${deleteData}" == "" ]; then
+    if (whiptail --title "Delete Data?" --yes-button "Keep Data" --no-button "Delete Data" --yesno "Do you want to delete all data related to LNDK?" 0 0); then
+      deleteData="0"
+    else
+      deleteData="1"
+    fi
+  fi
+
+  if [ "${deleteData}" == "1" ]; then
+    echo "# Deleting LNDK data ..."
+    sudo rm -rf /mnt/hdd/app-data/.lndk
+  else
+    echo "# LNDK data is kept on the disk"
+  fi
 
   # Set value in raspi blitz config
   /home/admin/config.scripts/blitz.conf.sh set lndk "off"
