@@ -159,9 +159,13 @@ fi
 
 # Show info menu
 if [ "$1" = "menu" ]; then
-  whiptail --title " LNDK " --msgbox "Your node is now forwarding onion messages!\n
-Check 'sudo systemctl status lndk' to see if it's running properly.\n
-See more information about LNDK here: https://github.com/lndk-org/lndk" 14 63
+  whiptail --title " LNDK " --msgbox "Your node is now able to pay BOLT12 offers and is forwarding onion messages!
+
+Use the 'lndk-cli' command to get started.
+
+Check 'sudo systemctl status lndk' to see if it's running properly.
+
+Find more information about LNDK here: https://github.com/lndk-org/lndk" 16 63
 
   echo "please wait ..."
   exit 0
