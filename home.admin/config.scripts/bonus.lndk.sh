@@ -139,6 +139,13 @@ WantedBy=multi-user.target
       sudo systemctl start lndk
       echo "# Started the lndk.service"
     fi
+
+    echo "# Add alias for lndk-cli"
+    sudo -u admin touch /home/admin/_aliases
+    if [ $(grep -c "alias lndk-cli" </home/admin/_aliases) -eq 0 ]; then
+      echo 'alias lndk-cli="lndk-cli -n mainnet --grpc-port=5635"' | sudo tee -a /home/admin/_aliases
+    fi
+
     # Set value in raspiblitz config
     /home/admin/config.scripts/blitz.conf.sh set lndk "on"
   else
