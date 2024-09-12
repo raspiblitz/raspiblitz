@@ -484,13 +484,9 @@ if [ "$1" = "update" ]; then
 
     cd /home/mempool/mempool || exit 1
 
-    # Reinstall the mempool configuration for nginx
-    cp nginx.conf nginx-mempool.conf /etc/nginx/nginx.conf
-    sudo systemctl restart nginx
-
     # Remove useless deps
     echo "Removing unnecessary modules..."
-    npm prune --production
+    sudo -u mempool npm prune --production
 
     echo "***  Restarting Mempool  ***"
     sudo systemctl start mempool
