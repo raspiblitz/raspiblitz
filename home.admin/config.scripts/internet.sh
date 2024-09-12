@@ -79,8 +79,7 @@ fi
 
 #############################################
 # get local IP Range
-localiprange=$(ip -o -4 addr show | awk '/scope global/ {last=$4} END {split(last, ip, "/"); split(ip[1], octets, "."); printf "%s.%s.%s.0/%s\n", octets[1], octets[2], octets[3], ip[2]}'
-)
+localiprange=$(ip -o -4 addr show ${networkDevice} | awk '/scope global/ {split($4,ip,"/"); split(ip[1],octets,"."); printf "%s.%s.%s.0/%s\n", octets[1], octets[2], octets[3], ip[2]}')
 
 #############################################
 # check DHCP
