@@ -86,10 +86,9 @@ fi
 echo
 echo "deleting SSH Pub keys ..."
 echo "keys will get recreated and sshd reactivated on fresh bootup, by _bootstrap.sh service"
-sudo systemctl stop sshd
-sudo systemctl disable sshd
+sudo systemctl stop ssh
+sudo systemctl disable ssh
 sudo rm /etc/ssh/ssh_host_*
-sudo touch ${raspi_bootdir}/ssh
 echo "OK"
 
 echo
