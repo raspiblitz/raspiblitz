@@ -112,7 +112,7 @@ EOF
     echo "[Unit]
 Description=lndk Service
 After=lnd.service
-PartOf=lnd.service
+BindsTo=lnd.service
 
 [Service]
 ExecStart=/usr/local/bin/lndk --conf=/mnt/hdd/app-data/.lndk/lndk.conf
