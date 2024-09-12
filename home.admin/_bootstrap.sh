@@ -81,6 +81,12 @@ ln_cl_mainnet_sync_initial_done=0
 ln_cl_testnet_sync_initial_done=0
 ln_cl_signet_sync_initial_done=0
 
+# detect VM
+vm=0
+if [ $(systemd-detect-virt) != "none" ]; then
+  vm=1
+fi
+
 # load already persisted valued (overwriting defaults if exist)
 source ${infoFile} 2>/dev/null
 
@@ -91,6 +97,7 @@ echo "setupPhase=${setupPhase}" >> $infoFile
 echo "setupStep=${setupStep}" >> $infoFile
 echo "baseimage=${baseimage}" >> $infoFile
 echo "cpu=${cpu}" >> $infoFile
+echo "vm=${vm}" >> $infoFile
 echo "blitzapi=${blitzapi}" >> $infoFile
 echo "displayClass=${displayClass}" >> $infoFile
 echo "displayType=${displayType}" >> $infoFile
