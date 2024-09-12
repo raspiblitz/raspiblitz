@@ -79,7 +79,7 @@ fi
 
 #############################################
 # get local IP Range
-localiprange=$(ip addr | grep 'state UP' -A2 | grep -E -v 'docker0|veth' | grep 'eth0\|wlan0\|enp0\|inet' | tail -n1 | awk '{print $2}' | awk -F. '{print $1"."$2"."$3".0/24"}')
+localiprange=$(ip -o -4 addr show ${networkDevice} | awk '/scope global/ {split($4,ip,"/"); split(ip[1],octets,"."); printf "%s.%s.%s.0/%s\n", octets[1], octets[2], octets[3], ip[2]}')
 
 #############################################
 # check DHCP
