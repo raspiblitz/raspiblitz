@@ -1,16 +1,18 @@
 #!/bin/bash
 
 # https://github.com/hoytech/strfry/commits/master/
-VERSION="32a367738c6db7430780058c4a6c98b271af73b2"
+# https://github.com/hoytech/strfry/tags
+VERSION="1.0.0"
 
 portTCP=7700
 portSSL=7701
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
-  echo "config script to switch the strfry nostr relay on or off"
-  echo "bonus.strfry.sh [on|off]"
-  echo "installs the version $VERSION"
+  echo "config script to switch the strfry nostr relay on, off or update"
+  echo "bonus.strfry.sh on     # installs the version: $VERSION"
+  echo "bonus.strfry.sh update # check and update to the latest tag in https://github.com/hoytech/strfry/tags"
+  echo "bonus.strfry.sh off    # removes the strfry service"
   exit 1
 fi
 
@@ -181,6 +183,43 @@ EOF
 
   # setting value in raspiblitz config
   /home/admin/config.scripts/blitz.conf.sh set strfry "on"
+  exit 0
+fi
+
+if [ "$1" = "update" ]; then
+  echo "# Update Strfry"
+  cd /home/strfry/strfry || exit 1
+  # fetch latest master
+  if [ "$(sudo -u strfry git fetch 2>&1 | grep -c "Please tell me who you are")" -gt 0 ]; then
+    sudo -u strfry git config user.email "you@example.com"
+    sudo -u strfry git config user.name "Your Name"
+  fi
+  sudo -u strfry git fetch
+  # unset $1
+  set --
+  UPSTREAM=${1:-'@{u}'}
+  LOCAL=$(sudo -u strfry git rev-parse @)
+  REMOTE=$(sudo -u strfry git rev-parse "$UPSTREAM")
+  # exclude tags with 'beta'
+  TAG=$(sudo -u strfry git tag | grep -v 'beta' | sort -V | tail -1)
+
+  if [ $LOCAL = $REMOTE ]; then
+    echo "# Up-to-date on version $TAG"
+  else
+    echo "# Pulling latest changes..."
+    sudo -u strfry git pull -p
+    echo "# Reset to the latest release tag: $TAG"
+    sudo -u strfry git reset --hard $TAG
+
+    echo "# Build strfry $TAG"
+    sudo -u strfry git submodule update --init
+    sudo -u strfry make setup-golpe
+    sudo -u strfry make -j2
+
+    sudo systemctl restart strfry
+
+    echo "# Updated strfry to $TAG"
+  fi
   exit 0
 fi
 
