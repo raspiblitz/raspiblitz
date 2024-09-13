@@ -196,6 +196,7 @@ if [ "$1" = on ]; then
 Description=c-lightning-REST daemon for ${CHAIN}
 Wants=${netprefix}lightningd.service
 After=${netprefix}lightningd.service
+BindsTo=${netprefix}lightningd.service
 
 [Service]
 ExecStart=/usr/bin/node /home/bitcoin/c-lightning-REST/${CLNETWORK}/cl-rest.js
