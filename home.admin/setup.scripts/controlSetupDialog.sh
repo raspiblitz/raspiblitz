@@ -285,6 +285,13 @@ fi
 echo "# Starting passwords dialog ..."
 sudo /home/admin/setup.scripts/dialogPasswords.sh || exit 1
 
+# check if password A is set
+source ${SETUPFILE}
+if [ "${passwordA}" == "" ]; then
+  /home/admin/config.scripts/blitz.error.sh $(basename "$0") "missing-passworda-1" "missing passwordA(1) in (${SETUPFILE}) after dialogPasswords.sh" ""
+  exit 1
+fi
+
 # set flag for bootstrap process to kick-off provision process
 /home/admin/_cache.sh set state "waitprovision"
 
