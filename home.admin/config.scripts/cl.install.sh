@@ -2,21 +2,27 @@
 # https://lightning.readthedocs.io/
 
 # https://github.com/ElementsProject/lightning/releases
-CLVERSION="v24.02.1"
+CLVERSION="v24.08.1"
 
 # install the latest master by using the last commit id
 # https://github.com/ElementsProject/lightning/commit/master
 # CLVERSION="063366ed7e3b7cc12a8d1681acc2b639cf07fa23"
 
 # https://github.com/ElementsProject/lightning/tree/master/contrib/keys
-# rustyrussell D9200E6CD1ADB8F1 # cdecker A26D6D9FE088ED58 # niftynei BFF0F67810C1EED1 # pneuroth (nepet) C3F21EE387FF4CD2
-PGPsigner="cdecker"
-PGPpubkeyLink="https://raw.githubusercontent.com/ElementsProject/lightning/master/contrib/keys/${PGPsigner}.txt"
-PGPpubkeyFingerprint="A26D6D9FE088ED58"
+# rustyrussell D9200E6CD1ADB8F1
+# cdecker A26D6D9FE088ED58
+# niftynei BFF0F67810C1EED1
+# pneuroth (nepet) C3F21EE387FF4CD2
+# sfarooqui (ShahanaFarooqui) DCA40B7128DA62A8
+# amyers (endothermicdev) F3BF63F2747436AB
 
-# PGPsigner="endothermicdev"
-# PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
-# PGPpubkeyFingerprint="8F55EE750D950E3E"
+# see https://github.com/ElementsProject/lightning/issues/7698
+#PGPsigner="sfarooqui"
+#PGPpubkeyLink="https://raw.githubusercontent.com/ElementsProject/lightning/master/contrib/keys/${PGPsigner}.txt"
+# ShahanaFarooqui B56B4453DA8C6DF7FC9BCFCBDCA40B7128DA62A8
+PGPsigner="ShahanaFarooqui"
+PGPpubkeyLink="https://github.com/ShahanaFarooqui.gpg"
+PGPpubkeyFingerprint="B56B4453DA8C6DF7FC9BCFCBDCA40B7128DA62A8"
 
 # help
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
@@ -38,27 +44,30 @@ fi
 function installDependencies() {
   echo "- installDependencies()"
   # from https://lightning.readthedocs.io/INSTALL.html#to-build-on-ubuntu
+  # apt packages
   sudo apt-get install -y \
     autoconf automake build-essential git libtool libsqlite3-dev \
     net-tools zlib1g-dev libsodium-dev gettext
   # additional requirements
   sudo apt-get install -y libpq-dev
-  # for clnrest (since v23.11)
+  # for clnrest - https://docs.corelightning.org/docs/installation#clnrest
   sudo apt-get install -y python3-json5 python3-flask python3-gunicorn
+  # python deps
   # upgrade pip
   sudo pip3 config set global.break-system-packages true
   sudo pip3 install --upgrade pip
   # for clnrest
-  sudo pip3 install mako
-  cd /home/bitcoin/lightning || exit 1
   sudo -u bitcoin pip3 config set global.break-system-packages true
-  sudo -u bitcoin pip3 install --user -r plugins/clnrest/requirements.txt
+  sudo -u bitcoin pip3 install --user flask-cors flask-restx pyln-client flask-socketio gevent gevent-websocket
+  # for wss proxy - https://docs.corelightning.org/docs/installation#wss-proxy
+  sudo -u bitcoin pip3 install --user pyln-client websockets
   # poetry
   sudo pip3 install poetry
   if ! grep -Eq '^PATH="$HOME/.local/bin:$PATH"' /home/bitcoin/.profile; then
     echo 'PATH="$HOME/.local/bin:$PATH"' | sudo tee -a /home/bitcoin/.profile
   fi
   export PATH="home/bitcoin/.local/bin:$PATH"
+  cd /home/bitcoin/lightning || exit 1
   sudo -u bitcoin poetry install
 }
 
@@ -70,6 +79,9 @@ function buildAndInstallCLbinaries() {
   echo "- make"
   echo
   sudo -u bitcoin make
+  echo
+  echo "- make check VALGRIND=0"
+  sudo -u bitcoin make check VALGRIND=0
   echo
   echo "- install to /usr/local/bin/"
   sudo make install || exit 1
@@ -233,7 +245,7 @@ if [ "$1" = on ] || [ "$1" = update ] || [ "$1" = testPR ]; then
     installDependencies
 
     currentCLversion=$(
-      cd /home/bitcoin/lightning 2>/dev/null
+      cd /home/bitcoin/lightning || exit 1
       git describe --tags 2>/dev/null
     )
     echo "# Building from source Core Lightning $currentCLversion"
@@ -259,10 +271,13 @@ if [ "$1" = on ] || [ "$1" = update ] || [ "$1" = testPR ]; then
   sudo -u bitcoin mkdir /home/bitcoin/cl-plugins-available 2>/dev/null
 
   echo "# Store the lightning data in /mnt/hdd/app-data/.lightning"
+  sudo mkdir -p /mnt/hdd/app-data/.lightning
   echo "# Symlink to /home/bitcoin/"
   sudo rm -rf /home/bitcoin/.lightning # not a symlink, delete
-  sudo mkdir -p /mnt/hdd/app-data/.lightning
   sudo ln -s /mnt/hdd/app-data/.lightning /home/bitcoin/
+  echo "# Symlink to /home/admin/"
+  sudo rm -rf /home/admin/.lightning # not a symlink, delete
+  sudo ln -s /mnt/hdd/app-data/.lightning /home/admin/
 
   if [ ${CLNETWORK} != "bitcoin" ] && [ ! -d /home/bitcoin/.lightning/${CLNETWORK} ]; then
     sudo -u bitcoin mkdir /home/bitcoin/.lightning/${CLNETWORK}
@@ -333,14 +348,11 @@ always-use-proxy=true
 }" | sudo tee /etc/logrotate.d/${netprefix}lightningd
   # debug:
   # sudo logrotate --debug /etc/logrotate.d/lightningd
-
   echo
   sudo -u admin touch /home/admin/_aliases
   if ! grep -Eq "^alias ${netprefix}lightning-cli" /home/admin/_aliases; then
-    echo "# Adding aliases"
+    echo "# Adding aliases: ${netprefix}cl, ${netprefix}cllog, ${netprefix}clconf"
     echo "\
-alias ${netprefix}lightning-cli=\"sudo -u bitcoin /usr/local/bin/lightning-cli\
- --conf=${CLCONF}\"
 alias ${netprefix}cl=\"sudo -u bitcoin /usr/local/bin/lightning-cli\
  --conf=${CLCONF}\"
 alias ${netprefix}cllog=\"sudo\
