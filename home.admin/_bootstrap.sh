@@ -887,7 +887,7 @@ if [ ${isMounted} -eq 0 ]; then
   # Set Password A (in all cases)
   
   if [ "${passwordA}" == "" ]; then
-    /home/admin/config.scripts/blitz.error.sh _bootstrap.sh "missing-passworda" "missing passwordA in (${setupFile})" "" ${logFile}
+    /home/admin/config.scripts/blitz.error.sh _bootstrap.sh "missing-passworda-2" "missing passwordA(2) in (${setupFile})" "" ${logFile}
     exit 1
   fi
 
