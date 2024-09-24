@@ -161,6 +161,7 @@ function installService() {
     echo "
 # Elementsd configuration
 datadir=/mnt/hdd/app-data/.elements
+walletdir=/mnt/hdd/app-data/.elements/liquidv1/wallets
 rpcuser=raspiblitz
 rpcpassword=$PASSWORD_B
 rpcbind=127.0.0.1
