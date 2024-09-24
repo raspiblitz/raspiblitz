@@ -177,6 +177,7 @@ else
   blitzpy_wheel=$(ls -trR /home/admin/raspiblitz/home.admin/BlitzPy/dist | grep -E ".*any.whl" | tail -n 1)
   blitzpy_version=$(echo ${blitzpy_wheel} | grep -oE "([0-9]\.[0-9]\.[0-9])")
   echo "# BlitzPy changed --> UPDATING to Version ${blitzpy_version}"
+  sudo pip config set global.break-system-packages true
   sudo -H /usr/bin/python -m pip install "/home/admin/raspiblitz/home.admin/BlitzPy/dist/${blitzpy_wheel}" >/dev/null 2>&1
 fi
 
