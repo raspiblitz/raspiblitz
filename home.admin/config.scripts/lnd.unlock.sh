@@ -50,7 +50,12 @@ fi
 
 lndStatus=$(sudo systemctl show ${netprefix}lnd --property=StatusText)
 echo "# {netprefix}lnd: ${lndStatus}"
-walletLocked=$( echo "${lndStatus}"| grep -c "Wallet locked")
+walletUnlocked=$( echo "${lndStatus}"| grep -c "Wallet unlocked")
+if [ ${walletUnlocked} -eq 0 ]; then
+    walletLocked=1
+else
+    walletLocked=0
+fi
 
 # if action is just status
 if [ "${action}" == "status" ]; then
@@ -60,7 +65,7 @@ fi
 
 # if already unlocked all is done
 if [ ${walletLocked} -eq 0 ]; then
-    echo "# OK LND wallet was already unlocked (or not ready yet)"
+    echo "# OK LND wallet was already unlocked"
     exit 0
 fi
 
