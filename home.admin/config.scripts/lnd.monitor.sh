@@ -39,8 +39,6 @@ fi
 # general info on the lnd service
 lnd_running=$(systemctl show ${netprefix}lnd --property=ActiveState 2>/dev/null | grep -c "=active")
 lnd_locked=$(systemctl show ${netprefix}lnd --property=StatusText 2>/dev/null | grep -c "Wallet locked")
-echo "ln_lnd_running='${lnd_running}'"
-echo "ln_lnd_locked='${lnd_locked}'"
 
 ######################################################
 # STATUS
@@ -50,7 +48,6 @@ echo "ln_lnd_locked='${lnd_locked}'"
 if [ "$2" = "status" ]; then
 
   lnd_version=$($lndcli_alias --version 2>/dev/null | cut -d ' ' -f3)
-  lnd_locked="0"
   lnd_ready="0"
   lnd_online="0"
   lnd_error_short=""
