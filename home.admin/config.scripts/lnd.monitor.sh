@@ -45,54 +45,58 @@ if [ "$2" = "status" ]; then
 
   lnd_version=$($lndcli_alias --version 2>/dev/null | cut -d ' ' -f3)
   lnd_running=$(systemctl status ${netprefix}lnd 2>/dev/null | grep -c "active (running)")
+  lnd_running="0"
   lnd_ready="0"
   lnd_online="0"
-  lnd_locked="0"
   lnd_error_short=""
   lnd_error_full=""
 
   if [ "${lnd_running}" != "0" ]; then
     lnd_running="1"
 
-    # test connection - record win & fail info
-    randStr=$(echo "$RANDOM")
-    rm /var/cache/raspiblitz/.lnd-${randStr}.out 2>/dev/null
-    rm /var/cache/raspiblitz/.lnd-${randStr}.error 2>/dev/null
-    touch /var/cache/raspiblitz/.lnd-${randStr}.out
-    touch /var/cache/raspiblitz/.lnd-${randStr}.error
-    echo "# $lndcli_alias getinfo"
-    $lndcli_alias getinfo 1>/var/cache/raspiblitz/.lnd-${randStr}.out 2>/var/cache/raspiblitz/.lnd-${randStr}.error
-    winData=$(cat /var/cache/raspiblitz/.lnd-${randStr}.out 2>/dev/null)
-    failData=$(cat /var/cache/raspiblitz/.lnd-${randStr}.error 2>/dev/null)
-    rm /var/cache/raspiblitz/.lnd-${randStr}.out
-    rm /var/cache/raspiblitz/.lnd-${randStr}.error
+    # quick wallet locked check
+    lnd_locked=$(sudo systemctl show ${netprefix}lnd --property=StatusText| grep -c "Wallet locked")
+    # only if wallet is not locked get more info
+    if [ ${lnd_locked} -eq 0 ]; then
+      # test connection - record win & fail info
+      randStr=$(echo "$RANDOM")
+      rm /var/cache/raspiblitz/.lnd-${randStr}.out 2>/dev/null
+      rm /var/cache/raspiblitz/.lnd-${randStr}.error 2>/dev/null
+      touch /var/cache/raspiblitz/.lnd-${randStr}.out
+      touch /var/cache/raspiblitz/.lnd-${randStr}.error
+      echo "# $lndcli_alias getinfo"
+      $lndcli_alias getinfo 1>/var/cache/raspiblitz/.lnd-${randStr}.out 2>/var/cache/raspiblitz/.lnd-${randStr}.error
+      winData=$(cat /var/cache/raspiblitz/.lnd-${randStr}.out 2>/dev/null)
+      failData=$(cat /var/cache/raspiblitz/.lnd-${randStr}.error 2>/dev/null)
+      rm /var/cache/raspiblitz/.lnd-${randStr}.out
+      rm /var/cache/raspiblitz/.lnd-${randStr}.error
 
-    # check for errors
-    if [ "${failData}" != "" ]; then
-      lnd_ready="0"
+      # check for errors
+      if [ "${failData}" != "" ]; then
+        lnd_ready="0"
 
-      # store error messages 
-      lnd_error_short=""
-      lnd_error_full=$(echo ${failData} | tr -d "'" | tr -d '"')
-
-      # check if error because wallet is locked
-      if [ $(echo "${failData}" | grep -c "wallet locked") -gt 0 ]; then
-        # signal wallet locked
-        lnd_locked="1"
-        # dont report it as error
+        # store error messages 
         lnd_error_short=""
-        lnd_error_full=""
-      fi
+        lnd_error_full=$(echo ${failData} | tr -d "'" | tr -d '"')
 
-    # check results if proof for online
-    else
-      lnd_ready="1"
-      connections=$( echo "${winData}" | grep "num_peers\"" | tr -cd '[[:digit:]]')
-      if [ "${connections}" != "" ] && [ "${connections}" != "0" ]; then
-        lnd_online="1"
-      fi
-    fi
+        # check if error because wallet is locked
+        if [ $(echo "${failData}" | grep -c "wallet locked") -gt 0 ]; then
+          # signal wallet locked
+          lnd_locked="1"
+          # dont report it as error
+          lnd_error_short=""
+          lnd_error_full=""
+        fi
 
+      # check results if proof for online
+      else
+        lnd_ready="1"
+        connections=$( echo "${winData}" | grep "num_peers\"" | tr -cd '[[:digit:]]')
+        if [ "${connections}" != "" ] && [ "${connections}" != "0" ]; then
+          lnd_online="1"
+        fi
+      fi
+    fi  
   fi 
 
   # print results
