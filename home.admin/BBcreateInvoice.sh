@@ -151,12 +151,12 @@ else
   while :; do
     if [ $LNTYPE = cl ]; then
       result=$($lightningcli_alias waitinvoice $label)
-      wasPayed=$(echo $result | grep -c 'paid')
+      wasPaid=$(echo $result | grep -c 'paid')
     elif [ $LNTYPE = lnd ]; then
       result=$($lncli_alias lookupinvoice ${rhash})
-      wasPayed=$(echo $result | grep -c '"settled": true')
+      wasPaid=$(echo $result | grep -c '"settled": true')
     fi
-    if [ ${wasPayed} -gt 0 ]; then
+    if [ ${wasPaid} -gt 0 ]; then
       echo
       echo $result
       echo
@@ -175,7 +175,7 @@ else
       echo
       echo $result
       echo
-      echo "Returning to menu - invoice was not payed yet."
+      echo "Returning to menu - the invoice has not been paid yet."
       break
     fi
 
