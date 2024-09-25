@@ -547,7 +547,7 @@ elif [ "${abcd}" = "c" ]; then
     echo "# CORE LIGHTNING not installed/active/encrypted"
   fi
 
-  # store password hash
+  # store password hash (either for lnd or core lightning)
   mkpasswd -m sha-512 "${newPassword}" -S "${hashedPasswordSalt:0:16}" > ${hashedPasswordStoragePath}/c.hash
   chown admin:admin ${hashedPasswordStoragePath}/c.hash
   chmod 660 ${hashedPasswordStoragePath}/c.hash
