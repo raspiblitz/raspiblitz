@@ -195,6 +195,21 @@ do
         echo "IPv6 only is OFF => no need to restart bitcoind nor BTCRPCexplorer"
       fi
 
+      # only restart LND if auto-unlock is activated
+      # AND neither the old nor the new IPv6 address is "::1"
+      source <(/home/admin/config.scripts/lnd.autounlock.sh status)
+      if [ "${autoUnlock}" = "on" ]; then
+        if [ "${publicIP_Old}" != "::1" ] && [ "${publicIP_New}" != "::1" ]; then
+          echo "restart LND to pickup up new publicIP"
+          systemctl stop lnd
+          systemctl start lnd
+        else
+          echo "publicIP_Old OR publicIP_New is equal ::1 => no need to restart LND"
+        fi
+      else
+        echo "new publicIP but no LND restart because no auto-unlock"
+      fi
+
       # trigger update if dynamic domain (if set)
       updateDynDomain=1
 
