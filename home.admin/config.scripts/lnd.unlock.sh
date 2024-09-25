@@ -49,7 +49,7 @@ if [ "${state}" == "reboot" ] || [ "${state}" == "shutdown" ]; then
 fi
 
 lndStatus=$(sudo systemctl show ${netprefix}lnd --property=StatusText)
-echo "# {$netprefix}lnd: ${lndStatus}"
+echo "# ${netprefix}lnd: ${lndStatus}"
 walletUnlocked=$( echo "${lndStatus}"| grep -c "Wallet unlocked")
 if [ ${walletUnlocked} -eq 0 ]; then
     walletLocked=1
