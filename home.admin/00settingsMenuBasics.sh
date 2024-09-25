@@ -6,7 +6,6 @@ source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
 
 echo "services default values"
-if [ ${#autoUnlock} -eq 0 ]; then autoUnlock="off"; fi
 if [ ${#runBehindTor} -eq 0 ]; then runBehindTor="off"; fi
 if [ ${#networkUPnP} -eq 0 ]; then networkUPnP="off"; fi
 if [ ${#touchscreen} -eq 0 ]; then touchscreen=0; fi
@@ -18,6 +17,9 @@ if [ ${#clEncryptedHSM} -eq 0 ]; then clEncryptedHSM="off"; fi
 if [ ${#clAutoUnlock} -eq 0 ]; then clAutoUnlock="off"; fi
 if [ ${#clWatchtowerClient} -eq 0 ]; then clWatchtowerClient="off"; fi
 if [ ${#blitzapi} -eq 0 ]; then blitzapi="off"; fi
+
+# detect if LND auto-unlock is active
+source <(/home/admin/config.scripts/lnd.autounlock.sh status)
 
 echo "# map LND to on/off"
 lndNode="off"
