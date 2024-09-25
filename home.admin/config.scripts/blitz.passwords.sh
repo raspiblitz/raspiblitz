@@ -526,7 +526,7 @@ elif [ "${abcd}" = "c" ]; then
 
     if [ "${autoUnlock}" == "on" ]; then
       echo "# Make sure Auto-Unlocks on"
-      sudo /home/admin/config.scripts/lnd.autounlock.sh on "${$newPassword}"
+      sudo /home/admin/config.scripts/lnd.autounlock.sh on "${newPassword}"
     fi
 
     echo "# Password changed"
