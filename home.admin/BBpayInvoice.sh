@@ -48,7 +48,7 @@ done
 # check number of connected peers
 echo "check for open channels"
 if [ $LNTYPE = cl ]; then
-  openChannels=$($lightningcli_alias listpeers | grep -c "CHANNELD_NORMAL")
+  openChannels=$($lightningcli_alias getinfo | jq .num_active_channels)
 elif [ $LNTYPE = lnd ]; then
   openChannels=$($lncli_alias listchannels 2>/dev/null | grep chan_id -c)
 fi
