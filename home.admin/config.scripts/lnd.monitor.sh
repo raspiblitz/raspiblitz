@@ -45,7 +45,7 @@ if [ "$2" = "status" ]; then
 
   lnd_version=$($lndcli_alias --version 2>/dev/null | cut -d ' ' -f3)
   lnd_running=$(systemctl status ${netprefix}lnd 2>/dev/null | grep -c "active (running)")
-  lnd_running="0"
+  lnd_locked="0"
   lnd_ready="0"
   lnd_online="0"
   lnd_error_short=""
