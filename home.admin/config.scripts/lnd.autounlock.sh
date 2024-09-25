@@ -69,6 +69,7 @@ fi
 
 # lnd conf file
 lndConfig="/mnt/hdd/lnd/lnd.conf"
+passwordFile="/mnt/hdd/lnd/data/chain/bitcoin/mainnet/password.info"
 
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
@@ -76,10 +77,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "# switching the Auto-Unlock ON"
 
   # password C needs to be stored on RaspiBlitz
-  echo "# storing password on hdd /mnt/hdd/lnd/data/chain/bitcoin/mainnet/wallet.password.txt"
-  sudo sh -c "echo \"${passwordC}\" > /mnt/hdd/lnd/data/chain/bitcoin/mainnet/wallet.password.txt"
-  sudo chmod 660 /mnt/hdd/lnd/data/chain/bitcoin/mainnet/wallet.password.txt
-  sudo chown bitcoin:bitcoin /mnt/hdd/lnd/data/chain/bitcoin/mainnet/wallet.password.txt
+  echo "# storing password on hdd ${passwordFile}"
+  sudo sh -c "echo \"${passwordC}\" > ${passwordFile}"
+  sudo chmod 660 "${passwordFile}"
+  sudo chown bitcoin:bitcoin "${passwordFile}"
 
   # remove any existing active config in lnd.conf
   sudo sed -i "/^wallet-unlock-password-file=/d" /mnt/hdd/lnd/lnd.conf
@@ -87,7 +88,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # add the config line under [Application Options] section
   sudo sed -i "/^\[Application Options\]/ { 
 n
-a wallet-unlock-password-file=/mnt/hdd/lnd/data/chain/bitcoin/mainnet/wallet.password.txt
+a wallet-unlock-password-file=${passwordFile}
 }" /mnt/hdd/lnd/lnd.conf
 
   echo "# Auto-Unlock is now ON (after manual lnd restart)"
@@ -103,7 +104,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # delete password C securely
   echo "# shredding password on for RaspiBlitz Auto-Unlock"
-  sudo shred -u /mnt/hdd/lnd/data/chain/bitcoin/mainnet/wallet.password.txt 2>/dev/null
+  sudo shred -u "${passwordFile}" 2>/dev/null
 
   # remove any existing active config in lnd.conf
   sudo sed -i "/^wallet-unlock-password-file=/d" /mnt/hdd/lnd/lnd.conf
