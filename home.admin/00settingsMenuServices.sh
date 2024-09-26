@@ -254,6 +254,17 @@ choice="off"; check=$(echo "${CHOICES}" | grep -c "pa")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${BTCPayServer}" != "${choice}" ]; then
   echo "BTCPayServer setting changed .."
+
+  #4049 warn if system has less than 8GB RAM
+  ramGB=$(free -g | awk '/^Mem:/{print $2}')
+  if [ "${choice}" =  "on" ] && [ ${ramGB} -lt 8 ]; then
+    whiptail --title "8GB RAM recommended for BTCPayServer" --yesno "8GB of RAM is recommended to run BTCPayServer on RaspiBlitz - you have less then that.\nDo you want to continue?" 10 50 --defaultno --yes-button "Continue" --no-button "Cancel"
+    if [ $? -eq 1 ]; then
+      # if user choosed CANCEL just null the choice
+      choice=""
+    fi
+  fi
+
   # check if TOR is installed
   source /mnt/hdd/raspiblitz.conf
   if [ "${choice}" =  "on" ] && [ "${runBehindTor}" = "off" ]; then
