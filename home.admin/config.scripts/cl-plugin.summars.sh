@@ -34,9 +34,9 @@ fi
 
 echo
 echo "# Running:"
-echo "${netprefix}lightning-cli -H summars summars-columns=IN_SATS,OUT_SATS,GRAPH_SATS,ALIAS summars-sort-by=IN_SATS"
+echo "${netprefix}lightning-cli -H summars summars-columns=IN_SATS,OUT_SATS,GRAPH_SATS,ALIAS,FLAG,BASE,PPM,UPTIME,HTLCS,STATE summars-sort-by=-IN_SATS"
 echo
-$lightningcli_alias -H summars summars-columns=IN_SATS,OUT_SATS,GRAPH_SATS,ALIAS summars-sort-by=IN_SATS
+$lightningcli_alias -H summars summars-columns=IN_SATS,OUT_SATS,GRAPH_SATS,ALIAS,FLAG,BASE,PPM,UPTIME,HTLCS,STATE summars-sort-by=-IN_SATS
 echo
 
 if [ "$(echo "$@" | grep -c "runonce")" -gt 0 ]; then
