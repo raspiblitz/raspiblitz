@@ -19,46 +19,46 @@ fi
 source <(/home/admin/config.scripts/network.aliases.sh getvars $1 $2)
 
 # check if chain is in sync
-if [ $LNTYPE = cl ];then
+if [ $LNTYPE = cl ]; then
   lncommand="${netprefix}lightning-cli"
-  BLOCKHEIGHT=$($bitcoincli_alias getblockchaininfo|grep blocks|awk '{print $2}'|cut -d, -f1)
+  BLOCKHEIGHT=$($bitcoincli_alias getblockchaininfo | grep blocks | awk '{print $2}' | cut -d, -f1)
   CLHEIGHT=$($lightningcli_alias getinfo | jq .blockheight)
-  if [ $BLOCKHEIGHT -eq $CLHEIGHT ];then
+  if [ $BLOCKHEIGHT -eq $CLHEIGHT ]; then
     cmdChainInSync=1
   else
     cmdChainInSync=0
   fi
-elif [ $LNTYPE = lnd ];then
+elif [ $LNTYPE = lnd ]; then
   lncommand="${netprefix}lncli"
   cmdChainInSync="$lncli_alias getinfo | grep '"synced_to_chain": true' -c"
 fi
 chainInSync=${cmdChainInSync}
 while [ "${chainInSync}" == "0" ]; do
   dialog --title "Fail: not in sync" \
-	 --ok-label "Try now" \
-	 --cancel-label "Give up" \
-	 --pause "\n\n'$lncommand getinfo' shows 'synced_to_chain': false\n\nTry again in a few seconds." 15 60 5
-  
+    --ok-label "Try now" \
+    --cancel-label "Give up" \
+    --pause "\n\n'$lncommand getinfo' shows 'synced_to_chain': false\n\nTry again in a few seconds." 15 60 5
+
   if [ $? -gt 0 ]; then
-      exit 0
+    exit 0
   fi
   chainInSync=${cmdChainInSync}
 done
 
 # check number of connected peers
 echo "check for open channels"
-if [ $LNTYPE = cl ];then
-  openChannels=$($lightningcli_alias listpeers | grep -c "CHANNELD_NORMAL")
-elif [ $LNTYPE = lnd ];then
-  openChannels=$($lncli_alias  listchannels 2>/dev/null | grep chan_id -c)
+if [ $LNTYPE = cl ]; then
+  openChannels=$($lightningcli_alias getinfo | jq .num_active_channels)
+elif [ $LNTYPE = lnd ]; then
+  openChannels=$($lncli_alias listchannels 2>/dev/null | grep chan_id -c)
 fi
 if [ ${openChannels} -eq 0 ]; then
-  echo 
+  echo
   echo "#########"
   echo "FAIL - You have NO ESTABLISHED CHANNELS .. open a channel first."
   echo "#########"
   sleep 3
-  echo 
+  echo
   exit 0
 fi
 
@@ -81,7 +81,7 @@ l1="Copy the LightningInvoice/PaymentRequest into here:"
 l2="Its a long string starting with '${paymentRequestStart}'"
 l3="To try it out go to: ${testSite}"
 dialog --title "Pay through the Lightning Network" \
---inputbox "$l1\n$l2\n$l3" 10 70 2>$_temp
+  --inputbox "$l1\n$l2\n$l3" 10 70 2>$_temp
 invoice=$(cat $_temp | xargs)
 shred -u $_temp
 if [ ${#invoice} -eq 0 ]; then
@@ -95,10 +95,10 @@ fi
 # TODO: maybe try/show the decoded info first by using https://api.lightning.community/#decodepayreq
 
 # build command
-if [ $LNTYPE = cl ];then
+if [ $LNTYPE = cl ]; then
   # pay bolt11 [msatoshi] [label] [riskfactor] [maxfeepercent] [retry_for] [maxdelay] [exemptfee]
   command="$lightningcli_alias pay ${invoice}"
-elif [ $LNTYPE = lnd ];then
+elif [ $LNTYPE = lnd ]; then
   command="$lncli_alias sendpayment --force --pay_req=${invoice}"
 fi
 
@@ -112,7 +112,7 @@ echo "Pay Invoice / Payment Request"
 echo "This script is an example using lightning in the command line."
 echo "It is not optimized for performance or error handling."
 echo "************************************************************"
-echo 
+echo
 echo "COMMAND LINE: "
 echo $command
 echo
@@ -125,9 +125,9 @@ error=$(cat ${_error})
 #echo "result(${result})"
 #echo "error(${error})"
 
-if [ $LNTYPE = cl ];then
+if [ $LNTYPE = cl ]; then
   resultIsError=$(echo "${result}" | grep -c '"code":')
-elif [ $LNTYPE = lnd ];then
+elif [ $LNTYPE = lnd ]; then
   resultIsError=$(echo "${result}" | grep -c "payment_error")
 fi
 if [ ${resultIsError} -gt 0 ]; then
