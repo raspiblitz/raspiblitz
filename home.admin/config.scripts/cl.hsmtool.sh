@@ -249,6 +249,7 @@ if [ "$1" = "new" ] || [ "$1" = "new-force" ] || [ "$1" = "seed" ] || [ "$1" = "
     echo "# No seedwords - exiting"
     exit 14
   fi
+  seedwordsCommaSeperated=$(echo "$seedwords" | sed 's/^ *//;s/ *$//' | tr ' ' ',')
   # place the seedwords to /home/bitcoin/.lightning/${CLNETWORK}/seedwords.info
   sudo touch /home/bitcoin/.lightning/${CLNETWORK}/seedwords.info
   sudo chown bitcoin:bitcoin /home/bitcoin/.lightning/${CLNETWORK}/seedwords.info
@@ -256,7 +257,7 @@ if [ "$1" = "new" ] || [ "$1" = "new-force" ] || [ "$1" = "seed" ] || [ "$1" = "
   echo "
 # This file was placed by cl.hsmtool.sh
 # Contains the seed words from which the hsm_secret in the same directory was generated from
-seedwords='${seedwords}'
+seedwords='${seedwordsCommaSeperated}'
 seedwords6x4='${seedwords6x4}'
 # Will be removed safely when the hsm_secret is encrypted.
 " | sudo -u bitcoin tee /home/bitcoin/.lightning/${CLNETWORK}/seedwords.info
