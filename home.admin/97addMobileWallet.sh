@@ -171,36 +171,14 @@ Please go to MAINMENU > SYSTEM > LNDCONF and set accept-keysend=1 first.
       exit 0;
     ;;
   ZEUS_IOS)
-      appstoreLink="https://apps.apple.com/us/app/zeus-ln/id1456038895"
-      sudo /home/admin/config.scripts/blitz.display.sh image /home/admin/raspiblitz/pictures/app_zeus.png
-	  whiptail --title "Install Zeus on your iOS device" \
-		--yes-button "Continue" \
-		--no-button "Link as QRcode" \
-		--yesno "Open the Apple App Store on your mobile phone.\n\nSearch for --> 'zeus ln'\n\nCheck that logo is like on LCD and author is: Zeus LN LLC\nWhen the app is installed and started --> Continue." 12 65
-	  if [ $? -eq 1 ]; then
-		sudo /home/admin/config.scripts/blitz.display.sh qr ${appstoreLink}
-		/home/admin/config.scripts/blitz.display.sh qr-console ${appstoreLink}
-	  fi
-	  sudo /home/admin/config.scripts/blitz.display.sh hide
+	  whiptail --title "Install Zeus on your Android Phone" \
+  --msgbox "Open the Android Play Store on your mobile phone.\n\nSearch for --> 'Zeus Wallet' by Atlas 21 Inc.\n\nWhen the app is installed and started --> OK" 11 65
   	  /home/admin/config.scripts/bonus.lndconnect.sh zeus-ios tor
   	  exit 0;
   	;;
   ZEUS_ANDROID)
-      appstoreLink="https://play.google.com/store/apps/details?id=app.zeusln.zeus"
-      sudo /home/admin/config.scripts/blitz.display.sh image /home/admin/raspiblitz/pictures/app_zeus.png
 	  whiptail --title "Install Zeus on your Android Phone" \
-		--yes-button "Continue" \
-		--no-button "StoreLink" \
-		--yesno "Open the Android Play Store on your mobile phone.\n\nSearch for --> 'zeus ln'\n\nCheck that logo is like on LCD and author is: Evan Kaloudis\nWhen app is installed and started --> Continue." 12 65
-	  if [ $? -eq 1 ]; then
-		sudo /home/admin/config.scripts/blitz.display.sh qr ${appstoreLink}
-		whiptail --title " App Store Link " --msgbox "\
-To install app open the following link:\n
-${appstoreLink}\n
-Or scan the qr code on the LCD with your mobile phone.
-" 11 70
-	  fi
-	  sudo /home/admin/config.scripts/blitz.display.sh hide
+  --msgbox "Open the Android Play Store on your mobile phone.\n\nSearch for --> 'Zeus Wallet' by Atlas 21 Inc.\n\nWhen the app is installed and started --> OK" 11 65
   	  /home/admin/config.scripts/bonus.lndconnect.sh zeus-android tor
   	  exit 0;
   	;;
