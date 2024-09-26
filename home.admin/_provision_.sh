@@ -147,6 +147,8 @@ ufw allow 18333 comment 'bitcoin testnet'
 echo "allow: bitcoin mainnet"
 ufw allow 8333 comment 'bitcoin mainnet'
 echo 'allow: lightning testnet'
+ufw allow 8332 comment 'bitcoin mainnet RPC'
+echo 'allow: lightning testnet'
 ufw allow 19735 comment 'lightning testnet'
 echo "allow: lightning mainnet"
 ufw allow 9735 comment 'lightning mainnet'
