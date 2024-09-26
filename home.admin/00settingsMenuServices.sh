@@ -258,7 +258,7 @@ if [ "${BTCPayServer}" != "${choice}" ]; then
   #4049 warn if system has less than 8GB RAM
   ramGB=$(free -g | awk '/^Mem:/{print $2}')
   if [ "${choice}" =  "on" ] && [ ${ramGB} -lt 7 ]; then
-    whiptail --title "8GB RAM recommended for BTCPayServer" --yesno "8GB of RAM is recommended to run BTCPayServer on RaspiBlitz - you have less than that.\nDo you want to continue?" 10 50 --defaultno --yes-button "Continue" --no-button "Cancel"
+    whiptail --title "Your RaspiBlitz has less than the recommended 8GB of RAM to run BTCPayServer.\nDo you really want to proceed?" 10 50 --defaultno --yes-button "Continue" --no-button "Cancel"
     if [ $? -eq 1 ]; then
       # if user choosed CANCEL just null the choice
       choice=""
