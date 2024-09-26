@@ -234,7 +234,8 @@ if [ "$1" = "new" ] || [ "$1" = "new-force" ] || [ "$1" = "seed" ] || [ "$1" = "
   elif [ "$1" = "new-force" ]; then
     # get 24 words
     source <(python /home/admin/config.scripts/blitz.mnemonic.py generate)
-    echo "seedwords='${seedwords}'"
+    seedwordsCommaSeperated=$(echo "$seedwords" | sed 's/^ *//;s/ *$//' | tr ' ' ',')
+    echo "seedwords='${seedwordsCommaSeperated}'"
     echo "seedwords6x4='${seedwords6x4}'"
   elif [ "$1" = "seed" ] || [ "$1" = "seed-force" ]; then
     #TODO get seedwords from cl.backup.sh seed-import-gui [$RESULTFILE]
