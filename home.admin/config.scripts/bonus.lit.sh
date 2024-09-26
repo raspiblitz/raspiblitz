@@ -12,7 +12,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
 fi
 
 # check who signed the release in https://github.com/lightninglabs/lightning-terminal/releases
-PGPsigner="ViktorTigerstrom"
+PGPsigner="ellemouton"
 
 if [ $PGPsigner = ellemouton ]; then
   pgpPubKey="D7D916376026F177"
