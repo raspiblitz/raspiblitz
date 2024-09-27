@@ -4,24 +4,15 @@
 # https://github.com/ElementsProject/lightning/releases
 CLVERSION="v24.08.1"
 
-# install the latest master by using the last commit id
-# https://github.com/ElementsProject/lightning/commit/master
-# CLVERSION="063366ed7e3b7cc12a8d1681acc2b639cf07fa23"
-
 # https://github.com/ElementsProject/lightning/tree/master/contrib/keys
 # rustyrussell D9200E6CD1ADB8F1
 # cdecker A26D6D9FE088ED58
 # niftynei BFF0F67810C1EED1
 # pneuroth (nepet) C3F21EE387FF4CD2
-# sfarooqui (ShahanaFarooqui) DCA40B7128DA62A8
+# sfarooqui (ShahanaFarooqui) B56B4453DA8C6DF7FC9BCFCBDCA40B7128DA62A8
 # amyers (endothermicdev) F3BF63F2747436AB
-
-# see https://github.com/ElementsProject/lightning/issues/7698
-#PGPsigner="sfarooqui"
-#PGPpubkeyLink="https://raw.githubusercontent.com/ElementsProject/lightning/master/contrib/keys/${PGPsigner}.txt"
-# ShahanaFarooqui B56B4453DA8C6DF7FC9BCFCBDCA40B7128DA62A8
-PGPsigner="ShahanaFarooqui"
-PGPpubkeyLink="https://github.com/ShahanaFarooqui.gpg"
+PGPsigner="sfarooqui"
+PGPpubkeyLink="https://raw.githubusercontent.com/ElementsProject/lightning/master/contrib/keys/${PGPsigner}.txt"
 PGPpubkeyFingerprint="B56B4453DA8C6DF7FC9BCFCBDCA40B7128DA62A8"
 
 # help
