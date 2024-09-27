@@ -76,6 +76,10 @@ if [ "$1" == "prestart" ]; then
     fi
   fi
 
+  if ! grep "^clnrest-port=${portprefix}7378" <${CLCONF}; then
+    echo "clnrest-port=${portprefix}7378" | tee -a ${CLCONF}
+  fi
+
   exit 0
 fi
 
