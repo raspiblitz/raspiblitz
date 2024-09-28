@@ -277,6 +277,7 @@ log-file=cl.log
 log-level=info
 plugin-dir=/home/bitcoin/${netprefix}cl-plugins-enabled
 clnrest-port=${portprefix}7378
+clnrest-host=0.0.0.0
 
 # Tor settings
 proxy=127.0.0.1:9050

@@ -16,17 +16,21 @@ echo "# Running: 'cl-plugin.clnrest.sh $*'"
 source <(/home/admin/config.scripts/network.aliases.sh getvars cl $2)
 
 if [ "$1" = on ]; then
-  # blitz.conf.sh set [key] [value] [?conffile] <noquotes>
+  clnNeedsRestart=0
   if ! grep "^clnrest-port=${portprefix}7378" "${CLCONF}" >/dev/null; then
     echo "# setting clnrest-port=${portprefix}7378"
     sudo /home/admin/config.scripts/blitz.conf.sh set "clnrest-port" "${portprefix}7378" "${CLCONF}" "noquotes"
-    source /home/admin/raspiblitz.info
-    if [ "${state}" == "ready" ]; then
-      echo "# OK the system is ready so restarting ${netprefix}lightningd to activate the clnrest plugin"
-      sudo systemctl restart ${netprefix}lightningd
-    fi
-  else
-    echo "# ${netprefix}cl clnrest-port was already set"
+    clnNeedsRestart=1
+  fi
+  if ! grep "^clnrest-host=0.0.0.0" "${CLCONF}" >/dev/null; then
+    echo "# setting clnrest-host=0.0.0.0"
+    sudo /home/admin/config.scripts/blitz.conf.sh set "clnrest-host" "0.0.0.0" "${CLCONF}" "noquotes"
+    clnNeedsRestart=1
+  fi
+  source /home/admin/raspiblitz.info
+  if [ "${state}" == "ready" ] && [ ${clnNeedsRestart} -eq 1 ]; then
+    echo "# OK the system is ready so restarting ${netprefix}lightningd to activate the clnrest plugin"
+    sudo systemctl restart ${netprefix}lightningd
   fi
 fi
 
