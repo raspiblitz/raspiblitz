@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#source /home/admin/raspiblitz.info
+source /home/admin/raspiblitz.info
 
 source <(/home/admin/_cache.sh get \
   state \
@@ -317,11 +317,11 @@ fi
 datetime=$(date +"%d %b %T %z")
 datetime="${datetime} up ${system_up_text}"
 
-#if [ "${vm}" == "1" ]; then
+if [ "${vm}" == "1" ]; then
     temp_info="VM detected"
-#else
-#    temp_info="temp %s°C %s°F"
-#fi
+else
+    temp_info="temp ${system_temp_celsius}°C ${system_temp_fahrenheit}°F"
+fi
 
 stty sane
 sleep 1
@@ -350,7 +350,7 @@ $lastLine
 "RaspiBlitz v${codeVersion}" \
 "-------------------------------------------" \
 "Refreshed: ${datetime}" \
-"CPU load${system_cpu_load##up*,  }" "${system_temp_celsius}" "${system_temp_fahrenheit}" \
+"CPU load${system_cpu_load##up*,  }" \
 "${hdd_used_info}" "${sync_percentage}"
 
 if [ ${#undervoltageReports} -gt 0 ] && [ "${undervoltageReports}" != "0" ]; then
