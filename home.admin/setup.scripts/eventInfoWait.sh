@@ -33,10 +33,10 @@ if [ "${mode}" != "lcd" ] && [ "${mode}" != "ssh" ]; then
     exit 1
 fi
 
-if [ "${vm}" == "0" ]; then
-    temp_info="${system_temp_celsius}°C"
-else
+if [ "${vm}" == "1" ]; then
     temp_info="VM"
+else
+    temp_info="${system_temp_celsius}°C"
 fi
 
 # default backtitle for dialog

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source /home/admin/raspiblitz.info 2>/dev/null
+#source /home/admin/raspiblitz.info 2>/dev/null
 
 source <(/home/admin/_cache.sh get \
   state \
@@ -317,12 +317,11 @@ fi
 datetime=$(date +"%d %b %T %z")
 datetime="${datetime} up ${system_up_text}"
 
-if [ "${vm}" == "0" ]; then
-    temp_info="temp %s°C %s°F"
-else
+if [ "${vm}" == "1" ]; then
     temp_info="VM detected"
+else
+    temp_info="temp %s°C %s°F"
 fi
-
 
 stty sane
 sleep 1
