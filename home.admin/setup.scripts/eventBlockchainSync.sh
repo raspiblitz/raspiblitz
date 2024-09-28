@@ -104,7 +104,7 @@ fi
 
 # display info to user
 time=$(date '+%H:%M:%S')
-if [ "${vm}" == "0"]; then
+if [ "${vm}" == "0" ]; then
     temp_info="${system_temp_celsius}°C ${system_temp_fahrenheit}°F"
 else
     temp_info="VM"

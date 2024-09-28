@@ -317,7 +317,7 @@ fi
 datetime=$(date +"%d %b %T %z")
 datetime="${datetime} up ${system_up_text}"
 
-if [ "${vm}" == "0"]; then
+if [ "${vm}" == "0" ]; then
     temp_info="temp %s°C %s°F"
 else
     temp_info="VM detected"

@@ -33,7 +33,7 @@ if [ "${mode}" != "lcd" ] && [ "${mode}" != "ssh" ]; then
     exit 1
 fi
 
-if [ "${vm}" == "0"]; then
+if [ "${vm}" == "0" ]; then
     temp_info="${system_temp_celsius}°C"
 else
     temp_info="VM"
