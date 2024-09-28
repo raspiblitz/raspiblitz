@@ -306,30 +306,21 @@ WantedBy=multi-user.target
 " | sudo tee /etc/systemd/system/${systemdService}.service
   sudo chown root:root /etc/systemd/system/${systemdService}.service
 
-  # set up Core LightningREST (if needed)
+  # set up clnrest
   if [ "${LNTYPE}" == "cl" ]; then
     echo "# modifying ${systemdService}.service for CL"
     sudo sed -i "s/^Wants=.*/Wants=${netprefix}lightningd.service/g" /etc/systemd/system/${systemdService}.service
     sudo sed -i "s/^After=.*/After=${netprefix}lightningd.service/g" /etc/systemd/system/${systemdService}.service
 
-    ## set up Core LightningREST
-    #/home/admin/config.scripts/cl.rest.sh on ${CHAIN}
+    # set up clnrest
+    /home/admin/config.scripts/cl-plugin.clnrest.sh on ${CHAIN}
 
-    # Create/reuse core-lightning's rune. Check createrune and showrunes documentation for more details on how to create runes
-    # Copy the rune and save it in a file which must be accessible to RTL. The content of the file must be LIGHTNING_RUNE="<your-rune>"
-
-    # blitz.conf.sh set [key] [value] [?conffile] <noquotes>
-    if ! grep "^clnrest-port=${portprefix}3100" "${CLCONF}" >/dev/null; then
-      echo "# setting clnrest-port=${portprefix}3100"
-      sudo /home/admin/config.scripts/blitz.conf.sh set "clnrest-port" "${portprefix}3100" "${CLCONF}" "noquotes"
-      source /home/admin/raspiblitz.info
-      if [ "${state}" == "ready" ]; then
-        echo "# OK the system is ready so restarting ${netprefix}lightningd to activate the clnrest plugin"
-        sudo systemctl start ${netprefix}lightningd
-      fi
-    else
-      echo "# ${netprefix}cl clnrest-port already set"
-    fi
+    # for CLN make sure user rtl is allowed to create and access admin runes
+    echo "# adding user rtl to group bitcoin"
+    sudo /usr/sbin/usermod --append --groups bitcoin rtl
+    echo "# symlink .lightning to rtl home"
+    sudo rm -rf /home/rtl/.lightning
+    sudo ln -s /mnt/hdd/app-data/.lightning /home/rtl/
   fi
 
   # Note about RTL config file
@@ -500,33 +491,24 @@ if [ "$1" = "prestart" ]; then
   # https://github.com/Ride-The-Lightning/RTL/blob/master/docs/C-Lightning-setup.md
   if [ "${LNTYPE}" == "cl" ]; then
     echo "# CLN config"
-    #cat /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json |
-    #  jq ".port = \"${RTLHTTP}\"" |
-    #  jq ".multiPass = \"${RPCPASSWORD}\"" |
-    #  jq ".multiPassHashed = \"\"" |
-    #  jq ".nodes[0].lnNode = \"${hostname}\"" |
-    #  jq ".nodes[0].lnImplementation = \"CLT\"" |
-    #  jq ".nodes[0].Authentication.macaroonPath = \"/home/bitcoin/c-lightning-REST/${CLNETWORK}/certs\"" |
-    #  jq ".nodes[0].Authentication.configPath = \"${CLCONF}\"" |
-    #  jq ".nodes[0].Authentication.swapMacaroonPath = \"/home/rtl/.loop/${CHAIN}/\"" |
-    #  jq ".nodes[0].Authentication.boltzMacaroonPath = \"/home/rtl/.boltz-lnd/macaroons/\"" |
-    #  jq ".nodes[0].Settings.userPersona = \"OPERATOR\"" |
-    #  jq ".nodes[0].Settings.lnServerUrl = \"https://127.0.0.1:${portprefix}6100\"" |
-    #  jq ".nodes[0].Settings.channelBackupPath = \"/mnt/hdd/app-data/rtl/${systemdService}-SCB-backup-$hostname\"" |
-    #  jq ".nodes[0].Settings.swapServerUrl = \"https://127.0.0.1:${SWAPSERVERPORT}\"" >/mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json.tmp
-
+    if [ ! -f /home/bitcoin/.lightning/${CLNETWORK}/rune_for_${netprefix}RTL ]; then
+      # Create/reuse core-lightning's rune. Check createrune and showrunes documentation for more details on how to create runes
+      newRune=$(/usr/local/bin/lightning-cli --conf=${CLCONF} createrune | jq .rune)
+      # Copy the rune and save it in a file which must be accessible to RTL. The content of the file must be LIGHTNING_RUNE="<your-rune>"
+      echo "LIGHTNING_RUNE=${newRune}" >/home/bitcoin/.lightning/${CLNETWORK}/rune_for_${netprefix}RTL
+    fi
     cat /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json |
       jq ".port = \"${RTLHTTP}\"" |
       jq ".multiPass = \"${RPCPASSWORD}\"" |
       jq ".multiPassHashed = \"\"" |
       jq ".nodes[0].lnNode = \"${hostname}\"" |
       jq ".nodes[0].lnImplementation = \"CLN\"" |
-      jq ".nodes[0].Authentication.runePath = \"/home/bitcoin/c-lightning-REST/${CLNETWORK}/certs\"" |
+      jq ".nodes[0].Authentication.runePath = \"/home/rtl/.lightning/${CLNETWORK}/rune_for_${netprefix}RTL\"" |
       jq ".nodes[0].Authentication.configPath = \"${CLCONF}\"" |
       jq ".nodes[0].Authentication.swapMacaroonPath = \"/home/rtl/.loop/${CHAIN}/\"" |
       jq ".nodes[0].Authentication.boltzMacaroonPath = \"/home/rtl/.boltz-lnd/macaroons/\"" |
       jq ".nodes[0].Settings.userPersona = \"OPERATOR\"" |
-      jq ".nodes[0].Settings.lnServerUrl = \"https://127.0.0.1:${portprefix}3100\"" |
+      jq ".nodes[0].Settings.lnServerUrl = \"https://127.0.0.1:${portprefix}7378\"" |
       jq ".nodes[0].Settings.channelBackupPath = \"/mnt/hdd/app-data/rtl/${systemdService}-SCB-backup-$hostname\"" |
       jq ".nodes[0].Settings.swapServerUrl = \"https://127.0.0.1:${SWAPSERVERPORT}\"" >/mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json.tmp
 
