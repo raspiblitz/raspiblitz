@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source /home/admin/raspiblitz.info 2>/dev/null
+
 source <(/home/admin/_cache.sh get \
   state \
   setupPhase \
@@ -315,6 +317,13 @@ fi
 datetime=$(date +"%d %b %T %z")
 datetime="${datetime} up ${system_up_text}"
 
+if [ "${vm}" == "0"]; then
+    temp_info="temp %s°C %s°F"
+else
+    temp_info="VM detected"
+fi
+
+
 stty sane
 sleep 1
 clear
@@ -327,7 +336,7 @@ ${color_yellow}               ${color_amber}%s ${color_green} ${ln_alias} ${upsI
 ${color_yellow}               ${color_gray}${network^} Fullnode${LNinfo} ${torInfo}
 ${color_yellow}        ,/     ${color_yellow}%s
 ${color_yellow}      ,'/      ${color_gray}%s
-${color_yellow}    ,' /       ${color_gray}%s, temp %s°C %s°F
+${color_yellow}    ,' /       ${color_gray}%s, ${temp_info}
 ${color_yellow}  ,'  /_____   ${color_gray}Free Mem ${color_ram}${ram} ${color_gray} HDD ${color_hdd}%s${color_gray}
 ${color_yellow},'_____    ,'  ${color_gray}SSH admin@${internet_localip}${color_gray} d${internet_rx} u${internet_tx}
 ${color_yellow}      /  ,'    ${color_gray}${webuiinfo} 
