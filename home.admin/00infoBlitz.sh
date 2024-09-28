@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#source /home/admin/raspiblitz.info 2>/dev/null
+source /home/admin/raspiblitz.info
 
 source <(/home/admin/_cache.sh get \
   state \
