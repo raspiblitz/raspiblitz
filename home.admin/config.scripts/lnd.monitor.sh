@@ -147,7 +147,7 @@ if [ "$2" = "info" ]; then
   fi
 
   # parse data
-  lnd_address=$(echo "${ln_getInfo}" | grep "uris" -A 1 | tr -d '\n' | cut -d '"' -f4)
+  lnd_address=$(echo "${ln_getInfo}" | jq -r '.uris[0]'
   lnd_tor=$(echo "${lnd_address}" | grep -c ".onion")
   lnd_sync_chain=$(echo "${ln_getInfo}" | grep "synced_to_chain" | grep "true" -c)
   lnd_sync_graph=$(echo "${ln_getInfo}" | grep "synced_to_graph" | grep "true" -c)
