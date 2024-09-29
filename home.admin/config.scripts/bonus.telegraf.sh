@@ -112,8 +112,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     fi
 
     # Collect telegrafInfluxUrl
+    telegrafInfluxUrl=""
     while true; do
-      telegrafInfluxUrl=$(whiptail --inputbox "Enter the IP address or domain followed by port of your metrics InfluxDB (e.g., http://192.168.1.1:8086):" 8 78 "http://192.168.178.12:8086" --title "InfluxDB URL" 3>&1 1>&2 2>&3)
+      telegrafInfluxUrl=$(whiptail --inputbox "Enter the IP address or domain followed by port of your metrics InfluxDB (e.g., http://192.168.1.1:8086):" 8 78 "${telegrafInfluxUrl}" --title "InfluxDB Connection" 3>&1 1>&2 2>&3)
       exitstatus=$?
       if [ $exitstatus -ne 0 ]; then
         echo "Operation canceled by user."
@@ -127,12 +128,19 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
         whiptail --msgbox "Invalid format. Please enter a valid IP address or domain followed by a port, with optional http(s) prefix." 8 78
         continue
       fi
-      break
+      # Perform a test using curl to check if the service is running
+      if curl --output /dev/null --silent --head --fail "${telegrafInfluxUrl}"; then
+        echo "OK Service is running at $telegrafInfluxUrl."
+        break
+      else
+        whiptail --msgbox "Was not able to connect to ${telegrafInfluxUrl} - please make sure InfluxDB is running and reachable for RaspiBlitz." 8 78
+        continue
+      fi
     done
 
     # Collect telegrafInfluxDatabase
     while true; do
-      telegrafInfluxDatabase=$(whiptail --inputbox "Enter the name of the database where to store the metrics:" 8 78 "telegraf" --title "InfluxDB Database" 3>&1 1>&2 2>&3)
+      telegrafInfluxDatabase=$(whiptail --inputbox "Enter the name of the database where to store the metrics:" 8 78 "raspiblitz" --title "InfluxDB Database" 3>&1 1>&2 2>&3)
       exitstatus=$?
       if [ $exitstatus -ne 0 ]; then
         echo "Operation canceled by user."
@@ -147,7 +155,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     # Collect telegrafInfluxUsername
     while true; do
-      telegrafInfluxUsername=$(whiptail --inputbox "Enter the username that is allowed to write on that database:" 8 78 "telegraf" --title "InfluxDB Username" 3>&1 1>&2 2>&3)
+      telegrafInfluxUsername=$(whiptail --inputbox "Enter the username that is allowed to write on that database:" 8 78 "raspiblitz" --title "InfluxDB Username" 3>&1 1>&2 2>&3)
       exitstatus=$?
       if [ $exitstatus -ne 0 ]; then
         echo "Operation canceled by user."
