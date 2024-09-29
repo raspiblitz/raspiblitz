@@ -129,8 +129,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
         continue
       fi
       # Perform a test using curl to check if the service is running
-      [[ $telegrafInfluxUrl =~ ^http ]] || telegrafInfluxUrl="http://$telegrafInfluxUrl"
-      if curl --output /dev/null --silent --head --fail "${telegrafInfluxUrl}"; then
+      [[ $telegrafInfluxUrl =~ ^(http|https):// ]] || telegrafInfluxUrl="http://$telegrafInfluxUrl"
+      if curl --output /dev/null --silent --head --fail "${telegrafInfluxUrl}/ping"; then
         echo "OK Service is running at $telegrafInfluxUrl."
         break
       else
