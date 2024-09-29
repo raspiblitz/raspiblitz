@@ -106,7 +106,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   
     # Display the info box with whiptail
     whiptail --title "Metrics Setup Information" --yesno "To run the Telegraf metrics service you need an external monitoring server running Grafana & InfluxDB. Please prepare InfluxDB database & user as described in github.com/raspiblitz/raspiblitz/blob/dev/home.admin/assets/telegraf/README.md - choose YES if all ready to config RaspiBlitz Telegraf service." 10 70;
-    if [ $? -eq 0 ]; then
+    if [ $? -eq 1 ]; then
       echo "# user cancel"
       exit 0
     fi
