@@ -7,11 +7,12 @@
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
- echo "config script to switch the telegraf metric collection on or off"
- echo "bonus.telegraf.sh status ---> get status of telegraf service"
- echo "bonus.telegraf.sh on     ---> install & config"
- echo "bonus.telegraf.sh off    ---> uninstall & reset config"
- exit 1
+  echo "# config script to switch the telegraf metric collection"
+  echo "# detailed setup info: github.com/raspiblitz/raspiblitz/tree/dev/home.admin/assets/telegraf"
+  echo "# bonus.telegraf.sh status ---> get status of telegraf service"
+  echo "# bonus.telegraf.sh on     ---> install & config"
+  echo "# bonus.telegraf.sh off    ---> uninstall & reset config"
+  exit 1
 fi
 
 # at this point the config file exists and can be sourced
