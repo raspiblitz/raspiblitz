@@ -75,9 +75,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   echo "*** INSTALL TELEGRAF ***"
 
-  # check if telegraf is already switched on
-  if [ "${telegrafMonitoring}" = "1" ] || [ "${telegrafMonitoring}" = "on" ]; then
-    echo "# Telegraf is already installed and configured."
+  # check installed by looking for service
+  serviceInstalled=$(sudo systemctl status telegraf --no-page 2>/dev/null | grep -c "telegraf.service - The plugin-driven")
+  if [ ${serviceInstalled} -eq 1 ]; then
+    echo "# Telegraf service is installed."
     echo "# If you want to reset config and reinstall, please switch off first."
     exit 0
   fi
