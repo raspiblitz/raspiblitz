@@ -75,6 +75,13 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   echo "*** INSTALL TELEGRAF ***"
 
+  # check if telegraf is already switched on
+  if [ "${telegrafMonitoring}" = "1" ] || [ "${telegrafMonitoring}" = "on" ]; then
+    echo "# Telegraf is already installed and configured."
+    echo "# If you want to reset config and reinstall, please switch off first."
+    exit 0
+  fi
+
   # check if config data in raspiblitz.conf is available
   configMissing=0
   if [ ${#telegrafInfluxUrl} -eq 0 ]; then
