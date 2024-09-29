@@ -3,13 +3,14 @@
 
 ###############################################################################
 #   File:   bonus.telegraf.sh
-#   Date:   2020-10-03
 ###############################################################################
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "config script to switch the telegraf metric collection on or off"
- echo "bonus.telegraf.sh [on|off|status]"
+ echo "bonus.telegraf.sh status ---> get status of telegraf service"
+ echo "bonus.telegraf.sh on     ---> install & config"
+ echo "bonus.telegraf.sh off    ---> uninstall & reset config"
  exit 1
 fi
 
@@ -50,14 +51,134 @@ if [ "$1" = "status" ]; then
 fi
 
 
+# Function to check if input is empty
+function check_empty() {
+    if [ -z "$1" ]; then
+        return 1
+    else
+        return 0
+    fi
+}
+
+# Function to validate IP address or domain with optional http(s) and port
+function validate_url() {
+    if [[ "$1" =~ ^(https?://)?([a-zA-Z0-9.-]+|\b\d{1,3}(\.\d{1,3}){3}\b):[0-9]+$ ]]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
 ###############################
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
+
   echo "*** INSTALL TELEGRAF ***"
+
+  # check if config data in raspiblitz.conf is available
+  configMissing=0
+  if [ ${#telegrafInfluxUrl} -eq 0 ]; then
+    echo "# Missing telegrafInfluxUrl in raspiblitz.conf"
+    configMissing=1
+  fi
+  if [ ${#telegrafInfluxDatabase} -eq 0 ]; then
+    echo "# Missing telegrafInfluxDatabase in raspiblitz.conf"
+    configMissing=1
+  fi
+  if [ ${#telegrafInfluxUsername} -eq 0 ]; then
+    echo "# Missing telegrafInfluxUsername in raspiblitz.conf"
+    configMissing=1
+  fi
+  if [ ${#telegrafInfluxPassword} -eq 0 ]; then
+    echo "# Missing telegrafInfluxPassword in raspiblitz.conf"
+    configMissing=1
+  fi
+
+  # enter config if missing (first init)
+  if [ ${configMissing} -eq 1 ]; then
+  
+    # Display the info box with whiptail
+    whiptail --title "Grafana Setup Information" --yesno "To run the Telegraf metrics service you need an external monitoring server running Grafana & InfluxDB. Please prepare InfluxDB database & user as described in https://github.com/raspiblitz/raspiblitz/blob/dev/home.admin/assets/telegraf/README.md - choose YES if all ready to config RaspiBlitz Telegraf service." 10 60;
+    if [ $? -eq 0 ]; then
+      echo "# user cancel"
+      exit 0
+    fi
+
+    # Collect telegrafInfluxUrl
+    while true; do
+      telegrafInfluxUrl=$(whiptail --inputbox "Enter the IP address or domain followed by port of your metrics InfluxDB (e.g., http://192.168.1.1:8086):" 8 78 "http://192.168.178.12:8086" --title "InfluxDB URL" 3>&1 1>&2 2>&3)
+      exitstatus=$?
+      if [ $exitstatus -ne 0 ]; then
+        echo "Operation canceled by user."
+        exit 1
+      fi
+      if ! check_empty "$telegrafInfluxUrl"; then
+        whiptail --msgbox "Input cannot be empty. Please enter a valid URL." 8 78
+        continue
+      fi
+      if ! validate_url "$telegrafInfluxUrl"; then
+        whiptail --msgbox "Invalid format. Please enter a valid IP address or domain followed by a port, with optional http(s) prefix." 8 78
+        continue
+      fi
+      break
+    done
+
+    # Collect telegrafInfluxDatabase
+    while true; do
+      telegrafInfluxDatabase=$(whiptail --inputbox "Enter the name of the database where to store the metrics:" 8 78 "telegraf" --title "InfluxDB Database" 3>&1 1>&2 2>&3)
+      exitstatus=$?
+      if [ $exitstatus -ne 0 ]; then
+        echo "Operation canceled by user."
+        exit 1
+      fi
+      if ! check_empty "$telegrafInfluxDatabase"; then
+        whiptail --msgbox "Input cannot be empty. Please enter a valid database name." 8 78
+        continue
+      fi
+      break
+    done
+
+    # Collect telegrafInfluxUsername
+    while true; do
+      telegrafInfluxUsername=$(whiptail --inputbox "Enter the username that is allowed to write on that database:" 8 78 "telegraf" --title "InfluxDB Username" 3>&1 1>&2 2>&3)
+      exitstatus=$?
+      if [ $exitstatus -ne 0 ]; then
+        echo "Operation canceled by user."
+        exit 1
+      fi
+      if ! check_empty "$telegrafInfluxUsername"; then
+        whiptail --msgbox "Input cannot be empty. Please enter a valid username." 8 78
+        continue
+      fi
+      break
+    done
+
+    # Collect telegrafInfluxPassword
+    while true; do
+      telegrafInfluxPassword=$(whiptail --passwordbox "Enter the password for that username:" 8 78 --title "InfluxDB Password" 3>&1 1>&2 2>&3)
+      exitstatus=$?
+      if [ $exitstatus -ne 0 ]; then
+        echo "Operation canceled by user."
+        exit 1
+      fi
+      if ! check_empty "$telegrafInfluxPassword"; then
+        whiptail --msgbox "Input cannot be empty. Please enter a valid password." 8 78
+        continue
+      fi
+      break
+    done
+
+    # save the config data to raspiblitz.conf
+    /home/admin/config.scripts/blitz.conf.sh set telegrafInfluxUrl "${telegrafInfluxUrl}"
+    /home/admin/config.scripts/blitz.conf.sh set telegrafInfluxDatabase "${telegrafInfluxDatabase}"
+    /home/admin/config.scripts/blitz.conf.sh set telegrafInfluxUsername "${telegrafInfluxUsername}"
+    /home/admin/config.scripts/blitz.conf.sh set telegrafInfluxPassword "${telegrafInfluxPassword}"
+  fi
+
   # source and target dir for copy operation
   telegraf_source_dir=${resources_dir}
   telegraf_target_dir=/etc/telegraf
-  #
+  
   # full path to telegraf config file for sed-replace operation
   telegraf_conf_file=${telegraf_target_dir}/telegraf.conf
 
@@ -160,8 +281,12 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # let apt-get remove the package
   sudo apt-get remove -y telegraf
 
-  echo "*** telegraf remove: set 'telegrafMonitoring=off' in config file 'raspiblitz.conf'"
+  echo "*** telegraf switch off and remove config ***"
   /home/admin/config.scripts/blitz.conf.sh set telegrafMonitoring "off"
+  /home/admin/config.scripts/blitz.conf.sh delete telegrafInfluxUrl
+  /home/admin/config.scripts/blitz.conf.sh delete telegrafInfluxDatabase
+  /home/admin/config.scripts/blitz.conf.sh delete telegrafInfluxUsername
+  /home/admin/config.scripts/blitz.conf.sh delete telegrafInfluxPassword
 
   echo "*** remove telegraf done ***"
 
