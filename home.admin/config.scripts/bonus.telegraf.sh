@@ -105,7 +105,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   if [ ${configMissing} -eq 1 ]; then
   
     # Display the info box with whiptail
-    whiptail --title "Metrics Setup Information" --yesno "To run the Telegraf metrics service you need an external monitoring server running Grafana & InfluxDB. Please prepare InfluxDB database & user as described in github.com/raspiblitz/raspiblitz/tree/dev/home.admin/assets/telegraf - choose YES if all ready to config RaspiBlitz Telegraf service." 12 75;
+    whiptail --title "Metrics Setup Information" --yesno "To run the Telegraf metrics service you need an external monitoring server running Grafana & InfluxDB. Please prepare InfluxDB database & user as described in github.com/raspiblitz/raspiblitz/tree/dev/home.admin/assets/telegraf Choose YES if all is ready to config RaspiBlitz Telegraf service." 12 75;
     if [ $? -eq 1 ]; then
       echo "# user cancel"
       exit 0
