@@ -732,6 +732,15 @@ else
   echo "Provisioning Tailscale - keep default" >> ${logFile}
 fi
 
+# Telegraf
+if [ "${telegrafMonitoring}" = "on" ]; then
+  echo "Provisioning Telegraf - run config script" >> ${logFile}
+  /home/admin/_cache.sh set message "Setup Telegraf"
+  sudo -u admin /home/admin/config.scripts/bonus.telegraf.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning Telegraf - keep default" >> ${logFile}
+fi
+
 # custom install script from user
 customInstallAvailable=$(ls /mnt/hdd/app-data/custom-installs.sh 2>/dev/null | grep -c "custom-installs.sh")
 if [ ${customInstallAvailable} -gt 0 ]; then
