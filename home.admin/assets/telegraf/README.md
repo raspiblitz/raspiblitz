@@ -4,7 +4,7 @@
 
 ![Grafana Dashboard Example](grafana_dashboard.png)
 
-InfluxDB & Grafana should run on seperate hardware - you might use an old RaspberryPi4 for that and take a look [here](https://github.com/gcgarner/IOTstack) for a nice dockerized installation of influxDB and Grafana.
+InfluxDB & Grafana should run on separate hardware - you might use an old RaspberryPi4 for that and take a look [here](https://github.com/gcgarner/IOTstack) for a nice dockerized installation of influxDB and Grafana.
 
 ### Prepare your InfluxDB for RaspiBlitz
 
@@ -20,7 +20,7 @@ If you havent yet create an `admin` user:
 CREATE USER "admin" WITH PASSWORD '[ADMIN-PASSWORD]' WITH ALL PRIVILEGES;
 ```
 
-Create datbase & user:
+Create database & user:
 ```
 CREATE DATABASE raspiblitz;
 SHOW DATABASES;
