@@ -651,7 +651,7 @@ if [ "$1" = "install" ]; then
   echo "# installing application dependencies"
   cd /home/lnbits/lnbits || exit 1
 
-  # check if poetry in installed, if not install it
+  # check if poetry is installed
   if ! sudo -u lnbits which poetry; then
     echo "# install poetry"
     sudo pip3 config set global.break-system-packages true
@@ -660,7 +660,12 @@ if [ "$1" = "install" ]; then
   fi
 
   echo "# install"
-  sudo -u lnbits poetry install
+  if sudo -u lnbits poetry install; then
+    echo "Poetry install completed successfully."
+  else
+    echo "Error: Poetry install failed (see above).. waiting 10 seconds"
+    sleep 10
+  fi
 
   # make sure default virtaulenv is used
   sudo apt-get remove -y python3-virtualenv 2>/dev/null
