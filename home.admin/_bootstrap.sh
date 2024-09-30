@@ -45,14 +45,9 @@ echo "***********************************************" >> $logFile
 # list all running systemd services for future debug
 systemctl list-units --type=service --state=running >> $logFile
 
-# check if the file /etc/ssh/sshd_init_keys exists --> initial boot of fresh sd card image
-if [ -f "/etc/ssh/sshd_init_keys" ]; then
-  echo "# init SSH KEYS fresh for new user" >> $logFile
-  /home/admin/config.scripts/blitz.ssh.sh init >> $logFile
-else
-  echo "# make sure SSH server is configured & running" >> $logFile
-  /home/admin/config.scripts/blitz.ssh.sh checkrepair >> $logFile
-fi
+# make sure ssh is configured and running
+echo "# make sure SSH server is configured & running" >> $logFile
+/home/admin/config.scripts/blitz.ssh.sh checkrepair >> $logFile
 
 echo "## prepare raspiblitz temp" >> $logFile
 
@@ -86,6 +81,12 @@ ln_cl_mainnet_sync_initial_done=0
 ln_cl_testnet_sync_initial_done=0
 ln_cl_signet_sync_initial_done=0
 
+# detect VM
+vm=0
+if [ $(systemd-detect-virt) != "none" ]; then
+  vm=1
+fi
+
 # load already persisted valued (overwriting defaults if exist)
 source ${infoFile} 2>/dev/null
 
@@ -96,6 +97,7 @@ echo "setupPhase=${setupPhase}" >> $infoFile
 echo "setupStep=${setupStep}" >> $infoFile
 echo "baseimage=${baseimage}" >> $infoFile
 echo "cpu=${cpu}" >> $infoFile
+echo "vm=${vm}" >> $infoFile
 echo "blitzapi=${blitzapi}" >> $infoFile
 echo "displayClass=${displayClass}" >> $infoFile
 echo "displayType=${displayType}" >> $infoFile
@@ -131,8 +133,9 @@ echo "# raspi_bootdir(${raspi_bootdir})" >> $logFile
 flagExists=$(ls ${raspi_bootdir}/stop 2>/dev/null | grep -c 'stop')
 if [ "${flagExists}" == "1" ]; then
   # set state info
+  localip=$(hostname -I | awk '{print $1}')
   /home/admin/_cache.sh set state "stop"
-  /home/admin/_cache.sh set message "stopped for manual provision"
+  /home/admin/_cache.sh set message "stopped for manual provision ${localip}"
   systemctl stop background.service
   systemctl stop background.scan.service
   # log info
@@ -284,7 +287,6 @@ source <(/home/admin/config.scripts/blitz.datadrive.sh status)
 ################################
 
 echo "Waiting for HDD/SSD ..." >> $logFile
-ls -la /etc/ssh >> $logFile 
 until [ ${isMounted} -eq 1 ] || [ ${#hddCandidate} -gt 0 ]
 do
 
@@ -885,7 +887,7 @@ if [ ${isMounted} -eq 0 ]; then
   # Set Password A (in all cases)
   
   if [ "${passwordA}" == "" ]; then
-    /home/admin/config.scripts/blitz.error.sh _bootstrap.sh "missing-passworda" "missing passwordA in (${setupFile})" "" ${logFile}
+    /home/admin/config.scripts/blitz.error.sh _bootstrap.sh "missing-passworda-2" "missing passwordA(2) in (${setupFile})" "" ${logFile}
     exit 1
   fi
 

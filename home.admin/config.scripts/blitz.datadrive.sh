@@ -230,21 +230,29 @@ if [ "$1" = "status" ]; then
     echo "hddTemperature="
     echo "hddTemperatureStr='?°C'"
 
-    # display results from hdd & partition detection
-    echo "hddCandidate='${hdd}'"
     hddBytes=0
     hddGigaBytes=0
     if [ "${hdd}" != "" ]; then
       hddBytes=$(fdisk -l /dev/$hdd | grep GiB | cut -d " " -f 5)
       if [ "${hddBytes}" = "" ]; then
-	hddBytes=$(fdisk -l /dev/$hdd | grep TiB | cut -d " " -f 5)
+	      hddBytes=$(fdisk -l /dev/$hdd | grep TiB | cut -d " " -f 5)
       fi
       hddGigaBytes=$(echo "scale=0; ${hddBytes}/1024/1024/1024" | bc -l)
     fi
+
+    # check if big enough
+    if [ ${hddGigaBytes} -lt 130 ]; then
+      echo "# Found HDD '${hdd}' is smaller than 130GB"
+      hdd=""
+      hddDataPartition=""
+    fi
+
+    # display results from hdd & partition detection
+    echo "hddCandidate='${hdd}'"
     echo "hddBytes=${hddBytes}"
     echo "hddGigaBytes=${hddGigaBytes}"
     echo "hddPartitionCandidate='${hddDataPartition}'"
-    
+
     # if positive deliver more data
     if [ ${#hddDataPartition} -gt 0 ]; then
       # check partition size in bytes and GBs

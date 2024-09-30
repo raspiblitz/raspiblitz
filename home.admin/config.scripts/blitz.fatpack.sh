@@ -137,6 +137,3 @@ echo "* Adding Code&Compile for WEBUI-APP: MEMPOOL"
 /home/admin/config.scripts/bonus.mempool.sh install || exit 1
 echo "* Adding Code&Compile for WEBUI-APP: ELECTRS"
 /home/admin/config.scripts/bonus.electrs.sh install || exit 1
-
-# set default display to LCD
-sudo /home/admin/config.scripts/blitz.display.sh set-display lcd

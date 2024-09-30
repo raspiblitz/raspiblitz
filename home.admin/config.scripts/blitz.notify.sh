@@ -68,6 +68,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   fi
 
   # install python lib for smime into virtual env
+  sudo pip config set global.break-system-packages true
   sudo -H /usr/bin/python3 -m pip install smime
 
   # write ssmtp config

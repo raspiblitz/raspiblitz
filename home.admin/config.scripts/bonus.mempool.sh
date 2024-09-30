@@ -2,7 +2,7 @@
 
 # https://github.com/mempool/mempool
 
-pinnedVersion="v2.5.0"
+pinnedVersion="v3.0.0"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -157,15 +157,18 @@ if [ "$1" = "install" ]; then
     exit 1
   fi
 
+  echo "# install Rust for mempool"
+  sudo -u mempool curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sudo -u mempool sh -s -- -y
+
   echo "# npm install for mempool explorer (backend)"
 
   cd ../backend/ || exit 1
-  if ! sudo -u mempool NG_CLI_ANALYTICS=false npm ci; then
+  if ! sudo -u mempool NG_CLI_ANALYTICS=false PATH=$PATH:/home/mempool/.cargo/bin npm ci; then
     echo "# FAIL - npm install did not run correctly, aborting"
     echo "result='failed npm install'"
     exit 1
   fi
-  if ! sudo -u mempool NG_CLI_ANALYTICS=false npm run build; then
+  if ! sudo -u mempool NG_CLI_ANALYTICS=false PATH=$PATH:/home/mempool/.cargo/bin npm run build; then
     echo "# FAIL - npm run build did not run correctly, aborting (2)"
     echo "result='failed npm run build'"
     exit 1
@@ -430,7 +433,7 @@ if [ "$1" = "update" ]; then
 
   cd /home/mempool/mempool || exit 1
 
-  localVersion=$(git describe --tag)
+  localVersion=$(sudo -u mempool git describe --tag)
   updateVersion=$(curl --header "X-GitHub-Api-Version:2022-11-28" -s https://api.github.com/repos/mempool/mempool/releases/latest | grep tag_name | head -1 | cut -d '"' -f4)
 
   if [ $localVersion = $updateVersion ]; then
@@ -446,12 +449,15 @@ if [ "$1" = "update" ]; then
 
     echo "# npm install for mempool explorer (backend)"
 
+    echo "# install Rust for mempool"
+    sudo -u mempool curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sudo -u mempool sh -s -- -y
+
     cd /home/mempool/mempool/backend/ || exit 1
-    if ! sudo -u mempool NG_CLI_ANALYTICS=false npm ci; then
+    if ! sudo -u mempool NG_CLI_ANALYTICS=false PATH=$PATH:/home/mempool/.cargo/bin npm ci; then
       echo "FAIL - npm install did not run correctly, aborting"
       exit 1
     fi
-    if ! sudo -u mempool NG_CLI_ANALYTICS=false npm run build; then
+    if ! sudo -u mempool NG_CLI_ANALYTICS=false PATH=$PATH:/home/mempool/.cargo/bin npm run build; then
       echo "FAIL - npm run build did not run correctly, aborting (3)"
       exit 1
     fi
@@ -478,17 +484,12 @@ if [ "$1" = "update" ]; then
 
     cd /home/mempool/mempool || exit 1
 
-    # Reinstall the mempool configuration for nginx
-    cp nginx.conf nginx-mempool.conf /etc/nginx/nginx.conf
-    sudo systemctl restart nginx
-
     # Remove useless deps
     echo "Removing unnecessary modules..."
-    npm prune --production
+    sudo -u mempool npm prune --production
 
     echo "***  Restarting Mempool  ***"
     sudo systemctl start mempool
-
   fi
 
   # check for error

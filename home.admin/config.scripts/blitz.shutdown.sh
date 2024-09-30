@@ -42,7 +42,7 @@ echo "-----------------------------------------------"
 sleep 3
 
 # general services to stop
-servicesToStop="electrs fulcrum"
+servicesToStop="electrs fulcrum elementsd"
 for service in ${servicesToStop}; do
   if systemctl is-active --quiet ${service}; then
     echo "stopping ${service} - please wait .."
