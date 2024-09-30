@@ -723,6 +723,15 @@ else
   echo "Provisioning FinTS - keep default" >> ${logFile}
 fi
 
+# Bostr2
+if [ "${bostr2}" = "on" ]; then
+  echo "Provisioning Bostr2 - run config script" >> ${logFile}
+  /home/admin/_cache.sh set message "Setup Bostr2"
+  sudo -u admin /home/admin/config.scripts/bonus.bostr2.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning Bostr2 - keep default" >> ${logFile}
+fi
+
 # Tailscale
 if [ "${tailscale}" = "on" ]; then
   echo "Provisioning Tailscale - run config script" >> ${logFile}
