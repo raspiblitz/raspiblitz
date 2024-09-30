@@ -172,7 +172,7 @@ if [ "${labelbase}" == "on" ]; then
   OPTIONS+=(LABELBASE "Labelbase (UTXO labeling)")
 fi
 if [ "${bostr2}" == "on" ]; then
-  OPTIONS+=(BOSTER2 "Boster2 (Nostr Relay Bouncer)")
+  OPTIONS+=(BOSTR2 "Bostr2 (Nostr Relay Bouncer)")
 fi
 
 # dont offer to switch to "testnet view for now" - so no wswitch back to mainnet needed
@@ -337,8 +337,8 @@ case $CHOICE in
         LABELBASE)
             sudo /home/admin/config.scripts/bonus.labelbase.sh menu
             ;;
-        BOSTER2)
-            sudo /home/admin/config.scripts/bonus.boster2.sh menu
+        BOSTR2)
+            sudo /home/admin/config.scripts/bonus.bostr2.sh menu
             ;;
         FINTS)
             sudo /home/admin/config.scripts/bonus.fints.sh menu
