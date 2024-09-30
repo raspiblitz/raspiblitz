@@ -660,10 +660,12 @@ if [ "$1" = "install" ]; then
   fi
 
   echo "# install"
+  exitCode=0
   if sudo -u lnbits poetry install; then
     echo "Poetry install completed successfully."
   else
     echo "Error: Poetry install failed (see above).. waiting 10 seconds"
+    exitCode=1
     sleep 10
   fi
 
@@ -672,7 +674,7 @@ if [ "$1" = "install" ]; then
   sudo pip uninstall -y virtualenv 2>/dev/null
   sudo apt-get install -y python3-virtualenv
 
-  exit 0
+  exit $exitCode
 fi
 
 # remove from system
