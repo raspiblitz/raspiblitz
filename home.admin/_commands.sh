@@ -280,6 +280,7 @@ function headless() {
 
 # command: cache
 function cache() {
+  # shellcheck disable=SC2068
   sudo /home/admin/_cache.sh $@
 }
 

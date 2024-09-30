@@ -209,12 +209,14 @@ elif [ "$1" = "set" ] || [ "$1" = "init" ]; then
 elif [ "$1" = "get" ]; then
 
   position=0
+  # shellcheck disable=SC2068
   for keystr in $@
   do
 
     # skip first parameter
     ((position++))
     if [ $position -eq 1 ]; then
+      # shellcheck disable=SC2145
       echo "# _cache.sh $@"
       continue
     fi
@@ -429,12 +431,14 @@ elif [ "$1" = "valid" ]; then
 
   position=0
   lasttouch_overall=""
+  # shellcheck disable=SC2068
   for keystr in $@
   do
 
     # skip first parameter from script - thats the action string
     ((position++))
     if [ $position -eq 1 ]; then
+      # shellcheck disable=SC2145
       echo "# _cache.sh $@"
       continue
     fi
