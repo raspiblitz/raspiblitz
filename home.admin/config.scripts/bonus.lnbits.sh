@@ -30,13 +30,14 @@ echo "# Running: 'bonus.lnbits.sh $*'"
 source /mnt/hdd/raspiblitz.conf
 
 function postgresConfig() {
-  
+
   sudo /home/admin/config.scripts/bonus.postgresql.sh on || exit 1
   echo "# Generate the database lnbits_db"
 
   # migrate clean up
   source <(/home/admin/_cache.sh get LNBitsMigrate)
   if [ "${LNBitsMigrate}" == "on" ]; then
+    echo "# LNBitsMigrate=on --> Cleaning old lnbits_db & lnbits_user"
     sudo -u postgres psql -c "drop database lnbits_db;"
     sudo -u postgres psql -c "drop user lnbits_user;"
   fi
