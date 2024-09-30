@@ -632,6 +632,9 @@ if [ "$1" = "install" ]; then
   echo "# *** INSTALL LNBITS ***"
   echo "# githubUser=$githubUser tag=$tag"
 
+  # make sure dependencies are installed
+  sudo apt-get install -y pkg-config build-essential python3-dev libsecp256k1-dev libffi-dev libgmp-dev
+
   # add lnbits user
   echo "*** Add the 'lnbits' user ***"
   sudo adduser --system --group --home /home/lnbits lnbits
