@@ -30,6 +30,7 @@ echo "# Running: 'bonus.lnbits.sh $*'"
 source /mnt/hdd/raspiblitz.conf
 
 function postgresConfig() {
+  
   sudo /home/admin/config.scripts/bonus.postgresql.sh on || exit 1
   echo "# Generate the database lnbits_db"
 
@@ -779,6 +780,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   if [ ! -e /mnt/hdd/app-data/LNBits/database.sqlite3 ]; then
     echo "# install database: PostgreSQL"
+
     # POSTGRES
     postgresConfig
 
@@ -789,7 +791,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # example: postgres://<user>:<password>@<host>/<database>
     sudo bash -c "echo 'LNBITS_DATABASE_URL=postgres://postgres:postgres@localhost:5432/lnbits_db' >> /home/lnbits/lnbits/.env"
     sudo bash -c "echo 'LNBITS_DATA_FOLDER=/mnt/hdd/app-data/LNBits/data' >> /home/lnbits/lnbits/.env"
+
   else
+
     echo "# install database: SQLite"
     /home/admin/config.scripts/blitz.conf.sh set LNBitsDB "SQLite"
 
@@ -800,10 +804,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo bash -c "echo 'LNBITS_DATA_FOLDER=/mnt/hdd/app-data/LNBits' >> /home/lnbits/lnbits/.env"
   fi
   sudo chown lnbits:lnbits -R /mnt/hdd/app-data/LNBits
-
-  # let switch command part do the detail config
-  /home/admin/config.scripts/bonus.lnbits.sh switch ${fundingsource}
-  cd /home/lnbits/lnbits || exit 1
 
   # open firewall
   echo
@@ -851,6 +851,10 @@ PrivateDevices=true
 [Install]
 WantedBy=multi-user.target
 EOF
+
+  # let switch command part do the detail config
+  /home/admin/config.scripts/bonus.lnbits.sh switch ${fundingsource}
+  cd /home/lnbits/lnbits || exit 1
 
   sudo systemctl enable lnbits
 

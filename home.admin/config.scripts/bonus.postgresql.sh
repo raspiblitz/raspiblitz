@@ -21,6 +21,13 @@ echo "# Using the default PostgreSQL version: $PG_VERSION"
 
 # switch on
 if [ "$command" = "1" ] || [ "$command" = "on" ]; then
+
+  # check if PostgreSQL is already installed
+  if psql --version; then
+    echo "# PostgreSQL already installed"
+    exit 0
+  fi
+
   echo "# Install PostgreSQL"
   if [ ! -f /etc/apt/trusted.gpg.d/postgresql.gpg ]; then
     curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/postgresql.gpg
