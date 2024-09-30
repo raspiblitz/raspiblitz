@@ -9,7 +9,7 @@ portSSL=8801
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "config script to switch the bostr2 nostr relay on or off"
-  echo "bonus.bostr2.sh [on|off]"
+  echo "bonus.bostr2.sh [on|off|status|menu]"
   echo "installs the version $VERSION"
   exit 1
 fi
