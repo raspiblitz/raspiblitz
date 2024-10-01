@@ -86,7 +86,5 @@
   sudo pg_dropcluster 15 main --stop || true
   sudo pg_dropcluster 13 main --stop || true
   sudo rm -rf /mnt/hdd/app-data/postgresql*
-  sudo apt-get remove -y postgresql-13
-  sudo apt-get remove -y postgresql-15
-  sudo apt-get remove -y postgresql
+  sudo apt-get remove -y postgresql*
 }
