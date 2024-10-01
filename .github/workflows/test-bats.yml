@@ -17,7 +17,7 @@ on:
 
 jobs:
   run-bats-tests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -26,6 +26,10 @@ jobs:
         run: |
           sudo apt update &>/dev/null
           sudo apt install -y bats
+
+      - name: Remove postgresql
+        run: |
+          sudo apt-get remove -y postgresql*
 
       - name: Run the bats tests with postgresql 15
         run: |
