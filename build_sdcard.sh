@@ -10,7 +10,7 @@
 # setup fresh SD card with image above - login via SSH and run this script:
 ##########################################################################
 
-# make sure to set locale to en_US.UTF-8 on system anf for this script
+# set locale to en_US.UTF-8 on system & activate for this script
 sed -i "s/^# en_US.UTF-8 UTF-8.*/en_US.UTF-8 UTF-8/g" /etc/locale.gen
 sed -i "s/^# en_US ISO-8859-1.*/en_US ISO-8859-1/g" /etc/locale.gen
 locale-gen en_US.UTF-8 en_US ISO-8859-1
