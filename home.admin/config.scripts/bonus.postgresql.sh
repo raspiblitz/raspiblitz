@@ -23,18 +23,17 @@ echo "# Using the default PostgreSQL version: $PG_VERSION"
 if [ "$command" = "1" ] || [ "$command" = "on" ]; then
 
   # check if PostgreSQL is already installed
-  if psql --version; then
-    echo "# PostgreSQL already installed"
-    exit 0
+  if psql --version | grep -q "psql (PostgreSQL) $PG_VERSION"; then
+    echo "# PostgreSQL $PG_VERSION is already installed"
+  else
+    echo "# Install PostgreSQL"
+    if [ ! -f /etc/apt/trusted.gpg.d/postgresql.gpg ]; then
+      curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/postgresql.gpg
+      echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
+      sudo apt update
+    fi
+    sudo apt install -y postgresql-$PG_VERSION
   fi
-
-  echo "# Install PostgreSQL"
-  if [ ! -f /etc/apt/trusted.gpg.d/postgresql.gpg ]; then
-    curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/postgresql.gpg
-    echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
-    sudo apt update
-  fi
-  sudo apt install -y postgresql-$PG_VERSION
 
   postgres_datadir="/var/lib/postgresql" # default data dir
   postgres_confdir="/etc/postgresql"     # default conf dir
@@ -185,8 +184,10 @@ if [ "$command" = "1" ] || [ "$command" = "on" ]; then
   fi
 
   # start cluster
-  sudo systemctl enable --now postgresql
-  sudo systemctl enable --now postgresql@$PG_VERSION-main
+  sudo systemctl enable postgresql
+  sudo systemctl start postgresql
+  sudo systemctl enable postgresql@$PG_VERSION-main
+  sudo systemctl start postgresql@$PG_VERSION-main
 
   # check if PostgreSQL was installed
   if psql --version; then
@@ -212,8 +213,6 @@ if [ "$command" = "1" ] || [ "$command" = "on" ]; then
     echo "ABORT - PostgreSQL install"
     exit 1
   fi
-
-  exit 0
 fi
 
 # switch off

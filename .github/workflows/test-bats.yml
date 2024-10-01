@@ -7,11 +7,11 @@ concurrency:
 on:
   workflow_dispatch:
   push:
-    branches: ["dev"]
+    branches: ["*"]
     paths:
       - "home.admin/config.scripts/bonus.postgresql.sh"
   pull_request:
-    branches: ["dev"]
+    branches: ["*"]
     paths:
       - "home.admin/config.scripts/bonus.postgresql.sh"
 
