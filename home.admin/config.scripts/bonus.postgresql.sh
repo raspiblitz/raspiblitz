@@ -193,7 +193,7 @@ if [ "$command" = "1" ] || [ "$command" = "on" ]; then
   if psql --version; then
     echo "# wait for the postgresql server to start"
     count=0
-    count_max=30
+    count_max=60
     while ! nc -zv '127.0.0.1' 5432 2>/dev/null; do
       count=$((count + 1))
       echo "sleep $count/$count_max"
@@ -214,8 +214,6 @@ if [ "$command" = "1" ] || [ "$command" = "on" ]; then
     echo "ABORT - PostgreSQL install"
     exit 1
   fi
-
-  exit 0
 fi
 
 # switch off
