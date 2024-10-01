@@ -31,8 +31,7 @@
 }
 
 @test "Switch cluster 13 off and move" {
-  sudo apt-get remove -y postgresql-13
-  sudo apt-get remove -y postgresql-15
+  sudo apt-get remove -y postgresql-1*
   sudo apt-get remove -y postgresql
   run ../home.admin/config.scripts/bonus.postgresql.sh off
   [ "$status" -eq 0 ]
