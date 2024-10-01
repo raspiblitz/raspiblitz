@@ -10,6 +10,11 @@
 # setup fresh SD card with image above - login via SSH and run this script:
 ##########################################################################
 
+# make sure to set locale to en_US.UTF-8 on system anf for this script
+sudo locale-gen en_US.UTF-8 en_US ISO-8859-1
+sudo update-locale LANG=en_US.UTF-8
+source /etc/default/locale
+
 defaultRepo="raspiblitz" # user that hosts a `raspiblitz` repo
 defaultBranch="v1.11" # latest version branch
 
@@ -322,24 +327,6 @@ if [ ${isDebianInHosts} -eq 0 ]; then
   echo "# Adding debian to /etc/hosts"
   echo "127.0.1.1       debian" | tee -a /etc/hosts > /dev/null
   systemctl restart networking
-fi
-
-# FIXING LOCALES
-# https://github.com/rootzoll/raspiblitz/issues/138
-# https://daker.me/2014/10/how-to-fix-perl-warning-setting-locale-failed-in-raspbian.html
-# https://stackoverflow.com/questions/38188762/generate-all-locales-in-a-docker-image
-if [ "${cpu}" = "aarch64" ] && { [ "${baseimage}" = "raspios_arm64" ] || [ "${baseimage}" = "debian" ]; }; then
-  echo -e "\n*** FIXING LOCALES FOR BUILD ***"
-  sed -i "s/^# en_US.UTF-8 UTF-8.*/en_US.UTF-8 UTF-8/g" /etc/locale.gen
-  sed -i "s/^# en_US ISO-8859-1.*/en_US ISO-8859-1/g" /etc/locale.gen
-  locale-gen
-  export LC_ALL=C
-  export LANGUAGE=en_US.UTF-8
-  export LANG=en_US.UTF-8
-  if [ ! -f /etc/apt/sources.list.d/raspi.list ]; then
-    echo "# Add the archive.raspberrypi.org/debian/ to the sources.list"
-    echo "deb http://archive.raspberrypi.org/debian/ bullseye main" | tee /etc/apt/sources.list.d/raspi.list
-  fi
 fi
 
 echo "*** Remove unnecessary packages ***"
