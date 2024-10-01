@@ -7,7 +7,7 @@ concurrency:
 on:
   workflow_dispatch:
   push:
-    branches: ["*"]
+    branches: ["dev"]
     paths:
       - "home.admin/config.scripts/bonus.postgresql.sh"
   pull_request:

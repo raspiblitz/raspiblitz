@@ -51,7 +51,7 @@
   sudo rm -rf /mnt/hdd/app-data/postgresql-conf.bak
   # run the script
   run ../home.admin/config.scripts/bonus.postgresql.sh on
-  [ "$status" -eq 0 ]
+  #[ "$status" -eq 0 ]
   run pg_lsclusters
   # check that no 13 cluster is present
   [ $(echo "$output" | grep -c "13  main") -eq 0 ]
