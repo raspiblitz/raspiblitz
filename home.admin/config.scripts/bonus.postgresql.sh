@@ -214,6 +214,8 @@ if [ "$command" = "1" ] || [ "$command" = "on" ]; then
     echo "ABORT - PostgreSQL install"
     exit 1
   fi
+
+  exit 0
 fi
 
 # switch off
