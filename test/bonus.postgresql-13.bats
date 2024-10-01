@@ -31,7 +31,9 @@
 }
 
 @test "Switch cluster 13 off and move" {
-  sudo apt-get remove -y postgresql*
+  sudo apt-get remove -y postgresql-13
+  sudo apt-get remove -y postgresql-15
+  sudo apt-get remove -y postgresql
   run ../home.admin/config.scripts/bonus.postgresql.sh off
   [ "$status" -eq 0 ]
   sudo mkdir -p /mnt/hdd/app-data/
@@ -84,5 +86,7 @@
   sudo pg_dropcluster 15 main --stop || true
   sudo pg_dropcluster 13 main --stop || true
   sudo rm -rf /mnt/hdd/app-data/postgresql*
-  sudo apt-get remove -y postgresql*
+  sudo apt-get remove -y postgresql-13
+  sudo apt-get remove -y postgresql-15
+  sudo apt-get remove -y postgresql
 }
