@@ -130,8 +130,8 @@ if [ "$command" = "1" ] || [ "$command" = "on" ]; then
       sudo chown -R postgres:postgres $postgres_datadir
       # start cluster temporarily
       sudo systemctl start postgresql
-      sudo pg_createcluster 13 main || echo "# cluster configuration already exists"
-      sudo pg_ctlcluster 13 main start || echo "# cluster 13/main is already on version 13."
+      sudo pg_createcluster 13 main
+      sudo pg_ctlcluster 13 main start
       echo "# Setting default password for postgres user"
       sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD 'postgres';"
       sudo systemctl stop postgresql
@@ -154,8 +154,8 @@ if [ "$command" = "1" ] || [ "$command" = "on" ]; then
     sudo chown -R postgres:postgres $postgres_datadir
     sudo systemctl start postgresql
     sudo systemctl start postgresql@13-main
-    sudo pg_createcluster 13 main || echo "# cluster configuration already exists"
-    sudo pg_ctlcluster 13 main start || echo "# cluster 13/main is already on version 13."
+    sudo pg_createcluster 13 main
+    sudo pg_ctlcluster 13 main start
 
     if [ -d /mnt/hdd/app-data/postgresql/$PG_VERSION ] || pg_lsclusters | grep -q "$PG_VERSION  main"; then
       echo "# backup /mnt/hdd/app-data/postgresql/$PG_VERSION"
@@ -195,7 +195,7 @@ if [ "$command" = "1" ] || [ "$command" = "on" ]; then
   if psql --version; then
     echo "# wait for the postgresql server to start"
     count=0
-    count_max=60
+    count_max=30
     while ! nc -zv '127.0.0.1' 5432 2>/dev/null; do
       count=$((count + 1))
       echo "sleep $count/$count_max"
