@@ -14,7 +14,7 @@ fi
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # check if Node.js was installed
-  if node -v | grep "${VERSION}"; then
+  if node -v 2>/dev/null | grep "${VERSION}"; then
     echo "Node.js $VERSION is already installed"
   else
     # install prerequisites
