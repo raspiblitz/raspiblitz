@@ -703,6 +703,9 @@ do
   if [ ${recheckCert} -eq 10 ]; then
     # make sure that the self-signed cert exists and are valid
     /home/admin/config.scripts/internet.selfsignedcert.sh create
+
+    # TODO: check if letsencrypt certs are valid for more than 10 days & renew if not
+
     # set default certs or refresh with letsencrypt
     /home/admin/config.scripts/bonus.letsencrypt.sh refresh-nginx-certs
   fi
