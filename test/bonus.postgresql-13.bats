@@ -1,5 +1,7 @@
 #!/usr/bin/env bats
 
+set -x
+
 @test "Create PostgreSQL 13 cluster" {
   postgres_datadir="/var/lib/postgresql" # default data dir
   postgres_confdir="/etc/postgresql"     # default conf dir
@@ -53,7 +55,12 @@
   [ "$status" -eq 0 ]
   run pg_lsclusters
   # check that no 13 cluster is present
-  [ $(echo "$output" | grep -c "13  main") -eq 0 ]
+  #[ $(echo "$output" | grep -c "13  main") -eq 0 ]
+  if [ $(echo "$output" | grep -c "13  main") -ne 0 ]; then
+    echo "Cluster 13 still present"
+    echo "$output"
+    return 1
+  fi
   # check that pg 15 cluster is present
   echo "$output" | grep -q "15  main"
   [ "$?" -eq 0 ]
