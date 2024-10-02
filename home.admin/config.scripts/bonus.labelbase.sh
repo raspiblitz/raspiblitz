@@ -1,9 +1,9 @@
 #!/bin/bash
 # path: /home/admin/config.scripts/bonus.labelbase.sh
 APPID="labelbase"
-VERSION="2.2.1"
+VERSION="2.2.2" # 2.2.1
 GITHUB_REPO="https://github.com/Labelbase/Labelbase/"
-GITHUB_TAG="2.2.1"
+GITHUB_TAG="2.2.2" # 2.2.1
 GITHUB_SIGN_AUTHOR=""
 GITHUB_SIGN_PUBKEYLINK=""
 GITHUB_SIGN_FINGERPRINT=""
