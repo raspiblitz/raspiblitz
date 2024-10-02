@@ -62,8 +62,8 @@ DNS.3   = $localip
     -out selfsigned.cert -days 3650 -config localhost.conf
 
   # set permissions on cert & key
-  sudo chown -h bitcoin:www-data $CERT_DIR/selfsigned.cert
-  sudo chown -h bitcoin:www-data $CERT_DIR/selfsigned.key 
+  sudo chown -h admin:www-data $CERT_DIR/selfsigned.cert
+  sudo chown -h admin:www-data $CERT_DIR/selfsigned.key 
 
   # reolad nginx
   sudo systemctl reload nginx 2>/dev/null
