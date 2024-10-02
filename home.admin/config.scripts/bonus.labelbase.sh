@@ -112,7 +112,7 @@ if [ "$1" = "menu" ]; then
 
   # basic info text - for an web app how to call with http & self-signed https
   dialogText="Open in your local web browser:
-https://${localIP}:${PORT_SSL}
+https://${localIP}:${PORT_SSL}\n
 with Fingerprint:
 ${fingerprint}\n
 "
