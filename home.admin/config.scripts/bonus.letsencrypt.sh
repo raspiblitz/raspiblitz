@@ -12,6 +12,9 @@ fi
 
 source /mnt/hdd/raspiblitz.conf
 
+# make sure the HDD is mounted
+mountpoint -q /mnt/hdd || { echo "# bonus.letsencrypt.sh - /mnt/hdd is not mounted. Exiting."; exit 1; }
+
 # https://github.com/acmesh-official/acme.sh/releases
 ACME_LOAD_BASE_URL="https://github.com/acmesh-official/acme.sh/archive/refs/tags/3.0.7.tar.gz"
 ACME_VERSION="3.0.7"
@@ -150,7 +153,7 @@ function refresh_certs_with_nginx() {
       if openssl x509 -checkend 86400 -noout -in "${CERT_FILE}"; then
         echo "# The certificate is valid for more than one day. OK use them nginx."
       else
-        echo "# The certificate is non-exitend, invalid, expired or will expire within a day. DONT use them the nginx."
+        echo "# The certificate is non-exist, invalid, expired or will expire within a day. DONT use them the nginx."
         continue
       fi
 
