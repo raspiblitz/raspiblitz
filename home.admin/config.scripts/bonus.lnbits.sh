@@ -29,6 +29,8 @@ fi
 echo "# Running: 'bonus.lnbits.sh $*'"
 source /mnt/hdd/raspiblitz.conf
 
+lnbitsConfig="/mnt/hdd/app-data/LNBits/data/.env"
+
 function postgresConfig() {
 
   sudo /home/admin/config.scripts/bonus.postgresql.sh on || exit 1
@@ -103,9 +105,9 @@ function revertMigration() {
     echo "# Configure config .env"
 
     # clean up
-    sudo sed -i "/^LNBITS_DATABASE_URL=/d" /home/lnbits/lnbits/.env
-    sudo sed -i "/^LNBITS_DATA_FOLDER=/d" /home/lnbits/lnbits/.env
-    sudo bash -c "echo 'LNBITS_DATA_FOLDER=/mnt/hdd/app-data/LNBits' >> /home/lnbits/lnbits/.env"
+    sudo sed -i "/^LNBITS_DATABASE_URL=/d" $lnbitsConfig
+    sudo sed -i "/^LNBITS_DATA_FOLDER=/d" $lnbitsConfig
+    sudo bash -c "echo 'LNBITS_DATA_FOLDER=/mnt/hdd/app-data/LNBits' >> ${lnbitsConfig}"
 
     # start service
     echo "# Start LNBits"
@@ -455,7 +457,7 @@ if [ "$1" = "prestart" ]; then
 
   # get if its for lnd or cl service
   echo "## lnbits.service PRESTART CONFIG"
-  echo "# --> /home/lnbits/lnbits/.env"
+  echo "# --> ${lnbitsConfig}"
 
   # set values based in funding source in raspiblitz config
   # portprefix is "" |  1 | 3
@@ -506,23 +508,23 @@ if [ "$1" = "prestart" ]; then
     echo "# Updating LND TLS & macaroon data fresh for LNbits config ..."
 
     # set tls.cert path (use | as separator to avoid escaping file path slashes)
-    sed -i "s|^LND_REST_CERT=.*|LND_REST_CERT=/mnt/hdd/app-data/lnd/tls.cert|g" /home/lnbits/lnbits/.env
+    sed -i "s|^LND_REST_CERT=.*|LND_REST_CERT=/mnt/hdd/app-data/lnd/tls.cert|g" $lnbitsConfig
     # set macaroon  path info in .env - USING HEX IMPORT
-    chmod 600 /home/lnbits/lnbits/.env
+    chmod 600 $lnbitsConfig
     macaroonAdminHex=$(xxd -ps -u -c 1000 /mnt/hdd/app-data/lnd/data/chain/${LNBitsNetwork}/${LNBitsChain}net/admin.macaroon)
     macaroonInvoiceHex=$(xxd -ps -u -c 1000 /mnt/hdd/app-data/lnd/data/chain/${LNBitsNetwork}/${LNBitsChain}net/invoice.macaroon)
     macaroonReadHex=$(xxd -ps -u -c 1000 /mnt/hdd/app-data/lnd/data/chain/${LNBitsNetwork}/${LNBitsChain}net/readonly.macaroon)
-    sed -i "s/^LND_REST_ADMIN_MACAROON=.*/LND_REST_ADMIN_MACAROON=${macaroonAdminHex}/g" /home/lnbits/lnbits/.env
-    sed -i "s/^LND_REST_INVOICE_MACAROON=.*/LND_REST_INVOICE_MACAROON=${macaroonInvoiceHex}/g" /home/lnbits/lnbits/.env
-    sed -i "s/^LND_REST_READ_MACAROON=.*/LND_REST_READ_MACAROON=${macaroonReadHex}/g" /home/lnbits/lnbits/.env
+    sed -i "s/^LND_REST_ADMIN_MACAROON=.*/LND_REST_ADMIN_MACAROON=${macaroonAdminHex}/g" $lnbitsConfig
+    sed -i "s/^LND_REST_INVOICE_MACAROON=.*/LND_REST_INVOICE_MACAROON=${macaroonInvoiceHex}/g" $lnbitsConfig
+    sed -i "s/^LND_REST_READ_MACAROON=.*/LND_REST_READ_MACAROON=${macaroonReadHex}/g" $lnbitsConfig
     # set the REST endpoint (use | as separator to avoid escaping slashes)
-    sed -i "s|^LND_REST_ENDPOINT=.*|LND_REST_ENDPOINT=https://127.0.0.1:${portprefix}8080|g" /home/lnbits/lnbits/.env
+    sed -i "s|^LND_REST_ENDPOINT=.*|LND_REST_ENDPOINT=https://127.0.0.1:${portprefix}8080|g" $lnbitsConfig
 
   elif [ "${LNBitsLightning}" == "cl" ]; then
 
-    isUsingCL=$(cat /home/lnbits/lnbits/.env | grep -c "LNBITS_BACKEND_WALLET_CLASS=CLightningWallet")
+    isUsingCL=$(cat $lnbitsConfig | grep -c "LNBITS_BACKEND_WALLET_CLASS=CLightningWallet")
     if [ "${isUsingCL}" != "1" ]; then
-      echo "# FAIL: /home/lnbits/lnbits/.env not set to CLN"
+      echo "# FAIL: ${lnbitsConfig} not set to CLN"
       exit 1
     fi
 
@@ -772,12 +774,12 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   # prepare .env file
   echo "# preparing env file"
-  sudo rm /home/lnbits/lnbits/.env 2>/dev/null
-  sudo -u lnbits touch /home/lnbits/lnbits/.env
+  sudo -u lnbits touch $lnbitsConfig
+  sudo chown lnbits:lnbits $lnbitsConfig
 
   # activate admin user
-  sudo sed -i "/^LNBITS_ADMIN_UI=/d" /home/lnbits/lnbits/.env
-  sudo bash -c "echo 'LNBITS_ADMIN_UI=true' >> /home/lnbits/lnbits/.env"
+  sudo sed -i "/^LNBITS_ADMIN_UI=/d" $lnbitsConfig
+  sudo bash -c "echo 'LNBITS_ADMIN_UI=true' >> ${lnbitsConfig}"
 
   if [ ! -e /mnt/hdd/app-data/LNBits/database.sqlite3 ]; then
     echo "# install database: PostgreSQL"
@@ -790,8 +792,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     # config update
     # example: postgres://<user>:<password>@<host>/<database>
-    sudo bash -c "echo 'LNBITS_DATABASE_URL=postgres://postgres:postgres@localhost:5432/lnbits_db' >> /home/lnbits/lnbits/.env"
-    sudo bash -c "echo 'LNBITS_DATA_FOLDER=/mnt/hdd/app-data/LNBits/data' >> /home/lnbits/lnbits/.env"
+    sudo bash -c "echo 'LNBITS_DATABASE_URL=postgres://postgres:postgres@localhost:5432/lnbits_db' >> ${lnbitsConfig}"
+    sudo bash -c "echo 'LNBITS_DATA_FOLDER=/mnt/hdd/app-data/LNBits/data' >> ${lnbitsConfig}"
 
   else
 
@@ -802,7 +804,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo mkdir -p /mnt/hdd/app-data/LNBits
 
     # config update
-    sudo bash -c "echo 'LNBITS_DATA_FOLDER=/mnt/hdd/app-data/LNBits' >> /home/lnbits/lnbits/.env"
+    sudo bash -c "echo 'LNBITS_DATA_FOLDER=/mnt/hdd/app-data/LNBits' >> ${lnbitsConfig}"
   fi
   sudo chown lnbits:lnbits -R /mnt/hdd/app-data/LNBits
 
@@ -961,14 +963,14 @@ if [ "$1" = "switch" ]; then
   echo "##############"
 
   # remove all old possible settings for former funding source (clean state)
-  sudo sed -i "/^LNBITS_BACKEND_WALLET_CLASS=/d" /home/lnbits/lnbits/.env 2>/dev/null
-  sudo sed -i "/^LND_REST_ENDPOINT=/d" /home/lnbits/lnbits/.env 2>/dev/null
-  sudo sed -i "/^LND_REST_CERT=/d" /home/lnbits/lnbits/.env 2>/dev/null
-  sudo sed -i "/^LND_REST_ADMIN_MACAROON=/d" /home/lnbits/lnbits/.env 2>/dev/null
-  sudo sed -i "/^LND_REST_INVOICE_MACAROON=/d" /home/lnbits/lnbits/.env 2>/dev/null
-  sudo sed -i "/^LND_REST_READ_MACAROON=/d" /home/lnbits/lnbits/.env 2>/dev/null
+  sudo sed -i "/^LNBITS_BACKEND_WALLET_CLASS=/d" $lnbitsConfig 2>/dev/null
+  sudo sed -i "/^LND_REST_ENDPOINT=/d" $lnbitsConfig 2>/dev/null
+  sudo sed -i "/^LND_REST_CERT=/d" $lnbitsConfig 2>/dev/null
+  sudo sed -i "/^LND_REST_ADMIN_MACAROON=/d" $lnbitsConfig 2>/dev/null
+  sudo sed -i "/^LND_REST_INVOICE_MACAROON=/d" $lnbitsConfig 2>/dev/null
+  sudo sed -i "/^LND_REST_READ_MACAROON=/d" $lnbitsConfig 2>/dev/null
   sudo /usr/sbin/usermod -G lnbits lnbits
-  sudo sed -i "/^CLIGHTNING_RPC=/d" /home/lnbits/lnbits/.env 2>/dev/null
+  sudo sed -i "/^CLIGHTNING_RPC=/d" $lnbitsConfig 2>/dev/null
 
   # LND CONFIG
   if [ "${fundingsource}" == "lnd" ] || [ "${fundingsource}" == "tlnd" ] || [ "${fundingsource}" == "slnd" ]; then
@@ -981,12 +983,12 @@ if [ "$1" = "switch" ]; then
 
     # prepare config entries in lnbits config for lnd
     echo "# preparing lnbits config for lnd"
-    sudo bash -c "echo 'LNBITS_BACKEND_WALLET_CLASS=LndRestWallet' >> /home/lnbits/lnbits/.env"
-    sudo bash -c "echo 'LND_REST_ENDPOINT=https://127.0.0.1:8080' >> /home/lnbits/lnbits/.env"
-    sudo bash -c "echo 'LND_REST_CERT=' >> /home/lnbits/lnbits/.env"
-    sudo bash -c "echo 'LND_REST_ADMIN_MACAROON=' >> /home/lnbits/lnbits/.env"
-    sudo bash -c "echo 'LND_REST_INVOICE_MACAROON=' >> /home/lnbits/lnbits/.env"
-    sudo bash -c "echo 'LND_REST_READ_MACAROON=' >> /home/lnbits/lnbits/.env"
+    sudo bash -c "echo 'LNBITS_BACKEND_WALLET_CLASS=LndRestWallet' >> ${lnbitsConfig}"
+    sudo bash -c "echo 'LND_REST_ENDPOINT=https://127.0.0.1:8080' >> ${lnbitsConfig}"
+    sudo bash -c "echo 'LND_REST_CERT=' >> ${lnbitsConfig}"
+    sudo bash -c "echo 'LND_REST_ADMIN_MACAROON=' >> ${lnbitsConfig}"
+    sudo bash -c "echo 'LND_REST_INVOICE_MACAROON=' >> ${lnbitsConfig}"
+    sudo bash -c "echo 'LND_REST_READ_MACAROON=' >> ${lnbitsConfig}"
 
   fi
 
@@ -1011,8 +1013,8 @@ if [ "$1" = "switch" ]; then
     fi
 
     echo "# preparing lnbits config for CLN"
-    sudo bash -c "echo 'LNBITS_BACKEND_WALLET_CLASS=CLightningWallet' >> /home/lnbits/lnbits/.env"
-    sudo bash -c "echo 'CLIGHTNING_RPC=/home/bitcoin/.lightning/bitcoin${clrpcsubdir}/lightning-rpc' >> /home/lnbits/lnbits/.env"
+    sudo bash -c "echo 'LNBITS_BACKEND_WALLET_CLASS=CLightningWallet' >> ${lnbitsConfig}"
+    sudo bash -c "echo 'CLIGHTNING_RPC=/home/bitcoin/.lightning/bitcoin${clrpcsubdir}/lightning-rpc' >> ${lnbitsConfig}"
   fi
 
   # set raspiblitz config value for funding
@@ -1198,10 +1200,10 @@ if [ "$1" = "migrate" ]; then
     sudo tar -cf /mnt/hdd/app-data/LNBits_sqlitedb_backup.tar -C /mnt/hdd/app-data LNBits/
 
     # remove existent config for database
-    sudo sed -i "/^LNBITS_DATABASE_URL=/d" /home/lnbits/lnbits/.env 2>/dev/null
-    sudo sed -i "/^LNBITS_DATA_FOLDER=/d" /home/lnbits/lnbits/.env 2>/dev/null
+    sudo sed -i "/^LNBITS_DATABASE_URL=/d" $lnbitsConfig 2>/dev/null
+    sudo sed -i "/^LNBITS_DATA_FOLDER=/d" $lnbitsConfig 2>/dev/null
     # restore sqlite database config
-    sudo bash -c "echo 'LNBITS_DATA_FOLDER=/mnt/hdd/app-data/LNBits' >> /home/lnbits/lnbits/.env"
+    sudo bash -c "echo 'LNBITS_DATA_FOLDER=/mnt/hdd/app-data/LNBits' >> ${lnbitsConfig}"
 
     # stop after sync was done
     sudo systemctl stop lnbits
@@ -1213,7 +1215,7 @@ if [ "$1" = "migrate" ]; then
 
     # example: postgres://<user>:<password>@<host>/<database>
     # add new postgres config
-    sudo bash -c "echo 'LNBITS_DATABASE_URL=postgres://lnbits_user:raspiblitz@localhost:5432/lnbits_db' >> /home/lnbits/lnbits/.env"
+    sudo bash -c "echo 'LNBITS_DATABASE_URL=postgres://lnbits_user:raspiblitz@localhost:5432/lnbits_db' >> ${lnbitsConfig}"
 
     # clean start on new postgres db prior migration
     echo "# LNBits first start with clean PostgreSQL"
@@ -1255,8 +1257,8 @@ if [ "$1" = "migrate" ]; then
     sudo chown lnbits:lnbits -R /mnt/hdd/app-data/LNBits/
 
     echo "# Configure .env"
-    sudo sed -i "/^LNBITS_DATA_FOLDER=/d" /home/lnbits/lnbits/.env 2>/dev/null
-    sudo bash -c "echo 'LNBITS_DATA_FOLDER=/mnt/hdd/app-data/LNBits/data' >> /home/lnbits/lnbits/.env"
+    sudo sed -i "/^LNBITS_DATA_FOLDER=/d" $lnbitsConfig 2>/dev/null
+    sudo bash -c "echo 'LNBITS_DATA_FOLDER=/mnt/hdd/app-data/LNBits/data' >> ${lnbitsConfig}"
 
     # setting value in raspi blitz config
     /home/admin/config.scripts/blitz.conf.sh set LNBitsMigrate "off"
