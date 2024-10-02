@@ -141,7 +141,7 @@ function refresh_certs_with_nginx() {
       echo "# FQDN(${FQDN})"
 
       # check if cert exists and is valid
-      CERT_FILE="${ACME_CERT_HOME}/${FQDN}_ecc/fullchain.cer.cer"
+      CERT_FILE="${ACME_CERT_HOME}/${FQDN}_ecc/fullchain.cer"
       echo "CERT_FILE(${CERT_FILE})"
       if openssl x509 -checkend 86400 -noout -in "${CERT_FILE}"; then
         echo "# The certificate is valid for more than one day. OK use them nginx."
