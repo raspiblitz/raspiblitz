@@ -1083,6 +1083,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo -u postgres psql -c "drop database lnbits_db;"
     sudo -u postgres psql -c "drop user lnbits_user;"
     sudo rm -R /mnt/hdd/app-data/LNBits
+    sudo rm /home/lnbits/lnbits/.env
   else
     echo "# keeping data"
   fi

@@ -13,6 +13,7 @@ CERT_DIR="/mnt/hdd/app-data/selfsignedcert"
 CERT_FILE="${CERT_DIR}/selfsigned.cert"
 
 create_self_signed_cert() {
+
   sudo mkdir -p "${CERT_DIR}"
   sudo chown -R bitcoin:bitcoin "${CERT_DIR}"
   cd /mnt/hdd/app-data/selfsignedcert || exit 1
@@ -56,6 +57,28 @@ DNS.3   = $localip
 
   sudo -u bitcoin openssl req -new -x509 -sha256 -key selfsigned.key \
     -out selfsigned.cert -days 3650 -config localhost.conf
+
+  # set permissions on cert & key
+  sudo chown -h root:www-data $CERT_DIR/selfsigned.cert
+  sudo chown -h root:www-data $CERT_DIR/selfsigned.key 
+
+  # create or overwrite exiting links
+  sudo mkdir -p /mnt/hdd/app-data/nginx/
+  sudo ln -sf $CERT_DIR/selfsigned.cert \
+              /mnt/hdd/app-data/nginx/tls.cert
+  sudo ln -sf $CERT_DIR/selfsigned.key \
+              /mnt/hdd/app-data/nginx/tls.key
+  sudo ln -sf $CERT_DIR/selfsigned.cert \
+              /mnt/hdd/app-data/nginx/tor_tls.cert
+  sudo ln -sf $CERT_DIR/selfsigned.key \
+              /mnt/hdd/app-data/nginx/tor_tls.key
+  sudo chown -h root:www-data /mnt/hdd/app-data/nginx/tls.cert
+  sudo chown -h root:www-data /mnt/hdd/app-data/nginx/tls.key
+  sudo chown -h root:www-data /mnt/hdd/app-data/nginx/tor_tls.cert
+  sudo chown -h root:www-data /mnt/hdd/app-data/nginx/tor_tls.key  
+
+  # reolad nginx
+  sudo systemctl reload nginx 2>/dev/null
 }
 
 check_certificate_validity() {
@@ -70,6 +93,7 @@ check_certificate_validity() {
 
 if [ "$1" = create ]; then
   if [[ -f "${CERT_DIR}/selfsigned.cert" && -f "${CERT_DIR}/selfsigned.key" ]]; then
+    # if certificate exists, check if it is still valid
     if ! check_certificate_validity; then
       create_self_signed_cert
     fi
@@ -84,9 +108,7 @@ if [ "$1" = reset ]; then
   echo "# Make sure the old certificate is not present"
   sudo rm -f "${CERT_DIR}/selfsigned.cert"
   sudo rm -f "${CERT_DIR}/selfsigned.key"
-
   create_self_signed_cert
-
   exit 0
 fi
 
