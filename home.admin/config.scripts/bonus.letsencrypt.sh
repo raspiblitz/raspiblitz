@@ -197,10 +197,10 @@ function refresh_certs_with_nginx() {
     done
 
     # set permissions
-    sudo chown -h root:www-data /mnt/hdd/app-data/nginx/tls.cert
-    sudo chown -h root:www-data /mnt/hdd/app-data/nginx/tls.key
-    sudo chown -h root:www-data /mnt/hdd/app-data/nginx/tor_tls.cert
-    sudo chown -h root:www-data /mnt/hdd/app-data/nginx/tor_tls.key  
+    sudo chown -h bitcoin:www-data /mnt/hdd/app-data/nginx/tls.cert
+    sudo chown -h bitcoin:www-data /mnt/hdd/app-data/nginx/tls.key
+    sudo chown -h bitcoin:www-data /mnt/hdd/app-data/nginx/tor_tls.cert
+    sudo chown -h bitcoin:www-data /mnt/hdd/app-data/nginx/tor_tls.key  
 
     # make a hashs of certs after
     certHashAfter1=$(sudo md5sum /mnt/hdd/app-data/nginx/tls.cert | head -n1 | cut -d " " -f1)
