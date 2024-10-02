@@ -175,7 +175,6 @@ case $CHOICE in
     ;;
   COPY-SOURCE)
     /home/admin/config.scripts/blitz.copychain.sh source
-    /home/admin/config.scripts/lnd.unlock.sh
     ;;
 esac
 
