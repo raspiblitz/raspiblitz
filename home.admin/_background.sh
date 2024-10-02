@@ -706,7 +706,7 @@ do
 
     # TODO: check if letsencrypt certs are valid for more than 10 days & renew if not
 
-    # set default certs or refresh with letsencrypt
+    # sets self-signed certs or letsencrypt certs (if valid) to nginx
     /home/admin/config.scripts/bonus.letsencrypt.sh refresh-nginx-certs
   fi
 
