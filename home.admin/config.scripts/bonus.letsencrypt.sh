@@ -116,14 +116,14 @@ function refresh_certs_with_nginx() {
     echo "# default IP certs"
     sudo rm /mnt/hdd/app-data/nginx/tls.cert
     sudo rm /mnt/hdd/app-data/nginx/tls.key
-    sudo ln -sf /mnt/hdd/lnd/tls.cert /mnt/hdd/app-data/nginx/tls.cert
-    sudo ln -sf /mnt/hdd/lnd/tls.key /mnt/hdd/app-data/nginx/tls.key
+    sudo ln -sf /mnt/hdd/app-data/selfsignedcert/selfsigned.cert /mnt/hdd/app-data/nginx/tls.cert
+    sudo ln -sf /mnt/hdd/app-data/selfsignedcert/selfsigned.key /mnt/hdd/app-data/nginx/tls.key
 
     echo "# default TOR certs"
     sudo rm /mnt/hdd/app-data/nginx/tor_tls.cert
     sudo rm /mnt/hdd/app-data/nginx/tor_tls.key
-    sudo ln -sf /mnt/hdd/lnd/tls.cert /mnt/hdd/app-data/nginx/tor_tls.cert
-    sudo ln -sf /mnt/hdd/lnd/tls.key /mnt/hdd/app-data/nginx/tor_tls.key
+    sudo ln -sf /mnt/hdd/app-data/selfsignedcert/selfsigned.cert /mnt/hdd/app-data/nginx/tor_tls.cert
+    sudo ln -sf /mnt/hdd/app-data/selfsignedcert/selfsigned.cert /mnt/hdd/app-data/nginx/tor_tls.key
 
     # SECOND: SET LETSENCRPYT CERTS FOR SUBSCRIPTIONS
 
@@ -139,6 +139,16 @@ function refresh_certs_with_nginx() {
       FQDN=$(echo "${i}" | cut -d "_" -f1)
       echo "# i(${i})"
       echo "# FQDN(${FQDN})"
+
+      # check if cert exists and is valid
+      CERT_FILE="${ACME_CET_HOME}/${FQDN}_ecc/fullchain.cer.cer"
+      echo "CERT_FILE(${CERT_FILE})"
+      if openssl x509 -checkend 86400 -noout -in "${CERT_FILE}"; then
+        echo "# The certificate is valid for more than one day. OK use them nginx."
+      else
+        echo "# The certificate is invalid, expired or will expire within a day. DONT use them the nginx."
+        #continue
+      fi
       # check if there is a LetsEncrypt Subscription for this domain
       details=$(/home/admin/config.scripts/blitz.subscriptions.letsencrypt.py subscription-detail $FQDN)
       if [ $(echo "${details}" | grep -c "error=") -eq 0 ] && [ ${#details} -gt 10 ]; then
@@ -147,6 +157,9 @@ function refresh_certs_with_nginx() {
 
         # get target for that domain
         options=$(echo "${details}" | jq -r ".target")
+        active=$(echo "${details}" | jq -r ".active")
+        
+        echo "# active(${active})"
 
         # replace certs for clearnet
         if [ "${options}" == "ip" ] || [ "${options}" == "ip&tor" ]; then
@@ -174,6 +187,11 @@ function refresh_certs_with_nginx() {
       fi
     done
 
+    # set permissions
+    sudo chown -h root:www-data /mnt/hdd/app-data/nginx/tls.cert
+    sudo chown -h root:www-data /mnt/hdd/app-data/nginx/tls.key
+    sudo chown -h root:www-data /mnt/hdd/app-data/nginx/tor_tls.cert
+    sudo chown -h root:www-data /mnt/hdd/app-data/nginx/tor_tls.key  
 }
 
 ###################

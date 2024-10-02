@@ -9,6 +9,9 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   exit 1
 fi
 
+# make sure the HDD is mounted
+mountpoint -q /mnt/hdd || { echo "# internet.selfsignedcert.sh - /mnt/hdd is not mounted. Exiting."; exit 1; }
+
 CERT_DIR="/mnt/hdd/app-data/selfsignedcert"
 CERT_FILE="${CERT_DIR}/selfsigned.cert"
 
@@ -61,21 +64,6 @@ DNS.3   = $localip
   # set permissions on cert & key
   sudo chown -h root:www-data $CERT_DIR/selfsigned.cert
   sudo chown -h root:www-data $CERT_DIR/selfsigned.key 
-
-  # create or overwrite exiting links
-  sudo mkdir -p /mnt/hdd/app-data/nginx/
-  sudo ln -sf $CERT_DIR/selfsigned.cert \
-              /mnt/hdd/app-data/nginx/tls.cert
-  sudo ln -sf $CERT_DIR/selfsigned.key \
-              /mnt/hdd/app-data/nginx/tls.key
-  sudo ln -sf $CERT_DIR/selfsigned.cert \
-              /mnt/hdd/app-data/nginx/tor_tls.cert
-  sudo ln -sf $CERT_DIR/selfsigned.key \
-              /mnt/hdd/app-data/nginx/tor_tls.key
-  sudo chown -h root:www-data /mnt/hdd/app-data/nginx/tls.cert
-  sudo chown -h root:www-data /mnt/hdd/app-data/nginx/tls.key
-  sudo chown -h root:www-data /mnt/hdd/app-data/nginx/tor_tls.cert
-  sudo chown -h root:www-data /mnt/hdd/app-data/nginx/tor_tls.key  
 
   # reolad nginx
   sudo systemctl reload nginx 2>/dev/null

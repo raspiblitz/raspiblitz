@@ -698,10 +698,13 @@ do
   ###############################
   # SSL CERT RENEWAL
   ###############################
-  # check every 60min
-  recheckCert=$((($counter % 3600)+1))
+  # check every 1min
+  recheckCert=$((($counter % 60)+1))
   if [ ${recheckCert} -eq 10 ]; then
+    # make sure that the self-signed cert exists and are valid
     /home/admin/config.scripts/internet.selfsignedcert.sh create
+    # set default certs or refresh with letsencrypt
+    /home/admin/config.scripts/internet.cert.sh refresh
   fi
 
   ###############################
