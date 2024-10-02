@@ -127,7 +127,7 @@ function refresh_certs_with_nginx() {
     sudo rm /mnt/hdd/app-data/nginx/tor_tls.cert
     sudo rm /mnt/hdd/app-data/nginx/tor_tls.key
     sudo ln -sf /mnt/hdd/app-data/selfsignedcert/selfsigned.cert /mnt/hdd/app-data/nginx/tor_tls.cert
-    sudo ln -sf /mnt/hdd/app-data/selfsignedcert/selfsigned.cert /mnt/hdd/app-data/nginx/tor_tls.key
+    sudo ln -sf /mnt/hdd/app-data/selfsignedcert/selfsigned.key /mnt/hdd/app-data/nginx/tor_tls.key
 
     # SECOND: SET LETSENCRPYT CERTS FOR SUBSCRIPTIONS (ONLY IF VALID)
 
@@ -205,10 +205,10 @@ function refresh_certs_with_nginx() {
     # make a hashs of certs after
     certHashAfter1=$(sudo md5sum /mnt/hdd/app-data/nginx/tls.cert | head -n1 | cut -d " " -f1)
     certHashAfter2=$(sudo md5sum /mnt/hdd/app-data/nginx/tor_tls.cert | head -n1 | cut -d " " -f1)
-    echo "# certHashBefore1(${certHashBefore1})"
-    echo "# certHashAfter1(${certHashAfter1})"
-    echo "# certHashBefore2(${certHashBefore2})"
-    echo "# certHashAfter2(${certHashAfter2})"
+    echo "# certHashBefore(${certHashBefore1})"
+    echo "# certHashAfter(${certHashAfter1})"
+    echo "# certHashBeforeTor(${certHashBefore2})"
+    echo "# certHashAfterTor(${certHashAfter2})"
     # check if nginx needs to be reloaded
     if [ "${certHashBefore1}" != "${certHashAfter1}" ] || [ "${certHashBefore2}" != "${certHashAfter2}" ]; then
       echo "# nginx needs to be reloaded"
