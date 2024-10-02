@@ -774,11 +774,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   # prepare .env file
   echo "# preparing env file"
+  sudo rm /home/lnbits/lnbits/.env 2>/dev/null
   sudo -u lnbits touch $lnbitsConfig
   sudo chown lnbits:lnbits $lnbitsConfig
-
-  # link file $lnbitsConfig to /home/lnbits/lnbits/.env
   sudo -u lnbits ln -s $lnbitsConfig /home/lnbits/lnbits/.env
+  sudo -u lnbits ln -s /mnt/hdd/app-data/LNBits/data/.env /home/lnbits/lnbits/.env
 
   # activate admin user
   sudo sed -i "/^LNBITS_ADMIN_UI=/d" $lnbitsConfig
