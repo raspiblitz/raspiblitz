@@ -695,6 +695,14 @@ do
     fi
   fi
 
+  ###############################
+  # SSL CERT RENEWAL
+  ###############################
+  # check every 60min
+  recheckCert=$((($counter % 3600)+1))
+  if [ ${recheckCert} -eq 10 ]; then
+    /home/admin/config.scripts/internet.selfsignedcert.sh create
+  fi
 
   ###############################
   # SUBSCRIPTION RENEWS
