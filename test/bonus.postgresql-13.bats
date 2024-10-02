@@ -47,7 +47,8 @@ set -x
 }
 
 @test "Recover cluster from 13 without config" {
-  sudo mv /mnt/hdd/app-data/postgresql.bak /mnt/hdd/app-data/postgresql
+  sudo rm -rf /mnt/hdd/app-data/postgresql/*
+  sudo mv /mnt/hdd/app-data/postgresql.bak/* /mnt/hdd/app-data/postgresql/
   sudo rm -rf /etc/postgresql
   sudo rm -rf /mnt/hdd/app-data/postgresql-conf.bak
   # run the script
