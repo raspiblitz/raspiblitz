@@ -1,7 +1,5 @@
 #!/usr/bin/env bats
 
-set -x
-
 @test "Create PostgreSQL 13 cluster" {
   postgres_datadir="/var/lib/postgresql" # default data dir
   postgres_confdir="/etc/postgresql"     # default conf dir
@@ -33,7 +31,8 @@ set -x
 }
 
 @test "Switch cluster 13 off and move" {
-  sudo apt-get remove -y postgresql-1*
+  sudo apt-get remove -y postgresql-13
+  sudo apt-get remove -y postgresql-15
   sudo apt-get remove -y postgresql
   run ../home.admin/config.scripts/bonus.postgresql.sh off
   [ "$status" -eq 0 ]
@@ -47,8 +46,7 @@ set -x
 }
 
 @test "Recover cluster from 13 without config" {
-  sudo rm -rf /mnt/hdd/app-data/postgresql/*
-  sudo mv /mnt/hdd/app-data/postgresql.bak/* /mnt/hdd/app-data/postgresql/
+  sudo mv /mnt/hdd/app-data/postgresql.bak /mnt/hdd/app-data/postgresql
   sudo rm -rf /etc/postgresql
   sudo rm -rf /mnt/hdd/app-data/postgresql-conf.bak
   # run the script
@@ -56,12 +54,7 @@ set -x
   [ "$status" -eq 0 ]
   run pg_lsclusters
   # check that no 13 cluster is present
-  #[ $(echo "$output" | grep -c "13  main") -eq 0 ]
-  if [ $(echo "$output" | grep -c "13  main") -ne 0 ]; then
-    echo "Cluster 13 still present"
-    echo "$output"
-    return 1
-  fi
+  [ $(echo "$output" | grep -c "13  main") -eq 0 ]
   # check that pg 15 cluster is present
   echo "$output" | grep -q "15  main"
   [ "$?" -eq 0 ]
