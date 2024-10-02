@@ -388,11 +388,6 @@ if [ ${mode} = "lnd-import-gui" ]; then
   source <(sudo /home/admin/config.scripts/lnd.backup.sh lnd-import ${filename})
 
   # TODO: check if update of LND is needed (see detailes in lnd-import) for edge case
-
-  # turn off auto-unlock if activated because password c might now change
-  if [ "${autoUnlock}" == "on" ]; then
-    /home/admin/config.scripts/lnd.autounlock.sh off
-  fi
   
   # restarting lnd & give final info
   sudo systemctl start lnd

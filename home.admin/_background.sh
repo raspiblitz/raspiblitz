@@ -197,6 +197,7 @@ do
 
       # only restart LND if auto-unlock is activated
       # AND neither the old nor the new IPv6 address is "::1"
+      source <(/home/admin/config.scripts/lnd.autounlock.sh status)
       if [ "${autoUnlock}" = "on" ]; then
         if [ "${publicIP_Old}" != "::1" ] && [ "${publicIP_New}" != "::1" ]; then
           echo "restart LND to pickup up new publicIP"
@@ -724,31 +725,6 @@ do
       btrfs scrub start /mnt/hdd/
     fi
 
-  fi
-
-  ###############################
-  # LND AUTO-UNLOCK
-  ###############################
-
-  # check every 10secs (only if LND is active)
-  recheckAutoUnlock=0
-  if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
-    recheckAutoUnlock=$((($counter % 10)+1))
-  fi
-  if [ ${recheckAutoUnlock} -eq 1 ]; then
-
-    # check if auto-unlock feature if activated
-    if [ "${autoUnlock}" = "on" ]; then
-
-      # check if lnd is locked
-      source <(/home/admin/config.scripts/lnd.unlock.sh status)
-      if [ "${locked}" != "0" ]; then
-
-        echo "STARTING AUTO-UNLOCK ..."
-        /home/admin/config.scripts/lnd.unlock.sh
-
-      fi
-    fi
   fi
 
   ###############################

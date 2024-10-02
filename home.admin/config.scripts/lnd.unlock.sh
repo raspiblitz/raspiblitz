@@ -38,6 +38,8 @@ if [ "${action}" == "chain-unlock" ]; then
     fi
 fi
 
+source <(/home/admin/config.scripts/network.aliases.sh getvars lnd ${chain}net)
+
 # dont if state is on reboot or shutdown
 source <(/home/admin/_cache.sh get state)
 if [ "${state}" == "reboot" ] || [ "${state}" == "shutdown" ]; then
@@ -46,38 +48,25 @@ if [ "${state}" == "reboot" ] || [ "${state}" == "shutdown" ]; then
   exit 0
 fi
 
-source <(/home/admin/config.scripts/network.aliases.sh getvars lnd ${chain}net)
-
-# check if wallet is already unlocked
-# echo "# checking LND wallet ... (can take some time)"
-lndError=$(${lncli_alias} getinfo 2>&1)
-walletLocked=$(echo "${lndError}" | grep -c "Wallet is encrypted")
-if [ "${walletLocked}" == "0" ]; then
-    # test for new error message
-    walletLocked=$(echo "${lndError}" | grep -c "wallet locked")
+lndStatus=$(sudo systemctl show ${netprefix}lnd --property=StatusText)
+echo "# ${netprefix}lnd: ${lndStatus}"
+walletUnlocked=$( echo "${lndStatus}"| grep -c "Wallet unlocked")
+if [ ${walletUnlocked} -eq 0 ]; then
+    walletLocked=1
+else
+    walletLocked=0
 fi
-macaroonsMissing=$(echo "${lndError}" | grep -c "unable to read macaroon")
 
 # if action is just status
 if [ "${action}" == "status" ]; then
     echo "locked=${walletLocked}"
-    echo "missingMacaroons=${macaroonsMissing}"
     exit 0
 fi
 
 # if already unlocked all is done
-if [ ${walletLocked} -eq 0 ] && [ ${macaroonsMissing} -eq 0 ]; then
+if [ ${walletLocked} -eq 0 ]; then
     echo "# OK LND wallet was already unlocked"
     exit 0
-fi
-
-# if no password check if stored for auto-unlock
-if [ ${#passwordC} -eq 0 ]; then
-    autoUnlockExists=$(sudo ls /root/lnd.autounlock.pwd 2>/dev/null | grep -c "lnd.autounlock.pwd")
-    if [ ${autoUnlockExists} -eq 1 ]; then
-        echo "# using auto-unlock"
-        passwordC=$(sudo cat /root/lnd.autounlock.pwd)
-    fi
 fi
 
 # if still no password get from user
@@ -113,15 +102,6 @@ while [ ${fallback} -eq 0 ]
 
         # SUCCESS UNLOCK
         echo "# OK LND wallet unlocked"
-
-        # if autoUnlock set in config (but this manual input was needed)
-        # there seems to be no stored password - make sure to store password c now
-        if [ "${autoUnlock}" == "on" ]; then
-            echo "# storing password C for future Auto-Unlock"
-            /home/admin/config.scripts/lnd.autounlock.sh on "${passwordC}"
-            sleep 1
-        fi
-
         exit 0
 
     elif [ ${wrongPassword} -gt 0 ]; then
