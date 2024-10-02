@@ -141,7 +141,7 @@ function refresh_certs_with_nginx() {
       echo "# FQDN(${FQDN})"
 
       # check if cert exists and is valid
-      CERT_FILE="${ACME_CET_HOME}/${FQDN}_ecc/fullchain.cer.cer"
+      CERT_FILE="${ACME_CERT_HOME}/${FQDN}_ecc/fullchain.cer.cer"
       echo "CERT_FILE(${CERT_FILE})"
       if openssl x509 -checkend 86400 -noout -in "${CERT_FILE}"; then
         echo "# The certificate is valid for more than one day. OK use them nginx."
@@ -149,17 +149,22 @@ function refresh_certs_with_nginx() {
         echo "# The certificate is invalid, expired or will expire within a day. DONT use them the nginx."
         #continue
       fi
+
       # check if there is a LetsEncrypt Subscription for this domain
       details=$(/home/admin/config.scripts/blitz.subscriptions.letsencrypt.py subscription-detail $FQDN)
       if [ $(echo "${details}" | grep -c "error=") -eq 0 ] && [ ${#details} -gt 10 ]; then
 
         echo "# details(${details})"
 
+        # check if subscription is active
+        active=$(echo "${details}" | jq -r ".active")
+        if [ "${active}" != "true" ]; then
+          echo "# not active(${active}) ... skipping"
+          continue
+        fi
+
         # get target for that domain
         options=$(echo "${details}" | jq -r ".target")
-        active=$(echo "${details}" | jq -r ".active")
-        
-        echo "# active(${active})"
 
         # replace certs for clearnet
         if [ "${options}" == "ip" ] || [ "${options}" == "ip&tor" ]; then
