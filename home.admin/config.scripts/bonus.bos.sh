@@ -4,7 +4,6 @@
 # https://github.com/alexbosworth/balanceofsatoshis/blob/master/package.json#L85
 # https://www.npmjs.com/package/balanceofsatoshis
 
-#BOSVERSION="17.9.1"
 BOSVERSION="19.3.4"
 
 # command info
