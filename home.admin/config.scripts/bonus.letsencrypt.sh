@@ -113,6 +113,10 @@ function refresh_certs_with_nginx() {
 
     # FIRST: SET ALL TO DEFAULT SELF SIGNED
 
+    # make a hashs of certs before
+    certHashBefore1=$(sudo md5sum /mnt/hdd/app-data/nginx/tls.cert | head -n1 | cut -d " " -f1)
+    certHashBefore2=$(sudo md5sum /mnt/hdd/app-data/nginx/tor_tls.cert | head -n1 | cut -d " " -f1)
+
     echo "# default IP certs"
     sudo rm /mnt/hdd/app-data/nginx/tls.cert
     sudo rm /mnt/hdd/app-data/nginx/tls.key
@@ -125,7 +129,7 @@ function refresh_certs_with_nginx() {
     sudo ln -sf /mnt/hdd/app-data/selfsignedcert/selfsigned.cert /mnt/hdd/app-data/nginx/tor_tls.cert
     sudo ln -sf /mnt/hdd/app-data/selfsignedcert/selfsigned.cert /mnt/hdd/app-data/nginx/tor_tls.key
 
-    # SECOND: SET LETSENCRPYT CERTS FOR SUBSCRIPTIONS
+    # SECOND: SET LETSENCRPYT CERTS FOR SUBSCRIPTIONS (ONLY IF VALID)
 
     if [ "${letsencrypt}" != "on" ]; then
       echo "# lets encrypt is off - so no certs replacements"
@@ -146,8 +150,8 @@ function refresh_certs_with_nginx() {
       if openssl x509 -checkend 86400 -noout -in "${CERT_FILE}"; then
         echo "# The certificate is valid for more than one day. OK use them nginx."
       else
-        echo "# The certificate is invalid, expired or will expire within a day. DONT use them the nginx."
-        #continue
+        echo "# The certificate is non-exitend, invalid, expired or will expire within a day. DONT use them the nginx."
+        continue
       fi
 
       # check if there is a LetsEncrypt Subscription for this domain
@@ -197,6 +201,21 @@ function refresh_certs_with_nginx() {
     sudo chown -h root:www-data /mnt/hdd/app-data/nginx/tls.key
     sudo chown -h root:www-data /mnt/hdd/app-data/nginx/tor_tls.cert
     sudo chown -h root:www-data /mnt/hdd/app-data/nginx/tor_tls.key  
+
+    # make a hashs of certs after
+    certHashAfter1=$(sudo md5sum /mnt/hdd/app-data/nginx/tls.cert | head -n1 | cut -d " " -f1)
+    certHashAfter2=$(sudo md5sum /mnt/hdd/app-data/nginx/tor_tls.cert | head -n1 | cut -d " " -f1)
+    echo "# certHashBefore1(${certHashBefore1})"
+    echo "# certHashAfter1(${certHashAfter1})"
+    echo "# certHashBefore2(${certHashBefore2})"
+    echo "# certHashAfter2(${certHashAfter2})"
+    # check if nginx needs to be reloaded
+    if [ "${certHashBefore1}" != "${certHashAfter1}" ] || [ "${certHashBefore2}" != "${certHashAfter2}" ]; then
+      echo "# nginx needs to be reloaded"
+      sudo systemctl restart nginx 2>&1
+    else
+      echo "# nginx certs are the same - no need to reload"
+    fi
 }
 
 ###################
@@ -241,8 +260,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     # make sure already existing certs get refreshed in to nginx
     refresh_certs_with_nginx
-    echo "# restarting nginx"
-    sudo systemctl restart nginx 2>&1
 
     exit 0
 
@@ -365,10 +382,6 @@ elif [ "$1" = "remove-cert" ]; then
     exit 1
   fi
 
-  # restart nginx
-  echo "# restarting nginx"
-  sudo systemctl restart nginx 2>&1
-
   exit 0
 
 
@@ -388,9 +401,6 @@ elif [ "$1" = "refresh-nginx-certs" ]; then
     exit 1
   fi
 
-  echo "# restarting nginx"
-  sudo systemctl restart nginx 2>&1
-
 
 ###################
 # OFF
@@ -407,10 +417,11 @@ elif [ "$1" = "0" ] || [ "$1" = "off" ]; then
       --config-home "${ACME_CONFIG_HOME}" \
       --cert-home "${ACME_CERT_HOME}"
 
+    # remove certs
+    sudo rm -r ${ACME_CERT_HOME}
+
     # refresh nginx
     refresh_certs_with_nginx
-    echo "# restarting nginx"
-    sudo systemctl restart nginx 2>&1
 
     # remove old script install
     sudo rm -r ${ACME_INSTALL_HOME}
