@@ -7,6 +7,7 @@
 - Update: Helipad (Podcasting 2.0 Boostagram reader) v0.2.0 [details](https://github.com/Podcastindex-org/helipad/releases/tag/v0.2.0)
 - Update: Mempool 3.0.0 [details](https://github.com/mempool/mempool/releases/tag/v3.0.0)
 - Update: RTL v0.15.2 [details](https://github.com/Ride-The-Lightning/RTL/releases/tag/v0.15.2)
+- Update: Jam (JoinMarket Web UI) v0.3.0 [details](https://github.com/joinmarket-webui/jam/releases/tag/v0.3.0)
 
 ## What's new in Version 1.11.2 of RaspiBlitz?
 

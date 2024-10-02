@@ -3,8 +3,19 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "# small config script to autounlock lnd after restart"
+ echo "# lnd.autounlock.sh status"
  echo "# lnd.autounlock.sh [on|off] [?passwordC]"
  exit 1
+fi
+
+if [ "$1" = "status" ]; then
+  autoUnlock=$(sudo cat /mnt/hdd/lnd/lnd.conf 2>/dev/null | grep -c "^wallet-unlock-password-file=")
+  if [ ${autoUnlock} -eq 0 ]; then
+    echo "autoUnlock=off"
+  else
+    echo "autoUnlock=on"
+  fi
+  exit 0
 fi
 
 # 1. parameter [on|off]
@@ -58,23 +69,29 @@ fi
 
 # lnd conf file
 lndConfig="/mnt/hdd/lnd/lnd.conf"
+passwordFile="/mnt/hdd/lnd/data/chain/bitcoin/mainnet/password.info"
 
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   echo "# switching the Auto-Unlock ON"
 
-  # setting value in raspi blitz config
-  /home/admin/config.scripts/blitz.conf.sh set autoUnlock "on"
-
   # password C needs to be stored on RaspiBlitz
-  echo "# storing password for root in /root/lnd.autounlock.pwd"
-  sudo sh -c "echo \"${passwordC}\" > /root/lnd.autounlock.pwd"
-  sudo chmod 660 /root/lnd.autounlock.pwd
-  sudo chown root:sudo /root/lnd.autounlock.pwd
+  echo "# storing password on hdd ${passwordFile}"
+  sudo sh -c "echo \"${passwordC}\" > ${passwordFile}"
+  sudo chmod 660 "${passwordFile}"
+  sudo chown bitcoin:bitcoin "${passwordFile}"
 
-  echo "# Auto-Unlock is now ON"
-  echo "# NOTE: you may need to reconnect mobile/external wallets (macaroon/tls)"
+  # remove any existing active config in lnd.conf
+  sudo sed -i "/^wallet-unlock-password-file=/d" /mnt/hdd/lnd/lnd.conf
+
+  # add the config line under [Application Options] section
+  sudo sed -i "/^\[Application Options\]/ { 
+n
+a wallet-unlock-password-file=${passwordFile}
+}" /mnt/hdd/lnd/lnd.conf
+
+  echo "# Auto-Unlock is now ON (after manual lnd restart)"
   exit 0
 fi
 
@@ -87,8 +104,11 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # delete password C securely
   echo "# shredding password on for RaspiBlitz Auto-Unlock"
-  sudo shred -u /root/lnd.autounlock.pwd 2>/dev/null
+  sudo shred -u "${passwordFile}" 2>/dev/null
 
-  echo "# Auto-Unlock is now OFF"
+  # remove any existing active config in lnd.conf
+  sudo sed -i "/^wallet-unlock-password-file=/d" /mnt/hdd/lnd/lnd.conf
+
+  echo "# Auto-Unlock is now OFF (after manual lnd restart)"
   exit 0
 fi
