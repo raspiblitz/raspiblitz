@@ -1,9 +1,9 @@
 #!/bin/bash
 # path: /home/admin/config.scripts/bonus.labelbase.sh
 APPID="labelbase"
-VERSION="2.2.2" # 2.2.1
+VERSION="2.2.2"
 GITHUB_REPO="https://github.com/Labelbase/Labelbase/"
-GITHUB_TAG="2.2.2" # 2.2.1
+GITHUB_TAG="2.2.2"
 GITHUB_SIGN_AUTHOR=""
 GITHUB_SIGN_PUBKEYLINK=""
 GITHUB_SIGN_FINGERPRINT=""
@@ -112,7 +112,6 @@ if [ "$1" = "menu" ]; then
 
   # basic info text - for an web app how to call with http & self-signed https
   dialogText="Open in your local web browser:
-http://${localIP}:${PORT_CLEAR}\n
 https://${localIP}:${PORT_SSL} with Fingerprint:
 ${fingerprint}\n
 "
