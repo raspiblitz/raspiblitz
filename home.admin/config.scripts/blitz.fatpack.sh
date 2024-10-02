@@ -81,6 +81,16 @@ echo "# defaultWEBUIuser(${defaultWEBUIuser})"
 echo "# defaultWEBUIrepo(${defaultWEBUIrepo})"
 sleep 3
 
+if [ "${defaultAPIuser}" == "" ] || [ "${defaultAPIrepo}" == "" ]; then
+  echo "FAIL: missing defaultAPIuser or defaultAPIrepo"
+  exit 1
+fi
+
+if [ "${defaultWEBUIuser}" == "" ] || [ "${defaultWEBUIrepo}" == "" ]; then
+  echo "FAIL: missing defaultWEBUIuser or defaultWEBUIrepo"
+  exit 1
+fi
+
 echo "* Adding nodeJS Framework ..."
 /home/admin/config.scripts/bonus.nodejs.sh on || exit 1
 
@@ -103,14 +113,14 @@ sudo -u admin curl https://raw.githubusercontent.com/bitcoin/bitcoin/master/cont
 # use dev branch when its an Release Candidate
 if [ "${isReleaseCandidate}" == "1" ]; then
   echo "# RELEASE CANDIDATE: using development branches for WebUI & API"
-  echo "* Adding Raspiblitz API ..."
+  echo "* Adding Raspiblitz API (a)..."
   sudo /home/admin/config.scripts/blitz.web.api.sh on "${defaultAPIuser}" "${defaultAPIrepo}" "dev" || exit 1
-  echo "* Adding Raspiblitz WebUI ..."
+  echo "* Adding Raspiblitz WebUI (a) ..."
   sudo /home/admin/config.scripts/blitz.web.ui.sh on "${defaultWEBUIuser}" "${defaultWEBUIrepo}" "master" || exit 1
 else
-  echo "* Adding Raspiblitz API ..."
+  echo "* Adding Raspiblitz API (b) ..."
   sudo /home/admin/config.scripts/blitz.web.api.sh on "${defaultAPIuser}" "${defaultAPIrepo}" "blitz-${branch}" || exit 1
-  echo "* Adding Raspiblitz WebUI ..."
+  echo "* Adding Raspiblitz WebUI (b) ..."
   sudo /home/admin/config.scripts/blitz.web.ui.sh on "${defaultWEBUIuser}" "${defaultWEBUIrepo}" "release/${branch}" || exit 1
 fi
 
