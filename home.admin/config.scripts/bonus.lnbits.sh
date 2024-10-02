@@ -777,6 +777,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo -u lnbits touch $lnbitsConfig
   sudo chown lnbits:lnbits $lnbitsConfig
 
+  # link file $lnbitsConfig to /home/lnbits/lnbits/.env
+  sudo -u lnbits ln -s $lnbitsConfig /home/lnbits/lnbits/.env
+
   # activate admin user
   sudo sed -i "/^LNBITS_ADMIN_UI=/d" $lnbitsConfig
   sudo bash -c "echo 'LNBITS_ADMIN_UI=true' >> ${lnbitsConfig}"
