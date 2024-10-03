@@ -799,7 +799,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # config update
     # example: postgres://<user>:<password>@<host>/<database>
     sudo sed -i "/^LNBITS_DATABASE_URL=/d" $lnbitsConfig 2>/dev/null
-    sudo sed -i "/^LNBITS_DATA_FOLDER==/d" $lnbitsConfig 2>/dev/null
+    sudo sed -i "/^LNBITS_DATA_FOLDER=/d" $lnbitsConfig 2>/dev/null
     sudo bash -c "echo 'LNBITS_DATABASE_URL=postgres://postgres:postgres@localhost:5432/lnbits_db' >> ${lnbitsConfig}"
     sudo bash -c "echo 'LNBITS_DATA_FOLDER=/mnt/hdd/app-data/LNBits/data' >> ${lnbitsConfig}"
 
@@ -812,7 +812,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo mkdir -p /mnt/hdd/app-data/LNBits
 
     # config update
-    sudo sed -i "/^LNBITS_DATA_FOLDER==/d" $lnbitsConfig 2>/dev/null
+    sudo sed -i "/^LNBITS_DATA_FOLDER=/d" $lnbitsConfig 2>/dev/null
     sudo bash -c "echo 'LNBITS_DATA_FOLDER=/mnt/hdd/app-data/LNBits' >> ${lnbitsConfig}"
   fi
   sudo chown lnbits:lnbits -R /mnt/hdd/app-data/LNBits
