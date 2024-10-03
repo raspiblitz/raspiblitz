@@ -133,7 +133,7 @@ if [ "${crtlWebinterface}" != "${choice}" ]; then
   errorOnInstall=$?
   if [ "${choice}" =  "on" ]; then
     if [ ${errorOnInstall} -eq 0 ]; then
-      sudo systemctl start RTL
+      sudo systemctl start cRTL
       echo "waiting 10 secs .."
       sleep 10
       /home/admin/config.scripts/bonus.rtl.sh menu cl mainnet
