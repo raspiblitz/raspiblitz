@@ -104,9 +104,9 @@ function revertMigration() {
 
     # update config
     echo "# Configure config .env"
+    sudo sed -i "/^LNBITS_DATABASE_URL=/d" $lnbitsConfig
 
     # clean up
-    sudo sed -i "/^LNBITS_DATABASE_URL=/d" $lnbitsConfig
     sudo sed -i "/^LNBITS_DATA_FOLDER=/d" $lnbitsConfig
     sudo bash -c "echo 'LNBITS_DATA_FOLDER=/mnt/hdd/app-data/LNBits' >> ${lnbitsConfig}"
 
@@ -777,13 +777,14 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo mkdir -p $lnbitsDataDir
   sudo chown lnbits:lnbits -R $lnbitsDataDir
 
-  # prepare .env file
   echo "# preparing env file"
+  # delete old .env file or old symbolic link
   sudo rm /home/lnbits/lnbits/.env 2>/dev/null
+  # make sure .env file exists at data drive
   sudo -u lnbits touch $lnbitsConfig
   sudo chown lnbits:lnbits $lnbitsConfig
+  # crete symbolic link
   sudo -u lnbits ln -s $lnbitsConfig /home/lnbits/lnbits/.env
-  sudo -u lnbits ln -s /mnt/hdd/app-data/LNBits/data/.env /home/lnbits/lnbits/.env
 
   # activate admin user
   sudo sed -i "/^LNBITS_ADMIN_UI=/d" $lnbitsConfig
@@ -797,6 +798,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     # config update
     # example: postgres://<user>:<password>@<host>/<database>
+    sudo sed -i "/^LNBITS_DATABASE_URL=/d" $lnbitsConfig 2>/dev/null
+    sudo sed -i "/^LNBITS_DATA_FOLDER==/d" $lnbitsConfig 2>/dev/null
     sudo bash -c "echo 'LNBITS_DATABASE_URL=postgres://postgres:postgres@localhost:5432/lnbits_db' >> ${lnbitsConfig}"
     sudo bash -c "echo 'LNBITS_DATA_FOLDER=/mnt/hdd/app-data/LNBits/data' >> ${lnbitsConfig}"
 
@@ -809,6 +812,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo mkdir -p /mnt/hdd/app-data/LNBits
 
     # config update
+    sudo sed -i "/^LNBITS_DATA_FOLDER==/d" $lnbitsConfig 2>/dev/null
     sudo bash -c "echo 'LNBITS_DATA_FOLDER=/mnt/hdd/app-data/LNBits' >> ${lnbitsConfig}"
   fi
   sudo chown lnbits:lnbits -R /mnt/hdd/app-data/LNBits
@@ -1084,8 +1088,8 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     echo "# deleting data"
     sudo -u postgres psql -c "drop database lnbits_db;"
     sudo -u postgres psql -c "drop user lnbits_user;"
-    sudo rm -R /mnt/hdd/app-data/LNBits
     sudo rm /home/lnbits/lnbits/.env
+    sudo rm -R /mnt/hdd/app-data/LNBits
   else
     echo "# keeping data"
   fi
@@ -1205,10 +1209,8 @@ if [ "$1" = "migrate" ]; then
     # create new backup
     sudo tar -cf /mnt/hdd/app-data/LNBits_sqlitedb_backup.tar -C /mnt/hdd/app-data LNBits/
 
-    # remove existent config for database
-    sudo sed -i "/^LNBITS_DATABASE_URL=/d" $lnbitsConfig 2>/dev/null
-    sudo sed -i "/^LNBITS_DATA_FOLDER=/d" $lnbitsConfig 2>/dev/null
     # restore sqlite database config
+    sudo sed -i "/^LNBITS_DATA_FOLDER=/d" $lnbitsConfig 2>/dev/null
     sudo bash -c "echo 'LNBITS_DATA_FOLDER=/mnt/hdd/app-data/LNBits' >> ${lnbitsConfig}"
 
     # stop after sync was done
@@ -1221,6 +1223,7 @@ if [ "$1" = "migrate" ]; then
 
     # example: postgres://<user>:<password>@<host>/<database>
     # add new postgres config
+    sudo sed -i "/^LNBITS_DATABASE_URL=/d" $lnbitsConfig 2>/dev/null
     sudo bash -c "echo 'LNBITS_DATABASE_URL=postgres://lnbits_user:raspiblitz@localhost:5432/lnbits_db' >> ${lnbitsConfig}"
 
     # clean start on new postgres db prior migration
