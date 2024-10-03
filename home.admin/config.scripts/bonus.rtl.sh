@@ -575,6 +575,16 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     fi
     echo "# Delete all configs"
     sudo rm -rf /mnt/hdd/app-data/rtl
+    echo "# Disable and stop all RTL services"
+    # Get all systemd services containing "RTL"
+    services=$(systemctl list-units --type=service --all | grep RTL | awk '{print $1}')
+    # Stop and remove each service
+    for service in $services; do
+      echo "Stopping service: $service"
+      sudo systemctl disable --now "$service"
+      sudo rm /etc/systemd/system/${service}.service
+    done
+    echo "# All RTL services have been stopped and removed."
   fi
 
   # close ports on firewall
