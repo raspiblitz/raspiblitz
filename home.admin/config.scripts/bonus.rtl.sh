@@ -491,11 +491,11 @@ if [ "$1" = "prestart" ]; then
   # https://github.com/Ride-The-Lightning/RTL/blob/master/docs/C-Lightning-setup.md
   if [ "${LNTYPE}" == "cl" ]; then
     echo "# CLN config"
-    if [ ! -f /home/bitcoin/.lightning/${CLNETWORK}/rune_for_${netprefix}RTL ]; then
+    if [ ! -f /mnt/hdd/app-data/rtl/${systemdService}/rune_for_${systemdService} ]; then
       # Create/reuse core-lightning's rune. Check createrune and showrunes documentation for more details on how to create runes
       newRune=$(/usr/local/bin/lightning-cli --conf=${CLCONF} createrune | jq .rune)
       # Copy the rune and save it in a file which must be accessible to RTL. The content of the file must be LIGHTNING_RUNE="<your-rune>"
-      echo "LIGHTNING_RUNE=${newRune}" >/home/bitcoin/.lightning/${CLNETWORK}/rune_for_${netprefix}RTL
+      echo "LIGHTNING_RUNE=${newRune}" >/mnt/hdd/app-data/rtl/${systemdService}/rune_for_${systemdService}
     fi
     cat /mnt/hdd/app-data/rtl/${systemdService}/RTL-Config.json |
       jq ".port = \"${RTLHTTP}\"" |
@@ -503,7 +503,7 @@ if [ "$1" = "prestart" ]; then
       jq ".multiPassHashed = \"\"" |
       jq ".nodes[0].lnNode = \"${hostname}\"" |
       jq ".nodes[0].lnImplementation = \"CLN\"" |
-      jq ".nodes[0].Authentication.runePath = \"/home/rtl/.lightning/${CLNETWORK}/rune_for_${netprefix}RTL\"" |
+      jq ".nodes[0].Authentication.runePath = \"/mnt/hdd/app-data/rtl/${systemdService}/rune_for_${systemdService}\"" |
       jq ".nodes[0].Authentication.configPath = \"${CLCONF}\"" |
       jq ".nodes[0].Authentication.swapMacaroonPath = \"/home/rtl/.loop/${CHAIN}/\"" |
       jq ".nodes[0].Authentication.boltzMacaroonPath = \"/home/rtl/.boltz-lnd/macaroons/\"" |
