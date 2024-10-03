@@ -29,7 +29,8 @@ fi
 echo "# Running: 'bonus.lnbits.sh $*'"
 source /mnt/hdd/raspiblitz.conf
 
-lnbitsConfig="/mnt/hdd/app-data/LNBits/data/.env"
+lnbitsDataDir="/mnt/hdd/app-data/LNBits/data"
+lnbitsConfig="${lnbitsDataDir}/.env"
 
 function postgresConfig() {
 
@@ -772,6 +773,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     exit 1
   fi
 
+ # prepare data dir file
+  sudo mkdir -p $lnbitsDataDir
+  sudo chown lnbits:lnbits -R $lnbitsDataDir
+
   # prepare .env file
   echo "# preparing env file"
   sudo rm /home/lnbits/lnbits/.env 2>/dev/null
@@ -789,9 +794,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     # POSTGRES
     postgresConfig
-
-    # new data directory
-    sudo mkdir -p /mnt/hdd/app-data/LNBits/data
 
     # config update
     # example: postgres://<user>:<password>@<host>/<database>
