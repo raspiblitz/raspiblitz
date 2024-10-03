@@ -33,8 +33,14 @@ if [ "${mode}" != "lcd" ] && [ "${mode}" != "ssh" ]; then
     exit 1
 fi
 
+if [ "${vm}" == "1" ]; then
+    temp_info="VM"
+else
+    temp_info="${system_temp_celsius}°C"
+fi
+
 # default backtitle for dialog
-backtitle="${codeVersion} ${eventID} / ${internet_localip} ${system_temp_celsius}°C ${hdd_used_info}"
+backtitle="${codeVersion} ${eventID} / ${internet_localip} ${temp_info} ${hdd_used_info}"
 
 ################################################
 # 1) WELL DEFINED EVENTS

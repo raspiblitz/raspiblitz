@@ -506,8 +506,11 @@ elif [ "${abcd}" = "c" ]; then
 
     echo "# CHANGE LND - PASSWORD C (only mainnet)"
 
-    echo "# Make sure Auto-Unlocks off"
-    sudo /home/admin/config.scripts/lnd.autounlock.sh off
+    source <(/home/admin/config.scripts/lnd.autounlock.sh status)
+    if [ "${autoUnlock}" == "on" ]; then
+      echo "# Make sure Auto-Unlocks off"
+      sudo /home/admin/config.scripts/lnd.autounlock.sh off
+    fi
 
     echo "# LND needs to be restarted to lock wallet first .. (please wait)"
     sudo systemctl restart lnd
@@ -520,6 +523,13 @@ elif [ "${abcd}" = "c" ]; then
       sleep 2
       exit 0
     fi
+
+    if [ "${autoUnlock}" == "on" ]; then
+      echo "# Make sure Auto-Unlocks on"
+      sudo /home/admin/config.scripts/lnd.autounlock.sh on "${newPassword}"
+    fi
+
+    echo "# Password changed"
 
   else
     echo "# LND not installed/active"
@@ -537,7 +547,7 @@ elif [ "${abcd}" = "c" ]; then
     echo "# CORE LIGHTNING not installed/active/encrypted"
   fi
 
-  # store password hash
+  # store password hash (either for lnd or core lightning)
   mkpasswd -m sha-512 "${newPassword}" -S "${hashedPasswordSalt:0:16}" > ${hashedPasswordStoragePath}/c.hash
   chown admin:admin ${hashedPasswordStoragePath}/c.hash
   chmod 660 ${hashedPasswordStoragePath}/c.hash

@@ -104,4 +104,9 @@ fi
 
 # display info to user
 time=$(date '+%H:%M:%S')
-dialog --title " Node is Syncing (${time}) " --backtitle "${codeVersion} / ${internet_localip} ${system_temp_celsius}°C ${system_temp_fahrenheit}°F / ${hdd_used_info}" --infobox "${infoStr}\n ${adminStr}" ${height} ${width}
+if [ "${vm}" == "0" ]; then
+    temp_info="${system_temp_celsius}°C ${system_temp_fahrenheit}°F"
+else
+    temp_info="VM"
+fi
+dialog --title " Node is Syncing (${time}) " --backtitle "${codeVersion} / ${internet_localip} ${temp_info} / ${hdd_used_info}" --infobox "${infoStr}\n ${adminStr}" ${height} ${width}

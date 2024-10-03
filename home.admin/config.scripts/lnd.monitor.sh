@@ -36,6 +36,10 @@ else
   exit 1
 fi
 
+# general info on the lnd service
+lnd_running=$(systemctl show ${netprefix}lnd --property=ActiveState 2>/dev/null | grep -c "=active")
+lnd_locked=$(systemctl show ${netprefix}lnd --property=StatusText 2>/dev/null | grep -c "Wallet locked")
+
 ######################################################
 # STATUS
 # check general status info
@@ -44,55 +48,54 @@ fi
 if [ "$2" = "status" ]; then
 
   lnd_version=$($lndcli_alias --version 2>/dev/null | cut -d ' ' -f3)
-  lnd_running=$(systemctl status ${netprefix}lnd 2>/dev/null | grep -c "active (running)")
   lnd_ready="0"
   lnd_online="0"
-  lnd_locked="0"
   lnd_error_short=""
   lnd_error_full=""
 
   if [ "${lnd_running}" != "0" ]; then
     lnd_running="1"
+    # only if wallet is not locked get more info
+    if [ ${lnd_locked} -eq 0 ]; then
+      # test connection - record win & fail info
+      randStr=$(echo "$RANDOM")
+      rm /var/cache/raspiblitz/.lnd-${randStr}.out 2>/dev/null
+      rm /var/cache/raspiblitz/.lnd-${randStr}.error 2>/dev/null
+      touch /var/cache/raspiblitz/.lnd-${randStr}.out
+      touch /var/cache/raspiblitz/.lnd-${randStr}.error
+      echo "# $lndcli_alias getinfo"
+      $lndcli_alias getinfo 1>/var/cache/raspiblitz/.lnd-${randStr}.out 2>/var/cache/raspiblitz/.lnd-${randStr}.error
+      winData=$(cat /var/cache/raspiblitz/.lnd-${randStr}.out 2>/dev/null)
+      failData=$(cat /var/cache/raspiblitz/.lnd-${randStr}.error 2>/dev/null)
+      rm /var/cache/raspiblitz/.lnd-${randStr}.out
+      rm /var/cache/raspiblitz/.lnd-${randStr}.error
 
-    # test connection - record win & fail info
-    randStr=$(echo "$RANDOM")
-    rm /var/cache/raspiblitz/.lnd-${randStr}.out 2>/dev/null
-    rm /var/cache/raspiblitz/.lnd-${randStr}.error 2>/dev/null
-    touch /var/cache/raspiblitz/.lnd-${randStr}.out
-    touch /var/cache/raspiblitz/.lnd-${randStr}.error
-    echo "# $lndcli_alias getinfo"
-    $lndcli_alias getinfo 1>/var/cache/raspiblitz/.lnd-${randStr}.out 2>/var/cache/raspiblitz/.lnd-${randStr}.error
-    winData=$(cat /var/cache/raspiblitz/.lnd-${randStr}.out 2>/dev/null)
-    failData=$(cat /var/cache/raspiblitz/.lnd-${randStr}.error 2>/dev/null)
-    rm /var/cache/raspiblitz/.lnd-${randStr}.out
-    rm /var/cache/raspiblitz/.lnd-${randStr}.error
+      # check for errors
+      if [ "${failData}" != "" ]; then
+        lnd_ready="0"
 
-    # check for errors
-    if [ "${failData}" != "" ]; then
-      lnd_ready="0"
-
-      # store error messages 
-      lnd_error_short=""
-      lnd_error_full=$(echo ${failData} | tr -d "'" | tr -d '"')
-
-      # check if error because wallet is locked
-      if [ $(echo "${failData}" | grep -c "wallet locked") -gt 0 ]; then
-        # signal wallet locked
-        lnd_locked="1"
-        # dont report it as error
+        # store error messages 
         lnd_error_short=""
-        lnd_error_full=""
-      fi
+        lnd_error_full=$(echo ${failData} | tr -d "'" | tr -d '"')
 
-    # check results if proof for online
-    else
-      lnd_ready="1"
-      connections=$( echo "${winData}" | grep "num_peers\"" | tr -cd '[[:digit:]]')
-      if [ "${connections}" != "" ] && [ "${connections}" != "0" ]; then
-        lnd_online="1"
-      fi
-    fi
+        # check if error because wallet is locked
+        if [ $(echo "${failData}" | grep -c "wallet locked") -gt 0 ]; then
+          # signal wallet locked
+          lnd_locked="1"
+          # dont report it as error
+          lnd_error_short=""
+          lnd_error_full=""
+        fi
 
+      # check results if proof for online
+      else
+        lnd_ready="1"
+        connections=$( echo "${winData}" | grep "num_peers\"" | tr -cd '[[:digit:]]')
+        if [ "${connections}" != "" ] && [ "${connections}" != "0" ]; then
+          lnd_online="1"
+        fi
+      fi
+    fi  
   fi 
 
   # print results
@@ -135,6 +138,18 @@ fi
 
 if [ "$2" = "info" ]; then
 
+  # quick if not running
+  if [ "${lnd_running}" == "0" ]; then
+    echo "error='not running'"
+    exit 1
+  fi
+
+  # quick if wallet is locked
+  if [ "${lnd_locked}" == "1" ]; then
+    echo "error='wallet locked'"
+    exit 1
+  fi
+
   # raw data demo:
   # sudo /usr/local/bin/lncli -n=mainnet --rpcserver=localhost:10009 --macaroonpath=/home/bitcoin/.lnd/data/chain/bitcoin/mainnet/readonly.macaroon --tlscertpath=/home/bitcoin/.lnd/tls.cert getinfo
 
@@ -147,7 +162,7 @@ if [ "$2" = "info" ]; then
   fi
 
   # parse data
-  lnd_address=$(echo "${ln_getInfo}" | grep "uris" -A 1 | tr -d '\n' | cut -d '"' -f4)
+  lnd_address=$(echo "${ln_getInfo}" | jq -r '.uris[0]')
   lnd_tor=$(echo "${lnd_address}" | grep -c ".onion")
   lnd_sync_chain=$(echo "${ln_getInfo}" | grep "synced_to_chain" | grep "true" -c)
   lnd_sync_graph=$(echo "${ln_getInfo}" | grep "synced_to_graph" | grep "true" -c)
@@ -212,6 +227,18 @@ fi
 
 if [ "$2" = "wallet" ]; then
 
+  # quick if not running
+  if [ "${lnd_running}" == "0" ]; then
+    echo "error='not running'"
+    exit 1
+  fi
+
+  # quick if wallet is locked
+  if [ "${lnd_locked}" == "1" ]; then
+    echo "error='wallet locked'"
+    exit 1
+  fi
+
   # raw data demo:
   # /usr/local/bin/lncli -n=mainnet --rpcserver=localhost:10009 --macaroonpath=/home/bitcoin/.lnd/data/chain/bitcoin/mainnet/readonly.macaroon --tlscertpath=/home/bitcoin/.lnd/tls.cert walletbalance
   # /usr/local/bin/lncli -n=mainnet --rpcserver=localhost:10009 --macaroonpath=/home/bitcoin/.lnd/data/chain/bitcoin/mainnet/readonly.macaroon --tlscertpath=/home/bitcoin/.lnd/tls.cert channelbalance
@@ -251,6 +278,18 @@ fi
 
 if [ "$2" = "channels" ]; then
 
+  # quick if not running
+  if [ "${lnd_running}" == "0" ]; then
+    echo "error='not running'"
+    exit 1
+  fi
+
+  # quick if wallet is locked
+  if [ "${lnd_locked}" == "1" ]; then
+    echo "error='wallet locked'"
+    exit 1
+  fi
+
   # raw data demo:
   # sudo /usr/local/bin/lncli -n=mainnet --rpcserver=localhost:10009 --macaroonpath=/home/bitcoin/.lnd/data/chain/bitcoin/mainnet/readonly.macaroon --tlscertpath=/home/bitcoin/.lnd/tls.cert listchannels
 
@@ -278,6 +317,18 @@ if [ "$2" = "fees" ]; then
 
 # raw data demo:
 # sudo /usr/local/bin/lncli -n=mainnet --rpcserver=localhost:10009 --macaroonpath=/home/bitcoin/.lnd/data/chain/bitcoin/mainnet/readonly.macaroon --tlscertpath=/home/bitcoin/.lnd/tls.cert feereport
+
+  # quick if not running
+  if [ "${lnd_running}" == "0" ]; then
+    echo "error='not running'"
+    exit 1
+  fi
+
+  # quick if wallet is locked
+  if [ "${lnd_locked}" == "1" ]; then
+    echo "error='wallet locked'"
+    exit 1
+  fi
 
   # get data
   ln_feereport=$($lndcli_alias feereport 2>/dev/null)

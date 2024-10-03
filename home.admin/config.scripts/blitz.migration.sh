@@ -84,6 +84,7 @@ migrate_raspiblitz_conf () {
   fi
   
   # write default raspiblitz config
+  source /home/admin/raspiblitz.info
   source /home/admin/_version.info
   echo "# RASPIBLITZ CONFIG FILE" > /home/admin/raspiblitz.conf
   sudo mv /home/admin/raspiblitz.conf /mnt/hdd/raspiblitz.conf
@@ -94,7 +95,13 @@ migrate_raspiblitz_conf () {
   /home/admin/config.scripts/blitz.conf.sh set network "bitcoin"
   /home/admin/config.scripts/blitz.conf.sh set chain "main"
   /home/admin/config.scripts/blitz.conf.sh set hostname "${nodename}"
-  /home/admin/config.scripts/blitz.conf.sh set displayClass "lcd"
+
+  if [ "${vm}" == "1" ]; then
+    /home/admin/config.scripts/blitz.conf.sh set displayClass "headless"
+  else
+    /home/admin/config.scripts/blitz.conf.sh set displayClass "lcd"
+  fi
+  
   /home/admin/config.scripts/blitz.conf.sh set lcdrotate "1"
   /home/admin/config.scripts/blitz.conf.sh set runBehindTor "on"
 
@@ -560,6 +567,12 @@ if [ "$1" = "import" ]; then
     echo "error='no raspiblitz.conf after unzip migration file'"
     echo "# reboot system ... HDD will offer fresh formating"
     exit 1
+  fi
+
+  #4073 if migration is imported on VM - make sure to set displayClass to headless
+  source /home/admin/raspiblitz.info
+  if [ "${vm}" == "1" ]; then
+    /home/admin/config.scripts/blitz.conf.sh set displayClass "headless"
   fi
 
   # correcting all user rights on data will be done by provisioning process
