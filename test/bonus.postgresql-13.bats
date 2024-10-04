@@ -55,7 +55,7 @@
   run pg_lsclusters
   # check that no 13 cluster is present
   [ $(echo "$output" | grep -c "13  main") -eq 0 ]
-  # check that no 13 cluster is present
+  # check that pg 15 cluster is present
   echo "$output" | grep -q "15  main"
   [ "$?" -eq 0 ]
   run sudo -u postgres psql -l
