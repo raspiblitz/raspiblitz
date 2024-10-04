@@ -148,11 +148,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "# Installing ${APPID} ..."
 
 
-
-
-
   # create a dedicated user for the app
-  # BACKGROUND is here to seperate running apps by unix users
+  # BACKGROUND is here to separate running apps by unix users
   # and only give file write access to the rest of the system where needed.
   echo "# create user"
   # If the user is intended to be loeed in to add '--shell /bin/bash'
