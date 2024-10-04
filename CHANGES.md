@@ -1,6 +1,7 @@
 ## What's new in Version 1.11.3 of RaspiBlitz?
 
 - New: Tailscale (basic install script) [details](https://en.wikipedia.org/wiki/Tailscale)
+- New: Connect Zeus to CLN via CLNrest (using the clnrest plugin and runes)
 - Update: Core Lightning v24.08.1 [details](https://github.com/ElementsProject/lightning/releases/tag/v24.08.1)
 - Update: Thunderhub v0.13.31 [details](https://github.com/apotdevin/thunderhub/releases/tag/v0.13.31)
 - Update: LNDK 0.2.0 (Pay BOLT12 offers with LND) [details](https://github.com/lndk-org/lndk/releases/tag/v0.2.0)
@@ -8,6 +9,10 @@
 - Update: Mempool 3.0.0 [details](https://github.com/mempool/mempool/releases/tag/v3.0.0)
 - Update: Balance of Satoshis 19.3.4 (bos) [details](https://github.com/alexbosworth/balanceofsatoshis/blob/v19.3.4/CHANGELOG.md#1934)
 - Update: Labelbase 2.2.2 [details](https://x.com/labelbase_space)
+- Update: Telegraf Metrics for InfluxDB/Grafana [details](https://github.com/raspiblitz/raspiblitz/tree/dev/home.admin/assets/telegraf/README.md)
+- Update: RTL v0.15.2 [details](https://github.com/Ride-The-Lightning/RTL/releases/tag/v0.15.2)
+- Update: Jam (JoinMarket Web UI) v0.3.0 [details](https://github.com/joinmarket-webui/jam/releases/tag/v0.3.0)
+- Update: CLBOSS 0.13.3 [details](https://github.com/ZmnSCPxj/clboss/releases/tag/v0.13.3)
 
 ## What's new in Version 1.11.2 of RaspiBlitz?
 
