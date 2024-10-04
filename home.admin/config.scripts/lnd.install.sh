@@ -89,7 +89,7 @@ if [ "$1" = "install" ] ; then
   # check if lnd binary is already installed
   if [ $(sudo -u admin lnd --version 2>/dev/null| grep -c 'lnd') -gt 0 ]; then
     echo "lnd binary already installed - done"
-    exit 1
+    exit 
   fi
 
   # get LND resources
