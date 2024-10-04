@@ -3,17 +3,17 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ]; then
   echo "config script to install or remove the Let's Encrypt Client (ACME.SH)"
-  echo "bonus.letsencrypt.sh [on|off]"
-  echo "bonus.letsencrypt.sh issue-cert DNSSERVICE FULLDOMAINNAME APITOKEN ip|tor|ip&tor"
-  echo "bonus.letsencrypt.sh remove-cert FULLDOMAINNAME ip|tor|ip&tor"
-  echo "bonus.letsencrypt.sh refresh-nginx-certs"
+  echo "internet.letsencrypt.sh [on|off]"
+  echo "internet.letsencrypt.sh issue-cert DNSSERVICE FULLDOMAINNAME APITOKEN ip|tor|ip&tor"
+  echo "internet.letsencrypt.sh remove-cert FULLDOMAINNAME ip|tor|ip&tor"
+  echo "internet.letsencrypt.sh refresh-nginx-certs"
   exit 1
 fi
 
 source /mnt/hdd/raspiblitz.conf
 
 # make sure the HDD is mounted
-mountpoint -q /mnt/hdd || { echo "# bonus.letsencrypt.sh - /mnt/hdd is not mounted. Exiting."; exit 1; }
+mountpoint -q /mnt/hdd || { echo "# internet.letsencrypt.sh - /mnt/hdd is not mounted. Exiting."; exit 1; }
 
 # https://github.com/acmesh-official/acme.sh/releases
 ACME_LOAD_BASE_URL="https://github.com/acmesh-official/acme.sh/archive/refs/tags/3.0.7.tar.gz"
@@ -119,6 +119,9 @@ function refresh_certs_with_nginx() {
     # make a hashs of certs before
     certHashBefore1=$(sudo md5sum /mnt/hdd/app-data/nginx/tls.cert | head -n1 | cut -d " " -f1)
     certHashBefore2=$(sudo md5sum /mnt/hdd/app-data/nginx/tor_tls.cert | head -n1 | cut -d " " -f1)
+
+    # make sure self-signed cert exists & is valid
+    /home/admin/config.scripts/internet.selfsignedcert.sh create
 
     echo "# default IP certs"
     sudo rm /mnt/hdd/app-data/nginx/tls.cert
@@ -367,7 +370,7 @@ elif [ "$1" = "remove-cert" ]; then
     options="ip&tor"
   fi
 
-  echo "# bonus.letsencrypt.sh remove-cert ${FQDN} ${options}"
+  echo "# internet.letsencrypt.sh remove-cert ${FQDN} ${options}"
 
   # remove cert from renewal
   $ACME_INSTALL_HOME/acme.sh --remove -d "${FQDN}" --ecc --home "${ACME_INSTALL_HOME}" --config-home "${ACME_CONFIG_HOME}" --cert-home "${ACME_CERT_HOME}" 2>&1

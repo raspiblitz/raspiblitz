@@ -97,7 +97,7 @@ if [ "$1" = reset ]; then
   sudo rm -f "${CERT_DIR}/selfsigned.cert"
   sudo rm -f "${CERT_DIR}/selfsigned.key"
   create_self_signed_cert
-  /home/admin/config.scripts/bonus.letsencrypt.sh refresh-nginx-certs
+  /home/admin/config.scripts/internet.letsencrypt.sh refresh-nginx-certs
   exit 0
 fi
 

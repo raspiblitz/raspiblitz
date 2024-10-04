@@ -229,7 +229,7 @@ def subscriptions_new(ip, dnsservice, domain, token, target):
         raise BlitzError("domain already exists", domain)
 
     # make sure lets encrypt client is installed
-    os.system("/home/admin/config.scripts/bonus.letsencrypt.sh on")
+    os.system("/home/admin/config.scripts/internet.letsencrypt.sh on")
 
     # dyndns
     real_ip = ip
@@ -288,9 +288,9 @@ def subscriptions_new(ip, dnsservice, domain, token, target):
 
     # run the ACME script
     print("# Running letsencrypt ACME script ...")
-    print("# /home/admin/config.scripts/bonus.letsencrypt.sh issue-cert {0} {1} {2} {3}".format(dnsservice, domain, token, target))
+    print("# /home/admin/config.scripts/internet.letsencrypt.sh issue-cert {0} {1} {2} {3}".format(dnsservice, domain, token, target))
     acme_result = subprocess.Popen(
-        ["/home/admin/config.scripts/bonus.letsencrypt.sh", "issue-cert", dnsservice, domain, token, target],
+        ["/home/admin/config.scripts/internet.letsencrypt.sh", "issue-cert", dnsservice, domain, token, target],
         stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf8')
     out, err = acme_result.communicate()
     eprint(str(out))
@@ -318,9 +318,9 @@ def subscriptions_cancel(s_id):
 
     # run the ACME script to remove cert
     if removed_cert:
-        print("# /home/admin/config.scripts/bonus.letsencrypt.sh remove-cert {0} {1}".format(removed_cert['id'], removed_cert['target']))
+        print("# /home/admin/config.scripts/internet.letsencrypt.sh remove-cert {0} {1}".format(removed_cert['id'], removed_cert['target']))
         acme_result = subprocess.Popen(
-            ["/home/admin/config.scripts/bonus.letsencrypt.sh", "remove-cert", removed_cert['id'],
+            ["/home/admin/config.scripts/internet.letsencrypt.sh", "remove-cert", removed_cert['id'],
              removed_cert['target']], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf8')
         out, err = acme_result.communicate()
         if out.find("error=") > -1:
@@ -336,7 +336,7 @@ def subscriptions_cancel(s_id):
 
     # deinstall letsencrypt/dyndns if this was last subscription
     if len(subs['subscriptions_letsencrypt']) == 0:
-        os.system("/home/admin/config.scripts/bonus.letsencrypt.sh off")
+        os.system("/home/admin/config.scripts/internet.letsencrypt.sh off")
         os.system("/home/admin/config.scripts/internet.dyndomain.sh off")
 
 def get_subscription(subscription_id):

@@ -127,8 +127,8 @@ elif [ "$1" = "https-on" ]; then
 
   if ! [ -f /mnt/hdd/app-data/nginx/tls.cert ];then
 
-      # create a self-signed cert if the LND cert is not present
-      /home/admin/config.scripts/internet.selfsignedcert.sh create
+      # make sure certs exists
+      /home/admin/config.scripts/internet.letsencrypt.sh refresh-nginx-certs
       
   else
     echo "# exists /mnt/hdd/app-data/nginx/tls.cert"
