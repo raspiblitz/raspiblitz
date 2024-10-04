@@ -11,7 +11,7 @@
 APPID="template" # one-word lower-case no-specials
 
 # clean human readable version - will be displayed in UI
-# just numbers only seperated by dots (2 or 0.1 or 1.3.4 or 3.4.5.2)
+# just numbers only separated by dots (2 or 0.1 or 1.3.4 or 3.4.5.2)
 VERSION="0.1"
 
 # the git repo to get the source code from for install
@@ -158,7 +158,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   /home/admin/config.scripts/bonus.nodejs.sh on
 
   # create a dedicated user for the app
-  # BACKGROUND is here to seperate running apps by unix users
+  # BACKGROUND is here to separate running apps by unix users
   # and only give file write access to the rest of the system where needed.
   echo "# create user"
   # If the user is intended to be loeed in to add '--shell /bin/bash'

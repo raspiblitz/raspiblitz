@@ -3,7 +3,7 @@
 
 # https://github.com/ZmnSCPxj/clboss/releases
 # https://github.com/ZmnSCPxj/clboss/commits/master
-CLBOSSVERSION="0673c50e7374ea8f5cb7e302f72b7978c6bd1794"
+CLBOSSVERSION="159ef70278100ab6fda4e625259f2a52b791979a"
 
 # command info
 if [ $# -lt 1 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
