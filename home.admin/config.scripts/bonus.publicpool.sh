@@ -14,10 +14,10 @@ PORT_UI="3335"
 APP_DATA_DIR="/mnt/hdd/app-data/${APPID}"
 
 # Debug information
-echo "Script name: $0"
-echo "All parameters: $@"
-echo "First parameter: $1"
-echo "Parameter count: $#"
+echo "# Script name: $0"
+echo "# All parameters: $@"
+echo "# First parameter: $1"
+echo "# Parameter count: $#"
 
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "# bonus.${APPID}.sh status            -> status information (key=value)"
@@ -98,6 +98,12 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "# Clone repositories"
   sudo -u ${APPID} git clone ${GITHUB_REPO} /home/${APPID}/${APPID}
   sudo -u ${APPID} git clone ${GITHUB_REPO_UI} /home/${APPID}/${APPID}-ui
+
+  # check that the repos were cloned
+  if [ ! -d "/home/${APPID}/${APPID}" ] || [ ! -d "/home/${APPID}/${APPID}-ui" ]; then
+    echo "# FAIL - Was not able to clone the GitHub repos."
+    exit 1
+  fi 
 
   # Modify the environment.prod.ts file of WebUI
   localIP=$(hostname -I | awk '{print $1}')
