@@ -9,10 +9,14 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   exit 1
 fi
 
+# make sure the HDD is mounted
+mountpoint -q /mnt/hdd || { echo "# internet.selfsignedcert.sh - /mnt/hdd is not mounted. Exiting."; exit 1; }
+
 CERT_DIR="/mnt/hdd/app-data/selfsignedcert"
 CERT_FILE="${CERT_DIR}/selfsigned.cert"
 
 create_self_signed_cert() {
+
   sudo mkdir -p "${CERT_DIR}"
   sudo chown -R bitcoin:bitcoin "${CERT_DIR}"
   cd /mnt/hdd/app-data/selfsignedcert || exit 1
@@ -56,6 +60,13 @@ DNS.3   = $localip
 
   sudo -u bitcoin openssl req -new -x509 -sha256 -key selfsigned.key \
     -out selfsigned.cert -days 3650 -config localhost.conf
+
+  # set permissions on cert & key
+  sudo chown -h admin:www-data $CERT_DIR/selfsigned.cert
+  sudo chown -h admin:www-data $CERT_DIR/selfsigned.key 
+
+  # reolad nginx
+  sudo systemctl reload nginx 2>/dev/null
 }
 
 check_certificate_validity() {
@@ -70,6 +81,7 @@ check_certificate_validity() {
 
 if [ "$1" = create ]; then
   if [[ -f "${CERT_DIR}/selfsigned.cert" && -f "${CERT_DIR}/selfsigned.key" ]]; then
+    # if certificate exists, check if it is still valid
     if ! check_certificate_validity; then
       create_self_signed_cert
     fi
@@ -84,9 +96,8 @@ if [ "$1" = reset ]; then
   echo "# Make sure the old certificate is not present"
   sudo rm -f "${CERT_DIR}/selfsigned.cert"
   sudo rm -f "${CERT_DIR}/selfsigned.key"
-
   create_self_signed_cert
-
+  /home/admin/config.scripts/internet.letsencrypt.sh refresh-nginx-certs
   exit 0
 fi
 

@@ -621,7 +621,7 @@ fi
 if [ "${letsencrypt}" = "on" ]; then
   echo "Provisioning letsencrypt - run config script" >> ${logFile}
   /home/admin/_cache.sh set message "Setup letsencrypt"
-  sudo -u admin /home/admin/config.scripts/bonus.letsencrypt.sh on >> ${logFile} 2>&1
+  sudo -u admin /home/admin/config.scripts/internet.letsencrypt.sh on >> ${logFile} 2>&1
 else
   echo "Provisioning letsencrypt - keep default" >> ${logFile}
 fi

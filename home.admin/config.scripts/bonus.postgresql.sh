@@ -21,13 +21,19 @@ echo "# Using the default PostgreSQL version: $PG_VERSION"
 
 # switch on
 if [ "$command" = "1" ] || [ "$command" = "on" ]; then
-  echo "# Install PostgreSQL"
-  if [ ! -f /etc/apt/trusted.gpg.d/postgresql.gpg ]; then
-    curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/postgresql.gpg
-    echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
-    sudo apt update
+
+  # check if PostgreSQL is already installed
+  if psql --version | grep -q "psql (PostgreSQL) $PG_VERSION"; then
+    echo "# PostgreSQL $PG_VERSION is already installed"
+  else
+    echo "# Install PostgreSQL"
+    if [ ! -f /etc/apt/trusted.gpg.d/postgresql.gpg ]; then
+      curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/postgresql.gpg
+      echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
+      sudo apt update
+    fi
+    sudo apt install -y postgresql-$PG_VERSION
   fi
-  sudo apt install -y postgresql-$PG_VERSION
 
   postgres_datadir="/var/lib/postgresql" # default data dir
   postgres_confdir="/etc/postgresql"     # default conf dir
@@ -39,17 +45,17 @@ if [ "$command" = "1" ] || [ "$command" = "on" ]; then
     echo "# There is no old pg data"
     # symlink conf dir
     sudo mkdir -p /mnt/hdd/app-data/postgresql-conf/postgresql
-    sudo chown -R postgres:postgres /mnt/hdd/app-data/postgresql-conf # fix ownership
-    sudo mv $postgres_confdir /etc/postgresql.bak                     # backup new empty dir
-    sudo rm -rf $postgres_confdir                                     # not a symlink.. delete it silently
-    sudo ln -s /mnt/hdd/app-data/postgresql-conf/postgresql /etc/     # create symlink
+    sudo chown -R postgres:postgres /mnt/hdd/app-data/postgresql-conf      # fix ownership
+    sudo mv $postgres_confdir /etc/postgresql.bak.$(date +'%Y%m%d_%H%M%S') # backup new empty dir
+    sudo rm -rf $postgres_confdir                                          # not a symlink.. delete it silently
+    sudo ln -s /mnt/hdd/app-data/postgresql-conf/postgresql /etc/          # create symlink
 
     # symlink data dir
     sudo mkdir -p /mnt/hdd/app-data/postgresql
-    sudo chown -R postgres:postgres /mnt/hdd/app-data/postgresql # fix ownership
-    sudo mv $postgres_datadir /var/lib/postgresql.bak            # backup new empty dir
-    sudo rm -rf $postgres_datadir                                # not a symlink.. delete it silently
-    sudo ln -s /mnt/hdd/app-data/postgresql /var/lib/            # create symlink
+    sudo chown -R postgres:postgres /mnt/hdd/app-data/postgresql               # fix ownership
+    sudo mv $postgres_datadir /var/lib/postgresql.bak.$(date +'%Y%m%d_%H%M%S') # backup new empty dir
+    sudo rm -rf $postgres_datadir                                              # not a symlink.. delete it silently
+    sudo ln -s /mnt/hdd/app-data/postgresql /var/lib/                          # create symlink
 
     echo "# Create PostgreSQL $PG_VERSION data"
     sudo mkdir -p $postgres_datadir/$PG_VERSION/main
@@ -64,10 +70,10 @@ if [ "$command" = "1" ] || [ "$command" = "on" ]; then
     if [ -d /mnt/hdd/app-data/postgresql-conf ]; then
       # symlink conf dir
       sudo mkdir -p /mnt/hdd/app-data/postgresql-conf/postgresql
-      sudo chown -R postgres:postgres /mnt/hdd/app-data/postgresql-conf # fix ownership
-      sudo mv $postgres_confdir /etc/postgresql.bak                     # backup new empty dir
-      sudo rm -rf $postgres_confdir                                     # not a symlink.. delete it silently
-      sudo ln -s /mnt/hdd/app-data/postgresql-conf/postgresql /etc/     # create symlink
+      sudo chown -R postgres:postgres /mnt/hdd/app-data/postgresql-conf      # fix ownership
+      sudo mv $postgres_confdir /etc/postgresql.bak.$(date +'%Y%m%d_%H%M%S') # backup new empty dir
+      sudo rm -rf $postgres_confdir                                          # not a symlink.. delete it silently
+      sudo ln -s /mnt/hdd/app-data/postgresql-conf/postgresql /etc/          # create symlink
     else
       # generate new cluster and use default config
       echo "# Create $PG_VERSION config"
@@ -94,10 +100,10 @@ if [ "$command" = "1" ] || [ "$command" = "on" ]; then
 
     # symlink data dir
     sudo mkdir -p /mnt/hdd/app-data/postgresql
-    sudo chown -R postgres:postgres /mnt/hdd/app-data/postgresql # fix ownership
-    sudo mv $postgres_datadir /var/lib/postgresql.bak            # backup new empty dir
-    sudo rm -rf $postgres_datadir                                # not a symlink.. delete it silently
-    sudo ln -s /mnt/hdd/app-data/postgresql /var/lib/            # create symlink
+    sudo chown -R postgres:postgres /mnt/hdd/app-data/postgresql               # fix ownership
+    sudo mv $postgres_datadir /var/lib/postgresql.bak.$(date +'%Y%m%d_%H%M%S') # backup new empty dir
+    sudo rm -rf $postgres_datadir                                              # not a symlink.. delete it silently
+    sudo ln -s /mnt/hdd/app-data/postgresql /var/lib/                          # create symlink
 
     sudo chown -R postgres:postgres $postgres_datadir
     sudo systemctl start postgresql
@@ -113,10 +119,10 @@ if [ "$command" = "1" ] || [ "$command" = "on" ]; then
     if [ -d /mnt/hdd/app-data/postgresql-conf ]; then
       # symlink conf dir
       sudo mkdir -p /mnt/hdd/app-data/postgresql-conf/postgresql
-      sudo chown -R postgres:postgres /mnt/hdd/app-data/postgresql-conf # fix ownership
-      sudo mv $postgres_confdir /etc/postgresql.bak                     # backup new empty dir
-      sudo rm -rf $postgres_confdir                                     # not a symlink.. delete it silently
-      sudo ln -s /mnt/hdd/app-data/postgresql-conf/postgresql /etc/     # create symlink
+      sudo chown -R postgres:postgres /mnt/hdd/app-data/postgresql-conf      # fix ownership
+      sudo mv $postgres_confdir /etc/postgresql.bak.$(date +'%Y%m%d_%H%M%S') # backup new empty dir
+      sudo rm -rf $postgres_confdir                                          # not a symlink.. delete it silently
+      sudo ln -s /mnt/hdd/app-data/postgresql-conf/postgresql /etc/          # create symlink
     else
       # generate new cluster and use default config
       echo "# Create pg 13 config"
@@ -126,7 +132,7 @@ if [ "$command" = "1" ] || [ "$command" = "on" ]; then
       sudo systemctl start postgresql
       sudo pg_createcluster 13 main
       sudo pg_ctlcluster 13 main start
-      echo "Setting default password for postgres user"
+      echo "# Setting default password for postgres user"
       sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD 'postgres';"
       sudo systemctl stop postgresql
       sudo systemctl stop postgresql@13-main
@@ -140,10 +146,10 @@ if [ "$command" = "1" ] || [ "$command" = "on" ]; then
 
     # symlink data dir
     sudo mkdir -p /mnt/hdd/app-data/postgresql
-    sudo chown -R postgres:postgres /mnt/hdd/app-data/postgresql # fix ownership
-    sudo mv $postgres_datadir /var/lib/postgresql.bak            # backup new empty dir
-    sudo rm -rf $postgres_datadir                                # not a symlink.. delete it silently
-    sudo ln -s /mnt/hdd/app-data/postgresql /var/lib/            # create symlink
+    sudo chown -R postgres:postgres /mnt/hdd/app-data/postgresql               # fix ownership
+    sudo mv $postgres_datadir /var/lib/postgresql.bak.$(date +'%Y%m%d_%H%M%S') # backup new empty dir
+    sudo rm -rf $postgres_datadir                                              # not a symlink.. delete it silently
+    sudo ln -s /mnt/hdd/app-data/postgresql /var/lib/                          # create symlink
 
     sudo chown -R postgres:postgres $postgres_datadir
     sudo systemctl start postgresql
@@ -159,6 +165,8 @@ if [ "$command" = "1" ] || [ "$command" = "on" ]; then
       sudo pg_dropcluster $PG_VERSION main
     fi
 
+    echo "# Make sure postgresql-$PG_VERSION is installed"
+    sudo apt install -y postgresql-$PG_VERSION
     # /usr/bin/pg_upgradecluster [OPTIONS] <old version> <cluster name> [<new data directory>]
     sudo pg_upgradecluster 13 main $postgres_datadir/$PG_VERSION/main || exit 1
     sudo chown -R postgres:postgres /mnt/hdd/app-data/postgresql/$PG_VERSION
@@ -178,8 +186,10 @@ if [ "$command" = "1" ] || [ "$command" = "on" ]; then
   fi
 
   # start cluster
-  sudo systemctl enable --now postgresql
-  sudo systemctl enable --now postgresql@$PG_VERSION-main
+  sudo systemctl enable postgresql
+  sudo systemctl start postgresql
+  sudo systemctl enable postgresql@$PG_VERSION-main
+  sudo systemctl start postgresql@$PG_VERSION-main
 
   # check if PostgreSQL was installed
   if psql --version; then
@@ -200,13 +210,12 @@ if [ "$command" = "1" ] || [ "$command" = "on" ]; then
     echo "Setting default password for postgres user"
     sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD 'postgres';"
     echo "OK PostgreSQL installed"
+    exit 0
   else
     echo "FAIL - Was not able to install PostgreSQL"
     echo "ABORT - PostgreSQL install"
     exit 1
   fi
-
-  exit 0
 fi
 
 # switch off

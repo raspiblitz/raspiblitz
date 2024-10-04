@@ -9,6 +9,7 @@
 - Update: Mempool 3.0.0 [details](https://github.com/mempool/mempool/releases/tag/v3.0.0)
 - Update: Balance of Satoshis 19.3.4 (bos) [details](https://github.com/alexbosworth/balanceofsatoshis/blob/v19.3.4/CHANGELOG.md#1934)
 - Update: Labelbase 2.2.2 [details](https://x.com/labelbase_space)
+- Update: LNbits 0.12.11 [details](https://github.com/lnbits/lnbits/releases/tag/0.12.11)
 - Update: Telegraf Metrics for InfluxDB/Grafana [details](https://github.com/raspiblitz/raspiblitz/tree/dev/home.admin/assets/telegraf/README.md)
 - Update: RTL v0.15.2 [details](https://github.com/Ride-The-Lightning/RTL/releases/tag/v0.15.2)
 - Update: Jam (JoinMarket Web UI) v0.3.0 [details](https://github.com/joinmarket-webui/jam/releases/tag/v0.3.0)
