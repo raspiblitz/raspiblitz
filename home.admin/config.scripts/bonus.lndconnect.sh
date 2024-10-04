@@ -98,7 +98,7 @@ elif [ "${targetWallet}" = "zeus-ios" ]; then
     usingIP2TOR="LND-REST-API"
     forceTOR=1
     host=$(sudo cat /mnt/hdd/tor/lndrest8080/hostname)
-    connectInfo="- start the Zeus Wallet --> Scan Node Config\n- scan the QR code \n- save Node Config"
+    connectInfo="- Start the Zeus Wallet --> Advanced Setup\n- Connect a Node --> Use Scan Icon (upper right corner) \n- Scan QR Code from LCD -> Save Node Config"
 
 elif [ "${targetWallet}" = "zeus-android" ]; then
 
@@ -106,7 +106,7 @@ elif [ "${targetWallet}" = "zeus-android" ]; then
     usingIP2TOR="LND-REST-API"
     forceTOR=1
     host=$(sudo cat /mnt/hdd/tor/lndrest8080/hostname)
-    connectInfo="- start the Zeus Wallet --> Scan Node Config\n- scan the QR code \n- save Node Config"
+    connectInfo="- Start the Zeus Wallet --> Advanced Setup\n- Connect a Node --> Use Scan Icon (upper right corner) \n- Scan QR Code from LCD -> Save Node Config"
 
 elif [ "${targetWallet}" = "sendmany-android" ]; then
 
