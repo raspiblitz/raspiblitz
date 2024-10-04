@@ -1,3 +1,8 @@
+## What's new in Version 1.12.0 of RaspiBlitz?
+
+- Update: Bitcoin Core v28.0 [details](https://bitcoincore.org/en/releases/28.0/)
+
+
 ## What's new in Version 1.11.3 of RaspiBlitz?
 
 - New: Tailscale (basic install script) [details](https://en.wikipedia.org/wiki/Tailscale)
@@ -9,7 +14,6 @@
 - Update: RTL v0.15.2 [details](https://github.com/Ride-The-Lightning/RTL/releases/tag/v0.15.2)
 - Update: Jam (JoinMarket Web UI) v0.3.0 [details](https://github.com/joinmarket-webui/jam/releases/tag/v0.3.0)
 - Update: CLBOSS 0.13.3 [details](https://github.com/ZmnSCPxj/clboss/releases/tag/v0.13.3)
-
 
 ## What's new in Version 1.11.2 of RaspiBlitz?
 
