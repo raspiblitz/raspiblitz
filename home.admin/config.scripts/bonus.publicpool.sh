@@ -198,16 +198,6 @@ WantedBy=multi-user.target
 " | sudo tee /etc/systemd/system/${APPID}-ui.service
   sudo chown root:root /etc/systemd/system/${APPID}-ui.service
 
-
-# change src/environments/environment.ts
-
-
-export const environment = {
-    production: false,
-    API_URL: 'http://localhost:3334',
-    STRATUM_URL: 'public-pool.io:21496'
-};
-
   # mark app as installed in raspiblitz config
   /home/admin/config.scripts/blitz.conf.sh set ${APPID} "on"
 
