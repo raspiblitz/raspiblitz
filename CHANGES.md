@@ -1,6 +1,6 @@
 ## What's new in Version 1.11.3 of RaspiBlitz?
 
-- New: Tailscale (basic install script) [details](https://en.wikipedia.org/wiki/Tailscale)
+- New: Tailscale (SSH menu > SETTINGS) [details](https://en.wikipedia.org/wiki/Tailscale)
 - New: Connect Zeus to CLN via CLNrest (using the clnrest plugin and runes)
 - Update: Core Lightning v24.08.1 [details](https://github.com/ElementsProject/lightning/releases/tag/v24.08.1)
 - Update: Thunderhub v0.13.31 [details](https://github.com/apotdevin/thunderhub/releases/tag/v0.13.31)
