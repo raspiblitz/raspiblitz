@@ -58,8 +58,7 @@ fi
 if [ "$1" = "menu" ]; then
   dialogTitle=" ${APPID} "
   dialogText="Open in your local web browser:
-http://${localIP}:${PORT_UI}
-Use your Password B to login.\n
+http://${localIP}:${PORT_UI}\n
 API: http://${localIP}:${PORT_API}\n
 In your miner configuration, set the
 Stratum: ${localIP}:${PORT_STRATUM}\n"
