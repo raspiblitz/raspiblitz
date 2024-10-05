@@ -171,6 +171,10 @@ fi
 if [ "${labelbase}" == "on" ]; then
   OPTIONS+=(LABELBASE "Labelbase (UTXO labeling)")
 fi
+if [ "${tailscale}" == "on" ]; then
+  OPTIONS+=(TAILSCALE "Tailscale VPN")
+fi
+
 
 # dont offer to switch to "testnet view for now" - so no wswitch back to mainnet needed
 #if [ ${chain} != "main" ]; then
@@ -333,6 +337,9 @@ case $CHOICE in
             ;;
         LABELBASE)
             sudo /home/admin/config.scripts/bonus.labelbase.sh menu
+            ;;
+        LABELBASE)
+            sudo /home/admin/config.scripts/internet.tailscale.sh menu
             ;;
         FINTS)
             sudo /home/admin/config.scripts/bonus.fints.sh menu
