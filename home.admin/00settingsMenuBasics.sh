@@ -112,7 +112,7 @@ fi
 # Important basic options
 OPTIONS+=(t 'Run behind Tor' ${runBehindTor})
 OPTIONS+=(z 'ZeroTier' ${zerotierSwitch})
-OPTIONS+=(l 'Tailscale' ${tailscale})
+OPTIONS+=(l 'Tailscale VPN' ${tailscale})
 
 if [ ${#runBehindTor} -eq 0 ] || [ "${runBehindTor}" = "off" ]; then
   OPTIONS+=(y ${dynDomainMenu} ${domainValue})
@@ -330,10 +330,8 @@ if [ "${tailscale}" != "${choice}" ]; then
   anychange=1
   error=""
   sudo -u admin /home/admin/config.scripts/internet.tailscale.sh ${choice}
-  if [ "${choice}" != "on" ]; then
-    dialog --msgbox "tailscale is now OFF." 5 46
-  else 
-    dialog --msgbox "tailscale is now ON." 5 46
+  if [ "${choice}" = "on" ]; then
+    sudo -u admin /home/admin/config.scripts/internet.tailscale.sh menu
   fi
 else
   echo "tailscale setting unchanged."
