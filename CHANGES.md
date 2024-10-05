@@ -1,5 +1,6 @@
 ## What's new in Version 1.11.3 of RaspiBlitz?
 
+- New: Publicpool - Open Source Solo Bitcoin Mining (SSH Menu) [details](https://www.youtube.com/watch?v=QbOsH04Z9xM)
 - New: Tailscale (basic install script) [details](https://en.wikipedia.org/wiki/Tailscale)
 - New: Connect Zeus to CLN via CLNrest (using the clnrest plugin and runes)
 - Update: Core Lightning v24.08.1 [details](https://github.com/ElementsProject/lightning/releases/tag/v24.08.1)
