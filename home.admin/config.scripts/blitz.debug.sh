@@ -432,6 +432,15 @@ else
   echo "- FINTS is OFF by config"
 fi
 
+if [ "${publicpool}" == "on" ]; then  
+  echo
+  echo "*** LAST 20 PUBLIPOOL LOGS ***"
+  echo "sudo journalctl -u publicpool -b --no-pager -n20"
+  sudo journalctl -u publicpool -b --no-pager -n20
+else
+  echo "- PUBLICPOOL is OFF by config"
+fi
+
 echo
 echo "*** MOUNTED DRIVES ***"
 echo "df -T -h"
