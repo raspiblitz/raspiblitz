@@ -338,7 +338,7 @@ case $CHOICE in
         LABELBASE)
             sudo /home/admin/config.scripts/bonus.labelbase.sh menu
             ;;
-        LABELBASE)
+        TAILSCALE)
             sudo /home/admin/config.scripts/internet.tailscale.sh menu
             ;;
         FINTS)

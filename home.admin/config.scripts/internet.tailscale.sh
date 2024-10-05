@@ -2,6 +2,7 @@
 
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "# config script to install Tailscale"
+  echo "# internet.tailscale.sh state"
   echo "# internet.tailscale.sh on"
   echo "# internet.tailscale.sh menu"
   echo "# internet.tailscale.sh off <--delete-data|--keep-data>"
