@@ -515,7 +515,7 @@ fi
 if [ "${#zerotier}" -gt 0 ] && [ "${zerotier}" != "off" ]; then
     echo "Provisioning ZeroTier - run config script" >> ${logFile}
     /home/admin/_cache.sh set message "Setup ZeroTier"
-    /home/admin/config.scripts/bonus.zerotier.sh on ${zerotier} >> ${logFile} 2>&1
+    /home/admin/config.scripts/internet.zerotier.sh on ${zerotier} >> ${logFile} 2>&1
 else
     echo "Provisioning ZeroTier - not active" >> ${logFile}
 fi
@@ -729,7 +729,7 @@ fi
 if [ "${tailscale}" = "on" ]; then
   echo "Provisioning Tailscale - run config script" >> ${logFile}
   /home/admin/_cache.sh set message "Setup Tailscale"
-  sudo -u admin /home/admin/config.scripts/bonus.tailscale.sh on >> ${logFile} 2>&1
+  sudo -u admin /home/admin/config.scripts/internet.tailscale.sh on >> ${logFile} 2>&1
 else
   echo "Provisioning Tailscale - keep default" >> ${logFile}
 fi

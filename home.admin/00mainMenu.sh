@@ -311,7 +311,7 @@ case $CHOICE in
             sudo /home/admin/config.scripts/bonus.thunderhub.sh menu
             ;;
         ZEROTIER)
-            sudo /home/admin/config.scripts/bonus.zerotier.sh menu
+            sudo /home/admin/config.scripts/internet.zerotier.sh menu
             ;;
         SPHINX)
             sudo /home/admin/config.scripts/bonus.sphinxrelay.sh menu
