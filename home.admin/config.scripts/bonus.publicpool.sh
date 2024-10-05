@@ -120,15 +120,18 @@ export const environment = {
 };
 EOL
 
-  echo "# Install and build backend"
+  echo "##### Install Backend"
   cd /home/${APPID}/${APPID}
   sudo npm install zeromq
+  sudo chown publicpool:publicpool -R /home/${APPID}/${APPID}
   sudo -u ${APPID} npm install || exit 1
+  echo "##### Build Backend"
   sudo -u ${APPID} npm run build || exit 1
 
-  echo "# Install and build frontend"
+  echo "##### Install Frontend"
   cd /home/${APPID}/${APPID}-ui
   sudo -u ${APPID} npm install || exit 1
+  echo "##### Build Frontend"
   sudo -u ${APPID} npm run build || exit 1
 
   echo "# Set correct permissions for npm cache"
