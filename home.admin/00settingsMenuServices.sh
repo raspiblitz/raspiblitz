@@ -49,7 +49,7 @@ if [ "${network}" == "bitcoin" ]; then
   OPTIONS+=(za 'BTC Jam (JoinMarket WebUI)' ${jam})
   OPTIONS+=(wa 'BTC Download Bitcoin Whitepaper' ${whitepaper})
   OPTIONS+=(ls 'BTC Labelbase' ${labelbase})
-  OPTIONS+=(pp 'BTC Publicpool (Solo Mining)' ${labelbase})  
+  OPTIONS+=(pp 'BTC Publicpool (Solo Mining)' ${publicpool})  
 fi
 
 # available for both LND & c-lightning
