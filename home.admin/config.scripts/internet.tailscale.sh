@@ -1,10 +1,11 @@
 #!/bin/sh
 
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
-  echo "config script to install Tailscale"
-  echo "internet.tailscale.sh on"
-  echo "internet.tailscale.sh off <--delete-data|--keep-data>"
-  exit 1
+  echo "# config script to install Tailscale"
+  echo "# internet.tailscale.sh on"
+  echo "# internet.tailscale.sh menu"
+  echo "# internet.tailscale.sh off <--delete-data|--keep-data>"
+  exit 0
 fi
 
 if [ "$1" = "on" ]; then
@@ -78,8 +79,9 @@ if [ "$1" = "on" ]; then
     tailscale ip -4
   fi
   exit 0
+fi  
 
-elif [ "$1" = "off" ]; then
+if [ "$1" = "off" ]; then
 
   echo "# Removing Tailscale"
   sudo systemctl disable --now tailscaled
@@ -113,4 +115,79 @@ elif [ "$1" = "off" ]; then
   /home/admin/config.scripts/blitz.conf.sh set tailscale off
 
   echo "# Removed Tailscale"
+  exit 0
+fi
+
+# gather status if tailscale
+installed=0
+backend_state=""
+status=$(sudo tailscale status --json 2>/dev/null)
+if [ ${#status} != 0 ]; then
+  installed=1
+  backend_state=$(echo "$status" | jq -r '.BackendState')
+fi
+
+if [ "$1" = "status" ]; then
+
+  echo "# Tailscale Status"
+  echo "installed=${installed}"
+  echo "state=${backend_state}"
+
+  # get login URL if needed
+  login_url=""
+  if [ "${backend_state}" = "NeedsLogin" ]; then
+    login_url=$(sudo timeout 3s tailscale login --nickname RaspiBlitz 2>&1 | grep https:// | awk '{$1=$1; print}')
+  fi
+  echo "login_url=${login_url}"
+
+  exit 0
+fi
+
+if [ "$1" = "menu" ]; then
+
+  # exit if tailscale is not installed
+  if [ ${installed} -eq 0 ]; then
+    echo "# Tailscale is not installed"
+    exit 0
+  fi
+
+  # if tailscale needs login
+  if [ "${backend_state}" = "NeedsLogin" ]; then
+    echo "# Tailscale needs login"
+
+    # while loop until user selects cancel in whiptail
+    while :
+    do
+
+      # get tailscale login URL
+      login_url=$(sudo timeout 3s tailscale login --nickname RaspiBlitz 2>&1 | grep https:// | awk '{$1=$1; print}')
+      if [ ${#login_url} -eq 0 ]; then
+        echo "# Error getting login URL"
+        sleep 3
+        exit 1
+      fi
+
+      # ask user to login
+      if (whiptail --title "Tailscale Login Needed" --yes-button "Test Login" --no-button "Cancel Login" --yesno "To connect your RaspiBlitz with Tailscale open the following Url In your browser:\n${login_url}\n\nIf you added this device, choose 'Test Login'" 0 0); then
+        # check if tailscale is now logged in
+        status=$(sudo tailscale status --json 2>/dev/null)
+        backend_state=$(echo "$status" | jq -r '.BackendState')
+        if [ "${backend_state}" = "NeedsLogin" ]; then
+          echo "# Tailscale still needs login"
+        else
+          echo "# OK Tailscale is logged in"
+          sleep 3
+          break
+        fi
+      else
+        echo "# Cancelled Tailscle login"
+        sleep 2
+        break
+      fi
+    done
+    exit 0
+  else
+    echo "# Tailscale state is '${backend_state}'"
+  fi
+  exit 0
 fi
