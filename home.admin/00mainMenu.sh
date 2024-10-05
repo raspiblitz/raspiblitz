@@ -171,6 +171,9 @@ fi
 if [ "${labelbase}" == "on" ]; then
   OPTIONS+=(LABELBASE "Labelbase (UTXO labeling)")
 fi
+if [ "${publicpool}" == "on" ]; then
+  OPTIONS+=(PUBLICPOOL "Public Pool (Bitcoin Solo Mining)")
+fi
 
 # dont offer to switch to "testnet view for now" - so no wswitch back to mainnet needed
 #if [ ${chain} != "main" ]; then
@@ -333,6 +336,9 @@ case $CHOICE in
             ;;
         LABELBASE)
             sudo /home/admin/config.scripts/bonus.labelbase.sh menu
+            ;;
+        PUBLICPOOL)
+            sudo /home/admin/config.scripts/bonus.publicpool.sh menu
             ;;
         FINTS)
             sudo /home/admin/config.scripts/bonus.fints.sh menu
