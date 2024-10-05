@@ -163,7 +163,7 @@ if [ "$1" = "menu" ]; then
       fi
 
       # ask user to login
-      if (whiptail --title "Tailscale Login Needed" --yes-button "Test Login" --no-button "Cancel Login" --yesno "To connect your RaspiBlitz with Tailscale open the following Url In your browser:\n${login_url}\n\nIf you added this device, choose 'Test Login'" 0 0); then
+      if (whiptail --title "Tailscale Login Needed" --yes-button "Test Login" --no-button "Cancel Login" --yesno "To connect your RaspiBlitz with Tailscale open the following Url in your browser:\n${login_url}\n\nIf you connected this device to Tailscale successfully, choose 'Test Login'" 0 0); then
         # check if tailscale is now logged in
         status=$(sudo tailscale status --json 2>/dev/null)
         backend_state=$(echo "$status" | jq -r '.BackendState')
@@ -171,7 +171,7 @@ if [ "$1" = "menu" ]; then
           echo "# Tailscale still needs login"
         else
           echo "# OK Tailscale is logged in"
-          sleep 3
+          whiptail --msgbox "Tailscale is now connected" 0 0
           break
         fi
       else
