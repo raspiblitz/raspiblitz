@@ -62,7 +62,7 @@ http://${localIP}:${PORT_UI}\n
 API: http://${localIP}:${PORT_API}\n
 In your miner configuration, set the
 Stratum: ${localIP}:${PORT_STRATUM}\n"
-  whiptail --title "Public Pool" --msgbox "${dialogText}" 15 67
+  whiptail --title "Public Pool" --msgbox "${dialogText}" 14 57
   echo "please wait ..."
   exit 0
 fi
