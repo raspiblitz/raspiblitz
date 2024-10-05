@@ -58,12 +58,12 @@ fi
 if [ "$1" = "menu" ]; then
   dialogTitle=" ${APPID} "
   dialogText="Open in your local web browser:
-http://${localIP}:${PORT_UI}\n
+http://${localIP}:${PORT_UI}
+Use your Password B to login.\n
 API: http://${localIP}:${PORT_API}\n
-Stratum: ${localIP}:${PORT_STRATUM}\n
-Use your Password B to login.\n"
-
-  whiptail --title "${dialogTitle}" --msgbox "${dialogText}" 15 67
+In your miner configuration, set the
+Stratum: ${localIP}:${PORT_STRATUM}\n"
+  whiptail --title "Public Pool" --msgbox "${dialogText}" 15 67
   echo "please wait ..."
   exit 0
 fi
