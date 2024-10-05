@@ -184,7 +184,7 @@ if [ "$1" = "menu" ]; then
     exit 0
   else
     echo "# Tailscale state is '${backend_state}'"
-    whiptail --msgbox "Tailscale state on RaspiBlitz is '${backend_state}'.\n\nLogin to with '${login_name}' on Tailscale to see details:\nhttps://login.tailscale.com\n\nOr on terminal use: sudo tailscale status --json" 0 0
+    whiptail --msgbox "Tailscale state on RaspiBlitz is '${backend_state}'.\n\nFor details login with '${login_name}' to Tailscale service:\nhttps://login.tailscale.com\n\nOr use on terminal command: sudo tailscale status --json" 0 0
   fi
   exit 0
 fi
