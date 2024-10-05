@@ -78,6 +78,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   /home/admin/config.scripts/bonus.nodejs.sh on
 
+  sudo apt install -y build-essential
+  sudo apt install -y cmake
+  sudo apt install -y libzmq3-dev
+
   echo "# create user"
   sudo adduser --system --group --shell /usr/sbin/nologin --home /home/${APPID} ${APPID} || exit 1
 
@@ -108,7 +112,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # Modify the environment.prod.ts file of WebUI
   localIP=$(hostname -I | awk '{print $1}')
   echo "# Updating environment.prod.ts with correct API and STRATUM URLs" 
-  sudo -u ${APPID} tee /home/${APPID}/${APPID}-ui/src/environments/environment.prod.ts > /dev/null << EOL
+  sudo -u ${APPID} tee /home/${APPID}/${APPID}-ui/src/environments/environment.ts > /dev/null << EOL
 export const environment = {
   production: true,
   API_URL: 'http://${localIP}:${PORT_API}',
@@ -118,6 +122,7 @@ EOL
 
   echo "# Install and build backend"
   cd /home/${APPID}/${APPID}
+  sudo npm install zeromq
   sudo -u ${APPID} npm install || exit 1
   sudo -u ${APPID} npm run build || exit 1
 
@@ -147,6 +152,7 @@ BITCOIN_RPC_PORT=8332
 BITCOIN_RPC_TIMEOUT=10000
 API_PORT=${PORT_API}
 STRATUM_PORT=${PORT_STRATUM}
+POOL_IDENTIFIER=raspiblitz
 NETWORK=mainnet
 API_SECURE=false
 " | sudo tee /home/${APPID}/${APPID}/.env >/dev/null
@@ -191,6 +197,16 @@ StandardError=journal
 WantedBy=multi-user.target
 " | sudo tee /etc/systemd/system/${APPID}-ui.service
   sudo chown root:root /etc/systemd/system/${APPID}-ui.service
+
+
+# change src/environments/environment.ts
+
+
+export const environment = {
+    production: false,
+    API_URL: 'http://localhost:3334',
+    STRATUM_URL: 'public-pool.io:21496'
+};
 
   # mark app as installed in raspiblitz config
   /home/admin/config.scripts/blitz.conf.sh set ${APPID} "on"
