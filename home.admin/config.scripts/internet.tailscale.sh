@@ -18,7 +18,7 @@ if [ "$1" = "on" ]; then
 
   # get debian release codename
   . /etc/os-release
-  if [ ${#VERSION_CODENAME} -eq 0 ]; then
+  if [ -z "$VERSION_CODENAME" ]; then
     echo "error='missing VERSION_CODENAME in /etc/os-release'"
     exit 1
   fi
@@ -66,12 +66,7 @@ if [ "$1" = "on" ]; then
   echo "# Installation complete!"
   if ! tailscale ip -4; then
     echo "# Log in to start using Tailscale by running:"
-    echo
-    if [ -z "sudo" ]; then
-      echo "tailscale up"
-    else
-      echo "sudo tailscale up"
-    fi
+    echo "sudo tailscale up"
   else
     echo "# Check your Tailscale IP with the command:"
     echo "tailscale ip -4"
@@ -95,7 +90,7 @@ if [ "$1" = "off" ]; then
   if [ "$2" = "--keep-data" ]; then
     deleteData="0"
   fi
-  if [ "${deleteData}" = "" ]; then
+  if [ -z "$deleteData" ]; then
     if (whiptail --title "Delete Data?" --yes-button "Keep Data" --no-button "Delete Data" --yesno "Do you want to delete all data related to Tailscale?" 0 0); then
       deleteData="0"
     else
@@ -104,7 +99,7 @@ if [ "$1" = "off" ]; then
   fi
 
   # execute on delete data
-  if [ "${deleteData}" = "1" ]; then
+  if [ "$deleteData" = "1" ]; then
     echo "# Removing Tailscale data"
     sudo rm -rf /mnt/hdd/app-data/tailscale
   else
@@ -122,7 +117,7 @@ fi
 installed=0
 backend_state=""
 status=$(sudo tailscale status --json 2>/dev/null)
-if [ ${#status} != 0 ]; then
+if [ -n "$status" ]; then
   installed=1
   backend_state=$(echo "$status" | jq -r '.BackendState')
 fi
@@ -135,7 +130,7 @@ if [ "$1" = "status" ]; then
 
   # get login URL if needed
   login_url=""
-  if [ "${backend_state}" = "NeedsLogin" ]; then
+  if [ "$backend_state" = "NeedsLogin" ]; then
     login_url=$(sudo timeout 3s tailscale login --nickname RaspiBlitz 2>&1 | grep https:// | awk '{$1=$1; print}')
   fi
   echo "login_url=${login_url}"
@@ -152,7 +147,7 @@ if [ "$1" = "menu" ]; then
   fi
 
   # if tailscale needs login
-  if [ "${backend_state}" = "NeedsLogin" ]; then
+  if [ "$backend_state" = "NeedsLogin" ]; then
     echo "# Tailscale needs login"
 
     # while loop until user selects cancel in whiptail
@@ -161,7 +156,7 @@ if [ "$1" = "menu" ]; then
 
       # get tailscale login URL
       login_url=$(sudo timeout 3s tailscale login --nickname RaspiBlitz 2>&1 | grep https:// | awk '{$1=$1; print}')
-      if [ ${#login_url} -eq 0 ]; then
+      if [ -z "$login_url" ]; then
         echo "# Error getting login URL"
         sleep 3
         exit 1
@@ -172,7 +167,7 @@ if [ "$1" = "menu" ]; then
         # check if tailscale is now logged in
         status=$(sudo tailscale status --json 2>/dev/null)
         backend_state=$(echo "$status" | jq -r '.BackendState')
-        if [ "${backend_state}" = "NeedsLogin" ]; then
+        if [ "$backend_state" = "NeedsLogin" ]; then
           echo "# Tailscale still needs login"
         else
           echo "# OK Tailscale is logged in"
