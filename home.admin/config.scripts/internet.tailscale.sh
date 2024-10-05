@@ -63,16 +63,12 @@ if [ "$1" = "on" ]; then
   # setting value in raspiblitz config
   /home/admin/config.scripts/blitz.conf.sh set tailscale on
 
+  echo
+  echo "##############################"
   echo "# Installation complete!"
-  if ! tailscale ip -4; then
-    echo "# Log in to start using Tailscale by running:"
-    echo "sudo tailscale up"
-  else
-    echo "# Check your Tailscale IP with the command:"
-    echo "tailscale ip -4"
-    echo "# Your Tailscale IP is:"
-    tailscale ip -4
-  fi
+  echo "# To config or see state of tailscale call:"
+  echo "# /home/admin/config.scripts/internet.tailscale.sh menu"
+
   exit 0
 fi  
 
