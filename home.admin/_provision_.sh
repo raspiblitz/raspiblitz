@@ -743,6 +743,15 @@ else
   echo "Provisioning Telegraf - keep default" >> ${logFile}
 fi
 
+# Telegraf
+if [ "${publicpool}" = "on" ]; then
+  echo "Provisioning Publicpool - run config script" >> ${logFile}
+  /home/admin/_cache.sh set message "Setup Publicpool"
+  sudo -u admin /home/admin/config.scripts/bonus.publicpool.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning Publicpool - keep default" >> ${logFile}
+fi
+
 # custom install script from user
 customInstallAvailable=$(ls /mnt/hdd/app-data/custom-installs.sh 2>/dev/null | grep -c "custom-installs.sh")
 if [ ${customInstallAvailable} -gt 0 ]; then
