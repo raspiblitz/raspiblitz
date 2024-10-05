@@ -120,6 +120,7 @@ status=$(sudo tailscale status --json 2>/dev/null)
 if [ -n "$status" ]; then
   installed=1
   backend_state=$(echo "$status" | jq -r '.BackendState')
+  login_name=$(echo "$status" | jq -r '.User[] | .LoginName')
 fi
 
 if [ "$1" = "status" ]; then
@@ -183,6 +184,7 @@ if [ "$1" = "menu" ]; then
     exit 0
   else
     echo "# Tailscale state is '${backend_state}'"
+    whiptail --msgbox "Tailscale state on RaspiBlitz is `${backend_state}`.\n\nLogin to with '${login_name}' on Tailscale to see details:\nhttps://login.tailscale.com\n\nOr on terminal use 'sudo tailscale status --json'" 0 0
   fi
   exit 0
 fi
