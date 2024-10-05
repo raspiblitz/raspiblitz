@@ -64,6 +64,9 @@ if [ "$1" = "on" ]; then
   # setting value in raspiblitz config
   /home/admin/config.scripts/blitz.conf.sh set tailscale on
 
+  echo "# Grace period for Tailscale to start ... 10 seconds"
+  sleep 10
+
   echo
   echo "##############################"
   echo "# Installation complete!"
