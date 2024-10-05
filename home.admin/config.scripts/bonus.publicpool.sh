@@ -118,13 +118,13 @@ EOL
 
   echo "# Install and build backend"
   cd /home/${APPID}/${APPID}
-  sudo -u ${APPID} npm install
-  sudo -u ${APPID} npm run build
+  sudo -u ${APPID} npm install || exit 1
+  sudo -u ${APPID} npm run build || exit 1
 
   echo "# Install and build frontend"
   cd /home/${APPID}/${APPID}-ui
-  sudo -u ${APPID} npm install
-  sudo -u ${APPID} npm run build
+  sudo -u ${APPID} npm install || exit 1
+  sudo -u ${APPID} npm run build || exit 1
 
   echo "# Set correct permissions for npm cache"
   sudo chown -R ${APPID}:${APPID} /home/${APPID}/.npm
