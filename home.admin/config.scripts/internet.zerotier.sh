@@ -3,9 +3,9 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "config script to install, uninstall ZeroTier"
-  echo "bonus.zerotier.sh on [?networkid]"
-  echo "bonus.zerotier.sh off"
-  echo "bonus.zerotier.sh menu"
+  echo "internet.zerotier.sh on [?networkid]"
+  echo "internet.zerotier.sh off"
+  echo "internet.zerotier.sh menu"
   exit 1
 fi
 
