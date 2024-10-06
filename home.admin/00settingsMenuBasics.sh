@@ -17,6 +17,7 @@ if [ ${#clAutoUnlock} -eq 0 ]; then clAutoUnlock="off"; fi
 if [ ${#clWatchtowerClient} -eq 0 ]; then clWatchtowerClient="off"; fi
 if [ ${#blitzapi} -eq 0 ]; then blitzapi="off"; fi
 if [ ${#tailscale} -eq 0 ]; then tailscale="off"; fi
+if [ ${#telegraf} -eq 0 ]; then telegraf="off"; fi
 
 # detect if LND auto-unlock is active
 source <(/home/admin/config.scripts/lnd.autounlock.sh status)
@@ -113,6 +114,8 @@ fi
 OPTIONS+=(t 'Run behind Tor' ${runBehindTor})
 OPTIONS+=(z 'ZeroTier' ${zerotierSwitch})
 OPTIONS+=(l 'Tailscale VPN' ${tailscale})
+
+OPTIONS+=(g 'Telegraf InfluxDB/Grafana Metrics' ${telegraf})
 
 if [ ${#runBehindTor} -eq 0 ] || [ "${runBehindTor}" = "off" ]; then
   OPTIONS+=(y ${dynDomainMenu} ${domainValue})
@@ -335,6 +338,21 @@ if [ "${tailscale}" != "${choice}" ]; then
   fi
 else
   echo "tailscale setting unchanged."
+fi
+
+# Telegraf process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "g")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${telegraf}" != "${choice}" ]; then
+  echo "telegraf setting changed .."
+  anychange=1
+  error=""
+  sudo -u admin /home/admin/config.scripts/bonus.telegraf.sh ${choice}
+  if [ "${choice}" = "on" ]; then
+    sudo -u admin /home/admin/config.scripts/bonus.telegraf.sh menu
+  fi
+else
+  echo "telegraf setting unchanged."
 fi
 
 # LND choice
