@@ -363,6 +363,9 @@ if [ "$1" = "menu" ]; then
   
     # run the config function
     config_telegraf
+
+    echo "# config data saved - telegraf starting up ... wait 10sec"
+    sleep 10
   fi
 
   echo "# get status .."
