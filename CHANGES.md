@@ -1,3 +1,8 @@
+## What's new in Version 1.12.0 of RaspiBlitz?
+
+- Update: Bitcoin Core v28.0 [details](https://bitcoincore.org/en/releases/28.0/)
+
+
 ## What's new in Version 1.11.3 of RaspiBlitz?
 
 - New: Publicpool - Open Source Solo Bitcoin Mining (SSH Menu) [details](https://www.youtube.com/watch?v=QbOsH04Z9xM)
