@@ -77,6 +77,13 @@ if [ "$1" = "status" ]; then
     echo "infoMessage='Not running - check: sudo journalctl -u telegraf'"
   fi
 
+  errorReport=""
+  countReportError=$(sudo journalctl -u telegraf.service -n 5 | grep -c "Failed to write metric")
+  if [ ${countReportError} -gt 0 ]; then
+    errorReport='failed to write metric to server'
+  fi
+  echo "errorReport='${errorReport}'"
+
   exit 0
 fi
 
@@ -356,11 +363,35 @@ if [ "$1" = "menu" ]; then
   
     # run the config function
     config_telegraf
-
   fi
 
-  echo "# telegraf is connected to: ${telegrafInfluxUrl}"
-  sleep 8
+  echo "# get status .."
+  sleep 2
+  source <(/home/admin/config.scripts/bonus.telegraf.sh status)
+  if [ ${serviceRunning} -eq 0 ]; then
+    echo "# telegraf is not running"
+    sleep 3
+    exit 1
+  fi
+
+  # whiptail info with option to reset config
+  if [ ${#errorReport} -gt 0 ]; then
+    infoText="The Telegraf service is running but reports an error:\n${errorReport}\n\nUse RESET-CONFIG to re-enter the InfluxDB credentials."
+  else
+    infoText="Telegraf is running.\n\nInfluxDB: ${telegrafInfluxUrl}\nDatabase: ${telegrafInfluxDatabase}\nUsername: ${telegrafInfluxUsername}"
+  fi
+
+  whiptail --title " Telegraf " --yes-button "OK" --no-button "RESET-CONFIG" --yesno "${infoText}" 0 0
+  if [ $? -eq 1 ]; then
+    sudo systemctl stop telegraf.service
+    /home/admin/config.scripts/blitz.conf.sh delete telegrafInfluxUrl
+    /home/admin/config.scripts/blitz.conf.sh delete telegrafInfluxDatabase
+    /home/admin/config.scripts/blitz.conf.sh delete telegrafInfluxUsername
+    /home/admin/config.scripts/blitz.conf.sh delete telegrafInfluxPassword
+    echo "# config reset"
+    sleep 3
+    /home/admin/config.scripts/bonus.telegraf.sh menu
+    fi
   exit 0
 fi
 
