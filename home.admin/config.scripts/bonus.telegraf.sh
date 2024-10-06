@@ -160,25 +160,16 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     exit 0
   fi
 
-  echo "*** telegraf installation:"
-  sudo apt install -y gnupg2 curl ca-certificates lsb-release
-
-  # Check if the key already exists, if not download and add it
-  echo "Adding InfluxData public key"
-  curl -sL https://repos.influxdata.com/influxdata-archive_compat.key | sudo gpg --dearmor -o /usr/share/keyrings/influxdata-archive-keyring.gpg
-
-  # Get the codename for the distribution
+  echo "*** telegraf installation: apt-get part"
+  # get the repository public key for apt-get
+  curl -sL https://repos.influxdata.com/influxdb.key | sudo apt-key add -
   DISTRIB_ID=$(lsb_release -c -s)
-
-  # Check if the repository is already added; if not, add it
-  if ! grep -q "repos.influxdata.com" /etc/apt/sources.list.d/influxdb.list 2>/dev/null; then
-    echo "Adding InfluxData repository to sources list"
-    echo "deb [signed-by=/usr/share/keyrings/influxdata-archive-keyring.gpg] https://repos.influxdata.com/debian $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/influxdata.list
-  else
-    echo "Repository already exists, skipping addition."
-  fi
-
-  # Update package list and install telegraf
+  # 
+  # changed according suggestion from @frennkie in #1501
+  echo "deb https://repos.influxdata.com/debian ${DISTRIB_ID} stable" | sudo tee -a /etc/apt/sources.list.d/influxdb.list >/dev/null
+  #
+  # as the key is untrusted, this is a dirty fix
+  sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys D8FF8E1F7DF8B07E
   sudo apt-get update
   sudo apt-get install -y telegraf || exit 1
 
