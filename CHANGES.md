@@ -1,5 +1,6 @@
 ## What's new in Version 1.11.3 of RaspiBlitz?
 
+- New: Publicpool - Open Source Solo Bitcoin Mining (SSH Menu) [details](https://www.youtube.com/watch?v=QbOsH04Z9xM)
 - New: Tailscale (SSH menu > SETTINGS) [details](https://en.wikipedia.org/wiki/Tailscale)
 - New: Telegraf Metrics for InfluxDB/Grafana (SSH menu > SETTINGS) [details](https://github.com/raspiblitz/raspiblitz/tree/dev/home.admin/assets/telegraf/README.md)
 - New: Connect Zeus to CLN via CLNrest (using the clnrest plugin and runes)

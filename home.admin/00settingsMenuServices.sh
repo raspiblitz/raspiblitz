@@ -31,6 +31,7 @@ if [ ${#lightningtipbot} -eq 0 ]; then lightningtipbot="off"; fi
 if [ ${#fints} -eq 0 ]; then fints="off"; fi
 if [ ${#lndk} -eq 0 ]; then lndk="off"; fi
 if [ ${#labelbase} -eq 0 ]; then labelbase="off"; fi
+if [ ${#publicpool} -eq 0 ]; then publicpool="off"; fi
 
 # show select dialog
 echo "run dialog ..."
@@ -48,6 +49,7 @@ if [ "${network}" == "bitcoin" ]; then
   OPTIONS+=(za 'BTC Jam (JoinMarket WebUI)' ${jam})
   OPTIONS+=(wa 'BTC Download Bitcoin Whitepaper' ${whitepaper})
   OPTIONS+=(ls 'BTC Labelbase' ${labelbase})
+  OPTIONS+=(pp 'BTC Publicpool (Solo Mining)' ${publicpool})  
 fi
 
 # available for both LND & c-lightning
@@ -606,6 +608,22 @@ if [ "${labelbase}" != "${choice}" ]; then
 else
   echo "Labelbase setting unchanged."
 fi
+
+# publicpool process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "pp")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${publicpool}" != "${choice}" ]; then
+  echo "Publicpool setting changed .."
+  anychange=1
+  sudo -u admin /home/admin/config.scripts/bonus.publicpool.sh ${choice}
+  source /mnt/hdd/raspiblitz.conf
+  if [ "${publicpool}" =  "on" ]; then
+    sudo -u admin /home/admin/config.scripts/bonus.publicpool.sh menu
+  fi
+else
+  echo "Publicpool setting unchanged."
+fi
+
 
 # fints process choice  
 choice="off"; check=$(echo "${CHOICES}" | grep -c "fn")
