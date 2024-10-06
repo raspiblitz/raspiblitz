@@ -381,7 +381,7 @@ if [ "$1" = "menu" ]; then
     sleep 10
   fi
 
-  echo "# get status .."
+  echo "# ... "
   sleep 2
   source <(/home/admin/config.scripts/bonus.telegraf.sh status)
   if [ ${serviceRunning} -eq 0 ]; then
