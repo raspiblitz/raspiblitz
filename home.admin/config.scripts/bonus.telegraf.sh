@@ -119,13 +119,13 @@ function config_telegraf() {
   #
   # CAUTION: make sure that *none* of the following variables (especially "password") contains a '/'
   #          this would break the sed-replacement
-  #
+
   echo "*** telegraf installation: telegrafInfluxDatabase = '${telegrafInfluxDatabase}'"
   sudo sed -i "s/^database = .*/database = \"${telegrafInfluxDatabase}\"/g" ${telegraf_conf_file}
-  #
+
   echo "*** telegraf installation: telegrafInfluxUsername = '${telegrafInfluxUsername}'"
   sudo sed -i "s/^username = .*/username = \"${telegrafInfluxUsername}\"/g" ${telegraf_conf_file}
-  #
+
   echo "*** telegraf installation: telegrafInfluxPassword = '${telegrafInfluxPassword}'"
   sudo sed -i "s/^password = .*/password = \"${telegrafInfluxPassword}\"/g" ${telegraf_conf_file}
 
@@ -136,6 +136,7 @@ function config_telegraf() {
   # ...and push some status into the logfile
   sleep 2
   sudo systemctl status telegraf.service --no-page 2>/dev/null
+
 }
 
 ###############################
@@ -204,11 +205,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   echo "*** install telegraf done ***"
 
-  # get status
+  # run config if data is set in raspiblitz.conf
   source <(/home/admin/config.scripts/bonus.telegraf.sh status)
-  # if not configMissing
   if [ ${configMissing} -eq 0 ]; then
-    # run the config function
     config_telegraf()
   fi
 
