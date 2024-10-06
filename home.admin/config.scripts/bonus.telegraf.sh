@@ -161,17 +161,30 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   fi
 
   echo "*** telegraf installation: apt-get part"
-  # get the repository public key for apt-get
-  curl -sL https://repos.influxdata.com/influxdb.key | sudo apt-key add -
+
+  # Check if the key already exists, if not download and add it
+  if [ ! -f /etc/apt/trusted.gpg.d/influxdb.asc ]; then
+    echo "Adding InfluxData public key"
+    curl -sL https://repos.influxdata.com/influxdb.key | sudo tee /etc/apt/trusted.gpg.d/influxdb.asc >/dev/null
+  else
+    echo "Public key already exists, skipping addition."
+  fi
+
+  # Get the codename for the distribution
   DISTRIB_ID=$(lsb_release -c -s)
-  # 
-  # changed according suggestion from @frennkie in #1501
-  echo "deb https://repos.influxdata.com/debian ${DISTRIB_ID} stable" | sudo tee -a /etc/apt/sources.list.d/influxdb.list >/dev/null
-  #
-  # as the key is untrusted, this is a dirty fix
-  sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys D8FF8E1F7DF8B07E
+
+  # Check if the repository is already added; if not, add it
+  if ! grep -q "^deb .*$DISTRIB_ID stable" /etc/apt/sources.list.d/influxdb.list 2>/dev/null; then
+    echo "Adding InfluxData repository to sources list"
+    echo "deb [signed-by=/etc/apt/trusted.gpg.d/influxdb.asc] https://repos.influxdata.com/debian ${DISTRIB_ID} stable" | sudo tee /etc/apt/sources.list.d/influxdb.list >/dev/null
+  else
+    echo "Repository already exists, skipping addition."
+  fi
+
+  # Update package list and install telegraf
   sudo apt-get update
   sudo apt-get install -y telegraf
+
 
   echo "*** telegraf installation: usermod part"
   # enable telegraf user to call "/opt/vc/bin/vcgencmd" for frequency and temperatures measurements
