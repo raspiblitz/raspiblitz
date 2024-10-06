@@ -208,7 +208,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # run config if data is set in raspiblitz.conf
   source <(/home/admin/config.scripts/bonus.telegraf.sh status)
   if [ ${configMissing} -eq 0 ]; then
-    config_telegraf()
+    config_telegraf
   fi
 
   exit 0
@@ -353,7 +353,7 @@ if [ "$1" = "menu" ]; then
     /home/admin/config.scripts/blitz.conf.sh set telegrafInfluxPassword "${telegrafInfluxPassword}"
   
     # run the config function
-    config_telegraf()
+    config_telegraf
 
   fi
 
