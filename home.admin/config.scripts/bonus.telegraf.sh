@@ -36,8 +36,8 @@ if [ "$1" = "status" ]; then
 
   echo "##### STATUS TELEGRAF SERVICE"
 
-  # check if "telegrafMonitoring" is enabled ("1"|"on") in raspiblitz.conf
-  if [ "${telegrafMonitoring}" = "1" ] || [ "${telegrafMonitoring}" = "on" ]; then
+  # check if "telegraf" is enabled ("1"|"on") in raspiblitz.conf
+  if [ "${telegraf}" = "1" ] || [ "${telegraf}" = "on" ]; then
     echo "configured=1"
   else
     echo "configured=0"
@@ -200,8 +200,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo cp -v ${telegraf_source_dir}/getraspiblitzipinfo.sh            ${telegraf_target_dir}/getraspiblitzipinfo.sh
   sudo chmod 755 ${telegraf_target_dir}/getraspiblitzipinfo.sh
 
-  echo "*** telegraf installation: set 'telegrafMonitoring=on' in config file 'raspiblitz.conf'"
-  /home/admin/config.scripts/blitz.conf.sh set telegrafMonitoring "on"
+  echo "*** telegraf installation: set 'telegraf=on' in config file 'raspiblitz.conf'"
+  /home/admin/config.scripts/blitz.conf.sh set telegraf "on"
 
   echo "*** install telegraf done ***"
 
@@ -225,7 +225,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   sudo apt-get remove -y telegraf
 
   echo "*** telegraf switch off and remove config ***"
-  /home/admin/config.scripts/blitz.conf.sh set telegrafMonitoring "off"
+  /home/admin/config.scripts/blitz.conf.sh set telegraf "off"
   /home/admin/config.scripts/blitz.conf.sh delete telegrafInfluxUrl
   /home/admin/config.scripts/blitz.conf.sh delete telegrafInfluxDatabase
   /home/admin/config.scripts/blitz.conf.sh delete telegrafInfluxUsername

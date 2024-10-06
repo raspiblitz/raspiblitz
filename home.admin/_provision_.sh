@@ -735,7 +735,7 @@ else
 fi
 
 # Telegraf
-if [ "${telegrafMonitoring}" = "on" ]; then
+if [ "${telegraf}" = "on" ]; then
   echo "Provisioning Telegraf - run config script" >> ${logFile}
   /home/admin/_cache.sh set message "Setup Telegraf"
   sudo -u admin /home/admin/config.scripts/bonus.telegraf.sh on >> ${logFile} 2>&1
