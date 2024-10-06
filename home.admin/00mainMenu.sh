@@ -338,7 +338,7 @@ case $CHOICE in
             sudo /home/admin/config.scripts/bonus.labelbase.sh menu
             ;;
         PUBLICPOOL)
-            sudo /home/admin/config.scripts/bonus.publicpool.sh menu
+            /home/admin/config.scripts/bonus.publicpool.sh menu
             ;;
         FINTS)
             sudo /home/admin/config.scripts/bonus.fints.sh menu
