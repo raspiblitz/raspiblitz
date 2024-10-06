@@ -160,11 +160,12 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     exit 0
   fi
 
-  echo "*** telegraf installation: apt-get part"
+  echo "*** telegraf installation:"
+  sudo apt install -y gnupg2 curl ca-certificates lsb-release
 
   # Check if the key already exists, if not download and add it
   echo "Adding InfluxData public key"
-  curl -sL https://repos.influxdata.com/influxdb.key | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/influxdb.gpg
+  curl -sL https://repos.influxdata.com/influxdata-archive_compat.key | sudo gpg --dearmor -o /usr/share/keyrings/influxdata-archive-keyring.gpg
 
   # Get the codename for the distribution
   DISTRIB_ID=$(lsb_release -c -s)
@@ -172,7 +173,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # Check if the repository is already added; if not, add it
   if ! grep -q "repos.influxdata.com" /etc/apt/sources.list.d/influxdb.list 2>/dev/null; then
     echo "Adding InfluxData repository to sources list"
-    echo "deb https://repos.influxdata.com/debian ${DISTRIB_ID} stable" | sudo tee /etc/apt/sources.list.d/influxdb.list >/dev/null
+    echo "deb [signed-by=/usr/share/keyrings/influxdata-archive-keyring.gpg] https://repos.influxdata.com/debian $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/influxdata.list
   else
     echo "Repository already exists, skipping addition."
   fi
