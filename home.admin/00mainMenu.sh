@@ -174,6 +174,9 @@ fi
 if [ "${tailscale}" == "on" ]; then
   OPTIONS+=(TAILSCALE "Tailscale VPN")
 fi
+if [ "${telegraf}" == "on" ]; then
+  OPTIONS+=(TELEGRAF "Telegraf InfluxDB/Grafana Metrics")
+fi
 
 
 # dont offer to switch to "testnet view for now" - so no wswitch back to mainnet needed
@@ -340,6 +343,9 @@ case $CHOICE in
             ;;
         TAILSCALE)
             sudo /home/admin/config.scripts/internet.tailscale.sh menu
+            ;;
+        TELEGRAF)
+            /home/admin/config.scripts/bonus.telegraf.sh menu
             ;;
         FINTS)
             sudo /home/admin/config.scripts/bonus.fints.sh menu
