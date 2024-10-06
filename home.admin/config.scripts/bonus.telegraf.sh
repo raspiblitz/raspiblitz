@@ -109,7 +109,7 @@ function validate_url() {
 function config_telegraf() {
 
   echo "# *** telegraf installation: replace influxDB url and creds"
-  sudo systemctl stop telegraf.service
+  sudo systemctl stop telegraf.service 2>/dev/null
 
   # make sure that raspiblitz.conf has the telegraf-variables properly set
   #   telegrafInfluxUrl
@@ -197,7 +197,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo usermod telegraf -a -G sudo
 
   # stop telegraf service
-  sudo systemctl stop telegraf.service
+  sudo systemctl stop telegraf.service 2>/dev/null
 
   echo "*** telegraf installation: copying telegraf config templates"
   # copy custom "telegraf.conf" template to the telegraf target dir
@@ -399,7 +399,7 @@ if [ "$1" = "menu" ]; then
 
   whiptail --title " Telegraf " --yes-button "OK" --no-button "RESET-CONFIG" --yesno "${infoText}" 0 0
   if [ $? -eq 1 ]; then
-    sudo systemctl stop telegraf.service
+    sudo systemctl stop telegraf.service 2>/dev/null
     /home/admin/config.scripts/blitz.conf.sh delete telegrafInfluxUrl
     /home/admin/config.scripts/blitz.conf.sh delete telegrafInfluxDatabase
     /home/admin/config.scripts/blitz.conf.sh delete telegrafInfluxUsername
