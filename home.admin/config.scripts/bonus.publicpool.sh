@@ -32,7 +32,7 @@ echo "# Running: 'bonus.${APPID}.sh $*'"
 source /mnt/hdd/raspiblitz.conf
 
 isInstalled=$(sudo ls /etc/systemd/system/${APPID}.service 2>/dev/null | grep -c "${APPID}.service")
-isRunning=$(systemctl status ${APPID} 2>/dev/null | grep -c 'active (running)')
+isRunning=$(sudo systemctl status ${APPID} 2>/dev/null | grep -c 'active (running)')
 
 if [ "${isInstalled}" == "1" ]; then
   localIP=$(hostname -I | awk '{print $1}')
