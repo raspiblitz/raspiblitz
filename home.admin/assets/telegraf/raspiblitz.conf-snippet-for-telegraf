@@ -5,7 +5,7 @@
 
 
 # all telegraf switches and configuration variables
-telegrafMonitoring=on
+telegraf=on
 telegrafInfluxUrl='http://192.168.2.46:8086'
 telegrafInfluxDatabase='telegraf'
 telegrafInfluxUsername='telegraf'
