@@ -376,9 +376,9 @@ if [ "$1" = "menu" ]; then
 
   # whiptail info with option to reset config
   if [ ${#errorReport} -gt 0 ]; then
-    infoText="The Telegraf service is running but reports an error:\n${errorReport}\n\nUse RESET-CONFIG to re-enter the InfluxDB credentials."
+    infoText="The Telegraf service is running but reports an error:\n${errorReport}\n\nCheck error logs for details:\nsudo journalctl -u telegraf.service -n 20\n\nUse RESET-CONFIG to re-enter the InfluxDB credentials."
   else
-    infoText="Telegraf is running.\n\nInfluxDB: ${telegrafInfluxUrl}\nDatabase: ${telegrafInfluxDatabase}\nUsername: ${telegrafInfluxUsername}"
+    infoText="Telegraf is running.\n\nInfluxDB: ${telegrafInfluxUrl}\nDatabase: ${telegrafInfluxDatabase}\nUsername: ${telegrafInfluxUsername}\n\nCheck logs for details:\nsudo journalctl -u telegraf.service -n 20"
   fi
 
   whiptail --title " Telegraf " --yes-button "OK" --no-button "RESET-CONFIG" --yesno "${infoText}" 0 0
