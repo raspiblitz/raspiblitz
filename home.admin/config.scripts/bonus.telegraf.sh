@@ -163,27 +163,23 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "*** telegraf installation: apt-get part"
 
   # Check if the key already exists, if not download and add it
-  if [ ! -f /etc/apt/trusted.gpg.d/influxdb.asc ]; then
-    echo "Adding InfluxData public key"
-    curl -sL https://repos.influxdata.com/influxdb.key | sudo tee /etc/apt/trusted.gpg.d/influxdb.asc >/dev/null
-  else
-    echo "Public key already exists, skipping addition."
-  fi
+  echo "Adding InfluxData public key"
+  curl -sL https://repos.influxdata.com/influxdb.key | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/influxdb.gpg
 
   # Get the codename for the distribution
   DISTRIB_ID=$(lsb_release -c -s)
 
   # Check if the repository is already added; if not, add it
-  if ! grep -q "^deb .*$DISTRIB_ID stable" /etc/apt/sources.list.d/influxdb.list 2>/dev/null; then
+  if ! grep -q "repos.influxdata.com" /etc/apt/sources.list.d/influxdb.list 2>/dev/null; then
     echo "Adding InfluxData repository to sources list"
-    echo "deb [signed-by=/etc/apt/trusted.gpg.d/influxdb.asc] https://repos.influxdata.com/debian ${DISTRIB_ID} stable" | sudo tee /etc/apt/sources.list.d/influxdb.list >/dev/null
+    echo "deb https://repos.influxdata.com/debian ${DISTRIB_ID} stable" | sudo tee /etc/apt/sources.list.d/influxdb.list >/dev/null
   else
     echo "Repository already exists, skipping addition."
   fi
 
   # Update package list and install telegraf
   sudo apt-get update
-  sudo apt-get install -y telegraf
+  sudo apt-get install -y telegraf || exit 1
 
 
   echo "*** telegraf installation: usermod part"
