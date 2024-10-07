@@ -15,6 +15,7 @@
 - Update: RTL v0.15.2 [details](https://github.com/Ride-The-Lightning/RTL/releases/tag/v0.15.2)
 - Update: Jam (JoinMarket Web UI) v0.3.0 [details](https://github.com/joinmarket-webui/jam/releases/tag/v0.3.0)
 - Update: CLBOSS 0.13.3 [details](https://github.com/ZmnSCPxj/clboss/releases/tag/v0.13.3)
+- Update: Electrum Server in Rust (electrs) v0.10.6 [details](https://github.com/romanz/electrs/blob/master/RELEASE-NOTES.md#0106-sep-29-2024)
 
 ## What's new in Version 1.11.2 of RaspiBlitz?
 
