@@ -1,4 +1,9 @@
-## What's new in Version 1.11.3 of RaspiBlitz?
+## What's new in Version 1.11.3rc1 of RaspiBlitz?
+
+Optimized now to run also on plain debian12 linux for Proxmox/VM & x86 systems.
+
+Download Release Candidate - RaspberryPi minimal image:
+https://github.com/raspiblitz/raspiblitz/actions/runs/11205797993/artifacts/2021462816
 
 - New: Publicpool - Open Source Solo Bitcoin Mining (SSH Menu) [details](https://www.youtube.com/watch?v=QbOsH04Z9xM)
 - New: Tailscale (SSH menu > SETTINGS) [details](https://en.wikipedia.org/wiki/Tailscale)
