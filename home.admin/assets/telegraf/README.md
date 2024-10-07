@@ -65,12 +65,11 @@ sudo systemctl restart influxdb
 
 ### Activate Telegraf on RaspiBlitz
 
-Back on your RaspiBlitz you can switch Telegraf service on with the following install script:
-```
-/home/admin/config.scripts/bonus.telegraf.sh on
-```
+Back on your RaspiBlitz you can switch Telegraf service on under `SSH-MAINMENU > SETTINGS > Telegraf`.
 
 Enter the connection details the script asks you for.
+
+_If you want to improve the service as a programmer you find the install script here `/home/admin/config.scripts/bonus.telegraf.sh`_
 
 ### Check Incoming Data on Grafana/InfluxDB server
 
