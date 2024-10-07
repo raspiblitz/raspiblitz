@@ -368,7 +368,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u electrs mkdir /home/electrs/.electrs 2>/dev/null
     echo "\
 log_filters = \"WARN\"
-timestamp = true
 jsonrpc_import = true
 index-batch-size = 10
 wait_duration_secs = 10
@@ -612,6 +611,8 @@ if [ "$1" = "update" ]; then
     # update config
     sudo -u electrs sed -i "/^server_banner = /d" /home/electrs/.electrs/config.toml
     sudo -u electrs bash -c "echo 'server_banner = \"Welcome to electrs $updateVersion - the Electrum Rust Server on your RaspiBlitz\"' >> /home/electrs/.electrs/config.toml"
+    # remove the deprecated timestamp entry
+    sudo -u electrs sed -i '/^timestamp = true/d' /home/electrs/.electrs/config.toml
 
     echo "# Updated Electrs to $updateVersion"
   fi
