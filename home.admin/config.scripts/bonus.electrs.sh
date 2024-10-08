@@ -313,7 +313,7 @@ if [ "$1" = "install" ]; then
 
     # verify
     sudo -u electrs /home/admin/config.scripts/blitz.git-verify.sh \
-      "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
+      "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" "${ELECTRSVERSION}" || exit 1
 
     # build
     sudo -u electrs /home/electrs/.cargo/bin/cargo build --locked --release || exit 1
