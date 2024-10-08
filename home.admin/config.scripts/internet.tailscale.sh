@@ -15,7 +15,7 @@ if [ "$1" = "on" ]; then
   if [ "$(systemctl is-active tailscaled)" = "active" ]; then
     echo "# Tailscale is already running"
     exit 0
-  fi  
+  fi
 
   # get debian release codename
   . /etc/os-release
@@ -74,7 +74,7 @@ if [ "$1" = "on" ]; then
   echo "# /home/admin/config.scripts/internet.tailscale.sh menu"
 
   exit 0
-fi  
+fi
 
 if [ "$1" = "off" ]; then
 
@@ -156,7 +156,7 @@ if [ "$1" = "menu" ]; then
     do
 
       # get tailscale login URL
-      login_url=$(sudo timeout 3s tailscale login --nickname RaspiBlitz 2>&1 | grep https:// | awk '{$1=$1; print}')
+      login_url=$(sudo timeout 3s sudo tailscale login --nickname RaspiBlitz 2>&1 | grep https:// | awk '{$1=$1; print}')
       if [ -z "$login_url" ]; then
         echo "# Error getting login URL"
         sleep 3
@@ -176,7 +176,7 @@ if [ "$1" = "menu" ]; then
           break
         fi
       else
-        echo "# Cancelled Tailscle login"
+        echo "# Cancelled Tailscale login"
         sleep 2
         break
       fi
@@ -184,7 +184,7 @@ if [ "$1" = "menu" ]; then
     exit 0
   else
     echo "# Tailscale state is '${backend_state}'"
-    whiptail --msgbox "Tailscale state on RaspiBlitz is '${backend_state}'.\n\nFor details login with '${login_name}' to Tailscale service:\nhttps://login.tailscale.com\n\nOr use on terminal command:\nsudo tailscale status --json" 0 0
+    whiptail --msgbox "Tailscale state on RaspiBlitz is '${backend_state}'.\n\nFor details login with '${login_name}' to Tailscale service:\nhttps://login.tailscale.com\n\nOr use the command in the terminal:\nsudo tailscale status" 0 0
   fi
   exit 0
 fi
