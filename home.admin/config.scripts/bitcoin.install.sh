@@ -265,8 +265,7 @@ ExecStartPre=-/home/admin/config.scripts/bitcoin.check.sh prestart ${CHAIN}
 ExecStart=/usr/local/bin/bitcoind ${chainparameter} \\
                                   -daemonwait \\
                                   -conf=/mnt/hdd/bitcoin/bitcoin.conf \\
-                                  -datadir=/mnt/hdd/bitcoin \\
-                                  -deprecatedrpc=warnings
+                                  -datadir=/mnt/hdd/bitcoin
 PermissionsStartOnly=true
 
 # Process management
