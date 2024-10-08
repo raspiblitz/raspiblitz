@@ -1,4 +1,4 @@
-## What's new in Version 1.11.3rc1 of RaspiBlitz?
+## What's new in Version 1.11.3 of RaspiBlitz?
 
 Optimized now to run also on plain debian12 linux for Proxmox/VM & x86 systems.
 
