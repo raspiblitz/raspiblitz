@@ -743,7 +743,7 @@ else
   echo "Provisioning Telegraf - keep default" >> ${logFile}
 fi
 
-# Telegraf
+# Publipool
 if [ "${publicpool}" = "on" ]; then
   echo "Provisioning Publicpool - run config script" >> ${logFile}
   /home/admin/_cache.sh set message "Setup Publicpool"
