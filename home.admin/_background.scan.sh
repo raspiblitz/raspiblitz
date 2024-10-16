@@ -170,6 +170,10 @@ do
     /home/admin/_cache.sh set system_count_undervoltage "${countReports}"
   fi
 
+  # update code commit
+  codeCommit=$(git -C /home/admin/raspiblitz rev-parse --short HEAD)
+  /home/admin/_cache.sh set codeCommit "${codeCommit}"
+
   #################
   # TOR
 
