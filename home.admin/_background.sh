@@ -706,7 +706,7 @@ do
     # TODO: check if letsencrypt certs are valid for more than 10 days & renew if not
 
     # sets self-signed certs or letsencrypt certs (if valid) to nginx
-    /home/admin/config.scripts/internet.letsencrypt.sh refresh-nginx-certs
+    sudo -u admin /home/admin/config.scripts/internet.letsencrypt.sh refresh-nginx-certs
   fi
 
   ###############################
