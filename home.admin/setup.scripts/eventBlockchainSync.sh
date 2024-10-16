@@ -110,4 +110,4 @@ if [ "${vm}" == "0" ]; then
 else
     temp_info="VM"
 fi
-dialog --title " Node is Syncing (${time}) " --backtitle "${codeVersion} (${codeRelease}) / ${internet_localip} ${temp_info} / ${hdd_used_info}" --infobox "${infoStr}\n ${adminStr}" ${height} ${width}
+dialog --title " Node is Syncing (${time}) " --backtitle "${codeVersion}-${codeRelease} ${internet_localip} ${temp_info} ${hdd_used_info}" --infobox "${infoStr}\n ${adminStr}" ${height} ${width}

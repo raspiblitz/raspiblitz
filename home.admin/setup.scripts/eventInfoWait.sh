@@ -40,7 +40,7 @@ else
 fi
 
 # default backtitle for dialog
-backtitle="${codeVersion} (${codeRelease}) ${eventID} / ${internet_localip} ${temp_info} ${hdd_used_info}"
+backtitle="${codeVersion}-${codeRelease} ${eventID} ${internet_localip} ${temp_info} ${hdd_used_info}"
 
 ################################################
 # 1) WELL DEFINED EVENTS
