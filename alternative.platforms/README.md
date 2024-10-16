@@ -307,7 +307,7 @@ Work notes partially based on: https://github.com/rootzoll/raspiblitz/blob/v1.7/
 #### Clean and shutdown the build machine
 * run the command (same as running `release` under `admin`):
     ```bash
-    sudo -u admin /home/admin/config.scripts/blitz.preparerelease.sh
+    sudo -u admin /home/admin/config.scripts/blitz.release.sh
     ```
 * This will shut down the laptop.
 * Remove the `Installation medium` and the `Ubuntu Live` USB stick and the LAN cable

@@ -53,10 +53,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     source <(sudo /home/admin/build_sdcard.sh -EXPORT)
     GITHUB_USER="${defaultWEBUIuser}"
     GITHUB_REPO="${defaultWEBUIrepo}"
-    
-    # use master branch when its an Release Candidate
-    source <(/home/admin/_cache.sh get codeVersion)
-    if [[ "$codeVersion" == *"rc"* ]]; then
+    activeBranch=$(git -C /home/admin/raspiblitz branch --show-current)
+    echo "# activeBranch detected by raspiblitz repo: ${activeBranch}"
+    # use dev branch when raspiblitz repo is n dev branch
+    if [[ "$activeBranch" == *"dev"* ]]; then    
       echo "# RELEASE CANDIDATE: using master branch"
       GITHUB_BRANCH="master"
     else

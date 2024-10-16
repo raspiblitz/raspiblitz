@@ -18,10 +18,10 @@ elif [ -d /boot ]; then
 fi
 echo "# raspi_bootdir(${raspi_bootdir})"
 
-# determine if this is a release candidate (use file not cache)
-codeVersion=$(cat /home/admin/_version.info | grep 'codeVersion="' | cut -d'"' -f2)
+# determine if this is a early release candidate (use file not cache)
+codeVersion=$(git -C /home/admin/raspiblitz branch --show-current)
 isReleaseCandidate=0
-if [[ "$codeVersion" == *"rc"* ]]; then
+if [[ "$codeVersion" == *"dev"* ]]; then
   isReleaseCandidate=1
 fi
 echo "# isReleaseCandidate(${isReleaseCandidate})"

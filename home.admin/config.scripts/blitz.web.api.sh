@@ -175,12 +175,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo cp /home/admin/raspiblitz/build_sdcard.sh /home/admin/build_sdcard.sh
     sudo chmod +x /home/admin/build_sdcard.sh 2>/dev/null
     source <(sudo /home/admin/build_sdcard.sh -EXPORT)
-    echo "# activeBranch detected by build_sdcard.sh: ${activeBranch}"
     GITHUB_USER="${defaultAPIuser}"
     GITHUB_REPO="${defaultAPIrepo}"
-    # use dev branch when its an Release Candidate
-    source <(/home/admin/_cache.sh get codeVersion)
-    if [[ "$codeVersion" == *"rc"* ]]; then
+    activeBranch=$(git -C /home/admin/raspiblitz branch --show-current)
+    echo "# activeBranch detected by raspiblitz repo: ${activeBranch}"
+    if [[ "$activeBranch" == *"dev"* ]]; then
       echo "# RELEASE CANDIDATE: using dev branch"
       GITHUB_BRANCH="dev"
     else

@@ -141,6 +141,7 @@ function check() {
 
 # command: release
 function release() {
+  firstPARAM=$1
   echo "Command to prepare your RaspiBlitz installation for sd card image:"
   echo "- delete logs"
   echo "- clean raspiblitz.info"
@@ -151,7 +152,7 @@ function release() {
   echo "- shutdown"
   confirmMsg release
   if [ $confirm -eq 1 ]; then
-    /home/admin/config.scripts/blitz.preparerelease.sh $1
+    /home/admin/config.scripts/blitz.release.sh $firstPARAM
   fi
 }
 

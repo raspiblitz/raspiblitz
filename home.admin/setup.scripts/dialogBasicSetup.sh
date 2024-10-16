@@ -21,7 +21,7 @@ OPTIONS+=(SHUTDOWN "Shutdown without Changes")
 CHOICE_HEIGHT=$(("${#OPTIONS[@]}/2+1"))
 HEIGHT=$(($CHOICE_HEIGHT+8))
 
-CHOICE=$(dialog --clear --backtitle "RaspiBlitz ${codeVersion} - Setup" --title "⚡ Welcome to your RaspiBlitz ⚡" --menu "\nChoose how you want to setup your RaspiBlitz: \n " ${HEIGHT} 64 ${CHOICE_HEIGHT}  "${OPTIONS[@]}" 2>&1 >/dev/tty)
+CHOICE=$(dialog --clear --backtitle "RaspiBlitz ${codeVersion}-${codeRelease} - Setup" --title "⚡ Welcome to your RaspiBlitz ⚡" --menu "\nChoose how you want to setup your RaspiBlitz: \n " ${HEIGHT} 64 ${CHOICE_HEIGHT}  "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
 case $CHOICE in
         FRESHSETUP)

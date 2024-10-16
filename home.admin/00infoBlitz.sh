@@ -9,6 +9,8 @@ source <(/home/admin/_cache.sh get \
   chain \
   lightning \
   codeVersion \
+  codeRelease \
+  codeCommit \
   hostname \
   undervoltageReports \
   hdd_used_info \
@@ -347,7 +349,7 @@ ${color_yellow}               ${color_gray}${ln_channelInfo} ${ln_peersInfo}
 ${color_yellow}               ${color_gray}${ln_feeReport}
 $lastLine
 " \
-"RaspiBlitz v${codeVersion}" \
+"RaspiBlitz ${codeVersion}-${codeRelease}" \
 "-------------------------------------------" \
 "Refreshed: ${datetime}" \
 "CPU load${system_cpu_load##up*,  }" \

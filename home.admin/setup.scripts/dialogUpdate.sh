@@ -7,7 +7,7 @@ source /home/admin/raspiblitz.info
 
 whiptail --title " RASPIBLITZ UPDATE " --yes-button "Start Update" --no-button "Other Options" --yesno "We found data from an old RaspiBlitz on your HDD/SSD.
 
-You can start now the UPDATE to version ${codeVersion}.
+You can start now the UPDATE to version ${codeVersion}-${codeRelease}.
 
 You will need to set a new Password A for the SSH login. All your channels will stay open and other passwords will stay the same.
 
