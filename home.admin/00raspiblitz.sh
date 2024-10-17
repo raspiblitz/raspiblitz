@@ -25,7 +25,10 @@ fi
 # special state: copysource
 if [ "${state}" = "stop" ]; then
   echo "***********************************************************"
-  echo "OK ready for manual provision - run 'release' at the end."
+  echo "Stop signal detectecd - OK ready for manual provision."
+  echo "If your ready for shutdown use the following command:"
+  echo "release --> for an official release"
+  echo "release -quick --> during development"
   if [ "${vm}" = "1" ]; then
     echo "REMOVE AUDIO DEVICE from VM before next boot up."
   fi
