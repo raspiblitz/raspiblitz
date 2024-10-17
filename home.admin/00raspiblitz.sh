@@ -24,7 +24,12 @@ fi
 
 # special state: copysource
 if [ "${state}" = "stop" ]; then
+  echo "***********************************************************"
   echo "OK ready for manual provision - run 'release' at the end."
+  if [ "${vm}" = "1" ]; then
+    echo "REMOVE AUDIO DEVICE from VM before next boot up."
+  fi
+  echo "***********************************************************"
   exit
 # special state: copysource
 elif [ "${state}" = "copysource" ]; then
