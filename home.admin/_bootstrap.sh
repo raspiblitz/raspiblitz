@@ -132,7 +132,6 @@ echo "# raspi_bootdir(${raspi_bootdir})" >> $logFile
 # when a file 'stop' is on the sd card bootfs partition root - stop for manual provision
 flagExists=$(ls ${raspi_bootdir}/stop 2>/dev/null | grep -c 'stop')
 if [ "${flagExists}" == "1" ]; then
-  # set state info
   localip=$(hostname -I | awk '{print $1}')
   /home/admin/_cache.sh set state "stop"
   /home/admin/_cache.sh set message "stopped for manual provision ${localip}"
@@ -140,6 +139,19 @@ if [ "${flagExists}" == "1" ]; then
   systemctl stop background.scan.service
   # log info
   echo "INFO: 'bootstrap stopped - run command release after manual provison to remove stop flag" >> ${logFile}
+  exit 0
+fi
+
+# VM stop signal for manual provision - when an audio device is detected on a VM
+flagExists=$(lspci | grep -c "Audio")
+if [ "${vm}" == "1"  ] && [ ${flagExists} -gt 0 ]; then
+  localip=$(hostname -I | awk '{print $1}')
+  /home/admin/_cache.sh set state "stop"
+  /home/admin/_cache.sh set message "VM stopped for manual provision"
+  systemctl stop background.service
+  systemctl stop background.scan.service
+  # log info
+  echo "INFO: 'bootstrap stopped - remove the audio device from the VM" >> ${logFile}
   exit 0
 fi
 
