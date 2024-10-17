@@ -186,7 +186,7 @@ elif [ "${eventID}" == "waitsetup" ] && [ "${mode}" == "lcd" ]; then
         source <(/home/admin/_cache.sh get system_ram_gb hddGigaBytes hddBlocksBitcoin hddBlocksLitecoin setupPhase)
 
         # custom backtitle for this dialog
-        backtitle="RaspiBlitz ${codeVersion}"
+        backtitle="RaspiBlitz ${codeVersion}-${codeRelease}"
 
         # display if RAM size
         backtitle="${backtitle} / ${system_ram_gb}GB RAM"
