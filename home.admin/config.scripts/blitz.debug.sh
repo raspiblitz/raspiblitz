@@ -57,6 +57,7 @@ fi
 
 # load code software version
 source /home/admin/_version.info
+codeCommit=$(git -C /home/admin/raspiblitz rev-parse --short HEAD)
 
 ## get basic info (its OK if not set yet)
 source /home/admin/raspiblitz.info 2>/dev/null
@@ -84,6 +85,8 @@ echo "***************************************************************"
 echo "* RASPIBLITZ DEBUG LOGS "
 echo "***************************************************************"
 echo "blitzversion: ${codeVersion}"
+echo "commit-release: ${codeRelease}"
+echo "commit-active: ${codeCommit}"
 echo "chainnetwork: ${network} / ${chain}"
 uptime
 echo
@@ -430,6 +433,15 @@ if [ "${fints}" == "on" ]; then
   sudo tail -n 30 /home/fints/log/fuelifints.log
 else
   echo "- FINTS is OFF by config"
+fi
+
+if [ "${publicpool}" == "on" ]; then  
+  echo
+  echo "*** LAST 20 PUBLIPOOL LOGS ***"
+  echo "sudo journalctl -u publicpool -b --no-pager -n20"
+  sudo journalctl -u publicpool -b --no-pager -n20
+else
+  echo "- PUBLICPOOL is OFF by config"
 fi
 
 echo

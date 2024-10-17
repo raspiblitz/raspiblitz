@@ -466,7 +466,7 @@ if [ ${mode} = "seed-import-gui" ]; then
       sudo chown admin:admin /var/cache/raspiblitz/.seed.tmp
 
       # dialog to enter
-      dialog --backtitle "RaspiBlitz - Recover from Core Lightning seed" --inputbox "Please enter/paste the SEED WORD LIST:\n(just the words, seperated by spaces, in correct order as numbered)" 9 78 2>/var/cache/raspiblitz/.seed.tmp
+      dialog --backtitle "RaspiBlitz - Recover from Core Lightning seed" --inputbox "Please enter/paste the SEED WORD LIST:\n(just the words, separated by spaces, in correct order as numbered)" 9 78 2>/var/cache/raspiblitz/.seed.tmp
       wordstring=$(cat /var/cache/raspiblitz/.seed.tmp | sed 's/[^a-zA-Z0-9 ]//g')
       sudo shred -u /var/cache/raspiblitz/.seed.tmp 2>/dev/null
       echo "processing ..."

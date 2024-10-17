@@ -27,7 +27,14 @@ if [ "$1" = "status" ]; then
     # check if backup device is mounted
     backupDeviceExists=$(df | grep -c "/mnt/backup")
     if [ ${backupDeviceExists} -gt 0 ]; then
-      echo "isMounted=1"
+       backupDeviceName=$(lsblk -o NAME,UUID | grep "${localBackupDeviceUUID}" | cut -d " " -f 1)
+       backupDeviceName=${backupDeviceName:2:4}
+       backupDeviceIsBackupDevice=$(df | grep -c ${backupDeviceName})
+       if [ ${backupDeviceIsBackupDevice} -gt 0 ]; then
+          echo "isMounted=1"
+       else
+          echo "isMounted=0"
+       fi
     else
       echo "isMounted=0"
     fi

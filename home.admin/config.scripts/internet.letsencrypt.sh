@@ -3,14 +3,17 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ]; then
   echo "config script to install or remove the Let's Encrypt Client (ACME.SH)"
-  echo "bonus.letsencrypt.sh [on|off]"
-  echo "bonus.letsencrypt.sh issue-cert DNSSERVICE FULLDOMAINNAME APITOKEN ip|tor|ip&tor"
-  echo "bonus.letsencrypt.sh remove-cert FULLDOMAINNAME ip|tor|ip&tor"
-  echo "bonus.letsencrypt.sh refresh-nginx-certs"
+  echo "internet.letsencrypt.sh [on|off]"
+  echo "internet.letsencrypt.sh issue-cert DNSSERVICE FULLDOMAINNAME APITOKEN ip|tor|ip&tor"
+  echo "internet.letsencrypt.sh remove-cert FULLDOMAINNAME ip|tor|ip&tor"
+  echo "internet.letsencrypt.sh refresh-nginx-certs"
   exit 1
 fi
 
 source /mnt/hdd/raspiblitz.conf
+
+# make sure the HDD is mounted
+mountpoint -q /mnt/hdd || { echo "# internet.letsencrypt.sh - /mnt/hdd is not mounted. Exiting."; exit 1; }
 
 # https://github.com/acmesh-official/acme.sh/releases
 ACME_LOAD_BASE_URL="https://github.com/acmesh-official/acme.sh/archive/refs/tags/3.0.7.tar.gz"
@@ -113,19 +116,26 @@ function refresh_certs_with_nginx() {
 
     # FIRST: SET ALL TO DEFAULT SELF SIGNED
 
+    # make a hashs of certs before
+    certHashBefore1=$(sudo md5sum /mnt/hdd/app-data/nginx/tls.cert | head -n1 | cut -d " " -f1)
+    certHashBefore2=$(sudo md5sum /mnt/hdd/app-data/nginx/tor_tls.cert | head -n1 | cut -d " " -f1)
+
+    # make sure self-signed cert exists & is valid
+    /home/admin/config.scripts/internet.selfsignedcert.sh create
+
     echo "# default IP certs"
     sudo rm /mnt/hdd/app-data/nginx/tls.cert
     sudo rm /mnt/hdd/app-data/nginx/tls.key
-    sudo ln -sf /mnt/hdd/lnd/tls.cert /mnt/hdd/app-data/nginx/tls.cert
-    sudo ln -sf /mnt/hdd/lnd/tls.key /mnt/hdd/app-data/nginx/tls.key
+    sudo ln -sf /mnt/hdd/app-data/selfsignedcert/selfsigned.cert /mnt/hdd/app-data/nginx/tls.cert
+    sudo ln -sf /mnt/hdd/app-data/selfsignedcert/selfsigned.key /mnt/hdd/app-data/nginx/tls.key
 
     echo "# default TOR certs"
     sudo rm /mnt/hdd/app-data/nginx/tor_tls.cert
     sudo rm /mnt/hdd/app-data/nginx/tor_tls.key
-    sudo ln -sf /mnt/hdd/lnd/tls.cert /mnt/hdd/app-data/nginx/tor_tls.cert
-    sudo ln -sf /mnt/hdd/lnd/tls.key /mnt/hdd/app-data/nginx/tor_tls.key
+    sudo ln -sf /mnt/hdd/app-data/selfsignedcert/selfsigned.cert /mnt/hdd/app-data/nginx/tor_tls.cert
+    sudo ln -sf /mnt/hdd/app-data/selfsignedcert/selfsigned.key /mnt/hdd/app-data/nginx/tor_tls.key
 
-    # SECOND: SET LETSENCRPYT CERTS FOR SUBSCRIPTIONS
+    # SECOND: SET LETSENCRPYT CERTS FOR SUBSCRIPTIONS (ONLY IF VALID)
 
     if [ "${letsencrypt}" != "on" ]; then
       echo "# lets encrypt is off - so no certs replacements"
@@ -139,11 +149,29 @@ function refresh_certs_with_nginx() {
       FQDN=$(echo "${i}" | cut -d "_" -f1)
       echo "# i(${i})"
       echo "# FQDN(${FQDN})"
+
+      # check if cert exists and is valid
+      CERT_FILE="${ACME_CERT_HOME}/${FQDN}_ecc/fullchain.cer"
+      echo "CERT_FILE(${CERT_FILE})"
+      if openssl x509 -checkend 86400 -noout -in "${CERT_FILE}"; then
+        echo "# The certificate is valid for more than one day. OK use them nginx."
+      else
+        echo "# The certificate is non-exist, invalid, expired or will expire within a day. DONT use them the nginx."
+        continue
+      fi
+
       # check if there is a LetsEncrypt Subscription for this domain
       details=$(/home/admin/config.scripts/blitz.subscriptions.letsencrypt.py subscription-detail $FQDN)
       if [ $(echo "${details}" | grep -c "error=") -eq 0 ] && [ ${#details} -gt 10 ]; then
 
         echo "# details(${details})"
+
+        # check if subscription is active
+        active=$(echo "${details}" | jq -r ".active")
+        if [ "${active}" != "true" ]; then
+          echo "# not active(${active}) ... skipping"
+          continue
+        fi
 
         # get target for that domain
         options=$(echo "${details}" | jq -r ".target")
@@ -174,6 +202,26 @@ function refresh_certs_with_nginx() {
       fi
     done
 
+    # set permissions
+    sudo chown -h admin:www-data /mnt/hdd/app-data/nginx/tls.cert
+    sudo chown -h admin:www-data /mnt/hdd/app-data/nginx/tls.key
+    sudo chown -h admin:www-data /mnt/hdd/app-data/nginx/tor_tls.cert
+    sudo chown -h admin:www-data /mnt/hdd/app-data/nginx/tor_tls.key  
+
+    # make a hashs of certs after
+    certHashAfter1=$(sudo md5sum /mnt/hdd/app-data/nginx/tls.cert | head -n1 | cut -d " " -f1)
+    certHashAfter2=$(sudo md5sum /mnt/hdd/app-data/nginx/tor_tls.cert | head -n1 | cut -d " " -f1)
+    echo "# certHashBefore(${certHashBefore1})"
+    echo "# certHashAfter(${certHashAfter1})"
+    echo "# certHashBeforeTor(${certHashBefore2})"
+    echo "# certHashAfterTor(${certHashAfter2})"
+    # check if nginx needs to be reloaded
+    if [ "${certHashBefore1}" != "${certHashAfter1}" ] || [ "${certHashBefore2}" != "${certHashAfter2}" ]; then
+      echo "# nginx needs to be reloaded"
+      sudo systemctl restart nginx 2>&1
+    else
+      echo "# nginx certs are the same - no need to reload"
+    fi
 }
 
 ###################
@@ -218,8 +266,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     # make sure already existing certs get refreshed in to nginx
     refresh_certs_with_nginx
-    echo "# restarting nginx"
-    sudo systemctl restart nginx 2>&1
 
     exit 0
 
@@ -324,7 +370,7 @@ elif [ "$1" = "remove-cert" ]; then
     options="ip&tor"
   fi
 
-  echo "# bonus.letsencrypt.sh remove-cert ${FQDN} ${options}"
+  echo "# internet.letsencrypt.sh remove-cert ${FQDN} ${options}"
 
   # remove cert from renewal
   $ACME_INSTALL_HOME/acme.sh --remove -d "${FQDN}" --ecc --home "${ACME_INSTALL_HOME}" --config-home "${ACME_CONFIG_HOME}" --cert-home "${ACME_CERT_HOME}" 2>&1
@@ -341,10 +387,6 @@ elif [ "$1" = "remove-cert" ]; then
     echo "error='nginx config failed'"
     exit 1
   fi
-
-  # restart nginx
-  echo "# restarting nginx"
-  sudo systemctl restart nginx 2>&1
 
   exit 0
 
@@ -365,9 +407,6 @@ elif [ "$1" = "refresh-nginx-certs" ]; then
     exit 1
   fi
 
-  echo "# restarting nginx"
-  sudo systemctl restart nginx 2>&1
-
 
 ###################
 # OFF
@@ -384,10 +423,11 @@ elif [ "$1" = "0" ] || [ "$1" = "off" ]; then
       --config-home "${ACME_CONFIG_HOME}" \
       --cert-home "${ACME_CERT_HOME}"
 
+    # remove certs
+    sudo rm -r ${ACME_CERT_HOME}
+
     # refresh nginx
     refresh_certs_with_nginx
-    echo "# restarting nginx"
-    sudo systemctl restart nginx 2>&1
 
     # remove old script install
     sudo rm -r ${ACME_INSTALL_HOME}

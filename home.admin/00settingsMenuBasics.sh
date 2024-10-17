@@ -6,9 +6,7 @@ source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
 
 echo "services default values"
-if [ ${#autoUnlock} -eq 0 ]; then autoUnlock="off"; fi
 if [ ${#runBehindTor} -eq 0 ]; then runBehindTor="off"; fi
-if [ ${#networkUPnP} -eq 0 ]; then networkUPnP="off"; fi
 if [ ${#touchscreen} -eq 0 ]; then touchscreen=0; fi
 if [ ${#lcdrotate} -eq 0 ]; then lcdrotate=0; fi
 if [ ${#zerotier} -eq 0 ]; then zerotier="off"; fi
@@ -18,6 +16,11 @@ if [ ${#clEncryptedHSM} -eq 0 ]; then clEncryptedHSM="off"; fi
 if [ ${#clAutoUnlock} -eq 0 ]; then clAutoUnlock="off"; fi
 if [ ${#clWatchtowerClient} -eq 0 ]; then clWatchtowerClient="off"; fi
 if [ ${#blitzapi} -eq 0 ]; then blitzapi="off"; fi
+if [ ${#tailscale} -eq 0 ]; then tailscale="off"; fi
+if [ ${#telegraf} -eq 0 ]; then telegraf="off"; fi
+
+# detect if LND auto-unlock is active
+source <(/home/admin/config.scripts/lnd.autounlock.sh status)
 
 echo "# map LND to on/off"
 lndNode="off"
@@ -110,10 +113,12 @@ fi
 # Important basic options
 OPTIONS+=(t 'Run behind Tor' ${runBehindTor})
 OPTIONS+=(z 'ZeroTier' ${zerotierSwitch})
+OPTIONS+=(l 'Tailscale VPN' ${tailscale})
+
+OPTIONS+=(g 'Telegraf InfluxDB/Grafana Metrics' ${telegraf})
 
 if [ ${#runBehindTor} -eq 0 ] || [ "${runBehindTor}" = "off" ]; then
   OPTIONS+=(y ${dynDomainMenu} ${domainValue})
-  OPTIONS+=(b 'BTC UPnP (AutoNAT)' ${networkUPnP})
 fi
 OPTIONS+=(p 'Parallel Testnet/Signet' ${parallelTestnets})
 
@@ -192,26 +197,6 @@ else
   echo "Dynamic Domain unchanged."
 fi
 
-# UPnP
-choice="off"; check=$(echo "${CHOICES}" | grep -c "b")
-if [ ${check} -eq 1 ]; then choice="on"; fi
-if [ "${networkUPnP}" != "${choice}" ]; then
-  echo "BTC UPnP Setting changed .."
-  anychange=1
-  if [ "${choice}" = "on" ]; then
-    echo "Starting BTC UPNP ..."
-    /home/admin/config.scripts/network.upnp.sh on
-    networkUPnP="on"
-    needsReboot=1
-  else
-    echo "Stopping BTC UPNP ..."
-    /home/admin/config.scripts/network.upnp.sh off
-    networkUPnP="off"
-    needsReboot=1
-  fi
-else
-  echo "BTC UPnP Setting unchanged."
-fi
 
 # Tor process choice
 choice="off"; check=$(echo "${CHOICES}" | grep -c "t")
@@ -332,13 +317,42 @@ if [ "${zerotierSwitch}" != "${choice}" ]; then
   echo "zerotier setting changed .."
   anychange=1
   error=""
-  sudo -u admin /home/admin/config.scripts/bonus.zerotier.sh ${choice}
+  sudo -u admin /home/admin/config.scripts/internet.zerotier.sh ${choice}
   if [ "${choice}" != "on" ]; then
     dialog --msgbox "ZeroTier is now OFF." 5 46
   fi
-
 else
   echo "ZeroTier setting unchanged."
+fi
+
+# Tailscale process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "l")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${tailscale}" != "${choice}" ]; then
+  echo "tailscale setting changed .."
+  anychange=1
+  error=""
+  sudo -u admin /home/admin/config.scripts/internet.tailscale.sh ${choice}
+  if [ "${choice}" = "on" ]; then
+    sudo -u admin /home/admin/config.scripts/internet.tailscale.sh menu
+  fi
+else
+  echo "tailscale setting unchanged."
+fi
+
+# Telegraf process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "g")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${telegraf}" != "${choice}" ]; then
+  echo "telegraf setting changed .."
+  anychange=1
+  error=""
+  sudo -u admin /home/admin/config.scripts/bonus.telegraf.sh ${choice}
+  if [ "${choice}" = "on" ]; then
+    sudo -u admin /home/admin/config.scripts/bonus.telegraf.sh menu
+  fi
+else
+  echo "telegraf setting unchanged."
 fi
 
 # LND choice
@@ -375,7 +389,7 @@ if [ "${clNode}" != "${choice}" ]; then
   echo "# Core Lightning NODE Setting changed .."
   if [ "${choice}" = "on" ]; then
     echo "# turning ON"
-    /home/admin/config.scripts/cl.install.sh on mainnet
+    /home/admin/config.scripts/cl.install.sh on mainnet || exit 1
     # generate wallet from seedwords or just display (write to dev/null to not write seed words to logs)
     echo "Generating CL wallet seedwords .."
     /home/admin/config.scripts/cl.hsmtool.sh new mainnet noninteractive

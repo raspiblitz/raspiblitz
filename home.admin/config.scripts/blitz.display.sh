@@ -443,14 +443,6 @@ fi
 
 if [ "${command}" == "set-display" ]; then
 
-  # Make sure needed packages are installed
-  if [ $(dpkg-query -l | grep "ii  fbi" | wc -l) = 0 ]; then
-    sudo apt-get install fbi -y > /dev/null
-  fi
-  if [ $(dpkg-query -l | grep "ii  qrencode" | wc -l) = 0 ]; then
-    sudo apt-get install qrencode -y > /dev/null
-  fi
-
   paramDisplayClass=$2
   paramDisplayType=$3
   echo "# blitz.display.sh set-display ${paramDisplayClass} ${paramDisplayType}"
@@ -459,6 +451,12 @@ if [ "${command}" == "set-display" ]; then
   # check if started with sudo
   if [ "$EUID" -ne 0 ]; then 
     echo "error='missing sudo'"
+    exit 1
+  fi
+
+  # abort if set to lcd and is vm
+  if [ "${vm}" == "1" ] && [ "${paramDisplayClass}" == "lcd" ]; then
+    echo "err='LCD not supported on VM'"
     exit 1
   fi
 
@@ -472,6 +470,14 @@ if [ "${command}" == "set-display" ]; then
   if [ "${paramDisplayClass}" == "" ]; then
     echo "err='missing parameter'"
     exit 1
+  fi
+
+  # Make sure needed packages are installed
+  if [ $(dpkg-query -l | grep "ii  fbi" | wc -l) = 0 ]; then
+    sudo apt-get install fbi -y > /dev/null
+  fi
+  if [ $(dpkg-query -l | grep "ii  qrencode" | wc -l) = 0 ]; then
+    sudo apt-get install qrencode -y > /dev/null
   fi
 
   echo "# old(${displayClass})"

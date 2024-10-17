@@ -52,6 +52,7 @@ if [ "$1" = "init" ]; then
   rm /etc/ssh/sshd_init_keys
 
   echo "# restart sshd"
+  systemctl enable ssh
   systemctl restart sshd
   if [ $? -gt 0 ]; then
     echo "error='sshd restart failed'"
@@ -138,7 +139,8 @@ if [ "$1" = "checkrepair" ]; then
   if [ ${sshdRunning} -eq 0 ]; then
     echo "# DETECTED: SSHD NOT RUNNING --> Try reconfigure & kickstart again"
     sudo dpkg-reconfigure openssh-server
-    sudo systemctl restart sshd
+    sudo systemctl enable ssh
+    sudo systemctl restart ssh
     sleep 3
   fi
 

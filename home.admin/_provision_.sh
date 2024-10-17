@@ -146,6 +146,8 @@ echo "allow: bitcoin testnet"
 ufw allow 18333 comment 'bitcoin testnet'
 echo "allow: bitcoin mainnet"
 ufw allow 8333 comment 'bitcoin mainnet'
+echo 'allow: bitcoin mainnet RPC'
+ufw allow 8332 comment 'bitcoin mainnet RPC'
 echo 'allow: lightning testnet'
 ufw allow 19735 comment 'lightning testnet'
 echo "allow: lightning mainnet"
@@ -513,7 +515,7 @@ fi
 if [ "${#zerotier}" -gt 0 ] && [ "${zerotier}" != "off" ]; then
     echo "Provisioning ZeroTier - run config script" >> ${logFile}
     /home/admin/_cache.sh set message "Setup ZeroTier"
-    /home/admin/config.scripts/bonus.zerotier.sh on ${zerotier} >> ${logFile} 2>&1
+    /home/admin/config.scripts/internet.zerotier.sh on ${zerotier} >> ${logFile} 2>&1
 else
     echo "Provisioning ZeroTier - not active" >> ${logFile}
 fi
@@ -619,7 +621,7 @@ fi
 if [ "${letsencrypt}" = "on" ]; then
   echo "Provisioning letsencrypt - run config script" >> ${logFile}
   /home/admin/_cache.sh set message "Setup letsencrypt"
-  sudo -u admin /home/admin/config.scripts/bonus.letsencrypt.sh on >> ${logFile} 2>&1
+  sudo -u admin /home/admin/config.scripts/internet.letsencrypt.sh on >> ${logFile} 2>&1
 else
   echo "Provisioning letsencrypt - keep default" >> ${logFile}
 fi
@@ -721,6 +723,33 @@ if [ "${fints}" = "on" ]; then
   sudo -u admin /home/admin/config.scripts/bonus.fints.sh on >> ${logFile} 2>&1
 else
   echo "Provisioning FinTS - keep default" >> ${logFile}
+fi
+
+# Tailscale
+if [ "${tailscale}" = "on" ]; then
+  echo "Provisioning Tailscale - run config script" >> ${logFile}
+  /home/admin/_cache.sh set message "Setup Tailscale"
+  sudo -u admin /home/admin/config.scripts/internet.tailscale.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning Tailscale - keep default" >> ${logFile}
+fi
+
+# Telegraf
+if [ "${telegraf}" = "on" ]; then
+  echo "Provisioning Telegraf - run config script" >> ${logFile}
+  /home/admin/_cache.sh set message "Setup Telegraf"
+  sudo -u admin /home/admin/config.scripts/bonus.telegraf.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning Telegraf - keep default" >> ${logFile}
+fi
+
+# Publipool
+if [ "${publicpool}" = "on" ]; then
+  echo "Provisioning Publicpool - run config script" >> ${logFile}
+  /home/admin/_cache.sh set message "Setup Publicpool"
+  sudo -u admin /home/admin/config.scripts/bonus.publicpool.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning Publicpool - keep default" >> ${logFile}
 fi
 
 # custom install script from user

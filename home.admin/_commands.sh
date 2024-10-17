@@ -141,6 +141,7 @@ function check() {
 
 # command: release
 function release() {
+  firstPARAM=$1
   echo "Command to prepare your RaspiBlitz installation for sd card image:"
   echo "- delete logs"
   echo "- clean raspiblitz.info"
@@ -151,7 +152,7 @@ function release() {
   echo "- shutdown"
   confirmMsg release
   if [ $confirm -eq 1 ]; then
-    /home/admin/config.scripts/blitz.preparerelease.sh
+    /home/admin/config.scripts/blitz.release.sh $firstPARAM
   fi
 }
 
@@ -161,6 +162,8 @@ function fatpack() {
   confirmMsg fatpack
   if [ $confirm -eq 1 ]; then
     sudo /home/admin/config.scripts/blitz.fatpack.sh
+    # raspberry pi fatpack has lcd display be default
+    sudo /home/admin/config.scripts/blitz.display.sh set-display lcd
   fi
 }
 

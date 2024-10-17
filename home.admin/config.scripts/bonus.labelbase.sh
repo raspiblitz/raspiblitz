@@ -1,9 +1,9 @@
 #!/bin/bash
 # path: /home/admin/config.scripts/bonus.labelbase.sh
 APPID="labelbase"
-VERSION="2.2.1"
+VERSION="2.2.2"
 GITHUB_REPO="https://github.com/Labelbase/Labelbase/"
-GITHUB_TAG="2.2.1"
+GITHUB_TAG="2.2.2"
 GITHUB_SIGN_AUTHOR=""
 GITHUB_SIGN_PUBKEYLINK=""
 GITHUB_SIGN_FINGERPRINT=""
@@ -112,8 +112,8 @@ if [ "$1" = "menu" ]; then
 
   # basic info text - for an web app how to call with http & self-signed https
   dialogText="Open in your local web browser:
-http://${localIP}:${PORT_CLEAR}\n
-https://${localIP}:${PORT_SSL} with Fingerprint:
+https://${localIP}:${PORT_SSL}\n
+with Fingerprint:
 ${fingerprint}\n
 "
 
@@ -148,11 +148,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "# Installing ${APPID} ..."
 
 
-
-
-
   # create a dedicated user for the app
-  # BACKGROUND is here to seperate running apps by unix users
+  # BACKGROUND is here to separate running apps by unix users
   # and only give file write access to the rest of the system where needed.
   echo "# create user"
   # If the user is intended to be loeed in to add '--shell /bin/bash'

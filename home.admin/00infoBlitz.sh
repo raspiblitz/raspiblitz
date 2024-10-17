@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source /home/admin/raspiblitz.info
+
 source <(/home/admin/_cache.sh get \
   state \
   setupPhase \
@@ -7,6 +9,8 @@ source <(/home/admin/_cache.sh get \
   chain \
   lightning \
   codeVersion \
+  codeRelease \
+  codeCommit \
   hostname \
   undervoltageReports \
   hdd_used_info \
@@ -315,6 +319,12 @@ fi
 datetime=$(date +"%d %b %T %z")
 datetime="${datetime} up ${system_up_text}"
 
+if [ "${vm}" == "1" ]; then
+    temp_info="VM detected"
+else
+    temp_info="temp ${system_temp_celsius}°C ${system_temp_fahrenheit}°F"
+fi
+
 stty sane
 sleep 1
 clear
@@ -327,7 +337,7 @@ ${color_yellow}               ${color_amber}%s ${color_green} ${ln_alias} ${upsI
 ${color_yellow}               ${color_gray}${network^} Fullnode${LNinfo} ${torInfo}
 ${color_yellow}        ,/     ${color_yellow}%s
 ${color_yellow}      ,'/      ${color_gray}%s
-${color_yellow}    ,' /       ${color_gray}%s, temp %s°C %s°F
+${color_yellow}    ,' /       ${color_gray}%s ${temp_info}
 ${color_yellow}  ,'  /_____   ${color_gray}Free Mem ${color_ram}${ram} ${color_gray} HDD ${color_hdd}%s${color_gray}
 ${color_yellow},'_____    ,'  ${color_gray}SSH admin@${internet_localip}${color_gray} d${internet_rx} u${internet_tx}
 ${color_yellow}      /  ,'    ${color_gray}${webuiinfo} 
@@ -339,10 +349,10 @@ ${color_yellow}               ${color_gray}${ln_channelInfo} ${ln_peersInfo}
 ${color_yellow}               ${color_gray}${ln_feeReport}
 $lastLine
 " \
-"RaspiBlitz v${codeVersion}" \
+"RaspiBlitz ${codeVersion}-${codeRelease}" \
 "-------------------------------------------" \
 "Refreshed: ${datetime}" \
-"CPU load${system_cpu_load##up*,  }" "${system_temp_celsius}" "${system_temp_fahrenheit}" \
+"CPU load${system_cpu_load##up*,  }" \
 "${hdd_used_info}" "${sync_percentage}"
 
 if [ ${#undervoltageReports} -gt 0 ] && [ "${undervoltageReports}" != "0" ]; then

@@ -6,7 +6,7 @@
 source /home/admin/raspiblitz.info 2>/dev/null
 
 # get values from cache
-source <(/home/admin/_cache.sh get codeVersion internet_localip blitzapi hdd_used_info system_temp_celsius)
+source <(/home/admin/_cache.sh get codeVersion codeRelease internet_localip blitzapi hdd_used_info system_temp_celsius)
 
 # 1st PARAMETER: eventID
 # fixed ID string for a certain event
@@ -33,8 +33,14 @@ if [ "${mode}" != "lcd" ] && [ "${mode}" != "ssh" ]; then
     exit 1
 fi
 
+if [ "${vm}" == "1" ]; then
+    temp_info="VM"
+else
+    temp_info="${system_temp_celsius}°C"
+fi
+
 # default backtitle for dialog
-backtitle="${codeVersion} ${eventID} / ${internet_localip} ${system_temp_celsius}°C ${hdd_used_info}"
+backtitle="${codeVersion}-${codeRelease} ${eventID} ${internet_localip} ${temp_info} ${hdd_used_info}"
 
 ################################################
 # 1) WELL DEFINED EVENTS
@@ -180,7 +186,7 @@ elif [ "${eventID}" == "waitsetup" ] && [ "${mode}" == "lcd" ]; then
         source <(/home/admin/_cache.sh get system_ram_gb hddGigaBytes hddBlocksBitcoin hddBlocksLitecoin setupPhase)
 
         # custom backtitle for this dialog
-        backtitle="RaspiBlitz ${codeVersion}"
+        backtitle="RaspiBlitz ${codeVersion}-${codeRelease}"
 
         # display if RAM size
         backtitle="${backtitle} / ${system_ram_gb}GB RAM"

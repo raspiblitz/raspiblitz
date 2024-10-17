@@ -127,28 +127,9 @@ elif [ "$1" = "https-on" ]; then
 
   if ! [ -f /mnt/hdd/app-data/nginx/tls.cert ];then
 
-    if [ -f /mnt/hdd/lnd/tls.cert ]; then
-      # use LND cert by default
-      echo "# use LND cert for: /mnt/hdd/app-data/nginx/tls.cert"
-      sudo ln -sf /mnt/hdd/lnd/tls.cert /mnt/hdd/app-data/nginx/tls.cert
-      sudo ln -sf /mnt/hdd/lnd/tls.key /mnt/hdd/app-data/nginx/tls.key
-      sudo ln -sf /mnt/hdd/lnd/tls.cert /mnt/hdd/app-data/nginx/tor_tls.cert
-      sudo ln -sf /mnt/hdd/lnd/tls.key /mnt/hdd/app-data/nginx/tor_tls.key
-    else
-      echo "# exists /mnt/hdd/app-data/nginx/tls.cert"
-
-      # create a self-signed cert if the LND cert is not present
-      /home/admin/config.scripts/internet.selfsignedcert.sh create
-
-      sudo ln -sf /mnt/hdd/app-data/selfsignedcert/selfsigned.cert \
-                  /mnt/hdd/app-data/nginx/tls.cert
-      sudo ln -sf /mnt/hdd/app-data/selfsignedcert/selfsigned.key \
-                  /mnt/hdd/app-data/nginx/tls.key
-      sudo ln -sf /mnt/hdd/app-data/selfsignedcert/selfsigned.cert \
-                  /mnt/hdd/app-data/nginx/tor_tls.cert
-      sudo ln -sf /mnt/hdd/app-data/selfsignedcert/selfsigned.key \
-                  /mnt/hdd/app-data/nginx/tor_tls.key
-    fi
+      # make sure certs exists
+      sudo -u admin /home/admin/config.scripts/internet.letsencrypt.sh refresh-nginx-certs
+      
   else
     echo "# exists /mnt/hdd/app-data/nginx/tls.cert"
   fi

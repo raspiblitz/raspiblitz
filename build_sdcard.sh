@@ -10,6 +10,14 @@
 # setup fresh SD card with image above - login via SSH and run this script:
 ##########################################################################
 
+# set locale to en_US.UTF-8 on system & activate for this script
+echo "# updating locale ..."
+sed -i "s/^# en_US.UTF-8 UTF-8.*/en_US.UTF-8 UTF-8/g" /etc/locale.gen
+sed -i "s/^# en_US ISO-8859-1.*/en_US ISO-8859-1/g" /etc/locale.gen
+locale-gen en_US.UTF-8 en_US ISO-8859-1 1>/dev/null
+update-locale LANG=en_US.UTF-8 1>/dev/null
+source /etc/default/locale
+
 defaultRepo="raspiblitz" # user that hosts a `raspiblitz` repo
 defaultBranch="v1.11" # latest version branch
 
@@ -53,6 +61,16 @@ fi
 if [ "$EUID" -ne 0 ]; then
   echo "error='run as root / may use sudo'"
   exit 1
+fi
+
+# Check if /usr/sbin is not in the PATH and add it if necessary
+if [[ ":$PATH:" != *":/usr/sbin:"* ]]; then
+    export PATH="$PATH:/usr/sbin"
+fi
+
+# Check if /usr/bin is not in the PATH and add it if necessary
+if [[ ":$PATH:" != *":/usr/bin:"* ]]; then
+    export PATH="$PATH:/usr/bin"
 fi
 
 if [ "$1" = "-EXPORT" ] || [ "$1" = "EXPORT" ]; then
@@ -314,24 +332,6 @@ if [ ${isDebianInHosts} -eq 0 ]; then
   systemctl restart networking
 fi
 
-# FIXING LOCALES
-# https://github.com/rootzoll/raspiblitz/issues/138
-# https://daker.me/2014/10/how-to-fix-perl-warning-setting-locale-failed-in-raspbian.html
-# https://stackoverflow.com/questions/38188762/generate-all-locales-in-a-docker-image
-if [ "${cpu}" = "aarch64" ] && { [ "${baseimage}" = "raspios_arm64" ] || [ "${baseimage}" = "debian" ]; }; then
-  echo -e "\n*** FIXING LOCALES FOR BUILD ***"
-  sed -i "s/^# en_US.UTF-8 UTF-8.*/en_US.UTF-8 UTF-8/g" /etc/locale.gen
-  sed -i "s/^# en_US ISO-8859-1.*/en_US ISO-8859-1/g" /etc/locale.gen
-  locale-gen
-  export LC_ALL=C
-  export LANGUAGE=en_US.UTF-8
-  export LANG=en_US.UTF-8
-  if [ ! -f /etc/apt/sources.list.d/raspi.list ]; then
-    echo "# Add the archive.raspberrypi.org/debian/ to the sources.list"
-    echo "deb http://archive.raspberrypi.org/debian/ bullseye main" | tee /etc/apt/sources.list.d/raspi.list
-  fi
-fi
-
 echo "*** Remove unnecessary packages ***"
 unnecessary_packages=(libreoffice* oracle-java* chromium-browser nuscratch scratch sonic-pi plymouth python2 vlc* cups)
 for pkg in "${unnecessary_packages[@]}"; do
@@ -344,6 +344,8 @@ for pkg in "${unnecessary_packages[@]}"; do
 done
 apt-get clean -y
 apt-get autoremove -y
+
+grep -q "^nameserver 8.8.8.8$" /etc/resolv.conf || echo "nameserver 8.8.8.8" >> /etc/resolv.conf
 
 echo -e "\n*** UPDATE Debian***"
 apt-get update -y
@@ -369,7 +371,7 @@ echo -e "\n*** SOFTWARE UPDATE ***"
 # sqlite3 -> database
 # fdisk -> create partitions
 # lsb-release -> needed to know which distro version we're running to add APT sources
-general_utils="sudo policykit-1 htop git curl bash-completion vim jq dphys-swapfile bsdmainutils autossh telnet vnstat parted dosfstools fbi sysbench build-essential dialog bc python3-dialog unzip whois fdisk lsb-release smartmontools rsyslog resolvconf"
+general_utils="sudo policykit-1 htop git curl bash-completion vim jq dphys-swapfile bsdmainutils autossh telnet vnstat parted dosfstools fbi sysbench build-essential dialog bc python3-dialog unzip whois fdisk lsb-release smartmontools rsyslog"
 # add btrfs-progs if not bookworm on aarch64
 [ "${architecture}" = "aarch64" ] && ! grep "12 (bookworm)" < /etc/os-release && general_utils="${general_utils} btrfs-progs"
 # python3-mako --> https://github.com/rootzoll/raspiblitz/issues/3441
@@ -378,6 +380,8 @@ server_utils="rsync net-tools xxd netcat-openbsd openssh-client openssh-sftp-ser
 [ "${baseimage}" = "armbian" ] && armbian_dependencies="armbian-config" # add armbian-config
 [ "${architecture}" = "amd64" ] && amd64_dependencies="network-manager" # add amd64 dependency
 
+apt_install resolvconf
+/sbin/resolvconf -u
 apt_install ${general_utils} ${python_dependencies} ${server_utils} ${amd64_dependencies} ${armbian_dependencies}
 apt-get clean -y
 apt-get autoremove -y
@@ -624,7 +628,7 @@ echo '%sudo ALL=(ALL) NOPASSWD:ALL' | sudo EDITOR='tee -a' visudo
 # check if group "admin" was created
 if [ $(sudo cat /etc/group | grep -c "^admin") -lt 1 ]; then
   echo -e "\nMissing group admin - creating it ..."
-  /usr/sbin/groupadd --force --gid 1002 admin
+  groupadd --force --gid 1002 admin
   usermod -a -G admin admin
 else
   echo -e "\nOK group admin exists"
@@ -641,7 +645,7 @@ echo "bitcoin:raspiblitz" | chpasswd
 chmod 755 /home/bitcoin
 
 # WRITE BASIC raspiblitz.info to sdcard
-# if further info gets added .. make sure to keep that on: blitz.preparerelease.sh
+# if further info gets added .. make sure to keep that on: blitz.release.sh
 touch /home/admin/raspiblitz.info
 echo "baseimage=${baseimage}" | tee raspiblitz.info
 echo "cpu=${cpu}" | tee -a raspiblitz.info
@@ -652,14 +656,14 @@ chown admin:admin /home/admin/raspiblitz.info
 
 echo -e "\n*** ADDING GROUPS FOR CREDENTIALS STORE ***"
 # access to credentials (e.g. macaroon files) in a central location is managed with unix groups and permissions
-/usr/sbin/groupadd --force --gid 9700 lndadmin
-/usr/sbin/groupadd --force --gid 9701 lndinvoice
-/usr/sbin/groupadd --force --gid 9702 lndreadonly
-/usr/sbin/groupadd --force --gid 9703 lndinvoices
-/usr/sbin/groupadd --force --gid 9704 lndchainnotifier
-/usr/sbin/groupadd --force --gid 9705 lndsigner
-/usr/sbin/groupadd --force --gid 9706 lndwalletkit
-/usr/sbin/groupadd --force --gid 9707 lndrouter
+groupadd --force --gid 9700 lndadmin
+groupadd --force --gid 9701 lndinvoice
+groupadd --force --gid 9702 lndreadonly
+groupadd --force --gid 9703 lndinvoices
+groupadd --force --gid 9704 lndchainnotifier
+groupadd --force --gid 9705 lndsigner
+groupadd --force --gid 9706 lndwalletkit
+groupadd --force --gid 9707 lndrouter
 
 echo -e "\n*** SHELL SCRIPTS & ASSETS ***"
 # copy raspiblitz repo from github
@@ -895,6 +899,7 @@ echo "1. login fresh --> user:admin password:raspiblitz"
 echo -e "2. run --> release\n"
 
 # make sure that at least the code is available (also if no internet)
+echo "** DISPLAY(${display})"
 /home/admin/config.scripts/blitz.display.sh prepare-install || exit 1
 # (do last - because it might trigger reboot)
 if [ "${display}" != "headless" ] || [ "${baseimage}" = "raspios_arm64" ]; then

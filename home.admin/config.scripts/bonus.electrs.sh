@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # https://github.com/romanz/electrs/releases
-ELECTRSVERSION="v0.10.4"
+ELECTRSVERSION="v0.10.6"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -313,7 +313,7 @@ if [ "$1" = "install" ]; then
 
     # verify
     sudo -u electrs /home/admin/config.scripts/blitz.git-verify.sh \
-      "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
+      "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" "${ELECTRSVERSION}" || exit 1
 
     # build
     sudo -u electrs /home/electrs/.cargo/bin/cargo build --locked --release || exit 1
@@ -368,7 +368,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo -u electrs mkdir /home/electrs/.electrs 2>/dev/null
     echo "\
 log_filters = \"WARN\"
-timestamp = true
 jsonrpc_import = true
 index-batch-size = 10
 wait_duration_secs = 10
@@ -599,7 +598,7 @@ if [ "$1" = "update" ]; then
     sudo -u electrs git reset --hard $updateVersion
 
     sudo -u electrs /home/admin/config.scripts/blitz.git-verify.sh \
-      "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
+      "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" "${updateVersion}" || exit 1
 
     echo "# Installing build dependencies"
     sudo -u electrs curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sudo -u electrs sh -s -- --default-toolchain none -y
@@ -612,6 +611,8 @@ if [ "$1" = "update" ]; then
     # update config
     sudo -u electrs sed -i "/^server_banner = /d" /home/electrs/.electrs/config.toml
     sudo -u electrs bash -c "echo 'server_banner = \"Welcome to electrs $updateVersion - the Electrum Rust Server on your RaspiBlitz\"' >> /home/electrs/.electrs/config.toml"
+    # remove the deprecated timestamp entry
+    sudo -u electrs sed -i '/^timestamp = true/d' /home/electrs/.electrs/config.toml
 
     echo "# Updated Electrs to $updateVersion"
   fi

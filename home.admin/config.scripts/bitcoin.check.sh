@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # command info
-if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ]; then
+if [ $# -eq 0 ] || [[ "$1" =~ ^(-h|--help|-help)$ ]]; then
   echo "# bitcoin.check.sh prestart [mainnet|testnet|signet]"
   exit 1
 fi
@@ -14,7 +14,6 @@ fi
 
 # check/repair lnd config before starting
 if [ "$1" == "prestart" ]; then
-
   echo "### RUNNING bitcoin.check.sh prestart"
 
   # check correct user
@@ -24,7 +23,7 @@ if [ "$1" == "prestart" ]; then
   fi
 
   # check correct parameter
-  if [ "$2" != "mainnet" ] && [ "$2" != "testnet" ] && [ "$2" != "signet" ]; then
+  if ! [[ "$2" =~ ^(mainnet|testnet|signet)$ ]]; then
     echo "# FAIL: missing/wrong parameter"
     exit 1
   fi
@@ -43,23 +42,24 @@ if [ "$1" == "prestart" ]; then
   sed -i '/^$/N;/^\n$/D' /mnt/hdd/bitcoin/bitcoin.conf
 
   ##### CHECK/SET CONFIG VALUES #####
-
-  # correct debug log path
-  if [ "${CHAIN}" == "mainnet" ]; then
-    bitcoinlog_entry="main.debuglogfile"
-    bitcoinlog_path="/mnt/hdd/bitcoin/debug.log"
-  elif [ "${CHAIN}" == "testnet" ]; then
-    bitcoinlog_entry="test.debuglogfile"
-    bitcoinlog_path="/mnt/hdd/bitcoin/testnet3/debug.log"
-  elif [ "${CHAIN}" == "signet" ]; then
-    bitcoinlog_entry="signet.debuglogfile"
-    bitcoinlog_path="/mnt/hdd/bitcoin/signet/debug.log"
-  fi
+  case "${CHAIN}" in
+    mainnet)
+      bitcoinlog_entry="main.debuglogfile"
+      bitcoinlog_path="/mnt/hdd/bitcoin/debug.log"
+      ;;
+    testnet)
+      bitcoinlog_entry="test.debuglogfile"
+      bitcoinlog_path="/mnt/hdd/bitcoin/testnet3/debug.log"
+      ;;
+    signet)
+      bitcoinlog_entry="signet.debuglogfile"
+      bitcoinlog_path="/mnt/hdd/bitcoin/signet/debug.log"
+      ;;
+  esac
 
   # make sure entry exists
   echo "# make sure entry(${bitcoinlog_entry}) exists"
-  extryExists=$(grep -c "^${bitcoinlog_entry}=" /mnt/hdd/bitcoin/bitcoin.conf)
-  if [ "${extryExists}" == "0" ]; then
+  if ! grep -q "^${bitcoinlog_entry}=" /mnt/hdd/bitcoin/bitcoin.conf; then
     echo "${bitcoinlog_entry}=${bitcoinlog_path}" >> /mnt/hdd/bitcoin/bitcoin.conf
   fi
 
@@ -71,7 +71,7 @@ if [ "$1" == "prestart" ]; then
   echo "# make sure bitcoin debug file exists"
   touch ${bitcoinlog_path}
   chown bitcoin:bitcoin ${bitcoinlog_path}
-  chmod 600 ${bitcoinlog_path} 
+  chmod 600 ${bitcoinlog_path}
 
   ##### STATISTICS #####
 
@@ -81,7 +81,6 @@ if [ "$1" == "prestart" ]; then
   fi
 
   echo "# OK PRESTART DONE"
-
 else
   echo "# FAIL: parameter not known - run with -h for help"
   exit 1

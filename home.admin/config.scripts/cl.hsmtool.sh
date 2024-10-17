@@ -234,7 +234,9 @@ if [ "$1" = "new" ] || [ "$1" = "new-force" ] || [ "$1" = "seed" ] || [ "$1" = "
   elif [ "$1" = "new-force" ]; then
     # get 24 words
     source <(python /home/admin/config.scripts/blitz.mnemonic.py generate)
-    echo "seedwords='${seedwords}'"
+    seedwordsCommaSeparated=$(echo "$seedwords" | sed 's/^ *//;s/ *$//;s/ \+/, /g')
+
+    echo "seedwords='${seedwordsCommaSeparated}'"
     echo "seedwords6x4='${seedwords6x4}'"
   elif [ "$1" = "seed" ] || [ "$1" = "seed-force" ]; then
     #TODO get seedwords from cl.backup.sh seed-import-gui [$RESULTFILE]
@@ -248,6 +250,7 @@ if [ "$1" = "new" ] || [ "$1" = "new-force" ] || [ "$1" = "seed" ] || [ "$1" = "
     echo "# No seedwords - exiting"
     exit 14
   fi
+  seedwordsCommaSeparated=$(echo "$seedwords" | sed 's/^ *//;s/ *$//;s/ \+/, /g')
   # place the seedwords to /home/bitcoin/.lightning/${CLNETWORK}/seedwords.info
   sudo touch /home/bitcoin/.lightning/${CLNETWORK}/seedwords.info
   sudo chown bitcoin:bitcoin /home/bitcoin/.lightning/${CLNETWORK}/seedwords.info
@@ -255,7 +258,7 @@ if [ "$1" = "new" ] || [ "$1" = "new-force" ] || [ "$1" = "seed" ] || [ "$1" = "
   echo "
 # This file was placed by cl.hsmtool.sh
 # Contains the seed words from which the hsm_secret in the same directory was generated from
-seedwords='${seedwords}'
+seedwords='${seedwordsCommaSeparated}'
 seedwords6x4='${seedwords6x4}'
 # Will be removed safely when the hsm_secret is encrypted.
 " | sudo -u bitcoin tee /home/bitcoin/.lightning/${CLNETWORK}/seedwords.info
