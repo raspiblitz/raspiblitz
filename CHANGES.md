@@ -2,9 +2,11 @@
 
 Optimized now to run also on plain debian12 linux for Proxmox/VM & x86 systems.
 
-Download Release Candidate - RaspberryPi minimal image:
-https://raspiblitz.fulmo.org/images/raspiblitz-min-v1.11.3rc2-2024-10-08.img.gz
-SHA-256-Checksum: a20e92b1d99c0dcc6fa6aa83f8212df6a0db8ae47616cc3b565c0f88f35c2457
+Download Release Candidates - RaspberryPi minimal image:
+https://raspiblitz.fulmo.org/images/raspiblitz-min-v1.11.3rc3-2024-10-18.img.gz
+SHA-256-Checksum: 5cea51978c291a27e632aefd1fe2e9ba48566c731e95d744edd6ba1b084be884
+https://raspiblitz.fulmo.org/images/raspiblitz-fat-v1.11.3rc3-2024-10-18.img.gz
+SHA-256-Checksum: 2a6eff477bbad2a42bc43e484deff9442d97ea4aaa45e752356c8fdaa99d0d75
 
 - New: Publicpool - Open Source Solo Bitcoin Mining (SSH Menu) [details](https://www.youtube.com/watch?v=QbOsH04Z9xM)
 - New: Tailscale (SSH menu > SETTINGS) [details](https://en.wikipedia.org/wiki/Tailscale)
