@@ -293,7 +293,7 @@ echo "baseimage=${baseimage}"
 raspi_configfile="/boot/config.txt"
 raspi_commandfile="/boot/cmdline.txt"
 if [ -d /boot/firmware ];then
-  raspi_configfile="/boot/firmware/config.txt" 
+  raspi_configfile="/boot/firmware/config.txt"
   raspi_commandfile="/boot/firmware/cmdline.txt"
 fi
 echo "raspi_configfile=${raspi_configfile}"
