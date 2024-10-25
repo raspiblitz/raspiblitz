@@ -7,14 +7,14 @@
 lndVersion="0.17.5-beta"
 
 # olaoluwa
-PGPauthor="roasbeef"
-PGPpkeys="https://keybase.io/roasbeef/pgp_keys.asc"
-PGPcheck="E4D85299674B2D31FAA1892E372CBD7633C61696"
+# PGPauthor="roasbeef"
+# PGPpkeys="https://raw.githubusercontent.com/lightningnetwork/lnd/master/scripts/keys/roasbeef.asc"
+# PGPcheck="A5B61896952D9FDA83BC054CDC42612E89237182"
 
 # guggero
-# PGPauthor="guggero"
-# PGPpkeys="https://keybase.io/guggero/pgp_keys.asc"
-# PGPcheck="F4FC70F07310028424EFC20A8E4256593F177720"
+PGPauthor="guggero"
+PGPpkeys="https://keybase.io/guggero/pgp_keys.asc"
+PGPcheck="F4FC70F07310028424EFC20A8E4256593F177720"
 
 # bitconner
 #PGPauthor="bitconner"
