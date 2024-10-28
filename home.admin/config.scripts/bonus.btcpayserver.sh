@@ -487,7 +487,6 @@ if [ "$1" = "install" ]; then
   echo "# Install NBXplorer $NBXplorerVersion"
   cd /home/btcpay || exit 1
   echo "# Download the NBXplorer source code $NBXplorerVersion"
-  sudo -u btcpay ssh-keyscan github.com >> ~/.ssh/known_hosts
   sudo -u btcpay git clone https://github.com/dgarage/NBXplorer.git
   if [ ! -d "/home/btcpay/NBXplorer" ]; then
     echo "# FAIL! on first git clone - retrying with snapshot download."
