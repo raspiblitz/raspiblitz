@@ -487,8 +487,8 @@ if [ "$1" = "install" ]; then
   echo "# Install NBXplorer $NBXplorerVersion"
   cd /home/btcpay || exit 1
   echo "# Download the NBXplorer source code $NBXplorerVersion"
-  sudo -u btcpay git clone https://github.com/dgarage/NBXplorer.git 2>/dev/null
-  cd NBXplorer || exit 1
+  sudo -u btcpay git clone https://github.com/dgarage/NBXplorer.git
+  cd NBXplorer
   sudo -u btcpay git reset --hard $NBXplorerVersion
   # PGP verify
   NBXPGPsigner="nicolasdorier"
