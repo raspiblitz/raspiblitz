@@ -492,7 +492,8 @@ if [ "$1" = "install" ]; then
     echo "# FAIL! on first git clone - retrying with SSH."
     sudo -u btcpay git clone git@github.com:dgarage/NBXplorer.git
     if [ ! -d "/home/btcpay/NBXplorer" ]; then
-      echo "# FAIL! also on second git clone of NBXplorer - exiting."
+      echo "# FAIL! also on second git clone of NBXplorer - uninstall & exiting."
+      /home/admin/config.scripts/bonus.btcpayserver.sh uninstall
       exit 1
     fi
   fi
