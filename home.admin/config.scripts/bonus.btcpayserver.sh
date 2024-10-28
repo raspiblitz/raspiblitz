@@ -489,15 +489,21 @@ if [ "$1" = "install" ]; then
   echo "# Download the NBXplorer source code $NBXplorerVersion"
   sudo -u btcpay git clone https://github.com/dgarage/NBXplorer.git
   if [ ! -d "/home/btcpay/NBXplorer" ]; then
-    echo "# FAIL! on first git clone - retrying with SSH."
-    sudo -u btcpay git clone git@github.com:dgarage/NBXplorer.git
+    echo "# FAIL! on first git clone - retrying with snapshot download."
+    sudo -u btcpay curl -L https://github.com/dgarage/NBXplorer/archive/refs/tags/$NBXplorerVersion.tar.gz -o NBXplorer.tar.gz
+    sudo -u btcpay tar -xzvf NBXplorer.tar.gz
+    sudo -u btcpay mv NBXplorer-* NBXplorer
     if [ ! -d "/home/btcpay/NBXplorer" ]; then
-      echo "# FAIL! also on second git clone of NBXplorer - exiting."
+      echo "# FAIL! also on second git clone of NBXplorer - uninstall & exiting."
+      /home/admin/config.scripts/bonus.btcpayserver.sh uninstall
       exit 1
     fi
+    cd NBXplorer
+  else
+    echo "# OK - git clone of NBXplorer successful."
+    cd NBXplorer
+    sudo -u btcpay git reset --hard $NBXplorerVersion
   fi
-  cd NBXplorer
-  sudo -u btcpay git reset --hard $NBXplorerVersion
   # PGP verify
   NBXPGPsigner="nicolasdorier"
   NBXPGPpubkeyLink="https://keybase.io/nicolasdorier/pgp_keys.asc"
@@ -523,7 +529,6 @@ if [ "$1" = "install" ]; then
   # from the build.sh with path
   sudo -u btcpay /home/btcpay/dotnet/dotnet build -c Release \
     /home/btcpay/btcpayserver/BTCPayServer/BTCPayServer.csproj || exit 1
-
   exit 0
 fi
 
