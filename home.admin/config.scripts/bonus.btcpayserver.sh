@@ -499,11 +499,13 @@ if [ "$1" = "install" ]; then
       /home/admin/config.scripts/bonus.btcpayserver.sh uninstall
       exit 1
     fi
+    cd NBXplorer
   else
     echo "# OK - git clone of NBXplorer successful."
+    cd NBXplorer
+    sudo -u btcpay git reset --hard $NBXplorerVersion
   fi
-  cd NBXplorer
-  sudo -u btcpay git reset --hard $NBXplorerVersion
+
   # PGP verify
   NBXPGPsigner="nicolasdorier"
   NBXPGPpubkeyLink="https://keybase.io/nicolasdorier/pgp_keys.asc"
@@ -529,7 +531,6 @@ if [ "$1" = "install" ]; then
   # from the build.sh with path
   sudo -u btcpay /home/btcpay/dotnet/dotnet build -c Release \
     /home/btcpay/btcpayserver/BTCPayServer/BTCPayServer.csproj || exit 1
-
   exit 0
 fi
 
