@@ -504,7 +504,6 @@ if [ "$1" = "install" ]; then
     cd NBXplorer
     sudo -u btcpay git reset --hard $NBXplorerVersion
   fi
-
   # PGP verify
   NBXPGPsigner="nicolasdorier"
   NBXPGPpubkeyLink="https://keybase.io/nicolasdorier/pgp_keys.asc"
