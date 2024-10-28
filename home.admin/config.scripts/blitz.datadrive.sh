@@ -35,17 +35,6 @@ elif [ -d /boot ]; then
 fi
 echo "# raspi_bootdir(${raspi_bootdir})"
 
-# install BTRFS if needed
-btrfsInstalled=$(btrfs --version 2>/dev/null | grep -c "btrfs-progs")
-if [ ${btrfsInstalled} -eq 0 ]; then
-  >&2 echo "# Installing BTRFS ..."
-  apt-get install -y btrfs-progs 1>/dev/null
-fi
-btrfsInstalled=$(btrfs --version 2>/dev/null | grep -c "btrfs-progs")
-if [ ${btrfsInstalled} -eq 0 ]; then
-  echo "error='missing btrfs package'"
-  exit 1
-fi
 
 # install smartmontools if needed
 smartmontoolsInstalled=$(apt-cache policy smartmontools | grep -c 'Installed: (none)' | grep -c "0")
@@ -66,13 +55,40 @@ fi
 # gathering system info
 # is global so that also other parts of this script can use this
 
+# check if a btrfs filesystem is available
 # basics
 isMounted=$(df | grep -c /mnt/hdd)
-isBTRFS=$(btrfs filesystem show 2>/dev/null| grep -c 'BLITZSTORAGE')
-isRaid=$(btrfs filesystem df /mnt/hdd 2>/dev/null | grep -c "Data, RAID1")
-isZFS=$(zfs list 2>/dev/null | grep -c "/mnt/hdd")
+isBTRFS="0"
+isRaid="0"
+isZFS="0"
 isSSD="0"
 isSMART="0"
+
+# BTRFS extras
+btrfsConnected=$(lsblk -f | grep -c btrfs)
+if [ ${btrfsConnected} -gt 0 ]; then
+
+  # install BTRFS if needed
+  btrfsInstalled=$(btrfs --version 2>/dev/null | grep -c "btrfs-progs")
+  if [ ${btrfsInstalled} -eq 0 ]; then
+    >&2 echo "# Installing BTRFS ..."
+    apt-get install -y btrfs-progs 1>/dev/null
+  fi
+  btrfsInstalled=$(btrfs --version 2>/dev/null | grep -c "btrfs-progs")
+  if [ ${btrfsInstalled} -eq 0 ]; then
+    echo "error='missing btrfs package'"
+    exit 1
+  fi
+  isBTRFS=$(btrfs filesystem show 2>/dev/null| grep -c 'BLITZSTORAGE')
+  isRaid=$(btrfs filesystem df /mnt/hdd 2>/dev/null | grep -c "Data, RAID1")
+
+fi
+
+# ZFS extras
+zfsConnected=$(lsblk -f | grep -c zfs)
+if [ ${zfsConnected} -gt 0 ]; then
+  isZFS=$(zfs list 2>/dev/null | grep -c "/mnt/hdd")
+fi
 
 # determine if swap is external on or not
 externalSwapPath="/mnt/hdd/swapfile"
@@ -656,6 +672,8 @@ if [ "$1" = "format" ]; then
   # check valid format
   if [ "$2" = "btrfs" ]; then
     >&2 echo "# DATA DRIVE - FORMATTING to BTRFS layout (new)"
+    # check if btrfs-tools are installed
+    apt-get install -y btrfs-progs 1>/dev/null
   elif [ "$2" = "ext4" ]; then
     >&2 echo "# DATA DRIVE - FORMATTING to EXT4 layout (old)"
   else
