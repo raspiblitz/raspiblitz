@@ -488,6 +488,14 @@ if [ "$1" = "install" ]; then
   cd /home/btcpay || exit 1
   echo "# Download the NBXplorer source code $NBXplorerVersion"
   sudo -u btcpay git clone https://github.com/dgarage/NBXplorer.git
+  if [ ! -d "/home/btcpay/NBXplorer" ]; then
+    echo "# FAIL! on first git clone - retrying with SSH."
+    sudo -u btcpay git clone git@github.com:dgarage/NBXplorer.git
+    if [ ! -d "/home/btcpay/NBXplorer" ]; then
+      echo "# FAIL! also on second git clone of NBXplorer - exiting."
+      exit 1
+    fi
+  fi
   cd NBXplorer
   sudo -u btcpay git reset --hard $NBXplorerVersion
   # PGP verify
