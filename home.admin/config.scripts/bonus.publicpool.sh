@@ -165,8 +165,8 @@ API_SECURE=false
   echo "
 [Unit]
 Description=${APPID}
-Wants=bitcoind
-After=bitcoind
+Wants=bitcoind.service
+After=bitcoind.service
 
 [Service]
 WorkingDirectory=/home/${APPID}/${APPID}
