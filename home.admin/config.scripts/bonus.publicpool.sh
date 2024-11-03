@@ -35,7 +35,7 @@ isInstalled=$(sudo ls /etc/systemd/system/${APPID}.service 2>/dev/null | grep -c
 isRunning=$(sudo systemctl status ${APPID} 2>/dev/null | grep -c 'active (running)')
 
 if [ "${isInstalled}" == "1" ]; then
-  localIP=$(hostname -I | awk '{print $1}')
+  loca  lIP=$(hostname -I | awk '{print $1}')
 fi
 
 if [ "$1" = "status" ]; then
@@ -105,6 +105,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # check that the repos were cloned
   if [ ! -d "/home/${APPID}/${APPID}" ] || [ ! -d "/home/${APPID}/${APPID}-ui" ]; then
     echo "# FAIL - Was not able to clone the GitHub repos."
+    echo "# running uninstall script to clean up"
+    /home/admin/config.scripts/bonus.publicpool.sh off
     exit 1
   fi 
 
