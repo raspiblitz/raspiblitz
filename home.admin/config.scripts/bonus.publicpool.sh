@@ -35,7 +35,7 @@ isInstalled=$(sudo ls /etc/systemd/system/${APPID}.service 2>/dev/null | grep -c
 isRunning=$(sudo systemctl status ${APPID} 2>/dev/null | grep -c 'active (running)')
 
 if [ "${isInstalled}" == "1" ]; then
-  loca  lIP=$(hostname -I | awk '{print $1}')
+  localIP=$(hostname -I | awk '{print $1}')
 fi
 
 if [ "$1" = "status" ]; then
