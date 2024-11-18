@@ -6,8 +6,8 @@
 # id string of your app (short single string unique in raspiblitz)
 APPID="albyhub" # one-word lower-case no-specials
 
-# clean human readable version - will be displayed in UI
-VERSION="1.0"
+# https://github.com/getAlby/hub/releases
+VERSION="1.10.4"
 
 # BASIC COMMANDLINE OPTIONS
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -22,7 +22,7 @@ fi
 # echoing comments is useful for logs - but start output with # when not a key=value
 echo "# Running: 'bonus.${APPID}.sh $*'"
 
-# check & load raspiblitz config
+source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
 
 #########################
@@ -102,18 +102,24 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   cd /opt/albyhub
 
   # download Alby Hub
-  wget https://getalby.com/install/hub/server-linux-aarch64.tar.bz2
+  if [ ${cpu} == "aarch64" ]; then
+    echo "# Downloading Alby Hub for aarch64"
+    wget -O albyhub-server.tar.bz2 https://github.com/getAlby/hub/releases/download/v$VERSION/albyhub-Server-Linux-aarch64.tar.bz2
+  else
+    echo "# Downloading Alby Hub for x86"
+    wget -O albyhub-server.tar.bz2 https://github.com/getAlby/hub/releases/download/v$VERSION/albyhub-Server-Linux-x86_64.tar.bz2 
+  fi
 
   # extract archives
-  tar -xvf server-linux-aarch64.tar.bz2
+  tar -xvf albyhub-server.tar.bz2
   if [[ $? -ne 0 ]]; then
-    echo "Failed to unpack Alby Hub. Potentially bzip2 is missing"
-    echo "Install it with sudo apt-get install bzip2"
+    echo "# Failed to download & unpack Alby Hub"
+    echo "error='download & unpack failed'"
     exit 1
   fi
 
   # cleanup
-  rm server-linux-aarch64.tar.bz2
+  rm albyhub-server.tar.bz2
 
   # allow Alby Hub to bind on port 80
   sudo setcap CAP_NET_BIND_SERVICE=+eip /opt/albyhub/bin/albyhub
