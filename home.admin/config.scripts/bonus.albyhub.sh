@@ -76,6 +76,12 @@ fi
 
 # show info menu
 if [ "$1" = "menu" ]; then
+
+  if [ ${isInstalled} -lt 1 ]; then
+    echo "error='App not installed'"
+    exit 1
+  fi
+
   # set the title for the dialog
   dialogTitle=" ${APPID} "
 
