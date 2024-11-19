@@ -171,10 +171,10 @@ Wants=network-online.target
 Type=simple
 Restart=always
 RestartSec=1
-User=$USER
+User=${APPID}
 ExecStart=/home/albyhub/bin/albyhub
 # Hack to ensure Alby Hub never uses more than 90% CPU
-CPUQuota=90%
+CPUQuota=90%sudo 
 
 Environment=\"PORT=${PORT_CLEAR}\"
 Environment=\"WORK_DIR=/mnt/hdd/app-data/${APPID}\"
