@@ -22,6 +22,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "# bonus.${APPID}.sh on        -> install the app"
   echo "# bonus.${APPID}.sh off       -> uninstall the app"
   echo "# bonus.${APPID}.sh menu      -> SSH menu dialog"
+  echo "# bonus.${APPID}.sh prestart  -> prestart used by systemd"
   exit 1
 fi
 
@@ -110,6 +111,12 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     exit 1
   fi
 
+  # check if lnd service is installed
+  if [ $(sudo ls /etc/systemd/system/lnd.service 2>/dev/null | grep -c 'lnd.service') -eq 0 ]; then
+    echo "error='LND needs to be installed'"
+    exit 1
+  fi
+
   echo "# Installing ${APPID} ..."
 
   echo "# create user"
@@ -143,11 +150,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   rm -f albyhub-server.tar.bz2
 
   # Setze die Berechtigungen für das Verzeichnis und die Dateien
-  sudo chmod -R 755 /home/albyhub/lib
-  sudo chown -R root:root /home/albyhub/lib
+  sudo chmod -R 755 /home/${APPID}/lib
+  sudo chown -R root:root /home/${APPID}/lib
 
   # make libs available
-  echo "/home/albyhub/lib" | sudo tee /etc/ld.so.conf.d/albyhub.conf
+  echo "/home/${APPID}/lib" | sudo tee /etc/ld.so.conf.d/${APPID}.conf
   sudo ldconfig
 
   # prepare data directory
@@ -159,20 +166,26 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo ufw allow ${PORT_CLEAR} comment "${APPID} HTTP"
   sudo ufw allow ${PORT_SSL} comment "${APPID} HTTPS"
 
+  # prepare Dynamic Drop-In File
+  sudo mkdir -p /etc/systemd/system/${APPID}.service.d/
+  sudo touch /etc/systemd/system/${APPID}.service.d/10-dynamic-env.conf
+  sudo chown ${APPID}:${APPID} /etc/systemd/system/${APPID}.service.d/10-dynamic-env.conf
+
   # create systemd service
   echo "# create systemd service: ${APPID}.service"
   echo "
 [Unit]
 Description=AlbyHub
-After=network-online.target
-Wants=network-online.target
+Wants=lnd.service
+After=lnd.service
 
 [Service]
 Type=simple
 Restart=always
 RestartSec=1
 User=${APPID}
-ExecStart=/home/albyhub/bin/albyhub
+ExecStartPre=-/home/admin/config.scripts/bonus.${APPID}.sh prestart
+ExecStart=/home/${APPID}/bin/${APPID}
 # Hack to ensure Alby Hub never uses more than 90% CPU
 CPUQuota=90%sudo 
 
@@ -269,6 +282,30 @@ server {
 
   echo "# Monitor with: sudo journalctl -f -u ${APPID}"
   echo "# OK install done"
+  exit 0
+fi
+
+##########################
+# PRESTART
+##########################
+
+# BACKGROUND is that this script will be called with `prestart` on every start & restart
+if [ "$1" = "prestart" ]; then
+
+  # needs to be run as the app user - stop if not run as the app user
+  # keep in mind that in the prestart section you cannot use `sudo` command
+  if [ "$USER" != "${APPID}" ]; then
+    echo "# FAIL: run as user ${APPID}"
+    exit 1
+  fi
+
+  echo "## PRESTART CONFIG START for ${APPID} (called by systemd prestart)"
+
+  echo "[Service]" > /etc/systemd/system/my-service.service.d/10-dynamic-env.conf
+  echo "Environment=\"SETTING_ENV_VAR=value\"" >> /etc/systemd/system/my-service.service.d/10-dynamic-env.conf
+  echo >> /etc/systemd/system/my-service.service.d/10-dynamic-env.conf
+
+  echo "## PRESTART CONFIG DONE for ${APPID}"
   exit 0
 fi
 
