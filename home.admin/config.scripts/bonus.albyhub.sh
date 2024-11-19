@@ -22,7 +22,6 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "# bonus.${APPID}.sh on        -> install the app"
   echo "# bonus.${APPID}.sh off       -> uninstall the app"
   echo "# bonus.${APPID}.sh menu      -> SSH menu dialog"
-  echo "# bonus.${APPID}.sh prestart  -> will be called by systemd before start"
   exit 1
 fi
 
@@ -141,7 +140,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   fi
 
   # cleanup
-  rm albyhub-server.tar.bz2
+  rm -f albyhub-server.tar.bz2
 
   # Setze die Berechtigungen für das Verzeichnis und die Dateien
   sudo chmod -R 755 /home/albyhub/lib
@@ -151,14 +150,20 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "/home/albyhub/lib" | sudo tee /etc/ld.so.conf.d/albyhub.conf
   sudo ldconfig
 
-  echo "debug exit"
-  exit 0
+  # prepare data directory
+  sudo mkdir -p /mnt/hdd/app-data/${APPID}
+  sudo chown -R ${APPID}:${APPID} /mnt/hdd/app-data/${APPID}
+
+  # open the ports in the firewall
+  echo "# updating Firewall"
+  sudo ufw allow ${PORT_CLEAR} comment "${APPID} HTTP"
+  sudo ufw allow ${PORT_SSL} comment "${APPID} HTTPS"
 
   # create systemd service
   echo "# create systemd service: ${APPID}.service"
   echo "
 [Unit]
-Description=Alby Hub
+Description=AlbyHub
 After=network-online.target
 Wants=network-online.target
 
@@ -167,12 +172,12 @@ Type=simple
 Restart=always
 RestartSec=1
 User=$USER
-ExecStart=/opt/albyhub/bin/albyhub
+ExecStart=/home/albyhub/bin/albyhub
 # Hack to ensure Alby Hub never uses more than 90% CPU
 CPUQuota=90%
 
-Environment=\"PORT=80\"
-Environment=\"WORK_DIR=/opt/albyhub/data\"
+Environment=\"PORT=${PORT_CLEAR}\"
+Environment=\"WORK_DIR=/mnt/hdd/app-data/${APPID}\"
 Environment=\"LDK_ESPLORA_SERVER=https://electrs.getalbypro.com\"
 Environment=\"LOG_EVENTS=true\"
 Environment=\"LDK_GOSSIP_SOURCE=\"
@@ -182,11 +187,88 @@ WantedBy=multi-user.target
 " | sudo tee /etc/systemd/system/${APPID}.service
   sudo chown root:root /etc/systemd/system/${APPID}.service
 
-  # enable and start the service
-  sudo systemctl enable ${APPID}
-  sudo systemctl start ${APPID}
+  # when tor is set on also install the hidden service
+  if [ "${runBehindTor}" = "on" ]; then
+    # activating tor hidden service
+    /home/admin/config.scripts/tor.onion-service.sh ${APPID} 80 ${PORT_TOR_CLEAR} 443 ${PORT_TOR_SSL}
+  fi
 
-  echo "\n\n✅ Installation finished! Please visit http://${localIP} to configure your new Alby Hub."
+  # nginx configuration
+  # BACKGROUND is that the plain HTTP is served by your web app, but thru the nginx proxy it will be available
+  # with (self-signed) HTTPS and with separate configs for Tor & Tor+HTTPS.
+  
+  echo "# setup nginx confing"
+
+  # write the HTTPS config
+  echo "
+server {
+    listen ${PORT_SSL} ssl;
+    listen [::]:${PORT_SSL} ssl;
+    server_name _;
+    include /etc/nginx/snippets/ssl-params.conf;
+    include /etc/nginx/snippets/ssl-certificate-app-data.conf;
+    access_log /var/log/nginx/access_${APPID}.log;
+    error_log /var/log/nginx/error_${APPID}.log;
+    location / {
+        proxy_pass http://127.0.0.1:${PORT_CLEAR};
+        include /etc/nginx/snippets/ssl-proxy-params.conf;
+    }
+}
+" | sudo tee /etc/nginx/sites-available/${APPID}_ssl.conf
+  sudo ln -sf /etc/nginx/sites-available/${APPID}_ssl.conf /etc/nginx/sites-enabled/
+
+  # write the Tor config
+  echo "
+server {
+    listen ${PORT_TOR_CLEAR};
+    server_name _;
+    access_log /var/log/nginx/access_${APPID}.log;
+    error_log /var/log/nginx/error_${APPID}.log;
+    location / {
+        proxy_pass http://127.0.0.1:${PORT_CLEAR};
+        include /etc/nginx/snippets/ssl-proxy-params.conf;
+    }
+}
+" | sudo tee /etc/nginx/sites-available/${APPID}_tor.conf
+  sudo ln -sf /etc/nginx/sites-available/${APPID}_tor.conf /etc/nginx/sites-enabled/
+
+  # write the Tor+HTTPS config
+  echo "
+server {
+    listen ${PORT_TOR_SSL} ssl;
+    server_name _;
+    include /etc/nginx/snippets/ssl-params.conf;
+    include /etc/nginx/snippets/ssl-certificate-app-data-tor.conf;
+    access_log /var/log/nginx/access_${APPID}.log;
+    error_log /var/log/nginx/error_${APPID}.log;
+    location / {
+        proxy_pass http://127.0.0.1:${PORT_CLEAR};
+        include /etc/nginx/snippets/ssl-proxy-params.conf;
+    }
+}
+" | sudo tee /etc/nginx/sites-available/${APPID}_tor_ssl.conf
+  sudo ln -sf /etc/nginx/sites-available/${APPID}_tor_ssl.conf /etc/nginx/sites-enabled/
+
+  # test nginx config & activate thru reload
+  sudo nginx -t
+  sudo systemctl reload nginx
+
+  # enable app up thru systemd
+  sudo systemctl enable ${APPID}
+  echo "# OK - the ${APPID}.service is now enabled"
+
+  # start app (only when blitz is ready)
+  source <(/home/admin/_cache.sh get state)
+  if [ "${state}" == "ready" ]; then
+    sudo systemctl start ${APPID}
+    echo "# OK - the ${APPID}.service is now started"
+  fi
+
+  echo "# mark app as installed in raspiblitz config"
+  /home/admin/config.scripts/blitz.conf.sh set ${APPID} "on"
+
+  echo "# Monitor with: sudo journalctl -f -u ${APPID}"
+  echo "# OK install done"
   exit 0
 fi
 
