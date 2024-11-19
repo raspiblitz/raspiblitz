@@ -13,8 +13,8 @@ VERSION="1.10.4"
 # delete if not an web app
 PORT_CLEAR="8029"
 PORT_SSL="8030"
-PORT_TOR_CLEAR="80"
-PORT_TOR_SSL="443"
+PORT_TOR_CLEAR="8031"
+PORT_TOR_SSL="8032"
 
 # BASIC COMMANDLINE OPTIONS
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
