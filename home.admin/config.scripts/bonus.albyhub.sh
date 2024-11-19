@@ -9,6 +9,13 @@ APPID="albyhub" # one-word lower-case no-specials
 # https://github.com/getAlby/hub/releases
 VERSION="1.10.4"
 
+# port numbers the app should run on
+# delete if not an web app
+PORT_CLEAR="8029"
+PORT_SSL="8030"
+PORT_TOR_CLEAR="80"
+PORT_TOR_SSL="443"
+
 # BASIC COMMANDLINE OPTIONS
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "# bonus.${APPID}.sh status    -> status information (key=value)"
@@ -41,7 +48,8 @@ isRunning=$(systemctl status ${APPID} 2>/dev/null | grep -c 'active (running)')
 if [ "${isInstalled}" == "1" ]; then
   # gather address info (whats needed to call the app)
   localIP=$(hostname -I | awk '{print $1}')
-  url="http://${localIP}"
+  toraddress=$(sudo cat /mnt/hdd/tor/${APPID}/hostname 2>/dev/null)
+  fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
 fi
 
 # if the action parameter `status` was called - just stop here and output all
@@ -53,7 +61,11 @@ if [ "$1" = "status" ]; then
   echo "isRunning=${isRunning}"
   if [ "${isInstalled}" == "1" ]; then
     echo "localIP='${localIP}'"
-    echo "url='${url}'"
+    echo "portCLEAR=${PORT_CLEAR}"
+    echo "portSSL=${PORT_SSL}"
+    echo "localIP='${localIP}'"
+    echo "toraddress='${toraddress}'"
+    echo "fingerprint='${fingerprint}'"
   fi
   exit
 fi
@@ -69,11 +81,14 @@ if [ "$1" = "menu" ]; then
 
   # basic info text - for a web app how to call with http
   dialogText="Open in your local web browser:
-http://${localIP}\n
-Use your Password B to login.\n"
+http://${localIP}:${PORT_CLEAR}\n
+https://${localIP}:${PORT_SSL} with Fingerprint:
+${fingerprint}\n
+Use your Password B to login.\n
+"
 
   # use whiptail to show SSH dialog & exit
-  whiptail --title "${dialogTitle}" --msgbox "${dialogText}" 10 67
+  whiptail --title "${dialogTitle}" --msgbox "${dialogText}" 18 67
   echo "please wait ..."
   exit 0
 fi
@@ -92,37 +107,38 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   echo "# Installing ${APPID} ..."
 
-  echo "\n\n⚡️ Welcome to Alby Hub"
-  echo "-----------------------------------------"
-  echo "Installing..."
+  echo "# create user"
+  sudo adduser --system --group --shell /bin/bash --home /home/${APPID} ${APPID} || exit 1
+  sudo -u ${APPID} cp -r /etc/skel/. /home/${APPID}/
 
-  # create directory and set permissions
-  sudo mkdir -p /opt/albyhub
-  sudo chown -R $USER:$USER /opt/albyhub
-  cd /opt/albyhub
+  echo "# add use to special groups"
+  sudo /usr/sbin/usermod --append --groups lndadmin ${APPID}
+
+  # use new app user home as install directory
+  cd /home/${APPID}
 
   # download Alby Hub
   if [ ${cpu} == "aarch64" ]; then
     echo "# Downloading Alby Hub for aarch64"
-    wget -O albyhub-server.tar.bz2 https://github.com/getAlby/hub/releases/download/v$VERSION/albyhub-Server-Linux-aarch64.tar.bz2
+    sudo wget -O albyhub-server.tar.bz2 https://github.com/getAlby/hub/releases/download/v$VERSION/albyhub-Server-Linux-aarch64.tar.bz2
   else
     echo "# Downloading Alby Hub for x86"
-    wget -O albyhub-server.tar.bz2 https://github.com/getAlby/hub/releases/download/v$VERSION/albyhub-Server-Linux-x86_64.tar.bz2 
+    sudo wget -O albyhub-server.tar.bz2 https://github.com/getAlby/hub/releases/download/v$VERSION/albyhub-Server-Linux-x86_64.tar.bz2 
   fi
 
   # extract archives
-  tar -xvf albyhub-server.tar.bz2
+  sudo tar -xvf albyhub-server.tar.bz2
   if [[ $? -ne 0 ]]; then
     echo "# Failed to download & unpack Alby Hub"
     echo "error='download & unpack failed'"
     exit 1
   fi
 
+  echo "debug exit"
+  exit 0
+
   # cleanup
   rm albyhub-server.tar.bz2
-
-  # allow Alby Hub to bind on port 80
-  sudo setcap CAP_NET_BIND_SERVICE=+eip /opt/albyhub/bin/albyhub
 
   # make libs available
   echo "/opt/albyhub/lib" | sudo tee /etc/ld.so.conf.d/albyhub.conf
@@ -177,9 +193,25 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   sudo systemctl disable ${APPID}.service
   sudo rm /etc/systemd/system/${APPID}.service
 
+  echo "# remove nginx symlinks"
+  sudo rm -f /etc/nginx/sites-enabled/${APPID}_ssl.conf 2>/dev/null
+  sudo rm -f /etc/nginx/sites-enabled/${APPID}_tor.conf 2>/dev/null
+  sudo rm -f /etc/nginx/sites-enabled/${APPID}_tor_ssl.conf 2>/dev/null
+  sudo rm -f /etc/nginx/sites-available/${APPID}_ssl.conf 2>/dev/null
+  sudo rm -f /etc/nginx/sites-available/${APPID}_tor.conf 2>/dev/null
+  sudo rm -f /etc/nginx/sites-available/${APPID}_tor_ssl.conf 2>/dev/null
+  sudo nginx -t
+  sudo systemctl reload nginx
+
+  echo "# close ports on firewall"
+  sudo ufw deny "${PORT_CLEAR}"
+  sudo ufw deny "${PORT_SSL}"
+
   echo "# delete user and directories"
   sudo userdel -rf ${APPID}
-  sudo rm -rf /opt/albyhub
+
+  echo "# removing Tor hidden service (if active)"
+  /home/admin/config.scripts/tor.onion-service.sh off ${APPID}
 
   echo "# mark app as uninstalled in raspiblitz config"
   /home/admin/config.scripts/blitz.conf.sh set ${APPID} "off"
