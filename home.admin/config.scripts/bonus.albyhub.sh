@@ -140,15 +140,19 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     exit 1
   fi
 
-  echo "debug exit"
-  exit 0
-
   # cleanup
   rm albyhub-server.tar.bz2
 
+  # Setze die Berechtigungen für das Verzeichnis und die Dateien
+  sudo chmod -R 755 /home/albyhub/lib
+  sudo chown -R root:root /home/albyhub/lib
+
   # make libs available
-  echo "/opt/albyhub/lib" | sudo tee /etc/ld.so.conf.d/albyhub.conf
+  echo "/home/albyhub/lib" | sudo tee /etc/ld.so.conf.d/albyhub.conf
   sudo ldconfig
+
+  echo "debug exit"
+  exit 0
 
   # create systemd service
   echo "# create systemd service: ${APPID}.service"
@@ -212,6 +216,10 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   echo "# close ports on firewall"
   sudo ufw deny "${PORT_CLEAR}"
   sudo ufw deny "${PORT_SSL}"
+
+  # remove libraries again
+  sudo rm /etc/ld.so.conf.d/albyhub.conf
+  sudo ldconfig
 
   echo "# delete user and directories"
   sudo userdel -rf ${APPID}
