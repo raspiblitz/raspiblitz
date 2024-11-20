@@ -42,14 +42,18 @@ if [ "$1" = "prestart" ]; then
     exit 1
   fi
 
+  # see: https://github.com/getAlby/hub/blob/master/.env.example
+
   echo "## PRESTART CONFIG START for ${APPID} (called by systemd prestart)"
   echo "# creating dynamic env file --> ${ENVFILE}"
   touch ${ENVFILE}
   chmod 770 ${ENVFILE}
   echo "PORT=${PORT_CLEAR}" > ${ENVFILE}
   echo "WORK_DIR=/mnt/hdd/app-data/${APPID}" >> ${ENVFILE}
-  echo "LDK_ESPLORA_SERVER=https://electrs.getalbypro.com" >> ${ENVFILE}
-  echo "LDK_GOSSIP_SOURCE=" >> ${ENVFILE}
+  echo "LN_BACKEND_TYPE=LND" >> ${ENVFILE}
+  echo "LND_ADDRESS=127.0.0.1:10009" >> ${ENVFILE}
+  echo "LND_CERT_FILE=/mnt/hdd/app-data/lnd/tls.cert" >> ${ENVFILE}
+  echo "LND_MACAROON_FILE=/mnt/hdd/app-data/lnd/data/chain/bitcoin/mainnet/admin.macaroon" >> ${ENVFILE}
   echo >> ${ENVFILE}
 
   echo "## PRESTART CONFIG DONE for ${APPID}"
