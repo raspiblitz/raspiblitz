@@ -292,8 +292,8 @@ if [ "$1" = "prestart" ]; then
   echo "## PRESTART CONFIG START for ${APPID} (called by systemd prestart)"
 
   echo "# creating dynamic env file --> /var/cache/raspiblitz/temp/${APPID}.env"
-  sudo -u ${APPID} touch /var/cache/raspiblitz/temp/${APPID}.env
-  sudo -u ${APPID} chmod 770 /var/cache/raspiblitz/temp/${APPID}.env
+  touch /var/cache/raspiblitz/temp/${APPID}.env
+  chmod 770 /var/cache/raspiblitz/temp/${APPID}.env
   echo "PORT=${PORT_CLEAR}" > /var/cache/raspiblitz/temp/${APPID}.env
   echo "WORK_DIR=/mnt/hdd/app-data/${APPID}" >> /var/cache/raspiblitz/temp/${APPID}.env
   echo "LDK_ESPLORA_SERVER=https://electrs.getalbypro.com" >> /var/cache/raspiblitz/temp/${APPID}.env
