@@ -47,15 +47,17 @@ if [ "$1" = "prestart" ]; then
   fi
 
   echo "## PRESTART CONFIG START for ${APPID} (called by systemd prestart)"
+  ENVFILE="/var/cache/raspiblitz/temp/${APPID}.env"
+  exit 0
 
-  echo "# creating dynamic env file --> /var/cache/raspiblitz/temp/${APPID}.env"
-  touch /var/cache/raspiblitz/temp/${APPID}.env
-  chmod 770 /var/cache/raspiblitz/temp/${APPID}.env
-  echo "PORT=${PORT_CLEAR}" > /var/cache/raspiblitz/temp/${APPID}.env
-  echo "WORK_DIR=/mnt/hdd/app-data/${APPID}" >> /var/cache/raspiblitz/temp/${APPID}.env
-  echo "LDK_ESPLORA_SERVER=https://electrs.getalbypro.com" >> /var/cache/raspiblitz/temp/${APPID}.env
-  echo "LDK_GOSSIP_SOURCE=" >> /var/cache/raspiblitz/temp/${APPID}.env
-  echo >> /var/cache/raspiblitz/temp/${APPID}.env
+  echo "# creating dynamic env file --> ${ENVFILE}"
+  touch ${ENVFILE}
+  chmod 770 ${ENVFILE}
+  echo "PORT=${PORT_CLEAR}" > ${ENVFILE}
+  echo "WORK_DIR=/mnt/hdd/app-data/${APPID}" >> ${ENVFILE}
+  echo "LDK_ESPLORA_SERVER=https://electrs.getalbypro.com" >> ${ENVFILE}
+  echo "LDK_GOSSIP_SOURCE=" >> ${ENVFILE}
+  echo >> ${ENVFILE}
 
   echo "## PRESTART CONFIG DONE for ${APPID}"
   exit 0
@@ -209,7 +211,7 @@ Restart=always
 RestartSec=1
 User=${APPID}
 ExecStartPre=-/home/admin/config.scripts/bonus.${APPID}.sh prestart
-EnvironmentFile=/var/cache/raspiblitz/temp/${APPID}.env
+#EnvironmentFile=/var/cache/raspiblitz/temp/${APPID}.env
 ExecStart=/home/${APPID}/bin/${APPID}
 # Hack to ensure Alby Hub never uses more than 90% CPU
 CPUQuota=90%sudo 
