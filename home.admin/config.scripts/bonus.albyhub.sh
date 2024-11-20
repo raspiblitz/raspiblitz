@@ -26,11 +26,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   exit 1
 fi
 
-# echoing comments is useful for logs - but start output with # when not a key=value
-echo "# Running: 'bonus.${APPID}.sh $*'"
-
-source /home/admin/raspiblitz.info
-source /mnt/hdd/raspiblitz.conf
+ENVFILE="/var/cache/raspiblitz/temp/${APPID}.env"
 
 ##########################
 # PRESTART
@@ -47,9 +43,6 @@ if [ "$1" = "prestart" ]; then
   fi
 
   echo "## PRESTART CONFIG START for ${APPID} (called by systemd prestart)"
-  ENVFILE="/var/cache/raspiblitz/temp/${APPID}.env"
-  exit 0
-
   echo "# creating dynamic env file --> ${ENVFILE}"
   touch ${ENVFILE}
   chmod 770 ${ENVFILE}
@@ -62,6 +55,12 @@ if [ "$1" = "prestart" ]; then
   echo "## PRESTART CONFIG DONE for ${APPID}"
   exit 0
 fi
+
+# echoing comments is useful for logs - but start output with # when not a key=value
+echo "# Running: 'bonus.${APPID}.sh $*'"
+
+source /home/admin/raspiblitz.info
+source /mnt/hdd/raspiblitz.conf
 
 #########################
 # INFO
