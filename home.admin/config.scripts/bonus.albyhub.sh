@@ -32,6 +32,35 @@ echo "# Running: 'bonus.${APPID}.sh $*'"
 source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
 
+##########################
+# PRESTART
+##########################
+
+# background is that this script will be called with `prestart` on every start & restart
+if [ "$1" = "prestart" ]; then
+
+  # needs to be run as the app user - stop if not run as the app user
+  # keep in mind that in the prestart section you cannot use `sudo` command
+  if [ "$USER" != "${APPID}" ]; then
+    echo "# FAIL: run as user ${APPID}"
+    exit 1
+  fi
+
+  echo "## PRESTART CONFIG START for ${APPID} (called by systemd prestart)"
+
+  echo "# creating dynamic env file --> /var/cache/raspiblitz/temp/${APPID}.env"
+  touch /var/cache/raspiblitz/temp/${APPID}.env
+  chmod 770 /var/cache/raspiblitz/temp/${APPID}.env
+  echo "PORT=${PORT_CLEAR}" > /var/cache/raspiblitz/temp/${APPID}.env
+  echo "WORK_DIR=/mnt/hdd/app-data/${APPID}" >> /var/cache/raspiblitz/temp/${APPID}.env
+  echo "LDK_ESPLORA_SERVER=https://electrs.getalbypro.com" >> /var/cache/raspiblitz/temp/${APPID}.env
+  echo "LDK_GOSSIP_SOURCE=" >> /var/cache/raspiblitz/temp/${APPID}.env
+  echo >> /var/cache/raspiblitz/temp/${APPID}.env
+
+  echo "## PRESTART CONFIG DONE for ${APPID}"
+  exit 0
+fi
+
 #########################
 # INFO
 #########################
@@ -272,35 +301,6 @@ server {
 
   echo "# Monitor with: sudo journalctl -f -u ${APPID}"
   echo "# OK install done"
-  exit 0
-fi
-
-##########################
-# PRESTART
-##########################
-
-# background is that this script will be called with `prestart` on every start & restart
-if [ "$1" = "prestart" ]; then
-
-  # needs to be run as the app user - stop if not run as the app user
-  # keep in mind that in the prestart section you cannot use `sudo` command
-  if [ "$USER" != "${APPID}" ]; then
-    echo "# FAIL: run as user ${APPID}"
-    exit 1
-  fi
-
-  echo "## PRESTART CONFIG START for ${APPID} (called by systemd prestart)"
-
-  echo "# creating dynamic env file --> /var/cache/raspiblitz/temp/${APPID}.env"
-  touch /var/cache/raspiblitz/temp/${APPID}.env
-  chmod 770 /var/cache/raspiblitz/temp/${APPID}.env
-  echo "PORT=${PORT_CLEAR}" > /var/cache/raspiblitz/temp/${APPID}.env
-  echo "WORK_DIR=/mnt/hdd/app-data/${APPID}" >> /var/cache/raspiblitz/temp/${APPID}.env
-  echo "LDK_ESPLORA_SERVER=https://electrs.getalbypro.com" >> /var/cache/raspiblitz/temp/${APPID}.env
-  echo "LDK_GOSSIP_SOURCE=" >> /var/cache/raspiblitz/temp/${APPID}.env
-  echo >> /var/cache/raspiblitz/temp/${APPID}.env
-
-  echo "## PRESTART CONFIG DONE for ${APPID}"
   exit 0
 fi
 
