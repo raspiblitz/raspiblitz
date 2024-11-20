@@ -111,7 +111,11 @@ fi
 # show info menu
 if [ "$1" = "menu" ]; then
 
-  if [ ${isInstalled} -lt 1 ]; then
+  if [ ${isInstalled} -eq 0 ] && [ "${albyhub}" == "on" ]; then
+    clear
+    echo "# AlbyHub needs re-install ..."
+    /home/admin/config.scripts/bonus.albyhub.sh on
+  elif [ ${isInstalled} -lt 1 ]; then
     echo "error='App not installed'"
     exit 1
   fi

@@ -32,6 +32,8 @@ if [ ${#fints} -eq 0 ]; then fints="off"; fi
 if [ ${#lndk} -eq 0 ]; then lndk="off"; fi
 if [ ${#labelbase} -eq 0 ]; then labelbase="off"; fi
 if [ ${#publicpool} -eq 0 ]; then publicpool="off"; fi
+if [ ${#albyhub} -eq 0 ]; then albyhub="off"; fi
+if [ "${albyhub}" == "on" ] && [ $(sudo ls /etc/systemd/system/albyhub.service 2>/dev/null | grep -c 'albyhub.service') -lt 1 ]; then albyhub="off"; fi
 
 # show select dialog
 echo "run dialog ..."
@@ -69,6 +71,7 @@ if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
   OPTIONS+=(ha 'LND ChannelTools (Fund Rescue)' ${chantools})
   OPTIONS+=(fa 'LND Helipad Boostagram reader' ${helipad})
   OPTIONS+=(lb 'LND LNDK (experimental BOLT 12)' ${lndk})
+  OPTIONS+=(ah 'LND AlbyHub (early access)' ${albyhub})
 fi
 
 # just available for CL
@@ -624,6 +627,31 @@ else
   echo "Publicpool setting unchanged."
 fi
 
+# publicpool process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "ah")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${albyhub}" != "${choice}" ]; then
+  echo "AlbyHub setting changed .."
+  anychange=1
+  if [ "${albyhub}" =  "on" ]; then
+    sudo -u admin /home/admin/config.scripts/bonus.albyhub.sh on
+    sudo -u admin /home/admin/config.scripts/bonus.albyhub.sh menu
+  else
+      whiptail --title "Delete Database?" \
+      --yes-button "Keep Database" \
+      --no-button "Delete Database" \
+      --yesno "AlbyHub is getting uninstalled. If you keep the database, you will be able to reuse the data should you choose to re-install. Do you wish to keep the database?" 10 80
+      if [ $? -eq 1 ]; then
+        echo "# Uninstalling AlbyHub AND DELETING DATA ..."
+        sudo -u admin /home/admin/config.scripts/bonus.albyhub.sh off delete-data
+      else
+        echo "# Uninstalling AlbyHub but keeping data ..."
+        sudo -u admin /home/admin/config.scripts/bonus.albyhub.sh off
+      fi
+  fi
+else
+  echo "AlbyHub setting unchanged."
+fi
 
 # fints process choice  
 choice="off"; check=$(echo "${CHOICES}" | grep -c "fn")
