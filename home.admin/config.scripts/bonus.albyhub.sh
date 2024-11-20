@@ -128,7 +128,7 @@ The Alby Hub password is managed seperate from RaspiBlitz - make sure to manage 
 "
 
   # use whiptail to show SSH dialog & exit
-  whiptail --title "${dialogTitle}" --msgbox "${dialogText}" 18 67
+  whiptail --title "${dialogTitle}" --msgbox "${dialogText}" 15 67
   echo "please wait ..."
   exit 0
 fi
