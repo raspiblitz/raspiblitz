@@ -197,8 +197,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo ufw allow ${PORT_SSL} comment "${APPID} HTTPS"
 
   # prepare env file
-  sudo -u ${APPID} touch ${ENVFILE}
-  sudo -u ${APPID} chmod 770 ${ENVFILE}
+    echo "# prepare env file --> ${ENVFILE}"
+  sudo touch ${ENVFILE}
+  sudo chown ${APPID}:${APPID} ${ENVFILE}
+  sudo chmod 770 ${ENVFILE}
 
   # create systemd service
   echo "# create systemd service: ${APPID}.service"
