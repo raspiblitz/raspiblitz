@@ -123,6 +123,7 @@ if [ "$1" = "menu" ]; then
   # set the title for the dialog
   dialogTitle=" ${APPID} "
   localIP=$(hostname -I | awk '{print $1}')
+  fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
 
   # basic info text - for a web app how to call with http
   dialogText="Open in your local web browser:
