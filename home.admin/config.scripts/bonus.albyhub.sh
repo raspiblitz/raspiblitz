@@ -166,11 +166,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo ufw allow ${PORT_CLEAR} comment "${APPID} HTTP"
   sudo ufw allow ${PORT_SSL} comment "${APPID} HTTPS"
 
-  # prepare Dynamic Drop-In File
-  sudo mkdir -p /etc/systemd/system/${APPID}.service.d/
-  sudo touch /etc/systemd/system/${APPID}.service.d/10-dynamic-env.conf
-  sudo chown ${APPID}:${APPID} /etc/systemd/system/${APPID}.service.d/10-dynamic-env.conf
-
   # create systemd service
   echo "# create systemd service: ${APPID}.service"
   echo "
@@ -185,15 +180,10 @@ Restart=always
 RestartSec=1
 User=${APPID}
 ExecStartPre=-/home/admin/config.scripts/bonus.${APPID}.sh prestart
+EnvironmentFile=/var/cache/raspiblitz/temp/${APPID}.env
 ExecStart=/home/${APPID}/bin/${APPID}
 # Hack to ensure Alby Hub never uses more than 90% CPU
 CPUQuota=90%sudo 
-
-Environment=\"PORT=${PORT_CLEAR}\"
-Environment=\"WORK_DIR=/mnt/hdd/app-data/${APPID}\"
-Environment=\"LDK_ESPLORA_SERVER=https://electrs.getalbypro.com\"
-Environment=\"LOG_EVENTS=true\"
-Environment=\"LDK_GOSSIP_SOURCE=\"
 
 [Install]
 WantedBy=multi-user.target
@@ -289,7 +279,7 @@ fi
 # PRESTART
 ##########################
 
-# BACKGROUND is that this script will be called with `prestart` on every start & restart
+# background is that this script will be called with `prestart` on every start & restart
 if [ "$1" = "prestart" ]; then
 
   # needs to be run as the app user - stop if not run as the app user
@@ -301,9 +291,14 @@ if [ "$1" = "prestart" ]; then
 
   echo "## PRESTART CONFIG START for ${APPID} (called by systemd prestart)"
 
-  echo "[Service]" > /etc/systemd/system/my-service.service.d/10-dynamic-env.conf
-  echo "Environment=\"SETTING_ENV_VAR=value\"" >> /etc/systemd/system/my-service.service.d/10-dynamic-env.conf
-  echo >> /etc/systemd/system/my-service.service.d/10-dynamic-env.conf
+  echo "# creating dynamic env file --> /var/cache/raspiblitz/temp/${APPID}.env"
+  sudo -u ${APPID} touch /var/cache/raspiblitz/temp/${APPID}.env
+  sudo -u ${APPID} chmod 770 /var/cache/raspiblitz/temp/${APPID}.env
+  echo "PORT=${PORT_CLEAR}" > /var/cache/raspiblitz/temp/${APPID}.env
+  echo "WORK_DIR=/mnt/hdd/app-data/${APPID}" >> /var/cache/raspiblitz/temp/${APPID}.env
+  echo "LDK_ESPLORA_SERVER=https://electrs.getalbypro.com" >> /var/cache/raspiblitz/temp/${APPID}.env
+  echo "LDK_GOSSIP_SOURCE=" >> /var/cache/raspiblitz/temp/${APPID}.env
+  echo >> /var/cache/raspiblitz/temp/${APPID}.env
 
   echo "## PRESTART CONFIG DONE for ${APPID}"
   exit 0
