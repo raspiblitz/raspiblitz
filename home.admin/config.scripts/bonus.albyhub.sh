@@ -26,7 +26,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   exit 1
 fi
 
-ENVFILE="/var/cache/raspiblitz/temp/${APPID}.env"
+ENVFILE="/home/${APPID}/config.env"
 
 ##########################
 # PRESTART
@@ -196,6 +196,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo ufw allow ${PORT_CLEAR} comment "${APPID} HTTP"
   sudo ufw allow ${PORT_SSL} comment "${APPID} HTTPS"
 
+  # prepare env file
+  sudo -u ${APPID} touch ${ENVFILE}
+  sudo -u ${APPID} chmod 770 ${ENVFILE}
+
   # create systemd service
   echo "# create systemd service: ${APPID}.service"
   echo "
@@ -210,7 +214,7 @@ Restart=always
 RestartSec=1
 User=${APPID}
 ExecStartPre=-/home/admin/config.scripts/bonus.${APPID}.sh prestart
-#EnvironmentFile=/var/cache/raspiblitz/temp/${APPID}.env
+EnvironmentFile=${ENVFILE}
 ExecStart=/home/${APPID}/bin/${APPID}
 # Hack to ensure Alby Hub never uses more than 90% CPU
 CPUQuota=90%sudo 
