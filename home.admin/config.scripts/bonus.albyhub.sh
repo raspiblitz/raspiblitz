@@ -18,11 +18,11 @@ PORT_TOR_SSL="8032"
 
 # BASIC COMMANDLINE OPTIONS
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
-  echo "# bonus.${APPID}.sh status    -> status information (key=value)"
-  echo "# bonus.${APPID}.sh on        -> install the app"
-  echo "# bonus.${APPID}.sh off       -> uninstall the app"
-  echo "# bonus.${APPID}.sh menu      -> SSH menu dialog"
-  echo "# bonus.${APPID}.sh prestart  -> prestart used by systemd"
+  echo "# bonus.${APPID}.sh status            -> status information (key=value)"
+  echo "# bonus.${APPID}.sh on                -> install the app"
+  echo "# bonus.${APPID}.sh off [delete-data] -> uninstall the app"
+  echo "# bonus.${APPID}.sh menu              -> SSH menu dialog"
+  echo "# bonus.${APPID}.sh prestart          -> prestart used by systemd"
   exit 1
 fi
 
@@ -124,7 +124,7 @@ if [ "$1" = "menu" ]; then
 http://${localIP}:${PORT_CLEAR}\n
 https://${localIP}:${PORT_SSL} with Fingerprint:
 ${fingerprint}\n
-Use your Password B to login.\n
+The Alby Hub password is managed seperate from RaspiBlitz - make sure to manage it safely.\n
 "
 
   # use whiptail to show SSH dialog & exit
