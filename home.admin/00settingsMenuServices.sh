@@ -65,13 +65,13 @@ if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
   OPTIONS+=(ra 'LND RTL Webinterface' ${rtlWebinterface})
   OPTIONS+=(ta 'LND ThunderHub' ${thunderhub})
   OPTIONS+=(la 'LND LIT (loop, pool, faraday)' ${lit})
+  OPTIONS+=(ah 'LND AlbyHub (early access)' ${albyhub})
   OPTIONS+=(gb 'LND LNDg (auto-rebalance, auto-fees)' ${lndg})
   OPTIONS+=(oa 'LND Balance of Satoshis' ${bos})
   OPTIONS+=(ya 'LND PyBLOCK' ${pyblock})
   OPTIONS+=(ha 'LND ChannelTools (Fund Rescue)' ${chantools})
   OPTIONS+=(fa 'LND Helipad Boostagram reader' ${helipad})
   OPTIONS+=(lb 'LND LNDK (experimental BOLT 12)' ${lndk})
-  OPTIONS+=(ah 'LND AlbyHub (early access)' ${albyhub})
 fi
 
 # just available for CL
