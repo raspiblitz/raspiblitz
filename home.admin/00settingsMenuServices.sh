@@ -633,7 +633,7 @@ if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${albyhub}" != "${choice}" ]; then
   echo "AlbyHub setting changed .."
   anychange=1
-  if [ "${albyhub}" =  "on" ]; then
+  if [ "${choice}" =  "on" ]; then
     sudo -u admin /home/admin/config.scripts/bonus.albyhub.sh on
     sudo -u admin /home/admin/config.scripts/bonus.albyhub.sh menu
   else
