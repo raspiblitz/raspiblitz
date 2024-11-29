@@ -1,3 +1,10 @@
+## What's new in Version 1.12.0 of RaspiBlitz?
+
+Features:
+
+- Update: Specter Desktop 2.0.5 [details](https://github.com/cryptoadvance/specter-desktop/releases/tag/v2.0.5)
+
+
 ## What's new in Version 1.11.3 of RaspiBlitz?
 
 Optimized now to run also on plain debian12 linux for Proxmox/VM & x86 systems.
