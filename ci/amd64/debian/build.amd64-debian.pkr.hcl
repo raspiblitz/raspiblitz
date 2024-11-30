@@ -10,7 +10,7 @@ variable "boot" { default = "uefi" }
 variable "preseed_file" { default = "preseed.cfg" }
 variable "hostname" { default = "raspiblitz-amd64" }
 
-variable "disk_size" { default = "30000" }
+variable "disk_size" { default = "27000" }
 variable "memory" { default = "4096" }
 variable "cpus" { default = "4" }
 
