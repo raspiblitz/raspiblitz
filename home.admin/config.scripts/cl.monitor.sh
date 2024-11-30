@@ -185,8 +185,8 @@ if [ "$2" = "info" ]; then
   cl_address="${pubkey}@${address}:${port}"
   cl_tor=$(echo "${cl_address}" | grep -c ".onion")
   cl_channels_pending=$(echo "${ln_getInfo}" | jq -r '.num_pending_channels')
-  cl_channels_active=$(echo "${ln_listpeers}" | jq -r '[.peers[] | select(.connected == true)] | length')
-  cl_channels_inactive=$(echo "${ln_listpeers}" | jq -r '[.peers[] | select(.connected == false)] | length')
+  cl_channels_active=$(echo "${ln_getInfo}" | jq -r '.num_active_channels')
+  cl_channels_inactive=$(echo "${ln_getInfo}" | jq -r '.num_inactive_channels')
   cl_channels_total=$((cl_channels_active + cl_channels_inactive))
   cl_peers=$(echo "${ln_getInfo}" | jq -r '.num_peers')
   cl_fees_collected_msat=$(echo "${ln_getInfo}" | jq -r '.fees_collected_msat')
