@@ -2,8 +2,8 @@
 
 #########################################################################
 # Build your SD card image based on: 2024-03-15-raspios-bookworm-arm64.img.xz
-# https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2024-11-19/
-# SHA256: ea6e68c48d14c3d78af5471c0b288bbf6522fdd775241f74d8295d106d344300
+# https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2024-03-15/
+# SHA256: 7e53a46aab92051d523d7283c080532bebb52ce86758629bf1951be9b4b0560f
 # also change in: raspiblitz/ci/arm64-rpi/build.arm64-rpi.pkr.hcl
 # PGP fingerprint: 8738CD6B956F460C - to check signature:
 # curl -O https://www.raspberrypi.org/raspberrypi_downloads.gpg.key && gpg --import ./raspberrypi_downloads.gpg.key && gpg --verify *.sig
@@ -329,7 +329,9 @@ isDebianInHosts=$(grep -c "debian" /etc/hosts)
 if [ ${isDebianInHosts} -eq 0 ]; then
   echo "# Adding debian to /etc/hosts"
   echo "127.0.1.1       debian" | tee -a /etc/hosts > /dev/null
-  systemctl restart networking
+  if [ "${baseimage}" != "raspios_arm64" ]; then
+    systemctl restart networking
+  fi
 fi
 
 echo "*** Remove unnecessary packages ***"
