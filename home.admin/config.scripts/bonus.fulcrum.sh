@@ -410,7 +410,7 @@ worker_threads = 1
 ## optimize for 4-8 GB RAM
 db_mem=1024
 db_max_open_files=200
-## fast_sync is now called utxo_cache
+## fast-sync is now called utxo_cache
 ## disable to prevent database corruption on restart
 #utxo_cache = 1024
 
