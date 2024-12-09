@@ -415,7 +415,7 @@ db_max_open_files=200
 #utxo_cache = 1024
 
 ## allow syncing wallets with a large number of addresses
-max_subs_per_ip = 100000 # default: 75000" |
+max_subs_per_ip = 1000000 # default: 75000" |
     sudo -u fulcrum tee /home/fulcrum/.fulcrum/fulcrum.conf
 
   createSystemdService
