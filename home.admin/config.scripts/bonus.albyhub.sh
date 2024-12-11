@@ -93,8 +93,7 @@ fi
 if [ "$1" = "status" ]; then
   echo "appID='${APPID}'"
   echo "version='${VERSION}'"
-  echo "isInstalled=${isInstalled}"
-  echo "isRunning=${isRunning}"
+  echo "installed=${isRunning}" # installed means towards webui on or off
   if [ "${isInstalled}" == "1" ]; then
     echo "localIP='${localIP}'"
     echo "toraddress='${toraddress}'"
