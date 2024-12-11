@@ -97,11 +97,13 @@ if [ "$1" = "status" ]; then
   echo "isRunning=${isRunning}"
   if [ "${isInstalled}" == "1" ]; then
     echo "localIP='${localIP}'"
-    echo "portCLEAR=${PORT_CLEAR}"
-    echo "portSSL=${PORT_SSL}"
-    echo "localIP='${localIP}'"
     echo "toraddress='${toraddress}'"
     echo "fingerprint='${fingerprint}'"
+    echo "httpPort='${PORT_CLEAR}'"
+    echo "httpsPort='${PORT_SSL}'"
+    echo "httpsForced='1'"
+    echo "httpsSelfsigned='1'"
+    echo "authMethod='userdefined'"
   fi
   exit
 fi
@@ -214,7 +216,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   isInstalled=$(compgen -u | grep -c ${APPID})
   if [ "${isInstalled}" == "0" ]; then
     echo "# Installing code base & dependencies first .."
-    /home/admin/config.scripts/bonus.albyhub.sh install || exit 1
+    /home/admin/config.scripts/bonus.albyhub.sh install || { echo "error='install failed'"; exit 1; }
   fi
 
   echo "# ACTIVATE Alby-Hub"
@@ -340,6 +342,9 @@ server {
 
   echo "# Monitor with: sudo journalctl -f -u ${APPID}"
   echo "# OK actvation done"
+
+  # needed for API/WebUI as signal that install ran thru
+  echo "result='OK'"
   exit 0
 fi
 
@@ -383,6 +388,8 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   fi
 
   echo "# OK - app should be uninstalled now"
+  # needed for API/WebUI as signal that install ran thru
+  echo "result='OK'"
   exit 0
 fi
 
