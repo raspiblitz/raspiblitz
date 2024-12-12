@@ -100,8 +100,13 @@ echo "OK"
 
 # make sure file system is clean and ready for release
 echo
-echo "fsck -fy ..."
-sudo fsck -fy
+echo "fsck on first boot ..."
+sudo touch /forcefsck
+if [ -e /dev/mmcblk0 ]; then
+  echo "fsck on /dev/mmcblk0 ..."
+  sudo umount /dev/mmcblk0p1
+  sudo fsck -fy /dev/mmcblk0p1
+fi
 
 echo
 echo "Will shutdown now."
