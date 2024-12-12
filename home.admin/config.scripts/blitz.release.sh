@@ -98,6 +98,11 @@ sudo systemctl disable ssh
 sudo rm /etc/ssh/ssh_host_*
 echo "OK"
 
+# make sure file system is clean and ready for release
+echo
+echo "fsck -fy ..."
+sudo fsck -fy
+
 echo
 echo "Will shutdown now."
 echo "Wait until Raspberry LEDs show no activity anymore."
