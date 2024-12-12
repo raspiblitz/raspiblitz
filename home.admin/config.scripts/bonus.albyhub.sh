@@ -178,7 +178,7 @@ if [ "$1" = "install" ]; then
   fi
 
   # cleanup
-  rm -f albyhub-server.tar.bz2
+  sudo rm -f albyhub-server.tar.bz2
 
   # Setze die Berechtigungen für das Verzeichnis und die Dateien
   sudo chmod -R 755 /home/${APPID}/lib
