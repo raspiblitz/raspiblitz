@@ -780,15 +780,16 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "# preparing env file"
   # delete old .env file or old symbolic link
   sudo rm /home/lnbits/lnbits/.env 2>/dev/null
+    
   # make sure .env file exists at data drive
-  sudo -u lnbits touch $lnbitsConfig
+  if [ ! -f $lnbitsConfig ]; then
+    sudo -u lnbits touch $lnbitsConfig
+    sudo bash -c "echo 'LNBITS_ADMIN_UI=true' >> ${lnbitsConfig}"
+  fi
   sudo chown lnbits:lnbits $lnbitsConfig
+
   # crete symbolic link
   sudo -u lnbits ln -s $lnbitsConfig /home/lnbits/lnbits/.env
-
-  # activate admin user
-  sudo sed -i "/^LNBITS_ADMIN_UI=/d" $lnbitsConfig
-  sudo bash -c "echo 'LNBITS_ADMIN_UI=true' >> ${lnbitsConfig}"
 
   if [ ! -e /mnt/hdd/app-data/LNBits/database.sqlite3 ]; then
     echo "# install database: PostgreSQL"
