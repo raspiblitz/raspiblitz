@@ -229,9 +229,17 @@ Consider adding a IP2TOR Bridge under OPTIONS."
   # Admin UI
   activatedAdminUI=$(sudo grep -c "LNBITS_ADMIN_UI=true" $lnbitsConfig)
   if [ ${activatedAdminUI} -eq 0 ]; then
-    OPTIONS+=(ADMINUI "Activate Admin UI")
+    OPTIONS+=(ADMINUI "Activate 'Admin UI'")
   else
-    OPTIONS+=(ADMINUI "Deactivate Admin UI")
+    OPTIONS+=(ADMINUI "Deactivate 'Admin UI'")
+  fi
+
+  # Allow New Accounts
+  noNewAccounts=$(sudo grep -c "LNBITS_ALLOW_NEW_ACCOUNTS=false" $lnbitsConfig)
+  if [ ${noNewAccounts} -eq 0 ]; then
+    OPTIONS+=(ACCOUNTS "Deactivate 'Allow New Accounts'")
+  else
+    OPTIONS+=(ACCOUNTS "Activate 'Allow New Accounts'")
   fi
 
   WIDTH=66
@@ -305,6 +313,24 @@ Consider adding a IP2TOR Bridge under OPTIONS."
       echo "Deactivate Admin UI"
       sudo sed -i "/^LNBITS_ADMIN_UI=/d" $lnbitsConfig
       sudo bash -c "echo 'LNBITS_ADMIN_UI=false' >> ${lnbitsConfig}"
+    fi
+    echo "Restarting LNbits ..."
+    sudo systemctl restart lnbits
+    echo "PRESS ENTER to continue"
+    read key
+    exit 0
+    ;;
+  ACCOUNTS)
+    clear
+    echo
+    if [ ${noNewAccounts} -eq 0 ]; then
+      echo "Deactivate Allow New Accounts"
+      sudo sed -i "/^LNBITS_ALLOW_NEW_ACCOUNTS=/d" $lnbitsConfig
+      sudo bash -c "echo 'LNBITS_ALLOW_NEW_ACCOUNTS=true' >> ${lnbitsConfig}"
+    else
+      echo "Activate Allow New Accounts"
+      sudo sed -i "/^LNBITS_ALLOW_NEW_ACCOUNTS=/d" $lnbitsConfig
+      sudo bash -c "echo 'LNBITS_ALLOW_NEW_ACCOUNTS=false' >> ${lnbitsConfig}"
     fi
     echo "Restarting LNbits ..."
     sudo systemctl restart lnbits
