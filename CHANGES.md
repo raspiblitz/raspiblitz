@@ -1,6 +1,6 @@
 ## What's new in Version 1.11.4 of RaspiBlitz?
 
-AlbyHub Featrzre Release with security/bug-fixing relevant updates.
+Small AlbyHub feature release with security/bug-fixing relevant updates.
 
 - Update: LND v0.18.3-beta [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.18.3-beta)
 
