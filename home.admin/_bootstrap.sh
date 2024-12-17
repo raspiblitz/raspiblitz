@@ -384,25 +384,30 @@ done
 # extend sd card to maximum capacity
 ################################
 
-source <(/home/admin/config.scripts/blitz.bootdrive.sh status)
-if [ "${needsExpansion}" == "1" ] && [ "${fsexpanded}" == "0" ]; then
-  echo "FSEXPAND needed ... starting process" >> $logFile
-  /home/admin/config.scripts/blitz.bootdrive.sh status >> $logFile
-  /home/admin/config.scripts/blitz.bootdrive.sh fsexpand >> $logFile
-  systemInitReboot=1
-  /home/admin/_cache.sh set message "FSEXPAND"
-elif [ "${tooSmall}" == "1" ]; then
-  echo "# FAIL #######" >> $logFile
-  echo "SDCARD TOO SMALL 16GB minimum" >> $logFile
-  echo "##############" >> $logFile
-  /home/admin/_cache.sh set state "sdtoosmall"
-  echo "System stopped. Please cut power." >> $logFile
-  sleep 6000
-  shutdown -r now
-  slepp 100
-  exit 1
+isBootingFromSD=$(lsblk | grep mmcblk0 | grep -c "/boot")
+if [ ${isBootingFromSD} -gt 0 ]; then
+  source <(/home/admin/config.scripts/blitz.bootdrive.sh status)
+  if [ "${needsExpansion}" == "1" ] && [ "${fsexpanded}" == "0" ]; then
+    echo "FSEXPAND needed ... starting process" >> $logFile
+    /home/admin/config.scripts/blitz.bootdrive.sh status >> $logFile
+    /home/admin/config.scripts/blitz.bootdrive.sh fsexpand >> $logFile
+    systemInitReboot=1
+    /home/admin/_cache.sh set message "FSEXPAND"
+  elif [ "${tooSmall}" == "1" ]; then
+    echo "# FAIL #######" >> $logFile
+    echo "SDCARD TOO SMALL 16GB minimum" >> $logFile
+    echo "##############" >> $logFile
+    /home/admin/_cache.sh set state "sdtoosmall"
+    echo "System stopped. Please cut power." >> $logFile
+    sleep 6000
+    shutdown -r now
+    sleep 100
+    exit 1
+  else
+    echo "No FS EXPAND needed. needsExpansion(${needsExpansion}) fsexpanded(${fsexpanded})" >> $logFile
+  fi
 else
-  echo "No FS EXPAND needed. needsExpansion(${needsExpansion}) fsexpanded(${fsexpanded})" >> $logFile
+  echo "Not running on an SD card. Skipping FS EXPAND check." >> $logFile
 fi
 
 # now that HDD/SSD is connected ... if relevant data from a previous RaspiBlitz was available
