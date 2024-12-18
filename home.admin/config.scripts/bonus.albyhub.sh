@@ -22,7 +22,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "# bonus.${APPID}.sh install           -> install the app"
   echo "# bonus.${APPID}.sh uninstall         -> uninstall the app"
   echo "# bonus.${APPID}.sh on                -> activate the app"
-  echo "# bonus.${APPID}.sh off [delete-data] -> dseactivate the app"
+  echo "# bonus.${APPID}.sh off [delete-data] -> deactivate the app"
   echo "# bonus.${APPID}.sh menu              -> SSH menu dialog"
   echo "# bonus.${APPID}.sh prestart          -> prestart used by systemd"
   exit 1
