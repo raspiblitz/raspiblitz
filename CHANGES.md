@@ -1,8 +1,10 @@
 ## What's new in Version 1.11.4 of RaspiBlitz?
 
+ReleaseCandidate: https://raspiblitz.fulmo.org/images/raspiblitz-min-v1.11.4rc1-2024-12-18.img.gz 
+
 Small AlbyHub feature release with security/bug-fixing relevant updates.
 
-- New: AlbyHub v1.11.3 (SSH & WebUI) [details](https://github.com/getAlby)
+- New: AlbyHub v1.12.0 (SSH & WebUI) [details](https://github.com/getAlby)
 - New: SSH-Option to tirn on/off LNbits AdminUI [details](https://github.com/raspiblitz/raspiblitz/issues/4876)
 - Update: LND v0.18.3-beta [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.18.3-beta)
 - Update: Core Lightning v24.11 [details](https://github.com/ElementsProject/lightning/releases/tag/v24.11)

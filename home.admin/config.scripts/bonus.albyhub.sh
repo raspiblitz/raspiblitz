@@ -7,7 +7,7 @@
 APPID="albyhub" # one-word lower-case no-specials
 
 # https://github.com/getAlby/hub/releases
-VERSION="1.11.3"
+VERSION="1.12.0"
 
 # port numbers the app should run on
 # delete if not an web app
@@ -133,7 +133,7 @@ if [ "$1" = "menu" ]; then
 http://${localIP}:${PORT_CLEAR}\n
 https://${localIP}:${PORT_SSL} with Fingerprint:
 ${fingerprint}\n
-The Alby Hub password is managed seperate from RaspiBlitz - make sure to manage it safely.\n
+The Alby Hub password is managed separate from RaspiBlitz - make sure to manage it safely.\n
 "
 
   # use whiptail to show SSH dialog & exit
