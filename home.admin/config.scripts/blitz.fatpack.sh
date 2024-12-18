@@ -131,6 +131,8 @@ sudo cp -a /home/blitzapi/blitz_web/build/* /home/admin/assets/nginx/www_public
 sudo chown admin:admin /home/admin/assets/nginx/www_public
 sudo rm -r /home/blitzapi/blitz_web/build/*
 
+echo "* Adding Code&Compile for WEBUI-APP: ALBYHUB"
+/home/admin/config.scripts/bonus.albyhub.sh install || exit 1
 echo "* Adding Code&Compile for WEBUI-APP: LNBITS"
 /home/admin/config.scripts/bonus.lnbits.sh install || exit 1
 echo "* Adding Code&Compile for WEBUI-APP: JAM"

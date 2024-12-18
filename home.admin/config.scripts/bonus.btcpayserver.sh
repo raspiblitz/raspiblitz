@@ -812,9 +812,6 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   fi
   echo "# OK BTCPayServer deactivated."
 
-  echo "# delete the btcpay user home directory"
-  sudo userdel -rf btcpay 2>/dev/null
-
   # needed for API/WebUI as signal that install ran thru
   echo "result='OK'"
 

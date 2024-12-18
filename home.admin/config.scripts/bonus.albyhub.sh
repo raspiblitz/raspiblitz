@@ -7,7 +7,7 @@
 APPID="albyhub" # one-word lower-case no-specials
 
 # https://github.com/getAlby/hub/releases
-VERSION="1.10.4"
+VERSION="1.11.3"
 
 # port numbers the app should run on
 # delete if not an web app
@@ -19,8 +19,10 @@ PORT_TOR_SSL="8032"
 # BASIC COMMANDLINE OPTIONS
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "# bonus.${APPID}.sh status            -> status information (key=value)"
-  echo "# bonus.${APPID}.sh on                -> install the app"
-  echo "# bonus.${APPID}.sh off [delete-data] -> uninstall the app"
+  echo "# bonus.${APPID}.sh install           -> install the app"
+  echo "# bonus.${APPID}.sh uninstall         -> uninstall the app"
+  echo "# bonus.${APPID}.sh on                -> activate the app"
+  echo "# bonus.${APPID}.sh off [delete-data] -> dseactivate the app"
   echo "# bonus.${APPID}.sh menu              -> SSH menu dialog"
   echo "# bonus.${APPID}.sh prestart          -> prestart used by systemd"
   exit 1
@@ -91,15 +93,16 @@ fi
 if [ "$1" = "status" ]; then
   echo "appID='${APPID}'"
   echo "version='${VERSION}'"
-  echo "isInstalled=${isInstalled}"
-  echo "isRunning=${isRunning}"
+  echo "installed=${isRunning}" # installed means towards webui on or off
   if [ "${isInstalled}" == "1" ]; then
-    echo "localIP='${localIP}'"
-    echo "portCLEAR=${PORT_CLEAR}"
-    echo "portSSL=${PORT_SSL}"
     echo "localIP='${localIP}'"
     echo "toraddress='${toraddress}'"
     echo "fingerprint='${fingerprint}'"
+    echo "httpPort='${PORT_CLEAR}'"
+    echo "httpsPort='${PORT_SSL}'"
+    echo "httpsForced='1'"
+    echo "httpsSelfsigned='1'"
+    echo "authMethod='userdefined'"
   fi
   exit
 fi
@@ -140,22 +143,10 @@ The Alby Hub password is managed seperate from RaspiBlitz - make sure to manage 
 fi
 
 ##########################
-# ON / INSTALL
+# INSTALL
 ##########################
 
-if [ "$1" = "1" ] || [ "$1" = "on" ]; then
-
-  # dont run install if already installed
-  if [ ${isInstalled} -eq 1 ]; then
-    echo "# ${APPID}.service is already installed."
-    exit 1
-  fi
-
-  # check if lnd service is installed
-  if [ $(sudo ls /etc/systemd/system/lnd.service 2>/dev/null | grep -c 'lnd.service') -eq 0 ]; then
-    echo "error='LND needs to be installed'"
-    exit 1
-  fi
+if [ "$1" = "install" ]; then
 
   echo "# Installing ${APPID} ..."
 
@@ -187,7 +178,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   fi
 
   # cleanup
-  rm -f albyhub-server.tar.bz2
+  sudo rm -f albyhub-server.tar.bz2
 
   # Setze die Berechtigungen für das Verzeichnis und die Dateien
   sudo chmod -R 755 /home/${APPID}/lib
@@ -196,9 +187,41 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # make libs available
   echo "/home/${APPID}/lib" | sudo tee /etc/ld.so.conf.d/${APPID}.conf
   sudo ldconfig
+  
+  echo "# Install ${APPID} done"
+  exit 0
+
+fi
+
+##########################
+# ON
+##########################
+
+if [ "$1" = "1" ] || [ "$1" = "on" ]; then
+
+  # dont run install if already installed
+  if [ ${isInstalled} -eq 1 ]; then
+    echo "# ${APPID}.service is already installed."
+    exit 1
+  fi
+
+  # check if lnd service is available (LND is needed as a base)
+  if [ $(sudo ls /etc/systemd/system/lnd.service 2>/dev/null | grep -c 'lnd.service') -eq 0 ]; then
+    echo "error='LND needs to be installed'"
+    exit 1
+  fi
+
+  # check if code is already installed
+  isInstalled=$(compgen -u | grep -c ${APPID})
+  if [ "${isInstalled}" == "0" ]; then
+    echo "# Installing code base & dependencies first .."
+    /home/admin/config.scripts/bonus.albyhub.sh install || { echo "error='install failed'"; exit 1; }
+  fi
+
+  echo "# ACTIVATE Alby-Hub"
 
   # prepare data directory
-  sudo mkdir -p /mnt/hdd/app-data/${APPID}
+  sudo mkdir -p /mnt/hdd/app-data/${APPID} 2>/dev/null
   sudo chown -R ${APPID}:${APPID} /mnt/hdd/app-data/${APPID}
 
   # open the ports in the firewall
@@ -207,7 +230,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo ufw allow ${PORT_SSL} comment "${APPID} HTTPS"
 
   # prepare env file
-    echo "# prepare env file --> ${ENVFILE}"
+  echo "# prepare env file --> ${ENVFILE}"
   sudo touch ${ENVFILE}
   sudo chown ${APPID}:${APPID} ${ENVFILE}
   sudo chmod 770 ${ENVFILE}
@@ -317,7 +340,10 @@ server {
   /home/admin/config.scripts/blitz.conf.sh set ${APPID} "on"
 
   echo "# Monitor with: sudo journalctl -f -u ${APPID}"
-  echo "# OK install done"
+  echo "# OK actvation done"
+
+  # needed for API/WebUI as signal that install ran thru
+  echo "result='OK'"
   exit 0
 fi
 
@@ -348,13 +374,6 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   sudo ufw deny "${PORT_CLEAR}"
   sudo ufw deny "${PORT_SSL}"
 
-  # remove libraries again
-  sudo rm /etc/ld.so.conf.d/albyhub.conf
-  sudo ldconfig
-
-  echo "# delete user and directories"
-  sudo userdel -rf ${APPID}
-
   echo "# removing Tor hidden service (if active)"
   /home/admin/config.scripts/tor.onion-service.sh off ${APPID}
 
@@ -368,6 +387,32 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   fi
 
   echo "# OK - app should be uninstalled now"
+  # needed for API/WebUI as signal that install ran thru
+  echo "result='OK'"
+  exit 0
+fi
+
+########################################
+# UNINSTALL (remove from system)
+########################################
+
+if [ "$1" = "uninstall" ]; then
+
+  isActive=$(sudo ls /etc/systemd/system/${APPID}.service 2>/dev/null | grep -c '${APPID}.service')
+  if [ "${isActive}" != "0" ]; then
+    echo "# cannot uninstall if still 'on'"
+    exit 1
+  fi
+
+  # remove libraries again
+  sudo rm /etc/ld.so.conf.d/albyhub.conf
+  sudo ldconfig
+
+  # nuke user
+  sudo userdel -rf ${APPID} 2>/dev/null
+
+  echo "# uninstall ${APPID} done"
+
   exit 0
 fi
 
