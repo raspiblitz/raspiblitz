@@ -36,7 +36,25 @@ elif [ $LNTYPE = lnd ];then
     dialog --title 'Info' --msgbox 'You need to turn OFF the LND AutoPilot first,\nso that closed channels are not opening up again.\nYou find the AutoPilot -----> SERVICES section' 7 55
     exit 0
   fi
-  command="$lncli_alias closeallchannels --force"
+  
+  # User choice for close type
+  close_type=$(dialog --clear \
+    --title "LND Channel Close Type" \
+    --menu "Choose how to close channels:" \
+    14 54 3 \
+    "COOP" "Attempt Cooperative Close" \
+    "FORCE" "Force Close Channels" \
+    2>&1 >/dev/tty)
+
+  # Set command based on user choice
+  if [ "$close_type" = "COOP" ]; then
+    command="$lncli_alias closeallchannels"
+  elif [ "$close_type" = "FORCE" ]; then
+    command="$lncli_alias closeallchannels --force"
+  else
+    echo "Invalid choice. Exiting."
+    exit 1
+  fi
 fi
 
 clear
@@ -85,7 +103,7 @@ echo "# RESULT:"
 if [ ${#command} -gt 0 ]; then
   if [ $LNTYPE = cl ];then
     cl_closeall
-  elif [ $LNTYPE = lnd ];then  
+  elif [ $LNTYPE = lnd ];then
     ${command}
   fi
 fi
