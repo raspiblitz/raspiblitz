@@ -1,10 +1,12 @@
+## What's new in Version 1.11.4 of RaspiBlitz?
+
+Small AlbyHub feature release with security/bug-fixing relevant updates.
+
+- Update: LND v0.18.3-beta [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.18.3-beta)
+
 ## What's new in Version 1.11.3 of RaspiBlitz?
 
 Optimized now to run also on plain debian12 linux for Proxmox/VM & x86 systems.
-
-Download Release Candidate - RaspberryPi minimal image:
-https://raspiblitz.fulmo.org/images/raspiblitz-min-v1.11.3rc2-2024-10-08.img.gz
-SHA-256-Checksum: a20e92b1d99c0dcc6fa6aa83f8212df6a0db8ae47616cc3b565c0f88f35c2457
 
 - New: Publicpool - Open Source Solo Bitcoin Mining (SSH Menu) [details](https://www.youtube.com/watch?v=QbOsH04Z9xM)
 - New: Tailscale (SSH menu > SETTINGS) [details](https://en.wikipedia.org/wiki/Tailscale)
