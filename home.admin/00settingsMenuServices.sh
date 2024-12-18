@@ -627,7 +627,7 @@ else
   echo "Publicpool setting unchanged."
 fi
 
-# publicpool process choice
+# albyhub process choice
 choice="off"; check=$(echo "${CHOICES}" | grep -c "ah")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${albyhub}" != "${choice}" ]; then
