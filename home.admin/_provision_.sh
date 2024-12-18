@@ -752,6 +752,15 @@ else
   echo "Provisioning Publicpool - keep default" >> ${logFile}
 fi
 
+# AlbyHub
+if [ "${albyhub}" = "on" ]; then
+  echo "Provisioning AlbyHub - run config script" >> ${logFile}
+  /home/admin/_cache.sh set message "Setup AlbyHub"
+  sudo -u admin /home/admin/config.scripts/bonus.albyhub.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning AlbyHub - keep default" >> ${logFile}
+fi
+
 # custom install script from user
 customInstallAvailable=$(ls /mnt/hdd/app-data/custom-installs.sh 2>/dev/null | grep -c "custom-installs.sh")
 if [ ${customInstallAvailable} -gt 0 ]; then
