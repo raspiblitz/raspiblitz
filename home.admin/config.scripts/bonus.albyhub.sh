@@ -133,7 +133,7 @@ if [ "$1" = "menu" ]; then
 http://${localIP}:${PORT_CLEAR}\n
 https://${localIP}:${PORT_SSL} with Fingerprint:
 ${fingerprint}\n
-The Alby Hub password is managed seperate from RaspiBlitz - make sure to manage it safely.\n
+The Alby Hub password is managed separate from RaspiBlitz - make sure to manage it safely.\n
 "
 
   # use whiptail to show SSH dialog & exit
@@ -166,7 +166,7 @@ if [ "$1" = "install" ]; then
     sudo wget -O albyhub-server.tar.bz2 https://github.com/getAlby/hub/releases/download/v$VERSION/albyhub-Server-Linux-aarch64.tar.bz2
   else
     echo "# Downloading Alby Hub for x86"
-    sudo wget -O albyhub-server.tar.bz2 https://github.com/getAlby/hub/releases/download/v$VERSION/albyhub-Server-Linux-x86_64.tar.bz2 
+    sudo wget -O albyhub-server.tar.bz2 https://github.com/getAlby/hub/releases/download/v$VERSION/albyhub-Server-Linux-x86_64.tar.bz2
   fi
 
   # extract archives
@@ -180,14 +180,14 @@ if [ "$1" = "install" ]; then
   # cleanup
   sudo rm -f albyhub-server.tar.bz2
 
-  # Setze die Berechtigungen für das Verzeichnis und die Dateien
+  # set permissions
   sudo chmod -R 755 /home/${APPID}/lib
   sudo chown -R root:root /home/${APPID}/lib
 
   # make libs available
   echo "/home/${APPID}/lib" | sudo tee /etc/ld.so.conf.d/${APPID}.conf
   sudo ldconfig
-  
+
   echo "# Install ${APPID} done"
   exit 0
 
@@ -252,7 +252,7 @@ ExecStartPre=-/home/admin/config.scripts/bonus.${APPID}.sh prestart
 EnvironmentFile=${ENVFILE}
 ExecStart=/home/${APPID}/bin/${APPID}
 # Hack to ensure Alby Hub never uses more than 90% CPU
-CPUQuota=90%sudo 
+CPUQuota=90%sudo
 
 [Install]
 WantedBy=multi-user.target
@@ -268,8 +268,8 @@ WantedBy=multi-user.target
   # nginx configuration
   # BACKGROUND is that the plain HTTP is served by your web app, but thru the nginx proxy it will be available
   # with (self-signed) HTTPS and with separate configs for Tor & Tor+HTTPS.
-  
-  echo "# setup nginx confing"
+
+  echo "# setup nginx config"
 
   # write the HTTPS config
   echo "
