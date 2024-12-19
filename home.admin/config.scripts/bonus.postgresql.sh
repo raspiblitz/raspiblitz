@@ -35,6 +35,12 @@ if [ "$command" = "1" ] || [ "$command" = "on" ]; then
     sudo apt install -y postgresql-$PG_VERSION
   fi
 
+  # make sure en_GB locale is available for now - see #4893
+  echo "# temp fixing locale"
+  sudo sed -i '/^#en_GB.UTF-8 UTF-8/s/^#//' /etc/locale.gen
+  sudo sed -i '/^# en_GB.UTF-8 UTF-8/s/^# //' /etc/locale.gen
+  sudo locale-gen
+
   postgres_datadir="/var/lib/postgresql" # default data dir
   postgres_confdir="/etc/postgresql"     # default conf dir
 

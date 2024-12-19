@@ -162,7 +162,7 @@ if [ "$1" = "install" ]; then
     exit 1
   fi
   echo
-  echo "- OK the installation of Core Lightning v${installed} is successful"
+  echo "- OK the installation of Core Lightning ${installed} is successful"
   exit 0
 fi
 
