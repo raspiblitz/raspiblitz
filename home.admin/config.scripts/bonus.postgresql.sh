@@ -62,7 +62,7 @@ if [ "$command" = "1" ] || [ "$command" = "on" ]; then
     sudo chown -R postgres:postgres $postgres_datadir
 
     echo "# Create cluster"
-    sudo pg_createcluster $PG_VERSION main
+    sudo pg_createcluster --locale en_US.UTF-8 $PG_VERSION main
     sudo pg_ctlcluster $PG_VERSION main start
 
   elif [ -d /mnt/hdd/app-data/postgresql/$PG_VERSION/main ]; then
@@ -79,12 +79,12 @@ if [ "$command" = "1" ] || [ "$command" = "on" ]; then
       echo "# Create $PG_VERSION config"
       sudo mkdir -p $postgres_datadir/$PG_VERSION/main
       sudo chown -R postgres:postgres $postgres_datadir
-      sudo pg_createcluster $PG_VERSION main
+      sudo pg_createcluster --locale en_US.UTF-8 $PG_VERSION main
       sudo pg_ctlcluster $PG_VERSION main start
       echo "Setting default password for postgres user"
       # start cluster temporarily
       sudo systemctl start postgresql
-      sudo pg_createcluster $PG_VERSION main
+      sudo pg_createcluster --locale en_US.UTF-8 $PG_VERSION main
       sudo pg_ctlcluster $PG_VERSION main start
       echo "Setting default password for postgres user"
       sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD 'postgres';"
@@ -108,7 +108,7 @@ if [ "$command" = "1" ] || [ "$command" = "on" ]; then
     sudo chown -R postgres:postgres $postgres_datadir
     sudo systemctl start postgresql
     sudo systemctl start postgresql@13-main
-    sudo pg_createcluster $PG_VERSION main
+    sudo pg_createcluster --locale en_US.UTF-8 $PG_VERSION main
     sudo pg_ctlcluster $PG_VERSION main start
 
   elif [ -d /mnt/hdd/app-data/postgresql/13/main ]; then
@@ -130,7 +130,7 @@ if [ "$command" = "1" ] || [ "$command" = "on" ]; then
       sudo chown -R postgres:postgres $postgres_datadir
       # start cluster temporarily
       sudo systemctl start postgresql
-      sudo pg_createcluster 13 main
+      sudo pg_createcluster --locale en_US.UTF-8 13 main
       sudo pg_ctlcluster 13 main start
       echo "# Setting default password for postgres user"
       sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD 'postgres';"
@@ -154,7 +154,7 @@ if [ "$command" = "1" ] || [ "$command" = "on" ]; then
     sudo chown -R postgres:postgres $postgres_datadir
     sudo systemctl start postgresql
     sudo systemctl start postgresql@13-main
-    sudo pg_createcluster 13 main
+    sudo pg_createcluster --locale en_US.UTF-8 13 main
     sudo pg_ctlcluster 13 main start
 
     if [ -d /mnt/hdd/app-data/postgresql/$PG_VERSION ] || pg_lsclusters | grep -q "$PG_VERSION  main"; then
