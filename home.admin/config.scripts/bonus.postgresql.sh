@@ -185,6 +185,24 @@ if [ "$command" = "1" ] || [ "$command" = "on" ]; then
     fi
   fi
 
+  # Setting PostgreSQL locale settings
+  LOCALE_SETTINGS=(
+    "lc_messages = 'en_US.UTF-8'"
+    "lc_monetary = 'en_US.UTF-8'"
+    "lc_numeric = 'en_US.UTF-8'"
+    "lc_time = 'en_US.UTF-8'"
+  )
+  for setting in "${LOCALE_SETTINGS[@]}"; do
+    key=$(echo "$setting" | cut -d= -f1 | tr -d ' ')
+    if ! sudo grep -q "^${key}" /etc/postgresql/$PG_VERSION/main/postgresql.conf; then
+      echo "# Adding $setting"
+      echo "$setting" | sudo tee -a /etc/postgresql/$PG_VERSION/main/postgresql.conf
+    else
+      echo "# Updating $setting"
+      sudo sed -i "s|^${key}.*|${setting}|" /etc/postgresql/$PG_VERSION/main/postgresql.conf
+    fi
+  done
+  
   # start cluster
   sudo systemctl enable postgresql
   sudo systemctl start postgresql
