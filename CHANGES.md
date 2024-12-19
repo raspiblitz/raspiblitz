@@ -7,7 +7,7 @@ Small AlbyHub feature release with security/bug-fixing relevant updates.
 - New: AlbyHub v1.12.0 (SSH & WebUI) [details](https://github.com/getAlby)
 - New: SSH-Option to tirn on/off LNbits AdminUI [details](https://github.com/raspiblitz/raspiblitz/issues/4876)
 - Update: LND v0.18.3-beta [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.18.3-beta)
-- Update: Core Lightning v24.11 [details](https://github.com/ElementsProject/lightning/releases/tag/v24.11)
+- Update: Core Lightning v24.11.1 [details](https://github.com/ElementsProject/lightning/releases/tag/v24.11.1)
 
 ## What's new in Version 1.11.3 of RaspiBlitz?
 
