@@ -259,6 +259,19 @@ if [ "$2" = "wallet" ]; then
     exit 1
   fi
 
+  ln_pendingbalance=$($lndcli_alias pendingchannels 2>/dev/null)
+  if [ "${ln_pendingbalance}" == "" ]; then
+    echo "error='no data'"
+    exit 1
+  fi  
+
+  ln_pendingonchainbalance_sum=$(echo "${ln_pendingbalance}" | jq -r '
+  ([ .pending_force_closing_channels[].channel.local_balance,
+     .pending_closing_channels[].channel.local_balance
+   ] | map(tonumber) | add // 0)')
+
+  lnd_wallet_onchain_pending=$(( ${lnd_wallet_onchain_pending:-0} + ${ln_pendingonchainbalance_sum:-0} ))
+
    # parse data
   lnd_wallet_channels_balance=$(echo "$ln_channelbalance" | jq -r '.balance')
   lnd_wallet_channels_pending=$(echo "$ln_channelbalance" | jq -r '.pending_open_balance')

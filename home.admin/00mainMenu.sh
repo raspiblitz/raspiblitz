@@ -180,6 +180,9 @@ fi
 if [ "${telegraf}" == "on" ]; then
   OPTIONS+=(TELEGRAF "Telegraf InfluxDB/Grafana Metrics")
 fi
+if [ "${albyhub}" == "on" ]; then
+  OPTIONS+=(ALBYHUB "AlbyHub")
+fi
 
 # dont offer to switch to "testnet view for now" - so no wswitch back to mainnet needed
 #if [ ${chain} != "main" ]; then
@@ -354,6 +357,9 @@ case $CHOICE in
             ;;
         FINTS)
             sudo /home/admin/config.scripts/bonus.fints.sh menu
+            ;;
+        ALBYHUB)
+            /home/admin/config.scripts/bonus.albyhub.sh menu
             ;;
         TESTNETS)
             /home/admin/00parallelChainsMenu.sh

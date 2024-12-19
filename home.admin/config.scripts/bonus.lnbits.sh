@@ -226,6 +226,24 @@ Consider adding a IP2TOR Bridge under OPTIONS."
     OPTIONS+=(MIGRATE-DB "Migrate SQLite to PostgreSQL database")
   fi
 
+  # Admin UI
+  activatedAdminUI=$(sudo grep -c "LNBITS_ADMIN_UI=true" $lnbitsConfig)
+  if [ ${activatedAdminUI} -eq 0 ]; then
+    OPTIONS+=(ADMINUI "Activate 'Admin UI'")
+  else
+    OPTIONS+=(ADMINUI "Deactivate 'Admin UI'")
+  fi
+
+  # Allow New Accounts (only if AdminUI is OFF)
+  allowNewAccountsFalse=$(sudo grep -c "LNBITS_ALLOW_NEW_ACCOUNTS=false" $lnbitsConfig)
+  if [ ${activatedAdminUI} -eq 0 ]; then
+    if [ ${allowNewAccountsFalse} -eq 0 ]; then
+      OPTIONS+=(NEWACCOUNTS "Disable New Accounts")
+    else
+      OPTIONS+=(NEWACCOUNTS "Enable New Accounts")
+    fi
+  fi
+
   WIDTH=66
   CHOICE_HEIGHT=$(("${#OPTIONS[@]}/2+1"))
   HEIGHT=$((CHOICE_HEIGHT + 7))
@@ -282,6 +300,44 @@ Consider adding a IP2TOR Bridge under OPTIONS."
     /home/admin/config.scripts/bonus.lnbits.sh backup
     echo
     echo "Backup done"
+    echo "PRESS ENTER to continue"
+    read key
+    exit 0
+    ;;
+  ADMINUI)
+    clear
+    echo
+    if [ ${activatedAdminUI} -eq 0 ]; then
+      echo "Activate Admin UI"
+      sudo sed -i "/^LNBITS_ADMIN_UI=/d" $lnbitsConfig
+      sudo bash -c "echo 'LNBITS_ADMIN_UI=true' >> ${lnbitsConfig}"
+    else
+      echo "Deactivate Admin UI"
+      sudo sed -i "/^LNBITS_ADMIN_UI=/d" $lnbitsConfig
+      sudo bash -c "echo 'LNBITS_ADMIN_UI=false' >> ${lnbitsConfig}"
+    fi
+    echo "Restarting LNbits to activate new setting ..."
+    sudo systemctl restart lnbits
+    echo "PRESS ENTER to continue"
+    read key
+    exit 0
+    ;;
+  NEWACCOUNTS)
+    clear
+    echo
+    if [ ${allowNewAccountsFalse} -eq 0 ]; then
+      echo "Disable New Accounts"
+      sudo sed -i "/^LNBITS_ALLOW_NEW_ACCOUNTS=/d" $lnbitsConfig
+      sudo sed -i "/^# LNBITS_ALLOW_NEW_ACCOUNTS=/d" $lnbitsConfig
+      sudo bash -c "echo 'LNBITS_ALLOW_NEW_ACCOUNTS=false' >> ${lnbitsConfig}"
+    else
+      echo "Enable New Accounts"
+      sudo sed -i "/^LNBITS_ALLOW_NEW_ACCOUNTS=/d" $lnbitsConfig
+      sudo sed -i "/^# LNBITS_ALLOW_NEW_ACCOUNTS=/d" $lnbitsConfig
+      sudo bash -c "echo 'LNBITS_ALLOW_NEW_ACCOUNTS=true' >> ${lnbitsConfig}"
+    fi
+    echo "Restarting LNbits to activate new setting ..."
+    sudo systemctl restart lnbits
     echo "PRESS ENTER to continue"
     read key
     exit 0
@@ -780,15 +836,16 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "# preparing env file"
   # delete old .env file or old symbolic link
   sudo rm /home/lnbits/lnbits/.env 2>/dev/null
+    
   # make sure .env file exists at data drive
-  sudo -u lnbits touch $lnbitsConfig
+  if [ ! -f $lnbitsConfig ]; then
+    sudo -u lnbits touch $lnbitsConfig
+    sudo bash -c "echo 'LNBITS_ADMIN_UI=true' >> ${lnbitsConfig}"
+  fi
   sudo chown lnbits:lnbits $lnbitsConfig
+
   # crete symbolic link
   sudo -u lnbits ln -s $lnbitsConfig /home/lnbits/lnbits/.env
-
-  # activate admin user
-  sudo sed -i "/^LNBITS_ADMIN_UI=/d" $lnbitsConfig
-  sudo bash -c "echo 'LNBITS_ADMIN_UI=true' >> ${lnbitsConfig}"
 
   if [ ! -e /mnt/hdd/app-data/LNBits/database.sqlite3 ]; then
     echo "# install database: PostgreSQL"
