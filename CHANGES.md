@@ -1,6 +1,12 @@
 ## What's new in Version 1.11.4 of RaspiBlitz?
 
-ReleaseCandidate: https://raspiblitz.fulmo.org/images/raspiblitz-min-v1.11.4rc1-2024-12-18.img.gz 
+ReleaseCandidate Minimal:
+https://raspiblitz.fulmo.org/images/raspiblitz-min-v1.11.4rc2-2024-12-20.img.gz
+SHA256: bea72c2dc85b6ae79653c597b0ca837abe586955f61728ab8fcbbb46f2bde75b
+
+ReleaseCandidate Fatpack:
+https://raspiblitz.fulmo.org/images/raspiblitz-fat-v1.11.4rc2-2024-12-20.img.gz
+SHA256: ab5ce68539c890d6d012d52f90bcc73f87ed38702dad381ddb3d50f6a0b40c9f
 
 Small AlbyHub feature release with security/bug-fixing relevant updates.
 
