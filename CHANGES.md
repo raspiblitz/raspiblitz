@@ -1,21 +1,21 @@
 ## What's new in Version 1.11.4 of RaspiBlitz?
 
-ReleaseCandidate Minimal:
-https://raspiblitz.fulmo.org/images/raspiblitz-min-v1.11.4rc2-2024-12-20.img.gz
-
-SHA256: bea72c2dc85b6ae79653c597b0ca837abe586955f61728ab8fcbbb46f2bde75b
-
-ReleaseCandidate Fatpack:
-https://raspiblitz.fulmo.org/images/raspiblitz-fat-v1.11.4rc2-2024-12-20.img.gz
-
-SHA256: ab5ce68539c890d6d012d52f90bcc73f87ed38702dad381ddb3d50f6a0b40c9f
-
 Small AlbyHub feature release with security/bug-fixing relevant updates.
 
 - New: AlbyHub v1.12.0 (SSH & WebUI) [details](https://github.com/getAlby)
-- New: SSH-Option to tirn on/off LNbits AdminUI [details](https://github.com/raspiblitz/raspiblitz/issues/4876)
+- New: SSH-Option to turn on/off LNbits AdminUI [details](https://github.com/raspiblitz/raspiblitz/issues/4876)
 - Update: LND v0.18.3-beta [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.18.3-beta)
 - Update: Core Lightning v24.11 [details](https://github.com/ElementsProject/lightning/releases/tag/v24.11)
+
+<u>Minimal-Image:</u>
+https://raspiblitz.fulmo.org/images/raspiblitz-min-v1.11.4-2024-12-24.img.gz<br>
+Signature: https://raspiblitz.fulmo.org/images/raspiblitz-min-v1.11.4-2024-12-24.img.gz.sig<br>
+SHA256: 3d874e8e2518bb9db79df196d1dd7e6d567a0608a3df568cadef87a77b4d3841
+
+<u>Fatpack-Image:</u>
+https://raspiblitz.fulmo.org/images/raspiblitz-fat-v1.11.4-2024-12-24.img.gz<br>
+Signature: https://raspiblitz.fulmo.org/images/raspiblitz-fat-v1.11.4-2024-12-24.img.gz.sig<br>
+SHA256: 31877d0085c20f34bf2bedeeec6bd4abc108595a4b0985d273ddaba2b0fbe654
 
 ## What's new in Version 1.11.3 of RaspiBlitz?
 
