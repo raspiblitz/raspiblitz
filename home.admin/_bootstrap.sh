@@ -81,6 +81,12 @@ ln_cl_mainnet_sync_initial_done=0
 ln_cl_testnet_sync_initial_done=0
 ln_cl_signet_sync_initial_done=0
 
+# detect physical Raspberry Pi
+rpi=0
+if grep -q "Raspberry Pi" /proc/device-tree/model 2>/dev/null; then
+ rpi=1
+fi
+
 # detect VM
 vm=0
 if [ $(systemd-detect-virt) != "none" ]; then
@@ -97,6 +103,7 @@ echo "setupPhase=${setupPhase}" >> $infoFile
 echo "setupStep=${setupStep}" >> $infoFile
 echo "baseimage=${baseimage}" >> $infoFile
 echo "cpu=${cpu}" >> $infoFile
+echo "rpi=${rpi}" >> $infoFile
 echo "vm=${vm}" >> $infoFile
 echo "blitzapi=${blitzapi}" >> $infoFile
 echo "displayClass=${displayClass}" >> $infoFile
@@ -489,13 +496,15 @@ fi
 ################################
 # UASP FIX
 ################################
-/home/admin/_cache.sh set message "checking HDD"
-source <(/home/admin/config.scripts/blitz.datadrive.sh uasp-fix)
-if [ "${neededReboot}" == "1" ]; then
-  echo "UASP FIX applied ... reboot needed." >> $logFile
-  systemInitReboot=1
-else
-  echo "No UASP FIX needed" >> $logFile
+if [ "${rpi}" == "1"  ] ; then
+  /home/admin/_cache.sh set message "checking HDD"
+  source <(/home/admin/config.scripts/blitz.datadrive.sh uasp-fix)
+  if [ "${neededReboot}" == "1" ]; then
+    echo "UASP FIX applied ... reboot needed." >> $logFile
+    systemInitReboot=1
+  else
+    echo "No UASP FIX needed" >> $logFile
+  fi
 fi
 
 ######################################
