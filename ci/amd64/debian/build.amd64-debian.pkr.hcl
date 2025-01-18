@@ -10,7 +10,7 @@ variable "boot" { default = "uefi" }
 variable "preseed_file" { default = "preseed.cfg" }
 variable "hostname" { default = "raspiblitz-amd64" }
 
-variable "disk_size" { default = "27000" }
+variable "image_size" { default = "27000" }
 variable "memory" { default = "4096" }
 variable "cpus" { default = "4" }
 
@@ -51,7 +51,7 @@ source "qemu" "debian" {
   boot_command     = local.boot_command
   boot_wait        = "5s"
   cpus             = var.cpus
-  disk_size        = var.disk_size
+  disk_size        = var.image_size
   http_directory   = "./http"
   iso_checksum     = var.iso_checksum
   iso_url          = "https://cdimage.debian.org/cdimage/release/current/amd64/iso-cd/${var.iso_name}"
