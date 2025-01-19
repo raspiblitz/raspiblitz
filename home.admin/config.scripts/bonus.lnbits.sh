@@ -585,6 +585,12 @@ if [ "$1" = "prestart" ]; then
       exit 1
     fi
 
+    CLIGHTNING_RPC=$(grep '^CLIGHTNING_RPC=' ${lnbitsConfig} | cut -d'=' -f2-)
+    while ! lightning-cli --rpc-file=${CLIGHTNING_RPC} getinfo &> /dev/null; do
+      echo "Waiting for CLN RPC socket to become available..."
+      sleep 1
+    done
+
     echo "# everything looks OK for lnbits config on CLN on ${LNBitsChain}net"
 
   else
