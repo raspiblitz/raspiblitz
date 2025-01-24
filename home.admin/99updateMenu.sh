@@ -526,27 +526,30 @@ By default a reboot is advised.
       sleep 8
       ;;
     CUSTOM)
-      sudo -u admin /home/admin/config.scripts/bitcoin.update.sh custom
-      whiptail \
-        --title " Bitcoin Core update " \
-        --yes-button "Reboot" \
-        --no-button "Skip Reboot" \
-        --yesno \
+      if ! sudo -u admin /home/admin/config.scripts/bitcoin.update.sh custom; then
+        exit 1
+      else
+        whiptail \
+          --title " Bitcoin Core update " \
+          --yes-button "Reboot" \
+          --no-button "Skip Reboot" \
+          --yesno \
 "OK Bitcoin Core update is done.
 
 By default a reboot is advised.
-      " 9 40
-      if [ $? -eq 0 ]; then
-        clear
-        echo "# REBOOT .."
-        sudo /home/admin/config.scripts/blitz.shutdown.sh reboot
-        sleep 8
-        exit 1
-      else
-        echo "# SKIP REBOOT"
-        echo "# starting the bitcoind.service .."
-        sudo systemctl start bitcoind
-        exit 0
+        " 9 40
+        if [ $? -eq 0 ]; then
+          clear
+          echo "# REBOOT .."
+          sudo /home/admin/config.scripts/blitz.shutdown.sh reboot
+          sleep 8
+          exit 1
+        else
+          echo "# SKIP REBOOT"
+          echo "# starting the bitcoind.service .."
+          sudo systemctl start bitcoind
+          exit 0
+        fi
       fi
       sleep 8
       ;;
