@@ -30,11 +30,10 @@ fi
 
 if [ "$1" = "status-sync" ] || [ "$1" = "status" ]; then
   # Check if the command was successful or if it failed with "Connection refused"
-  if ! echo "$getInfoOutput" | jq -r '.version' 2>/dev/null; then
-    # Command failed, make getInfo empty
+  versionExtracted=$(echo "$getInfoOutput" | jq -r '.version' 2>/dev/null)
+  if [ -z "$versionExtracted" ] || [ "$versionExtracted" = "null" ]; then
     getInfo=""
   else
-    # Command succeeded, store the output in getInfo
     getInfo="$getInfoOutput"
   fi
   if systemctl is-active fulcrum >/dev/null; then
