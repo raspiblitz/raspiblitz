@@ -49,6 +49,11 @@ function set_variables() {
       params[image_size]="$2"
       shift 2
       ;;
+    # qcow2 | raw
+    --image_type)
+      params[image_type]="$2"
+      shift 2
+      ;;
     --)
       shift
       break
