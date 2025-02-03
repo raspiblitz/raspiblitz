@@ -1188,17 +1188,6 @@ else
   echo "OK: Temp cleaned" >> $logFile
 fi
 
-###############################
-# RAID data check (BRTFS)
-###############################
-# see https://github.com/rootzoll/raspiblitz/issues/360#issuecomment-467698260
-
-if [ ${isRaid} -eq 1 ]; then
-  echo "TRIGGERING BTRFS RAID DATA CHECK ..."
-  echo "Check status with: sudo btrfs scrub status /mnt/hdd/"
-  btrfs scrub start /mnt/hdd/
-fi
-
 
 ####################
 # FORCE UASP FLAG

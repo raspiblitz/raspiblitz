@@ -721,25 +721,6 @@ do
   fi
 
   ###############################
-  # RAID data check (BRTFS)
-  ###############################
-  # see https://github.com/rootzoll/raspiblitz/issues/360#issuecomment-467698260
-
-  # check every hour
-  recheckRAID=$((($counter % 3600)+1))
-  if [ ${recheckRAID} -eq 1 ]; then
-
-    # check if BTRTFS raid is active & scrub
-    logger -p info "background.sh - RAID data check"
-    source <(/home/admin/config.scripts/blitz.datadrive.sh status)
-    if [ "${isBTRFS}" == "1" ] && [ "${isRaid}" == "1" ]; then
-      echo "STARTING BTRFS RAID DATA CHECK ..."
-      btrfs scrub start /mnt/hdd/
-    fi
-
-  fi
-
-  ###############################
   # Prepare next loop
   ###############################
 
