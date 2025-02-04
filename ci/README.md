@@ -34,7 +34,7 @@
 ## Ready made images for arm64-rpi
 * The images are built in GitHub actions
 * To see the downloadable artifacts will need to log in to GitHub
-* Find the latest successful build of the default amd64 image:
+* Find the latest successful build of the default arm64 image:
 https://github.com/raspiblitz/raspiblitz/actions/workflows/arm64-rpi-lean-image.yml?query=workflow%3Aarm64-rpi-lean-image-build+is%3Asuccess+branch%3Adev
 * unpack the artifact to the same directory
   ```
