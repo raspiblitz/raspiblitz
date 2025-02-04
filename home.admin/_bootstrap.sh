@@ -750,6 +750,7 @@ if [ "${scenario}" != "ready" ] ; then
     /home/admin/_cache.sh set message "copying system"
 
     # STORAGE
+    echo "# storageDevice(${storageDevice}) storageMountedPath(${storageMountedPath})" >> ${logFile}
     if [ ${#storageDevice} -gt 0 ] && [ ${#storageMountedPath} -eq 0 ]; then
       error=""
       source <(/home/admin/config.scripts/blitz.data.sh ${setupCommand} STORAGE "${storageDevice}" "${combinedDataStorage}" "${bootFromStorage}")
@@ -763,6 +764,7 @@ if [ "${scenario}" != "ready" ] ; then
     fi
 
     # SYSTEM
+    echo "# systemDevice(${systemDevice}) systemWarning(${systemWarning})" >> ${logFile}
     if [ ${#systemDevice} -gt 0 ] && [ "${bootFromStorage}" = "0" ] && [ ${#systemWarning} -eq 0 ]; then
       error=""
       source <(/home/admin/config.scripts/blitz.data.sh ${setupCommand} SYSTEM "${systemDevice}")
@@ -776,6 +778,7 @@ if [ "${scenario}" != "ready" ] ; then
     fi
 
     # DATA
+    echo "# dataDevice(${dataDevice}) dataWarning(${dataWarning})" >> ${logFile}
     if [ ${#dataDevice} -gt 0 ] && [ ${#dataWarning} -eq 0 ]; then
       error=""
       source <(/home/admin/config.scripts/blitz.data.sh ${setupCommand} DATA "${systemDevice}")
@@ -788,12 +791,13 @@ if [ "${scenario}" != "ready" ] ; then
       echo "DATA: ${setupCommand} DATA done" >> ${logFile}
     fi
 
-    # when system was installed on new boot drive 
+    # when system was installed on new boot drive
+    echo "scenario(${scenario})" >> ${logFile}
     if [ "${scenario}" = "setup:system" ] || [ "${scenario}" = "recover:system" ]; then
 
       # mark systemCopy as done in raspiblitz.setup
       if ! sed -i '' "s/^systemCopy=.*/systemCopy=done/" "${setupFile}"; then
-        echo "error='failed to update systemCopy in setupFile'" >&2
+        echo "error='failed to update systemCopy in setupFile'" >> ${logFile}
         exit 1
       fi
 
@@ -818,10 +822,14 @@ if [ "${scenario}" != "ready" ] ; then
       fi
 
       # reboot so that new system can start
+      echo "GOING INTO REBOOT" >> ${logFile}
       /home/admin/_cache.sh set state "reboot"
       /home/admin/_cache.sh set message "restarting system"
       shutdown -r now
       exit 0
+    else
+      # continue with setup
+      echo "NOT setup:system or recover:system" >> ${logFile}
     fi
 
   else
