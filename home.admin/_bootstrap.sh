@@ -712,13 +712,13 @@ if [ "${scenario}" != "ready" ] ; then
     bootFromStorage=0
 
   # system recommended setup:system but user decided against - downgrade to simple setup
-  elif [ "${scenario}" = "setup:system" ] && [ "${systemCopy}" = "no" ] && [ "${deleteData}" = "all" ]; then
+  elif [ "${scenario}" = "setup:system" ] && [ "${systemCopy}" = "0" ] && [ "${deleteData}" = "all" ]; then
     scenario="setup"
     setupCommand="setup"
     bootFromStorage=0
 
   # user agreed to system copy & delete all data
-  elif [ "${scenario}" = "setup:system" ] && [ "${systemCopy}" = "yes" ] && [ "${deleteData}" = "all" ]; then
+  elif [ "${scenario}" = "setup:system" ] && [ "${systemCopy}" = "0" ] && [ "${deleteData}" = "all" ]; then
     setupCommand="setup"
 
   # user agreed to run system from install medium and delete all data
@@ -729,6 +729,9 @@ if [ "${scenario}" != "ready" ] ; then
   # run recovery
   elif [ "${scenario}" = "recover:system" ] || [ "${scenario}" = "recover" ]; then
     setupCommand="recover"
+  
+  else
+    echo "WARN: No matching scenario found" >> ${logFile}
   fi
 
   echo "scenario(${scenario})" >> ${logFile}
