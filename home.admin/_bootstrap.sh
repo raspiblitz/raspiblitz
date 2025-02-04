@@ -718,7 +718,7 @@ if [ "${scenario}" != "ready" ] ; then
     bootFromStorage=0
 
   # user agreed to system copy & delete all data
-  elif [ "${scenario}" = "setup:system" ] && [ "${systemCopy}" = "0" ] && [ "${deleteData}" = "all" ]; then
+  elif [ "${scenario}" = "setup:system" ] && [ "${systemCopy}" = "1" ] && [ "${deleteData}" = "all" ]; then
     setupCommand="setup"
 
   # user agreed to run system from install medium and delete all data
@@ -735,6 +735,8 @@ if [ "${scenario}" != "ready" ] ; then
   fi
 
   echo "scenario(${scenario})" >> ${logFile}
+  echo "systemCopy(${systemCopy})" >> ${logFile}
+  echo "deleteData(${deleteData})" >> ${logFile}
   echo "setupCommand(${setupCommand})" >> ${logFile}
   echo "bootFromStorage(${bootFromStorage})" >> ${logFile}
 
