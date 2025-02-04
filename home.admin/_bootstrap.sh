@@ -731,6 +731,10 @@ if [ "${scenario}" != "ready" ] ; then
     setupCommand="recover"
   fi
 
+  echo "scenario(${scenario})" >> ${logFile}
+  echo "setupCommand(${setupCommand})" >> ${logFile}
+  echo "bootFromStorage(${bootFromStorage})" >> ${logFile}
+
   ###############################################
   # SYSTEM COPY OF FRESH SYSTEM (SETUP & RECOVER)
 
