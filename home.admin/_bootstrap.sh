@@ -780,7 +780,7 @@ if [ "${scenario}" != "ready" ] ; then
       fi
     fi
 
-    # when system was isntalled on new boot drive 
+    # when system was installed on new boot drive 
     if [ "${scenario}" = "setup:system" ] || [ "${scenario}" = "recover:system" ]; then
 
       # mark systemCopy as done in raspiblitz.setup

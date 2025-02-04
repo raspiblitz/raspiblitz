@@ -611,6 +611,8 @@ fi
 
 if [ "$action" = "mount" ]; then
 
+    
+
     # check if all drives are mounted - if not mount them and edit/check fstab
 
     # link data & storage to one drive unter /mnt/hdd
