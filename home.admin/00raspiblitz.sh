@@ -25,7 +25,7 @@ fi
 # special state: copysource
 if [ "${state}" = "stop" ]; then
   echo "***********************************************************"
-  echo "Stop signal detectecd - OK ready for manual provision."
+  echo "Stop signal detected - OK ready for manual provision."
   echo "If your ready for shutdown use the following command:"
   echo "release --> for an official release"
   echo "release -quick --> during development"
@@ -280,6 +280,7 @@ MAINMENU > REPAIR > REPAIR-LND > RETRYSCB
     else
         # every other state just push as event to SSH frontend
         /home/admin/setup.scripts/eventInfoWait.sh "${state}" "${message}"
+        sleep 1
     fi
   fi
 done
