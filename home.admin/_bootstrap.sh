@@ -759,6 +759,7 @@ if [ "${scenario}" != "ready" ] ; then
         /home/admin/_cache.sh set message "${error}"
         exit 1
       fi
+      echo "STORAGE: ${setupCommand} STORAGE done" >> ${logFile}
     fi
 
     # SYSTEM
@@ -771,6 +772,7 @@ if [ "${scenario}" != "ready" ] ; then
         /home/admin/_cache.sh set message "${error}"
         exit 1
       fi
+      echo "SYSTEM: ${setupCommand} SYSTEM done" >> ${logFile}
     fi
 
     # DATA
@@ -783,6 +785,7 @@ if [ "${scenario}" != "ready" ] ; then
         /home/admin/_cache.sh set message "${error}"
         exit 1
       fi
+      echo "DATA: ${setupCommand} DATA done" >> ${logFile}
     fi
 
     # when system was installed on new boot drive 
