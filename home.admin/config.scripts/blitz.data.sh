@@ -646,7 +646,7 @@ if [ "$action" = "setup" ] || [ "$action" = "recover" ]; then
 
     # check that it is a valid setup type: STORAGE, SEPERATE-DATA, SEPERATE-SYSTEM
     actionType=$2
-    if [ "${actionType}" != "STORAGE" ] && [ "${actionType}" != "SEPERATE-DATA" ] && [ "${actionType}" != "SEPERATE-SYSTEM" ]; then
+    if [ "${actionType}" != "STORAGE" ] && [ "${actionType}" != "DATA" ] && [ "${actionType}" != "SYSTEM" ]; then
         echo "# actionType(${actionType})"
         echo "error='setup type not supported'"
         echo "error='setup type not supported'" >> ${logFile}
