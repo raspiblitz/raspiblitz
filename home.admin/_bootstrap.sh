@@ -796,7 +796,7 @@ if [ "${scenario}" != "ready" ] ; then
     if [ "${scenario}" = "setup:system" ] || [ "${scenario}" = "recover:system" ]; then
 
       # mark systemCopy as done in raspiblitz.setup
-      if ! sed -i '' "s/^systemCopy=.*/systemCopy=done/" "${setupFile}"; then
+      if ! sed -i "s/^systemCopy=.*/systemCopy=done/" "${setupFile}"; then
         echo "error='failed to update systemCopy in setupFile'" >> ${logFile}
         exit 1
       fi
