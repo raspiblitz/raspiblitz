@@ -27,6 +27,7 @@ sudo systemctl stop background.scan.service
 # remove stop flag (if exists)
 echo "deleting stop flag .."
 sudo rm ${raspi_bootdir}/stop 2>/dev/null
+sudo rm /home/admin/stop 2>/dev/null
 
 # cleaning logs
 echo "deleting raspiblitz & system logs .."

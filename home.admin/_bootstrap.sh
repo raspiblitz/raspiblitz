@@ -123,8 +123,12 @@ raspi_bootdir="/boot/firmware"
 ######################################
 # STOP flags - for manual provision
 
-# when a file 'stop' is on the sd card bootfs partition root - stop for manual provision
+# when a file 'stop' is on the sd card bootfs partition root - stop for manual provision (raspberrypi)
 flagExists=$(ls ${raspi_bootdir}/stop 2>/dev/null | grep -c 'stop')
+# when a file 'stop' is in the /home/admin directory - stop for manual provision (laptop)
+if [ "${flagExists}" = "0" ]; then
+  flagExists=$(ls /home/admin/stop 2>/dev/null | grep -c 'stop')
+fi
 if [ "${flagExists}" = "1" ]; then
   localip=$(hostname -I | awk '{print $1}')
   /home/admin/_cache.sh set state "stop"
