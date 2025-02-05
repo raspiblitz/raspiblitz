@@ -439,8 +439,8 @@ if [ "$action" = "status" ] || [ "$action" = "mount" ] || [ "$action" = "unmount
 
             # dont use install device in proposed layout
             if [ "${dataDevice}" = "${installDevice}" ]; then
-                systemDevice=""
-                systemSizeGB=""
+                dataDevice=""
+                dataSizeGB=""
             fi
 
             # if there is was no spereated data drive - run combine data & storage partiton
