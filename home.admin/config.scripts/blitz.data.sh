@@ -333,6 +333,7 @@ if [ "$action" = "status" ] || [ "$action" = "mount" ] || [ "$action" = "unmount
     
     ########################
     # PROPOSE LAYOUT
+
     # before setup - when there is no storage device yet
     if [ ${#dataDevice} -eq 0 ] && [ ${combinedDataStorage} -eq 0 ]; then
 
@@ -431,13 +432,13 @@ if [ "$action" = "status" ] || [ "$action" = "mount" ] || [ "$action" = "unmount
             dataSizeGB=$(echo "${listOfDevices}" | head -n1 | awk '{print $2}')
 
             # ignore system device if choosen as data device
-            if [ "${systemDevice}" = "${dataDevice}" ]; then
+            if [ "${dataDevice}" = "${systemDevice}" ]; then
                 dataDevice=""
                 dataSizeGB=""
             fi
 
             # dont use install device in proposed layout
-            if [ "${systemDevice}" = "${installDevice}" ]; then
+            if [ "${dataDevice}" = "${installDevice}" ]; then
                 systemDevice=""
                 systemSizeGB=""
             fi
