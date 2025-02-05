@@ -410,6 +410,11 @@ if [ "$action" = "status" ] || [ "$action" = "mount" ] || [ "$action" = "unmount
                     systemDevice=""
                     systemSizeGB=""
 
+                # dont use install device in proposed layout
+                elif [ "${systemDevice}" = "${installDevice}" ]; then
+                    systemDevice=""
+                    systemSizeGB=""
+
                 # otherwise remove the system device from the list
                 else
                     listOfDevices=$(echo "${listOfDevices}" | grep -v "${systemDevice}")
@@ -429,6 +434,12 @@ if [ "$action" = "status" ] || [ "$action" = "mount" ] || [ "$action" = "unmount
             if [ "${systemDevice}" = "${dataDevice}" ]; then
                 dataDevice=""
                 dataSizeGB=""
+            fi
+
+            # dont use install device in proposed layout
+            if [ "${systemDevice}" = "${installDevice}" ]; then
+                systemDevice=""
+                systemSizeGB=""
             fi
 
             # if there is was no spereated data drive - run combine data & storage partiton
