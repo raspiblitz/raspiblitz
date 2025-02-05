@@ -15,10 +15,6 @@ configFile="/mnt/hdd/raspiblitz.conf"
 echo "_background.sh STARTED"
 echo "INFO: _background.sh loop started - sudo journalctl -f -u background" >> /home/admin/raspiblitz.log
 
-# global vars
-blitzTUIHeartBeatLine=""
-/home/admin/_cache.sh set blitzTUIRestarts "0"
-
 counter=0
 while [ 1 ]
 do
@@ -422,34 +418,6 @@ do
 
       fi
     fi
-  fi
-
-  ###############################
-  # BlitzTUI Monitoring
-  ###############################
-
-  # check every 30sec
-  recheckBlitzTUI=$(($counter % 30))
-  if [ "${touchscreen}" == "1" ] && [ ${recheckBlitzTUI} -eq 1 ]; then
-
-    echo "BlitzTUI Monitoring Check"
-    if [ -d "/var/cache/raspiblitz" ]; then
-      latestHeartBeatLine=$(tail -n 300 /var/cache/raspiblitz/pi/blitz-tui.log | grep beat | tail -n 1)
-    else
-      latestHeartBeatLine=$(tail -n 300 /home/pi/blitz-tui.log | grep beat | tail -n 1)
-    fi
-    if [ ${#blitzTUIHeartBeatLine} -gt 0 ]; then
-      #echo "blitzTUIHeartBeatLine(${blitzTUIHeartBeatLine})"
-      #echo "latestHeartBeatLine(${latestHeartBeatLine})"
-      if [ "${blitzTUIHeartBeatLine}" == "${latestHeartBeatLine}" ]; then
-        echo "FAIL - still no new heart beat .. restarting BlitzTUI"
-        source <(/home/admin/_cache.sh increment system_count_start_tui)
-        init 3 ; sleep 2 ; init 5
-      fi
-    else
-      echo "blitzTUIHeartBeatLine is empty - skipping check"
-    fi
-    blitzTUIHeartBeatLine="${latestHeartBeatLine}"
   fi
 
   ###############################
