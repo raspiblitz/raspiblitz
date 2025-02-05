@@ -825,7 +825,7 @@ if [ "${scenario}" != "ready" ] ; then
       echo "GOING INTO REBOOT" >> ${logFile}
       /home/admin/_cache.sh set state "reboot"
       /home/admin/_cache.sh set message "restarting system"
-      shutdown -r now
+      # TODO: shutdown -r now
       exit 0
     else
       # continue with setup
