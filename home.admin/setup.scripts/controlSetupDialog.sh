@@ -169,7 +169,7 @@ if [ "${setupPhase}" = "setup" ]; then
     # only offer 'keep blockchain' option on systems that dont boot from storage 
     existingBlockchain=""
     if [ "${system_setup_bootFromStorage}" == "0" ]; then
-      if [ "${system_setup_storageBlockchainGB}" != "" ] || [ "${system_setup_storageBlockchainGB}" != "0" ]; then
+      if [ "${system_setup_storageBlockchainGB}" != "" ] || [ "${system_setup_storageBlockchainGB}" != "0" ]; then
         existingBlockchain="BITCOIN"
       fi
     fi
