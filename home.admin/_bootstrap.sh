@@ -806,6 +806,12 @@ if [ "${scenario}" != "ready" ] ; then
       mount /dev/${dataPartition} /mnt/disk_data
       echo "copy setupFile(${setupFile}) to /mnt/disk_data/app-data/raspiblitz.setup" >> ${logFile}
       cp ${setupFile} /mnt/disk_data/home/admin/raspiblitz.setup
+      if [ $? -eq 1 ]; then
+        echo "FAIL: copy setupFile to new system failed" >> ${logFile}
+        /home/admin/_cache.sh set state "error"
+        /home/admin/_cache.sh set message "copy setupFile to new system failed"
+        exit 1
+      fi
       umount /mnt/disk_data
 
       # put flag file into old system 
@@ -825,7 +831,13 @@ if [ "${scenario}" != "ready" ] ; then
       echo "GOING INTO REBOOT" >> ${logFile}
       /home/admin/_cache.sh set state "reboot"
       /home/admin/_cache.sh set message "restarting system"
-      # TODO: shutdown -r now
+      # sync filesystem buffers
+      sync
+      # force write of memory-cached filesystem data
+      sync; echo 3 > /proc/sys/vm/drop_caches
+      # wait for sync to complete
+      sleep 2
+      shutdown -r now
       exit 0
     else
       # continue with setup
