@@ -74,6 +74,40 @@ if [ "$action" = "status" ] || [ "$action" = "mount" ] || [ "$action" = "unmount
         userWantsInspect=1
     fi
 
+    ##########################
+    # FIND INSTALL DEVICE
+
+    # find the first device (sd card, usb, cd rom) with a boot partition
+    installDevice=""
+    possibleInstallDevices=$(lsblk -o NAME,TRAN -d | grep -E 'mmc|usb|sr' | cut -d' ' -f1)
+    for device in ${possibleInstallDevices}; do
+        echo "# check device ${device}"
+        if parted --script "/dev/${device}" print 2>/dev/null | grep "^ *[0-9]" | grep -q "boot\|esp\|lba"; then
+            installDevice="${device}"
+            break
+        fi
+    done
+
+    # check if any partition of install device is mounted as root
+    installDeviceActive=0
+    if [ ${#installDevice} -gt 0 ]; then
+        rootPartition=$(lsblk -no NAME,MOUNTPOINT "/dev/${installDevice}"| awk '$2 == "/"' | sed 's/[└├]─//g' | cut -d' ' -f1)
+        if [ ${#rootPartition} -gt 0 ]; then
+            installDeviceActive=1
+        fi
+    fi
+
+    # check if install device is read-only
+    installDeviceReadOnly=0
+    if [ ${#installDevice} -gt 0 ]; then
+        if [ -f "/sys/block/${installDevice}/ro" ] && [ "$(cat /sys/block/${installDevice}/ro)" = "1" ]; then
+            installDeviceReadOnly=1
+        fi
+    fi
+
+    ##########################
+    # CHECK EXISTING DRIVES
+
     # initial values for drives & state to determine
     storageDevice=""
     systemDevice=""
@@ -199,12 +233,17 @@ if [ "$action" = "status" ] || [ "$action" = "mount" ] || [ "$action" = "unmount
                     exit 1
                 fi
 
-                # set data - just so that same device is used again to overwrite on fresh install
-                echo "#  - SYSTEM partition"
-                systemDevice="${deviceName}"
-                systemSizeGB="${size}"
-                systemPartition="${name}"
-                systemMountedPath="${mountPath}"
+                # check if system is install device (sd card or thumb drive)
+                if [ "${installDevice}" = "${deviceName}" ]; then
+                    echo "#  - INSTALL partition"
+                else
+                    # set data
+                    echo "#  - SYSTEM partition"
+                    systemDevice="${deviceName}"
+                    systemSizeGB="${size}"
+                    systemPartition="${name}"
+                    systemMountedPath="${mountPath}"
+                fi
 
             # Check MIGRATION: UMBREL
             elif [ -f "${mountPath}/umbrel/info.json" ]; then
@@ -311,16 +350,6 @@ if [ "$action" = "status" ] || [ "$action" = "mount" ] || [ "$action" = "unmount
         if (size >= 7) printf "%s %.0f\n", $1, size
         }' | sort -k2,2nr -k1,1 )
         #echo "listOfDevices='${listOfDevices}'"
-
-        # on laptop ignore identified system drive which is the INSTALL thumb drive on setup
-        # on RaspberryPi ignore all systems from thumb drives
-        if [ "${computerType}" = "laptop" ] || [ "${computerType}" = "raspberrypi" ]; then
-            echo "# on laptop or RaspberryPi ignore existing system drives for new setup"
-            systemDevice=""
-            systemSizeGB=""
-            systemPartition=""
-            systemMountedPath=""
-        fi
 
         # Set STORAGE (the biggest drive)
         storageDevice=$(echo "${listOfDevices}" | head -n1 | awk '{print $1}')
@@ -492,37 +521,6 @@ if [ "$action" = "status" ] || [ "$action" = "mount" ] || [ "$action" = "unmount
     # DATA
     if [ ${#dataDevice} -gt 0 ]; then
         dataDeviceName=$(find_by_id_filename "${dataDevice}")
-    fi
-
-    #################
-    # Install Device
-
-    # find the first device (sd card, usb, cd rom) with a boot partition
-    installDevice=""
-    possibleInstallDevices=$(lsblk -o NAME,TRAN -d | grep -E 'mmc|usb|sr' | cut -d' ' -f1)
-    for device in ${possibleInstallDevices}; do
-        echo "# check device ${device}"
-        if parted --script "/dev/${device}" print 2>/dev/null | grep "^ *[0-9]" | grep -q "boot\|esp\|lba"; then
-            installDevice="${device}"
-            break
-        fi
-    done
-
-    # check if any partition of install device is mounted as root
-    installDeviceActive=0
-    if [ ${#installDevice} -gt 0 ]; then
-        rootPartition=$(lsblk -no NAME,MOUNTPOINT "/dev/${installDevice}"| awk '$2 == "/"' | sed 's/[└├]─//g' | cut -d' ' -f1)
-        if [ ${#rootPartition} -gt 0 ]; then
-            installDeviceActive=1
-        fi
-    fi
-
-    # check if install device is read-only
-    installDeviceReadOnly=0
-    if [ ${#installDevice} -gt 0 ]; then
-        if [ -f "/sys/block/${installDevice}/ro" ] && [ "$(cat /sys/block/${installDevice}/ro)" = "1" ]; then
-            installDeviceReadOnly=1
-        fi
     fi
 
     #################
