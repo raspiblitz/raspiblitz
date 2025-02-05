@@ -334,7 +334,7 @@ if [ "$action" = "status" ] || [ "$action" = "mount" ] || [ "$action" = "unmount
     ########################
     # PROPOSE LAYOUT
     # before setup - when there is no storage device yet
-    if [ ${#storageDevice} -eq 0 ]; then
+    if [ ${#dataDevice} -eq 0 ] && [ ${combinedDataStorage} -eq 0 ]; then
 
         # get a list of all connected drives >7GB ordered by size (biggest first)
         listOfDevices=$(lsblk -dno NAME,SIZE | grep -E "^(sd|nvme)" | \
@@ -381,6 +381,7 @@ if [ "$action" = "status" ] || [ "$action" = "mount" ] || [ "$action" = "unmount
 
                 # force RaspberryPi with no NVMe to boot from SD
                 if [ "${computerType}" == "raspberrypi" ] && [ ${gotNVMe} -lt 1 ] ; then
+                    echo "# RaspberryPi with no NVMe - keep booting from SD card"
                     bootFromStorage=0
                     bootFromSD=1
 
