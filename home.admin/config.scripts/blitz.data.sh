@@ -539,12 +539,18 @@ if [ "$action" = "status" ] || [ "$action" = "mount" ] || [ "$action" = "unmount
     #################
     # Define Scenario
 
+    # Initialize systemCopy flag to default 0
+    systemCopy=0
+
     # migration: detected data from another node implementation
     if [ ${#scenario} -gt 0 ]; then
         echo "# scenario already set by analysis above to: ${scenario}"
        
     elif [ ${#storageMigration} -gt 0 ]; then
         scenario="migration"
+        if [ "${systemMountedPath}" != "/" ] && [ ${bootFromSD} -eq 0 ]; then
+            systemCopy=1
+        fi
 
     # nodata: no drives >64GB connected
     elif [ ${#storageDevice} -eq 0 ]; then
@@ -560,7 +566,8 @@ if [ "$action" = "status" ] || [ "$action" = "mount" ] || [ "$action" = "unmount
 
     # recover: drives there but unmounted & blitz config exists (check raspiblitz.conf with -inspect if its update)
     elif [ ${#storageDevice} -gt 0 ] && [ ${#storageMountedPath} -eq 0 ] && [ ${dataConfigFound} -eq 1 ] && [ "${systemMountedPath}" != "/" ] && [ ${bootFromSD} -eq 0 ]; then
-        scenario="recover:system" # auto update system before recover
+        scenario="recover"
+        systemCopy=1
 
     # recover: drives there but unmounted & blitz config exists (check raspiblitz.conf with -inspect if its update)
     elif [ ${#storageDevice} -gt 0 ] && [ ${#storageMountedPath} -eq 0 ] && [ ${dataConfigFound} -eq 1 ]; then
@@ -568,7 +575,8 @@ if [ "$action" = "status" ] || [ "$action" = "mount" ] || [ "$action" = "unmount
 
     # setup: drives there but unmounted & no blitz config exists & booted from install media
     elif [ ${#storageDevice} -gt 0 ] && [ ${#storageMountedPath} -eq 0 ] && [ ${dataConfigFound} -eq 0 ] && [ "${systemMountedPath}" != "/" ] && [ ${bootFromSD} -eq 0 ]; then
-        scenario="setup:system" # ask user to change bootdrive before setup
+        scenario="setup"
+        systemCopy=1
 
     # setup: drives there but unmounted & no blitz config exists 
     elif [ ${#storageDevice} -gt 0 ] && [ ${#storageMountedPath} -eq 0 ] && [ ${dataConfigFound} -eq 0 ]; then
@@ -581,6 +589,7 @@ if [ "$action" = "status" ] || [ "$action" = "mount" ] || [ "$action" = "unmount
 
     # output the result
     echo "scenario='${scenario}'"
+    echo "scenarioSystemCopy='${systemCopy}'"
     echo "storageDevice='${storageDevice}'"
     echo "storageDeviceName='${storageDeviceName}'"
     echo "storageSizeGB='${storageSizeGB}'"

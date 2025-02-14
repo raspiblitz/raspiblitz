@@ -647,7 +647,7 @@ if [ "${scenario}" != "ready" ] ; then
   # map scenario to setupPhase
   /home/admin/_cache.sh set "system_setup_askSystemCopy" "0"
 
-  if [ "${scenario}" = "setup:system" ]; then
+  if [ "${scenario}" = "setup" ] && [ "${scenarioSystemCopy}" = "1" ]; then
     setupPhase="setup"
     infoMessage="Please start Setup"
     /home/admin/_cache.sh set "system_setup_askSystemCopy" "1"
@@ -656,7 +656,7 @@ if [ "${scenario}" != "ready" ] ; then
     setupPhase="setup"
     infoMessage="Please start Setup"
 
-  elif [ "${scenario}" = "recover" ] || [ "${scenario}" = "recover:system" ]; then
+  elif [ "${scenario}" = "recover" ]; then
     setupPhase="recovery"
     infoMessage="Please start Recovery"
 
@@ -715,14 +715,14 @@ if [ "${scenario}" != "ready" ] ; then
     setupCommand="skip"
     bootFromStorage=0
 
-  # system recommended setup:system but user decided against - downgrade to simple setup
-  elif [ "${scenario}" = "setup:system" ] && [ "${systemCopy}" = "0" ] && [ "${deleteData}" = "all" ]; then
+  # system recommended setup & system but user decided against - downgrade to simple setup
+  elif [ "${scenario}" = "setup" ] && [ "${scenarioSystemCopy}" = "1" ] && [ "${systemCopy}" = "0" ] && [ "${deleteData}" = "all" ]; then
     scenario="setup"
     setupCommand="setup"
     bootFromStorage=0
 
   # user agreed to system copy & delete all data
-  elif [ "${scenario}" = "setup:system" ] && [ "${systemCopy}" = "1" ] && [ "${deleteData}" = "all" ]; then
+  elif [ "${scenario}" = "setup" ]&& [ "${scenarioSystemCopy}" = "1" ] && [ "${systemCopy}" = "1" ] && [ "${deleteData}" = "all" ]; then
     setupCommand="setup"
 
   # user agreed to run system from install medium and delete all data
@@ -731,7 +731,7 @@ if [ "${scenario}" != "ready" ] ; then
     bootFromStorage=0
 
   # run recovery
-  elif [ "${scenario}" = "recover:system" ] || [ "${scenario}" = "recover" ]; then
+  elif [ "${scenario}" = "recover" ]; then
     setupCommand="recover"
   
   else
@@ -797,7 +797,8 @@ if [ "${scenario}" != "ready" ] ; then
 
     # when system was installed on new boot drive
     echo "scenario(${scenario})" >> ${logFile}
-    if [ "${scenario}" = "setup:system" ] || [ "${scenario}" = "recover:system" ]; then
+    echo "scenarioSystemCopy(${scenarioSystemCopy})" >> ${logFile}
+    if [ "${scenarioSystemCopy}" = "1" ]; then
 
       # mark systemCopy as done in raspiblitz.setup
       if ! sed -i "s/^systemCopy=.*/systemCopy=done/" "${setupFile}"; then
@@ -846,7 +847,7 @@ if [ "${scenario}" != "ready" ] ; then
       exit 0
     else
       # continue with setup
-      echo "NOT setup:system or recover:system" >> ${logFile}
+      echo "NOT scenarioSystemCopy" >> ${logFile}
     fi
 
   else
