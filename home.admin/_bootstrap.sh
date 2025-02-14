@@ -807,6 +807,7 @@ if [ "${scenario}" != "ready" ] ; then
 
       # put setupFile to new system (so after reboot it dows not need to ask user again)
       source <(/home/admin/config.scripts/blitz.data.sh status)
+      mkdir -p /mnt/disk_data 2>/dev/null
       mount /dev/${dataPartition} /mnt/disk_data
       echo "copy setupFile(${setupFile}) to /mnt/disk_data/app-data/raspiblitz.setup" >> ${logFile}
       cp ${setupFile} /mnt/disk_data/home/admin/raspiblitz.setup
