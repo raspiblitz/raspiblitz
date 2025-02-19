@@ -328,6 +328,9 @@ bitcoin.node=bitcoind
 [bolt]
 db.bolt.auto-compact=true
 db.bolt.auto-compact-min-age=672h
+
+[protocol]
+protocol.custom-message=37913
 " | sudo -u bitcoin tee /home/bitcoin/.lnd/${netprefix}lnd.conf
   else
     echo "# The file /home/bitcoin/.lnd/${netprefix}lnd.conf is already present"
