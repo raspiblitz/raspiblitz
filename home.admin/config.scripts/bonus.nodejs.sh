@@ -2,7 +2,7 @@
 
 # follows https://github.com/nodesource/distributions/blob/master/README.md#manual-installation
 
-VERSION="20"
+VERSION="22"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
