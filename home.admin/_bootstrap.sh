@@ -806,7 +806,7 @@ if [ "${scenario}" != "ready" ] ; then
         exit 1
       fi
 
-      # put setupFile to new system (so after reboot it dows not need to ask user again)
+      # put setupFile to new system (so after reboot it does not need to ask user again)
       source <(/home/admin/config.scripts/blitz.data.sh status)
       mkdir -p /mnt/disk_data 2>/dev/null
       mount /dev/${dataPartition} /mnt/disk_data
