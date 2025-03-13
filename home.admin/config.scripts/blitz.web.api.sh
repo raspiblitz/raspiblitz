@@ -38,7 +38,7 @@ if [ "$1" = "info" ]; then
   origin=$(sudo -u blitzapi git config --get remote.origin.url)
   echo "repo='${origin}'"
 
-  # get github branch from repo directory with git command 
+  # get github branch from repo directory with git command
   branch=$(sudo -u blitzapi git rev-parse --abbrev-ref HEAD)
   echo "branch='${branch}'"
 
@@ -91,11 +91,10 @@ if [ "$1" = "update-config" ]; then
     if [ "${RPCPASS}" == "" ]; then
       RPCPASS="passwordB"
     fi
-    sed -i "s/^network=.*/network=mainnet/g" ./.env
-    sed -i "s/^bitcoind_ip_mainnet=.*/bitcoind_ip_mainnet=127.0.0.1/g" ./.env
-    sed -i "s/^bitcoind_ip_testnet=.*/bitcoind_ip_testnet=127.0.0.1/g" ./.env
-    sed -i "s/^bitcoind_user=.*/bitcoind_user=${RPCUSER}/g" ./.env
-    sed -i "s/^bitcoind_pw=.*/bitcoind_pw=${RPCPASS}/g" ./.env
+    sed -i "s/^BAPI_NETWORK=.*/BAPI_NETWORK=/g" ./.env
+    sed -i "s/^BAPI_BITCOIND_ADDRESS=.*/BAPI_BITCOIND_ADDRESS=127.0.0.1/g" ./.env
+    sed -i "s/^BAPI_BITCOIND_USER=.*/BAPI_BITCOIND_USER=${RPCUSER}/g" ./.env
+    sed -i "s/^BAPI_BITCOIND_RPC_PW=.*/BAPI_BITCOIND_RPC_PW=${RPCPASS}/g" ./.env
 
     # configure LND
     if [ "${lightning}" == "lnd" ]; then
@@ -103,10 +102,10 @@ if [ "$1" = "update-config" ]; then
       echo "# CONFIG Web API Lightning --> LND"
       tlsCert=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/tls.cert)
       adminMacaroon=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/bitcoin/${chain}net/admin.macaroon)
-      sed -i "s/^ln_node=.*/ln_node=lnd_grpc/g" ./.env
-      sed -i "s/^lnd_grpc_ip=.*/lnd_grpc_ip=127.0.0.1/g" ./.env
-      sed -i "s/^lnd_macaroon=.*/lnd_macaroon=${adminMacaroon}/g" ./.env
-      sed -i "s/^lnd_cert=.*/lnd_cert=${tlsCert}/g" ./.env
+      sed -i "s/^BAPI_LN_NODE=.*/BAPI_LN_NODE=lnd_grpc/g" ./.env
+      sed -i "s/^BAPI_LND_GRPC_IP=.*/BAPI_LND_GRPC_IP=127.0.0.1/g" ./.env
+      sed -i "s/^BAPI_LND_MACAROON=.*/BAPI_LND_MACAROON=${adminMacaroon}/g" ./.env
+      sed -i "s/^BAPI_LND_CERT=.*/BAPI_LND_CERT=${tlsCert}/g" ./.env
       if [ "${chain}" == "main" ]; then
         L2rpcportmod=0
         portprefix=""
@@ -124,8 +123,8 @@ if [ "$1" = "update-config" ]; then
     elif [ "${lightning}" == "cl" ]; then
 
       echo "# CONFIG Web API Lightning --> CL"
-      sed -i "s/^ln_node=.*/ln_node=cln_jrpc/g" ./.env
-      sed -i "s#^cln_jrpc_path=.*#cln_jrpc_path=\"/mnt/hdd/app-data/.lightning/bitcoin/lightning-rpc\"#g" ./.env
+      sed -i "s/^BAPI_LN_NODE=.*/ln_node=cln_jrpc/g" ./.env
+      sed -i "s#^BAPI_CLN_JRPC_PATH=.*#BAPI_CLN_JRPC_PATH=\"/mnt/hdd/app-data/.lightning/bitcoin/lightning-rpc\"#g" ./.env
 
       # get hex values of pem files
       # hexClient=$(sudo xxd -p -c2000 /home/bitcoin/.lightning/bitcoin/client.pem)
@@ -144,13 +143,13 @@ if [ "$1" = "update-config" ]; then
 
     else
       echo "# CONFIG Web API Lightning --> OFF"
-      sed -i "s/^ln_node=.*/ln_node=none/g" ./.env
+      sed -i "s/^BAPI_LN_NODE=.*/BAPI_LN_NODE=none/g" ./.env
     fi
 
   else
     echo "# CONFIG Web API ... still in setup, skip bitcoin & lightning"
-    sed -i "s/^network=.*/network=/g" ./.env
-    sed -i "s/^ln_node=.*/ln_node=/g" ./.env
+    sed -i "s/^BAPI_NETWORK=.*/BAPI_NETWORK=/g" ./.env
+    sed -i "s/^BAPI_LN_NODE=.*/BAPI_LN_NODE=/g" ./.env
   fi
 
   echo "# '.env' config updates - blitzapi maybe needs to be restarted"
