@@ -1,0 +1,16 @@
+image: hashicorp/packer:light
+
+job:
+  script: echo "Running CI job..."
+  tags:
+    - docker
+
+stages:
+  - build
+
+build_debian:
+  stage: build
+  script:
+    - cd ci/amd64/debian
+    - packer init .
+    - packer build build.amd64-debian.pkr.hcl
