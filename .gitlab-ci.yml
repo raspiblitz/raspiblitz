@@ -10,4 +10,4 @@ build_debian:
     - packer init .
     - packer build build.amd64-debian.pkr.hcl
   tags:
-    - docker
+    - packer
