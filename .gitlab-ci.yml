@@ -1,12 +1,14 @@
 image: hashicorp/packer:light
 
-job:
-  script: echo "Running CI job..."
-  tags:
-    - docker
-
 stages:
   - build
+
+build_job:
+  stage: build
+  script:
+    - echo "Running CI job..."
+  tags:
+    - docker
 
 build_debian:
   stage: build
