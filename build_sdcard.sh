@@ -39,6 +39,9 @@ me="${0##/*}"
 nocolor="\033[0m"
 red="\033[31m"
 
+# Konfiguration für nicht-interaktive Installation
+export DEBIAN_FRONTEND=noninteractive
+
 ## usage as a function to be called whenever there is a huge mistake on the options
 usage(){
   printf %s"${me} [--option <argument>]
