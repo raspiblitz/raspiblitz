@@ -12,6 +12,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
     >&2 echo "# blitz.data.sh recover SEPERATE-DATA [device]"
     >&2 echo "# blitz.data.sh kill-boot [device] # deactivate boot function from install medium"
     >&2 echo "# blitz.data.sh migration [umbrel|citadel|mynode] [partition] [-test] # will migrate partition to raspiblitz"
+    >&2 echo "# blitz.data.sh migration hdd [status|run]"
     >&2 echo "# blitz.data.sh uasp-fix [-info] # deactivates UASP for non supported USB HDD Adapters"
     echo "error='missing parameters'"
     exit 1
@@ -350,7 +351,7 @@ if [ "$action" = "status" ] || [ "$action" = "mount" ] || [ "$action" = "unmount
         }
         if (size >= 7) printf "%s %.0f\n", $1, size
         }' | sort -k2,2nr -k1,1 )
-        #echo "listOfDevices='${listOfDevices}'"
+        echo "listOfDevices='${listOfDevices}'"
 
         # Set STORAGE (the biggest drive)
         storageDevice=$(echo "${listOfDevices}" | head -n1 | awk '{print $1}')
@@ -633,8 +634,6 @@ fi
 ###################
 
 if [ "$action" = "mount" ]; then
-
-
 
     # check if all drives are mounted - if not mount them and edit/check fstab
 
@@ -1034,6 +1033,25 @@ fi
 ###################
 # MIGRATION
 ###################
+
+if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
+    action=$3
+
+    # get status of migration drives
+
+    if [ "${action}" = "status" ]; then
+        echo "TODO: output status of migration drives"
+        exit 0
+    fi
+
+    if [ "${action}" = "run" ]; then
+        echo "TODO: run migration"
+        exit 0
+    fi
+
+    echo "error='missing parameter'"
+    exit 1
+fi
 
 if [ "$1" = "migration" ]; then
 
