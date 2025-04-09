@@ -331,27 +331,37 @@ if [ "$action" = "status" ] || [ "$action" = "mount" ] || [ "$action" = "unmount
         # check if boot partition is on SD card (mmcblk) - staus quo, might change thru proposed layout
         bootFromSD=$(lsblk | grep mmcblk | grep -c /boot)
     fi
+
+    # get a list of all connected drives >7GB ordered by size (biggest first)
+    listOfDevices=$(lsblk -dno NAME,SIZE | grep -E "^(sd|nvme)" | \
+    awk '{ 
+    size=$2
+    if(size ~ /T/) { 
+    sub("T","",size); size=size*1024 
+    } else if(size ~ /G/) { 
+    sub("G","",size); size=size*1 
+    } else if(size ~ /M/) { 
+    sub("M","",size); size=size/1024 
+    }
+    if (size >= 7) printf "%s %.0f\n", $1, size
+    }' | sort -k2,2nr -k1,1 )
+    echo "listOfDevices='${listOfDevices}'"
+
+    echo "# installDevice: ${installDevice} (${installDeviceActive}) (${installDeviceReadOnly})"
+    echo "# storageDevice: ${storageDevice} (${storageSizeGB}GB) (${storageMountedPath})"
+    echo "# systemDevice: ${systemDevice} (${systemSizeGB}GB) (${systemMountedPath})"
+
+    # if there is an 
+    if [ -n "${dataDevice}" ]; then
+    fi
+
+    exit 0
     
     ########################
     # PROPOSE LAYOUT
 
     # before setup - when there is no storage device yet
     if [ ${#dataDevice} -eq 0 ] && [ ${combinedDataStorage} -eq 0 ]; then
-
-        # get a list of all connected drives >7GB ordered by size (biggest first)
-        listOfDevices=$(lsblk -dno NAME,SIZE | grep -E "^(sd|nvme)" | \
-        awk '{ 
-        size=$2
-        if(size ~ /T/) { 
-        sub("T","",size); size=size*1024 
-        } else if(size ~ /G/) { 
-        sub("G","",size); size=size*1 
-        } else if(size ~ /M/) { 
-        sub("M","",size); size=size/1024 
-        }
-        if (size >= 7) printf "%s %.0f\n", $1, size
-        }' | sort -k2,2nr -k1,1 )
-        echo "listOfDevices='${listOfDevices}'"
 
         # Set STORAGE (the biggest drive)
         storageDevice=$(echo "${listOfDevices}" | head -n1 | awk '{print $1}')
