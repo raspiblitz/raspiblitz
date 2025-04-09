@@ -353,6 +353,7 @@ if [ "$action" = "status" ] || [ "$action" = "mount" ] || [ "$action" = "unmount
 
     # if there is an 
     if [ -n "${dataDevice}" ]; then
+        echo "TODO:"
     fi
 
     exit 0
