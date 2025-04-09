@@ -349,7 +349,7 @@ if [ "$action" = "status" ] || [ "$action" = "mount" ] || [ "$action" = "unmount
         } else if(size ~ /M/) { 
         sub("M","",size); size=size/1024 
         }
-        if (size >= ${storageSizeGB}) printf "%s %.0f\n", $1, size
+        if (size >= '"$storageSizeGB"') printf "%s %.0f\n", $1, size
         }' | sort -k2,2nr -k1,1 )
         echo "listOfBiggerDevices='${listOfDevices}'"
     fi
