@@ -147,9 +147,18 @@ if [ "${setupPhase}" = "setup" ]; then
     exit 0
   fi
 
-  ###############################################
-  # FORMAT DRIVE on NEW SETUP or MIGRATION UPLOAD 
-  if [ "${menuresult}" == "0" ] || [ "${menuresult}" == "1" ]; then
+    # check for second HDDs
+  if [ "${menuresult}" == "6" ]; then
+    clear
+    echo "TODO: Tell user to setup old HDD (on USB)"
+    echo "TODO: check for second HDDs"
+    echo "TODO: exit if no second HDDs"
+    exit 0
+  fi
+
+  ###################################################
+  # FORMAT DRIVE on NEW SETUP or MIGRATION UPLOAD/HDD 
+  if [ "${menuresult}" == "0" ] || [ "${menuresult}" == "1"  || [ "${menuresult}" == "6" ]; then
 
     source <(/home/admin/_cache.sh get system_setup_askSystemCopy system_setup_bootFromStorage system_setup_combinedDataStorage)
 
