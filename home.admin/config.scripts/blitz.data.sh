@@ -1071,11 +1071,21 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
 
     if [ "${action}" = "menu-prepare" ]; then
         
+        # give user prepare information
         dialog --title " Migrate Data to new HDD/SSD/NVMe " --yes-label "Start Migration" --no-label "Back" --yesno "\nTo migrate your RaspiBlitz data from your old HDD/SSD/NVMe to a new bigger drive, please make sure of the following:\n\n- Have your old drive replaced with the new one\n  or start with complete new hardware.\n\n- Have your old drive connected via USB3\n  where you may need an USB adapter and on\n  RasperryPi4 power old drive seperately.\n\nChoose 'Start Migration' if everything is setup or go back." 17 70
         if [ $? -gt 0 ]; then
             # user canceled
             exit 1
         fi
+
+        # check if all needed parameters are set
+        source <(/home/admin/config.scripts/blitz.data.sh status)
+        if [ ${#biggerDevice} -eq 0 ]; then
+            dialog --msgbox "\nNo old drive with RaspiBlitz data found.\n\nIf your sure your setup is correct give feedback to RaspiBlitz devs." 10 60
+            exit 1
+        fi
+
+        # return 0 to indicate success and let calling script finish
         exit 0
     fi
 
