@@ -332,14 +332,11 @@ if [ "$action" = "status" ] || [ "$action" = "mount" ] || [ "$action" = "unmount
         bootFromSD=$(lsblk | grep mmcblk | grep -c /boot)
     fi
 
-    echo "# installDevice: ${installDevice} (${installDeviceActive}) (${installDeviceReadOnly})"
-    echo "# storageDevice: ${storageDevice} (${storageSizeGB}GB) (${storageMountedPath})"
-    echo "# systemDevice: ${systemDevice} (${systemSizeGB}GB) (${systemMountedPath})"
-
     # if there is an existing storage device
+    listOfBiggerDevice=""
     if [ -n "${storageDevice}" ]; then
         # get a list of all connected drives >7GB ordered by size (biggest first)
-        listOfDevices=$(lsblk -dno NAME,SIZE | grep -E "^(sd|nvme)" | \
+        listOfBiggerDevices=$(lsblk -dno NAME,SIZE | grep -E "^(sd|nvme)" | \
         awk '{ 
         size=$2
         if(size ~ /T/) { 
@@ -351,11 +348,17 @@ if [ "$action" = "status" ] || [ "$action" = "mount" ] || [ "$action" = "unmount
         }
         if (size >= '"$storageSizeGB"') printf "%s %.0f\n", $1, size
         }' | sort -k2,2nr -k1,1 )
-        echo "listOfBiggerDevices='${listOfDevices}'"
     fi
+    biggerDevice=$(echo "${listOfBiggerDevice}" | head -n1 | awk '{print $1}')
+    biggerDeviceGB=$(echo "${listOfBiggerDevice}" | head -n1 | awk '{print $2}')
+
+    echo "# installDevice: ${installDevice} (${installDeviceActive}) (${installDeviceReadOnly})"
+    echo "# storageDevice: ${storageDevice} (${storageSizeGB}GB) (${storageMountedPath})"
+    echo "# systemDevice: ${systemDevice} (${systemSizeGB}GB) (${systemMountedPath})"
+    echo "# biggerDevice: ${biggerDevice} (${biggerDeviceGB}GB)"
 
     exit 0
-    
+
     ########################
     # PROPOSE LAYOUT
 
