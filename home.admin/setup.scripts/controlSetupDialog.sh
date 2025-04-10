@@ -158,7 +158,8 @@ if [ "${setupPhase}" = "setup" ]; then
     clear
     echo "TODO: Format first & then Migrate HDD"
     sleep 10
-    
+    exit 0
+
   fi
 
   ###################################################
