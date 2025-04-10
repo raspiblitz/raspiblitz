@@ -354,9 +354,10 @@ if [ "$action" = "status" ] || [ "$action" = "mount" ] || [ "$action" = "unmount
         biggerSizeGB=$(echo "${listOfBiggerDevices}" | head -n1 | awk '{print $2}')
     fi
 
-    # echo "# installDevice: ${installDevice} (${installDeviceActive}) (${installDeviceReadOnly})"
-    # echo "# storageDevice: ${storageDevice} (${storageSizeGB}GB) (${storageMountedPath})"
-    # echo "# systemDevice: ${systemDevice} (${systemSizeGB}GB) (${systemMountedPath})"
+    echo "# installDevice: ${installDevice} (${installDeviceActive}) (${installDeviceReadOnly})"
+    echo "# storageDevice: ${storageDevice} (${storageSizeGB}GB) (${storageMountedPath})"
+    echo "# systemDevice: ${systemDevice} (${systemSizeGB}GB) (${systemMountedPath})"
+    echo "# biggerDevice: ${biggerDevice} (${biggerSizeGB}GB)"
 
     ########################
     # PROPOSE LAYOUT
