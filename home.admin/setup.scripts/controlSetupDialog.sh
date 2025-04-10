@@ -188,7 +188,7 @@ if [ "${setupPhase}" = "setup" ]; then
     fi
 
     # ask user about possible existing blockchain and formatting HDD
-    if [ "${menuresult}" != "6" ]
+    if [ "${menuresult}" != "6" ]; then
       /home/admin/setup.scripts/dialogDeleteData.sh "${existingBlockchain}"
       userChoice=$?
       if [ "${userChoice}" == "1" ]; then
@@ -199,6 +199,7 @@ if [ "${setupPhase}" = "setup" ]; then
         # STOP SETUP  - loop back to setup menu start
         exit 0
       fi
+    fi
 
   fi
 
