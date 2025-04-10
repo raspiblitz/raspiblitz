@@ -16,7 +16,7 @@ if [ "${specialOption}" == "migration" ]; then
   OPTIONS+=(CONVERT "Make Node a RaspiBlitz")  
 fi
 OPTIONS+=(FROMBACKUP "Upload Migration Backup")
-OPTIONS+=(FROMHDD "Migrate from old HDD/SSD")
+OPTIONS+=(FROMHDD "Copy from HDD/SSD/NVMe")
 OPTIONS+=(SHUTDOWN "Shutdown without Changes")
 
 CHOICE_HEIGHT=$(("${#OPTIONS[@]}/2+1"))

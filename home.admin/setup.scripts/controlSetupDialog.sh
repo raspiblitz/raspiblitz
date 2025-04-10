@@ -150,20 +150,14 @@ if [ "${setupPhase}" = "setup" ]; then
   # migrate HDD
   if [ "${menuresult}" == "6" ]; then
     
-    # ask user details on migrate HDD
+    # ask user details on migrate HDD (resutls in cache)
     sudo /home/admin/config.scripts/blitz.data.sh migration hdd menu-prepare
     if [ "$?" == "1" ]; then
       # user wants to exit
       exit 0
     fi
-
-
-
-    clear
-    echo "TODO: Format first & then Migrate HDD"
-    sleep 10
-    exit 0
-
+    source <(/home/admin/_cache.sh get hddMigrateDevice)
+    echo "hddMigrateDevice='${hddMigrateDevice}'" >> $SETUPFILE
   fi
 
   ###################################################
@@ -216,16 +210,14 @@ if [ "${setupPhase}" = "setup" ]; then
   ############################################
   # UPLOAD MIGRATION
   if [ "${menuresult}" == "1" ]; then
-
-    #/home/admin/setup.scripts/dialogMigration.sh raspiblitz
-    #if [ "$?" == "1" ]; then
-    #  # upload did not worked .. exit with 0 to restart process from outside loop
-    #  echo "Upload failed ... return to menu"
-    #  sleep 2
-    #  exit 0
-    #fi
-
     echo "uploadMigration=1" >> $SETUPFILE
+    echo "setPasswordA=1" >> $SETUPFILE
+  fi
+
+  ############################################
+  # HDD MIGRATION
+  if [ "${menuresult}" == "6" ]; then
+    echo "hddMigration=1" >> $SETUPFILE
     echo "setPasswordA=1" >> $SETUPFILE
   fi
 

@@ -1,7 +1,7 @@
 #!/bin/bash
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
     >&2 echo "# managing the data drive(s) with new bootable setups for RaspberryPi, VMs and Laptops"
-    >&2 echo "# blitz.data.sh status [-inspect] # auto detect the old/best drives to use for storage, system and data"
+    >&2 echo "# blitz.data.sh status [-inspect] [] # auto detect the old/best drives to use for storage, system and data"
     >&2 echo "# blitz.data.sh mount # mounts all drives and link all data folders"
     >&2 echo "# blitz.data.sh unmount # unmounts all drives"
     >&2 echo "# blitz.data.sh setup STOARGE [device] combinedData=[0|1] bootFromStorage=[0|1]"
@@ -768,7 +768,6 @@ if [ "$action" = "setup" ] || [ "$action" = "recover" ]; then
     echo "# actionBootFromStorage(${actionBootFromStorage})" >> ${logFile}
     echo "# actionCombinedData(${actionCombinedData})" >> ${logFile}
 
-
     ##########################
     # PARTITION & FORMAT (only if not in recovery)
 
@@ -1102,9 +1101,10 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
         fi
 
         # set migration info to cache
-        /home/admin/_cache.sh set migrateHDD "${biggerDevice}"
-        
-    
+        /home/admin/_cache.sh set hddMigrateDevice "${biggerDevice}"
+        /home/admin/_cache.sh set system_setup_askSystemCopy "1"    
+        /home/admin/_cache.sh set system_setup_storageBlockchainGB "0"
+           
         # return 0 to indicate success and let calling script finish
         exit 0
     fi
