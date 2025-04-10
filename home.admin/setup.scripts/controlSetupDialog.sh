@@ -149,7 +149,7 @@ if [ "${setupPhase}" = "setup" ]; then
 
   # migrate HDD
   if [ "${menuresult}" == "6" ]; then
-    sudo /home/admin/config.scripts/blitz.data.sh migrate hdd menu-prepare
+    sudo /home/admin/config.scripts/blitz.data.sh migration hdd menu-prepare
     if [ "$?" == "1" ]; then
       # user wants to exit
       exit 0
