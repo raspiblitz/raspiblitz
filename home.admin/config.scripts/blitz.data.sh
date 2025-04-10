@@ -349,8 +349,8 @@ if [ "$action" = "status" ] || [ "$action" = "mount" ] || [ "$action" = "unmount
         }
         if (size >= '"$storageSizeGB"') printf "%s %.0f\n", $1, size
         }' | sort -k2,2nr -k1,1 )
-        biggerDevice=$(echo "${listOfBiggerDevice}" | head -n1 | awk '{print $1}')
-        biggerDeviceGB=$(echo "${listOfBiggerDevice}" | head -n1 | awk '{print $2}')
+        biggerDevice=$(echo "${listOfBiggerDevices}" | head -n1 | awk '{print $1}')
+        biggerDeviceGB=$(echo "${listOfBiggerDevices}" | head -n1 | awk '{print $2}')
     fi
 
     echo "# installDevice: ${installDevice} (${installDeviceActive}) (${installDeviceReadOnly})"
