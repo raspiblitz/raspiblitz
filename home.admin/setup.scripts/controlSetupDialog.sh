@@ -162,7 +162,7 @@ if [ "${setupPhase}" = "setup" ]; then
 
   ###################################################
   # FORMAT DRIVE on NEW SETUP or MIGRATION UPLOAD/HDD 
-  if [ "${menuresult}" == "0" ] || [ "${menuresult}" == "1"  || [ "${menuresult}" == "6" ]; then
+  if [ "${menuresult}" = "0" ] || [ "${menuresult}" = "1"  || [ "${menuresult}" = "6" ]; then
 
     source <(/home/admin/_cache.sh get system_setup_askSystemCopy system_setup_bootFromStorage system_setup_combinedDataStorage)
 
@@ -188,22 +188,17 @@ if [ "${setupPhase}" = "setup" ]; then
     fi
 
     # ask user about possible existing blockchain and formatting HDD
-    /home/admin/setup.scripts/dialogDeleteData.sh "${existingBlockchain}"
-    userChoice=$?
-    if [ "${userChoice}" == "1" ]; then
-
-      echo "deleteData='all'" >> $SETUPFILE
-
-    elif [ "${userChoice}" == "2" ]; then
-
-      echo "deleteData='keepBlockchain'" >> $SETUPFILE
-
-    else
-
-      # STOP SETUP  - loop back to setup menu start
-      exit 0
-
-    fi
+    if [ "${menuresult}" != "6" ]
+      /home/admin/setup.scripts/dialogDeleteData.sh "${existingBlockchain}"
+      userChoice=$?
+      if [ "${userChoice}" == "1" ]; then
+        echo "deleteData='all'" >> $SETUPFILE
+      elif [ "${userChoice}" == "2" ]; then
+        echo "deleteData='keepBlockchain'" >> $SETUPFILE
+      else
+        # STOP SETUP  - loop back to setup menu start
+        exit 0
+      fi
 
   fi
 

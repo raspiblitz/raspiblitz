@@ -1094,7 +1094,7 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
         # confirm selection
         storageDeviceNameTrunc="${storageDeviceName:0:35}"
         biggerDeviceNameTrunc="${biggerDeviceName:0:35}"
-        dialog --title " Migrate Data to new HDD/SSD/NVMe " --yes-label "Continue" --no-label "Abort" --yesno "\nYou are about to migrate your RaspiBlitz data from:\n\n- ${storageSizeGB}GB ${storageDeviceNameTrunc} \n\nto:\n\n- ${biggerSizeGB}GB ${biggerDeviceNameTrunc}\n\nIs this correct?" 17 70
+        dialog --title " Migrate Data to new HDD/SSD/NVMe " --yes-label "Continue" --no-label "Abort" --yesno "\nYou are about to migrate your RaspiBlitz data from:\n\n- ${storageSizeGB}GB ${storageDeviceNameTrunc} \n\nto:\n\n- ${biggerSizeGB}GB ${biggerDeviceNameTrunc}\n\nAll data on target drive will be deleted! Is this correct?" 17 70
         if [ $? -gt 0 ]; then
             # user canceled
             exit 1
