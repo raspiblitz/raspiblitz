@@ -12,7 +12,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
     >&2 echo "# blitz.data.sh recover SEPERATE-DATA [device]"
     >&2 echo "# blitz.data.sh kill-boot [device] # deactivate boot function from install medium"
     >&2 echo "# blitz.data.sh migration [umbrel|citadel|mynode] [partition] [-test] # will migrate partition to raspiblitz"
-    >&2 echo "# blitz.data.sh migration hdd [status|run]"
+    >&2 echo "# blitz.data.sh migration hdd [menu|status|run]"
     >&2 echo "# blitz.data.sh uasp-fix [-info] # deactivates UASP for non supported USB HDD Adapters"
     echo "error='missing parameters'"
     exit 1
@@ -1069,7 +1069,20 @@ fi
 if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
     action=$3
 
-    # get status of migration drives
+    if [ "${action}" = "menu" ]; then
+        
+        dialog --title " Migrate Data to new HDD/SSD/NVMe " --yesno "\nTo migrate your RaspiBlitz data from your old HDD/SSD/NVMe to a new bigger drive, please make sure of the following:\n\n- Have your old drive replaced with the new one\n  or start with complete new hardware.\n\n- Have your old drive connected via USB3\n  where you may need an USB adapter and on\n  RasperryPi4 power old drive seperately.\n\nPress 'Start Migration' if everything is setup or go back." 17 70 \
+        --yes-label "Start Migration" --no-label "Back"
+        if [ $? -gt 0 ]; then
+            # user canceled
+            exit 1
+        fi
+
+        # make sure bigger drive is connected
+        source 
+
+        exit 0
+    fi
 
     if [ "${action}" = "status" ]; then
         echo "TODO: output status of migration drives"

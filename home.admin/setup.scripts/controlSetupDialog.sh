@@ -147,13 +147,18 @@ if [ "${setupPhase}" = "setup" ]; then
     exit 0
   fi
 
-    # check for second HDDs
+  # migrate HDD
   if [ "${menuresult}" == "6" ]; then
+    sudo /home/admin/config.scripts/blitz.data.sh migrate hdd menu-prepare
+    if [ "$?" == "1" ]; then
+      # user wants to exit
+      exit 0
+    fi
+
     clear
-    echo "TODO: Tell user to setup old HDD (on USB)"
-    echo "TODO: check for second HDDs"
-    echo "TODO: exit if no second HDDs"
-    exit 0
+    echo "TODO: Format first & then Migrate HDD"
+    sleep 10
+    
   fi
 
   ###################################################
