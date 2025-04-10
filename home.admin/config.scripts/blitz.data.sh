@@ -347,7 +347,8 @@ if [ "$action" = "status" ] || [ "$action" = "mount" ] || [ "$action" = "unmount
         } else if(size ~ /M/) { 
         sub("M","",size); size=size/1024 
         }
-        if (size >= '"$storageSizeGB"') printf "%s %.0f\n", $1, size
+        # Must be strictly bigger than current storage and not the storage device itself
+        if (size > '"$storageSizeGB"' && $1 != "'"$storageDevice"'") printf "%s %.0f\n", $1, size
         }' | sort -k2,2nr -k1,1 )
         biggerDevice=$(echo "${listOfBiggerDevices}" | head -n1 | awk '{print $1}')
         biggerSizeGB=$(echo "${listOfBiggerDevices}" | head -n1 | awk '{print $2}')
