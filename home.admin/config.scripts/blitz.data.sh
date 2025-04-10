@@ -354,10 +354,10 @@ if [ "$action" = "status" ] || [ "$action" = "mount" ] || [ "$action" = "unmount
         biggerSizeGB=$(echo "${listOfBiggerDevices}" | head -n1 | awk '{print $2}')
     fi
 
-    echo "# installDevice: ${installDevice} (${installDeviceActive}) (${installDeviceReadOnly})"
-    echo "# storageDevice: ${storageDevice} (${storageSizeGB}GB) (${storageMountedPath})"
-    echo "# systemDevice: ${systemDevice} (${systemSizeGB}GB) (${systemMountedPath})"
-    echo "# biggerDevice: ${biggerDevice} (${biggerSizeGB}GB)"
+    # echo "# installDevice: ${installDevice} (${installDeviceActive}) (${installDeviceReadOnly})"
+    # echo "# storageDevice: ${storageDevice} (${storageSizeGB}GB) (${storageMountedPath})"
+    # echo "# systemDevice: ${systemDevice} (${systemSizeGB}GB) (${systemMountedPath})"
+    # echo "# biggerDevice: ${biggerDevice} (${biggerSizeGB}GB)"
 
     ########################
     # PROPOSE LAYOUT
@@ -1092,8 +1092,19 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
             exit 1
         fi
 
-        # 
+        # confirm selection
+        storageDeviceNameTrunc="${storageDeviceName:0:35}"
+        biggerDeviceNameTrunc="${biggerDeviceName:0:35}"
+        dialog --title " Migrate Data to new HDD/SSD/NVMe " --yes-label "Continue" --no-label "Abort" --yesno "\nYou are about to migrate your RaspiBlitz data from:\n\n- ${storageSizeGB}GB ${storageDeviceNameTrunc} \n\nto:\n\n- ${biggerSizeGB}GB ${biggerDeviceNameTrunc}\n\nIs this correct?" 17 70
+        if [ $? -gt 0 ]; then
+            # user canceled
+            exit 1
+        fi
 
+        # set migration info to cache
+        /home/admin/_cache.sh set migrateHDD "${biggerDevice}"
+        
+    
         # return 0 to indicate success and let calling script finish
         exit 0
     fi
