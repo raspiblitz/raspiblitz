@@ -582,6 +582,10 @@ if [ "$action" = "status" ] || [ "$action" = "mount" ] || [ "$action" = "unmount
         fi
 
     # nodata: no drives >64GB connected
+    elif [ ${#biggerDevice} -gt 0 ]; then
+        scenario="biggerhdd"
+
+    # nodata: no drives >64GB connected
     elif [ ${#storageDevice} -eq 0 ]; then
         scenario="error:no-storage"
 
