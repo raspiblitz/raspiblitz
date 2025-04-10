@@ -563,6 +563,11 @@ if [ "$action" = "status" ] || [ "$action" = "mount" ] || [ "$action" = "unmount
         dataDeviceName=$(find_by_id_filename "${dataDevice}")
     fi
 
+    # BIGGER
+    if [ ${#biggerDevice} -gt 0 ]; then
+        biggerDeviceName=$(find_by_id_filename "${biggerDevice}")
+    fi
+
     #################
     # Define Scenario
 
@@ -651,6 +656,7 @@ if [ "$action" = "status" ] || [ "$action" = "mount" ] || [ "$action" = "unmount
     echo "installDeviceActive='${installDeviceActive}'"
     echo "installDeviceReadOnly='${installDeviceReadOnly}'"
     echo "biggerDevice='${biggerDevice}'"
+    echo "biggerDeviceName='${biggerDeviceName}'"
     echo "biggerSizeGB='${biggerSizeGB}'"
     echo "combinedDataStorage='${combinedDataStorage}'"
     echo "bootFromStorage='${bootFromStorage}'"
@@ -1084,6 +1090,8 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
             dialog --msgbox "\nNo old drive with RaspiBlitz data found.\n\nIf your sure your setup is correct give feedback to RaspiBlitz devs." 10 60
             exit 1
         fi
+
+        # 
 
         # return 0 to indicate success and let calling script finish
         exit 0
