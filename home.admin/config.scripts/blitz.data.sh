@@ -154,7 +154,7 @@ if [ "$action" = "status" ] || [ "$action" = "mount" ] || [ "$action" = "unmount
                 # create temp mount point if not exists
                 mkdir -p /mnt/temp 2>/dev/null
                 # try to mount
-                if ! mount "/dev/${name}" /mnt/temp; then
+                if ! mount "/dev/${name}" /mnt/temp 2>/dev/null; then
                     echo "error='cannot mount /dev/${name}'"
                     continue
                 fi
