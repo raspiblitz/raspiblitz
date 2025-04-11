@@ -1078,7 +1078,7 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
     if [ "${action}" = "menu-prepare" ]; then
         
         # give user prepare information
-        dialog --title " Migrate Data to new HDD/SSD/NVMe " --yes-label "Start Migration" --no-label "Back" --yesno "\nTo migrate your RaspiBlitz data from your old HDD/SSD/NVMe to a new bigger drive, please make sure of the following:\n\n- Have your old drive replaced with the new one\n  or start with complete new hardware.\n\n- Have your old drive connected via USB3\n  where you may need an USB adapter and on\n  RasperryPi4 power old drive seperately.\n\nChoose 'Start Migration' if everything is setup or go back." 17 70
+        dialog --title " Migrate Data to new HDD/SSD/NVMe " --yes-label "Start Migration" --no-label "Back" --yesno "\nTo migrate your RaspiBlitz data from your old HDD/SSD/NVMe to a new bigger drive, please make sure of the following:\n\n- If you run lightning make sure to have a\n  rescue backup downloaded.\n\n- Have your old drive replaced with the new one\n  or start with complete new hardware.\n\n- Have your old drive connected via USB3\n  where you may need an USB adapter and on\n  RasperryPi4 power old drive seperately.\n\nChoose 'Start Migration' if everything is setup or go back." 20 70
         if [ $? -gt 0 ]; then
             # user canceled
             exit 1
