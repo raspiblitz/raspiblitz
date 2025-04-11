@@ -215,6 +215,7 @@ if [ "${setupPhase}" = "setup" ]; then
   if [ "${menuresult}" == "6" ]; then
     echo "hddMigration=1" >> $SETUPFILE
     echo "setPasswordA=1" >> $SETUPFILE
+    echo "deleteData='all'" >> $SETUPFILE
   fi
 
   ############################################
