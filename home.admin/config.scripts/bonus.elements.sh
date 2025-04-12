@@ -166,6 +166,10 @@ rpcuser=raspiblitz
 rpcpassword=$PASSWORD_B
 rpcbind=127.0.0.1
 
+# Ensure PeerSwap compatibility
+acceptdiscountct=1
+creatediscountct=1
+
 # Bitcoin Core credentials
 mainchainrpcuser=raspibolt
 mainchainrpcpassword=$PASSWORD_B
