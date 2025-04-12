@@ -11,7 +11,7 @@ FALLACK_BRANCH="dev"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ]; then
-  echo "Manage RaspiBlitz Web API"
+  echo "Manage RaspiBlitz Web API and Celery Services"
   echo "blitz.web.api.sh info"
   echo "blitz.web.api.sh on [GITHUBUSER] [REPO] [BRANCH] [?COMMITORTAG]"
   echo "blitz.web.api.sh on DEFAULT"
@@ -45,6 +45,13 @@ if [ "$1" = "info" ]; then
   # get github commit from repo directory with git command
   commit=$(sudo -u blitzapi git rev-parse HEAD)
   echo "commit='${commit}'"
+
+  # Check status of systemd services
+  echo "# Checking service status..."
+  systemctl is-active --quiet blitzapi && echo "blitzapi_service_status='active'" || echo "blitzapi_service_status='inactive'"
+  systemctl is-active --quiet blitzapi-celery-worker && echo "celery_worker_service_status='active'" || echo "celery_worker_service_status='inactive'"
+  systemctl is-active --quiet blitzapi-celery-beat && echo "celery_beat_service_status='active'" || echo "celery_beat_service_status='inactive'"
+
 
   exit 0
 fi
@@ -91,7 +98,7 @@ if [ "$1" = "update-config" ]; then
     if [ "${RPCPASS}" == "" ]; then
       RPCPASS="passwordB"
     fi
-    sed -i "s/^BAPI_NETWORK=.*/BAPI_NETWORK=/g" ./.env
+    sed -i "s/^BAPI_NETWORK=.*/BAPI_NETWORK=${chain}net/g" ./.env
     sed -i "s/^BAPI_BITCOIND_ADDRESS=.*/BAPI_BITCOIND_ADDRESS=127.0.0.1/g" ./.env
     sed -i "s/^BAPI_BITCOIND_USER=.*/BAPI_BITCOIND_USER=${RPCUSER}/g" ./.env
     sed -i "s/^BAPI_BITCOIND_RPC_PW=.*/BAPI_BITCOIND_RPC_PW=${RPCPASS}/g" ./.env
@@ -123,7 +130,7 @@ if [ "$1" = "update-config" ]; then
     elif [ "${lightning}" == "cl" ]; then
 
       echo "# CONFIG Web API Lightning --> CL"
-      sed -i "s/^BAPI_LN_NODE=.*/ln_node=cln_jrpc/g" ./.env
+      sed -i "s/^BAPI_LN_NODE=.*/BAPI_LN_NODE=cln_jrpc/g" ./.env
       sed -i "s#^BAPI_CLN_JRPC_PATH=.*#BAPI_CLN_JRPC_PATH=\"/mnt/hdd/app-data/.lightning/bitcoin/lightning-rpc\"#g" ./.env
 
       # get hex values of pem files
@@ -131,7 +138,7 @@ if [ "$1" = "update-config" ]; then
       # hexClientKey=$(sudo xxd -p -c2000 /home/bitcoin/.lightning/bitcoin/client-key.pem)
       # hexCa=$(sudo xxd -p -c2000 /home/bitcoin/.lightning/bitcoin/ca.pem)
       # if [ "${hexClient}" == "" ]; then
-      #   echo "# FAIL /home/bitcoin/.lightning/bitcoin/*.pem files maybe missing"
+      #  echo "# FAIL /home/bitcoin/.lightning/bitcoin/*.pem files maybe missing"
       # fi
 
       # update config with hex values
@@ -152,7 +159,11 @@ if [ "$1" = "update-config" ]; then
     sed -i "s/^BAPI_LN_NODE=.*/BAPI_LN_NODE=/g" ./.env
   fi
 
-  echo "# '.env' config updates - blitzapi maybe needs to be restarted"
+  # Note: Celery services might need a restart if config changes affect them.
+  # The main blitzapi service restarts automatically due to ExecStartPre.
+  # For simplicity, Celery services are only restarted during 'update-code' or 'on'.
+  echo "# '.env' config updates - blitzapi service will restart automatically."
+  echo "# Celery services may need manual restart or 'update-code' run if config changes affect them."
   exit 0
 
 fi
@@ -242,7 +253,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     exit 1
   fi
 
-  echo "# INSTALL Web API ..."
+  echo "# INSTALL Web API & Celery Services..."
   # clean old source
   rm -r /root/blitz_api 2>/dev/null
   rm -r /home/blitzapi/blitz_api 2>/dev/null
@@ -294,20 +305,32 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   else
     echo "# using the latest code in branch"
   fi
-  # install
-  echo "# running install"
-  sudo -u blitzapi python3 -m venv venv
+
+  # install python dependencies
+  echo "# running install (Python venv & dependencies)"
+  # Make sure python3-venv is installed
+  if ! dpkg -s python3-venv >/dev/null 2>&1; then
+     echo "# Installing python3-venv..."
+     apt-get update
+     apt-get install -y python3-venv
+  fi
+  if ! sudo -u blitzapi python3 -m venv venv; then
+     echo "error='creating python venv failed'"
+     exit 1
+  fi
   # see https://github.com/raspiblitz/raspiblitz/issues/4169 - requires a Cython upgrade.
+  sudo -u blitzapi ./venv/bin/pip install --upgrade pip
   if ! sudo -u blitzapi ./venv/bin/pip install --upgrade Cython; then
     echo "error='pip install upgrade Cython'"
-    exit 1
   fi
+  echo "# Installing dependencies from requirements.txt..."
   if ! sudo -u blitzapi ./venv/bin/pip install -r requirements.txt --no-deps; then
     echo "error='pip install failed'"
     exit 1
   fi
 
   # prepare systemd service
+  echo "# Creating blitzapi systemd service..."
   echo "
 [Unit]
 Description=BlitzBackendAPI
@@ -334,10 +357,65 @@ PrivateTmp=true
 WantedBy=multi-user.target
 " | tee /etc/systemd/system/blitzapi.service
 
+  # Prepare Celery Worker systemd service
+  echo "# Creating blitzapi-celery-worker systemd service..."
+  echo "
+[Unit]
+Description=BlitzBackendAPI Celery Worker
+Wants=network.target
+After=network.target mnt-hdd.mount
+
+[Service]
+WorkingDirectory=/home/blitzapi/blitz_api
+ExecStart=/home/blitzapi/blitz_api/venv/bin/celery -A app.celery_app worker --loglevel=info
+User=blitzapi
+Group=blitzapi
+Type=simple
+Restart=always
+StandardOutput=journal
+StandardError=journal
+RestartSec=60
+
+# Hardening
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
+" | tee /etc/systemd/system/blitzapi-celery-worker.service
+
+  # Prepare Celery Beat systemd service
+  echo "# Creating blitzapi-celery-beat systemd service..."
+  echo "
+[Unit]
+Description=BlitzBackendAPI Celery Beat Scheduler
+Wants=network.target
+After=network.target mnt-hdd.mount
+
+[Service]
+WorkingDirectory=/home/blitzapi/blitz_api
+ExecStart=/home/blitzapi/blitz_api/venv/bin/celery -A app.celery_app beat --loglevel=info
+# ExecStart=/home/blitzapi/blitz_api/venv/bin/celery -A app.celery_app beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+User=blitzapi
+Group=blitzapi
+Type=simple
+Restart=always
+StandardOutput=journal
+StandardError=journal
+RestartSec=60
+
+# Hardening
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
+" | tee /etc/systemd/system/blitzapi-celery-beat.service
+
   chown -R blitzapi:blitzapi /home/blitzapi/blitz_api
 
-  systemctl enable blitzapi
-  systemctl start blitzapi
+  # Enable and start services
+  echo "# Enabling and starting services..."
+  systemctl enable blitzapi blitzapi-celery-worker blitzapi-celery-beat
+  systemctl start blitzapi blitzapi-celery-worker blitzapi-celery-beat
 
   # TODO: remove after experimental step (only have forward on nginx:80 /api)
   ufw allow 11111 comment 'WebAPI Develop'
@@ -345,10 +423,17 @@ WantedBy=multi-user.target
   source <(/home/admin/_cache.sh export internet_localip)
 
   # install info
-  echo "# the API is now running on port 11111 & doc available under:"
+  echo "# The API is now running on port 11111 & doc available under:"
   echo "# http://${internet_localip}/api/docs"
-  echo "# check for systemd:  sudo systemctl status blitzapi"
-  echo "# check for logs:     sudo journalctl -f -u blitzapi"
+  echo "# Celery worker and beat services are also running."
+  echo "# Check status:"
+  echo "#   sudo systemctl status blitzapi"
+  echo "#   sudo systemctl status blitzapi-celery-worker"
+  echo "#   sudo systemctl status blitzapi-celery-beat"
+  echo "# Check logs:"
+  echo "#   sudo journalctl -f -u blitzapi"
+  echo "#   sudo journalctl -f -u blitzapi-celery-worker"
+  echo "#   sudo journalctl -f -u blitzapi-celery-beat"
 
   # setting value in raspi blitz config
   /home/admin/config.scripts/blitz.conf.sh set blitzapi "on"
@@ -367,30 +452,48 @@ if [ "$1" = "update-code" ]; then
     currentBranch="$2"
   fi
 
-  apiActive=$(ls /etc/systemd/system/blitzapi.service | grep -c blitzapi.service)
+  apiActive=$(ls /etc/systemd/system/blitzapi.service 2>/dev/null | grep -c blitzapi.service)
   if [ "${apiActive}" != "0" ]; then
-    echo "# Update Web API CODE"
-    systemctl stop blitzapi
+    echo "# Update Web API CODE for API and Celery Services"
+
+    echo "# Stopping services..."
+    systemctl stop blitzapi blitzapi-celery-worker blitzapi-celery-beat
+
     sudo chown -R blitzapi:blitzapi /home/blitzapi/blitz_api
     cd /home/blitzapi/blitz_api || exit 1
     if [ "$currentBranch" == "" ]; then
       currentBranch=$(sudo -u blitzapi git rev-parse --abbrev-ref HEAD)
     fi
-    echo "# updating local repo ..."
+    echo "# Updating local repo (branch: ${currentBranch})..."
     oldCommit=$(sudo -u blitzapi git rev-parse HEAD)
     sudo -u blitzapi git fetch
-    sudo -u blitzapi git reset --hard origin/${currentBranch}
+    if sudo -u blitzapi git show-ref --verify --quiet refs/remotes/origin/${currentBranch}; then
+        sudo -u blitzapi git reset --hard origin/${currentBranch}
+    else
+        echo "# ERROR: Branch 'origin/${currentBranch}' not found in remote. Cannot update."
+        echo "# Restarting services with existing code..."
+        systemctl start blitzapi blitzapi-celery-worker blitzapi-celery-beat
+        exit 1
+    fi
+
     newCommit=$(sudo -u blitzapi git rev-parse HEAD)
     if [ "${oldCommit}" != "${newCommit}" ]; then
-      sudo -u blitzapi ./venv/bin/pip install -r requirements.txt
+      echo "# Code changed, updating dependencies..."
+      sudo -u blitzapi ./venv/bin/pip install --upgrade pip
+      if ! sudo -u blitzapi ./venv/bin/pip install -r requirements.txt --no-deps; then
+         echo "# WARNING: pip install failed during update. Services might not start correctly."
+      fi
     else
       echo "# no code changes"
     fi
-    systemctl start blitzapi
+
+    echo "# Restarting services..."
+    systemctl start blitzapi blitzapi-celery-worker blitzapi-celery-beat
+
     echo "# BRANCH ---> ${currentBranch}"
     echo "# old commit -> ${oldCommit}"
     echo "# new commit -> ${newCommit}"
-    echo "# blitzapi updates and restarted"
+    echo "# blitzapi, celery-worker, and celery-beat services updated and restarted."
     exit 0
   else
     echo "# blitzapi not active"
@@ -403,18 +506,31 @@ fi
 ###################
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
-  echo "# UNINSTALL Web API"
-  systemctl stop blitzapi
-  systemctl disable blitzapi
-  rm /etc/systemd/system/blitzapi.service
+  echo "# UNINSTALL Web API & Celery Services"
+  echo "# Stopping services..."
+  systemctl stop blitzapi blitzapi-celery-worker blitzapi-celery-beat 2>/dev/null
+  echo "# Disabling services..."
+  systemctl disable blitzapi blitzapi-celery-worker blitzapi-celery-beat 2>/dev/null
+  echo "# Removing service files..."
+  rm /etc/systemd/system/blitzapi.service 2>/dev/null
+  rm /etc/systemd/system/blitzapi-celery-worker.service 2>/dev/null
+  rm /etc/systemd/system/blitzapi-celery-beat.service 2>/dev/null
+  systemctl daemon-reload # To make systemd forget about the removed services
+  echo "# Removing user and home directory..."
   userdel -rf blitzapi
   # clean old source
   rm -r /root/blitz_api 2>/dev/null
+  ufw delete allow 11111 2>/dev/null
 
   # setting value in raspi blitz config
   /home/admin/config.scripts/blitz.conf.sh set blitzapi "off"
   /home/admin/config.scripts/blitz.conf.sh set blitzapi "off" /home/admin/raspiblitz.info
 
+  echo "# Web API & Celery services uninstalled."
   exit 0
 
 fi
+
+# Fallback for unknown commands
+echo "error='unknown command'"
+exit 1
