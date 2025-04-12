@@ -21,6 +21,7 @@ source <(/home/admin/_cache.sh get dnsworking)
 
 # remember original setupphase
 orgSetupPhase="${setupPhase}"
+menuresult=""
 
 ############################################
 # PRESETUP: SET DNS (just if needed)
@@ -58,6 +59,15 @@ if [ "${setupPhase}" == "recovery" ]; then
     /home/admin/_cache.sh set setupPhase "setup"
     echo "# you refused recovery option - defaulting to normal setup menu"
   fi
+fi
+
+############################################
+# QuickOption: Recovery
+if [ "${setupPhase}" == "biggerdevice" ]; then
+  # show recovery dialog
+  /home/admin/setup.scripts/dialogBiggerDevice.sh
+  /home/admin/_cache.sh set setupPhase "setup"
+  setupPhase="setup"
 fi
 
 ############################################

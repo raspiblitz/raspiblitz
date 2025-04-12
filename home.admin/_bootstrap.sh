@@ -647,14 +647,15 @@ if [ "${scenario}" != "ready" ] ; then
   # map scenario to setupPhase
   /home/admin/_cache.sh set "system_setup_askSystemCopy" "0"
 
-  if [ "${scenario}" = "setup" ] && [ "${scenarioSystemCopy}" = "1" ]; then
+  if [ "${scenario}" = "setup" ]; then
     setupPhase="setup"
     infoMessage="Please start Setup"
-    /home/admin/_cache.sh set "system_setup_askSystemCopy" "1"
+    /home/admin/_cache.sh set "system_setup_askSystemCopy" "${scenarioSystemCopy}"
 
-  elif [ "${scenario}" = "setup" ]; then
-    setupPhase="setup"
+  if [ "${scenario}" = "biggerdevice" ]; then
+    setupPhase="biggerdevice"
     infoMessage="Please start Setup"
+    /home/admin/_cache.sh set "system_setup_askSystemCopy" "${scenarioSystemCopy}"
 
   elif [ "${scenario}" = "recover" ]; then
     setupPhase="recovery"
