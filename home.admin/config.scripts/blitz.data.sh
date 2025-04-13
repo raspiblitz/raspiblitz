@@ -976,10 +976,10 @@ if [ "$action" = "copy-system" ]; then
         exit 1
     fi
     if [ "${actionDeviceType}" = "system" ]; then
-        systemPartition="${actionDevicePartitionBase}1"
+        systemPartition="${actionDevicePartitionBase}2"
     fi
     if [ "${actionDeviceType}" = "storage" ]; then
-        systemPartition="${actionDevicePartitionBase}1"
+        systemPartition="${actionDevicePartitionBase}2"
     fi  
 
     # debug info
