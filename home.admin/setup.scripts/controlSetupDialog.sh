@@ -176,7 +176,7 @@ if [ "${setupPhase}" = "setup" ]; then
   # FORMAT DRIVE on NEW SETUP or MIGRATION UPLOAD/HDD 
   if [ "${menuresult}" = "0" ] || [ "${menuresult}" = "1" ]  || [ "${menuresult}" = "6" ]; then
 
-    source <(/home/admin/_cache.sh get system_setup_askSystemCopy system_setup_bootFromStorage system_setup_combinedDataStorage)
+    source <(/home/admin/_cache.sh get system_setup_askSystemCopy system_setup_bootFromStorage)
 
     if [ "${system_setup_askSystemCopy}" == "1" ]; then
       # ask user about system copy

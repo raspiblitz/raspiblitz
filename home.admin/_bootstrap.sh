@@ -591,30 +591,8 @@ echo "Comparison result: $( [ "${scenario}" != "ready" ] && echo "true" || echo 
 if [ "${scenario}" != "ready" ] ; then
 
   echo "## WHEN SETUP IS NEEDED " >> $logFile
-  echo "/home/admin/config.scripts/blitz.data.sh status -inspect"
+  echo "/home/admin/config.scripts/blitz.data.sh status -inspect (auto store to cache)"
   source <(/home/admin/config.scripts/blitz.data.sh status -inspect)
-
-  # TODO: Add info if RaspberryPi, VM or LAPTOP
-
-  # put info into cache for ssh-dialog or web-dialog to pick up on
-  /home/admin/_cache.sh set "system_setup_bootFromStorage" "${bootFromStorage}"
-  /home/admin/_cache.sh set "system_setup_combinedDataStorage" "${combinedDataStorage}"
-  /home/admin/_cache.sh set "system_setup_storageDevice" "${storageDevice}"
-  /home/admin/_cache.sh set "system_setup_storageDeviceName" "${storageDeviceName}"
-  /home/admin/_cache.sh set "system_setup_storageSizeGB" "${storageSizeGB}"
-  /home/admin/_cache.sh set "system_setup_storageWarning" "${storageWarning}"
-  /home/admin/_cache.sh set "system_setup_storageBlockchainGB" "${storageBlockchainGB}"
-  /home/admin/_cache.sh set "system_setup_storageMigration" "${storageMigration}"
-  /home/admin/_cache.sh set "system_setup_systemDevice" "${systemDevice}"
-  /home/admin/_cache.sh set "system_setup_systemDeviceName" "${storageDeviceName}"
-  /home/admin/_cache.sh set "system_setup_systemSizeGB" "${systemSizeGB}"
-  /home/admin/_cache.sh set "system_setup_systemWarning" "${systemWarning}"
-  /home/admin/_cache.sh set "system_setup_dataDevice" "${dataDevice}"
-  /home/admin/_cache.sh set "system_setup_dataDeviceName" "${dataDeviceName}"
-  /home/admin/_cache.sh set "system_setup_dataSizeGB" "${dataSizeGB}"
-  /home/admin/_cache.sh set "system_setup_dataWarning" "${dataWarning}"
-  /home/admin/_cache.sh set "system_setup_installDevice" "${installDevice}"
-  /home/admin/_cache.sh set "system_setup_installDeviceReadOnly" "${installDeviceReadOnly}"
 
   # add info if a flag shows that install medium was tried before
   if [ -f "/home/admin/systemcopy.flag" ]; then
@@ -705,6 +683,9 @@ if [ "${scenario}" != "ready" ] ; then
 
   done
   echo "## WAIT LOOP: DONE" >> ${logFile}
+
+  echo "/home/admin/config.scripts/blitz.data.sh status -inspect (auto store to cache)"
+  source <(/home/admin/config.scripts/blitz.data.sh status -inspect)
 
   # get the results from the SSH-UI or WEB-UI
   echo "LOADING 'raspiblitz.setup' ..." >> ${logFile}

@@ -1,7 +1,7 @@
 #!/bin/bash
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
     >&2 echo "# managing the data drive(s) with new bootable setups for RaspberryPi, VMs and Laptops"
-    >&2 echo "# blitz.data.sh status [-inspect] [] # auto detect the old/best drives to use for storage, system and data"
+    >&2 echo "# blitz.data.sh status [-inspect] # auto detect the old/best drives to use for storage, system and data"
     >&2 echo "# blitz.data.sh mount # mounts all drives and link all data folders"
     >&2 echo "# blitz.data.sh unmount # unmounts all drives"
     >&2 echo "# blitz.data.sh setup STOARGE [device] combinedData=[0|1] bootFromStorage=[0|1]"
@@ -684,6 +684,29 @@ if [ "$action" = "status" ] || [ "$action" = "mount" ] || [ "$action" = "unmount
     echo "combinedDataStorage='${combinedDataStorage}'"
     echo "bootFromStorage='${bootFromStorage}'"
     echo "bootFromSD='${bootFromSD}'"
+
+    # save to cache when -inspect
+    if [ ${userWantsInspect} -eq 1 ]; then
+        echo "# saving values to cache as system_setup_*"
+        /home/admin/_cache.sh set "system_setup_bootFromStorage" "${bootFromStorage}"
+        /home/admin/_cache.sh set "system_setup_combinedDataStorage" "${combinedDataStorage}"
+        /home/admin/_cache.sh set "system_setup_storageDevice" "${storageDevice}"
+        /home/admin/_cache.sh set "system_setup_storageDeviceName" "${storageDeviceName}"
+        /home/admin/_cache.sh set "system_setup_storageSizeGB" "${storageSizeGB}"
+        /home/admin/_cache.sh set "system_setup_storageWarning" "${storageWarning}"
+        /home/admin/_cache.sh set "system_setup_storageBlockchainGB" "${storageBlockchainGB}"
+        /home/admin/_cache.sh set "system_setup_storageMigration" "${storageMigration}"
+        /home/admin/_cache.sh set "system_setup_systemDevice" "${systemDevice}"
+        /home/admin/_cache.sh set "system_setup_systemDeviceName" "${storageDeviceName}"
+        /home/admin/_cache.sh set "system_setup_systemSizeGB" "${systemSizeGB}"
+        /home/admin/_cache.sh set "system_setup_systemWarning" "${systemWarning}"
+        /home/admin/_cache.sh set "system_setup_dataDevice" "${dataDevice}"
+        /home/admin/_cache.sh set "system_setup_dataDeviceName" "${dataDeviceName}"
+        /home/admin/_cache.sh set "system_setup_dataSizeGB" "${dataSizeGB}"
+        /home/admin/_cache.sh set "system_setup_dataWarning" "${dataWarning}"
+        /home/admin/_cache.sh set "system_setup_installDevice" "${installDevice}"
+        /home/admin/_cache.sh set "system_setup_installDeviceReadOnly" "${installDeviceReadOnly}"
+    fi
 
     if [ "$action" = "status" ]; then
         exit 0
