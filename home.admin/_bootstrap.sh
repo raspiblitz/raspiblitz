@@ -591,7 +591,7 @@ echo "Starting Bootstrap Setup Section: $( [ "${scenario}" != "ready" ] && echo 
 if [ "${scenario}" != "ready" ] ; then
 
   echo "## WHEN SETUP IS NEEDED " >> $logFile
-  echo "/home/admin/config.scripts/blitz.data.sh status -inspect (auto store to cache)"
+  echo "/home/admin/config.scripts/blitz.data.sh status -inspect (auto store to cache)" >> $logFile
   source <(/home/admin/config.scripts/blitz.data.sh status -inspect)
 
   # add info if a flag shows that install medium was tried before
