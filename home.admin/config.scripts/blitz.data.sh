@@ -153,6 +153,7 @@ if [ "$action" = "status" ] || [ "$action" = "mount" ] || [ "$action" = "unmount
                 # check if the device is in the list of devices
                 if echo "${name}" | grep -q "${hddMigrateDeviceFrom}"; then
                     # remove the device from the list
+                    echo "# skipping device ${name} - migration source device set"
                     continue
                 fi
             fi
@@ -397,6 +398,7 @@ if [ "$action" = "status" ] || [ "$action" = "mount" ] || [ "$action" = "unmount
             if echo "${listOfDevices}" | grep -q "${hddMigrateDeviceFrom}"; then
                 # remove the device from the list
                 listOfDevices=$(echo "${listOfDevices}" | grep -v "${hddMigrateDeviceFrom}")
+                echo "# skipping device ${hddMigrateDeviceFrom} - migration source device set"
             fi
         fi
 
