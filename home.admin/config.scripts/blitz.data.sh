@@ -989,8 +989,6 @@ if [ "$action" = "copy-system" ]; then
     echo "# systemPartition(${systemPartition})" >> ${logFile}
     echo "# computerType(${computerType})" >> ${logFile}
 
-    exit 1
-
     ##########################
     # MAKE BOOTABLE
     echo "# MAKE BOOTABLE" >> ${logFile}
