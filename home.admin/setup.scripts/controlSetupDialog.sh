@@ -166,8 +166,10 @@ if [ "${setupPhase}" = "setup" ]; then
       # user wants to exit
       exit 0
     fi
-    source <(/home/admin/_cache.sh get hddMigrateDevice)
-    echo "hddMigrateDevice='${hddMigrateDevice}'" >> $SETUPFILE
+    source <(/home/admin/_cache.sh get hddMigrateDeviceFrom)
+    echo "hddMigrateDeviceFrom='${hddMigrateDeviceFrom}'" >> $SETUPFILE
+    source <(/home/admin/_cache.sh get hddMigrateDeviceTo)
+    echo "hddMigrateDeviceTo='${hddMigrateDeviceTo}'" >> $SETUPFILE
   fi
 
   ###################################################

@@ -147,6 +147,16 @@ if [ "$action" = "status" ] || [ "$action" = "mount" ] || [ "$action" = "unmount
             name=$(echo "$line" | awk '{print $1}')
             size=$(echo "$line" | awk '{print $2}')
             
+            # if user already set a migration source device - ignore it in the list
+            source <(/home/admin/_cache.sh get hddMigrateDeviceFrom)
+            if [ ${#hddMigrateDeviceFrom} -gt 0 ]; then
+                # check if the device is in the list of devices
+                if echo "${name}" | grep -q "${hddMigrateDeviceFrom}"; then
+                    # remove the device from the list
+                    continue
+                fi
+            fi
+
             # mount partition if not already mounted
             needsUnmount=0
             mountPath=$(findmnt -n -o TARGET "/dev/${name}" 2>/dev/null)   
@@ -379,6 +389,16 @@ if [ "$action" = "status" ] || [ "$action" = "mount" ] || [ "$action" = "unmount
         if (size >= 7) printf "%s %.0f\n", $1, size
         }' | sort -k2,2nr -k1,1 )
         echo "listOfDevices='${listOfDevices}'"
+
+        # if there is a migration device set - remove it from the list
+        source <(/home/admin/_cache.sh get hddMigrateDeviceFrom)
+        if [ ${#hddMigrateDeviceFrom} -gt 0 ]; then
+            # check if the device is in the list of devices
+            if echo "${listOfDevices}" | grep -q "${hddMigrateDeviceFrom}"; then
+                # remove the device from the list
+                listOfDevices=$(echo "${listOfDevices}" | grep -v "${hddMigrateDeviceFrom}")
+            fi
+        fi
 
         # Set STORAGE (the biggest drive)
         storageDevice=$(echo "${listOfDevices}" | head -n1 | awk '{print $1}')
@@ -1101,7 +1121,8 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
         fi
 
         # set migration info to cache
-        /home/admin/_cache.sh set hddMigrateDevice "${biggerDevice}"
+        /home/admin/_cache.sh set hddMigrateDeviceFrom "${storageDevice}"
+        /home/admin/_cache.sh set hddMigrateDeviceTo "${biggerDevice}"
         /home/admin/_cache.sh set system_setup_askSystemCopy "1"    
         /home/admin/_cache.sh set system_setup_storageBlockchainGB "0"
            
