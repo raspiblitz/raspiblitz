@@ -739,8 +739,6 @@ if [ "${scenario}" != "ready" ] ; then
   echo "systemDevice(${systemDevice})" >> ${logFile}
   echo "dataDevice(${dataDevice})" >> ${logFile}
 
-  exit 1
-
   ###############################################
   # SYSTEM COPY OF FRESH SYSTEM (SETUP & RECOVER)
 
@@ -749,8 +747,6 @@ if [ "${scenario}" != "ready" ] ; then
     echo "SYSTEM COPY OF FRESH SYSTEM" >> ${logFile}
     /home/admin/_cache.sh set state "systemcopy"
     /home/admin/_cache.sh set message "copying system"
-
-
 
     # STORAGE
     echo "# storageDevice(${storageDevice}) storageMountedPath(${storageMountedPath})" >> ${logFile}
@@ -797,7 +793,19 @@ if [ "${scenario}" != "ready" ] ; then
     # when system was installed on new boot drive
     echo "scenario(${scenario})" >> ${logFile}
     echo "systemCopy(${systemCopy})" >> ${logFile}
+
+    exit 1
+
     if [ "${systemCopy}" = "1" ]; then
+
+      if [ "${bootFromStorage}" = "0" ]; then
+        /home/admin/config.scripts/blitz.data.sh copy-system "${storageDevice}" storage >> ${logFile}
+      else
+        /home/admin/config.scripts/blitz.data.sh copy-system "${systemDevice}" system >> ${logFile}
+      fi
+
+      echo "DEBUG EXIT" >> ${logFile}
+      exit 1
 
       # mark systemCopy as done in raspiblitz.setup
       if ! sed -i "s/^systemCopy=.*/systemCopy=done/" "${setupFile}"; then

@@ -4,9 +4,10 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
     >&2 echo "# blitz.data.sh status [-inspect] # auto detect the old/best drives to use for storage, system and data"
     >&2 echo "# blitz.data.sh mount # mounts all drives and link all data folders"
     >&2 echo "# blitz.data.sh unmount # unmounts all drives"
-    >&2 echo "# blitz.data.sh setup STOARGE [device] combinedData=[0|1] bootFromStorage=[0|1]"
+    >&2 echo "# blitz.data.sh setup STOARGE [device] combinedData=[0|1] addSystemPartition=[0|1]"
     >&2 echo "# blitz.data.sh setup SEPERATE-SYSTEM [device]"
     >&2 echo "# blitz.data.sh setup SEPERATE-DATA [device]"
+    >&2 echo "# blitz.data.sh copy-system [device] [system|storage]"
     >&2 echo "# blitz.data.sh recover STOARGE [device] combinedData=[0|1] bootFromStorage=[0|1]"
     >&2 echo "# blitz.data.sh recover SEPERATE-SYSTEM [device]"
     >&2 echo "# blitz.data.sh recover SEPERATE-DATA [device]"
@@ -553,7 +554,7 @@ if [ "$action" = "status" ] || [ "$action" = "mount" ] || [ "$action" = "unmount
 
     # DATA
     if [ ${#dataDevice} -gt 0 ]; then
-        if [ ${dataSizeGB} -lt $((dataMinGB - 1)) ]; then
+        if [ ${dataSizeGB} -lt $((dataMinGB - 1)];then
             dataWarning='too-small'
         fi
     fi
@@ -738,12 +739,410 @@ if [ "$action" = "unmount" ]; then
     exit 1
 fi
 
+###################
+# FORMAT
+###################
+
+if [ "$action" = "setup" ]; then
+
+    echo "STARTED blitz.data.sh ${action} ..." >> ${logFile}
+
+    # check that it is a valid setup type: STORAGE, SEPERATE-DATA, SEPERATE-SYSTEM
+    actionType=$2
+    if [ "${actionType}" != "STORAGE" ] && [ "${actionType}" != "SEPERATE-DATA" ] && [ "${actionType}" != "SEPERATE-SYSTEM" ]; then
+        echo "# actionType(${actionType})"
+        echo "error='setup type not supported'"
+        echo "error='setup type not supported'" >> ${logFile}
+        exit 1
+    fi
+
+    # check that device is set & exists & not mounted
+    actionDevice=$3
+    if [ ${#actionDevice} -eq 0 ]; then
+        echo "error='missing device'"
+        echo "error='missing device'" >> ${logFile}
+        exit 1
+    fi
+    if ! lsblk -no NAME | grep -q "${actionDevice}$"; then
+        echo "error='device not found'"
+        echo "error='device not found'" >> ${logFile}
+        exit 1
+    fi
+    if findmnt -n -o TARGET "/dev/${actionDevice}" 2>/dev/null; then
+        echo "error='device is mounted'"
+        echo "error='device is mounted'" >> ${logFile}
+        exit 1
+    fi
+
+    # check if data should also be combined with storage
+    actionCombinedData=$4
+    if [ ${#actionCombinedData} -gt 0 ] &&  [ "${actionCombinedData}" != "combinedData=1" ] && [ "${actionCombinedData}" != "0" ] && [ "${actionCombinedData}" != "1" ]; then
+        echo "error='combinedData(${actionCombinedData})'" >> ${logFile}
+        echo "error='combinedData value not supported'"
+        exit 1
+    fi
+    if [ "${actionCombinedData}" = "combinedData=1" ] || [ "${actionCombinedData}" = "1" ]; then
+        actionCombinedData=1
+    else
+        actionCombinedData=0
+    fi
+
+    # check if boot should be from storage (create system partition)
+    actionCreateSystemPartition=$5
+    if [ ${#actionCreateSystemPartition} -gt 0 ] && [ "${actionCreateSystemPartition}" != "addSystemPartition=0" ] && [ "${actionCreateSystemPartition}" != "addSystemPartition=1" ] && [ "${actionCreateSystemPartition}" != "0" ] && [ "${actionCreateSystemPartition}" != "1" ]; then
+        echo "error='addSystemPartition(${actionCreateSystemPartition})'" >> ${logFile}
+        echo "error='addSystemPartition value not supported'"
+        exit 1
+    fi
+    if [ "${actionCreateSystemPartition}" = "addSystemPartition=1" ] || [ "${actionCreateSystemPartition}" = "1" ]; then
+        actionCreateSystemPartition=1
+    else
+        actionCreateSystemPartition=0
+    fi
+
+    # determine the partition base name
+    actionDevicePartitionBase=${actionDevice}
+    if [[ "${actionDevice}" =~ ^nvme ]]; then
+        actionDevicePartitionBase="${actionDevice}p"
+    fi
+
+    # debug info
+    echo "# actionType(${actionType})"  >> ${logFile}
+    echo "# actionDevice(${actionDevice})" >> ${logFile}
+    echo "# actionDevicePartitionBase(${actionDevicePartitionBase})" >> ${logFile}
+    echo "# actionCombinedData(${actionCombinedData})" >> ${logFile}
+    echo "# actionCreateSystemPartition(${actionCreateSystemPartition})" >> ${logFile}
+
+    ##########################
+    # PARTITION & FORMAT
+
+    # SYSTEM (single drive)
+    if [ "${actionType}" = "SEPERATE-SYSTEM" ]; then
+
+        echo "# SYSTEM partitioning" >> ${logFile}
+        sfdisk --delete /dev/${actionDevice} 2>/dev/null
+        wipefs -a /dev/${actionDevice} 2>/dev/null
+        parted /dev/${actionDevice} --script mklabel msdos
+        parted /dev/${actionDevice} --script mkpart primary fat32 1MiB 513MiB
+        parted /dev/${actionDevice} --script mkpart primary ext4 541MB 100%
+        wipefs -a /dev/${actionDevicePartitionBase}1 2>/dev/null
+        mkfs.fat -F 32 /dev/${actionDevicePartitionBase}1
+        wipefs -a /dev/${actionDevicePartitionBase}2 2>/dev/null
+        mkfs -t ext4  /dev/${actionDevicePartitionBase}2
+
+        # MAKE BOOTABLE
+        echo "# MAKE BOOTABLE" >> ${logFile}
+
+        # RASPBERRY PI
+        if [ "${computerType}" = "raspberrypi" ]; then
+            echo "# RaspberryPi - set LBA flag" >> ${logFile}
+            parted /dev/${actionDevice} --script set 1 lba on
+            isFlagSetLBA=$(parted /dev/${actionDevice} --script print | grep -c 'fat32.*lba')
+            if [ ${isFlagSetLBA} -eq 0 ]; then
+                echo "error='failed to set LBA flag'"
+                exit 1
+            fi
+            echo "# RaspberryPi - Bootorder" >> ${logFile}
+            isBootOrderSet=$(sudo rpi-eeprom-config | grep -cx "BOOT_ORDER=0xf461")
+            if [ ${isBootOrderSet} -eq 0 ]; then
+                echo "# .. changeing Bootorder" >> ${logFile}
+                rpi-eeprom-config --out bootconf.txt
+                sed -i '/^BOOT_ORDER=/d' ./bootconf.txt && sudo sh -c 'echo "BOOT_ORDER=0xf461" >> ./bootconf.txt'
+                rpi-eeprom-config --apply bootconf.txt
+                rm bootconf.txt
+            else
+                echo "# .. Bootorder already set" >> ${logFile}
+            fi
+
+        # VM & PC
+        else
+            echo "# VM & PC - set BOOT/ESP flag" >> ${logFile}
+            parted /dev/${actionDevice} --script set 1 boot on
+            parted /dev/${actionDevice} --script set 1 esp on
+            isFlagSetBOOT=$(parted /dev/${actionDevice} --script print | grep -c 'fat32.*boot')
+            if [ ${isFlagSetBOOT} -eq 0 ]; then
+                echo "error='failed to set BOOT flag'"
+                exit 1
+            fi
+            isFlagSetESP=$(parted /dev/${actionDevice} --script print | grep -c 'fat32.*esp')
+            if [ ${isFlagSetESP} -eq 0 ]; then
+                echo "error='failed to set ESP flag'"
+                exit 1
+            fi
+        fi
+
+    # STOARGE with System partition (if addSystemPartition=1)
+    elif [ "${actionType}" = "STORAGE" ] && [ ${actionCreateSystemPartition} -eq 1 ]; then
+
+        echo "# STORAGE partitioning (with boot)" >> ${logFile}
+        sfdisk --delete /dev/${actionDevice} 2>/dev/null
+        wipefs -a /dev/${actionDevice} 2>/dev/null
+        parted /dev/${actionDevice} --script mklabel msdos
+        parted /dev/${actionDevice} --script mkpart primary fat32 1MiB 513MiB
+        parted /dev/${actionDevice} --script mkpart primary ext4 541MB 65GB
+        parted /dev/${actionDevice} --script mkpart primary ext4 65GB 100%
+        echo "# .. formating" >> ${logFile}
+        wipefs -a /dev/${actionDevicePartitionBase}1 2>/dev/null
+        mkfs.fat -F 32 /dev/${actionDevicePartitionBase}1
+        wipefs -a /dev/${actionDevicePartitionBase}2 2>/dev/null
+        mkfs -t ext4  /dev/${actionDevicePartitionBase}2
+        wipefs -a /dev/${actionDevicePartitionBase}3 2>/dev/null
+        mkfs -t ext4  /dev/${actionDevicePartitionBase}3
+        rm -rf /mnt/disk_storage 2>/dev/null
+        mkdir -p /mnt/disk_storage 2>/dev/null
+        mount /dev/${actionDevicePartitionBase}3 /mnt/disk_storage
+        mkdir -p /mnt/disk_storage/app-storage
+        if [ ${actionCombinedData} -eq 1 ]; then
+            mkdir -p /mnt/disk_storage/app-data
+        fi
+        umount /mnt/disk_storage
+
+    # STORAGE without System partition (if addSystemPartition=0 or not set)
+    elif [ "${actionType}" = "STORAGE" ] && [ ${actionCreateSystemPartition} -eq 0 ]; then
+        echo "# STORAGE partitioning (no boot)" >> ${logFile}
+        sfdisk --delete /dev/${actionDevice} 2>/dev/null
+        wipefs -a /dev/${actionDevice} 2>/dev/null
+        parted /dev/${actionDevice} --script mklabel msdos
+        parted /dev/${actionDevice} --script mkpart primary ext4 1MB 100%
+        echo "# .. formating" >> ${logFile}
+        wipefs -a /dev/${actionDevicePartitionBase}1 2>/dev/null
+        mkfs -t ext4  /dev/${actionDevicePartitionBase}1
+        rm -rf /mnt/disk_storage 2>/dev/null
+        mkdir -p /mnt/disk_storage 2>/dev/null
+        mount /dev/${actionDevicePartitionBase}1 /mnt/disk_storage
+        mkdir -p /mnt/disk_storage/app-storage
+        if [ ${actionCombinedData} -eq 1 ]; then
+            mkdir -p /mnt/disk_storage/app-data
+        fi
+        umount /mnt/disk_storage
+
+    # DATA (single drive)
+    elif [ "${actionType}" = "SEPERATE-DATA" ]; then
+        echo "# DATA partitioning" >> ${logFile}
+        sfdisk --delete /dev/${actionDevice} 2>/dev/null
+        wipefs -a /dev/${actionDevice} 2>/dev/null
+        parted /dev/${actionDevice} --script mklabel msdos
+        parted /dev/${actionDevice} --script mkpart primary ext4 1MB 100%
+        echo "# .. formating" >> ${logFile}
+        wipefs -a /dev/${actionDevicePartitionBase}1 2>/dev/null
+        mkfs -t ext4  /dev/${actionDevicePartitionBase}1
+        rm -rf /mnt/disk_data 2>/dev/null
+        mkdir -p /mnt/disk_data 2>/dev/null
+        mount /dev/${actionDevicePartitionBase}1 /mnt/disk_data
+        mkdir -p /mnt/disk_data/app-data
+        umount /mnt/disk_data
+    fi
+
+    echo "# OK - ${action} done" >> ${logFile}
+    exit 0
+fi
 
 ###################
-# SETUP & RECOVER
+# COPY-SYSTEM
 ###################
 
-if [ "$action" = "setup" ] || [ "$action" = "recover" ]; then
+if [ "$action" = "copy-system" ]; then
+
+    echo "STARTED blitz.data.sh ${action} ..." >> ${logFile}
+
+    # check that device is set & exists & not mounted
+    actionDevice=$2
+    if [ ${#actionDevice} -eq 0 ]; then
+        echo "error='missing device'"
+        echo "error='missing device'" >> ${logFile}
+        exit 1
+    fi
+    if ! lsblk -no NAME | grep -q "${actionDevice}$"; then
+        echo "error='device not found'"
+        echo "error='device not found'" >> ${logFile}
+        exit 1
+    fi
+    if findmnt -n -o TARGET "/dev/${actionDevice}" 2>/dev/null; then
+        echo "error='device is mounted'"
+        echo "error='device is mounted'" >> ${logFile}
+        exit 1
+    fi
+
+    # determine the partition base name
+    actionDevicePartitionBase=${actionDevice}
+    if [[ "${actionDevice}" =~ ^nvme ]]; then
+        actionDevicePartitionBase="${actionDevice}p"
+    fi
+
+    actionDeviceType=$3
+    if [ "${actionDeviceType}" != "system" ] && [ "${actionDeviceType}" != "storage" ]; then
+        echo "# actionDeviceType(${actionDeviceType})"
+        echo "error='type not supported'"
+        exit 1
+    fi
+    if [ "${actionDeviceType}" = "system" ]; then
+        systemPartition="${actionDevicePartitionBase}1"
+    fi
+    if [ "${actionDeviceType}" = "storage" ]; then
+        systemPartition="${actionDevicePartitionBase}1"
+    fi  
+
+    # debug info
+    echo "# actionDevice(${actionDevice})" >> ${logFile}
+    echo "# actionDevicePartitionBase(${actionDevicePartitionBase})" >> ${logFile}
+    echo "# actionDeviceType(${actionDeviceType})" >> ${logFile}
+    echo "# systemPartition(${systemPartition})" >> ${logFile}
+    echo "# computerType(${computerType})" >> ${logFile}
+
+    exit 1
+
+    ##########################
+    # MAKE BOOTABLE
+    echo "# MAKE BOOTABLE" >> ${logFile}
+
+    # RASPBERRY PI
+    if [ "${computerType}" = "raspberrypi" ]; then
+        echo "# RaspberryPi - set LBA flag" >> ${logFile}
+        parted /dev/${actionDevice} --script set 1 lba on
+        isFlagSetLBA=$(parted /dev/${actionDevice} --script print | grep -c 'fat32.*lba')
+        if [ ${isFlagSetLBA} -eq 0 ]; then
+            echo "error='failed to set LBA flag'"
+            exit 1
+        fi
+        echo "# RaspberryPi - Bootorder" >> ${logFile}
+        isBootOrderSet=$(sudo rpi-eeprom-config | grep -cx "BOOT_ORDER=0xf461")
+        if [ ${isBootOrderSet} -eq 0 ]; then
+            echo "# .. changeing Bootorder" >> ${logFile}
+            rpi-eeprom-config --out bootconf.txt
+            sed -i '/^BOOT_ORDER=/d' ./bootconf.txt && sudo sh -c 'echo "BOOT_ORDER=0xf461" >> ./bootconf.txt'
+            rpi-eeprom-config --apply bootconf.txt
+            rm bootconf.txt
+        else
+            echo "# .. Bootorder already set" >> ${logFile}
+        fi
+
+    # VM & PC
+    else
+        echo "# VM & PC - set BOOT/ESP flag" >> ${logFile}
+        parted /dev/${actionDevice} --script set 1 boot on
+        parted /dev/${actionDevice} --script set 1 esp on
+        isFlagSetBOOT=$(parted /dev/${actionDevice} --script print | grep -c 'fat32.*boot')
+        if [ ${isFlagSetBOOT} -eq 0 ]; then
+            echo "error='failed to set BOOT flag'"
+            exit 1
+        fi
+        isFlagSetESP=$(parted /dev/${actionDevice} --script print | grep -c 'fat32.*esp')
+        if [ ${isFlagSetESP} -eq 0 ]; then
+            echo "error='failed to set ESP flag'"
+            exit 1
+        fi
+    fi
+
+    ##########################
+    # COPY SYSTEM
+    echo "# SYSTEM COPY" >> ${logFile}
+
+    # copy the boot drive
+    bootPath="/boot/efi"
+    bootPathEscpaed="\/boot\/efi"
+    if [ "${computerType}" = "raspberrypi" ]; then
+        bootPath="/boot/firmware/"
+        bootPathEscpaed="\/boot\/firmware"
+    fi
+    rm -rf /mnt/disk_boot 2>/dev/null
+    mkdir -p /mnt/disk_boot 2>/dev/null
+    mount /dev/${actionDevicePartitionBase}1 /mnt/disk_boot
+    if ! findmnt -n -o TARGET "/mnt/disk_boot" 2>/dev/null; then
+        echo "error='boot partition not mounted'"
+        exit 1
+    fi
+    if [ "${computerType}" = "raspberrypi" ]; then
+        echo "# .. boot rsync start" >> ${logFile}
+        rsync -axHAX --delete ${bootPath} /mnt/disk_boot/ || { echo "error='fail on boot copy'"; exit 1; }
+        echo "# OK - Boot copied" >> ${logFile}
+    fi
+
+    # copy the system drive
+    echo "# .. copy system" >> ${logFile}
+    rm -rf /mnt/disk_system 2>/dev/null
+    mkdir -p /mnt/disk_system 2>/dev/null
+    mount /dev/${actionDevicePartitionBase}2 /mnt/disk_system
+    if ! findmnt -n -o TARGET "/mnt/disk_system" 2>/dev/null; then
+        echo "error='system partition not mounted'"
+        exit 1
+    fi
+    echo "# .. system rsync start" >> ${logFile}
+    rsync -axHAX --delete\
+        --exclude=/dev/* \
+        --exclude=/proc/* \
+        --exclude=/sys/* \
+        --exclude=/tmp/* \
+        --exclude=/run/* \
+        --exclude=/mnt/* \
+        --exclude=/media/* \
+        --exclude=${bootPath}/* \
+        --exclude=/lost+found \
+        --exclude=/var/cache/* \
+        --exclude=/var/tmp/* \
+        --exclude=/var/log/* \
+        / /mnt/disk_system/ || { echo "error='fail on system copy'"; exit 1; }
+    echo "# OK - System copied" >> ${logFile}
+
+    # needed after fixes
+    mkdir -p /mnt/disk_system/var/log/redis
+    touch /mnt/disk_system/var/log/redis/redis-server.log
+    chown redis:redis /mnt/disk_system/var/log/redis/redis-server.log
+    chmod 644 /mnt/disk_system/var/log/redis/redis-server.log
+
+    # fstab link & command.txt
+    echo "# Perma mount boot & system drives" >> ${logFile}
+    BOOT_UUID=$(blkid -s UUID -o value /dev/${actionDevicePartitionBase}1)
+    ROOT_UUID=$(blkid -s UUID -o value /dev/${actionDevicePartitionBase}2)
+    ROOT_PARTUUID=$(sudo blkid -s PARTUUID -o value /dev/${actionDevicePartitionBase}2)
+    echo "# - BOOT_UUID(${BOOT_UUID})" >> ${logFile}
+    echo "# - ROOT_UUID(${ROOT_UUID})" >> ${logFile}
+    if [ "${computerType}" = "raspberrypi" ]; then
+        echo "# - RaspberryPi - edit command.txt" >> ${logFile}
+        sed -i "s|PARTUUID=[^ ]*|PARTUUID=$ROOT_PARTUUID|" /mnt/disk_boot/cmdline.txt
+    fi
+    cat > /mnt/disk_system/etc/fstab << EOF
+# /etc/fstab: static file system information
+#
+# <file system>                           <mount point>  <type>  <options>                              <dump>  <pass>
+UUID=${ROOT_UUID}                         /              ext4    defaults,noatime                       0       1
+UUID=${BOOT_UUID}                        ${bootPath}          vfat    defaults,noatime,umask=0077           0       2
+EOF
+
+    # install EFI GRUB for VM & PC
+    if [ "${computerType}" != "raspberrypi" ]; then
+        echo "# EFI GRUB" >> ${logFile}
+        DISK_SYSTEM="/mnt/disk_system"
+        BOOT_PARTITION="/dev/${actionDevicePartitionBase}1"
+        ROOT_PARTITION="/dev/${actionDevicePartitionBase}2"
+        echo "# Mounting root and boot partitions..." >> ${logFile}
+        umount /mnt/disk_boot 2>/dev/null
+        mkdir -p $DISK_SYSTEM/boot/efi 2>/dev/null
+        mount $BOOT_PARTITION $DISK_SYSTEM/boot/efi || { echo "Failed to mount boot partition"; exit 1; }
+        echo "# Bind mounting system directories..." >> ${logFile}
+        mount --bind /dev $DISK_SYSTEM/dev || { echo "Failed to bind /dev"; exit 1; }
+        mount --bind /sys $DISK_SYSTEM/sys || { echo "Failed to bind /sys"; exit 1; }
+        mount --bind /proc $DISK_SYSTEM/proc || { echo "Failed to bind /proc"; exit 1; }
+        rm $DISK_SYSTEM/etc/resolv.conf
+        cp /etc/resolv.conf $DISK_SYSTEM/etc/resolv.conf || { echo "Failed to copy resolv.conf"; exit 1; }
+        echo "# Entering chroot and setting up GRUB..." >> ${logFile}
+        chroot $DISK_SYSTEM /bin/bash <<EOF
+apt-get install -y grub-efi-amd64 efibootmgr
+grub-install --target=x86_64-efi --efi-directory=/boot/efi --removable --recheck
+update-grub
+EOF
+        umount $DISK_SYSTEM/boot/efi
+        umount $DISK_SYSTEM
+    fi
+
+    echo "# OK - ${action} done" >> ${logFile}
+    exit 0
+fi
+
+###################
+# RECOVER
+###################
+
+if [ "$action" = "recover" ]; then
 
     echo "STARTED blitz.data.sh ${action} ..." >> ${logFile}
 
@@ -788,16 +1187,27 @@ if [ "$action" = "setup" ] || [ "$action" = "recover" ]; then
     fi
 
     # check if boot should be from storage
-    actionBootFromStorage=$5
-    if [ ${#actionBootFromStorage} -gt 0 ] && [ "${actionBootFromStorage}" != "bootFromStorage=0" ] && [ "${actionBootFromStorage}" != "bootFromStorage=1" ] && [ "${actionBootFromStorage}" != "0" ] && [ "${actionBootFromStorage}" != "1" ]; then
-        echo "error='bootFromStorage(${actionBootFromStorage})'" >> ${logFile}
-        echo "error='bootFromStorage value not supported'"
+    actionCreateSystemPartition
+    =$5
+    if [ ${#actionCreateSystemPartition
+    } -gt 0 ] && [ "${actionCreateSystemPartition
+    }" != "addSystemPartition=0" ] && [ "${actionCreateSystemPartition
+    }" != "addSystemPartition=1" ] && [ "${actionCreateSystemPartition
+    }" != "0" ] && [ "${actionCreateSystemPartition
+    }" != "1" ]; then
+        echo "error='addSystemPartition(${actionCreateSystemPartition
+        })'" >> ${logFile}
+        echo "error='addSystemPartition value not supported'"
         exit 1
     fi
-    if [ "${actionBootFromStorage}" = "bootFromStorage=1" ] || [ "${actionBootFromStorage}" = "1" ]; then
-        actionBootFromStorage=1
+    if [ "${actionCreateSystemPartition
+    }" = "addSystemPartition=1" ] || [ "${actionCreateSystemPartition
+    }" = "1" ]; then
+        actionCreateSystemPartition
+        =1
     else
-        actionBootFromStorage=0
+        actionCreateSystemPartition
+        =0
     fi
 
     # determine the partition base name
@@ -810,137 +1220,16 @@ if [ "$action" = "setup" ] || [ "$action" = "recover" ]; then
     echo "# actionType(${actionType})"  >> ${logFile}
     echo "# actionDevice(${actionDevice})" >> ${logFile}
     echo "# actionDevicePartitionBase(${actionDevicePartitionBase})" >> ${logFile}
-    echo "# actionBootFromStorage(${actionBootFromStorage})" >> ${logFile}
+    echo "# actionCreateSystemPartition
+    (${actionCreateSystemPartition
+    })" >> ${logFile}
     echo "# actionCombinedData(${actionCombinedData})" >> ${logFile}
-
-    ##########################
-    # PARTITION & FORMAT (only if not in recovery)
-
-    # SYSTEM (single drive)
-    if [ "${action}" = "setup" ] && [ "${actionType}" = "SEPERATE-SYSTEM" ]; then
-        echo "# SYSTEM partitioning" >> ${logFile}
-        sfdisk --delete /dev/${actionDevice} 2>/dev/null
-        wipefs -a /dev/${actionDevice} 2>/dev/null
-        parted /dev/${actionDevice} --script mklabel msdos
-        parted /dev/${actionDevice} --script mkpart primary fat32 1MiB 513MiB
-        parted /dev/${actionDevice} --script mkpart primary ext4 541MB 100%
-        wipefs -a /dev/${actionDevicePartitionBase}1 2>/dev/null
-        mkfs.fat -F 32 /dev/${actionDevicePartitionBase}1
-        wipefs -a /dev/${actionDevicePartitionBase}2 2>/dev/null
-        mkfs -t ext4  /dev/${actionDevicePartitionBase}2
-
-    # STOARGE with System
-    elif [ "${action}" = "setup" ] && [ "${actionType}" = "STORAGE" ] && [ ${actionBootFromStorage} -eq 1 ]; then
-        echo "# STORAGE (with system) partitioning" >> ${logFile}
-        sfdisk --delete /dev/${actionDevice} 2>/dev/null
-        wipefs -a /dev/${actionDevice} 2>/dev/null
-        parted /dev/${actionDevice} --script mklabel msdos
-        parted /dev/${actionDevice} --script mkpart primary fat32 1MiB 513MiB
-        parted /dev/${actionDevice} --script mkpart primary ext4 541MB 65GB
-        parted /dev/${actionDevice} --script mkpart primary ext4 65GB 100%
-        echo "# .. formating" >> ${logFile}
-        wipefs -a /dev/${actionDevicePartitionBase}1 2>/dev/null
-        mkfs.fat -F 32 /dev/${actionDevicePartitionBase}1
-        wipefs -a /dev/${actionDevicePartitionBase}2 2>/dev/null
-        mkfs -t ext4  /dev/${actionDevicePartitionBase}2
-        wipefs -a /dev/${actionDevicePartitionBase}3 2>/dev/null
-        mkfs -t ext4  /dev/${actionDevicePartitionBase}3
-        rm -rf /mnt/disk_storage 2>/dev/null
-        mkdir -p /mnt/disk_storage 2>/dev/null
-        mount /dev/${actionDevicePartitionBase}3 /mnt/disk_storage
-        mkdir -p /mnt/disk_storage/app-storage
-        if [ ${actionCombinedData} -eq 1 ]; then
-            mkdir -p /mnt/disk_storage/app-data
-        fi
-        umount /mnt/disk_storage
-
-    # STOARGE (single drive OR host for seperate data & system)
-    elif [ "${action}" = "setup" ] && [ "${actionType}" = "STORAGE" ] && [ ${actionBootFromStorage} -eq 0 ]; then
-        echo "# STORAGE (no boot) partitioning" >> ${logFile}        
-        sfdisk --delete /dev/${actionDevice} 2>/dev/null
-        wipefs -a /dev/${actionDevice} 2>/dev/null
-        parted /dev/${actionDevice} --script mklabel msdos
-        parted /dev/${actionDevice} --script mkpart primary ext4 1MB 100%
-        echo "# .. formating" >> ${logFile}
-        wipefs -a /dev/${actionDevicePartitionBase}1 2>/dev/null
-        mkfs -t ext4  /dev/${actionDevicePartitionBase}1
-        rm -rf /mnt/disk_storage 2>/dev/null
-        mkdir -p /mnt/disk_storage 2>/dev/null
-        mount /dev/${actionDevicePartitionBase}1 /mnt/disk_storage
-        mkdir -p /mnt/disk_storage/app-storage
-        umount /mnt/disk_storage
-
-    # DATA (single drive)
-    elif [ "${action}" = "setup" ] && [ "${actionType}" = "SEPERATE-DATA" ]; then
-        echo "# DATA partitioning" >> ${logFile}
-        sfdisk --delete /dev/${actionDevice} 2>/dev/null
-        wipefs -a /dev/${actionDevice} 2>/dev/null
-        parted /dev/${actionDevice} --script mklabel msdos
-        parted /dev/${actionDevice} --script mkpart primary ext4 1MB 100%
-        echo "# .. formating" >> ${logFile}
-        wipefs -a /dev/${actionDevicePartitionBase}1 2>/dev/null
-        mkfs -t ext4  /dev/${actionDevicePartitionBase}1
-        rm -rf /mnt/disk_data 2>/dev/null
-        mkdir -p /mnt/disk_data 2>/dev/null
-        mount /dev/${actionDevicePartitionBase}1 /mnt/disk_data
-        mkdir -p /mnt/disk_data/app-data
-        umount /mnt/disk_data
-
-    else 
-        echo "# skipping: Partition & Format" >> ${logFile}
-    fi
-
-    ##########################
-    # MAKE BOOTABLE
-
-    if [ "${action}" = "setup" ] && ([ "${actionType}" = "SEPERATE-SYSTEM" ] || [ ${actionBootFromStorage} -eq 1 ]); then
-        echo "# MAKE BOOTABLE" >> ${logFile}
-
-        # RASPBERRY PI
-        if [ "${computerType}" = "raspberrypi" ]; then
-            echo "# RaspberryPi - set LBA flag" >> ${logFile}
-            parted /dev/${actionDevice} --script set 1 lba on
-            isFlagSetLBA=$(parted /dev/${actionDevice} --script print | grep -c 'fat32.*lba')
-            if [ ${isFlagSetLBA} -eq 0 ]; then
-                echo "error='failed to set LBA flag'"
-                exit 1
-            fi
-            echo "# RaspberryPi - Bootorder" >> ${logFile}
-            isBootOrderSet=$(sudo rpi-eeprom-config | grep -cx "BOOT_ORDER=0xf461")
-            if [ ${isBootOrderSet} -eq 0 ]; then
-                echo "# .. changeing Bootorder" >> ${logFile}
-                rpi-eeprom-config --out bootconf.txt
-                sed -i '/^BOOT_ORDER=/d' ./bootconf.txt && sudo sh -c 'echo "BOOT_ORDER=0xf461" >> ./bootconf.txt'
-                rpi-eeprom-config --apply bootconf.txt
-                rm bootconf.txt
-            else
-                echo "# .. Bootorder already set" >> ${logFile}
-            fi
-
-        # VM & PC
-        else
-            echo "# VM & PC - set BOOT/ESP flag" >> ${logFile}
-            parted /dev/${actionDevice} --script set 1 boot on
-            parted /dev/${actionDevice} --script set 1 esp on
-            isFlagSetBOOT=$(parted /dev/${actionDevice} --script print | grep -c 'fat32.*boot')
-            if [ ${isFlagSetBOOT} -eq 0 ]; then
-                echo "error='failed to set BOOT flag'"
-                exit 1
-            fi
-            isFlagSetESP=$(parted /dev/${actionDevice} --script print | grep -c 'fat32.*esp')
-            if [ ${isFlagSetESP} -eq 0 ]; then
-                echo "error='failed to set ESP flag'"
-                exit 1
-            fi
-        fi
-    else
-        echo "# skipping: Bootable" >> ${logFile}
-    fi
 
     ##########################
     # COPY SYSTEM
 
-    if [ ${actionType} = "SEPERATE-SYSTEM" ] || [ ${actionBootFromStorage} -eq 1 ]; then
+    if [ ${actionType} = "SEPERATE-SYSTEM" ] || [ ${actionCreateSystemPartition
+    } -eq 1 ]; then
         echo "# SYSTEM COPY" >> ${logFile}
 
         # copy the boot drive
