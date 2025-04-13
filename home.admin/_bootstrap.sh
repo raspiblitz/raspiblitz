@@ -794,8 +794,7 @@ if [ "${scenario}" != "ready" ] ; then
     echo "scenario(${scenario})" >> ${logFile}
     echo "systemCopy(${systemCopy})" >> ${logFile}
 
-    exit 1
-
+    # copy system
     if [ "${systemCopy}" = "1" ]; then
 
       if [ "${bootFromStorage}" = "0" ]; then
