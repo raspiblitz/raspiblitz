@@ -729,15 +729,15 @@ if [ "${scenario}" != "ready" ] ; then
   fi
 
   echo "scenario(${scenario})" >> ${logFile}
-  echo "systemCopy(${systemCopy})" >> ${logFile}
+  echo "scenarioSystemCopy(${scenarioSystemCopy})" >> ${logFile}    # recommended by system
+  echo "systemCopy(${systemCopy})" >> ${logFile}                    # user choice
+  echo "createSystemPartion(${createSystemPartion})" >> ${logFile}  # system partition
   echo "deleteData(${deleteData})" >> ${logFile}
   echo "setupCommand(${setupCommand})" >> ${logFile}
   echo "bootFromStorage(${bootFromStorage})" >> ${logFile}
   echo "storageDevice(${storageDevice})" >> ${logFile}
   echo "systemDevice(${systemDevice})" >> ${logFile}
   echo "dataDevice(${dataDevice})" >> ${logFile}
-  echo "createSystemPartion(${createSystemPartion})" >> ${logFile}
-  echo "scenarioSystemCopy(${scenarioSystemCopy})" >> ${logFile}
 
   exit 1
 
@@ -796,8 +796,8 @@ if [ "${scenario}" != "ready" ] ; then
 
     # when system was installed on new boot drive
     echo "scenario(${scenario})" >> ${logFile}
-    echo "scenarioSystemCopy(${scenarioSystemCopy})" >> ${logFile}
-    if [ "${scenarioSystemCopy}" = "1" ]; then
+    echo "systemCopy(${systemCopy})" >> ${logFile}
+    if [ "${systemCopy}" = "1" ]; then
 
       # mark systemCopy as done in raspiblitz.setup
       if ! sed -i "s/^systemCopy=.*/systemCopy=done/" "${setupFile}"; then
@@ -846,7 +846,7 @@ if [ "${scenario}" != "ready" ] ; then
       exit 0
     else
       # continue with setup
-      echo "NOT scenarioSystemCopy" >> ${logFile}
+      echo "NO systemCopy" >> ${logFile}
     fi
 
   else
