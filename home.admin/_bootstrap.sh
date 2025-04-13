@@ -798,9 +798,21 @@ if [ "${scenario}" != "ready" ] ; then
     if [ "${systemCopy}" = "1" ]; then
 
       if [ "${bootFromStorage}" = "0" ]; then
-        /home/admin/config.scripts/blitz.data.sh copy-system "${storageDevice}" storage >> ${logFile}
+        /home/admin/config.scripts/blitz.data.sh copy-system "${storageDevice}" storage
+        if [ $? -ne 0 ]; then
+          echo "FAIL: copy-system (storage) failed" >> ${logFile}
+          /home/admin/_cache.sh set state "error"
+          /home/admin/_cache.sh set message "copy-system failed"
+          exit 1
+        fi
       else
-        /home/admin/config.scripts/blitz.data.sh copy-system "${systemDevice}" system >> ${logFile}
+        /home/admin/config.scripts/blitz.data.sh copy-system "${systemDevice}" system
+        if [ $? -ne 0 ]; then
+          echo "FAIL: copy-system (system) failed" >> ${logFile}
+          /home/admin/_cache.sh set state "error"
+          /home/admin/_cache.sh set message "copy-system failed"
+          exit 1
+        fi
       fi
 
       echo "DEBUG EXIT" >> ${logFile}

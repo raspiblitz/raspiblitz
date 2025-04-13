@@ -969,9 +969,9 @@ if [ "$action" = "copy-system" ]; then
         actionDevicePartitionBase="${actionDevice}p"
     fi
 
-    actionDeviceType=$3
+    actionDeviceType=$(echo "$3" | tr '[:upper:]' '[:lower:]')
     if [ "${actionDeviceType}" != "system" ] && [ "${actionDeviceType}" != "storage" ]; then
-        echo "# actionDeviceType(${actionDeviceType})"
+        echo "# actionDeviceType(${actionDeviceType}) UNKOWN" >> ${logFile}
         echo "error='type not supported'"
         exit 1
     fi
