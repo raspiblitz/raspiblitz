@@ -554,7 +554,7 @@ if [ "$action" = "status" ] || [ "$action" = "mount" ] || [ "$action" = "unmount
 
     # DATA
     if [ ${#dataDevice} -gt 0 ]; then
-        if [ ${dataSizeGB} -lt $((dataMinGB - 1)];then
+        if [ ${dataSizeGB} -lt $((dataMinGB - 1) ]; then
             dataWarning='too-small'
         fi
     fi
@@ -1187,27 +1187,16 @@ if [ "$action" = "recover" ]; then
     fi
 
     # check if boot should be from storage
-    actionCreateSystemPartition
-    =$5
-    if [ ${#actionCreateSystemPartition
-    } -gt 0 ] && [ "${actionCreateSystemPartition
-    }" != "addSystemPartition=0" ] && [ "${actionCreateSystemPartition
-    }" != "addSystemPartition=1" ] && [ "${actionCreateSystemPartition
-    }" != "0" ] && [ "${actionCreateSystemPartition
-    }" != "1" ]; then
-        echo "error='addSystemPartition(${actionCreateSystemPartition
-        })'" >> ${logFile}
+    actionCreateSystemPartition=$5
+    if [ ${#actionCreateSystemPartition} -gt 0 ] && [ "${actionCreateSystemPartition}" != "addSystemPartition=0" ] && [ "${actionCreateSystemPartition}" != "addSystemPartition=1" ] && [ "${actionCreateSystemPartition}" != "0" ] && [ "${actionCreateSystemPartition}" != "1" ]; then
+        echo "error='addSystemPartition(${actionCreateSystemPartition})'" >> ${logFile}
         echo "error='addSystemPartition value not supported'"
         exit 1
     fi
-    if [ "${actionCreateSystemPartition
-    }" = "addSystemPartition=1" ] || [ "${actionCreateSystemPartition
-    }" = "1" ]; then
-        actionCreateSystemPartition
-        =1
+    if [ "${actionCreateSystemPartition}" = "addSystemPartition=1" ] || [ "${actionCreateSystemPartition}" = "1" ]; then
+        actionCreateSystemPartition=1
     else
-        actionCreateSystemPartition
-        =0
+        actionCreateSystemPartition=0
     fi
 
     # determine the partition base name

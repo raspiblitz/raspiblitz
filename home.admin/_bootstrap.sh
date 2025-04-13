@@ -818,7 +818,7 @@ if [ "${scenario}" != "ready" ] ; then
       mount /dev/${dataPartition} /mnt/disk_data
       echo "copy setupFile(${setupFile}) to /mnt/disk_data/app-data/raspiblitz.setup" >> ${logFile}
       cp ${setupFile} /mnt/disk_data/home/admin/raspiblitz.setup
-      if [ $? -eq 1 ]; then
+      if [ $? -ne 0 ]; then
         echo "FAIL: copy setupFile to new system failed" >> ${logFile}
         /home/admin/_cache.sh set state "error"
         /home/admin/_cache.sh set message "copy setupFile to new system failed"
