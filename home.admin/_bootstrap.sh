@@ -630,7 +630,7 @@ if [ "${scenario}" != "ready" ] ; then
     infoMessage="Please start Setup"
     /home/admin/_cache.sh set "system_setup_askSystemCopy" "${scenarioSystemCopy}"
 
-  if [ "${scenario}" = "biggerdevice" ]; then
+  elif [ "${scenario}" = "biggerdevice" ]; then
     setupPhase="biggerdevice"
     infoMessage="Please start Setup"
     /home/admin/_cache.sh set "system_setup_askSystemCopy" "${scenarioSystemCopy}"
