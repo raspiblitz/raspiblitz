@@ -554,7 +554,7 @@ if [ "$action" = "status" ] || [ "$action" = "mount" ] || [ "$action" = "unmount
 
     # DATA
     if [ ${#dataDevice} -gt 0 ]; then
-        if [ ${dataSizeGB} -lt $((dataMinGB - 1) ]; then
+        if [ ${dataSizeGB} -lt $((dataMinGB - 1)) ]; then
             dataWarning='too-small'
         fi
     fi
