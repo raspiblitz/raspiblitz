@@ -720,14 +720,24 @@ if [ "${scenario}" != "ready" ] ; then
     echo "WARN: No matching scenario found" >> ${logFile}
   fi
 
+  # even when the user decided not to run the system from storage/data drive
+  # create a place holder partition for future system use
+  # ONLY when a dedicated system device is available - dont create a system partition 
+  createSystemPartion=1
+  if [ ${#systemDevice} -gt 0 ]; then
+    createSystemPartion=0
+  fi
+
   echo "scenario(${scenario})" >> ${logFile}
   echo "systemCopy(${systemCopy})" >> ${logFile}
   echo "deleteData(${deleteData})" >> ${logFile}
   echo "setupCommand(${setupCommand})" >> ${logFile}
   echo "bootFromStorage(${bootFromStorage})" >> ${logFile}
-
-  # TODO: find correct setupCommand or create on
-  # TODO: make sure that system, storage & data devices are correct
+  echo "storageDevice(${storageDevice})" >> ${logFile}
+  echo "systemDevice(${systemDevice})" >> ${logFile}
+  echo "dataDevice(${dataDevice})" >> ${logFile}
+  echo "createSystemPartion(${createSystemPartion})" >> ${logFile}
+  echo "scenarioSystemCopy(${scenarioSystemCopy})" >> ${logFile}
 
   exit 1
 
@@ -740,11 +750,13 @@ if [ "${scenario}" != "ready" ] ; then
     /home/admin/_cache.sh set state "systemcopy"
     /home/admin/_cache.sh set message "copying system"
 
+
+
     # STORAGE
     echo "# storageDevice(${storageDevice}) storageMountedPath(${storageMountedPath})" >> ${logFile}
     if [ ${#storageDevice} -gt 0 ] && [ ${#storageMountedPath} -eq 0 ]; then
       error=""
-      source <(/home/admin/config.scripts/blitz.data.sh ${setupCommand} STORAGE "${storageDevice}" "${combinedDataStorage}" "${bootFromStorage}")
+      source <(/home/admin/config.scripts/blitz.data.sh ${setupCommand} STORAGE "${storageDevice}" "${combinedDataStorage}" "${createSystemPartion}")
       if [ "${error}" != "" ]; then
         echo "FAIL: '${setupCommand} STORAGE' failed error(${error})" >> ${logFile}
         /home/admin/_cache.sh set state "error"
@@ -772,7 +784,7 @@ if [ "${scenario}" != "ready" ] ; then
     echo "# dataDevice(${dataDevice}) dataWarning(${dataWarning})" >> ${logFile}
     if [ ${#dataDevice} -gt 0 ] && [ ${#dataWarning} -eq 0 ]; then
       error=""
-      source <(/home/admin/config.scripts/blitz.data.sh ${setupCommand} DATA "${systemDevice}")
+      source <(/home/admin/config.scripts/blitz.data.sh ${setupCommand} DATA "${dataDevice}")
       if [ "${error}" != "" ]; then
         echo "FAIL: '${setupCommand} DATA' failed error(${error})" >> ${logFile}
         /home/admin/_cache.sh set state "error"
