@@ -1454,6 +1454,12 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
             exit 1
         fi
 
+        # check that target partion is formatted
+        if [ $storagePartition -eq 0 ]; then
+            echo "error='target drive not formatted'"
+            exit 1
+        fi
+
         # get the biggest partition of the source hdd (thats the data or storage partition with data)
         sourcePartition=$(lsblk -no NAME,SIZE,TYPE | grep "${hddMigrateDeviceFrom}" | grep "part" | sort -k2 -h | tail -1 | awk '{print $1}' | sed 's/[^[:alnum:]]//g')
         if [ ${#sourcePartition} -eq 0 ]; then
