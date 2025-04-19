@@ -1448,14 +1448,9 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
             exit 1
         fi
 
-        # set source hdd of migration in cache
+        # set source hdd of migration in cache & get latest disk info
         /home/admin/_cache.sh set hddMigrateDeviceFrom "${hddMigrateDeviceFrom}"
-
         source <(/home/admin/config.scripts/blitz.data.sh status -inspect)
-        if [ "${scenario}" != "setup" ]; then
-            echo "error='wrong scenario'"
-            exit 1
-        fi
 
         # check that target partion is formatted
         if [ "${dataPartition}" = "" ]; then
@@ -1497,6 +1492,12 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
             echo "# storagePartition(${storagePartition})"
             echo "# make sure the partition is not mounted" 
             echo "error='storage partition is mounted'"
+            exit 1
+        fi
+
+        # only run if scenario is setup
+        if [ "${scenario}" != "setup" ]; then
+            echo "error='wrong scenario'"
             exit 1
         fi
 
