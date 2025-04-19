@@ -1535,7 +1535,7 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
         if [ -d /mnt/migrate_source/bitcoin ] && [ ! -L /mnt/migrate_source/bitcoin ]; then
             echo "# rsync bitcoin from source to target ..."
             echo "bitcoin" > /var/cache/raspiblitz/temp/progress.txt
-            rsync -ah --info=progress2 /mnt/migrate_source/bitcoin/ /mnt/migrate_storage/app-storage/bitcoin/ 2>&1 | stdbuf -oL tr '\r' '\n' | grep --line-buffered '%' | sed -n 's/.* \([0-9]\+\)% .*/\1%/p' >> /var/cache/raspiblitz/temp/progress.txt
+            rsync -ah --info=progress2 /mnt/migrate_source/bitcoin/ /mnt/migrate_storage/app-storage/bitcoin/ 2>&1 | stdbuf -oL tr '\r' '\n' | grep --line-buffered '%' | sed -n 's/.* \([0-9]\+\)% .*/\1%/p' > /var/cache/raspiblitz/temp/progress.txt
             if [ $? -ne 0 ]; then
                 echo "error='failed to rsync bitcoin'"
                 exit 1
