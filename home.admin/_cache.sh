@@ -77,7 +77,7 @@ if [ "$1" = "ramdisk" ] && [ "$2" = "on" ]; then
     else
       # missing -> add
       echo "" | sudo tee -a /etc/fstab >/dev/null
-      echo "tmpfs         /var/cache/raspiblitz  tmpfs  nodev,nosuid,size=32M  0  0" | sudo tee -a /etc/fstab >/dev/null
+      echo "tmpfs         /var/cache/raspiblitz  tmpfs  nodev,nosuid,size=64M  0  0" | sudo tee -a /etc/fstab >/dev/null
     fi
   fi
 
