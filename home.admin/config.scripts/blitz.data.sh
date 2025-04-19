@@ -1477,6 +1477,49 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
             exit 1
         fi
 
+        # check storage is not mounted
+        if findmnt -n -o TARGET "/dev/${storagePartition}" 2>/dev/null; then
+            echo "# storagePartition(${storagePartition})"
+            echo "# make sure the partition is not mounted" 
+            echo "error='storage partition is mounted'"
+            exit 1
+        fi
+
+        # mount target partition storage
+        mkdir -p /mnt/migrate_storage 2>/dev/null
+        mount "/dev/${storagePartition}" /mnt/migrate_storage
+        if ! findmnt -n -o TARGET "/mnt/migrate_storage" 2>/dev/null; then
+            echo "error='storage partition not mounted'"
+            exit 1
+        fi
+        
+        ##############
+        # SYNC STORAGE
+
+        echo "# rsync storage from source to target ..."
+        rsync -avh --progress /mnt/migrate_source/app-storage/ /mnt/migrate_storage/app-storage/
+        if [ $? -ne 0 ]; then
+            echo "error='failed to rsync storage'"
+            exit 1
+        fi
+
+        # old layout: bitcoin directory is still outside of app-storage
+        if [ -d /mnt/migrate_source/bitcoin ] && [ ! -L /mnt/migrate_source/bitcoin ]; then
+            echo "# rsync bitcoin from source to target ..."
+            rsync -avh --progress /mnt/migrate_source/bitcoin/ /mnt/migrate_storage/app-storage/bitcoin/
+            if [ $? -ne 0 ]; then
+                echo "error='failed to rsync bitcoin'"
+                exit 1
+            fi
+        fi
+
+        # unmount storage partition
+        umount /mnt/migrate_storage
+        if [ $? -ne 0 ]; then
+            echo "error='failed to unmount storage partition'"
+            exit 1
+        fi
+
         # check partition data is not mounted
         if findmnt -n -o TARGET "/dev/${dataPartition}" 2>/dev/null; then
             echo "# dataPartition(${dataPartition})"
@@ -1538,49 +1581,6 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
         umount /mnt/migrate_data
         if [ $? -ne 0 ]; then
             echo "error='failed to unmount data partition'"
-            exit 1
-        fi
-
-        # check storage is not mounted
-        if findmnt -n -o TARGET "/dev/${storagePartition}" 2>/dev/null; then
-            echo "# storagePartition(${storagePartition})"
-            echo "# make sure the partition is not mounted" 
-            echo "error='storage partition is mounted'"
-            exit 1
-        fi
-
-        # mount target partition storage
-        mkdir -p /mnt/migrate_storage 2>/dev/null
-        mount "/dev/${storagePartition}" /mnt/migrate_storage
-        if ! findmnt -n -o TARGET "/mnt/migrate_storage" 2>/dev/null; then
-            echo "error='storage partition not mounted'"
-            exit 1
-        fi
-        
-        ##############
-        # SYNC STORAGE
-
-        echo "# rsync storage from source to target ..."
-        rsync -avh --progress /mnt/migrate_source/app-storage/ /mnt/migrate_storage/app-storage/
-        if [ $? -ne 0 ]; then
-            echo "error='failed to rsync storage'"
-            exit 1
-        fi
-
-        # old layout: bitcoin directory is still outside of app-storage
-        if [ -d /mnt/migrate_source/bitcoin ] && [ ! -L /mnt/migrate_source/bitcoin ]; then
-            echo "# rsync bitcoin from source to target ..."
-            rsync -avh --progress /mnt/migrate_source/bitcoin/ /mnt/migrate_storage/app-storage/bitcoin/
-            if [ $? -ne 0 ]; then
-                echo "error='failed to rsync bitcoin'"
-                exit 1
-            fi
-        fi
-
-        # unmount storage partition
-        umount /mnt/migrate_storage
-        if [ $? -ne 0 ]; then
-            echo "error='failed to unmount storage partition'"
             exit 1
         fi
 
