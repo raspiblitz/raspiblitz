@@ -1455,13 +1455,13 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
         fi
 
         # check that target partion is formatted
-        if [ $dataPartition -eq 0 ]; then
+        if [ "${dataPartition}" = "" ]; then
             echo "error='data drive not formatted'"
             exit 1
         fi
 
         # check that target partion is formatted
-        if [ $storagePartition -eq 0 ]; then
+        if [ "${storagePartition}" = "" ]; then
             echo "error='storage drive not formatted'"
             exit 1
         fi
