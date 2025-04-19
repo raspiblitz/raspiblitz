@@ -23,6 +23,9 @@ fi
 contentWords=($2)
 contentString=$2
 
+progresstype=$(head -n 1 /var/cache/raspiblitz/temp/progress.txt)
+progress=$(tail -n 1 /var/cache/raspiblitz/temp/progress.txt)
+
 # 3rd PARAMETER (optional): Place of display - could be "lcd" or "ssh" (defalt)
 mode=$3
 if [ "${mode}" == "" ]; then
@@ -352,6 +355,15 @@ elif [ "${eventID}" == "systemcopy" ]; then
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "
 COPYING SYSTEM TO SSD/NVME
 This can take a while ...
+" 6 30
+
+elif [ "${eventID}" == "hdd-migration" ]; then
+
+    dialog --backtitle "${backtitle}" --cr-wrap --infobox "
+COPYING DRIVE
+From ${contentWords[0]}
+To ${contentWords[1]}
+${progresstype}: ${progress}
 " 6 30
 
 ################################################

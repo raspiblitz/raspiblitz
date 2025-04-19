@@ -747,8 +747,8 @@ if [ "${scenario}" != "ready" ] ; then
   if [ "${setupCommand}" = "setup" ] || [ "${setupCommand}" = "recover" ]; then
 
     echo "SYSTEM COPY OF FRESH SYSTEM" >> ${logFile}
-    /home/admin/_cache.sh set state "systemcopy"
-    /home/admin/_cache.sh set message "copying system"
+    /home/admin/_cache.sh set state "setup"
+    /home/admin/_cache.sh set message "formatting drives"
 
     # STORAGE
     echo "# storageDevice(${storageDevice}) storageMountedPath(${storageMountedPath})" >> ${logFile}
@@ -798,6 +798,10 @@ if [ "${scenario}" != "ready" ] ; then
 
     # copy system
     if [ "${systemCopy}" = "1" ]; then
+
+      echo "SYSTEM COPY OF FRESH SYSTEM" >> ${logFile}
+      /home/admin/_cache.sh set state "systemcopy"
+      /home/admin/_cache.sh set message "copying system"
 
       if [ "${bootFromStorage}" = "0" ]; then
         /home/admin/config.scripts/blitz.data.sh copy-system "${storageDevice}" storage
@@ -877,8 +881,8 @@ if [ "${scenario}" != "ready" ] ; then
 
   if [ "${hddMigration}" = "1" ]; then
     echo "## MIGRATION from old RaspiBlitz" >> ${logFile}
-    /home/admin/_cache.sh set state "migration"
-    /home/admin/_cache.sh set message "migrating storage drive"
+    /home/admin/_cache.sh set state "hdd-migration"
+    /home/admin/_cache.sh set message "${hddMigrateDeviceFrom} ${hddMigrateDeviceTo}"
     /home/admin/config.scripts/blitz.data.sh migration hdd run "${hddMigrateDeviceFrom}" >> ${logFile}
     if [ $? -ne 0 ]; then
       echo "FAIL: blitz.data.sh migration hdd run failed" >> ${logFile}
