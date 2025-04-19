@@ -1493,6 +1493,97 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
             exit 1
         fi
 
+        ##############
+        # SYNC DATA
+
+        echo "# rsync data from source to target ..."
+        rsync -avh --progress /mnt/disk_source/app-data/ /mnt/disk_data/app-data/
+        if [ $? -ne 0 ]; then
+            echo "error='failed to rsync data'"
+            exit 1
+        fi
+
+        # old layout: lnd directory is still outside of app-data
+        if [ -d /mnt/disk_source/lnd ] && [ ! -L /mnt/disk_source/lnd ]; then
+            echo "# rsync lnd from source to target ..."
+            rsync -avh --progress /mnt/disk_source/lnd/ /mnt/disk_data/app-data/lnd/
+            if [ $? -ne 0 ]; then
+                echo "error='failed to rsync lnd'"
+                exit 1
+            fi
+        fi
+
+        # old layout: tor directory is still outside of app-data
+        if [ -d /mnt/disk_source/tor ] && [ ! -L /mnt/disk_source/tor ]; then
+            echo "# rsync lnd from source to target ..."
+            rm -f /mnt/disk_source/tor/*.log*
+            rsync -avh --progress /mnt/disk_source/tor/ /mnt/disk_data/app-data/tor/
+            if [ $? -ne 0 ]; then
+                echo "error='failed to rsync tor'"
+                exit 1
+            fi
+        fi
+
+        # old layout: raspiblitz.conf file is still outside of app-data
+        if [ -f /mnt/disk_source/raspiblitz.conf ] && [ ! -L /mnt/disk_source/raspiblitz.conf ]; then
+            echo "# copy raspiblitz.conf from source to target ..."
+            cp /mnt/disk_source/raspiblitz.conf /mnt/disk_data/app-data/
+            if [ $? -ne 0 ]; then
+                echo "error='failed to rsync raspiblitz.conf'"
+                exit 1
+            fi
+        fi
+
+        # unmount data partition
+        umount /mnt/disk_data
+        if [ $? -ne 0 ]; then
+            echo "error='failed to unmount data partition'"
+            exit 1
+        fi
+
+        # check storage is not mounted
+        if findmnt -n -o TARGET "/dev/${storagePartition}" 2>/dev/null; then
+            echo "# storagePartition(${storagePartition})"
+            echo "# make sure the partition is not mounted" 
+            echo "error='storage partition is mounted'"
+            exit 1
+        fi
+
+        # mount target partition storage
+        mkdir -p /mnt/disk_storage 2>/dev/null
+        mount "/dev/${storagePartition}" /mnt/disk_storage
+        if ! findmnt -n -o TARGET "/mnt/disk_storage" 2>/dev/null; then
+            echo "error='storage partition not mounted'"
+            exit 1
+        fi
+        
+        ##############
+        # SYNC STORAGE
+
+        echo "# rsync storage from source to target ..."
+        rsync -avh --progress /mnt/disk_source/storage/ /mnt/disk_storage/
+        if [ $? -ne 0 ]; then
+            echo "error='failed to rsync storage'"
+            exit 1
+        fi
+
+        # old layout: bitcoin directory is still outside of app-storage
+        if [ -d /mnt/disk_source/bitcoin ] && [ ! -L /mnt/disk_source/bitcoin ]; then
+            echo "# rsync bitcoin from source to target ..."
+            rsync -avh --progress /mnt/disk_source/bitcoin/ /mnt/disk_storage/app-storage/bitcoin/
+            if [ $? -ne 0 ]; then
+                echo "error='failed to rsync bitcoin'"
+                exit 1
+            fi
+        fi
+
+        # unmount storage partition
+        umount /mnt/disk_storage
+        if [ $? -ne 0 ]; then
+            echo "error='failed to unmount storage partition'"
+            exit 1
+        fi
+
         echo "TODO: run migration"
         exit 0
     fi
