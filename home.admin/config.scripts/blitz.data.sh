@@ -1470,9 +1470,9 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
         fi
 
         # mount source partition
-        mkdir -p /mnt/disk_source 2>/dev/null
-        mount "/dev/${sourcePartition}" /mnt/disk_source
-        if ! findmnt -n -o TARGET "/mnt/disk_source" 2>/dev/null; then
+        mkdir -p /mnt/migrate_source 2>/dev/null
+        mount "/dev/${sourcePartition}" /mnt/migrate_source
+        if ! findmnt -n -o TARGET "/mnt/migrate_source" 2>/dev/null; then
             echo "error='source partition not mounted'"
             exit 1
         fi
@@ -1486,9 +1486,9 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
         fi
 
         # mount target partition data
-        mkdir -p /mnt/disk_data 2>/dev/null
-        mount "/dev/${dataPartition}" /mnt/disk_data
-        if ! findmnt -n -o TARGET "/mnt/disk_data" 2>/dev/null; then
+        mkdir -p /mnt/migrate_data 2>/dev/null
+        mount "/dev/${dataPartition}" /mnt/migrate_data
+        if ! findmnt -n -o TARGET "/mnt/migrate_data" 2>/dev/null; then
             echo "error='data partition not mounted'"
             exit 1
         fi
@@ -1497,16 +1497,16 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
         # SYNC DATA
 
         echo "# rsync data from source to target ..."
-        rsync -avh --progress /mnt/disk_source/app-data/ /mnt/disk_data/app-data/
+        rsync -avh --progress /mnt/migrate_source/app-data/ /mnt/migrate_data/app-data/
         if [ $? -ne 0 ]; then
             echo "error='failed to rsync data'"
             exit 1
         fi
 
         # old layout: lnd directory is still outside of app-data
-        if [ -d /mnt/disk_source/lnd ] && [ ! -L /mnt/disk_source/lnd ]; then
+        if [ -d /mnt/migrate_source/lnd ] && [ ! -L /mnt/migrate_source/lnd ]; then
             echo "# rsync lnd from source to target ..."
-            rsync -avh --progress /mnt/disk_source/lnd/ /mnt/disk_data/app-data/lnd/
+            rsync -avh --progress /mnt/migrate_source/lnd/ /mnt/migrate_data/app-data/lnd/
             if [ $? -ne 0 ]; then
                 echo "error='failed to rsync lnd'"
                 exit 1
@@ -1514,10 +1514,10 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
         fi
 
         # old layout: tor directory is still outside of app-data
-        if [ -d /mnt/disk_source/tor ] && [ ! -L /mnt/disk_source/tor ]; then
+        if [ -d /mnt/migrate_source/tor ] && [ ! -L /mnt/migrate_source/tor ]; then
             echo "# rsync lnd from source to target ..."
-            rm -f /mnt/disk_source/tor/*.log*
-            rsync -avh --progress /mnt/disk_source/tor/ /mnt/disk_data/app-data/tor/
+            rm -f /mnt/migrate_source/tor/*.log*
+            rsync -avh --progress /mnt/migrate_source/tor/ /mnt/migrate_data/app-data/tor/
             if [ $? -ne 0 ]; then
                 echo "error='failed to rsync tor'"
                 exit 1
@@ -1525,9 +1525,9 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
         fi
 
         # old layout: raspiblitz.conf file is still outside of app-data
-        if [ -f /mnt/disk_source/raspiblitz.conf ] && [ ! -L /mnt/disk_source/raspiblitz.conf ]; then
+        if [ -f /mnt/migrate_source/raspiblitz.conf ] && [ ! -L /mnt/migrate_source/raspiblitz.conf ]; then
             echo "# copy raspiblitz.conf from source to target ..."
-            cp /mnt/disk_source/raspiblitz.conf /mnt/disk_data/app-data/
+            cp /mnt/migrate_source/raspiblitz.conf /mnt/migrate_data/app-data/
             if [ $? -ne 0 ]; then
                 echo "error='failed to rsync raspiblitz.conf'"
                 exit 1
@@ -1535,7 +1535,7 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
         fi
 
         # unmount data partition
-        umount /mnt/disk_data
+        umount /mnt/migrate_data
         if [ $? -ne 0 ]; then
             echo "error='failed to unmount data partition'"
             exit 1
@@ -1550,9 +1550,9 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
         fi
 
         # mount target partition storage
-        mkdir -p /mnt/disk_storage 2>/dev/null
-        mount "/dev/${storagePartition}" /mnt/disk_storage
-        if ! findmnt -n -o TARGET "/mnt/disk_storage" 2>/dev/null; then
+        mkdir -p /mnt/migrate_storage 2>/dev/null
+        mount "/dev/${storagePartition}" /mnt/migrate_storage
+        if ! findmnt -n -o TARGET "/mnt/migrate_storage" 2>/dev/null; then
             echo "error='storage partition not mounted'"
             exit 1
         fi
@@ -1561,16 +1561,16 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
         # SYNC STORAGE
 
         echo "# rsync storage from source to target ..."
-        rsync -avh --progress /mnt/disk_source/storage/ /mnt/disk_storage/
+        rsync -avh --progress /mnt/migrate_source/storage/ /mnt/migrate_storage/
         if [ $? -ne 0 ]; then
             echo "error='failed to rsync storage'"
             exit 1
         fi
 
         # old layout: bitcoin directory is still outside of app-storage
-        if [ -d /mnt/disk_source/bitcoin ] && [ ! -L /mnt/disk_source/bitcoin ]; then
+        if [ -d /mnt/migrate_source/bitcoin ] && [ ! -L /mnt/migrate_source/bitcoin ]; then
             echo "# rsync bitcoin from source to target ..."
-            rsync -avh --progress /mnt/disk_source/bitcoin/ /mnt/disk_storage/app-storage/bitcoin/
+            rsync -avh --progress /mnt/migrate_source/bitcoin/ /mnt/migrate_storage/app-storage/bitcoin/
             if [ $? -ne 0 ]; then
                 echo "error='failed to rsync bitcoin'"
                 exit 1
@@ -1578,7 +1578,7 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
         fi
 
         # unmount storage partition
-        umount /mnt/disk_storage
+        umount /mnt/migrate_storage
         if [ $? -ne 0 ]; then
             echo "error='failed to unmount storage partition'"
             exit 1
