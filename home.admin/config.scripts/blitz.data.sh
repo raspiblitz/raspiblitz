@@ -1475,6 +1475,7 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
         if findmnt -n -o TARGET "/dev/${sourcePartition}" 2>/dev/null; then
             echo "# sourcePartition(${sourcePartition})"
             echo "# make sure the partition is not mounted" 
+            echo "# sudo umount /dev/${sourcePartition}"
             echo "error='source partition is mounted'"
             exit 1
         fi
@@ -1483,6 +1484,7 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
         if findmnt -n -o TARGET "/dev/${dataPartition}" 2>/dev/null; then
             echo "# dataPartition(${dataPartition})"
             echo "# make sure the partition is not mounted" 
+            echo "# sudo umount /dev/${dataPartition}"
             echo "error='data partition is mounted'"
             exit 1
         fi
@@ -1491,6 +1493,7 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
         if findmnt -n -o TARGET "/dev/${storagePartition}" 2>/dev/null; then
             echo "# storagePartition(${storagePartition})"
             echo "# make sure the partition is not mounted" 
+            echo "# sudo umount /dev/${storagePartition}"
             echo "error='storage partition is mounted'"
             exit 1
         fi
