@@ -602,7 +602,7 @@ if [ "${scenario}" != "ready" ] ; then
     /home/admin/_cache.sh set "system_setup_secondtry" "0"
   fi
 
-  # TODO: GET INFO FROM OTHE IMPLEMENTATIONS & COMPARE AGIANST LOCAL - not just LND
+  # TODO: GET INFO FROM OTHER IMPLEMENTATIONS & COMPARE AGAINST LOCAL - not just LND
   # when migration check if for outdated btc, lnd, cln
   if [ "${scenario}" = "migration" ]; then 
     migrationMode="normal"
@@ -653,6 +653,8 @@ if [ "${scenario}" != "ready" ] ; then
 
   # check if raspiblitz.setup exists (from former system copy step)
    if [ -f "/var/cache/raspiblitz/hdd-inspect/raspiblitz.setup" ]; then
+
+      # this is when booting from hdd after system copy
       echo "INFO: 'raspiblitz.setup' exists - skip user wait loop" >> ${logFile}
       cp -a /var/cache/raspiblitz/hdd-inspect/raspiblitz.setup ${setupFile}
       state="waitprovision"
@@ -815,9 +817,6 @@ if [ "${scenario}" != "ready" ] ; then
         fi
       fi
 
-      echo "DEBUG EXIT" >> ${logFile}
-      exit 1
-
       # mark systemCopy as done in raspiblitz.setup
       if ! sed -i "s/^systemCopy=.*/systemCopy=done/" "${setupFile}"; then
         echo "error='failed to update systemCopy in setupFile'" >> ${logFile}
@@ -873,16 +872,36 @@ if [ "${scenario}" != "ready" ] ; then
   fi
 
   #############################################
-  # MIGRATION FILE UPLOAD
-  #############################################
+  # MIGRATION from old RaspiBlitz
+  ############################################
 
-  # TODO: MIGRATION FILE UPLOAD as a second UI waitloop (after storage setup )
+  if [ "${hddMigration}" = "1" ]; then
+    echo "## MIGRATION from old RaspiBlitz" >> ${logFile}
+    /home/admin/_cache.sh set state "migration"
+    /home/admin/_cache.sh set message "migrating storage drive"
+    /home/admin/config.scripts/blitz.data.sh migration hdd run "${hddMigrateDeviceFrom}" >> ${logFile}
+    if [ $? -ne 0 ]; then
+      echo "FAIL: blitz.data.sh migration hdd run failed" >> ${logFile}
+      /home/admin/_cache.sh set state "error"
+      /home/admin/_cache.sh set message "blitz.migration.sh migrate failed"
+      exit 1
+    fi
+  fi
+
+  echo "DEBUG EXIT" >> ${logFile}
+  exit 1
+
+  #############################################
+  # MIGRATION from uploaded migration file
+  ############################################
+
+  # TODO
 
   #############################################
   # PROVISION PROCESS
   #############################################
 
-  # set flag that provision process was started on thsi system 
+  # set flag that provision process was started on this system 
   echo "the provision process was started but did not finish yet" > /home/admin/provision.flag
 
   if [ "${scenario}" = "setup" ]; then

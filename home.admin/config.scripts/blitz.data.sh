@@ -1437,6 +1437,62 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
     fi
 
     if [ "${action}" = "run" ]; then
+
+        # get source hdd of migration
+        hddMigrateDeviceFrom=$4
+        if [ ${#hddMigrateDeviceFrom} -eq 0 ]; then
+            echo "error='missing parameter'"
+            exit 1
+        fi
+
+        # set source hdd of migration in cache
+        /home/admin/_cache.sh set hddMigrateDeviceFrom "${hddMigrateDeviceFrom}"
+
+        source <(/home/admin/config.scripts/blitz.data.sh status -inspect)
+        if [ "${scenario}" != "setup" ]; then
+            echo "error='wrong scenario'"
+            exit 1
+        fi
+
+        # get the biggest partition of the source hdd (thats the data or storage partition with data)
+        sourcePartition=$(lsblk -no NAME,SIZE,TYPE | grep "${hddMigrateDeviceFrom}" | grep "part" | sort -k2 -h | tail -1 | awk '{print $1}')
+        if [ ${#sourcePartition} -eq 0 ]; then
+            echo "error='no source partition found'"
+            exit 1
+        fi
+
+        # check that partition is not mounted
+        if findmnt -n -o TARGET "/dev/${sourcePartition}" 2>/dev/null; then
+            echo "# sourcePartition(${sourcePartition})"
+            echo "# make sure the partition is not mounted" 
+            echo "error='source partition is mounted'"
+            exit 1
+        fi
+
+        # mount source partition
+        mkdir -p /mnt/disk_source 2>/dev/null
+        mount "/dev/${sourcePartition}" /mnt/disk_source
+        if ! findmnt -n -o TARGET "/mnt/disk_source" 2>/dev/null; then
+            echo "error='source partition not mounted'"
+            exit 1
+        fi
+
+        # check partition data is not mounted
+        if findmnt -n -o TARGET "/dev/${dataPartition}" 2>/dev/null; then
+            echo "# dataPartition(${dataPartition})"
+            echo "# make sure the partition is not mounted" 
+            echo "error='data partition is mounted'"
+            exit 1
+        fi
+
+        # mount target partition data
+        mkdir -p /mnt/disk_data 2>/dev/null
+        mount "/dev/${dataPartition}" /mnt/disk_data
+        if ! findmnt -n -o TARGET "/mnt/disk_data" 2>/dev/null; then
+            echo "error='data partition not mounted'"
+            exit 1
+        fi
+
         echo "TODO: run migration"
         exit 0
     fi
