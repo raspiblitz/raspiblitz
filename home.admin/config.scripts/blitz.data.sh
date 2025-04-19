@@ -1455,8 +1455,14 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
         fi
 
         # check that target partion is formatted
+        if [ $dataPartition -eq 0 ]; then
+            echo "error='data drive not formatted'"
+            exit 1
+        fi
+
+        # check that target partion is formatted
         if [ $storagePartition -eq 0 ]; then
-            echo "error='target drive not formatted'"
+            echo "error='storage drive not formatted'"
             exit 1
         fi
 
@@ -1475,11 +1481,11 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
             exit 1
         fi
 
-        # mount source partition
-        mkdir -p /mnt/migrate_source 2>/dev/null
-        mount "/dev/${sourcePartition}" /mnt/migrate_source
-        if ! findmnt -n -o TARGET "/mnt/migrate_source" 2>/dev/null; then
-            echo "error='source partition not mounted'"
+        # check partition data is not mounted
+        if findmnt -n -o TARGET "/dev/${dataPartition}" 2>/dev/null; then
+            echo "# dataPartition(${dataPartition})"
+            echo "# make sure the partition is not mounted" 
+            echo "error='data partition is mounted'"
             exit 1
         fi
 
@@ -1488,6 +1494,14 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
             echo "# storagePartition(${storagePartition})"
             echo "# make sure the partition is not mounted" 
             echo "error='storage partition is mounted'"
+            exit 1
+        fi
+
+        # mount source partition
+        mkdir -p /mnt/migrate_source 2>/dev/null
+        mount "/dev/${sourcePartition}" /mnt/migrate_source
+        if ! findmnt -n -o TARGET "/mnt/migrate_source" 2>/dev/null; then
+            echo "error='source partition not mounted'"
             exit 1
         fi
 
@@ -1523,14 +1537,6 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
         umount /mnt/migrate_storage
         if [ $? -ne 0 ]; then
             echo "error='failed to unmount storage partition'"
-            exit 1
-        fi
-
-        # check partition data is not mounted
-        if findmnt -n -o TARGET "/dev/${dataPartition}" 2>/dev/null; then
-            echo "# dataPartition(${dataPartition})"
-            echo "# make sure the partition is not mounted" 
-            echo "error='data partition is mounted'"
             exit 1
         fi
 
