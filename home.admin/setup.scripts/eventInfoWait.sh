@@ -365,7 +365,7 @@ COPYING DRIVE
 From ${contentWords[0]}
 To ${contentWords[1]}
 ${progresstype}: ${progress}
-" 6 30
+" 8 20
 
 ################################################
 # 2) GENERIC EVENT
