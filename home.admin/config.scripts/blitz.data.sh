@@ -1438,6 +1438,9 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
 
     if [ "${action}" = "run" ]; then
 
+        echo "# MIGRATING HDD"
+        echo "# see /var/cache/raspiblitz/temp/progress.txt for progress"
+
         # get source hdd of migration
         hddMigrateDeviceFrom=$4
         if [ ${#hddMigrateDeviceFrom} -eq 0 ]; then
