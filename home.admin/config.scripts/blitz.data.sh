@@ -1561,7 +1561,7 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
         # SYNC STORAGE
 
         echo "# rsync storage from source to target ..."
-        rsync -avh --progress /mnt/migrate_source/storage/ /mnt/migrate_storage/
+        rsync -avh --progress /mnt/migrate_source/app-storage/ /mnt/migrate_storage/app-storage/
         if [ $? -ne 0 ]; then
             echo "error='failed to rsync storage'"
             exit 1
