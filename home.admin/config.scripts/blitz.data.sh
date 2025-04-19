@@ -1525,7 +1525,7 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
 
         echo "# rsync storage from source to target ..."
         echo "chain" > /var/cache/raspiblitz/temp/progress.txt
-        rsync -ah --info=progress2 /mnt/migrate_source/app-storage/ /mnt/migrate_storage/app-storage/ 2>&1 | stdbuf -oL tr '\r' '\n' | grep --line-buffered '%' | sed -n 's/.* \([0-9]\+\)% .*/\1%/p' >> /var/cache/raspiblitz/temp/progress.txt
+        rsync -ah --info=progress2 /mnt/migrate_source/app-storage/ /mnt/migrate_storage/app-storage/ 2>&1 | stdbuf -oL tr '\r' '\n' | grep --line-buffered '%' | stdbuf -oL sed -n 's/.* \([0-9]\+\)% .*/\1%/p' >> /var/cache/raspiblitz/temp/progress.txt
         if [ $? -ne 0 ]; then
             echo "error='failed to rsync storage'"
             exit 1
@@ -1535,7 +1535,7 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
         if [ -d /mnt/migrate_source/bitcoin ] && [ ! -L /mnt/migrate_source/bitcoin ]; then
             echo "# rsync bitcoin from source to target ..."
             echo "bitcoin" > /var/cache/raspiblitz/temp/progress.txt
-            rsync -ah --info=progress2 /mnt/migrate_source/bitcoin/ /mnt/migrate_storage/app-storage/bitcoin/ 2>&1 | stdbuf -oL tr '\r' '\n' | grep --line-buffered '%' | sed -n 's/.* \([0-9]\+\)% .*/\1%/p' > /var/cache/raspiblitz/temp/progress.txt
+            rsync -ah --info=progress2 /mnt/migrate_source/bitcoin/ /mnt/migrate_storage/app-storage/bitcoin/ 2>&1 | stdbuf -oL tr '\r' '\n' | grep --line-buffered '%' | stdbuf -oL sed -n 's/.* \([0-9]\+\)% .*/\1%/p' >> /var/cache/raspiblitz/temp/progress.txt
             if [ $? -ne 0 ]; then
                 echo "error='failed to rsync bitcoin'"
                 exit 1
@@ -1562,7 +1562,7 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
 
         echo "# rsync data from source to target ..."
         echo "data" > /var/cache/raspiblitz/temp/progress.txt
-        rsync -ah --info=progress2 /mnt/migrate_source/app-data/ /mnt/migrate_data/app-data/ 2>&1 | stdbuf -oL tr '\r' '\n' | grep --line-buffered '%' | sed -n 's/.* \([0-9]\+\)% .*/\1%/p' >> /var/cache/raspiblitz/temp/progress.txt
+        rsync -ah --info=progress2 /mnt/migrate_source/app-data/ /mnt/migrate_data/app-data/ 2>&1 | stdbuf -oL tr '\r' '\n' | grep --line-buffered '%' | stdbuf -oL sed -n 's/.* \([0-9]\+\)% .*/\1%/p' >> /var/cache/raspiblitz/temp/progress.txt
         if [ $? -ne 0 ]; then
             echo "error='failed to rsync data'"
             exit 1
@@ -1572,7 +1572,7 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
         if [ -d /mnt/migrate_source/lnd ] && [ ! -L /mnt/migrate_source/lnd ]; then
             echo "# rsync lnd from source to target ..."
             echo "lnd" > /var/cache/raspiblitz/temp/progress.txt
-            rsync -ah --info=progress2 /mnt/migrate_source/lnd/ /mnt/migrate_data/app-data/lnd/ 2>&1 | stdbuf -oL tr '\r' '\n' | grep --line-buffered '%' | sed -n 's/.* \([0-9]\+\)% .*/\1%/p' >> /var/cache/raspiblitz/temp/progress.txt
+            rsync -ah --info=progress2 /mnt/migrate_source/lnd/ /mnt/migrate_data/app-data/lnd/ 2>&1 | stdbuf -oL tr '\r' '\n' | grep --line-buffered '%' | stdbuf -oL sed -n 's/.* \([0-9]\+\)% .*/\1%/p' >> /var/cache/raspiblitz/temp/progress.txt
             if [ $? -ne 0 ]; then
                 echo "error='failed to rsync lnd'"
                 exit 1
@@ -1584,7 +1584,7 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
             echo "# rsync lnd from source to target ..."
             rm -f /mnt/migrate_source/tor/*.log*
             echo "tor" > /var/cache/raspiblitz/temp/progress.txt
-            rsync -ah --info=progress2 /mnt/migrate_source/tor/ /mnt/migrate_data/app-data/tor/ 2>&1 | stdbuf -oL tr '\r' '\n' | grep --line-buffered '%' | sed -n 's/.* \([0-9]\+\)% .*/\1%/p' >> /var/cache/raspiblitz/temp/progress.txt
+            rsync -ah --info=progress2 /mnt/migrate_source/tor/ /mnt/migrate_data/app-data/tor/ 2>&1 | stdbuf -oL tr '\r' '\n' | grep --line-buffered '%' | stdbuf -oL sed -n 's/.* \([0-9]\+\)% .*/\1%/p' >> /var/cache/raspiblitz/temp/progress.txt
             if [ $? -ne 0 ]; then
                 echo "error='failed to rsync tor'"
                 exit 1
