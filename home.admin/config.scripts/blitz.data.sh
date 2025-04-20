@@ -68,7 +68,7 @@ fi
 # STATUS
 ###################
 
-if [ "$action" = "status" ] || [ "$action" = "mount" ] || [ "$action" = "unmount" ]; then
+if [ "$action" = "status" ]; then
 
     # optional: parameter
     userWantsInspect=0
@@ -730,11 +730,11 @@ if [ "$action" = "mount" ]; then
     source <(/home/admin/config.scripts/blitz.data.sh status)
 
     # check directories are already mounted
-    if mountpoint -q "${storageMountPoint}"; then
+    if ! mountpoint -q "${storageMountPoint}"; then
         echo "# Already mounted: ${storageMountPoint}"
         exit 1
     fi
-    if [ ${combinedDataStorage} -eq 0 ] && mountpoint -q "${dataMountPoint}"; then
+    if [ ${combinedDataStorage} -eq 0 ] && ! mountpoint -q "${dataMountPoint}"; then
         echo "# Already mounted: ${dataMountPoint}"
         exit 1
     fi
@@ -798,11 +798,11 @@ if [ "$action" = "mount" ]; then
     sleep 2
 
     # Verify mounts after attempt
-    if [ ! mountpoint -q "${storageMountPoint}" ]; then
+    if [ mountpoint -q "${storageMountPoint}" ]; then
         echo "error='Failed to mount ${storagePartition} on ${storageMountPoint} after fstab update'"
         exit 1
     fi
-    if [ ${combinedDataStorage} -eq 0 ] && [ ! mountpoint -q "${dataMountPoint}" ]; then
+    if [ ${combinedDataStorage} -eq 0 ] && [ mountpoint -q "${dataMountPoint}" ]; then
         echo "error='Failed to mount ${dataPartition} on ${dataMountPoint} after fstab update'"
         exit 1
     fi
