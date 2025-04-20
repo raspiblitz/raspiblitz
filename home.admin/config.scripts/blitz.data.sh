@@ -845,15 +845,17 @@ if [ "$action" = "link" ]; then
     echo "# adding main folders to ${mainMountPoint}"
     mkdir -p ${mainMountPoint}
 
+    # /app-storage
     unlink ${mainMountPoint}/app-storage 2>/dev/null
     if [ -d "${mainMountPoint}/app-storage" ]; then
         echo "error='${mainMountPoint}/app-storage already exists'"
         exit 1
     fi
-    ln -s ${storageMountPoint}/app-storage ${mainMountPoint}/app-storage
-    chown -R bitcoin:bitcoin ${storageMountPoint}/app-storage ${mainMountPoint}/app-storage
-    chmod -R 755 ${storageMountPoint}/app-storage ${mainMountPoint}/app-storage
+    ln -s ${storageMountedPath}/app-storage ${mainMountPoint}/app-storage
+    chown -R bitcoin:bitcoin ${storageMountedPath}/app-storage ${mainMountPoint}/app-storage
+    chmod -R 755 ${storageMountedPath}/app-storage ${mainMountPoint}/app-storage
 
+     # /app-data
     unlink ${mainMountPoint}/app-data 2>/dev/null
     if [ -d "${mainMountPoint}/app-data" ]; then
         echo "error='${mainMountPoint}/app-data already exists'"
