@@ -729,24 +729,8 @@ if [ "$action" = "mount" ]; then
     # Source status to get drive configuration
     source <(/home/admin/config.scripts/blitz.data.sh status)
 
-    # check storagePartition not empty
-    if [ ${#storagePartition} -eq 0 ]; then
-        echo "error='storagePartition not detected'"
-        exit 1
-    fi
-
-    # check dataPartition not empty
-    if [ ${#dataPartition} -eq 0 ] && [ ${combinedDataStorage} -eq 0 ]; then
-        echo "error='dataPartition not detected'"
-        exit 1
-    fi
-
-    # check if already mounted
+    # check directories are already mounted
     if mountpoint -q "${storageMountPoint}"; then
-        echo "# Already mounted: ${storageMountPoint}"
-        exit 1
-    fi
-    if [ $(findmnt -n -o SOURCE,TARGET | grep -c "/dev/${storagePartition}") -gt 0 ]; then
         echo "# Already mounted: ${storageMountPoint}"
         exit 1
     fi
@@ -754,6 +738,22 @@ if [ "$action" = "mount" ]; then
         echo "# Already mounted: ${dataMountPoint}"
         exit 1
     fi
+
+    # check partitions were found
+    if [ ${#storagePartition} -eq 0 ]; then
+        echo "error='storagePartition not detected'"
+        exit 1
+    fi
+    if [ ${#dataPartition} -eq 0 ] && [ ${combinedDataStorage} -eq 0 ]; then
+        echo "error='dataPartition not detected'"
+        exit 1
+    fi
+
+    # check if partititions are already mounted
+    if [ $(findmnt -n -o SOURCE,TARGET | grep -c "/dev/${storagePartition}") -gt 0 ]; then
+        echo "# Already mounted: ${storageMountPoint}"
+        exit 1
+    fi    
     if [ ${combinedDataStorage} -eq 0 ] && [ $(findmnt -n -o SOURCE,TARGET | grep -c "/dev/${dataPartition}") -gt 0 ]; then
         echo "# Already mounted: ${dataMountPoint}"
         exit 1
