@@ -861,7 +861,7 @@ if [ "$action" = "link" ]; then
     fi
     ln -s ${dataMountedPath}/app-data ${mainMountPoint}/app-data
     chown -R bitcoin:bitcoin ${dataMountedPath}/app-data ${mainMountPoint}/app-data
-    chown -R 755 ${dataMountedPath}/app-data ${mainMountPoint}/app-data
+    chmod -R 755 ${dataMountedPath}/app-data ${mainMountPoint}/app-data
 
     ####################################
     # NEW->OLD: links for old layout compatibility
@@ -873,7 +873,7 @@ if [ "$action" = "link" ]; then
         unlink ${mainMountPoint}/bitcoin 2>/dev/null
         ln -s ${storageMountedPath}/app-storage/bitcoin ${mainMountPoint}/bitcoin
         chown -R bitcoin:bitcoin ${mainMountPoint}/bitcoin
-        chown -R 777 ${mainMountPoint}/bitcoin
+        chmod -R 777 ${mainMountPoint}/bitcoin
     else
         echo "# NEW->OLD: Skipping /bitcoin (not found)"
     fi
@@ -884,7 +884,7 @@ if [ "$action" = "link" ]; then
         unlink ${mainMountPoint}/lnd 2>/dev/null
         ln -s ${dataMountedPath}/app-data/lnd ${mainMountPoint}/lnd
         chown -R bitcoin:bitcoin ${mainMountPoint}/lnd
-        chown -R 755 ${mainMountPoint}/lnd
+        chmod -R 755 ${mainMountPoint}/lnd
     else
         echo "# NEW->OLD: Skipping /lnd (not found)"
     fi
@@ -895,7 +895,7 @@ if [ "$action" = "link" ]; then
         unlink ${mainMountPoint}/tor 2>/dev/null
         ln -s ${dataMountedPath}/app-data/tor ${mainMountPoint}/tor
         chown -R debian-tor:debian-tor ${mainMountPoint}/lnd
-        chown -R 700 ${mainMountPoint}/lnd
+        chmod -R 700 ${mainMountPoint}/lnd
     else
         echo "# NEW->OLD: Skipping /tor (not found)"
     fi
@@ -906,7 +906,7 @@ if [ "$action" = "link" ]; then
         unlink ${mainMountPoint}/raspiblitz.conf 2>/dev/null
         ln -s ${dataMountedPath}/app-data/raspiblitz.conf ${mainMountPoint}/raspiblitz.conf
         chown root:sudo ${mainMountPoint}/raspiblitz.conf
-        chown 664 ${mainMountPoint}/raspiblitz.conf
+        chmod 664 ${mainMountPoint}/raspiblitz.conf
     else
         echo "# NEW->OLD: Skipping raspiblitz.conf (not found)"
     fi
@@ -921,7 +921,7 @@ if [ "$action" = "link" ]; then
         unlink ${mainMountPoint}/bitcoin 2>/dev/null
         ln -s ${storageMountedPath}/bitcoin ${mainMountPoint}/bitcoin
         chown -R bitcoin:bitcoin ${mainMountPoint}/bitcoin
-        chown -R 777 ${mainMountPoint}/bitcoin
+        chmod -R 777 ${mainMountPoint}/bitcoin
     else
         echo "# OLD->OLD: Skipping /bitcoin (not found)"
     fi
@@ -932,7 +932,7 @@ if [ "$action" = "link" ]; then
         unlink ${mainMountPoint}/lnd 2>/dev/null
         ln -s ${storageMountedPath}/lnd ${mainMountPoint}/lnd
         chown -R debian-tor:debian-tor ${mainMountPoint}/lnd
-        chown -R 700 ${mainMountPoint}/lnd
+        chmod -R 700 ${mainMountPoint}/lnd
     else
         echo "# OLD->OLD: Skipping /lnd (not found)"
     fi
@@ -943,7 +943,7 @@ if [ "$action" = "link" ]; then
         unlink ${mainMountPoint}/tor 2>/dev/null
         ln -s ${storageMountedPath}/tor ${mainMountPoint}/tor
         chown -R debian-tor:debian-tor ${mainMountPoint}/lnd
-        chown -R 700 ${mainMountPoint}/lnd
+        chmod -R 700 ${mainMountPoint}/lnd
     else
         echo "# OLD->OLD: Skipping /tor (not found)"
     fi
@@ -954,7 +954,7 @@ if [ "$action" = "link" ]; then
         unlink ${mainMountPoint}/raspiblitz.conf 2>/dev/null
         ln -s ${storageMountedPath}/raspiblitz.conf ${mainMountPoint}/raspiblitz.conf
         chown root:sudo ${mainMountPoint}/raspiblitz.conf
-        chown 664 ${mainMountPoint}/raspiblitz.conf
+        chmod 664 ${mainMountPoint}/raspiblitz.conf
     else
         echo "# OLD->OLD: Skipping raspiblitz.conf (not found)"
     fi
