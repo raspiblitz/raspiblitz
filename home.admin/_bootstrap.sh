@@ -892,9 +892,6 @@ if [ "${scenario}" != "ready" ] ; then
     fi
   fi
 
-  echo "DEBUG EXIT" >> ${logFile}
-  exit 1
-
   #############################################
   # MIGRATION from uploaded migration file
   ############################################
