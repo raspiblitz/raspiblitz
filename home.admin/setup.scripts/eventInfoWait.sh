@@ -358,6 +358,13 @@ COPYING SYSTEM TO SSD/NVME
 This can take a while ...
 " 6 30
 
+elif [ "${eventID}" == "hdd-format" ]; then
+
+    dialog --backtitle "${backtitle}" --cr-wrap --infobox "
+PREPARING DRIVES
+...
+" 6 20
+
 elif [ "${eventID}" == "hdd-migration" ]; then
 
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "

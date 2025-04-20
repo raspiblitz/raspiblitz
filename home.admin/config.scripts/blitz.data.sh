@@ -1608,7 +1608,13 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
             exit 1
         fi
 
-        echo "TODO: run migration"
+        # unmount source device
+        umount /mnt/migrate_source
+        if [ $? -ne 0 ]; then
+            echo "error='failed to unmount source partition'"
+            exit 1
+        fi
+
         rm /var/cache/raspiblitz/temp/progress.txt
         exit 0
     fi
