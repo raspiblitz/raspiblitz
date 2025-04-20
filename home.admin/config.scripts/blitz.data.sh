@@ -742,13 +742,21 @@ if [ "$action" = "mount" ]; then
     fi
 
     # check if already mounted
-    if findmnt -n -o SOURCE,TARGET | grep -q "^/dev/${storagePartition} ${storageMountPoint}$"; then
-        echo "# Already mounted: ${storagePartition} on ${storageMountPoint}" >> ${logFile}
-        exit 0
+    if mountpoint -q "${storageMountPoint}"; then
+        echo "# Already mounted: ${storageMountPoint}"
+        exit 1
     fi
-    if findmnt -n -o SOURCE,TARGET | grep -q "^/dev/${dataPartition} ${dataMountPoint}$"; then
-        echo "# Already mounted: ${dataPartition} on ${dataMountPoint}" >> ${logFile}
-        exit 0
+    if [ (findmnt -n -o SOURCE,TARGET | grep -c "/dev/${storagePartition}") -gt 0]; then
+        echo "# Already mounted: ${storageMountPoint}"
+        exit 1
+    fi
+    if [ ${combinedDataStorage} -eq 0 ] && [ mountpoint -q "${dataMountPoint}" ]; then
+        echo "# Already mounted: ${dataMountPoint}"
+        exit 1
+    fi
+    if [ ${combinedDataStorage} -eq 0 ] && [ (findmnt -n -o SOURCE,TARGET | grep -c "/dev/${dataPartition}") -gt 0 ]; then
+        echo "# Already mounted: ${dataMountPoint}"
+        exit 1
     fi
 
     # determine UUIDs of partitions
@@ -783,20 +791,20 @@ if [ "$action" = "mount" ]; then
     # Ensure all potential mount points exist
     echo "# Running mount -a"
     sync
+    systemctl daemon-reload
     mkdir -p ${storageMountPoint} ${dataMountPoint} ${mainMountPoint}
     chmod 000 ${storageMountPoint} ${dataMountPoint} ${mainMountPoint}
     mount -a
     sleep 2
 
     # Verify mounts after attempt
-    if ! findmnt -n -o SOURCE,TARGET | grep -q "^/dev/${storagePartition} ${storageMountPoint}$"; then
+    if [ ! mountpoint -q "${storageMountPoint}" ]; then
         echo "error='Failed to mount ${storagePartition} on ${storageMountPoint} after fstab update'"
         exit 1
     fi
-    if [ ${combinedDataStorage} -eq 0 ]; then
-        if ! findmnt -n -o SOURCE,TARGET | grep -q "^/dev/${dataPartition} ${dataMountPoint}$"; then
-            echo "error='Failed to mount ${dataPartition} on ${dataMountPoint} after fstab update'"
-            exit 1
+    if [ ${combinedDataStorage} -eq 0 ] && [ ! mountpoint -q "${dataMountPoint}" ]; then
+        echo "error='Failed to mount ${dataPartition} on ${dataMountPoint} after fstab update'"
+        exit 1
         fi
     fi
     echo "# Mount successful." >> ${logFile}
