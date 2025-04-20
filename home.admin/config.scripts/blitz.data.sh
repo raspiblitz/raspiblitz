@@ -3,7 +3,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
     >&2 echo "# managing the data drive(s) with new bootable setups for RaspberryPi, VMs and Laptops"
     >&2 echo "# blitz.data.sh status [-inspect] # auto detect the old/best drives to use for storage, system and data"
     >&2 echo "# blitz.data.sh mount # mounts all drives and link all data folders"
-    >&2 echo "# blitz.data.sh unmount # unmounts all drives"
+    >&2 echo "# blitz.data.sh link # (re)create all symlinks to files and folders (also mapping old layout to new layout)"
     >&2 echo "# blitz.data.sh setup STOARGE [device] combinedData=[0|1] addSystemPartition=[0|1]"
     >&2 echo "# blitz.data.sh setup SEPERATE-SYSTEM [device]"
     >&2 echo "# blitz.data.sh setup SEPERATE-DATA [device]"
@@ -714,27 +714,161 @@ if [ "$action" = "status" ] || [ "$action" = "mount" ] || [ "$action" = "unmount
     fi
 fi
 
-###################
+##############################
 # MOUNT
-###################
+# perma mount all devices
+#############################
 
 if [ "$action" = "mount" ]; then
 
-    # check if all drives are mounted - if not mount them and edit/check fstab
+    echo "# ACTION: blitz.data.sh mount" >> ${logFile}
 
-    # link data & storage to one drive unter /mnt/hdd
+    storageMountPoint="/mnt/disk_storage"
+    dataMountPoint="/mnt/disk_data"
 
-    # link legacy path for direcories and files - check old blitz.datadrive.sh link
+    # Source status to get drive configuration
+    source <(/home/admin/config.scripts/blitz.data.sh status)
 
-    echo "error='TODO blitz.data.sh mount'"
-    exit 1
+    # check storagePartition not empty
+    if [ ${#storagePartition} -eq 0 ]; then
+        echo "error='storagePartition not detected'"
+        exit 1
+    fi
+
+    # check dataPartition not empty
+    if [ ${#dataPartition} -eq 0 ] && [ ${combinedDataStorage} -eq 0 ]; then
+        echo "error='dataPartition not detected'"
+        exit 1
+    fi
+
+    # check if already mounted
+    if findmnt -n -o SOURCE,TARGET | grep -q "^/dev/${storagePartition} ${storageMountPoint}$"; then
+        echo "# Already mounted: ${storagePartition} on ${storageMountPoint}" >> ${logFile}
+        exit 0
+    fi
+    if findmnt -n -o SOURCE,TARGET | grep -q "^/dev/${dataPartition} ${dataMountPoint}$"; then
+        echo "# Already mounted: ${dataPartition} on ${dataMountPoint}" >> ${logFile}
+        exit 0
+    fi
+
+    # determine UUIDs of partitions
+    storageUUID=$(lsblk -no UUID /dev/${storagePartition} 2>/dev/null)
+    dataUUID=$(lsblk -no UUID /dev/${dataPartition} 2>/dev/null)
+
+    # Check if UUIDs were found
+    if [ -z "${storageUUID}" ]; then
+        echo "error='Could not find UUID for target partition ${targetPartition}'"
+        exit 1
+    fi
+    if [ ${combinedDataStorage} -eq 0 ] && [ -z "${dataUUID}" ]; then
+        echo "error='Could not find UUID for data partition ${dataPartition}'"
+        exit 1
+    fi
+
+    # just in case: remove old entries in fstab
+    sed -i "\#${storageMountPoint}#d" /etc/fstab
+    sed -i "/UUID=${storageUUID}/d" /etc/fstab
+    sed -i "\#${dataMountPoint}#d" /etc/fstab
+    sed -i "/UUID=${dataUUID}/d" /etc/fstab
+
+    # update fstab
+    echo "# Updating fstab for ${storagePartition} (${storageUUID}) -> ${storageMountPoint}"
+    echo "UUID=${storageUUID} ${storageMountPoint} ext4 defaults,noexec 0 2" >> /etc/fstab
+    echo "# combinedDataStorage: ${combinedDataStorage}"
+    if [ ${combinedDataStorage} -eq 0 ]; then
+        echo "# Also Updating fstab for ${dataPartition} (${dataUUID}) -> ${dataMountPoint}"
+        echo "UUID=${dataUUID} ${dataMountPoint} ext4 defaults,noexec 0 2" >> /etc/fstab
+    fi
+
+    # Ensure all potential mount points exist
+    echo "# Running mount -a"
+    sync
+    mkdir -p ${storageMountPoint} ${dataMountPoint} ${mainMountPoint}
+    chmod 000 ${storageMountPoint} ${dataMountPoint} ${mainMountPoint}
+    mount -a
+    sleep 2
+
+    # Verify mounts after attempt
+    if ! findmnt -n -o SOURCE,TARGET | grep -q "^/dev/${storagePartition} ${storageMountPoint}$"; then
+        echo "error='Failed to mount ${storagePartition} on ${storageMountPoint} after fstab update'"
+        exit 1
+    if
+    if [ ${combinedDataStorage} -eq 0 ]; then
+        if ! findmnt -n -o SOURCE,TARGET | grep -q "^/dev/${dataPartition} ${dataMountPoint}$"; then
+            echo "error='Failed to mount ${dataPartition} on ${dataMountPoint} after fstab update'"
+            exit 1
+        fi
+    fi
+    echo "# Mount successful." >> ${logFile}
+ 
+    # --- Linking Logic ---
+
+    echo "# Linking directories ..." >> ${logFile}
+
+    # Cleanups
+    if [ -L /home/bitcoin/.bitcoin ]; then rm /home/bitcoin/.bitcoin; fi
+    if [ -L /home/bitcoin/.lnd ]; then rm /home/bitcoin/.lnd; fi
+    if [ -L /mnt/hdd ]; then rm /mnt/hdd; fi # Remove old link if exists
+
+    # Create base directories and links
+    bitcoinUID=$(id -u bitcoin)
+    bitcoinGID=$(id -g bitcoin)
+
+    if [ ${combinedDataStorage} -eq 1 ]; then
+        echo "# Linking for combined mode (mounted on ${storageMountPoint})" >> ${logFile}
+        mkdir -p ${storageMountPoint}/bitcoin
+        mkdir -p ${storageMountPoint}/lnd
+        mkdir -p ${storageMountPoint}/app-data
+        mkdir -p ${storageMountPoint}/app-storage
+        mkdir -p ${storageMountPoint}/temp
+
+        if [ ! -L /home/bitcoin/.bitcoin ]; then ln -s ${targetMountPoint}/bitcoin /home/bitcoin/.bitcoin; fi
+        if [ ! -L /home/bitcoin/.lnd ]; then ln -s ${targetMountPoint}/lnd /home/bitcoin/.lnd; fi
+        # /mnt/hdd is the mountpoint itself, no link needed
+
+        # Set ownership
+        chown -R ${bitcoinUID}:${bitcoinGID} ${targetMountPoint}
+        chmod 777 ${targetMountPoint}/temp
+
+    else
+        # Separate mode: /mnt/storage (targetMountPoint) and /mnt/data (dataMountPoint)
+        echo "# Linking for separate mode (${targetMountPoint} + ${dataMountPoint})" >> ${logFile}
+        mkdir -p ${targetMountPoint}/bitcoin # Blockchain on storage
+        mkdir -p ${targetMountPoint}/app-storage
+        mkdir -p ${dataMountPoint}/lnd # LND on data
+        mkdir -p ${dataMountPoint}/app-data
+        mkdir -p ${dataMountPoint}/temp # Temp on data
+
+        if [ ! -L /home/bitcoin/.bitcoin ]; then ln -s ${targetMountPoint}/bitcoin /home/bitcoin/.bitcoin; fi
+        if [ ! -L /home/bitcoin/.lnd ]; then ln -s ${dataMountPoint}/lnd /home/bitcoin/.lnd; fi
+
+        # Create legacy /mnt/hdd link pointing to data drive
+        if [ ! -L /mnt/hdd ]; then ln -s ${dataMountPoint} /mnt/hdd; fi
+
+        # Link storage items into the data mount point structure (/mnt/hdd -> /mnt/data)
+        if [ ! -L ${dataMountPoint}/app-storage ]; then ln -s ${targetMountPoint}/app-storage ${dataMountPoint}/app-storage; fi
+        # Temp is already under dataMountPoint
+
+        # Set ownership
+        chown -R ${bitcoinUID}:${bitcoinGID} ${targetMountPoint}
+        chown -R ${bitcoinUID}:${bitcoinGID} ${dataMountPoint}
+        chmod 777 ${dataMountPoint}/temp
+    fi
+
+    # Fix ownership of home links
+    chown -R ${bitcoinUID}:${bitcoinGID} /home/bitcoin/.bitcoin /home/bitcoin/.lnd
+
+    echo "# OK - Linking done." >> ${logFile}
+    echo "# Mount and Link process finished." >> ${logFile}
+    echo "result='mounted'"
+    exit 0
 fi
 
 ###################
-# UNMOUNT
+# LINK
 ###################
 
-if [ "$action" = "unmount" ]; then
+if [ "$action" = "link" ]; then
     echo "error='TODO blitz.data.sh unmount'"
     exit 1
 fi
