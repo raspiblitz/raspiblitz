@@ -730,11 +730,11 @@ if [ "$action" = "mount" ]; then
     source <(/home/admin/config.scripts/blitz.data.sh status)
 
     # check directories are already mounted
-    if [ (df | grep -c "${storageMountPoint}") -gt 0 ]; then
+    if [ $(df | grep -c "${storageMountPoint}") -gt 0 ]; then
         echo "# Already mounted: ${storageMountPoint}"
         exit 1
     fi
-    if [ ${combinedDataStorage} -eq 0 ] && [ (df | grep -c "${dataMountPoint}") -gt 0 ]; then
+    if [ ${combinedDataStorage} -eq 0 ] && [ $(df | grep -c "${dataMountPoint}") -gt 0 ]; then
         echo "# Already mounted: ${dataMountPoint}"
         exit 1
     fi
@@ -798,11 +798,11 @@ if [ "$action" = "mount" ]; then
     sleep 2
 
     # Verify mounts after attempt
-    if [ (df | grep -c "${storageMountPoint}") -eq 0 ]; then
+    if [ $(df | grep -c "${storageMountPoint}") -eq 0 ]; then
         echo "error='Failed to mount ${storagePartition} on ${storageMountPoint} after fstab update'"
         exit 1
     fi
-    if [ ${combinedDataStorage} -eq 0 ] && [ (df | grep -c "${dataMountPoint}") -eq 0 ]; then
+    if [ ${combinedDataStorage} -eq 0 ] && [ $(df | grep -c "${dataMountPoint}") -eq 0 ]; then
         echo "error='Failed to mount ${dataPartition} on ${dataMountPoint} after fstab update'"
         exit 1
     fi
@@ -1108,7 +1108,7 @@ if [ "$action" = "copy-system" ]; then
 
     # determine the partition base name
     actionDevicePartitionBase=${actionDevice}
-    if [[ "${actionDevice}" =~ ^nvme ]]; then
+    if [[ "${actionDevice}" =~ nvme ]]; then
         actionDevicePartitionBase="${actionDevice}p"
     fi
 
