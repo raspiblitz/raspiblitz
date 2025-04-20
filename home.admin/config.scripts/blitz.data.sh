@@ -855,16 +855,8 @@ if [ "$action" = "link" ]; then
     ln -s ${dataMountedPath}/app-data ${mainMountPoint}/app-data
 
     ####################################
-    # links for old layout compatibility
-
-    # raspiblitz.conf
-    if [ -f "${dataMountedPath}/app-data/raspiblitz.conf" ]; then
-        echo "# NEW->OLD: Liniking raspiblitz.conf" >> ${logFile}
-        unlink ${mainMountPoint}/raspiblitz.conf 2>/dev/null
-        ln -s ${dataMountedPath}/app-data/raspiblitz.conf ${mainMountPoint}/raspiblitz.conf
-    else
-        echo "# NEW->OLD: Skipping raspiblitz.conf (not found)" >> ${logFile}
-    fi
+    # NEW->OLD: links for old layout compatibility
+    # when storage is new layout
 
     # bitcoin directory
     if [ -d "${storageMountedPath}/app-storage/bitcoin" ]; then
@@ -891,6 +883,55 @@ if [ "$action" = "link" ]; then
         ln -s ${dataMountedPath}/app-data/tor ${mainMountPoint}/tor
     else
         echo "# NEW->OLD: Skipping /tor (not found)" >> ${logFile}
+    fi
+
+    # raspiblitz.conf
+    if [ -f "${dataMountedPath}/app-data/raspiblitz.conf" ]; then
+        echo "# NEW->OLD: Liniking raspiblitz.conf" >> ${logFile}
+        unlink ${mainMountPoint}/raspiblitz.conf 2>/dev/null
+        ln -s ${dataMountedPath}/app-data/raspiblitz.conf ${mainMountPoint}/raspiblitz.conf
+    else
+        echo "# NEW->OLD: Skipping raspiblitz.conf (not found)" >> ${logFile}
+    fi
+
+    ####################################
+    # OLD->OLD: links for old layout compatibility
+    # when storage is on old single drive now mounted on /mnt/disk_storage
+
+    # bitcoin directory
+    if [ -d "${storageMountedPath}/bitcoin" ]; then
+        echo "# OLD->OLD: Liniking /bitcoin" >> ${logFile}
+        unlink ${mainMountPoint}/bitcoin 2>/dev/null
+        ln -s ${storageMountedPath}/bitcoin ${mainMountPoint}/bitcoin
+    else
+        echo "# OLD->OLD: Skipping /bitcoin (not found)" >> ${logFile}
+    fi
+
+    # lnd directory
+    if [ -f "${storageMountedPath}/lnd" ]; then
+        echo "# OLD->OLD: Liniking /lnd" >> ${logFile}
+        unlink ${mainMountPoint}/lnd 2>/dev/null
+        ln -s ${storageMountedPath}/lnd ${mainMountPoint}/lnd
+    else
+        echo "# OLD->OLD: Skipping /lnd (not found)" >> ${logFile}
+    fi
+
+    # tor directory
+    if [ -f "${storageMountedPath}/tor" ]; then
+        echo "# OLD->OLD: Liniking /tor" >> ${logFile}
+        unlink ${mainMountPoint}/tor 2>/dev/null
+        ln -s ${storageMountedPath}/tor ${mainMountPoint}/tor
+    else
+        echo "# OLD->OLD: Skipping /tor (not found)" >> ${logFile}
+    fi
+
+    # raspiblitz.conf
+    if [ -f "${storageMountedPath}/raspiblitz.conf" ]; then
+        echo "# OLD->OLD: Liniking raspiblitz.conf" >> ${logFile}
+        unlink ${mainMountPoint}/raspiblitz.conf 2>/dev/null
+        ln -s ${storageMountedPath}/raspiblitz.conf ${mainMountPoint}/raspiblitz.conf
+    else
+        echo "# OLD->OLD: Skipping raspiblitz.conf (not found)" >> ${logFile}
     fi
 
     # Create base directories and links
