@@ -896,8 +896,8 @@ if [ "$action" = "link" ]; then
         echo "# NEW->OLD: Liniking /tor"
         unlink ${mainMountPoint}/tor 2>/dev/null
         ln -s ${dataMountedPath}/app-data/tor ${mainMountPoint}/tor
-        chown -R debian-tor:debian-tor ${mainMountPoint}/lnd
-        chmod -R 700 ${mainMountPoint}/lnd
+        chown -R debian-tor:debian-tor ${mainMountPoint}/tor
+        chmod -R 700 ${mainMountPoint}/tor
     else
         echo "# NEW->OLD: Skipping /tor (not found)"
     fi
@@ -944,8 +944,8 @@ if [ "$action" = "link" ]; then
         echo "# OLD->OLD: Liniking /tor"
         unlink ${mainMountPoint}/tor 2>/dev/null
         ln -s ${storageMountedPath}/tor ${mainMountPoint}/tor
-        chown -R debian-tor:debian-tor ${mainMountPoint}/lnd
-        chmod -R 700 ${mainMountPoint}/lnd
+        chown -R debian-tor:debian-tor ${mainMountPoint}/tor
+        chmod -R 700 ${mainMountPoint}/tor
     else
         echo "# OLD->OLD: Skipping /tor (not found)"
     fi
