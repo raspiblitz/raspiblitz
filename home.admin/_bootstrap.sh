@@ -747,7 +747,7 @@ if [ "${scenario}" != "ready" ] ; then
   if [ "${setupCommand}" = "setup" ] || [ "${setupCommand}" = "recover" ]; then
 
     echo "SYSTEM COPY OF FRESH SYSTEM" >> ${logFile}
-    /home/admin/_cache.sh set state "hdd-fomat"
+    /home/admin/_cache.sh set state "hdd-format"
     /home/admin/_cache.sh set message "formatting drives"
 
     # STORAGE
