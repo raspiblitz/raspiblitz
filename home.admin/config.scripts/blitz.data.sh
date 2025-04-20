@@ -841,17 +841,17 @@ if [ "$action" = "link" ]; then
 
     echo "# adding main folders to ${mainMountPoint}"
     mkdir -p ${mainMountPoint}
-    
+
     unlink ${mainMountPoint}/app-storage 2>/dev/null
-    if [ -d "${storageMountPoint}/app-storage" ]; then
-        echo "error='${storageMountPoint}/app-storage already exists'"
+    if [ -d "${mainMountPoint}/app-storage" ]; then
+        echo "error='${mainMountPoint}/app-storage already exists'"
         exit 1
     fi
     ln -s ${storageMountPoint}/app-storage ${mainMountPoint}/app-storage
 
     unlink ${mainMountPoint}/app-data 2>/dev/null
-    if [ -d "${dataMountedPath}/app-data" ]; then
-        echo "error='${dataMountedPath}/app-data already exists'"
+    if [ -d "${mainMountPoint}/app-data" ]; then
+        echo "error='${mainMountPoint}/app-data already exists'"
         exit 1
     fi
     ln -s ${dataMountedPath}/app-data ${mainMountPoint}/app-data
