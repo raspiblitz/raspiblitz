@@ -792,7 +792,7 @@ if [ "$action" = "mount" ]; then
     if ! findmnt -n -o SOURCE,TARGET | grep -q "^/dev/${storagePartition} ${storageMountPoint}$"; then
         echo "error='Failed to mount ${storagePartition} on ${storageMountPoint} after fstab update'"
         exit 1
-    if
+    fi
     if [ ${combinedDataStorage} -eq 0 ]; then
         if ! findmnt -n -o SOURCE,TARGET | grep -q "^/dev/${dataPartition} ${dataMountPoint}$"; then
             echo "error='Failed to mount ${dataPartition} on ${dataMountPoint} after fstab update'"
@@ -800,8 +800,17 @@ if [ "$action" = "mount" ]; then
         fi
     fi
     echo "# Mount successful." >> ${logFile}
- 
-    # --- Linking Logic ---
+    exit 0
+fi
+
+###################
+# LINK
+###################
+
+if [ "$action" = "link" ]; then
+
+    echo "TODO"
+    exit 1
 
     echo "# Linking directories ..." >> ${logFile}
 
@@ -815,6 +824,7 @@ if [ "$action" = "mount" ]; then
     bitcoinGID=$(id -g bitcoin)
 
     if [ ${combinedDataStorage} -eq 1 ]; then
+
         echo "# Linking for combined mode (mounted on ${storageMountPoint})" >> ${logFile}
         mkdir -p ${storageMountPoint}/bitcoin
         mkdir -p ${storageMountPoint}/lnd
@@ -831,6 +841,7 @@ if [ "$action" = "mount" ]; then
         chmod 777 ${targetMountPoint}/temp
 
     else
+
         # Separate mode: /mnt/storage (targetMountPoint) and /mnt/data (dataMountPoint)
         echo "# Linking for separate mode (${targetMountPoint} + ${dataMountPoint})" >> ${logFile}
         mkdir -p ${targetMountPoint}/bitcoin # Blockchain on storage
@@ -862,15 +873,6 @@ if [ "$action" = "mount" ]; then
     echo "# Mount and Link process finished." >> ${logFile}
     echo "result='mounted'"
     exit 0
-fi
-
-###################
-# LINK
-###################
-
-if [ "$action" = "link" ]; then
-    echo "error='TODO blitz.data.sh unmount'"
-    exit 1
 fi
 
 ###################
