@@ -933,6 +933,7 @@ if [ "${scenario}" != "ready" ] ; then
     echo "runBehindTor='on'" >> $TEMPCONFIGFILE
   fi
 
+  # perma mount drives/partitions
   /home/admin/config.scripts/blitz.data.sh mount >> ${logFile}
   if [ $? -eq 1 ]; then
     echo "FAIL: blitz.data.sh mount failed" >> ${logFile}
@@ -941,16 +942,12 @@ if [ "${scenario}" != "ready" ] ; then
     exit 1
   fi
 
-  # make sure STORAGE is mounted (could be freshly formatted by user on last loop)
-  source <(/home/admin/config.scripts/blitz.datadrive.sh status)
-  echo "Temp mounting (2) data drive (hddFormat='${hddFormat}')" >> ${logFile}
-  source <(/home/admin/config.scripts/blitz.datadrive.sh tempmount)
-  echo "Temp mounting (2) result: ${isMounted}" >> ${logFile}
-
-  # check that HDD was temp mounted
-  if [ "${isMounted}" != "1" ]; then
-    /home/admin/_cache.sh set state "errorHDD"
-    /home/admin/_cache.sh set message "Was not able to mount HDD (2)"
+  # link directories together in /mnt/hdd
+  /home/admin/config.scripts/blitz.data.sh link >> ${logFile}
+  if [ $? -eq 1 ]; then
+    echo "FAIL: blitz.data.sh link failed" >> ${logFile}
+    /home/admin/_cache.sh set state "error"
+    /home/admin/_cache.sh set message "blitz.data.sh link failed"
     exit 1
   fi
 
