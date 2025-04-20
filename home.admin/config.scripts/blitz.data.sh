@@ -816,7 +816,6 @@ fi
 
 if [ "$action" = "link" ]; then
 
-    echo "# blitz.data.sh link" 
     mainMountPoint="/mnt/hdd"
 
     # Source status to get drive configuration
@@ -864,7 +863,7 @@ if [ "$action" = "link" ]; then
     if [ -d "${storageMountedPath}/app-storage/bitcoin" ]; then
         echo "# NEW->OLD: Liniking /bitcoin"
         unlink ${mainMountPoint}/bitcoin 2>/dev/null
-        ln -s ${storageMountedPath}/storage-data/bitcoin ${mainMountPoint}/bitcoin
+        ln -s ${storageMountedPath}/app-storage/bitcoin ${mainMountPoint}/bitcoin
     else
         echo "# NEW->OLD: Skipping /bitcoin (not found)"
     fi
