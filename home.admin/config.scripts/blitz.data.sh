@@ -721,8 +721,8 @@ fi
 
 if [ "$action" = "mount" ]; then
 
-    echo "# ACTION: blitz.data.sh mount" >> ${logFile}
 
+    echo "# blitz.data.sh mount" 
     storageMountPoint="/mnt/disk_storage"
     dataMountPoint="/mnt/disk_data"
 
@@ -816,69 +816,88 @@ fi
 
 if [ "$action" = "link" ]; then
 
-    echo "TODO"
-    exit 1
+    echo "# blitz.data.sh link" 
+    mainMountPoint="/mnt/hdd"
 
-    echo "# Linking directories ..." >> ${logFile}
+    # Source status to get drive configuration
+    source <(/home/admin/config.scripts/blitz.data.sh status)
 
-    # Cleanups
-    if [ -L /home/bitcoin/.bitcoin ]; then rm /home/bitcoin/.bitcoin; fi
-    if [ -L /home/bitcoin/.lnd ]; then rm /home/bitcoin/.lnd; fi
-    if [ -L /mnt/hdd ]; then rm /mnt/hdd; fi # Remove old link if exists
-
-    # Create base directories and links
-    bitcoinUID=$(id -u bitcoin)
-    bitcoinGID=$(id -g bitcoin)
-
+    # check drive pathes are available
+    if [ ${#storageMountedPath} -eq 0 ]; then
+        echo "error='storageMountedPath not detected'"
+        exit 1
+    fi
     if [ ${combinedDataStorage} -eq 1 ]; then
-
-        echo "# Linking for combined mode (mounted on ${storageMountPoint})" >> ${logFile}
-        mkdir -p ${storageMountPoint}/bitcoin
-        mkdir -p ${storageMountPoint}/lnd
-        mkdir -p ${storageMountPoint}/app-data
-        mkdir -p ${storageMountPoint}/app-storage
-        mkdir -p ${storageMountPoint}/temp
-
-        if [ ! -L /home/bitcoin/.bitcoin ]; then ln -s ${targetMountPoint}/bitcoin /home/bitcoin/.bitcoin; fi
-        if [ ! -L /home/bitcoin/.lnd ]; then ln -s ${targetMountPoint}/lnd /home/bitcoin/.lnd; fi
-        # /mnt/hdd is the mountpoint itself, no link needed
-
-        # Set ownership
-        chown -R ${bitcoinUID}:${bitcoinGID} ${targetMountPoint}
-        chmod 777 ${targetMountPoint}/temp
-
+        dataMountedPath="${storageMountedPath}"
     else
-
-        # Separate mode: /mnt/storage (targetMountPoint) and /mnt/data (dataMountPoint)
-        echo "# Linking for separate mode (${targetMountPoint} + ${dataMountPoint})" >> ${logFile}
-        mkdir -p ${targetMountPoint}/bitcoin # Blockchain on storage
-        mkdir -p ${targetMountPoint}/app-storage
-        mkdir -p ${dataMountPoint}/lnd # LND on data
-        mkdir -p ${dataMountPoint}/app-data
-        mkdir -p ${dataMountPoint}/temp # Temp on data
-
-        if [ ! -L /home/bitcoin/.bitcoin ]; then ln -s ${targetMountPoint}/bitcoin /home/bitcoin/.bitcoin; fi
-        if [ ! -L /home/bitcoin/.lnd ]; then ln -s ${dataMountPoint}/lnd /home/bitcoin/.lnd; fi
-
-        # Create legacy /mnt/hdd link pointing to data drive
-        if [ ! -L /mnt/hdd ]; then ln -s ${dataMountPoint} /mnt/hdd; fi
-
-        # Link storage items into the data mount point structure (/mnt/hdd -> /mnt/data)
-        if [ ! -L ${dataMountPoint}/app-storage ]; then ln -s ${targetMountPoint}/app-storage ${dataMountPoint}/app-storage; fi
-        # Temp is already under dataMountPoint
-
-        # Set ownership
-        chown -R ${bitcoinUID}:${bitcoinGID} ${targetMountPoint}
-        chown -R ${bitcoinUID}:${bitcoinGID} ${dataMountPoint}
-        chmod 777 ${dataMountPoint}/temp
+        if [ ${#dataMountedPath} -eq 0 ]; then
+            echo "error='dataMountedPath not detected'"
+            exit 1
+        fi
     fi
 
-    # Fix ownership of home links
-    chown -R ${bitcoinUID}:${bitcoinGID} /home/bitcoin/.bitcoin /home/bitcoin/.lnd
+    ####################################
+    # combine storage & data
 
-    echo "# OK - Linking done." >> ${logFile}
-    echo "# Mount and Link process finished." >> ${logFile}
-    echo "result='mounted'"
+    echo "# adding main folders to ${mainMountPoint}"
+    mkdir -p ${mainMountPoint}
+    unlink ${storageMountPoint}/app-storage 2>/dev/null
+    if [ -d "${storageMountPoint}/app-storage" ]; then
+        echo "error='${storageMountPoint}/app-storage already exists'"
+        exit 1
+    fi
+    ln -s ${dataMountedPath}/app-data ${mainMountPoint}/app-data
+    unlink ${mainMountPoint}/app-data 2>/dev/null
+    if [ -d "${mainMountPoint}/app-data" ]; then
+        echo "error='${mainMountPoint}/app-data already exists'"
+        exit 1
+    fi
+    ln -s ${dataMountedPath}/app-data ${mainMountPoint}/app-data
+
+    ####################################
+    # links for old layout compatibility
+
+    # raspiblitz.conf
+    if [ -f "${dataMountedPath}/app-data/raspiblitz.conf" ]; then
+        echo "# NEW->OLD: Liniking raspiblitz.conf" >> ${logFile}
+        unlink ${mainMountPoint}/raspiblitz.conf 2>/dev/null
+        ln -s ${dataMountedPath}/app-data/raspiblitz.conf ${mainMountPoint}/raspiblitz.conf
+    else
+        echo "# NEW->OLD: Skipping raspiblitz.conf (not found)" >> ${logFile}
+    fi
+
+    # bitcoin directory
+    if [ -d "${storageMountedPath}/app-storage/bitcoin" ]; then
+        echo "# NEW->OLD: Liniking /bitcoin" >> ${logFile}
+        unlink ${mainMountPoint}/bitcoin 2>/dev/null
+        ln -s ${storageMountedPath}/storage-data/bitcoin ${mainMountPoint}/bitcoin
+    else
+        echo "# NEW->OLD: Skipping /bitcoin (not found)" >> ${logFile}
+    fi
+
+    # lnd directory
+    if [ -f "${dataMountedPath}/app-data/lnd" ]; then
+        echo "# NEW->OLD: Liniking /lnd" >> ${logFile}
+        unlink ${mainMountPoint}/lnd 2>/dev/null
+        ln -s ${dataMountedPath}/app-data/lnd ${mainMountPoint}/lnd
+    else
+        echo "# NEW->OLD: Skipping /lnd (not found)" >> ${logFile}
+    fi
+
+    # tor directory
+    if [ -f "${dataMountedPath}/app-data/tor" ]; then
+        echo "# NEW->OLD: Liniking /tor" >> ${logFile}
+        unlink ${mainMountPoint}/tor 2>/dev/null
+        ln -s ${dataMountedPath}/app-data/tor ${mainMountPoint}/tor
+    else
+        echo "# NEW->OLD: Skipping /tor (not found)" >> ${logFile}
+    fi
+
+    # Create base directories and links
+    # bitcoinUID=$(id -u bitcoin)
+    # bitcoinGID=$(id -g bitcoin)
+    # chown -R ${bitcoinUID}:${bitcoinGID} /home/bitcoin/.bitcoin /home/bitcoin/.lnd
+
     exit 0
 fi
 
