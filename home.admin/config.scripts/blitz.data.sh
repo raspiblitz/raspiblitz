@@ -13,7 +13,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
     >&2 echo "# blitz.data.sh recover SEPERATE-DATA [device]"
     >&2 echo "# blitz.data.sh kill-boot [device] # deactivate boot function from install medium"
     >&2 echo "# blitz.data.sh migration [umbrel|citadel|mynode] [partition] [-test] # will migrate partition to raspiblitz"
-    >&2 echo "# blitz.data.sh migration hdd [menu-prepare|status|run]"
+    >&2 echo "# blitz.data.sh migration hdd [menu-prepare|run]"
     >&2 echo "# blitz.data.sh uasp-fix [-info] # deactivates UASP for non supported USB HDD Adapters"
     echo "error='missing parameters'"
     exit 1
@@ -1653,11 +1653,6 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
         /home/admin/_cache.sh set system_setup_storageBlockchainGB "0"
            
         # return 0 to indicate success and let calling script finish
-        exit 0
-    fi
-
-    if [ "${action}" = "status" ]; then
-        echo "TODO: output status of migration drives"
         exit 0
     fi
 
