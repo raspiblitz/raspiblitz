@@ -746,15 +746,15 @@ if [ "$action" = "mount" ]; then
         echo "# Already mounted: ${storageMountPoint}"
         exit 1
     fi
-    if [ (findmnt -n -o SOURCE,TARGET | grep -c "/dev/${storagePartition}") -gt 0]; then
+    if [ $(findmnt -n -o SOURCE,TARGET | grep -c "/dev/${storagePartition}") -gt 0 ]; then
         echo "# Already mounted: ${storageMountPoint}"
         exit 1
     fi
-    if [ ${combinedDataStorage} -eq 0 ] && [ mountpoint -q "${dataMountPoint}" ]; then
+    if [ ${combinedDataStorage} -eq 0 ] && mountpoint -q "${dataMountPoint}"; then
         echo "# Already mounted: ${dataMountPoint}"
         exit 1
     fi
-    if [ ${combinedDataStorage} -eq 0 ] && [ (findmnt -n -o SOURCE,TARGET | grep -c "/dev/${dataPartition}") -gt 0 ]; then
+    if [ ${combinedDataStorage} -eq 0 ] && [ $(findmnt -n -o SOURCE,TARGET | grep -c "/dev/${dataPartition}") -gt 0 ]; then
         echo "# Already mounted: ${dataMountPoint}"
         exit 1
     fi
@@ -805,7 +805,6 @@ if [ "$action" = "mount" ]; then
     if [ ${combinedDataStorage} -eq 0 ] && [ ! mountpoint -q "${dataMountPoint}" ]; then
         echo "error='Failed to mount ${dataPartition} on ${dataMountPoint} after fstab update'"
         exit 1
-        fi
     fi
     echo "# Mount successful." >> ${logFile}
     exit 0
@@ -1550,7 +1549,7 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
         fi
 
         # check if all needed parameters are set
-        source <(/home/admin/config.scripts/blitz.data.sh status)
+        source <(/home/admin/config.scripts.blitz.data.sh status)
         if [ ${#biggerDevice} -eq 0 ]; then
             dialog --msgbox "\nNo old drive with RaspiBlitz data found.\n\nIf your sure your setup is correct give feedback to RaspiBlitz devs." 10 60
             exit 1
