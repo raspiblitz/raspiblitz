@@ -835,6 +835,10 @@ if [ "$action" = "link" ]; then
         fi
     fi
 
+    echo "# storageMountedPath: ${storageMountedPath}"
+    echo "# dataMountedPath: ${dataMountedPath}"
+    echo "# mainMountPoint: ${mainMountPoint}"
+
     ####################################
     # combine storage & data
 
@@ -875,7 +879,7 @@ if [ "$action" = "link" ]; then
     fi
 
     # lnd directory
-    if [ -f "${dataMountedPath}/app-data/lnd" ]; then
+    if [ -d "${dataMountedPath}/app-data/lnd" ]; then
         echo "# NEW->OLD: Liniking /lnd"
         unlink ${mainMountPoint}/lnd 2>/dev/null
         ln -s ${dataMountedPath}/app-data/lnd ${mainMountPoint}/lnd
@@ -886,7 +890,7 @@ if [ "$action" = "link" ]; then
     fi
 
     # tor directory
-    if [ -f "${dataMountedPath}/app-data/tor" ]; then
+    if [ -d "${dataMountedPath}/app-data/tor" ]; then
         echo "# NEW->OLD: Liniking /tor"
         unlink ${mainMountPoint}/tor 2>/dev/null
         ln -s ${dataMountedPath}/app-data/tor ${mainMountPoint}/tor
@@ -923,7 +927,7 @@ if [ "$action" = "link" ]; then
     fi
 
     # lnd directory
-    if [ -f "${storageMountedPath}/lnd" ]; then
+    if [ -d "${storageMountedPath}/lnd" ]; then
         echo "# OLD->OLD: Liniking /lnd"
         unlink ${mainMountPoint}/lnd 2>/dev/null
         ln -s ${storageMountedPath}/lnd ${mainMountPoint}/lnd
@@ -934,7 +938,7 @@ if [ "$action" = "link" ]; then
     fi
 
     # tor directory
-    if [ -f "${storageMountedPath}/tor" ]; then
+    if [ -d "${storageMountedPath}/tor" ]; then
         echo "# OLD->OLD: Liniking /tor"
         unlink ${mainMountPoint}/tor 2>/dev/null
         ln -s ${storageMountedPath}/tor ${mainMountPoint}/tor
