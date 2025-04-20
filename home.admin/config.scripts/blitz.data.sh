@@ -860,38 +860,38 @@ if [ "$action" = "link" ]; then
 
     # bitcoin directory
     if [ -d "${storageMountedPath}/app-storage/bitcoin" ]; then
-        echo "# NEW->OLD: Liniking /bitcoin" >> ${logFile}
+        echo "# NEW->OLD: Liniking /bitcoin"
         unlink ${mainMountPoint}/bitcoin 2>/dev/null
         ln -s ${storageMountedPath}/storage-data/bitcoin ${mainMountPoint}/bitcoin
     else
-        echo "# NEW->OLD: Skipping /bitcoin (not found)" >> ${logFile}
+        echo "# NEW->OLD: Skipping /bitcoin (not found)"
     fi
 
     # lnd directory
     if [ -f "${dataMountedPath}/app-data/lnd" ]; then
-        echo "# NEW->OLD: Liniking /lnd" >> ${logFile}
+        echo "# NEW->OLD: Liniking /lnd"
         unlink ${mainMountPoint}/lnd 2>/dev/null
         ln -s ${dataMountedPath}/app-data/lnd ${mainMountPoint}/lnd
     else
-        echo "# NEW->OLD: Skipping /lnd (not found)" >> ${logFile}
+        echo "# NEW->OLD: Skipping /lnd (not found)"
     fi
 
     # tor directory
     if [ -f "${dataMountedPath}/app-data/tor" ]; then
-        echo "# NEW->OLD: Liniking /tor" >> ${logFile}
+        echo "# NEW->OLD: Liniking /tor"
         unlink ${mainMountPoint}/tor 2>/dev/null
         ln -s ${dataMountedPath}/app-data/tor ${mainMountPoint}/tor
     else
-        echo "# NEW->OLD: Skipping /tor (not found)" >> ${logFile}
+        echo "# NEW->OLD: Skipping /tor (not found)"
     fi
 
     # raspiblitz.conf
     if [ -f "${dataMountedPath}/app-data/raspiblitz.conf" ]; then
-        echo "# NEW->OLD: Liniking raspiblitz.conf" >> ${logFile}
+        echo "# NEW->OLD: Liniking raspiblitz.conf"
         unlink ${mainMountPoint}/raspiblitz.conf 2>/dev/null
         ln -s ${dataMountedPath}/app-data/raspiblitz.conf ${mainMountPoint}/raspiblitz.conf
     else
-        echo "# NEW->OLD: Skipping raspiblitz.conf (not found)" >> ${logFile}
+        echo "# NEW->OLD: Skipping raspiblitz.conf (not found)"
     fi
 
     ####################################
@@ -900,38 +900,38 @@ if [ "$action" = "link" ]; then
 
     # bitcoin directory
     if [ -d "${storageMountedPath}/bitcoin" ]; then
-        echo "# OLD->OLD: Liniking /bitcoin" >> ${logFile}
+        echo "# OLD->OLD: Liniking /bitcoin"
         unlink ${mainMountPoint}/bitcoin 2>/dev/null
         ln -s ${storageMountedPath}/bitcoin ${mainMountPoint}/bitcoin
     else
-        echo "# OLD->OLD: Skipping /bitcoin (not found)" >> ${logFile}
+        echo "# OLD->OLD: Skipping /bitcoin (not found)"
     fi
 
     # lnd directory
     if [ -f "${storageMountedPath}/lnd" ]; then
-        echo "# OLD->OLD: Liniking /lnd" >> ${logFile}
+        echo "# OLD->OLD: Liniking /lnd"
         unlink ${mainMountPoint}/lnd 2>/dev/null
         ln -s ${storageMountedPath}/lnd ${mainMountPoint}/lnd
     else
-        echo "# OLD->OLD: Skipping /lnd (not found)" >> ${logFile}
+        echo "# OLD->OLD: Skipping /lnd (not found)"
     fi
 
     # tor directory
     if [ -f "${storageMountedPath}/tor" ]; then
-        echo "# OLD->OLD: Liniking /tor" >> ${logFile}
+        echo "# OLD->OLD: Liniking /tor"
         unlink ${mainMountPoint}/tor 2>/dev/null
         ln -s ${storageMountedPath}/tor ${mainMountPoint}/tor
     else
-        echo "# OLD->OLD: Skipping /tor (not found)" >> ${logFile}
+        echo "# OLD->OLD: Skipping /tor (not found)"
     fi
 
     # raspiblitz.conf
     if [ -f "${storageMountedPath}/raspiblitz.conf" ]; then
-        echo "# OLD->OLD: Liniking raspiblitz.conf" >> ${logFile}
+        echo "# OLD->OLD: Liniking raspiblitz.conf"
         unlink ${mainMountPoint}/raspiblitz.conf 2>/dev/null
         ln -s ${storageMountedPath}/raspiblitz.conf ${mainMountPoint}/raspiblitz.conf
     else
-        echo "# OLD->OLD: Skipping raspiblitz.conf (not found)" >> ${logFile}
+        echo "# OLD->OLD: Skipping raspiblitz.conf (not found)"
     fi
 
     # Create base directories and links
