@@ -847,6 +847,8 @@ if [ "$action" = "link" ]; then
         exit 1
     fi
     ln -s ${storageMountPoint}/app-storage ${mainMountPoint}/app-storage
+    chown -R bitcoin:bitcoin ${storageMountPoint}/app-storage ${mainMountPoint}/app-storage
+    chmod -R 755 ${storageMountPoint}/app-storage ${mainMountPoint}/app-storage
 
     unlink ${mainMountPoint}/app-data 2>/dev/null
     if [ -d "${mainMountPoint}/app-data" ]; then
@@ -854,6 +856,8 @@ if [ "$action" = "link" ]; then
         exit 1
     fi
     ln -s ${dataMountedPath}/app-data ${mainMountPoint}/app-data
+    chown -R bitcoin:bitcoin ${dataMountedPath}/app-data ${mainMountPoint}/app-data
+    chown -R 755 ${dataMountedPath}/app-data ${mainMountPoint}/app-data
 
     ####################################
     # NEW->OLD: links for old layout compatibility
@@ -864,6 +868,8 @@ if [ "$action" = "link" ]; then
         echo "# NEW->OLD: Liniking /bitcoin"
         unlink ${mainMountPoint}/bitcoin 2>/dev/null
         ln -s ${storageMountedPath}/app-storage/bitcoin ${mainMountPoint}/bitcoin
+        chown -R bitcoin:bitcoin ${mainMountPoint}/bitcoin
+        chown -R 777 ${mainMountPoint}/bitcoin
     else
         echo "# NEW->OLD: Skipping /bitcoin (not found)"
     fi
@@ -873,6 +879,8 @@ if [ "$action" = "link" ]; then
         echo "# NEW->OLD: Liniking /lnd"
         unlink ${mainMountPoint}/lnd 2>/dev/null
         ln -s ${dataMountedPath}/app-data/lnd ${mainMountPoint}/lnd
+        chown -R bitcoin:bitcoin ${mainMountPoint}/lnd
+        chown -R 755 ${mainMountPoint}/lnd
     else
         echo "# NEW->OLD: Skipping /lnd (not found)"
     fi
@@ -882,6 +890,8 @@ if [ "$action" = "link" ]; then
         echo "# NEW->OLD: Liniking /tor"
         unlink ${mainMountPoint}/tor 2>/dev/null
         ln -s ${dataMountedPath}/app-data/tor ${mainMountPoint}/tor
+        chown -R debian-tor:debian-tor ${mainMountPoint}/lnd
+        chown -R 700 ${mainMountPoint}/lnd
     else
         echo "# NEW->OLD: Skipping /tor (not found)"
     fi
@@ -891,6 +901,8 @@ if [ "$action" = "link" ]; then
         echo "# NEW->OLD: Liniking raspiblitz.conf"
         unlink ${mainMountPoint}/raspiblitz.conf 2>/dev/null
         ln -s ${dataMountedPath}/app-data/raspiblitz.conf ${mainMountPoint}/raspiblitz.conf
+        chown root:sudo ${mainMountPoint}/raspiblitz.conf
+        chown 664 ${mainMountPoint}/raspiblitz.conf
     else
         echo "# NEW->OLD: Skipping raspiblitz.conf (not found)"
     fi
@@ -904,6 +916,8 @@ if [ "$action" = "link" ]; then
         echo "# OLD->OLD: Liniking /bitcoin"
         unlink ${mainMountPoint}/bitcoin 2>/dev/null
         ln -s ${storageMountedPath}/bitcoin ${mainMountPoint}/bitcoin
+        chown -R bitcoin:bitcoin ${mainMountPoint}/bitcoin
+        chown -R 777 ${mainMountPoint}/bitcoin
     else
         echo "# OLD->OLD: Skipping /bitcoin (not found)"
     fi
@@ -913,6 +927,8 @@ if [ "$action" = "link" ]; then
         echo "# OLD->OLD: Liniking /lnd"
         unlink ${mainMountPoint}/lnd 2>/dev/null
         ln -s ${storageMountedPath}/lnd ${mainMountPoint}/lnd
+        chown -R debian-tor:debian-tor ${mainMountPoint}/lnd
+        chown -R 700 ${mainMountPoint}/lnd
     else
         echo "# OLD->OLD: Skipping /lnd (not found)"
     fi
@@ -922,6 +938,8 @@ if [ "$action" = "link" ]; then
         echo "# OLD->OLD: Liniking /tor"
         unlink ${mainMountPoint}/tor 2>/dev/null
         ln -s ${storageMountedPath}/tor ${mainMountPoint}/tor
+        chown -R debian-tor:debian-tor ${mainMountPoint}/lnd
+        chown -R 700 ${mainMountPoint}/lnd
     else
         echo "# OLD->OLD: Skipping /tor (not found)"
     fi
@@ -931,14 +949,11 @@ if [ "$action" = "link" ]; then
         echo "# OLD->OLD: Liniking raspiblitz.conf"
         unlink ${mainMountPoint}/raspiblitz.conf 2>/dev/null
         ln -s ${storageMountedPath}/raspiblitz.conf ${mainMountPoint}/raspiblitz.conf
+        chown root:sudo ${mainMountPoint}/raspiblitz.conf
+        chown 664 ${mainMountPoint}/raspiblitz.conf
     else
         echo "# OLD->OLD: Skipping raspiblitz.conf (not found)"
     fi
-
-    # Create base directories and links
-    # bitcoinUID=$(id -u bitcoin)
-    # bitcoinGID=$(id -g bitcoin)
-    # chown -R ${bitcoinUID}:${bitcoinGID} /home/bitcoin/.bitcoin /home/bitcoin/.lnd
 
     exit 0
 fi
