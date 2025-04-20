@@ -751,11 +751,11 @@ if [ "$action" = "mount" ]; then
 
     # check if partititions are already mounted
     if [ $(findmnt -n -o SOURCE,TARGET | grep -c "/dev/${storagePartition}") -gt 0 ]; then
-        echo "# Already mounted: ${storageMountPoint}"
+        echo "# Already mounted: ${storagePartition}"
         exit 1
     fi    
     if [ ${combinedDataStorage} -eq 0 ] && [ $(findmnt -n -o SOURCE,TARGET | grep -c "/dev/${dataPartition}") -gt 0 ]; then
-        echo "# Already mounted: ${dataMountPoint}"
+        echo "# Already mounted: ${dataPartition}"
         exit 1
     fi
 
