@@ -746,11 +746,26 @@ if [ "$action" = "status" ]; then
         scenario="error:unknown-state"
     fi
 
+    # get used space on drives in GB
+    storageUsePercent=""
+    if [ ${#storagePartition} -gt 0 ]; then
+        storageUsePercent=$(df "/dev/${storagePartition}" 2>/dev/null | awk 'NR==2 {print $5}')
+    fi
+    dataUsePercent=""
+    if [ ${#dataPartition} -gt 0 ]; then
+        dataUsePercent=$(df "/dev/${dataPartition}" 2>/dev/null | awk 'NR==2 {print $5}')
+    elif [ ${combinedDataStorage} -eq 1 ] && [ ${#storagePartition} -gt 0 ]; then
+        dataUsePercent="${storageUsePercent}"
+    fi
+    systemUsePercent=""
+    if [ ${#systemPartition} -gt 0 ]; then
+        systemUsePercent=$(df "/dev/${systemPartition}" 2>/dev/null | awk 'NR==2 {print $5}')
+    fi
+
     # get free space on drives
     if [ ${#storageDevice} -gt 0 ]; then
         storageFreeKB=$(df -k | grep "/dev/${storageDevice}" | awk '{print $4}')
     fi
-
     if [ ${#dataDevice} -gt 0 ]; then
         dataFreeKB=$(df -k | grep "/dev/${dataDevice}" | awk '{print $4}')
     elif [ combinedDataStorage -eq 1 ]; then
@@ -769,6 +784,7 @@ if [ "$action" = "status" ]; then
     echo "storagePrunedMinGB='${storagePrunedMinGB}'"
     echo "storageFullMinGB='${storageFullMinGB}'"
     echo "storageFreeKB='${storageFreeKB}'"
+    echo "storageUsePercent='${storageUsePercent}'"
     echo "storageWarning='${storageWarning}'"
     echo "storagePartition='${storagePartition}'"
     echo "storageMountedPath='${storageMountedPath}'"
@@ -780,6 +796,7 @@ if [ "$action" = "status" ]; then
     echo "systemMinGB='${systemMinGB}'"
     echo "systemFreeKB='${systemFreeKB}'"
     echo "systemWarning='${systemWarning}'"
+    echo "systemUsePercent='${systemUsePercent}'"
     echo "systemPartition='${systemPartition}'"
     echo "systemMountedPath='${systemMountedPath}'"
     echo "dataDevice='${dataDevice}'"
@@ -788,6 +805,7 @@ if [ "$action" = "status" ]; then
     echo "dataMinGB='${dataMinGB}'"
     echo "dataFreeKB='${dataFreeKB}'"
     echo "dataWarning='${dataWarning}'"
+    echo "dataUsePercent='${dataUsePercent}'"
     echo "dataPartition='${dataPartition}'"
     echo "dataMountedPath='${dataMountedPath}'"
     echo "dataConfigFound='${dataConfigFound}'"
@@ -974,7 +992,7 @@ if [ "$action" = "link" ]; then
 
      # /app-data
     unlink ${mainMountPoint}/app-data 2>/dev/null
-    if [ -d "${mainMountPoint}/app-data" ]; then
+    if [ -d "${mainMountPoint}/app-data" ];then
         echo "error='${mainMountPoint}/app-data already exists'"
         exit 1
     fi
@@ -1764,7 +1782,7 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
         fi
 
         # check if all needed parameters are set
-        source <(/home/admin/config.scripts/blitz.data.sh status)
+        source <(/home/admin/config.scripts.blitz.data.sh status)
         if [ ${#biggerDevice} -eq 0 ]; then
             dialog --msgbox "\nNo old drive with RaspiBlitz data found.\n\nIf your sure your setup is correct give feedback to RaspiBlitz devs." 10 60
             exit 1
