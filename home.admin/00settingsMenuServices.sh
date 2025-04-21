@@ -213,8 +213,8 @@ if [ "${ElectRS}" != "${choice}" ]; then
   extraparameter=""
   if [ "${choice}" =  "on" ]; then
     # check on HDD size
-    source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
-    if [ ${hddGigaBytes} -lt 800 ]; then
+    source <(sudo /home/admin/config.scripts/blitz.data.sh status)
+    if [ ${storageSizeGB} -lt 800 ]; then
       whiptail --title " HDD/SSD TOO SMALL " --msgbox "\
 Since v1.5 we recommend at least a 1TB HDD/SSD if you want to run ElectRS.\n
 This is due to the eletcrum index that will grow over time and needs space.\n

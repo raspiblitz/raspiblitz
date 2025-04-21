@@ -261,8 +261,8 @@ MAINMENU > REPAIR > REPAIR-LND > RETRYSCB
       if [ "${state}" == "errorHDD" ]; then
         # print some debug detail info on HDD/SSD error
         echo "###########################################################"
-        echo "# blitz.datadrive.sh status"
-        sudo /home/admin/config.scripts/blitz.datadrive.sh status
+        echo "# blitz.data.sh status"
+        sudo /home/admin/config.scripts/blitz.data.sh status
       fi
       if [ "${message}" == "_provision.setup.sh fail" ]; then
         echo "# /home/admin/raspiblitz.provision-setup.log"

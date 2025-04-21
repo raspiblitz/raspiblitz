@@ -460,10 +460,11 @@ sudo journalctl --disk-usage
 sudo du -sh /var/log
 
 echo
-echo "*** DATADRIVE ***"
-source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
-sudo /home/admin/config.scripts/blitz.datadrive.sh status
-sudo smartctl -a /dev/${datadisk}
+echo "*** HDD/SSD/NVMe ***"
+source <(sudo /home/admin/config.scripts/blitz.data.sh status)
+sudo /home/admin/config.scripts/blitz.data.sh status
+sudo smartctl -a /dev/${storagePartition}
+
 echo
 
 echo "*** NETWORK ***"
