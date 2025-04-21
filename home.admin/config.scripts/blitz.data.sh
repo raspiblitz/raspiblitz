@@ -768,7 +768,7 @@ if [ "$action" = "status" ]; then
     fi
     if [ ${#dataDevice} -gt 0 ]; then
         dataFreeKB=$(df -k | grep "/dev/${dataDevice}" | awk '{print $4}')
-    elif [ combinedDataStorage -eq 1 ]; then
+    elif [ $combinedDataStorage -eq 1 ]; then
         dataFreeKB="${storageFreeKB}"
     fi
     if [ ${#systemDevice} -gt 0 ]; then
@@ -779,9 +779,9 @@ if [ "$action" = "status" ]; then
     if [ ${#storageDevice} -gt 0 ]; then
         storageCelsius=$(smartctl -A /dev/${storageDevice} | grep -E '^Temperature:|Temperature Sensor' | awk '{print $(NF-1)}' | head -n 1)
     fi
-    if [ ${#dataDevice} -gt 0 ]; then
+    elif [ ${#dataDevice} -gt 0 ]; then
         dataCelsius=$(smartctl -A /dev/${dataDevice} | grep -E '^Temperature:|Temperature Sensor' | awk '{print $(NF-1)}' | head -n 1)
-    elif [ combinedDataStorage -eq 1 ]; then
+    if [ $combinedDataStorage -eq 1 ]; then
         dataCelsius="${storageCelsius}"
     fi
     if [ ${#systemDevice} -gt 0 ]; then
