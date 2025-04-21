@@ -781,7 +781,6 @@ if [ "$action" = "status" ]; then
     fi
     if [ ${#dataDevice} -gt 0 ]; then
         dataCelsius=$(smartctl -A /dev/${dataDevice} | grep -E '^Temperature:|Temperature Sensor' | awk '{print $(NF-1)}' | head -n 1)
-    fi
     elif [ combinedDataStorage -eq 1 ]; then
         dataCelsius="${storageCelsius}"
     fi
