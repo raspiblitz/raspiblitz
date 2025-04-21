@@ -19,8 +19,7 @@ if [ "${network}" != "bitcoin" ]; then
 fi
 
 # check that HDD is available
-isMounted=$(sudo df | grep -c /mnt/hdd)
-if [ "${isMounted}" != "1" ]; then
+if [ ! -L /mnt/hdd/app-data ]; then
   echo "error='no datadrive is mounted'"
   exit 1
 fi

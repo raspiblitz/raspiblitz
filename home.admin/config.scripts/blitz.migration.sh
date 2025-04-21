@@ -18,7 +18,10 @@ fi
 ###################
 
 # check if data drive is mounted - other wise cannot operate
-isMounted=$(sudo df | grep -c /mnt/hdd)
+isMounted=0
+if [ -L /mnt/hdd/app-data ]; then
+  isMounted=1
+fi
 
 # set place where zipped TAR file gets stored
 defaultUploadPath="/mnt/hdd/temp/migration"

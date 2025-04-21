@@ -15,6 +15,8 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
     >&2 echo "# blitz.data.sh migration [umbrel|citadel|mynode] [partition] [-test] # will migrate partition to raspiblitz"
     >&2 echo "# blitz.data.sh migration hdd [menu-prepare|run]"
     >&2 echo "# blitz.data.sh uasp-fix [-info] # deactivates UASP for non supported USB HDD Adapters"
+    >&2 echo "# blitz.data.sh swap on # creates and activates an 8GB swapfile in / (Debian 12 only)"
+    >&2 echo "# blitz.data.sh swap off # deactivates and removes the swapfile"
     echo "error='missing parameters'"
     exit 1
 fi
@@ -65,6 +67,95 @@ if [ ${#action} -eq 0 ]; then
 fi
 
 ###################
+# SWAP MANAGEMENT
+###################
+
+if [ "$action" = "swap" ]; then
+
+    swapAction=$2
+    swapFilePath="/swapfile"
+    swapSizeGB=8
+
+    if [ "$swapAction" = "on" ]; then
+
+        echo "# blitz.data.sh swap on"
+        # check if swap is already active
+        if swapon --show | grep -q "${swapFilePath}"; then
+            echo "error='swapfile ${swapFilePath} already active'"
+            exit 1
+        fi
+        # check if file exists
+        if [ -f "${swapFilePath}" ]; then
+            echo "error='file ${swapFilePath} already exists but is not active swap'"
+            exit 1
+        fi
+        echo "# Creating ${swapSizeGB}GB swapfile at ${swapFilePath} ..."
+        fallocate -l ${swapSizeGB}G ${swapFilePath}
+        if [ $? -ne 0 ]; then
+            echo "error='failed to allocate space for swapfile'"
+            rm -f ${swapFilePath} 2>/dev/null
+            exit 1
+        fi
+        chmod 600 ${swapFilePath}
+        mkswap ${swapFilePath}
+        if [ $? -ne 0 ]; then
+            echo "error='failed to format swapfile'"
+            rm -f ${swapFilePath} 2>/dev/null
+            exit 1
+        fi
+        swapon ${swapFilePath}
+        if [ $? -ne 0 ]; then
+            echo "error='failed to activate swapfile'"
+            rm -f ${swapFilePath} 2>/dev/null
+            exit 1
+        fi
+        # make permanent
+        if ! grep -q "${swapFilePath} none swap sw 0 0" /etc/fstab; then
+            echo "${swapFilePath} none swap sw 0 0" >> /etc/fstab
+            echo "# Added swapfile to /etc/fstab"
+        fi
+        echo "result='swapfile created and activated'"
+        exit 0
+
+    elif [ "$swapAction" = "off" ]; then
+    
+        echo "# blitz.data.sh swap off"
+        # check if swap is active
+        if swapon --show | grep -q "${swapFilePath}"; then
+            echo "# Deactivating swapfile ${swapFilePath} ..."
+            swapoff ${swapFilePath}
+            if [ $? -ne 0 ]; then
+                echo "error='failed to deactivate swapfile'"
+                # continue trying to remove from fstab and delete file
+            fi
+        else
+            echo "# Swapfile ${swapFilePath} is not active."
+        fi
+        # remove from fstab
+        if grep -q "${swapFilePath} none swap sw 0 0" /etc/fstab; then
+            echo "# Removing swapfile entry from /etc/fstab ..."
+            sed -i "\#${swapFilePath} none swap sw 0 0#d" /etc/fstab
+        fi
+        # delete file
+        if [ -f "${swapFilePath}" ]; then
+            echo "# Deleting swapfile ${swapFilePath} ..."
+            rm -f ${swapFilePath}
+            if [ $? -ne 0 ]; then
+                echo "warning='failed to delete swapfile ${swapFilePath}'"
+            fi
+        else
+             echo "# Swapfile ${swapFilePath} not found."
+        fi
+        echo "result='swapfile deactivated and removed'"
+        exit 0
+
+    else
+        echo "error='unknown swap action'"
+        exit 1
+    fi
+fi
+
+###################
 # STATUS
 ###################
 
@@ -74,6 +165,14 @@ if [ "$action" = "status" ]; then
     userWantsInspect=0
     if [ "$2" = "-inspect" ]; then
         userWantsInspect=1
+    fi
+
+    ##########################
+    # CHECK SWAP STATUS
+    isSwapExternal=0
+    swapFilePath="/swapfile"
+    if swapon --show | grep -q "${swapFilePath}"; then
+        isSwapExternal=1
     fi
 
     ##########################
@@ -685,6 +784,7 @@ if [ "$action" = "status" ]; then
     echo "combinedDataStorage='${combinedDataStorage}'"
     echo "bootFromStorage='${bootFromStorage}'"
     echo "bootFromSD='${bootFromSD}'"
+    echo "isSwapExternal='${isSwapExternal}'"
 
     # save to cache when -inspect
     if [ ${userWantsInspect} -eq 1 ]; then

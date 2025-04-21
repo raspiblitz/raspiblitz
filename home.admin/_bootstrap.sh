@@ -950,7 +950,7 @@ if [ "${scenario}" != "ready" ] ; then
 
   # make sure all links between directories/drives are correct
   echo "Refreshing links between directories/drives .." >> ${logFile}
-  /home/admin/config.scripts/blitz.datadrive.sh link
+  /home/admin/config.scripts/blitz.data.sh link
 
   # copy over the raspiblitz.conf created from setup to HDD
   configExists=$(ls /mnt/hdd/raspiblitz.conf 2>/dev/null | grep -c "raspiblitz.conf")
@@ -1254,13 +1254,12 @@ fi
 # CLEAN HDD TEMP
 #####################################
 echo "CLEANING TEMP DRIVE/FOLDER" >> $logFile
-source <(/home/admin/config.scripts/blitz.datadrive.sh clean temp)
-if [ ${#error} -gt 0 ]; then
-  echo "FAIL: ${error}" >> $logFile
+if [ -d "/mnt/hdd/temp" ]; then
+  echo "# Cleaning /mnt/hdd/temp" >> $logFile
+  rm -rf /mnt/hdd/temp/*
 else
-  echo "OK: Temp cleaned" >> $logFile
+  echo "# No /mnt/hdd/temp folder found" >> $logFile
 fi
-
 
 ####################
 # FORCE UASP FLAG

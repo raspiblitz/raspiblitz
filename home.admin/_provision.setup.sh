@@ -202,7 +202,7 @@ if [ "${lightning}" == "lnd" ]; then
   fi
 
   # make sure all directories are linked
-  /home/admin/config.scripts/blitz.datadrive.sh link
+  /home/admin/config.scripts/blitz.data.sh link
 
   # check if now a config exists
   configLinkedCorrectly=$(ls /home/bitcoin/.lnd/lnd.conf | grep -c "lnd.conf")

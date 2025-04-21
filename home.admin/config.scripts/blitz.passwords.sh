@@ -15,7 +15,8 @@ fi
 # prepare hased password storage
 hashedPasswordSalt=""
 hashedPasswordStoragePath="/mnt/hdd/app-data/passwords"
-if [ $(df | grep -c "/mnt/hdd") -gt 0 ]; then
+
+if [ -L /mnt/hdd/app-data ]; then
   # check if path & salt file exists
   if [ $(sudo ls ${hashedPasswordStoragePath}/salt.txt | grep -c "salt.txt") -eq 0 ]; then
     echo "# creating salt & hashedPasswordStoragePath ..."

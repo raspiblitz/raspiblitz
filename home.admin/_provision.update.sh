@@ -28,19 +28,6 @@ echo "# _provision.update.sh" >> ${logFile}
 echo "###################################" >> ${logFile}
 /home/admin/_cache.sh set message "Running Data Update"
 
-# HDD BTRFS RAID REPAIR IF NEEDED
-source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
-if [ ${isBTRFS} -eq 1 ] && [ ${isMounted} -eq 1 ]; then
-  echo "CHECK BTRFS RAID"  >> ${logFile}
-  if [ ${isRaid} -eq 1 ] && [ ${#raidUsbDev} -eq 0 ]; then
-      echo "HDD was set to work in RAID, but RAID drive is not connected"  >> ${logFile}
-      echo "Trying to set HDD back to single mode."  >> ${logFile}
-      sudo /home/admin/config.scripts/blitz.datadrive.sh raid off >> ${logFile}
-  else
-      echo "OK"  >> ${logFile}
-  fi
-fi
-
 # LOAD DATA & PRECHECK
 
 # load old or init raspiblitz config

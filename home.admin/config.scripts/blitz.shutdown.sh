@@ -76,7 +76,7 @@ done
 if [ "${network}" != "" ]; then
   # stopping bitcoin (thru cli)
   echo "stop ${network}d (1) - please wait .."
-  timeout 10 sudo -u bitcoin ${network}-cli stop 2>/dev/null
+  timeout 20 sudo -u bitcoin ${network}-cli stop 2>/dev/null
 
   # stopping bitcoind (thru systemd)
   echo "stop ${network}d (2) - please wait .."
@@ -89,27 +89,7 @@ else
 fi
 
 # make sure drives are synced before shutdown
-source <(/home/admin/config.scripts/blitz.datadrive.sh status)
-if [ "${isBTRFS}" == "1" ] && [ "${isMounted}" == "1" ]; then
-  echo "STARTING BTRFS RAID DATA CHECK ..."
-  btrfs scrub start /mnt/hdd/
-fi
 sync
-
-# unmount HDD - try to kill all processes first #3114
-echo "# Killing the processes using /mnt/hdd"
-processesUsingDisk=$(lsof -t "/mnt/hdd")
-if [ -n "$processesUsingDisk" ]; then
-  while read -r pid; do
-    processName=$(ps -p $pid -o comm=)
-    echo "# Stop $processName with: 'kill -SIGTERM $pid'"
-    kill -SIGTERM $pid # Send SIGTERM signal
-    sleep 5            # Wait for the process to terminate
-  done <<<"$processesUsingDisk"
-fi
-
-echo "# Attempt to unmount /mnt/hdd"
-umount "/mnt/hdd"
 
 echo "starting shutdown ..."
 shutdown ${shutdownParams}

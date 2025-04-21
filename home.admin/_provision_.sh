@@ -125,10 +125,10 @@ rm -r /home/admin/tmpScriptDL
 cd
 
 ###### SWAP File
-source <(/home/admin/config.scripts/blitz.datadrive.sh status)
+source <(/home/admin/config.scripts/blitz.data.sh status)
 if [ ${isSwapExternal} -eq 0 ]; then
   echo "No external SWAP found - creating ... "
-  /home/admin/config.scripts/blitz.datadrive.sh swap on
+  /home/admin/config.scripts/blitz.data.sh swap on
 else
   echo "SWAP already OK"
 fi
@@ -847,15 +847,7 @@ fi
 # always at the end, because data drives will be just available again after a reboot
 echo "Prepare fstab for permanent data drive mounting .." >> ${logFile}
 # get info on data drive
-source <(/home/admin/config.scripts/blitz.datadrive.sh status)
-# update /etc/fstab
-echo "datadisk --> ${datadisk}" >> ${logFile}
-echo "datapartition --> ${datapartition}" >> ${logFile}
-if [ ${isBTRFS} -eq 0 ]; then
-  /home/admin/config.scripts/blitz.datadrive.sh fstab ${datapartition} >> ${logFile}
-else
-  /home/admin/config.scripts/blitz.datadrive.sh fstab ${datadisk} >> ${logFile}
-fi
+/home/admin/config.scripts/blitz.data.sh mount >> ${logFile}
 
 # MAKE SURE SERVICES ARE RUNNING
 echo "Make sure main services are running .." >> ${logFile}

@@ -84,7 +84,7 @@ lndHealthCheck()
 syncAndCheckLND() # from _provision.setup.sh
 {
   # make sure all directories are linked
-  sudo /home/admin/config.scripts/blitz.datadrive.sh link
+  sudo /home/admin/config.scripts/blitz.data.sh link
 
   # check if now a config exists
   configLinkedCorrectly=$(ls /home/bitcoin/.lnd/${netprefix}lnd.conf | grep -c "${netprefix}lnd.conf")

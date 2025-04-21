@@ -188,10 +188,10 @@ if [ "${action}" = "enable" ]; then
 
   echo -e "\n*** Enable Tor Service ***"
 
-  # check if HDD/SSD is available
-  if [ $(sudo df | grep -c "${hdd_path}") -lt 1 ]; then
-    echo "# FAIL: '${hdd_path}' needs to be mounted to enable Tor"
-    exit 2
+  # check if /mnt/hdd/app-data is available and symbolic link
+  if [ ! -L /mnt/hdd/app-data ]; then
+    echo "# FAIL: '/mnt/hdd/app-data' needs to be mounted/linked to enable Tor"
+    exit 1
   fi
 
   # create tor dirs and set permissions
