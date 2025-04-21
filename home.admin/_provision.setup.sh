@@ -82,7 +82,7 @@ cp /home/admin/assets/${network}.conf /home/admin/.${network}/${network}.conf
 chown -R admin:admin /home/admin/.${network} >>${logFile} 2>&1
 
 # make sure all directories are linked
-/home/admin/config.scripts/blitz.datadrive.sh link >> ${logFile}
+/home/admin/config.scripts/blitz.data.sh link >> ${logFile}
 
 # test bitcoin config
 confExists=$(ls /mnt/hdd/${network}/${network}.conf | grep -c "${network}.conf")
