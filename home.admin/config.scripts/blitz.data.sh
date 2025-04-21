@@ -775,6 +775,20 @@ if [ "$action" = "status" ]; then
         systemFreeKB=$(df -k | grep "/dev/${systemDevice}" | awk '{print $4}')
     fi
 
+    # get Temperature of drives
+    if [ ${#storageDevice} -gt 0 ]; then
+        storageCelsius=$(smartctl -A /dev/${storageDevice} | grep -E '^Temperature:|Temperature Sensor' | awk '{print $(NF-1)}' | head -n 1)
+    fi
+    if [ ${#dataDevice} -gt 0 ]; then
+        dataCelsius=$(smartctl -A /dev/${dataDevice} | grep -E '^Temperature:|Temperature Sensor' | awk '{print $(NF-1)}' | head -n 1)
+    fi
+    elif [ combinedDataStorage -eq 1 ]; then
+        dataCelsius="${storageCelsius}"
+    fi
+    if [ ${#systemDevice} -gt 0 ]; then
+        systemCelsius=$(smartctl -A /dev/${systemDevice} | grep -E '^Temperature:|Temperature Sensor' | awk '{print $(NF-1)}' | head -n 1)
+    fi
+
     # output the result
     echo "scenario='${scenario}'"
     echo "scenarioSystemCopy='${systemCopy}'"
@@ -785,6 +799,7 @@ if [ "$action" = "status" ]; then
     echo "storageFullMinGB='${storageFullMinGB}'"
     echo "storageFreeKB='${storageFreeKB}'"
     echo "storageUsePercent='${storageUsePercent}'"
+    echo "storageCelsius='${storageCelsius}'"
     echo "storageWarning='${storageWarning}'"
     echo "storagePartition='${storagePartition}'"
     echo "storageMountedPath='${storageMountedPath}'"
@@ -797,6 +812,7 @@ if [ "$action" = "status" ]; then
     echo "systemFreeKB='${systemFreeKB}'"
     echo "systemWarning='${systemWarning}'"
     echo "systemUsePercent='${systemUsePercent}'"
+    echo "systemCelsius='${systemCelsius}'"
     echo "systemPartition='${systemPartition}'"
     echo "systemMountedPath='${systemMountedPath}'"
     echo "dataDevice='${dataDevice}'"
@@ -806,6 +822,7 @@ if [ "$action" = "status" ]; then
     echo "dataFreeKB='${dataFreeKB}'"
     echo "dataWarning='${dataWarning}'"
     echo "dataUsePercent='${dataUsePercent}'"
+    echo "dataCelsius='${dataCelsius}'"
     echo "dataPartition='${dataPartition}'"
     echo "dataMountedPath='${dataMountedPath}'"
     echo "dataConfigFound='${dataConfigFound}'"
