@@ -746,6 +746,20 @@ if [ "$action" = "status" ]; then
         scenario="error:unknown-state"
     fi
 
+    # get free space on drives
+    if [ ${#storageDevice} -gt 0 ]; then
+        storageFreeKB=$(df -k | grep "/dev/${storageDevice}" | awk '{print $4}')
+    fi
+
+    if [ ${#dataDevice} -gt 0 ]; then
+        dataFreeKB=$(df -k | grep "/dev/${dataDevice}" | awk '{print $4}')
+    elif [ combinedDataStorage -eq 1 ]; then
+        dataFreeKB="${storageFreeKB}"
+    fi
+    if [ ${#systemDevice} -gt 0 ]; then
+        systemFreeKB=$(df -k | grep "/dev/${systemDevice}" | awk '{print $4}')
+    fi
+
     # output the result
     echo "scenario='${scenario}'"
     echo "scenarioSystemCopy='${systemCopy}'"
@@ -754,6 +768,7 @@ if [ "$action" = "status" ]; then
     echo "storageSizeGB='${storageSizeGB}'"
     echo "storagePrunedMinGB='${storagePrunedMinGB}'"
     echo "storageFullMinGB='${storageFullMinGB}'"
+    echo "storageFreeKB='${storageFreeKB}'"
     echo "storageWarning='${storageWarning}'"
     echo "storagePartition='${storagePartition}'"
     echo "storageMountedPath='${storageMountedPath}'"
@@ -763,6 +778,7 @@ if [ "$action" = "status" ]; then
     echo "systemDeviceName='${systemDeviceName}'"
     echo "systemSizeGB='${systemSizeGB}'"
     echo "systemMinGB='${systemMinGB}'"
+    echo "systemFreeKB='${systemFreeKB}'"
     echo "systemWarning='${systemWarning}'"
     echo "systemPartition='${systemPartition}'"
     echo "systemMountedPath='${systemMountedPath}'"
@@ -770,6 +786,7 @@ if [ "$action" = "status" ]; then
     echo "dataDeviceName='${dataDeviceName}'"
     echo "dataSizeGB='${dataSizeGB}'"
     echo "dataMinGB='${dataMinGB}'"
+    echo "dataFreeKB='${dataFreeKB}'"
     echo "dataWarning='${dataWarning}'"
     echo "dataPartition='${dataPartition}'"
     echo "dataMountedPath='${dataMountedPath}'"

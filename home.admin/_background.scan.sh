@@ -197,11 +197,6 @@ do
   # DATADRIVE
 
   source <(/home/admin/_cache.sh valid \
-    hdd_mounted \
-    hdd_capacity_bytes \
-    hdd_capacity_gb \
-    hdd_free_bytes \
-    hdd_free_gb \
     hdd_used_info \
     hdd_blockchain_data \
   )
@@ -261,19 +256,11 @@ do
   # HARDDRIVE
 
   # info on storage medium
-  source <(/home/admin/_cache.sh valid hdd_mounted)
+  source <(/home/admin/_cache.sh valid hdd_used_info)
   if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE2} ]; then
     echo "updating: /home/admin/config.scripts/blitz.datadrive.sh status"
     source <(/home/admin/config.scripts/blitz.datadrive.sh status)
-    /home/admin/_cache.sh set hdd_mounted "${isMounted}"
-    /home/admin/_cache.sh set hdd_capacity_bytes "${hddBytes}"
-    /home/admin/_cache.sh set hdd_capacity_gb "${hddGigaBytes}"
-    /home/admin/_cache.sh set hdd_free_bytes "${hddDataFreeBytes}"
-    /home/admin/_cache.sh set hdd_free_gb "${hddDataFreeGB}"
-    /home/admin/_cache.sh set hdd_used_info "${hddUsedInfo}"
-    /home/admin/_cache.sh set hddTemperature "${hddTemperature}"
-    /home/admin/_cache.sh set hddTBSize "${hddTBSize}"
-    
+    /home/admin/_cache.sh set hdd_used_info "${hddUsedInfo}" # construct here
   fi
 
   # exit if still setup or higher system stopped

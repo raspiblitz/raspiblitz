@@ -18,10 +18,10 @@ fi
 # check if HDD/SSD has enough space to run compaction (at least again the size as the channel.db at the moment)
 channelDBsizeKB=$(sudo ls -l --block-size=K /mnt/hdd/lnd/data/graph/mainnet/channel.db | cut -d " " -f5 | tr -dc '0-9')
 echo "# channelDBsizeKB(${channelDBsizeKB})"
-source <(sudo /home/admin/config.scripts/blitz.datadrive.sh status)
-echo "# hddDataFreeKB(${hddDataFreeKB})"
-if [ "${channelDBsizeKB}" != "" ] && [ "${hddDataFreeKB}" != "" ] && [ ${hddDataFreeKB} -lt ${channelDBsizeKB} ]; then
-  echo "error='HDD/SSD free space is too low to run LND compact'"
+source <(sudo /home/admin/config.scripts/blitz.data.sh status)
+echo "# hddDataFreeKB(${dataFreeKB})"
+if [ "${channelDBsizeKB}" != "" ] && [ "${dataFreeKB}" != "" ] && [ ${dataFreeKB} -lt ${channelDBsizeKB} ]; then
+  echo "error='HDD/SSD/NVMe free space is too low to run LND compact'"
   exit 1
 fi
 
