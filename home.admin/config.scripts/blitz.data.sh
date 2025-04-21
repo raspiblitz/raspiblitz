@@ -865,6 +865,16 @@ if [ "$action" = "link" ]; then
     chown -R bitcoin:bitcoin ${dataMountedPath}/app-data ${mainMountPoint}/app-data
     chmod -R 755 ${dataMountedPath}/app-data ${mainMountPoint}/app-data
 
+    # /temp
+    rm -rf ${storageMountedPath}/temp 2>/dev/null
+    mkdir -p ${storageMountedPath}/temp
+    rm -rf ${mainMountPoint}/temp 2>/dev/null
+    mkdir -p ${mainMountPoint}/temp
+    ln -s ${storageMountedPath}/temp ${mainMountPoint}/temp
+    chown -R bitcoin:bitcoin ${mainMountPoint}/temp
+    chmod -R 777 ${storageMountedPath}/temp
+    chmod -R 777 ${mainMountPoint}/temp
+
     ####################################
     # NEW->OLD: links for old layout compatibility
     # when storage is new layout
@@ -960,6 +970,12 @@ if [ "$action" = "link" ]; then
     else
         echo "# OLD->OLD: Skipping raspiblitz.conf (not found)"
     fi
+
+    ### bitcoin user symbol links
+    ln -s /mnt/hdd/bitcoin /home/bitcoin/.bitcoin
+    chown -R bitcoin:bitcoin /home/bitcoin/.bitcoin
+    ln -s /mnt/hdd/lnd /home/bitcoin/.lnd
+    chown -R bitcoin:bitcoin /home/bitcoin/.lnd
 
     exit 0
 fi
