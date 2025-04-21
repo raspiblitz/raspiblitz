@@ -60,6 +60,17 @@ fi
 ############################################
 # SETUP DONE CONFIRMATION (Konfetti Moment)
 
+# when old migration drive is still mounted
+
+if [ -f /mnt/hdd/app-storage/.migrated ]; then
+  # remove the migration drive
+  rm /mnt/hdd/app-storage/.migrated
+  whiptail --title " Drive Migration Done " --msgbox "\
+Please make sure that the old drive is now disconnected.\n\n\
+Keep as backup until everything works with the new drive and then delete old drive securely.\n
+" 10 65
+fi
+
 # when coming from fresh setup
 if [ "${setupPhase}" == "setup" ]; then
   clear

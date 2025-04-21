@@ -118,7 +118,7 @@ if [ "$action" = "swap" ]; then
         exit 0
 
     elif [ "$swapAction" = "off" ]; then
-    
+
         echo "# blitz.data.sh swap off"
         # check if swap is active
         if swapon --show | grep -q "${swapFilePath}"; then
@@ -1877,6 +1877,10 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
                 exit 1
             fi
         fi
+
+        # add flag to indicate that data was migrated
+        touch /mnt/migrate_storage/app-storage/.migrated
+        chmod 777 /mnt/migrate_storage/app-storage/.migrated
 
         # unmount storage partition
         umount /mnt/migrate_storage
