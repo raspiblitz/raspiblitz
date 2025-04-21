@@ -749,17 +749,17 @@ if [ "$action" = "status" ]; then
     # get used space on drives in GB
     storageUsePercent=""
     if [ ${#storagePartition} -gt 0 ]; then
-        storageUsePercent=$(df "/dev/${storagePartition}" 2>/dev/null | | awk 'NR==2 {sub(/%/, "", $5); print $5}')
+        storageUsePercent=$(df "/dev/${storagePartition}" 2>/dev/null | awk 'NR==2 {sub(/%/, "", $5); print $5}')
     fi
     dataUsePercent=""
     if [ ${#dataPartition} -gt 0 ]; then
-        dataUsePercent=$(df "/dev/${dataPartition}" 2>/dev/null | | awk 'NR==2 {sub(/%/, "", $5); print $5}')
+        dataUsePercent=$(df "/dev/${dataPartition}" 2>/dev/null | awk 'NR==2 {sub(/%/, "", $5); print $5}')
     elif [ ${combinedDataStorage} -eq 1 ] && [ ${#storagePartition} -gt 0 ]; then
         dataUsePercent="${storageUsePercent}"
     fi
     systemUsePercent=""
     if [ ${#systemPartition} -gt 0 ]; then
-        systemUsePercent=$(df "/dev/${systemPartition}" 2>/dev/null | | awk 'NR==2 {sub(/%/, "", $5); print $5}')
+        systemUsePercent=$(df "/dev/${systemPartition}" 2>/dev/null | awk 'NR==2 {sub(/%/, "", $5); print $5}')
     fi
 
     # get free space on drives
