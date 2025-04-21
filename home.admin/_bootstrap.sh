@@ -1237,19 +1237,6 @@ else
   echo "skipping LND credentials sync" >> $logFile
 fi
 
-################################
-# MOUNT BACKUP DRIVE
-# if "localBackupDeviceUUID" is set in
-# raspiblitz.conf mount it on boot
-################################
-echo "Checking if additional backup device is configured .. (${localBackupDeviceUUID})" >> $logFile
-if [ "${localBackupDeviceUUID}" != "" ] && [ "${localBackupDeviceUUID}" != "off" ]; then
-  echo "Yes - Mounting BackupDrive: ${localBackupDeviceUUID}" >> $logFile
-  /home/admin/config.scripts/blitz.backupdevice.sh mount >> $logFile
-else
-  echo "No additional backup device was configured." >> $logFile
-fi
-
 #####################################
 # CLEAN HDD TEMP
 #####################################

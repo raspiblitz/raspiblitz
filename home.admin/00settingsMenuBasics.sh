@@ -38,10 +38,6 @@ echo "# map nextcloudbackup to on/off"
 NextcloudBackup="off"
 if [ $nextcloudBackupServer ] && [ $nextcloudBackupUser ] && [ $nextcloudBackupPassword ]; then NextcloudBackup="on"; fi
 
-echo "# map localbackup to on/off"
-LocalBackup="off"
-if [ ${#localBackupDeviceUUID} -gt 0 ] && [ "${localBackupDeviceUUID}" != "off" ]; then LocalBackup="on"; fi
-
 echo "# map zerotier to on/off"
 zerotierSwitch="off"
 if [ "${zerotier}" != "off" ]; then zerotierSwitch="on"; fi
@@ -126,7 +122,6 @@ OPTIONS+=(p 'Parallel Testnet/Signet' ${parallelTestnets})
 # Lightning options (only LND and/or CLN)
 if [ "${lndNode}" == "on" ] || [ "${clNode}" == "on" ]; then
   OPTIONS+=(x 'SCB/Emergency-Backup on Nextcloud' ${NextcloudBackup})
-  OPTIONS+=(e 'SCB/Emergency-Backup USB Drive' ${LocalBackup})
 fi
 
 # LND & options (only when running LND)
@@ -297,17 +292,6 @@ if [ "${NextcloudBackup}" != "${choice}" ]; then
   fi
 else
   echo "Nextcloud backup setting unchanged."
-fi
-
-# LocalBackup process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "e")
-if [ ${check} -eq 1 ]; then choice="on"; fi
-if [ "${LocalBackup}" != "${choice}" ]; then
-  echo "BackupdDevice Setting changed .."
-  anychange=1
-  sudo /home/admin/config.scripts/blitz.backupdevice.sh ${choice}
-else
-  echo "BackupdDevice setting unchanged."
 fi
 
 # ZeroTier process choice
