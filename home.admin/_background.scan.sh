@@ -258,14 +258,18 @@ do
   # info on storage medium
   source <(/home/admin/_cache.sh valid hdd_used_info)
   if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE2} ]; then
-    echo "updating: /home/admin/config.scripts/blitz.datadrive.sh status"
-    source <(/home/admin/config.scripts/blitz.datadrive.sh status)
+    echo "updating: /home/admin/config.scripts/blitz.data.sh status"
+    source <(/home/admin/config.scripts/blitz.data.sh status)
 
     # get TB from storageSizeGB 
     storageSizeTB=$(echo "scale=2; ${storageSizeGB}/1024" | bc)
-    hddUsedInfo="SSD ${storageSizeTB}TB ${storageUsePercent}%"
-
+    temp=""
+    if [ "${storageCelsius}" != "" ]; then
+      temp="${storageCelsius}°C"
+    fi
+    hddUsedInfo="SSD ${storageSizeTB}TB ${storageUsePercent}% ${temp}"
     /home/admin/_cache.sh set hdd_used_percent "${hddUsedInfo}" # construct here
+    /home/admin/_cache.sh set hdd_temperature_celsius "${storageCelsius}" # construct here
     /home/admin/_cache.sh set hdd_used_info "${hddUsedInfo}" # construct here
   fi
 
