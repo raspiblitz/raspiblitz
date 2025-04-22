@@ -290,7 +290,7 @@ if [ "$action" = "status" ]; then
                 fi
                 
                 # check if its a combined data & storage partition
-                if [ -d "${mountPath}/app-data" ]; then
+                if [ -f "${mountPath}/app-data/raspiblitz.conf" ] || [ -f "${mountPath}/raspiblitz.conf" ]; then
                     if [ ${#dataDevice} -eq 0 ]; then
                         combinedDataStorage=1
                         dataPartition="${name}"
@@ -507,8 +507,6 @@ if [ "$action" = "status" ]; then
         storageSizeGB=$(echo "${listOfDevices}" | head -n1 | awk '{print $2}')
         # remove the storage device from the list
         listOfDevices=$(echo "${listOfDevices}" | grep -v "${storageDevice}")
-
-        echo "${listOfDevices}"
 
         if [ ${#storageDevice} -gt 0 ] && [ "${computerType}" = "pc" ]; then
             echo "# on bare metal PC - storage device is the system boot device"
