@@ -1133,6 +1133,7 @@ if [ "${scenario}" != "ready" ] ; then
 
   # delete provision in progress flag
   rm /home/admin/provision.flag
+  rm /var/cache/raspiblitz/hdd-inspect/raspiblitz.setup 2>/dev/null
 
   # mark provision process done
   /home/admin/_cache.sh set message "Provision Done"
