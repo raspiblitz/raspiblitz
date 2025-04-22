@@ -160,6 +160,7 @@ if [ "${provisionFlagExists}" = "1" ]; then
   /home/admin/_cache.sh set state "inconsistentsystem"
   /home/admin/_cache.sh set message "provision did not ran thru"
   echo "FAIL: 'provision did not ran thru' - need fresh sd card!" >> ${logFile}
+  rm /mnt/hdd/app-data/raspiblitz.setup
   exit 1
 fi
 
@@ -1133,7 +1134,7 @@ if [ "${scenario}" != "ready" ] ; then
 
   # delete provision in progress flag
   rm /home/admin/provision.flag
-  rm /var/cache/raspiblitz/hdd-inspect/raspiblitz.setup 2>/dev/null
+  rm /mnt/hdd/app-data/raspiblitz.setup 2>/dev/null
 
   # mark provision process done
   /home/admin/_cache.sh set message "Provision Done"

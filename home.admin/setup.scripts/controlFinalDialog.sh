@@ -64,7 +64,7 @@ fi
 
 if [ -f /mnt/hdd/app-storage/.migrated ]; then
   # remove the migration drive
-  rm -f /mnt/hdd/app-storage/.migrated
+  sudo rm -f /mnt/hdd/app-storage/.migrated
   whiptail --title " Drive Migration Done " --msgbox "\
 Please make sure that the old drive is now disconnected.\n\n\
 Keep as backup until everything works with the new drive and then delete old drive securely.\n
