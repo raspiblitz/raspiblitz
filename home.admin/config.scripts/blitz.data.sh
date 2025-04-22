@@ -465,10 +465,11 @@ if [ "$action" = "status" ]; then
         biggerSizeGB=$(echo "${listOfBiggerDevices}" | head -n1 | awk '{print $2}')
     fi
 
-    # echo "# installDevice: ${installDevice} (${installDeviceActive}) (${installDeviceReadOnly})"
-    # echo "# storageDevice: ${storageDevice} (${storageSizeGB}GB) (${storageMountedPath})"
-    # echo "# systemDevice: ${systemDevice} (${systemSizeGB}GB) (${systemMountedPath})"
-    # echo "# biggerDevice: ${biggerDevice} (${biggerSizeGB}GB)"
+    echo "# installDevice: ${installDevice} (${installDeviceActive}) (${installDeviceReadOnly})"
+    echo "# storageDevice: ${storageDevice} (${storageSizeGB}GB) (${storageMountedPath})"
+    echo "# systemDevice: ${systemDevice} (${systemSizeGB}GB) (${systemMountedPath})"
+    echo "# biggerDevice: ${biggerDevice} (${biggerSizeGB}GB)"
+    echo "# combinedDataStorage: ${combinedDataStorage}"
 
     ########################
     # PROPOSE LAYOUT
