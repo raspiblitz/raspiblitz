@@ -290,7 +290,7 @@ if [ "$action" = "status" ]; then
                 fi
                 
                 # check if its a combined data & storage partition
-                if [ -f "${mountPath}/app-data/raspiblitz.conf" ] || [ -f "${mountPath}/raspiblitz.conf" ]; then
+                if [ -d "${mountPath}/app-data" ]; then
                     if [ ${#dataDevice} -eq 0 ]; then
                         combinedDataStorage=1
                         dataPartition="${name}"
@@ -1337,8 +1337,9 @@ fi
 if [ "$action" = "copy-system" ]; then
 
     actionDevice=$2
+    actionDeviceType=$(echo "$3" | tr '[:upper:]' '[:lower:]')
     echo "STARTED blitz.data.sh ${action} (${actionDevice})..." >> ${logFile}
-
+        
     # check that device is set & exists & not mounted
     if [ ${#actionDevice} -eq 0 ]; then
         echo "error='missing device'"
@@ -1362,7 +1363,6 @@ if [ "$action" = "copy-system" ]; then
         actionDevicePartitionBase="${actionDevice}p"
     fi
 
-    actionDeviceType=$(echo "$3" | tr '[:upper:]' '[:lower:]')
     if [ "${actionDeviceType}" != "system" ] && [ "${actionDeviceType}" != "storage" ]; then
         echo "# actionDeviceType(${actionDeviceType}) UNKOWN" >> ${logFile}
         echo "error='type not supported'"
