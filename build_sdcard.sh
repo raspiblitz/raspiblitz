@@ -364,8 +364,11 @@ for SOURCE in "${REQUIRED_SOURCES[@]}"; do
   fi
 done
 
+export DEBIAN_FRONTEND=noninteractive
 apt-get update -y
-apt-get upgrade -f -y
+apt-get upgrade -f -y \
+  -o Dpkg::Options::="--force-confdef" \
+  -o Dpkg::Options::="--force-confold"
 
 echo -e "\n*** SOFTWARE UPDATE ***"
 # based on https://raspibolt.org/system-configuration.html#system-update
