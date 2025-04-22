@@ -508,6 +508,8 @@ if [ "$action" = "status" ]; then
         # remove the storage device from the list
         listOfDevices=$(echo "${listOfDevices}" | grep -v "${storageDevice}")
 
+        echo "${listOfDevices}"
+
         if [ ${#storageDevice} -gt 0 ] && [ "${computerType}" = "pc" ]; then
             echo "# on bare metal PC - storage device is the system boot device"
             bootFromStorage=1
