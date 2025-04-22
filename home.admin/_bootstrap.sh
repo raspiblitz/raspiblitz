@@ -746,7 +746,7 @@ if [ "${scenario}" != "ready" ] ; then
 
   if [ "${setupCommand}" = "setup" ] || [ "${setupCommand}" = "recover" ]; then
 
-    echo "SYSTEM COPY OF FRESH SYSTEM" >> ${logFile}
+    echo "FORMAT DRIVES" >> ${logFile}
     /home/admin/_cache.sh set state "hdd-format"
     /home/admin/_cache.sh set message "formatting drives"
 
@@ -800,9 +800,16 @@ if [ "${scenario}" != "ready" ] ; then
     if [ "${systemCopy}" = "1" ]; then
 
       echo "SYSTEM COPY OF FRESH SYSTEM" >> ${logFile}
+      source <(/home/admin/config.scripts/blitz.data.sh status)
+      echo "bootFromStorage(${bootFromStorage})" >> ${logFile}
+      echo "storageDevice(${storageDevice})" >> ${logFile}
+      echo "systemDevice(${systemDevice})" >> ${logFile}
+      echo "dataDevice(${dataDevice})" >> ${logFile}
+
       /home/admin/_cache.sh set state "systemcopy"
       /home/admin/_cache.sh set message "copying system"
 
+      echo "bootFromStorage(${bootFromStorage})" >> ${logFile}
       if [ "${bootFromStorage}" = "0" ]; then
         /home/admin/config.scripts/blitz.data.sh copy-system "${storageDevice}" storage
         if [ $? -ne 0 ]; then

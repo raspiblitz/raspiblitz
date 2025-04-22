@@ -1335,10 +1335,10 @@ fi
 
 if [ "$action" = "copy-system" ]; then
 
-    echo "STARTED blitz.data.sh ${action} ..." >> ${logFile}
+    actionDevice=$2
+    echo "STARTED blitz.data.sh ${action} (${actionDevice})..." >> ${logFile}
 
     # check that device is set & exists & not mounted
-    actionDevice=$2
     if [ ${#actionDevice} -eq 0 ]; then
         echo "error='missing device'"
         echo "error='missing device'" >> ${logFile}
