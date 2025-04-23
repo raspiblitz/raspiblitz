@@ -362,8 +362,7 @@ elif [ "${eventID}" == "hdd-format" ]; then
 
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "
 PREPARING DRIVES
-...
-" 6 20
+" 5 20
 
 elif [ "${eventID}" == "system-change" ]; then
 
