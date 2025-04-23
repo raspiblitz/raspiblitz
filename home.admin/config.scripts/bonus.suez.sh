@@ -16,7 +16,7 @@ PGPsigner="prusnak"
 PGPpubkeyLink="https://rusnak.io/public/pgp.txt"
 PGPpubkeyFingerprint="91F3B339B9A02A3D"
 
-source /mnt/hdd/raspiblitz.conf
+source /mnt/hdd/app-data/raspiblitz.conf
 
 # show info menu
 if [ "$1" = "menu" ]; then

@@ -3,7 +3,7 @@ clear
 
 # load raspiblitz config data
 source /home/admin/raspiblitz.info
-source /mnt/hdd/raspiblitz.conf
+source /mnt/hdd/app-data/raspiblitz.conf
 
 # make sure txindex and wallet of bitcoin is on
 /home/admin/config.scripts/network.wallet.sh on

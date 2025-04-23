@@ -13,7 +13,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ];
   exit 1
 fi
 
-source /mnt/hdd/raspiblitz.conf 2>/dev/null
+source /mnt/hdd/app-data/raspiblitz.conf 2>/dev/null
 
 cd /home/admin/raspiblitz
 

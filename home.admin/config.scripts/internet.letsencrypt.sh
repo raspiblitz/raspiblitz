@@ -10,7 +10,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ];
   exit 1
 fi
 
-source /mnt/hdd/raspiblitz.conf
+source /mnt/hdd/app-data/raspiblitz.conf
 
 # make sure the HDD is mounted
 mountpoint -q /mnt/hdd || { echo "# internet.letsencrypt.sh - /mnt/hdd is not mounted. Exiting."; exit 1; }

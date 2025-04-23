@@ -13,7 +13,7 @@ fi
 
 ## get system configs
 source /home/admin/raspiblitz.info 2>/dev/null
-source /mnt/hdd/raspiblitz.conf 2>/dev/null
+source /mnt/hdd/app-data/raspiblitz.conf 2>/dev/null
 
 # GETTING STATUS
 if [ "$1" = "status" ]; then

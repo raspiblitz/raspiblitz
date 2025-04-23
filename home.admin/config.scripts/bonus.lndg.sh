@@ -16,7 +16,7 @@ fi
 # check and load raspiblitz config
 # to know which network is running
 source /home/admin/raspiblitz.info
-source /mnt/hdd/raspiblitz.conf
+source /mnt/hdd/app-data/raspiblitz.conf
 
 if [ "$1" = "status" ] || [ "$1" = "menu" ]; then
 

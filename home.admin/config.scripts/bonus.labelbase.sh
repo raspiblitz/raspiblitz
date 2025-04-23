@@ -37,7 +37,7 @@ fi
 echo "# Running: 'bonus.${APPID}.sh $*'"
 
 # check & load raspiblitz config
-source /mnt/hdd/raspiblitz.conf
+source /mnt/hdd/app-data/raspiblitz.conf
 
 if [ -f "${LABELBASE_HOME}/exports.sh" ]; then
   echo "INFO: The file '${LABELBASE_HOME}/exports.sh' already exists."

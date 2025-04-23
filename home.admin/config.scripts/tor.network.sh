@@ -69,7 +69,7 @@ deactivateBitcoinOverTor()
 # check and load raspiblitz config
 # to know which network is running
 [ -f "/home/admin/raspiblitz.info" ] && . /home/admin/raspiblitz.info
-[ -f "/mnt/hdd/raspiblitz.conf" ] && . /mnt/hdd/raspiblitz.conf
+[ -f "/mnt/hdd/app-data/raspiblitz.conf" ] && . /mnt/hdd/app-data/raspiblitz.conf
 
 torActive=$(systemctl is-active tor@default | grep -c "^active")
 curl --socks5 127.0.0.1:9050 --socks5-hostname 127.0.0.1:9050 -m 5 -s https://check.torproject.org/api/ip | grep -q "\"IsTor\":true" && torFunctional=1
@@ -98,7 +98,7 @@ case "$1" in
 
     # make sure the network was set (by sourcing raspiblitz.conf)
     if [ ${#network} -eq 0 ]; then
-      echo "# FAIL - unknown network due to missing /mnt/hdd/raspiblitz.conf"
+      echo "# FAIL - unknown network due to missing raspiblitz.conf"
       echo "# switching Tor config on for RaspiBlitz services is just possible after basic hdd/ssd setup"
       echo "# but with new 'Tor by default' basic Tor socks will already be available from the start"
       exit 1
@@ -111,7 +111,7 @@ case "$1" in
     activateBitcoinOverTor
 
     # ACTIVATE APPS OVER TOR
-    . /mnt/hdd/raspiblitz.conf 2>/dev/null
+    . /mnt/hdd/app-data/raspiblitz.conf 2>/dev/null
     /home/admin/config.scripts/tor.onion-service.sh web80 80 80 443 443
     /home/admin/config.scripts/tor.onion-service.sh debuglogs 80 6969
     [ "${BTCRPCexplorer}" = "on" ] && /home/admin/config.scripts/tor.onion-service.sh btc-rpc-explorer 80 3022 443 3023

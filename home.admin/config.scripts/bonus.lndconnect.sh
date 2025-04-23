@@ -20,7 +20,7 @@ sudo apt-get install -y qrencode 1>/dev/null 2>/dev/null
 
 # load raspiblitz config data
 source /home/admin/raspiblitz.info
-source /mnt/hdd/raspiblitz.conf
+source /mnt/hdd/app-data/raspiblitz.conf
 
 #### PARAMETER
 

@@ -10,7 +10,7 @@ fi
 
 # load raspiblitz info & conf
 source /home/admin/raspiblitz.info
-source /mnt/hdd/raspiblitz.conf
+source /mnt/hdd/app-data/raspiblitz.conf
 
 # 1. parameter (default is unlock)
 action="$1"

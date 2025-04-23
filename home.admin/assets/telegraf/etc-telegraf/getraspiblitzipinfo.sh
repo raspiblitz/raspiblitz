@@ -54,7 +54,7 @@ declare -a has_changed
 
 
 # load local config (but should also work if not available)
-source /mnt/hdd/raspiblitz.conf 2>/dev/null
+source /mnt/hdd/app-data/raspiblitz.conf 2>/dev/null
 
 
 

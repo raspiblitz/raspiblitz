@@ -3,7 +3,7 @@
 # get raspiblitz config
 echo "# get raspiblitz config"
 source /home/admin/raspiblitz.info
-source /mnt/hdd/raspiblitz.conf
+source /mnt/hdd/app-data/raspiblitz.conf
 
 source <(/home/admin/config.scripts/network.aliases.sh getvars cl $1)
 
@@ -117,7 +117,7 @@ case $CHOICE in
         echo "# Restarting the blitzapi ..."
         sudo systemctl restart blitzapi
       fi
-      echo "# OK - lightning=cl is set in /mnt/hdd/raspiblitz.conf"
+      echo "# OK - lightning=cl is set in /mnt/hdd/app-data/raspiblitz.conf"
       echo
       echo "Press ENTER to return to main menu."
       read key

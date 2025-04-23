@@ -29,7 +29,7 @@ fi
 
 echo "# Running: 'bonus.${APPID}.sh $*'"
 
-source /mnt/hdd/raspiblitz.conf
+source /mnt/hdd/app-data/raspiblitz.conf
 
 isInstalled=$(sudo ls /etc/systemd/system/${APPID}.service 2>/dev/null | grep -c "${APPID}.service")
 isRunning=$(sudo systemctl status ${APPID} 2>/dev/null | grep -c 'active (running)')

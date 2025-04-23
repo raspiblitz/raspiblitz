@@ -335,7 +335,7 @@ WantedBy=multi-user.target
   fi
 }
 
-source /mnt/hdd/raspiblitz.conf
+source /mnt/hdd/app-data/raspiblitz.conf
 
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then

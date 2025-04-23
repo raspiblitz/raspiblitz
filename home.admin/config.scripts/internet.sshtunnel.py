@@ -173,7 +173,7 @@ def on(restore_on_update=False):
 
     # write ssh tunnel data to raspiblitz config (for update with new sd card)
     print("*** Updating RaspiBlitz Config")
-    with open('/mnt/hdd/raspiblitz.conf') as f:
+    with open('/mnt/hdd/app-data/raspiblitz.conf') as f:
         file_content = f.read()
     if file_content.count("sshtunnel=") == 0:
         file_content = file_content + "\nsshtunnel=''"
@@ -216,7 +216,7 @@ def on(restore_on_update=False):
             print("No need to set fixed address for LND with raspiblitz lndAddress")
     file_content = "".join([s for s in file_content.splitlines(True) if s.strip("\r\n")]) + "\n"
     print(file_content)
-    with open("/mnt/hdd/raspiblitz.conf", "w") as text_file:
+    with open("/mnt/hdd/app-data/raspiblitz.conf", "w") as text_file:
         text_file.write(file_content)
     print("DONE")
 
@@ -264,12 +264,12 @@ def off():
     print()
 
     print("*** Removing SSH Tunnel data from RaspiBlitz config")
-    with open('/mnt/hdd/raspiblitz.conf') as f:
+    with open('/mnt/hdd/app-data/raspiblitz.conf') as f:
         file_content = f.read()
     file_content = re.sub("sshtunnel=.*", "", file_content)
     file_content = re.sub("\n\n", "\n", file_content)
     print(file_content)
-    with open("/mnt/hdd/raspiblitz.conf", "w") as text_file:
+    with open("/mnt/hdd/app-data/raspiblitz.conf", "w") as text_file:
         text_file.write(file_content)
     print("OK Done")
 

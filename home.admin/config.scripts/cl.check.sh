@@ -12,7 +12,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ];
 fi
 
 # load variables
-source /mnt/hdd/raspiblitz.conf
+source /mnt/hdd/app-data/raspiblitz.conf
 
 source <(/home/admin/config.scripts/network.aliases.sh getvars cl $2)
 

@@ -3,7 +3,7 @@
 # get raspiblitz config
 echo "get raspiblitz config"
 source /home/admin/raspiblitz.info
-source /mnt/hdd/raspiblitz.conf
+source /mnt/hdd/app-data/raspiblitz.conf
 
 echo "services default values"
 if [ ${#runBehindTor} -eq 0 ]; then runBehindTor="off"; fi
@@ -271,7 +271,7 @@ if [ "${BTCPayServer}" != "${choice}" ]; then
   fi
 
   # check if TOR is installed
-  source /mnt/hdd/raspiblitz.conf
+  source /mnt/hdd/app-data/raspiblitz.conf
   if [ "${choice}" =  "on" ] && [ "${runBehindTor}" = "off" ]; then
     whiptail --title " BTCPayServer needs TOR " --msgbox "\
 At the moment the BTCPayServer on the RaspiBlitz needs TOR.\n
@@ -308,7 +308,7 @@ if [ "${lndmanage}" != "${choice}" ]; then
   echo "lndmanage Setting changed .."
   anychange=1
   sudo -u admin /home/admin/config.scripts/bonus.lndmanage.sh ${choice}
-  source /mnt/hdd/raspiblitz.conf
+  source /mnt/hdd/app-data/raspiblitz.conf
   if [ "${lndmanage}" =  "on" ]; then
     sudo -u admin /home/admin/config.scripts/bonus.lndmanage.sh menu
   fi
@@ -323,7 +323,7 @@ if [ "${chantools}" != "${choice}" ]; then
   echo "chantools Setting changed .."
   anychange=1
   sudo -u admin /home/admin/config.scripts/bonus.chantools.sh ${choice}
-  source /mnt/hdd/raspiblitz.conf
+  source /mnt/hdd/app-data/raspiblitz.conf
   if [ "${chantools}" =  "on" ]; then
     sudo -u admin /home/admin/config.scripts/bonus.chantools.sh menu
   fi
@@ -338,7 +338,7 @@ if [ "${bos}" != "${choice}" ]; then
   echo "Balance of Satoshis Setting changed .."
   anychange=1
   sudo -u admin /home/admin/config.scripts/bonus.bos.sh ${choice}
-  source /mnt/hdd/raspiblitz.conf
+  source /mnt/hdd/app-data/raspiblitz.conf
   if [ "${bos}" =  "on" ]; then
     sudo -u admin /home/admin/config.scripts/bonus.bos.sh menu
   fi
@@ -353,7 +353,7 @@ if [ "${pyblock}" != "${choice}" ]; then
   echo "PyBLOCK Setting changed .."
   anychange=1
   sudo -u admin /home/admin/config.scripts/bonus.pyblock.sh ${choice}
-  source /mnt/hdd/raspiblitz.conf
+  source /mnt/hdd/app-data/raspiblitz.conf
   if [ "${pyblock}" =  "on" ]; then
     sudo -u admin /home/admin/config.scripts/bonus.pyblock.sh menu
   fi
@@ -503,7 +503,7 @@ if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${joinmarket}" != "${choice}" ]; then
   echo "JoinMarket setting changed .."
   # check if TOR is installed
-  source /mnt/hdd/raspiblitz.conf
+  source /mnt/hdd/app-data/raspiblitz.conf
   if [ "${choice}" =  "on" ] && [ "${runBehindTor}" = "off" ]; then
     whiptail --title " Use Tor with JoinMarket" --msgbox "\
 It is highly recommended to use Tor with JoinMarket.\n
@@ -532,7 +532,7 @@ if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${jam}" != "${choice}" ]; then
   echo "Jam setting changed .."
   # check if TOR is installed
-  source /mnt/hdd/raspiblitz.conf
+  source /mnt/hdd/app-data/raspiblitz.conf
   if [ "${choice}" =  "on" ] && [ "${runBehindTor}" = "off" ]; then
     whiptail --title " Use Tor with Jam" --msgbox "\
 It is highly recommended to use Tor with Jam.\n
@@ -589,7 +589,7 @@ if [ "${whitepaper}" != "${choice}" ]; then
   echo "Whitepaper setting changed .."
   anychange=1
   sudo -u admin /home/admin/config.scripts/bonus.whitepaper.sh ${choice}
-  source /mnt/hdd/raspiblitz.conf
+  source /mnt/hdd/app-data/raspiblitz.conf
   if [ "${whitepaper}" =  "on" ]; then
     sudo -u admin /home/admin/config.scripts/bonus.whitepaper.sh menu
   fi
@@ -604,7 +604,7 @@ if [ "${labelbase}" != "${choice}" ]; then
   echo "Labelbase setting changed .."
   anychange=1
   sudo -u admin /home/admin/config.scripts/bonus.labelbase.sh ${choice}
-  source /mnt/hdd/raspiblitz.conf
+  source /mnt/hdd/app-data/raspiblitz.conf
   if [ "${labelbase}" =  "on" ]; then
     sudo -u admin /home/admin/config.scripts/bonus.labelbase.sh menu
   fi
@@ -619,7 +619,7 @@ if [ "${publicpool}" != "${choice}" ]; then
   echo "Publicpool setting changed .."
   anychange=1
   sudo -u admin /home/admin/config.scripts/bonus.publicpool.sh ${choice}
-  source /mnt/hdd/raspiblitz.conf
+  source /mnt/hdd/app-data/raspiblitz.conf
   if [ "${publicpool}" =  "on" ]; then
     sudo -u admin /home/admin/config.scripts/bonus.publicpool.sh menu
   fi

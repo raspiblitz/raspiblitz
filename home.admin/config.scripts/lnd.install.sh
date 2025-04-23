@@ -203,7 +203,7 @@ fi
 # CHAIN is signet | testnet | mainnet
 CHAIN=$2
 if [ -z "${CHAIN}" ] || [ "$2" = purge ]; then
-  source /mnt/hdd/raspiblitz.conf
+  source /mnt/hdd/app-data/raspiblitz.conf
   CHAIN=${chain}net
 fi
 if [ "${CHAIN}" = testnet ]||[ "${CHAIN}" = mainnet ]||[ "${CHAIN}" = signet ];then
@@ -233,7 +233,7 @@ fi
 
 source /home/admin/raspiblitz.info
 source <(/home/admin/_cache.sh get state)
-source /mnt/hdd/raspiblitz.conf
+source /mnt/hdd/app-data/raspiblitz.conf
 
 function removeParallelService() {
   if [ -f "/etc/systemd/system/${netprefix}lnd.service" ];then
@@ -347,7 +347,7 @@ After=${netprefix}bitcoind.service
 PartOf=${netprefix}bitcoind.service
 
 [Service]
-EnvironmentFile=/mnt/hdd/raspiblitz.conf
+EnvironmentFile=/mnt/hdd/app-data/raspiblitz.conf
 
 ExecStartPre=-/home/admin/config.scripts/lnd.check.sh prestart ${CHAIN}
 ExecStart=/usr/local/bin/lnd --configfile=/home/bitcoin/.lnd/${netprefix}lnd.conf

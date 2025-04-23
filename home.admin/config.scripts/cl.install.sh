@@ -168,7 +168,7 @@ fi
 
 # vars
 source /home/admin/raspiblitz.info
-source /mnt/hdd/raspiblitz.conf
+source /mnt/hdd/app-data/raspiblitz.conf
 TORGROUP="debian-tor"
 
 if [ "$1" = update ] || [ "$1" = testPR ]; then

@@ -253,7 +253,7 @@ if [ "$2" = "peer-kickstart" ]; then
   fi
   # if auto then determine whats running
   if [ "${addressFormat}" == "auto" ]; then
-    if [ "$(cat /mnt/hdd/raspiblitz.conf | grep -c "^runBehindTor=on")" != "0" ]; then
+    if [ "$(cat /mnt/hdd/app-data/raspiblitz.conf | grep -c "^runBehindTor=on")" != "0" ]; then
       addressFormat="tor"
     else
       source <(/home/admin/config.scripts/internet.sh status global)

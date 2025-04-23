@@ -14,7 +14,7 @@ fi
 
 echo "# bonus.specter.sh $1 $2"
 
-source /mnt/hdd/raspiblitz.conf
+source /mnt/hdd/app-data/raspiblitz.conf
 if [ $# -gt 1 ]; then
   CHAIN=$2
   chain=${CHAIN::-3}

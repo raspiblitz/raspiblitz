@@ -17,7 +17,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
 fi
 
 # at this point the config file exists and can be sourced
-source /mnt/hdd/raspiblitz.conf
+source /mnt/hdd/app-data/raspiblitz.conf
 
 # this variables is used repeatedly in this script
 resources_dir=/home/admin/assets/telegraf/etc-telegraf
@@ -116,7 +116,7 @@ function config_telegraf() {
   #   telegrafInfluxDatabase
   #   telegrafInfluxUsername
   #   telegrafInfluxPassword
-  source /mnt/hdd/raspiblitz.conf  
+  source /mnt/hdd/app-data/raspiblitz.conf  
 
   echo "# *** telegraf installation: telegrafInfluxUrl      = '${telegrafInfluxUrl}'"
   # due to the occurrence of '/' in the ${telegrafInfluxUrl} we need to switch to '#' as the sed-separator

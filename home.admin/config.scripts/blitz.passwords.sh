@@ -106,7 +106,7 @@ fi
 
 # load raspiblitz config (if available)
 source /home/admin/raspiblitz.info
-source /mnt/hdd/raspiblitz.conf
+source /mnt/hdd/app-data/raspiblitz.conf
 if [ ${#network} -eq 0 ]; then
   network="bitcoin"
 fi

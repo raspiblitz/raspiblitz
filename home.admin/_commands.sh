@@ -286,7 +286,7 @@ function cache() {
 
 # command: torthistx
 function torthistx() {
-  if [ $(cat /mnt/hdd/raspiblitz.conf 2>/dev/null | grep -c "runBehindTor=on") -eq 1 ]; then
+  if [ $(cat /mnt/hdd/app-data/raspiblitz.conf 2>/dev/null | grep -c "runBehindTor=on") -eq 1 ]; then
     echo "Broadcasting transaction through Tor to Blockstreams API and into the network."
     curl --socks5-hostname localhost:9050 -d $1 -X POST http://explorerzydxu5ecjrkwceayqybizmpjjznk5izmitf2modhcusuqlid.onion/api/tx
   else
@@ -344,7 +344,7 @@ function fwdreport() {
 # command: bos
 # switch to the bos user for Balance of Satoshis
 function bos() {
-  if [ $(grep -c "bos=on" < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
+  if [ $(grep -c "bos=on" < /mnt/hdd/app-data/raspiblitz.conf) -eq 1 ]; then
     echo "# switching to the bos user with the command: 'sudo su - bos'"
     echo "# use command 'exit' and then 'raspiblitz' to return to menu"
     echo "# use command 'bos --help' to list all possible options"
@@ -359,7 +359,7 @@ function bos() {
 # command: pyblock
 # switch to the pyblock user for PyBLOCK
 function pyblock() {
-  if [ $(grep -c "pyblock=on" < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
+  if [ $(grep -c "pyblock=on" < /mnt/hdd/app-data/raspiblitz.conf) -eq 1 ]; then
     cd /home/pyblock/pyblock
     sudo -u pyblock poetry run python -m pybitblock.console
   else
@@ -371,7 +371,7 @@ function pyblock() {
 # command: chantools
 # switch to the bitcoin user for chantools
 function chantools() {
-  if [ $(grep -c "chantools=on" < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
+  if [ $(grep -c "chantools=on" < /mnt/hdd/app-data/raspiblitz.conf) -eq 1 ]; then
     echo "# switching to the bitcoin user with the command: 'sudo su - bitcoin'"
     echo "# use command 'exit' and then 'raspiblitz' to return to menu"
     echo "# use command 'chantools' again to start"
@@ -386,7 +386,7 @@ function chantools() {
 # command: jm
 # switch to the joinmarket user for the JoininBox menu
 function jm() {
-  if [ $(grep -c "joinmarket=on"  < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
+  if [ $(grep -c "joinmarket=on"  < /mnt/hdd/app-data/raspiblitz.conf) -eq 1 ]; then
     echo "# switching to the joinmarket user with the command: 'sudo su - joinmarket'"
     sudo su - joinmarket
     echo "# use command 'raspiblitz' to return to menu"
@@ -399,7 +399,7 @@ function jm() {
 # command: manage
 # switch to lndmanage env
 function manage() {
-  if [ $(cat /mnt/hdd/raspiblitz.conf 2>/dev/null | grep -c "lndmanage=on") -eq 1 ]; then
+  if [ $(cat /mnt/hdd/app-data/raspiblitz.conf 2>/dev/null | grep -c "lndmanage=on") -eq 1 ]; then
     cd /home/admin/lndmanage
     source venv/bin/activate
     echo "NOTICE: Needs at least one active channel to run without error."
@@ -414,7 +414,7 @@ function manage() {
 # command: ckbunker
 # switch to the ckbunker user
 function ckbunker() {
-  if [ $(grep -c "ckbunker=on"  < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
+  if [ $(grep -c "ckbunker=on"  < /mnt/hdd/app-data/raspiblitz.conf) -eq 1 ]; then
     echo "# switching to the ckbunker user with the command: 'sudo su - ckbunker'"
     sudo su - ckbunker
     echo "# use command 'raspiblitz' to return to menu"
@@ -427,7 +427,7 @@ function ckbunker() {
 # command: lit
 # switch to the lit user for the loop, pool & faraday services
 function lit() {
-  if [ $(grep -c "lit=on"  < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
+  if [ $(grep -c "lit=on"  < /mnt/hdd/app-data/raspiblitz.conf) -eq 1 ]; then
     echo "# switching to the lit user with the command: 'sudo su - lit'"
     echo "# use command 'exit' and then 'raspiblitz' to return to menu"
     echo "# see the prefilled parameters with 'alias'"
@@ -442,8 +442,8 @@ function lit() {
 
 # aliases for lit
 # switch to the pool user for the Pool Service
-if [ -f "/mnt/hdd/raspiblitz.conf" ] && [ $(grep -c "lit=on"  < /mnt/hdd/raspiblitz.conf) -gt 0 ]; then
-  source /mnt/hdd/raspiblitz.conf
+if [ -f "/mnt/hdd/app-data/raspiblitz.conf" ] && [ $(grep -c "lit=on"  < /mnt/hdd/app-data/raspiblitz.conf) -gt 0 ]; then
+  source /mnt/hdd/app-data/raspiblitz.conf
   alias lit-frcli="sudo -u lit frcli --rpcserver=localhost:8443 \
     --tlscertpath=/home/lit/.lit/tls.cert \
     --macaroonpath=/home/lit/.faraday/${chain}net/faraday.macaroon"
@@ -538,7 +538,7 @@ function qr() {
 # command: bm
 # switch to the bitcoinminds user for the 'BitcoinMinds.org' in your local environment
 function bm() {
-  if [ $(grep -c "bitcoinminds=on"  < /mnt/hdd/raspiblitz.conf) -eq 1 ]; then
+  if [ $(grep -c "bitcoinminds=on"  < /mnt/hdd/app-data/raspiblitz.conf) -eq 1 ]; then
     echo ""
     echo "# ***"
     echo "# Switching to the bitcoinminds user with the command: 'sudo su - bitcoinminds'"
@@ -554,7 +554,7 @@ function bm() {
 
 # command: lnproxy
 function lnproxy() {
-  source /mnt/hdd/raspiblitz.conf
+  source /mnt/hdd/app-data/raspiblitz.conf
   if [ $# -gt 0 ]; then
     invoice=$1
   else
@@ -584,7 +584,7 @@ function lnproxy() {
 
 # command: suez
 function suez() {
-  source /mnt/hdd/raspiblitz.conf
+  source /mnt/hdd/app-data/raspiblitz.conf
   if [ ${lightning} = 'cl' ] || [ ${lightning} = 'lnd' ]; then
     if [ ! -f /home/bitcoin/suez/suez ];then
       /home/admin/config.scripts/bonus.suez.sh on

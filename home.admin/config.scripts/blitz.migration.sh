@@ -89,10 +89,10 @@ migrate_raspiblitz_conf () {
   # write default raspiblitz config
   source /home/admin/raspiblitz.info
   source /home/admin/_version.info
-  echo "# RASPIBLITZ CONFIG FILE" > /home/admin/raspiblitz.conf
-  sudo mv /home/admin/raspiblitz.conf /mnt/hdd/raspiblitz.conf
-  sudo chown root:sudo /mnt/hdd/raspiblitz.conf
-  sudo chmod 664 /mnt/hdd/raspiblitz.conf
+  echo "# RASPIBLITZ CONFIG FILE" > /mnt/hdd/app-data/raspiblitz.conf
+  sudo mv /home/admin/raspiblitz.conf /mnt/hdd/app-data/raspiblitz.conf
+  sudo chown root:sudo /mnt/hdd/app-data/raspiblitz.conf
+  sudo chmod 664 /mnt/hdd/app-data/raspiblitz.conf
 
   /home/admin/config.scripts/blitz.conf.sh set raspiBlitzVersion "${codeVersion}"
   /home/admin/config.scripts/blitz.conf.sh set network "bitcoin"
@@ -415,7 +415,7 @@ if [ "$1" = "export" ]; then
 
   # get name of RaspiBlitz from config (optional if exists)
   blitzname="-"
-  source /mnt/hdd/raspiblitz.conf 2>/dev/null
+  source /mnt/hdd/app-data/raspiblitz.conf 2>/dev/null
   if [ ${#hostname} -gt 0 ]; then
     blitzname="-${hostname}-"
   fi
@@ -457,7 +457,7 @@ if [ "$1" = "export-gui" ]; then
   sudo rm ${defaultUploadPath}/*.tar.gz 2>/dev/null
 
   echo "--> stopping services ..."
-  source /mnt/hdd/raspiblitz.conf
+  source /mnt/hdd/app-data/raspiblitz.conf
   # bitcoind
   sudo systemctl stop bitcoind
   if [ "${testnet}" == "on" ] || [ "${cl}" == "1" ]; then
@@ -565,7 +565,7 @@ if [ "$1" = "import" ]; then
   fi
 
   # check migration 
-  raspiblitzConfExists=$(sudo ls /mnt/hdd/raspiblitz.conf | grep -c "raspiblitz.conf")
+  raspiblitzConfExists=$(sudo ls /mnt/hdd/app-data/raspiblitz.conf | grep -c "raspiblitz.conf")
   if [ "${raspiblitzConfExists}" != "1" ]; then
     echo "error='no raspiblitz.conf after unzip migration file'"
     echo "# reboot system ... HDD will offer fresh formating"

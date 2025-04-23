@@ -10,7 +10,7 @@ fi
 
 # load config values
 source /home/admin/raspiblitz.info 2>/dev/null
-source /mnt/hdd/raspiblitz.conf 2>/dev/null
+source /mnt/hdd/app-data/raspiblitz.conf 2>/dev/null
 if [ ${#network} -eq 0 ]; then
   echo "FAIL - was not able to load config data / network"
   exit 1
@@ -41,7 +41,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "editing /mnt/hdd/${network}/${network}.conf"
   sudo sed -i "s/^upnp=.*/upnp=1/g" /mnt/hdd/${network}/${network}.conf
 # edit raspi blitz config
-  echo "editing /mnt/hdd/raspiblitz.conf"
+  echo "editing raspiblitz.conf"
   /home/admin/config.scripts/blitz.conf.sh set networkUPnP "on"
   # enable lnd service
   echo "OK - UPnP is now ON"
@@ -56,7 +56,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   echo "editing /mnt/hdd/${network}/${network}.conf"
   sudo sed -i "s/^upnp=.*/upnp=0/g" /mnt/hdd/${network}/${network}.conf
   # edit raspi blitz config
-  echo "editing /mnt/hdd/raspiblitz.conf"
+  echo "editing raspiblitz.conf"
   /home/admin/config.scripts/blitz.conf.sh set networkUPnP "off"
   # enable lnd service
   echo "OK - UPnP is now OFF"

@@ -1,5 +1,5 @@
 #########################################################################
-# this has to go to /mnt/hdd/raspiblitz.conf
+# this has to go to /mnt/hdd/app-data/raspiblitz.conf
 # make sure the settings match your local influxDB setup
 #########################################################################
 

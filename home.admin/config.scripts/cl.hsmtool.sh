@@ -39,14 +39,14 @@ fi
 
 echo "# Running 'cl.hsmtool.sh $*'"
 
-source /mnt/hdd/raspiblitz.conf
+source /mnt/hdd/app-data/raspiblitz.conf
 source <(/home/admin/config.scripts/network.aliases.sh getvars cl $2)
 hsmSecretPath="/home/bitcoin/.lightning/${CLNETWORK}/hsm_secret"
 
 # password file is on the disk if encrypted and auto-unlock is enabled
 passwordFile="/dev/shm/.${netprefix}cl.pw"
-if grep -Eq "${netprefix}clEncryptedHSM=on" /mnt/hdd/raspiblitz.conf;then
-  if grep -Eq "${netprefix}clAutoUnlock=on" /mnt/hdd/raspiblitz.conf;then
+if grep -Eq "${netprefix}clEncryptedHSM=on" /mnt/hdd/app-data/raspiblitz.conf;then
+  if grep -Eq "${netprefix}clAutoUnlock=on" /mnt/hdd/app-data/raspiblitz.conf;then
     passwordFile=/home/bitcoin/.${netprefix}cl.pw
   fi
 fi
@@ -429,7 +429,7 @@ elif [ "$1" = "decrypt" ]; then
 
 
 elif [ "$1" = "autounlock-on" ]; then
-  if grep -Eq "${netprefix}clEncryptedHSM=on" /mnt/hdd/raspiblitz.conf;then
+  if grep -Eq "${netprefix}clEncryptedHSM=on" /mnt/hdd/app-data/raspiblitz.conf;then
     echo "# Moving the password from $passwordFile to /home/bitcoin/.${netprefix}cl.pw"
     sudo -u bitcoin mv /dev/shm/.${netprefix}cl.pw /home/bitcoin/.${netprefix}cl.pw
   else

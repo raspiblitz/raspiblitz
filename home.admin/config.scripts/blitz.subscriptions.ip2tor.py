@@ -49,7 +49,7 @@ SERVICE_SPHINX = "SPHINX"
 # BASIC SETTINGS
 #####################
 session = requests.session()
-if Path("/mnt/hdd/raspiblitz.conf").is_file():
+if Path("/mnt/hdd/app-data/raspiblitz.conf").is_file():
     cfg = RaspiBlitzConfig()
     cfg.reload()
 

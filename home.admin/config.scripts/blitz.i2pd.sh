@@ -108,7 +108,7 @@ function bitcoinI2Pstatus {
 }
 
 echo "# Running: 'blitz.i2pd.sh $*'"
-source /mnt/hdd/raspiblitz.conf
+source /mnt/hdd/app-data/raspiblitz.conf
 
 # make sure to be present in PATH
 if ! echo "$PATH" | grep "/usr/sbin" >/dev/null; then

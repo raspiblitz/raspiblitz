@@ -3,7 +3,7 @@
 # get raspiblitz config
 echo "get raspiblitz config"
 source /home/admin/raspiblitz.info
-source /mnt/hdd/raspiblitz.conf
+source /mnt/hdd/app-data/raspiblitz.conf
 
 # source <(/home/admin/config.scripts/network.aliases.sh getvars <lnd|cl> <mainnet|testnet|signet>)
 source <(/home/admin/config.scripts/network.aliases.sh getvars cl $1)
@@ -21,12 +21,12 @@ OPTIONS+=(TIME "Set Timezone")
 OPTIONS+=(${network}LOG "Monitor the debug.log for ${CHAIN}")
 OPTIONS+=(${network}CONF "Edit the bitcoin.conf")
 
-if grep "^${netprefix}lnd=on" /mnt/hdd/raspiblitz.conf;then
+if grep "^${netprefix}lnd=on" /mnt/hdd/app-data/raspiblitz.conf;then
   OPTIONS+=(LNDLOG "Monitor the lnd.log for ${CHAIN}")
   OPTIONS+=(LNDCONF "Edit the lnd.conf for ${CHAIN}")
 fi
 
-if grep "^${netprefix}cl=on" /mnt/hdd/raspiblitz.conf;then
+if grep "^${netprefix}cl=on" /mnt/hdd/app-data/raspiblitz.conf;then
   OPTIONS+=(CLLOG "Monitor the CL log for ${CHAIN}")
   OPTIONS+=(CLCONF "Edit the CL config for ${CHAIN}")
 fi

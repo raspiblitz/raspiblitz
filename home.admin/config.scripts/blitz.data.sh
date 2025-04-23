@@ -1114,6 +1114,8 @@ if [ "$action" = "link" ]; then
         echo "# OLD->OLD: Liniking raspiblitz.conf"
         unlink ${mainMountPoint}/raspiblitz.conf 2>/dev/null
         ln -s ${storageMountedPath}/raspiblitz.conf ${mainMountPoint}/raspiblitz.conf
+        unlink ${storageMountedPath}/app-data/raspiblitz.conf 2>/dev/null
+        ln -s ${storageMountedPath}/raspiblitz.conf ${storageMountedPath}/app-data/raspiblitz.conf  
         chown root:sudo ${mainMountPoint}/raspiblitz.conf
         chmod 664 ${mainMountPoint}/raspiblitz.conf
     else

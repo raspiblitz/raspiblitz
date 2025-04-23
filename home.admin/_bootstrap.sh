@@ -15,7 +15,7 @@ source /home/admin/_version.info
 # CONFIGFILE - configuration of RaspiBlitz
 # used by fresh SD image to recover configuration
 # and delivers basic config info for scripts 
-configFile="/mnt/hdd/raspiblitz.conf"
+configFile="/mnt/hdd/app-data/raspiblitz.conf"
 
 # LOGFILE - store debug logs of bootstrap
 # resets on every start
@@ -960,7 +960,7 @@ if [ "${scenario}" != "ready" ] ; then
   /home/admin/config.scripts/blitz.data.sh link
 
   # copy over the raspiblitz.conf created from setup to HDD
-  configExists=$(ls /mnt/hdd/raspiblitz.conf 2>/dev/null | grep -c "raspiblitz.conf")
+  configExists=$(ls ${configFile} 2>/dev/null | grep -c "raspiblitz.conf")
   if [ "${configExists}" != "1" ]; then
     cp /var/cache/raspiblitz/temp/raspiblitz.conf ${configFile}
   fi
@@ -1000,7 +1000,7 @@ if [ "${scenario}" != "ready" ] ; then
     fi
 
     # make sure a raspiblitz.conf exists after migration
-    confExists=$(ls /mnt/hdd/raspiblitz.conf 2>/dev/null | grep -c "raspiblitz.conf")
+    confExists=$(ls /mnt/hdd/app-data/raspiblitz.conf 2>/dev/null | grep -c "raspiblitz.conf")
     if [ "${confExists}" != "1" ]; then
       /home/admin/config.scripts/blitz.error.sh _bootstrap.sh "migration-failed" "missing-config" "After runnign migration process - no raspiblitz.conf abvailable." ${logFile}
       exit 1

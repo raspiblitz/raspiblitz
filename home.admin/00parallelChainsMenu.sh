@@ -4,7 +4,7 @@
 # injecting specific perspectives can be done later
 
 source /home/admin/raspiblitz.info
-source /mnt/hdd/raspiblitz.conf
+source /mnt/hdd/app-data/raspiblitz.conf
 
 # BASIC MENU INFO
 WIDTH=64

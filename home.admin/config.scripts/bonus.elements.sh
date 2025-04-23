@@ -18,7 +18,7 @@ fi
 
 echo "# Running: bonus.elements.sh $*"
 
-source /mnt/hdd/raspiblitz.conf
+source /mnt/hdd/app-data/raspiblitz.conf
 # elementslogpath
 elementslogpath="/home/elements/.elements/liquidv1/debug.log"
 

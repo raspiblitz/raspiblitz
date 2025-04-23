@@ -18,7 +18,7 @@ fi
 # check and load raspiblitz config
 # to know which network is running
 source /home/admin/raspiblitz.info
-source /mnt/hdd/raspiblitz.conf
+source /mnt/hdd/app-data/raspiblitz.conf
 if [ ${#network} -eq 0 ]; then
  echo "FAIL - missing network info"
  exit 1
@@ -70,7 +70,7 @@ else
 fi
 
 # editing the raspi blitz config file
-echo "editing /mnt/hdd/raspiblitz.conf"
+echo "editing /mnt/hdd/app-data/raspiblitz.conf"
 if [ "$1" = "testnet" ]; then
   /home/admin/config.scripts/blitz.conf.sh set chain "test"
 else

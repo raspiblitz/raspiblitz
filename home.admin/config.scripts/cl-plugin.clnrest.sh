@@ -9,7 +9,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
 fi
 
 # check and load raspiblitz config to know which network is running
-source /mnt/hdd/raspiblitz.conf
+source /mnt/hdd/app-data/raspiblitz.conf
 
 # check and install qrencode if not present
 if [ $(dpkg-query -l | grep "ii  qrencode" | wc -l) = 0 ]; then

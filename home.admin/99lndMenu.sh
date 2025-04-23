@@ -3,7 +3,7 @@
 # get raspiblitz config
 echo "get raspiblitz config"
 source /home/admin/raspiblitz.info
-source /mnt/hdd/raspiblitz.conf
+source /mnt/hdd/app-data/raspiblitz.conf
 
 source <(/home/admin/config.scripts/network.aliases.sh getvars lnd $1)
 
@@ -136,7 +136,7 @@ case $CHOICE in
       # setting value in raspi blitz config
       /home/admin/config.scripts/blitz.conf.sh set lightning "lnd"
       sudo systemctl restart blitzapi 2>/dev/null
-      echo "# OK - lightning=lnd is set in /mnt/hdd/raspiblitz.conf"
+      echo "# OK - lightning=lnd is set in /mnt/hdd/app-data/raspiblitz.conf"
       echo
       echo "Press ENTER to return to main menu."
       read key

@@ -21,7 +21,7 @@ fi
 if [ "$1" = getvars ]; then
 
   source /home/admin/raspiblitz.info
-  source /mnt/hdd/raspiblitz.conf 2>/dev/null
+  source /mnt/hdd/app-data/raspiblitz.conf 2>/dev/null
 
   if [ ${#network} -eq 0 ]; then
     network=bitcoin

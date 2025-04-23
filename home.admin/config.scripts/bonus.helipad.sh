@@ -19,7 +19,7 @@ HELIPAD_BIN=$HELIPAD_HOME_DIR/.cargo/bin/helipad
 # check and load raspiblitz config
 # to know which network is running
 source /home/admin/raspiblitz.info
-source /mnt/hdd/raspiblitz.conf
+source /mnt/hdd/app-data/raspiblitz.conf
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then

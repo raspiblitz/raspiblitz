@@ -13,7 +13,7 @@ logFile="/home/admin/raspiblitz.provision-update.log"
 infoFile="/home/admin/raspiblitz.info"
 
 # CONFIGFILE - configuration of RaspiBlitz
-configFile="/mnt/hdd/raspiblitz.conf"
+configFile="/mnt/hdd/app-data/raspiblitz.conf"
 
 # SETUPFILE - - setup data of RaspiBlitz
 setupFile="/var/cache/raspiblitz/temp/raspiblitz.setup"

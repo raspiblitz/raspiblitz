@@ -11,7 +11,7 @@ if [ "$1" = "-menu" ]; then
 
   # load raspiblitz config data (with backup from old config)
   source /home/admin/raspiblitz.info
-  source /mnt/hdd/raspiblitz.conf
+  source /mnt/hdd/app-data/raspiblitz.conf
   if [ ${#network} -eq 0 ]; then network=$(cat .network); fi
   if [ ${#network} -eq 0 ]; then network="bitcoin"; fi
   if [ ${#chain} -eq 0 ]; then

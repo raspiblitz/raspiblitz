@@ -3,7 +3,7 @@
 # get raspiblitz config
 echo "# get raspiblitz config"
 source /home/admin/raspiblitz.info
-source /mnt/hdd/raspiblitz.conf
+source /mnt/hdd/app-data/raspiblitz.conf
 
 source <(/home/admin/config.scripts/network.aliases.sh getvars lnd $1)
 

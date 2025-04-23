@@ -2,7 +2,7 @@
 
 # TODO: later on this script will be run on build sdcard - make sure that the self-signed tls cert get created fresh on every new RaspiBlitz
 
-source /mnt/hdd/raspiblitz.conf 2>/dev/null
+source /mnt/hdd/app-data/raspiblitz.conf 2>/dev/null
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ]; then

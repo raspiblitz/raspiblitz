@@ -4,7 +4,7 @@ echo "Starting the main menu ..."
 
 # MAIN MENU AFTER SETUP
 source /home/admin/raspiblitz.info
-source /mnt/hdd/raspiblitz.conf
+source /mnt/hdd/app-data/raspiblitz.conf
 
 # FUNCTIONS
 

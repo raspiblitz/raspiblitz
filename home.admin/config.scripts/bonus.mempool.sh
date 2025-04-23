@@ -17,7 +17,7 @@ PGPsigner="wiz"
 PGPpubkeyLink="https://github.com/wiz.gpg"
 PGPpubkeyFingerprint="A394E332255A6173"
 
-source /mnt/hdd/raspiblitz.conf
+source /mnt/hdd/app-data/raspiblitz.conf
 
 # show info menu
 if [ "$1" = "menu" ]; then

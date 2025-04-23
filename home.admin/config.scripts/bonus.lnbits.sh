@@ -27,7 +27,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
 fi
 
 echo "# Running: 'bonus.lnbits.sh $*'"
-source /mnt/hdd/raspiblitz.conf
+source /mnt/hdd/app-data/raspiblitz.conf
 
 lnbitsDataDir="/mnt/hdd/app-data/LNBits/data"
 lnbitsConfig="${lnbitsDataDir}/.env"
@@ -955,7 +955,7 @@ EOF
   /home/admin/config.scripts/blitz.conf.sh set LNBits "on"
 
   # Hidden Service if Tor is active
-  source /mnt/hdd/raspiblitz.conf
+  source /mnt/hdd/app-data/raspiblitz.conf
   if [ "${runBehindTor}" = "on" ]; then
     # make sure to keep in sync with tor.network.sh script
     /home/admin/config.scripts/tor.onion-service.sh lnbits 80 5002 443 5003

@@ -62,7 +62,7 @@ codeCommit=$(git -C /home/admin/raspiblitz rev-parse --short HEAD)
 ## get basic info (its OK if not set yet)
 source /home/admin/raspiblitz.info 2>/dev/null
 source <(/home/admin/_cache.sh get state setupPhase)
-source /mnt/hdd/raspiblitz.conf 2>/dev/null
+source /mnt/hdd/app-data/raspiblitz.conf 2>/dev/null
 
 # for old nodes
 if [ ${#network} -eq 0 ]; then

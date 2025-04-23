@@ -58,7 +58,7 @@ if ! [[ "$pause" =~ ^[[:digit:]]+$ ]]; then
 fi
 
 # CONFIGFILE - configuration of RaspiBlitz
-configFile="/mnt/hdd/raspiblitz.conf"
+configFile="/mnt/hdd/app-data/raspiblitz.conf"
 
 # INFOFILE - state data from bootstrap
 infoFile="/home/admin/raspiblitz.info"

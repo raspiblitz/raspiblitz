@@ -7,7 +7,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  exit 1
 fi
 
-source /mnt/hdd/raspiblitz.conf
+source /mnt/hdd/app-data/raspiblitz.conf
 
 # add txindex with default value (0) to bitcoin.conf if missing
 if ! grep -Eq "^txindex=.*" /mnt/hdd/${network}/${network}.conf; then

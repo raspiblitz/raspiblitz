@@ -477,7 +477,7 @@ if [ "$1" = "status" ]; then
     echo "hddRaspiData=${hddRaspiData}"
     hddRaspiVersion=""
     if [ ${hddRaspiData} -eq 1 ]; then
-      source /mnt/hdd/raspiblitz.conf
+      source /mnt/hdd/app-data/raspiblitz.conf
       hddRaspiVersion="${raspiBlitzVersion}"
     fi
     echo "hddRaspiVersion='${hddRaspiVersion}'"
@@ -598,7 +598,7 @@ if [ "$1" = "status" ]; then
       hddAdapterUSAP=1
     fi
     # or UASP is set by config file
-    if [ $(cat /mnt/hdd/raspiblitz.conf 2>/dev/null | grep -c "forceUasp=on") -eq 1 ]; then
+    if [ $(cat /mnt/hdd/app-data/raspiblitz.conf 2>/dev/null | grep -c "forceUasp=on") -eq 1 ]; then
       hddAdapterUSAP=1
     fi
     # check if HDD ADAPTER is on UASP WHITELIST (tested devices)

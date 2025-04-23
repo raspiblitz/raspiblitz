@@ -41,7 +41,7 @@ fi
 echo "# Running: 'bonus.${APPID}.sh $*'"
 
 # check & load raspiblitz config
-source /mnt/hdd/raspiblitz.conf
+source /mnt/hdd/app-data/raspiblitz.conf
 
 #########################
 # INFO

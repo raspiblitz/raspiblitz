@@ -124,11 +124,11 @@ if [ ${mode} = "cl-export" ]; then
   # stop
   echo "# Stopping cl..."
   sudo systemctl stop lightningd 1>/dev/null
-  if grep -Eq "^tcl=on" /mnt/hdd/raspiblitz.conf; then
+  if grep -Eq "^tcl=on" /mnt/hdd/app-data/raspiblitz.conf; then
     echo "# stopping tcl..."
     sudo systemctl stop tlightningd 1>/dev/null
   fi
-  if grep -Eq "^scl=on" /mnt/hdd/raspiblitz.conf; then
+  if grep -Eq "^scl=on" /mnt/hdd/app-data/raspiblitz.conf; then
     echo "# stopping scl..."
     sudo systemctl stop slightningd 1>/dev/null
   fi
@@ -223,11 +223,11 @@ if [ ${mode} = "cl-import" ]; then
   # stop
   echo "# stopping cl..."
   sudo systemctl stop lightningd 1>/dev/null
-  if grep -Eq "^tcl=on" /mnt/hdd/raspiblitz.conf; then
+  if grep -Eq "^tcl=on" /mnt/hdd/app-data/raspiblitz.conf; then
     echo "# stopping tcl..."
     sudo systemctl stop tlightningd 1>/dev/null
   fi
-  if grep -Eq "^scl=on" /mnt/hdd/raspiblitz.conf; then
+  if grep -Eq "^scl=on" /mnt/hdd/app-data/raspiblitz.conf; then
     echo "# stopping scl..."
     sudo systemctl stop slightningd 1>/dev/null
   fi
@@ -342,7 +342,7 @@ if [ ${mode} = "cl-import-gui" ]; then
   fi
 
   # in production now start restoring CL data based on file
-  source /mnt/hdd/raspiblitz.conf
+  source /mnt/hdd/app-data/raspiblitz.conf
   
   # ask security question before deleting old wallet
   echo "WARNING: This will delete/overwrite the Core Lightning state/funds of this RaspiBlitz."

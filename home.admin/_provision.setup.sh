@@ -21,7 +21,7 @@ setupFile="/var/cache/raspiblitz/temp/raspiblitz.setup"
 source ${setupFile}
 
 # CONFIGFILE - configuration of RaspiBlitz
-configFile="/mnt/hdd/raspiblitz.conf"
+configFile="/mnt/hdd/app-data/raspiblitz.conf"
 source ${configFile}
 
 # log header
@@ -33,7 +33,7 @@ echo "# _provision.setup.sh" >> ${logFile}
 echo "###################################" >> ${logFile}
 
 # make sure a raspiblitz.conf exists
-confExists=$(ls /mnt/hdd/raspiblitz.conf 2>/dev/null | grep -c "raspiblitz.conf")
+confExists=$(ls /mnt/hdd/app-data/raspiblitz.conf 2>/dev/null | grep -c "raspiblitz.conf")
 if [ "${confExists}" != "1" ]; then
     /home/admin/config.scripts/blitz.error.sh _provision.setup.sh "missing-config" "No raspiblitz.conf abvailable." ${logFile}
     exit 6
@@ -145,7 +145,7 @@ echo "OK ${network} startup successful " >> ${logFile}
 
 ###################################
 # Prepare Lightning
-source /mnt/hdd/raspiblitz.conf
+source /mnt/hdd/app-data/raspiblitz.conf
 echo "Prepare Lightning (${lightning})" >> ${logFile}
 
 if [ "${hostname}" == "" ]; then

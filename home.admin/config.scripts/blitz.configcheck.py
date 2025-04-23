@@ -10,7 +10,7 @@ from configparser import ConfigParser, DEFAULTSECT
 from blitzpy import RaspiBlitzConfig, RaspiBlitzInfo
 
 LND_CONF = "/mnt/hdd/lnd/lnd.conf"
-RB_CONF = "/mnt/hdd/raspiblitz.conf"
+RB_CONF = "/mnt/hdd/app-data/raspiblitz.conf"
 
 log = logging.getLogger(__name__)
 
@@ -51,7 +51,7 @@ def main():
             if not args.quiet:
                 print("RaspiBlitz Config: \tERROR")
                 log.warning(err)
-                print("# Use command to fix: nano /mnt/hdd/raspiblitz.conf")
+                print("# Use command to fix: nano /mnt/hdd/app-data/raspiblitz.conf")
                 print("# CTRL+o to save / CRTL+x to exit / then reboot")
 
     else:

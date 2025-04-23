@@ -186,7 +186,7 @@ class BaseConfig(object):
 
 
 class RaspiBlitzConfig(BaseConfig):
-    def __init__(self, abs_path="/mnt/hdd/raspiblitz.conf"):
+    def __init__(self, abs_path="/mnt/hdd/app-data/raspiblitz.conf"):
         super().__init__()
         self.abs_path = abs_path
 

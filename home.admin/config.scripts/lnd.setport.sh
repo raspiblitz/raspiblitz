@@ -31,7 +31,7 @@ if [ ${portnumber} -gt 65535 ]; then
 fi
 
 # check if TOR is on
-source /mnt/hdd/raspiblitz.conf
+source /mnt/hdd/app-data/raspiblitz.conf
 if [ "${runBehindTor}" = "on" ]; then
   echo "FAIL - portnumber cannot be changed if TOR is ON (not implemented)"
   exit 1

@@ -15,7 +15,7 @@ fi
 # check and load raspiblitz config
 # to know which network is running
 source /home/admin/raspiblitz.info
-source /mnt/hdd/raspiblitz.conf
+source /mnt/hdd/app-data/raspiblitz.conf
 
 # generate data parts
 hex_macaroon=$(sudo xxd -plain /home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon | tr -d '\n')

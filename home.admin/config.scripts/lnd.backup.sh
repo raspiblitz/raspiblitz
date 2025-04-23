@@ -369,7 +369,7 @@ if [ ${mode} = "lnd-import-gui" ]; then
   fi
 
   # in production now start restoring LND data based on file
-  source /mnt/hdd/raspiblitz.conf
+  source /mnt/hdd/app-data/raspiblitz.conf
   
   # ask security question before deleting old wallet
   echo "WARNING: This will delete/overwrite the LND state/funds of this RaspiBlitz."
@@ -404,7 +404,7 @@ fi
 if [ ${mode} = "scb-export" ]; then
 
   # get file info
-  source /mnt/hdd/raspiblitz.conf
+  source /mnt/hdd/app-data/raspiblitz.conf
   echo "filename='/mnt/hdd/lnd/data/chain/${network}/${chain}net/channel.backup'"
   echo "fileuser='bitcoin'"
 

@@ -55,7 +55,7 @@ fi
 if [ "$1" = "update-config" ]; then
 
   # prepare configs data
-  source /mnt/hdd/raspiblitz.conf 2>/dev/null
+  source /mnt/hdd/app-data/raspiblitz.conf 2>/dev/null
   if [ "${network}" = "" ]; then
     network="bitcoin"
     chain="main"

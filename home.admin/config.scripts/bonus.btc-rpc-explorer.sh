@@ -19,7 +19,7 @@ PGPsigner="janoside"
 PGPpubkeyLink="https://github.com/janoside.gpg"
 PGPpubkeyFingerprint="70C0B166321C0AF8"
 
-source /mnt/hdd/raspiblitz.conf 2>/dev/null
+source /mnt/hdd/app-data/raspiblitz.conf 2>/dev/null
 
 ##########################
 # MENU
@@ -382,7 +382,7 @@ EOF
   sudo npm audit fix
 
   # Hidden Service for BTC-RPC-explorer if Tor is active
-  source /mnt/hdd/raspiblitz.conf
+  source /mnt/hdd/app-data/raspiblitz.conf
   if [ "${runBehindTor}" = "on" ]; then
     # make sure to keep in sync with tor.network.sh script
     sudo /home/admin/config.scripts/tor.onion-service.sh btc-rpc-explorer 80 3022 443 3023

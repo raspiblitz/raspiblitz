@@ -18,7 +18,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   exit 1
 fi
 
-source /mnt/hdd/raspiblitz.conf
+source /mnt/hdd/app-data/raspiblitz.conf
 
 # show info menu
 if [ "$1" = "menu" ]; then
@@ -64,8 +64,8 @@ ${additionalInfo}
 fi
 
 # add default value to raspi config if needed
-if ! grep -Eq "^homer=" /mnt/hdd/raspiblitz.conf; then
-  echo "homer=off" >> /mnt/hdd/raspiblitz.conf
+if ! grep -Eq "^homer=" /mnt/hdd/app-data/raspiblitz.conf; then
+  echo "homer=off" >> /mnt/hdd/app-data/raspiblitz.conf
 fi
 
 # status
@@ -202,10 +202,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   source /home/admin/raspiblitz.info
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^homer=.*/homer=on/g" /mnt/hdd/raspiblitz.conf
+  sudo sed -i "s/^homer=.*/homer=on/g" /mnt/hdd/app-data/raspiblitz.conf
 
   # Hidden Service for Mempool if Tor is active
-  source /mnt/hdd/raspiblitz.conf
+  source /mnt/hdd/app-data/raspiblitz.conf
   if [ "${runBehindTor}" = "on" ]; then
     # make sure to keep in sync with internet.tor.sh script
     /home/admin/config.scripts/tor.onion-service.sh homer 80 4092 443 4093
@@ -219,7 +219,7 @@ fi
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   # setting value in raspi blitz config
-  sudo sed -i "s/^homer=.*/homer=off/g" /mnt/hdd/raspiblitz.conf
+  sudo sed -i "s/^homer=.*/homer=off/g" /mnt/hdd/app-data/raspiblitz.conf
 
   isInstalled=$(sudo ls /var/www/homer/assets/config.yml.dist 2>/dev/null | grep -c 'config.yml.dist')
   if [ ${isInstalled} -eq 1 ]; then

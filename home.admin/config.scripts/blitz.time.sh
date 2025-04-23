@@ -62,7 +62,7 @@ fi
 # set-by-config
 ###################
 if [ "$1" = "set-by-config" ]; then
-  source /mnt/hdd/raspiblitz.conf
+  source /mnt/hdd/app-data/raspiblitz.conf
   if [ ${#timezone} -eq 0 ]; then
     echo "# no timezone set in raspiblitz.conf ... keeping default timezone"
     exit 1

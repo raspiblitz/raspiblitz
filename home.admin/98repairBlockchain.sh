@@ -3,7 +3,7 @@ echo ""
 
 # load raspiblitz config data
 source /home/admin/raspiblitz.info
-source /mnt/hdd/raspiblitz.conf
+source /mnt/hdd/app-data/raspiblitz.conf
 
 # Basic Options
 OPTIONS=(COPY "Copy from laptop/node over LAN (SKILLED)" \

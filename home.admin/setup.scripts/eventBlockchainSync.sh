@@ -5,7 +5,7 @@
 # these are the same set of infos the WebGUI dialog/controller has
 source /home/admin/_version.info
 source /home/admin/raspiblitz.info
-source /mnt/hdd/raspiblitz.conf 2>/dev/null
+source /mnt/hdd/app-data/raspiblitz.conf 2>/dev/null
 
 # 1st PARAMETER: ssh|lcd
 PRAMETER_LCD=0

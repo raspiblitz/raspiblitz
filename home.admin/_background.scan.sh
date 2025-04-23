@@ -51,7 +51,7 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 # CONFIGFILE - configuration of RaspiBlitz
-configFile="/mnt/hdd/raspiblitz.conf"
+configFile="/mnt/hdd/app-data/raspiblitz.conf"
 
 # INFOFILE - persited state data
 infoFile="/home/admin/raspiblitz.info"
@@ -299,7 +299,7 @@ do
   ####################################################################
 
   # read/update config values
-  source /mnt/hdd/raspiblitz.conf
+  source /mnt/hdd/app-data/raspiblitz.conf
 
   ###################
   # BITCOIN

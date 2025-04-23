@@ -3,7 +3,7 @@
 # get raspiblitz config
 echo "get raspiblitz config"
 source /home/admin/raspiblitz.info
-source /mnt/hdd/raspiblitz.conf
+source /mnt/hdd/app-data/raspiblitz.conf
 
 echo "services default values"
 if [ ${#runBehindTor} -eq 0 ]; then runBehindTor="off"; fi
@@ -287,7 +287,7 @@ if [ "${NextcloudBackup}" != "${choice}" ]; then
   sudo -u admin /home/admin/config.scripts/nextcloud.upload.sh ${choice}
   if [ "${choice}" =  "on" ]; then
     # doing initial upload so that user can see result
-    source /mnt/hdd/raspiblitz.conf
+    source /mnt/hdd/app-data/raspiblitz.conf
     sudo /home/admin/config.scripts/nextcloud.upload.sh upload /mnt/hdd/lnd/data/chain/${network}/${chain}net/channel.backup
   fi
 else

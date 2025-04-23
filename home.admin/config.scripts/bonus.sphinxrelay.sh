@@ -16,7 +16,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "bonus.sphinxrelay.sh github sync"
   exit 1
 fi
-source /mnt/hdd/raspiblitz.conf
+source /mnt/hdd/app-data/raspiblitz.conf
 
 # show info menu
 if [ "$1" = "menu" ]; then
@@ -449,7 +449,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo ""
 
     # Hidden Service if Tor is active
-    source /mnt/hdd/raspiblitz.conf
+    source /mnt/hdd/app-data/raspiblitz.conf
     if [ "${runBehindTor}" = "on" ]; then
       # make sure to keep in sync with tor.network.sh script
       /home/admin/config.scripts/tor.onion-service.sh sphinxrelay 80 3302 443 3303

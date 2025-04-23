@@ -8,7 +8,7 @@
 echo "Starting SSH user interface ... (please wait)"
 
 # CONFIGFILE - configuration of RaspiBlitz
-source /mnt/hdd/raspiblitz.conf 2>/dev/null
+source /mnt/hdd/app-data/raspiblitz.conf 2>/dev/null
 
 # INFOFILE - state data from bootstrap
 infoFile="/home/admin/raspiblitz.info"

@@ -25,7 +25,7 @@ PGPpubkeyFingerprint="(4AEE18F83AFDEB23|B5690EEEBB952194)"
 # PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
 # PGPpubkeyFingerprint="B9A26449A5528325"
 
-source /mnt/hdd/raspiblitz.conf
+source /mnt/hdd/app-data/raspiblitz.conf
 
 isInstalled=$(sudo ls /etc/systemd/system/circuitbreaker.service 2>/dev/null | grep -c 'circuitbreaker.service')
 

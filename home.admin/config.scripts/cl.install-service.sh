@@ -27,8 +27,8 @@ if [ $(sudo -u bitcoin cat ${CLCONF} | grep -c "^feeadjuster") -gt 0 ];then
   fi
 fi
 
-if grep -Eq "${netprefix}clEncryptedHSM=on" /mnt/hdd/raspiblitz.conf;then
-  if grep -Eq "${netprefix}clAutoUnlock=on" /mnt/hdd/raspiblitz.conf;then
+if grep -Eq "${netprefix}clEncryptedHSM=on" /mnt/hdd/app-data/raspiblitz.conf;then
+  if grep -Eq "${netprefix}clAutoUnlock=on" /mnt/hdd/app-data/raspiblitz.conf;then
     passwordFile=/home/bitcoin/.${netprefix}cl.pw
   else
     passwordFile=/dev/shm/.${netprefix}cl.pw

@@ -23,7 +23,7 @@ echo "### blitz.display.sh $command"
 
 # its OK if its not exist yet
 source /home/admin/raspiblitz.info
-source /mnt/hdd/raspiblitz.conf 2>/dev/null
+source /mnt/hdd/app-data/raspiblitz.conf 2>/dev/null
 
 # check if LCD (/dev/fb1) or HDMI (/dev/fb0)
 # see https://github.com/rootzoll/raspiblitz/pull/1580

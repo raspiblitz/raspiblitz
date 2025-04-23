@@ -15,7 +15,7 @@ fi
 echo "# cl-plugin.watchtower-client.sh $*"
 
 source <(/home/admin/config.scripts/network.aliases.sh getvars cl $2)
-source /mnt/hdd/raspiblitz.conf #to get runBehindTor
+source /mnt/hdd/app-data/raspiblitz.conf
 plugin="watchtower-client"
 pkg_dependencies="libssl-dev"
 

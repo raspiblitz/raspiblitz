@@ -8,7 +8,7 @@ if [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
 fi
 
 # load data from config
-source /mnt/hdd/raspiblitz.conf
+source /mnt/hdd/app-data/raspiblitz.conf
 
 if [ $# -gt 1 ];  then
   CHAIN=$2

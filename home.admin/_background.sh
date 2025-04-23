@@ -8,7 +8,7 @@
 infoFile="/home/admin/raspiblitz.info"
 
 # CONFIGFILE - configuration of RaspiBlitz
-configFile="/mnt/hdd/raspiblitz.conf"
+configFile="/mnt/hdd/app-data/raspiblitz.conf"
 
 # LOGS see: sudo journalctl -f -u background
 
@@ -145,7 +145,7 @@ do
       # store the old IP address
       publicIP_Old="${publicIP}"
       # refresh data
-      source /mnt/hdd/raspiblitz.conf
+      source /mnt/hdd/app-data/raspiblitz.conf
       # store the new IP address
       publicIP_New="${publicIP}"
       # some log output

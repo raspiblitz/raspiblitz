@@ -18,7 +18,7 @@ logFile="/home/admin/raspiblitz.log"
 infoFile="/home/admin/raspiblitz.info"
 
 # CONFIGFILE - configuration of RaspiBlitz
-configFile="/mnt/hdd/raspiblitz.conf"
+configFile="/mnt/hdd/app-data/raspiblitz.conf"
 
 # SETUPFILE
 # this key/value file contains the state during the setup process
@@ -812,8 +812,8 @@ echo "Start i2pd" >> ${logFile}
 /home/admin/config.scripts/blitz.i2pd.sh on >> ${logFile}
 
 # clean up raspiblitz config from old settings
-sed -i '/^autoPilot=/d' /mnt/hdd/raspiblitz.conf
-sed -i '/^lndKeysend=/d' /mnt/hdd/raspiblitz.conf
+sed -i '/^autoPilot=/d' /mnt/hdd/app-data/raspiblitz.conf
+sed -i '/^lndKeysend=/d' /mnt/hdd/app-data/raspiblitz.conf
 
 # signal setup done
 /home/admin/_cache.sh set message "Setup Done"

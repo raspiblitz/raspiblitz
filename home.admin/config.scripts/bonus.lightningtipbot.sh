@@ -15,7 +15,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   exit 1
 fi
 
-source /mnt/hdd/raspiblitz.conf
+source /mnt/hdd/app-data/raspiblitz.conf
 
 isInstalled=$(sudo ls /etc/systemd/system/lightningtipbot.service 2>/dev/null | grep -c 'lightningtipbot.service')
 

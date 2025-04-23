@@ -3,7 +3,7 @@
 # get raspiblitz config
 echo "# get raspiblitz config"
 source /home/admin/raspiblitz.info
-source /mnt/hdd/raspiblitz.conf
+source /mnt/hdd/app-data/raspiblitz.conf
 
 source <(/home/admin/config.scripts/network.aliases.sh getvars cl $1)
 
@@ -76,12 +76,12 @@ CHOICE=$(dialog --clear \
 case $CHOICE in
   ENCRYPT)
     sudo /home/admin/config.scripts/cl.hsmtool.sh encrypt $CHAIN
-    source /mnt/hdd/raspiblitz.conf
+    source /mnt/hdd/app-data/raspiblitz.conf
     ;;
 
   DECRYPT)
     /home/admin/config.scripts/cl.hsmtool.sh decrypt $CHAIN
-    source /mnt/hdd/raspiblitz.conf
+    source /mnt/hdd/app-data/raspiblitz.conf
     ;;
 
   PASSWORD_C)

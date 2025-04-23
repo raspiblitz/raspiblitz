@@ -2,7 +2,7 @@
 
 # get raspiblitz config
 source /home/admin/raspiblitz.info
-source /mnt/hdd/raspiblitz.conf
+source /mnt/hdd/app-data/raspiblitz.conf
 
 askBackupCopy()
 {

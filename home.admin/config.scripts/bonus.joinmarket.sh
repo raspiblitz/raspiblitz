@@ -39,7 +39,7 @@ PGPsigner="openoms"
 PGPpubkeyLink="https://github.com/openoms.gpg"
 PGPpubkeyFingerprint="13C688DB5B9C745DE4D2E4545BFB77609B081B65"
 
-source /mnt/hdd/raspiblitz.conf 2>/dev/null
+source /mnt/hdd/app-data/raspiblitz.conf 2>/dev/null
 
 # switch on
 if [ "$1" = "install" ]; then

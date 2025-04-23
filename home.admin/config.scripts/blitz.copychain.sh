@@ -9,7 +9,7 @@ fi
 
 # load basic system settings
 source /home/admin/raspiblitz.info 2>/dev/null
-source /mnt/hdd/raspiblitz.conf 2>/dev/null
+source /mnt/hdd/app-data/raspiblitz.conf 2>/dev/null
 
 # check that blockchain is set & supported
 if [ "${network}" != "bitcoin" ]; then

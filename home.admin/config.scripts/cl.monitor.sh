@@ -56,11 +56,11 @@ if [ "$2" = "status" ]; then
     # check if error because wallet is locked
     # the next release will have soecific error code for decryption  error
     # https://github.com/ElementsProject/lightning/pull/4908
-    source /mnt/hdd/raspiblitz.conf
+    source /mnt/hdd/app-data/raspiblitz.conf
     # password file is on the disk if encrypted and auto-unlock is enabled
     passwordFile="/dev/shm/.${netprefix}cl.pw"
-    if grep -Eq "${netprefix}clEncryptedHSM=on" /mnt/hdd/raspiblitz.conf; then
-      if grep -Eq "${netprefix}clAutoUnlock=on" /mnt/hdd/raspiblitz.conf; then
+    if grep -Eq "${netprefix}clEncryptedHSM=on" /mnt/hdd/app-data/raspiblitz.conf; then
+      if grep -Eq "${netprefix}clAutoUnlock=on" /mnt/hdd/app-data/raspiblitz.conf; then
         passwordFile=/home/bitcoin/.${netprefix}cl.pw
       fi
     fi

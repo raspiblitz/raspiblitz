@@ -40,7 +40,7 @@ IS_WIN32_ENV = sys.platform == "win32"
 SCREEN_HEIGHT = 318
 
 LND_CONF = "/mnt/hdd/lnd/lnd.conf"
-RB_CONF = "/mnt/hdd/raspiblitz.conf"
+RB_CONF = "/mnt/hdd/app-data/raspiblitz.conf"
 RB_INFO = "/home/admin/raspiblitz.info"
 
 STATUS_INTERVAL_LND = 30

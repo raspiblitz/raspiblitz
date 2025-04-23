@@ -4,7 +4,7 @@
 # to check debug logs: sudo cat /home/pi/.cache/lxsession/LXDE-pi/run.log
 
 source /home/admin/raspiblitz.info
-source /mnt/hdd/raspiblitz.conf
+source /mnt/hdd/app-data/raspiblitz.conf
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then

@@ -24,7 +24,7 @@ elif [ $PGPsigner = ViktorTigerstrom ]; then
   pgpPubKey="187F6ADD93AE3B0CF335AA6AB984570980684DCC"
 fi
 
-source /mnt/hdd/raspiblitz.conf
+source /mnt/hdd/app-data/raspiblitz.conf
 
 # show info menu
 if [ "$1" = "menu" ]; then
