@@ -18,10 +18,12 @@ sudo chown admin:admin $SETUPFILE
 sudo chmod 777 $SETUPFILE
 
 source <(/home/admin/_cache.sh get dnsworking)
+source <(/home/admin/_cache.sh get systemPartitionAvailable)
 
 # remember original setupphase
 orgSetupPhase="${setupPhase}"
 menuresult=""
+askBootFromNVMe="0"
 
 ############################################
 # PRESETUP: SET DNS (just if needed)
@@ -36,6 +38,7 @@ if [ "${setupPhase}" == "update" ]; then
   /home/admin/setup.scripts/dialogUpdate.sh
   if [ "$?" == "0" ]; then
     # proceed with provision (mark Password A to be set)
+    menuresult="4"
     echo "# OK update process starting .."
     echo "setPasswordA=1" >> $SETUPFILE
   else
@@ -318,6 +321,8 @@ if [ "${passwordA}" == "" ]; then
   sudo /home/admin/config.scripts/blitz.error.sh $(basename "$0") "missing-passworda-1" "missing passwordA(1) in (${SETUPFILE}) after dialogPasswords.sh" ""
   exit 1
 fi
+
+
 
 # set flag for bootstrap process to kick-off provision process
 /home/admin/_cache.sh set state "waitprovision"

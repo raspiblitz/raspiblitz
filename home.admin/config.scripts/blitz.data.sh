@@ -432,15 +432,12 @@ if [ "$action" = "status" ]; then
     done <<< "${ext4Partitions}"
 
     # check boot situation
-    if [ -n "${storageDevice}" ] && [ "${storageDevice}" = "${systemDevice}" ]; then
+    bootFromStorage=0
+    bootFromSD=$(lsblk | grep mmcblk | grep -c /boot)
+    if [ ${bootFromSD} -eq 0 ] && [ -n "${storageDevice}" ] && [ "${storageDevice}" = "${systemDevice}" ]; then
         # system runs from storage device
         bootFromStorage=1
         bootFromSD=0
-    else
-        # system might run from SD card
-        bootFromStorage=0
-        # check if boot partition is on SD card (mmcblk) - staus quo, might change thru proposed layout
-        bootFromSD=$(lsblk | grep mmcblk | grep -c /boot)
     fi
 
     # if there is an existing storage device

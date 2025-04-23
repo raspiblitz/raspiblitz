@@ -747,7 +747,7 @@ if [ "${scenario}" != "ready" ] ; then
 
   if [ "${setupCommand}" = "setup" ] || [ "${setupCommand}" = "recover" ]; then
 
-    echo "FORMAT DRIVES" >> ${logFile}
+    echo "FORMAT/RECOVER DRIVES" >> ${logFile}
     /home/admin/_cache.sh set state "hdd-format"
     /home/admin/_cache.sh set message "formatting drives"
 
