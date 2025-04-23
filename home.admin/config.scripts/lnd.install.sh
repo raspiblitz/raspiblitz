@@ -278,11 +278,23 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo ufw allow ${portprefix}8080 comment "${netprefix}lnd REST"
   sudo ufw allow 1${rpcportmod}009 comment "${netprefix}lnd RPC"
 
+  # make sure the bitcoin directory is present and is linked
+  echo "# Prepare directories"
+  source <(sudo /home/admin/config.scripts/blitz.data.sh status)
+  mkdir -p "${dataMountedPath}/app-data/lnd"
+  echo "# Liniking /lnd"
+  unlink /mnt/hdd/lnd 2>/dev/null
+  ln -s ${dataMountedPath}/app-data/lnd /mnt/hdd/lnd
+  chown -R bitcoin:bitcoin /mnt/hdd/lnd
+  chmod -R 755 /mnt/hdd/lnd
+
   echo "# Prepare directories"
   if [ ! -d /mnt/hdd/lnd ]; then
     echo "# Creating /mnt/hdd/lnd"
     sudo mkdir /mnt/hdd/lnd
   fi
+
+
   sudo chown -R bitcoin:bitcoin /mnt/hdd/lnd
   sudo chmod 755 /mnt/hdd/lnd
   if [ ! -L /home/bitcoin/.lnd ];then

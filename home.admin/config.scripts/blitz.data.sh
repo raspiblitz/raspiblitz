@@ -744,6 +744,11 @@ if [ "$action" = "status" ]; then
         scenario="error:unknown-state"
     fi
 
+    # copy data mounted path on combined storage
+    if [ "${storagePartition}" = "${dataPartition}" ] && [ ${#dataMountedPath} -eq 0 ] && [ ${combinedDataStorage} -eq 1 ]; then
+        dataMountedPath="${storageMountedPath}"
+    fi
+
     # get used space on drives in GB
     storageUsePercent=""
     if [ ${#storagePartition} -gt 0 ]; then
