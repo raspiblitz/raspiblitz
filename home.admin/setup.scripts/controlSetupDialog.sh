@@ -18,7 +18,7 @@ sudo chown admin:admin $SETUPFILE
 sudo chmod 777 $SETUPFILE
 
 source <(/home/admin/_cache.sh get dnsworking)
-source <(/home/admin/_cache.sh get systemPartition)
+source <(/home/admin/_cache.sh get system_setup_systemDevice)
 
 # remember original setupphase
 orgSetupPhase="${setupPhase}"
@@ -308,6 +308,26 @@ if [ "${setupPhase}" = "setup" ]; then
 
 fi
 
+source ${SETUPFILE}
+
+############################################
+# Decide of system copy
+
+if [ "${systemCopy}" == "" ]; then
+    if [ ${#system_setup_systemDevice} -gt 0 ]; then
+      # ask user about system copy
+      /home/admin/setup.scripts/dialogSystemCopy.sh
+      userChoice=$?
+      if [ "${userChoice}" == "0" ]; then
+        echo "systemCopy=1" >> $SETUPFILE
+      else
+        echo "systemCopy=0" >> $SETUPFILE
+      fi
+    else
+      echo "systemCopy=0" >> $SETUPFILE
+    fi
+fi
+
 ############################################
 # Enter Passwords
 # for fresh setup & migration
@@ -316,13 +336,10 @@ echo "# Starting passwords dialog ..."
 sudo /home/admin/setup.scripts/dialogPasswords.sh || exit 1
 
 # check if password A is set
-source ${SETUPFILE}
 if [ "${passwordA}" == "" ]; then
   sudo /home/admin/config.scripts/blitz.error.sh $(basename "$0") "missing-passworda-1" "missing passwordA(1) in (${SETUPFILE}) after dialogPasswords.sh" ""
   exit 1
 fi
-
-
 
 # set flag for bootstrap process to kick-off provision process
 /home/admin/_cache.sh set state "waitprovision"
