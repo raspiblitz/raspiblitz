@@ -89,9 +89,9 @@ mkdir /home/admin/.lnd/data >> ${logFile}
 cp -r /mnt/hdd/lnd/data/chain /home/admin/.lnd/data/chain >> ${logFile} 2>&1
 chown -R admin:admin /home/admin/.${network} >> ${logFile} 2>&1
 chown -R admin:admin /home/admin/.lnd >> ${logFile} 2>&1
-cp /home/admin/assets/tmux.conf.local /mnt/hdd/.tmux.conf.local >> ${logFile} 2>&1
-chown admin:admin /mnt/hdd/.tmux.conf.local >> ${logFile} 2>&1
-ln -s -f /mnt/hdd/.tmux.conf.local /home/admin/.tmux.conf.local >> ${logFile} 2>&1
+cp /home/admin/assets/tmux.conf.local /mnt/hdd/app-data/.tmux.conf.local >> ${logFile} 2>&1
+chown admin:admin /mnt/hdd/app-data/.tmux.conf.local >> ${logFile} 2>&1
+ln -s -f /mnt/hdd/app-data/.tmux.conf.local /home/admin/.tmux.conf.local >> ${logFile} 2>&1
 
 # PREPARE LND (if activated)
 if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
