@@ -18,7 +18,7 @@ sudo chown admin:admin $SETUPFILE
 sudo chmod 777 $SETUPFILE
 
 source <(/home/admin/_cache.sh get dnsworking)
-source <(/home/admin/_cache.sh get systemPartitionAvailable)
+source <(/home/admin/_cache.sh get systemPartition)
 
 # remember original setupphase
 orgSetupPhase="${setupPhase}"

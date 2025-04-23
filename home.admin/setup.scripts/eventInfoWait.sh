@@ -365,6 +365,13 @@ PREPARING DRIVES
 ...
 " 6 20
 
+elif [ "${eventID}" == "system-change" ]; then
+
+    dialog --backtitle "${backtitle}" --cr-wrap --infobox "
+REBOOT to CHANGE BOOT DRIVE
+
+Use password 'raspiblitz' for re-login. " 7 43
+
 elif [ "${eventID}" == "hdd-migration" ]; then
 
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "

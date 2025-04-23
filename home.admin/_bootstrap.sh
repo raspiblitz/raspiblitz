@@ -863,8 +863,8 @@ if [ "${scenario}" != "ready" ] ; then
 
       # reboot so that new system can start
       echo "GOING INTO REBOOT" >> ${logFile}
-      /home/admin/_cache.sh set state "reboot"
-      /home/admin/_cache.sh set message "restarting system"
+      /home/admin/_cache.sh set state "system-change"
+      /home/admin/_cache.sh set message "changing boot device"
       # sync filesystem buffers
       sync
       # force write of memory-cached filesystem data
