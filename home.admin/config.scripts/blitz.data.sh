@@ -1018,7 +1018,6 @@ if [ "$action" = "link" ]; then
     rm -rf ${storageMountedPath}/temp 2>/dev/null
     mkdir -p ${storageMountedPath}/temp
     rm -rf ${mainMountPoint}/temp 2>/dev/null
-    mkdir -p ${mainMountPoint}/temp
     ln -s ${storageMountedPath}/temp ${mainMountPoint}/temp
     chown -R bitcoin:bitcoin ${mainMountPoint}/temp
     chmod -R 777 ${storageMountedPath}/temp
