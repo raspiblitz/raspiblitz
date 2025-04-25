@@ -20,7 +20,7 @@ usage(){
 
 #### VARIABLES (some might be reset by prepare) ####
 
-hdd_path="/mnt/hdd"
+hdd_path="/mnt/hdd/app-data"
 download_dir="/home/admin/download"
 tor_data_dir="${hdd_path}/tor"
 tor_conf_dir="${hdd_path}/app-data/tor"
