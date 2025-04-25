@@ -317,9 +317,22 @@ if [ "${setupPhase}" = "setup" ]; then
 fi
 
 ############################################
+# Enter Passwords
+# for fresh setup & migration
+
+echo "# Starting passwords dialog ..."
+sudo /home/admin/setup.scripts/dialogPasswords.sh || exit 1
+
+# check if password A is set
+source ${SETUPFILE}
+if [ "${passwordA}" = "" ]; then
+  sudo /home/admin/config.scripts/blitz.error.sh $(basename "$0") "missing-passworda-1" "missing passwordA(1) in (${SETUPFILE}) after dialogPasswords.sh" ""
+  exit 1
+fi
+
+############################################
 # Decide of system copy
 
-source ${SETUPFILE}
 if [ "${systemCopy}" = "" ]; then
     if [ ${#system_setup_systemDevice} -gt 0 ]; then
       # ask user about system copy
@@ -333,20 +346,6 @@ if [ "${systemCopy}" = "" ]; then
     else
       echo "systemCopy=0" >> $SETUPFILE
     fi
-fi
-
-############################################
-# Enter Passwords
-# for fresh setup & migration
-
-echo "# Starting passwords dialog ..."
-sudo /home/admin/setup.scripts/dialogPasswords.sh || exit 1
-
-# check if password A is set
-source ${SETUPFILE}
-if [ "${passwordA}" = "" ]; then
-  sudo /home/admin/config.scripts/blitz.error.sh $(basename "$0") "missing-passworda-1" "missing passwordA(1) in (${SETUPFILE}) after dialogPasswords.sh" ""
-  exit 1
 fi
 
 # set flag for bootstrap process to kick-off provision process
