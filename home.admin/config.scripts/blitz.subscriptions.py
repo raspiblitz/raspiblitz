@@ -326,25 +326,25 @@ def main():
         if tag == "REST":
             # get TOR address for REST
             service_name = SERVICE_LND_REST_API
-            tor_address = subprocess.run(['sudo', 'cat', '/mnt/hdd/tor/lndrest/hostname'],
+            tor_address = subprocess.run(['sudo', 'cat', '/mnt/hdd/app-data/tor/lndrest/hostname'],
                                          stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
             tor_port = 8080
         if tag == "GRPC":
             # get TOR address for GRPC
             service_name = SERVICE_LND_GRPC_API
-            tor_address = subprocess.run(['sudo', 'cat', '/mnt/hdd/tor/lndrpc/hostname'],
+            tor_address = subprocess.run(['sudo', 'cat', '/mnt/hdd/app-data/tor/lndrpc/hostname'],
                                          stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
             tor_port = 10009
         if tag == "LNBITS":
             # get TOR address for LNBits
             service_name = SERVICE_LNBITS
-            tor_address = subprocess.run(['sudo', 'cat', '/mnt/hdd/tor/lnbits/hostname'],
+            tor_address = subprocess.run(['sudo', 'cat', '/mnt/hdd/app-data/tor/lnbits/hostname'],
                                          stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
             tor_port = 443
         if tag == "BTCPAY":
             # get TOR address for BTCPAY
             service_name = SERVICE_BTCPAY
-            tor_address = subprocess.run(['sudo', 'cat', '/mnt/hdd/tor/btcpay/hostname'],
+            tor_address = subprocess.run(['sudo', 'cat', '/mnt/hdd/app-data/tor/btcpay/hostname'],
                                          stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
             tor_port = 443
         if tag == "SELF":

@@ -454,7 +454,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       # make sure to keep in sync with tor.network.sh script
       /home/admin/config.scripts/tor.onion-service.sh sphinxrelay 80 3302 443 3303
       # get TOR address and store it readable for sphinxrelay user
-      toraddress=$(sudo cat /mnt/hdd/tor/sphinxrelay/hostname 2>/dev/null)
+      toraddress=$(sudo cat /mnt/hdd/app-data/tor/sphinxrelay/hostname 2>/dev/null)
       sudo -u sphinxrelay bash -c "echo '${toraddress}' > /home/sphinxrelay/sphinx-relay/dist/toraddress.txt"
     fi
 

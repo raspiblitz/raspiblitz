@@ -124,7 +124,7 @@ case "$1" in
     [ "${lndg}" = "on" ] && /home/admin/config.scripts/tor.onion-service.sh lndg 80 8886 443 8887
     if [ "${sphinxrelay}" = "on" ]; then
       /home/admin/config.scripts/tor.onion-service.sh sphinxrelay 80 3302 443 3303
-      toraddress=$(sudo cat /mnt/hdd/tor/sphinxrelay/hostname 2>/dev/null)
+      toraddress=$(sudo cat /mnt/hdd/app-data/tor/sphinxrelay/hostname 2>/dev/null)
       sudo -u sphinxrelay bash -c "echo '${toraddress}' > /home/sphinxrelay/sphinx-relay/dist/toraddress.txt"
     fi
     if [ "${helipad}" = "on" ]; then
@@ -135,7 +135,7 @@ case "$1" in
     echo "Setup logrotate"
     # add logrotate config for modified Tor dir on ext. disk
     sudo tee /etc/logrotate.d/raspiblitz-tor >/dev/null <<EOF
-/mnt/hdd/tor/*log {
+/mnt/hdd/app-data/tor/*log {
         size 100M
         rotate 4
         compress

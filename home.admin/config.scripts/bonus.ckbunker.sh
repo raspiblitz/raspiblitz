@@ -37,7 +37,7 @@ isRunning=$(systemctl status ckbunker 2>/dev/null | grep -c 'active (running)')
 if [ "${isInstalled}" == "1" ]; then
 
   # gather address info (whats needed to call the app)
-  toraddress=$(sudo cat /mnt/hdd/tor/ckbunker/hostname 2>/dev/null)
+  toraddress=$(sudo cat /mnt/hdd/app-data/tor/ckbunker/hostname 2>/dev/null)
   fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
 
 fi

@@ -60,7 +60,7 @@ if [ "$1" = connect ]; then
   # hidden service to https://xx.onion
   /home/admin/config.scripts/tor.onion-service.sh ${netprefix}clrest 443 ${portprefix}6100 1>/dev/null
 
-  toraddress=$(sudo cat /mnt/hdd/tor/${netprefix}clrest/hostname)
+  toraddress=$(sudo cat /mnt/hdd/app-data/tor/${netprefix}clrest/hostname)
   hex_macaroon=$(sudo -u bitcoin xxd -plain /home/bitcoin/c-lightning-REST/${CLNETWORK}/certs/access.macaroon | tr -d '\n')
   url="https://${localip}:${portprefix}6100/"
   # lndconnect="lndconnect://${toraddress}:443?macaroon=${hex_macaroon}"

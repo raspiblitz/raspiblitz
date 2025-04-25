@@ -82,7 +82,7 @@ if [ "$1" = "write-macaroons" ]; then
   sudo chown squeaknode ${lndMacaroonPath}
   sudo -u squeaknode sed -i "s|^SQUEAKNODE_LND_MACAROON_PATH=.*|SQUEAKNODE_LND_MACAROON_PATH=${lndMacaroonPath}|g" /home/squeaknode/squeaknode/.env
 
-  toraddress=$(sudo cat /mnt/hdd/tor/squeaknode-p2p-${chain}net/hostname 2>/dev/null)
+  toraddress=$(sudo cat /mnt/hdd/app-data/tor/squeaknode-p2p-${chain}net/hostname 2>/dev/null)
   sudo -u squeaknode sed -i "s|^SQUEAKNODE_SERVER_EXTERNAL_ADDRESS=.*|SQUEAKNODE_SERVER_EXTERNAL_ADDRESS=${toraddress}|g" /home/squeaknode/squeaknode/.env
 
   # set macaroon  path info in .env - USING PATH

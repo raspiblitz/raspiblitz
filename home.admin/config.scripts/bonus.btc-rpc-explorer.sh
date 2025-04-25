@@ -91,7 +91,7 @@ if [ "$1" = "status" ]; then
 
     # get network info
     localIP=$(hostname -I | awk '{print $1}')
-    toraddress=$(sudo cat /mnt/hdd/tor/btc-rpc-explorer/hostname 2>/dev/null)
+    toraddress=$(sudo cat /mnt/hdd/app-data/tor/btc-rpc-explorer/hostname 2>/dev/null)
     fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
 
     authMethod="user_admin_password_b"

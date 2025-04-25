@@ -70,7 +70,7 @@ elif [ "${exportType}" = "hexstring" ]; then
   adminMacaroon=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/${network}/${chain}net/admin.macaroon)
   invoiceMacaroon=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/${network}/${chain}net/invoice.macaroon)
   readonlyMacaroon=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/${network}/${chain}net/readonly.macaroon)
-  restTor=$(sudo cat /mnt/hdd/tor/lndrest/hostname)
+  restTor=$(sudo cat /mnt/hdd/app-data/tor/lndrest/hostname)
 
   clear
   echo "###### HEXSTRING EXPORT ######"

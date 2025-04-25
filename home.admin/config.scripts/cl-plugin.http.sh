@@ -23,7 +23,7 @@ PGPpubkeyFingerprint="(4AEE18F83AFDEB23|B5690EEEBB952194)"
 source <(/home/admin/config.scripts/network.aliases.sh getvars cl mainnet)
 
 if [ $1 = connect ];then
-  toraddress=$(sudo cat /mnt/hdd/tor/clHTTPplugin/hostname)
+  toraddress=$(sudo cat /mnt/hdd/app-data/tor/clHTTPplugin/hostname)
   PASSWORD_B=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcpassword | cut -c 13-)
   # https://github.com/rootzoll/raspiblitz/issues/2579#issuecomment-936091256
   # http://rpcuser:rpcpassword@xxx.onion:9080

@@ -179,7 +179,7 @@ do
   source <(/home/admin/_cache.sh valid tor_web_addr)
   if [ "${stillvalid}" == "0" ] || [ ${age} -gt ${MINUTE5} ]; then
     echo "updating: tor"
-    /home/admin/_cache.sh set tor_web_addr "$(cat /mnt/hdd/tor/web80/hostname 2>/dev/null)"
+    /home/admin/_cache.sh set tor_web_addr "$(cat /mnt/hdd/app-data/tor/web80/hostname 2>/dev/null)"
   fi
 
   #################

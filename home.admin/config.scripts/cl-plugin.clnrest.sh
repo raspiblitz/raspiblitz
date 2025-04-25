@@ -48,7 +48,7 @@ if [ "$1" = connect ]; then
   # hidden service to https://xx.onion
   /home/admin/config.scripts/tor.onion-service.sh ${netprefix}clnrest 443 ${portprefix}7378 1>/dev/null
 
-  toraddress=$(sudo cat /mnt/hdd/tor/${netprefix}clnrest/hostname)
+  toraddress=$(sudo cat /mnt/hdd/app-data/tor/${netprefix}clnrest/hostname)
   rune=$($lightningcli_alias createrune | jq -r .rune)
   url="https://${localip}:${portprefix}7378/"
   # clnrest://http://your_hidden_service.onion:your_port?&rune=your_rune

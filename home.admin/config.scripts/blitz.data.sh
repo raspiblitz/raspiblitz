@@ -1109,8 +1109,8 @@ if [ "$action" = "link" ]; then
     if [ -d "${storageMountedPath}/tor" ]; then
         echo "# OLD->OLD: Liniking /tor"
         unlink ${mainMountPoint}/tor 2>/dev/null
-        ln -s ${storageMountedPath}/tor ${mainMountPoint}/tor
-        chown -R debian-tor:debian-tor ${mainMountPoint}/tor
+        ln -s ${storageMountedPath}/tor ${mainMountPoint}/app-data/tor
+        chown -R debian-tor:debian-tor ${mainMountPoint}/app-data/tor
         chmod -R 700 ${mainMountPoint}/tor
     else
         echo "# OLD->OLD: Skipping /tor (not found)"

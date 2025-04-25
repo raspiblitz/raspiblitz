@@ -86,7 +86,7 @@ if [ "$1" = "status" ]; then
     if [ "${runBehindTor}" == "on" ]; then
       echo "TorRunning=1"
       if [ "$2" = "showAddress" ]; then
-        TORaddress=$(sudo cat /mnt/hdd/tor/electrs/hostname)
+        TORaddress=$(sudo cat /mnt/hdd/app-data/tor/electrs/hostname)
         echo "TORaddress='${TORaddress}'"
       fi
     else

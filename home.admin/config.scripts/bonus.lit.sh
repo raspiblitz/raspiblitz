@@ -31,7 +31,7 @@ if [ "$1" = "menu" ]; then
 
   # get network info
   localip=$(hostname -I | awk '{print $1}')
-  toraddress=$(sudo cat /mnt/hdd/tor/lit/hostname 2>/dev/null)
+  toraddress=$(sudo cat /mnt/hdd/app-data/tor/lit/hostname 2>/dev/null)
   fingerprint=$(sudo openssl x509 -in /home/lit/.lit/tls.cert -fingerprint -noout | cut -d"=" -f2)
 
   if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then

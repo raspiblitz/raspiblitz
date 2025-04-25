@@ -177,7 +177,7 @@ if [ "$1" = "status" ]; then
     sslFingerprintIP=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout 2>/dev/null | cut -d"=" -f2)
     echo "sslFingerprintIP='${sslFingerprintIP}'"
 
-    toraddress=$(sudo cat /mnt/hdd/tor/btcpay/hostname 2>/dev/null)
+    toraddress=$(sudo cat /mnt/hdd/app-data/tor/btcpay/hostname 2>/dev/null)
     echo "toraddress='${toraddress}'"
 
     sslFingerprintTOR=$(openssl x509 -in /mnt/hdd/app-data/nginx/tor_tls.cert -fingerprint -noout 2>/dev/null | cut -d"=" -f2)
