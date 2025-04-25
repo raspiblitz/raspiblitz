@@ -36,7 +36,7 @@ fi
 if [ "${setupPhase}" == "update" ]; then
   # show update dialog
   /home/admin/setup.scripts/dialogUpdate.sh
-  if [ "$?" == "0" ]; then
+  if [ "$?" = "0" ]; then
     # proceed with provision (mark Password A to be set)
     menuresult="4"
     echo "# OK update process starting .."
@@ -53,7 +53,7 @@ fi
 if [ "${setupPhase}" == "recovery" ]; then
   # show recovery dialog
   /home/admin/setup.scripts/dialogRecovery.sh
-  if [ "$?" == "0" ]; then
+  if [ "$?" = "0" ]; then
     # proceed with provision (mark Password A to be set)
     echo "# OK recover process starting .."
     echo "setPasswordA=1" >> $SETUPFILE
@@ -83,7 +83,7 @@ if [ "${setupPhase}" == "migration" ]; then
   echo "# Starting migration dialog (${system_setup_storageMigration}) ..."
 
   /home/admin/setup.scripts/dialogMigration.sh ${system_setup_storageMigration} "normal"
-  if [ "$?" == "0" ]; then
+  if [ "$?" = "0" ]; then
     # mark migration to happen on provision
     echo "migrationOS='${system_setup_storageMigration}'" >> $SETUPFILE
     # user needs to reset password A, B & C
@@ -214,9 +214,9 @@ if [ "${setupPhase}" = "setup" ]; then
     if [ "${menuresult}" != "6" ]; then
       /home/admin/setup.scripts/dialogDeleteData.sh "${existingBlockchain}"
       userChoice=$?
-      if [ "${userChoice}" == "1" ]; then
+      if [ "${userChoice}" = "1" ]; then
         echo "deleteData='all'" >> $SETUPFILE
-      elif [ "${userChoice}" == "2" ]; then
+      elif [ "${userChoice}" = "2" ]; then
         echo "deleteData='keepBlockchain'" >> $SETUPFILE
       else
         # STOP SETUP  - loop back to setup menu start
@@ -272,7 +272,7 @@ if [ "${setupPhase}" = "setup" ]; then
 
     lightningWalletDone=0
     source ${SETUPFILE}
-    if [ "${lightning}" == "none" ]; then
+    if [ "${lightning}" = "none" ]; then
       lightningWalletDone=1
       # also disable asking for password c if no lightning implementation was chosen
       sed -i "s/^setPasswordC=.*/setPasswordC=0/g" ${SETUPFILE}
@@ -280,13 +280,13 @@ if [ "${setupPhase}" = "setup" ]; then
     while [ "${lightningWalletDone}" == "0" ]
     do
 
-      if [ "${lightning}" == "lnd" ]; then
+      if [ "${lightning}" = "lnd" ]; then
 
         echo "# Starting lightning wallet dialog for LND ..."
         /home/admin/setup.scripts/dialogLightningWallet-lnd.sh
         dialogResult=$?
 
-      elif [ "${lightning}" == "cl" ]; then
+      elif [ "${lightning}" = "cl" ]; then
 
         echo "# Starting lightning wallet dialog for CORE LIGHTNING ..."
         /home/admin/setup.scripts/dialogLightningWallet-cl.sh
@@ -299,13 +299,13 @@ if [ "${setupPhase}" = "setup" ]; then
       fi
 
       # break loop only if a clean exit
-      if [ "${dialogResult}" == "0" ]; then
+      if [ "${dialogResult}" = "0" ]; then
         lightningWalletDone=1
       fi
 
       # allow user to cancel to terminal on dialog main menu
       # all other cancels have other exit codes
-      if [ "${dialogResult}" == "1" ]; then
+      if [ "${dialogResult}" = "1" ]; then
         echo "# you selected cancel - sending exit code 1"
         exit 1
       fi
@@ -320,7 +320,7 @@ fi
 # Decide of system copy
 
 source ${SETUPFILE}
-if [ "${systemCopy}" == "" ]; then
+if [ "${systemCopy}" = "" ]; then
     if [ ${#system_setup_systemDevice} -gt 0 ]; then
       # ask user about system copy
       /home/admin/setup.scripts/dialogSystemCopy.sh
@@ -344,7 +344,7 @@ sudo /home/admin/setup.scripts/dialogPasswords.sh || exit 1
 
 # check if password A is set
 source ${SETUPFILE}
-if [ "${passwordA}" == "" ]; then
+if [ "${passwordA}" = "" ]; then
   sudo /home/admin/config.scripts/blitz.error.sh $(basename "$0") "missing-passworda-1" "missing passwordA(1) in (${SETUPFILE}) after dialogPasswords.sh" ""
   exit 1
 fi
