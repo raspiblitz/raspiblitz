@@ -127,25 +127,15 @@ if [ "${setupPhase}" = "setup" ]; then
   /home/admin/setup.scripts/dialogBasicSetup.sh ${orgSetupPhase}
   menuresult=$?
 
-  # menu RECOVER menu option
-  if [ "${menuresult}" = "4" ]; then
-    setupPhase="${orgSetupPhase}"
-    /home/admin/_cache.sh set setupPhase "${setupPhase}"
-    # proceed with provision (mark Password A to be set)
-    echo "# OK update process starting .."
-    echo "setPasswordA=1" >> $SETUPFILE
+  # shutdown without changes
+  if [ "${menuresult}" == "0" ]; then
+    echo "menuchoice='setup'" >> $SETUPFILE
   fi
-  
-  # menu MIGRATE menu option
-  if [ "${menuresult}" == "5" ]; then
-    setupPhase="${orgSetupPhase}"
-    /home/admin/_cache.sh set setupPhase "${setupPhase}"
-    # mark migration to happen on provision
-    echo "migrationOS='${hddGotMigrationData}'" >> $SETUPFILE
-    # user needs to reset password A, B & C
-    echo "setPasswordA=1" >> $SETUPFILE
-    echo "setPasswordB=1" >> $SETUPFILE
-    echo "setPasswordC=1" >> $SETUPFILE
+
+  # shutdown without changes
+  if [ "${menuresult}" == "2" ]; then
+    sudo shutdown now
+    exit 0
   fi
 
   # exit to terminal
@@ -154,10 +144,27 @@ if [ "${setupPhase}" = "setup" ]; then
     exit 1
   fi
 
-  # shutdown without changes
-  if [ "${menuresult}" == "2" ]; then
-    sudo shutdown now
-    exit 0
+  # menu RECOVER menu option
+  if [ "${menuresult}" = "4" ]; then
+    setupPhase="${orgSetupPhase}"
+    /home/admin/_cache.sh set setupPhase "${setupPhase}"
+    # proceed with provision (mark Password A to be set)
+    echo "# OK update process starting .."
+    echo "menuchoice='recover'" >> $SETUPFILE
+    echo "setPasswordA=1" >> $SETUPFILE
+  fi
+  
+  # menu MIGRATE menu option
+  if [ "${menuresult}" == "5" ]; then
+    setupPhase="${orgSetupPhase}"
+    /home/admin/_cache.sh set setupPhase "${setupPhase}"
+    echo "menuchoice='uploadmigrate'" >> $SETUPFILE
+    # mark migration to happen on provision
+    echo "migrationOS='${hddGotMigrationData}'" >> $SETUPFILE
+    # user needs to reset password A, B & C
+    echo "setPasswordA=1" >> $SETUPFILE
+    echo "setPasswordB=1" >> $SETUPFILE
+    echo "setPasswordC=1" >> $SETUPFILE
   fi
 
   # migrate HDD
@@ -169,6 +176,7 @@ if [ "${setupPhase}" = "setup" ]; then
       # user wants to exit
       exit 0
     fi
+    echo "menuchoice='hddmigrate'" >> $SETUPFILE
     source <(/home/admin/_cache.sh get hddMigrateDeviceFrom)
     echo "hddMigrateDeviceFrom='${hddMigrateDeviceFrom}'" >> $SETUPFILE
     source <(/home/admin/_cache.sh get hddMigrateDeviceTo)

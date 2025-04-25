@@ -694,6 +694,12 @@ if [ "${scenario}" != "ready" ] ; then
   echo "LOADING 'raspiblitz.setup' ..." >> ${logFile}
   source ${setupFile}
 
+  # overwrite recover by user choice
+  if [ "${scenario}" = "recover" ] && [ "${menuchoice}" = "setup" ]; then
+    echo "OVERWRITE BY USERCHOICE recover -> setup" >> ${logFile}
+    scenario="setup"
+  fi
+
   # when this is the boot of the new system (skip to provision)
   if [ "${systemCopy}" = "done" ]; then
     scenario="setup"
