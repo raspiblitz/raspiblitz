@@ -794,17 +794,6 @@ if [ "$action" = "status" ]; then
         systemCelsius=$(smartctl -A /dev/${systemDevice} | grep -E '^Temperature:|Temperature Sensor' | awk '{print $(NF-1)}' | head -n 1)
     fi
 
-    # in case of recover - check storage device available system partition
-    if [ "${scenario}" = "recover" ] && [ ${#storageDevice} -gt 0 ] && [ ${#systemDevice} -eq 0 ]; then
-        # check that storagePartition ends on 3 (signals that the first partions are ready for system)
-        if [ ${#storagePartition} -gt 0 ]; then
-            storagePartitionEnd=$(echo "${storagePartition}" | sed 's/[0-9]*$//')
-            if [ ${#storagePartitionEnd} -gt 0 ]; then
-                systemDevice="${storageDevice}"
-            fi
-        fi
-    fi
-
     # output the result
     echo "scenario='${scenario}'"
     echo "scenarioSystemCopy='${systemCopy}'"

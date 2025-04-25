@@ -18,7 +18,6 @@ sudo chown admin:admin $SETUPFILE
 sudo chmod 777 $SETUPFILE
 
 source <(/home/admin/_cache.sh get dnsworking)
-source <(/home/admin/_cache.sh get system_setup_systemDevice)
 
 # remember original setupphase
 orgSetupPhase="${setupPhase}"
@@ -187,20 +186,7 @@ if [ "${setupPhase}" = "setup" ]; then
   # FORMAT DRIVE on NEW SETUP or MIGRATION UPLOAD/HDD 
   if [ "${menuresult}" = "0" ] || [ "${menuresult}" = "1" ]  || [ "${menuresult}" = "6" ]; then
 
-    source <(/home/admin/_cache.sh get system_setup_askSystemCopy system_setup_bootFromStorage)
-
-    if [ "${system_setup_askSystemCopy}" == "1" ]; then
-      # ask user about system copy
-      /home/admin/setup.scripts/dialogSystemCopy.sh
-      userChoice=$?
-      if [ "${userChoice}" == "0" ]; then
-        echo "systemCopy=1" >> $SETUPFILE
-      else
-        echo "systemCopy=0" >> $SETUPFILE
-      fi
-    fi
-
-    source <(/home/admin/_cache.sh get system_setup_storageMigration system_setup_storageBlockchainGB)
+    source <(/home/admin/_cache.sh get system_setup_storageMigration system_setup_storageBlockchainGB system_setup_bootFromStorage)
 
     # only offer 'keep blockchain' option on systems that dont boot from storage 
     existingBlockchain=""
@@ -331,24 +317,19 @@ if [ "${passwordA}" = "" ]; then
 fi
 
 ############################################
-# Decide of system copy
-
-if [ "${systemCopy}" = "" ]; then
-    if [ ${#system_setup_systemDevice} -gt 0 ]; then
-      # ask user about system copy
-      /home/admin/setup.scripts/dialogSystemCopy.sh
-      userChoice=$?
-      if [ "${userChoice}" == "0" ]; then
-        echo "systemCopy=1" >> $SETUPFILE
-      else
-        echo "systemCopy=0" >> $SETUPFILE
-      fi
-    else
-      echo "systemCopy=0" >> $SETUPFILE
-    fi
+# Ask System Copy
+source <(/home/admin/_cache.sh get system_setup_askSystemCopy)
+if [ "${system_setup_askSystemCopy}" = "1" ]; then
+  # ask user about system copy
+  /home/admin/setup.scripts/dialogSystemCopy.sh
+  userChoice=$?
+  if [ "${userChoice}" == "0" ]; then
+    echo "systemCopy=1" >> $SETUPFILE
+  else
+    echo "systemCopy=0" >> $SETUPFILE
+  fi
 fi
 
 # set flag for bootstrap process to kick-off provision process
 /home/admin/_cache.sh set state "waitprovision"
-
 clear

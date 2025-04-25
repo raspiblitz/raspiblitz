@@ -119,7 +119,7 @@ while [ ${exitMenuLoop} -eq 0 ]; do
   if [ "${setupPhase}" != "done" ] && [ "${state}" == "waitsetup" ]; then
     # push user to main menu
     echo "# controlSetupDialog.sh"
-    /home/admin/setup.scripts/controlSetupDialog.sh
+    /home/admin/setup.scripts/controlSetupDialog.sh 
     # use the exit code from setup menu as signal if menu loop should exited
     # 0 = continue loop / everything else = break loop and exit to terminal
     exitMenuLoop=$?
