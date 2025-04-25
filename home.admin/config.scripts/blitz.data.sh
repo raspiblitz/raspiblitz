@@ -5,12 +5,15 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
     >&2 echo "# blitz.data.sh mount # mounts all drives and link all data folders"
     >&2 echo "# blitz.data.sh link # (re)create all symlinks to files and folders (also mapping old layout to new layout)"
     >&2 echo "# blitz.data.sh setup STOARGE [device] combinedData=[0|1] addSystemPartition=[0|1]"
-    >&2 echo "# blitz.data.sh setup SEPERATE-SYSTEM [device]"
-    >&2 echo "# blitz.data.sh setup SEPERATE-DATA [device]"
+    >&2 echo "# blitz.data.sh setup SYSTEM [device]"
+    >&2 echo "# blitz.data.sh setup DATA [device]"
+    >&2 echo "# blitz.data.sh clean STOARGE [device] combinedData=[0|1] addSystemPartition=[0|1]"
+    >&2 echo "# blitz.data.sh clean SYSTEM [device]"
+    >&2 echo "# blitz.data.sh clean DATA [device]"
     >&2 echo "# blitz.data.sh copy-system [device] [system|storage]"
     >&2 echo "# blitz.data.sh recover STOARGE [device] combinedData=[0|1] bootFromStorage=[0|1]"
-    >&2 echo "# blitz.data.sh recover SEPERATE-SYSTEM [device]"
-    >&2 echo "# blitz.data.sh recover SEPERATE-DATA [device]"
+    >&2 echo "# blitz.data.sh recover SYSTEM [device]"
+    >&2 echo "# blitz.data.sh recover DATA [device]"
     >&2 echo "# blitz.data.sh kill-boot [device] # deactivate boot function from install medium"
     >&2 echo "# blitz.data.sh migration [umbrel|citadel|mynode] [partition] [-test] # will migrate partition to raspiblitz"
     >&2 echo "# blitz.data.sh migration hdd [menu-prepare|run]"
@@ -1143,9 +1146,9 @@ if [ "$action" = "setup" ]; then
 
     echo "STARTED blitz.data.sh ${action} ..." >> ${logFile}
 
-    # check that it is a valid setup type: STORAGE, SEPERATE-DATA, SEPERATE-SYSTEM
+    # check that it is a valid setup type: STORAGE, DATA, SYSTEM
     actionType=$2
-    if [ "${actionType}" != "STORAGE" ] && [ "${actionType}" != "SEPERATE-DATA" ] && [ "${actionType}" != "SEPERATE-SYSTEM" ]; then
+    if [ "${actionType}" != "STORAGE" ] && [ "${actionType}" != "DATA" ] && [ "${actionType}" != "SYSTEM" ]; then
         echo "# actionType(${actionType})"
         echo "error='setup type not supported'"
         echo "error='setup type not supported'" >> ${logFile}
@@ -1213,7 +1216,7 @@ if [ "$action" = "setup" ]; then
     # PARTITION & FORMAT
 
     # SYSTEM (single drive)
-    if [ "${actionType}" = "SEPERATE-SYSTEM" ]; then
+    if [ "${actionType}" = "SYSTEM" ]; then
 
         echo "# SYSTEM partitioning" >> ${logFile}
         sfdisk --delete /dev/${actionDevice} 2>/dev/null
@@ -1313,7 +1316,7 @@ if [ "$action" = "setup" ]; then
         umount /mnt/disk_storage
 
     # DATA (single drive)
-    elif [ "${actionType}" = "SEPERATE-DATA" ]; then
+    elif [ "${actionType}" = "DATA" ]; then
         echo "# DATA partitioning" >> ${logFile}
         sfdisk --delete /dev/${actionDevice} 2>/dev/null
         wipefs -a /dev/${actionDevice} 2>/dev/null
@@ -1447,7 +1450,12 @@ if [ "$action" = "copy-system" ]; then
     fi
     if [ "${computerType}" = "raspberrypi" ]; then
         echo "# .. boot rsync start" >> ${logFile}
-        rsync -axHAX --delete ${bootPath} /mnt/disk_boot/ || { echo "error='fail on boot copy'"; exit 1; }
+        echo "boot" > /var/cache/raspiblitz/temp/progress.txt
+        rsync -axHAX --delete --info=progress2 ${bootPath} /mnt/disk_boot/ 2>&1 | stdbuf -oL tr '\r' '\n' | grep --line-buffered '%' | stdbuf -oL sed -n 's/.* \([0-9]\+\)% .*/\1%/p' >> /var/cache/raspiblitz/temp/progress.txt
+        if [ $? -ne 0 ]; then
+            echo "error='fail on boot copy'"
+            exit 1
+        fi
         echo "# OK - Boot copied" >> ${logFile}
     fi
 
@@ -1461,6 +1469,7 @@ if [ "$action" = "copy-system" ]; then
         exit 1
     fi
     echo "# .. system rsync start" >> ${logFile}
+    echo "system" > /var/cache/raspiblitz/temp/progress.txt
     rsync -axHAX --delete\
         --exclude=/dev/* \
         --exclude=/proc/* \
@@ -1474,7 +1483,11 @@ if [ "$action" = "copy-system" ]; then
         --exclude=/var/cache/* \
         --exclude=/var/tmp/* \
         --exclude=/var/log/* \
-        / /mnt/disk_system/ || { echo "error='fail on system copy'"; exit 1; }
+        --info=progress2 / /mnt/disk_system/ 2>&1 | stdbuf -oL tr '\r' '\n' | grep --line-buffered '%' | stdbuf -oL sed -n 's/.* \([0-9]\+\)% .*/\1%/p' >> /var/cache/raspiblitz/temp/progress.txt
+    if [ $? -ne 0 ]; then
+        echo "error='fail on system copy'"
+        exit 1
+    fi
     echo "# OK - System copied" >> ${logFile}
 
     # needed after fixes
@@ -1528,19 +1541,20 @@ EOF
         umount $DISK_SYSTEM
     fi
 
+    rm /var/cache/raspiblitz/temp/progress.txt
     echo "# OK - ${action} done" >> ${logFile}
     exit 0
 fi
 
 ###################
-# RECOVER
+# RECOVER / CLEAN
 ###################
 
-if [ "$action" = "recover" ]; then
+if [ "$action" = "recover" ] || [ "$action" = "clean" ]; then
 
     echo "STARTED blitz.data.sh ${action} ..." >> ${logFile}
 
-    # check that it is a valid setup type: STORAGE, SEPERATE-DATA, SEPERATE-SYSTEM
+    # check that it is a valid setup type: STORAGE, DATA, SYSTEM
     actionType=$2
     if [ "${actionType}" != "STORAGE" ] && [ "${actionType}" != "DATA" ] && [ "${actionType}" != "SYSTEM" ]; then
         echo "# actionType(${actionType})"
@@ -1603,127 +1617,15 @@ if [ "$action" = "recover" ]; then
     echo "# actionType(${actionType})"  >> ${logFile}
     echo "# actionDevice(${actionDevice})" >> ${logFile}
     echo "# actionDevicePartitionBase(${actionDevicePartitionBase})" >> ${logFile}
-    echo "# actionCreateSystemPartition
-    (${actionCreateSystemPartition
-    })" >> ${logFile}
+    echo "# actionCreateSystemPartition(${actionCreateSystemPartition})" >> ${logFile}
     echo "# actionCombinedData(${actionCombinedData})" >> ${logFile}
 
-    ##########################
-    # COPY SYSTEM
+    if [ "${action}" = "clean" ]; then
+        echo "# TODO: CLEAN ${actionType}" >> ${logFile}
+    fi
 
-    if [ ${actionType} = "SEPERATE-SYSTEM" ] || [ ${actionCreateSystemPartition
-    } -eq 1 ]; then
-        echo "# SYSTEM COPY" >> ${logFile}
-
-        # copy the boot drive
-        bootPath="/boot/efi"
-        bootPathEscpaed="\/boot\/efi"
-        if [ "${computerType}" = "raspberrypi" ]; then
-            bootPath="/boot/firmware/"
-            bootPathEscpaed="\/boot\/firmware"
-        fi
-        rm -rf /mnt/disk_boot 2>/dev/null
-        mkdir -p /mnt/disk_boot 2>/dev/null
-        mount /dev/${actionDevicePartitionBase}1 /mnt/disk_boot
-        if ! findmnt -n -o TARGET "/mnt/disk_boot" 2>/dev/null; then
-            echo "error='boot partition not mounted'"
-            exit 1
-        fi
-        if [ "${computerType}" = "raspberrypi" ]; then
-            echo "# .. boot rsync start" >> ${logFile}
-            echo "boot" > /var/cache/raspiblitz/temp/progress.txt
-            rsync -axHAX --delete --info=progress2 ${bootPath} /mnt/disk_boot/ 2>&1 | stdbuf -oL tr '\r' '\n' | grep --line-buffered '%' | stdbuf -oL sed -n 's/.* \([0-9]\+\)% .*/\1%/p' >> /var/cache/raspiblitz/temp/progress.txt
-            if [ $? -ne 0 ]; then
-                echo "error='fail on boot copy'";
-                exit 1
-            fi
-            echo "# OK - Boot copied" >> ${logFile}
-        fi
-
-        # copy the system drive
-        echo "# .. copy system" >> ${logFile}
-        rm -rf /mnt/disk_system 2>/dev/null
-        mkdir -p /mnt/disk_system 2>/dev/null
-        mount /dev/${actionDevicePartitionBase}2 /mnt/disk_system
-        if ! findmnt -n -o TARGET "/mnt/disk_system" 2>/dev/null; then
-            echo "error='system partition not mounted'"
-            exit 1
-        fi
-        echo "# .. system rsync start" >> ${logFile}
-        echo "system" > /var/cache/raspiblitz/temp/progress.txt
-        rsync -axHAX --delete \
-            --exclude=/dev/* \
-            --exclude=/proc/* \
-            --exclude=/sys/* \
-            --exclude=/tmp/* \
-            --exclude=/run/* \
-            --exclude=/mnt/* \
-            --exclude=/media/* \
-            --exclude=${bootPath}/* \
-            --exclude=/lost+found \
-            --exclude=/var/cache/* \
-            --exclude=/var/tmp/* \
-            --exclude=/var/log/* \
-            --info=progress2 / /mnt/disk_system/ 2>&1 | stdbuf -oL tr '\r' '\n' | grep --line-buffered '%' | stdbuf -oL sed -n 's/.* \([0-9]\+\)% .*/\1%/p' >> /var/cache/raspiblitz/temp/progress.txt
-            if [ $? -ne 0 ]; then
-                echo "error='fail on system copy'";
-                exit 1
-            fi
-        echo "# OK - System copied" >> ${logFile}
-
-        # needed after fixes
-        mkdir -p /mnt/disk_system/var/log/redis
-        touch /mnt/disk_system/var/log/redis/redis-server.log
-        chown redis:redis /mnt/disk_system/var/log/redis/redis-server.log
-        chmod 644 /mnt/disk_system/var/log/redis/redis-server.log
-
-        # fstab link & command.txt
-        echo "# Perma mount boot & system drives" >> ${logFile}
-        BOOT_UUID=$(blkid -s UUID -o value /dev/${actionDevicePartitionBase}1)
-        ROOT_UUID=$(blkid -s UUID -o value /dev/${actionDevicePartitionBase}2)
-        ROOT_PARTUUID=$(sudo blkid -s PARTUUID -o value /dev/${actionDevicePartitionBase}2)
-        echo "# - BOOT_UUID(${BOOT_UUID})" >> ${logFile}
-        echo "# - ROOT_UUID(${ROOT_UUID})" >> ${logFile}
-        if [ "${computerType}" = "raspberrypi" ]; then
-            echo "# - RaspberryPi - edit command.txt" >> ${logFile}
-            sed -i "s|PARTUUID=[^ ]*|PARTUUID=$ROOT_PARTUUID|" /mnt/disk_boot/cmdline.txt
-        fi
-        cat > /mnt/disk_system/etc/fstab << EOF
-# /etc/fstab: static file system information
-#
-# <file system>                           <mount point>  <type>  <options>                              <dump>  <pass>
-UUID=${ROOT_UUID}                         /              ext4    defaults,noatime                       0       1
-UUID=${BOOT_UUID}                        ${bootPath}          vfat    defaults,noatime,umask=0077           0       2
-EOF
-
-        # install EFI GRUB for VM & PC
-        if [ "${computerType}" != "raspberrypi" ]; then
-            echo "# EFI GRUB" >> ${logFile}
-            DISK_SYSTEM="/mnt/disk_system"
-            BOOT_PARTITION="/dev/${actionDevicePartitionBase}1"
-            ROOT_PARTITION="/dev/${actionDevicePartitionBase}2"
-            echo "# Mounting root and boot partitions..." >> ${logFile}
-            umount /mnt/disk_boot 2>/dev/null
-            mkdir -p $DISK_SYSTEM/boot/efi 2>/dev/null
-            mount $BOOT_PARTITION $DISK_SYSTEM/boot/efi || { echo "Failed to mount boot partition"; exit 1; }
-            echo "# Bind mounting system directories..." >> ${logFile}
-            mount --bind /dev $DISK_SYSTEM/dev || { echo "Failed to bind /dev"; exit 1; }
-            mount --bind /sys $DISK_SYSTEM/sys || { echo "Failed to bind /sys"; exit 1; }
-            mount --bind /proc $DISK_SYSTEM/proc || { echo "Failed to bind /proc"; exit 1; }
-            rm $DISK_SYSTEM/etc/resolv.conf
-            cp /etc/resolv.conf $DISK_SYSTEM/etc/resolv.conf || { echo "Failed to copy resolv.conf"; exit 1; }
-            echo "# Entering chroot and setting up GRUB..." >> ${logFile}
-            chroot $DISK_SYSTEM /bin/bash <<EOF
-apt-get install -y grub-efi-amd64 efibootmgr
-grub-install --target=x86_64-efi --efi-directory=/boot/efi --removable --recheck
-update-grub
-EOF
-            umount $DISK_SYSTEM/boot/efi
-            umount $DISK_SYSTEM
-        fi
-
-    else
-        echo "# skipping: SystemCopy"
+    if [ "${action}" = "recover" ]; then
+        echo "# TODO: RECOVER ${actionType}" >> ${logFile}
     fi
 
     echo "# OK - ${action} done" >> ${logFile}

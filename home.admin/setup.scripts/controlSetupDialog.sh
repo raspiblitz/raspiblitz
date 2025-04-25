@@ -128,18 +128,18 @@ if [ "${setupPhase}" = "setup" ]; then
   menuresult=$?
 
   # shutdown without changes
-  if [ "${menuresult}" == "0" ]; then
+  if [ "${menuresult}" = "0" ]; then
     echo "menuchoice='setup'" >> $SETUPFILE
   fi
 
   # shutdown without changes
-  if [ "${menuresult}" == "2" ]; then
+  if [ "${menuresult}" = "2" ]; then
     sudo shutdown now
     exit 0
   fi
 
   # exit to terminal
-  if [ "${menuresult}" == "3" ]; then
+  if [ "${menuresult}" = "3" ]; then
     /home/admin/_cache.sh set setupPhase "${orgSetupPhase}"
     exit 1
   fi
@@ -155,7 +155,7 @@ if [ "${setupPhase}" = "setup" ]; then
   fi
   
   # menu MIGRATE menu option
-  if [ "${menuresult}" == "5" ]; then
+  if [ "${menuresult}" = "5" ]; then
     setupPhase="${orgSetupPhase}"
     /home/admin/_cache.sh set setupPhase "${setupPhase}"
     echo "menuchoice='uploadmigrate'" >> $SETUPFILE
@@ -168,7 +168,7 @@ if [ "${setupPhase}" = "setup" ]; then
   fi
 
   # migrate HDD
-  if [ "${menuresult}" == "6" ]; then
+  if [ "${menuresult}" = "6" ]; then
     
     # ask user details on migrate HDD (resutls in cache)
     sudo /home/admin/config.scripts/blitz.data.sh migration hdd menu-prepare

@@ -721,6 +721,11 @@ if [ "${scenario}" != "ready" ] ; then
     setupCommand="setup"
     bootFromStorage=0
 
+  # user agreed to run system from install medium and delete all data
+  elif [ "${scenario}" = "setup" ] && [ "${deleteData}" = "keepBlockchain" ]; then
+    setupCommand="clean"
+    bootFromStorage=0
+
   # run recovery
   elif [ "${scenario}" = "recover" ]; then
     setupCommand="recover"
@@ -751,7 +756,7 @@ if [ "${scenario}" != "ready" ] ; then
   ###############################################
   # SYSTEM COPY OF FRESH SYSTEM (SETUP & RECOVER)
 
-  if [ "${setupCommand}" = "setup" ] || [ "${setupCommand}" = "recover" ]; then
+  if [ "${setupCommand}" = "setup" ] || [ "${setupCommand}" = "recover" ] || [ "${setupCommand}" = "clean" ]; then
 
     echo "FORMAT/RECOVER DRIVES" >> ${logFile}
     /home/admin/_cache.sh set state "hdd-format"
