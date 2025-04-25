@@ -972,10 +972,6 @@ if [ "${scenario}" != "ready" ] ; then
     exit 1
   fi
 
-  # make sure all links between directories/drives are correct
-  echo "Refreshing links between directories/drives .." >> ${logFile}
-  /home/admin/config.scripts/blitz.data.sh link
-
   # copy over the raspiblitz.conf created from setup to HDD
   configExists=$(ls ${configFile} 2>/dev/null | grep -c "raspiblitz.conf")
   if [ "${configExists}" != "1" ]; then
