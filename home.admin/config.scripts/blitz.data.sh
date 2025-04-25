@@ -1130,10 +1130,12 @@ if [ "$action" = "link" ]; then
     fi
 
     ### bitcoin user symbol links
+    echo "# bitcoin user symbol link: bitcoin"
     unlink /home/bitcoin/.bitcoin 2>/dev/null
     ln -s /mnt/hdd/bitcoin /home/bitcoin/.bitcoin
     chown -R bitcoin:bitcoin /home/bitcoin/.bitcoin
 
+    echo "# bitcoin user symbol link: lnd"
     unlink /home/bitcoin/.lnd 2>/dev/null
     ln -s /mnt/hdd/lnd /home/bitcoin/.lnd
     chown -R bitcoin:bitcoin /home/bitcoin/.lnd
