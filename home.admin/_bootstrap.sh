@@ -963,6 +963,12 @@ if [ "${scenario}" != "ready" ] ; then
     exit 1
   fi
 
+  # copy over the raspiblitz.conf created from setup to HDD
+  configExists=$(ls ${configFile} 2>/dev/null | grep -c "raspiblitz.conf")
+  if [ "${configExists}" != "1" ]; then
+    cp /var/cache/raspiblitz/temp/raspiblitz.conf ${configFile}
+  fi
+
   # link directories together in /mnt/hdd (pre-provision)
   /home/admin/config.scripts/blitz.data.sh link >> ${logFile}
   if [ $? -eq 1 ]; then
@@ -970,12 +976,6 @@ if [ "${scenario}" != "ready" ] ; then
     /home/admin/_cache.sh set state "error"
     /home/admin/_cache.sh set message "blitz.data.sh link failed"
     exit 1
-  fi
-
-  # copy over the raspiblitz.conf created from setup to HDD
-  configExists=$(ls ${configFile} 2>/dev/null | grep -c "raspiblitz.conf")
-  if [ "${configExists}" != "1" ]; then
-    cp /var/cache/raspiblitz/temp/raspiblitz.conf ${configFile}
   fi
 
   # enable tor service
