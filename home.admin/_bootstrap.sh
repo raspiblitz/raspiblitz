@@ -943,7 +943,6 @@ if [ "${scenario}" != "ready" ] ; then
     echo "# CREATING raspiblitz.conf from setup file" >> ${logFile}
     source /home/admin/_version.info
     source ${setupFile}
-    echo "creating raspiblitz.conf" >> ${logFile}
     touch ${configFile} >> ${logFile}
     echo "# RASPIBLITZ CONFIG FILE" > ${configFile}
     echo "raspiBlitzVersion='${codeVersion}'" >> ${configFile}
@@ -955,6 +954,8 @@ if [ "${scenario}" != "ready" ] ; then
     echo "runBehindTor='on'" >> ${configFile}
     chown root:sudo ${configFile}
     chmod 664 ${configFile}
+    echo "cat ${configFile}" >> ${logFile}
+    cat ${configFile} >> ${logFile}
   fi
     
   # link directories together in /mnt/hdd (pre-provision)
