@@ -199,7 +199,6 @@ if [ "$1" = "install" ] ; then
   exit 0
 fi
 
-
 # CHAIN is signet | testnet | mainnet
 CHAIN=$2
 if [ -z "${CHAIN}" ] || [ "$2" = purge ]; then
@@ -278,23 +277,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo ufw allow ${portprefix}8080 comment "${netprefix}lnd REST"
   sudo ufw allow 1${rpcportmod}009 comment "${netprefix}lnd RPC"
 
-  # make sure the bitcoin directory is present and is linked
-  echo "# Prepare directories"
-  source <(sudo /home/admin/config.scripts/blitz.data.sh status)
-  mkdir -p "${dataMountedPath}/app-data/lnd"
-  echo "# Liniking /lnd"
-  unlink /mnt/hdd/app-data/lnd 2>/dev/null
-  ln -s ${dataMountedPath}/app-data/lnd /mnt/hdd/app-data/lnd
-  chown -R bitcoin:bitcoin /mnt/hdd/app-data/lnd
-  chmod -R 755 /mnt/hdd/app-data/lnd
-
   sudo chown -R bitcoin:bitcoin /mnt/hdd/app-data/lnd
   sudo chmod 755 /mnt/hdd/app-data/lnd
-  if [ ! -L /mnt/hdd/app-data/lnd ];then
-    echo "# Linking lnd for user bitcoin"
-    sudo rm /mnt/hdd/app-data/lnd 2>/dev/null
-    sudo ln -s /mnt/hdd/app-data/lnd /mnt/hdd/app-data/lnd
-  fi
 
   echo "# Create /mnt/hdd/app-data/lnd/${netprefix}lnd.conf"
   if [ ! -f /mnt/hdd/app-data/lnd/${netprefix}lnd.conf ];then
