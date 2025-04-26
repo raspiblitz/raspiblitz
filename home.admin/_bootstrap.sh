@@ -938,6 +938,15 @@ if [ "${scenario}" != "ready" ] ; then
     exit 1
   fi
 
+  # link directories together in /mnt/hdd (pre-provision)
+  /home/admin/config.scripts/blitz.data.sh link >> ${logFile}
+  if [ $? -eq 1 ]; then
+    echo "FAIL: blitz.data.sh link failed" >> ${logFile}
+    /home/admin/_cache.sh set state "error"
+    /home/admin/_cache.sh set message "blitz.data.sh link failed"
+    exit 1
+  fi
+
   if [ "${scenario}" = "setup" ]; then
     rm -f ${configFile}
     echo "# CREATING raspiblitz.conf from setup file" >> ${logFile}
@@ -957,16 +966,7 @@ if [ "${scenario}" != "ready" ] ; then
     echo "cat ${configFile}" >> ${logFile}
     cat ${configFile} >> ${logFile}
   fi
-    
-  # link directories together in /mnt/hdd (pre-provision)
-  /home/admin/config.scripts/blitz.data.sh link >> ${logFile}
-  if [ $? -eq 1 ]; then
-    echo "FAIL: blitz.data.sh link failed" >> ${logFile}
-    /home/admin/_cache.sh set state "error"
-    /home/admin/_cache.sh set message "blitz.data.sh link failed"
-    exit 1
-  fi
-
+  
   # enable tor service
   /home/admin/config.scripts/tor.install.sh enable >> ${logFile}
 
