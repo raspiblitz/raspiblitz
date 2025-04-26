@@ -929,31 +929,6 @@ if [ "${scenario}" != "ready" ] ; then
   # set flag that provision process was started on this system 
   echo "the provision process was started but did not finish yet" > /home/admin/provision.flag
 
-  if [ "${scenario}" = "setup" ]; then
-
-    echo "# CREATING raspiblitz.conf from your setup choices" >> ${logFile}
-
-    # source the raspiblitz version
-    source /home/admin/_version.info
-
-    # prepare & write basic config file
-    # will first be created and in cache drive
-    # and some lines below copied to hdd when mounted
-    TEMPCONFIGFILE="/var/cache/raspiblitz/temp/raspiblitz.conf"
-    rm $TEMPCONFIGFILE 2>/dev/null
-    touch $TEMPCONFIGFILE
-    chown admin:admin $TEMPCONFIGFILE
-    chmod 777 $TEMPCONFIGFILE
-    echo "# RASPIBLITZ CONFIG FILE" > $TEMPCONFIGFILE
-    echo "raspiBlitzVersion='${codeVersion}'" >> $TEMPCONFIGFILE
-    echo "lcdrotate='1'" >> $TEMPCONFIGFILE
-    echo "lightning='${lightning}'" >> $TEMPCONFIGFILE
-    echo "network='bitcoin'" >> $TEMPCONFIGFILE
-    echo "chain='main'" >> $TEMPCONFIGFILE
-    echo "hostname='${hostname}'" >> $TEMPCONFIGFILE
-    echo "runBehindTor='on'" >> $TEMPCONFIGFILE
-  fi
-
   # perma mount drives/partitions
   /home/admin/config.scripts/blitz.data.sh mount >> ${logFile}
   if [ $? -eq 1 ]; then
@@ -963,15 +938,25 @@ if [ "${scenario}" != "ready" ] ; then
     exit 1
   fi
 
-  # copy over the raspiblitz.conf created from setup to HDD
-  configExists=$(ls ${configFile} 2>/dev/null | grep -c "raspiblitz.conf")
-  if [ "${configExists}" != "1" ]; then
+  if [ "${scenario}" = "setup" ]; then
+    rm -f ${configFile}
+    echo "# CREATING raspiblitz.conf from setup file" >> ${logFile}
+    source /home/admin/_version.info
+    source ${setupFile}
     echo "creating raspiblitz.conf" >> ${logFile}
-    cp /var/cache/raspiblitz/temp/raspiblitz.conf ${configFile}
-  else
-    echo "raspiblitz.conf already exists" >> ${logFile}
+    touch ${configFile} >> ${logFile}
+    echo "# RASPIBLITZ CONFIG FILE" > ${configFile}
+    echo "raspiBlitzVersion='${codeVersion}'" >> ${configFile}
+    echo "lcdrotate='1'" >> ${configFile}
+    echo "lightning='${lightning}'" >> ${configFile}
+    echo "network='bitcoin'" >> ${configFile}
+    echo "chain='main'" >> ${configFile}
+    echo "hostname='${hostname}'" >> ${configFile}
+    echo "runBehindTor='on'" >> ${configFile}
+    chown root:sudo ${configFile}
+    chmod 664 ${configFile}
   fi
-
+    
   # link directories together in /mnt/hdd (pre-provision)
   /home/admin/config.scripts/blitz.data.sh link >> ${logFile}
   if [ $? -eq 1 ]; then

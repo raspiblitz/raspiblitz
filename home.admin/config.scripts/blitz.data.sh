@@ -963,6 +963,11 @@ if [ "$action" = "mount" ]; then
         echo "error='Failed to mount ${dataPartition} on ${dataMountPoint} after fstab update'"
         exit 1
     fi
+    chown bitcoin:bitcoin ${mainMountPoint}/app-storage
+    chown bitcoin:bitcoin ${mainMountPoint}/app-data
+    chmod 775 ${mainMountPoint}/app-storage
+    chmod 775 ${mainMountPoint}/app-data
+    
     echo "# Mount successful." >> ${logFile}
     exit 0
 fi
