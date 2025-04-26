@@ -963,7 +963,7 @@ if [ "${scenario}" != "ready" ] ; then
     exit 1
   fi
 
-  # link directories together in /mnt/hdd
+  # link directories together in /mnt/hdd (pre-provision)
   /home/admin/config.scripts/blitz.data.sh link >> ${logFile}
   if [ $? -eq 1 ]; then
     echo "FAIL: blitz.data.sh link failed" >> ${logFile}
@@ -1148,6 +1148,15 @@ if [ "${scenario}" != "ready" ] ; then
   # delete provision in progress flag
   rm /home/admin/provision.flag
   rm /mnt/hdd/app-data/raspiblitz.setup 2>/dev/null
+
+  # final relink of directories
+  /home/admin/config.scripts/blitz.data.sh link >> ${logFile}
+  if [ $? -eq 1 ]; then
+    echo "FAIL: blitz.data.sh link failed (2)" >> ${logFile}
+    /home/admin/_cache.sh set state "error"
+    /home/admin/_cache.sh set message "blitz.data.sh link failed (2)"
+    exit 1
+  fi
 
   # mark provision process done
   /home/admin/_cache.sh set message "Provision Done"
