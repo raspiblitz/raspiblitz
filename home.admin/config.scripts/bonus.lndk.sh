@@ -46,7 +46,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     fi
 
     # LND needs the following configuration settings so lndk can run.
-    lnd_conf_file="/home/bitcoin/.lnd/lnd.conf"
+    lnd_conf_file="/mnt/hdd/app-data/lnd/lnd.conf"
     lines=(
       "protocol.custom-message=513"
       "protocol.custom-nodeann=39"

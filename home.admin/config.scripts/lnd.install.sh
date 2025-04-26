@@ -290,14 +290,14 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   sudo chown -R bitcoin:bitcoin /mnt/hdd/app-data/lnd
   sudo chmod 755 /mnt/hdd/app-data/lnd
-  if [ ! -L /home/bitcoin/.lnd ];then
+  if [ ! -L /mnt/hdd/app-data/lnd ];then
     echo "# Linking lnd for user bitcoin"
-    sudo rm /home/bitcoin/.lnd 2>/dev/null
-    sudo ln -s /mnt/hdd/app-data/lnd /home/bitcoin/.lnd
+    sudo rm /mnt/hdd/app-data/lnd 2>/dev/null
+    sudo ln -s /mnt/hdd/app-data/lnd /mnt/hdd/app-data/lnd
   fi
 
-  echo "# Create /home/bitcoin/.lnd/${netprefix}lnd.conf"
-  if [ ! -f /home/bitcoin/.lnd/${netprefix}lnd.conf ];then
+  echo "# Create /mnt/hdd/app-data/lnd/${netprefix}lnd.conf"
+  if [ ! -f /mnt/hdd/app-data/lnd/${netprefix}lnd.conf ];then
     echo "# LND configuration
 
 [Application Options]
@@ -314,8 +314,8 @@ ignore-historical-gossip-filters=1
 stagger-initial-reconnect=true
 tlsautorefresh=1
 tlsdisableautofill=1
-tlscertpath=/home/bitcoin/.lnd/tls.cert
-tlskeypath=/home/bitcoin/.lnd/tls.key
+tlscertpath=/mnt/hdd/app-data/lnd/tls.cert
+tlskeypath=/mnt/hdd/app-data/lnd/tls.key
 
 # Set to false for nodes with larger amount of channels. This modification leads to increased 
 # latency during initialization, yet significantly boosts runtime performance of the daemon.
@@ -339,9 +339,9 @@ db.bolt.auto-compact-min-age=672h
 healthcheck.chainbackend.attempts=3
 healthcheck.chainbackend.timeout=2m0s 
 healthcheck.chainbackend.interval=1m30s
-" | sudo -u bitcoin tee /home/bitcoin/.lnd/${netprefix}lnd.conf
+" | sudo -u bitcoin tee /mnt/hdd/app-data/lnd/${netprefix}lnd.conf
   else
-    echo "# The file /home/bitcoin/.lnd/${netprefix}lnd.conf is already present"
+    echo "# The file /mnt/hdd/app-data/lnd/${netprefix}lnd.conf is already present"
   fi
 
   # systemd service
@@ -361,10 +361,10 @@ PartOf=${netprefix}bitcoind.service
 EnvironmentFile=/mnt/hdd/app-data/raspiblitz.conf
 
 ExecStartPre=-/home/admin/config.scripts/lnd.check.sh prestart ${CHAIN}
-ExecStart=/usr/local/bin/lnd --configfile=/home/bitcoin/.lnd/${netprefix}lnd.conf
+ExecStart=/usr/local/bin/lnd --configfile=/mnt/hdd/app-data/lnd/${netprefix}lnd.conf
 # avoid hanging on stop
 # ExecStop=/usr/local/bin/lncli -n=${CHAIN} --rpcserver localhost:1${rpcportmod}009 stop
-PIDFile=/home/bitcoin/.lnd/${netprefix}lnd.pid
+PIDFile=/mnt/hdd/app-data/lnd/${netprefix}lnd.pid
 
 User=bitcoin
 Group=bitcoin
@@ -425,7 +425,7 @@ alias ${netprefix}lndlog=\"sudo tail -n 30 -f /mnt/hdd/app-data/lnd/logs/${netwo
   fi
   if [ $(grep -c "alias ${netprefix}lndconf" < /home/admin/_aliases) -eq 0 ];then
     echo "\
-alias ${netprefix}lndconf=\"sudo nano /home/bitcoin/.lnd/${netprefix}lnd.conf\"\
+alias ${netprefix}lndconf=\"sudo nano /mnt/hdd/app-data/lnd/${netprefix}lnd.conf\"\
 " | sudo tee -a /home/admin/_aliases
   fi
 
@@ -484,7 +484,7 @@ alias ${netprefix}lndconf=\"sudo nano /home/bitcoin/.lnd/${netprefix}lnd.conf\"\
   echo "sudo journalctl -fu ${netprefix}lnd"
   echo "sudo systemctl status ${netprefix}lnd"
   echo "# logs:"
-  echo "sudo tail -f /home/bitcoin/.lnd/logs/bitcoin/${CHAIN}/lnd.log"
+  echo "sudo tail -f /mnt/hdd/app-data/lnd/logs/bitcoin/${CHAIN}/lnd.log"
   echo "# for the command line options use"
   echo "${netprefix}lncli help"
   echo

@@ -1579,8 +1579,8 @@ if [ "$1" = "link" ]; then
       rm /mnt/storage/bitcoin/bitcoin 2>/dev/null
     fi
     >&2 echo "# linking lnd for user bitcoin"
-    rm /home/bitcoin/.lnd 2>/dev/null
-    ln -s /mnt/hdd/app-data/lnd /home/bitcoin/.lnd
+    rm /mnt/hdd/app-data/lnd 2>/dev/null
+    ln -s /mnt/hdd/app-data/lnd /mnt/hdd/app-data/lnd
     >&2 echo "# - linking blockchain for user bitcoin"
     ln -s /mnt/storage/bitcoin /home/bitcoin/.bitcoin
     >&2 echo "# - linking storage into /mnt/hdd"
@@ -1603,8 +1603,8 @@ if [ "$1" = "link" ]; then
     rm /home/bitcoin/.bitcoin 2>/dev/null
     ln -s /mnt/hdd/bitcoin /home/bitcoin/.bitcoin
     >&2 echo "# linking lnd for user bitcoin"
-    rm /home/bitcoin/.lnd 2>/dev/null
-    ln -s /mnt/hdd/app-data/lnd /home/bitcoin/.lnd
+    rm /mnt/hdd/app-data/lnd 2>/dev/null
+    ln -s /mnt/hdd/app-data/lnd /mnt/hdd/app-data/lnd
     >&2 echo "# creating default storage & temp folders"
     mkdir -p /mnt/hdd/app-storage
     mkdir -p /mnt/hdd/temp
@@ -1613,7 +1613,7 @@ if [ "$1" = "link" ]; then
   # fix ownership of linked files
   chown -R bitcoin:bitcoin /mnt/hdd/bitcoin
   chown -R bitcoin:bitcoin /mnt/hdd/app-data/lnd
-  chown -R bitcoin:bitcoin /home/bitcoin/.lnd
+  chown -R bitcoin:bitcoin /mnt/hdd/app-data/lnd
   chown -R bitcoin:bitcoin /home/bitcoin/.bitcoin
   chown bitcoin:bitcoin /mnt/hdd/app-storage
   chown bitcoin:bitcoin /mnt/hdd/app-data

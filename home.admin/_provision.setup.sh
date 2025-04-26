@@ -202,9 +202,9 @@ if [ "${lightning}" == "lnd" ]; then
   /home/admin/config.scripts/blitz.data.sh link
 
   # check if now a config exists
-  configLinkedCorrectly=$(ls /home/bitcoin/.lnd/lnd.conf | grep -c "lnd.conf")
+  configLinkedCorrectly=$(ls /mnt/hdd/app-data/lnd/lnd.conf | grep -c "lnd.conf")
   if [ "${configLinkedCorrectly}" != "1" ]; then
-    /home/admin/config.scripts/blitz.error.sh _provision.setup.sh "lnd-link-broken" "link /home/bitcoin/.lnd/lnd.conf broken" "" ${logFile}
+    /home/admin/config.scripts/blitz.error.sh _provision.setup.sh "lnd-link-broken" "link /mnt/hdd/app-data/lnd/lnd.conf broken" "" ${logFile}
     exit 7
   fi
 
@@ -305,12 +305,12 @@ if [ "${lightning}" == "lnd" ]; then
 
   # check if macaroon exists now - if not fail
   attempt=0
-  while [ $(sudo -u bitcoin ls -la /home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon 2>/dev/null | grep -c admin.macaroon) -eq 0 ]; do
+  while [ $(sudo -u bitcoin ls -la /mnt/hdd/app-data/lnd/data/chain/${network}/${chain}net/admin.macaroon 2>/dev/null | grep -c admin.macaroon) -eq 0 ]; do
     echo "Waiting 2 mins for LND to create macaroons ... (${attempt}0s)" >> ${logFile}
     sleep 10
     attempt=$((attempt+1))
     if [ $attempt -eq 12 ];then
-      /home/admin/config.scripts/blitz.error.sh _provision.setup.sh "lnd-no-macaroons" "lnd did not create macaroons" "/home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon --> missing" ${logFile}
+      /home/admin/config.scripts/blitz.error.sh _provision.setup.sh "lnd-no-macaroons" "lnd did not create macaroons" "/mnt/hdd/app-data/lnd/data/chain/${network}/${chain}net/admin.macaroon --> missing" ${logFile}
       exit 14
     fi
   done

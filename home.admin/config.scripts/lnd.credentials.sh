@@ -88,9 +88,9 @@ if [ "$1" = "reset" ]; then
     cd || exit
     # shellcheck disable=SC2154 # gets the ${network} from the raspiblitz.conf
     sudo find /mnt/hdd/app-data/lnd/data/chain/"${network}"/"${chain}"net/ -iname '*.macaroon' -delete
-    sudo find /home/bitcoin/.lnd/data/chain/"${network}"/"${chain}"net/ -iname '*.macaroon' -delete
+    sudo find /mnt/hdd/app-data/lnd/data/chain/"${network}"/"${chain}"net/ -iname '*.macaroon' -delete
     if [ "${keepOldMacaroons}" != "1" ]; then
-      sudo rm /home/bitcoin/.lnd/data/chain/"${network}"/"${chain}"net/macaroons.db
+      sudo rm /mnt/hdd/app-data/lnd/data/chain/"${network}"/"${chain}"net/macaroons.db
     fi
 
     echo "# delete also lit macaroons if present"

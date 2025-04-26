@@ -18,7 +18,7 @@ source /home/admin/raspiblitz.info
 source /mnt/hdd/app-data/raspiblitz.conf
 
 # generate data parts
-hex_macaroon=$(sudo xxd -plain /home/bitcoin/.lnd/data/chain/${network}/${chain}net/admin.macaroon | tr -d '\n')
+hex_macaroon=$(sudo xxd -plain /mnt/hdd/app-data/lnd/data/chain/${network}/${chain}net/admin.macaroon | tr -d '\n')
 cert=$(sudo grep -v 'CERTIFICATE' /mnt/hdd/app-data/lnd/tls.cert | tr -d '=' | tr '/+' '_-' | tr -d '\n')
 
 #### ADAPT PARAMETERS BASED RASPIBLITZ CONFIG

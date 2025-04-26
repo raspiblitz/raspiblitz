@@ -19,7 +19,7 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 # base directory of lnd
-lndHomeDir="/home/bitcoin/.lnd"
+lndHomeDir="/mnt/hdd/app-data/lnd"
 
 # set based on network type (using own mapping to be able to run without calling sudo -u bitcoin)
 if [ "$1" == "mainnet" ]; then
@@ -151,7 +151,7 @@ if [ "$2" = "info" ]; then
   fi
 
   # raw data demo:
-  # sudo /usr/local/bin/lncli -n=mainnet --rpcserver=localhost:10009 --macaroonpath=/home/bitcoin/.lnd/data/chain/bitcoin/mainnet/readonly.macaroon --tlscertpath=/home/bitcoin/.lnd/tls.cert getinfo
+  # sudo /usr/local/bin/lncli -n=mainnet --rpcserver=localhost:10009 --macaroonpath=/mnt/hdd/app-data/lnd/data/chain/bitcoin/mainnet/readonly.macaroon --tlscertpath=/mnt/hdd/app-data/lnd/tls.cert getinfo
 
   # get data
   ln_getInfo=$($lndcli_alias getinfo 2>/dev/null)
@@ -240,8 +240,8 @@ if [ "$2" = "wallet" ]; then
   fi
 
   # raw data demo:
-  # /usr/local/bin/lncli -n=mainnet --rpcserver=localhost:10009 --macaroonpath=/home/bitcoin/.lnd/data/chain/bitcoin/mainnet/readonly.macaroon --tlscertpath=/home/bitcoin/.lnd/tls.cert walletbalance
-  # /usr/local/bin/lncli -n=mainnet --rpcserver=localhost:10009 --macaroonpath=/home/bitcoin/.lnd/data/chain/bitcoin/mainnet/readonly.macaroon --tlscertpath=/home/bitcoin/.lnd/tls.cert channelbalance
+  # /usr/local/bin/lncli -n=mainnet --rpcserver=localhost:10009 --macaroonpath=/mnt/hdd/app-data/lnd/data/chain/bitcoin/mainnet/readonly.macaroon --tlscertpath=/mnt/hdd/app-data/lnd/tls.cert walletbalance
+  # /usr/local/bin/lncli -n=mainnet --rpcserver=localhost:10009 --macaroonpath=/mnt/hdd/app-data/lnd/data/chain/bitcoin/mainnet/readonly.macaroon --tlscertpath=/mnt/hdd/app-data/lnd/tls.cert channelbalance
   # get data
   ln_walletbalance=$($lndcli_alias walletbalance 2>/dev/null)
   if [ "${ln_walletbalance}" == "" ]; then
@@ -304,7 +304,7 @@ if [ "$2" = "channels" ]; then
   fi
 
   # raw data demo:
-  # sudo /usr/local/bin/lncli -n=mainnet --rpcserver=localhost:10009 --macaroonpath=/home/bitcoin/.lnd/data/chain/bitcoin/mainnet/readonly.macaroon --tlscertpath=/home/bitcoin/.lnd/tls.cert listchannels
+  # sudo /usr/local/bin/lncli -n=mainnet --rpcserver=localhost:10009 --macaroonpath=/mnt/hdd/app-data/lnd/data/chain/bitcoin/mainnet/readonly.macaroon --tlscertpath=/mnt/hdd/app-data/lnd/tls.cert listchannels
 
   # get data
   ln_channels=$($lndcli_alias listchannels 2>/dev/null)
@@ -329,7 +329,7 @@ fi
 if [ "$2" = "fees" ]; then
 
 # raw data demo:
-# sudo /usr/local/bin/lncli -n=mainnet --rpcserver=localhost:10009 --macaroonpath=/home/bitcoin/.lnd/data/chain/bitcoin/mainnet/readonly.macaroon --tlscertpath=/home/bitcoin/.lnd/tls.cert feereport
+# sudo /usr/local/bin/lncli -n=mainnet --rpcserver=localhost:10009 --macaroonpath=/mnt/hdd/app-data/lnd/data/chain/bitcoin/mainnet/readonly.macaroon --tlscertpath=/mnt/hdd/app-data/lnd/tls.cert feereport
 
   # quick if not running
   if [ "${lnd_running}" == "0" ]; then

@@ -1031,113 +1031,46 @@ if [ "$action" = "link" ]; then
     chmod -R 777 ${storageMountedPath}/temp
     chmod -R 777 ${mainMountPoint}/temp
 
-    ####################################
-    # NEW->OLD: links for old layout compatibility
-    # when storage is new layout
+    # /mnt/hdd/bitcoin directory (deprecated)
+    mkdir -p "${storageMountedPath}/app-storage/bitcoin"
+    echo "# For backwards compatibility: Liniking ${mainMountPoint}/bitcoin"
+    unlink ${mainMountPoint}/bitcoin 2>/dev/null
+    ln -s ${storageMountedPath}/app-storage/bitcoin ${mainMountPoint}/bitcoin
+    chown -R bitcoin:bitcoin ${mainMountPoint}/bitcoin
+    chmod -R 777 ${mainMountPoint}/bitcoin
 
-    # bitcoin directory
-    if [ -d "${storageMountedPath}/app-storage/bitcoin" ]; then
-        echo "# NEW->OLD: Liniking /bitcoin"
-        unlink ${mainMountPoint}/bitcoin 2>/dev/null
-        ln -s ${storageMountedPath}/app-storage/bitcoin ${mainMountPoint}/bitcoin
-        chown -R bitcoin:bitcoin ${mainMountPoint}/bitcoin
-        chmod -R 777 ${mainMountPoint}/bitcoin
-    else
-        echo "# NEW->OLD: Skipping /bitcoin (not found)"
-    fi
+    # /mnt/hdd/lnd directory (deprecated)
+    mkdir -p "${dataMountedPath}/app-data/lnd"
+    echo "# For backwards compatibility: Liniking ${mainMountPoint}/lnd"
+    unlink ${mainMountPoint}/lnd 2>/dev/null
+    ln -s ${dataMountedPath}/app-data/lnd ${mainMountPoint}/lnd
+    chown -R bitcoin:bitcoin ${mainMountPoint}/lnd
+    chmod -R 755 ${mainMountPoint}/lnd
 
-    # lnd directory
-    if [ -d "${dataMountedPath}/app-data/lnd" ]; then
-        echo "# NEW->OLD: Liniking /lnd"
-        unlink ${mainMountPoint}/lnd 2>/dev/null
-        ln -s ${dataMountedPath}/app-data/lnd ${mainMountPoint}/lnd
-        chown -R bitcoin:bitcoin ${mainMountPoint}/lnd
-        chmod -R 755 ${mainMountPoint}/lnd
-    else
-        echo "# NEW->OLD: Skipping /lnd (not found)"
-    fi
+    # /mnt/hdd/tor directory (deprecated)
+    mkdir -p "${dataMountedPath}/app-data/tor"
+    echo "# For backwards compatibility: Liniking ${mainMountPoint}/tor"
+    unlink ${mainMountPoint}/tor 2>/dev/null
+    ln -s ${dataMountedPath}/app-data/tor ${mainMountPoint}/tor
+    chown -R debian-tor:debian-tor ${mainMountPoint}/tor
+    chmod -R 700 ${mainMountPoint}/tor
 
-    # tor directory
-    if [ -d "${dataMountedPath}/app-data/tor" ]; then
-        echo "# NEW->OLD: Liniking /tor"
-        unlink ${mainMountPoint}/tor 2>/dev/null
-        ln -s ${dataMountedPath}/app-data/tor ${mainMountPoint}/tor
-        chown -R debian-tor:debian-tor ${mainMountPoint}/tor
-        chmod -R 700 ${mainMountPoint}/tor
-    else
-        echo "# NEW->OLD: Skipping /tor (not found)"
-    fi
-
-    # raspiblitz.conf
-    if [ -f "${dataMountedPath}/app-data/raspiblitz.conf" ]; then
-        echo "# NEW->OLD: Liniking raspiblitz.conf"
-        unlink ${mainMountPoint}/raspiblitz.conf 2>/dev/null
-        ln -s ${dataMountedPath}/app-data/raspiblitz.conf ${mainMountPoint}/raspiblitz.conf
-        chown root:sudo ${mainMountPoint}/raspiblitz.conf
-        chmod 664 ${mainMountPoint}/raspiblitz.conf
-    else
-        echo "# NEW->OLD: Skipping raspiblitz.conf (not found)"
-    fi
-
-    ####################################
-    # OLD->OLD: links for old layout compatibility
-    # when storage is on old single drive now mounted on /mnt/disk_storage
-
-    # bitcoin directory
-    if [ -d "${storageMountedPath}/bitcoin" ]; then
-        echo "# OLD->OLD: Liniking /bitcoin"
-        unlink ${mainMountPoint}/bitcoin 2>/dev/null
-        ln -s ${storageMountedPath}/bitcoin ${mainMountPoint}/bitcoin
-        chown -R bitcoin:bitcoin ${mainMountPoint}/bitcoin
-        chmod -R 777 ${mainMountPoint}/bitcoin
-    else
-        echo "# OLD->OLD: Skipping /bitcoin (not found)"
-    fi
-
-    # lnd directory
-    if [ -d "${storageMountedPath}/lnd" ]; then
-        echo "# OLD->OLD: Liniking /lnd"
-        unlink ${mainMountPoint}/lnd 2>/dev/null
-        ln -s ${storageMountedPath}/lnd ${mainMountPoint}/lnd
-        chown -R debian-tor:debian-tor ${mainMountPoint}/lnd
-        chmod -R 700 ${mainMountPoint}/lnd
-    else
-        echo "# OLD->OLD: Skipping /lnd (not found)"
-    fi
-
-    # tor directory
-    if [ -d "${storageMountedPath}/tor" ]; then
-        echo "# OLD->OLD: Liniking /tor"
-        unlink ${mainMountPoint}/tor 2>/dev/null
-        ln -s ${storageMountedPath}/tor ${mainMountPoint}/app-data/tor
-        chown -R debian-tor:debian-tor ${mainMountPoint}/app-data/tor
-        chmod -R 700 ${mainMountPoint}/tor
-    else
-        echo "# OLD->OLD: Skipping /tor (not found)"
-    fi
-
-    # raspiblitz.conf
-    if [ -f "${storageMountedPath}/raspiblitz.conf" ]; then
-        echo "# OLD->OLD: Liniking raspiblitz.conf"
-        unlink ${mainMountPoint}/raspiblitz.conf 2>/dev/null
-        ln -s ${storageMountedPath}/raspiblitz.conf ${mainMountPoint}/raspiblitz.conf
-        unlink ${storageMountedPath}/app-data/raspiblitz.conf 2>/dev/null
-        ln -s ${storageMountedPath}/raspiblitz.conf ${storageMountedPath}/app-data/raspiblitz.conf  
-        chown root:sudo ${mainMountPoint}/raspiblitz.conf
-        chmod 664 ${mainMountPoint}/raspiblitz.conf
-    else
-        echo "# OLD->OLD: Skipping raspiblitz.conf (not found)"
-    fi
+    # /mnt/hdd/aspiblitz.conf (deprecated)
+    touch "${dataMountedPath}/app-data/raspiblitz.conf"
+    echo "# For backwards compatibility: Liniking ${mainMountPoint}/raspiblitz.conf"
+    unlink ${mainMountPoint}/raspiblitz.conf 2>/dev/null
+    ln -s ${dataMountedPath}/app-data/raspiblitz.conf ${mainMountPoint}/raspiblitz.conf
+    chown root:sudo ${mainMountPoint}/raspiblitz.conf
+    chmod 664 ${mainMountPoint}/raspiblitz.conf
 
     ### bitcoin user symbol links
-    echo "# bitcoin user symbol link: bitcoin"
+    echo "# bitcoin user symbol link: /home/bitcoin/.bitcoin"
     unlink /home/bitcoin/.bitcoin 2>/dev/null
-    ln -s /mnt/hdd/bitcoin /home/bitcoin/.bitcoin
+    ln -s /mnt/hdd/app-storage/bitcoin /home/bitcoin/.bitcoin
     chown -R bitcoin:bitcoin /home/bitcoin/.bitcoin
-
-    echo "# bitcoin user symbol link: lnd"
+    echo "# bitcoin user symbol link: /home/bitcoin/.lnd"
     unlink /home/bitcoin/.lnd 2>/dev/null
-    ln -s /mnt/hdd/lnd /home/bitcoin/.lnd
+    ln -s /mnt/hdd/app-data/lnd /home/bitcoin/.lnd
     chown -R bitcoin:bitcoin /home/bitcoin/.lnd
 
     exit 0
