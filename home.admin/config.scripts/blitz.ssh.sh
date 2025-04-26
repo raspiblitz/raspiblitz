@@ -198,6 +198,8 @@ if [ "$1" = "restore" ]; then
       sudo rm -rf /etc/ssh/*
       sudo cp -ra $DEFAULT_BASEDIR/* /etc/ssh/
       sudo chown -R root:root /etc/ssh
+      sudo chmod 600 /etc/ssh/ssh_host_*_key
+      sudo chmod 644 /etc/ssh/ssh_host_*_key.pub
       sudo dpkg-reconfigure openssh-server
       sudo systemctl restart sshd
       echo "# OK - sshd keys restore done"
