@@ -433,7 +433,7 @@ do
     #echo "SCB Monitoring ..."
     source ${configFile}
     # check if channel.backup exists
-    scbPath=/mnt/hdd/lnd/data/chain/${network}/${chain}net/channel.backup
+    scbPath=/mnt/hdd/app-data/lnd/data/chain/${network}/${chain}net/channel.backup
     scbExists=$(ls $scbPath 2>/dev/null | grep -c 'channel.backup')
     if [ ${scbExists} -eq 1 ]; then
 

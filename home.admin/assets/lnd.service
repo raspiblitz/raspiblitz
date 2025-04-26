@@ -13,10 +13,10 @@ After=bitcoind.service
 
 [Service]
 ExecStartPre=-/home/admin/config.scripts/lnd.check.sh prestart mainnet
-ExecStart=/usr/local/bin/lnd --configfile=/home/bitcoin/.lnd/lnd.conf
+ExecStart=/usr/local/bin/lnd --configfile=/mnt/hdd/app-data/lnd/lnd.conf
 # avoid hanging on stop
 # ExecStop=/usr/local/bin/lncli stop
-PIDFile=/home/bitcoin/.lnd/lnd.pid
+PIDFile=/home/bitcoin/lnd.pid
 
 User=bitcoin
 Group=bitcoin

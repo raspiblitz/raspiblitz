@@ -74,9 +74,9 @@ lndHealthCheck()
   sleep 10
 
   # Check LND health/fails (to be extended)
-  tlsExists=$(ls /mnt/hdd/lnd/tls.cert 2>/dev/null | grep -c "tls.cert")
+  tlsExists=$(ls /mnt/hdd/app-data/lnd/tls.cert 2>/dev/null | grep -c "tls.cert")
   if [ ${tlsExists} -eq 0 ]; then
-    echo "lnd-no-tls" "lnd not created TLS cert" "no /mnt/hdd/lnd/tls.cert"
+    echo "lnd-no-tls" "lnd not created TLS cert" "no /mnt/hdd/app-data/lnd/tls.cert"
     exit 9
   fi
 }
@@ -110,10 +110,10 @@ syncAndCheckLND() # from _provision.setup.sh
   sudo systemctl start ${netprefix}lnd
   echo "Starting LND Service ... executed"  
   
-  if [ $(sudo -u bitcoin ls /mnt/hdd/lnd/data/chain/bitcoin/${chain}net/wallet.db 2>/dev/null | grep -c wallet.db) -gt 0 ]; then
+  if [ $(sudo -u bitcoin ls /mnt/hdd/app-data/lnd/data/chain/bitcoin/${chain}net/wallet.db 2>/dev/null | grep -c wallet.db) -gt 0 ]; then
     echo "# OK, there is an LND wallet present"
   else
-    echo "lnd-no-wallet" "there is no LND wallet present" "/mnt/hdd/lnd/data/chain/bitcoin/${chain}net/wallet.db --> missing"
+    echo "lnd-no-wallet" "there is no LND wallet present" "/mnt/hdd/app-data/lnd/data/chain/bitcoin/${chain}net/wallet.db --> missing"
     exit 13
   fi
   # sync macaroons & TLS to other users
@@ -287,11 +287,11 @@ function removeLNDwallet
   echo "Reset wallet on ${CHAIN}"
   sudo rm -f /home/bitcoin/.lnd/${netprefix}lnd.conf
   sudo rm -f /home/bitcoin/.lnd/${netprefix}v3_onion_private_key
-  sudo rm -f /mnt/hdd/lnd/data/chain/${network}/${CHAIN}/wallet.db
+  sudo rm -f /mnt/hdd/app-data/lnd/data/chain/${network}/${CHAIN}/wallet.db
   sudo rm -f /home/bitcoin/.lnd/data/graph/${CHAIN}/channel.db
   sudo rm -f /home/bitcoin/.lnd/data/graph/${CHAIN}/sphinxreplay.db
   
-  sudo rm -rf /mnt/hdd/lnd/data/chain/${network}/${CHAIN}
+  sudo rm -rf /mnt/hdd/app-data/lnd/data/chain/${network}/${CHAIN}
   sudo rm -rf /home/bitcoin/.lnd/logs/${network}/${CHAIN}
   sudo rm -rf /home/bitcoin/.lnd/data/graph/${CHAIN}
   sudo rm -rf home/bitcoin/.lnd/data/watchtower/${CHAIN}
@@ -407,7 +407,7 @@ case $CHOICE in
       /home/admin/config.scripts/lnd.install.sh off signet
     fi
     echo "Reset wallet"
-    sudo rm -r /mnt/hdd/lnd
+    sudo rm -r /mnt/hdd/app-data/lnd
 
     ## from dialogLightningWallet.sh 
     # import file
@@ -507,14 +507,14 @@ case $CHOICE in
 
     echo
     echo "To show the scanning progress in the background will follow the lnd.log with:" 
-    echo "'sudo tail -n 30 -f /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log'"
+    echo "'sudo tail -n 30 -f /mnt/hdd/app-data/lnd/logs/${network}/${chain}net/lnd.log'"
     echo
     echo "Press ENTER to continue"
     echo "use CTRL+C any time to exit .. then use the command 'raspiblitz' to return to the menu"
     echo "(the rescan will continue in the background)"
     echo "#######################################################################################"
     read key
-    sudo tail -n 30 -f /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log    
+    sudo tail -n 30 -f /mnt/hdd/app-data/lnd/logs/${network}/${chain}net/lnd.log    
     ;;
 
 esac

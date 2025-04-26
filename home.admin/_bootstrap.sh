@@ -1220,8 +1220,8 @@ else
   if [ $(grep -c "shrinkdebugfile=" < /mnt/hdd/bitcoin/bitcoin.conf) -eq 0 ];then
     echo "shrinkdebugfile=1" | tee -a /mnt/hdd/bitcoin/bitcoin.conf
   fi
-  # /mnt/hdd/lnd/logs/bitcoin/mainnet/lnd.log
-  rm /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log 2>/dev/null
+  # /mnt/hdd/app-data/lnd/logs/bitcoin/mainnet/lnd.log
+  rm /mnt/hdd/app-data/lnd/logs/${network}/${chain}net/lnd.log 2>/dev/null
   # https://github.com/rootzoll/raspiblitz/issues/1700
   rm /mnt/storage/app-storage/electrs/db/mainnet/LOCK 2>/dev/null
 

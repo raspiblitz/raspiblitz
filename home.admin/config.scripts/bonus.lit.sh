@@ -225,11 +225,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # config  #
     ###########
     # check if lnd.conf has rpcmiddleware.enable entry under [rpcmiddleware]
-    if sudo grep rpcmiddleware /mnt/hdd/lnd/lnd.conf; then
-      sudo sed -i "s/^rpcmiddleware.enable=.*/rpcmiddleware.enable=true/g" /mnt/hdd/lnd/lnd.conf
+    if sudo grep rpcmiddleware /mnt/hdd/app-data/lnd/lnd.conf; then
+      sudo sed -i "s/^rpcmiddleware.enable=.*/rpcmiddleware.enable=true/g" /mnt/hdd/app-data/lnd/lnd.conf
     else
-      sudo bash -c "echo '[rpcmiddleware]' >> /mnt/hdd/lnd/lnd.conf"
-      sudo bash -c "echo 'rpcmiddleware.enable=true' >> /mnt/hdd/lnd/lnd.conf"
+      sudo bash -c "echo '[rpcmiddleware]' >> /mnt/hdd/app-data/lnd/lnd.conf"
+      sudo bash -c "echo 'rpcmiddleware.enable=true' >> /mnt/hdd/app-data/lnd/lnd.conf"
     fi
 
     if [ "${runBehindTor}" = "on" ]; then

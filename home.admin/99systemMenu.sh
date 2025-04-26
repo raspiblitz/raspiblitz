@@ -99,16 +99,16 @@ case $CHOICE in
   LNDLOG)
     clear
     echo
-    echo "Will follow the /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log"
-    echo "running 'sudo tail -n 30 -f /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log'"
+    echo "Will follow the /mnt/hdd/app-data/lnd/logs/${network}/${chain}net/lnd.log"
+    echo "running 'sudo tail -n 30 -f /mnt/hdd/app-data/lnd/logs/${network}/${chain}net/lnd.log'"
     echo
     echo "Press ENTER to continue"
     echo "use CTRL+C any time to abort .. then use the command 'raspiblitz' to return to the menu"
     echo "#######################################################################################"
     read key
-    sudo tail -n 30 -f /mnt/hdd/lnd/logs/${network}/${chain}net/lnd.log;;
+    sudo tail -n 30 -f /mnt/hdd/app-data/lnd/logs/${network}/${chain}net/lnd.log;;
   LNDCONF)
-    if /home/admin/config.scripts/blitz.setconf.sh "/mnt/hdd/lnd/${netprefix}lnd.conf" "root"
+    if /home/admin/config.scripts/blitz.setconf.sh "/mnt/hdd/app-data/lnd/${netprefix}lnd.conf" "root"
     then
       whiptail \
         --title "Restart" --yes-button "Restart" --no-button "Not now" \

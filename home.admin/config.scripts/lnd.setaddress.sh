@@ -14,10 +14,10 @@ fi
 mode="$1"
 
 # lnd conf file
-lndConfig="/mnt/hdd/lnd/lnd.conf"
+lndConfig="/mnt/hdd/app-data/lnd/lnd.conf"
 
 # get hash of lnd.conf before edit (to detect if changed later)
-md5HashBefore=$(sudo shasum -a 256 /mnt/hdd/lnd/lnd.conf)
+md5HashBefore=$(sudo shasum -a 256 /mnt/hdd/app-data/lnd/lnd.conf)
 
 # FIXED DOMAIN/IP
 if [ "${mode}" = "on" ]; then
@@ -37,13 +37,13 @@ if [ "${mode}" = "on" ]; then
   echo "# changing lnd.conf"
 
   # lnd.conf: uncomment tlsextradomain (just if it is still uncommented)
-  sudo sed -i "s/^#tlsextradomain=.*/tlsextradomain=/g" /mnt/hdd/lnd/lnd.conf
+  sudo sed -i "s/^#tlsextradomain=.*/tlsextradomain=/g" /mnt/hdd/app-data/lnd/lnd.conf
 
   # lnd.conf: domain value
-  sudo sed -i "s/^tlsextradomain=.*/tlsextradomain=${address}/g" /mnt/hdd/lnd/lnd.conf
+  sudo sed -i "s/^tlsextradomain=.*/tlsextradomain=${address}/g" /mnt/hdd/app-data/lnd/lnd.conf
 
   # refresh TLS cert
-  md5HashAfter=$(sudo shasum -a 256 /mnt/hdd/lnd/lnd.conf)
+  md5HashAfter=$(sudo shasum -a 256 /mnt/hdd/app-data/lnd/lnd.conf)
   if [ "${md5HashAfter}" != "${md5HashBefore}" ]; then
     echo "# lnd.conf changed - TLS certs need refreshing"
     sudo /home/admin/config.scripts/lnd.tlscert.sh refresh
@@ -68,10 +68,10 @@ if [ "${mode}" = "off" ]; then
   echo "# changing lnd.conf"
 
   # lnd.conf: comment tlsextradomain out
-  sudo sed -i "s/^tlsextradomain=.*/#tlsextradomain=/g" /mnt/hdd/lnd/lnd.conf
+  sudo sed -i "s/^tlsextradomain=.*/#tlsextradomain=/g" /mnt/hdd/app-data/lnd/lnd.conf
 
   # refresh TLS cert
-  md5HashAfter=$(sudo shasum -a 256 /mnt/hdd/lnd/lnd.conf)
+  md5HashAfter=$(sudo shasum -a 256 /mnt/hdd/app-data/lnd/lnd.conf)
   if [ "${md5HashAfter}" != "${md5HashBefore}" ]; then
     echo "# lnd.conf changed - TLS certs need refreshing"
     sudo /home/admin/config.scripts/lnd.tlscert.sh refresh

@@ -90,8 +90,8 @@ else
     sudo rm -f -r /mnt/hdd/litecoin/database
 
     # lnd (delete all)
-    sudo rm -f -r /mnt/hdd/lnd
-    sudo rm -f -r /mnt/hdd/backup_lnd
+    sudo rm -f -r /mnt/hdd/app-data/lnd
+    sudo rm -f -r /mnt/hdd/app-data/backup_lnd
 
     # mixed other files and folders (all)
     sudo rm -f -r /mnt/hdd/lost+found

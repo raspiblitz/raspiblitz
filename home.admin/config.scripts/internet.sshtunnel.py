@@ -45,7 +45,7 @@ WantedBy=multi-user.target
 """
 
 # get LND port form lnd.conf
-LND_PORT = subprocess.getoutput("sudo cat /mnt/hdd/lnd/lnd.conf | grep '^listen=*' | cut -f2 -d':'")
+LND_PORT = subprocess.getoutput("sudo cat /mnt/hdd/app-data/lnd/lnd.conf | grep '^listen=*' | cut -f2 -d':'")
 if len(LND_PORT) == 0:
     LND_PORT = "9735"
 
@@ -196,12 +196,12 @@ def on(restore_on_update=False):
 
         # make sure server_domain is set as tls alias
         print("Setting server as tls alias")
-        old_config_hash = subprocess.getoutput("sudo shasum -a 256 /mnt/hdd/lnd/lnd.conf")
-        subprocess.call("sudo sed -i \"s/^#tlsextradomain=.*/tlsextradomain=/g\" /mnt/hdd/lnd/lnd.conf", shell=True)
+        old_config_hash = subprocess.getoutput("sudo shasum -a 256 /mnt/hdd/app-data/lnd/lnd.conf")
+        subprocess.call("sudo sed -i \"s/^#tlsextradomain=.*/tlsextradomain=/g\" /mnt/hdd/app-data/lnd/lnd.conf", shell=True)
         subprocess.call(
-            "sudo sed -i \"s/^tlsextradomain=.*/tlsextradomain={}/g\" /mnt/hdd/lnd/lnd.conf".format(ssh_server_host),
+            "sudo sed -i \"s/^tlsextradomain=.*/tlsextradomain={}/g\" /mnt/hdd/app-data/lnd/lnd.conf".format(ssh_server_host),
             shell=True)
-        new_config_hash = subprocess.getoutput("sudo shasum -a 256 /mnt/hdd/lnd/lnd.conf")
+        new_config_hash = subprocess.getoutput("sudo shasum -a 256 /mnt/hdd/app-data/lnd/lnd.conf")
         if old_config_hash != new_config_hash:
             print("lnd.conf changed ... generating new TLS cert")
             subprocess.call("sudo /home/admin/config.scripts/lnd.tlscert.sh refresh", shell=True)

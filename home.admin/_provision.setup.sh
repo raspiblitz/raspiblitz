@@ -246,9 +246,9 @@ if [ "${lightning}" == "lnd" ]; then
   sleep 10
 
   # Check LND health/fails (to be extended)
-  tlsExists=$(ls /mnt/hdd/lnd/tls.cert 2>/dev/null | grep -c "tls.cert")
+  tlsExists=$(ls /mnt/hdd/app-data/lnd/tls.cert 2>/dev/null | grep -c "tls.cert")
   if [ ${tlsExists} -eq 0 ]; then
-      /home/admin/config.scripts/blitz.error.sh _provision.setup.sh "lnd-no-tls" "lnd not created TLS cert" "no /mnt/hdd/lnd/tls.cert" ${logFile}
+      /home/admin/config.scripts/blitz.error.sh _provision.setup.sh "lnd-no-tls" "lnd not created TLS cert" "no /mnt/hdd/app-data/lnd/tls.cert" ${logFile}
       exit 9
   fi
 

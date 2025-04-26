@@ -171,65 +171,65 @@ if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
   cp /home/admin/assets/lnd.service /etc/systemd/system/lnd.service >> ${logFile} 2>&1
 
   # if old lnd.conf exists ...
-  configExists=$(sudo ls /mnt/hdd/lnd/lnd.conf | grep -c '.conf')
+  configExists=$(sudo ls /mnt/hdd/app-data/lnd/lnd.conf | grep -c '.conf')
   if [ ${configExists} -eq 1 ]; then
 
     # make sure correct file permisions are set
-    chown bitcoin:bitcoin /mnt/hdd/lnd/lnd.conf
-    chmod 664 /mnt/hdd/lnd/lnd.conf
+    chown bitcoin:bitcoin /mnt/hdd/app-data/lnd/lnd.conf
+    chmod 664 /mnt/hdd/app-data/lnd/lnd.conf
 
     # make sure additional values are added to [Application Options] since v1.7
     echo "- lnd.conf --> checking additional [Application Options] since v1.7" >> ${logFile}
-    applicationOptionsLineNumber=$(grep -n "\[Application Options\]" /mnt/hdd/lnd/lnd.conf | cut -d ":" -f1)
+    applicationOptionsLineNumber=$(grep -n "\[Application Options\]" /mnt/hdd/app-data/lnd/lnd.conf | cut -d ":" -f1)
     if [ "${applicationOptionsLineNumber}" != "" ]; then
       applicationOptionsLineNumber="$(($applicationOptionsLineNumber+1))"
 
       # Avoid historical graph data sync
       # ignore-historical-gossip-filters=1
-      configParamExists=$(grep -c "^ignore-historical-gossip-filters=" /mnt/hdd/lnd/lnd.conf)
+      configParamExists=$(grep -c "^ignore-historical-gossip-filters=" /mnt/hdd/app-data/lnd/lnd.conf)
       if [ "${configParamExists}" == "0" ]; then
         echo " - ADDING 'ignore-historical-gossip-filters'" >> ${logFile}
-        sed -i "${applicationOptionsLineNumber}iignore-historical-gossip-filters=1" /mnt/hdd/lnd/lnd.conf
+        sed -i "${applicationOptionsLineNumber}iignore-historical-gossip-filters=1" /mnt/hdd/app-data/lnd/lnd.conf
       else
         echo " - OK 'ignore-historical-gossip-filters' exists (${configParamExists})" >> ${logFile}
       fi
 
       # Avoid slow startup time
       # sync-freelist=1
-      configParamExists=$(grep -c "^sync-freelist=" /mnt/hdd/lnd/lnd.conf)
+      configParamExists=$(grep -c "^sync-freelist=" /mnt/hdd/app-data/lnd/lnd.conf)
       if [ "${configParamExists}" == "0" ]; then
         echo " - ADDING 'sync-freelist'" >> ${logFile}
-        sed -i "${applicationOptionsLineNumber}isync-freelist=1" /mnt/hdd/lnd/lnd.conf
+        sed -i "${applicationOptionsLineNumber}isync-freelist=1" /mnt/hdd/app-data/lnd/lnd.conf
       else
         echo " - OK 'sync-freelist' exists (${configParamExists})" >> ${logFile}
       fi
 
       # Avoid high startup overhead
       # stagger-initial-reconnect=1
-      configParamExists=$(grep -c "^stagger-initial-reconnect=" /mnt/hdd/lnd/lnd.conf)
+      configParamExists=$(grep -c "^stagger-initial-reconnect=" /mnt/hdd/app-data/lnd/lnd.conf)
       if [ "${configParamExists}" == "0" ]; then
         echo " - ADDING 'stagger-initial-reconnect'" >> ${logFile}
-        sed -i "${applicationOptionsLineNumber}istagger-initial-reconnect=1" /mnt/hdd/lnd/lnd.conf
+        sed -i "${applicationOptionsLineNumber}istagger-initial-reconnect=1" /mnt/hdd/app-data/lnd/lnd.conf
       else
         echo " - OK 'stagger-initial-reconnect' exists (${configParamExists})" >> ${logFile}
       fi
 
       # Delete and recreate RPC TLS certificate when details change or cert expires
       # tlsautorefresh=1
-      configParamExists=$(grep -c "^tlsautorefresh=" /mnt/hdd/lnd/lnd.conf)
+      configParamExists=$(grep -c "^tlsautorefresh=" /mnt/hdd/app-data/lnd/lnd.conf)
       if [ "${configParamExists}" == "0" ]; then
         echo " - ADDING 'tlsautorefresh'" >> ${logFile}
-        sed -i "${applicationOptionsLineNumber}itlsautorefresh=1" /mnt/hdd/lnd/lnd.conf
+        sed -i "${applicationOptionsLineNumber}itlsautorefresh=1" /mnt/hdd/app-data/lnd/lnd.conf
       else
         echo " - OK 'tlsautorefresh' exists (${configParamExists})" >> ${logFile}
       fi
 
       # Do not include IPs in the RPC TLS certificate
       # tlsdisableautofill=1
-      configParamExists=$(grep -c "^tlsdisableautofill=" /mnt/hdd/lnd/lnd.conf)
+      configParamExists=$(grep -c "^tlsdisableautofill=" /mnt/hdd/app-data/lnd/lnd.conf)
       if [ "${configParamExists}" == "0" ]; then
         echo " - ADDING 'tlsdisableautofill'" >> ${logFile}
-        sed -i "${applicationOptionsLineNumber}itlsdisableautofill=1" /mnt/hdd/lnd/lnd.conf
+        sed -i "${applicationOptionsLineNumber}itlsdisableautofill=1" /mnt/hdd/app-data/lnd/lnd.conf
       else
         echo " - OK 'tlsdisableautofill' exists (${configParamExists})" >> ${logFile}
       fi
@@ -238,7 +238,7 @@ if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
       echo " - WARN: section '[Application Options]' not found in lnd.conf" >> ${logFile}
     fi
   else
-    echo "WARN: /mnt/hdd/lnd/lnd.conf not found" >> ${logFile}
+    echo "WARN: /mnt/hdd/app-data/lnd/lnd.conf not found" >> ${logFile}
   fi
 
   # start LND service

@@ -330,7 +330,7 @@ def main():
         sys.exit(1)
 
     os.environ['GRPC_SSL_CIPHER_SUITES'] = 'HIGH+ECDSA'
-    cert = open('/mnt/hdd/lnd/tls.cert', 'rb').read()
+    cert = open('/mnt/hdd/app-data/lnd/tls.cert', 'rb').read()
     ssl_creds = grpc.ssl_channel_credentials(cert)
     channel = grpc.secure_channel(grpcEndpoint, ssl_creds)
     if mode == "scb":

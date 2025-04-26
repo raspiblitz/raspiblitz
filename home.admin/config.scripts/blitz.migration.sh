@@ -67,14 +67,14 @@ migrate_lnd_conf () {
   fi
 
   # keep old conf as backup
-  sudo mv /mnt/hdd/lnd/lnd.conf /mnt/hdd/lnd/lnd.conf.migration
+  sudo mv /mnt/hdd/app-data/lnd/lnd.conf /mnt/hdd/app-data/lnd/lnd.conf.migration
   # start from fresh configuration template (user will set password B on recovery)
-  sudo cp /home/admin/assets/lnd.bitcoin.conf /mnt/hdd/lnd/lnd.conf
-  sudo sed -i "s/^alias=.*/alias=${nodename}/g" /mnt/hdd/lnd/lnd.conf
+  sudo cp /home/admin/assets/lnd.bitcoin.conf /mnt/hdd/app-data/lnd/lnd.conf
+  sudo sed -i "s/^alias=.*/alias=${nodename}/g" /mnt/hdd/app-data/lnd/lnd.conf
 
   # make sure correct file permisions are set
-  sudo chown bitcoin:bitcoin /mnt/hdd/lnd/lnd.conf
-  sudo chmod 664 /mnt/hdd/lnd/lnd.conf
+  sudo chown bitcoin:bitcoin /mnt/hdd/app-data/lnd/lnd.conf
+  sudo chmod 664 /mnt/hdd/app-data/lnd/lnd.conf
 
 }
 
@@ -226,9 +226,9 @@ if [ "$1" = "migration-umbrel" ]; then
     lndExists=$(sudo ls /mnt/hdd/umbrel/app-data/lightning/data/lnd/lnd.conf | grep -c "lnd.conf")
     if [ "${lndExists}" == "1" ]; then
       echo "# moving lnd data >=0.5.0"
-      sudo mv /mnt/hdd/lnd /mnt/hdd/backup_lnd 2>/dev/null
+      sudo mv /mnt/hdd/app-data/lnd /mnt/hdd/app-data/backup_lnd 2>/dev/null
       sudo mv /mnt/hdd/umbrel/app-data/lightning/data/lnd /mnt/hdd/
-      sudo chown bitcoin:bitcoin -R /mnt/hdd/lnd 
+      sudo chown bitcoin:bitcoin -R /mnt/hdd/app-data/lnd 
       migrate_lnd_conf ${nameNode}
       /home/admin/config.scripts/blitz.conf.sh set lnd on
       /home/admin/config.scripts/blitz.conf.sh set lightning "lnd"
@@ -237,9 +237,9 @@ if [ "$1" = "migration-umbrel" ]; then
     fi
   else
     echo "# moving old lnd data <0.5.0"
-    sudo mv /mnt/hdd/lnd /mnt/hdd/backup_lnd 2>/dev/null
+    sudo mv /mnt/hdd/app-data/lnd /mnt/hdd/app-data/backup_lnd 2>/dev/null
     sudo mv /mnt/hdd/umbrel/lnd /mnt/hdd/
-    sudo chown bitcoin:bitcoin -R /mnt/hdd/lnd
+    sudo chown bitcoin:bitcoin -R /mnt/hdd/app-data/lnd
     migrate_lnd_conf ${nameNode}
     /home/admin/config.scripts/blitz.conf.sh set lnd on
     /home/admin/config.scripts/blitz.conf.sh set lightning "lnd"
@@ -311,9 +311,9 @@ if [ "$1" = "migration-citadel" ]; then
   migrate_btc_conf
 
   # move lnd & call function to migrate config
-  sudo mv /mnt/hdd/lnd /mnt/hdd/backup_lnd 2>/dev/null
+  sudo mv /mnt/hdd/app-data/lnd /mnt/hdd/app-data/backup_lnd 2>/dev/null
   sudo mv /mnt/hdd/citadel/lnd /mnt/hdd/
-  sudo chown bitcoin:bitcoin -R /mnt/hdd/lnd
+  sudo chown bitcoin:bitcoin -R /mnt/hdd/app-data/lnd
   migrate_lnd_conf ${nameNode}
 
   # backup & rename the rest of the data
@@ -362,9 +362,9 @@ if [ "$1" = "migration-mynode" ]; then
   migrate_btc_conf
 
   # move lnd & call function to migrate config
-  sudo mv /mnt/hdd/lnd /mnt/hdd/backup_lnd 2>/dev/null
+  sudo mv /mnt/hdd/app-data/lnd /mnt/hdd/app-data/backup_lnd 2>/dev/null
   sudo mv /mnt/hdd/mynode/lnd /mnt/hdd/
-  sudo chown bitcoin:bitcoin -R /mnt/hdd/lnd
+  sudo chown bitcoin:bitcoin -R /mnt/hdd/app-data/lnd
   migrate_lnd_conf
 
   # copy lnd wallet password - so that user can set own on final setup

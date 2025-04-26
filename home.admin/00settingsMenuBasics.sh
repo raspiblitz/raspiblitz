@@ -288,7 +288,7 @@ if [ "${NextcloudBackup}" != "${choice}" ]; then
   if [ "${choice}" =  "on" ]; then
     # doing initial upload so that user can see result
     source /mnt/hdd/app-data/raspiblitz.conf
-    sudo /home/admin/config.scripts/nextcloud.upload.sh upload /mnt/hdd/lnd/data/chain/${network}/${chain}net/channel.backup
+    sudo /home/admin/config.scripts/nextcloud.upload.sh upload /mnt/hdd/app-data/lnd/data/chain/${network}/${chain}net/channel.backup
   fi
 else
   echo "Nextcloud backup setting unchanged."

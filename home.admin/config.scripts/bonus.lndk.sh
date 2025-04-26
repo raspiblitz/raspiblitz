@@ -90,7 +90,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     cat <<EOF | sudo tee /mnt/hdd/app-data/.lndk/lndk.conf
 address="https://localhost:10009"
-cert_path="/mnt/hdd/lnd/tls.cert"
+cert_path="/mnt/hdd/app-data/lnd/tls.cert"
 macaroon_path="/home/lndk/.lnd/data/chain/bitcoin/mainnet/admin.macaroon"
 grpc_port=5635
 log_level="debug"

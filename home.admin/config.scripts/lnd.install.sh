@@ -283,17 +283,17 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   source <(sudo /home/admin/config.scripts/blitz.data.sh status)
   mkdir -p "${dataMountedPath}/app-data/lnd"
   echo "# Liniking /lnd"
-  unlink /mnt/hdd/lnd 2>/dev/null
-  ln -s ${dataMountedPath}/app-data/lnd /mnt/hdd/lnd
-  chown -R bitcoin:bitcoin /mnt/hdd/lnd
-  chmod -R 755 /mnt/hdd/lnd
+  unlink /mnt/hdd/app-data/lnd 2>/dev/null
+  ln -s ${dataMountedPath}/app-data/lnd /mnt/hdd/app-data/lnd
+  chown -R bitcoin:bitcoin /mnt/hdd/app-data/lnd
+  chmod -R 755 /mnt/hdd/app-data/lnd
 
-  sudo chown -R bitcoin:bitcoin /mnt/hdd/lnd
-  sudo chmod 755 /mnt/hdd/lnd
+  sudo chown -R bitcoin:bitcoin /mnt/hdd/app-data/lnd
+  sudo chmod 755 /mnt/hdd/app-data/lnd
   if [ ! -L /home/bitcoin/.lnd ];then
     echo "# Linking lnd for user bitcoin"
     sudo rm /home/bitcoin/.lnd 2>/dev/null
-    sudo ln -s /mnt/hdd/lnd /home/bitcoin/.lnd
+    sudo ln -s /mnt/hdd/app-data/lnd /home/bitcoin/.lnd
   fi
 
   echo "# Create /home/bitcoin/.lnd/${netprefix}lnd.conf"
@@ -420,7 +420,7 @@ alias ${netprefix}lncli=\"sudo -u bitcoin /usr/local/bin/lncli\
   fi
   if [ $(grep -c "alias ${netprefix}lndlog" < /home/admin/_aliases) -eq 0 ];then
     echo "\
-alias ${netprefix}lndlog=\"sudo tail -n 30 -f /mnt/hdd/lnd/logs/${network}/${CHAIN}/lnd.log\"\
+alias ${netprefix}lndlog=\"sudo tail -n 30 -f /mnt/hdd/app-data/lnd/logs/${network}/${CHAIN}/lnd.log\"\
 " | sudo tee -a /home/admin/_aliases
   fi
   if [ $(grep -c "alias ${netprefix}lndconf" < /home/admin/_aliases) -eq 0 ];then
@@ -430,7 +430,7 @@ alias ${netprefix}lndconf=\"sudo nano /home/bitcoin/.lnd/${netprefix}lnd.conf\"\
   fi
 
   # if parameter "initwallet" was set and wallet does not exist yet
-  walletExists=$(sudo ls /mnt/hdd/lnd/data/chain/${network}/${CHAIN}/wallet.db 2>/dev/null | grep -c "wallet.db")
+  walletExists=$(sudo ls /mnt/hdd/app-data/lnd/data/chain/${network}/${CHAIN}/wallet.db 2>/dev/null | grep -c "wallet.db")
   if [ "${initwallet}" == "1" ] && [ "${walletExists}" == "0" ]; then
       # only ask on mainnet for passwordC - for the testnet/signet its default 'raspiblitz'
       if [ "${CHAIN}" == "mainnet" ]; then
@@ -449,7 +449,7 @@ alias ${netprefix}lndconf=\"sudo nano /home/bitcoin/.lnd/${netprefix}lnd.conf\"\
         echo "# press ENTER to continue"
         read key
       else
-        seedFile="/mnt/hdd/lnd/data/chain/${network}/${CHAIN}/seedwords.info"
+        seedFile="/mnt/hdd/app-data/lnd/data/chain/${network}/${CHAIN}/seedwords.info"
         echo "seedwords='${seedwords}'" | sudo tee ${seedFile}
         echo "seedwords6x4='${seedwords6x4}'" | sudo tee -a ${seedFile}
       fi
@@ -458,7 +458,7 @@ alias ${netprefix}lndconf=\"sudo nano /home/bitcoin/.lnd/${netprefix}lnd.conf\"\
   if [ "${CHAIN}" != "mainnet" ]; then
     echo "# Setting autounlock for ${CHAIN}"
     source <(/home/admin/config.scripts/network.aliases.sh getvars lnd ${CHAIN})
-    passwordFile="/mnt/hdd/lnd/data/chain/${network}/${CHAIN}/password.info"
+    passwordFile="/mnt/hdd/app-data/lnd/data/chain/${network}/${CHAIN}/password.info"
     # create passwordfile
     if ! sudo ls ${passwordFile} &>/dev/null; then
       echo "raspiblitz" | sudo -u bitcoin tee ${passwordFile} 1>/dev/null
@@ -528,7 +528,7 @@ if [ "$1" = "display-seed" ]; then
   fi
 
   # check if seedword file exists
-  seedwordFile="/mnt/hdd/lnd/data/chain/${network}/${CHAIN}/seedwords.info"
+  seedwordFile="/mnt/hdd/app-data/lnd/data/chain/${network}/${CHAIN}/seedwords.info"
   echo "# seedwordFile(${seedwordFile})"
   seedwordFileExists=$(ls ${seedwordFile} 2>/dev/null | grep -c "seedwords.info")
   echo "# seedwordFileExists(${seedwordFileExists})"
@@ -554,7 +554,7 @@ if [ "$1" = "display-seed" ]; then
       sudo rm ${seedwordFile} 2>/dev/null
     fi
   else
-    walletFile="/mnt/hdd/lnd/data/chain/${network}/${CHAIN}/wallet.db"
+    walletFile="/mnt/hdd/app-data/lnd/data/chain/${network}/${CHAIN}/wallet.db"
     whiptail --title "LND ${displayNetwork} Wallet Info" --msgbox "Your LND ${displayNetwork} wallet was already created before - there are no seed words available.\n\nTo secure your wallet secret you can manually backup the file: ${walletFile}" 11 76
   fi
   exit 0

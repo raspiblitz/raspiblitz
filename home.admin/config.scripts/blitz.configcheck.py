@@ -9,7 +9,7 @@ from argparse import RawTextHelpFormatter
 from configparser import ConfigParser, DEFAULTSECT
 from blitzpy import RaspiBlitzConfig, RaspiBlitzInfo
 
-LND_CONF = "/mnt/hdd/lnd/lnd.conf"
+LND_CONF = "/mnt/hdd/app-data/lnd/lnd.conf"
 RB_CONF = "/mnt/hdd/app-data/raspiblitz.conf"
 
 log = logging.getLogger(__name__)

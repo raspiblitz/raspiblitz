@@ -178,22 +178,22 @@ EOF
 
     if [ "${lightning}" = "lnd" ] || [ "${lnd}" = "on" ] || [ "${lnd}" = "1" ]; then
       echo "# *** Removing Tor from LND Mainnet ***"
-      sudo sed -i '/^\[[Tt]or\].*/d' /mnt/hdd/lnd/lnd.conf
-      sudo sed -i '/^tor\..*/d' /mnt/hdd/lnd/lnd.conf
+      sudo sed -i '/^\[[Tt]or\].*/d' /mnt/hdd/app-data/lnd/lnd.conf
+      sudo sed -i '/^tor\..*/d' /mnt/hdd/app-data/lnd/lnd.conf
       sudo systemctl restart lnd
     fi
 
     if [ "${tlnd}" = "on" ] || [ "${tlnd}" = "1" ]; then
       echo "# *** Removing Tor from LND Testnet ***"
-      sudo sed -i '/^\[[Tt]or\].*/d' /mnt/hdd/lnd/tlnd.conf
-      sudo sed -i '/^tor\..*/d' /mnt/hdd/lnd/tlnd.conf
+      sudo sed -i '/^\[[Tt]or\].*/d' /mnt/hdd/app-data/lnd/tlnd.conf
+      sudo sed -i '/^tor\..*/d' /mnt/hdd/app-data/lnd/tlnd.conf
       sudo systemctl restart tlnd
     fi
 
     if [ "${slnd}" = "on" ] || [ "${slnd}" = "1" ]; then
       echo "# *** Removing Tor from LND Signet ***"
-      sudo sed -i '/^\[[Tt]or\].*/d' /mnt/hdd/lnd/slnd.conf
-      sudo sed -i '/^tor\..*/d' /mnt/hdd/lnd/slnd.conf
+      sudo sed -i '/^\[[Tt]or\].*/d' /mnt/hdd/app-data/lnd/slnd.conf
+      sudo sed -i '/^tor\..*/d' /mnt/hdd/app-data/lnd/slnd.conf
       sudo systemctl restart slnd
     fi
 

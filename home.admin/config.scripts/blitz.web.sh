@@ -135,7 +135,7 @@ elif [ "$1" = "https-on" ]; then
   fi
 
   # make sure nginx process has permissions
-  sudo chmod 744 /mnt/hdd/lnd/tls.key
+  sudo chmod 744 /mnt/hdd/app-data/lnd/tls.key
 
   # replace public conf to - now with https version
   sudo rm /etc/nginx/sites-enabled/public.conf

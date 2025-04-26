@@ -9,7 +9,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
 fi
 
 if [ "$1" = "status" ]; then
-  autoUnlock=$(sudo cat /mnt/hdd/lnd/lnd.conf 2>/dev/null | grep -c "^wallet-unlock-password-file=")
+  autoUnlock=$(sudo cat /mnt/hdd/app-data/lnd/lnd.conf 2>/dev/null | grep -c "^wallet-unlock-password-file=")
   if [ ${autoUnlock} -eq 0 ]; then
     echo "autoUnlock=off"
   else
@@ -68,8 +68,8 @@ Password C will be stored on the device.
 fi
 
 # lnd conf file
-lndConfig="/mnt/hdd/lnd/lnd.conf"
-passwordFile="/mnt/hdd/lnd/data/chain/bitcoin/mainnet/password.info"
+lndConfig="/mnt/hdd/app-data/lnd/lnd.conf"
+passwordFile="/mnt/hdd/app-data/lnd/data/chain/bitcoin/mainnet/password.info"
 
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
@@ -83,13 +83,13 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo chown bitcoin:bitcoin "${passwordFile}"
 
   # remove any existing active config in lnd.conf
-  sudo sed -i "/^wallet-unlock-password-file=/d" /mnt/hdd/lnd/lnd.conf
+  sudo sed -i "/^wallet-unlock-password-file=/d" /mnt/hdd/app-data/lnd/lnd.conf
 
   # add the config line under [Application Options] section
   sudo sed -i "/^\[Application Options\]/ { 
 n
 a wallet-unlock-password-file=${passwordFile}
-}" /mnt/hdd/lnd/lnd.conf
+}" /mnt/hdd/app-data/lnd/lnd.conf
 
   echo "# Auto-Unlock is now ON (after manual lnd restart)"
   exit 0
@@ -107,7 +107,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   sudo shred -u "${passwordFile}" 2>/dev/null
 
   # remove any existing active config in lnd.conf
-  sudo sed -i "/^wallet-unlock-password-file=/d" /mnt/hdd/lnd/lnd.conf
+  sudo sed -i "/^wallet-unlock-password-file=/d" /mnt/hdd/app-data/lnd/lnd.conf
 
   echo "# Auto-Unlock is now OFF (after manual lnd restart)"
   exit 0

@@ -51,9 +51,9 @@ if [ "$1" == "prestart" ]; then
   ##### CLEAN UP #####
 
   # all lines with just spaces to empty lines
-  sed -i 's/^[[:space:]]*$//g' /mnt/hdd/lnd/lnd.conf
+  sed -i 's/^[[:space:]]*$//g' /mnt/hdd/app-data/lnd/lnd.conf
   # all double empty lines to single empty lines
-  sed -i '/^$/N;/^\n$/D' /mnt/hdd/lnd/lnd.conf
+  sed -i '/^$/N;/^\n$/D' /mnt/hdd/app-data/lnd/lnd.conf
 
   # set default chain parameter
   targetchain=$2
@@ -75,7 +75,7 @@ if [ "$1" == "prestart" ]; then
   sed -i "/^sync-freelist=1/d" ${lndConfFile}
 
   # delete autounlock if passwordFile not present
-  passwordFile="/mnt/hdd/lnd/data/chain/${network}/${CHAIN}/password.info"
+  passwordFile="/mnt/hdd/app-data/lnd/data/chain/${network}/${CHAIN}/password.info"
   if ! ls ${passwordFile} &>/dev/null; then
     sed -i "/^wallet-unlock-password-file=/d" ${lndConfFile}
   fi
@@ -382,19 +382,19 @@ if [ "$1" == "prestart" ]; then
 elif [ "$1" == "basic-setup" ]; then
 
   # check TLS exits
-  tlsExists=$(sudo ls /mnt/hdd/lnd/tls.cert 2>/dev/null | grep -c 'tls.cert')
+  tlsExists=$(sudo ls /mnt/hdd/app-data/lnd/tls.cert 2>/dev/null | grep -c 'tls.cert')
   if [ ${tlsExists} -gt 0 ]; then
     echo "tls=1"
   else
     echo "tls=0"
-    echo "err='tls.cert is missing in /mnt/hdd/lnd'"
+    echo "err='tls.cert is missing in /mnt/hdd/app-data/lnd'"
   fi
   # check TLS exits (on SD card for admin)
   tlsExists=$(sudo ls /home/admin/.lnd/tls.cert 2>/dev/null | grep -c 'tls.cert')
   if [ ${tlsExists} -gt 0 ]; then
     echo "tlsCopy=1"
     # check if the same
-    orgChecksum=$(sudo shasum -a 256 /mnt/hdd/lnd/tls.cert 2>/dev/null | cut -d " " -f1)
+    orgChecksum=$(sudo shasum -a 256 /mnt/hdd/app-data/lnd/tls.cert 2>/dev/null | cut -d " " -f1)
     cpyChecksum=$(sudo shasum -a 256 /home/admin/.lnd/tls.cert 2>/dev/null | cut -d " " -f1)
     if [ "${orgChecksum}" == "${cpyChecksum}" ]; then
       echo "tlsMismatch=0"
@@ -445,19 +445,19 @@ elif [ "$1" == "basic-setup" ]; then
   fi
 
   # check for admin macaroon exist (on HDD)
-  adminMacaroonExists=$(sudo ls /mnt/hdd/lnd/data/chain/${network}/${chain}net/admin.macaroon 2>/dev/null | grep -c 'admin.macaroon')
+  adminMacaroonExists=$(sudo ls /mnt/hdd/app-data/lnd/data/chain/${network}/${chain}net/admin.macaroon 2>/dev/null | grep -c 'admin.macaroon')
   if [ ${adminMacaroonExists} -gt 0 ]; then
     echo "macaroon=1"
   else
     echo "macaroon=0"
-    echo "err='admin.macaroon is missing in /mnt/hdd/lnd/data/chain/${network}/${chain}net'"
+    echo "err='admin.macaroon is missing in /mnt/hdd/app-data/lnd/data/chain/${network}/${chain}net'"
   fi
   # check for admin macaroon exist (on SD card for admin)
   adminMacaroonExists=$(sudo ls /home/admin/.lnd/data/chain/${network}/${chain}net/admin.macaroon 2>/dev/null | grep -c 'admin.macaroon')
   if [ ${adminMacaroonExists} -gt 0 ]; then
     echo "macaroonCopy=1"
     # check if the same
-    orgChecksum=$(sudo shasum -a 256 /mnt/hdd/lnd/data/chain/${network}/${chain}net/admin.macaroon 2>/dev/null | cut -d " " -f1)
+    orgChecksum=$(sudo shasum -a 256 /mnt/hdd/app-data/lnd/data/chain/${network}/${chain}net/admin.macaroon 2>/dev/null | cut -d " " -f1)
     cpyChecksum=$(sudo shasum -a 256 /home/admin/.lnd/data/chain/${network}/${chain}net/admin.macaroon 2>/dev/null | cut -d " " -f1)
     if [ "${orgChecksum}" == "${cpyChecksum}" ]; then
       echo "macaroonMismatch=0"
@@ -472,7 +472,7 @@ elif [ "$1" == "basic-setup" ]; then
   fi
 
   # check for walletDB exist
-  walletExists=$(sudo ls /mnt/hdd/lnd/data/chain/${network}/${chain}net/wallet.db 2>/dev/null | grep -c 'wallet.db')
+  walletExists=$(sudo ls /mnt/hdd/app-data/lnd/data/chain/${network}/${chain}net/wallet.db 2>/dev/null | grep -c 'wallet.db')
   if [ ${walletExists} -gt 0 ]; then
     echo "wallet=1"
   else

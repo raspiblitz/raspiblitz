@@ -10,8 +10,8 @@ if [ $# -eq 0 ]; then
  exit 1
 fi
 
-TLSPATH="/mnt/hdd/lnd"
-LNDCONF="/mnt/hdd/lnd/lnd.conf"
+TLSPATH="/mnt/hdd/app-data/lnd"
+LNDCONF="/mnt/hdd/app-data/lnd/lnd.conf"
 
 ### ADD IP
 
@@ -182,14 +182,14 @@ if [ "$1" = "refresh" ]; then
       echo "error='failed to generate new LND cert'"
       exit 1
     fi
-    newCertExists=$(sudo ls /mnt/hdd/lnd/tls.cert 2>/dev/null | grep -c '.cert')
+    newCertExists=$(sudo ls /mnt/hdd/app-data/lnd/tls.cert 2>/dev/null | grep -c '.cert')
     sleep 2
   done
 
   # stop lnd and let outside decide to restart or not
   sudo systemctl stop lnd
   sudo chmod 664 ${TLSPATH}/tls.cert
-  sudo chown bitcoin:bitcoin "/mnt/hdd/lnd/tls.cert"
+  sudo chown bitcoin:bitcoin "/mnt/hdd/app-data/lnd/tls.cert"
 
   echo "# symlink new cert to lnd app-data directory"
   if ! [[ -L "/mnt/hdd/app-data/lnd/tls.cert" ]]; then

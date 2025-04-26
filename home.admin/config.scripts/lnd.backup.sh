@@ -59,7 +59,7 @@ if [ "$1" == "mainnet" ] || [ "$1" == "testnet" ] || [ "$1" == "signet" ]; then
     fi
 
         # status
-    recoverymodeStatus=$(cat /mnt/hdd/lnd/${netprefix}lnd.conf | grep -c "^reset-wallet-transactions=true")
+    recoverymodeStatus=$(cat /mnt/hdd/app-data/lnd/${netprefix}lnd.conf | grep -c "^reset-wallet-transactions=true")
     if [ "$3" == "status" ]; then
       if [ ${recoverymodeStatus} -gt 0 ]; then
         echo "recoverymode=1"
@@ -77,17 +77,17 @@ if [ "$1" == "mainnet" ] || [ "$1" == "testnet" ] || [ "$1" == "signet" ]; then
       fi
 
       # make sure config entry exits
-      entryExists=$(cat /mnt/hdd/lnd/${netprefix}lnd.conf | grep -c "^reset-wallet-transactions=")
+      entryExists=$(cat /mnt/hdd/app-data/lnd/${netprefix}lnd.conf | grep -c "^reset-wallet-transactions=")
       if [ $entryExists -eq 0 ]; then
         # find section
-        sectionLine=$(cat /mnt/hdd/lnd/${netprefix}lnd.conf | grep -n "^\[Application Options\]" | cut -d ":" -f1)
+        sectionLine=$(cat /mnt/hdd/app-data/lnd/${netprefix}lnd.conf | grep -n "^\[Application Options\]" | cut -d ":" -f1)
         insertLine=$(expr $sectionLine + 1)
-        sed -i "${insertLine}ireset-wallet-transactions=false" /mnt/hdd/lnd/${netprefix}lnd.conf
+        sed -i "${insertLine}ireset-wallet-transactions=false" /mnt/hdd/app-data/lnd/${netprefix}lnd.conf
       fi
 
       # activate reset-wallet-transactions in lnd.conf
       echo "# activating recovery mode ..."
-      sed -i 's/^reset-wallet-transactions=.*/reset-wallet-transactions=true/g' /mnt/hdd/lnd/${netprefix}lnd.conf
+      sed -i 's/^reset-wallet-transactions=.*/reset-wallet-transactions=true/g' /mnt/hdd/app-data/lnd/${netprefix}lnd.conf
       echo "# OK - restart/reboot needed for: ${netprefix}lnd.service"
 
       # set system status
@@ -109,7 +109,7 @@ if [ "$1" == "mainnet" ] || [ "$1" == "testnet" ] || [ "$1" == "signet" ]; then
 
       # remove --reset-wallet-transactions parameter in systemd service
       echo "# deactivating recovery mode ..."
-      sed -i 's/^reset-wallet-transactions=.*/reset-wallet-transactions=false/g' /mnt/hdd/lnd/${netprefix}lnd.conf
+      sed -i 's/^reset-wallet-transactions=.*/reset-wallet-transactions=false/g' /mnt/hdd/app-data/lnd/${netprefix}lnd.conf
       
 
       echo "# OK - restart/reboot needed for: ${netprefix}lnd.service"
@@ -139,10 +139,10 @@ if [ ${mode} = "lnd-export" ]; then
 
   # add lnd version info into lnd dir (to detect needed updates later)
   lndVersion=$(sudo -u bitcoin lncli getinfo 2>/dev/null | jq -r ".version" | cut -d ' ' -f1)
-  sudo rm /mnt/hdd/lnd/version.info 2>/dev/null
+  sudo rm /mnt/hdd/app-data/lnd/version.info 2>/dev/null
   echo "${lndVersion}" > /home/admin/lnd.version.info
-  sudo mv /home/admin/lnd.version.info /mnt/hdd/lnd/version.info
-  sudo chown bitcoin:bitcoin /mnt/hdd/lnd/version.info
+  sudo mv /home/admin/lnd.version.info /mnt/hdd/app-data/lnd/version.info
+  sudo chown bitcoin:bitcoin /mnt/hdd/app-data/lnd/version.info
 
   # stop LND
   echo "# Stopping lnd..."
@@ -152,7 +152,7 @@ if [ ${mode} = "lnd-export" ]; then
   echo 
 
   # zip it
-  sudo tar -zcvf ${downloadPath}/lnd-rescue.tar.gz /mnt/hdd/lnd 1>&2
+  sudo tar -zcvf ${downloadPath}/lnd-rescue.tar.gz /mnt/hdd/app-data/lnd 1>&2
   sudo chown ${fileowner}:${fileowner} ${downloadPath}/lnd-rescue.tar.gz 1>&2
 
   # delete old backups
@@ -257,15 +257,15 @@ if [ ${mode} = "lnd-import" ]; then
 
   # clean DIR
   echo "# cleaning old LND data ..."
-  sudo rm -r /mnt/hdd/lnd/* 1>/dev/null 2>/dev/null
+  sudo rm -r /mnt/hdd/app-data/lnd/* 1>/dev/null 2>/dev/null
 
   # unpack zip
   echo "# restoring LND data from ${filename} ..."
   sudo tar -xf ${filename} -C / 1>/dev/null
-  sudo chown -R bitcoin:bitcoin /mnt/hdd/lnd 1>/dev/null
+  sudo chown -R bitcoin:bitcoin /mnt/hdd/app-data/lnd 1>/dev/null
 
   # lnd version of LND rescue file (thats packed as extra info in the file)
-  # its included since RaspiBlitz v1.7.1 /mnt/hdd/lnd/version.info
+  # its included since RaspiBlitz v1.7.1 /mnt/hdd/app-data/lnd/version.info
   # this can happen if someone uses the manual LND update and then uploads to an old default LND 
   # if so just signal this in the output (but also this file might be empty, when LND was dead)
   
@@ -405,7 +405,7 @@ if [ ${mode} = "scb-export" ]; then
 
   # get file info
   source /mnt/hdd/app-data/raspiblitz.conf
-  echo "filename='/mnt/hdd/lnd/data/chain/${network}/${chain}net/channel.backup'"
+  echo "filename='/mnt/hdd/app-data/lnd/data/chain/${network}/${chain}net/channel.backup'"
   echo "fileuser='bitcoin'"
 
   # localip

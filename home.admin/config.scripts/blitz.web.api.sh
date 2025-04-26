@@ -101,8 +101,8 @@ if [ "$1" = "update-config" ]; then
     if [ "${lightning}" == "lnd" ]; then
 
       echo "# CONFIG Web API Lightning --> LND"
-      tlsCert=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/tls.cert)
-      adminMacaroon=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/bitcoin/${chain}net/admin.macaroon)
+      tlsCert=$(sudo xxd -ps -u -c 1000 /mnt/hdd/app-data/lnd/tls.cert)
+      adminMacaroon=$(sudo xxd -ps -u -c 1000 /mnt/hdd/app-data/lnd/data/chain/bitcoin/${chain}net/admin.macaroon)
       sed -i "s/^ln_node=.*/ln_node=lnd_grpc/g" ./.env
       sed -i "s/^lnd_grpc_ip=.*/lnd_grpc_ip=127.0.0.1/g" ./.env
       sed -i "s/^lnd_macaroon=.*/lnd_macaroon=${adminMacaroon}/g" ./.env

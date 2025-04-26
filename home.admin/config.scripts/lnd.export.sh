@@ -67,9 +67,9 @@ if [ ${#exportType} -eq 0 ]; then
 ########################
 elif [ "${exportType}" = "hexstring" ]; then
 
-  adminMacaroon=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/${network}/${chain}net/admin.macaroon)
-  invoiceMacaroon=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/${network}/${chain}net/invoice.macaroon)
-  readonlyMacaroon=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/${network}/${chain}net/readonly.macaroon)
+  adminMacaroon=$(sudo xxd -ps -u -c 1000 /mnt/hdd/app-data/lnd/data/chain/${network}/${chain}net/admin.macaroon)
+  invoiceMacaroon=$(sudo xxd -ps -u -c 1000 /mnt/hdd/app-data/lnd/data/chain/${network}/${chain}net/invoice.macaroon)
+  readonlyMacaroon=$(sudo xxd -ps -u -c 1000 /mnt/hdd/app-data/lnd/data/chain/${network}/${chain}net/readonly.macaroon)
   restTor=$(sudo cat /mnt/hdd/app-data/tor/lndrest/hostname)
 
   clear
@@ -80,10 +80,10 @@ elif [ "${exportType}" = "hexstring" ]; then
   echo ""
   echo "invoiceMacaroon=${invoiceMacaroon}"
   echo ""
-  readonlyMacaroon=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/${network}/${chain}net/readonly.macaroon)
+  readonlyMacaroon=$(sudo xxd -ps -u -c 1000 /mnt/hdd/app-data/lnd/data/chain/${network}/${chain}net/readonly.macaroon)
   echo "readonlyMacaroon=${readonlyMacaroon}"
   echo ""
-  tlsCert=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/tls.cert)
+  tlsCert=$(sudo xxd -ps -u -c 1000 /mnt/hdd/app-data/lnd/tls.cert)
   echo "tlsCert=${tlsCert}"
   echo ""
 
@@ -112,10 +112,10 @@ elif [ "${exportType}" = "btcpay" ]; then
   macaroon=$(sudo -u admin lncli bakemacaroon address:read address:write info:read invoices:read invoices:write onchain:read)
 
   # old: admin macaroon (remove after v1.6.3 release)
-  #macaroon=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/${network}/${chain}net/admin.macaroon)
+  #macaroon=$(sudo xxd -ps -u -c 1000 /mnt/hdd/app-data/lnd/data/chain/${network}/${chain}net/admin.macaroon)
 
   # get certificate thumb
-  certthumb=$(sudo openssl x509 -noout -fingerprint -sha256 -inform pem -in /mnt/hdd/lnd/tls.cert | cut -d "=" -f 2)
+  certthumb=$(sudo openssl x509 -noout -fingerprint -sha256 -inform pem -in /mnt/hdd/app-data/lnd/tls.cert | cut -d "=" -f 2)
 
   # construct connection string
   connectionString="type=lnd-rest;server=https://${ip}:${port}/;macaroon=${macaroon};certthumbprint=${certthumb}"

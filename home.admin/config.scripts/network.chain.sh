@@ -50,20 +50,20 @@ fi
 # editing lnd config files (hdd & admin user)
 echo "edit lightning config .."
 # fix old lnd config file (that worked with switching comment)
-sudo sed -i "s/^#bitcoin.testnet=.*/bitcoin.testnet=1/g" /mnt/hdd/lnd/lnd.conf
+sudo sed -i "s/^#bitcoin.testnet=.*/bitcoin.testnet=1/g" /mnt/hdd/app-data/lnd/lnd.conf
 sudo sed -i "s/^#bitcoin.testnet=.*/bitcoin.testnet=1/g" /home/admin/.lnd/lnd.conf
 # changes based on parameter
 if [ "$1" = "testnet" ]; then
-  echo "editing /mnt/hdd/lnd/lnd.conf"
-  sudo sed -i "s/^${network}.mainnet.*/${network}.mainnet=0/g" /mnt/hdd/lnd/lnd.conf
-  sudo sed -i "s/^${network}.testnet.*/${network}.testnet=1/g" /mnt/hdd/lnd/lnd.conf
+  echo "editing /mnt/hdd/app-data/lnd/lnd.conf"
+  sudo sed -i "s/^${network}.mainnet.*/${network}.mainnet=0/g" /mnt/hdd/app-data/lnd/lnd.conf
+  sudo sed -i "s/^${network}.testnet.*/${network}.testnet=1/g" /mnt/hdd/app-data/lnd/lnd.conf
   echo "editing /home/admin/.lnd/lnd.conf"
   sudo sed -i "s/^${network}.mainnet.*/${network}.mainnet=0/g" /home/admin/.lnd/lnd.conf
   sudo sed -i "s/^${network}.testnet.*/${network}.testnet=1/g" /home/admin/.lnd/lnd.conf
 else
-  echo "editing /mnt/hdd/lnd/lnd.conf"
-  sudo sed -i "s/^${network}.mainnet.*/${network}.mainnet=1/g" /mnt/hdd/lnd/lnd.conf
-  sudo sed -i "s/^${network}.testnet.*/${network}.testnet=0/g" /mnt/hdd/lnd/lnd.conf
+  echo "editing /mnt/hdd/app-data/lnd/lnd.conf"
+  sudo sed -i "s/^${network}.mainnet.*/${network}.mainnet=1/g" /mnt/hdd/app-data/lnd/lnd.conf
+  sudo sed -i "s/^${network}.testnet.*/${network}.testnet=0/g" /mnt/hdd/app-data/lnd/lnd.conf
   echo "editing /home/admin/.lnd/lnd.conf"
   sudo sed -i "s/^${network}.mainnet.*/${network}.mainnet=1/g" /home/admin/.lnd/lnd.conf
   sudo sed -i "s/^${network}.testnet.*/${network}.testnet=0/g" /home/admin/.lnd/lnd.conf

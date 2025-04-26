@@ -83,10 +83,10 @@ echo "Copy HDD content for user admin" >> ${logFile}
 mkdir /home/admin/.${network} >> ${logFile}
 cp /mnt/hdd/${network}/${network}.conf /home/admin/.${network}/${network}.conf >> ${logFile} 2>&1
 mkdir /home/admin/.lnd >> ${logFile}
-cp /mnt/hdd/lnd/lnd.conf /home/admin/.lnd/lnd.conf >> ${logFile}
-cp /mnt/hdd/lnd/tls.cert /home/admin/.lnd/tls.cert >> ${logFile}
+cp /mnt/hdd/app-data/lnd/lnd.conf /home/admin/.lnd/lnd.conf >> ${logFile}
+cp /mnt/hdd/app-data/lnd/tls.cert /home/admin/.lnd/tls.cert >> ${logFile}
 mkdir /home/admin/.lnd/data >> ${logFile}
-cp -r /mnt/hdd/lnd/data/chain /home/admin/.lnd/data/chain >> ${logFile} 2>&1
+cp -r /mnt/hdd/app-data/lnd/data/chain /home/admin/.lnd/data/chain >> ${logFile} 2>&1
 chown -R admin:admin /home/admin/.${network} >> ${logFile} 2>&1
 chown -R admin:admin /home/admin/.lnd >> ${logFile} 2>&1
 cp /home/admin/assets/tmux.conf.local /mnt/hdd/app-data/.tmux.conf.local >> ${logFile} 2>&1
@@ -100,8 +100,8 @@ if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
   echo "*** Make backup of LND TLS files" >> ${logFile}
   rm -r  /var/cache/raspiblitz/tls_backup 2>/dev/null
   mkdir /var/cache/raspiblitz/tls_backup 2>/dev/null
-  cp /mnt/hdd/lnd/tls.cert /var/cache/raspiblitz/tls_backup/tls.cert >> ${logFile} 2>&1
-  cp /mnt/hdd/lnd/tls.key /var/cache/raspiblitz/tls_backup/tls.key >> ${logFile} 2>&1
+  cp /mnt/hdd/app-data/lnd/tls.cert /var/cache/raspiblitz/tls_backup/tls.cert >> ${logFile} 2>&1
+  cp /mnt/hdd/app-data/lnd/tls.key /var/cache/raspiblitz/tls_backup/tls.key >> ${logFile} 2>&1
 fi
 echo "" >> ${logFile}
 
@@ -472,7 +472,7 @@ fi
 # CUSTOM PORT
 echo "Provisioning LND Port" >> ${logFile}
 if [ ${#lndPort} -eq 0 ]; then
-  lndPort=$(cat /mnt/hdd/lnd/lnd.conf | grep "^listen=*" | cut -f2 -d':')
+  lndPort=$(cat /mnt/hdd/app-data/lnd/lnd.conf | grep "^listen=*" | cut -f2 -d':')
 fi
 if [ ${#lndPort} -gt 0 ]; then
   if [ "${lndPort}" != "9735" ]; then
@@ -786,9 +786,9 @@ echo "*** Replay backup of LND conf/tls" >> ${logFile}
 if [ -d "/var/cache/raspiblitz/tls_backup" ]; then
 
   echo "Copying TLS ..." >> ${logFile}
-  cp /var/cache/raspiblitz/tls_backup/tls.cert /mnt/hdd/lnd/tls.cert >> ${logFile} 2>&1
-  cp /var/cache/raspiblitz/tls_backup/tls.key /mnt/hdd/lnd/tls.key >> ${logFile} 2>&1
-  chown -R bitcoin:bitcoin /mnt/hdd/lnd >> ${logFile} 2>&1
+  cp /var/cache/raspiblitz/tls_backup/tls.cert /mnt/hdd/app-data/lnd/tls.cert >> ${logFile} 2>&1
+  cp /var/cache/raspiblitz/tls_backup/tls.key /mnt/hdd/app-data/lnd/tls.key >> ${logFile} 2>&1
+  chown -R bitcoin:bitcoin /mnt/hdd/app-data/lnd >> ${logFile} 2>&1
   echo "On next final restart admin creds will be updated by _bootstrap.sh" >> ${logFile}
 
   echo "DONE" >> ${logFile}

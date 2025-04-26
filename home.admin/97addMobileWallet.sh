@@ -148,7 +148,7 @@ Or scan the qr code on the LCD with your mobile phone.
   SENDMANY_ANDROID)
 
       # check if keysend is activated first
-	  keysendOn=$(cat /mnt/hdd/lnd/lnd.conf | grep -c '^accept-keysend=1')
+	  keysendOn=$(cat /mnt/hdd/app-data/lnd/lnd.conf | grep -c '^accept-keysend=1')
 	  if [ "${keysendOn}" == "0" ]; then
 	    whiptail --title " LND KEYSEND NEEDED " --msgbox "
 To use the chat feature of the SendMany app, you need to activate the Keysend feature first.

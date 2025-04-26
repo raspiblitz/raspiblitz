@@ -130,8 +130,8 @@ if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ] || [ "${lnd}" == "1" ]; t
   sudo journalctl -u lnd -b --no-pager -n12
   echo
   echo "*** LAST LND (MAINNET) INFO LOGS ***"
-  echo "sudo tail -n 50 /mnt/hdd/lnd/logs/${network}/mainnet/lnd.log"
-  sudo tail -n 50 /mnt/hdd/lnd/logs/${network}/mainnet/lnd.log
+  echo "sudo tail -n 50 /mnt/hdd/app-data/lnd/logs/${network}/mainnet/lnd.log"
+  sudo tail -n 50 /mnt/hdd/app-data/lnd/logs/${network}/mainnet/lnd.log
 else
   echo "- OFF by config -"
 fi
@@ -175,8 +175,8 @@ if [ "${tlnd}" == "on" ] || [ "${tlnd}" == "1" ]; then
   sudo journalctl -u tlnd -b --no-pager -n12
   echo
   echo "*** LAST 30 LND (TESTNET) INFO LOGS ***"
-  echo "sudo tail -n 30 /mnt/hdd/lnd/logs/${network}/testnet/tnd.log"
-  sudo tail -n 30 /mnt/hdd/lnd/logs/${network}/testnet/lnd.log
+  echo "sudo tail -n 30 /mnt/hdd/app-data/lnd/logs/${network}/testnet/tnd.log"
+  sudo tail -n 30 /mnt/hdd/app-data/lnd/logs/${network}/testnet/lnd.log
 else
   echo "- OFF by config -"
 fi
@@ -219,8 +219,8 @@ if [ "${slnd}" == "on" ] || [ "${slnd}" == "1" ]; then
   sudo journalctl -u slnd -b --no-pager -n12
   echo
   echo "*** LAST 30 LND (SIGNET) INFO LOGS ***"
-  echo "sudo tail -n 30 /mnt/hdd/lnd/logs/${network}/signet/tnd.log"
-  sudo tail -n 30 /mnt/hdd/lnd/logs/${network}/signet/lnd.log
+  echo "sudo tail -n 30 /mnt/hdd/app-data/lnd/logs/${network}/signet/tnd.log"
+  sudo tail -n 30 /mnt/hdd/app-data/lnd/logs/${network}/signet/lnd.log
 else
   echo "- OFF by config -"
 fi

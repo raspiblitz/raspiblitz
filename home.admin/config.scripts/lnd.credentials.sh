@@ -29,7 +29,7 @@ function copy_mac_set_perms() {
   local n=${3:-bitcoin} # the network (e.g. bitcoin) defaults to bitcoin
   local c=${4:-main}    # the chain (e.g. main, test, sim, reg) defaults to main (for mainnet)
 
-  sudo /bin/cp /mnt/hdd/lnd/data/chain/"${n}"/"${c}"net/"${file_name}" /mnt/hdd/app-data/lnd/data/chain/"${n}"/"${c}"net/"${file_name}"
+  sudo /bin/cp /mnt/hdd/app-data/lnd/data/chain/"${n}"/"${c}"net/"${file_name}" /mnt/hdd/app-data/lnd/data/chain/"${n}"/"${c}"net/"${file_name}"
   sudo /bin/chown --silent admin:"${group_name}" /mnt/hdd/app-data/lnd/data/chain/"${n}"/"${c}"net/"${file_name}"
   sudo /bin/chmod --silent 640 /mnt/hdd/app-data/lnd/data/chain/"${n}"/"${c}"net/"${file_name}"
 }
@@ -164,19 +164,19 @@ elif [ "$1" = "sync" ]; then
   fi
 
   echo "# make sure LND conf is readable and symlinked"
-  sudo chmod 644 "/mnt/hdd/lnd/${netprefix}lnd.conf"
-  sudo chown bitcoin:bitcoin "/mnt/hdd/lnd/${netprefix}lnd.conf"
+  sudo chmod 644 "/mnt/hdd/app-data/lnd/${netprefix}lnd.conf"
+  sudo chown bitcoin:bitcoin "/mnt/hdd/app-data/lnd/${netprefix}lnd.conf"
   if ! [[ -L "/mnt/hdd/app-data/lnd/${netprefix}lnd.conf" ]]; then
     sudo rm -rf "/mnt/hdd/app-data/lnd/${netprefix}lnd.conf"                # not a symlink.. delete it silently
-    sudo ln -s "/mnt/hdd/lnd/${netprefix}lnd.conf" "/mnt/hdd/app-data/lnd/${netprefix}lnd.conf"  # and create symlink
+    sudo ln -s "/mnt/hdd/app-data/lnd/${netprefix}lnd.conf" "/mnt/hdd/app-data/lnd/${netprefix}lnd.conf"  # and create symlink
   fi
 
   echo "# make sure TLS certificate is readable and symlinked"
-  sudo chmod 644 "/mnt/hdd/lnd/tls.cert"
-  sudo chown bitcoin:bitcoin "/mnt/hdd/lnd/tls.cert"
+  sudo chmod 644 "/mnt/hdd/app-data/lnd/tls.cert"
+  sudo chown bitcoin:bitcoin "/mnt/hdd/app-data/lnd/tls.cert"
   if ! [[ -L "/mnt/hdd/app-data/lnd/tls.cert" ]]; then
     sudo rm -rf "/mnt/hdd/app-data/lnd/tls.cert"                    # not a symlink.. delete it silently
-    sudo ln -s "/mnt/hdd/lnd/tls.cert" "/mnt/hdd/app-data/lnd/tls.cert"  # and create symlink
+    sudo ln -s "/mnt/hdd/app-data/lnd/tls.cert" "/mnt/hdd/app-data/lnd/tls.cert"  # and create symlink
   fi
   
 ###########################
