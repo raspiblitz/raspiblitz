@@ -288,13 +288,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   chown -R bitcoin:bitcoin /mnt/hdd/lnd
   chmod -R 755 /mnt/hdd/lnd
 
-  echo "# Prepare directories"
-  if [ ! -d /mnt/hdd/lnd ]; then
-    echo "# Creating /mnt/hdd/lnd"
-    sudo mkdir /mnt/hdd/lnd
-  fi
-
-
   sudo chown -R bitcoin:bitcoin /mnt/hdd/lnd
   sudo chmod 755 /mnt/hdd/lnd
   if [ ! -L /home/bitcoin/.lnd ];then
@@ -340,6 +333,12 @@ bitcoin.node=bitcoind
 [bolt]
 db.bolt.auto-compact=true
 db.bolt.auto-compact-min-age=672h
+
+# Allow for longer latency, especially useful for <8GB RAM Pi and congested mempool
+[healthcheck] 
+healthcheck.chainbackend.attempts=3
+healthcheck.chainbackend.timeout=2m0s 
+healthcheck.chainbackend.interval=1m30s
 " | sudo -u bitcoin tee /home/bitcoin/.lnd/${netprefix}lnd.conf
   else
     echo "# The file /home/bitcoin/.lnd/${netprefix}lnd.conf is already present"

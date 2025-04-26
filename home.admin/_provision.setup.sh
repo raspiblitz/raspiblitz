@@ -194,9 +194,6 @@ if [ "${lightning}" == "lnd" ]; then
   else
     # preparing new LND config (raspiblitz.setup)
     echo "Creating new LND config ..." >> ${logFile}
-    sudo -u bitcoin mkdir /mnt/hdd/lnd 2> /dev/null
-    cp /home/admin/assets/lnd.bitcoin.conf /mnt/hdd/lnd/lnd.conf
-    chown bitcoin:bitcoin /mnt/hdd/lnd/lnd.conf
     /home/admin/config.scripts/lnd.install.sh on mainnet
     /home/admin/config.scripts/lnd.setname.sh mainnet ${hostname}
   fi
