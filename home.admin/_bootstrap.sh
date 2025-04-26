@@ -966,7 +966,10 @@ if [ "${scenario}" != "ready" ] ; then
   # copy over the raspiblitz.conf created from setup to HDD
   configExists=$(ls ${configFile} 2>/dev/null | grep -c "raspiblitz.conf")
   if [ "${configExists}" != "1" ]; then
+    echo "creating raspiblitz.conf" >> ${logFile}
     cp /var/cache/raspiblitz/temp/raspiblitz.conf ${configFile}
+  else
+    echo "raspiblitz.conf already exists" >> ${logFile}
   fi
 
   # link directories together in /mnt/hdd (pre-provision)
