@@ -1039,6 +1039,7 @@ if [ "$action" = "link" ]; then
     # /mnt/hdd/bitcoin directory (move old data if needed & link for backwards compatibility)
     mkdir -p "${storageMountedPath}/app-storage/bitcoin"
     mkdir -p "${dataMountedPath}/app-data/bitcoin"
+    chown bitcoin:bitcoin "${dataMountedPath}/app-data/bitcoin"
     if [ -d "${storageMountedPath}/bitcoin" ]; then
         echo "# moving old data from ${storageMountedPath}/bitcoin to ${storageMountedPath}/app-storage/bitcoin"
         mv ${storageMountedPath}/bitcoin/* ${storageMountedPath}/app-storage/bitcoin/
