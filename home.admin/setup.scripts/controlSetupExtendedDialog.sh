@@ -10,6 +10,7 @@ if [ "${ui_migration_upload}" = "1" ]; then
 
   sudo /home/admin/config.scripts/blitz.migration.sh import-gui
 
+  /home/admin/_cache.sh set state "waitprovision"
   exit 0
 fi
 
