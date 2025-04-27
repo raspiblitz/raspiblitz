@@ -873,6 +873,10 @@ if [ "${scenario}" != "ready" ] ; then
 
     if [ "${uploadMigration}" = "1" ]; then
       echo "## MIGRATION from old RaspiBlitz via upload file" >> ${logFile}
+
+      ## process file
+      source <(/home/admin/config.scripts/blitz.migration.sh status)
+
     fi
 
     #############################################

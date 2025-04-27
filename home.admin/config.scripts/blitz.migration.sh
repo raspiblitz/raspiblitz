@@ -31,9 +31,29 @@ source <(/home/admin/config.scripts/internet.sh status local)
 
 # SCP download and upload links
 downloadUnix="scp -r 'bitcoin@${localip}:${defaultUploadPath}/raspiblitz-*.tar.gz' ./"
-downloadWin="scp -r bitcoin@${localip}:${defaultUploadPath}/raspiblitz-*.tar.gz ."
+downloadWin="scp -r bitcoin@${localip}:${defaultUploadPath}/# ...existing code...
+# check for a filename in the upload path
+firstMigrationFile=$(ls -1 ${defaultUploadPath}/raspiblitz-*.tar.gz 2>/dev/null | head -n 1)
+if [ -n "$firstMigrationFile" ]; then
+  echo "# Found migration file: ${firstMigrationFile}"
+  migrationFilename=$(basename "$firstMigrationFile")
+else
+  echo "# No migration files found"
+  migrationFilename=""
+fi
+# ...existing code... ."
 uploadUnix="scp -r ./raspiblitz-*.tar.gz bitcoin@${localip}:${defaultUploadPath}"
 uploadWin="scp -r ./raspiblitz-*.tar.gz bitcoin@${localip}:${defaultUploadPath}"
+
+# check for a filename in the upload path
+firstMigrationFile=$(ls -1 ${defaultUploadPath}/raspiblitz-*.tar.gz 2>/dev/null | head -n 1)
+if [ -n "$firstMigrationFile" ]; then
+  echo "# Found migration file: ${firstMigrationFile}"
+  migrationFilename=$(basename "$firstMigrationFile")
+else
+  echo "# No migration files found"
+  migrationFilename=""
+fi
 
 # output status data & exit
 if [ "$1" = "status" ]; then
@@ -44,6 +64,7 @@ if [ "$1" = "status" ]; then
   echo "uploadUnix=\"${uploadUnix}\""
   echo "downloadWin=\"${downloadWin}\""
   echo "uploadWin=\"${uploadWin}\""
+  echo "migrationFilename=\"${migrationFilename}\""
   exit 1
 fi
 
