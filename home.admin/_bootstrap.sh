@@ -704,6 +704,8 @@ if [ "${scenario}" != "ready" ] ; then
   if [ "${scenario}" = "recover" ] && [ "${menuchoice}" = "setup" ]; then
     echo "OVERWRITE BY USERCHOICE recover -> setup" >> ${logFile}
     scenario="setup"
+    setupPhase="setup"
+    /home/admin/_cache.sh set setupPhase "${setupPhase}"
   fi
 
   # when this is the boot of the new system (skip to provision)
