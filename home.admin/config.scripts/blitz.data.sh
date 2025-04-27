@@ -1116,6 +1116,7 @@ if [ "$action" = "link" ]; then
     echo "# admin user symbol link: /home/admin/.lnd"
     unlink /home/admin/.lnd 2>/dev/null
     ln -s /mnt/hdd/app-data/lnd /home/admin/.lnd
+    chmod -R g+X /home/admin/.lnd
 
     exit 0
 fi

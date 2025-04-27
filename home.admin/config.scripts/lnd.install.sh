@@ -278,7 +278,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo ufw allow 1${rpcportmod}009 comment "${netprefix}lnd RPC"
 
   sudo chown -R bitcoin:bitcoin /mnt/hdd/app-data/lnd
-  sudo chmod 755 /mnt/hdd/app-data/lnd
+  sudo chmod -R 750 /mnt/hdd/app-data/lnd
 
   echo "# Create /mnt/hdd/app-data/lnd/${netprefix}lnd.conf"
   if [ ! -f /mnt/hdd/app-data/lnd/${netprefix}lnd.conf ];then
