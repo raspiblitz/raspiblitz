@@ -7,7 +7,7 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 # LOGFILE - store debug logs of bootstrap
-logFile="/home/admin/raspiblitz.provision-migration.log"
+logFile="/home/admin/raspiblitz.log"
 
 # INFOFILE - state data from bootstrap
 infoFile="/home/admin/raspiblitz.info"
@@ -20,9 +20,6 @@ source /var/cache/raspiblitz/temp/raspiblitz.setup
 source <(/home/admin/_cache.sh get hddGotMigrationData hddVersionLND)
 
 # log header
-echo "" > ${logFile}
-chmod 640 ${logFile}
-chown root:sudo ${logFile}
 echo "###################################" >> ${logFile}
 echo "# _provision.migration.sh" >> ${logFile}
 echo "###################################" >> ${logFile}

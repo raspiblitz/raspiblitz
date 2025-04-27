@@ -1065,11 +1065,9 @@ if [ "${scenario}" != "ready" ] ; then
   # if setup - run provision setup first
   if [ "${setupPhase}" = "setup" ]; then
     echo "Calling _provision.setup.sh for basic setup tasks .." >> $logFile
-    echo "Follow in a new terminal with: 'tail -f raspiblitz.provision-setup.log'" >> $logFile
     /home/admin/_cache.sh set message "Provision Setup"
     /home/admin/_provision.setup.sh
     errorState=$?
-    cat /home/admin/raspiblitz.provision-setup.log
     if [ "$errorState" != "0" ]; then
       # only trigger an error message if the script hasnt itself triggered an error message already
       source <(/home/admin/_cache.sh get state)
@@ -1080,13 +1078,14 @@ if [ "${scenario}" != "ready" ] ; then
     fi
   fi
 
+  echo "# CHOOSE PROVISION: setupPhase(${setupPhase})" >> ${logFile}
+
   # if migration from other nodes - run the migration provision first
   if [ "${setupPhase}" = "migration" ]; then
     echo "Calling _provision.migration.sh for possible migrations .." >> $logFile
     /home/admin/_cache.sh set message "Provision migration"
     /home/admin/_provision.migration.sh
     errorState=$?
-    cat /home/admin/raspiblitz.provision-migration.log
     if [ "$errorState" != "0" ]; then
       # only trigger an error message if the script hasnt itself triggered an error message already
       source <(/home/admin/_cache.sh get state)
@@ -1100,11 +1099,9 @@ if [ "${scenario}" != "ready" ] ; then
   # if update/recovery/migration-followup
   if [ "${setupPhase}" = "update" ] || [ "${setupPhase}" = "recovery" ] || [ "${setupPhase}" = "migration" ]; then
     echo "Calling _provision.update.sh .." >> $logFile
-    echo "Follow in a new terminal with: 'tail -f raspiblitz.provision-update.log'" >> $logFile
     /home/admin/_cache.sh set message "Provision Update/Recovery/Migration"
     /home/admin/_provision.update.sh
     errorState=$?
-    cat /home/admin/raspiblitz.provision-update.log
     if [ "$errorState" != "0" ]; then
       # only trigger an error message if the script hasnt itself triggered an error message already
       source <(/home/admin/_cache.sh get state)
