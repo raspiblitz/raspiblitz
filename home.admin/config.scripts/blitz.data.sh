@@ -1014,8 +1014,8 @@ if [ "$action" = "link" ]; then
         exit 1
     fi
     ln -s ${storageMountedPath}/app-storage ${mainMountPoint}/app-storage
-    chown -R bitcoin:bitcoin ${storageMountedPath}/app-storage ${mainMountPoint}/app-storage
-    chmod -R 755 ${storageMountedPath}/app-storage ${mainMountPoint}/app-storage
+    chown bitcoin:bitcoin ${storageMountedPath}/app-storage ${mainMountPoint}/app-storage
+    chmod ${storageMountedPath}/app-storage ${mainMountPoint}/app-storage
 
      # /app-data
     unlink ${mainMountPoint}/app-data 2>/dev/null
@@ -1032,9 +1032,9 @@ if [ "$action" = "link" ]; then
     mkdir -p ${storageMountedPath}/temp
     rm -rf ${mainMountPoint}/temp 2>/dev/null
     ln -s ${storageMountedPath}/temp ${mainMountPoint}/temp
-    chown -R bitcoin:bitcoin ${mainMountPoint}/temp
-    chmod -R 777 ${storageMountedPath}/temp
-    chmod -R 777 ${mainMountPoint}/temp
+    chown bitcoin:bitcoin ${mainMountPoint}/temp
+    chmod 777 ${storageMountedPath}/temp
+    chmod 777 ${mainMountPoint}/temp
 
     # /mnt/hdd/bitcoin directory (move old data if needed & link for backwards compatibility)
     mkdir -p "${storageMountedPath}/app-storage/bitcoin"
@@ -1057,24 +1057,24 @@ if [ "$action" = "link" ]; then
     echo "# For backwards compatibility: Liniking ${mainMountPoint}/bitcoin"
     unlink ${mainMountPoint}/bitcoin 2>/dev/null
     ln -s ${storageMountedPath}/app-storage/bitcoin ${mainMountPoint}/bitcoin
-    chown -R bitcoin:bitcoin ${mainMountPoint}/bitcoin
-    chmod -R 777 ${mainMountPoint}/bitcoin
+    chown bitcoin:bitcoin ${mainMountPoint}/bitcoin
+    chmod 777 ${mainMountPoint}/bitcoin
 
     # /mnt/hdd/lnd directory (deprecated)
     mkdir -p "${dataMountedPath}/app-data/lnd"
     echo "# For backwards compatibility: Liniking ${mainMountPoint}/lnd"
     unlink ${mainMountPoint}/lnd 2>/dev/null
     ln -s ${dataMountedPath}/app-data/lnd ${mainMountPoint}/lnd
-    chown -R bitcoin:bitcoin ${mainMountPoint}/lnd
-    chmod -R 770 ${mainMountPoint}/lnd
+    chown bitcoin:bitcoin ${mainMountPoint}/lnd
+    chmod 770 ${mainMountPoint}/lnd
 
     # /mnt/hdd/tor directory (deprecated)
     mkdir -p "${dataMountedPath}/app-data/tor"
     echo "# For backwards compatibility: Liniking ${mainMountPoint}/tor"
     unlink ${mainMountPoint}/tor 2>/dev/null
     ln -s ${dataMountedPath}/app-data/tor ${mainMountPoint}/tor
-    chown -R debian-tor:debian-tor ${mainMountPoint}/tor
-    chmod -R 700 ${mainMountPoint}/tor
+    chown debian-tor:debian-tor ${mainMountPoint}/tor
+    chmod 700 ${mainMountPoint}/tor
 
     # /mnt/hdd/aspiblitz.conf (deprecated)
     touch "${dataMountedPath}/app-data/raspiblitz.conf"

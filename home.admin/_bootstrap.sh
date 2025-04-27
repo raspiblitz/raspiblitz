@@ -1222,6 +1222,10 @@ fi
 echo "# BOOSTRAP IN EVERY SITUATION" >> $logFile
 /home/admin/_cache.sh set setupPhase "starting"
 
+# make sure all is linked correctly
+echo "blitz.data.sh link" >> $logFile
+/home/admin/config.scripts/blitz.data.sh link >> ${logFile}
+
 # load data from config file fresh
 echo "load configfile data" >> $logFile
 source ${configFile}
