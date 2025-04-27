@@ -28,10 +28,8 @@ function copy_mac_set_perms() {
   local group_name=${2} # the unix group name (e.g. lndadmin)
   local n=${3:-bitcoin} # the network (e.g. bitcoin) defaults to bitcoin
   local c=${4:-main}    # the chain (e.g. main, test, sim, reg) defaults to main (for mainnet)
-
-  sudo /bin/cp /mnt/hdd/app-data/lnd/data/chain/"${n}"/"${c}"net/"${file_name}" /mnt/hdd/app-data/lnd/data/chain/"${n}"/"${c}"net/"${file_name}"
   sudo /bin/chown --silent admin:"${group_name}" /mnt/hdd/app-data/lnd/data/chain/"${n}"/"${c}"net/"${file_name}"
-  sudo /bin/chmod --silent 640 /mnt/hdd/app-data/lnd/data/chain/"${n}"/"${c}"net/"${file_name}"
+  sudo /bin/chmod --silent 750 /mnt/hdd/app-data/lnd/data/chain/"${n}"/"${c}"net/"${file_name}"
 }
 
 function check_macaroons() {
