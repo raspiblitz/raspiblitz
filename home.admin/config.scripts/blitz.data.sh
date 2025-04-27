@@ -1620,6 +1620,7 @@ if [ "$action" = "recover" ] || [ "$action" = "clean" ]; then
         fi
         if [ "${actionType}" = "STORAGE" ]; then
             # check first partition for storage
+            mkdir -p /mnt/disk_storage 2>/dev/null
             mount /dev/${actionDevicePartitionBase}1 /mnt/disk_storage
             if [ $? -ne 0 ]; then
                 echo "error='failed to mount /dev/${actionDevicePartitionBase}1'" >> ${logFile}
@@ -1660,6 +1661,7 @@ if [ "$action" = "recover" ] || [ "$action" = "clean" ]; then
             
             # Unmount after cleaning
             umount /mnt/disk_storage
+            rm -rf /mnt/disk_storage
         fi
         echo "# DONE: CLEAN ${actionType}" >> ${logFile}
     fi
