@@ -1604,7 +1604,64 @@ if [ "$action" = "recover" ] || [ "$action" = "clean" ]; then
     echo "# actionCombinedData(${actionCombinedData})" >> ${logFile}
 
     if [ "${action}" = "clean" ]; then
-        echo "# TODO: CLEAN ${actionType}" >> ${logFile}
+
+        # clean means the devices exist with partitions
+        # all data should get deleted only keep blockchain data
+
+        if [ "${actionType}" = "SYSTEM" ]; then
+            # system gets full wipe - same as format
+            /home/admin/config.scripts/blitz.data.sh format SYSTEM ${actionDevice}
+            exit $?
+        fi
+        if [ "${actionType}" = "DATA" ]; then
+            # data gets full wipe - same as format
+            /home/admin/config.scripts/blitz.data.sh format DATA ${actionDevice}
+            exit $?
+        fi
+        if [ "${actionType}" = "STORAGE" ]; then
+            # check first partition for storage
+            mount /dev/${actionDevicePartitionBase}1 /mnt/disk_storage
+            if [ $? -ne 0 ]; then
+                echo "error='failed to mount /dev/${actionDevicePartitionBase}1'" >> ${logFile}
+                echo "error='failed to mount storage partition'"
+                exit 1
+            fi
+            # check if /mnt/disk_storage/app-storage exists
+            if [ ! -d "/mnt/disk_storage/app-storage" ]; then
+                # multi partion layout
+                unmount /mnt/disk_storage
+                echo "# .. formating boot & system partition" >> ${logFile}
+                wipefs -a /dev/${actionDevicePartitionBase}1 2>/dev/null
+                mkfs.fat -F 32 /dev/${actionDevicePartitionBase}1
+                wipefs -a /dev/${actionDevicePartitionBase}2 2>/dev/null
+                mkfs -t ext4  /dev/${actionDevicePartitionBase}2
+                mount /dev/${actionDevicePartitionBase}3 /mnt/disk_storage
+                if [ $? -ne 0 ]; then
+                    echo "error='failed to mount /dev/${actionDevicePartitionBase}3'" >> ${logFile}
+                    echo "error='failed to mount storage partition'"
+                    exit 1
+                fi
+                if [ ! -d "/mnt/disk_storage/app-storage" ]; then
+                    echo "error='to /app-storage on /dev/${actionDevicePartitionBase}3'" >> ${logFile}
+                    echo "error='failed to mount storage partition'"
+                    exit 1
+                fi
+            fi
+            # in both setups /mnt/disk_storage/app-storage should exist
+            # delete all data in /mnt/disk_storage except for /mnt/disk_storage/app-storage
+            echo "# Cleaning storage partition - preserving app-storage" >> ${logFile}
+            find /mnt/disk_storage -maxdepth 1 -not -name "app-storage" -not -name "." -not -name ".." -exec rm -rf {} \;
+            find /mnt/disk_storage/app-storage -maxdepth 1 -not -name "blocks" -name "chainstate" -name "indexes" -not -name "." -not -name ".." -exec rm -rf {} \;
+            
+            # Create fresh app-data directory if needed with combined data
+            if [ ${actionCombinedData} -eq 1 ]; then
+                mkdir -p /mnt/disk_storage/app-data
+            fi
+            
+            # Unmount after cleaning
+            umount /mnt/disk_storage
+        fi
+        echo "# DONE: CLEAN ${actionType}" >> ${logFile}
     fi
 
     if [ "${action}" = "recover" ]; then
