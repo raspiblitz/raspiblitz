@@ -1061,23 +1061,37 @@ if [ "$action" = "link" ]; then
     chown bitcoin:bitcoin ${mainMountPoint}/bitcoin
     chmod 777 ${mainMountPoint}/bitcoin
 
-    # /mnt/hdd/lnd directory (deprecated)
+    # /mnt/hdd/lnd directory (move old data if needed & link for backwards compatibility)
     mkdir -p "${dataMountedPath}/app-data/lnd"
+    chown bitoin:bitcoin "${dataMountedPath}/app-data/lnd"
+    if [ -d "${storageMountedPath}/lnd" ]; then
+        echo "# moving old data from ${storageMountedPath}/lnd to ${dataMountedPath}/app-data/lnd"
+        mv ${storageMountedPath}/lnd/* ${dataMountedPath}/app-data/lnd/
+    fi
     echo "# For backwards compatibility: Liniking ${mainMountPoint}/lnd"
     unlink ${mainMountPoint}/lnd 2>/dev/null
     ln -s ${dataMountedPath}/app-data/lnd ${mainMountPoint}/lnd
     chown bitcoin:bitcoin ${mainMountPoint}/lnd
     chmod 770 ${mainMountPoint}/lnd
 
-    # /mnt/hdd/tor directory (deprecated)
+    # /mnt/hdd/tor directory (move old data if needed & link for backwards compatibility)
     mkdir -p "${dataMountedPath}/app-data/tor"
+    chown debian-tor:debian-tor "${dataMountedPath}/app-data/tor"
+    if [ -d "${storageMountedPath}/tor" ]; then
+        echo "# moving old data from ${storageMountedPath}/tor to ${dataMountedPath}/app-data/tor"
+        mv ${storageMountedPath}/tor/* ${dataMountedPath}/app-data/tor/
+    fi
     echo "# For backwards compatibility: Liniking ${mainMountPoint}/tor"
     unlink ${mainMountPoint}/tor 2>/dev/null
     ln -s ${dataMountedPath}/app-data/tor ${mainMountPoint}/tor
     chown debian-tor:debian-tor ${mainMountPoint}/tor
     chmod 700 ${mainMountPoint}/tor
 
-    # /mnt/hdd/aspiblitz.conf (deprecated)
+    # /mnt/hdd/aspiblitz.conf (move old file if needed & link for backwards compatibility)
+    if [ -f "${storageMountedPath}/raspiblitz.conf" ]; then
+        echo "# moving old config from ${storageMountedPath}/raspiblitz.conf to ${dataMountedPath}/app-data/raspiblitz.conf"
+        mv ${storageMountedPath}/raspiblitz.conf ${dataMountedPath}/app-data/raspiblitz.conf
+    fi
     touch "${dataMountedPath}/app-data/raspiblitz.conf"
     echo "# For backwards compatibility: Liniking ${mainMountPoint}/raspiblitz.conf"
     unlink ${mainMountPoint}/raspiblitz.conf 2>/dev/null
