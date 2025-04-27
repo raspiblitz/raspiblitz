@@ -1663,15 +1663,34 @@ if [ "$action" = "recover" ] || [ "$action" = "clean" ]; then
             umount /mnt/disk_storage
             rm -rf /mnt/disk_storage
         fi
-        echo "# DONE: CLEAN ${actionType}" >> ${logFile}
     fi
 
     if [ "${action}" = "recover" ]; then
-        echo "# TODO: RECOVER ${actionType}" >> ${logFile}
+
+        if [ "${actionType}" = "SYSTEM" ]; then
+            # system gets full wipe on recover - same as format
+            /home/admin/config.scripts/blitz.data.sh format SYSTEM ${actionDevice}
+            exit $?
+        fi
+        if [ "${actionType}" = "DATA" ]; then
+            echo "# .. data just keep as is" >> ${logFile}
+        fi
+        if [ "${actionType}" = "STORAGE" ]; then
+            # get number of partions of device
+            numPartitions=$(lsblk -no NAME /dev/${actionDevice} | grep -c "${actionDevicePartitionBase}")
+            if [ ${numPartitions} -eq 3 ]; then
+                echo "# .. formating boot & system partition" >> ${logFile}
+                wipefs -a /dev/${actionDevicePartitionBase}1 2>/dev/null
+                mkfs.fat -F 32 /dev/${actionDevicePartitionBase}1
+                wipefs -a /dev/${actionDevicePartitionBase}2 2>/dev/null
+                mkfs -t ext4  /dev/${actionDevicePartitionBase}2
+            else
+                echo "# .. storage has ${numPartitions} partitions - just keep as is" >> ${logFile}
+            fi
+        fi
     fi
 
-    echo "# OK - ${action} done" >> ${logFile}
-
+    echo "# DONE - blitz.data.sh ${action} ${actionType}" >> ${logFile}
     exit 0
 fi
 
