@@ -1046,12 +1046,14 @@ if [ "$action" = "link" ]; then
     if [ -f "${storageMountedPath}/app-storage/bitcoin/bitcoin.conf" ]; then
         echo "# moving bitcoin data file from ${storageMountedPath}/app-storage/bitcoin to ${dataMountedPath}/app-data/bitcoin"
         mv ${storageMountedPath}/app-storage/bitcoin/bitcoin.conf ${dataMountedPath}/app-data/bitcoin/bitcoin.conf
-        mv ${storageMountedPath}/app-storage/bitcoin/wallet.dat ${dataMountedPath}/app-data/bitcoin/wallet.dat
+        mv ${storageMountedPath}/app-storage/bitcoin/wallet.dat ${dataMountedPath}/app-data/bitcoin/wallet.dat 2>/dev/null
     fi
     unlink ${mainMountPoint}/app-storage/bitcoin/bitcoin.conf 2>/dev/null
     ln -s ${dataMountedPath}/app-data/bitcoin/bitcoin.conf ${mainMountPoint}/app-storage/bitcoin/bitcoin.conf 2>/dev/null
     unlink ${mainMountPoint}/app-storage/bitcoin/wallet.dat 2>/dev/null
-    ln -s ${dataMountedPath}/app-data/bitcoin/wallet.dat ${mainMountPoint}/app-storage/bitcoin/wallet.dat 2>/dev/null
+    if [ -f "${dataMountedPath}/app-data/bitcoin/wallet.dat" ]; then
+        ln -s ${dataMountedPath}/app-data/bitcoin/wallet.dat ${mainMountPoint}/app-storage/bitcoin/wallet.dat
+    fi
     echo "# For backwards compatibility: Liniking ${mainMountPoint}/bitcoin"
     unlink ${mainMountPoint}/bitcoin 2>/dev/null
     ln -s ${storageMountedPath}/app-storage/bitcoin ${mainMountPoint}/bitcoin
