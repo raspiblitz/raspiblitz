@@ -8,6 +8,7 @@ Features:
 - Update: amd64 base image: debian-12.8.0-amd64-netinst.iso [details](https://www.debian.org/releases/stable/amd64/release-notes/ch-whats-new.en.html)
 - Update: Specter Desktop 2.0.5 [details](https://github.com/cryptoadvance/specter-desktop/releases/tag/v2.0.5)
 - Update: Fulcrum Electrum server v1.11.1 (CLI install script with status menu) [details](https://github.com/cculianu/Fulcrum/releases/tag/v1.11.1)
+- Remove: Migration from Umbrel, MyNode, Citadel (because of new drive layout with boot option)
 
 ## What's new in Version 1.11.4 of RaspiBlitz?
 
