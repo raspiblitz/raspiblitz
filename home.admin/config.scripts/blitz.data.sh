@@ -1024,8 +1024,8 @@ if [ "$action" = "link" ]; then
         exit 1
     fi
     ln -s ${dataMountedPath}/app-data ${mainMountPoint}/app-data
-    chown -R bitcoin:bitcoin ${dataMountedPath}/app-data ${mainMountPoint}/app-data
-    chmod -R 755 ${dataMountedPath}/app-data ${mainMountPoint}/app-data
+    chown bitcoin:bitcoin ${dataMountedPath}/app-data ${mainMountPoint}/app-data
+    chmod 755 ${dataMountedPath}/app-data ${mainMountPoint}/app-data
 
     # /temp
     rm -rf ${storageMountedPath}/temp 2>/dev/null
@@ -1050,7 +1050,7 @@ if [ "$action" = "link" ]; then
     unlink ${mainMountPoint}/lnd 2>/dev/null
     ln -s ${dataMountedPath}/app-data/lnd ${mainMountPoint}/lnd
     chown -R bitcoin:bitcoin ${mainMountPoint}/lnd
-    chmod -R 755 ${mainMountPoint}/lnd
+    chmod -R 770 ${mainMountPoint}/lnd
 
     # /mnt/hdd/tor directory (deprecated)
     mkdir -p "${dataMountedPath}/app-data/tor"
@@ -1072,11 +1072,11 @@ if [ "$action" = "link" ]; then
     echo "# bitcoin user symbol link: /home/bitcoin/.bitcoin"
     unlink /home/bitcoin/.bitcoin 2>/dev/null
     ln -s /mnt/hdd/app-storage/bitcoin /home/bitcoin/.bitcoin
-    chown -R bitcoin:bitcoin /home/bitcoin/.bitcoin
+    chown bitcoin:bitcoin /home/bitcoin/.bitcoin
     echo "# bitcoin user symbol link: /home/bitcoin/.lnd"
     unlink /home/bitcoin/.lnd 2>/dev/null
     ln -s /mnt/hdd/app-data/lnd /home/bitcoin/.lnd
-    chown -R bitcoin:bitcoin /home/bitcoin/.lnd
+    chown bitcoin:bitcoin /home/bitcoin/.lnd
 
     ### admin user symbol links
     echo "# admin user symbol link: /home/admin/.bitcoin"
