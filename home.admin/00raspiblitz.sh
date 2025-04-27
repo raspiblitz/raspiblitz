@@ -126,6 +126,21 @@ while [ ${exitMenuLoop} -eq 0 ]; do
     if [ "${exitMenuLoop}" != "0" ]; then break; fi
   fi
 
+  #######################################
+  # 2nd SETUP MENU (after HDD/SSD format)
+  #######################################
+
+  # when is needed & bootstrap process signals that it waits for user dialog
+  if [ "${setupPhase}" != "done" ] && [ "${state}" == "waitsetup-extended" ]; then
+    # push user to main menu
+    echo "# controlSetupExtendedDialog.sh"
+    /home/admin/setup.scripts/controlSetupExtendedDialog.sh 
+    # use the exit code from setup menu as signal if menu loop should exited
+    # 0 = continue loop / everything else = break loop and exit to terminal
+    exitMenuLoop=$?
+    if [ "${exitMenuLoop}" != "0" ]; then break; fi
+  fi
+
   #####################################
   # SETUP DONE DIALOGS
   #####################################

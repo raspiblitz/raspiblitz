@@ -816,7 +816,65 @@ if [ "${scenario}" != "ready" ] ; then
     echo "scenario(${scenario})" >> ${logFile}
     echo "systemCopy(${systemCopy})" >> ${logFile}
 
-    # copy system
+
+    #############################################
+    # WAIT LOOP: 2nd SETUP UI WAIT LOOP
+    # (after HDD/SSD is setup)
+    ############################################
+
+    # at the moment only needed for upload file migration
+    if [ "${uploadMigration}" = "1" ]; then
+      # trigger the 2nd setup loop
+      $state="waitsetup-extended"
+    else
+      # skip the 2nd setup loop
+      state="waitprovision"
+    fi
+    /home/admin/_cache.sh set state "${state}"
+
+    echo "## 2nd WAIT LOOP: AFTER HDD/SETUP" >> ${logFile}
+    echo "state(${state})" >> ${logFile}
+    until [ "${state}" = "waitprovision" ]
+    do
+
+      # give the loop a little bed time
+      sleep 4
+
+      # check for updated state value from SSH-UI or WEB-UI for loop
+      source <(/home/admin/_cache.sh get state)
+
+    done
+    echo "## 2nd WAIT LOOP: DONE" >> ${logFile}
+
+    #############################################
+    # MIGRATION from old RaspiBlitz
+    ############################################
+
+    if [ "${hddMigration}" = "1" ]; then
+      echo "## MIGRATION from old RaspiBlitz via old HDD" >> ${logFile}
+      /home/admin/_cache.sh set state "hdd-migration"
+      /home/admin/_cache.sh set message "${hddMigrateDeviceFrom} ${hddMigrateDeviceTo}"
+      /home/admin/config.scripts/blitz.data.sh migration hdd run "${hddMigrateDeviceFrom}" >> ${logFile}
+      if [ $? -ne 0 ]; then
+        echo "FAIL: blitz.data.sh migration hdd run failed" >> ${logFile}
+        /home/admin/_cache.sh set state "error"
+        /home/admin/_cache.sh set message "blitz.migration.sh migrate failed"
+        exit 1
+      fi
+    fi
+
+    #############################################
+    # MIGRATION from uploaded migration file
+    ############################################
+
+    if [ "${uploadMigration}" = "1" ]; then
+      echo "## MIGRATION from old RaspiBlitz via upload file" >> ${logFile}
+    fi
+
+    #############################################
+    # SYSTEM COPY
+    ############################################
+
     if [ "${systemCopy}" = "1" ]; then
 
       echo "SYSTEM COPY OF FRESH SYSTEM" >> ${logFile}
@@ -900,29 +958,6 @@ if [ "${scenario}" != "ready" ] ; then
   else
     echo "Skipping System Copy" >> ${logFile}
   fi
-
-  #############################################
-  # MIGRATION from old RaspiBlitz
-  ############################################
-
-  if [ "${hddMigration}" = "1" ]; then
-    echo "## MIGRATION from old RaspiBlitz" >> ${logFile}
-    /home/admin/_cache.sh set state "hdd-migration"
-    /home/admin/_cache.sh set message "${hddMigrateDeviceFrom} ${hddMigrateDeviceTo}"
-    /home/admin/config.scripts/blitz.data.sh migration hdd run "${hddMigrateDeviceFrom}" >> ${logFile}
-    if [ $? -ne 0 ]; then
-      echo "FAIL: blitz.data.sh migration hdd run failed" >> ${logFile}
-      /home/admin/_cache.sh set state "error"
-      /home/admin/_cache.sh set message "blitz.migration.sh migrate failed"
-      exit 1
-    fi
-  fi
-
-  #############################################
-  # MIGRATION from uploaded migration file
-  ############################################
-
-  # TODO
 
   #############################################
   # PROVISION PROCESS

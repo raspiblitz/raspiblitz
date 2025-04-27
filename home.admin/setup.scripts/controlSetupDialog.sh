@@ -126,9 +126,15 @@ if [ "${setupPhase}" = "setup" ]; then
   /home/admin/setup.scripts/dialogBasicSetup.sh ${orgSetupPhase}
   menuresult=$?
 
-  # shutdown without changes
+  # explicit setup
   if [ "${menuresult}" = "0" ]; then
     echo "menuchoice='setup'" >> $SETUPFILE
+  fi
+
+  # upload migration file
+  if [ "${menuresult}" = "1" ]; then
+    echo "menuchoice='filemigration'" >> $SETUPFILE
+    echo "setPasswordA=1" >> $SETUPFILE
   fi
 
   # shutdown without changes
@@ -175,6 +181,7 @@ if [ "${setupPhase}" = "setup" ]; then
       # user wants to exit
       exit 0
     fi
+    echo "setPasswordA=1" >> $SETUPFILE
     echo "menuchoice='hddmigrate'" >> $SETUPFILE
     source <(/home/admin/_cache.sh get hddMigrateDeviceFrom)
     echo "hddMigrateDeviceFrom='${hddMigrateDeviceFrom}'" >> $SETUPFILE

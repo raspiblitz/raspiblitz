@@ -2029,56 +2029,47 @@ if [ "$1" = "migration" ]; then
         exit 1
     fi
 
+    echo "error='TODO migration'"
+
     #####################
     # MIGRATION: UMBREL
-    if [ "$2" = "umbrel" ]; then
-
-        # TODO: Detect and output Umbrel Version
-
-        if [ ${onlyTestIfMigratioinPossible} -eq 1 ]; then
-            # provide information about the versions
-            btcVersion=$(grep "lncm/bitcoind" ${mountPath}/umbrel/app-data/bitcoin/docker-compose.yml 2>/dev/null | sed 's/.*bitcoind://' | sed 's/@.*//')
-            clnVersion=$(grep "lncm/clightning" ${mountPath}/umbrel/app-data/core-lightning/docker-compose.yml 2>/dev/null | sed 's/.*clightning://' | sed 's/@.*//')
-            lndVersion=$(grep "lightninglabs/lnd" ${mountPath}/umbrel/app-data/lightning/docker-compose.yml 2>/dev/null | sed 's/.*lnd://' | sed 's/@.*//')
-            echo "btcVersion='${btcVersion}'"
-            echo "clnVersion='${clnVersion}'"
-            echo "lndVersion='${lndVersion}'"
-        else
-
-            echo "error='TODO migration'"
-
-        fi
+    # if [ "$2" = "umbrel" ]; then
+    #   # TODO: Detect and output Umbrel Version
+    #   if [ ${onlyTestIfMigratioinPossible} -eq 1 ]; then
+    #       # provide information about the versions
+    #       btcVersion=$(grep "lncm/bitcoind" ${mountPath}/umbrel/app-data/bitcoin/docker-compose.yml 2>/dev/null | sed 's/.*bitcoind://' | sed 's/@.*//')
+    #       clnVersion=$(grep "lncm/clightning" ${mountPath}/umbrel/app-data/core-lightning/docker-compose.yml 2>/dev/null | sed 's/.*clightning://' | sed 's/@.*//')
+    #       lndVersion=$(grep "lightninglabs/lnd" ${mountPath}/umbrel/app-data/lightning/docker-compose.yml 2>/dev/null | sed 's/.*lnd://' | sed 's/@.*//')
+    #       echo "btcVersion='${btcVersion}'"
+    #       echo "clnVersion='${clnVersion}'"
+    #       echo "lndVersion='${lndVersion}'"
+    #   else
+    #       echo "error='TODO migration'"
+    #   fi
 
     #####################
     # MIGRATION: CITADEL
-    elif [ "$2" = "citadel" ]; then
-
-        # TODO: Detect and output Citadel Version
-
-        if [ ${onlyTestIfMigratioinPossible} -eq 1 ]; then
-            # provide information about the versions
-            lndVersion=$(grep "lightninglabs/lnd" ${mountPath}/citadel/docker-compose.yml 2>/dev/null | sed 's/.*lnd://' | sed 's/@.*//')
-            echo "lndVersion='${lndVersion}'"
-        else
-
-            echo "error='TODO migration'"
-
-        fi
+    #elif [ "$2" = "citadel" ]; then
+    #   # TODO: Detect and output Citadel Version
+    #   if [ ${onlyTestIfMigratioinPossible} -eq 1 ]; then
+    #       # provide information about the versions
+    #       lndVersion=$(grep "lightninglabs/lnd" ${mountPath}/citadel/docker-compose.yml 2>/dev/null | sed 's/.*lnd://' | sed 's/@.*//')
+    #       echo "lndVersion='${lndVersion}'"
+    #   else
+    #       echo "error='TODO migration'"
+    #   fi
 
     #####################
     # MIGRATION: MYNODE
-    elif [ "$2" = "mynode" ]; then
-
-        echo "error='TODO'"
-
-    else
-        echo "error='migration type not supported'"
-    fi
+    #elif [ "$2" = "mynode" ]; then
+    #   echo "error='TODO'"
+    #else
+    #   echo "error='migration type not supported'"
+    #fi
 
     # unmount partition
     umount ${mountPath}
     rm -r ${mountPath}
-
     exit 0
 fi
 
