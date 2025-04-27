@@ -823,9 +823,10 @@ if [ "${scenario}" != "ready" ] ; then
     ############################################
 
     # at the moment only needed for upload file migration
+    echo "uploadMigration(${uploadMigration})" >> ${logFile}  
     if [ "${uploadMigration}" = "1" ]; then
       # trigger the 2nd setup loop
-      $state="waitsetup-extended"
+      state="waitsetup-extended"
       source <(/home/admin/config.scripts/blitz.migration.sh status)
       /home/admin/_cache.sh set "ui_migration_upload" "1"
       /home/admin/_cache.sh set "ui_migration_uploadUnix" "${uploadUnix}"
