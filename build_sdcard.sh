@@ -681,17 +681,6 @@ mv raspiblitz.info /home/admin/
 chmod 755 /home/admin/raspiblitz.info
 chown admin:admin /home/admin/raspiblitz.info
 
-echo -e "\n*** ADDING GROUPS FOR CREDENTIALS STORE ***"
-# access to credentials (e.g. macaroon files) in a central location is managed with unix groups and permissions
-groupadd --force --gid 9700 lndadmin
-groupadd --force --gid 9701 lndinvoice
-groupadd --force --gid 9702 lndreadonly
-groupadd --force --gid 9703 lndinvoices
-groupadd --force --gid 9704 lndchainnotifier
-groupadd --force --gid 9705 lndsigner
-groupadd --force --gid 9706 lndwalletkit
-groupadd --force --gid 9707 lndrouter
-
 echo -e "\n*** SHELL SCRIPTS & ASSETS ***"
 # copy raspiblitz repo from github
 cd /home/admin/ || exit 1
