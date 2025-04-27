@@ -432,7 +432,7 @@ elif [ "$1" == "basic-setup" ]; then
   else
     echo "configCopy=0"
     echo "configMismatch=0"
-    echo "err='$(netprefix)lnd.conf is missing for user admin'"
+    echo "err='${netprefix}lnd.conf is missing for user admin'"
   fi
 
   # get network from config (BLOCKCHAIN)

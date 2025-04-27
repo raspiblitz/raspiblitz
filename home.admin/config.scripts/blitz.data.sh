@@ -1078,6 +1078,14 @@ if [ "$action" = "link" ]; then
     ln -s /mnt/hdd/app-data/lnd /home/bitcoin/.lnd
     chown -R bitcoin:bitcoin /home/bitcoin/.lnd
 
+    ### admin user symbol links
+    echo "# admin user symbol link: /home/admin/.bitcoin"
+    unlink /home/admin/.bitcoin 2>/dev/null
+    ln -s /mnt/hdd/app-storage/bitcoin /home/admin/.bitcoin
+    echo "# admin user symbol link: /home/admin/.lnd"
+    unlink /home/admin/.lnd 2>/dev/null
+    ln -s /mnt/hdd/app-data/lnd /home/admin/.lnd
+
     exit 0
 fi
 
