@@ -154,6 +154,8 @@ elif [ "$1" = "sync" ]; then
   copy_mac_set_perms signer.macaroon lndsigner "${network}" "${chain}"
   copy_mac_set_perms walletkit.macaroon lndwalletkit "${network}" "${chain}"
   copy_mac_set_perms router.macaroon lndrouter "${network}" "${chain}"
+
+  sudo usermod -aG lndadmin admin
   
 ###########################
 # Check Macaroons and fix missing

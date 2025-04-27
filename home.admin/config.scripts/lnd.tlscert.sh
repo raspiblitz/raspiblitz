@@ -191,11 +191,6 @@ if [ "$1" = "refresh" ]; then
   sudo chmod 664 ${TLSPATH}/tls.cert
   sudo chown bitcoin:bitcoin "/mnt/hdd/app-data/lnd/tls.cert"
 
-  echo "# symlink new cert to lnd app-data directory"
-  if ! [[ -L "/mnt/hdd/app-data/lnd/tls.cert" ]]; then
-    sudo rm -rf "/mnt/hdd/app-data/lnd/tls.cert"               # not a symlink.. delete it silently
-    sudo ln -s ${TLSPATH}/tls.cert /home/admin/.lnd/tls.cert   # and create symlink
-  fi
   echo "# OK TLS certs are fresh - start of LND service needed"
   exit
 fi
