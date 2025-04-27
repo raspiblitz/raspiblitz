@@ -691,6 +691,7 @@ groupadd --force --gid 9704 lndchainnotifier
 groupadd --force --gid 9705 lndsigner
 groupadd --force --gid 9706 lndwalletkit
 groupadd --force --gid 9707 lndrouter
+usermod -aG lndadmin admin
 
 echo -e "\n*** SHELL SCRIPTS & ASSETS ***"
 # copy raspiblitz repo from github
