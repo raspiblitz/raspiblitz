@@ -24,7 +24,7 @@ if [ -L /mnt/hdd/app-data ]; then
 fi
 
 # set place where zipped TAR file gets stored
-defaultUploadPath="/mnt/hdd/temp/migration"
+defaultUploadPath="/mnt/hdd/temp"
 
 # get local ip
 source <(/home/admin/config.scripts/internet.sh status local)
@@ -42,8 +42,8 @@ else
   migrationFilename=""
 fi
 # ...existing code... ."
-uploadUnix="scp -r ./raspiblitz-*.tar.gz bitcoin@${localip}:${defaultUploadPath}"
-uploadWin="scp -r ./raspiblitz-*.tar.gz bitcoin@${localip}:${defaultUploadPath}"
+uploadUnix="scp -r ./raspiblitz-*.tar.gz admin@${localip}:${defaultUploadPath}"
+uploadWin="scp -r ./raspiblitz-*.tar.gz admin@${localip}:${defaultUploadPath}"
 
 # check for a filename in the upload path
 firstMigrationFile=$(ls -1 ${defaultUploadPath}/raspiblitz-*.tar.gz 2>/dev/null | head -n 1)
