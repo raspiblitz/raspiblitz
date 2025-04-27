@@ -826,6 +826,10 @@ if [ "${scenario}" != "ready" ] ; then
     if [ "${uploadMigration}" = "1" ]; then
       # trigger the 2nd setup loop
       $state="waitsetup-extended"
+      source <(/home/admin/config.scripts/blitz.migration.sh status)
+      /home/admin/_cache.sh set "ui_migration_upload" "1"
+      /home/admin/_cache.sh set "ui_migration_uploadUnix" "${uploadUnix}"
+      /home/admin/_cache.sh set "ui_migration_uploadWin" "${uploadWin}"
     else
       # skip the 2nd setup loop
       state="waitprovision"

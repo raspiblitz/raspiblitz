@@ -3,18 +3,12 @@
 # get basic system information
 # these are the same set of infos the WebGUI dialog/controler has
 source /home/admin/raspiblitz.info
-# get values from cache
 
-# SETUPFILE
-# this key/value file contains the state during the setup process
-SETUPFILE="/var/cache/raspiblitz/temp/raspiblitz.setup"
 
-# load setup state
-source ${SETUPFILE}
+source <(/home/admin/_cache.sh get ui_migration_upload ui_migration_uploadUnix ui_migration_uploadWin)
+if [ "${ui_migration_upload}" = "1" ]; then
 
-if [ "${hddMigration}" = "1" ]; then
-
-  # ask for upload file
+  sudo /home/admin/config.scripts/blitz.migration.sh import-gui
 
   exit 0
 fi

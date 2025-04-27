@@ -2,7 +2,7 @@
 
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "# managing the RaspiBlitz data - import, export, backup."
- echo "# blitz.migration.sh [export|import|export-gui]"
+ echo "# blitz.migration.sh [status|export|import|export-gui|import-gui]"
  echo "error='missing parameters'"
  exit 1
 fi
@@ -163,6 +163,30 @@ if [ "$1" = "export-gui" ]; then
   echo "Shutting down ...."
   sleep 4
   sudo /home/admin/config.scripts/blitz.shutdown.sh
+  exit 0
+fi
+
+if [ "$1" = "import-gui" ]; then
+
+  source <(/home/admin/_cache.sh get ui_migration_upload ui_migration_uploadUnix ui_migration_uploadWin)
+  clear
+  echo
+  echo "*******************************"
+  echo "* UPLOAD THE MIGRATION FILE *"
+  echo "*******************************"
+  echo 
+  echo "On your Linux or MacOS Laptop - OPEN NEW TERMINAL."
+  echo "Go into the folder where you have stored your raspiblitz-*.tar.gz file and run:"
+  echo "${ui_migration_uploadUnix}"
+  echo "Or on Windows use command:"
+  echo "${ui_migration_uploadWin}"
+  echo
+  echo "Use password A to authenticate file transfer."
+  echo
+  echo "After upload command press ENTER to process."
+  echo
+  read key
+  echo "Processing ...."
   exit 0
 fi
 
