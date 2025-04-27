@@ -1036,8 +1036,22 @@ if [ "$action" = "link" ]; then
     chmod -R 777 ${storageMountedPath}/temp
     chmod -R 777 ${mainMountPoint}/temp
 
-    # /mnt/hdd/bitcoin directory (deprecated)
+    # /mnt/hdd/bitcoin directory (move old data if needed & link for backwards compatibility)
     mkdir -p "${storageMountedPath}/app-storage/bitcoin"
+    mkdir -p "${dataMountedPath}/app-data/bitcoin"
+    if [ -d "${storageMountedPath}/bitcoin" ]; then
+        echo "# moving old data from ${storageMountedPath}/bitcoin to ${storageMountedPath}/app-storage/bitcoin"
+        mv ${storageMountedPath}/bitcoin/* ${storageMountedPath}/app-storage/bitcoin/
+    fi
+    if [ -f "${storageMountedPath}/app-storage/bitcoin/bitcoin.conf" ]; then
+        echo "# moving bitcoin data file from ${storageMountedPath}/app-storage/bitcoin to ${dataMountedPath}/app-data/bitcoin"
+        mv ${storageMountedPath}/app-storage/bitcoin/bitcoin.conf ${dataMountedPath}/app-data/bitcoin/bitcoin.conf
+        mv ${storageMountedPath}/app-storage/bitcoin/wallet.dat ${dataMountedPath}/app-data/bitcoin/wallet.dat
+    fi
+    unlink ${mainMountPoint}/app-storage/bitcoin/bitcoin.conf 2>/dev/null
+    ln -s ${dataMountedPath}/app-data/bitcoin/bitcoin.conf ${mainMountPoint}/app-storage/bitcoin/bitcoin.conf 2>/dev/null
+    unlink ${mainMountPoint}/app-storage/bitcoin/wallet.dat 2>/dev/null
+    ln -s ${dataMountedPath}/app-data/bitcoin/wallet.dat ${mainMountPoint}/app-storage/bitcoin/wallet.dat 2>/dev/null
     echo "# For backwards compatibility: Liniking ${mainMountPoint}/bitcoin"
     unlink ${mainMountPoint}/bitcoin 2>/dev/null
     ln -s ${storageMountedPath}/app-storage/bitcoin ${mainMountPoint}/bitcoin
