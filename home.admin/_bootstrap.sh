@@ -863,7 +863,7 @@ if [ "${scenario}" != "ready" ] ; then
 
     done
     echo "## 2nd WAIT LOOP: DONE" >> ${logFile}
-    unmount /mnt/upload 2>/dev/null
+    umount /mnt/upload 2>/dev/null
 
     #############################################
     # MIGRATION from old RaspiBlitz
