@@ -2118,8 +2118,6 @@ fi
 #############
 
 if [ "$1" = "reset" ]; then
-
-    echo "# blitz.data.sh reset"
     source <(/home/admin/config.scripts/blitz.data.sh status)
     if [ "${storageDevice}" = "" ]; then
         echo "error='no storage device found'"
