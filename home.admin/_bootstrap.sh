@@ -976,6 +976,17 @@ if [ "${scenario}" != "ready" ] ; then
     echo "Skipping System Copy" >> ${logFile}
   fi
 
+  ###################################
+  # Set Password A (in all cases)
+  
+  if [ "${passwordA}" = "" ]; then
+    /home/admin/config.scripts/blitz.error.sh _bootstrap.sh "missing-passworda-2" "missing passwordA(2) in (${setupFile})" "" ${logFile}
+    exit 1
+  fi
+
+  echo "# setting PASSWORD A" >> ${logFile}
+  /home/admin/config.scripts/blitz.passwords.sh set a "${passwordA}" >> ${logFile}
+
   #############################################
   # MIGRATION from old RaspiBlitz
   ############################################
@@ -1102,17 +1113,6 @@ if [ "${scenario}" != "ready" ] ; then
   /home/admin/_cache.sh set network "${network}"
   /home/admin/_cache.sh set chain "${chain}"
   /home/admin/_cache.sh set lightning "${lightning}"
-
-  ###################################
-  # Set Password A (in all cases)
-  
-  if [ "${passwordA}" = "" ]; then
-    /home/admin/config.scripts/blitz.error.sh _bootstrap.sh "missing-passworda-2" "missing passwordA(2) in (${setupFile})" "" ${logFile}
-    exit 1
-  fi
-
-  echo "# setting PASSWORD A" >> ${logFile}
-  /home/admin/config.scripts/blitz.passwords.sh set a "${passwordA}" >> ${logFile}
 
   # Bitcoin Mainnet
   if [ "${mainnet}" = "on" ] || [ "${chain}" = "main" ]; then
