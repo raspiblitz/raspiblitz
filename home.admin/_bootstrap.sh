@@ -871,7 +871,14 @@ if [ "${scenario}" != "ready" ] ; then
       echo "adding to ${setupFile} migrationFile(${migrationFile})" >> ${logFile}
       echo "migrationFile=${migrationFile}" >> ${setupFile}
     else
-      echo "No migration file found" >> ${logFile}
+      if [ "${uploadMigration}" = "1" ]; then
+        echo "FAIL: no migration file found" >> ${logFile}
+        /home/admin/_cache.sh set state "error"
+        /home/admin/_cache.sh set message "no migration file found"
+        exit 1
+      else
+        echo "OK - no migration file found" >> ${logFile}
+      fi
     fi
     umount /mnt/upload 2>/dev/null
 
