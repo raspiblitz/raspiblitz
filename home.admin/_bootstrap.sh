@@ -976,17 +976,6 @@ if [ "${scenario}" != "ready" ] ; then
     echo "Skipping System Copy" >> ${logFile}
   fi
 
-  ###################################
-  # Set Password A (in all cases)
-  
-  if [ "${passwordA}" = "" ]; then
-    /home/admin/config.scripts/blitz.error.sh _bootstrap.sh "missing-passworda-2" "missing passwordA(2) in (${setupFile})" "" ${logFile}
-    exit 1
-  fi
-
-  echo "# setting PASSWORD A" >> ${logFile}
-  /home/admin/config.scripts/blitz.passwords.sh set a "${passwordA}" >> ${logFile}
-
   #############################################
   # MIGRATION from old RaspiBlitz
   ############################################
@@ -1086,6 +1075,19 @@ if [ "${scenario}" != "ready" ] ; then
     echo "cat ${configFile}" >> ${logFile}
     cat ${configFile} >> ${logFile}
   fi
+
+  # load fresh setup data
+  echo "# Sourcing ${setupFile} " >> ${logFile}
+  source ${setupFile}
+
+  ###################################
+  # Set Password A (in all cases)
+  if [ "${passwordA}" = "" ]; then
+    /home/admin/config.scripts/blitz.error.sh _bootstrap.sh "missing-passworda-2" "missing passwordA(2) in (${setupFile})" "" ${logFile}
+    exit 1
+  fi
+  echo "# setting PASSWORD A" >> ${logFile}
+  /home/admin/config.scripts/blitz.passwords.sh set a "${passwordA}" >> ${logFile}
   
   # enable tor service
   /home/admin/config.scripts/tor.install.sh enable >> ${logFile}
