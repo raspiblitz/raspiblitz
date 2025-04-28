@@ -355,7 +355,7 @@ elif [ "${eventID}" == "systemcopy" ]; then
 
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "
 COPYING SYSTEM TO SSD/NVME
-This can take a while ...
+${progresstype}: ${progress}
 " 6 30
 
 elif [ "${eventID}" == "hdd-format" ]; then
@@ -367,9 +367,11 @@ PREPARING DRIVES
 elif [ "${eventID}" == "system-change" ]; then
 
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "
-REBOOT to CHANGE BOOT DRIVE
+System is new restarting
+to boot from SSD/NVME.
 
-Use password 'raspiblitz' for re-login. " 7 43
+Use password A for re-login:
+ssh admin@${internet_localip}" 9 35
 
 elif [ "${eventID}" == "hdd-migration" ]; then
 
