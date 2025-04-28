@@ -1680,13 +1680,13 @@ if [ "$action" = "recover" ] || [ "$action" = "clean" ]; then
             numPartitions=$(lsblk -no NAME /dev/${actionDevice} | grep -c "${actionDevicePartitionBase}")
             if [ ${numPartitions} -eq 3 ]; then
                 echo "# .. formating boot & system partition" >> ${logFile}
-                wipefs -a /dev/${actionDevicePartitionBase}1 2>/dev/null
-                mkfs.fat -F 32 /dev/${actionDevicePartitionBase}1
-                wipefs -a /dev/${actionDevicePartitionBase}2 2>/dev/null
-                mkfs -t ext4  /dev/${actionDevicePartitionBase}2
-                echo "storagePartition='${actionDevicePartitionBase}3"
+                wipefs -a /dev/${actionDevicePartitionBase}1 >> ${logFile}
+                mkfs.fat -F 32 /dev/${actionDevicePartitionBase}1 >> ${logFile}
+                wipefs -a /dev/${actionDevicePartitionBase}2 >> ${logFile}
+                mkfs -t ext4  /dev/${actionDevicePartitionBase}2 >> ${logFile}
+                echo "storagePartition='${actionDevicePartitionBase}3'"
             else
-                echo "storagePartition='${actionDevicePartitionBase}1"
+                echo "storagePartition='${actionDevicePartitionBase}1'"
                 echo "# .. storage has ${numPartitions} partitions - just keep as is" >> ${logFile}
             fi
         fi
