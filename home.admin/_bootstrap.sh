@@ -1041,6 +1041,9 @@ if [ "${scenario}" != "ready" ] ; then
       exit 1
     fi
 
+    # make sure upload mount is deleted
+    rm -rf /mnt/upload 2>/dev/null
+
     # signal recovery provision phase
     scenario="recovery"
     setupPhase="recovery"
