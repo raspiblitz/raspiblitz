@@ -466,9 +466,10 @@ if [ "$action" = "status" ]; then
     fi
 
     echo "# RESULT AFTER DETECTION"
-    echo "# installDevice: ${installDevice} (${installDeviceActive}) (${installDeviceReadOnly})"
+    echo "# dataDevice: ${dataDevice} (${dataSizeGB}GB) (${dataMountedPath})"
     echo "# storageDevice: ${storageDevice} (${storageSizeGB}GB) (${storageMountedPath})"
     echo "# systemDevice: ${systemDevice} (${systemSizeGB}GB) (${systemMountedPath})"
+    echo "# installDevice: ${installDevice} (${installDeviceActive}) (${installDeviceReadOnly})"
     echo "# biggerDevice: ${biggerDevice} (${biggerSizeGB}GB)"
     echo "# combinedDataStorage: ${combinedDataStorage}"
 
@@ -617,6 +618,8 @@ if [ "$action" = "status" ]; then
 
         fi
 
+    else
+        echo "# NO LAYOUT PROPOSAL ... using existing drive layout"
     fi
 
     #################
