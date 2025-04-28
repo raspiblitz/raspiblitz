@@ -883,27 +883,16 @@ if [ "${scenario}" != "ready" ] ; then
     umount /mnt/upload 2>/dev/null
 
     #############################################
-    # MIGRATION from old RaspiBlitz
-    ############################################
-
-    if [ "${hddMigration}" = "1" ]; then
-      echo "## MIGRATION from old RaspiBlitz via old HDD" >> ${logFile}
-      /home/admin/_cache.sh set state "hdd-migration"
-      /home/admin/_cache.sh set message "${hddMigrateDeviceFrom} ${hddMigrateDeviceTo}"
-      /home/admin/config.scripts/blitz.data.sh migration hdd run "${hddMigrateDeviceFrom}" >> ${logFile}
-      if [ $? -ne 0 ]; then
-        echo "FAIL: blitz.data.sh migration hdd run failed" >> ${logFile}
-        /home/admin/_cache.sh set state "error"
-        /home/admin/_cache.sh set message "blitz.migration.sh migrate failed"
-        exit 1
-      fi
-    fi
-
-    #############################################
     # SYSTEM COPY
     ############################################
 
     if [ "${systemCopy}" = "1" ]; then
+
+      if [ "${systemDevice}" = "" ]; then
+        echo "systemDevice() - using storageDevice for system" >> ${logFile}
+        systemDevice="${storageDevice}"
+        bootFromStorage=1
+      fi
 
       echo "SYSTEM COPY OF FRESH SYSTEM" >> ${logFile}
       echo "bootFromStorage(${bootFromStorage})" >> ${logFile}
@@ -985,6 +974,23 @@ if [ "${scenario}" != "ready" ] ; then
 
   else
     echo "Skipping System Copy" >> ${logFile}
+  fi
+
+  #############################################
+  # MIGRATION from old RaspiBlitz
+  ############################################
+
+  if [ "${hddMigration}" = "1" ]; then
+    echo "## MIGRATION from old RaspiBlitz via old HDD" >> ${logFile}
+    /home/admin/_cache.sh set state "hdd-migration"
+    /home/admin/_cache.sh set message "${hddMigrateDeviceFrom} ${hddMigrateDeviceTo}"
+    /home/admin/config.scripts/blitz.data.sh migration hdd run "${hddMigrateDeviceFrom}" >> ${logFile}
+    if [ $? -ne 0 ]; then
+      echo "FAIL: blitz.data.sh migration hdd run failed" >> ${logFile}
+      /home/admin/_cache.sh set state "error"
+      /home/admin/_cache.sh set message "blitz.migration.sh migrate failed"
+      exit 1
+    fi
   fi
 
   #############################################
