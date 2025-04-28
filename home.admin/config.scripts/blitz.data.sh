@@ -1044,9 +1044,8 @@ if [ "$action" = "link" ]; then
     chmod 755 ${dataMountedPath}/app-data ${mainMountPoint}/app-data
 
     # /temp
-    rm -rf ${storageMountedPath}/temp 2>/dev/null
-    mkdir -p ${storageMountedPath}/temp
-    rm -rf ${mainMountPoint}/temp 2>/dev/null
+    mkdir -p ${storageMountedPath}/temp 2>/dev/null
+    unlink ${mainMountPoint}/temp 2>/dev/null
     ln -s ${storageMountedPath}/temp ${mainMountPoint}/temp
     chown bitcoin:bitcoin ${mainMountPoint}/temp
     chmod 777 ${storageMountedPath}/temp
