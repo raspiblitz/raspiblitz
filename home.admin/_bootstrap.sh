@@ -863,6 +863,16 @@ if [ "${scenario}" != "ready" ] ; then
 
     done
     echo "## 2nd WAIT LOOP: DONE" >> ${logFile}
+
+    # detect possible uploaded migration file 
+    source <(/home/admin/config.scripts/blitz.migration.sh status)
+    if [ "${migrationFile}" != "" ]; then
+      # wirite migration file to setup file
+      echo "adding to ${setupFile} migrationFile(${migrationFile})" >> ${logFile}
+      echo "migrationFile=${migrationFile}" >> ${setupFile}
+    else
+      echo "No migration file found" >> ${logFile}
+    fi
     umount /mnt/upload 2>/dev/null
 
     #############################################
@@ -1000,7 +1010,7 @@ if [ "${scenario}" != "ready" ] ; then
   ############################################
 
   # if migrationFile was uploaded (value from raspiblitz.setup) - now import
-  source <(/home/admin/config.scripts/blitz.migration.sh status)
+  source ${setupFile}
   echo "# migrationFile(${migrationFile})" >> ${logFile}
   if [ "${migrationFile}" != "" ]; then
 
