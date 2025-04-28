@@ -476,8 +476,19 @@ if [ "$action" = "status" ]; then
     ########################
     # PROPOSE LAYOUT
 
-    # before setup - when there is no storage device yet
-    if [ ${#dataDevice} -eq 0 ] && [ ${combinedDataStorage} -eq 0 ]; then
+    # decide if we need to propose a layout
+    proposeLayout=0
+    if [ ${combinedDataStorage} -eq 0 ]; then
+        if [ ${#dataDevice} -eq 0 ] || [ ${#storageDevice} -eq 0 ]; then
+            proposeLayout=1
+            echo ""
+        fi
+    else
+        if [ ${#storageDevice} -eq 0 ]; then
+            proposeLayout=1
+        fi
+    fi
+    if [ ${proposeLayout} -eq 1 ]; then
 
         echo "# PROPOSING LAYOUT ..."
 
