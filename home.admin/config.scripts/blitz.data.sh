@@ -1623,12 +1623,7 @@ if [ "$action" = "recover" ] || [ "$action" = "clean" ]; then
         if [ "${actionType}" = "STORAGE" ]; then
             # check first partition for storage
             mkdir -p /mnt/disk_storage 2>/dev/null
-            mount /dev/${actionDevicePartitionBase}1 /mnt/disk_storage
-            if [ $? -ne 0 ]; then
-                echo "error='failed to mount /dev/${actionDevicePartitionBase}1'" >> ${logFile}
-                echo "error='failed to mount storage partition'"
-                exit 1
-            fi
+            mount /dev/${actionDevicePartitionBase}1 /mnt/disk_storage 2>/dev/null
             # check if /mnt/disk_storage/app-storage exists
             if [ ! -d "/mnt/disk_storage/app-storage" ]; then
                 # multi partion layout
@@ -1642,12 +1637,12 @@ if [ "$action" = "recover" ] || [ "$action" = "clean" ]; then
                 echo "storagePartition='${actionDevicePartitionBase}3'"
                 if [ $? -ne 0 ]; then
                     echo "error='failed to mount /dev/${actionDevicePartitionBase}3'" >> ${logFile}
-                    echo "error='failed to mount storage partition'"
+                    echo "error='failed to mount storage partition (1)'"
                     exit 1
                 fi
                 if [ ! -d "/mnt/disk_storage/app-storage" ]; then
                     echo "error='to /app-storage on /dev/${actionDevicePartitionBase}3'" >> ${logFile}
-                    echo "error='failed to mount storage partition'"
+                    echo "error='failed to mount storage partition (2)'"
                     exit 1
                 fi
             else
