@@ -365,12 +365,18 @@ PREPARING DRIVES
 
 elif [ "${eventID}" == "system-change" ]; then
 
-    dialog --backtitle "${backtitle}" --cr-wrap --infobox "
-System is new restarting
-to boot from SSD/NVME.
-
-Use password A for re-login:
-ssh admin@${internet_localip}" 9 35
+    clear
+    echo "###############################"
+    echo "# SYSTEM REBOOT FROM SSD/NVME"
+    echo "###############################"
+    echo
+    echo "System is now restarting to boot from SSD/NVME."
+    echo "Login again after about 1 minute via SSH to continue setup."
+    echo
+    echo "Use password A for re-login:"
+    echo "ssh admin@${internet_localip}"
+    echo
+    sleep 100
 
 elif [ "${eventID}" == "hdd-migration" ]; then
 
