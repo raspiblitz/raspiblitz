@@ -1278,6 +1278,7 @@ if [ "$action" = "setup" ]; then
             mkdir -p /mnt/disk_storage/app-data
         fi
         umount /mnt/disk_storage
+        echo "storagePartition='${actionDevicePartitionBase}3"
 
     # STORAGE without System partition (if addSystemPartition=0 or not set)
     elif [ "${actionType}" = "STORAGE" ] && [ ${actionCreateSystemPartition} -eq 0 ]; then
@@ -1297,6 +1298,7 @@ if [ "$action" = "setup" ]; then
             mkdir -p /mnt/disk_storage/app-data
         fi
         umount /mnt/disk_storage
+        echo "storagePartition='${actionDevicePartitionBase}1"
 
     # DATA (single drive)
     elif [ "${actionType}" = "DATA" ]; then
@@ -1637,6 +1639,7 @@ if [ "$action" = "recover" ] || [ "$action" = "clean" ]; then
                 wipefs -a /dev/${actionDevicePartitionBase}2 2>/dev/null
                 mkfs -t ext4  /dev/${actionDevicePartitionBase}2
                 mount /dev/${actionDevicePartitionBase}3 /mnt/disk_storage
+                echo "storagePartition='${actionDevicePartitionBase}3"
                 if [ $? -ne 0 ]; then
                     echo "error='failed to mount /dev/${actionDevicePartitionBase}3'" >> ${logFile}
                     echo "error='failed to mount storage partition'"
@@ -1647,6 +1650,8 @@ if [ "$action" = "recover" ] || [ "$action" = "clean" ]; then
                     echo "error='failed to mount storage partition'"
                     exit 1
                 fi
+            else
+                echo "storagePartition='${actionDevicePartitionBase}1"
             fi
             # in both setups /mnt/disk_storage/app-storage should exist
             # delete all data in /mnt/disk_storage except for /mnt/disk_storage/app-storage
@@ -1684,7 +1689,9 @@ if [ "$action" = "recover" ] || [ "$action" = "clean" ]; then
                 mkfs.fat -F 32 /dev/${actionDevicePartitionBase}1
                 wipefs -a /dev/${actionDevicePartitionBase}2 2>/dev/null
                 mkfs -t ext4  /dev/${actionDevicePartitionBase}2
+                echo "storagePartition='${actionDevicePartitionBase}3"
             else
+                echo "storagePartition='${actionDevicePartitionBase}1"
                 echo "# .. storage has ${numPartitions} partitions - just keep as is" >> ${logFile}
             fi
         fi

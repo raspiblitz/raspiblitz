@@ -823,7 +823,7 @@ if [ "${scenario}" != "ready" ] ; then
     ############################################
 
     # at the moment only needed for upload file migration
-    echo "uploadMigration(${uploadMigration})" >> ${logFile}  
+    echo "uploadMigration(${uploadMigration}) storagePartition(${storagePartition})" >> ${logFile}  
     if [ "${uploadMigration}" = "1" ]; then
       # trigger the 2nd setup loop
       state="waitsetup-extended"
@@ -831,6 +831,18 @@ if [ "${scenario}" != "ready" ] ; then
       /home/admin/_cache.sh set "ui_migration_upload" "1"
       /home/admin/_cache.sh set "ui_migration_uploadUnix" "${uploadUnix}"
       /home/admin/_cache.sh set "ui_migration_uploadWin" "${uploadWin}"
+      if [ "${storagePartition}" = "" ]; then
+        echo "FAIL: storagePartition is empty" >> ${logFile}
+        /home/admin/_cache.sh set state "error"
+        /home/admin/_cache.sh set message "storagePartition empty"
+        exit 1
+      fi
+      # prepare upload storage
+      mkdir -p /mnt/upload 2>/dev/null
+      mount /dev/${storagePartition} /mnt/upload
+      chown -R admin:admin /mnt/upload
+      chmod -R 777 /mnt/upload
+      rm -rf /mnt/upload/*
     else
       # skip the 2nd setup loop
       state="waitprovision"
@@ -892,6 +904,10 @@ if [ "${scenario}" != "ready" ] ; then
         /home/admin/_cache.sh set message "migration file import failed"
         exit 1
       fi
+      # remove the upload storage
+      rm -rf /mnt/upload/*
+      umount /mnt/upload
+      rm -rf /mnt/upload
     fi
 
     #############################################

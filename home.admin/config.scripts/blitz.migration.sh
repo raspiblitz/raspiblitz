@@ -24,7 +24,7 @@ if [ -L /mnt/hdd/app-data ]; then
 fi
 
 # set place where zipped TAR file gets stored
-defaultUploadPath="/mnt/hdd/temp"
+defaultUploadPath="/mnt/upload"
 
 # get local ip
 source <(/home/admin/config.scripts/internet.sh status local)
@@ -202,7 +202,7 @@ if [ "$1" = "import-gui" ]; then
   echo "Or on Windows use command:"
   echo "${ui_migration_uploadWin}"
   echo
-  echo "Use password A to authenticate file transfer."
+  echo "Use password 'raspiblitz' to authenticate file transfer."
   echo
   echo "After upload command press ENTER to process."
   echo
