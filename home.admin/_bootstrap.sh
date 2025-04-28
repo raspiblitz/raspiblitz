@@ -840,9 +840,10 @@ if [ "${scenario}" != "ready" ] ; then
       # prepare upload storage
       mkdir -p /mnt/upload 2>/dev/null
       mount /dev/${storagePartition} /mnt/upload
+      mkdir -p /mnt/upload/temp 2>/dev/null
       chown -R admin:admin /mnt/upload
       chmod -R 777 /mnt/upload
-      rm -rf /mnt/upload/*
+      rm -rf /mnt/upload/temp/*
     else
       # skip the 2nd setup loop
       state="waitprovision"
@@ -878,36 +879,6 @@ if [ "${scenario}" != "ready" ] ; then
         /home/admin/_cache.sh set message "blitz.migration.sh migrate failed"
         exit 1
       fi
-    fi
-
-    #############################################
-    # MIGRATION from uploaded migration file
-    ############################################
-
-    if [ "${uploadMigration}" = "1" ]; then
-      echo "## MIGRATION from old RaspiBlitz via upload file" >> ${logFile}
-      /home/admin/_cache.sh set state "file-migration"
-      /home/admin/_cache.sh set message "importing migration file data"
-      ## process file
-      source <(/home/admin/config.scripts/blitz.migration.sh status)
-      if [ "${migrationFilename}" = "" ]; then
-        echo "FAIL: migrationFilename is empty" >> ${logFile}
-        /home/admin/_cache.sh set state "error"
-        /home/admin/_cache.sh set message "migration file not found"
-        exit 1
-      fi
-      source <(/home/admin/config.scripts/blitz.migration.sh import "${migrationFilename}")
-      if [ $? -ne 0 ]; then
-        echo "FAIL: /home/admin/config.scripts/blitz.migration.sh import ${migrationFilename}" >> ${logFile}
-        echo "error(${error})" >> ${logFile}
-        /home/admin/_cache.sh set state "error"
-        /home/admin/_cache.sh set message "migration file import failed"
-        exit 1
-      fi
-      # remove the upload storage
-      umount /mnt/upload
-      sync
-      rm -rf /mnt/upload
     fi
 
     #############################################
@@ -1023,6 +994,66 @@ if [ "${scenario}" != "ready" ] ; then
     exit 1
   fi
 
+  #############################################
+  # MIGRATION from uploaded migration file
+  ############################################
+
+  if [ "${uploadMigration}" = "1" ]; then
+    echo "## MIGRATION from old RaspiBlitz via upload file" >> ${logFile}
+    /home/admin/_cache.sh set state "file-migration"
+    /home/admin/_cache.sh set message "importing migration file data"
+    ## process file
+    source <(/home/admin/config.scripts/blitz.migration.sh status)
+    if [ "${migrationFilename}" = "" ]; then
+      echo "FAIL: migrationFilename is empty" >> ${logFile}
+      /home/admin/_cache.sh set state "error"
+      /home/admin/_cache.sh set message "migration file not found"
+      exit 1
+    fi
+    source <(/home/admin/config.scripts/blitz.migration.sh import "${migrationFilename}")
+    if [ $? -ne 0 ]; then
+      echo "FAIL: /home/admin/config.scripts/blitz.migration.sh import ${migrationFilename}" >> ${logFile}
+      echo "error(${error})" >> ${logFile}
+      /home/admin/_cache.sh set state "error"
+      /home/admin/_cache.sh set message "migration file import failed"
+      exit 1
+    fi
+    # remove the upload zip
+    rm -rf /mnt/hdd/temp/*
+    scenario="recover"
+  fi
+
+  # if migrationFile was uploaded (value from raspiblitz.setup) - now import
+  source <(/home/admin/config.scripts/blitz.migration.sh status)
+  echo "# migrationFile(${migrationFile})" >> ${logFile}
+  if [ "${migrationFile}" != "" ]; then
+
+    echo "##### IMPORT MIGRATIONFILE: ${migrationFile}" >> ${logFile}
+
+    # unpack
+    /home/admin/_cache.sh set message "Unpacking Migration Data"
+    error=""
+    source <(/home/admin/config.scripts/blitz.migration.sh import "${migrationFile}")
+
+    # check for errors
+    if [ "${error}" != "" ]; then 
+      /home/admin/config.scripts/blitz.error.sh _bootstrap.sh "migration-import-error" "blitz.migration.sh import exited with error" "/home/admin/config.scripts/blitz.migration.sh import ${migrationFile} --> ${error}" ${logFile}
+      exit 1
+    fi
+
+    # make sure a raspiblitz.conf exists after migration
+    confExists=$(ls /mnt/hdd/app-data/raspiblitz.conf 2>/dev/null | grep -c "raspiblitz.conf")
+    if [ "${confExists}" != "1" ]; then
+      /home/admin/config.scripts/blitz.error.sh _bootstrap.sh "migration-failed" "missing-config" "After runnign migration process - no raspiblitz.conf abvailable." ${logFile}
+      exit 1
+    fi
+
+    # signal recovery provision phase
+    scenario="recovery"
+    setupPhase="recovery"
+    /home/admin/_cache.sh set setupPhase "${setupPhase}"
+  fi
+
   if [ "${scenario}" = "setup" ]; then
     rm -f ${configFile}
     echo "# CREATING raspiblitz.conf from setup file" >> ${logFile}
@@ -1055,39 +1086,6 @@ if [ "${scenario}" != "ready" ] ; then
   df >> ${logFile}
   echo "# lsblk -o NAME,FSTYPE,LABEL " >> ${logFile}
   lsblk -o NAME,FSTYPE,LABEL >> ${logFile}
-
-  # load fresh setup data
-  echo "# Sourcing ${setupFile} " >> ${logFile}
-  source ${setupFile}
-
-  # if migrationFile was uploaded (value from raspiblitz.setup) - now import
-  echo "# migrationFile(${migrationFile})" >> ${logFile}
-  if [ "${migrationFile}" != "" ]; then
-
-    echo "##### IMPORT MIGRATIONFILE: ${migrationFile}" >> ${logFile}
-
-    # unpack
-    /home/admin/_cache.sh set message "Unpacking Migration Data"
-    error=""
-    source <(/home/admin/config.scripts/blitz.migration.sh import "${migrationFile}")
-
-    # check for errors
-    if [ "${error}" != "" ]; then 
-      /home/admin/config.scripts/blitz.error.sh _bootstrap.sh "migration-import-error" "blitz.migration.sh import exited with error" "/home/admin/config.scripts/blitz.migration.sh import ${migrationFile} --> ${error}" ${logFile}
-      exit 1
-    fi
-
-    # make sure a raspiblitz.conf exists after migration
-    confExists=$(ls /mnt/hdd/app-data/raspiblitz.conf 2>/dev/null | grep -c "raspiblitz.conf")
-    if [ "${confExists}" != "1" ]; then
-      /home/admin/config.scripts/blitz.error.sh _bootstrap.sh "migration-failed" "missing-config" "After runnign migration process - no raspiblitz.conf abvailable." ${logFile}
-      exit 1
-    fi
-
-    # signal recovery provision phase
-    setupPhase="recovery"
-    /home/admin/_cache.sh set setupPhase "${setupPhase}"
-  fi
 
   # load fresh config data
   echo "# Sourcing ${configFile} " >> ${logFile}

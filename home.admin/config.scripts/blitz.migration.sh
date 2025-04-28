@@ -25,7 +25,7 @@ fi
 
 # set place where zipped TAR file gets stored
 defaultDownloadPath="/mnt/hdd/temp/migration"
-defaultUploadPath="/mnt/upload"
+defaultUploadPath="/mnt/upload/temp"
 
 # get local ip
 source <(/home/admin/config.scripts/internet.sh status local)
@@ -56,7 +56,7 @@ if [ "$1" = "status" ]; then
   echo "uploadUnix=\"${uploadUnix}\""
   echo "downloadWin=\"${downloadWin}\""
   echo "uploadWin=\"${uploadWin}\""
-  echo "migrationFilename=\"${migrationFilename}\""
+  echo "migrationFile=\"${migrationFilename}\""
   exit 1
 fi
 
