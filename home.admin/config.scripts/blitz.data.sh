@@ -20,6 +20,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
     >&2 echo "# blitz.data.sh uasp-fix [-info] # deactivates UASP for non supported USB HDD Adapters"
     >&2 echo "# blitz.data.sh swap on # creates and activates an 8GB swapfile in / (Debian 12 only)"
     >&2 echo "# blitz.data.sh swap off # deactivates and removes the swapfile"
+    >&2 echo "# blitz.data.sh reset # deletes all data & partitions on the storage device"
     echo "error='missing parameters'"
     exit 1
 fi
@@ -2109,6 +2110,33 @@ if [ "$1" = "migration" ]; then
     # unmount partition
     umount ${mountPath}
     rm -r ${mountPath}
+    exit 0
+fi
+
+#############
+# UASP-fix
+#############
+
+if [ "$1" = "reset" ]; then
+
+    echo "# blitz.data.sh reset"
+    source <(/home/admin/config.scripts/blitz.data.sh status)
+    if [ "${storageDevice}" = "" ]; then
+        echo "error='no storage device found'"
+        exit 1
+    fi
+    # ask user to confirm
+    echo "# WARNING: This will delete all data on ${storageDevice}"
+    echo "# Are you really sure? (y/n)"
+    read -r answer
+    if [ "${answer}" != "y" ]; then
+        echo "# User canceled"
+        exit 1
+    fi
+    echo "# Deleting all partitions on ${storageDevice} ..."
+    apt-get install -y gdisk
+    sgdisk --zap-all /dev/${storageDevice}
+    echo "# DONE"
     exit 0
 fi
 

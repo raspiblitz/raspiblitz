@@ -59,6 +59,7 @@ function blitzhelp() {
   echo "  sync         sync all repos from shared folder"
   echo "  sync code    sync only main raspiblitz repo from shared folder"
   echo "  sync api     sync only blitz api repo from shared folder"
+  echo "  reset        deletes all data/partitions on storage device"
   echo  
   echo "Power:"
   echo "  restart      restart the node"
@@ -118,6 +119,12 @@ function menu() {
 function repair() {
   cd /home/admin
   ./98repairMenu.sh
+}
+
+# command: reset
+# reset the storage device
+function reset() {
+  sudo /home/admin/config.scripts/blitz.data.sh reset
 }
 
 # command: restart
