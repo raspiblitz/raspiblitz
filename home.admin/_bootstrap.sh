@@ -863,6 +863,7 @@ if [ "${scenario}" != "ready" ] ; then
 
     done
     echo "## 2nd WAIT LOOP: DONE" >> ${logFile}
+    unmount /mnt/upload 2>/dev/null
 
     #############################################
     # MIGRATION from old RaspiBlitz
@@ -997,31 +998,6 @@ if [ "${scenario}" != "ready" ] ; then
   #############################################
   # MIGRATION from uploaded migration file
   ############################################
-
-  if [ "${uploadMigration}" = "1" ]; then
-    echo "## MIGRATION from old RaspiBlitz via upload file" >> ${logFile}
-    /home/admin/_cache.sh set state "file-migration"
-    /home/admin/_cache.sh set message "importing migration file data"
-    ## process file
-    source <(/home/admin/config.scripts/blitz.migration.sh status)
-    if [ "${migrationFilename}" = "" ]; then
-      echo "FAIL: migrationFilename is empty" >> ${logFile}
-      /home/admin/_cache.sh set state "error"
-      /home/admin/_cache.sh set message "migration file not found"
-      exit 1
-    fi
-    source <(/home/admin/config.scripts/blitz.migration.sh import "${migrationFilename}")
-    if [ $? -ne 0 ]; then
-      echo "FAIL: /home/admin/config.scripts/blitz.migration.sh import ${migrationFilename}" >> ${logFile}
-      echo "error(${error})" >> ${logFile}
-      /home/admin/_cache.sh set state "error"
-      /home/admin/_cache.sh set message "migration file import failed"
-      exit 1
-    fi
-    # remove the upload zip
-    rm -rf /mnt/hdd/temp/*
-    scenario="recover"
-  fi
 
   # if migrationFile was uploaded (value from raspiblitz.setup) - now import
   source <(/home/admin/config.scripts/blitz.migration.sh status)
