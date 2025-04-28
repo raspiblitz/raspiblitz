@@ -7,6 +7,9 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  exit 1
 fi
 
+# file to print debug info on longer processes to
+logFile="/home/admin/raspiblitz.log"
+
 # check if started with sudo
 if [ "$EUID" -ne 0 ]; then 
   echo "error='missing sudo'"
@@ -224,7 +227,7 @@ if [ "$1" = "import" ]; then
   fi
   echo "importFile='${importFile}'"
 
-  echo "# Importing (overwrite) (can take some time) .."
+  echo "# Importing (overwrite) (can take some time) .." >> ${logFile}
   sudo tar -xf ${importFile} -C /
   if [ "$?" != "0" ]; then
     echo "error='non zero exit state of unzipping migration file'"
@@ -232,7 +235,7 @@ if [ "$1" = "import" ]; then
     exit 1
   fi
 
-  echo "# Deleting import file .."
+  echo "# Deleting import file .." >> ${logFile}
   sudo rm ${importFile}
 
   # copy bitcoin data backups back to original places (if part of backup before v1.12)
