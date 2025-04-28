@@ -1026,7 +1026,7 @@ if [ "$action" = "link" ]; then
     # /app-storage
     unlink ${mainMountPoint}/app-storage 2>/dev/null
     if [ -d "${mainMountPoint}/app-storage" ]; then
-        echo "error='${mainMountPoint}/app-storage already exists'"
+        echo "error='${mainMountPoint}/app-storage is real directory'"
         exit 1
     fi
     ln -s ${storageMountedPath}/app-storage ${mainMountPoint}/app-storage
@@ -1036,7 +1036,7 @@ if [ "$action" = "link" ]; then
      # /app-data
     unlink ${mainMountPoint}/app-data 2>/dev/null
     if [ -d "${mainMountPoint}/app-data" ];then
-        echo "error='${mainMountPoint}/app-data already exists'"
+        echo "error='${mainMountPoint}/app-data is real directory'"
         exit 1
     fi
     ln -s ${dataMountedPath}/app-data ${mainMountPoint}/app-data
@@ -1085,6 +1085,10 @@ if [ "$action" = "link" ]; then
     fi
     echo "# For backwards compatibility: Liniking ${mainMountPoint}/lnd"
     unlink ${mainMountPoint}/lnd 2>/dev/null
+    if [ -d "${mainMountPoint}/lnd" ]; then
+        echo "error='${mainMountPoint}/lnd is real directory'"
+        exit 1
+    fi
     ln -s ${dataMountedPath}/app-data/lnd ${mainMountPoint}/lnd
     chown bitcoin:bitcoin ${mainMountPoint}/lnd
     chmod 770 ${mainMountPoint}/lnd
@@ -1098,6 +1102,10 @@ if [ "$action" = "link" ]; then
     fi
     echo "# For backwards compatibility: Liniking ${mainMountPoint}/tor"
     unlink ${mainMountPoint}/tor 2>/dev/null
+    if [ -d "${mainMountPoint}/tor" ]; then
+        echo "error='${mainMountPoint}/tor is real directory'"
+        exit 1
+    fi
     ln -s ${dataMountedPath}/app-data/tor ${mainMountPoint}/tor
     chown debian-tor:debian-tor ${mainMountPoint}/tor
     chmod 700 ${mainMountPoint}/tor
@@ -1110,6 +1118,10 @@ if [ "$action" = "link" ]; then
     touch "${dataMountedPath}/app-data/raspiblitz.conf"
     echo "# For backwards compatibility: Liniking ${mainMountPoint}/raspiblitz.conf"
     unlink ${mainMountPoint}/raspiblitz.conf 2>/dev/null
+    if [ -f "${mainMountPoint}/raspiblitz.conf" ]; then
+        echo "error='${mainMountPoint}/raspiblitz.conf is real file'"
+        exit 1
+    fi
     ln -s ${dataMountedPath}/app-data/raspiblitz.conf ${mainMountPoint}/raspiblitz.conf
     chown root:sudo ${mainMountPoint}/raspiblitz.conf
     chmod 664 ${mainMountPoint}/raspiblitz.conf

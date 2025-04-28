@@ -1018,7 +1018,7 @@ if [ "${scenario}" != "ready" ] ; then
 
   # if migrationFile was uploaded (value from raspiblitz.setup) - now import
   source ${setupFile}
-  echo "# migrationFile(${migrationFile})" >> ${logFile}
+  echo "# migrationFile(/mnt/disk_storage/temp/${migrationFile})" >> ${logFile}
   if [ "${migrationFile}" != "" ]; then
 
     echo "##### IMPORT MIGRATIONFILE: ${migrationFile}" >> ${logFile}
@@ -1026,7 +1026,7 @@ if [ "${scenario}" != "ready" ] ; then
     # unpack
     /home/admin/_cache.sh set message "Unpacking Migration Data"
     error=""
-    source <(/home/admin/config.scripts/blitz.migration.sh import "${migrationFile}")
+    source <(/home/admin/config.scripts/blitz.migration.sh import "/mnt/disk_storage/temp/${migrationFile}")
 
     # check for errors
     if [ "${error}" != "" ]; then 

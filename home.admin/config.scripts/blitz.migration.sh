@@ -227,20 +227,32 @@ if [ "$1" = "import" ]; then
   fi
   echo "importFile='${importFile}'"
 
-  echo "# Importing (overwrite) (can take some time) .." >> ${logFile}
-  sudo tar -xf ${importFile} -C /
+  echo "# Importiere Dateien (kann einige Zeit dauern)..." >> ${logFile}
+  # Temporäres Verzeichnis erstellen
+  sudo mkdir -p /mnt/hdd/temp/migration_extract
+
+  # Datei zuerst in temporäres Verzeichnis entpacken
+  sudo tar -xf ${importFile} -C /mnt/hdd/temp/migration_extract >> ${logFile}
   if [ "$?" != "0" ]; then
-    echo "error='non zero exit state of unzipping migration file'"
-    echo "# reboot system ... HDD will offer fresh formating"
+    echo "error='migration tar failed'"
     exit 1
   fi
-
-  echo "# Deleting import file .." >> ${logFile}
   sudo rm ${importFile}
+
+  # Mit rsync übertragen und dabei symbolische Links erhalten
+  sudo rsync -avK --keep-dirlinks /mnt/hdd/temp/migration_extract/mnt/hdd/ /mnt/hdd/ 2>>${logFile}
+  if [ "$?" != "0" ]; then
+    echo "error='migration rsync failed'"
+    exit 1
+  fi
+  sudo rm -rf /mnt/hdd/temp/migration_extract
+
 
   # copy bitcoin data backups back to original places (if part of backup before v1.12)
   if [ -d "/mnt/hdd/backup_bitcoin" ]; then
     echo "# Copying back bitcoin backup data .."
+    sudo mkdir -p /mnt/app-data/bitcoin
+    sudo chown -R bitcoin:bitcoin /mnt/hdd/app-data/bitcoin
     sudo cp /mnt/hdd/backup_bitcoin/bitcoin.conf /mnt/hdd/app-data/bitcoin/bitcoin.conf
     sudo cp /mnt/hdd/backup_bitcoin/wallet.dat /mnt/hdd/app-data/bitcoin/wallet.dat  2>/dev/null
     rm -rf /mnt/hdd/backup_bitcoin
