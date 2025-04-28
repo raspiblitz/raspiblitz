@@ -1257,8 +1257,8 @@ if [ "$action" = "setup" ]; then
     elif [ "${actionType}" = "STORAGE" ] && [ ${actionCreateSystemPartition} -eq 1 ]; then
 
         echo "# STORAGE partitioning (with boot)" >> ${logFile}
-        sfdisk --delete /dev/${actionDevice} 2>/dev/null
-        wipefs -a /dev/${actionDevice} 2>/dev/null
+        sfdisk --delete /dev/${actionDevice} >> ${logFile}
+        wipefs -a /dev/${actionDevice} >> ${logFile}
         parted /dev/${actionDevice} --script mklabel msdos >> ${logFile}
         parted /dev/${actionDevice} --script mkpart primary fat32 1MiB 513MiB >> ${logFile}
         parted /dev/${actionDevice} --script mkpart primary ext4 541MB 65GB >> ${logFile}
