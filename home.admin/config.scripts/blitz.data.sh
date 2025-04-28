@@ -1125,6 +1125,9 @@ if [ "$action" = "link" ]; then
     ln -s ${dataMountedPath}/app-data/raspiblitz.conf ${mainMountPoint}/raspiblitz.conf
     chown root:sudo ${mainMountPoint}/raspiblitz.conf
     chmod 664 ${mainMountPoint}/raspiblitz.conf
+    if [ -f "${storageMountedPath}/.tmux.conf.local" ]; then
+        mv ${storageMountedPath}/.tmux.conf.local ${mainMountPoint}/app-data/.tmux.conf.local
+    fi
 
     ### bitcoin user symbol links
     echo "# bitcoin user symbol link: /home/bitcoin/.bitcoin"

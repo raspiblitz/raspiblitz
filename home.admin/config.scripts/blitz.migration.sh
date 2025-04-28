@@ -247,7 +247,6 @@ if [ "$1" = "import" ]; then
   fi
   sudo rm -rf /mnt/hdd/temp/migration_extract
 
-
   # copy bitcoin data backups back to original places (if part of backup before v1.12)
   if [ -d "/mnt/hdd/backup_bitcoin" ]; then
     echo "# Copying back bitcoin backup data .."
