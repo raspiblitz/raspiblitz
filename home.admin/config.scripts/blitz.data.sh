@@ -481,7 +481,6 @@ if [ "$action" = "status" ]; then
     if [ ${combinedDataStorage} -eq 0 ]; then
         if [ ${#dataDevice} -eq 0 ] || [ ${#storageDevice} -eq 0 ]; then
             proposeLayout=1
-            echo ""
         fi
     else
         if [ ${#storageDevice} -eq 0 ]; then
@@ -590,8 +589,8 @@ if [ "$action" = "status" ]; then
             fi
         fi
 
-        # Set DATA (check last, because it more common to have STORAGE & DATA combined)
-        if [ ${#dataDevice} -eq 0 ]; then
+        # Set DATA (check last, because its more common to have STORAGE & DATA combined)
+        if [ ${#dataDevice} -eq 0 ] || [ "${dataDevice}" = "${storageDevice}" ]; then
 
             # when no data device yet: take the second biggest drive as the data drive
             dataDevice=$(echo "${listOfDevices}" | head -n1 | awk '{print $1}')
