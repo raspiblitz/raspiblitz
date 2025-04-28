@@ -1259,17 +1259,17 @@ if [ "$action" = "setup" ]; then
         echo "# STORAGE partitioning (with boot)" >> ${logFile}
         sfdisk --delete /dev/${actionDevice} 2>/dev/null
         wipefs -a /dev/${actionDevice} 2>/dev/null
-        parted /dev/${actionDevice} --script mklabel msdos
-        parted /dev/${actionDevice} --script mkpart primary fat32 1MiB 513MiB
-        parted /dev/${actionDevice} --script mkpart primary ext4 541MB 65GB
-        parted /dev/${actionDevice} --script mkpart primary ext4 65GB 100%
+        parted /dev/${actionDevice} --script mklabel msdos >> ${logFile}
+        parted /dev/${actionDevice} --script mkpart primary fat32 1MiB 513MiB >> ${logFile}
+        parted /dev/${actionDevice} --script mkpart primary ext4 541MB 65GB >> ${logFile}
+        parted /dev/${actionDevice} --script mkpart primary ext4 65GB 100% >> ${logFile}
         echo "# .. formating" >> ${logFile}
-        wipefs -a /dev/${actionDevicePartitionBase}1 2>/dev/null
-        mkfs.fat -F 32 /dev/${actionDevicePartitionBase}1
-        wipefs -a /dev/${actionDevicePartitionBase}2 2>/dev/null
-        mkfs -t ext4  /dev/${actionDevicePartitionBase}2
-        wipefs -a /dev/${actionDevicePartitionBase}3 2>/dev/null
-        mkfs -t ext4  /dev/${actionDevicePartitionBase}3
+        wipefs -a /dev/${actionDevicePartitionBase}1 2>/dev/null >> ${logFile}
+        mkfs.fat -F 32 /dev/${actionDevicePartitionBase}1 >> ${logFile}
+        wipefs -a /dev/${actionDevicePartitionBase}2 2>/dev/null >> ${logFile}
+        mkfs -t ext4  /dev/${actionDevicePartitionBase}2 >> ${logFile}
+        wipefs -a /dev/${actionDevicePartitionBase}3 2>/dev/null >> ${logFile}
+        mkfs -t ext4  /dev/${actionDevicePartitionBase}3 >> ${logFile}
         rm -rf /mnt/disk_storage 2>/dev/null
         mkdir -p /mnt/disk_storage 2>/dev/null
         mount /dev/${actionDevicePartitionBase}3 /mnt/disk_storage
@@ -1277,19 +1277,19 @@ if [ "$action" = "setup" ]; then
         if [ ${actionCombinedData} -eq 1 ]; then
             mkdir -p /mnt/disk_storage/app-data
         fi
-        umount /mnt/disk_storage
-        echo "storagePartition='${actionDevicePartitionBase}3"
+        umount /mnt/disk_storage >> ${logFile}
+        echo "storagePartition='${actionDevicePartitionBase}3'"
 
     # STORAGE without System partition (if addSystemPartition=0 or not set)
     elif [ "${actionType}" = "STORAGE" ] && [ ${actionCreateSystemPartition} -eq 0 ]; then
         echo "# STORAGE partitioning (no boot)" >> ${logFile}
-        sfdisk --delete /dev/${actionDevice} 2>/dev/null
-        wipefs -a /dev/${actionDevice} 2>/dev/null
-        parted /dev/${actionDevice} --script mklabel msdos
-        parted /dev/${actionDevice} --script mkpart primary ext4 1MB 100%
+        sfdisk --delete /dev/${actionDevice} >> ${logFile}
+        wipefs -a /dev/${actionDevice} >> ${logFile}
+        parted /dev/${actionDevice} --script mklabel msdos >> ${logFile}
+        parted /dev/${actionDevice} --script mkpart primary ext4 1MB 100% >> ${logFile}
         echo "# .. formating" >> ${logFile}
-        wipefs -a /dev/${actionDevicePartitionBase}1 2>/dev/null
-        mkfs -t ext4  /dev/${actionDevicePartitionBase}1
+        wipefs -a /dev/${actionDevicePartitionBase}1 >> ${logFile}
+        mkfs -t ext4  /dev/${actionDevicePartitionBase}1 >> ${logFile}
         rm -rf /mnt/disk_storage 2>/dev/null
         mkdir -p /mnt/disk_storage 2>/dev/null
         mount /dev/${actionDevicePartitionBase}1 /mnt/disk_storage
@@ -1298,7 +1298,7 @@ if [ "$action" = "setup" ]; then
             mkdir -p /mnt/disk_storage/app-data
         fi
         umount /mnt/disk_storage
-        echo "storagePartition='${actionDevicePartitionBase}1"
+        echo "storagePartition='${actionDevicePartitionBase}1'"
 
     # DATA (single drive)
     elif [ "${actionType}" = "DATA" ]; then
@@ -1634,12 +1634,12 @@ if [ "$action" = "recover" ] || [ "$action" = "clean" ]; then
                 # multi partion layout
                 unmount /mnt/disk_storage
                 echo "# .. formating boot & system partition" >> ${logFile}
-                wipefs -a /dev/${actionDevicePartitionBase}1 2>/dev/null
-                mkfs.fat -F 32 /dev/${actionDevicePartitionBase}1
-                wipefs -a /dev/${actionDevicePartitionBase}2 2>/dev/null
-                mkfs -t ext4  /dev/${actionDevicePartitionBase}2
-                mount /dev/${actionDevicePartitionBase}3 /mnt/disk_storage
-                echo "storagePartition='${actionDevicePartitionBase}3"
+                wipefs -a /dev/${actionDevicePartitionBase}1 >> ${logFile}
+                mkfs.fat -F 32 /dev/${actionDevicePartitionBase}1 >> ${logFile}
+                wipefs -a /dev/${actionDevicePartitionBase}2 >> ${logFile}
+                mkfs -t ext4  /dev/${actionDevicePartitionBase}2 >> ${logFile}
+                mount /dev/${actionDevicePartitionBase}3 /mnt/disk_storage >> ${logFile}
+                echo "storagePartition='${actionDevicePartitionBase}3'"
                 if [ $? -ne 0 ]; then
                     echo "error='failed to mount /dev/${actionDevicePartitionBase}3'" >> ${logFile}
                     echo "error='failed to mount storage partition'"
@@ -1651,7 +1651,7 @@ if [ "$action" = "recover" ] || [ "$action" = "clean" ]; then
                     exit 1
                 fi
             else
-                echo "storagePartition='${actionDevicePartitionBase}1"
+                echo "storagePartition='${actionDevicePartitionBase}1'"
             fi
             # in both setups /mnt/disk_storage/app-storage should exist
             # delete all data in /mnt/disk_storage except for /mnt/disk_storage/app-storage
