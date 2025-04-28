@@ -354,9 +354,8 @@ Cut power & create fresh sd card
 elif [ "${eventID}" == "systemcopy" ]; then
 
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "
-COPYING SYSTEM TO SSD/NVME
-${progresstype}: ${progress}
-" 6 30
+COPYING BOOT SYSTEM TO SSD/NVME
+Can take a while - please wait." 6 36
 
 elif [ "${eventID}" == "hdd-format" ]; then
 

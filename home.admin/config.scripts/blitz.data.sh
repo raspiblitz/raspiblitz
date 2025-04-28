@@ -1272,7 +1272,7 @@ if [ "$action" = "copy-system" ]; then
     if [ "${computerType}" = "raspberrypi" ]; then
         echo "# .. boot rsync start" >> ${logFile}
         echo "boot" > /var/cache/raspiblitz/temp/progress.txt
-        rsync -axHAX --delete --info=progress ${bootPath} /mnt/disk_boot/ 2>&1 | stdbuf -oL tr '\r' '\n' | grep --line-buffered '%' | stdbuf -oL sed -n 's/.*\([0-9]\+%\).*/\1/p' | sed 's/%//' >> /var/cache/raspiblitz/temp/progress.txt
+        rsync -axHAX --delete --info=progress2 ${bootPath} /mnt/disk_boot/ 2>&1 | stdbuf -oL tr '\r' '\n' | grep --line-buffered '%' | stdbuf -oL sed -n 's/.* \([0-9]\+\)% .*/\1%/p' >> /var/cache/raspiblitz/temp/progress.txt
         if [ $? -ne 0 ]; then
             echo "error='fail on boot copy'"
             exit 1
@@ -1304,7 +1304,7 @@ if [ "$action" = "copy-system" ]; then
         --exclude=/var/cache/* \
         --exclude=/var/tmp/* \
         --exclude=/var/log/* \
-        --info=progress / /mnt/disk_system/ 2>&1 | stdbuf -oL tr '\r' '\n' | grep --line-buffered '%' | stdbuf -oL sed -n 's/.*\([0-9]\+%\).*/\1/p' | sed 's/%//' >> /var/cache/raspiblitz/temp/progress.txt
+        --info=progress2 / /mnt/disk_system/ 2>&1 | stdbuf -oL tr '\r' '\n' | grep --line-buffered '%' | stdbuf -oL sed -n 's/.* \([0-9]\+\)% .*/\1%/p' >> /var/cache/raspiblitz/temp/progress.txt
                                                  
     if [ $? -ne 0 ]; then
         echo "error='fail on system copy'"
