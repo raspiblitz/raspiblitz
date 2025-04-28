@@ -1115,6 +1115,9 @@ if [ "$action" = "link" ]; then
         echo "# moving old config from ${storageMountedPath}/raspiblitz.conf to ${dataMountedPath}/app-data/raspiblitz.conf"
         mv ${storageMountedPath}/raspiblitz.conf ${dataMountedPath}/app-data/raspiblitz.conf
     fi
+    if [ -f "${mainMountPoint}/raspiblitz.conf" ]; then
+        mv ${mainMountPoint}/raspiblitz.conf ${mainMountPoint}/app-data/raspiblitz.conf
+    fi
     touch "${dataMountedPath}/app-data/raspiblitz.conf"
     echo "# For backwards compatibility: Liniking ${mainMountPoint}/raspiblitz.conf"
     unlink ${mainMountPoint}/raspiblitz.conf 2>/dev/null
@@ -1125,6 +1128,9 @@ if [ "$action" = "link" ]; then
     ln -s ${dataMountedPath}/app-data/raspiblitz.conf ${mainMountPoint}/raspiblitz.conf
     chown root:sudo ${mainMountPoint}/raspiblitz.conf
     chmod 664 ${mainMountPoint}/raspiblitz.conf
+    if [ -f "${mainMountPoint}/.tmux.conf.local" ]; then
+        mv ${mainMountPoint}/.tmux.conf.local ${mainMountPoint}/app-data/.tmux.conf.local
+    fi
     if [ -f "${storageMountedPath}/.tmux.conf.local" ]; then
         mv ${storageMountedPath}/.tmux.conf.local ${mainMountPoint}/app-data/.tmux.conf.local
     fi
