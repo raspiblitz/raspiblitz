@@ -465,6 +465,7 @@ if [ "$action" = "status" ]; then
         biggerSizeGB=$(echo "${listOfBiggerDevices}" | head -n1 | awk '{print $2}')
     fi
 
+    echo "# RESULT AFTER DETECTION"
     echo "# installDevice: ${installDevice} (${installDeviceActive}) (${installDeviceReadOnly})"
     echo "# storageDevice: ${storageDevice} (${storageSizeGB}GB) (${storageMountedPath})"
     echo "# systemDevice: ${systemDevice} (${systemSizeGB}GB) (${systemMountedPath})"
@@ -476,6 +477,8 @@ if [ "$action" = "status" ]; then
 
     # before setup - when there is no storage device yet
     if [ ${#dataDevice} -eq 0 ] && [ ${combinedDataStorage} -eq 0 ]; then
+
+        echo "# PROPOSING LAYOUT ..."
 
         # get a list of all connected drives >7GB ordered by size (biggest first)
         listOfDevices=$(lsblk -dno NAME,SIZE | grep -E "^(sd|nvme)" | \
