@@ -905,8 +905,8 @@ if [ "${scenario}" != "ready" ] ; then
         exit 1
       fi
       # remove the upload storage
-      rm -rf /mnt/upload/*
       umount /mnt/upload
+      sync
       rm -rf /mnt/upload
     fi
 

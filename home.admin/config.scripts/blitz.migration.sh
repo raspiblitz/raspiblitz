@@ -24,24 +24,15 @@ if [ -L /mnt/hdd/app-data ]; then
 fi
 
 # set place where zipped TAR file gets stored
+defaultDownloadPath="/mnt/hdd/temp/migration"
 defaultUploadPath="/mnt/upload"
 
 # get local ip
 source <(/home/admin/config.scripts/internet.sh status local)
 
 # SCP download and upload links
-downloadUnix="scp -r 'bitcoin@${localip}:${defaultUploadPath}/raspiblitz-*.tar.gz' ./"
-downloadWin="scp -r bitcoin@${localip}:${defaultUploadPath}/# ...existing code...
-# check for a filename in the upload path
-firstMigrationFile=$(ls -1 ${defaultUploadPath}/raspiblitz-*.tar.gz 2>/dev/null | head -n 1)
-if [ -n "$firstMigrationFile" ]; then
-  echo "# Found migration file: ${firstMigrationFile}"
-  migrationFilename=$(basename "$firstMigrationFile")
-else
-  echo "# No migration files found"
-  migrationFilename=""
-fi
-# ...existing code... ."
+downloadUnix="scp -r 'bitcoin@${localip}:${defaultDownloadPath}/raspiblitz-*.tar.gz' ./"
+downloadWin="scp -r bitcoin@${localip}:${defaultDownloadPath}/raspiblitz-*.tar.gz ."
 uploadUnix="scp -r ./raspiblitz-*.tar.gz admin@${localip}:${defaultUploadPath}"
 uploadWin="scp -r ./raspiblitz-*.tar.gz admin@${localip}:${defaultUploadPath}"
 
@@ -59,6 +50,7 @@ fi
 if [ "$1" = "status" ]; then
   echo "# RASPIBLITZ Data Import & Export"
   echo "localip=\"${localip}\""
+  echo "defaultDownloadPath=\"${defaultDownloadPath}\""
   echo "defaultUploadPath=\"${defaultUploadPath}\""
   echo "downloadUnix=\"${downloadUnix}\""
   echo "uploadUnix=\"${uploadUnix}\""
@@ -104,30 +96,30 @@ if [ "$1" = "export" ]; then
 
   # zip it
   echo "# Building the Export File (this can take some time) .."
-  sudo mkdir -p ${defaultUploadPath}
-  sudo tar -zcvf ${defaultUploadPath}/raspiblitz-export-temp.tar.gz -X ~/.exclude.temp /mnt/hdd 1>~/.include.temp 2>/dev/null
+  sudo mkdir -p ${defaultDownloadPath}
+  sudo tar -zcvf ${defaultDownloadPath}/raspiblitz-export-temp.tar.gz -X ~/.exclude.temp /mnt/hdd 1>~/.include.temp 2>/dev/null
 
   # get md5 checksum
   echo "# Building checksum (can take a while) ..." 
-  md5checksum=$(md5sum ${defaultUploadPath}/raspiblitz-export-temp.tar.gz | head -n1 | cut -d " " -f1)
+  md5checksum=$(md5sum ${defaultDownloadPath}/raspiblitz-export-temp.tar.gz | head -n1 | cut -d " " -f1)
   echo "md5checksum=${md5checksum}"
   
   # get byte size
-  bytesize=$(wc -c ${defaultUploadPath}/raspiblitz-export-temp.tar.gz | cut -d " " -f 1)
+  bytesize=$(wc -c ${defaultDownloadPath}/raspiblitz-export-temp.tar.gz | cut -d " " -f 1)
   echo "bytesize=${bytesize}"
 
   # final renaming 
   name="raspiblitz${blitzname}${datestamp}-${md5checksum}.tar.gz"
-  echo "exportpath='${defaultUploadPath}'"
+  echo "exportpath='${defaultDownloadPath}'"
   echo "filename='${name}'"
-  sudo mv ${defaultUploadPath}/raspiblitz-export-temp.tar.gz ${defaultUploadPath}/${name}
-  sudo chown bitcoin:bitcoin ${defaultUploadPath}/${name}
+  sudo mv ${defaultDownloadPath}/raspiblitz-export-temp.tar.gz ${defaultDownloadPath}/${name}
+  sudo chown bitcoin:bitcoin ${defaultDownloadPath}/${name}
 
   # delete temp files
   rm ~/.exclude.temp
   rm ~/.include.temp
 
-  echo "name=\"${defaultUploadPath}/${name}\""
+  echo "name=\"${defaultDownloadPath}/${name}\""
   echo "# OK - Export done"
   exit 0
 fi
@@ -135,7 +127,7 @@ fi
 if [ "$1" = "export-gui" ]; then
 
   # cleaning old migration files from blitz
-  sudo rm ${defaultUploadPath}/*.tar.gz 2>/dev/null
+  sudo rm ${defaultDownloadPath}/*.tar.gz 2>/dev/null
   source /mnt/hdd/app-data/raspiblitz.conf
 
   # make sure bitcoin & lighning is stopped
