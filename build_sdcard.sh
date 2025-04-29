@@ -798,7 +798,7 @@ if [ ! -f /var/log/auth.log ]; then
   touch /var/log/auth.log
 fi
 
-# *** CACHE DISK IN RAM & KEYVALUE-STORE***
+# *** CACHE DISK IN RAM & KEYVALUE-STORE ***
 echo "Activating CACHE RAM DISK ... "
 /home/admin/_cache.sh ramdisk on || exit 1
 /home/admin/_cache.sh keyvalue on || exit 1
