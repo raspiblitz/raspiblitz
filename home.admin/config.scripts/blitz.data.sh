@@ -2131,6 +2131,12 @@ if [ "$1" = "reset" ]; then
         echo "# User canceled"
         exit 1
     fi
+    echo "# Are you REALLY REALLY sure? (Y/N)"
+    read -r answer
+    if [ "${answer}" != "Y" ]; then
+        echo "# User canceled"
+        exit 1
+    fi
     echo "# Deleting all partitions on ${storageDevice} ..."
     apt-get install -y gdisk
     sgdisk --zap-all /dev/${storageDevice}
