@@ -153,8 +153,8 @@ case "$1" in
 EOF
 
     # make sure its the correct owner before last Tor restart
-    sudo chmod -R 700 /mnt/hdd/tor
-    sudo chown -R debian-tor:debian-tor /mnt/hdd/tor
+    sudo chmod -R 700 /mnt/hdd/app-data/tor
+    sudo chown -R debian-tor:debian-tor /mnt/hdd/app-data/tor
     sudo systemctl restart tor@default
     echo "OK - Tor is now $(systemctl is-active tor@default)"
     echo "needs reboot to activate new setting"
