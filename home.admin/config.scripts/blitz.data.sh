@@ -1910,25 +1910,28 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
 
         # mount source partition
         mkdir -p /mnt/migrate_source 2>/dev/null
+        echo "# mount /mnt/migrate_source -> ${sourcePartition} ..."
         mount "/dev/${sourcePartition}" /mnt/migrate_source
         if ! findmnt -n -o TARGET "/mnt/migrate_source" 2>/dev/null; then
             echo "error='source partition not mounted'"
             exit 1
         fi
 
+        ##############
+        # SYNC STORAGE
+
         # mount target partition storage
         mkdir -p /mnt/migrate_storage 2>/dev/null
+        echo "# mount /mnt/migrate_storage -> ${storagePartition} ..."
         mount "/dev/${storagePartition}" /mnt/migrate_storage
         if ! findmnt -n -o TARGET "/mnt/migrate_storage" 2>/dev/null; then
             echo "error='storage partition not mounted'"
             exit 1
         fi
-        
-        ##############
-        # SYNC STORAGE
 
         echo "# rsync storage from source to target ..."
         echo "chain" > /var/cache/raspiblitz/temp/progress.txt
+        mkdir -p /mnt/migrate_storage/app-storage 2>/dev/null
         rsync -ah --info=progress2 /mnt/migrate_source/app-storage/ /mnt/migrate_storage/app-storage/ 2>&1 | stdbuf -oL tr '\r' '\n' | grep --line-buffered '%' | stdbuf -oL sed -n 's/.* \([0-9]\+\)% .*/\1%/p' >> /var/cache/raspiblitz/temp/progress.txt
         if [ $? -ne 0 ]; then
             echo "error='failed to rsync storage'"
@@ -1938,6 +1941,7 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
         # old layout: bitcoin directory is still outside of app-storage
         if [ -d /mnt/migrate_source/bitcoin ] && [ ! -L /mnt/migrate_source/bitcoin ]; then
             echo "# rsync bitcoin from source to target ..."
+            mkdir -p /mnt/migrate_storage/app-storage/bitcoin 2>/dev/null
             echo "bitcoin" > /var/cache/raspiblitz/temp/progress.txt
             rsync -ah --info=progress2 /mnt/migrate_source/bitcoin/ /mnt/migrate_storage/app-storage/bitcoin/ 2>&1 | stdbuf -oL tr '\r' '\n' | grep --line-buffered '%' | stdbuf -oL sed -n 's/.* \([0-9]\+\)% .*/\1%/p' >> /var/cache/raspiblitz/temp/progress.txt
             if [ $? -ne 0 ]; then
@@ -1957,18 +1961,20 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
             exit 1
         fi
 
+        ##############
+        # SYNC DATA
+
         # mount target partition data
         mkdir -p /mnt/migrate_data 2>/dev/null
+        echo "# mount /mnt/migrate_data -> ${dataPartition} ..."
         mount "/dev/${dataPartition}" /mnt/migrate_data
         if ! findmnt -n -o TARGET "/mnt/migrate_data" 2>/dev/null; then
             echo "error='data partition not mounted'"
             exit 1
         fi
 
-        ##############
-        # SYNC DATA
-
         echo "# rsync data from source to target ..."
+        mkdir -p /mnt/migrate_data/app-data 2>/dev/null
         echo "data" > /var/cache/raspiblitz/temp/progress.txt
         rsync -ah --info=progress2 /mnt/migrate_source/app-data/ /mnt/migrate_data/app-data/ 2>&1 | stdbuf -oL tr '\r' '\n' | grep --line-buffered '%' | stdbuf -oL sed -n 's/.* \([0-9]\+\)% .*/\1%/p' >> /var/cache/raspiblitz/temp/progress.txt
         if [ $? -ne 0 ]; then
@@ -1979,6 +1985,7 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
         # old layout: lnd directory is still outside of app-data
         if [ -d /mnt/migrate_source/lnd ] && [ ! -L /mnt/migrate_source/lnd ]; then
             echo "# rsync lnd from source to target ..."
+            mkdir -p /mnt/migrate_data/app-data/lnd 2>/dev/null
             echo "lnd" > /var/cache/raspiblitz/temp/progress.txt
             rsync -ah --info=progress2 /mnt/migrate_source/lnd/ /mnt/migrate_data/app-data/lnd/ 2>&1 | stdbuf -oL tr '\r' '\n' | grep --line-buffered '%' | stdbuf -oL sed -n 's/.* \([0-9]\+\)% .*/\1%/p' >> /var/cache/raspiblitz/temp/progress.txt
             if [ $? -ne 0 ]; then
@@ -1989,8 +1996,9 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
 
         # old layout: tor directory is still outside of app-data
         if [ -d /mnt/migrate_source/tor ] && [ ! -L /mnt/migrate_source/tor ]; then
-            echo "# rsync lnd from source to target ..."
+            echo "# rsync tor from source to target ..."
             rm -f /mnt/migrate_source/tor/*.log*
+            mkdir -p /mnt/migrate_data/app-data/tor 2>/dev/null
             echo "tor" > /var/cache/raspiblitz/temp/progress.txt
             rsync -ah --info=progress2 /mnt/migrate_source/tor/ /mnt/migrate_data/app-data/tor/ 2>&1 | stdbuf -oL tr '\r' '\n' | grep --line-buffered '%' | stdbuf -oL sed -n 's/.* \([0-9]\+\)% .*/\1%/p' >> /var/cache/raspiblitz/temp/progress.txt
             if [ $? -ne 0 ]; then
@@ -2002,7 +2010,8 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
         # old layout: raspiblitz.conf file is still outside of app-data
         if [ -f /mnt/migrate_source/raspiblitz.conf ] && [ ! -L /mnt/migrate_source/raspiblitz.conf ]; then
             echo "# copy raspiblitz.conf from source to target ..."
-            cp /mnt/migrate_source/raspiblitz.conf /mnt/migrate_data/app-data/
+            mkdir -p /mnt/migrate_data/app-data 2>/dev/null
+            cp /mnt/migrate_source/raspiblitz.conf /mnt/migrate_data/app-data/raspiblitz.conf
             if [ $? -ne 0 ]; then
                 echo "error='failed to rsync raspiblitz.conf'"
                 exit 1
@@ -2023,7 +2032,16 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
             exit 1
         fi
 
-        rm /var/cache/raspiblitz/temp/progress.txt
+        # debug exit
+        echo "error='REMOTE DEBUG EXIT'"
+        exit 1
+
+        # clean up
+        rm -rf /mnt/migrate_source
+        rm -rf /mnt/migrate_storage
+        rm -rf /mnt/migrate_data
+        rm -rf /var/cache/raspiblitz/temp/progress.txt
+
         exit 0
     fi
 
