@@ -882,6 +882,14 @@ if [ "${scenario}" != "ready" ] ; then
     fi
     umount /mnt/upload 2>/dev/null
 
+    # pre-quick change of login passwort for admin
+    # do proper passwordA setting later when HDD is mounted
+    source ${setupFile}
+    if [ "${passwordA}" != "" ]; then
+      echo "## SETTING PASSWORD FOR ADMIN" >> ${logFile}
+      echo "admin:${passwordA}" | chpasswd
+    fi
+    
     #############################################
     # SYSTEM COPY
     ############################################
@@ -1079,15 +1087,6 @@ if [ "${scenario}" != "ready" ] ; then
   # load fresh setup data
   echo "# Sourcing ${setupFile} " >> ${logFile}
   source ${setupFile}
-
-  ###################################
-  # Set Password A (in all cases)
-  if [ "${passwordA}" = "" ]; then
-    /home/admin/config.scripts/blitz.error.sh _bootstrap.sh "missing-passworda-2" "missing passwordA(2) in (${setupFile})" "" ${logFile}
-    exit 1
-  fi
-  echo "# setting PASSWORD A" >> ${logFile}
-  /home/admin/config.scripts/blitz.passwords.sh set a "${passwordA}" >> ${logFile}
   
   # enable tor service
   /home/admin/config.scripts/tor.install.sh enable >> ${logFile}
@@ -1221,6 +1220,15 @@ if [ "${scenario}" != "ready" ] ; then
     /home/admin/_cache.sh set message "blitz.data.sh link failed (2)"
     exit 1
   fi
+
+  ###################################
+  # Set Password A (in all cases)
+  if [ "${passwordA}" = "" ]; then
+    /home/admin/config.scripts/blitz.error.sh _bootstrap.sh "missing-passworda-2" "missing passwordA(2) in (${setupFile})" "" ${logFile}
+    exit 1
+  fi
+  echo "# setting PASSWORD A" >> ${logFile}
+  /home/admin/config.scripts/blitz.passwords.sh set a "${passwordA}" >> ${logFile}
 
   # mark provision process done
   /home/admin/_cache.sh set message "Provision Done"
