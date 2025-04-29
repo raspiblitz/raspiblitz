@@ -2012,6 +2012,7 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
             echo "# copy raspiblitz.conf from source to target ..."
             mkdir -p /mnt/migrate_data/app-data 2>/dev/null
             cp /mnt/migrate_source/raspiblitz.conf /mnt/migrate_data/app-data/raspiblitz.conf
+            cp /mnt/migrate_source/.tmux.conf.local /mnt/migrate_data/app-data/.tmux.conf.local 2>/dev/null
             if [ $? -ne 0 ]; then
                 echo "error='failed to rsync raspiblitz.conf'"
                 exit 1
@@ -2031,10 +2032,6 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
             echo "error='failed to unmount source partition'"
             exit 1
         fi
-
-        # debug exit
-        echo "error='REMOTE DEBUG EXIT'"
-        exit 1
 
         # clean up
         rm -rf /mnt/migrate_source
