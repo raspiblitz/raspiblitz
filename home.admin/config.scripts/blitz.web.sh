@@ -43,6 +43,11 @@ elif [ "$1" = "http-on" ]; then
     exit 1
   fi
 
+  # make sure log dir exists
+  sudo mkdir -p /var/log/nginx 2>/dev/null
+  sudo chown root:adm /var/log/nginx 
+  sudo chmod 755 /var/log/nginx
+
   # additional config
   sudo mkdir -p /etc/systemd/system/nginx.service.d
   sudo tee /etc/systemd/system/nginx.service.d/raspiblitz.conf >/dev/null <<EOF
@@ -101,6 +106,11 @@ elif [ "$1" = "https-on" ]; then
 
   # create nginx app-data dir
   sudo mkdir /mnt/hdd/app-data/nginx/ 2>/dev/null
+
+  # make sure log dir exists
+  sudo mkdir -p /var/log/nginx 2>/dev/null
+  sudo chown root:adm /var/log/nginx 
+  sudo chmod 755 /var/log/nginx
 
   echo "# Checking dhparam.pem ..."
   if [ ! -f /etc/ssl/certs/dhparam.pem ]; then
