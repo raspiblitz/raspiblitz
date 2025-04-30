@@ -13,7 +13,7 @@ if [ "$1" == "redact" ]; then
   echo "# redacting file: ${redactFile}"
   if [ $(ls ${redactFile} 2>/dev/null | grep -c "${redactFile}") -lt 1 ]; then
     echo "# FAIL: file does not exist"
-    exi 1
+    exit 1
   fi
 
   # redact nodeIDs

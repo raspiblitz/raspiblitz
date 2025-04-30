@@ -263,14 +263,18 @@ do
 
     # get TB from storageSizeGB 
     storageSizeTB=$(echo "scale=2; ${storageSizeGB}/1024" | bc)
+    storageSizeBytes=$(echo "scale=0; ${storageSizeGB}*1024*1024*1024" | bc)
+    storageFreeBytes=$(echo "scale=0; ${storageFreeKB}*1024" | bc)
     temp=""
     if [ "${storageCelsius}" != "" ]; then
       temp="${storageCelsius}°C"
     fi
     hddUsedInfo="SSD ${storageSizeTB}TB ${storageUsePercent}% ${temp}"
-    /home/admin/_cache.sh set hdd_used_percent "${hddUsedInfo}" # construct here
-    /home/admin/_cache.sh set hdd_temperature_celsius "${storageCelsius}" # construct here
-    /home/admin/_cache.sh set hdd_used_info "${hddUsedInfo}" # construct here
+    /home/admin/_cache.sh set hdd_used_percent "${hddUsedInfo}"
+    /home/admin/_cache.sh set hdd_temperature_celsius "${storageCelsius}"
+    /home/admin/_cache.sh set hdd_used_info "${hddUsedInfo}"
+    /home/admin/_cache.sh set hdd_capacity_bytes "${ storageSizeBytes}"
+    /home/admin/_cache.sh set hdd_free_bytes "${storageFreeBytes}"
   fi
 
   # exit if still setup or higher system stopped
