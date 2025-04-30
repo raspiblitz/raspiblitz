@@ -697,6 +697,7 @@ sudo -u admin cp -r /home/admin/raspiblitz/home.admin/config.scripts /home/admin
 sudo -u admin chmod +x /home/admin/config.scripts/*.sh || exit 1
 sudo -u admin cp -r /home/admin/raspiblitz/home.admin/setup.scripts /home/admin/ || exit 1
 sudo -u admin chmod +x /home/admin/setup.scripts/*.sh || exit 1
+sudo -u admin git config --global --add safe.directory /home/admin/raspiblitz
 
 # install newest version of BlitzPy
 blitzpy_wheel=$(ls -tR /home/admin/raspiblitz/home.admin/BlitzPy/dist | grep -E "any.whl" | tail -n 1)
