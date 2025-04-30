@@ -989,10 +989,6 @@ if [ "${scenario}" != "ready" ] ; then
   ############################################
 
   if [ "${hddMigration}" = "1" ]; then
-
-    echo "## DEBUG WAIT 1 ## 300 secs" >> ${logFile}
-    sleep 300
-
     echo "## MIGRATION from old RaspiBlitz via old HDD" >> ${logFile}
     /home/admin/_cache.sh set state "hdd-migration"
     /home/admin/_cache.sh set message "${hddMigrateDeviceFrom} ${hddMigrateDeviceTo}"
@@ -1003,8 +999,9 @@ if [ "${scenario}" != "ready" ] ; then
       /home/admin/_cache.sh set message "blitz.migration.sh migrate failed"
       exit 1
     fi
-    echo "## DEBUG WAIT 2 ## 300 secs" >> ${logFile}
-    sleep 300
+    scenario="recovery"
+    setupPhase="recovery"
+    /home/admin/_cache.sh set setupPhase "${setupPhase}"
   fi
 
   #############################################
@@ -1031,9 +1028,6 @@ if [ "${scenario}" != "ready" ] ; then
     /home/admin/_cache.sh set message "blitz.data.sh link failed"
     exit 1
   fi
-
-    echo "## DEBUG WAIT 3 ## 300 secs" >> ${logFile}
-    sleep 300
 
   #############################################
   # MIGRATION from uploaded migration file
