@@ -1155,6 +1155,15 @@ if [ "$action" = "link" ]; then
     ln -s /mnt/hdd/app-data/lnd /home/admin/.lnd
     chmod -R g+X /home/admin/.lnd
 
+    # set permissions on complete lnd macaroon folder path
+    chmod a+rx ${mainMountPoint}/app-data/lnd 2>/dev/null
+    chmod a+rx ${mainMountPoint}/app-data/lnd/data 2>/dev/null
+    chmod a+rx ${mainMountPoint}/app-data/lnd/data/chain 2>/dev/null
+    chmod a+rx ${mainMountPoint}/app-data/lnd/data/chain/bitcoin 2>/dev/null
+    chmod a+rx ${mainMountPoint}/app-data/lnd/data/chain/bitcoin/mainnet 2>/dev/null
+    chmod a+rx ${mainMountPoint}/app-data/lnd/data/chain/bitcoin/testnet 2>/dev/null
+    chmod a+rx ${mainMountPoint}/app-data/lnd/data/chain/bitcoin/signet 2>/dev/null
+
     exit 0
 fi
 
