@@ -577,6 +577,19 @@ if [ "$1" = "prestart" ]; then
     # set the REST endpoint (use | as separator to avoid escaping slashes)
     sed -i "s|^LND_REST_ENDPOINT=.*|LND_REST_ENDPOINT=https://127.0.0.1:${portprefix}8080|g" $lnbitsConfig
 
+    echo "# Checking if LND REST API is responding ..."
+    count=0
+    while ! curl -s -k --head --request GET "https://127.0.0.1:${portprefix}8080/v1/getinfo" > /dev/null; do
+      count=$((count + 1))
+      if [ $count -gt 600 ]; then
+        echo "# FAIL: LND REST API did not respond after 10 minutes."
+        exit 1
+      fi
+      echo "# Waiting for LND REST API... (${count}s/600s)"
+      sleep 1
+    done
+    echo "# OK: LND REST API is responding."
+
   elif [ "${LNBitsLightning}" == "cl" ]; then
 
     isUsingCL=$(cat $lnbitsConfig | grep -c "LNBITS_BACKEND_WALLET_CLASS=CLightningWallet")
