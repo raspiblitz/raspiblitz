@@ -15,7 +15,8 @@ echo "# raspi_bootdir(${raspi_bootdir})"
 
 # write release info to to version file
 echo "writing codeRelease commit ro version file:"
-releaseCommit=$(git -C /home/admin/raspiblitz rev-parse --short HEAD)
+fullShortCommit=$(git -C /home/admin/raspiblitz rev-parse --short HEAD)
+releaseCommit=${fullShortCommit: -4}
 sed -i "s/^codeRelease=\".*\"/codeRelease=\"${releaseCommit}\"/" /home/admin/_version.info
 cat /home/admin/_version.info
 echo
