@@ -1,4 +1,4 @@
 # RaspiBlitz Version - always [major].[main].[sub] (sub can be a string like '2rc1')
-codeVersion="1.11.4"
+codeVersion="1.12.0rc1"
 codeRelease="dev"
 # keep last line with comment ---> IF YOU HAVE A NEW VERSION BRANCH > EDIT ALSO build_sdcard.sh
