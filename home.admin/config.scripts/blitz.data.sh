@@ -786,16 +786,16 @@ if [ "$action" = "status" ]; then
     fi
 
     # get free space on drives
-    if [ ${#storageDevice} -gt 0 ]; then
-        storageFreeKB=$(df -k | grep "/dev/${storageDevice}" | awk '{print $4}')
+    if [ ${#systemPartition} -gt 0 ]; then
+        storageFreeKB=$(df -k | grep "/dev/${systemPartition}" | awk '{print $4}' | tail -n 1)
     fi
-    if [ ${#dataDevice} -gt 0 ]; then
-        dataFreeKB=$(df -k | grep "/dev/${dataDevice}" | awk '{print $4}')
+    if [ ${#dataPartition} -gt 0 ]; then
+        dataFreeKB=$(df -k | grep "/dev/${dataPartition}" | awk '{print $4}' | tail -n 1)
     elif [ $combinedDataStorage -eq 1 ]; then
         dataFreeKB="${storageFreeKB}"
     fi
-    if [ ${#systemDevice} -gt 0 ]; then
-        systemFreeKB=$(df -k | grep "/dev/${systemDevice}" | awk '{print $4}')
+    if [ ${#systemPartition} -gt 0 ]; then
+        systemFreeKB=$(df -k | grep "/dev/${systemPartition}" | awk '{print $4}' | tail -n 1)
     fi
 
     # get Temperature of drives

@@ -273,7 +273,7 @@ do
     /home/admin/_cache.sh set hdd_used_percent "${hddUsedInfo}"
     /home/admin/_cache.sh set hdd_temperature_celsius "${storageCelsius}"
     /home/admin/_cache.sh set hdd_used_info "${hddUsedInfo}"
-    /home/admin/_cache.sh set hdd_capacity_bytes "${ storageSizeBytes}"
+    /home/admin/_cache.sh set hdd_capacity_bytes "${storageSizeBytes}"
     /home/admin/_cache.sh set hdd_free_bytes "${storageFreeBytes}"
   fi
 
