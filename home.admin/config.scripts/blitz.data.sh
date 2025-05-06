@@ -505,7 +505,7 @@ if [ "$action" = "status" ]; then
         }
         if (size >= 7) printf "%s %.0f\n", $1, size
         }' | sort -k2,2nr -k1,1 )
-        echo "listOfDevices='${listOfDevices}'"
+        # echo "listOfDevices='${listOfDevices}'"
 
         # if there is a migration device set - remove it from the list
         source <(/home/admin/_cache.sh get hddMigrateDeviceFrom)
@@ -591,20 +591,25 @@ if [ "$action" = "status" ]; then
         fi
 
         # Set DATA (check last, because its more common to have STORAGE & DATA combined)
+        echo "# check for DATA drive"
+        echo "#  - fo far dataDevice: (${dataDevice}) / storage(${storageDevice})"
         if [ ${#dataDevice} -eq 0 ] || [ "${dataDevice}" = "${storageDevice}" ]; then
 
             # when no data device yet: take the second biggest drive as the data drive
             dataDevice=$(echo "${listOfDevices}" | head -n1 | awk '{print $1}')
             dataSizeGB=$(echo "${listOfDevices}" | head -n1 | awk '{print $2}')
+            echo "#  - seleted dataDevice: ${dataDevice} (${dataSizeGB}GB)"
 
             # ignore system device if choosen as data device
             if [ "${dataDevice}" = "${systemDevice}" ]; then
+                echo "#  - data device is the same as system device - ignore it"
                 dataDevice=""
                 dataSizeGB=""
             fi
 
             # dont use install device in proposed layout
             if [ "${dataDevice}" = "${installDevice}" ]; then
+                echo "#  - data device is the same as install device - ignore it"
                 dataDevice=""
                 dataSizeGB=""
             fi
