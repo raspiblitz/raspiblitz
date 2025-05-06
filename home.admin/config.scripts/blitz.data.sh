@@ -2329,6 +2329,7 @@ if [ "$1" = "expand" ]; then
     fi
 
     # grow partition
+    apt install -y --no-install-recommends cloud-guest-utils
     growpart /dev/${deviceName} ${partitionNumber}
     if [ $? -ne 0 ]; then
         echo "error='failed to grow partition'"
@@ -2336,6 +2337,7 @@ if [ "$1" = "expand" ]; then
     fi
 
     # resize filesystem
+    apt-get install -y --no-install-recommends e2fsprogs
     resize2fs /dev/${partitionName}
     if [ $? -ne 0 ]; then
         echo "error='failed to resize filesystem'"
