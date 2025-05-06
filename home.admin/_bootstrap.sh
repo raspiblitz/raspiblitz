@@ -789,7 +789,7 @@ if [ "${scenario}" != "ready" ] ; then
 
     # SYSTEM
     echo "# systemDevice(${systemDevice}) systemWarning(${systemWarning})" >> ${logFile}
-    if [ ${#systemDevice} -gt 0 ] && [ "${bootFromStorage}" = "0" ] && [ ${#systemWarning} -eq 0 ]; then
+    if [ ${#systemDevice} -gt 0 ] && [ "${bootFromStorage}" = "0" ] && [ ${#systemWarning} -eq 0 ] && [ ${systemMountedPath} != "/" ]; then
       error=""
       source <(/home/admin/config.scripts/blitz.data.sh ${setupCommand} SYSTEM "${systemDevice}")
       if [ "${error}" != "" ]; then

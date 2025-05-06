@@ -12,18 +12,12 @@ source /home/admin/raspiblitz.info
 echo "# source /home/admin/raspiblitz.info" >> /home/admin/raspiblitz.log
 cat /home/admin/raspiblitz.info >> /home/admin/raspiblitz.log
 
-# make sure network defaults to bitcoin
-if [ "${network}" == "" ]; then
-  echo "# WARN: default network to bitcoin" >> /home/admin/raspiblitz.log
-  network="bitcoin"
-fi
-
 # make sure for future starts that blockchain service gets started after bootstrap
 # so deamon reloas needed ... system will go into reboot after last loop
 # needs to be after wait loop because otherwise the "restart" on COPY OVER LAN will not work
-echo "# Updating service ${network}d.service ..."
-sudo sed -i "s/^Wants=.*/Wants=bootstrap.service/g" /etc/systemd/system/${network}d.service
-sudo sed -i "s/^After=.*/After=bootstrap.service/g" /etc/systemd/system/${network}d.service
+echo "# Updating service bitcoin}d.service ..."
+sudo sed -i "s/^Wants=.*/Wants=bootstrap.service/g" /etc/systemd/system/bitcoind.service
+sudo sed -i "s/^After=.*/After=bootstrap.service/g" /etc/systemd/system/bitcoind.service
 sudo systemctl daemon-reload 2>/dev/null
 
 # delete setup data from RAM
