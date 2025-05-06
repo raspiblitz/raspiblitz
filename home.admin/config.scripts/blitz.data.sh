@@ -591,8 +591,8 @@ if [ "$action" = "status" ]; then
         fi
 
         # Set DATA (check last, because its more common to have STORAGE & DATA combined)
-        echo "# check for DATA drive"
-        echo "#  - fo far dataDevice: (${dataDevice}) / storage(${storageDevice})"
+        echo "# Selecting DATA device:"
+        echo "#  - so far dataDevice(${dataDevice}) / storageDevice(${storageDevice})"
         if [ ${#dataDevice} -eq 0 ] || [ "${dataDevice}" = "${storageDevice}" ]; then
 
             # when no data device yet: take the second biggest drive as the data drive
@@ -603,20 +603,18 @@ if [ "$action" = "status" ]; then
 
             # ignore system device if choosen as data device
             if [ "${dataDevice}" = "${systemDevice}" ]; then
-                echo "#  - data device is the same as system device - ignore it, take next"
+                echo "#  - dataDevice(${dataDevice}) is the same as system device - ignore it, check next in list"
                 dataDevice=$(echo "${listOfDevices}" | head -n1 | awk '{print $1}')
                 dataSizeGB=$(echo "${listOfDevices}" | head -n1 | awk '{print $2}')
                 listOfDevices=$(echo "${listOfDevices}" | grep -v "${dataDevice}")
-                echo "#  - seleted dataDevice: ${dataDevice} (${dataSizeGB}GB)"
             fi
 
             # dont use install device in proposed layout
             if [ "${dataDevice}" = "${installDevice}" ]; then
-                echo "#  - data device is the same as install device - ignore it, take next"
+                echo "#  - dataDevice(${dataDevice}) is the same as install device - ignore it, check next in list"
                 dataDevice=$(echo "${listOfDevices}" | head -n1 | awk '{print $1}')
                 dataSizeGB=$(echo "${listOfDevices}" | head -n1 | awk '{print $2}')
                 listOfDevices=$(echo "${listOfDevices}" | grep -v "${dataDevice}")
-                echo "#  - seleted dataDevice: ${dataDevice} (${dataSizeGB}GB)"
             fi
 
             # if there is was no spereated data drive - run combine data & storage partiton
@@ -637,6 +635,8 @@ if [ "$action" = "status" ]; then
                 listOfDevices=$(echo "${listOfDevices}" | grep -v "${dataDevice}")
             fi
 
+        else
+            echo "#  - dataDevice(${dataDevice}) already set - skip selection"
         fi
 
     else
