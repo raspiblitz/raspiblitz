@@ -821,6 +821,17 @@ if [ "$action" = "status" ]; then
         systemCelsius=$(smartctl -A /dev/${systemDevice} | grep -E '^Temperature:|Temperature Sensor' | awk '{print $(NF-1)}' | head -n 1)
     fi
 
+    # get unused space on drives
+    if [ ${#storageDevice} -gt 0 ]; then
+        storageUnusedPercent=$(parted /dev/${storageDevice} unit % print free | awk '/Free Space/ {v=$(NF-2); gsub(/[^0-9.]/, "", v)} END{print int(v)}')
+    fi
+    if [ ${#dataDevice} -gt 0 ]; then
+        dataUnusedPercent=$(parted /dev/${dataDevice} unit % print free | awk '/Free Space/ {v=$(NF-2); gsub(/[^0-9.]/, "", v)} END{print int(v)}')
+    fi
+    if [ ${#systemDevice} -gt 0 ]; then
+        systemUnusedPercent=$(parted /dev/${systemDevice} unit % print free | awk '/Free Space/ {v=$(NF-2); gsub(/[^0-9.]/, "", v)} END{print int(v)}')
+    fi
+
     # output the result
     echo "scenario='${scenario}'"
     echo "scenarioSystemCopy='${systemCopy}'"
@@ -837,6 +848,7 @@ if [ "$action" = "status" ]; then
     echo "storageMountedPath='${storageMountedPath}'"
     echo "storageBlockchainGB='${storageBlockchainGB}'"
     echo "storageMigration='${storageMigration}'"
+    echo "storageUnusedPercent='${storageUnusedPercent}'"
     echo "systemDevice='${systemDevice}'"
     echo "systemDeviceName='${systemDeviceName}'"
     echo "systemSizeGB='${systemSizeGB}'"
@@ -847,6 +859,7 @@ if [ "$action" = "status" ]; then
     echo "systemCelsius='${systemCelsius}'"
     echo "systemPartition='${systemPartition}'"
     echo "systemMountedPath='${systemMountedPath}'"
+    echo "systemUnusedPercent='${systemUnusedPercent}'"
     echo "dataDevice='${dataDevice}'"
     echo "dataDeviceName='${dataDeviceName}'"
     echo "dataSizeGB='${dataSizeGB}'"
@@ -859,6 +872,7 @@ if [ "$action" = "status" ]; then
     echo "dataMountedPath='${dataMountedPath}'"
     echo "dataConfigFound='${dataConfigFound}'"
     echo "dataInspectSuccess='${dataInspectSuccess}'"
+    echo "dataUnusedPercent='${dataUnusedPercent}'"
     echo "installDevice='${installDevice}'"
     echo "installDeviceActive='${installDeviceActive}'"
     echo "installDeviceReadOnly='${installDeviceReadOnly}'"
