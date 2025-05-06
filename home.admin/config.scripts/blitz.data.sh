@@ -822,6 +822,9 @@ if [ "$action" = "status" ]; then
     fi
 
     # get unused space on drives
+    storageUnusedPercent=0
+    dataUnusedPercent=0
+    systemUnusedPercent=0
     if [ ${#storageDevice} -gt 0 ]; then
         storageUnusedPercent=$(parted /dev/${storageDevice} unit % print free | awk '/Free Space/ {v=$(NF-2); gsub(/[^0-9.]/, "", v)} END{print int(v)}')
     fi
@@ -848,7 +851,7 @@ if [ "$action" = "status" ]; then
     echo "storageMountedPath='${storageMountedPath}'"
     echo "storageBlockchainGB='${storageBlockchainGB}'"
     echo "storageMigration='${storageMigration}'"
-    echo "storageUnusedPercent='${storageUnusedPercent}'"
+    echo "storageUnusedSpacePercent='${storageUnusedPercent}'"
     echo "systemDevice='${systemDevice}'"
     echo "systemDeviceName='${systemDeviceName}'"
     echo "systemSizeGB='${systemSizeGB}'"
@@ -859,7 +862,7 @@ if [ "$action" = "status" ]; then
     echo "systemCelsius='${systemCelsius}'"
     echo "systemPartition='${systemPartition}'"
     echo "systemMountedPath='${systemMountedPath}'"
-    echo "systemUnusedPercent='${systemUnusedPercent}'"
+    echo "systemUnusedSpacePercent='${systemUnusedPercent}'"
     echo "dataDevice='${dataDevice}'"
     echo "dataDeviceName='${dataDeviceName}'"
     echo "dataSizeGB='${dataSizeGB}'"
@@ -872,7 +875,7 @@ if [ "$action" = "status" ]; then
     echo "dataMountedPath='${dataMountedPath}'"
     echo "dataConfigFound='${dataConfigFound}'"
     echo "dataInspectSuccess='${dataInspectSuccess}'"
-    echo "dataUnusedPercent='${dataUnusedPercent}'"
+    echo "dataUnusedSpacePercent='${dataUnusedPercent}'"
     echo "installDevice='${installDevice}'"
     echo "installDeviceActive='${installDeviceActive}'"
     echo "installDeviceReadOnly='${installDeviceReadOnly}'"
