@@ -69,6 +69,13 @@ if [ "$1" = "ramdisk" ] && [ "$2" = "on" ]; then
 
   echo "# Turn ON: RAMDISK"
 
+  # check if ramdisk is already mounted
+  isMounted=$(df -h | grep -c "/var/cache/raspiblitz")
+  if [ ${isMounted} -gt 0 ]; then
+    echo "# RAMDISK already mounted"
+    exit 0
+  fi
+
   # make sure mountpoint exists
   sudo mkdir -p /var/cache/raspiblitz 2>/dev/null
   sudo rm -rf /var/cache/raspiblitz/* 2>/dev/null

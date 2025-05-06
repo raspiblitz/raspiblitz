@@ -29,6 +29,9 @@ infoFile="/home/admin/raspiblitz.info"
 # this key/value file contains the state during the setup process
 setupFile="/var/cache/raspiblitz/temp/raspiblitz.setup"
 
+ # make sure ram disk is mounted
+/home/admin/_cache.sh ramdisk on 
+
 # Backup last log file if available
 cp ${logFile} /home/admin/raspiblitz.last.log 2>/dev/null
 
