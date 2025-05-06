@@ -237,7 +237,7 @@ if [ "$action" = "status" ]; then
         }
         printf "%s %.0f\n", $1, size
     }' | sort -k2,2n -k1,1)
-    echo "ext4Partitions='${ext4Partitions}'"
+    # echo "ext4Partitions='${ext4Partitions}'"
 
     # check if some drive is already mounted on /mnt/temp
     mountPath=$(findmnt -n -o TARGET "/mnt/temp" 2>/dev/null)
