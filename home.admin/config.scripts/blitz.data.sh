@@ -598,6 +598,7 @@ if [ "$action" = "status" ]; then
             # when no data device yet: take the second biggest drive as the data drive
             dataDevice=$(echo "${listOfDevices}" | head -n1 | awk '{print $1}')
             dataSizeGB=$(echo "${listOfDevices}" | head -n1 | awk '{print $2}')
+            listOfDevices=$(echo "${listOfDevices}" | grep -v "${dataDevice}")
             echo "#  - seleted dataDevice: ${dataDevice} (${dataSizeGB}GB)"
 
             # ignore system device if choosen as data device
@@ -605,6 +606,7 @@ if [ "$action" = "status" ]; then
                 echo "#  - data device is the same as system device - ignore it, take next"
                 dataDevice=$(echo "${listOfDevices}" | head -n1 | awk '{print $1}')
                 dataSizeGB=$(echo "${listOfDevices}" | head -n1 | awk '{print $2}')
+                listOfDevices=$(echo "${listOfDevices}" | grep -v "${dataDevice}")
                 echo "#  - seleted dataDevice: ${dataDevice} (${dataSizeGB}GB)"
             fi
 
@@ -613,6 +615,7 @@ if [ "$action" = "status" ]; then
                 echo "#  - data device is the same as install device - ignore it, take next"
                 dataDevice=$(echo "${listOfDevices}" | head -n1 | awk '{print $1}')
                 dataSizeGB=$(echo "${listOfDevices}" | head -n1 | awk '{print $2}')
+                listOfDevices=$(echo "${listOfDevices}" | grep -v "${dataDevice}")
                 echo "#  - seleted dataDevice: ${dataDevice} (${dataSizeGB}GB)"
             fi
 
