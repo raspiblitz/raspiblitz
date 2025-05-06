@@ -21,6 +21,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
     >&2 echo "# blitz.data.sh swap on # creates and activates an 8GB swapfile in / (Debian 12 only)"
     >&2 echo "# blitz.data.sh swap off # deactivates and removes the swapfile"
     >&2 echo "# blitz.data.sh reset # deletes all data & partitions on the storage device"
+    >&2 echo "# blitz.data.sh expand [partition] # expands the partition to use all available space"
     echo "error='missing parameters'"
     exit 1
 fi
@@ -2287,5 +2288,60 @@ if [ "$1" = "uasp-fix" ]; then
             echo "neededReboot=0"
         fi
     fi
+    exit 0
+fi
+
+#############
+# Expand
+#############
+
+if [ "$1" = "expand" ]; then
+
+    echo "# blitz.data.sh expand"
+
+    # get partition name
+    partitionName=$2
+    if [ ${#partitionName} -eq 0 ]; then
+        echo "error='missing partition name'"
+        exit 1
+    fi
+
+    # spereate device name and partition number
+    partitionNumber=$(echo "${partitionName}" | grep -o '[0-9]*$')
+    deviceName=$(echo "${partitionName}" | sed "s/${partitionNumber}$//")
+    if [ ${#deviceName} -eq 0 ]; then
+        echo "error='missing device name'"
+        exit 1
+    fi
+    if [ ${#partitionNumber} -eq 0 ]; then
+        echo "error='missing partition number'"
+        exit 1
+    fi
+
+    echo "# deviceName(${deviceName})"
+    echo "# partitionNumber(${partitionNumber})"
+
+    # read partition table
+    partprobe /dev/sda
+    if [ $? -ne 0 ]; then
+        echo "error='failed to read partition table'"
+        exit 1
+    fi
+
+    # grow partition
+    growpart /dev/${deviceName} ${partitionNumber}
+    if [ $? -ne 0 ]; then
+        echo "error='failed to grow partition'"
+        exit 1
+    fi
+
+    # resize filesystem
+    resize2fs /dev/${partitionName}
+    if [ $? -ne 0 ]; then
+        echo "error='failed to resize filesystem'"
+        exit 1
+    fi
+
+    echo "# DONE check: df -h"
     exit 0
 fi
