@@ -1061,6 +1061,8 @@ if [ "$action" = "link" ]; then
     ln -s ${storageMountedPath}/app-storage ${mainMountPoint}/app-storage
     chown bitcoin:bitcoin ${storageMountedPath}/app-storage ${mainMountPoint}/app-storage
     chmod 755 ${storageMountedPath}/app-storage ${mainMountPoint}/app-storage
+    chmod o+x ${storageMountedPath}
+    chmod o+x ${storageMountedPath}/app-storage
 
      # /app-data
     unlink ${mainMountPoint}/app-data 2>/dev/null
@@ -1071,6 +1073,8 @@ if [ "$action" = "link" ]; then
     ln -s ${dataMountedPath}/app-data ${mainMountPoint}/app-data
     chown bitcoin:bitcoin ${dataMountedPath}/app-data ${mainMountPoint}/app-data
     chmod 755 ${dataMountedPath}/app-data ${mainMountPoint}/app-data
+    chmod o+x ${dataMountedPath}
+    chmod o+x ${dataMountedPath}/app-data
 
     # /temp
     mkdir -p ${storageMountedPath}/temp 2>/dev/null
