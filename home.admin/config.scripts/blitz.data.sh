@@ -1135,6 +1135,8 @@ if [ "$action" = "link" ]; then
         echo "error='${mainMountPoint}/tor is real directory'"
         exit 1
     fi
+    chown -R debian-tor:debian-tor ${mainMountPoint}/app-data/tor
+    chmod -R 700 ${mainMountPoint}/app-data/tor
     ln -s ${dataMountedPath}/app-data/tor ${mainMountPoint}/tor
     chown debian-tor:debian-tor ${mainMountPoint}/tor
     chmod 700 ${mainMountPoint}/tor
