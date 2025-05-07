@@ -1060,7 +1060,7 @@ if [ "$action" = "link" ]; then
     fi
     ln -s ${storageMountedPath}/app-storage ${mainMountPoint}/app-storage
     chown bitcoin:bitcoin ${storageMountedPath}/app-storage ${mainMountPoint}/app-storage
-    chmod ${storageMountedPath}/app-storage ${mainMountPoint}/app-storage
+    chmod 755 ${storageMountedPath}/app-storage ${mainMountPoint}/app-storage
 
      # /app-data
     unlink ${mainMountPoint}/app-data 2>/dev/null
@@ -1107,7 +1107,7 @@ if [ "$action" = "link" ]; then
 
     # /mnt/hdd/lnd directory (move old data if needed & link for backwards compatibility)
     mkdir -p "${dataMountedPath}/app-data/lnd"
-    chown bitoin:bitcoin "${dataMountedPath}/app-data/lnd"
+    chown bitcoin:bitcoin "${dataMountedPath}/app-data/lnd"
     if [ -d "${storageMountedPath}/lnd" ]; then
         echo "# moving old data from ${storageMountedPath}/lnd to ${dataMountedPath}/app-data/lnd"
         mv ${storageMountedPath}/lnd/* ${dataMountedPath}/app-data/lnd/
