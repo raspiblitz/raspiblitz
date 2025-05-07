@@ -714,7 +714,10 @@ if [ "${scenario}" != "ready" ] ; then
   # when this is the boot of the new system (skip to provision)
   if [ "${systemCopy}" = "done" ]; then
     echo "INFO: 'systemCopy' is done - skip to provision / scenario(${scenario})" >> ${logFile}
-    scenario="setup"
+    if [ "${scenario}" != "recover" ]; then
+      echo "INFO: set scenario to setup" >> ${logFile}
+      scenario="setup"
+    fi
     setupCommand="skip"
     bootFromStorage=0
 
