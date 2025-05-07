@@ -713,32 +713,38 @@ if [ "${scenario}" != "ready" ] ; then
 
   # when this is the boot of the new system (skip to provision)
   if [ "${systemCopy}" = "done" ]; then
+    echo "INFO: 'systemCopy' is done - skip to provision / scenario(${scenario})" >> ${logFile}
     scenario="setup"
     setupCommand="skip"
     bootFromStorage=0
 
   # system recommended setup & system but user decided against - downgrade to simple setup
   elif [ "${scenario}" = "setup" ] && [ "${scenarioSystemCopy}" = "1" ] && [ "${systemCopy}" = "0" ] && [ "${deleteData}" = "all" ]; then
+    echo "# downgrade to simple setup" >> ${logFile}
     scenario="setup"
     setupCommand="setup"
     bootFromStorage=0
 
   # user agreed to system copy & delete all data
   elif [ "${scenario}" = "setup" ] && [ "${scenarioSystemCopy}" = "1" ] && [ "${systemCopy}" = "1" ] && [ "${deleteData}" = "all" ]; then
+    echo "# user agreed to system copy & delete all data" >> ${logFile}
     setupCommand="setup"
 
   # user agreed to run system from install medium and delete all data
   elif [ "${scenario}" = "setup" ] && [ "${deleteData}" = "all" ]; then
+    echo "# user agreed to run system from install medium and delete all data" >> ${logFile}
     setupCommand="setup"
     bootFromStorage=0
 
   # user agreed to run system from install medium and delete all data
   elif [ "${scenario}" = "setup" ] && [ "${deleteData}" = "keepBlockchain" ]; then
+    echo "# user agreed to run system from install medium and keep blockchain" >> ${logFile}
     setupCommand="clean"
     bootFromStorage=0
 
   # run recovery
   elif [ "${scenario}" = "recover" ]; then
+    echo "# run recovery" >> ${logFile}
     setupCommand="recover"
   
   else
