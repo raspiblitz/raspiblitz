@@ -392,6 +392,6 @@ $lastLine
 #  if [ ${#appInfoLine} -gt 0 ]; then
 #    echo "${appInfoLine}"
 #  fi
-
-fi
+#
+#fi
 
