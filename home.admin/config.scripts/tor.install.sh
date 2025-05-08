@@ -246,6 +246,13 @@ profile system_tor flags=(attach_disconnected) {
   owner ${tor_data_dir}/ r,
   owner ${tor_conf_dir}/** rwk,
 
+  /mnt/hdd/app-data/tor/              rUx,
+  /mnt/hdd/app-data/tor/**            rwkix,
+  /mnt/disk_data/app-data/tor/        rUx,
+  /mnt/disk_data/app-data/tor/**      rwkix,
+  /mnt/disk_storage/app-data/tor/     rUx,
+  /mnt/disk_storage/app-data/tor/**   rwkix,
+
   # During startup, tor (as root) tries to open various things such as
   # directories via check_private_dir().  Let it.
   /var/lib/tor/** r,
