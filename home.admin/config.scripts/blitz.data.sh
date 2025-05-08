@@ -951,6 +951,10 @@ if [ "$action" = "mount" ]; then
         exit 1
     fi
 
+    # debug info
+    echo "# storagePartition: ${storagePartition}"
+    echo "# dataPartition: ${dataPartition}"
+
     # check if partititions are already mounted
     if [ $(findmnt -n -o SOURCE,TARGET | grep -c "/dev/${storagePartition}") -gt 0 ]; then
         echo "# Already mounted: ${storagePartition}"
@@ -967,13 +971,21 @@ if [ "$action" = "mount" ]; then
 
     # Check if UUIDs were found
     if [ -z "${storageUUID}" ]; then
-        echo "error='Could not find UUID for target partition ${targetPartition}'"
+        echo "error='Could not find UUID for target partition ${storagePartition}'"
         exit 1
     fi
     if [ ${combinedDataStorage} -eq 0 ] && [ -z "${dataUUID}" ]; then
         echo "error='Could not find UUID for data partition ${dataPartition}'"
         exit 1
     fi
+
+    # debug info
+    echo "# storageUUID: ${storageUUID}"
+    echo "# dataUUID: ${dataUUID}"
+    echo "# storageMountPoint: ${storageMountPoint}"
+    echo "# dataMountPoint: ${dataMountPoint}"
+    echo "# mainMountPoint: ${mainMountPoint}"
+    echo "# combinedDataStorage: ${combinedDataStorage}"
 
     # just in case: remove old entries in fstab
     sed -i "\#${storageMountPoint}#d" /etc/fstab
