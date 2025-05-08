@@ -923,8 +923,6 @@ fi
 
 if [ "$action" = "mount" ]; then
 
-
-    echo "# blitz.data.sh mount" 
     storageMountPoint="/mnt/disk_storage"
     dataMountPoint="/mnt/disk_data"
 
@@ -971,11 +969,11 @@ if [ "$action" = "mount" ]; then
 
     # Check if UUIDs were found
     if [ -z "${storageUUID}" ]; then
-        echo "error='Could not find UUID for target partition ${storagePartition}'"
+        echo "error='Could not find UUID for storage partition ${storagePartition} (${storageUUID})'"
         exit 1
     fi
     if [ ${combinedDataStorage} -eq 0 ] && [ -z "${dataUUID}" ]; then
-        echo "error='Could not find UUID for data partition ${dataPartition}'"
+        echo "error='Could not find UUID for data partition ${dataPartition} (${dataUUID})'"
         exit 1
     fi
 
