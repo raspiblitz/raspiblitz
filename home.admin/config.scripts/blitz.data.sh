@@ -1976,10 +1976,10 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
         fi
 
         # only run if scenario is setup
-        if [ "${scenario}" != "setup" ]; then
-            echo "error='wrong scenario'"
-            exit 1
-        fi
+        #if [ "${scenario}" != "setup" ]; then
+        #    echo "error='wrong scenario'"
+        #    exit 1
+        #fi
 
         # mount source partition
         mkdir -p /mnt/migrate_source 2>/dev/null
