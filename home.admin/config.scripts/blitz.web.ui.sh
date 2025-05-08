@@ -56,7 +56,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     activeBranch=$(git -C /home/admin/raspiblitz branch --show-current)
     echo "# activeBranch detected by raspiblitz repo: ${activeBranch}"
     # use dev branch when raspiblitz repo is n dev branch
-    if [[ "$activeBranch" == *"dev"* ]]; then    
+    if [[ "$activeBranch" == *"dev"* || "$activeBranch" != v* ]]; then
       echo "# RELEASE CANDIDATE: using master branch"
       GITHUB_BRANCH="master"
     else
