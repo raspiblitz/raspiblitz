@@ -968,11 +968,11 @@ if [ "$action" = "mount" ]; then
     dataUUID=$(lsblk -no UUID /dev/${dataPartition} 2>/dev/null)
 
     # Check if UUIDs were found
-    if [ -z "${storageUUID}" ]; then
+    if [ "${storageUUID}" = "" ]; then
         echo "error='Could not find UUID for storage partition ${storagePartition} (${storageUUID})'"
         exit 1
     fi
-    if [ ${combinedDataStorage} -eq 0 ] && [ -z "${dataUUID}" ]; then
+    if [ ${combinedDataStorage} -eq 0 ] && [ "${dataUUID}" = "" ]; then
         echo "error='Could not find UUID for data partition ${dataPartition} (${dataUUID})'"
         exit 1
     fi
