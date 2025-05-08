@@ -1875,9 +1875,18 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
 
         # set migration info to cache
         /home/admin/_cache.sh set hddMigrateDeviceFrom "${storageDevice}"
-        /home/admin/_cache.sh set hddMigrateDeviceTo "${biggerDevice}"
-        /home/admin/_cache.sh set system_setup_askSystemCopy "1"    
+        /home/admin/_cache.sh set hddMigrateDeviceTo "${biggerDevice}"  
         /home/admin/_cache.sh set system_setup_storageBlockchainGB "0"
+
+        # on raspberry pi only offer systemcopy >=RP5
+        /home/admin/_cache.sh set system_setup_askSystemCopy "${scenarioSystemCopy}"  
+        if [ "${computerType}" = "raspberrypi" ]; then
+            rpiVersion=$(strings /proc/device-tree/model | grep -o 'Raspberry Pi [0-9]\+' | grep -o '[0-9]\+')
+            if [ "${rpiVersion}" != "" ] && [ ${rpiVersion} -lt 5 ]; then
+                echo "# RaspberryPi4 - set system_setup_askSystemCopy to 0"
+                /home/admin/_cache.sh set system_setup_storageBlockchainGB "0"
+            fi
+        fi
            
         # return 0 to indicate success and let calling script finish
         exit 0
