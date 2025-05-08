@@ -347,7 +347,6 @@ ${color_yellow}   /'          ${color_gray}
 ${color_yellow}               ${color_gray}${LNline}
 ${color_yellow}               ${color_gray}${ln_channelInfo} ${ln_peersInfo}
 ${color_yellow}               ${color_gray}${ln_feeReport}
-$lastLine
 " \
 "RaspiBlitz ${codeVersion}-${codeRelease}" \
 "-------------------------------------------" \
