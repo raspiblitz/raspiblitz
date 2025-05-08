@@ -273,10 +273,13 @@ if [ "${lightning}" != "" ]; then
 
 fi
 
-
-  lastLine="\
+lastLine="\
+${color_gray}"
+if [ "${ln_external}" != "null" ]; then
+lastLine="\
 ${color_yellow}
 ${color_yellow}${ln_publicColor}${ln_external}${color_gray}"
+fi
 
 if [ "${joinmarket}" = "on" ];then
   # show JoinMarket stats in place of the LND URI only if the Yield Generator is running
