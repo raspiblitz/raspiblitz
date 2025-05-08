@@ -497,6 +497,16 @@ echo "*** POSSIBLE ERROR REPORTS ***"
 ls -1  /home/admin/error* 2>/dev/null
 echo
 
+# chech for ro-mounted system
+systemReadOnly=$(mount | grep ' on / ' | grep -c "ro")
+if [ ${systemReadOnly} -gt 0 ]; then
+  echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+  echo "!!! SYSTEM IS READ-ONLY !!!"
+  echo "System runs in read-only mode -> see: mount | grep ' on / '"
+  echo "If your not running install media in read-only mode, please there was a problem with the last shutdown or installation."
+  echo
+fi
+
 echo
 echo "*** OPTION: SHARE THIS DEBUG OUTPUT ***"
 echo "An easy way to share this debug output on GitHub or on a support chat"
