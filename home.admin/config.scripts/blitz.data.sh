@@ -974,7 +974,7 @@ if [ "$action" = "mount" ]; then
     # determine UUID of data partition (if needed)
     dataUUID=""
     if [ ${combinedDataStorage} -eq 0 ]; then
-        dataUUID=$(lsblk -no UUID "/dev/${dataPartition}")
+        dataUUID=$(blkid -s UUID -o value "/dev/${dataPartition}")
         if [ "${dataUUID}" = "" ]; then
             echo "error='Could not find UUID for data partition ${dataPartition} (${dataUUID})'"
             exit 1
