@@ -179,7 +179,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     GITHUB_REPO="${defaultAPIrepo}"
     activeBranch=$(git -C /home/admin/raspiblitz branch --show-current)
     echo "# activeBranch detected by raspiblitz repo: ${activeBranch}"
-    if [[ "$activeBranch" == *"dev"* ]]; then
+    if [[ "$activeBranch" == *"dev"* || "$activeBranch" != v* ]]; then
       echo "# RELEASE CANDIDATE: using dev branch"
       GITHUB_BRANCH="dev"
     else
