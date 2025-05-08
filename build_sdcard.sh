@@ -18,12 +18,14 @@ REQUIRED_SOURCES=(
 )
 
 # set locale to en_US.UTF-8 on system & activate for this script
-echo "# updating locale ..."
-sed -i "s/^# en_US.UTF-8 UTF-8.*/en_US.UTF-8 UTF-8/g" /etc/locale.gen
-sed -i "s/^# en_US ISO-8859-1.*/en_US ISO-8859-1/g" /etc/locale.gen
-locale-gen en_US.UTF-8 en_US ISO-8859-1 1>/dev/null
-update-locale LANG=en_US.UTF-8 1>/dev/null
-source /etc/default/locale
+if [ "$1" != "-EXPORT" ] && [ "$1" != "EXPORT" ]; then
+  echo "# updating locale ..."
+  sed -i "s/^# en_US.UTF-8 UTF-8.*/en_US.UTF-8 UTF-8/g" /etc/locale.gen
+  sed -i "s/^# en_US ISO-8859-1.*/en_US ISO-8859-1/g" /etc/locale.gen
+  locale-gen en_US.UTF-8 en_US ISO-8859-1 1>/dev/null
+  update-locale LANG=en_US.UTF-8 1>/dev/null
+  source /etc/default/locale
+fi
 
 defaultRepo="raspiblitz" # user that hosts a `raspiblitz` repo
 defaultBranch="v1.11" # latest version branch

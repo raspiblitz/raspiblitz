@@ -210,7 +210,7 @@ if [ "${blitzapi}" != "on" ] && [ ${blitzApiInstalled} -gt 0 ]; then
   /home/admin/config.scripts/blitz.web.api.sh off >> ${logFile} 2>&1
   /home/admin/config.scripts/blitz.web.ui.sh off >> ${logFile} 2>&1
 fi
-# WebAPI & UI (in case image was not fatpack - but webapi was switchen on)
+# WebAPI & UI (in case image was not fatpack - but webapi was switched on)
 if [ "${blitzapi}" == "on" ] && [ $blitzApiInstalled -eq 0 ]; then
     echo "Provisioning BlitzAPI - run config script" >> ${logFile}
     /home/admin/_cache.sh set message "Setup BlitzAPI (takes time)"
