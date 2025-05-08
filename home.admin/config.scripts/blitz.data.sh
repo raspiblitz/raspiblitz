@@ -798,7 +798,7 @@ if [ "$action" = "status" ]; then
 
     # get free space on drives
     if [ ${#systemPartition} -gt 0 ]; then
-        storageFreeKB=$(df -k | grep "/dev/${systemPartition}" | awk '{print $4}' | tail -n 1)
+        storageFreeKB=$(df -k | grep "/dev/${storagePartition}" | awk '{print $4}' | tail -n 1)
     fi
     if [ ${#dataPartition} -gt 0 ]; then
         dataFreeKB=$(df -k | grep "/dev/${dataPartition}" | awk '{print $4}' | tail -n 1)
