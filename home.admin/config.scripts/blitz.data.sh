@@ -965,7 +965,7 @@ if [ "$action" = "mount" ]; then
 
 
     # determine UUID of storage partition
-    storageUUID=$(lsblk -no UUID "/dev/${storagePartition}")
+    storageUUID=$(blkid -s UUID -o value "/dev/${storagePartition}")
     if [ "${storageUUID}" = "" ]; then
         echo "error='Could not find UUID for storage partition ${storagePartition} (${storageUUID})'"
         exit 1
