@@ -1983,7 +1983,7 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
 
         # mount source partition
         mkdir -p /mnt/migrate_source 2>/dev/null
-        echo "# mount /mnt/migrate_source -> ${sourcePartition} ..."
+        echo "# mount /mnt/migrate_source -> ${sourcePartition} uuid(${sourceUUID})..."
         mount -U "${sourceUUID}" /mnt/migrate_source
         if ! findmnt -n -o TARGET "/mnt/migrate_source" 2>/dev/null; then
             echo "error='source partition not mounted uuid(${sourceUUID})'"
