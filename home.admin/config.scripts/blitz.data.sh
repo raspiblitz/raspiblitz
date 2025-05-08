@@ -1941,6 +1941,13 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
             exit 1
         fi
 
+        # get UUID of source partition
+        sourceUUID=$(lsblk -n -o UUID "/dev/${sourcePartition}")
+        if [ ${#sourceUUID} -eq 0 ]; then
+            echo "error='no source partition UUID found'"
+            exit 1
+        fi
+
         # check that partition is not mounted
         if findmnt -n -o TARGET "/dev/${sourcePartition}" 2>/dev/null; then
             echo "# sourcePartition(${sourcePartition})"
@@ -1977,9 +1984,9 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
         # mount source partition
         mkdir -p /mnt/migrate_source 2>/dev/null
         echo "# mount /mnt/migrate_source -> ${sourcePartition} ..."
-        mount "/dev/${sourcePartition}" /mnt/migrate_source
+        mount -U "${sourceUUID}" /mnt/migrate_source
         if ! findmnt -n -o TARGET "/mnt/migrate_source" 2>/dev/null; then
-            echo "error='source partition not mounted'"
+            echo "error='source partition not mounted uuid(${sourceUUID})'"
             exit 1
         fi
 
@@ -2058,6 +2065,8 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
                 echo "error='failed to rsync lnd'"
                 exit 1
             fi
+        else
+            echo "# no old lnd directory found"
         fi
 
         # old layout: tor directory is still outside of app-data
@@ -2071,6 +2080,8 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
                 echo "error='failed to rsync tor'"
                 exit 1
             fi
+        else
+            echo "# no old tor directory found"
         fi
 
         # old layout: raspiblitz.conf file is still outside of app-data
@@ -2083,6 +2094,8 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
                 echo "error='failed to rsync raspiblitz.conf'"
                 exit 1
             fi
+        else
+            echo "# no old raspiblitz.conf file found"
         fi
 
         # unmount data partition
