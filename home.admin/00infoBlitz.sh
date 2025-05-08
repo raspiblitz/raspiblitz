@@ -355,44 +355,43 @@ $lastLine
 "CPU load${system_cpu_load##up*,  }" \
 "${hdd_used_info}" "${sync_percentage}"
 
-if [ ${#undervoltageReports} -gt 0 ] && [ "${undervoltageReports}" != "0" ]; then
-  echo "${undervoltageReports} undervoltage reports - run 'Hardware Test' in menu"
-elif [ ${#ups} -gt 1 ] && [ "${upsStatus}" = "n/a" ]; then
-  echo "UPS service activated but not running"
-else
-
-  # checking status of apps and display if in sync or problems
-  appInfoLine=""
-
-  # Electrum Server - electrs
-  fileFlagExists=$(sudo ls /mnt/hdd/app-storage/electrs/initial-sync.done 2>/dev/null | grep -c 'initial-sync.done')
-  if [ "${ElectRS}" == "on" ] && [ $fileFlagExists -eq 0 ]; then
-    error=""
-    source <(/home/admin/config.scripts/bonus.electrs.sh status-sync 2>/dev/null)
-    if [ ${#infoSync} -gt 0 ]; then
-      appInfoLine="Electrum: ${infoSync}"
-    fi
-  fi
-
-  # Electrum Server - fulcrum
-  fileFlagExists=$(sudo ls /mnt/hdd/app-storage/fulcrum/initial-sync.done 2>/dev/null | grep -c 'initial-sync.done')
-  if [ "${fulcrum}" == "on" ] && [ $fileFlagExists -eq 0 ]; then
-    error=""
-    source <(/home/admin/config.scripts/bonus.fulcrum.sh status-sync 2>/dev/null)
-    if [ ${#infoSync} -gt 0 ]; then
-      appInfoLine="Fulcrum: ${infoSync}"
-    fi
-  fi
-
-  # Transaction Index
-  source <(/home/admin/config.scripts/network.txindex.sh status)
-  if [ "${txindex}" == "1" ] && [ "${isIndexed}" != "1" ]; then
-      appInfoLine="Transaction Index: ${indexInfo}"
-  fi
-
-  if [ ${#appInfoLine} -gt 0 ]; then
-    echo "${appInfoLine}"
-  fi
+#if [ ${#undervoltageReports} -gt 0 ] && [ "${undervoltageReports}" != "0" ]; then
+#  echo "${undervoltageReports} undervoltage reports - run 'Hardware Test' in menu"
+#elif [ ${#ups} -gt 1 ] && [ "${upsStatus}" = "n/a" ]; then
+#  echo "UPS service activated but not running"
+#else
+#  # checking status of apps and display if in sync or problems
+#  appInfoLine=""
+#
+#  # Electrum Server - electrs
+#  fileFlagExists=$(sudo ls /mnt/hdd/app-storage/electrs/initial-sync.done 2>/dev/null | grep -c 'initial-sync.done')
+#  if [ "${ElectRS}" == "on" ] && [ $fileFlagExists -eq 0 ]; then
+#    error=""
+#    source <(/home/admin/config.scripts/bonus.electrs.sh status-sync 2>/dev/null)
+#    if [ ${#infoSync} -gt 0 ]; then
+#      appInfoLine="Electrum: ${infoSync}"
+#    fi
+#  fi
+#
+#  # Electrum Server - fulcrum
+#  fileFlagExists=$(sudo ls /mnt/hdd/app-storage/fulcrum/initial-sync.done 2>/dev/null | grep -c 'initial-sync.done')
+#  if [ "${fulcrum}" == "on" ] && [ $fileFlagExists -eq 0 ]; then
+#    error=""
+#    source <(/home/admin/config.scripts/bonus.fulcrum.sh status-sync 2>/dev/null)
+#    if [ ${#infoSync} -gt 0 ]; then
+#      appInfoLine="Fulcrum: ${infoSync}"
+#    fi
+#  fi
+#
+#  # Transaction Index
+#  source <(/home/admin/config.scripts/network.txindex.sh status)
+#  if [ "${txindex}" == "1" ] && [ "${isIndexed}" != "1" ]; then
+#      appInfoLine="Transaction Index: ${indexInfo}"
+#  fi
+#
+#  if [ ${#appInfoLine} -gt 0 ]; then
+#    echo "${appInfoLine}"
+#  fi
 
 fi
 
