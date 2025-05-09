@@ -25,18 +25,13 @@ sudo systemctl daemon-reload 2>/dev/null
 echo "# removing raspiblitz.setup" >> /home/admin/raspiblitz.log
 sudo rm /var/cache/raspiblitz/temp/raspiblitz.setup
 
-#m TODO: REMOVE LATER
-systemctl disable background.service
-systemctl disable background.scan.service
-systemctl disable bootstrap.service
-
 ########################################
 # AFTER SETUP REBOOT
 # touchscreen activation, start with configured SWAP, fix LCD text bug
+echo "# SHUTTING DOWN ..." >> /home/admin/raspiblitz.log
 sudo cp /home/admin/raspiblitz.log /home/admin/raspiblitz.setup.log
 sudo chmod 640 /home/admin/raspiblitz.setup.log
 sudo chown root:sudo /home/admin/raspiblitz.setup.log
-echo "# SHUTTING DOWN ..." >> /home/admin/raspiblitz.log
 timeout 120 sudo /home/admin/config.scripts/blitz.shutdown.sh reboot finalsetup
 # if system has not rebooted yet - force reboot directly
 sudo shutdown -r now

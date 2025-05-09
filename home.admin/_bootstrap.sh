@@ -808,6 +808,9 @@ if [ "${scenario}" != "ready" ] ; then
         exit 1
       fi
       echo "SYSTEM: ${setupCommand} SYSTEM done" >> ${logFile}
+    else
+      if [ "${systemMountedPath}" = "/" ]; then
+        echo "INFO: ${setupCommand} SYSTEM skipped - ist active system" >> ${logFile}
     fi
 
     # DATA
