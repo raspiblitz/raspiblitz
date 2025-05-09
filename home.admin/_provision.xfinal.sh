@@ -25,6 +25,11 @@ sudo systemctl daemon-reload 2>/dev/null
 echo "# removing raspiblitz.setup" >> /home/admin/raspiblitz.log
 sudo rm /var/cache/raspiblitz/temp/raspiblitz.setup
 
+#m TODO: REMOVE LATER
+systemctl disable background.service
+systemctl disable background.scan.service
+systemctl disable bootstrap.service
+
 ########################################
 # AFTER SETUP REBOOT
 # touchscreen activation, start with configured SWAP, fix LCD text bug
