@@ -2364,28 +2364,30 @@ if [ "$1" = "expand" ]; then
     echo "# deviceName(${deviceName})"
     echo "# partitionNumber(${partitionNumber})"
 
+    echo "# TODO: expand partition and filesystem"
+
     # read partition table
-    partprobe /dev/sda
-    if [ $? -ne 0 ]; then
-        echo "error='failed to read partition table'"
-        exit 1
-    fi
+    #partprobe /dev/sda
+    #if [ $? -ne 0 ]; then
+    #    echo "error='failed to read partition table'"
+    #    exit 1
+    #fi
 
     # grow partition
-    apt install -y --no-install-recommends cloud-guest-utils
-    growpart /dev/${deviceName} ${partitionNumber}
-    if [ $? -ne 0 ]; then
-        echo "error='failed to grow partition'"
-        exit 1
-    fi
+    #apt install -y --no-install-recommends cloud-guest-utils
+    #growpart /dev/${deviceName} ${partitionNumber}
+    #if [ $? -ne 0 ]; then
+    #    echo "error='failed to grow partition'"
+    #    exit 1
+    #fi
 
     # resize filesystem
-    apt-get install -y --no-install-recommends e2fsprogs
-    resize2fs /dev/${partitionName}
-    if [ $? -ne 0 ]; then
-        echo "error='failed to resize filesystem'"
-        exit 1
-    fi
+    #apt-get install -y --no-install-recommends e2fsprogs
+    #resize2fs /dev/${partitionName}
+    #if [ $? -ne 0 ]; then
+    #    echo "error='failed to resize filesystem'"
+    #    exit 1
+    #fi
 
     echo "# DONE check: df -h"
     exit 0
