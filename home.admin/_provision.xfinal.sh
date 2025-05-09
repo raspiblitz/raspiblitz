@@ -15,7 +15,7 @@ cat /home/admin/raspiblitz.info >> /home/admin/raspiblitz.log
 # make sure for future starts that blockchain service gets started after bootstrap
 # so deamon reloas needed ... system will go into reboot after last loop
 # needs to be after wait loop because otherwise the "restart" on COPY OVER LAN will not work
-echo "# Updating service bitcoin}d.service ..."
+echo "# Updating service bitcoind.service ..."
 sudo sed -i "s/^Wants=.*/Wants=bootstrap.service/g" /etc/systemd/system/bitcoind.service
 sudo sed -i "s/^After=.*/After=bootstrap.service/g" /etc/systemd/system/bitcoind.service
 sudo systemctl daemon-reload 2>/dev/null
