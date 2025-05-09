@@ -70,9 +70,6 @@ if [ "${isInstalled}" == "1" ]; then
 
   # gather address info (whats needed to call the app)
   localIP=$(hostname -I | awk '{print $1}')
-  toraddress=$(sudo cat /mnt/hdd/tor/${APPID}/hostname 2>/dev/null)
-  fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
-
 fi
 
 # if the action parameter `status` was called - just stop here and output all
@@ -117,9 +114,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   fi
 
   echo "# Installing ${APPID} ..."
-
-  # check and install NodeJS - if already installed it will skip
-  /home/admin/config.scripts/bonus.nodejs.sh on
 
   echo "# create user"
   # If the user is intended to be loeed in to add '--shell /bin/bash'
@@ -179,27 +173,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "bitcoind can take a lot of time to restart because of the blocks verification, please be patient."
   exit 0
 
-fi
-
-##########################
-# PRESTART
-##########################
-
-if [ "$1" = "prestart" ]; then
-
-  # needs to be run as the app user - stop if not run as the app user
-  # keep in mind that in the prestart section you cannot use `sudo` command
-  if [ "$USER" != "${APPID}" ]; then
-    echo "# FAIL: run as user ${APPID}"
-    exit 1
-  fi
-
-  echo "## PRESTART CONFIG START for ${APPID} (called by systemd prestart)"
-
-  echo "# no need for adhoc config needed so far"
-
-  echo "## PRESTART CONFIG DONE for ${APPID}"
-  exit 0
 fi
 
 ###########################################

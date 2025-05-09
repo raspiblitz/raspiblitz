@@ -617,7 +617,7 @@ else
   echo "Provisioning Mempool Explorer - keep default" >> ${logFile}
 fi
 
-# Bicoin Knots
+# Bitcoin Knots
 if [ "${knots}" = "on" ]; then
   echo "Provisioning Bitcoin Knots - run config script" >> ${logFile}
   /home/admin/_cache.sh set message "Setup Bitcoin Knots"
