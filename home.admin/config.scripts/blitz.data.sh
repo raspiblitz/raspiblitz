@@ -827,13 +827,13 @@ if [ "$action" = "status" ]; then
     dataUnusedPercent=0
     systemUnusedPercent=0
     if [ ${#storageDevice} -gt 0 ]; then
-        storageUnusedPercent=$(parted /dev/${storageDevice} unit % print free | awk '/Free Space/ {v=$(NF-2); gsub(/[^0-9.]/, "", v)} END{print int(v)}')
+        #storageUnusedPercent=$(parted /dev/${storageDevice} unit % print free | awk '/Free Space/ {v=$(NF-2); gsub(/[^0-9.]/, "", v)} END{print int(v)}')
     fi
     if [ ${#dataDevice} -gt 0 ]; then
-        dataUnusedPercent=$(parted /dev/${dataDevice} unit % print free | awk '/Free Space/ {v=$(NF-2); gsub(/[^0-9.]/, "", v)} END{print int(v)}')
+        #dataUnusedPercent=$(parted /dev/${dataDevice} unit % print free | awk '/Free Space/ {v=$(NF-2); gsub(/[^0-9.]/, "", v)} END{print int(v)}')
     fi
     if [ ${#systemDevice} -gt 0 ]; then
-        systemUnusedPercent=$(parted /dev/${systemDevice} unit % print free | awk '/Free Space/ {v=$(NF-2); gsub(/[^0-9.]/, "", v)} END{print int(v)}')
+        #systemUnusedPercent=$(parted /dev/${systemDevice} unit % print free | awk '/Free Space/ {v=$(NF-2); gsub(/[^0-9.]/, "", v)} END{print int(v)}')
     fi
 
     # output the result
