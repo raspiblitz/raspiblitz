@@ -45,12 +45,6 @@ echo "Running RaspiBlitz Bootstrap ${codeVersion}" >> $logFile
 date >> $logFile
 echo "***********************************************" >> $logFile
 
-# TODO: REMOVE THIS LATER
-/home/admin/_cache.sh set state "debugwait"
-/home/admin/_cache.sh set message "REMOVE LATER"
-echo "## DEBUG SLEEP" >> $logFile
-sleep 120
-
 # list all running systemd services for future debug
 systemctl list-units --type=service --state=running >> $logFile
 
@@ -1291,9 +1285,6 @@ else
 
   echo "# NORMAL START BOOTSTRAP" >> $logFile
   source <(/home/admin/config.scripts/blitz.data.sh status)
-
-  # TODO: REMOVE LATER
-  echo "# DEBUG STOP" >> $logFile
 
   #################################
   # FIX BLOCKCHAINDATA OWNER (just in case)
