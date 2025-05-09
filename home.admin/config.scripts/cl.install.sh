@@ -2,7 +2,7 @@
 # https://lightning.readthedocs.io/
 
 # https://github.com/ElementsProject/lightning/releases
-CLVERSION="v25.02"
+CLVERSION="v25.02.2"
 
 # https://github.com/ElementsProject/lightning/tree/master/contrib/keys
 # rustyrussell D9200E6CD1ADB8F1
@@ -11,9 +11,9 @@ CLVERSION="v25.02"
 # pneuroth (nepet) C3F21EE387FF4CD2
 # sfarooqui (ShahanaFarooqui) B56B4453DA8C6DF7FC9BCFCBDCA40B7128DA62A8
 # amyers (endothermicdev) F3BF63F2747436AB
-PGPsigner="amyers"
+PGPsigner="sfarooqui"
 PGPpubkeyLink="https://raw.githubusercontent.com/ElementsProject/lightning/master/contrib/keys/${PGPsigner}.txt"
-PGPpubkeyFingerprint="F3BF63F2747436AB"
+PGPpubkeyFingerprint="B56B4453DA8C6DF7FC9BCFCBDCA40B7128DA62A8"
 
 # help
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
@@ -61,11 +61,14 @@ function installDependencies() {
   sudo -u bitcoin poetry install
 
   # rust deps for cln-grpc and clnrest plugins
-  if ! sudo -u bitcoin cargo --version; then
-    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sudo sh -s -- --default-toolchain=stable -y
-    # move Rust binaries to be available system-wide
-    sudo mv $HOME/.cargo/bin/* /usr/local/bin/
+  if ! sudo -u bitcoin bash -c 'command -v cargo'; then
+    sudo -u bitcoin bash -c 'curl --proto "=https" --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y'
   fi
+  # Ensure /home/bitcoin/.cargo/bin is in PATH for the bitcoin user
+  if ! grep -Fq '.cargo/bin' /home/bitcoin/.profile; then
+    echo -e '\n# set PATH so it includes Cargo'\''s bin if it exists\nif [ -d "$HOME/.cargo/bin" ] ; then\n    PATH="$HOME/.cargo/bin:$PATH"\nfi' | sudo tee -a /home/bitcoin/.profile
+  fi
+  export PATH="/home/bitcoin/.cargo/bin:$PATH"
   sudo apt-get install -y protobuf-compiler
 
   # remove old clnrest dir if exists
