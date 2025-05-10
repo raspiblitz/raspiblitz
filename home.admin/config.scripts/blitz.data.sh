@@ -1433,7 +1433,7 @@ fi
 if [ "$action" = "setup" ]; then
 
     echo "STARTED blitz.data.sh ${action} ..." >> ${logFile}
-
+        
     # check that it is a valid setup type: STORAGE, DATA, SYSTEM
     actionType=$2
     if [ "${actionType}" != "STORAGE" ] && [ "${actionType}" != "DATA" ] && [ "${actionType}" != "SYSTEM" ]; then
@@ -1493,6 +1493,8 @@ if [ "$action" = "setup" ]; then
         actionDevicePartitionBase="${actionDevice}p"
     fi
 
+    source <(/home/admin/config.scripts/blitz.data.sh status)
+
     # debug info
     echo "# actionType(${actionType})"  >> ${logFile}
     echo "# actionDevice(${actionDevice})" >> ${logFile}
@@ -1506,55 +1508,95 @@ if [ "$action" = "setup" ]; then
     # SYSTEM (single drive)
     if [ "${actionType}" = "SYSTEM" ]; then
 
-        echo "# SYSTEM partitioning" >> ${logFile}
-        sfdisk --delete /dev/${actionDevice} 2>/dev/null
-        wipefs -a /dev/${actionDevice} 2>/dev/null
-        parted /dev/${actionDevice} --script mklabel msdos
-        parted /dev/${actionDevice} --script mkpart primary fat32 1MiB 513MiB
-        parted /dev/${actionDevice} --script mkpart primary ext4 541MB 100%
-        wipefs -a /dev/${actionDevicePartitionBase}1 2>/dev/null
-        mkfs.fat -F 32 /dev/${actionDevicePartitionBase}1
-        wipefs -a /dev/${actionDevicePartitionBase}2 2>/dev/null
-        mkfs -t ext4  /dev/${actionDevicePartitionBase}2
+        if [ ${systemMountedPath} = "/" ]; then
 
-        # MAKE BOOTABLE
-        echo "# MAKE BOOTABLE" >> ${logFile}
+             echo "# SYSTEM -> partitioning & format because its running & mounted system" >> ${logFile}
 
-        # RASPBERRY PI
-        if [ "${computerType}" = "raspberrypi" ]; then
-            echo "# RaspberryPi - set LBA flag" >> ${logFile}
-            parted /dev/${actionDevice} --script set 1 lba on
-            isFlagSetLBA=$(parted /dev/${actionDevice} --script print | grep -c 'fat32.*lba')
-            if [ ${isFlagSetLBA} -eq 0 ]; then
-                echo "error='failed to set LBA flag'"
-                exit 1
-            fi
-            echo "# RaspberryPi - Bootorder" >> ${logFile}
-            isBootOrderSet=$(sudo rpi-eeprom-config | grep -cx "BOOT_ORDER=0xf461")
-            if [ ${isBootOrderSet} -eq 0 ]; then
-                echo "# .. changeing Bootorder" >> ${logFile}
-                rpi-eeprom-config --out bootconf.txt
-                sed -i '/^BOOT_ORDER=/d' ./bootconf.txt && sudo sh -c 'echo "BOOT_ORDER=0xf461" >> ./bootconf.txt'
-                rpi-eeprom-config --apply bootconf.txt
-                rm bootconf.txt
-            else
-                echo "# .. Bootorder already set" >> ${logFile}
-            fi
-
-        # VM & PC
         else
-            echo "# VM & PC - set BOOT/ESP flag" >> ${logFile}
-            parted /dev/${actionDevice} --script set 1 boot on
-            parted /dev/${actionDevice} --script set 1 esp on
-            isFlagSetBOOT=$(parted /dev/${actionDevice} --script print | grep -c 'fat32.*boot')
-            if [ ${isFlagSetBOOT} -eq 0 ]; then
-                echo "error='failed to set BOOT flag'"
-                exit 1
+
+            echo "# SYSTEM partitioning" >> ${logFile}
+            sfdisk --delete /dev/${actionDevice} 2>/dev/null
+            wipefs -a /dev/${actionDevice} 2>/dev/null
+            parted /dev/${actionDevice} --script mklabel msdos
+            parted /dev/${actionDevice} --script mkpart primary fat32 1MiB 513MiB
+            parted /dev/${actionDevice} --script mkpart primary ext4 541MB 100%
+            wipefs -a /dev/${actionDevicePartitionBase}1 2>/dev/null
+            mkfs.fat -F 32 /dev/${actionDevicePartitionBase}1
+            wipefs -a /dev/${actionDevicePartitionBase}2 2>/dev/null
+            mkfs -t ext4  /dev/${actionDevicePartitionBase}2
+
+            # MAKE BOOTABLE
+            echo "# MAKE BOOTABLE" >> ${logFile}
+
+            # RASPBERRY PI
+            if [ "${computerType}" = "raspberrypi" ]; then
+                echo "# RaspberryPi - set LBA flag" >> ${logFile}
+                parted /dev/${actionDevice} --script set 1 lba on
+                isFlagSetLBA=$(parted /dev/${actionDevice} --script print | grep -c 'fat32.*lba')
+                if [ ${isFlagSetLBA} -eq 0 ]; then
+                    echo "error='failed to set LBA flag'"
+                    exit 1
+                fi
+                echo "# RaspberryPi - Bootorder" >> ${logFile}
+                isBootOrderSet=$(sudo rpi-eeprom-config | grep -cx "BOOT_ORDER=0xf461")
+                if [ ${isBootOrderSet} -eq 0 ]; then
+                    echo "# .. changeing Bootorder" >> ${logFile}
+                    rpi-eeprom-config --out bootconf.txt
+                    sed -i '/^BOOT_ORDER=/d' ./bootconf.txt && sudo sh -c 'echo "BOOT_ORDER=0xf461" >> ./bootconf.txt'
+                    rpi-eeprom-config --apply bootconf.txt
+                    rm bootconf.txt
+                else
+                    echo "# .. Bootorder already set" >> ${logFile}
+                fi
+
+            # VM & PC
+            else
+                echo "# VM & PC - set BOOT/ESP flag" >> ${logFile}
+                parted /dev/${actionDevice} --script set 1 boot on
+                parted /dev/${actionDevice} --script set 1 esp on
+                isFlagSetBOOT=$(parted /dev/${actionDevice} --script print | grep -c 'fat32.*boot')
+                if [ ${isFlagSetBOOT} -eq 0 ]; then
+                    echo "error='failed to set BOOT flag'"
+                    exit 1
+                fi
+                isFlagSetESP=$(parted /dev/${actionDevice} --script print | grep -c 'fat32.*esp')
+                if [ ${isFlagSetESP} -eq 0 ]; then
+                    echo "error='failed to set ESP flag'"
+                    exit 1
+                fi
             fi
-            isFlagSetESP=$(parted /dev/${actionDevice} --script print | grep -c 'fat32.*esp')
-            if [ ${isFlagSetESP} -eq 0 ]; then
-                echo "error='failed to set ESP flag'"
-                exit 1
+        fi
+
+        # fix boot drive
+        if [ "${computerType}" = "raspberrypi" ]; then
+
+            # RASPBERRY PI - add to cmdline.txt
+            systemPartitionUUID=$(blkid -s PARTUUID -o value /dev/${systemPartition})
+            if [ ${#systemPartitionUUID} -gt 0 ] && [ -f /boot/cmdline.txt ]; then
+                echo "# .. add ${systemPartitionUUID} to cmdline.txt" >> ${logFile}
+                cp /boot/cmdline.txt /boot/cmdline.txt.bak 2>/dev/null
+                sed -i \
+                    -e 's/\<root=[^ ]*//g' \
+                    -e 's/\<rootfstype=[^ ]*//g' \
+                    -e 's/\<rw//g' \
+                    -e 's/\<rootwait//g' \
+                    /boot/cmdline.txt
+                echo "root=PARTUUID=${systemPartitionUUID} rootfstype=ext4 rw rootwait" >> /boot/cmdline.txt
+            else
+                echo "warning='failed to add UUID(${systemPartition}) to /boot/cmdline.txt'" >> ${logFile}
+            fi
+
+        else
+            # PC & VM - add to GRUB
+            systemPartitionUUID=$(blkid -s PARTUUID -o value /dev/${systemPartition})
+            if [ ${#systemPartitionUUID} -gt 0 ] && [ -f /etc/default/grub ]; then
+                echo "# .. add ${systemPartitionUUID} to GRUB" >> ${logFile}
+                cp /etc/default/grub /etc/default/grub.bak 2>/dev/null
+                sed -i "s|^GRUB_CMDLINE_LINUX=\".*\"|GRUB_CMDLINE_LINUX=\"root=PARTUUID=${systemPartitionUUID} rw rootflags=errors=remount-ro\"|" /etc/default/grub
+                update-grub >> ${logFile}
+                grub-install /dev/${actionDevice} >> ${logFile}
+            else
+                echo "warning='failed to add UUID(${systemPartition}) to /etc/default/grub'" >> ${logFile}
             fi
         fi
 
@@ -1709,12 +1751,12 @@ if [ "$action" = "recover" ] || [ "$action" = "clean" ]; then
 
         if [ "${actionType}" = "SYSTEM" ]; then
             # system gets full wipe - same as format
-            /home/admin/config.scripts/blitz.data.sh format SYSTEM ${actionDevice}
+            /home/admin/config.scripts/blitz.data.sh setup SYSTEM ${actionDevice}
             exit $?
         fi
         if [ "${actionType}" = "DATA" ]; then
             # data gets full wipe - same as format
-            /home/admin/config.scripts/blitz.data.sh format DATA ${actionDevice}
+            /home/admin/config.scripts/blitz.data.sh setup DATA ${actionDevice}
             exit $?
         fi
         if [ "${actionType}" = "STORAGE" ]; then
@@ -1768,7 +1810,7 @@ if [ "$action" = "recover" ] || [ "$action" = "clean" ]; then
 
         if [ "${actionType}" = "SYSTEM" ]; then
             # system gets full wipe on recover - same as format
-            /home/admin/config.scripts/blitz.data.sh format SYSTEM ${actionDevice}
+            /home/admin/config.scripts/blitz.data.sh setup SYSTEM ${actionDevice}
             exit $?
         fi
         if [ "${actionType}" = "DATA" ]; then
@@ -1927,7 +1969,7 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
 
         # set source hdd of migration in cache & get latest disk info
         /home/admin/_cache.sh set hddMigrateDeviceFrom "${hddMigrateDeviceFrom}"
-        source <(/home/admin/config.scripts/blitz.data.sh status -inspect)
+        source <(/home/admin/config.scripts.blitz.data.sh status -inspect)
 
         # check that target partion is formatted
         if [ "${dataPartition}" = "" ]; then
@@ -2370,30 +2412,28 @@ if [ "$1" = "expand" ]; then
     echo "# deviceName(${deviceName})"
     echo "# partitionNumber(${partitionNumber})"
 
-    echo "# TODO: expand partition and filesystem"
-
     # read partition table
-    #partprobe /dev/sda
-    #if [ $? -ne 0 ]; then
-    #    echo "error='failed to read partition table'"
-    #    exit 1
-    #fi
+    partprobe /dev/${deviceName}
+    if [ $? -ne 0 ]; then
+        echo "error='failed to read partition table'"
+        exit 1
+    fi
 
     # grow partition
-    #apt install -y --no-install-recommends cloud-guest-utils
-    #growpart /dev/${deviceName} ${partitionNumber}
-    #if [ $? -ne 0 ]; then
-    #    echo "error='failed to grow partition'"
-    #    exit 1
-    #fi
+    apt install -y --no-install-recommends cloud-guest-utils
+    growpart /dev/${deviceName} ${partitionNumber}
+    if [ $? -ne 0 ]; then
+        echo "error='failed to grow partition'"
+        exit 1
+    fi
 
     # resize filesystem
-    #apt-get install -y --no-install-recommends e2fsprogs
-    #resize2fs /dev/${partitionName}
-    #if [ $? -ne 0 ]; then
-    #    echo "error='failed to resize filesystem'"
-    #    exit 1
-    #fi
+    apt-get install -y --no-install-recommends e2fsprogs
+    resize2fs /dev/${partitionName}
+    if [ $? -ne 0 ]; then
+        echo "error='failed to resize filesystem'"
+        exit 1
+    fi
 
     echo "# DONE check: df -h"
     exit 0

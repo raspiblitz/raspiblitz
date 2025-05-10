@@ -832,7 +832,6 @@ if [ "${scenario}" != "ready" ] ; then
     echo "scenario(${scenario})" >> ${logFile}
     echo "systemCopy(${systemCopy})" >> ${logFile}
 
-
     #############################################
     # WAIT LOOP: 2nd SETUP UI WAIT LOOP
     # (after HDD/SSD is setup)
@@ -1323,10 +1322,6 @@ else
   if [ ${#storagePartition} -gt 0 ] && [ ${#storageUnusedSpacePercent} -gt 0 ] && [ ${storageUnusedSpacePercent} != "0" ]; then
     echo "# EXPANDING STORAGE PARTITION" >> $logFile
     /home/admin/config.scripts/blitz.data.sh expand ${storagePartition} >> ${logFile}
-  fi
-  if [ ${#systemPartition} -gt 0 ] && [ "${bootFromStorage}" = "0" ] && [ ${#systemUnusedSpacePercent} -gt 0 ] && [ ${systemUnusedSpacePercent} != "0" ]; then
-    echo "# EXPANDING SYSTEM PARTITION" >> $logFile
-    /home/admin/config.scripts/blitz.data.sh expand ${systemPartition} >> ${logFile}
   fi
   if [ ${#dataPartition} -gt 0 ] && [ "${combinedDataStorage}" = "0" ] && [ ${#dataUnusedSpacePercent} -gt 0 ] && [ ${dataUnusedSpacePercent} != "0" ]; then
     echo "# EXPANDING DATA PARTITION" >> $logFile
