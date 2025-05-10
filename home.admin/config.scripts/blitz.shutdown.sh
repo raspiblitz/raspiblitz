@@ -46,9 +46,15 @@ servicesToStop="electrs fulcrum elementsd"
 for service in ${servicesToStop}; do
   if systemctl is-active --quiet ${service}; then
     echo "stopping ${service} - please wait .."
-    timeout 120 systemctl stop ${service}
+    timeout 240 systemctl stop ${service}
   fi
 done
+
+# stop heavy load apps (if installed)
+systemctl stop mempool.service 2>/dev/null
+systemctl stop publicpool.service 2>/dev/null
+systemctl stop btcpayserver.service 2>/dev/null
+systemctl stop nbxplorer.service 2>/dev/null
 
 # lndg
 # stopping LNDg (if installed)
@@ -68,7 +74,7 @@ lightningServicesToStop="lnd tlnd slnd lightningd tlightningd slightningd"
 for service in ${lightningServicesToStop}; do
   if systemctl is-active --quiet ${service}; then
     echo "stopping ${service} - please wait .."
-    timeout 120 systemctl stop ${service}
+    timeout 240 systemctl stop ${service}
   fi
 done
 
@@ -76,17 +82,21 @@ done
 if [ "${network}" != "" ]; then
   # stopping bitcoin (thru cli)
   echo "stop ${network}d (1) - please wait .."
-  timeout 20 sudo -u bitcoin ${network}-cli stop 2>/dev/null
+  timeout 120 sudo -u bitcoin ${network}-cli stop 2>/dev/null
 
   # stopping bitcoind (thru systemd)
   echo "stop ${network}d (2) - please wait .."
-  timeout 120 systemctl stop ${network}d 2>/dev/null
+  timeout 360 systemctl stop ${network}d 2>/dev/null
   timeout 120 systemctl stop t${network}d 2>/dev/null
   timeout 120 systemctl stop s${network}d 2>/dev/null
   sleep 3
 else
   echo "skipping stopping layer1 (network=='' in cache)"
 fi
+
+# attempt to unmount all filesystems to prevent read-only remounts
+echo "Attempting to unmount all filesystems..."
+umount -a -r || echo "Some filesystems could not be unmounted, proceeding with shutdown."
 
 # make sure drives are synced before shutdown
 sync
