@@ -1565,39 +1565,6 @@ if [ "$action" = "setup" ]; then
             fi
         fi
 
-        # fix boot drive
-        if [ "${computerType}" = "raspberrypi" ]; then
-
-            # RASPBERRY PI - add to cmdline.txt
-            systemPartitionUUID=$(blkid -s PARTUUID -o value /dev/${systemPartition})
-            if [ ${#systemPartitionUUID} -gt 0 ] && [ -f /boot/firmware/cmdline.txt ]; then
-                echo "# .. add ${systemPartitionUUID} to cmdline.txt" >> ${logFile}
-                cp /boot/firmware/cmdline.txt /boot/firmware/cmdline.txt.bak 2>/dev/null
-                sed -i \
-                    -e 's/\<root=[^ ]*//g' \
-                    -e 's/\<rootfstype=[^ ]*//g' \
-                    -e 's/\<rw//g' \
-                    -e 's/\<rootwait//g' \
-                    /boot/firmware/cmdline.txt
-                echo "root=PARTUUID=${systemPartitionUUID} rootfstype=ext4 rw rootwait" >> /boot/firmware/cmdline.txt
-            else
-                echo "warning='failed to add UUID(${systemPartition}) to /boot/firmware/cmdline.txt'" >> ${logFile}
-            fi
-
-        else
-            # PC & VM - add to GRUB
-            systemPartitionUUID=$(blkid -s PARTUUID -o value /dev/${systemPartition})
-            if [ ${#systemPartitionUUID} -gt 0 ] && [ -f /etc/default/grub ]; then
-                echo "# .. add ${systemPartitionUUID} to GRUB" >> ${logFile}
-                cp /etc/default/grub /etc/default/grub.bak 2>/dev/null
-                sed -i "s|^GRUB_CMDLINE_LINUX=\".*\"|GRUB_CMDLINE_LINUX=\"root=PARTUUID=${systemPartitionUUID} rw rootflags=errors=remount-ro\"|" /etc/default/grub
-                update-grub >> ${logFile}
-                grub-install /dev/${actionDevice} >> ${logFile}
-            else
-                echo "warning='failed to add UUID(${systemPartition}) to /etc/default/grub'" >> ${logFile}
-            fi
-        fi
-
     # STOARGE with System partition (if addSystemPartition=1)
     elif [ "${actionType}" = "STORAGE" ] && [ ${actionCreateSystemPartition} -eq 1 ]; then
 
