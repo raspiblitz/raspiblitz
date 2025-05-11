@@ -1572,18 +1572,18 @@ if [ "$action" = "setup" ]; then
 
             # RASPBERRY PI - add to cmdline.txt
             systemPartitionUUID=$(blkid -s PARTUUID -o value /dev/${systemPartition})
-            if [ ${#systemPartitionUUID} -gt 0 ] && [ -f /boot/cmdline.txt ]; then
+            if [ ${#systemPartitionUUID} -gt 0 ] && [ -f /boot/firmware/cmdline.txt ]; then
                 echo "# .. add ${systemPartitionUUID} to cmdline.txt" >> ${logFile}
-                cp /boot/cmdline.txt /boot/cmdline.txt.bak 2>/dev/null
+                cp /boot/firmware/cmdline.txt /boot/firmware/cmdline.txt.bak 2>/dev/null
                 sed -i \
                     -e 's/\<root=[^ ]*//g' \
                     -e 's/\<rootfstype=[^ ]*//g' \
                     -e 's/\<rw//g' \
                     -e 's/\<rootwait//g' \
-                    /boot/cmdline.txt
-                echo "root=PARTUUID=${systemPartitionUUID} rootfstype=ext4 rw rootwait" >> /boot/cmdline.txt
+                    /boot/firmware/cmdline.txt
+                echo "root=PARTUUID=${systemPartitionUUID} rootfstype=ext4 rw rootwait" >> /boot/firmware/cmdline.txt
             else
-                echo "warning='failed to add UUID(${systemPartition}) to /boot/cmdline.txt'" >> ${logFile}
+                echo "warning='failed to add UUID(${systemPartition}) to /boot/firmware/cmdline.txt'" >> ${logFile}
             fi
 
         else
