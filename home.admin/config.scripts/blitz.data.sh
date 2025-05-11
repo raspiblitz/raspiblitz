@@ -989,17 +989,15 @@ if [ "$action" = "mount" ]; then
     echo "# mainMountPoint: ${mainMountPoint}"
     echo "# combinedDataStorage: ${combinedDataStorage}"
 
-    # just in case: remove old entries in fstab
+    # update fstab
     sed -i "\#${storageMountPoint}#d" /etc/fstab
     sed -i "/UUID=${storageUUID}/d" /etc/fstab
-    sed -i "\#${dataMountPoint}#d" /etc/fstab
-    sed -i "/UUID=${dataUUID}/d" /etc/fstab
-
-    # update fstab
     echo "# Updating fstab for ${storagePartition} (${storageUUID}) -> ${storageMountPoint}"
     echo "UUID=${storageUUID} ${storageMountPoint} ext4 defaults,noexec 0 2" >> /etc/fstab
     echo "# combinedDataStorage: ${combinedDataStorage}"
     if [ ${combinedDataStorage} -eq 0 ]; then
+        sed -i "\#${dataMountPoint}#d" /etc/fstab
+        sed -i "/UUID=${dataUUID}/d" /etc/fstab 
         echo "# Also Updating fstab for ${dataPartition} (${dataUUID}) -> ${dataMountPoint}"
         echo "UUID=${dataUUID} ${dataMountPoint} ext4 defaults,noexec 0 2" >> /etc/fstab
     fi
