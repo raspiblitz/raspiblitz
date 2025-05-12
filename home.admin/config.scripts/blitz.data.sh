@@ -720,6 +720,20 @@ if [ "$action" = "status" ]; then
         biggerDeviceName=$(find_by_id_filename "${biggerDevice}")
     fi
 
+    # count number of partitions
+    storagePartitionsCount=0
+    systemPartitionsCount=0
+    dataPartitionsCount=0
+    if [ ${#storageDevice} -gt 0 ]; then
+        storagePartitionsCount=$(partx -g /dev/"${storageDevice}" | wc -l)
+    fi
+    if [ ${#systemDevice} -gt 0 ]; then
+        systemPartitionsCount=$(partx -g /dev/"${systemDevice}" | wc -l)
+    fi
+    if [ ${#dataDevice} -gt 0 ]; then
+        dataPartitionsCount=$(partx -g /dev/"${dataDevice}" | wc -l)
+    fi
+
     #################
     # Define Scenario
 
@@ -753,13 +767,16 @@ if [ "$action" = "status" ]; then
         scenario="ready"
 
     # recover: drives there but unmounted & blitz config exists (check raspiblitz.conf with -inspect if its update)
-    elif [ ${#storageDevice} -gt 0 ] && [ ${#storageMountedPath} -eq 0 ] && [ ${dataConfigFound} -eq 1 ] && [ "${systemMountedPath}" != "/" ] && [ ${bootFromSD} -eq 0 ]; then
-        scenario="recover"
-        systemCopy=1
-
-    # recover: drives there but unmounted & blitz config exists (check raspiblitz.conf with -inspect if its update)
     elif [ ${#storageDevice} -gt 0 ] && [ ${#storageMountedPath} -eq 0 ] && [ ${dataConfigFound} -eq 1 ]; then
         scenario="recover"
+        # when not bootet from sd card and device system is not already running
+        if [ ${bootFromSD} -eq 0 ] && [ "${systemMountedPath}" != "/" ]; then
+            systemCopy=1
+        fi
+        # when storagePartition > 2 (signals that the first partions are available for system)
+        if [ ${#storagePartition} -gt 0 ] && [ ${storagePartitionsCount} -gt 2 ] ; then
+            systemCopy=1
+        fi
 
     # setup: drives there but unmounted & no blitz config exists & booted from install media
     elif [ ${#storageDevice} -gt 0 ] && [ ${#storageMountedPath} -eq 0 ] && [ ${dataConfigFound} -eq 0 ] && [ "${systemMountedPath}" != "/" ] && [ ${bootFromSD} -eq 0 ]; then
@@ -858,6 +875,7 @@ if [ "$action" = "status" ]; then
     echo "storageCelsius='${storageCelsius}'"
     echo "storageWarning='${storageWarning}'"
     echo "storagePartition='${storagePartition}'"
+    echo "storagePartitionsCount='${storagePartitionsCount}'"
     echo "storageMountedPath='${storageMountedPath}'"
     echo "storageBlockchainGB='${storageBlockchainGB}'"
     echo "storageMigration='${storageMigration}'"
@@ -871,6 +889,7 @@ if [ "$action" = "status" ]; then
     echo "systemUsePercent='${systemUsePercent}'"
     echo "systemCelsius='${systemCelsius}'"
     echo "systemPartition='${systemPartition}'"
+    echo "systemPartitionsCount='${systemPartitionsCount}'"
     echo "systemMountedPath='${systemMountedPath}'"
     echo "systemUnusedSpacePercent='${systemUnusedPercent}'"
     echo "dataDevice='${dataDevice}'"
@@ -882,6 +901,7 @@ if [ "$action" = "status" ]; then
     echo "dataUsePercent='${dataUsePercent}'"
     echo "dataCelsius='${dataCelsius}'"
     echo "dataPartition='${dataPartition}'"
+    echo "dataPartitionsCount='${dataPartitionsCount}'"
     echo "dataMountedPath='${dataMountedPath}'"
     echo "dataConfigFound='${dataConfigFound}'"
     echo "dataInspectSuccess='${dataInspectSuccess}'"

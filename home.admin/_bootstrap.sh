@@ -642,15 +642,7 @@ if [ "${scenario}" != "ready" ] ; then
   elif [ "${scenario}" = "recover" ]; then
     setupPhase="recovery"
     infoMessage="Please start Recovery"
-    if [ ${#storageDevice} -gt 0 ]; then
-        echo "check that storagePartition ends on 3 (signals that the first partions are ready for system)" >> ${logFile}
-        if [ ${#storagePartition} -gt 0 ]; then
-            storagePartitionEnd=$(echo "${storagePartition}" | sed 's/[0-9]*$//')
-            if [ ${#storagePartitionEnd} -gt 0 ]; then
-              /home/admin/_cache.sh set "system_setup_askSystemCopy" 1
-            fi
-        fi
-    fi
+    /home/admin/_cache.sh set "system_setup_askSystemCopy" "${scenarioSystemCopy}"
 
   elif [ "${scenario}" = "migration" ]; then
     setupPhase="migration"
