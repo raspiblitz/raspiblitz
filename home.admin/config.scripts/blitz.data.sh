@@ -1944,6 +1944,7 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
         echo "### MIGRATING HDD"
         echo "# see /var/cache/raspiblitz/temp/progress.txt for progress"
         systemctl daemon-reload
+        sleep 3
 
         # get source hdd of migration
         hddMigrateDeviceFrom=$4
@@ -1955,7 +1956,7 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
 
         # set source hdd of migration in cache & get latest disk info
         /home/admin/_cache.sh set hddMigrateDeviceFrom "${hddMigrateDeviceFrom}"
-        source <(/home/admin/config.scripts.blitz.data.sh status -inspect)
+        source <(/home/admin/config.scripts/blitz.data.sh status -inspect)
 
         # check that target partion is formatted
         if [ "${dataPartition}" = "" ]; then
