@@ -598,6 +598,15 @@ if [ "${scenario}" != "ready" ] ; then
   echo "/home/admin/config.scripts/blitz.data.sh status -inspect (auto store to cache)" >> $logFile
   source <(/home/admin/config.scripts/blitz.data.sh status -inspect)
 
+  # when there are no partitions on any drive - signal all drives are clean 
+  if [ "${storagePartitionsCount}" = "0" ] && [ "${dataPartitionsCount}" = "0" ] && [ "${systemPartitionsCount}" = "0" ]; then
+    echo "INFO: no partitions on any drive - signal all drives are clean" >> $logFile
+    /home/admin/_cache.sh set system_setup_cleanDrives "1"
+  else
+    echo "INFO: partitions on drives found - ask user to delete data" >> $logFile
+    /home/admin/_cache.sh set system_setup_cleanDrives "0"
+  fi
+  
   # add info if a flag shows that install medium was tried before
   if [ -f "/home/admin/systemcopy.flag" ]; then
     /home/admin/_cache.sh set "system_setup_secondtry" "1"
