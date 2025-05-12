@@ -599,7 +599,7 @@ if [ "${scenario}" != "ready" ] ; then
   source <(/home/admin/config.scripts/blitz.data.sh status -inspect)
 
   # when there are no partitions on any drive - signal all drives are clean 
-  if [ "${storagePartitionsCount}" = "0" ] && [ "${dataPartitionsCount}" = "0" ] && [ "${systemPartitionsCount}" = "0" ]; then
+  if [ "${storagePartitionsCount}" = "0" ] && [ "${dataPartitionsCount}" = "0" ]; then
     echo "INFO: no partitions on any drive - signal all drives are clean" >> $logFile
     /home/admin/_cache.sh set system_setup_cleanDrives "1"
   else
