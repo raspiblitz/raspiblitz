@@ -1911,7 +1911,7 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
             rpiVersion=$(strings /proc/device-tree/model | grep -o 'Raspberry Pi [0-9]\+' | grep -o '[0-9]\+')
             if [ "${rpiVersion}" != "" ] && [ ${rpiVersion} -lt 5 ]; then
                 echo "# RaspberryPi4 - set system_setup_askSystemCopy to 0"
-                /home/admin/_cache.sh set system_setup_storageBlockchainGB "0"
+                /home/admin/_cache.sh set system_setup_askSystemCopy "0"
             fi
         fi
            
