@@ -467,13 +467,13 @@ if [ "$action" = "status" ]; then
         biggerSizeGB=$(echo "${listOfBiggerDevices}" | head -n1 | awk '{print $2}')
     fi
 
-    echo "# RESULT AFTER DETECTION"
-    echo "# dataDevice: ${dataDevice} (${dataSizeGB}GB) (${dataMountedPath})"
-    echo "# storageDevice: ${storageDevice} (${storageSizeGB}GB) (${storageMountedPath})"
-    echo "# systemDevice: ${systemDevice} (${systemSizeGB}GB) (${systemMountedPath})"
-    echo "# installDevice: ${installDevice} (${installDeviceActive}) (${installDeviceReadOnly})"
-    echo "# biggerDevice: ${biggerDevice} (${biggerSizeGB}GB)"
-    echo "# combinedDataStorage: ${combinedDataStorage}"
+    #echo "# RESULT AFTER DETECTION"
+    #echo "# dataDevice: ${dataDevice} (${dataSizeGB}GB) (${dataMountedPath})"
+    #echo "# storageDevice: ${storageDevice} (${storageSizeGB}GB) (${storageMountedPath})"
+    #echo "# systemDevice: ${systemDevice} (${systemSizeGB}GB) (${systemMountedPath})"
+    #echo "# installDevice: ${installDevice} (${installDeviceActive}) (${installDeviceReadOnly})"
+    #echo "# biggerDevice: ${biggerDevice} (${biggerSizeGB}GB)"
+    #echo "# combinedDataStorage: ${combinedDataStorage}"
 
     ########################
     # PROPOSE LAYOUT
@@ -1941,12 +1941,13 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
 
     if [ "${action}" = "run" ]; then
 
-        echo "# MIGRATING HDD"
+        echo "### MIGRATING HDD"
         echo "# see /var/cache/raspiblitz/temp/progress.txt for progress"
         systemctl daemon-reload
 
         # get source hdd of migration
         hddMigrateDeviceFrom=$4
+        echo "# hddMigrateDeviceFrom(${hddMigrateDeviceFrom})"
         if [ ${#hddMigrateDeviceFrom} -eq 0 ]; then
             echo "error='missing parameter'"
             exit 1
