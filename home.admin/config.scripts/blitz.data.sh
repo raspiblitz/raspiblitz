@@ -225,7 +225,8 @@ if [ "$action" = "status" ]; then
     
     # get a list of all existing ext4 partitions of connected storage drives
     # cdrom and sd card will get ignored - but it might include install thumb drive on laptops
-    ext4Partitions=$(lsblk -no NAME,SIZE,FSTYPE | sed 's/[└├]─//g' | grep -E "^(sd|nvme)" | grep "ext4" | \
+    ext4Partitions=$(lsblk -no NAME,SIZE,FSTYPE | sed 's/[└├]─//g' | grep -E "^(sd|nvme)" | grep "ext4")
+    ext4PartitionsSorted=$( echo "${ext4Partitions}" | \
     awk '{ 
         size=$2
         if(size ~ /T/) { 
@@ -237,7 +238,14 @@ if [ "$action" = "status" ]; then
         }
         printf "%s %.0f\n", $1, size
     }' | sort -k2,2n -k1,1)
+
     echo "ext4Partitions='${ext4Partitions}'"
+    echo "ext4Partitions='${ext4PartitionsSorted}'"
+    # if both have the same line count - use the sorted one
+    if [ "$(echo "${ext4Partitions}" | wc -l)" = "$(echo "${ext4PartitionsSorted}" | wc -l)" ]; then
+        echo "# using sorted list"
+        ext4Partitions="${ext4PartitionsSorted}"
+    fi  
 
     # check if some drive is already mounted on /mnt/temp
     mountPath=$(findmnt -n -o TARGET "/mnt/temp" 2>/dev/null)
