@@ -3,22 +3,22 @@
 # Based on: https://gist.github.com/normandmickey/3f10fc077d15345fb469034e3697d0d0
 
 # https://github.com/dgarage/NBXplorer/tags
-NBXplorerVersion="v2.5.2"
+NBXplorerVersion="v2.5.9"
 # https://github.com/btcpayserver/btcpayserver/releases
-BTCPayVersion="v1.13.0"
+BTCPayVersion="v2.0.3"
 
 # check who signed the release (person that published release)
-#PGPsigner="nicolasdorier"
-#PGPpubkeyLink="https://keybase.io/nicolasdorier/pgp_keys.asc"
-#PGPpubkeyFingerprint="AB4CFA9895ACA0DBE27F6B346618763EF09186FE"
+PGPsigner="nicolasdorier"
+PGPpubkeyLink="https://keybase.io/nicolasdorier/pgp_keys.asc"
+PGPpubkeyFingerprint="AB4CFA9895ACA0DBE27F6B346618763EF09186FE"
 # ---
 #PGPsigner="Kukks"
 #PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
 #PGPpubkeyFingerprint="8E5530D9D1C93097"
 # ---
-PGPsigner="web-flow"
-PGPpubkeyLink="https://github.com/web-flow.gpg"
-PGPpubkeyFingerprint="B5690EEEBB952194"
+# PGPsigner="web-flow"
+# PGPpubkeyLink="https://github.com/web-flow.gpg"
+# PGPpubkeyFingerprint="B5690EEEBB952194"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -457,18 +457,18 @@ if [ "$1" = "install" ]; then
   cpu=$(uname -m)
   if [ "${cpu}" = "aarch64" ]; then
     binaryVersion="arm64"
-    dotNetdirectLink="https://download.visualstudio.microsoft.com/download/pr/43e09d57-d0f5-4c92-a75a-b16cfd1983a4/cba02bd4f7c92fb59e22a25573d5a550/dotnet-sdk-8.0.100-linux-arm64.tar.gz"
-    dotNetChecksum="3296d2bc15cc433a0ca13c3da83b93a4e1ba00d4f9f626f5addc60e7e398a7acefa7d3df65273f3d0825df9786e029c89457aea1485507b98a4df2a1193cd765"
+    dotNetdirectLink="https://download.visualstudio.microsoft.com/download/pr/853490db-6fd3-4c17-ad8e-9dbb61261252/3d36d7d5b861bbb219aa1a66af6e6fd2/dotnet-sdk-8.0.403-linux-arm64.tar.gz"
+    dotNetChecksum="f42e1ba9a897f91c8d734b09a9bfc82428f0629b7cdd9375262158d9f282797c199558c37ae7f36947e57d8adc61af9490595c4e6bbd05217fd6d05133dded4d"
   elif [ "${cpu}" = "x86_64" ]; then
     binaryVersion="x64"
-    dotNetdirectLink="https://download.visualstudio.microsoft.com/download/pr/5226a5fa-8c0b-474f-b79a-8984ad7c5beb/3113ccbf789c9fd29972835f0f334b7a/dotnet-sdk-8.0.100-linux-x64.tar.gz"
-    dotNetChecksum="13905ea20191e70baeba50b0e9bbe5f752a7c34587878ee104744f9fb453bfe439994d38969722bdae7f60ee047d75dda8636f3ab62659450e9cd4024f38b2a5"
+    dotNetdirectLink="https://download.visualstudio.microsoft.com/download/pr/ca6cd525-677e-4d3a-b66c-11348a6f920a/ec395f498f89d0ca4d67d903892af82d/dotnet-sdk-8.0.403-linux-x64.tar.gz"
+    dotNetChecksum="7aa03678228b174f51c4535f18348cdf7a5d35e243b1f8cb28a4a30e402e47567d06df63c8f6da4bdc3c7e898f54f4acc08d9952bfa49d3f220d0353253ac3e9"
   else
     echo "# FAIL! CPU (${cpu}) not supported."
     echo "result='dotnet cpu not supported'"
     exit 1
   fi
-  dotNetName="dotnet-sdk-8.0.100-linux-${binaryVersion}.tar.gz"
+  dotNetName="dotnet-sdk-8.0.403-linux-${binaryVersion}.tar.gz"
   sudo rm /home/btcpay/${dotnetName} 2>/dev/null
   sudo -u btcpay wget "${dotNetdirectLink}" -O "${dotNetName}"
   # check binary is was not manipulated (checksum test)
@@ -520,10 +520,12 @@ if [ "$1" = "install" ]; then
   sudo -u btcpay git clone https://github.com/btcpayserver/btcpayserver.git 2>/dev/null
   cd btcpayserver || exit 1
   sudo -u btcpay git reset --hard $BTCPayVersion
-  #sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh "web-flow" "https://github.com/web-flow.gpg" "(4AEE18F83AFDEB23|B5690EEEBB952194)" || exit 1
 
   echo "# verify signature of ${PGPsigner}"
-  sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
+  if ! sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}"; then
+    # try with webflow
+    sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh "web-flow" "https://github.com/web-flow.gpg" "B5690EEEBB952194" || exit 1
+  fi
 
   echo "# Build BTCPayServer $BTCPayVersion"
   # from the build.sh with path
@@ -935,10 +937,6 @@ if [ "$1" = "update" ]; then
     TAG=$(git tag | grep v1 | sort -V | tail -1)
     echo "# Reset to the latest release tag: $TAG"
     sudo -u btcpay git reset --hard $TAG
-    # PGP verify - disabled for the update
-    # https://github.com/rootzoll/raspiblitz/issues/3025
-    # sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh \
-    #  "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
     echo "# Build BTCPayServer $TAG"
     # from the build.sh with path
     sudo systemctl stop btcpayserver
