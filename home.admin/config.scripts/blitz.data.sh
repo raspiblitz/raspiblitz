@@ -1963,14 +1963,17 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
         source <(/home/admin/config.scripts/blitz.data.sh status -inspect)
 
         # check that target partion is formatted
-        if [ "${dataPartition}" = "" ]; then
-            echo "error='data drive not formatted'"
+        if [ "${storagePartition}" = "" ]; then
+            echo "error='storage drive not formatted'"
             exit 1
         fi
 
         # check that target partion is formatted
-        if [ "${storagePartition}" = "" ]; then
-            echo "error='storage drive not formatted'"
+        if [ "${combinedDataStorage}" = "1" ]; then
+            dataPartition="${storagePartition}"
+        fi
+        if [ "${dataPartition}" = "" ]; then
+            echo "error='data drive not formatted'"
             exit 1
         fi
 
@@ -2014,12 +2017,6 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
             echo "error='storage partition is mounted'"
             exit 1
         fi
-
-        # only run if scenario is setup
-        #if [ "${scenario}" != "setup" ]; then
-        #    echo "error='wrong scenario'"
-        #    exit 1
-        #fi
 
         # mount source partition
         mkdir -p /mnt/migrate_source 2>/dev/null
