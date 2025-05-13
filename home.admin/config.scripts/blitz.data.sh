@@ -506,7 +506,7 @@ if [ "$action" = "status" ]; then
         }
         if (size >= 7) printf "%s %.0f\n", $1, size
         }' | sort -k2,2nr -k1,1 )
-        echo "listOfDevices='${listOfDevices}'"
+        #echo "listOfDevices='${listOfDevices}'"
 
         # if there is a migration device set - remove it from the list
         source <(/home/admin/_cache.sh get hddMigrateDeviceFrom)
