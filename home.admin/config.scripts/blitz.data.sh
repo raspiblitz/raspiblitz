@@ -952,6 +952,7 @@ fi
 
 if [ "$action" = "mount" ]; then
 
+    mainMountPoint="/mnt/hdd"
     storageMountPoint="/mnt/disk_storage"
     dataMountPoint="/mnt/disk_data"
 
