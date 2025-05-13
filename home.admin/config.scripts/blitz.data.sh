@@ -211,6 +211,13 @@ if [ "$action" = "status" ]; then
         fi
     fi
 
+    # check if some drive is already mounted on /mnt/temp
+    mountPath=$(findmnt -n -o TARGET "/mnt/temp" 2>/dev/null)
+    if [ -n "${mountPath}" ]; then
+        echo "error='a drive already mounted on /mnt/temp'"
+        exit 1
+    fi
+
     ##########################
     # CHECK EXISTING DRIVES
 
@@ -223,35 +230,17 @@ if [ "$action" = "status" ]; then
     dataConfigFound=0
     combinedDataStorage=0
     
-    # get a list of all existing ext4 partitions of connected storage drives (sdX, nvmeX)
-    # output is sorted by size (smallest first), then by name
-    # size is converted to GiB
-    ext4Partitions=$(lsblk -lno NAME,SIZE,FSTYPE,TYPE | \
-    awk '
-    # $1: NAME (e.g., sda1, nvme0n1p1)
-    # $2: SIZE (in bytes, due to -b option for lsblk)
-    # $3: FSTYPE (e.g., ext4)
-    # $4: TYPE (e.g., part)
-    ($4 == "part" && $3 == "ext4" && ($1 ~ /^sd/ || $1 ~ /^nvme/)) {
-        # Convert size from bytes to GiB
-        size_gib = $2 / (1024 * 1024 * 1024);
-        printf "%s %.0f\n", $1, size_gib;
-    }
-' | sort -k2,2n -k1,1)
-    echo "ext4Partitions='${ext4Partitions}'"
-
-    # check if some drive is already mounted on /mnt/temp
-    mountPath=$(findmnt -n -o TARGET "/mnt/temp" 2>/dev/null)
-    if [ -n "${mountPath}" ]; then
-        echo "error='a drive already mounted on /mnt/temp'"
-        exit 1
+    # get a list of all existing ext4 partitions of connected storage drives (sdX, nvmeX) - sorted by size (smallest first, then by name)
+    ext4Partitions=$(lsblk -b -n -l -o NAME,SIZE,FSTYPE,TYPE | grep "part" | grep "ext4" | grep -E "^(sd|nvme)" | awk '{print $1, $2}' | sort -k2,2n -k1,1)
+    if [ ${#ext4Partitions} -eq 0 ]; then
+        echo "# no ext4 partitions found"
     fi
 
     # check every partition if it has data to recover
     while IFS= read -r line; do
         if [ -n "$line" ]; then
             name=$(echo "$line" | awk '{print $1}')
-            size=$(echo "$line" | awk '{print $2}')
+            size=$(echo "$line" | awk '{printf "%.0f", $2/(1024*1024*1024)}')
             
             # if user already set a migration source device - ignore it in the list
             source <(/home/admin/_cache.sh get hddMigrateDeviceFrom)
