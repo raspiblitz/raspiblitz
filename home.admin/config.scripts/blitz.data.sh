@@ -1057,10 +1057,6 @@ if [ "$action" = "mount" ]; then
         echo "error='Failed to mount ${dataPartition} on ${dataMountPoint} after fstab update'"
         exit 1
     fi
-    chown bitcoin:bitcoin ${mainMountPoint}/app-storage
-    chown bitcoin:bitcoin ${mainMountPoint}/app-data
-    chmod 775 ${mainMountPoint}/app-storage
-    chmod 775 ${mainMountPoint}/app-data
     
     echo "# Mount successful." >> ${logFile}
     exit 0
@@ -1239,6 +1235,8 @@ if [ "$action" = "link" ]; then
     chmod -R g+X /home/admin/.lnd
 
     # set permissions on complete lnd macaroon folder path
+    chmod a+rx ${mainMountPoint} 2>/dev/null
+    chmod a+rx ${mainMountPoint}/app-data 2>/dev/null
     chmod a+rx ${mainMountPoint}/app-data/lnd 2>/dev/null
     chmod a+rx ${mainMountPoint}/app-data/lnd/data 2>/dev/null
     chmod a+rx ${mainMountPoint}/app-data/lnd/data/chain 2>/dev/null
