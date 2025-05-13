@@ -12,6 +12,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ];
   echo "RaspiBlitz Sync Scripts"
   echo "blitz.github.sh info"
   echo "blitz.github.sh [-run|-install|-justinstall] branch [repo]"
+  echo "blitz.github.sh sharedfolder [on|off]"
   exit 1
 fi
 
@@ -19,11 +20,21 @@ source /mnt/hdd/raspiblitz.conf 2>/dev/null
 
 cd /home/admin/raspiblitz
 
+# check if running shared folder
+sharedFolderIsOn=$(df | grep -c "/home/admin/raspiblitz")
+
 # gather info
-activeGitHubUser=$(sudo -u admin cat /home/admin/raspiblitz/.git/config 2>/dev/null | grep "url = " | cut -d "=" -f2 | cut -d "/" -f4)
-activeBranch=$(git branch 2>/dev/null | grep \* | cut -d ' ' -f2)
-commitHashLong=$(git log -n1 --format=format:"%H")
-commitHashShort=${commitHashLong:0:7}
+if [ ${sharedFolderIsOn} -eq 0 ]; then
+  activeGitHubUser=$(sudo -u admin cat /home/admin/raspiblitz/.git/config 2>/dev/null | grep "url = " | cut -d "=" -f2 | cut -d "/" -f4)
+  activeBranch=$(git branch 2>/dev/null | grep \* | cut -d ' ' -f2)
+  commitHashLong=$(git log -n1 --format=format:"%H")
+  commitHashShort=${commitHashLong:0:7}
+else
+  activeGitHubUser="local"
+  activeBranch="sharedfolder"
+  commitHashLong=""
+  commitHashShort=""
+fi
 
 # if parameter is "info" just give back basic info about sync
 if [ "$1" == "info" ]; then
@@ -35,8 +46,47 @@ if [ "$1" == "info" ]; then
   exit 1
 fi
 
+if [ "$1" == "sharedfolder" ]; then
+
+  if [ "$2" == "off" ]; then
+    if [ "${sharedFolderIsOn}" == "0" ]; then
+      echo "# Shared Folder is alraedy off"
+      exit 0
+    fi
+    sudo umount -f /home/admin/raspiblitz || echo "# failed to unmount shared folder" && exit 1
+    sudo rm -r /home/admin/raspiblitz
+    mv /home/admin/raspiblitz_github /home/admin/raspiblitz
+    exit 0
+  fi 
+
+  if [ "${sharedFolderIsOn}" == "1" ]; then
+    echo "# Shared Folder is alraedy on"
+    exit 0
+  fi
+
+  # manual instrctions to user
+  echo "# PLEASE MAKE SURE VM IS PREPARED - in UTM:"
+  echo "# - in VM settings (VM might need to be off for changes)"
+  echo "# - under SHARED activate 'SPICE WebDAV'"
+  echo "# - set path to your local 'raspiblitz' project folder"
+  echo "# IF YOUR SURE ALL IS READY PRESS ENTER or CTRL+c to abort"
+  read
+
+  # install dependencies (if not already installed)
+  sudo dpkg --configure -a
+  sudo DEBIAN_FRONTEND=noninteractive apt install -y spice-webdavd davfs2
+  sudo sed -i 's/# *use_locks.*/use_locks 0/' /etc/davfs2/davfs2.conf
+  sudo sed -i 's/# *ask_auth.*/ask_auth 0/' /etc/davfs2/davfs2.conf
+  sudo systemctl restart spice-webdavd 2>/dev/null
+
+  # mount shared folder
+  mv /home/admin/raspiblitz /home/admin/raspiblitz_github
+  mkdir -p /home/admin/raspiblitz
+  sudo mount -t davfs http://localhost:9843/ /home/admin/raspiblitz || echo "# failed to mount shared folder - run: blitz.github.sh sharedfolder off" && exit 1
+  exit 0
+fi
+
 # change branch if set as parameter
-vagrant=0
 clean=0
 install=0
 wantedBranch="$1"
@@ -45,12 +95,6 @@ if [ "${wantedBranch}" = "-run" ]; then
   # "-run" its just used by "patch" command and will ignore all further parameter
   wantedBranch="${activeBranch}"
   wantedGitHubUser="${activeGitHubUser}"
-  # detect if running in vagrant VM
-  vagrant=$(df | grep -c "/vagrant")
-  if [ "$2" = "git" ]; then 
-    echo "# forcing github over vagrant sync"
-    vagrant=0
-  fi
 fi
 if [ "${wantedBranch}" = "-install" ]; then
   install=1
@@ -64,8 +108,16 @@ if [ "${wantedBranch}" = "-justinstall" ]; then
   wantedGitHubUser=""
 fi
 
+# make sure github repo is unshallowed
+isShallow=$(git rev-parse --is-shallow-repositor)
+if [ "${isShallow}" = "true" ]; then
+  echo "# getting github history ..."
+  git config --global --add safe.directory /home/admin/raspiblitz
+  git fetch --unshallow || echo "# failed to unshallow github repo" && exit 1
+fi
+
 # set to another GutHub repo as origin
-if [ ${#wantedGitHubUser} -gt 0 ] && [ ${vagrant} -eq 0 ]; then
+if [ ${#wantedGitHubUser} -gt 0 ]; then
   echo "# your active GitHubUser is: ${activeGitHubUser}"
   echo "# your wanted GitHubUser is: ${wantedGitHubUser}"
   if [ "${activeGitHubUser}" = "${wantedGitHubUser}" ]; then
@@ -85,7 +137,7 @@ if [ ${#wantedGitHubUser} -gt 0 ] && [ ${vagrant} -eq 0 ]; then
   fi
 fi
 
-if [ ${#wantedBranch} -gt 0 ] && [ ${vagrant} -eq 0 ]; then
+if [ ${#wantedBranch} -gt 0 ]; then
   echo "# your active branch is: ${activeBranch}"
   echo "# your wanted branch is: ${wantedBranch}"
   if [ "${wantedBranch}" = "${activeBranch}" ]; then
@@ -119,8 +171,10 @@ fi
 
 checkSumBlitzPyBefore=$(find /home/admin/raspiblitz/home.admin/BlitzPy -type f -exec md5sum {} \; | md5sum)
 checkSumBlitzTUIBefore=$(find /home/admin/raspiblitz/home.admin/BlitzTUI -type f -exec md5sum {} \; | md5sum)
-
-if [ ${vagrant} -eq 0 ]; then
+if [ ${sharedFolderIsOn} -eq 1 ]; then
+  echo "# *** SYNCING RASPIBLITZ CODE WITH SHARED FOLDER ***"
+  cd ..
+else
   origin=$(git remote -v | grep 'origin' | tail -n1)
   echo "# *** SYNCING RASPIBLITZ CODE WITH GITHUB ***"
   echo "# This is for developing on your RaspiBlitz."
@@ -132,18 +186,6 @@ if [ ${vagrant} -eq 0 ]; then
   git config pull.rebase true
   git pull 1>&2
   cd ..
-else
-  cd ..
-  echo "# --> VAGRANT IS ACTIVE"
-  echo "# *** SYNCING RASPIBLITZ CODE WITH VAGRANT LINKED DIRECTORY ***"
-  echo "# This is for developing on your RaspiBlitz with a VM."
-  echo "# - delete /home/admin/raspiblitz"
-  sudo rm -r /home/admin/raspiblitz
-  sudo mkdir /home/admin/raspiblitz
-  echo "# - copy from vagrant new raspiblitz files (ignore hidden dirs)"
-  sudo cp -R /vagrant/* /home/admin/raspiblitz
-  echo "# - set admin as owner of files"
-  sudo chown admin:admin -R /home/admin/raspiblitz
 fi
 
 echo "# COPYING from GIT-Directory to /home/admin/"

@@ -133,7 +133,17 @@ patch()
            PR "Checkout a PullRequest to test"
 	)
 
-  CHOICE=$(whiptail --clear --title " GitHub user:${activeGitHubUser} branch:${activeBranch} (${commitHashShort})" --menu "" 11 60 4 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+  # when VM offer switch to shared folder
+  sharedFolderIsOn=$(df | grep -c "/home/admin/raspiblitz")
+  if [ "${vm}" = "1" ]; then
+    if [ ${sharedFolderIsOn} -eq 0 ]; then
+      OPTIONS+=(SHARED "FOLDER --> ON")
+    else
+      OPTIONS+=(SHARED "FOLDER --> OFF")
+    fi
+  fi
+
+  CHOICE=$(whiptail --clear --title " GitHub user:${activeGitHubUser} branch:${activeBranch} (${commitHashShort})" --menu "" 11 60 5 "${OPTIONS[@]}" 2>&1 >/dev/tty)
 
   clear
   case $CHOICE in
@@ -200,6 +210,17 @@ patch()
         fi
       fi
       patch all
+      exit 0
+      ;;
+    SHARED)
+      clear
+      if [ ${sharedFolderIsOn} -eq 0 ]; then
+        echo "enable shared folder .."
+        sudo /home/admin/config.scripts/blitz.github.sh sharedfolder on
+      else
+        echo "disable shared folder .."
+        sudo /home/admin/config.scripts/blitz.github.sh sharedfolder off
+      fi
       exit 0
       ;;
     PR)
