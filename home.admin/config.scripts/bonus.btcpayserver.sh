@@ -3,9 +3,9 @@
 # Based on: https://gist.github.com/normandmickey/3f10fc077d15345fb469034e3697d0d0
 
 # https://github.com/dgarage/NBXplorer/tags
-NBXplorerVersion="v2.5.9"
+NBXplorerVersion="v2.5.17"
 # https://github.com/btcpayserver/btcpayserver/releases
-BTCPayVersion="v2.0.3"
+BTCPayVersion="v2.0.5"
 
 # check who signed the release (person that published release)
 PGPsigner="nicolasdorier"
@@ -929,12 +929,12 @@ if [ "$1" = "update" ]; then
   REMOTE=$(git rev-parse "$UPSTREAM")
 
   if [ $LOCAL = $REMOTE ]; then
-    TAG=$(git tag | grep v1 | sort -V | tail -1)
+    TAG=$(git tag | grep v2 | sort -V | tail -1)
     echo "# Up-to-date on version $TAG"
   else
     echo "# Pulling latest changes..."
     sudo -u btcpay git pull -p
-    TAG=$(git tag | grep v1 | sort -V | tail -1)
+    TAG=$(git tag | grep v2 | sort -V | tail -1)
     echo "# Reset to the latest release tag: $TAG"
     sudo -u btcpay git reset --hard $TAG
     echo "# Build BTCPayServer $TAG"

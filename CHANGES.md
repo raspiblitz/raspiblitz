@@ -10,7 +10,7 @@ Features:
 - Update: RaspberryOS arm64 base image 2024-11-19 (Debian 12 Bookworm) [details](https://downloads.raspberrypi.com/raspios_full_arm64/release_notes.txt)
 - Update: amd64 base image: debian-12.8.0-amd64-netinst.iso [details](https://www.debian.org/releases/stable/amd64/release-notes/ch-whats-new.en.html)
 - Update: LNbits 1.0.0 [details](https://github.com/lnbits/lnbits/releases/tag/v1.0.0)
-- Update: BTCPayServer 2.0.3 [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v2.0.3)
+- Update: BTCPayServer v2.0.5 [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v2.0.5)
 - Update: Specter Desktop 2.0.5 [details](https://github.com/cryptoadvance/specter-desktop/releases/tag/v2.0.5)
 - Update: Fulcrum Electrum server v1.11.1 (CLI install script with status menu) [details](https://github.com/cculianu/Fulcrum/releases/tag/v1.11.1)
 - Update: Helipad (Podcasting 2.0 Boostagram reader) v0.2.1 [details](https://github.com/Podcastindex-org/helipad/)
