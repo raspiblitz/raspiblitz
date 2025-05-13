@@ -725,13 +725,13 @@ if [ "$action" = "status" ]; then
     systemPartitionsCount=0
     dataPartitionsCount=0
     if [ ${#storageDevice} -gt 0 ]; then
-        storagePartitionsCount=$(partx -g /dev/"${storageDevice}" | wc -l)
+        storagePartitionsCount=$(partx -g /dev/"${storageDevice}" 2>/dev/null | wc -l)
     fi
     if [ ${#systemDevice} -gt 0 ]; then
-        systemPartitionsCount=$(partx -g /dev/"${systemDevice}" | wc -l)
+        systemPartitionsCount=$(partx -g /dev/"${systemDevice}" 2>/dev/null | wc -l)
     fi
     if [ ${#dataDevice} -gt 0 ]; then
-        dataPartitionsCount=$(partx -g /dev/"${dataDevice}" | wc -l)
+        dataPartitionsCount=$(partx -g /dev/"${dataDevice}" 2>/dev/null | wc -l)
     fi
 
     #################
