@@ -40,6 +40,9 @@ else
   encryptedHSMoption=""
 fi
 
+sudo mkdir -p /run/lightningd
+sudo chown bitcoin:bitcoin /run/lightningd
+
 sudo systemctl stop ${netprefix}lightningd
 sudo systemctl disable ${netprefix}lightningd
 # based on https://github.com/ElementsProject/lightning/blob/master/contrib/init/lightningd.service

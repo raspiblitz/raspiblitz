@@ -2,7 +2,7 @@
 
 # set version (change if update is available)
 # https://github.com/ElementsProject/elements/releases
-VERSION="elements-23.2.1"
+VERSION="elements-23.2.4"
 SIG_PUBKEY="BD0F3062F87842410B06A0432F656B0610604482" # Pablo Greco <pgreco@blockstream.com>
 
 # command info
@@ -136,7 +136,7 @@ function installBinary {
 
 function removeService() {
   if [ -f "/etc/systemd/system/elementsd.service" ]; then
-    /usr/local/bin/elements-cli stop
+    elements-cli stop
     sudo systemctl stop elementsd
     sudo systemctl disable elementsd
     sudo rm /etc/systemd/system/elementsd.service 2>/dev/null

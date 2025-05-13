@@ -73,6 +73,9 @@ if [ "$1" == "prestart" ]; then
       echo "# The cln-grpc plugin is not present but in config"
       sed -i "/^grpc-port/d" ${CLCONF}
       rm -rf /home/bitcoin/${netprefix}cl-plugins-enabled/cln-grpc
+    else
+      echo "# Make sure that the correct GRPC port is used for $NETWORK" 
+      sed -i "/^grpc-port=*/grpc-port=${portprefix}4772/g" ${CLCONF}
     fi
   fi
 

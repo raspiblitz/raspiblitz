@@ -2,7 +2,7 @@
 # https://lightning.readthedocs.io/
 
 # https://github.com/ElementsProject/lightning/releases
-CLVERSION="v24.11"
+CLVERSION="v25.02.2"
 
 # https://github.com/ElementsProject/lightning/tree/master/contrib/keys
 # rustyrussell D9200E6CD1ADB8F1
@@ -11,9 +11,9 @@ CLVERSION="v24.11"
 # pneuroth (nepet) C3F21EE387FF4CD2
 # sfarooqui (ShahanaFarooqui) B56B4453DA8C6DF7FC9BCFCBDCA40B7128DA62A8
 # amyers (endothermicdev) F3BF63F2747436AB
-PGPsigner="rustyrussell"
+PGPsigner="sfarooqui"
 PGPpubkeyLink="https://raw.githubusercontent.com/ElementsProject/lightning/master/contrib/keys/${PGPsigner}.txt"
-PGPpubkeyFingerprint="D9200E6CD1ADB8F1"
+PGPpubkeyFingerprint="B56B4453DA8C6DF7FC9BCFCBDCA40B7128DA62A8"
 
 # help
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
@@ -43,14 +43,13 @@ function installDependencies() {
   sudo apt-get install -y libpq-dev
   # for clnrest - https://docs.corelightning.org/docs/installation#clnrest
   sudo apt-get install -y python3-json5 python3-flask python3-gunicorn
-  # python deps
+
+  # python deps for wss-proxy
   # upgrade pip
   sudo pip3 config set global.break-system-packages true
   sudo pip3 install --upgrade pip
-  # for clnrest
+  # for wss-proxy - https://docs.corelightning.org/docs/installation#wss-proxy
   sudo -u bitcoin pip3 config set global.break-system-packages true
-  sudo -u bitcoin pip3 install --user flask-cors flask-restx pyln-client flask-socketio gevent gevent-websocket
-  # for wss proxy - https://docs.corelightning.org/docs/installation#wss-proxy
   sudo -u bitcoin pip3 install --user pyln-client websockets
   # poetry
   sudo pip3 install poetry
@@ -60,6 +59,22 @@ function installDependencies() {
   export PATH="home/bitcoin/.local/bin:$PATH"
   cd /home/bitcoin/lightning || exit 1
   sudo -u bitcoin poetry install
+
+  # rust deps for cln-grpc and clnrest plugins
+  if ! sudo -u bitcoin bash -c 'command -v cargo'; then
+    sudo -u bitcoin bash -c 'curl --proto "=https" --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y'
+  fi
+  # Ensure /home/bitcoin/.cargo/bin is in PATH for the bitcoin user
+  if ! grep -Fq '.cargo/bin' /home/bitcoin/.profile; then
+    echo -e '\n# set PATH so it includes Cargo'\''s bin if it exists\nif [ -d "$HOME/.cargo/bin" ] ; then\n    PATH="$HOME/.cargo/bin:$PATH"\nfi' | sudo tee -a /home/bitcoin/.profile
+  fi
+  export PATH="/home/bitcoin/.cargo/bin:$PATH"
+  sudo apt-get install -y protobuf-compiler
+
+  # remove old clnrest dir if exists
+  if [ -d /usr/local/libexec/c-lightning/plugins/clnrest ]; then
+    sudo rm -rf /usr/local/libexec/c-lightning/plugins/clnrest
+  fi
 }
 
 function buildAndInstallCLbinaries() {
@@ -284,6 +299,7 @@ log-level=info
 plugin-dir=/home/bitcoin/${netprefix}cl-plugins-enabled
 clnrest-port=${portprefix}7378
 clnrest-host=0.0.0.0
+grpc-port=${portprefix}4772
 
 # Tor settings
 proxy=127.0.0.1:9050
