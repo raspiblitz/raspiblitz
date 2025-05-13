@@ -992,9 +992,12 @@ if [ "$action" = "mount" ]; then
         exit 1
     fi
 
-
     # determine UUID of storage partition
     storageUUID=$(blkid -s UUID -o value "/dev/${storagePartition}")
+    if [ "${storageUUID}" = "" ]; then
+        echo "# storageUUID not found with blkid - trying lsblk"
+        storageUUID=$(lsblk -n -o UUID "/dev/${storagePartition}")
+    fi
     if [ "${storageUUID}" = "" ]; then
         echo "error='Could not find UUID for storage partition ${storagePartition} (${storageUUID})'"
         exit 1
@@ -1004,6 +1007,10 @@ if [ "$action" = "mount" ]; then
     dataUUID=""
     if [ ${combinedDataStorage} -eq 0 ]; then
         dataUUID=$(blkid -s UUID -o value "/dev/${dataPartition}")
+        if [ "${dataUUID}" = "" ]; then
+            echo "# dataUUID not found with blkid - trying lsblk"
+            dataUUID=$(lsblk -n -o UUID "/dev/${dataPartition}")
+        fi
         if [ "${dataUUID}" = "" ]; then
             echo "error='Could not find UUID for data partition ${dataPartition} (${dataUUID})'"
             exit 1

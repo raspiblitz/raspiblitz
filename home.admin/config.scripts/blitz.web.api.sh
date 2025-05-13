@@ -67,8 +67,8 @@ if [ "$1" = "update-config" ]; then
   cp ./.env_sample ./.env
   dateStr=$(date)
   echo "# Update Web API CONFIG (${dateStr})"
-  sed -i "s/^# platform=.*/platform=raspiblitz/g" ./.env
-  sed -i "s/^platform=.*/platform=raspiblitz/g" ./.env
+  sed -i "s/^# BAPI_PLATFORM=.*/BAPI_PLATFORM=raspiblitz/g" ./.env
+  sed -i "s/^BAPI_PLATFORM=.*/BAPI_PLATFORM=raspiblitz/g" ./.env
 
   # configure access token secret
   if [ "${secret}" == "" ] || [ "${secret}" == "please_please_update_me_please" ]; then
