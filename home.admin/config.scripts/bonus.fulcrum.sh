@@ -385,29 +385,38 @@ if [ "$1" = on ]; then
   echo "# Get the RPC credentials from the bitcoin.conf"
   RPC_USER=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcuser | cut -c 9-)
   PASSWORD_B=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcpassword | cut -c 13-)
-  echo "\
+  echo "## Fulcrum Config File
+## for full explanations see:
+## https://github.com/cculianu/Fulcrum/blob/master/doc/fulcrum-example-config.conf
 datadir = /home/fulcrum/.fulcrum/db
 bitcoind = 127.0.0.1:8332
 rpcuser = ${RPC_USER}
 rpcpassword = ${PASSWORD_B}
-# RPi optimizations
-# avoid 'bitcoind request timed out'
-bitcoind_timeout = 600
-# reduce load (4 cores only)
-bitcoind_clients = 1
-worker_threads = 1
-db_mem=1024
-# for 4GB RAM
-db_max_open_files=200
-fast-sync = 1024
-# server connections
-# disable peer discovery and public server options
+
+## Server Connections
+## disable peer discovery and public server options
 peering = false
 announce = false
 tcp = 0.0.0.0:${portTCP}
 admin = ${portAdmin}
-# ssl via nginx
-" | sudo -u fulcrum tee /home/fulcrum/.fulcrum/fulcrum.conf
+## ssl is handled via nginx
+
+## RPi Optimizations
+## avoid 'bitcoind request timed out'
+bitcoind_timeout = 600
+## reduce load
+bitcoind_clients = 1
+worker_threads = 1
+## optimize for 4-8 GB RAM
+db_mem=1024
+db_max_open_files=200
+## fast-sync is now called utxo_cache
+## disable to prevent database corruption on restart
+#utxo_cache = 1024
+
+## allow syncing wallets with a large number of addresses
+max_subs_per_ip = 1000000 # default: 75000" |
+    sudo -u fulcrum tee /home/fulcrum/.fulcrum/fulcrum.conf
 
   createSystemdService
 
