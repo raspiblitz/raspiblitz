@@ -824,28 +824,28 @@ if [ "$action" = "status" ]; then
 
     # get free space on drives
     if [ ${#storagePartition} -gt 0 ]; then
-        storageFreeKB=$(df -k | grep "/dev/${storagePartition}" | awk '{print $4}' | tail -n 1)
+        storageFreeKB=$(df -k | grep "/dev/${storagePartition}" 2>/dev/null | awk '{print $4}' | tail -n 1)
     fi
     if [ ${#dataPartition} -gt 0 ]; then
-        dataFreeKB=$(df -k | grep "/dev/${dataPartition}" | awk '{print $4}' | tail -n 1)
+        dataFreeKB=$(df -k | grep "/dev/${dataPartition}" 2>/dev/null | awk '{print $4}' | tail -n 1)
     elif [ $combinedDataStorage -eq 1 ]; then
         dataFreeKB="${storageFreeKB}"
     fi
     if [ ${#systemPartition} -gt 0 ]; then
-        systemFreeKB=$(df -k | grep "/dev/${systemPartition}" | awk '{print $4}' | tail -n 1)
+        systemFreeKB=$(df -k | grep "/dev/${systemPartition}" 2>/dev/null | awk '{print $4}' | tail -n 1)
     fi
 
     # get Temperature of drives
     if [ ${#storageDevice} -gt 0 ]; then
-        storageCelsius=$(smartctl -A /dev/${storageDevice} | grep -E '^Temperature:|Temperature Sensor' | awk '{print $(NF-1)}' | head -n 1)
+        storageCelsius=$(smartctl -A /dev/${storageDevice} 2>/dev/null | grep -E '^Temperature:|Temperature Sensor' | awk '{print $(NF-1)}' | head -n 1)
     fi
     if [ ${#dataDevice} -gt 0 ]; then
-        dataCelsius=$(smartctl -A /dev/${dataDevice} | grep -E '^Temperature:|Temperature Sensor' | awk '{print $(NF-1)}' | head -n 1)
+        dataCelsius=$(smartctl -A /dev/${dataDevice} 2>/dev/null | grep -E '^Temperature:|Temperature Sensor' | awk '{print $(NF-1)}' | head -n 1)
     elif [ $combinedDataStorage -eq 1 ]; then
         dataCelsius="${storageCelsius}"
     fi
     if [ ${#systemDevice} -gt 0 ]; then
-        systemCelsius=$(smartctl -A /dev/${systemDevice} | grep -E '^Temperature:|Temperature Sensor' | awk '{print $(NF-1)}' | head -n 1)
+        systemCelsius=$(smartctl -A /dev/${systemDevice} 2>/dev/null | grep -E '^Temperature:|Temperature Sensor' | awk '{print $(NF-1)}' | head -n 1)
     fi
 
     # get unused space on drives
@@ -853,13 +853,13 @@ if [ "$action" = "status" ]; then
     dataUnusedPercent=0
     systemUnusedPercent=0
     if [ ${#storageDevice} -gt 0 ]; then
-        storageUnusedPercent=$(parted /dev/${storageDevice} unit % print free | awk '/Free Space/ {v=$(NF-2); gsub(/[^0-9.]/, "", v)} END{print int(v)}')
+        storageUnusedPercent=$(parted /dev/${storageDevice} unit % print free 2>/dev/null | awk '/Free Space/ {v=$(NF-2); gsub(/[^0-9.]/, "", v)} END{print int(v)}')
     fi
     if [ ${#dataDevice} -gt 0 ]; then
-        dataUnusedPercent=$(parted /dev/${dataDevice} unit % print free | awk '/Free Space/ {v=$(NF-2); gsub(/[^0-9.]/, "", v)} END{print int(v)}')
+        dataUnusedPercent=$(parted /dev/${dataDevice} unit % print free 2>/dev/null | awk '/Free Space/ {v=$(NF-2); gsub(/[^0-9.]/, "", v)} END{print int(v)}')
     fi
     if [ ${#systemDevice} -gt 0 ]; then
-        systemUnusedPercent=$(parted /dev/${systemDevice} unit % print free | awk '/Free Space/ {v=$(NF-2); gsub(/[^0-9.]/, "", v)} END{print int(v)}')
+        systemUnusedPercent=$(parted /dev/${systemDevice} unit % print free 2>/dev/null | awk '/Free Space/ {v=$(NF-2); gsub(/[^0-9.]/, "", v)} END{print int(v)}')
     fi
 
     # output the result
