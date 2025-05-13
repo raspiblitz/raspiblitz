@@ -805,6 +805,8 @@ if [ "$action" = "status" ]; then
     if [ "${storagePartition}" = "${dataPartition}" ] && [ ${#dataMountedPath} -eq 0 ] && [ ${combinedDataStorage} -eq 1 ]; then
         dataMountedPath="${storageMountedPath}"
     fi
+    
+    echo "# E"
 
     # get used space on drives in GB
     storageUsePercent=""
@@ -822,6 +824,8 @@ if [ "$action" = "status" ]; then
         systemUsePercent=$(df "/dev/${systemPartition}" 2>/dev/null | awk 'NR==2 {sub(/%/, "", $5); print $5}')
     fi
 
+    echo "# D"
+
     # get free space on drives
     if [ ${#storagePartition} -gt 0 ]; then
         storageFreeKB=$(df -k | grep "/dev/${storagePartition}" 2>/dev/null | awk '{print $4}' | tail -n 1)
@@ -834,6 +838,8 @@ if [ "$action" = "status" ]; then
     if [ ${#systemPartition} -gt 0 ]; then
         systemFreeKB=$(df -k | grep "/dev/${systemPartition}" 2>/dev/null | awk '{print $4}' | tail -n 1)
     fi
+
+    echo "# C"
 
     # get Temperature of drives
     if [ ${#storageDevice} -gt 0 ]; then
@@ -848,6 +854,8 @@ if [ "$action" = "status" ]; then
         systemCelsius=$(smartctl -A /dev/${systemDevice} 2>/dev/null | grep -E '^Temperature:|Temperature Sensor' | awk '{print $(NF-1)}' | head -n 1)
     fi
 
+    echo "# B"
+
     # get unused space on drives
     storageUnusedPercent=0
     dataUnusedPercent=0
@@ -861,6 +869,8 @@ if [ "$action" = "status" ]; then
     if [ ${#systemDevice} -gt 0 ]; then
         systemUnusedPercent=$(parted /dev/${systemDevice} unit % print free 2>/dev/null | awk '/Free Space/ {v=$(NF-2); gsub(/[^0-9.]/, "", v)} END{print int(v)}')
     fi
+
+    echo "# A"
 
     # output the result
     echo "scenario='${scenario}'"
