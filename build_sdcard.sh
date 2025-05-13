@@ -293,7 +293,7 @@ echo "baseimage=${baseimage}"
 raspi_configfile="/boot/config.txt"
 raspi_commandfile="/boot/cmdline.txt"
 if [ -d /boot/firmware ];then
-  raspi_configfile="/boot/firmware/config.txt" 
+  raspi_configfile="/boot/firmware/config.txt"
   raspi_commandfile="/boot/firmware/cmdline.txt"
 fi
 echo "raspi_configfile=${raspi_configfile}"
@@ -335,7 +335,7 @@ if [ ${isDebianInHosts} -eq 0 ]; then
 fi
 
 echo "*** Remove unnecessary packages ***"
-unnecessary_packages=(libreoffice* oracle-java* chromium-browser nuscratch scratch sonic-pi plymouth python2 vlc* cups)
+unnecessary_packages=(libreoffice* oracle-java* chromium-browser nuscratch scratch sonic-pi plymouth python2 vlc* cups* libcups* libcamera* firefox* ffmpeg libpostproc* eom* evince*)
 for pkg in "${unnecessary_packages[@]}"; do
   if dpkg-query -W -f='${Status}' $pkg 2>/dev/null | grep -q "ok installed"; then
     echo "Removing $pkg..."
