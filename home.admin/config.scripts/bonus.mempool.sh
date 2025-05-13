@@ -202,9 +202,18 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   if [ "${isInstalled}" == "0" ]; then
     echo "# Install code base first ...."
     if ! /home/admin/config.scripts/bonus.mempool.sh install; then
+      /home/admin/config.scripts/bonus.mempool.sh uninstall 2>/dev/null
       echo "FAIL - install did not run correctly, aborting"
       exit 1
     fi
+  fi
+
+  # check if /home/mempool/mempool exists
+  if [ ! -d "/home/mempool/mempool" ]; then
+    /home/admin/config.scripts/bonus.mempool.sh uninstall 2>/dev/null
+    echo "error='mempool code base install failed'"
+    echo "# please run manually first: /home/admin/config.scripts/bonus.mempool.sh install"
+    exit 1
   fi
 
   echo "# *** Activate MEMPOOL ***"
@@ -233,6 +242,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     RPC_USER=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcuser | cut -c 9-)
     PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
 
+    sudo rm /var/cache/raspiblitz/mempool-config.json 2>/dev/null
     touch /var/cache/raspiblitz/mempool-config.json
     chmod 600 /var/cache/raspiblitz/mempool-config.json || exit 1
     cat >/var/cache/raspiblitz/mempool-config.json <<EOF

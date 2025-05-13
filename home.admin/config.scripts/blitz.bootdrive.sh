@@ -67,20 +67,10 @@ if [ "${action}" == "fsexpand" ]; then
         if [ -x ${resizeRaspbian} ]; then
             echo "# RUNNING EXPAND RASPBERRYPI: ${resizeRaspbian}"
 		    sudo $resizeRaspbian --expand-rootfs 1>&2
+            sudo touch /forcefsck
             echo "# DONE - please reboot"
 	    else
             echo "# FAIL to execute on ${baseimage}: ${resizeRaspbian}"
-            echo "err='expand failed'"
-            exit 1
-        fi
-    elif [ "${baseimage}" = "armbian" ]; then
-        resizeArmbian="/usr/lib/armbian/armbian-resize-filesystem"
-        if [ -x ${resizeArmbian} ]; then
-            echo "# RUNNING EXPAND ARMBIAN: ${resizeArmbian}"
-            sudo $resizeArmbian start 1>&2
-            echo "# DONE - please reboot"
-	    else
-            echo "# FAIL to execute on ${baseimage}: ${resizeArmbian}"
             echo "err='expand failed'"
             exit 1
         fi

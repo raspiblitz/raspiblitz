@@ -11,6 +11,12 @@ fi
 # check and load raspiblitz config to know which network is running
 source /mnt/hdd/raspiblitz.conf
 
+# check and install qrencode if not present
+if [ $(dpkg-query -l | grep "ii  qrencode" | wc -l) = 0 ]; then
+  echo "# Installing qrencode..."
+  sudo apt-get install -y qrencode >/dev/null 2>&1
+fi
+
 echo "# Running: 'cl-plugin.clnrest.sh $*'"
 
 source <(/home/admin/config.scripts/network.aliases.sh getvars cl $2)

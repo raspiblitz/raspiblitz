@@ -288,7 +288,7 @@ if [ "${mode}" = "tested" ] || [ "${mode}" = "reckless" ] || [ "${mode}" = "cust
   tar -xvf ${binaryName}
   sudo install -m 0755 -o root -g root -t /usr/local/bin/ bitcoin-${bitcoinVersion}/bin/*
   sleep 3
-  if ! sudo /usr/local/bin/bitcoind --version | grep "${bitcoinVersion}"; then
+  if ! sudo -u bitcoin /usr/local/bin/bitcoind --version | grep "${bitcoinVersion}"; then
     echo
     echo "# BUILD FAILED --> Was not able to install bitcoind version(${bitcoinVersion})"
     exit 1

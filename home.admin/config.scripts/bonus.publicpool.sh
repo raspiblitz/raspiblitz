@@ -105,6 +105,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # check that the repos were cloned
   if [ ! -d "/home/${APPID}/${APPID}" ] || [ ! -d "/home/${APPID}/${APPID}-ui" ]; then
     echo "# FAIL - Was not able to clone the GitHub repos."
+    echo "# running uninstall script to clean up"
+    /home/admin/config.scripts/bonus.publicpool.sh off
     exit 1
   fi 
 
@@ -163,8 +165,8 @@ API_SECURE=false
   echo "
 [Unit]
 Description=${APPID}
-Wants=bitcoind
-After=bitcoind
+Wants=bitcoind.service
+After=bitcoind.service
 
 [Service]
 WorkingDirectory=/home/${APPID}/${APPID}

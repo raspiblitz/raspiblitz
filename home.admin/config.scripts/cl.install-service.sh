@@ -60,16 +60,14 @@ ExecStartPost=-/home/admin/config.scripts/cl.check.sh poststart $CHAIN
 
 # Creates /run/lightningd owned by bitcoin
 RuntimeDirectory=lightningd
-
 User=bitcoin
 Group=bitcoin
 # Type=forking hangs on restart
 Type=simple
 PIDFile=/run/lightningd/${netprefix}lightningd.pid
-Restart=on-failure
-
+Restart=always
+RestartSec=60
 TimeoutSec=240
-RestartSec=30
 StandardOutput=null
 StandardError=journal
 

@@ -1,19 +1,38 @@
 ## What's new in Version 1.12.0 of RaspiBlitz?
 
+Work In Progress
+
+Features:
+
+- Update: RaspberryOS arm64 base image 2024-11-19 (Debian 12 Bookworm) [details](https://downloads.raspberrypi.com/raspios_full_arm64/release_notes.txt)
+- Update: amd64 base image: debian-12.8.0-amd64-netinst.iso [details](https://www.debian.org/releases/stable/amd64/release-notes/ch-whats-new.en.html)
 - Update: BTCPayServer 2.0.3 [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v2.0.3)
+- Update: Specter Desktop 2.0.5 [details](https://github.com/cryptoadvance/specter-desktop/releases/tag/v2.0.5)
+- Update: Fulcrum Electrum server v1.11.1 (CLI install script with status menu) [details](https://github.com/cculianu/Fulcrum/releases/tag/v1.11.1)
+- Update: Helipad (Podcasting 2.0 Boostagram reader) v0.2.1 [details](https://github.com/Podcastindex-org/helipad/
+
+## What's new in Version 1.11.4 of RaspiBlitz?
+
+Small AlbyHub feature release with security/bug-fixing relevant updates.
+
+- New: AlbyHub v1.12.0 (SSH & WebUI) [details](https://github.com/getAlby)
+- New: SSH-Option to turn on/off LNbits AdminUI [details](https://github.com/raspiblitz/raspiblitz/issues/4876)
+- Update: LND v0.18.3-beta [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.18.3-beta)
+- Update: Core Lightning v24.11 [details](https://github.com/ElementsProject/lightning/releases/tag/v24.11)
+
+Download RaspberryPi images:
+
+- Minimal:
+https://raspiblitz.fulmo.org/images/raspiblitz-min-v1.11.4-2024-12-24.img.gz<br>
+SHA-256-Checksum: 3d874e8e2518bb9db79df196d1dd7e6d567a0608a3df568cadef87a77b4d3841
+
+- Fatpack:
+https://raspiblitz.fulmo.org/images/raspiblitz-fat-v1.11.4-2024-12-24.img.gz<br>
+SHA-256-Checksum: 31877d0085c20f34bf2bedeeec6bd4abc108595a4b0985d273ddaba2b0fbe654
 
 ## What's new in Version 1.11.3 of RaspiBlitz?
 
 Optimized now to run also on plain debian12 linux for Proxmox/VM & x86 systems.
-
-Download Release Candidates - RaspberryPi image:
-- Minimal:  
-https://raspiblitz.fulmo.org/images/raspiblitz-min-v1.11.3rc4-2024-10-28.img.gz  
-SHA-256-Checksum: d39fbdf01c33034a577e5fea6b30fae5c99471d804658f45ec7006a04bf3be28
-
-- Fatpack:  
-https://raspiblitz.fulmo.org/images/raspiblitz-fat-v1.11.3rc4-2024-10-28.img.gz  
-SHA-256-Checksum: 7d76d0a8a895e0d295c47e97b7059feadaad209ae49961180c0df415d9e50d0b
 
 Containing Features:
 
@@ -33,6 +52,16 @@ Containing Features:
 - Update: Jam (JoinMarket Web UI) v0.3.0 [details](https://github.com/joinmarket-webui/jam/releases/tag/v0.3.0)
 - Update: CLBOSS 0.13.3 [details](https://github.com/ZmnSCPxj/clboss/releases/tag/v0.13.3)
 - Update: Electrum Server in Rust (electrs) v0.10.6 [details](https://github.com/romanz/electrs/blob/master/RELEASE-NOTES.md#0106-sep-29-2024)
+
+Download RaspberryPi images:
+
+- Minimal:
+https://raspiblitz.fulmo.org/images/raspiblitz-min-v1.11.3-2024-11-03.img.gz<br>
+SHA-256-Checksum: 199fd4e671a49feb39420156031201c9118121d33ec6f9990fb9724de5be02c4
+
+- Fatpack:
+https://raspiblitz.fulmo.org/images/raspiblitz-fat-v1.11.3-2024-11-03.img.gz<br>
+SHA-256-Checksum: 65e523562768b21dcda85b96003c559a665015889402a3cea27638e6c5e290bd
 
 ## What's new in Version 1.11.2 of RaspiBlitz?
 
