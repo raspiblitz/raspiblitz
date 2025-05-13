@@ -223,29 +223,22 @@ if [ "$action" = "status" ]; then
     dataConfigFound=0
     combinedDataStorage=0
     
-    # get a list of all existing ext4 partitions of connected storage drives
-    # cdrom and sd card will get ignored - but it might include install thumb drive on laptops
-    ext4Partitions=$(lsblk -no NAME,SIZE,FSTYPE | sed 's/[└├]─//g' | grep -E "^(sd|nvme)" | grep "ext4")
-    ext4PartitionsSorted=$( echo "${ext4Partitions}" | \
-    awk '{ 
-        size=$2
-        if(size ~ /T/) { 
-          sub("T","",size); size=size*1024 
-        } else if(size ~ /G/) { 
-          sub("G","",size); size=size*1 
-        } else if(size ~ /M/) { 
-          sub("M","",size); size=size/1024 
-        }
-        printf "%s %.0f\n", $1, size
-    }' | sort -k2,2n -k1,1)
-
+    # get a list of all existing ext4 partitions of connected storage drives (sdX, nvmeX)
+    # output is sorted by size (smallest first), then by name
+    # size is converted to GiB
+    ext4Partitions=$(lsblk -lno NAME,SIZE,FSTYPE,TYPE | \
+    awk '
+    # $1: NAME (e.g., sda1, nvme0n1p1)
+    # $2: SIZE (in bytes, due to -b option for lsblk)
+    # $3: FSTYPE (e.g., ext4)
+    # $4: TYPE (e.g., part)
+    ($4 == "part" && $3 == "ext4" && ($1 ~ /^sd/ || $1 ~ /^nvme/)) {
+        # Convert size from bytes to GiB
+        size_gib = $2 / (1024 * 1024 * 1024);
+        printf "%s %.0f\n", $1, size_gib;
+    }
+' | sort -k2,2n -k1,1)
     echo "ext4Partitions='${ext4Partitions}'"
-    echo "ext4Partitions='${ext4PartitionsSorted}'"
-    # if both have the same line count - use the sorted one
-    if [ "$(echo "${ext4Partitions}" | wc -l)" = "$(echo "${ext4PartitionsSorted}" | wc -l)" ]; then
-        echo "# using sorted list"
-        ext4Partitions="${ext4PartitionsSorted}"
-    fi  
 
     # check if some drive is already mounted on /mnt/temp
     mountPath=$(findmnt -n -o TARGET "/mnt/temp" 2>/dev/null)
