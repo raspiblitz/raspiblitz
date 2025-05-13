@@ -1919,10 +1919,8 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
             exit 1
         fi
 
-        # check if all needed parameters are set
-        source <(/home/admin/config.scripts/blitz.data.sh status)
         if [ ${#biggerDevice} -eq 0 ]; then
-            dialog --msgbox "\nNo old drive with RaspiBlitz data found.\n\nIf your sure your setup is correct give feedback to RaspiBlitz devs." 10 60
+            dialog --msgbox "\nNo old drive with RaspiBlitz data found.\n\nMaybe you need to reset new bigger drive first:\nDisconnect old drive and use on terminal 'reset'.\nThen 'restart' and try again." 11 60
             exit 1
         fi
 
