@@ -187,7 +187,7 @@ if [ "$action" = "status" ]; then
     installDevice=""
     possibleInstallDevices=$(lsblk -o NAME,TRAN -d | grep -E 'mmc|usb|sr' | cut -d' ' -f1)
     for device in ${possibleInstallDevices}; do
-        echo "# check device ${device}"
+        echo "# check device(${device}) for boot partition"
         if parted --script "/dev/${device}" print 2>/dev/null | grep "^ *[0-9]" | grep -q "boot\|esp\|lba"; then
             installDevice="${device}"
             break
@@ -237,7 +237,7 @@ if [ "$action" = "status" ]; then
         }
         printf "%s %.0f\n", $1, size
     }' | sort -k2,2n -k1,1)
-    # echo "ext4Partitions='${ext4Partitions}'"
+    echo "ext4Partitions='${ext4Partitions}'"
 
     # check if some drive is already mounted on /mnt/temp
     mountPath=$(findmnt -n -o TARGET "/mnt/temp" 2>/dev/null)
