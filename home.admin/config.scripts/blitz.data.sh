@@ -1951,8 +1951,6 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
 
         echo "### MIGRATING HDD"
         echo "# see /var/cache/raspiblitz/temp/progress.txt for progress"
-        systemctl daemon-reload
-        sleep 3
 
         # get source hdd of migration
         hddMigrateDeviceFrom=$4
