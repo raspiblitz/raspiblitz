@@ -63,7 +63,7 @@ if [ "$1" = "update-config" ]; then
 
   # prepare config update
   cd /home/blitzapi/blitz_api || exit 1
-  secret=$(cat ./.env 2>/dev/null | grep "secret=" | cut -d "=" -f2)
+  secret=$(cat ./.env 2>/dev/null | grep "BAPI_JWT_SECRET=" | cut -d "=" -f2)
   cp ./.env_sample ./.env
   dateStr=$(date)
   echo "# Update Web API CONFIG (${dateStr})"
@@ -77,7 +77,7 @@ if [ "$1" = "update-config" ]; then
   else
     echo "# use existing secret"
   fi
-  sed -i "s/^secret=.*/secret=${secret}/g" ./.env
+  sed -i "s/^BAPI_JWT_SECRET=.*/BAPI_JWT_SECRET=${secret}/g" ./.env
 
   source /home/admin/raspiblitz.info 2>/dev/null
   if [ "${setupPhase}" == "done" ]; then
@@ -91,11 +91,10 @@ if [ "$1" = "update-config" ]; then
     if [ "${RPCPASS}" == "" ]; then
       RPCPASS="passwordB"
     fi
-    sed -i "s/^network=.*/network=mainnet/g" ./.env
-    sed -i "s/^bitcoind_ip_mainnet=.*/bitcoind_ip_mainnet=127.0.0.1/g" ./.env
-    sed -i "s/^bitcoind_ip_testnet=.*/bitcoind_ip_testnet=127.0.0.1/g" ./.env
-    sed -i "s/^bitcoind_user=.*/bitcoind_user=${RPCUSER}/g" ./.env
-    sed -i "s/^bitcoind_pw=.*/bitcoind_pw=${RPCPASS}/g" ./.env
+    sed -i "s/^BAPI_NETWORK=.*/BAPI_NETWORK=mainnet/g" ./.env
+    sed -i "s/^BAPI_BITCOIND_ADDRESS=.*/BAPI_BITCOIND_ADDRESS=127.0.0.1/g" ./.env
+    sed -i "s/^BAPI_BITCOIND_USER=.*/BAPI_BITCOIND_USER=${RPCUSER}/g" ./.env
+    sed -i "s/^BAPI_BITCOIND_RPC_PW=.*/BAPI_BITCOIND_RPC_PW=${RPCPASS}/g" ./.env
 
     # configure LND
     if [ "${lightning}" == "lnd" ]; then
@@ -103,29 +102,17 @@ if [ "$1" = "update-config" ]; then
       echo "# CONFIG Web API Lightning --> LND"
       tlsCert=$(sudo xxd -ps -u -c 1000 /mnt/hdd/app-data/lnd/tls.cert)
       adminMacaroon=$(sudo xxd -ps -u -c 1000 /mnt/hdd/app-data/lnd/data/chain/bitcoin/${chain}net/admin.macaroon)
-      sed -i "s/^ln_node=.*/ln_node=lnd_grpc/g" ./.env
-      sed -i "s/^lnd_grpc_ip=.*/lnd_grpc_ip=127.0.0.1/g" ./.env
-      sed -i "s/^lnd_macaroon=.*/lnd_macaroon=${adminMacaroon}/g" ./.env
-      sed -i "s/^lnd_cert=.*/lnd_cert=${tlsCert}/g" ./.env
-      if [ "${chain}" == "main" ]; then
-        L2rpcportmod=0
-        portprefix=""
-      elif [ "${chain}" == "test" ]; then
-        L2rpcportmod=1
-        portprefix=1
-      elif [ "${chain}" == "sig" ]; then
-        L2rpcportmod=3
-        portprefix=3
-      fi
-      lnd_grpc_port=1${L2rpcportmod}009
-      lnd_rest_port=${portprefix}8080
+      sed -i "s/^BAPI_LN_NODE=.*/BAPI_LN_NODE=lnd_grpc/g" ./.env
+      sed -i "s/^BAPI_LND_GRPC_IP=.*/BAPI_LND_GRPC_IP=127.0.0.1/g" ./.env
+      sed -i "s/^BAPI_LND_MACAROON=.*/lnd_macaroon=${adminMacaroon}/g" ./.env
+      sed -i "s/^BAPI_LND_CERT=.*/BAPI_LND_CERT=${tlsCert}/g" ./.env
 
     # configure CL
     elif [ "${lightning}" == "cl" ]; then
 
       echo "# CONFIG Web API Lightning --> CL"
-      sed -i "s/^ln_node=.*/ln_node=cln_jrpc/g" ./.env
-      sed -i "s#^cln_jrpc_path=.*#cln_jrpc_path=\"/mnt/hdd/app-data/.lightning/bitcoin/lightning-rpc\"#g" ./.env
+      sed -i "s/^BAPI_LN_NODE=.*/BAPI_LN_NODE=cln_jrpc/g" ./.env
+      sed -i "s#^BAPI_CLN_JRPC_PATH=.*#BAPI_CLN_JRPC_PATH=\"/mnt/hdd/app-data/.lightning/bitcoin/lightning-rpc\"#g" ./.env
 
       # get hex values of pem files
       # hexClient=$(sudo xxd -p -c2000 /home/bitcoin/.lightning/bitcoin/client.pem)
@@ -136,21 +123,21 @@ if [ "$1" = "update-config" ]; then
       # fi
 
       # update config with hex values
-      # sed -i "s/^cln_grpc_cert=.*/cln_grpc_cert=${hexClient}/g" ./.env
-      # sed -i "s/^cln_grpc_key=.*/cln_grpc_key=${hexClientKey}/g" ./.env
-      # sed -i "s/^cln_grpc_ca=.*/cln_grpc_ca=${hexCa}/g" ./.env
-      # sed -i "s/^cln_grpc_ip=.*/cln_grpc_ip=127.0.0.1/g" ./.env
-      # sed -i "s/^cln_grpc_port=.*/cln_grpc_port=4772/g" ./.env
+      # sed -i "s/^BAPI_CLN_GRPC_CERT=.*/BAPI_CLN_GRPC_CERT=${hexClient}/g" ./.env
+      # sed -i "s/^BAPI_CLN_GRPC_KEY=.*/BAPI_CLN_GRPC_KEY=${hexClientKey}/g" ./.env
+      # sed -i "s/^BAPI_CLN_GRPC_CA=.*/BAPI_CLN_GRPC_CA=${hexCa}/g" ./.env
+      # sed -i "s/^BAPI_CLN_GRPC_IP=.*/BAPI_CLN_GRPC_IP=127.0.0.1/g" ./.env
+      # sed -i "s/^BAPI_CLN_GRPC_PORT=.*/BAPI_CLN_GRPC_PORT=4772/g" ./.env
 
     else
       echo "# CONFIG Web API Lightning --> OFF"
-      sed -i "s/^ln_node=.*/ln_node=none/g" ./.env
+      sed -i "s/^BAPI_LN_NODE=.*/BAPI_LN_NODE=none/g" ./.env
     fi
 
   else
     echo "# CONFIG Web API ... still in setup, skip bitcoin & lightning"
-    sed -i "s/^network=.*/network=/g" ./.env
-    sed -i "s/^ln_node=.*/ln_node=/g" ./.env
+    sed -i "s/^BAPI_NETWORK==.*/BAPI_NETWORK==/g" ./.env
+    sed -i "s/^BAPI_LN_NODE=.*/BAPI_LN_NODE=/g" ./.env
   fi
 
   echo "# '.env' config updates - blitzapi maybe needs to be restarted"
