@@ -240,7 +240,7 @@ if [ "${mode}" = "tested" ] || [ "${mode}" = "reckless" ] || [ "${mode}" = "cust
       echo "# BUILD FAILED --> the PGP verification failed"
       echo "# try again or with a different version"
       echo "# if you want to skip verifying all signatures (and just show them) use the command:"
-      echo "# /home/admin/config.scripts/bonus.bitcoin.sh custom ${bitcoinVersion:-<version>} skipverify"
+      echo "# /home/admin/config.scripts/bitcoin.update.sh custom ${bitcoinVersion:-<version>} skipverify"
       exit 1
     fi
   fi
