@@ -28,6 +28,33 @@ amd64-lean-desktop-uefi-image:
 	# List the generated files
 	ls -lah ci/amd64/builds/raspiblitz-amd64-debian-lean-qemu/raspiblitz-amd64-debian-lean.qcow2.*
 
+amd64-lean-desktop-uefi-img:
+	# Run the build script
+	cd ci/amd64 && \
+	sudo bash packer.build.amd64-debian.sh \
+	  --pack lean \
+	  --github_user $(GITHUB_ACTOR) \
+	  --branch $(GITHUB_HEAD_REF) \
+	  --preseed_file preseed.cfg \
+	  --boot uefi \
+	  --desktop gnome \
+		--image_type raw
+
+	# Compute the checksum of the qemu image
+	cd ci/amd64/builds/raspiblitz-amd64-debian-lean-qemu && \
+	sha256sum raspiblitz-amd64-debian-lean.img > raspiblitz-amd64-debian-lean.img.sha256
+
+	# Compress the image
+	cd ci/amd64/builds/raspiblitz-amd64-debian-lean-qemu && \
+	gzip -v9 raspiblitz-amd64-debian-lean.img
+
+	# Compute the checksum of the compressed image
+	cd ci/amd64/builds/raspiblitz-amd64-debian-lean-qemu && \
+	sha256sum raspiblitz-amd64-debian-lean.img.gz > raspiblitz-amd64-debian-lean.img.gz.sha256
+
+	# List the generated files
+	ls -lah ci/amd64/builds/raspiblitz-amd64-debian-lean-qemu/raspiblitz-amd64-debian-lean.img.*
+
 amd64-lean-server-legacyboot-image:
 	# Run the build script
 	cd ci/amd64 && \

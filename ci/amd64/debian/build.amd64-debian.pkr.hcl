@@ -10,12 +10,15 @@ variable "boot" { default = "uefi" }
 variable "preseed_file" { default = "preseed.cfg" }
 variable "hostname" { default = "raspiblitz-amd64" }
 
-variable "disk_size" { default = "27000" }
+variable "image_size" { default = "27000" }
+variable "image_type" { default = "qcow2" }
+
 variable "memory" { default = "4096" }
 variable "cpus" { default = "4" }
 
 locals {
   name_template = "${var.hostname}-debian-${var.pack}"
+  image_extension = var.image_type == "raw" ? "img" : var.image_type
   bios_file     = var.boot == "uefi" ? "OVMF.fd" : "bios-256k.bin"
   boot_command = var.boot == "uefi" ? [
     "<wait><wait><wait>c<wait><wait><wait>",
@@ -51,7 +54,7 @@ source "qemu" "debian" {
   boot_command     = local.boot_command
   boot_wait        = "5s"
   cpus             = var.cpus
-  disk_size        = var.disk_size
+  disk_size        = var.image_size
   http_directory   = "./http"
   iso_checksum     = var.iso_checksum
   iso_url          = "https://cdimage.debian.org/cdimage/release/current/amd64/iso-cd/${var.iso_name}"
@@ -62,8 +65,8 @@ source "qemu" "debian" {
   ssh_port         = 22
   ssh_timeout      = "10000s"
   ssh_username     = "pi"
-  format           = "qcow2"
-  vm_name          = "${local.name_template}.qcow2"
+  format           = var.image_type
+  vm_name          = "${local.name_template}.${local.image_extension}"
   headless         = false
   vnc_bind_address = "127.0.0.1"
   vnc_port_max     = 5900
