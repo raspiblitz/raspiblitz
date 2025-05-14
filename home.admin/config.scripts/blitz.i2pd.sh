@@ -150,6 +150,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   fi
 
   echo "# i2pd config"
+  sudo sed -i '/^debug=tor$/d' /mnt/hdd/bitcoin/bitcoin.conf
   /home/admin/config.scripts/blitz.conf.sh set debug tor /mnt/hdd/bitcoin/bitcoin.conf noquotes
   confAdd debug i2p /mnt/hdd/bitcoin/bitcoin.conf
   /home/admin/config.scripts/blitz.conf.sh set i2psam 127.0.0.1:7656 /mnt/hdd/bitcoin/bitcoin.conf noquotes
@@ -261,6 +262,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   sudo apt remove -y i2pd
 
   echo "# Remove settings from bitcoind"
+  sudo sed -i '/^debug=tor$/d' /mnt/hdd/bitcoin/bitcoin.conf
   /home/admin/config.scripts/blitz.conf.sh delete debug /mnt/hdd/bitcoin/bitcoin.conf noquotes
   /home/admin/config.scripts/blitz.conf.sh set debug tor /mnt/hdd/bitcoin/bitcoin.conf noquotes
   /home/admin/config.scripts/blitz.conf.sh delete i2psam /mnt/hdd/bitcoin/bitcoin.conf noquotes
