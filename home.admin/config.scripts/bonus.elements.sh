@@ -136,7 +136,7 @@ function installBinary {
 
 function removeService() {
   if [ -f "/etc/systemd/system/elementsd.service" ]; then
-    /usr/local/bin/elements-cli stop
+    elements-cli stop
     sudo systemctl stop elementsd
     sudo systemctl disable elementsd
     sudo rm /etc/systemd/system/elementsd.service 2>/dev/null

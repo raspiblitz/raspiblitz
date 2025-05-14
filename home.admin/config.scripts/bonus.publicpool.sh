@@ -143,6 +143,10 @@ EOL
   sudo ufw allow ${PORT_STRATUM} comment "${APPID} Stratum"
   sudo ufw allow ${PORT_UI} comment "${APPID} UI"
 
+  echo "# increasing rpcworkqueue"
+  /home/admin/config.scripts/blitz.conf.sh set rpcworkqueue 512 /mnt/hdd/bitcoin/bitcoin.conf noquotes
+  /home/admin/config.scripts/blitz.conf.sh set rpcthreads 128 /mnt/hdd/bitcoin/bitcoin.conf noquotes
+
   # get RPC credentials
   RPC_USER=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcuser | cut -c 9-)
   RPC_PASS=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcpassword | cut -c 13-)

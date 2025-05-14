@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # https://github.com/lightninglabs/lightning-terminal/releases
-LITVERSION="0.12.5-alpha"
+LITVERSION="0.14.1-alpha"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -12,7 +12,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
 fi
 
 # check who signed the release in https://github.com/lightninglabs/lightning-terminal/releases
-PGPsigner="ViktorTigerstrom"
+PGPsigner="guggero"
 
 if [ $PGPsigner = ellemouton ]; then
   pgpPubKey="D7D916376026F177"
@@ -180,7 +180,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     elif [ ${isX86_64} -eq 1 ]; then
       OSversion="amd64"
     fi
-    SHA256=$(grep -i "linux-$OSversion" manifest-v$LITVERSION.txt | cut -d " " -f1)
+    SHA256=$(grep -i "linux-$OSversion-v$LITVERSION.tar.gz" manifest-v$LITVERSION.txt | cut -d " " -f1)
 
     echo
     echo "# LiT v${LITVERSION} for ${OSversion}"
@@ -191,7 +191,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     wget -N https://github.com/lightninglabs/lightning-terminal/releases/download/v${LITVERSION}/${binaryName}
 
     echo "# check binary was not manipulated (checksum test)"
-    wget -N https://github.com/lightninglabs/lightning-terminal/releases/download/v${LITVERSION}/manifest-v${LITVERSION}.sig
+    wget -N https://github.com/lightninglabs/lightning-terminal/releases/download/v${LITVERSION}/manifest-$PGPsigner-v${LITVERSION}.sig
     binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
     if [ "${binaryChecksum}" != "${SHA256}" ]; then
       echo "# FAIL # Downloaded LiT BINARY not matching SHA256 checksum: ${SHA256}"
@@ -199,7 +199,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     fi
     verifyResult=$(
       LANG=en_US.utf8
-      gpg --verify manifest-v${LITVERSION}.sig manifest-v${LITVERSION}.txt 2>&1
+      gpg --verify manifest-$PGPsigner-v${LITVERSION}.sig manifest-v${LITVERSION}.txt 2>&1
     )
     goodSignature=$(echo ${verifyResult} | grep 'Good signature' -c)
     echo "goodSignature(${goodSignature})"
