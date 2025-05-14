@@ -2,7 +2,7 @@
 
 # set version (change if update is available)
 # https://github.com/ElementsProject/elements/releases
-VERSION="elements-23.2.4"
+VERSION="elements-23.2.7"
 SIG_PUBKEY="BD0F3062F87842410B06A0432F656B0610604482" # Pablo Greco <pgreco@blockstream.com>
 
 # command info
@@ -165,6 +165,10 @@ walletdir=/mnt/hdd/app-data/.elements/liquidv1/wallets
 rpcuser=raspiblitz
 rpcpassword=$PASSWORD_B
 rpcbind=127.0.0.1
+
+# Ensure PeerSwap compatibility
+acceptdiscountct=1
+creatediscountct=1
 
 # Bitcoin Core credentials
 mainchainrpcuser=raspibolt
