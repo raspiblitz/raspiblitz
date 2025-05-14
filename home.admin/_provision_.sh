@@ -617,6 +617,15 @@ else
   echo "Provisioning Mempool Explorer - keep default" >> ${logFile}
 fi
 
+# Bitcoin Knots
+if [ "${knots}" = "on" ]; then
+  echo "Provisioning Bitcoin Knots - run config script" >> ${logFile}
+  /home/admin/_cache.sh set message "Setup Bitcoin Knots"
+  sudo -u admin /home/admin/config.scripts/bonus.knots.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning Bitcoin Knots - keep default" >> ${logFile}
+fi
+
 # letsencrypt
 if [ "${letsencrypt}" = "on" ]; then
   echo "Provisioning letsencrypt - run config script" >> ${logFile}

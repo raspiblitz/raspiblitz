@@ -33,6 +33,7 @@ if [ ${#lndk} -eq 0 ]; then lndk="off"; fi
 if [ ${#labelbase} -eq 0 ]; then labelbase="off"; fi
 if [ ${#publicpool} -eq 0 ]; then publicpool="off"; fi
 if [ ${#albyhub} -eq 0 ]; then albyhub="off"; fi
+if [ ${#knots} -eq 0 ]; then knots="off"; fi
 if [ "${albyhub}" == "on" ] && [ $(sudo ls /etc/systemd/system/albyhub.service 2>/dev/null | grep -c 'albyhub.service') -lt 1 ]; then albyhub="off"; fi
 
 # show select dialog
@@ -80,6 +81,7 @@ if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ]; then
 fi
 
 OPTIONS+=(fn 'FinTS/HBCI Interface (experimental)' ${fints})
+OPTIONS+=(bk 'Bitcoin Knots' ${knots})
 
 CHOICES=$(dialog --title ' Additional Mainnet Services ' \
           --checklist ' use spacebar to activate/de-activate ' \
@@ -580,6 +582,22 @@ When finished use the new 'MEMPOOL' entry in Main Menu for more info.\n
   fi
 else
   echo "Mempool Explorer Setting unchanged."
+fi
+
+choice="off"; check=$(echo "${CHOICES}" | grep -c "bk")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${knots}" != "${choice}" ]; then
+  echo "Bitcoin Knots settings changed .."
+  anychange=1
+  sudo -u admin /home/admin/config.scripts/bonus.knots.sh ${choice}
+  errorOnInstall=$?
+  if [ ${errorOnInstall} -eq 0 ]; then
+    echo "Bitcoin Knots is installed."
+  else
+    echo "Bitcoin Knots installation have failed."
+  fi
+else
+  echo "Bitcoin Knots setting unchanged"
 fi
 
 # Whitepaper process choice
