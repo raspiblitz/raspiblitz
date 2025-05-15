@@ -134,6 +134,10 @@ if [ "$1" = "checkrepair" ]; then
     /home/admin/config.scripts/blitz.ssh.sh renew
   fi
 
+  # make sure permissions are correct
+  sudo chown root:root /etc/ssh/ssh_host_*
+  sudo chmod 600 /etc/ssh/ssh_host_*
+
   # check if SSHD service is NOT running & active
   sshdRunning=$(sudo systemctl status sshd | grep -c "active (running)")
   if [ ${sshdRunning} -eq 0 ]; then
