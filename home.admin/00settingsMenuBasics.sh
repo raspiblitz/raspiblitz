@@ -208,8 +208,6 @@ RaspiBlitz will now install/activate Tor & after reboot run behind it.
 
 Please keep in mind that thru your LND node id & your previous IP history with your internet provider your lightning node could still be linked to your personal id even when running behind Tor. To unlink you from that IP history its recommended that after the switch/reboot to Tor you also use the REPAIR > RESET-LND option to create a fresh LND wallet. That might involve closing all channels & move your funds out of RaspiBlitz before that RESET-LND.
 " 16 76
-
-    /home/admin/config.scripts/network.upnp.sh off
   fi
 
   # change Tor

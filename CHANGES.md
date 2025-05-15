@@ -9,6 +9,7 @@ Features:
 - New: Optional separation of Data & Storage/Blockchain drives with Auto-Expand for Proxmox
 - Update: RaspberryOS arm64 base image 2024-11-19 (Debian 12 Bookworm) [details](https://downloads.raspberrypi.com/raspios_full_arm64/release_notes.txt)
 - Update: amd64 base image: debian-12.8.0-amd64-netinst.iso [details](https://www.debian.org/releases/stable/amd64/release-notes/ch-whats-new.en.html)
+- Update: Bitcoin Core v29.0 [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-29.0.md)
 - Update: LNbits 1.0.0 [details](https://github.com/lnbits/lnbits/releases/tag/v1.0.0)
 - Update: Lightning Terminal v0.14.1-alpha [details](https://github.com/lightninglabs/lightning-terminal/releases/tag/v0.14.1-alpha)
 - Update: BTCPayServer v2.0.5 [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v2.0.5)

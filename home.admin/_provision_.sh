@@ -368,15 +368,6 @@ else
     echo "Provisioning Tor - keep default" >> ${logFile}
 fi
 
-# NETWORK UPNP
-if [ "${networkUPnP}" = "on" ]; then
-    echo "Provisioning NETWORK UPnP - run config script" >> ${logFile}
-    /home/admin/_cache.sh set message "Setup UPnP"
-    /home/admin/config.scripts/network.upnp.sh on >> ${logFile} 2>&1
-else
-    echo "Provisioning NETWORK UPnP  - keep default" >> ${logFile}
-fi
-
 # DYNAMIC DOMAIN
 if [ "${#dynDomain}" -gt 0 ]; then
     echo "Provisioning DYNAMIC DOMAIN - run config script" >> ${logFile}
