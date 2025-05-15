@@ -552,10 +552,10 @@ if [ "${scenario}" != "ready" ] && [ "${baseimage}" = "raspios_arm64" ]; then
   echo "checking Firmware" >> $logFile
   /home/admin/_cache.sh set message "checking Firmware"
   echo "getting data" >> $logFile
-  isRaspberryPi5=$(cat /proc/device-tree/model 2>/dev/null | grep -c "Raspberry Pi 5")
-  firmwareBuildNumber=$(rpi-eeprom-update | grep "CURRENT" | cut -d "(" -f2 | sed 's/[^0-9]*//g')
-  echo "checking Firmware: isRaspberryPi5(${isRaspberryPi5}) firmwareBuildNumber(${firmwareBuildNumber})" >> $logFile
-  if [ ${isRaspberryPi5} -gt 0 ] && [ ${firmwareBuildNumber} -lt 1708097321 ]; then # Fri 16 Feb 15:28:41 UTC 2024 (1708097321)
+  raspberryPiVersion=$(tr -d '\0' 2>/dev/null < /sys/firmware/devicetree/base/model | sed -E 's/.*Raspberry Pi ([0-9]+).*/\1/')
+  firmwareBuildNumber=$(rpi-eeprom-update 2>/dev/null | grep "CURRENT" | cut -d "(" -f2 | sed 's/[^0-9]*//g')
+  echo "checking Firmware: isRaspberryPiVersion(${raspberryPiVersion}) firmwareBuildNumber(${firmwareBuildNumber})" >> $logFile
+  if [ "${raspberryPiVersion}" != "" ] && [ ${raspberryPiVersion} -gt 4 ] && [ ${firmwareBuildNumber} -lt 1741626637 ]; then # Mon Mar 10 05:10:37 PM UTC 2025 (1741626637)
     echo "updating Firmware" >> $logFile
     echo "RaspberryPi 5 detected with old firmware (${firmwareBuildNumber}) ... do update." >> $logFile
     apt-get update -y
