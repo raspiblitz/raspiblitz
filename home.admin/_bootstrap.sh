@@ -957,6 +957,7 @@ if [ "${scenario}" != "ready" ] ; then
       mkdir -p /mnt/disk_data 2>/dev/null
       mount /dev/${dataPartition} /mnt/disk_data
       echo "copy setupFile(${setupFile}) to /mnt/disk_data/app-data/raspiblitz.setup" >> ${logFile}
+      mkdir -p /mnt/disk_data/app-data 2>/dev/null
       cp ${setupFile} /mnt/disk_data/app-data/raspiblitz.setup
       if [ $? -ne 0 ]; then
         echo "FAIL: copy setupFile to new system failed" >> ${logFile}
