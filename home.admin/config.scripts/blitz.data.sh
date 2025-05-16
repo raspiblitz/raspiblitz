@@ -328,7 +328,7 @@ if [ "$action" = "status" ]; then
                 fi
 
             # Check SYSTEM DRIVE
-            elif [ -d "${mountPath}/boot" ] && [ -d "${mountPath}/home/admin/raspiblitz" ] && [ ${size} -gt 7 ]; then
+            elif [ -d "${mountPath}/boot" ] && [ -d "${mountPath}/home/admin/raspiblitz" ] && [ ${size} -gt 7 ] && [ "${storageDevice}" != "" ]; then
 
                 # check for unclean setups
                 if [ -d "${mountPath}/app-storage" ]; then
@@ -457,13 +457,13 @@ if [ "$action" = "status" ]; then
         biggerSizeGB=$(echo "${listOfBiggerDevices}" | head -n1 | awk '{print $2}')
     fi
 
-    #echo "# RESULT AFTER DETECTION"
-    #echo "# dataDevice: ${dataDevice} (${dataSizeGB}GB) (${dataMountedPath})"
-    #echo "# storageDevice: ${storageDevice} (${storageSizeGB}GB) (${storageMountedPath})"
-    #echo "# systemDevice: ${systemDevice} (${systemSizeGB}GB) (${systemMountedPath})"
-    #echo "# installDevice: ${installDevice} (${installDeviceActive}) (${installDeviceReadOnly})"
-    #echo "# biggerDevice: ${biggerDevice} (${biggerSizeGB}GB)"
-    #echo "# combinedDataStorage: ${combinedDataStorage}"
+    echo "# RESULT AFTER DETECTION"
+    echo "# dataDevice: ${dataDevice} (${dataSizeGB}GB) (${dataMountedPath})"
+    echo "# storageDevice: ${storageDevice} (${storageSizeGB}GB) (${storageMountedPath})"
+    echo "# systemDevice: ${systemDevice} (${systemSizeGB}GB) (${systemMountedPath})"
+    echo "# installDevice: ${installDevice} (${installDeviceActive}) (${installDeviceReadOnly})"
+    echo "# biggerDevice: ${biggerDevice} (${biggerSizeGB}GB)"
+    echo "# combinedDataStorage: ${combinedDataStorage}"
 
     ########################
     # PROPOSE LAYOUT
@@ -496,7 +496,7 @@ if [ "$action" = "status" ]; then
         }
         if (size >= 7) printf "%s %.0f\n", $1, size
         }' | sort -k2,2nr -k1,1 )
-        #echo "listOfDevices='${listOfDevices}'"
+        echo "listOfDevices='${listOfDevices}'"
 
         # if there is a migration device set - remove it from the list
         source <(/home/admin/_cache.sh get hddMigrateDeviceFrom)
