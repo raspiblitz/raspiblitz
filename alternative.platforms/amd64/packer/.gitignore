@@ -1,5 +1,6 @@
 # Cache objects
 packer_cache/
+output-raspiblitz/
 output-virtualbox-iso/
 output-vmware-iso/
 
