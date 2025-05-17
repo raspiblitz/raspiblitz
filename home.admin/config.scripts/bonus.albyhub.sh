@@ -7,7 +7,7 @@
 APPID="albyhub" # one-word lower-case no-specials
 
 # https://github.com/getAlby/hub/releases
-VERSION="1.12.0"
+VERSION="1.17.0"
 
 # port numbers the app should run on
 # delete if not an web app
