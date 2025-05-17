@@ -17,6 +17,7 @@ Features:
 - Update: BTCPayServer v2.0.5 [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v2.0.5)
 - Update: Specter Desktop 2.0.5 [details](https://github.com/cryptoadvance/specter-desktop/releases/tag/v2.0.5)
 - Update: Elements 23.2.7 [details](https://github.com/ElementsProject/elements)
+- Update: Channel Tools (chantools) v0.13.7 [details](https://github.com/lightninglabs/chantools/releases/tag/v0.13.7)
 - Update: Fulcrum Electrum server v1.11.1 (CLI install script with status menu) [details](https://github.com/cculianu/Fulcrum/releases/tag/v1.11.1)
 - Update: Helipad (Podcasting 2.0 Boostagram reader) v0.2.1 [details](https://github.com/Podcastindex-org/helipad/)
 - Remove: Migration from Umbrel, MyNode, Citadel (because of new drive layout with boot option)

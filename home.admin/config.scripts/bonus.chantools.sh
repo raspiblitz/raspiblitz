@@ -6,7 +6,7 @@
 
 lndVersion=$(lncli -v | cut -d " " -f 3 | cut -d"." -f2)
 if [ $lndVersion -gt 15 ]; then
-  pinnedVersion="0.12.0"
+  pinnedVersion="0.13.7"
 else
   echo "# LND is not installed or is an outdated version (v0.15.x or lower)"
   lncli -v
