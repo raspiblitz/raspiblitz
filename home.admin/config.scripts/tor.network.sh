@@ -138,7 +138,7 @@ case "$1" in
 /mnt/hdd/app-data/tor/*log {
         su debian-tor debian-tor
         size 100M
-        rotate 4
+        rotate 2
         compress
         delaycompress
         missingok
@@ -146,9 +146,7 @@ case "$1" in
         create 0640 debian-tor debian-tor
         sharedscripts
         postrotate
-                if invoke-rc.d tor status > /dev/null; then
-                        invoke-rc.d tor reload > /dev/null
-                fi
+            systemctl reload tor >/dev/null 2>&1 || true
         endscript
 }
 EOF
