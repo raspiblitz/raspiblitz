@@ -2,7 +2,7 @@
 
 # https://github.com/mempool/mempool
 
-pinnedVersion="v3.0.0"
+pinnedVersion="v3.2.1"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
