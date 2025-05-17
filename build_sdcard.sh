@@ -342,6 +342,15 @@ if [ ${isDebianInHosts} -eq 0 ]; then
   fi
 fi
 
+# force locale - see #4861
+# next major release should make sure to be set during sd build card
+echo
+echo "*** Forcing locales ..."
+sudo sed -i '/^en_US.UTF-8/s/^#//' /etc/locale.gen
+sudo sed -i '/^en_GB.UTF-8/s/^/#/' /etc/locale.gen
+sudo locale-gen
+echo -e "LANG=en_US.UTF-8\nLANGUAGE=en_US.UTF-8\nLC_ALL=en_US.UTF-8" | sudo tee /etc/default/locale > /dev/null
+
 echo "*** Remove unnecessary packages ***"
 unnecessary_packages=(libreoffice* oracle-java* chromium-browser nuscratch scratch sonic-pi plymouth python2 vlc* cups* libcups* libcamera* firefox* ffmpeg libpostproc* eom* evince*)
 for pkg in "${unnecessary_packages[@]}"; do
