@@ -14,7 +14,7 @@ Features:
 - Update: LNbits 1.0.0 [details](https://github.com/lnbits/lnbits/releases/tag/v1.0.0)
 - Update: AlbyHub v1.17.0 [details](https://github.com/getAlby/hub/releases/tag/v1.17.0)
 - Update: Lightning Terminal v0.14.1-alpha [details](https://github.com/lightninglabs/lightning-terminal/releases/tag/v0.14.1-alpha)
-- Update: BTCPayServer v2.0.5 [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v2.0.5)
+- Update: BTCPayServer v2.2.1 [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v2.2.1)
 - Update: Specter Desktop 2.0.5 [details](https://github.com/cryptoadvance/specter-desktop/releases/tag/v2.0.5)
 - Update: Elements 23.2.7 [details](https://github.com/ElementsProject/elements)
 - Update: Fulcrum Electrum server v1.11.1 (CLI install script with status menu) [details](https://github.com/cculianu/Fulcrum/releases/tag/v1.11.1)
