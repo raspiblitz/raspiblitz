@@ -1244,6 +1244,7 @@ if [ "$action" = "link" ]; then
     chmod a+rx ${mainMountPoint}/app-data/lnd/data/chain/bitcoin/mainnet 2>/dev/null
     chmod a+rx ${mainMountPoint}/app-data/lnd/data/chain/bitcoin/testnet 2>/dev/null
     chmod a+rx ${mainMountPoint}/app-data/lnd/data/chain/bitcoin/signet 2>/dev/null
+    chmod a+rx ${mainMountPoint}/app-data/lnd/tls.cert 2>/dev/null
 
     exit 0
 fi
