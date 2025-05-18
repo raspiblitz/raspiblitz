@@ -158,7 +158,7 @@ if [ "$1" = "prestart" ]; then
   # check if fulcrum is installed & running
   if [ "${fulcrum}" == "on" ]; then
     isFulcrumReady=$(netstat -tan | grep -c "50021")
-    echo "# fulcrum is ON .. and ready (${isElectrumReady})"
+    echo "# fulcrum is ON .. and ready (${isFulcrumReady})"
     electrumTCPport=50021
   fi
 
