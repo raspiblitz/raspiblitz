@@ -16,6 +16,14 @@ fi
 
 echo "# Running: bitcoin.update.sh $*"
 
+isBitcoinCoreInstalled=$(sudo -u bitcoin bitcoind --version | head -n 1 | grep -c "Bitcoin Core")
+if [ ${isBitcoinCoreInstalled} -eq 0 ]; then
+  echo "# if you have Bitcoin KNOTS installed - you first need to switch back to Bitcoin Core"
+  echo "# error='Bitcoin Core is not installed'"
+  sleep 3
+  exit 1
+fi
+
 # 1. parameter [info|tested|reckless]
 mode="$1"
 
