@@ -44,7 +44,6 @@ architecture=$(dpkg --print-architecture)
 
 add_tor_sources(){
   echo -e "\n*** Adding deb.torproject.org keyring ***"
-  wget -qO- https://deb.torproject.org/torproject.org/A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89.asc | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/torproject.gpg >/dev/null
   curl -s -x socks5h://127.0.0.1:9050 --connect-timeout 60 \
    "${tor_deb_repo_clean}/torproject.org/${tor_deb_repo_pgp_fingerprint}.asc" \
    | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/torproject.gpg 1>/dev/null
