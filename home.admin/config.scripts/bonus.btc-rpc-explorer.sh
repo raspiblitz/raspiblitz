@@ -151,7 +151,7 @@ if [ "$1" = "prestart" ]; then
     # electrs listening in port 50001 means index is built
     # Use flags: t = tcp protocol only  /  a = list all connection states (includes LISTEN)  /  n = don't resolve names => no dns spam
     isElectrsReady=$(netstat -tan | grep -c "50001")
-    echo "# electrs is ON .. and ready (${isElectrumReady})"
+    echo "# electrs is ON .. and ready (${isElectrsReady})"
     electrumTCPport=50001
   fi
 
