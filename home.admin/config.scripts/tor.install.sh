@@ -47,18 +47,18 @@ add_tor_sources(){
   curl -s -x socks5h://127.0.0.1:9050 --connect-timeout 60 \
    "${tor_deb_repo_clean}/torproject.org/${tor_deb_repo_pgp_fingerprint}.asc" \
    | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/torproject.gpg 1>/dev/null
-  validSignature=$(sudo gpg --show-keys --with-fingerprint /usr/share/keyrings/deb.torproject.org-keyring.gpg | grep -c "${tor_deb_repo_pgp_fingerprint::4}")
+  validSignature=$(sudo gpg --show-keys --with-fingerprint /etc/apt/trusted.gpg.d/torproject.gpg | grep -c "${tor_deb_repo_pgp_fingerprint::4}")
   if [ ${validSignature} -gt 0 ]; then
     echo "- OK key added over Tor"
   else
     echo "WARN: Was not able to import deb.torproject.org key over Tor";
     curl -s "https://deb.torproject.org/torproject.org/${tor_deb_repo_pgp_fingerprint}.asc" \
      | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/torproject.gpg 1>/dev/null
-    validSignature=$(sudo gpg --show-keys --with-fingerprint /usr/share/keyrings/deb.torproject.org-keyring.gpg | grep -c "${tor_deb_repo_pgp_fingerprint::4}")
+    validSignature=$(sudo gpg --show-keys --with-fingerprint /etc/apt/trusted.gpg.d/torproject.gpg | grep -c "${tor_deb_repo_pgp_fingerprint::4}")
     if [ ${validSignature} -gt 0 ]; then
       echo "- OK key added over clearnet"
     else
-      echo "! FAIL: Was not able to import deb.torproject.org key over clearnet - see: sudo gpg --show-keys --with-fingerprint /usr/share/keyrings/deb.torproject.org-keyring.gpg";
+      echo "! FAIL: Was not able to import deb.torproject.org key over clearnet - see: sudo gpg --show-keys --with-fingerprint /etc/apt/trusted.gpg.d/torproject.gpg";
       exit 1
     fi
   fi
