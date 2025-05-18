@@ -7,6 +7,7 @@ Features:
 - New: Boot from NVMe on RaspberryPi5
 - New: Copy from old HDD/SSD/NVMe
 - New: Optional separation of Data & Storage/Blockchain drives with Auto-Expand for Proxmox
+- New: Bitcoin Knots 28.1 (as option to replace Bitcoin Core - see SSH SETTINGS menu)
 - Update: RaspberryOS arm64 base image 2024-11-19 (Debian 12 Bookworm) [details](https://downloads.raspberrypi.com/raspios_full_arm64/release_notes.txt)
 - Update: amd64 base image: debian-12.8.0-amd64-netinst.iso [details](https://www.debian.org/releases/stable/amd64/release-notes/ch-whats-new.en.html)
 - Update: Bitcoin Core v29.0 [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-29.0.md)
