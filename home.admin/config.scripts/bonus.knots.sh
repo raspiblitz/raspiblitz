@@ -150,8 +150,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   # stop bitcoind
   sudo systemctl stop bitcoind
-  cd /usr/local/bin/
-  sudo rm bitcoin*
+  # backup existing bitcoin core binaries
+  echo "# Backup existing Bitcoin Core binaries"
+  sudo mkdir -p /usr/local/bin_bitcoin_core_backup
+  sudo mv /usr/local/bin/bitcoin* /usr/local/bin_bitcoin_core_backup/ 2>/dev/null || true
+  echo "# Existing Bitcoin Core binaries backed up to /usr/local/bin_bitcoin_core_backup/"
 
   # install the app
   cd /home/${APPID}/${APPID}
@@ -191,10 +194,17 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   echo "# mark app as uninstalled in raspiblitz config"
   /home/admin/config.scripts/blitz.conf.sh set ${APPID} "off"
 
-  echo "reinstall core"
+  echo "# Restore Bitcoin Core binaries"
   cd /usr/local/bin
-  sudo rm bitcoin*
-  sudo -u admin /home/admin/config.scripts/bitcoin.install.sh install
+  sudo rm bitcoin* 2>/dev/null || true
+  if [ -d "/usr/local/bin_bitcoin_core_backup" ] && [ "$(ls -A /usr/local/bin_bitcoin_core_backup)" ]; then
+    sudo mv /usr/local/bin_bitcoin_core_backup/bitcoin* /usr/local/bin/
+    sudo rm -rf /usr/local/bin_bitcoin_core_backup
+    echo "# Bitcoin Core binaries restored from backup."
+  else
+    echo "# No backup found, reinstalling Bitcoin Core."
+    sudo -u admin /home/admin/config.scripts/bitcoin.install.sh install
+  fi
   sudo systemctl restart bitcoind
 
   echo "# OK - app should be uninstalled now"
