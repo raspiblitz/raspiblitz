@@ -75,9 +75,6 @@ echo "reset DNS confs ..."
 echo -e "nameserver 1.1.1.1\nnameserver 84.200.69.80" | sudo tee /etc/resolv.conf > /dev/null
 echo "OK"
 
-# make sure Tor respo signing keys are uptodate #4648
-wget -qO- https://deb.torproject.org/torproject.org/A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89.asc | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/torproject.gpg >/dev/null
-
 # update system (only security updates with minimal risk of breaking changes)
 if [ "$1" != "-quick" ]; then
   echo
