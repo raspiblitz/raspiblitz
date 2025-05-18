@@ -223,7 +223,7 @@ if [ "$1" = "install" ]; then
   cd /home/btcrpcexplorer
   sudo -u btcrpcexplorer git clone https://github.com/janoside/btc-rpc-explorer.git
   cd btc-rpc-explorer
-  sudo -u btcrpcexplorer git reset --hard ${VERSION}
+  # sudo -u btcrpcexplorer git reset --hard ${VERSION}
   sudo -u btcrpcexplorer /home/admin/config.scripts/blitz.git-verify.sh "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
   sudo -u btcrpcexplorer npm ci
   if ! [ $? -eq 0 ]; then
