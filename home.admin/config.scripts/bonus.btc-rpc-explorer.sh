@@ -4,7 +4,8 @@
 # ~/.config/btc-rpc-explorer.env
 # https://github.com/janoside/btc-rpc-explorer/blob/master/.env-sample
 
-VERSION="v3.4.0"
+# use commit hash, because latest release 3.4.0 is too old
+GITHUBCOMMIT="153aa0ae7f902562bd1cfa2bbcea4c00026e5aef"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -223,7 +224,7 @@ if [ "$1" = "install" ]; then
   cd /home/btcrpcexplorer
   sudo -u btcrpcexplorer git clone https://github.com/janoside/btc-rpc-explorer.git
   cd btc-rpc-explorer
-  # sudo -u btcrpcexplorer git reset --hard ${VERSION}
+  sudo -u btcrpcexplorer git reset --hard ${GITHUBCOMMIT}
   sudo -u btcrpcexplorer /home/admin/config.scripts/blitz.git-verify.sh "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
   sudo -u btcrpcexplorer npm ci
   if ! [ $? -eq 0 ]; then
