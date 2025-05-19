@@ -9,8 +9,11 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   exit 1
 fi
 
-# make sure the HDD is mounted
-mountpoint -q /mnt/hdd || { echo "# internet.selfsignedcert.sh - /mnt/hdd is not mounted. Exiting."; exit 1; }
+# make sure /mnt/hdd/app-data exists
+if ! [ -d /mnt/hdd/app-data ]; then
+  echo "# internet.letsencrypt.sh - /mnt/hdd/app-data does not exist. Exiting."
+  exit 1
+fi
 
 CERT_DIR="/mnt/hdd/app-data/selfsignedcert"
 CERT_FILE="${CERT_DIR}/selfsigned.cert"

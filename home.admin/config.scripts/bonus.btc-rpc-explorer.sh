@@ -4,7 +4,8 @@
 # ~/.config/btc-rpc-explorer.env
 # https://github.com/janoside/btc-rpc-explorer/blob/master/.env-sample
 
-VERSION="v3.4.0"
+# use commit hash, because latest release 3.4.0 is too old
+GITHUBCOMMIT="153aa0ae7f902562bd1cfa2bbcea4c00026e5aef"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -147,26 +148,36 @@ if [ "$1" = "prestart" ]; then
   # check if electrs is installed & running
   if [ "${ElectRS}" == "on" ]; then
 
-    # CHECK THAT ELECTRS INDEX IS BUILD (WAITLOOP)
-    # electrs listening in port 50001 means index is build
+    # CHECK THAT ELECTRS INDEX IS BUILT (WAITLOOP)
+    # electrs listening in port 50001 means index is built
     # Use flags: t = tcp protocol only  /  a = list all connection states (includes LISTEN)  /  n = don't resolve names => no dns spam
-    isElectrumReady=$(netstat -tan | grep -c "50001")
-    if [ "${isElectrumReady}" == "0" ]; then
-      echo "# electrs is ON but not ready .. might still building index - kick systemd service into fail/wait/restart"
-      exit 1
-    fi
-    echo "# electrs is ON .. and ready (${isElectrumReady})"
+    isElectrsReady=$(netstat -tan | grep -c "50001")
+    echo "# electrs is ON .. and ready (${isElectrsReady})"
+    electrumTCPport=50001
+  fi
 
-    # CHECK THAT ELECTRS IS PART OF CONFIG
+  # check if fulcrum is installed & running
+  if [ "${fulcrum}" == "on" ]; then
+    isFulcrumReady=$(netstat -tan | grep -c "50021")
+    echo "# fulcrum is ON .. and ready (${isFulcrumReady})"
+    electrumTCPport=50021
+  fi
+
+  # Exit only if either service is on but neither is ready
+  if { [ "${ElectRS}" == "on" ] && [ "${electrsReady}" == "0" ]; } || { [ "${fulcrum}" == "on" ] && [ "${fulcrumReady}" == "0" ]; }; then
+    echo "# An Electrum Server is ON but not ready .. might still building index - kick systemd service into fail/wait/restart"
+    exit 1
+  fi
+
+  if [ ${isElectrsReady} -gt 0 ] || [ ${isFulcrumReady} -gt 0 ]; then
+    # CHECK THAT ELECTRUM SERVER IS PART OF CONFIG
     echo "# updating BTCEXP_ADDRESS_API=electrumx"
     sed -i 's/^BTCEXP_ADDRESS_API=.*/BTCEXP_ADDRESS_API=electrumx/g' /home/btcrpcexplorer/.config/btc-rpc-explorer.env
-
+    sed -i "s/^BTCEXP_ELECTRUMX_SERVERS=.*/BTCEXP_ELECTRUMX_SERVERS=tcp://127.0.0.1:${electrumTCPport}/g" /home/btcrpcexplorer/.config/btc-rpc-explorer.env
   else
-
     # ELECTRS=OFF --> MAKE SURE IT IS NOT CONNECTED
     echo "# updating BTCEXP_ADDRESS_API=none"
     sed -i 's/^BTCEXP_ADDRESS_API=.*/BTCEXP_ADDRESS_API=none/g' /home/btcrpcexplorer/.config/btc-rpc-explorer.env
-
   fi
 
   #  UPDATE RPC PASSWORD
@@ -213,7 +224,7 @@ if [ "$1" = "install" ]; then
   cd /home/btcrpcexplorer
   sudo -u btcrpcexplorer git clone https://github.com/janoside/btc-rpc-explorer.git
   cd btc-rpc-explorer
-  sudo -u btcrpcexplorer git reset --hard ${VERSION}
+  sudo -u btcrpcexplorer git reset --hard ${GITHUBCOMMIT}
   sudo -u btcrpcexplorer /home/admin/config.scripts/blitz.git-verify.sh "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
   sudo -u btcrpcexplorer npm ci
   if ! [ $? -eq 0 ]; then
