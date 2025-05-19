@@ -1770,10 +1770,13 @@ if [ "$action" = "recover" ] || [ "$action" = "clean" ]; then
                 # multi partion layout
                 unmount /mnt/disk_storage
                 echo "# .. formating boot & system partition" >> ${logFile}
+                echo "# - format: boot(/dev/${actionDevicePartitionBase}1)" >> ${logFile}
                 wipefs -a /dev/${actionDevicePartitionBase}1 >> ${logFile}
                 mkfs.fat -F 32 /dev/${actionDevicePartitionBase}1 >> ${logFile}
+                echo "# - format: system(/dev/${actionDevicePartitionBase}2)" >> ${logFile}
                 wipefs -a /dev/${actionDevicePartitionBase}2 >> ${logFile}
                 mkfs -t ext4  /dev/${actionDevicePartitionBase}2 >> ${logFile}
+                echo "# - mount: storage(/dev/${actionDevicePartitionBase}3)" >> ${logFile}
                 mount /dev/${actionDevicePartitionBase}3 /mnt/disk_storage >> ${logFile}
                 echo "storagePartition='${actionDevicePartitionBase}3'"
                 echo "# storagePartition(${actionDevicePartitionBase}3)" >> ${logFile}
@@ -1796,7 +1799,9 @@ if [ "$action" = "recover" ] || [ "$action" = "clean" ]; then
             echo "# Cleaning storage partition - preserving app-storage" >> ${logFile}
             find /mnt/disk_storage -maxdepth 1 -not -name "app-storage" -not -name "." -not -name ".." -exec rm -rf {} \;
             find /mnt/disk_storage/app-storage -maxdepth 1 -not -name "blocks" -name "chainstate" -name "indexes" -not -name "." -not -name ".." -exec rm -rf {} \;
-            
+            ls -la /mnt/disk_storage >> ${logFile}
+            ls -la /mnt/disk_storage/app-storage >> ${logFile}
+
             # Create fresh app-data directory if needed with combined data
             if [ ${actionCombinedData} -eq 1 ]; then
                 mkdir -p /mnt/disk_storage/app-data
