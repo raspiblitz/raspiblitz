@@ -342,6 +342,15 @@ if [ ${isDebianInHosts} -eq 0 ]; then
   fi
 fi
 
+# force locale - see #4861
+# next major release should make sure to be set during sd build card
+echo
+echo "*** Forcing locales ..."
+sudo sed -i '/^en_US.UTF-8/s/^#//' /etc/locale.gen
+sudo sed -i '/^en_GB.UTF-8/s/^/#/' /etc/locale.gen
+sudo locale-gen
+echo -e "LANG=en_US.UTF-8\nLANGUAGE=en_US.UTF-8\nLC_ALL=en_US.UTF-8" | sudo tee /etc/default/locale > /dev/null
+
 echo "*** Remove unnecessary packages ***"
 unnecessary_packages=(libreoffice* oracle-java* chromium-browser nuscratch scratch sonic-pi plymouth python2 vlc* cups* libcups* libcamera* firefox* ffmpeg libpostproc* eom* evince*)
 for pkg in "${unnecessary_packages[@]}"; do
@@ -392,7 +401,7 @@ echo -e "\n*** SOFTWARE UPDATE ***"
 # sqlite3 -> database
 # fdisk -> create partitions
 # lsb-release -> needed to know which distro version we're running to add APT sources
-general_utils="sudo policykit-1 htop git curl bash-completion vim jq dphys-swapfile bsdmainutils autossh telnet vnstat parted dosfstools fbi sysbench build-essential dialog bc python3-dialog unzip whois fdisk lsb-release smartmontools rsyslog"
+general_utils="sudo policykit-1 htop git curl bash-completion vim jq dphys-swapfile bsdmainutils autossh telnet vnstat parted dosfstools fbi sysbench build-essential dialog bc python3-dialog unzip whois fdisk lsb-release smartmontools rsyslog qrencode"
 # add btrfs-progs if not bookworm on aarch64
 [ "${architecture}" = "aarch64" ] && ! grep "12 (bookworm)" < /etc/os-release && general_utils="${general_utils} btrfs-progs"
 # python3-mako --> https://github.com/rootzoll/raspiblitz/issues/3441
@@ -502,6 +511,7 @@ if [ "${baseimage}" = "raspios_arm64" ]; then
     echo "dtparam=nvme" | tee -a $raspi_configfile
     echo 'dtoverlay=pi3-disable-bt' | tee -a $raspi_configfile
     echo 'dtoverlay=disable-bt' | tee -a $raspi_configfile
+    echo 'program_usb_timeout=1' | tee -a $raspi_configfile #4552
   else
     echo "# Raspiblitz Edits are already in $raspi_configfile"
   fi

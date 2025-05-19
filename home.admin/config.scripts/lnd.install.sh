@@ -415,6 +415,7 @@ alias ${netprefix}lndconf=\"sudo nano /mnt/hdd/app-data/lnd/${netprefix}lnd.conf
 
   # if parameter "initwallet" was set and wallet does not exist yet
   walletExists=$(sudo ls /mnt/hdd/app-data/lnd/data/chain/${network}/${CHAIN}/wallet.db 2>/dev/null | grep -c "wallet.db")
+  echo "# initwallet(${initwallet}) walletExists(${walletExists})"
   if [ "${initwallet}" == "1" ] && [ "${walletExists}" == "0" ]; then
       # only ask on mainnet for passwordC - for the testnet/signet its default 'raspiblitz'
       if [ "${CHAIN}" == "mainnet" ]; then
@@ -433,6 +434,7 @@ alias ${netprefix}lndconf=\"sudo nano /mnt/hdd/app-data/lnd/${netprefix}lnd.conf
         echo "# press ENTER to continue"
         read key
       else
+        sudo mkdir -p /mnt/hdd/app-data/lnd/data/chain/${network}/${CHAIN}
         seedFile="/mnt/hdd/app-data/lnd/data/chain/${network}/${CHAIN}/seedwords.info"
         echo "seedwords='${seedwords}'" | sudo tee ${seedFile}
         echo "seedwords6x4='${seedwords6x4}'" | sudo tee -a ${seedFile}

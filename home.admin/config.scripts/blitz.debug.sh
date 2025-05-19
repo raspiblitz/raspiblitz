@@ -258,8 +258,8 @@ else
   echo
 
   echo "*** LAST BLITZAPI LOGS ***"
-  echo "sudo journalctl -u blitzapi -b --no-pager -n20"
-  sudo journalctl -u blitzapi -b --no-pager -n20
+  echo "sudo journalctl -u blitzapi -b --no-pager -n40"
+  sudo journalctl -u blitzapi -b --no-pager -n40
   echo
 fi
 

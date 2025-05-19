@@ -19,15 +19,8 @@ echo "# Running: bitcoin.update.sh $*"
 # 1. parameter [info|tested|reckless]
 mode="$1"
 
-#4792 QUICK FIX --> downgrade reckless to tested
-# TODO: Remove with RaspiBlitz v1.12.0
-if [ "${mode}" = "reckless" ]; then
-  echo "# WARN: reckless mode is temp deactivated - switching to tested"
-  mode="tested"
-fi
-
 # RECOMMENDED UPDATE BY RASPIBLITZ TEAM (latest tested version available)
-bitcoinVersion="27.1" # example: 22.0 .. keep empty if no newer version as sd card build is available
+bitcoinVersion="" # example: 22.0 .. keep empty if no newer version as sd card build is available
 
 # GATHER DATA
 # setting download directory to the current user

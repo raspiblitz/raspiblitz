@@ -4,7 +4,7 @@
 # allyourbankarebelongtous 
 
 # https://github.com/cryptosharks131/lndg
-VERSION="1.8.0"
+VERSION="1.10.0"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
