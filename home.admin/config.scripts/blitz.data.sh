@@ -1136,7 +1136,7 @@ if [ "$action" = "link" ]; then
     chown bitcoin:bitcoin "${dataMountedPath}/app-data/bitcoin"
     if [ -d "${storageMountedPath}/bitcoin" ]; then
         echo "# moving old data from ${storageMountedPath}/bitcoin to ${storageMountedPath}/app-storage/bitcoin"
-        mv --force ${storageMountedPath}/bitcoin/* ${storageMountedPath}/app-storage/bitcoin/
+        rsync -a --remove-source-files --prune-empty-dirs ${storageMountedPath}/bitcoin/ ${storageMountedPath}/app-storage/bitcoin/
         if [ $? -ne 0 ]; then
             echo "error='failed to move ${storageMountedPath}/bitcoin/* to ${storageMountedPath}/app-storage/bitcoin/'"
         else
@@ -1165,9 +1165,9 @@ if [ "$action" = "link" ]; then
     chown bitcoin:bitcoin "${dataMountedPath}/app-data/lnd"
     if [ -d "${storageMountedPath}/lnd" ]; then
         echo "# moving old data from ${storageMountedPath}/lnd to ${dataMountedPath}/app-data/lnd"
-        mv --force ${storageMountedPath}/lnd/* ${dataMountedPath}/app-data/lnd/
+        rsync -a --remove-source-files --prune-empty-dirs ${storageMountedPath}/lnd/ ${dataMountedPath}/app-data/lnd/
         if [ $? -ne 0 ]; then
-            echo "error='failed to move ${storageMountedPath}/lnd/* to ${dataMountedPath}/app-data/lnd/'"
+            echo "error='failed to rsync /app-data/lnd/'"
         else
             rm -rf ${storageMountedPath}/lnd
         fi
@@ -1187,9 +1187,9 @@ if [ "$action" = "link" ]; then
     chown debian-tor:debian-tor "${dataMountedPath}/app-data/tor"
     if [ -d "${storageMountedPath}/tor" ]; then
         echo "# moving old data from ${storageMountedPath}/tor to ${dataMountedPath}/app-data/tor"
-        mv --force ${storageMountedPath}/tor/* ${dataMountedPath}/app-data/tor/
+        rsync -a --remove-source-files --prune-empty-dirs ${storageMountedPath}/tor/ ${dataMountedPath}/app-data/tor/
         if [ $? -ne 0 ]; then
-            echo "error='failed to move ${storageMountedPath}/tor/* to ${dataMountedPath}/app-data/tor/'"
+            echo "error='failed to rsync /app-data/tor/'"
         else
             rm -rf ${storageMountedPath}/tor
         fi
