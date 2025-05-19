@@ -928,6 +928,7 @@ if [ "$action" = "status" ]; then
         /home/admin/_cache.sh set "system_setup_storageWarning" "${storageWarning}"
         /home/admin/_cache.sh set "system_setup_storageBlockchainGB" "${storageBlockchainGB}"
         /home/admin/_cache.sh set "system_setup_storageMigration" "${storageMigration}"
+        /home/admin/_cache.sh set "system_setup_storagePartitionsCount" "${storagePartitionsCount}"
         /home/admin/_cache.sh set "system_setup_systemDevice" "${systemDevice}"
         /home/admin/_cache.sh set "system_setup_systemDeviceName" "${storageDeviceName}"
         /home/admin/_cache.sh set "system_setup_systemSizeGB" "${systemSizeGB}"

@@ -193,13 +193,22 @@ if [ "${setupPhase}" = "setup" ]; then
   # FORMAT DRIVE on NEW SETUP or MIGRATION UPLOAD/HDD 
   if [ "${menuresult}" = "0" ] || [ "${menuresult}" = "1" ]  || [ "${menuresult}" = "6" ]; then
 
-    source <(/home/admin/_cache.sh get system_setup_storageMigration system_setup_storageBlockchainGB system_setup_bootFromStorage system_setup_cleanDrives)
+    source <(/home/admin/_cache.sh get system_setup_storageMigration system_setup_storageBlockchainGB system_setup_bootFromStorage system_setup_cleanDrives system_setup_storagePartitionsCount)
 
-    # only offer 'keep blockchain' option on systems that dont boot from storage 
+    # handle existing blockchain data
     existingBlockchain=""
-    if [ "${system_setup_bootFromStorage}" == "0" ]; then
-      if [ "${system_setup_storageBlockchainGB}" != "" ] && [ "${system_setup_storageBlockchainGB}" != "0" ]; then
+    if [ "${system_setup_storageBlockchainGB}" != "" ] && [ "${system_setup_storageBlockchainGB}" != "0" ]; then
+      # allow, when not bootFromStorage
+      if [ "${system_setup_bootFromStorage}" == "0" ]; then
+        echo "# Existing blockchain can be used - cannot be moved to new drive layout"
         existingBlockchain="BITCOIN"
+      # allow, when bootFromStorage & storage already has 3 partitions (new drive layout)
+      elif [ "${system_setup_bootFromStorage}" == "1" ] && [ "${system_setup_storagePartitionsCount}" == "3" ] ; then
+        echo "# Existing blockchain can be used - already new drive layout"
+        existingBlockchain="BITCOIN"
+      # otherwise - dont use existing blockchain
+      else
+        echo "# Existing blockchain will not be used - to allow transfere to new drive layout"
       fi
     fi
 
