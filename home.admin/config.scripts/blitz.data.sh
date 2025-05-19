@@ -1143,7 +1143,7 @@ if [ "$action" = "link" ]; then
             rm -rf ${storageMountedPath}/bitcoin
         fi
     fi
-    if [ -f "${storageMountedPath}/app-storage/bitcoin/bitcoin.conf" ]; then
+    if [ -f "${storageMountedPath}/app-storage/bitcoin/bitcoin.conf" ] && [ ! -L "${storageMountedPath}/app-storage/bitcoin/bitcoin.conf" ]; then
         echo "# moving bitcoin data file from ${storageMountedPath}/app-storage/bitcoin to ${dataMountedPath}/app-data/bitcoin"
         mv --force ${storageMountedPath}/app-storage/bitcoin/bitcoin.conf ${dataMountedPath}/app-data/bitcoin/bitcoin.conf
         mv --force ${storageMountedPath}/app-storage/bitcoin/wallet.dat ${dataMountedPath}/app-data/bitcoin/wallet.dat 2>/dev/null
@@ -1151,7 +1151,7 @@ if [ "$action" = "link" ]; then
     unlink ${mainMountPoint}/app-storage/bitcoin/bitcoin.conf 2>/dev/null
     ln -s ${dataMountedPath}/app-data/bitcoin/bitcoin.conf ${mainMountPoint}/app-storage/bitcoin/bitcoin.conf 2>/dev/null
     unlink ${mainMountPoint}/app-storage/bitcoin/wallet.dat 2>/dev/null
-    if [ -f "${dataMountedPath}/app-data/bitcoin/wallet.dat" ]; then
+    if [ -f "${dataMountedPath}/app-data/bitcoin/wallet.dat" ] && [ ! -L "${dataMountedPath}/app-data/bitcoin/wallet.dat" ]; then
         ln -s ${dataMountedPath}/app-data/bitcoin/wallet.dat ${mainMountPoint}/app-storage/bitcoin/wallet.dat
     fi
     echo "# For backwards compatibility: Liniking ${mainMountPoint}/bitcoin"
@@ -1207,11 +1207,11 @@ if [ "$action" = "link" ]; then
     chmod 700 ${mainMountPoint}/tor
 
     # /mnt/hdd/aspiblitz.conf (move old file if needed & link for backwards compatibility)
-    if [ -f "${storageMountedPath}/raspiblitz.conf" ]; then
+    if [ -f "${storageMountedPath}/raspiblitz.conf" ] && [ ! -L "${storageMountedPath}/raspiblitz.conf" ]; then
         echo "# moving old config from ${storageMountedPath}/raspiblitz.conf to ${dataMountedPath}/app-data/raspiblitz.conf"
         mv --force ${storageMountedPath}/raspiblitz.conf ${dataMountedPath}/app-data/raspiblitz.conf
     fi
-    if [ -f "${mainMountPoint}/raspiblitz.conf" ]; then
+    if [ -f "${mainMountPoint}/raspiblitz.conf" ] && [ ! -L "${mainMountPoint}/raspiblitz.conf" ]; then
         mv --force ${mainMountPoint}/raspiblitz.conf ${mainMountPoint}/app-data/raspiblitz.conf
     fi
     touch "${dataMountedPath}/app-data/raspiblitz.conf"
@@ -1224,10 +1224,10 @@ if [ "$action" = "link" ]; then
     ln -s ${dataMountedPath}/app-data/raspiblitz.conf ${mainMountPoint}/raspiblitz.conf
     chown root:sudo ${mainMountPoint}/raspiblitz.conf
     chmod 664 ${mainMountPoint}/raspiblitz.conf
-    if [ -f "${mainMountPoint}/.tmux.conf.local" ]; then
+    if [ -f "${mainMountPoint}/.tmux.conf.local" ] && [ ! -L "${mainMountPoint}/.tmux.conf.local" ]; then
         mv --force ${mainMountPoint}/.tmux.conf.local ${mainMountPoint}/app-data/.tmux.conf.local
     fi
-    if [ -f "${storageMountedPath}/.tmux.conf.local" ]; then
+    if [ -f "${storageMountedPath}/.tmux.conf.local" ] && [ ! -L "${storageMountedPath}/.tmux.conf.local" ]; then
         mv --force ${storageMountedPath}/.tmux.conf.local ${mainMountPoint}/app-data/.tmux.conf.local
     fi
 
