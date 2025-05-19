@@ -33,22 +33,15 @@ elif [ "${extraParameter}" = "-blockchain" ]; then
     fi
 
     echo "# stopping services ... (please wait)"
-    echo "# - lnd"
-    sudo systemctl stop lnd.service 2>/dev/null
-    echo "# - blockchain"
     sudo systemctl stop bitcoind.service 2>/dev/null
-    echo ""
-    echo "# DELETING ..."
 
-    # delete bitcoin blockchain (but keep config & wallet)
-    sudo mv /mnt/hdd/bitcoin/bitcoin.conf /mnt/hdd/bitcoin.conf 2>/dev/null
-    sudo mv /mnt/hdd/bitcoin/wallet.dat /mnt/hdd/wallet.dat 2>/dev/null
-    sudo rm -f -r /mnt/hdd/bitcoin/*
-    sudo mv /mnt/hdd/bitcoin.conf /mnt/hdd/bitcoin/bitcoin.conf 2>/dev/null
-    sudo mv /mnt/hdd/wallet.dat /mnt/hdd/bitcoin/wallet.dat 2>/dev/null
-    sudo chown -R bitcoin:bitcoin /mnt/hdd/bitcoin
+    echo "selective blockchain data ... (please wait)"
 
-    echo "OK Blockchain data deleted - you may want now run: /home/admin/98repairBlockchain.sh"
+    # conf & wallet files are in /mnt/hdd/app-data/bitcoin - so delete all in storage
+    sudo rm -r -f /mnt/hdd/app-storage/bitcoin/*
+    sudo /home/admin/config.scripts/blitz.data.sh link
+
+    echo "OK Blockchain data deleted, restart needed - you may want now run: /home/admin/98repairBlockchain.sh"
     
 else
 
@@ -58,52 +51,25 @@ else
     read key
 
     echo "stopping services ... (please wait)"
-
-    echo "- swap"
     sudo dphys-swapfile swapoff
-
-    echo "- background"
     sudo systemctl stop background 2>/dev/null
-
-    echo "- lnd"
-    sudo systemctl stop lnd.service 2>/dev/null
-
-    echo "- blockchain"
     sudo systemctl stop bitcoind.service 2>/dev/null
 
     # just delete selective
     echo "selective delete ... (please wait)"
 
     # bitcoin mainnet (clean working files)
-    sudo rm -f /mnt/hdd/bitcoin/* 2>/dev/null
-    sudo rm -f /mnt/hdd/bitcoin/.* 2>/dev/null
-    sudo rm -f -r /mnt/hdd/bitcoin/database
+    sudo rm -f /mnt/hdd/app-storage/bitcoin/* 2>/dev/null
+    sudo rm -f /mnt/hdd/app-storage/bitcoin/.* 2>/dev/null
+    sudo rm -f -r /mnt/hdd/app-storage/bitcoin/database
 
-    # bitcoin testnet (clean working files)
-    sudo rm -f /mnt/hdd/bitcoin/testnet3/* 2>/dev/null
-    sudo rm -f /mnt/hdd/bitcoin/testnet3/.* 2>/dev/null
-    sudo rm -f -r /mnt/hdd/bitcoin/testnet/database
+    # delete all directories in /mnt/hdd/app-storage - but not the "bitcoin" folder
+    sudo mv /mnt/hdd/app-storage/bitcoin /mnt/hdd/app-data/bitcoin-temp 2>/dev/null
+    sudo rm -f -r /mnt/hdd/app-storage/* 2>/dev/null
+    sudo mv /mnt/hdd/app-data/bitcoin-temp /mnt/hdd/app-storage/bitcoin 2>/dev/null
 
-    # litecoin mainnet (clean working files) -- keep for legacy clean up reasons
-    sudo rm -f /mnt/hdd/litecoin/* 2>/dev/null
-    sudo rm -f /mnt/hdd/litecoin/.* 2>/dev/null
-    sudo rm -f -r /mnt/hdd/litecoin/database
-
-    # lnd (delete all)
-    sudo rm -f -r /mnt/hdd/app-data/lnd
-    sudo rm -f -r /mnt/hdd/app-data/backup_lnd
-
-    # mixed other files and folders (all)
-    sudo rm -f -r /mnt/hdd/lost+found
-    sudo rm -f -r /mnt/hdd/download
-    sudo rm -f -r /mnt/hdd/tor
-    sudo rm -f -r /mnt/hdd/temp
-    sudo rm -f -r /mnt/hdd/ssh
-    sudo rm -f -r /mnt/hdd/app-storage
-    sudo rm -f -r /mnt/hdd/app-data
-    sudo rm -f /mnt/hdd/swapfile
-    sudo rm -f /mnt/hdd/*.*
-
+    # delete all directries and files in /mnt/hdd/app-data
+    sudo rm -f -r /mnt/hdd/app-data 2>/dev/null
 fi
 
 echo "*************************"
