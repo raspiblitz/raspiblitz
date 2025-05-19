@@ -61,15 +61,16 @@ else
     # bitcoin mainnet (clean working files)
     sudo rm -f /mnt/hdd/app-storage/bitcoin/* 2>/dev/null
     sudo rm -f /mnt/hdd/app-storage/bitcoin/.* 2>/dev/null
-    sudo rm -f -r /mnt/hdd/app-storage/bitcoin/database
+    sudo rm -f -r /mnt/hdd/app-storage/bitcoin/indexes 2>/dev/null
 
     # delete all directories in /mnt/hdd/app-storage - but not the "bitcoin" folder
     sudo mv /mnt/hdd/app-storage/bitcoin /mnt/hdd/app-data/bitcoin-temp 2>/dev/null
     sudo rm -f -r /mnt/hdd/app-storage/* 2>/dev/null
     sudo mv /mnt/hdd/app-data/bitcoin-temp /mnt/hdd/app-storage/bitcoin 2>/dev/null
 
-    # delete all directries and files in /mnt/hdd/app-data
+    # delete rest of all data
     sudo rm -f -r /mnt/hdd/app-data 2>/dev/null
+    sudo rm -f -r /mnt/disk_storage/temp 2>/dev/null
 fi
 
 echo "*************************"
