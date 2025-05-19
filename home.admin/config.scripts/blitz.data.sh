@@ -1802,6 +1802,7 @@ if [ "$action" = "recover" ] || [ "$action" = "clean" ]; then
             find /mnt/disk_storage/app-storage/bitcoin -maxdepth 1 -not -name "blocks" -name "chainstate" -not -name "." -not -name ".." -exec rm -rf {} \;
             ls -la /mnt/disk_storage >> ${logFile}
             ls -la /mnt/disk_storage/app-storage >> ${logFile}
+            ls -la /mnt/disk_storage/app-storage/bitcoin >> ${logFile}
 
             # Create fresh app-data directory if needed with combined data
             if [ ${actionCombinedData} -eq 1 ]; then
