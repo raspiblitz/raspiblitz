@@ -70,8 +70,8 @@ else
 
     # delete rest of all data
     sudo rm -f -r /mnt/hdd/hdd/app-data 2>/dev/null
-    sudo rm -f -r /mnt/hdd/disk_storage/app-data 2>/dev/null
-    sudo rm -f -r /mnt/hdd/disk_data/app-data 2>/dev/null
+    sudo rm -f -r /mnt/disk_storage/app-data 2>/dev/null
+    sudo rm -f -r /mnt/disk_data/app-data 2>/dev/null
     sudo rm -f -r /mnt/disk_storage/temp 2>/dev/null
 fi
 
