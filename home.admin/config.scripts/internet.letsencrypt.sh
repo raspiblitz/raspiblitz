@@ -12,8 +12,11 @@ fi
 
 source /mnt/hdd/app-data/raspiblitz.conf
 
-# make sure the HDD is mounted
-mountpoint -q /mnt/hdd || { echo "# internet.letsencrypt.sh - /mnt/hdd is not mounted. Exiting."; exit 1; }
+# make sure /mnt/hdd/app-data exists
+if ! [ -d /mnt/hdd/app-data ]; then
+  echo "# internet.letsencrypt.sh - /mnt/hdd/app-data does not exist. Exiting."
+  exit 1
+fi
 
 # https://github.com/acmesh-official/acme.sh/releases
 ACME_LOAD_BASE_URL="https://github.com/acmesh-official/acme.sh/archive/refs/tags/3.0.7.tar.gz"
