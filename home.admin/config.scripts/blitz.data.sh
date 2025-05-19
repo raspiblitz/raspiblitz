@@ -1798,7 +1798,8 @@ if [ "$action" = "recover" ] || [ "$action" = "clean" ]; then
             # delete all data in /mnt/disk_storage except for /mnt/disk_storage/app-storage
             echo "# Cleaning storage partition - preserving app-storage" >> ${logFile}
             find /mnt/disk_storage -maxdepth 1 -not -name "app-storage" -not -name "." -not -name ".." -exec rm -rf {} \;
-            find /mnt/disk_storage/app-storage -maxdepth 1 -not -name "blocks" -name "chainstate" -name "indexes" -not -name "." -not -name ".." -exec rm -rf {} \;
+            find /mnt/disk_storage/app-storage -maxdepth 1 -not -name "bitcoin" -not -name "." -not -name ".." -exec rm -rf {} \;
+            find /mnt/disk_storage/app-storage/bitcoin -maxdepth 1 -not -name "blocks" -name "chainstate" -not -name "." -not -name ".." -exec rm -rf {} \;
             ls -la /mnt/disk_storage >> ${logFile}
             ls -la /mnt/disk_storage/app-storage >> ${logFile}
 
