@@ -143,7 +143,7 @@ if [ "${clNode}" == "on" ]; then
   fi
 fi
 
-OPTIONS+=(k 'Bitcoin Knots (replace Core)' ${knots})
+OPTIONS+=(k 'Bitcoin Knots (experimental)' ${knots})
 
 CHOICE_HEIGHT=$(("${#OPTIONS[@]}/2+1"))
 HEIGHT=$((CHOICE_HEIGHT+6))
