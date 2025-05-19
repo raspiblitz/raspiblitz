@@ -69,7 +69,9 @@ else
     sudo mv /mnt/hdd/app-data/bitcoin-temp /mnt/hdd/app-storage/bitcoin 2>/dev/null
 
     # delete rest of all data
-    sudo rm -f -r /mnt/hdd/app-data 2>/dev/null
+    sudo rm -f -r /mnt/hdd/hdd/app-data 2>/dev/null
+    sudo rm -f -r /mnt/hdd/disk_storage/app-data 2>/dev/null
+    sudo rm -f -r /mnt/hdd/disk_data/app-data 2>/dev/null
     sudo rm -f -r /mnt/disk_storage/temp 2>/dev/null
 fi
 
