@@ -1812,6 +1812,7 @@ if [ "$action" = "recover" ] || [ "$action" = "clean" ]; then
             # in both setups /mnt/disk_storage/app-storage should exist
             # delete all data in /mnt/disk_storage except for /mnt/disk_storage/app-storage
             echo "# Cleaning storage partition - preserving app-storage" >> ${logFile}
+            # TODO: This is not working yet .. refactor later
             find /mnt/disk_storage -maxdepth 1 -not -name "app-storage" -not -name "." -not -name ".." -exec rm -rf {} \;
             find /mnt/disk_storage/app-storage -maxdepth 1 -not -name "bitcoin" -not -name "." -not -name ".." -exec rm -rf {} \;
             find /mnt/disk_storage/app-storage/bitcoin -maxdepth 1 -not -name "blocks" -name "chainstate" -not -name "." -not -name ".." -exec rm -rf {} \;

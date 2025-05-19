@@ -203,9 +203,9 @@ if [ "${setupPhase}" = "setup" ]; then
         echo "# Existing blockchain can be used - cannot be moved to new drive layout"
         existingBlockchain="BITCOIN"
       # allow, when bootFromStorage & storage already has 3 partitions (new drive layout)
-      elif [ "${system_setup_bootFromStorage}" == "1" ] && [ "${system_setup_storagePartitionsCount}" == "3" ] ; then
-        echo "# Existing blockchain can be used - already new drive layout"
-        existingBlockchain="BITCOIN"
+      #elif [ "${system_setup_bootFromStorage}" == "1" ] && [ "${system_setup_storagePartitionsCount}" == "3" ] ; then
+      #  echo "# Existing blockchain can be used - already new drive layout"
+      #  existingBlockchain="BITCOIN"
       # otherwise - dont use existing blockchain
       else
         echo "# Existing blockchain will not be used - to allow transfere to new drive layout"
