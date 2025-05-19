@@ -98,6 +98,14 @@ fi
 
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
+  # dont install when lightning is already installed
+  # see https://github.com/raspiblitz/raspiblitz/pull/5021#issuecomment-2889640024
+  if [ "${lightning}" != ""]; then
+    echo "# ABORT KNOTS INSTALL - at the moment Knots can only be installed & run if no lightning implementation is installed."
+    sleep 5
+    exit 1
+  fi
+
   if [ "$(uname -m | grep -c 'arm')" -gt 0 ]; then
     bitcoinOSversion="arm-linux-gnueabihf"
   elif [ "$(uname -m | grep -c 'aarch64')" -gt 0 ]; then
@@ -105,7 +113,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   elif [ "$(uname -m | grep -c 'x86_64')" -gt 0 ]; then
     bitcoinOSversion="x86_64-linux-gnu"
   fi
-
 
   # dont run install if already installed
   if [ ${isInstalled} -eq 1 ]; then
