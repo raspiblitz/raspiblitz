@@ -1136,12 +1136,17 @@ if [ "$action" = "link" ]; then
     chown bitcoin:bitcoin "${dataMountedPath}/app-data/bitcoin"
     if [ -d "${storageMountedPath}/bitcoin" ]; then
         echo "# moving old data from ${storageMountedPath}/bitcoin to ${storageMountedPath}/app-storage/bitcoin"
-        mv ${storageMountedPath}/bitcoin/* ${storageMountedPath}/app-storage/bitcoin/
+        mv --force ${storageMountedPath}/bitcoin/* ${storageMountedPath}/app-storage/bitcoin/
+        if [ $? -ne 0 ]; then
+            echo "error='failed to move ${storageMountedPath}/bitcoin/* to ${storageMountedPath}/app-storage/bitcoin/'"
+        else
+            rm -rf ${storageMountedPath}/bitcoin
+        fi
     fi
     if [ -f "${storageMountedPath}/app-storage/bitcoin/bitcoin.conf" ]; then
         echo "# moving bitcoin data file from ${storageMountedPath}/app-storage/bitcoin to ${dataMountedPath}/app-data/bitcoin"
-        mv ${storageMountedPath}/app-storage/bitcoin/bitcoin.conf ${dataMountedPath}/app-data/bitcoin/bitcoin.conf
-        mv ${storageMountedPath}/app-storage/bitcoin/wallet.dat ${dataMountedPath}/app-data/bitcoin/wallet.dat 2>/dev/null
+        mv --force ${storageMountedPath}/app-storage/bitcoin/bitcoin.conf ${dataMountedPath}/app-data/bitcoin/bitcoin.conf
+        mv --force ${storageMountedPath}/app-storage/bitcoin/wallet.dat ${dataMountedPath}/app-data/bitcoin/wallet.dat 2>/dev/null
     fi
     unlink ${mainMountPoint}/app-storage/bitcoin/bitcoin.conf 2>/dev/null
     ln -s ${dataMountedPath}/app-data/bitcoin/bitcoin.conf ${mainMountPoint}/app-storage/bitcoin/bitcoin.conf 2>/dev/null
@@ -1160,7 +1165,12 @@ if [ "$action" = "link" ]; then
     chown bitcoin:bitcoin "${dataMountedPath}/app-data/lnd"
     if [ -d "${storageMountedPath}/lnd" ]; then
         echo "# moving old data from ${storageMountedPath}/lnd to ${dataMountedPath}/app-data/lnd"
-        mv ${storageMountedPath}/lnd/* ${dataMountedPath}/app-data/lnd/
+        mv --force ${storageMountedPath}/lnd/* ${dataMountedPath}/app-data/lnd/
+        if [ $? -ne 0 ]; then
+            echo "error='failed to move ${storageMountedPath}/lnd/* to ${dataMountedPath}/app-data/lnd/'"
+        else
+            rm -rf ${storageMountedPath}/lnd
+        fi
     fi
     echo "# For backwards compatibility: Liniking ${mainMountPoint}/lnd"
     unlink ${mainMountPoint}/lnd 2>/dev/null
@@ -1177,7 +1187,12 @@ if [ "$action" = "link" ]; then
     chown debian-tor:debian-tor "${dataMountedPath}/app-data/tor"
     if [ -d "${storageMountedPath}/tor" ]; then
         echo "# moving old data from ${storageMountedPath}/tor to ${dataMountedPath}/app-data/tor"
-        mv ${storageMountedPath}/tor/* ${dataMountedPath}/app-data/tor/
+        mv --force ${storageMountedPath}/tor/* ${dataMountedPath}/app-data/tor/
+        if [ $? -ne 0 ]; then
+            echo "error='failed to move ${storageMountedPath}/tor/* to ${dataMountedPath}/app-data/tor/'"
+        else
+            rm -rf ${storageMountedPath}/tor
+        fi
     fi
     echo "# For backwards compatibility: Liniking ${mainMountPoint}/tor"
     unlink ${mainMountPoint}/tor 2>/dev/null
@@ -1194,10 +1209,10 @@ if [ "$action" = "link" ]; then
     # /mnt/hdd/aspiblitz.conf (move old file if needed & link for backwards compatibility)
     if [ -f "${storageMountedPath}/raspiblitz.conf" ]; then
         echo "# moving old config from ${storageMountedPath}/raspiblitz.conf to ${dataMountedPath}/app-data/raspiblitz.conf"
-        mv ${storageMountedPath}/raspiblitz.conf ${dataMountedPath}/app-data/raspiblitz.conf
+        mv --force ${storageMountedPath}/raspiblitz.conf ${dataMountedPath}/app-data/raspiblitz.conf
     fi
     if [ -f "${mainMountPoint}/raspiblitz.conf" ]; then
-        mv ${mainMountPoint}/raspiblitz.conf ${mainMountPoint}/app-data/raspiblitz.conf
+        mv --force ${mainMountPoint}/raspiblitz.conf ${mainMountPoint}/app-data/raspiblitz.conf
     fi
     touch "${dataMountedPath}/app-data/raspiblitz.conf"
     echo "# For backwards compatibility: Liniking ${mainMountPoint}/raspiblitz.conf"
@@ -1210,10 +1225,10 @@ if [ "$action" = "link" ]; then
     chown root:sudo ${mainMountPoint}/raspiblitz.conf
     chmod 664 ${mainMountPoint}/raspiblitz.conf
     if [ -f "${mainMountPoint}/.tmux.conf.local" ]; then
-        mv ${mainMountPoint}/.tmux.conf.local ${mainMountPoint}/app-data/.tmux.conf.local
+        mv --force ${mainMountPoint}/.tmux.conf.local ${mainMountPoint}/app-data/.tmux.conf.local
     fi
     if [ -f "${storageMountedPath}/.tmux.conf.local" ]; then
-        mv ${storageMountedPath}/.tmux.conf.local ${mainMountPoint}/app-data/.tmux.conf.local
+        mv --force ${storageMountedPath}/.tmux.conf.local ${mainMountPoint}/app-data/.tmux.conf.local
     fi
 
     ### bitcoin user symbol links
