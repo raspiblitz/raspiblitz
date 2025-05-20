@@ -1118,6 +1118,7 @@ if [ "$action" = "link" ]; then
     fi
     ln -s ${dataMountedPath}/app-data ${mainMountPoint}/app-data
     chown bitcoin:bitcoin ${dataMountedPath}/app-data ${mainMountPoint}/app-data
+    chown -R bitcoin:bitcoin ${dataMountedPath}/app-data/bitcoin ${mainMountPoint}/app-data/bitcoin
     chmod 755 ${dataMountedPath}/app-data ${mainMountPoint}/app-data
     chmod o+x ${dataMountedPath}
     chmod o+x ${dataMountedPath}/app-data
