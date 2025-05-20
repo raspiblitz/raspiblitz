@@ -1145,18 +1145,22 @@ if [ "$action" = "link" ]; then
             rm -rf ${storageMountedPath}/bitcoin
         fi
     fi
+    if [ -d "${storageMountedPath}/app-storage/bitcoin/wallet.dat" ]; then
+        echo "# moving old wallet from ${storageMountedPath}/app-storage/bitcoin/wallet.dat to ${dataMountedPath}/app-data/bitcoin/wallets/wallet.dat"
+        mv --force ${storageMountedPath}/app-storage/bitcoin/wallet.dat ${dataMountedPath}/app-data/bitcoin/wallets/wallet.dat
+        if [ $? -ne 0 ]; then
+            echo "error='failed to move ${storageMountedPath}/app-storage/bitcoin/wallet.dat to ${dataMountedPath}/app-data/bitcoin/wallets/wallet.dat'"
+        fi
+    fi
     if [ -f "${storageMountedPath}/app-storage/bitcoin/bitcoin.conf" ] && [ ! -L "${storageMountedPath}/app-storage/bitcoin/bitcoin.conf" ]; then
-        echo "# moving bitcoin data file from ${storageMountedPath}/app-storage/bitcoin to ${dataMountedPath}/app-data/bitcoin"
+        echo "# moving bitcoin config file from ${storageMountedPath}/app-storage/bitcoin to ${dataMountedPath}/app-data/bitcoin"
         mv --force ${storageMountedPath}/app-storage/bitcoin/bitcoin.conf ${dataMountedPath}/app-data/bitcoin/bitcoin.conf
-        mv --force ${storageMountedPath}/app-storage/bitcoin/wallet.dat ${dataMountedPath}/app-data/bitcoin/wallet.dat 2>/dev/null
+        if [ $? -ne 0 ]; then
+            echo "error='failed to move ${storageMountedPath}/app-storage/bitcoin/bitcoin.conf to ${dataMountedPath}/app-data/bitcoin/bitcoin.conf'"
+        fi
     fi
     unlink ${mainMountPoint}/app-storage/bitcoin/bitcoin.conf 2>/dev/null
     ln -s ${dataMountedPath}/app-data/bitcoin/bitcoin.conf ${mainMountPoint}/app-storage/bitcoin/bitcoin.conf 2>/dev/null
-    unlink ${mainMountPoint}/app-storage/bitcoin/wallet.dat 2>/dev/null
-    if [ -f "${dataMountedPath}/app-data/bitcoin/wallet.dat" ] && [ ! -L "${dataMountedPath}/app-data/bitcoin/wallet.dat" ]; then
-        echo "# link wallet.dat"
-        ln -s ${dataMountedPath}/app-data/bitcoin/wallet.dat ${mainMountPoint}/app-storage/bitcoin/wallet.dat
-    fi
     echo "# For backwards compatibility: Liniking ${mainMountPoint}/bitcoin"
     unlink ${mainMountPoint}/bitcoin 2>/dev/null
     ln -s ${storageMountedPath}/app-storage/bitcoin ${mainMountPoint}/bitcoin
