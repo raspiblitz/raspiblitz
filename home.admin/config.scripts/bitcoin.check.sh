@@ -67,6 +67,12 @@ if [ "$1" == "prestart" ]; then
   echo "# make sure entry(${bitcoinlog_entry}) has the correct value(${bitcoinlog_path})"
   sed -i "s|^${bitcoinlog_entry}=.*|${bitcoinlog_entry}=${bitcoinlog_path}|g" /mnt/hdd/bitcoin/bitcoin.conf
 
+  # make sure wallet directory entry exists and points to app-data
+  echo "# make sure entry(walletdir) is set"
+  mkdir -p /mnt/hdd/app-data/bitcoin/wallets 2>/dev/null
+  sed -i "s|^main.walletdir=.*|main.walletdir=/mnt/hdd/app-data/bitcoin/wallets|g" /mnt/hdd/bitcoin/bitcoin.conf
+  sed -i "s|^main.wallet=.*|main.wallet=wallet.dat|g" /mnt/hdd/bitcoin/bitcoin.conf
+
   # make sure bitcoin debug file exists
   echo "# make sure bitcoin debug file exists"
   touch ${bitcoinlog_path}
