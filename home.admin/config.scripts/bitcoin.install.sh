@@ -264,7 +264,7 @@ Environment='MALLOC_ARENA_MAX=1'
 ExecStartPre=-/home/admin/config.scripts/bitcoin.check.sh prestart ${CHAIN}
 ExecStart=/usr/local/bin/bitcoind ${chainparameter} \\
                                   -daemonwait \\
-                                  -conf=/mnt/hdd/app-data/bitcoin/bitcoin.conf \\
+                                  -conf=/mnt/hdd/app-storage/bitcoin/bitcoin.conf \\
                                   -datadir=/mnt/hdd/app-storage/bitcoin
 PermissionsStartOnly=true
 
