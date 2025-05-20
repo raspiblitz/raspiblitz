@@ -1122,7 +1122,6 @@ if [ "$action" = "link" ]; then
     chmod 755 ${dataMountedPath}/app-data ${mainMountPoint}/app-data
     chmod o+x ${dataMountedPath}
     chmod o+x ${dataMountedPath}/app-data
-    chmod -R o+x ${dataMountedPath}/app-data/bitcoin
 
     # /temp
     mkdir -p ${storageMountedPath}/temp 2>/dev/null
@@ -1154,10 +1153,8 @@ if [ "$action" = "link" ]; then
     ln -s ${dataMountedPath}/app-data/bitcoin/bitcoin.conf ${mainMountPoint}/app-storage/bitcoin/bitcoin.conf 2>/dev/null
     unlink ${mainMountPoint}/app-storage/bitcoin/wallet.dat 2>/dev/null
     if [ -f "${dataMountedPath}/app-data/bitcoin/wallet.dat" ] && [ ! -L "${dataMountedPath}/app-data/bitcoin/wallet.dat" ]; then
-        echo "# ln -s ${mainMountPoint}/app-storage/bitcoin/wallet.dat ${dataMountedPath}/app-data/bitcoin/wallet.dat"
-        ln -s ${mainMountPoint}/app-storage/bitcoin/wallet.dat ${dataMountedPath}/app-data/bitcoin/wallet.dat 
-    else
-        echo "# no link"
+        echo "# link wallet.dat"
+        ln -s ${dataMountedPath}/app-data/bitcoin/wallet.dat ${mainMountPoint}/app-storage/bitcoin/wallet.dat
     fi
     echo "# For backwards compatibility: Liniking ${mainMountPoint}/bitcoin"
     unlink ${mainMountPoint}/bitcoin 2>/dev/null
