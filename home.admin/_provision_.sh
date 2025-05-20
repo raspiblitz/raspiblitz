@@ -784,11 +784,12 @@ echo "" >> ${logFile}
 
 # repair Bitcoin conf if needed
 echo "*** Repair Bitcoin Conf (if needed)" >> ${logFile}
-confExists="$(ls /mnt/hdd/${network} | grep -c "${network}.conf")"
+confExists="$(ls /mnt/hdd/app-data/${network} | grep -c "${network}.conf")"
 if [ ${confExists} -eq 0 ]; then
   echo "Doing init of ${network}.conf" >> ${logFile}
-  cp /home/admin/assets/bitcoin.conf /mnt/hdd/bitcoin/bitcoin.conf
-  chown bitcoin:bitcoin /mnt/hdd/bitcoin/bitcoin.conf
+  cp /home/admin/assets/bitcoin.conf /mnt/hdd/app-data/bitcoin/bitcoin.conf
+  chown bitcoin:bitcoin /mnt/hdd/app-data/bitcoin/bitcoin.conf
+  /home/admin/config.scripts/blitz.data.sh link
 fi
 
 # I2P
