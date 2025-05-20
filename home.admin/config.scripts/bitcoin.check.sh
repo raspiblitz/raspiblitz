@@ -69,7 +69,6 @@ if [ "$1" == "prestart" ]; then
 
   # make sure wallet directory entry exists and points to app-data
   echo "# make sure entry(walletdir) is set"
-  mkdir -p /mnt/hdd/app-data/bitcoin/wallets 2>/dev/null
   # remove existing wallet entries first
   sed -i '/^main.walletdir=/d' /mnt/hdd/bitcoin/bitcoin.conf
   sed -i '/^main.wallet=/d' /mnt/hdd/bitcoin/bitcoin.conf
