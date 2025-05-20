@@ -1152,10 +1152,10 @@ if [ "$action" = "link" ]; then
     ln -s ${dataMountedPath}/app-data/bitcoin/bitcoin.conf ${mainMountPoint}/app-storage/bitcoin/bitcoin.conf 2>/dev/null
     unlink ${mainMountPoint}/app-storage/bitcoin/wallet.dat 2>/dev/null
     if [ -f "${dataMountedPath}/app-data/bitcoin/wallet.dat" ] && [ ! -L "${dataMountedPath}/app-data/bitcoin/wallet.dat" ]; then
-        echo "# moving bitcoin data file from ${storageMountedPath}/app-storage/bitcoin to ${dataMountedPath}/app-data/bitcoin"
-        ln -s ${dataMountedPath}/app-data/bitcoin/wallet.dat ${mainMountPoint}/app-storage/bitcoin/wallet.dat
+        echo "# ln -s ${mainMountPoint}/app-storage/bitcoin/wallet.dat ${dataMountedPath}/app-data/bitcoin/wallet.dat"
+        ln -s ${mainMountPoint}/app-storage/bitcoin/wallet.dat ${dataMountedPath}/app-data/bitcoin/wallet.dat 
     else
-        echo "# no wallet.dat file found in ${storageMountedPath}/app-storage/bitcoin"
+        echo "# no link"
     fi
     echo "# For backwards compatibility: Liniking ${mainMountPoint}/bitcoin"
     unlink ${mainMountPoint}/bitcoin 2>/dev/null
