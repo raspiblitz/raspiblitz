@@ -1153,10 +1153,14 @@ if [ "$action" = "link" ]; then
         fi
     fi
     if [ -f "${storageMountedPath}/app-storage/bitcoin/bitcoin.conf" ] && [ ! -L "${storageMountedPath}/app-storage/bitcoin/bitcoin.conf" ]; then
-        echo "# moving bitcoin config file from ${storageMountedPath}/app-storage/bitcoin to ${dataMountedPath}/app-data/bitcoin"
-        mv --force ${storageMountedPath}/app-storage/bitcoin/bitcoin.conf ${dataMountedPath}/app-data/bitcoin/bitcoin.conf
-        if [ $? -ne 0 ]; then
-            echo "error='failed to move ${storageMountedPath}/app-storage/bitcoin/bitcoin.conf to ${dataMountedPath}/app-data/bitcoin/bitcoin.conf'"
+        if [ ! -f "${dataMountedPath}/app-data/bitcoin/bitcoin.conf" ]; then
+            echo "# moving bitcoin config file from ${storageMountedPath}/app-storage/bitcoin to ${dataMountedPath}/app-data/bitcoin"
+            mv --force ${storageMountedPath}/app-storage/bitcoin/bitcoin.conf ${dataMountedPath}/app-data/bitcoin/bitcoin.conf
+            if [ $? -ne 0 ]; then
+                echo "error='failed to move ${storageMountedPath}/app-storage/bitcoin/bitcoin.conf to ${dataMountedPath}/app-data/bitcoin/bitcoin.conf'"
+            fi
+        else
+            echo "error='there is ${storageMountedPath}/app-storage/bitcoin/bitcoin.conf AND ${dataMountedPath}/app-data/bitcoin/bitcoin.conf'"
         fi
     fi
     unlink ${mainMountPoint}/app-storage/bitcoin/bitcoin.conf 2>/dev/null
