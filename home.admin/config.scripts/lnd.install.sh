@@ -279,6 +279,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   sudo chown -R bitcoin:bitcoin /mnt/hdd/app-data/lnd
   sudo chmod -R 750 /mnt/hdd/app-data/lnd
+  sudo usermod -a -G lndadmin bitcoin
 
   echo "# Create /mnt/hdd/app-data/lnd/${netprefix}lnd.conf"
   if [ ! -f /mnt/hdd/app-data/lnd/${netprefix}lnd.conf ];then
