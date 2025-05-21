@@ -1160,7 +1160,6 @@ if [ "$action" = "link" ]; then
         fi
     fi
     unlink ${mainMountPoint}/app-storage/bitcoin/bitcoin.conf 2>/dev/null
-    ln -s ${dataMountedPath}/app-data/bitcoin/bitcoin.conf ${mainMountPoint}/app-storage/bitcoin/bitcoin.conf 2>/dev/null
 
     echo "# For backwards compatibility: Liniking ${mainMountPoint}/bitcoin"
     unlink ${mainMountPoint}/bitcoin 2>/dev/null
