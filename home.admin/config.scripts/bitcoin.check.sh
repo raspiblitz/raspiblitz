@@ -37,9 +37,9 @@ if [ "$1" == "prestart" ]; then
   ##### CLEAN UP #####
 
   # all lines with just spaces to empty lines
-  sed -i 's/^[[:space:]]*$//g' /mnt/hdd/bitcoin/bitcoin.conf
+  sed -i 's/^[[:space:]]*$//g' /mnt/hdd/app-data/bitcoin/bitcoin.conf
   # all double empty lines to single empty lines
-  sed -i '/^$/N;/^\n$/D' /mnt/hdd/bitcoin/bitcoin.conf
+  sed -i '/^$/N;/^\n$/D' /mnt/hdd/app-data/bitcoin/bitcoin.conf
 
   ##### CHECK/SET CONFIG VALUES #####
   case "${CHAIN}" in
@@ -59,24 +59,24 @@ if [ "$1" == "prestart" ]; then
 
   # make sure entry exists
   echo "# make sure entry(${bitcoinlog_entry}) exists"
-  if ! grep -q "^${bitcoinlog_entry}=" /mnt/hdd/bitcoin/bitcoin.conf; then
-    echo "${bitcoinlog_entry}=${bitcoinlog_path}" >> /mnt/hdd/bitcoin/bitcoin.conf
+  if ! grep -q "^${bitcoinlog_entry}=" /mnt/hdd/app-data/bitcoin/bitcoin.conf; then
+    echo "${bitcoinlog_entry}=${bitcoinlog_path}" >> /mnt/hdd/app-data/bitcoin/bitcoin.conf
   fi
 
   # make sure entry has the correct value
   echo "# make sure entry(${bitcoinlog_entry}) has the correct value(${bitcoinlog_path})"
-  sed -i "s|^${bitcoinlog_entry}=.*|${bitcoinlog_entry}=${bitcoinlog_path}|g" /mnt/hdd/bitcoin/bitcoin.conf
+  sed -i "s|^${bitcoinlog_entry}=.*|${bitcoinlog_entry}=${bitcoinlog_path}|g" /mnt/hdd/app-data/bitcoin/bitcoin.conf
 
   # make sure wallet directory entry exists and points to app-data
   echo "# make sure entry(walletdir) is set"
   # remove existing wallet entries first
-  sed -i '/^main.walletdir=/d' /mnt/hdd/bitcoin/bitcoin.conf
-  sed -i '/^main.wallet=/d' /mnt/hdd/bitcoin/bitcoin.conf
-  sed -i '/^walletdir=/d' /mnt/hdd/bitcoin/bitcoin.conf
-  sed -i '/^wallet=/d' /mnt/hdd/bitcoin/bitcoin.conf
+  sed -i '/^main.walletdir=/d' /mnt/hdd/app-data/bitcoin/bitcoin.conf
+  sed -i '/^main.wallet=/d' /mnt/hdd/app-data/bitcoin/bitcoin.conf
+  sed -i '/^walletdir=/d' /mnt/hdd/app-data/bitcoin/bitcoin.conf
+  sed -i '/^wallet=/d' /mnt/hdd/app-data/bitcoin/bitcoin.conf
   # add wallet entries with correct values
-  echo "main.walletdir=/mnt/hdd/app-data/bitcoin/wallets" >> /mnt/hdd/bitcoin/bitcoin.conf
-  echo "main.wallet=wallet.dat" >> /mnt/hdd/bitcoin/bitcoin.conf
+  echo "main.walletdir=/mnt/hdd/app-data/bitcoin/wallets" >> /mnt/hdd/app-data/bitcoin/bitcoin.conf
+  echo "main.wallet=wallet.dat" >> /mnt/hdd/app-data/bitcoin/bitcoin.conf
 
   # make sure bitcoin debug file exists
   echo "# make sure bitcoin debug file exists"
