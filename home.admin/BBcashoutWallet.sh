@@ -26,7 +26,7 @@ if [ $LNTYPE = cl ];then
   cl_num_inactive_channels="$(echo "${ln_getInfo}" | jq -r '.num_inactive_channels')" 2>/dev/null
   openChannels=$((ln_channels_online+cl_num_inactive_channels))
 elif [ $LNTYPE = lnd ];then
-  echo "# check lnd channels"
+  echo "# check lnd channels ($lncli_alias)"
   openChannels=$($lncli_alias listchannels 2>/dev/null | jq '.[] | length')
 fi
 if [ ${#openChannels} -eq 0 ]; then
