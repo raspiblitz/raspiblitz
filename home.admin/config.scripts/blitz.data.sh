@@ -1161,6 +1161,7 @@ if [ "$action" = "link" ]; then
     fi
     unlink ${mainMountPoint}/app-storage/bitcoin/bitcoin.conf 2>/dev/null
     ln -s ${dataMountedPath}/app-data/bitcoin/bitcoin.conf ${mainMountPoint}/app-storage/bitcoin/bitcoin.conf 2>/dev/null
+
     echo "# For backwards compatibility: Liniking ${mainMountPoint}/bitcoin"
     unlink ${mainMountPoint}/bitcoin 2>/dev/null
     ln -s ${storageMountedPath}/app-storage/bitcoin ${mainMountPoint}/bitcoin
@@ -1221,7 +1222,9 @@ if [ "$action" = "link" ]; then
     if [ -f "${mainMountPoint}/raspiblitz.conf" ] && [ ! -L "${mainMountPoint}/raspiblitz.conf" ]; then
         mv --force ${mainMountPoint}/raspiblitz.conf ${mainMountPoint}/app-data/raspiblitz.conf
     fi
+
     echo "you find bitcoin.conf now in ${mainMountPoint}/app-data/bitcoin/bitcoin.conf" > ${mainMountPoint}/bitcoin/bitcoin.conf.info
+
     if [ -f "${mainMountPoint}/.tmux.conf.local" ] && [ ! -L "${mainMountPoint}/.tmux.conf.local" ]; then
         mv --force ${mainMountPoint}/.tmux.conf.local ${mainMountPoint}/app-data/.tmux.conf.local
     fi
