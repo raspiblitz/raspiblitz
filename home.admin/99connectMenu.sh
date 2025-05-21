@@ -182,14 +182,14 @@ HiddenServicePort 8333 127.0.0.1:8333" | sudo tee -a /etc/tor/torrc
     fi
     echo "# Running on ${chain:-main}net"
     echo
-    allowIPrange=$(grep -c "rpcallowip=$localIPrange" <  /mnt/hdd/${network}/${network}.conf)
-    bindIP=$(grep -c "${chain:-main}.rpcbind=$localIP" <  /mnt/hdd/${network}/${network}.conf)
+    allowIPrange=$(grep -c "rpcallowip=$localIPrange" <  /mnt/hdd/app-data/${network}/${network}.conf)
+    bindIP=$(grep -c "${chain:-main}.rpcbind=$localIP" <  /mnt/hdd/app-data/${network}/${network}.conf)
     rpcTorService=$(grep -c "HiddenServicePort ${BITCOINRPCPORT} 127.0.0.1:${BITCOINRPCPORT}"  < /etc/tor/torrc)
     TorRPCaddress=$(sudo cat /mnt/hdd/app-data/tor/bitcoin${BITCOINRPCPORT}/hostname)
 
     function showRPCcredentials() {
-      RPCUSER=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcuser | cut -c 9-)
-      RPCPSW=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
+      RPCUSER=$(sudo cat /mnt/hdd/app-data/${network}/${network}.conf | grep rpcuser | cut -c 9-)
+      RPCPSW=$(sudo cat /mnt/hdd/app-data/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
       echo
       echo "RPC username:"
       echo "$RPCUSER"
@@ -247,11 +247,11 @@ HiddenServicePort 8333 127.0.0.1:8333" | sudo tee -a /etc/tor/torrc
 
         restartCore=0
         if [ $allowIPrange -eq 0 ]; then
-          echo "rpcallowip=$localIPrange" | sudo tee -a /mnt/hdd/${network}/${network}.conf
+          echo "rpcallowip=$localIPrange" | sudo tee -a /mnt/hdd/app-data/${network}/${network}.conf
           restartCore=1
         fi
         if [ $bindIP -eq 0 ]; then
-          echo "${chain}.rpcbind=$localIP" | sudo tee -a /mnt/hdd/${network}/${network}.conf
+          echo "${chain}.rpcbind=$localIP" | sudo tee -a /mnt/hdd/app-data/${network}/${network}.conf
           restartCore=1
         fi
         if [ $restartCore = 1 ];then
@@ -294,11 +294,11 @@ HiddenServicePort 8333 127.0.0.1:8333" | sudo tee -a /etc/tor/torrc
         sudo ufw deny from $localIPrange to any port ${BITCOINRPCPORT}
         restartCore=0
         if [ $allowIPrange -gt 0 ]; then
-          sudo sed -i "/^rpcallowip=.*/d" /mnt/hdd/${network}/${network}.conf
+          sudo sed -i "/^rpcallowip=.*/d" /mnt/hdd/app-data/${network}/${network}.conf
           restartCore=1
         fi
         if [ $bindIP -gt 0 ]; then
-          sudo sed -i "/^${chain}.rpcbind=$localIP/d" /mnt/hdd/${network}/${network}.conf
+          sudo sed -i "/^${chain}.rpcbind=$localIP/d" /mnt/hdd/app-data/${network}/${network}.conf
           restartCore=1
         fi
         if [ $restartCore = 1 ];then

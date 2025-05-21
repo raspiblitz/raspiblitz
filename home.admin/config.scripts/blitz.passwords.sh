@@ -336,7 +336,7 @@ elif [ "${abcd}" = "b" ]; then
   sed -i "s/^rpcpassword=.*/rpcpassword=${newPassword}/g" /home/admin/assets/${network}.conf 2>/dev/null
 
   # change in real configs
-  sed -i "s/^rpcpassword=.*/rpcpassword=${newPassword}/g" /mnt/hdd/${network}/${network}.conf 2>/dev/null
+  sed -i "s/^rpcpassword=.*/rpcpassword=${newPassword}/g" /mnt/hdd/app-data/${network}/${network}.conf 2>/dev/null
   sed -i "s/^rpcpassword=.*/rpcpassword=${newPassword}/g" /home/admin/.${network}/${network}.conf 2>/dev/null
 
   # dont reboot - starting either services manually below or they get restarted thru

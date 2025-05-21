@@ -80,54 +80,54 @@ if [ ${configExists} -eq 1 ]; then
   # https://github.com/rootzoll/raspiblitz/issues/217
   # https://github.com/rootzoll/raspiblitz/issues/950
 
-  if ! grep -Eq "^rpcallowip=.*" /mnt/hdd/${network}/${network}.conf; then
+  if ! grep -Eq "^rpcallowip=.*" /mnt/hdd/app-data/${network}/${network}.conf; then
     echo "fix issue #217 -> adding rpcallowip=127.0.0.1" >> ${logFile}
-    echo "rpcallowip=127.0.0.1" >> /mnt/hdd/${network}/${network}.conf
+    echo "rpcallowip=127.0.0.1" >> /mnt/hdd/app-data/${network}/${network}.conf
   else
     echo "check issue #217 -> ok rpcallow exists" >> ${logFile}
   fi
 
   # check whether "main." needs to be added to rpcport and rpcbind
-  if grep -Eq "^rpcport=.*" /mnt/hdd/${network}/${network}.conf; then
+  if grep -Eq "^rpcport=.*" /mnt/hdd/app-data/${network}/${network}.conf; then
     echo "fix issue #950 -> change rpcport to main.rpcport" >> ${logFile}
-    sudo sed -i -E 's/^(rpcport=.*)/main.\1/g' /mnt/hdd/${network}/${network}.conf
+    sudo sed -i -E 's/^(rpcport=.*)/main.\1/g' /mnt/hdd/app-data/${network}/${network}.conf
   else
     echo "check issue #950 -> ok ^rpcport does not exist" >> ${logFile}
   fi
 
-  if grep -Eq "^rpcbind=.*" /mnt/hdd/${network}/${network}.conf; then
+  if grep -Eq "^rpcbind=.*" /mnt/hdd/app-data/${network}/${network}.conf; then
     echo "fix issue #950 -> change rpcbind to main.rpcbind" >> ${logFile}
-    sudo sed -i -E 's/^(rpcbind=.*)/main.\1/g' /mnt/hdd/${network}/${network}.conf
+    sudo sed -i -E 's/^(rpcbind=.*)/main.\1/g' /mnt/hdd/app-data/${network}/${network}.conf
   else
     echo "check issue #950 -> ok ^rpcbind does not exist" >> ${logFile}
   fi
 
   # check whether right settings are there ("main.")
-  if ! grep -Eq "^main.rpcport=.*" /mnt/hdd/${network}/${network}.conf; then
+  if ! grep -Eq "^main.rpcport=.*" /mnt/hdd/app-data/${network}/${network}.conf; then
     echo "fix issue #217 -> adding main.rpcport=8332" >> ${logFile}
-    echo "main.rpcport=8332" >> /mnt/hdd/${network}/${network}.conf
+    echo "main.rpcport=8332" >> /mnt/hdd/app-data/${network}/${network}.conf
   else
     echo "check issue #217 -> ok main.rpcport exists" >> ${logFile}
   fi
 
-  if ! grep -Eq "^main.rpcbind=.*" /mnt/hdd/${network}/${network}.conf; then
+  if ! grep -Eq "^main.rpcbind=.*" /mnt/hdd/app-data/${network}/${network}.conf; then
     echo "fix issue #217 -> adding main.rpcbind=127.0.0.1:8332" >> ${logFile}
-    echo "main.rpcbind=127.0.0.1:8332" >> /mnt/hdd/${network}/${network}.conf
+    echo "main.rpcbind=127.0.0.1:8332" >> /mnt/hdd/app-data/${network}/${network}.conf
   else
     echo "check issue #217 -> ok main.rpcbind exists" >> ${logFile}
   fi
 
   # same for testnet
-  if ! grep -Eq "^test.rpcport=.*" /mnt/hdd/${network}/${network}.conf; then
+  if ! grep -Eq "^test.rpcport=.*" /mnt/hdd/app-data/${network}/${network}.conf; then
     echo "fix issue #950 -> adding test.rpcport=18332" >> ${logFile}
-    echo "test.rpcport=18332" >> /mnt/hdd/${network}/${network}.conf
+    echo "test.rpcport=18332" >> /mnt/hdd/app-data/${network}/${network}.conf
   else
     echo "check issue #950 -> ok test.rpcport exists" >> ${logFile}
   fi
 
-  if ! grep -Eq "^test.rpcbind=.*" /mnt/hdd/${network}/${network}.conf; then
+  if ! grep -Eq "^test.rpcbind=.*" /mnt/hdd/app-data/${network}/${network}.conf; then
     echo "fix issue #950 -> adding test.rpcbind=127.0.0.1:18332" >> ${logFile}
-    echo "test.rpcbind=127.0.0.1:18332" >> /mnt/hdd/${network}/${network}.conf
+    echo "test.rpcbind=127.0.0.1:18332" >> /mnt/hdd/app-data/${network}/${network}.conf
   else
     echo "check issue #950 -> ok test.rpcbind exists" >> ${logFile}
   fi
@@ -137,7 +137,7 @@ else
 fi
 
 # delete old Tor v1 addresses from config -  see: https://github.com/rootzoll/raspiblitz/issues/3659
-sed -i -E "/^addnode=[a-z0-9]{8,18}\.onion/d" /mnt/hdd/${network}/${network}.conf 2>/dev/null
+sed -i -E "/^addnode=[a-z0-9]{8,18}\.onion/d" /mnt/hdd/app-data/${network}/${network}.conf 2>/dev/null
 
 echo "Version Code: ${codeVersion}" >> ${logFile}
 echo "Version Data: ${raspiBlitzVersion}" >> ${logFile}
@@ -156,7 +156,7 @@ echo ""
 echo "*** Start ${network} (UPDATE) ***" >> ${logFile}
 /home/admin/_cache.sh set message "Blockchain Testrun"
 echo "- This can take a while .." >> ${logFile}
-chown -R bitcoin:bitcoin /mnt/hdd/${network} >>${logFile} 2>&1
+chown -R bitcoin:bitcoin /mnt/hdd/app-storage/${network} >>${logFile} 2>&1
 systemctl daemon-reload >> ${logFile}
 systemctl enable ${network}d.service >> ${logFile}
 systemctl start ${network}d.service >> ${logFile}

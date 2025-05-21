@@ -68,12 +68,12 @@ fi
 # copy configs files and directories
 echo ""
 echo "*** Prepare ${network} ***" >> ${logFile}
-mkdir /mnt/hdd/${network} >>${logFile} 2>&1
-chown -R bitcoin:bitcoin /mnt/hdd/${network} >>${logFile} 2>&1
-sudo -u bitcoin mkdir /mnt/hdd/${network}/blocks >>${logFile} 2>&1
-sudo -u bitcoin mkdir /mnt/hdd/${network}/chainstate >>${logFile} 2>&1
-cp /home/admin/assets/${network}.conf /mnt/hdd/${network}/${network}.conf
-chown bitcoin:bitcoin /mnt/hdd/${network}/${network}.conf >>${logFile} 2>&1
+mkdir /mnt/hdd/app-storage/${network} >>${logFile} 2>&1
+chown -R bitcoin:bitcoin /mnt/hdd/app-storage/${network} >>${logFile} 2>&1
+sudo -u bitcoin mkdir /mnt/hdd/app-storage/${network}/blocks >>${logFile} 2>&1
+sudo -u bitcoin mkdir /mnt/hdd/app-storage/${network}/chainstate >>${logFile} 2>&1
+cp /home/admin/assets/${network}.conf /mnt/hdd/app-data/${network}/${network}.conf
+chown bitcoin:bitcoin /mnt/hdd/app-data/${network}/${network}.conf >>${logFile} 2>&1
 mkdir /home/admin/.${network} >>${logFile} 2>&1
 cp /home/admin/assets/${network}.conf /home/admin/.${network}/${network}.conf
 chown -R admin:admin /home/admin/.${network} >>${logFile} 2>&1
@@ -82,8 +82,8 @@ chown -R admin:admin /home/admin/.${network} >>${logFile} 2>&1
 /home/admin/config.scripts/blitz.data.sh link >> ${logFile}
 
 # test bitcoin config
-confExists=$(ls /mnt/hdd/${network}/${network}.conf | grep -c "${network}.conf")
-echo "File Exists: /mnt/hdd/${network}/${network}.conf --> ${confExists}" >> ${logFile}
+confExists=$(ls /mnt/hdd/app-data/${network}/${network}.conf | grep -c "${network}.conf")
+echo "File Exists: /mnt/hdd/app-data/${network}/${network}.conf --> ${confExists}" >> ${logFile}
 
 # set password B as RPC password (from setup file)
 echo "# setting PASSWORD B" >> ${logFile}
@@ -94,23 +94,23 @@ if [ "${network}" == "bitcoin" ]; then
   echo "*** Optimizing RAM for Sync ***" >> ${logFile}
   kbSizeRAM=$(cat /proc/meminfo | grep "MemTotal" | sed 's/[^0-9]*//g')
   echo "kbSizeRAM(${kbSizeRAM})" >> ${logFile}
-  echo "dont forget to reduce dbcache once IBD is done" > "/mnt/hdd/${network}/blocks/selfsync.flag"
+  echo "dont forget to reduce dbcache once IBD is done" > "/mnt/hdd/app-storage/${network}/blocks/selfsync.flag"
   # RP4 8GB
   if [ ${kbSizeRAM} -gt 7500000 ]; then
     echo "Detected RAM >=8GB --> optimizing ${network}.conf" >> ${logFile}
-    sed -i "s/^dbcache=.*/dbcache=4096/g" /mnt/hdd/${network}/${network}.conf
+    sed -i "s/^dbcache=.*/dbcache=4096/g" /mnt/hdd/app-data/${network}/${network}.conf
   # RP4 4GB
   elif [ ${kbSizeRAM} -gt 3500000 ]; then
     echo "Detected RAM >=4GB --> optimizing ${network}.conf" >> ${logFile}
-    sed -i "s/^dbcache=.*/dbcache=2560/g" /mnt/hdd/${network}/${network}.conf
+    sed -i "s/^dbcache=.*/dbcache=2560/g" /mnt/hdd/app-data/${network}/${network}.conf
   # RP4 2GB
   elif [ ${kbSizeRAM} -gt 1500000 ]; then
     echo "Detected RAM >=2GB --> optimizing ${network}.conf" >> ${logFile}
-    sed -i "s/^dbcache=.*/dbcache=1536/g" /mnt/hdd/${network}/${network}.conf
+    sed -i "s/^dbcache=.*/dbcache=1536/g" /mnt/hdd/app-data/${network}/${network}.conf
   #RP3/4 1GB
   else
     echo "Detected RAM <=1GB --> optimizing ${network}.conf" >> ${logFile}
-    sed -i "s/^dbcache=.*/dbcache=512/g" /mnt/hdd/${network}/${network}.conf
+    sed -i "s/^dbcache=.*/dbcache=512/g" /mnt/hdd/app-data/${network}/${network}.conf
   fi
 fi
 
@@ -230,7 +230,7 @@ if [ "${lightning}" == "lnd" ]; then
     lndRunning=$(systemctl status lnd.service | grep -c running)
     if [ ${lndRunning} -eq 0 ]; then
       date +%s >> ${logFile}
-      echo "LND not ready yet ... waiting another 60 seconds." >> ${logFile}
+      echo "LND not ready yet ... waiting another 60 seconds (${loopcount})." >> ${logFile}
       sleep 10
     fi
     loopcount=$(($loopcount +1))

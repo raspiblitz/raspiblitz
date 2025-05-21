@@ -438,7 +438,7 @@ if [ "$1" = "prestart" ]; then
   echo "## RTL PRESTART CONFIG (called by systemd prestart)"
 
   # getting the up-to-date RPC password
-  RPCPASSWORD=$(cat /mnt/hdd/${network}/${network}.conf | grep "^rpcpassword=" | cut -d "=" -f2)
+  RPCPASSWORD=$(cat /mnt/hdd/app-data/${network}/${network}.conf | grep "^rpcpassword=" | cut -d "=" -f2)
   echo "# Using RPCPASSWORD(${RPCPASSWORD})"
 
   # determine correct loop swap server port (lit over loop single)

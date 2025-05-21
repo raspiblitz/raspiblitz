@@ -239,8 +239,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # prepare .env file
     echo "# getting RPC credentials from the ${network}.conf"
 
-    RPC_USER=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcuser | cut -c 9-)
-    PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
+    RPC_USER=$(sudo cat /mnt/hdd/app-data/${network}/${network}.conf | grep rpcuser | cut -c 9-)
+    PASSWORD_B=$(sudo cat /mnt/hdd/app-data/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
 
     sudo rm /var/cache/raspiblitz/mempool-config.json 2>/dev/null
     touch /var/cache/raspiblitz/mempool-config.json

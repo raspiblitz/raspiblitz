@@ -44,7 +44,7 @@ This can take multiple hours.
   fi
 
   # check if password protected
-  isBitcoinWalletOff=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep -c "^disablewallet=1")
+  isBitcoinWalletOff=$(sudo cat /mnt/hdd/app-data/${network}/${network}.conf | grep -c "^disablewallet=1")
   passwordInfo=""
   if [ "${isBitcoinWalletOff}" != "1" ]; then
     passwordInfo="Login is 'admin' with your Password B"
@@ -181,12 +181,12 @@ if [ "$1" = "prestart" ]; then
   fi
 
   #  UPDATE RPC PASSWORD
-  RPCPASSWORD=$(cat /mnt/hdd/${network}/${network}.conf | grep "^rpcpassword=" | cut -d "=" -f2)
+  RPCPASSWORD=$(cat /mnt/hdd/app-data/${network}/${network}.conf | grep "^rpcpassword=" | cut -d "=" -f2)
   echo "# updating BTCEXP_BITCOIND_PASS=${RPCPASSWORD}"
   sed -i "s/^BTCEXP_BITCOIND_PASS=.*/BTCEXP_BITCOIND_PASS=${RPCPASSWORD}/g" /home/btcrpcexplorer/.config/btc-rpc-explorer.env
 
   # WALLET PROTECTION (only if Bitcoin has wallet active protect BTC-RPC-Explorer with additional passwordB)
-  isBitcoinWalletOff=$(cat /mnt/hdd/${network}/${network}.conf | grep -c "^disablewallet=1")
+  isBitcoinWalletOff=$(cat /mnt/hdd/app-data/${network}/${network}.conf | grep -c "^disablewallet=1")
   if [ "${isBitcoinWalletOff}" == "1" ]; then
     echo "# updating BTCEXP_BASIC_AUTH_PASSWORD= --> no password needed because wallet is disabled"
     sed -i "s/^BTCEXP_BASIC_AUTH_PASSWORD=.*/BTCEXP_BASIC_AUTH_PASSWORD=/g" /home/btcrpcexplorer/.config/btc-rpc-explorer.env
@@ -279,8 +279,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # prepare .env file
     echo "# getting RPC credentials from the ${network}.conf"
 
-    RPC_USER=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcuser | cut -c 9-)
-    PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
+    RPC_USER=$(sudo cat /mnt/hdd/app-data/${network}/${network}.conf | grep rpcuser | cut -c 9-)
+    PASSWORD_B=$(sudo cat /mnt/hdd/app-data/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
 
     touch /var/cache/raspiblitz/btc-rpc-explorer.env
     chmod 600 /var/cache/raspiblitz/btc-rpc-explorer.env || exit 1

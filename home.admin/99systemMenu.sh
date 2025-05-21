@@ -81,7 +81,7 @@ case $CHOICE in
     read key
     sudo tail -n 30 -f ${bitcoinlogpath};;
   ${network}CONF)
-    if /home/admin/config.scripts/blitz.setconf.sh "/mnt/hdd/${network}/${network}.conf" "root"
+    if /home/admin/config.scripts/blitz.setconf.sh "/mnt/hdd/app-data/${network}/${network}.conf" "root"
     then
       whiptail \
         --title "Restart" --yes-button "Restart" --no-button "Not now" \

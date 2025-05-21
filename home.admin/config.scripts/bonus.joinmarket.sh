@@ -152,7 +152,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   # set password B
   echo "# setting PASSWORD_B as the password for the 'joinmarket' user"
-  PASSWORD_B=$(sudo grep rpcpassword /mnt/hdd/${network}/${network}.conf | cut -c 13-)
+  PASSWORD_B=$(sudo grep rpcpassword /mnt/hdd/app-data/${network}/${network}.conf | cut -c 13-)
   echo "joinmarket:$PASSWORD_B" | sudo chpasswd
 
   if [ -f /home/joinmarket/start.joininbox.sh ]; then

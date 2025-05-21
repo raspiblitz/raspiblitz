@@ -90,8 +90,8 @@ if [ "$1" = "update-config" ]; then
   if [ "${setupPhase}" == "done" ]; then
 
     # configure bitcoin
-    RPCUSER=$(sudo cat /mnt/hdd/${network}/${network}.conf 2>/dev/null | grep rpcuser | cut -c 9-)
-    RPCPASS=$(sudo cat /mnt/hdd/${network}/${network}.conf 2>/dev/null | grep rpcpassword | cut -c 13-)
+    RPCUSER=$(sudo cat /mnt/hdd/app-data/${network}/${network}.conf 2>/dev/null | grep rpcuser | cut -c 9-)
+    RPCPASS=$(sudo cat /mnt/hdd/app-data/${network}/${network}.conf 2>/dev/null | grep rpcpassword | cut -c 13-)
     if [ "${RPCUSER}" == "" ]; then
       RPCUSER="raspibolt"
     fi

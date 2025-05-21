@@ -10,12 +10,12 @@ fi
 source /mnt/hdd/app-data/raspiblitz.conf
 
 # add txindex with default value (0) to bitcoin.conf if missing
-if ! grep -Eq "^txindex=.*" /mnt/hdd/${network}/${network}.conf; then
-  echo "txindex=0" | sudo tee -a /mnt/hdd/${network}/${network}.conf >/dev/null
+if ! grep -Eq "^txindex=.*" /mnt/hdd/app-data/${network}/${network}.conf; then
+  echo "txindex=0" | sudo tee -a /mnt/hdd/app-data/${network}/${network}.conf >/dev/null
 fi
 
 # set variable ${txindex}
-source <(grep -E "^txindex=.*" /mnt/hdd/${network}/${network}.conf)
+source <(grep -E "^txindex=.*" /mnt/hdd/app-data/${network}/${network}.conf)
 
 # check for testnet and set pathAdd (e.g. for debug.log)
 pathAdd=""
@@ -51,8 +51,8 @@ if [ "$1" = "status" ]; then
   # try to gather if still indexing
   source <(/home/admin/_cache.sh get btc_mainnet_blocks_headers)
   blockchainHeight="${btc_mainnet_blocks_headers}"
-  indexedToBlock=$(tail -n 200 /mnt/hdd/${network}${pathAdd}/debug.log | grep "Syncing txindex with block chain from height" | tail -n 1 | cut -d " " -f 9 | sed 's/[^0-9]*//g')
-  indexFinished=$(tail -n 200 /mnt/hdd/${network}${pathAdd}/debug.log | grep -c "txindex is enabled at height")
+  indexedToBlock=$(tail -n 200 /mnt/hdd/app-storage/${network}${pathAdd}/debug.log | grep "Syncing txindex with block chain from height" | tail -n 1 | cut -d " " -f 9 | sed 's/[^0-9]*//g')
+  indexFinished=$(tail -n 200 /mnt/hdd/app-storage/${network}${pathAdd}/debug.log | grep -c "txindex is enabled at height")
 
   if [ ${#indexedToBlock} -eq 0 ] || [ ${indexFinished} -gt 0 ] || [ "${indexedToBlock}" = "${blockchainHeight}" ]; then
     echo "isIndexed=1"
@@ -87,7 +87,7 @@ fi
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # check txindex (parsed and sourced from bitcoin network config above)
   if [ ${txindex} == 0 ]; then
-    sudo sed -i "s/^txindex=.*/txindex=1/g" /mnt/hdd/${network}/${network}.conf
+    sudo sed -i "s/^txindex=.*/txindex=1/g" /mnt/hdd/app-data/${network}/${network}.conf
     echo "# switching txindex=1"
     isBitcoinRunning=$(systemctl is-active ${network}d | grep -c "^active")
     if [ ${isBitcoinRunning} -eq 1 ]; then
@@ -97,7 +97,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       echo "# ${network}d is not running - so NOT restarting"
     fi
     echo "# The indexing takes ~7h on an RPi4 with SSD"
-    echo "# monitor with: sudo tail -n 20 -f /mnt/hdd/${network}${pathAdd}/debug.log"
+    echo "# monitor with: sudo tail -n 20 -f /mnt/hdd/app-storage/${network}${pathAdd}/debug.log"
     exit 0
   else
     echo "# txindex is already active"
@@ -110,7 +110,7 @@ fi
 ###################
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   echo "# changing config ..."
-  sudo sed -i "s/^txindex=.*/txindex=0/g" /mnt/hdd/${network}/${network}.conf
+  sudo sed -i "s/^txindex=.*/txindex=0/g" /mnt/hdd/app-data/${network}/${network}.conf
   echo "# deinstalling apps needing txindex ..."
   sudo -u admin /home/admin/config.scripts/bonus.btc-rpc-explorer.sh off
   echo "# restarting bitcoind ..."
@@ -126,7 +126,7 @@ if [ "$1" = "delete" ]; then
   echo "# stopping bitcoind ..."
   sudo systemctl stop ${network}d
   echo "# deleting tx index ..."
-  sudo rm -r /mnt/hdd/${network}/indexes/txindex
+  sudo rm -r /mnt/hdd/app-storage/${network}/indexes/txindex
   echo "# restarting bitcoind ..."
   sudo systemctl restart ${network}d
   exit 0

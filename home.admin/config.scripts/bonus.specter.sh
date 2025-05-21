@@ -102,11 +102,11 @@ fi
 
 # blockfilterindex
 # add blockfilterindex with default value (0) to bitcoin.conf if missing
-if ! grep -Eq "^blockfilterindex=.*" /mnt/hdd/${network}/${network}.conf; then
-  echo "blockfilterindex=0" | sudo tee -a /mnt/hdd/${network}/${network}.conf >/dev/null
+if ! grep -Eq "^blockfilterindex=.*" /mnt/hdd/app-data/${network}/${network}.conf; then
+  echo "blockfilterindex=0" | sudo tee -a /mnt/hdd/app-data/${network}/${network}.conf >/dev/null
 fi
 # set variable ${blockfilterindex}
-source <(grep -E "^blockfilterindex=.*" /mnt/hdd/${network}/${network}.conf)
+source <(grep -E "^blockfilterindex=.*" /mnt/hdd/app-data/${network}/${network}.conf)
 
 function configure_specter {
   echo "#    --> creating App-config"
@@ -140,8 +140,8 @@ EOF
   sudo chown -RL specter:specter /home/specter/
 
   echo "# Adding the raspiblitz_${chain}net node to Specter"
-  RPCUSER=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcuser | cut -c 9-)
-  PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
+  RPCUSER=$(sudo cat /mnt/hdd/app-data/${network}/${network}.conf | grep rpcuser | cut -c 9-)
+  PASSWORD_B=$(sudo cat /mnt/hdd/app-data/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
 
   echo "# Connect Specter to the default mainnet node"
   cat >/home/admin/default.json <<EOF
@@ -400,7 +400,7 @@ EOF
   # blockfilterindex on
   # check txindex (parsed and sourced from bitcoin network config above)
   if [ "${blockfilterindex}" = "0" ]; then
-    sudo sed -i "s/^blockfilterindex=.*/blockfilterindex=1/g" /mnt/hdd/${network}/${network}.conf
+    sudo sed -i "s/^blockfilterindex=.*/blockfilterindex=1/g" /mnt/hdd/app-data/${network}/${network}.conf
     echo "# switching blockfilterindex=1"
     isBitcoinRunning=$(systemctl is-active ${network}d | grep -c "^active")
     if [ ${isBitcoinRunning} -eq 1 ]; then

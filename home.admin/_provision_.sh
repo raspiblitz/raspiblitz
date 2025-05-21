@@ -68,11 +68,11 @@ echo "deprecatedrpc=addresses" >> /mnt/hdd/app-data/bitcoin/bitcoin.conf 2>/dev/
 kbSizeRAM=$(cat /proc/meminfo | grep "MemTotal" | sed 's/[^0-9]*//g')
 if [ ${kbSizeRAM} -gt 1500000 ]; then
   echo "Detected RAM >1GB --> optimizing ${network}.conf"
-  sed -i "s/^maxmempool=.*/maxmempool=300/g" /mnt/hdd/${network}/${network}.conf
+  sed -i "s/^maxmempool=.*/maxmempool=300/g" /mnt/hdd/app-data/${network}/${network}.conf
 fi
 if [ ${kbSizeRAM} -gt 3500000 ]; then
   echo "Detected RAM >3GB --> optimizing ${network}.conf"
-  sed -i "s/^maxmempool=.*/maxmempool=300/g" /mnt/hdd/${network}/${network}.conf
+  sed -i "s/^maxmempool=.*/maxmempool=300/g" /mnt/hdd/app-data/${network}/${network}.conf
 fi
 
 # zram on for all devices

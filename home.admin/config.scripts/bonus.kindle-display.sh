@@ -54,8 +54,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     fi
 
     # setup kindle-display config
-    RPC_USER=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcuser | cut -c 9-)
-    RPC_PASS=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
+    RPC_USER=$(sudo cat /mnt/hdd/app-data/${network}/${network}.conf | grep rpcuser | cut -c 9-)
+    RPC_PASS=$(sudo cat /mnt/hdd/app-data/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
 
     sudo mkdir -p $APP_DATA_DIR
     sudo chown $USERNAME:$USERNAME $APP_DATA_DIR

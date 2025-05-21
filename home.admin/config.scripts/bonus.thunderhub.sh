@@ -224,7 +224,7 @@ EOF
 
     echo "*** create thubConfig.yaml ***"
     # use Password_B
-    PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
+    PASSWORD_B=$(sudo cat /mnt/hdd/app-data/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
     cat > /home/admin/thubConfig.yaml <<EOF
 masterPassword: '$PASSWORD_B' # Default password unless defined in account
 accounts:

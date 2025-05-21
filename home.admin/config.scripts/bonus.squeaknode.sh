@@ -127,8 +127,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # Prepare configs
     RPCHOST="localhost"
     RPCPORT="8332"
-    RPCUSER=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcuser | cut -c 9-)
-    PASSWORD_B=$(sudo cat /mnt/hdd/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
+    RPCUSER=$(sudo cat /mnt/hdd/app-data/${network}/${network}.conf | grep rpcuser | cut -c 9-)
+    PASSWORD_B=$(sudo cat /mnt/hdd/app-data/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
 
     # prefix for zmq
     if [ "${chain}" = "main" ];then
