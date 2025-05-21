@@ -507,6 +507,18 @@ if [ ${systemReadOnly} -gt 0 ]; then
   echo
 fi
 
+# check links
+if [ -f "/home/hdd/raspiblitz.conf" ] && [ ! -L "/home/hdd/raspiblitz.conf" ]; then
+  echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+  echo "!!! /home/admin/raspiblitz is NOT a symlink to /mnt/hdd/app-data/raspiblitz.conf anymore !!!"
+  echo
+fi
+if [ -f "/home/hdd/bitcoin/bitcoin.conf" ] && [ ! -L "/home/hdd/bitcoin/bitcoin.conf" ]; then
+  echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+  echo "!!! /home/hdd/app-storage/bitcoin/bitcoin.conf NOT at correct place - should only be in app-data"
+  echo
+fi
+
 echo
 echo "*** OPTION: SHARE THIS DEBUG OUTPUT ***"
 echo "An easy way to share this debug output on GitHub or on a support chat"
