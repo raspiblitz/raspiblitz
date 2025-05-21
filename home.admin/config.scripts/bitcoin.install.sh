@@ -183,28 +183,6 @@ function removeParallelService() {
 
 function installParallelService() {
   echo "# Installing Bitcoin Core instance on ${CHAIN}"
-  # bitcoin.conf
-  if [ ! -f /home/bitcoin/.bitcoin/bitcoin.conf ]; then
-    # add minimal config
-    randomRPCpass=$(tr </dev/urandom -dc _A-Z-a-z-0-9 | head -c8)
-    echo "
-# bitcoind configuration for ${CHAIN}
-
-# Connection settings
-rpcuser=raspiblitz
-rpcpassword=$randomRPCpass
-${bitcoinprefix}.zmqpubrawblock=tcp://127.0.0.1:${zmqprefix}332
-${bitcoinprefix}.zmqpubrawtx=tcp://127.0.0.1:${zmqprefix}333
-${bitcoinprefix}.zmqpubhashblock=tcp://127.0.0.1:${zmqprefix}334
-
-onlynet=onion
-proxy=127.0.0.1:9050
-
-datadir=/mnt/hdd/app-data/bitcoin
-" | sudo -u bitcoin tee /home/bitcoin/.bitcoin/bitcoin.conf
-  else
-    echo "# /home/bitcoin/.bitcoin/bitcoin.conf is present"
-  fi
 
   # make sure rpcbind is correctly configured
   sudo sed -i s/^rpcbind=/main.rpcbind=/g /mnt/hdd/app-data/bitcoin/bitcoin.conf
@@ -264,7 +242,7 @@ Environment='MALLOC_ARENA_MAX=1'
 ExecStartPre=-/home/admin/config.scripts/bitcoin.check.sh prestart ${CHAIN}
 ExecStart=/usr/local/bin/bitcoind ${chainparameter} \\
                                   -daemonwait \\
-                                  -conf=/mnt/hdd/app-storage/bitcoin/bitcoin.conf \\
+                                  -conf=/mnt/hdd/app-data/bitcoin/bitcoin.conf \\
                                   -datadir=/mnt/hdd/app-storage/bitcoin
 PermissionsStartOnly=true
 

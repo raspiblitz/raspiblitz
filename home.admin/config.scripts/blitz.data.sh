@@ -1234,7 +1234,7 @@ if [ "$action" = "link" ]; then
     ### bitcoin user symbol links
     echo "# bitcoin user symbol link: /home/bitcoin/.bitcoin"
     unlink /home/bitcoin/.bitcoin 2>/dev/null
-    ln -s /mnt/hdd/app-storage/bitcoin /home/bitcoin/.bitcoin
+    ln -s /mnt/hdd/app-data/bitcoin /home/bitcoin/.bitcoin
     chown bitcoin:bitcoin /home/bitcoin/.bitcoin
     echo "# bitcoin user symbol link: /home/bitcoin/.lnd"
     unlink /home/bitcoin/.lnd 2>/dev/null
@@ -1244,7 +1244,7 @@ if [ "$action" = "link" ]; then
     ### admin user symbol links
     echo "# admin user symbol link: /home/admin/.bitcoin"
     unlink /home/admin/.bitcoin 2>/dev/null
-    ln -s /mnt/hdd/app-storage/bitcoin /home/admin/.bitcoin
+    ln -s /mnt/hdd/app-data/bitcoin /home/admin/.bitcoin
     echo "# admin user symbol link: /home/admin/.lnd"
     unlink /home/admin/.lnd 2>/dev/null
     ln -s /mnt/hdd/app-data/lnd /home/admin/.lnd
