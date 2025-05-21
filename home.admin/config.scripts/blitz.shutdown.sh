@@ -94,10 +94,6 @@ else
   echo "skipping stopping layer1 (network=='' in cache)"
 fi
 
-# attempt to unmount all filesystems to prevent read-only remounts
-echo "Attempting to unmount all filesystems..."
-umount -a -r || echo "Some filesystems could not be unmounted, proceeding with shutdown."
-
 # make sure drives are synced before shutdown
 sync
 
