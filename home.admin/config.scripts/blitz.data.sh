@@ -1222,7 +1222,7 @@ if [ "$action" = "link" ]; then
         mv --force ${mainMountPoint}/raspiblitz.conf ${mainMountPoint}/app-data/raspiblitz.conf
     fi
 
-    echo "you find bitcoin.conf now in ${mainMountPoint}/app-data/bitcoin/bitcoin.conf" > ${mainMountPoint}/bitcoin/bitcoin.conf.info
+    echo "you find bitcoin.conf now in ${mainMountPoint}/app-data/bitcoin/bitcoin.conf" > ${mainMountPoint}/bitcoin/bitcoin-conf.info
 
     if [ -f "${mainMountPoint}/.tmux.conf.local" ] && [ ! -L "${mainMountPoint}/.tmux.conf.local" ]; then
         mv --force ${mainMountPoint}/.tmux.conf.local ${mainMountPoint}/app-data/.tmux.conf.local
