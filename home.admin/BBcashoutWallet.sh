@@ -18,16 +18,18 @@ fi
 source <(/home/admin/config.scripts/network.aliases.sh getvars $1 $2)
 
 # check if user has money in lightning channels - info about close all
+clear
 if [ $LNTYPE = cl ];then
+  echo "# check c-lightning channels"
   ln_getInfo=$($lightningcli_alias getinfo 2>/dev/null)
   ln_channels_online="$(echo "${ln_getInfo}" | jq -r '.num_active_channels')" 2>/dev/null
   cl_num_inactive_channels="$(echo "${ln_getInfo}" | jq -r '.num_inactive_channels')" 2>/dev/null
   openChannels=$((ln_channels_online+cl_num_inactive_channels))
 elif [ $LNTYPE = lnd ];then
+  echo "# check lnd channels"
   openChannels=$($lncli_alias listchannels 2>/dev/null | jq '.[] | length')
 fi
 if [ ${#openChannels} -eq 0 ]; then
-  clear
   echo "*** IMPORTANT **********************************"
   echo "It looks like $LNTYPE is not responding."
   echo "Still starting up, is locked or is not running?"
