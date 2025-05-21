@@ -55,8 +55,8 @@ usermod -a -G debian-tor bitcoin
 
 # make sure to have bitcoin core >=22 is backwards comp
 # see https://github.com/rootzoll/raspiblitz/issues/2546
-sed -i '/^deprecatedrpc=.*/d' /mnt/hdd/bitcoin/bitcoin.conf 2>/dev/null
-echo "deprecatedrpc=addresses" >> /mnt/hdd/bitcoin/bitcoin.conf 2>/dev/null
+sed -i '/^deprecatedrpc=.*/d' /mnt/hdd/app-data/bitcoin/bitcoin.conf 2>/dev/null
+echo "deprecatedrpc=addresses" >> /mnt/hdd/app-data/bitcoin/bitcoin.conf 2>/dev/null
 
 # backup SSH PubKeys
 /home/admin/config.scripts/blitz.ssh.sh backup

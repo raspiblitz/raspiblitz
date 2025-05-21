@@ -88,11 +88,11 @@ case $CHOICE in
 
   BISQ)
     OPTIONS=()
-    if [ $(grep -c "peerbloomfilters=1" < /mnt/hdd/bitcoin/bitcoin.conf) -eq 0 ]||\
+    if [ $(grep -c "peerbloomfilters=1" < /mnt/hdd/app-data/bitcoin/bitcoin.conf) -eq 0 ]||\
     [ $(grep -c Bisq < /etc/tor/torrc) -eq 0 ];then
       OPTIONS+=(ADDBISQ "Add a Hidden Service for Bisq")
     fi
-    if [ $(grep -c "peerbloomfilters=1" < /mnt/hdd/bitcoin/bitcoin.conf) -gt 0 ]&&\
+    if [ $(grep -c "peerbloomfilters=1" < /mnt/hdd/app-data/bitcoin/bitcoin.conf) -gt 0 ]&&\
     [ $(grep -c Bisq < /etc/tor/torrc) -gt 0 ];then
       OPTIONS+=(SHOWBISQ "Show the Hidden Service to connect Bisq")
       OPTIONS+=(REMOVEBISQ "Remove the Hidden Service for Bisq")
@@ -110,9 +110,9 @@ case $CHOICE in
       case $CHOICE in
         ADDBISQ)
           clear
-          if [ $(grep -c "peerbloomfilters=1" < /mnt/hdd/bitcoin/bitcoin.conf) -eq 0 ]
+          if [ $(grep -c "peerbloomfilters=1" < /mnt/hdd/app-data/bitcoin/bitcoin.conf) -eq 0 ]
           then
-            echo "peerbloomfilters=1" | sudo tee -a /mnt/hdd/bitcoin/bitcoin.conf
+            echo "peerbloomfilters=1" | sudo tee -a /mnt/hdd/app-data/bitcoin/bitcoin.conf
             echo "# Restarting bitcoind"
             sudo systemctl restart bitcoind
           else

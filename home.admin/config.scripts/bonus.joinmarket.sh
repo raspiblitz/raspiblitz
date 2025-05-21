@@ -195,9 +195,9 @@ fi
 " | sudo -u joinmarket tee -a /home/joinmarket/.bashrc
 
   echo "# Check 'deprecatedrpc=create_bdb' in bitcoin.conf"
-  if ! sudo grep "deprecatedrpc=create_bdb" "/mnt/hdd/bitcoin/bitcoin.conf"; then
+  if ! sudo grep "deprecatedrpc=create_bdb" "/mnt/hdd/app-data/bitcoin/bitcoin.conf"; then
     echo "# Place 'deprecatedrpc=create_bdb' in bitcoin.conf"
-    echo "deprecatedrpc=create_bdb" | sudo tee -a "/mnt/hdd/bitcoin/bitcoin.conf"
+    echo "deprecatedrpc=create_bdb" | sudo tee -a "/mnt/hdd/app-data/bitcoin/bitcoin.conf"
     source <(/home/admin/_cache.sh get state)
     if [ ${state} != "recovering" ]; then
       echo "# Restarting bitcoind"
@@ -207,18 +207,18 @@ fi
 
   # make sure the Bitcoin Core wallet is on
   /home/admin/config.scripts/network.wallet.sh on
-  if [ $(/usr/local/bin/bitcoin-cli -conf=/mnt/hdd/bitcoin/bitcoin.conf listwallets | grep -c wallet.dat) -eq 0 ]; then
+  if [ $(/usr/local/bin/bitcoin-cli -conf=/mnt/hdd/app-data/bitcoin/bitcoin.conf listwallets | grep -c wallet.dat) -eq 0 ]; then
     echo "# Create a non-descriptor wallet.dat"
-    /usr/local/bin/bitcoin-cli -conf=/mnt/hdd/bitcoin/bitcoin.conf -named createwallet wallet_name=wallet.dat descriptors=false
+    /usr/local/bin/bitcoin-cli -conf=/mnt/hdd/app-data/bitcoin/bitcoin.conf -named createwallet wallet_name=wallet.dat descriptors=false
   else
-    isDescriptor=$(/usr/local/bin/bitcoin-cli -conf=/mnt/hdd/bitcoin/bitcoin.conf -rpcwallet=wallet.dat getwalletinfo | grep -c '"descriptors": true,')
+    isDescriptor=$(/usr/local/bin/bitcoin-cli -conf=/mnt/hdd/app-data/bitcoin/bitcoin.conf -rpcwallet=wallet.dat getwalletinfo | grep -c '"descriptors": true,')
     if [ "$isDescriptor" -gt 0 ]; then
       # unload
       bitcoin-cli unloadwallet wallet.dat
       echo "# Move the wallet.dat with descriptors to /mnt/hdd/bitcoin/descriptors"
       sudo mv /mnt/hdd/bitcoin/wallet.dat /mnt/hdd/bitcoin/descriptors
       echo "# Create a non-descriptor wallet.dat"
-      bitcoin-cli -conf=/mnt/hdd/bitcoin/bitcoin.conf -named createwallet wallet_name=wallet.dat descriptors=false
+      bitcoin-cli -conf=/mnt/hdd/app-data/bitcoin/bitcoin.conf -named createwallet wallet_name=wallet.dat descriptors=false
     else
       echo "# The non-descriptor wallet.dat is loaded in bitcoind."
     fi

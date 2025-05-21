@@ -356,8 +356,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo
     echo "# Getting RPC credentials from the bitcoin.conf"
     # read PASSWORD_B
-    RPC_USER=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcuser | cut -c 9-)
-    PASSWORD_B=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcpassword | cut -c 13-)
+    RPC_USER=$(sudo cat /mnt/hdd/app-data/bitcoin/bitcoin.conf | grep rpcuser | cut -c 9-)
+    PASSWORD_B=$(sudo cat /mnt/hdd/app-data/bitcoin/bitcoin.conf | grep rpcpassword | cut -c 13-)
     echo "# Done"
 
     echo
@@ -495,8 +495,8 @@ WantedBy=multi-user.target
   fi
 
   # whitelist downloading to localhost from bitcoind
-  if ! sudo grep -Eq "^whitelist=download@127.0.0.1" /mnt/hdd/bitcoin/bitcoin.conf; then
-    echo "whitelist=download@127.0.0.1" | sudo tee -a /mnt/hdd/bitcoin/bitcoin.conf
+  if ! sudo grep -Eq "^whitelist=download@127.0.0.1" /mnt/hdd/app-data/bitcoin/bitcoin.conf; then
+    echo "whitelist=download@127.0.0.1" | sudo tee -a /mnt/hdd/app-data/bitcoin/bitcoin.conf
     bitcoindRestart=yes
   fi
 

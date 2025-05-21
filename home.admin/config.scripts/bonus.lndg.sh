@@ -151,7 +151,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo apt install -y virtualenv
     sudo -u lndg virtualenv -p python3 .venv
     sudo -u lndg .venv/bin/pip install -r requirements.txt
-    PASSWORD_B=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcpassword | cut -c 13-)
+    PASSWORD_B=$(sudo cat /mnt/hdd/app-data/bitcoin/bitcoin.conf | grep rpcpassword | cut -c 13-)
     echo "# LNDg initialize.py ..."
     sudo -u lndg .venv/bin/python initialize.py -pw $PASSWORD_B
 

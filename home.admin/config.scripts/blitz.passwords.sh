@@ -352,7 +352,7 @@ elif [ "${abcd}" = "b" ]; then
   # electrs
   if [ "${ElectRS}" == "on" ]; then
     echo "# changing the RPC password for ELECTRS"
-    RPC_USER=$(cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcuser | cut -c 9-)
+    RPC_USER=$(cat /mnt/hdd/app-data/bitcoin/bitcoin.conf | grep rpcuser | cut -c 9-)
     sudo sed -i "s/^auth = \"$RPC_USER.*\"/auth = \"$RPC_USER:${newPassword}\"/g" /home/electrs/.electrs/config.toml
     echo "# restarting electrs"
     sudo systemctl restart electrs.service

@@ -72,7 +72,7 @@ echo "prechecks OK"  >> ${logFile}
 # a conversion of config data or app data is needed
 
 # if old bitcoin.conf exists ...
-configExists=$(sudo ls /mnt/hdd/bitcoin/bitcoin.conf | grep -c '.conf')
+configExists=$(sudo ls /mnt/hdd/app-data/bitcoin/bitcoin.conf | grep -c '.conf')
 if [ ${configExists} -eq 1 ]; then
   echo "Checking old bitcoin.conf ..." >> ${logFile}
 
@@ -133,7 +133,7 @@ if [ ${configExists} -eq 1 ]; then
   fi
 
 else
-  echo "WARN: /mnt/hdd/bitcoin/bitcoin.conf not found" >> ${logFile}
+  echo "WARN: /mnt/hdd/app-data/bitcoin/bitcoin.conf not found" >> ${logFile}
 fi
 
 # delete old Tor v1 addresses from config -  see: https://github.com/rootzoll/raspiblitz/issues/3659

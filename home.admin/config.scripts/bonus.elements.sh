@@ -157,7 +157,7 @@ function installService() {
   echo "# Installing Elements"
   # elements.conf
   if [ ! -f /home/elements/.elements/elements.conf ]; then
-    PASSWORD_B=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcpassword | cut -c 13-)
+    PASSWORD_B=$(sudo cat /mnt/hdd/app-data/bitcoin/bitcoin.conf | grep rpcpassword | cut -c 13-)
     echo "
 # Elementsd configuration
 datadir=/mnt/hdd/app-data/.elements

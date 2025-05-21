@@ -96,7 +96,7 @@ if [ "$1" = "status" ]; then
     fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
 
     authMethod="user_admin_password_b"
-    isBitcoinWalletOff=$(cat /mnt/hdd/bitcoin/bitcoin.conf | grep -c "^disablewallet=1")
+    isBitcoinWalletOff=$(cat /mnt/hdd/app-data/bitcoin/bitcoin.conf | grep -c "^disablewallet=1")
     if [ "${isBitcoinWalletOff}" == "1" ]; then
       authMethod="none"
     fi

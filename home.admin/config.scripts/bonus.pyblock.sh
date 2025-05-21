@@ -64,7 +64,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   
   sudo rm -rf /home/pyblock/.bitcoin  # not a symlink.. delete it silently
   sudo -u pyblock mkdir /home/pyblock/.bitcoin
-  sudo cp /mnt/hdd/bitcoin/bitcoin.conf /home/pyblock/.bitcoin/
+  sudo cp /mnt/hdd/app-data/bitcoin/bitcoin.conf /home/pyblock/.bitcoin/
   sudo chown pyblock:pyblock /home/pyblock/.bitcoin/bitcoin.conf
 
   # make sure symlink to central app-data directory exists ***"

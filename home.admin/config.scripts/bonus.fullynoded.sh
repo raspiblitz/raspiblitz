@@ -10,8 +10,8 @@ source /mnt/hdd/app-data/raspiblitz.conf
 /home/admin/config.scripts/network.txindex.sh on
 
 # extract RPC credentials from bitcoin.conf - store only in var
-RPC_USER=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcuser | cut -c 9-)
-PASSWORD_B=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcpassword | cut -c 13-)
+RPC_USER=$(sudo cat /mnt/hdd/app-data/bitcoin/bitcoin.conf | grep rpcuser | cut -c 9-)
+PASSWORD_B=$(sudo cat /mnt/hdd/app-data/bitcoin/bitcoin.conf | grep rpcpassword | cut -c 13-)
 
 if [ "${chain}net" == "mainnet" ]; then
   BITCOINRPCPORT=8332

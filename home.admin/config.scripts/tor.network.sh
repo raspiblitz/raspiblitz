@@ -167,7 +167,7 @@ EOF
     /home/admin/config.scripts/blitz.conf.sh set runBehindTor "off"
 
     # remove "debug=tor" from bitcoin.conf
-    sudo sed -i '/^debug=tor$/d' /mnt/hdd/bitcoin/bitcoin.conf
+    sudo sed -i '/^debug=tor$/d' /mnt/hdd/app-databitcoin/bitcoin.conf
 
     # deactivate bitcoin over tor (function call)
     deactivateBitcoinOverTor

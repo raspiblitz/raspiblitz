@@ -355,9 +355,9 @@ if [ "$1" = on ]; then
   # activate zram
   /home/admin/config.scripts/blitz.zram.sh on
 
-  /home/admin/config.scripts/blitz.conf.sh set rpcworkqueue 512 /mnt/hdd/bitcoin/bitcoin.conf noquotes
-  /home/admin/config.scripts/blitz.conf.sh set rpcthreads 128 /mnt/hdd/bitcoin/bitcoin.conf noquotes
-  /home/admin/config.scripts/blitz.conf.sh set 'main.zmqpubhashblock' 'tcp://0.0.0.0:8433' /mnt/hdd/bitcoin/bitcoin.conf noquotes
+  /home/admin/config.scripts/blitz.conf.sh set rpcworkqueue 512 /mnt/hdd/app-data/bitcoin/bitcoin.conf noquotes
+  /home/admin/config.scripts/blitz.conf.sh set rpcthreads 128 /mnt/hdd/app-data/bitcoin/bitcoin.conf noquotes
+  /home/admin/config.scripts/blitz.conf.sh set 'main.zmqpubhashblock' 'tcp://0.0.0.0:8433' /mnt/hdd/app-data/bitcoin/bitcoin.conf noquotes
 
   source <(/home/admin/_cache.sh get state)
   if [ "${state}" == "ready" ]; then
@@ -382,8 +382,8 @@ if [ "$1" = on ]; then
 
   echo "# Create a config file"
   echo "# Get the RPC credentials from the bitcoin.conf"
-  RPC_USER=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcuser | cut -c 9-)
-  PASSWORD_B=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcpassword | cut -c 13-)
+  RPC_USER=$(sudo cat /mnt/hdd/app-data/bitcoin/bitcoin.conf | grep rpcuser | cut -c 9-)
+  PASSWORD_B=$(sudo cat /mnt/hdd/app-data/bitcoin/bitcoin.conf | grep rpcpassword | cut -c 13-)
   echo "## Fulcrum Config File
 ## for full explanations see:
 ## https://github.com/cculianu/Fulcrum/blob/master/doc/fulcrum-example-config.conf

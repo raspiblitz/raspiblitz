@@ -24,7 +24,7 @@ source <(/home/admin/config.scripts/network.aliases.sh getvars cl mainnet)
 
 if [ $1 = connect ];then
   toraddress=$(sudo cat /mnt/hdd/app-data/tor/clHTTPplugin/hostname)
-  PASSWORD_B=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcpassword | cut -c 13-)
+  PASSWORD_B=$(sudo cat /mnt/hdd/app-data/bitcoin/bitcoin.conf | grep rpcpassword | cut -c 13-)
   # https://github.com/rootzoll/raspiblitz/issues/2579#issuecomment-936091256
   # http://rpcuser:rpcpassword@xxx.onion:9080
   url="http://lightning:${PASSWORD_B}@${toraddress}:9080"
@@ -114,7 +114,7 @@ if [ "$1" = "on" ];then
   if ! grep -Eq "^http-pass=" ${CLCONF};then
     echo "# Editing ${CLCONF}"
     echo "# See: https://github.com/Fonta1n3/FullyNoded/blob/master/Docs/Lightning.md#setup-c-lightning-http-plugin"
-    PASSWORD_B=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcpassword | cut -c 13-)
+    PASSWORD_B=$(sudo cat /mnt/hdd/app-data/bitcoin/bitcoin.conf | grep rpcpassword | cut -c 13-)
     echo "
 http-pass=${PASSWORD_B}
 " | sudo tee -a ${CLCONF}

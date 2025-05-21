@@ -150,14 +150,14 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   fi
 
   echo "# i2pd config"
-  sudo sed -i '/^debug=tor$/d' /mnt/hdd/bitcoin/bitcoin.conf
-  /home/admin/config.scripts/blitz.conf.sh set debug tor /mnt/hdd/bitcoin/bitcoin.conf noquotes
-  confAdd debug i2p /mnt/hdd/bitcoin/bitcoin.conf
-  /home/admin/config.scripts/blitz.conf.sh set i2psam 127.0.0.1:7656 /mnt/hdd/bitcoin/bitcoin.conf noquotes
-  /home/admin/config.scripts/blitz.conf.sh set i2pacceptincoming 1 /mnt/hdd/bitcoin/bitcoin.conf noquotes
-  /home/admin/config.scripts/blitz.conf.sh set onlynet onion /mnt/hdd/bitcoin/bitcoin.conf noquotes
-  confAdd onlynet i2p /mnt/hdd/bitcoin/bitcoin.conf
-  PASSWORD_B=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcpassword | cut -c 13-)
+  sudo sed -i '/^debug=tor$/d' /mnt/hdd/app-data/bitcoin/bitcoin.conf
+  /home/admin/config.scripts/blitz.conf.sh set debug tor /mnt/hdd/app-data/bitcoin/bitcoin.conf noquotes
+  confAdd debug i2p /mnt/hdd/app-data/bitcoin/bitcoin.conf
+  /home/admin/config.scripts/blitz.conf.sh set i2psam 127.0.0.1:7656 /mnt/hdd/app-data/bitcoin/bitcoin.conf noquotes
+  /home/admin/config.scripts/blitz.conf.sh set i2pacceptincoming 1 /mnt/hdd/app-data/bitcoin/bitcoin.conf noquotes
+  /home/admin/config.scripts/blitz.conf.sh set onlynet onion /mnt/hdd/app-data/bitcoin/bitcoin.conf noquotes
+  confAdd onlynet i2p /mnt/hdd/app-data/bitcoin/bitcoin.conf
+  PASSWORD_B=$(sudo cat /mnt/hdd/app-data/bitcoin/bitcoin.conf | grep rpcpassword | cut -c 13-)
   cat <<EOF | sudo tee /etc/i2pd/i2pd.conf
 # i2pd settings for the RaspiBlitz
 # for the defaults see:
@@ -262,13 +262,13 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   sudo apt remove -y i2pd
 
   echo "# Remove settings from bitcoind"
-  sudo sed -i '/^debug=tor$/d' /mnt/hdd/bitcoin/bitcoin.conf
-  /home/admin/config.scripts/blitz.conf.sh delete debug /mnt/hdd/bitcoin/bitcoin.conf noquotes
-  /home/admin/config.scripts/blitz.conf.sh set debug tor /mnt/hdd/bitcoin/bitcoin.conf noquotes
-  /home/admin/config.scripts/blitz.conf.sh delete i2psam /mnt/hdd/bitcoin/bitcoin.conf noquotes
-  /home/admin/config.scripts/blitz.conf.sh delete i2pacceptincoming /mnt/hdd/bitcoin/bitcoin.conf noquotes
-  /home/admin/config.scripts/blitz.conf.sh delete onlynet /mnt/hdd/bitcoin/bitcoin.conf noquotes
-  /home/admin/config.scripts/blitz.conf.sh set onlynet onion /mnt/hdd/bitcoin/bitcoin.conf noquotes
+  sudo sed -i '/^debug=tor$/d' /mnt/hdd/app-data/bitcoin/bitcoin.conf
+  /home/admin/config.scripts/blitz.conf.sh delete debug /mnt/hdd/app-data/bitcoin/bitcoin.conf noquotes
+  /home/admin/config.scripts/blitz.conf.sh set debug tor /mnt/hdd/app-data/bitcoin/bitcoin.conf noquotes
+  /home/admin/config.scripts/blitz.conf.sh delete i2psam /mnt/hdd/app-data/bitcoin/bitcoin.conf noquotes
+  /home/admin/config.scripts/blitz.conf.sh delete i2pacceptincoming /mnt/hdd/app-data/bitcoin/bitcoin.conf noquotes
+  /home/admin/config.scripts/blitz.conf.sh delete onlynet /mnt/hdd/app-data/bitcoin/bitcoin.conf noquotes
+  /home/admin/config.scripts/blitz.conf.sh set onlynet onion /mnt/hdd/app-data/bitcoin/bitcoin.conf noquotes
 
   sudo rm /etc/systemd/system/i2pd.service
 

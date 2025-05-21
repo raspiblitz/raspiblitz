@@ -1320,8 +1320,8 @@ else
   # LND and Blockchain Errors will be still in systemd journals
 
   # limit debug.log to 10MB on start - see #3872
-  if [ $(grep -c "shrinkdebugfile=" < /mnt/hdd/bitcoin/bitcoin.conf) -eq 0 ];then
-    echo "shrinkdebugfile=1" | tee -a /mnt/hdd/bitcoin/bitcoin.conf
+  if [ $(grep -c "shrinkdebugfile=" < /mnt/hdd/app-data/bitcoin/bitcoin.conf) -eq 0 ];then
+    echo "shrinkdebugfile=1" | tee -a /mnt/hdd/app-data/bitcoin/bitcoin.conf
   fi
   # /mnt/hdd/app-data/lnd/logs/bitcoin/mainnet/lnd.log
   rm /mnt/hdd/app-data/lnd/logs/${network}/${chain}net/lnd.log 2>/dev/null

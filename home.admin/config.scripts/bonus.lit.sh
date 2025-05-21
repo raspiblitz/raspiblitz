@@ -241,7 +241,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       LOOPPROXY=""
       POOLPROXY=""
     fi
-    PASSWORD_B=$(sudo cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcpassword | cut -c 13-)
+    PASSWORD_B=$(sudo cat /mnt/hdd/app-data/bitcoin/bitcoin.conf | grep rpcpassword | cut -c 13-)
     echo "
 # Application Options
 httpslisten=0.0.0.0:8443

@@ -402,15 +402,15 @@ do
         # RP4 4GB
         if [ ${kbSizeRAM} -gt 3500000 ]; then
           echo "Detected RAM >=4GB --> normalizing bitcoin.conf"
-          sed -i "s/^dbcache=.*/dbcache=512/g" /mnt/hdd/bitcoin/bitcoin.conf
+          sed -i "s/^dbcache=.*/dbcache=512/g" /mnt/hdd/app-data/bitcoin/bitcoin.conf
         # RP4 2GB
         elif [ ${kbSizeRAM} -gt 1500000 ]; then
           echo "Detected RAM >=2GB --> normalizing bitcoin.conf"
-          sed -i "s/^dbcache=.*/dbcache=256/g" /mnt/hdd/bitcoin/bitcoin.conf
+          sed -i "s/^dbcache=.*/dbcache=256/g" /mnt/hdd/app-data/bitcoin/bitcoin.conf
         #RP3/4 1GB
         else
           echo "Detected RAM <=1GB --> normalizing bitcoin.conf"
-          sed -i "s/^dbcache=.*/dbcache=128/g" /mnt/hdd/bitcoin/bitcoin.conf
+          sed -i "s/^dbcache=.*/dbcache=128/g" /mnt/hdd/app-data/bitcoin/bitcoin.conf
         fi
 
         # relax sanning on sync progress (after 30 more secs)

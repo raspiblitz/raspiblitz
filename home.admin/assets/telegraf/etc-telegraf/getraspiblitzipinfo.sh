@@ -65,7 +65,7 @@ source /mnt/hdd/app-data/raspiblitz.conf 2>/dev/null
 #   [3]     ->   IPv6 at local network interface (eth0 or wlan0)
 #   [4]     ->   IPv4 at local network interface (eth0 or wlan0)
 ip_addr_curr[0]=$(echo "${publicIP}" | tr -d '[]')
-ip_addr_curr[1]=$(/usr/local/bin/bitcoin-cli  -conf=/mnt/hdd/bitcoin/bitcoin.conf  getnetworkinfo | jq -r ".localaddresses[0].address" 2>/dev/null)
+ip_addr_curr[1]=$(/usr/local/bin/bitcoin-cli  -conf=/mnt/hdd/app-data/bitcoin/bitcoin.conf  getnetworkinfo | jq -r ".localaddresses[0].address" 2>/dev/null)
 ip_addr_curr[2]=$(/usr/local/bin/lncli  --lnddir=/mnt/hdd/app-data/lnd  getinfo | jq -r ".uris[0]" 2>/dev/null | cut -d'@' -f2 | rev | cut -d':' -f2- | rev | tr -d '[]')
 ip_addr_curr[3]=$(ip -o -6 address show scope global up dev ${networkDevice} 2>/dev/null | cut -d'/' -f1 | awk '/inet6/{print $4}' | head -n 1)
 ip_addr_curr[4]=$(ip -o -4 address show scope global up dev ${networkDevice} 2>/dev/null | cut -d'/' -f1 | awk '/inet/{print $4}' | head -n 1)
