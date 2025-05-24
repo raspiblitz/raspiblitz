@@ -2,8 +2,28 @@
 """Client and server classes corresponding to protobuf-defined services."""
 from __future__ import absolute_import
 import grpc
-
 from . import walletunlocker_pb2 as walletunlocker__pb2
+import warnings
+
+GRPC_GENERATED_VERSION = '1.71.0'
+GRPC_VERSION = grpc.__version__
+_version_not_supported = False
+
+try:
+    from grpc._utilities import first_version_is_lower
+    _version_not_supported = first_version_is_lower(GRPC_VERSION, GRPC_GENERATED_VERSION)
+except ImportError:
+    _version_not_supported = True
+
+if _version_not_supported:
+    raise RuntimeError(
+        f'The grpc package installed is at version {GRPC_VERSION},'
+        + f' but the generated code in walletunlocker_pb2_grpc.py depends on'
+        + f' grpcio>={GRPC_GENERATED_VERSION}.'
+        + f' Please upgrade your grpc module to grpcio>={GRPC_GENERATED_VERSION}'
+        + f' or downgrade your generated code using grpcio-tools<={GRPC_VERSION}.'
+    )
+
 
 class WalletUnlockerStub(object):
     """
@@ -37,22 +57,22 @@ class WalletUnlockerStub(object):
                 '/lnrpc.WalletUnlocker/GenSeed',
                 request_serializer=walletunlocker__pb2.GenSeedRequest.SerializeToString,
                 response_deserializer=walletunlocker__pb2.GenSeedResponse.FromString,
-                )
+                _registered_method=True)
         self.InitWallet = channel.unary_unary(
                 '/lnrpc.WalletUnlocker/InitWallet',
                 request_serializer=walletunlocker__pb2.InitWalletRequest.SerializeToString,
                 response_deserializer=walletunlocker__pb2.InitWalletResponse.FromString,
-                )
+                _registered_method=True)
         self.UnlockWallet = channel.unary_unary(
                 '/lnrpc.WalletUnlocker/UnlockWallet',
                 request_serializer=walletunlocker__pb2.UnlockWalletRequest.SerializeToString,
                 response_deserializer=walletunlocker__pb2.UnlockWalletResponse.FromString,
-                )
+                _registered_method=True)
         self.ChangePassword = channel.unary_unary(
                 '/lnrpc.WalletUnlocker/ChangePassword',
                 request_serializer=walletunlocker__pb2.ChangePasswordRequest.SerializeToString,
                 response_deserializer=walletunlocker__pb2.ChangePasswordResponse.FromString,
-                )
+                _registered_method=True)
 
 
 class WalletUnlockerServicer(object):
@@ -156,6 +176,7 @@ def add_WalletUnlockerServicer_to_server(servicer, server):
     generic_handler = grpc.method_handlers_generic_handler(
             'lnrpc.WalletUnlocker', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
+    server.add_registered_method_handlers('lnrpc.WalletUnlocker', rpc_method_handlers)
 
 
  # This class is part of an EXPERIMENTAL API.
@@ -192,11 +213,21 @@ class WalletUnlocker(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/lnrpc.WalletUnlocker/GenSeed',
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/lnrpc.WalletUnlocker/GenSeed',
             walletunlocker__pb2.GenSeedRequest.SerializeToString,
             walletunlocker__pb2.GenSeedResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
 
     @staticmethod
     def InitWallet(request,
@@ -209,11 +240,21 @@ class WalletUnlocker(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/lnrpc.WalletUnlocker/InitWallet',
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/lnrpc.WalletUnlocker/InitWallet',
             walletunlocker__pb2.InitWalletRequest.SerializeToString,
             walletunlocker__pb2.InitWalletResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
 
     @staticmethod
     def UnlockWallet(request,
@@ -226,11 +267,21 @@ class WalletUnlocker(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/lnrpc.WalletUnlocker/UnlockWallet',
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/lnrpc.WalletUnlocker/UnlockWallet',
             walletunlocker__pb2.UnlockWalletRequest.SerializeToString,
             walletunlocker__pb2.UnlockWalletResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
 
     @staticmethod
     def ChangePassword(request,
@@ -243,8 +294,18 @@ class WalletUnlocker(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/lnrpc.WalletUnlocker/ChangePassword',
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/lnrpc.WalletUnlocker/ChangePassword',
             walletunlocker__pb2.ChangePasswordRequest.SerializeToString,
             walletunlocker__pb2.ChangePasswordResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
