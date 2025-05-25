@@ -306,7 +306,7 @@ until [ ${#scenario} -gt 0 ] && [[ ! "${scenario}" =~ ^error ]]; do
   if [ "${scenario}" = "error:no-storage" ]; then
     /home/admin/_cache.sh set state "noHDD"
     /home/admin/_cache.sh set message ">=1TB"
-  elif [ "${scenario}" =~ ^error ]; then
+  elif [[ "${scenario}" =~ ^error ]]; then
     echo "FAIL - error on HDD analysis: ${scenario}" >> $logFile
     /home/admin/_cache.sh set state "errorHDD"
     /home/admin/_cache.sh set message "${scenario}"
