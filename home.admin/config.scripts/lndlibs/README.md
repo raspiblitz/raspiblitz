@@ -27,7 +27,6 @@ Make sure the first lines (ignore comments) of the `lightning_pb2_grpc.py` look 
 ```
 from __future__ import absolute_import
 import grpc
-
 from . import lightning_pb2 as lightning__pb2
 ```
 
