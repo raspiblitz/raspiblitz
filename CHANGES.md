@@ -14,7 +14,7 @@ Features:
 - Update: Bitcoin Core v29.0 [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-29.0.md)
 - Update: LND v0.19.0-beta [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.19.0-beta)
 - Update: LNbits 1.0.0 [details](https://github.com/lnbits/lnbits/releases/tag/v1.0.0)
-- Update: AlbyHub v1.17.0 [details](https://github.com/getAlby/hub/releases/tag/v1.17.0)
+- Update: AlbyHub v1.17.2 [details](https://github.com/getAlby/hub/releases/tag/v1.17.2)
 - Update: Lightning Terminal v0.14.1-alpha [details](https://github.com/lightninglabs/lightning-terminal/releases/tag/v0.14.1-alpha)
 - Update: Mempool 3.2.1 [details](hhttps://github.com/mempool/mempool/releases/tag/v3.2.1)
 - Update: BTCPayServer v2.2.1 [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v2.2.1)
