@@ -213,6 +213,15 @@ if [ "$1" == "prestart" ]; then
     sed -i '/^externalip=*/d' ${lndConfFile}
   fi
 
+  # if no maxlogfiles set - set to 2
+  if [ $(cat ${lndConfFile} | grep -c "^maxlogfiles=") -eq 0 ]; then
+    setting ${lndConfFile} ${insertLine} "maxlogfiles" "2"
+  fi
+  # if no maxlogfilesize set - set to 100 MB
+  if [ $(cat ${lndConfFile} | grep -c "^maxlogfilesize=") -eq 0 ]; then
+    setting ${lndConfFile} ${insertLine} "maxlogfilesize" "100"
+  fi
+
   ##### BOLT SECTION #####
   # https://github.com/lightningnetwork/lnd/blob/0aa0831619cb320dbb74883c37a80ccbdde7f320/sample-lnd.conf#L1205
   sectionName="bolt"
