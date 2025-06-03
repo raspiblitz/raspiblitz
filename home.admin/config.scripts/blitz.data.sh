@@ -796,7 +796,7 @@ if [ "$action" = "status" ]; then
         dataMountedPath="${storageMountedPath}"
     fi
     
-    echo "# Used Space"
+    #echo "# Used Space"
 
     # get used space on drives in GB
     storageUsePercent=""
@@ -814,7 +814,7 @@ if [ "$action" = "status" ]; then
         systemUsePercent=$(df "/dev/${systemPartition}" 2>/dev/null | awk 'NR==2 {sub(/%/, "", $5); print $5}')
     fi
 
-    echo "# Free Space"
+    #echo "# Free Space"
 
     # get free space on drives
     if [ ${#storagePartition} -gt 0 ]; then
@@ -829,7 +829,7 @@ if [ "$action" = "status" ]; then
         systemFreeKB=$(df -k | grep "/dev/${systemPartition}" 2>/dev/null | awk '{print $4}' | tail -n 1)
     fi
 
-    echo "# Temperature"
+    #echo "# Temperature"
 
     # get Temperature of drives
     if [ ${#storageDevice} -gt 0 ]; then
@@ -851,12 +851,15 @@ if [ "$action" = "status" ]; then
     dataUnusedPercent=0
     systemUnusedPercent=0
     if [ ${#storageDevice} -gt 0 ]; then
+        echo "# A"
         storageUnusedPercent=$(parted /dev/${storageDevice} unit % print free 2>/dev/null | awk '/Free Space/ {v=$(NF-2); gsub(/[^0-9.]/, "", v)} END{print int(v)}')
     fi
     if [ ${#dataDevice} -gt 0 ]; then
+        echo "# B"
         dataUnusedPercent=$(parted /dev/${dataDevice} unit % print free 2>/dev/null | awk '/Free Space/ {v=$(NF-2); gsub(/[^0-9.]/, "", v)} END{print int(v)}')
     fi
     if [ ${#systemDevice} -gt 0 ]; then
+        echo "# C"
         systemUnusedPercent=$(parted /dev/${systemDevice} unit % print free 2>/dev/null | awk '/Free Space/ {v=$(NF-2); gsub(/[^0-9.]/, "", v)} END{print int(v)}')
     fi
 
