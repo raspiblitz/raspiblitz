@@ -483,7 +483,7 @@ if [ "$action" = "status" ]; then
 
         echo "# PROPOSING LAYOUT ..."
 
-        # get a list of all connected drives >7GB ordered by size (biggest first)
+        # get a list of all connected drives >15GB ordered by size (biggest first)
         listOfDevices=$(lsblk -dno NAME,SIZE | grep -E "^(sd|nvme)" | \
         awk '{ 
         size=$2
@@ -494,7 +494,7 @@ if [ "$action" = "status" ]; then
         } else if(size ~ /M/) { 
         sub("M","",size); size=size/1024 
         }
-        if (size >= 7) printf "%s %.0f\n", $1, size
+        if (size >= 15) printf "%s %.0f\n", $1, size
         }' | sort -k2,2nr -k1,1 )
         echo "listOfDevices='${listOfDevices}'"
 
