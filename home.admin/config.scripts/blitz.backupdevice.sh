@@ -60,8 +60,8 @@ if [ "$1" = "status" ]; then
         if [ ${sizeGigaBytes} -gt 0 ] && [ ${sizeGigaBytes} -lt 31 ]; then
           # add to array of candidates
           backupCandidate[${drivecounter}]="${mountoption}"
-          drivecounter=$(($drivecounter +1))
           echo "backupCandidate[${drivecounter}]='${mountoption}'"
+          drivecounter=$(($drivecounter +1))
         else
           echo "# ${disk} is not a candidate for backup device - size is ${sizeGigaBytes} GB"
         fi
@@ -117,7 +117,7 @@ if [ "$1" = "on" ]; then
 
     # check if there is only one candidate
     if [ ${backupCandidates} -gt 1 ]; then
-      dialog --title ' FAIL ' --msgbox 'There is more than one possible backup target connected.\nMake sure that just that one device is connected and try again.' 8 40
+      dialog --title ' FAIL ' --msgbox 'There is more than one possible backup target connected.\nMake sure that just that one device is connected maller than 32GB and try again.' 8 40
       clear
       exit 1
     fi
