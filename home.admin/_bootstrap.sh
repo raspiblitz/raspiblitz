@@ -1386,6 +1386,11 @@ else
   echo "skipping LND credentials sync" >> $logFile
 fi
 
+# mount optional backup device
+if [ "${localBackupDeviceUUID}" != "" ] && [ "${localBackupDeviceUUID}" != "off" ]; then
+  /home/admin/config.scripts/blitz.backupdevice.sh mount >> $logFile
+fi
+
 #####################################
 # CLEAN HDD TEMP
 #####################################

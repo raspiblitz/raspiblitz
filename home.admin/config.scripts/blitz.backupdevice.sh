@@ -152,9 +152,9 @@ THIS WILL DELETE ALL DATA ON THAT DEVICE!
       fi
       echo "# OK found device name ${hdd} that will now be formatted ..."
       echo "# Wiping all partitions (sfdisk/wipefs)"
-      sudo sfdisk --delete /dev/${hdd} 1>&2
+      sfdisk --delete /dev/${hdd} 1>&2
       sleep 4
-      sudo wipefs -a /dev/${hdd} 1>&2
+      wipefs -a /dev/${hdd} 1>&2
       sleep 4
       partitions=$(lsblk | grep -c "─${hdd}")
       if [ ${partitions} -gt 0 ]; then
@@ -164,10 +164,17 @@ THIS WILL DELETE ALL DATA ON THAT DEVICE!
       fi
       # using FAT32 here so that the backup can be easily opened on Windows and Mac
       echo "# Create on big partition /dev/${hdd}"
-      sudo parted /dev/${hdd} mklabel msdos 1>&2
-      sudo parted /dev/${hdd} mkpart primary fat32 0% 100% 1>&2
+      parted /dev/${hdd} mklabel msdos 1>&2
+      parted /dev/${hdd} mkpart primary fat32 0% 100% 1>&2
       echo "# Formatting FAT32"
-      sudo mkfs.vfat -F 32 -n 'BLITZBACKUP' /dev/${hdd}1 1>&2
+      mkfs.vfat -F 32 -n 'BLITZBACKUP' /dev/${hdd}1 1>&2
+      sleep 2
+      # Force kernel to re-read partition table and update device info
+      partprobe /dev/${hdd} 1>&2
+      sleep 1
+      # Trigger udev to update device information
+      udevadm settle
+      udevadm trigger --subsystem-match=block
       sleep 2
       echo "# Getting new UUID"
       uuid=$(lsblk -o UUID,NAME | grep "${hdd}1" | cut -d " " -f 1)
@@ -196,11 +203,11 @@ THIS WILL DELETE ALL DATA ON THAT DEVICE!
 
   if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
     # copy SCB over
-    sudo cp /mnt/hdd/app-data/lnd/data/chain/bitcoin/mainnet/channel.backup /mnt/backup/channel.backup 1>&2
+    cp /mnt/hdd/app-data/lnd/data/chain/bitcoin/mainnet/channel.backup /mnt/backup/channel.backup 1>&2
   fi
   if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ]; then
     # copy ER over
-    sudo cp /home/bitcoin/.lightning/bitcoin/emergency.recover /mnt/backup/emergency.recover 1>&2
+    cp /home/bitcoin/.lightning/bitcoin/emergency.recover /mnt/backup/emergency.recover 1>&2
   fi
 
   if [ ${userinteraction} -eq 1 ]; then
