@@ -582,15 +582,15 @@ if [ "$action" = "status" ]; then
         fi
 
         # Set DATA (check last, because its more common to have STORAGE & DATA combined)
-        echo "# Selecting DATA device:"
-        echo "#  - so far dataDevice(${dataDevice}) / storageDevice(${storageDevice})"
+        #echo "# Selecting DATA device:"
+        #echo "#  - so far dataDevice(${dataDevice}) / storageDevice(${storageDevice})"
         if [ ${#dataDevice} -eq 0 ] || [ "${dataDevice}" = "${storageDevice}" ]; then
 
             # when no data device yet: take the second biggest drive as the data drive
             dataDevice=$(echo "${listOfDevices}" | head -n1 | awk '{print $1}')
             dataSizeGB=$(echo "${listOfDevices}" | head -n1 | awk '{print $2}')
             listOfDevices=$(echo "${listOfDevices}" | grep -v "${dataDevice}")
-            echo "#  - seleted dataDevice: ${dataDevice} (${dataSizeGB}GB)"
+            #echo "#  - seleted dataDevice: ${dataDevice} (${dataSizeGB}GB)"
 
             # ignore system device if choosen as data device
             if [ "${dataDevice}" = "${systemDevice}" ]; then
