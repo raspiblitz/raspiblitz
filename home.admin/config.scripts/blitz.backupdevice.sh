@@ -163,7 +163,7 @@ THIS WILL DELETE ALL DATA ON THAT DEVICE!
         exit 1
       fi
       # using FAT32 here so that the backup can be easily opened on Windows and Mac
-      echo "# Create on big partition"
+      echo "# Create on big partition /dev/${hdd}"
       sudo parted /dev/${hdd} mklabel msdos 1>&2
       sudo parted /dev/${hdd} mkpart primary fat32 0% 100% 1>&2
       echo "# Formatting FAT32"
