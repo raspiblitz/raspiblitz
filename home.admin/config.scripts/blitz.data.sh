@@ -844,26 +844,23 @@ if [ "$action" = "status" ]; then
         systemCelsius=$(smartctl -A /dev/${systemDevice} 2>/dev/null | grep -E '^Temperature:|Temperature Sensor' | awk '{print $(NF-1)}' | head -n 1)
     fi
 
-    echo "# Unused Space"
+    #echo "# Unused Space"
 
     # get unused space on drives
     storageUnusedPercent=0
     dataUnusedPercent=0
     systemUnusedPercent=0
     if [ ${#storageDevice} -gt 0 ]; then
-        echo "# A"
         storageUnusedPercent=$(parted -s /dev/${storageDevice} unit % print free 2>/dev/null | awk '/Free Space/ {v=$(NF-2); gsub(/[^0-9.]/, "", v)} END{print int(v)}')
     fi
     if [ ${#dataDevice} -gt 0 ]; then
-        echo "# B (${dataDevice})"
         dataUnusedPercent=$(parted -s /dev/${dataDevice} unit % print free 2>/dev/null | awk '/Free Space/ {v=$(NF-2); gsub(/[^0-9.]/, "", v)} END{print int(v)}')
     fi
     if [ ${#systemDevice} -gt 0 ]; then
-        echo "# C"
         systemUnusedPercent=$(parted -s /dev/${systemDevice} unit % print free 2>/dev/null | awk '/Free Space/ {v=$(NF-2); gsub(/[^0-9.]/, "", v)} END{print int(v)}')
     fi
 
-    echo "# RESULTS"
+    #echo "# RESULTS"
 
     # output the result
     echo "scenario='${scenario}'"
