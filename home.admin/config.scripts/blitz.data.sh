@@ -852,15 +852,15 @@ if [ "$action" = "status" ]; then
     systemUnusedPercent=0
     if [ ${#storageDevice} -gt 0 ]; then
         echo "# A"
-        storageUnusedPercent=$(parted /dev/${storageDevice} unit % print free 2>/dev/null | awk '/Free Space/ {v=$(NF-2); gsub(/[^0-9.]/, "", v)} END{print int(v)}')
+        storageUnusedPercent=$(parted -s /dev/${storageDevice} unit % print free 2>/dev/null | awk '/Free Space/ {v=$(NF-2); gsub(/[^0-9.]/, "", v)} END{print int(v)}')
     fi
     if [ ${#dataDevice} -gt 0 ]; then
         echo "# B (${dataDevice})"
-        dataUnusedPercent=$(parted /dev/${dataDevice} unit % print free 2>/dev/null | awk '/Free Space/ {v=$(NF-2); gsub(/[^0-9.]/, "", v)} END{print int(v)}')
+        dataUnusedPercent=$(parted -s /dev/${dataDevice} unit % print free 2>/dev/null | awk '/Free Space/ {v=$(NF-2); gsub(/[^0-9.]/, "", v)} END{print int(v)}')
     fi
     if [ ${#systemDevice} -gt 0 ]; then
         echo "# C"
-        systemUnusedPercent=$(parted /dev/${systemDevice} unit % print free 2>/dev/null | awk '/Free Space/ {v=$(NF-2); gsub(/[^0-9.]/, "", v)} END{print int(v)}')
+        systemUnusedPercent=$(parted -s /dev/${systemDevice} unit % print free 2>/dev/null | awk '/Free Space/ {v=$(NF-2); gsub(/[^0-9.]/, "", v)} END{print int(v)}')
     fi
 
     echo "# RESULTS"
