@@ -168,6 +168,7 @@ THIS WILL DELETE ALL DATA ON THAT DEVICE!
       sudo parted /dev/${hdd} mkpart primary fat32 0% 100% 1>&2
       echo "# Formatting FAT32"
       sudo mkfs.vfat -F 32 -n 'BLITZBACKUP' /dev/${hdd}1 1>&2
+      sleep 2
       echo "# Getting new UUID"
       uuid=$(lsblk -o UUID,NAME | grep "${hdd}1" | cut -d " " -f 1)
       if [ "${uuid}" == "" ]; then
