@@ -307,7 +307,7 @@ tlskeypath=/mnt/hdd/app-data/lnd/tls.key
 sync-freelist=true
 
 # Specify the maximum number of logfiles retained in rotation and the threshold size for rotation initiation.
-maxlogfiles=5
+maxlogfiles=2
 maxlogfilesize=400
 
 [Bitcoin]
