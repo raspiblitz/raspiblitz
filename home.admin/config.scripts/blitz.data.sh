@@ -600,8 +600,6 @@ if [ "$action" = "status" ]; then
                 listOfDevices=$(echo "${listOfDevices}" | grep -v "${dataDevice}")
             fi
 
-            echo "# A"
-
             # dont use install device in proposed layout
             if [ "${dataDevice}" = "${installDevice}" ]; then
                 echo "#  - dataDevice(${dataDevice}) is the same as install device - ignore it, check next in list"
@@ -609,8 +607,6 @@ if [ "$action" = "status" ]; then
                 dataSizeGB=$(echo "${listOfDevices}" | head -n1 | awk '{print $2}')
                 listOfDevices=$(echo "${listOfDevices}" | grep -v "${dataDevice}")
             fi
-
-            echo "# B"
 
             # if there is was no spereated data drive - run combine data & storage partiton
             if [ ${#dataDevice} -eq 0 ]; then
@@ -630,8 +626,6 @@ if [ "$action" = "status" ]; then
                 listOfDevices=$(echo "${listOfDevices}" | grep -v "${dataDevice}")
             fi
 
-            echo "# C"
-
         else
             echo "#  - dataDevice(${dataDevice}) already set - skip selection"
         fi
@@ -642,7 +636,6 @@ if [ "$action" = "status" ]; then
 
     #################
     # Check Mininimal Sizes
-    echo "# D"
 
     # in case of combined data & storage partition
     if [ ${combinedDataStorage} -eq 1 ]; then
@@ -686,7 +679,6 @@ if [ "$action" = "status" ]; then
 
     #################
     # Device Names
-    echo "# E"
 
     # use: find_by_id_filename [DEVICENAME]
     find_by_id_filename() {
@@ -697,6 +689,8 @@ if [ "$action" = "status" ]; then
             fi
         done | sort | head -n1
     }
+
+    echo "# E"
 
     # STORAGE
     if [ ${#storageDevice} -gt 0 ]; then
@@ -734,6 +728,8 @@ if [ "$action" = "status" ]; then
 
     #################
     # Define Scenario
+
+    echo "# F"
 
     # Initialize systemCopy flag to default 0
     systemCopy=0
@@ -804,7 +800,7 @@ if [ "$action" = "status" ]; then
         dataMountedPath="${storageMountedPath}"
     fi
     
-    # echo "# Used Space"
+    echo "# Used Space"
 
     # get used space on drives in GB
     storageUsePercent=""
