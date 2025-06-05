@@ -69,12 +69,14 @@ if [ "$1" == "prestart" ]; then
   fi
 
   if [ $(grep -c "^grpc-port" <${CLCONF}) -gt 0 ]; then
-    if [ ! -f /home/bitcoin/${netprefix}cl-plugins-enabled/cln-grpc ] || [ "$(eval echo \$${netprefix}cln-grpc-port)" = "off" ]; then
+    if [ ! -f /home/bitcoin/${netprefix}cl-plugins-enabled/cln-grpc ] ||
+      [ ! -f /usr/local/libexec/c-lightning/plugins/cln-grpc ] ||
+      [ "$(eval echo \$${netprefix}cln-grpc-port)" = "off" ]; then
       echo "# The cln-grpc plugin is not present but in config"
       sed -i "/^grpc-port/d" ${CLCONF}
       rm -rf /home/bitcoin/${netprefix}cl-plugins-enabled/cln-grpc
     else
-      echo "# Make sure that the correct GRPC port is used for $NETWORK" 
+      echo "# Make sure that the correct GRPC port is used for $NETWORK"
       sed -i "/^grpc-port=*/grpc-port=${portprefix}4772/g" ${CLCONF}
     fi
   fi
