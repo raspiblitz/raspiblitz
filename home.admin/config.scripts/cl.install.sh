@@ -61,15 +61,7 @@ function installDependencies() {
   sudo -u bitcoin poetry install
 
   # rust deps for cln-grpc and clnrest plugins
-  if ! sudo -u bitcoin bash -c 'command -v cargo'; then
-    sudo -u bitcoin bash -c 'curl --proto "=https" --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y'
-  fi
-  # Ensure /home/bitcoin/.cargo/bin is in PATH for the bitcoin user
-  if ! grep -Fq '.cargo/bin' /home/bitcoin/.profile; then
-    echo -e '\n# set PATH so it includes Cargo'\''s bin if it exists\nif [ -d "$HOME/.cargo/bin" ] ; then\n    PATH="$HOME/.cargo/bin:$PATH"\nfi' | sudo tee -a /home/bitcoin/.profile
-  fi
-  export PATH="/home/bitcoin/.cargo/bin:$PATH"
-  sudo apt-get install -y protobuf-compiler
+  sudo apt-get install -y cargo rustfmt protobuf-compiler
 
   # remove old clnrest dir if exists
   if [ -d /usr/local/libexec/c-lightning/plugins/clnrest ]; then
