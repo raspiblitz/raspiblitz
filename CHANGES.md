@@ -24,6 +24,7 @@ Features:
 - Update: LNDg v1.10.0 [details](https://github.com/cryptosharks131/lndg/releases/tag/v1.10.0)
 - Update: Fulcrum Electrum server v1.11.1 (CLI install script with status menu) [details](https://github.com/cculianu/Fulcrum/releases/tag/v1.11.1)
 - Update: Helipad (Podcasting 2.0 Boostagram reader) v0.2.1 [details](https://github.com/Podcastindex-org/helipad/)
+- Update: JoininBox v0.8.4 [details](https://github.com/openoms/joininbox/releases/tag/v0.8.4)
 - Remove: Migration from Umbrel, MyNode, Citadel (because of new drive layout with boot option)
 
 ## What's new in Version 1.11.4 of RaspiBlitz?

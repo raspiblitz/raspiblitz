@@ -6,7 +6,7 @@
 # https://github.com/openoms/joininbox
 
 # https://github.com/openoms/joininbox/tags
-JBTAG="v0.8.3" # installs JoinMarket v0.9.11
+JBTAG="v0.8.4" # installs JoinMarket v0.9.11
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
