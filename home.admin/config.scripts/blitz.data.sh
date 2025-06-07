@@ -78,7 +78,7 @@ fi
 if [ "$action" = "swap" ]; then
 
     swapAction=$2
-    swapFilePath="/swapfile"
+    swapFilePath="/mnt/disk_storage/swapfile"
     swapSizeGB=8
 
     if [ "$swapAction" = "on" ]; then
@@ -115,8 +115,8 @@ if [ "$action" = "swap" ]; then
             exit 1
         fi
         # make permanent
-        if ! grep -q "${swapFilePath} none swap sw 0 0" /etc/fstab; then
-            echo "${swapFilePath} none swap sw 0 0" >> /etc/fstab
+        if ! grep -q "${swapFilePath}" /etc/fstab; then
+            echo "${swapFilePath}   none    swap    sw,x-systemd.requires=mnt-disk_storage.mount,x-systemd.after=mnt-disk_storage.mount   0 0" >> /etc/fstab
             echo "# Added swapfile to /etc/fstab"
         fi
         echo "result='swapfile created and activated'"
@@ -137,9 +137,9 @@ if [ "$action" = "swap" ]; then
             echo "# Swapfile ${swapFilePath} is not active."
         fi
         # remove from fstab
-        if grep -q "${swapFilePath} none swap sw 0 0" /etc/fstab; then
+        if grep -q "${swapFilePath}" /etc/fstab; then
             echo "# Removing swapfile entry from /etc/fstab ..."
-            sed -i "\#${swapFilePath} none swap sw 0 0#d" /etc/fstab
+            sed -i "\#^${swapFilePath}#d" /etc/fstab
         fi
         # delete file
         if [ -f "${swapFilePath}" ]; then
