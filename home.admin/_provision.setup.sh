@@ -331,17 +331,27 @@ fi
 if [ "${lightning}" == "cl" ]; then
 
   ###################################
-  # c-lightning
-  echo "############## c-lightning" >> ${logFile}
+  # core lightning
+  echo "############## core lightning" >> ${logFile}
 
-  # install c-lightning (when not done by sd card fatpack)
+  # install core lightning (when not done by sd card fatpack)
   # if already installed - will skip
   /home/admin/_cache.sh set message "Core Lightning Install"
-  /home/admin/config.scripts/cl.install.sh install >> ${logFile}
+  echo "# Starting CLN binary installation..." >> ${logFile}
+  if ! /home/admin/config.scripts/cl.install.sh install >> ${logFile} 2>&1; then
+    /home/admin/config.scripts/blitz.error.sh _provision.setup.sh "cl-install-binary" "cl.install.sh install failed" "Check ${logFile} for compilation errors. Possible causes: insufficient disk space, compilation failure, missing dependencies" ${logFile}
+    exit 20
+  fi
+  echo "# CLN binary installation completed successfully" >> ${logFile}
 
   echo "# switch mainnet config on" >> ${logFile}
   /home/admin/_cache.sh set message "Core Lightning Setup"
-  /home/admin/config.scripts/cl.install.sh on mainnet >> ${logFile}
+  echo "# Starting CLN mainnet configuration..." >> ${logFile}
+  if ! /home/admin/config.scripts/cl.install.sh on mainnet >> ${logFile} 2>&1; then
+    /home/admin/config.scripts/blitz.error.sh _provision.setup.sh "cl-config-mainnet" "cl.install.sh on mainnet failed" "Check ${logFile} for configuration errors. CLN binary may have installed but configuration failed" ${logFile}
+    exit 21
+  fi
+  echo "# CLN mainnet configuration completed successfully" >> ${logFile}
 
   # OLD WALLET FROM CLIGHTNING RESCUE
   if [ "${clrescue}" != "" ]; then
@@ -439,7 +449,7 @@ if [ "${lightning}" == "cl" ]; then
 
   fi
 
-  # stop c-lightning for the rest of the provision process
+  # stop core lightning for the rest of the provision process
   echo "stopping lightningd for the rest provision again (will start on next boot)" >> ${logFile}
   systemctl stop lightningd >> ${logFile}
 
