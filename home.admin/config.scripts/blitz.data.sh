@@ -118,7 +118,7 @@ if [ "$action" = "swap" ]; then
         fi
         # make permanent
         if ! grep -q "${swapFilePath}" /etc/fstab; then
-            echo "${swapFilePath}   none    swap    sw,x-systemd.requires=mnt-disk_storage.mount,x-systemd.after=mnt-disk_storage.mount   0 0" >> /etc/fstab
+            echo "${swapFilePath} none swap sw 0 0" >> /etc/fstab
             echo "# Added swapfile to /etc/fstab"
         fi
         echo "result='swapfile created and activated'"
