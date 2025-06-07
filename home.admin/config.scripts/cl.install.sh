@@ -269,17 +269,15 @@ if [ "$1" = on ] || [ "$1" = update ] || [ "$1" = testPR ]; then
   sudo -u bitcoin mkdir /home/bitcoin/cl-plugins-available 2>/dev/null
 
   echo "# Store the lightning data in /mnt/hdd/app-data/.lightning"
-  sudo mkdir -p /mnt/hdd/app-data/.lightning
+  # Create the main and network-specific lightning directories
+  sudo mkdir -p "/mnt/hdd/app-data/.lightning/${CLNETWORK}"
+  sudo chown -R bitcoin:bitcoin /mnt/hdd/app-data/.lightning
   echo "# Symlink to /home/bitcoin/"
   sudo rm -rf /home/bitcoin/.lightning # not a symlink, delete
   sudo ln -s /mnt/hdd/app-data/.lightning /home/bitcoin/
   echo "# Symlink to /home/admin/"
   sudo rm -rf /home/admin/.lightning # not a symlink, delete
   sudo ln -s /mnt/hdd/app-data/.lightning /home/admin/
-
-  if [ ${CLNETWORK} != "bitcoin" ] && [ ! -d /home/bitcoin/.lightning/${CLNETWORK} ]; then
-    sudo -u bitcoin mkdir /home/bitcoin/.lightning/${CLNETWORK}
-  fi
 
   if ! sudo ls ${CLCONF} 2>/dev/null; then
     echo "# Create ${CLCONF}"
