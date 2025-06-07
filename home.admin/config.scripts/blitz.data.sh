@@ -51,6 +51,9 @@ storageFullMinGB=890
 dataMinGB=32
 systemMinGB=32
 
+# swap file path
+swapFilePath="/swapfile"
+
 # check if started with sudo
 if [ "$EUID" -ne 0 ]; then 
   echo "error='run as root'"
@@ -78,7 +81,6 @@ fi
 if [ "$action" = "swap" ]; then
 
     swapAction=$2
-    swapFilePath="/mnt/disk_storage/swapfile"
     swapSizeGB=8
 
     if [ "$swapAction" = "on" ]; then
@@ -174,10 +176,9 @@ if [ "$action" = "status" ]; then
 
     ##########################
     # CHECK SWAP STATUS
-    isSwapExternal=0
-    swapFilePath="/swapfile"
+    swapActive=0
     if swapon --show | grep -q "${swapFilePath}"; then
-        isSwapExternal=1
+        swapActive=1
     fi
 
     ##########################
@@ -915,7 +916,7 @@ if [ "$action" = "status" ]; then
     echo "combinedDataStorage='${combinedDataStorage}'"
     echo "bootFromStorage='${bootFromStorage}'"
     echo "bootFromSD='${bootFromSD}'"
-    echo "isSwapExternal='${isSwapExternal}'"
+    echo "swapActive='${swapActive}'"
 
     # save to cache when -inspect
     if [ ${userWantsInspect} -eq 1 ]; then
