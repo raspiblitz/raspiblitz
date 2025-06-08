@@ -51,6 +51,19 @@ function installDependencies() {
   # for wss-proxy - https://docs.corelightning.org/docs/installation#wss-proxy
   sudo -u bitcoin pip3 config set global.break-system-packages true
   sudo -u bitcoin pip3 install --user pyln-client websockets grpcio-tools
+  # for the tests - install Core Lightning test dependencies matching pyproject.toml versions
+  # based on https://github.com/ElementsProject/lightning/blob/master/contrib/pyln-testing/pyproject.toml
+  sudo -u bitcoin pip3 install --user --upgrade \
+    "pytest>=7" \
+    "ephemeral-port-reserve>=1.1.4" \
+    "psycopg2-binary>=2.9" \
+    "python-bitcoinlib>=0.11.0" \
+    "jsonschema>=4.4.0" \
+    "Flask>=2" \
+    "cheroot>=8,<=10" \
+    "psutil>=5.9" \
+    "requests>=2.31.0" \
+    python-socketio websocket-client flaky
   # poetry
   sudo pip3 install poetry
   if ! grep -Eq '^PATH="$HOME/.local/bin:$PATH"' /home/bitcoin/.profile; then
