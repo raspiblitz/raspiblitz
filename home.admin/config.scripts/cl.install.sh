@@ -50,7 +50,7 @@ function installDependencies() {
   sudo pip3 install --upgrade pip
   # for wss-proxy - https://docs.corelightning.org/docs/installation#wss-proxy
   sudo -u bitcoin pip3 config set global.break-system-packages true
-  sudo -u bitcoin pip3 install --user pyln-client websockets
+  sudo -u bitcoin pip3 install --user pyln-client websockets grpcio-tools
   # poetry
   sudo pip3 install poetry
   if ! grep -Eq '^PATH="$HOME/.local/bin:$PATH"' /home/bitcoin/.profile; then
@@ -61,11 +61,27 @@ function installDependencies() {
   sudo -u bitcoin poetry install
 
   # rust deps for cln-grpc and clnrest plugins
-  # install rust to /opt/rust
+  echo "# Install Rust to /opt/rust/"
   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | \
     sudo RUSTUP_HOME=/opt/rust CARGO_HOME=/opt/rust sh -s -- --no-modify-path -y
-  # make rust binaries available system-wide
-  sudo ln -s /opt/rust/bin/* /usr/local/bin/
+  echo "# Set /opt/rust write access for rust group"
+  if ! getent group rust >/dev/null 2>&1; then
+    sudo groupadd rust
+  fi
+  sudo chown -R root:rust /opt/rust
+  sudo chmod -R g+w /opt/rust
+  sudo usermod -a -G rust bitcoin
+  echo "# Set the default Rust toolchain"
+  sudo RUSTUP_HOME=/opt/rust CARGO_HOME=/opt/rust /opt/rust/bin/rustup default stable
+  echo "# Make Rust binaries available system-wide"
+  sudo ln -sf /opt/rust/bin/* /usr/local/bin/
+  echo "# Set up system-wide environment variables for Rust"
+  if ! grep -q "RUSTUP_HOME=/opt/rust" /etc/environment; then
+    echo 'RUSTUP_HOME=/opt/rust' | sudo tee -a /etc/environment
+  fi
+  if ! grep -q "CARGO_HOME=/opt/rust" /etc/environment; then
+    echo 'CARGO_HOME=/opt/rust' | sudo tee -a /etc/environment
+  fi
 
   sudo apt-get install -y protobuf-compiler
 
@@ -78,17 +94,17 @@ function installDependencies() {
 function buildAndInstallCLbinaries() {
   echo "- configure"
   echo
-  sudo -u bitcoin ./configure
+  sudo -u bitcoin RUSTUP_HOME=/opt/rust CARGO_HOME=/opt/rust ./configure || exit 1
   echo
   echo "- make"
   echo
-  sudo -u bitcoin make
+  sudo -u bitcoin RUSTUP_HOME=/opt/rust CARGO_HOME=/opt/rust make || exit 1
   echo
   echo "- make check VALGRIND=0"
-  sudo -u bitcoin make check VALGRIND=0
+  sudo -u bitcoin RUSTUP_HOME=/opt/rust CARGO_HOME=/opt/rust make check VALGRIND=0 || exit 1
   echo
   echo "- install to /usr/local/bin/"
-  sudo make install || exit 1
+  sudo make RUSTUP_HOME=/opt/rust CARGO_HOME=/opt/rust install || exit 1
 }
 
 echo "# Running: 'cl.install.sh $*'"
@@ -158,7 +174,7 @@ if [ "$1" = "install" ]; then
 
   installDependencies
 
-  buildAndInstallCLbinaries
+  buildAndInstallCLbinaries || exit 1
 
   installed=$(sudo -u bitcoin lightning-cli --version)
   if [ ${#installed} -eq 0 ]; then
@@ -254,7 +270,7 @@ if [ "$1" = on ] || [ "$1" = update ] || [ "$1" = testPR ]; then
     )
     echo "# Building from source Core Lightning $currentCLversion"
 
-    buildAndInstallCLbinaries
+    buildAndInstallCLbinaries || exit 1
 
   fi
 
