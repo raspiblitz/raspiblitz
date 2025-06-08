@@ -2,7 +2,7 @@
 
 # https://github.com/joinmarket-webui/jam
 
-WEBUI_VERSION=0.3.0
+WEBUI_VERSION=0.4.0
 REPO=joinmarket-webui/jam
 USERNAME=jam
 HOME_DIR=/home/$USERNAME
