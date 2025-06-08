@@ -94,8 +94,8 @@ if [ "$1" == "prestart" ]; then
       echo "clnrest-host=0.0.0.0" | tee -a ${CLCONF}
     fi
     echo "# Make sure that the correct clnrest port is used for $NETWORK"
-    sed -i "/^clnrest-port=*/clnrest-port=${portprefix}7378/g" ${CLCONF}
-    sed -i "/^clnrest-host=*/clnrest-host=0.0.0.0/g" ${CLCONF}
+    sed -i "s/^clnrest-port=*/clnrest-port=${portprefix}7378/g" ${CLCONF}
+    sed -i "s/^clnrest-host=*/clnrest-host=0.0.0.0/g" ${CLCONF}
   else
     echo "# The clnrest plugin is not present but in config"
     sed -i "/^clnrest-port/d" ${CLCONF}
