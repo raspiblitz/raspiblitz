@@ -61,7 +61,13 @@ function installDependencies() {
   sudo -u bitcoin poetry install
 
   # rust deps for cln-grpc and clnrest plugins
-  sudo apt-get install -y cargo rustfmt protobuf-compiler
+  # install rust to /opt/rust
+  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | \
+    sudo RUSTUP_HOME=/opt/rust CARGO_HOME=/opt/rust sh -s -- --no-modify-path -y
+  # make rust binaries available system-wide
+  sudo ln -s /opt/rust/bin/* /usr/local/bin/
+
+  sudo apt-get install -y protobuf-compiler
 
   # remove old clnrest dir if exists
   if [ -d /usr/local/libexec/c-lightning/plugins/clnrest ]; then
