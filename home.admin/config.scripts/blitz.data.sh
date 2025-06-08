@@ -655,10 +655,10 @@ if [ "$action" = "status" ]; then
 
     # STORAGE
     if [ ${#storageDevice} -gt 0 ]; then
-        if [ ${storageSizeGB} -lt $((storageFullMinGB - 1)) ]; then
+        if [ ${storageSizeGB} -lt $(storageFullMinGB) ]; then
             storageWarning='only-pruned'
         fi
-        if [ ${storageSizeGB} -lt $((storagePrunedMinGB - 1)) ]; then
+        if [ ${storageSizeGB} -lt $(storagePrunedMinGB) ]; then
             storageWarning='too-small'
         fi
     fi
