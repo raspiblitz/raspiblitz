@@ -60,7 +60,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       echo "# RELEASE CANDIDATE: using master branch"
       GITHUB_BRANCH="master"
     else
-      GITHUB_BRANCH="release/${githubBranch}"
+      GITHUB_BRANCH="release/${activeBranch}"
     fi
     GITHUB_COMMITORTAG=""
   else
