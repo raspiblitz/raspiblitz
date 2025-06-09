@@ -193,7 +193,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       echo "# RELEASE CANDIDATE: using dev branch"
       GITHUB_BRANCH="dev"
     else
-      GITHUB_BRANCH="blitz-${githubBranch}"
+      GITHUB_BRANCH="blitz-${$activeBranch}"
     fi
 
     GITHUB_COMMITORTAG=""
