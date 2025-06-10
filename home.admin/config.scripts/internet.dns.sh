@@ -48,6 +48,7 @@ Do you want to set the fixed DNS 1.1.1.1 by Cloudflare (they claim they provide 
     autoreboot=1
   else
     echo "# Ignoring DNS-Test fail"
+    exit 0
   fi
 
 fi
