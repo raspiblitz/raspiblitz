@@ -351,6 +351,15 @@ sudo sed -i '/^en_GB.UTF-8/s/^/#/' /etc/locale.gen
 sudo locale-gen
 echo -e "LANG=en_US.UTF-8\nLANGUAGE=en_US.UTF-8\nLC_ALL=en_US.UTF-8" | sudo tee /etc/default/locale > /dev/null
 
+echo "*** Setting Fallback DNS ***"
+connName=$(nmcli -g GENERAL.CONNECTION device show eth0)
+echo "current connection: ${connName}"
+if [ -z "${connName}" ]; then
+  echo "No active connection found for eth0. Exiting."
+  exit 1
+fi
+nmcli connection modify "${connName}" ipv4.dns "208.67.222.222,208.67.220.220,1.1.1.1" ipv4.dns-priority -1 ipv4.ignore-auto-dns no
+
 echo "*** Remove unnecessary packages ***"
 unnecessary_packages=(libreoffice* oracle-java* chromium-browser nuscratch scratch sonic-pi plymouth python2 vlc* cups* libcups* libcamera* firefox* ffmpeg libpostproc* eom* evince*)
 for pkg in "${unnecessary_packages[@]}"; do
@@ -363,8 +372,6 @@ for pkg in "${unnecessary_packages[@]}"; do
 done
 apt-get clean -y
 apt-get autoremove -y
-
-grep -q "^nameserver 8.8.8.8$" /etc/resolv.conf || echo "nameserver 8.8.8.8" >> /etc/resolv.conf
 
 echo -e "\n*** UPDATE Debian***"  # add sources if not present
 echo -e "checking/adding sources ..."
@@ -401,7 +408,7 @@ echo -e "\n*** SOFTWARE UPDATE ***"
 # sqlite3 -> database
 # fdisk -> create partitions
 # lsb-release -> needed to know which distro version we're running to add APT sources
-general_utils="sudo policykit-1 htop git curl bash-completion vim jq dphys-swapfile bsdmainutils autossh telnet vnstat parted dosfstools fbi sysbench build-essential dialog bc python3-dialog unzip whois fdisk lsb-release smartmontools rsyslog qrencode"
+general_utils="sudo policykit-1 htop git curl bash-completion vim jq dphys-swapfile bsdmainutils autossh telnet vnstat parted dosfstools fbi sysbench build-essential dialog bc python3-dialog unzip whois fdisk lsb-release smartmontools rsyslog qrencode dnsutils"
 # add btrfs-progs if not bookworm on aarch64
 [ "${architecture}" = "aarch64" ] && ! grep "12 (bookworm)" < /etc/os-release && general_utils="${general_utils} btrfs-progs"
 # python3-mako --> https://github.com/rootzoll/raspiblitz/issues/3441
