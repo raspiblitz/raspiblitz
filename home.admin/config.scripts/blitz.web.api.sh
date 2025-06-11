@@ -188,6 +188,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     GITHUB_USER="${defaultAPIuser}"
     GITHUB_REPO="${defaultAPIrepo}"
     activeBranch=$(git -C /home/admin/raspiblitz branch --show-current)
+    if [ "${activeBranch}" == "" ]; then
+      echo "# activeBranch not detected by git command, trying build script repo(${githubBranch})"
+      activeBranch="${githubBranch}"
+    fi
     echo "# activeBranch detected by raspiblitz repo: ${activeBranch}"
     if [[ "$activeBranch" == *"dev"* || "$activeBranch" != v* ]]; then
       echo "# RELEASE CANDIDATE: using dev branch"
