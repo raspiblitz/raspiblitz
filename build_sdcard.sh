@@ -352,13 +352,12 @@ sudo locale-gen
 echo -e "LANG=en_US.UTF-8\nLANGUAGE=en_US.UTF-8\nLC_ALL=en_US.UTF-8" | sudo tee /etc/default/locale > /dev/null
 
 echo "*** Setting Fallback DNS ***"
-connName=$(nmcli -g GENERAL.CONNECTION device show eth0)
-echo "current connection: ${connName}"
-if [ -z "${connName}" ]; then
-  echo "No active connection found for eth0. Exiting."
-  exit 1
+connName=$(nmcli -g GENERAL.CONNECTION device show eth0 2>/dev/null)
+echo "current nmcli eth0 connection (${connName})"
+if [ "${connName}" != "" ]; then
+  echo "Adding DNS fallback servers ..."
+  nmcli connection modify "${connName}" ipv4.dns "208.67.222.222,208.67.220.220,1.1.1.1" ipv4.dns-priority -1 ipv4.ignore-auto-dns no
 fi
-nmcli connection modify "${connName}" ipv4.dns "208.67.222.222,208.67.220.220,1.1.1.1" ipv4.dns-priority -1 ipv4.ignore-auto-dns no
 
 echo "*** Remove unnecessary packages ***"
 unnecessary_packages=(libreoffice* oracle-java* chromium-browser nuscratch scratch sonic-pi plymouth python2 vlc* cups* libcups* libcamera* firefox* ffmpeg libpostproc* eom* evince*)
