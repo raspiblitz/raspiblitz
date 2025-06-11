@@ -329,7 +329,7 @@ if [ "$action" = "status" ]; then
                 fi
 
             # Check SYSTEM DRIVE
-            elif [ -d "${mountPath}/boot" ] && [ -d "${mountPath}/home/admin/raspiblitz" ] && [ ${size} -gt 7 ] && [ "${storageDevice}" != "" ]; then
+            elif [ -d "${mountPath}/boot" ] && [ -d "${mountPath}/home/admin/raspiblitz" ] && [ ${size} -gt 7 ]; then
 
                 # check for unclean setups
                 if [ -d "${mountPath}/app-storage" ]; then
@@ -656,24 +656,24 @@ if [ "$action" = "status" ]; then
 
     # STORAGE
     if [ ${#storageDevice} -gt 0 ]; then
-        if [ ${storageSizeGB} -lt $(storageFullMinGB) ]; then
+        if [ ${storageSizeGB} -lt ${storageFullMinGB} ]; then
             storageWarning='only-pruned'
         fi
-        if [ ${storageSizeGB} -lt $(storagePrunedMinGB) ]; then
+        if [ ${storageSizeGB} -lt ${storagePrunedMinGB} ]; then
             storageWarning='too-small'
         fi
     fi
 
     # SYSTEM
     if [ ${#systemDevice} -gt 0 ] && [ ${bootFromStorage} -eq 0 ]; then
-        if [ ${systemSizeGB} -lt $((systemMinGB - 1)) ]; then
+        if [ ${systemSizeGB} -lt ${systemMinGB} ]; then
             systemWarning='too-small'
         fi
     fi
 
     # DATA
     if [ ${#dataDevice} -gt 0 ]; then
-        if [ ${dataSizeGB} -lt $((dataMinGB - 1)) ]; then
+        if [ ${dataSizeGB} -lt ${dataMinGB} ]; then
             dataWarning='too-small'
         fi
     fi
