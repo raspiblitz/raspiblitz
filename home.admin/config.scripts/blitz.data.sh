@@ -329,7 +329,7 @@ if [ "$action" = "status" ]; then
                 fi
 
             # Check SYSTEM DRIVE
-            elif [ -d "${mountPath}/boot" ] && [ -d "${mountPath}/home/admin/raspiblitz" ] && [ ${size} -gt 7 ] && [ "${storageDevice}" != "" ]; then
+            elif [ -d "${mountPath}/boot" ] && [ -d "${mountPath}/home/admin/raspiblitz" ] && [ ${size} -gt 7 ]; then
 
                 # check for unclean setups
                 if [ -d "${mountPath}/app-storage" ]; then
