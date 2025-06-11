@@ -28,7 +28,7 @@ if [ "$1" != "-EXPORT" ] && [ "$1" != "EXPORT" ]; then
 fi
 
 defaultRepo="raspiblitz" # user that hosts a `raspiblitz` repo
-defaultBranch="v1.11" # latest version branch
+defaultBranch="v1.12" # latest version branch
 
 defaultAPIuser="fusion44"
 defaultAPIrepo="blitz_api"
