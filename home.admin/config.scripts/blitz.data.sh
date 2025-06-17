@@ -1860,9 +1860,9 @@ if [ "$action" = "recover" ] || [ "$action" = "clean" ]; then
                     mkfs.fat -F 32 /dev/${actionDevicePartitionBase}1 >> ${logFile}
                     wipefs -a /dev/${actionDevicePartitionBase}2 >> ${logFile}
                     mkfs -t ext4  /dev/${actionDevicePartitionBase}2 >> ${logFile}
-                else {
-                  echo "# dont format boot & system partition .. actionCreateSystemPartition(${actionCreateSystemPartition})" >> ${logFile}  
-                }
+                else
+                    echo "# dont format boot & system partition .. actionCreateSystemPartition(${actionCreateSystemPartition})" >> ${logFile}  
+                fi
                 echo "storagePartition='${actionDevicePartitionBase}3'"
                 echo "# storagePartition(${actionDevicePartitionBase}3)" >> ${logFile}
             else
