@@ -15,7 +15,7 @@ APP_DATA_DIR="/mnt/hdd/app-data/${APPID}"
 
 # Debug information
 echo "# Script name: $0"
-echo "# All parameters: $@"
+echo "# All parameters: $*"
 echo "# First parameter: $1"
 echo "# Parameter count: $#"
 

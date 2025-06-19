@@ -54,13 +54,17 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     GITHUB_USER="${defaultWEBUIuser}"
     GITHUB_REPO="${defaultWEBUIrepo}"
     activeBranch=$(git -C /home/admin/raspiblitz branch --show-current)
+    if [ "${activeBranch}" == "" ]; then
+      echo "# activeBranch not detected by git command, trying build script repo(${githubBranch})"
+      activeBranch="${githubBranch}"
+    fi
     echo "# activeBranch detected by raspiblitz repo: ${activeBranch}"
     # use dev branch when raspiblitz repo is n dev branch
     if [[ "$activeBranch" == *"dev"* || "$activeBranch" != v* ]]; then
       echo "# RELEASE CANDIDATE: using master branch"
       GITHUB_BRANCH="master"
     else
-      GITHUB_BRANCH="release/${githubBranch}"
+      GITHUB_BRANCH="release/${activeBranch}"
     fi
     GITHUB_COMMITORTAG=""
   else

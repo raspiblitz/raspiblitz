@@ -135,7 +135,8 @@ fi
 if [ "${flagExists}" = "1" ]; then
   localip=$(hostname -I | awk '{print $1}')
   /home/admin/_cache.sh set state "stop"
-  /home/admin/_cache.sh set message "stopped for manual provision ${localip}"
+  /home/admin/_cache.sh set message "stopped for manual provision"
+  /home/admin/_cache.sh set internet_localip "${localip}"
   systemctl stop background.service
   systemctl stop background.scan.service
   # log info
@@ -149,6 +150,7 @@ if [ "${vm}" = "1"  ] && [ ${flagExists} -gt 0 ]; then
   localip=$(hostname -I | awk '{print $1}')
   /home/admin/_cache.sh set state "stop"
   /home/admin/_cache.sh set message "VM stopped for manual provision"
+  /home/admin/_cache.sh set internet_localip "${localip}"
   systemctl stop background.service
   systemctl stop background.scan.service
   # log info
@@ -306,7 +308,7 @@ until [ ${#scenario} -gt 0 ] && [[ ! "${scenario}" =~ ^error ]]; do
   if [ "${scenario}" = "error:no-storage" ]; then
     /home/admin/_cache.sh set state "noHDD"
     /home/admin/_cache.sh set message ">=1TB"
-  elif [ "${scenario}" =~ ^error ]; then
+  elif [[ "${scenario}" =~ ^error ]]; then
     echo "FAIL - error on HDD analysis: ${scenario}" >> $logFile
     /home/admin/_cache.sh set state "errorHDD"
     /home/admin/_cache.sh set message "${scenario}"
@@ -1384,6 +1386,11 @@ if [ "${lightning}" = "lnd" ] || [ "${lnd}" = "on" ]; then
   /home/admin/config.scripts/lnd.credentials.sh sync "${chain:-main}net" >> $logFile
 else
   echo "skipping LND credentials sync" >> $logFile
+fi
+
+# mount optional backup device
+if [ "${localBackupDeviceUUID}" != "" ] && [ "${localBackupDeviceUUID}" != "off" ]; then
+  /home/admin/config.scripts/blitz.backupdevice.sh mount >> $logFile
 fi
 
 #####################################

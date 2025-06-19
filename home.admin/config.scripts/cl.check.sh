@@ -68,22 +68,39 @@ if [ "$1" == "prestart" ]; then
     fi
   fi
 
-  if [ $(grep -c "^grpc-port" <${CLCONF}) -gt 0 ]; then
-    if [ ! -f /home/bitcoin/${netprefix}cl-plugins-enabled/cln-grpc ] || [ "$(eval echo \$${netprefix}cln-grpc-port)" = "off" ]; then
-      echo "# The cln-grpc plugin is not present but in config"
-      sed -i "/^grpc-port/d" ${CLCONF}
-      rm -rf /home/bitcoin/${netprefix}cl-plugins-enabled/cln-grpc
-    else
-      echo "# Make sure that the correct GRPC port is used for $NETWORK" 
-      sed -i "/^grpc-port=*/grpc-port=${portprefix}4772/g" ${CLCONF}
+  if [ -f /home/bitcoin/${netprefix}cl-plugins-enabled/cln-grpc ] ||
+    [ -f /usr/local/libexec/c-lightning/plugins/cln-grpc ] ||
+    [ "$(eval echo \$${netprefix}cln-grpc-port)" != "off" ]; then
+    if [ $(grep -c "^grpc-port" <${CLCONF}) -eq 0 ]; then
+      echo "# Create grpc-port entry"
+      echo "grpc-port=${portprefix}4772" | tee -a ${CLCONF}
     fi
+    echo "# Make sure that the correct GRPC port is used for $NETWORK"
+    sed -i "s/^grpc-port=.*/grpc-port=${portprefix}4772/g" ${CLCONF}
+  else
+    echo "# The cln-grpc plugin is not present but in config"
+    sed -i "/^grpc-port/d" ${CLCONF}
+    rm -rf /home/bitcoin/${netprefix}cl-plugins-enabled/cln-grpc
   fi
 
-  if ! grep "^clnrest-port=${portprefix}7378" <${CLCONF}; then
-    echo "clnrest-port=${portprefix}7378" | tee -a ${CLCONF}
-  fi
-  if ! grep "^clnrest-host=0.0.0.0" <${CLCONF}; then
-    echo "clnrest-host=0.0.0.0" | tee -a ${CLCONF}
+  if [ -f /home/bitcoin/${netprefix}cl-plugins-enabled/clnrest ] ||
+    [ -f /usr/local/libexec/c-lightning/plugins/clnrest ]; then
+    if [ $(grep -c "^clnrest-port" <${CLCONF}) -eq 0 ]; then
+      echo "# Create clnrest-port entry"
+      echo "clnrest-port=${portprefix}7378" | tee -a ${CLCONF}
+    fi
+    if [ $(grep -c "^clnrest-host" <${CLCONF}) -eq 0 ]; then
+      echo "# Create clnrest-host entry"
+      echo "clnrest-host=0.0.0.0" | tee -a ${CLCONF}
+    fi
+    echo "# Make sure that the correct clnrest port is used for $NETWORK"
+    sed -i "s/^clnrest-port=.*/clnrest-port=${portprefix}7378/g" ${CLCONF}
+    sed -i "s/^clnrest-host=.*/clnrest-host=0.0.0.0/g" ${CLCONF}
+  else
+    echo "# The clnrest plugin is not present but in config"
+    sed -i "/^clnrest-port/d" ${CLCONF}
+    sed -i "/^clnrest-host/d" ${CLCONF}
+    rm -rf /home/bitcoin/${netprefix}cl-plugins-enabled/clnrest
   fi
 
   exit 0

@@ -50,7 +50,7 @@ function installDependencies() {
   sudo pip3 install --upgrade pip
   # for wss-proxy - https://docs.corelightning.org/docs/installation#wss-proxy
   sudo -u bitcoin pip3 config set global.break-system-packages true
-  sudo -u bitcoin pip3 install --user pyln-client websockets
+  sudo -u bitcoin pip3 install --user pyln-client websockets grpcio-tools
   # poetry
   sudo pip3 install poetry
   if ! grep -Eq '^PATH="$HOME/.local/bin:$PATH"' /home/bitcoin/.profile; then
@@ -61,14 +61,28 @@ function installDependencies() {
   sudo -u bitcoin poetry install
 
   # rust deps for cln-grpc and clnrest plugins
-  if ! sudo -u bitcoin bash -c 'command -v cargo'; then
-    sudo -u bitcoin bash -c 'curl --proto "=https" --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y'
+  echo "# Install Rust to /opt/rust/"
+  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | \
+    sudo RUSTUP_HOME=/opt/rust CARGO_HOME=/opt/rust sh -s -- --no-modify-path -y
+  echo "# Set /opt/rust write access for rust group"
+  if ! getent group rust >/dev/null 2>&1; then
+    sudo groupadd rust
   fi
-  # Ensure /home/bitcoin/.cargo/bin is in PATH for the bitcoin user
-  if ! grep -Fq '.cargo/bin' /home/bitcoin/.profile; then
-    echo -e '\n# set PATH so it includes Cargo'\''s bin if it exists\nif [ -d "$HOME/.cargo/bin" ] ; then\n    PATH="$HOME/.cargo/bin:$PATH"\nfi' | sudo tee -a /home/bitcoin/.profile
+  sudo chown -R root:rust /opt/rust
+  sudo chmod -R g+w /opt/rust
+  sudo usermod -a -G rust bitcoin
+  echo "# Set the default Rust toolchain"
+  sudo RUSTUP_HOME=/opt/rust CARGO_HOME=/opt/rust /opt/rust/bin/rustup default stable
+  echo "# Make Rust binaries available system-wide"
+  sudo ln -sf /opt/rust/bin/* /usr/local/bin/
+  echo "# Set up system-wide environment variables for Rust"
+  if ! grep -q "RUSTUP_HOME=/opt/rust" /etc/environment; then
+    echo 'RUSTUP_HOME=/opt/rust' | sudo tee -a /etc/environment
   fi
-  export PATH="/home/bitcoin/.cargo/bin:$PATH"
+  if ! grep -q "CARGO_HOME=/opt/rust" /etc/environment; then
+    echo 'CARGO_HOME=/opt/rust' | sudo tee -a /etc/environment
+  fi
+
   sudo apt-get install -y protobuf-compiler
 
   # remove old clnrest dir if exists
@@ -80,17 +94,34 @@ function installDependencies() {
 function buildAndInstallCLbinaries() {
   echo "- configure"
   echo
-  sudo -u bitcoin ./configure
+  sudo -u bitcoin RUSTUP_HOME=/opt/rust CARGO_HOME=/opt/rust ./configure || exit 1
   echo
   echo "- make"
   echo
-  sudo -u bitcoin make
-  echo
-  echo "- make check VALGRIND=0"
-  sudo -u bitcoin make check VALGRIND=0
+  sudo -u bitcoin RUSTUP_HOME=/opt/rust CARGO_HOME=/opt/rust make || exit 1
   echo
   echo "- install to /usr/local/bin/"
-  sudo make install || exit 1
+  sudo make RUSTUP_HOME=/opt/rust CARGO_HOME=/opt/rust install || exit 1
+}
+
+function runTests() {
+  # for the tests - install Core Lightning test dependencies matching pyproject.toml versions
+  # based on https://github.com/ElementsProject/lightning/blob/master/contrib/pyln-testing/pyproject.toml
+  echo "- install Core Lightning test dependencies"
+  sudo -u bitcoin pip3 install --user --upgrade \
+    "pytest>=7" \
+    "ephemeral-port-reserve>=1.1.4" \
+    "psycopg2-binary>=2.9" \
+    "python-bitcoinlib>=0.11.0" \
+    "jsonschema>=4.4.0" \
+    "Flask>=2" \
+    "cheroot>=8,<=10" \
+    "psutil>=5.9" \
+    "requests>=2.31.0" \
+    python-socketio websocket-client flaky
+  echo "- run tests"
+  echo
+  sudo -u bitcoin RUSTUP_HOME=/opt/rust CARGO_HOME=/opt/rust make check || exit 1
 }
 
 echo "# Running: 'cl.install.sh $*'"
@@ -160,7 +191,7 @@ if [ "$1" = "install" ]; then
 
   installDependencies
 
-  buildAndInstallCLbinaries
+  buildAndInstallCLbinaries || exit 1
 
   installed=$(sudo -u bitcoin lightning-cli --version)
   if [ ${#installed} -eq 0 ]; then
@@ -256,7 +287,7 @@ if [ "$1" = on ] || [ "$1" = update ] || [ "$1" = testPR ]; then
     )
     echo "# Building from source Core Lightning $currentCLversion"
 
-    buildAndInstallCLbinaries
+    buildAndInstallCLbinaries || exit 1
 
   fi
 
@@ -277,17 +308,15 @@ if [ "$1" = on ] || [ "$1" = update ] || [ "$1" = testPR ]; then
   sudo -u bitcoin mkdir /home/bitcoin/cl-plugins-available 2>/dev/null
 
   echo "# Store the lightning data in /mnt/hdd/app-data/.lightning"
-  sudo mkdir -p /mnt/hdd/app-data/.lightning
+  # Create the main and network-specific lightning directories
+  sudo mkdir -p "/mnt/hdd/app-data/.lightning/${CLNETWORK}"
+  sudo chown -R bitcoin:bitcoin /mnt/hdd/app-data/.lightning
   echo "# Symlink to /home/bitcoin/"
   sudo rm -rf /home/bitcoin/.lightning # not a symlink, delete
   sudo ln -s /mnt/hdd/app-data/.lightning /home/bitcoin/
   echo "# Symlink to /home/admin/"
   sudo rm -rf /home/admin/.lightning # not a symlink, delete
   sudo ln -s /mnt/hdd/app-data/.lightning /home/admin/
-
-  if [ ${CLNETWORK} != "bitcoin" ] && [ ! -d /home/bitcoin/.lightning/${CLNETWORK} ]; then
-    sudo -u bitcoin mkdir /home/bitcoin/.lightning/${CLNETWORK}
-  fi
 
   if ! sudo ls ${CLCONF} 2>/dev/null; then
     echo "# Create ${CLCONF}"

@@ -61,9 +61,11 @@ if [ "${needsExpansion}" == "1" ]; then
 fi
 
 apt_install() {
+  # shellcheck disable=SC2068
   sudo DEBIAN_FRONTEND=noninteractive apt install -y ${@}
   if [ $? -eq 100 ]; then
     echo "FAIL! apt failed to install needed packages!"
+    # shellcheck disable=SC2068
     echo ${@}
     exit 1
   fi

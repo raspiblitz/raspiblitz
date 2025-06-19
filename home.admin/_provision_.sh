@@ -111,11 +111,11 @@ cd
 
 ###### SWAP File
 source <(/home/admin/config.scripts/blitz.data.sh status)
-if [ ${isSwapExternal} -eq 0 ]; then
-  echo "No external SWAP found - creating ... "
+if [ ${bootFromSD} -eq 0 ] && [ ${swapActive} -eq 0 ]; then
+  echo "No SWAP found - creating ... "
   /home/admin/config.scripts/blitz.data.sh swap on
 else
-  echo "SWAP already OK"
+  echo "SWAP already OK - dont add swap when running from SD card or already active"
 fi
 
 ####### FIREWALL - just install (not configure)
@@ -276,7 +276,7 @@ else
 fi
 
 # LND binary install
-if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ] || [ "${tlnd}" == "on" ] || [ "${slnd}" == "on" ]; then
+if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ] || [ "${tlnd}" == "on" ] || [ "${slnd}" == "on" ]; then
   # if already installed by fatpack will skip
   echo "Provisioning LND Binary - run config script" >> ${logFile}
   /home/admin/config.scripts/lnd.install.sh install >> ${logFile} 2>&1

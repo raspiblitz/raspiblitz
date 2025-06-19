@@ -18,6 +18,7 @@ if [ ${#clWatchtowerClient} -eq 0 ]; then clWatchtowerClient="off"; fi
 if [ ${#blitzapi} -eq 0 ]; then blitzapi="off"; fi
 if [ ${#tailscale} -eq 0 ]; then tailscale="off"; fi
 if [ ${#telegraf} -eq 0 ]; then telegraf="off"; fi
+if [ ${#knots} -eq 0 ]; then knots="off"; fi
 
 # detect if LND auto-unlock is active
 source <(/home/admin/config.scripts/lnd.autounlock.sh status)
@@ -141,6 +142,8 @@ if [ "${clNode}" == "on" ]; then
     OPTIONS+=(q '-CL Auto-Unlock' ${clAutoUnlockMenu})
   fi
 fi
+
+OPTIONS+=(k 'Bitcoin Knots (experimental)' ${knots})
 
 CHOICE_HEIGHT=$(("${#OPTIONS[@]}/2+1"))
 HEIGHT=$((CHOICE_HEIGHT+6))
@@ -469,6 +472,22 @@ if [ "${clWatchtowerClient}" != "${choice}" ] && [ "${clNode}" == "on" ]; then
   needsReboot=0
 else
   echo "CL WATCHTOWER CLIENT Setting unchanged."
+fi
+
+choice="off"; check=$(echo "${CHOICES}" | grep -c "k")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${knots}" != "${choice}" ]; then
+  echo "Bitcoin Knots settings changed .."
+  anychange=1
+  sudo -u admin /home/admin/config.scripts/bonus.knots.sh ${choice}
+  errorOnInstall=$?
+  if [ ${errorOnInstall} -eq 0 ]; then
+    echo "Bitcoin Knots is installed."
+  else
+    echo "Bitcoin Knots installation have failed."
+  fi
+else
+  echo "Bitcoin Knots setting unchanged"
 fi
 
 # parallel testnet process choice

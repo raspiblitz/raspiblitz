@@ -192,7 +192,7 @@ if [ "$1" == "prestart" ]; then
 
   sectionLine=$(cat ${lndConfFile} | grep -n "^\[Application Options\]" | cut -d ":" -f1)
   echo "# sectionLine(${sectionLine})"
-  insertLine=$(expr $sectionLine + 1)
+  insertLine=$(expr $sectionLine + 2)
 
   # make sure API ports are set to standard
   setting ${lndConfFile} ${insertLine} "rpclisten" "0\.0\.0\.0\:1${L2rpcportmod}009"
@@ -211,6 +211,15 @@ if [ "$1" == "prestart" ]; then
   else
     # when running Tor a public ip can make startup problems - so remove
     sed -i '/^externalip=*/d' ${lndConfFile}
+  fi
+
+  # if no maxlogfiles set - set to 2
+  if [ $(cat ${lndConfFile} | grep -c "^maxlogfiles=") -eq 0 ]; then
+    setting ${lndConfFile} ${insertLine} "maxlogfiles" "2"
+  fi
+  # if no maxlogfilesize set - set to 100 MB
+  if [ $(cat ${lndConfFile} | grep -c "^maxlogfilesize=") -eq 0 ]; then
+    setting ${lndConfFile} ${insertLine} "maxlogfilesize" "400"
   fi
 
   ##### BOLT SECTION #####

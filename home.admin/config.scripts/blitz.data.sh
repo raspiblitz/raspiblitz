@@ -51,6 +51,9 @@ storageFullMinGB=890
 dataMinGB=32
 systemMinGB=32
 
+# swap file path
+swapFilePath="/swapfile"
+
 # check if started with sudo
 if [ "$EUID" -ne 0 ]; then 
   echo "error='run as root'"
@@ -78,7 +81,6 @@ fi
 if [ "$action" = "swap" ]; then
 
     swapAction=$2
-    swapFilePath="/swapfile"
     swapSizeGB=8
 
     if [ "$swapAction" = "on" ]; then
@@ -115,7 +117,7 @@ if [ "$action" = "swap" ]; then
             exit 1
         fi
         # make permanent
-        if ! grep -q "${swapFilePath} none swap sw 0 0" /etc/fstab; then
+        if ! grep -q "${swapFilePath}" /etc/fstab; then
             echo "${swapFilePath} none swap sw 0 0" >> /etc/fstab
             echo "# Added swapfile to /etc/fstab"
         fi
@@ -137,9 +139,9 @@ if [ "$action" = "swap" ]; then
             echo "# Swapfile ${swapFilePath} is not active."
         fi
         # remove from fstab
-        if grep -q "${swapFilePath} none swap sw 0 0" /etc/fstab; then
+        if grep -q "${swapFilePath}" /etc/fstab; then
             echo "# Removing swapfile entry from /etc/fstab ..."
-            sed -i "\#${swapFilePath} none swap sw 0 0#d" /etc/fstab
+            sed -i "\#^${swapFilePath}#d" /etc/fstab
         fi
         # delete file
         if [ -f "${swapFilePath}" ]; then
@@ -174,10 +176,9 @@ if [ "$action" = "status" ]; then
 
     ##########################
     # CHECK SWAP STATUS
-    isSwapExternal=0
-    swapFilePath="/swapfile"
+    swapActive=0
     if swapon --show | grep -q "${swapFilePath}"; then
-        isSwapExternal=1
+        swapActive=1
     fi
 
     ##########################
@@ -328,7 +329,7 @@ if [ "$action" = "status" ]; then
                 fi
 
             # Check SYSTEM DRIVE
-            elif [ -d "${mountPath}/boot" ] && [ -d "${mountPath}/home/admin/raspiblitz" ] && [ ${size} -gt 7 ] && [ "${storageDevice}" != "" ]; then
+            elif [ -d "${mountPath}/boot" ] && [ -d "${mountPath}/home/admin/raspiblitz" ] && [ ${size} -gt 7 ]; then
 
                 # check for unclean setups
                 if [ -d "${mountPath}/app-storage" ]; then
@@ -483,7 +484,7 @@ if [ "$action" = "status" ]; then
 
         echo "# PROPOSING LAYOUT ..."
 
-        # get a list of all connected drives >7GB ordered by size (biggest first)
+        # get a list of all connected drives >31GB ordered by size (biggest first)
         listOfDevices=$(lsblk -dno NAME,SIZE | grep -E "^(sd|nvme)" | \
         awk '{ 
         size=$2
@@ -494,7 +495,7 @@ if [ "$action" = "status" ]; then
         } else if(size ~ /M/) { 
         sub("M","",size); size=size/1024 
         }
-        if (size >= 7) printf "%s %.0f\n", $1, size
+        if (size >= 31) printf "%s %.0f\n", $1, size
         }' | sort -k2,2nr -k1,1 )
         echo "listOfDevices='${listOfDevices}'"
 
@@ -582,15 +583,15 @@ if [ "$action" = "status" ]; then
         fi
 
         # Set DATA (check last, because its more common to have STORAGE & DATA combined)
-        echo "# Selecting DATA device:"
-        echo "#  - so far dataDevice(${dataDevice}) / storageDevice(${storageDevice})"
+        #echo "# Selecting DATA device:"
+        #echo "#  - so far dataDevice(${dataDevice}) / storageDevice(${storageDevice})"
         if [ ${#dataDevice} -eq 0 ] || [ "${dataDevice}" = "${storageDevice}" ]; then
 
             # when no data device yet: take the second biggest drive as the data drive
             dataDevice=$(echo "${listOfDevices}" | head -n1 | awk '{print $1}')
             dataSizeGB=$(echo "${listOfDevices}" | head -n1 | awk '{print $2}')
             listOfDevices=$(echo "${listOfDevices}" | grep -v "${dataDevice}")
-            echo "#  - seleted dataDevice: ${dataDevice} (${dataSizeGB}GB)"
+            #echo "#  - seleted dataDevice: ${dataDevice} (${dataSizeGB}GB)"
 
             # ignore system device if choosen as data device
             if [ "${dataDevice}" = "${systemDevice}" ]; then
@@ -655,24 +656,24 @@ if [ "$action" = "status" ]; then
 
     # STORAGE
     if [ ${#storageDevice} -gt 0 ]; then
-        if [ ${storageSizeGB} -lt $((storageFullMinGB - 1)) ]; then
+        if [ ${storageSizeGB} -lt ${storageFullMinGB} ]; then
             storageWarning='only-pruned'
         fi
-        if [ ${storageSizeGB} -lt $((storagePrunedMinGB - 1)) ]; then
+        if [ ${storageSizeGB} -lt ${storagePrunedMinGB} ]; then
             storageWarning='too-small'
         fi
     fi
 
     # SYSTEM
     if [ ${#systemDevice} -gt 0 ] && [ ${bootFromStorage} -eq 0 ]; then
-        if [ ${systemSizeGB} -lt $((systemMinGB - 1)) ]; then
+        if [ ${systemSizeGB} -lt ${systemMinGB} ]; then
             systemWarning='too-small'
         fi
     fi
 
     # DATA
     if [ ${#dataDevice} -gt 0 ]; then
-        if [ ${dataSizeGB} -lt $((dataMinGB - 1)) ]; then
+        if [ ${dataSizeGB} -lt ${dataMinGB} ]; then
             dataWarning='too-small'
         fi
     fi
@@ -796,7 +797,7 @@ if [ "$action" = "status" ]; then
         dataMountedPath="${storageMountedPath}"
     fi
     
-    # echo "# Used Space"
+    #echo "# Used Space"
 
     # get used space on drives in GB
     storageUsePercent=""
@@ -814,7 +815,7 @@ if [ "$action" = "status" ]; then
         systemUsePercent=$(df "/dev/${systemPartition}" 2>/dev/null | awk 'NR==2 {sub(/%/, "", $5); print $5}')
     fi
 
-    # echo "# Free Space"
+    #echo "# Free Space"
 
     # get free space on drives
     if [ ${#storagePartition} -gt 0 ]; then
@@ -829,7 +830,7 @@ if [ "$action" = "status" ]; then
         systemFreeKB=$(df -k | grep "/dev/${systemPartition}" 2>/dev/null | awk '{print $4}' | tail -n 1)
     fi
 
-    # echo "# Temperature"
+    #echo "# Temperature"
 
     # get Temperature of drives
     if [ ${#storageDevice} -gt 0 ]; then
@@ -844,23 +845,23 @@ if [ "$action" = "status" ]; then
         systemCelsius=$(smartctl -A /dev/${systemDevice} 2>/dev/null | grep -E '^Temperature:|Temperature Sensor' | awk '{print $(NF-1)}' | head -n 1)
     fi
 
-    # echo "# Unused Space"
+    #echo "# Unused Space"
 
     # get unused space on drives
     storageUnusedPercent=0
     dataUnusedPercent=0
     systemUnusedPercent=0
     if [ ${#storageDevice} -gt 0 ]; then
-        storageUnusedPercent=$(parted /dev/${storageDevice} unit % print free 2>/dev/null | awk '/Free Space/ {v=$(NF-2); gsub(/[^0-9.]/, "", v)} END{print int(v)}')
+        storageUnusedPercent=$(parted -s /dev/${storageDevice} unit % print free 2>/dev/null | awk '/Free Space/ {v=$(NF-2); gsub(/[^0-9.]/, "", v)} END{print int(v)}')
     fi
     if [ ${#dataDevice} -gt 0 ]; then
-        dataUnusedPercent=$(parted /dev/${dataDevice} unit % print free 2>/dev/null | awk '/Free Space/ {v=$(NF-2); gsub(/[^0-9.]/, "", v)} END{print int(v)}')
+        dataUnusedPercent=$(parted -s /dev/${dataDevice} unit % print free 2>/dev/null | awk '/Free Space/ {v=$(NF-2); gsub(/[^0-9.]/, "", v)} END{print int(v)}')
     fi
     if [ ${#systemDevice} -gt 0 ]; then
-        systemUnusedPercent=$(parted /dev/${systemDevice} unit % print free 2>/dev/null | awk '/Free Space/ {v=$(NF-2); gsub(/[^0-9.]/, "", v)} END{print int(v)}')
+        systemUnusedPercent=$(parted -s /dev/${systemDevice} unit % print free 2>/dev/null | awk '/Free Space/ {v=$(NF-2); gsub(/[^0-9.]/, "", v)} END{print int(v)}')
     fi
 
-    # echo "# RESULTS"
+    #echo "# RESULTS"
 
     # output the result
     echo "scenario='${scenario}'"
@@ -915,7 +916,7 @@ if [ "$action" = "status" ]; then
     echo "combinedDataStorage='${combinedDataStorage}'"
     echo "bootFromStorage='${bootFromStorage}'"
     echo "bootFromSD='${bootFromSD}'"
-    echo "isSwapExternal='${isSwapExternal}'"
+    echo "swapActive='${swapActive}'"
 
     # save to cache when -inspect
     if [ ${userWantsInspect} -eq 1 ]; then
@@ -1574,6 +1575,7 @@ if [ "$action" = "setup" ]; then
             parted /dev/${actionDevice} --script mklabel msdos
             parted /dev/${actionDevice} --script mkpart primary fat32 1MiB 513MiB
             parted /dev/${actionDevice} --script mkpart primary ext4 541MB 100%
+            partprobe /dev/${actionDevice}
             wipefs -a /dev/${actionDevicePartitionBase}1 2>/dev/null
             mkfs.fat -F 32 /dev/${actionDevicePartitionBase}1
             wipefs -a /dev/${actionDevicePartitionBase}2 2>/dev/null
@@ -1631,6 +1633,7 @@ if [ "$action" = "setup" ]; then
         parted /dev/${actionDevice} --script mkpart primary fat32 1MiB 513MiB >> ${logFile}
         parted /dev/${actionDevice} --script mkpart primary ext4 541MB 65GB >> ${logFile}
         parted /dev/${actionDevice} --script mkpart primary ext4 65GB 100% >> ${logFile}
+        partprobe /dev/${actionDevice}
         echo "# .. formating" >> ${logFile}
         wipefs -a /dev/${actionDevicePartitionBase}1 2>/dev/null >> ${logFile}
         mkfs.fat -F 32 /dev/${actionDevicePartitionBase}1 >> ${logFile}
@@ -1656,6 +1659,7 @@ if [ "$action" = "setup" ]; then
         wipefs -a /dev/${actionDevice} >> ${logFile}
         parted /dev/${actionDevice} --script mklabel msdos >> ${logFile}
         parted /dev/${actionDevice} --script mkpart primary ext4 1MB 100% >> ${logFile}
+        partprobe /dev/${actionDevice}
         echo "# .. formating" >> ${logFile}
         wipefs -a /dev/${actionDevicePartitionBase}1 >> ${logFile}
         mkfs -t ext4  /dev/${actionDevicePartitionBase}1 >> ${logFile}
@@ -1677,6 +1681,7 @@ if [ "$action" = "setup" ]; then
         wipefs -a /dev/${actionDevice} 2>/dev/null
         parted /dev/${actionDevice} --script mklabel msdos
         parted /dev/${actionDevice} --script mkpart primary ext4 1MB 100%
+        partprobe /dev/${actionDevice}
         echo "# .. formating" >> ${logFile}
         wipefs -a /dev/${actionDevicePartitionBase}1 2>/dev/null
         mkfs -t ext4  /dev/${actionDevicePartitionBase}1
@@ -1849,11 +1854,15 @@ if [ "$action" = "recover" ] || [ "$action" = "clean" ]; then
             # get number of partions of device
             numPartitions=$(lsblk -no NAME /dev/${actionDevice} | grep -c "${actionDevicePartitionBase}")
             if [ ${numPartitions} -eq 3 ]; then
-                echo "# .. formating boot & system partition" >> ${logFile}
-                wipefs -a /dev/${actionDevicePartitionBase}1 >> ${logFile}
-                mkfs.fat -F 32 /dev/${actionDevicePartitionBase}1 >> ${logFile}
-                wipefs -a /dev/${actionDevicePartitionBase}2 >> ${logFile}
-                mkfs -t ext4  /dev/${actionDevicePartitionBase}2 >> ${logFile}
+                if [ "${actionCreateSystemPartition}" == "1" ]; then
+                    echo "# .. formating boot & system partition" >> ${logFile}
+                    wipefs -a /dev/${actionDevicePartitionBase}1 >> ${logFile}
+                    mkfs.fat -F 32 /dev/${actionDevicePartitionBase}1 >> ${logFile}
+                    wipefs -a /dev/${actionDevicePartitionBase}2 >> ${logFile}
+                    mkfs -t ext4  /dev/${actionDevicePartitionBase}2 >> ${logFile}
+                else
+                    echo "# dont format boot & system partition .. actionCreateSystemPartition(${actionCreateSystemPartition})" >> ${logFile}  
+                fi
                 echo "storagePartition='${actionDevicePartitionBase}3'"
                 echo "# storagePartition(${actionDevicePartitionBase}3)" >> ${logFile}
             else
