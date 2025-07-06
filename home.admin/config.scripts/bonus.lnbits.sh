@@ -169,7 +169,7 @@ TOR Browser Hidden Service address (QR see LCD):
 ${toraddress}"
   fi
 
-  whiptail --title " LNbits ${fundinginfo}" --yes-button "OK" --no-button "OPTIONS" --yesno "${text}" 18 78
+  whiptail --title " LNbits ${fundinginfo}" --yes-button "OK" --no-button "OPTIONS" --yesno "${text}" 15 78
   result=$?
   sudo /home/admin/config.scripts/blitz.display.sh hide
   echo "option (${result}) - please wait ..."
