@@ -3,7 +3,7 @@
 # https://github.com/lnbits/lnbits
 
 # https://github.com/lnbits/lnbits/releases
-tag="v1.0.0"
+tag="v1.1.0"
 VERSION="${tag}"
 
 # command info
@@ -610,7 +610,6 @@ if [ "$1" = "prestart" ]; then
   fi
 
   # protect the admin user id if exists
-  # chmod 640 /home/lnbits/lnbits/.super_user 2>/dev/null
   chmod 640 /mnt/hdd/app-data/LNBits/data/.super_user 2>/dev/null
 
   echo "# OK: prestart finished"
