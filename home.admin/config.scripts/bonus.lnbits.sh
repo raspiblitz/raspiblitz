@@ -3,7 +3,7 @@
 # https://github.com/lnbits/lnbits
 
 # https://github.com/lnbits/lnbits/releases
-tag="v1.0.0"
+tag="v1.1.0"
 VERSION="${tag}"
 
 # command info
@@ -150,7 +150,7 @@ if [ "$1" = "menu" ]; then
     fundinginfo="on CLN "
   fi
 
-  text="https://${localIP}:${httpsPort}${authMethod}"
+  text="https://${localIP}:${httpsPort}"
 
   if [ ${#publicDomain} -gt 0 ]; then
     text="${text}
@@ -169,23 +169,7 @@ TOR Browser Hidden Service address (QR see LCD):
 ${toraddress}"
   fi
 
-  if [ ${#ip2torDomain} -gt 0 ]; then
-    text="${text}\n
-IP2TOR+LetsEncrypt: https://${ip2torDomain}:${ip2torPort}
-SHA1 ${sslFingerprintTOR}\n
-https://${ip2torDomain}:${ip2torPort} ready for public use"
-  elif [ ${#ip2torIP} -gt 0 ]; then
-    text="${text}\n
-IP2TOR: https://${ip2torIP}:${ip2torPort}
-SHA1 ${sslFingerprintTOR}\n
-Consider adding a LetsEncrypt HTTPS Domain under OPTIONS."
-  elif [ ${#publicDomain} -eq 0 ]; then
-    text="${text}\n
-To enable easy reachability with normal browser from the outside
-Consider adding a IP2TOR Bridge under OPTIONS."
-  fi
-
-  whiptail --title " LNbits ${fundinginfo}" --yes-button "OK" --no-button "OPTIONS" --yesno "${text}" 18 78
+  whiptail --title " LNbits ${fundinginfo}" --yes-button "OK" --no-button "OPTIONS" --yesno "${text}" 15 78
   result=$?
   sudo /home/admin/config.scripts/blitz.display.sh hide
   echo "option (${result}) - please wait ..."
@@ -439,10 +423,8 @@ if [ "$1" = "status" ]; then
     echo "httpsSelfsigned='1'" # TODO: change later if IP2Tor+LetsEncrypt is active
     echo "publicIP='${publicIP}'"
 
-    # auth method is to call with a certain useer id
-    #admin_userid=$(sudo cat /home/lnbits/lnbits/.super_user)
-    admin_userid=$(sudo cat /mnt/hdd/app-data/LNBits/data/.super_user)
-    echo "authMethod='/wallet?usr=${admin_userid}'"
+    # auth method is web login
+    echo "authMethod='userdefined'"
 
     # check funding source
     if [ "${LNBitsFunding}" == "" ]; then
@@ -612,7 +594,6 @@ if [ "$1" = "prestart" ]; then
   fi
 
   # protect the admin user id if exists
-  # chmod 640 /home/lnbits/lnbits/.super_user 2>/dev/null
   chmod 640 /mnt/hdd/app-data/LNBits/data/.super_user 2>/dev/null
 
   echo "# OK: prestart finished"
