@@ -187,8 +187,7 @@ The fulcrum.service is not running.
 Please check the following debug info.
       " 8 48
     sudo journalctl -u fulcrum -n 100
-    echo "Press ENTER to get back to the Fulcrum menu."
-    read -r
+    echo "Press Q to get back to the Fulcrum menu."
   fi
 
   if [ ${initialSynced} -eq 0 ]; then
@@ -214,6 +213,7 @@ Check 'sudo nginx -t' for a detailed error message.
     fi
     /home/admin/config.scripts/blitz.web.sh
     echo "Press ENTER to get back to the Fulcrum menu."
+    read -r
   fi
 
   OPTIONS=(
