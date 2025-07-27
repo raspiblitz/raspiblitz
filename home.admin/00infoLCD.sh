@@ -93,7 +93,7 @@ while :
       source <(/home/admin/config.scripts/network.aliases.sh getvars)
     fi
 
-    if [ "${setupPhase}" != "done" ] || [ "${state}" == "reboot" ] || [ "${state}" == "shutdown" ] || [ "${state}" == "copytarget" ] || [ "${state}" == "copysource" ]; then
+    if [ "${setupPhase}" != "done" ] || [ "${state}" == "reboot" ] || [ "${state}" == "shutdown" ] || [ "${state}" == "copytarget" ] || [ "${state}" == "copysource" ] || [ "${state}" = "storageisfull" ] || [ "${state}" = "dataisfull" ]; then
 
       # show status info during boot & setup & repair on LCD
       if [ "${state}" == "" ]; then
@@ -107,8 +107,6 @@ while :
 
     # if lightning is syncing or scanning
     source <(/home/admin/_cache.sh get \
-      state \
-      message \
       lightning \
       ln_default_locked \
       btc_default_synced \
@@ -116,12 +114,6 @@ while :
       btc_default_sync_initialblockdownload \
       btc_default_blocks_behind \
     )
-
-    if [ "${state}" = "storageisfull" ] || [ "${state}" = "dataisfull" ] ; then
-      /home/admin/setup.scripts/eventInfoWait.sh "${state}" "${message}" lcd
-      sleep 3
-      continue
-    fi
 
     if [ "${lightning}" != "" ] && [ "${lightning}" != "none" ] && [ "${ln_default_locked}" == "1" ]; then
       /home/admin/setup.scripts/eventInfoWait.sh "walletlocked" "" lcd
