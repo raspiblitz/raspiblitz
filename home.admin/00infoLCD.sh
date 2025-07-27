@@ -93,7 +93,7 @@ while :
       source <(/home/admin/config.scripts/network.aliases.sh getvars)
     fi
 
-    if [ "${setupPhase}" != "done" ] || [ "${state}" == "reboot" ] || [ "${state}" == "shutdown" ] || [ "${state}" == "copytarget" ] || [ "${state}" == "copysource" ]; then
+    if [ "${setupPhase}" != "done" ] || [ "${state}" == "reboot" ] || [ "${state}" == "shutdown" ] || [ "${state}" == "copytarget" ] || [ "${state}" == "copysource" ] || [ "${state}" = "storageisfull" ] || [ "${state}" = "dataisfull" ]; then
 
       # show status info during boot & setup & repair on LCD
       if [ "${state}" == "" ]; then
