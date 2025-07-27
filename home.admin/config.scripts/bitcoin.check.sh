@@ -45,15 +45,15 @@ if [ "$1" == "prestart" ]; then
   case "${CHAIN}" in
     mainnet)
       bitcoinlog_entry="main.debuglogfile"
-      bitcoinlog_path="/mnt/hdd/bitcoin/debug.log"
+      bitcoinlog_path="/mnt/hdd/app-data/bitcoin/debug.log"
       ;;
     testnet)
       bitcoinlog_entry="test.debuglogfile"
-      bitcoinlog_path="/mnt/hdd/bitcoin/testnet3/debug.log"
+      bitcoinlog_path="/mnt/hdd/app-data/bitcoin/testnet3/debug.log"
       ;;
     signet)
       bitcoinlog_entry="signet.debuglogfile"
-      bitcoinlog_path="/mnt/hdd/bitcoin/signet/debug.log"
+      bitcoinlog_path="/mnt/hdd/app-data/bitcoin/signet/debug.log"
       ;;
   esac
 
@@ -78,6 +78,13 @@ if [ "$1" == "prestart" ]; then
   echo "main.walletdir=/mnt/hdd/app-data/bitcoin/wallets" >> /mnt/hdd/app-data/bitcoin/bitcoin.conf
   echo "main.wallet=wallet.dat" >> /mnt/hdd/app-data/bitcoin/bitcoin.conf
 
+  # remove any data directory entries - is already forced by parameter in bitcoind.service
+  echo "# remove any data directory entries"
+  sed -i '/^datadir=/d' /mnt/hdd/app-data/bitcoin/bitcoin.conf
+  sed -i '/^main.datadir=/d' /mnt/hdd/app-data/bitcoin/bitcoin.conf
+  sed -i '/^test.datadir=/d' /mnt/hdd/app-data/bitcoin/bitcoin.conf
+  sed -i '/^signet.datadir=/d' /mnt/hdd/app-data/bitcoin/bitcoin.conf   
+  
   # make sure bitcoin debug file exists
   echo "# make sure bitcoin debug file exists"
   touch ${bitcoinlog_path}
