@@ -246,6 +246,40 @@ do
     fi
   fi
 
+  ################################
+  # CHECK FULL STORAGE
+  ################################
+
+  # check every 5min
+  recheckStorage=$(($counter % 300))
+  if [ ${recheckStorage} -eq 1 ]; then
+
+    echo "*** CHECK FULL STORAGE ***"
+    percent=$(df --output=pcent /mnt/disk_storage | tail -1 | tr -dc '0-9');
+    if [ "${percent}" != "" ] && [ ${percent} -gt 98 ]; then
+      echo "WARN # STORAGE is ${percent} - sending warning"
+      /home/admin/_cache.sh set state "storageisfull"
+      /home/admin/_cache.sh set message "${percent}"
+    else
+      echo "OK - STORAGE is at ${percent}%"
+    fi
+
+    echo "*** CHECK FULL DATA ***"
+    if mountpoint -q /mnt/disk_data; then
+      percent=$(df --output=pcent /mnt/disk_data | tail -1 | tr -dc '0-9');
+      if [ "${percent}" != "" ] && [ ${percent} -gt 98 ]; then
+        echo "WARN # DATA is ${percent} - sending warning"
+        /home/admin/_cache.sh set state "dataisfull"
+        /home/admin/_cache.sh set message "${percent}"
+      else
+        echo "OK - DATA is at ${percent}%"
+      fi
+    else
+      echo "OK - /mnt/disk_data not mounted"
+    fi
+    
+  fi
+  
   ###############################
   # SYSTEM LOG FILE SIZES
   ###############################

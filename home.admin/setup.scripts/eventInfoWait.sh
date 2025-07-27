@@ -281,6 +281,20 @@ Preparing Provision
 Please wait ...
 " 6 24
 
+elif [ "${eventID}" == "storageisfull" ]; then
+
+    dialog --backtitle "${backtitle}" --cr-wrap --infobox "
+Your storage SSD/NVME is full (${contentString}%).
+Delete Apps or migrate to a bigger drive.
+" 6 50
+
+elif [ "${eventID}" == "dataisfull" ]; then
+
+    dialog --backtitle "${backtitle}" --cr-wrap --infobox "
+Your data SSD/NVME is full (${contentString}%).
+Delete Apps or migrate to a bigger drive.
+" 6 50
+
 elif [ "${eventID}" = "noIP-LAN" ] || [ "${eventID}" = "noIP-WIFI" ]; then
 
     # this event is mostly for LCD/HDMI display
