@@ -15,7 +15,7 @@ Features:
 - Update: Bitcoin Core v29.0 [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-29.0.md)
 - Update: Electrum Server in Rust (electrs) v0.10.10 [details](https://github.com/romanz/electrs/blob/master/RELEASE-NOTES.md#01010-jul-19-2025)
 - Update: LND v0.19.2-beta [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.19.2-beta)
-- Update: LNbits 1.1.0 [details](https://github.com/lnbits/lnbits/releases/tag/v1.1.0)
+- Update: LNbits 1.2.1 [details](https://github.com/lnbits/lnbits/releases/tag/v1.2.0)
 - Update: AlbyHub v1.17.2 [details](https://github.com/getAlby/hub/releases/tag/v1.17.2)
 - Update: Lightning Terminal v0.14.1-alpha [details](https://github.com/lightninglabs/lightning-terminal/releases/tag/v0.14.1-alpha)
 - Update: Mempool 3.2.1 [details](hhttps://github.com/mempool/mempool/releases/tag/v3.2.1)
