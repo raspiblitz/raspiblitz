@@ -14,6 +14,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "bonus.fulcrum.sh getinfo -> FulcrumAdmin getinfo output"
   echo "bonus.fulcrum.sh status -> don't call in loops"
   echo "bonus.fulcrum.sh status-sync"
+  echo "bonus.fulcrum.sh menu -> interactive SSH menu"
   echo "installs the version $fulcrumVersion"
   exit 1
 fi
@@ -186,9 +187,7 @@ The fulcrum.service is not running.
 Please check the following debug info.
       " 8 48
     sudo journalctl -u fulcrum -n 100
-    echo "Press ENTER to get back to main menu."
-    read -r
-    exit 0
+    echo "Press Q to get back to the Fulcrum menu."
   fi
 
   if [ ${initialSynced} -eq 0 ]; then
@@ -199,7 +198,6 @@ This can take multiple days.
 Monitor the progress with the command:
 'sudo journalctl -fu fulcrum'
 " 11 48
-    exit 0
   fi
 
   if [ ${nginxTest} -eq 0 ]; then
@@ -214,9 +212,8 @@ Check 'sudo nginx -t' for a detailed error message.
       sudo systemctl restart nginx
     fi
     /home/admin/config.scripts/blitz.web.sh
-    echo "Press ENTER to get back to main menu."
+    echo "Press ENTER to get back to the Fulcrum menu."
     read -r
-    exit 0
   fi
 
   OPTIONS=(
