@@ -540,7 +540,7 @@ if [ "$1" = "prestart" ]; then
     # check if lnbits user has read access on lnd data files
     checkReadAccess=$(cat /mnt/hdd/app-data/lnd/data/chain/${LNBitsNetwork}/${LNBitsChain}net/admin.macaroon | grep -c "lnd")
     if [ "${checkReadAccess}" != "1" ]; then
-      echo "# FAIL: missing lnd data in '/mnt/hdd/app-data/lnd' or missing access rights for lnbits user"
+      echo "# FAIL: missing lnd data in '/mnt/hdd/app-data/lnd/data/chain/${LNBitsNetwork}/${LNBitsChain}net/admin.macaroon' or missing access rights for lnbits user"
       exit 1
     fi
 
