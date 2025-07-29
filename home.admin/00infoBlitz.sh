@@ -387,7 +387,7 @@ else
   fi
 
   # Transaction Index
-  source <(/home/admin/config.scripts/network.txindex.sh status)
+  source <(sudo /home/admin/config.scripts/network.txindex.sh status)
   if [ "${txindex}" == "1" ] && [ "${isIndexed}" != "1" ]; then
       appInfoLine="Transaction Index: ${indexInfo}"
   fi
