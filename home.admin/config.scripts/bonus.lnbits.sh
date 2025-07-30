@@ -699,6 +699,8 @@ if [ "$1" = "install" ]; then
   # add lnbits user
   echo "*** Add the 'lnbits' user ***"
   sudo adduser --system --group --home /home/lnbits lnbits
+  # add user to group bitcoin
+  sudo usermod -a -G bitcoin lnbits
 
   # install from GitHub
   echo "# get the github code user(${githubUser}) branch(${tag})"
