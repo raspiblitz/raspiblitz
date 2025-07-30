@@ -10,7 +10,7 @@ Features:
 - New: Copy from old HDD/SSD/NVMe
 - New: Optional separation of Data & Storage/Blockchain drives with Auto-Expand for Proxmox
 - New: Bitcoin Knots 28.1 (as experimental option in SETTINGS ssh-menu)
-- Update: RaspberryOS arm64 base image 2024-11-19 (Debian 12 Bookworm) [details](https://downloads.raspberrypi.com/raspios_full_arm64/release_notes.txt)
+- Update: RaspberryOS arm64 base image 2025-05-13 (Debian 12 Bookworm) [details](https://downloads.raspberrypi.com/raspios_full_arm64/release_notes.txt)
 - Update: amd64 base image: debian-12.8.0-amd64-netinst.iso [details](https://www.debian.org/releases/stable/amd64/release-notes/ch-whats-new.en.html)
 - Update: Bitcoin Core v29.0 [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-29.0.md)
 - Update: LND v0.19.1-beta [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.19.1-beta)
