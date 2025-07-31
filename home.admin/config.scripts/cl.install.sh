@@ -2,7 +2,7 @@
 # https://lightning.readthedocs.io/
 
 # https://github.com/ElementsProject/lightning/releases
-CLVERSION="v25.02.2"
+CLVERSION="v25.05"
 
 # https://github.com/ElementsProject/lightning/tree/master/contrib/keys
 # rustyrussell D9200E6CD1ADB8F1
@@ -11,9 +11,9 @@ CLVERSION="v25.02.2"
 # pneuroth (nepet) C3F21EE387FF4CD2
 # sfarooqui (ShahanaFarooqui) B56B4453DA8C6DF7FC9BCFCBDCA40B7128DA62A8
 # amyers (endothermicdev) F3BF63F2747436AB
-PGPsigner="sfarooqui"
+PGPsigner="amyers"
 PGPpubkeyLink="https://raw.githubusercontent.com/ElementsProject/lightning/master/contrib/keys/${PGPsigner}.txt"
-PGPpubkeyFingerprint="B56B4453DA8C6DF7FC9BCFCBDCA40B7128DA62A8"
+PGPpubkeyFingerprint="F3BF63F2747436AB"
 
 # help
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
