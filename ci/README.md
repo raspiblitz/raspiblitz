@@ -75,7 +75,7 @@ https://github.com/rootzoll/raspiblitz/actions/workflows/amd64-lean-image.yml?qu
   sudo wipefs --all ${disk}
   ```
 
-#### Option 1 - rite the .qcow2 file directly to disk with `qemu-image dd`
+#### Option 1 - write the .qcow2 file directly to disk with `qemu-image dd`
 * requires less disk space - the .qcow2 volume is 8.1 GB
   ```
   sudo qemu-img dd if=./raspiblitz-amd64-debian-lean.qcow2 of=${disk} bs=4M
