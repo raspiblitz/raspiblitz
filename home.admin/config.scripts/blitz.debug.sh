@@ -117,8 +117,8 @@ echo "sudo journalctl -u ${network}d -b --no-pager -n20"
 sudo journalctl -u ${network}d -b --no-pager -n20
 echo
 echo "*** LAST BLOCKCHAIN (MAINNET) INFO LOGS ***"
-echo "sudo tail -n 50 /mnt/hdd/app-storage/${network}/debug.log"
-sudo tail -n 50 /mnt/hdd/app-storage/${network}${pathAdd}/debug.log
+echo "sudo tail -n 50 /mnt/hdd/app-data/${network}/debug.log"
+sudo tail -n 50 /mnt/hdd/app-data/${network}${pathAdd}/debug.log
 echo
 
 echo "*** LND (MAINNET) SYSTEMD STATUS ***"
