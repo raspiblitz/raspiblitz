@@ -135,7 +135,7 @@ elif [ "$1" = "sync" ]; then
   echo "# make sure LND app-data directories exist"
   sudo /bin/mkdir --mode 0755 --parents /mnt/hdd/app-data/lnd/data/chain/"${network}"/"${chain}"net/
 
-  echo `# make sure all user groups exit for default macaroons`
+  echo `# make sure all user groups exist for default macaroons`
   sudo /usr/sbin/groupadd --force --gid 9700 lndadmin
   sudo /usr/sbin/groupadd --force --gid 9701 lndinvoice
   sudo /usr/sbin/groupadd --force --gid 9702 lndreadonly
@@ -157,6 +157,7 @@ elif [ "$1" = "sync" ]; then
 
   sudo usermod -aG lndadmin admin
   sudo usermod -aG bitcoin admin
+  sudo usermod -aG lndadmin bitcoin
   
 ###########################
 # Check Macaroons and fix missing
