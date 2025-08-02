@@ -688,6 +688,7 @@ sudo -u bitcoin cp -r /etc/skel/. /home/bitcoin/
 echo "bitcoin:raspiblitz" | chpasswd
 # make home directory readable
 chmod 755 /home/bitcoin
+usermod -a -G bitcoin admin
 
 # WRITE BASIC raspiblitz.info to sdcard
 # if further info gets added .. make sure to keep that on: blitz.release.sh
