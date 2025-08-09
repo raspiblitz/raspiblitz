@@ -1272,7 +1272,6 @@ if [ "${scenario}" != "ready" ] ; then
   while [ "${btc_default_ready}" != "1" ]
   do
     loop_counter=$((loop_counter + 1))
-    btc_default_ready=""
     source <(/home/admin/_cache.sh get btc_default_ready)
     echo "# waitsync loop ${loop_counter} ... btc_default_ready(${btc_default_ready})" >> $logFile
     sleep 2
