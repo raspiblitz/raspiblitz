@@ -1268,11 +1268,18 @@ if [ "${scenario}" != "ready" ] ; then
   # wait until syncProgress is available (neeed for final dialogs)
   /home/admin/_cache.sh set state "waitsync"
   btc_default_ready="0"
+  loop_counter=0
   while [ "${btc_default_ready}" != "1" ]
   do
+    loop_counter=$((loop_counter + 1))
     source <(/home/admin/_cache.sh get btc_default_ready)
-    echo "# waitsync loop ... btc_default_ready(${btc_default_ready})" >> $logFile
+    echo "# waitsync loop ${loop_counter} ... btc_default_ready(${btc_default_ready})" >> $logFile
     sleep 2
+    if [ ${loop_counter} -eq 30 ]; then
+      echo "LOOP TAKES TOO LONG: Try deleting settings.json & force restart" >> $logFile
+      rm /mnt/hdd/app-storage/bitcoin/settings.json
+      systemctl restart bitcoind
+    fi
   done
 
   # one time add info on blockchain sync to chache
