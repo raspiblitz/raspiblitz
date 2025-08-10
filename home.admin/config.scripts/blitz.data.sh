@@ -2002,11 +2002,15 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
         fi
 
         # set source hdd of migration in cache & get latest disk info
+        echo "# checking storagePartition ... please wait"
         /home/admin/_cache.sh set hddMigrateDeviceFrom "${hddMigrateDeviceFrom}"
+        sync
+        sleep 6
         source <(/home/admin/config.scripts/blitz.data.sh status -inspect)
 
         # check that target partion is formatted
         if [ "${storagePartition}" = "" ]; then
+            echo "# storageDevice(${storageDevice})"
             echo "error='storage drive not formatted'"
             exit 1
         fi
