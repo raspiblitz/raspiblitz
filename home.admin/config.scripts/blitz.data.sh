@@ -1692,6 +1692,11 @@ if [ "$action" = "setup" ]; then
         umount /mnt/disk_data
     fi
 
+    # make sure info on drives is updated & visible in system
+    sync
+    partprobe /dev/${actionDevice}
+    udevadm settle
+
     echo "# OK - ${action} done" >> ${logFile}
     exit 0
 fi
