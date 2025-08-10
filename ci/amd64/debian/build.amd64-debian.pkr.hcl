@@ -1,5 +1,7 @@
-variable "iso_name" { default = "debian-12.11.0-amd64-netinst.iso" }
-variable "iso_checksum" { default = "30ca12a15cae6a1033e03ad59eb7f66a6d5a258dcf27acd115c2bd42d22640e8" }
+# images, checksums and signatures are at:
+# https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/
+variable "iso_name" { default = "debian-13.0.0-amd64-netinst.iso" }
+variable "iso_checksum" { default = "e363cae0f1f22ed73363d0bde50b4ca582cb2816185cf6eac28e93d9bb9e1504" }
 
 variable "pack" { default = "lean" }
 variable "github_user" { default = "raspiblitz" }
