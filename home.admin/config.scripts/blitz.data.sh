@@ -959,6 +959,9 @@ if [ "$action" = "mount" ]; then
     dataMountPoint="/mnt/disk_data"
 
     # Source status to get drive configuration
+    echo "# checking disk data ... please wait"
+    sync
+    sleep 4
     source <(/home/admin/config.scripts/blitz.data.sh status)
 
     # check directories are already mounted
@@ -973,6 +976,7 @@ if [ "$action" = "mount" ]; then
 
     # check partitions were found
     if [ ${#storagePartition} -eq 0 ]; then
+        echo "# storageDevice(${storageDevice})"
         echo "error='storagePartition not detected'"
         exit 1
     fi
