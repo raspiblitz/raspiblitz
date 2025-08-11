@@ -423,8 +423,25 @@ apt-get autoremove -y
 
 echo -e "\n*** Python DEFAULT libs & dependencies ***"
 
-if [ -f "/usr/bin/python3.11" ]; then
-  # use python 3.11 if available
+if [ -f "/usr/bin/python3.13" ]; then
+  # use python 3.13 if available (Debian 13 Trixie)
+  update-alternatives --install /usr/bin/python python /usr/bin/python3.13 1
+  # keep python backwards compatible
+  ln -s /usr/bin/python3.13 /usr/bin/python3.9
+  ln -s /usr/bin/python3.13 /usr/bin/python3.10
+  ln -s /usr/bin/python3.13 /usr/bin/python3.11
+  ln -s /usr/bin/python3.13 /usr/bin/python3.12
+  echo "python calls python3.13"
+elif [ -f "/usr/bin/python3.12" ]; then
+  # use python 3.12 if available
+  update-alternatives --install /usr/bin/python python /usr/bin/python3.12 1
+  # keep python backwards compatible
+  ln -s /usr/bin/python3.12 /usr/bin/python3.9
+  ln -s /usr/bin/python3.12 /usr/bin/python3.10
+  ln -s /usr/bin/python3.12 /usr/bin/python3.11
+  echo "python calls python3.12"
+elif [ -f "/usr/bin/python3.11" ]; then
+  # use python 3.11 if available (Debian 12 Bookworm)
   update-alternatives --install /usr/bin/python python /usr/bin/python3.11 1
   # keep python backwards compatible
   ln -s /usr/bin/python3.11 /usr/bin/python3.9
