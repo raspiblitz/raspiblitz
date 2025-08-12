@@ -2322,9 +2322,13 @@ if [ "$1" = "reset" ]; then
             exit 1
         fi
     fi
+    umount /mnt/disk_data 2>/dev/null
+    umount /mnt/disk_storage 2>/dev/null
     echo "# Deleting all partitions on ${storageDevice} ..."
+    wipefs -a /dev/${storageDevice}
     apt-get install -y gdisk
     sgdisk --zap-all /dev/${storageDevice}
+    sync
     echo "# DONE"
     exit 0
 fi
