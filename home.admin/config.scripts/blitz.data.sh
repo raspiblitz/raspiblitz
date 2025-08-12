@@ -2325,15 +2325,21 @@ if [ "$1" = "reset" ]; then
     echo "# Update Tools ..."
     apt-get install -y gdisk
     echo "# Stop Bitcoin and umount ..."
+    swapoff -a
     systemctl stop bitcoind
     sleep 3
     umount -f /mnt/disk_data 2>/dev/null
+    umount -l /mnt/disk_data 2>/dev/null
     umount -f /mnt/disk_storage 2>/dev/null
+    umount -l /mnt/disk_storage 2>/dev/null
     umount -f /mnt/disk_system 2>/dev/null
+    umount -l /mnt/disk_system 2>/dev/null
+    partprobe /dev/${storageDevice}
     echo "# Deleting all partitions on ${storageDevice} ..."
     wipefs -a /dev/${storageDevice}
     sgdisk --zap-all /dev/${storageDevice}
     sync
+    partprobe /dev/${storageDevice}
     echo "# DONE"
     exit 0
 fi
