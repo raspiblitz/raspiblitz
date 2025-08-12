@@ -2328,10 +2328,13 @@ if [ "$1" = "reset" ]; then
     swapoff -a
     systemctl stop bitcoind
     sleep 3
-    umount -f /mnt/disk_data 2>/dev/null
-    umount -l /mnt/disk_data 2>/dev/null
+    rm -rf /mnt/disk_storage/*
+    rm -rf /mnt/disk_storage/.[!.]*
+    rm -rf /mnt/disk_storage/..?*
     umount -f /mnt/disk_storage 2>/dev/null
     umount -l /mnt/disk_storage 2>/dev/null
+    umount -f /mnt/disk_data 2>/dev/null
+    umount -l /mnt/disk_data 2>/dev/null
     umount -f /mnt/disk_system 2>/dev/null
     umount -l /mnt/disk_system 2>/dev/null
     partprobe /dev/${storageDevice}
