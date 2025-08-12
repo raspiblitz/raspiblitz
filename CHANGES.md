@@ -28,6 +28,7 @@ Features:
 - Update: Helipad (Podcasting 2.0 Boostagram reader) v0.2.1 [details](https://github.com/Podcastindex-org/helipad/)
 - Update: Jam (JoinMarket Web UI) v0.4.0 [details](https://github.com/joinmarket-webui/jam/releases/tag/v0.4.0)
 - Update: JoininBox v0.8.4 [details](https://github.com/openoms/joininbox/releases/tag/v0.8.4)
+- Update: BTC-RPC-Explorer v3.5.1 [details](https://github.com/janoside/btc-rpc-explorer/blob/master/CHANGELOG.md#v351)
 - Remove: Migration from Umbrel, MyNode, Citadel (because of new drive layout with boot option)
 
 ## What's new in Version 1.11.4 of RaspiBlitz?
