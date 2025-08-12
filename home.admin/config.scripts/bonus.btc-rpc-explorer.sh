@@ -4,8 +4,8 @@
 # ~/.config/btc-rpc-explorer.env
 # https://github.com/janoside/btc-rpc-explorer/blob/master/.env-sample
 
-# use commit hash, because latest release 3.4.0 is too old
-GITHUBCOMMIT="153aa0ae7f902562bd1cfa2bbcea4c00026e5aef"
+# use commit hash, so that also in between updates can be used if needed
+GITHUBCOMMIT="8ed77ab225f5507c521b570d5240624de597ad44" #3.5.1
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -18,7 +18,7 @@ fi
 
 PGPsigner="janoside"
 PGPpubkeyLink="https://github.com/janoside.gpg"
-PGPpubkeyFingerprint="70C0B166321C0AF8"
+PGPpubkeyFingerprint="F579929B39B119CC7B0BB71FB326ACF51F317B69"
 
 source /mnt/hdd/app-data/raspiblitz.conf 2>/dev/null
 
