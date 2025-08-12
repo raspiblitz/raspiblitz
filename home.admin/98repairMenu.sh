@@ -153,6 +153,7 @@ case $CHOICE in
   RESET-ALL)
     askBackupCopy
     sudo /home/admin/config.scripts/blitz.data.sh reset OVERWRITE
+    sleep 3
     infoResetSDCard
     sudo shutdown now
     exit 1;
