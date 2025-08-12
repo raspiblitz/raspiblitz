@@ -87,7 +87,7 @@ fi
 OPTIONS+=(REINDEX-UTXO "Redindex Just Bitcoin Chainstate (Fast)")
 OPTIONS+=(REINDEX-FULL "Redindex Full Bitcoin Blockchain (Slow)")
 OPTIONS+=(RESET-CHAIN "Delete Blockchain & Re-Download")
-OPTIONS+=(RESET-HDD "Delete HDD Data but keep Blockchain")
+#OPTIONS+=(RESET-HDD "Delete HDD Data but keep Blockchain")
 OPTIONS+=(RESET-ALL "Delete HDD completely to start fresh")
 OPTIONS+=(DELETE-ELEC "Delete Electrum Index")
 
@@ -152,7 +152,8 @@ case $CHOICE in
     ;;
   RESET-ALL)
     askBackupCopy
-    /home/admin/XXcleanHDD.sh -all
+    sudo /home/admin/config.scripts/blitz.data.sh reset OVERWRITE
+    sleep 3
     infoResetSDCard
     sudo shutdown now
     exit 1;
