@@ -2305,19 +2305,22 @@ if [ "$1" = "reset" ]; then
         echo "error='no storage device found'"
         exit 1
     fi
-    # ask user to confirm
-    echo "# WARNING: This will delete all data on ${storageDevice}"
-    echo "# Are you really sure? (y/n)"
-    read -r answer
-    if [ "${answer}" != "y" ]; then
-        echo "# User canceled"
-        exit 1
-    fi
-    echo "# Are you REALLY REALLY sure? (Y/N)"
-    read -r answer
-    if [ "${answer}" != "Y" ]; then
-        echo "# User canceled"
-        exit 1
+    # check ask overide
+    if [ "$2" != "OVERWRITE" ]; then
+        # ask user to confirm
+        echo "# WARNING: This will delete all data on ${storageDevice}"
+        echo "# Are you really sure? (y/n)"
+        read -r answer
+        if [ "${answer}" != "y" ]; then
+            echo "# User canceled"
+            exit 1
+        fi
+        echo "# Are you REALLY REALLY sure? (Y/N)"
+        read -r answer
+        if [ "${answer}" != "Y" ]; then
+            echo "# User canceled"
+            exit 1
+        fi
     fi
     echo "# Deleting all partitions on ${storageDevice} ..."
     apt-get install -y gdisk
