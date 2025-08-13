@@ -1399,7 +1399,7 @@ if [ "$action" = "copy-system" ]; then
 
     ##########################
     # COPY SYSTEM
-    echo "# SYSTEM COPY" >> ${logFile}
+    echo "### SYSTEM COPY ###" >> ${logFile}
 
     # DEBUG: Log partition count before system copy
     beforeCopyPartitionCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
