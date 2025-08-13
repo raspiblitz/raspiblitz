@@ -771,7 +771,7 @@ if [ "${scenario}" != "ready" ] ; then
   # create a place holder partition for future system use
   # ONLY when a dedicated system device is available - dont create a system partition 
   createSystemPartion=1
-  if [ ${#systemDevice} -gt 0 ]; then
+  if [ ${#systemDevice} -gt 0 ] && [ "${systemDevice}" != "${storageDevice}" ]; then
     createSystemPartion=0
   fi
 
