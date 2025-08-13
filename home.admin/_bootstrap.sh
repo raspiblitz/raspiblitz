@@ -793,7 +793,7 @@ if [ "${scenario}" != "ready" ] ; then
 
     echo "FORMAT/RECOVER DRIVES" >> ${logFile}
     /home/admin/_cache.sh set state "hdd-format"
-    /home/admin/_cache.sh set message "formatting drives"
+    /home/admin/_cache.sh set message "{setupCommand}"
 
     # STORAGE
     echo "# storageDevice(${storageDevice}) storageMountedPath(${storageMountedPath})" >> ${logFile}
