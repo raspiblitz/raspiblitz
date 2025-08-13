@@ -1703,7 +1703,7 @@ if [ "$action" = "setup" ]; then
 
         else
 
-            echo "# SYSTEM partitioning" >> ${logFile}
+            echo "# SYSTEM partitionin #" >> ${logFile}
             
             # DEBUG: Log partition count before system partitioning operations
             beforeSystemPartitioningCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
@@ -2162,6 +2162,7 @@ if [ "$action" = "recover" ] || [ "$action" = "clean" ]; then
         if [ "${actionType}" = "SYSTEM" ]; then
             # system partition gets full wipe
             echo "# DEBUG CLEAN SYSTEM: Formatting system partition ${actionDevicePartitionBase}2" >> ${logFile}
+            wipefs -a /dev/${actionDevicePartitionBase}2 2>/dev/null
             mkfs -t ext4 /dev/${actionDevicePartitionBase}2
             exit $?
         fi
@@ -2283,9 +2284,10 @@ if [ "$action" = "recover" ] || [ "$action" = "clean" ]; then
     if [ "${action}" = "recover" ]; then
 
         if [ "${actionType}" = "SYSTEM" ]; then
-            # system gets full wipe on recover - same as format
-            echo "# DEBUG RECOVER SYSTEM: Calling setup SYSTEM ${actionDevice}" >> ${logFile}
-            /home/admin/config.scripts/blitz.data.sh setup SYSTEM ${actionDevice}
+            # system partition gets formatted
+            echo "# DEBUG RECOVER SYSTEM: Formatting SYSTEM partition ${actionDevicePartitionBase}2" >> ${logFile}
+            wipefs -a /dev/${actionDevicePartitionBase}2 2>/dev/null
+            mkfs -t ext4  /dev/${actionDevicePartitionBase}2 >> ${logFile}
             exit $?
         fi
         if [ "${actionType}" = "DATA" ]; then
