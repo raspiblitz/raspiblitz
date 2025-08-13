@@ -793,7 +793,7 @@ if [ "${scenario}" != "ready" ] ; then
 
     echo "FORMAT/RECOVER DRIVES" >> ${logFile}
     /home/admin/_cache.sh set state "hdd-format"
-    /home/admin/_cache.sh set message "{setupCommand}"
+    /home/admin/_cache.sh set message "${setupCommand}"
 
     # STORAGE
     echo "#### STORAGE ####" >> ${logFile}
