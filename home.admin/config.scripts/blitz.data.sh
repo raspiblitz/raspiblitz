@@ -2425,8 +2425,11 @@ fi
 if [ "$1" = "reset" ]; then
     source <(/home/admin/config.scripts/blitz.data.sh status)
     if [ "${storageDevice}" = "" ]; then
-        echo "error='no storage device found'"
-        exit 1
+        # check if nvme0n1 is available
+        if lsblk -no NAME | grep -q "nvme0n1"; then
+            echo "# found storage device: nvme0n1"
+            storageDevice="nvme0n1"
+        fi
     fi
     # check ask overide
     if [ "$2" != "OVERWRITE" ]; then
