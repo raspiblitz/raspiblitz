@@ -1301,6 +1301,12 @@ if [ "$action" = "copy-system" ]; then
         exit 1
     fi
 
+    # DEBUG: Log initial partition count
+    initialPartitionCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+    echo "# DEBUG: Initial partition count on ${actionDevice}: ${initialPartitionCount}" >> ${logFile}
+    echo "# DEBUG: Initial partitions list:" >> ${logFile}
+    lsblk -no NAME "/dev/${actionDevice}" >> ${logFile}
+
     # determine the partition base name
     actionDevicePartitionBase=${actionDevice}
     if [[ "${actionDevice}" =~ nvme ]]; then
@@ -1330,10 +1336,19 @@ if [ "$action" = "copy-system" ]; then
     # MAKE BOOTABLE
     echo "# MAKE BOOTABLE" >> ${logFile}
 
+    # DEBUG: Log partition count before making bootable
+    beforeBootablePartitionCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+    echo "# DEBUG: Partition count before making bootable: ${beforeBootablePartitionCount}" >> ${logFile}
+
     # RASPBERRY PI
     if [ "${computerType}" = "raspberrypi" ]; then
         echo "# RaspberryPi - set LBA flag" >> ${logFile}
         parted /dev/${actionDevice} --script set 1 lba on
+        
+        # DEBUG: Log partition count after setting LBA flag
+        afterLBAPartitionCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+        echo "# DEBUG: Partition count after LBA flag: ${afterLBAPartitionCount}" >> ${logFile}
+        
         isFlagSetLBA=$(parted /dev/${actionDevice} --script print | grep -c 'fat32.*lba')
         if [ ${isFlagSetLBA} -eq 0 ]; then
             echo "error='failed to set LBA flag'"
@@ -1355,7 +1370,17 @@ if [ "$action" = "copy-system" ]; then
     else
         echo "# VM & PC - set BOOT/ESP flag" >> ${logFile}
         parted /dev/${actionDevice} --script set 1 boot on
+        
+        # DEBUG: Log partition count after setting boot flag
+        afterBootPartitionCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+        echo "# DEBUG: Partition count after boot flag: ${afterBootPartitionCount}" >> ${logFile}
+        
         parted /dev/${actionDevice} --script set 1 esp on
+        
+        # DEBUG: Log partition count after setting ESP flag
+        afterESPPartitionCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+        echo "# DEBUG: Partition count after ESP flag: ${afterESPPartitionCount}" >> ${logFile}
+        
         isFlagSetBOOT=$(parted /dev/${actionDevice} --script print | grep -c 'fat32.*boot')
         if [ ${isFlagSetBOOT} -eq 0 ]; then
             echo "error='failed to set BOOT flag'"
@@ -1368,9 +1393,17 @@ if [ "$action" = "copy-system" ]; then
         fi
     fi
 
+    # DEBUG: Log partition count after making bootable
+    afterBootablePartitionCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+    echo "# DEBUG: Partition count after making bootable: ${afterBootablePartitionCount}" >> ${logFile}
+
     ##########################
     # COPY SYSTEM
     echo "# SYSTEM COPY" >> ${logFile}
+
+    # DEBUG: Log partition count before system copy
+    beforeCopyPartitionCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+    echo "# DEBUG: Partition count before system copy: ${beforeCopyPartitionCount}" >> ${logFile}
 
     # copy the boot drive
     bootPath="/boot/efi"
@@ -1381,11 +1414,21 @@ if [ "$action" = "copy-system" ]; then
     fi
     rm -rf /mnt/disk_boot 2>/dev/null
     mkdir -p /mnt/disk_boot 2>/dev/null
+    
+    # DEBUG: Log partition count before mounting boot
+    beforeMountBootPartitionCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+    echo "# DEBUG: Partition count before mounting boot: ${beforeMountBootPartitionCount}" >> ${logFile}
+    
     mount /dev/${actionDevicePartitionBase}1 /mnt/disk_boot
     if ! findmnt -n -o TARGET "/mnt/disk_boot" 2>/dev/null; then
         echo "error='boot partition not mounted'"
         exit 1
     fi
+    
+    # DEBUG: Log partition count after mounting boot
+    afterMountBootPartitionCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+    echo "# DEBUG: Partition count after mounting boot: ${afterMountBootPartitionCount}" >> ${logFile}
+    
     if [ "${computerType}" = "raspberrypi" ]; then
         echo "# .. boot rsync start" >> ${logFile}
         echo "boot" > /var/cache/raspiblitz/temp/progress.txt
@@ -1395,17 +1438,31 @@ if [ "$action" = "copy-system" ]; then
             exit 1
         fi
         echo "# OK - Boot copied" >> ${logFile}
+        
+        # DEBUG: Log partition count after boot copy
+        afterBootCopyPartitionCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+        echo "# DEBUG: Partition count after boot copy: ${afterBootCopyPartitionCount}" >> ${logFile}
     fi
 
     # copy the system drive
     echo "# .. copy system" >> ${logFile}
     rm -rf /mnt/disk_system 2>/dev/null
     mkdir -p /mnt/disk_system 2>/dev/null
+    
+    # DEBUG: Log partition count before mounting system
+    beforeMountSystemPartitionCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+    echo "# DEBUG: Partition count before mounting system: ${beforeMountSystemPartitionCount}" >> ${logFile}
+    
     mount /dev/${actionDevicePartitionBase}2 /mnt/disk_system
     if ! findmnt -n -o TARGET "/mnt/disk_system" 2>/dev/null; then
         echo "error='system partition not mounted'"
         exit 1
     fi
+    
+    # DEBUG: Log partition count after mounting system
+    afterMountSystemPartitionCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+    echo "# DEBUG: Partition count after mounting system: ${afterMountSystemPartitionCount}" >> ${logFile}
+    
     echo "# .. system rsync start" >> ${logFile}
     echo "system" > /var/cache/raspiblitz/temp/progress.txt
     rsync -axHAX --delete\
@@ -1429,6 +1486,10 @@ if [ "$action" = "copy-system" ]; then
     fi
     echo "# OK - System copied" >> ${logFile}
 
+    # DEBUG: Log partition count after system copy
+    afterSystemCopyPartitionCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+    echo "# DEBUG: Partition count after system copy: ${afterSystemCopyPartitionCount}" >> ${logFile}
+
     # needed after fixes
     mkdir -p /mnt/disk_system/var/log/redis
     touch /mnt/disk_system/var/log/redis/redis-server.log
@@ -1437,15 +1498,30 @@ if [ "$action" = "copy-system" ]; then
 
     # fstab link & command.txt
     echo "# Perma mount boot & system drives" >> ${logFile}
+    
+    # DEBUG: Log partition count before UUID operations
+    beforeUUIDPartitionCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+    echo "# DEBUG: Partition count before UUID operations: ${beforeUUIDPartitionCount}" >> ${logFile}
+    
     BOOT_UUID=$(blkid -s UUID -o value /dev/${actionDevicePartitionBase}1)
     ROOT_UUID=$(blkid -s UUID -o value /dev/${actionDevicePartitionBase}2)
     ROOT_PARTUUID=$(sudo blkid -s PARTUUID -o value /dev/${actionDevicePartitionBase}2)
     echo "# - BOOT_UUID(${BOOT_UUID})" >> ${logFile}
     echo "# - ROOT_UUID(${ROOT_UUID})" >> ${logFile}
+    
+    # DEBUG: Log partition count after UUID operations
+    afterUUIDPartitionCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+    echo "# DEBUG: Partition count after UUID operations: ${afterUUIDPartitionCount}" >> ${logFile}
+    
     if [ "${computerType}" = "raspberrypi" ]; then
         echo "# - RaspberryPi - edit command.txt" >> ${logFile}
         sed -i "s|PARTUUID=[^ ]*|PARTUUID=$ROOT_PARTUUID|" /mnt/disk_boot/cmdline.txt
+        
+        # DEBUG: Log partition count after cmdline.txt edit
+        afterCmdlinePartitionCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+        echo "# DEBUG: Partition count after cmdline.txt edit: ${afterCmdlinePartitionCount}" >> ${logFile}
     fi
+    
     cat > /mnt/disk_system/etc/fstab << EOF
 # /etc/fstab: static file system information
 #
@@ -1454,33 +1530,80 @@ UUID=${ROOT_UUID}                         /              ext4    defaults,noatim
 UUID=${BOOT_UUID}                        ${bootPath}          vfat    defaults,noatime,umask=0077           0       2
 EOF
 
+    # DEBUG: Log partition count after fstab creation
+    afterFstabPartitionCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+    echo "# DEBUG: Partition count after fstab creation: ${afterFstabPartitionCount}" >> ${logFile}
+
     # install EFI GRUB for VM & PC
     if [ "${computerType}" != "raspberrypi" ]; then
         echo "# EFI GRUB" >> ${logFile}
+        
+        # DEBUG: Log partition count before GRUB installation
+        beforeGRUBPartitionCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+        echo "# DEBUG: Partition count before GRUB installation: ${beforeGRUBPartitionCount}" >> ${logFile}
+        
         DISK_SYSTEM="/mnt/disk_system"
         BOOT_PARTITION="/dev/${actionDevicePartitionBase}1"
         ROOT_PARTITION="/dev/${actionDevicePartitionBase}2"
         echo "# Mounting root and boot partitions..." >> ${logFile}
         umount /mnt/disk_boot 2>/dev/null
+        
+        # DEBUG: Log partition count after umounting disk_boot
+        afterUmountBootPartitionCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+        echo "# DEBUG: Partition count after umounting disk_boot: ${afterUmountBootPartitionCount}" >> ${logFile}
+        
         mkdir -p $DISK_SYSTEM/boot/efi 2>/dev/null
         mount $BOOT_PARTITION $DISK_SYSTEM/boot/efi || { echo "Failed to mount boot partition"; exit 1; }
+        
+        # DEBUG: Log partition count after mounting boot for GRUB
+        afterMountBootGRUBPartitionCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+        echo "# DEBUG: Partition count after mounting boot for GRUB: ${afterMountBootGRUBPartitionCount}" >> ${logFile}
+        
         echo "# Bind mounting system directories..." >> ${logFile}
         mount --bind /dev $DISK_SYSTEM/dev || { echo "Failed to bind /dev"; exit 1; }
         mount --bind /sys $DISK_SYSTEM/sys || { echo "Failed to bind /sys"; exit 1; }
         mount --bind /proc $DISK_SYSTEM/proc || { echo "Failed to bind /proc"; exit 1; }
         rm $DISK_SYSTEM/etc/resolv.conf
         cp /etc/resolv.conf $DISK_SYSTEM/etc/resolv.conf || { echo "Failed to copy resolv.conf"; exit 1; }
+        
+        # DEBUG: Log partition count before chroot GRUB
+        beforeChrootPartitionCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+        echo "# DEBUG: Partition count before chroot GRUB: ${beforeChrootPartitionCount}" >> ${logFile}
+        
         echo "# Entering chroot and setting up GRUB..." >> ${logFile}
         chroot $DISK_SYSTEM /bin/bash <<EOF
 apt-get install -y grub-efi-amd64 efibootmgr
 grub-install --target=x86_64-efi --efi-directory=/boot/efi --removable --recheck
 update-grub
 EOF
+        
+        # DEBUG: Log partition count after chroot GRUB
+        afterChrootPartitionCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+        echo "# DEBUG: Partition count after chroot GRUB: ${afterChrootPartitionCount}" >> ${logFile}
+        
         umount $DISK_SYSTEM/boot/efi
         umount $DISK_SYSTEM
+        
+        # DEBUG: Log partition count after final umount
+        afterFinalUmountPartitionCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+        echo "# DEBUG: Partition count after final umount: ${afterFinalUmountPartitionCount}" >> ${logFile}
     fi
 
     rm /var/cache/raspiblitz/temp/progress.txt
+    
+    # DEBUG: Log final partition count
+    finalPartitionCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+    echo "# DEBUG: Final partition count on ${actionDevice}: ${finalPartitionCount}" >> ${logFile}
+    echo "# DEBUG: Final partitions list:" >> ${logFile}
+    lsblk -no NAME "/dev/${actionDevice}" >> ${logFile}
+    
+    # DEBUG: Summary of partition count changes
+    echo "# DEBUG: PARTITION COUNT SUMMARY:" >> ${logFile}
+    echo "# DEBUG: Initial: ${initialPartitionCount} -> Final: ${finalPartitionCount}" >> ${logFile}
+    if [ "${initialPartitionCount}" != "${finalPartitionCount}" ]; then
+        echo "# WARNING: Partition count changed during copy-system operation!" >> ${logFile}
+    fi
+    
     echo "# OK - ${action} done" >> ${logFile}
     exit 0
 fi
