@@ -1614,7 +1614,7 @@ fi
 
 if [ "$action" = "setup" ]; then
 
-    echo "STARTED blitz.data.sh ${action} ..." >> ${logFile}
+    echo "STARTED blitz.data.sh setup ..." >> ${logFile}
         
     # check that it is a valid setup type: STORAGE, DATA, SYSTEM
     actionType=$2
@@ -2160,9 +2160,9 @@ if [ "$action" = "recover" ] || [ "$action" = "clean" ]; then
         # all data should get deleted only keep blockchain data
 
         if [ "${actionType}" = "SYSTEM" ]; then
-            # system gets full wipe - same as format
-            echo "# DEBUG CLEAN SYSTEM: Calling setup SYSTEM ${actionDevice}" >> ${logFile}
-            /home/admin/config.scripts/blitz.data.sh setup SYSTEM ${actionDevice}
+            # system partition gets full wipe
+            echo "# DEBUG CLEAN SYSTEM: Formatting system partition ${actionDevicePartitionBase}2" >> ${logFile}
+            mkfs -t ext4 /dev/${actionDevicePartitionBase}2
             exit $?
         fi
         if [ "${actionType}" = "DATA" ]; then
