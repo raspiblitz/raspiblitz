@@ -793,11 +793,13 @@ if [ "${scenario}" != "ready" ] ; then
 
     echo "FORMAT/RECOVER DRIVES" >> ${logFile}
     /home/admin/_cache.sh set state "hdd-format"
-    /home/admin/_cache.sh set message "formatting drives"
+    /home/admin/_cache.sh set message "${setupCommand}"
 
     # STORAGE
+    echo "#### STORAGE ####" >> ${logFile}
     echo "# storageDevice(${storageDevice}) storageMountedPath(${storageMountedPath})" >> ${logFile}
     if [ ${#storageDevice} -gt 0 ] && [ ${#storageMountedPath} -eq 0 ]; then
+      echo "STORAGE: ${setupCommand} STORAGE start" >> ${logFile}
       error=""
       source <(/home/admin/config.scripts/blitz.data.sh ${setupCommand} STORAGE "${storageDevice}" "${combinedDataStorage}" "${createSystemPartion}")
       if [ "${error}" != "" ]; then
@@ -807,12 +809,16 @@ if [ "${scenario}" != "ready" ] ; then
         exit 1
       fi
       echo "STORAGE: ${setupCommand} STORAGE done" >> ${logFile}
+    else
+      echo "STORAGE: ${setupCommand} STORAGE skipped - already mounted" >> ${logFile}
     fi
 
     # SYSTEM
+    echo "#### SYSTEM ####" >> ${logFile}
     echo "# systemDevice(${systemDevice}) systemWarning(${systemWarning})" >> ${logFile}
     if [ ${#systemDevice} -gt 0 ] && [ "${bootFromStorage}" = "0" ] && [ ${#systemWarning} -eq 0 ]; then
       error=""
+      echo "SYSTEM: ${setupCommand} SYSTEM start" >> ${logFile}
       source <(/home/admin/config.scripts/blitz.data.sh ${setupCommand} SYSTEM "${systemDevice}")
       if [ "${error}" != "" ]; then
         echo "FAIL: '${setupCommand} SYSTEM' failed error(${error})" >> ${logFile}
@@ -824,13 +830,17 @@ if [ "${scenario}" != "ready" ] ; then
     else
       if [ "${systemMountedPath}" = "/" ]; then
         echo "SYSTEM: ${setupCommand} SYSTEM skipped - its active system" >> ${logFile}
+      else
+        echo "SYSTEM: ${setupCommand} SYSTEM skipped - already mounted" >> ${logFile}
       fi
     fi
 
     # DATA
+    echo "#### DATA ####" >> ${logFile}
     echo "# dataDevice(${dataDevice}) dataWarning(${dataWarning})" >> ${logFile}
     if [ ${#dataDevice} -gt 0 ] && [ ${#dataWarning} -eq 0 ]; then
       error=""
+      echo "DATA: ${setupCommand} DATA start" >> ${logFile}
       source <(/home/admin/config.scripts/blitz.data.sh ${setupCommand} DATA "${dataDevice}")
       if [ "${error}" != "" ]; then
         echo "FAIL: '${setupCommand} DATA' failed error(${error})" >> ${logFile}
@@ -839,6 +849,12 @@ if [ "${scenario}" != "ready" ] ; then
         exit 1
       fi
       echo "DATA: ${setupCommand} DATA done" >> ${logFile}
+    else
+      if [ "${dataMountedPath}" = "/mnt/hdd" ]; then
+        echo "DATA: ${setupCommand} DATA skipped - its active data" >> ${logFile}
+      else
+        echo "DATA: ${setupCommand} DATA skipped - already mounted" >> ${logFile}
+      fi
     fi
 
     # when system was installed on new boot drive
@@ -930,7 +946,7 @@ if [ "${scenario}" != "ready" ] ; then
         bootFromStorage=1
       fi
 
-      echo "SYSTEM COPY OF FRESH SYSTEM" >> ${logFile}
+      echo "#### SYSTEM COPY OF FRESH SYSTEM" >> ${logFile}
       echo "bootFromStorage(${bootFromStorage})" >> ${logFile}
       echo "storageDevice(${storageDevice})" >> ${logFile}
       echo "systemDevice(${systemDevice})" >> ${logFile}

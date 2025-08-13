@@ -1301,6 +1301,12 @@ if [ "$action" = "copy-system" ]; then
         exit 1
     fi
 
+    # DEBUG: Log initial partition count
+    initialPartitionCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+    echo "# DEBUG: Initial partition count on ${actionDevice}: ${initialPartitionCount}" >> ${logFile}
+    echo "# DEBUG: Initial partitions list:" >> ${logFile}
+    lsblk -no NAME "/dev/${actionDevice}" >> ${logFile}
+
     # determine the partition base name
     actionDevicePartitionBase=${actionDevice}
     if [[ "${actionDevice}" =~ nvme ]]; then
@@ -1330,10 +1336,19 @@ if [ "$action" = "copy-system" ]; then
     # MAKE BOOTABLE
     echo "# MAKE BOOTABLE" >> ${logFile}
 
+    # DEBUG: Log partition count before making bootable
+    beforeBootablePartitionCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+    echo "# DEBUG: Partition count before making bootable: ${beforeBootablePartitionCount}" >> ${logFile}
+
     # RASPBERRY PI
     if [ "${computerType}" = "raspberrypi" ]; then
         echo "# RaspberryPi - set LBA flag" >> ${logFile}
         parted /dev/${actionDevice} --script set 1 lba on
+        
+        # DEBUG: Log partition count after LBA flag
+        afterLBAPartitionCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+        echo "# DEBUG: Partition count after LBA flag: ${afterLBAPartitionCount}" >> ${logFile}
+        
         isFlagSetLBA=$(parted /dev/${actionDevice} --script print | grep -c 'fat32.*lba')
         if [ ${isFlagSetLBA} -eq 0 ]; then
             echo "error='failed to set LBA flag'"
@@ -1355,7 +1370,17 @@ if [ "$action" = "copy-system" ]; then
     else
         echo "# VM & PC - set BOOT/ESP flag" >> ${logFile}
         parted /dev/${actionDevice} --script set 1 boot on
+        
+        # DEBUG: Log partition count after boot flag
+        afterBootPartitionCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+        echo "# DEBUG: Partition count after boot flag: ${afterBootPartitionCount}" >> ${logFile}
+        
         parted /dev/${actionDevice} --script set 1 esp on
+        
+        # DEBUG: Log partition count after setting ESP flag
+        afterESPPartitionCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+        echo "# DEBUG: Partition count after ESP flag: ${afterESPPartitionCount}" >> ${logFile}
+        
         isFlagSetBOOT=$(parted /dev/${actionDevice} --script print | grep -c 'fat32.*boot')
         if [ ${isFlagSetBOOT} -eq 0 ]; then
             echo "error='failed to set BOOT flag'"
@@ -1368,9 +1393,17 @@ if [ "$action" = "copy-system" ]; then
         fi
     fi
 
+    # DEBUG: Log partition count after making bootable
+    afterBootablePartitionCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+    echo "# DEBUG: Partition count after making bootable: ${afterBootablePartitionCount}" >> ${logFile}
+
     ##########################
     # COPY SYSTEM
-    echo "# SYSTEM COPY" >> ${logFile}
+    echo "### SYSTEM COPY ###" >> ${logFile}
+
+    # DEBUG: Log partition count before system copy
+    beforeCopyPartitionCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+    echo "# DEBUG: Partition count before system copy: ${beforeCopyPartitionCount}" >> ${logFile}
 
     # copy the boot drive
     bootPath="/boot/efi"
@@ -1381,11 +1414,21 @@ if [ "$action" = "copy-system" ]; then
     fi
     rm -rf /mnt/disk_boot 2>/dev/null
     mkdir -p /mnt/disk_boot 2>/dev/null
+    
+    # DEBUG: Log partition count before mounting boot
+    beforeMountBootPartitionCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+    echo "# DEBUG: Partition count before mounting boot: ${beforeMountBootPartitionCount}" >> ${logFile}
+    
     mount /dev/${actionDevicePartitionBase}1 /mnt/disk_boot
     if ! findmnt -n -o TARGET "/mnt/disk_boot" 2>/dev/null; then
         echo "error='boot partition not mounted'"
         exit 1
     fi
+    
+    # DEBUG: Log partition count after mounting boot
+    afterMountBootPartitionCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+    echo "# DEBUG: Partition count after mounting boot: ${afterMountBootPartitionCount}" >> ${logFile}
+    
     if [ "${computerType}" = "raspberrypi" ]; then
         echo "# .. boot rsync start" >> ${logFile}
         echo "boot" > /var/cache/raspiblitz/temp/progress.txt
@@ -1395,17 +1438,31 @@ if [ "$action" = "copy-system" ]; then
             exit 1
         fi
         echo "# OK - Boot copied" >> ${logFile}
+        
+        # DEBUG: Log partition count after boot copy
+        afterBootCopyPartitionCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+        echo "# DEBUG: Partition count after boot copy: ${afterBootCopyPartitionCount}" >> ${logFile}
     fi
 
     # copy the system drive
     echo "# .. copy system" >> ${logFile}
     rm -rf /mnt/disk_system 2>/dev/null
     mkdir -p /mnt/disk_system 2>/dev/null
+    
+    # DEBUG: Log partition count before mounting system
+    beforeMountSystemPartitionCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+    echo "# DEBUG: Partition count before mounting system: ${beforeMountSystemPartitionCount}" >> ${logFile}
+    
     mount /dev/${actionDevicePartitionBase}2 /mnt/disk_system
     if ! findmnt -n -o TARGET "/mnt/disk_system" 2>/dev/null; then
         echo "error='system partition not mounted'"
         exit 1
     fi
+    
+    # DEBUG: Log partition count after mounting system
+    afterMountSystemPartitionCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+    echo "# DEBUG: Partition count after mounting system: ${afterMountSystemPartitionCount}" >> ${logFile}
+    
     echo "# .. system rsync start" >> ${logFile}
     echo "system" > /var/cache/raspiblitz/temp/progress.txt
     rsync -axHAX --delete\
@@ -1429,6 +1486,10 @@ if [ "$action" = "copy-system" ]; then
     fi
     echo "# OK - System copied" >> ${logFile}
 
+    # DEBUG: Log partition count after system copy
+    afterSystemCopyPartitionCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+    echo "# DEBUG: Partition count after system copy: ${afterSystemCopyPartitionCount}" >> ${logFile}
+
     # needed after fixes
     mkdir -p /mnt/disk_system/var/log/redis
     touch /mnt/disk_system/var/log/redis/redis-server.log
@@ -1437,15 +1498,30 @@ if [ "$action" = "copy-system" ]; then
 
     # fstab link & command.txt
     echo "# Perma mount boot & system drives" >> ${logFile}
+    
+    # DEBUG: Log partition count before UUID operations
+    beforeUUIDPartitionCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+    echo "# DEBUG: Partition count before UUID operations: ${beforeUUIDPartitionCount}" >> ${logFile}
+    
     BOOT_UUID=$(blkid -s UUID -o value /dev/${actionDevicePartitionBase}1)
     ROOT_UUID=$(blkid -s UUID -o value /dev/${actionDevicePartitionBase}2)
     ROOT_PARTUUID=$(sudo blkid -s PARTUUID -o value /dev/${actionDevicePartitionBase}2)
     echo "# - BOOT_UUID(${BOOT_UUID})" >> ${logFile}
     echo "# - ROOT_UUID(${ROOT_UUID})" >> ${logFile}
+    
+    # DEBUG: Log partition count after UUID operations
+    afterUUIDPartitionCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+    echo "# DEBUG: Partition count after UUID operations: ${afterUUIDPartitionCount}" >> ${logFile}
+    
     if [ "${computerType}" = "raspberrypi" ]; then
         echo "# - RaspberryPi - edit command.txt" >> ${logFile}
         sed -i "s|PARTUUID=[^ ]*|PARTUUID=$ROOT_PARTUUID|" /mnt/disk_boot/cmdline.txt
+        
+        # DEBUG: Log partition count after cmdline.txt edit
+        afterCmdlinePartitionCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+        echo "# DEBUG: Partition count after cmdline.txt edit: ${afterCmdlinePartitionCount}" >> ${logFile}
     fi
+    
     cat > /mnt/disk_system/etc/fstab << EOF
 # /etc/fstab: static file system information
 #
@@ -1454,33 +1530,80 @@ UUID=${ROOT_UUID}                         /              ext4    defaults,noatim
 UUID=${BOOT_UUID}                        ${bootPath}          vfat    defaults,noatime,umask=0077           0       2
 EOF
 
+    # DEBUG: Log partition count after fstab creation
+    afterFstabPartitionCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+    echo "# DEBUG: Partition count after fstab creation: ${afterFstabPartitionCount}" >> ${logFile}
+
     # install EFI GRUB for VM & PC
     if [ "${computerType}" != "raspberrypi" ]; then
         echo "# EFI GRUB" >> ${logFile}
+        
+        # DEBUG: Log partition count before GRUB installation
+        beforeGRUBPartitionCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+        echo "# DEBUG: Partition count before GRUB installation: ${beforeGRUBPartitionCount}" >> ${logFile}
+        
         DISK_SYSTEM="/mnt/disk_system"
         BOOT_PARTITION="/dev/${actionDevicePartitionBase}1"
         ROOT_PARTITION="/dev/${actionDevicePartitionBase}2"
         echo "# Mounting root and boot partitions..." >> ${logFile}
         umount /mnt/disk_boot 2>/dev/null
+        
+        # DEBUG: Log partition count after umounting disk_boot
+        afterUmountBootPartitionCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+        echo "# DEBUG: Partition count after umounting disk_boot: ${afterUmountBootPartitionCount}" >> ${logFile}
+        
         mkdir -p $DISK_SYSTEM/boot/efi 2>/dev/null
         mount $BOOT_PARTITION $DISK_SYSTEM/boot/efi || { echo "Failed to mount boot partition"; exit 1; }
+        
+        # DEBUG: Log partition count after mounting boot for GRUB
+        afterMountBootGRUBPartitionCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+        echo "# DEBUG: Partition count after mounting boot for GRUB: ${afterMountBootGRUBPartitionCount}" >> ${logFile}
+        
         echo "# Bind mounting system directories..." >> ${logFile}
         mount --bind /dev $DISK_SYSTEM/dev || { echo "Failed to bind /dev"; exit 1; }
         mount --bind /sys $DISK_SYSTEM/sys || { echo "Failed to bind /sys"; exit 1; }
         mount --bind /proc $DISK_SYSTEM/proc || { echo "Failed to bind /proc"; exit 1; }
         rm $DISK_SYSTEM/etc/resolv.conf
         cp /etc/resolv.conf $DISK_SYSTEM/etc/resolv.conf || { echo "Failed to copy resolv.conf"; exit 1; }
+        
+        # DEBUG: Log partition count before chroot GRUB
+        beforeChrootPartitionCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+        echo "# DEBUG: Partition count before chroot GRUB: ${beforeChrootPartitionCount}" >> ${logFile}
+        
         echo "# Entering chroot and setting up GRUB..." >> ${logFile}
         chroot $DISK_SYSTEM /bin/bash <<EOF
 apt-get install -y grub-efi-amd64 efibootmgr
 grub-install --target=x86_64-efi --efi-directory=/boot/efi --removable --recheck
 update-grub
 EOF
+        
+        # DEBUG: Log partition count after chroot GRUB
+        afterChrootPartitionCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+        echo "# DEBUG: Partition count after chroot GRUB: ${afterChrootPartitionCount}" >> ${logFile}
+        
         umount $DISK_SYSTEM/boot/efi
         umount $DISK_SYSTEM
+        
+        # DEBUG: Log partition count after final umount
+        afterFinalUmountPartitionCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+        echo "# DEBUG: Partition count after final umount: ${afterFinalUmountPartitionCount}" >> ${logFile}
     fi
 
     rm /var/cache/raspiblitz/temp/progress.txt
+    
+    # DEBUG: Log final partition count
+    finalPartitionCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+    echo "# DEBUG: Final partition count on ${actionDevice}: ${finalPartitionCount}" >> ${logFile}
+    echo "# DEBUG: Final partitions list:" >> ${logFile}
+    lsblk -no NAME "/dev/${actionDevice}" >> ${logFile}
+    
+    # DEBUG: Summary of partition count changes
+    echo "# DEBUG: PARTITION COUNT SUMMARY:" >> ${logFile}
+    echo "# DEBUG: Initial: ${initialPartitionCount} -> Final: ${finalPartitionCount}" >> ${logFile}
+    if [ "${initialPartitionCount}" != "${finalPartitionCount}" ]; then
+        echo "# WARNING: Partition count changed during copy-system operation!" >> ${logFile}
+    fi
+    
     echo "# OK - ${action} done" >> ${logFile}
     exit 0
 fi
@@ -1491,7 +1614,7 @@ fi
 
 if [ "$action" = "setup" ]; then
 
-    echo "STARTED blitz.data.sh ${action} ..." >> ${logFile}
+    echo "STARTED blitz.data.sh setup ..." >> ${logFile}
         
     # check that it is a valid setup type: STORAGE, DATA, SYSTEM
     actionType=$2
@@ -1519,6 +1642,13 @@ if [ "$action" = "setup" ]; then
         echo "error='device is mounted'" >> ${logFile}
         exit 1
     fi
+
+    # DEBUG: Log initial partition count for setup
+    initialSetupPartitionCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+    echo "# DEBUG SETUP: Initial partition count on ${actionDevice}: ${initialSetupPartitionCount}" >> ${logFile}
+    echo "# DEBUG SETUP: Initial partitions list:" >> ${logFile}
+    lsblk -no NAME "/dev/${actionDevice}" >> ${logFile}
+    parted /dev/${actionDevice} --script print >> ${logFile} 2>&1
 
     # check if data should also be combined with storage
     actionCombinedData=$4
@@ -1573,25 +1703,80 @@ if [ "$action" = "setup" ]; then
 
         else
 
-            echo "# SYSTEM partitioning" >> ${logFile}
+            echo "# SYSTEM partitionin #" >> ${logFile}
+            
+            # DEBUG: Log partition count before system partitioning operations
+            beforeSystemPartitioningCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+            echo "# DEBUG SETUP SYSTEM: Partition count before system partitioning: ${beforeSystemPartitioningCount}" >> ${logFile}
+            
             sfdisk --delete /dev/${actionDevice} 2>/dev/null
+            
+            # DEBUG: Log partition count after sfdisk delete
+            afterSfdiskDeleteCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+            echo "# DEBUG SETUP SYSTEM: Partition count after sfdisk delete: ${afterSfdiskDeleteCount}" >> ${logFile}
+            
             wipefs -a /dev/${actionDevice} 2>/dev/null
+            
+            # DEBUG: Log partition count after wipefs
+            afterWipeFsCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+            echo "# DEBUG SETUP SYSTEM: Partition count after wipefs: ${afterWipeFsCount}" >> ${logFile}
+            
             parted /dev/${actionDevice} --script mklabel msdos
+            
+            # DEBUG: Log partition count after mklabel
+            afterMklabelCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+            echo "# DEBUG SETUP SYSTEM: Partition count after mklabel: ${afterMklabelCount}" >> ${logFile}
+            
             parted /dev/${actionDevice} --script mkpart primary fat32 1MiB 513MiB
+            
+            # DEBUG: Log partition count after first mkpart
+            afterFirstMkpartCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+            echo "# DEBUG SETUP SYSTEM: Partition count after first mkpart: ${afterFirstMkpartCount}" >> ${logFile}
+            
             parted /dev/${actionDevice} --script mkpart primary ext4 541MB 100%
+            
+            # DEBUG: Log partition count after second mkpart
+            afterSecondMkpartCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+            echo "# DEBUG SETUP SYSTEM: Partition count after second mkpart: ${afterSecondMkpartCount}" >> ${logFile}
+            
             partprobe /dev/${actionDevice}
+            
+            # DEBUG: Log partition count after partprobe
+            afterPartprobeCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+            echo "# DEBUG SETUP SYSTEM: Partition count after partprobe: ${afterPartprobeCount}" >> ${logFile}
+            echo "# DEBUG SETUP SYSTEM: Partitions after partprobe:" >> ${logFile}
+            lsblk -no NAME "/dev/${actionDevice}" >> ${logFile}
+            
             wipefs -a /dev/${actionDevicePartitionBase}1 2>/dev/null
             mkfs.fat -F 32 /dev/${actionDevicePartitionBase}1
+            
+            # DEBUG: Log partition count after formatting partition 1
+            afterFormat1Count=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+            echo "# DEBUG SETUP SYSTEM: Partition count after formatting partition 1: ${afterFormat1Count}" >> ${logFile}
+            
             wipefs -a /dev/${actionDevicePartitionBase}2 2>/dev/null
             mkfs -t ext4  /dev/${actionDevicePartitionBase}2
+            
+            # DEBUG: Log partition count after formatting partition 2
+            afterFormat2Count=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+            echo "# DEBUG SETUP SYSTEM: Partition count after formatting partition 2: ${afterFormat2Count}" >> ${logFile}
 
             # MAKE BOOTABLE
             echo "# MAKE BOOTABLE" >> ${logFile}
+
+            # DEBUG: Log partition count before making bootable
+            beforeBootableSystemCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+            echo "# DEBUG SETUP SYSTEM: Partition count before making bootable: ${beforeBootableSystemCount}" >> ${logFile}
 
             # RASPBERRY PI
             if [ "${computerType}" = "raspberrypi" ]; then
                 echo "# RaspberryPi - set LBA flag" >> ${logFile}
                 parted /dev/${actionDevice} --script set 1 lba on
+                
+                # DEBUG: Log partition count after LBA flag
+                afterLBASystemCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+                echo "# DEBUG SETUP SYSTEM: Partition count after LBA flag: ${afterLBASystemCount}" >> ${logFile}
+                
                 isFlagSetLBA=$(parted /dev/${actionDevice} --script print | grep -c 'fat32.*lba')
                 if [ ${isFlagSetLBA} -eq 0 ]; then
                     echo "error='failed to set LBA flag'"
@@ -1613,7 +1798,17 @@ if [ "$action" = "setup" ]; then
             else
                 echo "# VM & PC - set BOOT/ESP flag" >> ${logFile}
                 parted /dev/${actionDevice} --script set 1 boot on
+                
+                # DEBUG: Log partition count after boot flag
+                afterBootFlagSystemCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+                echo "# DEBUG SETUP SYSTEM: Partition count after boot flag: ${afterBootFlagSystemCount}" >> ${logFile}
+                
                 parted /dev/${actionDevice} --script set 1 esp on
+                
+                # DEBUG: Log partition count after setting ESP flag
+                afterESPFlagSystemCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+                echo "# DEBUG SETUP SYSTEM: Partition count after ESP flag: ${afterESPFlagSystemCount}" >> ${logFile}
+                
                 isFlagSetBOOT=$(parted /dev/${actionDevice} --script print | grep -c 'fat32.*boot')
                 if [ ${isFlagSetBOOT} -eq 0 ]; then
                     echo "error='failed to set BOOT flag'"
@@ -1631,75 +1826,248 @@ if [ "$action" = "setup" ]; then
     elif [ "${actionType}" = "STORAGE" ] && [ ${actionCreateSystemPartition} -eq 1 ]; then
 
         echo "# STORAGE partitioning (with boot)" >> ${logFile}
+        
+        # DEBUG: Log partition count before storage partitioning operations
+        beforeStoragePartitioningCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+        echo "# DEBUG SETUP STORAGE: Partition count before storage partitioning: ${beforeStoragePartitioningCount}" >> ${logFile}
+        
         sfdisk --delete /dev/${actionDevice} >> ${logFile}
+        
+        # DEBUG: Log partition count after sfdisk delete
+        afterSfdiskDeleteStorageCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+        echo "# DEBUG SETUP STORAGE: Partition count after sfdisk delete: ${afterSfdiskDeleteStorageCount}" >> ${logFile}
+        
         wipefs -a /dev/${actionDevice} >> ${logFile}
+        
+        # DEBUG: Log partition count after wipefs
+        afterWipeFsStorageCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+        echo "# DEBUG SETUP STORAGE: Partition count after wipefs: ${afterWipeFsStorageCount}" >> ${logFile}
+        
         parted /dev/${actionDevice} --script mklabel msdos >> ${logFile}
+        
+        # DEBUG: Log partition count after mklabel
+        afterMklabelStorageCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+        echo "# DEBUG SETUP STORAGE: Partition count after mklabel: ${afterMklabelStorageCount}" >> ${logFile}
+        
         parted /dev/${actionDevice} --script mkpart primary fat32 1MiB 513MiB >> ${logFile}
+        
+        # DEBUG: Log partition count after first mkpart
+        afterFirstMkpartStorageCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+        echo "# DEBUG SETUP STORAGE: Partition count after first mkpart: ${afterFirstMkpartStorageCount}" >> ${logFile}
+        
         parted /dev/${actionDevice} --script mkpart primary ext4 541MB 65GB >> ${logFile}
+        
+        # DEBUG: Log partition count after second mkpart
+        afterSecondMkpartStorageCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+        echo "# DEBUG SETUP STORAGE: Partition count after second mkpart: ${afterSecondMkpartStorageCount}" >> ${logFile}
+        
         parted /dev/${actionDevice} --script mkpart primary ext4 65GB 100% >> ${logFile}
+        
+        # DEBUG: Log partition count after third mkpart
+        afterThirdMkpartStorageCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+        echo "# DEBUG SETUP STORAGE: Partition count after third mkpart: ${afterThirdMkpartStorageCount}" >> ${logFile}
+        
         partprobe /dev/${actionDevice}
+        
+        # DEBUG: Log partition count after partprobe
+        afterPartprobeStorageCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+        echo "# DEBUG SETUP STORAGE: Partition count after partprobe: ${afterPartprobeStorageCount}" >> ${logFile}
+        echo "# DEBUG SETUP STORAGE: Partitions after partprobe:" >> ${logFile}
+        lsblk -no NAME "/dev/${actionDevice}" >> ${logFile}
+        
         echo "# .. formating" >> ${logFile}
         wipefs -a /dev/${actionDevicePartitionBase}1 2>/dev/null >> ${logFile}
         mkfs.fat -F 32 /dev/${actionDevicePartitionBase}1 >> ${logFile}
+        
+        # DEBUG: Log partition count after formatting partition 1
+        afterFormat1StorageCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+        echo "# DEBUG SETUP STORAGE: Partition count after formatting partition 1: ${afterFormat1StorageCount}" >> ${logFile}
+        
         wipefs -a /dev/${actionDevicePartitionBase}2 2>/dev/null >> ${logFile}
         mkfs -t ext4  /dev/${actionDevicePartitionBase}2 >> ${logFile}
+        
+        # DEBUG: Log partition count after formatting partition 2
+        afterFormat2StorageCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+        echo "# DEBUG SETUP STORAGE: Partition count after formatting partition 2: ${afterFormat2StorageCount}" >> ${logFile}
+        
         wipefs -a /dev/${actionDevicePartitionBase}3 2>/dev/null >> ${logFile}
         mkfs -t ext4  /dev/${actionDevicePartitionBase}3 >> ${logFile}
+        
+        # DEBUG: Log partition count after formatting partition 3
+        afterFormat3StorageCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+        echo "# DEBUG SETUP STORAGE: Partition count after formatting partition 3: ${afterFormat3StorageCount}" >> ${logFile}
+        
         rm -rf /mnt/disk_storage 2>/dev/null
         mkdir -p /mnt/disk_storage 2>/dev/null
         mount /dev/${actionDevicePartitionBase}3 /mnt/disk_storage
+        
+        # DEBUG: Log partition count after mounting partition 3
+        afterMountStorageCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+        echo "# DEBUG SETUP STORAGE: Partition count after mounting partition 3: ${afterMountStorageCount}" >> ${logFile}
+        
         mkdir -p /mnt/disk_storage/app-storage
         if [ ${actionCombinedData} -eq 1 ]; then
             mkdir -p /mnt/disk_storage/app-data
         fi
         umount /mnt/disk_storage >> ${logFile}
+        
+        # DEBUG: Log partition count after unmounting
+        afterUmountStorageCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+        echo "# DEBUG SETUP STORAGE: Partition count after unmounting: ${afterUmountStorageCount}" >> ${logFile}
+        
         echo "storagePartition='${actionDevicePartitionBase}3'"
         echo "# storagePartition(${actionDevicePartitionBase}3)" >> ${logFile}
 
     # STORAGE without System partition (if addSystemPartition=0 or not set)
     elif [ "${actionType}" = "STORAGE" ] && [ ${actionCreateSystemPartition} -eq 0 ]; then
         echo "# STORAGE partitioning (no boot)" >> ${logFile}
+        
+        # DEBUG: Log partition count before storage partitioning operations (no boot)
+        beforeStorageNoBootCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+        echo "# DEBUG SETUP STORAGE NO-BOOT: Partition count before storage partitioning: ${beforeStorageNoBootCount}" >> ${logFile}
+        
         sfdisk --delete /dev/${actionDevice} >> ${logFile}
+        
+        # DEBUG: Log partition count after sfdisk delete
+        afterSfdiskDeleteNoBootCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+        echo "# DEBUG SETUP STORAGE NO-BOOT: Partition count after sfdisk delete: ${afterSfdiskDeleteNoBootCount}" >> ${logFile}
+        
         wipefs -a /dev/${actionDevice} >> ${logFile}
+        
+        # DEBUG: Log partition count after wipefs
+        afterWipeFsNoBootCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+        echo "# DEBUG SETUP STORAGE NO-BOOT: Partition count after wipefs: ${afterWipeFsNoBootCount}" >> ${logFile}
+        
         parted /dev/${actionDevice} --script mklabel msdos >> ${logFile}
+        
+        # DEBUG: Log partition count after mklabel
+        afterMklabelNoBootCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+        echo "# DEBUG SETUP STORAGE NO-BOOT: Partition count after mklabel: ${afterMklabelNoBootCount}" >> ${logFile}
+        
         parted /dev/${actionDevice} --script mkpart primary ext4 1MB 100% >> ${logFile}
+        
+        # DEBUG: Log partition count after mkpart
+        afterMkpartNoBootCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+        echo "# DEBUG SETUP STORAGE NO-BOOT: Partition count after mkpart: ${afterMkpartNoBootCount}" >> ${logFile}
+        
         partprobe /dev/${actionDevice}
+        
+        # DEBUG: Log partition count after partprobe
+        afterPartprobeNoBootCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+        echo "# DEBUG SETUP STORAGE NO-BOOT: Partition count after partprobe: ${afterPartprobeNoBootCount}" >> ${logFile}
+        echo "# DEBUG SETUP STORAGE NO-BOOT: Partitions after partprobe:" >> ${logFile}
+        lsblk -no NAME "/dev/${actionDevice}" >> ${logFile}
+        
         echo "# .. formating" >> ${logFile}
         wipefs -a /dev/${actionDevicePartitionBase}1 >> ${logFile}
         mkfs -t ext4  /dev/${actionDevicePartitionBase}1 >> ${logFile}
+        
+        # DEBUG: Log partition count after formatting
+        afterFormatNoBootCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+        echo "# DEBUG SETUP STORAGE NO-BOOT: Partition count after formatting: ${afterFormatNoBootCount}" >> ${logFile}
+        
         rm -rf /mnt/disk_storage 2>/dev/null
         mkdir -p /mnt/disk_storage 2>/dev/null
         mount /dev/${actionDevicePartitionBase}1 /mnt/disk_storage
+        
+        # DEBUG: Log partition count after mounting
+        afterMountNoBootCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+        echo "# DEBUG SETUP STORAGE NO-BOOT: Partition count after mounting: ${afterMountNoBootCount}" >> ${logFile}
+        
         mkdir -p /mnt/disk_storage/app-storage
         if [ ${actionCombinedData} -eq 1 ]; then
             mkdir -p /mnt/disk_storage/app-data
         fi
         umount /mnt/disk_storage
+        
+        # DEBUG: Log partition count after unmounting
+        afterUmountNoBootCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+        echo "# DEBUG SETUP STORAGE NO-BOOT: Partition count after unmounting: ${afterUmountNoBootCount}" >> ${logFile}
+        
         echo "storagePartition='${actionDevicePartitionBase}1'"
         echo "# storagePartition(${actionDevicePartitionBase}1)" >> ${logFile}
 
     # DATA (single drive)
     elif [ "${actionType}" = "DATA" ]; then
         echo "# DATA partitioning" >> ${logFile}
+        
+        # DEBUG: Log partition count before data partitioning operations
+        beforeDataPartitioningCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+        echo "# DEBUG SETUP DATA: Partition count before data partitioning: ${beforeDataPartitioningCount}" >> ${logFile}
+        
         sfdisk --delete /dev/${actionDevice} 2>/dev/null
+        
+        # DEBUG: Log partition count after sfdisk delete
+        afterSfdiskDeleteDataCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+        echo "# DEBUG SETUP DATA: Partition count after sfdisk delete: ${afterSfdiskDeleteDataCount}" >> ${logFile}
+        
         wipefs -a /dev/${actionDevice} 2>/dev/null
+        
+        # DEBUG: Log partition count after wipefs
+        afterWipeFsDataCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+        echo "# DEBUG SETUP DATA: Partition count after wipefs: ${afterWipeFsDataCount}" >> ${logFile}
+        
         parted /dev/${actionDevice} --script mklabel msdos
+        
+        # DEBUG: Log partition count after mklabel
+        afterMklabelDataCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+        echo "# DEBUG SETUP DATA: Partition count after mklabel: ${afterMklabelDataCount}" >> ${logFile}
+        
         parted /dev/${actionDevice} --script mkpart primary ext4 1MB 100%
+        
+        # DEBUG: Log partition count after mkpart
+        afterMkpartDataCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+        echo "# DEBUG SETUP DATA: Partition count after mkpart: ${afterMkpartDataCount}" >> ${logFile}
+        
         partprobe /dev/${actionDevice}
+        
+        # DEBUG: Log partition count after partprobe
+        afterPartprobeDataCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+        echo "# DEBUG SETUP DATA: Partition count after partprobe: ${afterPartprobeDataCount}" >> ${logFile}
+        echo "# DEBUG SETUP DATA: Partitions after partprobe:" >> ${logFile}
+        lsblk -no NAME "/dev/${actionDevice}" >> ${logFile}
+        
         echo "# .. formating" >> ${logFile}
         wipefs -a /dev/${actionDevicePartitionBase}1 2>/dev/null
         mkfs -t ext4  /dev/${actionDevicePartitionBase}1
+        
+        # DEBUG: Log partition count after formatting
+        afterFormatDataCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+        echo "# DEBUG SETUP DATA: Partition count after formatting: ${afterFormatDataCount}" >> ${logFile}
+        
         rm -rf /mnt/disk_data 2>/dev/null
         mkdir -p /mnt/disk_data 2>/dev/null
         mount /dev/${actionDevicePartitionBase}1 /mnt/disk_data
+        
+        # DEBUG: Log partition count after mounting
+        afterMountDataCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+        echo "# DEBUG SETUP DATA: Partition count after mounting: ${afterMountDataCount}" >> ${logFile}
+        
         mkdir -p /mnt/disk_data/app-data
         umount /mnt/disk_data
+        
+        # DEBUG: Log partition count after unmounting
+        afterUmountDataCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+        echo "# DEBUG SETUP DATA: Partition count after unmounting: ${afterUmountDataCount}" >> ${logFile}
     fi
 
     # make sure info on drives is updated & visible in system
     sync
     partprobe /dev/${actionDevice}
     udevadm settle
+
+    # DEBUG: Log final partition count for setup
+    finalSetupPartitionCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+    echo "# DEBUG SETUP: Final partition count on ${actionDevice}: ${finalSetupPartitionCount}" >> ${logFile}
+    echo "# DEBUG SETUP: Final partitions list:" >> ${logFile}
+    lsblk -no NAME "/dev/${actionDevice}" >> ${logFile}
+    
+    # DEBUG: Summary of partition count changes for setup
+    echo "# DEBUG SETUP: PARTITION COUNT SUMMARY:" >> ${logFile}
+    echo "# DEBUG SETUP: Initial: ${initialSetupPartitionCount} -> Final: ${finalSetupPartitionCount}" >> ${logFile}
+    if [ "${initialSetupPartitionCount}" != "${finalSetupPartitionCount}" ]; then
+        echo "# DEBUG SETUP: Partition count changed during setup operation!" >> ${logFile}
+    fi
 
     echo "# OK - ${action} done" >> ${logFile}
     exit 0
@@ -1739,6 +2107,13 @@ if [ "$action" = "recover" ] || [ "$action" = "clean" ]; then
         echo "error='device is mounted'" >> ${logFile}
         exit 1
     fi
+
+    # DEBUG: Log initial partition count for recover/clean
+    initialRecoverPartitionCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+    echo "# DEBUG ${action^^}: Initial partition count on ${actionDevice}: ${initialRecoverPartitionCount}" >> ${logFile}
+    echo "# DEBUG ${action^^}: Initial partitions list:" >> ${logFile}
+    lsblk -no NAME "/dev/${actionDevice}" >> ${logFile}
+    parted /dev/${actionDevice} --script print >> ${logFile} 2>&1
 
     # check if data should also be combined with storage
     actionCombinedData=$4
@@ -1785,32 +2160,75 @@ if [ "$action" = "recover" ] || [ "$action" = "clean" ]; then
         # all data should get deleted only keep blockchain data
 
         if [ "${actionType}" = "SYSTEM" ]; then
-            # system gets full wipe - same as format
-            /home/admin/config.scripts/blitz.data.sh setup SYSTEM ${actionDevice}
+            # system partition gets full wipe
+            echo "# DEBUG CLEAN SYSTEM: Formatting system partition ${actionDevicePartitionBase}2" >> ${logFile}
+            wipefs -a /dev/${actionDevicePartitionBase}2 2>/dev/null
+            mkfs -t ext4 /dev/${actionDevicePartitionBase}2
             exit $?
         fi
         if [ "${actionType}" = "DATA" ]; then
             # data gets full wipe - same as format
+            echo "# DEBUG CLEAN DATA: Calling setup DATA ${actionDevice}" >> ${logFile}
             /home/admin/config.scripts/blitz.data.sh setup DATA ${actionDevice}
             exit $?
         fi
         if [ "${actionType}" = "STORAGE" ]; then
+            
+            # DEBUG: Log partition count before clean storage operations
+            beforeCleanStorageCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+            echo "# DEBUG CLEAN STORAGE: Partition count before clean operations: ${beforeCleanStorageCount}" >> ${logFile}
+            
             # check first partition for storage
             mkdir -p /mnt/disk_storage 2>/dev/null
             mount /dev/${actionDevicePartitionBase}1 /mnt/disk_storage 2>/dev/null
+            
+            # DEBUG: Log partition count after attempting to mount partition 1
+            afterMountAttemptCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+            echo "# DEBUG CLEAN STORAGE: Partition count after mount attempt partition 1: ${afterMountAttemptCount}" >> ${logFile}
+            
             # check if /mnt/disk_storage/app-storage exists
             if [ ! -d "/mnt/disk_storage/app-storage" ]; then
                 # multi partion layout
-                unmount /mnt/disk_storage
+                umount /mnt/disk_storage 2>/dev/null
+                
+                # DEBUG: Log partition count after umount partition 1
+                afterUmount1Count=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+                echo "# DEBUG CLEAN STORAGE: Partition count after umount partition 1: ${afterUmount1Count}" >> ${logFile}
+                
                 echo "# .. formating boot & system partition" >> ${logFile}
                 echo "# - format: boot(/dev/${actionDevicePartitionBase}1)" >> ${logFile}
                 wipefs -a /dev/${actionDevicePartitionBase}1 >> ${logFile}
+                
+                # DEBUG: Log partition count after wipefs partition 1
+                afterWipeP1Count=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+                echo "# DEBUG CLEAN STORAGE: Partition count after wipefs partition 1: ${afterWipeP1Count}" >> ${logFile}
+                
                 mkfs.fat -F 32 /dev/${actionDevicePartitionBase}1 >> ${logFile}
+                
+                # DEBUG: Log partition count after mkfs partition 1
+                afterMkfsP1Count=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+                echo "# DEBUG CLEAN STORAGE: Partition count after mkfs partition 1: ${afterMkfsP1Count}" >> ${logFile}
+                
                 echo "# - format: system(/dev/${actionDevicePartitionBase}2)" >> ${logFile}
                 wipefs -a /dev/${actionDevicePartitionBase}2 >> ${logFile}
+                
+                # DEBUG: Log partition count after wipefs partition 2
+                afterWipeP2Count=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+                echo "# DEBUG CLEAN STORAGE: Partition count after wipefs partition 2: ${afterWipeP2Count}" >> ${logFile}
+                
                 mkfs -t ext4  /dev/${actionDevicePartitionBase}2 >> ${logFile}
+                
+                # DEBUG: Log partition count after mkfs partition 2
+                afterMkfsP2Count=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+                echo "# DEBUG CLEAN STORAGE: Partition count after mkfs partition 2: ${afterMkfsP2Count}" >> ${logFile}
+                
                 echo "# - mount: storage(/dev/${actionDevicePartitionBase}3)" >> ${logFile}
                 mount /dev/${actionDevicePartitionBase}3 /mnt/disk_storage >> ${logFile}
+                
+                # DEBUG: Log partition count after mounting partition 3
+                afterMountP3Count=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+                echo "# DEBUG CLEAN STORAGE: Partition count after mounting partition 3: ${afterMountP3Count}" >> ${logFile}
+                
                 echo "storagePartition='${actionDevicePartitionBase}3'"
                 echo "# storagePartition(${actionDevicePartitionBase}3)" >> ${logFile}
                 if [ $? -ne 0 ]; then
@@ -1830,6 +2248,11 @@ if [ "$action" = "recover" ] || [ "$action" = "clean" ]; then
             # in both setups /mnt/disk_storage/app-storage should exist
             # delete all data in /mnt/disk_storage except for /mnt/disk_storage/app-storage
             echo "# Cleaning storage partition - preserving app-storage" >> ${logFile}
+            
+            # DEBUG: Log partition count before cleaning operations
+            beforeCleaningCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+            echo "# DEBUG CLEAN STORAGE: Partition count before cleaning operations: ${beforeCleaningCount}" >> ${logFile}
+            
             # TODO: This is not working yet .. refactor later
             find /mnt/disk_storage -maxdepth 1 -not -name "app-storage" -not -name "." -not -name ".." -exec rm -rf {} \;
             find /mnt/disk_storage/app-storage -maxdepth 1 -not -name "bitcoin" -not -name "." -not -name ".." -exec rm -rf {} \;
@@ -1838,6 +2261,10 @@ if [ "$action" = "recover" ] || [ "$action" = "clean" ]; then
             ls -la /mnt/disk_storage/app-storage >> ${logFile}
             ls -la /mnt/disk_storage/app-storage/bitcoin >> ${logFile}
 
+            # DEBUG: Log partition count after cleaning operations
+            afterCleaningCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+            echo "# DEBUG CLEAN STORAGE: Partition count after cleaning operations: ${afterCleaningCount}" >> ${logFile}
+
             # Create fresh app-data directory if needed with combined data
             if [ ${actionCombinedData} -eq 1 ]; then
                 mkdir -p /mnt/disk_storage/app-data
@@ -1845,6 +2272,11 @@ if [ "$action" = "recover" ] || [ "$action" = "clean" ]; then
             
             # Unmount after cleaning
             umount /mnt/disk_storage
+            
+            # DEBUG: Log partition count after final umount
+            afterFinalUmountCleanCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+            echo "# DEBUG CLEAN STORAGE: Partition count after final umount: ${afterFinalUmountCleanCount}" >> ${logFile}
+            
             rm -rf /mnt/disk_storage
         fi
     fi
@@ -1852,25 +2284,66 @@ if [ "$action" = "recover" ] || [ "$action" = "clean" ]; then
     if [ "${action}" = "recover" ]; then
 
         if [ "${actionType}" = "SYSTEM" ]; then
-            # system gets full wipe on recover - same as format
-            /home/admin/config.scripts/blitz.data.sh setup SYSTEM ${actionDevice}
+            # system partition gets formatted
+            echo "# DEBUG RECOVER SYSTEM: Formatting SYSTEM partition ${actionDevicePartitionBase}2" >> ${logFile}
+            wipefs -a /dev/${actionDevicePartitionBase}2 2>/dev/null
+            mkfs -t ext4  /dev/${actionDevicePartitionBase}2 >> ${logFile}
             exit $?
         fi
         if [ "${actionType}" = "DATA" ]; then
             echo "# .. data just keep as is" >> ${logFile}
+            
+            # DEBUG: Log partition count for data recover (no changes expected)
+            dataRecoverCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+            echo "# DEBUG RECOVER DATA: Partition count (no changes): ${dataRecoverCount}" >> ${logFile}
         fi
         if [ "${actionType}" = "STORAGE" ]; then
+            
+            # DEBUG: Log partition count before recover storage operations
+            beforeRecoverStorageCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+            echo "# DEBUG RECOVER STORAGE: Partition count before recover operations: ${beforeRecoverStorageCount}" >> ${logFile}
+            
             # get number of partions of device
             numPartitions=$(lsblk -no NAME /dev/${actionDevice} | grep -c "${actionDevicePartitionBase}")
+            echo "# DEBUG RECOVER STORAGE: Number of partitions found: ${numPartitions}" >> ${logFile}
+            
             if [ ${numPartitions} -eq 3 ]; then
                 if [ "${actionCreateSystemPartition}" == "1" ]; then
                     echo "# .. formating boot & system partition" >> ${logFile}
+                    
+                    # DEBUG: Log partition count before formatting boot partition
+                    beforeFormatBootCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+                    echo "# DEBUG RECOVER STORAGE: Partition count before formatting boot: ${beforeFormatBootCount}" >> ${logFile}
+                    
                     wipefs -a /dev/${actionDevicePartitionBase}1 >> ${logFile}
+                    
+                    # DEBUG: Log partition count after wipefs boot partition
+                    afterWipeBootCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+                    echo "# DEBUG RECOVER STORAGE: Partition count after wipefs boot: ${afterWipeBootCount}" >> ${logFile}
+                    
                     mkfs.fat -F 32 /dev/${actionDevicePartitionBase}1 >> ${logFile}
+                    
+                    # DEBUG: Log partition count after mkfs boot partition
+                    afterMkfsBootCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+                    echo "# DEBUG RECOVER STORAGE: Partition count after mkfs boot: ${afterMkfsBootCount}" >> ${logFile}
+                    
                     wipefs -a /dev/${actionDevicePartitionBase}2 >> ${logFile}
+                    
+                    # DEBUG: Log partition count after wipefs system partition
+                    afterWipeSystemCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+                    echo "# DEBUG RECOVER STORAGE: Partition count after wipefs system: ${afterWipeSystemCount}" >> ${logFile}
+                    
                     mkfs -t ext4  /dev/${actionDevicePartitionBase}2 >> ${logFile}
+                    
+                    # DEBUG: Log partition count after mkfs system partition
+                    afterMkfsSystemCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+                    echo "# DEBUG RECOVER STORAGE: Partition count after mkfs system: ${afterMkfsSystemCount}" >> ${logFile}
                 else
-                    echo "# dont format boot & system partition .. actionCreateSystemPartition(${actionCreateSystemPartition})" >> ${logFile}  
+                    echo "# dont format boot & system partition .. actionCreateSystemPartition(${actionCreateSystemPartition})" >> ${logFile}
+                    
+                    # DEBUG: Log partition count when not formatting boot/system
+                    noFormatCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+                    echo "# DEBUG RECOVER STORAGE: Partition count (no boot/system format): ${noFormatCount}" >> ${logFile}
                 fi
                 echo "storagePartition='${actionDevicePartitionBase}3'"
                 echo "# storagePartition(${actionDevicePartitionBase}3)" >> ${logFile}
@@ -1878,8 +2351,25 @@ if [ "$action" = "recover" ] || [ "$action" = "clean" ]; then
                 echo "storagePartition='${actionDevicePartitionBase}1'"
                 echo "# storagePartition(${actionDevicePartitionBase}1)" >> ${logFile}
                 echo "# .. storage has ${numPartitions} partitions - just keep as is" >> ${logFile}
+                
+                # DEBUG: Log partition count for single partition storage
+                singlePartitionCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+                echo "# DEBUG RECOVER STORAGE: Partition count (single partition): ${singlePartitionCount}" >> ${logFile}
             fi
         fi
+    fi
+
+    # DEBUG: Log final partition count for recover/clean
+    finalRecoverPartitionCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+    echo "# DEBUG ${action^^}: Final partition count on ${actionDevice}: ${finalRecoverPartitionCount}" >> ${logFile}
+    echo "# DEBUG ${action^^}: Final partitions list:" >> ${logFile}
+    lsblk -no NAME "/dev/${actionDevice}" >> ${logFile}
+    
+    # DEBUG: Summary of partition count changes for recover/clean
+    echo "# DEBUG ${action^^}: PARTITION COUNT SUMMARY:" >> ${logFile}
+    echo "# DEBUG ${action^^}: Initial: ${initialRecoverPartitionCount} -> Final: ${finalRecoverPartitionCount}" >> ${logFile}
+    if [ "${initialRecoverPartitionCount}" != "${finalRecoverPartitionCount}" ]; then
+        echo "# DEBUG ${action^^}: Partition count changed during ${action} operation!" >> ${logFile}
     fi
 
     echo "# DONE - blitz.data.sh ${action} ${actionType}" >> ${logFile}
@@ -2302,8 +2792,11 @@ fi
 if [ "$1" = "reset" ]; then
     source <(/home/admin/config.scripts/blitz.data.sh status)
     if [ "${storageDevice}" = "" ]; then
-        echo "error='no storage device found'"
-        exit 1
+        # check if nvme0n1 is available
+        if lsblk -no NAME | grep -q "nvme0n1"; then
+            echo "# found storage device: nvme0n1"
+            storageDevice="nvme0n1"
+        fi
     fi
     # check ask overide
     if [ "$2" != "OVERWRITE" ]; then
