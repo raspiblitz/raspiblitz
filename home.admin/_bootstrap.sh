@@ -816,7 +816,7 @@ if [ "${scenario}" != "ready" ] ; then
     # SYSTEM
     echo "#### SYSTEM ####" >> ${logFile}
     echo "# systemDevice(${systemDevice}) systemWarning(${systemWarning})" >> ${logFile}
-    if [ ${#systemDevice} -gt 0 ] && [ "${bootFromStorage}" = "0" ] && [ ${#systemWarning} -eq 0 ]; then
+    if [ ${#systemDevice} -gt 0 ] && [ "${systemDevice}" != "${storageDevice}" ] && [ "${bootFromStorage}" = "0" ] && [ ${#systemWarning} -eq 0 ]; then
       error=""
       echo "SYSTEM: ${setupCommand} SYSTEM start" >> ${logFile}
       source <(/home/admin/config.scripts/blitz.data.sh ${setupCommand} SYSTEM "${systemDevice}")
@@ -838,7 +838,7 @@ if [ "${scenario}" != "ready" ] ; then
     # DATA
     echo "#### DATA ####" >> ${logFile}
     echo "# dataDevice(${dataDevice}) dataWarning(${dataWarning})" >> ${logFile}
-    if [ ${#dataDevice} -gt 0 ] && [ ${#dataWarning} -eq 0 ]; then
+    if [ ${#dataDevice} -gt 0 ] && [ "${dataDevice}" != "${storageDevice}" ] && [ ${#dataWarning} -eq 0 ]; then
       error=""
       echo "DATA: ${setupCommand} DATA start" >> ${logFile}
       source <(/home/admin/config.scripts/blitz.data.sh ${setupCommand} DATA "${dataDevice}")
