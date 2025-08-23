@@ -188,11 +188,13 @@ if [ "${lightning}" == "lnd" ]; then
     fi
     # fix config after import
     /home/admin/config.scripts/lnd.install.sh on mainnet
+    /home/admin/config.scripts/lnd.credentials.sh sync mainnet >> $logFile
   else
     # preparing new LND config (raspiblitz.setup)
     echo "Creating new LND config ..." >> ${logFile}
     /home/admin/config.scripts/lnd.install.sh on mainnet
     /home/admin/config.scripts/lnd.setname.sh mainnet ${hostname}
+    /home/admin/config.scripts/lnd.credentials.sh sync mainnet >> $logFile
   fi
 
   # make sure all directories are linked
