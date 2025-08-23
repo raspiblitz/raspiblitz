@@ -229,6 +229,13 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     exit 1
   fi
 
+  lightningImpl=$2
+  if [ "${lightningImpl}" != "lnd" ] && [ "${lightningImpl}" != "cl" ]; then
+    echo "# missing or wrong parameter <lnd|cl>"
+    exit 1
+  fi
+  LNTYPE=${lightningImpl}
+
   # check that is already active
   isActive=$(sudo ls /etc/systemd/system/${systemdService}.service 2>/dev/null | grep -c "${systemdService}.service")
   if [ ${isActive} -eq 1 ]; then

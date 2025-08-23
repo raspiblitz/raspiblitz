@@ -284,10 +284,11 @@ else
     echo "Provisioning LND Binary - not active" >> ${logFile}
 fi
 
-# LND Mainnet (when not main instance)
+# LND Mainnet (only when not main instance)
 if [ "${lnd}" == "on" ] && [ "${lightning}" != "lnd" ]; then
     echo "Provisioning LND Mainnet - run config script" >> ${logFile}
     /home/admin/config.scripts/lnd.install.sh on mainnet >> ${logFile} 2>&1
+    /home/admin/config.scripts/lnd.credentials.sh sync mainnet >> $logFile
 else
     echo "Provisioning LND Mainnet - not active as secondary option" >> ${logFile}
 fi
@@ -296,6 +297,7 @@ fi
 if [ "${tlnd}" == "on" ]; then
     echo "Provisioning LND Testnet - run config script" >> ${logFile}
     /home/admin/config.scripts/lnd.install.sh on testnet >> ${logFile} 2>&1
+    /home/admin/config.scripts/lnd.credentials.sh sync testnet >> $logFile
     systemctl start tlnd >> ${logFile} 2>&1
 else
     echo "Provisioning LND Testnet - not active" >> ${logFile}
@@ -305,6 +307,7 @@ fi
 if [ "${slnd}" == "on" ]; then
     echo "Provisioning LND Signet - run config script" >> ${logFile}
     /home/admin/config.scripts/lnd.install.sh on signet >> ${logFile} 2>&1
+    /home/admin/config.scripts/lnd.credentials.sh sync signet >> $logFile
     systemctl start slnd >> ${logFile} 2>&1
 else
   echo "Provisioning LND Signet - not active" >> ${logFile}

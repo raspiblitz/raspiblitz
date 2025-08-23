@@ -418,6 +418,7 @@ case $CHOICE in
     sudo rm $_temp 2>/dev/null
 
     /home/admin/config.scripts/lnd.install.sh on ${CHAIN}
+    /home/admin/config.scripts/lnd.credentials.sh sync "${CHAIN}"
     sudo systemctl start ${netprefix}lnd
     
     syncAndCheckLND
