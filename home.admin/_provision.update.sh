@@ -164,10 +164,7 @@ systemctl start ${network}d.service >> ${logFile}
 # INSTALL LND on Update/Recovery
 if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
 
-  # prepare lnd service
-  cp /home/admin/assets/lnd.service /etc/systemd/system/lnd.service >> ${logFile} 2>&1
-
-  # if old lnd.conf exists ...
+  # if old lnd.conf exists ... update it to latest standards
   configExists=$(sudo ls /mnt/hdd/app-data/lnd/lnd.conf | grep -c '.conf')
   if [ ${configExists} -eq 1 ]; then
 
@@ -237,6 +234,13 @@ if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
   else
     echo "WARN: /mnt/hdd/app-data/lnd/lnd.conf not found" >> ${logFile}
   fi
+
+  # install & turn on lnd
+  /home/admin/config.scripts/lnd.install.sh on mainnet >> ${logFile} 2>&1
+  /home/admin/config.scripts/lnd.credentials.sh sync mainnet >> $logFile
+
+  # prepare lnd service
+  cp /home/admin/assets/lnd.service /etc/systemd/system/lnd.service >> ${logFile} 2>&1
 
   # start LND service
   echo "Starting LND Service ..." >> ${logFile}
