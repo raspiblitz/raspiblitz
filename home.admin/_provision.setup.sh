@@ -218,6 +218,12 @@ if [ "${lightning}" == "lnd" ]; then
   # copy lnd service
   cp /home/admin/assets/lnd.service /etc/systemd/system/lnd.service >> ${logFile}
 
+  # set permissions
+  echo "# /mnt/hdd/app-data/lnd" >> ${logFile}
+  ls -la /mnt/hdd/app-data/lnd >> ${logFile}
+  chown -R bitcoin:bitcoin /mnt/hdd/app-data/lnd >> ${logFile}
+  ls -la /mnt/hdd/app-data/lnd >> ${logFile}
+
   # start lnd up
   echo "Starting LND Service ..." >> ${logFile}
   systemctl enable lnd >> ${logFile}
