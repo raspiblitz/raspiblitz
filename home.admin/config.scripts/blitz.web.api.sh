@@ -155,8 +155,8 @@ if [ "$1" = "update-config" ]; then
 
   else
     echo "# CONFIG Web API ... still in setup, skip bitcoin & lightning"
-    sed -i "s/^BAPI_NETWORK=.*/BAPI_NETWORK=/g" ./.env
-    sed -i "s/^BAPI_LN_NODE=.*/BAPI_LN_NODE=/g" ./.env
+    sed -i "s/^BAPI_NETWORK=.*/BAPI_NETWORK=none/g" ./.env
+    sed -i "s/^BAPI_LN_NODE=.*/BAPI_LN_NODE=none/g" ./.env
   fi
 
   # Note: Celery services might need a restart if config changes affect them.
