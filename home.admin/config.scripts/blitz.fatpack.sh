@@ -31,10 +31,11 @@ echo "# isReleaseCandidate(${isReleaseCandidate})"
 
 # check if sd card needs expansion before fatpack
 source <(sudo /home/admin/config.scripts/blitz.bootdrive.sh status)
-if [ "${needsExpansion}" == "1" ]; then
+if [ ${rootPartitionBytes} -lt 31465668608 ]; then
 
     echo "################################################"
     echo "# SD CARD NEEDS EXPANSION BEFORE FATPACK"
+    echo "# AND MAKE SURE TO USE 64GB SD CARD"
     echo "# this will be done now ... and trigger a reboot"
     echo "# after reboot run this script again"
     echo "################################################"
