@@ -241,18 +241,6 @@ ${toraddress}"
     2>&1 >/dev/tty)
 
   case $CHOICE in
-  IP2TOR-ON)
-    python /home/admin/config.scripts/blitz.subscriptions.ip2tor.py create-ssh-dialog LNBITS ${toraddress} 443
-    exit 0
-    ;;
-  IP2TOR-OFF)
-    clear
-    python /home/admin/config.scripts/blitz.subscriptions.ip2tor.py subscription-cancel ${ip2torID}
-    echo
-    echo "OK - PRESS ENTER to continue"
-    read key
-    exit 0
-    ;;
   HTTPS-ON)
     python /home/admin/config.scripts/blitz.subscriptions.letsencrypt.py create-ssh-dialog
     exit 0
@@ -432,13 +420,6 @@ if [ "$1" = "status" ]; then
     fi
     echo "LNBitsFunding='${LNBitsFunding}'"
 
-    # check for LetsEnryptDomain for DynDns
-    error=""
-    source <(sudo /home/admin/config.scripts/blitz.subscriptions.ip2tor.py ip-by-tor $publicIP 2>/dev/null)
-    if [ ${#error} -eq 0 ]; then
-      echo "publicDomain='${domain}'"
-    fi
-
     sslFingerprintIP=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout 2>/dev/null | cut -d"=" -f2)
     echo "sslFingerprintIP='${sslFingerprintIP}'"
 
@@ -447,26 +428,6 @@ if [ "$1" = "status" ]; then
 
     sslFingerprintTOR=$(openssl x509 -in /mnt/hdd/app-data/nginx/tor_tls.cert -fingerprint -noout 2>/dev/null | cut -d"=" -f2)
     echo "sslFingerprintTOR='${sslFingerprintTOR}'"
-
-    # check for IP2TOR
-    error=""
-    source <(sudo /home/admin/config.scripts/blitz.subscriptions.ip2tor.py ip-by-tor $toraddress)
-    if [ ${#error} -eq 0 ]; then
-      echo "ip2torType='${ip2tor-v1}'"
-      echo "ip2torID='${id}'"
-      echo "ip2torIP='${ip}'"
-      echo "ip2torPort='${port}'"
-      # check for LetsEnryptDomain on IP2TOR
-      error=""
-      source <(sudo /home/admin/config.scripts/blitz.subscriptions.letsencrypt.py domain-by-ip $ip)
-      if [ ${#error} -eq 0 ]; then
-        echo "ip2torDomain='${domain}'"
-        domainWarning=$(sudo /home/admin/config.scripts/blitz.subscriptions.letsencrypt.py subscription-detail ${domain} ${port} | jq -r ".warning")
-        if [ ${#domainWarning} -gt 0 ]; then
-          echo "ip2torWarn='${domainWarning}'"
-        fi
-      fi
-    fi
 
     # check for error
     isDead=$(sudo systemctl status lnbits | grep -c 'inactive (dead)')
