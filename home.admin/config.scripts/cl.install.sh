@@ -98,8 +98,9 @@ function buildAndInstallCLbinaries() {
   echo
   echo "- make"
   echo
+# auf das Binary umschalten und die Options leer lassen
   sudo -u bitcoin RUSTUP_HOME=/opt/rust CARGO_HOME=/opt/rust \
-  make PROTOC_OPTS="--experimental_allow_proto3_optional=true" || exit 1
+  make PROTOC="protoc" PROTOC_OPTS="" || exit 1
   echo
   echo "- install to /usr/local/bin/"
   sudo make RUSTUP_HOME=/opt/rust CARGO_HOME=/opt/rust install || exit 1
