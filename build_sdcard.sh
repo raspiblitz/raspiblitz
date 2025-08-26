@@ -895,7 +895,11 @@ echo "Provisioning BLITZ WEB SERVICE"
 # *** FATPACK *** (can be activated by parameter - see details at start of script)
 if ${fatpack}; then
   echo "* FATPACK activated"
-  /home/admin/config.scripts/blitz.fatpack.sh || exit 1
+  /home/admin/config.scripts/blitz.fatpack.sh
+  if [ $? -gt 0 ]; then
+    echo "FATPACK FAILED - please check the output above."
+    exit 1
+  fi
 else
   echo "* skipping FATPACK"
 fi

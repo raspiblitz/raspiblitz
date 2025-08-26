@@ -66,7 +66,7 @@ fi
 echo "# Running: 'bonus.${APPID}.sh $*'"
 
 source /home/admin/raspiblitz.info
-source /mnt/hdd/app-data/raspiblitz.conf
+source /mnt/hdd/app-data/raspiblitz.conf 2>/dev/null
 
 #########################
 # INFO
@@ -93,6 +93,8 @@ fi
 if [ "$1" = "status" ]; then
   echo "appID='${APPID}'"
   echo "version='${VERSION}'"
+  fatpack=$(compgen -u | grep -c ${APPID})
+  echo "fatpack=${fatpack}"
   echo "installed=${isRunning}" # installed means towards webui on or off
   if [ "${isInstalled}" == "1" ]; then
     echo "localIP='${localIP}'"
@@ -219,6 +221,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   fi
 
   echo "# ACTIVATE Alby-Hub"
+
+  # make sure albyhub is in the lndadmin group
+  sudo /usr/sbin/usermod --append --groups lndadmin albyhub
 
   # prepare data directory
   sudo mkdir -p /mnt/hdd/app-data/${APPID} 2>/dev/null

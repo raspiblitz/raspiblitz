@@ -400,6 +400,9 @@ if [ "$1" = "status" ]; then
 
   echo "version='${VERSION}'"
 
+    fatpack=$(compgen -u | grep -c lnbits)
+    echo "fatpack=${fatpack}"
+
   if [ "${LNBits}" = "on" ]; then
     echo "installed=1"
 

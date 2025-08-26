@@ -42,7 +42,7 @@ function installDependencies() {
   # additional requirements
   sudo apt-get install -y libpq-dev
   # for clnrest - https://docs.corelightning.org/docs/installation#clnrest
-  sudo apt-get install -y python3-json5 python3-flask python3-gunicorn
+  sudo apt-get install -y python3-json5 python3-flask python3-gunicorn python3-grpc-tools
 
   # python deps for wss-proxy
   # upgrade pip
@@ -92,15 +92,23 @@ function installDependencies() {
 }
 
 function buildAndInstallCLbinaries() {
-  echo "- configure"
+
+  sudo -u bitcoin python3 -m pip install --user --upgrade grpcio-tools protobuf
+
+  # patch makefile
+  sudo -u bitcoin sed -i -E 's/ --experimental_allow_proto3_optional(=true)?//g' Makefile
+
+  # delete old file
+  sudo -u bitcoin rm -f contrib/pyln-grpc-proto/pyln/grpc/*_pb2.py contrib/pyln-grpc-proto/pyln/grpc/*_pb2_grpc.py
+
   echo
+  echo "########## configure"
   sudo -u bitcoin RUSTUP_HOME=/opt/rust CARGO_HOME=/opt/rust ./configure || exit 1
   echo
-  echo "- make"
-  echo
-  sudo -u bitcoin RUSTUP_HOME=/opt/rust CARGO_HOME=/opt/rust make || exit 1
-  echo
-  echo "- install to /usr/local/bin/"
+  echo "########## make"
+  sudo -u bitcoin RUSTUP_HOME=/opt/rust CARGO_HOME=/opt/rust make -j"$(nproc)" || exit 1
+  echo 
+  echo "########## install"
   sudo make RUSTUP_HOME=/opt/rust CARGO_HOME=/opt/rust install || exit 1
 }
 

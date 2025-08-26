@@ -18,7 +18,7 @@ PGPsigner="romanz"
 PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
 PGPpubkeyFingerprint="87CAE5FA46917CBB"
 
-source /mnt/hdd/app-data/raspiblitz.conf
+source /mnt/hdd/app-data/raspiblitz.conf 2>/dev/null
 
 # give status (dont call regularly - just on occasions)
 if [ "$1" = "status" ]; then
@@ -29,6 +29,9 @@ if [ "$1" = "status" ]; then
   echo "##### STATUS ELECTRS SERVICE"
 
   echo "version='${ELECTRSVERSION}'"
+
+  fatpack=$(compgen -u | grep -c electrs)
+  echo "fatpack=${fatpack}"
 
   if [ "${ElectRS}" = "on" ]; then
     echo "configured=1"

@@ -38,6 +38,8 @@ if [ "$1" = "status" ]; then
   toraddress=$(sudo cat /mnt/hdd/app-data/tor/${USERNAME}/hostname 2>/dev/null)
 
   echo "version='${WEBUI_VERSION}'"
+  fatpack=$(compgen -u | grep -c ${USERNAME})
+  echo "fatpack=${fatpack}"
   echo "installed='${isActive}'"
   echo "localIP='${localip}'"
   echo "httpPort='7500'"

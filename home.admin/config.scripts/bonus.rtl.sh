@@ -5,7 +5,7 @@ RTLVERSION="v0.15.2"
 
 # check and load raspiblitz config
 # to know which network is running
-source /mnt/hdd/app-data/raspiblitz.conf
+source /mnt/hdd/app-data/raspiblitz.conf 2>/dev/null
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -70,10 +70,13 @@ if [ "$1" = "status" ] || [ "$1" = "menu" ]; then
   isInstalled=$(sudo ls /etc/systemd/system/${netprefix}${typeprefix}RTL.service 2>/dev/null | grep -c 'RTL.service')
   localip=$(hostname -I | awk '{print $1}')
   toraddress=$(sudo cat /mnt/hdd/app-data/tor/${netprefix}${typeprefix}RTL/hostname 2>/dev/null)
-  fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
+  fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout 2>/dev/null| cut -d"=" -f2)
   RTLHTTPS=$((RTLHTTP + 1))
 
   if [ "$1" = "status" ]; then
+
+    fatpack=$(compgen -u | grep -c rtl)
+    echo "fatpack=${fatpack}"
 
     echo "version='${RTLVERSION}'"
     echo "installed='${isInstalled}'"
