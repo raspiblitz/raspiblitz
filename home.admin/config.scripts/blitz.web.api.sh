@@ -327,7 +327,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   if ! sudo -u blitzapi ./venv/bin/pip install --upgrade Cython; then
     echo "error='pip install upgrade Cython'"
   fi
-  echo "# Installing dependencies from requirements.txt..."
+  echo "# Installing dependencies from requirements.txt ..."
   if ! sudo -u blitzapi env PIP_INDEX_URL=https://pypi.org/simple PIP_EXTRA_INDEX_URL= ./venv/bin/pip install --no-cache-dir -r requirements.txt --no-deps; then
     echo "error='pip install failed'"
     exit 1
