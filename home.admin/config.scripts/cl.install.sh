@@ -97,11 +97,11 @@ function buildAndInstallCLbinaries() {
   sudo -u bitcoin RUSTUP_HOME=/opt/rust CARGO_HOME=/opt/rust ./configure || exit 1
   echo
   echo "- make"
+  export PROTOC_OPTS="--experimental_allow_proto3_optional=true"
   echo
   sudo -u bitcoin RUSTUP_HOME=/opt/rust CARGO_HOME=/opt/rust make || exit 1
   echo
   echo "- install to /usr/local/bin/"
-  export PROTOC_OPTS="--experimental_allow_proto3_optional=true"
   sudo make RUSTUP_HOME=/opt/rust CARGO_HOME=/opt/rust install || exit 1
 }
 
