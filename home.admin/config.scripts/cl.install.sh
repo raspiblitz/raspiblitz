@@ -101,33 +101,9 @@ function buildAndInstallCLbinaries() {
   sudo -u bitcoin RUSTUP_HOME=/opt/rust CARGO_HOME=/opt/rust make || exit 1
   echo
   echo "- install to /usr/local/bin/"
+  export PROTOC_OPTS="--experimental_allow_proto3_optional=true"
   sudo make RUSTUP_HOME=/opt/rust CARGO_HOME=/opt/rust install || exit 1
 }
-
-function PoetryBuildAndInstallCLbinaries() {
-  echo "- configure"
-  echo
-  # Ensure deps are in the venv (no-op if already done)
-  sudo -u bitcoin poetry install --no-interaction --no-root
-
-  # Make ./configure record the Poetry Python, so later 'python3 -m ...' uses it
-  PY_POETRY=$(sudo -u bitcoin poetry run which python)
-
-  sudo -u bitcoin RUSTUP_HOME=/opt/rust CARGO_HOME=/opt/rust \
-  ./configure PYTHON="$PY_POETRY" || exit 1
-
-  echo
-  echo "- make"
-  echo
-  # Build inside the Poetry venv so grpc_tools.protoc matches the expected flags
-  sudo -u bitcoin RUSTUP_HOME=/opt/rust CARGO_HOME=/opt/rust \
-  poetry run make || exit 1
-
-  echo
-  echo "- install to /usr/local/bin/"
-  sudo make RUSTUP_HOME=/opt/rust CARGO_HOME=/opt/rust install || exit 1
-}
-
 
 function runTests() {
   # for the tests - install Core Lightning test dependencies matching pyproject.toml versions
@@ -216,7 +192,7 @@ if [ "$1" = "install" ]; then
 
   installDependencies
 
-  PoetryBuildAndInstallCLbinaries || exit 1
+  buildAndInstallCLbinaries || exit 1
 
   installed=$(sudo -u bitcoin lightning-cli --version)
   if [ ${#installed} -eq 0 ]; then
@@ -312,7 +288,7 @@ if [ "$1" = on ] || [ "$1" = update ] || [ "$1" = testPR ]; then
     )
     echo "# Building from source Core Lightning $currentCLversion"
 
-    PoetryBuildAndInstallCLbinaries || exit 1
+    buildAndInstallCLbinaries || exit 1
 
   fi
 
