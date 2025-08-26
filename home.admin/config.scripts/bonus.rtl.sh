@@ -75,6 +75,9 @@ if [ "$1" = "status" ] || [ "$1" = "menu" ]; then
 
   if [ "$1" = "status" ]; then
 
+    fatpack=$(compgen -u | grep -c rtl)
+    echo "fatpack='${fatpack}'"
+
     echo "version='${RTLVERSION}'"
     echo "installed='${isInstalled}'"
     echo "localIP='${localip}'"

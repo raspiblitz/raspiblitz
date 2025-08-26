@@ -136,19 +136,72 @@ sudo rm -r /home/blitzapi/blitz_web/build/*
 
 echo "* Adding Code&Compile for WEBUI-APP: ALBYHUB"
 /home/admin/config.scripts/bonus.albyhub.sh install || exit 1
+source <(sudo /home/admin/config.scripts/bonus.albyhub.sh status)
+if [ "${fatpack}" != "1" ]; then
+  echo "FATPACK FAIL: albyhub"
+  exit 1
+fi
+
 echo "* Adding Code&Compile for WEBUI-APP: LNBITS"
 /home/admin/config.scripts/bonus.lnbits.sh install || exit 1
+source <(sudo /home/admin/config.scripts/bonus.lnbits.sh status)
+if [ "${fatpack}" != "1" ]; then
+  echo "FATPACK FAIL: lnbits"
+  exit 1
+fi
+
 echo "* Adding Code&Compile for WEBUI-APP: JAM"
 /home/admin/config.scripts/bonus.jam.sh install || exit 1
+source <(sudo /home/admin/config.scripts/bonus.jam.sh status)
+if [ "${fatpack}" != "1" ]; then
+  echo "FATPACK FAIL: jam"
+  exit 1
+fi
+
 echo "* Adding Code&Compile for WEBUI-APP: BTCPAYSERVER"
 /home/admin/config.scripts/bonus.btcpayserver.sh install || exit 1
+source <(sudo /home/admin/config.scripts/bonus.btcpayserver.sh status)
+if [ "${fatpack}" != "1" ]; then
+  echo "FATPACK FAIL: btcpayserver"
+  exit 1
+fi
+
 echo "* Adding Code&Compile for WEBUI-APP: RTL"
 /home/admin/config.scripts/bonus.rtl.sh install || exit 1
+source <(sudo /home/admin/config.scripts/bonus.rtl.sh status)
+if [ "${fatpack}" != "1" ]; then
+  echo "FATPACK FAIL: rtl"
+  exit 1
+fi
+
 echo "* Adding Code&Compile for WEBUI-APP: THUNDERHUB"
 /home/admin/config.scripts/bonus.thunderhub.sh install || exit 1
+source <(sudo /home/admin/config.scripts/bonus.thunderhub.sh status)
+if [ "${fatpack}" != "1" ]; then
+  echo "FATPACK FAIL: thunderhub"
+  exit 1
+fi
+
 echo "* Adding Code&Compile for WEBUI-APP: BTC RPC EXPLORER"
 /home/admin/config.scripts/bonus.btc-rpc-explorer.sh install || exit 1
+source <(sudo /home/admin/config.scripts/bonus.btc-rpc-explorer.sh status)
+if [ "${fatpack}" != "1" ]; then
+  echo "FATPACK FAIL: btc-rpc-explorer"
+  exit 1
+fi
+
 echo "* Adding Code&Compile for WEBUI-APP: MEMPOOL"
 /home/admin/config.scripts/bonus.mempool.sh install || exit 1
+source <(sudo /home/admin/config.scripts/bonus.mempool.sh status)
+if [ "${fatpack}" != "1" ]; then
+  echo "FATPACK FAIL: mempool"
+  exit 1
+fi
+
 echo "* Adding Code&Compile for WEBUI-APP: ELECTRS"
 /home/admin/config.scripts/bonus.electrs.sh install || exit 1
+source <(sudo /home/admin/config.scripts/bonus.electrs.sh status)
+if [ "${fatpack}" != "1" ]; then
+  echo "FATPACK FAIL: electrs"
+  exit 1
+fi
