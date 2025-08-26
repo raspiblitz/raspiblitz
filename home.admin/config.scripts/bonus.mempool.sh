@@ -69,7 +69,7 @@ if [ "$1" = "status" ]; then
   echo "version='${pinnedVersion}'"
 
   fatpack=$(compgen -u | grep -c mempool)
-  echo "fatpack='${fatpack}'"
+  echo "fatpack=${fatpack}"
 
   if [ "${mempoolExplorer}" = "on" ]; then
     echo "configured=1"

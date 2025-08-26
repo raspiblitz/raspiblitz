@@ -34,7 +34,7 @@ if [ "$1" = "status" ] || [ "$1" = "menu" ]; then
   if [ "$1" = "status" ]; then
 
     fatpack=$(compgen -u | grep -c thunderhub)
-    echo "fatpack='${fatpack}'"
+    echo "fatpack=${fatpack}"
 
     echo "version='${THUBVERSION}'"
     echo "installed='${isInstalled}'"

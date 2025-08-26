@@ -85,7 +85,7 @@ if [ "$1" = "status" ]; then
   echo "version='${VERSION}'"
 
     fatpack=$(compgen -u | grep -c btcrpcexplorer)
-    echo "fatpack='${fatpack}'"
+    echo "fatpack=${fatpack}"
 
   if [ "${BTCRPCexplorer}" = "on" ]; then
     echo "configured=1"

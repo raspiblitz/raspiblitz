@@ -31,7 +31,7 @@ if [ "$1" = "status" ]; then
   echo "version='${ELECTRSVERSION}'"
 
   fatpack=$(compgen -u | grep -c electrs)
-  echo "fatpack='${fatpack}'"
+  echo "fatpack=${fatpack}"
 
   if [ "${ElectRS}" = "on" ]; then
     echo "configured=1"

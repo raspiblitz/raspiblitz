@@ -39,7 +39,7 @@ if [ "$1" = "status" ]; then
 
   echo "version='${WEBUI_VERSION}'"
   fatpack=$(compgen -u | grep -c ${USERNAME})
-  echo "fatpack='${fatpack}'"
+  echo "fatpack=${fatpack}"
   echo "installed='${isActive}'"
   echo "localIP='${localip}'"
   echo "httpPort='7500'"

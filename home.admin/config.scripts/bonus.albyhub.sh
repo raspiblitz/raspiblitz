@@ -94,7 +94,7 @@ if [ "$1" = "status" ]; then
   echo "appID='${APPID}'"
   echo "version='${VERSION}'"
   fatpack=$(compgen -u | grep -c ${APPID})
-  echo "fatpack='${fatpack}'"
+  echo "fatpack=${fatpack}"
   echo "installed=${isRunning}" # installed means towards webui on or off
   if [ "${isInstalled}" == "1" ]; then
     echo "localIP='${localIP}'"

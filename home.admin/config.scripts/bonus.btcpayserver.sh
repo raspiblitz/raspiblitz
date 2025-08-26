@@ -152,7 +152,7 @@ if [ "$1" = "status" ]; then
   echo "version='${BTCPayVersion}'"
 
   fatpack=$(compgen -u | grep -c btcpay)
-  echo "fatpack='${fatpack}'"
+  echo "fatpack=${fatpack}"
 
   isInstalled=$(compgen -u | grep -c btcpay)
   echo "prepared=${isInstalled}"
