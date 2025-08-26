@@ -92,7 +92,9 @@ function installDependencies() {
 }
 
 function buildAndInstallCLbinaries() {
-  
+
+  sudo -u bitcoin python3 -m pip install --user --upgrade grpcio-tools protobuf
+
   # patch makefile
   sudo -u bitcoin sed -i -E 's/ --experimental_allow_proto3_optional(=true)?//g' Makefile
 
