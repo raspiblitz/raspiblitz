@@ -92,18 +92,17 @@ function installDependencies() {
 }
 
 function buildAndInstallCLbinaries() {
-  echo "- configure"
+  # patch makefile
+  sudo -u bitcoin sed -i 's/--experimental_allow_proto3_optional/&=true/g' Makefile
   echo
-  sudo -u bitcoin RUSTUP_HOME=/opt/rust CARGO_HOME=/opt/rust ./configure || exit 1
+  echo "########## configure"
+  sudo -u bitcoin RUSTUP_HOME=/opt/rust CARGO_HOME=/opt/rust ./configure
   echo
-  echo "- make"
-  echo
-# auf das Binary umschalten und die Options leer lassen
-  sudo -u bitcoin RUSTUP_HOME=/opt/rust CARGO_HOME=/opt/rust \
-  make PROTOC="protoc" PROTOC_OPTS="" || exit 1
-  echo
-  echo "- install to /usr/local/bin/"
-  sudo make RUSTUP_HOME=/opt/rust CARGO_HOME=/opt/rust install || exit 1
+  echo "########## make"
+  sudo -u bitcoin RUSTUP_HOME=/opt/rust CARGO_HOME=/opt/rust make -j"$(nproc)"
+  echo 
+  echo "########## install"
+  sudo make RUSTUP_HOME=/opt/rust CARGO_HOME=/opt/rust install
 }
 
 function runTests() {
