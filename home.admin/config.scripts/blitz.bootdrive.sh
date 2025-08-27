@@ -45,6 +45,18 @@ if [ $rootPartitionBytes -lt $minimumSizeByte ]; then
     fi
 fi
 
+# only if sd card
+if [ "${rootDrive}" == "mmcblk0" ]; then
+    bytesDiff=$((rootDriveBytes - rootPartitionBytes))
+    # if the system partition is 1GB smaller than the whole drive - expand
+    if [ $bytesDiff -gt 1000000000 ]; then
+        echo "# rootDrive has ${bytesDiff} bytes more than rootPartition"
+        if [ "${fsexpanded}" != "1" ]; then
+            needsExpansion=1
+        fi
+    fi
+fi
+
 if [ "${action}" == "status" ]; then
 
     echo "rootPartition='${rootPartition}'"
