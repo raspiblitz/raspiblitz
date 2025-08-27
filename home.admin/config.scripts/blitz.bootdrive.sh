@@ -31,6 +31,7 @@ action=$1
 minimumSizeByte=28023152640
 rootPartitionLine=$(sudo mount | grep " / " | cut -d " " -f 1)
 rootPartition=$(basename ${rootPartitionLine})
+rootDrive=$(basename "$(readlink -f "/sys/class/block/$rootPartition/..")")
 rootPartitionBytes=$(lsblk -b -o NAME,SIZE | grep "${rootPartition}" | awk '{print $2}')
 
 # make conclusions
@@ -47,6 +48,7 @@ if [ "${action}" == "status" ]; then
 
     echo "rootPartition='${rootPartition}'"
     echo "rootPartitionBytes=${rootPartitionBytes}"
+    echo "rootDrive='${rootDrive}'"
     echo "needsExpansion=${needsExpansion}"
     echo "fsexpanded=${fsexpanded}" # from raspiblitz.info
     echo "tooSmall=${tooSmall}"
