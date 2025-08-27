@@ -125,6 +125,7 @@ raspi_bootdir="/boot/firmware"
 
 ######################################
 # STOP flags - for manual provision
+rm /tmp/100mb.spacer 2>/dev/null # remove spacer file to create wiggle room on pishrinked images
 
 # when a file 'stop' is on the sd card bootfs partition root - stop for manual provision (raspberrypi)
 flagExists=$(ls ${raspi_bootdir}/stop 2>/dev/null | grep -c 'stop')
@@ -137,7 +138,6 @@ if [ "${flagExists}" = "1" ]; then
   /home/admin/_cache.sh set state "stop"
   /home/admin/_cache.sh set message "stopped for manual provision"
   /home/admin/_cache.sh set internet_localip "${localip}"
-  rm /tmp/100mb.spacer # remove spacer file to create wiggle room on pishrinked images
   systemctl stop background.service
   systemctl stop background.scan.service
   # log info
