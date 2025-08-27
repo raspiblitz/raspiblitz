@@ -31,7 +31,9 @@ action=$1
 minimumSizeByte=28023152640
 rootPartitionLine=$(sudo mount | grep " / " | cut -d " " -f 1)
 rootPartition=$(basename ${rootPartitionLine})
+rootDrive=$(basename "$(readlink -f "/sys/class/block/$rootPartition/..")")
 rootPartitionBytes=$(lsblk -b -o NAME,SIZE | grep "${rootPartition}" | awk '{print $2}')
+rootDriveBytes=$(lsblk -b -o NAME,SIZE | grep "${rootDrive} " | awk '{print $2}')
 
 # make conclusions
 needsExpansion=0
@@ -43,10 +45,24 @@ if [ $rootPartitionBytes -lt $minimumSizeByte ]; then
     fi
 fi
 
+# only if sd card
+if [ "${rootDrive}" == "mmcblk0" ]; then
+    bytesDiff=$((rootDriveBytes - rootPartitionBytes))
+    # if the system partition is 1GB smaller than the whole drive - expand
+    if [ $bytesDiff -gt 1000000000 ]; then
+        echo "# rootDrive has ${bytesDiff} bytes more than rootPartition"
+        if [ "${fsexpanded}" != "1" ]; then
+            needsExpansion=1
+        fi
+    fi
+fi
+
 if [ "${action}" == "status" ]; then
 
     echo "rootPartition='${rootPartition}'"
     echo "rootPartitionBytes=${rootPartitionBytes}"
+    echo "rootDrive='${rootDrive}'"
+    echo "rootDriveBytes=${rootDriveBytes}"
     echo "needsExpansion=${needsExpansion}"
     echo "fsexpanded=${fsexpanded}" # from raspiblitz.info
     echo "tooSmall=${tooSmall}"

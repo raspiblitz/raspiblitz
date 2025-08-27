@@ -125,6 +125,7 @@ raspi_bootdir="/boot/firmware"
 
 ######################################
 # STOP flags - for manual provision
+rm /tmp/100mb.spacer 2>/dev/null # remove spacer file to create wiggle room on pishrinked images
 
 # when a file 'stop' is on the sd card bootfs partition root - stop for manual provision (raspberrypi)
 flagExists=$(ls ${raspi_bootdir}/stop 2>/dev/null | grep -c 'stop')
