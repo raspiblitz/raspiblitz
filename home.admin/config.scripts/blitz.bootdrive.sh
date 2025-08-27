@@ -33,7 +33,7 @@ rootPartitionLine=$(sudo mount | grep " / " | cut -d " " -f 1)
 rootPartition=$(basename ${rootPartitionLine})
 rootDrive=$(basename "$(readlink -f "/sys/class/block/$rootPartition/..")")
 rootPartitionBytes=$(lsblk -b -o NAME,SIZE | grep "${rootPartition}" | awk '{print $2}')
-rootDriveBytes=$(lsblk -b -o NAME,SIZE | grep "${rootDrive}" | awk '{print $2}')
+rootDriveBytes=$(lsblk -b -o NAME,SIZE | grep "${rootDrive} " | awk '{print $2}')
 
 # make conclusions
 needsExpansion=0
