@@ -13,7 +13,7 @@ You have several options for the SSD: Either you install the 1TB SSD in the syst
 
 ## Create Debian VM
 
-We install Raspiblitz on a fresh Debian machine. Therefore we have to download the ISO file from Debian first. Here just choose the right processor architecture: (For me it is amd64)
+We install Raspiblitz on a fresh Debian machine. Therefore we have to download the ISO file from Debian first. Here make sure to select same version of Debian (currently "**Bookworm**") as Raspiblitz is based on and to choose the right processor architecture: (For me it is amd64)
 
 [https://www.debian.org/distrib/netinst](https://www.debian.org/distrib/netinst)
 
