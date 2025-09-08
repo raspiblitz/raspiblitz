@@ -341,7 +341,7 @@ alias frcli=\"frcli --rpcserver=localhost:8443 \
   --macaroonpath=/home/lit/.faraday/${chain}net/faraday.macaroon\"
 alias tapcli=\"tapcli --rpcserver=localhost:8443 \
   --tlscertpath=/home/lit/.lit/tls.cert \
-  --macaroonpath=/home/lit/.tapd/${chain}net/admin.macaroon\"
+  --macaroonpath=/home/lit/.tapd/data/${chain}net/admin.macaroon\"
 " | sudo tee -a /home/lit/.bashrc
 
   # open ports on firewall
