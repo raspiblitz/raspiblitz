@@ -45,7 +45,7 @@ Use your Password B to login.\n
 Hidden Service address for the Tor Browser (see LCD for QR):
 https://${toraddress}\n
 For the command line switch to 'lit' user with: 'sudo su - lit'
-use the commands: 'lncli', litcli, 'lit-loop', 'lit-pool' and 'lit-frcli'.
+use the commands: 'lncli', 'litcli', 'lit-loop', 'lit-pool', 'lit-frcli' and 'tapcli'.
 " 19 74
     sudo /home/admin/config.scripts/blitz.display.sh hide
   else
@@ -57,7 +57,7 @@ ${fingerprint}\n
 Use your Password B to login.\n
 Activate TOR to access the web interface from outside your local network.\n
 For the command line switch to 'lit' user with: 'sudo su - lit'
-use the commands: 'lncli', 'lit-loop', 'lit-pool' and 'lit-frcli'.
+use the commands: 'lncli', 'litcli', 'loop', 'pool', 'frcli' and 'tapcli'.
 " 19 63
   fi
   echo "please wait ..."
@@ -150,6 +150,16 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo ln -s /mnt/hdd/app-data/.pool/ /home/lit/.pool
     sudo chown lit:lit -R /mnt/hdd/app-data/.pool
 
+    echo "# Taproot Assets"
+    # move old data if present
+    sudo mv /home/loop/.tapd /mnt/hdd/app-data/ 2>/dev/null
+    echo "# make sure the data directory exists"
+    sudo mkdir -p /mnt/hdd/app-data/.tapd
+    echo "# symlink"
+    sudo rm -rf /home/lit/.tapd # not a symlink.. delete it silently
+    sudo ln -s /mnt/hdd/app-data/.tapd/ /home/lit/.tapd
+    sudo chown lit:lit -R /mnt/hdd/app-data/.tapd
+
     echo "Detect CPU architecture ..."
     isARM=$(uname -m | grep -c 'arm')
     isAARCH64=$(uname -m | grep -c 'aarch64')
@@ -220,6 +230,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo install -m 0755 -o root -g root -t /usr/local/bin litd
     sudo install -m 0755 -o root -g root -t /usr/local/bin loop
     sudo install -m 0755 -o root -g root -t /usr/local/bin pool
+    sudo install -m 0755 -o root -g root -t /usr/local/bin tapcli
 
     ###########
     # config  #
@@ -319,15 +330,18 @@ WantedBy=multi-user.target
 alias litcli=\"litcli --rpcserver=localhost:8443 \
   --tlscertpath=/home/lit/.lit/tls.cert \
   --macaroonpath=/home/lit/.lit/${chain}net/lit.macaroon\"
-alias lit-loop=\"loop --rpcserver=localhost:8443 \
+alias loop=\"loop --rpcserver=localhost:8443 \
   --tlscertpath=/home/lit/.lit/tls.cert \
   --macaroonpath=/home/lit/.loop/${chain}net/loop.macaroon\"
-alias lit-pool=\"pool --rpcserver=localhost:8443 \
+alias pool=\"pool --rpcserver=localhost:8443 \
   --tlscertpath=/home/lit/.lit/tls.cert \
   --macaroonpath=/home/lit/.pool/${chain}net/pool.macaroon\"
-alias lit-frcli=\"frcli --rpcserver=localhost:8443 \
+alias frcli=\"frcli --rpcserver=localhost:8443 \
   --tlscertpath=/home/lit/.lit/tls.cert \
   --macaroonpath=/home/lit/.faraday/${chain}net/faraday.macaroon\"
+alias tapcli=\"tapcli --rpcserver=localhost:8443 \
+  --tlscertpath=/home/lit/.lit/tls.cert \
+  --macaroonpath=/home/lit/.tapd/${chain}net/admin.macaroon\"
 " | sudo tee -a /home/lit/.bashrc
 
   # open ports on firewall
