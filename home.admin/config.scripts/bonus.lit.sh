@@ -45,7 +45,7 @@ Use your Password B to login.\n
 Hidden Service address for the Tor Browser (see LCD for QR):
 https://${toraddress}\n
 For the command line switch to 'lit' user with: 'sudo su - lit'
-use the commands: 'lncli', 'lit-loop', 'lit-pool' and 'lit-frcli'.
+use the commands: 'lncli', litcli, 'lit-loop', 'lit-pool' and 'lit-frcli'.
 " 19 74
     sudo /home/admin/config.scripts/blitz.display.sh hide
   else
@@ -316,6 +316,9 @@ WantedBy=multi-user.target
 
   # aliases
   echo "
+alias litcli=\"litcli --rpcserver=localhost:8443 \
+  --tlscertpath=/home/lit/.lit/tls.cert \
+  --macaroonpath=/home/lit/.lit/${chain}net/lit.macaroon\"
 alias lit-loop=\"loop --rpcserver=localhost:8443 \
   --tlscertpath=/home/lit/.lit/tls.cert \
   --macaroonpath=/home/lit/.loop/${chain}net/loop.macaroon\"
