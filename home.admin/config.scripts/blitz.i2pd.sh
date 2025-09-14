@@ -90,9 +90,9 @@ function add_repo {
 function bitcoinI2Pstatus {
   echo "# I2P related logs from the bitcoin debug log"
   echo "# Follow live with the command:"
-  echo "sudo tail -n 1000 -f /mnt/hdd/bitcoin/debug.log | grep i2p"
+  echo "sudo tail -n 1000 -f /mnt/hdd/app-data/bitcoin/debug.log | grep i2p"
   echo
-  sudo cat /mnt/hdd/bitcoin/debug.log | grep i2p
+  sudo cat /mnt/hdd/app-data/bitcoin/debug.log | grep i2p
   echo
   echo "# Running the command:"
   echo "bitcoin-cli -netinfo 4"
@@ -215,7 +215,7 @@ EOF
   echo "# Config: /etc/i2pd/i2pd.conf"
   echo "# i2pd web console: ${localip}:7070"
   echo "# Monitor i2p in bitcoind:"
-  echo "sudo tail -n 100 /mnt/hdd/bitcoin/debug.log | grep i2p"
+  echo "sudo tail -n 100 /mnt/hdd/app-data/bitcoin/debug.log | grep i2p"
   echo "bitcoin-cli -netinfo 4"
 
   exit 0

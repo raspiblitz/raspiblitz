@@ -376,7 +376,7 @@ EOF
   /home/admin/config.scripts/blitz.conf.sh set mempoolExplorer "on"
 
   echo "# needs to finish creating txindex to be functional"
-  echo "# monitor with: sudo tail -n 20 -f /mnt/hdd/bitcoin/debug.log"
+  echo "# monitor with: sudo tail -n 20 -f /mnt/hdd/app-data/bitcoin/debug.log"
 
   # Hidden Service for Mempool if Tor is active
   if [ "${runBehindTor}" = "on" ]; then

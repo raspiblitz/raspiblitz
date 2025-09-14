@@ -64,11 +64,11 @@ case $CHOICE in
     ;;
   ${network}LOG)
     if [ ${CHAIN} = signet ]; then
-      bitcoinlogpath="/mnt/hdd/bitcoin/signet/debug.log"
+      bitcoinlogpath="/mnt/hdd/app-data/bitcoin/signet/debug.log"
     elif [ ${CHAIN} = testnet ]; then
-      bitcoinlogpath="/mnt/hdd/bitcoin/testnet3/debug.log"
+      bitcoinlogpath="/mnt/hdd/app-data/bitcoin/testnet3/debug.log"
     elif [ ${CHAIN} = mainnet ]; then
-      bitcoinlogpath="/mnt/hdd/bitcoin/debug.log"      
+      bitcoinlogpath="/mnt/hdd/app-data/bitcoin/debug.log"      
     fi
     clear
     echo

@@ -44,11 +44,11 @@ elif [ ${CHAIN} = mainnet ]; then
 fi
 # bitcoinlogpath
 if [ ${CHAIN} = signet ]; then
-  bitcoinlogpath="/mnt/hdd/app-storage/bitcoin/signet/debug.log"
+  bitcoinlogpath="/mnt/hdd/app-data/bitcoin/signet/debug.log"
 elif [ ${CHAIN} = testnet ]; then
-  bitcoinlogpath="/mnt/hdd/app-storage/bitcoin/testnet3/debug.log"
+  bitcoinlogpath="/mnt/hdd/app-data/bitcoin/testnet3/debug.log"
 elif [ ${CHAIN} = mainnet ]; then
-  bitcoinlogpath="/mnt/hdd/app-storage/bitcoin/debug.log"
+  bitcoinlogpath="/mnt/hdd/app-data/bitcoin/debug.log"
 fi
 
 function addBitcoinAliases {

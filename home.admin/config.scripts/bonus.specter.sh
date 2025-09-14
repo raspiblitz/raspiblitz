@@ -410,7 +410,7 @@ EOF
       echo "# ${network}d is not running - so NOT restarting"
     fi
     echo "# The indexing takes ~10h on an RPi4 with SSD"
-    echo "# check with: sudo cat /mnt/hdd/bitcoin/debug.log | grep filter"
+    echo "# check with: sudo cat /mnt/hdd/app-data/bitcoin/debug.log | grep filter"
   else
     echo "# blockfilterindex is already active"
   fi
