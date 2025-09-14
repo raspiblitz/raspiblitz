@@ -85,6 +85,9 @@ if [ "$1" == "prestart" ]; then
   sed -i '/^test.datadir=/d' /mnt/hdd/app-data/bitcoin/bitcoin.conf
   sed -i '/^signet.datadir=/d' /mnt/hdd/app-data/bitcoin/bitcoin.conf   
   
+  # remove any whitelist entries (whitebind is used instead)
+  sed -i '/^whitelist=/d' /mnt/hdd/app-data/bitcoin/bitcoin.conf
+
   # make sure bitcoin debug file exists
   echo "# make sure bitcoin debug file exists"
   touch ${bitcoinlog_path}

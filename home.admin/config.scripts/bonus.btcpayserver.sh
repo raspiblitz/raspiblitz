@@ -59,6 +59,7 @@ function NBXplorerConfig() {
   sudo -u btcpay mkdir -p /home/btcpay/.nbxplorer/Main
   echo "\
 network=mainnet
+btcnodeendpoint=127.0.0.1:8336
 btc.rpc.user=${RPC_USER}
 btc.rpc.password=${PASSWORD_B}
 postgres=User ID=nbxplorer;Host=localhost;Port=5432;Application Name=nbxplorer;MaxPoolSize=20;Database=nbxplorermainnet;Password='raspiblitz';
@@ -670,9 +671,9 @@ WantedBy=multi-user.target
 
   NBXplorerConfig
 
-  # whitelist localhost in bitcoind
-  if ! sudo grep -Eq "^whitelist=127.0.0.1" /mnt/hdd/app-data/bitcoin/bitcoin.conf; then
-    echo "whitelist=127.0.0.1" | sudo tee -a /mnt/hdd/app-data/bitcoin/bitcoin.conf
+  # whitelist connection in bitcoind
+  if ! sudo grep -Eq "^whitebind=127.0.0.1:8336" /mnt/hdd/app-data/bitcoin/bitcoin.conf; then
+    echo "whitebind=127.0.0.1:8336" | sudo tee -a /mnt/hdd/app-data/bitcoin/bitcoin.conf
     bitcoindRestart=yes
   fi
 
