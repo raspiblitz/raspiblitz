@@ -1342,16 +1342,16 @@ if [ "$action" = "copy-system" ]; then
 
     # RASPBERRY PI
     if [ "${computerType}" = "raspberrypi" ]; then
-        echo "# RaspberryPi - set LBA flag" >> ${logFile}
-        parted /dev/${actionDevice} --script set 1 lba on
+        echo "# RaspberryPi - set ESP flag" >> ${logFile}
+        parted /dev/${actionDevice} --script set 1 esp on
         
-        # DEBUG: Log partition count after LBA flag
-        afterLBAPartitionCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
-        echo "# DEBUG: Partition count after LBA flag: ${afterLBAPartitionCount}" >> ${logFile}
+        # DEBUG: Log partition count after ESP flag
+        afterESPPartitionCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+        echo "# DEBUG: Partition count after ESP flag: ${afterESPPartitionCount}" >> ${logFile}
         
-        isFlagSetLBA=$(parted /dev/${actionDevice} --script print | grep -c 'fat32.*lba')
-        if [ ${isFlagSetLBA} -eq 0 ]; then
-            echo "error='failed to set LBA flag'"
+        isFlagSetESP=$(parted /dev/${actionDevice} --script print | grep -c 'esp')
+        if [ ${isFlagSetESP} -eq 0 ]; then
+            echo "error='failed to set ESP flag'"
             exit 1
         fi
         echo "# RaspberryPi - Bootorder" >> ${logFile}
@@ -1368,25 +1368,14 @@ if [ "$action" = "copy-system" ]; then
 
     # VM & PC
     else
-        echo "# VM & PC - set BOOT/ESP flag" >> ${logFile}
-        parted /dev/${actionDevice} --script set 1 boot on
-        
-        # DEBUG: Log partition count after boot flag
-        afterBootPartitionCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
-        echo "# DEBUG: Partition count after boot flag: ${afterBootPartitionCount}" >> ${logFile}
-        
+        echo "# VM & PC - set ESP flag" >> ${logFile}
         parted /dev/${actionDevice} --script set 1 esp on
         
         # DEBUG: Log partition count after setting ESP flag
         afterESPPartitionCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
         echo "# DEBUG: Partition count after ESP flag: ${afterESPPartitionCount}" >> ${logFile}
         
-        isFlagSetBOOT=$(parted /dev/${actionDevice} --script print | grep -c 'fat32.*boot')
-        if [ ${isFlagSetBOOT} -eq 0 ]; then
-            echo "error='failed to set BOOT flag'"
-            exit 1
-        fi
-        isFlagSetESP=$(parted /dev/${actionDevice} --script print | grep -c 'fat32.*esp')
+        isFlagSetESP=$(parted /dev/${actionDevice} --script print | grep -c 'esp')
         if [ ${isFlagSetESP} -eq 0 ]; then
             echo "error='failed to set ESP flag'"
             exit 1
@@ -1721,7 +1710,7 @@ if [ "$action" = "setup" ]; then
             afterWipeFsCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
             echo "# DEBUG SETUP SYSTEM: Partition count after wipefs: ${afterWipeFsCount}" >> ${logFile}
             
-            parted /dev/${actionDevice} --script mklabel msdos
+            parted /dev/${actionDevice} --script mklabel gpt
             
             # DEBUG: Log partition count after mklabel
             afterMklabelCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
@@ -1770,16 +1759,16 @@ if [ "$action" = "setup" ]; then
 
             # RASPBERRY PI
             if [ "${computerType}" = "raspberrypi" ]; then
-                echo "# RaspberryPi - set LBA flag" >> ${logFile}
-                parted /dev/${actionDevice} --script set 1 lba on
+                echo "# RaspberryPi - set ESP flag" >> ${logFile}
+                parted /dev/${actionDevice} --script set 1 esp on
                 
-                # DEBUG: Log partition count after LBA flag
-                afterLBASystemCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
-                echo "# DEBUG SETUP SYSTEM: Partition count after LBA flag: ${afterLBASystemCount}" >> ${logFile}
+                # DEBUG: Log partition count after ESP flag
+                afterESPSysteemCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
+                echo "# DEBUG SETUP SYSTEM: Partition count after ESP flag: ${afterESPSysteemCount}" >> ${logFile}
                 
-                isFlagSetLBA=$(parted /dev/${actionDevice} --script print | grep -c 'fat32.*lba')
-                if [ ${isFlagSetLBA} -eq 0 ]; then
-                    echo "error='failed to set LBA flag'"
+                isFlagSetESP=$(parted /dev/${actionDevice} --script print | grep -c 'esp')
+                if [ ${isFlagSetESP} -eq 0 ]; then
+                    echo "error='failed to set ESP flag'"
                     exit 1
                 fi
                 echo "# RaspberryPi - Bootorder" >> ${logFile}
@@ -1796,25 +1785,14 @@ if [ "$action" = "setup" ]; then
 
             # VM & PC
             else
-                echo "# VM & PC - set BOOT/ESP flag" >> ${logFile}
-                parted /dev/${actionDevice} --script set 1 boot on
-                
-                # DEBUG: Log partition count after boot flag
-                afterBootFlagSystemCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
-                echo "# DEBUG SETUP SYSTEM: Partition count after boot flag: ${afterBootFlagSystemCount}" >> ${logFile}
-                
+                echo "# VM & PC - set ESP flag" >> ${logFile}
                 parted /dev/${actionDevice} --script set 1 esp on
                 
                 # DEBUG: Log partition count after setting ESP flag
                 afterESPFlagSystemCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
                 echo "# DEBUG SETUP SYSTEM: Partition count after ESP flag: ${afterESPFlagSystemCount}" >> ${logFile}
                 
-                isFlagSetBOOT=$(parted /dev/${actionDevice} --script print | grep -c 'fat32.*boot')
-                if [ ${isFlagSetBOOT} -eq 0 ]; then
-                    echo "error='failed to set BOOT flag'"
-                    exit 1
-                fi
-                isFlagSetESP=$(parted /dev/${actionDevice} --script print | grep -c 'fat32.*esp')
+                isFlagSetESP=$(parted /dev/${actionDevice} --script print | grep -c 'esp')
                 if [ ${isFlagSetESP} -eq 0 ]; then
                     echo "error='failed to set ESP flag'"
                     exit 1
@@ -1843,25 +1821,25 @@ if [ "$action" = "setup" ]; then
         afterWipeFsStorageCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
         echo "# DEBUG SETUP STORAGE: Partition count after wipefs: ${afterWipeFsStorageCount}" >> ${logFile}
         
-        parted /dev/${actionDevice} --script mklabel msdos >> ${logFile}
+    parted /dev/${actionDevice} --script mklabel gpt >> ${logFile}
         
         # DEBUG: Log partition count after mklabel
         afterMklabelStorageCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
         echo "# DEBUG SETUP STORAGE: Partition count after mklabel: ${afterMklabelStorageCount}" >> ${logFile}
         
-        parted /dev/${actionDevice} --script mkpart primary fat32 1MiB 513MiB >> ${logFile}
+    parted /dev/${actionDevice} --script mkpart primary fat32 1MiB 513MiB >> ${logFile}
         
         # DEBUG: Log partition count after first mkpart
         afterFirstMkpartStorageCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
         echo "# DEBUG SETUP STORAGE: Partition count after first mkpart: ${afterFirstMkpartStorageCount}" >> ${logFile}
         
-        parted /dev/${actionDevice} --script mkpart primary ext4 541MB 65GB >> ${logFile}
+    parted /dev/${actionDevice} --script mkpart primary ext4 541MB 65GB >> ${logFile}
         
         # DEBUG: Log partition count after second mkpart
         afterSecondMkpartStorageCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
         echo "# DEBUG SETUP STORAGE: Partition count after second mkpart: ${afterSecondMkpartStorageCount}" >> ${logFile}
         
-        parted /dev/${actionDevice} --script mkpart primary ext4 65GB 100% >> ${logFile}
+    parted /dev/${actionDevice} --script mkpart primary ext4 65GB 100% >> ${logFile}
         
         # DEBUG: Log partition count after third mkpart
         afterThirdMkpartStorageCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
@@ -1938,13 +1916,13 @@ if [ "$action" = "setup" ]; then
         afterWipeFsNoBootCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
         echo "# DEBUG SETUP STORAGE NO-BOOT: Partition count after wipefs: ${afterWipeFsNoBootCount}" >> ${logFile}
         
-        parted /dev/${actionDevice} --script mklabel msdos >> ${logFile}
+    parted /dev/${actionDevice} --script mklabel gpt >> ${logFile}
         
         # DEBUG: Log partition count after mklabel
         afterMklabelNoBootCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
         echo "# DEBUG SETUP STORAGE NO-BOOT: Partition count after mklabel: ${afterMklabelNoBootCount}" >> ${logFile}
         
-        parted /dev/${actionDevice} --script mkpart primary ext4 1MB 100% >> ${logFile}
+    parted /dev/${actionDevice} --script mkpart primary ext4 1MB 100% >> ${logFile}
         
         # DEBUG: Log partition count after mkpart
         afterMkpartNoBootCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
@@ -2007,13 +1985,13 @@ if [ "$action" = "setup" ]; then
         afterWipeFsDataCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
         echo "# DEBUG SETUP DATA: Partition count after wipefs: ${afterWipeFsDataCount}" >> ${logFile}
         
-        parted /dev/${actionDevice} --script mklabel msdos
+    parted /dev/${actionDevice} --script mklabel gpt
         
         # DEBUG: Log partition count after mklabel
         afterMklabelDataCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
         echo "# DEBUG SETUP DATA: Partition count after mklabel: ${afterMklabelDataCount}" >> ${logFile}
         
-        parted /dev/${actionDevice} --script mkpart primary ext4 1MB 100%
+    parted /dev/${actionDevice} --script mkpart primary ext4 1MB 100%
         
         # DEBUG: Log partition count after mkpart
         afterMkpartDataCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
