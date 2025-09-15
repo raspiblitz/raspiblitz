@@ -789,6 +789,7 @@ echo "" >> ${logFile}
 echo "*** Repair Bitcoin Conf (if needed)" >> ${logFile}
 confExists="$(ls /mnt/hdd/app-data/${network} | grep -c "${network}.conf")"
 if [ ${confExists} -eq 0 ]; then
+  /home/admin/_cache.sh set message "Update HDD layout (can take long time)"
   echo "Doing init of ${network}.conf" >> ${logFile}
   cp /home/admin/assets/bitcoin.conf /mnt/hdd/app-data/bitcoin/bitcoin.conf
   chown bitcoin:bitcoin /mnt/hdd/app-data/bitcoin/bitcoin.conf

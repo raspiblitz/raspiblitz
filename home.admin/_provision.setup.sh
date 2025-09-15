@@ -79,6 +79,7 @@ cp /home/admin/assets/${network}.conf /home/admin/.${network}/${network}.conf
 chown -R admin:admin /home/admin/.${network} >>${logFile} 2>&1
 
 # make sure all directories are linked
+/home/admin/_cache.sh set message "Update HDD layout (can take long time)"
 /home/admin/config.scripts/blitz.data.sh link >> ${logFile}
 
 # test bitcoin config
@@ -114,6 +115,7 @@ if [ "${network}" == "bitcoin" ]; then
   fi
 fi
 
+
 # start network service
 echo ""
 echo "*** Start ${network} (SETUP) ***" >> ${logFile}
@@ -134,7 +136,7 @@ do
   sync
   loopcount=$(($loopcount +1))
   if [ ${loopcount} -gt 50 ]; then
-    /home/admin/config.scripts/blitz.error.sh _provision.setup.sh "btc-testrun-fail" "${network}d not running" "sudo -u bitcoin ${network}-cli getblockchaininfo | grep "initialblockdownload" -c --> ${bitcoinRunning}" ${logFile}
+    /home/admin/config.scripts/blitz.error.sh _provision.setup.sh "btc-testrun-fail" "${network}d not running" "sudo -u bitcoin ${network}-cli getblockchaininfo | grep 'initialblockdownload' -c --> ${bitcoinRunning}" ${logFile}
     exit 4
   fi
 done
@@ -198,6 +200,7 @@ if [ "${lightning}" == "lnd" ]; then
   fi
 
   # make sure all directories are linked
+  /home/admin/_cache.sh set message "Update HDD layout (can take long time)"
   /home/admin/config.scripts/blitz.data.sh link
 
   # check if now a config exists
