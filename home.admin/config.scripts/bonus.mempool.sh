@@ -148,6 +148,11 @@ if [ "$1" = "install" ]; then
   echo "# npm install for mempool explorer (frontend)"
 
   cd frontend || exit 1
+
+  # patch to fix #5122 - remove on next mempool update because they fixed it
+  sudo -u mempool sed -i '/^function download(filename, url) {/a\  if (!url) return;' sync-assets.js
+  # end patch
+
   if ! sudo -u mempool NG_CLI_ANALYTICS=false npm ci; then
     echo "FAIL - npm install did not run correctly, aborting"
     exit 1
