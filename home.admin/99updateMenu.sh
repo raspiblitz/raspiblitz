@@ -459,7 +459,13 @@ Do you really want to update Bitcoin Core now?
 
       error=""
       warn=""
-      sudo -u admin /home/admin/config.scripts/bitcoin.update.sh tested
+      sudo -u admin /home/admin/config.scripts/bitcoin.update.sh tested || {
+        whiptail --title "ERROR" --msgbox "bitcoin.update.sh failed
+
+It was called at $(readlink -f "${BASH_SOURCE[0]}"):${LINENO}
+Consider running that manually to debug " 10 80
+        exit 0
+      }
       whiptail \
         --title " Bitcoin Core update " \
         --yes-button "Reboot" \
