@@ -274,6 +274,13 @@ elif [ "${eventID}" == "waitsetup" ] && [ "${mode}" == "ssh" ]; then
 Please wait ...
 " 5 22
 
+elif [ "${eventID}" == "waitprovision" ] && [ "${contentString}" == "hdd-migrate" ]; then
+
+    dialog --backtitle "${backtitle}" --cr-wrap --infobox "
+Changing Data Layout of HDD/SSD/NVMe
+Can take looooooong time - just wait.
+" 6 44
+
 elif [ "${eventID}" == "waitprovision" ]; then
 
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "

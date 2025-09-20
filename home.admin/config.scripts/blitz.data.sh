@@ -7,7 +7,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
     >&2 echo "# blitz.data.sh setup STOARGE [device] combinedData=[0|1] addSystemPartition=[0|1]"
     >&2 echo "# blitz.data.sh setup SYSTEM [device]"
     >&2 echo "# blitz.data.sh setup DATA [device]"
-    >&2 echo "# blitz.data.sh clean STOARGE [device] combinedData=[0|1] addSystemPartition=[0|1]"
+    >&2 echo "# blitz.data.sh clean STOARGE [device] combinedData=[0|1]"
     >&2 echo "# blitz.data.sh clean SYSTEM [device]"
     >&2 echo "# blitz.data.sh clean DATA [device]"
     >&2 echo "# blitz.data.sh copy-system [device] [system|storage]"
@@ -1142,6 +1142,7 @@ if [ "$action" = "link" ]; then
     mkdir -p "${dataMountedPath}/app-data/bitcoin"
     chown bitcoin:bitcoin "${dataMountedPath}/app-data/bitcoin"
     if [ -d "${storageMountedPath}/bitcoin" ]; then
+        /home/admin/_cache.sh set message "hdd-migrate"
         echo "# moving old data from ${storageMountedPath}/bitcoin to ${storageMountedPath}/app-storage/bitcoin"
         rsync -a --remove-source-files --prune-empty-dirs ${storageMountedPath}/bitcoin/ ${storageMountedPath}/app-storage/bitcoin/
         if [ $? -ne 0 ]; then
@@ -1180,6 +1181,7 @@ if [ "$action" = "link" ]; then
     mkdir -p "${dataMountedPath}/app-data/lnd"
     chown bitcoin:bitcoin "${dataMountedPath}/app-data/lnd"
     if [ -d "${storageMountedPath}/lnd" ]; then
+        /home/admin/_cache.sh set message "hdd-migrate"
         echo "# moving old data from ${storageMountedPath}/lnd to ${dataMountedPath}/app-data/lnd"
         rsync -a --remove-source-files --prune-empty-dirs ${storageMountedPath}/lnd/ ${dataMountedPath}/app-data/lnd/
         if [ $? -ne 0 ]; then
@@ -1202,6 +1204,7 @@ if [ "$action" = "link" ]; then
     mkdir -p "${dataMountedPath}/app-data/tor"
     chown debian-tor:debian-tor "${dataMountedPath}/app-data/tor"
     if [ -d "${storageMountedPath}/tor" ]; then
+        /home/admin/_cache.sh set message "hdd-migrate"
         echo "# moving old data from ${storageMountedPath}/tor to ${dataMountedPath}/app-data/tor"
         rsync -a --remove-source-files --prune-empty-dirs ${storageMountedPath}/tor/ ${dataMountedPath}/app-data/tor/
         if [ $? -ne 0 ]; then
@@ -1896,7 +1899,7 @@ if [ "$action" = "setup" ]; then
         echo "storagePartition='${actionDevicePartitionBase}3'"
         echo "# storagePartition(${actionDevicePartitionBase}3)" >> ${logFile}
 
-    # STORAGE without System partition (if addSystemPartition=0 or not set)
+    # STORAGE without System partition (if addSystemPartition=0)
     elif [ "${actionType}" = "STORAGE" ] && [ ${actionCreateSystemPartition} -eq 0 ]; then
         echo "# STORAGE partitioning (no boot)" >> ${logFile}
         
@@ -2225,16 +2228,23 @@ if [ "$action" = "recover" ] || [ "$action" = "clean" ]; then
             fi
             # in both setups /mnt/disk_storage/app-storage should exist
             # delete all data in /mnt/disk_storage except for /mnt/disk_storage/app-storage
-            echo "# Cleaning storage partition - preserving app-storage" >> ${logFile}
+            # Cleaning storage partition - preserving app-storage
+            echo "# Cleaning storage partition - preserving blockchain (blocks & chainstate)" >> ${logFile}
             
-            # DEBUG: Log partition count before cleaning operations
-            beforeCleaningCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
-            echo "# DEBUG CLEAN STORAGE: Partition count before cleaning operations: ${beforeCleaningCount}" >> ${logFile}
-            
-            # TODO: This is not working yet .. refactor later
-            find /mnt/disk_storage -maxdepth 1 -not -name "app-storage" -not -name "." -not -name ".." -exec rm -rf {} \;
-            find /mnt/disk_storage/app-storage -maxdepth 1 -not -name "bitcoin" -not -name "." -not -name ".." -exec rm -rf {} \;
-            find /mnt/disk_storage/app-storage/bitcoin -maxdepth 1 -not -name "blocks" -name "chainstate" -not -name "." -not -name ".." -exec rm -rf {} \;
+            # Alte Logik löschte versehentlich chainstate. Neu:
+            # 1. Auf Root der Partition alles löschen außer app-storage
+            find /mnt/disk_storage -mindepth 1 -maxdepth 1 \
+                -not -name "app-storage" -exec rm -rf {} \;
+            # 2. In app-storage alles löschen außer bitcoin
+            find /mnt/disk_storage/app-storage -mindepth 1 -maxdepth 1 \
+                -not -name "bitcoin" -exec rm -rf {} \;
+            # 3. In bitcoin alles löschen außer blocks und chainstate (beides behalten)
+            if [ -d /mnt/disk_storage/app-storage/bitcoin ]; then
+              find /mnt/disk_storage/app-storage/bitcoin -mindepth 1 -maxdepth 1 \
+                -not -name "blocks" -not -name "chainstate" -exec rm -rf {} \;
+            fi
+
+            # Logging nach Cleanup
             ls -la /mnt/disk_storage >> ${logFile}
             ls -la /mnt/disk_storage/app-storage >> ${logFile}
             ls -la /mnt/disk_storage/app-storage/bitcoin >> ${logFile}
