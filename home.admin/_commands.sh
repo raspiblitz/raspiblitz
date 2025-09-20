@@ -179,7 +179,7 @@ function clean() {
   fi
   confirmMsg clean
   if [ $confirm -eq 1 ]; then
-    sudo /home/admin/config.scripts/blitz.data.sh clean STORAGE "${storageDevice}" combinedData="${combinedDataStorage}" $firstPARAM
+    sudo /home/admin/config.scripts/blitz.data.sh clean STORAGE "${storageDevice}"
   fi
 }
 
