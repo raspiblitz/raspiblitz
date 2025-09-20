@@ -67,10 +67,6 @@ deactivateBitcoinOverTor()
   echo "onlynet=ipv4" | sudo tee -a "/home/bitcoin/.${network}/${network}.conf" >/dev/null
   echo "onlynet=ipv6" | sudo tee -a "/home/bitcoin/.${network}/${network}.conf" >/dev/null
 
-  # DNS / DNS Seeding wieder aktivieren
-  echo "dnsseed=1" | sudo tee -a "/home/bitcoin/.${network}/${network}.conf" >/dev/null
-  echo "dns=1" | sudo tee -a "/home/bitcoin/.${network}/${network}.conf" >/dev/null
-
   # remove empty lines
   sudo sed -i '/^ *$/d' "/home/bitcoin/.${network}/${network}.conf"
 
