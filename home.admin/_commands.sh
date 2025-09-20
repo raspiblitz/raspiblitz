@@ -166,7 +166,6 @@ function release() {
 # command: clean
 function clean() {
   firstPARAM=$1
-  echo "Command to prepare your RaspiBlitz installation for sd card image:"
   echo "- deletes all data from drive - just keeps blocks and chainstate (LOSS OF FUNDS POSSIBLE!)"
   source <(/home/admin/_cache.sh get state)
   if [ "$state" != "waitsetup" ]; then
@@ -180,7 +179,7 @@ function clean() {
   fi
   confirmMsg clean
   if [ $confirm -eq 1 ]; then
-    /home/admin/config.scripts/blitz.data.sh clean STORAGE "${storageDevice}" combinedDataStorage="${combinedDataStorage}" $firstPARAM
+    sudo /home/admin/config.scripts/blitz.data.sh clean STORAGE "${storageDevice}" combinedDataStorage="${combinedDataStorage}" $firstPARAM
   fi
 }
 
