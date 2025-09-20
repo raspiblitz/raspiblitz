@@ -1142,6 +1142,7 @@ if [ "$action" = "link" ]; then
     mkdir -p "${dataMountedPath}/app-data/bitcoin"
     chown bitcoin:bitcoin "${dataMountedPath}/app-data/bitcoin"
     if [ -d "${storageMountedPath}/bitcoin" ]; then
+        /home/admin/_cache.sh set message "hdd-migrate"
         echo "# moving old data from ${storageMountedPath}/bitcoin to ${storageMountedPath}/app-storage/bitcoin"
         rsync -a --remove-source-files --prune-empty-dirs ${storageMountedPath}/bitcoin/ ${storageMountedPath}/app-storage/bitcoin/
         if [ $? -ne 0 ]; then
@@ -1180,6 +1181,7 @@ if [ "$action" = "link" ]; then
     mkdir -p "${dataMountedPath}/app-data/lnd"
     chown bitcoin:bitcoin "${dataMountedPath}/app-data/lnd"
     if [ -d "${storageMountedPath}/lnd" ]; then
+        /home/admin/_cache.sh set message "hdd-migrate"
         echo "# moving old data from ${storageMountedPath}/lnd to ${dataMountedPath}/app-data/lnd"
         rsync -a --remove-source-files --prune-empty-dirs ${storageMountedPath}/lnd/ ${dataMountedPath}/app-data/lnd/
         if [ $? -ne 0 ]; then
@@ -1202,6 +1204,7 @@ if [ "$action" = "link" ]; then
     mkdir -p "${dataMountedPath}/app-data/tor"
     chown debian-tor:debian-tor "${dataMountedPath}/app-data/tor"
     if [ -d "${storageMountedPath}/tor" ]; then
+        /home/admin/_cache.sh set message "hdd-migrate"
         echo "# moving old data from ${storageMountedPath}/tor to ${dataMountedPath}/app-data/tor"
         rsync -a --remove-source-files --prune-empty-dirs ${storageMountedPath}/tor/ ${dataMountedPath}/app-data/tor/
         if [ $? -ne 0 ]; then
