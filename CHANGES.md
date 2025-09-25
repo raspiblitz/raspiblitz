@@ -1,7 +1,5 @@
 ## What's new in Version 1.12.0 of RaspiBlitz?
 
-Work In Progress - Still Release Candidates
-
 Introducing a new drive layout, now allowing to even boot and running the system from NVMe.
 
 Features:
