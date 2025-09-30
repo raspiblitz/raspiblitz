@@ -48,6 +48,13 @@ if [ "$1" == "prestart" ]; then
     exit 1
   fi
 
+  ##### FILE PERMISSIONS #####
+  # make sure is readable by group
+  chmod g+rx /mnt/hdd/app-data/lnd/data
+  chmod g+rx /mnt/hdd/app-data/lnd/data/chain
+  chmod g+rx /mnt/hdd/app-data/lnd/data/chain/${network}
+  chmod g+rx /mnt/hdd/app-data/lnd/data/chain/${network}/${chain}net
+
   ##### CLEAN UP #####
 
   # all lines with just spaces to empty lines

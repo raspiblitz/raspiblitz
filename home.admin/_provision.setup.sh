@@ -188,11 +188,13 @@ if [ "${lightning}" == "lnd" ]; then
     fi
     # fix config after import
     /home/admin/config.scripts/lnd.install.sh on mainnet
+    /home/admin/config.scripts/lnd.credentials.sh sync mainnet >> $logFile
   else
     # preparing new LND config (raspiblitz.setup)
     echo "Creating new LND config ..." >> ${logFile}
     /home/admin/config.scripts/lnd.install.sh on mainnet
     /home/admin/config.scripts/lnd.setname.sh mainnet ${hostname}
+    /home/admin/config.scripts/lnd.credentials.sh sync mainnet >> $logFile
   fi
 
   # make sure all directories are linked
@@ -215,6 +217,12 @@ if [ "${lightning}" == "lnd" ]; then
 
   # copy lnd service
   cp /home/admin/assets/lnd.service /etc/systemd/system/lnd.service >> ${logFile}
+
+  # set permissions
+  echo "# /mnt/hdd/app-data/lnd" >> ${logFile}
+  ls -la /mnt/hdd/app-data/lnd >> ${logFile}
+  chown -R bitcoin:bitcoin /mnt/hdd/app-data/lnd >> ${logFile}
+  ls -la /mnt/hdd/app-data/lnd >> ${logFile}
 
   # start lnd up
   echo "Starting LND Service ..." >> ${logFile}

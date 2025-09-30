@@ -19,7 +19,7 @@ PGPpubkeyFingerprint="4403F1DFBE779457"
 # check and load raspiblitz config
 # to know which network is running
 source /home/admin/raspiblitz.info
-source /mnt/hdd/app-data/raspiblitz.conf
+source /mnt/hdd/app-data/raspiblitz.conf 2>/dev/null
 
 if [ "$1" = "status" ] || [ "$1" = "menu" ]; then
 
@@ -27,11 +27,15 @@ if [ "$1" = "status" ] || [ "$1" = "menu" ]; then
   isInstalled=$(sudo ls /etc/systemd/system/thunderhub.service 2>/dev/null | grep -c 'thunderhub.service')
   localip=$(hostname -I | awk '{print $1}')
   toraddress=$(sudo cat /mnt/hdd/app-data/tor/thunderhub/hostname 2>/dev/null)
-  fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout | cut -d"=" -f2)
+  fingerprint=$(openssl x509 -in /mnt/hdd/app-data/nginx/tls.cert -fingerprint -noout 2>/dev/null | cut -d"=" -f2)
   httpPort="3010"
   httpsPort="3011"
 
   if [ "$1" = "status" ]; then
+
+    fatpack=$(compgen -u | grep -c thunderhub)
+    echo "fatpack=${fatpack}"
+
     echo "version='${THUBVERSION}'"
     echo "installed='${isInstalled}'"
     echo "localIP='${localip}'"

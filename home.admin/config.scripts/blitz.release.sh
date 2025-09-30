@@ -97,6 +97,11 @@ sudo systemctl disable ssh
 sudo rm /etc/ssh/ssh_host_*
 echo "OK"
 
+# write a 100mb file - so that after pishrink the partion has wiggle room on first start deleting this file
+echo "writing 100mb SPACER to /tmp/100mb.spacer"
+sudo dd if=/dev/zero of=/tmp/100mb.spacer bs=1M count=100
+echo "OK"
+
 # make sure file system is clean and ready for release
 echo
 echo "fsck on first boot ..."

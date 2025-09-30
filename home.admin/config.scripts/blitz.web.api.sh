@@ -155,8 +155,8 @@ if [ "$1" = "update-config" ]; then
 
   else
     echo "# CONFIG Web API ... still in setup, skip bitcoin & lightning"
-    sed -i "s/^BAPI_NETWORK=.*/BAPI_NETWORK=/g" ./.env
-    sed -i "s/^BAPI_LN_NODE=.*/BAPI_LN_NODE=/g" ./.env
+    sed -i "s/^BAPI_NETWORK=.*/BAPI_NETWORK=none/g" ./.env
+    sed -i "s/^BAPI_LN_NODE=.*/BAPI_LN_NODE=none/g" ./.env
   fi
 
   # Note: Celery services might need a restart if config changes affect them.
@@ -327,11 +327,13 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   if ! sudo -u blitzapi ./venv/bin/pip install --upgrade Cython; then
     echo "error='pip install upgrade Cython'"
   fi
-  echo "# Installing dependencies from requirements.txt..."
-  if ! sudo -u blitzapi ./venv/bin/pip install -r requirements.txt --no-deps; then
+  echo "# Installing dependencies from requirements.txt ..."
+  sudo -u blitzapi env PIP_CONFIG_FILE=/dev/null PIP_INDEX_URL=https://pypi.org/simple PIP_EXTRA_INDEX_URL= ./venv/bin/pip install --no-cache-dir rich-toolkit==0.14.6
+  if ! sudo -u blitzapi ./venv/bin/pip install --no-cache-dir -r requirements.txt --no-deps; then
     echo "error='pip install failed'"
     exit 1
   fi
+
 
   # prepare systemd service
   echo "# Creating blitzapi systemd service..."

@@ -17,7 +17,7 @@ PGPsigner="wiz"
 PGPpubkeyLink="https://github.com/wiz.gpg"
 PGPpubkeyFingerprint="A394E332255A6173"
 
-source /mnt/hdd/app-data/raspiblitz.conf
+source /mnt/hdd/app-data/raspiblitz.conf 2>/dev/null
 
 # show info menu
 if [ "$1" = "menu" ]; then
@@ -68,8 +68,8 @@ if [ "$1" = "status" ]; then
 
   echo "version='${pinnedVersion}'"
 
-  isInstalled=$(compgen -u | grep -c mempool)
-  echo "codebase=${isInstalled}"
+  fatpack=$(compgen -u | grep -c mempool)
+  echo "fatpack=${fatpack}"
 
   if [ "${mempoolExplorer}" = "on" ]; then
     echo "configured=1"
@@ -148,6 +148,11 @@ if [ "$1" = "install" ]; then
   echo "# npm install for mempool explorer (frontend)"
 
   cd frontend || exit 1
+
+  # patch to fix #5122 - remove on next mempool update because they fixed it
+  sudo -u mempool sed -i '/^function download(filename, url) {/a\  if (!url) return;' sync-assets.js
+  # end patch
+
   if ! sudo -u mempool NG_CLI_ANALYTICS=false npm ci; then
     echo "FAIL - npm install did not run correctly, aborting"
     exit 1
@@ -376,7 +381,7 @@ EOF
   /home/admin/config.scripts/blitz.conf.sh set mempoolExplorer "on"
 
   echo "# needs to finish creating txindex to be functional"
-  echo "# monitor with: sudo tail -n 20 -f /mnt/hdd/bitcoin/debug.log"
+  echo "# monitor with: sudo tail -n 20 -f /mnt/hdd/app-data/bitcoin/debug.log"
 
   # Hidden Service for Mempool if Tor is active
   if [ "${runBehindTor}" = "on" ]; then

@@ -1,7 +1,5 @@
 ## What's new in Version 1.12.0 of RaspiBlitz?
 
-Work In Progress - Still Release Candidates
-
 Introducing a new drive layout, now allowing to even boot and running the system from NVMe.
 
 Features:
@@ -10,11 +8,12 @@ Features:
 - New: Copy from old HDD/SSD/NVMe
 - New: Optional separation of Data & Storage/Blockchain drives with Auto-Expand for Proxmox
 - New: Bitcoin Knots 28.1 (as experimental option in SETTINGS ssh-menu)
-- Update: RaspberryOS arm64 base image 2024-11-19 (Debian 12 Bookworm) [details](https://downloads.raspberrypi.com/raspios_full_arm64/release_notes.txt)
+- Update: RaspberryOS arm64 base image 2025-05-13 (Debian 12 Bookworm) [details](https://downloads.raspberrypi.com/raspios_full_arm64/release_notes.txt)
 - Update: amd64 base image: debian-12.8.0-amd64-netinst.iso [details](https://www.debian.org/releases/stable/amd64/release-notes/ch-whats-new.en.html)
 - Update: Bitcoin Core v29.0 [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-29.0.md)
-- Update: LND v0.19.0-beta [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.19.0-beta)
-- Update: LNbits 1.0.0 [details](https://github.com/lnbits/lnbits/releases/tag/v1.0.0)
+- Update: Core Lightning v25.05 [details](https://github.com/ElementsProject/lightning/releases/tag/v25.05)
+- Update: LND v0.19.3-beta [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.19.3-beta)
+- Update: LNbits 1.2.1 [details](https://github.com/lnbits/lnbits/releases/tag/v1.2.0)
 - Update: AlbyHub v1.17.2 [details](https://github.com/getAlby/hub/releases/tag/v1.17.2)
 - Update: Lightning Terminal v0.14.1-alpha [details](https://github.com/lightninglabs/lightning-terminal/releases/tag/v0.14.1-alpha)
 - Update: Mempool 3.2.1 [details](hhttps://github.com/mempool/mempool/releases/tag/v3.2.1)
@@ -27,6 +26,7 @@ Features:
 - Update: Helipad (Podcasting 2.0 Boostagram reader) v0.2.1 [details](https://github.com/Podcastindex-org/helipad/)
 - Update: Jam (JoinMarket Web UI) v0.4.0 [details](https://github.com/joinmarket-webui/jam/releases/tag/v0.4.0)
 - Update: JoininBox v0.8.4 [details](https://github.com/openoms/joininbox/releases/tag/v0.8.4)
+- Update: BTC-RPC-Explorer v3.5.1 [details](https://github.com/janoside/btc-rpc-explorer/blob/master/CHANGELOG.md#v351)
 - Remove: Migration from Umbrel, MyNode, Citadel (because of new drive layout with boot option)
 
 ## What's new in Version 1.11.4 of RaspiBlitz?

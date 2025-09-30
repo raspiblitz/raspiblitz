@@ -125,6 +125,7 @@ raspi_bootdir="/boot/firmware"
 
 ######################################
 # STOP flags - for manual provision
+rm /tmp/100mb.spacer 2>/dev/null # remove spacer file to create wiggle room on pishrinked images
 
 # when a file 'stop' is on the sd card bootfs partition root - stop for manual provision (raspberrypi)
 flagExists=$(ls ${raspi_bootdir}/stop 2>/dev/null | grep -c 'stop')
@@ -771,7 +772,7 @@ if [ "${scenario}" != "ready" ] ; then
   # create a place holder partition for future system use
   # ONLY when a dedicated system device is available - dont create a system partition 
   createSystemPartion=1
-  if [ ${#systemDevice} -gt 0 ]; then
+  if [ ${#systemDevice} -gt 0 ] && [ "${systemDevice}" != "${storageDevice}" ]; then
     createSystemPartion=0
   fi
 
@@ -793,11 +794,13 @@ if [ "${scenario}" != "ready" ] ; then
 
     echo "FORMAT/RECOVER DRIVES" >> ${logFile}
     /home/admin/_cache.sh set state "hdd-format"
-    /home/admin/_cache.sh set message "formatting drives"
+    /home/admin/_cache.sh set message "${setupCommand}"
 
     # STORAGE
+    echo "#### STORAGE ####" >> ${logFile}
     echo "# storageDevice(${storageDevice}) storageMountedPath(${storageMountedPath})" >> ${logFile}
     if [ ${#storageDevice} -gt 0 ] && [ ${#storageMountedPath} -eq 0 ]; then
+      echo "STORAGE: ${setupCommand} STORAGE start" >> ${logFile}
       error=""
       source <(/home/admin/config.scripts/blitz.data.sh ${setupCommand} STORAGE "${storageDevice}" "${combinedDataStorage}" "${createSystemPartion}")
       if [ "${error}" != "" ]; then
@@ -807,12 +810,16 @@ if [ "${scenario}" != "ready" ] ; then
         exit 1
       fi
       echo "STORAGE: ${setupCommand} STORAGE done" >> ${logFile}
+    else
+      echo "STORAGE: ${setupCommand} STORAGE skipped - already mounted" >> ${logFile}
     fi
 
     # SYSTEM
+    echo "#### SYSTEM ####" >> ${logFile}
     echo "# systemDevice(${systemDevice}) systemWarning(${systemWarning})" >> ${logFile}
-    if [ ${#systemDevice} -gt 0 ] && [ "${bootFromStorage}" = "0" ] && [ ${#systemWarning} -eq 0 ]; then
+    if [ ${#systemDevice} -gt 0 ] && [ "${systemDevice}" != "${storageDevice}" ] && [ "${bootFromStorage}" = "0" ] && [ ${#systemWarning} -eq 0 ]; then
       error=""
+      echo "SYSTEM: ${setupCommand} SYSTEM start" >> ${logFile}
       source <(/home/admin/config.scripts/blitz.data.sh ${setupCommand} SYSTEM "${systemDevice}")
       if [ "${error}" != "" ]; then
         echo "FAIL: '${setupCommand} SYSTEM' failed error(${error})" >> ${logFile}
@@ -824,13 +831,17 @@ if [ "${scenario}" != "ready" ] ; then
     else
       if [ "${systemMountedPath}" = "/" ]; then
         echo "SYSTEM: ${setupCommand} SYSTEM skipped - its active system" >> ${logFile}
+      else
+        echo "SYSTEM: ${setupCommand} SYSTEM skipped - already mounted" >> ${logFile}
       fi
     fi
 
     # DATA
+    echo "#### DATA ####" >> ${logFile}
     echo "# dataDevice(${dataDevice}) dataWarning(${dataWarning})" >> ${logFile}
-    if [ ${#dataDevice} -gt 0 ] && [ ${#dataWarning} -eq 0 ]; then
+    if [ ${#dataDevice} -gt 0 ] && [ "${dataDevice}" != "${storageDevice}" ] && [ ${#dataWarning} -eq 0 ]; then
       error=""
+      echo "DATA: ${setupCommand} DATA start" >> ${logFile}
       source <(/home/admin/config.scripts/blitz.data.sh ${setupCommand} DATA "${dataDevice}")
       if [ "${error}" != "" ]; then
         echo "FAIL: '${setupCommand} DATA' failed error(${error})" >> ${logFile}
@@ -839,6 +850,12 @@ if [ "${scenario}" != "ready" ] ; then
         exit 1
       fi
       echo "DATA: ${setupCommand} DATA done" >> ${logFile}
+    else
+      if [ "${dataMountedPath}" = "/mnt/hdd" ]; then
+        echo "DATA: ${setupCommand} DATA skipped - its active data" >> ${logFile}
+      else
+        echo "DATA: ${setupCommand} DATA skipped - already mounted" >> ${logFile}
+      fi
     fi
 
     # when system was installed on new boot drive
@@ -930,7 +947,7 @@ if [ "${scenario}" != "ready" ] ; then
         bootFromStorage=1
       fi
 
-      echo "SYSTEM COPY OF FRESH SYSTEM" >> ${logFile}
+      echo "#### SYSTEM COPY OF FRESH SYSTEM" >> ${logFile}
       echo "bootFromStorage(${bootFromStorage})" >> ${logFile}
       echo "storageDevice(${storageDevice})" >> ${logFile}
       echo "systemDevice(${systemDevice})" >> ${logFile}
@@ -1268,11 +1285,18 @@ if [ "${scenario}" != "ready" ] ; then
   # wait until syncProgress is available (neeed for final dialogs)
   /home/admin/_cache.sh set state "waitsync"
   btc_default_ready="0"
+  loop_counter=0
   while [ "${btc_default_ready}" != "1" ]
   do
+    loop_counter=$((loop_counter + 1))
     source <(/home/admin/_cache.sh get btc_default_ready)
-    echo "# waitsync loop ... btc_default_ready(${btc_default_ready})" >> $logFile
+    echo "# waitsync loop ${loop_counter} ... btc_default_ready(${btc_default_ready})" >> $logFile
     sleep 2
+    if [ ${loop_counter} -eq 30 ]; then
+      echo "LOOP TAKES TOO LONG: Try deleting settings.json & force restart" >> $logFile
+      rm /mnt/hdd/app-storage/bitcoin/settings.json
+      systemctl restart bitcoind
+    fi
   done
 
   # one time add info on blockchain sync to chache

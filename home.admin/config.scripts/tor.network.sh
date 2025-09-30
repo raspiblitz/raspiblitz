@@ -27,9 +27,11 @@ activateBitcoinOverTor()
     deactivateBitcoinOverTor
 
     sudo chmod 777 "/home/bitcoin/.${network}/${network}.conf"
+    sudo sed -i "s/^onlynet=.*//g" "/home/bitcoin/.${network}/${network}.conf"
     echo "Adding Tor config to the the ${network}.conf ..."
     sudo sed -i "s/^torpassword=.*//g" "/home/bitcoin/.${network}/${network}.conf"
     echo "onlynet=onion" | sudo tee -a "/home/bitcoin/.${network}/${network}.conf"
+    echo "onlynet=i2p" | sudo tee -a "/home/bitcoin/.${network}/${network}.conf"
     echo "proxy=127.0.0.1:9050" | sudo tee -a "/home/bitcoin/.${network}/${network}.conf"
     echo "main.bind=127.0.0.1" | sudo tee -a "/home/bitcoin/.${network}/${network}.conf"
     echo "test.bind=127.0.0.1" | sudo tee -a "/home/bitcoin/.${network}/${network}.conf"
@@ -51,7 +53,7 @@ activateBitcoinOverTor()
 
 deactivateBitcoinOverTor()
 {
-  # always make sure also to remove old settings
+  # alte/tor-bezogene Settings entfernen
   sudo sed -i "s/^onlynet=.*//g" "/home/bitcoin/.${network}/${network}.conf"
   sudo sed -i "s/^main.addnode=.*//g" "/home/bitcoin/.${network}/${network}.conf"
   sudo sed -i "s/^test.addnode=.*//g" "/home/bitcoin/.${network}/${network}.conf"
@@ -60,8 +62,14 @@ deactivateBitcoinOverTor()
   sudo sed -i "s/^test.bind=.*//g" "/home/bitcoin/.${network}/${network}.conf"
   sudo sed -i "s/^dnsseed=.*//g" "/home/bitcoin/.${network}/${network}.conf"
   sudo sed -i "s/^dns=.*//g" "/home/bitcoin/.${network}/${network}.conf"
+
+  # explizit only IPv4 & IPv6
+  echo "onlynet=ipv4" | sudo tee -a "/home/bitcoin/.${network}/${network}.conf" >/dev/null
+  echo "onlynet=ipv6" | sudo tee -a "/home/bitcoin/.${network}/${network}.conf" >/dev/null
+
   # remove empty lines
   sudo sed -i '/^ *$/d' "/home/bitcoin/.${network}/${network}.conf"
+
   sudo cp "/home/bitcoin/.${network}/${network}.conf" "/home/admin/.${network}/${network}.conf"
   sudo chown admin:admin "/home/admin/.${network}/${network}.conf"
 }
@@ -167,7 +175,7 @@ EOF
     /home/admin/config.scripts/blitz.conf.sh set runBehindTor "off"
 
     # remove "debug=tor" from bitcoin.conf
-    sudo sed -i '/^debug=tor$/d' /mnt/hdd/app-databitcoin/bitcoin.conf
+    sudo sed -i '/^debug=tor$/d' /mnt/hdd/app-data/bitcoin/bitcoin.conf
 
     # deactivate bitcoin over tor (function call)
     deactivateBitcoinOverTor

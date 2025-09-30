@@ -18,7 +18,7 @@ PGPsigner="romanz"
 PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
 PGPpubkeyFingerprint="87CAE5FA46917CBB"
 
-source /mnt/hdd/app-data/raspiblitz.conf
+source /mnt/hdd/app-data/raspiblitz.conf 2>/dev/null
 
 # give status (dont call regularly - just on occasions)
 if [ "$1" = "status" ]; then
@@ -29,6 +29,9 @@ if [ "$1" = "status" ]; then
   echo "##### STATUS ELECTRS SERVICE"
 
   echo "version='${ELECTRSVERSION}'"
+
+  fatpack=$(compgen -u | grep -c electrs)
+  echo "fatpack=${fatpack}"
 
   if [ "${ElectRS}" = "on" ]; then
     echo "configured=1"
@@ -373,6 +376,7 @@ index-batch-size = 10
 wait_duration_secs = 10
 jsonrpc_timeout_secs = 15
 db_dir = \"/mnt/hdd/app-storage/electrs/db\"
+daemon_p2p_addr = \"127.0.0.1:8335\"
 auth = \"${RPC_USER}:${PASSWORD_B}\"
 # allow BTC-RPC-explorer show tx-s for addresses with a history of more than 100
 txid_limit = 1000
@@ -494,9 +498,9 @@ WantedBy=multi-user.target
     /home/admin/config.scripts/tor.onion-service.sh electrs 50002 50002 50001 50001
   fi
 
-  # whitelist downloading to localhost from bitcoind
-  if ! sudo grep -Eq "^whitelist=download@127.0.0.1" /mnt/hdd/app-data/bitcoin/bitcoin.conf; then
-    echo "whitelist=download@127.0.0.1" | sudo tee -a /mnt/hdd/app-data/bitcoin/bitcoin.conf
+ # whitelist connection in bitcoind
+  if ! sudo grep -Eq "^whitebind=download@127.0.0.1:8335" /mnt/hdd/app-data/bitcoin/bitcoin.conf; then
+    echo "whitebind=download@127.0.0.1:8335" | sudo tee -a /mnt/hdd/app-data/bitcoin/bitcoin.conf
     bitcoindRestart=yes
   fi
 

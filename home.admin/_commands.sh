@@ -163,14 +163,38 @@ function release() {
   fi
 }
 
+# command: clean
+function clean() {
+  firstPARAM=$1
+  echo "- deletes all data from drive - just keeps blocks and chainstate (LOSS OF FUNDS POSSIBLE!)"
+  source <(/home/admin/_cache.sh get state)
+  if [ "$state" != "waitsetup" ]; then
+    echo "error='can only be called on fresh sd card image - before setup or recover'"
+    exit 1
+  fi
+  source <(sudo /home/admin/config.scripts/blitz.data.sh status)
+  if [ "${storageDevice}" = "" ]; then
+    echo "error='no storage device'"
+    exit 1
+  fi
+  confirmMsg clean
+  if [ $confirm -eq 1 ]; then
+    sudo /home/admin/config.scripts/blitz.data.sh clean STORAGE "${storageDevice}"
+  fi
+}
+
 # command: fatpack
 function fatpack() {
   echo "Command to be called only on a fresh stopped minimal build to re-pack installs."
   confirmMsg fatpack
   if [ $confirm -eq 1 ]; then
     sudo /home/admin/config.scripts/blitz.fatpack.sh
-    # raspberry pi fatpack has lcd display be default
-    sudo /home/admin/config.scripts/blitz.display.sh set-display lcd
+    if [ $? -eq 0 ]; then
+      # raspberry pi fatpack has lcd display be default
+      sudo /home/admin/config.scripts/blitz.display.sh set-display lcd
+    else
+      echo "FATPACK FAILED - please check the output above."
+    fi
   fi
 }
 

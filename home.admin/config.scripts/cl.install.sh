@@ -2,7 +2,7 @@
 # https://lightning.readthedocs.io/
 
 # https://github.com/ElementsProject/lightning/releases
-CLVERSION="v25.02.2"
+CLVERSION="v25.05"
 
 # https://github.com/ElementsProject/lightning/tree/master/contrib/keys
 # rustyrussell D9200E6CD1ADB8F1
@@ -11,9 +11,9 @@ CLVERSION="v25.02.2"
 # pneuroth (nepet) C3F21EE387FF4CD2
 # sfarooqui (ShahanaFarooqui) B56B4453DA8C6DF7FC9BCFCBDCA40B7128DA62A8
 # amyers (endothermicdev) F3BF63F2747436AB
-PGPsigner="sfarooqui"
+PGPsigner="amyers"
 PGPpubkeyLink="https://raw.githubusercontent.com/ElementsProject/lightning/master/contrib/keys/${PGPsigner}.txt"
-PGPpubkeyFingerprint="B56B4453DA8C6DF7FC9BCFCBDCA40B7128DA62A8"
+PGPpubkeyFingerprint="F3BF63F2747436AB"
 
 # help
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
@@ -42,7 +42,7 @@ function installDependencies() {
   # additional requirements
   sudo apt-get install -y libpq-dev
   # for clnrest - https://docs.corelightning.org/docs/installation#clnrest
-  sudo apt-get install -y python3-json5 python3-flask python3-gunicorn
+  sudo apt-get install -y python3-json5 python3-flask python3-gunicorn python3-grpc-tools
 
   # python deps for wss-proxy
   # upgrade pip
@@ -92,15 +92,23 @@ function installDependencies() {
 }
 
 function buildAndInstallCLbinaries() {
-  echo "- configure"
+
+  sudo -u bitcoin python3 -m pip install --user --upgrade grpcio-tools protobuf
+
+  # patch makefile
+  sudo -u bitcoin sed -i -E 's/ --experimental_allow_proto3_optional(=true)?//g' Makefile
+
+  # delete old file
+  sudo -u bitcoin rm -f contrib/pyln-grpc-proto/pyln/grpc/*_pb2.py contrib/pyln-grpc-proto/pyln/grpc/*_pb2_grpc.py
+
   echo
+  echo "########## configure"
   sudo -u bitcoin RUSTUP_HOME=/opt/rust CARGO_HOME=/opt/rust ./configure || exit 1
   echo
-  echo "- make"
-  echo
-  sudo -u bitcoin RUSTUP_HOME=/opt/rust CARGO_HOME=/opt/rust make || exit 1
-  echo
-  echo "- install to /usr/local/bin/"
+  echo "########## make"
+  sudo -u bitcoin RUSTUP_HOME=/opt/rust CARGO_HOME=/opt/rust make -j"$(nproc)" || exit 1
+  echo 
+  echo "########## install"
   sudo make RUSTUP_HOME=/opt/rust CARGO_HOME=/opt/rust install || exit 1
 }
 

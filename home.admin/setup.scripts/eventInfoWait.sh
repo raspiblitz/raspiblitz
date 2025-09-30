@@ -274,12 +274,35 @@ elif [ "${eventID}" == "waitsetup" ] && [ "${mode}" == "ssh" ]; then
 Please wait ...
 " 5 22
 
+elif [ "${eventID}" == "waitprovision" ] && [ "${contentString}" == "hdd-migrate" ]; then
+
+    dialog --backtitle "${backtitle}" --cr-wrap --infobox "
+Changing Data Layout of HDD/SSD/NVMe
+Can take looooooong time - just wait.
+" 6 44
+
 elif [ "${eventID}" == "waitprovision" ]; then
 
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "
 Preparing Provision
 Please wait ...
 " 6 24
+
+elif [ "${eventID}" == "storageisfull" ]; then
+
+    dialog --backtitle "${backtitle}" --cr-wrap --infobox "
+Your storage SSD/NVME is full (${contentString}%).
+Delete apps or migrate to a bigger drive.
+ssh admin@${internet_localip}
+" 7 50
+
+elif [ "${eventID}" == "dataisfull" ]; then
+
+    dialog --backtitle "${backtitle}" --cr-wrap --infobox "
+Your data SSD/NVME is full (${contentString}%).
+Delete apps or migrate to a bigger drive.
+ssh admin@${internet_localip}
+" 7 50
 
 elif [ "${eventID}" = "noIP-LAN" ] || [ "${eventID}" = "noIP-WIFI" ]; then
 
@@ -361,7 +384,8 @@ elif [ "${eventID}" == "hdd-format" ]; then
 
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "
 PREPARING DRIVES
-" 5 20
+${contentString}
+" 6 20
 
 elif [ "${eventID}" == "system-change" ]; then
 

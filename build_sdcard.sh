@@ -688,6 +688,7 @@ sudo -u bitcoin cp -r /etc/skel/. /home/bitcoin/
 echo "bitcoin:raspiblitz" | chpasswd
 # make home directory readable
 chmod 755 /home/bitcoin
+usermod -a -G bitcoin admin
 
 # WRITE BASIC raspiblitz.info to sdcard
 # if further info gets added .. make sure to keep that on: blitz.release.sh
@@ -894,7 +895,11 @@ echo "Provisioning BLITZ WEB SERVICE"
 # *** FATPACK *** (can be activated by parameter - see details at start of script)
 if ${fatpack}; then
   echo "* FATPACK activated"
-  /home/admin/config.scripts/blitz.fatpack.sh || exit 1
+  /home/admin/config.scripts/blitz.fatpack.sh
+  if [ $? -gt 0 ]; then
+    echo "FATPACK FAILED - please check the output above."
+    exit 1
+  fi
 else
   echo "* skipping FATPACK"
 fi

@@ -4,7 +4,7 @@
 ## based on https://raspibolt.github.io/raspibolt/raspibolt_40_lnd.html#lightning-lnd
 ## see LND releases: https://github.com/lightningnetwork/lnd/releases
 ### If you change here - make sure to also change interims version in lnd.update.sh #!
-lndVersion="0.19.0-beta"
+lndVersion="0.19.3-beta"
 
 # olaoluwa
 PGPauthor="roasbeef"
@@ -279,7 +279,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   sudo chown -R bitcoin:bitcoin /mnt/hdd/app-data/lnd
   sudo chmod -R 750 /mnt/hdd/app-data/lnd
-  sudo usermod -a -G lndadmin bitcoin
 
   echo "# Create /mnt/hdd/app-data/lnd/${netprefix}lnd.conf"
   if [ ! -f /mnt/hdd/app-data/lnd/${netprefix}lnd.conf ];then
