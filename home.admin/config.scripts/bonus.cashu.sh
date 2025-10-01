@@ -456,7 +456,8 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   echo "# stop & remove systemd service"
   sudo systemctl stop ${APPID}-backend 2>/dev/null
   sudo systemctl stop ${APPID}-frontend 2>/dev/null
-  sudo systemctl disable ${APPID}.service
+  sudo systemctl disable ${APPID}-frontend.service
+  sudo systemctl disable ${APPID}-backend.service
   sudo rm /etc/systemd/system/${APPID}-backend.service
   sudo rm /etc/systemd/system/${APPID}-frontend.service
 
