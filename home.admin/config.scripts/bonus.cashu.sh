@@ -180,6 +180,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       exit 1
   fi
 
+  # basic .env config
+  sudo -u ${APPID} cp .env.example .env
+  sudo -u ${APPID} sed -i 's/^MINT_LISTEN_HOST=.*$/MINT_LISTEN_HOST=0.0.0.0/' .env
+  sudo -u ${APPID} sed -i 's/^MINT_DATABASE=.*$/MINT_DATABASE=/mnt/hdd/app-data/cashu' .env
+
   # install nodeJS
   /home/admin/config.scripts/bonus.nodejs.sh on
 
