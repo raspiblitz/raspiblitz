@@ -217,6 +217,21 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       exit 1
   fi
 
+  # basic .env config
+  sudo -u ${APPID} cp .env.example .env
+  sudo -u ${APPID} sed -i "s|^BITCOIN_RPC_USER=.*$|BITCOIN_RPC_USER='raspibolt'|" .env
+  sudo -u ${APPID} sed -i "s|^MINT_TYPE=.*$|MINT_TYPE='nutshell'|" .env
+  sudo -u ${APPID} sed -i "s|^MINT_API=.*$|MINT_API='http://localhost:3338'|" .env
+  sudo -u ${APPID} sed -i "s|^MINT_DATABASE=.*$|MINT_DATABASE='/mnt/hdd/app-data/cashu/mint.sqlite3'|" .env
+  sudo -u ${APPID} sed -i "s|^AI_API=.*$|AI_API=''|" .env
+
+  # move to perstart later on
+  RPC_PASS=$(sudo cat /mnt/hd/app-data/bitcoin/bitcoin.conf | grep rpcpassword | cut -c 13-)
+  sudo -u ${APPID} sed -i "s|^ADMIN_PASSWORD=.*$|ADMIN_PASSWORD='{$RPC_PASS}'|" .env
+  sudo -u ${APPID} sed -i "s|^BITCOIN_RPC_PASSWORD=.*$|BITCOIN_RPC_PASSWORD='{$RPC_PASS}'|" .env
+  sudo -u ${APPID} sed -i "s|^LIGHTNING_TYPE=.*$|LIGHTNING_TYPE=''|" .env
+  sudo -u ${APPID} sed -i "s|^TAPROOT_ASSETS_TYPE=.*$|TAPROOT_ASSETS_TYPE=''|" .env
+
   # open the ports in the firewall
   echo "# updating Firewall"
   sudo ufw allow ${PORT_CLEAR} comment "${APPID} HTTP"
