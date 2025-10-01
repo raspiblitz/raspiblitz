@@ -62,9 +62,8 @@ fi
 if [ "$1" = "status" ]; then
   echo "appID='${APPID}'"
   echo "version='${VERSION}'"
-  echo "githubRepo='${GITHUB_REPO}'"
-  echo "githubVersion='${GITHUB_TAG}'"
-  echo "githubSignature='${GITHUB_SIGNATURE}'"
+  echo "githubRepo='${GITHUB_REPO_BACKEND}'"
+  echo "githubVersion='${GITHUB_TAG_BACKEND}'"
   echo "isInstalled=${isInstalled}"
   echo "isRunning=${isRunning}"
   if [ "${isInstalled}" == "1" ]; then
