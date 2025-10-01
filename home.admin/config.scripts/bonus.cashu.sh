@@ -203,13 +203,13 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   cd /home/${APPID}/frontend
   export NG_CLI_ANALYTICS=false
   export NG_FORCE_TTY=false
+  sudo -u ${APPID} sed -i 's|nest build && ng build|nest build && ng build --no-interactive|' ./package.json
   sudo -u ${APPID} npm install --logLevel warn
   if ! [ $? -eq 0 ]; then
       echo "# FAIL - npm install did not run correctly - deleting code & exit"
       sudo rm -r /home/${APPID}/${APPID}
       exit 1
   fi
-  sudo -u cashu ng config -g cli.interactive false
   sudo -u ${APPID} npm run build
   if ! [ $? -eq 0 ]; then
       echo "# FAIL - npm run build did not run correctly - deleting code & exit"
