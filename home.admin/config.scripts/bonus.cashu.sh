@@ -194,7 +194,21 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # compile frontend
   echo "# FRONTEND compile/install the app"
   cd /home/${APPID}/frontend
-  sudo -u ${APPID} npm install --only=prod --logLevel warn
+
+  #manually fix tsconfig.server.json
+  sed -i '$d' ./tsconfig.server.json   # letzte Zeile löschen
+  sed -i '$d' ./tsconfig.server.json   # nochmal letzte Zeile löschen
+  cat <<'EOF' >> ./tsconfig.server.json
+  "include": ["src/server"],
+  "exclude": [
+    "**/*.spec.ts",
+    "**/*.test.ts",
+    "src/server/test/**",
+    "**/*.e2e-spec.ts"
+  ]
+}
+EOF
+  sudo -u ${APPID} npm install --logLevel warn
   if ! [ $? -eq 0 ]; then
       echo "# FAIL - npm install did not run correctly - deleting code & exit"
       sudo rm -r /home/${APPID}/${APPID}
