@@ -194,20 +194,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # compile frontend
   echo "# FRONTEND compile/install the app"
   cd /home/${APPID}/frontend
-
-  #manually fix tsconfig.server.json
-  sed -i '$d' ./tsconfig.server.json   # letzte Zeile löschen
-  sed -i '$d' ./tsconfig.server.json   # nochmal letzte Zeile löschen
-  cat <<'EOF' >> ./tsconfig.server.json
-  "include": ["src/server"],
-  "exclude": [
-    "**/*.spec.ts",
-    "**/*.test.ts",
-    "src/server/test/**",
-    "**/*.e2e-spec.ts"
-  ]
-}
-EOF
+  export NG_CLI_ANALYTICS=false
   sudo -u ${APPID} npm install --logLevel warn
   if ! [ $? -eq 0 ]; then
       echo "# FAIL - npm install did not run correctly - deleting code & exit"
@@ -285,8 +272,8 @@ PrivateDevices=true
 
 [Install]
 WantedBy=multi-user.target
-" | sudo tee /etc/systemd/system/${APPID}-backend.service
-  sudo chown root:root /etc/systemd/system/${APPID}-backend.service
+" | sudo tee /etc/systemd/system/${APPID}-frontend.service
+  sudo chown root:root /etc/systemd/system/${APPID}-frontend.service
 
   # when tor is set on also install the hidden service
   if [ "${runBehindTor}" = "on" ]; then
@@ -443,9 +430,11 @@ fi
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   echo "# stop & remove systemd service"
-  sudo systemctl stop ${APPID} 2>/dev/null
+  sudo systemctl stop ${APPID}-backend 2>/dev/null
+  sudo systemctl stop ${APPID}-frontend 2>/dev/null
   sudo systemctl disable ${APPID}.service
-  sudo rm /etc/systemd/system/${APPID}.service
+  sudo rm /etc/systemd/system/${APPID}-backend.service
+  sudo rm /etc/systemd/system/${APPID}-frontend.service
 
   echo "# remove nginx symlinks"
   sudo rm -f /etc/nginx/sites-enabled/${APPID}_ssl.conf 2>/dev/null
