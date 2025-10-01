@@ -184,6 +184,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo -u ${APPID} cp .env.example .env
   sudo -u ${APPID} sed -i 's/^MINT_LISTEN_HOST=.*$/MINT_LISTEN_HOST=0.0.0.0/' .env
   sudo -u ${APPID} sed -i 's/^MINT_DATABASE=.*$/MINT_DATABASE=/mnt/hdd/app-data/cashu' .env
+  MINTKEY=$(openssl rand -hex 32)
+  sudo -u ${APPID} sed -i "s|^# MINT_PRIVATE_KEY=.*$|MINT_PRIVATE_KEY=${MINTKEY}|" .env
 
   # install nodeJS
   /home/admin/config.scripts/bonus.nodejs.sh on
