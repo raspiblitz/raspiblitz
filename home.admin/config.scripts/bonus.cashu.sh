@@ -11,7 +11,7 @@ GITHUB_TAG_BACKEND="${VERSION}"
 
 # the git repo is just used for the front end
 GITHUB_REPO_FRONTEND="https://github.com/orangeshyguy21/orchard"
-GITHUB_TAG_FRONTEND="v1.3.0"
+GITHUB_TAG_FRONTEND="v1.2.1"
 
 # port numbers the app should run on
 # delete if not an web app
