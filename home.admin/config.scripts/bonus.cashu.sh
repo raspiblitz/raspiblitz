@@ -195,6 +195,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "# FRONTEND compile/install the app"
   cd /home/${APPID}/frontend
   export NG_CLI_ANALYTICS=false
+  export NG_FORCE_TTY=false
   sudo -u ${APPID} npm install --logLevel warn
   if ! [ $? -eq 0 ]; then
       echo "# FAIL - npm install did not run correctly - deleting code & exit"
