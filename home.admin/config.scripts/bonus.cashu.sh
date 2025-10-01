@@ -165,7 +165,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   fi
 
   # download orchard - CASHU BACKEND
-  echo "# FRONTEND download the source code & verify"
+  echo "# NUTSHELL download the source code & verify"
   sudo -u ${APPID} git clone ${GITHUB_REPO_BACKEND} /home/${APPID}/backend
   cd /home/${APPID}/backend
   if [ "${GITHUB_TAG_BACKEND}" != "" ]; then
@@ -209,6 +209,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       sudo rm -r /home/${APPID}/${APPID}
       exit 1
   fi
+  sudo -u cashu ng config -g cli.interactive false
   sudo -u ${APPID} npm run build
   if ! [ $? -eq 0 ]; then
       echo "# FAIL - npm run build did not run correctly - deleting code & exit"
