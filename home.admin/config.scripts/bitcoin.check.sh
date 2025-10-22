@@ -63,6 +63,10 @@ if [ "$1" == "prestart" ]; then
     echo "${bitcoinlog_entry}=${bitcoinlog_path}" >> /mnt/hdd/app-data/bitcoin/bitcoin.conf
   fi
 
+  # delete any debuglogfile in app-storage and link to new location in app-data
+  rm -f /mnt/hdd/app-storage/bitcoin/debug.log
+  ln -s /mnt/hdd/app-data/bitcoin/debug.log /mnt/hdd/app-storage/bitcoin/debug.log
+
   # make sure entry has the correct value
   echo "# make sure entry(${bitcoinlog_entry}) has the correct value(${bitcoinlog_path})"
   sed -i "s|^${bitcoinlog_entry}=.*|${bitcoinlog_entry}=${bitcoinlog_path}|g" /mnt/hdd/app-data/bitcoin/bitcoin.conf
