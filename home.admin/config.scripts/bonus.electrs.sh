@@ -232,21 +232,24 @@ Check 'sudo nginx -t' for a detailed error message.
     echo
     echo "On Network Settings > Server menu:"
     echo "- deactivate automatic server selection"
-    echo "- as manual server set '${localIP}' & '${portSSL}'"
+    echo "- as manual server set '${localIP}':'${portTCP}':t"
     echo "- laptop and RaspiBlitz need to be within same local network"
     echo
     echo "To start directly from laptop terminal use"
-    echo "PC: electrum --oneserver --server ${localIP}:${portSSL}:s"
-    echo "MAC: open -a /Applications/Electrum.app --args --oneserver --server ${localIP}:${portSSL}:s"
+    echo "PC: electrum --oneserver --server ${localIP}:${portTCP}:t"
+    echo "MAC: open -a /Applications/Electrum.app --args --oneserver --server ${localIP}:${portTCP}:t"
     if [ ${TorRunning} -eq 1 ]; then
       echo
       echo "The Tor Hidden Service address for electrs is (see LCD for QR code):"
       echo "${TORaddress}"
       echo
       echo "To connect through TOR open the Tor Browser and start with the options:"
-      echo "electrum --oneserver --server ${TORaddress}:50002:s --proxy socks5:127.0.0.1:9150"
+      echo "electrum --oneserver --server ${TORaddress}:50001:t --proxy socks5:127.0.0.1:9150"
       sudo /home/admin/config.scripts/blitz.display.sh qr "${TORaddress}"
     fi
+    echo
+    echo "If you want to use SSL encrypted connections use in examples above"
+    echo "'${localIP}':'${portSSL}':s' instead of '${localIP}':'${portTCP}':t"
     echo
     echo "For more details check the RaspiBlitz README on ElectRS:"
     echo "https://github.com/rootzoll/raspiblitz"
