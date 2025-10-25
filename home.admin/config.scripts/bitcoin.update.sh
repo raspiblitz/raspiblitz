@@ -44,7 +44,7 @@ elif [ "$(uname -m | grep -c 'x86_64')" -gt 0 ]; then
 fi
 
 # installed version
-installedVersion=$(sudo -u bitcoin bitcoind --version | head -n1 | cut -d" " -f4 | cut -c 2-)
+installedVersion=$(sudo -u bitcoin bitcoind --version | head -n1 | cut -d" " -f5 | cut -c 2-)
 
 # test if the installed version already the tested/recommended update version
 bitcoinUpdateInstalled=$(echo "${installedVersion}" | grep -c "${bitcoinVersion}")
@@ -137,12 +137,12 @@ if [ "${mode}" = "tested" ]; then
   if [ "${result}" -eq 2 ]; then
     # this can happen if bitcoin install script already has a higher version then the tested version set by this script (see above)
     echo "# installed version is newer then to be updated version --> ABORT"
-    echo 
+    echo
     exit 1
   fi
   if [ "${result}" -eq 0 ]; then
     echo "# version is already installed --> ABORT"
-    echo 
+    echo
     exit 1
   fi
 
