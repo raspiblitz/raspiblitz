@@ -1,3 +1,7 @@
+## What's new in Version 1.12.1 of RaspiBlitz?
+
+- Update: AlbyHub v1.20.0 [details](https://github.com/getAlby/hub/releases/tag/v1.20.0)
+
 ## What's new in Version 1.12.0 of RaspiBlitz?
 
 Introducing a new drive layout, now allowing to even boot and running the system from NVMe.
