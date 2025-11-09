@@ -123,12 +123,16 @@ else
   echo "# FAIL - git config pull.rebase true"
   exit
 fi
-git pull 1>&2
-if [ $? -eq 0 ]; then
-  echo "# OK - git pull"
+if [[ ${activeBranch} != pr* ]]; then
+  git pull 1>&2
+  if [ $? -eq 0 ]; then
+    echo "# OK - git pull"
+  else
+    echo "# FAIL - git pull"
+    exit
+  fi
 else
-  echo "# FAIL - git pull"
-  exit
+  echo "# SKIP - git pull on PR-Branches"
 fi
 cd ..
 echo "# COPYING from GIT-Directory to /home/admin/"
