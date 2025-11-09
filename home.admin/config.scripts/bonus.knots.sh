@@ -100,7 +100,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   # dont install when lightning is already installed
   # see https://github.com/raspiblitz/raspiblitz/pull/5021#issuecomment-2889640024
-  if [ "${lightning}" != "" ] && [ "$2" != "-force" ]; then
+  if [ "${lightning}" != "" ] && [ "${lightning}" != "none" ] && [ "$2" != "-force" ]; then
     echo "# ABORT KNOTS INSTALL - at the moment Knots can only be installed & run if no lightning implementation is installed."
     echo "# For experimental overrule use on terminal: '/home/admin/config.scripts/bonus.knots.sh on -force'"
     sleep 6
