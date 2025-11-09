@@ -1,6 +1,7 @@
 ## What's new in Version 1.12.1 of RaspiBlitz?
 
 - Update: AlbyHub v1.20.0 [details](https://github.com/getAlby/hub/releases/tag/v1.20.0)
+- Update: Bitcoin Knots 29.2 (optional) [details](https://github.com/bitcoinknots/bitcoin/releases/tag/v29.2.knots20251010)
 
 ## What's new in Version 1.12.0 of RaspiBlitz?
 
