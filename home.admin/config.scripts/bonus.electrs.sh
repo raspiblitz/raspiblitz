@@ -306,7 +306,7 @@ if [ "$1" = "install" ]; then
     echo "# Installing Rust for the electrs user"
     echo
     # https://github.com/romanz/electrs/blob/master/doc/usage.md#build-dependencies
-    sudo -u electrs curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sudo -u electrs sh -s -- --default-toolchain none -y
+    sudo -u electrs curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sudo -u electrs sh -s -- --default-toolchain stable -y
     sudo apt install -y clang cmake build-essential # for building 'rust-rocksdb'
 
     echo
@@ -608,7 +608,7 @@ if [ "$1" = "update" ]; then
       "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" "${updateVersion}" || exit 1
 
     echo "# Installing build dependencies"
-    sudo -u electrs curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sudo -u electrs sh -s -- --default-toolchain none -y
+    sudo -u electrs curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sudo -u electrs sh -s -- --default-toolchain stable -y
     sudo apt install -y clang cmake build-essential # for building 'rust-rocksdb'
     echo
 
