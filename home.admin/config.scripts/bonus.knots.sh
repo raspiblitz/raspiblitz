@@ -12,10 +12,10 @@ APPID="knots" # one-word lower-case no-specials
 
 # clean human readable version - will be displayed in UI
 # just numbers only separated by dots (2 or 0.1 or 1.3.4 or 3.4.5.2)
-VERSION="29.2"
+VERSION="29.2.2"
 
 FILEMASTER="29.x"
-FILEMASTERTAG="29.2.knots20251010"
+FILEMASTERTAG="29.2.knots20251110"
 
 # the git repo to get the source code from for install
 GITHUB_REPO="https://github.com/bitcoinknots/bitcoin"
@@ -23,7 +23,7 @@ GITHUB_REPO="https://github.com/bitcoinknots/bitcoin"
 # the github tag of the version of the source code to install
 # can also be a commit hash
 # if empty it will use the latest source version
-GITHUB_TAG="v29.2.knots20251010"
+GITHUB_TAG="v29.2.knots20251110"
 
 # the github signature to verify the author
 # leave GITHUB_SIGN_AUTHOR empty to skip verifying
