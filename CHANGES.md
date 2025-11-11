@@ -1,5 +1,6 @@
 ## What's new in Version 1.12.1 of RaspiBlitz?
 
+- Update: Bitcoin Core v29.2 [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-29.2.md)
 - Update: Electrum Server in Rust (electrs) v0.10.10 [details](https://github.com/romanz/electrs/blob/master/RELEASE-NOTES.md#01010-jul-19-2025)
 - Update: AlbyHub v1.20.0 [details](https://github.com/getAlby/hub/releases/tag/v1.20.0)
 - Update: Bitcoin Knots 29.2 (optional) [details](https://github.com/bitcoinknots/bitcoin/releases/tag/v29.2.knots20251010)
