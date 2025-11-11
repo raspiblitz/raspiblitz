@@ -95,7 +95,7 @@ if [ "$1" = "export" ]; then
   # zip it
   echo "# Building the Export File (this can take some time) .."
   sudo mkdir -p ${defaultDownloadPath}
-  sudo tar -zcvf ${defaultDownloadPath}/raspiblitz-export-temp.tar.gz -X ~/.exclude.temp /mnt/hdd/app-data 1>~/.include.temp 2>/dev/null
+  sudo tar -zcvf ${defaultDownloadPath}/raspiblitz-export-temp.tar.gz -X ~/.exclude.temp /mnt/hdd/app-data/ 1>~/.include.temp 2>/dev/null
 
   # delete info files from app-data after export
   sudo rm /mnt/hdd/app-data/v2.migration.info 2>/dev/null
