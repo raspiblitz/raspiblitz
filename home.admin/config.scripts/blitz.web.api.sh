@@ -330,7 +330,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "# Installing dependencies from requirements.txt ..."
   sudo -u blitzapi ./venv/bin/python -m pip install --upgrade pip
   sudo -u blitzapi env PIP_CONFIG_FILE=/dev/null PIP_INDEX_URL=https://pypi.org/simple PIP_EXTRA_INDEX_URL= ./venv/bin/pip install --no-cache-dir rich-toolkit==0.14.6
-  if ! sudo -u blitzapi ./venv/bin/pip install --no-cache-dir -r requirements.txt --no-deps --index-url https://pypi.org/simple --no-extra-index-url; then
+  if ! sudo -u blitzapi ./venv/bin/pip install --no-cache-dir -r requirements.txt --no-deps --index-url https://pypi.org/simple; then
     echo "error='pip install failed'"
     exit 1
   fi
