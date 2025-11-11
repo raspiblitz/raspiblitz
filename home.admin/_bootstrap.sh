@@ -686,6 +686,14 @@ if [ "${scenario}" != "ready" ] ; then
   # until SSH or WEBUI setup data is available
   #############################################
 
+  echo "/home/admin/config.scripts/blitz.data.sh status -inspect (auto store to cache A)"
+  source <(/home/admin/config.scripts/blitz.data.sh status -inspect)
+
+  # when blockchain data is present - set flag for WebUI
+  if [ "${storageBlockchainGB}" != "" ] && [ "${storageBlockchainGB}" != "0" ]; then
+    /home/admin/_cache.sh set hddBlocksBitcoin 1
+  fi
+
   echo "## WAIT LOOP: USER SETUP/UPDATE/MIGRATION" >> ${logFile}
   echo "state(${state})" >> ${logFile}
   until [ "${state}" = "waitprovision" ]
@@ -700,13 +708,8 @@ if [ "${scenario}" != "ready" ] ; then
   done
   echo "## WAIT LOOP: DONE" >> ${logFile}
 
-  echo "/home/admin/config.scripts/blitz.data.sh status -inspect (auto store to cache)"
+  echo "/home/admin/config.scripts/blitz.data.sh status -inspect (auto store to cache B)"
   source <(/home/admin/config.scripts/blitz.data.sh status -inspect)
-  
-  # when blockchain data is present - set flag for WebUI
-  if [ "${storageBlockchainGB}" != "" ] && [ "${storageBlockchainGB}" != "0" ]; then
-    /home/admin/_cache.sh set hddBlocksBitcoin 1
-  fi
 
   # get the results from the SSH-UI or WEB-UI
   echo "LOADING 'raspiblitz.setup' ..." >> ${logFile}
