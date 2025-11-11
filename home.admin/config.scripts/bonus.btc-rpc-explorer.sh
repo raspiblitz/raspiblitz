@@ -148,6 +148,11 @@ if [ "$1" = "prestart" ]; then
   echo "## btc-rpc-explorer.service PRESTART CONFIG"
   echo "# --> /home/btcrpcexplorer/.config/btc-rpc-explorer.env"
 
+  # Robust initial values to avoid unset-variable issues
+  isElectrsReady=0
+  isFulcrumReady=0
+  electrumTCPport=""
+
   # check if electrs is installed & running
   if [ "${ElectRS}" == "on" ]; then
 
@@ -166,17 +171,18 @@ if [ "$1" = "prestart" ]; then
     electrumTCPport=50021
   fi
 
-  # Exit only if either service is on but neither is ready
-  if { [ "${ElectRS}" == "on" ] && [ "${electrsReady}" == "0" ]; } || { [ "${fulcrum}" == "on" ] && [ "${fulcrumReady}" == "0" ]; }; then
+  # Exit only if either service is on but not ready
+  if { [ "${ElectRS}" == "on" ] && [ "${isElectrsReady}" == "0" ]; } || { [ "${fulcrum}" == "on" ] && [ "${isFulcrumReady}" == "0" ]; }; then
     echo "# An Electrum Server is ON but not ready .. might still building index - kick systemd service into fail/wait/restart"
     exit 1
   fi
 
-  if [ ${isElectrsReady} -gt 0 ] || [ ${isFulcrumReady} -gt 0 ]; then
+  if [ "${isElectrsReady}" -gt 0 ] || [ "${isFulcrumReady}" -gt 0 ]; then
     # CHECK THAT ELECTRUM SERVER IS PART OF CONFIG
     echo "# updating BTCEXP_ADDRESS_API=electrumx"
     sed -i 's/^BTCEXP_ADDRESS_API=.*/BTCEXP_ADDRESS_API=electrumx/g' /home/btcrpcexplorer/.config/btc-rpc-explorer.env
-    sed -i "s/^BTCEXP_ELECTRUMX_SERVERS=.*/BTCEXP_ELECTRUMX_SERVERS=tcp://127.0.0.1:${electrumTCPport}/g" /home/btcrpcexplorer/.config/btc-rpc-explorer.env
+    # Use different delimiter to avoid collision with "tcp://"
+    sed -i "s|^BTCEXP_ELECTRUMX_SERVERS=.*|BTCEXP_ELECTRUMX_SERVERS=tcp://127.0.0.1:${electrumTCPport}|g" /home/btcrpcexplorer/.config/btc-rpc-explorer.env
   else
     # ELECTRS=OFF --> MAKE SURE IT IS NOT CONNECTED
     echo "# updating BTCEXP_ADDRESS_API=none"
