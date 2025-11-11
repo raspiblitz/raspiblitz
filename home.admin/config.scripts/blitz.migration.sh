@@ -241,7 +241,7 @@ if [ "$1" = "import" ]; then
 
   isV2Migration=1
   # check if its a v2 migration if /mnt/hdd/temp/migration_extract/v2.migration.info exists
-  if [ -f "/mnt/hdd/temp/migration_extract/v2.migration.info" ]; then
+  if [ -f "/mnt/hdd/temp/migration_extract/app-data/v2.migration.info" ]; then
     migrationVersion=2
   fi
   echo "# Migration Version: ${migrationVersion}" >> ${logFile} 
@@ -256,11 +256,12 @@ if [ "$1" = "import" ]; then
   if [ "${migrationVersion}" == "2" ]; then
       echo "# Detected v2 migration file ..." >> ${logFile}
       # Mit rsync übertragen und dabei symbolische Links erhalten
-      sudo rsync -avK /mnt/hdd/temp/migration_extract/mnt/hdd/ /mnt/hdd/app-data 2>>${logFile}
+      sudo rsync -avK /mnt/hdd/temp/migration_extract/app-data/ /mnt/hdd/app-data/ 2>>${logFile}
       if [ "$?" != "0" ]; then
         echo "error='migration rsync failed'"
         exit 1
       fi
+      sudo rm /mnt/hdd/app-data/v2.migration.info
   fi
   sudo rm -rf /mnt/hdd/temp/migration_extract
 
