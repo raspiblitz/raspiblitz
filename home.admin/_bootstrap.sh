@@ -702,6 +702,11 @@ if [ "${scenario}" != "ready" ] ; then
 
   echo "/home/admin/config.scripts/blitz.data.sh status -inspect (auto store to cache)"
   source <(/home/admin/config.scripts/blitz.data.sh status -inspect)
+  
+  # when blockchain data is present - set flag for WebUI
+  if [ "${storageBlockchainGB}" != "" ] && [ "${storageBlockchainGB}" != "0" ]; then
+    /home/admin/_cache.sh set hddBlocksBitcoin 1
+  fi
 
   # get the results from the SSH-UI or WEB-UI
   echo "LOADING 'raspiblitz.setup' ..." >> ${logFile}
