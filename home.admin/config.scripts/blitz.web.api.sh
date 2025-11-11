@@ -329,13 +329,14 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   fi
   echo "# Installing dependencies from requirements.txt ..."
   sudo -u blitzapi ./venv/bin/python -m pip install --upgrade pip
-  echo -e "[global]\nindex-url = https://pypi.org/simple" | sudo tee /etc/pip.conf > /dev/null
+  echo -e "[global]\nindex-url = https://pypi.org/simple" | sudo tee /etc/pip.conf > /dev/nul
+  # install with https://www.piwheels.org/simple turned off to avoid issues with some packages
   sudo -u blitzapi env PIP_CONFIG_FILE=/dev/null PIP_INDEX_URL=https://pypi.org/simple PIP_EXTRA_INDEX_URL= ./venv/bin/pip install --no-cache-dir rich-toolkit==0.14.6
+  echo -e "[global]\nindex-url = https://pypi.org/simple\nextra-index-url = https://www.piwheels.org/simple" | sudo tee /etc/pip.conf > /dev/null
   if ! sudo -u blitzapi ./venv/bin/pip install --no-cache-dir -r requirements.txt --no-deps; then
     echo "error='pip install failed'"
     exit 1
   fi
-
 
   # prepare systemd service
   echo "# Creating blitzapi systemd service..."
