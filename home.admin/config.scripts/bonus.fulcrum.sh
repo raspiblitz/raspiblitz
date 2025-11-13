@@ -403,8 +403,6 @@ bitcoind_timeout = 600
 ## reduce load
 bitcoind_clients = 1
 worker_threads = 1
-## optimize for 4-8 GB RAM
-db_mem = 256
 db_max_open_files = 200
 
 ## allow syncing wallets with a large number of addresses
