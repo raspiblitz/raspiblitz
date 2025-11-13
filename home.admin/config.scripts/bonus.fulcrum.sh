@@ -46,8 +46,8 @@ fi
 
 if [ "$1" = "status" ]; then
   echo "##### STATUS FULCRUM SERVICE"
-  fulcrumVersion=$(/home/fulcrum/Fulcrum -v 2>/dev/null | grep -oP 'Fulcrum \K\d+\.\d+\.\d+')
-  echo "version='${fulcrumVersion}'"
+  displayVersion=$(/home/fulcrum/Fulcrum -v 2>/dev/null | grep Fulcrum)
+  echo "version='${displayVersion}'"
 
   source /mnt/hdd/app-data/raspiblitz.conf
   if [ "${fulcrum}" = "on" ]; then
