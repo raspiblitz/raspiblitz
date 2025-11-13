@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # https://github.com/cculianu/Fulcrum/releases
-fulcrumVersion="1.12.0"
+fulcrumVersion="2.0.0"
 
 portTCP="50021"
 portSSL="50022"
@@ -404,11 +404,8 @@ bitcoind_timeout = 600
 bitcoind_clients = 1
 worker_threads = 1
 ## optimize for 4-8 GB RAM
-db_mem=1024
-db_max_open_files=200
-## fast-sync is now called utxo_cache
-## disable to prevent database corruption on restart
-#utxo_cache = 1024
+db_mem = 256
+db_max_open_files = 200
 
 ## allow syncing wallets with a large number of addresses
 max_subs_per_ip = 1000000 # default: 75000" |
