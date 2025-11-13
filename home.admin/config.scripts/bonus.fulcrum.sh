@@ -325,7 +325,7 @@ StartLimitBurst=2
 StartLimitIntervalSec=20
 
 [Service]
-ExecStart=/home/fulcrum/Fulcrum /home/fulcrum/.fulcrum/fulcrum.conf
+ExecStart=/home/fulcrum/Fulcrum --db-upgrade /home/fulcrum/.fulcrum/fulcrum.conf
 KillSignal=SIGINT
 User=fulcrum
 LimitNOFILE=8192
@@ -501,6 +501,15 @@ if [ "$1" = update ]; then
   downloadAndVerifyBinary
 
   sudo systemctl disable --now fulcrum
+
+  # Update config file: remove deprecatedutxo_cache and fast_sync entries
+  configFile="/home/fulcrum/.fulcrum/fulcrum.conf"
+  if [ -f "$configFile" ]; then
+    echo "# Updating Fulcrum config file"
+    # Remove utxo_cache and fast_sync entries
+    sudo -u fulcrum sed -i '/^utxo_cache/d' "$configFile"
+    sudo -u fulcrum sed -i '/^fast_sync/d' "$configFile"
+  fi
 
   createSystemdService
 
