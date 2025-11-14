@@ -218,11 +218,23 @@ Check 'sudo nginx -t' for a detailed error message.
 
   OPTIONS=(
     CONNECT "How to connect"
-    REINDEX "Delete and rebuild the Fulcrum database"
     STATUS "Fulcrum status info"
+    LOGS "Show service logs"
+    CONF "Edit fulcrum.conf"
+    SERVICE "Edit systemd service"
+    REINDEX "Delete and rebuild the Fulcrum database"
   )
 
-  CHOICE=$(whiptail --clear --title "Fulcrum Electrum Server" --menu "menu" 10 50 3 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+  WIDTH=64
+  CHOICE_HEIGHT=$(("${#OPTIONS[@]}/2+1"))
+  HEIGHT=$((CHOICE_HEIGHT+7))
+  CHOICE=$(dialog --clear \
+                --title "Fulcrum Electrum Server" \
+                --ok-label "Select" \
+                --cancel-label "Back" \
+                --menu "Choose an option:" \
+                $HEIGHT $WIDTH $CHOICE_HEIGHT \
+                "${OPTIONS[@]}" 2>&1 >/dev/tty)
   clear
 
   case $CHOICE in
@@ -253,15 +265,82 @@ Check 'sudo nginx -t' for a detailed error message.
     echo "For more details check the RaspiBlitz README on Fulcrum:"
     echo "https://github.com/raspiblitz/raspiblitz"
     echo
-    echo "Press ENTER to get back to main menu."
-    read key
+    echo "Press ENTER to continue..."
+    read -r
     sudo /home/admin/config.scripts/blitz.display.sh hide
     ;;
   STATUS)
     sudo /home/admin/config.scripts/bonus.fulcrum.sh status
     echo
-    echo "Press ENTER to get back to main menu."
-    read key
+    echo "Press ENTER to continue..."
+    read -r
+    ;;
+  LOGS)
+    echo "######## Fulcrum Service Logs ########"
+    echo "# Running: 'sudo journalctl -fu fulcrum -n 100'"
+    echo "# Showing the last 100 log entries and following new ones..."
+    echo "# Press CTRL+C to exit the log view and return to menu"
+    echo "# Press ENTER to continue"
+    read -r
+    sudo journalctl -fu fulcrum -n 100
+    echo
+    echo "Press ENTER to continue..."
+    read -r
+    ;;
+  CONF)
+    echo "######## Edit Fulcrum Configuration ########"
+    configFile="/home/fulcrum/.fulcrum/fulcrum.conf"
+    if [ -f "$configFile" ]; then
+      echo "# Opening fulcrum.conf for editing with nano..."
+      echo "# Save changes with CTRL+O, then press ENTER"
+      echo "# Exit nano with CTRL+X"
+      echo "# Press ENTER to continue or CTRL+C to cancel"
+      read -r
+      sudo nano "$configFile"
+      echo
+      echo "# Configuration file editing completed."
+      echo "# Do you want to restart the Fulcrum service now? (y/N)"
+      read -r restart
+      if [ "$restart" = "y" ] || [ "$restart" = "Y" ]; then
+        echo "# Restarting Fulcrum service..."
+        sudo systemctl restart fulcrum
+        echo "# Service restarted."
+      else
+        echo "# Remember to restart the service manually: sudo systemctl restart fulcrum"
+      fi
+    else
+      echo "# ERROR: Configuration file not found at $configFile"
+    fi
+    echo
+    echo "Press ENTER to continue..."
+    read -r
+    ;;
+  SERVICE)
+    echo "######## Edit Fulcrum Systemd Service ########"
+    echo "# Running: 'sudo systemctl edit --full fulcrum'"
+    echo "# Opening systemd service editor..."
+    echo "# This will open the full service file for editing"
+    echo "# Press ENTER to continue or CTRL+C to cancel"
+    read -r
+    sudo systemctl edit --full fulcrum
+    echo
+    echo "# Systemd service file edited."
+    echo "# Do you want to reload systemd and restart Fulcrum? (y/N)"
+    read -r restart
+    if [ "$restart" = "y" ] || [ "$restart" = "Y" ]; then
+      echo "# Reloading systemd daemon..."
+      sudo systemctl daemon-reload
+      echo "# Restarting Fulcrum service..."
+      sudo systemctl restart fulcrum
+      echo "# Service restarted."
+    else
+      echo "# Remember to reload systemd and restart manually:"
+      echo "# sudo systemctl daemon-reload"
+      echo "# sudo systemctl restart fulcrum"
+    fi
+    echo
+    echo "Press ENTER to continue..."
+    read -r
     ;;
   REINDEX)
     echo "######## Delete and rebuild the Fulcrum database ########"
@@ -277,7 +356,7 @@ Check 'sudo nginx -t' for a detailed error message.
     sudo systemctl start fulcrum
     echo "# ok"
     echo
-    echo "Press ENTER to get back to main menu."
+    echo "Press ENTER to continue..."
     read -r
     ;;
   esac
