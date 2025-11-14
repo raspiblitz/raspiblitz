@@ -396,6 +396,17 @@ function downloadAndVerifyBinary() {
 
 function createSystemdService() {
   echo "# Create a systemd service"
+
+  # Check if database already exists
+  # Add --db-upgrade flag when no v2 db exists
+  local dbUpgradeFlag=""
+  if [ -d "/mnt/hdd/app-storage/fulcrum/db/fulc2_db/" ]; then
+    echo "# Existing database found - skipping --db-upgrade flag"
+  else
+    echo "# No version 2 database detected - adding --db-upgrade flag"
+    dbUpgradeFlag="--db-upgrade "
+  fi
+
   echo "\
 [Unit]
 Description=Fulcrum
@@ -404,7 +415,7 @@ StartLimitBurst=2
 StartLimitIntervalSec=20
 
 [Service]
-ExecStart=/home/fulcrum/Fulcrum --db-upgrade /home/fulcrum/.fulcrum/fulcrum.conf
+ExecStart=/home/fulcrum/Fulcrum ${dbUpgradeFlag}/home/fulcrum/.fulcrum/fulcrum.conf
 KillSignal=SIGINT
 User=fulcrum
 LimitNOFILE=8192
@@ -415,6 +426,7 @@ Restart=on-failure
 [Install]
 WantedBy=multi-user.target
 " | sudo tee /etc/systemd/system/fulcrum.service
+  sudo systemctl daemon-reload
 }
 
 # set the platform
