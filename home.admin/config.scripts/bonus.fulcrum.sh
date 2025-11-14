@@ -595,17 +595,45 @@ if [ "$1" = update ]; then
 fi
 
 if [ "$1" = off ]; then
+  echo "# Stopping and disabling Fulcrum service..."
   sudo systemctl disable --now fulcrum
+
+  # remove systemd service file
+  isInstalled=$(sudo ls /etc/systemd/system/fulcrum.service 2>/dev/null | grep -c 'fulcrum.service')
+  if [ ${isInstalled} -eq 1 ]; then
+    sudo rm /etc/systemd/system/fulcrum.service
+  else
+    echo "# fulcrum.service is not installed."
+  fi
+
+  # remove the database directory if deleteindex parameter is given
+  if [ "$2" = "deleteindex" ]; then
+    echo "# Deleting Fulcrum database..."
+    sudo rm -rf /mnt/hdd/app-storage/fulcrum
+  fi
+
+  echo "# Removing Fulcrum user and home directory..."
   sudo userdel -rf fulcrum
+
   # remove Tor service
+  echo "# Removing Tor hidden service..."
   /home/admin/config.scripts/tor.onion-service.sh off fulcrum
+
   # close ports on firewall
+  echo "# Closing firewall ports..."
   sudo ufw delete allow ${portTCP}
   sudo ufw delete allow ${portSSL}
-  # to remove the database directory:
-  # sudo rm -rf /mnt/hdd/app-storage/fulcrum
+
+  # NOTE: nginx stream configuration is left in place
+  # To manually remove, edit: sudo nano /etc/nginx/nginx.conf
+  # and remove the 'upstream fulcrum' and related 'server' block
+
   # setting value in raspiblitz config
   /home/admin/config.scripts/blitz.conf.sh set fulcrum "off"
+
+  echo "# Fulcrum uninstalled successfully"
+  echo "# NOTE: nginx configuration for Fulcrum remains in /etc/nginx/nginx.conf"
+  echo "# To remove manually: sudo nano /etc/nginx/nginx.conf"
   exit 0
 fi
 
