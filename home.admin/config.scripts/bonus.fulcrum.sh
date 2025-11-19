@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # https://github.com/cculianu/Fulcrum/releases
-fulcrumVersion="2.0.0"
+fulcrumVersion="2.1.0"
 
 portTCP="50021"
 portSSL="50022"
