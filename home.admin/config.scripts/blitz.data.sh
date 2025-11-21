@@ -1144,11 +1144,27 @@ if [ "$action" = "link" ]; then
     if [ -d "${storageMountedPath}/bitcoin" ]; then
         /home/admin/_cache.sh set message "hdd-migrate"
         echo "# moving old data from ${storageMountedPath}/bitcoin to ${storageMountedPath}/app-storage/bitcoin"
-        rsync -a --remove-source-files --prune-empty-dirs ${storageMountedPath}/bitcoin/ ${storageMountedPath}/app-storage/bitcoin/
-        if [ $? -ne 0 ]; then
-            echo "error='failed to move ${storageMountedPath}/bitcoin/* to ${storageMountedPath}/app-storage/bitcoin/'"
+        # Check if source and destination are on the same filesystem
+        srcDevice=$(stat -c %d "${storageMountedPath}/bitcoin" 2>/dev/null)
+        dstDevice=$(stat -c %d "${storageMountedPath}/app-storage" 2>/dev/null)
+        if [ "${srcDevice}" = "${dstDevice}" ] && [ -n "${srcDevice}" ]; then
+            # Same filesystem - use mv (instant, just updates directory entries)
+            echo "# same filesystem detected - using mv for instant move"
+            mv ${storageMountedPath}/bitcoin/* ${storageMountedPath}/app-storage/bitcoin/ 2>/dev/null
+            if [ $? -ne 0 ]; then
+                echo "error='failed to move ${storageMountedPath}/bitcoin/* to ${storageMountedPath}/app-storage/bitcoin/'"
+            else
+                rm -rf ${storageMountedPath}/bitcoin
+            fi
         else
-            rm -rf ${storageMountedPath}/bitcoin
+            # Different filesystems - use rsync (copies data, slower but safe)
+            echo "# different filesystems detected - using rsync"
+            rsync -a --remove-source-files --prune-empty-dirs ${storageMountedPath}/bitcoin/ ${storageMountedPath}/app-storage/bitcoin/
+            if [ $? -ne 0 ]; then
+                echo "error='failed to move ${storageMountedPath}/bitcoin/* to ${storageMountedPath}/app-storage/bitcoin/'"
+            else
+                rm -rf ${storageMountedPath}/bitcoin
+            fi
         fi
     fi
     if [ -d "${storageMountedPath}/app-storage/bitcoin/wallet.dat" ]; then
@@ -1183,11 +1199,27 @@ if [ "$action" = "link" ]; then
     if [ -d "${storageMountedPath}/lnd" ]; then
         /home/admin/_cache.sh set message "hdd-migrate"
         echo "# moving old data from ${storageMountedPath}/lnd to ${dataMountedPath}/app-data/lnd"
-        rsync -a --remove-source-files --prune-empty-dirs ${storageMountedPath}/lnd/ ${dataMountedPath}/app-data/lnd/
-        if [ $? -ne 0 ]; then
-            echo "error='failed to rsync /app-data/lnd/'"
+        # Check if source and destination are on the same filesystem
+        srcDevice=$(stat -c %d "${storageMountedPath}/lnd" 2>/dev/null)
+        dstDevice=$(stat -c %d "${dataMountedPath}/app-data" 2>/dev/null)
+        if [ "${srcDevice}" = "${dstDevice}" ] && [ -n "${srcDevice}" ]; then
+            # Same filesystem - use mv (instant, just updates directory entries)
+            echo "# same filesystem detected - using mv for instant move"
+            mv ${storageMountedPath}/lnd/* ${dataMountedPath}/app-data/lnd/ 2>/dev/null
+            if [ $? -ne 0 ]; then
+                echo "error='failed to move /app-data/lnd/'"
+            else
+                rm -rf ${storageMountedPath}/lnd
+            fi
         else
-            rm -rf ${storageMountedPath}/lnd
+            # Different filesystems - use rsync (copies data, slower but safe)
+            echo "# different filesystems detected - using rsync"
+            rsync -a --remove-source-files --prune-empty-dirs ${storageMountedPath}/lnd/ ${dataMountedPath}/app-data/lnd/
+            if [ $? -ne 0 ]; then
+                echo "error='failed to rsync /app-data/lnd/'"
+            else
+                rm -rf ${storageMountedPath}/lnd
+            fi
         fi
     fi
     echo "# For backwards compatibility: Liniking ${mainMountPoint}/lnd"
@@ -1206,11 +1238,27 @@ if [ "$action" = "link" ]; then
     if [ -d "${storageMountedPath}/tor" ]; then
         /home/admin/_cache.sh set message "hdd-migrate"
         echo "# moving old data from ${storageMountedPath}/tor to ${dataMountedPath}/app-data/tor"
-        rsync -a --remove-source-files --prune-empty-dirs ${storageMountedPath}/tor/ ${dataMountedPath}/app-data/tor/
-        if [ $? -ne 0 ]; then
-            echo "error='failed to rsync /app-data/tor/'"
+        # Check if source and destination are on the same filesystem
+        srcDevice=$(stat -c %d "${storageMountedPath}/tor" 2>/dev/null)
+        dstDevice=$(stat -c %d "${dataMountedPath}/app-data" 2>/dev/null)
+        if [ "${srcDevice}" = "${dstDevice}" ] && [ -n "${srcDevice}" ]; then
+            # Same filesystem - use mv (instant, just updates directory entries)
+            echo "# same filesystem detected - using mv for instant move"
+            mv ${storageMountedPath}/tor/* ${dataMountedPath}/app-data/tor/ 2>/dev/null
+            if [ $? -ne 0 ]; then
+                echo "error='failed to move /app-data/tor/'"
+            else
+                rm -rf ${storageMountedPath}/tor
+            fi
         else
-            rm -rf ${storageMountedPath}/tor
+            # Different filesystems - use rsync (copies data, slower but safe)
+            echo "# different filesystems detected - using rsync"
+            rsync -a --remove-source-files --prune-empty-dirs ${storageMountedPath}/tor/ ${dataMountedPath}/app-data/tor/
+            if [ $? -ne 0 ]; then
+                echo "error='failed to rsync /app-data/tor/'"
+            else
+                rm -rf ${storageMountedPath}/tor
+            fi
         fi
     fi
     echo "# For backwards compatibility: Liniking ${mainMountPoint}/tor"
