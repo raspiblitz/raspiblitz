@@ -1,7 +1,7 @@
 # images, checksums and signatures are at:
 # https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/
-variable "iso_name" { default = "debian-13.1.0-amd64-netinst.iso" }
-variable "iso_checksum" { default = "658b28e209b578fe788ec5867deebae57b6aac5fce3692bbb116bab9c65568b3" }
+variable "iso_name" { default = "debian-13.2.0-amd64-netinst.iso" }
+variable "iso_checksum" { default = "677c4d57aa034dc192b5191870141057574c1b05df2b9569c0ee08aa4e32125d" }
 
 variable "pack" { default = "lean" }
 variable "github_user" { default = "raspiblitz" }
