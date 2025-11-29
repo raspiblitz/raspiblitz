@@ -119,15 +119,29 @@ function configure_specter {
     torOnly="false"
     tor_control_port=""
   fi
+
+  # Set the active node alias based on the chain
+  # Always use raspiblitz_${chain}net format, never "default"
+  active_alias="raspiblitz_${chain}net"
+
+  # Get Bitcoin RPC credentials early to use for Specter auth
+  echo "# Getting Bitcoin RPC credentials"
+  RPCUSER=$(sudo cat /mnt/hdd/app-data/${network}/${network}.conf | grep rpcuser | cut -c 9-)
+  PASSWORD_B=$(sudo cat /mnt/hdd/app-data/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
+
+  # Hash the password for Specter using werkzeug (same library Specter uses)
+  # Use Specter's virtual environment to access werkzeug
+  PASSWORD_HASH=$(sudo -u specter /home/specter/.env/bin/python3 -c "from werkzeug.security import generate_password_hash; print(generate_password_hash('${PASSWORD_B}'))")
+
   cat >/home/admin/config.json <<EOF
 {
     "auth": {
-        "method": "rpcpasswordaspin",
+        "method": "passwordonly",
         "password_min_chars": 6,
         "rate_limit": 10,
         "registration_link_timeout": 1
     },
-    "active_node_alias": "raspiblitz_${chain}net",
+    "active_node_alias": "${active_alias}",
     "proxy_url": "${proxy}",
     "only_tor": "${torOnly}",
     "tor_control_port": "${tor_control_port}",
@@ -139,56 +153,50 @@ EOF
   sudo mv /home/admin/config.json /home/specter/.specter/config.json
   sudo chown -RL specter:specter /home/specter/
 
-  echo "# Adding the raspiblitz_${chain}net node to Specter"
-  RPCUSER=$(sudo cat /mnt/hdd/app-data/${network}/${network}.conf | grep rpcuser | cut -c 9-)
-  PASSWORD_B=$(sudo cat /mnt/hdd/app-data/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
-
-  echo "# Connect Specter to the default mainnet node"
-  cat >/home/admin/default.json <<EOF
+  # Create the user_manager directory and admin user with hashed password
+  sudo mkdir -p /home/specter/.specter/user_manager
+  cat >/home/admin/admin_user.json <<EOF
 {
-    "python_class": "cryptoadvance.specter.node.Node",
-    "fullpath": "/home/specter/.specter/nodes/default.json"
-    "name": "raspiblitz_mainnet",
-    "alias": "default",
-    "autodetect": false,
-    "datadir": "",
-    "user": "${RPCUSER}",
-    "password": "${PASSWORD_B}",
-    "port": "8332",
-    "host": "localhost",
-    "protocol": "http",
+    "id": "admin",
+    "username": "admin",
+    "password": "${PASSWORD_HASH}",
+    "config": {},
+    "is_admin": true,
+    "services": []
 }
 EOF
-  sudo mv /home/admin/default.json /home/specter/.specter/nodes/default.json
-  sudo chown -RL specter:specter /home/specter/
+  sudo mv /home/admin/admin_user.json /home/specter/.specter/user_manager/admin.json
+  sudo chown -R specter:specter /home/specter/.specter/user_manager
 
-  if [ "${chain}" != "main" ]; then
-    if [ "${chain}" = "test" ]; then
-      portprefix=1
-    elif [ "${chain}" = "sig" ]; then
-      portprefix=3
-    fi
-    PORT="${portprefix}8332"
+  echo "# Adding the raspiblitz_${chain}net node to Specter"
 
-    echo "# Connect Specter to the raspiblitz_${chain}net node"
-    cat >/home/admin/raspiblitz_${chain}net.json <<EOF
+  # Set the port based on the chain
+  if [ "${chain}" = "main" ]; then
+    PORT="8332"
+  elif [ "${chain}" = "test" ]; then
+    PORT="18332"
+  elif [ "${chain}" = "sig" ]; then
+    PORT="38332"
+  fi
+
+  echo "# Connect Specter to the raspiblitz_${chain}net node"
+  cat >/home/admin/raspiblitz_${chain}net.json <<EOF
 {
+    "python_class": "cryptoadvance.specter.node.Node",
+    "fullpath": "/home/specter/.specter/nodes/raspiblitz_${chain}net.json",
     "name": "raspiblitz_${chain}net",
     "alias": "raspiblitz_${chain}net",
     "autodetect": false,
-    "datadir": "/mnt/hdd/bitcoin",
+    "datadir": "/mnt/hdd/app-storage/bitcoin",
     "user": "${RPCUSER}",
     "password": "${PASSWORD_B}",
     "port": "${PORT}",
     "host": "localhost",
-    "protocol": "http",
-    "external_node": true,
-    "fullpath": "/home/specter/.specter/nodes/raspiblitz_${chain}net.json"
+    "protocol": "http"
 }
 EOF
-    sudo mv /home/admin/raspiblitz_${chain}net.json /home/specter/.specter/nodes/raspiblitz_${chain}net.json
-    sudo chown -RL specter:specter /home/specter/
-  fi
+  sudo mv /home/admin/raspiblitz_${chain}net.json /home/specter/.specter/nodes/raspiblitz_${chain}net.json
+  sudo chown -RL specter:specter /home/specter/
 }
 
 # config
