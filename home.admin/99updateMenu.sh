@@ -591,6 +591,10 @@ if [ "${ElectRS}" == "on" ]; then
   OPTIONS+=(ELECTRS "Update Electrs")
 fi
 
+if [ "${fulcrum}" == "on" ]; then
+  OPTIONS+=(FULCRUM "Update Fulcrum")
+fi
+
 if [ "${RTL}" == "on" ]||[ "${cRTL}" == "on" ]; then
   OPTIONS+=(RTL "Update RTL")
 fi
@@ -661,6 +665,9 @@ case $CHOICE in
     ;;
   ELECTRS)
     /home/admin/config.scripts/bonus.electrs.sh update
+    ;;
+  FULCRUM)
+    /home/admin/config.scripts/bonus.fulcrum.sh update
     ;;
   RTL)
     /home/admin/config.scripts/bonus.rtl.sh update
