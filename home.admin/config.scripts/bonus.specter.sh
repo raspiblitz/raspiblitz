@@ -129,9 +129,13 @@ function configure_specter {
   RPCUSER=$(sudo cat /mnt/hdd/app-data/${network}/${network}.conf | grep rpcuser | cut -c 9-)
   PASSWORD_B=$(sudo cat /mnt/hdd/app-data/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
 
-  # Hash the password for Specter using werkzeug (same library Specter uses)
-  # Use Specter's virtual environment to access werkzeug
-  PASSWORD_HASH=$(sudo -u specter /home/specter/.env/bin/python3 -c "from werkzeug.security import generate_password_hash; print(generate_password_hash('${PASSWORD_B}'))")
+  # Hash the password for Specter using Specter's own hash_password function
+  # Use Specter's virtual environment to access the user module
+  PASSWORD_JSON=$(sudo -u specter /home/specter/.env/bin/python3 -c "
+import json
+from cryptoadvance.specter.user import hash_password
+print(json.dumps(hash_password('${PASSWORD_B}')))
+")
 
   cat >/home/admin/config.json <<EOF
 {
@@ -153,20 +157,22 @@ EOF
   sudo mv /home/admin/config.json /home/specter/.specter/config.json
   sudo chown -RL specter:specter /home/specter/
 
-  # Create the user_manager directory and admin user with hashed password
-  sudo mkdir -p /home/specter/.specter/user_manager
-  cat >/home/admin/admin_user.json <<EOF
-{
-    "id": "admin",
-    "username": "admin",
-    "password": "${PASSWORD_HASH}",
-    "config": {},
-    "is_admin": true,
-    "services": []
-}
+  # Create the users.json file with admin user (Specter's format)
+  cat >/home/admin/users.json <<EOF
+[
+    {
+        "id": "admin",
+        "username": "admin",
+        "password": ${PASSWORD_JSON},
+        "is_admin": true,
+        "jwt_tokens": {},
+        "encrypted_user_secret": null,
+        "services": []
+    }
+]
 EOF
-  sudo mv /home/admin/admin_user.json /home/specter/.specter/user_manager/admin.json
-  sudo chown -R specter:specter /home/specter/.specter/user_manager
+  sudo mv /home/admin/users.json /home/specter/.specter/users.json
+  sudo chown specter:specter /home/specter/.specter/users.json
 
   echo "# Adding the raspiblitz_${chain}net node to Specter"
 
