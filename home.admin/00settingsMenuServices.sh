@@ -13,6 +13,7 @@ if [ ${#BTCRPCexplorer} -eq 0 ]; then BTCRPCexplorer="off"; fi
 if [ ${#specter} -eq 0 ]; then specter="off"; fi
 if [ ${#BTCPayServer} -eq 0 ]; then BTCPayServer="off"; fi
 if [ ${#ElectRS} -eq 0 ]; then ElectRS="off"; fi
+if [ ${#fulcrum} -eq 0 ]; then fulcrum="off"; fi
 if [ ${#lndmanage} -eq 0 ]; then lndmanage="off"; fi
 if [ ${#joinmarket} -eq 0 ]; then joinmarket="off"; fi
 if [ ${#jam} -eq 0 ]; then jam="off"; fi
@@ -43,6 +44,7 @@ OPTIONS=()
 # just available for BTC
 if [ "${network}" == "bitcoin" ]; then
   OPTIONS+=(ea 'BTC Electrum Rust Server' ${ElectRS})
+  OPTIONS+=(fu 'BTC Fulcrum Electrum Server' ${fulcrum})
   OPTIONS+=(pa 'BTC PayServer' ${BTCPayServer})
   OPTIONS+=(ba 'BTC RPC-Explorer' ${BTCRPCexplorer})
   OPTIONS+=(sa 'BTC Specter Desktop' ${specter})
@@ -252,6 +254,56 @@ When finished use the new 'ELECTRS' entry in Main Menu for more info.\n
 
 else
   echo "ElectRS Setting unchanged."
+fi
+
+# Fulcrum process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "fu")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${fulcrum}" != "${choice}" ]; then
+  echo "Fulcrum Setting changed .."
+  anychange=1
+  extraparameter=""
+  if [ "${choice}" =  "on" ]; then
+    # check on HDD size
+    source <(sudo /home/admin/config.scripts/blitz.data.sh status)
+    if [ ${storageSizeGB} -lt 800 ]; then
+      whiptail --title " HDD/SSD TOO SMALL " --msgbox "\
+We recommend at least a 1TB HDD/SSD if you want to run Fulcrum.\n
+This is due to the electrum index that will grow over time and needs space.\n
+To migrate to a bigger HDD/SSD check RaspiBlitz README on 'migration'.\n
+" 14 50
+    else
+      /home/admin/config.scripts/bonus.fulcrum.sh on ${extraparameter}
+      errorOnInstall=$?
+      if [ ${errorOnInstall} -eq 0 ]; then
+        sudo systemctl start fulcrum
+        whiptail --title " Installed Fulcrum Server " --msgbox "\
+The index database needs to be created before Fulcrum can be used.\n
+This can take hours/days depending on your RaspiBlitz.\n
+When finished use the new 'FULCRUM' entry in Main Menu for more info.\n
+" 14 50
+      needsReboot=0
+      else
+        l1="# FAIL on Fulcrum install #"
+        l2="Try manual install on terminal after reboot with:"
+        l3="/home/admin/config.scripts/bonus.fulcrum.sh on"
+        dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
+      fi
+    fi
+  fi
+  if [ "${choice}" =  "off" ]; then
+	  whiptail --title "Delete Fulcrum Index?" \
+    --yes-button "Keep Index" \
+    --no-button "Delete Index" \
+    --yesno "Fulcrum is getting uninstalled. Do you also want to delete the Fulcrum Index? It contains no important data, but can take multiple hours to rebuild if needed again." 10 60
+	  if [ $? -eq 1 ]; then
+      extraparameter="deleteindex"
+	  fi
+    /home/admin/config.scripts/bonus.fulcrum.sh off ${extraparameter}
+  fi
+
+else
+  echo "Fulcrum Setting unchanged."
 fi
 
 # BTCPayServer process choice

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # https://github.com/cculianu/Fulcrum/releases
-fulcrumVersion="1.12.0"
+fulcrumVersion="2.1.0"
 
 portTCP="50021"
 portSSL="50022"
@@ -46,8 +46,8 @@ fi
 
 if [ "$1" = "status" ]; then
   echo "##### STATUS FULCRUM SERVICE"
-  fulcrumVersion=$(/home/fulcrum/Fulcrum -v 2>/dev/null | grep -oP 'Fulcrum \K\d+\.\d+\.\d+')
-  echo "version='${fulcrumVersion}'"
+  displayVersion=$(/home/fulcrum/Fulcrum -v 2>/dev/null | grep Fulcrum)
+  echo "version='${displayVersion}'"
 
   source /mnt/hdd/app-data/raspiblitz.conf
   if [ "${fulcrum}" = "on" ]; then
@@ -218,11 +218,23 @@ Check 'sudo nginx -t' for a detailed error message.
 
   OPTIONS=(
     CONNECT "How to connect"
-    REINDEX "Delete and rebuild the Fulcrum database"
     STATUS "Fulcrum status info"
+    LOGS "Show service logs"
+    CONF "Edit fulcrum.conf"
+    SERVICE "Edit systemd service"
+    REINDEX "Delete and rebuild the Fulcrum database"
   )
 
-  CHOICE=$(whiptail --clear --title "Fulcrum Electrum Server" --menu "menu" 10 50 3 "${OPTIONS[@]}" 2>&1 >/dev/tty)
+  WIDTH=64
+  CHOICE_HEIGHT=$(("${#OPTIONS[@]}/2+1"))
+  HEIGHT=$((CHOICE_HEIGHT+7))
+  CHOICE=$(dialog --clear \
+                --title "Fulcrum Electrum Server" \
+                --ok-label "Select" \
+                --cancel-label "Back" \
+                --menu "Choose an option:" \
+                $HEIGHT $WIDTH $CHOICE_HEIGHT \
+                "${OPTIONS[@]}" 2>&1 >/dev/tty)
   clear
 
   case $CHOICE in
@@ -253,15 +265,82 @@ Check 'sudo nginx -t' for a detailed error message.
     echo "For more details check the RaspiBlitz README on Fulcrum:"
     echo "https://github.com/raspiblitz/raspiblitz"
     echo
-    echo "Press ENTER to get back to main menu."
-    read key
+    echo "Press ENTER to continue..."
+    read -r
     sudo /home/admin/config.scripts/blitz.display.sh hide
     ;;
   STATUS)
     sudo /home/admin/config.scripts/bonus.fulcrum.sh status
     echo
-    echo "Press ENTER to get back to main menu."
-    read key
+    echo "Press ENTER to continue..."
+    read -r
+    ;;
+  LOGS)
+    echo "######## Fulcrum Service Logs ########"
+    echo "# Running: 'sudo journalctl -fu fulcrum -n 100'"
+    echo "# Showing the last 100 log entries and following new ones..."
+    echo "# Press CTRL+C to exit the log view and return to menu"
+    echo "# Press ENTER to continue"
+    read -r
+    sudo journalctl -fu fulcrum -n 100
+    echo
+    echo "Press ENTER to continue..."
+    read -r
+    ;;
+  CONF)
+    echo "######## Edit Fulcrum Configuration ########"
+    configFile="/home/fulcrum/.fulcrum/fulcrum.conf"
+    if [ -f "$configFile" ]; then
+      echo "# Opening fulcrum.conf for editing with nano..."
+      echo "# Save changes with CTRL+O, then press ENTER"
+      echo "# Exit nano with CTRL+X"
+      echo "# Press ENTER to continue or CTRL+C to cancel"
+      read -r
+      sudo nano "$configFile"
+      echo
+      echo "# Configuration file editing completed."
+      echo "# Do you want to restart the Fulcrum service now? (y/N)"
+      read -r restart
+      if [ "$restart" = "y" ] || [ "$restart" = "Y" ]; then
+        echo "# Restarting Fulcrum service..."
+        sudo systemctl restart fulcrum
+        echo "# Service restarted."
+      else
+        echo "# Remember to restart the service manually: sudo systemctl restart fulcrum"
+      fi
+    else
+      echo "# ERROR: Configuration file not found at $configFile"
+    fi
+    echo
+    echo "Press ENTER to continue..."
+    read -r
+    ;;
+  SERVICE)
+    echo "######## Edit Fulcrum Systemd Service ########"
+    echo "# Running: 'sudo systemctl edit --full fulcrum'"
+    echo "# Opening systemd service editor..."
+    echo "# This will open the full service file for editing"
+    echo "# Press ENTER to continue or CTRL+C to cancel"
+    read -r
+    sudo systemctl edit --full fulcrum
+    echo
+    echo "# Systemd service file edited."
+    echo "# Do you want to reload systemd and restart Fulcrum? (y/N)"
+    read -r restart
+    if [ "$restart" = "y" ] || [ "$restart" = "Y" ]; then
+      echo "# Reloading systemd daemon..."
+      sudo systemctl daemon-reload
+      echo "# Restarting Fulcrum service..."
+      sudo systemctl restart fulcrum
+      echo "# Service restarted."
+    else
+      echo "# Remember to reload systemd and restart manually:"
+      echo "# sudo systemctl daemon-reload"
+      echo "# sudo systemctl restart fulcrum"
+    fi
+    echo
+    echo "Press ENTER to continue..."
+    read -r
     ;;
   REINDEX)
     echo "######## Delete and rebuild the Fulcrum database ########"
@@ -277,7 +356,7 @@ Check 'sudo nginx -t' for a detailed error message.
     sudo systemctl start fulcrum
     echo "# ok"
     echo
-    echo "Press ENTER to get back to main menu."
+    echo "Press ENTER to continue..."
     read -r
     ;;
   esac
@@ -317,6 +396,17 @@ function downloadAndVerifyBinary() {
 
 function createSystemdService() {
   echo "# Create a systemd service"
+
+  # Check if database already exists
+  # Add --db-upgrade flag when no v2 db exists
+  local dbUpgradeFlag=""
+  if [ -d "/mnt/hdd/app-storage/fulcrum/db/fulc2_db/" ]; then
+    echo "# Existing database found - skipping --db-upgrade flag"
+  else
+    echo "# No version 2 database detected - adding --db-upgrade flag"
+    dbUpgradeFlag="--db-upgrade "
+  fi
+
   echo "\
 [Unit]
 Description=Fulcrum
@@ -325,7 +415,7 @@ StartLimitBurst=2
 StartLimitIntervalSec=20
 
 [Service]
-ExecStart=/home/fulcrum/Fulcrum /home/fulcrum/.fulcrum/fulcrum.conf
+ExecStart=/home/fulcrum/Fulcrum ${dbUpgradeFlag}/home/fulcrum/.fulcrum/fulcrum.conf
 KillSignal=SIGINT
 User=fulcrum
 LimitNOFILE=8192
@@ -336,6 +426,7 @@ Restart=on-failure
 [Install]
 WantedBy=multi-user.target
 " | sudo tee /etc/systemd/system/fulcrum.service
+  sudo systemctl daemon-reload
 }
 
 # set the platform
@@ -403,12 +494,7 @@ bitcoind_timeout = 600
 ## reduce load
 bitcoind_clients = 1
 worker_threads = 1
-## optimize for 4-8 GB RAM
-db_mem=1024
-db_max_open_files=200
-## fast-sync is now called utxo_cache
-## disable to prevent database corruption on restart
-#utxo_cache = 1024
+db_max_open_files = 200
 
 ## allow syncing wallets with a large number of addresses
 max_subs_per_ip = 1000000 # default: 75000" |
@@ -505,6 +591,15 @@ if [ "$1" = update ]; then
 
   sudo systemctl disable --now fulcrum
 
+  # Update config file: remove deprecatedutxo_cache and fast_sync entries
+  configFile="/home/fulcrum/.fulcrum/fulcrum.conf"
+  if [ -f "$configFile" ]; then
+    echo "# Updating Fulcrum config file"
+    # Remove utxo_cache and fast_sync entries
+    sudo -u fulcrum sed -i '/^utxo_cache/d' "$configFile"
+    sudo -u fulcrum sed -i '/^fast_sync/d' "$configFile"
+  fi
+
   createSystemdService
 
   sudo systemctl enable --now fulcrum
@@ -512,17 +607,45 @@ if [ "$1" = update ]; then
 fi
 
 if [ "$1" = off ]; then
+  echo "# Stopping and disabling Fulcrum service..."
   sudo systemctl disable --now fulcrum
+
+  # remove systemd service file
+  isInstalled=$(sudo ls /etc/systemd/system/fulcrum.service 2>/dev/null | grep -c 'fulcrum.service')
+  if [ ${isInstalled} -eq 1 ]; then
+    sudo rm /etc/systemd/system/fulcrum.service
+  else
+    echo "# fulcrum.service is not installed."
+  fi
+
+  # remove the database directory if deleteindex parameter is given
+  if [ "$2" = "deleteindex" ]; then
+    echo "# Deleting Fulcrum database..."
+    sudo rm -rf /mnt/hdd/app-storage/fulcrum
+  fi
+
+  echo "# Removing Fulcrum user and home directory..."
   sudo userdel -rf fulcrum
+
   # remove Tor service
+  echo "# Removing Tor hidden service..."
   /home/admin/config.scripts/tor.onion-service.sh off fulcrum
+
   # close ports on firewall
+  echo "# Closing firewall ports..."
   sudo ufw delete allow ${portTCP}
   sudo ufw delete allow ${portSSL}
-  # to remove the database directory:
-  # sudo rm -rf /mnt/hdd/app-storage/fulcrum
+
+  # NOTE: nginx stream configuration is left in place
+  # To manually remove, edit: sudo nano /etc/nginx/nginx.conf
+  # and remove the 'upstream fulcrum' and related 'server' block
+
   # setting value in raspiblitz config
   /home/admin/config.scripts/blitz.conf.sh set fulcrum "off"
+
+  echo "# Fulcrum uninstalled successfully"
+  echo "# NOTE: nginx configuration for Fulcrum remains in /etc/nginx/nginx.conf"
+  echo "# To remove manually: sudo nano /etc/nginx/nginx.conf"
   exit 0
 fi
 
