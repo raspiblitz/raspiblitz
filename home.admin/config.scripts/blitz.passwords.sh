@@ -430,6 +430,12 @@ elif [ "${abcd}" = "b" ]; then
     sudo systemctl restart elementsd.service
   fi
 
+  # specter
+  if [ "${specter}" == "on" ]; then
+    echo "# changing the password for specter"
+    sudo /home/admin/config.scripts/bonus.specter.sh config
+  fi
+
   echo "# OK -> RPC Password B changed"
   sleep 3
 
