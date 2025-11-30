@@ -1,7 +1,7 @@
 #!/bin/bash
 # https://github.com/cryptoadvance/specter-desktop
 
-pinnedVersion="2.0.5"
+pinnedVersion="2.1.1"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -256,6 +256,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     echo "#    --> pip-installing specter"
     sudo -u specter /home/specter/.env/bin/python3 -m pip install --upgrade cryptoadvance.specter==$pinnedVersion || exit 1
+
+    # Pin SQLAlchemy to 1.x to fix compatibility with spectrum extension
+    # SQLAlchemy 2.x removed __all__ attribute which breaks spectrum
+    echo "#    --> Pinning SQLAlchemy to compatible version"
+    sudo -u specter /home/specter/.env/bin/python3 -m pip install "sqlalchemy>=1.4,<2.0"
 
     # activating Authentication here ...
     configure_specter
