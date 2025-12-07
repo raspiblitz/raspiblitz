@@ -44,6 +44,7 @@ Links with more info:
 https://github.com/rootzoll/raspiblitz/blob/dev/FAQ.cl.md#clboss
 https://github.com/ZmnSCPxj/clboss#operating
 " 0 0
+  exit $?
 fi
 
 function buildFromSource() {
