@@ -6,6 +6,7 @@
 - Update: Specter Desktop 2.1.1 [details](https://github.com/cryptoadvance/specter-desktop/releases/tag/v2.1.1)
 - Update: Fulcrum Electrum server v2.1.0 [details](https://github.com/cculianu/Fulcrum/releases/tag/v2.1.0)
 - Update: Bitcoin Knots 29.2 (optional) [details](https://github.com/bitcoinknots/bitcoin/releases/tag/v29.2.knots20251010)
+- Update: Suez commit:8f29314 [details](https://github.com/prusnak/suez/commits/master)
 
 ## What's new in Version 1.12.0 of RaspiBlitz?
 
