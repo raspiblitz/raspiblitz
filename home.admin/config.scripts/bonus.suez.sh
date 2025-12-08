@@ -2,7 +2,7 @@
 
 # https://github.com/prusnak/suez/commits/master
 # reactivate PGP verification if the pinned / last commit is signed
-SUEZVERSION="d055a1f8b4a81488c72f60da9b51b0f0932c5146"
+SUEZVERSION="8f29314bb8d898f9766bd8255d1ff28e3d7e3a9e"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
