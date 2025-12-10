@@ -43,7 +43,9 @@ packages:
   - libffi-dev
   - libgmp-dev
   
-  # Hardware support
+  # Hardware support (for LCD displays and I2C devices)
+  # These are lightweight packages and included by default for maximum hardware compatibility
+  # They have minimal overhead even when unused (headless mode)
   - i2c-tools
   - python3-smbus
   

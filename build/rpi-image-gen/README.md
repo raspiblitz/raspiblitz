@@ -1,6 +1,6 @@
 # RaspiBlitz rpi-image-gen Integration
 
-This directory contains configuration files for building RaspiBlitz images using the [rpi-image-gen](https://github.com/raspberrypi/rpi-imager-gen) framework.
+This directory contains configuration files for building RaspiBlitz images using the [rpi-image-gen](https://github.com/raspberrypi/rpi-image-gen) framework.
 
 ## Overview
 
@@ -21,8 +21,8 @@ The rpi-image-gen integration allows for fully automated, reproducible builds of
    ```bash
    sudo apt-get update
    sudo apt-get install -y git python3 python3-pip qemu-user-static
-   git clone https://github.com/raspberrypi/rpi-imager-gen.git
-   cd rpi-imager-gen
+   git clone https://github.com/raspberrypi/rpi-image-gen.git
+   cd rpi-image-gen
    sudo pip3 install -r requirements.txt
    ```
 

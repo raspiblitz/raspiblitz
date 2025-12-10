@@ -125,7 +125,7 @@ pip3 install .
 rpi-image-gen --version
 ```
 
-> **Note**: The actual rpi-image-gen tool syntax may differ. This guide assumes the tool follows standard conventions. Refer to the official rpi-image-gen documentation for exact commands.
+> **Note**: This guide provides example commands based on standard image build tool patterns. The actual rpi-image-gen tool is announced in [this Raspberry Pi blog post](https://www.raspberrypi.com/news/introducing-rpi-image-gen-build-highly-customised-raspberry-pi-software-images/). When the tool is released, refer to its official documentation for the exact command syntax and options. The configuration files in this repository (YAML and INI) are designed to be compatible with layer-based image build tools.
 
 ## Quick Start
 

@@ -134,8 +134,11 @@ jobs:
         run: |
           cd build/rpi-image-gen
           
-          # Note: This assumes rpi-image-gen is installed and available
-          # Adjust the command based on actual rpi-image-gen syntax
+          # NOTE: This workflow is designed for the rpi-image-gen tool announced by Raspberry Pi.
+          # When the tool is officially released, update this command to match its actual syntax.
+          # For now, this serves as a template for the expected functionality.
+          # See: https://www.raspberrypi.com/news/introducing-rpi-image-gen-build-highly-customised-raspberry-pi-software-images/
+          
           echo "Starting rpi-image-gen build..."
           rpi-image-gen build raspiblitz.ini || {
             echo "Build failed! Check build.log for details"
