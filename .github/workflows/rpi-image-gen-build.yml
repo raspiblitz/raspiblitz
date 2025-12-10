@@ -1,0 +1,227 @@
+name: RPI Image Gen Build
+
+# This workflow builds RaspiBlitz images using rpi-image-gen
+# It can be triggered manually or on specific events
+
+on:
+  # Manual trigger
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'RaspiBlitz branch to build'
+        required: false
+        default: 'dev'
+      fatpack:
+        description: 'Build fatpack variant (true/false)'
+        required: false
+        default: 'false'
+      display:
+        description: 'Display class (lcd/hdmi/headless)'
+        required: false
+        default: 'headless'
+  
+  # Trigger on pushes to specific branches
+  push:
+    branches:
+      - dev
+      - 'v*'
+    paths:
+      - 'build_sdcard.sh'
+      - 'build/rpi-image-gen/**'
+      - 'home.admin/**'
+  
+  # Nightly builds
+  schedule:
+    # Run at 2 AM UTC every day
+    - cron: '0 2 * * *'
+
+jobs:
+  build-rpi-image:
+    name: Build RaspiBlitz Image
+    runs-on: ubuntu-22.04
+    
+    # Timeout after 2 hours to avoid hanging builds
+    timeout-minutes: 120
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch || github.ref }}
+      
+      - name: Free up disk space
+        run: |
+          # Remove unnecessary software to free up space
+          sudo apt-get remove -y '^llvm-.*' '^dotnet-.*' '^mono-.*' '^mysql-.*' '^php.*' azure-cli google-cloud-cli
+          sudo apt-get autoremove -y
+          sudo apt-get clean
+          df -h
+      
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            git \
+            python3 \
+            python3-pip \
+            python3-venv \
+            qemu-user-static \
+            binfmt-support \
+            parted \
+            kpartx \
+            dosfstools \
+            debootstrap \
+            debian-archive-keyring \
+            wget \
+            curl \
+            rsync \
+            pigz \
+            pv
+      
+      - name: Install rpi-image-gen
+        run: |
+          # Clone and install rpi-image-gen
+          git clone https://github.com/raspberrypi/rpi-imager-gen.git /tmp/rpi-image-gen
+          cd /tmp/rpi-image-gen
+          python3 -m venv venv
+          source venv/bin/activate
+          pip3 install -r requirements.txt
+          pip3 install .
+          echo "/tmp/rpi-image-gen/venv/bin" >> $GITHUB_PATH
+      
+      - name: Set build variables
+        id: vars
+        run: |
+          # Set version from git
+          VERSION="${GITHUB_REF_NAME}-$(git rev-parse --short HEAD)"
+          echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
+          
+          # Set branch
+          BRANCH="${{ github.event.inputs.branch || github.ref_name }}"
+          echo "BRANCH=${BRANCH}" >> $GITHUB_OUTPUT
+          
+          # Set fatpack
+          FATPACK="${{ github.event.inputs.fatpack || 'false' }}"
+          echo "FATPACK=${FATPACK}" >> $GITHUB_OUTPUT
+          
+          # Set display
+          DISPLAY="${{ github.event.inputs.display || 'headless' }}"
+          echo "DISPLAY=${DISPLAY}" >> $GITHUB_OUTPUT
+          
+          # Generate artifact name
+          ARTIFACT_NAME="raspiblitz-${VERSION}"
+          if [ "${FATPACK}" = "true" ]; then
+            ARTIFACT_NAME="${ARTIFACT_NAME}-fatpack"
+          fi
+          echo "ARTIFACT_NAME=${ARTIFACT_NAME}" >> $GITHUB_OUTPUT
+      
+      - name: Show build configuration
+        run: |
+          echo "Building RaspiBlitz image with the following configuration:"
+          echo "  Branch: ${{ steps.vars.outputs.BRANCH }}"
+          echo "  Version: ${{ steps.vars.outputs.VERSION }}"
+          echo "  Fatpack: ${{ steps.vars.outputs.FATPACK }}"
+          echo "  Display: ${{ steps.vars.outputs.DISPLAY }}"
+          echo "  Artifact: ${{ steps.vars.outputs.ARTIFACT_NAME }}"
+      
+      - name: Build image
+        env:
+          GITHUB_USER: ${{ github.repository_owner }}
+          BRANCH: ${{ steps.vars.outputs.BRANCH }}
+          VERSION: ${{ steps.vars.outputs.VERSION }}
+          FATPACK: ${{ steps.vars.outputs.FATPACK }}
+          DISPLAY: ${{ steps.vars.outputs.DISPLAY }}
+        run: |
+          cd build/rpi-image-gen
+          
+          # Note: This assumes rpi-image-gen is installed and available
+          # Adjust the command based on actual rpi-image-gen syntax
+          echo "Starting rpi-image-gen build..."
+          rpi-image-gen build raspiblitz.ini || {
+            echo "Build failed! Check build.log for details"
+            if [ -f build.log ]; then
+              echo "=== Last 100 lines of build.log ==="
+              tail -100 build.log
+            fi
+            exit 1
+          }
+      
+      - name: Calculate checksums
+        run: |
+          cd build/rpi-image-gen
+          
+          # Generate SHA256 checksum
+          if ls raspiblitz-*.img.gz 1> /dev/null 2>&1; then
+            for img in raspiblitz-*.img.gz; do
+              sha256sum "${img}" > "${img}.sha256"
+              echo "Generated checksum for ${img}"
+            done
+          fi
+          
+          # Generate SHA256 for uncompressed image if it exists
+          if ls raspiblitz-*.img 1> /dev/null 2>&1; then
+            for img in raspiblitz-*.img; do
+              [ -f "${img}" ] && sha256sum "${img}" > "${img}.sha256"
+              echo "Generated checksum for ${img}"
+            done
+          fi
+      
+      - name: List build artifacts
+        run: |
+          cd build/rpi-image-gen
+          echo "=== Build Artifacts ==="
+          ls -lh raspiblitz-* 2>/dev/null || echo "No artifacts found"
+          
+          if [ -f build.log ]; then
+            echo ""
+            echo "=== Build Log Summary ==="
+            tail -50 build.log
+          fi
+      
+      - name: Upload image artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.vars.outputs.ARTIFACT_NAME }}
+          path: |
+            build/rpi-image-gen/raspiblitz-*.img.gz
+            build/rpi-image-gen/raspiblitz-*.img.sha256
+            build/rpi-image-gen/raspiblitz-*-sbom.json
+          retention-days: 30
+          if-no-files-found: error
+      
+      - name: Upload build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log-${{ steps.vars.outputs.ARTIFACT_NAME }}
+          path: build/rpi-image-gen/build.log
+          retention-days: 14
+          if-no-files-found: warn
+      
+      - name: Create release (on tag push)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            build/rpi-image-gen/raspiblitz-*.img.gz
+            build/rpi-image-gen/raspiblitz-*.img.sha256
+            build/rpi-image-gen/raspiblitz-*-sbom.json
+          body: |
+            # RaspiBlitz ${{ steps.vars.outputs.VERSION }}
+            
+            Automated build from tag ${{ github.ref_name }}
+            
+            **Configuration:**
+            - Branch: ${{ steps.vars.outputs.BRANCH }}
+            - Fatpack: ${{ steps.vars.outputs.FATPACK }}
+            - Display: ${{ steps.vars.outputs.DISPLAY }}
+            
+            **Installation:**
+            1. Download the `.img.gz` file
+            2. Verify checksum: `sha256sum -c raspiblitz-*.img.sha256`
+            3. Flash to SD card using [Balena Etcher](https://www.balena.io/etcher/)
+            4. Insert SD card into Raspberry Pi and boot
+            
+            See [documentation](../../docs/development/automatic-image-build.md) for more details.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
