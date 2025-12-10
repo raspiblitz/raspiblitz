@@ -108,8 +108,8 @@ sudo apt-get install -y \
 
 ```bash
 # Clone the rpi-image-gen repository
-git clone https://github.com/raspberrypi/rpi-imager-gen.git
-cd rpi-imager-gen
+git clone https://github.com/raspberrypi/rpi-image-gen.git
+cd rpi-image-gen
 
 # Create virtual environment
 python3 -m venv venv
@@ -473,8 +473,8 @@ jobs:
       
       - name: Install rpi-image-gen
         run: |
-          git clone https://github.com/raspberrypi/rpi-imager-gen.git
-          cd rpi-imager-gen
+          git clone https://github.com/raspberrypi/rpi-image-gen.git
+          cd rpi-image-gen
           pip3 install -r requirements.txt
           pip3 install .
       
@@ -668,7 +668,7 @@ sudo systemctl restart systemd-binfmt
 ## Resources
 
 - [RaspiBlitz GitHub Repository](https://github.com/raspiblitz/raspiblitz)
-- [rpi-image-gen Documentation](https://github.com/raspberrypi/rpi-imager-gen)
+- [rpi-image-gen Documentation](https://github.com/raspberrypi/rpi-image-gen)
 - [build_sdcard.sh Source](../../build_sdcard.sh)
 - [RaspiBlitz Configuration Files](../../build/rpi-image-gen/)
 

@@ -81,7 +81,7 @@ jobs:
       - name: Install rpi-image-gen
         run: |
           # Clone and install rpi-image-gen
-          git clone https://github.com/raspberrypi/rpi-imager-gen.git /tmp/rpi-image-gen
+          git clone https://github.com/raspberrypi/rpi-image-gen.git /tmp/rpi-image-gen
           cd /tmp/rpi-image-gen
           python3 -m venv venv
           source venv/bin/activate
