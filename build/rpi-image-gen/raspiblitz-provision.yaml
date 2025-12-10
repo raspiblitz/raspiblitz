@@ -1,0 +1,62 @@
+# RaspiBlitz Provision Layer Configuration
+# This layer runs build_sdcard.sh in image build mode
+
+name: raspiblitz-provision
+description: Provisions RaspiBlitz using build_sdcard.sh in image build mode
+
+# Dependencies
+depends:
+  - raspiblitz-base
+
+# Files to copy into the image
+files:
+  # The build script will be downloaded from GitHub
+  # This allows for version-specific builds
+
+# Commands to run during provisioning
+run:
+  # Download build_sdcard.sh from the specified GitHub repo and branch
+  - |
+    GITHUB_USER="${GITHUB_USER:-raspiblitz}"
+    BRANCH="${BRANCH:-dev}"
+    echo "Downloading build_sdcard.sh from ${GITHUB_USER}/${BRANCH}"
+    wget -O /tmp/build_sdcard.sh "https://raw.githubusercontent.com/${GITHUB_USER}/raspiblitz/${BRANCH}/build_sdcard.sh"
+    chmod +x /tmp/build_sdcard.sh
+  
+  # Run build_sdcard.sh in image build mode
+  # This will install and configure RaspiBlitz without hardware-dependent operations
+  - |
+    GITHUB_USER="${GITHUB_USER:-raspiblitz}"
+    BRANCH="${BRANCH:-dev}"
+    FATPACK="${FATPACK:-false}"
+    DISPLAY="${DISPLAY:-headless}"
+    WIFI_REGION="${WIFI_REGION:-off}"
+    
+    echo "Running build_sdcard.sh in image build mode"
+    echo "Parameters: user=${GITHUB_USER} branch=${BRANCH} fatpack=${FATPACK} display=${DISPLAY} wifi=${WIFI_REGION}"
+    
+    cd /tmp
+    RB_IMAGE_BUILD=true bash ./build_sdcard.sh \
+      --image-build \
+      --interaction=false \
+      --fatpack="${FATPACK}" \
+      --github-user="${GITHUB_USER}" \
+      --branch="${BRANCH}" \
+      --display="${DISPLAY}" \
+      --tweak-boot-drive=false \
+      --wifi-region="${WIFI_REGION}"
+  
+  # Clean up temporary files
+  - rm -f /tmp/build_sdcard.sh
+  
+  # Final cleanup
+  - apt-get autoremove -y
+  - apt-get clean
+  - rm -rf /var/lib/apt/lists/*
+  - rm -rf /tmp/* /var/tmp/*
+
+# Post-install: Enable systemd services that were skipped in image build mode
+# These will be enabled on first boot via the bootstrap service
+enable_services:
+  # Services are managed by RaspiBlitz bootstrap on first boot
+  # No services enabled here to avoid conflicts with image build mode
