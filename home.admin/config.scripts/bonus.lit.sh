@@ -45,7 +45,7 @@ Use your Password B to login.\n
 Hidden Service address for the Tor Browser (see LCD for QR):
 https://${toraddress}\n
 For the command line switch to 'lit' user with: 'sudo su - lit'
-use the commands: 'lncli', 'litcli', 'lit-loop', 'lit-pool', 'lit-frcli' and 'tapcli'.
+use the commands: 'lncli', 'litcli', 'loop', 'pool', 'frcli' and 'tapcli'.
 " 19 74
     sudo /home/admin/config.scripts/blitz.display.sh hide
   else
@@ -152,7 +152,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     echo "# Taproot Assets"
     # move old data if present
-    sudo mv /home/loop/.tapd /mnt/hdd/app-data/ 2>/dev/null
+    sudo mv /home/lit/.tapd /mnt/hdd/app-data/ 2>/dev/null
     echo "# make sure the data directory exists"
     sudo mkdir -p /mnt/hdd/app-data/.tapd
     echo "# symlink"
