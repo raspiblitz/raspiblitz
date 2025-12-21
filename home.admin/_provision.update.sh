@@ -27,6 +27,12 @@ echo "###################################" >> ${logFile}
 
 # LOAD DATA & PRECHECK
 
+# check if config file exists
+if [ ! -f ${configFile} ]; then
+  /home/admin/config.scripts/blitz.error.sh _provision.update.sh "missing-config" "missing ${configFile}" "" ${logFile}
+  exit 1
+fi
+
 # load old or init raspiblitz config
 source ${configFile}
 
