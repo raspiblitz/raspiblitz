@@ -634,7 +634,11 @@ if [ "${scenario}" != "ready" ] ; then
   # TODO: REPLACE THIS OLD VALUES IN SSH & WEBUI
   /home/admin/_cache.sh set hddCandidate "${hddCandidate}"
   /home/admin/_cache.sh set hddGigaBytes "${storageSizeGB}"
-  /home/admin/_cache.sh set hddBlocksBitcoin "${storageBlockchainGB}"
+  if [ "${storageBlockchainGB}" != "" ] && [ ${storageBlockchainGB} -ge 1 ]; then
+      /home/admin/_cache.sh set hddBlocksBitcoin "1"
+  else
+      /home/admin/_cache.sh set hddBlocksBitcoin "0"
+  fi
   /home/admin/_cache.sh set hddGotMigrationData "${hddGotMigrationData}"
   /home/admin/_cache.sh set hddVersionLND "${hddVersionLND}"
 
