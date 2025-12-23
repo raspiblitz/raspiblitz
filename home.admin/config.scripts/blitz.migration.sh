@@ -241,7 +241,7 @@ if [ "$1" = "import" ]; then
 
   echo "# Prepare file sync ..." >> ${logFile}
 
-  isV2Migration=1
+  migrationVersion=1
   # check if its a v2 migration if /mnt/hdd/temp/migration_extract/v2.migration.info exists
   if [ -f "/mnt/hdd/temp/migration_extract/app-data/v2.migration.info" ]; then
     migrationVersion=2
