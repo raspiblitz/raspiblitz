@@ -76,14 +76,6 @@ if [ "$1" = "export" ]; then
 
   # collect files to exclude in export in temp file
   echo "*.tar.gz" > ~/.exclude.temp
-  echo "/mnt/hdd/bitcoin" >> ~/.exclude.temp 
-  echo "/mnt/hdd/temp" >> ~/.exclude.temp
-  echo "/mnt/hdd/lost+found" >> ~/.exclude.temp
-  echo "/mnt/hdd/app-storage" >> ~/.exclude.temp
-  echo "/mnt/hdd/snapshots" >> ~/.exclude.temp  # keep for legacy reasons (until v2)
-  echo "/mnt/hdd/torrent" >> ~/.exclude.temp # keep for legacy reasons (until v2)
-  echo "/mnt/hdd/litecoin" >> ~/.exclude.temp # keep for legacy reasons (until v2)
-  echo "/mnt/hdd/swapfile" >> ~/.exclude.temp # keep for legacy reasons (until v2)
 
   # get date stamp
   datestamp=$(date "+%y-%m-%d-%H-%M")
@@ -97,10 +89,18 @@ if [ "$1" = "export" ]; then
   fi
   echo "# blitzname=${blitzname}"
 
+  # place info files into app-data for export
+  sudo touch /mnt/hdd/app-data/v2.migration.info
+
   # zip it
-  echo "# Building the Export File (this can take some time) .."
+  dataPath=$(readlink -f /mnt/hdd/app-data)
+  echo "# Building the Export File - this can take some time (${dataPath}) .."
   sudo mkdir -p ${defaultDownloadPath}
-  sudo tar -zcvf ${defaultDownloadPath}/raspiblitz-export-temp.tar.gz -X ~/.exclude.temp /mnt/hdd 1>~/.include.temp 2>/dev/null
+  # sudo tar -zcvf ${defaultDownloadPath}/raspiblitz-export-temp.tar.gz "${dataPath}" 1>~/.include.temp 2>/dev/null
+  sudo tar -zcvf "${defaultDownloadPath}/raspiblitz-export-temp.tar.gz" -C "$(dirname "$dataPath")" "$(basename "$dataPath")" 1>~/.include.temp 2>/dev/null
+
+  # delete info files from app-data after export
+  sudo rm /mnt/hdd/app-data/v2.migration.info 2>/dev/null
 
   # get md5 checksum
   echo "# Building checksum (can take a while) ..." 
@@ -239,11 +239,32 @@ if [ "$1" = "import" ]; then
   fi
   sudo rm ${importFile}
 
-  # Mit rsync übertragen und dabei symbolische Links erhalten
-  sudo rsync -avK --keep-dirlinks /mnt/hdd/temp/migration_extract/mnt/hdd/ /mnt/hdd/ 2>>${logFile}
-  if [ "$?" != "0" ]; then
-    echo "error='migration rsync failed'"
-    exit 1
+  echo "# Prepare file sync ..." >> ${logFile}
+
+  migrationVersion=1
+  # check if its a v2 migration if /mnt/hdd/temp/migration_extract/v2.migration.info exists
+  if [ -f "/mnt/hdd/temp/migration_extract/app-data/v2.migration.info" ]; then
+    migrationVersion=2
+  fi
+  echo "# Migration Version: ${migrationVersion}" >> ${logFile} 
+  if [ "${migrationVersion}" == "1" ]; then
+      echo "# Detected OLD migration file ..." >> ${logFile}
+      # Mit rsync übertragen und dabei symbolische Links erhalten
+      sudo rsync -avK --keep-dirlinks /mnt/hdd/temp/migration_extract/mnt/hdd/ /mnt/hdd/ 2>>${logFile}
+      if [ "$?" != "0" ]; then
+        echo "error='migration rsync failed'"
+        exit 1
+      fi
+  fi
+  if [ "${migrationVersion}" == "2" ]; then
+      echo "# Detected v2 migration file ..." >> ${logFile}
+      # Mit rsync übertragen und dabei symbolische Links erhalten
+      sudo rsync -avK /mnt/hdd/temp/migration_extract/app-data/ /mnt/hdd/app-data/ 2>>${logFile}
+      if [ "$?" != "0" ]; then
+        echo "error='migration rsync failed'"
+        exit 1
+      fi
+      sudo rm /mnt/hdd/app-data/v2.migration.info
   fi
   sudo rm -rf /mnt/hdd/temp/migration_extract
 
