@@ -1144,8 +1144,10 @@ if [ "$action" = "link" ]; then
     if [ -d "${storageMountedPath}/bitcoin" ]; then
         /home/admin/_cache.sh set message "hdd-migrate"
         echo "# moving old data from ${storageMountedPath}/bitcoin to ${storageMountedPath}/app-storage/bitcoin"
-        rsync -a --remove-source-files --prune-empty-dirs ${storageMountedPath}/bitcoin/ ${storageMountedPath}/app-storage/bitcoin/
-        if [ $? -ne 0 ]; then
+        mvError=0
+        mv --force ${storageMountedPath}/bitcoin/* ${storageMountedPath}/app-storage/bitcoin/ 2>/dev/null || mvError=1
+        mv --force ${storageMountedPath}/bitcoin/.[!.]* ${storageMountedPath}/app-storage/bitcoin/ 2>/dev/null || mvError=1
+        if [ ${mvError} -ne 0 ] && [ "$(ls -A ${storageMountedPath}/bitcoin 2>/dev/null)" ]; then
             echo "error='failed to move ${storageMountedPath}/bitcoin/* to ${storageMountedPath}/app-storage/bitcoin/'"
         else
             rm -rf ${storageMountedPath}/bitcoin
@@ -1183,9 +1185,11 @@ if [ "$action" = "link" ]; then
     if [ -d "${storageMountedPath}/lnd" ]; then
         /home/admin/_cache.sh set message "hdd-migrate"
         echo "# moving old data from ${storageMountedPath}/lnd to ${dataMountedPath}/app-data/lnd"
-        rsync -a --remove-source-files --prune-empty-dirs ${storageMountedPath}/lnd/ ${dataMountedPath}/app-data/lnd/
-        if [ $? -ne 0 ]; then
-            echo "error='failed to rsync /app-data/lnd/'"
+        mvError=0
+        mv --force ${storageMountedPath}/lnd/* ${dataMountedPath}/app-data/lnd/ 2>/dev/null || mvError=1
+        mv --force ${storageMountedPath}/lnd/.[!.]* ${dataMountedPath}/app-data/lnd/ 2>/dev/null || mvError=1
+        if [ ${mvError} -ne 0 ] && [ "$(ls -A ${storageMountedPath}/lnd 2>/dev/null)" ]; then
+            echo "error='failed to move ${storageMountedPath}/lnd/* to ${dataMountedPath}/app-data/lnd/'"
         else
             rm -rf ${storageMountedPath}/lnd
         fi
@@ -2623,13 +2627,16 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
 
         # old layout: lnd directory is still outside of app-data
         if [ -d /mnt/migrate_source/lnd ] && [ ! -L /mnt/migrate_source/lnd ]; then
-            echo "# rsync lnd from source to target ..."
+            echo "# moving lnd from source to target ..."
             mkdir -p /mnt/migrate_data/app-data/lnd 2>/dev/null
             echo "lnd" > /var/cache/raspiblitz/temp/progress.txt
-            rsync -ah --info=progress2 /mnt/migrate_source/lnd/ /mnt/migrate_data/app-data/lnd/ 2>&1 | stdbuf -oL tr '\r' '\n' | grep --line-buffered '%' | stdbuf -oL sed -n 's/.* \([0-9]\+\)% .*/\1%/p' >> /var/cache/raspiblitz/temp/progress.txt
-            if [ $? -ne 0 ]; then
-                echo "error='failed to rsync lnd'"
-                exit 1
+            mvError=0
+            mv --force /mnt/migrate_source/lnd/* /mnt/migrate_data/app-data/lnd/ 2>/dev/null || mvError=1
+            mv --force /mnt/migrate_source/lnd/.[!.]* /mnt/migrate_data/app-data/lnd/ 2>/dev/null || mvError=1
+            if [ ${mvError} -ne 0 ] && [ "$(ls -A /mnt/migrate_source/lnd 2>/dev/null)" ]; then
+                echo "error='failed to move /mnt/migrate_source/lnd/* to /mnt/migrate_data/app-data/lnd/'"
+            else
+                rm -rf /mnt/migrate_source/lnd
             fi
         else
             echo "# no old lnd directory found"
@@ -2641,7 +2648,7 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
             rm -f /mnt/migrate_source/tor/*.log*
             mkdir -p /mnt/migrate_data/app-data/tor 2>/dev/null
             echo "tor" > /var/cache/raspiblitz/temp/progress.txt
-            rsync -ah --info=progress2 /mnt/migrate_source/tor/ /mnt/migrate_data/app-data/tor/ 2>&1 | stdbuf -oL tr '\r' '\n' | grep --line-buffered '%' | stdbuf -oL sed -n 's/.* \([0-9]\+\)% .*/\1%/p' >> /var/cache/raspiblitz/temp/progress.txt
+            rsync -a --remove-source-files --prune-empty-dirs /mnt/migrate_source/tor/ /mnt/migrate_data/app-data/tor/
             if [ $? -ne 0 ]; then
                 echo "error='failed to rsync tor'"
                 exit 1
@@ -2745,6 +2752,7 @@ if [ "$1" = "migration" ]; then
     #       echo "lndVersion='${lndVersion}'"
     #   else
     #       echo "error='TODO migration'"
+
     #   fi
 
     #####################
