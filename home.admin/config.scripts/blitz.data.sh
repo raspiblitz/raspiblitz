@@ -1142,6 +1142,13 @@ if [ "$action" = "link" ]; then
     mkdir -p "${dataMountedPath}/app-data/bitcoin"
     chown bitcoin:bitcoin "${dataMountedPath}/app-data/bitcoin"
     if [ -d "${storageMountedPath}/bitcoin" ]; then
+        # if ${storageMountedPath}/app-storage/bitcoin is not a directory - delete & create directory
+        if [ ! -d "${storageMountedPath}/app-storage/bitcoin" ]; then
+            rm -f "${storageMountedPath}/app-storage/bitcoin"
+            mkdir -p "${storageMountedPath}/app-storage/bitcoin"
+            chown bitcoin:bitcoin "${storageMountedPath}/app-storage/bitcoin"
+        fi
+        # now move data
         /home/admin/_cache.sh set message "hdd-migrate"
         echo "# moving old data from ${storageMountedPath}/bitcoin to ${storageMountedPath}/app-storage/bitcoin"
         mvError=0
