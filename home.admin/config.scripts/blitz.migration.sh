@@ -239,6 +239,8 @@ if [ "$1" = "import" ]; then
   fi
   sudo rm ${importFile}
 
+  echo "# Prepare file sync ..." >> ${logFile}
+
   isV2Migration=1
   # check if its a v2 migration if /mnt/hdd/temp/migration_extract/v2.migration.info exists
   if [ -f "/mnt/hdd/temp/migration_extract/app-data/v2.migration.info" ]; then
@@ -253,6 +255,7 @@ if [ "$1" = "import" ]; then
         echo "error='migration rsync failed'"
         exit 1
       fi
+  fi
   if [ "${migrationVersion}" == "2" ]; then
       echo "# Detected v2 migration file ..." >> ${logFile}
       # Mit rsync übertragen und dabei symbolische Links erhalten
