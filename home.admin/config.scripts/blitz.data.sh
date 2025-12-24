@@ -1211,7 +1211,7 @@ if [ "$action" = "link" ]; then
         # use rsync to move files (hidden & merge directories)
         rsync -a --remove-source-files "${storageMountedPath}/lnd/" "${dataMountedPath}/app-data/lnd/"
         if [ $? -ne 0 ]; then
-            echo "error='failed to rsync ${storageMountedPath}/lnd/* to ${dataMountedPath}/app-data/lnd/'"
+            echo "error='failed to rsync ${storageMountedPath}/lnd/ to ${dataMountedPath}/app-data/lnd/'"
         else
             echo "# rsync OK - cleaning up old location"
             find "${storageMountedPath}/lnd" -type d -empty -delete 2>/dev/null
