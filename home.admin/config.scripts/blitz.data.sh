@@ -1219,7 +1219,7 @@ if [ "$action" = "link" ]; then
         fi
 
     fi
-    echo "# For backwards compatibility: Liniking ${mainMountPoint}/lnd"
+    echo "# For backwards compatibility: Linking ${mainMountPoint}/lnd"
     unlink ${mainMountPoint}/lnd 2>/dev/null
     if [ -d "${mainMountPoint}/lnd" ]; then
         echo "error='${mainMountPoint}/lnd is real directory'"
