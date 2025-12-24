@@ -1204,7 +1204,7 @@ if [ "$action" = "link" ]; then
     mkdir -p "${dataMountedPath}/app-data/lnd"
     chown bitcoin:bitcoin "${dataMountedPath}/app-data/lnd"
     if [ -d "${storageMountedPath}/lnd" ]; then
-        # if ${storageMountedPath}/app-storage/bitcoin is not a directory - delete & create directory
+        # if ${dataMountedPath}/app-data/lnd is not a directory - delete & create directory
         if [ ! -d "${dataMountedPath}/app-data/lnd" ]; then
             echo "# fixing non-directory ${dataMountedPath}/app-data/lnd"
             rm -f "${dataMountedPath}/app-data/lnd"
@@ -1217,7 +1217,7 @@ if [ "$action" = "link" ]; then
         mvError=0
 
         # use mv to move main files first
-        mv --force "${storageMountedPath}"/lnd/* "${dataMountedPath}/app-data/lnd/" 2>/dev/null || mvError=1
+        mv --force ${storageMountedPath}/lnd/* ${dataMountedPath}/app-data/lnd/ 2>/dev/null
         if [ $? -ne 0 ]; then
             echo "error='failed to mv ${storageMountedPath}/lnd/* to ${dataMountedPath}/app-data/lnd/'"
             mvError=1
