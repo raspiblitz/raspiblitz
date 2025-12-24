@@ -1204,37 +1204,20 @@ if [ "$action" = "link" ]; then
     mkdir -p "${dataMountedPath}/app-data/lnd"
     chown bitcoin:bitcoin "${dataMountedPath}/app-data/lnd"
     if [ -d "${storageMountedPath}/lnd" ]; then
-        # if ${dataMountedPath}/app-data/lnd is not a directory - delete & create directory
-        if [ ! -d "${dataMountedPath}/app-data/lnd" ]; then
-            echo "# fixing non-directory ${dataMountedPath}/app-data/lnd"
-            rm -f "${dataMountedPath}/app-data/lnd"
-            mkdir -p "${dataMountedPath}/app-data/lnd"
-            chown bitcoin:bitcoin "${dataMountedPath}/app-data/lnd"
-        fi
-        # now move data
+
         /home/admin/_cache.sh set message "hdd-migrate"
         echo "# moving old data from ${storageMountedPath}/lnd to ${dataMountedPath}/app-data/lnd"
-        mvError=0
 
-        # use mv to move main files first
-        mv --force ${storageMountedPath}/lnd/* ${dataMountedPath}/app-data/lnd/ 2>/dev/null
-        if [ $? -ne 0 ]; then
-            echo "error='failed to mv ${storageMountedPath}/lnd/* to ${dataMountedPath}/app-data/lnd/'"
-            mvError=1
-        fi
-
-        # use rsync to move remaining files (hidden & merge directories)
+        # use rsync to move files (hidden & merge directories)
         rsync -a --remove-source-files "${storageMountedPath}/lnd/" "${dataMountedPath}/app-data/lnd/"
         if [ $? -ne 0 ]; then
             echo "error='failed to rsync ${storageMountedPath}/lnd/* to ${dataMountedPath}/app-data/lnd/'"
-            mvError=1
-        fi
-        
-        # clean up
-        if [ ${mvError} -eq 0 ] && [ "$(ls -A "${storageMountedPath}/lnd" 2>/dev/null)" ]; then
+        else
+            echo "# rsync OK - cleaning up old location"
             find "${storageMountedPath}/lnd" -type d -empty -delete 2>/dev/null
             rm -rf "${storageMountedPath}/lnd" 2>/dev/null
         fi
+
     fi
     echo "# For backwards compatibility: Liniking ${mainMountPoint}/lnd"
     unlink ${mainMountPoint}/lnd 2>/dev/null
