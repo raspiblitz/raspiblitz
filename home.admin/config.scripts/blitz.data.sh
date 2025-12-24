@@ -1217,7 +1217,7 @@ if [ "$action" = "link" ]; then
         mvError=0
 
         # use mv to move main files first
-        mv --force ${storageMountedPath}/lnd/* ${dataMountedPath}/app-data/lnd/ 2>/dev/null || mvError=1
+        mv --force ${storageMountedPath}/lnd/* ${dataMountedPath}/app-data/lnd/ 2>/dev/null
         if [ $? -ne 0 ]; then
             echo "error='failed to mv ${storageMountedPath}/lnd/* to ${dataMountedPath}/app-data/lnd/'"
             mvError=1
