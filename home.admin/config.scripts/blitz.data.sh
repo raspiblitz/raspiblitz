@@ -1204,7 +1204,7 @@ if [ "$action" = "link" ]; then
     mkdir -p "${dataMountedPath}/app-data/lnd"
     chown bitcoin:bitcoin "${dataMountedPath}/app-data/lnd"
     if [ -d "${storageMountedPath}/lnd" ]; then
-        # if ${storageMountedPath}/app-storage/bitcoin is not a directory - delete & create directory
+        # if ${dataMountedPath}/app-data/lnd is not a directory - delete & create directory
         if [ ! -d "${dataMountedPath}/app-data/lnd" ]; then
             echo "# fixing non-directory ${dataMountedPath}/app-data/lnd"
             rm -f "${dataMountedPath}/app-data/lnd"
