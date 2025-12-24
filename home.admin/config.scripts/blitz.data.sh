@@ -1231,9 +1231,9 @@ if [ "$action" = "link" ]; then
         fi
         
         # clean up
-        if [ ${mvError} -eq 0 ] && [ "$(ls -A ${storageMountedPath}/lnd 2>/dev/null)" ]; then
-            find ${storageMountedPath}/lnd -type d -empty -delete 2>/dev/null
-            rm -rf ${storageMountedPath}/lnd 2>/dev/null
+        if [ ${mvError} -eq 0 ] && [ "$(ls -A "${storageMountedPath}/lnd" 2>/dev/null)" ]; then
+            find "${storageMountedPath}/lnd" -type d -empty -delete 2>/dev/null
+            rm -rf "${storageMountedPath}/lnd" 2>/dev/null
         fi
     fi
     echo "# For backwards compatibility: Liniking ${mainMountPoint}/lnd"
