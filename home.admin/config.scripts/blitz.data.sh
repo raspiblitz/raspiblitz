@@ -2659,7 +2659,7 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
             # use rsync to move files (hidden & merge directories)
             rsync -a --remove-source-files "/mnt/migrate_source/lnd/" "/mnt/migrate_data/app-data/lnd/"
             if [ $? -ne 0 ]; then
-                 echo "error='failed to rsync /mnt/migrate_source/lnd/ to /mnt/migrate_data/app-data/lnd/'"
+                echo "error='failed to rsync /mnt/migrate_source/lnd/ to /mnt/migrate_data/app-data/lnd/'"
             else
                 # clean up empty directories left by rsync
                 echo "# rsync OK - cleaning up empty directories in /mnt/migrate_source/lnd ..."
