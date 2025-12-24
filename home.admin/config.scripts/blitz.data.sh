@@ -1142,13 +1142,36 @@ if [ "$action" = "link" ]; then
     mkdir -p "${dataMountedPath}/app-data/bitcoin"
     chown bitcoin:bitcoin "${dataMountedPath}/app-data/bitcoin"
     if [ -d "${storageMountedPath}/bitcoin" ]; then
+        # if ${storageMountedPath}/app-storage/bitcoin is not a directory - delete & create directory
+        if [ ! -d "${storageMountedPath}/app-storage/bitcoin" ]; then
+            echo "# fixing non-directory ${storageMountedPath}/app-storage/bitcoin"
+            rm -f "${storageMountedPath}/app-storage/bitcoin"
+            mkdir -p "${storageMountedPath}/app-storage/bitcoin"
+            chown bitcoin:bitcoin "${storageMountedPath}/app-storage/bitcoin"
+        fi
+        # now move data
         /home/admin/_cache.sh set message "hdd-migrate"
         echo "# moving old data from ${storageMountedPath}/bitcoin to ${storageMountedPath}/app-storage/bitcoin"
-        rsync -a --remove-source-files --prune-empty-dirs ${storageMountedPath}/bitcoin/ ${storageMountedPath}/app-storage/bitcoin/
+        mvError=0
+
+        # use mv to move main files first
+        mv --force "${storageMountedPath}"/bitcoin/* "${storageMountedPath}/app-storage/bitcoin/" 2>/dev/null || mvError=1
         if [ $? -ne 0 ]; then
-            echo "error='failed to move ${storageMountedPath}/bitcoin/* to ${storageMountedPath}/app-storage/bitcoin/'"
-        else
-            rm -rf ${storageMountedPath}/bitcoin
+            echo "error='failed to mv ${storageMountedPath}/bitcoin/* to ${storageMountedPath}/app-storage/bitcoin/'"
+            mvError=1
+        fi
+
+        # use rsync to move remaining files (hidden & merge directories)
+        rsync -a --remove-source-files "${storageMountedPath}/bitcoin/" "${storageMountedPath}/app-storage/bitcoin/"
+        if [ $? -ne 0 ]; then
+            echo "error='failed to rsync ${storageMountedPath}/bitcoin/ to ${storageMountedPath}/app-storage/bitcoin/'"
+            mvError=1
+        fi
+        
+        # clean up
+        if [ ${mvError} -eq 0 ] && [ "$(ls -A "${storageMountedPath}/bitcoin" 2>/dev/null)" ]; then
+            find "${storageMountedPath}/bitcoin" -type d -empty -delete 2>/dev/null
+            rm -rf "${storageMountedPath}/bitcoin" 2>/dev/null
         fi
     fi
     if [ -d "${storageMountedPath}/app-storage/bitcoin/wallet.dat" ]; then
@@ -1181,16 +1204,22 @@ if [ "$action" = "link" ]; then
     mkdir -p "${dataMountedPath}/app-data/lnd"
     chown bitcoin:bitcoin "${dataMountedPath}/app-data/lnd"
     if [ -d "${storageMountedPath}/lnd" ]; then
+
         /home/admin/_cache.sh set message "hdd-migrate"
         echo "# moving old data from ${storageMountedPath}/lnd to ${dataMountedPath}/app-data/lnd"
-        rsync -a --remove-source-files --prune-empty-dirs ${storageMountedPath}/lnd/ ${dataMountedPath}/app-data/lnd/
+
+        # use rsync to move files (hidden & merge directories)
+        rsync -a --remove-source-files "${storageMountedPath}/lnd/" "${dataMountedPath}/app-data/lnd/"
         if [ $? -ne 0 ]; then
-            echo "error='failed to rsync /app-data/lnd/'"
+            echo "error='failed to rsync ${storageMountedPath}/lnd/ to ${dataMountedPath}/app-data/lnd/'"
         else
-            rm -rf ${storageMountedPath}/lnd
+            echo "# rsync OK - cleaning up old location"
+            find "${storageMountedPath}/lnd" -type d -empty -delete 2>/dev/null
+            rm -rf "${storageMountedPath}/lnd" 2>/dev/null
         fi
+
     fi
-    echo "# For backwards compatibility: Liniking ${mainMountPoint}/lnd"
+    echo "# For backwards compatibility: Linking ${mainMountPoint}/lnd"
     unlink ${mainMountPoint}/lnd 2>/dev/null
     if [ -d "${mainMountPoint}/lnd" ]; then
         echo "error='${mainMountPoint}/lnd is real directory'"
@@ -2623,14 +2652,21 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
 
         # old layout: lnd directory is still outside of app-data
         if [ -d /mnt/migrate_source/lnd ] && [ ! -L /mnt/migrate_source/lnd ]; then
-            echo "# rsync lnd from source to target ..."
+            echo "# moving lnd from source to target ..."
             mkdir -p /mnt/migrate_data/app-data/lnd 2>/dev/null
             echo "lnd" > /var/cache/raspiblitz/temp/progress.txt
-            rsync -ah --info=progress2 /mnt/migrate_source/lnd/ /mnt/migrate_data/app-data/lnd/ 2>&1 | stdbuf -oL tr '\r' '\n' | grep --line-buffered '%' | stdbuf -oL sed -n 's/.* \([0-9]\+\)% .*/\1%/p' >> /var/cache/raspiblitz/temp/progress.txt
+
+            # use rsync to move files (hidden & merge directories)
+            rsync -a --remove-source-files "/mnt/migrate_source/lnd/" "/mnt/migrate_data/app-data/lnd/"
             if [ $? -ne 0 ]; then
-                echo "error='failed to rsync lnd'"
-                exit 1
+                echo "error='failed to rsync /mnt/migrate_source/lnd/ to /mnt/migrate_data/app-data/lnd/'"
+            else
+                # clean up empty directories left by rsync
+                echo "# rsync OK - cleaning up empty directories in /mnt/migrate_source/lnd ..."
+                find "/mnt/migrate_source/lnd" -type d -empty -delete 2>/dev/null
+                rm -rf /mnt/migrate_source/lnd
             fi
+        
         else
             echo "# no old lnd directory found"
         fi
@@ -2641,7 +2677,7 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
             rm -f /mnt/migrate_source/tor/*.log*
             mkdir -p /mnt/migrate_data/app-data/tor 2>/dev/null
             echo "tor" > /var/cache/raspiblitz/temp/progress.txt
-            rsync -ah --info=progress2 /mnt/migrate_source/tor/ /mnt/migrate_data/app-data/tor/ 2>&1 | stdbuf -oL tr '\r' '\n' | grep --line-buffered '%' | stdbuf -oL sed -n 's/.* \([0-9]\+\)% .*/\1%/p' >> /var/cache/raspiblitz/temp/progress.txt
+            rsync -a --remove-source-files --prune-empty-dirs /mnt/migrate_source/tor/ /mnt/migrate_data/app-data/tor/
             if [ $? -ne 0 ]; then
                 echo "error='failed to rsync tor'"
                 exit 1
@@ -2745,6 +2781,7 @@ if [ "$1" = "migration" ]; then
     #       echo "lndVersion='${lndVersion}'"
     #   else
     #       echo "error='TODO migration'"
+
     #   fi
 
     #####################
