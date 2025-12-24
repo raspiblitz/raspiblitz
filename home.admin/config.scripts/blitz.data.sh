@@ -2653,26 +2653,20 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
         # old layout: lnd directory is still outside of app-data
         if [ -d /mnt/migrate_source/lnd ] && [ ! -L /mnt/migrate_source/lnd ]; then
             echo "# moving lnd from source to target ..."
-            rm -f /mnt/migrate_data/app-data/lnd 2>/dev/null
             mkdir -p /mnt/migrate_data/app-data/lnd 2>/dev/null
             echo "lnd" > /var/cache/raspiblitz/temp/progress.txt
-            mvError=0
-            mv --force /mnt/migrate_source/lnd/* /mnt/migrate_data/app-data/lnd/ 2>/dev/null || mvError=1
-            
-            # use rsync to move remaining files (hidden & merge directories)
+
+            # use rsync to move files (hidden & merge directories)
             rsync -a --remove-source-files "/mnt/migrate_source/lnd/" "/mnt/migrate_data/app-data/lnd/"
             if [ $? -ne 0 ]; then
-                 mvError=1
-            fi
-            
-            # clean up empty directories left by rsync
-            find "/mnt/migrate_source/lnd" -type d -empty -delete 2>/dev/null
-
-            if [ ${mvError} -ne 0 ] && [ "$(ls -A /mnt/migrate_source/lnd 2>/dev/null)" ]; then
-                echo "error='failed to move /mnt/migrate_source/lnd/* to /mnt/migrate_data/app-data/lnd/'"
+                 echo "error='failed to rsync /mnt/migrate_source/lnd/ to /mnt/migrate_data/app-data/lnd/'"
             else
+                # clean up empty directories left by rsync
+                echo "# rsync OK - cleaning up empty directories in /mnt/migrate_source/lnd ..."
+                find "/mnt/migrate_source/lnd" -type d -empty -delete 2>/dev/null
                 rm -rf /mnt/migrate_source/lnd
             fi
+        
         else
             echo "# no old lnd directory found"
         fi
