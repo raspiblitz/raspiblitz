@@ -1164,7 +1164,7 @@ if [ "$action" = "link" ]; then
         # use rsync to move remaining files (hidden & merge directories)
         rsync -a --remove-source-files "${storageMountedPath}/bitcoin/" "${storageMountedPath}/app-storage/bitcoin/"
         if [ $? -ne 0 ]; then
-            echo "error='failed to rsync ${storageMountedPath}/bitcoin/* to ${storageMountedPath}/app-storage/bitcoin/'"
+            echo "error='failed to rsync ${storageMountedPath}/bitcoin/ to ${storageMountedPath}/app-storage/bitcoin/'"
             mvError=1
         fi
         
