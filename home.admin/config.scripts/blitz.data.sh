@@ -2644,6 +2644,7 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
         # old layout: lnd directory is still outside of app-data
         if [ -d /mnt/migrate_source/lnd ] && [ ! -L /mnt/migrate_source/lnd ]; then
             echo "# moving lnd from source to target ..."
+            rm -f /mnt/migrate_data/app-data/lnd 2>/dev/null
             mkdir -p /mnt/migrate_data/app-data/lnd 2>/dev/null
             echo "lnd" > /var/cache/raspiblitz/temp/progress.txt
             mvError=0
