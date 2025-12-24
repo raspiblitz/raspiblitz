@@ -1155,23 +1155,23 @@ if [ "$action" = "link" ]; then
         mvError=0
 
         # use mv to move main files first
-        mv --force ${storageMountedPath}/bitcoin/* ${storageMountedPath}/app-storage/bitcoin/ 2>/dev/null || mvError=1
+        mv --force "${storageMountedPath}"/bitcoin/* "${storageMountedPath}/app-storage/bitcoin/" 2>/dev/null || mvError=1
         if [ $? -ne 0 ]; then
             echo "error='failed to mv ${storageMountedPath}/bitcoin/* to ${storageMountedPath}/app-storage/bitcoin/'"
             mvError=1
         fi
 
         # use rsync to move remaining files (hidden & merge directories)
-        rsync -a --remove-source-files ${storageMountedPath}/bitcoin/ ${storageMountedPath}/app-storage/bitcoin/
+        rsync -a --remove-source-files "${storageMountedPath}/bitcoin/" "${storageMountedPath}/app-storage/bitcoin/"
         if [ $? -ne 0 ]; then
             echo "error='failed to rsync ${storageMountedPath}/bitcoin/* to ${storageMountedPath}/app-storage/bitcoin/'"
             mvError=1
         fi
         
         # clean up
-        if [ ${mvError} -eq 0 ] && [ "$(ls -A ${storageMountedPath}/bitcoin 2>/dev/null)" ]; then
-            find ${storageMountedPath}/bitcoin -type d -empty -delete 2>/dev/null
-            rm -rf ${storageMountedPath}/bitcoin 2>/dev/null
+        if [ ${mvError} -eq 0 ] && [ "$(ls -A "${storageMountedPath}/bitcoin" 2>/dev/null)" ]; then
+            find "${storageMountedPath}/bitcoin" -type d -empty -delete 2>/dev/null
+            rm -rf "${storageMountedPath}/bitcoin" 2>/dev/null
         fi
     fi
     if [ -d "${storageMountedPath}/app-storage/bitcoin/wallet.dat" ]; then
@@ -1217,23 +1217,23 @@ if [ "$action" = "link" ]; then
         mvError=0
 
         # use mv to move main files first
-        mv --force ${storageMountedPath}/lnd/* ${dataMountedPath}/app-data/lnd/ 2>/dev/null || mvError=1
+        mv --force "${storageMountedPath}"/lnd/* "${dataMountedPath}/app-data/lnd/" 2>/dev/null || mvError=1
         if [ $? -ne 0 ]; then
             echo "error='failed to mv ${storageMountedPath}/lnd/* to ${dataMountedPath}/app-data/lnd/'"
             mvError=1
         fi
 
         # use rsync to move remaining files (hidden & merge directories)
-        rsync -a --remove-source-files ${storageMountedPath}/lnd/ ${dataMountedPath}/app-data/lnd/
+        rsync -a --remove-source-files "${storageMountedPath}/lnd/" "${dataMountedPath}/app-data/lnd/"
         if [ $? -ne 0 ]; then
             echo "error='failed to rsync ${storageMountedPath}/lnd/* to ${dataMountedPath}/app-data/lnd/'"
             mvError=1
         fi
         
         # clean up
-        if [ ${mvError} -eq 0 ] && [ "$(ls -A ${storageMountedPath}/lnd 2>/dev/null)" ]; then
-            find ${storageMountedPath}/lnd -type d -empty -delete 2>/dev/null
-            rm -rf ${storageMountedPath}/lnd 2>/dev/null
+        if [ ${mvError} -eq 0 ] && [ "$(ls -A "${storageMountedPath}/lnd" 2>/dev/null)" ]; then
+            find "${storageMountedPath}/lnd" -type d -empty -delete 2>/dev/null
+            rm -rf "${storageMountedPath}/lnd" 2>/dev/null
         fi
     fi
     echo "# For backwards compatibility: Liniking ${mainMountPoint}/lnd"
@@ -2677,13 +2677,13 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
             mv --force /mnt/migrate_source/lnd/* /mnt/migrate_data/app-data/lnd/ 2>/dev/null || mvError=1
             
             # use rsync to move remaining files (hidden & merge directories)
-            rsync -a --remove-source-files /mnt/migrate_source/lnd/ /mnt/migrate_data/app-data/lnd/
+            rsync -a --remove-source-files "/mnt/migrate_source/lnd/" "/mnt/migrate_data/app-data/lnd/"
             if [ $? -ne 0 ]; then
                  mvError=1
             fi
             
             # clean up empty directories left by rsync
-            find /mnt/migrate_source/lnd -type d -empty -delete 2>/dev/null
+            find "/mnt/migrate_source/lnd" -type d -empty -delete 2>/dev/null
 
             if [ ${mvError} -ne 0 ] && [ "$(ls -A /mnt/migrate_source/lnd 2>/dev/null)" ]; then
                 echo "error='failed to move /mnt/migrate_source/lnd/* to /mnt/migrate_data/app-data/lnd/'"
