@@ -7,6 +7,7 @@
 - Update: Fulcrum Electrum server v2.1.0 [details](https://github.com/cculianu/Fulcrum/releases/tag/v2.1.0)
 - Update: Bitcoin Knots 29.2 (optional) [details](https://github.com/bitcoinknots/bitcoin/releases/tag/v29.2.knots20251010)
 - Update: Suez commit:8f29314 [details](https://github.com/prusnak/suez/commits/master)
+- Update: Labelbase 2.3.0 [details](https://x.com/labelbase_space)
 - Fix: Speedup data layout migration from 1.11.4 to 1.12.1 [details](https://github.com/raspiblitz/raspiblitz/issues/5194)
 
 ## What's new in Version 1.12.0 of RaspiBlitz?
