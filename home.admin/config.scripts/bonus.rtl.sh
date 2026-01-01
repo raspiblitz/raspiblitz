@@ -581,7 +581,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   if [ "$(echo "$@" | grep -c purge)" -gt 0 ]; then
     /home/admin/config.scripts/bonus.rtl.sh uninstall
     if [ $LNTYPE = cl ]; then
-      /home/admin/config.scripts/cl.rest.sh off ${CHAIN} purge
+      /home/admin/config.scripts/cl-plugin.clnrest.sh off ${CHAIN} purge
     fi
     echo "# Delete all configs"
     sudo rm -rf /mnt/hdd/app-data/rtl

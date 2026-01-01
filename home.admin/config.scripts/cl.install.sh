@@ -2,7 +2,7 @@
 # https://lightning.readthedocs.io/
 
 # https://github.com/ElementsProject/lightning/releases
-CLVERSION="v25.05"
+CLVERSION="v25.12"
 
 # https://github.com/ElementsProject/lightning/tree/master/contrib/keys
 # rustyrussell D9200E6CD1ADB8F1
@@ -11,9 +11,10 @@ CLVERSION="v25.05"
 # pneuroth (nepet) C3F21EE387FF4CD2
 # sfarooqui (ShahanaFarooqui) B56B4453DA8C6DF7FC9BCFCBDCA40B7128DA62A8
 # amyers (endothermicdev) F3BF63F2747436AB
-PGPsigner="amyers"
+# madel (Madeline Paech) A57AFC231B580804
+PGPsigner="madel"
 PGPpubkeyLink="https://raw.githubusercontent.com/ElementsProject/lightning/master/contrib/keys/${PGPsigner}.txt"
-PGPpubkeyFingerprint="F3BF63F2747436AB"
+PGPpubkeyFingerprint="A57AFC231B580804"
 
 # help
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
@@ -34,31 +35,13 @@ fi
 
 function installDependencies() {
   echo "- installDependencies()"
-  # from https://lightning.readthedocs.io/INSTALL.html#to-build-on-ubuntu
+  # from https://docs.corelightning.org/docs/installation#to-build-on-ubuntu
   # apt packages
   sudo apt-get install -y \
-    autoconf automake build-essential git libtool libsqlite3-dev \
-    net-tools zlib1g-dev libsodium-dev gettext
-  # additional requirements
+    autoconf automake build-essential git libtool libsqlite3-dev libffi-dev \
+    python3 python3-pip python3-mako net-tools zlib1g-dev libsodium-dev gettext lowdown
+  # additional requirements (postgres support)
   sudo apt-get install -y libpq-dev
-  # for clnrest - https://docs.corelightning.org/docs/installation#clnrest
-  sudo apt-get install -y python3-json5 python3-flask python3-gunicorn python3-grpc-tools
-
-  # python deps for wss-proxy
-  # upgrade pip
-  sudo pip3 config set global.break-system-packages true
-  sudo pip3 install --upgrade pip
-  # for wss-proxy - https://docs.corelightning.org/docs/installation#wss-proxy
-  sudo -u bitcoin pip3 config set global.break-system-packages true
-  sudo -u bitcoin pip3 install --user pyln-client websockets grpcio-tools
-  # poetry
-  sudo pip3 install poetry
-  if ! grep -Eq '^PATH="$HOME/.local/bin:$PATH"' /home/bitcoin/.profile; then
-    echo 'PATH="$HOME/.local/bin:$PATH"' | sudo tee -a /home/bitcoin/.profile
-  fi
-  export PATH="home/bitcoin/.local/bin:$PATH"
-  cd /home/bitcoin/lightning || exit 1
-  sudo -u bitcoin poetry install
 
   # rust deps for cln-grpc and clnrest plugins
   echo "# Install Rust to /opt/rust/"
@@ -73,6 +56,9 @@ function installDependencies() {
   sudo usermod -a -G rust bitcoin
   echo "# Set the default Rust toolchain"
   sudo RUSTUP_HOME=/opt/rust CARGO_HOME=/opt/rust /opt/rust/bin/rustup default stable
+  # Ensure permissions are correct after rustup operations
+  sudo chown -R root:rust /opt/rust
+  sudo chmod -R g+w /opt/rust
   echo "# Make Rust binaries available system-wide"
   sudo ln -sf /opt/rust/bin/* /usr/local/bin/
   echo "# Set up system-wide environment variables for Rust"
@@ -83,6 +69,18 @@ function installDependencies() {
     echo 'CARGO_HOME=/opt/rust' | sudo tee -a /etc/environment
   fi
 
+  # Install uv for Python dependency management (replaces poetry in CLN 25.x+)
+  echo "# Installing uv for Python dependency management"
+  if ! command -v uv &>/dev/null; then
+    sudo RUSTUP_HOME=/opt/rust CARGO_HOME=/opt/rust cargo install --locked uv || exit 1
+    # Ensure uv is symlinked into /usr/local/bin
+    sudo ln -sf /opt/rust/bin/uv /usr/local/bin/uv
+  fi
+
+  # Sync Python dependencies with uv
+  cd /home/bitcoin/lightning || exit 1
+  sudo -u bitcoin RUSTUP_HOME=/opt/rust CARGO_HOME=/opt/rust uv sync --all-extras --all-groups --frozen
+
   sudo apt-get install -y protobuf-compiler
 
   # remove old clnrest dir if exists
@@ -92,44 +90,30 @@ function installDependencies() {
 }
 
 function buildAndInstallCLbinaries() {
+  cd /home/bitcoin/lightning || exit 1
 
-  sudo -u bitcoin python3 -m pip install --user --upgrade grpcio-tools protobuf
-
-  # patch makefile
-  sudo -u bitcoin sed -i -E 's/ --experimental_allow_proto3_optional(=true)?//g' Makefile
-
-  # delete old file
-  sudo -u bitcoin rm -f contrib/pyln-grpc-proto/pyln/grpc/*_pb2.py contrib/pyln-grpc-proto/pyln/grpc/*_pb2_grpc.py
+  # Ensure /opt/rust has correct permissions before building
+  echo "# Ensuring /opt/rust permissions for rust group"
+  sudo chown -R root:rust /opt/rust
+  sudo chmod -R g+w /opt/rust
 
   echo
   echo "########## configure"
   sudo -u bitcoin RUSTUP_HOME=/opt/rust CARGO_HOME=/opt/rust ./configure || exit 1
   echo
-  echo "########## make"
-  sudo -u bitcoin RUSTUP_HOME=/opt/rust CARGO_HOME=/opt/rust make -j"$(nproc)" || exit 1
-  echo 
+  echo "########## make (using uv run)"
+  sudo -u bitcoin RUSTUP_HOME=/opt/rust CARGO_HOME=/opt/rust uv run make -j"$(nproc)" || exit 1
+  echo
   echo "########## install"
-  sudo make RUSTUP_HOME=/opt/rust CARGO_HOME=/opt/rust install || exit 1
+  sudo RUSTUP_HOME=/opt/rust CARGO_HOME=/opt/rust make install || exit 1
 }
 
 function runTests() {
-  # for the tests - install Core Lightning test dependencies matching pyproject.toml versions
-  # based on https://github.com/ElementsProject/lightning/blob/master/contrib/pyln-testing/pyproject.toml
-  echo "- install Core Lightning test dependencies"
-  sudo -u bitcoin pip3 install --user --upgrade \
-    "pytest>=7" \
-    "ephemeral-port-reserve>=1.1.4" \
-    "psycopg2-binary>=2.9" \
-    "python-bitcoinlib>=0.11.0" \
-    "jsonschema>=4.4.0" \
-    "Flask>=2" \
-    "cheroot>=8,<=10" \
-    "psutil>=5.9" \
-    "requests>=2.31.0" \
-    python-socketio websocket-client flaky
-  echo "- run tests"
+  # Test dependencies are managed by uv sync in installDependencies()
+  cd /home/bitcoin/lightning || exit 1
+  echo "- run tests (using uv run)"
   echo
-  sudo -u bitcoin RUSTUP_HOME=/opt/rust CARGO_HOME=/opt/rust make check || exit 1
+  sudo -u bitcoin RUSTUP_HOME=/opt/rust CARGO_HOME=/opt/rust uv run make check VALGRIND=0 || exit 1
 }
 
 echo "# Running: 'cl.install.sh $*'"

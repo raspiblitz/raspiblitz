@@ -81,7 +81,6 @@ fi
 
 if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ]; then
   OPTIONS+=(ZEUS_CLNREST "Zeus to CLNrest (Android or iOS)")
-	OPTIONS+=(ZEUS_CLREST "Zeus to C-Lightning-REST (Android or iOS)[DEPRECATED]")
 	OPTIONS+=(FULLYNODED_CL "Fully Noded to CL REST (iOS+Tor)")
 fi
 
@@ -258,18 +257,5 @@ ZEUS_CLNREST)
 	  sudo /home/admin/config.scripts/blitz.display.sh hide
   	/home/admin/config.scripts/cl-plugin.clnrest.sh connect
   	exit 0;
-	;;
-ZEUS_CLREST)
-      sudo /home/admin/config.scripts/blitz.display.sh image /home/admin/raspiblitz/pictures/app_zeus.png
-	  whiptail --title "Install Zeus on your Android or iOS Phone" \
-		--yes-button "Continue" \
-		--no-button "Cancel" \
-		--yesno "Open the https://zeusln.app/ on your mobile phone to find the App Store link or binary for your phone.\n\nWhen the app is installed and started --> Continue." 12 65
-	  if [ $? -eq 1 ]; then
-		exit 0
-	  fi
-	  sudo /home/admin/config.scripts/blitz.display.sh hide
-  	  /home/admin/config.scripts/cl.rest.sh connect
-  	  exit 0;
 	;;
 esac

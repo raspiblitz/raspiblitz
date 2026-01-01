@@ -16,7 +16,7 @@ function help() {
 }
 
 # https://github.com/lightningd/plugins/commits/master/backup
-pinnedVersion="46f28a88a2aa15c7c1b3c95a21dd99ea2195995e"
+pinnedVersion="b63622d66ea8cfaa1e99fde1626ae86815ad1be8"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -39,18 +39,15 @@ function install() {
 
   if [ $($lightningcli_alias plugin list 2>/dev/null | grep -c "/${plugin}") -eq 0 ]; then
     echo "# Checking dependencies"
-    # upgrade pip
-    sudo pip3 config set global.break-system-packages true
-    sudo pip3 install --upgrade pip
-
-    # pip dependencies
-    sudo -u bitcoin pip3 config set global.break-system-packages true
-    sudo -u bitcoin pip3 install pyln-client tqdm psutil
-
-    # poetry
-    sudo pip3 install poetry || exit 1
+    # uv should be installed from main CLN install
+    if ! command -v uv &>/dev/null; then
+      echo "# Installing uv for backup plugin"
+      curl -LsSf https://astral.sh/uv/install.sh | sudo UV_INSTALL_DIR=/usr/local/bin sh
+      export PATH="/usr/local/bin:$PATH"
+    fi
+    
     cd ${plugindir}/backup/ || exit 1
-    sudo -u bitcoin poetry install
+    sudo -u bitcoin uv sync --all-extras
 
     sudo chmod +x ${plugindir}/${plugin}/${plugin}.py
 
@@ -91,8 +88,12 @@ if [ "$1" = on ]; then
   # https://github.com/lightningd/plugins/tree/master/backup#setup
   echo "# Initialize the backup plugin"
   cd ${plugindir}/backup/ || exit 1
-  sudo -u bitcoin poetry run /home/bitcoin/cl-plugins-available/plugins/backup/backup-cli init --lightning-dir /home/bitcoin/.lightning/${CLNETWORK} \
-    file:///home/bitcoin/${netprefix}lightningd.sqlite3.backup
+  if ! sudo -u bitcoin uv run python /home/bitcoin/cl-plugins-available/plugins/backup/backup-cli init --lightning-dir /home/bitcoin/.lightning/${CLNETWORK} \
+    file:///home/bitcoin/${netprefix}lightningd.sqlite3.backup; then
+    echo "# ERROR: Failed to initialize backup plugin"
+    exit 1
+  fi
+  echo "# Backup plugin initialized successfully"
 
   if [ $(crontab -u admin -l | grep -c "backup-compact $CHAIN") -eq 0 ]; then
     echo "Add weekly backup-compact as a cronjob"
@@ -151,7 +152,7 @@ then
 
     # restore
     cd ${plugindir}/backup/ || exit 1
-    sudo -u bitcoin poetry run /home/bitcoin/cl-plugins-available/plugins/backup/backup-cli restore \
+    sudo -u bitcoin uv run python /home/bitcoin/cl-plugins-available/plugins/backup/backup-cli restore \
       file:///home/bitcoin/${netprefix}lightningd.sqlite3.backup \
       /home/bitcoin/.lightning/${CLNETWORK}/lightningd.sqlite3
 
