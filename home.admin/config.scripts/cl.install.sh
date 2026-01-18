@@ -2,7 +2,7 @@
 # https://lightning.readthedocs.io/
 
 # https://github.com/ElementsProject/lightning/releases
-CLVERSION="v25.12"
+CLVERSION="v25.12.1"
 
 # https://github.com/ElementsProject/lightning/tree/master/contrib/keys
 # rustyrussell D9200E6CD1ADB8F1
@@ -12,9 +12,10 @@ CLVERSION="v25.12"
 # sfarooqui (ShahanaFarooqui) B56B4453DA8C6DF7FC9BCFCBDCA40B7128DA62A8
 # amyers (endothermicdev) F3BF63F2747436AB
 # madel (Madeline Paech) A57AFC231B580804
-PGPsigner="madel"
+# cln (cln@blockstream.com) 616C52F99D0612B2A151B1074129A994AA7E9852
+PGPsigner="cln"
 PGPpubkeyLink="https://raw.githubusercontent.com/ElementsProject/lightning/master/contrib/keys/${PGPsigner}.txt"
-PGPpubkeyFingerprint="A57AFC231B580804"
+PGPpubkeyFingerprint="616C52F99D0612B2A151B1074129A994AA7E9852"
 
 # help
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
@@ -108,6 +109,75 @@ function buildAndInstallCLbinaries() {
   sudo RUSTUP_HOME=/opt/rust CARGO_HOME=/opt/rust make install || exit 1
 }
 
+function downloadAndVerifySourceZip() {
+  # Downloads, verifies, and extracts the CLN source zip
+  # Uses CLVERSION variable for the version to download
+  cd /home/bitcoin || exit 1
+  echo
+  echo "- Downloading Core Lightning ${CLVERSION} source release"
+  echo
+
+  # Download the source zip and SHA256SUMS signature file
+  sudo -u bitcoin wget -O "lightning-${CLVERSION}.zip" \
+    "https://github.com/ElementsProject/lightning/releases/download/${CLVERSION}/lightning-${CLVERSION}.zip" || exit 1
+  sudo -u bitcoin wget -O "SHA256SUMS-${CLVERSION}" \
+    "https://github.com/ElementsProject/lightning/releases/download/${CLVERSION}/SHA256SUMS-${CLVERSION}" || exit 1
+  sudo -u bitcoin wget -O "SHA256SUMS-${CLVERSION}.asc" \
+    "https://github.com/ElementsProject/lightning/releases/download/${CLVERSION}/SHA256SUMS-${CLVERSION}.asc" || exit 1
+
+  echo
+  echo "- Importing PGP key of ${PGPsigner} for verification"
+  echo
+
+  # Import PGP key
+  sudo -u bitcoin wget -O "/var/cache/raspiblitz/pgp_keys_${PGPsigner}.asc" "${PGPpubkeyLink}" || exit 1
+  echo "# Verifying ${PGPsigner} key fingerprint"
+  fingerprint=$(gpg --show-keys --keyid-format LONG "/var/cache/raspiblitz/pgp_keys_${PGPsigner}.asc" 2>/dev/null | grep -c "${PGPpubkeyFingerprint}")
+  if [ "${fingerprint}" -lt 1 ]; then
+    echo "# ERROR --> ${PGPsigner} PGP fingerprint mismatch"
+    exit 1
+  fi
+  sudo -u bitcoin gpg --import "/var/cache/raspiblitz/pgp_keys_${PGPsigner}.asc" || exit 1
+
+  echo
+  echo "- Verifying SHA256SUMS signature"
+  echo
+
+  # Verify the signature on SHA256SUMS
+  sudo -u bitcoin gpg --verify "SHA256SUMS-${CLVERSION}.asc" "SHA256SUMS-${CLVERSION}" 2>&1 | tee /tmp/cl_gpg_verify.txt
+  goodSignature=$(grep -c "Good signature" /tmp/cl_gpg_verify.txt)
+  if [ "${goodSignature}" -lt 1 ]; then
+    echo "# ERROR --> SHA256SUMS signature verification failed"
+    exit 1
+  fi
+  echo "# OK - SHA256SUMS signature verified"
+
+  echo
+  echo "- Verifying source zip checksum"
+  echo
+
+  # Verify the zip file checksum
+  expectedChecksum=$(grep "lightning-${CLVERSION}.zip" "SHA256SUMS-${CLVERSION}" | awk '{print $1}')
+  actualChecksum=$(sha256sum "lightning-${CLVERSION}.zip" | awk '{print $1}')
+  if [ "${expectedChecksum}" != "${actualChecksum}" ]; then
+    echo "# ERROR --> Checksum mismatch for lightning-${CLVERSION}.zip"
+    echo "# Expected: ${expectedChecksum}"
+    echo "# Actual: ${actualChecksum}"
+    exit 1
+  fi
+  echo "# OK - Checksum verified for lightning-${CLVERSION}.zip"
+
+  echo
+  echo "- Extracting source"
+  echo
+
+  # Extract and set up directory
+  sudo -u bitcoin unzip -q "lightning-${CLVERSION}.zip" || exit 1
+  sudo -u bitcoin rm -rf lightning
+  sudo -u bitcoin mv "lightning-${CLVERSION}" lightning
+  sudo -u bitcoin rm -f "lightning-${CLVERSION}.zip" "SHA256SUMS-${CLVERSION}" "SHA256SUMS-${CLVERSION}.asc"
+}
+
 function runTests() {
   # Test dependencies are managed by uv sync in installDependencies()
   cd /home/bitcoin/lightning || exit 1
@@ -168,18 +238,7 @@ if [ "$1" = "install" ]; then
   fi
 
   # download and verify the source from github
-  cd /home/bitcoin || exit 1
-  echo
-  echo "- Cloning https://github.com/ElementsProject/lightning.git"
-  echo
-  sudo -u bitcoin git clone https://github.com/ElementsProject/lightning.git
-  cd lightning || exit 1
-  echo
-  echo "- Reset to version ${CLVERSION}"
-  sudo -u bitcoin git reset --hard ${CLVERSION}
-
-  sudo -u bitcoin /home/admin/config.scripts/blitz.git-verify.sh \
-    "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" "${CLVERSION}" || exit 1
+  downloadAndVerifySourceZip
 
   installDependencies
 
@@ -238,32 +297,37 @@ if [ "$1" = on ] || [ "$1" = update ] || [ "$1" = testPR ]; then
     sudo apt-get update
 
     cd /home/bitcoin || exit 1
-    if [ "$1" = "update" ] || [ "$1" = "testPR" ]; then
-      echo
-      echo "# Deleting the old source code"
-      sudo rm -rf lightning
-    fi
     echo
-    echo "# Cloning https://github.com/ElementsProject/lightning.git"
-    echo
-    sudo -u bitcoin git clone https://github.com/ElementsProject/lightning.git
-    cd lightning || exit 1
-    echo
+    echo "# Deleting the old source code"
+    sudo rm -rf lightning
 
-    if [ "$1" = "update" ]; then
-      if [ $# -gt 1 ]; then
-        CLVERSION=$2
-        echo "# Installing the version ${CLVERSION}"
-        sudo -u bitcoin git reset --hard ${CLVERSION}
-      else
-        echo "# Updating to the latest commit in:"
-        echo "# https://github.com/ElementsProject/lightning"
-        echo "# Make sure this is intended, there might be no way to downgrade your database"
-        echo "# Press ENTER to continue or CTRL+C to abort the update"
-        read -r key
-      fi
+    if [ "$1" = "update" ] && [ $# -gt 1 ]; then
+      # Update to a specific version - use zip download with signature verification
+      CLVERSION=$2
+      downloadAndVerifySourceZip
+
+    elif [ "$1" = "update" ]; then
+      # Update to latest commit - use git clone (no verification)
+      echo
+      echo "# Cloning https://github.com/ElementsProject/lightning.git"
+      echo
+      sudo -u bitcoin git clone https://github.com/ElementsProject/lightning.git
+      cd lightning || exit 1
+      echo
+      echo "# Updating to the latest commit in:"
+      echo "# https://github.com/ElementsProject/lightning"
+      echo "# Make sure this is intended, there might be no way to downgrade your database"
+      echo "# Press ENTER to continue or CTRL+C to abort the update"
+      read -r key
 
     elif [ "$1" = "testPR" ]; then
+      # Test a PR - use git clone
+      echo
+      echo "# Cloning https://github.com/ElementsProject/lightning.git"
+      echo
+      sudo -u bitcoin git clone https://github.com/ElementsProject/lightning.git
+      cd lightning || exit 1
+      echo
       PRnumber=$2 || exit 1
       echo "# Using the PR:"
       echo "# https://github.com/ElementsProject/lightning/pull/${PRnumber}"
@@ -275,7 +339,7 @@ if [ "$1" = on ] || [ "$1" = update ] || [ "$1" = testPR ]; then
 
     currentCLversion=$(
       cd /home/bitcoin/lightning || exit 1
-      git describe --tags 2>/dev/null
+      git describe --tags 2>/dev/null || echo "${CLVERSION}"
     )
     echo "# Building from source Core Lightning $currentCLversion"
 
