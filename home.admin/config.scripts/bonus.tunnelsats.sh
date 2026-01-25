@@ -176,6 +176,71 @@ EOF
     read -p "Press [Enter] once you have safely backed up your configuration..."
 }
 
+# Helper to get the public key from local config
+get_local_pubkey() {
+    # Find the first tunnelsats_*.conf file
+    local conf_file=$(find "$CONFIG_DIR" -maxdepth 1 -name "tunnelsats_*.conf" -type f | head -n 1)
+    if [ -z "$conf_file" ] || [ ! -f "$conf_file" ]; then
+        return 1
+    fi
+    
+    local priv_key=$(grep "^PrivateKey" "$conf_file" | cut -d '=' -f2 | tr -d ' ')
+    if [ -z "$priv_key" ]; then
+        return 1
+    fi
+    
+    echo "$priv_key" | wg pubkey
+}
+
+# Renew/Extend an existing subscription
+renew_subscription() {
+    local pubkey
+    pubkey=$(get_local_pubkey) || { print_error "No local subscription found to renew."; return 1; }
+    
+    local status_json
+    status_json=$(check_status "$pubkey") || return 1
+    
+    local is_active=$(echo "$status_json" | jq -r '.is_active')
+    local valid_until=$(echo "$status_json" | jq -r '.valid_until')
+    
+    if ! (whiptail --title "Subscription Status" --yesno "Current Status: $is_active\nValid Until: $valid_until\n\nDo you want to extend your subscription?" 12 60); then
+        return 0
+    fi
+    
+    local duration
+    duration=$(whiptail --title "Extend Subscription" --menu "Choose duration:" 12 60 4 \
+        "1" "1 Month" \
+        "3" "3 Months" \
+        "6" "6 Months" \
+        "12" "12 Months" 3>&1 1>&2 2>&3)
+    
+    [ -z "$duration" ] && return 0
+    
+    print_info "Requesting renewal for $duration months..."
+    local headers=($(get_api_headers "$API_BASE"))
+    local payload="{\"pubkey\":\"$pubkey\", \"months\":$duration}"
+    
+    local order_json
+    order_json=$(curl -s "${headers[@]}" -X POST -d "$payload" "${API_BASE}/setup/renew")
+    
+    if echo "$order_json" | jq -e '.error' > /dev/null; then
+        local msg=$(echo "$order_json" | jq -r '.message')
+        print_error "Renewal Error: $msg"
+        return 1
+    fi
+    
+    local bolt11=$(echo "$order_json" | jq -r '.invoice')
+    local order_id=$(echo "$order_json" | jq -r '.id')
+    
+    if ! pay_invoice "$bolt11"; then
+        whiptail --title "Payment Failed" --msgbox "Payment failed. Please pay manually:\n$bolt11" 15 60
+        return 1
+    fi
+    
+    poll_order "$order_id" || return 1
+    print_success "Subscription extended successfully!"
+}
+
 # Check subscription status for a given public key
 check_status() {
     local pubkey="$1"
@@ -264,8 +329,11 @@ main() {
         setup)
             setup_flow
             ;;
+        renew)
+            renew_subscription
+            ;;
         *)
-            echo "Usage: $0 [status|get-servers|setup] [args...]"
+            echo "Usage: $0 [status|get-servers|setup|renew] [args...]"
             exit 1
             ;;
     esac
