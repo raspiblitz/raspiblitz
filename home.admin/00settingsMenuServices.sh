@@ -30,6 +30,7 @@ if [ ${#chantools} -eq 0 ]; then chantools="off"; fi
 if [ ${#helipad} -eq 0 ]; then helipad="off"; fi
 if [ ${#lightningtipbot} -eq 0 ]; then lightningtipbot="off"; fi
 if [ ${#fints} -eq 0 ]; then fints="off"; fi
+if [ ${#tunnelsats} -eq 0 ]; then tunnelsats="off"; fi
 if [ ${#lndk} -eq 0 ]; then lndk="off"; fi
 if [ ${#labelbase} -eq 0 ]; then labelbase="off"; fi
 if [ ${#publicpool} -eq 0 ]; then publicpool="off"; fi
@@ -81,7 +82,9 @@ if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ]; then
   OPTIONS+=(ca 'Core Lightning RTL Webinterface' ${crtlWebinterface})
 fi
 
+OPTIONS+=(ma 'Homer Dashboard' ${homer})
 OPTIONS+=(fn 'FinTS/HBCI Interface (experimental)' ${fints})
+OPTIONS+=(ts 'TunnelSats VPN' ${tunnelsats})
 
 CHOICES=$(dialog --title ' Additional Mainnet Services ' \
           --checklist ' use spacebar to activate/de-activate ' \
@@ -714,6 +717,23 @@ if [ "${fints}" != "${choice}" ]; then
   sudo -u admin /home/admin/config.scripts/bonus.fints.sh ${choice}
 else
   echo "fints setting unchanged."
+fi
+
+# tunnelsats process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "ts")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${tunnelsats}" != "${choice}" ]; then
+  echo "TunnelSats setting changed .."
+  anychange=1
+  if [ "${choice}" == "on" ]; then
+    /home/admin/config.scripts/bonus.tunnelsats.sh setup
+  else
+    # For now, uninstall just stops the service or similar
+    # In a real environment, this would call tunnelsats.sh uninstall
+    sudo /home/admin/config.scripts/tunnelsats.sh uninstall
+  fi
+else
+  echo "TunnelSats setting unchanged."
 fi
 
 if [ ${anychange} -eq 0 ]; then
